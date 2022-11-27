@@ -64,30 +64,43 @@ RETURN 1
 #DIM FIRST_LINE
 #DIM 使用目标
 対象側 = !発動側
+IF 対象部隊 == -1
+;如果对方是守军，只能回复我方疲劳
+	IF 発動部隊 != -1
+		UNIT_TIRED_COUNT:発動勢力:発動部隊 = MAX(UNIT_TIRED_COUNT:発動勢力:発動部隊 - RAND(4, 8), 0)
+		PRINTFORML 我方部队的疲劳度回复了！
+	ENDIF
+	RETURN 1
+ENDIF
+IF 発動部隊 == -1
+;如果我方是守军，只能降低敌方疲劳
+	IF 対象部隊 != -1
+		UNIT_TIRED_COUNT:対象勢力:対象部隊 += RAND(4, 8)
+		PRINTFORML 敌方部队变得疲惫了！
+	ENDIF
+	RETURN 1
+ENDIF
+;接下来是两方都不是守军的情况
 IF CFLAG:発動者:1 != CFLAG:MASTER:1
 ;AI使用
-	IF UNIT_TIRED_COUNT:発動勢力:発動部隊 >= 6 || !IS_COUNTRY(対象勢力)
+	IF UNIT_TIRED_COUNT:発動勢力:発動部隊 >= 6
 		PRINTFORML 我方部队的疲劳度回复了！
-		IF 発動部隊>=0
-			UNIT_TIRED_COUNT:発動勢力:発動部隊 = MAX(UNIT_TIRED_COUNT:発動勢力:発動部隊 - RAND(4, 8), 0)
-		ELSE
-			CITY_TIRED_COUNT:発動勢力 = MAX(CITY_TIRED_COUNT:発動勢力 - RAND(4, 8), 0)
-		ENDIF
+		UNIT_TIRED_COUNT:発動勢力:発動部隊 = MAX(UNIT_TIRED_COUNT:発動勢力:発動部隊 - RAND(4, 8), 0)
 	ELSE
 		PRINTFORML 敌方部队变得疲惫了！
-		IF 対象部隊>=0
-			UNIT_TIRED_COUNT:対象勢力:対象部隊 = MIN(UNIT_TIRED_COUNT:対象勢力:対象部隊 + RAND(4, 8),100)
-		ELSE
-			CITY_TIRED_COUNT:対象勢力 = MIN(CITY_TIRED_COUNT:対象勢力 + RAND(4, 8),100)
-		ENDIF
+		UNIT_TIRED_COUNT:対象勢力:対象部隊 += RAND(4, 8)
 	ENDIF
-	RETURN
+	RETURN 1
 ENDIF
+
 FIRST_LINE = LINECOUNT
-PRINTFORML --请选择发动效果--
+PRINTFORML --当前我军疲劳度{発動部隊 == -1?CITY_TIRED_COUNT:発動勢力#UNIT_TIRED_COUNT:発動勢力:発動部隊},请选择发动效果--
+PRINTL
 PRINTBUTTON " 0[敌军疲劳度上升]", 0
 PRINTL
+PRINTL
 PRINTBUTTON " 1[我军疲劳度下降]", 1
+PRINTL
 PRINTL
 $INPUT_LOOP1
 INPUT
@@ -97,27 +110,19 @@ IF RESULT < 0 || RESULT > 1
 ENDIF
 CLEARLINE LINECOUNT - FIRST_LINE
 使用目标 = RESULT
-IF 使用目标 || !IS_COUNTRY(対象勢力)
+IF 使用目标
 ;我军疲劳度下降
 	PRINTFORML 我方部队的疲劳度回复了！
-	IF 発動部隊>=0
-		UNIT_TIRED_COUNT:発動勢力:発動部隊 = MAX(UNIT_TIRED_COUNT:発動勢力:発動部隊 - RAND(4, 8), 0)
-	ELSE
-		CITY_TIRED_COUNT:発動勢力 = MAX(CITY_TIRED_COUNT:発動勢力 - RAND(4, 8), 0)
-	ENDIF
+	UNIT_TIRED_COUNT:発動勢力:発動部隊 = MAX(UNIT_TIRED_COUNT:発動勢力:発動部隊 - RAND(4, 8), 0)
 ELSE
 ;敌军疲劳度上升
 	PRINTFORML 敌方部队变得疲惫了！
-	IF 対象部隊>0
-		UNIT_TIRED_COUNT:対象勢力:対象部隊 = MIN(UNIT_TIRED_COUNT:対象勢力:対象部隊 + RAND(4, 8),100)
-	ELSE
-		CITY_TIRED_COUNT:対象勢力 = MIN(CITY_TIRED_COUNT:対象勢力 + RAND(4, 8),100)
-	ENDIF
+	UNIT_TIRED_COUNT:対象勢力:対象部隊 += RAND(4, 8)
 ENDIF
-RETURN
+
 
 @SKILL_165_TROOP_1_EXPLANATION
-RESULTS = 抉择：使敌军疲劳度上升/使我军疲劳度下降
+RESULTS = 抉择：使敌军部队疲劳度上升/使我军部队疲劳度下降
 
 @SKILL_165_TROOP_1_CANT_TELL
 

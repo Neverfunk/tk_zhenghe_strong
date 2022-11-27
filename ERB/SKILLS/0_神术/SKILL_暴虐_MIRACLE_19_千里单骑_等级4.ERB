@@ -56,7 +56,8 @@ IF CFLAG:对象:所属 != 0
 					FOR LOCAL:2, 0, MAX_UNIT_COMMANDER
 						IF GET_UNIT_COMMANDER(LOCAL:0, LOCAL:1, LOCAL:2) == 对象
 							;对象 = 势力LOCAL:0的部队LOCAL:1的第LOCAL:2将领
-							SIF GET_UNIT_COMMANDER(LOCAL:0, LOCAL:1,LOCAL:2) == GET_UNIT_COMMANDER(LOCAL:0, LOCAL:1,LOCAL:2 + 1)
+							上任 = 1
+							SIF GET_UNIT_COMMANDER(LOCAL:0, LOCAL:1+1) == GET_UNIT_COMMANDER(LOCAL:0, LOCAL:1+2)
 								;独自一人领军的情况
 								优先度 += 300
 						ENDIF
@@ -96,7 +97,7 @@ ELSE
 	ENDSELECT
 ENDIF
 ;角色成长型
-SELECTCASE TALENT:对象:300
+SELECTCASE TALENT:对象:300 
 	CASE 0 ;万能 武防知政
 		优先度 += 20
 	CASE 1 ;知将 武防知
@@ -148,7 +149,7 @@ RETURN 1
 #DIM 対象部隊
 対象側 = !発動側
 
-RETURN BATTLE_COMMANDER_NUM:発動側 == 1
+RETURN BATTLE_COMMANDER_NUM:発動側 == 1 
 
 ;効果をここに記述
 @SKILL_0_MIRACLE_19_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
@@ -177,7 +178,7 @@ ELSEIF ABL:発動者:信仰 < 50 ;虔信
 	PRINTFORML %ANAME(発動者)%的武闘防衛提升了!
 ELSE
 	TIMES BATTLE_武闘パワー:発動側:COMBAT_SKILL_TARGET, 1.07
-	TIMES BATTLE_防衛パワー:発動側:COMBAT_SKILL_TARGET, 1.07
+	TIMES BATTLE_防衛パワー:発動側:COMBAT_SKILL_TARGET, 1.07 
 	PRINTFORML %ANAME(発動者)%的武闘防衛提升了!
 ENDIF
 

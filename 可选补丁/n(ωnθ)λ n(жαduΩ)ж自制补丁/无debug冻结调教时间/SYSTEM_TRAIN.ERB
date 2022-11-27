@@ -222,7 +222,7 @@ IF TRAIN_PLACE == ""
 	ENDIF
 ENDIF
 
-PRINTL 
+PRINTL
 
 ;-------------------------------------------------
 ;DESC  :MPLY:0が-1だとまずい時用の仮決め
@@ -466,12 +466,12 @@ IF FLAG:主導権所有者 == -1
 	;主導権が自明の場合には表示しない
 ;	IF LOCAL:1 != 1 && LOCAL:1 != 2
 ;		PRINTFORML %ANAME(MASTER)%は主導権をその場の雰囲気に任せた
-;		PRINTL 
+;		PRINTL
 ;	ENDIF
 ENDIF
 
 ;コマンド名称の表示
-LOCALS:0 = 
+LOCALS:0 =
 VARSET RESULTS, ""
 TRYCALLFORM COM_NAME{SELECTCOM}
 IF IS_MPLY(MASTER)
@@ -523,6 +523,7 @@ ENDIF
 
 ;-------------------------------------------------
 ;コマンド実行後の処理
+;命令执行后的处理
 ;-------------------------------------------------
 @EVENTCOMEND
 #PRI
@@ -732,7 +733,7 @@ IF !TFLAG:2 && LOCAL:20
 			IF LOCAL:20 >= 2
 				LOCALS:0 = 們
 			ELSE
-				LOCALS:0 = 
+				LOCALS:0 =
 			ENDIF
 			IF BASE:MASTER:気力 <= 0
 				LOCALS:1 = 失去意識昏迷的
@@ -741,7 +742,7 @@ IF !TFLAG:2 && LOCAL:20
 			ENDIF
 
 			WAIT
-			PRINTL 
+			PRINTL
 			IF LOCAL:20 == 1
 				IF BASE:MASTER:気力 <= 0
 					CALL KOJO_EVENT(LOCAL:0, 111)
@@ -786,14 +787,23 @@ LINES_TRAIN = LINECOUNT
 ;EQUIPの初期化
 CALL INIT_EQUIP()
 
+;跳转信仰事件
+TRYCCALL SHOP_LIFE_MIRACLE
+	LOCAL = MIRACLE_LUST_TRAIN_FORM
+	IF INRANGE(LOCAL,1,7)
+		TRYCALL SHOP_LIFE_USERSHOP68_LUST_COMMON( MIRACLE_LUST_TRAIN_FORM_STR:LOCAL, MIRACLE_LUST_TRAIN_MAIN , MIRACLE_LUST_TRAIN_EXPLOW:LOCAL , MIRACLE_LUST_TRAIN_EXPUP:LOCAL)
+	ENDIF
+CATCH
+ENDCATCH
+
 ;子育てモード
 IF FLAG:調教モード == 3
-	PRINTL 
+	PRINTL
 	PRINTFORMW (天很快就要黑了。今天就這樣悠閒的度過了)
 	BEGIN AFTERTRAIN
 
 ELSEIF FLAG:調教モード == 4 || FLAG:調教モード == 5
-	PRINTL 
+	PRINTL
 	PRINTFORMW (看来今天的調教已経結束了…)
 	BEGIN AFTERTRAIN
 
@@ -806,7 +816,7 @@ ELSEIF FLAG:調教モード == 7
 ELSEIF FLAG:ウフフフラグ
 	;睡姦中
 	IF TFLAG:8
-		PRINTL 
+		PRINTL
 		PRINTFORMW (為了不讓対方醒来時発現、做完善後工作後早早的回去了)
 
 		;主人公がターゲット側の場合、ターゲットとプレイヤーを入れ替えておく
@@ -819,17 +829,17 @@ ELSEIF FLAG:ウフフフラグ
 
 	;主人公が行動不能
 	ELSEIF TFLAG:2
-		PRINTL 
+		PRINTL
 		PRINTFORMW (因為時間太晚了、總算是被解放了)
-	;デート中
+	;约会中
 	ELSEIF TFLAG:54
-		PRINTL 
+		PRINTL
 		PRINTFORMW (已経到了很晚了。決定今天就到這里然後直接回去了)
 	ELSEIF FLAG:夜這い
-		PRINTL 
+		PRINTL
 		PRINTFORMW (再留下的話会相当危險。於是今天就這樣直接逃回去了)
 	ELSE
-		PRINTL 
+		PRINTL
 		PRINTFORMW (都到了凌晨了。決定今天在這裡睡覚)
 	ENDIF
 	BEGIN AFTERTRAIN
@@ -838,6 +848,8 @@ ELSEIF FLAG:ウフフフラグ
 ELSE
 	;主人公がターゲット側の場合、ターゲットとプレイヤーを入れ替えておく
 	;(MTAR:0が必ず会いに行った相手を指すようにしておく)
+	;主人公作为调教目标的情况下，先更换目标和玩家
+	;（MTAR:0一定要指去见的对象）
 	IF MTAR:0 == MASTER
 		SWAP MTAR:0, MPLY:0
 	ENDIF
@@ -848,11 +860,11 @@ ELSE
 	WAIT
 	CALL SINGLE_DRAWLINE
 	PRINTFORMW 已経到了很晚的時間了…
-	PRINTL 
+	PRINTL
 
-	PRINTPLAIN   
+	PRINTPLAIN
 	PRINTBUTTON "0[就這樣分別]", 0
-	PRINTPLAIN     
+	PRINTPLAIN
 	IF GET_PLACENAME(TFLAG:54) == "城下町"
 		IF (IS_FEMALE(MASTER) && IS_MALE(MTAR:0)) || (GROUPMATCH(TALENT:MASTER:性別, 4, 5) && GROUPMATCH(TALENT:(MTAR:0):性別, 0, 3) && TALENT:(MTAR:0):恋人)
 			PRINTBUTTON "1[帯進旅館(対方付錢)]", 1
@@ -864,9 +876,9 @@ ELSE
 	ELSE
 		PRINTBUTTON "1[直接推倒]", 1
 	ENDIF
-	PRINTPLAIN     
+	PRINTPLAIN
 	PRINTBUTTON "2[進行誘惑]", 2
-	PRINTL 
+	PRINTL
 
 	$INPUT_LOOP
 	INPUT
@@ -874,9 +886,10 @@ ELSE
 	LOCAL:1 = 0
 	LOCAL:2 = RESULT
 
-	;このまま別れる
+	;就这样分别
 	IF LOCAL:2 == 0
 		;ムードが60以上または相手が肉便器で通常または育児中なら押し倒し／おねだりの判定
+		;如果气氛在60以上或者对方在肉便器中正常或育儿的话，判定为推倒/睡觉
 		IF (TFLAG:37 >= 60 || GETBIT(TALENT:(MTAR:0):淫乱系, 素質_淫乱_精液便女)) && ARG:0 == 0 && GROUPMATCH(CFLAG:(MTAR:0):行動不能状態, 0, 2)
 			;押し倒し／おねだり判定
 			CALL PUSH_OVER
@@ -939,6 +952,20 @@ ELSE
 
 	;ウフフ突入の場合
 	IF LOCAL:1
+		;--信仰--触发调教类型0=会见 1=调教俘虏 2=侍寝 3=夜袭  4=慰安民众 5=留宿
+		MIRACLE_LUST_TRAIN_FORM = 5
+		;--信仰--玩家制造色欲调教事件变量赋值--
+		MIRACLE_LUST_TRAIN_MAIN = MASTER
+		MIRACLE_LUST_TRAIN_TARGET:0 = 2 ;人数初始化
+		MIRACLE_LUST_TRAIN_TARGET:1 = MASTER ;玩家参与
+		MIRACLE_LUST_TRAIN_TARGET:2 = (MTAR:0) ;调教参与者记录
+		MIRACLE_LUST_PRE_FALL:2 = MIRACLE_FALLCOUNT(MTAR:0) ;调教前陷落代码,函数在 祷告_践行教义事件.ERB
+		MIRACLE_LUST_PRE_MAKELOVE:2 = TALENT:(MTAR:0):合意 ;调教前是否取得对象合意
+		MIRACLE_LUST_PRE_LIKE:2 = CFLAG:(MTAR:0):好感度 ;调教前对象好感度
+		MIRACLE_LUST_PRE_TRUST:2 = CFLAG:(MTAR:0):依存度 ;调教前对象依存度
+		MIRACLE_LUST_PRE_BELONG:2 = CFLAG:(MTAR:0):従属度 ;调教前对象従属度
+		MIRACLE_LUST_PRE_CONTROL:2 = CFLAG:(MTAR:0):支配度 ;调教前对象支配度
+		;--信仰--结束--
 		IF LOCAL:1 == 3
 			IF GET_PLACENAME(TFLAG:54) == "城下町"
 				PRINTFORMW 已経想要的%ANAME(MTAR:0)%、領着%ANAME(MASTER)%進入了城下町的旅館…
@@ -999,7 +1026,7 @@ ENDIF
 ;	RETURN 0
 ;ENDIF
 
-;PRINTL 
+;PRINTL
 ;CALL SINGLE_DRAWLINE
 
 ;睡姦を行った場合
@@ -1013,7 +1040,7 @@ ENDIF
 ;真名許可フラグ
 ;CFLAG:(MTAR:0):8 = 1
 
-;PRINTL 
+;PRINTL
 ;SETCOLOR カラー_注意
 ;PRINTFORML %ANAME(MTAR:0)%から真名「%CALLNAME:(MTAR:0)%」を許されました
 ;RESETCOLOR
@@ -1295,6 +1322,8 @@ IF TCVAR:(MTAR:0):24 >= TCVAR:(MTAR:0):25
 		IF TCVAR:(MTAR:0):催眠中 <= 0
 			PRINTFORMW 獲得%ANAME(MTAR:0)%的<合意>
 			TALENT:(MTAR:0):合意 = 1
+			;跳转信仰事件
+			TRYCALL SHOP_LIFE_USERSHOP68_LUST_COMMON2("取得合意",MASTER,MTAR:0,5,8)
 		ENDIF
 
 	;酔った勢いで成功
@@ -1441,6 +1470,8 @@ IF GET_INITIATIVE_RATE(MTAR:0) > 0
 
 			TALENT:(MTAR:0):合意 = 1
 			PRINTFORMW 獲得%ANAME(MTAR:0)%的<合意>
+			;跳转信仰事件
+			TRYCALL SHOP_LIFE_USERSHOP68_LUST_COMMON2("取得合意",MASTER,MTAR:0,5,8)
 		ENDIF
 		RETURN 1
 
@@ -1480,6 +1511,8 @@ ELSE
 
 			TALENT:(MTAR:0):合意 = 1
 			PRINTFORMW 獲得%ANAME(MTAR:0)%的<合意>
+			;跳转信仰事件
+			TRYCALL SHOP_LIFE_USERSHOP68_LUST_COMMON2("取得合意",MASTER,MTAR:0,5,8)
 		ENDIF
 		RETURN 2
 

@@ -142,6 +142,7 @@ SELECTCASE RAND:100 * (1 + TALENT:MASTER:謎之魅力)
 ENDSELECT
 ;------------------------------------
 ;イベント発生タイミングを前に変更
+;约会事件是否发生
 IF !イベント発生
 	CALL KOJO_DATE_EVENT(対象, 内容)
 	SIF RESULT
@@ -227,7 +228,8 @@ ENDSELECT
 PRINTFORML %ANAME(対象)%的好感度上昇了{結果}
 PRINTFORML 消費了3,000金
 
-
+;跳转信仰事件
+TRYCALL SHOP_LIFE_USERSHOP68_LUST_COMMON2("约会",MASTER,対象,2,5)
 
 PRINTFORMW 
 IF SHOP_TIME < CALC_SHOP_TIME()
@@ -237,8 +239,15 @@ IF SHOP_TIME < CALC_SHOP_TIME()
 ENDIF
 
 ;デートイベントが発生していなければ、キスと告白を受けるかもしれない
+;;如果约会活动没有发生的话，可能会被亲吻和告白
 IF !イベント発生
 	;デート後、一定条件でキスされる
+	
+	;--信仰--玩家制造色欲调教事件变量赋值--
+	MIRACLE_LUST_TRAIN_TARGET:0 = 2 ;人数初始化
+	MIRACLE_LUST_TRAIN_TARGET:1 = MASTER ;玩家参与
+	MIRACLE_LUST_TRAIN_TARGET:2 = 対象 ;调教参与者记录
+	;--信仰--结束--
 	IF CFLAG:対象:好感度 >= 1000 && RAND:3 == 0
 		PRINTFORML 
 		PRINTFORML 約会後回家的路上、突然被%ANAME(対象)%亲了一下
@@ -272,6 +281,10 @@ ENDIF
 RESULT = 1
 
 LINES_SHOP = LINECOUNT
+
+;跳转信仰事件
+TRYCALL SHOP_LIFE_USERSHOP68_LUST_COMMON("约会",MASTER,1,4)
+
 BEGIN TURNEND
 
 RETURN 1

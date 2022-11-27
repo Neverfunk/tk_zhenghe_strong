@@ -1,0 +1,1284 @@
+﻿@MILLIONAIRE_DERIVATION_CREATE_MILLIONAIRE
+#DIM 対象
+
+CALL CREATE_RANDOM_CHARA(0, -1, 0)
+FLAG:汎用武将カウント --
+対象 = RESULT
+IF LOCAL == -1
+	RETURN -1
+ENDIF
+
+NO:対象 = GET_EMPTY_NO()
+NAME:対象 = 富豪
+CALLNAME:対象 = 富豪
+CSTR:対象:0 =
+CSTR:対象:1 =
+TALENT:対象:性別 = 0
+MAXBASE:対象:体力 = 99999999
+MAXBASE:対象:気力 = 99999999
+MAXBASE:対象:精神力 = 1500
+BASE:対象:体力 = MAXBASE:対象:体力
+BASE:対象:気力 = MAXBASE:対象:気力
+BASE:対象:精神力 = MAXBASE:対象:精神力
+ABL:対象:性知識 = 5
+ABL:対象:Ｃ感 = 5
+ABL:対象:Ｖ感 = 3
+ABL:対象:Ａ感 = 3
+ABL:対象:Ｂ感 = 3
+ABL:対象:Ｍ感 = 5
+ABL:対象:欲望 = 15
+ABL:対象:性技 = 20
+ABL:対象:性知識 = 5
+ABL:対象:奉仕 = 1
+ABL:対象:性交 = 15
+ABL:対象:百合 = 0
+ABL:対象:精愛 = 3
+ABL:対象:露出 = 2
+ABL:対象:射精 = 15
+ABL:対象:排泄 = 3
+ABL:対象:加虐 = 5
+ABL:対象:主導度Ｕ = RAND(300, 600)
+ABL:対象:主導度Ｎ = RAND(300, 600)
+ABL:対象:倒錯度 = RAND(300, 500)
+EXP:対象:絶頂経験 = 500
+ABL:対象:武闘 = 60
+ABL:対象:防衛 = 30
+ABL:対象:知略 = 30
+ABL:対象:政治 = 30
+ABL:対象:料理 = 10
+ABL:対象:肝臓 = 3
+IF HAS_PENIS(対象)
+	FOR LOCAL, 30, 50
+		SIF GROUPMATCH(LOCAL, 36, 46)
+			CONTINUE
+		COM_TENDENCY:対象:LOCAL = RAND:2
+	NEXT
+ENDIF
+
+TALENT:対象:精力超群 = 1
+TALENT:対象:陰毛現在値 = 陰毛_標準
+TALENT:対象:陰毛目標値 = 陰毛_標準
+TALENT:対象:Ｖ緊緻度 = GET_DEFAULT_TIGHTNESS("普通")
+TALENT:対象:Ａ緊緻度 = GET_DEFAULT_TIGHTNESS("普通")
+TALENT:(対象):処女 = 0
+TALENT:(対象):無接吻経験 = 0
+TALENT:(対象):童貞 = 0
+TALENT:(対象):後庭処女 = 1
+SEXUAL_EXPERIENCE:(対象):初体験_処女 = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_処女 = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_キス = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_キス = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_童貞 = 不明
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_童貞 = 不明
+SEXUAL_EXPERIENCE:(対象):初体験_アナル処女 = ----
+SEXUAL_LAST_EXPERIENCE:(対象):初体験_アナル処女 = ----
+CFLAG:対象:慰安参加者 = 1
+CFLAG:対象:慰安婦 = 1
+CFLAG:対象:調教参加フラグ  = 1
+CFLAG:対象:強制友好化 = 1
+
+
+;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_MILLIONAIRE_REVENGE_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("MILLIONAIRE")
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_MILLIONAIRE_REVENGE_DECISION()
+#DIM 対象
+
+SIF DVAR:富豪_誘拐カウンタ == 0
+	RETURN 0
+
+対象 = ID_TO_CHARA(DVAR:富豪_誘拐対象)
+SIF 対象 == -1
+	RETURN 0
+
+SIF !IS_FEMALE(対象)
+	RETURN 0
+
+SIF GET_COUNTRY_BOSS(CFLAG:対象:所属) == 対象
+	RETURN 0
+
+SIF 対象 == MASTER
+	RETURN 0
+
+SIF CFLAG:対象:特殊状態 == 特殊状態_死亡
+	RETURN 0
+
+DVAR:富豪_誘拐カウンタ --
+SIF DVAR:富豪_誘拐カウンタ == 0
+	RETURN 1
+
+RETURN 0
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_MILLIONAIRE_REVENGE()
+#DIM 対象
+
+対象 = ID_TO_CHARA(DVAR:富豪_誘拐対象)
+
+TALENT:対象:Ｃ鈍感 = 0
+TALENT:対象:Ｖ鈍感 = 0
+TALENT:対象:Ａ鈍感 = 0
+TALENT:対象:Ｂ鈍感 = 0
+TALENT:対象:Ｍ鈍感 = 0
+TALENT:対象:Ｃ敏感 = 1
+TALENT:対象:Ｖ敏感 = 1
+TALENT:対象:Ａ敏感 = 1
+TALENT:対象:Ｂ敏感 = 1
+TALENT:対象:Ｍ敏感 = 1
+TALENT:対象:否定快感 = 0
+
+PRINTFORMW 深夜……
+PRINTFORMW 在据点巡逻时，%ANAME(対象)%发现一名躲在暗处的可疑男子。
+;TranslatedMark 拠点を見まわっていた%ANAME(対象)%は、怪しげな男が物陰に隠れているのを発見した
+PRINTFORMW 看样子是街上的流氓。大概是为了寻找值钱的东西而偷偷潜入的吧
+;TranslatedMark どうやら街のごろつきのようだ。おおかた、金目のものでも求めて忍び込んだのだろう
+PRINTFORMW %ANAME(対象)%为了盘问而接近他，但后脑勺却传来一阵剧烈的疼痛！
+;TranslatedMark 尋問するため近づこうとした%ANAME(対象)%だったが、後頭部を鋭い痛みが襲った！
+PRINTFORMW 连还手的时间都没有，%ANAME(対象)%就昏倒了……
+;TranslatedMark 応戦する間もなく、%ANAME(対象)%は昏倒させられてしまった……
+PRINTFORMW ・
+PRINTFORMW ・
+PRINTFORMW ・
+PRINTFORMW 在冰冷而坚硬的触感中，%ANAME(対象)%醒了
+;TranslatedMark 冷たく硬い感触に、%ANAME(対象)%は目を覚ました
+PRINTFORMW 头痛得厉害，身体也不舒服
+;TranslatedMark 頭がひどく痛み、身体も軋んでいる
+PRINTFORMW 是不是因为喝了太多的酒而醉倒了呢。不耐烦地站起来，才注意到
+;TranslatedMark 大酒でもして、酔い潰れてしまったのだろうか。うんざりしながら起き上がり、気づく
+PRINTFORMW 自己的衣服被脱下，刚才是倒在地上。手脚上都套着枷锁
+;TranslatedMark 服を脱がされ、床に寝転がされていた。両手足には枷がはめられている
+PRINTFORMW 而且这里不是自己的房间。陌生昏暗的房间，恐怕是监牢
+;TranslatedMark さらにここは自室ではない。見知らぬ薄暗い部屋、おそらく牢屋だ
+PRINTFORMW 由于紧张感，意识一下子清醒了。还很迟钝的脑子运转起来，思考到底发生了什么
+;TranslatedMark 緊張感で意識が一気に覚醒した。一体何があったか、鈍い頭を回し思い出す
+PRINTFORMW 那时，因为可疑人物而分了心，真是太大意了
+;TranslatedMark あのとき、ごろつきに気をとられたのはうかつだった
+PRINTFORMW 那个一定是诱饵，然后"真正的主谋"从后面出手，应该是这样的手法没有错
+;TranslatedMark あれは囮で、「本命」の者が後ろから一撃を加える、そういう手はずだったに違いない
+PRINTFORMW 完全是自己的疏忽。但是，现在在这里后悔也没办法。现在必须想办法逃出去。
+;TranslatedMark まったくの不覚だ。だが、悔いていても仕方ない。今は脱出せねばならない。
+PRINTFORMW 「你终于醒了吗。亏你还能睡得那么香。乡下出来的女人是感觉都麻木了吗？」
+;TranslatedMark 「ようやくお目覚めか。よくもまぁあれだけグースカ寝ていられることだ。田舎女は感覚が麻痺しているのか？」
+PRINTFORMW 粘稠而下流的嗓音。%ANAME(対象)%对那个声音很耳熟
+;TranslatedMark ねっとりした、いやらしい声だった。%ANAME(対象)%はその声に聞き覚えがある
+PRINTFORMW 一脸不高兴地站在那边的，是以前来买%ANAME(MASTER)%的富豪……
+;TranslatedMark 以前%ANAME(MASTER)%の不興を買った富豪だ……
+PRINTFORMW 「哼，那群混混作为猴子也还算有用。只要我付钱，就什么事都肯干」
+;TranslatedMark 「ふん、連中も、猿にしては役に立つ。金さえ払えば何にでも手を染めるのだからな」
+PRINTFORMW 他一定是绑架%ANAME(対象)%的主犯。%ANAME(対象)%向他要求现在马上放了自己
+;TranslatedMark この男が%ANAME(対象)%を拉致した主犯であるに違いなかった。今すぐ解放するよう、%ANAME(対象)%は要求する
+PRINTFORMW 「喂喂，那是什么眼神？区区雌穴，竟然敢用那种眼神看我？」
+;TranslatedMark 「おいおい、なんだその目は？　雌穴風情が、この私にそんな目を向けて良いとでも？」
+PRINTFORMW 「该怨恨的对象搞错了吧。如果那只野蛮的猴子对我的态度再端正一点的话，你也不会落得这样的下场吧」
+;TranslatedMark 「恨む相手が違うだろう。あの野蛮な猿がもう少しまともなら、お前もこんなことにはならなかったのだ」
+PRINTFORMW 「给我听好了？和把我关进监狱这般的重罪相比，你被关在这里根本没什么大不了的」
+;TranslatedMark 「いいか？　この私が牢に放り込まれることの重大さに比べたら、貴様ごときがここにいようと大したことではない」
+PRINTFORMW 「但是那家伙最讨厌的，就是你被带走这件事情了吧。所以就“如他所愿”了」
+;TranslatedMark 「だが奴が最も嫌がるのは、お前を連れて行かれることだろうからな。望み通りにしてやったのさ」
+PRINTFORMW 「然后我也得到了可以说是让我的入狱能算是有意义的“东西”」
+;TranslatedMark 「そして私は、牢に放り込まれた甲斐のあったといえるだけのものを得るわけだ」
+PRINTFORMW 如果现在手能动一定会一拳打上去，如果脚能动的话一定会踢上去
+;TranslatedMark 腕が動けば殴っているし、足が動けば蹴っている
+PRINTFORMW 因为哪一个都动弹不得，所以就狠狠地瞪了他一眼
+;TranslatedMark どちらもできないため、思い切り睨み付けた
+PRINTFORMW 「哈哈哈！很强硬啊。很好。看你这样能持续到什么时候」
+;TranslatedMark 「ははは！　強気なことだな。大いに結構。それがいつまで続くか見物だな」
+PRINTFORMW 「……那么，为了让你会明白谁才是绝对的支配者，需要侵犯你多少次呢？」
+;TranslatedMark 「……さて、お前は何回犯されたら、誰が絶対的な支配者か学ぶかな？」
+PRINTFORMW 「自己的存在价值，说到底只不过是为了性处理而被使用的"穴"而已，需要几天才能学到呢？」
+;TranslatedMark 「自分の存在が、しょせんは性処理のための『穴』に過ぎんと、何日目で学ぶだろうなぁ？」
+PRINTFORMW 一边说着，这男人压倒了%ANAME(対象)%
+;TranslatedMark 言いながら、男は%ANAME(対象)%に覆い被さる
+PRINTFORMW 手上做的粗俗的动作，男人把手伸向%ANAME(対象)%的身体
+;TranslatedMark 下衆な手つきで、%ANAME(対象)%の身体に手を伸ばす
+PRINTFORMW 虽然是想要抵抗的%ANAME(対象)%，但因为被捆绑起来了什么都做不到……
+;TranslatedMark 抵抗する%ANAME(対象)%だったが、縛り上げられていてはどうにもならなかった……
+
+FLAG:ターンエンド調教 = 3
+FLAG:慰安場所 = 慰安_行き先_貴族の居住地
+TRAIN_PLACE = 貴族の屋敷
+CVARSET CFLAG, GETNUM(CFLAG, "慰安参加者") , 0
+CVARSET CFLAG, GETNUM(CFLAG, "調教参加フラグ") , 0
+CFLAG:対象:調教参加フラグ = 1
+CALL MILLIONAIRE_DERIVATION_CREATE_MILLIONAIRE()
+CALL ADD_EVENTTRAIN_CALLEE("MILLIONAIRE_REVENGE")
+CALL ADD_EVENTEND_CALLEE("MILLIONAIRE_REVENGE_A")
+DAILY_CANCEL = 1
+
+@EVENTTRAIN_MILLIONAIRE_REVENGE
+TFLAG:56 = 30
+
+@EVENTEND_MILLIONAIRE_REVENGE_A
+#DIM 対象
+対象 = ID_TO_CHARA(DVAR:富豪_誘拐対象)
+
+PRINTFORML
+PRINTFORMW 「那么，差不多该有自知之明了吧？」
+;TranslatedMark 「さて、そろそろ身の程をわきまえたんじゃぁないか？」
+PRINTFORMW 富豪一边冷笑着一边说道
+;TranslatedMark にやにやと笑いながら、富豪は言ってくる
+PRINTFORMW 向那张满是横肉的脸吐了唾沫
+;TranslatedMark その顔につばを吐きかけてやった
+PRINTFORMW 「……这样啊。……那就、让你再多学点吧」
+;TranslatedMark 「……それはそれは。……なら、もっと学ばせてやろうじゃあないか」
+PRINTFORMW 富豪再次压倒了%ANAME(対象)%……
+;TranslatedMark 富豪は再び、%ANAME(対象)%に覆い被さった……
+PRINTFORML
+FLAG:ターンエンド調教 = 3
+FLAG:慰安場所 = 慰安_行き先_貴族の居住地
+TRAIN_PLACE = 貴族の屋敷
+CVARSET CFLAG, GETNUM(CFLAG, "慰安参加者") , 0
+CVARSET CFLAG, GETNUM(CFLAG, "調教参加フラグ") , 0
+CFLAG:対象:調教参加フラグ = 1
+CALL MILLIONAIRE_DERIVATION_CREATE_MILLIONAIRE()
+CALL ADD_EVENTTRAIN_CALLEE("MILLIONAIRE_REVENGE")
+CALL ADD_EVENTEND_CALLEE("MILLIONAIRE_REVENGE_B")
+DAILY_CANCEL = 1
+
+@EVENTEND_MILLIONAIRE_REVENGE_B
+#DIM 対象
+対象 = ID_TO_CHARA(DVAR:富豪_誘拐対象)
+
+PRINTFORMW 「嗯，该休息了」
+;TranslatedMark 「ふん、休憩だ」
+PRINTFORMW 即使这男人再怎么精力绝伦，但毕竟连续做了数十发的性交还是会消耗体力的吧
+;TranslatedMark 絶倫というほかない男の精力であっても、流石に何十発と連続しての性交は体力を消耗するのだろう
+PRINTFORMW 他从%ANAME(対象)%身边离开，将水瓶里的水含入口中
+;TranslatedMark 彼は%ANAME(対象)%から離れ、水差しの水を口に含んだ
+PRINTFORMW 另一方面，%ANAME(対象)%是一种不确定是否还活着的状态
+;TranslatedMark 一方の%ANAME(対象)%はといえば、生きているかも定かでない状態だ
+PRINTFORMW 全身沾满汗水、白浊和爱液的%PRONOUN(対象)%，已经连活动一根手指的力气都没有了
+;TranslatedMark 全身汗と白濁と愛液にまみれた%PRONOUN(対象)%には、もはや指一本動かす気力すら残されていない
+PRINTFORMW 只有胸口的上下浮动，勉强能证明她还活着……
+;TranslatedMark 胸の上下していることだけが、かろうじて生存を伝えている……
+PRINTFORMW 「喂，谁让你睡觉了」
+;TranslatedMark 「おい、何を寝ている」
+PRINTFORMW 男人抓住水壶，把里面的水倒在%ANAME(対象)%的身上
+;TranslatedMark 男は水差しを手に掴み、その中身を%ANAME(対象)%にぶちまける
+PRINTFORMW 从短暂的休息中苏醒来的%ANAME(対象)%，再次以几乎要咬上去的气势开始盯着富豪
+;TranslatedMark つかの間の休息から覚醒した%ANAME(対象)%は、再び富豪を噛みつかんばかりの勢いで睨み始めた
+PRINTFORMW 「呀嘞呀嘞。脸和身体姑且不论，内在是一只狂犬啊」
+;TranslatedMark 「やれやれ。顔と身体はともかく、中身は狂犬だなこれは」
+PRINTFORMW 「那，好吧。不管要花多少天，我都会把你的尖牙折断把你的利爪切掉，让你变成听话的母狗」
+;TranslatedMark 「まあ、いい。何日でもかけて牙をへし折り爪を切り、雌犬にしたてあげてやる」
+PRINTFORMW 「呼呼，你就尽力抵抗吧」
+;TranslatedMark 「ククッ、せいぜい頑張ることだなァ？」
+PRINTFORMW 说完了这句，这男人就离开了牢狱……
+;TranslatedMark 言うだけ言って、男は牢を後にした……
+
+CALL COLOR_PRINTW(@"%ANAME(対象)%被富豪抓住了", カラー_警告)
+
+SETBIT TALENT:対象:日常系, 素質_デイリー_富豪の虜囚
+CALL CHANGE_COUNTRY(対象, 0)
+CFLAG:対象:特殊状態 = 0
+
+RETURN 1
+
+;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_MILLIONAIRE_TRAIN_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("MILLIONAIRE")
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_MILLIONAIRE_TRAIN_DECISION()
+#DIM 対象
+
+RETURN 1
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_MILLIONAIRE_TRAIN_SETTARGET()
+#DIM 対象
+
+FOR LOCAL, 0, CHARANUM
+	IF GETBIT(TALENT:LOCAL:日常系, 素質_デイリー_富豪の虜囚)
+		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+		DAILY_TARGET_NUM ++
+	ENDIF
+NEXT
+
+RETURN DAILY_TARGET_NUM > 0
+
+;---------------------
+;イベント本体
+;---------------------
+@EVENT_DAILY_DERIVATION_MILLIONAIRE_TRAIN()
+#DIM 対象
+
+対象 = DAILY_TARGET:0
+
+CALL EVENT_DAILY_DARIVATION_MILLIONAIRE_RESCUE(対象)
+SIF RESULT == 1
+	RETURN 0
+
+PRINTFORMW 被富豪绑架的%ANAME(対象)%，正在接受调教……
+;TranslatedMark 富豪に捕らわれている%ANAME(対象)%が、調教を受けている……
+
+FOR LOCAL, 0, 10
+	SELECTCASE DVAR:富豪_調教カウンタ
+		CASE 0
+			PRINTDATAW
+				DATALIST
+					DATAFORM 虽然%ANAME(対象)%胡乱地发出喊叫声，但男人却毫不在意地使用%ANAME(対象)%的肉穴
+					;TranslatedMark %ANAME(対象)%は喚き散らすが、男は一切遠慮せず、%ANAME(対象)%の穴を使っていく
+					DATAFORM %PRONOUN(対象)%拼命压抑着每次被顶上时都忍不住要发出的娇声……
+					;TranslatedMark 一突きされる度に零れそうになる嬌声を、%PRONOUN(対象)%は必死に抑えている……
+				ENDLIST
+				DATALIST
+					DATAFORM 男人带着下流的笑容，侵犯着%ANAME(対象)%
+					;TranslatedMark 男は下卑た笑いを浮かべながら、%ANAME(対象)%を犯している
+					DATAFORM 为了不喘出声音，%PRONOUN(対象)%拼命忍着……
+					;TranslatedMark 声をあげまいと、%PRONOUN(対象)%は必死にこらえている……
+				ENDLIST
+				DATALIST
+					DATAFORM %ANAME(対象)%被用指尖来回责弄着雌穴
+					;TranslatedMark %ANAME(対象)%は雌穴を指先でほじくり返されている
+					DATAFORM 男人一味地责弄%PRONOUN(対象)%的弱点，%PRONOUN(対象)%勉强忍耐着……
+					;TranslatedMark 弱いところをひたすらに責めあげられながらも、%PRONOUN(対象)%はどうにかこらえている……
+				ENDLIST
+				DATALIST
+					DATAFORM %ANAME(対象)%的尻穴被责弄着
+					;TranslatedMark %ANAME(対象)%は尻穴を穿たれている
+					DATAFORM 明明是被人责弄着排泄口，%ANAME(対象)%却因那男人巧妙的性技而感到快感……
+					;TranslatedMark 排泄口を弄くられているというのに、男の巧みな性技に%ANAME(対象)%は性感を覚えてしまう……
+				ENDLIST
+				DATALIST
+					DATAFORM %ANAME(対象)%被逼迫着用嘴巴侍奉男人
+					;TranslatedMark %ANAME(対象)%は男のモノに口で奉仕させられている
+					DATAFORM 大概是因为不耐烦了吧，男子将腰撞到%PRONOUN(対象)%的脸上，将肉棒顶到喉咙深处……
+					;TranslatedMark じれったくなったのか、男は%PRONOUN(対象)%の顔面に腰を叩きつけ、喉でペニスをしごいていく……
+				ENDLIST
+				DATALIST
+					DATAFORM %ANAME(対象)%被鞭子和针责备着
+					;TranslatedMark %ANAME(対象)%は鞭や針で責め立てられている
+					DATAFORM 男人嘲笑着那咬着牙忍耐着疼痛的样子……
+					;TranslatedMark 奥歯を噛み締め痛みを堪えるさまを、男は嘲笑っている……
+				ENDLIST
+				DATALIST
+					DATAFORM %ANAME(対象)%被安装的各种各样的道具所责弄的同时，被男人侵犯了
+					;TranslatedMark %ANAME(対象)%は様々な責め具を取り付けられ、犯されている
+					DATAFORM %ANAME(対象)%拼命忍耐着被毫不留情地插入的快感……
+					;TranslatedMark 容赦なく叩きつけられる快感を、%ANAME(対象)%は必死にこらえている……
+				ENDLIST
+				DATALIST
+					DATAFORM %ANAME(対象)%被被逼迫地说了服从那男人的话语
+					;TranslatedMark %ANAME(対象)%は男に服従するような言葉を言わされている
+					DATAFORM 每说一句，都会把充满了怨恨的像是想杀人的视线投向那男人……
+					;TranslatedMark 一言一言吐き出す度に、恨みだけで殺せそうな視線を男に向けている……
+				ENDLIST
+			ENDDATA
+			{
+				CALL FUCK(対象, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 欲望, 性技, 性交, 奉仕, 精愛, 緊縛, 苦痛快楽, 被虐, 接吻, 口淫, 自慰, 露出, Ｖ性交, Ａ性交", "膣内射精, 腸内射精, 口内射精, 処女喪失, Ａ処女喪失, 接吻喪失, CFLAG減少",
+					GET_SPERM_ID("富豪"), "富豪のペニス", "富豪", "", "強姦")
+			}
+		CASE 1
+			PRINTDATAW
+				DATALIST
+					DATAFORM 像是抽泣一般接受着活塞运动的冲击，%ANAME(対象)%达到了顶峰
+					;TranslatedMark しゃくりあげるようなストロークを受けるたび、%ANAME(対象)%は絶頂してしまう
+					DATAFORM 承受着像是象征结束的强有力的膣内射精，%PRONOUN(対象)%弓着背扭动着身子迷上了这种感觉……
+					;TranslatedMark とどめと言わんばかりの力強い射精を膣内に受け、%PRONOUN(対象)%は背を反らして悶え狂う……
+				ENDLIST
+				DATALIST
+					DATAFORM 被从背后进行激烈的活塞运动，%ANAME(対象)%的身体不受自身意识控制达到了顶点
+					;TranslatedMark 後ろからの激しいピストンに、%ANAME(対象)%は意志と関わらず絶頂してしまう
+					DATAFORM 但是，男人完全不管这件事情，接着激烈地反复抽送……
+					;TranslatedMark だが、男はそんなことなど関係なく、なおも激しく抽送を繰り返す……
+				ENDLIST
+				DATALIST
+					DATAFORM %ANAME(対象)%被插入尻穴，即使感到十分羞耻依旧绝顶了
+					;TranslatedMark %ANAME(対象)%は菊穴を穿たれ、はしたなくも絶頂している
+					DATAFORM 男人毫不留情地、像是说%PRONOUN(対象)%的绝顶根本无所谓一样，激烈地顶着腰……
+					;TranslatedMark 男には容赦がなく、%PRONOUN(対象)%の絶頂など関係ないと言わんばかりに激しく腰を叩きつけていく……
+				ENDLIST
+				DATALIST
+					DATAFORM 两穴里都被插入了有着下流尺寸的玩具，%ANAME(対象)%忍不住高潮了
+					;TranslatedMark 両穴にえげつないサイズの玩具をねじ込まれ、%ANAME(対象)%はこらえきれずアクメしてしまう
+					DATAFORM 当然，那男人不会因此而放过她，%ANAME(対象)%更是一次又一次地被激烈地责弄着二穴……
+					;TranslatedMark むろん男がそれで許すはずもなく、%ANAME(対象)%はさらに何度も何度も激しく二穴をえぐられていく……
+				ENDLIST
+				DATALIST
+					DATAFORM %ANAME(対象)%被用肉棒插入喉咙深处
+					;TranslatedMark %ANAME(対象)%は男のモノを喉奥にまで突きこまれている
+					DATAFORM 一方面感到粘膜被摩擦着的痛苦，另一方面，秘部的深处却在持续传来发热的感觉……
+					;TranslatedMark 粘膜をえぐられる苦痛を覚える一方で、秘部の奥の奥は熱をおびつつある……
+				ENDLIST
+				DATALIST
+					DATAFORM 作为调教，%ANAME(対象)%正在被打屁股
+					;TranslatedMark %ANAME(対象)%は躾と称して尻を叩かれている
+					DATAFORM 每当响起啪啪的击打声，%ANAME(対象)%就会痛苦地呻吟，但另一方面，秘部却渐渐开始湿润……
+					;TranslatedMark ぱぁん、ぱぁんと破裂音が響くたび、%ANAME(対象)%は痛みに呻くが、一方でその秘部は湿り気を帯びつつある……
+				ENDLIST
+				DATALIST
+					DATAFORM %ANAME(対象)%被被逼迫地说了服从那男人的话语
+					;TranslatedMark %ANAME(対象)%は男に服従するような言葉を言わされている
+					DATAFORM 每一句话都有抵抗的感觉，但是当初的杀意多少被削弱了……
+					;TranslatedMark 一言一言発するごとに抵抗は感じているようだが、当初あった殺意はいくぶん削がれてしまっている……
+				ENDLIST
+			ENDDATA
+			{
+				CALL FUCK(対象, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 欲望, 性技, 性交, 奉仕, 精愛, 緊縛, 苦痛快楽, 被虐, 接吻, 口淫, 自慰, 露出, Ｖ性交, Ａ性交", "膣内射精, 腸内射精, 口内射精, 処女喪失, Ａ処女喪失, 接吻喪失, CFLAG減少",
+					GET_SPERM_ID("富豪"), "富豪のペニス", "富豪", "", "強姦")
+			}
+		CASE 2
+			PRINTDATAW
+				DATALIST
+					DATAFORM 子宫口被阴茎轻轻挤压着，%ANAME(対象)%发出娇喘
+					;TranslatedMark 子宮口をペニスで小突かれ、%ANAME(対象)%は嬌声をあげヨガっている
+					DATAFORM 那腰像是想要榨取精液一样开始扭动……
+					;TranslatedMark その腰は、精液を欲しがるかのようにくねりはじめている……
+				ENDLIST
+				DATALIST
+					DATAFORM 男人下流的腰技，%ANAME(対象)%感受到了极致的快感
+					;TranslatedMark 男のねっとりとした腰使いに、%ANAME(対象)%は官能の極みに達している
+					DATAFORM 发出的是、因为快感而融化了一般的女人的声音……
+					;TranslatedMark あがるのは、甘くとろけた女の声だ……
+				ENDLIST
+				DATALIST
+					DATAFORM 直肠被阴茎蹂躏，%ANAME(対象)%不成体统地娇声大叫
+					;TranslatedMark 直腸をペニスで蹂躙され、%ANAME(対象)%はあられもなく嬌声をあげている
+					DATAFORM 为了榨取精液而缩紧的尻穴，完成了从排泄口向第二性器官的脱胎换骨……
+					;TranslatedMark 菊座は精を絞りとるように収縮し、排泄口から第二の性器へと生まれ変わろうとしている……
+				ENDLIST
+				DATALIST
+					DATAFORM %ANAME(対象)%的两穴都被塞入了下流尺寸的玩具，像孩子一样流着口水
+					;TranslatedMark %ANAME(対象)%の両穴はえげつのないサイズの玩具を咥え込み、子供のように涎を垂らしている
+					DATAFORM %ANAME(対象)%明明达到了激烈的绝顶，但是肉壁好像是在说还不满足一样收缩着……
+					;TranslatedMark 激しく絶頂する%ANAME(対象)%だが、それでも足りないといわんばかりに、その肉ひだは収縮している……
+				ENDLIST
+				DATALIST
+					DATAFORM %ANAME(対象)%用嘴为男人服务
+					;TranslatedMark %ANAME(対象)%は男のモノに口で奉仕している
+					DATAFORM 到底是「被逼迫着做」还是「自己在做」，两者的区别正在渐渐变得暧昧……
+					;TranslatedMark 「やらされている」のか「している」のか、その境はどんどんと曖昧になっていっている……
+				ENDLIST
+				DATALIST
+					DATAFORM 作为调教，%ANAME(対象)%正在被鞭子和蜡烛所责备
+					;TranslatedMark %ANAME(対象)%は躾と称し、鞭やろうそくで責められている
+					DATAFORM 因为疼痛而发出的不是悲鸣而是娇艳的声音……
+					;TranslatedMark 痛みによってあがるのは、悲鳴ではなく艶やかな声になっている……
+				ENDLIST
+				DATALIST
+					DATAFORM %ANAME(対象)%被被逼迫地说了服从那男人的话语
+					;TranslatedMark %ANAME(対象)%は男に服従するような言葉を言わされている
+					DATAFORM 以毫无抵触地、陈述事实一般的语气，%PRONOUN(対象)%说了很多卑屈的话……
+					;TranslatedMark 抵抗もなく、事実を述べるかのような口調で、%PRONOUN(対象)%は卑屈な言葉を並べ立てる……
+				ENDLIST
+			ENDDATA
+			{
+				CALL FUCK(対象, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 欲望, 性技, 性交, 奉仕, 精愛, 緊縛, 苦痛快楽, 被虐, 接吻, 口淫, Ｖ性交, Ａ性交", "膣内射精, 腸内射精, 口内射精, 処女喪失, Ａ処女喪失, 接吻喪失, CFLAG減少",
+					GET_SPERM_ID("富豪"), "富豪のペニス", "富豪", "", "強姦")
+			}
+		CASE 3
+			PRINTDATAW
+				DATALIST
+					DATAFORM %ANAME(対象)%明显积极地和男人交合着，自己扭动着腰
+					;TranslatedMark %ANAME(対象)%は明らかに積極的に男と交わり腰をくねらせる
+					DATAFORM 无法逃离地沉迷于阴茎所带来的快乐……
+					;TranslatedMark ペニスがもたらす快楽から、逃れられなくなっている……
+				ENDLIST
+				DATALIST
+					DATAFORM 每次沾满肠液的尻穴被插入时，%ANAME(対象)%都会因快感会发出娇喘声
+					;TranslatedMark とろとろにとろけたアナルを突かれるたび、%ANAME(対象)%はヨガり声をあげている
+					DATAFORM 每次被插入时都会溢出的白浊，证明%PRONOUN(対象)%已经多次在那里接受了精液……
+					;TranslatedMark 突かれるたび噴き出す白濁は、%PRONOUN(対象)%がもう何度もそこで精を受け止めたという動かぬ証拠だ……
+				ENDLIST
+				DATALIST
+					DATAFORM %ANAME(対象)%一边被男人打屁股，一边被强烈侵犯
+					;TranslatedMark %ANAME(対象)%は男に尻肉を叩かれながら、激しく犯されている
+					DATAFORM 每当响起令人心情舒畅的拍打声，%PRONOUN(対象)%像是代替悲鸣一样被强迫动起腰来
+					;TranslatedMark 小気味良い破裂音が響くたび、%PRONOUN(対象)%は悲鳴のような強制をあげて腰を振る……
+				ENDLIST
+				DATALIST
+					DATAFORM %ANAME(対象)%被男人要求骑乘位性交
+					;TranslatedMark %ANAME(対象)%は男に騎乗位を求められている
+					DATAFORM 被束缚着的%PRONOUN(対象)%拼命地摇着腰，追求着性交的快乐……
+					;TranslatedMark 縛られながらも%PRONOUN(対象)%は必死に腰を振り、性交の快楽を得ようとしている……
+				ENDLIST
+				DATALIST
+					DATAFORM %ANAME(対象)%用嘴为男人服务
+					;TranslatedMark %ANAME(対象)%は男のモノに口で奉仕している
+					DATAFORM 不是「被人强迫」，而是%PRONOUN(対象)%自身「主动在做」……
+					;TranslatedMark 「やらされている」のではなく、%PRONOUN(対象)%が自ら「している」のだ……
+				ENDLIST
+				DATALIST
+					DATAFORM 作为奖赏，%ANAME(対象)%被鞭子和蜡烛所责备
+					;TranslatedMark %ANAME(対象)%は褒美と称し、鞭やろうそくで責められている
+					DATAFORM 发出娇艳的声音，由于疼痛%PRONOUN(対象)%达到了绝顶……
+					;TranslatedMark 艶やかな声をあげ、痛みによって%PRONOUN(対象)%は絶頂する……
+				ENDLIST
+				DATALIST
+					DATAFORM %ANAME(対象)%被被逼迫地说了服从那男人的话语
+					;TranslatedMark %ANAME(対象)%は男に服従するような言葉を言わされている
+					DATAFORM 每说一句话，甜美的喜悦就让%ANAME(対象)%的脑髓麻木……
+					;TranslatedMark 一言一言並べるたび、甘美な悦びが%ANAME(対象)%の脳髄をしびれさせる……
+				ENDLIST
+			ENDDATA
+			{
+				CALL FUCK(対象, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 欲望, 性技, 性交, 奉仕, 精愛, 緊縛, 苦痛快楽, 被虐, 接吻, 口淫, Ｖ性交, Ａ性交", "膣内射精, 腸内射精, 口内射精, 処女喪失, Ａ処女喪失, 接吻喪失, CFLAG減少",
+					GET_SPERM_ID("富豪"), "富豪のペニス", "富豪", "", "強姦")
+			}
+		CASE 4
+			PRINTDATAW
+				DATALIST
+					DATAFORM %ANAME(対象)%骑在男人身上，自己摆动着腰，想要接受珍贵的精液
+					;TranslatedMark %ANAME(対象)%は男にまたがって自ら腰を振り、貴重な精を受け止めようとしている
+					DATAFORM 按她所期待地射精之后，%ANAME(対象)%仿佛在说受不了似的，弓起背达到了高潮
+					;TranslatedMark 彼が望み通りに射精すると、%ANAME(対象)%はたまらないといわんばかりに背を反らしてアクメを迎えた……
+				ENDLIST
+				DATALIST
+					DATAFORM 被男人插入了作为第二性器官脱胎换骨的尻穴，%ANAME(対象)%发出了不成体统的娇滴滴的声音
+					;TranslatedMark 男によって第二の性器として生まれ変わったアナルを穿たれ、%ANAME(対象)%はだらしのないヨガり声をまきちらしている
+					DATAFORM 被从后面打着屁股，留下手掌的痕迹，%ANAME(対象)%拼命摇着腰讨好着男人开心……
+					;TranslatedMark 後ろから尻肉を叩かれ、手のひらの痕を残されながら、%ANAME(対象)%は必死に腰を振って男を悦ばせようとしている……
+				ENDLIST
+				DATALIST
+					DATAFORM %ANAME(対象)%被男人命令，当场开始展示自慰表演
+					;TranslatedMark %ANAME(対象)%は男に命じられ、即席のオナニーショーを披露している
+					DATAFORM 男子嘲笑着她那张开大腿弓着身子拼命玩弄着雌穴的低贱的样子……
+					;TranslatedMark がに股を広げ背筋を反らせながら必死に雌穴をほじくる浅ましい様を、男は嘲笑っている……
+				ENDLIST
+				DATALIST
+					DATAFORM %ANAME(対象)%主动吮吸着男人的东西，吸起脸颊努力侍奉着
+					;TranslatedMark %ANAME(対象)%は自ら男のものにしゃぶりつき、頬をすぼめて奉仕している
+					DATAFORM 一边慢慢品尝射在嘴里的精液，一边一滴不剩地将其喝干……
+					;TranslatedMark 口内にぶちまけられた精液をゆっくりと味わいながら、余すことなく飲み干していく……
+				ENDLIST
+				DATALIST
+					DATAFORM %ANAME(対象)%匍匐在地上，向男人下跪，发誓要服从他
+					;TranslatedMark %ANAME(対象)%は地べたに這いつくばり、男に土下座し、彼に服従を誓っている
+					DATAFORM 大概是因为不满意她说的话吧，男子踩着%PRONOUN(対象)%的头，咕噜咕噜地压在地板上
+					;TranslatedMark 口上が気に入らなかったのか、男は%PRONOUN(対象)%の頭を踏みつけ、ぐりぐりと床に押し付ける
+					DATAFORM %PRONOUN(対象)%对此也感到高兴，低着头在自己的阴部里咕噜咕噜地玩弄着……
+					;TranslatedMark %PRONOUN(対象)%はそれにすら喜びを覚え、頭を下げたまま自らの陰部をこねくり回している……
+				ENDLIST
+				DATALIST
+					DATAFORM %ANAME(対象)%被男人贯穿，把雌穴用于性处理
+					;TranslatedMark %ANAME(対象)%は男に貫かれ、雌穴を性処理に使われている
+					DATAFORM 在被刺激着弱点的快感中，%PRONOUN(対象)%的雌穴潮吹了……
+					;TranslatedMark 弱点をえぐられる悦びに、%PRONOUN(対象)%の雌穴は潮を噴きちらしている……
+				ENDLIST
+			ENDDATA
+			{
+				CALL FUCK(対象, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 欲望, 性技, 性交, 奉仕, 精愛, 緊縛, 苦痛快楽, 被虐, 接吻, 口淫, Ｖ性交, Ａ性交", "膣内射精, 腸内射精, 口内射精, 処女喪失, Ａ処女喪失, 接吻喪失, CFLAG減少",
+					GET_SPERM_ID("富豪"), "富豪のペニス", "富豪", "", "強姦")
+			}
+	ENDSELECT
+	PRINTFORML 凌辱还要继续……
+	;TranslatedMark 陵辱は更に続く……
+	CALL SINGLE_DRAWLINE
+NEXT
+
+DVAR:富豪_調教カウンタ ++
+FLAG:ターンエンド調教 = 3
+FLAG:慰安場所 = 慰安_行き先_貴族の居住地
+TRAIN_PLACE = 貴族の屋敷
+CVARSET CFLAG, GETNUM(CFLAG, "慰安参加者") , 0
+CVARSET CFLAG, GETNUM(CFLAG, "調教参加フラグ") , 0
+CFLAG:対象:調教参加フラグ = 1
+CALL MILLIONAIRE_DERIVATION_CREATE_MILLIONAIRE()
+CALL ADD_EVENTTRAIN_CALLEE("MILLIONAIRE_TRAIN")
+CALL ADD_EVENTEND_CALLEE("MILLIONAIRE_TRAIN")
+DAILY_CANCEL = 1
+
+
+@EVENTTRAIN_MILLIONAIRE_TRAIN
+TFLAG:56 = 30
+
+@EVENTEND_MILLIONAIRE_TRAIN
+#DIM 対象
+SIF DVAR:富豪_調教カウンタ != 5
+	RETURN 1
+
+FOR LOCAL, 0, CHARANUM
+	IF GETBIT(TALENT:LOCAL:日常系, 素質_デイリー_富豪の虜囚)
+		対象 = LOCAL
+		CONTINUE
+	ENDIF
+NEXT
+
+
+PRINTFORMW ……调教结束后，%ANAME(対象)%仍继续为富豪服务
+;TranslatedMark ……調教が終わった後も、%ANAME(対象)%は富豪に奉仕を続けていた
+PRINTFORMW 不知道插入了自己两穴多少次进行"注射"的东西，发出吱吱的声音不断地将其吮吸着
+;TranslatedMark 自身の両穴を散々穿って「くださった」モノを、じゅぷじゅぷと音を立ててしゃぶり続ける
+PRINTFORMW 从%STR_BODY("膣：欲情")%和%STR_BODY("アナル：感度")%中，发出了被充分注入白浊的声音
+;TranslatedMark %STR_BODY("膣：欲情")%や%STR_BODY("アナル：感度")%からは、たっぷりと注ぎ込まれた白濁が音を立ててあふれ出している
+PRINTFORMW 「你这不是也变得蛮坦率的了吗？」
+;TranslatedMark 「お前もずいぶん、素直になったじゃぁないか？」
+PRINTFORMW 被他指出这点，%ANAME(対象)%感到很羞耻
+;TranslatedMark 彼に指摘され、%ANAME(対象)%は恥ずかしさを覚える
+PRINTFORMW 自己只不过为了是处理性欲而存在的毫无价值的肉穴，只不过是他出于善良的心在使用它而已
+;TranslatedMark 己は性処理のための無価値な穴に過ぎず、あくまで彼の温情によって使っていただいているに過ぎない
+PRINTFORMW 想请你忘记那个连这都不知道的愚蠢的过去的自己
+;TranslatedMark そんなことも分かっていなかった愚かな昔の自分のことは、忘れていただきたかった
+PRINTFORMW %PRONOUN(対象)%当初抱持着的反抗心早已被折断，现在已经变成了向他献媚的雌性了
+;TranslatedMark %PRONOUN(対象)%が当初抱いていた反抗心はとっくにへし折られており、今や彼に媚びる雌に成り果てている
+PRINTFORMW 「对了，今天想要你见几个人」
+;TranslatedMark 「そうだ、今日はお前に合わせたい奴がいる」
+PRINTFORMW 「是在把你带来这里的时候雇佣的那批人。嘛，不过是一群用棉花代替了脑浆塞进脑袋里的一群人罢了」
+;TranslatedMark 「お前をここに連れてくるにあたって使った連中がいてな。まあ、脳みその代わりに綿埃が頭に詰まっているような連中だ」
+PRINTFORMW 「虽然和你一样都是毫无价值的人，但既然雇佣了他们来工作，那就得给报酬」
+;TranslatedMark 「お前と同じく等しく無価値だが、雇って仕事をさせたからには報酬をやらねばならん」
+PRINTFORMW 「工钱已经交付了。但是，既然的确派上了用场，就必须要给点"奖金"吧？」
+;TranslatedMark 「金はすでに渡してある。だが、それなりに役に立った以上、『ボーナス』をくれてやらねばならんからな？」
+PRINTFORMW %ANAME(対象)%理解了他所说的意思
+;TranslatedMark 彼の言っていることの意味を、%ANAME(対象)%は理解する
+PRINTFORMW 也就是说，他命令%ANAME(対象)%为绑架了自己的流氓们服务
+;TranslatedMark つまり彼は、%ANAME(対象)%に、自分自身をさらったごろつきどもに奉仕しろと命令しているのだ
+PRINTFORMW 但是，完全没有主张是非的权利和想法。%ANAME(対象)%的这个身体就是为了侍奉所有阴茎而存在的
+;TranslatedMark それに対し、是非を唱える権利もつもりも、%ANAME(対象)%にはない。この身はあらゆるペニスに仕えるためにあるのだが
+PRINTFORMW ……当然，他的要求为最优先是大前提
+;TranslatedMark ……無論、彼が最優先であるのは大前提であるが
+PRINTFORMW 「来吧，该出场了」
+;TranslatedMark 「そら、おでましだ」
+PRINTFORMW 牢里冰冷沉重的门，发出沉重的声音打开了
+;TranslatedMark 牢の冷たく重い扉が、重たい音をたてて開かれる
+PRINTFORMW 一个接一个进入的是包括%ANAME(対象)%之前巡逻中发现的那个可疑男子在内的流氓们
+;TranslatedMark ぞろぞろと入り込んできたのは、%ANAME(対象)%が巡回中に見つけたあの怪しげな男を含むごろつきども
+PRINTFORMW 还有，那时应该是一同巡逻的%ANAME(対象)%的部下
+;TranslatedMark そして、巡回に同伴していたはずの、%ANAME(対象)%の部下だった
+PRINTFORMW 「军队如果要征兵的话，必须要确认一下他的来历吧？」
+;TranslatedMark 「軍に兵を迎えるのなら、その素性は確認しておかねばなぁ？」
+PRINTFORMW 「可能会混入谁的手下……不过，你们这些猴子好像没有考虑那种事情的头脑」
+;TranslatedMark 「誰かの子飼いを紛れ込まされるかもしれんからな……まあ、貴様ら猿に、そんなことを考える頭はなかったようだが」
+PRINTFORMW 「那么。你们这些家伙，只要不弄死，她就随你们的便了。厌倦了就扔到那附近吧。我会派人回收的」
+;TranslatedMark 「さて。貴様ら、ソレのことは殺さなければ好きにしていいぞ。飽きたらその辺りに捨てておけ。適当な者に回収させる」
+PRINTFORMW 说罢，男人离开了房间。剩下的只有那些流氓和暴露出淫荡姿态的%ANAME(対象)%
+;TranslatedMark 言って、男は部屋を後にする。残されたのはごろつきどもと、みだらな姿を晒す%ANAME(対象)%だけだ
+PRINTFORMW %ANAME(対象)%向他们下跪献媚。看到男人们因为自己而勃起的东西，眼神就开始摇动
+;TranslatedMark %ANAME(対象)%は媚びるように彼らの元に跪く。男たちが自らの勃起した一物を見せつけると、瞳を蕩かせた
+PRINTFORMW 垂下眉尾，伸出舌头，好像在说希望快点把它插进去似的
+;TranslatedMark はやくそれを突っ込んで欲しいと言わんばかりに眉尻を垂れ下げ、舌を突き出す
+PRINTFORMW 对被那个男人灌输了自己是什么东西的现在的%PRONOUN(対象)%来说，拥有阴茎的人不管是谁都是服务的对象
+;TranslatedMark あの男に自分の何たるかを叩きこまれたいまの%PRONOUN(対象)%にとって、ペニスを持つものは誰であれ奉仕の対象なのだ
+PRINTFORMW 即使是背叛自己，让自己陷入圈套的原部下
+;TranslatedMark それが自分を裏切り、罠にかけた元部下であろうとも
+PRINTFORMW 总之，男人们自觉很幸运地聚到自己打开大腿，开始要求插入的%ANAME(対象)%身边
+;TranslatedMark ともかく、自ら股を開き、挿入をねだり始めた%ANAME(対象)%に、これ幸いと男たちは群がっていく
+PRINTFORMW 被插入，被射精，被强迫绝顶，%PRONOUN(対象)%的意识转眼间变的一片空白地溶化了……
+;TranslatedMark 挿入され、射精され、絶頂させられ、%PRONOUN(対象)%の意識はあっという間に白く溶けていった……
+PRINTFORML
+FLAG:ターンエンド調教 = 3
+FLAG:慰安場所 = 慰安_行き先_貴族の居住地
+CVARSET CFLAG, GETNUM(CFLAG, "慰安参加者") , 0
+CVARSET CFLAG, GETNUM(CFLAG, "調教参加フラグ") , 0
+CFLAG:対象:調教参加フラグ = 1
+FOR LOCAL, 0, 5
+	CALL CREATE_IAN_MOB(慰安_行き先_スラム, LOCAL + 1)
+NEXT
+CALL ADD_EVENTTRAIN_CALLEE("MILLIONAIRE_TRAIN")
+CALL ADD_EVENTEND_CALLEE("MILLIONAIRE_TRAIN_B")
+DAILY_CANCEL = 1
+
+
+@EVENTEND_MILLIONAIRE_TRAIN_B
+#DIM 対象
+
+FOR LOCAL, 0, CHARANUM
+	IF GETBIT(TALENT:LOCAL:日常系, 素質_デイリー_富豪の虜囚)
+		対象 = LOCAL
+		CONTINUE
+	ENDIF
+NEXT
+
+PRINTFORML
+PRINTFORMW 等一切都结束了，地痞们出去后，%ANAME(対象)%被运走了
+;TranslatedMark 何もかもが終わり、ごろつきどもが出て行った後、%ANAME(対象)%は運びだされた
+PRINTFORMW 富豪的手下清洁了她的身体，负责照顾她
+;TranslatedMark 富豪の手の者によってその身体は清められ、ケアされていく
+PRINTFORMW ……然后，为了成为适合富豪的小妾的姿态，被“改造”了……
+;TranslatedMark ……そして、彼の妾にふさわしい姿に、「造り変えられて」いった……
+
+IF GET_INMOU_LEVEL(対象) > 陰毛_パイパン
+	CALL SET_INMOU_DEFAULT(対象, 陰毛_ハート型)
+	TALENT:対象:陰毛現在値 = 陰毛_ハート型
+ENDIF
+
+FOR LOCAL, 0, 3
+	CALL SET_PIERCE_RANKED(対象, 1, ピアス_ラビア, ピアス_ペニス, ピアス_クリトリス, ピアス_乳首, ピアス_へそ, ピアス_耳, ピアス_舌, ピアス_鼻)
+	CALL SET_TATTOO_RANDOM(対象, STR_FOR_TATTOO(-1))
+NEXT
+
+PRINTFORMW 回过神来，%ANAME(対象)%躺在了豪华的床上
+;TranslatedMark 気がつけば、%ANAME(対象)%は豪奢なベッドに横たえられていた
+PRINTFORMW 衣服也是从来没有穿过的，非常漂亮的定做款
+;TranslatedMark 衣服も、今まで一度も身につけたことのないような、立派なあつらえのものだ
+PRINTFORMW 懂得了自己成为了为他而生的女人
+;TranslatedMark 自分が彼のための女になったことを理解させられる
+PRINTFORMW 就算是%ANAME(対象)%，即使被给予行动的自由，也不打算逃跑
+;TranslatedMark %ANAME(対象)%としても、行動の自由を与えられたところで、逃げるつもりはなかった
+PRINTFORMW 一直在考虑将所获得的自由用于富豪
+;TranslatedMark 与えられた自由を、富豪のために使うことばかり考えていた
+PRINTFORMW 想象着又会被那样强烈的侵犯，%ANAME(対象)%的身体也变得火热起来……
+;TranslatedMark またあのように激しく犯されることを想像して、%ANAME(対象)%は身体を熱くした……
+
+CALL COLOR_PRINTW(@"%ANAME(対象)%が富豪の愛妾となりました", カラー_警告)
+
+SETBIT TALENT:対象:日常系, 素質_デイリー_富豪の愛妾
+CLEARBIT TALENT:対象:日常系, 素質_デイリー_富豪の虜囚
+SETBIT TALENT:対象:淫乱系, 素質_淫乱_淫乱
+CALL CHANGE_COUNTRY(対象, 0)
+CALL LOSE_RELATION_TALENT(対象)
+CFLAG:対象:特殊状態 = 0
+
+RETURN 1
+
+;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_MILLIONAIRE_SLAVE_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("MILLIONAIRE")
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_MILLIONAIRE_SLAVE_DECISION()
+RETURN 1
+
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_DERIVATION_MILLIONAIRE_SLAVE_SETTARGET()
+FOR LOCAL, 0, CHARANUM
+	IF GETBIT(TALENT:LOCAL:日常系, 素質_デイリー_富豪の愛妾)
+		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+		DAILY_TARGET_NUM ++
+	ENDIF
+NEXT
+
+SIF DAILY_TARGET_NUM < 1
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_MILLIONAIRE_SLAVE()
+#DIM 対象
+
+対象 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+
+CALL EVENT_DAILY_DARIVATION_MILLIONAIRE_RESCUE(対象)
+SIF RESULT == 1
+	RETURN 0
+
+PRINTFORMW %ANAME(対象)%与富豪交合着……
+;TranslatedMark %ANAME(対象)%が富豪の男に抱かれている……
+
+SELECTCASE RAND:10
+	CASE 0
+		PRINTFORML 男人将腰压在%ANAME(対象)%身上，在最深处释放出精液
+		;TranslatedMark 男は%ANAME(対象)%に腰を押し付け、一番深くで精を解き放つ
+		PRINTFORML 由于被填满子宫而感到强烈的快乐，%ANAME(対象)%一边扭动着身体一边绝顶了
+		;TranslatedMark 子宮を埋め尽くす強烈な快楽に、%ANAME(対象)%は身悶えしながら絶頂する
+		PRINTFORML 男子拔出阴茎后，%PRONOUN(対象)%什么也没说，就用嘴吮吸，开始用心扫除……
+		;TranslatedMark 男がペニスを引き抜くと、%PRONOUN(対象)%は何も言われずとも口でそれをしゃぶり、丹念に清め始めた……
+	CASE 1
+		PRINTFORML 男人从背后贯穿%ANAME(対象)%，激烈地侵犯着她
+		;TranslatedMark 男は%ANAME(対象)%を後ろから貫き、激しく犯している
+		PRINTFORML %ANAME(対象)%在被男人的索求的同时自己动起了腰，讨好着他
+		;TranslatedMark %ANAME(対象)%は男に求められるがまま腰を振り立て、彼を悦ばせている
+		PRINTFORML 作为奖赏，男子朝臀肉拍打下去，%ANAME(対象)%发出了像是受不了一般的尖叫声，勒紧阴道
+		;TranslatedMark 褒美として男が尻肉を叩くと、%ANAME(対象)%はたまらないというヨガり声をあげ、膣を締め上げる
+		PRINTFORML 在那之后，%ANAME(対象)%无数次被男人注入了精液……
+		;TranslatedMark その後も、%ANAME(対象)%は幾度となく男に精を注がれた……
+	CASE 2
+		PRINTFORML 男人在侵犯%ANAME(対象)%的尻穴
+		;TranslatedMark 男は%ANAME(対象)%の尻穴を犯している
+		PRINTFORML 被他调教成为性器的尻穴，对激烈的抽送感到喜悦，紧紧地勒紧肉棒
+		;TranslatedMark 彼によって調教され性器と化したアナルは、激しい抽送に悦びきゅうきゅうと肉棒を締め上げる
+		PRINTFORML 伴随着每次活塞运动，%PRONOUN(対象)%都一边发出下流的声音一边由于快感而发狂
+		;TranslatedMark そしてその度、%PRONOUN(対象)%は下品な声を撒き散らしながら法悦に狂ってみせた
+		PRINTFORML 男子将白浊注入直肠后，%ANAME(対象)%弓起身子达到了绝顶……
+		;TranslatedMark 男が直腸に白濁を注ぐと、%ANAME(対象)%は背を反らして絶頂してみせた……
+	CASE 3
+		PRINTFORML 男人侵犯着%ANAME(対象)%
+		;TranslatedMark 男は%ANAME(対象)%を犯している
+		PRINTFORML 单今天就被中出了不知道多少次的%ANAME(対象)%由于疲惫无反应，但是男人却不在乎
+		;TranslatedMark 今日だけで数えられないほどの射精を受けた%ANAME(対象)%は疲弊し無反応だが、男はお構い無しだ
+		PRINTFORML 不久男子射精，拔出阴茎之后，无法控制溢出的白浊就会从阴道口滴答滴答地流出
+		;TranslatedMark やがて男が射精し、ペニスを引き抜くと、収まりきらない白濁が膣口からどろりとこぼれ落ちる
+		PRINTFORML 男子强行插入了半开的%ANAME(対象)%的嘴巴，强行逼迫她进行扫除……
+		;TranslatedMark 男は半開きになった%ANAME(対象)%の口にモノをねじ込み、無理矢理に清めさせた……
+	CASE 4
+		PRINTFORML %ANAME(対象)%和其他的爱妾们一起为富豪服务
+		;TranslatedMark 他の愛妾たちとともに、%ANAME(対象)%は男に奉仕している
+		PRINTFORML 男子随意地触摸%PRONOUN(対象)%的乳房，责弄着秘部，%PRONOUN(対象)%就像是无法忍耐快感一样扭动着
+		;TranslatedMark 男が気まぐれに%PRONOUN(対象)%の乳房に触れ、秘部を弄ぶと、%PRONOUN(対象)%はそれだけでたまらないというようにヨガる
+		PRINTFORML 在那之后，女人们排列着，一个一个地被插入………
+		;TranslatedMark その後女達は並べられ、一人ひとり順番に貫かれていった………
+	CASE 5
+		PRINTFORML %ANAME(対象)%用嘴为男人服务
+		;TranslatedMark %ANAME(対象)%は男のモノに口で奉仕している
+		PRINTFORML 能为他服务而心感喜悦颤抖着的%ANAME(対象)%，用指尖责弄着自己的股间
+		;TranslatedMark 彼に奉仕できる悦びに打ち震える%ANAME(対象)%は、自らの股ぐらを指先で弄くり回している
+		PRINTFORML 不久男子射精后，流入口中的白浊之热使得%ANAME(対象)%达到了绝顶
+		;TranslatedMark やがて男が射精すると、口内に流れ込んだ白濁の熱さに%ANAME(対象)%は絶頂した
+		PRINTFORML 在这之后，作为顺从的服务的奖赏，%ANAME(対象)%被赋予了满满的子種……
+		;TranslatedMark その後、%ANAME(対象)%は従順な奉仕の褒美として、たっぷりと種をつけられた……
+	CASE 6
+		PRINTFORML %ANAME(対象)%被男人带去参加了奴隶的品评会
+		;TranslatedMark %ANAME(対象)%は男に連れられ、奴隷の品評会に参加した
+		PRINTFORML 好事家们互相交换自己的奴隶，来比较谁的奴隶做的比较好
+		;TranslatedMark 好事家共が自らの奴隷を互いに交換し、その出来を競っている
+		PRINTFORML %ANAME(対象)%也为了富豪而向许多陌生男子敞开了大腿，榨取了他们的精液
+		;TranslatedMark %ANAME(対象)%も、富豪のために多くの見知らぬ男に股を開き、その精を搾り取った
+		PRINTFORML 回来后，作为"好孩子"的奖赏，被富豪给予了满满的子種……
+		;TranslatedMark 戻ったあとは、『いい子』にしていた褒美として、富豪にたっぷりと種をつけられたようだ……
+	CASE 7
+		PRINTFORML %ANAME(対象)%被束缚着同时被侵着犯
+		;TranslatedMark %ANAME(対象)%は縛り上げられ、犯されている
+		PRINTFORML 陶醉于陷入肌肤的绳子带来的甜美感觉，沉溺在肉棒的快感中
+		;TranslatedMark 肌に食い込む縄の甘美な感覚に陶酔を覚えながら、肉棒の快感に溺れている
+		PRINTFORML 男人一边嘲笑着被被责备同时还因为快感而扭动着身体的%ANAME(対象)%的下流的姿态，一边动着腰
+		;TranslatedMark 戒められながらにして浅ましくヨガる%ANAME(対象)%を嘲笑いながら、男は腰を叩きつける
+		PRINTFORML 从束缚中解放的时候，皮肤上还残留着红色的绳印……
+		;TranslatedMark 解放されるころには、その肌には赤い縄の後が残っていた……
+	CASE 8
+		PRINTFORML 男子戏谑地在%ANAME(対象)%的全身上安装玩具，绑起来放置不管
+		;TranslatedMark 男は戯れに、%ANAME(対象)%の全身に玩具を取り付け、縛り上げて放置した
+		PRINTFORML 即使%ANAME(対象)%达到了高潮，机器也会毫不留情地继续给%PRONOUN(対象)%带来快感
+		;TranslatedMark %ANAME(対象)%が絶頂しようとも、機械は容赦なく%PRONOUN(対象)%に快楽を与えていく
+		PRINTFORML 甚至在%ANAME(対象)%失去意识的时候还继续着责弄……
+		;TranslatedMark 責めは%ANAME(対象)%が気を失おうとも続いた……
+		PRINTFORML 终于得到解放的时候，%PRONOUN(対象)%所在的地方爱液积成了水洼……
+		;TranslatedMark ようやく解放されるころ、%PRONOUN(対象)%のいたあたりには愛液が水溜りのようになっていた……
+	CASE 9
+		PRINTFORML %ANAME(対象)%跨在男人身上，用肉穴服务着
+		;TranslatedMark %ANAME(対象)%は男の上にまたがり、肉穴で奉仕している
+		PRINTFORML 当男人要求她再多动动腰的时候，%ANAME(対象)%就按照他说的那样淫荡地摇着屁股
+		;TranslatedMark 男がもっと腰を振るよう要求すると、%ANAME(対象)%は言われたとおりみだらに尻を振る
+		PRINTFORML 每当因他的坚挺的一物绝顶的时候，%PRONOUN(対象)%就对自己下流的姿态进行谢罪
+		;TranslatedMark 彼のモノのたくましさに絶頂してしまうたび、%PRONOUN(対象)%は自らの浅ましさについて謝罪してみせる
+		PRINTFORML 男人射精后，%ANAME(対象)%一边感受着子宫的热度一边向后仰，迎来了高潮……
+		;TranslatedMark 男が射精すると、%ANAME(対象)%はその熱を子宮で感じながら背を反らしアクメを迎えた……
+ENDSELECT
+
+CALL FUCK(対象, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 欲望, 性技, 性交, 奉仕, 精愛, 緊縛, 苦痛快楽, 被虐, 接吻, 口淫, Ｖ性交, Ａ性交", "膣内射精, 腸内射精, 口内射精, 処女喪失, Ａ処女喪失, 接吻喪失, CFLAG減少",　GET_SPERM_ID("富豪"), "富豪のペニス", "富豪", "", "調教")
+PRINTFORMW
+IF RAND:100 < 15
+	CALL COLOR_PRINTW(@"男は%ANAME(対象)%に飽きたようだ……", カラー_警告)
+	CALL COLOR_PRINTW(@"男は%ANAME(対象)%を彼の館から追い出した……", カラー_警告)
+	CLEARBIT TALENT:対象:日常系, 素質_デイリー_富豪の愛妾
+	SETBIT   TALENT:対象:日常系, 素質_デイリー_元愛妾
+ENDIF
+
+RETURN 1
+
+
+;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_MILLIONAIRE_AFTER_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("MILLIONAIRE")
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_MILLIONAIRE_AFTER_DECISION()
+FOR LOCAL, 0, CHARANUM
+	SIF GETBIT(TALENT:LOCAL:日常系, 素質_デイリー_元愛妾)
+		RETURN 1
+NEXT
+
+RETURN 0
+
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_DERIVATION_MILLIONAIRE_AFTER_SETTARGET()
+FOR LOCAL, 0, CHARANUM
+	IF GETBIT(TALENT:LOCAL:日常系, 素質_デイリー_元愛妾)
+		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+		DAILY_TARGET_NUM ++
+	ENDIF
+NEXT
+
+SIF DAILY_TARGET_NUM < 1
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_MILLIONAIRE_AFTER()
+#DIM 対象
+
+対象 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+
+CALL EVENT_DAILY_DARIVATION_MILLIONAIRE_RESCUE(対象)
+SIF RESULT == 1
+	RETURN 0
+
+PRINTFORMW 被富豪抛弃的%ANAME(対象)%在街头徘徊……
+;TranslatedMark 富豪に捨てられた%ANAME(対象)%が路頭に迷っている……
+
+SELECTCASE RAND:10
+	CASE 0
+		PRINTFORML %ANAME(対象)%被流氓们轮奸
+		;TranslatedMark %ANAME(対象)%はごろつきたちに輪姦されている
+		PRINTFORML 男人们一个接一个地把阴茎插入%ANAME(対象)%所有的肉穴，将子種注入进去
+		;TranslatedMark 男たちは%ANAME(対象)%のあらゆる穴に次から次にペニスを突き入れ、種を吐き出していく
+		PRINTFORML 曾经被富豪调教过的%ANAME(対象)%，很快就沉溺在快乐中，淫荡地索求着性交
+		;TranslatedMark かつて富豪によって躾けられつくした%ANAME(対象)%は、すぐに快楽に溺れ、淫らに性交をねだるようになった
+		PRINTFORML 终于从流氓那里解放的时候，那个身体没有没被白浊弄脏的地方……
+		;TranslatedMark 解放されるころ、その身体に白濁に汚されていないところはなくなっていた……
+		CALL FUCK(対象, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 欲望, 性技, 性交, 奉仕, 精愛, 緊縛, 苦痛快楽, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交", "膣内射精, 腸内射精, 口内射精, 処女喪失, Ａ処女喪失, 接吻喪失, CFLAG減少",　GET_SPERM_ID("地痞"), "ごろつきのペニス", "地痞", "", "輪姦")
+	CASE 1
+		PRINTFORML 失去归所的%ANAME(対象)%，徘徊到了贫民窟
+		;TranslatedMark 行く宛もない%ANAME(対象)%は、スラムに辿り着いた
+		PRINTFORML ……但是对%ANAME(対象)%这般的"上等货"，这群人不可能简单地欢迎她
+		;TranslatedMark ……が、%ANAME(対象)%のような「上玉」を、彼らがただ迎え入れるはずもない
+		PRINTFORML %ANAME(対象)%马上被流浪者包围，剥下衣服，然后被轮奸
+		;TranslatedMark %ANAME(対象)%はすぐに浮浪者に取り囲まれ、服を剥ぎ取られ、そして輪姦された
+		PRINTFORML 明明被侵犯了，曾经被富豪开发过的肉体却感到喜悦，%ANAME(対象)%眨眼间就变成了他们的性奴隶……
+		;TranslatedMark 犯されているというのに、かつて富豪に開発された肉体は悦び、%ANAME(対象)%はあっという間に彼らの性奴隷と成り果てた……
+		CALL FUCK(対象, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 欲望, 性技, 性交, 奉仕, 精愛, 緊縛, 苦痛快楽, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交", "膣内射精, 腸内射精, 口内射精, 処女喪失, Ａ処女喪失, 接吻喪失, CFLAG減少",　GET_SPERM_ID("流浪漢"), "流浪漢的肉棒", "流浪漢", "", "輪姦")
+	CASE 2
+		PRINTFORML %ANAME(対象)%在可疑的店里工作
+		;TranslatedMark %ANAME(対象)%は怪しげな店で働いている
+		PRINTFORML 为了生存下去，只能成为娼妇了
+		;TranslatedMark 食っていくためには、もはや娼婦にでもなる他になかったのだ
+		PRINTFORML 不知道来历的男人们来买%ANAME(対象)%的时候，有时会温柔、有时会暴力地和她交合
+		;TranslatedMark 素性も知れない男が%ANAME(対象)%を訪れては、時に優しく、時に暴力的に抱いていく
+		PRINTFORML 一夜之间，%ANAME(対象)%的经验人数增加了很多……
+		;TranslatedMark 一晩の間に、%ANAME(対象)%の経験人数は随分と増えてしまった……
+		CALL FUCK(対象, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 欲望, 性技, 性交, 奉仕, 精愛, 緊縛, 苦痛快楽, 被虐, 接吻, 口淫, 売春, Ｖ性交, Ａ性交, 売春", "膣内射精, 腸内射精, 口内射精, 処女喪失, Ａ処女喪失, 接吻喪失, CFLAG減少",　GET_SPERM_ID("娼館的客人"), @"客のペニス", @"客", "", "売春")
+	CASE 3
+		PRINTFORML %ANAME(対象)%在可疑的店里工作
+		;TranslatedMark %ANAME(対象)%は怪しげな店で働いている
+		PRINTFORML 在舞台上表演和狗的交配
+		;TranslatedMark ステージの上で、犬との交尾を披露していた
+		PRINTFORML 对于只考虑让雌性怀孕的充满野性的活塞运动，%ANAME(対象)%发出了不成体统的声音
+		;TranslatedMark 雌を孕ませることしか考えていない野性的なピストンに、%ANAME(対象)%はあられもない声をあげる
+		PRINTFORML 在观众的围观下，%ANAME(対象)%在众人面前被野兽注入了子種……
+		;TranslatedMark 観客の野次を浴びながら、%ANAME(対象)%は大勢の前で獣に種を植え付けられた……
+		CALL FUCK(対象, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 欲望, 性技, 性交, 奉仕, 精愛, 緊縛, 苦痛快楽, 被虐, 接吻, 口淫, 獣姦, Ｖ性交, Ａ性交, 売春", "膣内射精, 腸内射精, 口内射精, 処女喪失, Ａ処女喪失, 接吻喪失, CFLAG減少",　GET_SPERM_ID("犬"), @"犬のペニス", @"犬", "", "売春")
+
+	CASE 4
+		PRINTFORML %ANAME(対象)%被流氓轮奸
+		;TranslatedMark %ANAME(対象)%はごろつきに輪姦されている
+		PRINTFORML %ANAME(対象)%被打了奇怪的药，一开始的抵抗像是完全消失了一样积极地摇着腰，撸动着着阴茎
+		;TranslatedMark 怪しげな薬を打たれた%ANAME(対象)%は、当初の抵抗などなかったかのように積極的に腰を振り、ペニスをしゃぶりたてる
+		PRINTFORML 对于暴露出淫荡样子的%ANAME(対象)%，男人们给予追加的药作为奖赏
+		;TranslatedMark 淫らな様を晒す%ANAME(対象)%に、男たちは褒美として追加の薬を投与していく
+		PRINTFORML 数小时后，终于得到了解放的%ANAME(対象)%，一边露出空虚的笑容，一边在自己的阴部里咕哩咕哩地责弄着……
+		;TranslatedMark 数時間後、ようやく解放された%ANAME(対象)%は、虚ろな笑みを浮かべながら自らの陰部をこねくり回し続けていた……
+		CALL FUCK(対象, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 欲望, 性技, 性交, 奉仕, 精愛, 緊縛, 苦痛快楽, 被虐, 接吻, 口淫, 輪姦, 薬物依存, Ｖ性交, Ａ性交", "膣内射精, 腸内射精, 口内射精, 処女喪失, Ａ処女喪失, 接吻喪失, CFLAG減少",　GET_SPERM_ID("地痞"), "ごろつきのペニス", "地痞", "", "輪姦")
+
+	CASE 5
+		PRINTFORML %ANAME(対象)%好像是想靠"打零工"来赚钱
+		;TranslatedMark %ANAME(対象)%は「立ちんぼ」をして稼ごうとしたようだ
+		PRINTFORML 但是，这引起了当地地痞们的不快，%PRONOUN(対象)%被他们抓住了
+		;TranslatedMark だが、それが地元のごろつきどもの不興を買い、%PRONOUN(対象)%は捕らえられてしまった
+		PRINTFORML 在他们的据点，%ANAME(対象)%暴露在被称为惩罚的激烈的暴力和轮奸中
+		;TranslatedMark 彼らのたまり場で、%ANAME(対象)%は罰と称して激しい暴力と輪姦に晒された
+		PRINTFORML ……但是即便如此，曾经被富豪彻底调教过的肉体，却下流地沉溺在快乐中……
+		;TranslatedMark ……しかしそれでも、かつて富豪に徹底的に躾けられた肉体は、浅ましくも快楽に溺れてしまっていた……
+		CALL FUCK(対象, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 欲望, 性技, 性交, 奉仕, 精愛, 緊縛, 苦痛快楽, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, 売春", "膣内射精, 腸内射精, 口内射精, 処女喪失, Ａ処女喪失, 接吻喪失, CFLAG減少",　GET_SPERM_ID("地痞"), "ごろつきのペニス", "地痞", "", "輪姦")
+	CASE 6
+		PRINTFORML 无法忍受追求着性交的身体的疼痛，%ANAME(対象)%成为了“壁尻”
+		;TranslatedMark 性交を求める身体の疼きに耐えかね、%ANAME(対象)%は壁尻となったようだ
+		PRINTFORML 不知道来历的男人们一个接一个地来到这里，像是在使用抽纸一样用完就扔地使用%ANAME(対象)%的雌穴和尻穴
+		;TranslatedMark 素性も知れぬ男たちが次々に訪れては、%ANAME(対象)%の雌穴を、尻穴を、チリ紙感覚で使い捨てていく
+		PRINTFORML 明明不被当做人看，%ANAME(対象)%却因快乐而感到苦闷，一个劲地绝顶着
+		;TranslatedMark 人としてすら見られていないというのに、%ANAME(対象)%は快楽に悶え、ひたすらに絶頂していた
+		PRINTFORML 工作结束的时候，%ANAME(対象)%的下半身已经沾满了惨不忍睹的粘稠的液体
+		;TranslatedMark 仕事が終わるころには、%ANAME(対象)%の下半身は見るも無残なほどにどろどろになっていた……
+		CALL FUCK(対象, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 欲望, 性技, 性交, 奉仕, 精愛, 緊縛, 苦痛快楽, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交", "膣内射精, 腸内射精, 口内射精, 処女喪失, Ａ処女喪失, 接吻喪失, CFLAG減少",　GET_SPERM_ID("地痞"), "ごろつきのペニス", "地痞", "", "売春")
+	CASE 7
+		PRINTFORML %ANAME(対象)%好像在贫民窟卖淫
+		;TranslatedMark %ANAME(対象)%はスラムで売春をしているようだ
+		PRINTFORML 即使以一般情况下遇到会皱眉、捏鼻子、想要远离对方的人为对象，也会为了活下去而提供服务，打开自己的大腿
+		;TranslatedMark 普通ならば眉をしかめ鼻をつまみ遠ざかるような者が相手であっても、生きていくため奉仕し、股を開く
+		PRINTFORML 或者说，只要是愿意侵犯自己的人的话，已经是谁都可以了
+		;TranslatedMark あるいは、自分を犯してくれる相手であれば、もはや誰でも良かったのかもしれない
+		PRINTFORML 总之，%ANAME(対象)%为了少得可怜的钱，出卖着自己的身体……
+		;TranslatedMark ともかくも、%ANAME(対象)%は雀の涙ほどの金のため、自らの春を売りさばいて渡った……
+		CALL FUCK(対象, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 欲望, 性技, 性交, 奉仕, 精愛, 緊縛, 苦痛快楽, 被虐, 接吻, 口淫, 売春, Ｖ性交, Ａ性交, 売春", "膣内射精, 腸内射精, 口内射精, 処女喪失, Ａ処女喪失, 接吻喪失, CFLAG減少",　GET_SPERM_ID("流浪漢"), "流浪漢的肉棒", "流浪漢", "", "売春")
+	CASE 8
+		PRINTFORML %ANAME(対象)%生活在贫民窟
+		;TranslatedMark %ANAME(対象)%はスラムで暮らしている
+		PRINTFORML ……但是，是作为流浪者们的肉便器
+		;TranslatedMark ……ただし、浮浪者どもの肉便器として
+		PRINTFORML 被沾满污垢和污物的阴茎插入，又或是吮吸这样的阴茎，尽管如此，%ANAME(対象)%却因感到快感而扭动着身体，达到了高潮
+		;TranslatedMark 垢や汚物にまみれたペニスを突きこまれ、しゃぶらされ、それでも%ANAME(対象)%はヨガり、絶頂していく
+		PRINTFORML 对于曾经由于富豪的调教而屈服%PRONOUN(対象)%来说，现在所在的地狱与其说是残酷，不如说是幸福……
+		;TranslatedMark かつて富豪に心をへし折られた%PRONOUN(対象)%にとって、今いる地獄は苛酷さゆえにむしろ幸福をもたらしてくれていた……
+		CALL FUCK(対象, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 欲望, 性技, 性交, 奉仕, 精愛, 緊縛, 苦痛快楽, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交", "膣内射精, 腸内射精, 口内射精, 処女喪失, Ａ処女喪失, 接吻喪失, CFLAG減少",　GET_SPERM_ID("流浪漢"), "流浪漢的肉棒", "流浪漢", "", "輪姦")
+	CASE 9
+		PRINTFORML %ANAME(対象)%在郊区以脱衣舞娘为工作生活着
+		;TranslatedMark %ANAME(対象)%は場末のストリップダンサーとして働いている
+		PRINTFORML 一边沐浴着低贱的视线和下流的倒彩，一边以自己的裸体作为卖点继续跳舞
+		;TranslatedMark 下卑た目線、下品な野次を浴びながら、己の裸身を売り物として踊り続ける
+		PRINTFORML 尽管如此，曾经被富豪调教过的肉体和内心都感到兴奋，%PRONOUN(対象)%的股间在不知不觉中湿润了
+		;TranslatedMark それでも、かつて富豪に調教された肉体も心も興奮を覚え、%PRONOUN(対象)%の股ぐらは知らぬ間に濡れそぼっていた
+		PRINTFORML 在那之后，%ANAME(対象)%向剧场的常客们张开双腿，以自己的身体为交换挣到了赖以为生的钱……
+		;TranslatedMark その後%ANAME(対象)%は、劇場の常連相手に股を開き、春と引き換えに生きるための金を稼いだ……
+		CALL FUCK(対象, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 欲望, 性技, 性交, 奉仕, 精愛, 緊縛, 苦痛快楽, 被虐, 接吻, 口淫, 売春, Ｖ性交, Ａ性交, 売春", "膣内射精, 腸内射精, 口内射精, 処女喪失, Ａ処女喪失, 接吻喪失, CFLAG減少",　GET_SPERM_ID("娼館的客人"), @"客のペニス", @"客", "", "売春")
+ENDSELECT
+PRINTFORMW
+IF RAND:100 < 15
+	CALL COLOR_PRINTW(@"%ANAME(対象)%は何もかもを諦めたようだ……", カラー_警告)
+	CALL COLOR_PRINTW(@"%ANAME(対象)%は幻想郷の歴史から姿を消した……", カラー_警告)
+	CLEARBIT TALENT:対象:日常系, 素質_デイリー_元愛妾
+ENDIF
+
+RETURN 1
+
+;---------------------
+;救出イベント
+;---------------------
+@EVENT_DAILY_DARIVATION_MILLIONAIRE_RESCUE(対象)
+#DIM 対象
+#DIM 担当者
+#DIM 能力合計
+
+SIF DVAR:富豪_探索断念フラグ
+	RETURN 0
+
+CALL SINGLE_DRAWLINE
+PRINTFORMW 去搜索失踪的%ANAME(対象)%吧……？
+;TranslatedMark 行方不明になった%ANAME(対象)%を捜索しにいこうか……？
+PRINTL
+CALL ASK_MULTI_JUDGE("捜索(金10000必要)", MONEY >= 10000, "捜索(兵5000消費)", COUNTRY_SOLDIER:(CFLAG:MASTER:所属) >= 5000, "去看看状况", 1, "停止搜索", 1)
+
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORML 不能对%ANAME(対象)%置之不理
+		;TranslatedMark %ANAME(対象)%のことを放っておくわけにはいかない
+		PRINTFORML 决定出资搜索
+		;TranslatedMark 金を拠出し、捜索することにした
+		MONEY -= 10000
+	CASE 1
+		PRINTFORML 不能对%ANAME(対象)%置之不理
+		;TranslatedMark %ANAME(対象)%のことを放っておくわけにはいかない
+		PRINTFORML 决定派出军队搜索
+		;TranslatedMark 兵を拠出し、捜索することにした
+		COUNTRY_SOLDIER:(CFLAG:MASTER:所属) -= 5000
+	CASE 2
+		PRINTFORML 可惜没有富余的资源
+		;TranslatedMark 残念ながら余裕がない
+		PRINTFORML 现在决定先看看情况
+		;TranslatedMark 今は様子を見ることにした
+		PRINTFORMW 
+		CALL SINGLE_DRAWLINE
+		RETURN 0
+	CASE 3
+		PRINTFORML 再接着搜查也没有意义了
+		;TranslatedMark これ以上の捜索は無意味だと判断した
+		PRINTFORML 很遗憾，我决定停止搜索%ANAME(対象)%
+		;TranslatedMark 残念だが、%ANAME(対象)%の捜索を打ち切ることにした
+		PRINTFORMW 
+		CALL SINGLE_DRAWLINE
+		DVAR:富豪_探索断念フラグ = 1
+		RETURN 0
+ENDSELECT
+
+PRINTFORML 让谁来负责搜索吧……？
+;TranslatedMark 誰に担当させよう……？
+PRINTFORML 擅长武斗和谋术的人似乎比较好……
+;TranslatedMark 荒事と権謀術数に長けた者が良さそうだ……
+CALL SINGLE_DRAWLINE
+CALL SELECT_CHARA_LIST_ONLY_LOGIC_SLG("DEFAULT", "DEFAULT")
+
+IF RESULT == -1
+	PRINTFORML 还是决定这次不去了
+	;TranslatedMark やはり今回は見送ることにした
+	RETURN 0
+ELSE
+	担当者 = RESULT
+	PRINTFORML 决定由%ANAME(担当者)%来负责
+	;TranslatedMark %ANAME(担当者)%が担当することにした
+	能力合計 = ABL:担当者:武闘 + ABL:担当者:知略
+ENDIF
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+
+IF 能力合計 < RAND:120 + 80
+	PRINTFORML ……很遗憾，没能找到%ANAME(対象)%……
+	;TranslatedMark ……残念ながら、%ANAME(対象)%を見つけられなかった……
+	PRINTFORMW 
+	RETURN 0
+ENDIF
+
+PRINTFORML 找到了%ANAME(対象)%！
+;TranslatedMark %ANAME(対象)%が見つかった！
+
+IF GETBIT(TALENT:対象:日常系, 素質_デイリー_元愛妾)
+	PRINTFORML 据说在贫民窟的流浪者们的"饲养场"里找到了……
+	;TranslatedMark スラム街で浮浪者たちに「飼われて」いたところを見つかったそうだ……
+	PRINTFORMW %ANAME(MASTER)%慌张张地赶过去，尽管全身都被玷污了，但那肯定是%ANAME(対象)%
+	;TranslatedMark %ANAME(MASTER)%が慌てて駆けつけると、確かに全身汚されてこそいたが%ANAME(対象)%に間違いなかった
+	PRINTFORMW ……%ANAME(対象)%一看到这边就蹭了过来，说着些索求着交合的淫秽的话
+	;TranslatedMark ……%ANAME(対象)%はこちらを見るなり擦りより、抱いてくれるよう淫らな言葉を並べてねだる
+	PRINTFORMW 长期残酷的生活，似乎完全摧毁了%PRONOUN(対象)%的心，将其扭曲了
+	;TranslatedMark 長きにわたる酷い生活は、%PRONOUN(対象)%の心を完全に砕き、ねじ曲げてしまったらしい
+	PRINTFORMW 现在%ANAME(対象)%已经完全不记得%ANAME(MASTER)%，变成了肉便器……
+	;TranslatedMark 今や%ANAME(対象)%は%ANAME(MASTER)%のことも覚えていない、ただの肉便器に成り果てていた……
+	TALENT:対象:空虚 = 1
+	CFLAG:対象:崩壊 = 3000
+	CALL SET_PIERCE_RANDOM(対象, 0)
+	CALL SET_PIERCE_RANDOM(対象, 0)
+	CALL SET_PIERCE_RANDOM(対象, 0)
+	CALL SET_TATTOO_RANDOM(対象, STR_FOR_TATTOO(-1), 0)
+	CALL SET_TATTOO_RANDOM(対象, STR_FOR_TATTOO(-1), 0)
+	CALL SET_TATTOO_RANDOM(対象, STR_FOR_TATTOO(-1), 0)
+	SETBIT TALENT:対象:淫乱系, 素質_淫乱_淫乱
+	SETBIT TALENT:対象:淫乱系, 素質_淫乱_精液便女
+	SETBIT TALENT:対象:淫乱系, 素質_淫乱_ＡＶ女優
+	SETBIT TALENT:対象:淫乱系, 素質_淫乱_雌犬
+	SETBIT TALENT:対象:淫乱系, 素質_淫乱_薬物中毒
+	SETBIT TALENT:対象:淫乱系, 素質_淫乱_娼婦
+	CFLAG:対象:好感度 = MIN(CFLAG:対象:好感度 , 0) 
+	CFLAG:対象:依存度 = MIN(CFLAG:対象:依存度 , 0) 
+	CFLAG:対象:従属度 = MIN(CFLAG:対象:従属度 , 0) 
+	CFLAG:対象:支配度 = MIN(CFLAG:対象:支配度 , 0) 
+
+	CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属)
+	CLEARBIT TALENT:対象:日常系, 素質_デイリー_元愛妾
+	RETURN 1
+ELSEIF GETBIT(TALENT:対象:日常系, 素質_デイリー_富豪の愛妾)
+	PRINTFORMW 被目击到被那个富豪作为"养的母狗"在地下社交界炫耀着
+	;TranslatedMark 例の富豪が「飼い犬」として裏の社交界で見せびらかしていたという目撃情報が入った
+	PRINTFORMW %ANAME(MASTER)%秘密处理掉了富豪，救出了%ANAME(対象)%
+	;TranslatedMark %ANAME(MASTER)%は富豪を秘密裏に始末し、%ANAME(対象)%を救出させた
+	PRINTFORMW %ANAME(MASTER)%慌张张地跑过去，确实是%ANAME(対象)%
+	;TranslatedMark %ANAME(MASTER)%が慌てて駆けつけると、確かに%ANAME(対象)%だった
+	PRINTFORMW 穿着华丽而又淫乱的服装的%PRONOUN(対象)%，完全不像原来的%ANAME(対象)%
+	;TranslatedMark きらびやかで淫らな衣装を身につけた%PRONOUN(対象)%の姿は、元の%ANAME(対象)%とはとても思えない
+	PRINTFORMW 不停地追问主人在哪，想要安慰因为需求快感而感到疼痛的身体
+	;TranslatedMark ご主人様はどこ、としきりに尋ね、疼いた身体を慰めようとしている
+	PRINTFORMW 并且开始用谄媚的声音向%ANAME(MASTER)%索求着交合
+	;TranslatedMark さらには%ANAME(MASTER)%に対し、媚びた声で快楽をねだり始めた
+	PRINTFORMW 试着交流了几句，%ANAME(対象)%似乎已经不知道%ANAME(MASTER)%是谁了
+	;TranslatedMark 言葉を交わしてみたが、%ANAME(対象)%は%ANAME(MASTER)%が誰だか分からなくなっているようだった
+	PRINTFORMW 因为长期被作为爱奴饲养，%ANAME(対象)%的内心奔溃了……
+	;TranslatedMark 長きにわたり愛奴として飼われていたことで、%ANAME(対象)%の心は折られてしまったのだ……
+	CALL COLOR_PRINTW("暗殺した富豪の資産から金100000を奪った", カラー_注意)
+	MONEY += 100000
+	TALENT:対象:空虚 = 1
+	CFLAG:対象:崩壊 = 3000
+	CALL SET_PIERCE_RANDOM(対象, 0)
+	CALL SET_TATTOO_RANDOM(対象, STR_FOR_TATTOO(-1), 0)
+	SETBIT TALENT:対象:淫乱系, 素質_淫乱_淫乱
+	CFLAG:対象:好感度 = MIN(CFLAG:対象:好感度 , 0) 
+	CFLAG:対象:依存度 = MIN(CFLAG:対象:依存度 , 0) 
+	CFLAG:対象:従属度 = MIN(CFLAG:対象:従属度 , 0) 
+	CFLAG:対象:支配度 = MIN(CFLAG:対象:支配度 , 0) 
+	CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属)
+	CLEARBIT TALENT:対象:日常系, 素質_デイリー_富豪の愛妾
+	RETURN 1
+ELSEIF DVAR:富豪_調教カウンタ >= 2
+	PRINTFORML 被发现被关在那个富豪的宅邸里进行着调教
+	;TranslatedMark 例の富豪が自身の屋敷で調教していたのが発覚したのだ
+	PRINTFORMW %ANAME(MASTER)%秘密处理掉了富豪，救出了%ANAME(対象)%
+	;TranslatedMark %ANAME(MASTER)%は富豪を秘密裏に始末し、%ANAME(対象)%を救出させた
+	PRINTFORMW ……虽然得到了救助，但%ANAME(対象)%还是露出了不安的表情
+	;TranslatedMark ……救助されこそしたが、%ANAME(対象)%は不安そうな表情を浮かべていた
+	PRINTFORMW 擅自离开主人家没关系吗？必须要服务……透露着这样的想法
+	;TranslatedMark ご主人様の下を勝手に離れて大丈夫だろうか、奉仕しなくては……と漏らしている
+	PRINTFORMW 长期的调教，似乎扭曲了她的内心
+	;TranslatedMark 長きにわたる調教が、彼女の心をねじ曲げていたようだ
+	PRINTFORMW 只能慢慢地花时间去恢复了吧……
+	;TranslatedMark じっくりと時間を掛けて取り戻していくしかないだろう……
+	CALL COLOR_PRINTW("暗殺した富豪の資産から金100000を奪った", カラー_注意)
+	MONEY += 100000
+	CFLAG:対象:好感度 = MAX(CFLAG:対象:好感度 / 3 , 0) 
+	CFLAG:対象:依存度 = MAX(CFLAG:対象:依存度 / 3 , 0) 
+	CFLAG:対象:従属度 = MAX(CFLAG:対象:従属度 / 3 , 0) 
+	CFLAG:対象:支配度 = MAX(CFLAG:対象:支配度 / 3 , 0) 
+	SETBIT TALENT:対象:淫乱系, 素質_淫乱_淫乱
+	CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属)
+	CLEARBIT TALENT:対象:日常系, 素質_デイリー_富豪の虜囚
+	DVAR:富豪_調教カウンタ = 0
+	RETURN 1
+ELSEIF DVAR:富豪_調教カウンタ < 2
+	PRINTFORML 被发现被关在那个富豪的宅邸里进行着调教
+	;TranslatedMark 例の富豪が自身の屋敷で調教していたのが発覚したのだ
+	PRINTFORMW %ANAME(MASTER)%秘密处理掉了富豪，救出了%ANAME(対象)%
+	;TranslatedMark %ANAME(MASTER)%は富豪を秘密裏に始末し、%ANAME(対象)%を救出させた
+	PRINTFORMW %ANAME(対象)%看着%ANAME(MASTER)%，露出了安心的表情
+	;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%を見て、心底安心した表情を見せた
+	PRINTFORMW 尽管身体被那个下贱的人玩弄了，但是内心好像没有屈服
+	;TranslatedMark 身体こそあの下衆に嬲りものにされたが、心までは砕かれていなかったようだ
+	PRINTFORMW 这样的话马上就能恢复了吧……
+	;TranslatedMark これならじきに復帰できるだろう……
+	CALL COLOR_PRINTW("暗殺した富豪の資産から金100000を奪った", カラー_注意)
+	MONEY += 100000
+	CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属)
+	CLEARBIT TALENT:対象:日常系, 素質_デイリー_富豪の虜囚
+	DVAR:富豪_調教カウンタ = 0
+	RETURN 1
+ENDIF
+RETURN 0
+
+;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_MILLIONAIRE_REVENGE_MINIGAME
+#DIM 回避
+#DIM 正解
+#DIMS 答え文字列 = "左", "右", "上", "下"
+#DIM 答え
+
+;5回、正しい選択肢を選ぶ
+FOR LOCAL, 0, 5
+
+	;答えを出しておく
+	答え = RAND:4
+	回避 = RAND:3
+
+	IF 回避
+		CALL COLOR_PRINTL(@"%答え文字列:答え%に避けろ！", カラー_警告)
+	ELSE
+		CALL COLOR_PRINTL(@"%答え文字列:答え%を避けろ！", カラー_警告)
+	ENDIF
+
+	FOR LOCAL:1, 0, VARSIZE("答え文字列")
+		PRINTFORML [{LOCAL:1}] %答え文字列:(LOCAL:1)%
+	NEXT
+
+	TINPUT 1500, -1, 1
+
+	;失敗したら強制終了
+	SIF (回避 && RESULT != 答え) || (!回避 && RESULT == 答え)
+		BREAK
+	SIF LOCAL != 4
+		PRINTFORML 贼人向这边袭来……！
+		;TranslatedMark 賊はまだ襲い掛かってくる……！
+NEXT
+
+RETURN LOCAL == 5

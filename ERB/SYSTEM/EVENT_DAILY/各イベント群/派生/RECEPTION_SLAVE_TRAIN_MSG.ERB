@@ -1,0 +1,206 @@
+﻿
+;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_RECEPTION_TRAIN_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("RECEPTION")
+
+
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_RECEPTION_TRAIN_DECISION()
+RETURN 1
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_DERIVATION_RECEPTION_TRAIN_SETTARGET()
+FOR LOCAL, 0, CHARANUM
+	SIF !GETBIT(TALENT:LOCAL:日常系, 素質_デイリー_貴族の愛人)
+		CONTINUE
+	SIF CFLAG:LOCAL:特殊状態 != 0
+		CONTINUE
+	SIF CFLAG:LOCAL:捕虜先 != 0
+		CONTINUE
+	SIF RAND:3
+		CONTINUE
+	DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+	DAILY_TARGET_NUM ++
+NEXT
+
+SIF DAILY_TARGET_NUM < 1
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_RECEPTION_TRAIN()
+#DIM 対象
+
+FOR LOCAL, 0, DAILY_TARGET_NUM
+	対象 = DAILY_TARGET:LOCAL
+	PRINTFORMW %ANAME(対象)%前往贵族的宅邸……
+	PRINTFORML
+	SELECTCASE RAND:30
+		CASE 0
+			PRINTFORML %ANAME(対象)%跨坐在男人身上，用小穴吞入肉棒
+			PRINTFORML 将强壮的肉棒深深地容纳近密壶里，受不了地好几次发出淫荡的娇喘声
+			PRINTFORML 拼命地摇着腰，对他反复说着相爱的话，催促着射精
+			PRINTFORMW 然后受到期待已久的射精后，%ANAME(対象)%大大地仰起身子，达到了高潮
+		CASE 1
+			PRINTFORML %ANAME(対象)%被男性所按压，一边被胶粘地接吻一边被拥抱
+			PRINTFORML 两人用上下的嘴连在一起，一个劲地追求对方，贪图快乐
+			PRINTFORML %ANAME(対象)%充满爱欲的眼睛里只能看清对方的脸
+			PRINTFORMW 不久，两人一起达到了高潮，%ANAME(対象)%的子宫里接受男人充满爱欲的精液，一起呻吟着喘息起来
+		CASE 2
+			PRINTFORML %ANAME(対象)%双臂被男人抓住，从背后被激烈地进行侵犯
+			PRINTFORML 每当啪嗒啪嗒拍肉的声音响起，%ANAME(対象)%的身体都会止不住地颤抖着
+			PRINTFORML 下腹子宫位置无数次被深入并顶得凸起来，已经到了极限的%ANAME(対象)%，回头看到的只有男人那令人厌恶的目光
+			PRINTFORMW 男子在%ANAME(対象)%的最深处射精后，%ANAME(対象)%的下腹微微鼓起，得到了期待已久的精液之后浑身颤抖着达到了高潮
+		CASE 3
+			PRINTFORML 两人泡在浴池里交合着
+			PRINTFORML 外面和里面给予的热度和快乐，已经让身体完全兴奋了，尽管如此还是不想出来
+			PRINTFORML 看着%ANAME(対象)%那疲惫又可爱的样子，男人兴奋的肉棒勃起得更加厉害了
+			PRINTFORMW 不久又注入了几次精液，%ANAME(対象)%紧贴在他的胸口，迎来了今天最激烈的高潮
+		CASE 4
+			PRINTFORML 两人在床上枕着枕头谈话着
+			PRINTFORML 被他那健壮的胸脯怀抱的幸福感，即使是猥亵的言语也能让%ANAME(対象)%的身体兴奋起来
+			PRINTFORML 终于忍不住了的%ANAME(対象)%，一边搓着他强壮的肉棒一边仰望着他
+			PRINTFORMW 那个动作又让男人的肉棒恢复了硬度，一边哈哈地笑着一边压在了%ANAME(対象)%的身上
+		CASE 5
+			PRINTFORML 俩人度过了甜蜜的一晚
+			PRINTFORML 激烈地蠕动着，到了高潮就抱在一起休息，过了一会儿又再次舞动着腰贪图快乐
+			PRINTFORML 从结合部溢出了收不住的精液，两人也变得汗流浃背
+			PRINTFORMW 这也是对现在的%ANAME(対象)%来说更加兴奋的香料，到早上之前迎来了数不清的高潮
+		CASE 6
+			PRINTFORML 两人用舌头互相刺激对方的生殖器
+			PRINTFORML 大幅度地吞吐他强壮的肉棒，嘴里充满了雄性气息，大脑的理智都快被融化了
+			PRINTFORML 而且下半身用他的手指和舌头不断地给带来快乐，使得身体不断颤抖
+			PRINTFORMW 不久彼此的性器便到了忍耐力的极限，两人为了平息这一切而激烈地缠绕在一起
+		CASE 7
+			PRINTFORML %ANAME(対象)%被对方翻过来后按住进行活塞运动(%ANAME(対象)%はまんぐり返しの姿勢で激しいピストンをされている)
+			PRINTFORML 每撞一次子宫都会受到压碎般的冲击，%ANAME(対象)%的瞳孔不时地收缩，呻吟起来
+			PRINTFORML 但双腿紧紧地夹住对方的腰部，像是不让精液浪费得溢出来一样
+			PRINTFORMW 不久男子低吟着，精液猛地注入子宫，%ANAME(対象)%一边接受期待已久的种子，一边达到了高潮
+		CASE 8
+			PRINTFORML 男人抱起%ANAME(対象)%诱惑的双腿，把肉棒捅得更狠了
+			PRINTFORML 对方就像是在用着自家的飞机杯一样，扶着%ANAME(対象)%的身体反复套动，尽情地用肉棒%ANAME(対象)%在的阴道肉壁磨蹭冲击
+			PRINTFORML 明明是被粗暴地侵犯着，%ANAME(対象)%每一次都能被给予大脑麻木的快感使得身体抖动起来，意识都变得模糊
+			PRINTFORMW 一次又一次地被男人用精液冲击子宫，使得%ANAME(対象)%精疲力尽，但男人依旧毫不在意地把%ANAME(対象)%当成飞机杯继续使用
+		CASE 9
+			PRINTFORML %ANAME(対象)%在床上和他激烈地做爱
+			PRINTFORML %ANAME(対象)%被男子那健壮的肉棒迷住了，为了不让肉棒离开拼命地用双腿搂住腰
+			PRINTFORML 当男人问是否满意的时候，%ANAME(対象)%便强有力地肯定了，并列举了一些能传达他作如何富有魅力的话
+			PRINTFORMW 最后%ANAME(対象)%撒娇地向对方请求中出，身心愉悦的男人将那炽热的精液尽情地释放出来
+		CASE 10
+			PRINTFORML %ANAME(対象)%浑身颤抖着不断扭动腰部
+			PRINTFORML 由于被男人灌下媚药的效果，%ANAME(対象)%从刚才开始就不断地达到了高潮
+			PRINTFORML 但是尽管如此，子宫的疼痛却丝毫没有止住，因为持续的喘息，喉咙也变得干渴
+			PRINTFORMW 男人那坚挺的肉棒仿佛永远不会衰弱下去一样，%ANAME(対象)%在迎来早晨之前不断地被顶上高潮
+		CASE 11
+			PRINTFORML %ANAME(対象)%大口喘气着，被男人抱在怀中
+			PRINTFORML 接受了男人的巨根和精液，从蜜穴溢出粘稠的白浊液，浑身都被激烈的性爱弄得筋疲力尽
+			PRINTFORML 表情恍惚，意识早已模糊，只要被男人温柔地抚摸，就很轻松地达到了高潮
+			PRINTFORMW 不久男子邀请再来一次，用亲吻回答回应了他，用颤抖的身体接受了肉棒再一次进攻
+		CASE 12
+			PRINTFORML %ANAME(対象)%与男性一边接吻一边缠绵着
+			PRINTFORML 以面对座位的体位纠缠在一起，缓慢地动着腰部，一边用舌头紧紧地缠绕在一起
+			PRINTFORML 为了喘息而放开嘴唇，%ANAME(対象)%用充满爱欲的眼神注视着男人，再次抱住男人，用舌头缠住男人
+			PRINTFORMW 虽然不是很激烈，但由于肉棒带来的刺激依旧过于强烈，男子每次射精，都会使%ANAME(対象)%都达到高潮
+		CASE 13
+			PRINTFORML 在男人的房间里回响着%ANAME(対象)%激烈的喘息声
+			PRINTFORML 被猛烈攻击子宫，说着下流的话，%ANAME(対象)%被刺激着达到了高潮，由于被阴道勒紧肉棒，男人也用力射精了
+			PRINTFORML 已经不知道射了多少次，但其量依旧很多，从结合部溢出的妹汁和精液将床单弄湿
+			PRINTFORMW %ANAME(対象)%嘟囔着"好可惜啊"，结果被男人又用力顶了一下，并表示想要多少就能给多少，结果整夜都被内射了个够
+		CASE 14
+			PRINTFORML %ANAME(対象)%奄奄一息地躺在地板上
+			PRINTFORML 被男人带来的各种各样的玩具责弄着，刺激着全身的性感带使得身体反复激烈的高潮
+			PRINTFORML 在这种状态下，被男人夸奖可玩价值非常高的%ANAME(対象)%，颤抖着微微一笑
+			PRINTFORMW 然后被男人送到床上，这次被他带来的本体弄得极其愉悦
+		CASE 15
+			PRINTFORML %ANAME(対象)%靠在桌子上，以后立体位被侵犯
+			PRINTFORML 正在激烈性交的时候，其中一个男部下来了，但他却毫不在意地被侵犯的%ANAME(対象)%，处理着自己的工作
+			PRINTFORML %ANAME(対象)%也无法掩饰不断给予的刺激所带来的的刺激感，一脸感到羞耻的样子，但却更加兴奋和激动了
+			PRINTFORMW 随后男子射精，忘记了旁边还有还有人在看，颤抖着身体剧烈潮吹高潮了
+		CASE 16
+			PRINTFORML %ANAME(対象)%被带到了大浴场
+			PRINTFORML 全身起泡沫后使用自己的身体作为工具，清洗着男人身体各处
+			PRINTFORML 精心服务之后男人身下的肉棒逐渐勃起，%ANAME(対象)%咽下唾沫出神地凝视着
+			PRINTFORMW 男子把%ANAME(対象)%带到浴池里，随后立即把肉棒戳进%ANAME(対象)%早已湿热的小穴，一边让水花飞溅一边激烈地侵犯了
+		CASE 17
+			PRINTFORML %ANAME(対象)%在对方工作的跪在双脚之间、给予口交侍奉
+			PRINTFORML 以前由于感到过于粗壮难以下咽的肉棒，现在也能含进喉咙里，把肉棒全部吞下去
+			PRINTFORML 用眼睛看男人的脸色，用舌头和喉咙持续操作，不久后，伴随着低沉的呻吟声，炽热的精液被注入喉咙里
+			PRINTFORMW 男人满足地抚摸着发出淫荡的声音将精液全部吞掉的%ANAME(対象)%，抱起%ANAME(対象)%搬到了床上
+		CASE 18
+			PRINTFORML %ANAME(対象)%被男人抬起一边腿一边进行交合
+			PRINTFORML 因为快感支撑着身体的腿快撑不住而抱住了男子，一边有节奏地娇声呻吟
+			PRINTFORML 被男人问到下次的接待是什么时候，%ANAME(対象)%一边夹杂着喘息声，一边用撒娇的声音回答说随时欢迎
+			PRINTFORMW 男子对%ANAME(対象)%的回答十分满意地笑着，给子宫注入了满满的奖赏
+		CASE 19
+			PRINTFORML %ANAME(対象)%穿着舞者的服装跳舞
+			PRINTFORML 虽然%ANAME(対象)%身上的衣服可以说非常淫荡了，羞耻感使得脸上泛红，但被男人夸奖后却很开心地虚心接受了
+			PRINTFORML 跳到男子满意为止的%ANAME(対象)%完全被灼烧着，全身都是汗的身体蹭到了男子身上要奖赏
+			PRINTFORMW 被漂浮着的雌性香味所兴奋的男子直接扒开了%ANAME(対象)%私处的布料，给予了充分的奖赏
+		CASE 20
+			PRINTFORML %ANAME(対象)%穿上了女仆装，被肆意责弄着身体
+			PRINTFORML 与抗拒着主人的手扭捏着身体和喘气着拒绝所相反，脸上已经变得飘飘然的样子，内裤下陷造成的密缝也已经湿热了
+			PRINTFORML 被令人讨厌的男子注视着，反复对着身体到处抚摸，舔舐敏感部位
+			PRINTFORML 然后，男子的肉棒戳了进去，身体像是按耐不住了一样颤抖起来，不由得发出了娇声，一下子剧烈地达到了高潮
+		CASE 21
+			PRINTFORML 在跪趴的姿势下被男人侵犯，%ANAME(対象)%却沉溺在快感中
+			PRINTFORML 每次被肉棒用力挺到深处的时候，意识都会变得模糊，无法忍受的甜蜜喘息也会漏出来
+			PRINTFORML 铃口不断对了子宫口施以撞击，%ANAME(対象)%控制不住地喘息着，身体随着子宫口被冲击而颤抖起来
+			PRINTFORML 男人也达到了极限，在阴道紧绷的刺激下，深深地插入，尽情地射精
+		CASE 22
+			PRINTFORML 两人连在一起躺在床上，度过了一段时间
+			PRINTFORML 时而接吻时而轻声细语爱的话语，度过宛如恋人般甜蜜时光
+			PRINTFORML 不久%ANAME(対象)%就受不了了，有点害羞地摇着腰
+			PRINTFORML 男子也接受了这个刺激，用肉棒在%ANAME(対象)%小穴中咕噜咕噜地刺激着，开始慢慢地互相贪图的性爱的快感
+		CASE 23
+			PRINTFORML 男子射精之后，%ANAME(対象)%也达到了高潮
+			PRINTFORML 男子拔下肉棒，取出灌满精液的避孕套。周围滚着好几条已使用的避孕套
+			PRINTFORML %ANAME(対象)%阻止了男人准备套下一个避孕套的动作，请求他直接戳进来
+			PRINTFORML 男子好像就等着那句话似的笑了起来，把避孕套扔了出去，把肉棒用力顶了进去
+		CASE 24
+			PRINTFORML %ANAME(対象)%跨坐在正坐着椅子的男人进行侍奉
+			PRINTFORML 被男人粗暴地责弄着胸部所刺激身体，沉迷于肉棒给予的快感而摆动着腰
+			PRINTFORML 感觉到男子的肉棒痉挛的时候，腰的动作也加快了，最终男子在子宫内射出炽热的精液的时候，撒娇似的抱住了男人达到高潮
+			PRINTFORML 男人从下面向上推动沉浸在绝顶余韵中的%ANAME(対象)%，%ANAME(対象)%以出神的表情再次开始服务
+		CASE 25
+			PRINTFORML %ANAME(対象)%穿着肩头大开的印花T恤访问
+			PRINTFORML 男子抓住衬衫的下摆慢慢地往下拉，在看不见乳头的位置停下来
+			PRINTFORML 男子兴奋地将%ANAME(対象)%推倒，把手滑进衬衣下面，从后面插入
+			PRINTFORML 男人盯着从衣服缝里翘起的乳头，放出比平时更浓的精液
+		CASE 26
+			PRINTFORML %ANAME(対象)%穿着胸口略张的和服来到贵族的宅邸，露出胸脯，乳头微微露出的样子
+			PRINTFORML 男子要求骑乘位，让%ANAME(対象)%坐下，时不时用力推上去，让%ANAME(対象)%发出娇声
+			PRINTFORML %ANAME(対象)%每次在男人身上上下摆动时，衣服便不断地拍打着，时而露出柔软的皮肤，时而将其掩盖起来
+			PRINTFORML 然后，男子手搭着%ANAME(対象)%的和服，用力地左右张开，吸着%ANAME(対象)%的乳头
+		CASE 27
+			PRINTFORML 随后激烈地挺动腰，男子的肉棒挺动的同时把%ANAME(対象)%结合处溢出的妹汁和先前中出的精液牵引出多条丝液
+			PRINTFORML 肉体间碰撞的淫靡之音，与男女交合时互相喘息的声音，混杂在一起形成淫乱的音乐
+			PRINTFORML 光是声音就足以表明两人性欲有多旺盛，雄厚的雄性气息与香甜的雌性淫气代表着欲望如此强烈
+			PRINTFORML 男子的肉棒在%ANAME(対象)%的阴道射出精液，等肉棒停止了颤抖的时候，就%ANAME(対象)%要求"再来一次吧"
+		CASE 28
+			PRINTFORML %ANAME(対象)%被男性束缚着身体，用画笔描绘全身
+			PRINTFORML 画笔在身上描绘的时候让人难以忍受，忍不住因为痒而笑出来，试着扭动身体挣扎着，但是因为被束缚，无法从笔中逃脱
+			PRINTFORML 男子用毛笔责弄%ANAME(対象)%的侧腹、脚掌、腋下等敏感部位，%ANAME(対象)%激烈痉挛，恳求对方停下来
+			PRINTFORML 男子每次在%ANAME(対象)%的身上用画笔描绘时，都会使得%ANAME(対象)%将插入的男子的肉棒更加用力地裹紧
+		CASE 29
+			PRINTFORML %ANAME(対象)%把手放在窗户上，被男人从后面咚咚地插了进去
+			PRINTFORML 为了不让外面看到，%ANAME(対象)%低下了头，结果却被男子抓住头发，命令把脸露出来
+			PRINTFORML 男子加快了抽插的速度，%ANAME(対象)%的脸也因逐渐加重的刺激变得微微扭曲无力，用几乎外面都能听见的声音喘息着
+			PRINTFORML %ANAME(対象)%被对方射精而绝顶，毫不知情地被外面一晃而过的路人看见了自己淫荡的表情(誰が見ているとも知れない窓外にイキ顔を晒した)
+	ENDSELECT
+	CALL FUCK_TRAIN(対象, GET_SPERM_ID("不明"), @"貴族の\@ RAND:2 ? 肉棒 # 唇\@", @"貴族")
+NEXT
+PRINTFORMW 

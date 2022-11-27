@@ -1,0 +1,144 @@
+﻿;-------------------------------------------------
+;初回調教時のイベント
+;-------------------------------------------------
+@BANDIT_REV_TRAIN_SP_EVENT(勢力)
+#DIM 対象
+#DIM 勢力
+SIF FLAG:逆調教回数 > 0
+	RETURN 0
+
+IF SP_COUNTRY_START:特殊勢力_野盗 == 特殊勢力スタート_士官
+	PRINTFORMW 闯入房间的土匪们看到了%ANAME(MASTER)%的样子之后，大笑起来
+	;TranslatedMark 部屋にどやどやと入ってきた野盗たちは、%ANAME(MASTER)%の姿を見て爆笑した
+	PRINTFORMW “什么啊，你被自己的势力抓住了吗”，他们七嘴八舌地说着诸如此类的话
+	;TranslatedMark なに自分の勢力にとっ捕まってるんだお前はと、口々に囃したてる
+	PRINTFORMW 笑了一阵之后，土匪们解开了%ANAME(MASTER)%的绳子，从牢狱里出来了……
+	;TranslatedMark ひとしきり笑った後、野盗たちは%ANAME(MASTER)%の縄を解き、牢から出した……
+	CALL COLORPRINT (@"%ANAME(MASTER)%又回到了野盗的阵营", カラー_注意, "L")
+	CALL CHANGE_COUNTRY(MASTER, CFLAG:MASTER:捕虜先, 1)
+	RETURN 1
+ELSEIF SP_COUNTRY_START:特殊勢力_野盗 == 特殊勢力スタート_奴隷
+	PRINTFORMW 冲进房间的土匪们看到了%ANAME(MASTER)%的样子之后，就笑了起来
+	;TranslatedMark 部屋にどやどやと入ってきた野盗たちは、%ANAME(MASTER)%の姿を見てニヤニヤと笑う
+	PRINTFORMW 她说，她忘不了过去的奴隶生活，所以想回来
+	;TranslatedMark 奴隷生活が忘れられなくて戻ってきちまったのかよ、と
+	PRINTFORMW 看来，只要让%ANAME(MASTER)%重新成为奴隶，她就能从牢狱里出来……
+	;TranslatedMark どうやら、%ANAME(MASTER)%が奴隷になることを認めれば、牢から出すつもりでいるようだ……
+	PRINTFORML
+	CALL ASK_YN("再次成为奴隶", "不想成为奴隶")
+	IF RESULT == 0
+		PRINTFORMW “就知道你会回来”，土匪们笑着解开了%ANAME(MASTER)%的绳子
+		;TranslatedMark そう来なくっちゃなと笑い、野盗たちは%ANAME(MASTER)%の縄を解いた
+		PRINTFORMW “那就快点来开始做奴隶的工作吧”，这样说着，他们将自己的肉棒露了出来
+		;TranslatedMark じゃあ早速奴隷の仕事をしてもらおうかと、彼らは自らのペニスを露出させる
+		PRINTFORMW 然后，%ANAME(MASTER)%在这段时间里，进行了奴隶的工作……
+		;TranslatedMark そして%ANAME(MASTER)%は、しばしの間、奴隷としての仕事に従事した……
+		CALL FUCK_GANGBANG(MASTER, GET_SPERM_ID("土匪"), @"土匪の\@ RAND:2 ? 肉棒 # 唇\@", "土匪")
+		CALL CHANGE_COUNTRY(MASTER, CFLAG:MASTER:捕虜先, 1)
+		RETURN 1
+	ELSE
+		PRINTFORMW 我已经不是你们的同伴了……%ANAME(MASTER)%毅然地说
+		;TranslatedMark もうお前たちのいいなりになんてならない……%ANAME(MASTER)%は毅然と言う
+		PRINTFORMW 土匪们笑了笑，说着“来教教你什么是立场”，然后开始聚集在%ANAME(MASTER)%身上……
+		;TranslatedMark 野盗たちはそれを笑い捨て、立場ってもんを教えてやるよと、%ANAME(MASTER)%に群がり始めた……
+	ENDIF
+ENDIF
+
+
+;-------------------------------------------------
+;定期イベント
+;-------------------------------------------------
+@BANDIT_REV_TRAIN_REGULAR_EVENT(勢力)
+#DIM 勢力
+
+SIF FLAG:逆調教回数 == 0 || FLAG:逆調教回数 % 4 != 0
+	RETURN 0
+
+PRINTFORMW 冲进房间的土匪们看到了%ANAME(MASTER)%的样子之后，就笑了起来
+;TranslatedMark 部屋にどやどやと入ってきた野盗たちは、%ANAME(MASTER)%の姿を見てニヤニヤと笑う
+PRINTFORMW 他们对她说，如果她已经无法脱离奴性了，那就可以把她放出来……
+;TranslatedMark 奴隷根性が染みついたやつなら、出してやってもいいんだけどなー、などと言い出した……
+PRINTFORMW 看来，只要%ANAME(MASTER)%重新成为奴隶，她就能从牢狱里出来……
+;TranslatedMark どうやら、%ANAME(MASTER)%が奴隷になることを認めれば、牢から出すつもりでいるようだ……
+PRINTFORML
+CALL ASK_YN("成为奴隶", "不想成为奴隶")
+IF RESULT == 0
+	PRINTFORMW “就知道你会回来”，土匪们笑着解开了%ANAME(MASTER)%的绳子
+	;TranslatedMark そう来なくっちゃなと笑い、野盗たちは%ANAME(MASTER)%の縄を解いた
+	PRINTFORMW “那就快点来开始做奴隶的工作吧”，这样说着，他们将自己的肉棒露了出来
+	;TranslatedMark じゃあ早速奴隷の仕事をしてもらおうかと、彼らは自らのペニスを露出させる
+	PRINTFORMW 然后，%ANAME(MASTER)%在这段时间里，进行了奴隶的工作……
+	;TranslatedMark そして%ANAME(MASTER)%は、しばしの間、奴隷としての仕事に従事した……
+	CALL FUCK_GANGBANG(MASTER, GET_SPERM_ID("土匪"), @"土匪の\@ RAND:2 ? 肉棒 # 唇\@", "土匪")
+	CALL CHANGE_COUNTRY(MASTER, CFLAG:MASTER:捕虜先, 1)
+	CALL PLAYER_FALLEN_TO_SP_COUNTRY(勢力)
+	CALL BANDIT_FALLEN_LEAVE_MARK(MASTER)
+	RETURN 1
+ELSE
+	PRINTFORMW 谁会当你们的奴隶……%ANAME(MASTER)%毅然地说
+	;TranslatedMark だれがお前たちの奴隷になどと……%ANAME(MASTER)%は毅然と言う
+	PRINTFORMW 土匪们笑了笑，说着“来教教你什么是立场”，然后开始聚集在%ANAME(MASTER)%身上……
+	;TranslatedMark 野盗たちはそれを笑い捨て、立場ってもんを教えてやるよと、%ANAME(MASTER)%に群がり始めた……
+ENDIF
+
+;-------------------------------------------------
+;知り合いがきたときのイベント
+;-------------------------------------------------
+@BANDIT_REV_TRAIN_MSG(勢力, 知り合い参加者, 知り合い参加数)
+#DIM 勢力
+#DIM REF 知り合い参加者
+#DIM 知り合い参加数
+CALL SINGLE_DRAWLINE
+PRINTFORML 随着调教时间的临近，%ANAME(MASTER)%像往常一样被拘束在调教房里、
+;TranslatedMark 調教の時間が近づくと、%ANAME(MASTER)%はいつものように調教部屋で拘束され、
+PRINTFORMW 剩下要做的，就是等着被男人们玷污了
+;TranslatedMark あとは男達に汚されるのを待つのみとなった
+PRINTFORMW 那些过来的土匪带来了%ANAME(MASTER)%熟悉的对象
+;TranslatedMark やってきた野盗は、%ANAME(MASTER)%が良く見知った相手を連れてきていた
+PRINTFORMW 是%ANAME(知り合い参加者:0, 知り合い参加数)%…
+;TranslatedMark %ANAME(知り合い参加者:0, 知り合い参加数)%だ…
+PRINTFORMW 除了脖子上套着坚固的项圈以外，大家都是一丝不挂的样子，全身都涂着下流的涂鸦
+;TranslatedMark 頑丈な首輪が嵌められている以外は皆一糸まとわぬ姿で、全身に卑猥な落書きを施されている
+IF IS_FEMALE(知り合い参加者:0)
+	PRINTFORMW 可能是事先已经被充分侵犯过了吧，她们的脸、乳房、两穴都已经沾满了爱液和精液……
+	;TranslatedMark 事前にたっぷりと犯されてきたのだろう、顔も乳房も両穴も、既に愛液や精液でどろどろになっている……
+ELSE
+	PRINTFORMW 可能是事先已经被充分侵犯过了吧，她们的身体各处都被白浊液玷污了……
+	;TranslatedMark 事前にたっぷりと犯されてきたのだろう、あちこちを白濁で汚されている……
+ENDIF
+PRINTFORMW 土匪强行拉着项圈，但%ANAME(知り合い参加者:0, 知り合い参加数)%不仅没有抗拒，还顺从地跟着……
+;TranslatedMark 首輪を野盗は強引に引っ張るが、%ANAME(知り合い参加者:0, 知り合い参加数)%は嫌がるどころか、従順についていく……
+PRINTFORMW 土匪咯咯咯地笑着说道，“我要在这里干你的朋友”…
+;TranslatedMark 野盗はニヤニヤと笑いながら、お前の知り合いをここでヤってやるよと言い始めた…
+PRINTFORMW 大概是%ANAME(知り合い参加者:0, 知り合い参加数)%明白了接下来要做的事情。她们岔开双腿，扭着腰，开始用淫秽的语言索求肉棒……
+;TranslatedMark これから行われることを、%ANAME(知り合い参加者:0, 知り合い参加数)%は理解したのだろう。股を開き、腰をくねらせ、淫らな言葉で肉棒をねだり始めた……
+
+
+;-------------------------------------------------
+;参加者選択アルゴリズム
+;-------------------------------------------------
+@BANDIT_REV_TRAIN_CHOOSE_PARTICIPANT(勢力)
+#DIM 勢力
+
+FOR LOCAL:0, 0, 4
+	;確率で犬豚が対象に
+	IF !RAND:20
+		FOR LOCAL:1, 0, CHARANUM
+			IF CFLAG:(LOCAL:1):所属 == 勢力 && IS_ANIMAL(LOCAL:1) && !CFLAG:(LOCAL:1):調教参加フラグ
+				CFLAG:(LOCAL:1):調教参加フラグ = 1
+				BREAK
+			ENDIF
+		NEXT
+		CALL ADD_ANIMAL(勢力, RAND:3 + 1)
+		CFLAG:(CHARANUM -1):調教参加フラグ = 1
+	;普通に野盗を選出
+	ELSE
+		FOR LOCAL:1, 0, CHARANUM
+			IF TALENT:(LOCAL:1):特殊勢力素質 == 特殊勢力_野盗 && !CFLAG:(LOCAL:1):調教参加フラグ && CFLAG:(LOCAL:1):所属 == 勢力
+				CFLAG:(LOCAL:1):調教参加フラグ = 1
+				CFLAG:(LOCAL:1):TEXT_LAST非表示 = 1
+				BREAK
+			ENDIF
+		NEXT
+	ENDIF
+NEXT

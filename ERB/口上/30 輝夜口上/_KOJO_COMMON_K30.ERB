@@ -1,0 +1,725 @@
+﻿;-------------------------------------------------
+;共通部分
+;-------------------------------------------------
+;=================================================
+;●口上の存在判定
+;=================================================
+@KOJO_EXIST_K30
+
+;=================================================
+;●開始時
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_TRAIN_START_K30
+
+;=================================================
+;●終了時
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_TRAIN_END_K30
+
+;=================================================
+;●コマンド実行時(このキャラがプレイヤー側のとき)
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_TARGET_K30
+
+;=================================================
+;●コマンド実行時(このキャラがプレイヤー側のとき)
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_PLAYER_K30
+
+;=================================================
+;●コマンド実行前(ターゲット・プレイヤー問わず)
+;※地の文が表示される前に実行される。戻り値に1を設定する(RETURN 1)と地の文がカットされる
+;  必要に応じてKOJO_COM_TARGETの代わりに使う
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_BEFORE_K30
+RETURN 0
+
+;=================================================
+;●コマンド実行後(パラメータの変動処理が終わってから呼び出される)
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_AFTER_K30
+;[虚ろ]状態の場合、口が塞がっている場合は口上を表示しない
+IF TALENT:空虚 || IS_EQUIP_CONTINUE(TARGET, "口装着")
+	RETURN 0
+ENDIF
+;-------------------------------------------------
+;初絶頂は使い回せそうなのでここに作成
+;-------------------------------------------------
+;-------------------------------------------------
+;初めてＣ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｃ絶頂 > 0
+PRINTFORML 
+	IF CFLAG:220 == 0
+		CFLAG:220 = 1
+			PRINTFORML 「啊啊啊啊♥ 啊……啊………这、这样…………」
+			PRINTFORML 辉夜因为第一次被人弄到高潮而感到羞耻，浑身发抖。
+	;2回目以降
+	ELSE
+		IF GETBIT(TALENT:淫乱系, 素質_淫乱_淫核)
+			SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「啊啊啊啊啊啊啊♥ 再多摸一下♥♥」
+				PRINTFORML 辉夜因阴蒂感觉到的快感而疯狂。
+			CASE 1
+				PRINTFORML 「呼，好舒服啊♥♥ 好舒服♥♥♥」
+				PRINTFORML 在阴蒂带来的快感中辉夜完全被俘虏了。
+			CASE 2
+				PRINTFORML 「不行啊♥♥ 要是被那样碰触的话♥♥♥♥」
+				PRINTFORML 辉夜的身体剧烈的颤抖起来，。
+			ENDSELECT
+		;捕虜調教時
+		ELSEIF FLAG:12 == 2
+			IF TALENT:恋慕 || TALENT:服従
+				SELECTCASE RAND:3
+				CASE 0
+					PRINTFORML 「啊啊啊啊……！！哈……哈……！ 」
+				CASE 1
+					PRINTFORML 「啊啊…被玩弄了……」
+					PRINTFORML 辉夜无法忍受的达到了绝顶
+				CASE 2
+					PRINTFORML 「嗯♥ 啊，啊啊……不要看、不要看啊……」
+					PRINTFORML 辉夜想要用手遮住因绝顶而完全垮下来的脸。
+				ENDSELECT
+			ELSE
+				SELECTCASE RAND:2
+				CASE 0
+					PRINTFORML 「啊！哈……哈……！」
+					PRINTFORML 辉夜无法忍受的绝顶了，颤抖着…。
+				CASE 1
+					PRINTFORML 「嗯♥ 啊，看啊…」
+					PRINTFORML 辉夜想要用手遮住因绝顶而完全垮下来的脸。
+				ENDSELECT
+			ENDIF
+		ELSE
+			SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「啊啊啊啊……！！哈……哈……！」
+			CASE 1
+				PRINTFORML 「但是，但是，不要再摸了………」
+				PRINTFORML 辉夜无法忍受的绝顶了，颤抖着…。
+			CASE 2
+				PRINTFORML 「嗯♥ 啊，啊啊………好害羞，不要看！……」
+				PRINTFORML 辉夜想要用手遮住因绝顶而完全垮下来的脸。
+			ENDSELECT
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;初めてＶ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｖ絶頂 > 0
+PRINTFORML 
+	IF CFLAG:221 == 0
+		CFLAG:221 = 1
+			PRINTFORML 「啊，有什么要来了吗！？啊啊啊啊…♥♥」
+			PRINTFORML 辉夜因第一次绝顶而睁大了眼睛。
+	;2回目以降
+	ELSE
+		;捕虜調教時
+		IF FLAG:12 == 2
+			IF TALENT:恋慕 || TALENT:服従
+				SELECTCASE RAND:2
+				CASE 0
+					PRINTFORML 「————啊」
+					PRINTFORML 辉夜紧紧闭上眼睛，品味着绝顶的快乐。
+				CASE 1
+					PRINTFORML 「唔哇，咱自己可没做过这种事……嗯……」
+					PRINTFORML 辉夜一边呼出粗气，一边沉浸在绝顶的余韵中……
+				ENDSELECT
+			ELSE
+				SELECTCASE RAND:2
+				CASE 0
+					PRINTFORML 「这、下面、咯吱咯吱地……哎呀……」
+				CASE 1
+					PRINTFORML 「不、不想说……」
+					PRINTFORML 辉夜处在屈辱和快乐的夹缝中，脸因苦闷而通红。
+				ENDSELECT
+			ENDIF
+		ELSEIF GETBIT(TALENT:淫乱系, 素質_淫乱_淫壷)
+			IF RAND:3 == 0
+				PRINTFORML 「啊，哈♥♥ 嗯，嗯♥♥♥」
+				;セックス時
+				IF SELECTCOM == 30 || SELECTCOM == 31 || SELECTCOM == 32 || SELECTCOM == 33 || SELECTCOM == 34 || SELECTCOM == 35 || SELECTCOM == 36 || SELECTCOM == 37 || SELECTCOM == 38 || SELECTCOM == 39 || SELECTCOM == 55 || SELECTCOM == 57
+					PRINTFORML 绝顶的同时，辉夜的阴道为了追求%ANAME(MASTER)%的精液而紧紧地束缚着…。
+				ELSE
+					PRINTFORML 辉夜尖叫着绝顶了，露出了已经变的一塌糊涂的脸…。
+				ENDIF
+			ELSEIF RAND:2 == 0
+				;セックス時
+				IF SELECTCOM == 30 || SELECTCOM == 31 || SELECTCOM == 32 || SELECTCOM == 33 || SELECTCOM == 34 || SELECTCOM == 35 || SELECTCOM == 36 || SELECTCOM == 37 || SELECTCOM == 38 || SELECTCOM == 39 || SELECTCOM == 55 || SELECTCOM == 57
+					IF NOWEX:MASTER:射精 > 0
+						PRINTFORML 「呜、哈、是啊♥」
+						PRINTFORML 「不许在我之前先去……嗯♥」
+					ELSE
+						PRINTFORML 「哈哈……嘛，还可以做呢…？fufu♥」
+						PRINTFORML 辉夜笑着，又开始扭动起腰来…。
+					ENDIF
+				ELSE
+					;指
+					IF SELECTCOM == 3
+						PRINTFORML 「啊啊啊啊啊♥ 只靠手指什么的……嗯♥♥♥」
+						PRINTFORML 辉夜面露出屈辱和欲望交织在一起的表情。
+					;道具
+					ELSEIF SELECTCOM == 22 || SELECTCOM == 61
+						PRINTFORML 「啊，啊啊啊♥ 像玩具一样，不行，不行…嗯♥」
+						PRINTFORML 绝顶后，辉夜用屈辱的目光盯着玩弄自己的道具…。
+					ENDIF
+				ENDIF
+			ELSE 
+				IF RAND:3 == 0
+					PRINTFORML 「啊啊啊啊啊♥ 哈哈哈♥ 」
+					PRINTFORML 「嗯，嗯……好舒服啊…♥♥♥」
+					PRINTFORML 辉夜因为快感而无意识地抽动着腰……。
+				ELSEIF RAND:2 == 0
+					PRINTFORML 「不行啊，啊，太不好意思了♥ 啊，要变的奇怪了♥♥♥」
+					PRINTFORML 辉夜的脸上浮现出不像公主的狂乱表情。
+				ELSE 
+					PRINTFORML 「呃，啊~♥ 哈哈…啊，啊啊………嗯♥♥」
+					PRINTFORML 「啊啊啊……♥ 不行，不行……太舒服了……♥」
+				ENDIF
+			ENDIF
+		ELSE
+			IF RAND:3 == 0
+				PRINTFORML 「啊啊♥ 嗯，去了，嗯……嗯♥♥」
+				;セックス時
+				IF SELECTCOM == 30 || SELECTCOM == 31 || SELECTCOM == 32 || SELECTCOM == 33 || SELECTCOM == 34 || SELECTCOM == 35 || SELECTCOM == 36 || SELECTCOM == 37 || SELECTCOM == 38 || SELECTCOM == 39 || SELECTCOM == 55 || SELECTCOM == 57
+					PRINTFORML 在绝顶的同时，辉夜的阴道紧紧地勒紧了…。
+				ELSE
+					PRINTFORML 辉夜因快乐而流下了口水，颤抖着身体。
+				ENDIF
+			ELSEIF RAND:2 == 0
+				;セックス時
+				IF SELECTCOM == 30 || SELECTCOM == 31 || SELECTCOM == 32 || SELECTCOM == 33 || SELECTCOM == 34 || SELECTCOM == 35 || SELECTCOM == 36 || SELECTCOM == 37 || SELECTCOM == 38 || SELECTCOM == 39 || SELECTCOM == 55 || SELECTCOM == 57
+					;マスターが射精
+					IF NOWEX:MASTER:射精 > 0
+						PRINTFORML 「哈…哈……喂，你也快点去吧…啊！」
+						PRINTFORML 辉夜露出了傲慢的表情，为了让%ANAME(MASTER)%舒服而开始摇起腰来…。
+					ELSE
+						PRINTFORML 「哈…哈…不能只有我出丑……嗯」
+						PRINTFORML 辉夜强迫着自己因快乐而颤抖的身体，为了让%ANAME(MASTER)%舒服而摇晃着要…。
+					ENDIF
+				ELSE
+					;指
+					IF SELECTCOM == 3
+						PRINTFORML 「啊啊啊啊啊♥ 这、这样的……只用手指……嗯♥」
+						PRINTFORML 辉夜因为被手指玩弄的屈辱而颤抖。
+					;道具
+					ELSEIF SELECTCOM == 22 || SELECTCOM == 61 || SELECTCOM == 65
+						PRINTFORML 「嗯啊！♥♥ 啊，嗯啊………呃，道具什么的……屈辱啊……」
+						PRINTFORML 辉夜非常厌恶地盯着性玩具……
+					ENDIF
+				ENDIF
+			ELSE 
+				IF RAND:3 == 0
+					PRINTFORML 「————嗯」
+					PRINTFORML 辉夜紧紧闭上眼睛，品味着绝顶的快乐。
+				ELSEIF RAND:2 == 0
+					PRINTFORML 「哈…哈哈……嗯♥」
+					PRINTFORML 「哇，咱自己可没做过这种事……嗯……」
+					PRINTFORML 辉夜一边呼出粗气，一边沉浸在绝顶的余韵中……
+				ELSE 
+					PRINTFORML 「啊，啊啊……嗯♥」
+					PRINTFORML 「啊、下面、咯吱咯吱地……嗯……」
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+
+;-------------------------------------------------
+;初めてＡ絶頂
+;-------------------------------------------------
+IF NOWEX:Ａ絶頂 > 0
+	PRINTFORML 
+	;初回
+	IF CFLAG:222 == 0
+		CFLAG:222 = 1
+			PRINTFORML 「呐，总觉得，屁股好舒服啊……嗯♥」
+			;Aセックス時
+			IF SELECTCOM == 40 || SELECTCOM == 41 || SELECTCOM == 42 || SELECTCOM == 43 || SELECTCOM == 44 || SELECTCOM == 45 || SELECTCOM == 46 || SELECTCOM == 47 || SELECTCOM == 48 || SELECTCOM == 49 || SELECTCOM == 56 || SELECTCOM == 58
+				PRINTFORML 被侵犯着尻穴的辉夜终于第一次经历了肛门绝顶。
+			ELSE
+				PRINTFORML 被玩弄尻穴的辉夜和小穴一起到达了绝顶
+			ENDIF
+		PRINTFORML 「哈…哈哈……这个，这种感觉，难道……」
+		PRINTFORML 「啊………这个、这样的、嗯……嗯」
+		PRINTFORML 辉夜似乎因为尻穴绝顶，而感觉非常羞耻……
+	;2回目以降
+	ELSE
+		;捕虜調教時
+		IF FLAG:12 == 2
+			IF TALENT:恋慕 || TALENT:服従
+				PRINTFORML 「嗯~嗯~！」
+				PRINTFORML 辉夜紧紧闭上眼睛，想要抵抗尻穴带来的一阵一阵的绝顶感。
+			ELSE
+				PRINTFORML 「啊啊…屁股什么的……」
+				PRINTFORML 辉夜可能是感到了屈辱吧，脸通红地颤抖着…。
+			ENDIF
+		ELSEIF GETBIT(TALENT:淫乱系, 素質_淫乱_尻穴狂い)
+			IF RAND:3 == 0
+				PRINTFORML 「啊，屁股，屁股，啊♥ ～～～～♥♥♥」
+				PRINTFORML 辉夜在尻穴的快乐中达到了绝顶。
+			ELSEIF RAND:2 == 0
+					;Aセックス時
+					IF SELECTCOM == 40 || SELECTCOM == 41 || SELECTCOM == 42 || SELECTCOM == 43 || SELECTCOM == 44 || SELECTCOM == 45 || SELECTCOM == 46 || SELECTCOM == 47 || SELECTCOM == 48 || SELECTCOM == 49 || SELECTCOM == 56 || SELECTCOM == 58
+						PRINTFORML %ANAME(MASTER)%轻轻地拍打乐一下辉夜的屁股，她的肛门就紧紧地绷紧了。
+					ELSE
+						PRINTFORML %ANAME(MASTER)%就这样揉了揉辉夜的屁股，她害羞地颤抖着。
+					ENDIF
+			ELSE
+				PRINTFORML 「啊啊啊，好啊♥ 屁股好舒服……嗯♥♥♥」
+				PRINTFORML 辉夜浑身发抖，流着口水露出了阿黑颜。
+			ENDIF
+		ELSE
+			IF RAND:3 == 0
+				PRINTFORML 「～～～～！！」
+				PRINTFORML 辉夜紧紧闭上眼睛，想要抵抗尻穴的绝顶感。
+			ELSEIF RAND:2 == 0
+				PRINTFORML 「啊啊啊，啊……竟然用屁股……」
+				PRINTFORML 辉夜可能是感到了屈辱吧，脸通红地颤抖着…。
+			ELSE 
+				PRINTFORML 「啊…啊…、屁股…去了……嗯…」
+				PRINTFORML 辉夜即使到了这个时期，似乎还是对用屁股绝顶产生了抵触…。
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;初めてＢ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｂ絶頂 > 0
+PRINTFORML 
+	IF CFLAG:223 == 0
+		CFLAG:223 = 1
+			PRINTFORML 「啊啊啊啊♥♥」
+			PRINTFORML 「啊，啊啊……嗯，胸部竟然能这么舒服……」
+			PRINTFORML 辉夜在乳房第一次达到绝顶时表现出轻微的动摇。
+	;2回目以降
+	ELSE
+		;捕虜調教時
+		IF FLAG:12 == 2
+			IF TALENT:恋慕 || TALENT:服従
+				SELECTCASE RAND:2
+				CASE 0
+					PRINTFORML 「嗯，乳头也好痛……」
+					PRINTFORML 辉夜对自己的痴态感到十分沮丧。
+				CASE 1
+					PRINTFORML 「啊，啊♥」
+					PRINTFORML 绝顶的辉夜两乳颤抖着。
+				ENDSELECT
+			ELSE
+				SELECTCASE RAND:2
+				CASE 0
+					PRINTFORML 「嗯……这样的事，我怎么会承认……！」
+					PRINTFORML 辉夜虽然在绝顶的那一瞬间放松了表情，但马上又咬紧牙关掩饰住自己。
+				CASE 1
+					PRINTFORML 「这样，真没出息……」
+					PRINTFORML 辉夜一边呼出魅惑的气息，一边忍耐着绝顶的余韵。
+				ENDSELECT
+			ENDIF
+		ELSEIF GETBIT(TALENT:淫乱系, 素質_淫乱_淫乳)
+			SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「啊啊啊……嗯♥ 呃，好，好舒服……♥♥♥」
+				PRINTFORML 辉夜露出了平时绝对看不到的表情，颤抖着…。
+			CASE 1
+				PRINTFORML 「～～～～♥♥♥ 啊是啊……哈哈……♥」
+				PRINTFORML 「啊啊，我的胸口在抽动了…fufu♥」
+			CASE 2
+				PRINTFORML 「啊，啊啊啊♥♥ 是啊，嗯，嗯…嗯♥」
+				PRINTFORML 辉夜似乎很讨厌乳头的突然直立，两乳都在颤抖着。
+			ENDSELECT
+		ELSE
+			SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「啊，啊♥ 啊，嗯，嗯…哇，我做了这么恶心的事……」
+				PRINTFORML 也许是因为因胸部绝顶而带来的极致的羞耻感，辉夜的脸涨得通红，低着眼睛。
+			CASE 1
+				PRINTFORML 「啊，啊♥」
+				PRINTFORML 绝顶的辉夜两乳颤抖着。
+			CASE 2
+				PRINTFORML 「啊啊啊啊♥ 啊，这样，好害羞……嗯♥」
+				PRINTFORML 辉夜的乳头直立着绝顶了。
+			ENDSELECT
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;初めてＭ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｍ絶頂 > 0
+PRINTFORML 
+	IF CFLAG:224 == 0
+		CFLAG:224 = 1
+			PRINTFORML 「嗯！？嗯，嗯……♥」
+			PRINTFORML 辉夜用嘴唇第一次达到了高潮，翻起了白眼。
+	;2回目以降
+	ELSE
+		;捕虜調教時
+		IF FLAG:12 == 2
+			IF TALENT:恋慕 || TALENT:服従
+				PRINTFORML 「嗯，嗯♥ 哈……哈……♥」
+				PRINTFORML 辉夜捂着嘴，扭动着身体。
+			ELSE
+				PRINTFORML 「嗯…嘿！！」
+				PRINTFORML 辉夜捂着嘴，拼命地忍耐着什么。
+			ENDIF
+		ELSE
+			SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「嗯，嗯♥♥ 哈、哈…嗯♥♥♥」
+				PRINTFORML 从绝顶的辉夜口中滴落下口水，吐着粗气浑身颤抖…。
+			CASE 1
+				PRINTFORML 「嗯…嗯，嗯♥♥ ……嗯，哈，嗯♥♥」
+				PRINTFORML 辉夜一边用通红的脸呼出粗气，一边擦拭着从口中洒出来的唾液。
+			CASE 2
+				PRINTFORML 「嗯，嗯♥ 哈、哈、哈…♥」
+				PRINTFORML 辉夜似乎是因为口腔的刺激而达到了高潮。
+			ENDSELECT
+		ENDIF
+	ENDIF
+ENDIF
+;-------------------------------------------------
+
+;=================================================
+;●単体エンディング関係
+;=================================================
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;★ここから先にはエンディングが記述されています★
+;ネタバレを避けたい方は閲覧しないようにご注意下さい。
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+@KOJO_SINGLE_ENDING_K30
+;単体エンディング
+;全都市を統一したとき、好感度5000以上かつ全キャラ中最も好感度が高いと表示される
+#DIM 対象
+IF TALENT:正妻 && FLAG:周回数 > 1
+	PRINTFORML
+	PRINTFORML
+	PRINTFORMW 「第{FLAG:周回数}周目了啊，%ANAME(MASTER)%大人还真是恶趣味呢」
+	PRINTFORMW 「在TK这样的世界，不断重复着所谓的爱恋什么的」
+	PRINTFORMW
+	PRINTFORML 就在%ANAME(MASTER)%看见了统一的时候，时间，突然停止了，然后，便是这样的声音传来
+	PRINTFORMW
+	PRINTFORMW 这种声音，%ANAME(MASTER)%再熟悉不过了，是辉夜，自己在这周目的妻子。是的，这周目而已。
+	IF CFLAG:対象:引き継ぎキャラ == 1
+		PRINTFORML 「虽然妾身的被您保留了上周目的能力，不过看起来，记忆并没有保留呢」
+	ELSEIF CFLAG:対象:引き継ぎキャラ != 1
+		PRINTFORML 「能力，还有，记忆，在进入下周目的时候，您一丝一毫都没有给妾身保留呢」
+	ENDIF
+	PRINTFORMW
+	PRINTFORMW 「妾身说的对吗？%ANAME(MASTER)%大人？亦或者说，夫君？亦或者说，在%ANAME(MASTER)%大人背后的，那位大人？」
+	PRINTFORML 「在喜欢上妾身之前，您是否还和其他人在一起过呢？这样的话」
+	PRINTFORMW
+	SETCOLOR 0xFF0000
+	PRINTFORML
+	PRINTFORMW 「杀 了 你 哦 ！」
+	PRINTFORML
+	RESETCOLOR
+	PRINTFORMW 「呼呼，开玩笑的啦，妾身毕竟是小恶魔吧，这种事情，也是可以允许的吧。所以，能不能告诉妾身，那个人是谁呢？」
+	PRINTFORMW 「然后」
+	SETCOLOR 0xFF0000
+	PRINTFORML
+	PRINTFORMW 「杀 了 她 哦 ！」
+	PRINTFORML
+	RESETCOLOR
+	CALL ASK_YN("是你，一直都是你", "沉默")
+	IF RESULT == 0
+		PRINTFORML
+		PRINTFORMW 时停，突然解除了
+		PRINTFORMW 然后，她从背后，抱了上来
+		PRINTFORML 「拜托了，%ANAME(MASTER)%大人，哪怕是假的，也请一直这样，欺骗着妾身，也请一直这样」
+		PRINTFORMW 背后的衣服，已经被泪水打湿了，但是%ANAME(MASTER)%，丝毫不敢动弹
+		PRINTFORML 再紧接着，自己的嘴唇，突然被一份柔软堵住了，额头，也被难以抵抗的巨力，顶在了另一个额头上
+		PRINTFORML 泪水是咸的，蓬莱人的血，也是咸的，但即使是这样，已经咬破了自己和%ANAME(MASTER)%嘴唇的公主殿下，也没有想要放开的样子
+		PRINTFORMW
+		PRINTFORMW 然后，她就保持着这么痛苦的样子，暂停了呼吸
+		PRINTFORMW
+		PRINTFORMW 不过，对于非生非死的蓬莱人来说，这样的死亡，也不过就是短暂的睡眠而已
+		PRINTFORML %ANAME(MASTER)%轻柔的托举着公主殿下，把她送回了自己的房间
+		PRINTFORML 房间里，有着一封信，是辉夜殿下那娟秀的字体
+		PRINTFORMW
+		PRINTFORML %ANAME(MASTER)%大人，如果您能看到这封信，那您一定能回想起，咱当初对您说过什么吧，「下一个宇宙，等你」
+		PRINTFORMW
+		PRINTFORMW 对于妾身这样的罪人来说，背叛，是可以容忍的。因为无论是谁，在无尽的岁月之后，都会理解到，只有彼此，是永恒的
+		PRINTFORML 永琳是这样想的，妾身也是这样想的，而妹红，在无尽的岁月之后，也终将会理解到这一点
+		PRINTFORMW 所以，唯一有过背叛的人，只是妾身罢了。是妾身，在无尽的岁月里，因为孤寂，增加了一位又一位的陪伴者
+		PRINTFORMW
+		PRINTFORML 但是，您，不一样。所谓永生种的记忆，对您来说，也不过是可以操作的玩物
+		PRINTFORML 所谓悠久的时间，不过取决于您是否厌倦
+		PRINTFORML 但是，这样的您，夫君大人，却愿意给妾身一层虚假的希望，愿意让妾身感受那寤寐思服的切骨之痛
+		SETCOLOR カラー_オレンジ
+			PRINTFORML
+			PRINTFORMW 「所以，下一个宇宙，还和妾身在一起，好吗？」
+			PRINTFORML
+			RESETCOLOR
+	ELSE
+		PRINTFORML 这样啊，%ANAME(MASTER)%大人
+		PRINTFORML %ANAME(MASTER)%的沉默，已经证明了一切
+		PRINTFORML 但是，下一瞬间，公主殿下还是抱了上来
+		PRINTFORML 「既然夫君大人选择了沉默，那就不要再说话了」
+		PRINTFORMW 这么说完，她便用嘴唇，堵了上来
+		PRINTFORML 只能说真不愧是公主殿下嘛，即使是哭红了的双眼，也不过是给这精致的面容增加了一丝媚态罢了
+		PRINTFORML %ANAME(MASTER)%即使在这样的情况下，也不过在回想着一些不着调的东西
+		PRINTFORMW
+		PRINTFORML 说到底，TK就是这样的世界罢了，所谓的正妻，小妾，恋慕，亲爱，服从，隶属，特殊势力陷落，日常堕落素质
+		PRINTFORML 也不过是%ANAME(MASTER)%的玩物罢了，有人悲伤自己被骗，从而怒杀其他人
+		PRINTFORML 有人从此打开了新世界，自称玩的挺花
+		PRINTFORML 有人自己沉沦于这个世界之中，感受整个世界的疯狂
+		PRINTFORML 最好的，也不过是像这样，玩弄她人的感情罢了
+		PRINTFORMW
+		PRINTFORMW 只是，TK是这样，TW,AM,AV,魔王，SQC,MGT，一切的一切，所谓的主角，和所谓的玩家，又何尝有过改变呢
+		PRINTFORMW 这个世界，就是这样，已经病了，仅此而已
+		PRINTFORMW
+		PRINTFORML 刚才还在哭泣的公主殿下，就这么沉睡了，她用她永远的力量，赐予了自己永眠
+		PRINTFORMW 真是可笑啊，所谓的蓬莱药，两位制作者，又怎么可能没办法取消效果呢
+		PRINTFORML 但是，她选择了沉睡，而不是让你永眠，所谓的鸵鸟，不过如此
+		SETCOLOR 0xFF0000
+			PRINTFORML
+			PRINTFORMW 忘记成佛的亡灵无法诞生出新的生命
+			PRINTFORMW 不会死亡的人类无法知晓色彩鲜明的冥界
+			PRINTFORMW 生生生生暗生始
+			PRINTFORMW 死死死死冥死终
+			PRINTFORML
+		RESETCOLOR
+	ENDIF
+ELSEIF TALENT:正妻
+	PRINTFORML
+	PRINTFORMW ————永远亭
+	PRINTFORML 
+	PRINTFORML 嘛，也已经过了这么久了吗
+	PRINTFORML 辉夜一边躺在%ANAME(MASTER)%怀里，一边嘟囔着
+	PRINTFORML 「我知道你想说什么」
+	PRINTFORML 「对于身为永生种的咱来说，这样的时间实在是太微不足道了吧」
+	PRINTFORMW 「甚至说，整个幻想乡存在的时间，对于咱来说，都只能算渺小而已」
+	PRINTFORML 「这就是永生种的罪，视宇宙之死的不老不死」
+	PRINTFORML 「但是，在这段时间里，我遇到了你」
+	PRINTFORMW 「和你一起度过的时间，比我之前生活的那么久的年月还要充实」
+	PRINTFORML  
+	PRINTFORML 辉夜平静地微笑着向%ANAME(MASTER)%招手。
+	PRINTFORMW %ANAME(MASTER)%弯下腰，脸靠了过去，然后，被给予了一个温柔的吻。
+	PRINTFORML 「……欺骗咱，是一种罪」
+	PRINTFORML 「但妾身是永远与须臾的罪人，所以，你的罪，微不足道」
+	PRINTFORML 「但是，如果你愿意和咱承担一样的罪的话」
+	PRINTFORML 一切都很安静，辉夜牵起了%ANAME(MASTER)%的手。
+	PRINTFORMW 像是缠绕着手指一样牵着手，她再次闭上了眼睛。
+	PRINTFORML 
+	PRINTFORML 再次的接吻，不再仅是将彼此的嘴唇重叠在一起的东西，而是让一种将温暖、柔软的感觉充满了内心，这是不死者的契约……。
+	PRINTFORMW 
+	PRINTFORML 
+	PRINTFORML 「下一个宇宙等你」
+	PRINTFORMW 悄悄地松开嘴唇，辉夜喃喃细语着，只让%ANAME(MASTER)%听见。
+	PRINTFORML 
+	PRINTFORML ………………………
+	PRINTFORMW ……………
+	PRINTFORML 
+	PRINTFORMW 蓬莱之人
+	PRINTFORMW 一种非生非死的存在
+	PRINTFORMW 甚至说，其存在本身就是一种宇宙的错误而已
+	PRINTFORMW 但是，这也并非如此，因为即使宇宙毁灭，她们也会在下一个宇宙留下她们的痕迹
+	PRINTFORMW 只是，有一天，她们中，多了一个他，同样不可知，不可视，不可闻说
+	PRINTFORMW 毕竟是视宇宙之死的不死罪人
+	PRINTFORML 
+ELSEIF TALENT:恋慕
+	PRINTFORML
+	PRINTFORMW ————永远亭
+	PRINTFORML 
+	PRINTFORML 辉夜坐在椅子上托着腮，眼神迷离。
+	PRINTFORML 过了一会，她把脸转向站在一旁的%ANAME(MASTER)%，恶作剧般地笑了。
+	PRINTFORML 「幻想乡终于统一了呢」
+	PRINTFORMW 「真是的，真是个超乎意料的家伙呢」
+	PRINTFORMW 辉夜含笑地问%ANAME(MASTER)%。
+	PRINTFORML 
+	PRINTFORMW ……但是，这里是幻想乡。
+	PRINTFORMW 神秘最后仅存之地。
+	PRINTFORMW 凭着自己这种莽夫，想要维护统治是不可能的吧？……。
+	PRINTFORML 
+	PRINTFORMW 看到了陷入沉思的%ANAME(MASTER)%，辉夜歪着头“哎呀”了一声。
+	PRINTFORML 「%ANAME(MASTER)%，明明已经君临人类之上了，却还像个小孩子一样呢？」
+	PRINTFORMW 像开玩笑似的，辉夜笑着，温柔地对%ANAME(MASTER)%说"没关系的"。
+	PRINTFORML 「妾身再怎么说，曾经也是个公主呢，这种事，咱会帮你的」
+	PRINTFORMW 「喂！别那么看着咱嘛，实在不行还有师匠呢，不是嘛」
+	PRINTFORML 
+	PRINTFORML 辉夜紧紧握着%ANAME(MASTER)%的手，露出了孩子般的神态。
+	PRINTFORMW 纤细、洁白、柔弱的手指，却也具备了其他人所没有的温柔。
+	PRINTFORMW 「所以，%ANAME(MASTER)%……今后，也请多多指教」
+	PRINTFORML 
+ELSE
+	PRINTFORML
+	PRINTFORMW ————%ANAME(MASTER)%之家
+	PRINTFORML 
+	PRINTFORMW 「幻想乡终于平静下来了啊」
+	PRINTFORML 「这样，咱就可以天天打游戏了......外来人别的不说，带进来的东西却是很棒呢」
+	PRINTFORMW 辉夜瘫倒在床上，手里捧着一台PS5
+	PRINTFORML 
+	PRINTFORMW 「有什么想要的东西吗？妾身会给你奖赏的。」
+	PRINTFORML %ANAME(MASTER)%摇了摇头，辉夜皱起了眉头。
+	PRINTFORMW 「没有吗？那可不行……」
+	PRINTFORML 
+	PRINTFORMW 「那样的话……你就每天准备茶和点心来等我吧，咱会一直赖在这里的」
+	PRINTFORML 「这是双赢哦，是双赢！」
+	PRINTFORMW 辉夜翻了个身，然后继续瘫在床上玩起了游戏。
+	PRINTFORML 
+	PRINTFORMW ……今后，%ANAME(MASTER)%和公主的缘分还会继续下去。
+ENDIF
+;RETURNの値を0→1に変えると、デフォルトの単体エンディングメッセージがスキップされる
+RETURN 1
+
+@KOJO_DEAD_ENDING_K30
+;斬首エンディング
+;自勢力が滅亡したときの選択肢で「……斬れ」を選択して主人公が死亡した場合に、好感度5000以上かつ全キャラ中最も好感度が高いと表示される
+IF TALENT:正妻
+	PRINTFORML
+	PRINTFORMW 永远亭，人里童话所记载之地
+	PRINTFORML 据说，在史册中只是隐约提到的战争更久之前，那里曾有一位公主和一位医师
+	PRINTFORML 医师？公主？都是十分陌生的词，但是，无论怎么样，能得到先辈们推崇为神明的职业，也是我唯一的希望
+	PRINTFORML 我在这片亘古以来就长存的竹林里，已经搜寻了几年了。
+	PRINTFORML 饥荒，瘟疫，战争，死亡四骑士的铁骑，依然在幻想乡四处践踏
+	PRINTFORMW 我肩负着整个人里的希望，从代代相传的史官家族的废墟之下，找到了幻想乡缘起这本书
+	PRINTFORMW 无论怎样，这本书里的英雄传，是我们唯一的希望了
+	PRINTFORML 当然，也或许.....
+	PRINTFORMW 是毁灭
+	PRINTFORMW
+	PRINTFORMW 当月圆之夜，我看到竹林里那格格不入的亭子的时候，我知道，这里就是我的目的地了
+	PRINTFORML 但是，我不知道的是，这里也是......一切开始流动之时
+	PRINTFORML 像是从神话中走出的黑发公主破开火焰
+	PRINTFORMW 从银河之中缓缓落地
+	SETCOLOR カラー_黄
+		PRINTFORMW 「生命璀璨美丽，却成为众人的囚笼」
+		PRINTFORMW 「身已飘渺，却未忘使命之人」
+		PRINTFORML 「躯干已灭，仅剩头颅存活之人」
+		PRINTFORMW 「追求无缘之爱的人」
+		PRINTFORML 「而我.....?」
+	RESETCOLOR
+	PRINTFORMW 像是什么缓缓醒来一样，疯狂的恶意从四面八方涌来
+	PRINTFORML 「永琳，火鸡，你们，差点就成功了呢」
+	PRINTFORMW 随着她的呼唤，她那原本华丽的和服，逐渐被一套不透光的漆黑西服替代
+	PRINTFORML 「那么，就由我，给这个荒诞的世界，献上我的戏剧吧」
+	PRINTFORMW 她的嘴角微微勾起
+	PRINTFORMW 「首先是————————」
+	PRINTFORMW
+	SETCOLOR カラー_黄
+		PRINTFORMW 「新难题·白垩纪大灭绝」
+	RESETCOLOR
+	PRINTFORML
+	PRINTFORMW 巨大的陨石似乎从过去被重新缓缓聚集起来
+	PRINTFORML
+	SETCOLOR カラー_黄
+		PRINTFORML 然后是「新难题·戴森球奇观」
+	RESETCOLOR
+	PRINTFORML
+	PRINTFORMW 超越了当前世界科技的自动机械化装置缓缓覆盖太阳
+	PRINTFORML
+	SETCOLOR カラー_黄
+		PRINTFORML 接着是「新难题·终末之轮回」
+	RESETCOLOR
+	PRINTFORML
+	PRINTFORMW 无法移除的最终灾难，似乎从不可知的未来，坚定，而又缓慢的来到现在
+	PRINTFORML
+	SETCOLOR カラー_黄
+		PRINTFORML 再接着是「新难题·缸中之脑」
+	RESETCOLOR
+	PRINTFORML
+	PRINTFORMW 原本仍在厮杀，在狂欢，在混乱不堪的整个世界，一点，一点的化作了数据流
+	PRINTFORML
+	SETCOLOR カラー_黄
+		PRINTFORML 最后是「新难题·天灾飞升」
+	RESETCOLOR
+	SETCOLOR 0xFF0000
+		PRINTFORMW 						鐏甸暱鐩寳鏂圭湡鍏介珮鐩笩绾插墠妫辫湧褰㈢洰椋熻倝鐩剨绱㈠姩鐗╅
+		PRINTFORML 								鑵旇偁鍔ㄧ墿妫樼毊鍔ㄧ墿鏈夌粸鍔ㄧ墿鍘熺敓鍔ㄧ墿鐪熷悗鐢熷姩鐗╀簹鐣屾伓榄斿洓瓒
+		PRINTFORMW 袨薪袨薪袨薪袨薪袨薪袨薪袨薪袨薪袨薪袨薪袨薪袨薪 浠栦粬浠栦粬浠栦粬浠栦粬浠栦粬浠栦粬 
+		PRINTFORML 		濂瑰ス濂瑰ス濂瑰ス濂瑰ス濂瑰ス濂瑰ス LeLeLeLeLeLeLeLeLeLeLeLe 
+		PRINTFORMW 					鍗虫槸涓囩墿涔嬩腑 
+		PRINTFORML 
+		PRINTFORMW 															鏄� 绁�
+		PRINTFORML 							绁炴槸瀛樺湪鐨�
+		PRINTFORMW 
+	RESETCOLOR
+	PRINTFORMW 
+	PRINTFORMW 
+	PRINTFORMW 
+	PRINTFORMW 
+	PRINTFORMW 
+	PRINTFORMW 
+	PRINTFORML 「我会去找您的，%ANAME(MASTER)%大人」
+	PRINTFORMW 「不」
+	PRINTFORMW
+	PRINTFORMW
+	PRINTFORML 「是您」
+	SETCOLOR カラー_黄
+		PRINTFORMW 哪怕，来到另一个世界！！！
+	RESETCOLOR
+ELSEIF TALENT:恋慕
+	PRINTFORML
+	PRINTFORMW ————永远亭
+	PRINTFORML 
+	PRINTFORMW 自从失去%ANAME(MASTER)%之后，公主殿下就一直消沉着。
+	PRINTFORML 
+	PRINTFORML 整天坐在椅子上发呆，即使搭话也只会含糊地回答。
+	PRINTFORMW 或者说，只不过是在不停的自杀中消磨时间而已。
+	PRINTFORMW 偶尔会拿出%ANAME(MASTER)%的骨灰罐，然后，流着血泪，直至死亡…。
+	PRINTFORML 
+	PRINTFORMW 今天公主殿下也坐在椅子上，眺望着远方。
+	PRINTFORMW 对于永生种来说，这种经历，持续到宇宙毁灭之时，也不是没有可能吧
+	PRINTFORML 
+ENDIF
+
+;RETURNの値を0→1に変えると、デフォルトの単体エンディングメッセージがスキップされる
+RETURN 1

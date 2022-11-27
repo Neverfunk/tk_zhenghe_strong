@@ -1,0 +1,143 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_DAILY_MISC_RATE()
+RETURN 100
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_DAILY_MISC_DECISION()
+RETURN 1
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_DAILY_MISC_GENRE()
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_DAILY_MISC()
+#DIM 対象
+
+SELECTCASE RAND:100
+;能力の上昇
+CASE 0 TO 21
+	CALL DAILY_EVENT_RAND_CHARASELECT(0)
+	IF RESULT >= 0
+		対象 = RESULT
+		SELECTCASE RAND:100
+			CASE 0 TO 69
+				LOCAL:1 = 1
+			CASE 70 TO 89
+				LOCAL:1 = 2
+			CASE 90 TO 99
+				LOCAL:1 = 3
+		ENDSELECT
+		SELECTCASE RAND:4
+			CASE 0
+				LOCALS = 武闘
+				ABL:対象:武闘 += LOCAL:1
+				LOCAL:2 = GETNUM(ABL, "武闘")
+			CASE 1
+				LOCALS = 防衛
+				ABL:対象:防衛 += LOCAL:1
+				LOCAL:2 = GETNUM(ABL, "防衛")
+			CASE 2
+				LOCALS = 知略
+				ABL:対象:知略 += LOCAL:1
+				LOCAL:2 = GETNUM(ABL, "知略")
+			CASE 3
+				LOCALS = 政治
+				ABL:対象:政治 += LOCAL:1
+				LOCAL:2 = GETNUM(ABL, "政治")
+		ENDSELECT
+		PRINTFORML %ANAME(対象)%在積極的秘密特訓……
+		CALL COLOR_PRINTL(@"%ANAME(対象)%的%LOCALS%提高了{LOCAL:1}、変成了{ABL:対象:(LOCAL:2)}！", カラー_オレンジ)
+	ENDIF
+
+;好景気
+CASE 22 TO 38
+	CALL DAILY_EVENT_RAND_CITYSELECT(0)
+	対象 = RESULT
+	IF 対象 > 0
+		PRINTFORML %CITY_NAME:対象%的經濟変好了……
+		SETCOLOR カラー_オレンジ
+		CALL MODIFY_CITY_ECONOMY(対象, RAND(10000, 30000))
+		RESETCOLOR
+		ENDIF
+
+;兵数が増える
+CASE 39 TO 55
+	LOCALS = %ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%
+	LOCAL:1 = GET_OWN_CITY(CFLAG:MASTER:所属)
+	LOCAL:2 = RAND(LOCAL:1 * 300, LOCAL:1 * 300 + 500)
+	COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += LOCAL:2
+	PRINTFORML %LOCALS%的人望、讓民衆自発組成了義勇軍……
+	SETCOLOR カラー_オレンジ
+	PRINTFORML 兵数増加了{LOCAL:2}、変成了{COUNTRY_SOLDIER:(CFLAG:MASTER:所属)}！
+	RESETCOLOR
+
+;サボり魔を取得するか、削除する
+CASE 56 TO 77
+	CALL DAILY_EVENT_RAND_CHARASELECT(0)
+	対象 = RESULT
+	IF 対象 >= 0
+		IF TALENT:対象:懶散
+			PRINTFORML 最近%ANAME(対象)%總感覺渾身充滿了干勁……
+			SETCOLOR カラー_オレンジ
+			PRINTFORML %ANAME(対象)%克服了【懶散】！
+			RESETCOLOR
+			TALENT:対象:懶散 = 0
+		ELSE
+			PRINTFORML 最近%ANAME(対象)%總感覺毫無干勁……
+			SETCOLOR カラー_警告
+			PRINTFORML %ANAME(対象)%変得【懶散】了！
+			RESETCOLOR
+			TALENT:対象:懶散 = 1
+		ENDIF
+	ENDIF
+
+;ケガをするか、ケガから復帰
+CASE 78 TO 82
+	CALL DAILY_EVENT_RAND_CHARASELECT(0)
+	対象 = RESULT
+	IF 対象 >= 0
+		IF COOLTIME:対象:0
+			PRINTFORML %ANAME(対象)%的傷比預想的要更快治好了
+			SETCOLOR カラー_オレンジ
+			PRINTFORML %ANAME(対象)%從休養時間中復帰了！
+			RESETCOLOR
+			COOLTIME:対象:0 = 0
+		ELSE
+			LOCAL:1 = RAND:3 + 1
+			PRINTFORML %ANAME(対象)%好像在訓練中受傷了
+			CALL SET_COOLTIME(対象, LOCAL:1)
+		ENDIF
+	ENDIF
+
+;国家の兵力が増加する
+CASE 83 TO 99
+	CALL DAILY_EVENT_RAND_COUNTRYSELECT()
+	対象 = RESULT
+	IF 対象 >= 0 && IS_COUNTRY(対象)
+		LOCAL:1 = RAND(MIN(DAY * 100, 5000), MIN(DAY * 200, 10000))
+		COUNTRY_SOLDIER:(対象) += LOCAL:1
+		PRINTFORML %ANAME(GET_COUNTRY_BOSS(対象))%進行了徴兵！
+		CALL COLOR_PRINTL(@"兵数増加了{LOCAL:1}", カラー_注意)
+	ENDIF
+;その他=異常終了
+CASEELSE
+	RETURN 0
+ENDSELECT
+		
+RETURN 1

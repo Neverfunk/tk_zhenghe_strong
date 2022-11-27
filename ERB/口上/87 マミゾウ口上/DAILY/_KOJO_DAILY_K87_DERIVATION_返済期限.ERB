@@ -1,0 +1,132 @@
+﻿;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@KOJO_DAILY_K87_DERIVATION_REPAYMENT_DISABLE(対象)
+#DIM 対象
+RETURN KOJO_DAILY_GET_DISABLE_CONFIG(対象, "LENDER")
+
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K87_DERIVATION_REPAYMENT_DECISION(対象)
+#DIM 対象
+
+SIF CFLAG:対象:捕虜先 || CFLAG:対象:特殊状態
+	RETURN 0
+
+SIF KDVAR:対象:マミゾウ_金貸し_返済期限 == 0
+	RETURN 0
+
+KDVAR:対象:マミゾウ_金貸し_返済期限 --
+
+SIF KDVAR:対象:マミゾウ_金貸し_返済期限 > 0
+	RETURN 0
+
+IF CFLAG:対象:所属 == CFLAG:MASTER:所属
+	CALL SINGLE_DRAWLINE
+	PRINTFORMW 因为同属一个部门，向%ANAME(対象)%借的钱好像变空了……
+	;TranslatedMark 所属が同じになったので、%ANAME(対象)%に借りていた金のことはチャラになったようだ……
+	CALL SINGLE_DRAWLINE
+	KDVAR:対象:マミゾウ_金貸し_返済額 = 0
+	RETURN 0
+ENDIF
+
+RETURN 1
+
+
+;---------------------
+;本体
+;---------------------
+@KOJO_DAILY_K87_DERIVATION_REPAYMENT(対象)
+#DIM 対象
+#DIM 担保
+
+
+PRINTFORMW %ANAME(対象)%来了……
+;TranslatedMark %ANAME(対象)%がやってきた……
+PRINTFORMW 「好久不见了。那么，把借的钱还给我吧？」
+;TranslatedMark 「久しぶりじゃな。さて、貸した金を返してもらおうか？」
+
+CALL ASK_MULTI_JUDGE("偿还", MONEY >= KDVAR:対象:マミゾウ_金貸し_返済額, "不还", 1)
+
+IF RESULT == 0
+	MONEY -= KDVAR:対象:マミゾウ_金貸し_返済額
+	CALL ICPRINT(@"金<{KDVAR:対象:マミゾウ_金貸し_返済額}>、耳をそろえて返した……", "L", カラー_注意)
+	PRINTFORMW 「嗯，确实」
+	;TranslatedMark 「ん、確かに」
+	PRINTFORMW 「那么我就这样，有机会的话再见面吧」
+	;TranslatedMark 「それじゃ儂はこれで、機会があったらまた会おう」
+	PRINTFORMW %ANAME(対象)%离开了……
+	;TranslatedMark %ANAME(対象)%は立ち去った……
+	KDVAR:対象:マミゾウ_金貸し_返済額 = 0
+	RETURN 1
+ENDIF
+
+PRINTFORML 不好意思还不起……坦率地那样传达了
+;TranslatedMark すまないが返せない……素直にそう伝えた
+PRINTFORMW %ANAME(対象)%露出吃惊的表情
+;TranslatedMark %ANAME(対象)%は呆れた表情を浮かべる
+PRINTFORMW 「还不回来的话……？那为什么借了？」
+;TranslatedMark 「返せないとな……？　ならなぜ借りた？」
+PRINTFORMW 「啊，没办法。因为说还不回来的东西也没办法。……但是，代替的东西要吗？」
+;TranslatedMark 「まあ、仕方ない。返せんものを返せと言っても仕方がないからのう。……ただし、代わりのものはいただくぞい？」
+
+CALL DAILY_EVENT_RAND_CHARASELECT()
+
+担保 = RESULT
+{
+SELECTCASE IFRAND(
+				  "0", GET_COUNTRY_BOSS(CFLAG:MASTER:所属) == MASTER,
+				  "1", !GROUPMATCH(担保, MASTER, GET_COUNTRY_BOSS(CFLAG:MASTER:所属)),
+				  "2", GET_COUNTRY_BOSS(CFLAG:MASTER:所属) != MASTER)
+}
+	;主人公が君主、かつほかの対象が選択されなかった
+	;スケベするだけ
+	CASE 0
+		PRINTFORMW 「不是那样的……那么，我来代替你保持贞操吧」
+		;TranslatedMark 「そうじゃな……では代わりに、お前さんの貞操をいただこうか」
+		PRINTFORMW 「什么，不要做坏事。一动不动就好了……低处」
+		;TranslatedMark 「なに、悪いようにはせんよ。じっとしておればいい……くく」
+		PRINTFORMW 开始说了不得了的话……但是，错误就在这里。也不能拒绝
+		;TranslatedMark とんでもないことを言い始めた……だが、非はこちらにある。拒否するわけにもいくまい
+		PRINTFORMW 放弃了就委身于你了……
+		;TranslatedMark あきらめて身を任せることにした……
+		$START
+		;全員の調教参加フラグをクリア
+		CVARSET CFLAG, 6, 0
+		CFLAG:対象:調教参加フラグ = 1
+		CFLAG:対象:好感度 += 200
+		CFLAG:対象:強制友好化 = 1
+		BASE:対象:体力 = MAXBASE:対象:体力
+		BASE:対象:気力 = MAXBASE:対象:気力
+		;強制逆調教フラグをオン
+		FLAG:ターンエンド調教 = 2
+		;それ以降のデイリーイベント発生を潰す
+		DAILY_CANCEL = 1
+	CASE 1
+		PRINTFORMW 「不是那样的……就凭你的伙伴的身分吧」
+		;TranslatedMark 「そうじゃな……お前さんの仲間の身柄でよかろ」
+		PRINTFORMW 「不好意思，我要带你去%ANAME(担保)%」
+		;TranslatedMark 「悪いが、%ANAME(担保)%を連れていくぞい」
+		PRINTFORMW 失去战斗力很严峻……但是，没有办法
+		;TranslatedMark 戦力を失うのは厳しい……だが、致し方あるまい
+		PRINTFORMW 目送着被带走的%ANAME(担保)%……
+		;TranslatedMark 連れていかれる%ANAME(担保)%を見送った……
+		CALL CHANGE_COUNTRY(担保, CFLAG:対象:所属, 1)
+		CALL COLOR_PRINTW(@"%ANAME(担保)%が、%ANAME(対象)%の所属である%ANAME(GET_COUNTRY_BOSS(CFLAG:対象:所属))%に移籍しました", カラー_警告)
+	CASE 2
+		PRINTFORMW 「不是那样的……那么，我来代替你保持你的身份和贞操吧」
+		;TranslatedMark 「そうじゃな……では代わりに、お前さんの身柄と貞操をいただこうか」
+		PRINTFORMW 「什么，不要做坏事。你要是老实点就好了。……低处」
+		;TranslatedMark 「なに、悪いようにはせんよ。おとなしくしておいてくれればの。……くく」
+		PRINTFORMW 被做什么呢……但是，没办法
+		;TranslatedMark 何をされるのか……だが、しかたがない
+		PRINTFORMW 放弃了就把自己交给他，之后就被带去了……
+		;TranslatedMark あきらめて身を任せ、その後連れていかれることにした……
+		CALL CAPTURE(MASTER, CFLAG:対象:所属)
+		GOTO START
+ENDSELECT
+
+RETURN 1

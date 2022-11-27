@@ -1,0 +1,78 @@
+@BUILDING_GET_NAME_红雾发生器()
+    #FUNCTIONS
+    RETURNF "红雾发生器"
+
+@BUILDING_GET_EXP_红雾发生器()
+    #FUNCTIONS
+    RETURNF "可以发动《红雾》，发动后会改变战斗时的技能触发率，但会降低他国评价"
+
+@BUILDING_SET_INFO_ID_67()
+    BUILDING_TYPE:建造物_红雾发生器 = 建造物_类型_幻想类
+    BUILDING_LEVEL:建造物_红雾发生器 = 建造物_等级_三级建筑
+    BUILDING_LIMIT_NUM:建造物_红雾发生器 = 建造物_数量限制_1
+    BUILDING_LIMIT_UNI:建造物_红雾发生器 = 0
+    BUILDING_COUNTRY_ID:建造物_红雾发生器:特殊勢力_普通势力 = 1
+    BUILDING_COUNTRY_ID:建造物_红雾发生器:特殊勢力_野盗 = 1
+    BUILDING_COUNTRY_ID:建造物_红雾发生器:特殊勢力_ホフゴブリン = 1
+    BUILDING_COUNTRY_ID:建造物_红雾发生器:特殊勢力_外来人 = 1
+    BUILDING_COUNTRY_ID:建造物_红雾发生器:特殊勢力_触手 = 1
+    BUILDING_COUNTRY_ID:建造物_红雾发生器:特殊勢力_自警団 = 1
+    BUILDING_COUNTRY_ID:建造物_红雾发生器:特殊勢力_サキュバス = 1
+    BUILDING_COUNTRY_ID:建造物_红雾发生器:特殊勢力_狂信者 = 1
+    BUILDING_HAVE_SKILL:建造物_红雾发生器 = 1
+    BUILDING_TOHO_REQ_ID:建造物_红雾发生器:0 = 10
+
+@CHECK_BUILDING_FUNCTION_红雾发生器(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    SIF !CHECK_BUILDING_CHARA_LIMIT_USING(COUNTRY_ID,建造物_红雾发生器)
+        RETURNF RESULT:0
+    RESULT:1 = TMP_BUILDING_EXIST_FLAG:COUNTRY_ID:建造物_红雾发生器
+    IF RESULT:1 > 0
+        RESULT:0 = 1
+    ENDIF
+    RETURNF RESULT:0
+
+@BUILDING_SKILL_红雾发生器(COUNTRY_ID)
+    #DIM COUNTRY_ID
+    #DIM STATUS
+    STATUS = BUILDING_SKILL_BUFF:COUNTRY_ID:建造物_红雾发生器 > 0
+
+    PRINTFORML 发动时永久生效，己方部队的技能触发率增加，敌方部队的技能触发率降低；回合末降低他国的评价。
+    PRINTFORM 当前状态：
+    IF STATUS
+        CALL COLOR_PRINTL("已开启",カラー_緑)
+    ELSE
+        CALL COLOR_PRINTL("已关闭",カラー_警告)
+    ENDIF
+    PRINTFORML 是否切换?
+    CALL ASK_YN()
+    IF !RESULT
+        PRINTFORML 发动了《红雾发生器》的技能
+        CALL BUILDING_SKILL_红雾发生器_FUNCTION(COUNTRY_ID)
+    ENDIF
+    PRINTFORMW 完毕
+
+@BUILDING_TEXT_红雾发生器_SKILL(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    SIF !CHECK_BUILDING_TEXT_OUTPUT(COUNTRY_ID)
+        RETURNF 0
+    BUILDING_TEXT = PRINT_BUILDING_TEXT_TITLE_F()
+    PRINTFORM 《红雾发生器》的技能生效了！
+    PRINTFORML %ANAME(GET_COUNTRY_BOSS(COUNTRY_ID))%部队的技能触发率增加，敌人的技能触发率降低
+    RETURNF 1
+
+@BUILDING_SKILL_红雾发生器_FUNCTION(COUNTRY_ID)
+    #DIM COUNTRY_ID
+    #DIM CITY_ID
+    SIF !IS_COUNTRY(COUNTRY_ID)
+        RETURN
+    IF !BUILDING_SKILL_BUFF:COUNTRY_ID:建造物_红雾发生器
+        BUILDING_SKILL_BUFF:COUNTRY_ID:建造物_红雾发生器 = 1
+        BUILDING_SKILL_BUFF_REMAIN:COUNTRY_ID:建造物_红雾发生器 = BUILDING_TIME_FOREVER
+    ELSE
+        BUILDING_SKILL_BUFF:COUNTRY_ID:建造物_红雾发生器 = 0
+        BUILDING_SKILL_BUFF_REMAIN:COUNTRY_ID:建造物_红雾发生器 = 0
+    ENDIF
+

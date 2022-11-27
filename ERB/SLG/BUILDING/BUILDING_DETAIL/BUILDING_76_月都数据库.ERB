@@ -1,0 +1,45 @@
+@BUILDING_GET_NAME_月都数据库()
+    #FUNCTIONS
+    RETURNF "月都数据库"
+
+@BUILDING_GET_EXP_月都数据库()
+    #FUNCTIONS
+    RETURNF "每回合科技研究速度+1"
+
+@BUILDING_SET_INFO_ID_76()
+    BUILDING_TYPE:建造物_月都数据库 = 建造物_类型_幻想类
+    BUILDING_LEVEL:建造物_月都数据库 = 建造物_等级_二级建筑
+    BUILDING_LIMIT_NUM:建造物_月都数据库 = 建造物_数量限制_1
+    BUILDING_LIMIT_UNI:建造物_月都数据库 = 0
+    BUILDING_COUNTRY_ID:建造物_月都数据库:特殊勢力_普通势力 = 1
+    BUILDING_COUNTRY_ID:建造物_月都数据库:特殊勢力_野盗 = 1
+    BUILDING_COUNTRY_ID:建造物_月都数据库:特殊勢力_ホフゴブリン = 1
+    BUILDING_COUNTRY_ID:建造物_月都数据库:特殊勢力_外来人 = 1
+    BUILDING_COUNTRY_ID:建造物_月都数据库:特殊勢力_触手 = 1
+    BUILDING_COUNTRY_ID:建造物_月都数据库:特殊勢力_自警団 = 1
+    BUILDING_COUNTRY_ID:建造物_月都数据库:特殊勢力_サキュバス = 1
+    BUILDING_COUNTRY_ID:建造物_月都数据库:特殊勢力_狂信者 = 1
+    BUILDING_HAVE_SKILL:建造物_月都数据库 = 0
+    BUILDING_TOHO_REQ_ID:建造物_月都数据库:0 = 53
+
+@CHECK_BUILDING_FUNCTION_月都数据库(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    SIF !CHECK_BUILDING_CHARA_LIMIT_USING(COUNTRY_ID,建造物_月都数据库)
+        RETURNF RESULT:0
+    RESULT:1 = TMP_BUILDING_EXIST_FLAG:COUNTRY_ID:建造物_月都数据库
+    IF RESULT:1 > 0
+        RESULT:0 = 1
+    ENDIF
+    RETURNF RESULT:0
+
+@BUILDING_TEXT_月都数据库(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    SIF !CHECK_BUILDING_TEXT_OUTPUT(COUNTRY_ID)
+        RETURNF 0
+    BUILDING_TEXT = PRINT_BUILDING_TEXT_TITLE_F()
+    PRINTFORM 因为《月都数据库》的存在，
+    PRINTFORML 记载了大量古代先进科技的月度数据库正在协助科研
+    PRINTFORML %ANAME(GET_COUNTRY_BOSS(COUNTRY_ID))%势力的研究速度加快了1期!
+    RETURNF 1

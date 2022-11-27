@@ -1,0 +1,115 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_BEAT_BRIGAND_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_BEAT_BRIGAND_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_BEAT_BRIGAND(対象)
+#DIM 対象
+PRINTFORML 領民因為附近出現了山賊而非常困擾
+PRINTFORML 被拜託想想辦法
+PRINTL
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+
+CALL ASK_YN("尝试讨伐", "放棄")
+
+IF RESULT == 1
+	PRINTFORML 獨自前去太危険了
+	PRINTFORMW 決定拋棄領民返回拠点
+	RETURN 1
+ENDIF
+
+PRINTFORML 不能放過他們
+PRINTFORML %ANAME(対象)%決定前去討伐山賊
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+
+IF LIMIT(ABL:対象:武闘, 30, 80) > RAND:100
+	IF IS_MALE(対象) || !CONFIG:203
+		PRINTFORML 成功了！
+		PRINTFORML %ANAME(対象)%非常顺利的討伐了山贼
+		PRINTFORMW 在領民的感謝中返回了拠点
+		CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:15 + 1, 1)
+		RETURN 1
+	ELSE
+		PRINTFORML 成功了！
+		PRINTFORML %ANAME(対象)%非常顺利的討伐了山贼
+		PRINTFORMW 山贼們在%ANAME(対象)%殺死他們前投降了、獲得勝利的%ANAME(対象)%把他們叫進了山寨
+		PRINTFORML
+		PRINTFORML %ANAME(対象)%坐在首領的位置上、命令跪著的山賊擡起頭
+		PRINTFORML 山賊們顫抖著露出恐懼的表情看向%ANAME(対象)%、看到的卻是拉開自己的衣服正揉捏著%STR_BODY("胸：愛撫", 対象)%的淫亂女人
+		PRINTFORML %ANAME(対象)%露出狂野的笑容命令男人的第一件事就是、奉仕她到滿意爲止
+		PRINTFORML 男人到再也忍耐不住、爭先恐後的冲向%ANAME(対象)%、女人命令最大最臭的肉棒優先插入自己的淫穴
+		PRINTFORMW 其餘男人只能擼動著肉棒等待在正享受著的女人旁邊
+		PRINTFORML
+		PRINTFORML 男人很快就到达了限界、%ANAME(対象)%露出輕蔑的笑容收紧了阴道、把精液一滴不漏的吸到了%STR_BODY("膣：処女確認：時間経過:Ｖ挿入:中出し", 対象)%里
+		PRINTFORML 踢開了男人后、女人用手接住正從淫穴中流出的精液一口喝了下去、又命令其餘男人一起上前來奉仕
+		PRINTFORMW 之後山贼们也持续的在享受著的%ANAME(対象)%的%STR_BODY("身体", 対象)%中盡情的注入著種子
+		CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, 輪姦, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精", GET_SPERM_ID("山賊"), @"山賊的\@RAND:2 ? 肉棒 # 嘴唇\@", "山賊", "", "勝利后的淫宴")
+		PRINTFORML
+		PRINTFORMW %ANAME(対象)%榨取了所有山賊的精液、讓男人們之後來拠点報道
+		PRINTFORMW 在領民的感謝中返回了拠点
+		COUNTRY_SOLDIER:(CFLAG:対象:所属) += 5000
+		CALL ICPRINT("兵数增加了<5000>", "L", カラー_注意)
+		CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:15 + 1, 1)
+	ENDIF
+	RETURN 1
+ENDIF
+
+IF IS_MALE(対象)
+	PRINTFORML 失败了！
+	PRINTFORMW 山贼比想象中的更強、反被山贼打倒的%ANAME(対象)%拼命的逃走了
+	CALL ADD_COOLTIME(対象, 2)
+	RETURN 1
+ENDIF
+
+PRINTFORML 失败了！
+PRINTFORMW 山贼比想象中的更強、反被山贼打倒的%ANAME(対象)%被他们拖回了山寨
+PRINTFORML
+
+IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+	PRINTFORML 被五花大绑的%ANAME(対象)%，首先被作为战利品呈给了他们的老大
+	PRINTFORML 没有想到的是，山贼的首领居然意外地是个女强人
+	PRINTFORMW 不过结果没有什么差别，%ANAME(対象)%照样被剥光衣服按在了床上
+	PRINTFORML
+	PRINTFORML 首领的卧室里传出了女人们的喘息声
+	PRINTFORML 能成为山贼首领的女人果然与众不同，性技和欲望都远非正常人可比拟，马上就令%ANAME(対象)%因快感失去力量
+	PRINTFORML %ANAME(対象)%在巧妙的刺激下眼中浮出爱心，自发地配合对方扭动起身体
+	PRINTFORML 滚烫的秘贝紧贴在一起，二人拉锯般一前一后摆动着腰部，把溢出的爱液互相涂抹到对方的小腹上
+	PRINTFORMW 理性早就退出了舞台，完全沦为欲望奴隶的二人，像野兽一样沉浸在一次又一次的高潮之中
+	CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 百合", "接吻喪失",0, @"山賊女老大的\@RAND:2 ? 阴唇 # 嘴唇\@", "", "", "敗北した末の強姦")
+	IF ABL:対象:性技 + ABL:対象:奉仕 + ABL:対象:百合 >= 5 + RAND:10
+		PRINTFORML
+		PRINTFORMW 用高超的技巧征服了女首领，为自己争取到了自由
+	ELSE
+		PRINTFORML
+		PRINTFORMW 完全败在了女首领的技巧之下，不过趁她休息的时候偷偷溜走了
+	ENDIF
+ELSE
+	PRINTFORML %ANAME(対象)%変成了山贼們的肉便器
+	PRINTFORML 抵抗就会被殴打、被持续的侵犯着、%ANAME(対象)%変得非常順從地奉仕著他們
+	PRINTFORML 现在淫乱的身体也跨坐在一个山贼的身上自己晃动着腰部
+	PRINTFORML 男人到达限界的时候%ANAME(対象)%露出空虚的笑容收紧了阴道、把精液一滴不漏的吸到了%STR_BODY("膣：処女確認：時間経過:Ｖ挿入:中出し", 対象)%里
+	PRINTFORMW 之後山贼们也持续的在中意的%ANAME(対象)%的%STR_BODY("身体", 対象)%中盡情的注入著種子
+	CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, 輪姦, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精", GET_SPERM_ID("山賊"), @"山賊的\@RAND:2 ? 肉棒 # 嘴唇\@", "山賊", "", "敗北した末の輪姦")
+	PRINTFORML
+	PRINTFORMW %ANAME(対象)%被狠狠的侵犯后、總算逃回来了
+ENDIF
+
+CALL ADD_COOLTIME(対象, 2)
+
+RETURN 1
+

@@ -1,0 +1,705 @@
+﻿;調教終了時のイベント、特に素質関連
+
+;-------------------------------------------------
+;恋慕等の取得
+;-------------------------------------------------
+@TALENT_CHECK(ARG:0)
+
+SIF IS_ANIMAL(ARG:0) || TALENT:(ARG:0):慰安婦
+	RETURN 0
+
+CALL TALENT_CHECK_LOSE_MIND(ARG:0)
+
+SIF !(TALENT:(ARG:0):空虚 || TALENT:(ARG:0):崩壊)
+	CALL TALENT_CHECK_FALLEN(ARG:0)
+
+CALL GET_FALLEN_BONUS(ARG:0)
+
+CALL TALENT_CHECK_OTHERS(ARG:0)
+
+CALL TALENT_CHECK_EROS(ARG:0)
+
+SIF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫乱)
+	CALL TALENT_CHECK_PART(ARG:0)
+
+;-------------------------------------------------
+;プライド高いを所有するキャラクターが主人した場合の処理
+;ARG:1は色変更を行わないフラグ	ARG:2は先頭の改行を行わないフラグ
+;-------------------------------------------------
+@TALENT_LOSE_PRIDE(ARG:0, ARG:1, ARG:2)
+SIF !ARG:1
+	SETCOLOR カラー_注意
+IF TALENT:(ARG:0):自尊心高
+	SIF !ARG:2
+		PRINTL
+	PRINTFORML 失去了自尊心的%ANAME(ARG:0)%変得非常弱気了……
+	PRINTFORMW %ANAME(ARG:0)%失去了<自尊心高>
+	TALENT:(ARG:0):自尊心高 = 0
+	IF TALENT:(ARG:0):孤高 || TALENT:(ARG:0):堅強 || !TALENT:(ARG:0):胆怯 || TALENT:(ARG:0):傲慢 || TALENT:(ARG:0):傲嬌 || TALENT:(ARG:0):反抗的
+		ABL:(ARG:0):主導度Ｎ -= (ABL:(ARG:0):主導度Ｎ + 1000) / 5 * (TALENT:(ARG:0):堅強 + 1)
+		ABL:(ARG:0):主導度Ｕ -= (ABL:(ARG:0):主導度Ｕ + 1000) / 5 * (TALENT:(ARG:0):堅強 + 1)
+		ABL:(ARG:0):主導度Ｎ = LIMIT(ABL:(ARG:0):主導度Ｎ, -1000, 1000)
+		ABL:(ARG:0):主導度Ｕ = LIMIT(ABL:(ARG:0):主導度Ｕ, -1000, 1000)
+		IF TALENT:(ARG:0):孤高
+			PRINTFORMW %ANAME(ARG:0)%失去了<孤高>
+			TALENT:(ARG:0):孤高 = 0
+		ENDIF
+		IF TALENT:(ARG:0):堅強
+			PRINTFORMW %ANAME(ARG:0)%失去了<堅強>
+			TALENT:(ARG:0):堅強 = 0
+		ELSEIF !TALENT:(ARG:0):胆怯
+			PRINTFORMW %ANAME(ARG:0)%獲得了<胆怯>
+			TALENT:(ARG:0):胆怯 = 1
+		ENDIF
+		;反発系の素質から一つだけ失う
+		IF TALENT:(ARG:0):反抗的
+			PRINTFORMW %ANAME(ARG:0)%失去了<反抗的>
+			TALENT:(ARG:0):反抗的 = 0
+		ELSEIF TALENT:(ARG:0):傲慢
+			PRINTFORMW %ANAME(ARG:0)%失去了<傲慢>
+			TALENT:(ARG:0):傲慢 = 0
+		ELSEIF TALENT:(ARG:0):傲嬌
+			PRINTFORMW %ANAME(ARG:0)%失去了<傲嬌>
+			TALENT:(ARG:0):傲嬌 = 0
+		ENDIF
+	ENDIF
+ENDIF
+SIF !ARG:1
+	RESETCOLOR
+
+;-------------------------------------------------
+;特殊勢力による淫乱取得時などの貞操観念喪失・貞操無頓着入手時の処理
+;ARG:1は色変更を行わないフラグ
+;-------------------------------------------------
+@TALENT_LOSE_TEISOU(ARG:0, ARG:1)
+SIF !ARG:1
+	SETCOLOR カラー_注意
+IF TALENT:(ARG:0):貞操観念
+	PRINTFORMW %ANAME(ARG:0)%失去了<貞操観念>、獲得了<不在乎貞操>
+	TALENT:(ARG:0):貞操観念 = 0
+	TALENT:(ARG:0):不在乎貞操 = 1
+ELSEIF !TALENT:(ARG:0):不在乎貞操
+	PRINTFORMW %ANAME(ARG:0)%獲得了<不在乎貞操>
+	TALENT:(ARG:0):不在乎貞操 = 1
+ENDIF
+SIF !ARG:1
+	RESETCOLOR
+
+;-------------------------------------------------
+;虚ろの喪失・回復処理
+;-------------------------------------------------
+@TALENT_CHECK_LOSE_MIND(ARG:0)
+
+SIF TALENT:(ARG:0):崩壊
+	RETURN 0
+
+IF !TALENT:(ARG:0):空虚 && CFLAG:(ARG:0):崩壊 >= 1000 + MAX(MAXBASE:(ARG:0):精神力, 1000)
+	CALL SINGLE_EMPTY_LINE()
+	CALL KOJO_EVENT(ARG:0, 78)
+	SETCOLOR カラー_注意
+	PRINTFORMW %ANAME(ARG:0)%得到了<空虚>
+	RESETCOLOR
+	TALENT:(ARG:0):空虚 = 1
+
+;[空虚]の回復
+ELSEIF TALENT:(ARG:0):空虚 && CFLAG:(ARG:0):崩壊 < -500 + MAX(MAXBASE:(ARG:0):精神力, 1000)
+	CALL SINGLE_EMPTY_LINE()
+	PRINTFORMW %ANAME(ARG:0)%的様子改変了…
+	PRINTFORML 疲憊不已的%ANAME(ARG:0)%的心霊總算是恢復了原状
+	SETCOLOR カラー_注意
+	PRINTFORMW %ANAME(ARG:0)%失去了<空虚>
+	RESETCOLOR
+	TALENT:(ARG:0):空虚 = 0
+ENDIF
+
+;[崩壊]の取得
+IF !TALENT:(ARG:0):崩壊 && CFLAG:(ARG:0):崩壊 >= 3500 + MAX(MAXBASE:(ARG:0):精神力, 1000)
+	CALL SINGLE_EMPTY_LINE()
+	CALL KOJO_EVENT(ARG:0, 79)
+	SETCOLOR カラー_注意
+	PRINTFORMW %ANAME(ARG:0)%得到了<崩坏>
+	RESETCOLOR
+	TALENT:(ARG:0):崩壊 = 1
+ENDIF
+
+;-------------------------------------------------
+;恋慕・服従・淫乱
+;-------------------------------------------------
+@TALENT_CHECK_FALLEN(ARG:0)
+
+LOCAL:1 = 0
+
+
+IF !IS_SLAVE(ARG:0) && !IS_LOVER(ARG:0) && !IS_SLAVED_BY(ARG:0) && !TALENT:(ARG:0):親友 && IS_SAMESEX(MASTER, ARG:0) && !TALENT:(ARG:0):兩面通吃 && CFLAG:(ARG:0):好感度 >= 1500
+	CALL SINGLE_EMPTY_LINE()
+	CALL KOJO_EVENT(ARG:0, 61)
+	SETCOLOR カラー_注意
+	PRINTFORMW %ANAME(ARG:0)%獲得了<親友>
+	RESETCOLOR
+	TALENT:(ARG:0):親友 = 1
+ENDIF
+
+SIF CFLAG:(ARG:0):陥落するな
+	GOTO LEWDNESS_CHECK
+
+IF !IS_SLAVE(ARG:0) && !IS_SLAVED_BY(ARG:0)
+	IF !TALENT:(ARG:0):恋慕 && CFLAG:(ARG:0):好感度 > CFLAG:(ARG:0):従属度 && CFLAG:(ARG:0):好感度 >= 1500  && CFLAG:(ARG:0):依存度 >= 300 && (!IS_SAMESEX(MASTER, ARG:0) || TALENT:(ARG:0):兩面通吃 || TALENT:(ARG:0):恋人)
+		CALL SINGLE_EMPTY_LINE()
+		CALL KOJO_EVENT(ARG:0, 60)
+		SETCOLOR カラー_注意
+		IF TALENT:(ARG:0):親友
+			PRINTFORMW %ANAME(ARG:0)%失去了<親友>獲得了<恋慕>
+		ELSE
+			PRINTFORMW %ANAME(ARG:0)%獲得了<恋慕>
+		ENDIF
+		RESETCOLOR
+		TALENT:(ARG:0):恋慕 = 1
+		TALENT:(ARG:0):親友 = 0
+		;堕とした人数＋１
+		FLAG:陥落人数 += !(CFLAG:(ARG:0):陥落済み)
+		CFLAG:(ARG:0):陥落済み = 1
+		LOCAL:1 = 1
+	ENDIF
+
+	IF !TALENT:(ARG:0):親愛 && CFLAG:(ARG:0):好感度 >= 10000 && CFLAG:(ARG:0):依存度 >= 3000 && ABL:(ARG:0):奉仕 >= ランク閾値:ランク_その他:ランク_C && TALENT:(ARG:0):恋慕
+		CALL SINGLE_EMPTY_LINE()
+		CALL KOJO_EVENT(ARG:0, 62)
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(ARG:0)%獲得了<親愛>
+		RESETCOLOR
+		TALENT:(ARG:0):親愛 = 1
+		LOCAL:1 = 2
+	ENDIF
+ENDIF
+
+IF !IS_LOVER(ARG:0) && !IS_SLAVED_BY(ARG:0)
+	IF !TALENT:(ARG:0):服従 && CFLAG:(ARG:0):従属度 >= 1500 && CFLAG:(ARG:0):依存度 >= 300 && !TALENT:(ARG:0):恋慕
+		CALL SINGLE_EMPTY_LINE()
+		CALL KOJO_EVENT(ARG:0, 63)
+		SETCOLOR カラー_注意
+		IF TALENT:(ARG:0):親友
+			PRINTFORMW %ANAME(ARG:0)%失去了<親友>獲得了<服従>
+		ELSE
+			PRINTFORMW %ANAME(ARG:0)%獲得了<服從>
+		ENDIF
+		RESETCOLOR
+		SIF TALENT:(ARG:0):自尊心高
+			CALL TALENT_LOSE_PRIDE(ARG:0)
+		TALENT:(ARG:0):親友 = 0
+		TALENT:(ARG:0):服従 = 1
+		;堕とした人数＋１
+		FLAG:陥落人数 += !(CFLAG:(ARG:0):陥落済み)
+		CFLAG:(ARG:0):陥落済み = 1
+		LOCAL:1 = 3
+	ENDIF
+
+	IF !TALENT:(ARG:0):隷属 && CFLAG:(ARG:0):従属度 >= 10000 && CFLAG:(ARG:0):依存度 >= 3000 && ABL:(ARG:0):奉仕 >= ランク閾値:ランク_その他:ランク_C && TALENT:(ARG:0):服従
+		CALL SINGLE_EMPTY_LINE()
+		CALL KOJO_EVENT(ARG:0, 64)
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(ARG:0)%獲得了<隷属>
+		RESETCOLOR
+		TALENT:(ARG:0):隷属 = 1
+		LOCAL:1 = 4
+	ENDIF
+ENDIF
+
+IF !IS_LOVER(ARG:0) && !IS_SLAVE(ARG:0)
+	IF !TALENT:(ARG:0):主人 && CFLAG:(ARG:0):支配度 >= 1500 && CFLAG:(ARG:0):依存度 >= 300 && !TALENT:(ARG:0):恋慕
+		CALL SINGLE_EMPTY_LINE()
+		CALL KOJO_EVENT(ARG:0, 80)
+		SETCOLOR カラー_注意
+		IF TALENT:(ARG:0):親友
+			PRINTFORMW %ANAME(ARG:0)%失去了<親友>、成為了%ANAME(MASTER)%的<主人>
+		ELSE
+			PRINTFORMW %ANAME(ARG:0)%成為了%ANAME(MASTER)%的<主人>
+		ENDIF
+		RESETCOLOR
+		TALENT:(ARG:0):親友 = 0
+		TALENT:(ARG:0):主人 = 1
+		;堕とした人数＋１
+		FLAG:陥落人数 += !(CFLAG:(ARG:0):陥落済み)
+		CFLAG:(ARG:0):陥落済み = 1
+		LOCAL:1 = 6
+	ENDIF
+
+	IF !TALENT:(ARG:0):所有者 && CFLAG:(ARG:0):支配度 >= 10000 && CFLAG:(ARG:0):依存度 >= 3000 && ABL:(ARG:0):奉仕 >= ランク閾値:ランク_その他:ランク_C && TALENT:(ARG:0):主人
+		CALL SINGLE_EMPTY_LINE()
+		CALL KOJO_EVENT(ARG:0, 81)
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(ARG:0)%成為了%ANAME(MASTER)%的<所有者>
+		RESETCOLOR
+		TALENT:(ARG:0):所有者 = 1
+		LOCAL:1 = 7
+	ENDIF
+ENDIF
+
+$LEWDNESS_CHECK
+
+LOCAL:0 = ABL:(ARG:0):Ｃ感 + ABL:(ARG:0):Ｖ感 + ABL:(ARG:0):Ａ感 + ABL:(ARG:0):Ｂ感 + ABL:(ARG:0):Ｍ感 + ABL:(ARG:0):射精
+{
+	IF !GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫乱) && ABL:(ARG:0):欲望 >= ランク閾値:ランク_その他:ランク_B && MAX(ABL:(ARG:0):精愛, ABL:(ARG:0):奉仕) >= ランク閾値:ランク_その他:ランク_C &&
+		MAX(ABL:(ARG:0):性交, ABL:(ARG:0):百合, ABL:(ARG:0):自慰) >= ランク閾値:ランク_その他:ランク_D && LOCAL:0 >= 20 && EXP:(ARG:0):絶頂経験 >= 500
+}
+	CALL SINGLE_EMPTY_LINE()
+	CALL KOJO_EVENT(ARG:0, 65)
+	SETCOLOR カラー_注意
+	PRINTFORMW %ANAME(ARG:0)%獲得了<淫乱>
+	RESETCOLOR
+	SETBIT TALENT:(ARG:0):淫乱系, 素質_淫乱_淫乱
+	LOCAL:1 = 5
+ENDIF
+SELECTCASE LOCAL:1
+	;恋慕
+	CASE 1
+		IF TALENT:(ARG:0):難以越過的底線
+			CALL COLOR_PRINTW(@"%ANAME(ARG:0)%失去了<難以越過的底線>", カラー_注意)
+			TALENT:(ARG:0):難以越過的底線 = 0
+		ENDIF
+		IF TALENT:(ARG:0):冷漠
+			CALL COLOR_PRINTW(@"%ANAME(ARG:0)%失去了<冷漠>", カラー_注意)
+			TALENT:(ARG:0):冷漠 = 0
+		ENDIF
+	;親愛
+	CASE 2
+		IF TALENT:(ARG:0):孤高
+			CALL COLOR_PRINTW(@"%ANAME(ARG:0)%失去了<孤高>", カラー_注意)
+			TALENT:(ARG:0):孤高 = 0
+		ENDIF
+	;従属
+	CASE 3
+		IF TALENT:(ARG:0):難以越過的底線
+			CALL COLOR_PRINTW(@"%ANAME(ARG:0)%失去了<難以越過的底線>", カラー_注意)
+			TALENT:(ARG:0):難以越過的底線 = 0
+		ENDIF
+		IF TALENT:(ARG:0):反抗的
+			CALL COLOR_PRINTW(@"%ANAME(ARG:0)%失去了<反抗的>", カラー_注意)
+			TALENT:(ARG:0):反抗的 = 0
+		ENDIF
+	;隷属
+	CASE 4
+		IF TALENT:(ARG:0):圧抑
+			CALL COLOR_PRINTW(@"%ANAME(ARG:0)%失去了<圧抑>", カラー_注意)
+			TALENT:(ARG:0):圧抑 = 0
+		ENDIF
+	CASE 6
+		IF TALENT:(ARG:0):自制心
+			CALL COLOR_PRINTW(@"%ANAME(ARG:0)%失去了<自制心>", カラー_注意)
+			TALENT:(ARG:0):自制心 = 0
+		ENDIF
+	CASE 7
+		IF !TALENT:(ARG:0):解放
+			CALL COLOR_PRINTW(@"%ANAME(ARG:0)%獲得了<解放>", カラー_注意)
+			TALENT:(ARG:0):解放 = 1
+		ENDIF
+	;淫乱
+	CASE 5
+		;対象が特殊勢力の陥落系か雌犬か肉便器か苗床を所持しているか、遠隔調教のターゲット実行回数が20回以上なら貞操観念を喪失
+		IF TALENT:(ARG:0):貞操観念 && (IS_FALLEN_TO_SP_COUNTRY(ARG:0) || GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_雌犬) || GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_精液便女) || GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_苗床) || COM_EXP:(ARG:0):398 >= 200)
+			CALL COLOR_PRINTW(@"%ANAME(ARG:0)%失去了<貞操観念>", カラー_注意)
+			TALENT:(ARG:0):貞操観念 = 0
+		ENDIF
+		IF TALENT:(ARG:0):否定快感
+			CALL COLOR_PRINTW(@"%ANAME(ARG:0)%失去了<否定快感>", カラー_注意)
+			TALENT:(ARG:0):否定快感 = 0
+		ENDIF
+ENDSELECT
+
+IF IS_FALLEN(ARG:0) && !CFLAG:(ARG:0):陥落済み
+	FLAG:陥落人数 += !(CFLAG:(ARG:0):陥落済み)
+	CFLAG:(ARG:0):陥落済み = 1
+ENDIF
+;-------------------------------------------------
+;陥落ボーナス取得
+;-------------------------------------------------
+@GET_FALLEN_BONUS(ARG:0)
+
+SIF FLAG:陥落人数 < (FLAG:陥落ボーナス受領数 + 1) * 5
+	RETURN 0
+
+CALL SINGLE_EMPTY_LINE()
+CALL COLOR_PRINTL("根據到現在為止讓他人陷落的経験、想要獲得什麼……", カラー_注意)
+CALL ASK_MULTI_JUDGE("謎之魅力", !TALENT:MASTER:謎之魅力, "上天的使者", !TALENT:MASTER:上天的使者, "技師", !TALENT:MASTER:技師, "精力超群", !TALENT:MASTER:精力超群, "君主的器量", !TALENT:MASTER:君主的器量, "向心力", !TALENT:MASTER:向心力, "金", 1)
+SELECTCASE RESULT
+	CASE 0
+		CALL COLOR_PRINTW(@"%ANAME(MASTER)%掌握了<謎之魅力>", カラー_注意)
+		TALENT:MASTER:謎之魅力 = 1
+	CASE 1
+		CALL COLOR_PRINTW(@"%ANAME(MASTER)%掌握了<上天的使者>", カラー_注意)
+		TALENT:MASTER:上天的使者 = 1
+	CASE 2
+		CALL COLOR_PRINTW(@"%ANAME(MASTER)%掌握了<技師>", カラー_注意)
+		TALENT:MASTER:技師 = 1
+	CASE 3
+		CALL COLOR_PRINTW(@"%ANAME(MASTER)%掌握了<精力超群>", カラー_注意)
+		TALENT:MASTER:精力超群 = 1
+	CASE 4
+		CALL COLOR_PRINTW(@"%ANAME(MASTER)%掌握了<君主的器量>", カラー_注意)
+		TALENT:MASTER:君主的器量 = 1
+	CASE 5
+		CALL COLOR_PRINTW(@"%ANAME(MASTER)%掌握了<向心力>", カラー_注意)
+		TALENT:MASTER:向心力 = 1
+	CASE 6
+		CALL COLOR_PRINTW("收到了50000金", カラー_注意)
+		MONEY += 50000
+ENDSELECT
+FLAG:陥落ボーナス受領数 ++
+
+RETURN 1
+
+;-------------------------------------------------
+;その他素質取得
+;-------------------------------------------------
+@TALENT_CHECK_OTHERS(ARG:0)
+;酔い累積値が150000以上で酒豪が付く	下戸の場合は下戸を失う
+IF !TALENT:(ARG:0):酒豪 && CFLAG:(ARG:0):酔い累積値 >= 150000
+	CFLAG:(ARG:0):酔い累積値 = 0
+	CALL SINGLE_EMPTY_LINE()
+	CALL KOJO_EVENT(ARG:0, 74)
+	SETCOLOR カラー_注意
+	IF TALENT:(ARG:0):不擅飲酒
+		PRINTFORMW %ANAME(ARG:0)%失去了<不擅飲酒>
+		TALENT:(ARG:0):不擅飲酒 = 0
+	ELSE
+		PRINTFORMW %ANAME(ARG:0)%獲得了<酒豪>
+		TALENT:(ARG:0):酒豪 = 1
+	ENDIF
+	RESETCOLOR
+ENDIF
+
+;おもらし経験30以上でおもらし癖
+IF !TALENT:(ARG:0):漏尿癖 && EXP:(ARG:0):失禁経験 >= 30
+	CALL SINGLE_EMPTY_LINE()
+	CALL KOJO_EVENT(ARG:0, 76)
+	SETCOLOR カラー_注意
+	PRINTFORMW %ANAME(ARG:0)%獲得了<漏尿癖>
+	RESETCOLOR
+	TALENT:(ARG:0):漏尿癖 = 1
+ENDIF
+
+
+;-------------------------------------------------
+;淫乱の取得を前提としないエロ系陥落素質
+;-------------------------------------------------
+@TALENT_CHECK_EROS(ARG:0)
+;輪姦経験200以上、欲望B以上、性交C以上で肉便器
+IF !GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_精液便女) && EXP:(ARG:0):輪姦経験 >= 200 && ABL:(ARG:0):欲望 >= ランク閾値:ランク_その他:ランク_B && ABL:(ARG:0):性交 >= ランク閾値:ランク_その他:ランク_C
+	CALL SINGLE_EMPTY_LINE()
+	PRINTFORMW %ANAME(ARG:0)%的様子有些奇怪……
+	IF TALENT:(ARG:0):自尊心高
+		PRINTFORMW %ANAME(ARG:0)%輸給了被侵犯的快感、接受了自己成為性処理用的便器的事実
+	ELSE
+		PRINTFORMW %ANAME(ARG:0)%は覚醒了被侵犯的快感、為了被当做便器使用的喜悦而献出了身体
+	ENDIF
+	CALL KOJO_EVENT(ARG:0,  82)
+	SETCOLOR カラー_ピンク
+	PRINTFORMW %ANAME(ARG:0)%成為了<精液便女>
+	RESETCOLOR
+	SETBIT TALENT:(ARG:0):淫乱系, 素質_淫乱_精液便女
+	SIF TALENT:(ARG:0):自尊心高
+		CALL TALENT_LOSE_PRIDE(ARG:0)
+	CALL TALENT_LOSE_TEISOU(ARG:0)
+ENDIF
+
+;薬物依存が300を越えると薬物依存を取得
+IF !GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_薬物中毒) && CFLAG:(ARG:0):薬物依存 > 300
+	CALL SINGLE_EMPTY_LINE()
+	PRINTFORMW %ANAME(ARG:0)%的様子有些奇怪……
+	PRINTFORMW %ANAME(ARG:0)%、反復的使用着薬物、変得完全無法脱離了
+	CALL KOJO_EVENT(ARG:0, 85)
+	SETCOLOR カラー_ピンク
+	PRINTFORMW %ANAME(ARG:0)%獲得了<薬物中毒>
+	RESETCOLOR
+	SETBIT TALENT:(ARG:0):淫乱系, 素質_淫乱_薬物中毒
+ENDIF
+
+;被催眠経験300以上, 催眠絶頂経験500以上、催眠S
+IF !GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_傀儡) && EXP:(ARG:0):被催眠経験 > 300 && EXP:(ARG:0):催眠絶頂経験 >= 500 && ABL:(ARG:0):催眠 >= ランク閾値:ランク_その他:ランク_S
+	CALL SINGLE_EMPTY_LINE()
+	PRINTFORMW %ANAME(ARG:0)%的様子有些奇怪……
+	PRINTFORMW %ANAME(ARG:0)%、經過多次的深度催眠、変成了只要打個響指就會自己張開大腿的玩具
+	CALL KOJO_EVENT(ARG:0, 95)
+	CALL COLOR_PRINTW(@"%ANAME(ARG:0)%獲得了<傀儡>", カラー_ピンク)
+	SETBIT TALENT:(ARG:0):淫乱系, 素質_淫乱_傀儡
+ENDIF
+
+;ＮＴＲ経験5
+IF !GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_浮気癖) && EXP:(ARG:0):ＮＴＲ経験 >= 5
+	CALL SINGLE_EMPTY_LINE()
+	PRINTFORMW %ANAME(ARG:0)%的様子有些奇怪……
+	PRINTFORMW %ANAME(ARG:0)%、由于出軌了多次、変得立馬就能対他人張開大腿了
+	CALL KOJO_EVENT(ARG:0, 96)
+	CALL COLOR_PRINTW(@"%ANAME(ARG:0)%獲得了<出軌上癮>", カラー_ピンク)
+	SETBIT TALENT:(ARG:0):淫乱系, 素質_淫乱_浮気癖
+ENDIF
+
+
+
+;-------------------------------------------------
+;部位特化素質＆サドマゾの取得処理
+;一回の調教で取得できる素質は１つのみ
+;-------------------------------------------------
+@TALENT_CHECK_PART(ARG:0)
+;[加虐] 奉仕A以上、性技B以上、ウフフ主導度1000以上、倒錯度800以上で、今回の主人公の絶頂回数が30以上、サドB以上
+IF !GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_サド) && ABL:(ARG:0):奉仕 >= ランク閾値:ランク_その他:ランク_A && ABL:(ARG:0):性技 >= ランク閾値:ランク_その他:ランク_B && ABL:(ARG:0):主導度Ｕ >= 1000 && ABL:(ARG:0):倒錯度 >= 800 && SUM_EX(MASTER) >= 30 && ABL:(ARG:0):加虐 >= ランク閾値:ランク_その他:ランク_B
+	CALL SINGLE_EMPTY_LINE()
+	PRINTFORMW %ANAME(ARG:0)%的様子有些奇怪…
+	PRINTFORML %ANAME(ARG:0)%変得在対他人性虐待時会感到強烈的快感…
+	CALL KOJO_EVENT(ARG:0, 71)
+	SETCOLOR カラー_ピンク
+	PRINTFORMW %ANAME(ARG:0)%獲得了<加虐>
+	RESETCOLOR
+	SETBIT TALENT:(ARG:0):淫乱系, 素質_淫乱_サド
+ENDIF
+
+;[被虐] ウフフ主導度-1000以下、倒錯度800以上、緊縛経験50以上、苦痛快楽経験200以上、今回の絶頂回数が100以上、マゾB以上
+IF  !GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_マゾ) && ABL:(ARG:0):主導度Ｕ <= -1000 && ABL:(ARG:0):倒錯度 >= 800 && EXP:(ARG:0):緊縛経験 >= 50 && EXP:(ARG:0):苦痛快楽経験 >= 200 && SUM_EX(ARG:0) >= 100 && ABL:(ARG:0):被虐 >= ランク閾値:ランク_その他:ランク_B
+	CALL SINGLE_EMPTY_LINE()
+	PRINTFORMW %ANAME(ARG:0)%的様子有些奇怪…
+	PRINTFORML %ANAME(ARG:0)%完全被受虐時的快感所俘虜…
+	CALL KOJO_EVENT(ARG:0, 72)
+	SETCOLOR カラー_ピンク
+	PRINTFORMW %ANAME(ARG:0)%獲得了<被虐>
+	RESETCOLOR
+	SETBIT TALENT:(ARG:0):淫乱系, 素質_淫乱_マゾ
+ENDIF
+
+;[淫核] 竿なし、Ｃ感覚Ｓランク以上、倒錯度100以上、今回のＣ絶頂回数が50以上
+IF  !GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫核) && !HAS_PENIS(ARG:0) && ABL:(ARG:0):Ｃ感 >= ランク閾値:ランク_その他:ランク_S && ABL:(ARG:0):倒錯度 >= 100 && EX:(ARG:0):Ｃ絶頂 >= 50
+	CALL SINGLE_EMPTY_LINE()
+	PRINTFORMW %ANAME(ARG:0)%的様子有些奇怪…
+	PRINTFORML %ANAME(ARG:0)%完全沈溺与陰蒂帯来的快感之中…
+	CALL KOJO_EVENT(ARG:0, 66)
+	SETCOLOR カラー_ピンク
+	PRINTFORMW %ANAME(ARG:0)%獲得了<淫核>
+	RESETCOLOR
+	SETBIT TALENT:(ARG:0):淫乱系, 素質_淫乱_淫核
+ENDIF
+
+;[淫壷] 「Ｖ感覚Ａランク以上且つ、性交Dランク以上且つ、Ｖ拡張経験30以上」もしくは「Ｖ感覚Ｓランク以上且つ、性交Ｃランク以上」で、今回のＶ絶頂回数が50以上
+IF  !GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫壷) && ((ABL:(ARG:0):Ｖ感 >= ランク閾値:ランク_その他:ランク_A && ABL:(ARG:0):性交 >= ランク閾値:ランク_その他:ランク_D && EXP:(ARG:0):Ｖ拡張経験 >= 30) || (ABL:(ARG:0):Ｖ感 >= ランク閾値:ランク_その他:ランク_S && ABL:(ARG:0):性交 >= ランク閾値:ランク_その他:ランク_C)) && EX:(ARG:0):Ｖ絶頂 >= 50
+	CALL SINGLE_EMPTY_LINE()
+	PRINTFORMW %ANAME(ARG:0)%的様子有些奇怪…
+	PRINTFORML %ANAME(ARG:0)%的淫乱的蜜壷、時刻都在尋求着男人的肉棒而不停的蠢動…
+	CALL KOJO_EVENT(ARG:0, 67)
+	SETCOLOR カラー_ピンク
+	PRINTFORMW %ANAME(ARG:0)%獲得了<淫壷>
+	RESETCOLOR
+	SETBIT TALENT:(ARG:0):淫乱系, 素質_淫乱_淫壷
+ENDIF
+
+;[尻穴狂い] 「Ａ感覚Ａランク以上且つ、Ａ拡張経験50以上」もしくは「Ａ感覚Ｓランク以上、倒錯度800以上」で、今回のＡ絶頂回数が50以上
+IF  !GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_尻穴狂い) && ((ABL:(ARG:0):Ａ感 >= ランク閾値:ランク_その他:ランク_A && EXP:(ARG:0):Ａ拡張経験 >= 50) || (ABL:(ARG:0):Ａ感 >= ランク閾値:ランク_その他:ランク_S && ABL:(ARG:0):倒錯度 >= 800)) && EX:(ARG:0):Ａ絶頂 >= 50
+	CALL SINGLE_EMPTY_LINE()
+	PRINTFORMW %ANAME(ARG:0)%的様子有些奇怪…
+	PRINTFORML %ANAME(ARG:0)%的菊穴完全変成了能獲得極大快感的淫乱的器官…
+	CALL KOJO_EVENT(ARG:0, 68)
+	SETCOLOR カラー_ピンク
+	PRINTFORMW %ANAME(ARG:0)%獲得了<菊穴狂>
+	RESETCOLOR
+	SETBIT TALENT:(ARG:0):淫乱系, 素質_淫乱_尻穴狂い
+ENDIF
+
+;[淫乳] Ｂ感覚Ｓランク以上、倒錯度100以上、今回のＢ絶頂回数が50以上
+IF  !GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫乳) && ABL:(ARG:0):Ｂ感 >= ランク閾値:ランク_その他:ランク_S && ABL:(ARG:0):倒錯度 >= 100 && EX:(ARG:0):Ｂ絶頂 >= 50
+	CALL SINGLE_EMPTY_LINE()
+	PRINTFORMW %ANAME(ARG:0)%的様子有些奇怪…
+	PRINTFORML %ANAME(ARG:0)%受到完全開発変得淫乱的胸部只要受到些許刺激就会讓%ANAME(ARG:0)%呻吟出来…
+	CALL KOJO_EVENT(ARG:0, 69)
+	SETCOLOR カラー_ピンク
+	PRINTFORMW %ANAME(ARG:0)%獲得了<淫乳>
+	RESETCOLOR
+	SETBIT TALENT:(ARG:0):淫乱系, 素質_淫乱_淫乳
+ENDIF
+
+;[蕩唇] Ｍ感覚Ａランク以上、キス経験200以上、口淫経験100以上、今回のＭ絶頂回数が50以上
+IF  !GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_蕩唇) && ABL:(ARG:0):Ｍ感 >= ランク閾値:ランク_その他:ランク_A && EXP:(ARG:0):接吻経験 >= 200 && EXP:(ARG:0):口淫経験 >= 100 && EX:(ARG:0):Ｍ絶頂 >= 50
+	CALL SINGLE_EMPTY_LINE()
+	PRINTFORMW %ANAME(ARG:0)%的様子有些奇怪…
+	PRINTFORML %ANAME(ARG:0)%的嘴和下面的嘴一樣、変成了能感受到性的快感的女性的性器…
+	CALL KOJO_EVENT(ARG:0, 70)
+	SETCOLOR カラー_ピンク
+	PRINTFORMW %ANAME(ARG:0)%獲得了<蕩唇>
+	RESETCOLOR
+	SETBIT TALENT:(ARG:0):淫乱系, 素質_淫乱_蕩唇
+ENDIF
+
+;[尿道狂い] 「Ｕ感覚Ａランク以上、Ｕ挿入経験100以上」もしくは「Ｕ感覚Ｓランク以上、倒錯度800以上」で、今回のＡ絶頂回数が50以上
+IF  !GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_尿道狂い) && ((ABL:(ARG:0):Ｕ感 >= ランク閾値:ランク_その他:ランク_A && EXP:(ARG:0):Ｕ開発経験 >= 100) || (ABL:(ARG:0):Ｕ感 >= ランク閾値:ランク_その他:ランク_S && ABL:(ARG:0):倒錯度 >= 800)) && EX:(ARG:0):Ｕ絶頂 >= 50
+	CALL SINGLE_EMPTY_LINE()
+	PRINTFORMW  %ANAME(ARG:0)%的様子有些奇怪…
+	PRINTFORML  %ANAME(ARG:0)%的尿道已经完全感受到了性爱的快乐，変成了能感受到性的快感的女性的性器…
+	CALL KOJO_EVENT(ARG:0, 68)
+	SETCOLOR カラー_ピンク
+	PRINTFORMW  %ANAME(ARG:0)%獲得了<尿道狂>
+	RESETCOLOR
+	SETBIT TALENT:(ARG:0):淫乱系, 素質_淫乱_尿道狂い
+ENDIF
+
+;[射精狂い] 竿あり、Ｃ感覚Ｃランク以上、射精Ａランク以上、今回の射精回数が30以上
+IF  !GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_射精狂い) && HAS_PENIS(ARG:0) && ABL:(ARG:0):Ｃ感 >= ランク閾値:ランク_その他:ランク_C && ABL:(ARG:0):射精 >= ランク閾値:ランク_その他:ランク_A && EX:(ARG:0):射精 >= 30
+	CALL SINGLE_EMPTY_LINE()
+	PRINTFORMW %ANAME(ARG:0)%的様子有些奇怪…
+	PRINTFORML %ANAME(ARG:0)%的肉棒不管射出多少次都会因為焦急的等待着下一次射精而発疼…
+	CALL KOJO_EVENT(ARG:0, 73)
+	SETCOLOR カラー_ピンク
+	PRINTFORMW %ANAME(ARG:0)%獲得了<射精狂>
+	RESETCOLOR
+	SETBIT TALENT:(ARG:0):淫乱系, 素質_淫乱_射精狂い
+ENDIF
+
+;[苗床] 触手Ｃランク以上、触手出産経験100以上
+IF  !GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_苗床) && ABL:(ARG:0):触手 >= ランク閾値:ランク_その他:ランク_C && EXP:(ARG:0):触手出産経験 >= 100
+	CALL SINGLE_EMPTY_LINE()
+	PRINTFORMW %ANAME(ARG:0)%的様子有些奇怪…
+	PRINTFORML %ANAME(ARG:0)%被触手寄生、対成為了触手的苗床而感到了喜悦
+	CALL KOJO_EVENT(ARG:0, 86)
+	SETCOLOR カラー_ピンク
+	PRINTFORMW %ANAME(ARG:0)%成為了<苗床>
+	RESETCOLOR
+	SETBIT TALENT:(ARG:0):淫乱系, 素質_淫乱_苗床
+ENDIF
+
+;[生ハメ依存] Ｖ(Ａ）感Ａランク以上、Ｖ（Ａ）性交経験200以上、今回の絶頂回数100以上
+IF !GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_生ハメ依存) && ((ABL:(ARG:0):Ｖ感 >= ランク閾値:ランク_その他:ランク_A && EXP:(ARG:0):Ｖ性交経験 >= 200 && EXP:(ARG:0):膣内射精経験 >= 150) || (ABL:(ARG:0):Ａ感 >= ランク閾値:ランク_その他:ランク_A && EXP:(ARG:0):Ａ性交経験 >= 200 && EXP:(ARG:0):腸内射精経験 >= 150)) && SUM_EX(ARG:0) >= 100
+	CALL SINGLE_EMPTY_LINE()
+	PRINTFORMW %ANAME(ARG:0)%的様子有些奇怪…
+	PRINTFORML %ANAME(ARG:0)%反復進行着無套性交的結果、身体変得不是無套肉棒就無法得到満足
+	CALL KOJO_EVENT(ARG:0, 87)
+	SETCOLOR カラー_ピンク
+	PRINTFORMW %ANAME(ARG:0)%獲得了<迷恋無套肉棒>
+	RESETCOLOR
+	SETBIT TALENT:(ARG:0):淫乱系, 素質_淫乱_生ハメ依存
+ENDIF
+
+;[孕みたがり] 出産C、妊娠経験10以上
+IF  !GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_孕みたがり) && ABL:(ARG:0):出産 >= ランク閾値:ランク_その他:ランク_C && ABL:(ARG:0):性交 >= ランク閾値:ランク_その他:ランク_A
+	CALL SINGLE_EMPTY_LINE()
+	PRINTFORMW %ANAME(ARG:0)%的様子有些奇怪…
+	PRINTFORML %ANAME(ARG:0)%反復的妊娠出産的結果、已経徹底沈迷于那種快感之中
+	CALL KOJO_EVENT(ARG:0, 88)
+	SETCOLOR カラー_ピンク
+	PRINTFORMW %ANAME(ARG:0)%獲得了<沈迷被中出妊娠>
+	RESETCOLOR
+	SETBIT TALENT:(ARG:0):淫乱系, 素質_淫乱_孕みたがり
+ENDIF
+
+;[露出狂] 露出A,欲望A,自慰C
+IF  !GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_露出狂) && ABL:(ARG:0):露出 >= ランク閾値:ランク_その他:ランク_A && ABL:(ARG:0):欲望 >= ランク閾値:ランク_その他:ランク_A && ABL:(ARG:0):自慰 >= ランク閾値:ランク_その他:ランク_C
+	CALL SINGLE_EMPTY_LINE()
+	PRINTFORMW %ANAME(ARG:0)%的様子有些奇怪…
+	PRINTFORML %ANAME(ARG:0)%完全沈迷于自己的肉体展露在外的快感
+	CALL KOJO_EVENT(ARG:0, 92)
+	SETCOLOR カラー_ピンク
+	PRINTFORMW %ANAME(ARG:0)%成為了<露出狂>
+	RESETCOLOR
+	SETBIT TALENT:(ARG:0):淫乱系, 素質_淫乱_露出狂
+ENDIF
+
+;獣姦経験200以上、欲望A以上、性交C以上で雌犬
+IF  !GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_雌犬) && EXP:(ARG:0):獣姦経験 >= 200 && ABL:(ARG:0):欲望 >= ランク閾値:ランク_その他:ランク_A && ABL:(ARG:0):性交 >= ランク閾値:ランク_その他:ランク_B
+	CALL SINGLE_EMPTY_LINE()
+	PRINTFORMW %ANAME(ARG:0)%的様子有些奇怪……
+	PRINTFORMW %ANAME(ARG:0)%、無法忘懷和野獣交配時的快感
+	CALL KOJO_EVENT(ARG:0,  83)
+	SETCOLOR カラー_ピンク
+	PRINTFORMW %ANAME(ARG:0)%成為了<雌犬>
+	RESETCOLOR
+	SETBIT TALENT:(ARG:0):淫乱系, 素質_淫乱_雌犬
+ENDIF
+
+;女限定、売春経験100以上、欲望B以上、性技C、奉仕C以上で娼婦
+IF  !GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_娼婦) && IS_FEMALE(ARG:0) && EXP:(ARG:0):売春経験 >= 100 && ABL:(ARG:0):欲望 >= ランク閾値:ランク_その他:ランク_B && ABL:(ARG:0):性技 >= ランク閾値:ランク_その他:ランク_C && ABL:(ARG:0):奉仕 >= ランク閾値:ランク_その他:ランク_C
+	CALL SINGLE_EMPTY_LINE()
+	PRINTFORMW %ANAME(ARG:0)%的様子有些奇怪……
+	PRINTFORMW %ANAME(ARG:0)%、覚醒了出賣自己的身体換取金錢的快感
+	CALL KOJO_EVENT(ARG:0,  84)
+	SETCOLOR カラー_ピンク
+	PRINTFORMW %ANAME(ARG:0)%成為了<娼婦>
+	RESETCOLOR
+	SETBIT TALENT:(ARG:0):淫乱系, 素質_淫乱_娼婦
+	CALL TALENT_LOSE_TEISOU(ARG:0)
+ENDIF
+
+;女限定、撮影経験300以上、欲望A以上、性技A、露出C以上でＡＶ女優
+IF  !GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_ＡＶ女優) && IS_FEMALE(ARG:0) && EXP:(ARG:0):撮影経験 >= 300 && ABL:(ARG:0):欲望 >= ランク閾値:ランク_その他:ランク_A && ABL:(ARG:0):性技 >= ランク閾値:ランク_その他:ランク_A && ABL:(ARG:0):露出 >= ランク閾値:ランク_その他:ランク_C
+	CALL SINGLE_EMPTY_LINE()
+	PRINTFORMW %ANAME(ARG:0)%的様子有些奇怪……
+	PRINTFORMW %ANAME(ARG:0)%、在自己的癡態被記録時感到了喜悦
+	CALL KOJO_EVENT(ARG:0,  89)
+	SETCOLOR カラー_ピンク
+	PRINTFORMW %ANAME(ARG:0)%成為了<ＡＶ女優>
+	RESETCOLOR
+	SETBIT TALENT:(ARG:0):淫乱系, 素質_淫乱_ＡＶ女優
+	CALL TALENT_LOSE_TEISOU(ARG:0)
+ENDIF
+
+;[良質母胎]
+;以下のどちらか
+;触手A,触手出産経験300,苗床所持
+;出産A,妊娠経験30
+{
+	IF !GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_良質母胎) &&
+		(
+		(ABL:(ARG:0):触手 > ランク閾値:ランク_その他:ランク_A && EXP:(ARG:0):触手出産経験 >= 300 && GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_苗床)) ||
+		(ABL:(ARG:0):出産 >= ランク閾値:ランク_その他:ランク_A && EXP:(ARG:0):妊娠経験 >= 30 && GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_孕みたがり))
+		)
+}
+	CALL SINGLE_EMPTY_LINE()
+	PRINTFORMW %ANAME(ARG:0)%的様子有些奇怪…
+	PRINTFORML 通過一次又一次懷孕、%ANAME(ARG:0)%変成了極其容易排卵、非常容易受孕的体質
+	CALL KOJO_EVENT(ARG:0, 93)
+	SETCOLOR カラー_ピンク
+	PRINTFORMW %ANAME(ARG:0)%獲得了<良質母胎>
+	RESETCOLOR
+	SETBIT TALENT:(ARG:0):淫乱系, 素質_淫乱_良質母胎
+ENDIF
+
+;[濃厚精液] 性交A、射精A、孕ませ経験30以上
+IF !GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_濃厚精液) && ABL:(ARG:0):性交 >= ランク閾値:ランク_その他:ランク_A && ABL:(ARG:0):射精 >= ランク閾値:ランク_その他:ランク_A && EXP:(ARG:0):授孕経験 >= 30
+	CALL SINGLE_EMPTY_LINE()
+	PRINTFORMW %ANAME(ARG:0)%的様子有些奇怪…
+	PRINTFORML 通過一次又一次的讓女性懷孕、%ANAME(ARG:0)%的精液已經変成了最適合讓人受孕的濃厚大量的精液
+	CALL KOJO_EVENT(ARG:0, 94)
+	SETCOLOR カラー_ピンク
+	PRINTFORMW %ANAME(ARG:0)%獲得了<濃厚精液>
+	RESETCOLOR
+	SETBIT TALENT:(ARG:0):淫乱系, 素質_淫乱_濃厚精液
+ENDIF
+
+;自慰狂い
+;自慰A、倒錯度800以上
+{
+	IF !GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_自慰狂い) &&
+		ABL:(ARG:0):自慰 >= ランク閾値:ランク_その他:ランク_A  &&
+		ABL:(ARG:0):倒錯度 >= 800
+}
+	CALL SINGLE_EMPTY_LINE()
+	PRINTFORMW %ANAME(ARG:0)%的様子有些奇怪…
+	PRINTFORML %ANAME(ARG:0)%因为过分沉迷自慰，已经变成了不手淫就活不下去的身体了
+	CALL KOJO_EVENT(ARG:0, 97)
+	SETCOLOR カラー_ピンク
+	PRINTFORMW %ANAME(ARG:0)%獲得了<自慰狂>
+	RESETCOLOR
+	SETBIT TALENT:(ARG:0):淫乱系, 素質_淫乱_自慰狂い
+ENDIF
+
+;雌牛
+;女限定、母乳体質、淫乳所持、噴乳A、倒錯度800以上、
+{
+	IF !GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_雌牛) &&
+		IS_FEMALE(ARG:0) &&
+		TALENT:(ARG:0):母乳体質 &&
+		GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫乳) &&
+		ABL:(ARG:0):噴乳 >= ランク閾値:ランク_その他:ランク_A  &&
+		ABL:(ARG:0):倒錯度 >= 800
+}
+	CALL SINGLE_EMPTY_LINE()
+	PRINTFORMW  %ANAME(ARG:0)%的様子有些奇怪……
+	PRINTFORMW  %ANAME(ARG:0)%的胸部已经像家畜一样，不被挤榨母乳就平静不下来
+	CALL KOJO_EVENT(ARG:0, 98)
+	SETCOLOR カラー_ピンク
+	PRINTFORMW  %ANAME(ARG:0)%獲得了<雌牛>
+	RESETCOLOR
+	SETBIT TALENT:(ARG:0):淫乱系, 素質_淫乱_雌牛
+ENDIF

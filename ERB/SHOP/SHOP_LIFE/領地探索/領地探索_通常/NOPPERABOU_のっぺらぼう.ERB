@@ -1,0 +1,48 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_NOPPERABOU_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_NOPPERABOU_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_NOPPERABOU(対象)
+#DIM 対象
+PRINTFORML 走在夜路上的%ANAME(対象)%、聽到了不知從哪傳來了哭聲
+PRINTFORML 在河邊佇立的柳樹下、有一位少女蹲在那裡
+PRINTFORML 是離家出走的姑娘吧、還是不要自找麻煩比較好……
+PRINTFORML 
+CALL ASK_YN("打招呼", "離去")
+
+IF RESULT == 1
+	PRINTFORML 多一事不如少一事
+	PRINTFORML 決定趕緊離開
+	RETURN 1
+ENDIF
+
+PRINTFORML 不能置之不理、%ANAME(対象)%向少女打了招呼
+PRINTFORMW ……慢慢地轉過頭來的少女、竟然沒有臉！
+PRINTFORMW 是無面！
+
+IF LIMIT(MAXBASE:対象:気力, 1500, 2500) > RAND:3000
+	PRINTFORML %ANAME(対象)%忍住了差點就脫口而出的悲鳴
+	PRINTFORMW 対著露出正体的無面大喝一聲！
+	PRINTFORML 那氣勢讓対方感到了害怕、慌忙的逃走了……
+	CALL ICPRINT(@"%ANAME(対象)%的気力上昇了<50>、変成了<{MAXBASE:対象:気力}>", "L", カラー_注意)
+ELSE
+	PRINTFORML %ANAME(対象)%因為這嚇人的事情発出了悲鳴、逃走了！
+	PRINTFORMW 不小心在逃跑時摔倒在地、受傷了……
+	CALL ADD_COOLTIME(対象, 1)
+ENDIF
+
+RETURN 1

@@ -1,0 +1,121 @@
+﻿@SELECT_CHARA_RANDOM_LOGIC_SLG_RANDOM_INDEPENDENCE_Protectorate(対象)
+#DIM 対象
+RETURN CAN_RANDOM_INDEPENDENCE_Protectorate(対象)
+
+;----------------------------------------------
+;独立宣言をするNPCの候補を選択し、確率ロール
+;----------------------------------------------
+@SLG_RANDOM_INDEPENDENCE_Protectorate
+#DIM 結果
+#DIM 判定値
+#DIM 野心無視フラグ
+#DIM 宗主国勢力
+#DIM 宗主国勢力名
+#DIM その他従属国
+
+;10期以降
+SIF !(DAY >= 10)
+	RETURN 0
+
+;10%の確率で野心をフラットに扱う
+野心無視フラグ = RAND:100 < 10
+
+IF 野心無視フラグ
+	CALL SELECT_CHARA_RANDOM("SLG_RANDOM_INDEPENDENCE_Protectorate")
+ELSE
+	CALL SELECT_CHARA_RANDOM("SLG_RANDOM_INDEPENDENCE_Protectorate", "SLG_RANDOM_INDEPENDENCE")
+ENDIF
+
+結果 = RESULT
+
+SIF 結果 == -1
+	RETURN 0
+
+判定値 = CALC_INDEPENDENCE_RATE(結果)
+
+;確率ロールに失敗したら戻る
+IF 判定値 <= RAND:10000
+	RETURN 0
+ENDIF
+
+FOR LOCAL:0, 0, MAX_TREATY_M
+	FOR LOCAL:1, 0, MAX_TREATY_COUNTRY
+		IF TREATY_M_COUNTRY:(LOCAL:0):(LOCAL:1):0 == CFLAG:結果:所属 || TREATY_CO_COUNTRY:(LOCAL:0):(LOCAL:1):0 == CFLAG:結果:所属 || TREATY_P_COUNTRY:(LOCAL:0):(LOCAL:1):0 == CFLAG:結果:所属
+			FOR LOCAL:2, 0, MAX_TREATY_COUNTRY
+				;主人公の勢力の従属国は、陥落している場合は独立宣言しない
+				;ただし印象値が非常に悪い場合はなおも独立宣言を企てる
+				;閾値は本人の野心によって変動する
+				SIF TREATY_CO_COUNTRY:(LOCAL:0):(LOCAL:2):1 == CFLAG:MASTER:所属 && IS_FALLEN(結果) && REL_HATE:結果:MASTER - REL_LIKE:結果:MASTER < 1500 * (100 - ABL:結果:野心) / 100
+					RETURN 0
+				SIF TREATY_P_COUNTRY:(LOCAL:0):(LOCAL:2):1 == CFLAG:MASTER:所属 && IS_FALLEN(結果) && REL_HATE:結果:MASTER - REL_LIKE:結果:MASTER < 1500 * (100 - ABL:結果:野心) / 100
+					RETURN 0
+				;宗主国への敵対値が500以上、かつ敵対値が好感度より500以上でなければならない
+				IF TREATY_CO_COUNTRY:(LOCAL:0):(LOCAL:2):1 > 0
+					宗主国勢力 = TREATY_CO_COUNTRY:(LOCAL:0):(LOCAL:2):1
+					SIF REL_HATE:結果:(GET_COUNTRY_BOSS(宗主国勢力)) < 500 || REL_HATE:結果:(GET_COUNTRY_BOSS(宗主国勢力)) - REL_LIKE:結果:(GET_COUNTRY_BOSS(宗主国勢力)) < 500
+						RETURN 0
+				ELSEIF TREATY_P_COUNTRY:(LOCAL:0):(LOCAL:2):1 > 0
+					宗主国勢力 = TREATY_P_COUNTRY:(LOCAL:0):(LOCAL:2):1
+					SIF REL_HATE:結果:(GET_COUNTRY_BOSS(宗主国勢力)) < 500 || REL_HATE:結果:(GET_COUNTRY_BOSS(宗主国勢力)) - REL_LIKE:結果:(GET_COUNTRY_BOSS(宗主国勢力)) < 500
+						RETURN 0
+				ENDIF
+			NEXT
+		ENDIF
+	NEXT
+NEXT
+CALL COLOR_PRINTW(@"%NAME_FORMAL(結果)%宣布从%NAME_FORMAL(GET_COUNTRY_BOSS(宗主国勢力))%势力中独立了！", カラー_警告)
+CALL INIT_Protectorate_RENOUNCE(CFLAG:結果:所属, 宗主国勢力)
+CALL INIT_Union_RENOUNCE(CFLAG:結果:所属)
+CALL CHANGE_RELATION_C_TO_C(CFLAG:結果:所属, 宗主国勢力, -500, 500)
+CALL CHANGE_RELATION_C_TO_C(宗主国勢力, CFLAG:結果:所属, -500, 500)
+
+;宗主国勢力のその他従属国のうち独立宣言勢力との関係がより良好であるときその従属国も独立
+その他従属国 = 0
+宗主国勢力名 = GET_COUNTRY_BOSS(宗主国勢力)
+FOR LOCAL:0, 0, MAX_COUNTRY
+	IF (COUNTRY_Protectorate_REFERENCE:(LOCAL:0):0 == 3 || COUNTRY_Protectorate_REFERENCE:(LOCAL:0):0 == 4) && COUNTRY_Protectorate_REFERENCE:(LOCAL:0):2 == 宗主国勢力 && IS_COUNTRY(LOCAL:0) && LOCAL:0 != CFLAG:結果:所属
+		その他従属国 = LOCAL:0
+		IF REL_HATE:(GET_COUNTRY_BOSS(その他従属国)):宗主国勢力名 > REL_HATE:(GET_COUNTRY_BOSS(その他従属国)):結果 && REL_LIKE:(GET_COUNTRY_BOSS(その他従属国)):宗主国勢力名 < REL_LIKE:(GET_COUNTRY_BOSS(その他従属国)):結果 && REL_HATE:(GET_COUNTRY_BOSS(その他従属国)):宗主国勢力名 > 100
+			CALL COLOR_PRINTW(@"%NAME_FORMAL(GET_COUNTRY_BOSS(その他従属国))%也从%NAME_FORMAL(GET_COUNTRY_BOSS(宗主国勢力))%的势力中宣布独立了！", カラー_警告)
+			CALL INIT_Protectorate_RENOUNCE(その他従属国, 宗主国勢力)
+			CALL INIT_Union_RENOUNCE(その他従属国)
+			CALL CHANGE_RELATION_C_TO_C(その他従属国, 宗主国勢力, -500, 500)
+			CALL CHANGE_RELATION_C_TO_C(宗主国勢力, その他従属国, -500, 500)
+		ENDIF
+	ENDIF
+NEXT
+
+RETURN 1
+
+;----------------------------------------------
+;独立宣言できる状態か
+;----------------------------------------------
+@CAN_RANDOM_INDEPENDENCE_Protectorate(対象)
+#FUNCTION
+#DIM 対象
+SIF 対象 == MASTER
+	RETURNF 0
+;君主でなければならない
+SIF GET_COUNTRY_BOSS(CFLAG:(対象):所属) != 対象
+	RETURNF 0
+;植民地か傀儡国でなければならない
+SIF COUNTRY_Protectorate:(CFLAG:(対象):所属) < 3
+	RETURNF 0
+;無所属でない／いずれかの勢力の捕虜ではない／放浪もしくは死亡状態ではないか
+SIF !IS_COUNTRY(CFLAG:対象:所属) || CFLAG:対象:捕虜先 || CFLAG:対象:特殊状態
+	RETURNF 0
+;SPキャラも謀反を起こさない
+SIF IS_SP_CHARA(対象)
+	RETURNF 0
+;特殊勢力所属なら駄目
+SIF IS_SP_COUNTRY(CFLAG:対象:所属)
+	RETURNF 0
+;(従属国パッチ)辺境伯は駄目
+SIF CFLAG:対象:1702 == 1
+	RETURNF 0
+;野心が皆無なやつも謀反を起こさない
+SIF ABL:対象:野心 <= 0
+	RETURNF 0
+
+RETURNF 1
+

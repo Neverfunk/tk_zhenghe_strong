@@ -1,0 +1,428 @@
+﻿;-------------------------------------------------
+;ARG:0とARG:1の勢力の間にARG:0を連邦参加国,ARG:1を連邦発起国とする条約を成立させる関数
+;ARG:1が既に連邦を形成していた場合,ARG:1の連邦にARG:0が加盟する
+;成功したら1 失敗したら0
+;-------------------------------------------------
+
+@INIT_Union(ARG:0, ARG:1)
+#DIM 暫定ナンバー
+#DIM 連邦ナンバー
+#DIM 確定連邦名
+#DIM 発起国君主
+#DIM 参加国君主
+
+IF !IS_COUNTRY(ARG:0) || !IS_COUNTRY(ARG:1)
+	THROW 请为0号参数和1号参数分别指定正确的势力号
+ENDIF
+
+発起国君主 = GET_COUNTRY_BOSS(ARG:1)
+参加国君主 = GET_COUNTRY_BOSS(ARG:0)
+
+IF COUNTRY_Protectorate:(ARG:1) >= 2
+	PRINTFORMW 不能与従属国缔结永久同盟
+	RETURN 0
+ELSEIF COUNTRY_Protectorate:(ARG:0) >= 2
+	;自国が宗主国でない従属国とは連邦を形成しない
+	IF COUNTRY_Protectorate_REFERENCE:(ARG:0):0 == 2 && COUNTRY_Protectorate_REFERENCE:(ARG:0):2 != ARG:1
+		PRINTFORMW 我们不能与非宗主国的边境伯缔结永久同盟
+		RETURN 0
+	ENDIF
+	IF COUNTRY_Protectorate_REFERENCE:(ARG:0):0 == 3 && COUNTRY_Protectorate_REFERENCE:(ARG:0):2 != ARG:1
+		PRINTFORMW 我们不能与非宗主国的殖民地缔结永久同盟
+		RETURN 0
+	ENDIF
+	IF COUNTRY_Protectorate_REFERENCE:(ARG:0):0 == 4 && COUNTRY_Protectorate_REFERENCE:(ARG:0):2 != ARG:1
+		PRINTFORMW 我们不能与非宗主国的傀儡国缔结永久同盟
+		RETURN 0
+	ENDIF
+ENDIF
+
+IF IS_TREATY_UNI:(ARG:0) == 1
+	PRINTFORMW 对方已经组成了联邦
+	RETURN 0
+ELSEIF IS_TREATY_UNI:(ARG:1) == 1
+	連邦ナンバー = COUNTRY_Union_REFERENCE:(ARG:1):0
+	FOR LOCAL:1, 0, MAX_COUNTRY
+		; LOCAL:1に空きがあれば成立
+		IF TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:1):0 <= 0 && !IS_TREATY_UNI:(ARG:0)
+			PRINTFORML %ANAME(参加国君主)%加入了%ANAME(発起国君主)%的联邦
+			TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:1):0 = ARG:0
+			確定連邦名 = 連邦ナンバー
+			IS_TREATY_UNI:(ARG:0) = 1
+			
+			;連邦ナンバー簡易変数参考を設定
+			COUNTRY_Union_REFERENCE:(ARG:0):0 = 連邦ナンバー
+			COUNTRY_Union_REFERENCE:(ARG:0):1 = COUNTRY_Union_REFERENCE:(ARG:1):1
+			
+			;ARG:0が他国を従属国としているときその従属国も連邦に加盟
+			IF COUNTRY_Protectorate:(ARG:0) == 1
+				FOR LOCAL:2, 0, MAX_TREATY_M
+					;辺境伯の処理
+					IF TREATY_M_COUNTRY:(LOCAL:2):1:1 == ARG:0 && TREATY_M_COUNTRY:(LOCAL:2):0:0 > 0
+						FOR LOCAL:5, 0, MAX_COUNTRY
+							; LOCAL:5に空きがあれば成立
+							IF TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:5):0 <= 0
+								TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:5):0 = (TREATY_M_COUNTRY:(LOCAL:2):0:0)
+								IS_TREATY_UNI:(TREATY_M_COUNTRY:(LOCAL:2):0:0) = 1
+								
+								;連邦ナンバー簡易変数参考を設定
+								COUNTRY_Union_REFERENCE:(TREATY_M_COUNTRY:(LOCAL:2):0:0):0 = 連邦ナンバー
+								COUNTRY_Union_REFERENCE:(TREATY_M_COUNTRY:(LOCAL:2):0:0):1 = COUNTRY_Union_REFERENCE:(ARG:1):1
+								
+								PRINTFORML %ANAME(参加国君主)%的边境伯%ANAME(GET_COUNTRY_BOSS(TREATY_M_COUNTRY:(LOCAL:2):0:0))%也加入了联邦
+								BREAK
+							ENDIF
+						NEXT
+					ENDIF
+					;植民地の処理
+					IF TREATY_CO_COUNTRY:(LOCAL:2):1:1 == ARG:0 && TREATY_CO_COUNTRY:(LOCAL:2):0:0 > 0
+						FOR LOCAL:9, 0, MAX_COUNTRY
+							;LOCAL:9に空きがあれば成立
+							IF TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:9):0 <= 0
+								TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:9):0 = (TREATY_CO_COUNTRY:(LOCAL:2):0:0)
+								IS_TREATY_UNI:(TREATY_CO_COUNTRY:(LOCAL:2):0:0) = 1
+								
+								;連邦ナンバー簡易変数参考を設定
+								COUNTRY_Union_REFERENCE:(TREATY_CO_COUNTRY:(LOCAL:2):0:0):0 = 連邦ナンバー
+								COUNTRY_Union_REFERENCE:(TREATY_CO_COUNTRY:(LOCAL:2):0:0):1 = COUNTRY_Union_REFERENCE:(ARG:1):1
+								
+								PRINTFORML %ANAME(参加国君主)%的殖民地君主%ANAME(GET_COUNTRY_BOSS(TREATY_CO_COUNTRY:(LOCAL:2):0:0))%也加入了联邦
+								BREAK
+							ENDIF
+						NEXT
+					ENDIF
+					;傀儡国の処理
+					IF TREATY_P_COUNTRY:(LOCAL:2):1:1 == ARG:0 && TREATY_P_COUNTRY:(LOCAL:2):0:0 > 0
+						FOR LOCAL:13, 0, MAX_COUNTRY
+							; LOCAL:13に空きがあれば成立
+							IF TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:13):0 <= 0
+								TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:13):0 = (TREATY_P_COUNTRY:(LOCAL:2):0:0)
+								IS_TREATY_UNI:(TREATY_P_COUNTRY:(LOCAL:2):0:0) = 1
+								
+								;連邦ナンバー簡易変数参考を設定
+								COUNTRY_Union_REFERENCE:(TREATY_P_COUNTRY:(LOCAL:2):0:0):0 = 連邦ナンバー
+								COUNTRY_Union_REFERENCE:(TREATY_P_COUNTRY:(LOCAL:2):0:0):1 = COUNTRY_Union_REFERENCE:(ARG:1):1
+								
+								PRINTFORML %ANAME(参加国君主)%的傀儡国君主%ANAME(GET_COUNTRY_BOSS(TREATY_P_COUNTRY:(LOCAL:2):0:0))%也加入了联邦
+								BREAK
+							ENDIF
+						NEXT
+					ENDIF
+				NEXT
+			ENDIF
+			GOTO A_JUNP
+		ENDIF
+	NEXT
+ELSE
+	FOR 暫定ナンバー, 1, MAX_COUNTRY
+		;連邦ナンバーに空きがあれば成立
+		IF TREATY_UNI_COUNTRY:暫定ナンバー:0:0 <= 0
+			連邦ナンバー = 暫定ナンバー
+			BREAK
+		ENDIF
+		IF 暫定ナンバー == MAX_COUNTRY - 1
+			PRINTFORMW 連邦ナンバーが満杯です
+			PRINTL 
+			RETURN 0
+		ENDIF
+	NEXT
+	PRINTFORML %ANAME(発起国君主)%与%ANAME(参加国君主)%的联邦形成了
+	TREATY_UNI_COUNTRY:連邦ナンバー:0:1 = ARG:1
+	TREATY_UNI_COUNTRY:連邦ナンバー:0:0 = ARG:0
+	IS_TREATY_UNI:(ARG:0) = 1
+	IS_TREATY_UNI:(ARG:1) = 1
+	確定連邦名 = 連邦ナンバー
+	
+	;連邦ナンバー簡易変数参考を設定
+	COUNTRY_Union_REFERENCE:(ARG:0):0 = 連邦ナンバー
+	COUNTRY_Union_REFERENCE:(ARG:0):1 = ARG:1
+	
+	COUNTRY_Union_REFERENCE:(ARG:1):0 = 連邦ナンバー
+	COUNTRY_Union_REFERENCE:(ARG:1):1 = ARG:1
+	
+	;ARG:0が他国を従属国としているときその従属国も連邦に加盟
+	IF COUNTRY_Protectorate:(ARG:0) == 1
+		FOR LOCAL:2, 0, MAX_TREATY_M
+			;辺境伯の処理
+			IF TREATY_M_COUNTRY:(LOCAL:2):1:1 == ARG:0 && TREATY_M_COUNTRY:(LOCAL:2):0:0 > 0
+				FOR LOCAL:5, 0, MAX_COUNTRY
+					; LOCAL:5に空きがあれば成立
+					IF TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:5):0 <= 0
+						TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:5):0 = (TREATY_M_COUNTRY:(LOCAL:2):0:0)
+						IS_TREATY_UNI:(TREATY_M_COUNTRY:(LOCAL:2):0:0) = 1
+						
+						;連邦ナンバー簡易変数参考を設定
+						COUNTRY_Union_REFERENCE:(TREATY_M_COUNTRY:(LOCAL:2):0:0):0 = 連邦ナンバー
+						COUNTRY_Union_REFERENCE:(TREATY_M_COUNTRY:(LOCAL:2):0:0):1 = COUNTRY_Union_REFERENCE:(ARG:1):1
+						
+						PRINTFORML %ANAME(参加国君主)%的边境伯%ANAME(GET_COUNTRY_BOSS(TREATY_M_COUNTRY:(LOCAL:2):0:0))%也加入了联邦
+						BREAK
+					ENDIF
+				NEXT
+			ENDIF
+			;植民地の処理
+			IF TREATY_CO_COUNTRY:(LOCAL:2):1:1 == ARG:0 && TREATY_CO_COUNTRY:(LOCAL:2):0:0 > 0
+				FOR LOCAL:9, 0, MAX_COUNTRY
+					;LOCAL:9に空きがあれば成立
+					IF TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:9):0 <= 0
+						TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:9):0 = (TREATY_CO_COUNTRY:(LOCAL:2):0:0)
+						IS_TREATY_UNI:(TREATY_CO_COUNTRY:(LOCAL:2):0:0) = 1
+						
+						;連邦ナンバー簡易変数参考を設定
+						COUNTRY_Union_REFERENCE:(TREATY_CO_COUNTRY:(LOCAL:2):0:0):0 = 連邦ナンバー
+						COUNTRY_Union_REFERENCE:(TREATY_CO_COUNTRY:(LOCAL:2):0:0):1 = COUNTRY_Union_REFERENCE:(ARG:1):1
+						
+						PRINTFORML %ANAME(参加国君主)%的殖民地君主%ANAME(GET_COUNTRY_BOSS(TREATY_CO_COUNTRY:(LOCAL:2):0:0))%也加入了联邦
+						BREAK
+					ENDIF
+				NEXT
+			ENDIF
+			;傀儡国の処理
+			IF TREATY_P_COUNTRY:(LOCAL:2):1:1 == ARG:0 && TREATY_P_COUNTRY:(LOCAL:2):0:0 > 0
+				FOR LOCAL:13, 0, MAX_COUNTRY
+					; LOCAL:13に空きがあれば成立
+					IF TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:13):0 <= 0
+						TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:13):0 = (TREATY_P_COUNTRY:(LOCAL:2):0:0)
+						IS_TREATY_UNI:(TREATY_P_COUNTRY:(LOCAL:2):0:0) = 1
+						
+						;連邦ナンバー簡易変数参考を設定
+						COUNTRY_Union_REFERENCE:(TREATY_P_COUNTRY:(LOCAL:2):0:0):0 = 連邦ナンバー
+						COUNTRY_Union_REFERENCE:(TREATY_P_COUNTRY:(LOCAL:2):0:0):1 = COUNTRY_Union_REFERENCE:(ARG:1):1
+						
+						PRINTFORML %ANAME(参加国君主)%的殖民地君主%ANAME(GET_COUNTRY_BOSS(TREATY_P_COUNTRY:(LOCAL:2):0:0))%也加入了联邦
+						BREAK
+					ENDIF
+				NEXT
+			ENDIF
+		NEXT
+	ENDIF
+ENDIF
+
+$ A_JUNP
+
+CALL INIT_Union_alliance(確定連邦名)
+
+RETURN 1
+
+;-------------------------------------------------
+;ARG:0の連邦構成国間に永久同盟を成立させる関数
+;従属国とその宗主国との間には成立させない
+;-------------------------------------------------
+
+@INIT_Union_alliance(ARG:0)
+#DIM 主従関係フラグ
+主従関係フラグ = 0
+
+FOR LOCAL:0, 0, MAX_COUNTRY
+	;当該連邦参加国を探す
+	IF COUNTRY_Union_REFERENCE:(LOCAL:0):0 == ARG:0 && IS_COUNTRY(LOCAL:0)
+		;自国以外の当該連邦参加国を探す
+		FOR LOCAL:1, 0, MAX_COUNTRY
+			IF LOCAL:0 != LOCAL:1 && COUNTRY_Union_REFERENCE:(LOCAL:1):0 == ARG:0 && IS_COUNTRY(LOCAL:1)
+				;従属関係を検索する
+				SIF COUNTRY_Protectorate_REFERENCE:(LOCAL:0):0 == 2 && COUNTRY_Protectorate_REFERENCE:(LOCAL:1):0 == 1 && COUNTRY_Protectorate_REFERENCE:(LOCAL:0):2 == LOCAL:1
+					主従関係フラグ = 1
+				SIF COUNTRY_Protectorate_REFERENCE:(LOCAL:1):0 == 2 && COUNTRY_Protectorate_REFERENCE:(LOCAL:0):0 == 1 && COUNTRY_Protectorate_REFERENCE:(LOCAL:1):2 == LOCAL:0
+					主従関係フラグ = 1
+				SIF COUNTRY_Protectorate_REFERENCE:(LOCAL:0):0 == 3 && COUNTRY_Protectorate_REFERENCE:(LOCAL:1):0 == 1 && COUNTRY_Protectorate_REFERENCE:(LOCAL:0):2 == LOCAL:1
+					主従関係フラグ = 1
+				SIF COUNTRY_Protectorate_REFERENCE:(LOCAL:1):0 == 3 && COUNTRY_Protectorate_REFERENCE:(LOCAL:0):0 == 1 && COUNTRY_Protectorate_REFERENCE:(LOCAL:1):2 == LOCAL:0
+					主従関係フラグ = 1
+				SIF COUNTRY_Protectorate_REFERENCE:(LOCAL:0):0 == 4 && COUNTRY_Protectorate_REFERENCE:(LOCAL:1):0 == 1 && COUNTRY_Protectorate_REFERENCE:(LOCAL:0):2 == LOCAL:1
+					主従関係フラグ = 1
+				SIF COUNTRY_Protectorate_REFERENCE:(LOCAL:1):0 == 4 && COUNTRY_Protectorate_REFERENCE:(LOCAL:0):0 == 1 && COUNTRY_Protectorate_REFERENCE:(LOCAL:1):2 == LOCAL:0
+					主従関係フラグ = 1
+				;主従関係フラグがなく、永久同盟関係にないとき永久同盟を締結
+				IF 主従関係フラグ != 1 && CHECK_COUNTRY_RELATION_F(LOCAL:0, LOCAL:1) != 4
+					CALL INIT_ALLIANCE_union(LOCAL:0, LOCAL:1, ARG:0)
+				ENDIF
+				主従関係フラグ = 0
+			ENDIF
+		NEXT
+	ENDIF
+NEXT
+
+RETURN 1
+
+;-------------------------------------------------
+;連邦構成国であるARG:0とARG:1の勢力の間に永久同盟を成立させる関数
+;成功したら1 空きがなければ0
+;連邦ナンバーごとに、TREATY_A_COUNTRY:(LOCAL:0):0」や「TREATY_A_TERM:(LOCAL:0)」の「LOCAL:0」部分(以下「同盟変数」)を割り当て
+;「Union_Use_ALLIANCE_NUMBER」は1以上を使用するように
+;-------------------------------------------------
+@INIT_ALLIANCE_union(ARG:0, ARG:1, 連邦ナンバー)
+#DIM CUR_RELATION
+#DIM 連邦ナンバー
+#DIM 未使用同盟変数
+#DIM 割当同盟変数
+IF !IS_COUNTRY(ARG:0) || !IS_COUNTRY(ARG:1)
+	THROW 请为0号参数和1号参数分别指定正确的势力号
+ENDIF
+
+;まだ連邦ナンバーごとの同盟変数割り当てがなされていないとき、割り当て
+IF Union_Use_ALLIANCE_NUMBER:連邦ナンバー == 0
+	;使用されていない同盟変数を検索
+	FOR LOCAL:0, 1, MAX_TREATY_A - 1
+		IF TREATY_A_TERM:(LOCAL:0) <= 0
+			未使用同盟変数 = LOCAL:0
+			BREAK
+		ENDIF
+	NEXT
+	;全ての同盟変数が使用されているとき、処理を中止
+	IF 未使用同盟変数 == 0
+		PRINTW 因为所有的同盟变量都被使用了，建立永久同盟失败了
+		RETURN
+	ENDIF
+	;割り当て
+	Union_Use_ALLIANCE_NUMBER:連邦ナンバー = 未使用同盟変数
+ENDIF
+
+割当同盟変数 = Union_Use_ALLIANCE_NUMBER:連邦ナンバー
+TREATY_A_TERM:割当同盟変数 = 9999
+
+FOR LOCAL:0, 0, MAX_TREATY_COUNTRY
+	SIF TREATY_A_COUNTRY:割当同盟変数:(LOCAL:0) == ARG:0
+		BREAK
+	IF TREATY_A_COUNTRY:割当同盟変数:(LOCAL:0) == 0
+		TREATY_A_COUNTRY:割当同盟変数:(LOCAL:0) = ARG:0
+		BREAK
+	ENDIF
+NEXT
+
+FOR LOCAL:0, 0, MAX_TREATY_COUNTRY
+	SIF TREATY_A_COUNTRY:割当同盟変数:(LOCAL:0) == ARG:1
+		BREAK
+	IF TREATY_A_COUNTRY:割当同盟変数:(LOCAL:0) == 0
+		TREATY_A_COUNTRY:割当同盟変数:(LOCAL:0) = ARG:1
+		BREAK
+	ENDIF
+NEXT
+
+;現在の国家関係マップを作成
+CALL TMP_CREATE_RELATION_MAP
+
+; 関係マップのカウンタを戻す
+CUR_RELATION = TMP_COUNTRY_RELATION:(ARG:0):(ARG:1)
+SELECTCASE CUR_RELATION
+	CASE 1
+		COUNTRY_TREATY_NO:(ARG:0):1 --
+		COUNTRY_TREATY_NO:(ARG:1):1 --
+	CASE 3, 4
+		COUNTRY_TREATY_NO:(ARG:0):0 --
+		COUNTRY_TREATY_NO:(ARG:1):0 --
+ENDSELECT
+
+; 関係マップの更新
+IF CUR_RELATION < 4
+	TMP_COUNTRY_RELATION:(ARG:0):(ARG:1) = 4
+	TMP_COUNTRY_RELATION:(ARG:1):(ARG:0) = 4
+	TMP_COUNTRY_RELATION_TERM:(ARG:0):(ARG:1) = 9999
+	TMP_COUNTRY_RELATION_TERM:(ARG:1):(ARG:0) = 9999
+	CUR_RELATION = 4
+ENDIF
+PRINTFORML %ANAME(GET_COUNTRY_BOSS(ARG:0))%与%ANAME(GET_COUNTRY_BOSS(ARG:1))%缔结了永久同盟
+
+RETURN
+
+;-------------------------------------------------
+;ARG:0を所属する連邦から脱退させる関数
+;成功したら1失敗したら0
+;ARG:0とARG:0の宗主国との間の処理は先にしておくこと
+;-------------------------------------------------
+@INIT_Union_RENOUNCE(ARG:0)
+#DIM 連邦ナンバー
+#DIM 割当同盟変数
+#DIM 連邦構成国
+
+IF IS_TREATY_UNI:(ARG:0) == 0
+	PRINTFORMW Error %ANAME(GET_COUNTRY_BOSS(ARG:0))%没有形成联邦
+	PRINTL 
+	RETURN 0
+ENDIF
+
+連邦ナンバー = COUNTRY_Union_REFERENCE:(ARG:0):0
+IF COUNTRY_Union_REFERENCE:(ARG:0):1 == ARG:0
+	PRINTFORMW Error %ANAME(GET_COUNTRY_BOSS(ARG:0))%是联邦主导国
+	PRINTL 
+	RETURN 0
+ENDIF
+
+;所属連邦を検索
+FOR LOCAL:1, 0, MAX_COUNTRY
+	IF TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:1):0 == ARG:0
+		TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:1):0 = 0
+		
+		;連邦ナンバー簡易変数参考をリセット
+		COUNTRY_Union_REFERENCE:(ARG:0):0 = 0
+		COUNTRY_Union_REFERENCE:(ARG:0):1 = 0
+		
+		BREAK
+	ENDIF
+NEXT
+
+割当同盟変数 = Union_Use_ALLIANCE_NUMBER:連邦ナンバー
+
+;現在の国家関係マップを作成
+CALL TMP_CREATE_RELATION_MAP
+
+FOR LOCAL:0, 0, MAX_TREATY_COUNTRY
+	IF TREATY_A_COUNTRY:割当同盟変数:(LOCAL:0) == ARG:0
+		TREATY_A_COUNTRY:割当同盟変数:(LOCAL:0) = 0
+		
+	ELSEIF TREATY_A_COUNTRY:割当同盟変数:(LOCAL:0) > 0
+		連邦構成国 = TREATY_A_COUNTRY:割当同盟変数:(LOCAL:0)
+		COUNTRY_TREATY_NO:(ARG:0):0 --
+		COUNTRY_TREATY_NO:連邦構成国:0 --
+		
+		TMP_COUNTRY_RELATION:(ARG:0):連邦構成国 = 0
+		TMP_COUNTRY_RELATION:連邦構成国:(ARG:0) = 0
+		TMP_COUNTRY_RELATION_TERM:(ARG:0):連邦構成国 = 0
+		TMP_COUNTRY_RELATION_TERM:連邦構成国:(ARG:0) = 0
+		
+		PRINTFORML %ANAME(GET_COUNTRY_BOSS(ARG:0))%势力和%ANAME(GET_COUNTRY_BOSS(連邦構成国))%势力之间的永久同盟被破弃了
+		;TranslatedMark %ANAME(GET_COUNTRY_BOSS(ARG:0))%勢力と%ANAME(GET_COUNTRY_BOSS(連邦構成国))%勢力との間の永久同盟は破棄されました
+		
+	ENDIF
+	
+NEXT
+
+IS_TREATY_UNI:(ARG:0) = 0
+CALL CHECK_NON_Union(連邦ナンバー)
+
+RETURN 1
+
+;-------------------------------------------------
+;1勢力しか所属していない連邦を解体
+;-------------------------------------------------
+@CHECK_NON_Union(連邦ナンバー)
+#DIM 連邦ナンバー
+#DIM 参加国カウンター
+
+参加国カウンター = 0
+;ある勢力が従属国かつその宗主国がARG:0であるとき参加国カウンターを+1
+FOR LOCAL:0, 0, MAX_COUNTRY
+	SIF COUNTRY_Union_REFERENCE:(LOCAL:0):0 == 連邦ナンバー
+		参加国カウンター ++
+NEXT
+
+;参加国カウンターが2以上であるとき処理を中止
+SIF 参加国カウンター >= 2
+	RETURN
+
+Union_Use_ALLIANCE_NUMBER:連邦ナンバー = 0
+
+FOR LOCAL:0, 0, MAX_COUNTRY
+	IF COUNTRY_Union_REFERENCE:(LOCAL:0):0 == 連邦ナンバー
+		IS_TREATY_UNI:(LOCAL:0) = 0
+		COUNTRY_Union_REFERENCE:(LOCAL:0):0 = 0
+		COUNTRY_Union_REFERENCE:(LOCAL:0):1 = 0
+		FOR LOCAL:1, 0, MAX_COUNTRY
+			SIF TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:1):0 == LOCAL:0
+				TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:1):0 = 0
+			SIF TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:1):1 == LOCAL:0
+				TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:1):1 = 0
+		NEXT
+	BREAK
+	ENDIF
+NEXT
+

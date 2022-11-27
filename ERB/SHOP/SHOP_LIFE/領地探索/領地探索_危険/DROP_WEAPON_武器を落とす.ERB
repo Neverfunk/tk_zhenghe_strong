@@ -1,0 +1,198 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_DROP_WEAPON_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_DROP_WEAPON_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_DROP_WEAPON(対象)
+#DIM 対象
+IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+	PRINTFORML 走在险峻的山路时，不小心把武器掉下了悬崖
+	PRINTFORML 慌忙跑到山崖下，遇到了一个头上生着一对可爱猫耳的少女
+	PRINTFORML 少女怀里抱着刚刚掉下去的武器
+	PRINTFORML 看来是被她捡到了，%ANAME(対象)%把事情的经过向她说明后希望她能够归还
+	PRINTFORML 对方犹豫了一下，回答道要拿回武器的话需要给她3000金，或者说……
+	PRINTFORML 她红着脸提起了裙子，湿漉漉的内裤勾勒出股间缝隙的形状
+	PRINTFORML 说起来，最近好像说是小动物的发情期来着……
+ELSE
+	PRINTFORML 走在險峻的山路時、不小心武器掉下了懸崖
+	PRINTFORML 慌忙的跑到崖下、遇到了一個流浪漢
+	PRINTFORML 男人的手中握著剛剛掉下去的武器
+	PRINTFORML 看来是被這男人揀到了、把事情経過向他説明後希望他能夠帰還
+	SIF IS_FEMALE(対象)
+		PRINTFORML 男人用着黏糊糊的視線看向%ANAME(対象)%
+	PRINTFORML 這已経是我的東西了、如果無論如何都想要我還你的話就給我3000金
+ENDIF
+
+PRINTL
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+CALL ASK_MULTI_JUDGE("武力奪回", 1, "付錢", MONEY >= 3000, "放棄", 1, "用嘴奉仕", IS_FEMALE(対象), "用身体支付", IS_FEMALE(対象))
+
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORML 原本就是自己的東西、沒必要付錢
+		PRINTFORML %ANAME(対象)%向\@ (CONFIG:202 == 1 && TALENT:対象:0 == 1) ? 少女 # 男人\@襲撃過去！
+		IF LIMIT(ABL:対象:武闘, 30, 70) > RAND:100
+			PRINTFORML 成功了！
+
+			IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+				PRINTFORML 吃力躲避着少女的弹幕，好不容易从她手中抢回了武器
+				PRINTFORMW 不理会趴在地上不停摩擦双腿的少女，%ANAME(対象)%离开了那里
+			ELSE
+				PRINTFORML 因為是徒手所以有些苦戦但還是成功從男人那裡奪回了武器
+				PRINTFORMW 確認一下無法動弾的男人樣子後離開了那裡
+			ENDIF
+
+			CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:5 + 3)
+		ELSEIF IS_MALE(対象)
+			PRINTFORML 糟了！
+			PRINTFORML 因為沒有武器所以沒能発揮出像往常一樣的力量…
+			PRINTFORMW 襲撃失敗被打傷后武器被男人直接帯走了
+			CALL ADD_COOLTIME(対象, 2)
+		ELSE
+			PRINTFORML 糟了！
+
+			IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+				PRINTFORML 努力躲避着少女的弹幕，但最终还是不小心被击中了…
+				PRINTFORML 变得破破烂烂的%ANAME(対象)%无力地倒在了地上
+				PRINTFORML 把武器藏到了一边，少女把%ANAME(対象)%拖进了附近的树丛……
+			ELSE
+				PRINTFORML 因為沒有武器所以沒能発揮出像往常一樣的力量…
+				PRINTFORMW 襲撃失敗被打傷后武器被男人直接帯走了
+				PRINTFORMW 男人把無力的%ANAME(対象)%拖進了附近的樹叢……
+			ENDIF
+
+			PRINTFORML
+			$RAPE_SCENE
+
+			IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+				PRINTFORML 从树丛的深处传来了粘稠的水声
+				PRINTFORMW 衣服被剥光的%ANAME(対象)%，正被发情的妖怪少女作为玩具而使用着
+				PRINTFORML 骑跨在%ANAME(対象)%的脸上，少女一边揉着自己的阴核，一边命令%ANAME(対象)%用舌头侍奉自己的小穴
+				PRINTFORML 泛滥而出的蜜液洒满%ANAME(対象)%的脸颊，蕴含在其中的费洛蒙早已另%ANAME(対象)%失去理智
+				PRINTFORMW 但伸向自己股间的双手全都被妖怪少女所控制，对方坏笑着表示只有满足她才能得到快乐
+				PRINTFORML 听到这话的%ANAME(対象)%立刻加快了舌头的动作，拼命在对方湿润的秘穴中搅动着，连肉壁上的每一个褶皱都不愿放过
+				PRINTFORML 如愿得到快感的少女，像奖励一般地俯下身去，逗弄起%ANAME(対象)%%STR_BODY("陰唇：処女確認", 対象)%
+				PRINTFORMW 好不容易才得到梦寐以求的快乐的%ANAME(対象)%，一下子就弓起后背走上了天国……
+				CALL FUCK(対象, "欲望, 奉仕, 性交, Ｃ, Ｂ, 接吻, 口淫, 百合", "接吻喪失",0, @"妖怪少女的\@RAND:2 ? 秘贝 # 嘴唇\@", "", "", "敗北した末の強姦")
+				PRINTFORML
+				PRINTFORML 直到太阳下山，%ANAME(対象)%才终于被满足的少女解放了
+				PRINTFORMW 被抢走了内裤和裙子，%ANAME(対象)%一路遮遮掩掩地逃回了家……
+			ELSE
+				PRINTFORML 從樹叢的深処傳來了男女的交合聲
+				PRINTFORMW 衣服被剝光的%ANAME(対象)%、正被流浪漢侵犯著
+				PRINTFORML 缺少女人的男人毫不留情地抽插著、%ANAME(対象)%已經精疲力竭了
+				PRINTFORMW 被從後面不停用力地剜動著%STR_BODY("膣：処女確認：時間経過：Ｖ挿入：中出し", 対象)%、%ANAME(対象)%快要喘不過氣了
+				PRINTFORMW 一邊揉搓著%STR_BODY("胸：性交", 対象)%、一邊拍打著%STR_BODY("尻：性交：後背位", 対象)%、被迫屈服于他
+				PRINTFORMW 當男人把髒汚泛黄的精液射入膣内的時候、%ANAME(対象)%大幅後弓著背高潮了……
+				CALL FUCK(対象, "欲望, 精愛, 性交, Ｖ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_SPERM_ID("流浪漢"), @"流浪漢的\@RAND:2 ? 肉棒 # 嘴唇\@", "流浪漢", "", "敗北した末の強姦")
+				PRINTFORML
+				PRINTFORMW %ANAME(対象)%被解放的時候夜已經深了
+				PRINTFORMW 被男人逼迫著約定下次再來、武器和衣服都被他搶走了……
+			ENDIF
+
+			CALL ADD_COOLTIME(対象, 3)
+		ENDIF
+	CASE 1
+		PRINTFORML 只能棄卒保車了……
+		PRINTFORML 默默地付了錢
+		CALL ICPRINT("支付了<3000>金", "L", カラー_注意)
+		MONEY -= 3000
+	CASE 2
+		PRINTFORML 雖然有些可惜、但不值得付那麼多錢
+		PRINTFORMW 於是放棄離開了
+	CASE 3
+
+		IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+			PRINTFORML 用嘴满足你，能把它还回来么……
+			PRINTFORMW 听到如此回答的少女，立刻欣喜地把%ANAME(対象)%带进了附近的树丛
+			PRINTFORML
+			PRINTFORML %ANAME(対象)%紧贴在妖怪少女的股间，用舌头奉仕着她一张一合的秘穴
+			PRINTFORMW 分泌的体液中含有妖怪专属的信息素，香甜的味道不断融化着%ANAME(対象)%的心灵
+			PRINTFORML 分不清嘴里的究竟是唾液还是爱液，饥渴的%ANAME(対象)%干脆一股脑地咽了下去
+			PRINTFORMW 每当舌尖从少女柔嫩的花瓣上分离时，粘稠的液体都会在之间连成一道晶莹的丝线
+			PRINTFORML 身体愈发火热的%ANAME(対象)%的手指，不知不觉向着自己的下半身移动而去
+			PRINTFORML 随着少女身体的一阵颤抖，汹涌的蜜液喷满了%ANAME(対象)%的头上脸上
+			PRINTFORMW 被香甜的气味包围了的%ANAME(対象)%，也在自慰的动作中达到了高潮……
+			CALL FUCK(対象, "欲望, 百合, 奉仕, 性技, Ｃ, Ｍ, 口淫, 自慰", "接吻喪失", 0, @"妖怪少女的\@RAND:2 ? 秘贝 # 嘴唇\@", "", "", "売春")
+			PRINTFORML
+			IF ABL:対象:性技 + ABL:対象:奉仕 < RAND:10
+				PRINTFORMW %ANAME(対象)%的奉仕沒有让少女满足
+				PRINTFORMW 欲求不满的少女，立刻激动地推到了%ANAME(対象)%……
+				GOTO RAPE_SCENE
+			ELSE
+				PRINTFORMW 少女把武器还了回来
+				PRINTFORMW 询问着能否再次见面，少女红着脸告诉%ANAME(対象)%自己家的……
+			ENDIF
+
+		ELSE
+			PRINTFORML 用嘴奉仕、能把它還給我麼……
+			PRINTFORML 這麼說完後、男人淫笑著把%ANAME(対象)%帯進了附近的樹叢
+			PRINTFORML
+			PRINTFORML %ANAME(対象)%一邊発出唾液的粘糊聲、一邊舔弄著男人的肉棒
+			PRINTFORMW 充滿恥垢的肉棒散発著悪臭、讓%ANAME(対象)%因為本能而有些饑渴難耐
+			PRINTFORMW %ANAME(対象)%的手指不知不覺中移向了下半身、最後開始了自慰
+			PRINTFORMW 男人因為%PRONOUN(対象)%的痴態更加興奮了、命令加快動作
+			PRINTFORMW 之後男人射出了精液、%ANAME(対象)%在沒有命令的情況下、自己把精液全部喝下去了……
+			CALL FUCK(対象, "欲望, 精愛, 奉仕, 性技, Ｍ, 口淫", "接吻喪失, 口内射精", 0, @"流浪漢的\@RAND:2 ? 肉棒 # 嘴唇\@", "", "", "売春")
+			PRINTFORML
+			IF ABL:対象:性技 + ABL:対象:奉仕 < RAND:10
+				PRINTFORMW %ANAME(対象)%的奉仕沒有讓男人滿足
+				PRINTFORMW 他接下來、開始侵犯起%ANAME(対象)%……
+				GOTO RAPE_SCENE
+			ELSE
+				PRINTFORMW 男人把武器歸還了
+				PRINTFORMW 淫笑著說道、下次有機會的話再來啊……
+			ENDIF
+		ENDIF
+
+	CASE 4
+				IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+
+			PRINTFORML 把身体交给你，能把它还回来么……
+			PRINTFORMW 听到如此回答的少女，立刻欣喜地把%ANAME(対象)%带进了附近的树丛
+			PRINTFORML
+			PRINTFORML 安静点的草丛中渐渐响起了两位少女炽热的呻吟声
+			PRINTFORMW 赤裸的%ANAME(対象)%被压在身下，二人在激烈的舌吻中互交换着唾液
+			PRINTFORML 少女的乳房紧贴着%ANAME(対象)%%STR_BODY("胸部：感触", 対象)%，粉红的突起彼此磨蹭着挺立了起来
+			PRINTFORMW 秘贝分泌的爱液沿着股间缓缓流下，在二人身体的摩擦中被逐渐涂抹均匀，随着肉体的挤压而发出黏糊糊的水声
+			PRINTFORML 少女上下扭动着腰部，稚嫩的花瓣紧紧压在%ANAME(対象)%的秘缝上，充血的阴蒂由于每次摩擦而互相刺激，给二人带来一阵阵闪电般的快感
+			PRINTFORMW 发情的本能带给妖怪少女无底洞般的欲望，她贪婪地从%ANAME(対象)%身上攫取着快乐，身体在接连的高潮中不住地颤抖着
+			PRINTFORML 高强度的性爱早已让%ANAME(対象)%筋疲力尽，但远未满足的少女却不给她喘息的时间，无尽的快感像漩风一样席卷着%ANAME(対象)%的全身
+			PRINTFORMW 浑身沾满彼此体液的二人，在悄然而至的月色下闪烁着晶莹的色彩……
+			CALL FUCK(対象, "欲望, 百合, 奉仕, 性技, Ｃ, Ｂ, Ｍ, 口淫, 接吻", "接吻喪失", 0, @"妖怪少女的\@RAND:2 ? 秘贝 # 嘴唇\@", "", "", "売春")
+			PRINTFORML
+			PRINTFORML %ANAME(対象)%浑身瘫软地躺在地上，少女把武器轻轻摆在她的身边
+			PRINTFORMW 把%ANAME(対象)%的内裤穿在了自己身上，少女渐渐消失在树林中
+		ELSE
+			PRINTFORML 用身体支付、能把它還給我麼……
+			PRINTFORML 這麼說完後、男人淫笑著把%ANAME(対象)%帯進了附近的樹叢
+			PRINTFORMW
+			PRINTFORML 在安静的茂密草叢裡響起陣陣的男女激烈交合声
+			PRINTFORML 全裸的%ANAME(対象)%被男人仰面推倒、把肉棒挿入了深処
+			PRINTFORML 每次被発泄著性欲的男人毫不留情地用力剜動%STR_BODY("膣：処女確認：時間経過：感度", 対象)%的時候、%ANAME(対象)%都會痙攣呻吟
+			PRINTFORML 在男人用雙手抓住臉強行吻上來的時候、%ANAME(対象)%開始悶聲掙扎著
+			PRINTFORML 而男人在舌頭不停的交纏同時腰部更是激烈的運動着、%ANAME(対象)%感受着下半身的衝撃不禁身体顫抖繃緊了双脚
+			PRINTFORML 在被蹂躙般一樣激烈的性愛中、%ANAME(対象)%不管正被侵犯着的事実無意識的收縮着小穴纏緊了他的肉棒
+			PRINTFORMW 當髒汚泛黄的精液從男人肉棒射入膣内的時候、%ANAME(対象)%大幅後弓著背発出了淫叫
+			CALL FUCK(対象, "欲望, 精愛, 性交, Ｖ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_SPERM_ID("流浪漢"), @"流浪漢的\@RAND:2 ? 肉棒 # 嘴唇\@", "流浪漢", "", "売春")
+			PRINTFORML
+			PRINTFORML 男人把武器扔向了躺在地上失神的%ANAME(対象)%身辺
+			PRINTFORMW 説道這就給我啦、拿着内裤就離開了
+		ENDIF
+
+ENDSELECT
+
+RETURN 1

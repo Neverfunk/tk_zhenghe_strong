@@ -1,0 +1,199 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_DRUNK_RAPE_RATE()
+RETURN 25
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_DRUNK_RAPE_DECISION()
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+SIF DAY < 10
+	RETURN 0
+RETURN 1
+
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_DRUNK_RAPE_SETTARGET()
+
+;遭遇キャラの選出
+CALL SELECT_CHARA_RANDOM("DAILY_DRUNK_RAPE")
+
+SIF RESULT == -1
+	RETURN 0
+
+DAILY_TARGET:0 = RESULT
+
+RETURN 1
+
+@SELECT_CHARA_RANDOM_LOGIC_DAILY_DRUNK_RAPE(対象)
+#DIM 対象
+RETURN CFLAG:対象:所属 != CFLAG:MASTER:所属 && !CFLAG:対象:捕虜先 && IS_FEMALE(対象) && !IS_ANIMAL(対象) && CFLAG:対象:特殊状態 != 特殊状態_死亡 && !(CFLAG:対象:特殊状態 == 0 && CFLAG:対象:所属 == 0)
+
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_DRUNK_RAPE_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;---------------------
+@EVENT_DAILY_DRUNK_RAPE()
+#DIM 対象
+
+
+IF GET_COUNTRY_BOSS(CFLAG:MASTER:所属) == MASTER
+	PRINTFORMW 从部下那里听说不久会举行宴会
+	PRINTFORMW 各个国家的人都会来，是一场盛大的宴会
+	PRINTFORMW 稍做休息去看一看怎么样
+	DVAR:睡姦_発生フラグ = 1
+ELSEIF DVAR:睡姦_発生フラグ == 0
+	PRINTFORMW 从%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%那里听说会举行宴会。
+	PRINTFORMW 各个国家的人都会来，是一场盛大的宴会
+	PRINTFORMW 稍做休息去看一看怎么样
+	DVAR:睡姦_発生フラグ = 1
+ELSE
+	PRINTFORMW 宴会再次举行
+ENDIF
+
+PRINTFORMW 怎么办呢
+;TranslatedMark どうしようか
+CALL ASK_YN("出席", "算了吧")
+IF RESULT == 1
+	PRINTFORMW 因为很忙所以谢绝了
+	RETURN 1
+ENDIF
+
+PRINTFORMW 难得的机会，我决定出席一下
+
+
+対象 = DAILY_TARGET:0
+
+IF 対象 <= 0
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW 有些无聊的宴会
+	RETURN 1
+ENDIF
+
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW 是比想象更热闹的宴会
+PRINTFORMW 不仅仅是人类，各种种族的人都来了
+PRINTFORMW 大家都在这个时候忘了种族归属，非常热闹
+PRINTFORMW 被热情所感染，%ANAME(MASTER)%也差不多喝醉了
+PRINTFORMW 这时，发现了独自一人站在那里的%ANAME(対象)%
+IF CFLAG:対象:好感度 < 0
+	PRINTFORML 但是发现了%ANAME(MASTER)%的%ANAME(対象)%看了一眼，就走掉了
+	PRINTFORMW 没办法，%ANAME(MASTER)%只能和其他人一起喝酒了
+	CFLAG:対象:面識 = 1
+	RETURN 1
+ELSEIF CFLAG:対象:面識 == 1
+	PRINTFORMW 再次看到%ANAME(MASTER)%的%ANAME(対象)%走了过来
+ELSE
+	PRINTFORMW 虽然并不相识，但能在这里遇到也是缘分吧，试着搭话了
+ENDIF
+PRINTFORMW 一边喝酒一边轻松地聊天
+PRINTFORMW 看起来%ANAME(対象)%是被朋友介绍的、但是没找到那个朋友、好像有些无聊
+PRINTFORMW 与其他势力的%ANAME(対象)%能交流的事也不多，在这个机会亲密起来也不错吧
+PRINTFORMW 怎么办
+CALL ASK_MULTI("继续谈笑", "邀请跳舞", "比酒")
+IF RESULT == 0
+	PRINTFORMW 彼此都很无聊的两个人边喝酒边谈笑
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW 度过了愉快的时光
+	CFLAG:対象:好感度 += 300
+	CFLAG:対象:面識 = 1
+	RETURN 1
+ELSEIF RESULT == 1
+	PRINTFORML 在邀请%ANAME(対象)%跳舞的时候、她虽然害羞但还是抓住了%ANAME(MASTER)%的手
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW 度过了愉快的时光
+	CFLAG:対象:好感度 += 300
+	CFLAG:対象:面識 = 1
+	RETURN 1
+ELSE
+	PRINTFORML %ANAME(MASTER)%想要做一些恶作剧
+	PRINTFORML 特地与%ANAME(対象)%比起谁能喝的更多
+	PRINTFORMW 与已经有些醉意、情绪高涨的%ANAME(対象)%一决胜负
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW ・
+	IF ABL:対象:肝臓 * 10 >= ABL:MASTER:肝臓 * 10
+		PRINTFORML 但是不管喝多少酒、%ANAME(対象)%也没有一点醉的迹象
+		PRINTFORMW 相反、%ANAME(MASTER)%被醉意击溃了
+		PRINTFORML 
+		PRINTFORML 被其他人发现的%ANAME(MASTER)%醒来后
+		PRINTFORML 已经没有%ANAME(対象)%身影了
+		PRINTFORMW %ANAME(MASTER)%一边抱着疼痛的脑袋、一边蹒跚着回去了
+		CFLAG:対象:好感度 += 100
+		CFLAG:対象:面識 = 1
+		RETURN 1
+	ENDIF
+	PRINTFORML 过了一段时间、%ANAME(対象)%完全醉倒了
+	PRINTFORMW %ANAME(MASTER)%以照料的名义把她带进了附近的屋子
+	PRINTFORML 将她放在床上并脱掉了衣服、感受到了柔嫩的肌肤
+	PRINTFORML 嗯...虽然中途有呻吟但是完全没有醒来的样子
+	PRINTFORMW %ANAME(MASTER)%将已经勃起的家伙解放出来、插入了湿润的秘部
+	SELECTCASE RAND:2
+		CASE 0
+			PRINTFORML %ANAME(対象)%已经完全醉了，被%ANAME(MASTER)%侵犯了也没有醒来的样子
+			SELECTCASE RAND:5
+				CASE 0
+					PRINTFORMW 在其无意识的情况下、顺从了自己的身体、满满的播种了
+				CASE 1
+					PRINTFORMW 每一次动作都能感觉身体对肉棒非常敏感、让%ANAME(MASTER)%非常满足
+				CASE 2
+					PRINTFORMW %ANAME(MASTER)%在她的嘴中、胸部和小穴中射出了精液
+				CASE 3
+					PRINTFORMW 享受着嫩滑肌肤和紧致的小穴途中、%ANAME(MASTER)%射出了好几次精液
+				CASE 4
+					PRINTFORMW 在没有抵抗的女性肉体中、%ANAME(MASTER)%忘我的抽动腰部播种
+			ENDSELECT
+		CASE 1
+			PRINTFORML 她在被侵犯的途中醒来了、但是意识还很朦胧、不知道在做什么的样子
+			SELECTCASE RAND:5
+				CASE 0
+					PRINTFORMW 即使预告会被中出也没有抵抗，坦率的小穴多次接受了%ANAME(MASTER)%的精液
+					;TranslatedMark 膣出し予告をしても抵抗もされず、坦率に%ANAME(MASTER)%の精を受け入れる彼女に何度も膣出しした
+				CASE 1
+					PRINTFORMW %ANAME(MASTER)%没有被迷糊中的她抵抗、在她的体内充分地播种了
+				CASE 2
+					PRINTFORMW 朦胧状态下被尽情播种的%ANAME(対象)%发出了可爱的喘息
+				CASE 3
+					PRINTFORMW 朦胧中的她紧紧抱住%ANAME(MASTER)%
+				CASE 4
+					PRINTFORMW %ANAME(MASTER)%按喜好引导着一脸恍惚的%ANAME(対象)%侍奉自己
+			ENDSELECT
+	ENDSELECT
+	CALL FUCK_RAPE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%の\@ RAND:2 ? 肉棒 # 唇\@", ANAME(MASTER))
+	CALL FUCK(MASTER, "Ｃ, 性交, 射精, 奉仕", "接吻喪失, 童貞喪失", 0, @"%ANAME(対象)%の\@ RAND:2 ? 秘貝 # 唇\@", "", @"%ANAME(対象)%の膣")
+ENDIF
+PRINTFORML 
+PRINTFORML %ANAME(MASTER)%充分享用了她的身体
+PRINTFORMW 在把身体擦干净，穿上衣服后，就离开了那个地方
+CFLAG:対象:面識 = 1
+
+RETURN 1

@@ -1,0 +1,348 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K21_AMAYAKASI_RATE(対象)
+#DIM 対象
+RETURN (KDVAR:対象:藍_甘やかし > 0 ? 200 # 70)
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K21_AMAYAKASI_DECISION(対象)
+#DIM 対象
+
+;プレイヤーキャラが紫か幽幽子だと発生しない
+SIF (MASTER == NAME_TO_CHARA("紫") || MASTER == NAME_TO_CHARA("幽幽子"))
+	RETURN 0
+
+;恋慕系か主人系で、合意がなければだめ
+SIF !((IS_LOVER(対象) || IS_SLAVED_BY(対象)) && TALENT:対象:合意)
+	RETURN 0
+
+;ペニスがないと駄目
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+	
+;対象が女でないとだめ
+SIF !IS_FEMALE(対象)
+	RETURN 0
+	
+;終わってたら発生しない
+SIF KDVAR:対象:藍_甘やかし == -1
+	RETURN 0
+	
+;ARG:0が口上デイリーイベントを実施できるかの簡易チェック関数。
+;ARG:1 0 MASTERと別勢力である 1 MASTERと同一勢力である　-1 どちらでもよい
+;ARG:2 0 捕虜でない 1 捕虜である -1 どちらでもよい
+;ARG:3 0 面識がない 1 面識がある -1 どちらでもよい
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1) 
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K21_AMAYAKASI_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K21_AMAYAKASI(対象)
+#DIM 対象
+#DIM 対象都市
+#DIM 対象都市2
+#DIM 橙
+
+橙 = NAME_TO_CHARA("橙")
+
+;自国都市ランダム
+CALL DAILY_EVENT_RAND_CITYSELECT(0)
+対象都市 = RESULT
+SIF 対象都市 < 0
+	RETURN 0
+
+CALL DAILY_EVENT_RAND_CITYSELECT(0)
+対象都市2 = RESULT
+SIF 対象都市 < 0
+	RETURN 0
+	
+SELECTCASE KDVAR:対象:藍_甘やかし
+	CASE 0
+		PRINTFORMW 深夜。%ANAME(MASTER)%的房間裡還亮著燈
+		PRINTFORML 最近的文件工作堆積如山、%ANAME(MASTER)%常常工作到深夜…
+		PRINTFORML 不能因為領地內的經濟問題而偷懶、%ANAME(MASTER)%臉色蒼白地批閱著文件
+		PRINTFORMW 「…沒問題吧？　%ANAME(MASTER)%。看你一副很疲憊的樣子」
+		PRINTFORML 可能是擔心連日來的忙碌、%ANAME(対象)%過來探望了
+		PRINTFORMW 「嗯…这堆文件实在是多了吧。你的脸色也不好、稍微休息一下怎么样？　之后的就交给我了」
+		PRINTFORML 虽然是非常难得的建议、但是%ANAME(対象)%因为非常的优秀已经接受了比自己更多的工作了
+		PRINTFORMW 我还要给她添加负担吗…怎么办？
+		PRINTFORML
+		CALL ASK_YN("那就、恭敬不如从命吧…", "没关系、总会有办法的…总会有办法的…")
+		IF RESULT == 1
+			PRINTFORML 「真的没关系吗？　……那麼、我就先離開了…」
+			PRINTFORML %ANAME(対象)%帶著擔心的表情離開了……
+			PRINTFORMW 這是我的工作。不能給%ANAME(対象)%添加額外的負擔
+			PRINTFORML 再次埋頭進書山沒多久就開始視線模糊了
+			PRINTFORMW 可能是因為連日的疲勞、意識漸漸模糊了……
+			PRINTFORML
+			PRINTFORMW
+			CALL COLOR_PRINTL(@"%ANAME(MASTER)%因為過勞倒下了！", カラー_注意)
+			PRINTFORML
+			PRINTFORMW
+			PRINTFORML ・
+			PRINTFORML ・・
+			PRINTFORMW ・・・
+			PRINTFORML 「……嗯？　終於醒過來了嗎%ANAME(MASTER)%。啊啊、你繼續睡吧。沒關係、文件就交給我吧」
+			PRINTFORML %ANAME(MASTER)%的意識恢復之後、%ANAME(対象)%打了聲招呼。她發現了倒下的%ANAME(MASTER)%並照顧了他
+			PRINTFORMW 「為了以防萬一再來看一次真的太好了、你好像輕微貧血、之後去看看醫生比較好」
+			PRINTFORML 到底失去了意識多久了呢？最近的文件很多、如果不快點繼續處理的話…
+			PRINTFORMW 「不行。我不是讓你繼續休息嗎？　你之前就是因為強撐著才暈過去的。不要擔心工作了」
+			PRINTFORML %ANAME(対象)%撫摸著%ANAME(MASTER)%的頭、她尾巴的末端正卷起無數的筆、以驚人的速度處理著文件
+			PRINTFORMW 「我的本體是九尾狐哦？　所以沒有關係的。首先、先從最近日期的文件開始處理起來吧」
+			PRINTFORML 結果%ANAME(対象)%一下子就把大量的文件都處理好了、這樣一來就暫時沒有問題了吧
+			PRINTFORMW 「真是的。雖然努力工作很了不起、但是希望你在倒下之前先依靠我。還是說、我靠不住？」
+			PRINTFORMW 不、我不是這個意思…我只是不想在工作中給%ANAME(対象)%增加多餘的負擔…
+			PRINTFORML 「…你這麼溫柔是你的優點、但是如果自己倒下的話就一切白費了。……我真的、很擔心你啊…」
+			PRINTFORMW %ANAME(対象)%一邊說著一邊抱住了%ANAME(MASTER)%、尾巴也溫柔地包裹住了%ANAME(MASTER)%的全身
+			PRINTFORMW 「今天就讓我陪著你睡覺吧。…以後也不用客氣、請盡情和我撒嬌…」
+			ABL:対象:主導度Ｎ += 150
+			CFLAG:対象:好感度 += 100
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了100", 0x00FFFF)
+			CALL PRINT_ADD_EXP(MASTER, "政治経験値", RAND(5, 10), 1)
+			CALL TRAIN_AUTO_ABLUP(MASTER)
+			KDVAR:対象:藍_甘やかし = 1
+			PRINTFORMW
+		ELSE
+			PRINTFORMW 「呼呼、就請交給我吧。你就稍微休息一下吧」
+			PRINTFORML %ANAME(対象)%讓%ANAME(MASTER)%枕在自己的大腿上睡覺、她尾巴的末端卷起無數的筆、以驚人的速度處理著文件
+			PRINTFORML 「我的本體是九尾狐哦？　所以沒有關係的。首先、先從最近日期的文件開始處理起來吧」
+			PRINTFORMW 結果%ANAME(対象)%一下子就把大量的文件都處理好了、這樣一來就暫時沒有問題了吧
+			PRINTFORML 「怎麼樣？　我是不是很厲害。所以說、你隨時隨地都可以拜託我哦」
+			PRINTFORML %ANAME(対象)%開心地撫摸著%ANAME(MASTER)%的頭。似乎非常高興能夠被拜託幫忙
+			PRINTFORMW 「那麼、工作也完成了、…你的臉色還是很差勁呢。我去給你拿點開胃的飲料來吧」
+			PRINTFORML 工作結束喘了口氣後、%ANAME(対象)%抱住了%ANAME(MASTER)%、尾巴也溫柔地包裹住了%ANAME(MASTER)%的全身
+			PRINTFORML 「今天就讓我陪著你睡覺吧。…以後也不用客氣、請盡情和我撒嬌…」
+			PRINTFORMW ……第二天、可能是因為被%ANAME(対象)%治愈了的效果吧、身體已經沒有任何不適了、精神也徹底煥發了起來
+			ABL:対象:主導度Ｎ += 100
+			CFLAG:対象:好感度 += 150
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了150", 0x00FFFF)
+			KDVAR:対象:藍_甘やかし = 1
+			;クールタイムがあったら-1
+			SIF COOLTIME:MASTER:0 < 0
+				CALL ADD_COOLTIME(MASTER, -1)
+			PRINTFORMW
+		ENDIF
+	CASE 1
+		PRINTFORML 深夜。%ANAME(MASTER)%的房間裡還亮著燈
+		PRINTFORML %ANAME(MASTER)%又被堆積成山的文件給困住了…
+		PRINTFORMW 「沒問題嗎？　%ANAME(MASTER)%。可以的話請讓我再幫你吧？」
+		PRINTFORML 可能是擔心工作到深夜還沒完成、%ANAME(対象)%又來看望%ANAME(MASTER)%了
+		PRINTFORMW 那麼、怎麼辦呢？
+		PRINTFORML
+		CALL ASK_YN("那就、恭敬不如從命吧", "不、沒關係的")
+		IF RESULT == 1
+			PRINTFORML 「……看來、這不是強撐著說出來的話。臉色不錯」
+			PRINTFORML 如果需要被多次幫助的話那麼這個男人就是廢物。%ANAME(MASTER)%對著%ANAME(対象)%表示「這次沒問題」
+			PRINTFORMW （確實呢…如果我太多管閒事的話%ANAME(MASTER)%會覺得自己沒用的…雖然有點寂寞但是沒有辦法）
+			PRINTFORML 「我知道了。但是請讓我準備一下夜宵吧、這樣可以吧？」
+			PRINTFORMW 正好肚子也餓了。%ANAME(MASTER)%準備吃完%ANAME(対象)%做的夜宵再繼續工作
+			PRINTDATAW
+			;DATA ちなみにメニューはきつねうどんだった
+			;DATA ちなみにメニューは稲荷寿司だった
+			;DATA ちなみにメニューは油揚げの味噌汁だった
+			;DATA ちなみにメニューは油揚げのサラダだった
+			;DATA ちなみにメニューは焼き油揚げだった
+			;DATA ちなみにメニューは信玄袋だった
+			DATA 今晚的菜品是油炸豆腐面
+			DATA 今晚的菜品是稲荷寿司
+			DATA 今晚的菜品是油炸味增湯
+			DATA 今晚的菜品是油炸莎拉
+			DATA 今晚的菜品是油炸豆腐
+			DATA 今晚的菜品是信玄袋
+			ENDDATA
+			PRINTFORML
+			PRINTFORML
+			PRINTFORMW …總算在天亮之前結束了工作。%ANAME(MASTER)%在愉快的成就感的包圍下很快睡著了…
+			CFLAG:対象:好感度 += 100
+			CALL PRINT_ADD_EXP(MASTER, "政治経験値", RAND(10, 25), 1)
+			CALL TRAIN_AUTO_ABLUP(MASTER)
+			KDVAR:対象:藍_甘やかし = -1
+			PRINTFORMW
+		ELSE
+			PRINTFORMW 撒嬌般地要求幫忙、%ANAME(対象)%一邊微笑著一邊溫柔撫摸著%ANAME(MASTER)%的頭
+			PRINTFORML 「呼呼。我很開心哦、你這麼坦率地要我幫忙。好、我馬上幫你忙」
+			PRINTFORMW %ANAME(対象)%說完後、在%ANAME(MASTER)%的眼前創造了很多式神
+			PRINTFORML 「這些傢伙雖然不會什麼複雜的工作、但是這些雜務還是可以處理得很好」
+			PRINTFORMW 巴掌般大小的式神各自拿起了筆開始工作
+			PRINTFORML 以防萬一、確認了一下完成的文件發現都沒問題。真是方便的能力啊……
+			PRINTFORMW 「那麼、接下來就交給式神吧…還有啊、還有就是…」
+			PRINTFORML 「%ANAME(MASTER)%、工作到深夜應該很累吧。讓我來幫你按摩吧」
+			PRINTFORMW 說著、%ANAME(対象)%開始為%ANAME(MASTER)%揉肩膀
+			PRINTFORML 力度恰到好處、以絕妙的方法不停揉捏著、讓%ANAME(MASTER)%情不自禁呻吟出聲
+			PRINTFORMW 「呼呼…喜歡嗎？　來吧、趴在床上…。背部和腰部都會幫你做的」
+			PRINTFORML %ANAME(対象)%那柔軟靈巧的手指確實能解除肌肉的酸痛、令%ANAME(MASTER)%舒服得沉迷其中
+			PRINTFORMW 「是不是特別舒服？　呼呼、紫大人也經常找我按摩哦…而且還被她稱讚過呢♪」
+			PRINTFORML 包含著愛情的按摩和她那甜蜜的香味、還有在耳邊輕聲細語的溫柔聲音讓%ANAME(MASTER)%悄然入睡…
+			PRINTFORMW 「已經睡著了啊…之後的事情就交給我吧…今後也、不用考慮這麼多呢……❤」
+			PRINTFORML ・
+			PRINTFORML ・・
+			PRINTFORMW …睡得很熟…。第二天早上、桌子上放著完成了的文件
+			ABL:対象:主導度Ｎ += 150
+			CFLAG:対象:好感度 += 150
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了150", 0x00FFFF)
+			;クールタイムがあったら-1
+			SIF COOLTIME:MASTER:0 < 0
+				CALL ADD_COOLTIME(MASTER, -1)
+			KDVAR:対象:藍_甘やかし ++
+			PRINTFORMW
+		ENDIF
+	CASE 2
+		PRINTFORMW 某一天。忙于工作的%ANAME(MASTER)%、更多的文件堆積在了桌子上。看著文件的數量實在是令人苦笑不已…
+		PRINTFORML ……為什麼？　這麼多的文件會讓人累死的吧？　這工作到底要持續到什麼時候？
+		PRINTFORMW 「啊、%ANAME(MASTER)%、又在工作嗎…哇、這麼多真是太厲害了……。可以的話、讓我來做吧？」
+		PRINTFORML 正在緊繃著臉目瞪口呆的時候、%ANAME(対象)%再次來看望了
+		PRINTFORML 畢竟文件的數量實在是太多了、所以想讓她幫忙…
+		PRINTFORMW 那麼、要請她幫忙嗎？
+		PRINTFORML
+		CALL ASK_YN("幫幫我…", "没关系、总会有办法的…总会有办法的…")
+		IF RESULT == 1
+			PRINTFORML %ANAME(対象)%在聽到、「自己會想辦法」的回答後。笑容從臉上消失了
+			PRINTFORML 「誒誒っ！？　…這、這樣啊……我知道了よ……但、但是沒關係、你無論什麼時候都可以拜託我的哦？」
+			PRINTFORMW %ANAME(対象)%對%ANAME(MASTER)%的堅定意志表示尊重、但是很明顯非常不安的樣子…
+			PRINTFORML 「那麼、就幫你準備點吃的吧。幫這麼一點小忙的話也是可以的吧？」
+			PRINTFORMW …確實、需要補充能量呢。%ANAME(MASTER)%拜託%ANAME(対象)%做飯之後重新開始了工作
+			PRINTDATAW
+			;DATA ちなみにメニューはきつねうどんだった
+			;DATA ちなみにメニューは稲荷寿司だった
+			;DATA ちなみにメニューは油揚げの味噌汁だった
+			;DATA ちなみにメニューは油揚げのサラダだった
+			;DATA ちなみにメニューは焼き油揚げだった
+			;DATA ちなみにメニューは信玄袋だった
+			DATA 今晚的菜品是油炸豆腐面
+			DATA 今晚的菜品是稲荷寿司
+			DATA 今晚的菜品是油炸味增湯
+			DATA 今晚的菜品是油炸莎拉
+			DATA 今晚的菜品是油炸豆腐
+			DATA 今晚的菜品是信玄袋
+			ENDDATA
+			PRINTFORML ・
+			PRINTFORML ・・
+			PRINTFORMW ・・・幾天之後
+			PRINTFORML ……終於%ANAME(MASTER)%完成了！　把不可能完成的量的工作全部做完了！
+			PRINTFORMW 但是作為代價、好像失去了普通人的感情、但這也許只是暫時的吧…
+			PRINTFORMW 在一旁守護著%ANAME(MASTER)%的%ANAME(対象)%也不由得流下了淚水。仿佛在為自己的孩子成就了偉業而高興…
+			PRINTFORML 把完成的文件交給負責人的時候
+			PRINTFORML
+			CALL SINGLE_DRAWLINE
+			PRINTFORML 
+			PRINTFORMW 我只是把所有人的工作都收集起來放著、難道你一個人全部做完了！？
+			PRINTFORML 
+			CALL SINGLE_DRAWLINE
+			PRINTFORML
+			PRINTFORMW 之類的話、大概是心裡作用吧
+			PRINTFORMW 剩下的只有、睡覺了…、只有、睡覺了…、現在可以、睡覺了…………
+			PRINTFORML %ANAME(MASTER)%在那之後、因為過度疲勞而臥床不起…
+			CALL COLOR_PRINTW(@"%ANAME(MASTER)%因為過勞而倒下了！", カラー_注意)
+			CALL ADD_COOLTIME(MASTER, 1)
+			PRINTFORMW ……此後、%ANAME(MASTER)%暫時被免除了文書工作
+			CALL PRINT_ADD_EXP(MASTER, "政治経験値", RAND(40, 60), 1)
+			CALL TRAIN_AUTO_ABLUP(MASTER)
+			KDVAR:対象:藍_甘やかし = -1
+			PRINTFORMW
+		ELSE
+			PRINTFORML 已經不行了。%ANAME(MASTER)%撒嬌般地倒向了%ANAME(対象)%…
+			PRINTFORMW %ANAME(MASTER)%雙眼含淚地求著%ANAME(対象)%幫忙。那樣子大大刺激了%ANAME(対象)%的母性
+			PRINTFORML 「啊啊、啊啊！　就交給我吧！　沒關係、以後什麼都不用擔心了」
+			PRINTFORMW %ANAME(対象)%溫柔地抱住了%ANAME(MASTER)%、用自己的式神和尾巴開始處理起堆積如山的文件
+			PRINTFORML 「我也覺得這個數量太多了。分幾天高效率地完成吧。首先從城墻修繕方案開始…」
+			PRINTFORMW 她那全心投入工作的姿態讓人感到心痛。但是當提議自己也來幫忙、%ANAME(対象)%卻鄭重拒絕了
+			PRINTFORML 「沒關係、就交給我吧。我不會再讓你感到辛苦了」
+			PRINTFORMW 裡、%ANAME(対象)%溫柔地話語溫暖了被大量文件折磨的%ANAME(MASTER)%的心…
+			PRINTFORML 「現在就可以睡覺了…。你可以枕在我的胸口上睡覺哦…❤」
+			PRINTFORML %ANAME(対象)%把%ANAME(MASTER)%的臉溫柔地埋在自己的胸口、一邊輕輕撫摸著他的背部一邊唱著搖籃曲
+			PRINTFORMW %ANAME(MASTER)%在%ANAME(対象)%的體香和搖籃曲的包圍下、安心地入眠了……
+			CITY_GUARD:対象都市 += 20
+			CALL ICPRINT(@"%CITY_NAME:対象都市%的防御力上升了<20>點、變成了<{CITY_GUARD:対象都市}>", "W", カラー_注意)
+			PRINTFORML 
+			PRINTFORMW ―　过了一天　―
+			PRINTFORML 
+			PRINTFORMW 「今天是征召士兵的項目嗎…啊、早上好%ANAME(MASTER)%」
+			PRINTFORML 當%ANAME(MASTER)%醒來、發現%ANAME(対象)%早已開始工作了
+			PRINTFORML 「不用擔心哦。從今以後、所有的事情都交給我吧。不會再有不好的事情了」
+			PRINTFORMW 「比起這個…你最近好像很忙所以積攢了很多？」
+			PRINTFORML %ANAME(対象)%一邊說著一邊责弄著%ANAME(MASTER)%的股間。那根肉棒早已一柱擎天
+			PRINTFORMW 「呼呼❤　一大早就開始很有精神了呢❤。現在就做點能讓你更加精神的事情吧❤」
+			PRINTFORML 「所以今晚也請你什麼都別管、全部交給我就好了…❤」
+			PRINTFORMW ……結果這一天、聽之任之地充分享受了和%ANAME(対象)%的性愛生活……
+			CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴")
+			COUNTRY_SOLDIER:(CFLAG:対象:所属) += 4000
+			CALL ICPRINT("兵力增加了<4000>", "L", カラー_注意)
+			PRINTFORML 
+			PRINTFORMW ―　过了一天　―
+			PRINTFORML 
+			PRINTFORMW 「今天是投資周嗎。那麼就選這個吧…啊、早上好%ANAME(MASTER)%」
+			PRINTFORML 今天%ANAME(対象)%也早早地開始工作了。一大堆的文件都快處理得七七八八了
+			PRINTFORMW 「呼呼呼、如果是我就買這個！…話雖如此、果然還是有些累了…」
+			PRINTFORML %ANAME(MASTER)%為了犒勞%ANAME(対象)%、開始給她揉肩。こ雖然只能做這麼點事情…
+			PRINTFORML 「啊っ…❤　嗯嗯❤…很舒服喲❤、%ANAME(MASTER)%。謝謝你❤」
+			PRINTFORMW 「但是光這樣還是有點不夠呢…吶、%ANAME(MASTER)%。今天的工作好像也快要結束了…」
+			PRINTFORML 「作為獎勵、今晚能安慰一下我的身體嗎…❤」
+			PRINTFORMW %ANAME(対象)%靠在%ANAME(MASTER)%的身上、用貓咪發情般柔媚的聲音誘惑道
+			PRINTFORMW ……結果這一天、充分地享受了和%ANAME(対象)%的性愛生活……
+			CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+			CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴")
+			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴")
+			CALL MODIFY_CITY_ECONOMY(対象都市2, RAND(15000, 25000))
+			PRINTFORML 
+			PRINTFORMW ―　过了一天　―
+			PRINTFORML 
+			PRINTFORMW 「好了、工作已經結束了…但是這麼快提交文件的話、可能又要被派去做其他工作了吧」
+			PRINTFORML …確實。因為本來以為要花兩個星期的時間來做的工作、結果三天左右就做完了…
+			PRINTFORMW 「所以…吶、%ANAME(MASTER)%…。離期限還有一天、我們乾脆兩個人獨處、好好休息一下怎麼樣…？」
+			PRINTFORML %ANAME(対象)%一邊說著、一邊用妖艷的姿勢把%ANAME(MASTER)%抱住、在%ANAME(MASTER)%的耳邊熱情地低聲私語
+			PRINTFORMW 「因為一直都很努力、所以今天稍微偷一下懶也不會有人說閒話的…❤」
+			PRINTFORML 「想吃什麼我都會給你做的哦。要不用我的尾巴給你挖挖耳朵怎麼樣？　紫大人也很喜歡被我這麼做、甚至有點上癮呢…」
+			PRINTFORMW 「然後如果你還想…和我做之前做的那些事情、我們也可以做哦…❤」
+			PRINTFORML %ANAME(対象)%那溫暖的體香、甜美的聲音…然後用柔軟的身體抱住了%ANAME(MASTER)%
+			PRINTFORMW …那也許不錯…。%ANAME(MASTER)%決定和%ANAME(対象)%做愛
+			PRINTFORML 「呼呼…對對。你能坦率地對我撒嬌我很高興哦♪　接下來我會、好好地治愈你。然後…」
+			PRINTFORMW 「那之後就一直……做愛吧❤」
+			FOR LOCAL, 0, 5
+				CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+				CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴")
+			NEXT
+			PRINTFORML ・
+			PRINTFORML ・
+			PRINTFORMW 之後又過了幾天
+			PRINTFORML 因為太過於依賴%ANAME(対象)%、%ANAME(MASTER)%完全不出房間了、真是一場災難
+			PRINTFORMW 閉門不出不露面的結果就是、周圍開始傳說%ANAME(MASTER)%已經死了、所以慌忙出現在大家面前
+			PRINTFORML 然後兩人的墮落糜爛的生活被知道了、%ANAME(MASTER)%和%ANAME(対象)%一起都被人責備了
+			PRINTFORMW 為了限制%ANAME(対象)%一段時間、頒布了『禁止過度溺愛令』……
+			CFLAG:対象:好感度 += 500
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了500", 0x00FFFF)
+			ABL:対象:主導度Ｎ += 300
+			ABL:対象:主導度Ｕ += 300
+			CALL COLOR_PRINTW(@"因為%ANAME(対象)%的溺愛、%ANAME(MASTER)%的身體變遲鈍了！", カラー_注意)
+			ABL:MASTER:防衛 -= 1
+			CALL COLOR_PRINTW(@"%ANAME(MASTER)%的防衛力下降了1", カラー_注意)
+			ABL:MASTER:武闘 -= 1
+			CALL COLOR_PRINTW(@"%ANAME(MASTER)%的武闘下降了1", カラー_注意)
+			ABL:MASTER:知略 -= 1
+			CALL COLOR_PRINTW(@"%ANAME(MASTER)%的知略下降了1", カラー_注意)
+			SIF !(MASTER == NAME_TO_CHARA("橙")) 
+				PRINTFORMW 被橙叮囑道「不要太依賴%ANAME(対象)%大人了哦」……
+			KDVAR:対象:藍_甘やかし = -1
+			PRINTFORMW
+		ENDIF
+ENDSELECT
+
+RETURN 1

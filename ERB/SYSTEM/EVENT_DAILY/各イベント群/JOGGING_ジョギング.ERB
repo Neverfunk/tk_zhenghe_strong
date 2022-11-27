@@ -1,0 +1,165 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_JOGGING_RATE()
+RETURN 30
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_JOGGING_DECISION()
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_JOGGING_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_JOGGING_SETTARGET()
+
+;同じ国に所属している妊娠中でも捕虜でもない女キャラ、対象がいない場合はイベントキャンセル
+FOR LOCAL, 1, CHARANUM
+	IF CFLAG:(LOCAL):所属 == CFLAG:MASTER:所属 && !(CFLAG:(LOCAL):行動不能状態 == 行動不能_臨月) && !CFLAG:(LOCAL):捕虜先 && IS_FEMALE(LOCAL) && !IS_ANIMAL(LOCAL)
+		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL 
+		DAILY_TARGET_NUM ++
+	ENDIF
+NEXT
+
+SIF DAILY_TARGET_NUM == 0
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_JOGGING
+#DIM 対象
+
+CALL FISHER_YATES_SHAFFLE(DAILY_TARGET_NUM)
+
+対象 = DAILY_TARGET:(SHAFFLE_ARRAY:0)
+
+;セリフを削除
+;口上デイリーじゃないんだからさぁ
+PRINTFORML 遇到了正在跑步的%ANAME(対象)%
+PRINTFORML 她现在好像要继续去跑步了
+PRINTFORMW 她似乎邀请了%ANAME(MASTER)%一起去跑步
+PRINTFORML 怎麼辦？
+CALL ASK_YN("跑", "拒绝")
+IF RESULT == 1
+	PRINTFORML 我拒绝了。
+	PRINTFORMW 虽然她觉得很可惜，但还是精神饱满地离开了
+ELSEIF RESULT == 0
+	PRINTFORML 难得的机会，所以决定跑步
+	PRINTFORMW %ANAME(MASTER)%和她一起在宫殿周围奔跑
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW ・
+	IF (MAXBASE:MASTER:体力 / 100) * (RAND:10 + 1) >= (MAXBASE:対象:体力 / 100) * (RAND:10 + 1)
+		PRINTFORML 气喘吁吁的%ANAME(対象)%软绵绵地躺在树荫下。
+		PRINTFORMW 汗水浸透了她的衣衫。那运动过后通红的脸庞，显得非常妖艳
+		PRINTFORML 怎麼辦？
+		CALL ASK_YN("递给她水", "袭击她")
+		IF RESULT == 0
+			PRINTFORML %ANAME(MASTER)%给%ANAME(対象)%递了瓶水
+			PRINTFORMW 她笑着向%ANAME(MASTER)%道谢，喝得津津有味
+			CFLAG:対象:好感度 += 150
+			CALL COLOR_PRINT(@"%ANAME(対象)%的好感度上升了150", カラー_注意)
+			PRINTFORMW 
+		ELSE
+			PRINTFORML %ANAME(MASTER)%感到无法忍受，走上前去遮住了坐在树下的%ANAME(対象)%的头顶
+			PRINTFORMW 她感到惊讶不知所措，但是看到%ANAME(MASTER)%的股间的膨胀而脸变得通红
+			IF !(CFLAG:対象:好感度 >= 1500 || CFLAG:対象:従属度 >= 1500 || CFLAG:対象:支配度 >= 1500 || TALENT:対象:合意 == 1)
+				PRINTFORML 当%ANAME(MASTER)%想要把手伸向%ANAME(対象)%的身体时、她发出了尖叫
+				PRINTFORMW 她害怕的把%ANAME(MASTER)%撞倒，然后一溜烟地跑了出去
+				CFLAG:対象:好感度 -= 500
+				CALL COLOR_PRINT(@"%ANAME(対象)%的好感度下降了500…", カラー_注意)
+				PRINTFORMW 
+			ELSE
+				PRINTFORML %ANAME(MASTER)%向%ANAME(対象)%的身体伸出手，她轻轻地发出了喘息声。
+				PRINTFORML 就这样慢慢地继续爱抚着她，她毫不抵抗地慢慢扭动着身体。
+				PRINTFORML 脸颊变得通红，有些急促的喘着气
+				PRINTFORMW 无法忍受地把手放在%ANAME(対象)%的身上，她害羞地点了点头。
+				PRINTFORML 
+				PRINTFORMW 从树丛的深处传来了娇艳的女子喘息声。
+				PRINTFORML %ANAME(MASTER)%将%ANAME(対象)%带入附近的丛林深处，激烈地交合着
+				PRINTFORML 她的身体火辣辣的，每次往上抬起都会有敏感地反应
+				PRINTFORML 感觉太过激动喘息着的%ANAME(対象)%的姿态激起了%ANAME(MASTER)%的兴奋、腰动的更快了
+				PRINTFORMW 一边做着抱着她向上做着活塞运动，她有些难受的扭动身子用力地勒紧了阴道。
+				PRINTFORML 其中%ANAME(対象)%自己抱着%ANAME(MASTER)%露出了发情的充满着雌性气息的脸并狠狠亲吻着。
+				PRINTFORML %ANAME(MASTER)%也仿佛要回礼似地深深地把腰往上顶，一边和她激烈地缠绕着舌头。
+				PRINTFORMW 紧贴着彼此的汗水混合在一起，贪婪地只是将肉体重叠在一起。
+				PRINTFORML 她迷离地紧紧抱住%ANAME(MASTER)%的手，吐出更加妖艳缠绵的舌头。
+				PRINTFORML %ANAME(対象)%出现痉挛时，她的整个阴道会相应地摩擦以促进射精。
+				PRINTFORMW %ANAME(MASTER)%紧紧地抱住%ANAME(対象)%，在她达到顶峰的同时，也一起达到了顶峰射出了了精液。
+				PRINTFORML …结束了绝顶的她因其余韵无力地靠在%ANAME(MASTER)%的身边
+				PRINTFORML %ANAME(対象)%一副恍惚的表情，湿润了瞳孔、打从心底感觉很舒服地松了一口气。
+				PRINTFORML 下半身依旧昂扬的%ANAME(MASTER)%一次不能满足、无法忍受地和她接吻希望能做下去
+				PRINTFORMW %ANAME(MASTER)%继续向她索求，她浮现出迷惑的笑容，扭动了腰部。
+				PRINTFORMW 那天下午两个人做到汗流浃背，一心享受野外性爱的乐趣。
+				CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+				CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴")
+				CFLAG:対象:好感度 += 300
+				CALL COLOR_PRINT(@"%ANAME(対象)%的好感度上升了300", カラー_注意)
+				PRINTFORMW 
+			ENDIF
+		ENDIF
+	ELSE
+		PRINTFORML %ANAME(MASTER)%は%ANAME(対象)%的体力被折腾得精疲力尽.。
+		PRINTFORML 不能再跑了，决定在通风良好的树荫下休息
+		PRINTFORMW 流着汗笑着的她洋洋得意地被戏弄了一番
+		IF (CFLAG:対象:好感度 >= 1300 || CFLAG:対象:従属度 >= 1300 || CFLAG:対象:支配度 >= 1300 || TALENT:対象:合意 == 1 || ABL:対象:欲望 >= 2) && ABL:対象:性知識 >= 2 && TALENT:対象:処女 == 0
+			PRINTFORMW %ANAME(MASTER)%扶在树上调整了呼吸，突然被%ANAME(対象)%的身影盖住了
+			PRINTFORML 正感到不知所措的时候，她一脸怪异地舔着舌头逼近了过来。
+			PRINTFORML 一边喃喃自语着想让慢跑中火辣辣的身体静下来，一边把身体压了过来。
+			PRINTFORML 被那个柔软的触感和鼻腔搔痒的汗味所刺激，不由自主地身体做出了反应
+			PRINTFORMW 知道一切准备完毕的她心满意足地推倒了%ANAME(MASTER)%
+			PRINTFORML 
+			PRINTFORML 从少有人经过的灌木丛里传来一阵少女的喘息声
+			PRINTFORML 跨坐在%ANAME(MASTER)%身上的%ANAME(対象)%、头发散乱着激烈的晃着腰
+			PRINTFORMW 汗液四处飞散的身姿非常妖艳，让人被迷住了。
+			PRINTFORML 每当%ANAME(対象)%的腰部上下移动时，整个欧金金就会被强烈地缠住，她都会忍不住呻吟出来。
+			PRINTFORML 她看到%ANAME(MASTER)%的样子，露出妖艳的笑容，扭动着腰部。
+			PRINTFORMW 亀頭被舔着的感覚让%ANAME(MASTER)%再次呻吟了出来，她像小恶魔一样笑了出来
+			PRINTFORML %ANAME(対象)%与%ANAME(MASTER)%接吻，剧烈地扭动腰部以促进射精
+			PRINTFORML 忍耐已经达到极限了，肉棒膨胀得快到要射精的时候了。
+			PRINTFORMW 最后她深深地沉下了腰的同时、%ANAME(MASTER)%也狠狠地射精了
+			PRINTFORML %ANAME(対象)%直接用子宫接受了这些精液，发出欢喜的声音仰起身子。
+			PRINTFORML 疲也许是太过疲惫的缘故吧，比平时释放出了更加大量的精液的%ANAME(MASTER)%的身体颤抖了起来
+			PRINTFORML 与此相配合她也一起颤抖了起来、在眼眸中浮现出迷离的色彩
+			PRINTFORMW 射精终于结束后，她一下子倒在了%ANAME(MASTER)%的身上
+			PRINTFORMW …%ANAME(MASTER)%们一边调整呼吸，一边紧紧地拥抱在一起。
+			PRINTFORML 不久，%ANAME(対象)%又开始抚摸起对方的身体，一边抬起头祈求的看着对方。
+			PRINTFORML 她的表情完全是完全陷入了发情的状态，默默地了明白她也想要继续下去。
+			PRINTFORMW %ANAME(MASTER)%代替回答轻轻往上动着，%ANAME(対象)%发出喜悦的声音，身体颤抖着。
+			PRINTFORMW 那天下午汗流浃背，两个人只顾着像发情的野兽一样互相索求
+			CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴")
+			CFLAG:対象:好感度 += 300
+			CALL COLOR_PRINT(@"%ANAME(対象)%的好感度上升了300", カラー_注意)
+			PRINTFORMW 
+		ELSE
+			CFLAG:対象:好感度 += 150
+			CALL COLOR_PRINT(@"%ANAME(対象)%的好感度上升了150", カラー_注意)
+			PRINTFORMW 
+		ENDIF
+	ENDIF
+	CFLAG:対象:面識 = 1
+	IF MAXBASE:MASTER:体力 < 5000
+		MAXBASE:MASTER:体力 += 100
+		CALL COLOR_PRINT(@"%ANAME(MASTER)%的体力上升了100", カラー_注意)
+	ENDIF
+	PRINTFORMW 
+ENDIF
+
+RETURN 1

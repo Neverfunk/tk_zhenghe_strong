@@ -1,0 +1,80 @@
+﻿;--------------------------------------
+;蜂起イベントが発生するかの判定
+;--------------------------------------
+@VIGILANTE_RISE_RATE()
+;既に出現しているか、自警団なし設定なら発動しない
+SIF SP_COUNTRY_APPEARED:特殊勢力_自警団 || !SP_COUNTRY_RANK:(特殊勢力_自警団)
+	RETURN 0
+
+;いっぱいなら駄目
+SIF GET_NEW_COUNTRY() == -1
+	RETURN 0
+
+SIF !CHECK_SP_COUNTRY_RISE(特殊勢力_自警団)
+	RETURN 0
+RETURN 1
+
+
+;--------------------------------------
+;自警団出現イベント
+;出現できたら1、できなければ0をかえす
+;--------------------------------------
+@VIGILANTE_RISE(都市 = 0)
+#DIM 自警団
+#DIM 都市
+;自警団勢力を作成
+CALL VIGILANTE_INIT()
+自警団 = RESULT
+
+;作れなかったら戻す
+SIF 自警団 == -1
+	RETURN 0
+
+CALL SP_COUNTRY_RISE(自警団, 都市)
+
+SIF !RESULT
+	RETURN 0
+
+SP_COUNTRY_APPEARED:特殊勢力_自警団 = 1
+RETURN 自警団
+
+;--------------------------------------
+;蜂起イベント用都市選択処理
+;--------------------------------------
+@VIGILANTE_RISE_SELECT_CITY()
+#DIM 住宅街
+住宅街 = GET_CITYNUMBER("人里住宅街")
+IF 住宅街 >= 0 && (!IS_COUNTRY(CITY_OWNER:住宅街) || GET_OWN_CITY(CITY_OWNER:住宅街) >= 2)
+	LOCAL = 住宅街
+ELSE
+	CALL SP_COUNTRY_RISE_SELECT_CITY()
+	LOCAL = RESULT
+ENDIF
+RETURN LOCAL
+
+;--------------------------------------
+;蜂起イベント用メッセージ関数
+;--------------------------------------
+@VIGILANTE_RISE_MSG(勢力, 対象)
+#DIM 勢力
+#DIM 対象
+CALL SINGLE_DRAWLINE
+SETCOLOR カラー_警告
+PRINTFORMW 幻想乡大战争的爆发，让幻想乡彻底失去了秩序
+PRINTFORMW 没有约束的妖怪们，在各个人类村庄大开杀戒，弱小的人类们如同玩物一般被任意虐杀
+PRINTFORMW 没有巫女或者蓬莱人来阻拦，纵使是幻想乡人类最大聚集地人间之里，也已经成为妖怪们的自助餐厅
+PRINTFORMW 「但是，这种情况将不复存在了！」
+PRINTFORMW 为荒芜的幻想乡而担忧的勇士们%CITY_NAME:(対象)%\@ GET_OWN_CITY(勢力) > 1 ? など # \@于是成立了自警团！
+PRINTFORMW 宣布起义的自警团在人里各地开展了演讲
+PRINTFORML 「我们，将保护人类！」
+PRINTFORML 「我们，会恢复秩序！」
+PRINTFORML 「我们会把那些妖怪们击溃，让它们感受人类的愤怒」
+PRINTFORML 「我们会打败一切的贤者或者巫女，把这些引发战争的罪魁祸首绳之以法！」
+PRINTFORML 「我们会证明，谁才更有资格领导幻想乡！谁才能让幻想乡有着光明的未来！」
+PRINTFORML 「是时候了，如今的我们，将会让所有的邪恶的妖怪，那些辜负我们信仰的神明，还有那些巫女与魔法使，这些人类的叛徒」
+PRINTFORML 「是时候展现我们的力量，让它们为自己的暴行付出代价！」
+PRINTFORMW 自警团在人里各地进行的独立演讲，传播着所谓「正确的思想」，却引发了村民们一片掌声
+PRINTFORMW 他们成功地激发了人里的民族情绪与种族之间的矛盾
+PRINTFORMW 现在，一腔复仇的怒火与追求独立与安稳生活的人类义军，以不可阻挡之气焰杀出了村庄
+PRINTFORMW 幻想乡的贤者们，会怎么应对这次人里革命呢
+RESETCOLOR

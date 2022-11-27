@@ -1,0 +1,154 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K140_REVENGE_RATE(対象)
+#DIM 対象
+RETURN 1000
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K140_REVENGE_DECISION(対象)
+#DIM 対象
+#DIM 霊夢
+
+霊夢 = NAME_TO_CHARA("霊夢")
+
+SIF 霊夢 == -1 || 霊夢 == MASTER
+	RETURN 0
+
+SIF GROUPMATCH(MASTER, NAME_TO_CHARA("霊夢"))
+	RETURN 0
+
+SIF IS_FALLEN(霊夢)
+	RETURN 0
+
+SIF CFLAG:霊夢:捕虜先 != CFLAG:MASTER:所属
+	RETURN 0
+
+SIF KDVAR:対象:易者_復讐
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0) && CHECK_KOJO_DAILY_HAPPEN(霊夢, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K140_REVENGE_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K140_REVENGE(対象)
+#DIM 対象
+#DIM 霊夢
+
+KDVAR:対象:易者_復讐 = 1
+
+霊夢 = NAME_TO_CHARA("霊夢")
+
+PRINTFORMW 「%ANAME(MASTER)%，可以稍微占用点时间吗？」
+PRINTFORML 深夜已至，%ANAME(対象)%敲响了%ANAME(MASTER)%的房门
+PRINTFORML 「听说你抓到了那个巫女」
+PRINTFORML 「怎么说呢……我和那个巫女曾有过些……就说是过节吧」
+PRINTFORML 「虽然她应该不会把那件事放在心上，但时至今日，我依旧对她怀恨在心」
+PRINTFORMW 「因此，能通融一下，把她交由我来处置吗？」
+PRINTFORMW 「占卜师本来就是操控人感情的职业」
+PRINTFORMW 「待我将她调教到惟命是从后，自会归还于你」
+PRINTFORMW 「不必担心她的安危，我不是会做出那种事的人」
+PRINTFORML 虽然很冷静地说出了极端的事情，但从他的眼神可以看出他是认真的
+PRINTFORML 不经令人好奇起他与%ANAME(霊夢)%之间的恩怨……
+
+;TranslatedMark 「%ANAME(MASTER)%、少しいいか？」
+;TranslatedMark 夜、%ANAME(対象)%が%ANAME(MASTER)%の部屋を訪ねてきた
+;TranslatedMark 「あの巫女を捕まえたそうじゃないか」
+;TranslatedMark 「俺はあの巫女と何というか……因縁があってな、あっちは覚えちゃないだろうが、俺は恨んでる」
+;TranslatedMark 「そこで相談なんだが、アイツを俺に任せてくれないか？」
+;TranslatedMark 「こう見えて人間の扱いには慣れてる。綺麗な身体のまま、何でも言うことを聞く人形にしてお前に返してやる」
+;TranslatedMark %ANAME(対象)%の目は本気だった。%ANAME(霊夢)%に対しよほど深い恨みがあるのだろう
+;TranslatedMark どうしたものか……
+
+PRINTFORML 
+CALL ASK_YN("交由他处置", "果然还是不行")
+;原文 ("任せてみる", "やめておく")
+; ———— 如果选项要统一的话请帮忙改掉（
+
+IF RESULT == 1
+	PRINTFORMW 「……你没听到我说的话吗！？」
+	PRINTFORMW 当然有在听着，但如果只是私人恩怨的话，果然还是没理由把她交给你
+	PRINTFORMW 把%ANAME(対象)%赶回去了……
+	
+	;TranslatedMark 「俺の話を聞いていたのか！？」
+	;TranslatedMark もちろん聞いていたが、その上で、そんな話を受け入れるわけにはいかない
+	;TranslatedMark 喚く%ANAME(対象)%を追い返した……
+	
+	RETURN 1
+ENDIF
+
+PRINTFORMW 「感激不尽！我要让暴力巫女见识到什么叫风水轮流转……」
+PRINTFORMW 在拿到牢房的钥匙后，%ANAME(対象)%激动地离去了……
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+PRINTFORMW 「%ANAME(MASTER)%！上次真是太感谢了」
+PRINTFORMW 「我给你带好消息来了……喂，快点打声招呼」
+PRINTFORML 几天后，%ANAME(対象)%带着%ANAME(霊夢)%，兴冲冲地找上门来
+PRINTFORML 看样子他的"复仇"进行得相当成功
+PRINTFORMW 变得完全老实的%ANAME(霊夢)%，在%ANAME(MASTER)%面前深深地鞠下了躬
+PRINTFORML 「违抗%ANAME(MASTER)%的命令真的非常抱歉」
+PRINTFORMW 「%ANAME(対象)%已经让我好好反省了……今后也请多多关照」
+PRINTFORMW 「怎么样，很厉害吧？」等%ANAME(霊夢)%完成问候，%ANAME(対象)%紧接着自豪地说到
+PRINTFORMW 「就算是那个巫女，经我的手也会变成这样」
+PRINTFORMW 「当然了，正如约定的那样，%ANAME(霊夢)%现在不光听话，人也好好的」
+PRINTFORMW 「之后就好好享受她吧」
+PRINTFORMW 「总之，我的大仇已报……真是一身轻松啊！」
+PRINTFORMW %ANAME(対象)%带着释怀的表情离开了……
+
+;TranslatedMark 「よしきた！　ククッ、目にもの見せてやるぞ暴力巫女め……」
+;TranslatedMark %ANAME(対象)%に牢の鍵を渡すと、小躍りしながら早速向かっていった……
+; · · · 
+;TranslatedMark 「おお%ANAME(MASTER)%！　いつぞやはありがとうな」
+;TranslatedMark 「良い報告をしに来たんだ、ほら、挨拶をしろ」
+;TranslatedMark 数日後、%ANAME(対象)%が鷹揚に声をかけてきた
+;TranslatedMark 横に連れているのは%ANAME(霊夢)%だ。どうやら「復讐」に成功したらしい
+;TranslatedMark すっかり大人しくなった様子の%ANAME(霊夢)%は、%ANAME(MASTER)%に深々とお辞儀した
+;TranslatedMark 「このたびは、%ANAME(MASTER)%に逆らうようなことをして申し訳ありませんでした」
+;TranslatedMark 「そのことについて、%ANAME(対象)%にたっぷり反省させてもらったので……今後ともよろしくお願いいたします」
+;TranslatedMark %ANAME(霊夢)%の挨拶に続き、どうだ、すごいだろう？　と%ANAME(対象)%は自慢げに言う
+;TranslatedMark 「あの巫女も、俺の手にかかればこうなるってわけだ」
+;TranslatedMark 「もちろん、約束通り%ANAME(霊夢)%は綺麗な身体のままだ。それでいて何でも言うことを聞くようにした」
+;TranslatedMark 「後は適当に楽しむなりなんなりしてくれ、俺の復讐は終わったから……ああ、スカッとしたなぁ！」
+;TranslatedMark %ANAME(対象)%は機嫌よく立ち去った……
+
+CALL COLOR_PRINTW(@"%ANAME(霊夢)%が忠誠を誓いました", カラー_注意)
+CALL COLOR_PRINTW(@"%ANAME(霊夢)%の合意を得ました", カラー_注意)
+
+CFLAG:対象:好感度 += 1000
+
+CFLAG:霊夢:従属度 = MAX(CFLAG:霊夢:従属度, 1500)
+CFLAG:霊夢:依存度 = MAX(CFLAG:霊夢:依存度, 300)
+TALENT:霊夢:服従 = 1
+TALENT:霊夢:合意 = 1
+TALENT:霊夢:難以越過的底線 = 0
+TALENT:霊夢:チョロイン = 1
+TALENT:霊夢:容易湿 = 1
+TALENT:霊夢:Ｃ鈍感 = 0
+TALENT:霊夢:Ｂ鈍感 = 0
+TALENT:霊夢:Ｖ鈍感 = 0
+TALENT:霊夢:Ａ鈍感 = 0
+TALENT:霊夢:Ｃ敏感 = 1
+TALENT:霊夢:Ｂ敏感 = 1
+TALENT:霊夢:Ｖ敏感 = 1
+TALENT:霊夢:Ａ敏感 = 1
+
+RETURN 1

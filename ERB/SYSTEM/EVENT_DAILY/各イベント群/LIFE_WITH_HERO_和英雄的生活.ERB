@@ -1,0 +1,223 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_LIFE_WITH_HERO_RATE()
+RETURN 30
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_LIFE_WITH_HERO_DECISION()
+
+SIF IS_FEMALE(MASTER) && !HAS_PENIS(MASTER)
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+
+@EVENT_DAILY_LIFE_WITH_HERO_GENRE()
+
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_LIFE_WITH_HERO_SETTARGET()
+FOR LOCAL, 0, CHARANUM
+	IF CFLAG:(LOCAL):所属 == CFLAG:MASTER:所属  && !CFLAG:(LOCAL):捕虜先 && IS_FEMALE(LOCAL) && !IS_ANIMAL(LOCAL) && GETBIT(TALENT:LOCAL:日常系, 素質_デイリー_憧憬英雄的人)
+		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+		DAILY_TARGET_NUM ++
+	ENDIF
+NEXT
+SIF DAILY_TARGET_NUM < 1
+	RETURN 0
+
+RETURN 1
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_LIFE_WITH_HERO()
+#DIM 対象
+対象 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+PRINTFORML 「%ANAME(MASTER)%！ 今天也要加油支持哦！」
+PRINTFORMW 今天%ANAME(対象)%也精神百倍地和自己的英雄%ANAME(MASTER)%一起度过
+PRINTL 
+PRINTFORML 「……呐%ANAME(MASTER)%」
+PRINTFORMW 要说有什么变化的话，就是像期待一样带着热诚的瞳孔注视着%ANAME(MASTER)%的%ANAME(対象)%吧……
+PRINTL 
+
+	IF ABL:対象:欲望 >= 5
+	;スキンコスプレイ解禁
+	SELECTCASE RAND:3
+		CASE 0
+		;波濤のチアリーダー
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「今天是拉拉队队长吗？%ANAME(MASTER)%最喜欢被应援了呢」
+				PRINTFORMW 这么说着，%ANAME(対象)%对着透明的啦啦队女服毫不害羞地换上了衣服
+				PRINTL
+			CASE 1
+				PRINTFORMW 「啊？你今天想换个感觉吗？」
+				PRINTFORMW 「哇，%ANAME(MASTER)%这个……是啦啦队的衣服吗？」
+				PRINTFORMW 虽然这件衣服上下都很暴露，但%ANAME(対象)%还是很高兴地穿上了
+				PRINTL 
+			CASE 2
+				PRINTFORMW 「嘿嘿，作为拉拉队队长我会全力支持%ANAME(MASTER)%的！」
+				PRINTFORMW  %ANAME(対象)%日常的活泼，与毫不吝惜地晃动的胸部的组合，酿成了难以言喻的性感
+				PRINTFORMW 「啊，好像讨厌%ANAME(MASTER)%的眼神啊」
+				PRINTFORML 虽然这么说，但%ANAME(対象)%还是开心的笑了
+				PRINTL 
+		ENDSELECT
+
+		PRINTFORMW ・・・
+		PRINTFORMW ・
+		PRINTFORMW ・
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTL 
+				PRINTFORMW 「%ANAME(対象)%和%ANAME(MASTER)%的相性是最棒的……啊♥ 所以，一定能拿到奖牌……♥」
+				PRINTFORMW 一边把她的背靠在墙壁上，一边将一只脚高高举起，让阴茎插入张开的%ANAME(対象)%的胯股座，激烈地向上突刺
+				PRINTFORMW 「哎呀！？嘛，又变大了……啊啊♥」
+				PRINTFORMW %ANAME(対象)%在快乐中颤抖着，直到%ANAME(MASTER)%满足为止都维持着这个姿态……
+			CASE 1
+				PRINTL 
+				PRINTFORMW 「看，%ANAME(MASTER)%加油♥ 我会支持你的，所以♥」
+				PRINTFORMW 作为给%ANAME(MASTER)%的特别应援，%ANAME(対象)%以骑乘位美艳地上下摇晃着腰
+				PRINTFORMW 「啊、等等♥ 啊、等等♥ 更加兴奋起来吧，%ANAME(MASTER)%……♥」
+				PRINTFORMW 每次身体颤抖的时候，两个大大的胸部都会摇晃起来，%ANAME(MASTER)%享受到了美妙的光景……
+			CASE 2
+				PRINTL 
+				PRINTFORMW 「%ANAME(MASTER)%，张开嘴。是的，就那样……嗯，嗯……」
+				PRINTFORMW 「嗯～……♥ 嗯，嗯……嗯，啊……♥ 嗯，嗯	♥」
+				PRINTFORMW 品尝着嘴对嘴注入的饮料水，最后品尝着%ANAME(対象)%与舌头交融的贪婪之吻
+				PRINTFORMW 「……噗！嘿嘿，怎么样？这就是%ANAME(対象)%给%ANAME(MASTER)%提供的专用运动饮料的味道哦♥」
+		ENDSELECT
+
+		CASE 1
+		;サマー・スピンオフ
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「今天是泳衣吗？是想着一起去海边啊！」
+				PRINTFORMW 虽然%ANAME(対象)%看起来很开心地笑着，但%ANAME(MASTER)%却烦恼着，这样的%ANAME(対象)%到底能不能在众人面前露出来呢……
+				PRINTL
+			CASE 1
+				PRINTFORMW 「啊？你说今天要和往常不一样换件衣服吗？」
+				PRINTFORMW 「哇，%ANAME(MASTER)%这个……泳衣？」
+				PRINTFORMW 「%ANAME(MASTER)%、找到适合%ANAME(対象)%尺寸的泳衣不是很辛苦吗？」
+				PRINTFORMW 要是能看到%ANAME(対象)%的泳衣就没什么大不了的了！%ANAME(MASTER)%挺起胸膛这么说着
+				PRINTL
+			CASE 2
+				PRINTFORMW 「虽然尺寸不错，但是这个……还是牺牲了腰围，啊……」
+				PRINTFORML 到底是害羞，%ANAME(対象)%保住了自己身体低着头
+				PRINTFORMW 但是，这一举动本身就足以煽动男人的情欲
+				PRINTL 
+		ENDSELECT
+
+		PRINTFORMW ・・・
+		PRINTFORMW ・
+		PRINTFORMW ・
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTL 
+				PRINTFORMW 「嘿嘿，怎么样%ANAME(MASTER)%。%ANAME(対象)%的胸、舒服吗……？」
+				PRINTFORMW 将阴茎夹在泳装束缚住的胸之间，%ANAME(対象)%忘我地摇摆着胸部
+				PRINTFORMW 「啊……现在，啪嗒啪嗒地跳起来了呢♥ 发现英雄的弱点了吗♥」
+			CASE 1
+				PRINTL 
+				PRINTFORMW 「%ANAME(MASTER)%……！ 太激烈的话，会掉下来的……啊！」
+				PRINTFORMW 「太粗暴的话会弄破的……♥ 呜呜、呜呜……♥」
+				PRINTFORMW 一边分开泳衣插入着阴茎，一边享受%ANAME(対象)%的阴道和屁股的柔软一边晃动着腰部……
+			CASE 2
+				PRINTL 
+				PRINTFORMW 「讨厌……能看见胸部……啊啊♥」
+				PRINTFORMW 「因为是色情的英雄，%ANAME(MASTER)%♥ 啊♥ 啊啊♥」
+				PRINTFORMW 挪开胸前的泳衣，双手揉着漂亮的胸部，用正常位做爱了……
+		ENDSELECT
+
+		CASE 2
+		;通常プレイと同じ
+		PRINTFORMW ・・・
+		PRINTFORMW ・
+		PRINTFORMW ・
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORMW 「被这么展示的话，太丢脸了，%ANAME(MASTER)%……」
+				PRINTFORMW 抓住%ANAME(対象)%的大腿，认真观察着张开的大腿的%ANAME(対象)%
+				PRINTFORMW 已经湿透了的阴道看起来很想要什么似的滴滴答答的渗出爱液，把%ANAME(MASTER)%完全硬起来的阴茎像平常美味一样吞了进去
+				PRINTFORMW 「啊，啊啊……♥ 嗯，嘿嘿……和憧憬的英雄相爱，是最幸福的」
+				PRINTFORMW 「哎呀！嗯！啊啊！这样的%ANAME(対象)%就只是普通的女孩子了……♥」
+			CASE 1
+				PRINTL 
+				PRINTFORMW 「啊，啊……♥ 好厉害%ANAME(MASTER)%……♥ 英雄果然不算强健……哎呀♥」
+				PRINTFORMW 「啊啊啊！不要、不要♥ 不行不行，现在如果被用力推上去的话……啊，啊♥ 啊♥ 非常♥ 啊啊啊啊……♥」
+				PRINTFORMW 虽然是四肢爬行的姿势，但腰部还是好好地挺了起来，%ANAME(対象)%也完全显露出了一副融化的表情
+			CASE 2
+				PRINTL 
+				PRINTFORMW 「嗯，嗯，嗯，咕，嗯，嗯，嗯~……♥」
+				PRINTFORMW 「怎么样%ANAME(MASTER)%、%ANAME(対象)%的嘴巴……舒服吗？」
+				PRINTFORMW 在阴茎上感觉到与胸部和阴道不同的感觉的同时，%ANAME(MASTER)%满足地吐出了一口气
+				PRINTFORMW 「太好了♥ %ANAME(対象)%会一直这样支持%ANAME(MASTER)%的身心的♥ 嗯，嗯，嗯……♥」
+		ENDSELECT
+	ENDSELECT
+
+	ELSE
+	PRINTFORMW ・・・
+	PRINTFORMW ・
+	PRINTFORMW ・
+	SELECTCASE RAND:3
+		CASE 0
+				PRINTFORMW 「被这么展示的话，太丢脸了，%ANAME(MASTER)%……」
+				PRINTFORMW 抓住%ANAME(対象)%的大腿，认真观察着张开的大腿的%ANAME(対象)%
+				PRINTFORMW 已经湿透了的阴道看起来很想要什么似的滴滴答答的渗出爱液，把%ANAME(MASTER)%完全硬起来的阴茎像平常美味一样吞了进去
+				PRINTFORMW 「啊，啊啊……♥ 嗯，嘿嘿……和憧憬的英雄相爱，是最幸福的」
+				PRINTFORMW 「哎呀！嗯！啊啊！这样的%ANAME(対象)%就只是普通的女孩子了……♥」
+			CASE 1
+				PRINTL 
+				PRINTFORMW 「啊，啊……♥ 好厉害%ANAME(MASTER)%……♥ 英雄果然不算强健……哎呀♥」
+				PRINTFORMW 「啊啊啊！不要、不要♥ 不行不行，现在如果被用力推上去的话……啊，啊♥ 啊♥ 非常♥ 啊啊啊啊……♥」
+				PRINTFORMW 虽然是四肢爬行的姿势，但腰部还是好好地挺了起来，%ANAME(対象)%也完全显露出了一副融化的表情
+			CASE 2
+				PRINTL 
+				PRINTFORMW 「嗯，嗯，嗯，咕，嗯，嗯，嗯~……♥」
+				PRINTFORMW 「怎么样%ANAME(MASTER)%、%ANAME(対象)%的嘴巴……舒服吗？」
+				PRINTFORMW 在阴茎上感觉到与胸部和阴道不同的感觉的同时，%ANAME(MASTER)%满足地吐出了一口气
+				PRINTFORMW 「太好了♥ %ANAME(対象)%会一直这样支持%ANAME(MASTER)%的身心的♥ 嗯，嗯，嗯……♥」
+	ENDSELECT
+	ENDIF
+
+	CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的唇", ANAME(MASTER))
+	CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的小穴")
+	PRINTL 
+	PRINTL 
+	PRINTFORMW ……不知道第几次迎来了顶峰，终于满足了的%ANAME(MASTER)%释放了%ANAME(対象)%
+
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTL 
+			PRINTFORMW 「……%ANAME(MASTER)%，%ANAME(対象)%让你满足了吗……？」
+			PRINTFORMW %ANAME(対象)%，即使在经受过剧烈的暴力之后，也不忘呼吸急促的向他心爱的英雄致敬
+			PRINTL 
+		CASE 1
+			PRINTL 
+			PRINTFORMW 「啊啊……♥ 最幸福的……嘿嘿……♥」
+			PRINTFORMW 在下腹部感受着被可爱的英雄注入的温热的同时，%ANAME(対象)%看起来很幸福……
+			PRINTL 
+		CASE 2
+			PRINTL 
+			PRINTFORMW 「从憧憬的英雄那里收到了很多礼物……♥」
+			PRINTFORMW 虽然被白浊弄脏了，但是可爱英雄的行为还是让%ANAME(対象)%充满了幸福感……
+			PRINTL 
+	ENDSELECT
+
+
+
+RETURN 1

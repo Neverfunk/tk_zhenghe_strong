@@ -1,0 +1,121 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K43_GENEROSITY_RATE(対象)
+#DIM 対象
+RETURN 20
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K43_GENEROSITY_DECISION(対象)
+#DIM 対象
+#DIM 早苗
+#DIM 諏訪子
+
+早苗 = NAME_TO_CHARA("早苗")
+諏訪子 = NAME_TO_CHARA("諏訪子")
+
+SIF !(IS_FALLEN(対象) && IS_FALLEN(早苗) && IS_FALLEN(諏訪子))
+	RETURN 0
+
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1) && CHECK_KOJO_DAILY_HAPPEN(諏訪子, 1, 0, 1) && CHECK_KOJO_DAILY_HAPPEN(早苗, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K43_GENEROSITY_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K43_GENEROSITY(対象)
+#DIM 対象
+#DIM 早苗
+#DIM 諏訪子
+
+早苗 = NAME_TO_CHARA("早苗")
+諏訪子 = NAME_TO_CHARA("諏訪子")
+
+
+IF KDVAR:対象:神奈子_度量
+	PRINTFORMW %ANAME(対象)%、%ANAME(諏訪子)%、%ANAME(早苗)%三个人一起来到卧室
+	PRINTFORMW 「那么、能和我聊聊吗……？」
+ELSE
+	PRINTFORMW %ANAME(対象)%、%ANAME(諏訪子)%、%ANAME(早苗)%三个人一起来到卧室
+	PRINTFORMW 以为发生了什么事、%ANAME(対象)%说道
+	PRINTFORMW 「%ANAME(MASTER)%、我有话想和你谈谈」
+	PRINTFORMW 「哎呀、把我们两柱神和早苗都拿下了、你真是个不得了的家伙呢」
+	PRINTFORMW 「我们毕竟是神和現人神哦？　可不能当做普通人那样随便打发了呢」
+	IF IS_MALE(MASTER)
+		PRINTFORMW 「……不过、作为一个要娶好几个妻子的男人、要拥有不让女人寂寞，要懂得体贴女人的心胸。你不这么想吗？」
+	ELSE
+		PRINTFORMW 「……不过、作为一个女子。像这样娶了好几个人的你，真的有把我们维系起来的度量吗？让人不禁有些怀疑呢」
+	ENDIF
+	PRINTFORMW 「因此、为了能确定%ANAME(MASTER)%到底能不能做到、我们几个决定要测试你一下」
+	PRINTFORMW ……虽说是测试，但总而言之就是要交合吧
+	PRINTFORMW 也许是非常期待的缘故吧、脸颊上似乎冒起了热气……
+ENDIF
+PRINTFORML
+CALL ASK_YN("抱过去", "今天算了")
+
+IF RESULT == 1
+	PRINTFORMW 「嗯……是吗，那太遗憾了」
+	PRINTFORMW 「没办法啊，那就回去吧……下次，一定要一起好好享受哦？」
+	PRINTFORMW 三个人离开了……
+	KDVAR:対象:神奈子_度量 = 1
+	RETURN
+ENDIF
+
+PRINTFORMW 「那么」
+PRINTFORMW 「来吧，大家一起来吧……♥」
+PRINTFORMW 邀请三个人上床……
+
+KDVAR:対象:神奈子_度量 = 1
+
+;全員の調教参加フラグをクリア
+CVARSET CFLAG, 6, 0
+
+TALENT:対象:合意 = 1
+TALENT:諏訪子:合意 = 1
+TALENT:早苗:合意 = 1
+TALENT:対象:チョロイン = 1
+TALENT:諏訪子:チョロイン = 1
+TALENT:早苗:チョロイン = 1
+
+CFLAG:対象:調教参加フラグ = 1
+CFLAG:対象:調教中帰らない = 1
+CFLAG:対象:強制友好化 = 1
+BASE:対象:体力 = MAXBASE:対象:体力
+BASE:対象:気力 = MAXBASE:対象:気力
+
+CFLAG:諏訪子:調教参加フラグ = 1
+CFLAG:諏訪子:調教中帰らない = 1
+CFLAG:諏訪子:強制友好化 = 1
+BASE:諏訪子:体力 = MAXBASE:諏訪子:体力
+BASE:諏訪子:気力 = MAXBASE:諏訪子:気力
+
+CFLAG:早苗:調教参加フラグ = 1
+CFLAG:早苗:調教中帰らない = 1
+CFLAG:早苗:強制友好化 = 1
+BASE:早苗:体力 = MAXBASE:早苗:体力
+BASE:早苗:気力 = MAXBASE:早苗:気力
+
+;強制逆調教フラグをオン
+FLAG:ターンエンド調教 = 1
+;それ以降のデイリーイベント発生を潰す
+DAILY_CANCEL = 1
+
+RETURN 1
+

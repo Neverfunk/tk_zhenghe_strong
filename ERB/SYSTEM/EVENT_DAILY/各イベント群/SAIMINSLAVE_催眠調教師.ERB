@@ -1,0 +1,199 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_SAIMINSLAVE_RATE()
+RETURN 30
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_SAIMINSLAVE_DECISION()
+SIF DVAR:催眠調教_発生フラグ < 0
+	RETURN 0
+RETURN 1
+
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_SAIMINSLAVE_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_SAIMINSLAVE()
+#DIM 対象
+
+PRINTFORML 最近、領内的治安似乎并不是很好
+PRINTFORMW 或许让谁去巡逻一下会比较好
+PRINTFORML 那麼、讓谁去呢？
+CALL SELECT_CHARA_LIST_ONLY_LOGIC_SEX("SAIMINSLAVE", "DEFAULT")
+対象 = RESULT
+IF RESULT < 0
+	PRINTFORML 不要，现在正在忙碌
+	PRINTFORMW 强化了警备的巡逻
+	RETURN
+ELSEIF RESULT == MASTER
+	PRINTFORMW %ANAME(対象)%独自前往区巡逻了
+ELSE
+	PRINTFORMW 把任务交給了%ANAME(対象)%
+ENDIF
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+IF IS_MALE(対象) || (HAS_PENIS(MASTER) && RAND:2)
+	SELECTCASE RAND:5
+		CASE 0
+			PRINTFORMW 没发生任何事
+		CASE 1
+			PRINTFORMW 遇到了少女可能会被强奸的現場！
+			PRINTFORML %ANAME(対象)%拔剑怒吼着将强奸魔们吓跑了
+			PRINTFORML 少女流下了眼泪
+			PRINTFORMW 这个表情与破烂的衣服下裸露的肌肤令人心动
+			PRINTFORML 怎么做？
+			CALL ASK_YN("侵犯" ,"送她回家")
+			IF RESULT == 1
+				PRINTFORML 在想些什么呢
+				PRINTFORMW 挥去了脑中的邪念把外套披在她身上将她安全送回了家
+				RETURN
+			ENDIF
+			PRINTFORML %ANAME(対象)%忍不住将少女带进了一旁的阴暗处侵犯了
+			PRINTFORML 将幼小的少女抓住强行侵犯的行为令%ANAME(対象)%感到兴奋而激烈的动起了腰
+			PRINTFORMW 与发出悲鸣哭泣着的少女结合着、无论射了多少次都没有萎缩的迹象
+			CALL FUCK(対象, "性技, 性交, Ｃ, 射精", "童貞喪失", 0, "", "", @"少女の膣", "強姦")
+			PRINTFORMW 事後、将侵犯到失神的少女丢在原地离开了
+		CASE 2
+			PRINTFORMW …注意到时钱包已经被偷走了
+			LOCAL = 1000 + (500 * (RAND:10 + 1))
+			SIF LOCAL > MONEY
+				LOCAL = MONEY
+			MONEY -= LOCAL
+			PRINTFORMW 金{LOCAL}失去了
+			;TranslatedMark 金{LOCAL}を失った
+		CASE 3
+			PRINTFORMW 发现了人群中有正在被痴漢骚扰的少女！
+			PRINTFORML 抓住了咸猪手后痴汉发出了悲鳴逃走了
+			PRINTFORML 少女露出了害羞的表情向%ANAME(対象)%道谢
+			PRINTFORMW 害羞的满脸通红的脸十分可爱
+			PRINTFORML 怎么做？
+			CALL ASK_YN("带去旅馆" ,"送她回家")
+			IF RESULT == 1
+				PRINTFORML 在想些什么呢
+				PRINTFORMW 挥去了脑中的邪念把外套披在她身上将她安全送回了家
+				RETURN
+			ENDIF
+			PRINTFORML 欺骗少女送她去安全的地方就这么带进旅馆后侵犯
+			PRINTFORML 最初大声哭喊的少女也慢慢地放弃不再抵抗了
+			PRINTFORMW 最後、少女的身体微微颤抖、发出可爱的娇喘将%ANAME(対象)%接纳了
+			CALL FUCK(対象, "性技, 性交, Ｃ, 射精", "童貞喪失", 0, "", "", @"少女の膣", "強姦")
+			PRINTFORMW 事後、将侵犯到失神的少女丢在原地离开了
+		CASE 4
+			PRINTFORML 一个乞讨的少女靠了过来
+			PRINTFORMW 急急忙忙的跑过来伸出了茶碗
+			PRINTFORML 怎么做？
+			CALL ASK_YN("無視她离开" ,"買下少女")
+			IF RESULT == 0
+				PRINTFORML 無視乞讨的少女离开了
+				PRINTFORMW 能够感觉到背后少女投来怨恨的视线
+				RETURN
+			ENDIF
+			PRINTFORML 仔细观察之后发现她有着非常不错的身体
+			PRINTFORMW 一晚多少钱？这样向少女询问后她扭扭捏捏的牵住了%ANAME(対象)%的手
+			PRINTFORML 
+			PRINTFORML 被带到少女简陋巢穴的%ANAME(対象)%立刻将身体和她重叠在了一起
+			PRINTFORML 充分享受着少女那虽然幼小却已经成熟的女性身体拼命摆动的感觉
+			PRINTFORMW %ANAME(対象)%抵挡不住诱惑而开始突刺使兴奋的少女娇喘声又变大了、就这样持续交合了一整晚
+			CALL FUCK(対象, "性技, 性交, Ｃ, 射精", "童貞喪失", 0, "", "", @"少女の膣", "売春")
+			PRINTFORMW 事後、将侵犯到失神的少女丢在原地离开了
+	ENDSELECT
+	RETURN
+ENDIF
+PRINTFORML 巡逻时在没什么人的小巷里找到了一个小摊
+PRINTFORML 好奇的靠近后发现摊位上正在贩卖一些从未见过的道具
+PRINTFORMW 「欢迎光临、唔嘻嘻嘻」
+PRINTFORML 身为店主的男人露出了可疑的微笑搓着双手
+PRINTFORML 「这可是催眠药哟、无论是谁都能让她百依百顺」
+PRINTFORMW 男人拿起了又破又烂的可疑道具开始兴致勃勃的说明起来
+PRINTFORML 怎么做？
+CALL ASK_YN("無視他离开" ,"无语的听他讲")
+IF RESULT == 0
+	PRINTFORML 太可疑了
+	PRINTFORMW 無視了他直接离开
+	PRINTFORML 在这之后巡逻也没有特别的发现
+	RETURN
+ENDIF
+
+IF ABL:対象:催眠 > 3
+	PRINTFORMW 深谙此道的%ANAME(対象)%稍稍看了一眼男人的动作，便识破了他低劣的催眠术
+	PRINTFORMW %ANAME(対象)%冷哼一声，毫不犹豫地劈向男人
+	PRINTFORMW 那人便和摊上的道具一起横躺在了地上，丢了性命
+	PRINTFORMW 在检查摊位时发现一本书，也许可以增加自己的催眠技巧。
+	EXP:対象:催眠経験値 += 40
+	DVAR:催眠調教_発生フラグ = -1
+ELSEIF EXP:対象:被催眠経験 > RAND:20 + 30
+	PRINTFORMW 多次被催眠的%ANAME(対象)%盯着催眠师的眼睛，还未等他说几句话，就发现了一丝熟悉的感觉
+	PRINTFORMW 然而%ANAME(対象)%早被其他人的催眠力量侵犯过的身躯并未被眼前的人所控制
+	PRINTFORMW 来不及多想，%ANAME(対象)%立刻闭上眼睛，转身离开了
+ELSE
+	PRINTFORML 催眠什么的太愚蠢了、怎么可能会有那么方便的东西
+	PRINTFORML 恐怕这是一个欺骗门外汉赚取金钱的诈欺师吧
+	PRINTFORMW 「啊、你不信吗？虽然我最初也是这样的、唔嘻嘻嘻」
+	PRINTFORML 「实际上，这是我从旅行者那里得到的道具，所以我在等待猎物的到来」
+	PRINTFORML 这家伙在说什么？
+	PRINTFORMW 「就好像小姐你这样的人吧？哎呀、一直寻找着对我口味的身体」
+	PRINTFORML 男人用着猥琐的视线不断打量着我的身体令我感覚非常不快
+	PRINTFORML 看起来是想对我用催眠对他言听计从、真是没有自知之明
+	PRINTFORMW 那种东西怎么可能对我起效、做得到的话就来试试看啊
+	PRINTFORML 因为男人过于失礼的态度而说出了那样的话
+	PRINTFORML 「唔嘻嘻嘻、哎呀其实你早就已经被我催眠了、你看」
+	PRINTFORMW 男人伸出手、抓住了我的胸
+	IF TALENT:対象:胸囲尺寸 >= 1
+		PRINTFORML 「唔哦、这个重量感、比看上去还要大啊」
+		PRINTFORMW 不客气的将手指陷入我的胸部里激烈的揉搓着
+	ELSEIF TALENT:対象:胸囲尺寸 == 0
+		PRINTFORML 「这可真是相当的美乳啊、触感和重量都恰到好处」
+		PRINTFORMW 男人用着下流的手法包裹着我的胸部搓揉着
+	ELSE
+		PRINTFORML 「这个合手的尺寸、正合我口味、唔嘻嘻嘻」
+		PRINTFORMW 有少许自卑感的胸部全部被用手掌包裹着来回扭动着责弄
+	ENDIF
+	PRINTFORML 对他的指技大意了的我稍微感到快感后情不自禁的开始扭动着身体
+	PRINTFORML 但是这种程度和催眠没有任何关系
+	PRINTFORMW 对着正執拗的责弄着我胸部的男人说出挑衅的话后他露出了猥琐的笑容
+	PRINTFORML 「诶、你这个蠢女人、就这么想被侵犯吗？那就自己来摇动腰诱惑我啊」
+	PRINTFORML 反而被他挑衅的我不由得生气
+	PRINTFORML 说到如此地步不能就这么沉默的回去
+	PRINTFORMW 我将自己的裙子卷起向他展示着我扭动着腰的淫荡姿态
+	PRINTFORML 来啊来啊、能够催眠就让我见识一下、有本事就来侵犯这个无防备的笨蛋小穴吧
+	PRINTFORML 「咕嘿嘿嘿、居然真的做了、这家伙」
+	PRINTFORMW 「好吧、既然如此就如你所言让我尽情的侵犯你吧」
+	PRINTFORML 完全被我的挑衅所骗的男人舔着舌头用手搂住了我的腰
+	PRINTFORML 蠢货男人呢
+	PRINTFORMW 我在心里嘲讽着他的同时用手指爱抚着自己的秘所、为接下来被侵犯作準備
+	PRINTFORML 这样随时随地都能被侵犯了、但这不是因为催眠而是我自己的决定
+	PRINTFORML 让这个男人的肉棒屈服、明白自己的斤两、之後再因欺诈的罪名将他抓住丢进牢房里
+	PRINTFORMW 就在我考虑着这些事时男人将我带到了他小巷里的巢穴中
+	PRINTFORML …
+	PRINTFORML ……
+	PRINTFORMW ………
+	PRINTFORML 在充分的说服之后、我与男人告别了
+	PRINTFORML 他在和我无套的中出做爱之后改过自新并说再也不会做出欺诈的行为
+	PRINTFORMW 「唔嘻嘻嘻、怨气积攒的时候再来做我的对象吧」
+	PRINTFORML 「从此以后我会按我喜欢慢慢的調教你的做好觉悟吧」
+	PRINTFORML 离别之际对我说着这样的事、真是热心的人呢
+	PRINTFORMW 突然小穴内的精液溢了出来令我不由得慌忙收紧小穴
+	PRINTFORML 把内裤给他之后现在我裙下的小穴一览无遗
+	PRINTFORML 这幅样子可不能给别人看到
+	PRINTFORMW 收紧小穴时我这么想着、忍耐着濒临绝顶的小穴草草结束了巡逻回家
+	CALL FUCK_RAPE(対象, GET_SPERM_ID("催眠調教師"), @"催眠調教師の\@ RAND:2 ? 肉棒 # 唇\@", "催眠調教師")
+	DVAR:催眠調教_対象ID = GET_ID(対象)
+	DVAR:催眠調教_発生フラグ = -1
+	EXP:対象:被催眠経験 += 3
+ENDIF
+	RETURN 1
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_SAIMINSLAVE(対象)
+#DIM 対象
+CALL SELECT_CHARA_LIST_SHOW_LOGIC_DEFAULT(対象)
+RETURN RESULT && !GETBIT(TALENT:対象:日常系, 素質_デイリー_無自覚催眠奴隷)

@@ -1,0 +1,136 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_166_PERSONAL_1_EXIST
+RETURN 1
+
+@SKILL_166_PERSONAL_1_NAME
+RESULTS = 他山之玉
+
+;レベルは1-5まで
+@SKILL_166_PERSONAL_1_LEVEL
+RETURN 5
+
+;対象選択
+@SKILL_166_PERSONAL_1_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1
+
+;発動判定
+@SKILL_166_PERSONAL_1_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN BATTLE_COMMANDER_NUM:対象側 > 0
+
+;発動テキストをオーバライドしたいときに。
+;「誰それのスキル発動！　○○した！」の「○○した！」の部分を実装したい場合は、
+;これじゃなくてINVOKEで書けばいいです。
+;@SKILL_166_PERSONAL_1_INVOKE_TEXT(発動者, スキル, ジャンル)
+;#DIM 発動者
+;#DIM スキル
+;#DIMS ジャンル
+
+;効果をここに記述
+@SKILL_166_PERSONAL_1_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 角色
+#DIM 技能类型,300
+#DIM 技能ID,300
+#DIM 技能NO,300
+#DIM 技能总数
+#DIM 随机数
+対象側 = !発動側
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
+	技能总数 = 0
+	角色 = BATTLE_COMMANDER:対象側:LOCAL
+	FOR LOCAL:1, 0, MAX_SKILL_SLOT
+		IF SKILL_NO_SLOT:角色:スキル_ジャンル_PERSONAL:(LOCAL:1) != -1 && SKILL_ID_SLOT:角色:スキル_ジャンル_PERSONAL:(LOCAL:1) != -1
+			SIF SKILL_NO_SLOT:角色:スキル_ジャンル_PERSONAL:(LOCAL:1) == 166 && SKILL_ID_SLOT:角色:スキル_ジャンル_PERSONAL:(LOCAL:1) == 1
+				;跳过本技能
+				CONTINUE
+			技能类型:技能总数 = スキル_ジャンル_PERSONAL
+			技能ID:技能总数 = SKILL_ID_SLOT:角色:スキル_ジャンル_PERSONAL:(LOCAL:1)
+			技能NO:技能总数 = SKILL_NO_SLOT:角色:スキル_ジャンル_PERSONAL:(LOCAL:1)
+			技能总数 ++
+			TRYCCALLFORM SKILL_{技能NO:技能总数}_%SKILL_GENRE_ENG:スキル_ジャンル_PERSONAL%_{技能ID:技能总数}_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+				SIF !RESULT
+					技能总数--
+			CATCH
+				技能总数--
+			ENDCATCH
+		ENDIF
+		IF SKILL_NO_SLOT:角色:スキル_ジャンル_TROOP:(LOCAL:1) != -1 && SKILL_ID_SLOT:角色:スキル_ジャンル_TROOP:(LOCAL:1) != -1
+			技能类型:技能总数 = スキル_ジャンル_TROOP
+			技能ID:技能总数 = SKILL_ID_SLOT:角色:スキル_ジャンル_TROOP:(LOCAL:1)
+			技能NO:技能总数 = SKILL_NO_SLOT:角色:スキル_ジャンル_TROOP:(LOCAL:1)
+			技能总数 ++
+			TRYCCALLFORM SKILL_{技能NO:技能总数}_%SKILL_GENRE_ENG:スキル_ジャンル_TROOP%_{技能ID:技能总数}_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+				SIF !RESULT
+					技能总数--
+			CATCH
+				技能总数--
+			ENDCATCH
+		ENDIF
+	NEXT
+	IF 技能总数 <= 0
+		PRINTFORML ..%ANAME(角色)%没有可以被复刻的技能
+	ELSE
+		随机数 = RAND:技能总数
+		CALLFORM SKILL_{技能NO:随机数}_%SKILL_GENRE_ENG:(技能类型:随机数)%_{技能ID:随机数}_NAME
+		PRINTFORML ..%ANAME(発動者)%复刻了%ANAME(角色)%的技能「%RESULTS%」！
+		TRYCCALLFORM SKILL_{技能NO:随机数}_%SKILL_GENRE_ENG:(技能类型:随机数)%_{技能ID:随机数}_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+			IF !RESULT
+				CONTINUE
+				RETURN 0
+			ENDIF
+		CATCH
+		ENDCATCH
+		CALLFORM SKILL_{技能NO:随机数}_%SKILL_GENRE_ENG:(技能类型:随机数)%_{技能ID:随机数}_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+	ENDIF
+NEXT
+
+@SKILL_166_PERSONAL_1_EXPLANATION
+RESULTS = 对敌方全员分别发动，从其所持个人和部队技能中随机复刻一项
+
+@SKILL_166_PERSONAL_1_CANT_TELL
+
+@SKILL_166_PERSONAL_1_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 400

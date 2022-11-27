@@ -1,0 +1,134 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K134_YATUME_UNAGI_RATE(対象)
+#DIM 対象
+RETURN 30
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K134_YATUME_UNAGI_DECISION(対象)
+#DIM 対象
+
+;ドレミーと面識があり、所属がおなじ、恋慕を所持、3%
+SIF !TALENT:対象:恋慕
+	RETURN 0
+
+SIF KDVAR:対象:ドレミー_ヤツメウナギ
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K134_YATUME_UNAGI_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K134_YATUME_UNAGI(対象)
+#DIM 対象
+
+PRINTFORMW 工作的时候，%ANAME(対象)%来了房间……
+;TranslatedMark 仕事をしていると、%ANAME(対象)%が部屋に訪れたてきた……
+PRINTFORMW 「附近来了鳗鱼摊子……一起去吗？」
+;TranslatedMark 「近くにヤツメウナギの屋台が来ているんだけど……一緒に行きませんか？」
+CALL ASK_YN("一起去吧", "因为工作很忙所以就谢绝了")
+;TranslatedMark CALL ASK_YN("付き合う", "仕事が忙しいので遠慮する")
+IF RESULT == 1
+	PRINTFORMW 「是吗……」
+	;TranslatedMark 「そうですか……」
+	PRINTFORMW 「那么我试试别的方法吧」
+	;TranslatedMark 「では他の方を当たってみますね」
+	PRINTFORMW %ANAME(対象)%离开了房间……
+	;TranslatedMark %ANAME(対象)%は部屋から去っていった……
+ELSE
+	PRINTFORML 「呵呵，那我们走吧」
+	;TranslatedMark 「ふふっ、それでは行きましょうか」
+	PRINTFORMW 带着%ANAME(対象)%来到夜晚的郊外……
+	;TranslatedMark %ANAME(対象)%を連れて夜の町外れへ繰り出した……
+	PRINTFORML
+	PRINTFORML
+	PRINTFORML
+	PRINTFORML 「诶…这就是传说中的鳗鱼吗…你真是太小了」
+	;TranslatedMark 「へぇ…これが噂のヤツメウナギですか…結構小ぶりなのね」
+	PRINTFORMW 在两人面前烤的鳗鱼没有汤味的蒸味儿，用筷子抓起来表面似乎有点弹性
+	;TranslatedMark 二人の前に出されたヤツメウナギの蒲焼きは汁臭いような蒸れたニオイもなく、箸で掴むと表面に少し弾力があるようだ
+	PRINTFORMW 「那么马上…MGMG…MGMG…非常」
+	;TranslatedMark 「では早速…MGMG…MGMG…ごくん」
+	PRINTFORML 看到她在旁边开始吃的样子，没想到她竟然抓着一串大口吃
+	;TranslatedMark となりで食べ始める姿を見、%ANAME(MASTER)%も思わず串を掴み身を口に頬張った
+	PRINTFORML 一口，放入口中，烤鳗鱼蒲烧有着刺痛的牙齿触感，感觉不到皮目和身体的交界，山椒对味道醇厚的佐料汁很有效
+	;TranslatedMark 一口、口に入れると蒲焼はコリコリとした歯触りがし、皮目と身の境が感じられず、トロッとしたコクのあるタレに山椒が効いていた
+	PRINTFORMW 「…甜辣酱配上花椒，感觉很刺激，咬起来也很有意思…这个好啊」
+	;TranslatedMark 「…甘辛いタレに山椒がピリッとした感じ、コリコリしてて歯ごたえも面白い…良いわねぇコレ」
+	PRINTFORML 喝一口倒在透明杯子里的清酒，一边享受清凉感的苦味，一边等待下一个蒲烧……
+	;TranslatedMark 透明なコップに注がれた清酒を一口、清涼感のある苦味を楽しみながら次の蒲焼を待つ……
+	PRINTFORMW 边喝酒边等烤鳗鱼串的快乐让%ANAME(MASTER)%的心雀跃不已
+	;TranslatedMark 酒を飲みながら蒲焼を待つ楽しさに%ANAME(MASTER)%の心は躍る
+	PRINTFORML "谢谢你，美女客人！"
+	;TranslatedMark 『ありがとう美人のお客さん！』
+	PRINTFORML "这个调味汁是我反复研究和改良制作的，是我最自信的一种哦！"
+	;TranslatedMark 『このタレは私が研究と改良を重ねて作ったものだからね～、自信の一品だよ！』
+	PRINTFORMW 麻雀店主麻利地把下一个烤鳗鱼串烤好
+	;TranslatedMark 手早く、それでいて無駄なく次の蒲焼を焼き上げて行く雀の店主
+	PRINTFORML 「哈哈，听到了吗，%ANAME(MASTER)%？我被称是美女客人哦~」
+	;TranslatedMark 「ははぁん、聞きました%ANAME(MASTER)%？ 美人のお客さんですって～」
+	PRINTFORMW %ANAME(対象)%已经比%ANAME(MASTER)%喝得快了吗
+	;TranslatedMark %ANAME(対象)%は既に%ANAME(MASTER)%よりハイペースで飲んでいたのか出来上がっている
+	PRINTFORML
+	PRINTFORML "这么说来，最近追加了新的饮料~"
+	;TranslatedMark 『そういえば最近新しい飲み物を追加したんだ～』
+	PRINTFORML 说完麻雀的店主把大瓶饮料放在了柜台上
+	;TranslatedMark そう言って雀の店主は大瓶をカウンターの上に置いた
+	PRINTFORMW 像酒瓶一样的瓶子里浸着蛇和香料……
+	;TranslatedMark 酒瓶と思わしき瓶の中には蛇や香料らしきものが漬け込まれている……
+	PRINTFORML 「诶…那是什么？」
+	;TranslatedMark 「へぇ…それはどういうもので？」
+	PRINTFORML "酒里有高丽参、蝮蛇、甲鱼和芋头。"
+	;TranslatedMark 『お酒に高麗人参、マムシ、スッポンやイモリを漬け込んだ薬酒だよ』
+	PRINTFORML 「那我就要那个吧？%ANAME(MASTER)%也一样」
+	;TranslatedMark 「じゃあそれを貰おうかしら？ %ANAME(MASTER)%もね」
+	PRINTFORMW 《哈》
+	;TranslatedMark 『はーい』
+	PRINTFORML 透明的杯子里注入了与酒精不同的、有着独特味道的茶色的酒……
+	;TranslatedMark 透明なコップにアルコールとは別の、独特な匂いをした茶色い酒が注がれていく……
+	PRINTFORMW 虽然有点刺鼻的味道，但还是把嘴贴在杯子边缘一点点喝了下去
+	;TranslatedMark 少し鼻をつく匂いであるものの、コップの縁に口を付けて少しずつ飲んだ
+	PRINTFORML "要抑制鳗鱼脂肪的野兽味，而且是很好喝的酒呢~"
+	;TranslatedMark 『ヤツメウナギの脂肪の獣臭さを抑えれて尚且つ美味しいお酒でね～』
+	PRINTFORML 像发酵物一样强烈的香味，刚开始觉得很香，但是一直喝下去，意外的能行
+	;TranslatedMark 発酵物のような強烈な香りに、初めはウッ、と思ったけど飲み続けれるし意外といける
+	PRINTFORMW 在舌尖上滚动的话，伴随着灼烧般的辣味，药草的香味慢慢飘来……
+	;TranslatedMark 舌の上で転がすと、焼けるような辛さと共に、まったりと薬草の香が漂ってくる……
+	PRINTFORML 「哎呀哎呀，%ANAME(MASTER)%好像相当喜欢呢…」
+	;TranslatedMark 「おやおや、%ANAME(MASTER)%ったら相当気に入ったようねぇ…」
+	PRINTFORMW 之后，两人一边听着老板娘关于新酒的造诣和讲究，一边享受着药酒…
+	;TranslatedMark その後、女将の新たなお酒に関する薀蓄や拘りを聞きつつも二人は薬酒を楽しんだ…
+	PRINTFORML
+	PRINTFORML "对了对了对了，这种药酒会变得精神起来，晚上睡不着呢~"
+	;TranslatedMark 『そうそう、この薬酒ってスッゴク元気になって夜寝れなくなっちゃうのよね～』
+	PRINTFORML 因为喝了药酒，身体感觉到了前所未有的热气…
+	;TranslatedMark 薬酒のおかげで体が感じた事が無いくらいの熱気を帯びている…
+	PRINTFORMW
+	CALL COLOR_PRINT("好感度上升了200", カラー_注意)
+	;TranslatedMark "好感度が 200上がった", カラー_注意
+	PRINTFORML
+	CFLAG:対象:好感度 += 200
+	KDVAR:対象:ドレミー_ヤツメウナギ = 1
+ENDIF
+
+RETURN 1

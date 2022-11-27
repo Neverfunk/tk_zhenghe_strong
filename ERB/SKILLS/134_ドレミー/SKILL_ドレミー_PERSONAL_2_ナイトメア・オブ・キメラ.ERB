@@ -1,0 +1,85 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_134_PERSONAL_2_EXIST
+RETURN 1
+
+@SKILL_134_PERSONAL_2_NAME
+RESULTS = 奇美拉的噩梦
+
+;レベルは1-5まで
+@SKILL_134_PERSONAL_2_LEVEL
+RETURN 4
+
+;対象選択
+@SKILL_134_PERSONAL_2_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 能力, 3
+VARSET 能力
+COMBAT_SKILL_TARGET = 発動番号
+RETURN 1
+
+;発動判定
+@SKILL_134_PERSONAL_2_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+LOCAL = (発動部隊 >= 0 ? UNIT_SOLDIER:発動勢力:発動部隊 # CITY_SOLDIER:発動勢力)
+LOCAL:1 = (対象部隊 >= 0 ? UNIT_SOLDIER:対象勢力:対象部隊 # CITY_SOLDIER:対象勢力)
+RETURN LOCAL * 2 <= LOCAL:1
+
+;効果をここに記述
+@SKILL_134_PERSONAL_2_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+PRINTFORML 最终手段！上吧！哆来咪机器人出动！
+TIMES BATTLE_武闘パワー:発動側:COMBAT_SKILL_TARGET, 1.20
+TIMES BATTLE_防衛パワー:発動側:COMBAT_SKILL_TARGET, 1.20
+TIMES BATTLE_知略パワー:発動側:COMBAT_SKILL_TARGET, 1.20
+RETURN 1
+
+;
+@SKILL_134_PERSONAL_2_EXPLANATION
+RESULTS = 在我方部队兵力大幅度落后于敌方时触发。使自身的武闘、防衛与知力提升。
+
+
+@SKILL_134_PERSONAL_2_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 1000
+
+@SKILL_134_PERSONAL_2_CANT_TELL

@@ -1,0 +1,78 @@
+﻿;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@KOJO_DAILY_K51_DERIVATION_WHERE_IS_TENSHI_DISABLE(対象)
+#DIM 対象
+RETURN KOJO_DAILY_GET_DISABLE_CONFIG(対象, "WHERE_IS_TENSHI")
+
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K51_DERIVATION_WHERE_IS_TENSHI_DECISION(対象)
+#DIM 対象
+#DIM 天子
+天子 = NAME_TO_CHARA("天子")
+
+SIF 天子 == -1
+	RETURN 0
+
+;監視中でなければ戻る
+SIF KDVAR:対象:衣玖_たずねびと != 1
+	RETURN 0
+
+SIF !ALLSAMES(CFLAG:MASTER:所属, CFLAG:天子:所属, CFLAG:対象:所属)
+	RETURN 0
+
+IF CFLAG:対象:所属 != CFLAG:MASTER:所属
+	PRINTFORML 因为所属不同的部门，%ANAME(対象)%撤回了对%ANAME(MASTER)%的请求……
+	;TranslatedMark 所属が別になったので、%ANAME(対象)%は%ANAME(MASTER)%への頼みを取り下げたようだ……
+	KDVAR:対象:衣玖_たずねびと = 2
+	RETURN 0
+ENDIF
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0)
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@KOJO_DAILY_K51_DERIVATION_WHERE_IS_TENSHI_SETTARGET(対象)
+#DIM 対象
+FOR LOCAL, 0, CHARANUM
+
+NEXT
+RETURN 1
+
+;---------------------
+;本体
+;---------------------
+@KOJO_DAILY_K51_DERIVATION_WHERE_IS_TENSHI(対象)
+#DIM 対象
+#DIM 天子
+天子 = NAME_TO_CHARA("天子")
+
+PRINTFORML 在房间工作时，%ANAME(対象)%来访问了
+;TranslatedMark 在房間工作時、%ANAME(対象)%過来拜訪了
+PRINTFORMW 「%ANAME(MASTER)%小姐，谢谢您关心我女儿的事」
+;TranslatedMark 「%ANAME(MASTER)%さん、総領娘様の件はありがとうございました」
+PRINTFORMW 「老大娘，要是能再冷静一点就好了……」
+;TranslatedMark 「総領娘様も、もう少し落ちついてくださればいいのですが……」
+PRINTFORMW 「啊，那种话真是无所谓啊。因此，我只是一点心意，还想向您道谢……」
+;TranslatedMark 「ああ、そんな話はどうでもいいことでしたね。それで、ほんの気持ち程度ですがお礼をと思いまして……」
+PRINTFORMW 「对不起，打搅您工作了。那么」
+;TranslatedMark 「お仕事中、失礼しました。では」
+PRINTFORML 把包裹交给这里后，%ANAME(対象)%就离开了房间
+;TranslatedMark こちらに小包を渡すと、%ANAME(対象)%は部屋から立ち去った
+PRINTFORML 少女的态度，变得温柔了……
+;TranslatedMark 少女的態度、変得柔和了……
+CALL COLOR_PRINTW(@"%ANAME(対象)%的好感度上昇了", カラー_注意)
+CALL COLOR_PRINTW("金5000を得ました", カラー_注意)
+CFLAG:対象:好感度 += 700
+CFLAG:対象:依存度 += 200
+MONEY += 5000
+KDVAR:対象:衣玖_たずねびと = 2
+
+RETURN 1

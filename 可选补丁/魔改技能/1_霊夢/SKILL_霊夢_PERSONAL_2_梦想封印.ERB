@@ -1,0 +1,94 @@
+;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_1_PERSONAL_2_EXIST
+RETURN 1
+
+@SKILL_1_PERSONAL_2_NAME
+RESULTS = 灵符「梦想封印」
+
+;レベルは1-5まで
+@SKILL_1_PERSONAL_2_LEVEL
+RETURN 5
+
+;対象選択
+@SKILL_1_PERSONAL_2_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+SIF BATTLE_COMMANDER_NUM:対象側 == 0
+	RETURN 0
+COMBAT_SKILL_TARGET = RAND:(BATTLE_COMMANDER_NUM:対象側)
+RETURN 1
+
+;発動判定
+@SKILL_1_PERSONAL_2_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1
+
+;効果をここに記述
+@SKILL_1_PERSONAL_2_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+PRINTFORML  “看来要解决这次麻烦的异变，就只能把你们这帮家伙 全 部 退 治 了。”
+PRINTFORML  “灵符「梦想封印」！”
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
+	IF RAND:100 < 50
+		PRINTFORML  %ANAME(BATTLE_COMMANDER:対象側:LOCAL)%被阵法压制了…！
+		PRINTFORML  %ANAME(BATTLE_COMMANDER:対象側:LOCAL)%无法释放技能了！
+		BATTLE_SKILL_SEALED:対象側:COMBAT_SKILL_TARGET = 1
+	ELSE
+		PRINTFORML  %ANAME(BATTLE_COMMANDER:対象側:LOCAL)%抵抗住压制了！
+	ENDIF
+NEXT
+RETURN 1
+
+PRINTFORML %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%被命中了！
+PRINTFORML 無法参加這場戦闘！
+CALL BATTLE_KNOCKOUT(対象側, COMBAT_SKILL_TARGET)
+RETURN 1
+
+@SKILL_1_PERSONAL_2_EXPLANATION
+RESULTS = 中概率封印敵全员技能；敌一人战斗不能。
+
+
+
+
+@SKILL_1_PERSONAL_2_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 700

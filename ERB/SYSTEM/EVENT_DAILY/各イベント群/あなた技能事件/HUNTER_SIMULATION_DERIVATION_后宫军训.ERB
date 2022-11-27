@@ -1,0 +1,167 @@
+﻿;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_HUNTER_EXAM_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("HUNTER_SIMULATION")
+
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_DERIVATION_HUNTER_EXAM_DECISION()
+SIF DAY < 5
+    RETURN 0
+SIF DVAR:演习历时 == 0
+    RETURN 0
+;MASTERがペニスを持っている
+SIF !(HAS_PENIS(MASTER))
+    RETURN 0
+SIF ABL:MASTER:性技 < 3
+    RETURN 0
+SIF ABL:MASTER:武闘 + ABL:MASTER:防衛 + ABL:MASTER:知略 + ABL:MASTER:政治 < 250
+    RETURN 0
+SIF !IS_COUNTRY(CFLAG:MASTER:所属)
+    RETURN 0
+SIF GET_COUNTRY_BOSS(CFLAG:MASTER:所属) != MASTER
+    RETURN 0
+SIF DVAR:后宫事件冷却
+    RETURN 0
+;技能只能习得一系，除非全部遗忘
+SIF CHECK_SKILL_DUPLICATE(MASTER, スキル_ジャンル_PERSONAL, 0, 41) || CHECK_SKILL_DUPLICATE(MASTER, スキル_ジャンル_PERSONAL, 0, 42)
+    RETURN 0
+RETURN RAND:1000 < 500 / (DVAR:演习flag + 1)
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_DERIVATION_HUNTER_EXAM_SETTARGET()
+FOR LOCAL, 0, CHARANUM
+    SIF !GETBIT(TALENT:LOCAL:日常系, 素質_デイリー_专属奴隶)
+        CONTINUE
+    SIF CFLAG:LOCAL:所属 != CFLAG:MASTER:所属 || CFLAG:LOCAL:特殊状態 || (!IS_SLAVE(LOCAL) && !IS_LOVER(LOCAL)) || !IS_FEMALE(LOCAL)
+        CONTINUE
+    IF !COOLTIME:LOCAL:0
+        DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+        DAILY_TARGET_NUM ++
+    ENDIF
+NEXT
+SIF DAILY_TARGET_NUM < 12
+    RETURN 0
+RETURN 1
+
+;---------------------
+;イベントの進行度合いに応じてイベント名を変更したい場合に利用
+;変更する必要がない場合、この関数は不要
+;---------------------
+@EVENT_DAILY_DERIVATION_HUNTER_EXAM_NAME()
+RESULTS '= @"第{DVAR:军训历时 + 1}届大军训"
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_HUNTER_EXAM()
+#DIM 主题
+#DIM 能力
+#DIM 獲得経験値
+
+PRINTFORMW 经过模拟对抗演习的洗礼后，为了充分训练各位少女的战力，第{DVAR:军训历时 + 1}届大军训正式召开！
+主题 = RAND:6
+PRINTFORMW 那么，本次大军训的主题是——
+SELECTCASE 主题
+    CASE 0
+        能力 = GETNUM(ABL, "武闘")
+        PRINTFORML 性爱擂台！
+        FORCEWAIT
+        PRINTFORMW 这次特训的内容很简单——%ANAME(MASTER)%要与少女们展开车轮战
+        PRINTFORMW 只要前来挑战的少女输了，%ANAME(MASTER)%就可以任意凌辱她的身体
+        PRINTFORMW 当然，只要%ANAME(MASTER)%想，在战斗中随时可以扒下少女的衣服
+        PRINTFORMW 如此一来，%ANAME(MASTER)%渐渐占尽上头，甚至能在少女进攻时瞬间将肉棒插进暴露的小穴里
+        PRINTFORMW 即使不用那些淫招，%ANAME(MASTER)%和自己强奸过的少女对打也能稳定占到上风
+        PRINTFORMW 即使如此%ANAME(MASTER)%也有落败的时候，这时候与之对战的少女一般便会抓住这千载难逢的机会，骑在上面百般侮辱
+        PRINTFORMW 虽然期间挨了不少打，但既能欺辱少女又能锻炼双方的武艺，这可是双赢～
+    CASE 1
+        能力 = GETNUM(ABL, "防衛")
+        PRINTFORML 扒衣大赛！
+        FORCEWAIT
+        PRINTFORMW 少女们换上了特制的衣服，开始了以扒下其他少女的衣服为目标的比赛
+        PRINTFORMW 这种衣服只要稍一用力就可以从后方或者前方完整地剥下来，甚至可以重复利用
+        PRINTFORMW 一般%ANAME(MASTER)%会作为裁判，把被扒光衣服的少女抱走，或者当众侵犯
+        PRINTFORMW 但有时%ANAME(MASTER)%也会参与其中，这时候便是%ANAME(MASTER)%去扒少女们的衣服了
+        PRINTFORMW 面对%ANAME(MASTER)%的咸猪手，少女们自然会拼命反抗
+        PRINTFORMW 可是缺乏防备的少女有时会被在暗处伏击的%ANAME(MASTER)%抱住，一边被扒衣服一边被侵犯
+        PRINTFORMW 甚至有一局，%ANAME(MASTER)%干脆先把少女们都强奸内射到她们倒地不起，再一个个扒去衣服
+        PRINTFORMW 这样淫乱的比赛固然和平时的临幸没什么太大的区别，但起码比赛之后，少女们的防备意识都能有所提高……
+    CASE 2
+        能力 = GETNUM(ABL, "知略")
+        PRINTFORML 猜灯谜！
+        FORCEWAIT
+        PRINTFORMW 少女们换上透明的浴衣，一起办一场盛大的花火大会
+        PRINTFORMW 虽说花火大会包含很多东西，但这其中最主要的活动便是猜灯谜了
+        PRINTFORMW 对于很多少女来说，一边猜谜一边做爱是一种很惬意的事
+        PRINTFORMW 幸好%ANAME(MASTER)%在事前就想出了一个绝妙的主意：
+        PRINTFORMW 现在少女们要轮流来到拘束架上，在被%ANAME(MASTER)%后入侵犯的同时去猜出随机抽选的灯谜
+        PRINTFORMW 只要在上面的少女能在高潮之前猜出谜底，便能享受和%ANAME(MASTER)%一起绝顶的待遇
+        PRINTFORMW 否则……就会被塞上振动棒在会场一侧放置play，直到所有人完成一次轮次为止
+        PRINTFORMW 这次大会一共持续了很久，但因为多日的调教导致少女们的身体个个高度敏感，每天都只有少数人能够顺利被中出
+        PRINTFORMW 甚至有的人为了攀比，还会在事后自己把中出次数用记号笔记在大腿根部
+        PRINTFORMW 能在如此场合都能开动脑筋，想必冷静下来的话一定能纵横寰宇……吧？
+    CASE 3
+        能力 = GETNUM(ABL, "政治")
+        PRINTFORML 文书特训！
+        FORCEWAIT
+        PRINTFORMW 少女们换上透明的裸体衬衫，一起学习文书工作所需要的知识
+        PRINTFORMW 说是特训，实际上就是很——长的自习课
+        PRINTFORMW 只是有亲爱的%ANAME(MASTER)%主人可以答疑解惑而已
+        PRINTFORMW 为了提起少女们的积极性，决定让每次随堂小测得第一名的人可以坐在%ANAME(MASTER)%的肉棒上自习
+        PRINTFORMW 不过因为每个坐在上面的少女都会渐渐变得沉迷做爱而无心学习，反而搞得这个“第一名特等席”竟能多次易手
+        PRINTFORMW 可想而知，到了下课的时候，实际上几乎每个少女都已经流下了在上面坐过的痕迹
+        PRINTFORMW 虽然事后经常被吐槽说“明明就是想让大家穿成这样做爱而已”，但是少女们真的能从中学到点有用的知识
+        PRINTFORMW 只是……是哪方面的就不知道了……
+    CASE 4
+        能力 = GETNUM(ABL, "歌唱")
+        PRINTFORML 偶像练习！
+        FORCEWAIT
+        PRINTFORMW 少女们换上被改造地极其暴露的偶像制服，在舞台上练习舞蹈
+        PRINTFORMW 当然，除了舞蹈，还有许许多多偶像所需要的技能也需要练习
+        PRINTFORMW 但这些练习共同的要点便是在做爱的同时保持冷静和注意力集中
+        PRINTFORMW 例如第一节课，便是让少女骑在%ANAME(MASTER)%的阴茎上，一边扭腰一边唱歌
+        PRINTFORMW 第二节课便是通过变换体位来锻炼少女身体的柔韧性
+        PRINTFORMW 即使到了真正在舞台上实践舞蹈的时候，也要在下身两个洞都同时装有振动棒的情况下冷静完成舞蹈
+        PRINTFORML 因为跳的最好的少女能够在之后几天被%ANAME(MASTER)%尽情宠爱，所以大家都非常卖力
+        PRINTFORMW 虽然不怎么正经，但好歹大家的歌唱技能都有所提高～
+    CASE 5
+        能力 = GETNUM(ABL, "料理")
+        PRINTFORML 新妻修行！
+        FORCEWAIT
+        PRINTFORMW 少女们换上裸体围裙，轮流服侍着她们的夫君——也就是%ANAME(MASTER)%主人
+        PRINTFORMW 而%ANAME(MASTER)%则要尽好夫君的责任，轮流为各位娇妻播种
+        PRINTFORMW 虽说主旨如此简单，但实际上要考核的内容很多：
+        PRINTFORMW 要在做爱的同时做到顺利完成家务、
+        PRINTFORMW 即使被突然插入也要从容不迫地进行性处理、
+        PRINTFORMW 更不用说做爱中还有具体的考核了
+        PRINTFORMW 为了得到好成绩，各位少女都在拼尽了全力侍奉着%ANAME(MASTER)%……
+        PRINTFORML 虽然这次的军训似乎只是和做爱有关系，但意外的是这居然可以锻炼少女们的厨艺……！
+        PRINTFORMW 也算是意外收获吧～
+ENDSELECT
+FOR LOCAL, 0, DAILY_TARGET_NUM
+    CALL FUCK(DAILY_TARGET:LOCAL, "Ｃ, Ｖ, Ｂ, 欲望, 精愛, 奉仕, 奉仕, 性交, 接吻, 口淫, Ｖ性交", "膣内射精, 接吻喪失, 処女喪失, 口内射精",　GET_ID(MASTER), @"%ANAME(MASTER)%的阴茎", ANAME(MASTER), "", "調教")
+    CALL FUCK(MASTER, "欲望, 性技, 性交, 加虐, Ｃ, 射精, 露出, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(DAILY_TARGET:LOCAL)%的小穴", "調教")
+
+    獲得経験値 = SPECIAL_TRAIN_CALC_EFFECT(DAILY_TARGET:LOCAL, 能力) * MAX(MIN(ABL:(DAILY_TARGET:LOCAL):性技, ABL:MASTER:性技), 1) / 5
+    CALL PRINT_ADD_EXP(DAILY_TARGET:LOCAL, @"%ABLNAME:能力%経験値", 獲得経験値, 1)
+    CALL TRAIN_AUTO_ABLUP(DAILY_TARGET:LOCAL)
+NEXT
+IF DVAR:演习历时 >= 3 && !CHECK_SKILL_DUPLICATE(MASTER, スキル_ジャンル_PERSONAL, 0, 44)
+    PRINTFORMW 至今为止“操”练了不知多少少女的%ANAME(MASTER)%好像顿悟了什么……
+    PRINTFORMW 这几天借着淫威凌辱了不少府中的少女，%ANAME(MASTER)%渐渐领悟出一种战术……
+    PRINTFORMW 只要自己的性技够强，就能直接在战场上将所有的女将尽收囊中！
+    CALL SKILL_LEARN(MASTER, スキル_ジャンル_PERSONAL, 0, 44)
+    CALL COLOR_PRINTW(@"%ANAME(MASTER)%领悟了将战场上的女性们肆意玩弄的技能！", カラー_注意)
+ENDIF
+DVAR:军训历时 ++
+DVAR:演习flag ++
+DVAR:后宫事件冷却 = 5
+RETURN 1

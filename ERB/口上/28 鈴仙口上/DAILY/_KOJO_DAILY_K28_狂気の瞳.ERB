@@ -1,0 +1,134 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K28_INVISIBLE_FULL_MOON_RATE(対象)
+#DIM 対象
+RETURN 60
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K28_INVISIBLE_FULL_MOON_DECISION(対象)
+#DIM 対象
+
+;主人公が永遠亭キャラでは駄目
+SIF GROUPMATCH(MASTER, NAME_TO_CHARA("てゐ"), NAME_TO_CHARA("輝夜"), NAME_TO_CHARA("永琳"))
+	RETURN 0
+
+;恋慕 or 服従かつ合意がないと駄目
+SIF !((TALENT:対象:恋慕 || TALENT:対象:服従) && TALENT:対象:合意)
+	RETURN 0
+
+;欲望がLv3以上じゃないと駄目
+SIF ABL:対象:欲望 < 3
+	RETURN 0
+
+;対象が女でないとだめ
+SIF !IS_FEMALE(対象)
+	RETURN 0
+
+;主人公がペニスを持ってないと駄目
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K28_INVISIBLE_FULL_MOON_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K28_INVISIBLE_FULL_MOON(対象)
+#DIM 対象
+
+
+PRINTFORML 夜晚。正当你准备走向被褥就寝时，从%ANAME(MASTER)%的房间外响起了敲门声
+;TranslatedMark 夜。そろそろ布団に向かおうかと思った頃に、%ANAME(MASTER)%の部屋にノックが響いた
+PRINTFORMW 出去看看是谁后，发现是气息混乱，脸色潮红的%ANAME(対象)%站在外面
+;TranslatedMark 誰だろうと出てみると、息を荒げ、顔を紅潮させた%ANAME(対象)%が立っていた
+PRINTFORML 从她扭扭捏捏的摩擦着流淌下爱液的大腿上，吐出香艳气息的样子看起来完全是处于发情期中
+;TranslatedMark もじもじと摺り合わせる太ももには愛液が伝い、艶っぽい吐息を吐くその姿は完全に発情しているように見える
+PRINTFORMW 「拜托了，%ANAME(MASTER)%。什么都不要说，看着我的眼睛……」
+;TranslatedMark 「ねえ、お願い%ANAME(MASTER)%。何も言わずに、私の眼を見て……」
+PRINTFORMW 在她的眼睛里，闪烁着与平常不同的妖艳光芒。你被那光芒所吸引……
+;TranslatedMark 彼女の瞳には、いつもと違う妖しい光が燈っているように見える。その光に魅入られそうになる……
+PRINTL
+CALL ASK_YN("盯着眼睛", "移开眼睛")
+
+IF RESULT == 0
+	PRINTFORML 如她所说的那样，你被那亮起妖艳而美丽的光芒的双眼所俘获…
+	;TranslatedMark 言われるがままに、その妖しくも美しい光を放つ瞳に魅入る…
+	PRINTFORMW 下一个瞬间，%ANAME(MASTER)%被异常的情欲所侵袭
+	;TranslatedMark 次の瞬間、%ANAME(MASTER)%は尋常でない情欲に襲われる
+	PRINTFORML 「对不起…我，我自己也做过，但完全不够…不是和%ANAME(MASTER)%做就无法满足我」
+	;TranslatedMark 「ごめんね…。自分でもシたんだけど、でも全然駄目なの…。%ANAME(MASTER)%とじゃないと満足できないのよ」
+	PRINTFORMW %ANAME(MASTER)%的精神被%ANAME(対象)%操纵狂气程度的能力所支配，只想着侵犯眼前的女人
+	;TranslatedMark %ANAME(MASTER)%の精神は%ANAME(対象)%の能力によって狂気で支配され、目の前の女を犯すことしか考えられなくなってしまう
+	PRINTFORML 「如果变成这样，接下来你就会一直侵犯我吧…来把我搞得乱七八糟的♥」
+	;TranslatedMark 「そんな風になっちゃえば…私のこと、いっぱい犯してくれるよね。私のこと、めちゃくちゃにしてくれるよね…♥」
+	PRINTFORMW %ANAME(対象)%向%ANAME(MASTER)%暴露出自己燃烧着欲火的身体，像是期待着被猛烈的强暴
+	;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の前で愛欲に火照った裸体を晒して、激しく犯されることを望んでいるようだ
+	PRINTFORMW 被狂气所支配的%ANAME(MASTER)%将她推倒在床上，让她如愿以偿的被侵犯……
+	;TranslatedMark 狂気に支配された%ANAME(MASTER)%は望みどおり、目の前の雌を犯しつくすべくベッドに押し倒した……
+	CVARSET CFLAG, 6, 0
+	FLAG:ターンエンド調教 = 1
+	FLAG:調教モード = 2
+	CFLAG:対象:調教参加フラグ = 1
+	CFLAG:対象:調教中帰らない = 1
+	ABL:対象:主導度Ｕ -= 300
+	CFLAG:対象:強制友好化 = 1
+	BASE:対象:体力 = MAXBASE:対象:体力
+	BASE:対象:気力 = MAXBASE:対象:気力
+	BASE:MASTER:体力 = MAXBASE:MASTER:体力
+	BASE:MASTER:気力 = MAXBASE:MASTER:気力
+	;それ以降のデイリーイベント発生を潰す
+	DAILY_CANCEL = 1
+	;フラグ
+	KDVAR:対象:鈴仙_狂気の瞳 = 1
+ELSE
+	PRINTFORML 你对那进入脑海中的妖艳光芒感到本能的恐惧，移开了视线
+	;TranslatedMark 心の中まで入り込んでくるような光の妖しさに本能的な恐怖を覚え、目をそらしてしまう
+	PRINTFORMW 「…你不会对我发狂吧…」
+	;TranslatedMark 「…私に狂ってくれないのね…」
+	PRINTFORML 妖艳的光芒从喃喃自语的%ANAME(対象)%的瞳中消失，取而代之的是泪水
+	;TranslatedMark そう呟く%ANAME(対象)%の瞳からは妖しい光は消え、代わりに涙で潤んでいた
+	PRINTFORMW 问她到底怎么了时，她轻轻抱住了%ANAME(MASTER)%的胸口
+	;TranslatedMark 一体どうしたんだ、と問うと、彼女は%ANAME(MASTER)%の胸元に抱きついてきた
+	PRINTFORML 「因为没办法啊！无论我怎么自慰都没办法解决！」
+	;TranslatedMark 「だってしょうがないじゃない！　いくら自分で慰めても全然治まらないんだもん！」
+	PRINTFORML 「所以才想被%ANAME(MASTER)%抱啊！我想被%ANAME(MASTER)%侵犯的一塌糊涂啊！」
+	;TranslatedMark 「だから%ANAME(MASTER)%に抱かれたかったのよ！　%ANAME(MASTER)%にめちゃくちゃに犯してもらいたかったのよ！」
+	PRINTFORMW 「……这样的事…别让我说啊…笨蛋…」
+	;TranslatedMark 「……こんなこと…言わせないでよ…バカぁ…」
+	PRINTFORMW %ANAME(対象)%变红了脸，哭了起来。虽然没有亲身经历过，但发情期的性欲看来很难处理…
+	;TranslatedMark %ANAME(対象)%は顔を真っ赤にして泣きじゃくる。自分には分からないが、発情期の性欲の処理は本当に大変なのだろう…
+	PRINTFORML 如果让她说了这么多，然后就这么让她走，那也太残忍了
+	;TranslatedMark 彼女にここまで言わせてただ帰す、というのも酷な話だ
+	PRINTFORMW %ANAME(MASTER)%抱着%ANAME(対象)%，把她推倒在床上
+	;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%を抱き寄せてベッドに押し倒す
+	PRINTFORMW 「啊…♥谢谢你，%ANAME(MASTER)%…♥」
+	;TranslatedMark 「あっ…♥　ありがとう、%ANAME(MASTER)%…♥」
+	PRINTFORMW …这之后，直到黎明升起前两人都一直在做爱，%ANAME(対象)%似乎非常满足……
+	;TranslatedMark …その後、明け方近くまでたっぷり愛し合って、%ANAME(対象)%は満足してくれたようだ……
+	CALL FUCK(対象, "Ｖ, 奉仕, 性交, 欲望, 性技, Ｖ性交", "膣内射精, 処女喪失", GET_ID(MASTER), "", ANAME(MASTER), "", "和姦")
+	CALL FUCK(MASTER, "Ｃ, 射精, 欲望, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣", "和姦")
+	CFLAG:対象:好感度 += 500
+	CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了500", カラー_シアン)
+ENDIF
+
+
+RETURN 1
+

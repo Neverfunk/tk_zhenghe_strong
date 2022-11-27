@@ -1,0 +1,154 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K92_LOM_RATE(対象)
+#DIM 対象
+RETURN 50
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K92_LOM_DECISION(対象)
+#DIM 対象
+
+;散歩できるのは一回きり
+SIF KDVAR:対象:わかさぎ姫_石の魚
+    RETURN 0
+
+;霧の湖が存在するマップ限定
+;実質MAP_DEFAULT限定
+SIF FINDELEMENT(CITY_NAME, "霧の湖") == -1
+    RETURN 0
+
+;こいつらは「お初にお目にかかります」ってな仲ではなかろうから駄目
+SIF GROUPMATCH(MASTER, NAME_TO_CHARA("赤蛮奇"), NAME_TO_CHARA("影狼"))
+    RETURN 0
+
+;捕虜にしたりする都合、君主の場合はダメ
+;まずないと思うけど
+SIF GET_COUNTRY_BOSS(CFLAG:対象:所属) == 対象
+    RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 0, 0, 0)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K92_LOM_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K92_LOM(対象)
+#DIM 対象
+
+CFLAG:対象:面識 = 1
+KDVAR:対象:わかさぎ姫_石の魚 = 1
+
+
+PRINTFORMW 「那个，对不起……」
+;TranslatedMark 「あのぉ、すみません……」
+PRINTFORML 在雾之湖畔散步的时候，意外地听到了呼救声
+;TranslatedMark 霧の湖のほとりを歩いていると、不意に声をかけられた
+PRINTFORMW 正想着会是什么，忽然发现湖边有只人鱼被冲上了岸
+;TranslatedMark 何かと思えば、浜辺に人魚が打ち上げられている
+PRINTFORML 「初次见面。我是%NAME_FORMAL(対象)%」
+;TranslatedMark 「お初にお目にかかります。私は%NAME_FORMAL(対象)%」
+PRINTFORML 「因为一点小事故被抛了出来，现在有些难办。」
+;TranslatedMark 「ちょっとした事故で打ち上げられてしまって、難儀してるんです」
+PRINTFORML 「能帮我一下吗？请站在那里就行了」
+;TranslatedMark 「助けてくれませんか？　そこに立ってくださればいいので」
+
+$ENDLESS
+CALL ASK_MULTI("帮助", "拒绝", "带回去")
+
+IF RESULT == 1
+    PRINTFORML 「请不要那么说」
+    ;TranslatedMark 「まあそうおっしゃらずに」
+    GOTO ENDLESS
+ELSEIF RESULT == 2
+    PRINTFORMW 「哎、那个、等一下？」
+    ;TranslatedMark 「えっ、あの、ちょっと？」
+    PRINTFORML 在没有海的幻想乡里，人鱼算是个稀有物种
+    ;TranslatedMark 海のない幻想郷で人魚なんてなかなかのレアだ
+    PRINTFORMW 决定带回去……
+    ;TranslatedMark 持ち帰ることにした……
+    CALL COLOR_PRINTW(@"捕获了%ANAME(対象)%", カラー_注意)
+    CALL CAPTURE(対象, CFLAG:MASTER:所属)
+    RETURN 1
+ENDIF
+
+PRINTFORMW 「谢谢，那么……嘿！」
+;TranslatedMark 「ありがとうございます、では……えいっ！」
+PRINTFORML 当%ANAME(MASTER)%站在指定的位置上时，%ANAME(対象)%使用尾巴飞了起来
+;TranslatedMark 指し示された位置に%ANAME(MASTER)%が立つと、%ANAME(対象)%は尾を使って飛び上がる
+PRINTFORML 在空中翻出一个漂亮的筋斗，之后无声地落到了湖里
+;TranslatedMark 空中で見事な宙返りをきめると、音もなく湖に着水した
+PRINTFORMW ……这个，自己站在这里有意义吗？
+;TranslatedMark ……これ、自分がいる意味はあったのだろうか？
+PRINTFORMW %ANAME(対象)%先是潜入水底，过了一会儿只把脸部露出水面
+;TranslatedMark %ANAME(対象)%は一度水に潜り、しばらくすると水面に顔だけ出してきた
+PRINTFORML 「呀啊，得救了。我被妖精的恶作剧捉弄到了……」
+;TranslatedMark 「いやあ、助かりました。妖精がやって来て悪戯をしかけてきまして」
+PRINTFORMW 「顺便问一下，想要些什么做回礼呢？」
+;TranslatedMark 「ところで、何かお礼なんていかがですか？」
+PRINTFORML 虽然只是站在那里什么也没做……那么，怎么办呢……
+;TranslatedMark 突っ立っていただけで何もしていないのだが、さて、どうしようか……
+
+$SELECT_OREI
+
+CALL ASK_MULTI("想要钱", "成为伙伴", "H！", "不要", "能看见妖精的咒语")
+
+SELECTCASE RESULT
+    CASE 0
+        PRINTFORMW 「钱吗？」
+        ;TranslatedMark 「お金ですか？」
+        PRINTFORMW 「不巧的是我的身上没有现金……给您一块水底捡到的漂亮石头如何？」
+        ;TranslatedMark 「あいにく現金は持ち合わせてないんですが……水底で拾った綺麗な石を差し上げます」
+        PRINTFORMW 「卖掉的话应该能换一些钱吧…大概」
+        ;TranslatedMark 「売ればいくらかにはなると思いますよ……多分」
+        PRINTFORMW 把从%ANAME(対象)%那里得到的石头在道具店卖掉了……
+        ;TranslatedMark %ANAME(対象)%からもらった石を道具屋で売った……
+        CALL COLOR_PRINTW("得到了", ,"3000", カラー_注意, "金")
+        MONEY += 3000
+    CASE 1
+        PRINTFORMW 「想要伙伴吗？」
+        ;TranslatedMark 「仲間ですか？」
+        PRINTFORMW 「我明白了。如果我可以的话」
+        ;TranslatedMark 「わかりました。私でよければ」
+        PRINTFORMW 「啊，但是我不擅长粗暴的事情，如果能考虑到这一点的话」
+        ;TranslatedMark 「あっ、でも荒事は不得意ですから、そのあたりは配慮いただけると」
+        CALL COLOR_PRINTW(@"%ANAME(対象)%成为了同伴", カラー_注意)
+        CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属)
+    CASE 2
+        PRINTFORMW 「……不纯洁！」
+        ;TranslatedMark 「……不潔！」
+        PRINTFORML %ANAME(対象)%以惊人的气势潜入了水中
+        ;TranslatedMark %ANAME(対象)%は凄い勢いで水に潜ってしまった
+        PRINTFORMW 被逃走了……
+        ;TranslatedMark 逃げられてしまった……
+        CFLAG:対象:好感度 -= 500
+    CASE 3
+        PRINTFORMW 「不需要客气什么的……真是个无欲无求的人啊」
+        ;TranslatedMark 「遠慮は不要なんですけど……無欲な人ですね」
+        PRINTFORMW 「嘛，既然那么说的话」
+        ;TranslatedMark 「まあ、そういうことなら」
+        PRINTFORMW 没收到什么特别的……
+        ;TranslatedMark 特に何も受け取らなかった……
+    CASE 4
+        PRINTFORML 「……？妖精什么的，即使没有咒语也能看见吧？」
+        ;TranslatedMark 「……？　妖精なんて、おまじないがなくても見えますよね？」
+        GOTO SELECT_OREI
+ENDSELECT
+
+
+RETURN 1

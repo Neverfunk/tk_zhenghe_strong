@@ -1,0 +1,63 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_ENCOUNT_DANMAKU_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_ENCOUNT_DANMAKU_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_ENCOUNT_DANMAKU(対象)
+#DIM 対象
+PRINTFORML 探索時、突然從頭上落了下什麼！
+PRINTFORML 抬頭一看是妖精們正在進行弾幕戦
+PRINTFORML 被捲入的話那就糟了、慌忙的想要離開現場但是更多的弾幕飛了過来！
+PRINTL
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "知略"))
+CALL ASK_MULTI("全力突囲", "見切模式", "故意不動")
+
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORML 用氣勢來回避
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		IF LIMIT(ABL:対象:武闘 * 2, 50, 100) > RAND:100
+			PRINTFORML 成功了！
+			PRINTFORML %ANAME(対象)%成功閃過了弾幕
+			PRINTFORMW 也算是一次好的訓練
+			CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:10 + 1, 1)
+		ELSE
+			PRINTFORML 但是弾幕比想象的還要激烈、被撃中了！
+			CALL ADD_COOLTIME(対象, 1)
+		ENDIF
+	CASE 1
+		PRINTFORML 努力看穿弾幕的形状
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		IF LIMIT(ABL:対象:武闘 * 2, 50, 100) > RAND:100
+			PRINTFORML 成功了！
+			PRINTFORML %ANAME(対象)%成功閃過了弾幕
+			PRINTFORMW 也算是一次好的訓練
+			CALL PRINT_ADD_EXP(対象, "知略経験値", RAND:10 + 1, 1)
+		ELSE
+			PRINTFORML 但是弾幕比想象的還要激烈、被撃中了！
+			CALL ADD_COOLTIME(対象, 1)
+		ENDIF
+	CASE 2
+		PRINTFORML 決定一動不動……
+		PRINTFORML 平安的回避了
+ENDSELECT
+
+RETURN 1

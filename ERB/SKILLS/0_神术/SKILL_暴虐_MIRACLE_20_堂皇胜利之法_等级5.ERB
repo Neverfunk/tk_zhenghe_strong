@@ -1,0 +1,208 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_0_MIRACLE_20_EXIST
+RETURN 1
+
+@SKILL_0_MIRACLE_20_NAME
+RESULTS = 堂皇胜利之法
+
+;レベルは1-5まで
+@SKILL_0_MIRACLE_20_LEVEL
+RETURN 5
+
+@SKILL_0_MIRACLE_20_FROMWHO
+;0或不存在=通用 1=暴虐 2=诡术 3=腐朽 4=色欲
+RETURN 1
+
+@SKILL_0_MIRACLE_20_SELFLEARN(对象)
+#DIM 对象
+#DIM 上任
+#DIM 优先度
+#DIM 技能ID = 20  ;本技能ID
+优先度 = 0
+;信仰等级要求
+CALLFORM SKILL_0_MIRACLE_{技能ID}_LEVEL
+SIF ABL:对象:信仰 < FAITH_LEVEL:RESULT
+	RETURN 0
+;神术等级加成,一般认为越高越强
+优先度 += RESULT * 20
+;已有技能联动
+;角色属性
+;角色是否主君
+;领土数量
+;被俘虏时
+;部队/都市就任情况
+上任 = 0
+IF CFLAG:对象:所属 != 0
+	FOR LOCAL:0, 0, MAX_CITY
+		IF CITY_COMMANDER:(LOCAL:0) != 0
+			FOR LOCAL:1, 0, MAX_CITY_COMMANDER
+				IF GET_CITY_COMMANDER(LOCAL:0, LOCAL:1) == 对象
+					;对象 = 都市LOCAL:0的第LOCAL:1守将
+					上任 = 1
+					优先度 += 50 + GET_SOLDIER(LOCAL:0,-1)/1000
+				ENDIF
+			NEXT
+		ENDIF
+	NEXT
+	FOR LOCAL:0, 0, MAX_COUNTRY
+		IF IS_COUNTRY(LOCAL:0)
+			FOR LOCAL:1, 0, 10
+				IF UNIT_COMMANDER:(LOCAL:0):(LOCAL:1) != 0
+					FOR LOCAL:2, 0, MAX_UNIT_COMMANDER
+						IF GET_UNIT_COMMANDER(LOCAL:0, LOCAL:1, LOCAL:2) == 对象
+							;对象 = 势力LOCAL:0的部队LOCAL:1的第LOCAL:2将领
+							上任 = 1
+							优先度 += 50 + GET_SOLDIER(LOCAL:0,-LOCAL:1)/1000
+						ENDIF
+					NEXT
+				ENDIF
+			NEXT
+		ENDIF
+	NEXT
+ENDIF
+SIF !上任
+	优先度 -= 300
+;势力方针/倾向
+IF CFLAG:对象:所属 == CFLAG:MASTER:所属 ;此分支暂时无用
+	SELECTCASE COUNTRY_POLICY:(CFLAG:对象:所属)
+		CASE 政策_経済
+			优先度 -= 20
+		CASE 政策_徴兵
+			优先度 += 20
+		CASE 政策_防衛
+			优先度 -= 10
+		CASEELSE ;政策未定
+	ENDSELECT
+ELSE
+	SELECTCASE COUNTRY_AI_TYPE:(CFLAG:对象:所属)
+		CASE AI_通常
+			优先度 += 0
+		CASE AI_好戦
+			优先度 += 20
+		CASE AI_防衛
+			优先度 += 0
+		CASE AI_外交
+			优先度 -= 20
+		CASE AI_内政
+			优先度 -= 20
+		CASE AI_蛮行
+			优先度 += 30
+		CASE AI_ホフゴブリン
+	ENDSELECT
+ENDIF
+;角色成长型
+SELECTCASE TALENT:对象:300 
+	CASE 0 ;万能 武防知政
+		优先度 += 30
+	CASE 1 ;知将 武防知
+		优先度 += 30
+	CASE 2 ;学士 政治 知略
+		优先度 += 0
+	CASE 3 ;两道 武防政
+		优先度 += 20
+	CASE 4 ; 武官 武防
+		优先度 += 30
+	CASE 5 ;军师 知略
+		优先度 += 10
+	CASE 6 ;文官 政治
+		优先度 -= 30
+	CASE 7 ;芸能 歌唱
+		优先度 -= 30
+	CASE 8 ;料理
+		优先度 -= 30
+	CASE 9 ;天才
+		优先度 += 30
+ENDSELECT
+RETURN MAX(优先度,0)
+
+
+;対象選択
+@SKILL_0_MIRACLE_20_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+;我方部隊対象
+RETURN 1
+
+;発動判定
+@SKILL_0_MIRACLE_20_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+
+RETURN GET_SOLDIER(発動勢力, 発動部隊) > GET_SOLDIER(対象勢力, 対象部隊) && GET_SOLDIER(対象勢力, 対象部隊) > 0
+
+;効果をここに記述
+@SKILL_0_MIRACLE_20_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 兵数差
+#DIM 比较单元
+兵数差 = GET_SOLDIER(発動勢力, 発動部隊) - GET_SOLDIER(対象勢力, 対象部隊)
+比较单元 = MAX(1,GET_SOLDIER(対象勢力, 対象部隊)/5)
+SIF 兵数差 < 0 
+	RETURN 1
+	 
+IF 兵数差 <= 比较单元 ;20%以内
+	TIMES BATTLE_ATK:発動側, 1.02
+	TIMES BATTLE_DEF:発動側, 1.02
+	PRINTFORML 我方部队的攻击和防御提升！
+ELSEIF 兵数差 <= 比较单元 * 2 ;20%-40%
+	TIMES BATTLE_ATK:発動側, 1.04
+	TIMES BATTLE_DEF:発動側, 1.04
+	PRINTFORML 我方部队的攻击和防御提升！
+ELSEIF 兵数差 <= 比较单元 * 3
+	TIMES BATTLE_ATK:発動側, 1.06
+	TIMES BATTLE_DEF:発動側, 1.06
+	PRINTFORML 我方部队的攻击和防御提升！
+ELSEIF 兵数差 <= 比较单元 * 4
+	TIMES BATTLE_ATK:発動側, 1.08
+	TIMES BATTLE_DEF:発動側, 1.08
+	PRINTFORML 我方部队的攻击和防御提升！
+ELSE
+	TIMES BATTLE_ATK:発動側, 1.10
+	TIMES BATTLE_DEF:発動側, 1.10
+	PRINTFORML 我方部队的攻击和防御大提升！
+ENDIF
+
+
+@SKILL_0_MIRACLE_20_EXPLANATION
+RESULTS = 当我方部队多于敌方部队时，依据兵数差获得攻击防御增益
+
+@SKILL_0_MIRACLE_20_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 1000

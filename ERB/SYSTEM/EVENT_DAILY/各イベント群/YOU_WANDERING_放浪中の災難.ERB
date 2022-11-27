@@ -1,0 +1,1324 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_YOU_WANDERING_RATE()
+RETURN 100
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_YOU_WANDERING_DECISION()
+SIF CFLAG:MASTER:所属 != 0 || CFLAG:MASTER:捕虜先 != 0
+	RETURN 0
+
+SIF !IS_FEMALE(MASTER)
+	RETURN 0
+
+SIF MAX(ABL:MASTER:武闘, ABL:MASTER:知略, ABL:MASTER:政治, ABL:MASTER:防衛) >= 70 || ABL:MASTER:武闘 + ABL:MASTER:知略 + ABL:MASTER:政治 + ABL:MASTER:防衛 >= 240
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_YOU_WANDERING_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_YOU_WANDERING()
+#DIM 土匪
+
+土匪 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_野盗))
+
+SELECTCASE RAND:30
+	;獣に食べ物をねだる & MONEY < 100
+	CASE 0
+		PRINTFORML 旅途中，饿得无可奈何地倒在巷子的一角
+		PRINTFORML 看到野狗贪婪地吃着从哪里偷来的面包。
+		PRINTFORMW 对于现在的%ANAME(MASTER)%来说，这好像就是美味佳肴一样，不由得肚子直叫。
+		PRINTFORML 听到那声音的野狗转过身来
+		PRINTFORML 看起来是条筋骨隆隆的，凶残的公狗
+		PRINTFORMW 怎麼辦？
+		CALL ASK_YN("谄媚地要吃的东西", "尽力夺取食物")
+		IF RESULT == 1
+			PRINTFORMW %ANAME(MASTER)%竭尽全力想要夺走食物
+			PRINTFORML ・
+			PRINTFORML ・
+			PRINTFORMW ・
+			PRINTFORML 没能占据上风
+			PRINTFORML 盯着浑身破破烂烂的%ANAME(MASTER)%、雄犬不停的用鼻子嗅着
+			PRINTFORMW 因为恐惧而颤抖、本能地做出服从的姿势、而公狗嗷呜~的一声扑了上来
+		ELSE
+			PRINTFORML 因为太饿了，%ANAME(MASTER)%放弃了自尊心，四肢着地趴在地上
+			PRINTFORML 公狗用警惕的眼神瞪着
+			PRINTFORMW %ANAME(MASTER)%喉咙里发出谄媚的呜咽，翻滚并摆出服从的姿势
+			PRINTFORML 公狗呜呜地叫着，边喘着鼻子边慢慢靠近，不停地嗅着气味
+			PRINTFORMW 因为恐惧而颤抖、本能地做出服从的姿势、而公狗嗷呜~的一声扑了上来
+		ENDIF
+		PRINTFORML %ANAME(MASTER)%被野狗压在身下激烈的干着、啊嘿啊嘿地喘着粗气
+		PRINTFORML 他似乎很喜欢%ANAME(MASTER)%的身体，专心致志地挥动腰用肉棒击打着
+		PRINTFORML 被畜生侵犯的屈辱感、和雄性的冲击带来的快感让%ANAME(MASTER)%的雌性本能觉醒了
+		PRINTFORML 冷不防地！龟头顶到了子宫口、身体不由自主的弹跳着、娇声地呻吟
+		PRINTFORMW 野狗大声吠叫着在%ANAME(MASTER)%体内紧绷的阴道里、射出大量的精液
+		CALL FUCK(MASTER, "欲望, 性技, 性交, Ｃ, Ｖ, 獣姦, Ｖ性交", "処女喪失, 膣内射精", GET_SPERM_ID("犬"), @"野良犬のペニス", @"野良犬", "", "強姦")
+		PRINTFORML
+		PRINTFORML 那之后、野狗满足地走掉了
+		PRINTFORMW %ANAME(MASTER)%摇摇晃晃的站起身、哭泣着拿过野狗的食物大口地吃着
+	;餓鬼に襲われる
+	CASE 1
+		PRINTFORMW 流浪中，疲惫的%ANAME(MASTER)%在人迹罕至的空房子里休息，遇到了饿鬼
+		PRINTFORML 他看了%ANAME(MASTER)%，就发出尖锐的声音袭来！
+		CALL ASK_MULTI("迎战" ,"逃走" ,"谈判")
+		IF RESULT == 2
+			PRINTFORMW 试着进行沟通！
+		ELSEIF RESULT == 1
+			PRINTFORMW 试着逃走！
+		ELSE
+			PRINTFORMW 勇敢的迎战！
+		ENDIF
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		PRINTFORML 但是却失败了…
+		PRINTFORMW 饿鬼把捕获的%ANAME(MASTER)%粗暴地推倒，扒掉了衣服。
+		PRINTFORML
+		PRINTFORML 空房子里响起肉体啪嗒啪嗒的碰撞声和%ANAME(MASTER)%的呻吟声
+		PRINTFORML 他沉迷于%ANAME(MASTER)%的身体，一边凶恶地大喊大叫着，一边用力挺着腰突刺着
+		PRINTFORML 无论怎么推打、他都紧紧地抱住%ANAME(MASTER)%的身体不肯离开
+		PRINTFORML 面对那顽固的爱抚和激烈的活塞，渐渐地无法忍耐，身体扭动着，感受起快感来。
+		PRINTFORMW 不久，他将肉棒深深地顶进去，射出精液，%ANAME(MASTER)%无法自控地绝顶了。
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, Ｖ性交, Ａ性交", "処女喪失, 膣内射精, Ａ処女喪失, 腸内射精, 接吻喪失", GET_SPERM_ID("流浪妖怪"), @"餓鬼の\@RAND:2 ? 肉棒 # 唇\@", @"餓鬼", "", "強姦")
+		PRINTFORML
+		PRINTFORML 饿鬼狠狠地侵犯了%ANAME(MASTER)%之后，满足地离开了。
+		PRINTFORMW 之后，只留下了全身被弄脏，呆呆地躺着的%ANAME(MASTER)%。
+	;理不尽な調査
+	CASE 2
+		PRINTFORML 在流浪途中路过了一个城镇、被士兵叫住了
+		PRINTFORML 说是在警戒着恐怖分子之类的可疑人物
+		PRINTFORML 他们嘻嘻地轻佻地上下打量着%ANAME(MASTER)%
+		PRINTFORML 因为觉得很恶心而想退走，一名士兵突然伸出了%ANAME(MASTER)%的手臂
+		PRINTFORMW %ANAME(MASTER)%惊讶的看着他们、士兵们表示她很可疑，所以要更仔细地调查一下，然后强行带到了搜查所。
+		PRINTFORML
+		PRINTFORML 被带进监狱深处的%ANAME(MASTER)%被士兵们轮奸了
+		PRINTFORML 想要的她逃跑被推倒毒打，然后作为惩罚不断的、在被侵犯着而哭喊的%ANAME(MASTER)%体内注入精液。
+		PRINTFORMW 被反复折磨后的%ANAME(MASTER)%变得非常老实、现在一边哭一边顺从地侍奉着他们。
+		PRINTFORML 如今她骑跨在一个士兵的肉棒上扭动着腰肢，同时双手和嘴巴还在拼命侍奉着别人的肉棒。
+		PRINTFORML 被阴道内射精当然也不允许逃开，只能带着抽搐的笑容一滴不剩的接受了
+		PRINTFORMW %ANAME(MASTER)%的肉体受到好评，被他们一直持续审讯到晚上，全身都被精液弄得粘糊糊的。
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 奉仕, 情愛, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 輪姦, 口淫, Ｖ性交, Ａ性交", "処女喪失, 膣内射精, Ａ処女喪失, 腸内射精", GET_SPERM_ID("兵士"), @"兵士の\@RAND:2 ? 肉棒 # 唇\@", @"兵士", "", "輪姦")
+		PRINTFORML
+		PRINTFORMW %ANAME(MASTER)%经过整夜调查之后，终于被没收了所有东西后扔出去了
+		MONEY = 0
+	;野盗に襲われる
+	CASE 3
+		PRINTFORMW 山走在山路上，从周围感觉到了几个人的气息
+		PRINTFORML 怎麼辦？
+		CALL ASK_MULTI("观察情况" ,"向周围打招呼" ,"匆匆离去")
+		IF RESULT == 2
+			PRINTFORML 有不祥预感的%ANAME(MASTER)%一溜烟地跑了起来
+			PRINTFORML 周围灌木丛中出现了人影，挡住了%ANAME(MASTER)%的去路。
+			PRINTFORMW 急急忙忙想要转身，却被更多的人影包围了。
+		ELSEIF RESULT == 1
+			PRINTFORML 可能有人在附近吧，这样想的%ANAME(MASTER)%向周围的人打招呼。
+			PRINTFORML 然后周围的树丛里出现了几个人影......是一群土匪！
+			PRINTFORMW 慌慌张张地想逃跑时已经晚了，%ANAME(MASTER)%被包围了
+		ELSE
+			PRINTFORML 有野兽什么的吗
+			PRINTFORML 一动不动地警戒着，突然被从背后堵住了嘴！
+			PRINTFORML 挣扎着想逃跑，但被轻松地当场压制住了。
+			PRINTFORMW 然后周围草丛中出现了一群男人组成的团伙.。
+		ENDIF
+		PRINTFORMW 土匪们嘻地笑着，巧妙地将抵抗的%ANAME(MASTER)%绑起来，带走了
+		PRINTFORML
+		PRINTFORML 在某个小屋里、被弄得粘糊糊的%ANAME(MASTER)%惨无人道地躺着。
+		PRINTFORML 被劫持的%ANAME(MASTER)%被土匪们当着性奴残忍的轮奸了，变得破烂不堪。
+		PRINTFORML 由于过分的对待%ANAME(MASTER)%变得茫然失神，空虚地望着从秘所溢出的精液
+		PRINTFORML 土匪们在进行下流的对话，讨论着今后该怎么使用%ANAME(MASTER)%，她会会生谁的孩子之类的
+		PRINTFORMW 休息结束后，他们再次来到%ANAME(MASTER)%身边，小屋又传来了悲痛的喘息声。
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 奉仕, 情愛, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 輪姦, 口淫, Ｖ性交, Ａ性交", "処女喪失, 膣内射精, Ａ処女喪失, 腸内射精", GET_SPERM_ID("土匪"), @"土匪の\@RAND:2 ? 肉棒 # 唇\@", @"土匪", "", "輪姦")
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 奉仕, 情愛, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 輪姦, 口淫, Ｖ性交, Ａ性交", "処女喪失, 膣内射精, Ａ処女喪失, 腸内射精", GET_SPERM_ID("土匪"), @"土匪の\@RAND:2 ? 肉棒 # 唇\@", @"土匪", "", "輪姦")
+		PRINTFORML
+		PRINTFORMW 作为他们的性奴隶被狠狠地侵犯了，但是抓住了空隙，总算是逃脱了。
+		CALL SET_TATTOO_RANDOM(MASTER, STR_FOR_TATTOO(-1), 0)
+		IF RESULT != -1
+			CALL COLOR_PRINT(@"但作为凌辱的证明被在%GET_TATTOO_NAME(RESULT)%纹了「%TATTOO:MASTER:RESULT%」的字样", カラー_注意)
+			PRINTFORMW
+		ENDIF
+	;河童の縄張りに入り込む
+	CASE 4
+		PRINTFORML 旅途中，在河滩上休息时，水面上浮出了气泡
+		PRINTFORML 好像在窥视着什么，突然从河里伸出了一条手臂，抓住了%ANAME(MASTER)%的脚踝！？
+		PRINTFORMW 差点被拖入水中，正在抵抗中，河童终于从河里出现了
+		PRINTFORML 对被突然袭击这件事事情提出抗议，对方抱怨说这里是自己的庭院，所以不要随意在这里休息。
+		PRINTFORML 然后河童说如果想离开的话、就把尻子玉留下来
+		PRINTFORML 怎麼辦？
+		CALL ASK_YN("打倒他", "交出尻子玉")
+		IF RESULT == 0
+			PRINTFORML 对妖怪没有慈悲
+			PRINTFORMW %ANAME(MASTER)%决定打倒河童！
+		ELSE
+			PRINTFORML 但是身上没有尻子玉
+			PRINTFORMW 出于无奈只好打倒河童！
+		ENDIF
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		PRINTFORML 但是被干掉了…
+		PRINTFORMW 河童将无法抵抗的%ANAME(MASTER)%拖入水中
+		PRINTFORML
+		PRINTFORML 在昏暗的河童巢中，响起了男女交欢的激烈蜜音和喘息声
+		PRINTFORML 被河童压在身下，毫不留情地反复插入肉棒，%ANAME(MASTER)%喘息着。
+		PRINTFORML 他雄伟的肉棒，每击一次产生直接传到头顶的冲击，身体和心都被摧毁得一干二净。
+		PRINTFORML 渐渐%ANAME(MASTER)%在无意识中自己紧紧抱住他，发出了无可救药的娇声
+		PRINTFORMW 他开始加速冲刺、%ANAME(MASTER)%尽管是被侵犯着、却仍然张开了子宫口迎接着河童的种子
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 口内射精, 接吻喪失", GET_SPERM_ID("流浪妖怪"), @"河童の\@RAND:2 ? 肉棒 # 唇\@", @"河童", "", "強姦")
+		PRINTFORML
+		PRINTFORML 大概是侵犯够了满足了吧吧，河童解放了%ANAME(MASTER)%
+		PRINTFORMW 但是%ANAME(MASTER)%暂时无法忘记、子宫里残留着的他的热感
+	;天狗に見初められる
+	CASE 5
+		PRINTFORML 走在山路上，突然身体浮了起来！
+		PRINTFORML 慌慌张张地扭动着脚的%ANAME(MASTER)%，发现原来有人抱着她。
+		PRINTFORML 是天狗！
+		PRINTFORMW 因突发事件而慌张的%ANAME(MASTER)%连抗议的话来得及说，天狗就把%ANAME(MASTER)%带走了。
+		PRINTFORML
+		PRINTFORML …被带去的是他的栖身之处
+		PRINTFORML 因为害怕被吃掉而浑身发抖
+		PRINTFORMW 但是莫名其妙地、被天狗求婚了。
+		PRINTFORML 对走在山路上的%ANAME(MASTER)%的身影一见钟情。
+		PRINTFORML %ANAME(MASTER)%想着怎么会有这么随便的事情你，不过就算拒绝恐怕也无济于事了。
+		$SEXHARA_TENGU_LOOP
+		PRINTFORML 怎麼辦？
+		CALL ASK_YN("装作接受的样子", "固执地拒绝")
+		IF RESULT == 1
+			PRINTFORML 还是没能接受，拒绝了
+			PRINTFORMW 却被天狗像盯着食物一样的看着
+			GOTO SEXHARA_TENGU_LOOP
+		ELSE
+			PRINTFORML 姑且装作接受了，让他疏忽大意之后再逃跑
+			PRINTFORML 他对%ANAME(MASTER)%的回答非常高兴、马上说要过夫妇生活
+			PRINTFORMW 看到他兴致勃勃的开始准备着与%ANAME(MASTER)%共同生活的样子，后悔说出了笨拙的话。
+			PRINTFORML
+			PRINTFORML 那天晚上，天狗来索求夫妻间的交欢
+			PRINTFORMW 想方设法拒绝，可是被强行推倒了
+			PRINTFORML
+			PRINTFORML %ANAME(MASTER)%被以对面坐位的姿势剧烈地侵犯
+			PRINTFORML 梆梆邦邦的激烈抽插、每一次都会剧烈的冲击着子宫、%ANAME(MASTER)%眼前一片空白
+			PRINTFORML 他巧妙的技巧和出色的肉棒，很快就把%ANAME(MASTER)%俘虏了
+			PRINTFORML 粗大的肉棒啪嗒啪嗒地擦着G点，%ANAME(MASTER)%不由自主地仰起身子，就这样绝顶了。
+			PRINTFORMW 已经不再是演技了，%ANAME(MASTER)%和天狗就像一对真正的夫妇一样，整晚都和在激烈的交配着。
+			CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 口内射精, 接吻喪失", GET_SPERM_ID("流浪妖怪"), @"天狗の\@RAND:2 ? 肉棒 # 唇\@", @"天狗", "", "強姦")
+			CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 口内射精, 接吻喪失", GET_SPERM_ID("流浪妖怪"), @"天狗の\@RAND:2 ? 肉棒 # 唇\@", @"天狗", "", "強姦")
+			PRINTFORML
+			PRINTFORML 过了一段短暂的夫妻生活，突然就被解放了
+			PRINTFORML 他说，%ANAME(MASTER)%眼神中不时流露出的悲伤说明了她留下来很痛苦
+			PRINTFORMW 突然间，他丢下哑然的%ANAME(MASTER)%飞走了
+		ENDIF
+	;物取りと間違われる
+	CASE 6
+		PRINTFORML 在热闹的市场上走着，碰上了一个小孩儿
+		PRINTFORML 放着一屁股坐在地上的%ANAME(MASTER)%不管，小孩子赶紧消失在人群中
+		PRINTFORML 一边抚摸着屁股一边说着这真是飞来横会站起来，突然被抓住了手臂
+		PRINTFORMW 「你这个小偷！偷了我们的商品想逃跑可不行啊！」
+		PRINTFORML 抓住%ANAME(MASTER)%手臂的小胖男子用可怕的气势叫嚷着
+		PRINTFORML 与无法理解突发事态的%ANAME(MASTER)%相对的，男子更加愤怒地拉着她的胳膊。
+		PRINTFORML 「来吧！偷东西会有什么下场，让身体充分地教你吧！」
+		PRINTFORMW 由于他的气势和力量，%ANAME(MASTER)%还没来得及辩白就被带走了…
+		PRINTFORML
+		PRINTFORML 被捆绑住带上眼罩的%ANAME(MASTER)%被商人粗暴地侵犯
+		PRINTFORML 他向%ANAME(MASTER)%的肉穴里插入巨大的男根，毫不留情地狠狠地抽打着，发泄着怒气。
+		PRINTFORML %ANAME(MASTER)%一边颤抖着身体一边道歉，但是却让他的进攻越发激烈。
+		PRINTFORML 什么都看不见的%ANAME(MASTER)%只能感受到他的肉棒在阴道里蹂躏的感觉，不由得喘不过气来
+		PRINTFORMW 之后精液在阴道深处被射了出来、冲击着子宫壁、灼热的感觉让她达到了高潮
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, 緊縛, 被虐, Ｖ性交", "処女喪失, 膣内射精, 口内射精, 接吻喪失", GET_SPERM_ID("偶遇的男人"), @"商人の\@RAND:2 ? 肉棒 # 唇\@", @"商人", "", "強姦")
+		PRINTFORML
+		MONEY = 0
+		IF 土匪 == -1
+			PRINTFORMW 那之后、%ANAME(MASTER)%被没收了身上的钱然后释放了…
+		ELSE
+			PRINTFORMW 那之后、%ANAME(MASTER)%被没收了身上的钱然后释放了、带到奴隶市场上、卖给了土匪…
+			; CFLAG:MASTER:捕虜先 = 土匪
+			CALL CAPTURE(MASTER,土匪)
+		ENDIF
+	;食べ物と引き換えに農家と
+	CASE 7
+		PRINTFORML %ANAME(MASTER)%在旅途中因饥饿而倒下了
+		PRINTFORML 已经好久没吃到好东西了…
+		PRINTFORML 正在一筹莫展的时候，一个干完农活暮归的农民就走过去了
+		PRINTFORMW …是个有着在田间劳动中锻炼出来的强壮筋骨的人
+		PRINTFORML 听了%ANAME(MASTER)%情况的男子说要食物可以但是要用身体来交换
+		PRINTFORML 怎麼辦？
+		CALL ASK_YN("已经饿的前胸贴后背了", "不管怎么说，干不了那种事…")
+		IF RESULT == 1
+			PRINTFORML 不管怎么说，干不了那种事
+			PRINTFORML 刚这样说完，肚子就发出了巨大的咕噜声
+			PRINTFORMW 害羞地低下了头，农夫说着就这样定好了，抱起%ANAME(MASTER)%带到自己家里去了
+		ELSE
+			PRINTFORML 已经饿的前胸贴后背了
+			PRINTFORML %ANAME(MASTER)%稍稍烦恼之后，微微点了点头
+			PRINTFORMW 农夫嘿嘿的憨笑着抱起%ANAME(MASTER)%朝着自己家走去
+		ENDIF
+		PRINTFORML
+		PRINTFORML %ANAME(MASTER)%在被窝里一副神魂颠倒的表情被男人的手臂抱着
+		PRINTFORML 他拥有与身躯相称的优秀肉棒，%ANAME(MASTER)%被充分的宠爱了
+		PRINTFORML 被热烈的性爱数次送上绝顶的%ANAME(MASTER)%作为一只雌性完全被他俘虏了
+		PRINTFORMW 在他的怀里沉浸在余韵中闭上眼睛，在子宫中还能感受到充分的热度，不由得流出了甜美的呻吟。
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 口内射精, 接吻喪失", GET_SPERM_ID("偶遇的男人"), @"農民の\@RAND:2 ? 肉棒 # 唇\@", @"農民", "", "和姦")
+		PRINTFORML
+		PRINTFORMW 之后，%ANAME(MASTER)%以睡觉来换取食物，像农夫的妻子一样度过了一段时间。
+	;詐欺師に騙される
+	CASE 8
+		PRINTFORML 在旅途中遇到了一个商人
+		PRINTFORML 他很会说话，并且告诉了%ANAME(MASTER)%一些简单赚钱方法
+		PRINTFORMW 为路费所困扰的%ANAME(MASTER)%马上被这个话题吸引了。
+		PRINTFORML
+		PRINTFORML 但是男人的真实身份是个骗子！
+		PRINTFORML %ANAME(MASTER)%所有的钱都被骗光了，不仅如此，还欠了很多债
+		PRINTFORMW 愤慨地向男人提出抗议，但他表示自己没有任何责任
+		PRINTFORML 男人用下流的视线凝视了%ANAME(MASTER)%一会之后，在耳边低声说道。
+		PRINTFORML 「这样下去的话，你会被卖给土匪的吧？这样好吗？无论是作为人类的尊严还是生命都得不到保证吧…」
+		PRINTFORML 他的威胁让%ANAME(MASTER)%感到恐惧，但是仍然毫无办法。
+		PRINTFORMW 男人看到这幅样子，笑着说自己可以替%ANAME(MASTER)%承担债务。
+		PRINTFORML 代价就是，用身体来侍奉他
+		PRINTFORML %ANAME(MASTER)%因为强烈的愤怒而发抖，但仍在思考现在的局面
+		PRINTFORML 怎麼辦？
+		CALL ASK_YN("接受", "拒绝")
+		IF RESULT == 1
+			PRINTFORML 不能让这种男人随心所欲！
+			PRINTFORMW %ANAME(MASTER)%果断的拒绝了，那个男人就遗憾地耸耸肩离开了
+			PRINTFORML
+			MONEY = 0
+			IF 土匪 == -1
+				PRINTFORMW 数日後、%ANAME(MASTER)%被黑社会抓住，狠狠地凌辱了。
+				CALL FUCK(MASTER, "欲望, 性技, 性交, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交", "処女喪失, 膣内射精, 口内射精, 接吻喪失, Ａ処女喪失, 腸内射精", GET_SPERM_ID("土匪"), @"土匪の\@RAND:2 ? 肉棒 # 唇\@", @"土匪", "", "輪姦")
+				PRINTFORMW
+			ELSE
+				PRINTFORML 数日後、%ANAME(MASTER)%被黑社会抓住，卖给了土匪。
+				PRINTFORMW 当然，是在被他们好好爽过之后…
+				CALL FUCK(MASTER, "欲望, 性技, 性交, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交", "処女喪失, 膣内射精, 口内射精, 接吻喪失, Ａ処女喪失, 腸内射精", GET_SPERM_ID("土匪"), @"土匪の\@RAND:2 ? 肉棒 # 唇\@", @"土匪", "", "輪姦")
+				PRINTFORMW
+				CALL CAPTURE(MASTER, 土匪)
+			ENDIF
+			MONEY = 0
+			RETURN 1
+		ELSE
+			PRINTFORML 被卖给土匪，这不是闹着玩儿的
+			PRINTFORML %ANAME(MASTER)%因为愤怒而发抖，却发现自己别无选择
+			PRINTFORML 对着一脸从容不迫的男人，%ANAME(MASTER)%小声地表示着接受。
+			PRINTFORML 「嗯？你那是什么态度？应该有更合适的说法吧」
+			PRINTFORMW %ANAME(MASTER)%只好咬牙切齿地恳求着侍奉男人、来换取他的帮助
+		ENDIF
+		PRINTFORML
+		PRINTFORML %ANAME(MASTER)%跪在男人的胯下、用嘴巴含住肉棒侍奉着
+		PRINTFORML 满是脏污的肉棒刚一塞进喉咙里，%ANAME(MASTER)%就被浓厚的雄性气味熏得头都发晕了。
+		PRINTFORML 我强忍着不适侍奉着、突然%ANAME(MASTER)%嘴巴里的肉棒就射出了浓厚的精液
+		PRINTFORMW 惊慌失措地想要躲开，头却被按住了，只能流着眼泪喝光了所有的东西。
+		PRINTFORML 头被放开后，梨花带雨的%ANAME(MASTER)%的样子，让他似乎更加兴奋了，马上就抓住%ANAME(MASTER)%，推倒在床上。
+		PRINTFORML 然后毫不留情地将再次勃起的肉棒塞进肉穴，猛烈地突刺着。
+		PRINTFORML 被毫不留情的侵犯的%ANAME(MASTER)%喘息着，只能拼命地紧紧地抱住他
+		PRINTFORMW 之后一整晚都被他发泄着无穷无尽的性欲，但是无论如何仍在拼命的拒绝被腔内射精
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 口内射精, 接吻喪失", GET_SPERM_ID("偶遇的男人"), @"詐欺師の\@RAND:2 ? 肉棒 # 唇\@", @"詐欺師", "", "強姦")
+		PRINTFORML
+		PRINTFORML 男人心满意足之后帮%ANAME(MASTER)%还清了债务
+		PRINTFORMW 再需要钱的时候，就还来用身体换，他嘲笑般的说着离开了
+		MONEY = 0
+	;浮浪者の天幕で犯される
+	CASE 9
+		PRINTFORML 遇暴风雨的%ANAME(MASTER)%逃到了附近的帐篷窝
+		PRINTFORMW 但是那里是流浪汉的栖息地
+		PRINTFORML 他怒骂着滚出去，可外面却是暴雨和狂风、而且离城市很远。
+		PRINTFORML 怎麼辦？
+		CALL ASK_YN("请求避雨", "听话的出去")
+		IF RESULT == 1
+			PRINTFORMW 只好又走出去了
+			PRINTFORML ・
+			PRINTFORML ・
+			PRINTFORMW ・
+			PRINTFORML 但还是不行
+			PRINTFORML 经过数步之后，暴雨就大了连路都看不清了，立刻就逃回了刚才的帐篷里去。
+			PRINTFORML 看到身体瑟瑟发抖的%ANAME(MASTER)%、男人说如果把身体交出来就可以留宿。
+			PRINTFORMW %ANAME(MASTER)%虽然对那下流的眼神十分厌恶，但也只能硬着头皮点了点头。
+		ELSE
+			PRINTFORML 这样暴风雨里不能出去，%ANAME(MASTER)%恳求着男人
+			PRINTFORML 男子用下流的视线望着这边，说如果把身体交出来，就可以留宿。
+			PRINTFORMW %ANAME(MASTER)%虽然对那下流的眼神十分厌恶，但也只能硬着头皮点了点头。
+		ENDIF
+		PRINTFORMW 他脸上露出歪斜的笑容，立刻跳到%ANAME(MASTER)%身边，责弄着她的身体
+		PRINTFORML
+		PRINTFORML 「怎么样！怎么样！这个不错吧！哈哈哈！」
+		PRINTFORML 流浪漢的肉棒嘭嘭地在%ANAME(MASTER)%的肉穴里进出
+		PRINTFORML 面对激烈的攻势，%ANAME(MASTER)%为了不有感觉而埋头拼命忍耐着
+		PRINTFORMW 但是被完全爱抚过的身体、每一次被撞击的时候都会产生让人目眩的快感
+		PRINTFORML 「哦！哦！你不想被其他人听到吗？卡哇伊~~~！看招！看招！看招！」
+		PRINTFORML 但那种拼命抗争的姿态刺激了他的兴奋点，攻势越来越激烈，插得更深
+		PRINTFORML 在终于无法忍受的%ANAME(MASTER)%的娇声响起的同时，他把黄色精液射进了腔内
+		PRINTFORMW 他兴奋地再次开始抽插、在这之后的夜色中、%ANAME(MASTER)%的娇喘声和激烈的雨声交织在一起
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 口内射精, 接吻喪失", GET_SPERM_ID("偶遇的男人"), @"流浪漢的\@RAND:2 ? 肉棒 # 唇\@", @"流浪漢", "", "強姦")
+		PRINTFORML
+		PRINTFORML 暴风雨完全停止的时候，%ANAME(MASTER)%醒了。
+		PRINTFORML 好象被男人整夜侵犯得精疲力尽地睡着了
+		PRINTFORML 他正大声打呼噜地睡着
+		PRINTFORMW 趁此机会%ANAME(MASTER)%逃出了帐篷
+	;誘拐されて奴隷市場に
+	CASE 10
+		PRINTFORML 在胡同里走着，突然被一把小刀从背后抵住了
+		PRINTFORMW 然后被用阴沉的声音威胁说不想死的话就跟着走
+		PRINTFORML 怎麼辦？
+		CALL ASK_MULTI("进行抵抗" ,"老实听话" ,"大声呼救")
+		IF RESULT == 2
+			PRINTFORMW %ANAME(MASTER)%大声地求救
+			PRINTFORML …但是没有人出手相助
+			PRINTFORML 那个行为让男人怒吼着重击了%ANAME(MASTER)%的头
+			PRINTFORMW 男人把昏厥了的%ANAME(MASTEr)%拖走了…
+		ELSEIF RESULT == 1
+			PRINTFORML 在这种情况下，最好不要做冲动的事
+			PRINTFORML %ANAME(MASTER)%乖乖地跟在男人身后，往更暗的巷子深处走去
+			PRINTFORML 正要钻空子逃跑时，冷不防地被喷了奇怪的液体
+			PRINTFORMW 急急忙忙地屏住气，但时间已经晚了，%ANAME(MASTER)%失去意识摇摇晃晃地倒在地上了.
+		ELSE
+			PRINTFORML %ANAME(MASTER)%一把抓住男人的胳膊抵抗着
+			PRINTFORML 但是他的力量比预想的要强，轻易就被抓住了
+			PRINTFORMW 男人用熟练的手势捆住疯狂挣扎的%ANAME(MASTER)%拖走了…
+		ENDIF
+		PRINTFORML
+		PRINTFORML 被绑架的%ANAME(MASTER)%在某个昏暗的地下室被调教
+		PRINTFORML 由于不断的调教，阴核和乳头都勃起了，爱液如洪水般从秘所里涌出。
+		PRINTFORML 一直被熟练技巧调教的%ANAME(MASTER)%，无法抗拒的露出丢人的表情
+		PRINTFORML 无论如何也想反抗，作为雌性的肉体也被俘虏了，无法拒绝地体会着肉棒的味道
+		PRINTFORMW 不久，调教结束时，%ANAME(MASTER)%完全变成了一副与雌奴隶相称的样貌
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 口内射精, 接吻喪失", GET_SPERM_ID("土匪"), @"人攫いの\@RAND:2 ? 肉棒 # 唇\@", @"人攫い", "", "強姦")
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 口内射精, 接吻喪失", GET_SPERM_ID("土匪"), @"人攫いの\@RAND:2 ? 肉棒 # 唇\@", @"人攫い", "", "強姦")
+		PRINTFORML
+		MONEY = 0
+		IF 土匪 == -1
+			PRINTFORMW 在作为雌奴隶被卖的前一刻，%ANAME(MASTER)%总算逃脱了。
+		ELSE
+			PRINTFORMW 被完全调教成雌奴隶的%ANAME(MASTER)%后来被卖到奴隶市场、被土匪买走了…
+			; CFLAG:MASTER:捕虜先 = 土匪
+			CALL CAPTURE(MASTER,土匪)
+		ENDIF
+	;つまみ食いの代償
+	CASE 11 & MONEY < 100
+		PRINTFORML 肚子空空的旅行中、路过了热闹的市场
+		PRINTFORMW 排列着各式各样美味的小摊子，飘荡着美味的香气
+		PRINTFORML 闻着那种味道越发觉得饿得难受起来
+		PRINTFORML …偷偷看了眼、店员正在和顾客交谈
+		PRINTFORML 怎麼辦？
+		CALL ASK_YN("偷偷吃一点", "忍耐住")
+		IF RESULT == 1
+			PRINTFORML 忍着想摇摇晃晃的走开，可是肚子太饿了
+			PRINTFORMW 突然失手把摊子的商品撒在地上了
+			PRINTFORML 店员跑到%ANAME(MASTER)%面前，你做了什么！你必须赔钱！等等之类的话蜂拥而至
+		ELSE
+			PRINTFORML 忍不住匆匆忙忙地偷吃了
+			PRINTFORMW 真香！
+			PRINTFORML 看来店员也没注意到
+			PRINTFORML %ANAME(MASTER)%战战兢兢地又伸出手来
+			PRINTFORMW ….但是突然有人抓住了那只手！
+			PRINTFORML 慌慌张张地抬起头来，店员像恶鬼一样瞪着%ANAME(MASTER)%
+			PRINTFORML 「偷吃东西的贱人、快点赔钱！」
+		ENDIF
+		PRINTFORML %ANAME(MASTER)%辩解道是因为没有钱，所以太饿了，请原谅我。
+		PRINTFORMW 他粗暴地拉起%ANAME(MASTER)%的手臂，拽到了胡同里
+		PRINTFORML
+		PRINTFORML %ANAME(MASTER)%卡在商店背后的墙上、屁股露在另一边
+		PRINTFORML 偶尔会有客人和店员过来，不客气地使用%ANAME(MASTER)%的肉穴，随意释放着精液
+		PRINTFORML 她脚下滴有大量精液，说明已经被使用过好多次了
+		PRINTFORML 最初哭泣着请求原谅的%ANAME(MASTER)%现在也露出不检点的表情，急促地喘息着
+		PRINTFORMW 本人还打算抵抗，但是身体却无意识的等待着下一个使用者，瘙痒的子宫渴求着冲击。
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, Ｃ, Ｖ, Ａ, 緊縛, 被虐, Ｖ性交, Ａ性交", "処女喪失, 膣内射精, Ａ処女喪失, 腸内射精", GET_SPERM_ID("偶遇的男人"), @"偶遇的男人的\@RAND:2 ? 肉棒 # 唇\@", @"偶遇的男人", "", "強姦")
+		PRINTFORML
+		PRINTFORMW 在经过了一天的尻壁之后、终于被放走了
+	;秘密基地でエロガキに飼われる
+	CASE 12
+		PRINTFORML 旅途中，找不到住处很为难，只好在杂草丛生的广场上找了间简陋的小屋
+		PRINTFORML 往里看，散落着玩具、连环画等，看来是小孩子的秘密基地
+		PRINTFORMW 今晚打搅了、想在这里露宿
+		PRINTFORML
+		PRINTFORML 晚上，%ANAME(MASTER)%听到了动静醒来，发现一群孩子们正围观着自己
+		PRINTFORML 以为是建这个基地的小孩的样子%ANAME(MASTER)%想要打招呼而坐起来
+		PRINTFORMW 但是手臂被什么东西拉得起不来.竟然被铐住了！
+		PRINTFORML 「她醒了、怎么办？」「没见过这个人」「警察知道你过来吗？」「秘密基地的消息不能走漏」
+		PRINTFORML %ANAME(MASTER)%慌慌张张地说自己不可疑，只想借宿一晚上
+		PRINTFORML 孩子们疑惑地看着%ANAME(MASTER)%地悄悄地交谈起来
+		PRINTFORMW %ANAME(MASTER)%正思索着怎么办呢，一个小孩出现在前面。
+		PRINTFORML 「嘿嘿，大姐姐，那我们也有东西想借用一下」
+		PRINTFORML 借什么？还没来得及问、小男孩就伸手抓住了%ANAME(MASTER)%的胸
+		PRINTFORMW 面对吃惊的%ANAME(MASTER)%，他嘻嘻地笑着揉着双峰。
+		PRINTFORML 「真的好柔软！、跟爸爸告诉我的一样、嘿嘿嘿」
+		PRINTFORML 慌忙想要进行抵抗、却被他迅速地紧紧抱住了
+		PRINTFORML 「哈~哈~，姐姐的身体、怎么样？就借我们一晚上吧」
+		PRINTFORML 他一边喘着气，一边咬着%ANAME(MASTER)%的如同，用笨拙的手势揉搓着双峰，把衣服扒下来。
+		PRINTFORMW 还在观望的其他孩子们也被他催促着，朝%ANAME(MASTER)%聚集起来
+		PRINTFORML
+		PRINTFORML 「要射出来了！大姐姐！」「怀孕吧！怀上我的孩子吧！」
+		PRINTFORML 咕噜噜噜噜！小孩子们的精液很有气势地注入%ANAME(MASTER)%腔内深处
+		PRINTFORML 被锁住的%ANAME(MASTER)%无法逃跑，感受到这种热度，身体也战战兢兢地绝顶了。
+		PRINTFORMW 在那之后的几天里，%ANAME(MASTER)%作为他们的玩具被饲养在秘密基地。
+		PRINTFORML 性觉醒过来的孩子们，只要像猴子那样有空闲，就会带着一副男子汉一样的表情继续侵犯%ANAME(MASTER)%
+		PRINTFORML %ANAME(MASTER)%被完全掌握了弱点，他们用幼小的手指和肉棒也能更容易的捉弄她
+		PRINTFORML 如今只有一责弄她的乳头、或者用尖锐的东西顶进腔壁、她就会无法自控的绝顶潮吹…
+		PRINTFORMW 之后不久，%ANAME(MASTER)%在秘密基地被继续饲养着，逐渐接受了与孩子们性交。
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 輪姦, 接吻, 口淫, 露出, Ｖ性交, Ａ性交", "処女喪失, 膣内射精, Ａ処女喪失, 腸内射精, 接吻喪失, 口内射精", GET_SPERM_ID("子供"), @"子供の\@RAND:2 ? 肉棒 # 唇\@", @"子供", "", "輪姦")
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 輪姦, 接吻, 口淫, 露出, Ｖ性交, Ａ性交", "処女喪失, 膣内射精, Ａ処女喪失, 腸内射精, 接吻喪失, 口内射精", GET_SPERM_ID("子供"), @"子供の\@RAND:2 ? 肉棒 # 唇\@", @"子供", "", "輪姦")
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 輪姦, 接吻, 口淫, 露出, Ｖ性交, Ａ性交", "処女喪失, 膣内射精, Ａ処女喪失, 腸内射精, 接吻喪失, 口内射精", GET_SPERM_ID("子供"), @"子供の\@RAND:2 ? 肉棒 # 唇\@", @"子供", "", "輪姦")
+		PRINTFORML
+		PRINTFORML 被严重侵犯之后，%ANAME(MASTER)%总算趁机逃跑了
+		PRINTFORMW 但是子宫里早就完全染满了他们精液的感觉
+	;体調不良時に動物に襲われる
+	CASE 13
+		PRINTFORML 旅途上积聚了很多疲劳，把身体搞垮了
+		PRINTFORML 不能再走路了%ANAME(MASTER)%决定在附近的洞穴休息一下。
+		PRINTFORMW …闭上眼睛休息了一会儿，听到从洞穴深处传来了什么东西在走来的声音。
+		PRINTFORML %ANAME(MASTER)%晃了晃头凝视着洞穴深处，黑暗中出现了一只野猪
+		PRINTFORML 双眼睛血丝糊糊的，大口喷着粗气地瞪着%ANAME(MASTER)%
+		PRINTFORML %ANAME(MASTER)%急急忙忙想坐起身来，却摇摇晃晃地跌倒了
+		PRINTFORMW 野猪一边嘶吼着、一边慢慢靠近倒地的%ANAME(MASTER)%…
+		PRINTFORML
+		PRINTFORML 被拖到洞穴深处的%ANAME(MASTER)%被猪压在身下，一边被剧烈地侵犯一边呻吟着
+		PRINTFORML %ANAME(MASTER)%虽然也拼命抵抗过，但是却扭不过野猪的力量被强行插入了肉棒。
+		PRINTFORMW 完全依赖本能的野性交尾疯狂刺激着子宫、%ANAME(MASTER)%翻着白眼身体颤动着跳动
+		PRINTFORML 拼命地否定快乐想要忍耐，但是被野猪肉棒无情挤压的阴道、随着每次冲击传来了无法抵抗的感觉。
+		PRINTFORML 不久，随着野猪高亢的吼叫，灼热的子种被注入腔内，视野变得雪白，身体也变得焦躁起来
+		PRINTFORMW %ANAME(MASTER)%在强烈的背德感和恐惧感的支配下、子宫变得瘙痒难耐、娇声呻吟起来…
+		CALL FUCK(MASTER, "欲望, 性技, 性交, Ｃ, Ｖ, 獣姦, Ｖ性交", "処女喪失, 膣内射精", GET_SPERM_ID("不明"), @"猪のペニス", @"猪", "", "強姦")
+		PRINTFORML
+		PRINTFORML 配了几次种后，猪好像很满足似的，就跑到哪里去了。
+		PRINTFORMW 之后留下了一个破破烂烂，奄奄一息的%ANAME(MASTER)%。
+	;外来人の実験台に
+	CASE 14
+		PRINTFORML 在流浪中的时候找到了一间空屋进去休息，突然一个男人进来了
+		;TranslatedMark 放浪中に空き小屋で休んでいると、一人の男がやってきた
+		PRINTFORMW 穿着没见过的打扮，打听了一下好像是从外面来的人
+		;TranslatedMark 見たことのない恰好をしている、話を聞くとどうやら外から来た人間の様だ
+		PRINTFORML 怎么办？
+		;TranslatedMark どうしよう？
+		CALL ASK_YN("将他送往城镇", "更进一步的聊一聊")
+		;CALL ASK_YN("町まで送る", "もっと話を聞く")
+		IF RESULT == 0
+			PRINTFORML 提议将他送到镇上，他非常的感谢，作为谢礼，递上了一个包裹
+			;TranslatedMark 町まで送ろうかと提案すると彼は大変感謝し、お礼として何やら包みを差し出してきた
+		ELSE
+			PRINTFORML 又聊了聊，他好像刚刚从妖怪的袭击里逃出来
+			;TranslatedMark もっと話を聞くと、先程妖怪に襲われて逃げてきたらしい
+			PRINTFORML 觉得这样下去他可能会被妖怪吃掉的%ANAME(MASTER)%决定把他送到镇上
+			;TranslatedMark このままでは妖怪に食べられてしまうと思った%ANAME(MASTER)%は彼を町まで送ることにした
+			PRINTFORMW 他非常的感谢，作为谢礼，递上了一个包裹
+			;TranslatedMark 彼は大変感謝しお礼として何やら包みを差し出してきた
+		ENDIF
+		PRINTFORML 好像是外面世界的糖果，%ANAME(MASTER)%直接吃了下去，是很甜的草莓味的
+		;TranslatedMark 外の世界の飴玉らしい、早速食べてみると甘いイチゴの味がした
+		PRINTFORML 但是，为了给他引路而站起来的时候，视野突然扭曲，摔倒在了地上
+		;TranslatedMark しかしいざ案内するために立ち上がろうとすると、グラッと視界が歪み倒れてしまった
+		PRINTFORML 突然发生的事情让%ANAME(MASTER)%混乱了起来，渐渐全身麻木无法动弹
+		;TranslatedMark いきなりの事に混乱していると徐々に全身がしびれて動けなくなっていく
+		PRINTFORMW 颤抖着抬头看他，俯视着%ANAME(MASTER)%的男人，脸上露出了微笑
+		;TranslatedMark 震えながら彼を見上げると、%ANAME(MASTER)%を見下ろしてニヤリと笑みを浮かべていた
+		PRINTFORML
+		PRINTFORML 昏暗的地下室里响起了%ANAME(MASTER)%掺杂着悲鸣的喘息声
+		;TranslatedMark 薄暗い地下室に%ANAME(MASTER)%の悲鳴のような喘ぎ声が響き渡っている
+		PRINTFORML 被椅子束缚着的%ANAME(MASTER)%，被男人用手激烈的爱抚着，颤抖的潮吹着
+		;TranslatedMark 椅子に縛り付けられた%ANAME(MASTER)%は、激しく手マンされながらガクガクと震えて潮を吹いている
+		PRINTFORML %ANAME(MASTER)%成为了他开发的新药的实验台，快感比平时敏感了好几倍
+		;TranslatedMark %ANAME(MASTER)%は彼の開発した新薬の実験台にされており、快感が通常の何倍も敏感になっているのだ
+		PRINTFORMW 只需轻轻抚摸裂缝就能让她弹起来的快乐不断在体内奔走，阴核被掐一下的话就会瞬间到达顶峰
+		;TranslatedMark 割れ目を軽く撫でられるだけで弾ける様な快楽が走り、陰核をつねられるとたまらず絶頂してしまう
+		PRINTFORML 终于忍不住了的%ANAME(MASTER)%开始想要阴茎，说出了本不应该说的话语
+		;TranslatedMark やがて我慢できなくなった%ANAME(MASTER)%はペニスを求めて、あられもないおねだりの言葉を吐き出した
+		PRINTFORML 接受了这个请求的他露出卑猥的笑容，解除下%ANAME(MASTER)%的束缚，把那个东西伸到了眼前
+		;TranslatedMark その懇願を受けた彼は下卑た笑みを浮かべると%ANAME(MASTER)%の拘束を解くとその一物を目の前に突き出してきた
+		PRINTFORML %ANAME(MASTER)%只能想到自己被肉棒侵犯的事情，于是自己将衣服解下向面前的男人索求着
+		;TranslatedMark もはや肉棒に犯される事しか考えられない%ANAME(MASTER)%は、自らひくつくまんこを広げておねだりをしてしまう
+		PRINTFORMW 当他满意得将期待已久的肉棒插入的时候，%ANAME(MASTER)%的理性完全被击溃了，露出了难看的表情
+		;TranslatedMark 満足した彼に待望のペニスをねじ込まれると、%ANAME(MASTER)%は意識を飛ばしながら無様にアクメ顔を晒した
+		CALL FUCK(MASTER, "欲望, 欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｃ, Ｖ, Ｂ, Ｍ, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_SPERM_ID("外来人"), @"外来人的\@RAND:2 ? 肉棒 # 唇\@", @"外来人", "", "強姦")
+		PRINTFORML
+		PRINTFORML 做了很多实验之后，%ANAME(MASTER)%就被抛弃在路边了
+		;TranslatedMark 散々実験体にされた後、あなたは道端に放置された
+		PRINTFORMW 由于实验的影响，你的阴蒂变得比别人敏感了一倍…
+		;TranslatedMark 実験の影響であなたのクリトリスは人一倍敏感にされてしまった…
+		TALENT:MASTER:Ｃ敏感 = 1
+	;見習い催眠術師に引っかかる
+	CASE 15
+		PRINTFORML 在街上走着，一个喘着粗气面色慌张的男子向%ANAME(MASTER)%搭话
+		;TranslatedMark 町を歩いていると息を荒げ緊張した男に話しかけられた
+		PRINTFORMW 希望%ANAME(MASTER)%协助他填写调查问卷
+		;TranslatedMark アンケートに協力してほしいとの事だ
+		$SEXHARA_SAIMIN_LOOP
+		PRINTFORML 怎么办？
+		;TranslatedMark どうしよう？
+		CALL ASK_YN("帮忙", "拒绝")
+		;CALL ASK_YN("協力する", "拒绝")
+		IF RESULT == 1
+			PRINTFORMW 虽然拒绝了，但他还是坚持着不松手
+			;TranslatedMark 断ったが、彼は食い下がってきた
+			GOTO SEXHARA_SAIMIN_LOOP
+		ELSE
+			PRINTFORML 没办法，只好合作了
+			;TranslatedMark 仕方なく協力することにした
+			PRINTFORML %ANAME(MASTER)%暂时的回答着一些无聊的问题
+			;TranslatedMark しばらくたわいない質問に答えていく
+			PRINTFORMW 提问的途中，%ANAME(MASTER)%突然很在意他一直盯着自己看的目光…
+			;TranslatedMark 質問中、彼がやけにこちらの目を覗き込んでくるのが気になった…
+			PRINTFORML 「那么就是最后的问题。…啊，%ANAME(MASTER)%已经变成我的性奴隶了」
+			;TranslatedMark 「それでは最後の質問です。…あ、%ANAME(MASTER)%はぼ、僕の性奴隷になっています」
+			PRINTFORMW …和他对视，时间停止了
+			;TranslatedMark …彼と目が合い、時間が止まった
+			PRINTFORML 他在说什么？是这样没错，自己不就是他的性奴隶吗？
+			;TranslatedMark 彼は何を言っているのだろうか？その通り、自分は彼の性奴隷に決まっているじゃないか
+			PRINTFORML 回答说他说的没错，他高兴得跳了起来
+			;TranslatedMark その通りよと答えると彼は嬉しそうに飛び上がり喜んだ
+			PRINTFORML 「太好了！正如老师说的那样，我也可以做到！」
+			;TranslatedMark 「やった！先生に言われたとおり、僕にもできたぞ！」
+			PRINTFORMW 当%ANAME(MASTER)%发呆的时候，%ANAME(MASTER)%被他牵起了手，命令跟他一起走
+			;TranslatedMark %ANAME(MASTER)%がキョトンとしていると、彼はその手を引き、ついてくるように命じてきた
+		ENDIF
+		PRINTFORML
+		PRINTFORML 在酒店的一个房间里，%ANAME(MASTER)%跨坐在他的身上，一副淫乱的表情，激烈地摆动着腰
+		;TranslatedMark ホテルの一室で%ANAME(MASTER)%は彼に跨ってだらしない表情で激しく腰を振っている
+		PRINTFORML %ANAME(MASTER)%她一边上下移动臀部，一边发出淫秽的声音，像个母狗一样扭动着身子
+		;TranslatedMark %ANAME(MASTER)%はじゅっぷじゅっぷと卑猥な音を立てながら腰を上下させ、あられもなくヨガリ狂う
+		PRINTFORML 他仰视着淫荡摆动着的%ANAME(MASTER)%的身体，露出满意的笑容，命令她动的更加激烈
+		;TranslatedMark 彼は淫らに揺れる%ANAME(MASTER)%の肢体を見上げて満足げに笑みを浮かべ、更に淫らに踊るように命じる
+		PRINTFORMW 完全变成他的性奴隶的%ANAME(MASTER)%，像娼妇一样浮现出诱惑的表情让身体摆动着
+		;TranslatedMark すっかり彼の性奴隷と化した%ANAME(MASTER)%は、娼婦の様に蠱惑的な表情を浮かべ身体をくねらせる
+		PRINTFORML 被他称赞的话，喜悦就会在身体里不断游走，胸前和子宫都热辣地疼得不得了，吐出着香甜的喘息
+		;TranslatedMark その様を彼に褒められると悦びが駆け巡り、胸と子宮が熱く疼いてたまらず甘い吐息を漏らしてしまう
+		PRINTFORML 忽然，他在阴核上捏了一把，让%ANAME(MASTER)%感受到了一股不可抗拒的快感，拱起了身体，达到了高潮
+		;TranslatedMark 不意に陰核をキュッとつねられると、たまらぬ快楽が指先まで走り、身体を弓なりに反らして絶頂した
+		PRINTFORML 他像是在享受着反应一样随心所欲地责弄着身体，%ANAME(MASTER)%也欣然接受了
+		;TranslatedMark 彼は反応を楽しむように好き放題に身体を弄りだし、%ANAME(MASTER)%も悦びのままにそれを受け入れた
+		PRINTFORMW …%ANAME(MASTER)%作为他的实验台，经历了各种各样的玩法，身心都得到了开发
+		;TranslatedMark …%ANAME(MASTER)%は彼の実験台として様々なプレイをつき合わされ、身も心も開発されてしまった
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, 口淫, 接吻, 露出, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_SPERM_ID("流氓"), @"催眠術師の\@RAND:2 ? 肉棒 # 唇\@", @"催眠術師", "", "催眠中の調教")
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, 口淫, 接吻, 露出, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_SPERM_ID("流氓"), @"催眠術師の\@RAND:2 ? 肉棒 # 唇\@", @"催眠術師", "", "催眠中の調教")
+		PRINTFORML
+		PRINTFORML 连续几天成为性玩具的%ANAME(MASTER)%，有一天催眠突然被解除了
+		;TranslatedMark 数日にわたり彼の性玩具になり下がっていた%ANAME(MASTER)%だが、ふとした時に催眠が解けた
+		PRINTFORMW %ANAME(MASTER)%想起了以前的事，在他发现之前就慌张地逃走了
+		;TranslatedMark 今までの事を思い出した%ANAME(MASTER)%は彼に気づかれる前に慌てて逃げだした
+	;弾幕ごっこの流れ弾に当たる
+	CASE 16
+		PRINTFORML 在乡间小道上走着，突然降下了弹幕！
+		;TranslatedMark 田舎道を歩いていると突然弾幕が降ってきた！
+		PRINTFORML 慌慌张张低下头躲避，从空中飞下来了两个妖怪
+		;TranslatedMark 慌てて身をかがめると、上空から二人の妖怪が降りてきた
+		PRINTFORMW 看起来是在进行弹幕游戏
+		;TranslatedMark どうやら弾幕ごっこをしていたらしい
+		PRINTFORML %ANAME(MASTER)%像他们进行了抗议，他们一起看了看%ANAME(MASTER)%，互相说了些什么
+		;TranslatedMark 抗議していると、彼らは%ANAME(MASTER)%を見つめて何やら話をしだした
+		PRINTFORML 然后，他们说希望%ANAME(MASTER)%作为见证人见证这场胜负的结局
+		;TranslatedMark そして何事かを合意をすると%ANAME(MASTER)%に勝負の結末を見届けてほしいと言ってきた
+		PRINTFORMW 被两人不断的胁迫着的%ANAME(MASTER)%，无奈之下同意了…
+		;TranslatedMark 二人に強く迫られ%ANAME(MASTER)%は断り切れず、仕方なく同意した…
+		PRINTFORML 于是两个人飞了起来继续进行比赛
+		;TranslatedMark すると二人は再び飛び上がって勝負を続けた
+		PRINTFORML 终于胜负进入了白热化，他们分出了胜负！赢了的是…
+		;TranslatedMark 勝負は白熱していたが、やがて勝負がついた！勝ったのは…
+		CALL ASK_YN("肌肉男妖怪", "聪明的妖怪")
+		;CALL ASK_YN("マッチョな妖怪", "スマートな妖怪だ")
+		IF RESULT == 0
+			PRINTFORMW 是个肌肉男的妖怪！
+			;TranslatedMark マッチョな妖怪だ！
+		ELSE
+			PRINTFORMW 是个聪明的妖怪！
+			;TranslatedMark スマートな妖怪だ！
+		ENDIF
+		PRINTFORML 报上胜利者的名字后，他来到了%ANAME(MASTER)%身边抓住她的手臂
+		;TranslatedMark 彼は勝ち名乗りを上げると、%ANAME(MASTER)%の元に降りてきてその腕をつかんだ
+		PRINTFORML 面对着惊讶的%ANAME(MASTER)%，他突然宣布你是我的
+		;TranslatedMark 驚く%ANAME(MASTER)%に対し、彼はいきなり君は俺のものだと宣言してきた
+		PRINTFORML 就连失败者妖怪也承认了，但是%ANAME(MASTER)%不断地抗议着从来没听说过这样的事情
+		;TranslatedMark そんな話は聞いていないと抗議しても負けた妖怪すらもそれを認めてきた
+		PRINTFORML 看来是被擅自当作胜负的奖品了…
+		;TranslatedMark どうやら勝手に勝負の景品にされてしまっていたようだ…
+		PRINTFORMW 当注意到的时候已经晚了，%ANAME(MASTER)%被强行拖到了他的老巢里
+		;TranslatedMark しかし気づいた時にはもう遅く、無理矢理彼のねぐらへと浚われてしまった
+		PRINTFORML
+		PRINTFORML 从妖怪的巢穴里传来了男女激烈的身体碰撞声和%ANAME(MASTER)%那不成体统的喘息声
+		;TranslatedMark 妖怪のねぐらから激しく男女のまぐわう音と%ANAME(MASTER)%のあられもない喘ぎ声が漏れてくる
+		PRINTFORML %ANAME(MASTER)%在那之后被连日连夜的拥抱，已经完全记住了阴茎的形状
+		;TranslatedMark %ANAME(MASTER)%は浚われてから連日連夜抱かれ続け、すっかり彼のペニスを覚え込まされてしまっている
+		PRINTFORML 每次被他强健的阴茎插入时，子宫都会激烈的颤动，会让身体麻痹的快感在身体中不断的奔走
+		;TranslatedMark 逞しいペニスで一突きされる度に子宮が震え、爪先まで痺れる様な抗いようのない快楽が駆け巡る
+		PRINTFORML 完全作为雌性屈服了的%ANAME(MASTER)%，现在毫不犹豫地摇着腰索求着他的种子
+		;TranslatedMark 完全に雌として屈服した%ANAME(MASTER)%は、今では躊躇なく腰を振り自ら彼の種をねだるようになった
+		PRINTFORMW 他也很喜欢这样的%ANAME(MASTER)%，就好像真的夫妻一样，只要有空就埋头于生孩子
+		;TranslatedMark そんな%ANAME(MASTER)%を彼も気に入り、まるで本物の夫婦の様に暇さえあれば子作りに明け暮れた
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, 口淫, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_SPERM_ID("流浪妖怪"), @"流浪妖怪的\@RAND:2 ? 肉棒 # 唇\@", @"流浪妖怪", "", "強姦")
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, 口淫, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_SPERM_ID("流浪妖怪"), @"流浪妖怪的\@RAND:2 ? 肉棒 # 唇\@", @"流浪妖怪", "", "強姦")
+		PRINTFORML
+		PRINTFORML 然后%ANAME(MASTER)%就这样被养了一段时间，直到有一天妖怪退治屋把他消灭了
+		;TranslatedMark そうして%ANAME(MASTER)%はしばらく飼われていたが、ある日妖怪退治屋が彼を退治した
+		PRINTFORMW 虽然%ANAME(MASTER)%被救出了，但是子宫里还微微的残留着他热度和对他的依恋…
+		;TranslatedMark %ANAME(MASTER)%は救出されたが、子宮にはかすかに熱と名残惜しさが残った…
+	;二人組の強盗
+	CASE 17
+		PRINTFORML 走在山路上，来到了一个小湖边
+		;TranslatedMark 山道を歩いていると小さな湖に出た
+		PRINTFORML 汗流浃背的%ANAME(MASTER)%决定在这里沐浴
+		;TranslatedMark 汗だくの%ANAME(MASTER)%はここで水浴びをしていくことにした
+		PRINTFORML 沐浴在很舒服的冷水中的时候,背后突然传来打招呼的声音
+		;TranslatedMark 冷たい水を浴びて一心地ついていると背後から声をかけられた
+		PRINTFORMW 回头一看，两个男人正在微笑得注视着%ANAME(MASTER)%
+		;TranslatedMark 振り返ると二人組の男がニヤニヤ笑いながら%ANAME(MASTER)%を見つめていた
+		PRINTFORML 他们手里拿着%ANAME(MASTER)%的行李和衣服
+		;TranslatedMark 彼らは%ANAME(MASTER)%の荷物と服を手に取っている
+		PRINTFORML 虽然请求他们归还，他们却说不想免费做，还色迷迷的看着%ANAME(MASTER)%的身体
+		;TranslatedMark 返してほしいと頼むが、彼らはただでは嫌だと言い%ANAME(MASTER)%の身体をいやらしく見つめてきた
+		PRINTFORML 从那个视线来看，%ANAME(MASTER)%理解了他们需要的东西…
+		;TranslatedMark その目線で彼らの要求するモノは否が応でも理解できた…
+		CALL ASK_YN("无奈的接受", "断然拒绝")
+		;CALL ASK_YN("渋々受け入れる", "断固として断る")
+		IF RESULT == 0
+			PRINTFORML 不能光着身子逃走…
+			;TranslatedMark 裸で逃げるわけにもいかない…
+			PRINTFORML %ANAME(MASTER)%勉强接受了
+			;TranslatedMark %ANAME(MASTER)%は渋々受け入れることにした
+			PRINTFORMW 他们吹着口哨接近了%ANAME(MASTER)%
+			;TranslatedMark 彼らは口笛を吹きながら%ANAME(MASTER)%に近づいてきた
+		ELSE
+			PRINTFORML %ANAME(MASTER)%愤怒地拒绝了，他们打算把行李和衣服带走
+			;TranslatedMark %ANAME(MASTER)%が憤って断ると、彼らは荷物を手に去ろうとした
+			PRINTFORML %ANAME(MASTER)%慌忙把他们留下
+			;TranslatedMark %ANAME(MASTER)%は慌てて彼らを引き留めた
+			PRINTFORMW 他们带着卑猥的笑容，炫耀似的挥动着手里的行李和衣服
+			;TranslatedMark 彼らは下卑た笑みを浮かべながら、荷物と服をぶらつかせて見せる
+			PRINTFORML 不能光着身子逃走…
+			;TranslatedMark 裸で逃げるわけにもいかない…
+			PRINTFORML %ANAME(MASTER)%勉强接受了
+			;TranslatedMark %ANAME(MASTER)%は渋々受け入れることにした
+			PRINTFORMW 他们吹着口哨接近了%ANAME(MASTER)%
+			;TranslatedMark 彼らは口笛を吹きながら%ANAME(MASTER)%に近づいてきた
+		ENDIF
+		PRINTFORML
+		PRINTFORML 被两个男人夹住，身体粗暴的晃动着，%ANAME(MASTER)%翻着白眼喘息着
+		;TranslatedMark 男たちに挟まれ乱暴に揺すられながら、%ANAME(MASTER)%は白目を剥いて喘いでいる
+		PRINTFORML 感受着深深刺入两穴的阴茎传来的强烈的压迫感，眼中闪烁着火花
+		;TranslatedMark 両穴に深々と突き刺さったペニスによる強烈な圧迫感で目の中でチカチカと火花が散る
+		PRINTFORML 两人每一次摆动腔肉都会受到摩擦，灼烧般的疼痛和快感在身体里不断的奔走，气喘吁吁的娇喘着
+		;TranslatedMark 二人が腰を振る度に肉が擦られ、灼ける様な痛みと快楽が走りヒィヒィと喘いでしまう
+		PRINTFORMW 随着男人们腰部的动作加快，%ANAME(MASTER)%的娇声也越来越大
+		;TranslatedMark 次第に男たちの腰の動きが早まると共に%ANAME(MASTER)%の嬌声もより激しく大きくなっていく
+		PRINTFORML 被夹在中间的肉被咯吱咯吱地挖着，%ANAME(MASTER)%的身体不由自主的跳动了起来
+		;TranslatedMark 挟まれた肉をゴリゴリと抉られ、%ANAME(MASTER)%はたまらずビクンビクンと体をはねさせる
+		PRINTFORML 不久，%ANAME(MASTER)%和男人们一起达到了顶峰，不加掩饰的娇声响彻了周围一带
+		;TranslatedMark やがて%ANAME(MASTER)%は男達と同時に絶頂に達し、あられもない嬌声が周囲一帯に響き渡った
+		PRINTFORMW 在他们满足之前，%ANAME(MASTER)%一直做着他们的对手，雌穴和尻穴都被扩大了
+		;TranslatedMark %ANAME(MASTER)%は彼らが満足するまで相手をさせられ、雌穴も尻穴もすっかり広がり切ってしまった
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 奉仕, 情愛, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 輪姦, 口淫, Ｖ性交, Ａ性交", "処女喪失, 膣内射精, Ａ処女喪失, 腸内射精, 接吻喪失, 口内射精", GET_SPERM_ID("流氓"), @"ならず者の\@RAND:2 ? 肉棒 # 唇\@", @"流氓", "", "輪姦")
+		PRINTFORML
+		PRINTFORML %ANAME(MASTER)%在天黑的时候终于被解放了
+		;TranslatedMark %ANAME(MASTER)%は日が暮れる頃にようやく解放された
+		PRINTFORMW 但是男人们毫不留情地拿走了%ANAME(MASTER)%的钱包，说了下次再见就走了
+		;TranslatedMark しかし男たちは容赦なく%ANAME(MASTER)%の財布を抜き取り、また会おうぜと言って去っていった
+		MONEY = 0
+	;追剥に襲われる
+	CASE 18
+		PRINTFORML 刚穿过贫民窟就被人抢走了行李
+		;TranslatedMark スラム街を通り抜けているといきなり荷物をひったくられた
+		PRINTFORML 如果就这样被拿走的话就身无分文了！
+		;TranslatedMark あれを取られると無一文になってしまう！
+		PRINTFORMW %ANAME(MASTER)%连忙追赶着他
+		;TranslatedMark %ANAME(MASTER)%は慌てて彼を追いかけた
+		PRINTFORML 但是他巧妙地穿过错综复杂的小巷
+		;TranslatedMark しかし彼は入り組んだ路地裏を巧みに駆け抜けていく
+		PRINTFORML 到达了一个十字路口的时候，他不见了…
+		;TranslatedMark やがて十字路に差し掛かった時に彼を見失ってしまった…
+		PRINTFORML 他走了哪条路？
+		;TranslatedMark 彼はどの道を進んだのだろうか？
+		CALL ASK_MULTI("左面的路" ,"正面的路", "右面的路")
+		;CALL ASK_MULTI("左の道" ,"正面の道", "右の道")
+		IF RESULT == 0
+			PRINTFORMW 朝着左面的路走了进去！
+			;TranslatedMark 左の道に向かった！
+		ELSEIF RESULT == 1
+			PRINTFORMW 朝着正前方的路走了进去！
+			;TranslatedMark 正面の道に向かった！
+		ELSE
+			PRINTFORMW 朝着右面的路走了进去！
+			;TranslatedMark 右の道に向かった！
+		ENDIF
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		PRINTFORML 啪！
+		;TranslatedMark バチィン！
+		PRINTFORML 一走入路口，脚上就传来了一阵剧烈的疼痛，扑通一声跌倒了
+		;TranslatedMark 道に入ると、いきなり足元に強烈な痛みが走りつんのめってこけてしまった
+		PRINTFORML 一边忍耐着疼痛一边看脚下，发现捕兽夹紧紧地夹住了%ANAME(MASTER)%的脚
+		;TranslatedMark 痛みを堪えながら足元を見ると、トラばさみが%ANAME(MASTER)%の足をがっしりと咥え込んでいた
+		PRINTFORML 正在与捕兽夹艰苦争斗的时候，之前的目标从阴暗处走了出来
+		;TranslatedMark なんとか外そうと悪戦苦闘していると、先ほどの追剥が現れた
+		PRINTFORMW 看到了无法动弹的%ANAME(MASTER)%，露出笑容逼近了过来
+		;TranslatedMark そして動けない%ANAME(MASTER)%を見ると、ニヤつきながら迫ってきた
+		PRINTFORML
+		PRINTFORML %ANAME(MASTER)%在巷子里被剥下衣服毫不留情地侵犯起来，不断的呻吟着
+		;TranslatedMark %ANAME(MASTER)%は路地裏で追剥に容赦なく犯されながら呻き声を上げている
+		PRINTFORML %ANAME(MASTER)%被顶在了墙上，那个男人从背后不断的推进着，只能咬紧牙关忍耐
+		;TranslatedMark 壁に押し付けられ背後から激しく突き上げられながらも、歯を喰いしばって堪えようとする
+		PRINTFORMW 但是每次被那个男人的阴茎进出着的时候，腔内的肉都会被挖出来，无情的快感不断的侵袭过来
+		;TranslatedMark しかしカリ太のペニスが出入りする度に膣肉を抉られ、容赦のない快楽が襲い掛かってくる
+		PRINTFORML 出乎意料的突然突入了最深处，冲击直达大脑，%ANAME(MASTER)%漏出了凄厉的喘息声
+		;TranslatedMark 不意に深々と突き刺されると、脳天まで衝撃が走り%ANAME(MASTER)%は情けない喘ぎ声を漏らしてしまう
+		PRINTFORML 他嘲笑着不断颤抖的%ANAME(MASTER)%的样子，一边笑骂着一边激烈的动起了腰
+		;TranslatedMark 彼はブルブルと震える%ANAME(MASTER)%の様子を嘲笑い、罵倒しながら激しく腰を打ち付けてくる
+		PRINTFORMW %ANAME(MASTER)%在那之后也一直被粗暴的侵犯，多次品尝了不希望到达的顶峰
+		;TranslatedMark %ANAME(MASTER)%はその後も乱暴に犯され続け、何度も望まぬ絶頂を味わわされてしまった
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, Ｃ, Ｖ, Ｂ, Ｖ性交", "処女喪失, 膣内射精", GET_SPERM_ID("流氓"), @"", @"流氓", "", "強姦")
+		PRINTFORML
+		PRINTFORML 满意的朝着%ANAME(MASTER)%吐了口唾沫离开了
+		;TranslatedMark 満足した彼は%ANAME(MASTER)%に唾を吐いてその場を去っていった
+		PRINTFORMW 被留在原地破破烂烂的%ANAME(MASTER)%被抢走了行李，但却露出了恍惚的表情
+		;TranslatedMark 残された%ANAME(MASTER)%はボロボロにされ荷物を奪われたにもかかわらずどこか恍惚の表情をしてい
+		MONEY = 0
+	;坊主に騙され犯される
+	CASE 19
+		PRINTFORML 旅途中遇到大雨的%ANAME(MASTER)%决定在附近的寺庙避雨
+		;TranslatedMark 旅の途中で雨に遭遇した%ANAME(MASTER)%は近くの寺で雨宿りをすることにした
+		PRINTFORML 亲切的住持把%ANAME(MASTER)%迎入院内，甚至还提供了食物
+		;TranslatedMark 親切な住職は%ANAME(MASTER)%を境内にあげてくれ、食事まで出してくれた
+		PRINTFORMW …吃完饭后，一边喝茶一边聊天，身体渐渐地热了起来
+		;TranslatedMark …食後、お茶を飲みながら会話をしていると徐々に体が熱くなりだした
+		PRINTFORML 在子宫承受着不明原因的痛痒的时候，住持若无其事地把身体靠了过来
+		;TranslatedMark 原因不明の子宮の疼きにもじもじしていると、住職がさりげなく体を寄せてくる
+		PRINTFORML 刚想要推开他，他却毫不在意的用手在%ANAME(MASTER)%的肌肤上爬了起来
+		;TranslatedMark 離れようとしたが彼は構わずに%ANAME(MASTER)%の肌にツツッと手を這わせてきた
+		PRINTFORML 酥麻的快感不断在身体中奔走，不由得发出了"啊"的甜美喘息声
+		;TranslatedMark すると痺れる様な快楽が駆け巡り、思わず「あんっ」っと甘い喘ぎ声をあげてしまった
+		PRINTFORMW 他满意地笑着，把颤抖的%ANAME(MASTER)%带进了卧室…
+		;TranslatedMark 彼はその様子に満足そうに笑うと震える%ANAME(MASTER)%を寝室へと連れ込んだ…
+		PRINTFORML
+		PRINTFORML 「怎么样，这里舒服吗？呵呵，不要忍耐，只要是我，不管什么女人都一样」
+		;TranslatedMark 「どうじゃ、ここがいいじゃろ？ふっふ、我慢するな、わしにかかればどんな女でも一緒じゃ」
+		PRINTFORML 住持抓着%ANAME(MASTER)%的脚踝，激烈地摆动着腰，用同样粘粘糊糊的语调低声的说着
+		;TranslatedMark 住職は%ANAME(MASTER)%の足を抱えてねっとりと腰を振りながら同じくねっとりとした口調で囁いてくる
+		PRINTFORML 但这种腰技确实的，准确地抓住了%ANAME(MASTER)%的弱点，%ANAME(MASTER)%无法忍耐的扭动着身体
+		;TranslatedMark その腰遣いは確かで、的確に%ANAME(MASTER)%の弱点を突いてきて我慢できずに身体をくねらせてしまう
+		PRINTFORML 每被阴茎摩擦一次，都会有刺痛的快感不断的在身体里奔走，%ANAME(MASTER)%无意识地缩紧了腔内
+		;TranslatedMark ペニスで一擦りされる度に爪先までざわつくような快楽が駆け巡り、無意識に膣を締めつけていた
+		PRINTFORMW 他好像很享受这种反应似的，踏踏实实地攻了过来，%ANAME(MASTER)%一整晚都被疼爱着
+		;TranslatedMark 彼はその反応を楽しむ様にじっくりと攻め立ててきて、%ANAME(MASTER)%は一晩中たっぷりと可愛がられた
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, Ｃ, Ｖ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 口内射精, 接吻喪失", GET_SPERM_ID("流氓"), @"住職の\@RAND:2 ? 肉棒 # 唇\@", @"住職", "", "強姦")
+		PRINTFORML
+		PRINTFORML 第二天，%ANAME(MASTER)%被带着一副什么都没发生的表情的住持送别，离开了寺庙
+		;TranslatedMark 翌日、%ANAME(MASTER)%は何もなかったかのような顔の住職に見送られて寺を後にした
+		PRINTFORMW 但是他的身体还残留着他的热度，脸颊也微微染上了颜色
+		;TranslatedMark しかしその体には彼の熱がしっかりと残っており、頬が微かに染まっていた
+	;強引なナンパ
+	CASE 20
+		PRINTFORML 旅途中，路过欢乐街的时候被人搭讪了
+		;TranslatedMark 旅の途中、歓楽街を歩いているとナンパされた
+		PRINTFORMW 从衣服的边缘露出纹身，是典型的小混混的风貌
+		;TranslatedMark 衣服の端からタトゥーが覗いており典型的なチンピラといった風貌だ
+		PRINTFORML 怎么办？
+		;TranslatedMark どうしよう？
+		CALL ASK_YN("逃跑", "拒绝")
+		;CALL ASK_YN("逃げる", "拒否する")
+		IF RESULT == 0
+			PRINTFORML 想逃跑，但却被紧紧地抓住了腰，没能逃开
+			;TranslatedMark 逃げようとしたが、がっしりと腰を掴まれ逃げられなかった
+			PRINTFORML 对于蛮横的他，不管怎样拒绝都没有作用
+			;TranslatedMark 強引な彼に対して何とか拒否しようとするもそれも叶わず
+		ELSE
+			PRINTFORML 本来想拒绝他，但他却没打算让%ANAME(MASTER)%逃走
+			;TranslatedMark そんな気分ではないと拒否しようとしたが彼は%ANAME(MASTER)%を逃がさなかった
+			PRINTFORML 想甩开强行逼近的他，但却被抓住了腰，没能实现
+			;TranslatedMark 強引に迫る彼を何とか振り切ろうとしたが腰を掴まれそれも叶わず
+		ENDIF
+		PRINTFORMW 结果，被带到了附近的旅馆…
+		;TranslatedMark 結局、近くの宿へと連れこまれてしまった…
+		PRINTFORML
+		PRINTFORML 一进屋就被他推倒，前戏也草草了事地直接插入了阴茎
+		;TranslatedMark 部屋に入るなり彼に押し倒され、前戯もそこそこにペニスをねじ込まれた
+		PRINTFORML 被强健的阴茎激烈地抽插着，每一次都不由自主地将身体仰起
+		;TranslatedMark 逞しいペニスで激しく突き上げられ、一突き毎に思わず身体を仰け反らせてしまう
+		PRINTFORML 对于年轻人特有的热情性爱，抵抗着的%ANAME(MASTER)%也渐渐露出了甜美的喘息声
+		;TranslatedMark 若さに任せた情熱的なセックスに、抵抗していた%ANAME(MASTER)%も次第に甘い喘ぎ声を漏らしだす
+		PRINTFORMW 不久，他发出了低沉的呻吟，射精了，%ANAME(MASTER)%也发出了无法掩饰的娇声一起到达了高潮
+		;TranslatedMark やがて彼が低く呻きながら射精すると、%ANAME(MASTER)%もあられもない嬌声と共に絶頂に達した
+		PRINTFORML 沉浸在绝顶的愉悦中互相拥抱着，体会着逐渐渗入子宫的热度身体不断颤抖着
+		;TranslatedMark 絶頂の余韻に浸って抱きしめ合っていると、子宮に染み込む熱を感じて身震いしてしまう
+		PRINTFORMW 感觉到阴茎逐渐恢复硬度的%ANAME(MASTER)%，开始自己摇动起腰要求着二回战
+		;TranslatedMark やがてペニスが硬さを取り戻すのを感じた%ANAME(MASTER)%は、自ら腰を揺らして次を求めていた
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 口内射精, 接吻喪失", GET_SPERM_ID("偶遇的男人"), @"偶遇的男人的\@RAND:2 ? 肉棒 # 唇\@", @"偶遇的男人", "", "和姦")
+		PRINTFORML
+		PRINTFORMW 被疼爱了一整晚之后，交换了联系方式和他分别了
+		;TranslatedMark 一晩中たっぷり可愛がられた後、連絡先を交換して彼と別れた
+	;ヤクザとぶつかる
+	CASE 21
+		PRINTFORML 走在拥挤的欢乐街上，撞到了黑道的肩
+		;TranslatedMark 混雑した歓楽街を歩いていると、ヤクザと肩をぶつけてしまった
+		PRINTFORMW 虽然向盯着她的男人道歉了，但却没有被原谅，他一边怒吼着一边抓住了%ANAME(MASTER)%的手腕
+		;TranslatedMark 睨み付けてくる男に謝罪したが許されず、彼は怒鳴りながら%ANAME(MASTER)%の腕を掴んできた
+		PRINTFORML 怎么办？
+		;TranslatedMark どうしよう？
+		CALL ASK_MULTI("挥开" ,"谢罪" ,"寻求帮助")
+		;CALL ASK_MULTI("振りはらう" ,"謝る" ,"助けを求める")
+		IF RESULT == 2
+			PRINTFORML 感觉到危险的%ANAME(MASTER)%大声向周围的人求助
+			;TranslatedMark 危険を感じた%ANAME(MASTER)%は大声で周囲に助けを求めた
+			PRINTFORML …但是谁也不想违抗黑道人物，没有人准备帮助她
+			;TranslatedMark …しかしいかにもヤクザといった風貌の男に逆らう者は誰もおらず誰も助けてくれなかった
+		ELSEIF RESULT == 1
+			PRINTFORML 靠自己的力量是不够的
+			;TranslatedMark 自力ではどうしようもない
+		ELSE
+			PRINTFORML 恐惧着的%ANAME(MASTER)%把手甩开想逃走
+			;TranslatedMark 恐怖した%ANAME(MASTER)%は振り払って逃げようとした
+			PRINTFORML 但是却敌不过男人的力量，被抓紧手腕发出了悲鸣声
+			;TranslatedMark しかし男の力には適わず、より強く腕を掴まれて呻き声を上げる
+		ENDIF
+		PRINTFORML 对着紧盯着%ANAME(MASTER)%的男人，说出了：“请原谅我，不管什么我都会做的”
+		;TranslatedMark 睨み付けてくる男に対し、何でもするのでどうか許してくださいと許しを請うしかなかった
+		PRINTFORMW 男人对于那个回答漏出了满意的笑容，把%ANAME(MASTER)%带到了附近的酒店…
+		;TranslatedMark 男はその返事に不敵な笑みを浮かべると、%ANAME(MASTER)%を近場のホテルへと連れ込んだ…
+		PRINTFORML
+		PRINTFORML %ANAME(MASTER)%一边被男人配种，一边跳动着身体，痛苦地喘息着
+		;TranslatedMark %ANAME(MASTER)%は男に種付けプレスを食らいながら身体を跳ねさせて苦しそうに喘いでいる
+		PRINTFORML 被男人毫不留情的进行着活塞，身体最终完全屈服于他的阴茎
+		;TranslatedMark ドスンドスンと響く様な容赦ないピストンを見舞われ、身体はすっかり彼のペニスに屈服しており
+		PRINTFORMW 大脑不断被雪白的快感侵袭，忍不住紧紧地抱住他，缩紧了腔肉
+		;TranslatedMark 一突き毎に真っ白になるような快楽に襲われ、たまらず彼にしがみついて膣肉を締め付けてしまう
+		PRINTFORML 男人好像也很喜欢%ANAME(MASTER)%的身体，像狗一样不停的前后挥动着腰蹂躏着
+		;TranslatedMark 男の方も%ANAME(MASTER)%の身体を気に入った様で、盛った犬の様に激しく腰を振って蹂躙してくる
+		PRINTFORML %ANAME(MASTER)%的红肿小穴溢满了爱液缠绕在男人的阴茎上
+		;TranslatedMark %ANAME(MASTER)%のまんこは赤く腫れあがり愛液を溢れさせながらぎゅうぎゅうと男の一物に絡みつく
+		PRINTFORML 男人无视了%ANAME(MASTER)%避孕的话语，毫不留情的将炙热的精液灌入了%ANAME(MASTER)%的胎内
+		;TranslatedMark 男は%ANAME(MASTER)%の避妊の言葉も無視し、容赦なくその灼熱の精液を胎内へと叩きつけてきた
+		PRINTFORMW 被一次又一次注入精液的快感所淹没，%ANAME(MASTER)%直到晕倒前一直被交合着
+		;TranslatedMark 一度の射精で彼の興奮は収まるはずもなく、気を失うまで抱かれ続けることになった
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 口内射精, 接吻喪失", GET_SPERM_ID("流氓"), @"ならず者の\@RAND:2 ? 肉棒 # 唇\@", @"流氓", "", "強姦")
+		PRINTFORML
+		PRINTFORMW 把被狠狠侵犯，气喘吁吁的躺在床上的%ANAME(MASTER)%放置在哪里，黑道就那样离开了
+		;TranslatedMark 散々犯され息も絶え絶えでベッドに横たわる%ANAME(MASTER)%を放置し、ヤクザはさっさと去っていった
+	;薬の売人
+	CASE 22
+		PRINTFORML 路过贫民窟的时候，遇到了可疑的男人们
+		;TranslatedMark スラム街を歩いていると、怪しい男たちを見つけた
+		PRINTFORMW 他们鬼鬼祟祟的躲避着别人的目光，谈论着什么
+		;TranslatedMark コソコソと人目を気にしながら何事か話をしている
+		PRINTFORML 怎么办？
+		;TranslatedMark どうしよう？
+		CALL ASK_YN("偷偷的听听看", "立即离开现场")
+		;CALL ASK_YN("聞き耳を立てる", "その場を離れる")
+		IF RESULT == 0
+			PRINTFORML 在意内容的%ANAME(MASTER)%走近后竖起耳朵听了
+			;TranslatedMark 内容が気になった%ANAME(MASTER)%は聞き耳を立てた
+			PRINTFORML …看来是在进行毒品的交易
+			;TranslatedMark …どうやら麻薬の取引をしているようだ
+			PRINTFORMW 一不小心听入了神，碰到周围的物品发出了响动！
+			;TranslatedMark つい夢中で聞き入っていると、あやまって物音を立ててしまった！
+		ELSE
+			PRINTFORML 男人们看起来很可怕的样子，%ANAME(MASTER)%选择马上离开那个地方
+			;TranslatedMark 怖そうな男達だ、すぐにその場を離れることにした
+			PRINTFORMW 但是没注意到脚边的小树枝一脚踩了上去，发出了响动！
+			;TranslatedMark しかし足元の小枝に気づかず踏み抜き、物音を立ててしまった！
+		ENDIF
+		PRINTFORML 听到声音的男人们回过头来
+		;TranslatedMark 音を聞いた男たちがこちらを振り向いた
+		PRINTFORML %ANAME(MASTER)%慌慌张张想要离开那个地方，却没能成功，被抓住了…
+		;TranslatedMark 慌ててその場を離れようとしたが逃げきれず、捕まってしまった…
+		PRINTFORML %ANAME(MASTER)%被男人们逼问着，解释说什么都没有看到，理所当然的没有被信任…
+		;TranslatedMark 男たちに詰め寄られ、何も聞いていないと弁明するも当然信用されなかった
+		PRINTFORMW 被一个男人抓住手腕的%ANAME(MASTER)%收到了需要被调查的宣告，就这样被拉走了…
+		;TranslatedMark 男の一人に腕を掴まれた%ANAME(MASTER)%は調べてやると宣告され、どこかへ拉致された…
+		PRINTFORML
+		PRINTFORML 在昏暗的地下室里回荡着%ANAME(MASTER)%的娇声和身体间的碰撞声
+		;TranslatedMark 薄暗い地下室に%ANAME(MASTER)%の嬌声と肉の打ち合う音が響き渡る
+		PRINTFORML 「哼！哼！这里舒服吗！哎！药腌的母猪！喂！喂！」
+		;TranslatedMark 「ふん！ふん！ここがいいのか！えぇ！薬漬けの雌豚が！おら！おら！」
+		PRINTFORML %ANAME(MASTER)%完全沉迷于性的快乐，自己摇动着腰露出不知羞耻的表情
+		;TranslatedMark %ANAME(MASTER)%はすっかりヤク漬けセックスにド嵌りしており、自ら腰を振ってアヘ顔を晒している
+		PRINTFORMW 双臂被人从背后抓住，粗暴的穿插着阴茎，将身体仰起，发狂的摇晃着
+		;TranslatedMark 両腕を背後から掴まれて乱暴にペニスを打ち付けられて、身体を仰け反らせてヨガリ狂う
+		PRINTFORML 「哼！你这个不要脸的家伙！来吧！该死的！要射了！来吧！」
+		;TranslatedMark 「くぅ！生意気に締め付けやがって！おら！イくのか！イけ！イき狂え！」
+		PRINTFORML 被进行了更激烈的冲刺，脑子里变得雪白，全身不断的痉挛着
+		;TranslatedMark 一層激しくスパートをかけられると、頭の中が真っ白になり、全身を痙攣させてしまう
+		PRINTFORML 雌性的本能寻求着子种，将子宫降下，主动的打开子宫口，紧紧的收紧阴道
+		;TranslatedMark そして雌の本能が子種を求める様に子宮口をぱくつかせて膣全体を締め付けはじめる
+		PRINTFORMW 不久后精液在阴道里被毫不留情的释放出来，%ANAME(MASTER)%发出喜悦的声音到达了高潮
+		;TranslatedMark やがて容赦ない膣内射精を放たれると、%ANAME(MASTER)%は悦びの声を上げてアクメに達した
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 接吻, 口淫, Ｖ性交, Ａ性交", "処女喪失, 膣内射精, 口内射精, 接吻喪失, Ａ処女喪失, 腸内射精", GET_SPERM_ID("流氓"), @"ならず者の\@RAND:2 ? 肉棒 # 唇\@", @"流氓", "", "強姦")
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 接吻, 口淫, Ｖ性交, Ａ性交", "処女喪失, 膣内射精, 口内射精, 接吻喪失, Ａ処女喪失, 腸内射精", GET_SPERM_ID("流氓"), @"ならず者の\@RAND:2 ? 肉棒 # 唇\@", @"流氓", "", "強姦")
+		PRINTFORML
+		PRINTFORML %ANAME(MASTER)%被药物浸渍着当成性奴隶饲养了很久，一段时间后男人被逮捕了
+		;TranslatedMark ヤク漬けにされて性奴隷として飼われていた%ANAME(MASTER)%だが、ほどなく彼は逮捕された
+		PRINTFORMW 虽然%ANAME(MASTER)%被解放了，但体内还残留着被给予的热量和快乐…
+		;TranslatedMark %ANAME(MASTER)%も解放されたが、その体の奥には散々与えられた熱と快楽が残ってしまっていた…
+	;オークション
+	CASE 23
+		PRINTFORML 在一个欢乐街的酒吧中喝酒，店员突然搭了话
+		;TranslatedMark ある歓楽街のパブで飲んでいると店員に声をかけられた
+		PRINTFORML 「现在开始要举办一个有趣的活动，你要不要也来参加下？」
+		;TranslatedMark 「今から面白いイベントをやるんだけど、君も参加しないかい？」
+		PRINTFORML 看了看店内的样子，中间的舞台边很多男人聚集着
+		;TranslatedMark 店内の様子を窺うと、奥のステージの周りに多数の男たちが群がっている
+		PRINTFORMW 那里会有什么表演吗
+		;TranslatedMark あそこで何かのショーをするのだろうか
+		PRINTFORML 怎么办？
+		;TranslatedMark どうしよう？
+		CALL ASK_YN("参加", "再考虑一下")
+		;CALL ASK_YN("参加する", "遠慮する")
+		IF RESULT == 0
+			PRINTFORML 因为很感兴趣，于是决定参加
+			;TranslatedMark 興味をひかれたので参加することにした
+			PRINTFORMW %ANAME(MASTER)%点了点头，被带到了舞台内部
+			;TranslatedMark %ANAME(MASTER)%が頷くと店の奥へと案内された
+		ELSE
+			PRINTFORML %ANAME(MASTER)%说了再考虑一下，但是店员坚称有免费的饮料不断的劝说着
+			;TranslatedMark 遠慮しようとしたらお酒代を無料にするので是非にと迫られた
+			PRINTFORML 由于过于强硬，%ANAME(MASTER)%不由得点了点头
+			;TranslatedMark そのあまりの強引さについつい頷いてしまった
+			PRINTFORMW 于是被带到了舞台的深处
+			;TranslatedMark すると店の奥へと案内された
+		ENDIF
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		PRINTFORML 「让大家久等了！又到了今天主要活动的时间了！」
+		;TranslatedMark 「皆様お待たせいたしました！本日のメインイベントのお時間です！」
+		PRINTFORMW 当主持人在舞台上宣布开幕时，观众中的男人们都发出了欢呼声
+		;TranslatedMark ステージの上で司会が開幕を宣言すると、観客の男たちから歓声が上がる
+		PRINTFORML 「那么，马上来介绍一下今天的商品吧！请！」
+		;TranslatedMark 「それでは早速本日の商品たちをご紹介しましょう！どうぞ！」
+		PRINTFORML 在主持人的信号下，舞台的窗帘被打开，全裸的女性们并肩的站在一起
+		;TranslatedMark 司会の合図でステージのカーテンが開かれると、全裸の女性たちが並んでいた
+		PRINTFORML 每个人都戴着带号码牌的项圈，像是在吸引观众一样扭动着身体
+		;TranslatedMark それぞれが番号札付きの首輪をつけており、観客を誘う様に身体をくねらせている
+		PRINTFORMW 由于她们的登场，观众们一齐欢呼起来，会场被热烈的气氛包围着
+		;TranslatedMark 彼女達の登場で観客からは一斉に歓声が上がり、会場は熱気で包まれだす
+		PRINTFORMW …%ANAME(MASTER)%也在女性的队列中，她红着脸颤抖着
+		;TranslatedMark …女性たちの列の中に一人だけ顔を真っ赤にして震えている%ANAME(MASTER)%がいた
+		PRINTFORML 活动是与女性们共度一夜的拍卖
+		;TranslatedMark イベントとは女性たちの一夜を掛けてのオークションだったのだ
+		PRINTFORML 没想到会变成这样，%ANAME(MASTER)%混乱的环顾着四周
+		;TranslatedMark まさかこんなことになるとは思わなかった%ANAME(MASTER)%は混乱した様に辺りを見回す
+		PRINTFORMW 男人们笑嘻嘻地看着%ANAME(MASTER)%，目光像舔舐一样从上到下凝视着
+		;TranslatedMark そんな%ANAME(MASTER)%の様子を男たちはニヤニヤと眺め、上から下まで舐る様に見つめている
+		PRINTFORML 忍不住想从舞台上逃离，但是拍卖会无情的开始了
+		;TranslatedMark 耐えきれず舞台から降りようとしたが、無情にもオークションが始まってしまった
+		PRINTFORML 女性们一个接一个地被竞拍着，伴随着兴奋会场的气氛不断的激昂起来
+		;TranslatedMark 次々と女たちが競られていき、それに伴い会場の興奮もどんどんと昂っていく
+		PRINTFORML 终于轮到了%ANAME(MASTER)%，她站在了舞台正面，被推到了观众们的面前
+		;TranslatedMark やがて%ANAME(MASTER)%の番になり、ステージの正面、観客たちの目の前に押し出される
+		PRINTFORML 因为太过羞耻而发出小小的悲鸣的%ANAME(MASTER)%，不由得引起了观众们的兴奋
+		;TranslatedMark 羞恥のあまり小さく悲鳴を上げる%ANAME(MASTER)%の姿は、図らずも観客たちの興奮を煽った
+		PRINTFORMW %ANAME(MASTER)%的竞争十分激烈，不久就有一个穿着得体的绅士中标了
+		;TranslatedMark %ANAME(MASTER)%の目の前で競りは大盛り上がりし、やがて一人の恰幅の良い紳士に落札された
+		PRINTFORML 他立刻来到了%ANAME(MASTER)%的身边，脸上露出了令人厌恶的笑容，目不转睛地盯着她
+		;TranslatedMark 彼は早速%ANAME(MASTER)%の元にやって来ると、いやらしい笑みを浮かべてジロジロと見つめてきた
+		PRINTFORML 仿佛被看透用手隐藏住的性器深处一样的目光，使%ANAME(MASTER)%缩起了身体发着抖
+		;TranslatedMark 手で隠している性器の奥まで見透かされるような感覚に、%ANAME(MASTER)%は小さくなって震える
+		PRINTFORMW 但是事到如今已经不被允许逃跑了，一边被揉着屁股一边被带进了店里面的单间…
+		;TranslatedMark しかし今更逃げることも許されず、尻を揉まれながら店の奥の個室に連れ込まれた…
+		PRINTFORMW 就这样持续被他粘糊糊的责弄着，一整晚都经历着一次又一次的绝顶
+		;TranslatedMark そうして彼のねっとりとしたセックスで弄ばれ続け、一晩中絶頂させられる事になった
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, 露出, Ｖ性交, 売春", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_SPERM_ID("貴族"), @"富豪の\@RAND:2 ? 肉棒 # 唇\@", @"富豪", "", "売春")
+		PRINTFORML
+		PRINTFORML 到了黎明时分，终于被满意的他解放了
+		;TranslatedMark 夜明け頃になって満足した彼にようやく解放された
+		PRINTFORMW 腔内还残留着他阴茎感觉的%ANAME(MASTER)%，摇摇晃晃地离开了店
+		;TranslatedMark 膣内にまだペニスが入っている様な感触を覚えながら、フラフラと店を後にした
+	;鬼の酒宴
+	CASE 24
+		PRINTFORML 旅途中遇到了正在喝酒的鬼
+		;TranslatedMark 旅の途中で酒を飲んでいる鬼に出会った
+		PRINTFORMW 他兴高采烈地邀请%ANAME(MASTER)%一起喝酒
+		;TranslatedMark 彼は上機嫌に%ANAME(MASTER)%にもお酒を勧めてきた
+		$SEXHARA_OSAKE_LOOP
+		PRINTFORML 怎么办？
+		;TranslatedMark どうしよう？
+		CALL ASK_YN("一起喝", "拒绝")
+		;CALL ASK_YN("飲む", "拒绝")
+		IF RESULT == 1
+			PRINTFORMW 不管怎么拒绝，他还是强行的把酒递了过来
+			;TranslatedMark いくら断っても彼は強引に盃を差し出してきた
+			GOTO SEXHARA_OSAKE_LOOP
+		ELSE
+			PRINTFORML 无法拒绝，于是决定陪他一起喝
+			;TranslatedMark 断り切れずに付き合うことにした
+			PRINTFORML …鬼的酒非常厉害，一口就感觉到头昏眼花，身体发热
+			;TranslatedMark …鬼の酒は非常に強く、一口で頭がのぼせた様に熱くなった
+			PRINTFORMW 鬼怪看到了迷糊的%ANAME(MASTER)%高兴地笑着并继续劝酒
+			;TranslatedMark クラクラする%ANAME(MASTER)%を見て鬼は上機嫌に笑いさらに酒を勧めてくる
+		ENDIF
+		PRINTFORML 本来想拒绝，却被硬灌进了嘴里
+		;TranslatedMark 流石に断ろうとするも無理矢理口に流し込まれてしまった
+		PRINTFORML %ANAME(MASTER)%很快就烂醉如泥，为了支撑摇摇晃晃的身体靠在鬼身上
+		;TranslatedMark %ANAME(MASTER)%はすぐに泥酔し、ふらつく体を支えようと鬼に寄りかかった
+		PRINTFORML 于是鬼笑了起来，抱着%ANAME(MASTER)%将手插进衣服里摸索
+		;TranslatedMark すると鬼はニィと笑い、%ANAME(MASTER)%を抱き寄せ身体をまさぐってきた
+		PRINTFORML 炙热的身体被手不断的爱抚着，忍不住喘息了起来
+		;TranslatedMark 火照り切った体をゴツゴツした指で愛撫され、たまらず喘いでしまう
+		PRINTFORMW 看到露出性感表情的鬼，兴奋的把%ANAME(MASTER)%推倒了
+		;TranslatedMark その色気たっぷりの表情と喘ぎに鬼も興奮した様に%ANAME(MASTER)%を押し倒してきた
+		PRINTFORML
+		PRINTFORML %ANAME(MASTER)%被鬼压成了像瑜伽动作一样的姿势，激烈的交合着
+		;TranslatedMark %ANAME(MASTER)%は鬼に抱えられる格好で激しく突き上げられながら、ヒィヒィとヨガっている
+		PRINTFORML 仿佛像人的手腕那么粗的阴茎不断的向%ANAME(MASTER)%的腔内抽插着，%ANAME(MASTER)%的腔内像要坏掉了一样被扩张着
+		;TranslatedMark 人の腕程の極太ちんぽだが、ふやけきった秘所はみっちりと広がりながら深々と咥えこんでいる
+		PRINTFORMW 一度穿透子宫抵达大脑的快感，将%ANAME(MASTER)%的脑内染成雪白，%ANAME(MASTER)%因喜悦而全身颤抖着
+		;TranslatedMark 一突き度に子宮から脳天まで快楽が突き抜け頭が真っ白になり、%ANAME(MASTER)%は悦びで全身を震わせる
+		PRINTFORML 鬼好像也很喜欢%ANAME(MASTER)%的蜜壶，一边高兴地呻吟着，一边更加激烈地抽插着
+		;TranslatedMark 鬼の方も%ANAME(MASTER)%の蜜壺を気に入った様で、嬉しそうに唸りながら一層激しく腰を打ち付けてくる
+		PRINTFORML 不久，他的灼热精液气势汹汹地注入胎内，%ANAME(MASTER)%达到了疯狂的强烈绝顶
+		;TranslatedMark やがて彼の灼熱の精液が勢いよく胎内に注がれると、%ANAME(MASTER)%は気が狂うほどの強烈な絶頂に達した
+		PRINTFORMW 完全被他迷住了的%ANAME(MASTER)%自己摇着腰要求下一次，肉欲的宴会持续了一夜
+		;TranslatedMark すっかり彼にメロメロになった%ANAME(MASTER)%は自ら腰を振って次をねだり、肉欲の宴は一晩中続いた
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, Ｖ拡張, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失", GET_SPERM_ID("流浪妖怪"), @"鬼の唇", @"鬼", "", "強姦")
+		PRINTFORML
+		PRINTFORMW 经过一整晚的疼爱后，约定再会后与鬼分别了
+		;TranslatedMark 一晩中たっぷりと可愛がられた後、再会を約束して鬼と別れた
+	;死霊術師の実験
+;	CASE 25
+;		PRINTFORML 一个人在夜里赶路，突然被一名男子打了招呼
+;		PRINTFORMW 因为在路过前面茂密的草丛的时候把东西弄丢了，所以请求一起找
+;		PRINTFORML 怎麼辦？
+;		CALL ASK_YN("帮忙", "拒绝")
+;			IF RESULT == 0
+;				PRINTFORML 看着他为难的样子决定帮忙
+;				PRINTFORML 和男人一起走向茂密的草丛
+;				PRINTFORMW 刚想问问到底是什么时候掉的、却察觉到了四周的异样
+;				PRINTFORML 竟然是一群僵尸围了过来
+;				PRINTFORML 赶紧要叫上男人逃跑、却看到了他盖在兜帽下面孔露出一个不明意味的笑容
+;				PRINTFORMW 意识到这是陷阱的时候已经太迟了、被僵尸们捕获了…
+;			ELSE
+;				PRINTFORML 感觉怪怪的、于是拒绝了
+;				PRINTFORML 失望的男子咂着嘴，念起一种奇怪的咒语
+;				PRINTFORMW %ANAME(MASTER)%惊恐的想要逃离、却发现周围气氛不对
+;				PRINTFORML 一大群僵尸出现了！
+;				PRINTFORML 男人看着这边、他盖在兜帽下面孔露出一个不明意味的笑容
+;				PRINTFORMW 还没来得及求助，就被僵尸们抓住了
+;			ENDIF
+;		PRINTFORML
+;		PRINTFORML 在远离村庄的诡异小屋中，%ANAME(MASTER)%被无数的僵尸群侵犯
+;		PRINTFORML 深深插入的肉棒顶起的小腹上浮现出了不详的花纹
+;		PRINTFORML 被死灵术士当做了试验品、刻上了能够怀上僵尸种子的奇异纹路
+;		PRINTFORMW 僵尸们本能地用腐烂的肉棒交替着在%ANAME(MASTER)%的下体里进进出出、抽插着射出精液
+;		PRINTFORML 不知多少伺候奇怪的纹路开始发光了、%ANAME(MASTER)%的子宫和头部被快感的浪潮席卷、就这样绝顶了
+;		PRINTFORML 开始还在抵抗的%ANAME(MASTER)%、如今带着啊嘿颜、主动地扭动着腰部迎合着僵尸们的插入
+;		PRINTFORML 两穴又被中出了几十发、%ANAME(MASTER)%毫不压抑地发出大声的浪叫、这样绝顶了
+;		PRINTFORMW …%ANAME(MASTER)%没有休息的时间、被不知疲倦的僵尸们不断的侵犯、内射着
+;		CALL FUCK(MASTER, "欲望, 性技, 性交, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, 口淫", "処女喪失, 膣内射精, 接吻喪失, Ａ処女喪失, 腸内射精", GET_SPERM_ID("流浪妖怪"), @"僵尸の肉棒", @"僵尸", "", "輪姦")
+;		CALL FUCK(MASTER, "欲望, 性技, 性交, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, 口淫", "処女喪失, 膣内射精, 接吻喪失, Ａ処女喪失, 腸内射精", GET_SPERM_ID("流浪妖怪"), @"僵尸の肉棒", @"僵尸", "", "輪姦")
+;		CALL FUCK(MASTER, "欲望, 性技, 性交, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, 口淫", "処女喪失, 膣内射精, 接吻喪失, Ａ処女喪失, 腸内射精", GET_SPERM_ID("流浪妖怪"), @"僵尸の肉棒", @"僵尸", "", "輪姦")
+;		PRINTFORML
+;		PRINTFORML 也许是对实验满意了，那个男人带着僵尸们离开了
+;		PRINTFORMW 被留在原地、破破烂烂的%ANAME(MASTER)%因为孕育了僵尸孩子的恐惧和快感的余韵、又持续地痉挛了好一阵子
+	;安宿の亭主
+	CASE 26
+		PRINTFORML 旅途中，找到了一家小客栈
+		;TranslatedMark 旅の途中、安宿を見つけた
+		PRINTFORML 阴暗旅馆的经营者是一个油头滑脑的丑男，不由得皱起了眉头
+		;TranslatedMark 脂ぎった醜い男が経営している陰気な宿で思わず顔をしかめてしまう
+		PRINTFORMW 但是没有其他可住的地方，%ANAME(MASTER)%只好在那里过夜
+		;TranslatedMark しかし他に泊まるところもない%ANAME(MASTER)%は仕方なくそこで一晩を過ごすことにした
+		PRINTFORML
+		PRINTFORML …深夜，被吱吱的开门声吵醒了
+		;TranslatedMark …深夜、ドアがきしむ音で目が覚めた
+		PRINTFORML 睡眼惺忪地睁开眼睛，看到那个男人站在旁边
+		;TranslatedMark 眠気でボーっとしながらなんだろうと瞼を開くと、例の亭主が傍らに立っていた
+		PRINTFORMW %ANAME(MASTER)%惊愕于本应不在的男子，不由得发出小小的悲鸣
+		;TranslatedMark いないはずの男に%ANAME(MASTER)%は驚愕して、思わず小さく悲鳴を上げてしまう
+		PRINTFORML 他的脸上浮现出了令人毛骨悚然的微笑，逐渐逼近了床上的%ANAME(MASTER)%
+		;TranslatedMark 彼はニチャアと不気味な笑みを浮かべると、ベッドに膝を立てて%ANAME(MASTER)%に迫ってくる
+		PRINTFORML 要被侵犯了！这样想着的%ANAME(MASTER)%拼命地想逃，但却在关键时刻被抓住了
+		;TranslatedMark 犯される！そう思った%ANAME(MASTER)%は必死で逃げようとしたが、寸でのところで捕まってしまった
+		PRINTFORMW 他抓住拼命挣扎着的%ANAME(MASTER)%，用粗麻绳绑在床上，压了上去
+		;TranslatedMark 彼は暴れる%ANAME(MASTER)%を押さえつけ荒縄でベッドに括りつけると、覆いかぶさってきた
+		PRINTFORML
+		PRINTFORML 昏暗的房间里回响起床板剧烈的摇晃声和身体的碰撞声，还有%ANAME(MASTER)%的呻吟声
+		;TranslatedMark 薄暗い部屋の中に激しくベッドのきしむ音と肉の打ち合う音、そして%ANAME(MASTER)%の呻き声が響く
+		PRINTFORML 被他巨大的身体压着，阴茎在腔内狂野的抽插，%ANAME(MASTER)%的身体小幅度的痉挛着
+		;TranslatedMark 彼の巨体に伸し掛かられながら野太いペニスで深々と貫かれて、%ANAME(MASTER)%はブルブルと小刻みに痙攣する
+		PRINTFORMW 对于久违的猎物兴奋不已的他，就像猪一样一边喘气一边以击溃子宫的气势激烈地动起了腰
+		;TranslatedMark 久々の獲物に興奮した彼はまるで豚の様に息を荒げながら子宮を潰す勢いで激しく腰を打ち付けてくる
+		PRINTFORML 受到这样的冲击，%ANAME(MASTER)%忍不住将身体伸直，从颤抖的喉咙里发出呻吟声
+		;TranslatedMark その衝撃に%ANAME(MASTER)%はたまらず一突き毎に爪先までピンと伸ばして、震える喉から呻き声を上げてしまう
+		PRINTFORML 男子的腰逐渐加快，与此同时，%ANAME(MASTER)%的呻吟声也变得妖媚，变得尖锐起来
+		;TranslatedMark 次第に男の腰の動きが加速していくと、それに合わせて%ANAME(MASTER)%の呻き声も色っぽく、甲高くなっていく
+		PRINTFORMW 然后男子进一步深入地射精后，%ANAME(MASTER)%流着泪达到了不希望的绝顶…
+		;TranslatedMark そして男が一層深くねじ込んで射精すると、%ANAME(MASTER)%は涙を流しながら望まぬ絶頂に達してしまった…
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_SPERM_ID("おっさん"), @"汚いおっさんの\@RAND:2 ? 肉棒 # 唇\@", @"汚いおっさん", "", "強姦")
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_SPERM_ID("おっさん"), @"汚いおっさんの\@RAND:2 ? 肉棒 # 唇\@", @"汚いおっさん", "", "強姦")
+		PRINTFORML
+		PRINTFORMW 在那之后的数日，%ANAME(MASTER)%一直被男人侵犯着，但总算找到了逃走的机会
+		;TranslatedMark その後数日に渡り男に犯されていた%ANAME(MASTER)%だが、何とかスキをついて逃げだす事が出来た
+	;フタナリ美女
+	CASE 27
+		PRINTFORML 在茶馆里休息，一个女人过来搭话
+		PRINTFORML 似乎和%ANAME(MASTER)%一样、一个人旅行着
+		PRINTFORMW 我请客、过来一起玩吧
+		PRINTFORML 怎麼辦？
+		CALL ASK_YN("去玩", "谢绝")
+		IF RESULT == 0
+			PRINTFORML 好久没玩乐了，所以决定同意了
+			PRINTFORMW 她也非常高兴，两人马上一起上街了
+		ELSE
+			PRINTFORML 因为想一个人待着，所以谢绝了
+			PRINTFORMW 她虽然看起来很遗憾，但并没有继续强迫
+			RETURN 1
+		ENDIF
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		PRINTFORMW 和她一起玩，玩得很开心
+		PRINTFORML 因为玩的太累了，决定在旅馆住一晚.
+		PRINTFORML 但是当和她一起走进房间时，突然被抱住，嘴唇被堵住了。
+		PRINTFORMW 惊慌失措看着的她恶作剧般地笑着，然后被温柔地推倒在床上
+		PRINTFORML 在不知所措的%ANAME(MASTER)%面前她掀起了裙子、那里居然长着一根雄壮的肉棒！
+		PRINTFORML 已经变得硬邦邦的、她像看着好吃的一样盯着%ANAME(MASTER)%
+		PRINTFORMW 她舔了舔舌头，压在了%ANAME(MASTER)%身上，再次亲吻着嘴唇
+		PRINTFORML
+		PRINTFORML 在床上，%ANAME(MASTER)%与她激烈地缠绵在一起
+		PRINTFORML 因为同为女人、所以她的腰技和指技都能准确的攻击到弱点、%ANAME(MASTER)%漏出了淫荡的母兽般的表情
+		PRINTFORMW 肉棒深深地贯穿了，乳头和阴核被咯吱地扭压着，身体不由自主的因为快感而扭动。
+		PRINTFORML 女人同性之间做爱的背德感让%ANAME(MASTER)%的身体更加敏感、带来了更多的观感刺激
+		PRINTFORML 不久后她的肉棒开始剜起阴道深处的媚肉、%ANAME(MASTER)%的身体反躬的像只虾米一般、发出悦耳的娇喘
+		PRINTFORMW 完全被她俘虏了的%ANAME(MASTER)%、度过了一个激情似火的夜晚
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, 百合, 百合, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_SPERM_ID("不明"), @"フタナリ美女の唇", @"フタナリ美女", "", "和姦")
+		PRINTFORML
+		PRINTFORMW 第二天、两人热烈的相吻道别
+	;生贄にされる
+	CASE 28
+		PRINTFORML 旅途中，来到了一个小村落
+		;TranslatedMark 旅の途中、小さな集落に立ち寄った
+		PRINTFORML 村民们为了欢迎%ANAME(MASTER)%的到来，请他吃饭
+		;TranslatedMark 村人は%ANAME(MASTER)%を歓迎し、ご馳走を振るまってくれた
+		PRINTFORMW 但是在招待的时候突然感受到了强烈的睡意，睡着了…
+		;TranslatedMark しかし歓待の最中に突如強烈な眠気に襲われ、眠りに落ちてしまった…
+		PRINTFORML
+		PRINTFORML 感到不协调而睁开眼睛，%ANAME(MASTER)%就被捆绑了起来
+		;TranslatedMark 違和感を覚えて目を覚ますと、%ANAME(MASTER)%は縛り上げられていた
+		PRINTFORML 不知发生了什么事而混乱着的%ANAME(MASTER)%，在身边看见了刚刚的村民
+		;TranslatedMark 何があったのかと混乱する%ANAME(MASTER)%だが、傍らに先程の村人を見つけた
+		PRINTFORMW 他一看见%ANAME(MASTER)%醒了，就低下头，说要将%ANAME(MASTER)%作为村子的祭品
+		;TranslatedMark 彼は%ANAME(MASTER)%が目を覚ましたのを見ると頭を下げ、村の為に生贄になってくれと言う
+		PRINTFORML 这个村子附近出现了魔物，如果不定期供奉祭品的话，村子就会被袭击
+		;TranslatedMark この村の近くには魔物が出て、定期的に生贄を捧げないと村が襲われてしまうらしい
+		PRINTFORML 突然有人这么说，%ANAME(MASTER)%感到很混乱，黑暗中出现了一个巨大的影子
+		;TranslatedMark 突然そんなことを言われて混乱していると、暗闇の中から巨大な影がぬぅっと現れた
+		PRINTFORMW 恐怖的颤抖着看向那个影子，好像是像直立的青蛙一样的魔物
+		;TranslatedMark 恐怖に震えながらその影を見ると、直立した蛙の様な魔物だとわかった
+		PRINTFORML 一瞥旁边的村民，他也同样恐惧的颤抖着向那家伙下跪
+		;TranslatedMark 傍らの村人をちらと見ると彼もまた同じく恐怖で震えながらそいつに土下座している
+		PRINTFORML 那家伙一看到%ANAME(MASTER)%就浮现出扭曲的笑容，将她抱了起来
+		;TranslatedMark そいつは%ANAME(MASTER)%を見ると歪んだ笑みを浮かべ、ひょいと身体を抱え上げる
+		PRINTFORMW %ANAME(MASTER)%拼命抵抗了，但是毫无作用，被带到了黑暗中………
+		;TranslatedMark 必死で抵抗したがそれも空しく、暗闇の中へと連れ去られてしまった………
+		PRINTFORML
+		PRINTFORML 在散发着臭味的山洞深处，光线无法抵达的黑暗之中传来狂乱的女性娇声
+		;TranslatedMark かび臭い洞窟の奥深く、光も届かない暗闇の中に狂乱する女性の嬌声が木霊する
+		PRINTFORML %ANAME(MASTER)%在青蛙人的怀抱中，露出狂乱的表情疯狂的扭动着
+		;TranslatedMark %ANAME(MASTER)%は蛙人間に抱かれながらアヘアヘとまるで狂人の様な顔を晒してヨガリ狂っている
+		PRINTFORMW 「“他”的体液中含有强烈的媚药成分，猎物的身心都会被快乐所俘虏
+		;TranslatedMark 「彼」の体液には強烈な媚薬成分が含まれており、獲物の身も心も快楽の虜にしてしまうのだ
+		PRINTFORML 他看着%ANAME(MASTER)%一边呻吟一边跳动着身体将阴茎含入嘴中的样子，露出了满意的笑容
+		;TranslatedMark 深々とペニスを咥え込み身体を跳ねさせる%ANAME(MASTER)%の様子を見て、彼は満足そうに唸り声を上げる
+		PRINTFORML %ANAME(MASTER)%为了得到更多的快乐而自发的将腔肉收紧，不断的扭动着腰，一次又一次的抵达了雌性的绝顶
+		;TranslatedMark %ANAME(MASTER)%はより深い快楽を得るべく自ら腰をくねらせ膣肉をしめつけ何度も雌イキに達する
+		PRINTFORML 粘滑的肌肤和带着青黑色血筋的肉棒在如今的%ANAME(MASTER)%眼中都是可爱的，双眼已经变成了♥的形状
+		;TranslatedMark ぬめりとした肌も青黒くグロテスクな肉棒も今の%ANAME(MASTER)%には愛しく映り、目を♥を浮かべている
+		PRINTFORMW 冷突然，他猛地射精了，%ANAME(MASTER)%伴随着呻吟将自己的身体大幅度的仰了起来
+		;TranslatedMark 不意に彼が勢いよく射精すると、%ANAME(MASTER)%はあられもない嬌声と共に大きく身を仰け反らせた
+		PRINTFORML 由于浸入子宫的热度，两次，三次，不断绝顶着的同时将子宫和阴道紧紧的收缩着，一滴也不落下地吞了进去
+		;TranslatedMark 子宮に染み込む熱で二度三度と絶頂しながら子宮と膣を収縮させて一滴残らず呑み込んでいく
+		PRINTFORML 经历了漫长时间的射精后，%ANAME(MASTER)%倒在了他的身上，激烈地喘息着，露出了恍惚的表情
+		;TranslatedMark そして長い射精が終わると%ANAME(MASTER)%は彼に倒れ込み、激しく息を荒げながら恍惚の表情を見せた
+		PRINTFORMW …被他看中的%ANAME(MASTER)%为了他生孩子，在那之后也过着夫妻般的生活
+		;TranslatedMark …彼に気に入られた%ANAME(MASTER)%は子供を孕ませるべくその後もまるで夫婦の様な生活を続けた
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, Ｖ拡張, 獣姦, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失", GET_SPERM_ID("流浪妖怪"), @"化け物の唇", @"化け物", "", "強姦")
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, Ｖ拡張, 獣姦, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失", GET_SPERM_ID("流浪妖怪"), @"化け物の唇", @"化け物", "", "強姦")
+		PRINTFORML
+		PRINTFORML 当意识到时，%ANAME(MASTER)%已经被搁置在山路上了
+		;TranslatedMark %ANAME(MASTER)%は気づけば山道に放置されていた
+		PRINTFORML 环顾四周，魔物不见踪影
+		;TranslatedMark 周囲を見回しても魔物は影も形も見当たらない
+		PRINTFORMW %ANAME(MASTER)%惊讶地站了起来，感觉她的下腹还残留着他那微弱的热度…
+		;TranslatedMark 化かされたのだろうか訝しみながら立ち上がると、下腹部に微かに残った彼の熱を感じた…
+	;迷子になって
+	CASE 29
+		PRINTFORML 穿过森林的时候迷路了
+		;TranslatedMark 森を通り抜ける途中、迷子になってしまった
+		PRINTFORML 太阳落山了，走投无路的时候，遇到了一个男人
+		;TranslatedMark 日が落ちかけて途方に暮れていると、男に遭遇した
+		PRINTFORML 头发胡子都蓬乱，打扮得很寒碜
+		;TranslatedMark 髪も髭もボサボサでみすぼらしい恰好をしている
+		PRINTFORMW 他好像看穿了%ANAME(MASTER)%在森林里迷了路，说要帮她带路
+		;TranslatedMark 彼は%ANAME(MASTER)%が迷子だと見抜いたようで、道を教えてやろうと言ってきた
+		PRINTFORML 怎么办？
+		;TranslatedMark どうしよう？
+		CALL ASK_YN("跟着走", "拒绝")
+		;CALL ASK_YN("ついていく", "やめておく")
+		IF RESULT == 0
+			PRINTFORML 多少有点可疑，但是别无他法
+			;TranslatedMark 多少怪しいものの他に手もない
+			PRINTFORMW %ANAME(MASTER)%向他道谢，跟着他走了
+			;TranslatedMark %ANAME(MASTER)%は彼にお礼を言ってついて行った
+		ELSE
+			PRINTFORML 委婉地指出了他很可疑
+			;TranslatedMark 控えめに言っても怪しい男だ
+			PRINTFORML %ANAME(MASTER)%决定拒绝后自己离开
+			;TranslatedMark %ANAME(MASTER)%は遠慮して立ち去ることにした
+			PRINTFORMW 但是背向男子的瞬间，后脑受到强烈的冲击而昏倒了…
+			;TranslatedMark しかし男に背を向けた瞬間、後頭部に激しい衝撃を受けて昏倒してしまった…
+		ENDIF
+		PRINTFORML
+		PRINTFORML 从废屋中传来被强奸的%ANAME(MASTER)%悲痛的叫声
+		;TranslatedMark 廃屋の中からレイプされている%ANAME(MASTER)%の悲痛な叫びが響いてくる
+		PRINTFORML 被流浪者捉住的%ANAME(MASTER)%被带到他的窝里侵犯了
+		;TranslatedMark 浮浪者に捕まってしまった%ANAME(MASTER)%は彼のねぐらに連れ込まるなり犯されてしまった
+		PRINTFORML 被推到在地上的同时强烈的撞击着她的身体，%ANAME(MASTER)%因为痛苦和恐惧发出着呜咽声，身体不住颤抖着
+		;TranslatedMark 押し倒されながら激しく突かれて、%ANAME(MASTER)%は苦痛と恐怖で嗚咽交じりに呻いて身を震わせる
+		PRINTFORMW 从一直发出声音的结合部溢出着精液，说明已经被不知几次的侵犯了
+		;TranslatedMark ずっちゅずっちゅと音を立てる結合部からは精液が溢れて出ており、すでに何度も汚された事を物語る
+		PRINTFORML 男子再次低声呻吟着，在胎内注入了不知第几次的精液，%ANAME(MASTER)%随着悲鸣扭动着身体
+		;TranslatedMark 再び男が低く唸り胎内に何度目かのザーメンが注がれると、%ANAME(MASTER)%は悲鳴を上げて身をよじらせた
+		PRINTFORML 但是，她无法逃脱，一边感受着男人肮脏的精液渗入子宫中，一边流着泪
+		;TranslatedMark しかし逃れられるはずもなく、子宮に男の汚らしい精液が染み込んでくるのを感じながら涙を流した
+		PRINTFORMW %ANAME(MASTER)%在男子的巢穴里被饲养了一段时间，不分昼夜，被连续的播着种
+		;TranslatedMark %ANAME(MASTER)%は男のねぐらでしばらく飼われることになり、昼夜問わずに何度も種付けレイプされることになった
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_SPERM_ID("流浪漢"), @"流浪漢的\@RAND:2 ? 肉棒 # 唇\@", @"流浪漢", "", "強姦")
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, 奉仕, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_SPERM_ID("流浪漢"), @"流浪漢的\@RAND:2 ? 肉棒 # 唇\@", @"流浪漢", "", "強姦")
+		PRINTFORML
+		PRINTFORMW 虽然一直在被强奸着，但是还是找到了一个机会逃走了
+		;TranslatedMark 散々レイプされていたが、隙をついて何とか逃げ出す事が出来た
+	;一応条件未達成の場合の汎用レイプ
+	CASEELSE
+		PRINTFORML 旅行途中，%ANAME(MASTER)%正在路上走着，突然被不知道什么人从腋下架起了双臂扣住了
+		;TranslatedMark 旅の途中、道を歩いているといきなり何者かに羽交い絞めにされた
+		PRINTFORMW 完全无法抵抗，就这样被拖进了附近的建筑物中
+		;TranslatedMark 抵抗したが適わず、そのまま近くの建物の中に引きずり込まれてしまった
+		PRINTFORML
+		PRINTFORML 被带入地下室的%ANAME(MASTER)%被男人强奸了
+		;TranslatedMark 地下室に連れ込まれた%ANAME(MASTER)%は男にレイプされている
+		PRINTFORML 被粗暴的活塞运动挖掘着腔内，漏出了苦闷的呻吟声
+		;TranslatedMark 乱暴なピストンで膣を抉られ、苦痛のあまり呻き声を漏らしてしまう
+		PRINTFORML 不久后，%ANAME(MASTER)%拼命的恳求也没有产生作用，就那样被腔内射精了
+		;TranslatedMark やがて%ANAME(MASTER)%の必死の懇願もむなしく、膣内射精をされてしまった
+		PRINTFORMW 面对呜咽着颤抖的%ANAME(MASTER)%，男人满足的开始了第二回…
+		;TranslatedMark 嗚咽を上げて震える%ANAME(MASTER)%に対し、男は満足そうに次を開始した…
+		CALL FUCK(MASTER, "欲望, 性技, 性交, 情愛, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, 接吻, 口淫, Ｖ性交, Ａ性交", "処女喪失, 膣内射精, 口内射精, 接吻喪失, Ａ処女喪失, 腸内射精", GET_SPERM_ID("流氓"), @"ならず者の\@RAND:2 ? 肉棒 # 唇\@", @"流氓", "", "強姦")
+		PRINTFORML
+		PRINTFORML 之后，男子被警察逮捕，%ANAME(MASTER)%也被救出
+		;TranslatedMark その後、男は警察に逮捕され%ANAME(MASTER)%も救出された
+		PRINTFORMW 但是没能忘记身上的疼痛和热度…
+		;TranslatedMark しかし体に刻まれた傷と熱は忘れられなかった…
+ENDSELECT
+
+RETURN 1
+
+@EVENT_DAILY_YOU_WANDERING_ALLOW_WHEN_WANDERING
+RETURN 1
+

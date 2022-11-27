@@ -1,0 +1,592 @@
+﻿;-------------------------------------------------
+;共通部分
+;-------------------------------------------------
+
+;=================================================
+;●口上の存在判定
+;=================================================
+@KOJO_EXIST_K87
+
+;=================================================
+;●開始時
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_TRAIN_START_K87
+
+;=================================================
+;●終了時
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_TRAIN_END_K87
+
+;=================================================
+;●コマンド実行時(このキャラがプレイヤー側のとき)
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_TARGET_K87
+
+;=================================================
+;●コマンド実行時(このキャラがプレイヤー側のとき)
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_PLAYER_K87
+
+;=================================================
+;●コマンド実行後(パラメータの変動処理が終わってから呼び出される)
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_AFTER_K87
+;[虚ろ]状態の場合、口が塞がっている場合は口上を表示しない
+IF TALENT:空虚 || IS_EQUIP_CONTINUE(TARGET, "口装着") || CFLAG:400 == 1
+	RETURN 0
+ENDIF
+
+;淫乱かつこちらに主導権が有るとたまに索求するお試し記述。条件を満たすと確率が上がる。
+;現状索求を聞いても特に意味は無い。育成のお楽しみ要素、達成感、マンネリ回避…的な？
+
+;会いに行く or 閨に呼ぶ
+IF GETBIT(TALENT:淫乱系, 素質_淫乱_淫乱) && TFLAG:45 == 0 && (FLAG:調教モード == 0 || FLAG:調教モード == 1) && CFLAG:600 == 1
+	;V索求
+	IF RAND:5 == 0 && !TALENT:妊娠 && TequIP:1 == 1
+		PRINTFORML 
+		IF RAND:4 == 0 && ABL:Ｖ感 >= 5
+			PRINTFORMW [膣交索求]
+			;TranslatedMark ［膣交索求］
+				IF RAND:2 == 0
+					PRINTFORML 「你…不想要孩子吗？」
+					;TranslatedMark 「おぬし…、子供は欲しくないかえ？」
+				ELSE
+					PRINTFORML 「送到嘴边了还不吃难道不是男人的耻辱吗？」
+					;TranslatedMark 「据え膳食わぬは男の恥じゃぞお？」
+				ENDIF
+				IF RAND:2 == 0 
+					PRINTFORMW %ANAME(TARGET)%张开了秘部，露出了淫靡的微笑……
+					;TranslatedMark %ANAME(TARGET)%は、秘部を拡げて淫靡に微笑んでいる……
+				ELSE
+					PRINTFORMW %ANAME(TARGET)%躺在床上伸出双臂邀请%ANAME(MASTER)%……
+					;TranslatedMark %ANAME(TARGET)%は寝そべったまま%ANAME(MASTER)%を招き入れるように腕を伸ばしている……
+				ENDIF
+		ELSEIF RAND:3 == 0 && GETBIT(TALENT:淫乱系, 素質_淫乱_淫壷)
+			PRINTFORMW [膣交索求]
+			;TranslatedMark ［膣交索求］
+				IF RAND:2 == 0 
+					PRINTFORML 「把我变成这样的身体的不是你吗…？在我满足之前我不会让你回去哦…？」
+					;TranslatedMark 「儂をこんな体にしたのはおぬしじゃからな…？満足させてくれるまで離さぬぞお…？」
+				ELSE
+					PRINTFORML 「落入你手的我，也不过只是一只雌性罢了…」
+					;TranslatedMark 「おぬしの手にかかると儂もただの雌じゃのう…」
+				ENDIF
+				IF RAND:2 == 0 
+					PRINTFORMW %ANAME(TARGET)%将秘部扩大，邀请%ANAME(MASTER)%……
+					;TranslatedMark %ANAME(TARGET)%は、秘部を大きく拡げて%ANAME(MASTER)%を誘っている……
+				ELSE
+					PRINTFORMW %ANAME(TARGET)%像邀请%ANAME(MASTER)%一样打开大腿，爱液从秘部滴到了地上……
+					;TranslatedMark %ANAME(TARGET)%が%ANAME(MASTER)%を招き入れるように股を開くと、愛液が地面に滴り落ちた……
+				ENDIF
+		ELSEIF RAND:2 == 0 && (TequIP:1 == 2 || TequIP:1 == 10 )
+			PRINTFORMW [膣交索求]
+			;TranslatedMark ［膣交索求］
+			PRINTFORML 「不要这样的玩具…我想要你的…」
+			;TranslatedMark 「こんな玩具ではなく…、おぬしのが欲しいのじゃ…」
+				IF RAND:2 == 0 
+					PRINTFORMW %ANAME(TARGET)%有所欲求地凝视着%ANAME(MASTER)%……
+					;TranslatedMark %ANAME(TARGET)%は切なげに%ANAME(MASTER)%を見つめている……
+				ELSE
+					PRINTFORMW %ANAME(TARGET)%淫靡地摇晃着腰……
+					;TranslatedMark %ANAME(TARGET)%は淫靡に腰を揺らした……
+				ENDIF
+		ELSE
+			PRINTFORML 
+		ENDIF
+	;A索求
+	ELSEIF RAND:4 == 0 && TequIP:2 == 1
+		PRINTFORML 
+		IF RAND:4 == 0 && ABL:Ａ感 >= 5
+			PRINTFORMW [肛交索求]
+			;TranslatedMark ［肛交索求］
+				IF RAND:2 == 0 
+					PRINTFORML 「差不多该…我开始怀念这个了…」
+					;TranslatedMark 「そろそろ…、こちらが恋しくなってきてのう…」
+				ELSE
+					PRINTFORML 「我也…完全加入变态的行列了吗…？」
+					;TranslatedMark 「儂も…、すっかり変態の仲間入りかのう…？」
+				ENDIF
+				IF RAND:2 == 0 
+					PRINTFORMW %ANAME(TARGET)%向%ANAME(MASTER)%抬起屁股，恳求肛门做爱……
+					;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%に尻を突き出すとアナルセックスを懇願した……
+				ELSE
+					PRINTFORMW %ANAME(TARGET)%用两个手指把尻穴扩大，邀请%ANAME(MASTER)%……
+					;TranslatedMark %ANAME(TARGET)%は二本の指で尻穴を大きく拡げ、%ANAME(MASTER)%を誘っている……
+				ENDIF
+		ELSEIF RAND:3 == 0 && GETBIT(TALENT:淫乱系, 素質_淫乱_尻穴狂い)
+			PRINTFORMW [肛交索求]
+			;TranslatedMark ［肛交索求］
+				IF RAND:2 == 0 
+					PRINTFORML 「这个不像样子的尻穴…、请尽情地疼爱一下吧…？」
+					;TranslatedMark 「このはしたない穴を…、どうか存分に可愛がってくれんかのぅ…？」
+				ELSE
+					PRINTFORML 「尻穴疼得受不了…、能帮我…让它平静下来吗？」
+					;TranslatedMark 「尻穴が疼いてたまらんのじゃ…、鎮めては…くれんかのう？」
+				ENDIF
+				IF RAND:2 == 0 
+					PRINTFORMW %ANAME(TARGET)%用两个手指把尻穴扩大，邀请%ANAME(MASTER)%……
+					;TranslatedMark %ANAME(TARGET)%は二本の指で尻穴を大きく拡げ、%ANAME(MASTER)%を誘っている……
+				ELSE
+					PRINTFORMW 完全松弛的%ANAME(TARGET)%的尻穴，像是在等待着%ANAME(MASTER)%不停抽动着……
+					;TranslatedMark すっかり弛緩し縦に割れた%ANAME(TARGET)%の尻穴は、%ANAME(MASTER)%を待ち侘びたようにヒクついている……
+				ENDIF
+		ELSEIF RAND:2 == 0 && TequIP:2 == 10
+			PRINTFORMW [肛交索求]
+			;TranslatedMark ［肛交索求］
+			PRINTFORML 「不要这样的玩具…我想要你的…」
+			;TranslatedMark 「こんな玩具ではなく…、おぬしのモノが欲しいのじゃ…」
+				IF RAND:2 == 0 
+					PRINTFORMW %ANAME(TARGET)%有所欲求地凝视着%ANAME(MASTER)%……
+					;TranslatedMark %ANAME(TARGET)%は切なげに%ANAME(MASTER)%を見つめている……
+				ELSE
+					PRINTFORMW %ANAME(TARGET)%淫靡地摇晃着腰……
+					;TranslatedMark %ANAME(TARGET)%は淫靡に腰を揺らした……
+				ENDIF
+		ELSE
+			PRINTFORML 
+		ENDIF
+	;C索求
+	ELSEIF RAND:3 == 0
+		PRINTFORML 
+		IF RAND:4 == 0 && ABL:Ｃ感 >= 5
+			PRINTFORMW [阴核爱抚索求]
+			;TranslatedMark ［陰核索求］
+			PRINTFORML 「」
+			PRINTFORMW %ANAME(TARGET)%的指尖在阴核上抚摸着……
+			;TranslatedMark %ANAME(TARGET)%はクリトリスに指先を這わせている……
+		ELSEIF RAND:3 == 0 && GETBIT(TALENT:淫乱系, 素質_淫乱_淫核)
+			PRINTFORMW [阴核爱抚索求]
+			;TranslatedMark ［陰核索求］
+			PRINTFORML 「这里刺痛着疼得受不了…」
+			;TranslatedMark 「ジンジン疼いて堪らんのじゃ…」
+			PRINTFORMW %ANAME(TARGET)%展示了自己的阴核……
+			;TranslatedMark %ANAME(TARGET)%はクリトリスを見せつけてきた……
+		ELSEIF RAND:2 == 0 && TequIP:0 == 10
+			PRINTFORMW [阴核爱抚索求]
+			;TranslatedMark ［陰核索求］
+			PRINTFORML 「其实我想让你用你的手玩弄这里…」
+			;TranslatedMark 「本当はおぬしの手で弄って欲しいんじゃが…」
+			PRINTFORMW %ANAME(TARGET)%不满地凝视着安装在阴核上的淫具……
+			;TranslatedMark %ANAME(TARGET)%はクリトリスに取り付けられた淫具を恨めしげに見つめている……
+		ELSE
+			PRINTFORML 
+		ENDIF
+	;B索求
+	ELSEIF RAND:2 == 0
+		PRINTFORML 
+		IF RAND:4 == 0 && ABL:Ｂ感 >= 5
+			PRINTFORMW [乳房索求]
+			;TranslatedMark ［乳房索求］
+			PRINTFORML 「如果是你的话，无论做什么都……」
+			;TranslatedMark 「おぬしにならどんなことをされても……」
+			PRINTFORMW %ANAME(TARGET)%用双手在胸部挤出山谷来诱惑……
+			;TranslatedMark %ANAME(TARGET)%は両腕で胸の谷間を作って誘惑している……
+		ELSEIF RAND:3 == 0 && GETBIT(TALENT:淫乱系, 素質_淫乱_淫乳)
+			PRINTFORMW [乳房索求]
+			;TranslatedMark ［乳房索求］
+			PRINTFORML 「唔…胸部好涨好难受啊……」
+			;TranslatedMark 「うむぅ…、胸が張って苦しいのう……」
+			PRINTFORMW %ANAME(TARGET)%偷偷地将视线投向%ANAME(MASTER)%……
+			;TranslatedMark %ANAME(TARGET)%はチラチラと%ANAME(MASTER)%に視線を寄越している……
+		ELSEIF RAND:2 == 0 && TequIP:3 == 10
+			PRINTFORMW 「其实我想让你用你的手玩弄这里…」
+			;TranslatedMark 「本当はおぬしの手で弄って欲しいんじゃが…」
+			PRINTFORMW %ANAME(TARGET)%不满地看着乳头上安装的淫具……
+			;TranslatedMark %ANAME(TARGET)%は乳首に取り付けられた淫具を恨めしげに見つめている……
+		ELSE
+			PRINTFORML 
+		ENDIF
+	;M索求
+	ELSE
+		PRINTFORML 
+		IF RAND:3 == 0 && ABL:Ｍ感 >= 5
+			PRINTFORMW [接吻索求]
+			;TranslatedMark ［キス索求］
+			PRINTFORMW 「嗯……」
+			;TranslatedMark 「ん……」
+			PRINTFORMW %ANAME(TARGET)%用手指咚咚地敲着嘴唇请索求亲吻……
+			;TranslatedMark %ANAME(TARGET)%は唇をトントンと指で叩いてキスをせがんでいる……
+		ELSEIF RAND:2 == 0 && GETBIT(TALENT:淫乱系, 素質_淫乱_蕩唇)
+			PRINTFORMW [口交索求]
+			;TranslatedMark ［口交索求］
+			PRINTFORML 「总觉得嘴巴里有点寂寞啊…」
+			;TranslatedMark 「なにやら口さみしいのう…」
+			PRINTFORMW %ANAME(TARGET)%在嘴前用手指比出环状，摆出伸出舌头的姿势……
+			;TranslatedMark %ANAME(TARGET)%は口の前で指の輪を作り、舌を突き出すジェスチャーをしている……
+		ELSE
+			PRINTFORML 
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;初絶頂は使い回せそうなのでここに作成　多重絶頂もそのうち
+;-------------------------------------------------
+;-------------------------------------------------
+;初めてＣ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｃ絶頂 > 0
+	PRINTFORML 
+	IF CFLAG:220 == 0
+		CFLAG:220 = 1
+		;PRINTFORMW 「」
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;初めてＶ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｖ絶頂 > 0
+	PRINTFORML 
+	;初回
+	IF CFLAG:221 == 0
+		CFLAG:221 = 1
+		PRINTFORML 「嗯…！嗯…嘿，%UNICODE(0x2661)%！！」
+		;TranslatedMark 「んっ…！くぅぅ～…っ%UNICODE(0x2661)%！！」
+		PRINTFORMW 用令人意外的可爱声音，颤抖着身体的%ANAME(TARGET)%达到了高潮
+		;TranslatedMark 意外なほど可愛らしい声で、身を震わせながら%ANAME(TARGET)%は絶頂に達した
+			;セックス時
+			IF SELECTCOM == 30 || SELECTCOM == 31 || SELECTCOM == 32 || SELECTCOM == 33 || SELECTCOM == 34 || SELECTCOM == 35 || SELECTCOM == 36 || SELECTCOM == 55 || SELECTCOM == 57
+				PRINTFORML 「…身体的相性也不差嘛……」
+				;TranslatedMark 「…身体の相性は、悪くないようじゃな……」
+			ELSE
+				PRINTFORML 「唔…！只靠技术就能让我高潮吗，失策了…」
+				;TranslatedMark 「ぐっ…！テクだけでイかされるとは、不覚じゃ…」
+			ENDIF
+		PRINTFORMW %ANAME(TARGET)%用迷离的眼神盯着%ANAME(MASTER)%……
+		;TranslatedMark %ANAME(TARGET)%は焦点の合わない目で%ANAME(MASTER)%を見つめている……
+	;2回目以降
+	ELSE
+		IF GETBIT(TALENT:淫乱系, 素質_淫乱_淫壷)
+			IF RAND:3 == 0
+				PRINTFORML 「——%UNICODE(0x2661)%！啊——―噗噫_________%UNICODE(0x2661)%%UNICODE(0x2661)%！！」
+				;TranslatedMark 「ッ――――%UNICODE(0x2661)%！ッッ――――z__________%UNICODE(0x2661)%%UNICODE(0x2661)%！！」
+				;セックス時
+				IF SELECTCOM == 30 || SELECTCOM == 31 || SELECTCOM == 32 || SELECTCOM == 33 || SELECTCOM == 34 || SELECTCOM == 35 || SELECTCOM == 36 || SELECTCOM == 55 || SELECTCOM == 57
+					PRINTFORML 绝顶的同时，%ANAME(TARGET)%的阴道为了索求子代的种子而紧紧地勒紧了……
+					;TranslatedMark 絶頂と同時に、%ANAME(TARGET)%の膣が子胤を求めて強く引き締まった……
+				ELSE
+					PRINTFORML 在绝顶的同时，%ANAME(TARGET)%的阴道像是要发出声音一般勒紧了……
+					;TranslatedMark 絶頂と同時に、%ANAME(TARGET)%の膣が音がせんばかりに強く締まった……
+				ENDIF
+			ELSEIF RAND:2 == 0
+				;セックス時
+				IF SELECTCOM == 30 || SELECTCOM == 31 || SELECTCOM == 32 || SELECTCOM == 33 || SELECTCOM == 34 || SELECTCOM == 35 || SELECTCOM == 36 || SELECTCOM == 55 || SELECTCOM == 57
+					;マスターが射精
+					IF NOWEX:MASTER:射精 > 0
+						PRINTFORML 「啊…呼…！一起去吧…%UNICODE(0x2661)%%UNICODE(0x2661)%A！」
+						;TranslatedMark 「あ…ふぅっ…！イク時は一緒じゃ…っ%UNICODE(0x2661)%%UNICODE(0x2661)%！」
+						PRINTFORMW %ANAME(TARGET)%感受到了%ANAME(MASTER)%的绝顶征兆，腰更加剧烈地抽动着……
+						;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の絶頂の予兆を感じて一層腰を激しく動かした……
+					ELSE
+						PRINTFORML 「咕！…接下来轮到我让你高潮了！」
+						;TranslatedMark 「くっ！…つ、次は儂がイかせる番じゃ！」
+						PRINTFORMW %ANAME(TARGET)%又开始热情地动起腰来了……
+						;TranslatedMark %ANAME(TARGET)%はやっきになって再び腰を動かし始めた……
+					ENDIF
+				ELSE
+					;道具
+					IF IS_EQUIP_TARGET(MTAR:0, 61)
+						PRINTFORML 「啊…噫…%UNICODE(0x2661)%用那个玩具…搅拌的话…%UNICODE(0x2661)%…啊，%UNICODE(0x2661)%！」
+						;TranslatedMark 「あっ…ひっ…%UNICODE(0x2661)%おもちゃっ…かき回したらっ…%UNICODE(0x2661)%ひゃ…っ、あぁっ%UNICODE(0x2661)%！」
+						PRINTFORMW %ANAME(TARGET)%感受到肉棒抽送带来的快感缩紧了身子……
+						;TranslatedMark %ANAME(TARGET)%はバイブの快感に身を縮こませた……
+					;指
+					ELSEIF SELECTCOM == 3
+						PRINTFORML 「那样…用手指…搅动的话…%UNICODE(0x2661)%…噫啊，%UNICODE(0x2661)%！」
+						;TranslatedMark 「そんな…ゆびっ…かき回したらっ…%UNICODE(0x2661)%ひゃ…っ、あぁっ%UNICODE(0x2661)%！」
+						PRINTFORMW %ANAME(TARGET)%被手指刺激到敏感的地方，用力地向后仰去……
+						;TranslatedMark %ANAME(TARGET)%は敏感な箇所を指でなぞられ背中を大きく反らせた……
+					ENDIF
+				ENDIF
+			ELSE 
+				PRINTFORML 「啊…嗯……你真是太棒了……%UNICODE(0x2661)%」
+				;TranslatedMark 「はっ…ふぅぅ……っ%UNICODE(0x2661)%お前さん、最高じゃったぞ……%UNICODE(0x2661)%」
+				PRINTFORMW %ANAME(TARGET)%作为一只雌性沉浸在最棒的绝顶余韵中……
+				;TranslatedMark %ANAME(TARGET)%は雌として最高の絶頂の余韻に浸っている……
+			ENDIF
+		ELSE
+			IF RAND:3 == 0
+				PRINTFORML 「嗯…！——%UNICODE(0x2661)%！」
+				;TranslatedMark 「んんっ…！ッ――――%UNICODE(0x2661)%！」
+				;セックス時
+				IF SELECTCOM == 30 || SELECTCOM == 31 || SELECTCOM == 32 || SELECTCOM == 33 || SELECTCOM == 34 || SELECTCOM == 35 || SELECTCOM == 36 || SELECTCOM == 55 || SELECTCOM == 57
+					PRINTFORML 绝顶的同时，%ANAME(TARGET)%的阴道勒紧了%ANAME(MASTER)%的阴茎……
+					;TranslatedMark 絶頂と同時に、%ANAME(TARGET)%の膣が%ANAME(MASTER)%のペニスを締め上げた……
+				ELSE
+					PRINTFORML 在绝顶的同时，%ANAME(TARGET)%的阴道像是要发出声音一般勒紧了……
+					;TranslatedMark 絶頂と同時に、%ANAME(TARGET)%の膣が音がせんばかりに強く締まった……
+				ENDIF
+			ELSEIF RAND:2 == 0
+				;セックス時
+				IF SELECTCOM == 30 || SELECTCOM == 31 || SELECTCOM == 32 || SELECTCOM == 33 || SELECTCOM == 34 || SELECTCOM == 35 || SELECTCOM == 36 || SELECTCOM == 55 || SELECTCOM == 57
+					;マスターが射精
+					IF NOWEX:MASTER:射精 > 0
+						PRINTFORML 「啊…呼…！啊…、怎么能只有我去…！」
+						;TranslatedMark 「あ…ふっ…！くっ…、儂だけがイクものかっ…！」
+						PRINTFORMW %ANAME(TARGET)%为了让%ANAME(MASTER)%也一起高潮更激烈地动起了腰……
+						;TranslatedMark %ANAME(TARGET)%は、%ANAME(MASTER)%もイかせるべく一層腰を激しく動かし始めた……
+					ELSE
+						PRINTFORML 「咕！…接下来轮到我让你高潮了！」
+						;TranslatedMark 「くっ！…つ、次は儂がイかせる番じゃ！」
+						PRINTFORMW %ANAME(TARGET)%兴奋地再次开始活动起腰……
+						;TranslatedMark %ANAME(TARGET)%は躍起になって再び腰を動かし始めた……
+					ENDIF
+				ELSE
+					;道具
+					IF IS_EQUIP_TARGET(MTAR:0, 61)
+						PRINTFORML 「嗯…呜，嗯！…那样的玩具啊…呜，%UNICODE(0x2661)%！」
+						;TranslatedMark 「ふ…っ、うぅぅッ！…そんな玩具でぇ…っ%UNICODE(0x2661)%！」
+						PRINTFORMW %ANAME(TARGET)%在振动棒带来的快感中缩紧了身子……
+						;TranslatedMark %ANAME(TARGET)%はバイブの振動に身を縮こませた……
+					;指
+					ELSEIF SELECTCOM == 3
+						PRINTFORML 「嗯…嗯，嗯！…被手指什么的给…哈，%UNICODE(0x2661)%！」
+						;TranslatedMark 「ふ…っ、うぅぅッ！…指なんぞでぇ…っ%UNICODE(0x2661)%！」
+						PRINTFORMW %ANAME(TARGET)%被手指刺激到敏感的地方，用力地向后仰去……
+						;TranslatedMark %ANAME(TARGET)%は敏感な箇所を指でなぞられ背中を大きく反らせた……
+					ENDIF
+				ENDIF
+			ELSE 
+				PRINTFORMW 「啊…呼…呼，%UNICODE(0x2661)%！」
+				;TranslatedMark 「はっ…ふぅぅ…っ%UNICODE(0x2661)%！」
+				PRINTFORML 「…你这不是很能干吗……」
+				;TranslatedMark 「…お前さん、なかなかやるではないか……」
+				PRINTFORMW %ANAME(TARGET)%沉浸在绝顶的余韵中……
+				;TranslatedMark %ANAME(TARGET)%は絶頂の余韻に浸っている……
+			ENDIF
+		ENDIF
+	ENDIF
+	PRINTFORML 
+ENDIF
+
+;-------------------------------------------------
+;初めてＡ絶頂
+;-------------------------------------------------
+IF NOWEX:Ａ絶頂 > 0
+	PRINTFORML 
+	;初回
+	IF CFLAG:222 == 0
+		CFLAG:222 = 1
+		PRINTFORML 「啊…噫…！？呼…呜…！？」
+		;TranslatedMark 「あ…ひぃっ…！？い゛…、くぅぅうぅ…ッ！？」
+			;Aセックス時
+			IF SELECTCOM == 40 || SELECTCOM == 41 || SELECTCOM == 42 || SELECTCOM == 43 || SELECTCOM == 44 || SELECTCOM == 45 || SELECTCOM == 46 || SELECTCOM == 56 || SELECTCOM == 58
+				PRINTFORMW 被侵犯尻穴的%ANAME(TARGET)%的脸突然扭曲，全身颤抖起来的
+				;TranslatedMark 尻穴を犯されていた%ANAME(TARGET)%の顔がふと歪み、全身をガクガクとわななかせた
+			ELSE
+				PRINTFORMW 被责弄尻穴的%ANAME(TARGET)%的脸突然扭曲，全身颤抖起来的
+				;TranslatedMark 尻穴を弄られていた%ANAME(TARGET)%の顔がふと歪み、全身をガクガクとわななかせた
+			ENDIF
+		PRINTFORMW 看来%ANAME(TARGET)%是第一次达到肛门绝顶
+		;TranslatedMark どうやら%ANAME(TARGET)%は初めて肛門絶頂に達したようだ
+		PRINTFORML 「不，不对…、不是这样的…！」
+		;TranslatedMark 「ち、違っ…、これは違っ…！」
+		PRINTFORML %ANAME(TARGET)%因异常的快感而感到羞愧，两手捂着染红的脸……
+		;TranslatedMark %ANAME(TARGET)%はアブノーマルな快感で果ててしまったことに恥じ入った様子で、朱に染まった顔を両手で抑えている……
+	;2回目以降
+	ELSE
+		IF GETBIT(TALENT:淫乱系, 素質_淫乱_尻穴狂い)
+			IF RAND:3 == 0
+				PRINTFORML 「――――%UNICODE(0x2661)%%UNICODE(0x2661)%A！！！」
+				;TranslatedMark 「――――っっッ%UNICODE(0x2661)%%UNICODE(0x2661)%%UNICODE(0x2661)%！！！」
+				PRINTFORMW %ANAME(TARGET)%竖起了摇动着的尾巴上的毛，发出了不成声的呼喊……
+				;TranslatedMark %ANAME(TARGET)%は尻尾をゾワゾワと毛羽立たせ、声にならない叫びを上げた……
+			ELSEIF RAND:2 == 0
+				PRINTFORML ——变态————
+				;TranslatedMark ――――変態――――
+					;Aセックス時
+					IF SELECTCOM == 40 || SELECTCOM == 41 || SELECTCOM == 42 || SELECTCOM == 43 || SELECTCOM == 44 || SELECTCOM == 45 || SELECTCOM == 46 || SELECTCOM == 56 || SELECTCOM == 58
+						PRINTFORMW 在耳边如此轻声细语的话，%ANAME(TARGET)%的肛门一下子缩紧了，用力勒着%ANAME(MASTER)%的阴茎……
+						;TranslatedMark 耳元でそう囁くと、%ANAME(TARGET)%の肛門がミチリと一層強く%ANAME(MASTER)%の陰茎を締め上げた……
+					ELSE
+						PRINTFORMW 在耳边轻声细语，%ANAME(TARGET)%的肛门缩紧了……
+						;TranslatedMark 耳元でそう囁くと、%ANAME(TARGET)%の肛門がミチリと一層強く締まった……
+					ENDIF
+			ELSE 
+				PRINTFORML 「啊啊啊啊…！屁……屁股要去…%UNICODE(0x2661)%%UNICODE(0x2661)%！」
+				;TranslatedMark 「あっあぁあっ…！おひっ……おひりィっ…%UNICODE(0x2661)%%UNICODE(0x2661)%！」
+				PRINTFORMW %ANAME(TARGET)%的括约肌无数次地反复收缩，将%ANAME(TARGET)%引导至绝顶的高峰……
+				;TranslatedMark %ANAME(TARGET)%の括約筋は幾度と無く収縮を繰り返し、%ANAME(TARGET)%を絶頂の高みに導いていく……
+			ENDIF
+		ELSE
+			IF RAND:3 == 0
+				PRINTFORML 「―――――%UNICODE(0x2661)%！！！」
+				;TranslatedMark 「――――っっッ%UNICODE(0x2661)%！！！」
+				PRINTFORMW %ANAME(TARGET)%竖起了摇动着的尾巴上的毛，发出了不成声的呼喊……
+				;TranslatedMark %ANAME(TARGET)%は尻尾をゾワゾワと毛羽立たせ、声にならない叫びを上げた……
+			ELSEIF RAND:2 == 0
+				PRINTFORML ——变态————
+				;TranslatedMark ――――変態――――
+				PRINTFORMW 在耳边轻声细语，%ANAME(TARGET)%的脸变得通红，瞪着%ANAME(MASTER)%……
+				;TranslatedMark 耳元でそう囁くと、%ANAME(TARGET)%は真っ赤になりながら%ANAME(MASTER)%を睨みつけてきた……
+			ELSE 
+				PRINTFORML 「啊…啊…、屁股…好奇怪、好奇怪啊………」
+				;TranslatedMark 「あ…あぁ…、尻が…ヘン、にぃ………」
+				PRINTFORMW %ANAME(TARGET)%对于自己的身体已经被调教成了用尻穴也能高潮的样子的事实，到了这个时候仍然不愿意接受的样子……
+				;TranslatedMark %ANAME(TARGET)%は己の体が尻穴でイクように調教された事実に、この期に及んでなお抵抗が有るようだ……
+			ENDIF
+		ENDIF
+	ENDIF
+	PRINTFORML 
+ENDIF
+
+;-------------------------------------------------
+;初めてＢ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｂ絶頂 > 0
+	IF CFLAG:223 == 0
+		CFLAG:223 = 1
+		;PRINTFORMW 「」
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;初めてＭ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｍ絶頂 > 0
+	IF CFLAG:224 == 0
+		CFLAG:224 = 1
+		;PRINTFORMW 「」
+	ENDIF
+ENDIF
+
+;=================================================
+;●単体エンディング関係
+;=================================================
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;★ここから先にはエンディングが記述されています★
+;ネタバレを避けたい方は閲覧しないようにご注意下さい。
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+@KOJO_SINGLE_ENDING_K87
+;単体エンディング
+;全都市を統一したとき、好感度5000以上かつ全キャラ中最も好感度が高いと表示される
+IF TALENT:正妻
+	PRINTFORML 
+ELSEIF TALENT:服従
+	PRINTFORML 
+ELSEIF TALENT:恋慕
+	PRINTFORML 
+ELSE
+	PRINTFORML 
+ENDIF
+
+;RETURNの値を0→1に変えると、デフォルトの単体エンディングメッセージがスキップされる
+RETURN 0
+
+@KOJO_DEAD_ENDING_K87
+;斬首エンディング
+;自勢力が滅亡したときの選択肢で「……斬れ」を選択して主人公が死亡した場合に、好感度5000以上かつ全キャラ中最も好感度が高いと表示される
+IF TALENT:正妻
+	PRINTFORMW ―――墓地
+	;TranslatedMark ―――――墓所
+	PRINTFORML 
+	PRINTFORMW 「…嗯，我早就做好了你放着我不管，自己一个人离开人世的觉悟了」
+	;TranslatedMark 「…まあ、置いて逝かれるということは覚悟しておったよ」
+	PRINTFORMW 「说到底人和妖怪的寿命是不一样的…」
+	;TranslatedMark 「そもそも人と妖怪では生きる時間が違うでな…」
+	PRINTFORML 
+	PRINTFORMW 「但是呢…」
+	;TranslatedMark 「でものう…」
+	PRINTFORMW 「不管怎么说…这也太快了吧…」
+	;TranslatedMark 「いくらなんでも…早すぎるじゃろう…」
+	PRINTFORMW 「说什么一定会回来啊…这个骗子…」
+	;TranslatedMark 「何が必ず帰るじゃ…嘘吐きめ…」
+	PRINTFORMW 「不是约好了吗…」
+	;TranslatedMark 「約束したではないか…」
+	PRINTFORMW 「固执己见，连命都没了……」
+	;TranslatedMark 「意地を張って命も失って…」
+	PRINTFORMW 「这个…！大笨蛋…！」
+	;TranslatedMark 「このっ…！大馬鹿者めが…！」
+	PRINTFORMW 「…………」
+	PRINTFORML 
+	PRINTFORMW 「…我…还会再来的…」
+	;TranslatedMark 「…また、来るぞい」
+	PRINTFORML 墓碑前的人影宛如一瞬间的白日梦一般消失了
+	;TranslatedMark 墓石の前の人影がまるで一瞬の白昼夢のように掻き消えると、
+	PRINTFORML 此时发生了不可思议的事情，明明天空一点云都没有却开始有雨滴落下
+	;TranslatedMark 不思議なことに雲も無いのに雨滴が落ち始め、
+	PRINTFORMW 为了隐藏泪痕，温柔地湿润了地面……
+	;TranslatedMark 涙の跡を隠すように優しく地面を濡らしていった……
+ELSE
+	PRINTFORMW ―――墓地
+	;TranslatedMark ―――――墓所
+	PRINTFORML 
+	PRINTFORMW 「真是…明明平常闹腾得不行，去世的时候却干脆地走了……」
+	;TranslatedMark 「まったく…、さんざん暴れまわった癖に逝く時はあっさり逝きおって……」
+	PRINTFORMW 「…………」
+	PRINTFORML 
+	PRINTFORMW 「…假如」
+	;TranslatedMark 「…のう」
+	PRINTFORMW 「假如说，我」
+	;TranslatedMark 「もし、儂が」
+	PRINTFORMW 「我说我喜欢你」
+	;TranslatedMark 「おぬしのことを好いておったと」
+	PRINTFORMW 「希望能和你一起活下去」
+	;TranslatedMark 「共に生きたいと願っておったと」
+	PRINTFORMW 「想要交换互相守护一生的契约」
+	;TranslatedMark 「一生の契りを交わしたかったと」
+	PRINTFORMW 「如果我认真地说出了这种话，你会嘲笑我吗」
+	;TranslatedMark 「そう本気で思っておったと言ったら、おぬしは笑ったじゃろうか」
+	PRINTFORMW 「…………」
+	PRINTFORML 
+	PRINTFORMW 「…那么，再见了」
+	;TranslatedMark 「…では、さよならじゃ」
+	PRINTFORML 一阵风吹过的之后，墓碑前已经没有人影了
+	;TranslatedMark 一陣の風が吹いた時、墓石の前には既に人影は無く
+	PRINTFORMW 只有树叶寂寞地飞舞着……
+	;TranslatedMark ただ木の葉だけが寂しげに舞っていた……
+ENDIF
+;RETURNの値を0→1に変えると、デフォルトの単体エンディングメッセージがスキップされる
+RETURN 0

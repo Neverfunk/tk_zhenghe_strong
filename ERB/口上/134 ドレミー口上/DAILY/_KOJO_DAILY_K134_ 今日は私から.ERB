@@ -1,0 +1,2225 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K134_SEISAI_ONLY_RATE(対象)
+#DIM 対象
+RETURN 70
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K134_SEISAI_ONLY_DECISION(対象)
+#DIM 対象
+
+;ドレミーと面識があり、所属がおなじ、正妻であること、7%
+SIF !TALENT:対象:正妻
+	RETURN 0
+
+;ネトラレミー中は起きない
+SIF KDVAR:対象:ドレミー_ネトラレミー > 0
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K134_SEISAI_ONLY_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K134_SEISAI_ONLY(対象)
+#DIM 対象
+#DIM 経験値
+
+PRINTFORML 
+PRINTFORMW 今天的工作终于结束了
+;TranslatedMark ようやく今日の分の仕事が終わった
+PRINTFORML 还有些体力…是稍微活动一下身体。
+;TranslatedMark さて体力が少し余っているな…少し身体を動かすか？
+PRINTFORML 还是今天在床上休息？
+;TranslatedMark それとも今日はベッドで休もうか？
+CALL ASK_YN("活动下筋骨", "工作做完睡大觉")
+IF RESULT == 0
+	SELECTCASE RAND:100
+		CASE IS < 40
+			経験値 = GET_EXP(GETNUM(ABL, "武闘"))
+		CASE IS < 70
+			経験値 = GET_EXP(GETNUM(ABL, "防衛"))
+		CASE IS < 90
+			経験値 = GET_EXP(GETNUM(ABL, "知略"))
+		CASEELSE
+			経験値 = GET_EXP(GETNUM(ABL, "政治"))
+	ENDSELECT
+	PRINTFORML 一个人一边重新审视自己的战斗方式一边挥舞武器……
+	;TranslatedMark 一人で自分の戦い方を見直しながら武器を振った……
+	CALL PRINT_ADD_EXP(MASTER, EXPNAME:経験値, RAND:5 + 1, 1)
+	CALL TRAIN_AUTO_ABLUP(MASTER)
+	PRINTFORMW %ANAME(MASTER)%就这样一直持续到早上
+	;TranslatedMark %ANAME(MASTER)%はそのまま朝まで続けた
+ELSE
+	IF KDVAR:対象:ドレミー_今日は私から == 0
+		PRINTFORML 
+		PRINTFORML 在大家开始安静入睡的深夜，%ANAME(MASTER)%也要睡了，躺在床上
+		;TranslatedMark 皆が寝静まり始めた深夜、%ANAME(MASTER)%も寝ようとベッドに横になった
+		PRINTFORML 自从娶了%ANAME(対象)%为妻之后，每天都睡在同一张床上
+		;TranslatedMark %ANAME(対象)%を妻に迎えてからは必ず毎日同じベッドで寝ている
+		PRINTFORML 但是妻子没有在旁边，平时应该是最先上床的……
+		;TranslatedMark だが隣には妻は居ない、普段なら先に床に就いている筈だが……
+		PRINTFORMW 想着一定是去了梦的世界吧，%ANAME(MASTER)%就把蜡烛的熄灭，一个人先睡了
+		;TranslatedMark きっと夢の世界に行っているのだろうと考え、%ANAME(MASTER)%は蝋燭の灯を消して一人で寝ることにした
+		PRINTFORMW ・
+		PRINTFORMW ・
+		PRINTFORMW ・
+		SETCOLOR カラー_ピンク
+		PRINTFORML 烛光朦胧地照着房间……奇怪的是，蜡烛确实是被熄灭了
+		;TranslatedMark ぼんやりと蝋燭の火が部屋を照らしている……おかしい、蝋燭の火は確かに消したはずだが
+		PRINTFORML 「呵呵，%ANAME(MASTER)%真的是，就这样醒了的话，这么浅的睡眠可是做不到好梦哦？」
+		;TranslatedMark 「ふふっ%ANAME(MASTER)%ったら、これで起きちゃうなんて眠りが浅いですねぇ良い夢見れませんよ？」
+		PRINTFORML 睁开眼睛朝着发出声音的方向，在那里%ANAME(対象)%嘲讽般地微笑着举起裙子站在床的旁边
+		;TranslatedMark 目を覚まし声のする方へ向くと、そこには挑発的に微笑んでスカートをたくし上げた%ANAME(対象)%がベッドの傍に立っていた
+		PRINTFORML 「…讨厌……渴望做爱的女人吗？」
+		;TranslatedMark 「…セックス好きの女って……嫌い？」
+		PRINTFORMW %ANAME(対象)%用手抚摸着%ANAME(MASTER)%的脸颊，在耳边轻声说到
+		;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の頬に手を当てて耳元でそう囁いた
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORML %ANAME(MASTER)%将自己的手放在正抚摸自己脸颊上的手上，传达了自己的想法
+		;TranslatedMark %ANAME(MASTER)%は頬に当てられた手に自らの手を重ね、自身の思いを伝えた
+		PRINTFORML 「……那么…开始吧吧」
+		;TranslatedMark 「……じゃあ…いいよね」
+		PRINTFORML 面色不变的%ANAME(対象)%松开手，站在睡着的%ANAME(MASTER)%上
+		;TranslatedMark 表情を変える事無く%ANAME(対象)%は手を離し、寝そべる%ANAME(MASTER)%の上に立つ
+		PRINTFORML %ANAME(対象)%就这样脱下衣服，漏出带着紫色蕾丝边的情趣内衣
+		;TranslatedMark そのまま%ANAME(対象)%はスルスルと衣服を脱ぎ落とし、艶っぽい紫に綺麗な刺繍レースをあしらったベビードール姿になる
+		PRINTFORML 可以看到她紧绷的乳头，透过被打湿的内衣也能看出秘穴因为情欲已经溢出的爱液
+		;TranslatedMark ピンっと張った乳首が透けて見え、下着の上からでも欲情しきっているのがわかるほどの愛液で蜜壺が濡れている……
+		PRINTFORML %ANAME(対象)%握着%ANAME(MASTER)%的手，伸向湿了的秘穴
+		;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の手を握り、濡れた蜜壺をなぞらせてきた
+		PRINTFORML 粘糊糊的爱液在%ANAME(MASTER)%的手指之间发出粘糊糊的声音还拉着丝……
+		;TranslatedMark ネットリとした愛液が%ANAME(MASTER)%の指と指の間でヌチャヌチャと音を立てて糸を引いている……
+		PRINTFORML 「已经……变成这样了吗♥嗯……♥」
+		;TranslatedMark 「もう……こんなになっちゃったの♥　んちゅっ……♥」
+		PRINTFORML 看到%ANAME(MASTER)%勃起的时候，%ANAME(対象)%开始深吻并将舌头纠缠起来
+		;TranslatedMark %ANAME(MASTER)%が勃起したのを見てとると、%ANAME(対象)%は互いの舌を交わらせる程の濃厚なキスをしてきた
+		PRINTFORML 「%ANAME(MASTER)%不要动呢♥」
+		;TranslatedMark 「%ANAME(MASTER)%は動かなくていいわ♥」
+		PRINTFORMW 
+	ELSE
+		SETCOLOR カラー_ピンク
+		PRINTFORML 在大家开始安静入睡的深夜，%ANAME(MASTER)%也要睡了，躺在床上，旁边躺着一只%ANAME(対象)%
+		;TranslatedMark 皆が寝静まり始めた深夜、%ANAME(MASTER)%も寝ようとベッドに横になると隣に%ANAME(対象)%が横たわっていた
+		PRINTFORML 「呵呵，今天也……对吧♥」
+		;TranslatedMark 「ふふっ、今日も……ね♥」
+		PRINTFORML %ANAME(対象)%穿上艳丽的带有漂亮刺绣花边的%SPLIT_RAND("紫/黒/赤/緑/青/白", 1)%色的%SPLIT_RAND("背带裙睡衣/开胸睡衣/紧身女胸衣/衬群", 1)%
+		;TranslatedMark %ANAME(対象)%はすでに艶っぽい%SPLIT_RAND("紫/黒/赤/緑/青/白", 1)%に綺麗な刺繍レースをあしらった%SPLIT_RAND("ベビードール/オープンブラ/ビスチェ/スリップ", 1)%姿だ
+		PRINTFORMW 粉红稚嫩的%SPLIT_RAND("乳首/阴蒂", 1)%隐隐约约显露出来，透过内衣能明显看见秘穴已经被爱液打的透湿
+		;TranslatedMark ピンっと張った%SPLIT_RAND("乳首/クリトリス", 1)%が透けて見え、下着の上からでも欲情しきっているのがわかるほどの愛液で蜜壺が濡れている……
+		PRINTFORM
+			;―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+		IF RAND:5 == 0
+			PRINTFORML %ANAME(対象)%握着%ANAME(MASTER)%的手，伸向湿了的秘穴
+			;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の手を握り、濡れた蜜壺をなぞらせてきた
+			PRINTFORML 粘糊糊的爱液在%ANAME(MASTER)%的手指之间发出粘糊糊的声音还拉着丝……
+			;TranslatedMark ネットリとした愛液が%ANAME(MASTER)%の指と指の間でヌチャヌチャと音を立てて糸を引いている……
+			PRINTFORML 「已经……变成这样了吗♥嗯……♥」
+			;TranslatedMark 「もう……こんなになっちゃったの♥　んちゅっ……♥」
+			PRINTFORML  看到%ANAME(MASTER)%勃起的时候，%ANAME(対象)%开始深吻并将舌头纠缠起来
+			;TranslatedMark %ANAME(MASTER)%が勃起したのを見てとると、%ANAME(対象)%は互いの舌を交わらせる程の濃厚なキスをしてきた
+		ELSEIF RAND:4 == 0
+			PRINTFORML %ANAME(対象)%把手环在%ANAME(MASTER)%背后并紧紧搂住，用身体紧紧贴在他的背上
+			;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の背に手をまわし、身体を押し付けるように抱き着いてきた
+			PRINTFORML 「哇♥哈哈♥哇♥哈哈♥」
+			;TranslatedMark 「すぅーっ♥　はぁぁ♥　すぅーっ♥　はぁぁ♥」
+			PRINTFORML 将鼻子贴在%ANAME(MASTER)%耳后进行深呼吸的%ANAME(対象)%，每次呼吸都会全身颤抖
+			;TranslatedMark %ANAME(MASTER)%の耳の裏に鼻をあてて深呼吸をする%ANAME(対象)%、呼吸の度に身体をビクッと震わせている
+			PRINTFORML 每当身体颤抖的时候，%ANAME(MASTER)%的阴茎就会发出粘糊糊的声音，摩擦着%ANAME(対象)%湿了的秘穴……
+			;TranslatedMark 身体が震える度に%ANAME(MASTER)%のペニスはヌチャヌチャと音を立てて%ANAME(対象)%の濡れた蜜壺を摩っていく……
+			PRINTFORML 「不行……忍耐不住了♥嗯~……♥」
+			;TranslatedMark 「だめ……我慢デキない♥　んちゅっ……♥」
+			PRINTFORML  看到%ANAME(MASTER)%勃起的时候，%ANAME(対象)%开始深吻并将舌头纠缠起来
+			;TranslatedMark %ANAME(MASTER)%が勃起したのを見てとると、%ANAME(対象)%は互いの舌を交わらせる程の濃厚なキスをしてきた
+		ELSEIF RAND:3 == 0
+			PRINTFORML 「伸出舌头！♥瞧♥嗯，嗯♥啊~，等下……♥」
+			;TranslatedMark 「舌出して♥　ほら♥　んむっ♥　ちゅ、れろっ……♥」
+			PRINTFORML 再舌头纠缠后说完这句话，%ANAME(対象)%就开始把舌尖缠到对方的舌头，舔到舌低和嘴巴上表层
+			;TranslatedMark 言われるまま舌を出すと、%ANAME(対象)%はその舌先に自らの舌先を絡ませ舌裏や天井まで舐める
+			PRINTFORML 「啊……嗯…嗯♥」
+			;TranslatedMark 「あむっ……ぢゅるるるっ…んっ♥」
+			PRINTFORML %ANAME(対象)%叼着%ANAME(MASTER)%的舌头，然后发出如同口交一样的声音吸吮着
+			;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の舌を咥え、フェラチオをするように音を立てて吸い始める
+			PRINTFORML %ANAME(対象)%就这样抱住%ANAME(MASTER)%，淫荡地摇晃着头
+			;TranslatedMark そのまま更に%ANAME(MASTER)%に抱きつきながら%ANAME(対象)%は淫らに首を動かす
+			PRINTFORML 过了一会儿，%ANAME(対象)%终于从%ANAME(MASTER)%的舌头上松开了嘴
+			;TranslatedMark しばらくしてようやく%ANAME(対象)%は%ANAME(MASTER)%の舌から舌先を離した
+			PRINTFORML 彼此的舌头垂着透明而粘稠的线，连接在一起……
+			;TranslatedMark 互いの舌先は透明で粘っこい糸をつぅーと垂らし繋がっている……
+		ELSEIF RAND:2 == 0
+			PRINTFORML %ANAME(対象)%把手环在%ANAME(MASTER)%背后并紧紧搂住，用身体紧紧贴在他的背上
+			;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の背に手をまわし、身体を押し付けるように抱き着いてきた
+			PRINTFORML 「哈哈♥呐……%ANAME(MASTER)%♥」
+			;TranslatedMark 「はぁぁ♥　ねぇ……%ANAME(MASTER)%♥」
+			PRINTFORML %ANAME(対象)%用手温柔地爱抚着%ANAME(MASTER)%的阴茎，在耳边轻声细语
+			;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%のペニスを手で優しく愛撫しながら耳元で囁く
+			PRINTFORMW 「小鸡鸡♥又勃起了呢♥♥♥来继续做爱吧♥♥心情就会快乐了呢♥♥♥」
+			;TranslatedMark 「おちんちん♥　勃てて♥♥♥　いっぱいエッチしよ♥♥　気持ちよくなっちゃお♥♥♥」
+			PRINTFORMW 「喜欢♥最喜欢%ANAME(MASTER)%了♥♥我爱你♥」
+			;TranslatedMark 「好き♥　%ANAME(MASTER)%大好き♥♥　愛してる♥」
+			PRINTFORMW 「快操我♥♥阴穴~♥是个好男人♥我想要%ANAME(MASTER)%的小鸡鸡♥♥♥」
+			;TranslatedMark 「ほら触って♥♥　オマンコ♥　グッチョグチョなの♥　%ANAME(MASTER)%のおちんちん欲しいの♥♥♥」
+			PRINTFORMW 「真快乐啊~♥做爱了很多次呢♥」
+			;TranslatedMark 「気持ちよくなっちゃお♥　いっぱいエッチしちゃお♥」
+			PRINTFORMW 「让我孕育吧~♥♥满满的~♥♥♥心情舒畅起来~♥♥♥瞧♥小鸡鸡勃起了♥♥」
+			;TranslatedMark 「孕ませて♥♥　いっぱい♥♥♥　気持ちよくして♥♥♥　ほら♥　おちんちん勃てて♥♥」
+			PRINTFORMW 「真色情呢~♥♥好快乐~♥♥来做爱吧~♥对吧♥♥♥」
+			;TranslatedMark 「エッチ♥♥　気持ち良～い♥♥　エッチしよ♥　ねっ♥♥♥」
+			PRINTFORMW 「被%ANAME(MASTER)%用小鸡~鸡♥♥戳得满满的~♥♥得到很多呢~♥♥♥」
+			;TranslatedMark 「%ANAME(MASTER)%のおちんちんで♥♥　いっぱい突いて♥♥　いっぱい出して♥♥♥」
+			PRINTFORMW 「喜欢♥♥喜欢♥♥喜欢♥♥♥做爱啥的~♥♥%ANAME(MASTER)%♥♥♥最喜欢了~♥♥♥」
+			;TranslatedMark 「好き♥♥　好き♥♥　好き♥♥♥　エッチしたいの♥♥　%ANAME(MASTER)%♥♥♥　大好きっ♥♥♥」
+			PRINTFORML  %ANAME(MASTER)%在%ANAME(対象)%的耳语中勃起，%ANAME(対象)%开始深吻并纠缠彼此的舌头
+			;TranslatedMark %ANAME(対象)%の囁きに%ANAME(MASTER)%が勃起すると、%ANAME(対象)%は互いの舌を交わらせる程の濃厚なキスをしてきた
+		ELSE
+			PRINTFORML %ANAME(対象)%从内衣露出乳头，靠近%ANAME(MASTER)%的嘴边
+			;TranslatedMark %ANAME(対象)%は下着から乳首を露出させ%ANAME(MASTER)%の口元へ近付けた
+			PRINTFORML 「呐……请吸着~♥」
+			;TranslatedMark 「ねぇ……吸って♥」
+			PRINTFORML %ANAME(MASTER)%让舌头舔上了%ANAME(対象)%淡粉色的乳晕上…
+			;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%の淡いピンク色の乳輪に舌を這わせる…
+			PRINTFORML 「嗯……♥　……呵呵呵♥」
+			;TranslatedMark 「もぅ……♥　……ふふっ♥」
+			PRINTFORML %ANAME(MASTER)%就那样只盯着乳晕持续进攻
+			;TranslatedMark そのまま乳輪だけをねちっこく攻め続ける%ANAME(MASTER)%
+			PRINTFORMW
+			PRINTFORML 「嗯♥　……呜——♥」
+			;TranslatedMark 「んっ♥　……ふっー♥」
+			PRINTFORML %ANAME(対象)%的乳头已经紧紧地立起来了，充满了对%ANAME(MASTER)%舌尖爱抚的期待…
+			;TranslatedMark 既に%ANAME(対象)%の乳首はピンっと張り詰め、%ANAME(MASTER)%の舌先による愛撫への期待に満ちている…
+			PRINTFORML 「%ANAME(MASTER)%……」
+			PRINTFORML %ANAME(対象)%有些用难受的声音嘟囔着
+			;TranslatedMark 切なげな声で呟いている%ANAME(対象)%
+			PRINTFORML 看到这个样子，%ANAME(MASTER)%把一直玩弄乳轮的舌尖移到了乳头上
+			;TranslatedMark その姿を見て%ANAME(MASTER)%は乳輪ばかりを責めていた舌先を乳頭に移した
+			PRINTFORML 「啊♥♥♥那样突然♥♥♥♥」
+			;TranslatedMark 「あっ♥♥♥　そんな急に♥♥♥♥」
+			PRINTFORMW 
+			PRINTFORML %ANAME(MASTER)%用舌尖舔舐乳头，用舌尖稍微碰了一下
+			;TranslatedMark %ANAME(MASTER)%は乳頭を舌先で舐め絞ったり、舌先でちょっぴり触れさせた
+			PRINTFORML 「啊哈哈♥……啊…嗯……啊啊…♥」
+			;TranslatedMark 「あはっ♥……はっ…んっ……くあっ…♥」
+			PRINTFORML 每次%ANAME(対象)%都会弓起腰来…
+			;TranslatedMark そのたび%ANAME(対象)%は腰を浮かせ感じている…
+			PRINTFORML 在那里%ANAME(MASTER)%一边咬着变硬的乳头一边吧嗒吧嗒地吸着
+			;TranslatedMark そこへ%ANAME(MASTER)%は固くなった乳首を甘噛みしつつチュパチュパと音をたてて吸った
+			PRINTFORML 「啊啊啊♥♥就像婴儿一样♥♥」
+			;TranslatedMark 「あぁん♥♥　そんな赤ちゃんみたいに♥♥」
+			PRINTFORML 「呵呵呵♥好啊♥喜欢乳房吧♥」
+			;TranslatedMark 「ふふっ♥　良いですよ♥　おっぱい好きなのよね♥」
+			PRINTFORML 当%ANAME(MASTER)%松口的时候，%ANAME(対象)%吻住了彼此的舌头
+			;TranslatedMark %ANAME(MASTER)%が口を離すと、%ANAME(対象)%が互いの舌を交わらせる程の濃厚なキスをしてきた
+		ENDIF
+			;―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+		IF RAND:6 == 0
+			PRINTFORML 「%ANAME(MASTER)%不要动呢♥」
+			;TranslatedMark 「%ANAME(MASTER)%は動かなくていいわ♥」
+		ELSEIF RAND:5 == 0
+			PRINTFORML 「交给我吧♥让你快乐起来~♥♥」
+			;TranslatedMark 「私に任せて♥　いっぱい気持ち良くしてあげる♥♥」
+		ELSEIF RAND:4 == 0
+			PRINTFORML 「用勃起的小鸡鸡让我怀孕吧~♥就这样…直接射在里面♥biubiubiu~地♥我会让你尽情地射的~」
+			;TranslatedMark 「バキバキに勃起した孕ませおちんちん♥　私のねっ…とりオマンコでドピュ♥ドピュ♥させてあげる」
+		ELSEIF RAND:3 == 0
+			PRINTFORML 「喜欢吧♥那让我们好好地感受相爱的快感吧♥话虽如此也别忘要进行浓厚的配种做爱哦~♥」
+			;TranslatedMark 「好き♥　いっぱい愛し合いましょ♥　と～っても濃厚な種付け孕ませセックスしましょ♥」
+		ELSEIF RAND:2 == 0
+			PRINTFORML 「让我看看♥好舒服啊~♥」
+			;TranslatedMark 「えっちしましょ♥　気持ちいいえっち♥」
+		ELSE
+			PRINTFORML 「呵呵呵♥在正处于危险日的我的子宫给咕噜咕噜地灌满吧♥♥♥」
+			;TranslatedMark 「ふふっ♥　危険日子宮でおちんちんジュポジュポさせてあげる♥♥♥」
+		ENDIF
+			;――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+		PRINTFORMW 
+	ENDIF
+;――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+		;手コキ・フェラ・パイズリ・素股のどれかが選択される
+	SELECTCASE RAND:4
+			;手コキ＋手に射精
+		CASE 0
+			PRINTFORMW %ANAME(対象)%开始拿起%ANAME(MASTER)%的阴茎
+			;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%のペニスを手に取りしごき始めた
+			IF RAND:3 == 0
+				PRINTFORML
+				PRINTFORML 「哼哼，还在我手中扑哧扑哧地响呢♥」
+				;TranslatedMark 「ふふっ、手の中でびくんびくんしてる♥」
+				PRINTFORML 专心地撸阴茎的%ANAME(対象)%
+				;TranslatedMark 丹念にペニスをしごいていく%ANAME(対象)%
+				PRINTFORML 右手捋着阴茎，左手摸着睾丸
+				;TranslatedMark 右手でペニスをしごきながら左手で袋を優しい手つきで触っている
+				PRINTFORML 不太强也不太弱，%ANAME(対象)%以适中的力度侍奉着%ANAME(MASTER)%逐渐到达射精的界限
+				;TranslatedMark 強すぎず弱すぎず、程よい%ANAME(対象)%の奉仕に%ANAME(MASTER)%は徐々に射精へと向かっていく
+				PRINTFORML 「如果想射精的话……♥随时都可以♥我会接住的~♥」
+				;TranslatedMark 「射精したくなったら……♥　いつでもしていいわ♥　受け止めてあげる♥」
+				PRINTFORMW
+			ELSEIF RAND:2 == 0
+				PRINTFORML
+				PRINTFORML 「呵呵呵♥战战兢兢的好可爱啊……嗯，嗯♥」
+				;TranslatedMark 「ふふっ♥　ビクビクしちゃって可愛いわね……えいっ♥」
+				PRINTFORML 用手指轻轻地弹阴茎
+				;TranslatedMark ぴんっと指で軽くペニスを弾く
+				PRINTFORML 对于麻木般的快感，%ANAME(MASTER)%不由得仰面朝天
+				;TranslatedMark 痺れる様な快感に思わず%ANAME(MASTER)%は仰け反る
+				PRINTFORML 「哎呀♥有点疼吗♥嗯……不是那样的吧♥」
+				;TranslatedMark 「あらっ♥　ちょっと痛かったかしら♥　んっー……そうでもないようね♥」
+				PRINTFORML 这样说着，%ANAME(対象)%又恢复了手的动作
+				;TranslatedMark そう言って%ANAME(対象)%は手の動きを再開させた
+				PRINTFORMW
+			ELSE
+				PRINTFORML
+				PRINTFORML 「呵呵呵♥变成了相当大的孩子呢……♥」
+				;TranslatedMark 「ふふっ♥　随分と大きな子供になっちゃったわねぇ……♥」
+				PRINTFORML %ANAME(MASTER)%把脸贴在%ANAME(対象)%的大腿上，玩弄着她的胸部
+				;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%の太ももに顔を乗せ、彼女の胸を弄っている
+				PRINTFORML  另一方面，%ANAME(対象)%一边浮现出慈爱的表情，一边细心地捋动着竿
+				;TranslatedMark 一方で慈愛の表情を浮かべながら丹念に竿をしごいていく%ANAME(対象)%
+				PRINTFORML 不太强也不太弱，%ANAME(対象)%以适中的力度侍奉着%ANAME(MASTER)%逐渐到达射精的界限
+				;TranslatedMark 強すぎず弱すぎず、程よい%ANAME(対象)%の奉仕に%ANAME(MASTER)%は徐々に射精へと向かっていく
+				PRINTFORML 「想要射精的话♥随时都可以♥我会接住的♥」
+				;TranslatedMark 「射精したくなったら♥　いつでもしていいわ♥　受け止めてあげる♥」
+				PRINTFORMW
+			ENDIF
+			PRINTFORML %ANAME(MASTER)%就那样射精在%ANAME(対象)%的手中
+			;TranslatedMark %ANAME(MASTER)%はそのまま%ANAME(対象)%の手に射精した
+			IF RAND:4 == 0
+				PRINTFORML 「啊啊，手掌好粘啊♥」
+				;TranslatedMark 「あーあー、手のひらがドロドロですねぇ♥」
+				PRINTFORML %ANAME(対象)%把手和脸上的精液舔干净。
+				;TranslatedMark 手や顔にかかった精液を%ANAME(対象)%は奇麗に舐めとっていく。
+				PRINTFORMW 大概已经习惯了味道吧，从表情上可以看出欲望的颜色…
+				;TranslatedMark もう味にも慣れてしまったのか、表情には欲情の色が窺えた…
+			ELSEIF RAND:3 == 0
+				PRINTFORML 「真是射不尽啊……♥」
+				;TranslatedMark 「底無しですね……♥」
+				PRINTFORMW %ANAME(対象)%一边欣赏着刚射精不久又开始变硬的%ANAME(MASTER)%的阴茎一边眺望着……
+				;TranslatedMark %ANAME(対象)%は、射精直後にも関わらず手の中で再び固くなり始めた%ANAME(MASTER)%の陰茎を惚けながら眺めている……
+			ELSEIF RAND:2 == 0
+				PRINTFORML 「…啊……啊哈哈♥」
+				;TranslatedMark 「…ぁ……あはっ♥」
+				PRINTFORML %ANAME(対象)%用一只手接住飞出的精液，用一杯精液形成的水洼完成了
+				;TranslatedMark %ANAME(対象)%は飛び出した精液を片手で受け止め、掌には一杯の精液で出来た水たまりが完成する
+				PRINTFORML %ANAME(対象)%一口气喝干了，把剩下的部分干净地舔了下去
+				;TranslatedMark それを%ANAME(対象)%は一気に飲み干し、残った分を奇麗に舐めとっていった
+				PRINTFORMW 尽管如此还是不够吧，用眼睛向上看着，一边手淫，一边贪婪地请求下一次射精…
+				;TranslatedMark それでも足りないのか上目遣いで手淫しながら、物欲しそうに次の射精を強請った…
+			ELSE
+				PRINTFORML 「…呋呋……♥」
+				;TranslatedMark 「…ふふっ……♥」
+				PRINTFORML 把手和脸上的精液清洁干净后，%ANAME(対象)%舔阴茎剩下的汁液
+				;TranslatedMark 手や顔を奇麗に掃除した後、%ANAME(対象)%はペニスを扱いて残り汁を舐めとる
+				PRINTFORMW 看到还勃起的%ANAME(MASTER)%的肉棒，对他的坚挺无比着迷…
+				;TranslatedMark 未だに勃起する%ANAME(MASTER)%の肉棒を見て、その逞しさに見惚れていた…
+			ENDIF
+			;フェラチオ＋口内射精
+		CASE 1
+			PRINTFORMW %ANAME(対象)%开始舔%ANAME(MASTER)%的阴茎
+			;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%のペニスを舐め始めた
+				;――――――――――――――――――――――――――――――――――――――――
+			IF RAND:3 == 0
+				PRINTFORML 「嗯，嗯♥喂，等等……」
+				;TranslatedMark 「んむっ♥　ちゅ、れろっ……」
+			ELSEIF RAND:2 == 0
+				PRINTFORML 「…来吧…嗯…嗯…♥」
+				;TranslatedMark 「…じゅる…っ…んっんんぅ…♥」
+			ELSE
+				PRINTFORML 「啊……嗯…嗯♥」
+				;TranslatedMark 「あむっ……ぢゅるるるっ…んっ♥」
+			ENDIF
+				;――――――――――――――――――――――――――――――――――――――――
+			IF RAND:3 == 0
+				PRINTFORML %ANAME(対象)%准确地攻击着%ANAME(MASTER)%的弱点
+				;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の弱いところを的確に攻めてくる
+				PRINTFORML 「啾啵……呋呋，什么时候都可以射到嘴里哦？」
+				;TranslatedMark 「ちゅぽっ……ふふっ、いつでも口の中に射精していいのですよ？」
+				PRINTFORML 「嗯……啾噜，啾噜噜噜……」
+				;TranslatedMark 「んむっ……ちゅるっ、じゅるるる……」
+				PRINTFORML %ANAME(対象)%一边抱住%ANAME(MASTER)%一边淫荡地动着头
+				;TranslatedMark %ANAME(MASTER)%に抱きつきながら%ANAME(対象)%は淫らに首を動かす
+				PRINTFORML 不知是不是想快一点得到精液，她眼睛向上看着，渴望着射精
+				;TranslatedMark 速く精液が欲しいのか上目遣いで射精を切望している
+			ELSEIF RAND:2 == 0
+				PRINTFORML %ANAME(対象)%一边流着泪一边快速地移动着脖子做着深喉口交。
+				;TranslatedMark 自らイマラチオをするように%ANAME(対象)%は涙目になりながら高速で首をストロークさせる
+				PRINTFORML %ANAME(MASTER)%心里只想着变得更舒服，无视淌出的口水，继续用手不停摇晃
+				;TranslatedMark %ANAME(MASTER)%が気持ち良くなるのを最優先している為か、涎を零すのも構わず振り続ける
+				PRINTFORML 结果，%ANAME(MASTER)%的射精感变得越来越强了…
+				;TranslatedMark その成果あってか、高まる%ANAME(MASTER)%の射精感はすぐに早まっていった…
+			ELSE
+				PRINTFORML %ANAME(対象)%快速地摇着头，用空着的手揉搓着睾丸，侍奉着炽热的肉棒。
+				;TranslatedMark 速めに首を動かしながらも空いた手でタマを揉んで%ANAME(対象)%は熱い肉棒を奉仕する。
+				PRINTFORML 把阴茎伸到脸颊的一侧，从外面看到明显的突起后%ANAME(対象)%开心地笑了…
+				;TranslatedMark 頬側にペニスを外から浮き出るのが分かるくらいに擦りつけ、%ANAME(対象)%は楽しそうに笑った…
+			ENDIF
+			PRINTFORMW %ANAME(MASTER)%就那样射精在%ANAME(対象)%的口中
+			;TranslatedMark %ANAME(MASTER)%はそのまま%ANAME(対象)%の口に射精した
+			PRINTFORML
+				;――――――――――――――――――――――――――――――――――――――――
+			IF !RAND:5
+				PRINTFORML 「…嗯……咕咚……哈…嗯…♥」
+				;TranslatedMark 「…んっ……ごくっ……はぁー…っ…♥」
+			ELSEIF !RAND:4
+				PRINTFORML 「嗯…嗯……哈……哈啊…咕咚，咕咚♥」
+				;TranslatedMark 「んっ…んっ……はぁっ……ごくっ…ごくっ♥」
+			ELSEIF !RAND:3
+				PRINTFORML 「咕……咕咚♥……啊啊啊…嗯……嗯…」
+				;TranslatedMark 「コクッ……ごくんっ♥……ふぁっ…んっ……んんっ…」
+			ELSEIF !RAND:2
+				PRINTFORML 「…啾噜……嗯…嗯……哦，嗯……♥」
+				;TranslatedMark 「…じゅるっ……んっ…ぢゅー……ごきゅっ……♥」
+			ELSE
+				PRINTFORML 「……咕咚…♥…嗯……嗯……♥」
+				;TranslatedMark 「……ごくんっ…♥…ぢゅるるるっ……んっ……♥」
+			ENDIF
+				;――――――――――――――――――――――――――――――――――――――――
+			IF !RAND:5
+				PRINTFORML 把肉棒刺进%ANAME(対象)%的喉咙，就这样射精。
+				;TranslatedMark 肉棒を%ANAME(対象)%の喉まで突き入れると、そのまま射精する。
+				PRINTFORML 为了不被直接流入喉咙的液体呛到，%ANAME(対象)%拼命忍耐。
+				;TranslatedMark 直接喉に流し込まれる液体でむせないよう%ANAME(対象)%は必死に耐える。
+				PRINTFORMW 被抚摸着脑袋称赞全部喝光了的事，忍住眼泪的%ANAME(対象)%马上露出了笑容…
+				;TranslatedMark 全て飲みきれたことを頭を撫でて褒めてやると、涙を堪えていた%ANAME(対象)%はすぐに笑顔になった…
+			ELSEIF !RAND:4
+				PRINTFORML %ANAME(対象)%像是等得不耐烦似的，在喉咙里开始喝起了从阴茎射出的精液。
+				;TranslatedMark 待ちかねていたかのようにペニスから吐き出された精液を、%ANAME(対象)%は喉を鳴らして飲み始めた。
+				PRINTFORML %ANAME(対象)%为了治愈喉咙的干渴继续接受着精液。
+				;TranslatedMark %ANAME(対象)%は喉の渇きを癒すようにザーメンを受け止め続ける。
+				PRINTFORMW 射精基本结束后，像是要求再来一次一样，用眼睛向上看，再次叼起勃起的肉棒…
+				;TranslatedMark 射精があらかた終わると、おかわりを強請るように上目遣いで未だ勃起する肉棒を咥え直した…
+			ELSEIF !RAND:3
+				PRINTFORML 射精结束后，%ANAME(対象)%拔出阴茎，打算吐出嘴里积存的新鲜精液。
+				;TranslatedMark 射精が終わると%ANAME(対象)%はペニスを引き抜き、口に溜まった新鮮な精液を吐き出そうとする。
+				PRINTFORML 但是，不知为何吐不出来，喉咙咕咚一声响了起来，吞进了胃里。
+				;TranslatedMark しかし、それを吐き出すことが何故か出来ず、ゴクンと喉を鳴らして胃に収めてしまった。
+				PRINTFORML 虽然装着不高兴的表情…但泛着红晕的脸明显充满了情欲。
+				;TranslatedMark 不機嫌そうな表情を取り繕ってはいたが…頬を赤らめて欲情しているのが明らかだった。
+				PRINTFORML 为了让她清扫尿道里剩下的部分，就把肉棒靠近了%ANAME(対象)%的脸，在一瞬间的犹豫之后含在了嘴里……
+				;TranslatedMark 尿道に残った分を掃除させようと%ANAME(対象)%の顔に肉棒を近づければ、一瞬の戸惑いの後に口へ含んだ…
+			ELSEIF !RAND:2
+				PRINTFORML %ANAME(対象)%用贪婪的表情将持续射在嘴里的%ANAME(MASTER)%的精液喝干。
+				;TranslatedMark 口に出され続ける%ANAME(MASTER)%の精液を%ANAME(対象)%は欲情した顔で飲み干す。
+				PRINTFORML 尿道里残留的部分也会很好地吸收出来，全部进了胃里。
+				;TranslatedMark 尿道に残った分も勢いよく吸い出して、全て胃の中に収める。
+				PRINTFORMW 陶醉于这种行为，充满欲望的%ANAME(対象)%再次叼着阴茎继续侍奉…
+				;TranslatedMark その行為に陶酔し、欲情する%ANAME(対象)%は再びペニスを咥え奉仕を続けた…
+			ELSE
+				PRINTFORML 喝完阴茎射出的精液，%ANAME(MASTER)%的余韵也平息了。
+				;TranslatedMark ペニスから吐き出されるザーメンを飲み干し、%ANAME(MASTER)%の余韻も治まった。
+				PRINTFORMW 但是，尽管如此，%ANAME(対象)%还是吞吐着睾丸，渴望着下一次射精…
+				;TranslatedMark だが、それでも%ANAME(対象)%はストロークを続け、次の射精を所望している…
+			ENDIF
+			;パイズリ＋胸射精
+		CASE 2
+			PRINTFORMW %ANAME(対象)%用胸口开始夹住%ANAME(MASTER)%的阴茎
+			;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%のペニスを胸で挟みしごきはじめた
+				;――――――――――――――――――――――――――――――――――――――――
+			IF RAND:2 == 0
+				PRINTFORML 「…………嗯…啊…嗯…♥…」
+				;TranslatedMark 「…………んっ…あ…っ…♥…」
+			ELSE
+				PRINTFORML 「…啊…♥」
+				;TranslatedMark 「…ぁ…♥」
+			ENDIF
+				;――――――――――――――――――――――――――――――――――――――――
+			IF RAND:6 == 0
+				PRINTFORML %ANAME(対象)%跨坐在躺着的%ANAME(MASTER)%身上，把阴茎引导到自己的胸部间。
+				;TranslatedMark %ANAME(対象)%は寝そべった自分に跨る%ANAME(MASTER)%のペニスを谷間に導いた。
+				PRINTFORML %ANAME(MASTER)%看着%ANAME(対象)%开心地微笑着，不断揉捏改变着几乎能从手中溢出的乳房的形状
+				;TranslatedMark 手から溢れる胸の圧迫感を変えながら気持ち良さそうに腰を振る%ANAME(MASTER)%を見て%ANAME(対象)%は嬉しそうに微笑む。
+				PRINTFORMW 每次上下击打的时候龟头就会出现在脸前，然后%ANAME(対象)%会很可爱地舔一下…
+				;TranslatedMark 打ち付ける度に顔に姿を現す亀頭を、%ANAME(対象)%は愛おしく舐め上げた…
+			ELSEIF RAND:5 == 0
+				PRINTFORML %ANAME(MASTER)%把肉棒插入%ANAME(対象)%满溢的双丘山谷，两手压住开始摆动腰。
+				;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%の溢れんばかりの双丘の谷間に肉棒を差し込むと、両手で抑え込んで腰を振り始めた。
+				PRINTFORMW %ANAME(対象)%配合着用爆乳上下抚摸，用嘴唇舌头安抚着勉强从那山谷中露出的龟头…
+				;TranslatedMark %ANAME(対象)%は合わせるように爆乳で上下にストロークしながら、谷間から苦しそうに顔をだす亀頭を唇と舌で愛撫する…
+			ELSEIF RAND:4 == 0
+				PRINTFORML %ANAME(対象)%用丰乳夹着阴茎，用习惯了的动作开始了阴茎。
+				;TranslatedMark %ANAME(対象)%は豊満な乳でペニスを挟むと、慣れた動きでパイズリを始めた。
+				PRINTFORML 用两只胳膊压迫着被隐藏在胸部之间的肉棒，啪嗒啪嗒地做着活塞运动。
+				;TranslatedMark 谷間に隠れた肉棒を両腕で胸を圧迫しながらタプンタプンと音鳴らしてピストンする。
+				PRINTFORMW 这种令人兴奋的景象，令%ANAME(MASTER)%的射精感不断提高…
+				;TranslatedMark 視覚的に興奮させるその光景に、%ANAME(MASTER)%は射精感を高めていく…
+			ELSEIF RAND:3 == 0
+				PRINTFORML 胸前夹着%ANAME(MASTER)%的阴茎，大小正好合适。
+				;TranslatedMark 胸で%ANAME(MASTER)%のペニスを挟むと、丁度いい形でフィットする。
+				PRINTFORMW 每次%ANAME(対象)%使身体上下移动的时候，被夹在胸部之间的%ANAME(MASTER)%的肉棒就会得到强烈的快感…
+				;TranslatedMark %ANAME(対象)%が身体を上下させる度に、カリが谷間で強く刺激され、%ANAME(MASTER)%の快感を高めていく…
+			ELSEIF RAND:2 == 0
+				PRINTFORML 轻轻地抬起快要溢出来的双丘，把它们压在一起，然后把阴茎从前面插入，就那样晃动身体。
+				;TranslatedMark 溢れんばかりの双丘を軽く持ち上げ圧迫させ、ペニスを前から挿入してそのまま身体をゆっくと動かす。
+				PRINTFORML %ANAME(MASTER)%抓着%ANAME(対象)%的肩膀像做爱一样摆动着腰享受着垂着的乳房。
+				;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%の肩を掴みセックスするように腰を振って縦パイズリを堪能する。
+				PRINTFORMW 由于手的压迫，仿佛像是在真正插入性交一样的快感，使%ANAME(MASTER)%变得兴奋起来
+				;TranslatedMark 手による圧迫加減でまるで本番をしているかのような快感が、%ANAME(MASTER)%の興奮を高めていく
+			ELSE
+				PRINTFORML %ANAME(対象)%用柔软的胸脯夹住%ANAME(MASTER)%的阴茎，首先轻轻地上下移动。
+				;TranslatedMark %ANAME(対象)%は柔かな胸で%ANAME(MASTER)%のペニスを挟み、まずは軽く上下していく。
+				PRINTFORML 然后变成左右交替上下的动作，每次变换都会刺激着被压在双丘上的阴茎。
+				;TranslatedMark 今度は左右交互に上下していく動きに変え、変える度に双丘をペニスに押し付け刺激する。
+				PRINTFORMW 看着慢慢活动着腰的%ANAME(MASTER)%，变得舒服起来的%ANAME(対象)%进一步加强了刺激…
+				;TranslatedMark 徐々に腰を動かしてく%ANAME(MASTER)%を見て、気を良くした%ANAME(対象)%はさらに刺激を強めていった…
+			ENDIF
+			PRINTFORMW %ANAME(MASTER)%就那样射精在%ANAME(対象)%的胸中
+			;TranslatedMark %ANAME(MASTER)%はそのまま%ANAME(対象)%の胸に射精した
+			PRINTFORML
+				;――――――――――――――――――――――――――――――――――――――――
+			IF !RAND:3
+				PRINTFORML 「…啊……啊哈哈♥」
+				;TranslatedMark 「…ぁ……あはっ♥」
+			ELSEIF !RAND:2
+				PRINTFORML 「…呋呋……♥」
+				;TranslatedMark 「…ふふっ……♥」
+			ELSE
+				PRINTFORML 「…嗯…嗯♥」
+				;TranslatedMark 「…っ…あんっ♥」
+			ENDIF
+				;――――――――――――――――――――――――――――――――――――――――
+			IF RAND:3 == 0
+				PRINTFORML %ANAME(TARGET)%用胸接住了被猛地射出的精液。
+				;TranslatedMark 勢いよく射精して吐き出されたザーメンを、%ANAME(対象)%は胸で全て受け止める
+				PRINTFORML 然后用手涂在整个胸部上，看起来很淫靡。
+				;TranslatedMark そして手で胸全体に潤滑油として淫靡にコーティングしていく
+				PRINTFORMW 涂抹结束后，比刚才更滑的胸部再次开始了肉棒的侍奉…
+				;TranslatedMark コーティングが終わると、先ほど以上に滑りが良くなった胸で肉棒の奉仕を再開した…
+			ELSEIF !RAND:2
+				PRINTFORML %ANAME(TARGET)%高兴地看着被大量精液污染的胸部，用手指抚摸后，舔着缠绕在手上的精液。
+				;TranslatedMark 大量の精液で汚された胸を%ANAME(対象)%は嬉しそうに眺め、指で撫でて絡め付いた精液を舐めとっていく
+				PRINTFORML 在%ANAME(対象)%舔舐期间，%ANAME(MASTER)%把龟头压在乳头上，想把剩下的部分射出来
+				;TranslatedMark %ANAME(対象)%が舐めている間に、%ANAME(MASTER)%は乳首に亀頭を押し付けて残りの分を出そうとする
+				PRINTFORMW 舔完后，用嘴里含住阴茎吸了剩下的东西…
+				;TranslatedMark 舐めとりが終わると、ペニスを口に含んで残りを吸いあげていった…
+			ELSE
+				PRINTFORML %ANAME(MASTER)%在顶峰前抓住丰满的乳房，被柔软的压迫感包围在谷间中射精
+				;TranslatedMark %ANAME(MASTER)%は絶頂寸前に豊満な乳房を掴み、柔らかな圧迫感に包まれて谷間の中で射精した
+				PRINTFORML 用胸上下交替运动涂抹谷间积存的精液，用精液使皮肤变得黏糊糊的
+				;TranslatedMark 谷間に溜まった精液を胸で上下交互に動かし、肌をザーメンでベトベトにさせていく
+				PRINTFORMW 过了一会儿打开胸膛，发现精液的拉丝已经污染了展开的山谷…
+				;TranslatedMark 暫くして胸を広げると、広がった精液が糸を引いて谷間を汚していた…
+			ENDIF 
+			;素股＋股への射精(手射精の書き換え)
+		CASE 3
+			PRINTFORMW %ANAME(対象)%用自己的生殖器开始玩弄%ANAME(MASTER)%的阴茎
+			;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%のペニスを自らの性器でしごきはじめた
+			PRINTDATAL
+				DATAFORM 「咦…好酥糊…啊……啊…嗯……那里…♪」
+				;TranslatedMark 「きっ…気持ちっ…あっ……あんっ…っ……そこぉっ…♪」
+				DATAFORM 「…嗯…哎呀…好……以…嗯…♥」
+				;TranslatedMark 「…っ…ひゃっ…いいっ……もっ…とぉっ…♥」
+				DATAFORM 「啊哈哈♥……啊…嗯……啊啊…♥」
+				;TranslatedMark 「あはっ♥……はっ…んっ……くあっ…♥」
+				DATAFORM 「嗯…♪……嗯…啊……好酥糊…咦……♥」
+				;TranslatedMark 「はぅっ…♪……っ…あっ……きもち…いっ……♥」
+				DATAFORM 「啊啊啊啊啊啊……嗯啊啊！…♥」
+				;TranslatedMark 「ぁっあっぁっああっ……んぁあっ！…♥」
+				DATAFORM 「…啊…啊啊…哈哈…♥」
+				;TranslatedMark 「…あっ…ぁんっ…はっはっ…♥」
+				DATAFORM 「中…手…嗯…啊啊啊啊！…嗯…啊啊啊！♥」
+				;TranslatedMark 「当たっ…て…っ…ああぁっ！…あんっ…はぁあぁっ！♥」
+				DATAFORM 「哎呀………啊…啊啊啊啊啊♪」
+				;TranslatedMark 「っひゃんっ………ぁ…あっあっぁあっ♪」
+				DATAFORM 「啊啊！……嗯…嗯……啊…啊哈哈♥」
+				;TranslatedMark 「ふぁっ！……んっ…んっあっ……ぁ…あはっ♥」
+				DATAFORM 「……啊啊！……麻…麻掉了……啊啊啊♥」
+				;TranslatedMark 「……つぁっ！……し…しびれっ……ふぁっ♥」
+			ENDDATA
+			IF RAND:4 == 0
+				PRINTFORML %ANAME(MASTER)%把性器对准被爱液濡湿了的%ANAME(対象)%的秘所，快速地摩擦。
+				;TranslatedMark 愛液で濡れきった%ANAME(対象)%の秘所に%ANAME(MASTER)%は性器同士を合わせ、素早く擦っていく。
+				PRINTFORMW 在入口被强烈刺激的同时，%ANAME(対象)%也努力地动着身体，加强冲击的力道…
+				;TranslatedMark 入口を強く刺激されつつ、%ANAME(対象)%もなんとか動いて当たる力を強めていく…
+			ELSEIF RAND:3 == 0
+				PRINTFORML %ANAME(対象)%跨坐在%ANAME(MASTER)%上，以艳丽的姿态动着腰。
+				;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に跨って、艶めいた腰つきで動いていく。
+			ELSEIF RAND:2 == 0
+				PRINTFORML 把身体交给%ANAME(MASTER)%，%ANAME(対象)%抱住%ANAME(MASTER)%，将手臂绕在脖子上。
+				;TranslatedMark %ANAME(MASTER)%に身体を委ね、%ANAME(対象)%は%ANAME(MASTER)%を抱き寄せるように腕を首に回す。
+				PRINTFORMW 慢慢地刺激着%ANAME(対象)%的湿漉漉的焦急的秘处…
+				;TranslatedMark 焦らすように濡れる%ANAME(対象)%の秘所を遅めに刺激していった…
+			ELSE
+				PRINTFORML %ANAME(対象)%跨坐在%ANAME(MASTER)%身上，用被爱液浸湿的滑溜溜的秘所摩擦着%ANAME(MASTER)%的身体。
+				;TranslatedMark %ANAME(MASTER)%に跨り、%ANAME(対象)%は愛液で滑りが良くなった秘所を%ANAME(MASTER)%のに擦り付ける。
+				PRINTFORMW 不断起伏的身体，传来的快感使%ANAME(対象)%发出了淫荡的声音
+				;TranslatedMark うねりながら身体を動かし、伝わってくる快感に%ANAME(対象)%は淫らな声を上げていた…
+			ENDIF
+			PRINTFORML
+			PRINTFORMW %ANAME(MASTER)%就那样射精在%ANAME(対象)%的胯下
+			;TranslatedMark %ANAME(MASTER)%はそのまま%ANAME(対象)%の股へと射精した
+			IF RAND:4 == 0
+				PRINTFORML 「啊啊啊，你的腿好黏啊♥」
+				;TranslatedMark 「あーあー、お股がドロドロですねぇ♥」
+				PRINTFORML %ANAME(対象)%用手干净地舔着大腿上的精液
+				;TranslatedMark 股にかかった精液を%ANAME(対象)%は手で奇麗に舐めとっていく
+				PRINTFORMW 大概已经习惯了味道吧，从表情上可以看出欲望的颜色…
+				;TranslatedMark もう味にも慣れてしまったのか、表情には欲情の色が窺えた…
+			ELSEIF RAND:3 == 0
+				PRINTFORML 「无底洞吗你……？」
+				;TranslatedMark 「底無しですか貴方……？」
+				PRINTFORMW %ANAME(対象)%虽然刚射精不久，但在胯间又开始变硬了，半呆呆地看着%ANAME(MASTER)%的阴茎……
+				;TranslatedMark %ANAME(対象)%は、射精直後にも関わらず股の間で再び固くなり始めた%ANAME(MASTER)%の陰茎を半ば呆れながら眺めている……
+			ELSEIF RAND:2 == 0
+				PRINTFORML 「…啊……啊哈哈♥」
+				;TranslatedMark 「…ぁ……あはっ♥」
+				PRINTFORML %ANAME(対象)%用一只手接住飞出的精液，用一杯精液形成的水洼完成了
+				;TranslatedMark %ANAME(対象)%は飛び出した精液を片手で受け止め、掌には一杯の精液で出来た水たまりが完成する
+				PRINTFORML %ANAME(対象)%一口气喝干了，把剩下的部分干净地舔了下去
+				;TranslatedMark それを%ANAME(対象)%は一気に飲み干し、残った分を奇麗に舐めとっていった
+				PRINTFORMW 尽管如此还是不够吧，用眼睛向上看着，一边手淫，一边贪婪地请求下一次射精…
+				;TranslatedMark それでも足りないのか上目遣いで手淫しながら、物欲しそうに次の射精を強請った…
+			ELSE
+				PRINTFORML 「…呋呋……♥」
+				;TranslatedMark 「…ふふっ……♥」
+				PRINTFORML 手和大腿清洁干净后，%ANAME(対象)%用阴茎舔剩下的汁液
+				;TranslatedMark 手や股を奇麗に掃除した後、%ANAME(対象)%はペニスを扱いて残り汁を舐めとる
+				PRINTFORMW 看到还勃起的%ANAME(MASTER)%的肉棒，对他的坚挺无比着迷…
+				;TranslatedMark 未だに勃起する%ANAME(MASTER)%の肉棒を見て、その逞しさに見惚れていた…
+			ENDIF
+	ENDSELECT
+			;――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+	PRINTFORML 
+	PRINTFORML 「呵呵呵♥那么，再见♥」
+	;TranslatedMark 「ふふっ♥　それじゃっ♥」
+			;騎乗位かA騎乗位かのどれかが選択される
+	IF RAND:2 == 0
+		PRINTFORML %ANAME(対象)%用骑乘位的姿势将勃起的%ANAME(MASTER)%的肉棒吞入阴道内
+		;TranslatedMark %ANAME(対象)%はギンギンに勃起した%ANAME(MASTER)%の肉棒を騎乗位の体勢で膣内に飲み込む
+		IF RAND:5 == 0
+			PRINTFORML %ANAME(対象)%的阴道内，%ANAME(MASTER)%的阴茎发出声音地进入了
+			;TranslatedMark %ANAME(対象)%の膣内に%ANAME(MASTER)%のペニスが音を立てて入っていく
+			PRINTFORML %ANAME(MASTER)%抓住%ANAME(対象)%的腰狠狠地顶了上去
+			;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%の腰を掴んで思い切り突き上げた
+			PRINTFORML 「哈啊♥等，等一下♥　……不要突然顶上去……嗯啊啊♥♥」
+			;TranslatedMark 「はぁんっ♥　ちょ、っと♥　……いきなり突き上げないで……んぁあっ♥♥」
+			PRINTFORML %ANAME(MASTER)%腰部激烈地上下连续贯穿%ANAME(対象)%的阴道内
+			;TranslatedMark %ANAME(MASTER)%は腰を激しく上下させ連続で%ANAME(対象)%の膣内を貫く
+			PRINTFORML 「等一下♥%ANAME(MASTER)%♥　……再慢一点……啊啊啊♥」
+			;TranslatedMark 「ま、まって♥　%ANAME(MASTER)%っ♥　……もう少しゆっくり……ぁあっ♥」
+			PRINTFORMW
+		ELSEIF RAND:4 == 0
+			PRINTFORML 「哎呀♥好厉害……里面，进去了……♥」
+			;TranslatedMark 「やっ♥　すご、い……奥まで、届いてるぅ……♥」
+			PRINTFORML %ANAME(対象)%跨坐在%ANAME(MASTER)%身上混乱地喘息着
+			;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に跨り乱れ喘いでいる
+			PRINTFORML 「%ANAME(MASTER)%的小鸡鸡，又热又硬……♥」
+			;TranslatedMark 「%ANAME(MASTER)%のおちんちん、熱くて、硬くてぇっ……♥」
+			PRINTFORML 为了配合淫荡地摆动着腰的%ANAME(対象)%，%ANAME(MASTER)%也从下面刺进肉棒
+			;TranslatedMark 淫らに腰を振る%ANAME(対象)%に合わせように、%ANAME(MASTER)%も下から肉棒を突き刺す
+			PRINTFORML 「嗯，嗯♥　……啊啊啊♥射出来♥♥精液♥射出来♥♥♥」
+			;TranslatedMark 「んんっ♥　……ぁあんっ♥　出してっ♥♥　精液っ♥　出してっ♥♥♥」
+			PRINTFORML 龟头碰在子宫口上的触感，让%ANAME(対象)%发出了悲鸣般声音的同时有了快感
+			;TranslatedMark コツンと子宮口に亀頭が当たる感触に悲鳴のような声で%ANAME(対象)%はよがる
+			PRINTFORML 不顾怀孕的危险，要求把热热的东西在里面射出来…
+			;TranslatedMark 妊娠の危険などお構いなしに、熱い中出しを求めていった…
+			PRINTFORMW
+		ELSEIF RAND:3 == 0
+			PRINTFORML 「这个体位，能够主导，说不定会喜欢上……♥」
+			;TranslatedMark 「この体位、私がリード出来るから結構好きかも……♥」
+			PRINTFORML 「看，这个怎么样？呜哩呜哩♥」
+			;TranslatedMark 「ほら、これなんかどう？ うりうりっ♥」
+			PRINTFORML 或许是获得了主导权，束缚解除了吧，抓住了%ANAME(MASTER)%，反复进行激烈的活塞
+			;TranslatedMark 主導権を得られタガが外れたのか、%ANAME(MASTER)%を押さえつけて激しいピストン繰り返していく
+			PRINTFORML %ANAME(対象)%开始转动腰，前后左右，上下不规则地运动，增加着%ANAME(MASTER)%的快感
+			;TranslatedMark %ANAME(対象)%は腰をぐるぐると回転させ始め、前後左右、上下と不規則に動かし、%ANAME(MASTER)%の快感を増大させる
+			PRINTFORML 「嗯♥　……呋呋呋♥呐，阴道内又变大了哦？想射出来吧？嗯♥」
+			;TranslatedMark 「んっ♥　……ふふっ♥　ねぇ、また膣内で大きくなってますよ？　出したいんでしょう？　んっー♥」
+			PRINTFORML %ANAME(対象)%一边喘着粗气，一边露出充满欲望的笑容，自己动着腰，把肉棒放在子宫口，引诱着射精
+			;TranslatedMark %ANAME(対象)%は荒い息遣いをしながら欲情しきった笑みを浮かべ、自ら腰を動かし肉棒を子宮口に当てて中出しを誘う
+			PRINTFORML 「哈哈，我会让你更舒服的……♥」
+			;TranslatedMark 「ははぁん、もっと気持ち良くさせてあげるわね……♥」
+			PRINTFORML 就如料想的那样在痉挛的同时从下面顶上去，她就立刻发出了快乐的娇喘声
+			;TranslatedMark 流石にやられっぱなしも癪なので下から突きあげてやると、嬉しそうに喘いだ…
+			PRINTFORML 「哈啊，等♥等一下♥突然♥　……不要突然顶上去……嗯啊啊♥♥」
+			;TranslatedMark 「はぁんっ♥　ちょ♥　っと♥　……いきなり突き上げないで……んぁあっ♥♥」
+			PRINTFORMW
+		ELSEIF RAND:2 == 0
+			PRINTFORML
+			PRINTFORML 「哈啊♥啊、哈♥%ANAME(MASTER)%……♥」
+			;TranslatedMark 「はっ♥　ぁあっ♥　%ANAME(MASTER)%っ……♥」
+			PRINTFORML 在狭窄的阴道内勒紧肉棒的同时，%ANAME(対象)%大幅度地垂直摆动腰部
+			;TranslatedMark 狭い膣内で肉棒を絞めつけ、%ANAME(対象)%は長いストロークで腰を縦に振っていく
+			PRINTFORML 「啊啊啊♥　……好舒服，%ANAME(MASTER)%……♥」
+			;TranslatedMark 「あぁっ♥　……気持ちいい、%ANAME(MASTER)%……♥」
+			PRINTFORML 就像是在回应想要雄性遗传因子的子宫一般，其冲刺的间隔也变得短而激烈
+			;TranslatedMark 雄の遺伝子を欲しがる子宮に応えるように、そのピッチも短く激しくなる
+			PRINTFORML %ANAME(MASTER)%将手伸向%ANAME(対象)%的另一侧的胸，一边责弄乳头一边摆动腰部
+			;TranslatedMark %ANAME(対象)%のもう片方の胸に手を伸ばし、乳首を弄りながら%ANAME(MASTER)%も腰を動かす
+			PRINTFORML 「嗯啊啊♥哎呀♥不行，太舒服了……已经♥　……啊啊啊啊♥♥」
+			;TranslatedMark 「んぁあっ♥　やっ♥　だめ、気持ち良過ぎて……もう♥　……ぁああっ♥♥」
+			PRINTFORML 笑着俯视着颤抖着身体的%ANAME(MASTER)%，催促着射精…
+			;TranslatedMark ゾクゾクと身体を震わせる%ANAME(MASTER)%を笑顔で見下ろして、射精を促していった…
+			PRINTFORMW
+		ELSE
+			PRINTFORML
+			PRINTFORML %ANAME(対象)%用黏糊糊的肉壶摇晃着被吸住的阴茎
+			;TranslatedMark トロトロの肉壷に捉えられたペニスを激しいグラインドで腰を振る%ANAME(対象)%
+			PRINTFORML 「啊♥啊啊啊♥%ANAME(MASTER)%、喜欢、最喜欢……♥」
+			;TranslatedMark 「あっ♥　ぁあっ♥　%ANAME(MASTER)%、好き、大好きぃっ……♥」
+			PRINTFORML %ANAME(対象)%在%ANAME(MASTER)%的上面一边乱叫着一边表达着爱意
+			;TranslatedMark %ANAME(MASTER)%の上で乱れながら愛を叫んでくる%ANAME(対象)%
+			PRINTFORML 作为回礼，%ANAME(MASTER)%也在轻声表达着爱的同时抬起了腰
+			;TranslatedMark %ANAME(MASTER)%もお返しに愛を囁きつつ腰を突き上げる
+			PRINTFORML %ANAME(対象)%进一步在阴道内刺激着肉棒
+			;TranslatedMark %ANAME(MASTER)%を犯しているような感覚に欲情して、%ANAME(対象)%はさらに肉棒を膣内で刺激する
+			PRINTFORML 「哈，啊♥已经，不行了，好像快到了……♥」
+			;TranslatedMark 「は、ぁあんっ♥　も、もう、だめ、イッちゃいそう……♥」
+			PRINTFORML 「哈哈♥嗯啊啊♥啊啊啊啊啊……♥♥」
+			;TranslatedMark 「はっ♥　んぁっ♥　ぁぁぁあああっ……♥♥」
+			PRINTFORML 一边感受着子宫落下的感觉，一边追求浓厚的配种，继续着活塞运动…
+			;TranslatedMark 降りてくる子宮を感じながら、濃厚な種付けを求めてピストンを続けた…
+			PRINTFORMW
+		ENDIF
+			;――――――――――――――――――――――――――――――――――――――――
+				;妊娠
+		IF TALENT:対象:妊娠
+			PRINTFORML
+				;――――――――――――――――――――――――――――――――――――――――
+			IF !RAND:10
+				PRINTFORML 「阴道内……摩擦…♥……啊啊…啊啊啊哈哈♥」
+				;TranslatedMark 「膣内っ……こすれっ…♥……あぁっ…あっあっあっはぁんっ♥」
+			ELSEIF !RAND:9
+				PRINTFORML 「…嗯…哎呀…好……嗯！……♥」
+				;TranslatedMark 「…っ…ひゃっ…いいっ……ぅあぁっ！……♥」
+			ELSEIF !RAND:8
+				PRINTFORML 「啊哈哈♥……啊…嗯……啊啊…♥」
+				;TranslatedMark 「あはっ♥……はっ…んっ……くあっ…♥」
+			ELSEIF !RAND:7
+				PRINTFORML 「嗯…♪……嗯…啊……好酥糊…咦……♥」
+				;TranslatedMark 「はぅっ…♪……っ…あっ……きもち…いっ……♥」
+			ELSEIF !RAND:6
+				PRINTFORML 「啊啊啊啊啊啊……嗯啊啊！…♥」
+				;TranslatedMark 「ぁっあっぁっああっ……んぁあっ！…♥」
+			ELSEIF !RAND:5
+				PRINTFORML 「…嗯…啊…在阴道内…噗呲…嗯……♥」
+				;TranslatedMark 「…ぅあっ…ぁっ…膣内で…コツンっ…てっ……♥」
+			ELSEIF !RAND:4
+				PRINTFORML 「戳中…了…嗯♥…啊啊啊啊！…嗯…啊啊啊！♥」
+				;TranslatedMark 「当たっ…て…っ♥…ああぁっ！…あんっ…はぁあぁっ！♥」
+			ELSEIF !RAND:3
+				PRINTFORML 「嗯啊啊……啊……嗯…噫…嗯……射出来…哈啊哈啊…♪」
+				;TranslatedMark 「んぁあっ……はっ……ぃ…いっ…ぱい……出し…っはぁぁんっ…♪」
+			ELSEIF !RAND:2
+				PRINTFORML 「啊啊！……嗯…嗯……啊…啊哈哈♥」
+				;TranslatedMark 「ふぁっ！……んっ…んっあっ……ぁ…あはっ♥」
+			ELSE
+				PRINTFORML 「…感觉……啊…太棒了…♥……要去了…哎呀♥」
+				;TranslatedMark 「…ッ気持ち……ぁっ…よすぎ…♥……イっちゃっ…ひゃあぁあっ♥」
+			ENDIF
+				;――――――――――――――――――――――――――――――――――――――――
+			IF RAND:3 == 0
+				PRINTFORML 「嗯…！？不，肚子里的孩子好像有点吃惊…」
+				;TranslatedMark 「んんっ…！？いや、少しお腹の子がびっくりしたようなので…」
+				PRINTFORML %ANAME(対象)%在揉着肚子……
+				;TranslatedMark %ANAME(対象)%はお腹を擦っている……
+			ELSEIF RAND:2 == 0
+				PRINTFORML 「喂，怀孕期间忍耐一下吧」
+				;TranslatedMark 「こらっ、妊娠中くらい我慢しなさい」
+				PRINTFORML %ANAME(対象)%带着有些生气的表情鼓起了脸颊……
+				;TranslatedMark %ANAME(対象)%は、少し怒った様子で頬を膨らませている……
+			ELSE
+				PRINTFORML 「呼…停下来…我说过了…嗯…」
+				;TranslatedMark 「ふぅっ…、止めてと…言ったのに…っ…」
+				PRINTFORML %ANAME(対象)%身体颤抖着，沉浸在阴道内射精的余韵中……
+				;TranslatedMark %ANAME(対象)%は、身体を震わせて膣内射精の余韻に浸っている……
+			ENDIF
+			PRINTFORMW
+				;――――――――――――――――――――――――――――――――――――――――
+				;淫壷
+		ELSEIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫壷)
+			PRINTFORML
+				;――――――――――――――――――――――――――――――――――――――――
+			IF !RAND:23
+				PRINTFORML 「阴道内…射出来…♥……啊啊…啊嘎…酱……嗯♥」
+				;TranslatedMark 「膣内でっ…出て…♥……あぁっ…赤…ちゃん……っ♥」
+			ELSEIF !RAND:22
+				PRINTFORML 「…会…♥……怀孕的…嗯……♥」
+				;TranslatedMark 「…妊娠…♥……しちゃうのぉっ…っ……♥」
+			ELSEIF !RAND:21
+				PRINTFORML 「嗯…♥！在里面吗…可能"可以"吧…♥？」
+				;TranslatedMark 「んっ…♥！中に出てる…これは”出来る”かもしれないですね…♥？」
+			ELSEIF !RAND:20
+				PRINTFORML 「射了很多呢…♥♥」
+				;TranslatedMark 「いっぱい出しましたね…♥♥」
+			ELSEIF !RAND:19
+				PRINTFORML 「呼…、热……快要溶化了……♥」
+				;TranslatedMark 「ふぅっ…、熱っ……蕩けそう……♥」
+			ELSEIF !RAND:18
+				PRINTFORML 「………♥…啊啊啊…很多…遗传因子…啊…流…出，来♥」
+				;TranslatedMark 「………♥…ぁあっ…沢山…遺伝子…はっ…流れて…きたっ♥」
+			ELSEIF !RAND:17
+				PRINTFORML 「…受精……嗯…去了……好像…嗯……♥」
+				;TranslatedMark 「…受精……っ…しちゃった……みたい…っ……♥」
+			ELSEIF !RAND:16
+				PRINTFORML 「啊啊啊啊啊啊……嗯啊啊！…♥」
+				;TranslatedMark 「ぁっあっぁっああっ……んぁあっ！…♥」
+			ELSEIF !RAND:15
+				PRINTFORML 「…今天是…啊…危险…日……嗯…满满的…射出来♥」
+				;TranslatedMark 「…今日は…ぁっ…危険…日っ……っ…いっぱい…出してっ♥」
+			ELSEIF !RAND:14
+				PRINTFORML 「戳中…了…嗯♥…啊啊啊啊！…嗯…啊啊啊！♥」
+				;TranslatedMark 「当たっ…て…っ♥…ああぁっ！…あんっ…はぁあぁっ！♥」
+			ELSEIF !RAND:13
+				PRINTFORML 「…啊啊……出来了……嗯…种子……被进去了…啊啊…♪」
+				;TranslatedMark 「…ぁあっ……出てるぅ……ぃ…種付け……されちゃった…ぁんっ…♪」
+			ELSEIF !RAND:12
+				PRINTFORML 「…嗯……啊哈哈♥……出了很多……」
+				;TranslatedMark 「…んっ……あはっ♥……いっぱい出たぁ……」
+			ELSEIF !RAND:11
+				PRINTFORML 「子宫……♥……满满的…我要♥」
+				;TranslatedMark 「子宮に……♥……いっぱい…ちょうだいっ♥」
+			ELSEIF !RAND:10
+				PRINTFORML 「进入子宫……你的粘稠精液…♥……满满的…射精吧♥」
+				;TranslatedMark 「子宮にっ……貴方のドロドロ精液…♥……いっぱい…射精してっ♥」
+			ELSEIF !RAND:9
+				PRINTFORML 「…呐…在阴道内…♥……射精………嗯…啊啊…♥」
+				;TranslatedMark 「…な…膣内にっ…♥……射精して………っ…あぁっ…♥」
+			ELSEIF !RAND:8
+				PRINTFORML 「啊哈哈♥……啊…嗯……啊啊…♥」
+				;TranslatedMark 「あはっ♥……はっ…んっ……くあっ…♥」
+			ELSEIF !RAND:7
+				PRINTFORML 「好棒…嗯……啊啊…嗯……舒服…好…嗯……♥！」
+				;TranslatedMark 「いいの…っ……ああっ…っ……気持ち…いい…っ……♥！」
+			ELSEIF !RAND:6
+				PRINTFORML 「啊啊啊啊啊啊……嗯啊啊！…♥」
+				;TranslatedMark 「ぁっあっぁっああっ……んぁあっ！…♥」
+			ELSEIF !RAND:5
+				PRINTFORML 「…嗯…啊…在阴道内…噗呲…嗯……♥」
+				;TranslatedMark 「…ぅあっ…ぁっ…膣内で…コツンっ…てっ……♥」
+			ELSEIF !RAND:4
+				PRINTFORML 「戳中…了…嗯♥…啊啊啊啊！…嗯…啊啊啊！♥」
+				;TranslatedMark 「当たっ…て…っ♥…ああぁっ！…あんっ…はぁあぁっ！♥」
+			ELSEIF !RAND:3
+				PRINTFORML 「嗯啊啊……啊……嗯…噫…嗯……射出来…哈啊哈啊…♪」
+				;TranslatedMark 「んぁあっ……はっ……ぃ…いっ…ぱい……出し…っはぁぁんっ…♪」
+			ELSEIF !RAND:2
+				PRINTFORML 「呐呐……嗯…把我……啊…夺走看看吧♥」
+				;TranslatedMark 「ほらぁっ……んっ…私を……ぁ…奪ってみせてっ♥」
+			ELSE
+				PRINTFORML 「…感觉……啊……♥……去了…呀啊啊♥」
+				;TranslatedMark 「…ッ気持ち……ぁっ……♥……イっちゃっ…ひゃあぁあっ♥」
+			ENDIF
+				;――――――――――――――――――――――――――――――――――――――――
+			IF RAND:16 == 0
+				PRINTFORML 将脚缠在打算开始射精的%ANAME(MASTER)%的腰上，%ANAME(対象)%强行要求中出
+				;TranslatedMark 射精を始めようとする%ANAME(MASTER)%の腰に脚を絡め、%ANAME(対象)%は中出しを強要させる
+				PRINTFORML 从膨胀到极限的肉棒中放出的精液，被侵犯子宫的快乐吓得%ANAME(対象)%浑身颤抖
+				;TranslatedMark 限界まで膨れ上がった肉棒から放たれる精液で、子宮を犯される快楽に%ANAME(対象)%は震えた
+				PRINTFORML 一边沉浸在孕育的雌性的喜悦中，%ANAME(対象)%一边抚摩着充满遗传因子的肚子…
+				;TranslatedMark 孕ませられる雌の悦びに浸りながら、%ANAME(対象)%は遺伝子で満ちたお腹を愛おしそうにさすった…
+				PRINTFORML 「啊啊…♥…是在阴道内射出是吧♥…可能"可以"的吧…？」
+				;TranslatedMark 「ぁんっ…♥…膣内で出しましたね♥…これは”出来る”かもしれませんよ…？」
+			ELSEIF RAND:15 == 0
+				PRINTFORML 用激烈的冲刺摇晃着被黏糊糊的肉壶抓住的阴茎
+				;TranslatedMark トロトロの肉壷に捉えられたペニスを激しいグラインドで腰を振る
+				PRINTFORML %ANAME(対象)%进一步在阴道内刺激着肉棒
+				;TranslatedMark %ANAME(MASTER)%を犯しているような感覚に欲情して、%ANAME(対象)%はさらに肉棒を膣内で刺激する
+				PRINTFORML 一边感受着子宫落下的感觉，一边追求浓厚的配种，继续着活塞运动…
+				;TranslatedMark 降りてくる子宮を感じながら、濃厚な種付けを求めてピストンを続けた…
+				PRINTFORML %ANAME(対象)%揉着充满精液的小腹……
+				;TranslatedMark %ANAME(対象)%は精液で満たされた下腹部を擦っている……
+			ELSEIF RAND:14 == 0
+				PRINTFORML 「…但是，这种程度还没满足了吧？」
+				;TranslatedMark 「…だけど、この程度で満足しないのでしょう？」
+				PRINTFORML 为了配合淫荡地摆动着腰的%ANAME(対象)%，%ANAME(MASTER)%也从下面刺进肉棒
+				;TranslatedMark 淫らに腰を振る%ANAME(対象)%に合わせるように、%ANAME(MASTER)%も下から肉棒を突き刺す
+				PRINTFORML 龟头碰在子宫口上的触感，让%ANAME(対象)%发出了悲鸣般声音的同时有了快感
+				;TranslatedMark コツンと子宮口に亀頭が当たる感触に悲鳴のような声で%ANAME(対象)%はよがる
+				PRINTFORML 不管妊娠的危险，%ANAME(対象)%要求在阴道把炙热的东西射出…
+				;TranslatedMark 妊娠の危険などお構いなしに、%ANAME(対象)%の膣は熱い中出しを求めていった…
+			ELSEIF RAND:13 == 0
+				PRINTFORML 在狭窄的阴道内勒紧肉棒的同时，%ANAME(対象)%大幅度地垂直摆动腰部
+				;TranslatedMark 狭い膣内で肉棒を絞めつけ、%ANAME(対象)%は長いストロークで腰を縦に振っていく
+				PRINTFORML 就像是在回应想要雄性遗传因子的子宫一般，其冲刺的间隔也变得短而激烈
+				;TranslatedMark 雄の遺伝子を欲しがる子宮に応えるように、そのピッチも短く激しくなる
+				PRINTFORML 笑着俯视着颤抖着身体的%ANAME(MASTER)%，催促着射精…
+				;TranslatedMark ゾクゾクと身体を震わせる%ANAME(MASTER)%を笑顔で見下ろして、射精を促していった…
+				PRINTFORML %ANAME(対象)%把眼睛眯得很细，用手指捞起从秘处中流出的白色浑浊液，就那样舔着……
+				;TranslatedMark %ANAME(対象)%は目をうっとりと細めると秘裂から零れ出た白濁液を指で掬うと、そのまま舐めとった……
+			ELSEIF RAND:12 == 0
+				PRINTFORML %ANAME(MASTER)%为了进行交配的最终目的的配种，用龟头撬开子宫口吐出了遗传因子
+				;TranslatedMark %ANAME(MASTER)%は交尾の最終目的である種付けをするべく、亀頭で子宮口をこじ開けて遺伝子を吐き出した
+				PRINTFORML 精子们为了回应当事人的想法，拼命地向卵子游去
+				;TranslatedMark 精子たちは当人たちの思いに応えるべく、必死に卵子に向けて泳ぎだす
+				PRINTFORML 希望生孩子的%ANAME(対象)%，祈祷着所爱之人的种子能够平安受精…
+				;TranslatedMark 子を成すことを望む%ANAME(対象)%は、愛する人の種が無事受精することを祈った…
+				PRINTFORML 「呼…射出来了…嗯……♥」
+				;TranslatedMark 「ふぅっ…、出て…るぅ……♥」
+				PRINTFORML %ANAME(対象)%身体颤抖着，沉浸在阴道内射精的余韵中……
+				;TranslatedMark %ANAME(対象)%は、身体を震わせて膣内射精の余韻に浸っている……
+			ELSEIF RAND:11 == 0
+				PRINTFORML %ANAME(対象)%像发情的雌性一样，用子宫接受了被欲望释放的%ANAME(MASTER)%的遗传因子
+				;TranslatedMark 欲望のまま放たれる%ANAME(MASTER)%の遺伝子を、%ANAME(対象)%は発情した雌のように子宮で受け止める
+				PRINTFORML 如同蹂躏一般在子宫中飞腾，充满了扑通扑通的感觉，%ANAME(対象)%也沉浸在快感中
+				;TranslatedMark 蹂躙するがの如く子宮の中を飛びはねとぷとぷと満たす感覚に%ANAME(対象)%もまた快感に浸る
+				PRINTFORML 在射精结束之前，两人一边痉挛一边将身体向对方压着…
+				;TranslatedMark 射精が終わるまでの間、二人は痙攣しながら身体を押し付け合った…
+			ELSEIF RAND:10 == 0
+				PRINTFORML 伴随着妊娠的风险，%ANAME(対象)%毫无抵抗地接受了阴道内射精
+				;TranslatedMark 妊娠のリスクを伴うというのに、%ANAME(対象)%は一切の抵抗なく膣内射精を受け止めた
+				PRINTFORML 小小的子宫无法完全容纳的白浊液，开始溢出污染阴道内
+				;TranslatedMark 小さな子宮に治まり切らない白濁液は、溢れ返って膣内を汚し始める
+				PRINTFORML %ANAME(対象)%因为子宫的热度而短暂的颤抖，抱住沉浸在射精余韵中的%ANAME(MASTER)%…
+				;TranslatedMark 暫くの間%ANAME(対象)%は子宮の熱さに震え、射精の余韻に浸る%ANAME(MASTER)%を抱きしめた…
+				PRINTFORML 「呋呋……辛苦了…♥」
+				;TranslatedMark 「ふふっ……お疲れ様…♥」
+			ELSEIF RAND:9 == 0
+				PRINTFORML 用腰压住剧烈地扭动着，阴道壁被高高的龟头剜去的快感，让%ANAME(対象)%无法忍受，娇声叫了起来。
+				;TranslatedMark 覆いかぶさったまま腰を激しくピストンさせ、高いカリにゴリゴリ抉られる膣壁の快感に%ANAME(対象)%も耐え切れず嬌声を上げる
+				PRINTFORML %ANAME(対象)%把身体靠在摇摇晃晃的床上，抱着%ANAME(MASTER)%的脖子，像恋人一样把一切托付给他
+				;TranslatedMark %ANAME(対象)%はギシギシと揺れるベッドに身を預け、%ANAME(MASTER)%の首に腕を回して恋人のように全てを任せる
+				PRINTFORML 由于被打入的甘悦而激烈混乱，用没有余力抬高的手臂抓住床单，脚缠在%ANAME(MASTER)%的腰上催促着阴道内射…
+				;TranslatedMark 打ち込まれる甘悦によって激しく乱れ、上げる余力もなくなった腕でシーツを掴み、%ANAME(MASTER)%の腰に足を絡めて膣内出しを促す…
+				PRINTFORML 「…满满的♥……好幸福…」
+				;TranslatedMark 「…いっぱい♥……幸せ…」
+			ELSEIF RAND:8 == 0
+				PRINTFORML 让%ANAME(対象)%四肢着地趴着，%ANAME(MASTER)%就那样开始摇起腰来贯穿阴道内
+				;TranslatedMark %ANAME(対象)%を四つん這いにさせると、%ANAME(MASTER)%はそのまま膣内を貫くように腰を打ち付け始めた
+				PRINTFORML 似乎是雌的本能从兽的交尾般的姿势中觉醒了，%ANAME(対象)%的声音失去了理性变成了妖艳的叫声。
+				;TranslatedMark 獣の交尾のような体勢に雌の本能が目覚めたのか、%ANAME(対象)%の声は理性を失い妖艶なものになってく。
+				PRINTFORML 在房间里响起的肉体敲击的声音中，两人的动作逐渐加快了速度…
+				;TranslatedMark 部屋に響く肉を打つ音に興奮を高めながら、二人の行為は徐々に速度を速めていった…
+			ELSEIF RAND:7 == 0
+				PRINTFORML %ANAME(対象)%为了回礼，开始用骑乘位淫荡地扭动腰
+				;TranslatedMark %ANAME(対象)%は、お返しとばかりに騎乗位で腰を淫らに動かし始めた
+				PRINTFORML %ANAME(対象)%的身体虽然发出了粗暴的呻吟，但就像记住%ANAME(MASTER)%的肉棒一样，每次吞咽到根部时，阴道内的形状就会和%ANAME(MASTER)%的那根对齐。
+				;TranslatedMark %ANAME(対象)%は声を荒げつつも%ANAME(MASTER)%の肉棒を覚えるように、根元まで飲み込む度に膣内の形を%ANAME(MASTER)%のモノへと合わせていく
+				PRINTFORML 在心里向%ANAME(MASTER)%道歉的同时，身体却渴求着相形良好的%ANAME(MASTER)%，为了寻求更大的快乐扭动了腰…
+				;TranslatedMark 心では%ANAME(MASTER)%に謝りながら、身体は相性の良い%ANAME(MASTER)%を選んでしまい、更なる快楽を求めて腰を振りたくった…
+			ELSEIF RAND:6 == 0
+				PRINTFORML 彼此都接近高潮。连接在一起的两个人什么都不说，只是互相拥抱，开始最后的冲刺
+				;TranslatedMark 互いに限界が近い。繋がった二人は何も言わずに抱き合ってラストスパートをかける
+				PRINTFORML 子宫口早就张开了嘴，向那个毫无防备的子宫里倒上了沾满肉欲的精液
+				;TranslatedMark 子宮口はとっくに口を開いており、その無防備な子宮に向かって肉欲に塗れた精汁をぶちまけた
+				PRINTFORML %ANAME(対象)%发出更大的娇声震动身体，将阴道壁变窄，从阴茎上一滴一滴地榨取精液
+				;TranslatedMark %ANAME(対象)%は一段と大きい嬌声を上げて身を震わせると、膣壁を狭くさせてペニスから一滴残らず精液を搾り取ろうとする
+				PRINTFORML 在射精结束之前两人自然地接吻，沉浸在愉快的余韵中…
+				;TranslatedMark 射精が終わるまで二人は自然と口づけを交わし、心地よい余韻に浸っていた…
+			ELSEIF RAND:5 == 0
+				PRINTFORML 即将绝顶的%ANAME(MASTER)%从后面拉着%ANAME(対象)%的手臂，比刚才更加激烈地继续拍打肉棒
+				;TranslatedMark 絶頂寸前の%ANAME(MASTER)%は後ろから%ANAME(対象)%の腕を引っ張り、先ほどよりも激しく肉棒を打ち込み続ける
+				PRINTFORML 在龟头撬开子宫口的触感中感受到了高潮的兴奋，同时也给为了快乐堕落成了淫荡雌性的%ANAME(対象)%进行了配种
+				;TranslatedMark 亀頭で子宮口をこじ開けていく感触に最高潮の興奮を感じながら、快楽に堕ち淫らな雌と化した%ANAME(対象)%に種付けを果たした
+				PRINTFORML 插入的从根部膨胀的肉棒。绝顶收缩的阴道壁。被吐出的精子们向唯一的逃避场所——子宫如雪崩般袭来
+				;TranslatedMark 根本まで挿入され膨張した肉棒。絶頂で収縮する膣壁。吐き出された精子たちは唯一の逃げ場である子宮へと雪崩を打って入り込む
+				PRINTFORML %ANAME(対象)%感受到了子宫被填满的感觉，感受到了作为女人最棒的快感和幸福…
+				;TranslatedMark %ANAME(対象)%は子宮が満たされていく感覚を覚え、女として最高の快感と幸福を味わった…
+			ELSEIF RAND:4 == 0
+				PRINTFORML 虽然射精已经很近了，但是%ANAME(対象)%却掌握着主导权，啪嗒啪嗒地响着，用妖艳的腰技继续扭动着腰
+				;TranslatedMark もう射精が近いというのに%ANAME(対象)%は主導権を握ったまま、バチュバチュと音を立てながら妖艶な腰つきで腰を振り続ける
+				PRINTFORML %ANAME(MASTER)%无法忍受就那样在阴道内射精了，但是%ANAME(対象)%仍没有停止运动
+				;TranslatedMark %ANAME(MASTER)%は耐え切れずにそのまま膣内に射精したが、しかし%ANAME(対象)%は動きを止めない
+				PRINTFORML 每次坐下的时候，龟头都会在顶点撬开子宫口，将大量的精液推上去，送到子宫内
+				;TranslatedMark 腰を下ろす度に絶頂でエラを張った亀頭が大量の精液を押し上げ、子宮内へと送り込む
+				PRINTFORML 不被填满就无法满足的%ANAME(対象)%，在射精结束后为了榨取精液而继续做着活塞…
+				;TranslatedMark 満タンでないと満足できない%ANAME(対象)%は、射精が終わった後も精液を搾り取ろうとピストンを続行した…
+			ELSEIF RAND:3 == 0
+				PRINTFORML …子宫接受了数次射精，射出的时候%ANAME(対象)%也没有停止运动
+				;TranslatedMark …何度目かの射精を子宮で受け止め、出ている間にも%ANAME(対象)%は動きを止めることはない
+				PRINTFORML 把在狭窄的阴道内射精的肉棒勒紧，%ANAME(対象)%用大幅度的运动摇着腰
+				;TranslatedMark 狭い膣内で射精している肉棒を絞めつけ、%ANAME(対象)%は長いストロークで腰を縦に振っていく
+				PRINTFORML 随着贪欲追求滋润的子宫，间距越来越短、激烈、淫荡
+				;TranslatedMark 貪欲に潤いを求める子宮に従い、どんどんピッチも短く激しく淫らになる
+				PRINTFORML %ANAME(対象)%笑着俯视着在过于强烈的快乐中多次射精的%ANAME(MASTER)%，并且催促着射精…
+				;TranslatedMark 強すぎる快楽に何度も射精する%ANAME(MASTER)%を%ANAME(対象)%は笑顔で見下ろして、さらに射精を促していった…
+			ELSEIF RAND:2 == 0
+				PRINTFORML …是不是%ANAME(対象)%的阴道内太舒服了，%ANAME(MASTER)%不断重复射精
+				;TranslatedMark …%ANAME(対象)%の膣内があまりに気持ちいいのか、%ANAME(MASTER)%は絶えず射精を繰り返す
+				PRINTFORML 被精液和爱液变得黏糊糊的肉壶里抓住阴茎，在激烈的冲刺中继续摆动着腰
+				;TranslatedMark 精液と愛液でトロトロの肉壷に捉えられたペニスを、まだまだ欲しいと激しいグラインドで腰を振り続ける
+				PRINTFORML 在被%ANAME(MASTER)%侵犯的情况下露出了恍惚的笑容，%ANAME(対象)%用在阴道内的肉棒进一步刺激着。
+				;TranslatedMark %ANAME(MASTER)%を犯している状況に恍惚の笑みを浮かべ、%ANAME(対象)%はさらに肉棒を膣内で刺激す。
+				PRINTFORML 在龟头接触到已经降下了的子宫的同时，为了寻求更浓厚的配种而继续进行活塞运动…
+				;TranslatedMark 既に降りている子宮を亀頭の接触で感じながら、さらなる濃厚な種付けを求めてピストンを続けた…
+			ELSE
+				PRINTFORML …两人持续了很长一段时间的行动，虽然已经多次达到了顶峰，但却丝毫没有停止的迹象，%ANAME(対象)%继续挥着腰
+				;TranslatedMark …長く行為を続け、絶頂を何度もした二人ではあるが、止める気配は一向になく%ANAME(対象)%は腰を振り続ける
+				PRINTFORML 被在眼前淫荡地摆动着腰的%ANAME(対象)%所吸引，%ANAME(MASTER)%就这样从阴茎不断地吐出射精
+				;TranslatedMark 目の前で淫らに腰を振る%ANAME(対象)%に魅せられ、%ANAME(MASTER)%はされるがままにペニスから射精を次々に吐き出していく
+				PRINTFORML 每次身体接触都会发出微弱的水声，从交合处溢出了无法进入的精液
+				;TranslatedMark 一度身体を下す度に鈍い水音がなり、接合部からは入りきらない精液が溢れ出てくる
+				PRINTFORML 但是即使这样也还是觉得有点欠缺，%ANAME(対象)%反复进行活塞追求着新的精液…
+				;TranslatedMark しかしそれでも物足りないのか、%ANAME(対象)%はピストンを繰り返し新しい精液を求めていった…
+			ENDIF
+			PRINTFORMW
+				;――――――――――――――――――――――――――――――――――――――――
+		ELSE
+			PRINTFORML
+				;――――――――――――――――――――――――――――――――――――――――
+			IF !RAND:20
+				PRINTFORML 「阴道内…射出来…♥……啊啊…啊嘎…酱……嗯♥」
+				;TranslatedMark 「膣内でっ…出て…♥……あぁっ…赤…ちゃん……っ♥」
+			ELSEIF !RAND:19
+				PRINTFORML 「…会…♥……怀孕的…嗯……♥」
+				;TranslatedMark 「…妊娠…♥……しちゃうのぉっ…っ……♥」
+			ELSEIF !RAND:18
+				PRINTFORML 「………♥…啊啊啊…很多…遗传因子…啊…流…出，来♥」
+				;TranslatedMark 「………♥…ぁあっ…沢山…遺伝子…はっ…流れて…きたっ♥」
+			ELSEIF !RAND:17
+				PRINTFORML 「…受精……嗯…去了……好像…嗯……♥」
+				;TranslatedMark 「…受精……っ…しちゃった……みたい…っ……♥」
+			ELSEIF !RAND:16
+				PRINTFORML 「啊啊啊啊啊啊……嗯啊啊！…♥」
+				;TranslatedMark 「ぁっあっぁっああっ……んぁあっ！…♥」
+			ELSEIF !RAND:15
+				PRINTFORML 「…今天是…啊…危险…日……嗯…满满的…射出来♥」
+				;TranslatedMark 「…今日は…ぁっ…危険…日っ……っ…いっぱい…出してっ♥」
+			ELSEIF !RAND:14
+				PRINTFORML 「戳中…了…嗯♥…啊啊啊啊！…嗯…啊啊啊！♥」
+				;TranslatedMark 「当たっ…て…っ♥…ああぁっ！…あんっ…はぁあぁっ！♥」
+			ELSEIF !RAND:13
+				PRINTFORML 「…啊啊……出来了……嗯…种子……被进去了…啊啊…♪」
+				;TranslatedMark 「…ぁあっ……出てるぅ……ぃ…種付け……されちゃった…ぁんっ…♪」
+			ELSEIF !RAND:12
+				PRINTFORML 「…嗯……啊哈哈♥……出了很多……」
+				;TranslatedMark 「…んっ……あはっ♥……いっぱい出たぁ……」
+			ELSEIF !RAND:11
+				PRINTFORML 「子宫……♥……满满的…我要♥」
+				;TranslatedMark 「子宮に……♥……いっぱい…ちょうだいっ♥」
+			ELSEIF !RAND:10
+				PRINTFORML 「进入子宫……你的粘稠精液…♥……满满的…射精吧♥」
+				;TranslatedMark 「子宮にっ……貴方のドロドロ精液…♥……いっぱい…射精してっ♥」
+			ELSEIF !RAND:9
+				PRINTFORML 「…呐…在阴道内…♥……射精………嗯…啊啊…♥」
+				;TranslatedMark 「…な…膣内にっ…♥……射精して………っ…あぁっ…♥」
+			ELSEIF !RAND:8
+				PRINTFORML 「啊哈哈♥……啊…嗯……啊啊…♥」
+				;TranslatedMark 「あはっ♥……はっ…んっ……くあっ…♥」
+			ELSEIF !RAND:7
+				PRINTFORML 「好棒…嗯……啊啊…嗯……舒服…好…嗯……♥！」
+				;TranslatedMark 「いいの…っ……ああっ…っ……気持ち…いい…っ……♥！」
+			ELSEIF !RAND:6
+				PRINTFORML 「啊啊啊啊啊啊……嗯啊啊！…♥」
+				;TranslatedMark 「ぁっあっぁっああっ……んぁあっ！…♥」
+			ELSEIF !RAND:5
+				PRINTFORML 「…嗯…啊…在阴道内…噗呲…嗯……♥」
+				;TranslatedMark 「…ぅあっ…ぁっ…膣内で…コツンっ…てっ……♥」
+			ELSEIF !RAND:4
+				PRINTFORML 「戳中…了…嗯♥…啊啊啊啊！…嗯…啊啊啊！♥」
+				;TranslatedMark 「当たっ…て…っ♥…ああぁっ！…あんっ…はぁあぁっ！♥」
+			ELSEIF !RAND:3
+				PRINTFORML 「嗯啊啊……啊……嗯…噫…嗯……射出来…哈啊哈啊…♪」
+				;TranslatedMark 「んぁあっ……はっ……ぃ…いっ…ぱい……出し…っはぁぁんっ…♪」
+			ELSEIF !RAND:2
+				PRINTFORML 「呐呐……嗯…把我……啊…夺走看看吧♥」
+				;TranslatedMark 「ほらぁっ……んっ…私を……ぁ…奪ってみせてっ♥」
+			ELSE
+				PRINTFORML 「…感觉……啊……♥……去了…呀啊啊♥」
+				;TranslatedMark 「…ッ気持ち……ぁっ……♥……イっちゃっ…ひゃあぁあっ♥」
+			ENDIF
+				;――――――――――――――――――――――――――――――――――――――――
+			IF RAND:13 == 0
+				PRINTFORML 将脚缠在打算开始射精的%ANAME(MASTER)%的腰上，%ANAME(対象)%强行要求中出
+				;TranslatedMark 射精を始めようとする%ANAME(MASTER)%の腰に脚を絡め、%ANAME(対象)%は中出しを強要させる
+				PRINTFORML 从膨胀到极限的肉棒中放出的精液，被侵犯子宫的快乐吓得%ANAME(対象)%浑身颤抖
+				;TranslatedMark 限界まで膨れ上がった肉棒から放たれる精液で、子宮を犯される快楽に%ANAME(対象)%は震えた
+				PRINTFORML 一边沉浸在孕育的雌性的喜悦中，%ANAME(対象)%一边抚摩着充满遗传因子的肚子…
+				;TranslatedMark 孕ませられる雌の悦びに浸りながら、%ANAME(対象)%は遺伝子で満ちたお腹を愛おしそうにさすった…
+				PRINTFORML 「啊啊…♥…是在阴道内射出是吧♥…可能"可以"的吧…？」
+				;TranslatedMark 「ぁんっ…♥…膣内で出しましたね♥…これは”出来る”かもしれませんよ…？」
+			ELSEIF RAND:12 == 0
+				PRINTFORML %ANAME(MASTER)%为了进行交配的最终目的的配种，用龟头撬开子宫口吐出了遗传因子
+				;TranslatedMark %ANAME(MASTER)%は交尾の最終目的である種付けをするべく、亀頭で子宮口をこじ開けて遺伝子を吐き出した
+				PRINTFORML 精子们为了回应当事人的想法，拼命地向卵子游去
+				;TranslatedMark 精子たちは当人たちの思いに応えるべく、必死に卵子に向けて泳ぎだす
+				PRINTFORML 希望生孩子的%ANAME(対象)%，祈祷着所爱之人的种子能够平安受精…
+				;TranslatedMark 子を成すことを望む%ANAME(対象)%は、愛する人の種が無事受精することを祈った…
+				PRINTFORML 「呼…射出来了…嗯……♥」
+				;TranslatedMark 「ふぅっ…、出て…るぅ……♥」
+				PRINTFORML %ANAME(対象)%身体颤抖着，沉浸在阴道内射精的余韵中……
+				;TranslatedMark %ANAME(対象)%は、身体を震わせて膣内射精の余韻に浸っている……
+			ELSEIF RAND:11 == 0
+				PRINTFORML %ANAME(対象)%像发情的雌性一样，用子宫接受了被欲望释放的%ANAME(MASTER)%的遗传因子
+				;TranslatedMark 欲望のまま放たれる%ANAME(MASTER)%の遺伝子を、%ANAME(対象)%は発情した雌のように子宮で受け止める
+				PRINTFORML 如同蹂躏一般在子宫中飞腾，充满了扑通扑通的感觉，%ANAME(対象)%也沉浸在快感中
+				;TranslatedMark 蹂躙するがの如く子宮の中を飛びはねとぷとぷと満たす感覚に%ANAME(対象)%もまた快感に浸る
+				PRINTFORML 在射精结束之前，两人一边痉挛一边将身体向对方压着…
+				;TranslatedMark 射精が終わるまでの間、二人は痙攣しながら身体を押し付け合った…
+			ELSEIF RAND:10 == 0
+				PRINTFORML 伴随着妊娠的风险，%ANAME(対象)%毫无抵抗地接受了阴道内射精
+				;TranslatedMark 妊娠のリスクを伴うというのに、%ANAME(対象)%は一切の抵抗なく膣内射精を受け止めた
+				PRINTFORML 小小的子宫无法完全容纳的白浊液，开始溢出污染阴道内
+				;TranslatedMark 小さな子宮に治まり切らない白濁液は、溢れ返って膣内を汚し始める
+				PRINTFORML %ANAME(対象)%因为子宫的热度而短暂的颤抖，抱住沉浸在射精余韵中的%ANAME(MASTER)%…
+				;TranslatedMark 暫くの間%ANAME(対象)%は子宮の熱さに震え、射精の余韻に浸る%ANAME(MASTER)%を抱きしめた…
+				PRINTFORML 「呋呋……辛苦了…♥」
+				;TranslatedMark 「ふふっ……お疲れ様…♥」
+			ELSEIF RAND:9 == 0
+				PRINTFORML 用腰压住剧烈地扭动着，阴道壁被高高的龟头剜去的快感，让%ANAME(対象)%无法忍受，娇声叫了起来。
+				;TranslatedMark 覆いかぶさったまま腰を激しくピストンさせ、高いカリにゴリゴリ抉られる膣壁の快感に%ANAME(対象)%も耐え切れず嬌声を上げる
+				PRINTFORML %ANAME(対象)%把身体靠在摇摇晃晃的床上，抱着%ANAME(MASTER)%的脖子，像恋人一样把一切托付给他
+				;TranslatedMark %ANAME(対象)%はギシギシと揺れるベッドに身を預け、%ANAME(MASTER)%の首に腕を回して恋人のように全てを任せる
+				PRINTFORML 由于被打入的甘悦而激烈混乱，用没有余力抬高的手臂抓住床单，脚缠在%ANAME(MASTER)%的腰上催促着阴道内射…
+				;TranslatedMark 打ち込まれる甘悦によって激しく乱れ、上げる余力もなくなった腕でシーツを掴み、%ANAME(MASTER)%の腰に足を絡めて膣内出しを促す…
+				PRINTFORML 「…满满的♥……好幸福…」
+				;TranslatedMark 「…いっぱい♥……幸せ…」
+			ELSEIF RAND:8 == 0
+				PRINTFORML 让%ANAME(対象)%四肢着地趴着，%ANAME(MASTER)%就那样开始摇起腰来贯穿阴道内
+				;TranslatedMark %ANAME(対象)%を四つん這いにさせると、%ANAME(MASTER)%はそのまま膣内を貫くように腰を打ち付け始めた
+				PRINTFORML 似乎是雌的本能从兽的交尾般的姿势中觉醒了，%ANAME(対象)%的声音失去了理性变成了妖艳的叫声。
+				;TranslatedMark 獣の交尾のような体勢に雌の本能が目覚めたのか、%ANAME(対象)%の声は理性を失い妖艶なものになってく。
+				PRINTFORML 在房间里响起的肉体敲击的声音中，两人的动作逐渐加快了速度…
+				;TranslatedMark 部屋に響く肉を打つ音に興奮を高めながら、二人の行為は徐々に速度を速めていった…
+			ELSEIF RAND:7 == 0
+				PRINTFORML %ANAME(対象)%为了回礼，开始用骑乘位淫荡地扭动腰
+				;TranslatedMark %ANAME(対象)%は、お返しとばかりに騎乗位で腰を淫らに動かし始めた
+				PRINTFORML %ANAME(対象)%的身体虽然发出了粗暴的呻吟，但就像记住%ANAME(MASTER)%的肉棒一样，每次吞咽到根部时，阴道内的形状就会和%ANAME(MASTER)%的那根对齐。
+				;TranslatedMark %ANAME(対象)%は声を荒げつつも%ANAME(MASTER)%の肉棒を覚えるように、根元まで飲み込む度に膣内の形を%ANAME(MASTER)%のモノへと合わせていく
+				PRINTFORML 在心里向%ANAME(MASTER)%道歉的同时，身体却渴求着相形良好的%ANAME(MASTER)%，为了寻求更大的快乐扭动了腰…
+				;TranslatedMark 心では%ANAME(MASTER)%に謝りながら、身体は相性の良い%ANAME(MASTER)%を選んでしまい、更なる快楽を求めて腰を振りたくった…
+			ELSEIF RAND:6 == 0
+				PRINTFORML 彼此都接近高潮。连接在一起的两个人什么都不说，只是互相拥抱，开始最后的冲刺
+				;TranslatedMark 互いに限界が近い。繋がった二人は何も言わずに抱き合ってラストスパートをかける
+				PRINTFORML 子宫口早就张开了嘴，向那个毫无防备的子宫里倒上了沾满肉欲的精液
+				;TranslatedMark 子宮口はとっくに口を開いており、その無防備な子宮に向かって肉欲に塗れた精汁をぶちまけた
+				PRINTFORML %ANAME(対象)%发出更大的娇声震动身体，将阴道壁变窄，从阴茎上一滴一滴地榨取精液
+				;TranslatedMark %ANAME(対象)%は一段と大きい嬌声を上げて身を震わせると、膣壁を狭くさせてペニスから一滴残らず精液を搾り取ろうとする
+				PRINTFORML 在射精结束之前两人自然地接吻，沉浸在愉快的余韵中…
+				;TranslatedMark 射精が終わるまで二人は自然と口づけを交わし、心地よい余韻に浸っていた…
+			ELSEIF RAND:5 == 0
+				PRINTFORML 即将绝顶的%ANAME(MASTER)%从后面拉着%ANAME(対象)%的手臂，比刚才更加激烈地继续拍打肉棒
+				;TranslatedMark 絶頂寸前の%ANAME(MASTER)%は後ろから%ANAME(対象)%の腕を引っ張り、先ほどよりも激しく肉棒を打ち込み続ける
+				PRINTFORML 在龟头撬开子宫口的触感中感受到了高潮的兴奋，同时也给为了快乐堕落成了淫荡雌性的%ANAME(対象)%进行了配种
+				;TranslatedMark 亀頭で子宮口をこじ開けていく感触に最高潮の興奮を感じながら、快楽に堕ち淫らな雌と化した%ANAME(対象)%に種付けを果たした
+				PRINTFORML 插入的从根部膨胀的肉棒。绝顶收缩的阴道壁。被吐出的精子们向唯一的逃避场所——子宫如雪崩般袭来
+				;TranslatedMark 根本まで挿入され膨張した肉棒。絶頂で収縮する膣壁。吐き出された精子たちは唯一の逃げ場である子宮へと雪崩を打って入り込む
+				PRINTFORML %ANAME(対象)%感受到了子宫被填满的感觉，感受到了作为女人最棒的快感和幸福…
+				;TranslatedMark %ANAME(対象)%は子宮が満たされていく感覚を覚え、女として最高の快感と幸福を味わった…
+			ELSEIF RAND:4 == 0
+				PRINTFORML 虽然射精已经很近了，但是%ANAME(対象)%却掌握着主导权，啪嗒啪嗒地响着，用妖艳的腰技继续扭动着腰
+				;TranslatedMark もう射精が近いというのに%ANAME(対象)%は主導権を握ったまま、バチュバチュと音を立てながら妖艶な腰つきで腰を振り続ける
+				PRINTFORML %ANAME(MASTER)%无法忍受就那样在阴道内射精了，但是%ANAME(対象)%仍没有停止运动
+				;TranslatedMark %ANAME(MASTER)%は耐え切れずにそのまま膣内に射精したが、しかし%ANAME(対象)%は動きを止めない
+				PRINTFORML 每次坐下的时候，龟头都会在顶点撬开子宫口，将大量的精液推上去，送到子宫内
+				;TranslatedMark 腰を下ろす度に絶頂でエラを張った亀頭が大量の精液を押し上げ、子宮内へと送り込む
+				PRINTFORML 不被填满就无法满足的%ANAME(対象)%，在射精结束后为了榨取精液而继续做着活塞…
+				;TranslatedMark 満タンでないと満足できない%ANAME(対象)%は、射精が終わった後も精液を搾り取ろうとピストンを続行した…
+			ELSEIF RAND:3 == 0
+				PRINTFORML …子宫接受了数次射精，射出的时候%ANAME(対象)%也没有停止运动
+				;TranslatedMark …何度目かの射精を子宮で受け止め、出ている間にも%ANAME(対象)%は動きを止めることはない
+				PRINTFORML 把在狭窄的阴道内射精的肉棒勒紧，%ANAME(対象)%用大幅度的运动摇着腰
+				;TranslatedMark 狭い膣内で射精している肉棒を絞めつけ、%ANAME(対象)%は長いストロークで腰を縦に振っていく
+				PRINTFORML 随着贪欲追求滋润的子宫，间距越来越短、激烈、淫荡
+				;TranslatedMark 貪欲に潤いを求める子宮に従い、どんどんピッチも短く激しく淫らになる
+				PRINTFORML %ANAME(対象)%笑着俯视着在过于强烈的快乐中多次射精的%ANAME(MASTER)%，并且催促着射精…
+				;TranslatedMark 強すぎる快楽に何度も射精する%ANAME(MASTER)%を%ANAME(対象)%は笑顔で見下ろして、さらに射精を促していった…
+			ELSEIF RAND:2 == 0
+				PRINTFORML …是不是%ANAME(対象)%的阴道内太舒服了，%ANAME(MASTER)%不断重复射精
+				;TranslatedMark …%ANAME(対象)%の膣内があまりに気持ちいいのか、%ANAME(MASTER)%は絶えず射精を繰り返す
+				PRINTFORML 被精液和爱液变得黏糊糊的肉壶里抓住阴茎，在激烈的冲刺中继续摆动着腰
+				;TranslatedMark 精液と愛液でトロトロの肉壷に捉えられたペニスを、まだまだ欲しいと激しいグラインドで腰を振り続ける
+				PRINTFORML 在被%ANAME(MASTER)%侵犯的情况下露出了恍惚的笑容，%ANAME(対象)%用在阴道内的肉棒进一步刺激着。
+				;TranslatedMark %ANAME(MASTER)%を犯している状況に恍惚の笑みを浮かべ、%ANAME(対象)%はさらに肉棒を膣内で刺激す。
+				PRINTFORML 在龟头接触到已经降下了的子宫的同时，为了寻求更浓厚的配种而继续进行活塞运动…
+				;TranslatedMark 既に降りている子宮を亀頭の接触で感じながら、さらなる濃厚な種付けを求めてピストンを続けた…
+			ELSE
+				PRINTFORML …两人持续了很长一段时间的行动，虽然已经多次达到了顶峰，但却丝毫没有停止的迹象，%ANAME(対象)%继续挥着腰
+				;TranslatedMark …長く行為を続け、絶頂を何度もした二人ではあるが、止める気配は一向になく%ANAME(対象)%は腰を振り続ける
+				PRINTFORML 被在眼前淫荡地摆动着腰的%ANAME(対象)%所吸引，%ANAME(MASTER)%就这样从阴茎不断地吐出射精
+				;TranslatedMark 目の前で淫らに腰を振る%ANAME(対象)%に魅せられ、%ANAME(MASTER)%はされるがままにペニスから射精を次々に吐き出していく
+				PRINTFORML 每次身体接触都会发出微弱的水声，从交合处溢出了无法进入的精液
+				;TranslatedMark 一度身体を下す度に鈍い水音がなり、接合部からは入りきらない精液が溢れ出てくる
+				PRINTFORML 但是即使这样也还是觉得有点欠缺，%ANAME(対象)%反复进行活塞追求着新的精液…
+				;TranslatedMark しかしそれでも物足りないのか、%ANAME(対象)%はピストンを繰り返し新しい精液を求めていった…
+			ENDIF
+			PRINTFORMW
+				;――――――――――――――――――――――――――――――――――――――――
+		ENDIF
+			;A騎乗位
+	ELSE
+		PRINTFORML %ANAME(対象)%用骑乘位的姿势把银勃起的%ANAME(MASTER)%的肉棒吞进了屁股洞里
+		;TranslatedMark %ANAME(対象)%はギンギンに勃起した%ANAME(MASTER)%の肉棒を騎乗位の体勢で尻穴に飲み込む
+		IF RAND:5 == 0
+			PRINTFORML
+			PRINTFORML %ANAME(MASTER)%的阴茎发出声音进入%ANAME(対象)%的屁股孔
+			;TranslatedMark %ANAME(対象)%の尻穴に%ANAME(MASTER)%のペニスが音を立てて入っていく
+			PRINTFORML %ANAME(MASTER)%抓住%ANAME(対象)%的腰狠狠地顶了上去
+			;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%の腰を掴んで思い切り突き上げた
+			PRINTFORML 「哈啊♥等，等一下♥　……不要突然顶上去……嗯啊啊♥♥」
+			;TranslatedMark 「はぁんっ♥　 ちょ、っと♥　……いきなり突き上げないで……んぁあっ♥♥」
+			PRINTFORML %ANAME(MASTER)%的腰激烈地上下运动，连续地贯穿着%ANAME(対象)%的尻穴
+			;TranslatedMark %ANAME(MASTER)%は腰を激しく上下させ連続で%ANAME(対象)%の尻穴を貫く
+			PRINTFORML 「等一下♥%ANAME(MASTER)%♥……再慢一点……啊啊啊♥」
+			;TranslatedMark 「ま、まって♥　%ANAME(MASTER)%っ♥……もう少しゆっくり……ぁあっ♥」
+			PRINTFORMW
+		ELSEIF RAND:4 == 0
+			PRINTFORML
+			PRINTFORML 「哎呀♥好厉害……里面，进去了……♥」
+			;TranslatedMark 「やっ♥　すご、い……奥まで、届いてるぅ……♥」
+			PRINTFORML %ANAME(対象)%跨坐在%ANAME(MASTER)%身上混乱地喘息着
+			;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に跨り乱れ喘いでいる
+			PRINTFORML 「%ANAME(MASTER)%的，又热又硬……♥」
+			;TranslatedMark 「%ANAME(MASTER)%のが、熱くて、硬くてぇっ……♥」
+			PRINTFORML 「嗯，嗯♥　……啊啊啊♥射出来♥♥精液♥射出来♥♥♥」
+			;TranslatedMark 「んんっ♥　……ぁあんっ♥　出してっ♥♥　精液っ♥　出してっ♥♥♥」
+			PRINTFORML “咚”的一声，龟头碰在S字直肠上的触感，让%ANAME(対象)%发出了悲鸣般声音的同时渴求着炽热的中出
+			;TranslatedMark コツンとS字直腸に亀頭が当たる感触に悲鳴のような声で%ANAME(対象)%はよがり熱い中出しを求めていった…
+			PRINTFORMW
+		ELSEIF RAND:3 == 0
+			PRINTFORML
+			PRINTFORML 「这个体位，能够主导，说不定会喜欢上……♥」
+			;TranslatedMark 「この体位、私がリード出来るから結構好きかも……♥」
+			PRINTFORML 「看，这个怎么样？呜哩呜哩♥」
+			;TranslatedMark 「ほら、これなんかどう？ うりうりっ♥」
+			PRINTFORML %ANAME(対象)%开始转动腰部
+			;TranslatedMark %ANAME(対象)%は腰をぐるぐると回転させ始める
+			PRINTFORML 前后左右，上下不规则地活动，增加%ANAME(MASTER)%的快感
+			;TranslatedMark 前後左右、上下と不規則に動かし、%ANAME(MASTER)%の快感を増大させる
+			PRINTFORML 「嗯……呋呋，呐，又在屁股里变大了呢？」
+			;TranslatedMark 「んっ……ふふっ、ねぇ、またお尻の中で大きくなってますよ？」
+			PRINTFORML %ANAME(対象)%一边喘着粗气，一边露出充满欲望的笑容，自己动着腰，把肉棒贴在S字直肠上，引诱她从中出来
+			;TranslatedMark %ANAME(対象)%は荒い息遣いをしながら欲情しきった笑みを浮かべ、自ら腰を動かし肉棒をS字直腸に当てて中出しを誘う
+			PRINTFORML 「哈哈，我会让你更舒服的……♥」
+			;TranslatedMark 「ははぁん、もっと気持ち良くさせてあげるわね……♥」
+			PRINTFORML 就如料想的那样在痉挛的同时从下面顶上去，她就立刻发出了快乐的娇喘声
+			;TranslatedMark 流石にやられっぱなしも癪なので下から突きあげてやると、嬉しそうに喘いだ…
+			PRINTFORML 「哈啊，等♥等一下♥突然♥　……不要突然顶上去……嗯啊啊♥♥」
+			;TranslatedMark 「はぁんっ♥　ちょ♥　っと♥　……いきなり突き上げないで……んぁあっ♥♥」
+			PRINTFORMW
+		ELSEIF RAND:2 == 0
+			PRINTFORML
+			PRINTFORML 「哈啊♥啊、哈♥%ANAME(MASTER)%……♥」
+			;TranslatedMark 「はっ♥　ぁあっ♥　%ANAME(MASTER)%っ……♥」
+			PRINTFORML %ANAME(対象)%一边责弄着自己的胸部和剪发一边积极地活动着腰
+			;TranslatedMark %ANAME(対象)%は自分の胸とクリトリスを弄りながら積極的に腰を動かしている
+			PRINTFORML 「啊啊啊♥　……好舒服，%ANAME(MASTER)%……♥」
+			;TranslatedMark 「あぁっ♥　……気持ちいい、%ANAME(MASTER)%……♥」
+			PRINTFORML %ANAME(MASTER)%将手伸向%ANAME(対象)%的另一侧的胸，一边责弄乳头一边摆动腰部
+			;TranslatedMark %ANAME(対象)%のもう片方の胸に手を伸ばし、乳首を弄りながら%ANAME(MASTER)%も腰を動かす
+			PRINTFORML 「嗯啊啊♥ 哎呀♥不行，太舒服了……已经♥　……啊啊啊啊♥♥」
+			;TranslatedMark 「んぁあっ♥ やっ♥　だめ、気持ち良過ぎて……もう♥　……ぁああっ♥♥」
+			PRINTFORML 笑着俯视着颤抖着身体的%ANAME(MASTER)%，催促着射精…
+			;TranslatedMark ゾクゾクと身体を震わせる%ANAME(MASTER)%を笑顔で見下ろして、射精を促していった…
+			PRINTFORMW
+		ELSE
+			PRINTFORML
+			PRINTFORML 「啊♥啊啊啊♥%ANAME(MASTER)%、喜欢、最喜欢……♥」
+			;TranslatedMark 「あっ♥　ぁあっ♥　%ANAME(MASTER)%、好き、大好きぃっ……♥」
+			PRINTFORML %ANAME(対象)%在%ANAME(MASTER)%的上面一边乱叫着一边表达着爱意
+			;TranslatedMark %ANAME(MASTER)%の上で乱れながら愛を叫んでくる%ANAME(対象)%
+			PRINTFORML 作为回礼，%ANAME(MASTER)%也在轻声表达着爱的同时抬起了腰
+			;TranslatedMark %ANAME(MASTER)%もお返しに愛を囁きつつ腰を突き上げる
+			PRINTFORML %ANAME(対象)%感觉到自己犯了%ANAME(MASTER)%，于是用S字直肠刺激肉棒
+			;TranslatedMark %ANAME(MASTER)%を犯しているような感覚に欲情して、%ANAME(対象)%はさらに肉棒をS字直腸で刺激する
+			PRINTFORML 「哈，啊♥已经，不行了，好像快到了……♥」
+			;TranslatedMark 「は、ぁあんっ♥　も、もう、だめ、イッちゃいそう……♥」
+			PRINTFORML 「哈哈♥嗯啊啊♥啊啊啊啊啊……♥♥」
+			;TranslatedMark 「はっ♥　んぁっ♥　ぁぁぁあああっ……♥♥」
+			PRINTFORMW
+		ENDIF
+				;――――――――――――――――――――――――――――――――――――――――
+		PRINTFORML
+		PRINTFORML %ANAME(MASTER)%就那样射精了%ANAME(対象)%的直肠
+		;TranslatedMark %ANAME(MASTER)%はそのまま%ANAME(対象)%の直腸へと射精した
+		IF RAND:6 == 0
+			PRINTFORMW 「哈哈，又在屁股洞里了吗…？？」
+			;TranslatedMark 「ははぁん、またお尻の穴に出すのですか…？？」
+			PRINTFORMW 「反正总是这样…」
+			;TranslatedMark 「どうせいつもの事…」
+			PRINTFORML 「一起……♥？」
+			;TranslatedMark 「一緒に……♥？」
+			PRINTFORMW %ANAME(対象)%更加强烈地勒紧了刚刚被射精的尻穴，在射精的同时再次达到了顶峰……
+			;TranslatedMark %ANAME(対象)%は止めとばかりにイったばかりのアヌスをさらに強く締め上げ、射精と同時に再び絶頂に達した……
+		ELSEIF RAND:5 == 0
+			PRINTFORMW 「哈哈，又放到屁股洞里了吗…？」
+			;TranslatedMark 「ははぁん、またお尻の穴に出すのですか…？」
+			PRINTFORML 「可以哦…你这个变态♥」
+			;TranslatedMark 「イッて良いですよ…この変態さん♥」
+			PRINTFORMW %ANAME(対象)%欲罢不能般地将屁股洞紧紧地夹紧……
+			;TranslatedMark %ANAME(対象)%は止めとばかりにアヌスをさらに強く締め上げた……
+		ELSEIF RAND:4 == 0
+			PRINTFORML 「哈…嗯……！都怪你，我的肚子都要烧焦了…♥」
+			;TranslatedMark 「は…んっ……！貴方のせいですっかりお腹が灼けたようね…♥」
+			PRINTFORMW %ANAME(対象)%的屁股孔已经失去了作为门的作用，滴答着精液……
+			;TranslatedMark %ANAME(対象)%の尻穴は既に門としての役割を放棄し、ぽっかり開いたまま精液を垂れ流している……
+		ELSEIF RAND:3 == 0
+			PRINTFORML 「已经可以完全用下面的嘴喝光了呢…♥」
+			;TranslatedMark 「すっかり、下の口でも飲み干せるようになってしまったわね…♥」
+			PRINTFORMW %ANAME(対象)%把发出搅拌精液的声音的肚子用满足的心情摩擦着……
+			;TranslatedMark %ANAME(対象)%は精液を撹拌して音を立てるお腹を、満足気に擦っている……
+		ELSEIF RAND:2 == 0
+			PRINTFORML 「啊…嗯，屁股上…使不出力………」
+			;TranslatedMark 「あぅ…っ、尻に…力がはいらない………」
+			PRINTFORMW 由于性交松弛了的%ANAME(対象)%的肛门中精液缓缓流出……
+			;TranslatedMark アナルセックスで緩んだ%ANAME(対象)%の肛門から精液が零れ落ちた……
+		ELSE
+			PRINTFORML 「哈……嗯，屁股孔好像要被灼烧了……」
+			;TranslatedMark 「はぅ……っ、尻穴が灼けそう……」
+			PRINTFORMW %ANAME(対象)%似乎从粘液充满肠内的感觉中逐渐感受到快乐……
+			;TranslatedMark %ANAME(対象)%は、粘液が腸内を満たしていく感覚に快楽を覚えつつあるようだ……
+		ENDIF
+	ENDIF
+			;――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+	PRINTFORML 
+			;正常位/後背位/対面座位/背面座位の４つランダム(アナル入れると長くなるのとややこしいのでスルー)
+			;正常位
+	IF RAND:4 == 0
+		PRINTFORML %ANAME(MASTER)%推倒了%ANAME(対象)%，将阴茎刺入%ANAME(対象)%的秘裂，动了腰…
+		;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%を押し倒し、%ANAME(対象)%の秘裂にペニスを突き入れ腰を動かした…
+		IF RAND:5 == 0
+			PRINTFORML 
+			PRINTFORML 「这个姿势…我不能对你随心所欲，有点可惜呢」
+			;TranslatedMark 「この姿勢だと……私があなたを好きに出来ないから、ちょっと残念ね」
+			PRINTFORML 虽然被%ANAME(対象)%随意摆弄也不错，但也不能一直当条金枪鱼吧
+			;TranslatedMark %ANAME(対象)%に好きにされるのもそれはそれでいいが、いつまでもマグロでいるわけにもいかない
+			PRINTFORML %ANAME(MASTER)%开始剧烈地活动腰
+			;TranslatedMark %ANAME(MASTER)%は腰を激しく動かし始める
+			PRINTFORML 「嗯♥太强，强烈了♥呀啊♥」
+			;TranslatedMark 「んぅっ♥　はげ、しっ♥　やぁんっ♥」
+			PRINTFORML %ANAME(対象)%向这边伸出手
+			;TranslatedMark %ANAME(対象)%が手をこちらに伸ばしてきた
+			PRINTFORML 握住那只手后%ANAME(対象)%也握了回来
+			;TranslatedMark その手を握ってあげると%ANAME(対象)%も握り返してくる
+			PRINTFORML %ANAME(MASTER)%和%ANAME(対象)%紧紧相连，一边品味着幸福一边冲刺
+			;TranslatedMark %ANAME(MASTER)%も%ANAME(対象)%と繋がっている幸福を噛み締めながらスパートをかけた
+			PRINTFORML 「嗯啊啊♥%ANAME(MASTER)%♥%ANAME(MASTER)%♥」
+			;TranslatedMark 「んぁあっ♥　%ANAME(MASTER)%っ♥　%ANAME(MASTER)%っ♥」
+			PRINTFORML 「嗯啊♥、啊啊啊～～♥♥♥」
+			;TranslatedMark 「んぁ♥、ぁぁあああ～～～っ♥♥♥」
+			PRINTFORMW
+		ELSEIF RAND:4 == 0
+			PRINTFORML 
+			PRINTFORML 「嗯♥……%ANAME(MASTER)%的♥进来了，嗯♥」
+			;TranslatedMark 「んっ♥……%ANAME(MASTER)%のがっ♥　はいって、くるっ♥」
+			PRINTFORML %ANAME(対象)%在自己的阴道里感觉着%ANAME(MASTER)%的阴茎
+			;TranslatedMark %ANAME(対象)%は自分の膣内で%ANAME(MASTER)%のペニスを感じているようだ
+			PRINTFORML 「啊哈哈♥好厉害……又大又热……♥」
+			;TranslatedMark 「ぁはっ♥、すごい……大きくて、熱い……♥」
+			PRINTFORML %ANAME(MASTER)%一边在阴道内快速抽插着阴茎，一边用空着的嘴吸着%ANAME(対象)%的乳头
+			;TranslatedMark %ANAME(MASTER)%はペニスを速いテンポで膣内を抽挿しつつ、空いた口で%ANAME(対象)%の乳首に吸いつく
+			PRINTFORML 「啊啊啊♥嗯♥嗯，啊♥啊♥啊哈哈♥」
+			;TranslatedMark 「ふぁっ♥　んっ♥　んっあっ♥　ぁ♥　あはっ♥」
+			PRINTFORML 被贪婪地吮吸着乳头的%ANAME(MASTER)%所带来的快感攻击，%ANAME(対象)%将脚缠在了%ANAME(MASTER)%的腰上想要得到更多的快乐…
+			;TranslatedMark 貪るように乳首を吸う%ANAME(MASTER)%に快楽攻めにされ、%ANAME(対象)%はもっと快楽を得ようと%ANAME(MASTER)%の腰に脚を絡めた…
+			PRINTFORML 「呐，动起来吧……让我更多地感受到你……♥」
+			;TranslatedMark 「ね、動いて……貴方を、もっと感じさせて……♥」
+			PRINTFORML 听了%ANAME(対象)%的话，%ANAME(MASTER)%抬起了躺着的%ANAME(対象)%的下半身，不断从上面击打着
+			;TranslatedMark %ANAME(対象)%の言葉を聞いて%ANAME(MASTER)%は寝そべる%ANAME(対象)%の下半身を持ち上げ、%ANAME(MASTER)%が上から打ち付けるようにストロークする
+			PRINTFORML 「啊♥哈啊♥里，里面，动来动去♥」
+			;TranslatedMark 「ぁ♥　はぁんっ♥　カ、カリで、えぐられるぅっ♥」
+			PRINTFORML 「可以哦♥更加激烈地动起来吧♥啊啊啊啊啊♥」
+			;TranslatedMark 「いいのぉ♥　もっと、激しくうごいてぇ♥　ああぁっ♥」
+			PRINTFORMW 
+		ELSEIF RAND:3 == 0
+			PRINTFORML 
+			PRINTFORML 「嗯啊啊♥啊，啊♥啊啊啊啊♥」
+			;TranslatedMark 「んぁっ♥　あ、あっ♥　ふぁあっ♥」
+			PRINTFORML 持续小幅度的活塞运动
+			;TranslatedMark %ANAME(MASTER)%は小刻みにピストン運動を続ける
+			PRINTFORML %ANAME(MASTER)%用炽热的肉棒将充满爱液的%ANAME(対象)%的肉壶压住继续侵犯着
+			;TranslatedMark 愛液で満ちた%ANAME(対象)%の肉壷を、覆いかぶさる%ANAME(MASTER)%は熱い肉棒で犯し続ける
+			PRINTFORML 「%ANAME(MASTER)%的……在阴道内渐渐变大♥」
+			;TranslatedMark 「%ANAME(MASTER)%の……膣内でどんどん大きくなって、る♥」
+			PRINTFORML 「呐♥差不多该去了吧……？我也要♥」
+			;TranslatedMark 「ねぇ♥　そろそろイキそう……？ 私も、もうっ♥」
+			PRINTFORML 听到这句话的%ANAME(MASTER)%更深地刺进了阴茎
+			;TranslatedMark その言葉を聞いた%ANAME(MASTER)%は一際深く奥へとペニスを突き入れた
+			PRINTFORML 「啊啊啊♥在最里面，你的……♥」
+			;TranslatedMark 「きゃぁんっ♥　いちばん奥に、貴方の……♥」
+			PRINTFORML %ANAME(対象)%悄悄地在耳边轻声细语着，渴望被中出
+			;TranslatedMark %ANAME(対象)%はそっと耳元で囁きながら中出しを切望する
+			PRINTFORML %ANAME(MASTER)%为了回应她，加快了腰的动作，准备把剩下的精液种入体内
+			;TranslatedMark 応えてやろうと%ANAME(MASTER)%は残りの精液を植えつけるべく腰の動きを速めた
+			PRINTFORML 在达到极限的高潮中焦灼着身体，两人互相拍打着性器直到高潮……
+			;TranslatedMark 極限まで高まっていくボルテージに身を焦がしながら、二人は果てるまで性器を打ち付けあった…
+			PRINTFORML 「已经♥已经……不行啊♥♥♥♥」
+			;TranslatedMark 「もう♥　もう……ダメぇぇぇっ♥♥♥♥」
+			PRINTFORMW 
+		ELSEIF RAND:2 == 0
+			PRINTFORML 
+			PRINTFORML %ANAME(MASTER)%尽情地扭腰击打%ANAME(対象)%
+			;TranslatedMark %ANAME(対象)%に思いっきり腰を打ち付ける%ANAME(MASTER)%
+			PRINTFORML 「哦，哦♥」
+			;TranslatedMark 「きゃぅっ♥」
+			PRINTFORML 腰部结束撞击后，竖直腰，从阴道内缓缓拔出阴茎
+			;TranslatedMark 腰を打ちつけた後、膣内からゆっくりとペニスが抜ける直前まで腰を引く
+			PRINTFORML 「哈、哈……啊……♥」
+			;TranslatedMark 「はぁ、はぁ……ぁ……♥」
+			PRINTFORML %ANAME(対象)%露出遗憾的表情凝视着交合的部分
+			;TranslatedMark %ANAME(対象)%が残念そうな表情をして接合部分を見つめる
+			PRINTFORML 看到了那个反应后，再一次狠狠地击打起了腰部
+			;TranslatedMark その反応を確かめると、再び思いっきり腰を打ちつけた
+			PRINTFORML 「啊，嗯♥　……真是的，不要，那么急……」
+			;TranslatedMark 「んぁあんっ♥　……もう、じらさ、ないでぇ……」
+			PRINTFORML %ANAME(対象)%露出难受的表情
+			;TranslatedMark %ANAME(対象)%は切なそうな表情をしている
+			PRINTFORML 这次用快速摇摆的方式猛烈地击打腰部
+			;TranslatedMark 今度は速いストロークで激しく腰を打ち付ける
+			PRINTFORML 「啊啊啊啊♥ 啊，嗯♥嗯♥」
+			;TranslatedMark 「ふぁあっ♥ ぁ、んぁっ♥　あんっ♥」
+			PRINTFORML 「啊♥太激烈了……啊，呀啊啊啊♥」
+			;TranslatedMark 「あっ♥　はげし……ぁ、やぁぁああんっ♥」
+			PRINTFORMW 
+		ELSE
+			PRINTFORML 
+			PRINTFORML 「……呋呋，果然这个姿势，感觉很安心啊……」
+			;TranslatedMark 「……ふふっ、やっぱりこの体勢、安心できるわ……」
+			PRINTFORML 「因为，能从正面看到你的身影……」
+			;TranslatedMark 「だって、あなたの姿を真正面から見れるんだもの……」
+			PRINTFORML 听到这句话，我的心怦怦地跳动
+			;TranslatedMark その言葉を聞いて胸がドキリと高鳴る%ANAME(MASTER)%
+			PRINTFORML 「嗯♥啊……呋呋呋♥现在长大了♥」
+			;TranslatedMark 「んっ♥　ぁ……ふふっ♥　今、おおきくなった♥」
+			PRINTFORML %ANAME(MASTER)%因为害羞而移开视线
+			;TranslatedMark %ANAME(MASTER)%は気恥ずかしくなり目を逸らす
+			PRINTFORML 然后%ANAME(対象)%用双臂搂住脖子抱住
+			;TranslatedMark すると%ANAME(対象)%は両腕を首に絡ませて抱きついてきた
+			PRINTFORML 「别害羞了……呐，动起来吧？」
+			;TranslatedMark 「恥ずかしがらないでいいわよ……ね、動いて？」
+			PRINTFORML %ANAME(MASTER)%忍耐不住，剧烈地动起了腰来
+			;TranslatedMark %ANAME(MASTER)%は我慢がきかなくなり、腰を激しく動かした
+			PRINTFORML 「啊♥啊，嗯啊♥啊，哈哈♥」
+			;TranslatedMark 「あ♥　ぁ、んぁあっ♥　ふぁ、はぁあんっ♥」
+			PRINTFORML 「%ANAME(MASTER)%♥嗯啊啊♥最喜欢……啊啊啊♥」
+			;TranslatedMark 「%ANAME(MASTER)%っ♥　 んぁっ♥　大好き……ぁあんっ♥」
+			PRINTFORMW
+		ENDIF
+			;後背位
+	ELSEIF RAND:4 == 0
+		PRINTFORML %ANAME(MASTER)%推倒了%ANAME(対象)%，从背后把阴茎刺入了爬在四座的%ANAME(対象)%的秘裂，动了腰…
+		;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%を押し倒し、四つん這いの%ANAME(対象)%の秘裂にバックからペニスを突き入れ腰を動かした…
+		IF RAND:7 == 0
+			PRINTFORML
+			PRINTFORML  从背后激烈地抽插着%ANAME(対象)%的阴道
+			;TranslatedMark バックから%ANAME(対象)%の膣内を激しく往復する
+			PRINTFORML 「啊啊啊♥啊♥好棒，%ANAME(MASTER)%……♥」
+			;TranslatedMark 「ぁあんっ♥　あっ♥　いい、%ANAME(MASTER)%……♥」
+			PRINTFORML 「在阴道内♥你的♥在暴走着……嗯啊啊♥」
+			;TranslatedMark 「膣内で♥　貴方のが♥　暴れて……んぁあっ♥」
+			PRINTFORML %ANAME(対象)%的屁股和尾巴可爱地摇着
+			;TranslatedMark %ANAME(対象)%のお尻と尻尾が可愛く揺れている
+			PRINTFORML 一边动着腰，一边用温柔的手抚摸着尾巴
+			;TranslatedMark 腰を動かしながら尻尾を優しい手つきで撫でてやる
+			PRINTFORML 「啊啊啊！？」
+			;TranslatedMark 「んきゃぁっ！？」
+			PRINTFORML 好像是突然被抚摸吓了一跳，阴道紧紧地勒住了阴茎
+			;TranslatedMark 突然撫でられて驚いたらしい、膣内がペニスをぎゅうぎゅうと締め付けてくる
+			PRINTFORML %ANAME(MASTER)%差点就要射精了，但是动员了所有的理性把它压制住了
+			;TranslatedMark %ANAME(MASTER)%は射精してしまいそうになったが理性を総動員して押さえ込んだ
+			PRINTFORML 然后再次剧烈地前后移动腰
+			;TranslatedMark そして再び腰を激しく前後に動かす
+			PRINTFORML 「嗯啊啊♥啊啊啊♥呀，我要♥♥」
+			;TranslatedMark 「んぁっ♥　あぁっ♥　やぁ、イッちゃうぅっ♥♥」
+			PRINTFORMW 
+		ELSEIF RAND:6 == 0
+			PRINTFORML
+			PRINTFORML 从背后用勃起的肉棒侵犯%ANAME(対象)%的%ANAME(MASTER)%，用空着的双臂开始揉捏%ANAME(対象)%的胸部
+			;TranslatedMark 後ろから%ANAME(対象)%をいきり勃つ肉棒で犯す%ANAME(MASTER)%は、空いた両腕で%ANAME(対象)%の胸を揉み始める
+			PRINTFORML 「从后面，擦到了最舒服的地方……嗯啊啊♥」
+			;TranslatedMark 「後ろからだと、一番気持ちいいとこに擦れて……んぁっ♥」
+			PRINTFORML 过度的舒适感使阴道内紧绷，进一步刺激了阴道壁
+			;TranslatedMark 余りの気持ちよさに膣内が締め付けられ、余計にカリが膣壁を刺激する
+			PRINTFORML 「非常的♥好舒服……嗯♥哈♥」
+			;TranslatedMark 「すごく♥　気持ちいい……んっ♥　はぁっ♥」
+			PRINTFORML 「嗯♥呜，嗯♥而且……深入地进入……嗯啊啊♥啊啊啊♥」
+			;TranslatedMark 「んっ♥　くぅんっ♥　それに……深くまで入ってきて……んぁあっ♥　ひぁっ♥」
+			PRINTFORML 简直就像真的在侵犯一样，%ANAME(MASTER)%的肉欲完全没有停止，房间里不断传来性器击打的声音和娇声…
+			;TranslatedMark まるで本当に犯しているようで、%ANAME(MASTER)%の肉欲は止まることなく、部屋には性器を打ち付ける音と嬌声が響き続けた…
+			PRINTFORMW 
+		ELSEIF RAND:5 == 0
+			PRINTFORML 
+			PRINTFORML %ANAME(MASTER)%的又热又硬的肉棒蹂躏着充满爱液的%ANAME(対象)%的蜜罐
+			;TranslatedMark 愛液に満ちた%ANAME(対象)%の蜜壺を%ANAME(MASTER)%の熱い剛直が蹂躙する
+			PRINTFORML 一直被玩弄，无法用手臂支撑上半身，无力地躺在床上
+			;TranslatedMark 責め続けられて腕で上半身を支え切れなくなり、力無くベッドへ倒れ臥す
+			PRINTFORML 「嗯♥　……啊，哈♥」
+			;TranslatedMark 「んぅっ♥　……ぁ、はぁんっ♥」
+			PRINTFORML 「%ANAME(MASTER)%的……最里面，进去了……♥」
+			;TranslatedMark 「%ANAME(MASTER)%のが ……奥に、当たって……♥」
+			PRINTFORML 每次被贯穿深处%ANAME(対象)%都会发出甜美的悲鸣
+			;TranslatedMark 奥を貫くたびに%ANAME(対象)%が甘い悲鳴を漏らす
+			PRINTFORML 想听到更多可爱的声音，%ANAME(MASTER)%加快了腰的速度
+			;TranslatedMark その可愛い声をもっと聞きたくなり、%ANAME(MASTER)%は腰の速度を早める
+			PRINTFORML 「嗯啊啊♥等、哎呀……啊♥啊♥嗯，嗯♥」
+			;TranslatedMark 「んぁあっ♥　ちょ、はや……あっ♥　あっ♥　ふぁんっ♥」
+			PRINTFORML %ANAME(対象)%沉浸在快感之中根本无法思考，%ANAME(MASTER)%认为还不够所以继续不停地侵犯着阴道…
+			;TranslatedMark 快楽に墜ちて思考がまったく回らなくなった%ANAME(対象)%を、%ANAME(MASTER)%はまだ足りぬと膣内を犯し続けた…
+			PRINTFORMW 
+		ELSEIF RAND:4 == 0
+			PRINTFORML 
+			PRINTFORML 「嗯♥啊啊啊♥到里面来了啊……♥」
+			;TranslatedMark 「ん♥　ぁあっ♥　奥まで、きてるのぉっ……♥」
+			PRINTFORML %ANAME(対象)%只抬起屁股就倒在床上，任%ANAME(MASTER)%压住后扭动腰部
+			;TranslatedMark 尻だけ上げてベッドに倒れこむ%ANAME(対象)%に%ANAME(MASTER)%は覆いかぶさるようにして腰を動かす
+			PRINTFORML 之后将身体完全沉溺于%ANAME(MASTER)%带来的快感，继续发出娇滴滴的声音。
+			;TranslatedMark あとは%ANAME(MASTER)%から与え続けられる快感に身を委ねて嬌声を発し続ける
+			PRINTFORML 当%ANAME(MASTER)%为了播种而一直摆动着腰时，%ANAME(対象)%沉浸在了作为雌性的幸福感中…
+			;TranslatedMark 種付けする為に腰を振り続ける%ANAME(MASTER)%に、%ANAME(対象)%は雌としての幸福感に浸っていた…
+			PRINTFORML 腰部每一次击打，%ANAME(対象)%柔软的屁股便被扑哧扑哧地拍打着
+			;TranslatedMark 腰を打ち付けるたびに%ANAME(対象)%の柔らかそうなお尻がぷるぷると波打っている
+			PRINTFORML 双手抚摸着%ANAME(対象)%的屁股，顺时针旋转腰部。
+			;TranslatedMark %ANAME(対象)%のお尻を両手で撫でながら、腰を時計回りにぐるぐると回す
+			PRINTFORML 「嗯啊啊♥阴道内请不要搅拌……♥」
+			;TranslatedMark 「んぁあっ♥　膣内、かき回さないでぇっ……♥」
+			PRINTFORML 腰再次剧烈地前后挪动
+			;TranslatedMark 再び激しく腰を前後に動かす
+			PRINTFORML 「哈噫噫♥嗯啊啊♥酥糊，呀啊啊啊♥」
+			;TranslatedMark 「ひんっ♥　んぁあっ♥　気持ち、い、ぃやああぁんっ♥」
+			PRINTFORMW 
+		ELSEIF RAND:3 == 0
+			PRINTFORML 
+			PRINTFORML 「这个姿势…我不能对你随心所欲，有点可惜呢」
+			;TranslatedMark 「この姿勢だと……私があなたを好きに出来ないから、ちょっと残念ね」
+			PRINTFORML 虽然被%ANAME(対象)%随意摆弄也不错，但也不能一直当条金枪鱼吧
+			;TranslatedMark %ANAME(対象)%に好きにされるのもそれはそれでいいが、いつまでもマグロでいるわけにもいかない
+			PRINTFORML %ANAME(MASTER)%也开始剧烈地活动腰
+			;TranslatedMark %ANAME(MASTER)%も腰を激しく動かし始める
+			PRINTFORML 「嗯♥太激、烈了……哎呀♥」
+			;TranslatedMark 「んぅっ♥　はげ、し……やぁんっ♥」
+			PRINTFORML %ANAME(対象)%向身后伸出手
+			;TranslatedMark %ANAME(対象)%が後ろへ手を伸ばしてきた
+			PRINTFORML %ANAME(MASTER)%抓住匍匐着的%ANAME(対象)%的腰，以让爱液飞溅的速度做着活塞运动
+			;TranslatedMark %ANAME(MASTER)%は四つん這いになった%ANAME(対象)%の腰を掴み愛液が飛び散る程の速さでピストンする
+			PRINTFORML %ANAME(MASTER)%和%ANAME(対象)%紧紧相连，一边品味着幸福一边冲刺
+			;TranslatedMark %ANAME(MASTER)%も%ANAME(対象)%と繋がっている幸福を噛み締めながらスパートをかけた
+			PRINTFORML 「嗯啊啊♥%ANAME(MASTER)%♥%ANAME(MASTER)%……嗯♥」
+			;TranslatedMark 「んぁあっ♥　%ANAME(MASTER)%っ♥　%ANAME(MASTER)%……っ♥」
+			PRINTFORML 「嗯，啊啊啊～～♥♥♥」
+			;TranslatedMark 「んぁ、ぁぁあああ～～～♥♥♥」
+			PRINTFORML %ANAME(対象)%承受着无法抑制的热情，上半身大幅后仰，持续喘着粗气…
+			;TranslatedMark 受ける%ANAME(対象)%は抑えきれぬボルテージに、上半身を大きくのけ反らして喘ぎ続ける…
+			PRINTFORMW 
+		ELSEIF RAND:2 == 0
+			PRINTFORML 
+			PRINTFORML 「嗯啊啊♥啊♥啊啊啊啊♥」
+			;TranslatedMark 「んぁっあ♥　あっ♥　ふぁあっ♥」
+			PRINTFORML 持续小幅度的活塞运动
+			;TranslatedMark %ANAME(MASTER)%は小刻みにピストン運動を続ける
+			PRINTFORML 「%ANAME(MASTER)%的……在阴道内渐渐变大……♥」
+			;TranslatedMark 「%ANAME(MASTER)%の……膣内でどんどん大きくなって、る……♥」
+			PRINTFORML 「呐，差不多该射了……？我也要♥」
+			;TranslatedMark 「ねぇ、そろそろイキそう……？ 私も、もうっ♥」
+			PRINTFORML 听到这句话的%ANAME(MASTER)%更深地刺进了阴茎
+			;TranslatedMark その言葉を聞いた%ANAME(MASTER)%は一際深く奥へとペニスを突き入れた
+			PRINTFORML 「啊啊啊♥在最里面，你的……♥」
+			;TranslatedMark 「きゃぁんっ♥　いちばん奥に、貴方の……♥」
+			PRINTFORML 「已经♥已经♥啊啊啊♥」
+			;TranslatedMark 「もう♥　もぅ♥　あぁっ♥」
+			PRINTFORMW 
+		ELSE
+			PRINTFORML 
+			PRINTFORML 「呜♥咕♥哈啊啊啊啊♥」
+			;TranslatedMark 「んぅっ♥　くっ♥　ぁはぁあんっ♥」
+			PRINTFORML %ANAME(対象)%只抬起屁股就倒在床上，任%ANAME(MASTER)%压住后扭动腰部
+			;TranslatedMark 尻だけ上げてベッドに倒れこむ%ANAME(対象)%に%ANAME(MASTER)%は覆いかぶさるようにして腰を動かす
+			PRINTFORML 「嗯♥太激、烈了……哎呀♥」
+			;TranslatedMark 「んぅっ♥　はげ、し……やぁんっ♥」
+			PRINTFORML 之后将身体完全沉溺于%ANAME(MASTER)%带来的快感，继续发出娇滴滴的声音。
+			;TranslatedMark あとは%ANAME(MASTER)%から与え続けられる快感に身を委ねて嬌声を発し続ける
+			PRINTFORML 把%ANAME(対象)%的一只手拉到身前，再开始拍打腰部
+			;TranslatedMark %ANAME(対象)%の片腕を引き寄せて、更に腰を打ち付ける
+			PRINTFORML 「嗯啊！？这个姿势，到里面去……啊啊♥」
+			;TranslatedMark 「んぁあっ！？ この姿勢、奥まで……ぁうっ♥」
+			PRINTFORML 「好厉害♥里面，进去了……♥♥♥」
+			;TranslatedMark 「すごぉい♥　届いてる、奥にぃっ……♥♥♥」
+			PRINTFORML 当%ANAME(MASTER)%为了播种而一直摆动着腰时，%ANAME(対象)%沉浸在了作为雌性的幸福感中…
+			;TranslatedMark 種付けする為に腰を振り続ける%ANAME(MASTER)%に、%ANAME(対象)%は雌としての幸福感に浸っていた…
+			PRINTFORMW 
+		ENDIF
+			;対面座位
+	ELSEIF RAND:4 == 0
+		PRINTFORML %ANAME(対象)%一边抱住%ANAME(MASTER)%一边坐下，以秘密破裂吞噬了%ANAME(MASTER)%的阴茎…
+		;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%を抱き締めながら腰を降ろして、秘裂で%ANAME(MASTER)%のペニスを飲み込んだ…
+		IF RAND:5 == 0
+			PRINTFORML 
+			PRINTFORML 「嗯♥啊啊♥　……啊，哈哈♥」
+			;TranslatedMark 「んっ♥　ぁっ♥　……あっ、はぁんっ♥」
+			PRINTFORML 这次吸着%ANAME(対象)%的胸部，用舌头咕噜咕噜地转动乳头
+			;TranslatedMark 今度は%ANAME(対象)%の胸に吸い付き、乳首を舌でコロコロと転がす
+			PRINTFORML 「嗯哈哈♥」
+			;TranslatedMark 「んはぁっ♥」
+			PRINTFORML 可能是感觉太舒服了，%ANAME(対象)%的身体都翘了起来。
+			;TranslatedMark 気持ち良かったのか、%ANAME(対象)%の体がエビ反りになる
+			PRINTFORML 一边对胸部持续爱抚，一边重新开始腰部的活动
+			;TranslatedMark 胸への愛撫を続けながら腰の動きを再開する
+			PRINTFORML 「哈，啊♥　……%ANAME(MASTER)%……嗯♥」
+			;TranslatedMark 「は、ぁっ♥　……%ANAME(MASTER)%……っ♥」
+			PRINTFORMW
+		ELSEIF RAND:4 == 0
+			PRINTFORML 
+			PRINTFORML 「呋呋呋♥呐……这个怎么样？舒服吗？」
+			;TranslatedMark 「ふふっ♥　ねぇ……これはどう？ 気持ちいい？」
+			PRINTFORML 这样说着，%ANAME(対象)%突然咯哩咯哩地扭起腰来
+			;TranslatedMark そう言って%ANAME(対象)%は腰をグリグリと回してくる
+			PRINTFORML %ANAME(MASTER)%因为阴茎不规则的快感不由得皱起了眉头
+			;TranslatedMark ペニスに与えられる不規則な快感に%ANAME(MASTER)%は思わず顔をしかめる
+			PRINTFORML 「呋呋，感觉很舒服呢……嗯♥啊……♥」
+			;TranslatedMark 「ふふ、気持ち良さそうね……んっ♥　あっ……♥」
+			PRINTFORML 动着腰的%ANAME(対象)%自己也好像感觉到了很多快感
+			;TranslatedMark 腰を動かしている%ANAME(対象)%自身も大分感じてきているようだ
+			PRINTFORML %ANAME(MASTER)%把腰向前一挺
+			;TranslatedMark %ANAME(MASTER)%は腰を前に突き出す
+			PRINTFORML 「呜♥哈啊啊啊啊♥呀啊，啊……♥」
+			;TranslatedMark 「んぅっ♥　ぁはぁっ♥　ん、やぁあっ……♥」
+			PRINTFORMW
+		ELSEIF RAND:3 == 0
+			PRINTFORML 
+			PRINTFORML 「嗯………嗯，嗯………♥」
+			;TranslatedMark 「ふむ………、んちゅっ………♥」
+			PRINTFORML 两人在床上重复着浓烈的接吻，抱在一起互相寻求对方的身体重叠在一起
+			;TranslatedMark 二人はベッドの上で濃厚なキスを繰り返し、抱き合いながら互いを求めあう身体を重ねる
+			PRINTFORML 「嗯♥啊，哈♥」
+			;TranslatedMark 「んぅっ♥　ぁ、はぁっ♥」
+			PRINTFORML 一边用舌头侵犯彼此的口腔，一边用性器分泌体液，不厌其烦地持续抽插。
+			;TranslatedMark 舌でお互いの口内を犯しながら、性器でも体液を分泌して飽きずに抽挿をし続ける
+			PRINTFORML %ANAME(対象)%被来自%ANAME(MASTER)%的持续的快感折磨着
+			;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%から与えられ続ける快感に悶えている
+			PRINTFORML 「嗯♥呜、哈……♥」
+			;TranslatedMark 「んっ♥　くっ、はぁっ……♥」
+			PRINTFORML %ANAME(MASTER)%抱着%ANAME(対象)%加快了腰的动作
+			;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%を抱きしめて腰の動きを早めた
+			PRINTFORML 「%ANAME(MASTER)%♥我，要来了……♥」
+			;TranslatedMark 「%ANAME(MASTER)%っ♥　私、きちゃうぅっ……♥」
+			PRINTFORML 动作渐渐激烈起来，两人以淫荡的姿势扭动着…
+			;TranslatedMark 動きは徐々に激しくなり、淫らな腰つきで二人は動いていった…
+			PRINTFORML 「呵♥啊啊啊啊♥」
+			;TranslatedMark 「ふぁ♥　ぁああんっ♥」
+			PRINTFORMW
+		ELSEIF RAND:2 == 0
+			PRINTFORML
+			PRINTFORML 「嗯♥　……呜、哈♥」
+			;TranslatedMark 「んっ♥　……くっ、はぁっ♥」
+			PRINTFORML 配合%ANAME(MASTER)%阴茎的长度调整摆动腰的幅度，有节奏地贪图在阴道壁勃起的男根
+			;TranslatedMark %ANAME(MASTER)%のペニスの長さに合わせて腰を振る幅を調整し、テンポよく膣壁で勃起する男根を貪る
+			PRINTFORML 「再来一点……♥更加激烈……♥」
+			;TranslatedMark 「もっと、きて……♥　もっと、激しくっ……♥」
+			PRINTFORML %ANAME(対象)%缠住脚寻求更激烈的刺激
+			;TranslatedMark %ANAME(対象)%は脚を絡めてきて更なる激しさを求める
+			PRINTFORML 阴道内紧紧压迫着%ANAME(MASTER)%的阴茎
+			;TranslatedMark 膣内がキュッと締まって%ANAME(MASTER)%のペニスを圧迫する
+			PRINTFORML %ANAME(MASTER)%不服输般地提高了腰的速度
+			;TranslatedMark 負けじと腰の速度を上げる%ANAME(MASTER)%
+			PRINTFORML 在啪啦啪啦的淫荡的声音中，%ANAME(対象)%为得到的快感一边扭动着身体，一边轻吻着，忘我地扭动着腰
+			;TranslatedMark パンパンと淫らな音が響くなか%ANAME(対象)%は得られる快感に身を捩りながら、軽いキスをして献身的に腰を弾ませていった…
+			PRINTFORML 「啊，啊♥%ANAME(MASTER)%♥嗯，嗯♥」
+			;TranslatedMark 「ぁ、あっ♥　%ANAME(MASTER)%っ♥　んんっ♥」
+			PRINTFORMW
+		ELSE
+			PRINTFORML
+			PRINTFORML 慢慢地从%ANAME(対象)%的阴道内拔出阴茎
+			;TranslatedMark ゆっくりと%ANAME(対象)%の膣内にペニスを出し入れをする
+			PRINTFORML 但是，似乎觉得还不够，%ANAME(対象)%自己开始主动摇起腰来
+			;TranslatedMark しかし、それだと物足りないのか、%ANAME(対象)%は自分から腰を振ってくる
+			PRINTFORML 「呋呋……不用客气哦？更多……♥」
+			;TranslatedMark 「ふふっ……遠慮しないでいいのですよ？ もっと……♥」
+			PRINTFORML 彼此用手脚紧紧抱在一起，快感从沸腾的身体内迸发出来
+			;TranslatedMark お互い手足で強く抱きしめ合い、快楽に滾る身体を弾ませていく
+			PRINTFORML 「激烈地……动起来……嗯，嗯♥」
+			;TranslatedMark 「激しく……動いて？ ……んむっ♥」
+			PRINTFORML 每次上下移动贴在阴道壁上的龟头所带来的快感，让彼此的身体微微地痉挛了
+			;TranslatedMark 上下に動く度に膣壁に当たるカリの快感に、お互い身体を小さく痙攣させる
+			PRINTFORML 在兴奋于从交合处传来的猥亵水声的同时，%ANAME(MASTER)%开始用接近射精的肉棒敲击子宫口…
+			;TranslatedMark 接合部から響く卑猥な水音に興奮しつつ、%ANAME(MASTER)%は射精が近い肉棒で子宮口を叩き始めた…
+			PRINTFORML 「嗯啊啊♥就那样，更多地♥动起来♥哈啊啊♥」
+			;TranslatedMark 「んぁあっ♥　そう、もっとっ♥　動いてぇっ♥　はぁあんっ♥」
+			PRINTFORMW
+		ENDIF
+			;背面座位
+	ELSE
+		PRINTFORML %ANAME(MASTER)%从背后抱住了%ANAME(対象)%的身体，一边抚摸着秘裂的身体一边抬起了腰…
+		;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%の身体を背後から抱き上げると、秘裂を貫いて愛撫しながら腰を突き上げた…
+		IF RAND:5 == 0
+			PRINTFORML
+			PRINTFORML 「嗯啊啊啊♥啊，啊啊♥」
+			;TranslatedMark 「んぁあぅっ♥　ぁ、ふぁあんっ♥」
+			PRINTFORML %ANAME(対象)%的阴道内一下子缩紧，阻止了阴茎的插入
+			;TranslatedMark %ANAME(対象)%の膣内がキュッと締まり、ペニスの挿入を拒もうとする
+			PRINTFORML 在后座上激烈的击球，%ANAME(対象)%的头朝这边来要求接吻
+			;TranslatedMark 背面座位で激しいストロークしながら、%ANAME(対象)%は首をこちらに向かせてキスをおねだりする
+			PRINTFORML 但却起了反效果，%ANAME(MASTER)%的阴茎变得更加坚硬了
+			;TranslatedMark しかし結局は逆効果となり、%ANAME(MASTER)%のペニスは更に硬さを増す
+			PRINTFORML 「！？ 等、等一下……太大了……！？」
+			;TranslatedMark 「！？ ちょっ……まだ、大きく……！？」
+			PRINTFORML 随着兴奋度的高涨，交合也变得淫荡起来，每次冲刺间隔的时间也变短了
+			;TranslatedMark 興奮が高まる度にグラインドも淫らになっていき、ピッチも短くなっていく
+			PRINTFORML 「呀，哈哈♥太厉害了♥这样啊♥奇怪…变、变♥♥」
+			;TranslatedMark 「や、はぁんっ♥　すごっ♥　こんなのっ♥　おかしく…なっ、ちゃう♥♥」
+			PRINTFORML 为了达到即将到来的绝顶，两人像发情的野兽一样激烈地进行着活塞运动…
+			;TranslatedMark 迫る絶頂に達するべく、二人は発情した獣のようにピストンを激しくしていった…
+			PRINTFORMW
+		ELSEIF RAND:4 == 0
+			PRINTFORML
+			PRINTFORML 「嗯♥啊啊啊♥好舒服……♥」
+			;TranslatedMark 「んっ♥　ぁあっ♥　気持ち、いいっ……♥」
+			PRINTFORML 「啊啊♥嗯啊啊♥　……呐，这里也……呐♥」
+			;TranslatedMark 「ぁっ♥　んぁっ♥　……ねぇ、ここも……ね♥」
+			PRINTFORML %ANAME(MASTER)%让%ANAME(対象)%自己动起来，然后用手指捏住了%ANAME(対象)%隆起的乳头
+			;TranslatedMark 動くのを%ANAME(対象)%に任せ、%ANAME(MASTER)%は隆起する%ANAME(対象)%の乳首を指でつまんだ
+			PRINTFORML 「嗯♥啊，哈……♥」
+			;TranslatedMark 「んっ♥　ぁ、はぁんっ……♥」
+			PRINTFORML 为了进一步刺激%ANAME(対象)%扑腾的身体，把乳头轻轻拉了一下
+			;TranslatedMark ビクンと身体を跳ねさせる%ANAME(対象)%をさらに刺激してやる為に乳頭を軽く引っ張った
+			PRINTFORML 「咔哈♥不，不要一下子这么激烈啊……♥」
+			;TranslatedMark 「きゃっ♥　い、いきなりはげしくっ　しないでっ……♥」
+			PRINTFORML 没有了余裕的%ANAME(対象)%动作变得非常大胆，在那个刺激下%ANAME(MASTER)%的射精感也越发强烈起来…
+			;TranslatedMark 余裕が無くなった%ANAME(対象)%の動きは激しく大胆なものになっていき、その刺激で%ANAME(MASTER)%も射精感を高めていった…
+			PRINTFORML 「嗯，嗯♥哈哈啊啊♥」
+			;TranslatedMark 「っくぅ♥　はぁぁああんっ♥」
+			PRINTFORMW
+		ELSEIF RAND:3 == 0
+			PRINTFORML
+			PRINTFORML 一边感受着%ANAME(対象)%身体的重量一边活动着腰部
+			;TranslatedMark %ANAME(対象)%の体重を感じながら腰を動かす
+			PRINTFORML 「嗯啊啊♥哈♥　……喂，这次我要动了…♥」
+			;TranslatedMark 「んぁっ♥　はぁっ♥　……ねぇ、今度は私が動くから…♥」
+			PRINTFORML 这样说着，%ANAME(対象)%开始上下摆动腰部
+			;TranslatedMark そう言うと%ANAME(対象)%は腰を上下に動かし始めた
+			PRINTFORML 「啊啊啊♥你的♥阴道里……♥」
+			;TranslatedMark 「あぁっ♥　貴方のがっ♥　膣内でっ……♥」
+			PRINTFORML 「%ANAME(MASTER)%♥嗯啊啊♥%ANAME(MASTER)%……♥」
+			;TranslatedMark 「%ANAME(MASTER)%っ♥　んぁっ♥　%ANAME(MASTER)%っ……♥」
+			PRINTFORMW
+		ELSEIF RAND:2 == 0
+			PRINTFORML
+			PRINTFORML 「嗯♥太激烈了♥啊啊啊♥」
+			;TranslatedMark 「んっ♥　はげし♥　ぁあっ♥」
+			PRINTFORML 每次互相击打性器，洒下的爱液就会煽动欲情，使%ANAME(MASTER)%进一步加速了活塞运动
+			;TranslatedMark 性器を打ち付け合うごとに撒き散らされる愛液に欲情しつつ、%ANAME(MASTER)%はピストンを速めた
+			PRINTFORML 「好厉害，好厉害♥♥♥　……里面，撞到了……♥」
+			;TranslatedMark 「すご、ぉいっ♥♥♥　……奥に、当たってる……♥」
+			PRINTFORML %ANAME(対象)%把手臂绕在%ANAME(MASTER)%的脖子上
+			;TranslatedMark %ANAME(MASTER)%の首に腕を回してくる%ANAME(対象)%
+			PRINTFORML 「啊啊♥啊♥……嗯，嗯♥」
+			;TranslatedMark 「ぁっ♥　あっ♥……ひぅぅううんっ♥」
+			PRINTFORML 用艳丽的声音娇喘着的%ANAME(対象)%，贪婪淫荡地动着自己的腰…
+			;TranslatedMark 艶めかしい声で喘ぐ%ANAME(対象)%は、貪るように自らも腰を淫らに動かしていく…
+			PRINTFORMW
+		ELSE
+			PRINTFORML 
+			PRINTFORML %ANAME(MASTER)%从背后揉着%ANAME(対象)%的胸
+			;TranslatedMark %ANAME(対象)%の後ろから胸を揉む%ANAME(MASTER)%
+			PRINTFORML 「哎呀♥胸部……不要揉，要有感觉了……♥」
+			;TranslatedMark 「やっ♥　おっぱい……揉まないで、感じちゃうからぁ……♥」
+			PRINTFORML 享受着%ANAME(対象)%的胸部的触感的同时，小心地持续摆动着腰
+			;TranslatedMark %ANAME(対象)%の胸の感触を楽しみながら腰を小刻みに振り続ける
+			PRINTFORML 「哈啊♥不行♥♥阴道和♥胸部同时♥什么的，啊……♥♥♥」
+			;TranslatedMark 「や♥　だめぇ♥♥　膣内と♥　おっぱい同時に♥　なんてぇっ……♥♥♥」
+			PRINTFORML 「啊♥啊……♥」
+			;TranslatedMark 「あっ♥　ぁ……♥」
+			PRINTFORMW
+		ENDIF
+	ENDIF
+			;――――――――――――――――――――――――――――――――――――――――
+			;ファイナル射精
+	IF TALENT:対象:妊娠
+		PRINTFORML
+				;――――――――――――――――――――――――――――――――――――――――
+		IF !RAND:10
+			PRINTFORML 「阴道内……摩擦…♥……啊啊…啊啊啊哈哈♥」
+			;TranslatedMark 「膣内っ……こすれっ…♥……あぁっ…あっあっあっはぁんっ♥」
+		ELSEIF !RAND:9
+			PRINTFORML 「…嗯…哎呀…好……嗯！……♥」
+			;TranslatedMark 「…っ…ひゃっ…いいっ……ぅあぁっ！……♥」
+		ELSEIF !RAND:8
+			PRINTFORML 「啊哈哈♥……啊…嗯……啊啊…♥」
+			;TranslatedMark 「あはっ♥……はっ…んっ……くあっ…♥」
+		ELSEIF !RAND:7
+			PRINTFORML 「嗯…♪……嗯…啊……好酥糊…咦……♥」
+			;TranslatedMark 「はぅっ…♪……っ…あっ……きもち…いっ……♥」
+		ELSEIF !RAND:6
+			PRINTFORML 「啊啊啊啊啊啊……嗯啊啊！…♥」
+			;TranslatedMark 「ぁっあっぁっああっ……んぁあっ！…♥」
+		ELSEIF !RAND:5
+			PRINTFORML 「…嗯…啊…在阴道内…噗呲…嗯……♥」
+			;TranslatedMark 「…ぅあっ…ぁっ…膣内で…コツンっ…てっ……♥」
+		ELSEIF !RAND:4
+			PRINTFORML 「戳中…了…嗯♥…啊啊啊啊！…嗯…啊啊啊！♥」
+			;TranslatedMark 「当たっ…て…っ♥…ああぁっ！…あんっ…はぁあぁっ！♥」
+		ELSEIF !RAND:3
+			PRINTFORML 「嗯啊啊……啊……嗯…噫…嗯……射出来…哈啊哈啊…♪」
+			;TranslatedMark 「んぁあっ……はっ……ぃ…いっ…ぱい……出し…っはぁぁんっ…♪」
+		ELSEIF !RAND:2
+			PRINTFORML 「啊啊！……嗯…嗯……啊…啊哈哈♥」
+			;TranslatedMark 「ふぁっ！……んっ…んっあっ……ぁ…あはっ♥」
+		ELSE
+			PRINTFORML 「…感觉……啊…太棒了…♥……要去了…哎呀♥」
+			;TranslatedMark 「…ッ気持ち……ぁっ…よすぎ…♥……イっちゃっ…ひゃあぁあっ♥」
+		ENDIF
+				;――――――――――――――――――――――――――――――――――――――――
+		IF RAND:3 == 0
+			PRINTFORML 「嗯…！？不，肚子里的孩子好像有点吃惊…」
+			;TranslatedMark 「んんっ…！？いや、少しお腹の子がびっくりしたようなので…」
+			PRINTFORML %ANAME(対象)%在揉着肚子……
+			;TranslatedMark %ANAME(対象)%はお腹を擦っている……
+		ELSEIF RAND:2 == 0
+			PRINTFORML 「喂，怀孕期间忍耐一下吧」
+			;TranslatedMark 「こらっ、妊娠中くらい我慢しなさい」
+			PRINTFORML %ANAME(対象)%带着有些生气的表情鼓起了脸颊……
+			;TranslatedMark %ANAME(対象)%は、少し怒った様子で頬を膨らませている……
+		ELSE
+			PRINTFORML 「呼…停下来…我说过了…嗯…」
+			;TranslatedMark 「ふぅっ…、止めてと…言ったのに…っ…」
+			PRINTFORML %ANAME(対象)%身体颤抖着，沉浸在阴道内射精的余韵中……
+			;TranslatedMark %ANAME(対象)%は、身体を震わせて膣内射精の余韻に浸っている……
+		ENDIF
+		PRINTFORMW
+				;――――――――――――――――――――――――――――――――――――――――
+				;淫壷
+	ELSEIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫壷)
+		PRINTFORML
+				;――――――――――――――――――――――――――――――――――――――――
+		IF !RAND:23
+			PRINTFORML 「阴道内…射出来…♥……啊啊…啊嘎…酱……嗯♥」
+			;TranslatedMark 「膣内でっ…出て…♥……あぁっ…赤…ちゃん……っ♥」
+		ELSEIF !RAND:22
+			PRINTFORML 「…会…♥……怀孕的…嗯……♥」
+			;TranslatedMark 「…妊娠…♥……しちゃうのぉっ…っ……♥」
+		ELSEIF !RAND:21
+			PRINTFORML 「嗯…♥！在里面吗…可能"可以"吧…♥？」
+			;TranslatedMark 「んっ…♥！中に出てる…これは”出来る”かもしれないですね…♥？」
+		ELSEIF !RAND:20
+			PRINTFORML 「射了很多呢…♥♥」
+			;TranslatedMark 「いっぱい出しましたね…♥♥」
+		ELSEIF !RAND:19
+			PRINTFORML 「呼…、热……快要溶化了……♥」
+			;TranslatedMark 「ふぅっ…、熱っ……蕩けそう……♥」
+		ELSEIF !RAND:18
+			PRINTFORML 「………♥…啊啊啊…很多…遗传因子…啊…流…出，来♥」
+			;TranslatedMark 「………♥…ぁあっ…沢山…遺伝子…はっ…流れて…きたっ♥」
+		ELSEIF !RAND:17
+			PRINTFORML 「…受精……嗯…去了……好像…嗯……♥」
+			;TranslatedMark 「…受精……っ…しちゃった……みたい…っ……♥」
+		ELSEIF !RAND:16
+			PRINTFORML 「啊啊啊啊啊啊……嗯啊啊！…♥」
+			;TranslatedMark 「ぁっあっぁっああっ……んぁあっ！…♥」
+		ELSEIF !RAND:15
+			PRINTFORML 「…今天是…啊…危险…日……嗯…满满的…射出来♥」
+			;TranslatedMark 「…今日は…ぁっ…危険…日っ……っ…いっぱい…出してっ♥」
+		ELSEIF !RAND:14
+			PRINTFORML 「戳中…了…嗯♥…啊啊啊啊！…嗯…啊啊啊！♥」
+			;TranslatedMark 「当たっ…て…っ♥…ああぁっ！…あんっ…はぁあぁっ！♥」
+		ELSEIF !RAND:13
+			PRINTFORML 「…啊啊……出来了……嗯…种子……被进去了…啊啊…♪」
+			;TranslatedMark 「…ぁあっ……出てるぅ……ぃ…種付け……されちゃった…ぁんっ…♪」
+		ELSEIF !RAND:12
+			PRINTFORML 「…嗯……啊哈哈♥……出了很多……」
+			;TranslatedMark 「…んっ……あはっ♥……いっぱい出たぁ……」
+		ELSEIF !RAND:11
+			PRINTFORML 「子宫……♥……满满的…我要♥」
+			;TranslatedMark 「子宮に……♥……いっぱい…ちょうだいっ♥」
+		ELSEIF !RAND:10
+			PRINTFORML 「进入子宫……你的粘稠精液…♥……满满的…射精吧♥」
+			;TranslatedMark 「子宮にっ……貴方のドロドロ精液…♥……いっぱい…射精してっ♥」
+		ELSEIF !RAND:9
+			PRINTFORML 「…呐…在阴道内…♥……射精………嗯…啊啊…♥」
+			;TranslatedMark 「…な…膣内にっ…♥……射精して………っ…あぁっ…♥」
+		ELSEIF !RAND:8
+			PRINTFORML 「啊哈哈♥……啊…嗯……啊啊…♥」
+			;TranslatedMark 「あはっ♥……はっ…んっ……くあっ…♥」
+		ELSEIF !RAND:7
+			PRINTFORML 「好棒…嗯……啊啊…嗯……舒服…好…嗯……♥！」
+			;TranslatedMark 「いいの…っ……ああっ…っ……気持ち…いい…っ……♥！」
+		ELSEIF !RAND:6
+			PRINTFORML 「啊啊啊啊啊啊……嗯啊啊！…♥」
+			;TranslatedMark 「ぁっあっぁっああっ……んぁあっ！…♥」
+		ELSEIF !RAND:5
+			PRINTFORML 「…嗯…啊…在阴道内…噗呲…嗯……♥」
+			;TranslatedMark 「…ぅあっ…ぁっ…膣内で…コツンっ…てっ……♥」
+		ELSEIF !RAND:4
+			PRINTFORML 「戳中…了…嗯♥…啊啊啊啊！…嗯…啊啊啊！♥」
+			;TranslatedMark 「当たっ…て…っ♥…ああぁっ！…あんっ…はぁあぁっ！♥」
+		ELSEIF !RAND:3
+			PRINTFORML 「嗯啊啊……啊……嗯…噫…嗯……射出来…哈啊哈啊…♪」
+			;TranslatedMark 「んぁあっ……はっ……ぃ…いっ…ぱい……出し…っはぁぁんっ…♪」
+		ELSEIF !RAND:2
+			PRINTFORML 「呐呐……嗯…把我……啊…夺走看看吧♥」
+			;TranslatedMark 「ほらぁっ……んっ…私を……ぁ…奪ってみせてっ♥」
+		ELSE
+			PRINTFORML 「…感觉……啊……♥……去了…呀啊啊♥」
+			;TranslatedMark 「…ッ気持ち……ぁっ……♥……イっちゃっ…ひゃあぁあっ♥」
+		ENDIF
+				;――――――――――――――――――――――――――――――――――――――――
+		IF RAND:16 == 0
+			PRINTFORML 将脚缠在打算开始射精的%ANAME(MASTER)%的腰上，%ANAME(対象)%强行要求中出
+			;TranslatedMark 射精を始めようとする%ANAME(MASTER)%の腰に脚を絡め、%ANAME(対象)%は中出しを強要させる
+			PRINTFORML 从膨胀到极限的肉棒中放出的精液，被侵犯子宫的快乐吓得%ANAME(対象)%浑身颤抖
+			;TranslatedMark 限界まで膨れ上がった肉棒から放たれる精液で、子宮を犯される快楽に%ANAME(対象)%は震えた
+			PRINTFORML 一边沉浸在孕育的雌性的喜悦中，%ANAME(対象)%一边抚摩着充满遗传因子的肚子…
+			;TranslatedMark 孕ませられる雌の悦びに浸りながら、%ANAME(対象)%は遺伝子で満ちたお腹を愛おしそうにさすった…
+			PRINTFORML 「啊啊…♥…是在阴道内射出是吧♥…可能"可以"的吧…？」
+			;TranslatedMark 「ぁんっ…♥…膣内で出しましたね♥…これは”出来る”かもしれませんよ…？」
+		ELSEIF RAND:15 == 0
+			PRINTFORML 用激烈的冲刺摇晃着被黏糊糊的肉壶抓住的阴茎
+			;TranslatedMark トロトロの肉壷に捉えられたペニスを激しいグラインドで腰を振る
+			PRINTFORML %ANAME(対象)%进一步在阴道内刺激着肉棒
+			;TranslatedMark %ANAME(MASTER)%を犯しているような感覚に欲情して、%ANAME(対象)%はさらに肉棒を膣内で刺激する
+			PRINTFORML 一边感受着子宫落下的感觉，一边追求浓厚的配种，继续着活塞运动…
+			;TranslatedMark 降りてくる子宮を感じながら、濃厚な種付けを求めてピストンを続けた…
+			PRINTFORML %ANAME(対象)%揉着充满精液的小腹……
+			;TranslatedMark %ANAME(対象)%は精液で満たされた下腹部を擦っている……
+		ELSEIF RAND:14 == 0
+			PRINTFORML 「…但是，这种程度还没满足了吧？」
+			;TranslatedMark 「…だけど、この程度で満足しないのでしょう？」
+			PRINTFORML 为了配合淫荡地摆动着腰的%ANAME(対象)%，%ANAME(MASTER)%也从下面刺进肉棒
+			;TranslatedMark 淫らに腰を振る%ANAME(対象)%に合わせるように、%ANAME(MASTER)%も下から肉棒を突き刺す
+			PRINTFORML 龟头碰在子宫口上的触感，让%ANAME(対象)%发出了悲鸣般声音的同时有了快感
+			;TranslatedMark コツンと子宮口に亀頭が当たる感触に悲鳴のような声で%ANAME(対象)%はよがる
+			PRINTFORML 不管妊娠的危险，%ANAME(対象)%要求在阴道把炙热的东西射出…
+			;TranslatedMark 妊娠の危険などお構いなしに、%ANAME(対象)%の膣は熱い中出しを求めていった…
+		ELSEIF RAND:13 == 0
+			PRINTFORML 在狭窄的阴道内勒紧肉棒的同时，%ANAME(対象)%大幅度地垂直摆动腰部
+			;TranslatedMark 狭い膣内で肉棒を絞めつけ、%ANAME(対象)%は長いストロークで腰を縦に振っていく
+			PRINTFORML 就像是在回应想要雄性遗传因子的子宫一般，其冲刺的间隔也变得短而激烈
+			;TranslatedMark 雄の遺伝子を欲しがる子宮に応えるように、そのピッチも短く激しくなる
+			PRINTFORML 笑着俯视着颤抖着身体的%ANAME(MASTER)%，催促着射精…
+			;TranslatedMark ゾクゾクと身体を震わせる%ANAME(MASTER)%を笑顔で見下ろして、射精を促していった…
+			PRINTFORML %ANAME(対象)%把眼睛眯得很细，用手指捞起从秘处中流出的白色浑浊液，就那样舔着……
+			;TranslatedMark %ANAME(対象)%は目をうっとりと細めると秘裂から零れ出た白濁液を指で掬うと、そのまま舐めとった……
+		ELSEIF RAND:12 == 0
+			PRINTFORML %ANAME(MASTER)%为了进行交配的最终目的的配种，用龟头撬开子宫口吐出了遗传因子
+			;TranslatedMark %ANAME(MASTER)%は交尾の最終目的である種付けをするべく、亀頭で子宮口をこじ開けて遺伝子を吐き出した
+			PRINTFORML 精子们为了回应当事人的想法，拼命地向卵子游去
+			;TranslatedMark 精子たちは当人たちの思いに応えるべく、必死に卵子に向けて泳ぎだす
+			PRINTFORML 希望生孩子的%ANAME(対象)%，祈祷着所爱之人的种子能够平安受精…
+			;TranslatedMark 子を成すことを望む%ANAME(対象)%は、愛する人の種が無事受精することを祈った…
+			PRINTFORML 「呼…射出来了…嗯……♥」
+			;TranslatedMark 「ふぅっ…、出て…るぅ……♥」
+			PRINTFORML %ANAME(対象)%身体颤抖着，沉浸在阴道内射精的余韵中……
+			;TranslatedMark %ANAME(対象)%は、身体を震わせて膣内射精の余韻に浸っている……
+		ELSEIF RAND:11 == 0
+			PRINTFORML %ANAME(対象)%像发情的雌性一样，用子宫接受了被欲望释放的%ANAME(MASTER)%的遗传因子
+			;TranslatedMark 欲望のまま放たれる%ANAME(MASTER)%の遺伝子を、%ANAME(対象)%は発情した雌のように子宮で受け止める
+			PRINTFORML 如同蹂躏一般在子宫中飞腾，充满了扑通扑通的感觉，%ANAME(対象)%也沉浸在快感中
+			;TranslatedMark 蹂躙するがの如く子宮の中を飛びはねとぷとぷと満たす感覚に%ANAME(対象)%もまた快感に浸る
+			PRINTFORML 在射精结束之前，两人一边痉挛一边将身体向对方压着…
+			;TranslatedMark 射精が終わるまでの間、二人は痙攣しながら身体を押し付け合った…
+		ELSEIF RAND:10 == 0
+			PRINTFORML 伴随着妊娠的风险，%ANAME(対象)%毫无抵抗地接受了阴道内射精
+			;TranslatedMark 妊娠のリスクを伴うというのに、%ANAME(対象)%は一切の抵抗なく膣内射精を受け止めた
+			PRINTFORML 小小的子宫无法完全容纳的白浊液，开始溢出污染阴道内
+			;TranslatedMark 小さな子宮に治まり切らない白濁液は、溢れ返って膣内を汚し始める
+			PRINTFORML %ANAME(対象)%因为子宫的热度而短暂的颤抖，抱住沉浸在射精余韵中的%ANAME(MASTER)%…
+			;TranslatedMark 暫くの間%ANAME(対象)%は子宮の熱さに震え、射精の余韻に浸る%ANAME(MASTER)%を抱きしめた…
+			PRINTFORML 「呋呋……辛苦了…♥」
+			;TranslatedMark 「ふふっ……お疲れ様…♥」
+		ELSEIF RAND:9 == 0
+			PRINTFORML 用腰压住剧烈地扭动着，阴道壁被高高的龟头剜去的快感，让%ANAME(対象)%无法忍受，娇声叫了起来。
+			;TranslatedMark 覆いかぶさったまま腰を激しくピストンさせ、高いカリにゴリゴリ抉られる膣壁の快感に%ANAME(対象)%も耐え切れず嬌声を上げる
+			PRINTFORML %ANAME(対象)%把身体靠在摇摇晃晃的床上，抱着%ANAME(MASTER)%的脖子，像恋人一样把一切托付给他
+			;TranslatedMark %ANAME(対象)%はギシギシと揺れるベッドに身を預け、%ANAME(MASTER)%の首に腕を回して恋人のように全てを任せる
+			PRINTFORML 由于被打入的甘悦而激烈混乱，用没有余力抬高的手臂抓住床单，脚缠在%ANAME(MASTER)%的腰上催促着阴道内射…
+			;TranslatedMark 打ち込まれる甘悦によって激しく乱れ、上げる余力もなくなった腕でシーツを掴み、%ANAME(MASTER)%の腰に足を絡めて膣内出しを促す…
+			PRINTFORML 「…满满的♥……好幸福…」
+			;TranslatedMark 「…いっぱい♥……幸せ…」
+		ELSEIF RAND:8 == 0
+			PRINTFORML 让%ANAME(対象)%四肢着地趴着，%ANAME(MASTER)%就那样开始摇起腰来贯穿阴道内
+			;TranslatedMark %ANAME(対象)%を四つん這いにさせると、%ANAME(MASTER)%はそのまま膣内を貫くように腰を打ち付け始めた
+			PRINTFORML 似乎是雌的本能从兽的交尾般的姿势中觉醒了，%ANAME(対象)%的声音失去了理性变成了妖艳的叫声。
+			;TranslatedMark 獣の交尾のような体勢に雌の本能が目覚めたのか、%ANAME(対象)%の声は理性を失い妖艶なものになってく。
+			PRINTFORML 在房间里响起的肉体敲击的声音中，两人的动作逐渐加快了速度…
+			;TranslatedMark 部屋に響く肉を打つ音に興奮を高めながら、二人の行為は徐々に速度を速めていった…
+		ELSEIF RAND:7 == 0
+			PRINTFORML %ANAME(対象)%为了回礼，开始用骑乘位淫荡地扭动腰
+			;TranslatedMark %ANAME(対象)%は、お返しとばかりに騎乗位で腰を淫らに動かし始めた
+			PRINTFORML %ANAME(対象)%的身体虽然发出了粗暴的呻吟，但就像记住%ANAME(MASTER)%的肉棒一样，每次吞咽到根部时，阴道内的形状就会和%ANAME(MASTER)%的那根对齐。
+			;TranslatedMark %ANAME(対象)%は声を荒げつつも%ANAME(MASTER)%の肉棒を覚えるように、根元まで飲み込む度に膣内の形を%ANAME(MASTER)%のモノへと合わせていく
+			PRINTFORML 在心里向%ANAME(MASTER)%道歉的同时，身体却渴求着相形良好的%ANAME(MASTER)%，为了寻求更大的快乐扭动了腰…
+			;TranslatedMark 心では%ANAME(MASTER)%に謝りながら、身体は相性の良い%ANAME(MASTER)%を選んでしまい、更なる快楽を求めて腰を振りたくった…
+		ELSEIF RAND:6 == 0
+			PRINTFORML 彼此都接近高潮。连接在一起的两个人什么都不说，只是互相拥抱，开始最后的冲刺
+			;TranslatedMark 互いに限界が近い。繋がった二人は何も言わずに抱き合ってラストスパートをかける
+			PRINTFORML 子宫口早就张开了嘴，向那个毫无防备的子宫里倒上了沾满肉欲的精液
+			;TranslatedMark 子宮口はとっくに口を開いており、その無防備な子宮に向かって肉欲に塗れた精汁をぶちまけた
+			PRINTFORML %ANAME(対象)%发出更大的娇声震动身体，将阴道壁变窄，从阴茎上一滴一滴地榨取精液
+			;TranslatedMark %ANAME(対象)%は一段と大きい嬌声を上げて身を震わせると、膣壁を狭くさせてペニスから一滴残らず精液を搾り取ろうとする
+			PRINTFORML 在射精结束之前两人自然地接吻，沉浸在愉快的余韵中…
+			;TranslatedMark 射精が終わるまで二人は自然と口づけを交わし、心地よい余韻に浸っていた…
+		ELSEIF RAND:5 == 0
+			PRINTFORML 即将绝顶的%ANAME(MASTER)%从后面拉着%ANAME(対象)%的手臂，比刚才更加激烈地继续拍打肉棒
+			;TranslatedMark 絶頂寸前の%ANAME(MASTER)%は後ろから%ANAME(対象)%の腕を引っ張り、先ほどよりも激しく肉棒を打ち込み続ける
+			PRINTFORML 在龟头撬开子宫口的触感中感受到了高潮的兴奋，同时也给为了快乐堕落成了淫荡雌性的%ANAME(対象)%进行了配种
+			;TranslatedMark 亀頭で子宮口をこじ開けていく感触に最高潮の興奮を感じながら、快楽に堕ち淫らな雌と化した%ANAME(対象)%に種付けを果たした
+			PRINTFORML 插入的从根部膨胀的肉棒。绝顶收缩的阴道壁。被吐出的精子们向唯一的逃避场所——子宫如雪崩般袭来
+			;TranslatedMark 根本まで挿入され膨張した肉棒。絶頂で収縮する膣壁。吐き出された精子たちは唯一の逃げ場である子宮へと雪崩を打って入り込む
+			PRINTFORML %ANAME(対象)%感受到了子宫被填满的感觉，感受到了作为女人最棒的快感和幸福…
+			;TranslatedMark %ANAME(対象)%は子宮が満たされていく感覚を覚え、女として最高の快感と幸福を味わった…
+		ELSEIF RAND:4 == 0
+			PRINTFORML 虽然射精已经很近了，但是%ANAME(対象)%却掌握着主导权，啪嗒啪嗒地响着，用妖艳的腰技继续扭动着腰
+			;TranslatedMark もう射精が近いというのに%ANAME(対象)%は主導権を握ったまま、バチュバチュと音を立てながら妖艶な腰つきで腰を振り続ける
+			PRINTFORML %ANAME(MASTER)%无法忍受就那样在阴道内射精了，但是%ANAME(対象)%仍没有停止运动
+			;TranslatedMark %ANAME(MASTER)%は耐え切れずにそのまま膣内に射精したが、しかし%ANAME(対象)%は動きを止めない
+			PRINTFORML 每次坐下的时候，龟头都会在顶点撬开子宫口，将大量的精液推上去，送到子宫内
+			;TranslatedMark 腰を下ろす度に絶頂でエラを張った亀頭が大量の精液を押し上げ、子宮内へと送り込む
+			PRINTFORML 不被填满就无法满足的%ANAME(対象)%，在射精结束后为了榨取精液而继续做着活塞…
+			;TranslatedMark 満タンでないと満足できない%ANAME(対象)%は、射精が終わった後も精液を搾り取ろうとピストンを続行した…
+		ELSEIF RAND:3 == 0
+			PRINTFORML …子宫接受了数次射精，射出的时候%ANAME(対象)%也没有停止运动
+			;TranslatedMark …何度目かの射精を子宮で受け止め、出ている間にも%ANAME(対象)%は動きを止めることはない
+			PRINTFORML 把在狭窄的阴道内射精的肉棒勒紧，%ANAME(対象)%用大幅度的运动摇着腰
+			;TranslatedMark 狭い膣内で射精している肉棒を絞めつけ、%ANAME(対象)%は長いストロークで腰を縦に振っていく
+			PRINTFORML 随着贪欲追求滋润的子宫，间距越来越短、激烈、淫荡
+			;TranslatedMark 貪欲に潤いを求める子宮に従い、どんどんピッチも短く激しく淫らになる
+			PRINTFORML %ANAME(対象)%笑着俯视着在过于强烈的快乐中多次射精的%ANAME(MASTER)%，并且催促着射精…
+			;TranslatedMark 強すぎる快楽に何度も射精する%ANAME(MASTER)%を%ANAME(対象)%は笑顔で見下ろして、さらに射精を促していった…
+		ELSEIF RAND:2 == 0
+			PRINTFORML …是不是%ANAME(対象)%的阴道内太舒服了，%ANAME(MASTER)%不断重复射精
+			;TranslatedMark …%ANAME(対象)%の膣内があまりに気持ちいいのか、%ANAME(MASTER)%は絶えず射精を繰り返す
+			PRINTFORML 被精液和爱液变得黏糊糊的肉壶里抓住阴茎，在激烈的冲刺中继续摆动着腰
+			;TranslatedMark 精液と愛液でトロトロの肉壷に捉えられたペニスを、まだまだ欲しいと激しいグラインドで腰を振り続ける
+			PRINTFORML 在被%ANAME(MASTER)%侵犯的情况下露出了恍惚的笑容，%ANAME(対象)%用在阴道内的肉棒进一步刺激着。
+			;TranslatedMark %ANAME(MASTER)%を犯している状況に恍惚の笑みを浮かべ、%ANAME(対象)%はさらに肉棒を膣内で刺激す。
+			PRINTFORML 在龟头接触到已经降下了的子宫的同时，为了寻求更浓厚的配种而继续进行活塞运动…
+			;TranslatedMark 既に降りている子宮を亀頭の接触で感じながら、さらなる濃厚な種付けを求めてピストンを続けた…
+		ELSE
+			PRINTFORML …两人持续了很长一段时间的行动，虽然已经多次达到了顶峰，但却丝毫没有停止的迹象，%ANAME(対象)%继续挥着腰
+			;TranslatedMark …長く行為を続け、絶頂を何度もした二人ではあるが、止める気配は一向になく%ANAME(対象)%は腰を振り続ける
+			PRINTFORML 被在眼前淫荡地摆动着腰的%ANAME(対象)%所吸引，%ANAME(MASTER)%就这样从阴茎不断地吐出射精
+			;TranslatedMark 目の前で淫らに腰を振る%ANAME(対象)%に魅せられ、%ANAME(MASTER)%はされるがままにペニスから射精を次々に吐き出していく
+			PRINTFORML 每次身体接触都会发出微弱的水声，从交合处溢出了无法进入的精液
+			;TranslatedMark 一度身体を下す度に鈍い水音がなり、接合部からは入りきらない精液が溢れ出てくる
+			PRINTFORML 但是即使这样也还是觉得有点欠缺，%ANAME(対象)%反复进行活塞追求着新的精液…
+			;TranslatedMark しかしそれでも物足りないのか、%ANAME(対象)%はピストンを繰り返し新しい精液を求めていった…
+		ENDIF
+		PRINTFORMW
+				;――――――――――――――――――――――――――――――――――――――――
+	ELSE
+		PRINTFORML
+				;――――――――――――――――――――――――――――――――――――――――
+		IF !RAND:20
+			PRINTFORML 「阴道内…射出来…♥……啊啊…啊嘎…酱……嗯♥」
+			;TranslatedMark 「膣内でっ…出て…♥……あぁっ…赤…ちゃん……っ♥」
+		ELSEIF !RAND:19
+			PRINTFORML 「…会…♥……怀孕的…嗯……♥」
+			;TranslatedMark 「…妊娠…♥……しちゃうのぉっ…っ……♥」
+		ELSEIF !RAND:18
+			PRINTFORML 「………♥…啊啊啊…很多…遗传因子…啊…流…出，来♥」
+			;TranslatedMark 「………♥…ぁあっ…沢山…遺伝子…はっ…流れて…きたっ♥」
+		ELSEIF !RAND:17
+			PRINTFORML 「…受精……嗯…去了……好像…嗯……♥」
+			;TranslatedMark 「…受精……っ…しちゃった……みたい…っ……♥」
+		ELSEIF !RAND:16
+			PRINTFORML 「啊啊啊啊啊啊……嗯啊啊！…♥」
+			;TranslatedMark 「ぁっあっぁっああっ……んぁあっ！…♥」
+		ELSEIF !RAND:15
+			PRINTFORML 「…今天是…啊…危险…日……嗯…满满的…射出来♥」
+			;TranslatedMark 「…今日は…ぁっ…危険…日っ……っ…いっぱい…出してっ♥」
+		ELSEIF !RAND:14
+			PRINTFORML 「戳中…了…嗯♥…啊啊啊啊！…嗯…啊啊啊！♥」
+			;TranslatedMark 「当たっ…て…っ♥…ああぁっ！…あんっ…はぁあぁっ！♥」
+		ELSEIF !RAND:13
+			PRINTFORML 「…啊啊……出来了……嗯…种子……被进去了…啊啊…♪」
+			;TranslatedMark 「…ぁあっ……出てるぅ……ぃ…種付け……されちゃった…ぁんっ…♪」
+		ELSEIF !RAND:12
+			PRINTFORML 「…嗯……啊哈哈♥……出了很多……」
+			;TranslatedMark 「…んっ……あはっ♥……いっぱい出たぁ……」
+		ELSEIF !RAND:11
+			PRINTFORML 「子宫……♥……满满的…我要♥」
+			;TranslatedMark 「子宮に……♥……いっぱい…ちょうだいっ♥」
+		ELSEIF !RAND:10
+			PRINTFORML 「进入子宫……你的粘稠精液…♥……满满的…射精吧♥」
+			;TranslatedMark 「子宮にっ……貴方のドロドロ精液…♥……いっぱい…射精してっ♥」
+		ELSEIF !RAND:9
+			PRINTFORML 「…呐…在阴道内…♥……射精………嗯…啊啊…♥」
+			;TranslatedMark 「…な…膣内にっ…♥……射精して………っ…あぁっ…♥」
+		ELSEIF !RAND:8
+			PRINTFORML 「啊哈哈♥……啊…嗯……啊啊…♥」
+			;TranslatedMark 「あはっ♥……はっ…んっ……くあっ…♥」
+		ELSEIF !RAND:7
+			PRINTFORML 「好棒…嗯……啊啊…嗯……舒服…好…嗯……♥！」
+			;TranslatedMark 「いいの…っ……ああっ…っ……気持ち…いい…っ……♥！」
+		ELSEIF !RAND:6
+			PRINTFORML 「啊啊啊啊啊啊……嗯啊啊！…♥」
+			;TranslatedMark 「ぁっあっぁっああっ……んぁあっ！…♥」
+		ELSEIF !RAND:5
+			PRINTFORML 「…嗯…啊…在阴道内…噗呲…嗯……♥」
+			;TranslatedMark 「…ぅあっ…ぁっ…膣内で…コツンっ…てっ……♥」
+		ELSEIF !RAND:4
+			PRINTFORML 「戳中…了…嗯♥…啊啊啊啊！…嗯…啊啊啊！♥」
+			;TranslatedMark 「当たっ…て…っ♥…ああぁっ！…あんっ…はぁあぁっ！♥」
+		ELSEIF !RAND:3
+			PRINTFORML 「嗯啊啊……啊……嗯…噫…嗯……射出来…哈啊哈啊…♪」
+			;TranslatedMark 「んぁあっ……はっ……ぃ…いっ…ぱい……出し…っはぁぁんっ…♪」
+		ELSEIF !RAND:2
+			PRINTFORML 「呐呐……嗯…把我……啊…夺走看看吧♥」
+			;TranslatedMark 「ほらぁっ……んっ…私を……ぁ…奪ってみせてっ♥」
+		ELSE
+			PRINTFORML 「…感觉……啊……♥……去了…呀啊啊♥」
+			;TranslatedMark 「…ッ気持ち……ぁっ……♥……イっちゃっ…ひゃあぁあっ♥」
+		ENDIF
+				;――――――――――――――――――――――――――――――――――――――――
+		IF RAND:13 == 0
+			PRINTFORML 将脚缠在打算开始射精的%ANAME(MASTER)%的腰上，%ANAME(対象)%强行要求中出
+			;TranslatedMark 射精を始めようとする%ANAME(MASTER)%の腰に脚を絡め、%ANAME(対象)%は中出しを強要させる
+			PRINTFORML 从膨胀到极限的肉棒中放出的精液，被侵犯子宫的快乐吓得%ANAME(対象)%浑身颤抖
+			;TranslatedMark 限界まで膨れ上がった肉棒から放たれる精液で、子宮を犯される快楽に%ANAME(対象)%は震えた
+			PRINTFORML 一边沉浸在孕育的雌性的喜悦中，%ANAME(対象)%一边抚摩着充满遗传因子的肚子…
+			;TranslatedMark 孕ませられる雌の悦びに浸りながら、%ANAME(対象)%は遺伝子で満ちたお腹を愛おしそうにさすった…
+			PRINTFORML 「啊啊…♥…是在阴道内射出是吧♥…可能"可以"的吧…？」
+			;TranslatedMark 「ぁんっ…♥…膣内で出しましたね♥…これは”出来る”かもしれませんよ…？」
+		ELSEIF RAND:12 == 0
+			PRINTFORML %ANAME(MASTER)%为了进行交配的最终目的的配种，用龟头撬开子宫口吐出了遗传因子
+			;TranslatedMark %ANAME(MASTER)%は交尾の最終目的である種付けをするべく、亀頭で子宮口をこじ開けて遺伝子を吐き出した
+			PRINTFORML 精子们为了回应当事人的想法，拼命地向卵子游去
+			;TranslatedMark 精子たちは当人たちの思いに応えるべく、必死に卵子に向けて泳ぎだす
+			PRINTFORML 希望生孩子的%ANAME(対象)%，祈祷着所爱之人的种子能够平安受精…
+			;TranslatedMark 子を成すことを望む%ANAME(対象)%は、愛する人の種が無事受精することを祈った…
+			PRINTFORML 「呼…射出来了…嗯……♥」
+			;TranslatedMark 「ふぅっ…、出て…るぅ……♥」
+			PRINTFORML %ANAME(対象)%身体颤抖着，沉浸在阴道内射精的余韵中……
+			;TranslatedMark %ANAME(対象)%は、身体を震わせて膣内射精の余韻に浸っている……
+		ELSEIF RAND:11 == 0
+			PRINTFORML %ANAME(対象)%像发情的雌性一样，用子宫接受了被欲望释放的%ANAME(MASTER)%的遗传因子
+			;TranslatedMark 欲望のまま放たれる%ANAME(MASTER)%の遺伝子を、%ANAME(対象)%は発情した雌のように子宮で受け止める
+			PRINTFORML 如同蹂躏一般在子宫中飞腾，充满了扑通扑通的感觉，%ANAME(対象)%也沉浸在快感中
+			;TranslatedMark 蹂躙するがの如く子宮の中を飛びはねとぷとぷと満たす感覚に%ANAME(対象)%もまた快感に浸る
+			PRINTFORML 在射精结束之前，两人一边痉挛一边将身体向对方压着…
+			;TranslatedMark 射精が終わるまでの間、二人は痙攣しながら身体を押し付け合った…
+		ELSEIF RAND:10 == 0
+			PRINTFORML 伴随着妊娠的风险，%ANAME(対象)%毫无抵抗地接受了阴道内射精
+			;TranslatedMark 妊娠のリスクを伴うというのに、%ANAME(対象)%は一切の抵抗なく膣内射精を受け止めた
+			PRINTFORML 小小的子宫无法完全容纳的白浊液，开始溢出污染阴道内
+			;TranslatedMark 小さな子宮に治まり切らない白濁液は、溢れ返って膣内を汚し始める
+			PRINTFORML %ANAME(対象)%因为子宫的热度而短暂的颤抖，抱住沉浸在射精余韵中的%ANAME(MASTER)%…
+			;TranslatedMark 暫くの間%ANAME(対象)%は子宮の熱さに震え、射精の余韻に浸る%ANAME(MASTER)%を抱きしめた…
+			PRINTFORML 「呋呋……辛苦了…♥」
+			;TranslatedMark 「ふふっ……お疲れ様…♥」
+		ELSEIF RAND:9 == 0
+			PRINTFORML 用腰压住剧烈地扭动着，阴道壁被高高的龟头剜去的快感，让%ANAME(対象)%无法忍受，娇声叫了起来。
+			;TranslatedMark 覆いかぶさったまま腰を激しくピストンさせ、高いカリにゴリゴリ抉られる膣壁の快感に%ANAME(対象)%も耐え切れず嬌声を上げる
+			PRINTFORML %ANAME(対象)%把身体靠在摇摇晃晃的床上，抱着%ANAME(MASTER)%的脖子，像恋人一样把一切托付给他
+			;TranslatedMark %ANAME(対象)%はギシギシと揺れるベッドに身を預け、%ANAME(MASTER)%の首に腕を回して恋人のように全てを任せる
+			PRINTFORML 由于被打入的甘悦而激烈混乱，用没有余力抬高的手臂抓住床单，脚缠在%ANAME(MASTER)%的腰上催促着阴道内射…
+			;TranslatedMark 打ち込まれる甘悦によって激しく乱れ、上げる余力もなくなった腕でシーツを掴み、%ANAME(MASTER)%の腰に足を絡めて膣内出しを促す…
+			PRINTFORML 「…满满的♥……好幸福…」
+			;TranslatedMark 「…いっぱい♥……幸せ…」
+		ELSEIF RAND:8 == 0
+			PRINTFORML 让%ANAME(対象)%四肢着地趴着，%ANAME(MASTER)%就那样开始摇起腰来贯穿阴道内
+			;TranslatedMark %ANAME(対象)%を四つん這いにさせると、%ANAME(MASTER)%はそのまま膣内を貫くように腰を打ち付け始めた
+			PRINTFORML 似乎是雌的本能从兽的交尾般的姿势中觉醒了，%ANAME(対象)%的声音失去了理性变成了妖艳的叫声。
+			;TranslatedMark 獣の交尾のような体勢に雌の本能が目覚めたのか、%ANAME(対象)%の声は理性を失い妖艶なものになってく。
+			PRINTFORML 在房间里响起的肉体敲击的声音中，两人的动作逐渐加快了速度…
+			;TranslatedMark 部屋に響く肉を打つ音に興奮を高めながら、二人の行為は徐々に速度を速めていった…
+		ELSEIF RAND:7 == 0
+			PRINTFORML %ANAME(対象)%为了回礼，开始用骑乘位淫荡地扭动腰
+			;TranslatedMark %ANAME(対象)%は、お返しとばかりに騎乗位で腰を淫らに動かし始めた
+			PRINTFORML %ANAME(対象)%的身体虽然发出了粗暴的呻吟，但就像记住%ANAME(MASTER)%的肉棒一样，每次吞咽到根部时，阴道内的形状就会和%ANAME(MASTER)%的那根对齐。
+			;TranslatedMark %ANAME(対象)%は声を荒げつつも%ANAME(MASTER)%の肉棒を覚えるように、根元まで飲み込む度に膣内の形を%ANAME(MASTER)%のモノへと合わせていく
+			PRINTFORML 在心里向%ANAME(MASTER)%道歉的同时，身体却渴求着相形良好的%ANAME(MASTER)%，为了寻求更大的快乐扭动了腰…
+			;TranslatedMark 心では%ANAME(MASTER)%に謝りながら、身体は相性の良い%ANAME(MASTER)%を選んでしまい、更なる快楽を求めて腰を振りたくった…
+		ELSEIF RAND:6 == 0
+			PRINTFORML 彼此都接近高潮。连接在一起的两个人什么都不说，只是互相拥抱，开始最后的冲刺
+			;TranslatedMark 互いに限界が近い。繋がった二人は何も言わずに抱き合ってラストスパートをかける
+			PRINTFORML 子宫口早就张开了嘴，向那个毫无防备的子宫里倒上了沾满肉欲的精液
+			;TranslatedMark 子宮口はとっくに口を開いており、その無防備な子宮に向かって肉欲に塗れた精汁をぶちまけた
+			PRINTFORML %ANAME(対象)%发出更大的娇声震动身体，将阴道壁变窄，从阴茎上一滴一滴地榨取精液
+			;TranslatedMark %ANAME(対象)%は一段と大きい嬌声を上げて身を震わせると、膣壁を狭くさせてペニスから一滴残らず精液を搾り取ろうとする
+			PRINTFORML 在射精结束之前两人自然地接吻，沉浸在愉快的余韵中…
+			;TranslatedMark 射精が終わるまで二人は自然と口づけを交わし、心地よい余韻に浸っていた…
+		ELSEIF RAND:5 == 0
+			PRINTFORML 即将绝顶的%ANAME(MASTER)%从后面拉着%ANAME(対象)%的手臂，比刚才更加激烈地继续拍打肉棒
+			;TranslatedMark 絶頂寸前の%ANAME(MASTER)%は後ろから%ANAME(対象)%の腕を引っ張り、先ほどよりも激しく肉棒を打ち込み続ける
+			PRINTFORML 在龟头撬开子宫口的触感中感受到了高潮的兴奋，同时也给为了快乐堕落成了淫荡雌性的%ANAME(対象)%进行了配种
+			;TranslatedMark 亀頭で子宮口をこじ開けていく感触に最高潮の興奮を感じながら、快楽に堕ち淫らな雌と化した%ANAME(対象)%に種付けを果たした
+			PRINTFORML 插入的从根部膨胀的肉棒。绝顶收缩的阴道壁。被吐出的精子们向唯一的逃避场所——子宫如雪崩般袭来
+			;TranslatedMark 根本まで挿入され膨張した肉棒。絶頂で収縮する膣壁。吐き出された精子たちは唯一の逃げ場である子宮へと雪崩を打って入り込む
+			PRINTFORML %ANAME(対象)%感受到了子宫被填满的感觉，感受到了作为女人最棒的快感和幸福…
+			;TranslatedMark %ANAME(対象)%は子宮が満たされていく感覚を覚え、女として最高の快感と幸福を味わった…
+		ELSEIF RAND:4 == 0
+			PRINTFORML 虽然射精已经很近了，但是%ANAME(対象)%却掌握着主导权，啪嗒啪嗒地响着，用妖艳的腰技继续扭动着腰
+			;TranslatedMark もう射精が近いというのに%ANAME(対象)%は主導権を握ったまま、バチュバチュと音を立てながら妖艶な腰つきで腰を振り続ける
+			PRINTFORML %ANAME(MASTER)%无法忍受就那样在阴道内射精了，但是%ANAME(対象)%仍没有停止运动
+			;TranslatedMark %ANAME(MASTER)%は耐え切れずにそのまま膣内に射精したが、しかし%ANAME(対象)%は動きを止めない
+			PRINTFORML 每次坐下的时候，龟头都会在顶点撬开子宫口，将大量的精液推上去，送到子宫内
+			;TranslatedMark 腰を下ろす度に絶頂でエラを張った亀頭が大量の精液を押し上げ、子宮内へと送り込む
+			PRINTFORML 不被填满就无法满足的%ANAME(対象)%，在射精结束后为了榨取精液而继续做着活塞…
+			;TranslatedMark 満タンでないと満足できない%ANAME(対象)%は、射精が終わった後も精液を搾り取ろうとピストンを続行した…
+		ELSEIF RAND:3 == 0
+			PRINTFORML …子宫接受了数次射精，射出的时候%ANAME(対象)%也没有停止运动
+			;TranslatedMark …何度目かの射精を子宮で受け止め、出ている間にも%ANAME(対象)%は動きを止めることはない
+			PRINTFORML 把在狭窄的阴道内射精的肉棒勒紧，%ANAME(対象)%用大幅度的运动摇着腰
+			;TranslatedMark 狭い膣内で射精している肉棒を絞めつけ、%ANAME(対象)%は長いストロークで腰を縦に振っていく
+			PRINTFORML 随着贪欲追求滋润的子宫，间距越来越短、激烈、淫荡
+			;TranslatedMark 貪欲に潤いを求める子宮に従い、どんどんピッチも短く激しく淫らになる
+			PRINTFORML %ANAME(対象)%笑着俯视着在过于强烈的快乐中多次射精的%ANAME(MASTER)%，并且催促着射精…
+			;TranslatedMark 強すぎる快楽に何度も射精する%ANAME(MASTER)%を%ANAME(対象)%は笑顔で見下ろして、さらに射精を促していった…
+		ELSEIF RAND:2 == 0
+			PRINTFORML …是不是%ANAME(対象)%的阴道内太舒服了，%ANAME(MASTER)%不断重复射精
+			;TranslatedMark …%ANAME(対象)%の膣内があまりに気持ちいいのか、%ANAME(MASTER)%は絶えず射精を繰り返す
+			PRINTFORML 被精液和爱液变得黏糊糊的肉壶里抓住阴茎，在激烈的冲刺中继续摆动着腰
+			;TranslatedMark 精液と愛液でトロトロの肉壷に捉えられたペニスを、まだまだ欲しいと激しいグラインドで腰を振り続ける
+			PRINTFORML 在被%ANAME(MASTER)%侵犯的情况下露出了恍惚的笑容，%ANAME(対象)%用在阴道内的肉棒进一步刺激着。
+			;TranslatedMark %ANAME(MASTER)%を犯している状況に恍惚の笑みを浮かべ、%ANAME(対象)%はさらに肉棒を膣内で刺激す。
+			PRINTFORML 在龟头接触到已经降下了的子宫的同时，为了寻求更浓厚的配种而继续进行活塞运动…
+			;TranslatedMark 既に降りている子宮を亀頭の接触で感じながら、さらなる濃厚な種付けを求めてピストンを続けた…
+		ELSE
+			PRINTFORML …两人持续了很长一段时间的行动，虽然已经多次达到了顶峰，但却丝毫没有停止的迹象，%ANAME(対象)%继续挥着腰
+			;TranslatedMark …長く行為を続け、絶頂を何度もした二人ではあるが、止める気配は一向になく%ANAME(対象)%は腰を振り続ける
+			PRINTFORML 被在眼前淫荡地摆动着腰的%ANAME(対象)%所吸引，%ANAME(MASTER)%就这样从阴茎不断地吐出射精
+			;TranslatedMark 目の前で淫らに腰を振る%ANAME(対象)%に魅せられ、%ANAME(MASTER)%はされるがままにペニスから射精を次々に吐き出していく
+			PRINTFORML 每次身体接触都会发出微弱的水声，从交合处溢出了无法进入的精液
+			;TranslatedMark 一度身体を下す度に鈍い水音がなり、接合部からは入りきらない精液が溢れ出てくる
+			PRINTFORML 但是即使这样也还是觉得有点欠缺，%ANAME(対象)%反复进行活塞追求着新的精液…
+			;TranslatedMark しかしそれでも物足りないのか、%ANAME(対象)%はピストンを繰り返し新しい精液を求めていった…
+		ENDIF
+	ENDIF
+	PRINTFORMW
+	RESETCOLOR
+	PRINTFORMW ・
+	PRINTFORMW ・
+	PRINTFORMW ・
+	PRINTFORML
+	IF !RAND:5
+		PRINTFORML 「………早上…？」
+		;TranslatedMark 「………朝…？」
+	ELSEIF !RAND:4
+		PRINTFORML 「…………啾♥」
+		;TranslatedMark 「…………ちゅっ♥」
+	ELSEIF !RAND:3
+		PRINTFORML 「………早上好♥」
+		;TranslatedMark 「………おはよう%ANAME(MASTER)%♥」
+	ELSEIF !RAND:2
+		PRINTFORML 「………♥」
+	ELSE
+		PRINTFORML 「…………呵呵呵♥」
+		;TranslatedMark 「…………ふふっ♥」
+	ENDIF
+			;――――――――――――――――――――――――――――――――――――――――
+	IF RAND:4 == 0
+		PRINTFORML 两个人从互相的窗户中醒来，为了准备平时的工作，两个人开始穿衣服
+		;TranslatedMark お互いまどろみから目覚め切ると、いつもの仕事の準備をするために二人は服を着始める
+		PRINTFORMW 准备结束后的%ANAME(対象)%突然轻轻地吻了%ANAME(MASTER)%，笑着先走了一步…
+		;TranslatedMark 支度を終えた%ANAME(対象)%は不意に%ANAME(MASTER)%に軽く口付けすると、笑顔で一足先に退出していった…
+	ELSEIF RAND:3 == 0
+		PRINTFORML 突然嘴唇有了柔软的触感，睡着的%ANAME(MASTER)%睁开了眼睑
+		;TranslatedMark ふと唇に柔らかい感触がしたので、眠っていた%ANAME(MASTER)%は瞼を開く
+		PRINTFORML 在朦胧的视野中，现在正是双唇重叠的%ANAME(対象)%的脸
+		;TranslatedMark ぼやけ気味の視界には、今まさに唇を重ねている%ANAME(対象)%の顔が映った
+		PRINTFORMW 当注意到%ANAME(MASTER)%醒了的时候，%ANAME(対象)%害羞地微笑了…
+		;TranslatedMark %ANAME(MASTER)%が目を覚ましたのに気付くと、%ANAME(対象)%は恥ずかしげに微笑んだ…
+	ELSEIF RAND:2 == 0
+		PRINTFORML 结束了激烈的交换唾液的吻后，看到了%ANAME(対象)%的脸，好像被开关打开了
+		;TranslatedMark 唾液を交換するほどの濃厚なキスを終え、%ANAME(対象)%の顔を見るとどうやらスイッチが入ってしまったようだ
+		PRINTFORMW 因为有工作的准备，所以让发情的%ANAME(対象)%忍耐住后，和抱在手臂上的%ANAME(対象)%一起离开了房间…
+		;TranslatedMark 仕事の準備もあるので発情した%ANAME(対象)%を我慢させた後、腕に抱きつく%ANAME(対象)%と共に部屋を出た…
+	ELSE
+		PRINTFORML 从唤醒的吻中醒来的%ANAME(対象)%哼着小曲换完衣服，像在%ANAME(MASTER)%的手臂上撒娇般地抱住他
+		;TranslatedMark お目覚めのキスで目覚めた%ANAME(対象)%は鼻歌交じりに着替えを終え、%ANAME(MASTER)%の腕に甘えるように抱きつく
+		PRINTFORMW 在那之后，心情愉快的两个人一直在调情到最后一刻…
+		;TranslatedMark その後、気分の乗った二人はギリギリの時間までイチャイチャし続けた…
+	ENDIF
+	CFLAG:対象:従属度 += 200
+	CALL FUCK(対象, "Ｃ, Ｖ, Ｂ, 欲望, 奉仕, 性交, 性技, 精愛, 苦痛快楽, 被虐, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_ID(MASTER), @"%ANAME(MASTER)%の\@ RAND:2 ? 肉棒 # 唇\@", ANAME(MASTER), "", "調教")
+	PRINTFORMW
+	KDVAR:対象:ドレミー_今日は私から = 1
+ENDIF
+
+RETURN 1
+
+
+

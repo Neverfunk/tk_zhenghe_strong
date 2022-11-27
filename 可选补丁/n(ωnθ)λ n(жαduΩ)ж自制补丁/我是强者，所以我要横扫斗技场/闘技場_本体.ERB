@@ -1,0 +1,406 @@
+﻿;-------------------------------------------------
+;「闘技場」の本体
+;-------------------------------------------------
+@SHOP_LIFE_ARENA(対象)
+#DIM 対象
+#DIM 敵戦闘力
+#DIM 相手男
+#DIMS CONST 相手候補男 = "狼男", "天狗", "鬼", "流浪妖怪", "流氓"
+#DIMS CONST 相手候補女 = "天狗の娘", "河童の娘", "女傭兵", "巫女", "土匪の娘"
+#DIMS 相手名前
+#DIM 出場キャラ, 3
+#DIM 対戦相手がキャラ
+#DIM OPPONENT_ID
+
+DUMPRAND
+VARSET 出場キャラ, -1
+
+;ひとりめ
+CALL SELECT_CHARA_RANDOM("ARENA_MAIN")
+出場キャラ:0 = RESULT
+LOCALS:0 = %ANAME(RESULT)%(目安:{ARENA_GET_POWER(RESULT)})
+
+;ふたりめとさんにんめは非自勢力
+CALL SELECT_CHARA_RANDOM_MULTI(2, "ARENA_SUB")
+出場キャラ:1 = SELECTED_CHARA:0
+出場キャラ:2 = SELECTED_CHARA:1
+SIF 出場キャラ:1 >= 0
+	LOCALS:1 = %ANAME(出場キャラ:1)%(目安:{ARENA_GET_POWER(出場キャラ:1)})
+
+SIF 出場キャラ:2 >= 0
+	LOCALS:2 = %ANAME(出場キャラ:2)%(目安:{ARENA_GET_POWER(出場キャラ:2)})
+
+FOR LOCAL,0, 3
+	SIF 出場キャラ:LOCAL == -1
+		LOCALS:LOCAL = 選択不可
+NEXT
+
+CALL SINGLE_DRAWLINE
+PRINTFORML %ANAME(対象)%来到地下斗技场
+PRINTFORML 里面很多人类和妖怪，气氛几近沸腾
+
+IF !RAND:5
+	SELECTCASE RAND:4
+		CASE 0
+			PRINTFORML 在中央圆形的擂台上，败北的女战士在众人面前被凌辱…
+		CASE 1
+			PRINTFORML 其中一个擂台，有个女奴隶刚被鬼怪打败，好像要被侵犯了…
+		CASE 2
+			PRINTFORML 赌上赌注的观众们在擂台旁摩拳擦掌地吆喝着…
+		CASE 3
+			PRINTFORML 满身是血的剑斗士把%ANAME(対象)%用担架抬了出去…
+	ENDSELECT
+
+	PRINTFORML 「欢迎光临，这里是斗技场」
+	PRINTFORML 「正如您所见的,这里热闹非凡」
+	PRINTFORML 「和普通的不同，这是有女斗士的竞技场。」
+	PRINTFORML 「其中的意味……你明白吧?」
+	IF IS_MALE(対象)
+		PRINTFORML 他脸上现出卑鄙的笑容
+	ELSE
+		PRINTFORML 他舔着嘴唇看着%ANAME(対象)%的身体，脸上露出下流的笑容
+	ENDIF
+	PRINTFORML 「赢了的话就拿钱回去」
+ENDIF
+
+PRINTFORML 
+PRINTFORML 「…那么，和谁战斗？强敌才能赚钱」
+CALL COLOR_PRINTL("「报名费是", , "5000", カラー_注意, "」")
+IF 出場キャラ >= 0
+	PRINTFORML 「...正思考时，另一名像你一样的战士也报了名」
+	CALL PRINT_ARENA_IMAGE(出場キャラ:0,出場キャラ:1,出場キャラ:2)
+ENDIF
+
+PRINTFORML
+PRINTFORML 己方的实力:{ARENA_GET_POWER(対象)}
+{
+	CALL ASK_MULTI_JUDGE("弱的敌人(预计:60)" , 1, "普通的敌人(预计:120)" , 1, "强的敌人(预计:150)", 1, "太强了(预计:180)", 1, "回去吧", 1,
+		@"%LOCALS:0%", 出場キャラ:0 != -1, @"%LOCALS:1%", 出場キャラ:1 != -1, @"%LOCALS:2%", 出場キャラ:2 != -1)
+}
+対戦相手がキャラ = 0
+
+SELECTCASE RESULT
+	CASE 0
+		敵戦闘力 = 40 + RAND:40
+	CASE 1
+		敵戦闘力 = 100 + RAND:40
+	CASE 2
+		敵戦闘力 = 130 + RAND:40
+	CASE 3
+		敵戦闘力 = 160 + RAND:40
+	CASE 4
+		INITRAND
+		RETURN 0
+	CASE 5, 6, 7
+		OPPONENT_ID = 出場キャラ:(RESULT - 5)
+		敵戦闘力 = ARENA_GET_POWER(OPPONENT_ID) * RAND(80, 120) / 100
+		対戦相手がキャラ = 1
+ENDSELECT
+
+PRINTFORML 金5000を支払った
+MONEY -= 5000
+
+IF !対戦相手がキャラ
+	IF IS_FEMALE(対象) && HAS_PENIS(対象)
+		PRINTFORML 「另外，你的话，需要选择对手的性别吗？」
+		PRINTFORML 「嘿嘿，不管怎么样，都会成为一个有趣的节目」
+		PRINTFORML 选择哪一个呢？
+		CALL ASK_YN("男" ,"女")
+		相手男 = !RESULT
+	ELSEIF IS_MALE(対象)
+		相手男 = 0
+	ELSE
+		相手男 = 1
+	ENDIF
+
+	IF 相手男
+		相手名前 = %相手候補男:(RAND:VARSIZE("相手候補男"))%
+	ELSE
+		相手名前 = %相手候補女:(RAND:VARSIZE("相手候補女"))%
+	ENDIF
+ELSE
+	相手名前 = %ANAME(OPPONENT_ID)%
+	相手男 = IS_MALE(OPPONENT_ID)
+ENDIF
+
+PRINTFORML 「好，那这家伙就是你对手」
+PRINTFORMW 对手的名字是%相手名前%
+PRINTFORML 「为了不死而努力吧，嘿嘿」
+PRINTFORMW %ANAME(対象)%穿过接待处，向着剑斗场走去
+
+IF !対戦相手がキャラ
+	IF 相手男
+		SELECTCASE RAND:4
+			CASE 0
+				PRINTFORML 「嘿嘿，真可爱啊」
+				PRINTFORMW %相手名前%舔着嘴唇
+			CASE 1
+				PRINTFORML 「我的对手，居然是上等尤物啊，嘎吱嘎吱」
+				PRINTFORMW %相手名前%露出下流的笑容
+			CASE 2
+				PRINTFORML 「这好像很有趣呢，嘿嘿」
+				PRINTFORMW %相手名前%的胯股之间看得见的鼓起了
+			CASE 3
+				PRINTFORML 「已经无法忍耐了！快点让我干吧！」
+				PRINTFORMW %相手名前%眼里发着红光
+		ENDSELECT
+	ELSE
+		SELECTCASE RAND:4
+			CASE 0
+				PRINTFORML 「绝不能被打败！」
+				PRINTFORMW %相手名前%摆好了架势
+			CASE 1
+				PRINTFORML 「…绝对不会输的！」
+				PRINTFORMW %相手名前%朝这边瞪了一眼
+			CASE 2
+				PRINTFORML 「让我赶快打倒你回家吧」
+				PRINTFORMW 可是与言词相反，她微微颤抖着
+			CASE 3
+				PRINTFORML 「%ANAME(対象)%实力不足啊」
+				PRINTFORMW %相手名前%的脸上露出了凶狠的笑容
+		ENDSELECT
+	ENDIF
+ENDIF
+
+CALL ARENA_BATTLE(対象, 相手名前, 敵戦闘力)
+
+
+IF RESULT > 0
+	CALL ARENA_WIN(対象, 相手名前, 相手男, 対戦相手がキャラ ? OPPONENT_ID # -1)
+	CALL COLOR_PRINTW(@"得到了奖金{ARENA_CALC_MONEY(対象, 敵戦闘力)}", カラー_注意)
+	MONEY += ARENA_CALC_MONEY(対象, 敵戦闘力)
+
+	CALL ARENA_ADD_EXP(対象, 敵戦闘力, 1)
+
+ELSE
+	CALL ARENA_LOSE(対象, 相手名前, 相手男, 対戦相手がキャラ ? OPPONENT_ID # -1)
+	CALL ARENA_ADD_EXP(対象, 敵戦闘力, 0)
+ENDIF
+
+SIF ARENA_GET_POWER(対象) < 180
+	CFLAG:対象:行動済み = 1
+
+INITRAND
+
+RETURN 1
+
+
+;-------------------------------------------------
+;「闘技場」の対戦相手決定
+;-------------------------------------------------
+@SELECT_CHARA_RANDOM_LOGIC_ARENA_MAIN(対象)
+#DIM 対象
+SIF MASTER == 対象
+	RETURN 0
+SIF IS_SP_COUNTRY_CHARA(対象)
+	RETURN 0
+SIF IS_ANIMAL(対象)
+	RETURN 0
+SIF CFLAG:対象:捕虜先
+	RETURN 0
+SIF TALENT:対象:奴隷市場モブ
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;「闘技場」の対戦相手決定 - 主人公と同一勢力は除く
+;-------------------------------------------------
+@SELECT_CHARA_RANDOM_LOGIC_ARENA_SUB(対象)
+#DIM 対象
+SIF CFLAG:MASTER:所属 == CFLAG:対象:所属
+	RETURN 0
+SIF 対象 == MASTER
+	RETURN 0
+CALL SELECT_CHARA_RANDOM_LOGIC_ARENA_MAIN(対象)
+RETURN RESULT
+
+;-------------------------------------------------
+;「闘技場」戦闘力算出
+;-------------------------------------------------
+@ARENA_GET_POWER(対象)
+#FUNCTION
+#DIM 対象
+RETURNF MAX(ABL:対象:武闘 + ABL:対象:防衛, ABL:対象:武闘 + ABL:対象:知略, ABL:対象:防衛 + ABL:対象:知略, 1)
+
+;-------------------------------------------------
+;「闘技場」賞金算出
+;-------------------------------------------------
+@ARENA_CALC_MONEY(対象, 敵戦闘力)
+#FUNCTION
+#DIM 対象
+#DIM 戦闘力
+#DIM 敵戦闘力
+#DIM 実力比
+#DIM 賞金
+戦闘力 = ARENA_GET_POWER(対象)
+実力比 = 敵戦闘力 * 100 / 戦闘力
+賞金 = 5000 + 敵戦闘力 * 50 * RAND(80, 120) / 100
+SIF 実力比 > 100
+	賞金 = 賞金 * 実力比 / 100
+RETURNF 賞金
+
+;-------------------------------------------------
+;「闘技場」経験値加算処理
+;-------------------------------------------------
+@ARENA_ADD_EXP(対象, 敵戦闘力, 勝利)
+#DIM 対象
+#DIM 敵戦闘力
+#DIM 勝利
+#DIM 経験値総量
+#DIM 獲得経験値, 6
+
+VARSET 獲得経験値
+
+経験値総量 = MAX(ARENA_CALC_EXP(対象, 敵戦闘力) / (勝利 == 1 ? 1 # 5), 1)
+
+FOR LOCAL, 0, 経験値総量
+	獲得経験値:(IFRAND("0TO2", 1, "3TO5", RAND:100 < 50)) ++
+NEXT
+
+SIF 獲得経験値:0 > 0
+	CALL PRINT_ADD_EXP(対象, "武闘経験値", 獲得経験値:0, 1)
+SIF 獲得経験値:1 > 0
+	CALL PRINT_ADD_EXP(対象, "防衛経験値", 獲得経験値:1, 1)
+SIF 獲得経験値:2 > 0
+	CALL PRINT_ADD_EXP(対象, "知略経験値", 獲得経験値:2, 1)
+SIF 獲得経験値:3 > 0
+	CALL PRINT_ADD_EXP(対象, "政治経験値", 獲得経験値:3, 1)
+SIF 獲得経験値:4 > 0
+	CALL PRINT_ADD_EXP(対象, "歌唱経験値", 獲得経験値:4, 1)
+SIF 獲得経験値:5 > 0
+	CALL PRINT_ADD_EXP(対象, "料理経験値", 獲得経験値:5, 1)
+CALL TRAIN_AUTO_ABLUP(対象)
+RETURN 1
+
+;-------------------------------------------------
+;「闘技場」賞金算出
+;-------------------------------------------------
+@ARENA_CALC_EXP(対象, 敵戦闘力)
+#FUNCTION
+#DIM 対象
+#DIM 戦闘力
+#DIM 敵戦闘力
+#DIM 実力比
+#DIM 経験値
+戦闘力 = ARENA_GET_POWER(対象)
+実力比 = 敵戦闘力 * 100 / 戦闘力
+経験値 = (RAND:20 + 10 + 敵戦闘力 / 5) * 実力比 / 100
+RETURNF 経験値
+
+;-------------------------------------------------
+;「闘技場」戦闘パート
+;-------------------------------------------------
+@ARENA_BATTLE(対象, 相手名前, 敵戦闘力)
+#DIM 対象
+#DIMS 相手名前
+#DIM 敵戦闘力
+#DIM 累積結果
+#DIM 戦闘結果
+
+CALL SINGLE_DRAWLINE
+PRINTFORMW %ANAME(対象)%一摆好架势，裁判的讯号就响了！
+累積結果 = 0
+WHILE 1
+	戦闘結果 = RAND(ARENA_GET_POWER(対象) / 2, ARENA_GET_POWER(対象)) - RAND(敵戦闘力 / 2, 敵戦闘力)
+	IF 戦闘結果 > 0
+		PRINTFORML %ANAME(対象)%的攻击击中了%相手名前%！
+		PRINTFORMW %相手名前%受伤了
+	ELSE
+		PRINTFORML 没能避开%相手名前%的攻击！
+		PRINTFORMW %ANAME(対象)%受伤了
+	ENDIF
+	IF 戦闘結果 > 0
+		累積結果  ++
+	ELSE
+		累積結果 --
+	ENDIF
+	SIF ABS(累積結果) >= 3
+		BREAK
+WEND
+
+CALL SINGLE_DRAWLINE
+PRINTFORM 「到此为止！」
+
+RETURN 累積結果
+
+;-------------------------------------------------
+;「闘技場」勝利
+;-------------------------------------------------
+@ARENA_WIN(対象, 相手名前, 相手男, 相手キャラ)
+#DIM 対象
+#DIMS 相手名前
+#DIM 相手男
+#DIM 相手キャラ
+
+PRINTFORMW %ANAME(対象)%漂亮地取胜了！
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+IF !相手男
+	PRINTFORML 精疲力尽的%相手名前%跪倒在%ANAME(対象)%面前的地上
+	PRINTFORMW 观众台响起了激烈的要求侵犯她的呼声
+	PRINTFORML 怎麼辦？
+	CALL ASK_MULTI_JUDGE("什么也不做", 1 ,"侵犯", HAS_PENIS(対象))
+	IF RESULT == 0
+		PRINTFORML 不打算让他们如愿
+		PRINTFORMW %ANAME(対象)%温柔地抱起她，一起离开了斗技场
+	ELSE
+		CALL PRINT_FUCK_FACE(相手キャラ,900,7)
+		PRINTFORML 不想浪费这样的机会
+		PRINTFORMW %ANAME(対象)%笑了笑，向她慢慢走近
+		CALL ARENA_RAPE_MALE(対象, 相手名前, 相手キャラ)
+		IF 相手キャラ != -1
+			IF GET_COUNTRY_BOSS(CFLAG:相手キャラ:所属) == 相手キャラ
+				PRINTFORMW %ANAME(相手キャラ)%败北之后，连身体也被凌辱的消息，立刻在幻想乡中四处传播开来……
+				FOR LOCAL, 0, MAX_COUNTRY
+					SIF !IS_COUNTRY(LOCAL) || GROUPMATCH(LOCAL, CFLAG:対象:所属, CFLAG:相手キャラ:所属)
+						CONTINUE
+					CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:相手キャラ:所属, -300, 300)
+				NEXT
+			ENDIF
+			CFLAG:相手キャラ:好感度 -= 500
+			CFLAG:相手キャラ:従属度 += 500
+			CFLAG:相手キャラ:依存度 += 500
+		ENDIF
+	ENDIF
+ELSE
+	PRINTFORML %ANAME(対象)%的胜利遭受到了观众的嘘声
+	PRINTFORML 然后对伏在地上的%相手名前%大声辱骂起来
+	PRINTFORMW %ANAME(対象)%在被卷入混乱之前离开了那个地方
+ENDIF
+PRINTFORML 
+PRINTFORMW %ANAME(対象)%领取了奖金，以轻快的步伐离开了斗技场。
+
+;-------------------------------------------------
+;「闘技場」敗北
+;-------------------------------------------------
+@ARENA_LOSE(対象, 相手名前, 相手男, 相手キャラ)
+#DIM 対象
+#DIMS 相手名前
+#DIM 相手男
+#DIM 相手キャラ
+
+PRINTFORMW %ANAME(対象)%被打倒了…
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+IF !相手男
+	PRINTFORML 观众对着败北的%ANAME(対象)%骂声四起
+ELSE
+	PRINTFORMW 观众对着败北的%ANAME(対象)%骂声四起
+	PRINTFORML %相手名前%慢慢地走近无力地趴在地上的%ANAME(対象)%
+	PRINTFORMW %ANAME(対象)%想要逃走,可是却被他扑倒了
+	CALL ARENA_RAPE_FEMALE(対象, 相手名前, 相手キャラ)
+	IF GET_COUNTRY_BOSS(CFLAG:対象:所属) == 対象
+		PRINTFORMW %ANAME(対象)%败北之后，连身体也被凌辱的消息，立刻在幻想乡中四处传播开来……
+		FOR LOCAL, 0, MAX_COUNTRY
+			SIF !IS_COUNTRY(LOCAL) || LOCAL == CFLAG:対象:所属
+				CONTINUE
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:対象:所属, -300, 300)
+		NEXT
+	ENDIF
+ENDIF
+CALL ADD_COOLTIME(対象, 2)
+PRINTFORML 
+PRINTFORMW …%ANAME(対象)%拖着疲惫的身子回到据点
+

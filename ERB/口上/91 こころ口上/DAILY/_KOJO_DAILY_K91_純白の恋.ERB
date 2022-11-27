@@ -1,0 +1,209 @@
+;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K91_PURE_LOVE_RATE(対象)
+#DIM 対象
+RETURN 1000
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K91_PURE_LOVE_DECISION(対象)
+#DIM 対象
+
+SIF !KDVAR:対象:こころ_まだ知らぬ感情 == 1
+	RETURN 0
+
+SIF KDVAR:対象:こころ_純白の恋 >= 8 || KDVAR:対象:こころ_純白の恋 == 0
+	RETURN 0
+
+SIF !IS_FALLEN(対象)
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K91_PURE_LOVE_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K91_PURE_LOVE(対象)
+#DIM 対象
+IF KDVAR:対象:こころ_純白の恋 == 1
+    PRINTFORMW 你向来不是一个浪漫的人，和其他女孩的亲密关系，与其说是爱恋，不如说是水到渠成
+    PRINTFORMW 所以，你，并不懂爱
+    PRINTFORMW
+    PRINTFORMW 然而，可笑的是，正是这样的你，这样在这个世界，也尽情的展现着生命的活力的你
+    PRINTFORMW 就像是不断燃烧的太阳一样，吸引着无数少女像飞蛾一样的奋不顾身
+	PRINTFORMW 然而，你还是不懂爱
+	PRINTFORMW 正如现在一样
+	PRINTFORMW 纯洁无瑕的少女看着你，你也如此看着她
+	PRINTFORMW 在其他少女看起来，也许你们这就是约会吧
+    PRINTFORMW 但这并不是，你们更像是兄妹，亦或是父女
+    PRINTFORMW 是啊，这就是你，比起恋人，更像是镜子
+    PRINTFORMW 对方向你输出了多少爱恋，你也会等同的回以多少爱恋
+    PRINTFORMW 而面对尚未明晰的少女
+    PRINTFORMW 你
+    PRINTFORMW 就不知所措了
+    PRINTFORMW
+    PRINTFORMW 你们一起去看人偶剧
+    PRINTFORMW 一起去吃刨冰
+    PRINTFORMW 一起去赏花
+    PRINTFORMW 一起去赏月
+    PRINTFORMW 好像什么也没有改变
+    PRINTFORMW
+    PRINTFORMW 又好像......
+    PRINTFORMW
+    KDVAR:対象:こころ_純白の恋 = 2
+ELSEIF KDVAR:対象:こころ_純白の恋 == 2
+	PRINTFORMW 过了几天，心又来了
+	PRINTFORMW 依然是那副无机质的表情，依然是那些不知所措而乱动的面具
+	PRINTFORMW 你无法理解她为什么会再来
+	PRINTFORMW
+    PRINTFORMW 在你看来，你做的很糟
+	PRINTFORMW 不像是一个成熟者，更像是一位初出茅庐而不知所措的少年
+    PRINTFORMW 她理应感到失望
+    PRINTFORMW 然后认识到
+    PRINTFORMW 你不是一个合格的老师
+    PRINTFORMW 不，不是这样的
+    PRINTFORMW 你这么向自己回答道
+    PRINTFORMW
+    PRINTFORMW 然后，手指，在不经意间，被少女勾住
+    PRINTFORMW 那微微颤抖的小拇指，让你的心也随之一颤
+    PRINTFORMW 整个心，也随之安静下来
+    PRINTFORMW 这样就好
+    PRINTFORMW 又何必多想
+    PRINTFORMW
+    PRINTFORMW 少女是这样
+    PRINTFORMW 你
+    PRINTFORMW 亦是这样
+    KDVAR:対象:こころ_純白の恋 = 3
+ELSEIF KDVAR:対象:こころ_純白の恋 == 3
+    PRINTFORMW 今天的活动，是读诗
+    PRINTFORMW 其实，面对这样的孩子，还是读童话比较好吧
+    PRINTFORMW 你这么想着
+    PRINTFORMW 但是，她固执的要听诗
+    PRINTFORMW 你也只好从图书馆里借了几本，随手翻开
+    PRINTFORMW 念诵起来
+    SETCOLOR カラー_黄
+    PRINTFORMW 【每日你与宇宙的光一同游戏】
+    PRINTFORMW 【微妙的访客，你来到花中、水中】
+    PRINTFORMW 【你不只是这颗每日被我当成一束花】
+    PRINTFORMW 【紧握在手中的白色的头】
+    PRINTFORMW 【没有人能与你相比，从我爱你的那一刻开始】
+    PRINTFORMW 【容我将你伸展于黄色的花环中】
+    RESETCOLOR
+    PRINTFORMW 就这样，少女温暖的身体蜷缩在你的怀抱中
+    PRINTFORMW 这样就好
+    KDVAR:対象:こころ_純白の恋 = 4
+ELSEIF KDVAR:対象:こころ_純白の恋 == 4
+    PRINTFORMW 今天的活动，是赏月
+    PRINTFORMW 这不是你的第一次赏月了
+    PRINTFORMW
+    PRINTFORMW 或者是与人狼共舞
+    PRINTFORMW
+    PRINTFORMW 又或者是公主殿下的邀约
+    PRINTFORMW
+    PRINTFORMW 但是，你从来没有如此平静过
+    PRINTFORMW 少女清澈的眼神就这么直愣愣的看着你
+    PRINTFORMW 而你，又通过这样的眼神
+    PRINTFORMW 看见了你自己
+    PRINTFORMW 这不仅是少女在明晰什么是爱的过程
+    PRINTFORMW 也是你，从被动的回馈爱，到主动的给予爱的过程
+    SETCOLOR カラー_黄
+    PRINTFORMW 【月亮，太阳，炎热，寒冷，突然间】
+    PRINTFORMW 【睡着于幸运岛屿们的喉间】
+    PRINTFORMW 【它们洁白，甜美，如清凉的臀部】
+    PRINTFORMW 【在潮湿的夜里我以吻织成的衣裳】
+    PRINTFORMW 【颤抖着，疯狂地被电流所激】
+    PRINTFORMW 【以英雄的方式分化成诸般梦境】
+    PRINTFORMW 【与醉人的玫瑰，践实于我的身上】
+    PRINTFORMW 【逆流而上，在外围的波浪当中】
+    PRINTFORMW 【你平行的身躯被我的双臂所系住】
+    PRINTFORMW 【像一条与我的灵魂无尽接合的鱼】
+    PRINTFORMW 【快与慢，在天空下的活力里】
+    RESETCOLOR
+    KDVAR:対象:こころ_純白の恋 = 5
+	CALL FUCK(MASTER, "慾望, 性技, 侍奉, 性交, Ｃ, Ｖ挿入, 接吻", "童貞喪失, 接吻喪失", 0, @"%ANAME(対象)%の唇", "", @"%ANAME(対象)%の膣", "調教")
+	CALL FUCK(対象, "Ｃ, Ｖ, Ｂ, 慾望, 侍奉, 性交, 性技, 精愛, 痛苦快楽, 受虐, 口淫, Ｖ性交", "接吻喪失, 處女喪失, 膣内射精, 口内射精", GET_ID(MASTER), @"%ANAME(MASTER)%の\@ RAND:2 ? 陰莖 # 唇\@", ANAME(MASTER), "", "調教")
+ELSEIF KDVAR:対象:こころ_純白の恋 == 5
+    PRINTFORMW 清晨醒来的时候，少女依然蜷缩在你的怀里
+    PRINTFORMW 你对着其额头轻轻一吻，才转身离开
+    PRINTFORMW 军营的事依旧很多
+    PRINTFORMW 但是，你知道她爱着你
+    PRINTFORMW 你也知道你爱着她
+    PRINTFORMW 除此以外，什么都不重要了
+    PRINTFORMW 或许，更重要的是
+    PRINTFORMW 在你走后
+    PRINTFORMW 少女呆呆的摸着自己的额头
+    PRINTFORMW 任由狮子面快活的旋转着
+    KDVAR:対象:こころ_純白の恋 = 6
+ELSEIF KDVAR:対象:こころ_純白の恋 == 6
+    PRINTFORMW
+    SETCOLOR カラー_黄
+    PRINTFORMW 烟火大会
+    RESETCOLOR
+    PRINTFORMW
+    PRINTFORMW 向来是孩子们最喜欢的节日
+    PRINTFORMW 虽然你也不知道这些妖精，付丧神，神灵，兔子到底还算不算是孩子
+    PRINTFORMW 不过，即使是这样，也掩盖不住你的好心情
+    PRINTFORMW 少女身着浴衣，在你身后小步走着
+    PRINTFORMW 你也不急，两人就这么静静的逛着
+    PRINTFORMW 捉金鱼，吃关东煮，扔套圈，逛庙会，猜灯谜
+    PRINTFORMW 你们都很安静，只是少女身边的狮子面，依然在快活的旋转着
+    PRINTFORMW
+    PRINTFORMW 就这样，两人默默坐在山上
+    PRINTFORMW 看着花火
+    PRINTFORMW 拥吻
+    PRINTFORMW 少女抬起头想要说些什么
+    PRINTFORMW 你刚准备用食指指肚打断，却被少女含在了嘴里
+    PRINTFORMW 随后，她嗫嚅着
+    PRINTFORMW 爱
+    PRINTFORMW 你明白了，就像你一样，爱，是藏不住的
+    KDVAR:対象:こころ_純白の恋 = 7
+ELSEIF KDVAR:対象:こころ_純白の恋 == 7
+    PRINTFORMW
+    PRINTFORMW 【浮士德】
+    PRINTFORMW
+    PRINTFORMW 【可她已经满了十四岁啊】
+    PRINTFORMW
+    PRINTFORMW 【墨菲斯托】
+    PRINTFORMW
+    PRINTFORMW 【你这口气真像个花花公子】
+    PRINTFORMW 【巴不得好花多多都属于你】
+    PRINTFORMW 【自以为想摘什么就摘什么】
+    PRINTFORMW 【不管它是贞操，还是荣誉】
+    PRINTFORMW 【可是啊并非总能随心所欲】
+    PRINTFORMW
+    PRINTFORMW 你合上书，轻点眉头微微皱起的少女的额头
+    PRINTFORMW 这就足够了
+    PRINTFORMW
+    PRINTFORMW 因为身边人的幸福就可以忽视掉远在天边的他人的悲剧
+    PRINTFORMW 每天清晨醒来，看着身边人开心的笑容
+    PRINTFORMW 就可以满心欢喜
+    PRINTFORMW
+    PRINTFORMW 每每念及她们的幸福，就可以将世界其他角落正在发生的不幸遗忘
+    PRINTFORMW 只要她们还生活在这个世界
+    PRINTFORMW 就可以自私而武断的将这个世界认定为充满欢声笑语的世界
+    PRINTFORMW
+    PRINTFORMW 这样，就够了
+    PRINTFORMW 你抱起了少女新生成的面具
+    PRINTFORMW 这是 爱，是，你我之间的爱
+    KDVAR:対象:こころ_純白の恋 = 8
+ENDIF
+RETURN 1
+

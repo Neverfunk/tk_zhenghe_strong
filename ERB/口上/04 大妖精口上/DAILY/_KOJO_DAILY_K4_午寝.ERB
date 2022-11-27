@@ -1,0 +1,76 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K4_SIESTA_RATE(対象)
+#DIM 対象
+RETURN 30
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K4_SIESTA_DECISION(対象)
+#DIM 対象
+
+;主人公はペニスがあること
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K4_SIESTA_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+
+;---------------------
+@KOJO_DAILY_K4_SIESTA(対象)
+#DIM 対象
+	PRINTFORMW 临近中午，工作中的%ANAME(MASTER)%感到困意来袭
+	PRINTFORMW 就这样稍微休息一下吧
+	PRINTFORMW 「%ANAME(MASTER)%睡着了吗？%ANAME(MASTER)%酱？」
+	PRINTFORMW 耳边传来的是大妖精轻声问询
+	PRINTFORMW 突然想要恶作剧一下
+	PRINTFORMW 如果我睡着了，小家伙会做些什么呢？
+	PRINTFORMW 怎么办？
+	CALL ASK_YN("嗯，好，我已经睡熟了谁也叫不醒", "装睡这种事情小孩子才会做啦")
+	IF RESULT == 1
+		PRINTFORMW 缓缓睁开了眼睛，冲着大妖精笑了笑
+		PRINTFORML 「如果太过疲劳的话，还是应该去休息呢」
+		PRINTFORMW 「嗯？政务太着急没时间休息，这样啊...」
+		PRINTFORML 第二天收到了大妖精送的提神茶饮
+		CFLAG:対象:好感度 += 200
+		KDVAR:対象:大妖精_午寝 = 1
+	ELSEIF RESULT == 0
+		PRINTFORMW 装作熟睡没有理会大妖精的话
+		PRINTFORMW 「唉？真的睡着了」
+		PRINTFORMW 大妖精靠了过来
+		IF CFLAG:4:好感度 >= 500
+			PRINTFORMW 「呼呼，好可爱的睡相」
+			PRINTFORMW 闭着眼似乎感受到了大妖精的的吐息传递到了脸上
+			PRINTFORMW 下一刻感觉到小小的唇贴在了脸上
+			PRINTFORMW 「工作时间睡觉被恶作剧也是没办法呢」
+			PRINTFORMW 大妖精现在肯定是羞得满脸通红吧？
+		ENDIF
+		PRINTFORMW 「积攒了很多政务呢」
+		PRINTFORMW 大妖精的目光转到了桌上的文件
+		PRINTFORMW 只是些琐事，并不是什么机密，让她看了也无妨
+		PRINTFORMW 决定继续装睡
+		PRINTFORMW 「感觉是我可以帮得上忙的内容呢！」
+		PRINTFORMW 大妖精取过一叠文件，坐在另一种桌子旁开始动笔去做
+		PRINTFORMW 安下心来真的就这样睡过去了
+		PRINTFORMW 醒来的时候那部分文件都已经被很棒的处理完了
+		PRINTFORMW 桌子旁还放着一块小巧的蛋糕
+		CFLAG:対象:好感度 += 500
+		CALL COLOR_PRINTL(@"%ANAME(対象)%的知略上昇了3", カラー_注意)
+		ABL:対象:知略 += 3
+		KDVAR:対象:大妖精_午寝 = 1
+	ENDIF
+
+RETURN 1

@@ -1,0 +1,230 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K25_COMPOSE_RATE(対象)
+#DIM 対象
+RETURN 50
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K25_COMPOSE_DECISION(対象)
+#DIM 対象
+
+SIF KDVAR:対象:ミスティア_作詞
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K25_COMPOSE_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K25_COMPOSE(対象)
+#DIM 対象
+#DIM 選択肢, 5
+#DIMS 歌詞, 5, 5
+#DIM 正解パターン, 5, 5
+#DIM 候補パターン
+#DIM 制限時間
+#DIM FIRST_LINE
+#DIM 現在ミリ秒
+
+制限時間 = 10000
+
+歌詞:0:0 = 不覺春已過
+歌詞:0:1 = TO
+歌詞:0:2 = 抓人
+歌詞:0:3 = 在這個
+歌詞:0:4 = 拔下這頭髮
+
+歌詞:1:0 = 薰風裊裊漫步還
+歌詞:1:1 = 抓人
+歌詞:1:2 = 拔下這頭髮
+歌詞:1:3 = 幻想鄉
+歌詞:1:4 = BE
+
+歌詞:2:0 = 假髮に
+歌詞:2:1 = 翠籠香具山
+歌詞:2:2 = 抓人
+歌詞:2:3 = OR
+歌詞:2:4 = 可不能
+
+歌詞:3:0 = 按常理
+歌詞:3:1 = 去抓
+歌詞:3:2 = NOT TO
+歌詞:3:3 = 往歲白衣一片片
+歌詞:3:4 = 做
+
+歌詞:4:0 = 今年又誰曬衣衫
+歌詞:4:1 = BE
+歌詞:4:2 = 假髮
+歌詞:4:3 = 行事
+歌詞:4:4 = 人類了
+
+正解パターン:0:0 = 0
+正解パターン:0:1 = 0
+正解パターン:0:2 = 1
+正解パターン:0:3 = 3
+正解パターン:0:4 = 0
+
+正解パターン:1:0 = 2
+正解パターン:1:1 = 1
+正解パターン:1:2 = 2
+正解パターン:1:3 = 1
+正解パターン:1:4 = 4
+
+正解パターン:2:0 = 4
+正解パターン:2:1 = 2
+正解パターン:2:2 = 0
+正解パターン:2:3 = 4
+正解パターン:2:4 = 2
+
+正解パターン:3:0 = 1
+正解パターン:3:1 = 4
+正解パターン:3:2 = 3
+正解パターン:3:3 = 2
+正解パターン:3:4 = 1
+
+正解パターン:4:0 = 3
+正解パターン:4:1 = 3
+正解パターン:4:2 = 4
+正解パターン:4:3 = 0
+正解パターン:4:4 = 3
+
+
+
+
+PRINTFORMW 「嗚ー唔……還是決定不了……」
+PRINTFORMW %ANAME(対象)%好像在念着什麼……
+PRINTL
+CALL ASK_YN("搭話", "還是算了")
+
+IF RESULT == 1
+	PRINTFORMW 打擾他人思考可不是一件雅事
+	PRINTFORMW 就這樣無視並離開了……
+	KDVAR:対象:ミスティア_作詞 = 1
+	RETURN 1
+ENDIF
+
+PRINTFORMW 「啊、%ANAME(MASTER)%」
+PRINTFORMW 「其實、我正在為新曲填詞……但沒甚麼靈感」
+PRINTFORMW 「不如一起來想吧？」
+PRINTFORML
+CALL ASK_YN("没問題", "現在很忙")
+
+IF RESULT == 1
+	PRINTFORMW 很遺憾現在實在太忙
+	PRINTFORMW 因此拒絕了……
+	KDVAR:対象:ミスティア_作詞 = 1
+	RETURN 1
+ENDIF
+
+PRINTFORMW 「真的嗎！？　謝謝你！」
+PRINTFORMW 「那就讓你試試挑戰一下吧！　準備好了嗎！？」
+PRINTFORMW 「來吧ー！」
+
+PRINTL
+CALL COLOR_PRINTL("請在限定時間來創作出好的歌詞！！", カラー_注意)
+PRINTL
+
+FIRST_LINE = LINECOUNT
+
+;TINPUTが残り時間を返さないので苦肉の策
+;なぜ苦肉の策かというと、GETMILLISECONDは精度があまり良くないため
+現在ミリ秒 = GETMILLISECOND()
+
+FOR LOCAL, 0, VARSIZE("正解パターン", 1)
+
+	FOR LOCAL:1, 0, VARSIZE("歌詞", 1)
+		PRINTFORML [{LOCAL:1}] %歌詞:LOCAL:(LOCAL:1)%
+	NEXT
+
+	$INPUT_LOOP
+
+	TINPUT 制限時間, -1, 1, ""
+
+	;時間切れ
+	IF RESULT == -1
+		PRINTFORMW 雖然拼命地思考、但沒有想出好的歌詞……
+		PRINTFORMW 「唔ー……果然很難嗎？」
+		PRINTFORMW 「看來你今天的狀態不太好呢、希望你下次再幫我吧」
+		PRINTFORMW 今日就這樣結束吧……
+		RETURN 1
+	ENDIF
+
+	IF !INRANGE(RESULT, 0, 4)
+		制限時間 = GETMILLISECOND() - 現在ミリ秒
+		現在ミリ秒 = GETMILLISECOND()
+		GOTO INPUT_LOOP
+	ENDIF
+
+	選択肢:LOCAL = RESULT
+	CLEARLINE LINECOUNT - FIRST_LINE
+	制限時間 -= GETMILLISECOND() - 現在ミリ秒
+	現在ミリ秒 = GETMILLISECOND()
+
+NEXT
+
+PRINTFORMW 創作完成！
+PRINTFORMW 立刻讓%ANAME(対象)%演唱一下吧……
+
+PRINTFORML
+FOR LOCAL, 0, VARSIZE("選択肢")
+	PRINTFORMW 「%歌詞:LOCAL:(選択肢:LOCAL)%～♪」
+NEXT
+PRINTFORMW
+
+FOR LOCAL, 0, VARSIZE("正解パターン", 1)
+	IF 選択肢:0 == 正解パターン:LOCAL:0
+		候補パターン = LOCAL
+		BREAK
+	ENDIF
+NEXT
+
+FOR LOCAL, 0, VARSIZE("正解パターン", 1)
+	IF 選択肢:LOCAL != 正解パターン:候補パターン:LOCAL
+		PRINTFORMW 「……唔……」
+		PRINTFORMW 「總覺得、有什麼地方不對勁」
+		PRINTFORMW 「嘛、即使創作成這樣我也沒資格批評、請不要在意」
+		PRINTFORMW 「下次如果你能在挑戰的話，我會很高興的！」
+		PRINTFORMW 看來%ANAME(対象)%並不滿意你所創作的歌詞
+		PRINTFORMW 今日就這樣結束吧……
+		RETURN
+	ENDIF
+NEXT
+
+PRINTFORMW 「好厲害！　漂亮、真漂亮！」
+PRINTFORMW 看來%ANAME(対象)%非常滿意你所創作的歌詞
+PRINTFORMW 「這樣就可以在下次的LIVE演唱了！　現在就去練習吧！」
+PRINTFORMW 「謝謝你呢、%ANAME(MASTER)%！」
+PRINTFORMW %ANAME(対象)%充滿幹勁地離開了……
+PRINTL
+CALL COLOR_PRINTW(@"%ANAME(対象)%的好感度上昇了", カラー_注意)
+CALL COLOR_PRINTW(@"%ANAME(MASTER)%的歌唱上升了8", カラー_注意)
+CALL COLOR_PRINTW(@"%ANAME(対象)%的歌唱上升了8", カラー_注意)
+
+CFLAG:対象:好感度 += 300
+ABL:MASTER:歌唱 += 8
+ABL:対象:歌唱 += 8
+
+CALL SKILL_LEARN_BY_NAME(対象, スキル_ジャンル_PERSONAL, NO:対象, "人类的牢笼")
+SIF RESULT
+	CALL COLOR_PRINTW(@"%ANAME(対象)%習得了技能「人类的牢笼」！", カラー_注意)
+
+KDVAR:対象:ミスティア_作詞 = 1
+
+RETURN 1

@@ -1,0 +1,6298 @@
+﻿;-------------------------------------------------
+;「捕虜調教」の口上
+;-------------------------------------------------
+
+;=================================================
+;●開始時のセリフ
+;=================================================
+@KOJO_TRAIN_START_B_K46
+;[虚ろ]状態なら口上を表示しない
+IF TALENT:空虚
+	RETURN
+ENDIF
+
+;-------------------------------------------------
+;初回
+;-------------------------------------------------
+IF CFLAG:202 == 0
+	CFLAG:202 = 1
+	;初対面の場合
+	IF !CFLAG:17
+		PRINTFORML 告诉露娜她身为俘虏，需要接受调教。惊恐和畏惧浮上了她的脸颊
+		;TranslatedMark 捕虜調教に来た、と伝えると、ルナチャイルドは明らかに怯えた表情を見せた
+		PRINTFORML 「请、请不要做过分的事……」
+		;TranslatedMark 「ひ、ひどいことはしないでください……」
+		PRINTFORMW 总之，%ANAME(MASTER)%先问了露娜，你要回到自己的国家吗
+		;TranslatedMark とりあえず%ANAME(MASTER)%は、では自分の国に降るか？と聞いてみた
+		PRINTFORML 「那、那样的话就好了……」
+		;TranslatedMark 「そ、それはそのう……」
+		PRINTFORML 很遗憾，对敌人也一样温柔的虫豸这样的事，在这里不会发生的
+		;TranslatedMark 残念だが、味方につかない者に優しくしてやるような虫のいい話はない
+		PRINTFORMW %ANAME(MASTER)%决定教育一下露娜……
+		;TranslatedMark %ANAME(MASTER)%はルナチャイルドをしつけてやることにした……
+	;既に会ったことがある場合
+	ELSE
+		IF TALENT:恋慕 || TALENT:服従
+			PRINTFORML 「求、求你了。我会成为你的伙伴的，请不要做过分的事」
+			;TranslatedMark 「お、お願い。仲間になるからひどいことはしないで」
+			PRINTFORML 露娜已经屈服了，%ANAME(MASTER)%把她投入监狱的时候，她连连哀求
+			;TranslatedMark %ANAME(MASTER)%が牢に入ると、すでに屈服しているルナチャイルドはこんなことを言ってきた
+			PRINTFORML 不过既然她现在是俘虏了，怎么处置都是我的自由
+			;TranslatedMark だが捕虜にした以上は、どうしようとこちらの勝手だ
+			PRINTFORMW 那么，怎么办呢……
+			;TranslatedMark さて、どうしてやろうか……
+		ELSE
+			PRINTFORML 「就、就算我们有一面之缘我也不会屈服的」
+			;TranslatedMark 「し、知り合いだからってすぐ従ったりしないからね」
+			PRINTFORML 露娜好像在极力地虚张声势
+			;TranslatedMark ルナチャイルドは精一杯虚勢を張っているようだ
+			PRINTFORMW 那么，怎么办呢……
+			;TranslatedMark さて、どうしてやろうか……
+		ENDIF
+	ENDIF
+
+;-------------------------------------------------
+;開始時(1回のみ)
+;-------------------------------------------------
+;恋慕または服従を獲得した
+ELSEIF CFLAG:202 < 3 && (TALENT:恋慕 || TALENT:服従)
+	CFLAG:202 = 3
+	PRINTFORML 「呐，我会把自己献给%ANAME(MASTER)%的，把我从牢房里放出来嘛」
+	;TranslatedMark 「ねえ、%ANAME(MASTER)%に従うから牢屋から出してよぉ」
+	PRINTFORML 某种程度上说露娜确实已经屈服了
+	;TranslatedMark 確かにルナチャイルドはある程度屈服しているようだ
+	PRINTFORML 但是，既然她现在是俘虏，那怎么处理都是我的自由
+	;TranslatedMark だが、捕虜にしている間はどうしようとこちらの勝手である
+	PRINTFORMW 那么，怎么办呢……
+	;TranslatedMark さて、どうしてやろうか……
+;依存度が300以上になった
+ELSEIF CFLAG:202 < 2 && CFLAG:3 >= 300
+	CFLAG:202 = 2
+	PRINTFORML 「喂，我不会逃跑的，把我从牢房放出来嘛」
+	;TranslatedMark 「ねえ、逃げたりしないから牢屋から出してよぉ」
+	PRINTFORML 那句话似乎是认真的，但怎么做由我自己决定
+	;TranslatedMark その言葉は本気のようだが、どうするかはこちらの勝手だ
+
+;-------------------------------------------------
+;開始時(2回目以降)
+;-------------------------------------------------
+;恋慕 or 服従
+ELSEIF TALENT:恋慕 || TALENT:服従
+	PRINTFORML （呜呜，是不是要把我在牢房里玩弄到完全屈服为止啊……）
+	;TranslatedMark （うう、完全に屈服するまで牢屋でもてあそぶ気なんだわ……）
+;依存度が300以上
+ELSEIF CFLAG:3 >= 300
+	PRINTFORML 「嗯，明明真的没有逃跑……」
+	;TranslatedMark 「ううっ、本当に逃げたりしないのに……」
+;それ以外
+ELSE
+	PRINTFORML 露娜消除声音悄悄逃走，但是她摔倒了，被%ANAME(MASTER)%抓住了……
+	;TranslatedMark ルナチャイルドは音を消してこっそり逃げようとしたが、転んで%ANAME(MASTER)%に捕まってしまった……
+	PRINTFORML 「对不起！我不会再逃跑了，请不要做过分的事了！」
+	;TranslatedMark 「ひいいごめんなさいごめんなさい！もうしないからひどいことしないでー！」
+ENDIF
+
+;=================================================
+;●終了時のセリフ
+;=================================================
+@KOJO_TRAIN_END_B_K46
+;[虚ろ]状態なら口上を表示しない
+IF TALENT:空虚
+	RETURN
+ENDIF
+
+;-------------------------------------------------
+;行動不能の場合
+;-------------------------------------------------
+;酒酔いによる行動不能
+IF TCVAR:53 == 1
+	;PRINTFORMW 
+;快感のあまり気絶
+ELSEIF TCVAR:52
+	PRINTFORML 「――……――……」
+	PRINTFORML 露娜翻着白眼，大口地喘息着……
+	;TranslatedMark ルナチャイルドは白目を剥き、ぱくぱくと呼吸だけをしている……
+;疲労による行動不能
+ELSEIF TCVAR:51
+	PRINTFORML 「站不起来了……不要就这样放着我……」
+	;TranslatedMark 「た、立てない……このまま置いていかないでー……」
+	PRINTFORML %ANAME(MASTER)%抱起疲惫的露娜放在床上
+	;TranslatedMark %ANAME(MASTER)%は疲れ切ったルナチャイルドを、ベッドに寝かせてやった
+ENDIF
+
+;-------------------------------------------------
+;終了時(1回のみ)
+;-------------------------------------------------
+;初めて依存度が300以上になった
+IF CFLAG:203 < 2 && CFLAG:2 >= 300
+	CFLAG:203 = 2
+	;行動不能ならフラグだけ立てて表示はしない
+	IF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
+		PRINTFORML （呜呜……说实话，就算想逃也逃不出去……）
+		;TranslatedMark （うう……正直逃げようとしても無駄っぽい……）
+	ENDIF
+;初回
+ELSEIF CFLAG:203 < 1
+	CFLAG:203 = 1
+	;行動不能ならフラグだけ立てて表示はしない
+	IF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
+		IF TALENT:烙印
+			;PRINTFORMW 
+		ELSE
+			PRINTFORML 「不、不要再来了……」
+			;TranslatedMark 「も、もう来ないで……」
+			PRINTFORML 露娜虽然很害怕但还是拒绝了%ANAME(MASTER)%
+			;TranslatedMark ルナチャイルドは怯えながらも%ANAME(MASTER)%を拒絶した
+		ENDIF
+	ENDIF
+
+;-------------------------------------------------
+;終了時(2回目以降)
+;-------------------------------------------------
+;行動不能なら非表示
+ELSEIF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
+	IF TALENT:烙印
+		;PRINTFORMW 
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			PRINTFORML 「我什么都听你的，求你把我从牢房里放出来吧……」
+			;TranslatedMark 「何でも言うこと聞くから牢屋から出してよぉ……」
+			PRINTFORML 露娜哭着紧紧抱住了%ANAME(MASTER)%，却被甩脱了手……
+			;TranslatedMark ルナチャイルドは泣きながらすがりついてきたが、%ANAME(MASTER)%はその手を振り払った……
+		;依存度が300以上
+		ELSEIF CFLAG:3 >= 300
+			PRINTFORML 「……哈。怎么做才能从牢房里出来呢」
+			;TranslatedMark 「……はぁ。どうすれば牢屋から出してもらえるのかなぁ」
+		;それ以外
+		ELSE
+			PRINTFORML 露娜想趁着调教结束的间隙逃跑，却踩到了什么液体，滑倒了……
+			;TranslatedMark ルナチャイルドは調教が終わった隙をついて逃げようとしたが、何かの液体に滑って転んでしまった……
+			PRINTFORML 「啊，对不起！下次再也不这样了！」
+			;TranslatedMark 「わああごめんなさい！次はもうしませんから！」
+		ENDIF
+	ENDIF
+ENDIF
+
+;=================================================
+;●コマンド実行前(このキャラがターゲット側のとき)
+;※地の文が表示される前に実行される。戻り値に1を設定する(RETURN 1)と地の文がカットされる
+;  必要に応じてKOJO_COM_TARGETの代わりに使う
+;=================================================
+@KOJO_COM_BEFORE_TARGET_B_K46
+;[虚ろ]状態の場合、口が塞がっている場合は口上を表示しない
+IF TALENT:空虚 || IS_EQUIP_CONTINUE(TARGET, "口装着")
+	RETURN 0
+ENDIF
+
+RETURN 0
+
+;=================================================
+;●コマンド実行前(このキャラがプレイヤー側のとき)
+;※地の文が表示される前に実行される。戻り値に1を設定する(RETURN 1)と地の文がカットされる
+;  必要に応じてKOJO_COM_PLAYERの代わりに使う
+;=================================================
+@KOJO_COM_BEFORE_PLAYER_B_K46
+;[虚ろ]状態の場合、口が塞がっている場合は口上を表示しない
+IF TALENT:空虚 || IS_EQUIP_CONTINUE(TARGET, "口装着")
+	RETURN 0
+ENDIF
+
+RETURN 0
+
+;=================================================
+;●コマンド実行時(このキャラがプレイヤーでもターゲットでも呼び出される)
+;  プレイヤー・ターゲットの区別がないコマンドはここに口上を記述する
+;=================================================
+@KOJO_COM_B_K46
+;[虚ろ]状態の場合、口が塞がっている場合は口上を表示しない
+IF TALENT:空虚 || IS_EQUIP_CONTINUE(TARGET, "口装着")
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;キス
+;-------------------------------------------------
+IF SELECTCOM == 20
+	;ファーストキス
+	IF TALENT:無接吻経験
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「嗯……接吻不是恋人之间才做的事情吗？」
+			;TranslatedMark 「ええー……キスって恋人同士がするもんじゃないの？」
+			PRINTFORML 「没办法啊，已经这样了……」
+			;TranslatedMark 「しょうがないなあ、もう」
+		ENDIF
+	;キス経験済み
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		ELSE
+			PRINTFORML 「嗯……我是个妖精，还是你的俘虏，和我接吻很奇怪啊」
+			;TranslatedMark 「んっ……やっぱり捕虜の妖精とキスするなんて変よぉ」
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;貝合わせ
+;-------------------------------------------------
+IF SELECTCOM == 21
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;双頭バイブ
+;-------------------------------------------------
+IF SELECTCOM == 22
+	;初めて
+	IF IS_COM_FIRST()
+		;このキャラと主人公が共に処女
+		IF EXP:TARGET:Ｖ性交経験 == 1 && EXP:MASTER:Ｖ性交経験 == 1
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;このキャラのみ処女
+		ELSEIF EXP:TARGET:Ｖ性交経験 == 1
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;主人公のみ処女
+		ELSEIF EXP:MASTER:Ｖ性交経験 == 1
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;このキャラと主人公が共に非処女
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ｖ感Lv3以上
+			IF ABL:Ｖ感 >= 3
+				;PRINTFORMW 
+			;Ｖ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;Ｖ感Lv3以上
+			IF ABL:Ｖ感 >= 3
+				;PRINTFORMW 
+			;Ｖ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ｖ感Lv3以上
+			IF ABL:Ｖ感 >= 3
+				;PRINTFORMW 
+			;Ｖ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;=================================================
+;●コマンド実行時(このキャラがターゲット側のとき)
+;=================================================
+@KOJO_COM_TARGET_B_K46
+;[虚ろ]状態の場合、口が塞がっている場合は口上を表示しない
+IF TALENT:空虚 || IS_EQUIP_CONTINUE(TARGET, "口装着")
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;愛撫(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 0
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「别、别碰我啊……」
+			;TranslatedMark 「さ、触らないで……」
+			PRINTFORML 虽然露娜似乎很讨厌，但由于恐惧战俘调教而不敢激烈抵抗……
+			;TranslatedMark ルナチャイルドは嫌がっているようだが、捕虜調教の恐怖で強く抵抗できないようだ……
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			PRINTFORML 「嗯……」
+			;TranslatedMark 「んっ……」
+			PRINTFORML 露娜放弃了，把身心都交给了我……
+			;TranslatedMark ルナチャイルドは諦めて身を任せている……
+		;それ以外
+		ELSE
+			PRINTFORML 「……」
+			PRINTFORML 露娜颤抖着接受爱抚……
+			;TranslatedMark ルナチャイルドは震えながら愛撫されるに任せている……
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;胸愛撫(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 1
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「我、我的胸部都还没有变大呢……」
+			;TranslatedMark 「お、おっぱいは膨らんでないです……」
+			PRINTFORML 爱抚着小小的胸部，露娜露出了困惑的表情……
+			;TranslatedMark ルナチャイルドは小さな胸を愛撫されることに戸惑いを覚えている……
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ｂ感Lv3以上
+			IF ABL:Ｂ感 >= 3
+				;PRINTFORMW 
+			;Ｂ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ｂ感Lv3以上
+			IF ABL:Ｂ感 >= 3
+				PRINTFORML 「哎呀，乳头变硬了……」
+				;TranslatedMark 「ひゃっ、乳首が、硬くなって……」
+			;Ｂ感Lv3未満
+			ELSE
+				PRINTFORML 「这样做有什么意义啊……？」
+				;TranslatedMark 「こんなの、なんの意味があるの……？」
+				PRINTFORML 爱抚着小小的胸部，露娜露出了困惑的表情……
+				;TranslatedMark ルナチャイルドは小さな胸を愛撫されることに戸惑いを覚えている……
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;クンニ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 2
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「哎呀~~~别舔了呀……」
+			;TranslatedMark 「いやあっ、舐めないで……」
+			PRINTFORML 露娜开%ANAME(MASTER)%的脸，但是她的力量完全无法摆脱……
+			;TranslatedMark ルナチャイルドは%ANAME(MASTER)%の顔を払いのけようとするが、圧倒的に力が足りない……
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ｃ感Lv3以上
+			IF ABL:Ｃ感 >= 3
+				;PRINTFORMW 
+			;Ｃ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ｃ感Lv3以上
+			IF ABL:Ｃ感 >= 3
+				PRINTFORML 「不、不行了！尿要漏出来了了！」
+				;TranslatedMark 「だ、だめぇ！おしっこ漏れちゃう！」
+			;Ｃ感Lv3未満
+			ELSE
+				PRINTFORML 「……」
+				PRINTFORML 舔舐着露娜的小穴，露娜颤抖着，任凭玩弄……
+				;TranslatedMark ルナチャイルドは震えながら秘部を舐められるに任せている……
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;指挿入(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 3
+	;初めて
+	IF IS_COM_FIRST()
+		;処女
+		IF TALENT:処女
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORML 「那、那里不应该插手指啊……」
+				;TranslatedMark 「そ、そこは、指入れるところじゃない……」
+				PRINTFORML 看来，露娜还是有一点点性知识的嘛
+				;TranslatedMark どうやら、最低限の性知識はあるようだ
+			ENDIF
+		;非処女
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				PRINTFORML 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ｖ感Lv3以上
+			IF ABL:Ｖ感 >= 3
+				;PRINTFORMW 
+			;Ｖ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ｖ感Lv3以上
+			IF ABL:Ｖ感 >= 3
+				PRINTFORML 「咿~~~，拔出来啊！」
+				;TranslatedMark 「ひいい、抜いてぇ！」
+				PRINTFORML 阴道里的快感让露娜难以忍受……
+				;TranslatedMark ルナチャイルドは膣内からの快楽に耐えかねているようだ……
+			;Ｖ感Lv3未満
+			ELSE
+				PRINTFORML 「请、请不要太粗暴……」
+				;TranslatedMark 「ら、乱暴にはしないで……」
+				PRINTFORML 露娜放弃了抵抗，任凭手指在阴道里抽插……
+				;TranslatedMark ルナチャイルドは、諦めて指の動きを受け入れている……
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;アナル愛撫(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 4
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「那，那里很脏，不能碰呀！」
+			;TranslatedMark 「そ、そこは汚いから触っちゃダメ！」
+			PRINTFORML 露娜语气强烈地抗议，还真是少见呢。%ANAME(MASTER)%无视她的抗议继续爱抚
+			;TranslatedMark ルナチャイルドは珍しく強い口調で抵抗してきたが、%ANAME(MASTER)%は無視して愛撫を続けた
+			PRINTFORML 「啊……一点也不舒服……」
+			;TranslatedMark 「あぅぅ……ぐにぐにされて気持ち悪い……」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ａ感Lv3以上
+			IF ABL:Ａ感 >= 3
+				;PRINTFORMW 
+			;Ａ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ａ感Lv3以上
+			IF ABL:Ａ感 >= 3
+				PRINTFORML 「屁股要变奇怪了！不要在里面动呀！」
+				;TranslatedMark 「お尻が変になるぅ！中で動かさないでぇ！」
+			;Ａ感Lv3未満
+			ELSE
+				PRINTFORML %ANAME(MASTER)%形容着手指上沾染的肠液的味道，露娜害羞的扭捏着……
+				;TranslatedMark %ANAME(MASTER)%の指についたアヌスの匂いを指摘してやると、ルナチャイルドは恥ずかしがった……
+				PRINTFORML 「住手……别闻了……」
+				;TranslatedMark 「やめてぇ……嗅がないでぇ……」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;泡踊り(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 5
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;尻尾挿入(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 6
+	;初めて
+	IF IS_COM_FIRST()
+		;処女
+		IF TALENT:処女
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;非処女
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ｖ感Lv3以上
+			IF ABL:Ｖ感 >= 3
+				;PRINTFORMW 
+			;Ｖ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;Ｖ感Lv3以上
+			IF ABL:Ｖ感 >= 3
+				;PRINTFORMW 
+			;Ｖ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ｖ感Lv3以上
+			IF ABL:Ｖ感 >= 3
+				;PRINTFORMW 
+			;Ｖ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;尻尾Ａ挿入(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 7
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ａ感Lv3以上
+			IF ABL:Ａ感 >= 3
+				;PRINTFORMW 
+			;Ａ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;Ａ感Lv3以上
+			IF ABL:Ａ感 >= 3
+				;PRINTFORMW 
+			;Ａ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ａ感Lv3以上
+			IF ABL:Ａ感 >= 3
+				;PRINTFORMW 
+			;Ａ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;手コキ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 10
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;フェラ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 11
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;パイズリ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 12
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;素股(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 13
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;足コキ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 14
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;尻コキ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 15
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;オナホコキ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 16
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;尻尾コキ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 17
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;正常位(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 30
+	;初めて
+	IF IS_COM_FIRST()
+		;処女
+		IF EXP:TARGET:Ｖ性交経験 == 1
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORML 「住手呀！和妖精做这种事情很奇怪的呀！」
+				;TranslatedMark 「やめてー！こんなこと妖精とするなんておかしいわよー！」
+				PRINTFORML %ANAME(MASTER)%无视了露娜的抗议，一口气贯穿了她的小穴，夺走了她的处女
+				;TranslatedMark %ANAME(MASTER)%はルナチャイルドの抗弁に構わず、一気に処女穴を貫いた
+			ENDIF
+		;非処女
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORML 「住手呀！和妖精做这种事情很奇怪的呀！」
+				;TranslatedMark 「やめてー！こんなこと妖精とするなんておかしいわよー！」
+				PRINTFORML %ANAME(MASTER)%无视了露娜的抗议，一口气贯穿了她的小穴
+				;TranslatedMark %ANAME(MASTER)%はルナチャイルドの抗弁に構わず、一気にペニスを突き入れた
+			ENDIF
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ｖ感Lv3以上
+			IF ABL:Ｖ感 >= 3
+				;PRINTFORMW 
+			;Ｖ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ｖ感Lv3以上
+			IF ABL:Ｖ感 >= 3
+				PRINTFORML 「住手呀，再慢一点呀！？」
+				;TranslatedMark 「やめっ、もっとゆっくりぃ！？」
+				PRINTFORML 强烈的快感让露娜难以忍受，向%ANAME(MASTER)%恳求着
+				;TranslatedMark ルナチャイルドは快感に耐えられないのか、%ANAME(MASTER)%に許しを請うている
+			;Ｖ感Lv3未満
+			ELSE
+				PRINTFORML 「快点结束吧……」
+				;TranslatedMark 「早く終わってよぉ……」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;後背位(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 31
+	;初めて
+	IF IS_COM_FIRST()
+		;処女
+		IF EXP:TARGET:Ｖ性交経験 == 1
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORML 「住手呀！和妖精做这种事情很奇怪的呀！」
+				;TranslatedMark 「やめてー！こんなこと妖精とするなんておかしいわよー！」
+				PRINTFORML %ANAME(MASTER)%无视了露娜的抗议，一口气贯穿了她的小穴，夺走了她的处女
+				;TranslatedMark %ANAME(MASTER)%はルナチャイルドの抗弁に構わず、一気に処女穴を貫いた
+			ENDIF
+		;非処女
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORML （哈……反正是妖精嘛，就应该像狗一样被侵犯的吧）
+				;TranslatedMark （はぁ……しょせん妖精なんて犬みたいに犯されるのがお似合いよね）
+			ENDIF
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ｖ感Lv3以上
+			IF ABL:Ｖ感 >= 3
+				;PRINTFORMW 
+			;Ｖ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ｖ感Lv3以上
+			IF ABL:Ｖ感 >= 3
+				PRINTFORML 「等等，太快了呀！？」
+				;TranslatedMark 「やめっ、もっとゆっくりぃ！？」
+				PRINTFORML 强烈的快感让露娜难以忍受，向%ANAME(MASTER)%恳求着
+				;TranslatedMark ルナチャイルドは快感に耐えられないのか、%ANAME(MASTER)%に許しを請うている
+			;Ｖ感Lv3未満
+			ELSE
+				PRINTFORML 「呜呜，快点结束啊」
+				;TranslatedMark 「ううう、早く終わってよぉ」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;対面座位(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 32
+	;初めて
+	IF IS_COM_FIRST()
+		;処女
+		IF EXP:TARGET:Ｖ性交経験 == 1
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORML 「住手呀！和妖精做这种事情很奇怪的呀！」
+				;TranslatedMark 「やめてー！こんなこと妖精とするなんておかしいわよー！」
+				PRINTFORML %ANAME(MASTER)%无视了露娜的抗议，一口气贯穿了她的小穴，夺走了她的处女
+				;TranslatedMark %ANAME(MASTER)%はルナチャイルドの抗弁に構わず、一気に処女穴を貫いた
+			ENDIF
+		;非処女
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORML 「这样的事……要是和恋人一起做就好了呢」
+				;TranslatedMark 「こういうのは恋人とすればいいのに……」
+			ENDIF
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ｖ感Lv3以上
+			IF ABL:Ｖ感 >= 3
+				;PRINTFORMW 
+			;Ｖ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ｖ感Lv3以上
+			IF ABL:Ｖ感 >= 3
+				PRINTFORML 「等下呀~~~放开我！」
+				;TranslatedMark 「やめっ、離して！」
+				PRINTFORML 强烈的快感让露娜难以忍受，想要逃离%ANAME(MASTER)%的身边
+				;TranslatedMark ルナチャイルドは快感に耐えられないのか、%ANAME(MASTER)%から離れようとしている
+			;Ｖ感Lv3未満
+			ELSE
+				PRINTFORML 露娜紧紧抱住了%ANAME(MASTER)%
+				;TranslatedMark ルナチャイルドは%ANAME(MASTER)%にしがみついている
+				PRINTFORML 「我可不是喜欢%ANAME(MASTER)%哟，我只是不喜欢后背位……」
+				;TranslatedMark 「これは後ろに倒れるのがイヤなんであって、%ANAME(MASTER)%が好きなんじゃないからね」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;背面座位(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 33
+	;初めて
+	IF IS_COM_FIRST()
+		;処女
+		IF EXP:TARGET:Ｖ性交経験 == 1
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORML 「住手呀！和妖精做这种事情很奇怪的呀！」
+				;TranslatedMark 「やめてー！こんなこと妖精とするなんておかしいわよー！」
+				PRINTFORML %ANAME(MASTER)%无视了露娜的抗议，一口气贯穿了她的小穴，夺走了她的处女
+				;TranslatedMark %ANAME(MASTER)%はルナチャイルドの抗弁に構わず、一気に処女穴を貫いた
+			ENDIF
+		;非処女
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORML 「讨厌呀~~~不要拿我当玩具呀！」
+				;TranslatedMark 「イヤー！体中オモチャにしないでー！」
+			ENDIF
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ｖ感Lv3以上
+			IF ABL:Ｖ感 >= 3
+				;PRINTFORMW 
+			;Ｖ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ｖ感Lv3以上
+			IF ABL:Ｖ感 >= 3
+				PRINTFORML 「噫噫噫~~~！至少别刺激那么多地方呀！」
+				;TranslatedMark 「ひいぃ！せめて一箇所だけにしてー！」
+				PRINTFORML 刺激着露娜全身的性感带，露娜经受不住这样的快感，呻吟着
+				;TranslatedMark ルナチャイルドは全身の性感帯への刺激に耐えかねているようだ
+			;Ｖ感Lv3未満
+			ELSE
+				PRINTFORML 「讨厌呀~~~不要拿我当玩具呀！」
+				;TranslatedMark 「イヤー！体中オモチャにしないでー！」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;騎乗位(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 34
+	;初めて
+	IF IS_COM_FIRST()
+		;処女
+		IF EXP:TARGET:Ｖ性交経験 == 1
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORML 「为什么必须要做这种事嘛……呀！对不起！」
+				;TranslatedMark 「なんでそんなことしなきゃ……ひいっすいませんやります！」
+				PRINTFORML 露娜露出了讨厌的神色，于是稍微威胁了她一下。
+				;TranslatedMark 最初は嫌がっていたルナチャイルドだったが、少し脅すとすぐに従った
+				PRINTFORML 「慢慢地……慢慢地来就没问题了……呜、咕……」
+				;TranslatedMark 「ゆ、ゆっくり……ゆっくりやれば大丈夫……ひっ、うぐぅ……」
+				PRINTFORML 很遗憾，像这样慢慢插入的话，只能让自己更加疼痛吧
+				;TranslatedMark 残念ながら、ゆっくり挿入すれば余計に痛みが続くだけだろう
+				PRINTFORMW %ANAME(MASTER)%满足地欣赏着露娜痛苦扭动的身躯，然后挺起了腰，一口气插入了她的小穴
+				;TranslatedMark %ANAME(MASTER)%はしばらくルナチャイルドが痛がる姿を楽しんだあとで、一気に腰を突き入れてやった
+			ENDIF
+		;非処女
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORML 露娜露出了讨厌的神色，于是稍微威胁了她一下，露娜马上艰难地扭动起了腰肢
+				;TranslatedMark ルナチャイルドは最初は嫌がっていたが、少し脅すとすぐに腰を振り出した
+				PRINTFORML 「好、好的……我自己动……」
+				;TranslatedMark 「は、はい……自分で動きます……」
+			ENDIF
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ｖ感Lv3以上
+			IF ABL:Ｖ感 >= 3
+				;PRINTFORMW 
+			;Ｖ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ｖ感Lv3以上
+			IF ABL:Ｖ感 >= 3
+				PRINTFORML 「呀~~~太舒服了~~~我动不了了啊！」
+				;TranslatedMark 「いやっ、気持ちよすぎて動けないよぉ！」
+				PRINTFORML 强烈的快感让露娜自己动不了腰了。没办法，%ANAME(MASTER)%自己耸动着腰肢，继续抽插着
+				;TranslatedMark ルナチャイルドは快楽を恐れて腰を動かそうとしない。仕方ないので%ANAME(MASTER)%は自分から腰を上下してやった
+				PRINTFORML 「呀~~~不要呀~~~！」
+				;TranslatedMark 「ひいい、やめてー！」
+			;Ｖ感Lv3未満
+			ELSE
+				PRINTFORML （呜呜……好累哦……）
+				;TranslatedMark （うう……疲れる……）
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;背面騎乗位(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 35
+	;初めて
+	IF IS_COM_FIRST()
+		;処女
+		IF EXP:TARGET:Ｖ性交経験 == 1
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORML 「为什么必须要做这种事嘛……呀！对不起！」
+				;TranslatedMark 「なんでそんなことしなきゃ……ひいっすいませんやります！」
+				PRINTFORML 露娜露出了讨厌的神色，于是稍微威胁了她一下，露娜马上顺从了
+				;TranslatedMark 最初は嫌がっていたルナチャイルドだったが、少し脅すとすぐに従った
+				PRINTFORML 「慢慢来……慢慢来就没问题了……呜、呜……」
+				;TranslatedMark 「ゆ、ゆっくり……ゆっくりやれば大丈夫……ひっ、うぐぅ……」
+				PRINTFORML 很遗憾，像这样慢慢插入的话，只能让自己更加疼痛吧
+				;TranslatedMark 残念ながら、ゆっくり挿入すれば余計に痛みが続くだけだろう
+				PRINTFORMW %ANAME(MASTER)%满足地欣赏着露娜痛苦扭动的身躯，然后挺起了腰，一口气插入了她的小穴
+				;TranslatedMark %ANAME(MASTER)%はしばらくルナチャイルドが痛がる姿を楽しんだあとで、一気に腰を突き入れてやった
+			ENDIF
+		;非処女
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORML 露娜露出了讨厌的神色，于是稍微威胁了她一下，露娜马上艰难地扭动起了腰肢
+				;TranslatedMark ルナチャイルドは最初は嫌がっていたが、少し脅すとすぐに腰を振り出した
+				PRINTFORML 「好、好的……我自己动……」
+				;TranslatedMark 「は、はい……自分で動きます……」
+			ENDIF
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ｖ感Lv3以上
+			IF ABL:Ｖ感 >= 3
+				;PRINTFORMW 
+			;Ｖ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ｖ感Lv3以上
+			IF ABL:Ｖ感 >= 3
+				PRINTFORML 「呀~~~太舒服了~~~我动不了了啊！」
+				;TranslatedMark 「いやっ、気持ちよすぎて動けないよぉ！」
+				PRINTFORML 强烈的快感让露娜自己动不了腰了。没办法，%ANAME(MASTER)%自己耸动着腰肢，继续抽插着
+				;TranslatedMark ルナチャイルドは快楽を恐れて腰を動かそうとしない。仕方ないので%ANAME(MASTER)%は自分から腰を上下してやった
+				PRINTFORML 「呀~~~不要呀~~~！」
+				;TranslatedMark 「ひいい、やめてー！」
+			;Ｖ感Lv3未満
+			ELSE
+				PRINTFORML （呜呜……好累哦……）
+				;TranslatedMark （うう……疲れる……）
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ正常位(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 40
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「不要呀！不要插进屁股里呀！」
+			;TranslatedMark 「やめてー！お尻になんて入れないでー！」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ａ感Lv3以上
+			IF ABL:Ａ感 >= 3
+				;PRINTFORMW 
+			;Ａ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ａ感Lv3以上
+			IF ABL:Ａ感 >= 3
+				PRINTFORML 「好奇怪啊，屁股好舒服呀，我变得好奇怪啊！呀~~~，拔出来呀~~~」
+				;TranslatedMark 「変よぉ、お尻が気持ちいいとかおかしいから！ぬ、抜いてぇ！」
+				PRINTFORML 露娜沉浸在肛门被抽插的快乐之中，逐渐迷失了自我
+				;TranslatedMark ルナチャイルドはアナルセックスの快楽に混乱しているようだ……
+			;Ａ感Lv3未満
+			ELSE
+				PRINTFORML 「好痛，屁股好痛，快拔出来啊！」
+				;TranslatedMark 「痛い、お尻痛いから抜いてぇ！」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ後背位(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 41
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「要、要插进屁股里吗……！？」
+			;TranslatedMark 「お、お尻に入れられて……！？」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ａ感Lv3以上
+			IF ABL:Ａ感 >= 3
+				;PRINTFORMW 
+			;Ａ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ａ感Lv3以上
+			IF ABL:Ａ感 >= 3
+				PRINTFORML 「好奇怪啊，屁股好舒服呀，我变得好奇怪啊！呀~~~，拔出来呀~~~」
+				;TranslatedMark 「変よぉ、お尻が気持ちいいとかおかしいから！ぬ、抜いてぇ！」
+				PRINTFORML 露娜沉浸在肛门被抽插的快乐之中，逐渐迷失了自我
+				;TranslatedMark ルナチャイルドはアナルセックスの快楽に混乱しているようだ……
+			;Ａ感Lv3未満
+			ELSE
+				PRINTFORML 「好痛，屁股好痛，快拔出来啊！」
+				;TranslatedMark 「痛い、お尻痛いから抜いてぇ！」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ対面座位(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 42
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「不要呀！不要插进屁股里呀！」
+			;TranslatedMark 「やめてー！お尻になんて入れないでー！」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ａ感Lv3以上
+			IF ABL:Ａ感 >= 3
+				;PRINTFORMW 
+			;Ａ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ａ感Lv3以上
+			IF ABL:Ａ感 >= 3
+				PRINTFORML 「好奇怪啊，屁股好舒服呀，我变得好奇怪啊！呀~~~，拔出来呀~~~」
+				;TranslatedMark 「変よぉ、お尻が気持ちいいとかおかしいから！ぬ、抜いてぇ！」
+				PRINTFORML 露娜沉浸在肛门被抽插的快乐之中，逐渐迷失了自我
+				;TranslatedMark ルナチャイルドはアナルセックスの快楽に混乱しているようだ……
+			;Ａ感Lv3未満
+			ELSE
+				PRINTFORML 「好痛，屁股好痛，快拔出来啊！」
+				;TranslatedMark 「痛い、お尻痛いから抜いてぇ！」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ背面座位(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 43
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「年！不要把全身都当玩具！」
+			;TranslatedMark 「イヤー！体中オモチャにしないでー！」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ａ感Lv3以上
+			IF ABL:Ａ感 >= 3
+				;PRINTFORMW 
+			;Ａ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ａ感Lv3以上
+			IF ABL:Ａ感 >= 3
+				PRINTFORML 「好了好了，连屁股都觉得舒服了，好奇怪啊！」
+				;TranslatedMark 「ひいい、お尻まで全部気持ちいいとかおかしいよー！」
+				PRINTFORML 露娜柴尔德似乎难以忍受对全身性感带的刺激
+				;TranslatedMark ルナチャイルドは全身の性感帯への刺激に耐えかねているようだ
+			;Ａ感Lv3未満
+			ELSE
+				PRINTFORML 「讨厌呀~~~不要拿我当玩具呀！」
+				;TranslatedMark 「イヤー！体中オモチャにしないでー！」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ騎乗位(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 44
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 露娜露出了讨厌的神色，于是稍微威胁了她一下，露娜马上艰难地扭动起了腰肢
+			;TranslatedMark ルナチャイルドは最初は嫌がっていたが、少し脅すとすぐに腰を振り出した
+			PRINTFORML 「好、好的……我自己动……」
+			;TranslatedMark 「は、はい……自分で動きます……」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ａ感Lv3以上
+			IF ABL:Ａ感 >= 3
+				;PRINTFORMW 
+			;Ａ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ａ感Lv3以上
+			IF ABL:Ａ感 >= 3
+				PRINTFORML 「不要呀……我的屁屁变得好奇怪呀……」
+				;TranslatedMark 「だめ……こんなのお尻おかしくなる……」
+				PRINTFORML 强烈的快感让露娜自己动不了腰了。没办法，%ANAME(MASTER)%自己耸动着腰肢，继续抽插着
+				;TranslatedMark 菊門への快楽を恐れたルナチャイルドは動きを止めてしまった。%ANAME(MASTER)%は仕方ないので自分で腰を動かしてやった
+				PRINTFORML 「哎呀！住手呀！」
+				;TranslatedMark 「いやぁー！やめてぇー！」
+			;Ａ感Lv3未満
+			ELSE
+				PRINTFORML （呜呜……好累哦……）
+				;TranslatedMark （うう……疲れる……）
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ背面騎乗位(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 45
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 露娜露出了讨厌的神色，于是稍微威胁了她一下，露娜马上艰难地扭动起了腰肢
+			;TranslatedMark ルナチャイルドは最初は嫌がっていたが、少し脅すとすぐに腰を振り出した
+			PRINTFORML 「好、好的……我自己动……」
+			;TranslatedMark 「は、はい……自分で動きます……」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ａ感Lv3以上
+			IF ABL:Ａ感 >= 3
+				;PRINTFORMW 
+			;Ａ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ａ感Lv3以上
+			IF ABL:Ａ感 >= 3
+				PRINTFORML 「不要呀……我的屁屁变得好奇怪呀……」
+				;TranslatedMark 「だめ……こんなのお尻おかしくなる……」
+				PRINTFORML 强烈的快感让露娜自己动不了腰了。没办法，%ANAME(MASTER)%自己耸动着腰肢，继续抽插着
+				;TranslatedMark 菊門への快楽を恐れたルナチャイルドは動きを止めてしまった。%ANAME(MASTER)%は仕方ないので自分で腰を動かしてやった
+				PRINTFORML 「哎呀！住手呀」
+				;TranslatedMark 「いやぁー！やめてぇー！」
+			;Ａ感Lv3未満
+			ELSE
+				PRINTFORML （呜呜……好累哦……）
+				;TranslatedMark （うう……疲れる……）
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;ローター(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 60
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「咿呀~~~这是什么鸟蛋啊，好凶暴啊！」
+			;TranslatedMark 「ひいい！その卵凶暴すぎよー！」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ｃ感Lv3以上
+			IF ABL:Ｃ感 >= 3
+				;PRINTFORMW 
+			;Ｃ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ｃ感Lv3以上
+			IF ABL:Ｃ感 >= 3
+				PRINTFORML 「不、不要再动了，有什么要出来了！」
+				;TranslatedMark 「と、止めてー！出る、なんか出るぅ！」
+			;Ｃ感Lv3未満
+			ELSE
+				PRINTFORML 「别再欺负我了！这个蛋太凶暴了！」
+				;TranslatedMark 「押し当てないでー！その卵凶暴すぎる！」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;バイブ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 61
+	;初めて
+	IF IS_COM_FIRST()
+		;処女
+		IF TALENT:処女
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORMW 「呀~~~救救我！要被刺穿了！」
+				;TranslatedMark 「ひいい、助けてー！串刺しにされるー！」
+			ENDIF
+		;非処女
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORMW 「哎呀！这是什么啊，在我的里面暴走着……」
+				;TranslatedMark 「いやぁー！何これ、中で暴れてるー！」
+			ENDIF
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ｖ感Lv3以上
+			IF ABL:Ｖ感 >= 3
+				;PRINTFORMW 
+			;Ｖ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ｖ感Lv3以上
+			IF ABL:Ｖ感 >= 3
+				PRINTFORML 「哎呀！要用玩具让我舒服……太奇怪了」
+				;TranslatedMark 「いやぁー！オモチャでアソコが気持ちよくなるなんておかしいよー！」
+			;Ｖ感Lv3未満
+			ELSE
+				PRINTFORML 「那里不是放玩具的地方呀！」
+				;TranslatedMark 「そこはオモチャ入れる場所じゃないってばぁ！」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;アナルバイブ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 62
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 「哎呀，好痛！别这样呀，太粗暴了！」
+			;TranslatedMark 「いやぁー、痛い痛い！無理矢理入れないでー！」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ａ感Lv3以上
+			IF ABL:Ａ感 >= 3
+				;PRINTFORMW 
+			;Ａ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ａ感Lv3以上
+			IF ABL:Ａ感 >= 3
+				PRINTFORML 「嗯嗯嗯~~~捅进屁股里了，这么舒服……我是不是变得奇怪了啊……」
+				;TranslatedMark 「ひいい、お尻にオモチャ突っ込まれて、気持ちよくなって、何もかもおかしいよぉ！」
+			;Ａ感Lv3未満
+			ELSE
+				PRINTFORML 「呀~~~在我的里面嗡嗡的动着~~~！」
+				;TranslatedMark 「ひいい、ゴリゴリいってるー！」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;クリキャップ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 63
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「呃，好像在振动……这是什么啊？」
+			;TranslatedMark 「うっ、なんか震えてる……何これ？」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ｃ感Lv3以上
+			IF ABL:Ｃ感 >= 3
+				;PRINTFORMW 
+			;Ｃ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ｃ感Lv3以上
+			IF ABL:Ｃ感 >= 3
+				PRINTFORML 「呀~~~拿下去呀~~~小豆豆要变得奇怪了啊！」
+				;TranslatedMark 「は、外してー！クリトリスが戻らなくなっちゃう！」
+			;Ｃ感Lv3未満
+			ELSE
+				PRINTFORML 「也不是很痛，但是好违和啊……」
+				;TranslatedMark 「痛くはないけど違和感しかない……」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;ニプルキャップ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 64
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「咿呀。好奇怪呀，不要夹我的胸部啊——」
+			;TranslatedMark 「ひいい。変なものおっぱいに着けないでー」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ｂ感Lv3以上
+			IF ABL:Ｂ感 >= 3
+				;PRINTFORMW 
+			;Ｂ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ｂ感Lv3以上
+			IF ABL:Ｂ感 >= 3
+				PRINTFORML 「噫噫噫~~~乳头要夹掉了~~~快摘下来呀！」
+				;TranslatedMark 「ひいい、乳首取れる！外してー！」
+			;Ｂ感Lv3未満
+			ELSE
+				PRINTFORML 「呜呜、乳头颤抖着……好恶心」
+				;TranslatedMark 「うう、おっぱいが震えてる……気持ち悪い」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ｖ拡張バルーン(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 65
+	;初めて
+	IF IS_COM_FIRST()
+		;処女
+		IF TALENT:処女
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;非処女
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORML %ANAME(MASTER)%告诉露娜，现在要扩张她的阴道
+				;TranslatedMark %ANAME(MASTER)%は、これからルナチャイルドの膣内を拡張すると言った
+				PRINTFORML 「咿~~~不行不行~那样的我才不要~~！」
+				;TranslatedMark 「ひー！そんなの必要ないからやめあぎゃあああ！？」
+			ENDIF
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ｖ感Lv3以上
+			IF ABL:Ｖ感 >= 3
+				;PRINTFORMW 
+			;Ｖ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ｖ感Lv3以上
+			IF ABL:Ｖ感 >= 3
+				PRINTFORML 「呜……我居然习惯了被这种玩具……」
+				;TranslatedMark 「ううっ……こんな道具にも慣れちゃうなんて……」
+			;Ｖ感Lv3未満
+			ELSE
+				PRINTFORML 「好痛啊！快点拔出来呀！」
+				;TranslatedMark 「苦しいー！早く抜いてー！」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ拡張バルーン(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 66
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML %ANAME(MASTER)%告诉露娜，接下来要扩张她的肛门
+			;TranslatedMark %ANAME(MASTER)%は、これからルナチャイルドの腸内を拡張すると言った
+			PRINTFORML 「咿~~~不行不行~那样的我才不要~~！」
+			;TranslatedMark 「ひー！そんなの必要ないからやめあぎゃあああ！？」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ａ感Lv3以上
+			IF ABL:Ａ感 >= 3
+				;PRINTFORMW 
+			;Ａ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ａ感Lv3以上
+			IF ABL:Ａ感 >= 3
+				PRINTFORML 「呜……我居然习惯了被这种玩具……」
+				;TranslatedMark 「ううっ……こんな道具にも慣れちゃうなんて……」
+			;Ａ感Lv3未満
+			ELSE
+				PRINTFORML 「呜呜……便便变多的话怎么办呀……」
+				;TranslatedMark 「うう……うんちが太くなったらどうしよう……」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;ローション(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 70
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「哇，粘粘滑滑的。这是什么呀？」
+			;TranslatedMark 「うわっ、ぬるぬる。何これ？」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「之后很难洗干净呢……」
+			;TranslatedMark 「後で洗い流すのが大変そう……」
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;媚薬(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 71
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「这种药……马上就能让我变舒服？我不想喝那么恐怖的东西……呀！我喝我喝！」
+			;TranslatedMark 「すぐ気持ちよくなれる薬？そんな怖いの飲みたくな……ひいっ飲みます！」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「嗯，身体好热……我不会喜欢上这种感觉了吧……」
+			;TranslatedMark 「うー、身体が熱い……。もう好きにしてよぉ」
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;排卵誘発剤(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 72
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「啊？能让我怀上小宝宝！？好可怕的药，我绝对不要喝！」
+			;TranslatedMark 「あ、赤ちゃんができやすくなる薬……！？そんな恐ろしいもの絶対飲まなむぐー！？」
+			PRINTFORML %ANAME(MASTER)%强行把药灌到了露娜的嘴里……
+			;TranslatedMark %ANAME(MASTER)%はルナチャイルドの口にむりやり薬をねじ込んだ……
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「呜呜，我不想喝这个了……」
+			;TranslatedMark 「ううう、こんなの飲みたくないのに……」
+			PRINTFORML 露娜恐惧地颤抖着，战战兢兢地把药吞了下去……
+			;TranslatedMark ルナチャイルドは恐怖に震えながら、いやいや薬を飲み込んだ……
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;絶倫丸(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 73
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「这种药能让身子变强壮吗？好可疑啊……对不起，我喝我喝！」
+			;TranslatedMark 「体が強くなる薬？なんかうさんくさ……ひいっごめんなさい飲みます！」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML （嘛，至少喝了它不会再因为昏过去而被教训呢……）
+			;TranslatedMark （ま、また気絶もできずに責められるんだ……）
+			PRINTFORML 露娜的心里似乎笼罩着乌云
+			;TranslatedMark ルナチャイルドは暗い気持ちになっているようだ
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;脅す(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 80
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 威胁要使用暴力，露娜立刻开始求饶……
+			;TranslatedMark 暴力をチラつかせると、ルナチャイルドはすぐに許しを請うてきた……
+			PRINTFORML 「原谅我吧，请不要弄痛我啊……」
+			;TranslatedMark 「い、痛いのだけは許してください……」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+				;PRINTFORMW 
+			ELSE
+				PRINTFORML 威胁要使用暴力，露娜立刻开始求饶……
+				;TranslatedMark 暴力をチラつかせると、ルナチャイルドはすぐに許しを請うてきた……
+				PRINTFORML 「原谅我吧，请不要弄痛我啊……」
+				;TranslatedMark 「い、痛いのだけは許してください……」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;スパンキング(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 81
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「对不起，对不起，你说什么我都会听的！」
+			;TranslatedMark 「ごめんなさいごめんなさい、何でも言うこと聞くから助けてー！」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+				;PRINTFORMW 
+			ELSE
+				PRINTFORML 「哎呀！我会乖乖听话的，别再打我了！」
+				;TranslatedMark 「ひいっ！ぎゃっ！言うこと聞くから、叩くのはやめてー！」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;鞭(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 82
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「好疼啊！不打我我也会乖乖听话的啊」
+			;TranslatedMark 「ひいっ！そんなので叩かなくても言うこと聞きますから！」
+			PRINTFORML %ANAME(MASTER)%无视了露娜的恳求，毫不留情地鞭打着她
+			;TranslatedMark %ANAME(MASTER)%は許しを請うルナチャイルドに容赦なく鞭を叩き付けた……
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+				;PRINTFORMW 
+			ELSE
+				PRINTFORML 「好疼！哎呀！原谅我吧！原谅我吧！」
+				;TranslatedMark 「ひいっ！ぎゃああ！許して！許してえ！」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;針(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 83
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「求、求你了，原谅我吧，不要这样……」
+			;TranslatedMark 「お、お願い、それだけは、それだけは許して……」
+			PRINTFORML %ANAME(MASTER)%无视了露娜的恳求，毫不留情的用针刺着她
+			;TranslatedMark %ANAME(MASTER)%は懇願するルナチャイルドに容赦なく針を突き刺した
+			PRINTFORML 「――～～！！？」
+			PRINTFORMW 露娜痛苦的悲鸣响彻了整个牢房……
+			;TranslatedMark 牢の中に、ルナチャイルドの声にならない悲鳴が響き渡った……
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+				;PRINTFORMW 
+			ELSE
+				PRINTFORML 「――！！～～！！！」
+				PRINTFORML 露娜痛苦不堪，不断悲鸣着……
+				;TranslatedMark ルナチャイルドは、あまりの痛みに悲鳴を上げ続けている……
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;目隠し(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 84
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「摘、摘掉呀，什么都看不见了！」
+			;TranslatedMark 「は、外してー！何も見えない！」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+				;PRINTFORMW 
+			ELSE
+				PRINTFORML 「咿……」
+				;TranslatedMark 「ひいい……」
+				PRINTFORML 露娜不知道接下来会遭受什么事情，恐惧地颤抖着……
+				;TranslatedMark ルナチャイルドは、これから何をされるか分からない恐怖に震えている……
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;縄(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 85
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「不要呀！不把我捆起来我也逃不掉的呀！」
+			;TranslatedMark 「やめてー！縛らなくても逃げられないから！」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+				;PRINTFORMW 
+			ELSE
+				PRINTFORML 「绳子勒进皮肤了……好疼啊！」
+				;TranslatedMark 「縄がくいこんで痛いよう……」
+				PRINTFORML 露娜呜呜地哭了起来……
+				;TranslatedMark ルナチャイルドは泣きべそをかいている……
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;口枷(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 86
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;フィストファック(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 87
+	;初めて
+	IF IS_COM_FIRST()
+		;処女
+		IF TALENT:処女
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;非処女
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ｖ感Lv5以上
+			IF ABL:Ｖ感 >= 5
+				;PRINTFORMW 
+			;Ｖ感Lv5未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;Ｖ感Lv5以上
+			IF ABL:Ｖ感 >= 5
+				;PRINTFORMW 
+			;Ｖ感Lv5未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ｖ感Lv5以上
+			IF ABL:Ｖ感 >= 5
+				;PRINTFORMW 
+			;Ｖ感Lv5未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;アナルフィスト(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 88
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ａ感Lv5以上
+			IF ABL:Ａ感 >= 5
+				;PRINTFORMW 
+			;Ａ感Lv5未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;Ａ感Lv5以上
+			IF ABL:Ａ感 >= 5
+				;PRINTFORMW 
+			;Ａ感Lv5未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ａ感Lv5以上
+			IF ABL:Ａ感 >= 5
+				;PRINTFORMW 
+			;Ａ感Lv5未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;平手打ち(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 89
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「呀！别打我好不好！」
+			;TranslatedMark 「いぎゃっ、ぶたないでー！」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+				;PRINTFORMW 
+			ELSE
+				PRINTFORML 「反、反对暴力……」
+				;TranslatedMark 「ぼ、暴力反対……」
+				PRINTFORML 露娜抚摸着通红的脸颊……
+				;TranslatedMark ルナチャイルドは真っ赤になった頬をさすっている……
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;イラマチオ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 90
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「那、那么大的东西……我会窒息的！住手唔唔唔！！！？」
+			;TranslatedMark 「そ、そんな大きいのを入れたら息が詰まっちゃう！やめうぐぅーーー！！！？」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+				;PRINTFORMW 
+			ELSE
+				PRINTFORML 「嗯唔、唔唔唔！？――――！！！」
+				;TranslatedMark 「んぐうっ！？――――！！！」
+				PRINTFORML 露娜的小嘴被塞满，快要窒息了
+				;TranslatedMark ルナチャイルドは、小さな口を塞がれて窒息しそうになっている
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;首絞め(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 94
+		;初めて
+	IF IS_COM_FIRST()
+			;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+		ELSE
+			PRINTFORML 「不、不要……呕……」
+			;TranslatedMark 「や、やめ……おごっ……」
+		ENDIF
+		;二回目以降
+	ELSE
+			;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+		ELSE
+			PRINTFORML 「呃……啊……」
+			;TranslatedMark 「ぐえっ……あがっ……」
+			PRINTFORML 露娜发出青蛙被捏住一般的声音……
+			;TranslatedMark ルナチャイルドはカエルが潰れたような声を出している……
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;腹パン(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 97
+		;初めて
+	IF IS_COM_FIRST()
+			;恋慕
+		IF TALENT:恋慕
+			IF TALENT:妊娠
+					;PRINTFORMW 
+			ELSE
+				PRINTFORML 
+				PRINTFORML 
+			ENDIF
+			;それ以外
+		ELSE
+			IF TALENT:妊娠
+				PRINTFORML 「不要呀！肚子里还有小宝宝呀！」
+				;TranslatedMark 「やめてー！お腹に赤ちゃんいるんだからー！」
+				PRINTFORML 露娜把手放在肚子上保护自己，%ANAME(MASTER)%拨开她的手，毫不留情地打了上去……
+				;TranslatedMark %ANAME(MASTER)%は腹を守ろうとするルナチャイルドの手をどけ、容赦なく殴りつけた……
+			ELSE
+				PRINTFORML 「咕……啊啊啊啊啊……」
+				;TranslatedMark 「うええ……おえええええ……」
+				PRINTFORML 露娜的内脏都在痛苦地翻滚，忍不住吐了出来……
+				;TranslatedMark ルナチャイルドは内臓を痛みつけられ、吐しゃ物を吐き出している……
+			ENDIF
+		ENDIF
+		;二回目以降
+	ELSE
+			;恋慕
+		IF TALENT:恋慕
+			IF TALENT:妊娠
+					;PRINTFORMW 
+			ELSE
+				PRINTFORML 
+			ENDIF
+			;それ以外
+		ELSE
+			IF TALENT:妊娠
+				PRINTFORML 「求求你了，小宝宝、放过小宝宝吧……」
+				;TranslatedMark 「お願い、赤ちゃんは、赤ちゃんだけは許して……」
+				PRINTFORML %ANAME(MASTER)%无视哭着哀求的露娜，毫不留情地殴打了她的腹部……
+				;TranslatedMark %ANAME(MASTER)%は泣きながら許しを乞うルナチャイルドを無視し、容赦なく腹部を殴りつけた……
+			ELSE
+				PRINTFORML 「咕……啊啊啊啊啊……」
+				;TranslatedMark 「げぼっ……おげええええ……」
+				PRINTFORML 露娜的内脏都在痛苦地翻滚，忍不住吐了出来……
+				;TranslatedMark ルナチャイルドは内臓を痛みつけられ、吐しゃ物を吐き出している……
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;自慰(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 100
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;顔面騎乗(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 101
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;プレイヤーが膣がない(玉舐め)
+			IF !HAS_VAGINA(MPLY:0)
+				;PRINTFORMW 
+			;プレイヤーに膣がある(秘部舐め)
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;プレイヤーが膣がない(玉舐め)
+			IF !HAS_VAGINA(MPLY:0)
+				;PRINTFORMW 
+			;プレイヤーに膣がある(秘部舐め)
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;プレイヤーが膣がない(玉舐め)
+			IF !HAS_VAGINA(MPLY:0)
+				;PRINTFORMW 
+			;プレイヤーに膣がある(秘部舐め)
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;プレイヤーが膣がない(玉舐め)
+			IF !HAS_VAGINA(MPLY:0)
+				;PRINTFORMW 
+			;プレイヤーに膣がある(秘部舐め)
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;プレイヤーが膣がない(玉舐め)
+			IF !HAS_VAGINA(MPLY:0)
+				;PRINTFORMW 
+			;プレイヤーに膣がある(秘部舐め)
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ顔面騎乗(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 102
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;電気按摩(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 103
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「好痛好痛，放开我的脚啊！」
+			;TranslatedMark 「痛い痛い、足離してー！」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「太激烈了！再温柔一点呀！」
+			;TranslatedMark 「激しすぎるよぉ！もっと優しくしてー！」
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;足を舐める(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 104
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;亀頭責め手コキ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 106
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;亀頭責めフェラ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 107
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;放尿するする(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 130
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;尿を掛ける(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 131
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;利尿剤(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 140
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「嗯……想尿尿了……」
+			;TranslatedMark 「うぅ……おしっこしたい……」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「我想尿尿，让我去厕所吧……」
+			;TranslatedMark 「おしっこしたいから、トイレに行かせてよぉ」
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;浣腸(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 141
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「哎呀！不要看呀！」
+			;TranslatedMark 「いやぁー！見ないでー！」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;排泄Lv2以上
+			IF ABL:排泄 >= 2
+				;PRINTFORMW 
+			;排泄Lv2未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;排泄Lv2以上
+			IF ABL:排泄 >= 2
+				;PRINTFORMW 
+			;排泄Lv2未満
+			ELSE
+				PRINTFORML 「呜呜……想看我这种样子，不知道%ANAME(MASTER)%在想什么……」
+				;TranslatedMark 「うう……うんちする姿が見たいなんて、%ANAME(MASTER)%の考えることが分からないよぉ……」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;浣腸＆プラグ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 142
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「嗯，好难受啊……让我去厕所……！」
+			;TranslatedMark 「く、苦しい……ト、トイレに行かせて……！」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;排泄Lv2以上
+			IF ABL:排泄 >= 2
+				;PRINTFORMW 
+			;排泄Lv2未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;排泄Lv2以上
+			IF ABL:排泄 >= 2
+				;PRINTFORMW 
+			;排泄Lv2未満
+			ELSE
+				PRINTFORML 「肚子好痛啊……让我去厕所……」
+				;TranslatedMark 「お腹痛いよぉ……。おトイレ行かせてぇ……！」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;放屁する(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 150
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手召喚(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 200
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「哎呀，妖怪！」
+			;TranslatedMark 「ひぎゃー、妖怪！」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			ELSE
+				PRINTFORML 「呀！又是这种东西吗」
+				;TranslatedMark 「ひいい、またそいつをけしかけるの……？」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手挿入(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 201
+	;初めて
+	IF IS_COM_FIRST()
+		;処女
+		IF TALENT:処女
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORML 「呀，救救我！我被串起来了！」
+				;TranslatedMark 「ひいい、助けてー！串刺しにされるー！」
+			ENDIF
+		;非処女
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORML 「哎呀！不要进来呀！」
+				;TranslatedMark 「いやぁー！入ってこないでー！」
+			ENDIF
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				PRINTFORML （还挺舒服的……算了吧……）
+				;TranslatedMark （気持ちいいから……もういいや……）
+				PRINTFORML 露娜空洞的眼睛注视着正在小穴里抽插的触手……
+				;TranslatedMark ルナチャイルドは虚ろな目で触手の抽送を見つめている……
+			ELSE
+				PRINTFORML 「呜呜，拔不出来……」
+				;TranslatedMark 「ううう、抜けないよう……」
+				PRINTFORML 露娜用尽全力想要把触手拔出来，但是力量不够，触手仍然在她的小穴里不停抽插……
+				;TranslatedMark ルナチャイルドは秘裂を貫く触手を抜こうとしているが、どう見ても力が足りない……
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手Ａ挿入(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 202
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;YMなら日常茶飯事
+			PRINTFORML 「哎呀！要从屁股一直穿到嘴巴吗！」
+			;TranslatedMark 「ぎゃあー！お尻から口まで貫通されるー！」
+			PRINTFORML 并没有做到那种程度
+			;TranslatedMark さすがにそこまではしない
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				PRINTFORML （还挺舒服的……算了吧……）
+				;TranslatedMark （気持ちいいから……もういいや……）
+				PRINTFORML 露娜空洞的眼睛注视着触手的抽送……
+				;TranslatedMark ルナチャイルドは虚ろな目で触手の抽送を見つめている……
+			ELSE
+				PRINTFORML 「好、好恐怖……不要进来啊……」
+				;TranslatedMark 「こ、怖い……奥まで入ってこないで……」
+				PRINTFORML 露娜似乎很害怕被刺穿
+				;TranslatedMark ルナチャイルドは串刺しの恐怖に怯えているようだ
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手クリ責め(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 203
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「住手，为什么要那样……！？」
+			;TranslatedMark 「やめっ、何でそんなとこ……！？」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				PRINTFORML 「呀~~~~~好厉害~~~」
+				;TranslatedMark 「ひぃいいいいいーっ！！」
+				PRINTFORML 触手不停地刺激着小豆豆，露娜高声呻吟起来……
+				;TranslatedMark ルナチャイルドは絶え間ないクリトリスへの刺激に悲鳴を上げ続けている……
+			ELSE
+				PRINTFORML 「不要再玩小豆豆了！要尿出来了！」
+				;TranslatedMark 「こすらないでー！おしっこ出ちゃうからぁ！」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手胸愛撫(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 204
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「住手，为什么要那样……！？」
+			;TranslatedMark 「やめっ、何でそんなとこ……！？」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				PRINTFORML 「哎呀~~~~啊啊啊啊！？」
+				;TranslatedMark 「ひゃああああああーっ！？」
+				PRINTFORML 触手不断地刺激着乳头，露娜高声呻吟着……
+				;TranslatedMark ルナチャイルドは絶え間ない乳首への刺激に悲鳴を上げ続けている……
+			ELSE
+				PRINTFORML 「不要呀~~~胸部要去了~~~~」
+				;TranslatedMark 「やめてー！おっぱい取れちゃうよー！」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手オナホ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 205
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手コキ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 206
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手搾乳(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 207
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手緊縛(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 208
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「哇！动不了了！我要被消化了！」
+			;TranslatedMark 「ぎゃああー！動きを封じられて消化されるー！」
+			PRINTFORML 不会做那种事的
+			;TranslatedMark さすがにそんなことはない
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			PRINTFORML 「虽然知道不会被消化，但还是希望你放开我……」
+			;TranslatedMark 「消化されないのは分かったけど、離して欲しい……」
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手口辱(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 210
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手オナニー(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 211
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手産卵(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 212
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「怎、怎么回事……。呐，在我身体里种了什么……？」
+				;TranslatedMark 「ぐ、ぐるじい……。な、何か植え付けられてる……？」
+				PRINTFORML 当%ANAME(MASTER)%告诉露娜触手在她的子宫里产卵了。露娜恐惧地哭喊起来
+				;TranslatedMark %ANAME(MASTER)%がそれは触手の卵だと説明すると、ルナチャイルドは恐怖で泣き叫んだ
+				PRINTFORMW 「哎呀！我的肚子会被触手刺穿吗？我要死了吗？」
+				;TranslatedMark 「いやぁー！？お腹から触手に突き破られて死ぬぅー！」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				PRINTFORML 「嘿嘿……我的生活时刻伴随着触手产卵呢……」
+					;TranslatedMark 「えへへ……私、ずーっと触手の卵産んで暮らすのね……」
+					PRINTFORML 露娜嘿嘿地笑着，眼神空洞……
+					;TranslatedMark ルナチャイルドは虚ろな瞳で笑っている……
+				ELSE
+					PRINTFORML 「拜托了……快点乖乖地生下来吧……」
+					;TranslatedMark 「お、お願い……早く大人しく産まれて……」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手Ａ産卵(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 213
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「咿呀！！什么东西进到屁股里了，粘粘的……！？」
+				;TranslatedMark 「ひぎいいい！お尻に柔らかいのが……！？」
+				PRINTFORML 当%ANAME(MASTER)%告诉露娜触手在她的屁股里产卵了。露娜恐惧地哭喊起来
+				;TranslatedMark %ANAME(MASTER)%がそれは触手の卵だと説明すると、ルナチャイルドは恐怖で泣き叫んだ
+				PRINTFORMW 「哎呀！我的肚子会被触手刺穿吗？我要死了吗？」
+				;TranslatedMark 「いやぁー！産まれた触手に体内から殺されるー！」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				PRINTFORML 「嘿嘿……我的生活时刻伴随着触手产卵呢……」
+					;TranslatedMark 「えへへ……私、ずーっと触手の卵産んで暮らすのね……」
+					PRINTFORML 露娜嘿嘿地笑着，眼神空洞……
+					;TranslatedMark ルナチャイルドは虚ろな瞳で笑っている……
+				ELSE
+					PRINTFORML 「快点，快点生下来吧……！」
+					;TranslatedMark 「早く、早く産まれてぇ……！」
+					PRINTFORML 露娜拼命地想要排便，但是在长大之前是不会生下来的吧
+					;TranslatedMark ルナチャイルドは排便をするように必死でいきんでいるが、ある程度成長するまでは無駄だろう
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;=================================================
+;●コマンド実行時(このキャラがプレイヤー側のとき)
+;=================================================
+@KOJO_COM_PLAYER_B_K46
+;[虚ろ]状態の場合、口が塞がっている場合は口上を表示しない
+IF TALENT:空虚 || IS_EQUIP_CONTINUE(TARGET, "口装着")
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;愛撫(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 0
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;胸愛撫(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 1
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;クンニ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 2
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;指挿入(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 3
+	;初めて
+	IF IS_COM_FIRST()
+		;主人公が処女
+		IF EXP:MASTER:Ｖ性交経験 == 1
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;主人公が非処女
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;アナル愛撫(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 4
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;泡踊り(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 5
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「这、这样可以吗……？」
+			;TranslatedMark 「こ、これでいいの……？」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「体型相差好多，很难做啊」
+			;TranslatedMark 「体の大きさが違うから、やりにくいよぉ」
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;尻尾挿入(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 6
+	;初めて
+	IF IS_COM_FIRST()
+		;主人公が処女
+		IF EXP:MASTER:Ｖ性交経験 == 1
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;主人公が非処女
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;尻尾Ａ挿入(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 7
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;手コキ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 10
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML %ANAME(MASTER)%教给了露娜一些手淫的技巧，让她爱抚着肉棒
+			;TranslatedMark %ANAME(MASTER)%は、ルナチャイルドに手コキのやり方を教え、奉仕するよう命じた
+			PRINTFORML 「试试看吧……但是我的手很小，能做得好吗……」
+			;TranslatedMark 「やってみますけど、手が小さいからうまくできるか分かりませんよ？」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「嗯……不用两只手的话，做不太好啊」
+			;TranslatedMark 「うーん、両手でやらないとうまく動かせないなぁ」
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;フェラ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 11
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「诶？这么大的东西，我的嘴装不进去呀」
+			;TranslatedMark 「ええー？こんな大きいの、口に入らないですよ」
+			PRINTFORML 当%ANAME(MASTER)%再次下令为其服务时，露娜提心吊胆地将嘴唇贴在了龟头上
+			;TranslatedMark %ANAME(MASTER)%が重ねて奉仕を命ずると、ルナチャイルドはおずおずと亀頭に口を付けた
+			PRINTFORMW 「嗯……可能会喜欢上这种味道呢。哎呀呀……」
+			;TranslatedMark 「ちゅっ……味は好みかも。れろれろ……」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「味道还不错，但是好累哦，我的下巴都要掉了呢」
+			;TranslatedMark 「味はいいんだけど、顎が外れそうになるのよねぇ」
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;パイズリ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 12
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「我又没有胸部，真要这么做吗？」
+			;TranslatedMark 「おっぱいなんてないんだけど、本当にやるの？」
+			PRINTFORML 「嘛，随你怎么说吧……」
+			;TranslatedMark 「まあ、どうしてもって言うならいいけど……」
+			PRINTFORMW 露娜似乎很在意自己的胸部，无法释然
+			;TranslatedMark ルナチャイルドは釈然としないようだ
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「这样真的很舒服吗……」
+			;TranslatedMark 「本当にこんなのが気持ちいいのかしら……」
+			PRINTFORML 露娜努力地用胸部摩挲着肉棒……
+			;TranslatedMark ルナチャイルドはない胸を必死にこすりつけている……
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;素股(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 13
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「又要用下面摩擦吗？嘛，我知道了」
+			;TranslatedMark 「おまたでこするの？まあ、分かったわ」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「和用手和嘴比起来，这样比较轻松呢」
+			;TranslatedMark 「手や口よりは、苦しくなくていいわね」
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;足コキ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 14
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「诶，你说想让我踩你的小鸡鸡吗！？」
+			;TranslatedMark 「えっ、おちんちん踏んで欲しいって！？」
+			PRINTFORML 「总之先试试看……」
+			;TranslatedMark 「と、とりあえずやってみるわ……」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「想让妖精来踩下面吗？真是奇怪的兴趣啊……」
+			;TranslatedMark 「妖精に踏んで欲しいって、変わった趣味よね……」
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;尻コキ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 15
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「嗯，要用屁股夹着小鸡鸡呢」
+			;TranslatedMark 「えーっと、おちんちんをお尻で挟むのね」
+			PRINTFORML 「嘛，虽然没有胸，用屁股也能做到差不多的事情，这也挺合理的吧……？」
+			;TranslatedMark 「まあ、胸がなくてもできるから合理的ではあるのかも……？」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「虽然知道怎么做，但是这样我不太舒服呢」
+			;TranslatedMark 「分かってたけどこれ、私はあんまり気持ちよくないなぁ」
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;オナホコキ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 16
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「把这个塞得满满的就行了吧」
+			;TranslatedMark 「これにおちんちん突っ込めばいいのね」
+			PRINTFORML 「不要勉强自己哦，虽然嘴上逞着能，很快就要射了吧？」
+			;TranslatedMark 「口とかより無理がなくていいかも」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「用这个确实感觉不错，但是想要喝的话有点费劲呢」
+			;TranslatedMark 「これ、楽でいいわー。せーえき飲めないのが難だけど」
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;尻尾コキ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 17
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;正常位(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 30
+	;初めて
+	IF IS_COM_FIRST()
+		;主人公が処女
+		IF EXP:MASTER:Ｖ性交経験 == 1
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;主人公が非処女
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;後背位(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 31
+	;初めて
+	IF IS_COM_FIRST()
+		;主人公が処女
+		IF EXP:MASTER:Ｖ性交経験 == 1
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;主人公が非処女
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;対面座位(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 32
+	;初めて
+	IF IS_COM_FIRST()
+		;主人公が処女
+		IF EXP:MASTER:Ｖ性交経験 == 1
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;主人公が非処女
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;背面座位(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 33
+	;初めて
+	IF IS_COM_FIRST()
+		;主人公が処女
+		IF EXP:MASTER:Ｖ性交経験 == 1
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;主人公が非処女
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;騎乗位(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 34
+	;初めて
+	IF IS_COM_FIRST()
+		;主人公が処女
+		IF EXP:MASTER:Ｖ性交経験 == 1
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;主人公が非処女
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;背面騎乗位(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 35
+	;初めて
+	IF IS_COM_FIRST()
+		;主人公が処女
+		IF EXP:MASTER:Ｖ性交経験 == 1
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;主人公が非処女
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ正常位(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 40
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ後背位(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 41
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ対面座位(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 42
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ背面座位(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 43
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ騎乗位(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 44
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ背面騎乗位(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 45
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;ローター(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 60
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;バイブ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 61
+	;初めて
+	IF IS_COM_FIRST()
+		;主人公が処女
+		IF EXP:MASTER:Ｖ性交経験 == 1
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;主人公が非処女
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;アナルバイブ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 62
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;クリキャップ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 63
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;ニプルキャップ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 64
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ｖ拡張バルーン(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 65
+	;初めて
+	IF IS_COM_FIRST()
+		;主人公が処女
+		IF EXP:MASTER:Ｖ性交経験 == 1
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;主人公が非処女
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ拡張バルーン(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 66
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;ローション(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 70
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;媚薬(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 71
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;排卵誘発剤(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 72
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;絶倫丸(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 73
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;脅す(プレイヤー)
+;-------------------------------------------------
+;実行不可
+
+;-------------------------------------------------
+;スパンキング(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 81
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;鞭(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 82
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;針(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 83
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;目隠し(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 84
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;縄(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 85
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;口枷(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 86
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;フィストファック(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 87
+	;初めて
+	IF IS_COM_FIRST()
+		;主人公が処女
+		IF EXP:MASTER:Ｖ性交経験 == 1
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;主人公が非処女
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;アナルフィスト(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 88
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;平手打ち(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 89
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;イラマチオ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 90
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;自慰(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 100
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「自慰吗？有听说过这样的事情，但是还没试过呢……」
+			;TranslatedMark 「オナニー？興味はあるけど、やったことは……」
+			PRINTFORML %ANAME(MASTER)%详细地教给露娜如何让自己快乐起来
+			;TranslatedMark %ANAME(MASTER)%はルナチャイルドにオナニーのやり方を詳しく教えてやった……
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;自慰Lv2以上
+			IF ABL:自慰 >= 2
+				;PRINTFORMW 
+			;自慰Lv2未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;自慰Lv2以上
+			IF ABL:自慰 >= 2
+				PRINTFORML 「啊啊，好舒服啊……」
+				;TranslatedMark 「あっあっあっ、気持ちいいよう……」
+				PRINTFORML 露娜已经忘了%ANAME(MASTER)%就在眼前，沉浸在自慰中无法自拔
+				;TranslatedMark ルナチャイルドは%ANAME(MASTER)%が見ているのも忘れて自慰にふけっている
+			;自慰Lv2未満
+			ELSE
+				PRINTFORML 「呜呜……好害羞呀……但是好舒服哦……」
+				;TranslatedMark 「うう……恥ずかしいけどけっこう楽しい……」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;顔面騎乗(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 101
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「诶？坐在%ANAME(MASTER)%的脸上就可以了吗？」
+			;TranslatedMark 「ええー？%ANAME(MASTER)%の顔に乗ればいいの？」
+			PRINTFORML 虽然不太明白是什么意思，但露娜还是跨上了%ANAME(MASTER)%的脸……
+			;TranslatedMark 意味が分からないと言いつつも、ルナチャイルドは%ANAME(MASTER)%の顔にまたがった……
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「这有什么好开心的嘛……」
+			;TranslatedMark 「何が楽しいのかしら……」
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ顔面騎乗(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 102
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「要、要舔我屁股上的洞洞吗？」
+			;TranslatedMark 「お、お尻の穴をこすり付けるの？」
+			PRINTFORML 「呜呜……好、好羞耻哦……」
+			;TranslatedMark 「うう……恥ずかしい……」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;Ａ感Lv3以上
+			IF ABL:Ａ感 >= 3
+				;PRINTFORMW 
+			;Ａ感Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;Ａ感Lv3以上
+			IF ABL:Ａ感 >= 3
+				PRINTFORML %ANAME(MASTER)%因为露娜柴尔德无法忍受快乐而想要逃走，所以抓住腰挽留了她
+				;TranslatedMark %ANAME(MASTER)%はルナチャイルドが快楽に耐えきれず逃げようとしたので、腰をつかんで引き止めた
+				PRINTFORML 「哎呀！放开我呀！」
+				;TranslatedMark 「いやー！離してぇー！」
+			;Ａ感Lv3未満
+			ELSE
+				PRINTFORML 「……我还是有点担心呢，不会很臭吗？」
+				;TranslatedMark 「……私が心配するのもなんだけど、臭いんじゃないの？」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;電気按摩(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 103
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;足を舐める(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 104
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「好、好的……我舔……」
+			;TranslatedMark 「は、はい……舐めます……」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「啾、啾……这，这样就不会对我做过分的事了吧？」
+			;TranslatedMark 「じゅぷっ、じゅぷっ……こ、これで酷いことはしないんですよね？」
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;亀頭責め手コキ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 106
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「只刺激一下前端就好吧」
+			;TranslatedMark 「先っぽだけ刺激すればいいのね」
+			PRINTFORML 「这样还比较轻松」
+			;TranslatedMark 「それなら比較的楽だわ」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「我的手很小，这样做的话比较容易呢」
+			;TranslatedMark 「これ、手が小さくてもできるからいいなぁ」
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;亀頭責めフェラ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 107
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「只舔前端就可以了吧」
+			;TranslatedMark 「先っぽだけ舐めればいいのね」
+			PRINTFORML 「这样做……怎么放到嘴里呢？」
+			;TranslatedMark 「それなら何とか口の中に入るかな……？」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		ELSE
+			PRINTFORML 「嗯~~~嗯~~~唔姆唔姆~~~」
+			;TranslatedMark 「ちゅーっ、れろれろれろ……」
+			PRINTFORML 「嗯，这样的话差不多没那么费事呢」
+			;TranslatedMark 「うん、これぐらいなら何とか……」
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;土下座(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 110
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			PRINTFORML 「诶，要我土下座？为什么？」
+				;TranslatedMark 「えっ土下座？なんで？」
+				PRINTFORML 「看到跪在地上的女孩子会兴奋吗？……这性癖真是麻烦呢」
+				;TranslatedMark 「土下座してる女の子を見ると興奮する？……難儀な性癖ねぇ」
+			;それ以外
+			ELSE
+				PRINTFORML 「为什么要土下座嘛……呀！对不起！虽然不知道为什么，对不起！」
+				;TranslatedMark 「なんで土下座なんて……ひいっすみません！何だか分からないけどごめんなさい！」
+				PRINTFORML %ANAME(MASTER)%稍微威胁了一下，露娜马上双膝跪了下来，两手伏地，不敢抬起头来
+				;TranslatedMark ルナチャイルドは、%ANAME(MASTER)%が少し脅すとすぐ土下座した
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			PRINTFORML 「这样可以吗？再加上道歉比较好吗？」
+				;TranslatedMark 「これでいいかな？謝ったりした方がいい？」
+				PRINTFORML 露娜毫不犹豫地跪了下来，双手伏地，把自尊什么的抛诸脑后
+				;TranslatedMark ルナチャイドはためらいなく土下座している。プライドなどというものはないようだ
+			;それ以外
+			ELSE
+				PRINTFORML 「对不起！不管是土下座还是什么别的都会做的，请不要对我做过分的事！」
+				;TranslatedMark 「ごめんなさい！土下座でも何でもしますからひどいことはしないでくださいっ！」
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;放尿するする(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 130
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「不、不尿尿可以吗！？」
+			;TranslatedMark 「な、なんでおしっこなんてしないといけないの！？」
+			PRINTFORML %ANAME(MASTER)%再次强硬地命令露娜必须做……
+			;TranslatedMark %ANAME(MASTER)%は、重ねて強い口調で命令した……
+			PRINTFORMW 「好、好，我做我做！嗯~，好害羞啊……」
+			;TranslatedMark 「ひいっ、やりますやります！ううっ、恥ずかしい……」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;排泄Lv2以上
+			IF ABL:排泄 >= 2
+				;PRINTFORMW 
+			;排泄Lv2未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;排泄Lv2以上
+			IF ABL:排泄 >= 2
+				PRINTFORML 「呜呜，在别人面前尿尿，我却变得开心起来了……」
+				;TranslatedMark 「うう、人前でおしっこするのが楽しくなるなんて……」
+			;排泄Lv2未満
+			ELSE
+				PRINTFORML 「这样做只会弄脏房间而已……」
+				;TranslatedMark 「こんなの、部屋が汚れるだけよぉ……」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;尿を掛ける(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 131
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORML 「哈啊！？你说什么？想淋我的尿！？」
+			;TranslatedMark 「はああ！？おしっこかけて欲しいって、何言ってんの！？」
+			PRINTFORML 露娜的眼神仿佛是在看疯子一般。%ANAME(MASTER)%再次下了命令
+			;TranslatedMark ルナチャイルドは狂人を見る目で見てきたが、%ANAME(MASTER)%は重ねて命令した
+			PRINTFORMW 「我知道了，我会做的……」
+			;TranslatedMark 「わ、分かりました、やります……」
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;排泄Lv2以上
+			IF ABL:排泄 >= 2
+				;PRINTFORMW 
+			;排泄Lv2未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			PRINTFORML （哇， 有这么爽吗……好恐怖……）
+			;TranslatedMark （うわ、幸せそう……怖い……）
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;口内放尿(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 132
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+				PRINTFORML 「诶！？想喝我的尿吗？」
+				;TranslatedMark 「ええっ！？おしっこが飲みたい！？」
+				PRINTFORML 「（这个人脑袋坏掉了吗……还是赶紧搞定吧……）」
+				;TranslatedMark 「（この人頭おかしいわ……早く済ませよう……）」
+				PRINTFORMW 露娜虽然很害怕，但还是在%ANAME(MASTER)%的口内尿出来了
+				;TranslatedMark ルナチャイルドは怯えながらも、%ANAME(MASTER)%の口内に放尿した
+			ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;排泄Lv2以上
+			IF ABL:排泄 >= 2
+				;PRINTFORMW 
+			;排泄Lv2未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;排泄Lv2以上
+			IF ABL:排泄 >= 2
+				;PRINTFORMW 
+			;排泄Lv2未満
+			ELSE
+				PRINTFORML 「呜呜……把尿喝下去了……真搞不懂……」
+				;TranslatedMark 「うう……飲まれてる……意味がわからない……！」
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;利尿剤(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 140
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;浣腸(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 141
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;浣腸＆プラグ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 142
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;放屁する(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 150
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;排泄Lv2以上
+			IF ABL:排泄 >= 2
+				;PRINTFORMW 
+			;排泄Lv2未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;排泄Lv2以上
+			IF ABL:排泄 >= 2
+				;PRINTFORMW 
+			;排泄Lv2未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;排泄Lv2以上
+			IF ABL:排泄 >= 2
+				;PRINTFORMW 
+			;排泄Lv2未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;顔騎放屁(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 151
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;排泄Lv2以上
+			IF ABL:排泄 >= 2
+				;PRINTFORMW 
+			;排泄Lv2未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;排泄Lv2以上
+			IF ABL:排泄 >= 2
+				;PRINTFORMW 
+			;排泄Lv2未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;排泄Lv2以上
+			IF ABL:排泄 >= 2
+				;PRINTFORMW 
+			;排泄Lv2未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手召喚(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 200
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手挿入(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 201
+	;初めて
+	IF IS_COM_FIRST()
+		;主人公が処女
+		IF EXP:MASTER:Ｖ性交経験 == 1
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;主人公が非処女
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手Ａ挿入(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 202
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手クリ責め(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 203
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手胸愛撫(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 204
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手オナホ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 205
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手コキ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 206
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手搾乳(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 207
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手緊縛(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 208
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手口辱(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 210
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手オナニー(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 211
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			;触手Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			;触手Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;触手Lv3以上
+			IF ABL:触手 >= 3
+				;PRINTFORMW 
+			;触手Lv3未満
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手産卵(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 212
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手Ａ産卵(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 213
+	;初めて
+	IF IS_COM_FIRST()
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	;二回目以降
+	ELSE
+		;恋慕 or 服従
+		IF TALENT:恋慕 || TALENT:服従
+			;PRINTFORMW 
+		;依存度300以上
+		ELSEIF CFLAG:3 >= 300
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			;PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;=================================================
+;●コマンド実行後(パラメータの変動処理が終わってから呼び出される)
+;=================================================
+@KOJO_COM_AFTER_B_K46
+;[虚ろ]状態の場合、口が塞がっている場合は口上を表示しない
+IF TALENT:空虚 || IS_EQUIP_CONTINUE(TARGET, "口装着")
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;処女喪失
+;-------------------------------------------------
+;主人公とのセックスによる処女喪失
+IF TCVAR:13 == 1
+	;恋慕 or 服従
+	IF TALENT:恋慕 || TALENT:服従
+		;PRINTFORMW 
+	;それ以外
+	ELSE
+		PRINTFORML 「好痛啊！好痛啊！血、血流出来了！」
+		;TranslatedMark 「痛い痛い痛い！血が！血がぁ！」
+		PRINTFORML 比起处女被夺走，下体撕裂的痛处让露娜精神受到了更大的冲击
+		;TranslatedMark ルナチャイルドは、処女を奪われたことよりその痛みに衝撃を受けているようだ
+	ENDIF
+;主人公にセックス以外で処女を奪われる
+ELSEIF TCVAR:13 == 2
+	;恋慕 or 服従
+	IF TALENT:恋慕 || TALENT:服従
+		;PRINTFORMW 
+	;それ以外
+	ELSE
+		PRINTFORML 「好痛啊！好痛啊！血、血流出来了！」
+		;TranslatedMark 「痛い痛い痛い！血が！血がぁ！」
+		PRINTFORML 比起处女被夺走，下体撕裂的痛处让露娜精神受到了更大的冲击
+		;TranslatedMark ルナチャイルドは、処女を奪われたことよりその痛みに衝撃を受けているようだ
+	ENDIF
+;それ以外の時に処女喪失
+ELSEIF TCVAR:13 == 3 || TCVAR:13 == 4
+	;恋慕 or 服従
+	IF TALENT:恋慕 || TALENT:服従
+		;PRINTFORMW 
+	;それ以外
+	ELSE
+		PRINTFORML 「好痛啊！好痛啊！血、血流出来了！」
+		;TranslatedMark 「痛い痛い痛い！血が！血がぁ！」
+		PRINTFORML 比起处女被夺走，下体撕裂的痛处让露娜精神受到了更大的冲击
+		;TranslatedMark ルナチャイルドは、処女を奪われたことよりその痛みに衝撃を受けているようだ
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;主人公を射精させた
+;-------------------------------------------------
+IF NOWEX:MASTER:射精 > 0
+	SELECTCASE GET_STACK_SPERM_TO(MASTER, TARGET)
+		;膣に射精
+		CASE 1
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORML 「啊，肚子里好暖和啊」
+				;TranslatedMark 「あうう、お腹の中にあったかいのがぁ」
+			ENDIF
+		;アナルに射精
+		CASE 2
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			ELSE
+				PRINTFORML 「咿呀、射到屁股里了」
+				;TranslatedMark 「ひいい、お尻の中に入ってくるぅ」
+			ENDIF
+		;手に射精
+		CASE 3
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORML 「哇，吓了我一跳。能满足你真是太好了」
+				;TranslatedMark 「わっ、びっくりした。まあ満足してくれてよかったわ」
+			ENDIF
+		;口に射精
+		CASE 4
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;精愛Lv1以上
+			ELSEIF ABL:精愛 >= 1
+				PRINTFORML 「腥腥的臭臭的呢，但是我好像喜欢上这苦苦的味道呢……」
+				;TranslatedMark 「ちょっと生臭いけど、この苦みは好きかも……」
+			;それ以外
+			ELSE
+				PRINTFORML 「不管怎么说，虽然味道不错，但还是喝不下去……」
+				;TranslatedMark 「けほっけほっ、味は悪くないけど飲み込めない……」
+			ENDIF
+		;胸に射精
+		CASE 5
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORML 「哇，射出来了。我这样小小的胸部也能满足你吗……」
+				;TranslatedMark 「わっ、出た。よくこんな胸で満足できるなあ……」
+			ENDIF
+		;足に射精
+		CASE 6
+		;尻尾に射精
+		CASE 7
+		;顔に射精
+		CASE 8
+		;髪に射精
+		CASE 9
+		;腋に射精
+		CASE 10
+		;その他の場所に射精
+		CASEELSE
+	ENDSELECT
+
+;-------------------------------------------------
+;主人公を射精させずに絶頂させた
+;-------------------------------------------------
+ELSEIF NOWEX:MASTER:Ｃ絶頂 + NOWEX:MASTER:Ｖ絶頂 + NOWEX:MASTER:Ａ絶頂 + NOWEX:MASTER:Ｂ絶頂 + NOWEX:MASTER:Ｍ絶頂 > 0
+	;恋慕 or 服従
+	IF TALENT:恋慕 || TALENT:服従
+		PRINTFORML 「舒服吗？那我再陪你做一次吧」
+		;TranslatedMark 「気持ちいいの？じゃあもっとしてあげるわね」
+	;それ以外
+	ELSE
+		;PRINTFORMW 
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;おもらしした
+;-------------------------------------------------
+SELECTCASE TCVAR:0
+	;尿意がある状態で絶頂強度の合計が4以上
+	CASE 1
+		PRINTFORML 「啊……嗯……」
+		;TranslatedMark 「あ……う……」
+		PRINTFORML 露娜高潮迭起，浑身颤抖着，尿液也不自觉的漏了出来……
+		;TranslatedMark ルナチャイルドは無意識に尿を垂れ流しながら絶頂に震えている……
+	;尿意が高い状態で絶頂
+	CASE 2
+		PRINTFORML 「哎呀！？」
+		;TranslatedMark 「ひゃああっ！？」
+		PRINTFORML 突然的绝顶让露娜无法忍受，失禁了
+		;TranslatedMark ルナチャイルドは不意の絶頂に耐えきれず、失禁した
+		PRINTFORMW 「呜呜呜、我尿出来了，对不起……」
+		;TranslatedMark 「ううう、おもらししてごめんなさい……」
+	;尿意の限界
+	CASE 3
+		PRINTFORML 「啊啊啊~~~~~，我忍不住了——」
+		;TranslatedMark 「あああ、もう我慢できない～！」
+		PRINTFORML 露娜忍不住尿意，失禁了
+		;TranslatedMark ルナチャイルドは尿意に耐えきれず、失禁した
+		PRINTFORMW 「呜呜呜、我尿出来了，对不起……」
+		;TranslatedMark 「ううう、おもらししてごめんなさい……」
+	;恐怖による失禁
+	CASE 4
+		PRINTFORML 「呜呜呜、我尿出来了，对不起……」
+		;TranslatedMark 「ごめんなさい、おもらししてごめんなさい……」
+		PRINTFORML 露娜比起失禁，露娜更害怕受到惩罚……
+		;TranslatedMark ルナチャイルドは失禁したことより、そのおしおきに怯えている……
+ENDSELECT

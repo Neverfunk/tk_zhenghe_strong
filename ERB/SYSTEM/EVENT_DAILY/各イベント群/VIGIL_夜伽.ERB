@@ -1,0 +1,238 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_VIGIL_RATE()
+RETURN 150
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_VIGIL_DECISION()
+SIF !IS_FEMALE(MASTER)
+	RETURN 0
+RETURN DAY >= 10
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_VIGIL_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_VIGIL_SETTARGET()
+
+SIF !IS_SP_COUNTRY(CFLAG:MASTER:所属)
+	RETURN 0
+
+;男で、主人公と同勢力で、捕虜でなく死亡もしていないキャラから対象をランダム選出(好感度と従属度が高いキャラの方が選ばれやすい)
+FOR LOCAL, 0, CHARANUM
+	IF IS_MALE(LOCAL) && CFLAG:LOCAL:所属 == CFLAG:MASTER:所属 && CFLAG:LOCAL:捕虜先 == 0 && CFLAG:LOCAL:行動不能状態 != 行動不能_子供
+		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+		DAILY_TARGET_NUM ++
+	ENDIF
+NEXT
+
+SIF DAILY_TARGET_NUM < 1
+	RETURN 0
+
+RETURN 1
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_VIGIL()
+#DIM 対象
+
+対象 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+
+PRINTFORML 被%ANAME(対象)%要求侍寢
+PRINTFORMW 怎麼辦？
+CALL ASK_YN("答應", "拒絕")
+
+IF RESULT == 1 && !GETBIT(TALENT:MASTER:淫乱系, 素質_淫乱_淫乱) && !IS_FALLEN_TO_SP_COUNTRY(MASTER)
+	PRINTFORML 今天很累而且沒有這個心情
+	PRINTFORMW 被拒絕後%ANAME(対象)%很可惜地聳了聳肩離開了
+	RETURN 1
+ELSEIF RESULT == 1
+	PRINTFORML 因為疲憊想要拒絕、但是一想到被他圧在身上身体就饑渴得無法忍受
+	PRINTFORMW %ANAME(MASTER)%扭扭捏捏地輕輕點頭之後、%ANAME(対象)%笑着說道會在房間内等着後就離開了
+ELSE
+	PRINTFORML 當然要答應対方的要求
+	PRINTFORMW 凝視着%ANAME(対象)%并眨眼示意後、他笑着說道會在房間内等着後就離開了
+ENDIF
+PRINTFORML
+PRINTFORML 深夜、スケスケの衣装に身を包んだ%ANAME(MASTER)%が枕を抱きながら静まった廊下を歩いている
+PRINTFORML 期待に胸を弾ませている%ANAME(MASTER)%の歩調は、本人も気づかぬうちに早足になっていた
+PRINTFORML 彼の部屋の前に着く頃には、息はすでに荒くなっており、秘所からはじわりと愛液が滲んでいた
+PRINTFORML 深呼吸をして落ち着いてから小さく扉を叩くと、すぐに扉が開かれ%ANAME(対象)%が現れた
+PRINTFORMW %ANAME(MASTER)%の火照った姿を確認した彼はニヤリと笑うと、その身体を抱き寄せて部屋の中へと招き入れた
+PRINTFORML 
+SELECTCASE RAND:30
+	CASE 0
+		PRINTFORML %ANAME(MASTER)%跨坐於%ANAME(対象)%上面， 用手在後面支撐著身體激烈地扭腰
+		PRINTFORML 深深地吞下肉棒的小穴隨著%ANAME(MASTER)%上下搖動腰部時溢出愛液， 發出猥瑣的聲音
+		PRINTFORML %ANAME(MASTER)%的表情已經完全陶醉於其中，垂著舌頭不停嬌喘
+		PRINTFORMW %ANAME(MASTER)%被%ANAME(対象)%雄壯的肉棒抽插取樂了一整晚
+	CASE 1
+		PRINTFORML %ANAME(MASTER)%被%ANAME(対象)%按在床上，一邊被肉棒抽插一邊被飢渴地纏繞著舌頭
+		PRINTFORML 雄壯的肉棒鎖定攻擊着子宮令%ANAME(MASTER)%的腦袋像爆發一樣充滿著快感
+		PRINTFORML %ANAME(MASTER)%的雌性本能受到刺激令子宮疼痛起來，身體全身繼續奉仕着%ANAME(対象)%等待著他的子種
+		PRINTFORMW 不久，被注入期待已久的子種後，%ANAME(MASTER)%被至高的幸福感包圍的同時發出嬌聲高潮了
+	CASE 2
+		PRINTFORML 在響起了肉體相互碰撞的啪啪聲同時，亦響起了%ANAME(MASTER)%充滿節奏感的嬌喘聲
+		PRINTFORML %ANAME(MASTER)%從背後被%ANAME(対象)%粗暴地侵犯，露出了雌犬般的模樣
+		PRINTFORML 肉棒挖着膣壁的的感覺令%ANAME(MASTER)%痙攣並聲不成聲地呻吟着
+		PRINTFORMW %ANAME(対象)%一整晚都被雄壯的肉棒調教，充滿幸福感地高潮了好幾回
+	CASE 3
+		PRINTFORML 嬌喘着的%ANAME(MASTER)%仰躺在床上並被%ANAME(対象)%的肉棒緩慢地抽插
+		PRINTFORML 他就像故意讓%ANAME(MASTER)%焦急一樣慢慢動腰，%ANAME(MASTER)%的身體不斷苦悶掙扎
+		PRINTFORML 陰道和肉棒互相磨擦，令%ANAME(MASTER)%因為從腦袋中爆發的快感而翻白眼，感到快要快狂
+		PRINTFORMW 之後%ANAME(MASTER)%不斷地被調教，直到早上時腿和腰已經站不起來了
+	CASE 4
+		PRINTFORML %ANAME(対象)% 用手彈少女的突起時，%ANAME(MASTER)%大大地弓起背發出嬌聲
+		PRINTFORML 經過他巧妙的愛撫後%ANAME(MASTER)%的身體變得敏感，小穴已經粘糊糊了
+		PRINTFORML 現在插進來的話會怎麼樣呢?正當這樣思考時，他雄壯的肉棒出現在%ANAME(MASTER)%的眼前
+		PRINTFORMW 已經忍耐不了雙眼充滿♥的%ANAME(MASTER)%將小穴掰開，說出下流話索求了
+	CASE 5
+		PRINTFORML %ANAME(MASTER)%被%ANAME(対象)%抱著，一邊扭動身體一邊發出喜悅的聲音
+		PRINTFORML %ANAME(対象)%粗暴地動腰欺負著子宮，令%ANAME(MASTER)%身體震顫着腦袋變得一片空白
+		PRINTFORML 那根雄壯的肉棒往外抽出，陰道蠕動着將男根緊緊纏着，吸往身體深處
+		PRINTFORMW 他低吼着的同時往%ANAME(MASTER)%裏面釋出大量精液，%ANAME(MASTER)%露出雌性的表情高潮了
+	CASE 6
+		PRINTFORML %ANAME(MASTER)%和%ANAME(対象)%如同戀人一樣互相緊扣雙手並陶醉地搖動著腰
+		PRINTFORML 啪！啪！啪！肉體不斷相互碰撞，肉棒在陰道内的每一次摩擦都會讓%ANAME(MASTER)%露出雌性的表情
+		PRINTFORML 每次突進都會令%ANAME(MASTER)%忍耐不住快要高潮般扭腰，刺激肉棒催促著射精
+		PRINTFORMW 已經完全興奮的兩人不滿足於只高潮一兩次，一整晚都相愛着
+	CASE 7
+		PRINTFORML %ANAME(MASTER)%受到不知第幾次的膣内射精後，發出大大的嬌聲高潮了
+		PRINTFORML 胎內被注入了大量的子種同時，%ANAME(MASTER)%痙攣地露出阿嘿顏
+		PRINTFORML 為了變更姿勢%ANAME(対象)%暫時將肉棒拔出，大量的精液從結合部位溢出來了
+		PRINTFORMW 看見他不知疲憊的肉棒後，子宮感到疼痛的%ANAME(MASTER)%再次張開身體迎接男人
+	CASE 8
+		PRINTFORML %ANAME(MASTER)%以正常位的姿勢被%ANAME(対象)%激烈侵犯着
+		PRINTFORML 他每次突進都會向%ANAME(MASTER)%喃喃細語着愛，並像野獸一樣蹂躙着小穴內
+		PRINTFORML 在熱情的甜言蜜語攻勢之下%ANAME(MASTER)%身心慢慢地沉溺在肉慾之中
+		PRINTFORMW 肉棒與子宮口緊密接觸就這樣釋放特濃精液的同時，%ANAME(MASTER)%露出快要失去意識的表情高潮了
+	CASE 9
+		PRINTFORML %ANAME(MASTER)%跨坐於%ANAME(対象)%上面，用下面的口深深地含著肉棒扭動著腰
+		PRINTFORML 腰沈下來時肉棒都會撞到子宮口，令%ANAME(MASTER)%感到腦袋要麻痺般的衝擊發出嬌聲
+		PRINTFORML %ANAME(MASTER)%感覺到子宮因為渴望子種懷孕而降下來，更激烈地扭動着腰
+		PRINTFORMW %ANAME(MASTER)% 一邊索求着%ANAME(対象)%的種子一邊熱心奉仕， 然後因被無數次被播種作為獎勵而感到喜悅
+	CASE 10
+		PRINTFORML 床架響起嗄吱嗄吱的聲音，%ANAME(MASTER)%跨坐在%ANAME(対象)%身體上不斷跳動着
+		PRINTFORML %ANAME(MASTER)%帶著下流的表情用下面吞吐着男人的肉棒，像娼婦一樣扭動着身體
+		PRINTFORML 忽然他動腰不斷往上頂，%ANAME(MASTER)%嚇一跳地身體向後仰， 發出喜悅的聲音
+		PRINTFORMW 震顫着的%ANAME(MASTER)%一邊看著%ANAME(対象)%， 一邊為了承受精液更快地動腰了
+	CASE 11
+		PRINTFORML 被%ANAME(対象)%盡情欺負後，%ANAME(MASTER)%橫躺在床上微弱地喘息
+		PRINTFORML %ANAME(MASTER)%愛憐地輕撫着被内射的滿滿的発熱的小腹、身体微顫
+		PRINTFORML 在身边休憩的%ANAME(対象)%再次圧過来後、%ANAME(MASTER)%瞬間就滿臉通紅的張開了身体
+		PRINTFORMW 像恋人一樣甜蜜的交合了一整晚、伴隨着快感、%ANAME(MASTER)%被注入了大量的精子
+	CASE 12
+		PRINTFORML %ANAME(MASTER)%被%ANAME(対象)%侵犯得支撐不住身體，沉溺於快感之中
+		PRINTFORML 在他的精力超群精力之下%ANAME(MASTER)%已經像個壞掉的人偶一樣，帶著恍惚的表情一邊嬌喘一邊扭動着身體
+		PRINTFORML 在%ANAME(対象)%顫抖着在%ANAME(MASTER)%腔内射精的時候，%ANAME(MASTER)%因強烈的快樂和熱感發出陶醉其中的聲音
+		PRINTFORMW 直到天明時，在%ANAME(対象)%旁邊的%ANAME(MASTER)%露出迷戀的表情抱著男人的手臂
+	CASE 13
+		PRINTFORML %ANAME(MASTER)%跨坐在%ANAME(対象)%上面將肉棒吞到小穴深處，%ANAME(MASTER)%與他接吻着
+		PRINTFORML 一邊連繫着一邊貪圖對方一樣纏繞著舌頭，腦袋因為要溶化一樣的感覺而恍惚
+		PRINTFORML %ANAME(MASTER)%幸福地收緊陰道，感覺到肉棒在自己裏面跳動後嘿嘿地笑着
+		PRINTFORMW %ANAME(MASTER)%抬起上半身一邊和深愛的他互相凝視着、一邊慢慢地扭動起腰進行着奉仕
+	CASE 14
+		PRINTFORML %ANAME(MASTER)%四肢着地趴在床上，被肉棒粗暴地插入
+		PRINTFORML %ANAME(対象)%激烈地搖動着腰不斷欺負子宮，%ANAME(MASTER)%身體彈跳着般並不斷妖媚地嬌喘
+		PRINTFORML 龜頭再次插到最深處，%ANAME(MASTER)%震顫着扭動身體
+		PRINTFORMW 即使像玩具一樣被隨意侵犯，%ANAME(MASTER)%仍然感到喜悅並沉迷其中
+	CASE 15
+		PRINTFORML %ANAME(MASTER)%被%ANAME(対象)%戴上了項圈、以站立後背位的姿勢承受着激烈地抽插
+		PRINTFORML 他像是在調教寵物一樣在抽送的同時拍打着臀肉、每次都會讓%ANAME(MASTER)%顫抖地発出娇喘
+		PRINTFORML 一边頂弄着子宮口一邊預告到要口内射精後、%ANAME(MASTER)%像小狗一樣鳴叫着央求着精子
+		PRINTFORMW 被徹夜調教打下了標記的%ANAME(MASTER)%、在離別時恋恋不捨地用頭磨蹭着%ANAME(対象)%
+	CASE 16
+		PRINTFORML %ANAME(MASTER)%被%ANAME(対象)%從背後抱起然後用肉棒激烈地頂弄着
+		PRINTFORML 子宮都要被圧垮般的激烈地抽插、讓%ANAME(MASTER)%踡起腳尖不停地喘息
+		PRINTFORML 突然受到的像要貫穿頭頂般的強烈突刺、不由得讓%ANAME(MASTER)%大幅顫抖着身体、就這樣高潮了
+		PRINTFORMW 在震顫的腔肉下他也忍不住的朝着胎內射精後、感受到下腹那股灼熱的%ANAME(MASTER)%迎来了連續地高潮
+	CASE 17
+		PRINTFORML %ANAME(対象)%温柔地推倒%ANAME(MASTER)%後、一邊親吻着全身一邊温柔地愛撫着
+		PRINTFORML 爬遍脖颈、鎖骨、背脊、乳房、大腿内侧等全身的性敏感帯的巧妙地愛撫讓%ANAME(MASTER)%有些喘不過氣来
+		PRINTFORML 很快就無法忍受的%ANAME(MASTER)%自己掰開了已經黏糊糊的小穴、央求着他的肉棒
+		PRINTFORMW 和愛撫一樣緩慢而又温柔的性愛讓%ANAME(MASTER)%忘記了時間、連續交合了好幾次
+	CASE 18
+		PRINTFORML %ANAME(MASTER)%被推倒在床上並被肉棒插入的同時，%ANAME(MASTER)%露出喜悦的表情嬌喘着
+		PRINTFORML 他熱情的性愛中每次抽插快樂都會湧入，身體因雌性的本能震顫並發出喜悦的聲音
+		PRINTFORML 雙手撫摸著%ANAME(対象)%的頭同時%ANAME(MASTER)%露出充滿情慾的表情伸出舌頭後，他猛扑上來纏繞著舌頭
+		PRINTFORMW 陶醉於令腦袋如同要溶化般的熱烈性愛之中互相貪婪着身體， 疲倦結束時子宮已經充滿精液了
+	CASE 19
+		PRINTFORML %ANAME(MASTER)%躺在床上、被%ANAME(対象)%不停地侵犯着
+		PRINTFORML 腔穴被堅挺的肉柱圧得滿滿的、%ANAME(MASTER)%在極大的快感下吐着舌頭露出了啊嘿顔
+		PRINTFORML 在他說道快要射了後%ANAME(MASTER)%緊緊地收縮着腔道、在子宮被白濁射滿的時候全身顫抖地高潮了
+		PRINTFORMW 榨出他最後一滴精液後的%ANAME(MASTER)%吸吮着他的肉棒沒有放開、露出淫靡的表情扭動着身体邀請着再来一次
+	CASE 20
+		PRINTFORML 一進入房間他就將%ANAME(MASTER)%推倒將肉棒插入
+		PRINTFORML 驚訝的%ANAME(MASTER)%沒有抵抗並接受，他不斷搖動著腰進行活塞運動
+		PRINTFORML 他如同撒嬌般緊抱著%ANAME(MASTER)%拼命地扭腰，令母性本能受到刺激的%ANAME(MASTER)%身體不斷震顫着
+		PRINTFORMW 就這樣在他滿足之前整晚都在撒嬌，子宮承受著他的精液，%ANAME(MASTER)% 自身也去了無數次
+	CASE 21
+		PRINTFORML %ANAME(MASTER)%坐在%ANAME(対象)%身上將整根肉棒吞到小穴中
+		PRINTFORML 被他抱到懷裏在感覺到對方吐息下的距離互相凝視着同時，二人開始輕輕地搖動着腰
+		PRINTFORML 保持緊貼對方同時，舌頭相互纏繞，二人互相比試親吻對方身體的技巧，享受着緩慢的性愛
+		PRINTFORMW 不久後二人同時到達極限，像戀人一樣呼喚對方名字並高潮了
+	CASE 22
+		PRINTFORML 陰道被%ANAME(対象)%的巨大的肉棒所填滿的%ANAME(MASTER)%不住地痙攣着
+		PRINTFORML 肉棒每次進出腔内的時候全体腔壁都會被摩擦、被圧倒性的快感襲撃的%ANAME(MASTER)%一下子就高潮了
+		PRINTFORML 幾次活塞運動後%ANAME(MASTER)%的身体已經完全成為了他的肉棒的俘虜、無意識地緊纏着他的肉棒
+		PRINTFORMW 在這驚人的享受下他也很快迎来了極限、射出了大量的精液、讓%ANAME(MASTER)%発出了下流的聲音再次高潮了
+	CASE 23
+		PRINTFORML 喝了媚薬後情慾湧上全身的%ANAME(MASTER)%忍耐不了地依偎着他索求
+		PRINTFORML 他看到這樣的%ANAME(MASTER)%後便躺在床上，命令%ANAME(MASTER)%奉仕已經立起的肉棒
+		PRINTFORML %ANAME(MASTER)%像發情的母狗一樣撲向肉棒用私處貼近龜頭，然後一口氣沉下腰整根吞到裏面
+		PRINTFORMW 得到期待的肉棒後，%ANAME(MASTER)%高潮了無數次同時在他命令下奉仕了一整晚
+	CASE 24
+		PRINTFORML  %ANAME(MASTER)%抱著%ANAME(対象)%的手臂，帶著睡眼惺忪的表情瞌睡着
+		PRINTFORML 被熟練的技巧狠狠地疼愛後，%ANAME(MASTER)%只快就變成只會向撒嬌的雌性
+		PRINTFORML 被滿滿地播種的下腹部被溫柔地愛撫，%ANAME(MASTER)%想起之前被做過的事後，子宮再次因情慾而疼痛起來
+		PRINTFORMW 不久後無法忍耐的%ANAME(MASTER)%扭扭捏捏地向他索求後，再度被他推倒時%ANAME(MASTER)%露出喜悦的表情
+	CASE 25
+		PRINTFORML %ANAME(対象)%以播種正常位的姿勢侵犯着%ANAME(MASTER)%，激烈地抽插着肉棒
+		PRINTFORML 子宮被激烈的活塞活動不斷推撞後雌性的本能受到刺激，%ANAME(対象)%陷落成雌穴沉溺於快感之中
+		PRINTFORML %ANAME(MASTER)%痙攣同時，肉棒也感受着陰道蠕動着的觸感，陶醉地激烈搖動着腰
+		PRINTFORMW %ANAME(対象)%低吼射精同時，%ANAME(MASTER)%也感覺到雌性的快樂同時高潮了
+	CASE 26
+		PRINTFORML 子宮接受着%ANAME(対象)%的子種同時，%ANAME(MASTER)%大大地向後仰發出嬌聲達到高潮了
+		PRINTFORML %ANAME(MASTER)%與他保持連繫緊緊相擁，身體因從下腹傳來的熱感和高潮的余韻而震顫着
+		PRINTFORML 調整一下呼吸後，二人不謀而合舌頭再次纏繞在一起腰部不斷互相碰撞，再次開始了交合
+		PRINTFORMW 體液互相混雜變得黏黏糊糊，二人一整晚互相貪戀對方沉溺於肉慾之中
+	CASE 27
+		PRINTFORML %ANAME(対象)%一邊壓住趴在床上的%ANAME(MASTER)%一邊用肉棒往深處抽插
+		PRINTFORML 粗大的肉棒刺激子宮口時，%ANAME(MASTER)%身體如同被電擊般跳了起來並嬌喘着
+		PRINTFORML 過多的衝擊令%ANAME(MASTER)%搖頭求饒，但他毫不理會並用龜頭插進子宮口
+		PRINTFORMW 然後就這樣在子宮內釋放出灼熱的精液，%ANAME(MASTER)%頭腦變得一片空白並痙攣的同時高潮了
+	CASE 28
+		PRINTFORML %ANAME(MASTER)%被%ANAME(対象)%舉起了雙腿、在激烈地侵犯下不停喘息着
+		PRINTFORML 像是要挖出腔壁般的粗暴的抽插、讓%ANAME(MASTER)%抓緊了床単拼命地保持着意識
+		PRINTFORML 但是突然間腔内被射入了灼熱的精液後、無法忍耐地大幅後弓起身体迎来了高潮
+		PRINTFORMW 即使在那麼激烈地進攻下、%ANAME(MASTER)%都是一副恍惚的表情、在受到更加激烈地侵犯時不停地発出着愉悦的嬌喘
+	CASE 29
+		PRINTFORML 一回戰結束後%ANAME(MASTER)%吸吮著%ANAME(対象)%的肉棒進行著掃除口交
+		PRINTFORML 股間溢着白濁的%ANAME(MASTER)%將給予自己快樂的肉棒充滿愛意地細心掃除
+		PRINTFORML %ANAME(MASTER)%熱心的奉仕令肉棒再度變硬
+		PRINTFORMW 他推倒%ANAME(MASTER)%，%ANAME(MASTER)%因喜悦震顫同時張開雙手迎接
+ENDSELECT
+CALL FUCK_TRAIN(MASTER, GET_ID(対象), @"%ANAME(対象)%の\@RAND:2 ? 肉棒 # 唇\@", ANAME(対象))
+CFLAG:対象:好感度 += 500 - RAND:200
+CFLAG:対象:支配度 += 500 - RAND:200
+CFLAG:対象:面識 = 1
+RETURN 1

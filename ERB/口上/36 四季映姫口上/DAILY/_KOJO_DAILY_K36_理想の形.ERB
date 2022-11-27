@@ -1,0 +1,130 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K36_YOUR_IDEAL_RATE(対象)
+#DIM 対象
+RETURN 1000
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K36_YOUR_IDEAL_DECISION(対象)
+#DIM 対象
+
+SIF KDVAR:対象:四季映姫_理想の形
+	RETURN 0
+
+SIF ABL:MASTER:武闘 + ABL:MASTER:知略 + ABL:MASTER:防衛 + ABL:MASTER:政治 < 280
+	RETURN 0
+
+SIF GET_OWN_CITY(CFLAG:MASTER:所属) < 8
+	RETURN 0
+
+SIF MASTER == NAME_TO_CHARA("小町")
+	RETURN 0
+
+SIF !IS_LOVER(対象) && !IS_SLAVE(対象)
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K36_YOUR_IDEAL_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K36_YOUR_IDEAL(対象)
+#DIM 対象
+
+
+KDVAR:対象:四季映姫_理想の形 = 1
+
+PRINTFORMW %ANAME(MASTER)%在自己的房間工作時、%ANAME(対象)%が過来拜訪了
+PRINTFORMW 「%ANAME(MASTER)%。有一件事、想問你」
+PRINTFORMW 「即使在幻想鄉裡你也是少有的人才。然後在我們的協力之下。離幻想鄉統一的日子不遠了」
+PRINTFORMW 「然後……在這個未来、你能夠看見什麼？」
+PRINTFORML 「来告訴我你的理想吧」
+PRINTFORML 
+CALL ASK_MULTI("平和", "力", "金", "快楽")
+
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORMW 「原来如此」
+		PRINTFORMW 「這個、就算脱離現在這樣的戦爭状態、也不一定会実現」
+		PRINTFORMW 「就算沒有了物理上的戦爭、人們的心霊也不一定会安寧」
+		PRINTFORMW 「這会是一条艱難的道路……但我喜歡」
+		PRINTFORMW 「嗯嗯。讓我努力幇忙実現%ANAME(MASTER)%的理想吧」
+		PRINTFORMW 看来、%ANAME(対象)%很満意你的答案……
+		CFLAG:対象:好感度 += 300
+	CASE 1
+		PRINTFORMW 「原来如此」
+		PRINTFORMW 「称霸一方……這個、也算是一種理想吧」
+		PRINTFORMW 「雖然作為閻魔很難完全贊同你的答案……不過沒有説謊誠実回答是值得讚賞的」
+		PRINTFORMW 「謝謝你能聽我説話」
+		PRINTFORMW %ANAME(対象)%離開了……
+	CASE 2
+		PRINTFORMW 「原来如此」
+		PRINTFORMW 「不錯的答案……從現実層面来考慮嗎」
+		PRINTFORMW 「嗯？　怎麼了、真是微妙的表情」
+		PRINTFORMW 「啊啊、我們彼岸之人不会考慮錢与悪的関係的」
+		PRINTFORMW 「説起来、你知道為什麼三途川会有渡河費的制度嗎？」
+		PRINTFORMW 「因為賺錢、本身就是一種善行」
+		PRINTFORMW 「所以、努力賺錢。也是你的善行」
+		PRINTFORMW 看来、%ANAME(対象)%很満意你的答案……
+		CFLAG:対象:好感度 += 300
+	CASE 3
+		IF IS_LOVER(対象)
+			PRINTFORMW 「……哈ー」
+			PRINTFORMW 「你不覚得你自己……過於誠実了嗎」
+			PRINTFORMW 「聽好了？　快楽的確並不是坏事、但是過於追求会令人変得頹廃」
+			PRINTFORMW 「堕落変得頹廃的人死後会去的地方、応該不言自明吧？」
+			PRINTFORMW 「我不可以讓%ANAME(MASTER)%堕入這種末路。暫時禁欲吧」
+			PRINTFORMW %ANAME(対象)%気沖沖地離開了……
+			CFLAG:対象:好感度 -= 300
+			SIF TALENT:対象:合意
+				CALL COLOR_PRINTW(@"失去了%ANAME(対象)%的合意", カラー_注意)
+			TALENT:対象:合意 = 0
+		ELSEIF IS_SLAVE(対象)
+			PRINTFORMW 「……哼哼、是這樣嗎」
+			PRINTFORML 快楽……這樣回答時、%ANAME(対象)%浮現出笑容
+			PRINTFORMW 「嗯嗯、嗯嗯、是這樣呢、你是個能将像我這樣難以取悦的閻魔也能令其堕落的人呢」
+			PRINTFORMW 「将周囲的人捲入、変得像自己一樣頹廃的方向前進……是這樣的人啊、你」
+			PRINTFORMW 「這条道路最後等待你的只有破滅。被憎恨的人買兇殺死、在不知何処的野外死掉之類的……」
+			PRINTFORMW 「無論如何、你最後能去的地方大概就只有地獄吧」
+			PRINTFORML %ANAME(対象)%的笑容、漸漸変得妖艶
+			PRINTFORML 慢慢地変成女人的表情
+			PRINTFORMW 「你応該……沒有恐懼吧、就算你已経知道這種事、還是很想要黏膜互相接触的快楽吧？」
+			PRINTFORMW 「我知道的哦、因為我也、受到你不少的影響、呢」
+			PRINTFORML 語畢、%ANAME(対象)%開始脱掉身上的衣服
+			PRINTFORML 像剛出生一樣光滑的身体、 娇媚地依偎着你……
+			PRINTFORMW 「来吧、直到你身体腐朽之前、我們兩個人一起追求理想吧」
+			PRINTFORMW 「你不会拒絶吧？　如果你拒絶的話……現在就讓你墜入地獄」
+			PRINTFORML 当然、不可能拒絶
+			PRINTFORML 与%ANAME(対象)%做了一堆快楽的事……
+			IF HAS_PENIS(MASTER)
+				CALL FUCK(MASTER, "Ｃ, 射精, 欲望, Ｖ挿入", "接吻喪失, 童貞喪失", 0, @"%ANAME(対象)%的嘴唇", "", @"%ANAME(対象)%的膣穴", "和姦")
+				CALL FUCK(対象, "Ｖ, Ｃ, Ｂ, Ｍ, 奉仕, 性交, 欲望, 性技, 精愛, Ｖ性交, 接吻, 口淫", "接吻喪失, 膣内射精, 処女喪失", GET_ID(MASTER), @"%ANAME(MASTER)%的肉棒", ANAME(MASTER), "", "和姦")
+			ELSE
+				CALL FUCK(MASTER, "欲望, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 百合, 接吻", "接吻喪失", 0, @"%ANAME(対象)%的嘴唇", "", "", "和姦")
+				CALL FUCK(対象, "欲望, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 百合, 接吻", "接吻喪失", 0, @"%ANAME(MASTER)%的嘴唇", "", "", "和姦")
+			ENDIF
+		ENDIF
+ENDSELECT
+
+RETURN 1
+
+

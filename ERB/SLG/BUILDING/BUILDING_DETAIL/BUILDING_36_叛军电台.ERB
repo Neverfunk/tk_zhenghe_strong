@@ -1,0 +1,56 @@
+@BUILDING_GET_NAME_叛军电台()
+    #FUNCTIONS
+    RETURNF "叛军电台"
+
+@BUILDING_GET_EXP_叛军电台()
+    #FUNCTIONS
+    RETURNF "回合结束时获得额外的兵力补充；回合结束时我方部队疲劳度降低。"
+
+@BUILDING_SET_INFO_ID_36()
+    BUILDING_TYPE:建造物_叛军电台 = 建造物_类型_通讯类
+    BUILDING_LEVEL:建造物_叛军电台 = 建造物_等级_一级建筑
+    BUILDING_LIMIT_NUM:建造物_叛军电台 = 建造物_数量限制_1
+    BUILDING_LIMIT_UNI:建造物_叛军电台 = 0
+    BUILDING_COUNTRY_ID:建造物_叛军电台:特殊勢力_野盗 = 1
+    BUILDING_COUNTRY_ID:建造物_叛军电台:特殊勢力_ホフゴブリン = 1
+    BUILDING_COUNTRY_ID:建造物_叛军电台:特殊勢力_外来人 = 1
+    BUILDING_COUNTRY_ID:建造物_叛军电台:特殊勢力_触手 = 1
+    BUILDING_COUNTRY_ID:建造物_叛军电台:特殊勢力_自警団 = 1
+    BUILDING_COUNTRY_ID:建造物_叛军电台:特殊勢力_サキュバス = 1
+    BUILDING_COUNTRY_ID:建造物_叛军电台:特殊勢力_狂信者 = 1
+    BUILDING_HAVE_SKILL:建造物_叛军电台 = 0
+    BUILDING_TOHO_REQ_ID:建造物_叛军电台:0 = 0
+
+
+@CHECK_BUILDING_FUNCTION_叛军电台(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    RESULT:1 = TMP_BUILDING_EXIST_FLAG:COUNTRY_ID:建造物_叛军电台
+    IF RESULT:1 > 0 && (IS_SP_COUNTRY(COUNTRY_ID) || GET_OWN_CITY(COUNTRY_ID) == 1)
+        RESULT:0 = 1
+    ENDIF
+    RETURNF RESULT:0
+
+@BUILDING_TEXT_叛军电台_1(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    SIF !CHECK_BUILDING_TEXT_OUTPUT(COUNTRY_ID)
+        RETURNF 0
+    BUILDING_TEXT = PRINT_BUILDING_TEXT_TITLE_F()
+    PRINTFORM 因为《叛军电台》的存在，
+    SIF IS_SP_COUNTRY(COUNTRY_ID)
+        PRINTFORML 即使被宣为异端的%ANAME(GET_COUNTRY_BOSS(COUNTRY_ID))%势力仍能募集到部队！
+    SIF !IS_SP_COUNTRY(COUNTRY_ID)
+        PRINTFORML 即使身处绝境的%ANAME(GET_COUNTRY_BOSS(COUNTRY_ID))%势力仍能募集到部队！
+    RETURNF 1
+
+@BUILDING_TEXT_叛军电台_2(COUNTRY_ID,UNIT_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    #DIM UNIT_ID
+    SIF !CHECK_BUILDING_TEXT_OUTPUT(COUNTRY_ID)
+        RETURNF 0
+    BUILDING_TEXT = PRINT_BUILDING_TEXT_TITLE_F()
+    PRINTFORM 因为《叛军电台》的存在，
+    PRINTFORML %ANAME(GET_COUNTRY_BOSS(COUNTRY_ID))%的军队{UNIT_ID}疲劳恢复了！
+    RETURNF 1

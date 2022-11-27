@@ -1,0 +1,192 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_FAIR_DATE_RATE()
+RETURN 25
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_FAIR_DATE_DECISION()
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_FAIR_DATE_SETTARGET()
+
+FOR LOCAL, 0, CHARANUM
+	;女キャラ、かつ自国所属かつ捕虜でない、かつ動物でない
+	IF IS_FEMALE(LOCAL) && CFLAG:LOCAL:所属 == CFLAG:MASTER:所属 && !CFLAG:LOCAL:捕虜先 && !IS_ANIMAL(LOCAL) && CFLAG:LOCAL:面識 && CFLAG:LOCAL:好感度 > 0
+		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+		DAILY_TARGET_NUM ++
+	ENDIF
+NEXT
+
+SIF DAILY_TARGET_NUM < 1
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_FAIR_DATE_GENRE()
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_FAIR_DATE
+#DIM 対象
+
+対象 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+
+PRINTFORML 遇见了穿着浴衣的%ANAME(対象)%
+PRINTFORMW 听说现在正在举办祭典
+IF CFLAG:対象:好感度 >= 500 
+	PRINTFORMW %ANAME(MASTER)%被邀请一同前往
+ELSE
+	PRINTFORMW 现在很闲，要去跟她一起去么？
+ENDIF
+PRINTFORML 怎么办？
+CALL ASK_YN("一起去", "送别")
+IF RESULT == 1
+	PRINTFORMW 因为感觉到疲惫，所以谢绝了邀请
+	IF CFLAG:対象:好感度 >= 500
+		PRINTFORMW 少女看起来很遗憾，但还是微笑着离开了
+	ENDIF
+	RETURN
+ELSE
+	PRINTFORMW 听到说要一起去，少女就笑了起来
+ENDIF
+PRINTFORML 
+PRINTFORML 祭典上人山人海
+PRINTFORMW 为了不走散而贴在一起，能少女身上柔和的香气扑鼻而来
+PRINTFORML 仿佛忘记了自己的身份、她像个活泼的花季少女
+PRINTFORMW 和平时不一样的装扮然人感到十分有魅力，不知不觉就看痴了
+PRINTFORML 一发呆就撞在了少女身上、立刻慌慌张张的后退两步
+PRINTFORML 少女看着%ANAME(対象)%的反应掩着嘴轻笑
+PRINTFORMW 两个人脸色微红，带着暧昧气息在参加了祭典
+PRINTFORML 
+SELECTCASE RAND:9
+	;食べ歩き
+	CASE 0
+		PRINTFORML 祭典上到处弥漫着美食的气味
+		PRINTFORML 炒面、章鱼烧、棉花糖、巧克力香蕉
+		PRINTFORMW 少女一边吃着一边盯着新的摊位
+		IF MONEY >= 1000
+			MONEY -= 1000
+			CFLAG:対象:好感度 += 100
+			PRINTFORMW 消费了1000金
+			PRINTFORMW 好感度上升了100
+		ENDIF
+	;射的
+	CASE 1
+		PRINTFORML 来到了射击小屋面前
+		PRINTFORMW 少女看上了奖品中的一个玩偶、决定参加挑战
+		PRINTFORML 
+		IF ABL:MASTER:武闘 / 10 + RAND:5 >= RAND:7
+			PRINTFORML 顺利的拿到了玩偶！
+			PRINTFORMW 将玩偶递给了少女，少女开心的笑了起来
+			CFLAG:対象:好感度 += 150
+			PRINTFORMW 好感度上升了150
+		ELSE
+			PRINTFORML 没有成功
+			PRINTFORMW 少女看起来很遗憾，但还是表示没关系
+			CFLAG:対象:好感度 += 50
+			PRINTFORMW 好感度上升了50
+		ENDIF
+	;金魚すくい
+	CASE 2
+		PRINTFORML 被正在捞金鱼的人邀请了
+		PRINTFORMW 少女提出进行竞赛
+		PRINTFORML 
+		IF ABL:MASTER:知略 / 10 + RAND:5 >= RAND:7
+			PRINTFORML 成功地赢得了竞赛！
+			PRINTFORMW 一边与少女商量如何培养金鱼，一边继续逛着摊子
+			CFLAG:対象:好感度 += 150
+			PRINTFORMW 好感度上升了150
+		ELSE
+			PRINTFORML 少女赢得了胜利
+			PRINTFORMW 她一边商量着金鱼的培育方法，一边继续逛着摊子
+			CFLAG:対象:好感度 += 50
+			PRINTFORMW 好感度上升了50
+		ENDIF
+	;くじびき
+	CASE 3
+		PRINTFORML 遇到了抽签的摊子
+		PRINTFORMW 两人被邀请去比试一下运气
+		PRINTFORML 
+		IF RAND:3 == 0
+			PRINTFORML 抽中更好的签！
+			PRINTFORMW 将赠品递给少女后，她露出了开心的微笑
+			CFLAG:対象:好感度 += 150
+			PRINTFORMW 好感度上升了150
+		ELSE
+			PRINTFORML 很可惜，抽到了较差的签
+			PRINTFORMW 赢得比赛的少女脸上带着喜悦，两人再次前往其他摊位
+			CFLAG:対象:好感度 += 50
+			PRINTFORMW 好感度上升了50
+		ENDIF
+	;食べ歩き2
+	CASE 4
+		PRINTFORML 空气中到处弥漫着美食的气味
+		PRINTFORML 美狗、刨冰、土豆黄油
+		PRINTFORMW 两个人买了喜欢的食物，一边吃东西一边离开了摊子
+		IF MONEY >= 1000
+			MONEY -= 1000
+			CFLAG:対象:好感度 += 100
+			PRINTFORMW 金1000を消費した
+			PRINTFORMW 好感度上升了100
+		ENDIF
+	;お面屋
+	CASE 5
+		PRINTFORML 发现了面具店
+		PRINTFORMW 其中有令人怀念的东西和从未见过的假面，各种各样的面具被摆在摊位上售卖。
+		PRINTFORML 买了两人比较中意的面具
+		PRINTFORMW 和少女笑着回到了祭典的人流里
+		CFLAG:対象:好感度 += 80
+		PRINTFORMW 好感度上升了80
+	;小休止
+	CASE 6
+		PRINTFORML 在祭典中逛累了的%ANAME(対象)%决定稍微休息一下
+		PRINTFORMW 正好找到了长椅，两个人靠在长椅上说着话
+		PRINTFORML 少女难的在祭典上没有保持平常的繁琐礼仪
+		PRINTFORMW 休息了一会儿，又被她拉回了小摊中
+		CFLAG:対象:好感度 += 80
+		PRINTFORMW 好感度上升了80
+	;人混みの中
+	CASE 7
+		PRINTFORML 祭典上人山人海
+		PRINTFORMW 一移开眼睛，就会和少女分开
+		PRINTFORML 少女的手掌轻轻握了过来
+		PRINTFORML 你什么也没说，紧紧地抓住了她的手
+		PRINTFORMW 两个人牵着手在祭典中穿行
+		CFLAG:対象:好感度 += 80
+		PRINTFORMW 好感度上升了80
+	;ヨーヨー釣り
+	CASE 8
+		PRINTFORML 看到了钓水球的孩子
+		PRINTFORML 看的了这个少女想要试一下
+		PRINTFORMW 从大量的水球中一眼看出了自己喜欢的颜色
+		PRINTFORML 
+		IF ABL:MASTER:防衛 / 10 + RAND:5 >= RAND:7
+			PRINTFORML 成功将水球钩了上来！
+			PRINTFORMW 少女开心地笑着，像小孩子一样欢闹
+			CFLAG:対象:好感度 += 150
+			PRINTFORMW 好感度上升了150
+		ELSE
+			PRINTFORML 没能成功钩起水球
+			PRINTFORMW 很遗憾的和少女一起离开了摊子
+			CFLAG:対象:好感度 += 50
+			PRINTFORMW 好感度上升了50
+		ENDIF
+ENDSELECT
+
+RETURN 1

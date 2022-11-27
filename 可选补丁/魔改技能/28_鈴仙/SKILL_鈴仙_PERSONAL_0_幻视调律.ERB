@@ -1,0 +1,124 @@
+;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_28_PERSONAL_0_EXIST
+RETURN 1
+
+@SKILL_28_PERSONAL_0_NAME
+RESULTS = 狂符〖幻视调律〗(Visionary Tuning)
+
+;レベルは1-5まで
+@SKILL_28_PERSONAL_0_LEVEL
+RETURN 1
+
+;対象選択
+@SKILL_28_PERSONAL_0_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+SIF BATTLE_COMMANDER_NUM:対象側 == 0
+	RETURN 0
+COMBAT_SKILL_TARGET = RAND:(BATTLE_COMMANDER_NUM:対象側)
+RETURN 1
+
+;発動判定
+@SKILL_28_PERSONAL_0_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1
+
+;発動テキストをオーバライドしたいときに。
+;「誰それのスキル発動！　○○した！」の「○○した！」の部分を実装したい場合は、
+;これじゃなくてINVOKEで書けばいいです。
+;@SKILL_28_PERSONAL_0_INVOKE_TEXT(発動者, スキル, ジャンル)
+;#DIM 発動者
+;#DIM スキル
+;#DIMS ジャンル
+
+;効果をここに記述
+@SKILL_28_PERSONAL_0_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+PRINTFORML  “为什么要让我出战……”
+PRINTFORML  铃仙低着头，声音带着明显的颤抖。
+PRINTFORML  “明明好不容易才从月球上逃下来……”
+PRINTFORML  看不见她的表情，却能听出话语中的哭腔。
+PRINTFORML  “想要活下去……所以即使背上逃兵、叛徒的罪名也无所谓……”
+
+PRINTFORML  “说到底根本没有为这毫无意义的战争付出生命的理由吧？”
+PRINTFORML  铃仙双手抱着脑袋，语速突然加快。
+PRINTFORML  “明明是上面的大人之间的冲突就要我们去上替她们卖命打仗吗？”
+PRINTFORML  “无论战场上死了多少士兵对于她们而言都只是纸面上的数字吧？”
+PRINTFORML  “为什么凭什么啊明明只是想要活下去难道这也是罪吗？”
+PRINTFORML  铃仙的语速越来越快，身躯散发出与平日不同的、扭曲不详的气场。
+
+PRINTFORML  “……”
+PRINTFORML  “是啊……”
+PRINTFORML  “我不是早就明白了吗？”
+PRINTFORML  像是想通了什么，铃仙停下了那瘆人的碎碎念，转而用一种冷漠的语气自言自语。
+
+PRINTFORML  “不战斗的话，就没办法活下去啊……”
+PRINTFORML  随后，她做出了更加可怕的发言。
+PRINTFORML  “那么，全部杀光吧……”
+
+PRINTFORML  “为了我能活下去，”
+PRINTFORML  铃仙抬起头，面容平静，猩红的双眼中散发着狂乱的光芒。
+PRINTFORML  “请你们去死吧！！”
+
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
+	TIMES BATTLE_武闘パワー:対象側:LOCAL, 0.55
+	TIMES BATTLE_防衛パワー:対象側:LOCAL, 0.55
+	TIMES BATTLE_知略パワー:対象側:LOCAL, 0.55
+	TIMES BATTLE_妖術パワー:対象側:LOCAL, 0.55
+NEXT
+
+BATTLE_RATE_ATC:発動側 += 55
+
+PRINTFORML 敵方全員的武闘下降！
+PRINTFORML 敵方全員的防衛下降！
+PRINTFORML 敵方全員的知略下降！
+PRINTFORML 敵方全員的妖術下降！
+
+PRINTFORML 敌部队受到的伤害增加！
+
+@SKILL_28_PERSONAL_0_EXPLANATION
+RESULTS = 使敵方全員多项属性下降、受到的伤害增加。
+
+@SKILL_28_PERSONAL_0_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 700

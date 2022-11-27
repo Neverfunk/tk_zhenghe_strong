@@ -1,0 +1,56 @@
+﻿;-------------------------------------------------
+;自治を求める
+;-------------------------------------------------
+@Colonial_Office_Demand_autonomy
+#DIM 宗主国勢力
+#DIM 宗主国勢力名
+#DIM 自国勢力
+#DIM 自国勢力名
+#DIMS 従属国種別
+
+自国勢力 = CFLAG:MASTER:所属
+自国勢力名 = GET_COUNTRY_BOSS(自国勢力)
+
+FOR LOCAL:0, 0, MAX_TREATY_CO
+	;(従属国パッチ)植民地である場合
+	IF TREATY_CO_COUNTRY:(LOCAL:0):0:0 == 自国勢力 && TREATY_CO_COUNTRY:(LOCAL:0):1:1 >= 1
+		宗主国勢力 = TREATY_CO_COUNTRY:(LOCAL:0):1:1
+		従属国種別 = 植民地
+		BREAK
+	;(従属国パッチ)傀儡国である場合
+	ELSEIF TREATY_P_COUNTRY:(LOCAL:0):0:0 == 自国勢力 && TREATY_P_COUNTRY:(LOCAL:0):1:1 >= 1
+		宗主国勢力 = TREATY_P_COUNTRY:(LOCAL:0):1:1
+		従属国種別 = 傀儡国
+		BREAK
+	ENDIF
+NEXT
+
+宗主国勢力名 = GET_COUNTRY_BOSS(宗主国勢力)
+
+CALL SINGLE_DRAWLINE
+PRINTFORML 独立宣言 现在是[%ANAME(宗主国勢力名)%]势力的[%従属国種別%]
+CALL SINGLE_DRAWLINE
+
+PRINTL 
+PRINTL 当被承认自治时，就会从原来的宗主国独立出来，并与宗主国建立永久同盟
+PRINTL 
+PRINTFORML 要从%ANAME(宗主国勢力名)%势力中寻求自治吗？
+
+;はい／いいえ入力処理
+CALL ASK_YN()
+IF RESULT == 1
+	REDRAW 1
+	RETURN
+	
+ELSE
+	;好感度1200以上、敵対値0
+	IF REL_LIKE:宗主国勢力名:自国勢力名 >= 1200 && REL_HATE:宗主国勢力名:自国勢力名 <= 0
+		PRINTFORMW %ANAME(宗主国勢力名)%承认了%ANAME(自国勢力名)%的独立！
+		CALL INIT_Protectorate_Independence(自国勢力, 宗主国勢力)
+	ELSE
+		PRINTFORML %ANAME(宗主国勢力名)%不承认%ANAME(自国勢力名)%的独立…
+		PRINTFORMW 需要更多的好感度
+	ENDIF
+ENDIF
+
+

@@ -1,0 +1,186 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K3_EX_RUMIA_RATE(対象)
+#DIM 対象
+RETURN 50
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K3_EX_RUMIA_DECISION(対象)
+#DIM 対象
+
+;合意がないとだめ
+SIF !TALENT:対象:合意
+	RETURN 0
+	
+;主人公と同一勢力で捕虜でなく、主人公が肉棒持ちで、好感度1500以上
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0) && HAS_PENIS(MASTER) && CFLAG:対象:好感度 >= 1500
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K3_EX_RUMIA_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラから隨機に一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K3_EX_RUMIA(対象)
+#DIM 対象
+#DIM 霊夢
+霊夢 = NAME_TO_CHARA("霊夢")
+
+;一回目
+IF KDVAR:対象:ルーミア_EXルーミア == 0
+	PRINTFORML 「喂、%ANAME(MASTER)%。一起来玩吗？」
+	PRINTFORMW 在休息日，%ANAME(対象)%来到了%ANAME(MASTER)%的房间
+	PRINTFORML 没有什么要拒绝的理由，就邀请到了房间里
+	PRINTFORMW 「哇，谢谢你♪」
+	PRINTFORML 就这样，两个人一边躺着吃点心一边看漫画，悠闲地度过了
+	PRINTFORMW 突然发现%ANAME(対象)%头上带的发带，稍微有点脏了
+	PRINTFORMW 平时就在意皮肤粗糙、头发脏污等问题的%ANAME(対象)%
+	PRINTFORMW 把显眼的丝带上的污垢原封不动地放在那里，总觉得有些违和
+	PRINTFORML 「嗯？啊，这个？虽然知道，但是自己是不会碰的」
+	PRINTFORMW %ANAME(対象)%说，这不是单纯的丝带，而是封印了某些东西的符纸
+	PRINTFORMW 由于封印时下的术，她不会接触到这个符纸，平时也不会意识到…
+	PRINTFORML 「我也是最近照镜子一看，觉得脏了呢」
+	PRINTFORMW 「如果是我以外的人的话，好像能摸到，%ANAME(MASTER)%试一试？」
+	PRINTFORMW 「顺便帮我洗一下就好了。啊，或许会升级呢！？」
+	PRINTFORML 如果是很轻的封印的话…
+	PRINTFORMW 嘛，符纸只要再穿上就可以了，但是被封印的东西不知道是什么，可以取下来吗？…
+	PRINTFORMW 那么，怎么办呢……
+	CALL ASK_YN("拿下来", "就那样放着")
+	IF RESULT == 1
+		PRINTFORMW 被封印了，也有相应的理由吧
+		PRINTFORMW 用不着和神作对
+		PRINTFORMW %ANAME(MASTER)%将符纸保持原样，继续与%ANAME(対象)%玩闹起来……
+		CFLAG:対象:好感度 += 200
+		RETURN 1
+	ELSE
+		PRINTFORML 嗯，以如此引人注目的形式放置不管，也许并不是那么严重的事情
+		PRINTFORMW 稍微有点好奇心，就试着取了符纸
+		PRINTFORML 「嗯，可能有点害怕了。感觉有什么危险的话请马上放回去」
+		PRINTFORMW %ANAME(対象)%也有点紧张的样子。总之，试着温柔地取下符纸
+		PRINTFORML …认真观察手上的符纸。远远的看到白色线条的部分全部用白字写着咒语一样的东西…
+		PRINTFORMW 「……嗯？这个……嗯」
+		PRINTFORML %ANAME(対象)%注意到身体的异常。好像感觉到了力量的高涨
+		PRINTFORMW 「这、这是…嘿！黑暗力量高涨……溢出来了…嘿！」
+		PRINTFORML 「这就是我真正的力量吗！！」
+		CALL COLOR_PRINTW(@"%ANAME(対象)%が、释放出被封印的真正力量！", カラー_注意) 
+		CALL COLOR_PRINTL(@"%ANAME(対象)%的武闘上升了1！", カラー_注意)
+		ABL:対象:武闘 += 1
+		CALL COLOR_PRINTL(@"%ANAME(対象)%的防衛上升了1！", カラー_注意)
+		ABL:対象:防衛 += 1
+		CALL COLOR_PRINTW(@"%ANAME(対象)%的知略上升了1！", カラー_注意)
+		ABL:対象:知略 += 1
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORMW ・・・
+		PRINTFORMW 虽然感觉不到自己变得有多强大……
+		PRINTFORMW 「…嗯，是这样的吧」
+		IF CFLAG:霊夢:所属 == CFLAG:MASTER:所属 &&  !(MASTER == NAME_TO_CHARA("霊夢"))
+			PRINTFORML 
+			CALL SINGLE_DRAWLINE
+			PRINTFORML 
+			PRINTFORML 　　被封印也就是这种程度
+			PRINTFORML 
+			CALL SINGLE_DRAWLINE
+			PRINTFORML 
+			PRINTFORML 不知从哪里传来了博丽巫女的话语…
+			PRINTFORMW 
+		ENDIF
+		PRINTFORMW 「啊，简单的power up『ＥＸ%ANAME(対象)%！』我还以为能到这种程度呢」
+		PRINTFORML 
+		CALL COLOR_PRINTL(@"ドクンッ", カラー_警告)
+		PRINTFORMW 
+		PRINTFORMW 「啊，那个…总觉得…有点……」
+		PRINTFORML %ANAME(対象)%突然跪了下来。果然发生了什么不好的事情吗！？
+		PRINTFORMW 急忙打算给%ANAME(対象)%安装符纸的时候，反过来被她控制住了，就那样被推倒了
+		PRINTFORML 然后，在发出抵抗声之前，被%ANAME(対象)%的嘴唇堵住了嘴
+		PRINTFORMW 「嗯…嘘♥嗯…继续…嗯…♥♥」
+		PRINTFORML %ANAME(MASTER)%在%ANAME(対象)%掌控下、由于无法呼吸的激烈接吻而陷入缺氧状态，意识朦胧
+		PRINTFORMW 确认了%ANAME(MASTER)%的抵抗力减弱了的%ANAME(対象)%，跨坐在%ANAME(MASTER)%身上，把衣服扔到了一边
+		PRINTFORML 那个姿态并不是平时那个天真无邪的少女，而是一个劲地闪烁着妖艳的淫光的妖怪
+		PRINTFORMW 完全被情欲支配了的%ANAME(対象)%，一个劲的渴求着%ANAME(MASTER)%的精液……
+		
+		CVARSET CFLAG, 6, 0
+		KDVAR:対象:ルーミア_EXルーミアとセックス中 = 1
+		FLAG:ターンエンド調教 = 2
+		CVARSET CFLAG, 6, 0
+		CFLAG:対象:調教参加フラグ = 1
+		CFLAG:対象:調教中帰らない = 1
+		ABL:対象:主導度Ｕ += 500
+		CFLAG:対象:強制友好化 = 1
+		BASE:対象:体力 = MAXBASE:対象:体力
+		BASE:対象:気力 = MAXBASE:対象:気力
+		;それ以降のデイリーイベント発生を潰す
+		DAILY_CANCEL = 1
+	ENDIF
+;２回目以降
+ELSE
+	PRINTFORML 「喂、%ANAME(MASTER)%。可以再来玩吗？」
+	PRINTFORMW 休息日、%ANAME(対象)%又来%ANAME(MASTER)%的屋子里玩了
+	PRINTFORML 好像不记得上次在这里干过什么
+	PRINTFORMW 「嘿嘿，不用顾虑，滚来滚去吧♪」
+	PRINTFORML 躺着吃吃点心、看看漫画，两个人悠闲地度过一段时光
+	PRINTFORMW 突然又一次注意到了%ANAME(対象)%头上的发带
+	PRINTFORMW 上一次，她因为取了这个东西而变得混乱不堪的样子不禁浮现在我的脑海里
+	PRINTFORMW 「嗯？怎么了？　%ANAME(MASTER)%。啊，这个？」
+	PRINTFORML 「我知道脏了…这个，自己是不会碰的」
+	PRINTFORMW 「如果是我以外的人的话，好像能摸到，%ANAME(MASTER)%试着拿下来看看？」
+	PRINTFORMW 「顺便帮我洗一下就好了。啊，或许会升级也说不定！？」
+	PRINTFORML 因为没有记忆，所以%ANAME(対象)%又一次天真无邪的这么说着
+	PRINTFORML 但是%ANAME(MASTER)%还记得上次那么激烈的交合…
+	PRINTFORML 怎么办呢……
+	CALL ASK_YN("拿下来", "还是算了")
+	IF RESULT == 1
+		PRINTFORMW ……把失忆时发生的事情当作好事，去寻求交合，怎么看也不应该吧
+		PRINTFORMW 而且……继续做那样的事情的话，可能会完全沉溺于她的身体呢…
+		PRINTFORMW %ANAME(MASTER)%将符纸保持原样，继续与%ANAME(対象)%玩闹起来……
+		CFLAG:対象:好感度 += 200
+		RETURN 1
+	ELSE
+		PRINTFORML 想起上次在这里发生的事情
+		PRINTFORMW %ANAME(MASTER)%的身体、因为情欲而不自觉的疼了起来
+		PRINTFORML %ANAME(MASTER)%将%ANAME(対象)%的符紙拿了下来
+		PRINTFORMW 「好！这样就是EX的我…」
+		PRINTFORML 
+		CALL COLOR_PRINTL(@"ドクンッ", カラー_警告)
+		PRINTFORMW 
+		PRINTFORMW 「啊，那个…总觉得…嗯……」
+		PRINTFORML %ANAME(対象)%突然跪了下来。就这么期待着接下来会发生的事情，靠近了她
+		PRINTFORMW %ANAME(対象)%完全没有辜负期待，将%ANAME(MASTER)%推倒在了床上
+		PRINTFORML 然后迫不及待的，用嘴激烈地吮吸着%ANAME(MASTER)%的嘴唇
+		;TranslatedMark そして待ちきれないという風情で、%ANAME(MASTER)%の口を唇によって激しく貪る
+		PRINTFORMW 「嗯…嘘♥嗯…继续…嗯…♥♥」
+		PRINTFORML %ANAME(MASTER)%在%ANAME(対象)%掌控下、由于无法呼吸的激烈接吻而陷入缺氧状态，意识朦胧
+		PRINTFORMW 确认了%ANAME(MASTER)%的抵抗力减弱了的%ANAME(対象)%，跨坐在%ANAME(MASTER)%的身上，把衣服扔到了一边
+		PRINTFORML 那个姿态并不是平时天真无邪的少女，而是一个劲地闪烁着妖艳的淫光的妖怪
+		PRINTFORMW 欲望再次解封了的%ANAME(対象)%，一个劲的渴求着%ANAME(MASTER)%的精液……
+
+		CVARSET CFLAG, 6, 0
+		KDVAR:対象:ルーミア_EXルーミア ++
+		KDVAR:対象:ルーミア_EXルーミアとセックス中 = 1
+		FLAG:ターンエンド調教 = 2
+		CVARSET CFLAG, 6, 0
+		CFLAG:対象:調教参加フラグ = 1
+		CFLAG:対象:調教中帰らない = 1
+		ABL:対象:主導度Ｕ += 300
+		CFLAG:対象:強制友好化 = 1
+		BASE:対象:体力 = MAXBASE:対象:体力
+		BASE:対象:気力 = MAXBASE:対象:気力
+		;それ以降のデイリーイベント発生を潰す
+		DAILY_CANCEL = 1
+	ENDIF
+ENDIF
+
+RETURN 1

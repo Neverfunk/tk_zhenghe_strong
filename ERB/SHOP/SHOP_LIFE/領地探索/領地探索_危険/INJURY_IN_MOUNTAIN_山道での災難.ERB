@@ -1,0 +1,140 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_INJURY_IN_MOUNTAIN_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_INJURY_IN_MOUNTAIN_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_INJURY_IN_MOUNTAIN(対象)
+#DIM 対象
+
+PRINTFORMW 在山路上散步時、不小心滑倒扭傷了
+IF IS_MALE(対象)
+	PRINTFORML 用剣代替拐杖行走的時候遇見了旅人
+	PRINTFORMW 他説要幫忙拿行李
+	PRINTFORML 怎麼辦？
+	PRINTFORML 
+	CALL ASK_YN("接受好意" ,"自己拿著")
+	IF RESULT == 1
+		PRINTFORML 不、自己拿著
+		PRINTFORMW 被拒絕的他聳了聳肩直接走了
+		PRINTFORML …雖然順利下山了但是可能因為太過勉強了、傷勢悪化了
+		CALL ADD_COOLTIME(対象, 2)
+	ELSEIF RESULT == 0
+		PRINTFORML 接受対方的好意
+		IF RAND:3
+			PRINTFORMW 但是他一拿到行李就直接跑掉了！
+			PRINTFORML %ANAME(対象)%要追上去的時候因為受傷而直接摔倒了
+			PRINTFORMW 結果、%ANAME(対象)%不僅是受了傷、行李還全丟了…
+			CALL ADD_COOLTIME(対象, 2)
+			LOCAL = MIN(MONEY, 5000)
+			CALL ICPRINT("失去了<{LOCAL}>金", "L", カラー_注意)
+			MONEY -= LOCAL
+		ELSE
+			PRINTFORMW 把行李託付給他后一起下山了
+			PRINTFORML …平安下山的%ANAME(対象)%向他答謝之後離開了
+		ENDIF
+	ENDIF
+	RETURN
+ENDIF
+SELECTCASE RAND:3
+	CASE 0
+	
+		IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+			PRINTFORML 陷入困境的时候发情的天狗少女出现了
+			PRINTFORMW 以满足她的欲望作为代价，请求她把自己送到安全的地方
+			PRINTFORML
+			PRINTFORML 少女把%ANAME(対象)%抱回自己的家里，迅速扒光了她的衣服
+			PRINTFORML 发情的肉体散发着火烧般的热量，紧紧缠绕在%ANAME(対象)%的身上，渐渐点燃了她的欲望
+			PRINTFORML 摩擦的秘缝溢出大量液体，沾满了二人重合的下身，随着每次移动而发出粘稠的水声
+			PRINTFORML 两人激烈地相拥而吻，唾液在彼此的嘴中交融混合，最后被不知哪方全部咽下，立刻开始索求更多
+			PRINTFORML 浸润在妖怪体液里特有的信息素中，%ANAME(対象)%逐渐忘记了自己的目的，一心只想着更多的快乐
+			PRINTFORMW 在高潮与高潮的重复之中，她们慢慢丧失了时间观念，不分昼夜地沉迷于无尽的幸福之中……
+			CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, 百合", "接吻喪失",0, @"天狗少女的\@RAND:2 ? 秘贝 # 嘴唇\@", "", "", "发情期的意外")
+			PRINTFORML
+			PRINTFORMW 过了几天之后，%ANAME(対象)%被依依不舍的少女抱到了镇子的入口
+			RETURN 1
+		ELSE
+			PRINTFORML 陷入困境的時候天狗出現了
+			PRINTFORMW 他抱起地盤的侵入者%ANAME(対象)%飛到了其他地方
+			PRINTFORML 
+			PRINTFORMW 他把%ANAME(対象)%帯入巣穴後當作專用的生子機器連著調教了好幾日
+			PRINTFORML 粗長的肉棒每次挿入頂到子宮時所帯來的衝撃、讓意識都要飛去了
+			PRINTFORML 那野性的只為了讓雌性懷孕的野獸般的交尾行為、%ANAME(対象)%的身体也漸漸地習慣了
+			PRINTFORML 一邊被抽插一邊被激烈揉搓著胸部讓%ANAME(対象)%忍不住発出了呻吟
+			PRINTFORMW 然後被大量精液注入的時候%ANAME(対象)%発出淫靡的嬌喘高潮了
+			CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, 接吻, 口淫, 露出, 緊縛, 被虐, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精", GET_SPERM_ID("天狗"), @"天狗的\@RAND:2 ? 肉棒 # 嘴唇\@", "天狗", "", "ねぐらでの調教")
+		ENDIF
+		
+	CASE 1
+	
+		IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+			PRINTFORML 陷入困境的时候看到了路过的魔法少女
+			PRINTFORMW 注意到陷入困境的%ANAME(対象)%，对方露出了恶作剧的微笑
+			PRINTFORML
+			PRINTFORML 她从背后抱住%ANAME(対象)%的身体，伤到脚踝的%ANAME(対象)%根本没有逃脱的能力
+			PRINTFORML 邪恶的双手深入%ANAME(対象)%的上衣，肆意欺负着%STR_BODY("胸：愛撫", 対象)%，把它们捏成各种各样的形状
+			PRINTFORML 不理会%ANAME(対象)%的挣扎，她又把手伸向%ANAME(対象)%的股间，隔着内裤的布料挑逗起%STR_BODY("クリ：感度", 対象)%
+			PRINTFORML 粗糙的触感反而激起了更大的刺激，%ANAME(対象)%的身体不住地颤抖着，内裤中央扩散出一块圆形的水渍
+			PRINTFORML 晶莹的唾液也不争气地从嘴角流出，少女立刻吻上了%ANAME(対象)%的嘴唇，像是补偿一样把自己的唾液灌了进去
+			PRINTFORMW 屈服在快感之下的%ANAME(対象)%浑身颤抖着达到了高潮，不过对方的兴致却一点都没有减少……
+			CALL FUCK(対象, "欲望, 奉仕, 性技, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 百合", "接吻喪失",0, "魔法少女的嘴唇", "", "", "恶作剧时的意外")
+			PRINTFORML
+			PRINTFORMW 向生起闷气的%ANAME(対象)%道了个歉，少女用魔法治好她的伤口之后就离开了
+			RETURN 1
+		ELSE
+			PRINTFORML 陷入困境的時候看到了山賊
+			PRINTFORMW 他們把受傷了無法行動的%ANAME(対象)%當做猟物抓回了老巣
+			PRINTFORML 
+			PRINTFORMW 被山賊抓回老巣的%ANAME(対象)%過著作為他們的慰安婦的日子
+			PRINTFORML %ANAME(対象)%每天都毫無休止的被男人們輪流在體內隨心所欲的射精
+			PRINTFORML 即使想要逃跑也會被他們笑著圧住、然後作為懲罰會被更加粗暴的侵犯
+			PRINTFORML 失去逃跑精力的%ANAME(対象)%為了不被粗暴対待只能変得順從的奉仕他們
+			PRINTFORMW 在他們的性欲下被持續玷汚的%ANAME(対象)%的身体沾滿了雄性的氣味
+			CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, 接吻, 口淫, 輪姦, 緊縛, 被虐, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("山賊"), @"山賊的\@RAND:2 ? 肉棒 # 嘴唇\@", "山賊", "", "ねぐらでの輪姦")
+		ENDIF
+		
+	CASE 2
+		IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+			PRINTFORML 陷入困境的时候遇到了女冒险家
+			PRINTFORMW 帮到是可以帮你，但你要先让我满意，对方是这么说的
+			PRINTFORML
+			PRINTFORML 女人脱去了内裤，将下体压在%ANAME(対象)%的脸上，想要回家的%ANAME(対象)%只好用舌头侍奉了起来
+			PRINTFORML 她的阴唇充满了雌性的气味，并且由于长时间包在盔甲里而沾满了汗水，让努力舔舐着的%ANAME(対象)%渐渐感到一种奇怪的感觉
+			PRINTFORML 对方的洞穴中流淌出一股股爱液，咸腥的味道令%ANAME(対象)%感觉自己的身体也慢慢变得火热了起来
+			PRINTFORML 一边奉仕着对方，%ANAME(対象)%的手一边不自觉地向自己的股间伸去，隔着内裤抚摸起了自己的小穴
+			PRINTFORML %ANAME(対象)%的技巧令女人十分满意，她不停揉捏着自己的胸部，没过多久就达到了高潮。沉迷于自慰中的%ANAME(対象)%被她的爱液喷了一身，也立刻走上了自己的绝顶
+			PRINTFORMW 两个人大口大口地喘息着，回味着高潮的余韵。过了一会儿，%ANAME(対象)%被尚未得到满足的女人推倒在地……
+			CALL FUCK(対象, "欲望, 奉仕, 性技, Ｃ, Ｖ, Ｂ, Ｍ, 百合, 自慰", "接吻喪失",0, "女冒险家的阴唇", "", "", "帮忙的报酬")
+			PRINTFORML
+			PRINTFORMW 欲望满足之后，%ANAME(対象)%被她扛在肩上带回了镇子
+			RETURN 1
+		ELSE
+			PRINTFORML 陷入困境的時候遇到了流浪漢
+			PRINTFORMW 他看到倒下的%ANAME(対象)%吃驚了一瞬後、露出下流的笑容靠近了過來
+			PRINTFORML 
+			PRINTFORMW 被流浪漢狠狠地侵犯後、被玷汚%ANAME(対象)%被丟在了原地
+			PRINTFORML 在這種状况下不可能平安無事、之後又被其他男人和妖怪輪流侵犯了
+			PRINTFORML 被粗暴侵犯到忘記了腳痛的%ANAME(対象)%全身沾滿精液呆然地躺在地上
+			PRINTFORML 這時候來的其他的流浪漢搬起了%ANAME(対象)%、慌忙地運回了老巣
+			PRINTFORMW 然後%ANAME(対象)%一整晚都在他的老巣中、被毫不留情地用髒汚泛黄的精液内射了
+			CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, 接吻, 口淫, 露出, Ｖ性交, Ａ性交, 輪姦", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精", GET_SPERM_ID("流浪漢"), @"流浪漢的\@RAND:2 ? 肉棒 # 嘴唇\@", "流浪漢", "", "ねぐらでの輪姦")
+		ENDIF
+		
+ENDSELECT
+PRINTFORML 
+PRINTFORMW 之後、%ANAME(対象)%總算是逃走了
+CALL ADD_COOLTIME(対象, 2)
+
+RETURN 1

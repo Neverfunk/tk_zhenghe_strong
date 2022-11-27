@@ -1,0 +1,130 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K57_AFTER_COMPETE_RATE(対象)
+#DIM 対象
+RETURN 60
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K57_AFTER_COMPETE_DECISION(対象)
+#DIM 対象
+
+;マスターにペニスがないと出ない
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+
+;レイプしていること
+SIF KDVAR:対象:キスメ_飛んで井の中 != 2
+	RETURN 0
+
+;終わらせたら出ない
+SIF KDVAR:対象:キスメ_いやらしき井戸の怪
+	RETURN 0
+
+SIF IS_LOVER(対象)
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 0, 0)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K57_AFTER_COMPETE_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K57_AFTER_COMPETE(対象)
+#DIM 対象
+#DIM 判定値
+
+PRINTFORML 深夜……
+PRINTFORMW 在領地內巡邏時、突然有個吊桶掉了下來！
+PRINTFORMW ……但、華麗地避開了！
+PRINTFORMW 「……切」
+PRINTFORML 正在想怎麼回事時発現又是%ANAME(対象)%
+PRINTFORML 是因為記恨着自己被侵犯的事嗎、用非常厲害的表情瞪着這邊
+PRINTFORML ……不過、好像自己的突襲被避開後她就放棄了……
+PRINTFORML 
+CALL ASK_MULTI("侵犯", "提供給士兵", "回去")
+SELECTCASE RESULT
+	CASE 2
+		PRINTFORML 現在沒有這種興趣
+		PRINTFORML 什麼也不做就讓%ANAME(対象)%回去了
+		PRINTFORMW 「我不會放棄的……」
+		PRINTFORML  %ANAME(対象)%低聲嘟囔着什麼、乖乖回去了……
+	CASE 1
+		PRINTFORMW 「唔、你這、這個……！」
+		PRINTFORML 呼叫了增援、將%ANAME(対象)%提供給士兵
+		PRINTFORML 讓%ANAME(対象)%慰安士兵了……
+		PRINTFORML
+		CALL FUCK_GANGBANG(対象, GET_SPERM_ID("兵士"), @"兵士の\@ RAND:2 ? 肉棒 # 唇\@", "兵士")
+		PRINTFORML
+		PRINTFORMW 「呼啊……啊咕、哈唔……♥」
+		PRINTFORMW 將失神痙攣着的%ANAME(対象)%棄於地上不顧、並返回據點了……
+	CASE 0
+		PRINTFORMW 「啊……」
+		PRINTFORML 扒光了%ANAME(対象)%的衣服。就像放棄了一樣、沒有做任何抵抗
+		PRINTFORML 真是不錯。舐舐舌頭、緊緊抱住%ANAME(対象)%……
+		PRINTFORML
+		CALL FUCK_RAPE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的肉棒", @"%ANAME(MASTER)%")
+		CALL FUCK(MASTER, "Ｃ, 性交, 射精, 奉仕", "接吻喪失, 童貞喪失", 0, @"%ANAME(対象)%的\@ RAND:2 ? 秘貝 # 嘴唇\@", "", @"%ANAME(対象)%的膣穴")
+		PRINTFORML 
+		PRINTFORMW 「呼啊……啊咕、哈唔……♥」
+		PRINTFORMW 「啊哈、啊啊……♥」
+		PRINTFORMW %ANAME(対象)%享用了一陣%ANAME(MASTER)%後、將肉棒從還有一口氣不斷喘息的%PRONOUN(対象)%身上拔出
+		PRINTFORML %ANAME(対象)%全身痙攣、快楽地顫動
+		PRINTFORML 現在要説什麼好呢……？
+		CALL ASK_MULTI_JUDGE("命令她発誓成為奴隸", GET_COUNTRY_BOSS(CFLAG:対象:所属) != 対象, "叫她下次再過来", 1)
+		SELECTCASE RESULT
+			CASE 1
+				PRINTFORMW 「是……我知道了……♥」
+				PRINTFORMW 下次再過来讓我侵犯吧
+				PRINTFORMW 用着厳厲的語気命令、%ANAME(対象)%聽到後用沾満精液的臉点頭……
+				CFLAG:対象:従属度 += 300
+				CFLAG:対象:依存度 += 100
+			CASE 0
+				PRINTFORMW 「係、我発誓……我是%ANAME(MASTER)%大人的奴隷……♥」
+				PRINTFORMW 「請好好疼愛我、主人……嗯」
+				PRINTFORMW 遞出肉棒、讓%ANAME(対象)%親吻作為誓約之吻、%ANAME(対象)%用沾満精液的臉用陶醉的神情将肉棒含着
+				PRINTFORMW 這副身姿、已經沒有當初那一股殺氣了……
+				CALL COLOR_PRINTW(@"讓%ANAME(対象)%服従了", カラー_注意)
+				CALL COLOR_PRINTW(@"%ANAME(対象)%成為了奴隸", カラー_注意)
+				IF RAND:3
+					CALL SET_PIERCE_RANKED(対象, 0, ピアス_ラビア, ピアス_ペニス, ピアス_クリトリス, ピアス_乳首, ピアス_へそ, ピアス_耳, ピアス_舌, ピアス_鼻)
+					SIF RESULT != -1
+						CALL COLOR_PRINTW(@"%ANAME(対象)%的%GET_PIERCE_NAME(RESULT)%、被安上了象征着服從的環……", カラー_ピンク)
+				ELSE
+					CALL COLOR_PRINTW(@"作為服從的證明、%ANAME(対象)%的陰毛被修整成了心型……", カラー_ピンク)
+					TALENT:対象:陰毛目標値 = 陰毛_ハート型
+					TALENT:対象:陰毛現在値 = 陰毛_ハート型
+				ENDIF
+				CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属, 1)
+				TALENT:対象:服従 = 1
+				TALENT:対象:烙印 = 1
+				TALENT:対象:合意 = 1
+				TALENT:対象:チョロイン = 1
+				TALENT:対象:自尊心低 = 1
+				TALENT:対象:Ｍ気質 = 1
+				TALENT:対象:保守的 = 0
+				TALENT:対象:不易湿 = 0
+				TALENT:対象:学習慢 = 0
+				TALENT:対象:汚臭敏感 = 0
+				CFLAG:対象:従属度 = MAX(CFLAG:対象:従属度, 1500)
+				CFLAG:対象:依存度 = MAX(CFLAG:対象:依存度, 500)
+				SETBIT TALENT:対象:淫乱系, 素質_淫乱_マゾ
+				KDVAR:対象:キスメ_いやらしき井戸の怪 = 1
+		ENDSELECT
+ENDSELECT
+RETURN 1

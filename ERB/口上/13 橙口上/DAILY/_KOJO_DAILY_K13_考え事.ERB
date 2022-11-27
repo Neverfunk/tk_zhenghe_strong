@@ -1,0 +1,106 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K13_THINKING_RATE(対象)
+#DIM 対象
+RETURN 50
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K13_THINKING_DECISION(対象)
+#DIM 対象
+
+SIF KDVAR:対象:橙_考え事
+	RETURN 0
+
+SIF GROUPMATCH(MASTER, NAME_TO_CHARA("紫"), NAME_TO_CHARA("藍"))
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0)
+
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K13_THINKING_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K13_THINKING(対象)
+#DIM 対象
+
+SIF !CFLAG:対象:面識
+	CFLAG:対象:面識 = 1
+
+	KDVAR:対象:橙_考え事 = 1
+
+
+PRINTFORMW 「嗯？　嗯……」
+PRINTFORML 在走廊巡视时，看到了%ANAME(対象)%。
+PRINTFORMW 要怎么办呢……
+CALL ASK_YN("搭話", "還是算了")
+
+IF RESULT == 1
+	PRINTFORMW 别去在意比较好
+	PRINTFORMW 不去理會了
+	RETURN 1
+ENDIF
+
+PRINTFORMW 「啊，%ANAME(MASTER)%！」
+PRINTFORMW 「为了增加手下，我正在试着和野猫打招呼。」
+PRINTFORMW 「但因为是野猫，就算搭话也不理我。」
+PRINTFORML 「怎么办呢…… 唔……」
+CALL ASK_MULTI("劝她坚持沟通", "劝她使用诱饵", "劝她静观其变", "劝她改变目标", "劝她还是放弃")
+
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORML 不管什么事，持之以恒的决心是最重要的
+		PRINTFORMW 或许可以坚持说到对方回应……
+		PRINTFORMW 「嗯…… 能行吗？」
+		PRINTFORMW 「好，就这么试试吧。」
+		PRINTFORMW ……最后、%ANAME(対象)%沮丧地回来了
+		PRINTFORMW 好像不太顺利……
+	CASE 1
+		PRINTFORML 说到底还是动物，诱捕战术一定会有效
+		PRINTFORML 「嗯……　这可能是个不错的主意。」
+		PRINTFORML 「试一试吧。」
+		PRINTFORML ……归来的%ANAME(対象)%的身后，跟着一大群野猫
+		PRINTFORML 看来还是有效的……
+		CALL COLOR_PRINTL(@"%ANAME(対象)%的武闘上昇了3", カラー_注意)
+		ABL:対象:武闘 += 3
+	CASE 2
+		PRINTFORML 猫的话就算不管也还会再来的吧
+		PRINTFORML 「嗯……　应该吧。」
+		PRINTFORML 「那就等等看吧。」
+		PRINTFORML ……喝醉了的%ANAME(対象)%回来了
+		PRINTFORMW 看来不行……
+	CASE 3
+		PRINTFORML 就算猫加入我们也不会增加战力
+		PRINTFORML 让看起来更强壮的动物加入我们吧……
+		PRINTFORML 「嗯？ 我想也是呢。」
+		PRINTFORML 「好的。 我会试试的。」
+		PRINTFORML ……之后，受伤了的%ANAME(対象)%回来了。
+		PRINTFORML 好像是在跟熊打招呼的时候挨揍了……
+		CALL ADD_COOLTIME(対象, 3)
+	CASE 4
+		PRINTFORML 有时候事情就是会不太顺利。
+		PRINTFORML 还是放弃比较好……
+		PRINTFORML 「是这样吗？」
+		PRINTFORML 「这次就先放弃好了。」
+ENDSELECT
+
+RETURN 1
+
+
+

@@ -1,0 +1,217 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_TERRITORY_KOUMAKAN_RATE()
+RETURN 50
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_TERRITORY_KOUMAKAN_DECISION()
+#DIM 紅魔館
+#DIM 哥布林
+紅魔館 = GET_CITYNUMBER("紅魔館")
+哥布林 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン)
+
+SIF 紅魔館 == -1
+	RETURN 0
+SIF CITY_OWNER:紅魔館 != CFLAG:MASTER:所属
+	RETURN 0
+SIF GET_COUNTRY_BOSS(CFLAG:MASTER:所属) == MASTER
+	RETURN 0
+SIF CFLAG:MASTER:所属 == 哥布林
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_TERRITORY_KOUMAKAN_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_TERRITORY_KOUMAKAN
+#DIM 紅魔館
+紅魔館 = GET_CITYNUMBER("紅魔館")
+
+IF IS_MALE(MASTER) || (HAS_PENIS(MASTER) && RAND:2)
+	PRINTFORML 被命令去监督在红魔馆的女仆妖精们好好工作
+	PRINTFORML …指导中，一只妖精犯了错误
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORMW 似乎是弄翻了茶壶，把红茶撒到了地毯上
+		CASE 1
+			PRINTFORMW 乱丢弹幕打破了玻璃
+		CASE 2
+			PRINTFORMW 忘记关掉水龙头，发现的时候已经漫到了房间外
+	ENDSELECT
+	PRINTFORML 怎麼辦？
+	CALL ASK_MULTI("亲切地指导" ,"严加指导" ,"惩罚，惩罚")
+	IF RESULT == 0
+		PRINTFORML 谁都会犯错误
+		PRINTFORMW %ANAME(MASTER)%用温柔的口吻指导着她，还安慰她不要太害怕失败
+		FOR LOCAL, 0, CHARANUM
+			IF CFLAG:(LOCAL):所属 == CFLAG:MASTER:所属 && !CFLAG:(LOCAL):捕虜先 && !IS_ANIMAL(LOCAL)
+				CFLAG:(LOCAL):好感度 += 20 + RAND:20
+			ENDIF
+		NEXT
+		CALL COLOR_PRINTW("体谅部下的态度得到广泛的认可", カラー_注意)
+	ELSEIF RESULT == 1
+		PRINTFORML 绝对不要再犯这种低级错误！
+		PRINTFORMW %ANAME(MASTER)%训斥着犯了错误的妖精
+		CALL MODIFY_CITY_ECONOMY(紅魔館, RAND(10000, 30000))
+	ELSEIF RESULT == 2
+		PRINTFORML %ANAME(MASTER)%看着垂头丧气的她
+		PRINTFORML 发现她有着作为妖精来说过于傲人的肉体，凹凸有致的曲线甚至把宽松的女仆服都撑了起来
+		PRINTFORMW 突然来了兴致的%ANAME(MASTER)%以惩罚她为由把她带入了自己的房间
+		PRINTFORML
+		SELECTCASE RAND:5
+			CASE 0
+				PRINTFORML 妖精女仆骑在%ANAME(MASTER)%的身上扭动着她纤小的身体
+				PRINTFORML 她轻易的接受了快感，主动的扭动起自己的腰
+				PRINTFORML 阴道肉一边轻轻地痉挛一边紧紧地勒紧肉棒，急切的地寻求着精子。
+				PRINTFORMW 意料之外的极品女体让%ANAME(MASTER)%冲分享受了无套中出的做爱……
+			CASE 1
+				PRINTFORML 她被%ANAME(MASTER)%压在身下激烈地冲刺着，全身都在颤抖
+				PRINTFORML 明明刚才还是处女，现在却已经被雌性的快感所俘虏，眼中浮现出♥大口喘息着
+				PRINTFORML 享受着她的闷哼和可爱的扭曲着的表情，蹂躏着她的阴部深处
+				PRINTFORMW %ANAME(MASTER)%迎合着她的索求不停内射，直到做到厌烦了为止……
+			CASE 2
+				PRINTFORML 结束了惩罚之后，妖精女仆躺在%ANAME(MASTER)%的怀中喘息着恢复体力
+				PRINTFORML 也许是妖精的缘故吧，她很快就沉浸在快乐中，最后华丽地高潮了。
+				PRINTFORML 抚摸着她的头，被她撒娇的%ANAME(MASTER)%脸上全是温柔的表情
+				PRINTFORMW %ANAME(MASTER)%向她表示还想再继续惩罚她的时候，她满脸期待地把臀部贴上了%ANAME(MASTER)%的阴茎
+			CASE 3
+				PRINTFORML %ANAME(MASTER)%让她扶在墙上挺着屁股，从背后激烈的侵犯着她
+				PRINTFORML 没有前戏的插入和粗暴的顶撞，让她一边呻吟一边哭泣。
+				PRINTFORML 请求着饶恕的她反而煽动了%ANAME(MASTER)%的嗜虐心，腰的动作变得更快了
+				PRINTFORMW 彻底的惩罚了这个小妖精之后，%ANAME(MASTER)%把破破烂烂的她丢在自己的房间里，独自离开了
+			CASE 4
+				PRINTFORML  %ANAME(MASTER)%把她按到在地，连衣服也没扒掉就那么直接强行插入了她的阴部
+				PRINTFORML 无视她的哭喊和求饶，沉迷于在她未经人事的阴道中猛烈抽插
+				PRINTFORML 她扭动着身体想要逃离侵犯，但是阴道却紧紧地吸着肉棒
+				PRINTFORMW 持续了超长时间的侵犯终于摧毁了她的抵抗，从喉咙中漏出了甜蜜的喘息……
+		ENDSELECT
+		CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "妖精メイドの唇", "", "妖精メイドの膣", "調教")
+		PRINTFORML
+		PRINTFORML 经过了%ANAME(MASTER)%的调教，她完全变成了一个成熟的女仆妖精。
+		PRINTFORMW 不过在%ANAME(MASTER)%没有注意的时候，总会有一双期待着什么的眼睛在凝视着%ANAME(MASTER)%……
+	ENDIF
+ELSE
+	PRINTFORML %ANAME(MASTER)%被命令去监督红魔馆的哥布林们工作
+	PRINTFORML …结果正好抓到一只正在偷懒的哥布林
+	PRINTFORMW 正在训斥他的时候，他竟然反过来向%ANAME(MASTER)%讨要以前工作的奖励
+	PRINTFORML 怎麼辦？
+	CALL ASK_MULTI_JUDGE("发他工资", MONEY >= 1000,"给予处罚", 1,"问他想要什么", 1)
+	IF RESULT == 0
+		PRINTFORML 如他所愿的把工资发到了他的手里
+		PRINTFORML 他拿过钱后哼了一声，老老实实的回去投入了工作
+		MONEY -= 1000
+		CALL COLOR_PRINTL("支付工资花掉了1000金", カラー_注意)
+		CALL MODIFY_CITY_ECONOMY(紅魔館, RAND(10000, 30000))
+	ELSEIF RESULT == 1
+		PRINTFORMW %ANAME(MASTER)%决定给这个得意忘形的哥布林一些惩罚
+		CALL COLOR_PRINTW("你别想吃饭了！", カラー_警告)
+		PRINTFORMW 他吓得不敢再多说什么，立刻投入了工作。不仅如此，还对其他的地精起到了杀鸡儆猴的效果。
+		LOCAL:1 = 3 + 3 * RAND:5
+		CITY_GUARD:紅魔館 = MAX(CITY_GUARD:紅魔館 + LOCAL:1, 1)
+		CALL COLOR_PRINTW(@"%CITY_NAME:紅魔館%的防衛率上升了{LOCAL:1}", カラー_注意)
+	ELSEIF RESULT == 2
+		IF CONFIG:203
+			PRINTFORML 听到%ANAME(MASTER)%的答复时他卻沒注意到%ANAME(MASTER)%的嘴角扬起了一絲不易察觉的弧度
+			PRINTFORMW 他跟着%ANAME(MASTER)%走进红魔馆一处隐蔽的小房间
+			PRINTFORML
+			PRINTFORML 哥布林踏入房间的瞬间，%ANAME(MASTER)%立刻把房门锁住推倒了他
+			PRINTFORML 惊讶的他努力想要推开%ANAME(MASTER)%，但是骑在他身上的%ANAME(MASTER)%用胸部抵住了他的嘴
+			PRINTFORML 胸部散发出香濃的雌性气息，引得哥布林一瞬间忘记了抵抗，连肉棒都开始挺立了起來
+			PRINTFORMW 就在双手停下的时候，%ANAME(MASTER)%飞快的撕掉了哥布林的衣服，然后把肉棒拧进腔道，开始享受哥布林的悲鸣
+			PRINTFORML
+			SELECTCASE RAND:5
+				CASE 0
+					PRINTFORML 毫不留情的榨取著与体格不相称的凶暴巨物，哥布林被猛烈的快感冲得只翻白眼
+					PRINTFORML %ANAME(MASTER)%很清楚男人的弱点在哪，在她的攻势下哥布林的抵抗简直不堪一击
+					PRINTFORML 每当她扭动腰部时，被猛烈摩擦的肉棒都會向大脑传去如同巨浪一般的快感
+					PRINTFORMW 哥布林慢慢的屈服于这個女人，被那压倒性的快感浪潮改造成了只知道肉欲的性玩具……
+				CASE 1
+					PRINTFORML 那阴道的每次緊縮都像是要榨乾所有精液，把哥布林的身体和心灵一点一点的摧毁
+					PRINTFORML 全身都失去力气的哥布林无助的高潮着，爱液和他浓厚的精液混在一起到处乱喷
+					PRINTFORML 哥布林忘记了其他的所有知觉，只剩下肉棒一边感受着愛液的灼热一边向大脑反馈着快感
+					PRINTFORMW 脑中只剩下作为性玩具的快感的哥布林接下来就只是被一味的逆侵犯着，侵犯到失去意识……
+				CASE 2
+					PRINTFORML 哥布林被%ANAME(MASTER)%抓住双腿猛烈的进攻，双手狂乱一样的四处乱拍
+					PRINTFORML 每当肉棒带着淫秽的声音顶入深处时，哥布林都会漏出不像样的表情和按捺不住的喘息
+					PRINTFORML 被%ANAME(MASTER)%肆意责弄身躯的屈辱刺激着哥布林的情绪，用已经七零八落的理性乞求着饶恕
+					PRINTFORMW 但是射出的大量精液还是把哥布林送上了巅峰，屈辱的喊声在这个房间中回荡着……
+				CASE 3
+					PRINTFORML %ANAME(MASTER)%用皮项圈铐住哥布林的脖子，扯着链子骑在哥布林的身上猛烈的冲刺着
+					PRINTFORML 一边被榨取著精液，一边被%ANAME(MASTER)%用看垃圾的目光盯著，哥布林的抵抗心被这两重快感完全淹没了
+					PRINTFORML 哥布林被"主人"的緊致的阴道榨取著，还被强迫着感谢他的侵犯
+					PRINTFORMW 从部下堕落成宠物的哥布林逐渐被他调教成了一条公狗……
+				CASE 4
+					PRINTFORML 哥布林被毫不留情的榨取著精液，激烈的攻势让哥布林连呼吸都变得支离破碎
+					PRINTFORML 浓厚的精液噴射而出的感觉夺去了哥布林所有的意识，让哥布林疯狂的高潮着
+					PRINTFORML 就连高潮中也没有停下攻势的子宮刮擦着已經极度敏感的肉棒，哥布林的脑袋里只剩下猛烈的快感
+					PRINTFORMW 在这之后哥布林被%ANAME(MASTER)%蹂躏成了破破烂烂的肉袋……
+			ENDSELECT
+			CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, Ｖ性交, 口淫", "接吻喪失, 処女喪失, 膣内射精, 口内射精, CFLAG減少", GET_SPERM_ID("哥布林"), @"哥布林的\@RAND:2 ? 肉棒 # 唇\@", "哥布林", "", "調教犯錯的哥布林")
+			PRINTFORML
+			PRINTFORML 在%ANAME(MASTER)%用哥布林满足了自己的性欲之后，丢下了哥布林，自己离开了这个房间
+			PRINTFORML 充满精液气味的房间里只剩下一个瘫倒在地上不时痉挛哥布林
+			PRINTFORMW 全身各处都黏着精液和愛液的哥布林脸上完全是被快感扭曲的表情……
+		ELSE
+			PRINTFORML 听到%ANAME(MASTER)%的答复时他的的嘴角扬起了意思不易察觉的弧度
+			PRINTFORMW 他油嘴滑舌的引诱着%ANAME(MASTER)%走进红魔馆一处隐蔽的小房间
+			PRINTFORML
+			PRINTFORML %ANAME(MASTER)%踏入房间的瞬间，他立刻把房门锁住推倒了%ANAME(MASTER)%
+			PRINTFORML 惊讶的%ANAME(MASTER)%努力想要推开他，但是骑在%ANAME(MASTER)%身上的地精还是掏出了有着惊人大小的肉棒
+			PRINTFORML 几乎快戳到鼻子的肉棒散发出浓烈的雄性气息，引得%ANAME(MASTER)%一瞬间忘记了抵抗，连子宫都开始紧张了起来
+			PRINTFORMW 就在双手停下的时候，地精飞快的撕掉了%ANAME(MASTER)%的衣裙，然后把肉棒拧进腔道，开始享受%ANAME(MASTER)%的娇呼和悲鸣
+			PRINTFORML
+			SELECTCASE RAND:5
+				CASE 0
+					PRINTFORML 与体格不相称的凶暴巨物毫不留情的挖掘着腔肉，%ANAME(MASTER)%被猛烈的快感冲得只翻白眼
+					PRINTFORML 这个地精很清楚女人的弱点在哪，在他的攻势下%ANAME(MASTER)%的抵抗简直不堪一击
+					PRINTFORML 每当他挺动腰部时，被猛烈撞击的子宫口都会向大脑传去如同巨浪一般的快感
+					PRINTFORMW %ANAME(MASTER)%慢慢的屈服于这根巨棒，被那压倒性的快感浪潮改造成了只知道肉欲的雌肉……
+				CASE 1
+					PRINTFORML 那雄伟的巨棒的每次冲击都像是要撞破子宫一样，把%ANAME(MASTER)%的身体和心灵一点一点的摧毁
+					PRINTFORML 全身都被顶到失去力气的%ANAME(MASTER)%无助的高潮着，爱液和他浓厚的精液混在一起到处乱喷
+					PRINTFORML %ANAME(MASTER)%忘记了其他的所有知觉，只剩下子宫一边感受着精液的灼热一边向大脑反馈着快感
+					PRINTFORMW 脑中只剩下作为雌肉的快感的%ANAME(MASTER)%接下来就只是被一味的侵犯着，侵犯到失去意识……
+				CASE 2
+					PRINTFORML %ANAME(MASTER)%被他抬起双腿猛烈的进攻，双手狂乱一样的四处乱拍
+					PRINTFORML 每当肉棒带着淫秽的声音顶入深处时，%ANAME(MASTER)%都会漏出不像样的表情和按捺不住的娇呼
+					PRINTFORML 被地精肆意责弄身躯的屈辱刺激着%ANAME(MASTER)%的情绪，用已经七零八落的理性乞求着饶恕
+					PRINTFORMW 但是射入胎房内的大量的精液还是把%ANAME(MASTER)%送上了巅峰，受孕的喊声在这个房间中回荡着……
+				CASE 3
+					PRINTFORML 他用皮项圈铐住%ANAME(MASTER)%的脖子，扯着链子骑在%ANAME(MASTER)%的身上猛烈的冲刺着
+					PRINTFORML 一边被打着屁股，一边被冲击着子宫，%ANAME(MASTER)%的抵抗心被这两重快感完全淹没了
+					PRINTFORML %ANAME(MASTER)%被"主人"的健壮的肉棒挖掘着阴道，还被强迫着感谢他的侵犯
+					PRINTFORMW 从管理者堕落成宠物的%ANAME(MASTER)%逐渐被他调教成了一条母狗……
+				CASE 4
+					PRINTFORML %ANAME(MASTER)%被毫不留情的抽插和内射，激烈的攻势让%ANAME(MASTER)%连呼吸都变得支离破碎
+					PRINTFORML 浓厚的精液浸满整个子宫的感觉夺去了%ANAME(MASTER)%所有的意识，让%ANAME(MASTER)%疯狂的高潮着
+					PRINTFORML 就连高潮中也没有停下攻势的肉棒刮擦着极度敏感的阴肉，%ANAME(MASTER)%的脑袋里只剩下猛烈的快感和粉红色的雌性意识
+					PRINTFORMW 在这之后%ANAME(MASTER)%被这根精力超群的阴茎蹂躏成了破破烂烂的肉袋……
+			ENDSELECT
+			CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, Ｖ性交, 口淫", "接吻喪失, 処女喪失, 膣内射精, 口内射精, CFLAG減少", GET_SPERM_ID("哥布林"), @"哥布林的\@RAND:2 ? 肉棒 # 唇\@", "哥布林", "", "調教")
+			PRINTFORML
+			PRINTFORML 在他用%ANAME(MASTER)%满足了自己的性欲之后，丢下了%ANAME(MASTER)%，自己离开了这个房间
+			PRINTFORML 充满精液气味的房间里只剩下一个瘫倒在地上不时痉挛%ANAME(MASTER)%
+			PRINTFORMW 全身各处都黏着精液的%ANAME(MASTER)%脸上完全是被快感扭曲的表情……
+		ENDIF
+	ENDIF
+ENDIF
+
+RETURN 1

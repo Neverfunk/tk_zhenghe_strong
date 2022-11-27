@@ -1,0 +1,135 @@
+@SLG_BUILDING_TURNEND_CHANGE_CFLAG_CHARA
+    #DIM COUNTRY_ID
+    #DIM CHARA_ID
+    COUNTRY_ID = CFLAG:MASTER:所属
+    VARSET SHOW_FLAG,1
+    FOR CHARA_ID,0,CHARANUM
+        SIF CHARA_ID == MASTER || (CFLAG:CHARA_ID:所属 != COUNTRY_ID && CFLAG:CHARA_ID:捕虜先 != COUNTRY_ID)
+            CONTINUE
+
+        IF CHECK_BUILDING_FUNCTION_SELECT(-1,COUNTRY_ID,建造物_合法性机构) > 0 && CFLAG:CHARA_ID:所属 == COUNTRY_ID
+            SIF CFLAG:CHARA_ID:好感度 >= 0
+                CFLAG:CHARA_ID:好感度 += 100
+            SIF SHOW_FLAG:COUNTRY_ID:0
+                BUILDING_TEXT = BUILDING_TEXT_合法性机构_1(COUNTRY_ID)
+            SHOW_FLAG:COUNTRY_ID:0 = 0
+        ENDIF
+
+        IF CHECK_BUILDING_FUNCTION_SELECT(-1,COUNTRY_ID,建造物_事迹宣传台) > 0 && CFLAG:CHARA_ID:所属 == COUNTRY_ID
+            SIF CFLAG:CHARA_ID:好感度 >= 0
+                CFLAG:CHARA_ID:依存度 += 10
+            SIF SHOW_FLAG:COUNTRY_ID:1
+                BUILDING_TEXT = BUILDING_TEXT_事迹宣传台_1(COUNTRY_ID)
+            SHOW_FLAG:COUNTRY_ID:1 = 0
+        ENDIF
+
+        IF CHECK_BUILDING_FUNCTION_SELECT(-1,COUNTRY_ID,建造物_梦境暗示仪) > 0 && CFLAG:CHARA_ID:所属 == COUNTRY_ID
+            SIF CFLAG:CHARA_ID:好感度 >= 0
+                CFLAG:CHARA_ID:従属度 += 50
+            SIF SHOW_FLAG:COUNTRY_ID:2
+                BUILDING_TEXT = BUILDING_TEXT_梦境暗示仪_1(COUNTRY_ID)
+            SHOW_FLAG:COUNTRY_ID:2 = 0
+        ENDIF
+
+        IF CHECK_BUILDING_FUNCTION_SELECT(-1,COUNTRY_ID,建造物_和平部) > 0 && CFLAG:CHARA_ID:所属 == COUNTRY_ID
+            CFLAG:CHARA_ID:好感度 += 800
+            SIF SHOW_FLAG:COUNTRY_ID:3
+                BUILDING_TEXT = BUILDING_TEXT_和平部_1(COUNTRY_ID)
+            SHOW_FLAG:COUNTRY_ID:3 = 0
+        ENDIF
+
+        IF CHECK_BUILDING_FUNCTION_SELECT(-1,COUNTRY_ID,建造物_真理部) > 0 && CFLAG:CHARA_ID:所属 == COUNTRY_ID
+            CFLAG:CHARA_ID:好感度 = MAX(CFLAG:CHARA_ID:好感度,0)
+            CFLAG:CHARA_ID:依存度 = MAX(CFLAG:CHARA_ID:依存度,0)
+            CFLAG:CHARA_ID:従属度 = MAX(CFLAG:CHARA_ID:従属度,0)
+            SIF SHOW_FLAG:COUNTRY_ID:4
+                BUILDING_TEXT = BUILDING_TEXT_真理部_1(COUNTRY_ID)
+            SHOW_FLAG:COUNTRY_ID:4 = 0
+        ENDIF
+
+        IF CHECK_BUILDING_FUNCTION_SELECT(-1,COUNTRY_ID,建造物_友爱部) > 0 && CFLAG:CHARA_ID:捕虜先 == COUNTRY_ID
+            CFLAG:CHARA_ID:従属度 += 500
+            CFLAG:CHARA_ID:依存度 += 500
+            SIF SHOW_FLAG:COUNTRY_ID:5
+                BUILDING_TEXT = BUILDING_TEXT_友爱部_1(COUNTRY_ID)
+            SHOW_FLAG:COUNTRY_ID:5 = 0
+        ENDIF
+
+    NEXT
+
+@SLG_BUILDING_TURNEND_CHANGE_CFLAG_COUNTRY
+    #DIM COUNTRY_ID
+    #DIM CHARA_ID
+    VARSET SHOW_FLAG,1
+    FOR COUNTRY_ID,0,MAX_COUNTRY
+        SIF !IS_COUNTRY(COUNTRY_ID)
+            CONTINUE
+        FOR CHARA_ID,0,CHARANUM
+            IF CHECK_BUILDING_FUNCTION_SELECT(-1,COUNTRY_ID,建造物_精神恢复仪) > 0 && (CFLAG:CHARA_ID:捕虜先 == COUNTRY_ID || CFLAG:CHARA_ID:所属 == COUNTRY_ID)
+                SIF TALENT:(CHARA_ID):空虚
+                    CFLAG:(CHARA_ID):崩壊 -= 300 + (MAXBASE:(CHARA_ID):精神力/2)
+                CFLAG:(CHARA_ID):崩壊 = LIMIT(CFLAG:(CHARA_ID):崩壊, 0, 10000)
+                SIF SHOW_FLAG:COUNTRY_ID:0
+                    BUILDING_TEXT = BUILDING_TEXT_精神恢复仪(COUNTRY_ID)
+                SHOW_FLAG:COUNTRY_ID:0 = 0
+            ENDIF
+
+            IF CHECK_BUILDING_FUNCTION_SELECT(-1,COUNTRY_ID,建造物_精神重构仪) > 0 && (CFLAG:CHARA_ID:捕虜先 == COUNTRY_ID || CFLAG:CHARA_ID:所属 == COUNTRY_ID)
+
+                SIF TALENT:(CHARA_ID):崩壊
+                    CFLAG:(CHARA_ID):崩壊 -= 600 + (MAXBASE:(CHARA_ID):精神力)
+                CFLAG:(CHARA_ID):崩壊 = LIMIT(CFLAG:(CHARA_ID):崩壊, 0, 10000)
+                SIF SHOW_FLAG:COUNTRY_ID:1
+                    BUILDING_TEXT = BUILDING_TEXT_精神重构仪(COUNTRY_ID)
+                SHOW_FLAG:COUNTRY_ID:1 = 0
+            ENDIF
+
+            IF CHECK_BUILDING_FUNCTION_SELECT(-1,COUNTRY_ID,建造物_噩梦发生器) > 0 && TALENT:CHARA_ID:特殊勢力陥落系 == 0 && IS_SP_COUNTRY(COUNTRY_ID)
+                IF !TALENT:(CHARA_ID):空虚
+                    IF IS_FALLEN(CHARA_ID)
+                        CFLAG:(CHARA_ID):崩壊 += MIN(0,600 - (MAXBASE:(CHARA_ID):精神力)/2)
+                    ELSE
+                        CFLAG:(CHARA_ID):崩壊 += MIN(0,900 - (MAXBASE:(CHARA_ID):精神力)/2)
+                    ENDIF
+                ENDIF
+                IF TALENT:(CHARA_ID):空虚
+                    CFLAG:(CHARA_ID):崩壊 += MIN(0,400 - (MAXBASE:(CHARA_ID):精神力 / 4))
+                ENDIF
+                CFLAG:(CHARA_ID):崩壊 = LIMIT(CFLAG:(CHARA_ID):崩壊, 0, 10000)
+                SIF SHOW_FLAG:COUNTRY_ID:2
+                    BUILDING_TEXT = BUILDING_TEXT_噩梦发生器_1(COUNTRY_ID)
+                SHOW_FLAG:COUNTRY_ID:2 = 0
+            ENDIF
+
+            IF CHECK_BUILDING_FUNCTION_SELECT(-1,COUNTRY_ID,建造物_戒毒所) > 0 && (CFLAG:CHARA_ID:捕虜先 == COUNTRY_ID || CFLAG:CHARA_ID:所属 == COUNTRY_ID)
+
+                IF GETBIT(TALENT:(CHARA_ID):淫乱系, 素質_淫乱_薬物中毒)
+                    IF CFLAG:(CHARA_ID):薬物依存 <= 300
+                        CLEARBIT TALENT:(CHARA_ID):淫乱系, 素質_淫乱_薬物中毒
+                    ENDIF
+                    IF CFLAG:CHARA_ID:捕虜先 == COUNTRY_ID
+                        CFLAG:(CHARA_ID):薬物依存 = MAX(CFLAG:(CHARA_ID):薬物依存 * 3 / 10, 300)
+                    ELSE
+                        CFLAG:(CHARA_ID):薬物依存 = MAX(CFLAG:(CHARA_ID):薬物依存 * 9 / 10, 300)
+                    ENDIF
+                ELSE
+                    CFLAG:(CHARA_ID):薬物依存 = MAX(CFLAG:(CHARA_ID):薬物依存 - RAND:(MAX(CFLAG:(CHARA_ID):薬物依存 / 2, 1)), 0)
+                ENDIF
+                SIF SHOW_FLAG:COUNTRY_ID:3
+                    BUILDING_TEXT = BUILDING_TEXT_戒毒所(COUNTRY_ID)
+                SHOW_FLAG:COUNTRY_ID:3 = 0
+            ENDIF
+
+            IF CHECK_BUILDING_FUNCTION_SELECT(-1,COUNTRY_ID,建造物_“快乐”所) > 0 && (CFLAG:CHARA_ID:所属 == COUNTRY_ID)
+
+                IF GETBIT(TALENT:(CHARA_ID):淫乱系, 素質_淫乱_薬物中毒)
+                    CFLAG:(CHARA_ID):薬物依存 += 30
+                ELSEIF !IS_COUNTRY(CFLAG:CHARA_ID:捕虜先)
+                    CFLAG:(CHARA_ID):薬物依存 += 10
+                ENDIF
+                SIF SHOW_FLAG:COUNTRY_ID:4
+                    BUILDING_TEXT = BUILDING_TEXT_“快乐”所_1(COUNTRY_ID)
+                SHOW_FLAG:COUNTRY_ID:4 = 0
+            ENDIF
+        NEXT
+    NEXT

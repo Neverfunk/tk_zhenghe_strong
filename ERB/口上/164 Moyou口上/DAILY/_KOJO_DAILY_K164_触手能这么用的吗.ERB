@@ -1,0 +1,223 @@
+;---------------------
+;基本发生概率(1000分率100为10%)
+;再加上configue项目的发生频率，所以概率还会有所变化
+;---------------------
+@KOJO_DAILY_K164_AMAZING_OPERATION_RATE(対象)
+#DIM 対象
+RETURN 50
+
+
+;---------------------
+;概率以外的发生判定
+;〇期以后会发生，或者如果DAILY使用的变量是-1，就不会发生。
+;---------------------
+@KOJO_DAILY_K164_AMAZING_OPERATION_DECISION(対象)
+#DIM 対象
+
+SIF !CFLAG:対象:好感度 >= 500
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+;---------------------
+;选择事件的类型，下面用写的是 每日_题材_色情
+;在配置中使用
+;---------------------
+@KOJO_DAILY_K164_AMAZING_OPERATION_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;事件发生时返回1，未发生时返回0
+;没有发生是指，从满足特定条件的角色中随机选择一人的DAILY，原本就没有一个角色满足这个条件的时候。
+;对于使用过旧版本的人来说，就是在每日的本体开头返回-1的状况。
+;---------------------
+@KOJO_DAILY_K164_AMAZING_OPERATION(対象)
+#DIM 対象
+#DIM 判定値
+PRINTFORML 今天没什么事情，去看看%ANAME(対象)%在干什么吧
+IF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫乱)
+    PRINTFORMW 走进门口时，好像传来了奇怪的声音
+    PRINTFORMW 稍微偷偷看一下
+    PRINTFORMW 正在用触手做着不可描述的事
+    PRINTFORML ...
+    PRINTFORML ...
+    PRINTL    
+    CALL ASK_YN("装作没看见离开吧", "破门而入")
+    SELECTCASE RESULT
+	    CASE 0 	
+            PRINTFORMW ...暴露的话会被触手追着抽的吧
+            PRINTFORMW 这里就明智点退下吧
+            SELECTCASE RAND:2
+                CASE 0
+                ;暴露了
+                CFLAG:対象:好感度 += 100
+                CASE 1
+                ;没暴露
+                CFLAG:対象:好感度 += 50
+            ENDSELECT
+         CASE 1
+            PRINTFORMW 一口气推开了门
+            IF TALENT:対象:合意
+                PRINTFORMW 激烈运动了一番
+                CFLAG:対象:好感度 += 300
+            ELSE
+                ;PRINTFORMW
+                CFLAG:対象:好感度 += 50
+            ENDIF
+    ENDSELECT
+ELSE
+;普通剧情
+    SELECTCASE RAND:2
+        case 0
+            PRINTFORMW %ANAME(対象)%好像在忙着整理文档的的样子
+            PRINTFORMW 还是不打搅了
+            PRINTFORMW 悄悄关上门去厨房给她拿了些点心
+            CFLAG:対象:好感度 += 100
+        case 1
+            PRINTFORMW %ANAME(対象)%正瘫在沙发上休息      
+            PRINTFORMW 要邀请%ANAME(対象)%出去逛逛吗  
+            PRINTL    
+            CALL ASK_YN("要出去走走吗", "让她继续休息吧")
+                SELECTCASE RESULT
+                    CASE 0 	
+                        PRINTFORMW 要去街上散散步吗？
+                        IF CFLAG:対象:好感度 >= 1000
+                            PRINTFORMW 「诶！一起散步？呣嗯，咳...虽然很麻烦，但竟然你来求我了我就陪陪你吧」
+                            PRINTFORMW 虽然嘴上不耐烦，但触手貌似已经在跳草裙舞了，是类似狗尾巴一样的原理吗
+                            PRINTL
+                            PRINTFORMW ...
+                            PRINTFORMW ...
+                            PRINTFORMW ...
+                            PRINTL                            
+                            PRINTFORMW 来到了商业街，总之随便逛逛吧
+                            PRINTFORMW 正想拉着%ANAME(対象)%去服装店之类的地方看看，%ANAME(対象)%的触手仿佛感应到了什么一般一齐指向了一个方向
+                            PRINTFORMW 「这、这个...莫非是？！」
+                            PRINTFORMW %ANAME(対象)%两眼直直地盯着一台形似洗衣机的机器
+                            PRINTFORMW 仔细一看这好像是游戏机啊，貌似是音游
+                            PRINTFORMW 你想玩这个吗？
+                            PRINTFORMW 「想！」
+                            PRINTFORMW 把钱交给%ANAME(対象)%后，%ANAME(対象)%兴冲冲地跑到机子前玩了起来
+                            ;从幽香事件那抄来的（
+                            判定値 = (ABL:対象:武闘 + 5)
+	                        IF 65 > 判定値
+                                PRINTFORMW 貌似还不熟悉规则的样子，%ANAME(対象)%全程手忙脚乱地，甚至连八根触手都用上了
+                                PRINTFORMW 看%ANAME(対象)%吃瘪的样子也蛮有趣的...
+                                PRINTFORMW ...
+                                PRINTFORMW ...感觉有些不对？
+                                PRINTFORMW 硄！硄！硄！
+                                PRINTFORMW 气急败坏的%ANAME(対象)%开始用触手砸起了机器...
+                                SELECTCASE RAND:3
+                                    CASE 0
+                                        PRINTFORMW 趁还没有人注意到，赶紧把她抱走了...
+                                    CASE 1
+                                        PRINTFORMW 趁还没造成财产损失，赶紧把她抱走了...
+                                    CASE 2
+                                        PRINTFORMW 巨大的响声引来了工作人员
+                                        PRINTFORMW 因为拆机被赶出去了...还交了1500金当维修费
+                                        CALL COLOR_PRINTL("失去了1500金", カラー_警告)
+			                            MONEY -= 1500
+                                ENDSELECT
+                            ELSEIF 90 > 判定値
+                                PRINTFORMW 在成功打过几张简单的谱面后，%ANAME(対象)%已经基本掌握了游戏的玩法！
+                                PRINTFORMW 那就是用触手！（这算作弊了吧喂？！）
+                                PRINTFORMW ...
+                                PRINTFORMW 最后玩得很开心...
+                                IF RAND:100 < 30
+                                    PRINTFORMW 由于用力过猛，回去以后手臂脖子外加触手都疼了好几天
+                                    CALL ADD_COOLTIME(対象, 1)
+                                ENDIF
+                                CFLAG:対象:好感度 += 100
+                            ELSE
+                                PRINTFORMW %ANAME(対象)%已经玩的很熟练了，连大部分的难曲都不在话下
+                                PRINTFORMW 虽然姿势很奇怪就是了...
+                                PRINTFORMW 八根触手各吸着一个按键，双手则用来划屏幕
+                                PRINTFORMW 据说在外界把音游高手叫做触手，这位又是另一种意义上的触手了啊...
+                                PRINTFORMW ...微妙的感觉
+                                PRINTFORMW ...
+                                PRINTFORMW 等着也是无聊，该干点什么好呢...
+                                PRINTFORMW 视线落在了%ANAME(対象)%毫无防备的胸部
+                                CALL ASK_YN("恶作剧", "算了吧")
+                                SELECTCASE RESULT
+                                    CASE 0
+                                        PRINTFORMW 朝%ANAME(対象)%的胸部，伸出双手
+                                        IF ABL:Ｂ感 >= 3
+                                            PRINTFORMW 「等、等下，现在不要...」
+                                            PRINTFORMW 意识到发生了什么的%ANAME(対象)%紧张了起来，尽管如此似乎并不打算把手收回用于防护
+                                            PRINTFORMW 「不要、不要碰那里...呀啊❤」
+                                            PRINTFORMW 听到了意外可爱的声音啊
+                                            PRINTFORMW %ANAME(対象)%满脸通红，眼角挂着泪，用仿佛要吃人一样的眼神地盯着你
+                                            PRINTFORMW 既然如此，干脆做到底吧...
+                                            PRINTFORMW ...从衣服下面把手伸了进去
+                                            PRINTFORMW 「喂！等下、你该不会是要...」
+                                            PRINTFORMW 随着游戏逐渐进入高潮，%ANAME(MASTER)%的双手也从%ANAME(対象)%的细腰逐渐摸上双峰……
+                                            PRINTFORMW %ANAME(対象)%的双脚开始有些发软，身体不也时轻微地颤抖
+                                            PRINTFORMW  ...朝着凸起的地方用力一捏
+                                            PRINTFORMW 「咿呀！！❤」
+                                            PRINTFORMW %ANAME(対象)%在发出了甜美的叫声后，瘫软在地
+                                            PRINTFORML ...
+                                            PRINTFORMW 在人潮聚集过来前，带着陷入恍惚的%ANAME(対象)%离开了
+                                            CFLAG:対象:好感度 += 300
+                                        ELSE
+                                            PRINTFORMW 「诶？等、噫呀！你在干什么啊！」
+                                            PRINTFORMW  %ANAME(対象)%因为游戏不能停下来，只能恶狠狠地盯着你
+                                            PRINTFORMW  ...
+                                            PRINTFORMW  结束后被双手加八根触手造成了十次攻击
+                                            PRINTFORMW  %ANAME(対象)%气呼呼地离开了
+                                            CFLAG:対象:好感度 += 50
+                                        ENDIF
+                                    CASE 1
+                                        IF 120 < ABL:対象:武闘
+                                            PRINTFORMW 还是老老实实看着吧
+                                            PRINTFORMW ...
+                                            PRINTFORMW 最后玩得很开心...
+                                            PRINTFORMW 回去的路上，%ANAME(対象)%看起来很高兴
+                                            SELECTCASE RAND:5
+                                                CASE 0
+                                                    PRINTFORMW 貌似是AP了潘多拉白谱了...
+                                                    PRINTFORMW 然而由于刷了太多次，触手短时间内是没法缓过来了
+                                                    CALL ADD_COOLTIME(対象, 1)
+                                                    CFLAG:対象:好感度 += 300
+                                                CASE 1
+                                                    PRINTFORMW 貌似是AP了BREaK! BREaK! BREaK!...
+                                                    CFLAG:対象:好感度 += 200
+                                                CASE 2
+                                                    PRINTFORMW 貌似是AP了封焰の135秒...
+                                                    CFLAG:対象:好感度 += 300
+                                                CASE 3
+                                                    IF RAND:100 < 30
+                                                        PRINTFORMW 貌似是AP+了Regulus...
+                                                        PRINTFORMW 然而结尾转得太狠，触手连带着把脖子扭伤了，回去疼了好几天
+                                                        CALL ADD_COOLTIME(対象, 1)
+                                                        CFLAG:対象:好感度 += 300
+                                                    ELSE
+                                                        PRINTFORMW 貌似是AP了Regulus...
+                                                        CFLAG:対象:好感度 += 200
+                                                    ENDIF
+                                                CASE 4
+                                                    PRINTFORMW 貌似是AP了Valsqotch
+                                                    CFLAG:対象:好感度 += 300
+                                            ENDSELECT
+                                        ELSE
+                                            PRINTFORMW 还是老老实实看着吧
+                                            PRINTFORMW ...
+                                            PRINTFORMW 最后玩得很开心...
+                                            CFLAG:対象:好感度 += 100
+                                        ENDIF
+                                ENDSELECT
+                            ENDIF
+                        ELSE
+                            PRINTFORMW %ANAME(対象)%有气无力地看了你一眼，用头上的触手做出了驱赶的样子
+                            PRINTFORMW 已经懒到连话都不想说的地步吗...
+                        ENDIF
+                    CASE 1
+                        PRINTFORMW 悄悄关上门去厨房给她拿了些点心
+                        CFLAG:対象:好感度 += 100
+                ENDSELECT
+    ENDSELECT
+ENDIF
+
+
+RETURN 1
+
+

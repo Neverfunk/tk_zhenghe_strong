@@ -1,0 +1,83 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_0_MIRACLE_17_EXIST
+RETURN 1
+
+@SKILL_0_MIRACLE_17_NAME
+RESULTS = 飨食+
+
+;レベルは1-5まで
+@SKILL_0_MIRACLE_17_LEVEL
+RETURN 2
+@SKILL_0_MIRACLE_17_LEVELUP(对象)
+#DIM 对象
+;对于存在升级版本的技能,使用升级函数
+;满足升级条件就删除低级学习高级技能
+SIF ABL:对象:信仰 >= FAITH_LEVEL:3
+	CALL MIRACLE_SKILL_LEVELUP(对象,"飨食+","飨食++")
+;対象選択
+@SKILL_0_MIRACLE_17_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+;我方部隊対象
+RETURN 1
+
+;発動判定
+@SKILL_0_MIRACLE_17_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1
+
+;効果をここに記述
+@SKILL_0_MIRACLE_17_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+
+#DIM 随机值
+対象側 = !発動側
+随机值=RAND(1,MIN((ABL:発動者:信仰)/10,5))
+CALL PRINT_ADD_EXP(発動者, "料理経験値",随机值, 1)
+CALL TRAIN_AUTO_ABLUP(発動者)
+
+
+@SKILL_0_MIRACLE_17_EXPLANATION
+RESULTS = 根据信仰，提升自身料理经验值。
+
+@SKILL_0_MIRACLE_17_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 1000

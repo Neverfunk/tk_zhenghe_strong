@@ -1,0 +1,90 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_GOBLIN_OVULATION_RATE()
+RETURN 75
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_GOBLIN_OVULATION_DECISION()
+#DIM ゴブリン
+ゴブリン = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_ホフゴブリン))
+SIF ゴブリン == -1
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_GOBLIN_OVULATION_SETTARGET()
+#DIM ゴブリン
+ゴブリン = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_ホフゴブリン))
+FOR LOCAL, 0, CHARANUM
+	;ホフゴブリン勢力所属で捕虜でなく妊娠しておらず危険日である女性キャラ
+	SIF CFLAG:LOCAL:所属 != ゴブリン
+		CONTINUE
+	SIF CFLAG:LOCAL:捕虜先
+		CONTINUE
+	SIF CFLAG:LOCAL:妊娠期間
+		CONTINUE
+	SIF !IS_OVULATION(LOCAL)
+		CONTINUE
+	DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+	DAILY_TARGET_NUM ++
+NEXT
+SIF DAILY_TARGET_NUM < 1
+	RETURN 0
+RETURN 1
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_GOBLIN_OVULATION_GENRE()
+RETURN デイリー_ジャンル_特殊勢力
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_GOBLIN_OVULATION
+#DIM 対象
+#DIM ゴブリン
+ゴブリン = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_ホフゴブリン))
+
+
+対象 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+
+PRINTFORML %ANAME(対象)%被哥布林們包囲了
+;TranslatedMark %ANAME(対象)%をホフゴブリンたちが取り囲んでいる
+PRINTFORMW 哥布林們輪姦著処于危険日的%ANAME(対象)%、像要讓其懷孕
+;TranslatedMark 危険日である%ANAME(対象)%を輪姦し、孕ませようというのだ
+PRINTFORML 為了確保懷孕、在事前就給%PRONOUN(対象)%喂下了排卵誘発剤
+;TranslatedMark 妊娠を確実なものとするために、%PRONOUN(対象)%には事前に排卵誘発剤が投与されてある
+PRINTFORMW 雖然明明是在被侵犯、被強迫懷孕、但是作為奴隸被調教過的%ANAME(対象)%的身体卻一陣陣蠢動
+;TranslatedMark これから犯され孕まされようというのに、奴隷として躾けられた%ANAME(対象)%は身体を疼かせている
+PRINTFORML 當無數的肉棒伸到眼前時、%PRONOUN(対象)%臉頰泛紅、懇求道想要被侵犯
+;TranslatedMark 目の前に無数のペニスが差し出されると、%PRONOUN(対象)%は頬を上気させ、犯してくれるよう懇願する
+PRINTFORMW 都不需要説那種話、哥布林們就囲住了%ANAME(対象)%、一個接一個的不停在那肉穴中注入著種子……
+;TranslatedMark 言われるまでもないと、ホフゴブリンたちは%ANAME(対象)%に群がり、その肉穴に代わる代わる子種を注ぎ続けた……
+
+;避妊薬を無効化し、排卵誘発剤を使ってたことにする
+CFLAG:対象:避妊薬残ターン = 0
+CFLAG:対象:排卵誘発剤 = 1
+
+CALL FUCK_SP(対象, "欲望, 精愛, 奉仕, 性交, Ｖ, 輪姦", "膣内射精, 処女喪失", ゴブリン, GET_SPERM_ID("哥布林"), @"哥布林的\@ RAND:2 ? 唇 # 肉棒 \@", "哥布林", "", "輪姦")
+
+FOR LOCAL, 0, 10
+	CALL FUCK_SP(対象, "", "膣内射精, 処女喪失", ゴブリン, GET_SPERM_ID("哥布林"), @"哥布林的\@ RAND:2 ? 唇 # 肉棒 \@", "哥布林", "", "輪姦")
+NEXT
+CALL COLOR_PRINTW(@"%ANAME(対象)%的子宮、被注入了大量濃厚的精液", カラー_ピンク)
+
+RETURN 1

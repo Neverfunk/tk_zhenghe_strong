@@ -1,0 +1,145 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_ANIMAL_SEX_BATTLE_RATE()
+RETURN 25
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_ANIMAL_SEX_BATTLE_DECISION()
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+SIF DVAR:種族間抗争_娘惚れフラグ > 1
+	RETURN 0
+RETURN DAY >= 15
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_ANIMAL_SEX_BATTLE_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+
+;だいぶ手入れしました　by喚く
+@EVENT_DAILY_ANIMAL_SEX_BATTLE()
+#DIMS 妖怪の種族
+#DIMS 妖怪の種族二
+#DIM 対象
+#DIM 上昇, 2
+
+PRINTFORML 幻想郷中各種各樣的妖怪們互相爭闘想要支配人類
+PRINTFORML 雖說是爭闘但其實是類似水面下的遊戲一樣的東西
+PRINTFORMW 但是対被隨心所欲対待的人類來説是難以忍受的
+PRINTFORML …話說回來、最近在年輕的妖怪娘們之間流行起了用性技爭闘
+PRINTFORML 用性迷惑人類確實是自古以來妖怪們就很得意的手段之一
+PRINTFORMW 人類完全承受不了！
+PRINTFORML 因此、%ANAME(MASTER)%那裡也受到了這余波的來訪
+PRINTFORML 狐、狸、兎、天狗…多種多様的妖怪娘們湧向了%ANAME(MASTER)%的家
+PRINTFORML 好像是聽到了%ANAME(MASTER)%的傳言、想通過%ANAME(MASTER)%選擇了誰來分割勝負的樣子
+PRINTFORMW 紛紛吵著一定要選擇和自己做…
+PRINTFORML 怎麼辦呢？
+CALL ASK_MULTI("謝絕", "狐娘" ,"狸娘" ,"兎娘" ,"天狗娘")
+IF RESULT == 0
+	PRINTFORML 現在沒有那種心情
+	PRINTFORMW 雖然很抱歉但還是決定謝絕
+	RETURN 1
+ENDIF
+
+対象 = RESULT
+
+SELECTCASE RAND:5
+	CASE 0
+		PRINTFORMW 她害羞地溫柔握住了%ANAME(MASTER)%的手
+	CASE 1
+		PRINTFORMW 她露出滿臉笑容親了下%ANAME(MASTER)%的臉龐
+	CASE 2
+		PRINTFORMW 她立刻就挽住了%ANAME(MASTER)%的胳膊并興致勃勃地注視著%ANAME(MASTER)%
+	CASE 3
+		PRINTFORMW 她猛地抱住了%ANAME(MASTER)%開始摩擦起身體
+	CASE 4
+		PRINTFORMW 她一下就扭捏了起來并羞澀地看著%ANAME(MASTER)%
+ENDSELECT
+PRINTFORMW 摟住了%種族間抗争_種類:対象%娘的腰把她帯進了寝室
+PRINTFORML 
+SELECTCASE RAND:5
+	CASE 0
+		PRINTFORML 手指摸上她肌膚的時候、讓她敏感的身體発顫并発出了可愛的呻吟
+	CASE 1
+		PRINTFORML 脫去衣服的她露出了雖然小只但是卻顯示自己已經是出色的雌性的豐滿的肢體
+	CASE 2
+		PRINTFORML 她用熱烈的視線凝視著%ANAME(MASTER)%并撒嬌般的摩擦著大腿
+	CASE 3
+		PRINTFORML 她的肌膚那仿佛在吸住手指一般的柔軟的感觸刺激起了%ANAME(MASTER)%的慾望
+	CASE 4
+		PRINTFORML 從她身體発散出的甜蜜的雌性氣味充滿了%ANAME(MASTER)%的鼻腔
+ENDSELECT
+SELECTCASE RAND:5
+	CASE 0
+		PRINTFORMW 盡情地享受著%種族間抗争_種類:対象%娘那可愛的嬌喘和她那緊緊纏繞著肉棒的媚肉
+	CASE 1
+		PRINTFORMW 盡情疼愛著配合著腰部的動作淫亂扭動著身體発出嬌喘的%種族間抗争_種類:対象%娘
+	CASE 2
+		PRINTFORMW 和眼中浮現出♥并張開雙手索求的%種族間抗争_種類:対象%娘滿身大汗的纏在一起
+	CASE 3
+		PRINTFORMW %ANAME(MASTER)%被跨坐在身上淫亂地扭動腰肢的她連續榨精了好幾次
+	CASE 4
+		PRINTFORMW 她可愛的身體每次在%ANAME(MASTER)%挺腰撞撃的時候都會一顫、讓%ANAME(MASTER)%樂在其中
+ENDSELECT
+CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%種族間抗争_種類:対象%娘的膣穴", "和姦")
+PRINTFORMW 
+
+IF (ABL:MASTER:性技 + ABL:MASTER:性交 + ABL:MASTER:奉仕 + ABL:MASTER:射精) < 12 + (DAY / 12)
+	PRINTFORML 「完全就是謠言啊…」
+	PRINTFORMW 翌日清晨、她低聲嘀咕著、迅速離開了
+	RETURN 1
+ENDIF
+
+;すでに惚れられているキャラでなければ通い始める
+IF !GROUPMATCH(対象, DVAR:種族間抗争_娘の種族, DVAR:種族間抗争_娘2の種族)
+	PRINTFORML 「那個…那個…我還可以、再來麼…？」
+	PRINTFORMW 翌日清晨、依依不捨的她在約好再會之後離開了
+	DVAR:種族間抗争_娘惚れフラグ ++
+	DVAR:(DVAR:種族間抗争_娘2の種族 == 0 ? 種族間抗争_娘2の種族 # 種族間抗争_娘の種族) = 対象
+ENDIF
+
+VARSET 上昇, -1
+
+SELECTCASE 対象
+	CASE 種族間抗争_狐
+		上昇:0 = NAME_TO_CHARA("藍")
+	CASE 種族間抗争_狸
+		上昇:0 = NAME_TO_CHARA("マミゾウ")
+	CASE 種族間抗争_兎
+		上昇:0 = NAME_TO_CHARA("てゐ")
+		上昇:1 = NAME_TO_CHARA("鈴仙")
+	CASE 種族間抗争_天狗
+		上昇:0 = NAME_TO_CHARA("文")
+		上昇:1 = NAME_TO_CHARA("はたて")
+ENDSELECT
+
+SIF GROUPMATCH(MASTER, 上昇:0, 上昇:1)
+	RETURN 1
+PRINTFORML 和%種族間抗争_種類:対象%娘之間的情事傳入了同種族妖怪的耳中
+
+SETCOLOR カラー_シアン
+PRINTFORM 引起了%ANAME(上昇:0)%
+SIF 上昇:1 != -1
+	PRINTFORM 和%ANAME(上昇:1)%
+PRINTFORMW 的関心
+RESETCOLOR
+
+CFLAG:(上昇:0):好感度 += 200
+SIF 上昇:1 != -1
+CFLAG:(上昇:1):好感度 += 200

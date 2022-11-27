@@ -1,0 +1,429 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K31_FUCKMEAT_RATE(対象)
+#DIM 対象
+RETURN 100
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K31_FUCKMEAT_DECISION(対象)
+#DIM 対象
+#DIM 輝夜
+
+輝夜 = NAME_TO_CHARA("輝夜")
+
+SIF !IS_FEMALE(対象) || !IS_FEMALE(輝夜)
+	RETURN 0
+
+SIF !IS_COUNTRY(CFLAG:輝夜:所属)
+	RETURN 0
+
+SIF CFLAG:輝夜:所属 != CFLAG:対象:所属
+	RETURN 0
+
+;純愛路線でいってる人にこのイベントはだいぶ辛かろうかなって……（思いやり
+SIF IS_LOVER(対象)
+	RETURN 0
+
+SIF KDVAR:対象:妹紅_永遠の便女と蓬莱の便女
+	RETURN 0
+
+SIF !GETBIT(TALENT:輝夜:淫乱系, 素質_淫乱_精液便女)
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0) && CHECK_KOJO_DAILY_HAPPEN(輝夜, 1, 0)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K31_FUCKMEAT_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K31_FUCKMEAT(対象)
+#DIM 対象
+#DIM 輝夜
+
+輝夜 = NAME_TO_CHARA("輝夜")
+
+PRINTFORMW 「%ANAME(輝夜)%你把我叫到这种地方干什么……？」
+;TranslatedMark 「%ANAME(輝夜)%め、こんなところに呼び出して何を……？」
+PRINTFORML 正闲得无聊的%ANAME(対象)%被%ANAME(輝夜)%邀请道"告诉你一个非常好的打发时间的方法"
+;TranslatedMark 暇を持て余しまくり困っていた%ANAME(対象)%は、%ANAME(輝夜)%に「とってもいい暇の潰し方を教えてあげる」と誘われた
+PRINTFORMW ……被叫来的地方是深夜的贫民窟深处，实在是很可疑啊
+;TranslatedMark ……呼び出されたのが深夜の貧民窟の深部というのが、たいへんに怪しかったが
+PRINTFORML 嘛，如果%ANAME(輝夜)%有什么企图的话，把那个企图一把火烧掉就行了
+;TranslatedMark まあ、%ANAME(輝夜)%が何か企んでいるのなら、その企みごと燃やしてやればいい
+PRINTFORMW 就这样勇敢地来到了指定的小屋，%ANAME(対象)%所看到的，却是意料之外的光景
+;TranslatedMark そんな風に勇んで、指定された小屋を訪ねた%ANAME(対象)%が目の当たりにしたのは、あまりにも予想外の光景だった
+PRINTFORML 「啊哈哈♥啊、哈啊、啊、大鸡鸡♥啊，好棒，再深一点，啊啊♥」
+;TranslatedMark 「あはんっ♥　あんッ、あッ、あッ、ちんぽっ♥　あは、いいわ、もっと突いて、あああ♥」
+PRINTFORMW 「啊，好棒——噗嗯！？呜，噗、噗、噗、噗呜呜♥噗、啾噜噜、噗呜♥」
+;TranslatedMark 「あ、すごッ――んぶぅゥ!?　ングッ、ぐぶッ、ングゥウ♥　ぐッ、ぢゅるるッ、んぷぅう♥」
+PRINTFORMW 蛰伏在贫民窟里的几个、不，几十个流浪汉挤在小屋里
+;TranslatedMark 貧民窟に潜む何人もの、いや何十人もの浮浪者が、小屋にひしめいていた
+PRINTFORML 体臭混合在一起，形成了刺眼的强烈气味。眼泪都要渗出来了
+;TranslatedMark 体臭がミックスされ、目に染みる激臭となっている。涙がにじんだほどだ
+PRINTFORML 虽然眼前的景象让人生恶，但是%ANAME(対象)%的目光却一直注视着一处
+;TranslatedMark 嫌悪すべき光景で、しかし%ANAME(対象)%は一点に目を注いでいた
+PRINTFORMW 目光无法离开，在男人们环绕的中心，被轮奸的少女——%ANAME(輝夜)%
+;TranslatedMark 男達の輪の中央で、輪姦されている少女――%ANAME(輝夜)%から、目を離せなかった
+PRINTFORMW 「嗯……哈啊、哈啊……!?」
+;TranslatedMark 「んな……はッ、はぁ……!?」
+PRINTFORML 情况实在令人费解
+;TranslatedMark 状況はまったく理解しがたかった
+PRINTFORML 难道是她打算召集一群男人突袭，结果自己反被袭击了，是这样的吗？不过很难想象%ANAME(輝夜)%会被这种小手段打得措手不及
+;TranslatedMark 男達を集めて不意打ちさせるつもりで、自分が襲われた、という感じか？　しかし%ANAME(輝夜)%がそこらの三下に不覚を取るとも考えにくい
+PRINTFORML 奇怪的是，%ANAME(輝夜)%看起来非常的享受
+;TranslatedMark 何より%ANAME(輝夜)%は、ひどく悦んでいるように見えた
+PRINTFORMW 尽管被男人们激烈地贪求着%STR_BODY("身体",対象)%，贯穿着%STR_BODY("膣",対象)%和%STR_BODY("アナル",対象)%，还同时在做深喉
+;TranslatedMark 男達に%STR_BODY("身体",対象)%を貪られ、%STR_BODY("膣",対象)%や%STR_BODY("アナル",対象)%を貫かれて、激しくイラマチオされているにもかかわらず、だ
+PRINTFORML 「噗呜，嗯，啾，噗呜♥咕，嗯……咕呜，嗯♥」
+;TranslatedMark 「んぶぅッ、んぢゅ、んぐぅうッ♥　んくゥ、ん……こくんっ、んぅ♥」
+PRINTFORMW 「嘞咯嘞咯嘞咯……啾噜，噗呜♥嗯，呜嗯，嗯♥」
+;TranslatedMark 「れろれろれろッ……ぢゅる、ング♥　んっんっんっ、んうぅ、んッ♥」
+PRINTFORML 侵犯口腔的男人低声呻吟着，将精液射入了%ANAME(輝夜)%的口中。
+;TranslatedMark 口腔を犯す男が低く呻き、精を%ANAME(輝夜)%の口内に放つ
+PRINTFORMW %ANAME(輝夜)%非但没有把那个让人看都不想看一眼的丑陋男子的精液吐出来，反而吞咽了下去，甚至浮现出了陶醉的表情。
+;TranslatedMark 誰もが目を背ける醜い男のスペルマを、%ANAME(輝夜)%は吐き出すどころか喉を鳴らして嚥下し、恍惚の表情すら浮かべていた
+PRINTFORMW 「这,到底是怎么回事……」
+;TranslatedMark 「何、これ。どういうこと……」
+PRINTFORML 回过神来的时候，%ANAME(対象)%已经瘫软在了那里
+;TranslatedMark 気づけば%ANAME(対象)%は、そこにへなへなと崩れ落ちていた
+PRINTFORMW 眼前惨不忍睹的景象，以及在其中心扭动着身体的少女那令人窒息的淫相，仿佛夺走了自己的心魂
+;TranslatedMark 目の前の酸鼻極まる光景と、その中心で踊る少女のむせ返る淫らさに、魂を奪われていた
+PRINTFORMW 「哇，啊，啊……」
+;TranslatedMark 「ッは、あ、あ……」
+PRINTFORML 那个%ANAME(輝夜)%，向肮脏的男人们献媚，用卑猥的舌头吮吸着阴茎，扭动着屁股用两个洞接着精液
+;TranslatedMark あの%ANAME(輝夜)%が、汚らしい男どもに媚び、卑猥な舌使いで魔羅をしゃぶり、腰をくねらせては両穴で精を受け止めている
+PRINTFORML 那满身都是精液和男根的疯狂的样子，在不知不觉中使%ANAME(対象)%兴奋起来了
+;TranslatedMark スペルマと男根にまみれてよがり狂う様は、知らず知らずのうちに%ANAME(対象)%を昂ぶらせていた
+PRINTFORMW 子宫疼了起来，大腿在无意识地蹭着
+;TranslatedMark 子宮が疼いている。太腿が、無意識のうちに擦れ合わされていた
+PRINTFORML 「嗯，哈，啊……♥呵呵，妹红，你来啦」
+;TranslatedMark 「ンッ、は、あぁ……♥　ふふ、妹紅、来たのね」
+PRINTFORMW 「哇，等一下%ANAME(輝夜)%，你别用那副样子接近我……嗯、嗯呣呜呜呜！？」
+;TranslatedMark 「うわ、ちょっと待て%ANAME(輝夜)%、お前その格好で近づくな……んッ、んぅううッ!?」
+PRINTFORML 在狂乱中的辉夜，终于注意到了这里。带着艳丽的笑容，接近了%ANAME(対象)%
+;TranslatedMark 狂乱の最中で、ようやくこちらに気づいたらしい。輝夜は艶然たる笑みを浮かべ、%ANAME(対象)%へと近づく
+PRINTFORML 被精液、爱液和其他不知是什么的汁液所浸染的模样, 既异样又美丽，混杂着偷窥被抓的动摇，让妹红不知如何是好
+;TranslatedMark 精液や愛液やその他得体の知れない汁にまみれた様は異様ながらも美しく、窃視がバレた動揺もありまともに対応できない
+PRINTFORMW 然后,%ANAME(輝夜)%深深吻上了慌乱中不知所措的%ANAME(対象)%
+;TranslatedMark そうして混乱する%ANAME(対象)%に、%ANAME(輝夜)%はあろうことか口づけた
+CALL KISS_COMMON(対象, @"%ANAME(輝夜)%の唇")
+PRINTFORML 「噗呜、嘞咯、啾、啾。嘞咯嘞咯……啾呜……啾噜噜」
+;TranslatedMark 「くぷぅ、れろっ、ちゅっ、ちゅッ。れろれろ……んちゅっ、ぢゅるる……っ」
+PRINTFORMW 「呜、呜呜!?　噗、呜、呜……呣、呜……、嗯！呣呜呜呜……呜」
+;TranslatedMark 「んッ、んぅ!?　く、んゥ、ふぅ……んッ、んぅ……、ッ！　んんぅう……ッ」
+PRINTFORML 不知怎么回事，手脚挣扎的%ANAME(対象)%，被%ANAME(輝夜)%那仿佛要把自己的嘴与外界完全隔绝般的舌技瞬间融化，忘记了抵抗
+;TranslatedMark 訳も分からず手足を暴れさせた%ANAME(対象)%も、%ANAME(輝夜)%の隔絶した舌技にアッという間に蕩かされ、抵抗を忘れる
+PRINTFORML 就这样，舌头舔舐着粘膜，相互缠绕着
+;TranslatedMark されるがまま、れろれろと口内粘膜を絡ませ合う
+PRINTFORMW 吸吮过流浪汉们的肉棒的%ANAME(輝夜)%的口腔里，散发着强烈的精臭和氨臭，但她却毫不在意
+;TranslatedMark 浮浪者どもの魔羅をしゃぶっていた%ANAME(輝夜)%の口内からは、強烈な精臭とアンモニア臭がしたが、気にもならなかった
+PRINTFORMW 「嗯……!?」
+;TranslatedMark 「んんンッ……!?」
+PRINTFORML 突然，粘糊糊的汁液被送到嘴里
+;TranslatedMark 不意に、恐ろしく粘っこい汁が口中へ送り込まれる
+PRINTFORML 带着让人联想到淤泥的腥臭的污浊，这不可能是%ANAME(輝夜)%的
+;TranslatedMark ヘドロを想像させる生臭さを伴った汚濁が、%ANAME(輝夜)%の唾液であろうはずもない
+PRINTFORML 肯定是刚刚被灌得满满的流浪汉的精液
+;TranslatedMark 先ほどたっぷり注がれた、浮浪者のスペルマに違いなかった
+PRINTFORML 然而，%ANAME(対象)%却将这脏东西吞下了
+;TranslatedMark 汚物でしかないそれを、しかし%ANAME(対象)%は嚥下してしまう
+PRINTFORMW 眼前少女的艳丽，现场异样的氛围，完全将自己吞没了
+;TranslatedMark 目の前の少女の艶やかさに、場の異様な空気に、完全に飲まれていた
+PRINTFORMW 「嗯……♥噗呜，呣，呜呜……」
+;TranslatedMark 「んぅッ……♥　く、んぅ、んぅうう……」
+PRINTFORML 在混乱中，%ANAME(輝夜)%剥下了%ANAME(対象)%的衣服，用手指在%STR_BODY("身体",対象)%游走，轻抚着肌肤
+;TranslatedMark どさくさに紛れて、%ANAME(輝夜)%は%ANAME(対象)%の服を剥ぎ取り、%STR_BODY("身体",対象)%へ指を這わせ、肌を擦り合わせる
+PRINTFORML 肌肤被沾满精液的手弄脏了，反而让%ANAME(対象)%感到兴奋
+;TranslatedMark 精液まみれの手や肌が触れ汚されてしまうが、むしろ%ANAME(対象)%は興奮を覚えてしまっていた
+PRINTFORMW 开始用白皙的手指刺激自己的%STR_BODY("膣：感度",対象)%……
+;TranslatedMark 白い指が、自らの%STR_BODY("膣：感度",対象)%をくちくちと嬲り始めている……
+PRINTFORML 「诶嘿嘿，是新的便女啊?」
+;TranslatedMark 「えっへへへ、新しい便女ちゃんかあ？」
+PRINTFORML 「这孩子我见过，是竹林的引路人的那个孩子吧？哎呀，样子看来真可爱啊，真是赚到了」
+;TranslatedMark 「この子見たことあるぜ、竹林の案内人の子だろ？　いやぁ、こうしてみると可愛いねぇ、ハメがいがあるわ」
+PRINTFORMW 「嘿嘿，%ANAME(対象)%酱，你已经在自慰了啊。果然和%ANAME(輝夜)%酱是好朋友啊！哈哈哈~」
+;TranslatedMark 「へへ、%ANAME(対象)%ちゃん、もうオナニーなんかしちゃってよ。%ANAME(輝夜)%ちゃんと類友だなこりゃぁ」
+PRINTFORML 被男人们尽情视奸着
+;TranslatedMark 男達に、じろじろと見られている
+PRINTFORMW 尽管被充满性欲的下流目光盯着，%ANAME(対象)%也讨厌不起来
+;TranslatedMark 性欲まみれのいやらしい目を向けられてなお、%ANAME(対象)%は嫌悪することができないでいた
+PRINTFORMW 「噗哈……♥呼呼，好可爱啊，%ANAME(対象)%。就请你先在那里在暂时参观一会儿吧。永远的消磨时间的方法……啊♥」
+;TranslatedMark 「ぷは……♥　ふふ、可愛いわね、%ANAME(対象)%。貴女はしばらく、そこで見学してなさいな。永遠の暇の潰し方を……あぁあッ♥」
+PRINTFORML  话还没有说完
+;TranslatedMark 言葉が最後まで紡がれることはなかった
+PRINTFORML 两个人的嘴唇一分开，男人们就蜂拥而上地贯穿着%ANAME(輝夜)%的那个洞
+;TranslatedMark 唇が離れるなり、男共が%ANAME(輝夜)%に群がり、その穴を貫いたからだ
+PRINTFORML 被位于人之里社会最底层的人强行跨了上去，%STR_BODY("膣：感度", 対象)%被迫进行着侍奉
+;TranslatedMark 人里社会の底辺に位置する輩に、強引に跨がらされ、%STR_BODY("膣：感度", 対象)%で奉仕させられている
+PRINTFORMW 然后又被人从后面压了上去，贯穿了%STR_BODY("アナル", 対象)%
+;TranslatedMark さらに後ろからのしかかられ、%STR_BODY("アナル", 対象)%を穿たれていた
+PRINTFORML 「啊哈♥呣、呣呜、咕哈啊、啊、呜呜♥哦、咦、哈阿啊啊♥」
+;TranslatedMark 「あっはぁんッ♥　あ、んぅッ、くはッ、あぅッ、んぅう♥　おッ、ひッ、はぁああッ♥」
+PRINTFORML 「啊，便器还是这么舒服啊」
+;TranslatedMark 「いやぁ、相変わらず具合のいい便器だよなぁ」
+PRINTFORMW 「就算变松了，死了就会变回来吧？真是方便啊！」
+;TranslatedMark 「ユルくなっても死ねば戻るんだろ？　便利なもんだよなぁ！」
+PRINTFORML 男人们一边随意使用%ANAME(輝夜)%，一边咯咯地嘲笑着
+;TranslatedMark 男達は%ANAME(輝夜)%を好き放題に使いながら、ゲラゲラと嘲笑っている
+PRINTFORMW 对曾经连皇帝都见不到的女人，真是难以想象的态度
+;TranslatedMark かつて帝ですらも見ることのできなかった女を相手しているとは、とても思えない態度だった
+PRINTFORMW 「呜呜，呜……呜……呣，呜……♥」
+;TranslatedMark 「うっ、うぅ……うぅ……ッ、んぅう……ッ♥」
+PRINTFORML 一旁的%ANAME(対象)%在莫名其妙的冲动下，用手指不停地揉着自己的%STR_BODY("膣", 対象)%
+;TranslatedMark 一方の%ANAME(対象)%は、訳の分からない衝動のままに、自らの%STR_BODY("膣", 対象)%を指でこね回していた
+PRINTFORML 只有%ANAME(輝夜)%被痛愛而感到的妒忌，以及連自己父親的追求也拒絕的女人，如今卻對這種人隨便張開雙腿而感到的憤怒
+;TranslatedMark %ANAME(輝夜)%ばかりあんな風にしてもらってズルいという嫉妬、そもそも自分の父親を振っておいてあんな連中に淫売のように股を開くなんてという怒り
+PRINTFORML 各种各样的感情混杂在一起，伴随着异样的性奋袭来
+;TranslatedMark 様々な感情が混ざり合い、興奮とともに襲いかかっていた
+PRINTFORML 所有的这些全部都化作了手指激烈的动作，变成对自己肉体的挑弄刺激
+;TranslatedMark それらは全て、激しい指の動きとなり、自らの肉体を嬲っていく
+PRINTFORMW 从紧咬的齿缝中，溢出了无法隐藏的娇声
+;TranslatedMark 噛みしめた奥歯の隙間から、隠しようもない嬌声が漏れていた
+PRINTFORMW 「嘿嘿嘿，%ANAME(対象)%酱哟，不要一个人在那舒服了，一起来吧」
+;TranslatedMark 「へへへ、%ANAME(対象)%ちゃんよ、そんな風に一人で気持ちよくなってないで、一緒に遊ぼうぜぇ」
+PRINTFORMW 「啊……」
+;TranslatedMark 「アッ……」
+PRINTFORML 回过神来，发现自己已经被流浪汉们团团围住了
+;TranslatedMark 気づけば、自らの周りを浮浪者達がぐるりと取り囲んでいた
+PRINTFORML 将沾满了耻垢的肮脏阴茎朝向这边
+;TranslatedMark 恥垢にまみれた汚らしいペニスを、こちらへ向けている
+PRINTFORMW 那能够让鼻子都弯曲的浓烈恶臭，现在却让%ANAME(対象)%不由得心跳加速
+;TranslatedMark 鼻の曲がる濃厚な悪臭は、しかし今の%ANAME(対象)%にとっては、胸をときめかせる芳しい香りだった
+PRINTFORMW 「你知道该做什么了吧?好不容易被%ANAME(輝夜)%酱邀请了，体验一下也不错吧?」
+;TranslatedMark 「何すればいいかは分かるよな？　せっかく%ANAME(輝夜)%ちゃんが招待してくれたんだ、体験してみるのも悪くねぇと思うだろぉ？」
+PRINTFORMW 「哈……啊，啊」
+;TranslatedMark 「は……ッあ、あ」
+PRINTFORML 眼前的龟头像节拍器一样摇摇晃晃。%ANAME(対象)%的眼睛自然而然地追逐着那个东西
+;TranslatedMark 目の前で亀頭がメトロノームのようにゆらゆらと揺らされる。%ANAME(対象)%の目は、自然とソレを追いかける
+PRINTFORMW 明明在眼前被展示了男人的脏东西，却觉得很开心。嘴里传来饥渴的感觉，慢慢地把嘴唇靠近——终于，吻上了龟头
+;TranslatedMark 汚いモノを見せつけられているのに、覚えるのは悦びだ。口が疼くまま、唇を近づけていく――やがて、亀頭にキスをした
+CALL KISS_COMMON(対象, "流浪漢的肉棒")
+PRINTFORMW 「呜呜——♥嗯呜，啊呣呜，啾噜噜，嘞咯，啾噜噜，呜♥嘞咯、嘞咯嘞咯♥」
+;TranslatedMark 「んぅうう――ッ♥　んふっ、あむぅッ、ぢゅるッ、れろッ、ぢゅるるッ、んふぅ♥　れろっ、れろれろっ♥」
+PRINTFORML 口腔中充斥着令舌头酸麻的腐味，以及让横膈膜都要吐出来的脏臭
+;TranslatedMark 口内に満ちるのは、舌の痺れるえぐみと、横隔膜をせり上がらせる汚臭だ
+PRINTFORMW 但是，它们却唤起了雌性那无可救药的喜悦。
+;TranslatedMark が、それらが喚起させるのは、どうしようもない牝の悦びだった
+PRINTFORML 张大着嘴巴，把男根塞进嘴里
+;TranslatedMark 口を大きく広げ、男根を頬張る
+PRINTFORML 一边发出啾噗啾噗的声音一边吮吸着，舌头也蠢动着来回舔舐，去除着耻垢
+;TranslatedMark ぢゅぷぢゅぷと音を立てながらしゃぶりたて、舌を蠢かして舐め回して恥垢をこそげ落とす
+PRINTFORMW 简直是卑猥至极，那不亚于%ANAME(輝夜)%的，连妓女都相形见绌的口技
+;TranslatedMark まさに卑猥極まり、%ANAME(輝夜)%に勝るとも劣らぬ、娼婦顔負けのフェラチオだった
+PRINTFORMW 「哇啊，不愧是%ANAME(輝夜)%酱的朋友。真是淫乱得一塌糊涂啊」
+;TranslatedMark 「おほッ、流石%ANAME(輝夜)%ちゃんのオトモダチだ。とんでもない淫乱だなぁ」
+PRINTFORMW 「今天是作为便女出道了吗？还是说，这就是彻头彻尾的变态吧」
+;TranslatedMark 「今日が便女デビューなんだろ？　それでコレってことは、根っからの変態なんだろうなぁ」
+PRINTFORMW 「呣呜呜♥啾噜噜、嘞咯嘞咯、嗯、嗯呜♥嗯，呜呜，啾呜，嗯」
+;TranslatedMark 「んぅう♥　ぢゅるゥ、れろれろ、んっ、んぅ♥　ンッ、んぅッ、ちゅむゥ、んぅううっ」
+PRINTFORML 被人用蔑视的眼神从上面冷冷地看着身体却变得难以忍受起来
+;TranslatedMark の三下に不覚を取るとも考えにくい、見下した目で吐き捨てられることもたまらない
+PRINTFORML 轮流地对着伸过来的好几根肉棒,又是吮吸又是舔舐
+;TranslatedMark 差し出された何本もの魔羅に、代わる代わるしゃぶりついては舐め回していく
+PRINTFORMW 嘴唇接触过的人数，在很短的时间内就增加了……
+;TranslatedMark 唇での経験人数が、僅かな時間に増えていく……
+FOR LOCAL, 0, 3
+	CALL FUCK(対象, "欲望, 奉仕, 性技, 精愛, Ｍ, 口淫, 輪姦, ", "接吻喪失, 口内射精, CFLAG減少", GET_SPERM_ID("流浪漢"), @"流浪漢的肉棒", "流浪漢", "", "輪姦")
+NEXT
+PRINTFORMW 「嗯哈啊哈啊♥咕咚、呜呜、咕咚、咕咚……呣呜呜呜……♥」
+;TranslatedMark 「んっはっ♥　んくッ、んぅッ、こくっ、こく……んぅうう……ッ♥」
+PRINTFORML 不久男人们的射精，将%ANAME(対象)%的嘴和脸都染成了白色
+;TranslatedMark やがて男達が射精し、%ANAME(対象)%の口内を、顔を白く染めていく
+PRINTFORMW 满身是白浊的样子，正是男人们揶揄的便女……
+;TranslatedMark 白濁にまみれた姿はまさに、男達が揶揄する通りの便女だ……
+PRINTFORML 「哎呀，接下来终于是期待的时间了」
+;TranslatedMark 「ほぉれ、次はいよいよ、お楽しみの時間だぜぇ」
+PRINTFORMW 「啊♥」
+;TranslatedMark 「あんッ♥」
+PRINTFORML 被粗暴地推倒，手脚被抓住，无法抵抗
+;TranslatedMark 乱暴に押し倒され、手足を掴まれ抵抗できなくされる
+PRINTFORMW 要是被打开大腿的话，%STR_BODY("陰唇", 対象)%就会暴露在男人们的面前……
+;TranslatedMark 股を開かされれば、男達の%STR_BODY("陰唇", 対象)%が露わになる……
+PRINTFORML 「喂，是大鸡鸡，好好品尝！」
+;TranslatedMark 「そら、チンポだ、たっぷり味わえ！」
+PRINTFORMW 「啊，呀啊啊啊啊啊啊啊啊♥」
+;TranslatedMark 「あッ、あぁああああああああーッ♥」
+CALL VIRGIN_COMMON(対象, "流浪漢")
+PRINTFORML 任谁都会觉得恶心的阳具，被气势汹汹地被捅进了%STR_BODY("膣", 対象)%
+;TranslatedMark 誰もが嫌がる男のモノが、勢いよく%STR_BODY("膣", 対象)%へ叩きつけられる
+PRINTFORMW 对于深入子宫口的一击，被色欲迷乱的%ANAME(対象)%发出了源自内心的幸福的声音
+;TranslatedMark 子宮口まで届くストロークに、すっかり色に狂った%ANAME(対象)%は幸福そのものの声をあげる
+PRINTFORML 正因为是一辈子都没碰过女人的人，所以只要有够进行活塞的对象送上门来，不管是怎样的少女都会堕落为母狗
+;TranslatedMark 女日照りの連中だからこそ繰り出されるピストンを受ければ、どんな少女であろうと牝に堕ちてしまう
+PRINTFORMW 即使是%ANAME(対象)%也不例外，像个便女似的自己摇腰渴求着更进一步的快感……
+;TranslatedMark %ANAME(対象)%とて例外ではなく、便女らしく自ら腰を振りたくってさらなる快感をねだっている……
+PRINTFORML 「呵呵，%ANAME(対象)%的话，表情变得不错起来了呢。淫乱的表情……♥」
+;TranslatedMark 「ふふ、%ANAME(対象)%ったら、いい顔になったわね。いやらしい顔……♥」
+PRINTFORMW 「啊，哇，哈啊♥%ANAME(輝夜)%、%ANAME(輝夜)%」
+;TranslatedMark 「アッ、は、あ♥　%ANAME(輝夜)%、%ANAME(輝夜)%ぁっ」
+PRINTFORML 不断低声说着淫秽话语的%ANAME(輝夜)%也被男人们使用着
+;TranslatedMark うっとりと呟く%ANAME(輝夜)%もまた、男達に使われていた
+PRINTFORML 几近疯狂的抽动，前后都被抠挖着
+;TranslatedMark 擦り切れそうな勢いで、前も後ろもほじくり倒されている
+PRINTFORMW %ANAME(対象)%用难受的声音呼唤着%ANAME(輝夜)%的名字
+;TranslatedMark 切ない声で、%ANAME(対象)%は%ANAME(輝夜)%の名前を呼ぶ
+PRINTFORML 「哈、啊哈、啊……♥哇呣呜♥啾，啾噜，啾噜噜，嘞咯」
+;TranslatedMark 「はぁッ、あはぁ、ア……ッ♥　はむぅ♥　んちゅッ、ぢゅるゥ、ぢゅるるッ、れろっ」
+PRINTFORMW 「嗯哼♥嗯，嗯♥嗯嗯嗯，噗呜呜呜♥」
+;TranslatedMark 「んふ♥　ん、んッ♥　んっんっんっ、んぅううっ♥」
+PRINTFORML 不一会儿，不知从哪边开始，又接吻了
+;TranslatedMark やがて、どちらからともなく、またキスを交わした
+PRINTFORML 对于%ANAME(対象)%来讲，这是对教会她这么舒服的事的感谢之吻
+;TranslatedMark %ANAME(対象)%にとっては、こんなに気持ちいいことを教えてくれたことへの、感謝のキスだった
+PRINTFORMW 一边将舌头紧紧地缠绕在一起，一边将嘴里积存的散发着恶臭的精液混合，互相吞下
+;TranslatedMark れろれろと舌を絡め合わせながら、口中に溜まった汚臭放つスペルマをぐちゃぐちゃとミックスし、互いに嚥下する
+PRINTFORML 「喂，我要射了！」
+;TranslatedMark 「そら、出すぞ！」
+PRINTFORMW 「嗯，嗚嗚嗚嗚嗚嗚嗚嗚嗚嗚嗚嗚嗚嗚嗚嗚嗚嗚嗚嗚嗚嗚嗚嗚♥♥」
+;TranslatedMark 「んぅううううううううんッ♥」
+PRINTFORML 在这时，男人们到了极限
+;TranslatedMark そうこうしているうちに、男達が限界を迎える
+PRINTFORML 伴随噗咕噗咕的声音，就像热浆注入子宫一样的感觉，%ANAME(対象)%迎来了高潮
+;TranslatedMark びゅくびゅくと、熱い泥が子宮内に注がれる感覚で、%ANAME(対象)%はアクメを迎える
+PRINTFORMW 如此舒服的絶頂，是很少能体会到的
+;TranslatedMark こんなにも気持ちいい絶頂は、滅多に味わえなかった
+CALL FUCK_GANGBANG(対象, GET_SPERM_ID("流浪漢"), "流浪漢的肉棒", "流浪漢")
+CALL FUCK_GANGBANG(輝夜, GET_SPERM_ID("流浪漢"), "流浪漢的肉棒", "流浪漢")
+PRINTFORML 「哈啊、哇……哈啊、哈啊」
+;TranslatedMark 「はぁッ、あは……あはぁ、はぁ」
+PRINTFORMW 「嗯……♥啊，啊，哈啊……」
+;TranslatedMark 「んっ……♥　あんッ、あぁ、はぁ……」
+PRINTFORML 陰莖被從肉洞裏拔出來
+;TranslatedMark 肉穴からペニスを引き抜かれる
+PRINTFORML 两个人的%STR_BODY("膣：処女確認：時間経過",対象)%中，白色的东西满满地溢出来……
+;TranslatedMark 二人の%STR_BODY("膣：処女確認：時間経過",対象)%から、白いものがどろりと溢れる……
+PRINTFORMW 男人们对住满了自己种子的便女吐着唾沫……
+;TranslatedMark 自分たちがたっぷりと種をつけた便女に、男達は唾を吐きかける……
+PRINTFORMW 「嘿嘿，做爱的时候才发现，你是个同性恋吧？」
+;TranslatedMark 「へへ、セックスの最中もレズりあいやがってよぉ」
+PRINTFORMW 「那么喜欢对方的话，就试着在这里磨镜吧」
+;TranslatedMark 「そんなに相手が好きならホレ、ここで貝合わせしてみろや」
+PRINTFORML 毫无道理的命令
+;TranslatedMark 従う義理のない命令だ
+PRINTFORML ……但是，对于%ANAME(対象)%来说，这是一个很不错的提议
+;TranslatedMark ……が、%ANAME(対象)%にとってはこれ以上なく素敵な提案に思えた
+PRINTFORML 这对于%ANAME(輝夜)%来说也是一样的，两人互相碰触发情的%STR_BODY("身体",対象)%，將腿纏在一起。
+;TranslatedMark それは%ANAME(輝夜)%にとっても同じだったようで、二人は発情した%STR_BODY("身体",対象)%を触れあわせ、脚を絡ませ合う
+PRINTFORMW 一边用腿夹着彼此的大腿，一边开始互相摩擦%STR_BODY("陰唇",対象)%和%STR_BODY("クリ：欲情",対象)%……
+;TranslatedMark お互いの股間を脚で挟むようにしながら、%STR_BODY("陰唇",対象)%や%STR_BODY("クリ：欲情",対象)%同士を擦り合わせはじめる……
+PRINTFORML 「啊嗯、嗯♥啊，啊，啊♥啊啊♥」
+;TranslatedMark 「あんッ、あんッ♥　あ、あ、あぁッ♥　あぁ♥」
+PRINTFORML 「啊哈哈♥嗯，啊，啊啊啊♥」
+;TranslatedMark 「あはぁッ♥　んっ、あぁ、あっあっあっあっ♥」
+PRINTFORMW 「嘿嘿，真是让人把持不住的下酒菜啊」
+;TranslatedMark 「へへ、たまんねぇオカズだな」
+PRINTFORML 将滴着白浊的湿漉漉的肉穴摩擦在一起，互相贪图快乐地摩擦着
+;TranslatedMark ぬちゃぬちゃと、白濁を滴らせる肉穴を擦り合わせて、快楽を貪り会う
+PRINTFORMW 哪怕是周圍的男人們在街上路过, 都回头用两位美女的痴态，对男根上下撸动
+;TranslatedMark 周囲の男達は、道を歩けば誰もが振り返る美女二人の痴態を肴に、男根を扱き上げている
+PRINTFORML 「等一下，就算不用做那样的事我们也会帮你做的……哇呣呜♥嗯呜，啾噜噜♥」
+;TranslatedMark 「ちょっと、そんなことしないでも私たちがしてあげるのに……はむぅ♥　んっ、ぢゅるるぅッ♥」
+PRINTFORMW 「啊呣、呜♥　嘞咯嘞咯、啾、嘞咯、啾呜呜♥　啾、呣呜、呣呜呜♥」
+;TranslatedMark 「あむっ、ん♥　れろれろっ、んちゅッ、れろッ、ぢゅぅうッ♥　んちゅッ、んぅう、んぅうう♥」
+PRINTFORML 知道自己该干什么后，%ANAME(輝夜)%立刻开始吮吸起他们的阳具，用双手开始套弄起来
+;TranslatedMark 何のために自分たちがいるのかと、%ANAME(輝夜)%は早速、彼らのモノをしゃぶり、両手で扱き始める
+PRINTFORMW %ANAME(対象)%虽然慢了点，但也模仿着，要用自己的小穴来努力侍奉
+;TranslatedMark %ANAME(対象)%も出遅れながらもそれに倣い、自らの穴でもって尽くしていく
+PRINTFORML 「嗯呜、呋♥嗯呜、咕、呣呜呜♥咕呣、呜呜呜呜呜♥」
+;TranslatedMark 「ンッ、ふ♥　んっ、くっ、んぅうゥ♥　くふ、んんんんんんんっ♥」
+PRINTFORMW 「咕呜♥咕咚、咕咚……♥呣嗯，呜呜呜呜呜♥」
+;TranslatedMark 「んく♥　こくっ、こくっこくっ……♥　ンッ、んぅうううううッ♥」
+PRINTFORML 溅在头发上，脸上，射在喉咙里的精液变得混乱不堪。
+;TranslatedMark 髪に、顔にぶちまけられ、喉に出されたスペルマが絡みついていく
+PRINTFORMW 虽然满身污泥，却在百合行为中达到了快感的顶点
+;TranslatedMark 汚泥にまみれながら、レズの快感の頂点に至る
+PRINTFORML 「嘿嘿，能和大叔一起玩真是太好了吧？啊？」
+;TranslatedMark 「へへッ、オトモダチとイけてよかったなぁ？　ええ？」
+PRINTFORML 「还有大鸡鸡哦，尽情享受到天亮吧」
+;TranslatedMark 「まだまだチンポはあるからよぉ、夜が明けるまで楽しんでいってくれや」
+PRINTFORMW 「啊……啊哈……♥」
+;TranslatedMark 「あ、……あはぁッ……♥」
+PRINTFORML 男人的话并不假，勃起的男根还有几十条
+;TranslatedMark 男達の言葉に偽りはなく、勃起した男根はまだまだ何十本とあった
+PRINTFORMW 之后要被这里的全体男人都使用……面对这毁灭性的想象，%ANAME(対象)%发出了甜蜜的吐息……
+;TranslatedMark これから全員に、使い潰してもらうのだ……破滅的な想像に、%ANAME(対象)%が漏らしたのは甘い吐息だった……
+PRINTFORMW ・
+PRINTFORMW ・
+PRINTFORMW ・
+FOR LOCAL, 0, 5
+	CALL FUCK_GANGBANG(対象, GET_SPERM_ID("流浪漢"), @"流浪漢的\@ RAND:2 ? 肉棒 # 唇\@", @"流浪漢")
+	CALL FUCK(対象, "百合", "")
+NEXT
+FOR LOCAL, 0, 5
+	CALL FUCK_GANGBANG(輝夜, GET_SPERM_ID("流浪漢"), @"流浪漢的\@ RAND:2 ? 肉棒 # 唇\@", @"流浪漢")
+	CALL FUCK(輝夜, "百合", "")
+
+NEXT
+CALL SET_PIERCE_RANKED(対象, 1, ピアス_乳首, ピアス_ラビア, ピアス_ペニス, ピアス_クリトリス,ピアス_へそ, ピアス_耳, ピアス_舌, ピアス_鼻)
+CALL SET_PIERCE_RANKED(輝夜, 1, ピアス_乳首, ピアス_ラビア, ピアス_ペニス, ピアス_クリトリス,ピアス_へそ, ピアス_耳, ピアス_舌, ピアス_鼻)
+CALL SET_TATTOO_RANKED(輝夜, "便女1号", 1, タトゥー_頬, タトゥー_秘部, タトゥー_尻, タトゥー_額, タトゥー_肩, タトゥー_胸, タトゥー_背, タトゥー_腹, タトゥー_腿, タトゥー_足首)
+CALL SET_TATTOO_RANKED(対象, "便女2号", 1, タトゥー_頬, タトゥー_秘部, タトゥー_尻, タトゥー_額, タトゥー_肩, タトゥー_胸, タトゥー_背, タトゥー_腹, タトゥー_腿, タトゥー_足首)
+PRINTFORMW ・
+PRINTFORMW ・
+PRINTFORMW ・
+
+PRINTFORML 最后，直到天黑后，她们才被释放。
+;TranslatedMark 結局、二人が解放されたのは夜も白んでからだった
+PRINTFORML 不过，说释放多少有些不妥
+;TranslatedMark もっとも、解放というのは若干語弊がある
+PRINTFORML 因为小穴已经松松垮垮的了，再加上勞累過度，像条金枪鱼一样一动不动，所以就被扔进了小巷里。
+;TranslatedMark 穴が緩んだし疲れすぎてマグロになってきたから、という理由で、路地裏に放り捨てられたのだ
+PRINTFORML 全身白浊，嘴里和两个洞里，黏糊糊的精液溢出来的样子，任谁看都知道是受到了足以造成精神创伤的轮奸
+;TranslatedMark 全身白濁にまみれ、口や両穴からどろどろとスペルマをこぼす姿は、誰が見てもトラウマものの輪姦をされたのだと分かるものだ
+PRINTFORMW ……但是，那空洞的眼睛里却浮现出了心形的图案
+;TranslatedMark ……が、虚ろな瞳にはハートマークが浮かんでいた
+PRINTFORML 「……怎么样，%ANAME(対象)%？」
+;TranslatedMark 「……どうだった、%ANAME(対象)%？」
+PRINTFORMW 「……啊哈……♥」
+;TranslatedMark 「……あはぁ……ッ♥」
+PRINTFORML %ANAME(輝夜)%突然问道
+;TranslatedMark %ANAME(輝夜)%がぽつりと問い掛ける
+PRINTFORMW %ANAME(対象)%没有回答，但从漏出的吐息中可以看出她的想法
+;TranslatedMark %ANAME(対象)%は答えを返さなかったが、どう思っているかは漏れた溜息から明らかだった
+PRINTFORMW 「呵呵，收到了很不错的"礼物"吧……再去，那里吧？」
+;TranslatedMark 「ふふ、素敵な"お土産"ももらっちゃったし……またあそこ、イきましょうね？」
+PRINTFORML 不过，%ANAME(対象)%没有回答
+;TranslatedMark やはり、%ANAME(対象)%は返事をしなかった
+PRINTFORML 反而凝视着沾满了精液，散发着恶臭的%ANAME(輝夜)%，让其跨坐在自己的身上
+;TranslatedMark スペルマにまみれ汚臭を放つ%ANAME(輝夜)%を見つめ、その身体に覆い被さる
+PRINTFORMW 一边摩擦着秘部，一边用舌头舔舐着肌肤……
+;TranslatedMark 秘部を擦り合わせながら、肌に舌を這わせていく……
+PRINTFORML 「啊……♥%ANAME(対象)%，已经坏掉了吗？」
+;TranslatedMark 「あん……♥　%ANAME(対象)%ったら、壊れちゃったの？」
+PRINTFORML 「衣服也被拿走了，现在这个样子……大家都快到了起床的时间了，不早点回去的话，会被发现的哦？」
+;TranslatedMark 「服も取られちゃって、こんな格好で……みんな起きてくる時間だから、早く帰らないと、見つかっちゃうわ？」
+PRINTFORML 「这样下去的话，一定会有人说这里有一个裸体、浑身精液的变态便女，然后引起骚动……男人聚在一起，说不定又要被轮奸了……？"」
+;TranslatedMark 「そしたら、きっと、ここに裸で精液まみれの変態便女がいるぞって騒がれて……男の人が集まってきて、また輪姦されちゃうかもね……？」
+PRINTFORMW 「啊哈哈……♥啊、啊、啊……♥」
+;TranslatedMark 「あはッ……♥　あッ、あッ、ああ……ッ♥」
+PRINTFORML 如果被谁发现的话，一切都完了
+;TranslatedMark 誰かに見つかれば、何もかも終わってしまう
+PRINTFORMW 两个人就像无所谓一样，继续沉迷于同性爱恋之中……
+;TranslatedMark そんなことはどうでもいいとばかりに、二人は同性愛にふけり続けた……
+
+KDVAR:対象:妹紅_永遠の便女と蓬莱の便女 = 1
+
+IF !GETBIT(TALENT:対象:淫乱系, 素質_淫乱_精液便女)
+	CALL COLOR_PRINTL(@"%ANAME(対象)%が公衆便女になった", カラー_注意)
+	SETBIT TALENT:対象:淫乱系, 素質_淫乱_精液便女
+	CALL TALENT_LOSE_PRIDE(対象)
+ENDIF
+
+RETURN 1
+

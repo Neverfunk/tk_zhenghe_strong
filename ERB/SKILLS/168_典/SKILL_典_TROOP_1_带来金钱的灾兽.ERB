@@ -1,0 +1,86 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_168_TROOP_1_EXIST
+RETURN 1
+
+@SKILL_168_TROOP_1_NAME
+RESULTS = 带来金钱的灾兽
+
+;レベルは1-5まで
+@SKILL_168_TROOP_1_LEVEL
+RETURN 3
+
+;対象選択
+@SKILL_168_TROOP_1_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1
+
+;発動判定
+@SKILL_168_TROOP_1_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1
+
+;発動テキストをオーバライドしたいときに。
+;「誰それのスキル発動！　○○した！」の「○○した！」の部分を実装したい場合は、
+;これじゃなくてINVOKEで書けばいいです。
+;@SKILL_168_TROOP_1_INVOKE_TEXT(発動者, スキル, ジャンル)
+;#DIM 発動者
+;#DIM スキル
+;#DIMS ジャンル
+
+;効果をここに記述
+@SKILL_168_TROOP_1_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+LOCAL = RAND(2000, 4500)
+PRINTFORML %ANAME(発動者)%凭借口才与诡计赚取了钱财！
+PRINTFORML 国库资金增加了{LOCAL}！
+MONEY:(CFLAG:(発動者):所属) += LOCAL
+BATTLE_RATE_ATC:対象側 += 5
+PRINTFORML 我方部队受到的伤害增加了！
+
+@SKILL_168_TROOP_1_EXPLANATION
+RESULTS = 在战斗过程中获得国库资金，使我方部队受到的伤害增加
+
+@SKILL_168_TROOP_1_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 500

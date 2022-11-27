@@ -1,0 +1,297 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_ARBEIT_RATE()
+RETURN (DVAR:アルバイト_発生フラグ > 0 ? 500 # 50)
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_ARBEIT_DECISION()
+SIF !IS_FEMALE(MASTER)
+	RETURN 0
+SIF CFLAG:MASTER:捕虜先 != 0
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_ARBEIT_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_ARBEIT
+
+IF DVAR:アルバイト_発生フラグ == 0
+	PRINTFORML 有一天，被邀请去一家酒馆里打工。
+	IF CFLAG:MASTER:所属 == 0
+		PRINTFORML 正好%ANAME(MASTER)%也没有什么自由收入
+		PRINTFORMW 这么简单的工作正好可以赚点钱
+	ELSE
+		PRINTFORML 貌似不知道%ANAME(MASTER)%是这个国家的军官
+		PRINTFORMW 正好当副业赚点钱也不错
+	ENDIF
+	PRINTFORML 怎麼辦？
+	CALL ASK_YN("试着做一下", "还是拒绝吧")
+	IF RESULT == 1
+		PRINTFORMW 因为在意店里奇怪的气氛而拒绝了工作
+		RETURN
+	ELSEIF RESULT == 0
+		PRINTFORML 试着在这工作了
+		PRINTFORML 在契约书上签了字，就被带到店的里面了
+		PRINTFORML 商店里面有一个延伸到地下的楼梯
+		PRINTFORMW 跟着可疑的店长走出楼梯到了一个酒馆
+		PRINTFORML 昏暗的店内响着吵闹的音乐
+		PRINTFORML 舞台上聚光灯照射着的舞者穿着猥亵暴露的服装跳着舞
+		PRINTFORMW 服务员们也和普通的酒馆不同，穿着妓女的服装接待客人
+		PRINTFORML 出乎预料的景象让%ANAME(MASTER)%说不出话来，带到店的后台被交付了制服
+		PRINTFORML 抗议刚才的契约，提出了不知道要在这种地方工作
+		PRINTFORMW 店长用和之前截然不同的态度威胁说不照做就是打破契约
+		PRINTFORML 怎麼辦？
+		CALL ASK_YN("勉强把衣服换上", "逃走")
+		IF RESULT == 0
+			PRINTFORML 想要就这样跑掉，却因为契约威胁没有办法
+			PRINTFORML %ANAME(MASTER)%只能硬着头皮换上了衣服
+			PRINTFORMW 衣服是和其他店员一样猥亵暴露的服装
+		ELSEIF RESULT == 1
+			PRINTFORMW %ANAME(MASTER)%逃出来了！
+			PRINTFORML 
+			IF ABL:MASTER:防衛 / 10 + RAND:5 > RAND:10
+				PRINTFORMW …总算逃出来了
+				RETURN
+			ELSE
+				PRINTFORML 可是没能逃掉就被抓住了
+				PRINTFORML 被愤怒的男人打了一拳，只有照做乖乖换衣服。
+				PRINTFORMW 衣服是和其他店员一样猥亵暴露的服装
+			ENDIF
+		ENDIF
+		PRINTFORML 害羞的脸颊通红
+		PRINTFORML 他用恶心的视线看着身体下流地笑着
+		PRINTFORMW 然后告诉她需要先进行培训，强行把%ANAME(MASTER)%带进了店长办公室。
+		PRINTFORML 
+		PRINTFORML 暴露的的衣服凌乱的挂在身上，%ANAME(MASTER)%跨在店长身上晃动着腰
+		PRINTFORML %ANAME(MASTER)%被灌下了强力的媚药、完全沉浸进去的样子激烈的娇喘着
+		PRINTFORML 肉棒在小穴里的每一次摩擦都会让大脑产生强烈的快乐，身体反射性的产生痉挛
+		IF TALENT:MASTER:処女 == 1
+			PRINTFORMW 直到刚才为止还是处女的%ANAME(MASTER)%因为无比的快乐已经感觉非常的满足
+		ELSE
+			PRINTFORMW 在压倒性的快乐波涛中，%ANAME(MASTER)%忘记了反抗，忘记了反抗，浑身是汗疯狂的扭动着腰
+		ENDIF
+		PRINTFORML 巧妙的抱着腰向弱点不停的冲刺，%ANAME(MASTER)%止不住地仰着身子就绝顶了
+		PRINTFORML 男人看到了绝顶的%ANAME(MASTER)%如果再这样下去的话就不能接待客人了。
+		PRINTFORML 在绝顶的状态下用颤抖的声音道歉的%ANAME(MASTER)%的表情，已经成为一只失去理性的母狗了
+		PRINTFORMW 在一晚上都接受了店长的教育，到了身体的深处已经牢牢记住了雄性的感觉了
+		CALL FUCK(MASTER, "欲望, 性交, 精愛, 性技, 性技, 奉仕, Ｖ, Ｂ, Ｍ, Ｃ, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精, CFLAG減少", GET_SPERM_ID("流氓"), @"店長の\@RAND:2 ? 肉棒 # 唇\@", @"店長", "", "敗北した末の強姦")
+		PRINTFORMW 
+		PRINTFORML 培训结束后的%ANAME(MASTER)%被释放了
+		PRINTFORML 但是被拍到了一张被强奸的照片
+		PRINTFORMW 被威胁到如果不想被传播出去，今后就要来这上班…
+		DVAR:アルバイト_発生フラグ = 1
+	ENDIF
+ELSE
+	PRINTFORML %ANAME(MASTER)%去打工了…
+	PRINTFORMW 店长看到了%ANAME(MASTER)%，脸上浮现出卑劣的笑容，手在腰上抚摸了起来
+	IF DVAR:アルバイト_発生フラグ >= 5
+		PRINTFORML 「应该习惯了，差不多该成为员工了吧？」他低声说道
+		PRINTFORML 听到这句话，子宫会不由自主地发热，身上开始颤抖
+		PRINTFORML 但是，%ANAME(MASTER)%忍不住说不出拒绝的话
+		PRINTFORMW 他一边抱着%ANAME(MASTER)%一边要求她开始工作
+	ELSEIF DVAR:アルバイト_発生フラグ >= 3
+		PRINTFORML 「很受上次的接待客人欢迎，很适合接待客人不是吗？」他低声说道
+		PRINTFORML 那句话让她想起了上次的事情，因为害羞不禁低下了头
+		PRINTFORML 可是%ANAME(MASTER)%只是为了照片而嘟囔着拒绝的话而摇头
+		PRINTFORMW 他笑了笑就命令%ANAME(MASTER)%就这样开始工作
+	ELSE
+		PRINTFORML 「真是一副好身体，让客人抱着真是可惜啊」他低声说道
+		PRINTFORML 听着这句话%ANAME(MASTER)%突然想起来了照片的事情
+		PRINTFORML %ANAME(MASTER)%的样子被他看在眼里，他笑了笑继续抚摸着她的身体
+		PRINTFORMW 过了一会儿，在受到性骚扰后，他命令%ANAME(MASTER)%就这样开始工作
+	ENDIF
+	PRINTFORML 
+	SELECTCASE RAND:16
+		CASE 0
+			PRINTFORMW %ANAME(MASTER)%被强迫穿着兔女郎的服装来接待客人
+			PRINTFORML 客人以一种下流的眼神注视着%ANAME(MASTER)%的胸部和屁股
+			PRINTFORML 那个视线和酒场的气氛所影响，%ANAME(MASTER)%的身体渐渐感觉火热了起来
+			PRINTFORMW 一边吐着热气一边做着工作的事，被醉的很厉害的的客人纠缠住了
+			PRINTFORML 即使是向其他的店员寻求帮助，却装作不看的样子，一直被死死地纠缠着
+			PRINTFORML 他一边抓着勃起肉棒，一边呼着酒气来邀请她
+			PRINTFORMW 虽然想办法逃跑，但也没能实现，最后被半推半就的带进了厕所
+			PRINTFORML 不久，从单间里就有%ANAME(MASTER)%的娇喘声传了出来
+			PRINTFORMW 党顾客满意的时候，%ANAME(MASTER)%身上已经被黏糊糊的白浊液覆盖了
+		CASE 1
+			PRINTFORMW 在聚光灯的照射下%ANAME(MASTER)%跳着钢管舞
+			PRINTFORML %ANAME(MASTER)%穿着暴露的衣服红着脸生硬的跳着
+			PRINTFORML 那个带著一点青涩的感觉反而让客人的兴奋，叫骂声和欢呼声纷飞
+			PRINTFORMW 空气中%ANAME(MASTER)%无意识地轻盈地摆着腰
+			PRINTFORML 客人的要求越来越刺激，不久就有了脱衣的呼声
+			PRINTFORML  已经完全成为职业舞者的%ANAME(MASTER)%微笑着回应那个呼叫
+			PRINTFORMW 一边扭动身体一边脱衣的%ANAME(MASTER)%的姿态让场会的气氛越来越热烈
+			PRINTFORML %ANAME(MASTER)%全裸的时候气氛达到了顶点，客人跳到了舞台上
+			PRINTFORML 然后捉住了疲惫不堪的%ANAME(MASTER)%就这样变成到了公开的强奸
+			PRINTFORMW 一直到打烊为止不断兴奋的男人们让她被白浊液黏糊糊的覆盖了
+		CASE 2
+			PRINTFORMW %ANAME(MASTER)%被强迫穿着夜总会暴露的衣服来接待客人
+			PRINTFORML 穿着极度暴露的衣服，被一种令人讨厌的眼神盯着
+			PRINTFORML %ANAME(MASTER)%在注意到其视线的同时，不得不带着笑容接待客人。
+
+
+			PRINTFORMW 有个肥胖的中年男性很中意%ANAME(MASTER)%的样子不依不饶地纠缠着她
+			PRINTFORML 即使想办法逃跑，也被他抓住肩膀，被他带着酒臭气喘吁吁地纠缠着
+			PRINTFORML 肌肤接触逐渐变得过激起来，手指伸到了敏感的地方
+			PRINTFORMW 想向店员求救，却被视而不见
+			PRINTFORML 然后被强行亲上了嘴唇，就这样被推倒在座位上了
+			PRINTFORMW 在阴暗的酒馆角落里，%ANAME(MASTER)%一直被他侵犯直到他满足了性欲。
+		CASE 3
+			PRINTFORMW %ANAME(MASTER)%在人声嘈杂的酒馆里做服务员
+			PRINTFORML 店里来了很多流氓大吵大闹。%ANAME(MASTER)%也被迫接待这些客人
+			PRINTFORML 一个被流氓纠缠的客人反抗了起来把他赶开了
+			PRINTFORMW 于是流氓拿着啤酒就向%ANAME(MASTER)%走了过来
+			PRINTFORML 想谢罪逃脱但是他的朋友聚集起来逃不掉了。
+			PRINTFORML 他们异口同声的向%ANAME(MASTER)%提出请求来证明诚意%ANAME(MASTER)%就点头了
+			PRINTFORMW %ANAME(MASTER)%被带着卑鄙的笑容的流氓们被带到了店的后面
+			PRINTFORMW 天亮时的小巷里只留下了被凌辱的衣服破破烂烂的%ANAME(MASTER)%躺着
+		CASE 4
+			PRINTFORMW %ANAME(MASTER)%被强迫当作服务员
+			PRINTFORML 穿着暴露的衣服，刚刚开始接客，就不留情地被性骚扰了
+			PRINTFORML 在昏暗的店内到处都进行着令人讨厌的服务
+			PRINTFORMW %ANAME(MASTER)%被一名客人要求也开始了服务
+			PRINTFORML 他醉得很厉害，一坐在%ANAME(MASTER)%旁边就开始抚摸坐在身边的她
+			PRINTFORML 想办法跑掉，但是客人的建议没办法拒绝，被强迫喝了一瓶酒，一下子就烂醉如泥
+			PRINTFORMW 不省人事了的%ANAME(MASTER)%潮红着脸接受着客人的性骚扰，也无法抵抗不停发出喘息。
+			PRINTFORML 他指着%ANAME(MASTER)%的样子向服务员说了句话，就就被带进了店里面准备的单间
+			PRINTFORMW %ANAME(MASTER)%在朦胧的意识中彻夜被他继续调教着。
+		CASE 5
+			PRINTFORMW 在轻快的音乐响的酒馆里，%ANAME(MASTER)%在跳着舞
+			PRINTFORML 穿着性感的舞女服，跳着华丽的舞姿，让客人的目光都吸引在她身上
+			PRINTFORML 看着汗珠遍布而发光的肌肤和高耸的乳房晃动的时候，男人们发出了咽下口水的声音
+			PRINTFORML %ANAME(MASTER)%来到附近，客人在抚摸身体的时候会把小费夹在衣服的缝隙里
+			PRINTFORMW 尽管是不习惯跳舞，但%ANAME(MASTER)%被不可思议的骄傲感包围着，热心地跳着舞
+			PRINTFORML 跳舞的样子被一个客人盯上，在跳完舞后被邀请过去了
+			PRINTFORML 已经身体发热的%ANAME(MASTER)%在他的劝说下不禁胸部和子宫发热颔首同意了
+			PRINTFORMW %ANAME(MASTER)%像他的恋人一样贴近着，一边朝着VIP房间走去
+			PRINTFORMW 于是%ANAME(MASTER)%一晚上作为他专用的舞女华丽地跳着舞
+		CASE 6
+			PRINTFORMW %ANAME(MASTER)%被安排来伺候客人
+			PRINTFORML 今天的服装更加刺激，只是稍微动一下就能看到内衣和下面的样子
+			PRINTFORML 被猥亵的视线所注视着，勉强工作了的%ANAME(MASTER)%被一位客人要求斟酒了
+			PRINTFORMW 看看周围也没有其他可以腾出手帮忙的人，没办法，只好坐在他旁边招呼客人
+			PRINTFORML 与其他客人不同没有性骚扰也没有过激的要求%ANAME(MASTER)%有点对他松了口气
+			PRINTFORML 但是，在酒中混入了媚药，%ANAME(MASTER)%渐渐地呼吸急促了起来
+			PRINTFORMW 不知道理由，子宫也开始不停的发热，%ANAME(MASTER)%脸上的表情也开始僵硬起来。
+			PRINTFORML 酒也让%ANAME(MASTER)%的理性开始恍惚起来，对他带走的要求没有细细思考就同意了
+			PRINTFORMW %ANAME(MASTER)%被带进酒店，用一个健壮的肉棒蹂躏了一夜
+		CASE 7
+			PRINTFORMW %ANAME(MASTER)%今天作为钢管舞舞者工作
+			PRINTFORML 因羞耻而与其他孩子相比明显动作迟钝的%ANAME(MASTER)%，猥亵的嘲笑声充斥着场地
+			PRINTFORML %ANAME(MASTER)%一边流泪一边拼命地向继续着动作，拼命地晃动着腰
+			PRINTFORMW 那个表情好像受到了客人的欢迎，倒彩也变得更加大声了，来煽动%ANAME(MASTER)%
+			PRINTFORML 当注意到的时候，%ANAME(MASTER)%一边朝着客人胯下，一边把身体转动起来
+			PRINTFORML 那个胸口和吊带皮带夹了大量的小费
+			PRINTFORMW 被要求的事让%ANAME(MASTER)%不知不觉地感受到了作为雌性的快感。
+			PRINTFORML 即使结束跳舞，身体的欲望也无法平息的%ANAME(MASTER)%当然也无法拒绝客人的邀请
+			PRINTFORMW %ANAME(MASTER)%在店里的后面被几个男人按住，带着雌兽的表情绝顶了好几次
+		CASE 8
+			PRINTFORMW %ANAME(MASTER)%一副兔女郎的模样来接客
+			PRINTFORML 在服务中，客人不断地对%ANAME(MASTER)%进行性骚扰
+			PRINTFORML 揉着胸部和屁股，抚摸大腿，故意把啤酒洒在乳沟里
+			PRINTFORMW 性骚扰不断加重下去逐渐%ANAME(MASTER)%呼吸也渐渐急促了起来脸颊染红着
+			PRINTFORML 为了擦掉客人洒了的酒，钻进桌子下面，竟然发现了肉棒
+			PRINTFORML 喝醉了的客人说，这个也要收拾了，就把它推到了%ANAME(MASTER)%的面前
+			PRINTFORMW %ANAME(MASTER)%对反复的爱抚和店内的气氛以及靠近的雄性的气味无法抗拒
+			PRINTFORML 发觉%ANAME(MASTER)%吮吸着肉棒发出扑哧扑哧猥亵的口水声
+			PRINTFORML 而且%ANAME(MASTER)%的眼睛里浮现了♥，一边吮吸着肉棒，一边责弄着自己的秘穴。
+			PRINTFORMW 被服务很好的客人邀请了%ANAME(MASTER)%她带着欲求不满的表情就一起去宾馆。
+		CASE 9
+			PRINTFORMW %ANAME(MASTER)%在战场般的酒馆里服务着一大批客人
+			PRINTFORML 客人中冒出一群流氓来围住了%ANAME(MASTER)%
+			PRINTFORML %ANAME(MASTER)%一边用笑容面对着那些流氓，一边拼命地工作着
+			PRINTFORMW 但是，被一个小混混缠住，强行挂上了赌注
+			PRINTFORML 被周围的客人要求的打赌%ANAME(MASTER)%也想早点结束于是就答应了
+			PRINTFORML 但是，在他的胜利的结果下%ANAME(MASTER)%也被索取了赌注的代价
+			PRINTFORMW 拒绝了交付赌注，马上就输给了周围人的压力，只好无奈答应了他的要求
+			PRINTFORML %ANAME(MASTER)%被他舔了一下脸颊，作为战利品带走了
+			PRINTFORMW 他的身体充满力量，性交了一整夜被抱着的她完全作为雌兽被教育了
+		CASE 10
+			PRINTFORMW %ANAME(MASTER)%因为忙碌的接待客人而气喘吁吁
+			PRINTFORML 吊带带上夹着好几个开关，线的前端连接到了短裙的里面
+			PRINTFORML %ANAME(MASTER)%的秘所里有多个跳蛋，偶尔会有客人摆开开关享受一下她的反应
+			PRINTFORMW 在%ANAME(MASTER)%忍不住发出的闷声中，他们发出低劣的笑，增强了跳蛋的震动
+			PRINTFORML 偶尔忍不住就逃到店后面，这次受到了店长的性骚扰
+			PRINTFORMW 他一边抱怨着%ANAME(MASTER)%的工作态度，一边执拗地抚摸着屁股和大腿
+			PRINTFORML %ANAME(MASTER)%在手指伸到敏感地方的时候忍不住按住裙子
+			PRINTFORML %ANAME(MASTER)%因为反抗的态度，被带到了店长室里进行再教育
+			PRINTFORMW %ANAME(MASTER)%一晚上就被精力充沛的店长的肉棒充分的教育着
+		CASE 11
+			PRINTFORMW %ANAME(MASTER)%被派到单间服务一个中年男子
+			PRINTFORML 他用下流的眼神望着%ANAME(MASTER)%的身体来回抚摩
+			PRINTFORML 忍受着他粗鲁的行为，%ANAME(MASTER)%压下了不悦的表情还是用笑脸相迎
+			PRINTFORMW 迎合追捧着他的粗话，让他渐渐兴致勃勃了起来
+			PRINTFORML 当她觉得不妙的时候，他的手指已经钻进了%ANAME(MASTER)%的衣服里
+			PRINTFORML 想要发出悲鸣的声音，硬是被强行用嘴堵住嘴唇，就这样一直被爱抚着
+			PRINTFORMW 明明应该不快的事情，他却巧妙的用手指刺激着%ANAME(MASTER)%不由得吐露出了甜蜜的气息
+			PRINTFORML 那种反应让他更加中意%ANAME(MASTER)%迎着急促的呼吸把她按着推倒了
+			PRINTFORMW 他的性欲就像没完没了地侵犯着让她几次达到了绝顶
+		CASE 12
+			PRINTFORMW 今天举行了大乱交派对
+			PRINTFORML 客人和店员都穿着暴露的服装，男女互相吸引着
+			PRINTFORML 在他们不受控制的交换中，%ANAME(MASTER)%也不知不觉地被包围了。
+			PRINTFORMW 然后终于开始乱交了，%ANAME(MASTER)%被一个客人邀请去了
+			PRINTFORML %ANAME(MASTER)%想拒绝，但被好几个男人挤在一起按在了地上
+			PRINTFORML 在全身被责弄的同时，被喝了酒的%ANAME(MASTER)%不久就开始失去意识
+			PRINTFORML %ANAME(MASTER)%的极上的肉体大受好评，接连吸引男人们聚集了无数的肉棒过来
+			PRINTFORMW 每次被内射的时候，在大腿上写着正字，在她被放开的时候已经数不清了
+		CASE 13
+			PRINTFORMW 被酩酊大醉的客人大骂着
+			PRINTFORML 他一边抱着%ANAME(MASTER)%下面的手也在不停的乱摸着
+			PRINTFORML %ANAME(MASTER)%虽然感到厌恶，但还是用职业微笑来应对
+			PRINTFORML 他兴高采烈地要求石头剪刀布
+			PRINTFORMW 输了的人就要开心的把对方的衣服脱掉し%ANAME(MASTER)%因为羞耻而涨红了脸
+			PRINTFORML 同时不允许用手臂遮住身体，把裸体暴露在人群里
+			PRINTFORML 游戏到%ANAME(MASTER)%成为全裸为止强制地被进行着
+			PRINTFORML 他称为惩罚游戏，在其他客人面前开始了%ANAME(MASTER)%的强奸秀
+			PRINTFORML 全裸着没有办法逃走，被他粗壮的肉棒激烈地被侵犯达到了好几次绝顶
+			PRINTFORMW 他非常喜欢%ANAME(MASTER)%，说着下次也要再关照就回去了
+		CASE 14
+			PRINTFORMW 工作中，被其他的店员叫到了后院
+			PRINTFORML 正以为是什么事，他就拿出了%ANAME(MASTER)%换衣服的照片
+			PRINTFORML 看着因为被偷拍而受到打击%ANAME(MASTER)%，他抿嘴笑了笑
+			PRINTFORMW 用颤抖的声音问到什么是目的的时候，腰就被他揽着低下头悄悄说出了目的
+			PRINTFORML 没有办法逃离这个地方，就被强行带到了单间里
+			PRINTFORML 两具年轻的身体激烈的性交着，好几次被没有避孕措施的大量内射让她不停的绝顶着
+			PRINTFORMW 但是工作中也只要一有空就被叫出来毫不留情的不停被强奸
+			PRINTFORMW 在关店的时候他有悄悄靠在身边强行要取了联系方式
+		CASE 15
+			PRINTFORMW %ANAME(MASTER)%被客人要求在舞台上唱着歌
+			PRINTFORML 舞动着衣服一边唱歌一边跳舞的%ANAME(MASTER)%的身姿吸引着观众的视线
+			PRINTFORML 但是，当时的%ANAME(MASTER)%，因为害羞脸颊通红，连观众的声音都听不进去
+			PRINTFORMW 在上舞台前，在店长那里被内射了大量的种子，在子宫内充满了他的精液
+			PRINTFORML 身体跳动的时候，从秘所就溢出来了精液，%ANAME(MASTER)%拼命地夹紧秘穴
+			PRINTFORML 身体在刚才的做爱中变得异常敏感，子宫不停地在发热，乳头也变得胀大
+			PRINTFORMW 以发情的表情高潮着一边继续歌唱的%ANAME(MASTER)%的姿态让观众更加性奋
+			PRINTFORMW 演唱结束后，作为舞台表演成功的奖励，%ANAME(MASTER)%又被店长侵犯了很多次
+	ENDSELECT
+	CALL FUCK(MASTER, "欲望, 性交, 精愛, 性技, 性技, 奉仕, Ｖ, Ｂ, Ｍ, Ｃ, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精, CFLAG減少", GET_SPERM_ID("流氓"), @"店長の\@RAND:2 ? 肉棒 # 唇\@", @"店長", "", "強姦")
+	PRINTFORML 
+	LOCAL = 2000 + (ABL:MASTER:奉仕 + ABL:MASTER:性技 + ABL:MASTER:性交) * 400
+	MONEY += LOCAL
+	PRINTFORMW 作为报酬收到了金{LOCAL}
+	DVAR:アルバイト_発生フラグ ++
+	IF DVAR:アルバイト_発生フラグ + RAND:10 > 10
+		PRINTFORML 被告知已经完成了契约的要求，被解放了
+		PRINTFORMW %ANAME(MASTER)%带着子宫想要被插入的感觉，盯着店长离开了酒馆
+		DVAR:アルバイト_発生フラグ = 0
+	ELSE
+		PRINTFORMW 又被叫来了…
+	ENDIF
+ENDIF
+
+RETURN 1
+
+@EVENT_DAILY_ARBEIT_ALLOW_WHEN_WANDERING
+RETURN 1
+

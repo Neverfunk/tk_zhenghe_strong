@@ -1,0 +1,67 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_REST_UNDER_A_TREE_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_REST_UNDER_A_TREE_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_REST_UNDER_A_TREE(対象)
+#DIM 対象
+PRINTFORML 在森林中散步的時候、恰好発現了一片完美的樹陰
+PRINTFORML 在那裡睡一覚的話会很舒服吧
+PRINTFORMW 怎麼辦？
+PRINTL
+CALL ASK_YN("躺下", "離去")
+IF RESULT == 1
+	PRINTFORML 現在正在趕時間
+	PRINTFORMW %ANAME(対象)%直接離開了這裡
+	RETURN 1
+ENDIF
+
+PRINTFORML 難得遇見那就休息一下吧
+PRINTFORMW %ANAME(対象)%躺在了樹陰下
+IF RAND:3 == 0
+	PRINTFORML 躺下後感覚腰辺有硬硬的東西
+	PRINTFORML 埋着什麼東西麼？
+	PRINTFORML 挖出了一座金幣山！
+	PRINTFORML 以前有人埋在這裡的吧
+	PRINTFORMW 周囲沒有其他人的跡象、決定帯走這些錢
+	MONEY += 5000
+	CALL ICPRINT("獲得了<5000>金", "W", カラー_注意)
+ELSE
+	PRINTFORML 躺了下去閉上了眼睛
+	PRINTFORML 吹拂在臉上的風十分舒服
+	PRINTFORMW 睡意漸漸襲来、很快就睡着了
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW ・
+	IF RAND:2 == 0
+		PRINTFORML 在烏鴉的叫声中睜開了眼睛
+		PRINTFORML 看来是完全睡着了、天空已経染上了晚霞
+		PRINTFORML 睡得非常舒服
+		PRINTFORMW %ANAME(対象)%站起来伸了個懶腰、邁着軽快的步伐踏上了帰途
+	ELSE
+		PRINTFORML 在烏鴉的叫声中睜開了眼睛
+		PRINTFORML 看来是完全睡着了、天空已経染上了晚霞
+		PRINTFORML 起身打算回去的%ANAME(対象)%察覚到了違和感
+		PRINTFORMW 錢包沒了！
+		PRINTFORML 好像是沈睡的時候被人偸走了
+		PRINTFORMW 責備着自己過於大意無精打采地踏上了帰途
+		LOCAL = MIN(MONEY, 3000)
+		MONEY -= LOCAL
+		CALL ICPRINT(@"失去了<{LOCAL}>金", "W", カラー_注意)
+	ENDIF
+ENDIF
+RETURN 1
+

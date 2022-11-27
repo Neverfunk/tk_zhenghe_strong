@@ -1,0 +1,87 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_CHALLENGE_DANMAKU_DANGER_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_CHALLENGE_DANMAKU_DANGER_DECISION(対象)
+#DIM 対象
+RETURN IS_FEMALE(対象)
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_CHALLENGE_DANMAKU_DANGER(対象)
+#DIM 対象
+PRINTFORML 走在路上的時候、突然被流浪的妖怪発起了弾幕挑戦
+PRINTFORML 贏了的話就給錢
+PRINTFORML 但是、輸得的話就要讓他肆意责弄身体
+
+PRINTL
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "知略"))
+CALL ASK_YN("接受", "拒絕")
+IF RESULT == 1
+	PRINTFORML 怎麼想都覺得賭注不相稱
+	PRINTFORML 拒絕了
+	RETURN 1
+ENDIF
+
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+IF LIMIT(ABL:対象:武闘 + ABL:対象:知略, 75, 150) > RAND:150
+	PRINTFORML 漂亮的勝利了！
+	PRINTFORML 贏了比試讓自己更加自信了
+	IF CONFIG:203 && IS_FEMALE(対象)
+		PRINTFORML 正在妖怪自我懷疑時、%ANAME(対象)%提出了一個要求
+		PRINTFORMW 妖怪露出屈辱的表情、但作爲手下敗將只能跟著少女走了……
+		PRINTFORML
+		PRINTFORML 在牢房中、妖怪被捆綁在桌子上、%ANAME(対象)%騎在他身上不停搖動著腰
+		PRINTFORML 作為敗北的代價妖怪被%ANAME(対象)%狠狠榨取著精液、露出恍惚的表情吐出舌頭
+		PRINTFORML 女人那粗暴得性愛、讓妖怪此時身心完完全全的被征服了
+		PRINTFORML 休息结束后，她%STR_BODY("身体", 対象)%69式坐在他身上，用嘴吮吸著肉棒、妖怪用炽热的目光看著面前流淌下精液的小穴,请求着下次。
+		;TranslatedMark 休憩を終えた彼がその%STR_BODY("身体", 対象)%を抱き寄せると、%ANAME(対象)%は熱っぽい視線を送って次を索求する
+		PRINTFORMW 而%ANAME(対象)%也回応了他的要求、轉過身把肉棒插入了小穴、激烈的上下活動著
+		CALL FUCK(対象, "欲望, 性交, 奉仕, 性技, Ｖ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_SPERM_ID("戰敗妖怪"), @"戰敗妖怪的\@RAND:2 ? 肉棒 # 嘴唇\@", "戰敗妖怪", "", "逆强姦的榨取")
+		PRINTFORML
+		PRINTFORMW %ANAME(対象)%榨取了妖怪一整晚后、讓他拖着顫抖的身体離開了拠点
+	ENDIF
+	CALL ICPRINT("獲得了賞金<10000>金", "L", カラー_注意)
+	CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:8 + 6, 1)
+	CALL PRINT_ADD_EXP(対象, "知略経験値", RAND:8 + 6, 1)
+	MONEY += 10000
+	RETURN 1
+ENDIF
+
+PRINTFORML 居然輸了
+PRINTFORMW 輸了比試的%ANAME(対象)%、按照約定被妖怪帯回了巣穴……
+PRINTFORML
+
+IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+	PRINTFORML 妖怪粗暴地剥下%ANAME(対象)%的衣服，将她按在地上
+	PRINTFORML 没有进行任何前戏，妖怪直接把自己的性器贴上了%ANAME(対象)%%STR_BODY("陰唇: 処女確認", 対象)%
+	PRINTFORML 起初干燥的摩擦让%ANAME(対象)%痛的叫出了声，但对方像小河一般泛滥的爱液迅速提供了润滑，使%ANAME(対象)%也逐渐感到了快感
+	PRINTFORML 强行夺走%ANAME(対象)%的嘴唇，妖怪灵活的舌头在%ANAME(対象)%的口腔里胡乱地搅拌着，溢出的唾液沿着嘴角滴到了地上
+	PRINTFORML 妖怪唾液中费洛蒙的味道侵蚀着%ANAME(対象)%的理性，令她渐渐配合起了对方的动作
+	PRINTFORMW 就算对方什么也没说，%ANAME(対象)%也会主动上去摩擦起下体，%ANAME(対象)%就这么成为了妖怪的俘虏……
+	CALL FUCK(対象, "欲望, 性交, 奉仕, 性技,Ｃ, Ｖ, Ｍ, Ｂ, 接吻, 口淫, 百合", "接吻喪失",0, @"流浪妖怪的\@RAND:2 ? 阴唇 # 嘴唇\@", "", "", "敗北した末の強姦")
+	PRINTFORML
+	PRINTFORMW 被解放后依然感到恋恋不舍的%ANAME(対象)%，主动留下了内裤
+ELSE
+	PRINTFORML %ANAME(対象)%的跨間流淌出大量的白濁精液、奄奄一息
+	PRINTFORML 作為敗北的代價被妖怪狠狠侵犯了的%ANAME(対象)%、露出恍惚的表情躺在地上
+	PRINTFORML 妖怪那粗暴得性愛、讓%ANAME(対象)%此時身心完完全全的被征服了
+	PRINTFORML 休息结束的他抱住了%STR_BODY("身体", 対象)%、%ANAME(対象)%投出热切的视线索求着下一次
+	PRINTFORMW 而妖怪也回応了她的要求立刻把肉棒插入%ANAME(対象)%的小穴、激烈的抽插着
+	CALL FUCK(対象, "欲望, 性交, 奉仕, 性技, Ｖ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_SPERM_ID("流浪妖怪"), @"流浪妖怪的\@RAND:2 ? 肉棒 # 嘴唇\@", "流浪妖怪", "", "敗北した末の強姦")
+	PRINTFORML
+	PRINTFORMW 被侵犯了一整晚後重獲自由的%ANAME(対象)%、拖着顫抖的身体回到了拠点
+ENDIF
+
+RETURN 1

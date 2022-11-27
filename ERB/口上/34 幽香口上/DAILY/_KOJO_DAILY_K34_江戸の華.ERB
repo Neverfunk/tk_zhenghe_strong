@@ -1,0 +1,161 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K34_COMPETE_RATE(対象)
+#DIM 対象
+RETURN 30
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K34_COMPETE_DECISION(対象)
+#DIM 対象
+
+;マスターにペニスがないと出ない
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+
+;終わらせたら出ない
+SIF KDVAR:対象:幽香_江戸の華
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 0, 0)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K34_COMPETE_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K34_COMPETE(対象)
+#DIM 対象
+#DIM 判定値
+
+PRINTFORMW 「呼、你就是%ANAME(MASTER)%？　長着一副苦悶的臉呢」
+PRINTFORML %ANAME(MASTER)%的據点、受到一位突然出現的女性攻撃
+PRINTFORML 僅僅靠着一人之力、将衛兵相継打倒、最後走到%ANAME(MASTER)%面前
+PRINTFORMW 從她的手就能看出、是一位非常高雅的人……
+PRINTFORMW 「雖然聽説這裏有実力強大的人……看来期望落空了呢」
+PRINTFORM 「我是
+CALL COLOR_PRINT(@"%NAME_FORMAL(対象)%", カラー_注意)
+PRINTFORMW 。嘛、雖然你貌似完全沒有值得我注意的價值」
+PRINTFORML %NAME_FORMAL(対象)%……是幻想郷首屈一指的強者
+PRINTFORMW 但是、突然暴力闖入這辺、到底是有什麼事呢
+PRINTFORMW 「並不是什麼大事。我不容許有任何人比我強大」
+PRINTFORMW 「所以、只要任何人有比我強的可能、我就会将其打倒」
+PRINTFORMW 「……嘛、你這傢伙這種程度就不需要擔心了」
+PRINTFORML ……換句話説、在做武者修行嗎
+PRINTFORMW 「如何？　要跟我戦一場嗎？　嘛、雖然結果顯而易見呢」
+PRINTFORM 「如果你勝利的話、
+CALL COLOR_PRINT(@"要做什麼都可以", カラー_注意, )
+PRINTFORMW 」
+PRINTFORM 「不過、我勝利的話……対了、
+CALL COLOR_PRINT(@"就拿走你所有的金錢吧", カラー_注意, )
+PRINTFORMW 」
+PRINTFORMW 「雖然我並不是很需要錢、但我很想看看你這傢伙被奪去所有錢財後後悔万分的表情♪」
+PRINTFORML 看上去從容不迫的%ANAME(対象)%非常強大、完全摸不清底細
+PRINTFORML 没错，但是也不是什么不能赢的对手。怎麼辦……
+PRINTFORML 
+CALL ASK_YN("接受", "請她回去")
+
+IF RESULT == 1
+	PRINTFORMW 対手是対手。這樣隨便戦闘会対自己形勢不利。所以請她回去了
+	PRINTFORMW 「呼……臨陣脱逃。看来真的期望落空了呢」
+	PRINTFORMW 「嘛、你連作為我的対手價值都沒有。打擾你了」
+	PRINTFORMW %ANAME(対象)%離開了……
+	KDVAR:対象:幽香_江戸の華 = 1
+ELSE
+	PRINTFORMW 「呼。已能看見結果了」
+	PRINTFORMW %ANAME(MASTER)%将%NAME_FORMAL(対象)%帯到據点的中庭……
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORML ・
+	;勇儀と武闘が等しいと50%。以降1勝るごとに5％。
+	判定値 = (ABL:MASTER:武闘 + 10 - ABL:対象:武闘) * 5
+	IF RAND:100 > 判定値
+		PRINTFORMW 「真是狼狽呢」
+		PRINTFORML ……果然、%ANAME(対象)%很強
+		PRINTFORMW 但是沒想到、居然会被人一拳打倒……
+		PRINTFORMW 「哈。真是無聊。作為令我感到無聊的懲罰、你的錢就帰我了」
+		PRINTFORMW 「我沒有奪去你的性命、你就応該感謝我呢」
+		CALL COLOR_PRINTW(@"所持金全部被奪走了", カラー_警告)
+		PRINTFORMW 「那麼、再見了。雖然我覚得我們不会再見面」
+		PRINTFORMW %ANAME(対象)%離開了……
+		MONEY = 0
+		KDVAR:対象:幽香_江戸の華 = 1
+	ELSE
+		PRINTFORMW 「騙人吧……我居然……！」
+		PRINTFORML 總算……勉強地勝利了
+		PRINTFORML %ANAME(対象)%的拳力量超乎想像。被打中一拳的話大概就完蛋了
+		PRINTFORMW ……不過会不会被這種単調毫無変化的拳打中又是另一回事了
+		PRINTFORMW 「呼……約定就是約定。隨便你吧」
+		PRINTFORMW 原本以為她会逃跑的、意外地遵守承諾呢
+		PRINTFORMW 那麼、要怎麼辦……
+		PRINTL
+		CALL ASK_MULTI_JUDGE("讓其做部下", GET_COUNTRY_BOSS(CFLAG:対象:所属) != 対象, "投獄", GET_COUNTRY_BOSS(CFLAG:対象:所属) != 対象, "処刑", GET_COUNTRY_BOSS(CFLAG:対象:所属) != 対象,  "奪去金錢", 1, "侵犯", 1)
+		SELECTCASE RESULT
+			CASE 0
+				PRINTFORMW 「……哈啊？　部下？　我？」
+				PRINTFORMW 「……哈。如果你不怕被自己養的狗反咬的話」
+				CALL COLOR_PRINTW(@"%ANAME(対象)%成為了部下", カラー_注意)
+				CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属, 1)
+				CFLAG:対象:好感度 += 500
+				KDVAR:対象:幽香_江戸の華 = 1
+			CASE 1
+				PRINTFORMW 「呼……嘛、這樣啊。如果只是這種程度胡鬧的話」
+				PRINTFORMW 「就隨便你吧」
+				PRINTFORMW %ANAME(対象)%被士兵帯走了……
+				CALL COLOR_PRINTW(@"俘虜了%ANAME(対象)%", カラー_注意)
+				CALL CAPTURE(対象, CFLAG:MASTER:所属)
+				KDVAR:対象:幽香_江戸の華 = 1
+			CASE 2
+				PRINTFORMW 「……嗚！」
+				PRINTFORMW 「……呼、看来我運気用尽了呢、隨便你吧」
+				PRINTFORMW %ANAME(対象)%被士兵帯走了……
+				CALL COLOR_PRINTW(@"把%ANAME(対象)%処刑了", カラー_注意)
+				PRINTL
+				CALL EXECUTION(対象)
+				PRINTL
+				CALL CHANGE_COUNTRY(対象, 0, 1, 1)
+				CFLAG:対象:所属 = 0
+				CFLAG:対象:特殊状態 = 特殊状態_死亡
+				KDVAR:対象:幽香_江戸の華 = 1
+			CASE 3
+				PRINTFORMW 「錢、嗎。呼、看来你跟我很相似呢」
+				PRINTFORMW 「来、拿去吧」
+				CALL COLOR_PRINTW(@"得到了100000金", カラー_注意)
+				MONEY += 100000
+				PRINTFORMW 「那麼、再見了。下次在戦場上再会吧」
+				PRINTFORMW %ANAME(対象)%離開了……
+				KDVAR:対象:幽香_江戸の華 = 1
+			CASE 4
+				PRINTFORMW 「甚……等、等一下……！」
+				PRINTFORMW 将胡鬧的%ANAME(対象)%圧制住、並扒光了她的衣服……
+				PRINTFORML
+				CALL FUCK_RAPE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的肉棒", @"%ANAME(MASTER)%")
+				PRINTFORML 
+				PRINTFORMW 「啊……啊啊、啊哈、啊啊……♥」
+				PRINTFORMW 発出下流喘息声、双腿大開股間溢出精液的%ANAME(対象)%、被%ANAME(MASTER)%丟出據点外了……
+				KDVAR:対象:幽香_江戸の華 = 2
+		ENDSELECT
+	ENDIF
+ENDIF
+
+CALL COLOR_PRINTW(@"結識了%ANAME(対象)%", カラー_注意)
+CFLAG:対象:面識 = 1
+
+
+
+RETURN 1
+

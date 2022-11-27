@@ -1,0 +1,51 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_STRANGE_RESTAURANT_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_STRANGE_RESTAURANT_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------    
+@TERRITORY_EVENT_STRANGE_RESTAURANT(対象)
+#DIM 対象
+
+PRINTFORML 在商店街散步的時候看見了有些在意的飲食店
+PRINTFORML 乍一看只是普通的料理店……
+PRINTFORML 
+CALL ASK_YN("进去试试", "放棄")
+
+IF RESULT == 1 
+	PRINTFORML 肚子還不餓
+	PRINTFORML 作罷
+	RETURN 1
+ENDIF
+
+PRINTFORML 正好有點餓了
+PRINTFORMW 決定進去看看
+PRINTFORML 
+PRINTFORML 店裡面很陰暗、有奇怪的氛圍
+PRINTFORML 店員身上也散発著讓人不安的氣氛
+PRINTFORMW 滿心懷疑的點了菜、端上的料理竟然非常地美味
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+
+IF RAND:3
+	PRINTFORML 吃得非常飽
+ELSE
+	PRINTFORML 肚子吃壞了
+	PRINTFORML 暗自発誓再也不回去了
+	CALL ADD_COOLTIME(対象, 2)
+ENDIF
+
+RETURN 1

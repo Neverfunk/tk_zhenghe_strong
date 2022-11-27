@@ -1,0 +1,189 @@
+#DIM CONST COLOR_色情建筑 = 0xFF0080
+
+#DIM SAVEDATA SHOW_FLAG,MAX_COUNTRY,99;用于防止建筑提示反复显示
+
+
+
+
+;城市最大建筑槽位
+#DIM CONST MAX_BUILDING_SLOT_NUM = 3
+;都市の建造物
+#DIM SAVEDATA CITY_BUILDING, MAX_CITY,MAX_BUILDING_SLOT_NUM
+
+;建筑列表输出设置
+;0 是否显示不可建造的建筑
+;1~n X类建造物师是否显示
+#DIM SAVEDATA BUILDING_PRINT_LIST_CONFIG,10
+
+;国家建造物存在标识
+#DIM SAVEDATA TMP_BUILDING_EXIST_FLAG,MAX_COUNTRY,BUILDING_NUM
+
+;国家建造物BUFF标识
+#DIM SAVEDATA TMP_BUILDING_BUFF_FLAG,MAX_COUNTRY,BUILDING_NUM
+
+;国家建筑物计数
+#DIM SAVEDATA TMP_BUILDING_CNT,MAX_COUNTRY,BUILDING_NUM
+
+;建造物类型
+#DIM SAVEDATA BUILDING_TYPE,BUILDING_NUM
+#DIM CONST 建造物_类型_未启用 = -1
+#DIM CONST 建造物_类型_经济类 = 1
+#DIM CONST 建造物_类型_军事类 = 2
+#DIM CONST 建造物_类型_政治类 = 3
+#DIM CONST 建造物_类型_科技类 = 4
+#DIM CONST 建造物_类型_防御类 = 5
+#DIM CONST 建造物_类型_通讯类 = 6
+#DIM CONST 建造物_类型_色情类 = 7
+#DIM CONST 建造物_类型_幻想类 = 8
+#DIM CONST 建造物_类型_特殊类 = 9
+
+;建造物等级
+#DIM SAVEDATA BUILDING_LEVEL,BUILDING_NUM
+#DIM CONST 建造物_等级_不可建造 = -1
+#DIM CONST 建造物_等级_一级建筑 = 1
+#DIM CONST 建造物_等级_二级建筑 = 2
+#DIM CONST 建造物_等级_三级建筑 = 3
+
+;建造物数量限制
+#DIM SAVEDATA BUILDING_LIMIT_NUM,BUILDING_NUM
+#DIM CONST 建造物_数量限制_无 = 99999
+#DIM CONST 建造物_数量限制_不可建造 = 0
+#DIM CONST 建造物_数量限制_1 = 1
+
+
+;建造物在联邦间是否可以共享
+#DIM SAVEDATA BUILDING_LIMIT_UNI,BUILDING_NUM
+
+;0即表示普通势力
+;其他势力ID已经在SP_COUNTRY.ERH中定义
+#DIM CONST 特殊勢力_普通势力 = 0
+; 特殊勢力_野盗 = 1
+; 特殊勢力_ホフゴブリン = 2
+; 特殊勢力_外来人 = 3
+; 特殊勢力_触手 = 4
+; 特殊勢力_自警団 = 5
+; 特殊勢力_サキュバス = 6
+; 特殊勢力_狂信者 = 7
+
+;建造物可建造的势力ID数组
+#DIM SAVEDATA BUILDING_COUNTRY_ID,BUILDING_NUM,8
+
+;建造物是否存在技能
+#DIM SAVEDATA BUILDING_HAVE_SKILL,BUILDING_NUM
+
+;建造物角色限制
+#DIM SAVEDATA BUILDING_LIMIT_CHARA,BUILDING_NUM
+
+;建造物对应一般角色ID数组
+#DIM SAVEDATA BUILDING_TOHO_REQ_ID,BUILDING_NUM,MAX_CHARA_NUM
+
+;防止获取政治力时产生循环FLAG
+#DIM PREVENT_GET_POLITICS_LOOP_FLAG
+
+;建造物の建造物ID
+#DIM CONST BUILDING_START = 1
+#DIM CONST 建造物_独占市场 = 1
+#DIM CONST 建造物_全国市场 = 2
+#DIM CONST 建造物_基础工业园区 = 3
+#DIM CONST 建造物_高新工业园区 = 4
+#DIM CONST 建造物_金融大厦 = 5
+#DIM CONST 建造物_度假区 = 6
+#DIM CONST 建造物_兵舎 = 7
+#DIM CONST 建造物_大型仓库 = 8
+#DIM CONST 建造物_军宣部 = 9
+#DIM CONST 建造物_野战基地 = 10
+#DIM CONST 建造物_前线指挥所 = 11
+#DIM CONST 建造物_伤兵医院 = 12
+#DIM CONST 建造物_空军基地 = 13
+#DIM CONST 建造物_指挥部 = 14
+#DIM CONST 建造物_参谋部 = 15
+#DIM CONST 建造物_情报部 = 16
+#DIM CONST 建造物_地方政府 = 17
+#DIM CONST 建造物_大宴会场 = 18
+#DIM CONST 建造物_国土资源局 = 19
+#DIM CONST 建造物_人力资源部 = 20
+#DIM CONST 建造物_社会保障部 = 21
+#DIM CONST 建造物_劳动部 = 22
+#DIM CONST 建造物_发改委 = 23
+#DIM CONST 建造物_国安部 = 24
+#DIM CONST 建造物_议会大厅 = 25
+#DIM CONST 建造物_外交部 = 26
+#DIM CONST 建造物_研究所 = 27
+#DIM CONST 建造物_大学园区 = 28
+#DIM CONST 建造物_忍者之里 = 29
+#DIM CONST 建造物_科研大楼 = 30
+#DIM CONST 建造物_定向实验室 = 31
+#DIM CONST 建造物_弓櫓 = 32
+#DIM CONST 建造物_大本营 = 33
+#DIM CONST 建造物_守卫炮台 = 34
+#DIM CONST 建造物_长程火炮阵地 = 35
+#DIM CONST 建造物_叛军电台 = 36
+#DIM CONST 建造物_短波电台 = 37
+#DIM CONST 建造物_长波电台 = 38
+#DIM CONST 建造物_小型妓院 = 39
+#DIM CONST 建造物_淫腐街 = 40
+#DIM CONST 建造物_国家大妓院 = 41
+#DIM CONST 建造物_旧淫腐街 = 42
+#DIM CONST 建造物_情色竞技场 = 43
+#DIM CONST 建造物_竞技场转播点 = 44
+#DIM CONST 建造物_竞技场自媒体 = 45
+#DIM CONST 建造物_赞助竞技场 = 46
+#DIM CONST 建造物_谈论间 = 47
+#DIM CONST 建造物_愉悦间 = 48
+#DIM CONST 建造物_黑话间 = 49
+#DIM CONST 建造物_博爱间 = 50
+#DIM CONST 建造物_理解间 = 51
+#DIM CONST 建造物_永恒间 = 52
+#DIM CONST 建造物_合法性机构 = 53
+#DIM CONST 建造物_事迹宣传台 = 54
+#DIM CONST 建造物_梦境暗示仪 = 55
+#DIM CONST 建造物_和平部 = 56
+#DIM CONST 建造物_真理部 = 57
+#DIM CONST 建造物_友爱部 = 58
+#DIM CONST 建造物_精神恢复仪 = 59
+#DIM CONST 建造物_精神重构仪 = 60
+#DIM CONST 建造物_噩梦发生器 = 61
+#DIM CONST 建造物_戒毒所 = 62
+#DIM CONST 建造物_“快乐”所 = 63
+#DIM CONST 建造物_博丽结界 = 64
+#DIM CONST 建造物_雾雨魔法店 = 65
+#DIM CONST 建造物_人偶剧场 = 66
+#DIM CONST 建造物_红雾发生器 = 67
+#DIM CONST 建造物_寺子屋 = 68
+#DIM CONST 建造物_八目鳗穴 = 69
+#DIM CONST 建造物_永远亭药业 = 70
+#DIM CONST 建造物_一片花海 = 71
+#DIM CONST 建造物_八云议堂 = 72
+#DIM CONST 建造物_河童工业园区 = 73
+#DIM CONST 建造物_要石 = 74
+#DIM CONST 建造物_核熔炉心 = 75
+#DIM CONST 建造物_月都数据库 = 76
+#DIM CONST 建造物_鸟船空间站 = 77
+#DIM CONST 建造物_奴隶市场 = 78
+#DIM CONST 建造物_专业招募所 = 79
+#DIM CONST 建造物_独占奴隶市场 = 80
+#DIM CONST 建造物_集群巢穴 = 81
+#DIM CONST 建造物_陷阱巢穴 = 82
+#DIM CONST 建造物_哥布林王巢穴 = 83
+#DIM CONST 建造物_皮套人演出中心 = 84
+#DIM CONST 建造物_NFT市场 = 85
+#DIM CONST 建造物_科学阻断器 = 86
+#DIM CONST 建造物_自然培养皿 = 87
+#DIM CONST 建造物_孵化所 = 88
+#DIM CONST 建造物_外神接入点 = 89
+#DIM CONST 建造物_前线哨站 = 90
+#DIM CONST 建造物_纵深阵地 = 91
+#DIM CONST 建造物_地下工事 = 92
+#DIM CONST 建造物_噩梦祭坛 = 93
+#DIM CONST 建造物_美梦祭坛 = 94
+#DIM CONST 建造物_春梦祭坛 = 95
+#DIM CONST 建造物_全息界标 = 96
+#DIM CONST 建造物_神学院 = 97
+#DIM CONST 建造物_古神雕像 = 98
+#DIM CONST 建造物_スパコン = 99
+#DIM CONST 建造物_清掃局 = 100
+#DIM CONST 建造物_公衆便所 = 101
+
+;建造物类型数量
+;因为要作为预定义的参数所以+1
+#DIM CONST BUILDING_NUM = (建造物_公衆便所+1)

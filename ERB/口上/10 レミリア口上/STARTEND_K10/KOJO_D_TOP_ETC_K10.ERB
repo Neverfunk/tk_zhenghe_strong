@@ -1,0 +1,332 @@
+﻿;─────────────────────────────────────── 
+;●「捕虜逆調教(外来勢力に捕まった場合)」開始時
+;─────────────────────────────────────── 
+@KOJO_TRAIN_START_D_K10
+#DIM レミリア_対象
+#DIM レミリア
+
+レミリア_対象 = MASTER
+レミリア = NAME_TO_CHARA("レミリア")
+
+;レミリア口上の使用可否設定と初期化
+SIF CFLAG:レミリア:400 == 0
+	CALL KOJO_ASK_RESET_K10
+
+;口上を不使用設定なら戻る
+SIF CFLAG:レミリア:400 == 1
+	RETURN 0
+
+SETCOLOR レミリア_口上カラー
+
+;─────────────────────────────────────── 
+;○初回
+;─────────────────────────────────────── 
+IF CFLAG:レミリア:206 == 0
+
+	;捕虜逆調教(外来)口上初回呼び出しフラグオン
+	CFLAG:レミリア:206 = 1
+
+	;───────────────────────────────────── 
+	;▼虚ろ
+	;───────────────────────────────────── 
+	IF TALENT:レミリア:空虚
+		IF IS_MALE(レミリア_対象)
+			PRINTFORML 「嗯……❤小气鬼……白色的……精液」
+			;TranslatedMark 「うー……❤　おちんぽぉ……しろいの……ごはん」
+		ELSE
+			PRINTFORML 「身体？……❤好舒服……？来玩吧……」
+			;TranslatedMark 「おんなのこぉ……❤　気持ちいー……？　遊ぼ……」
+		ENDIF
+		PRINTFORMDL %ANAME(レミリア)%带着空虚的目光接近了…
+		;TranslatedMark %ANAME(レミリア)%は虚ろな瞳で近付いてきた…
+		WAIT
+		RESETCOLOR
+		RETURN 0
+	ENDIF
+
+	;───────────────────────────────────── 
+	;▼通常
+	;───────────────────────────────────── 
+	PRINTFORML 「%CALLNAME_K10(レミリア_対象)%？你在这里做什么？」
+	;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%？　こんなところで何してるの？」
+	PRINTFORMDW %ANAME(レミリア)%不想隐藏赤裸的身体，歪着头问
+	;TranslatedMark %ANAME(レミリア)%は裸の体を隠そうともせず、小首を傾げて問いかけてきた
+	PRINTL 
+	IF CHECK_K10("陥落", レミリア_対象)
+		PRINTFORML 「没必要问什么啊。你是来找我的吧」
+		;TranslatedMark 「なんて聞くまでもなかったわね。私を探しに来たんでしょ」
+		PRINTFORML 「乖孩子。你来得正是时候」
+		;TranslatedMark 「いい子。ちょうどいい時に来たわね」
+		PRINTFORMDW 解开不能动弹的%ANAME(レミリア_対象)%，轻轻抚摸着头
+		;TranslatedMark 身動きできない%ANAME(レミリア_対象)%を解こうともせず、頭を撫でてくる
+		PRINTL 
+		PRINTFORML 「%CALLNAME_K10(レミリア_対象)%也不知道吧。我想告诉%CALLNAME_K10(レミリア_対象)%一些事呢」
+		;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%にも、ううん。%CALLNAME_K10(レミリア_対象)%に教えてあげたいと思っていたの」
+		PRINTFORML 「这里，很开心。大家都想给我血」
+		;TranslatedMark 「ここ、楽しいの。みんな私に血をくれたがるのよ」
+		PRINTFORML 「以前，因为我吃得很少所以不能喝很多，但是，如果是白血的话，好像可以喝很多呢」
+		;TranslatedMark 「私小食だからあまり飲めないけど、白い血だったら割とたくさん飲めるみたい」
+		PRINTFORMDW %ANAME(レミリア)%完全没有被改变意识的样子，而是发自内心地这么高兴地说
+		;TranslatedMark %ANAME(レミリア)%はまるで変わりなく、心から楽しそうに言った
+		PRINTL 
+		PRINTFORML 「鸡鸡？好开心啊」
+		;TranslatedMark 「ジッケン？　って、楽しいわ」
+		PRINTFORML 「%CALLNAME_K10(レミリア_対象)%也来做吧？」
+		;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%もしましょ？」
+		PRINTFORML 「嗯……嗯❤嗯，嗯」
+		;TranslatedMark 「むくぅ……んっ❤　ぢゅうっ」
+	ELSE
+		PRINTFORML 「被人当作人质的话，就什么也办不到了？」
+		;TranslatedMark 「誰かを人質にでもとられて、どうしようもなくなった？」
+		PRINTFORML 「还是，啊。和我一样吗？」
+		;TranslatedMark 「それとも、あぁ。私と同じ？」
+		PRINTFORML 「这里很好玩。大家都想给我血」
+		;TranslatedMark 「ここって楽しいの。皆私に血をくれたがるのよ」
+		PRINTFORMDW %ANAME(レミリア)%完全没有被改变意识的样子，而是发自内心地这么高兴地说
+		;TranslatedMark %ANAME(レミリア)%はまるで変わりなく、心から楽しそうに言った
+		PRINTL 
+		PRINTFORML 「我吃得很少，但如果是白血的话，可以喝很多」
+		;TranslatedMark 「私小食だからあまり飲めないけど、白い血だったら割とたくさん飲めるの」
+		PRINTFORML 「鸡鸡？好开心啊。%CALLNAME_K10(レミリア_対象)%也来做吧？」
+		;TranslatedMark 「ジッケン？　って、楽しいわ。%CALLNAME_K10(レミリア_対象)%もしましょ？」
+	ENDIF
+	IF IS_MALE(レミリア_対象)
+		PRINTFORMDL %ANAME(レミリア)%毫不犹豫地用那小小的嘴唇吮吸着%ANAME(レミリア_対象)%的阴茎……
+		;TranslatedMark %ANAME(レミリア)%は何のためらいもなく、その小さな唇で%ANAME(レミリア_対象)%の陰茎にしゃぶりついた……
+	ELSE
+		PRINTFORMDL %ANAME(レミリア)%毫不犹豫地用那小小的舌头开始舔%ANAME(レミリア_対象)%的私处……
+		;TranslatedMark %ANAME(レミリア)%は何のためらいもなく、その小さな舌で%ANAME(レミリア_対象)%のワレメを舐め始めた……
+	ENDIF
+
+;─────────────────────────────────────── 
+;○二回目以降
+;─────────────────────────────────────── 
+ELSE
+
+	;───────────────────────────────────── 
+	;▼虚ろ
+	;───────────────────────────────────── 
+	IF TALENT:レミリア:空虚
+		IF IS_MALE(レミリア_対象)
+			PRINTFORML 「嗯……❤小气鬼……白色的……精液」
+			;TranslatedMark 「うー……❤　おちんぽぉ……しろいの……ごはん」
+		ELSE
+			PRINTFORML 「身体？……❤好舒服……？来玩吧……」
+			;TranslatedMark 「おんなのこぉ……❤　気持ちいー……？　遊ぼ……」
+		ENDIF
+		PRINTFORMDL %ANAME(レミリア)%带着空虚的目光接近了…
+		;TranslatedMark %ANAME(レミリア)%は虚ろな瞳で近付いてきた…
+		WAIT
+		RESETCOLOR
+		RETURN 0
+	ENDIF
+
+	;───────────────────────────────────── 
+	;▼通常
+	;───────────────────────────────────── 
+	PRINTFORML 「%CALLNAME_K10(レミリア_対象)%，你有好好做什么吗？」
+	;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%、ちゃんとおなにーしてた？」
+	PRINTFORML 「你是为了我而蓄血的吧？」
+	;TranslatedMark 「私の為に血を溜めていてくれたでしょ？」
+	PRINTFORML 「肚子饿了。快给我喝。——嗯，嗯……好开心❤一直……啊，啊」
+	;TranslatedMark 「おなかが減ったの。早く飲ませて。――ん、れぅ……ちゅうっ❤　ずっ……ぢゅっ」
+ENDIF
+
+;終了
+WAIT
+RESETCOLOR
+RETURN 0
+
+;─────────────────────────────────────── 
+;●「捕虜逆調教(外来)」終了
+;─────────────────────────────────────── 
+@KOJO_TRAIN_END_D_K10
+#DIM レミリア_対象
+#DIM レミリア
+
+レミリア_対象 = レミリア_対象
+レミリア = NAME_TO_CHARA("レミリア")
+
+;口上を不使用設定なら戻る
+SIF CFLAG:レミリア:400 == 1
+	RETURN 0
+
+SETCOLOR レミリア_口上カラー
+
+PRINTL 
+
+;─────────────────────────────────────── 
+;行動不能
+;─────────────────────────────────────── 
+;離脱済み
+IF TCVAR:レミリア:53 > 1
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+IF TALENT:レミリア:空虚
+	PRINTFORML 「嗯……嗯……」
+	;TranslatedMark 「う……んん……」
+	PRINTFORMDL %ANAME(レミリア)%意识模糊了
+	;TranslatedMark %ANAME(レミリア)%はぼうっとしてる
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+;酒酔いによる行動不能
+IF TCVAR:レミリア:53 == 1
+	PRINTFORML 「……嗯……已经……不能喝……嗯」
+	;TranslatedMark 「……ううー……もう……飲めにゃ……ひ」
+	PRINTFORMDL %ANAME(レミリア)%灭亡了
+	;TranslatedMark %ANAME(レミリア)%は潰れてしまった
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+;快感のあまり気絶
+IF TCVAR:レミリア:52 || BASE:レミリア:気力 <= 300
+	PRINTFORML 「……嗯❤嗯……」
+	;TranslatedMark 「……ふあ❤　う……」
+	PRINTFORMDL %ANAME(レミリア)%手脚不时抽搐着，恍惚地笑着
+	;TranslatedMark %ANAME(レミリア)%はくったりした手足を時々ぴくつかせて、恍惚と笑んでいる
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+;疲労による行動不能
+IF TCVAR:レミリア:51
+	PRINTFORML 「嗯……嗯……」
+	;TranslatedMark 「う……んん……」
+	PRINTFORMDL %ANAME(レミリア)%疲倦地睡着了
+	;TranslatedMark %ANAME(レミリア)%は疲れ果てた顔で眠っている
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+;─────────────────────────────────────── 
+;主人公の行動不能
+;─────────────────────────────────────── 
+IF TALENT:レミリア_対象:空虚
+	PRINTFORML 「虽然觉得不能动的人偶很无聊」
+	;TranslatedMark 「動けないお人形はつまんないって思ってたけど」
+	PRINTFORML 「嗯，是的❤噗……嗯，嗯……嗯，嗯❤」
+	;TranslatedMark 「ん、ぢゅ❤　ぷっ……ふ、あむ……んれぅっ❤」
+	PRINTFORMW 「正适合吃饭呢」
+	;TranslatedMark 「ごはん食べるには、ちょうどいいのね」
+	PRINTL 
+	IF IS_MALE(レミリア_対象)
+		PRINTFORML 「只要让小鸡鸡勃起就好了。射精就好了」
+		;TranslatedMark 「おちんぽだけ勃起させていてくれたらいいの。射精してくれたらいいの」
+		PRINTFORML 「快点……把牛奶拿出来❤啊，对啊」
+		;TranslatedMark 「ほらあ早く……ミルク、出しなさい❤　あむっ、ぢゅっ」
+	ELSE
+		PRINTFORML 「张开大腿，只把爱液流下来就好了。交给我就行了」
+		;TranslatedMark 「股を開いて、愛液だけ垂れ流してくれていたらいいの。いっててくれればいいの」
+		PRINTFORML 「快点……让它出来吧❤嗯，嗯」
+		;TranslatedMark 「ほらあ早く……本気汁、出しなさい❤　れぅう、ぢゅっ」
+	ENDIF
+	PRINTFORMDL %ANAME(レミリア)%的身体一直缠绕在已经目光空虚的%ANAME(レミリア_対象)%身上
+	;TranslatedMark %ANAME(レミリア)%は虚ろな瞳の%ANAME(レミリア_対象)%にいつまでも体を絡ませ続けている
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+;酒酔いによる行動不能
+IF TCVAR:レミリア_対象:53
+	PRINTFORML 「喝醉了吗？做了个好梦吗？」
+	;TranslatedMark 「酔っぱらっちゃったのぉ？　いい夢見てる？」
+	IF IS_MALE(レミリア_対象)
+		PRINTFORML 「一射出来就变成了水龙头，做了个好几天都停不下来的梦呢」
+		;TranslatedMark 「出しっぱなしで蛇口みたいになっちゃって、何日も止まらない夢を見なさい」
+		PRINTFORML 「我给你看❤嗯，嗯……呼、呼❤好吃……嗯，嗯」
+		;TranslatedMark 「私が見せてあげる❤　ん、ぢゅうっ……ぷ、ふぁ❤　美味し……んっんっ」
+	ELSE
+		PRINTFORML 「一直射出来，直到连抽搐也做不到了，做个好几天也无法停不下来的梦吧」
+		;TranslatedMark 「いきっぱなしで痙攣もできなくなって、何日も止まらない夢を見なさい」
+		PRINTFORML 「我给你看❤嗯，嗯……嗯，河豚，哈哈❤好吃……嗯，嗯」
+		;TranslatedMark 「私が見せてあげる❤　ん、れうぅ……ん、ふぐ、は❤　美味し……んっんっ」
+	ENDIF
+	PRINTFORMDL %ANAME(レミリア)%一直将身体缠在烂醉如泥的%ANAME(レミリア_対象)%身上
+	;TranslatedMark %ANAME(レミリア)%は酔い潰れた%ANAME(レミリア_対象)%にいつまでも体を絡ませ続けている
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+;快感のあまり気絶
+IF TCVAR:レミリア_対象:52 || BASE:レミリア_対象:気力 <= 300
+	PRINTFORML 「打算回去了吗？做了个好梦吗？」
+	;TranslatedMark 「いっちゃって戻れないのぉ？　いい夢見てる？」
+	IF IS_MALE(レミリア_対象)
+		PRINTFORML 「一射出来就变成了水龙头，做了个好几天都停不下来的梦呢」
+		;TranslatedMark 「出しっぱなしで蛇口みたいになっちゃって、何日も止まらない夢を見なさい」
+		PRINTFORML 「我给你看❤嗯，嗯……呼、呼❤好吃……嗯，嗯」
+		;TranslatedMark 「私が見せてあげる❤　ん、ぢゅうっ……ぷ、ふぁ❤　美味し……んっんっ」
+	ELSE
+		PRINTFORML 「一直射出来，直到连抽搐也做不到了，做个好几天也无法停不下来的梦吧」
+		;TranslatedMark 「いきっぱなしで痙攣もできなくなって、何日も止まらない夢を見なさい」
+		PRINTFORML 「我给你看❤嗯，嗯……嗯，河豚，哈哈❤好吃……嗯，嗯」
+		;TranslatedMark 「私が見せてあげる❤　ん、れうぅ……ん、ふぐ、は❤　美味し……んっんっ」
+	ENDIF
+	PRINTFORMDL %ANAME(レミリア)%的身体一直缠绕在失去意识的%ANAME(レミリア_対象)%身上
+	;TranslatedMark %ANAME(レミリア)%は気を失った%ANAME(レミリア_対象)%にいつまでも体を絡ませ続けている
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+;疲労による行動不能
+IF TCVAR:レミリア_対象:51
+	PRINTFORML 「已经不行了吗？体力到极限了？　……晚安？」
+	;TranslatedMark 「もう駄目？　体力限界？　……いい夢見てる？」
+	IF IS_MALE(レミリア_対象)
+		PRINTFORML 「一射出来就变成了水龙头，做了个好几天都停不下来的梦呢」
+		;TranslatedMark 「出しっぱなしで蛇口みたいになっちゃって、何日も止まらない夢を見なさい」
+		PRINTFORML 「我给你看❤嗯，嗯……呼、呼❤好吃……嗯，嗯」
+		;TranslatedMark 「私が見せてあげる❤　ん、ぢゅうっ……ぷ、ふぁ❤　美味し……んっんっ」
+	ELSE
+		PRINTFORML 「一直射出来，直到连抽搐也做不到了，做个好几天也无法停不下来的梦吧」
+		;TranslatedMark 「いきっぱなしで痙攣もできなくなって、何日も止まらない夢を見なさい」
+		PRINTFORML 「我给你看❤嗯，嗯……嗯，河豚，哈哈❤好吃……嗯，嗯」
+		;TranslatedMark 「私が見せてあげる❤　ん、れうぅ……ん、ふぐ、は❤　美味し……んっんっ」
+	ENDIF
+	PRINTFORMDL %ANAME(レミリア)%一直缠绕在疲惫的%ANAME(レミリア_対象)%身上
+	;TranslatedMark %ANAME(レミリア)%は疲れ果てた%ANAME(レミリア_対象)%にいつまでも体を絡ませ続けている
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+;─────────────────────────────────────── 
+;初回
+;─────────────────────────────────────── 
+IF CFLAG:レミリア:206 < 2
+	CFLAG:206 = 2
+	PRINTFORML 「什么都不用担心。你是我的」
+	;TranslatedMark 「何も心配しなくていいわ。おまえは私のもの」
+	PRINTFORML 「只要这件事没有改变，就没有其他烦恼了。好吗？」
+	;TranslatedMark 「そのことさえ変わりがなければ、他に憂いはない。そうでしょ？」
+	PRINTFORML 「你只要被我抱着，把血奉献给我，让我感到喜悦就可以了」
+	;TranslatedMark 「おまえはただ私に抱かれて、私に血を捧げ、悦んでいればいい」
+	PRINTFORML 「%CALLNAME_K10(レミリア_対象)%是为此而生的」
+	;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%はそのために生まれたの」
+;─────────────────────────────────────── 
+;二回目以降
+;─────────────────────────────────────── 
+ELSE
+	PRINTFORML 「你什么都不用想，只要把血献给我就已经很幸福了」
+	;TranslatedMark 「おまえは何も考えず、私に血を捧げることだけを幸福になさい」
+	PRINTFORML 「%CALLNAME_K10(レミリア_対象)%是为此而生的」
+	;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%はそのために生まれたの」
+ENDIF
+
+;終了
+WAIT
+RESETCOLOR
+RETURN 0
+

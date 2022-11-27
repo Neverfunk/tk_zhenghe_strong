@@ -1,0 +1,125 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_BOOKSHOP_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_BOOKSHOP_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_BOOKSHOP(対象)
+#DIM 対象
+
+IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+	PRINTFORML 发现一个旧书店后走了进去
+	PRINTFORML 店主是一个年轻的少女，正一脸无聊地叼着笔不知在干什么
+	PRINTFORMW 注意到进门的%ANAME(対象)%，她打量了一下%ANAME(対象)%的身体，立刻像想到什么一样在纸上画起了东西
+ELSE
+	PRINTFORML 発現一個舊書店後走了進去
+	PRINTFORML 裡面有一位中年店主正在櫃檯内讀書
+	PRINTFORMW 他瞥了這邊一眼後又把視線移回了書上
+ENDIF
+
+PRINTL
+PRINTFORML 怎麼辦？
+CALL ASK_MULTI("読兵法書" ,"読料理書" ,"読魔術書")
+IF RESULT == 0
+	PRINTFORMW 閱読了兵法書
+	PRINTFORML
+	PRINTFORMW 很有參考價值
+	CALL PRINT_ADD_EXP(対象, "知略経験値", RAND:8 + 6, 1)
+ELSEIF RESULT == 1
+	PRINTFORMW 閱読了料理書
+	PRINTFORML
+	PRINTFORMW 記住了新的食譜
+	CALL PRINT_ADD_EXP(対象, "料理経験値", RAND:8 + 6, 1)
+ELSEIF RESULT == 2
+	PRINTFORMW 把手伸向了魔術書
+	PRINTFORML
+	IF TALENT:対象:妖術知識 == 1
+		PRINTFORMW 学到了魔術的竅門
+		CALL PRINT_ADD_EXP(対象, "妖術経験値", RAND:8 + 6, 1)
+	ELSE
+		PRINTFORMW 但是書裡面都是亂七八糟的東西不知道到底寫了什麼
+	ENDIF
+ENDIF
+IF RAND:2 || IS_MALE(対象)
+	RETURN
+ENDIF
+
+IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+	PRINTFORML
+	PRINTFORML 读着书的%ANAME(対象)%，头脑渐渐发昏
+	PRINTFORML 感觉到有什么不对劲的时候，%ANAME(対象)%的意识已经模糊，呆立在了原地
+	PRINTFORMW 看到%ANAME(対象)%这个样子的少女扔下笔，慢慢靠了过来……
+	PRINTFORML
+	PRINTFORML 书店里卖的不只有旧书，在一个隐秘的角落里，还悄悄摆放着各种各样的百合同人志
+	PRINTFORMW 这些同人志好像很受一些少女的欢迎，每天都有红着脸偷偷来这里翻看的女生
+	PRINTFORML 被当做服务生的%ANAME(対象)%，每天的任务就是在少女们来看书的时候，按照漫画里的描述侍奉她们的小穴
+	PRINTFORML 一边朗读着书里的对白，一边努力舔舐着少女的秘缝，每次都让她们浑身颤抖地沉浸到书的内容中去
+	PRINTFORML 少女们高潮的时候，为了不让爱液弄脏珍贵的书本，%ANAME(対象)% 只能用嘴接住她们飞溅的蜜汁，随后尽数吞进口中
+	PRINTFORMW 满足完客人的需求，%ANAME(対象)%再用舌头舔干净溢出的体液，替她们整理好弄乱的服装，满脸笑容地欢迎她们下次光临
+	CALL FUCK(対象, "欲望, 奉仕, 性技, 口淫, 百合", "接吻喪失",0, "少女顾客的秘贝", "", "", "催眠をかけられながら調教")
+	PRINTFORML
+	PRINTFORML 另外，那些同人志的作者好像就是店主本人
+	PRINTFORML 快要临近截稿日了，她积攒了很多压力，所以%ANAME(対象)%下班之后也会被带回家，在她画画期间抚慰她的下体
+	PRINTFORML 每当她灵感枯竭的时候，%ANAME(対象)%总是主动帮忙，让她在%ANAME(対象)%身上寻找灵感
+	PRINTFORML 被催眠术控制的%ANAME(対象)%，就算被摆成糟糕的姿势也没有怨言，甚至主动做出色情的动作供她参考
+	PRINTFORML 一天的工作结束以后，为了放松她的身体，%ANAME(対象)%也经常陪她一起入浴，用身体为她进行按摩
+	PRINTFORMW 多亏了%ANAME(対象)%的帮助，新的作品总算准时完成了。作品提交的那天晚上，二人为了庆祝胜利，整夜整夜缠绵在一起……
+	CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, 百合", "接吻喪失",0, @"少女店主的\@RAND:2 ? 秘贝 # 嘴唇\@", "", "", "催眠をかけられながら調教")
+	PRINTFORML
+	PRINTFORML 作品完成后就被解放了的%ANAME(対象)%，某天收到了店主寄来的新作
+	PRINTFORMW 不知为何里面的一位女主角和%ANAME(対象)%长得很像，令她感到十分在意
+ELSEIF CONFIG:203
+	PRINTFORML
+	PRINTFORML 讀著書的%ANAME(対象)%、感覺到有什麼不対勁
+	PRINTFORML 她發現手中的書有問題、%ANAME(対象)%故意裝作意識不清、呆立在了原地
+	PRINTFORMW 看到這個樣子的店長発出淫笑、靠近了%ANAME(対象)%……
+	PRINTFORML
+	PRINTFORML %ANAME(対象)%作為書店的看板娘在那工作
+	PRINTFORML 在店長的命令下、不僅是接待客人、擺貨、訂貨、就連口交和性交也是熱情的做著
+	PRINTFORMW 店長以爲中了催眠術的%ANAME(対象)%、其實是主動做著這些事情
+	PRINTFORML 沒有客人的時候會被店長抱到書店的陰暗処、來客人的時候就在櫃檯下面舔弄著店長的肉棒
+	PRINTFORML 當然所有的精液都會一滴不漏的接住、在奉仕過後也不忘用濃厚的接吻作為回禮
+	PRINTFORML 関店之後也會被他帯回家、一邊照顧他的日常生活一邊被反復多次的内射中出
+	PRINTFORMW 直到某天%ANAME(対象)%感到有點無聊了、一邊騎在店長身上搖動著腰、一邊說出了真相……
+	PRINTFORML 在店長驚慌的同時榨取出了精液、%ANAME(対象)%站起身舔著沾滿精液的手指説出了某個要求
+	PRINTFORML 第二天開始、書店的客人們得知只要在店内購買書籍就可以得到看板娘%ANAME(対象)%的奉仕
+	PRINTFORMW 看著店門口排起的長隊、%ANAME(対象)%舔了舔嘴唇
+	CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_SPERM_ID("書店的店主"), @"書店的店主的\@RAND:2 ? 肉棒 # 嘴唇\@", "書店的店主", "", "假裝被催眠后的看板娘日常")
+	CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_SPERM_ID("書店的店主"), @"書店的店主的\@RAND:2 ? 肉棒 # 嘴唇\@", "書店的店主", "", "假裝被催眠后的看板娘日常")
+	PRINTFORML
+	PRINTFORML 但是這樣的生活也沒有持續太長時間、因爲部下過來找到了她
+	PRINTFORMW %ANAME(対象)%雖然感到遺憾、但還是公務要緊、就榨取出身下一名男人的精液后離開了書店
+
+ELSE
+	PRINTFORML
+	PRINTFORML 讀著書的%ANAME(対象)%、頭腦漸漸発昏
+	PRINTFORML 感覺到有什麼不対勁的時候、%ANAME(対象)%的意識已經模糊、呆立在了原地
+	PRINTFORMW 看到這個樣子的店主発出淫笑、靠近了%ANAME(対象)%……
+	PRINTFORML
+	PRINTFORML %ANAME(対象)%作為書店的店員在那工作
+	PRINTFORML 在店長的命令下、不僅是接待客人、擺貨、訂貨、就連口交和性交也是熱情的做著
+	PRINTFORMW 中了他的催眠術的%ANAME(対象)%被改変了認識和常識、認為這是理所當然的事情
+	PRINTFORML 沒有客人的時候會被店長抱到書店的陰暗処、來客人的時候就在櫃檯下面舔弄著店長的肉棒
+	PRINTFORML 當然所有的精液都會一滴不漏的接住、在奉仕過後也不忘用濃厚的接吻作為回禮
+	PRINTFORML 関店之後也會被他帯回家、一邊照顧他的日常生活一邊被反復多次的内射中出
+	PRINTFORMW 但是這所有事情对于現在的%ANAME(対象)%來說都是很普通的事、被他命令道懷上他的孩子後、子宮一陣蠢動、点了点頭……
+	CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_SPERM_ID("書店的店主"), @"書店的店主的\@RAND:2 ? 肉棒 # 嘴唇\@", "書店的店主", "", "催眠をかけられながら調教")
+	CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_SPERM_ID("書店的店主"), @"書店的店主的\@RAND:2 ? 肉棒 # 嘴唇\@", "書店的店主", "", "催眠をかけられながら調教")
+	PRINTFORML
+	PRINTFORML 但是這樣的生活也沒有持續太長時間、有一次催眠中斷了
+	PRINTFORMW %ANAME(対象)%雖然内心一片混亂、但還是在被他再次抓獲之前逃出了書店
+ENDIF
+
+RETURN 1

@@ -1,0 +1,374 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_REPAYMENT_RATE()
+RETURN (DVAR:恩返し_発生フラグ || DVAR:恩返し_通い妻フラグ > 0 ? 250 # 30)
+
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_REPAYMENT_DECISION()
+SIF DVAR:恩返し_発生フラグ == -1
+	RETURN 0
+SIF DAY < 10
+	RETURN 0
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_REPAYMENT_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体　ハブとして扱う
+;---------------------
+@EVENT_DAILY_REPAYMENT()
+#DIM 対象
+
+TRYCALLFORM EVENT_DAILY_REPAYMENT_%TOSTR(DVAR:恩返し_発生フラグ)%
+SIF RESULT
+	DVAR:恩返し_発生フラグ ++
+RETURN 1
+
+;---------------------
+;初回
+;---------------------
+@EVENT_DAILY_REPAYMENT_0()
+#DIM 対象
+対象 = RAND(1, VARSIZE("恩返し_種類"))
+PRINTFORMW 久違的假日
+PRINTFORMW %ANAME(MASTER)%在森林中散歩時、聽到了微微的呻吟聲
+PRINTFORMW 有誰受傷了嗎？
+PRINTFORM 跟隨聲音向草木茂盛的方向前進後、見到一隻被陷阱捕捉了的%恩返し_種類:対象%
+PRINTFORMW %恩返し_種類:対象%見到%ANAME(MASTER)%後、擺出警戒的姿勢
+PRINTFORMW 陷阱緊緊地拘束著%恩返し_種類:対象%、令其無法自力逃生
+PRINTFORMW 仔細一看那個陷阱已經相當殘舊、看來是誰放置後就遺忘了的樣子
+PRINTFORMW 怎麼辦……
+CALL ASK_MULTI("幫助", "放置", "做成晚餐")
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORMW %ANAME(MASTER)%看見%恩返し_種類:対象% 悲慘的模樣後，決定伸出援手了
+		PRINTFORMW 將%恩返し_種類:対象%從陷阱中解放後，%恩返し_種類:対象%盯著%ANAME(MASTER)%一會
+		PRINTFORMW 不久後便轉身， 一溜煙地逃跑了
+		PRINTFORMW 做了好事後心情變得不錯，%ANAME(MASTER)%心情愉快地結束散步了
+		DVAR:恩返し_動物番号 = 対象
+	CASE 1
+		PRINTFORMW 跟自己沒什麼關係吧
+		PRINTFORMW %ANAME(MASTER)%離開了
+		DVAR:恩返し_発生フラグ = -1
+		RETURN 0
+	CASE 2
+		PRINTFORMW %ANAME(MASTER)%將%恩返し_種類:対象%刺死後，拿回去獎勵給部下了
+		CALL PRINT_ADD_EXP(MASTER, EXPNAME:(GET_EXP(GETNUM(ABL, "料理"))), 5, 1)
+		CALL TRAIN_AUTO_ABLUP(MASTER)
+		DVAR:恩返し_発生フラグ = -1
+		RETURN 0
+ENDSELECT
+RETURN 1
+
+;---------------------
+;2回目
+;---------------------
+@EVENT_DAILY_REPAYMENT_1()
+PRINTFORMW 工作時被告知有客人來訪
+PRINTFORMW 會見後無論怎麼看對方都只是個村娘
+PRINTFORMW 「…初次見面，我是以前受到這邊士兵幫助的人」
+PRINTFORMW 「因為實在受到了不少幫助、所以希望能夠做點什麼報答這份恩情」
+PRINTFORMW 如此彬彬有禮的姑娘令人感到敬佩
+PRINTFORMW 但是士兵幫助人民是理所當然的、不需要太在意
+PRINTFORMW 「但是…如果無法報答這份恩情的話，我會良心不安的、我一定好好工作的、拜託你了！」
+PRINTFORMW 少女露出認真的表情纏著%ANAME(MASTER)%不肯輕易放棄
+PRINTFORMW 既然意志那麼堅定的話、讓她如願會比較好吧
+PRINTFORMW 怎麼辦……
+CALL ASK_YN("讓她幫忙工作", "還是拒絕吧")
+IF RESULT == 1
+	PRINTFORMW 即使如此都不能隨便讓外人幫忙
+	PRINTFORMW 這份心意就收下了，但真的不需要。%ANAME(MASTER)%這樣說道後、少女一時間還是糾纏不放
+	PRINTFORMW 不久後露出依依不捨的表情望著%ANAME(MASTER)%、失望地離開了
+	DVAR:恩返し_発生フラグ = -1
+	RETURN 0
+ENDIF
+
+PRINTFORMW 這樣的話就讓她幫忙做一些簡單的工作吧
+PRINTFORMW 「謝謝你！我會加油的！」
+PRINTFORMW 少女的表情一瞬間明亮起來、並順勢抱著%ANAME(MASTER)%
+PRINTFORMW 「啊、對、對不起…太高興了、誒嘿嘿…」
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+PRINTFORMW 多得少女的幫忙工作有所進展
+SELECTCASE RAND:3
+	CASE 0
+		SETCOLOR カラー_オレンジ
+		PRINTFORML 兵数増加了500人！
+		RESETCOLOR
+		COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 500
+	CASE 1
+		SETCOLOR カラー_オレンジ
+		PRINTFORML 資金増加了1000！
+		RESETCOLOR
+		MONEY += 500
+	CASE 2
+		SETCOLOR カラー_オレンジ
+		PRINTFORML 評判上升了些許！
+		RESETCOLOR
+		FOR LOCAL, 1, MAX_COUNTRY
+			SIF IS_COUNTRY(LOCAL)
+				CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 30, 0)
+		NEXT
+ENDSELECT
+PRINTFORMW 少女に禮貌地告別時、看起來很高興地笑了
+PRINTFORMW 「誒嘿嘿、能為%ANAME(MASTER)%工作真是太好了…」
+PRINTFORMW 嗯哼、看來受到幫助的不只士兵和自己
+PRINTFORMW 但正當準備提出疑問前、少女精神不錯地揮著手離開了
+RETURN 1
+
+;---------------------
+;3回目
+;---------------------
+@EVENT_DAILY_REPAYMENT_2()
+PRINTFORMW 假日，%ANAME(MASTER)%的家有客人來訪
+PRINTFORMW 「你好，我又來幫忙了」
+PRINTFORMW 是以前曾經來幫忙的少女，為甚麼會知道自己家的位置呢？
+PRINTFORMW 「那個， 我向宮殿那邊請假， 然後就請教你家的位置了」
+PRINTFORMW 我軍處理個人情報實在太輕率了，%ANAME(MASTER)%這樣想着
+PRINTFORMW 但之前的幫忙作為報恩已經足夠了，%ANAME(MASTER)%這樣拒絕時、少女看起來有點垂頭喪氣
+PRINTFORMW 「那麼，那個...讓我幫你煮飯吧！拜託你了！」
+PRINTFORMW 這次連理由都沒有啊， 但就這樣拒絕少女的心意也不太好
+PRINTFORMW 怎麼辦……
+CALL ASK_YN("讓她幫忙煮飯", "拒絕")
+IF RESULT == 1
+	PRINTFORMW 這份心意就收下了，但真的不需要。%ANAME(MASTER)%這樣說道後、少女一時間還是糾纏不放
+	PRINTFORMW 不久後露出依依不捨的表情望著%ANAME(MASTER)%、失望地離開了
+	DVAR:恩返し_発生フラグ = -1
+	RETURN 0
+ENDIF
+
+PRINTFORMW 如果這樣能滿足她的話那就沒所謂了
+PRINTFORMW 「是、讓我助你一臂之力吧！」
+PRINTFORMW 少女看起來很高興、幹勁滿滿地走向廚房
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+PRINTFORMW 少女的料理味道樸素, 整體上還算可以
+PRINTFORMW 是因為幹勁過頭了嗎，分量稍微有點多
+PRINTFORMW 「誒嘿嘿... 看起來合你的口味呢， 我很高興」
+PRINTFORML 「那個， 我準備好餐後酒了， 我幫你斟酒吧...請用」
+PRINTFORMW %ANAME(MASTER)% 無法拒絕並喝酒時， 注意到天色已經變暗
+PRINTFORMW 跟少女說你差不多是時候回家了時， 少女開始支支吾吾
+PRINTFORMW 正當站起來準備送少女回家時， 少女突然抱着你
+PRINTFORML 「那麼突然很抱歉……但是、我不想回去……」
+PRINTFORMW %ANAME(MASTER)%因為太突然而感到不知所措時， 少女 繼續抱著%ANAME(MASTER)%並用濕潤的眼神抬頭望著%ANAME(MASTER)%
+PRINTFORML 「... 求你了... 可以抱我嗎？？」
+PRINTFORMW 突然之間在說什麼，%ANAME(MASTER)% 勸喻少女冷靜下來
+PRINTFORML 「那、那個、我，對%ANAME(MASTER)%... 那時候就、 那個...」
+PRINTFORML 少女滿臉通紅地努力發出聲音
+PRINTFORMW 少女認真的話語，令%ANAME(MASTER)% 稍微有點驚訝並認真地聽著
+PRINTFORML 「感到為難了嗎...?還是說、我、沒有魅力嗎...?」
+PRINTFORMW 和少女對上視線
+PRINTFORMW …那雙眼睛，看起來並不像說謊
+PRINTFORML 被女生如此逼近，根本不可能拒絕
+PRINTFORMW %ANAME(MASTER)%溫柔地握住少女抱住自己的手，嘴唇相互重疊
+PRINTFORML 「嗯……！」
+PRINTFORMW 少女身體微微震顫着並接受了
+PRINTFORMW 為了緩解緊張氣氛，努力隔着衣服温柔地愛撫少女的身體
+PRINTFORML 「嗯、嗯嗯…啊啾……哈啊……」
+PRINTFORMW 嘴唇重疊間少女微微呼出甘甜的吐息，輕撫着%ANAME(MASTER)%的臉頰
+PRINTFORML 「嗯！啊…啊、嗯……咕嗯……！」
+PRINTFORMW 將手伸入衣服，用手指撫摸陰部，能感覺到微微濕潤
+PRINTFORMW 確認後%ANAME(MASTER)%保持嘴唇重疊，就這樣溫柔地推倒了少女
+CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失, 接吻喪失", 0, "村娘の唇", "", "村娘の膣")
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+PRINTFORMW 第二天早上張開眼睛，看不到少女的身姿
+PRINTFORMW 枕邊放着還有餘溫殘留的食物，看來是少女為自己淮備的早餐
+PRINTFORMW 強行令自己還沒睡醒的腦袋清醒，並在早餐冷下來前吃掉了
+RETURN 1
+
+
+;---------------------
+;4回目
+;---------------------
+@EVENT_DAILY_REPAYMENT_3()
+
+PRINTFORMW 「啊…你、你好…」
+PRINTFORMW 少女又來訪了、看起來有點害羞
+PRINTFORMW 「今、今日我帶了鰻魚和蔬菜過來了！」
+PRINTFORMW 「然後那個…可以的話、再次……」
+PRINTFORMW 已經無法拒絕了、%ANAME(MASTER)%讓少女進入自己的家
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+PRINTFORMW 「哈啊♥嗯♥啊啊♥」
+PRINTFORMW 餐後、被褥之中狀況非常激烈
+PRINTFORML 「啊♥啊♥啊啊♥那邊、好棒♥」
+PRINTFORML %ANAME(MASTER)%前後搖動著腰令少女發出愉快的嬌聲，小穴不斷收緊
+PRINTFORMW 少女承受著之前作為處女未能想像到的激烈抽插， 扭動着身體
+PRINTFORML 「嗯♥啊♥啊啊♥更多♥」
+PRINTFORML 少女妖豔的動作和充滿肉慾的表情，令%ANAME(MASTER)%興奮地加速、更激烈地搖動腰抽插少女的身體
+PRINTFORMW 然後保持節拍地結合、少女的喘息聲再次響起、膣肉蠕動著刺激肉棒令%ANAME(MASTER)%難以忍受
+PRINTFORML 「唔♥嗯嗯♥去了♥要去了♥啊♥%ANAME(MASTER)%桑♥%ANAME(MASTER)%桑♥啊啊♥」
+PRINTFORMW 臨近絶頂、少女身體顫抖著並呼喚%ANAME(MASTER)%的名字
+PRINTFORML 「啊♥去了去了♥♥♥要♥♥♥去了了嗯嗯嗯嗯嗯嗯♥♥♥♥♥」
+PRINTFORML 少女大大地弓起背、並發出分外大的喘嬌聲高潮時
+PRINTFORMW 小穴緊緊纏著肉棒，%ANAME(MASTER)%到達極限，在少女裏面釋放灼熱的精液
+CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失, 接吻喪失", 0, "村娘の唇", "", "村娘の膣")
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+PRINTFORML 少女睡在%ANAME(MASTER)%的手臂上
+PRINTFORMW 陷入沉睡的意識之中、朦朦朧朧地看見少女幸福的表情
+PRINTFORMW …%ANAME(MASTER)%眼前有不可思議的東西
+IF 恩返し_種類:(DVAR:恩返し_動物番号) == "鶴"
+	PRINTFORML 少女的後背有什麼柔軟的東西，%ANAME(MASTER)%好奇查看了
+	PRINTFORMW 看起來就跟%恩返し_種類:(DVAR:恩返し_動物番号)%的羽翼一樣
+	PRINTFORML 「嗯…」
+	PRINTFORMW 被褥中的少女扭動著身體
+	PRINTFORML 然後%ANAME(MASTER)%的手中、感覺到像羽毛一樣的觸感
+	PRINTFORMW 在被褥中用手摸索時、感覺觸摸到濃密的羽毛
+ELSE
+	PRINTFORML 少女的頭髮之中有什麼東西輕輕地彈出來
+	PRINTFORMW 看起來就跟%恩返し_種類:(DVAR:恩返し_動物番号)%的耳朵一樣
+	PRINTFORML 「嗯…」
+	PRINTFORMW 被褥中的少女扭動著身體
+	PRINTFORML %ANAME(MASTER)%的大腿、有種綿綿的感覺
+	PRINTFORMW 在被褥中用手摸索時、感覺到毛茸茸的觸感
+ENDIF
+PRINTFORML 「嗯嗯…」
+PRINTFORMW 少女的身體輕輕地震顫著
+PRINTFORML 這是什麼呢、被褥中的綿漏出來了嗎？夢嗎？還是說…
+PRINTFORMW 思考時睡意來襲、%ANAME(MASTER)%的意識和疑問共同被帶到夢的深處之中
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+PRINTFORMW 明早、醒來時、果然又見不到少女的身姿
+RETURN 1
+
+;---------------------
+;最後
+;---------------------
+@EVENT_DAILY_REPAYMENT_4()
+#DIM 対象
+PRINTFORML 「你好，誒嘿，我又來打擾了」
+PRINTFORMW 少女又來了
+PRINTFORML 已經理所當然地來到自己家裏，並走向廚房
+PRINTFORMW 這個身姿看起來就只是個村娘
+PRINTFORMW …之前的事，果然只是夢而已嗎？
+PRINTFORML 但是那個觸感非常真實
+PRINTFORMW 萬一少女是怪物或妖怪之類的話，接近%ANAME(MASTER)%說不定有什麼企圖
+PRINTFORMW 怎麼辦……？
+
+CALL ASK_YN("質問正體", "退治")
+
+IF RESULT == 1
+	PRINTFORML 這傢伙是化成人類，偷偷接近自己的妖怪
+	PRINTFORMW 完全不知道她有甚麼目的，應該趁她現在大意時將其退治
+	PRINTFORML %ANAME(MASTER)%走到廚房接近少女背後，心一橫一刀斬下去！
+	PRINTFORMW 到最後に%ANAME(MASTER)%看見少女還帶著一副完全搞不懂怎麼回事的表情
+	PRINTFORMW …少女斷氣時、變化成%恩返し_種類:(DVAR:恩返し_動物番号)%的屍體、果然是由妖怪化成的人類
+	PRINTFORML 雖然不清楚少女會否做對自己不利的事情、但這樣就解決了
+	PRINTFORMW 雖然總感覺在什麼地方見過這隻%恩返し_種類:(DVAR:恩返し_動物番号)%、但應該只是錯覺吧
+	PRINTFORMW %ANAME(MASTER)%將屍體適當地掩埋在庭院中、並將所有事拋諸腦後了
+	DVAR:恩返し_発生フラグ = -1
+	RETURN 0
+ENDIF 
+
+
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+PRINTFORMW 飯後，晩酌時質問少女正體為何物
+PRINTFORML 「………」
+PRINTFORMW 被%ANAME(MASTER)%質問的少女低頭不語，抬頭時帶着微妙的表情開口了
+PRINTFORML 「我...以前，是%ANAME(MASTER)%救助了的%恩返し_種類:(DVAR:恩返し_動物番号)%…」
+PRINTFORMW 「當我被陷阱困住時，%ANAME(MASTER)%、解救了我……」
+PRINTFORMW 聽到這番話語後，%ANAME(MASTER)%想起自己曾經解救過一隻%恩返し_種類:(DVAR:恩返し_動物番号)%
+PRINTFORML 「我並不是想欺騙你……只是、想報答、當時的恩情而已……」
+PRINTFORMW 少女蹒跚地用震顫的聲音回答
+PRINTFORML 「人類的金錢非常貴重，實、實在難以獲得、然後……我就只能做、這種事了……」
+PRINTFORMW 「……對不起」
+PRINTFORML 少女低頭哭泣、帶著淚聲盡力擠出聲音
+PRINTFORMW 看來沒有說謊
+PRINTFORML 看見少女低頭震顫着哭泣的樣子，已經沒辦法將她退治了
+PRINTFORMW 但是，該說甚麼呢？
+CALL ASK_MULTI_JUDGE("邀請到我軍", CAN_ADD_RANDOM_CHARA(), "以後再來也沒關係", 1, "以後別再來了", 1)
+IF RESULT == 2
+	PRINTFORML 這樣的話已經足夠了
+	PRINTFORMW 在此之後、不想再跟妖怪扯上關係
+	PRINTFORMW 要求少女以後別再來了
+	PRINTFORML 少女聽到後不久
+	PRINTFORMW 擠出了聲音、感到困擾的話就沒辦法了、這樣低聲說著
+	PRINTFORML 最後、說了一句「謝謝你」作辭別後
+	PRINTFORMW 下一瞬間、變回%恩返し_種類:(DVAR:恩返し_動物番号)%的姿態、就這樣消失在夜晚的陰暗中
+	PRINTFORMW 原地只剩下殘留著少女餘溫的衣服……
+ELSEIF RESULT == 1
+	PRINTFORML 用手撫摸著少女低下的頭
+	PRINTFORMW 一瞬間少女的身體變得僵硬、但發現純粹只是撫摸自己的頭後、帶著害怕的表情抬起頭
+	PRINTFORML 不需要道歉、你已經充分地報恩了
+	PRINTFORMW 撫摸著少女的頭並如此告訴她後、少女逐漸停止哽咽並用微微濕潤的眼睛看著你
+	PRINTFORML 以後想來這邊的話也沒關係、非常歡迎你
+	PRINTFORMW 「誒嘿嘿…是……在此以後、請多多指教了…♥」
+	PRINTFORML 將雙眼帶著淚光地歡笑的少女抱到懷裏
+	PRINTFORMW 雙唇重疊、就這樣推倒了……
+	DVAR:恩返し_通い妻フラグ = 1
+ELSE
+	PRINTFORML 用手撫摸著少女低下的頭
+	PRINTFORMW 一瞬間少女的身體變得僵硬、但發現純粹只是撫摸自己的頭後、帶著害怕的表情抬起頭
+	PRINTFORML 不需要道歉、你已經充分地報恩了
+	PRINTFORMW 撫摸著少女的頭並如此告訴她後、少女逐漸停止哽咽並用微微濕潤的眼睛看著你
+	PRINTFORML 如果可以的話來我們的軍隊吧？這樣邀請少女
+	PRINTFORMW 「誒、那個…那個」
+	PRINTFORMW 突然的邀請、雖然令少女感到不知所措
+	PRINTFORMW 但經過短暫的思考後、少女望著%ANAME(MASTER)%嫣然一笑地回答
+	PRINTFORMW 「誒嘿嘿…是……在此以後、請多多指教了…♥」
+	PRINTFORML 將雙眼帶著淚光地歡笑的少女抱到懷裏
+	PRINTFORMW 雙唇重疊、就這樣推倒了……
+	CALL CREATE_RANDOM_CHARA(0,0,1)
+	対象 = RESULT
+	ABL:対象:武闘 = 15 + RAND:10
+	ABL:対象:防衛 = 15 + RAND:10
+	ABL:対象:知略 = 15 + RAND:10
+	ABL:対象:政治 = 25 + RAND:10
+	ABL:対象:歌唱 = 35 + RAND:10
+	ABL:対象:料理 = 45 + RAND:10
+	CALL TAG_INIT(対象,25)
+	CALL LEARN_SKILL_GENERAL_BY_NAME(対象, "实干家")
+	CALL LEARN_SKILL_GENERAL_BY_NAME(対象, "治疗")
+	IF 恩返し_種類:(DVAR:恩返し_動物番号) == "鶴"
+		TALENT:対象:動物耳 = 0
+		TALENT:対象:尾巴 = 0
+	ELSEIF 恩返し_種類:(DVAR:恩返し_動物番号) == "兎"
+		TALENT:対象:動物耳 = 1
+		TALENT:対象:尾巴 = 0
+	ELSE
+		TALENT:対象:動物耳 = 1
+		TALENT:対象:尾巴 = 1
+	ENDIF
+	CALL VIRGINIZE_LOST(対象, 初体験_処女)
+	CALL VIRGINIZE_LOST(対象, 初体験_キス)
+	SEXUAL_EXPERIENCE:(対象):初体験_処女 = %ANAME(MASTER)%
+	SEXUAL_LAST_EXPERIENCE:(対象):初体験_処女 = %ANAME(MASTER)%
+	SEXUAL_EXPERIENCE:(対象):初体験_キス = %ANAME(MASTER)%
+	SEXUAL_LAST_EXPERIENCE:(対象):初体験_キス = %ANAME(MASTER)%
+	TALENT:対象:反抗的 = 0
+	TALENT:対象:難以越過的底線 = 0
+	TALENT:対象:傲嬌 = 0
+	TALENT:対象:合意 = 1
+	TALENT:対象:献身的 = 1
+	CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属, 1)
+	CFLAG:対象:好感度 = 1200
+	CFLAG:対象:依存度 = 1200
+	CFLAG:対象:従属度 = 1200
+	CALL COLOR_PRINTW(@"%ANAME(対象)%加入我軍了", カラー_注意)
+	CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", @"%ANAME(MASTER)%")
+	CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失, 接吻喪失", 0, @"%ANAME(対象)%的嘴唇", "", @"%ANAME(対象)%的膣穴")
+	DVAR:恩返し_キャラID= GET_ID(対象)
+	PRINTFORMW
+ENDIF
+DVAR:恩返し_発生フラグ = -1
+RETURN 0

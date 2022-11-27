@@ -1,0 +1,164 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K94_KAGEROU_SANPO_RATE(対象)
+#DIM 対象
+RETURN 50
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K94_KAGEROU_SANPO_DECISION(対象)
+#DIM 対象
+
+;散歩できるのは一回きり
+SIF KDVAR:対象:影狼_月夜の散歩
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 0, 0, 0)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K94_KAGEROU_SANPO_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K94_KAGEROU_SANPO(対象)
+#DIM 対象
+PRINTFORMW 晚上，突然抬头仰望天空，看到了美丽的月亮
+;TranslatedMark 夜、ふと空を見上げると綺麗な月が出ていた
+PRINTFORMW 似乎是因为沉迷于工作而没有注意到的，非常大很漂亮的月亮
+;TranslatedMark 仕事に夢中で気づかなかったらしい、とても大きく綺麗な月だ
+PRINTFORMW 如果是这样的夜晚，就不工作，出去月夜散步也许也不错
+;TranslatedMark こんな夜ならば仕事をやめて、月夜の散歩に出かけるのもいいかもしれない
+PRINTFORML 怎么办呢
+;TranslatedMark どうしようか
+CALL SINGLE_DRAWLINE
+PRINTFORML
+CALL ASK_YN("出去散步", "算了吧")
+IF RESULT == 1
+	PRINTFORML 不，我们回去工作吧
+	;TranslatedMark いや、仕事に戻るとしよう
+	RETURN 1
+ELSE
+	PRINTFORML 偶尔这样休息一下也不错吧
+	;TranslatedMark たまにはこんな息抜きもいいだろう
+	PRINTFORMW %ANAME(MASTER)%悄悄地走出了宫殿
+	;TranslatedMark %ANAME(MASTER)%はこっそりと宮殿を抜けだした
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW 夜风宜人
+	;TranslatedMark 夜風が気持ちいい
+	PRINTFORMW 月夜下，静静地在竹林里散步的时候，突然听到了狼的远吠
+	;TranslatedMark 月夜の元、静かに竹林を散歩していると不意に狼の遠吠えが聞こえてきた
+	PRINTFORMW 大概是这附近有狼吧，我被好奇心驱使，朝着远处传来吼声的方向走去
+	;TranslatedMark この辺りに狼などいたのか、そう思いつい好奇心に釣られて遠吠えの聞こえてきた方へと足を向けた
+	PRINTFORMW 走了一会儿，走出了月光照耀的广场
+	;TranslatedMark しばらく歩くと月の明かりに照らされた広場に出た
+	PRINTFORMW 在广场中央的残株上坐着什么，仰望着月亮
+	;TranslatedMark その広場の中央にある切株の上に何かが座り、月を見上げている
+	PRINTFORMW 以为是狼，凝神一看，原来在那里的是一个有着大耳朵、艳丽的长发和蓬松的大尾巴的姑娘
+	;TranslatedMark 狼かと思い目を凝らすと、そこにいたのは大きな耳と艶やかな長い髪そしてふんわりとした大きな尻尾を持った娘だった
+	PRINTFORMW 我不由得被月光照得神魂颠倒，不知道是不是注意到了我的视线，和少女的目光相遇了
+	;TranslatedMark 月夜に照らされたその姿に思わず見とれていると、こちらの視線に気づいたのか娘と目があった
+	PRINTFORMW 「哎呀…这么晚还见人，真少见」
+	;TranslatedMark 「あら…こんな夜中に人に会うなんて珍しい」
+	PRINTFORMW 少女的声音就像铃铛的声音一样，静静地在夜空中凛然回响
+	;TranslatedMark 娘の声はまるで鈴の音の様に、静かな夜空に凛と響いた
+	PRINTFORMW 「在这种地方怎么了？一个人在夜里迷路很危险吗？」
+	;TranslatedMark 「こんなところでどうしたの？夜に一人なんて危ないわよ、迷子かしら？」
+	PRINTFORMW 恶作剧般地笑着问你
+	;TranslatedMark 悪戯そうに笑いながらあなたに問いかけてきた
+	PRINTFORML
+	CALL ASK_MULTI("听到远处传来狼的吼声", "你又在干什么呢", "因为月亮很漂亮")
+	IF RESULT == 0
+		PRINTFORMW 「狼？…啊，啊哈哈，是啊，确实听到了呢」
+		;TranslatedMark 「狼？…あっ、あはは、そうね、確かに聞こえたわね」
+		PRINTFORMW 莫名其妙地笑着
+		;TranslatedMark 何がおかしかったのかけらけらと笑っている
+		PRINTFORMW 「这么美丽的月夜，狼不是也很兴奋吗？」
+		;TranslatedMark 「こんなに綺麗な月夜だもの、狼も興奮しちゃったんじゃないかしら？」
+		PRINTFORMW 确实，即使是人类的自己，也会有情绪高涨的时候
+		;TranslatedMark 確かに人間の自分でも気が高ぶっている、そんなこともあるかもしれない
+		PRINTFORMW 「…但是一个人的话很恐怖，要不要暂时在这里一起聊聊？」
+		;TranslatedMark 「…でも一人じゃ怖いわね、しばらくここで一緒にお話でもしない？」
+		PRINTFORMW 啪嗒啪嗒地在坐着的树桩上催促
+		;TranslatedMark 腰かけている切株の上をぽんぽんと叩いて催促してくる
+		PRINTFORMW 在这样的夜晚相遇也是一种缘分，%ANAME(MASTER)%这样想着，就接受了她的邀请
+		;TranslatedMark こんな夜に出会ったのも何かの縁、そう思った%ANAME(MASTER)%は彼女の誘いに乗ることにした
+		PRINTFORMW 「呵呵…你说我是梦吗？」
+		;TranslatedMark 「ふふっ…私、%ANAME(対象)%って言うの、あなたは？」
+		PRINTFORMW 在月亮被云彩遮住之前，和她一起聊了一会儿
+		;TranslatedMark 月が雲に隠れるまでしばらくの間、彼女と共に語り合った
+	ELSEIF RESULT == 1
+		PRINTFORMW 「我？嗯，是散步吗？呵呵呵」
+		;TranslatedMark 「私？うーん、お散歩かな？ふふっ」
+		PRINTFORMW 带着为难的害羞表情笑着摇着尾巴
+		;TranslatedMark 困ったような照れたような表情で笑いながら、尻尾を振っている
+		PRINTFORMW 月光下的那张脸照得很美
+		;TranslatedMark 月夜に照らされたその顔はとても綺麗に映った
+		PRINTFORMW 「这么漂亮的月夜，光睡觉不是太可惜了吗？」
+		;TranslatedMark 「こんなに綺麗な月夜だもの、ただ寝ちゃうなんてもったいないじゃない？」
+		PRINTFORMW 确实，也许也有自己也这么认为而呆在这里的少女
+		;TranslatedMark 確かに自分もそう思ってここにいる、そんな娘もいるかもしれない
+		PRINTFORMW 「…喂，你不觉得遇到这样的夜晚也是什么缘分吗？说点什么吧」
+		;TranslatedMark 「…ね、こんな夜にあったのも何かの縁だと思わない？少しお話でもしましょうよ」
+		PRINTFORMW 啪嗒啪嗒地在坐着的树桩上催促
+		;TranslatedMark 腰かけている切株の上をぽんぽんと叩いて催促してくる
+		PRINTFORMW 虽然有点妖艳，但更具魅力的提案，%ANAME(MASTER)%这样想，于是接受了她的邀请
+		;TranslatedMark 妖しいがそれ以上に魅力的な提案だ、そう思った%ANAME(MASTER)%は彼女の誘いに乗ることにした
+		PRINTFORMW 「呵呵…你说我是梦吗？」
+		;TranslatedMark 「ふふっ…私、%ANAME(対象)%って言うの、あなたは？」
+		PRINTFORMW 在月亮被云彩遮住之前，和她一起聊了一会儿
+		;TranslatedMark 月が雲に隠れるまでしばらくの間、彼女と共に語り合った
+	ELSE
+		PRINTFORMW 「呵呵，是啊，真是美丽的月亮啊」
+		;TranslatedMark 「うふふっ、そうよね、素敵な月よね」
+		PRINTFORMW 她似乎很满足地笑着，再次仰望月夜
+		;TranslatedMark 何やら満足そうに笑い、彼女は再び月夜を見上げた
+		PRINTFORMW 不知道为什么，那个样子非常适合，让人感到无比神秘
+		;TranslatedMark 何故かはわからないが、その姿はとても似合っていて、この上なく神秘的に感じた
+		PRINTFORMW 「…喂，你也来这边一起赏月吧？」
+		;TranslatedMark 「…ねぇ、あなたもこっちに来て一緒にお月見しない？」
+		PRINTFORMW 呆呆地望着她，突然有人叫了一声，我就回过神来
+		;TranslatedMark ボーっと彼女を眺めていると、不意に声をかけられて我に返った
+		PRINTFORMW 「也有很好喝的酒哦？怎么样？」
+		;TranslatedMark 「美味しいお酒もあるわよ？どう？」
+		PRINTFORMW "月见酒"是一种风流，%ANAME(MASTER)%这样想着，便接受了她的邀请
+		;TranslatedMark 月見酒とは風流だ、そう思った%ANAME(MASTER)%は彼女の誘いに乗ることにした
+		PRINTFORMW 「呵呵…你说我是梦吗？」
+		;TranslatedMark 「ふふっ…私、%ANAME(対象)%って言うの、あなたは？」
+		PRINTFORMW 在月亮被云彩遮住之前，和她一起聊了一会儿
+		;TranslatedMark 月が雲に隠れるまでしばらくの間、彼女と共に語り合った
+	ENDIF
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW 回过神来，回到了宫殿前
+	;TranslatedMark 気付くと、宮殿の前に戻っていた
+	PRINTFORMW 环顾四周，完全没有女孩的身影
+	;TranslatedMark 辺りを見回しても娘の姿は影も形もない
+	PRINTFORMW 被月光照射，幻象也看见了吗？
+	;TranslatedMark 月の光に当てられて、幻でも見ていたのだろうか？
+	PRINTFORMW 惊讶地仰望天空，月亮已经完全被云彩遮住看不见了
+	;TranslatedMark 訝しげに空を見上げると月はすっかり雲に隠れて見えなくなっていた
+	CFLAG:対象:好感度 = MAX(CFLAG:対象:好感度, 300)
+	CFLAG:対象:面識 = 1
+	KDVAR:対象:影狼_月夜の散歩 = 1
+ENDIF
+
+
+RETURN 1
+

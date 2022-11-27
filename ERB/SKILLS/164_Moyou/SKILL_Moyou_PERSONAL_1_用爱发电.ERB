@@ -1,0 +1,184 @@
+;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_164_PERSONAL_1_EXIST
+RETURN 1
+
+@SKILL_164_PERSONAL_1_NAME
+RESULTS = 用爱发电
+
+;レベルは1-5まで
+@SKILL_164_PERSONAL_1_LEVEL
+RETURN SKILL_164_PERSONAL_1_CHECK_LEVEL()
+
+;対象選択
+@SKILL_164_PERSONAL_1_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1
+
+;発動判定
+@SKILL_164_PERSONAL_1_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN CFLAG:発動者:好感度 > 500 && CFLAG:発動者:所属 == CFLAG:MASTER:所属
+
+;発動テキストをオーバライドしたいときに。
+;「誰それのスキル発動！　○○した！」の「○○した！」の部分を実装したい場合は、
+;これじゃなくてINVOKEで書けばいいです。
+;@SKILL_164_PERSONAL_1_INVOKE_TEXT(発動者, スキル, ジャンル)
+;#DIM 発動者
+;#DIM スキル
+;#DIMS ジャンル
+
+;効果をここに記述
+@SKILL_164_PERSONAL_1_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+PRINTFORML Moyou在汉化群里@了全体成员！
+PRINTFORML 经过汉化组各位的努力，最终产生了意想不到的效果——
+SELECTCASE SKILL_164_PERSONAL_1_CHECK_LEVEL()
+	CASE 1
+        PRINTFORML 汉化组的热情吸引了一众有志之士！
+        CALL INCREASE_SOLDIER(発動勢力, 発動部隊, 300, 1)
+	CASE 2
+        SELECTCASE RAND:2
+            CASE 0
+                PRINTFORML 汉化组的热情吸引了一众有志之士！
+                CALL INCREASE_SOLDIER(発動勢力, 発動部隊, RAND(400, 600), 1)
+            CASE 1
+                PRINTFORML 汉化组的热情激励了Moyou！
+                TIMES BATTLE_武闘パワー:発動側:発動番号, 1.1
+                TIMES BATTLE_防衛パワー:発動側:発動番号, 1.1
+        ENDSELECT
+	CASE 3
+        SELECTCASE RAND:3
+            CASE 0
+                PRINTFORML 汉化组的热情吸引了一众有志之士！
+                CALL INCREASE_SOLDIER(発動勢力, 発動部隊, RAND(500, 900), 1)
+            CASE 1
+                PRINTFORML 汉化组的热情激励了Moyou！
+                TIMES BATTLE_武闘パワー:発動側:発動番号, 1.15
+                TIMES BATTLE_防衛パワー:発動側:発動番号, 1.15
+            CASE 2
+                PRINTFORML 汉化组的热情感染了我方将领！
+                FOR LOCAL, 0, BATTLE_COMMANDER_NUM:発動側
+	                TIMES BATTLE_武闘パワー:発動側:LOCAL, 1.06
+	                TIMES BATTLE_防衛パワー:発動側:LOCAL, 1.06
+                NEXT
+        ENDSELECT
+	CASE 4
+        SELECTCASE RAND:4
+            CASE 0
+                PRINTFORML 汉化组的热情吸引了一众有志之士！
+                CALL INCREASE_SOLDIER(発動勢力, 発動部隊, RAND(600, 1200), 1)
+            CASE 1
+                PRINTFORML 汉化组的热情激励了Moyou！
+                TIMES BATTLE_武闘パワー:発動側:発動番号, 1.2
+                TIMES BATTLE_防衛パワー:発動側:発動番号, 1.2
+            CASE 2
+                PRINTFORML 汉化组的热情感染了我方将领！
+                FOR LOCAL, 0, BATTLE_COMMANDER_NUM:発動側
+	                TIMES BATTLE_武闘パワー:発動側:LOCAL, 1.08
+	                TIMES BATTLE_防衛パワー:発動側:LOCAL, 1.08
+                NEXT
+            CASE 3
+                PRINTFORML 汉化组的热情震慑了敌方将领！
+                FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
+	                TIMES BATTLE_武闘パワー:対象側:LOCAL, 0.96
+	                TIMES BATTLE_防衛パワー:対象側:LOCAL, 0.96
+                NEXT
+        ENDSELECT
+	CASE 5
+        SELECTCASE RAND:5
+            CASE 0
+                PRINTFORML 汉化组的热情吸引了一众有志之士！
+                CALL INCREASE_SOLDIER(発動勢力, 発動部隊, RAND(700, 1500), 1)
+            CASE 1
+                PRINTFORML 汉化组的热情激励了Moyou！
+                TIMES BATTLE_武闘パワー:発動側:発動番号, 1.25
+                TIMES BATTLE_防衛パワー:発動側:発動番号, 1.25
+            CASE 2
+                PRINTFORML 汉化组的热情感染了我方将领！
+                FOR LOCAL, 0, BATTLE_COMMANDER_NUM:発動側
+	                TIMES BATTLE_武闘パワー:発動側:LOCAL, 1.1
+	                TIMES BATTLE_防衛パワー:発動側:LOCAL, 1.1
+                NEXT
+            CASE 3
+                PRINTFORML 汉化组的热情震慑了敌方将领！
+                FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
+	                TIMES BATTLE_武闘パワー:対象側:LOCAL, 0.95
+	                TIMES BATTLE_防衛パワー:対象側:LOCAL, 0.95
+                NEXT
+            CASE 4
+                PRINTFORML 汉化组偷改了敌人的数据
+                CALL DECREASE_SOLDIER(対象勢力, 対象部隊, RAND(2000, 2500), 1)
+        ENDSELECT
+ENDSELECT
+
+@SKILL_164_PERSONAL_1_EXPLANATION
+RESULTS = 当主人公与Moyou同属同一势力时触发。基于Moyou的好感度，随机获得不同的效果。
+
+@SKILL_164_PERSONAL_1_CANT_TELL
+
+@SKILL_164_PERSONAL_1_CHECK_LEVEL()
+#FUNCTION
+LOCAL = NAME_TO_CHARA("Moyou")
+SIF LOCAL < 0
+	RETURNF 0
+SELECTCASE CFLAG:LOCAL:好感度
+	CASE IS < 750
+		RETURNF 1
+	CASE IS < 2500
+		RETURNF 2
+	CASE IS < 7500
+		RETURNF 3
+	CASE IS < 15000
+		RETURNF 4
+	CASEELSE
+		RETURNF 5
+ENDSELECT
+RETURNF 1
+
+@SKILL_164_PERSONAL_1_IS_RATE_VARIABLE
+RETURN 1
+
+@SKILL_164_PERSONAL_1_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN (200 + SKILL_164_PERSONAL_1_CHECK_LEVEL() * 20)

@@ -1,0 +1,161 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_DRUG_ADDICT_RATE()
+RETURN 1000
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_DRUG_ADDICT_DECISION()
+RETURN 1
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_DRUG_ADDICT_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_DRUG_ADDICT_SETTARGET()
+FOR LOCAL, 0, CHARANUM
+	IF !CFLAG:LOCAL:捕虜先 && CFLAG:LOCAL:特殊状態 != 特殊状態_死亡 && IS_FEMALE(LOCAL)
+		;CFLAG:薬物依存に応じて判定（最大30）。TALENT薬物依存持ちだと50%まで増加。
+		IF (GETBIT(TALENT:LOCAL:淫乱系, 素質_淫乱_薬物中毒) ? 50 # MIN(CFLAG:LOCAL:薬物依存 / 7, 30)) > RAND:100
+			DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+			DAILY_TARGET_NUM ++
+		ENDIF
+	ENDIF
+NEXT
+
+SIF DAILY_TARGET_NUM < 1
+	RETURN 0
+RETURN 1
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_DRUG_ADDICT()
+#DIM 対象
+#DIMS 竿役
+
+FOR LOCAL, 0, DAILY_TARGET_NUM
+	対象 = DAILY_TARGET:LOCAL
+	PRINTFORMW %ANAME(対象)%因為藥物的禁斷症狀而感到痛苦……
+	SELECTCASE RAND:13
+		CASE 0
+			PRINTFORML %ANAME(対象)%因症狀而痛苦不堪時，被一個可疑的藥商發現了
+			PRINTFORML 藥商要求%ANAME(対象)%的肉體作為藥物的交換條件
+			PRINTFORML 如果能得到藥的話，自己的貞操怎麼都沒所謂。%ANAME(対象)%脫掉身上的衣服，與藥商交合……
+			PRINTFORML 男人將藥物扔向全身沾滿精液躺在床上的%ANAME(対象)%後便離去了
+			竿役 = 麻薬販子
+		CASE 1
+			PRINTFORML %ANAME(対象)%為了賺取藥費，作為娼婦工作了
+			PRINTFORML %ANAME(対象)%的性愛技術，令客人感到非常滿意
+			PRINTFORML %ANAME(対象)%被無數男人買下，並在肉穴裏注入精液
+			PRINTFORML %ANAME(対象)%被奸污一整天後獲得少量的錢，只足以買到一點點藥物……
+			竿役 = 娼館的客人
+		CASE 2
+			PRINTFORML %ANAME(対象)%被惡劣的男人們輪姦了
+			PRINTFORML 想要獲得藥物的話，就拿自己的肉體來換
+			PRINTFORML 對於因禁斷症狀而痛苦的%ANAME(対象)%來說，選擇只有一個
+			PRINTFORML 男人們發出咯咯的笑聲，%ANAME(対象)%身上所有穴一個一個被塞入肉棒
+			PRINTFORML 不久後，男人們將藥扔向全身沾滿精液發呆的%ANAME(対象)%……
+			竿役 = 地痞
+		CASE 3
+			PRINTFORML %ANAME(対象)%一邊嘿嘿地笑着，一邊被男人們輪姦了
+			PRINTFORML 貧民街的惡漢們將奇怪的藥賣給%ANAME(対象)%後，%ANAME(対象)%就當場使用了
+			PRINTFORML 明明被人侵犯，%ANAME(対象)%卻看起來很幸福，主動在男人上面扭腰
+			PRINTFORML 當男人在膣内注入大量的種子時，%ANAME(対象)%受不了挺起腰高潮了……
+			竿役 = 地痞
+		CASE 4
+			PRINTFORML %ANAME(対象)%為了買藥，向偶遇的男人出賣身體了
+			PRINTFORML 被帶入旅館後，%ANAME(対象)%主動積極地擼着、吸吮着男人的肉棒，跨坐在男人上面扭腰
+			PRINTFORML 男人在射精五次以上後，付了不少錢……
+			PRINTFORML %ANAME(対象)%賺到的錢，只足以買少量的藥……
+			竿役 = 偶遇的男人
+		CASE 5
+			PRINTFORML %ANAME(対象)%為了買藥，向偶遇的男人出賣身體
+			PRINTFORML ……但，與當地黑幫視線接觸時，%ANAME(対象)%就被人綁架了！
+			PRINTFORML 那麼想要藥的話就試試這個吧，他們這樣說着，並對%ANAME(対象)%注射可疑的藥
+			PRINTFORML %ANAME(対象)%很快受到藥效影響，嘿嘿地空虛笑着，男人們開始一個一個侵犯着%ANAME(対象)%……
+			PRINTFORML 他們狠狠地輪姦%ANAME(対象)%後，將渾身精液的%ANAME(対象)%丟到暗巷之中……
+			PRINTFORML 由於可疑藥物的效果，%ANAME(対象)%藥物中毒症狀變得更嚴重了
+			竿役 = 地痞
+		CASE 6
+			PRINTFORML 受到藥物效果影響變得奇怪的%ANAME(対象)%，被流浪漢搭訕了
+			PRINTFORML %ANAME(対象)%主動地吸吮充滿污垢的肉棒，主動打開雙腿與其性交
+			PRINTFORML  子宮被肉棒不斷撞擊， 將要將意識吹飛般的快感向%ANAME(対象)%襲來……
+			PRINTFORML 男人離開後，只剩下%ANAME(対象)%，白濁的精液從被內射了幾次的肉穴中流出……
+			竿役 = 流浪漢
+		CASE 7
+			PRINTFORML %ANAME(対象)%為了買藥，去表演脫衣舞了
+			PRINTFORML 穿著下流的衣服站在舞台上，跳着強調乳房和陰部的舞蹈
+			PRINTFORML 將衣服脫掉，並用手來回责弄着露出在外，已經十分濕潤的雌穴
+			PRINTFORML 不久興奮的客人爬上舞台，脫衣秀變成輪姦秀了……
+			PRINTFORML %ANAME(対象)%獲得了大量藥物作為表演報酬
+			竿役 = 跳脱衣舞时的客人
+		CASE 8
+			PRINTFORML %ANAME(対象)%去拜訪在暗巷裏開店的可疑商人了
+			PRINTFORML 商人好心地當場免費贈送藥物給%ANAME(対象)%
+			PRINTFORML 獲得藥物後立即使用的%ANAME(対象)%意識變得朦朧後，被商人推倒，扒光衣服，開始侵犯了
+			PRINTFORML 明明被強姦，%ANAME(対象)%卻因為藥物的效力而快樂得失常，乞求著膣内射精
+			PRINTFORML 結果少女離開商店時，膣内被內射次數一隻手都數不完……
+			PRINTFORML 明明被人侵犯了，少女卻為了獲得更多藥物打算以後再拜訪商店……
+			竿役 = 麻薬販子
+		CASE 9
+			PRINTFORML 為了求得藥物，%ANAME(対象)%拜訪了在暗巷的可疑商人
+			PRINTFORML %ANAME(対象)%說出自己沒有錢後，商人要求%ANAME(対象)%與自己做愛來換取藥物
+			PRINTFORML 為了獲得藥，%ANAME(対象)%自行脫掉衣服，背向商人雙手扶着牆挺起了屁股
+			PRINTFORML 商人一邊嘲笑着%ANAME(対象)%的姿態，一邊將陰莖放進少女的肉穴之中……
+			PRINTFORML 少女的喘嬌聲響遍暗巷……
+			PRINTFORML %ANAME(対象)%獲得藥物，就是肉穴被灌入大量白濁精液後的事了
+			竿役 = 麻薬販子
+		CASE 10
+			PRINTFORML %ANAME(対象)%被男人們輪姦，並露出下流的啊嘿顏
+			PRINTFORML 可疑的男人提供藥物給%ANAME(対象)%注射後，將處於迷眩狀態的%ANAME(対象)%賣給其他男人
+			PRINTFORML 口內、菊穴、雌穴都被肉棒插入和抽送，強烈的快樂沖擊著%ANAME(対象)%的腦袋……
+			PRINTFORML 完事後，賣藥的男人將一點小錢丟給全身沾滿精液倒在地上的%ANAME(対象)%……
+			IF CFLAG:対象:所属 == CFLAG:MASTER:所属
+				CALL COLOR_PRINTL("获得了<1>金", カラー_注意)
+				MONEY += 1
+			ENDIF
+			竿役 = 地痞
+		CASE 11
+			PRINTFORML %ANAME(対象)%去拜訪賣藥的人了
+			PRINTFORML 要是能做白老鼠幫忙實驗新藥的話就用格外便宜的價錢賣給你，%ANAME(対象)%聽到後毫不猶豫答應了
+			PRINTFORML 將新藥喝下後，強烈的迷眩感向%ANAME(対象)%襲來
+			PRINTFORML 流著口水，全身痙攣的%ANAME(対象)%被賣藥人推倒在地，強行侵犯了……
+			PRINTFORML 完事後，%ANAME(対象)%得到了約定好的藥物
+			竿役 = 麻薬販子
+		CASE 12
+			PRINTFORML 我沒有錢請賣藥給我，被%ANAME(対象)%拜託了的賣藥人，要求%ANAME(対象)%拿身體來交換
+			PRINTFORML 為了藥物做甚麼也可以，%ANAME(対象)%自行脫掉衣服，開始吸吮賣藥人的肉棒
+			PRINTFORML 是因為很滿意%ANAME(対象)%的奉仕嗎，賣藥人將注射器刺入%ANAME(対象)%的脖子，注入強烈的藥物
+			PRINTFORML 途中，%ANAME(対象)%因為幻覺，開始說着下流的話語
+			PRINTFORML 賣藥人推倒了%ANAME(対象)%，在肉穴中灌入了滿滿的精液……
+			竿役 = 麻薬販子
+	ENDSELECT
+	CALL FUCK_RAPE(対象, GET_SPERM_ID("地痞"), @"%竿役%的\@ RAND:2 ? 肉棒 # 嘴唇\@", @"%竿役%")
+	CFLAG:対象:薬物依存 += RAND(50, 100)
+
+	PRINTFORMW
+NEXT
+RETURN 1
+
+@EVENT_DAILY_DRUG_ADDICT_ALLOW_WHEN_WANDERING
+RETURN 1
+

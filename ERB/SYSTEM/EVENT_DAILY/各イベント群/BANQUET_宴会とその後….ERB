@@ -1,0 +1,101 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_BANQUET_RATE()
+RETURN 30
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_BANQUET_DECISION()
+SIF DAY < 15
+	RETURN 0
+
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_BANQUET_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_BANQUET()
+#DIM 対象
+
+PRINTFORML 好像召開了慰勞用的宴會
+PRINTFORMW %ANAME(MASTER)%要怎麼做？
+CALL ASK_MULTI("獨自参加" ,"邀請他人" ,"不参加")
+IF RESULT == 2
+	PRINTFORML 很可惜現在很忙
+	PRINTFORMW 決定這次不参加
+ELSEIF RESULT == 0
+	PRINTFORMW 決定獨自参加
+	PRINTFORML …
+	PRINTFORML ……
+	PRINTFORMW ………
+	PRINTFORML 是非常愉快的宴會
+	PRINTFORMW %ANAME(MASTER)%心滿意足的回到了房間
+	CALL PRINT_ADD_EXP(MASTER, "肝臓経験値", RAND(100, 200), 1)
+	CALL TRAIN_AUTO_ABLUP(MASTER)
+ELSEIF RESULT == 1
+	PRINTFORML 機會難得就邀請下別人吧
+	PRINTFORMW 要邀請誰？
+	CALL SELECT_CHARA_LIST_ONLY_LOGIC_SLG("BANQUET", "NONE")
+	IF RESULT == -1
+		PRINTFORMW 還是決定這次不参加了
+		RETURN 1
+	ENDIF
+	対象 = RESULT
+	PRINTFORML 決定邀請%ANAME(対象)%
+	PRINTFORMW %ANAME(対象)%面対%ANAME(MASTER)%的邀請非常高興的應了下來
+	PRINTFORML …
+	PRINTFORML ……
+	PRINTFORMW ………
+	IF (CFLAG:対象:好感度 <= 1000 && CFLAG:対象:従属度 <= 1000)
+		PRINTFORML 是非常愉快的宴會
+		PRINTFORMW %ANAME(MASTER)%們心滿意足的分別了
+		CFLAG:対象:好感度 += RAND(100, 300)
+		CALL PRINT_ADD_EXP(MASTER, "肝臓経験値", RAND(100, 200), 1)
+		CALL PRINT_ADD_EXP(対象, "肝臓経験値", RAND(100, 200), 1)
+		CALL TRAIN_AUTO_ABLUP(MASTER)
+		CALL TRAIN_AUTO_ABLUP(対象)
+	ELSE
+		PRINTFORML 一短時間後宴會也到了高潮
+		PRINTFORMW %ANAME(MASTER)%正愉快地喝酒的時候突然間%ANAME(対象)%靠在了身上
+		PRINTFORML 似乎是被空気所感染而完全酔倒了
+		PRINTFORML 臉頰泛紅、呼吸加快、一直在嘟囔著什麼
+		PRINTFORML …那和往常不同的全身都是空隙樣子和那充滿色氣的神色迷離的臉龐讓%ANAME(MASTER)%不由得咽了口口水
+		PRINTFORMW 然後無法忍耐的以照顧的名義把她帯到了陰暗処
+		PRINTFORML 
+		PRINTFORML 在稍微遠離宴會場所的陰暗処隱隱約約傳來了%ANAME(対象)%微弱的喘息聲
+		PRINTFORMW %ANAME(MASTER)%讓她扶著墻壁、緊緊地抱著她的肢體激烈的頂著腰
+		PRINTFORML 渾身潮紅的她的反應比任何時間都要敏感、配合著%ANAME(MASTER)%的愛撫不停発出了可愛的嬌喘聲
+		PRINTFORML 但是還保留著最低程度的理性、為了不讓別人聽到而拼命的忍耐著
+		PRINTFORMW 因為快楽和羞恥而滿臉通紅眼中含淚的顫抖的表情更加刺激了%ANAME(MASTER)%、讓%ANAME(MASTER)%戳弄的動作愈発激烈了
+		PRINTFORML 雖然嘴上輕聲說著拒絕的話、但是她的身体反應非常老實、嬌艶地顫抖著
+		PRINTFORMW 那黏糊的肉穴緊緊地纏住了肉棒讓%ANAME(MASTER)%忍不住地用力挺腰挿入到了更深処
+		PRINTFORML 被頂弄到弱點的她大幅後仰発出了不成聲的嬌喘…并潮吹了
+		PRINTFORMW 儘管如此還忍耐著不発出太大聲音的她拼命地緊咬牙関、渾身痙攣顫抖著高潮了
+		PRINTFORMW 之後%ANAME(MASTER)%也沒有放過她、完全忘記了後面地同伴滿身大汗持續互相貪求著……
+		CALL FUCK(対象, "Ｃ, Ｂ, Ｖ, Ｍ, 欲望, 性交, 奉仕, 精愛, 口淫, 接吻, Ｖ性交", "処女喪失, 接吻喪失, 膣内射精", GET_ID(MASTER), @"%ANAME(MASTER)%の\@RAND:2 ? 肉棒 # 唇\@", ANAME(MASTER), "", "強姦")
+		CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣", "強姦")
+		CFLAG:対象:好感度 += RAND(200, 500)
+		CALL PRINT_ADD_EXP(MASTER, "肝臓経験値", RAND(100, 200), 1)
+		CALL PRINT_ADD_EXP(対象, "肝臓経験値", RAND(100, 200), 1)
+		CALL TRAIN_AUTO_ABLUP(MASTER)
+		CALL TRAIN_AUTO_ABLUP(対象)
+		PRINTFORMW 
+	ENDIF
+ENDIF
+
+RETURN 1
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_BANQUET(対象)
+#DIM 対象
+RETURN CFLAG:対象:行動不能状態 != 行動不能_子供 && CFLAG:対象:所属 == CFLAG:MASTER:所属 && !IS_ANIMAL(対象) && CFLAG:対象:捕虜先 == 0 && !IS_MALE(対象) && 対象 != MASTER

@@ -1,0 +1,1007 @@
+﻿;-------------------------------------------------
+;「テンタクル・ダイソン砲を起動する」
+;-------------------------------------------------
+@Colonial_Office_GOODS_EXECUTED_07
+#DIM FIRST_LINE
+#DIM 連邦ナンバー
+#DIM 対象
+
+;連邦ナンバーを検索
+FOR LOCAL:0, 0, MAX_COUNTRY
+	FOR LOCAL:1, 0, MAX_COUNTRY
+		IF TREATY_UNI_COUNTRY:(LOCAL:0):(LOCAL:1):0 == CFLAG:MASTER:所属 || TREATY_UNI_COUNTRY:(LOCAL:0):(LOCAL:1):1 == CFLAG:MASTER:所属
+			連邦ナンバー = LOCAL:0
+			BREAK
+		ENDIF
+	NEXT
+NEXT
+
+CALL SINGLE_DRAWLINE
+PRINTL 启动触手・戴森炮
+PRINTL 消費「触手能量」「3」使被触手陵辱的他国士官不能行动2回合
+PRINTFORML 现在的触手能量[@{RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:3}
+
+IF RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:3 < 3
+	PRINTW 触手能量不足
+	RETURN
+ENDIF
+
+FIRST_LINE = LINECOUNT
+
+$CHARA_LIST_LOOP
+
+PRINTL 攻撃対象选择
+CALL SINGLE_DRAWLINE
+
+
+CALL SELECT_CHARA_LIST_ONLY_LOGIC_SLG("TENTACLE_Dyson", "NONE")
+
+
+SIF RESULT == -1
+	RETURN 0
+
+対象 = RESULT
+
+;対象キャラの情報を表示
+FLAG:能力表示モード = 0
+CALL SINGLE_DRAWLINE
+CALL SHOW_INFO(対象)
+CALL SINGLE_DRAWLINE
+PRINTFORML 将这个角色作为触手・戴森炮的攻击对象吗？
+
+;はい／いいえ入力処理
+CALL ASK_YN()
+IF RESULT == 1
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO CHARA_LIST_LOOP
+ENDIF
+
+PRINTW 向触手・戴森炮注入触手能量……
+PRINTL
+PRINTL 一超过一定数量，被戴森球覆盖的触手就开始繁殖
+PRINTW 由于互相繁殖、那个塊急速膨胀
+PRINTL 
+PRINTL 打开炮口后，从狭窄的出口冒出了大量的触手!
+PRINTFORMW 顺势穿过固定在炮口前端的间隙、冲到了%ANAME(対象)%的眼前…
+PRINTL 
+
+IF CFLAG:対象:行動不能状態 == 行動不能_子供
+	IF HAS_PENIS(対象)
+		CALL FUCK(対象, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, Ｕ,苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手攻撃")
+		CALL FUCK(対象, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, Ｕ,苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手攻撃")
+	ELSE
+		CALL FUCK(対象, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, Ｕ,苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手攻撃")
+		CALL FUCK(対象, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, Ｕ,苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手攻撃")
+	ENDIF
+	PRINTFORMW 触手离开后留下的，只有被蹂躏了不成熟的身体，赤裸躺在那里的%ANAME(対象)%…
+	PRINTL
+	CALL ADD_COOLTIME(対象, 3)
+	CALL CHANGE_RELATION_C_TO_C(CFLAG:対象:所属, CFLAG:MASTER:所属, -750, 750)
+ELSE
+	IF HAS_PENIS(対象)
+		CALL FUCK(対象, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, Ｕ,苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手攻撃")
+		CALL FUCK(対象, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, Ｕ,苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手攻撃")
+	ELSE
+		CALL FUCK(対象, "欲望, 性技, 精愛, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, Ｕ,苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手攻撃")
+		CALL FUCK(対象, "欲望, 性技, 精愛, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ,Ｕ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手攻撃")
+	ENDIF
+	PRINTFORMW 触手离开后留下的，只有被蹂躏了身体，赤裸躺在那里的%ANAME(対象)%…
+	PRINTL
+	CALL ADD_COOLTIME(対象, 2)
+	CALL CHANGE_RELATION_C_TO_C(CFLAG:対象:所属, CFLAG:MASTER:所属, -500, 500)
+ENDIF
+RESTART
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_TENTACLE_Dyson(対象)
+#DIM 対象
+RETURN 対象 != MASTER && CFLAG:対象:所属 != CFLAG:MASTER:所属 && !CFLAG:対象:捕虜先 && CFLAG:対象:特殊状態 < 1
+
+;-------------------------------------------------
+;「Quasi-stellar Tentacle Obliteratorを起動する」本体
+;-------------------------------------------------
+@Colonial_Office_GOODS_EXECUTED_08
+#DIM 連邦ナンバー
+#DIM 対象
+#DIM 加工元識別ナンバー
+#DIM 種類
+#DIM 使用中記念品数
+#DIM 使用中生命の素数
+#DIM 組数
+#DIM 選択可能フラグ, 4
+#DIM 充填率加算
+
+;連邦ナンバーを検索
+FOR LOCAL:0, 0, MAX_COUNTRY
+	FOR LOCAL:1, 0, MAX_COUNTRY
+		IF TREATY_UNI_COUNTRY:(LOCAL:0):(LOCAL:1):0 == CFLAG:MASTER:所属 || TREATY_UNI_COUNTRY:(LOCAL:0):(LOCAL:1):1 == CFLAG:MASTER:所属
+			連邦ナンバー = LOCAL:0
+			BREAK
+		ENDIF
+	NEXT
+NEXT
+
+使用中記念品数 = 0
+使用中生命の素数 = 0
+;特殊使用中の記念品数を算定
+FOR 加工元識別ナンバー, 0, 999
+	FOR 種類, 1, 7
+		IF TYPE_GOODS_EXECUTED:加工元識別ナンバー:種類:1 == 3
+			使用中記念品数 ++
+		ENDIF
+	NEXT
+NEXT
+;特殊使用中の記念品数を算定
+FOR 加工元識別ナンバー, 0, 999
+	IF TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:0 == 3 || TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:1 == 3
+		使用中生命の素数 ++
+	ENDIF
+NEXT
+
+組数 = MIN(使用中記念品数, 使用中生命の素数)
+
+選択可能フラグ:1 = 0
+選択可能フラグ:2 = 0
+選択可能フラグ:3 = 0
+
+CALL SINGLE_DRAWLINE
+PRINTL 启动类星触陨
+PRINTL 分别设置「幼小的纪念品」和「生命之素」之后，在回合结束时消耗「触手能量」来提高填充率
+PRINTL 作为核心的分组越多，转换效率就越高
+PRINTFORML 现在的触手能量[{RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:3}]
+PRINTFORML 现在的核心组数[　{組数}組]
+CALL SINGLE_DRAWLINE
+PRINTL
+PRINTBUTTON "[1]　纪念品的设置・撤下", 1
+PRINTFORML 　现在使用中的纪念品数　[　{使用中記念品数}個]
+PRINTBUTTON "[2]生命之素的设置・撤下", 2
+PRINTFORML 　现在使用中的生命之素数[　{使用中生命の素数}個]
+PRINTL
+; IF 組数 <= 0
+; 	PRINT 请分别设置1个以上的「纪念品」和「生命之素」
+; ELSEIF RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:3 <= 0
+; 	PRINT 需要「触手能量」来填充能量
+; ELSE
+; 	選択可能フラグ:1 = 1
+; 	PRINTBUTTON "[3]进行填充", 3
+; ENDIF
+PRINTFORML 　现在的填充率[{RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:4}％]
+PRINTL
+
+IF RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:4 < 30
+	PRINTFORML 填充率超过30％就可以摧毁部队
+ELSE
+	選択可能フラグ:2 = 1
+	PRINTBUTTON "[4]摧毁部队", 4
+	PRINTL 　消耗填充率30％
+ENDIF
+IF RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:4 < 100
+	PRINTFORML 填充率超过100％就可以摧毁城市
+ELSE
+	選択可能フラグ:3 = 1
+	PRINTBUTTON "[5]摧毁城市", 5
+	PRINTL 　消耗填充率100％
+ENDIF
+
+PRINTL
+PRINTBUTTON "999[取消]", 999
+PRINTL 
+
+REDRAW 0
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 999
+	REDRAW 1
+	RETURN
+
+; ELSEIF RESULT == 3 && 選択可能フラグ:1 == 1
+; 	RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:3 -= 1
+; 	充填率加算 = 組数 * 5
+; 	RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:4 += 充填率加算
+ELSEIF RESULT == 1
+	CALL Colonial_Office_GOODS_EXECUTED_08_GOODS_Child
+ELSEIF RESULT == 2
+	CALL Colonial_Office_GOODS_EXECUTED_08_GOODS_Foetation
+ELSEIF RESULT == 4 && 選択可能フラグ:2 == 1
+	CALL Colonial_Office_GOODS_EXECUTED_08_ATTACK_Unit
+ELSEIF RESULT == 5 && 選択可能フラグ:3 == 1
+	CALL Colonial_Office_GOODS_EXECUTED_08_ATTACK_City
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+RESTART
+
+;-------------------------------------------------
+;「Quasi-stellar Tentacle Obliteratorを起動する」記念品を設置・撤去する
+;-------------------------------------------------
+@Colonial_Office_GOODS_EXECUTED_08_GOODS_Child
+#DIM 加工元識別ナンバー
+#DIM 種類
+
+CALL SINGLE_DRAWLINE
+PRINTL 可以设置・撤去加工厂中正在育儿的孩子的纪念品
+PRINTL 各势力的态度每回合都会大幅恶化
+CALL SINGLE_DRAWLINE
+
+FOR 加工元識別ナンバー, 0, 999
+	FOR 種類, 0, 10
+		IF TYPE_GOODS_EXECUTED:加工元識別ナンバー:種類:1 == 1
+			SETCOLOR カラー_緑
+			PRINTBUTTON @"{加工元識別ナンバー}[%NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類%]", 加工元識別ナンバー
+			RESETCOLOR
+			PRINTL
+		ELSEIF TYPE_GOODS_EXECUTED:加工元識別ナンバー:種類:1 == 3
+			PRINTBUTTON @"{加工元識別ナンバー}[%NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類%]", 加工元識別ナンバー
+			SETCOLOR カラー_注意
+			PRINTL [使用中]
+			RESETCOLOR
+		ELSEIF TYPE_GOODS_EXECUTED:加工元識別ナンバー:種類:1 == 4 || TYPE_GOODS_EXECUTED:加工元識別ナンバー:種類:1 == 2
+			SETCOLOR カラー_灰色
+			PRINTFORM {加工元識別ナンバー}[%NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類%]
+			SETCOLOR カラー_警告
+			PRINTL [不能使用]
+			RESETCOLOR
+		ENDIF
+	NEXT
+NEXT
+
+CALL SINGLE_DRAWLINE
+PRINTBUTTON "999[取消]", 999
+PRINTL 
+
+REDRAW 0
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 999
+	REDRAW 1
+	RETURN
+
+ELSE
+	FOR 種類, 0, 10
+		IF TYPE_GOODS_EXECUTED:RESULT:種類:1 == 1
+			TYPE_GOODS_EXECUTED:RESULT:種類:1 = 3
+			RESTART
+		ELSEIF TYPE_GOODS_EXECUTED:RESULT:種類:1 == 3
+			TYPE_GOODS_EXECUTED:RESULT:種類:1 = 1
+			RESTART
+		ENDIF
+	NEXT
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+RESTART
+
+
+;-------------------------------------------------
+;「Quasi-stellar Tentacle Obliteratorを起動する」生命の素を設置・撤去する
+;-------------------------------------------------
+@Colonial_Office_GOODS_EXECUTED_08_GOODS_Foetation
+#DIM 加工元識別ナンバー
+
+CALL SINGLE_DRAWLINE
+PRINTL 生命之素的设置・撤下
+CALL SINGLE_DRAWLINE
+
+FOR 加工元識別ナンバー, 0, 999
+	IF TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:0 == 1 || TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:1 == 1
+		SETCOLOR カラー_緑
+		PRINTBUTTON @"{加工元識別ナンバー}[%NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:7%]", 加工元識別ナンバー
+		RESETCOLOR
+		PRINTL
+	ELSEIF TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:0 == 3 || TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:1 == 3
+		PRINTBUTTON @"{加工元識別ナンバー}[%NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:7%]", 加工元識別ナンバー
+		SETCOLOR カラー_注意
+		PRINTL [使用中]
+		RESETCOLOR
+	ELSEIF TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:0 == 4 || TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:1 == 4
+		SETCOLOR カラー_灰色
+		PRINTFORM {加工元識別ナンバー}[%NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:7%]
+		SETCOLOR カラー_警告
+		PRINTL [不能使用]
+		RESETCOLOR
+	ENDIF
+NEXT
+
+CALL SINGLE_DRAWLINE
+PRINTBUTTON "999[取消]", 999
+PRINTL 
+
+REDRAW 0
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 999
+	REDRAW 1
+	RETURN
+
+ELSEIF TYPE_GOODS_EXECUTED:RESULT:7:0 == 1
+	TYPE_GOODS_EXECUTED:RESULT:7:0 = 3
+ELSEIF TYPE_GOODS_EXECUTED:RESULT:7:1 == 1
+	TYPE_GOODS_EXECUTED:RESULT:7:1 = 3
+ELSEIF TYPE_GOODS_EXECUTED:RESULT:7:0 == 3
+	TYPE_GOODS_EXECUTED:RESULT:7:0 = 1
+ELSEIF TYPE_GOODS_EXECUTED:RESULT:7:1 == 3
+	TYPE_GOODS_EXECUTED:RESULT:7:1 = 1
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+RESTART
+
+
+;-------------------------------------------------
+;「Quasi-stellar Tentacle Obliteratorを起動する」部隊を破壊する
+;-------------------------------------------------
+@Colonial_Office_GOODS_EXECUTED_08_ATTACK_Unit
+#DIM FIRST_LINE
+#DIM 連邦ナンバー
+#DIM 連邦構成国, MAX_COUNTRY
+#DIM 対象勢力
+#DIM 対象勢力名
+#DIM 選択可能フラグ, MAX_UNIT
+#DIM 対象部隊
+#DIM 部隊存在フラグ
+#DIM 対象部隊士官, 4
+
+;連邦ナンバー・連邦構成国を検索
+FOR LOCAL:0, 0, MAX_COUNTRY
+	FOR LOCAL:1, 0, MAX_COUNTRY
+		IF TREATY_UNI_COUNTRY:(LOCAL:0):(LOCAL:1):0 == CFLAG:MASTER:所属 || TREATY_UNI_COUNTRY:(LOCAL:0):(LOCAL:1):1 == CFLAG:MASTER:所属
+			連邦ナンバー = LOCAL:0
+			連邦構成国:(CFLAG:MASTER:所属) = 1
+			BREAK
+		ENDIF
+	NEXT
+NEXT
+
+PRINTFORML 请选择要攻击的敌对势力
+CALL Colonial_Office_indicate_3
+
+IF RESULT == 0
+	RETURN 0
+ENDIF
+
+対象勢力 = RESULT
+対象勢力名 = GET_COUNTRY_BOSS(対象勢力)
+
+PRINTFORML 接下来,请选择要攻击的部队
+CALL SINGLE_DRAWLINE
+
+FIRST_LINE = LINECOUNT
+$SHOW_LOOP
+部隊存在フラグ = 0
+VARSET 選択可能フラグ
+FOR LOCAL:0, 0, MAX_UNIT
+	IF UNIT_SOLDIER:対象勢力:(LOCAL:0) > 0
+		部隊存在フラグ = 1
+		選択可能フラグ:(LOCAL:0) = 1
+		PRINTBUTTON @"{LOCAL:0 + 1, 2}[  部隊{LOCAL:0 + 1, 2}]", LOCAL:0 + 1
+		PRINT   
+		CALL SHOW_UNIT_INFO(対象勢力, LOCAL:0, 12)
+		RESETCOLOR
+	ENDIF
+NEXT
+IF !部隊存在フラグ
+	PRINTFORML 现在的对象势力中没有正在编成的部队
+ENDIF
+
+PRINTBUTTON " 0[取消]", 0
+PRINTL 
+
+REDRAW 0
+
+$INPUT_LOOP
+INPUT
+
+SIF RESULT == 0
+	RETURN
+
+対象部隊 = RESULT - 1
+
+IF 選択可能フラグ:対象部隊 != 1
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+
+PRINTFORML 要使用「类星触陨」进行攻击吗？
+
+;はい／いいえ入力処理
+CALL ASK_YN()
+IF RESULT == 1
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ENDIF
+
+対象部隊士官:0 = GET_UNIT_COMMANDER(対象勢力, 対象部隊, 0)
+対象部隊士官:1 = GET_UNIT_COMMANDER(対象勢力, 対象部隊, 1)
+対象部隊士官:2 = GET_UNIT_COMMANDER(対象勢力, 対象部隊, 2)
+RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:4 -= 30
+
+;部隊マップを更新
+CALL TMP_MODIFY_UNIT_MAP(対象勢力, 対象部隊, UNIT_POSITION:対象勢力:対象部隊)
+
+UNIT_SOLDIER:対象勢力:対象部隊 = 0
+UNIT_POSITION:対象勢力:対象部隊 = 0
+UNIT_TARGET:対象勢力:対象部隊 = 0
+UNIT_COMMANDER:対象勢力:対象部隊 = 0
+UNIT_TIRED_COUNT:対象勢力:対象部隊 = 0
+UNIT_CAPTURE_CITY:対象勢力:対象部隊 = 0
+UNIT_FBATTLE:対象勢力:対象部隊 = 0
+
+PRINTFORML 「类星触陨」发生出了绝顶光线
+PRINTFORML 尽管只是最大输出功率的30％，但是%ANAME(対象勢力名)%势力的士兵全部都「升天」了…
+
+FOR LOCAL:0, 0, 3
+	IF 対象部隊士官:(LOCAL:0) >= 0
+		PRINTFORML 被卷入到绝顶光线中的%ANAME(対象部隊士官:(LOCAL:0))%，在一瞬间中体会到了一生级别的快感
+		PRINTFORML 连昏厥都做不到，持续体会着绝顶地狱…
+		PRINTL
+		CALL FUCK(対象部隊士官:(LOCAL:0), "欲望, 欲望, Ｃ, Ｃ, Ｖ, Ｖ, Ｂ, Ｂ, Ａ, Ａ, Ｍ, Ｍ, Ｕ, Ｕ, 排泄, 苦痛快楽, 被虐, 苦痛快楽, 被虐", "CFLAG減少, 性癖取得")
+		CALL FUCK(対象部隊士官:(LOCAL:0), "欲望, 欲望, Ｃ, Ｃ, Ｖ, Ｖ, Ｂ, Ｂ, Ａ, Ａ, Ｍ, Ｍ, Ｕ, Ｕ, 排泄, 苦痛快楽, 被虐, 苦痛快楽, 被虐", "CFLAG減少, 性癖取得")
+		CALL ADD_COOLTIME(対象部隊士官:(LOCAL:0), 5)
+	ENDIF
+NEXT
+
+PRINTFORMW %ANAME(対象勢力名)%势力的态度大大恶化了
+CALL CHANGE_RELATION_C_TO_C(対象勢力, CFLAG:MASTER:所属, -750, 750)
+
+;-------------------------------------------------
+;「Quasi-stellar Tentacle Obliteratorを起動する」都市を攻撃する
+;-------------------------------------------------
+@Colonial_Office_GOODS_EXECUTED_08_ATTACK_City
+#DIM FIRST_LINE
+#DIM 連邦ナンバー
+#DIM 連邦構成国, MAX_COUNTRY
+#DIM 都市
+#DIMS 都市名
+#DIM 対象勢力
+#DIM 対象勢力名
+
+;連邦ナンバー・連邦構成国を検索
+FOR LOCAL:0, 0, MAX_COUNTRY
+	FOR LOCAL:1, 0, MAX_COUNTRY
+		IF TREATY_UNI_COUNTRY:(LOCAL:0):(LOCAL:1):0 == CFLAG:MASTER:所属 || TREATY_UNI_COUNTRY:(LOCAL:0):(LOCAL:1):1 == CFLAG:MASTER:所属
+			連邦ナンバー = LOCAL:0
+			連邦構成国:(CFLAG:MASTER:所属) = 1
+			BREAK
+		ENDIF
+	NEXT
+NEXT
+
+FOR LOCAL:0, 0, MAX_COUNTRY
+	IF TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:0):0 > 0
+		連邦構成国:(TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:0):0) = 1
+	ELSEIF TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:0):1 > 0
+		連邦構成国:(TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:0):1) = 1
+	ENDIF
+NEXT
+
+PRINTFORML 请选择要攻击的敌对势力
+CALL SINGLE_DRAWLINE
+
+FIRST_LINE = LINECOUNT
+$SHOW_LOOP
+CALL SET_CITY_COLOR_COUNTRY
+CALL SET_CITY_COLOR_UNIT
+CALL DRAWMAP
+CALL RESET_CITY_COLOR
+CALL SINGLE_DRAWLINE
+
+PRINTBUTTON " 0[取消]", 0
+PRINTL 
+
+REDRAW 0
+
+$INPUT_LOOP
+INPUT
+
+SIF RESULT == 0
+	RETURN
+
+IF !INRANGE(RESULT, 1000, 1000 + MAX_CITY - 1)
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+
+都市 = RESULT - 1000
+都市名 = %GET_RELAYNAME(都市)%
+対象勢力 = CITY_OWNER:都市
+対象勢力名 = GET_COUNTRY_BOSS(対象勢力)
+
+IF 連邦構成国:対象勢力 == 1
+	PRINTFORMW 不能攻击自国・従属国・宗主国・永久同盟国的领土
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+
+;対象キャラの情報を表示
+CALL SINGLE_DRAWLINE
+CALL SHOW_CITY_INFO(都市)
+CALL SINGLE_DRAWLINE
+PRINTFORM 你真的要攻击这个城市吗？
+SETCOLOR カラー_警告
+PRINTFORML (你将会与整个幻想乡为敌！)
+RESETCOLOR
+;はい／いいえ入力処理
+CALL ASK_YN()
+IF RESULT == 1
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO SHOW_LOOP
+ENDIF
+
+PRINTFORML 充能达到极限的「类星触陨」所发射出的最大功率绝顶光线包围了%都市名%
+PRINTFORML 街上的居民，不分男女老幼，瞬间全部「升天」了…
+PRINTW …………
+PRINTL
+
+CITY_ECONOMY:都市 = 50
+CITY_ECONOMY_LIMIT:都市 = 50
+CITY_SOLDIER:都市 = 100
+RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:4 -= 100
+
+FOR LOCAL, 1, MAX_COUNTRY
+	SIF !IS_COUNTRY(LOCAL) || LOCAL == CFLAG:MASTER:所属 || 連邦構成国:(LOCAL) == 1
+		CONTINUE
+	CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -3000, 3000)
+NEXT
+IF FORMED_PanGENSOKYO_Defense_League == 1
+	PRINTFORMW 面对这又一次的暴行，各方势力都感受到极度的愤怒…
+ELSE
+	PRINTFORML 有可能导致幻想乡崩溃的武器，被用在了攻击城市的暴行中
+	PRINTFORML %ANAME(対象勢力名)%呼吁全部势力团结起来，一致对抗这一「危机」！
+	PRINTL
+	IF IS_SP_COUNTRY(対象勢力)
+		PRINTFORML 但是，作为到现在为止一直在威胁幻想乡的%ANAME(対象勢力名)%所说的话
+		PRINTW 没有人愿意去听…
+		PRINTL
+	ELSE
+		CALL Colonial_Office_GOODS_EXECUTED_08_ATTACK_City_FORM_PanGENSOKYO(対象勢力)
+		SETCOLOR カラー_警告
+		PRINTFORML 响应%ANAME(対象勢力名)%号召的势力，被%ANAME(対象勢力名)%势力所统合在了一起！
+		RESETCOLOR
+		FORMED_PanGENSOKYO_Defense_League = 1
+		PRINTW 标榜为「泛幻想乡防卫同盟」的那个集团，能够成为我们的障碍，吗…？
+		PRINTL
+	ENDIF
+ENDIF
+
+RETURN
+
+;-------------------------------------------------
+;「Quasi-stellar Tentacle Obliteratorを起動する」汎幻想郷防衛同盟
+;-------------------------------------------------
+@Colonial_Office_GOODS_EXECUTED_08_ATTACK_City_FORM_PanGENSOKYO(ARG:0)
+#DIM 対象勢力名
+#DIM 併合勢力名
+#DIM 連邦ナンバー
+#DIM 連邦構成国, MAX_COUNTRY
+
+;連邦ナンバー・連邦構成国を検索
+FOR LOCAL:0, 0, MAX_COUNTRY
+	FOR LOCAL:1, 0, MAX_COUNTRY
+		IF TREATY_UNI_COUNTRY:(LOCAL:0):(LOCAL:1):0 == CFLAG:MASTER:所属 || TREATY_UNI_COUNTRY:(LOCAL:0):(LOCAL:1):1 == CFLAG:MASTER:所属
+			連邦ナンバー = LOCAL:0
+			連邦構成国:(CFLAG:MASTER:所属) = 1
+			BREAK
+		ENDIF
+	NEXT
+NEXT
+
+FOR LOCAL:0, 0, MAX_COUNTRY
+	IF TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:0):0 > 0
+		連邦構成国:(TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:0):0) = 1
+	ELSEIF TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:0):1 > 0
+		連邦構成国:(TREATY_UNI_COUNTRY:連邦ナンバー:(LOCAL:0):1) = 1
+	ENDIF
+NEXT
+
+対象勢力名 = GET_COUNTRY_BOSS(ARG:0)
+FOR LOCAL:0, 0, MAX_COUNTRY
+
+	IF 連邦構成国:(LOCAL:0) == 1 || IS_SP_COUNTRY(LOCAL:0) || !IS_COUNTRY(LOCAL:0) || LOCAL:0 == ARG:0
+		CONTINUE
+	ENDIF
+
+	併合勢力名 = GET_COUNTRY_BOSS(LOCAL:0)
+	PRINTFORML %ANAME(併合勢力名)%赞同了%ANAME(対象勢力名)%
+	;兵数の移動
+	CALL CLEAR_ALL_UNIT(LOCAL:0)
+	COUNTRY_SOLDIER:(ARG:0) += COUNTRY_SOLDIER:(LOCAL:0)
+	COUNTRY_SOLDIER:(LOCAL:0) = 0
+	
+	;領地の接収
+	FOR LOCAL:1, 0, MAX_CITY
+		IF CITY_OWNER:(LOCAL:1) == LOCAL:0
+			CITY_OWNER:(LOCAL:1) = ARG:0
+		ENDIF
+	NEXT
+	
+	;士官の組み込み
+	FOR LOCAL:1, 0, CHARANUM
+		IF CFLAG:(LOCAL:1):所属 == LOCAL:0
+			;捕虜でない、または自勢力の捕虜であるとき、そのまま自勢力に所属変更、解放
+			IF !CFLAG:(LOCAL:1):捕虜先 || CFLAG:(LOCAL:1):捕虜先 == ARG:0
+				CALL CHANGE_COUNTRY(LOCAL:1, ARG:0, 1)
+			ELSE
+				;第三勢力にとらわれているとき、所属だけ自勢力に変える
+				CALL CHANGE_COUNTRY(LOCAL:1, ARG:0)
+			ENDIF
+		ENDIF
+	NEXT
+	
+	;LOCAL:0勢力の捕虜となっていたキャラの処理
+	;LOCAL:0勢力が捕虜持ってるか
+	IF CMATCH(CFLAG:捕虜先, LOCAL:0)
+		FOR LOCAL:1, 0, CHARANUM
+			IF CFLAG:(LOCAL:1):捕虜先 == LOCAL:0
+				;自陣営の士官なら、そのまま元に取消
+				IF CFLAG:(LOCAL:1):所属 == ARG:0
+					CALL CAPTURE(LOCAL:1, 0)
+				ENDIF
+			ENDIF
+		NEXT
+		FOR LOCAL:1, 0, CHARANUM
+			IF CFLAG:(LOCAL:1):捕虜先 == LOCAL:0
+				;第三勢力の士官なら、一旦所属はそのままに捕虜とする
+				CALL CAPTURE(LOCAL:1, ARG:0)
+			ENDIF
+		NEXT
+	ENDIF
+
+	;旧勢力の後始末
+	CALL DESTROY_COUNTRY(LOCAL:0)
+	
+NEXT
+
+
+;-------------------------------------------------
+;「マトリョーシ姦ブレインを起動する」本体
+;-------------------------------------------------
+@Colonial_Office_GOODS_EXECUTED_09
+#DIM 連邦ナンバー
+#DIM 対象
+#DIM 加工元識別ナンバー
+#DIM 種類
+#DIM 使用中記念品数
+#DIM 使用中生命の素数
+#DIM 組数
+#DIM 選択可能フラグ, 4
+#DIM 充填率加算
+
+;連邦ナンバーを検索
+FOR LOCAL:0, 0, MAX_COUNTRY
+	FOR LOCAL:1, 0, MAX_COUNTRY
+		IF TREATY_UNI_COUNTRY:(LOCAL:0):(LOCAL:1):0 == CFLAG:MASTER:所属 || TREATY_UNI_COUNTRY:(LOCAL:0):(LOCAL:1):1 == CFLAG:MASTER:所属
+			連邦ナンバー = LOCAL:0
+			BREAK
+		ENDIF
+	NEXT
+NEXT
+
+使用中記念品数 = 0
+使用中生命の素数 = 0
+;特殊使用中の記念品数を算定
+FOR 加工元識別ナンバー, 0, 999
+	FOR 種類, 1, 7
+		IF TYPE_GOODS_EXECUTED:加工元識別ナンバー:種類:1 == 4
+			使用中記念品数 ++
+		ENDIF
+	NEXT
+NEXT
+;特殊使用中の記念品数を算定
+FOR 加工元識別ナンバー, 0, 999
+	IF TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:0 == 4 || TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:1 == 4
+		使用中生命の素数 ++
+	ENDIF
+NEXT
+
+組数 = MIN(使用中記念品数, 使用中生命の素数)
+
+選択可能フラグ:1 = 0
+選択可能フラグ:2 = 0
+選択可能フラグ:3 = 0
+
+CALL SINGLE_DRAWLINE
+PRINTL 启动矩阵奸脑
+PRINTL 分别设置「幼小的纪念品」和「生命之素」之后，在回合结束时可以消耗「高浓度精力」来获得研究点数
+PRINTL 作为核心的分组越多，转换效率就越高
+PRINTFORML "现在的高浓度精力量[{RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:2}]
+PRINTFORML 现在的核心组数　　[　{組数}組]
+CALL SINGLE_DRAWLINE
+PRINTL
+PRINTBUTTON "[1]　纪念品的设置・撤下", 1
+PRINTFORML 　现在使用中的纪念品数　　[　{使用中記念品数}個]
+PRINTBUTTON "[2]生命之素的设置・撤下", 2
+PRINTFORML 　现在使用中的生命之素数[　{使用中生命の素数}個]
+PRINTL
+; IF 組数 <= 0
+; 	PRINT 请分别设置1个以上的「纪念品」和「生命之素」
+; ELSEIF RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:2 <= 0
+; 	PRINT 「高浓度精力」数不足
+; ELSE
+; 	選択可能フラグ:1 = 1
+; 	PRINTBUTTON "[3]注入", 3
+; ENDIF
+PRINTL
+
+PRINTBUTTON "999[取消]", 999
+PRINTL 
+
+REDRAW 0
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 999
+	REDRAW 1
+	RETURN
+
+; ELSEIF RESULT == 3 && 選択可能フラグ:1 == 1
+; 	RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:2 -= 1
+; 	充填率加算 = 組数 * 10
+; 	RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属) += 充填率加算
+; 	PRINTFORML 获得研究点数{充填率加算}
+ELSEIF RESULT == 1
+	CALL Colonial_Office_GOODS_EXECUTED_09_GOODS_Child
+ELSEIF RESULT == 2
+	CALL Colonial_Office_GOODS_EXECUTED_09_GOODS_Foetation
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+RESTART
+
+
+;-------------------------------------------------
+;「マトリョーシ姦ブレインを起動する」記念品を設置・撤去する
+;-------------------------------------------------
+@Colonial_Office_GOODS_EXECUTED_09_GOODS_Child
+#DIM 加工元識別ナンバー
+#DIM 種類
+
+CALL SINGLE_DRAWLINE
+PRINTL 可以设置・撤去加工厂中正在育儿的孩子的纪念品
+PRINTL 各势力的态度每回合都会大幅恶化
+CALL SINGLE_DRAWLINE
+
+FOR 加工元識別ナンバー, 0, 999
+	FOR 種類, 0, 10
+		IF TYPE_GOODS_EXECUTED:加工元識別ナンバー:種類:1 == 1
+			SETCOLOR カラー_緑
+			PRINTBUTTON @"{加工元識別ナンバー}[%NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類%]", 加工元識別ナンバー
+			RESETCOLOR
+			PRINTL
+		ELSEIF TYPE_GOODS_EXECUTED:加工元識別ナンバー:種類:1 == 4
+			PRINTBUTTON @"{加工元識別ナンバー}[%NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類%]", 加工元識別ナンバー
+			SETCOLOR カラー_注意
+			PRINTL [使用中]
+			RESETCOLOR
+		ELSEIF TYPE_GOODS_EXECUTED:加工元識別ナンバー:種類:1 == 3 || TYPE_GOODS_EXECUTED:加工元識別ナンバー:種類:1 == 2
+			SETCOLOR カラー_灰色
+			PRINTFORM {加工元識別ナンバー}[%NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類%]
+			SETCOLOR カラー_警告
+			PRINTL [不能使用]
+			RESETCOLOR
+		ENDIF
+	NEXT
+NEXT
+
+CALL SINGLE_DRAWLINE
+PRINTBUTTON "999[取消]", 999
+PRINTL 
+
+REDRAW 0
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 999
+	REDRAW 1
+	RETURN
+
+ELSE
+	FOR 種類, 0, 10
+		IF TYPE_GOODS_EXECUTED:RESULT:種類:1 == 1
+			TYPE_GOODS_EXECUTED:RESULT:種類:1 = 4
+			RESTART
+		ELSEIF TYPE_GOODS_EXECUTED:RESULT:種類:1 == 4
+			TYPE_GOODS_EXECUTED:RESULT:種類:1 = 1
+			RESTART
+		ENDIF
+	NEXT
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+RESTART
+
+
+;-------------------------------------------------
+;「マトリョーシ姦ブレインを起動する」生命の素を設置・撤去する
+;-------------------------------------------------
+@Colonial_Office_GOODS_EXECUTED_09_GOODS_Foetation
+#DIM 加工元識別ナンバー
+
+CALL SINGLE_DRAWLINE
+PRINTL 生命之素的设置・撤下
+CALL SINGLE_DRAWLINE
+
+FOR 加工元識別ナンバー, 0, 999
+	IF TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:0 == 1 || TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:1 == 1
+		SETCOLOR カラー_緑
+		PRINTBUTTON @"{加工元識別ナンバー}[%NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:7%]", 加工元識別ナンバー
+		RESETCOLOR
+		PRINTL
+	ELSEIF TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:0 == 4 || TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:1 == 4
+		PRINTBUTTON @"{加工元識別ナンバー}[%NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:7%]", 加工元識別ナンバー
+		SETCOLOR カラー_注意
+		PRINTL [使用中]
+		RESETCOLOR
+	ELSEIF TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:0 == 3 || TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:1 == 3
+		SETCOLOR カラー_灰色
+		PRINTFORM {加工元識別ナンバー}[%NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:7%]
+		SETCOLOR カラー_警告
+		PRINTL [不能使用]
+		RESETCOLOR
+	ENDIF
+NEXT
+
+CALL SINGLE_DRAWLINE
+PRINTBUTTON "999[取消]", 999
+PRINTL 
+
+REDRAW 0
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 999
+	REDRAW 1
+	RETURN
+
+ELSEIF TYPE_GOODS_EXECUTED:RESULT:7:0 == 1
+	TYPE_GOODS_EXECUTED:RESULT:7:0 = 4
+ELSEIF TYPE_GOODS_EXECUTED:RESULT:7:1 == 1
+	TYPE_GOODS_EXECUTED:RESULT:7:1 = 4
+ELSEIF TYPE_GOODS_EXECUTED:RESULT:7:0 == 4
+	TYPE_GOODS_EXECUTED:RESULT:7:0 = 1
+ELSEIF TYPE_GOODS_EXECUTED:RESULT:7:1 == 4
+	TYPE_GOODS_EXECUTED:RESULT:7:1 = 1
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+RESTART
+
+;-------------------------------------------------
+;戦略フェイズ終了時の「Quasi-stellar Tentacle Obliterator」処理
+;-------------------------------------------------
+@Colonial_Office_GOODS_EXECUTED_08_TURN_END(連邦ナンバー)
+#DIM 連邦ナンバー
+#DIM 対象
+#DIM 加工元識別ナンバー
+#DIM 種類
+#DIM 使用中記念品数
+#DIM 使用中生命の素数
+#DIM 組数
+#DIM 充填率加算
+#DIM 現有触手エネルギー量
+
+SETCOLOR カラー_ピンク
+PRINTL 触手·戴森炮运转中……
+PRINTL 
+RESETCOLOR
+
+使用中記念品数 = 0
+使用中生命の素数 = 0
+;特殊使用中の記念品数を算定
+FOR 加工元識別ナンバー, 0, 999
+	FOR 種類, 1, 7
+		IF TYPE_GOODS_EXECUTED:加工元識別ナンバー:種類:1 == 3
+			使用中記念品数 ++
+		ENDIF
+	NEXT
+NEXT
+;特殊使用中の記念品数を算定
+FOR 加工元識別ナンバー, 0, 999
+	IF TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:0 == 3 || TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:1 == 3
+		使用中生命の素数 ++
+	ENDIF
+NEXT
+
+組数 = MIN(使用中記念品数, 使用中生命の素数)
+現有触手エネルギー量 = RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:3
+
+IF 現有触手エネルギー量 <= 組数
+	RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:3 = 0
+	充填率加算 = 現有触手エネルギー量 * 10
+	RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:4 += 充填率加算
+	PRINT 现在的触手能量[ 
+	SETCOLOR カラー_警告
+	PRINT 0
+	RESETCOLOR
+	PRINTL  ]
+ELSE
+	RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:3 -= 組数
+	充填率加算 = 組数 * 10
+	RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:4 += 充填率加算
+	PRINTFORML 现在的触手能量[ {RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:3} ]
+ENDIF
+
+PRINT 現在的充填率[ 
+SELECTCASE RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:4
+	CASE IS >= 100
+		SETCOLOR カラー_注意
+		PRINTFORM {RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:4}
+		RESETCOLOR
+	CASE IS >= 30
+		SETCOLOR カラー_緑
+		PRINTFORM {RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:4}
+		RESETCOLOR
+	CASEELSE
+		PRINTFORM {RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:4}
+ENDSELECT
+PRINTL  ]%
+PRINTW 
+
+;-------------------------------------------------
+;戦略フェイズ終了時の「マトリョーシ姦ブレイン」処理
+;-------------------------------------------------
+@Colonial_Office_GOODS_EXECUTED_09_TURN_END(連邦ナンバー)
+#DIM 連邦ナンバー
+#DIM 対象
+#DIM 加工元識別ナンバー
+#DIM 種類
+#DIM 使用中記念品数
+#DIM 使用中生命の素数
+#DIM 組数
+#DIM 充填率加算
+#DIM 現有高濃度精力量
+
+SETCOLOR カラー_ピンク
+PRINTL 矩阵奸脑运转中……
+PRINTL 
+RESETCOLOR
+
+使用中記念品数 = 0
+使用中生命の素数 = 0
+;特殊使用中の記念品数を算定
+FOR 加工元識別ナンバー, 0, 999
+	FOR 種類, 1, 7
+		IF TYPE_GOODS_EXECUTED:加工元識別ナンバー:種類:1 == 4
+			使用中記念品数 ++
+		ENDIF
+	NEXT
+NEXT
+;特殊使用中の記念品数を算定
+FOR 加工元識別ナンバー, 0, 999
+	IF TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:0 == 4 || TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:1 == 4
+		使用中生命の素数 ++
+	ENDIF
+NEXT
+
+組数 = MIN(使用中記念品数, 使用中生命の素数)
+現有高濃度精力量 = RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:2
+
+IF 現有高濃度精力量 <= 組数
+	RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:2 = 0
+	充填率加算 = 現有高濃度精力量 * 5
+	RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属) += 充填率加算
+	PRINT 現在的高濃度精力量[ 
+	SETCOLOR カラー_警告
+	PRINT 0
+	RESETCOLOR
+	PRINTL  ]
+ELSE
+	RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:2 -= 組数
+	充填率加算 = 組数 * 5
+	RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属) += 充填率加算
+	PRINTFORML 現在的高濃度精力量[ {RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:2} ]
+ENDIF
+
+PRINTFORML 研究点数{充填率加算}取得
+PRINTW 

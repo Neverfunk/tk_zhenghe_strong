@@ -1,0 +1,32 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_TALK_WITH_ELDER_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_TALK_WITH_ELDER_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_TALK_WITH_ELDER(対象)
+#DIM 対象
+PRINTFORML 領地内探索時、聽見了有人被評價為賢者
+PRINTFORML 在意的%ANAME(対象)%去見了一面
+PRINTFORMW 賢者看起来和普通的友善的老爺爺一樣
+IF LIMIT(ABL:対象:政治, 60, 100) > RAND:100
+	PRINTFORML 但是交談的時候能感覚到対方的智慧非常高
+	PRINTFORMW %ANAME(対象)%徹夜与他交談
+	CALL PRINT_ADD_EXP(対象, "政治経験値", RAND:6 + 3, 1)
+ELSE
+	PRINTFORML 交談的時候只能聽見糊塗的回答、並沒有什麼深刻的話語
+	PRINTFORMW 看来評價靠不住。失望的離開了賢者的家
+ENDIF
+RETURN 1

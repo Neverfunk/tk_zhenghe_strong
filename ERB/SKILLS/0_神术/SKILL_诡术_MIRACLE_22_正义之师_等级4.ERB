@@ -1,0 +1,178 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_0_MIRACLE_22_EXIST
+RETURN 1
+
+@SKILL_0_MIRACLE_22_NAME
+RESULTS = 正义之师
+
+;レベルは1-5まで
+@SKILL_0_MIRACLE_22_LEVEL
+RETURN 4
+
+@SKILL_0_MIRACLE_22_FROMWHO
+;0或不存在=通用 1=暴虐 2=诡术 3=腐朽 4=色欲
+RETURN 2
+
+@SKILL_0_MIRACLE_22_SELFLEARN(对象)
+#DIM 对象
+#DIM 上任
+#DIM 优先度
+#DIM 技能ID = 22  ;本技能ID
+优先度 = 0
+;信仰等级要求
+CALLFORM SKILL_0_MIRACLE_{技能ID}_LEVEL
+SIF ABL:对象:信仰 < FAITH_LEVEL:RESULT
+	RETURN 0
+;神术等级加成,一般认为越高越强
+优先度 += RESULT * 20
+;已有技能联动
+;角色属性
+SIF ABL:对象:信仰 < 50
+	优先度 -= 30
+SIF ABL:对象:信仰 >= 50
+	优先度 += ABL:对象:信仰 / 2
+;角色是否主君
+;领土数量
+;被俘虏时
+;部队/都市就任情况
+上任 = 0
+IF CFLAG:对象:所属 != 0
+	FOR LOCAL:0, 0, MAX_CITY
+		IF CITY_COMMANDER:(LOCAL:0) != 0
+			FOR LOCAL:1, 0, MAX_CITY_COMMANDER
+				IF GET_CITY_COMMANDER(LOCAL:0, LOCAL:1) == 对象
+					;对象 = 都市LOCAL:0的第LOCAL:1守将
+					上任 = 1
+					优先度 += 50
+				ENDIF
+			NEXT
+		ENDIF
+	NEXT
+	FOR LOCAL:0, 0, MAX_COUNTRY
+		IF IS_COUNTRY(LOCAL:0)
+			FOR LOCAL:1, 0, 10
+				IF UNIT_COMMANDER:(LOCAL:0):(LOCAL:1) != 0
+					FOR LOCAL:2, 0, MAX_UNIT_COMMANDER
+						IF GET_UNIT_COMMANDER(LOCAL:0, LOCAL:1, LOCAL:2) == 对象
+							;对象 = 势力LOCAL:0的部队LOCAL:1的第LOCAL:2将领
+							上任 = 1
+							优先度 += 50
+						ENDIF
+					NEXT
+				ENDIF
+			NEXT
+		ENDIF
+	NEXT
+ENDIF
+SIF !上任
+	优先度 -= 300
+RETURN MAX(优先度,0)
+
+;対象選択
+@SKILL_0_MIRACLE_22_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 加和
+#DIM 角色
+;我方部隊対象
+
+RETURN 1
+
+;発動判定
+@SKILL_0_MIRACLE_22_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+
+LOCAL:1 = 0 ;对方
+LOCAL:2 = 0 ;己方
+FOR LOCAL:0,0,BATTLE_COMMANDER_NUM:対象側,1
+	LOCAL:1 += ABL:(BATTLE_COMMANDER:対象側:LOCAL):信仰
+NEXT
+FOR LOCAL:0,0,BATTLE_COMMANDER_NUM:発動側,1
+	LOCAL:1 += ABL:(BATTLE_COMMANDER:発動側:LOCAL):信仰
+NEXT
+RETURN LOCAL:2 > LOCAL:1
+
+;効果をここに記述
+@SKILL_0_MIRACLE_22_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 君主
+#DIM 信仰差
+#DIM 人数
+対象側 = !発動側
+LOCAL:1 = 0 ;对方
+LOCAL:2 = 0 ;己方
+FOR LOCAL:0,0,BATTLE_COMMANDER_NUM:対象側,1
+	LOCAL:1 += ABL:(BATTLE_COMMANDER:対象側:LOCAL):信仰
+NEXT
+FOR LOCAL:0,0,BATTLE_COMMANDER_NUM:発動側,1
+	LOCAL:1 += ABL:(BATTLE_COMMANDER:発動側:LOCAL):信仰
+NEXT
+
+IF 対象部隊 >= 0
+	君主 = GET_COUNTRY_BOSS(対象勢力)
+ELSE
+	君主 = GET_COUNTRY_BOSS(CITY_OWNER:対象勢力)
+ENDIF
+信仰差 = LOCAL:2 - LOCAL:1
+IF 信仰差 < 20
+	人数 = MIN(GET_SOLDIER(対象勢力, 対象部隊) * 3 / 100, 1500)
+	PRINTFORML \@ 君主 >= 0 ? %ANAME(君主)% # 敌方 \@部队的信念产生了动摇,一些士兵叛变了!
+ELSEIF 信仰差 < 40
+	人数 = MIN(GET_SOLDIER(対象勢力, 対象部隊) * 4 / 100, 1800)
+	PRINTFORML \@ 君主 >= 0 ? %ANAME(君主)% # 敌方 \@部队的信念产生了动摇,一些士兵叛变了!
+ELSEIF 信仰差 < 60
+	人数 = MIN(GET_SOLDIER(対象勢力, 対象部隊) * 5 / 100, 2200)
+	PRINTFORML \@ 君主 >= 0 ? %ANAME(君主)% # 敌方 \@部队的信念产生了动摇,一些士兵叛变了!
+ELSE
+	人数 = MIN(GET_SOLDIER(対象勢力, 対象部隊) * 6 / 100, 2500)
+	PRINTFORML \@ 君主 >= 0 ? %ANAME(君主)% # 敌方 \@部队的信念产生了动摇,一些士兵叛变了!
+ENDIF
+CALL DECREASE_SOLDIER(対象勢力, 対象部隊, 人数, 1)
+CALL INCREASE_SOLDIER(発動勢力, 発動部隊, 人数, 1)
+
+
+
+@SKILL_0_MIRACLE_22_EXPLANATION
+RESULTS = 我方信仰高于敌方时，根据信仰差诱降敌方部分兵力
+
+@SKILL_0_MIRACLE_22_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 1000

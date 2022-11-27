@@ -1,0 +1,163 @@
+﻿;主導度・倒錯度に関する処理
+
+;-------------------------------------------------
+;素質に応じて主導度・倒錯度を初期設定
+;-------------------------------------------------
+@INIT_TENDENCY(ARG:0)
+;CSVファイルが存在する(東方キャラ)ならCSVの設定をチェック
+IF EXISTCSV(NO:(ARG:0))
+	LOCAL:10 = CSVABL(NO:(ARG:0), 90)
+	LOCAL:11 = CSVABL(NO:(ARG:0), 91)
+	LOCAL:12 = CSVABL(NO:(ARG:0), 92)
+ELSE
+	LOCAL:10 = 0
+	LOCAL:11 = 0
+	LOCAL:12 = 0
+ENDIF
+
+;CSVで主導度Ｎが設定されていればそちらを優先
+IF LOCAL:10 != 0
+	ABL:(ARG:0):主導度Ｎ = LOCAL:10
+ELSE
+	LOCAL:0 = 0
+
+	;胆怯(－)
+	SIF TALENT:(ARG:0):胆怯
+		LOCAL:0 -= 100
+
+	;反抗的(＋)
+	SIF TALENT:(ARG:0):反抗的
+		LOCAL:0 += 100
+
+	;堅強(＋)
+	SIF TALENT:(ARG:0):堅強
+		LOCAL:0 += 50
+
+	;坦率(－)
+	SIF TALENT:(ARG:0):坦率
+		LOCAL:0 -= 100
+
+	;老実(－)
+	SIF TALENT:(ARG:0):老実
+		LOCAL:0 -= 150
+
+	;自尊心高(＋)
+	SIF TALENT:(ARG:0):自尊心高
+		LOCAL:0 += 100
+
+	;傲慢(＋)
+	SIF TALENT:(ARG:0):傲慢
+		LOCAL:0 += 150
+
+	;自尊心低(－)
+	SIF TALENT:(ARG:0):自尊心低
+		LOCAL:0 -= 100
+
+	;自制心(－)
+	SIF TALENT:(ARG:0):自制心
+		LOCAL:0 -= 30
+
+	;冷漠(－)
+	SIF TALENT:(ARG:0):冷漠
+		LOCAL:0 -= 80
+
+	;感情缺乏(－)
+	SIF TALENT:(ARG:0):感情缺乏
+		LOCAL:0 -= 50
+
+	;好奇心(＋)
+	SIF TALENT:(ARG:0):好奇心
+		LOCAL:0 += 50
+
+	;保守的(－)
+	SIF TALENT:(ARG:0):保守的
+		LOCAL:0 -= 50
+
+	;楽観的(＋)
+	SIF TALENT:(ARG:0):楽観的
+		LOCAL:0 += 30
+
+	;悲観的(－)
+	SIF TALENT:(ARG:0):悲観的
+		LOCAL:0 -= 30
+
+	;喜歡引人注目(＋)
+	SIF TALENT:(ARG:0):喜歡引人注目
+		LOCAL:0 += 150
+
+	;害羞(－)
+	SIF TALENT:(ARG:0):害羞
+		LOCAL:0 -= 100
+
+	;不知羞恥(＋)
+	SIF TALENT:(ARG:0):不知羞恥
+		LOCAL:0 += 50
+
+	;献身的(－)
+	SIF TALENT:(ARG:0):献身的
+		LOCAL:0 -= 50
+
+	;Ｓ気質(＋)
+	SIF TALENT:(ARG:0):Ｓ気質
+		LOCAL:0 += 50
+
+	;Ｍ気質(－)
+	SIF TALENT:(ARG:0):Ｍ気質
+		LOCAL:0 -= 50
+
+	;小悪魔(＋)
+	SIF TALENT:(ARG:0):小悪魔
+		LOCAL:0 += 100
+
+	ABL:(ARG:0):主導度Ｎ = LIMIT(LOCAL:0, -1000, 1000)
+ENDIF
+
+;CSVで主導度Ｕが設定されていればそちらを優先
+IF LOCAL:11 != 0
+	ABL:(ARG:0):主導度Ｕ = LOCAL:11
+ELSE
+	LOCAL:0 = ABL:(ARG:0):主導度Ｎ / 10
+
+	;害羞(－)
+	SIF TALENT:(ARG:0):害羞
+		LOCAL:0 -= 50
+
+	;不知羞恥(＋)
+	SIF TALENT:(ARG:0):不知羞恥
+		LOCAL:0 += 25
+
+	;Ｓ気質(＋)
+	SIF TALENT:(ARG:0):Ｓ気質
+		LOCAL:0 += 300
+
+	;Ｍ気質(－)
+	SIF TALENT:(ARG:0):Ｍ気質
+		LOCAL:0 -= 300
+
+	;小悪魔(＋)
+	SIF TALENT:(ARG:0):小悪魔
+		LOCAL:0 += 100
+
+	ABL:(ARG:0):主導度Ｕ = LIMIT(LOCAL:0, -1000, 1000)
+ENDIF
+
+;CSVで倒錯度が設定されていればそちらを優先
+IF LOCAL:12 != 0
+	ABL:(ARG:0):倒錯度 = LOCAL:12
+ELSE
+	LOCAL:0 = 0
+
+	;Ｓ気質(＋)
+	SIF TALENT:(ARG:0):Ｓ気質
+		LOCAL:0 += 100
+
+	;Ｍ気質(＋)
+	SIF TALENT:(ARG:0):Ｍ気質
+		LOCAL:0 += 100
+
+	;倒錯的(＋)
+	SIF TALENT:(ARG:0):倒錯的
+		LOCAL:0 += 300
+
+	ABL:(ARG:0):倒錯度 = LIMIT(LOCAL:0, 0, 1000)
+ENDIF

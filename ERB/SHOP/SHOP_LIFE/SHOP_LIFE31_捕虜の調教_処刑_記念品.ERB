@@ -1,0 +1,97 @@
+﻿;-------------------------------------------------
+;ARG:0の記念品を取得する
+;(子供フラグが1ならば加工元が育児中の子供 妊婦フラグが1ならば加工元が妊婦)
+;(物品の種類:0=ダミー 1=磔像 2=肉便器 3=性奴隷 4=射精地獄 5=触手部屋副管理人 6=触手地獄 7=生命の素 8=剝製)
+;-------------------------------------------------
+@GET_GOODS_EXECUTED(ARG:0, 種類, 子供フラグ, 妊婦フラグ)
+#DIM 種類
+#DIM 子供フラグ
+#DIM 妊婦フラグ
+#DIM 加工元識別ナンバー
+
+;空いている加工元識別ナンバーを検索・割り当て
+FOR LOCAL:0, 0, 999
+	IF IS_GOODS_EXECUTED:(LOCAL:0) == 0
+		加工元識別ナンバー = LOCAL:0
+		BREAK
+	ENDIF
+NEXT
+
+IS_GOODS_EXECUTED:加工元識別ナンバー = 1
+NAME_BEFORE_GOODS_EXECUTED:加工元識別ナンバー = ARG:0
+TYPE_GOODS_EXECUTED:加工元識別ナンバー:種類:子供フラグ = 1
+CFLAG:(ARG:0):1704 = 1
+
+HAVE_GOODS_EXECUTED:種類 += 1
+
+IF 種類 == 1
+	IF 子供フラグ == 1
+		NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類 = 被钉在十字架上的幼小的「%ANAME(ARG:0)%」
+	ELSE
+		NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類 = 被钉在十字架上的「%ANAME(ARG:0)%」
+	ENDIF
+ELSEIF 種類 == 2
+	IF 子供フラグ == 1
+		NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類 = 被做成肉便器的幼小的「%ANAME(ARG:0)%」
+	ELSE
+		NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類 = 被做成肉便器的「%ANAME(ARG:0)%」
+	ENDIF
+ELSEIF 種類 == 3
+	IF 子供フラグ == 1
+		NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類 = 被做成性奴隶的幼小的「%ANAME(ARG:0)%」
+	ELSE
+		NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類 = 被做成性奴隶的「%ANAME(ARG:0)%」
+	ENDIF
+ELSEIF 種類 == 4
+	IF 子供フラグ == 1
+		NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類 = 堕进射精地狱的幼小的「%ANAME(ARG:0)%」
+	ELSE
+		NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類 = 堕进射精地狱的「%ANAME(ARG:0)%」
+	ENDIF
+ELSEIF 種類 == 5
+	IF 子供フラグ == 1
+		NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類 = 被任命为触手部屋副管理员的年幼的「%ANAME(ARG:0)%」
+	ELSE
+		NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類 = 被任命为触手部屋副管理员的「%ANAME(ARG:0)%」
+	ENDIF
+ELSEIF 種類 == 6
+	IF 子供フラグ == 1
+		NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類 = 被触手吞噬的幼小的「%ANAME(ARG:0)%」
+	ELSE
+		NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類 = 被触手吞噬的「%ANAME(ARG:0)%」
+	ENDIF
+ELSEIF 種類 == 8
+	IF 子供フラグ == 1
+		NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類 = 被做成标本的幼小的「%ANAME(ARG:0)%」
+	ELSE
+		NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類 = 被做成标本的「%ANAME(ARG:0)%」
+	ENDIF
+ENDIF
+
+PRINTFORMW ★获得了纪念品[%NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類%]
+PRINTL 
+
+IF 妊婦フラグ == 1
+	TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:子供フラグ = 1
+	IF 子供フラグ == 1
+		NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:7 = 从幼小的「%ANAME(ARG:0)%」那里提取的生命之素
+		TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:1 = 1
+		HAVE_GOODS_EXECUTED:7 += 1
+		NAME_FATHER_FETUS:加工元識別ナンバー = CFLAG:(ARG:0):子の父親
+	ELSE
+		NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:7 = 从「%ANAME(ARG:0)%」那里提取的生命之素
+		TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:0 = 1
+		HAVE_GOODS_EXECUTED:7 += 1
+		NAME_FATHER_FETUS:加工元識別ナンバー = CFLAG:(ARG:0):子の父親
+	ENDIF
+	
+	CFLAG:(ARG:0):行動不能状態 = 0
+	CFLAG:(ARG:0):妊娠期間 = 0
+	CFLAG:(ARG:0):子の父親 = 0
+	TALENT:(ARG:0):妊娠 = 0
+	CALL MOTHER_SHRINK_BUSTSIZE(ARG:0)
+	CALL MOTHER_STOP_MILKING(ARG:0)
+	
+	PRINTFORMW 另外，从%ANAME(ARG:0)%那里获得了★纪念品[生命之素]
+ENDIF
+

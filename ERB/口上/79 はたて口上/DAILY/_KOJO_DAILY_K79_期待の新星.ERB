@@ -1,0 +1,106 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K79_RISING_STAR_RATE(対象)
+#DIM 対象
+RETURN 200
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K79_RISING_STAR_DECISION(対象)
+#DIM 対象
+#DIM 文
+
+文 = NAME_TO_CHARA("文")
+
+SIF MASTER != NAME_TO_CHARA("あなた")
+	RETURN 0
+
+SIF !KDVAR:文:文_新聞勧誘
+	RETURN 0
+
+SIF KDVAR:対象:はたて_期待の新星
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 0, 0, 0) && CHECK_KOJO_DAILY_HAPPEN(文)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K79_RISING_STAR_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K79_RISING_STAR(対象)
+#DIM 対象
+
+#DIM 文
+文 = NAME_TO_CHARA("文")
+
+PRINTFORMW 「喂，你%ANAME(MASTER)%？」
+PRINTFORMW 在街上巡回时，突然被少女打了招呼
+PRINTFORMW 背上长着翅膀的那一带，应该是鸦天狗吧……？
+
+IF KDVAR:文:文_新聞勧誘 == 1
+	PRINTFORM 「啊，对不起。我是
+	CALL COLORPRINT(NAME_FORMAL(対象), カラー_注意)
+	PRINTFORMW 。%ANAME(文)%是同事还是竞争对手」
+	PRINTFORMW “呐，你真的拒绝了。%ANAME(文)%的邀请吗？”
+	PRINTFORML 竞争对手……天狗建立了独自的社会，也属于敌对派系吧。
+	PRINTFORML %ANAME(文)%因为拒绝了这样的话，所以才来讨好自己的派系吧……
+	PRINTFORMW 不管怎样，在知道是为了什么而与之接触之前，都应该慎重行动吧。
+	PRINTFORMW 「诶？和？我希望你不要那么客气……被%ANAME(文)%灌输什么了吗？」
+	PRINTFORMW “那家伙是个各式各样的家伙，但我可不是那样呢？今天只是想采访而已”
+	PRINTFORMW “可能不知道，%ANAME(MASTER)%是期待的新星，到处都在传闻。”
+	PRINTFORMW “所以想听听我说话。怎么样？
+ELSE
+	PRINTFORMW 「啊，对不起。我是
+	CALL COLORPRINT(NAME_FORMAL(対象), カラー_注意)
+	PRINTFORMW 。%ANAME(文)%是同事还是竞争对手」
+	PRINTFORMW “喂喂，%ANAME(文)%邀请你转会是真的吗？”
+	PRINTFORML 竞争对手……天狗构筑着独自的社会。属于敌对派系吗？
+	PRINTFORML 那么，从这个少女的角度来看，自己是不是就是敌人呢？
+	PRINTFORMW 虽然不会突然在街上袭击，但还是应该慎重行动吧。
+	PRINTFORMW 「诶？和？我希望你不要那么客气……被%ANAME(文)%灌输什么了吗？」
+	PRINTFORMW “那家伙是个各式各样的家伙，但我可不是那样呢？今天只是想采访而已”
+	PRINTFORMW “可能不知道，%ANAME(MASTER)%是期待的新星，到处都在传闻。”
+	PRINTFORMW “所以想听听我说话。怎么样？
+ENDIF
+
+PRINTFORML 虽然轻易相信对方也会觉得有些可疑，但对于%ANAME(対象)%这个少女来说，却感觉不到有问题
+PRINTFORMW 真的只是因为好奇心而接触的吗？
+PRINTFORML 
+
+CALL ASK_YN("接收取材", "现在很忙")
+
+IF RESULT == 0
+	PRINTFORMW “真的！？这就是我的独家采访，来吧！”
+	PRINTFORMW “那么，首先是……”
+	PRINTFORMW 没有恶意吧
+	PRINTFORMW 这样判断的%ANAME(MASTER)%暂时陪同了%ANAME(対象)%的采访……
+ELSE
+	PRINTFORMW “啊，是吗？那没办法了……”
+	PRINTFORMW “但是下次一定要告诉我哦？如果登载了引人注目的采访，我想报纸的发行量一定会上升的！”
+	PRINTFORMW 「那么再见，请多关照！」
+	PRINTFORMW 只说了一句，%ANAME(対象)%就走了
+	PRINTFORMW 虽然那笑容并无伤害……但是天狗，还是不要太相信为好……
+ENDIF
+
+CALL COLOR_PRINTW(@"認識了%ANAME(対象)%", カラー_注意)
+CFLAG:対象:面識 = 1
+
+KDVAR:対象:はたて_期待の新星 = 1
+
+
+RETURN 1

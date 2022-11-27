@@ -1,0 +1,131 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_TRAINING_TOGETHER_RATE()
+RETURN 30
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_TRAINING_TOGETHER_DECISION()
+SIF DAY < 5
+	RETURN 0
+;MASTERがペニスを持っている
+SIF !(HAS_PENIS(MASTER))
+	RETURN 0
+
+RETURN 1
+
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_TRAINING_TOGETHER_SETTARGET()
+
+FOR LOCAL, 0, CHARANUM
+	SIF !IS_FEMALE(LOCAL)
+		CONTINUE
+	SIF LOCAL == MASTER
+		CONTINUE
+	;自国所属かつ捕虜でない
+	IF CFLAG:LOCAL:所属 == CFLAG:MASTER:所属 && !CFLAG:LOCAL:捕虜先 && CFLAG:LOCAL:面識
+		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+		DAILY_TARGET_NUM ++
+	ENDIF
+NEXT
+
+SIF DAILY_TARGET_NUM < 1
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_TRAINING_TOGETHER_GENRE()
+RETURN デイリー_ジャンル_トレーナー
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_TRAINING_TOGETHER
+#DIM 対象
+
+対象 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+
+IF RAND:2 == 0
+	PRINTFORMW 看到了正在訓練的%ANAME(対象)%
+	PRINTFORML 怎麼辦？
+	CALL ASK_YN("一起訓練", "離開")
+	IF RESULT == 1
+		PRINTFORMW 最好別去打擾、%ANAME(MASTER)%離開了
+	ELSE
+		PRINTFORMW 提議一起訓練后她開心地接受了
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		LOCAL = (ABL:MASTER:武闘 + ABL:MASTER:防衛) * (RAND:5 + 1) - (ABL:対象:武闘 + ABL:対象:防衛) * (RAND:4 + 1)
+		IF LOCAL >= 100
+			PRINTFORMW 訓練進展非常順利
+			PRINTFORML 作為答謝被邀請一起吃飯、高興地同行了
+			PRINTFORMW 飯菜非常美味、兩人聊得意興盎然、午後也一起愉快地度過了
+			CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:10 + 6, 1)
+			CALL PRINT_ADD_EXP(対象, "防衛経験値", RAND:10 + 6, 1)
+			CALL TRAIN_AUTO_ABLUP(対象)
+			CFLAG:対象:好感度 += RAND:300 + 500
+		ELSEIF LOCAL >= 0
+			PRINTFORMW 完成了充実地訓練
+			PRINTFORMW 一邊用毛巾擦汗一邊表示感謝的她的笑容非常耀眼
+			CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:5 + 3, 1)
+			CALL PRINT_ADD_EXP(対象, "防衛経験値", RAND:5 + 3, 1)
+			CALL TRAIN_AUTO_ABLUP(対象)
+			CFLAG:対象:好感度 += RAND:100 + 300
+		ELSE
+			PRINTFORMW 訓練非常圓滿的結束了
+			PRINTFORMW 和表達謝意的她分別了
+			CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:3 + 1, 1)
+			CALL PRINT_ADD_EXP(対象, "防衛経験値", RAND:3 + 1, 1)
+			CALL TRAIN_AUTO_ABLUP(対象)
+			CFLAG:対象:好感度 += 100
+		ENDIF
+	ENDIF
+ELSE
+	PRINTFORMW 看到了正在学習的%ANAME(対象)%
+	PRINTFORML 怎麼辦？
+	CALL ASK_YN("一起学習", "離開")
+	IF RESULT == 1
+		PRINTFORMW 最好別去打擾、%ANAME(MASTER)%離開了
+	ELSE
+		PRINTFORMW 提議一起学習后她開心地接受了
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		LOCAL = (ABL:MASTER:知略 + ABL:MASTER:政治) * (RAND:5 + 1) - (ABL:対象:知略 + ABL:対象:政治) * (RAND:4 + 1)
+		IF LOCAL >= 100
+			PRINTFORMW 学習進展非常順利
+			PRINTFORML 作為答謝被邀請一起吃飯、高興地同行了
+			PRINTFORMW 飯菜非常美味、兩人聊得意興盎然、午後也一起愉快地度過了
+			CALL PRINT_ADD_EXP(対象, "知略経験値", RAND:10 + 6, 1)
+			CALL PRINT_ADD_EXP(対象, "政治経験値", RAND:10 + 6, 1)
+			CALL TRAIN_AUTO_ABLUP(対象)
+			CFLAG:対象:好感度 += RAND:300 + 500
+		ELSEIF LOCAL >= 0
+			PRINTFORMW 完成了充実地学習
+			PRINTFORMW 説著一起学習很開心并表示感謝的她的笑容非常耀眼
+			CALL PRINT_ADD_EXP(対象, "知略経験値", RAND:5 + 3, 1)
+			CALL PRINT_ADD_EXP(対象, "政治経験値", RAND:5 + 3, 1)
+			CALL TRAIN_AUTO_ABLUP(対象)
+			CFLAG:対象:好感度 += RAND:100 + 300
+		ELSE
+			PRINTFORMW 学習非常圓滿的結束了
+			PRINTFORMW 和表達謝意的她分別了
+			CALL PRINT_ADD_EXP(対象, "知略経験値", RAND:3 + 1, 1)
+			CALL PRINT_ADD_EXP(対象, "政治経験値", RAND:3 + 1, 1)
+			CALL TRAIN_AUTO_ABLUP(対象)
+			CFLAG:対象:好感度 += 100
+		ENDIF
+	ENDIF
+ENDIF
+
+RETURN 1

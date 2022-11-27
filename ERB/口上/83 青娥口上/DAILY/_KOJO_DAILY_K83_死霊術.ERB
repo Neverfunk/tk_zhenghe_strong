@@ -1,0 +1,165 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K83_NECRO_RATE(対象)
+#DIM 対象
+RETURN 50
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K83_NECRO_DECISION(対象)
+#DIM 対象
+
+;死人が1人はいないとダメ(処刑拡張パッチ)対象が記念品になっていると不可
+LOCAL:2 = 0
+FOR LOCAL:0, 0, CHARANUM
+	SIF CFLAG:(LOCAL:0):特殊状態 == 特殊状態_死亡 && CFLAG:(LOCAL:0):1704 == 0
+		;BREAKするとLOCALは1増える
+		GOTO PASSED
+NEXT
+
+RETURN 0
+
+$PASSED
+
+SIF KDVAR:対象:青娥_死霊術 == 2
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, -1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K83_NECRO_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K83_NECRO(対象)
+#DIM 対象
+#DIM 素体
+#DIM 蘇生対象
+
+
+IF KDVAR:対象:青娥_死霊術
+	PRINTFORMW 「%ANAME(MASTER)%大人，%ANAME(MASTER)%大人」
+	;TranslatedMark 「%ANAME(MASTER)%さま%ANAME(MASTER)%さま」
+	PRINTFORML 「我想要再试一次死灵术，可以吗？」
+	;TranslatedMark 「また死霊術、手を出してみます？」
+	PRINTFORML 「虽然需要『素体』……」
+	;TranslatedMark 「『素体』は必要になりますけど……」
+ELSE
+	PRINTFORMW 「%ANAME(MASTER)%大人，%ANAME(MASTER)%大人」
+	;TranslatedMark 「%ANAME(MASTER)%さま%ANAME(MASTER)%さま」
+	PRINTFORML 被叫了之后回头一看，%ANAME(対象)%正在穿过墙壁进入房间
+	;TranslatedMark 呼ばれて振り返ると、%ANAME(対象)%が壁を抜けて部屋に入ってくるところだった
+	PRINTFORMW 是有必须要穿墙过来的急事吗？这样问她，%ANAME(対象)%呵呵笑着
+	;TranslatedMark 壁を抜けるほど急ぎの用なのか？と声をかけると、%ANAME(対象)%はふふ、と笑みを浮かべた
+	PRINTFORMW 「不想被人看到的、亏心的事……你会喜欢吗？」
+	;TranslatedMark 「人に見られたくないような、やましい用事……だったら喜んでくれます？」
+	PRINTFORML %ANAME(MASTER)%为了知道%ANAME(対象)%的目的，催促她继续说下去
+	;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%の目的を知るため、話を続けるように促した
+	PRINTFORMW 「我很高兴你能有兴趣」
+	;TranslatedMark 「興味を持ってくれてうれしいですわ」
+	PRINTFORMW 「……如果能得到一个什么都会听的忠实仆人，%ANAME(MASTER)%您会怎么做呢？」
+	;TranslatedMark 「……もし、何でも聞いてくれる忠実なしもべが手に入るとして、%ANAME(MASTER)%さまはいかがなさいますか？」
+	PRINTFORMW 「暗杀、谋略、或是夜晚的侍奉……什么都可以，嗯，什么都可以做」
+	;TranslatedMark 「暗殺、謀略、あるいは夜伽に使うのもよし……なんでもありです、ええ、なんでも」
+	PRINTFORMW 「如果%ANAME(MASTER)%大人希望的话，我可以进行准备。死灵术什么都能做。是的」
+	;TranslatedMark 「%ANAME(MASTER)%さまが望むなら、用意できますわ。死霊術はなんでもできますの。ええ」
+	PRINTFORMW 「不过作为代价，需要准备一个活着的『素体』，不过这并不是什么大问题，不是吗？」
+	;TranslatedMark 「代わりに、生きた『素体』が必要になりますけれど、これはどうとでもなりますでしょう？」
+	PRINTFORMW 「生气的那个人，讨厌的那个人，把自己逼到绝境的那个人，用这种家伙的话，不觉得是一石二鸟吗？」
+	;TranslatedMark 「ムカつくあいつ、気に入らないあいつ、自分を追い落としそうな奴、そういう輩を使えば、一石二鳥だと思いません？」
+	PRINTFORML %ANAME(MASTER)%有些惊慌失措。也就是说，%ANAME(対象)%可以让死者复活
+	;TranslatedMark %ANAME(MASTER)%は狼狽えた。つまり、%ANAME(対象)%は死者を蘇らせられると言っているのだ
+	PRINTFORMW 作为交换，必须要牺牲一个活人。
+	;TranslatedMark 引き換えに、代わりに生きた人間を贄とする必要があると
+	PRINTFORMW 虽然用了一些外法，但能得到的利益肯定也很大……
+	;TranslatedMark それは外法もいいところだが、得られる利も間違いなく大きい……
+	PRINTFORMW 「您理解得很快。不愧是我国引以为豪的优秀人才啊」
+	;TranslatedMark 「お早い理解ですこと。さすが、我が国の誇る優秀な人材というだけのことはありますわ」
+	PRINTFORML 「然后……怎么样？要试着堕落成为外道吗？」
+	;TranslatedMark 「それで……どうされます？　外道に堕ちてみますか？」
+ENDIF
+PRINTFORML
+CALL ASK_YN("拜托了", "拒绝")
+;TranslatedMark "頼む", "断る"
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORMW 「我明白了」
+		;TranslatedMark 「了解しましたわ」
+		$SELECT_OBJECTIVE
+		PRINTFORML 那么，要提供谁呢……
+		;TranslatedMark さて、誰を提供しようか……
+		CALL SELECT_CHARA_LIST_ONLY_LOGIC_SLG("KOJO_DAILY_K83_NECRO_VICTIM", "DEFAULT")
+		素体 = RESULT
+		IF 素体 == -1
+			PRINTFORMW 「啊，事到如今你才意识到自己的罪行吗？哦呵呵」
+			;TranslatedMark 「あら、今更になって罪を自覚されたんですか？　うふふ」
+			PRINTFORMW 「嘛，如果是那样的话那就没办法了，祝你好运」
+			;TranslatedMark 「ま、そういうことでしたら仕方ありませんわ、ごきげんよう」
+			PRINTFORMW 这样说着，%ANAME(対象)%穿过墙壁消失了……
+			;TranslatedMark そう言うと、%ANAME(対象)%は壁を抜けてどこかへ消えていった……
+			KDVAR:対象:青娥_死霊術 = 1
+			RETURN
+		ENDIF
+		PRINTFORMW 「然后呢？要让谁复活？」
+		;TranslatedMark 「それで？　どなたを蘇らせますの？」
+		CALL SELECT_CHARA_LIST_ONLY_LOGIC_SLG("KOJO_DAILY_K83_NECRO_OBJ", "NONE")
+		蘇生対象 = RESULT
+		IF 蘇生対象 == -1
+			PRINTFORMW 「啊，要改变素体吗？」
+			;TranslatedMark 「あら、素体を変えられます？」
+			PRINTFORMW 「请慢慢挑选。哦呵呵」
+			;TranslatedMark 「どうぞどうぞ、ごゆっくりお選びになってくださいな。うふふ」
+			GOTO SELECT_OBJECTIVE
+		ENDIF
+		CALL CHANGE_COUNTRY(素体, 0, 1, 1)
+		CFLAG:蘇生対象:好感度 += 1000
+		CFLAG:蘇生対象:従属度 += 10000
+		CFLAG:蘇生対象:依存度 += 5000
+		CALL CHANGE_COUNTRY(蘇生対象, CFLAG:MASTER:所属)
+		TALENT:蘇生対象:合意 = 1
+		TALENT:蘇生対象:チョロイン = 1
+		TALENT:蘇生対象:隷属 = 1
+		KDVAR:対象:青娥_死霊術 = 1
+		PRINTFORMW ・
+		PRINTFORMW ・
+		PRINTFORMW ・
+		PRINTFORMW 「让您久等了，只为%ANAME(MASTER)%而活的忠实仆人完成了」
+		;TranslatedMark 「おまたせしました、%ANAME(MASTER)%のためだけに生きる忠実なしもべができあがりましたわ」
+		CALL COLOR_PRINTW(@"%ANAME(蘇生対象)%复活了", カラー_注意)
+		;TranslatedMark @"%ANAME(蘇生対象)%が蘇りました", カラー_注意
+	CASE 1
+		PRINTFORMW 「啊，这样没问题吗？」
+		;TranslatedMark 「あら、よろしいんですの？」
+		PRINTFORMW 「本来以为你会很喜欢这样的……」
+		;TranslatedMark 「楽しめるかと思っていたのですけれど……」
+		PRINTFORMW 「那样的话就没办法了。请保重」
+		;TranslatedMark 「それでしたら仕方ありませんわね。ごきげんよう」
+		KDVAR:対象:青娥_死霊術 = 2
+ENDSELECT
+
+RETURN 1
+
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_KOJO_DAILY_K83_NECRO_VICTIM(対象)
+#DIM 対象
+RETURN CFLAG:対象:所属 == CFLAG:MASTER:所属 && CFLAG:対象:行動不能状態 != 行動不能_子供 && !IS_ANIMAL(対象) && !IS_SP_CHARA(対象) && 対象 != MASTER && 対象 != NAME_TO_CHARA("青娥")
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_KOJO_DAILY_K83_NECRO_OBJ(対象)
+#DIM 対象
+;(処刑拡張パッチ)対象が記念品になっていると不可
+RETURN CFLAG:対象:特殊状態 == 特殊状態_死亡 && CFLAG:対象:1704 == 0

@@ -1,0 +1,48 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_ATTEND_BANQUET_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_ATTEND_BANQUET_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_ATTEND_BANQUET(対象)
+#DIM 対象
+PRINTFORML 遭遇了宴会
+PRINTFORML 人類和妖怪混在一起非常熱鬧
+PRINTFORML ……一個喝醉的人向這邊招了招手
+PRINTL
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "肝臓"))
+
+CALL ASK_YN("参加" ,"離開這裡")
+IF RESULT == 1
+	PRINTFORML 没有那種心情
+	PRINTFORML %ANAME(対象)%離開了那個地方
+	RETURN 1
+ENDIF
+PRINTFORML 因為很難得所以決定参加
+PRINTFORMW 他歡迎著%ANAME(対象)%、立刻就勸起酒來
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+IF ABL:対象:肝臓 >= 3 + RAND:4
+	PRINTFORML %ANAME(対象)%豪邁的喝法引起了喝彩
+	PRINTFORMW 開心的宴会持續了一整夜
+ELSE
+	PRINTFORML %ANAME(対象)%喝的酩酊大醉
+	PRINTFORMW 抱著持續疼痛的頭踏上了歸途
+	CALL ADD_COOLTIME(対象, 1)
+ENDIF
+CALL PRINT_ADD_EXP(対象, "肝臓経験値", RAND(50, 100), 1)
+
+RETURN 1

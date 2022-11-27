@@ -1,0 +1,258 @@
+﻿;鞭
+
+;-------------------------------------------------
+;コマンド名称
+;-------------------------------------------------
+@COM_NAME82
+LOCALS:0 = 鞭打
+
+RESULTS:0 = %LOCALS:0%(主動)
+RESULTS:1 = %LOCALS:0%(被役)
+RESULTS:2 = %LOCALS:0%(使役)
+RESULTS:3 = %LOCALS:0%(被動)
+RESULTS:4 = %LOCALS:0%(使役)
+RESULTS:5 = %LOCALS:0%(展示)
+
+;TranslatedMark RESULTS:0 = %LOCALS:0%で打つ
+;TranslatedMark RESULTS:1 = %LOCALS:0%で打た(被动)
+;TranslatedMark RESULTS:2 = %LOCALS:0%で打た(请求)
+;TranslatedMark RESULTS:3 = %LOCALS:0%で打た(被动)
+;TranslatedMark RESULTS:4 = %LOCALS:0%で打た(请求)
+;TranslatedMark RESULTS:5 = %LOCALS:0%打ち(展示)
+
+;-------------------------------------------------
+;選択可否判定
+;-------------------------------------------------
+@COM_ABLE82
+;共通部分
+CALL COM_ABLE_COMMON(82)
+SIF RESULT == 0
+	RETURN 0
+;プレイヤーは最大で1人まで
+SIF MPLY_NUM <= 0 || MPLY_NUM > 1
+	RETURN 0
+;ターゲットは最大で2人まで
+SIF MTAR_NUM <= 0 || MTAR_NUM > 2
+	RETURN 0
+;鞭が必要
+SIF !ITEM:鞭 && !ITEM:A_鞭
+	RETURN 0
+
+FOR LOCAL:0, 0, MTAR_NUM
+		SIF !(CAN_REACH_BODY(MPLY:0, MTAR:(LOCAL:0)) || CAN_REACH_GROIN(MPLY:0, MTAR:(LOCAL:0)))
+		RETURN 0
+NEXT
+RETURN 1
+
+;-------------------------------------------------
+;メイン処理
+;-------------------------------------------------
+@COM82
+;実行判定
+CALL COM_ORDER_COMMON
+SIF RESULT == 0
+	RETURN 0
+
+;●プレイヤーについて処理
+DOWNBASE:(MPLY:0):体力 += 100
+EXP:(MPLY:0):嗜虐経験値 += RAND:3 + 1
+
+SOURCE:(MPLY:0):嗜虐 = 400
+SOURCE:(MPLY:0):逸脱 = 150
+
+;主導権に応じた優越・屈従のソース追加
+CALL ADD_SOURCE_INITIATIVE_U(MPLY:0, 170, 50)
+
+;●全ターゲットについて処理
+FOR LOCAL:0, 0, MTAR_NUM
+	LOCAL:1 = MTAR:(LOCAL:0)
+
+	DOWNBASE:(LOCAL:1):体力 += 60
+
+	SOURCE:(LOCAL:1):苦痛 = 400 + MIN(ABL:(MPLY:0):武闘, 90) * 3
+	SOURCE:(LOCAL:1):露出 = 50
+	SOURCE:(LOCAL:1):逸脱 = 150
+
+	;主導権に応じた優越・屈従のソース追加
+	CALL ADD_SOURCE_INITIATIVE_U(LOCAL:1, 0, 170)
+	EXP:(LOCAL:1):被虐経験値 += RAND:3 + 1
+
+	IF GETBIT(TALENT:(MPLY:0):淫乱系, 素質_淫乱_サド)
+		TIMES SOURCE:(LOCAL:1):苦痛, 1.50
+	ENDIF
+NEXT
+
+;主導度変化基準値
+TFLAG:49 = 2
+
+;倒錯度変化基準値
+TFLAG:50 = 4
+
+;レズ・ＢＬ経験基準値
+TFLAG:51 = 0
+
+RETURN 1
+
+;-------------------------------------------------
+;固有の実行判定
+;-------------------------------------------------
+@COM_ORDER_PLAYER82(ARG:0)
+;実行値の設定
+TCVAR:(ARG:0):25 = 110
+
+;共通部分
+CALL COM_ORDER(ARG:0)
+
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲望Lv{ABL:(ARG:0):欲望}", ABL:(ARG:0):欲望 * 1)
+CALL COM_ORDER_ELEMENT(ARG:0, @"加虐Lv{ABL:(ARG:0):加虐}", ABL:(ARG:0):加虐 * 3)
+
+LOCAL:0 = GET_PALAMLV(PALAM:(ARG:0):欲情)
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲情Lv{LOCAL:0}", MIN(LOCAL:0 * 1, 10))
+
+IF TALENT:(ARG:0):老実
+	CALL COM_ORDER_ELEMENT(ARG:0, "老実", -3)
+ENDIF
+IF TALENT:(ARG:0):害羞
+	CALL COM_ORDER_ELEMENT(ARG:0, "害羞", -2)
+ENDIF
+IF TALENT:(ARG:0):献身的
+	CALL COM_ORDER_ELEMENT(ARG:0, "献身的", 3)
+ENDIF
+IF TALENT:(ARG:0):Ｓ気質
+	CALL COM_ORDER_ELEMENT(ARG:0, "Ｓ気質", 6)
+ENDIF
+
+IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_サド)
+	CALL COM_ORDER_ELEMENT(ARG:0, "加虐", 40)
+ELSE
+	IF ABL:(ARG:0):主導度Ｕ >= 500
+		CALL COM_ORDER_ELEMENT(ARG:0, "主導度", 15)
+	ELSEIF ABL:(ARG:0):主導度Ｕ >= 300
+		CALL COM_ORDER_ELEMENT(ARG:0, "主導度", 10)
+	ELSEIF ABL:(ARG:0):主導度Ｕ >= 100
+		CALL COM_ORDER_ELEMENT(ARG:0, "主導度", 5)
+	ELSEIF ABL:(ARG:0):主導度Ｕ > -100
+		CALL COM_ORDER_ELEMENT(ARG:0, "主導度", 0)
+	ELSE
+		CALL COM_ORDER_ELEMENT(ARG:0, "主導度", -5)
+	ENDIF
+
+	IF ABL:(ARG:0):倒錯度 >= 800
+		CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 20)
+	ELSEIF ABL:(ARG:0):倒錯度 >= 500
+		CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 15)
+	ELSEIF ABL:(ARG:0):倒錯度 >= 300
+		CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 10)
+	ELSEIF ABL:(ARG:0):倒錯度 >= 100
+		CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 5)
+	ELSE
+		CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 0)
+	ENDIF
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;地の文(前文)
+;-------------------------------------------------
+@COM_TEXT_BEFORE82
+;ターゲットが２人
+IF MTAR_NUM == 2
+	LOCALS:0 = %ANAME(MTAR:0)%和%ANAME(MTAR:1)%
+	LOCALS:1 = 轮流
+
+;ターゲットが１人
+ELSE
+	LOCALS:0 = %ANAME(MTAR:0)%
+	LOCALS:1 = 
+ENDIF
+
+SELECTCASE GET_COM_INITIATIVE()
+	;プレイヤーに主導権
+	CASE 0
+		IF MPLY:0 == MASTER
+			PRINTFORMW %ANAME(MPLY:0)%用鞭子%LOCALS:1%抽打了%LOCALS:0%好几次…
+			;TranslatedMark %ANAME(MPLY:0)%は%LOCALS:0%を%LOCALS:1%鞭で何度も打ち据えた…
+		ELSEIF ABL:(MPLY:0):加虐 >= 3
+			PRINTFORMW %ANAME(MPLY:0)%浮现出嗜虐的表情，用鞭子狠狠地%LOCALS:1%抽打了%LOCALS:0%…
+			;TranslatedMark %ANAME(MPLY:0)%は嗜虐的な表情を浮かべると、%LOCALS:0%を鞭で%LOCALS:1%激しく打ち据えた…
+		ELSE
+			PRINTFORMW %ANAME(MPLY:0)%稍微有些紧张地握着鞭子，甩到%LOCALS:0%身上…
+			;TranslatedMark %ANAME(MPLY:0)%はやや緊張するように鞭を構えると、%LOCALS:0%の体に振り下ろした…
+		ENDIF
+	;ターゲットに主導権
+	CASE 1
+		PRINTFORML %LOCALS:0%让%ANAME(MPLY:0)%拿着鞭子，然后命令他鞭笞自己
+		;TranslatedMark %LOCALS:0%は%ANAME(MPLY:0)%に鞭を持たせると、それで叩くように命令した
+		IF MPLY:0 == MASTER
+			PRINTFORMW %ANAME(MPLY:0)%听从%ANAME(MTAR:0)%的命令，多次%LOCALS:1%鞭打了%LOCALS:0%…
+			;TranslatedMark %ANAME(MPLY:0)%は%ANAME(MTAR:0)%に言われるまま、%LOCALS:0%を%LOCALS:1%何度も鞭で打った…
+		ELSEIF ABL:(MPLY:0):加虐 >= 3
+			PRINTFORMW %ANAME(MPLY:0)%惊讶地苦笑着，毫不客气地%LOCALS:1%向%LOCALS:0%的身体甩下鞭子…
+			;TranslatedMark %ANAME(MPLY:0)%は呆れたように苦笑すると、遠慮無く%LOCALS:0%の体に%LOCALS:1%鞭を振り下ろし%TARGET_STR("た", "てきた")%…
+		ELSE
+			PRINTFORMW %ANAME(MPLY:0)%虽然很困惑，但还是像被命令的那样%LOCALS:1%对%LOCALS:0%的身体挥舞着鞭子…
+			;TranslatedMark %ANAME(MPLY:0)%は困惑しながらも、言われた通りに%LOCALS:0%の体に%LOCALS:1%鞭を振るった…
+		ENDIF
+	;第三者に主導権
+	CASEELSE
+		PRINTFORML %ANAME(TFLAG:45)%命令%ANAME(MPLY:0)%用鞭子抽打%LOCALS:0%的身体
+		;TranslatedMark %ANAME(TFLAG:45)%は%ANAME(MPLY:0)%に対して、%LOCALS:0%の体を鞭で叩くように命令した
+		PRINTFORMW %ANAME(MPLY:0)%听从了命令，鞭打着%LOCALS:0%的身体…
+		;TranslatedMark %ANAME(MPLY:0)%は言われるまま、%LOCALS:0%の体に鞭を%LOCALS:1%振り下ろした…
+ENDSELECT
+
+;--------------------------------------------------------
+;地の文(パラメータ・刻印変動後)
+;--------------------------------------------------------
+@COM_TEXT_LAST82
+FOR LOCAL:0, 0, MTAR_NUM
+	LOCAL:1 = MTAR:(LOCAL:0)
+	IF (LOCAL:1 != MASTER || CONFIG:441) && !IS_ANIMAL(LOCAL:1)
+		LOCAL:2 = CUP:(LOCAL:1):怖主
+		LOCAL:3 = CUP:(LOCAL:1):怒主
+
+		IF ABL:(LOCAL:1):被虐 >= 5
+			PRINTFORML %ANAME(LOCAL:1)%虽然感觉到了疼痛，但还是很高兴地发出了甜蜜的声音
+			;TranslatedMark %ANAME(LOCAL:1)%は痛みを感じているにもかかわらず嬉しそうに甘い声を上げている
+		ELSEIF ABL:(LOCAL:1):被虐 >= 3
+			PRINTFORML 虽然%ANAME(LOCAL:1)%发出了悲鸣，但那声音中夹杂着甜蜜的色彩
+			;TranslatedMark %ANAME(LOCAL:1)%は悲鳴を上げるが、その声には甘い色が混じっている
+		ELSEIF LOCAL:2 >= 3000
+			PRINTFORML %ANAME(LOCAL:1)%由于过度的疼痛和恐怖，哭得面目全非
+			;TranslatedMark %ANAME(LOCAL:1)%はあまりの痛みと恐怖に恥も外聞もなく泣き叫んでいる
+		ELSEIF LOCAL:2 >= 1500
+			PRINTFORML %ANAME(LOCAL:1)%无法忍受疼痛，叫苦连天地发狂
+			;TranslatedMark %ANAME(LOCAL:1)%は痛みに耐えきれず、何度も悲鳴を上げながら悶え狂っている
+		ELSEIF LOCAL:2 >= 500
+			PRINTFORML %ANAME(LOCAL:1)%痛得嘴里直哼哼
+			;TranslatedMark %ANAME(LOCAL:1)%は痛みのあまり口から呻きを漏らしている
+		ELSE
+			IF LOCAL:3 >= 200 && !IS_INITIATIVE(MTAR:(LOCAL:0))
+				PRINTFORML %ANAME(LOCAL:1)%一边忍耐着疼痛，一边瞪着%ANAME(MPLY:0)%
+				;TranslatedMark %ANAME(LOCAL:1)%は痛みに耐えながら、%ANAME(MPLY:0)%を睨みつけた
+			ELSE
+				PRINTFORML %ANAME(LOCAL:1)%咬紧牙关忍耐着疼痛
+				;TranslatedMark %ANAME(LOCAL:1)%は歯を食いしばって痛みに耐えている
+			ENDIF
+		ENDIF
+	ENDIF
+NEXT
+
+;-------------------------------------------------
+
+;コマンド区分
+;-------------------------------------------------
+
+@COM_AVAILABLE_WHEN82
+RETURN コマンド_ウフフ
+
+;--------------------
+;性嗜好用関数
+;--------------------
+@COM_PREFERENCE_PLAYER_82()
+RETURN POWER(2, 性的嗜好_虐げたい)
+
+@COM_PREFERENCE_TARGET_82()
+RETURN POWER(2, 性的嗜好_虐げられたい)
+

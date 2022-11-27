@@ -1,0 +1,215 @@
+﻿;ローター
+
+;-------------------------------------------------
+;コマンド名称
+;-------------------------------------------------
+@COM_NAME60
+LOCALS:0 = 跳蛋
+
+RESULTS:0 = %LOCALS:0%(主動)
+RESULTS:1 = %LOCALS:0%(被役)
+RESULTS:2 = %LOCALS:0%(使役)
+RESULTS:3 = %LOCALS:0%(被動)
+RESULTS:4 = %LOCALS:0%(使役)
+RESULTS:5 = %LOCALS:0%(展示)
+
+;-------------------------------------------------
+;選択可否判定
+;-------------------------------------------------
+@COM_ABLE60
+;共通部分
+CALL COM_ABLE_COMMON(60)
+SIF RESULT == 0
+	RETURN 0
+;プレイヤーは最大で1人まで
+SIF MPLY_NUM <= 0 || MPLY_NUM > 1
+	RETURN 0
+;ターゲットは1人以上
+SIF MTAR_NUM <= 0
+	RETURN 0
+;ローターが必要
+SIF !ITEM:跳蛋 && !ITEM:A_跳蛋
+	RETURN 0
+FOR LOCAL, 0, MTAR_NUM
+	SIF !HAS_VAGINA(MTAR:LOCAL)
+		RETURN 0
+	SIF !CAN_REACH_GROIN(MPLY:0, MTAR:LOCAL)
+		RETURN 0
+NEXT
+RETURN 1
+
+;-------------------------------------------------
+;メイン処理
+;-------------------------------------------------
+@COM60
+;実行判定
+CALL COM_ORDER_COMMON
+SIF RESULT == 0
+	RETURN 0
+
+;●プレイヤーについて処理
+DOWNBASE:(MPLY:0):体力 += 80
+
+EXP:(MPLY:0):性技経験値 += MTAR_NUM / 2 + 1
+
+SOURCE:(MPLY:0):奉仕 = SERVE_HOUSHI(MPLY:0, 200)
+SOURCE:(MPLY:0):接触 = 10
+SOURCE:(MPLY:0):性行動 = 90
+
+;主導権に応じた優越・屈従のソース追加
+CALL ADD_SOURCE_INITIATIVE_U(MPLY:0, 100, 20)
+
+;侍奉経験値を得られるコマンドのフラグ
+TCVAR:(MPLY:0):4 = 1
+FOR LOCAL, 0, MTAR_NUM
+	LOCAL:2 = MTAR:LOCAL
+	;●ターゲットについて処理
+	DOWNBASE:(LOCAL:2):体力 += 80
+
+	SOURCE:(LOCAL:2):露出 = 50
+	SOURCE:(LOCAL:2):逸脱 = 80
+	SOURCE:(LOCAL:2):接触 = 10
+	SOURCE:(LOCAL:2):快Ｃ = SENSE_HOUSHI(MPLY:0, LOCAL:2, 2300)
+	SOURCE:(LOCAL:2):性行動 = 180
+
+	;主導権に応じた優越・屈従のソース追加
+	CALL ADD_SOURCE_INITIATIVE_U(LOCAL:2, 50, 0)
+
+	IF TALENT:(MPLY:0):技師
+		TIMES SOURCE:(LOCAL:2):快Ｃ, 1.50
+	ENDIF
+
+NEXT
+
+;主導度変化基準値
+TFLAG:49 = 1
+
+;倒錯度変化基準値
+TFLAG:50 = 0
+
+;レズ・ＢＬ経験基準値
+TFLAG:51 = 2
+
+RETURN 1
+
+;-------------------------------------------------
+;固有の実行判定
+;-------------------------------------------------
+@COM_ORDER_PLAYER60(ARG:0)
+;実行値の設定
+TCVAR:(ARG:0):25 = 60
+
+;共通部分
+CALL COM_ORDER(ARG:0)
+
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲望Lv{ABL:(ARG:0):欲望}", ABL:(ARG:0):欲望 * 1)
+CALL COM_ORDER_ELEMENT(ARG:0, @"侍奉Lv{ABL:(ARG:0):奉仕}", ABL:(ARG:0):奉仕 * 4)
+
+LOCAL:0 = GET_PALAMLV(PALAM:(ARG:0):欲情)
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲情Lv{LOCAL:0}", MIN(LOCAL:0 * 1, 10))
+
+IF TALENT:(ARG:0):害羞
+	CALL COM_ORDER_ELEMENT(ARG:0, "害羞", -1)
+ENDIF
+IF TALENT:(ARG:0):献身的
+	CALL COM_ORDER_ELEMENT(ARG:0, "献身的", 6)
+ENDIF
+IF TALENT:(ARG:0):否定快感
+	CALL COM_ORDER_ELEMENT(ARG:0, "否定快感", -1)
+ENDIF
+
+;合意
+IF !TALENT:(ARG:0):合意 && !TALENT:(ARG:0):親友
+	CALL COM_ORDER_ELEMENT(ARG:0, "合意無", -10)
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;地の文(前文)
+;-------------------------------------------------
+@COM_TEXT_BEFORE60
+IF MTAR_NUM >= 2
+	LOCALS:1 = %ANAME(MTAR:0)%们
+;%ANAME(MTAR:0)%たち
+ELSE
+	LOCALS:1 = %ANAME(MTAR:0)%
+ENDIF
+SELECTCASE GET_COM_INITIATIVE()
+	;プレイヤーに主導権
+	CASE 0
+		PRINTFORMW %ANAME(MPLY:0)%将颤抖的跳蛋按在了%LOCALS:1%的秘唇上
+		;TranslatedMark %ANAME(MPLY:0)%は%LOCALS:1%の秘唇に震えるローターを押し当て%TARGET_STR("た", "てきた")%…
+	;ターゲットに主導権
+	CASE 1
+		PRINTFORMW %LOCALS:1%让%ANAME(MPLY:0)%的拿着跳蛋，按在了自己的小豆豆上
+		;TranslatedMark %LOCALS:1%は%ANAME(MPLY:0)%の手にローターを持たせると、それを自身のクリトリスに押し当てさせた…
+	;第三者に主導権
+	CASEELSE
+		PRINTFORML %ANAME(TFLAG:45)%命令%ANAME(MPLY:0)%使用跳蛋玩弄%LOCALS:1%
+		;TranslatedMark %ANAME(TFLAG:45)%は%ANAME(MPLY:0)%に、ローターを使って%LOCALS:1%を責めるように命令した
+		PRINTFORMW %ANAME(MPLY:0)%将颤抖着的跳蛋按压在%LOCALS:1%秘唇上
+		;TranslatedMark %ANAME(MPLY:0)%は言われるまま%LOCALS:1%の秘唇に震えるローターを押し当てた…
+ENDSELECT
+
+;--------------------------------------------------------
+;地の文(パラメータ・刻印変動後)
+;--------------------------------------------------------
+@COM_TEXT_LAST60
+FOR LOCAL:0, 0, MTAR_NUM
+	IF (MTAR:LOCAL != MASTER || CONFIG:441)
+		LOCAL:2 = CUP:(MTAR:LOCAL):快Ｃ
+
+		IF LOCAL:2 < 300
+			PRINTFORML %ANAME(MTAR:LOCAL)%的那里还静静地闭合着，也许还需要一点时间才能感觉快乐
+			;TranslatedMark %ANAME(MTAR:LOCAL)%のそこはまだしっとりと閉じたままだ。快楽を感じるにはもう少しかかるかもしれない
+		ELSEIF LOCAL:2 < 1000
+			PRINTFORML %ANAME(MTAR:LOCAL)%虽然一直忍耐着对小豆豆的刺激，但对此已经有了感觉
+			;TranslatedMark %ANAME(MTAR:LOCAL)%はクリトリスへの刺激にじっと耐えているものの、確実に感じてきているようだ
+		ELSEIF LOCAL:2 < 3000
+			PRINTFORM 敏感的小豆豆被这样玩弄，你感受到了吗，%ANAME(MTAR:LOCAL)%
+			;TranslatedMark 敏感な豆を丹念に弄られると感じるのか、%ANAME(MTAR:LOCAL)%は
+			IF TALENT:(MTAR:LOCAL):害羞
+				PRINTFORML 羞得面红耳赤，%ANAME(MTAR:LOCAL)%用手捂着自己的嘴，生怕声音漏了出来
+				;TranslatedMark 羞恥に頬を赤く染め手で自分の口を抑えて声が出るのをこらえている
+			ELSEIF TALENT:(MTAR:LOCAL):解放 || TALENT:(MTAR:LOCAL):接受快感
+				PRINTL 发出灼熱的吐息并把身体交给了快感
+			ELSEIF TALENT:(MTAR:LOCAL):圧抑 || TALENT:(MTAR:LOCAL):孤高 || TALENT:(MTAR:LOCAL):否定快感
+				PRINTL 像是在否定快感一般摇头忍耐着
+			ELSE
+				PRINTL 爱液从秘所中溢出的同时轻轻松了口气
+			ENDIF
+		ELSEIF LOCAL:2 < 6000
+			PRINTFORML 将颤抖着的跳蛋放在%ANAME(MTAR:LOCAL)%的小豆豆上碰触后，%ANAME(MTAR:LOCAL)%发出可爱的声音，轻轻地摇晃着身体
+			;TranslatedMark %ANAME(MTAR:LOCAL)%の小さな豆を震えるローターで擦り上げてやると%ANAME(MTAR:LOCAL)%は可愛らしい声を漏らしながらがくがくと身体を揺らした
+		ELSEIF LOCAL:2 < 10000
+			PRINTFORML %ANAME(MTAR:LOCAL)%发出明显的欢愉之声，并将跳蛋压在了自己秘唇上
+			;TranslatedMark %ANAME(MTAR:LOCAL)%は明らかな快楽の声をあげ、自らローターにその部分を押し付けてきた
+		ELSE
+			IF TALENT:(MTAR:LOCAL):Ｃ敏感
+				PRINTFORML %ANAME(MTAR:LOCAL)%因为对敏感的小豆豆的玩弄而浑身颤抖，声音也渐渐的大了起来
+				;TranslatedMark %ANAME(MTAR:LOCAL)%は敏感なクリトリスへの責めに激しく身もだえし、あられも無い声を張り上げ続けた
+			ELSE
+				PRINTFORML %ANAME(MTAR:LOCAL)%因为对小豆豆的刺激，发出了激烈的喘息声，不断挣扎着
+				;TranslatedMark %ANAME(MTAR:LOCAL)%はクリトリスへの刺激に激しい喘ぎ声を上げながら悶え続けた
+			ENDIF
+		ENDIF
+	ENDIF
+NEXT
+
+;-------------------------------------------------
+
+;コマンド区分
+;-------------------------------------------------
+
+@COM_AVAILABLE_WHEN60
+RETURN コマンド_ウフフ
+
+;--------------------
+;性嗜好用関数
+;--------------------
+@COM_PREFERENCE_PLAYER_60()
+RETURN POWER(2, 性的嗜好_道具を使いたい)
+
+@COM_PREFERENCE_TARGET_60()
+RETURN POWER(2, 性的嗜好_道具を使われたい)
+

@@ -1,0 +1,122 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K11_HOBGOBLIN_GANGBANG_RATE(対象)
+#DIM 対象
+RETURN 300
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K11_HOBGOBLIN_GANGBANG_DECISION(対象)
+#DIM 対象
+#DIM ゴブリン
+ゴブリン = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン)
+
+SIF ゴブリン == -1 || CFLAG:対象:捕虜先 != ゴブリン || CFLAG:対象:所属 == ゴブリン
+	RETURN 0
+
+SIF KDVAR:対象:フランドール_禁じられた遊び
+	RETURN 0
+
+SIF ABL:対象:性知識 >= ランク閾値:ランク_性知識:ランク_C
+	RETURN 0
+
+SIF GETBIT(TALENT:対象:特殊勢力陥落系, 特殊勢力_ホフゴブリン)
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, -1, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K11_HOBGOBLIN_GANGBANG_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K11_HOBGOBLIN_GANGBANG(対象)
+#DIM 対象
+#DIM ゴブリン
+ゴブリン = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン)
+
+PRINTFORMW 「啊、哈啊、啊啊♥」
+;TranslatedMark 「あっ、あはっ、あぁっ♥」
+PRINTFORMW 「啊、好厲害、這個好舒服ー♥」
+;TranslatedMark 「あっ、すごい、これきもちーっ♥」
+PRINTFORML 在又暗又冷的牢獄裏、%ANAME(対象)%被哥布林凌辱了
+;TranslatedMark 暗く冷たい牢獄で、%ANAME(対象)%がホフゴブリンに凌辱されている
+PRINTFORML ……但、%PRONOUN(対象)%看起来沒有感到憤怒或悲傷。倒不如説看起来很快楽
+;TranslatedMark ……が、%PRONOUN(対象)%に怒りや悲しみといった感情はみえない。むしろ楽しげですらあった
+PRINTFORMW 哥布林像是要将小穴插到変形一樣向上抽插、而%PRONOUN(対象)%自己主動扭動着腰
+;TranslatedMark 穴の形が変わりそうなほど突き上げられながら、自ら腰を振りたくっている
+PRINTFORMW 用來破坏東西的双手、現在温柔地擼着肉棒……
+;TranslatedMark ものを破壊して回っていた両手は、ペニスを優しく扱きあげている……
+PRINTFORMW 「嗯、想我含着？　可以哦♥」
+;TranslatedMark 「んっ、咥えてほしいの？　いいよ♥」
+PRINTFORMW 「啊ー呣、嗯咕、嗯、啾嚕」
+;TranslatedMark 「あーむっ、んふぅ、んっ、ぢゅるっ」
+PRINTFORML 小小的嘴巴為了取悦哥布林被塞満了肉棒
+;TranslatedMark 小さな口いっぱいにペニスをほおばり、悦ばせていく
+PRINTFORML 他們的肉棒太粗、令下巴変得好疲倦、但他們変得更精神了
+;TranslatedMark 彼らのモノは太すぎて、顎が疲れるのだけれども、こうすることで彼らは一層元気になる
+PRINTFORMW 被教会了那麼快楽的時候、這種程度的是完全不算是懲罰吧
+;TranslatedMark こんな楽しい遊びを教えてくれたのだから、これくらいのことはしても罰はあたらないだろう
+PRINTFORMW 「嗯、咕嗚、嗯、嗯嗯嗯嗯♥」
+;TranslatedMark 「んっ、くぷっ、んっ、んぅうっ♥」
+PRINTFORML 実際上%ANAME(対象)%並沒有很好理解自己処於什麼情況
+;TranslatedMark 実のところ%ANAME(対象)%は、自分が置かれている状況、されていることをよく理解していない
+PRINTFORML 性知識淺薄的%PRONOUN(対象)%、対於自己被輪姦的事実、被教導成「快楽的遊戲」
+;TranslatedMark 性知識の薄い%PRONOUN(対象)%は、このおぞましい輪姦のことを、ただ「楽しい遊び」と教えられていた
+PRINTFORML 小穴被人抽插、被膣内射精、亦只認為是一件非常舒服的事
+;TranslatedMark 穴にペニスを突きこまれることも、膣内に精を放たれることも、気持ちがよくて楽しいとしか思っていない
+PRINTFORMW 当初覚得哥布林是「監禁自己的悪人」、現在的評價已経変成「教会自己快楽遊戲的好人」
+;TranslatedMark 当初「自分を閉じ込めた悪者」と思っていたホフゴブリンのことも、「楽しい遊びを教えてくれたいい人」と評価していた
+PRINTFORMW 「嗯嗯嗯唔……♥」
+;TranslatedMark 「んんんぅっ……♥」
+PRINTFORML 不久、肉棒在膣内釋放出精液。被人咕嚕咕嚕地注入温熱液体的感覚、%ANAME(対象)%陶醉地絶頂了
+;TranslatedMark やがて、肉棒が膣内で精を解き放つ。どくどくと熱いものを注がれる感覚に、%ANAME(対象)%は瞳を蕩かせ絶頂する
+PRINTFORMW 将肉棒拔掉後、精液從不知被内射了多少次変得黏糊糊的小穴中流出来
+;TranslatedMark モノが引き抜かれると、無垢だった秘貝から、収まりきらない何発分もの白濁がどろどろと零れた
+PRINTFORML 差不多是時候了、他們向%ANAME(対象)%提案
+;TranslatedMark そろそろ良いだろうと、彼らは%ANAME(対象)%に提案をする
+PRINTFORMW 要做我們的肉便器嗎？
+;TranslatedMark 俺たちの肉便器にならないか？　と
+PRINTFORML 対性一無所知的%ANAME(対象)%、並不知道肉便器的意思
+;TranslatedMark 性のことなどろくに知らない%ANAME(対象)%は、肉便器という言葉に首をかしげる
+PRINTFORML 所以、他們陳述「事実」、肉便器就是可以一直玩這個遊戲的意思
+;TranslatedMark なれば、ずっとこの遊びができるようになると、彼らは"事実"を述べる
+PRINTFORMW 完全沈迷於遊戲之中的%PRONOUN(対象)%、回答沒有一点遲疑
+;TranslatedMark この遊びにすっかりハマっている%PRONOUN(対象)%が、迷うはずもなかった
+PRINTFORMW 「真的嗎！？　我做我做！」
+;TranslatedMark 「ほんと！？　なるなる！」
+PRINTFORML 再作為肉便器的證明、%ANAME(対象)%的脖子被戴上了結実的頸圈
+;TranslatedMark それじゃあ、これが肉便器の証だと、%ANAME(対象)%の首に頑丈な首輪が嵌められる
+PRINTFORML %ANAME(対象)%自豪地撫摸将自己的未来出賣了的證明
+;TranslatedMark 己の未来を売り飛ばした証拠を、%ANAME(対象)%は誇らしげに撫でる
+PRINTFORMW 之後、他們充分地使用了新的肉便器……
+;TranslatedMark その後、彼らは新たな肉便器を、たっぷりと使ってやった……
+PRINTFORML 
+CALL COLOR_PRINTL(@"%ANAME(対象)%がホフゴブリンの肉便器になった", カラー_注意)
+TRYCALLFORM %SP_COUNTRY_NAME_ENG:特殊勢力_ホフゴブリン%_FALLEN_LEAVE_MARK(対象)
+PRINTFORML 
+
+FOR LOCAL, 0, 3
+	CALL FUCK_GANGBANG_SP(対象, GET_SPERM_ID("ホフゴブリン"), "ホフゴブリンのペニス", "ホフゴブリン", ゴブリン)
+NEXT
+
+KDVAR:対象:フランドール_禁じられた遊び = 1
+SETBIT TALENT:対象:特殊勢力陥落系, 特殊勢力_ホフゴブリン
+CALL CHANGE_COUNTRY(対象, ゴブリン, 1)
+
+RETURN 1
+

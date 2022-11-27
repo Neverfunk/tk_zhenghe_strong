@@ -1,0 +1,86 @@
+@BUILDING_GET_NAME_博丽结界()
+    #FUNCTIONS
+    RETURNF "博丽结界"
+
+@BUILDING_GET_EXP_博丽结界()
+    #FUNCTIONS
+    RETURNF "所在都市防御倍率提高"
+
+@BUILDING_SET_INFO_ID_64()
+    BUILDING_TYPE:建造物_博丽结界 = 建造物_类型_幻想类
+    BUILDING_LEVEL:建造物_博丽结界 = 建造物_等级_二级建筑
+    BUILDING_LIMIT_NUM:建造物_博丽结界 = 建造物_数量限制_1
+    BUILDING_LIMIT_UNI:建造物_博丽结界 = 0
+    BUILDING_COUNTRY_ID:建造物_博丽结界:特殊勢力_普通势力 = 1
+    BUILDING_COUNTRY_ID:建造物_博丽结界:特殊勢力_野盗 = 1
+    BUILDING_COUNTRY_ID:建造物_博丽结界:特殊勢力_ホフゴブリン = 1
+    BUILDING_COUNTRY_ID:建造物_博丽结界:特殊勢力_外来人 = 1
+    BUILDING_COUNTRY_ID:建造物_博丽结界:特殊勢力_触手 = 1
+    BUILDING_COUNTRY_ID:建造物_博丽结界:特殊勢力_自警団 = 1
+    BUILDING_COUNTRY_ID:建造物_博丽结界:特殊勢力_サキュバス = 1
+    BUILDING_COUNTRY_ID:建造物_博丽结界:特殊勢力_狂信者 = 1
+    BUILDING_HAVE_SKILL:建造物_博丽结界 = 1
+    BUILDING_TOHO_REQ_ID:建造物_博丽结界:0 = 1
+
+@CHECK_BUILDING_FUNCTION_博丽结界(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    SIF !CHECK_BUILDING_CHARA_LIMIT_USING(COUNTRY_ID,建造物_博丽结界)
+        RETURNF RESULT:0
+    RESULT:1 = TMP_BUILDING_EXIST_FLAG:COUNTRY_ID:建造物_博丽结界
+    IF RESULT:1 > 0
+        RESULT:0 = 1
+    ENDIF
+    RETURNF RESULT:0
+
+
+@BUILDING_SKILL_博丽结界(COUNTRY_ID)
+    #DIM COUNTRY_ID
+    PRINTFORML 发动后极大幅增加一城市的防卫倍率
+    PRINTFORML 冷却时间3回合
+    PRINTFORML 是否发动
+    CALL ASK_YN()
+    IF !RESULT
+        CALL SINGLE_DRAWLINE
+        PRINTFORML 发动了《博丽结界》的技能
+        CALL BUILDING_SKILL_博丽结界_FUNCTION(COUNTRY_ID)
+        IF RESULT
+            BUILDING_SKILL_COLDTIME:COUNTRY_ID:建造物_博丽结界 = 3
+            PRINTFORMW 完毕
+        ENDIF
+    ENDIF
+@BUILDING_SKILL_博丽结界_FUNCTION(COUNTRY_ID)
+    #DIM CITY_ID
+    #DIM COUNTRY_ID
+    CALL SET_CITY_COLOR_COUNTRY
+    CALL SET_CITY_COLOR_UNIT
+    CALL DRAWMAP
+    CALL RESET_CITY_COLOR
+    CALL SINGLE_DRAWLINE
+
+    PRINTFORML 请选择要提升的城市
+    PRINTBUTTON " 0[取消]", 0
+    PRINTL
+    $INPUT_LOOP0
+    INPUT
+
+    IF RESULT == 0
+        RETURN 0
+    ELSEIF RESULT >= 1001 && RESULT <= 1001 + CITY_NUM
+        CITY_ID = RESULT - 1000
+        IF CITY_OWNER:(CITY_ID) == COUNTRY_ID
+            PRINTFORML 提高%CITY_NAME:CITY_ID%的防御倍率？
+        ELSE
+            RESTART
+        ENDIF
+        CALL ASK_YN()
+        IF !RESULT
+            BUILDING_SKILL_BUFF:COUNTRY_ID:建造物_博丽结界 = CITY_ID
+            BUILDING_SKILL_BUFF_REMAIN:COUNTRY_ID:建造物_博丽结界 = 1
+            RETURN 1
+        ELSE
+            RESTART
+        ENDIF
+    ELSE
+        GOTO INPUT_LOOP0
+    ENDIF

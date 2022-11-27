@@ -1,0 +1,111 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_0_MIRACLE_26_EXIST
+RETURN 1
+
+@SKILL_0_MIRACLE_26_NAME
+RESULTS = 奇迹和魔法可不是免费的
+
+;レベルは1-5まで
+@SKILL_0_MIRACLE_26_LEVEL
+RETURN 5
+
+@SKILL_0_MIRACLE_26_FROMWHO
+;0或不存在=通用 1=暴虐 2=诡术 3=腐朽 4=色欲
+RETURN 3
+
+@SKILL_0_MIRACLE_26_SELFLEARN(对象)
+#DIM 对象
+RETURN 0
+
+;対象選択
+@SKILL_0_MIRACLE_26_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 加和
+#DIM 角色
+;我方部隊対象
+
+RETURN 1
+
+
+
+;発動判定
+@SKILL_0_MIRACLE_26_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM FIRST_LINE
+対象側 = !発動側
+;本技能暂不设置AI使用
+SIF CFLAG:発動者:1 != CFLAG:MASTER:1
+	RETURN 0
+CALL SKILL_0_MIRACLE_26_NAME
+PRINTL 
+FIRST_LINE = LINECOUNT
+PRINTFORML %ANAME(発動者)%持有技能「%RESULTS%」,是否发动?
+PRINTBUTTON " 0[是]", 0
+PRINTL  
+PRINTBUTTON " 1[否]", 1
+PRINTL 
+INPUT
+CLEARLINE LINECOUNT - FIRST_LINE
+SIF RESULT == 0
+	RETURN 1
+RETURN 0
+
+;効果をここに記述
+@SKILL_0_MIRACLE_26_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+SETCOLOR 107,142,35
+PRINTFORML 「奇迹不是免费的」
+PRINTFORML 「如果祈祷希望的话，只会散布与此相同的绝望」
+RESETCOLOR
+PRINTFORML %ANAME(GET_COUNTRY_BOSS(対象勢力))%部队中一半的士兵绝望地化为了飞灰！
+CALL DECREASE_SOLDIER(対象勢力, 対象部隊, GET_SOLDIER(対象勢力, 対象部隊)/2, 1)
+PRINTFORML %ANAME(発動者)%的气力衰竭了！治疗时间增加了8回合，无法参战了。
+COOLTIME:発動者:0 += 8
+CALL FORCE_FREE(発動者)
+CFLAG:発動者:杀敌数 = 0
+
+@SKILL_0_MIRACLE_26_EXPLANATION
+RESULTS = (仅玩家)战斗阶段可发动，以自身无法战斗8回合为代价，敌方部队减半
+
+@SKILL_0_MIRACLE_26_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 1000

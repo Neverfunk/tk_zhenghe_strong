@@ -1,0 +1,161 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_0_MIRACLE_1_EXIST
+RETURN 1
+
+@SKILL_0_MIRACLE_1_NAME
+RESULTS = 修身
+
+;レベルは1-5まで
+@SKILL_0_MIRACLE_1_LEVEL
+RETURN 1
+
+@SKILL_0_MIRACLE_1_LEVELUP(对象)
+#DIM 对象
+;对于存在升级版本的技能,使用升级函数
+;满足升级条件就删除低级学习高级技能
+SIF ABL:对象:信仰 >= FAITH_LEVEL:3
+	CALL MIRACLE_SKILL_LEVELUP(对象,"修身","修身++")
+SIF ABL:对象:信仰 >= FAITH_LEVEL:2
+	CALL MIRACLE_SKILL_LEVELUP(对象,"修身","修身+")
+
+@SKILL_0_MIRACLE_1_SELFLEARN(对象)
+;返回自学优先度
+;不允许自学的技能直接返回0或不添加本函数,基础技能的升级版技能也同上
+#DIM 对象
+#DIM 优先度
+#DIM 技能ID = 1
+优先度 = 0
+;信仰等级要求
+CALLFORM SKILL_0_MIRACLE_{技能ID}_LEVEL
+SIF ABL:对象:信仰 < FAITH_LEVEL:RESULT
+	RETURN 0
+;神术等级加成,一般认为越高越强
+优先度 += RESULT * 20
+;已有技能联动
+CALL FIND_GENERAL_SKILL(对象,"修身+")
+SIF RESULT
+	RETURN 0
+CALL FIND_GENERAL_SKILL(对象,"修身++")
+SIF RESULT
+	RETURN 0		
+;角色属性
+SIF ABL:对象:武闘 >= 80
+	优先度 -= 10
+SIF ABL:对象:武闘 <= 50
+	优先度 += 20
+;角色是否主公
+
+;势力方针/倾向
+IF CFLAG:对象:所属 == CFLAG:MASTER:所属 ;暂时无用
+	SELECTCASE COUNTRY_POLICY:(CFLAG:对象:所属)
+		CASE 政策_経済
+			优先度 -= 20
+		CASE 政策_徴兵
+			优先度 += 20
+		CASE 政策_防衛
+		CASEELSE ;政策未定
+	ENDSELECT
+ELSE
+	SELECTCASE COUNTRY_AI_TYPE:(CFLAG:对象:所属)
+		CASE AI_通常
+		CASE AI_好戦
+			优先度 += 20
+		CASE AI_防衛
+		CASE AI_外交
+			优先度 -= 20
+		CASE AI_内政
+			优先度 -= 20
+		CASE AI_蛮行
+			优先度 += 30
+		CASE AI_ホフゴブリン
+	ENDSELECT
+ENDIF
+;角色成长型
+SELECTCASE TALENT:对象:300 
+	CASE 0 ;万能 武防知政
+		优先度 += 10
+	CASE 1 ;知将 武防知
+		优先度 += 20
+	CASE 2 ;学士 政治
+		优先度 -= 50
+	CASE 3 ;两道 武防政
+		优先度 += 20
+	CASE 4 ; 武官 武防
+		优先度 += 30
+	CASE 5 ;军师 知略
+		优先度 -= 20
+	CASE 6 ;文官 政治
+		优先度 -= 50
+	CASE 7 ;芸能 歌唱
+		优先度 -= 50
+	CASE 8 ;料理
+		优先度 -= 50
+	CASE 9 ;天才
+		优先度 += 10
+ENDSELECT
+RETURN MAX(优先度,0)
+
+;対象選択
+@SKILL_0_MIRACLE_1_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+;我方部隊対象
+RETURN 1
+
+;発動判定
+@SKILL_0_MIRACLE_1_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1
+
+;効果をここに記述
+@SKILL_0_MIRACLE_1_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+CALL PRINT_ADD_EXP(発動者, "武闘経験値",RAND(1,MIN((ABL:発動者:信仰)/10,3)+1), 1)
+CALL TRAIN_AUTO_ABLUP(発動者)
+
+
+@SKILL_0_MIRACLE_1_EXPLANATION
+RESULTS = 根据信仰，提升自身武闘经验值。
+
+@SKILL_0_MIRACLE_1_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 1000

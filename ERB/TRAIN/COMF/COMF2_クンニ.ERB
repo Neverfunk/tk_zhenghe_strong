@@ -1,0 +1,447 @@
+﻿;クンニ
+
+;-------------------------------------------------
+;コマンド名称
+;-------------------------------------------------
+@COM_NAME2
+LOCAL:0 = IS_RIDE(MPLY:0, MTAR:0)
+
+;男性プレイヤーがターゲットに顔面騎乗中
+IF LOCAL:0 && !HAS_VAGINA(MPLY:0)
+	LOCALS:0 = 顔騎舐陰
+;非男性プレイヤーがターゲットに顔面騎乗中 or ターゲットからプレイヤーにフェラ・クンニ中
+ELSEIF LOCAL:0 || SEARCH_EQUIP(11, MTAR:0, MPLY:0) >= 0 || SEARCH_EQUIP(2, MTAR:0, MPLY:0) >= 0
+	IF HAS_PENIS(MTAR:0) && HAS_VAGINA(MTAR:0)
+		LOCALS:0 = 六九式(Ｃ)
+	ELSE
+		LOCALS:0 = 六九式
+	ENDIF
+ELSE
+	LOCALS:0 = 舐陰
+ENDIF
+
+RESULTS:0 = %LOCALS:0%(主動)
+RESULTS:1 = %LOCALS:0%(被役)
+RESULTS:2 = %LOCALS:0%(使役)
+RESULTS:3 = %LOCALS:0%(被動)
+RESULTS:4 = %LOCALS:0%(使役)
+RESULTS:5 = %LOCALS:0%(展示)
+
+;-------------------------------------------------
+;選択可否判定
+;-------------------------------------------------
+@COM_ABLE2
+;共通部分
+CALL COM_ABLE_COMMON(2)
+SIF RESULT == 0
+	RETURN 0
+;プレイヤーは最大で1人まで
+SIF MPLY_NUM <= 0 || MPLY_NUM > 1
+	RETURN 0
+;ターゲットは最大で1人まで
+SIF MTAR_NUM <= 0 || MTAR_NUM > 1
+	RETURN 0
+;対象にＶが必要
+SIF !HAS_VAGINA(MTAR:0)
+	RETURN 0
+SIF !CAN_LICK_GROIN(MPLY:0, MTAR:0)
+	RETURN 0
+;target is anal facesitting player
+SIF SEARCH_EQUIP(102, MTAR:0, MPLY:0) >= 0
+	RETURN 0
+;Although this is technically a Ｃ action, players won't understand if cunnilingus is blocked by the clit cap or similar.
+;SIF IS_EQUIP_TARGET(MTAR:0, 63)
+;	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;メイン処理
+;-------------------------------------------------
+@COM2
+;実行判定
+CALL COM_ORDER_COMMON
+SIF RESULT == 0
+	RETURN 0
+
+
+
+;顔面騎乗中は強制的に非継続にする
+IF IS_RIDDEN(MPLY:0)
+	TFLAG:1 = 1
+ENDIF
+
+;●プレイヤーについて処理
+DOWNBASE:(MPLY:0):体力 += 120
+
+EXP:(MPLY:0):性技経験値 += 1
+
+SOURCE:(MPLY:0):奉仕 = SERVE_HOUSHI(MPLY:0, 300)
+SOURCE:(MPLY:0):接触 = 50
+SOURCE:(MPLY:0):性行動 = 300
+
+;主導権に応じた優越・屈従のソース追加
+CALL ADD_SOURCE_INITIATIVE_U(MPLY:0, 150, 100)
+
+;侍奉経験値を得られるコマンドのフラグ
+TCVAR:(MPLY:0):4 = 1
+
+;膣口へのキス
+CALL KISS_COMMON(MPLY:0, @"%ANAME(MTAR:0)%的秘貝", GET_SITUATION_BY_TRAIN_MODE())
+
+;●ターゲットについて処理
+DOWNBASE:(MTAR:0):体力 += 60
+
+SOURCE:(MTAR:0):液体追加 = 300
+SOURCE:(MTAR:0):露出 = 150
+SOURCE:(MTAR:0):逸脱 = 50
+SOURCE:(MTAR:0):接触 = 50
+SOURCE:(MTAR:0):快Ｃ = SENSE_HOUSHI(MPLY:0, MTAR:0, 1500)
+SOURCE:(MTAR:0):性行動 = 300
+
+;主導権に応じた優越・屈従のソース追加
+CALL ADD_SOURCE_INITIATIVE_U(MTAR:0, 150, 0)
+
+IF TALENT:(MPLY:0):舌頭霊活
+	TIMES SOURCE:(MTAR:0):快Ｃ, 1.50
+ENDIF
+
+;主導度変化基準値
+TFLAG:49 = 2
+
+;倒錯度変化基準値
+TFLAG:50 = 0
+
+;レズ・ＢＬ経験基準値
+TFLAG:51 = 3
+
+RETURN 1
+
+;-------------------------------------------------
+;継続コマンドかどうかを設定
+;-------------------------------------------------
+@COM_IS_EQUIP2
+RETURN 1
+
+;-------------------------------------------------
+;継続状態の処理
+;-------------------------------------------------
+@COM_EQUIP2(ARG:0)
+LOCAL:2 = MEQUIP_PLAYER:(ARG:0):0
+LOCAL:3 = MEQUIP_TARGET:(ARG:0):0
+
+;●プレイヤーの処理
+DOWNBASE:(LOCAL:2):体力 += 20
+
+EXP:(LOCAL:2):性技経験値 += 1
+
+SOURCE:(LOCAL:2):奉仕 += SERVE_HOUSHI(LOCAL:2, 100)
+SOURCE:(LOCAL:2):接触 += 25
+SOURCE:(LOCAL:2):性行動 += 100
+
+;侍奉経験値を得られるコマンドのフラグ
+TCVAR:(LOCAL:2):4 = 1
+
+;●ターゲットの処理
+DOWNBASE:(LOCAL:3):体力 += 10
+
+SOURCE:(LOCAL:3):液体追加 += 150
+SOURCE:(LOCAL:3):露出 += 75
+SOURCE:(LOCAL:3):逸脱 += 25
+SOURCE:(LOCAL:3):接触 += 25
+SOURCE:(LOCAL:3):性行動 += 100
+
+IF TALENT:(LOCAL:2):舌頭霊活
+	SOURCE:(LOCAL:3):快Ｃ += SENSE_HOUSHI(LOCAL:2, LOCAL:3, 1125)
+ELSE
+	SOURCE:(LOCAL:3):快Ｃ += SENSE_HOUSHI(LOCAL:2, LOCAL:3, 750)
+ENDIF
+
+;-------------------------------------------------
+;継続中の表示
+;-------------------------------------------------
+@EQUIP_MESSAGE2(ARG:0)
+RESULTS = %EQUIP_PLAYER_ANAME(ARG:0)%対%EQUIP_TARGET_ANAME(ARG:0)%舐陰中
+
+;-------------------------------------------------
+;継続中の地の文(前文)
+;-------------------------------------------------
+@COM_TEXT_BEFORE_EQUIP2(ARG:0)
+PRINTFORML %EQUIP_PLAYER_ANAME(ARG:0)%正舔舐著%EQUIP_TARGET_ANAME(ARG:0)%的秘唇…
+
+;-------------------------------------------------
+;継続を解除したときの地の文
+;-------------------------------------------------
+@COM_TEXT_RELEASE_EQUIP2(ARG:0)
+
+;-------------------------------------------------
+;固有の実行判定
+;-------------------------------------------------
+@COM_ORDER_PLAYER2(ARG:0)
+;実行値の設定
+TCVAR:(ARG:0):25 = 75
+
+;共通部分
+CALL COM_ORDER(ARG:0)
+
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲望Lv{ABL:(ARG:0):欲望}", ABL:(ARG:0):欲望 * 1)
+CALL COM_ORDER_ELEMENT(ARG:0, @"侍奉Lv{ABL:(ARG:0):奉仕}", ABL:(ARG:0):奉仕 * 4)
+
+LOCAL:0 = GET_PALAMLV(PALAM:(ARG:0):欲情)
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲情Lv{LOCAL:0}", MIN(LOCAL:0 * 2, 20))
+
+IF TCVAR:(ARG:0):60
+	CALL COM_ORDER_ELEMENT(ARG:0, "媚薬", 6)
+ENDIF
+
+IF TALENT:(ARG:0):害羞
+	CALL COM_ORDER_ELEMENT(ARG:0, "害羞", -1)
+ENDIF
+IF TALENT:(ARG:0):汚臭鈍感
+	CALL COM_ORDER_ELEMENT(ARG:0, "汚臭鈍感", 1)
+ENDIF
+IF TALENT:(ARG:0):汚臭敏感
+	CALL COM_ORDER_ELEMENT(ARG:0, "汚臭敏感", -3)
+ENDIF
+IF TALENT:(ARG:0):献身的
+	CALL COM_ORDER_ELEMENT(ARG:0, "献身的", 6)
+ENDIF
+IF TALENT:(ARG:0):否定快感
+	CALL COM_ORDER_ELEMENT(ARG:0, "否定快感", -1)
+ENDIF
+IF TALENT:(ARG:0):討厭女人
+	CALL COM_ORDER_ELEMENT(ARG:0, "討厭女人", -7)
+ENDIF
+
+;合意
+IF !TALENT:(ARG:0):合意 && !TALENT:(ARG:0):親友
+	CALL COM_ORDER_ELEMENT(ARG:0, "合意無", -10)
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;地の文(前文)
+;-------------------------------------------------
+@COM_TEXT_BEFORE2
+LOCAL:5 = SEARCH_EQUIP(101, MPLY:0, MTAR:0)
+LOCAL:6 = SEARCH_EQUIP(102, MPLY:0, MTAR:0)
+LOCAL:7 = SEARCH_EQUIP(11, MTAR:0, MPLY:0)
+LOCAL:8 = SEARCH_EQUIP(2, MTAR:0, MPLY:0)
+LOCAL:9 = SEARCH_EQUIP(101, MTAR:0, MPLY:0)
+LOCALS:1 = 
+IF HAS_PENIS(MTAR:0)
+	LOCALS:1 = 在肉竿根処的
+ELSEIF PALAM:(MTAR:0):潤滑 >= PALAMLV:5
+	LOCALS:1 = 濕透的
+ELSEIF TALENT:(MTAR:0):体格 == 体格_子供
+	LOCALS:1 = 幼小的
+ENDIF
+
+IF IS_PIERCED(MTAR:0, ピアス_ラビア)
+	LOCALS:2 = 上著環的
+ELSE
+	LOCALS:2 = 
+ENDIF
+
+SELECTCASE GET_INMOU_LEVEL(MTAR:0)
+	CASE 1, 2
+		LOCALS:3 = 陰毛茂盛的
+	CASEELSE
+		LOCALS:3 = 
+ENDSELECT
+
+IF CUM_GET_AMOUNT:(MTAR:0):射精部位_膣内 > 0
+	LOCALS:4 = 正溢出白濁的
+ELSE
+	LOCALS:4 = 
+ENDIF
+
+
+;プレイヤーがターゲットに顔面騎乗中かつ男の場合
+IF LOCAL:5 >= 0 && !HAS_VAGINA(MPLY:0)
+	SELECTCASE GET_COM_INITIATIVE()
+		;プレイヤーに主導権
+		CASE 0
+			PRINTFORMW %ANAME(MPLY:0)%一邊讓%ANAME(MTAR:0)%舔舐著自己的睪丸、一邊舔舐著%ANAME(MTAR:0)%的%LOCALS:2%%LOCALS:3%%LOCALS:1%%LOCALS:4%裂縫…
+		;ターゲットに主導権
+		CASE 1
+			PRINTFORMW %ANAME(MTAR:0)%一邊舔舐著%ANAME(MPLY:0)%的睪丸、一邊讓%ANAME(MPLY:0)%舔舐著自己的%LOCALS:2%%LOCALS:3%%LOCALS:1%%LOCALS:4%裂縫…
+		;第三者に主導権
+		CASEELSE
+			PRINTFORML %ANAME(TFLAG:45)%命令%ANAME(MPLY:0)%去舔舐%ANAME(MTAR:0)%的%LOCALS:2%秘唇
+			PRINTFORMW %ANAME(MPLY:0)%一邊讓%ANAME(MTAR:0)%舔舐著自己的睪丸、一邊舔舐著%ANAME(MTAR:0)%的%LOCALS:2%%LOCALS:3%%LOCALS:1%%LOCALS:4%裂縫…
+			;TranslatedMark %ANAME(MPLY:0)%は%ANAME(MTAR:0)%に自身の玉を舐めさせながら、%ANAME(MTAR:0)%の%LOCALS:2%%LOCALS:3%%LOCALS:1%%LOCALS:4%ワレメを舐めほぐした…
+	ENDSELECT
+	;顔面騎乗の地の文をカット
+	IF LOCAL:5 >= 0
+		MEQUIP_CUT:(LOCAL:5) = 1
+	ENDIF
+
+;非男性プレイヤーがターゲットに顔面騎乗中 or ターゲットからプレイヤーにフェラ・クンニ中
+ELSEIF LOCAL:5 >= 0 || LOCAL:6 >= 0 || LOCAL:7 >= 0 || LOCAL:8 >= 0
+	IF LOCAL:6 >= 0
+		LOCALS:0 = 肛門
+	ELSEIF LOCAL:7 >= 0
+		LOCALS:0 = 陰茎
+	ELSE
+		LOCALS:0 = 秘唇
+	ENDIF
+	SELECTCASE GET_COM_INITIATIVE()
+		;プレイヤーに主導権
+		CASE 0
+			PRINTFORMW %ANAME(MPLY:0)%一邊讓%ANAME(MTAR:0)%舔舐著自己的%LOCALS:0%、一邊舔舐著%ANAME(MTAR:0)%的%LOCALS:2%%LOCALS:3%%LOCALS:1%%LOCALS:4%裂縫…
+		;ターゲットに主導権
+		CASE 1
+			PRINTFORMW %ANAME(MTAR:0)%一邊舔舐著%ANAME(MPLY:0)%的%LOCALS:0%、一邊讓%ANAME(MPLY:0)%舔舐著自己的%LOCALS:2%%LOCALS:3%%LOCALS:1%%LOCALS:4%裂縫…
+		;第三者に主導権
+		CASEELSE
+			PRINTFORML %ANAME(TFLAG:45)%命令%ANAME(MPLY:0)%和%ANAME(MTAR:0)%用六九式互相口交
+			PRINTFORMW %ANAME(MPLY:0)%一邊讓%ANAME(MTAR:0)%舔舐著自己的%LOCALS:0%、一邊舔舐著%ANAME(MTAR:0)%的%LOCALS:2%%LOCALS:3%%LOCALS:1%%LOCALS:4%裂縫…
+	ENDSELECT
+	;顔面騎乗・フェラ・クンニの地の文をカット
+	IF LOCAL:5 >= 0
+		MEQUIP_CUT:(LOCAL:5) = 1
+	ENDIF
+	IF LOCAL:6 >= 0
+		MEQUIP_CUT:(LOCAL:6) = 1
+	ENDIF
+	IF LOCAL:7 >= 0
+		MEQUIP_CUT:(LOCAL:7) = 1
+	ENDIF
+	IF LOCAL:8 >= 0
+		MEQUIP_CUT:(LOCAL:8) = 1
+	ENDIF
+
+;ターゲットからプレイヤーに顔面騎乗中
+;ELSEIF LOCAL:8 >= 0
+;	SELECTCASE GET_COM_INITIATIVE()
+;		;プレイヤーに主導権
+;		CASE 0
+;			PRINTFORMW %ANAME(MPLY:0)%は%ANAME(MTAR:0)%を顔の上に跨がらせたまま、下から%ANAME(MTAR:0)%の%LOCALS:2%%LOCALS:3%%LOCALS:4%ワレメを貪るように舐め上げ%TARGET_STR("た", "てきた")%…
+;		;ターゲットに主導権
+;		CASE 1
+;			PRINTFORMW %ANAME(MTAR:0)%は%ANAME(MPLY:0)%の顔に跨ったまま、グリグリと腰を押し付けて自身の%LOCALS:2%%LOCALS:3%%LOCALS:4%ワレメを舐めさせた…
+;		;第三者に主導権
+;		CASEELSE
+;			PRINTFORML %ANAME(TFLAG:45)%は%ANAME(MPLY:0)%に%ANAME(MTAR:0)%の秘唇を舐めるように命令した
+;			PRINTFORMW %ANAME(MPLY:0)%は%ANAME(MTAR:0)%を顔の上に跨がらせたまま、下から%ANAME(MTAR:0)%の%LOCALS:2%%LOCALS:3%%LOCALS:4%ワレメを舐め上げた…
+;	ENDSELECT
+;	;顔面騎乗の地の文をカットする
+;	MEQUIP_CUT:(LOCAL:8) = 1
+
+;プレイヤーが拘束中
+ELSEIF IS_BIND(MPLY:0)
+	SELECTCASE GET_COM_INITIATIVE()
+		;プレイヤーに主導権
+		CASE 0
+			PRINTFORMW %ANAME(MPLY:0)%用力把臉埋在了%ANAME(MTAR:0)%的%LOCALS:2%%LOCALS:3%%LOCALS:1%%LOCALS:4%裂縫上、用舌頭激烈地舔舐著…
+		;ターゲットに主導権
+		CASE 1
+			PRINTFORMW %ANAME(MTAR:0)%把自己的%LOCALS:2%%LOCALS:3%%LOCALS:1%%LOCALS:4%裂縫圧在無法行動的%ANAME(MPLY:0)%嘴上、讓%ANAME(MPLY:0)%舔舐侍奉…
+		;第三者に主導権
+		CASEELSE
+			PRINTFORML %ANAME(TFLAG:45)%対%ANAME(MTAR:0)%、下達了讓%ANAME(MPLY:0)%舔舐秘唇的命令
+			PRINTFORMW %ANAME(MTAR:0)%把自己的%LOCALS:2%%LOCALS:3%%LOCALS:1%%LOCALS:4%裂縫圧在無法行動的%ANAME(MPLY:0)%嘴上、讓%ANAME(MPLY:0)%舔舐…
+	ENDSELECT
+
+ELSE
+	SELECTCASE GET_COM_INITIATIVE()
+		;プレイヤーに主導権
+		CASE 0
+			PRINTFORMW %ANAME(MPLY:0)%用舌頭舔舐著%ANAME(MTAR:0)%的%LOCALS:2%%LOCALS:3%%LOCALS:1%%LOCALS:4%裂縫…
+		;ターゲットに主導権
+		CASE 1
+			IF GETBIT(TALENT:(MTAR:0):淫乱系, 素質_淫乱_サド)
+				LOCALS:4 = 露出嗜虐的笑容、
+			ELSEIF GETBIT(TALENT:(MTAR:0):淫乱系, 素質_淫乱_淫乱)
+				LOCALS:4 = 露出恍惚的表情、
+			ENDIF
+			PRINTFORMW %ANAME(MTAR:0)%%LOCALS:4%把自己的%LOCALS:2%%LOCALS:3%%LOCALS:1%%LOCALS:4%裂縫圧在%ANAME(MPLY:0)%嘴上、讓%ANAME(MPLY:0)%舔舐侍奉…
+		;第三者に主導権
+		CASEELSE
+			PRINTFORML %ANAME(TFLAG:45)%命令%ANAME(MPLY:0)%舔舐%ANAME(MTAR:0)%的秘唇
+			PRINTFORMW %ANAME(MPLY:0)%用舌頭舔舐著%ANAME(MTAR:0)%的%LOCALS:2%%LOCALS:3%%LOCALS:1%%LOCALS:4%裂縫…
+	ENDSELECT
+ENDIF
+
+
+IF CUM_CUR_AMOUNT:(MTAR:0):射精部位_膣内
+	PRINTFORM %SPLIT_RAND("熱的/粘粘的/濃厚的/新鮮的", 1)%精液
+
+	IF ABL:(MPLY:0):精愛 >= 4
+		PRINTFORML %SPLIT_RAND("爱好精液的/获得了精愛味覚的/渴望精液的", 1)%%ANAME(MPLY:0)%的嘴边滴落，%PRONOUN(MPLY:0)%发出了喜悦的呻吟声…
+	ELSE
+		PRINTFORML %ANAME(MPLY:0)%的嘴边滴落，%PRONOUN(MPLY:0)%被迫侍奉着…
+	ENDIF
+	;target eats 1/4th + 3 cum, up to 20
+	LOCAL = LIMIT(MIN(((CUM_CUR_AMOUNT:(MTAR:0):射精部位_膣内 / 4) + 3), CUM_CUR_AMOUNT:(MTAR:0):射精部位_膣内) , 0, 20)
+	CUM_CUR_AMOUNT:(MTAR:0):射精部位_膣内 -= LOCAL
+	CUM_CUR_AMOUNT:(MPLY:0):射精部位_口 += LOCAL
+	SIF CUM_CUR_AMOUNT:(MTAR:0):射精部位_膣内 == 0
+		PRINTFORML %ANAME(MTAR:0)%的%STR_BODY("膣", MPLY:0)%的精液全部被%ANAME(MPLY:0)%舔舐干了
+	;Cumlove exp increases by amount of cum
+	EXP:(MPLY:0):精愛経験値 += LOCAL
+	;Swallowing exp
+	SIF ABL:(MPLY:0):精愛 >= 4
+		EXP:(MPLY:0):口内射精経験 ++
+	WAIT
+ENDIF
+
+
+;--------------------------------------------------------
+;地の文(パラメータ・刻印変動後)
+;--------------------------------------------------------
+@COM_TEXT_LAST2
+
+IF MTAR:0 != MASTER || CONFIG:441
+	LOCAL:2 = CUP:(MTAR:0):快Ｃ
+
+	IF TCVAR:(MTAR:0):52
+		;気絶中
+		PRINTFORML %ANAME(MTAR:0)%每次被舔舐到秘唇時、身体都會一顫
+	ELSEIF LOCAL:2 < 300
+		PRINTFORML %ANAME(MTAR:0)%的那裡還未濕潤并緊緊閉合。想要感到快感的話還需要再花一點時間
+	ELSEIF LOCAL:2 < 1000
+		PRINTFORML %ANAME(MTAR:0)%雖然一直在忍耐著舐陰的刺激、但是已經有感覺了
+	ELSEIF LOCAL:2 < 3000
+		PRINTFORM 感覺到敏感的秘豆被舔舐的%ANAME(MTAR:0)%、
+		IF TALENT:(MTAR:0):害羞
+			PRINT 羞得滿臉通紅、用手捂著嘴想要圧住自己的呻吟聲、
+		ELSEIF TALENT:(MTAR:0):解放 || TALENT:(MTAR:0):接受快感
+			PRINTL 発出灼熱的吐息把身体交給了快感
+		ELSEIF TALENT:(MTAR:0):圧抑 || TALENT:(MTAR:0):孤高 || TALENT:(MTAR:0):否定快感
+			PRINTL 像是在否定快感一般搖頭忍耐著
+		ELSE
+			PRINTL 在愛液從秘所中溢出的同時輕輕鬆了口氣
+		ENDIF
+	ELSEIF LOCAL:2 < 6000
+		PRINTFORML %ANAME(MTAR:0)%的小秘豆每次被舌頭摩擦到的時候、%ANAME(MTAR:0)%都會漏出可愛的嬌喘聲并扭動著身體
+	ELSEIF LOCAL:2 < 10000
+		PRINTFORML %ANAME(MTAR:0)%在快感下発出了明亮的嬌喘聲、無意識地用手抓住%ANAME(MPLY:0)%的頭、用力地摁向下體
+	ELSE
+		IF TALENT:(MTAR:0):Ｃ敏感
+			PRINTFORML %ANAME(MTAR:0)%在敏感的陰蒂被激烈刺激所帯來的快感下不停扭動著身體、那淫靡的嬌喘聲也越來越高
+		ELSE
+			PRINTFORML %ANAME(MTAR:0)%在陰蒂被舔舐所帯來的刺激下、一直在激烈喘息、扭動身體忍耐著快感
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+
+;コマンド区分
+;-------------------------------------------------
+
+@COM_AVAILABLE_WHEN2
+RETURN コマンド_ウフフ
+
+;--------------------
+;性嗜好用関数
+;--------------------
+@COM_PREFERENCE_PLAYER_2()
+RETURN POWER(2, 性的嗜好_愛撫したい)
+
+@COM_PREFERENCE_TARGET_2()
+RETURN POWER(2, 性的嗜好_愛撫されたい)
+
+@COM_STACK_SPERM_MTAR_TO_MPLY_2()
+RETURN 射精部位_顔

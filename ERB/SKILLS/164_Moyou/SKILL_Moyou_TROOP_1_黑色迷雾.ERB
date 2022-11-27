@@ -1,0 +1,83 @@
+;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_164_TROOP_1_EXIST
+RETURN 1
+
+@SKILL_164_TROOP_1_NAME
+RESULTS = 黑色迷雾
+
+;レベルは1-5まで
+@SKILL_164_TROOP_1_LEVEL
+RETURN 4
+
+;対象選択
+@SKILL_164_TROOP_1_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+;自部隊対象
+RETURN 1
+
+;発動判定
+@SKILL_164_TROOP_1_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+SIF 発動部隊 < 0
+	RETURN 0
+RETURN BATTLE_COMMANDER_NUM:発動側 == 1
+
+;効果をここに記述
+@SKILL_164_TROOP_1_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+PRINTFORML Moyou突然释放了大量黑雾！
+PRINTL (这雾怎么有股鱼腥味)
+PRINTFORML 战场被黑雾笼罩，战斗无法进行！
+BATTLE_RATE_GRD_B:発動側 += 100
+BATTLE_RATE_GRD_B:対象側 += 100
+PRINTL (顺带一提，部队当天的伙食从普通米饭升级成了墨鱼汁拌饭，我方部队的疲劳度回复了！)
+UNIT_TIRED_COUNT:発動勢力:発動部隊 = MAX(UNIT_TIRED_COUNT:発動勢力:発動部隊 - RAND(3, 6), 0)
+
+@SKILL_164_TROOP_1_EXPLANATION
+RESULTS = 当我方部队将领中只有自己时触发。使双方部队无法造成伤害，同时使我方部队的疲劳度减少。
+
+@SKILL_164_TROOP_1_CANT_TELL
+
+@SKILL_164_TROOP_1_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 200

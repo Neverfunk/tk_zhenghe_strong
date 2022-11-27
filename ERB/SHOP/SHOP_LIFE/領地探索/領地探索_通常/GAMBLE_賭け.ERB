@@ -1,0 +1,151 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_GAMBLE_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_GAMBLE_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_GAMBLE(対象)
+#DIM 対象
+
+PRINTFORML 在酒場喝酒的時候、被一位其他客人邀請用撲克賭一場
+IF IS_MALE(対象) || (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+	PRINTFORML 贏了的話就能享用她的身体、輸了的話要給她5000金
+ELSE
+	PRINTFORML 贏了的話能獲得10000金、輸了的話就要肉償
+ENDIF
+PRINTL
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "知略"))
+
+CALL ASK_MULTI_JUDGE("參加", IS_FEMALE(対象) || (IS_MALE(対象) && MONEY >= 5000), "拒絕", 1)
+
+IF RESULT == 1
+	PRINTFORML 沒有興趣
+	PRINTFORML 繼續獨酌
+	RETURN 1
+ENDIF
+
+PRINTFORML 開賭！
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+
+IF LIMIT(ABL:対象:知略, 50, 90) > RAND:100
+	PRINTFORMW 勝利了！
+	IF IS_MALE(対象) || (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+	
+		IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+			PRINTFORML 是認為自己絕対不會輸麼、一臉震驚的女人聳拉著肩膀、垂頭喪氣
+			PRINTFORML 不愿献出身体的女人提出希望用10000金代替肉偿
+			PRINTL
+			
+			CALL ASK_MULTI("要钱", "要你")
+			SELECTCASE RESULT
+				CASE 0
+					PRINTFORML 女人不甘心地把钱拍在桌上
+					PRINTFORMW 随后就头也不回地离开了，嘴里说着下次一定要打败你之类的话
+					CALL ICPRINT("得到了<10000>金", "L", カラー_注意)
+					MONEY += 10000
+					RETURN 1
+				CASE 1
+					PRINTFORMW 被逼迫履行賭約的女人不情願地點了點頭
+					PRINTFORMW %ANAME(対象)%摟住女人的腰、把她帯到了附近的旅館
+					PRINTFORML
+					PRINTFORML 女人一言不发地被%ANAME(対象)%脱光了衣服，满脸通红地低垂着头
+					PRINTFORML 和外表看来正好相反，她对于这种事好像十分害羞，一直微妙地遮着自己隐秘的部位
+					PRINTFORML %ANAME(対象)%被这种反应勾起了兴趣，转而攻击起了一些不重要的地方
+					PRINTFORML 逐渐被挑起欲望的她开始不停扭动身体，渴望能从%ANAME(対象)%处得到一些更加直接的刺激，但%ANAME(対象)%始终假装没有看到
+					PRINTFORML 就算想要自己动手也总会被%ANAME(対象)%拨到一边，不满足于细水长流的快感的她发出了欲求不满的呻吟
+					PRINTFORML 看到时机已到的%ANAME(対象)%一口气刺激起了她全身的性感带，突如其来的快感直接将她送上了前所未有的决定
+					PRINTFORMW 夜晚剩下的时间里，她努力侍奉着%ANAME(対象)%的身体，以期换取进入高潮的许可
+					RETURN 1
+			ENDSELECT
+		ENDIF
+		
+		PRINTFORML 是認為自己絕対不會輸麼、一臉震驚的女人聳拉著肩膀、垂頭喪氣
+		PRINTFORMW 被逼迫履行賭約的女人不情願地點了點頭
+		PRINTFORMW %ANAME(対象)%摟住女人的腰、把她帯到了附近的旅館
+		PRINTL 
+		PRINTFORML 立即剝掉衣服之後、她用手遮著自己的胸部和秘所
+		PRINTFORML 和之前的態度完全相反、好像還很純潔的樣子、低垂著通紅的臉
+		PRINTFORML 被勾起了興趣的%ANAME(対象)%撲向了有些膽怯的她、一整晚都在認真的開発那個肉体敏感的部位
+		PRINTFORML 效果非常顯著、剛才還和黃花閨女一樣羞恥的她、如今已經覺醒了作為雌性的喜悅、嬌軀亂顫不停高聲地呻吟著
+		PRINTFORMW %ANAME(対象)%和她就這樣、直到彼此的体力耗盡進入睡眠之前一直貪婪地発泄著性欲
+		CALL FUCK(対象, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失, 接吻喪失", 0, "酒場的女客的嘴唇", "", "酒場的女客的膣穴", "和姦")
+	ELSE
+		PRINTFORML 按照約定得到了賭金
+		CALL ICPRINT(@"獲得了<10000>金", "L", カラー_注意)
+		MONEY += 10000
+	ENDIF
+ELSE
+	PRINTFORMW 輸了……
+	IF IS_FEMALE(対象)
+	
+		IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+			IF MONEY >= 5000
+				PRINTFORML 女人用表情暗示你还可以有付钱之外的选项
+				PRINTL
+				
+				CALL ASK_MULTI("交出金钱", "交出身体")
+				SELECTCASE RESULT
+					CASE 0
+						PRINTFORML 按照約定支付了賭金
+						CALL ICPRINT("失去了<5000>金", "L", カラー_注意)
+						MONEY -= 5000
+						RETURN 1
+					CASE 1
+						PRINTFORML 不想交钱，希望可以用身体代替
+						PRINTFORMW 女人微微一笑，伸手搂住%ANAME(対象)%，向附近的旅馆走去
+						$FUCK_SCENE
+						PRINTFORML
+						PRINTFORML 粗暴地剥掉%ANAME(対象)%的衣服，女人用鉴赏的眼光打量着她的身体
+						IF TALENT:対象:喜歡引人注目 || GETBIT(TALENT:対象:淫乱系, 素質_淫乱_露出狂)
+							PRINTFORML 对此丝毫不以为意的%ANAME(対象)%，像是炫耀一般地展示起了自己的隐私部位
+						ELSE
+							PRINTFORML 被这种眼神弄得有些不舒服，%ANAME(対象)%微微挪动着身体，企图遮住自己的私密部位
+						ENDIF
+						PRINTFORML 但女人才不给她这样的机会，她立刻扑倒了%ANAME(対象)%，照着%ANAME(対象)%敏感的地方就开始胡乱地舔舐起来，弄得她身上到处都是唾液的痕迹
+						PRINTFORML 不满足于这些事情，她把秘穴压向%ANAME(対象)%的脸颊，要求她制造出尽可能多的蜜液，然后涂抹在自己身上
+						PRINTFORML 过了不久，%ANAME(対象)%浑身沾满了二人的体液，在灯光下闪烁着晶莹的光芒
+						PRINTFORML 早就失去正常判断力的%ANAME(対象)%，一边玩弄着身上的液体，一边对女人的各种要求言听计从
+						PRINTFORMW 就算是各种淫靡的姿势也无所谓，这些影像被女人的手机镜头永远保存了起来
+						CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, Ｃ, Ｂ, Ｍ, 接吻, 口淫, 百合, 露出", "接吻喪失",0, @"酒場的女客的嘴唇\@RAND:2 ? 秘贝 # 嘴唇\@", "", "", "和姦")
+						PRINTFORML
+						PRINTFORMW 第二天，女人把浑身黏糊糊的%ANAME(対象)%洗干净后送回了家
+						RETURN 1
+				ENDSELECT
+			ELSE 
+				PRINTFORML 身上没有钱可以交出来的钱，%ANAME(対象)%只好提出用身体付账
+				PRINTFORMW 女人微微一笑，伸手搂住%ANAME(対象)%，向附近的旅馆走去
+				GOTO FUCK_SCENE
+			ENDIF 
+		ENDIF
+		
+		PRINTFORML 男用手摟住了%ANAME(対象)%的腰、説要陪他一整晚
+		PRINTFORMW 約定就是約定。%ANAME(対象)%只能默默從了他
+		PRINTFORML 
+		PRINTFORML 男人用他精湛的手法、很快就讓%ANAME(対象)%露出了飄飄然的表情
+		PRINTFORML 被粗壮的肉棒魅惑了的%ANAME(対象)%、毫不猶豫地掰開了自己的%STR_BODY("膣", 対象)%請求著挿入
+		PRINTFORMW 那粗暴又不失技巧的腰技讓%ANAME(対象)%什麼也不在乎了、即使是膣内射精也毫不抵抗地接受了
+		CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_SPERM_ID("流氓"), @"流氓的\@RAND:2 ? 肉棒 # 嘴唇\@", "流氓", "", "和姦")
+		PRINTFORML 
+		PRINTFORMW 天色発白的時候終於被解放了的%ANAME(対象)%、按着下腹部帯着蹣跚的步伐踏上了帰途
+	ELSE
+		PRINTFORML 按照約定支付了賭金
+		CALL ICPRINT("失去了<5000>金", "L", カラー_注意)
+		MONEY -= 5000
+	ENDIF
+ENDIF
+
+RETURN 1

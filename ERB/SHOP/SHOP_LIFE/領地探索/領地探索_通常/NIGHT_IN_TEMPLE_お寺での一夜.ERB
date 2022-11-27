@@ -1,0 +1,42 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_NIGHT_IN_TEMPLE_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_NIGHT_IN_TEMPLE_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_NIGHT_IN_TEMPLE(対象)
+#DIM 対象
+
+PRINTFORML 探索的途中天已經黑了、決定在寺廟借住一晚
+PRINTFORMW 得到了住持的熱情款待、明明是在寺廟卻被推薦了酒肉
+PRINTFORML 怎麼辦？
+CALL ASK_YN("接受好意" ,"責難葷腥")
+IF RESULT == 1
+	PRINTFORML 責難為什麼寺廟會有葷腥之後他一臉掃興再也沒有說什麼了
+	PRINTFORMW %ANAME(対象)%住了一晚後在天亮前趕緊離開了寺廟
+	RETURN
+ENDIF
+
+PRINTFORML 無法拒絕厚意的%ANAME(対象)%喝下了递来的酒
+PRINTFORMW 看到這個的住持露出了滿足的笑容、像是在開宴會一樣不断的勧著酒
+PRINTFORML 
+PRINTFORMW 翌日清晨、在寝室醒來的%ANAME(対象)%向住持道謝之後離開了寺廟
+IF ABL:対象:肝臓 <= 3
+	PRINTFORML ……連酔了兩天
+	CALL ADD_COOLTIME(対象, 2)
+ENDIF
+CALL PRINT_ADD_EXP(対象, "肝臓経験値", RAND(50, 100), 1)
+
+RETURN 1

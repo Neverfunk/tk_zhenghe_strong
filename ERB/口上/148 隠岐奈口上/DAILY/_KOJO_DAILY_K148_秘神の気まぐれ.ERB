@@ -1,0 +1,463 @@
+﻿
+
+;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K148_NIGHTEVENT_RATE(対象)
+#DIM 対象
+RETURN 80
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K148_NIGHTEVENT_DECISION(対象)
+#DIM 対象
+
+;対象との所属が同じ、好感度500以上、8%
+SIF !CFLAG:対象:好感度 >= 500
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+RETURN 1
+
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K148_NIGHTEVENT_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K148_NIGHTEVENT(対象)
+#DIM 対象
+#DIM 経験値
+
+PRINTFORML 
+PRINTFORML 有一天晚上。
+;TranslatedMark ある晩のこと。
+SELECTCASE RAND:3
+;添い寝   
+	CASE 0
+	;正妻
+		IF TALENT:対象:正妻
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORMW 当%ANAME(MASTER)%准备睡觉的时候，隐岐奈渐渐靠近了。
+					;TranslatedMark %ANAME(MASTER)%が寝る準備をしていると、隠岐奈がそろそろと近寄ってきた。
+					PRINTFORML 
+					PRINTFORML 「今天已经休息了吗？那我也一起睡吧」
+					;TranslatedMark 「%ANAME(MASTER)%、今日はもうお休みか？ なら、私も一緒に寝てしまおうかな」
+					PRINTFORML 这么说来，隐岐奈脱掉衣服，开始换睡衣…。
+					;TranslatedMark そう言うと隠岐奈は服を脱ぎ、寝巻に着替え始める…。
+					PRINTFORMW 因为眼前的对象是伴侣，所以她对于暴露自己的肌肤也没有踌躇的样子。
+					;TranslatedMark 目の前にいる相手が伴侶であるゆえに、彼女は自身の素肌を晒すことにも躊躇する様子はない。
+					PRINTFORML 白嫩光滑的肌肤，柔软的肢体。
+					;TranslatedMark 白く滑らかな肌、柔らかな肢体。
+					PRINTFORMW 正因为很清楚这种感觉，所以%ANAME(MASTER)%才会被她的身影所吸引。
+					;TranslatedMark その感触をよく知っているからこそ、%ANAME(MASTER)%は彼女の姿に釘付けになってしまう。
+					PRINTFORML 
+					PRINTFORML 「……你看什么」
+					;TranslatedMark 「……何をそんなに見ている」
+					PRINTFORMW 「不好意思，今天没有那种心情……到明天为止，能忍耐吗？」
+					;TranslatedMark 「悪いが、今日はそういう気分じゃないんだ……明日まで、我慢できるな？」
+					PRINTFORML 但是，隐岐奈却露出使坏的笑容，躺在床上。
+					;TranslatedMark にや、と意地悪な笑みを浮かべ、隠岐奈は寝台に寝転がる。
+					PRINTFORML 虽然看不出是在邀请你，但既然吃了"お托け"，就只能陪着睡了。
+					;TranslatedMark 誘っているようにも見えなくないが、"おあずけ"を食らった以上は添い寝に留めるほかはない。
+					PRINTFORMW %ANAME(MASTER)%也躺在她的旁边，感受着旁边的温暖，闭上了眼睛。
+					;TranslatedMark %ANAME(MASTER)%も彼女の隣に横たわり、傍らのぬくもりを感じつつ、目を瞑った。
+				CASE 1
+					PRINTFORML 「%ANAME(MASTER)%……已经很晚了，睡吧…？」
+					;TranslatedMark 「%ANAME(MASTER)%……もう遅いし、寝よう…？」
+					PRINTFORMW 隐岐奈一副很困的样子，很难拉%ANAME(MASTER)%的袖子。
+					;TranslatedMark 隠岐奈は眠たげな様子で、くいくいと%ANAME(MASTER)%の袖を引っ張る。
+					PRINTFORML 确实今天熬夜过多了。不睡的话明天会响的吧。
+					;TranslatedMark 確かに今日は夜更かししすぎた。そろそろ寝ないと明日に響くだろう。
+					PRINTFORMW %ANAME(MASTER)%抱着隐岐奈的腰，一起向床走去…。
+					;TranslatedMark %ANAME(MASTER)%は隠岐奈の腰を抱き、共にベッドへと向かった…。
+					PRINTFORML 
+					PRINTFORML 「呼啊……晚安………」
+					;TranslatedMark 「ふあぁ……おやすみ………」
+					PRINTFORML 好像睡意已经到了极限，隐岐奈一躺下就睡着了。
+					;TranslatedMark どうやら眠気が限界に達していたようで、隠岐奈は横になるとすぐに寝入ってしまった。
+					PRINTFORMW 虽然感觉有点欠缺，但%ANAME(MASTER)%还是尽情地看着她的睡颜然后就睡着了…。
+					;TranslatedMark 少し物足りなさを感じつつも、%ANAME(MASTER)%は彼女の寝顔を存分に眺めてから眠りに落ちた…。
+				CASE 2
+					PRINTFORML 「……偶尔像这样粘在一起也不错啊」
+					;TranslatedMark 「……たまには、こうしてくっついているだけなのも悪くないな」
+					PRINTFORMW 脸埋在%ANAME(MASTER)%的心中，隐岐奈突然微笑了。
+					;TranslatedMark %ANAME(MASTER)%の胸に顔を埋め、隠岐奈はふっと微笑んだ。
+					PRINTFORML "因为今天很累，所以拒绝了晚上的邀请，但是隐岐奈好像要和人谈恋爱，所以妥协的结果就是现在的这种状态。
+					;TranslatedMark "今日は疲れているから"と夜の誘いを断ったものの、隠岐奈が人肌恋しそうだったので妥協した結果が今のこの状態だ。
+					PRINTFORMW 一开始似乎很不满的她，在抱着她的时候也很满足，现在幸福地眯着眼睛。
+					;TranslatedMark 最初は不満げだった彼女も、しばらく抱き着いているうちに満足したようで、今は幸せそうに目を細めている。
+					PRINTFORML 
+					PRINTFORML 「我喜欢你……」
+					;TranslatedMark 「%ANAME(MASTER)%、好きだ……」
+					PRINTFORML 隐岐奈小声嘟囔着，更加紧紧地贴着%ANAME(MASTER)%闭上了眼睛。
+					;TranslatedMark 隠岐奈は小さくそう呟くと、より一層ぎゅっと%ANAME(MASTER)%に密着して目を瞑った。
+					PRINTFORMW 把%ANAME(MASTER)%温柔地抱回去，以满足的心情入睡。
+					;TranslatedMark %ANAME(MASTER)%も優しく抱き返してやり、満たされた気持ちで眠りについた。
+			ENDSELECT 
+	;恋慕 or 服従
+		ELSEIF TALENT:対象:恋慕 || TALENT:対象:服従
+			SELECTCASE RAND:4
+				CASE 0
+					PRINTFORML %ANAME(MASTER)%准备睡觉的时候，隐岐奈从背后出现并抱住了她。
+					;TranslatedMark %ANAME(MASTER)%が寝る準備をしていると、背後から隠岐奈が現われて抱き着いてきた。
+					PRINTFORML 「我也正好在睡觉的地方。如果是那样的话，可以同床做哦？」
+					;TranslatedMark 「私も丁度寝るところでな。なんだったら同衾してやってもいいぞ？」
+					PRINTFORMW 因为无论怎么努力都不会放开，所以%ANAME(MASTER)%决定和隐岐奈一起睡。
+					;TranslatedMark どう頑張っても放してくれそうになかったので、%ANAME(MASTER)%は隠岐奈と一緒に寝ることにした。
+				CASE 1
+					PRINTFORML %ANAME(MASTER)%一上床，隐岐奈就已经睡着了。
+					;TranslatedMark %ANAME(MASTER)%がベッドに向かうと、すでに隠岐奈が寝ころんでいた。
+					PRINTFORML 「这张床睡起来很舒服。暂时这样吧」
+					;TranslatedMark 「このベッド、寝心地が良いな。しばらくこうさせてもらおうか」
+					PRINTFORML 「……%ANAME(MASTER)%也想睡觉就好了？」
+					;TranslatedMark 「……%ANAME(MASTER)%も、寝たかったらいいんだぞ？」
+					PRINTFORMW 隐岐奈一边这样说着，一边把脸染红，扑通一声拍到了旁边的空间。
+					;TranslatedMark そう言いながら、隠岐奈は頬を染めてぽんぽんと隣のスペースを叩いた。
+				CASE 2
+					PRINTFORML %ANAME(MASTER)%一上床，隐岐奈就已经睡着了。
+					;TranslatedMark %ANAME(MASTER)%がベッドに向かうと、すでに隠岐奈が寝ころんでいた。
+					PRINTFORML 「终于来了，太晚了！」
+					;TranslatedMark 「やっと来たのか、遅いぞ！」
+					PRINTFORML 「我给你抱枕，快躺下」
+					;TranslatedMark 「私の抱き枕にしてやるから、さっさと横になりなさい」
+					PRINTFORMW 没办法，%ANAME(MASTER)%只好听从了，隐岐奈很高兴地抱了过来。
+					;TranslatedMark %ANAME(MASTER)%が仕方なく従うと、隠岐奈は嬉しそうに抱き着いてきた。
+				CASE 3
+					PRINTFORML %ANAME(MASTER)%准备睡觉的时候，隐岐奈从背后出现并抱住了她。
+					;TranslatedMark %ANAME(MASTER)%が寝る準備をしていると、背後から隠岐奈が現われて抱き着いてきた。
+					PRINTFORML 「%ANAME(MASTER)%，会睡吧？我陪你睡」
+					;TranslatedMark 「%ANAME(MASTER)%、寝るのだろう？私が添い寝してやる」
+					PRINTFORMW 「既然这样，就唱摇篮曲吧，呵呵」
+					;TranslatedMark 「なんなら子守唄でも歌ってやろうか、ふふふっ」
+			ENDSELECT
+			PRINTFORML
+			PRINTFORML %ANAME(MASTER)%和隐岐奈度过了快乐的时光！
+			;TranslatedMark %ANAME(MASTER)%は隠岐奈と楽しい時間を過ごした！
+			PRINTFORMW ………但是，特别是色情的活动没有发生就结束了。
+			;TranslatedMark ………が、特にエッチなイベントは起こらずに終わった。
+	;その他
+		ELSE
+			PRINTFORML %ANAME(MASTER)%一上床，不知为何隐岐奈已经睡着了。
+			;TranslatedMark %ANAME(MASTER)%がベッドに向かうと、何故かすでに隠岐奈が寝ころんでいた。
+			PRINTFORML 「这张床睡起来很舒服。暂时让我这样做吧」
+			;TranslatedMark 「このベッド、寝心地が良いな。しばらくこうさせてもらうぞ」
+			PRINTFORMW 「你也想睡觉的话，随你的便」
+			;TranslatedMark 「お前も寝たいなら、勝手にしなさい」
+			PRINTFORML
+			PRINTFORML %ANAME(MASTER)%和隐岐奈一起度过了愉快的时光！
+			;TranslatedMark %ANAME(MASTER)%は隠岐奈とそこそこ楽しい時間を過ごした！
+			PRINTFORMW ………但是，特别是色情的活动没有发生就结束了。
+			;TranslatedMark ………が、特にエッチなイベントは起こらずに終わった。
+		ENDIF
+		CFLAG:対象:好感度 += 100
+		CFLAG:対象:従属度 += 100
+		RETURN 1
+
+;晩酌
+	CASE 1
+		PRINTFORML 工作结束后，在自己的房间里悠闲地度过，突然发现脖子上塞满了一个冷冰冰的东西。
+		;TranslatedMark 仕事を終えて自室でのんびりしていると、突然うなじにヒンヤリとしたものが押し当てられた。
+		PRINTFORML %ANAME(MASTER)%吓了一跳回头一看，隐岐奈边笑边把酒瓶给我看。
+		;TranslatedMark %ANAME(MASTER)%が驚いて振り返ると、隠岐奈がニヤニヤしながら酒瓶を見せつけてきた。
+		SELECTCASE RAND:4
+			CASE 0
+				PRINTFORMW 「你能喝到好酒吗。要和我交往吗？」
+				;TranslatedMark 「良い酒が手に入ってな。付き合ってもらうぞ？」
+			CASE 1
+				PRINTFORMW 「%ANAME(MASTER)%，晚上喝酒怎么样？反正闲着吧？」
+				;TranslatedMark 「%ANAME(MASTER)%、晩酌でもどうだ？どうせ暇だろう？」
+			CASE 2
+				PRINTFORMW 「我带来了好酒。有下酒菜，一起享受吧」
+				;TranslatedMark 「良い酒を持ってきたぞ。肴もあるし、一緒に楽しもうじゃないか」
+			CASE 3
+				PRINTFORMW 「因为是安静的好夜晚。喝晚饭怎么样？」
+				;TranslatedMark 「静かな良い夜だからな。晩酌でもどうだ？」
+		ENDSELECT 
+		;妊娠中の飲酒は禁物！
+		IF TALENT:MASTER:妊娠
+			PRINTFORML 
+			PRINTFORML 「……虽然这么说了，但是你怀孕了啊」
+			;TranslatedMark 「……とは言ったが、お前は妊娠中だったな」
+			PRINTFORMW 「茶和果汁哪个好？啊，也有姜汁汽水哦？」
+			;TranslatedMark 「お茶とジュース、どっちが良い？ あ、ジンジャーエールもあるよ？」
+			PRINTFORMW 就这样，%ANAME(MASTER)%一边被劝着喝各种各样的饮料和下酒菜，一边陪着隐岐奈一起喝酒。
+			;TranslatedMark こうして、様々な飲み物やおつまみを勧められながら、%ANAME(MASTER)%は隠岐奈の酒盛りに付き合ってあげた。
+			PRINTFORML 
+			PRINTFORML ……因为剩下了一点酒，所以被隐岐奈硬逼着"去拿吧"…。
+			;TranslatedMark ……少しお酒が余ったので、隠岐奈に「取っておけ」と押し付けられた…。
+			CALL COLOR_PRINTW("日本酒を1つ手に入れた！", カラー_注意)
+			経験値 = GET_EXP(GETNUM(ABL, "肝臓"))
+			CALL PRINT_ADD_EXP(対象, EXPNAME:経験値, RAND:5 + 1, 1)
+			CALL TRAIN_AUTO_ABLUP(対象)
+			ITEM:日本酒 += 1
+		ELSEIF TALENT:対象:妊娠
+			PRINTFORML 
+			PRINTFORMW 「……虽然这么说，但是我怀孕了。这酒你都可以喝！」
+			;TranslatedMark 「……とは言ったが、私は妊娠中だからね。その酒はお前が全部飲んでよろしい！」
+			PRINTFORML 怎么样，很开心吧？隐岐奈露出了得意的表情…。
+			;TranslatedMark どうだ、嬉しいだろう？とばかりに隠岐奈はドヤ顔をしている…。
+			PRINTFORMW %ANAME(MASTER)%很感激地接过酒，一边让她斟酒一边享受。
+			;TranslatedMark %ANAME(MASTER)%はありがたくお酒を受け取り、彼女に酌をしてもらいながら楽しんだ。
+			PRINTFORML 
+			PRINTFORML 结果，酒多了一点，之后就能有效利用了吧…。
+			;TranslatedMark 結局、酒は少し余ってしまったが、後で有効活用できるだろう…。
+			CALL COLOR_PRINTW("日本酒を1つ手に入れた！", カラー_注意)
+			ITEM:日本酒 += 1
+			経験値 = GET_EXP(GETNUM(ABL, "肝臓"))
+			CALL PRINT_ADD_EXP(MASTER, EXPNAME:経験値, RAND:5 + 1, 1)
+			CALL TRAIN_AUTO_ABLUP(対象)
+		ELSE
+			PRINTFORML %ANAME(MASTER)%点了点头，隐岐奈很高兴地为我斟酒。
+			;TranslatedMark %ANAME(MASTER)%が頷くと、隠岐奈は嬉しそうに御酌をしてくれた。
+			PRINTFORMW 「喂，尝一尝吧！下酒菜也很好吃哦，再多吃点吧～♪」
+			;TranslatedMark 「そら、味わって飲め！ つまみも美味いぞ、もっと食え～♪」
+			経験値 = GET_EXP(GETNUM(ABL, "肝臓"))
+			CALL PRINT_ADD_EXP(対象, EXPNAME:経験値, RAND:5 + 1, 1)
+			CALL TRAIN_AUTO_ABLUP(対象)
+			CALL PRINT_ADD_EXP(MASTER, EXPNAME:経験値, RAND:5 + 1, 1)
+			CALL TRAIN_AUTO_ABLUP(MASTER)
+		ENDIF
+		PRINTFORML
+		PRINTFORML 就这样，%ANAME(MASTER)%和隐岐奈度过了快乐的时光！
+		;TranslatedMark こうして、%ANAME(MASTER)%は隠岐奈と楽しい時間を過ごした！
+		PRINTFORMW ………但是，特别是色情的活动没有发生就结束了。
+		;TranslatedMark ………が、特にエッチなイベントは起こらずに終わった。
+		CFLAG:対象:好感度 += 100
+		CFLAG:対象:従属度 += 100
+		RETURN 1
+;そのほかいろいろ
+	CASE 2
+	;正妻
+		IF TALENT:対象:正妻
+			PRINTFORML 工作结束后回到自己的房间，隐岐奈笑着迎接了我。
+			;TranslatedMark 仕事を終えて自室に戻ると、隠岐奈が笑顔で出迎えてくれた。
+			PRINTFORML 「你回来了，%ANAME(MASTER)%。今天也辛苦到很晚啊」
+			;TranslatedMark 「おかえり、%ANAME(MASTER)%。今日も遅くまで大変だったな」
+			SELECTCASE RAND:6
+				CASE 0
+					PRINTFORML 「快点，躺下吧。我给你按摩吧」
+					;TranslatedMark 「早速だが、横になれ。私がマッサージしてやろう」
+					PRINTFORMW 在隐岐奈的催促下，%ANAME(MASTER)%趴在床上…。
+					;TranslatedMark 隠岐奈に促され、%ANAME(MASTER)%はベッドにうつ伏せになった…。
+					PRINTFORML 
+					PRINTFORML 「哦，很讲究啊…这个好像有揉的价值！」
+					;TranslatedMark 「おお、よく凝っているなぁ…これは揉み甲斐がありそうだ！」
+					PRINTFORML 用适当的力量揉搓身体，%ANAME(MASTER)%在舒适中露出声音。
+					;TranslatedMark 程よい力加減で体をもみもみされ、%ANAME(MASTER)%は心地よさに声を漏らす。
+					PRINTFORML 「呵呵……这里怎么样？舒服吗？」
+					;TranslatedMark 「ふふふ……ここはどうだ？気持ち良いか？」
+					PRINTFORMW 看了%ANAME(MASTER)%的样子，隐岐奈也变得心情好了吧，而且按摩也开始发烧了…。
+					;TranslatedMark %ANAME(MASTER)%の様子を見て隠岐奈も気を良くしたのか、さらにマッサージに熱が入っていった…。
+					PRINTFORML 
+					PRINTFORMW 就这样，%ANAME(MASTER)%充分地放松了…！
+					;TranslatedMark こうして、%ANAME(MASTER)%は充分にリラックスすることができた…！
+				CASE 1
+					PRINTFORML 「喝点热的吗？可以放松哦」
+					;TranslatedMark 「何か温かいものでも飲むか？リラックスできるぞ」
+					PRINTFORMW %ANAME(MASTER)%点了点头，隐岐奈突然微笑着去拿饮料。
+					;TranslatedMark %ANAME(MASTER)%が頷くと、隠岐奈はふっと微笑んで飲み物を取りに行った。
+					PRINTFORML 
+					PRINTFORML 「让你久等了。我沏了可可」
+					;TranslatedMark 「待たせたな。ココアを淹れてきたよ」
+					PRINTFORMW 隐岐奈拿着两个冒着热气的马克杯回到了房间。
+					;TranslatedMark 湯気を立てる2つのマグカップを持って、隠岐奈が部屋に戻ってきた。
+					PRINTFORML 「对了，要不要也加棉花糖。甜度加倍疲劳也会消散的吧」
+					;TranslatedMark 「そうだ、マシュマロも入れてみようか。甘さ倍増で疲れも吹き飛ぶだろうさ」
+					PRINTFORML 这样说着，隐岐奈不知从哪里拿来了棉花糖的袋子，取出三个装在热可可里。
+					;TranslatedMark そう言って隠岐奈はどこからかマシュマロの袋を持ってくると、3つほど取り出して熱々のココアに落とした。
+					PRINTFORML 然后轻轻搅拌的话，棉花糖一瞬间就会融化，甜甜的香味就会扩散开来。
+					;TranslatedMark そして軽くかき混ぜれば、あっという間にマシュマロは蕩け、甘い香りがその場に広がる。
+					PRINTFORMW 「呵呵，看起来很好吃啊！那么，我就不客气了…」
+					;TranslatedMark 「ふふ、美味しそうだな！では、いただきます…」
+					PRINTFORML 一边嘟囔着"我也要吃"，一边喝着马克杯，热气腾腾的甜液体像是要消除身体的疲劳似的渗透进来。
+					;TranslatedMark %ANAME(MASTER)%もいただきますと呟いてマグカップを傾けると、熱くて甘い液体が体の疲れを取るかのように染み渡る。
+					PRINTFORMW 松了一口气，总觉得心情很幸福。
+					;TranslatedMark ほっと息を吐くと、なんだかとても幸せな気持ちになれた。
+					PRINTFORML 
+					PRINTFORMW 就这样，%ANAME(MASTER)%和隐岐奈一起度过了充实的夜晚…！
+					;TranslatedMark こうして、%ANAME(MASTER)%は隠岐奈とともに充実した夜の時間を過ごした…！
+				CASE 2
+					PRINTFORML 对着她的话微微点了点头，%ANAME(MASTER)%坐在沙发上吐了一口气。
+					;TranslatedMark 彼女の言葉に小さく頷き、%ANAME(MASTER)%はソファに腰を沈めて息を吐いた。
+					PRINTFORMW 隐岐奈很客气地坐在旁边，若无其事地偷看脸…。
+					;TranslatedMark 隠岐奈はその隣に遠慮がちに座り、さりげなく顔を覗きこんでくる…。
+					PRINTFORML 「………你看起来很累，今天就不干了吧」
+					;TranslatedMark 「………お疲れのようだし、今日はやめておくか」
+					PRINTFORMW 看到%ANAME(MASTER)%的样子，隐岐奈有些遗憾地嘟囔着。
+					;TranslatedMark %ANAME(MASTER)%の様子を見て、隠岐奈は少し残念そうに呟いた。
+					PRINTFORML 你说什么？这么一问，她脸上稍微染了一下，移开了视线。
+					;TranslatedMark 何を？と訊いてみれば、彼女はほんのりと頬を染めて目を逸らす。
+					PRINTFORML 「没什么……明天也没关系…！」
+					;TranslatedMark 「べ、別に……明日でも構わないことだ…！」
+					PRINTFORMW 隐岐奈虽然掩饰了平静，但却暴露了她在追求%ANAME(MASTER)%，不禁露出了笑容。
+					;TranslatedMark 隠岐奈は平静を繕っているが、%ANAME(MASTER)%を求めていることがバレバレで、思わず笑みが零れてしまう。
+					PRINTFORML 
+					PRINTFORML 但是今天真的很累，谢谢你的关心。
+					;TranslatedMark だが今日は本当に疲れているので、その気遣いはありがたい。
+					PRINTFORMW %ANAME(MASTER)%轻轻抚摸了隐岐奈的头，开始准备睡觉…。
+					;TranslatedMark %ANAME(MASTER)%は軽く隠岐奈の頭を撫でてから、寝る準備を始めるのだった…。
+				CASE 3
+					PRINTFORML 
+					PRINTFORML %ANAME(MASTER)%坐在沙发上，隐岐奈也坐在旁边和她说话。
+					;TranslatedMark %ANAME(MASTER)%がソファに腰かけると、隠岐奈もその隣に座って話しかけてきた。
+					PRINTFORMW 「最近好像有点忙…明天也会变得忙吗？」
+					;TranslatedMark 「最近は何かと忙しいようだが…明日も忙しくなりそうなのか？」
+					PRINTFORMW 对隐岐奈的提问点了点头，她做出了稍微思考一下的动作，拿起了%ANAME(MASTER)%的手。
+					;TranslatedMark 隠岐奈の問いかけに頷くと、彼女は少し考えるような仕草してから、%ANAME(MASTER)%の手を取った。
+					PRINTFORML 「那么，明天就帮你一点忙吧」
+					;TranslatedMark 「なら、明日はちょっとだけ力添えをしてやろう」
+					PRINTFORML 「我来帮你拉出后背的力量。放心吧，我会调整到没有副作用的」
+					;TranslatedMark 「私が背中の力を引き出してやる。安心しろ、副作用もないように調整するからね」
+					PRINTFORMW 怎么说呢，这是像隐岐奈一样的备份方法。
+					;TranslatedMark 何と言うか、隠岐奈らしいバックアップの仕方だ。
+					PRINTFORML 她害羞地微笑着说谢谢。
+					;TranslatedMark ありがとうと礼を言うと、彼女は少し照れながらも微笑んだ。
+					PRINTFORML 「不客气。那么，今天就睡吧，消除疲劳吧」
+					;TranslatedMark 「どういたしまして。さあ、今日はもう寝て、疲れを取ると良い」
+					PRINTFORMW 「啊啊……如果睡不着的话，可以唱摇篮曲吗？呵呵呵！」
+					;TranslatedMark 「ああ……眠れないというのなら、子守唄を歌ってやっても構わんぞ？ふふふっ！」
+					PRINTFORML 
+					PRINTFORMW ………%ANAME(MASTER)%在隐岐奈的照顾下，睡得很舒服。
+					;TranslatedMark ………%ANAME(MASTER)%は隠岐奈に世話を焼かれつつ、心地よい眠りについた。
+				CASE 4
+					PRINTFORML 「呼啊……我已经困了，要睡了…」
+					;TranslatedMark 「ふあぁ……私はもう眠いから寝るぞ…」
+					PRINTFORMW 一边打哈欠，隐岐奈慢慢地躺在床上。
+					;TranslatedMark 大きな欠伸をしながら、隠岐奈はゆるゆるとベッドに入っていった。
+					PRINTFORMW 目送着这样的她，%ANAME(MASTER)%坐在沙发上，呆呆地回头看今天一天。
+					;TranslatedMark そんな彼女を見送り、%ANAME(MASTER)%はソファに腰を沈め、ぼーっと今日一日を振り返る。
+					PRINTFORML ……………。
+					PRINTFORMW ……过了一会儿就觉得困了，所以%ANAME(MASTER)%也决定进入裙带。
+					;TranslatedMark ……しばらくすると眠気を感じてきたので、%ANAME(MASTER)%も閨に入ることにした。
+					PRINTFORML 
+					PRINTFORML 「嗯……嗯……」
+					;TranslatedMark 「すぅ……すぅ……」
+					PRINTFORML 隐岐奈似乎已经在梦中了，一边发出规则的鼾声，一边晒着毫无防备的睡颜。
+					;TranslatedMark 隠岐奈はすでに夢の中にいるようで、規則的な寝息を立てながら無防備な寝顔を晒している。
+					PRINTFORMW %ANAME(MASTER)%在额头上轻轻地吻了一下，自己也埋在被子里闭上了眼睛……。
+					;TranslatedMark %ANAME(MASTER)%はその額に軽くキスを落としてから、自身も布団に身を埋めて目を瞑った……。
+				CASE 5
+					PRINTFORMW 
+					PRINTFORML 「但是…其实今天从部下那里得到了这样的东西」
+					;TranslatedMark 「ところで…実は今日、部下からこんなものを貰ってね」
+					PRINTFORML 隐岐奈兴冲冲地拿出小箱子，打开盖子。
+					;TranslatedMark 隠岐奈はいそいそと小さな箱を取り出すと、その蓋をぱかりと開ける。
+					PRINTFORML 一看，那里装着美丽形状的巧克力，像宝石一样。
+					;TranslatedMark 見れば、そこには美しく形作られたチョコレートが宝石のように詰められていた。
+					PRINTFORMW 高级巧克力的芳香扑鼻而来，%ANAME(MASTER)%不由得咽下了口水…。
+					;TranslatedMark 高級チョコレートの芳醇な香りが鼻腔をくすぐり、%ANAME(MASTER)%は思わず唾を飲み込む…。
+					PRINTFORML 
+					PRINTFORML 「呵呵，看起来很好吃吧？好的，嗯♪」
+					;TranslatedMark 「ふふっ、美味しそうだろう？ はい、あーん♪」
+					PRINTFORML %ANAME(MASTER)%用嘴接受了用隐岐奈纤细手指摘取的巧克力。
+					;TranslatedMark 隠岐奈の細い指で摘まみ上げられたチョコを、%ANAME(MASTER)%は口で受け取る。
+					PRINTFORMW 撑着嘴的瞬间，口中弥漫着浓厚的甜味和香味，幸福感一下子涌了出来。
+					;TranslatedMark 頬張った瞬間、口いっぱいに濃厚な甘さと香りが広がり、ほんわりと幸福感が湧きあがった。
+					PRINTFORML 「真是的，脸上看起来那么幸福…」
+					;TranslatedMark 「まったく、そんなに幸せそうな顔をして…」
+					PRINTFORML 隐岐奈苦笑着说，自己也嘴里含着巧克力，然后双眸细密。
+					;TranslatedMark 苦笑を浮かべつつ、隠岐奈は自身もチョコを口に含み、そして双眸を細める。
+					PRINTFORMW 不久%ANAME(MASTER)%要求再来一碗，隐岐奈又给我吃了一块巧克力。
+					;TranslatedMark やがて%ANAME(MASTER)%がおかわりを要求すると、隠岐奈はまた一つ、もう一つとチョコレートを食べさせてくれた。
+					PRINTFORML 
+					PRINTFORMW 就这样，两个人度过了悠闲的夜晚…。
+					;TranslatedMark こうして、二人はゆったりとした夜の時間を過ごすのだった…。
+			ENDSELECT
+	;恋慕 or 服従
+		ELSEIF TALENT:対象:恋慕 || TALENT:対象:服従
+			PRINTFORML 工作结束后，在自己的房间里悠闲地度过，突然从背后被打了招呼。
+			;TranslatedMark 仕事を終えて自室でのんびりしていると、急に背後から声をかけられた。
+			PRINTFORMW %ANAME(MASTER)%吃惊地回头一看，不知什么时候隐岐奈站在那里。
+			;TranslatedMark %ANAME(MASTER)%が驚いて振り返ると、いつの間にかそこには隠岐奈が佇んでいた。
+			SELECTCASE RAND:6
+				CASE 0
+					PRINTFORML 「今天的工作也辛苦了，%ANAME(MASTER)%」
+					;TranslatedMark 「本日の業務もご苦労であった、%ANAME(MASTER)%」
+					PRINTFORML 「所以，作为奖赏，我自己给你按摩！喂，快躺下」
+					;TranslatedMark 「ってことで、褒美に私自ら按摩してやるぞ！ ほーら、さっさと横になれ」
+					PRINTFORMW 直到隐岐奈满足为止，%ANAME(MASTER)%一直在按摩身体……。
+					;TranslatedMark 隠岐奈が満足するまで、%ANAME(MASTER)%はひたすら体を揉まれ続けた……。
+				CASE 1
+					PRINTFORML 「%ANAME(MASTER)%，坐在我旁边」
+					;TranslatedMark 「%ANAME(MASTER)%、隣座るぞ」
+					PRINTFORML 隐岐奈深深地坐在%ANAME(MASTER)%的旁边，好像在自己的房间里一样开始放松。
+					;TranslatedMark 隠岐奈は%ANAME(MASTER)%の隣に深く腰掛けると、自分の部屋にいるかのようにくつろぎ始めた。
+					PRINTFORMW 「嗯……还是一如既往的好沙发…我也想要一样的啊」
+					;TranslatedMark 「ふぅぅ……相変わらず良いソファだ…私も同じの欲しいなぁ」
+				CASE 2
+					PRINTFORML 「什么嘛，瞪圆眼睛。我神出鬼没是常有的事吧？」
+					;TranslatedMark 「なんだ、目を丸くして。私が神出鬼没なのはいつものことだろう？」
+					PRINTFORMW 隐岐奈嫣然一笑，坐在%ANAME(MASTER)%的旁边蹭了过来。
+					;TranslatedMark 隠岐奈はにやりと笑うと、%ANAME(MASTER)%の隣に座って擦り寄ってきた。
+				CASE 3
+					PRINTFORML 「什么，没什么大不了的。我只是来闲谈一下」
+					;TranslatedMark 「なに、大したことじゃない。ちょっと雑談をしに来ただけさ」
+					PRINTFORMW 就这样，%ANAME(MASTER)%和隐岐奈聊到睡着为止。
+					;TranslatedMark そのまま、眠くなるまで%ANAME(MASTER)%と隠岐奈はお喋りして過ごした。
+				CASE 4
+					PRINTFORML 「我收到了点心，要吃吗？」
+					;TranslatedMark 「お菓子貰ってきたぞ、食べるか？」
+					PRINTFORMW %ANAME(MASTER)%和隐岐奈一边吃着巧克力和饼干，一边聊天。
+					;TranslatedMark チョコレートやビスケットをつまみながら、%ANAME(MASTER)%と隠岐奈はお喋りした。
+				CASE 5
+					PRINTFORML 「因为有空所以来了」
+					;TranslatedMark 「暇だったから来たぞー」
+					PRINTFORML 「那么，赶紧玩%ANAME(MASTER)%吧！」
+					;TranslatedMark 「さーて、さっそく%ANAME(MASTER)%で遊ぶとするか！」
+					PRINTFORMW 隐岐奈心情很好地开始玩起%ANAME(MASTER)%的头发。
+					;TranslatedMark 隠岐奈は上機嫌に%ANAME(MASTER)%の髪の毛を弄って遊び始めた。
+			ENDSELECT 
+			PRINTFORML
+			PRINTFORML %ANAME(MASTER)%和隐岐奈度过了快乐的时光！
+			;TranslatedMark %ANAME(MASTER)%は隠岐奈と楽しい時間を過ごした！
+			PRINTFORMW ………但是，特别是色情的活动没有发生就结束了。
+			;TranslatedMark ………が、特にエッチなイベントは起こらずに終わった。
+	;その他
+		ELSE
+			PRINTFORML 工作结束后，在自己的房间里悠闲地度过，突然从背后被打了招呼。
+			;TranslatedMark 仕事を終えて自室でのんびりしていると、急に背後から声をかけられた。
+			PRINTFORMW %ANAME(MASTER)%吃惊地回头一看，不知什么时候隐岐奈站在那里。
+			;TranslatedMark %ANAME(MASTER)%が驚いて振り返ると、いつの間にかそこには隠岐奈が佇んでいた。
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORML 「明天也要早起，快点睡吧」
+					;TranslatedMark 「明日も早いからさっさと寝るんだぞー」
+					PRINTFORMW 「那倒是，请和我交往吧！」
+					;TranslatedMark 「それはそうと、私に付き合ってもらうけれどな！」
+				CASE 1
+					PRINTFORMW 「因为有空所以来了，%ANAME(MASTER)%」
+					;TranslatedMark 「暇だったから来たぞ、%ANAME(MASTER)%」
+				CASE 2
+					PRINTFORMW 「嗯？我只是来跟你聊天而已」
+					;TranslatedMark 「ん？お喋りしにきただけだぞ」
+			ENDSELECT 
+			PRINTFORML
+			PRINTFORML %ANAME(MASTER)%和隐岐奈一起度过了愉快的时光！
+			;TranslatedMark %ANAME(MASTER)%は隠岐奈とそこそこ楽しい時間を過ごした！
+			PRINTFORMW ………但是，特别是色情的活动没有发生就结束了。
+			;TranslatedMark ………が、特にエッチなイベントは起こらずに終わった。
+		ENDIF
+		CFLAG:対象:好感度 += 100
+		CFLAG:対象:従属度 += 100
+		RETURN 1
+ENDSELECT
+
+

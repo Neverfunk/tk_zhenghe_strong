@@ -1,0 +1,108 @@
+﻿;-------------------------------------------------
+;定期イベント
+;-------------------------------------------------
+@VIGILANTE_REV_TRAIN_REGULAR_EVENT(勢力)
+#DIM 勢力
+
+SIF FLAG:逆調教回数 == 0 || FLAG:逆調教回数 % 4 != 0
+	RETURN 0
+
+PRINTFORML 教育的时间一临近，%ANAME(MASTER)%就像往常一样被扔进「指导室」、
+;TranslatedMark 「教育」の時間が近づくと、%ANAME(MASTER)%はいつものように「指導室」に放り込まれ、
+PRINTFORML 剩下的就等着被男人们弄脏了
+;TranslatedMark あとは男どもに汚されるのを待つのみとなった
+PRINTFORML 来了的团员们问道，差不多该理解我们的理念了吗
+;TranslatedMark やってきた団員たちは、そろそろ我々の思想を理解してくれたかい、と尋ねた
+PRINTFORMW 团员们开始劝道，如果加入这个团体的话，我们也不用做这种不道义的事情了
+;TranslatedMark 団に参加すれば、我々もこんな非道なことをしなくても済むんだが、と言い始める
+PRINTFORML 成为团员的话，最低限度的行动是不会被限制的
+;TranslatedMark 団員になれば、最低限の行動は認められるだろう
+PRINTFORML 但那也意味着会继续被他们侵犯和玷污。
+;TranslatedMark しかしそれは、彼らに使い潰され、汚され続けることを意味している
+PRINTFORMW 另一方面来讲，只要点头默认的话，今后或许就解脱了吧
+;TranslatedMark 一方で、首を縦にふれば、今この瞬間は楽になるだろう
+PRINTFORML 该如何抉择呢……
+;TranslatedMark どうするべきだろうか……
+CALL ASK_YN("放弃抵抗并入团(奴隷化)", "谁会成为你们这些家伙的伙伴?")
+
+IF RESULT == 0
+	PRINTFORML %ANAME(MASTER)%木讷地点了点头，团员们的脸上露出得意狂妄的淫笑
+	;TranslatedMark %ANAME(MASTER)%がうなずくと、団員達は異様に明るい笑みを浮かべた
+	PRINTFORML 团员们随后道，我们会帮你刻下团员的烙印
+	;TranslatedMark では団員の印をつけてあげようと言い始めた
+	IF HAS_PENIS(MASTER)
+		CALL SET_PIERCE(MASTER, ピアス_ペニス, 0)
+		IF RESULT
+			CALL COLOR_PRINTW("そしてそのペニスに、痛々しいピアスを取り付けた……", カラー_ピンク)
+		ELSE
+			CALL COLOR_PRINTW("そしてそのペニスに、二度と消えない焼き印を刻んだ……", カラー_ピンク)
+		ENDIF
+	ELSE
+		CALL SET_PIERCE(MASTER, ピアス_乳首, 0)
+		IF RESULT
+			CALL COLOR_PRINTW("そしてその乳首に、痛々しいピアスを取り付けた……", カラー_ピンク)
+		ELSE
+			CALL COLOR_PRINTW("そしてその乳房に、二度と消えない焼き印を刻んだ……", カラー_ピンク)
+		ENDIF
+	ENDIF
+	SETCOLOR カラー_注意
+	PRINTFORMW %ANAME(MASTER)%被迫加入了自警团
+	;TranslatedMark %ANAME(MASTER)%は自警団に参加させられました
+	RESETCOLOR
+	SETBIT TALENT:MASTER:特殊勢力陥落系, 特殊勢力_自警団
+	CALL CHANGE_COUNTRY(MASTER, 勢力, 1)
+	CALL PLAYER_FALLEN_TO_SP_COUNTRY(勢力)
+	RETURN 1
+ELSE
+	PRINTFORML %ANAME(MASTER)%拒绝了这么做，还没有开化吗！他们咆哮道
+	;TranslatedMark %ANAME(MASTER)%が拒否すると、まだ分からないのか！　と、彼らは激高する
+	PRINTFORML 要教育到你明白为止！随后，团员们疯狂地涌向%ANAME(MASTER)%!
+	;TranslatedMark 理解するまで教育を続けるからな！　と、乱暴に%ANAME(MASTER)%に群がっていく
+	PRINTFORML 在那里，所谓的正义和道德，大概是不存在的……
+	;TranslatedMark そこに正義や倫理と呼べるものは、およそ存在していなかった……
+ENDIF
+
+;-------------------------------------------------
+;知り合いがきたときのイベント
+;-------------------------------------------------
+@VIGILANTE_REV_TRAIN_MSG(勢力, 知り合い参加者, 知り合い参加数)
+#DIM 勢力
+#DIM REF 知り合い参加者
+#DIM 知り合い参加数
+CALL SINGLE_DRAWLINE
+PRINTFORML 教育的时间一临近，%ANAME(MASTER)%就像往常一样被扔进「指导室」
+;TranslatedMark 「教育」の時間が近づくと、%ANAME(MASTER)%はいつものように「指導室」に放り込まれ、
+PRINTFORML 剩下的就等着被男人们弄脏了
+;TranslatedMark あとは男どもに汚されるのを待つのみとなった
+PRINTFORMW 赶到这里的自警团员们带了%ANAME(MASTER)%熟悉的人来
+;TranslatedMark やってきた自警団員たちは、%ANAME(MASTER)%が良く見知った相手を連れてきていた
+PRINTFORMW %ANAME(知り合い参加者:0, 知り合い参加数)%…
+PRINTFORMW 没有穿着衣服，全身沾满了白浊。这样就是在帮助他们的「活动」吧
+;TranslatedMark 衣服を身に着けておらず、全身は白濁にまみれている。彼らの「活動」を手伝っていたのだろう
+PRINTFORMW 本应是悲惨的待遇，但大家都异乎寻常地闪耀着双瞳，自警团的思想正确性被传达给了%ANAME(MASTER)%
+;TranslatedMark 惨めな扱いのはずだが、皆異様なまでに瞳を輝かせ、自警団の思想の正しさを%ANAME(MASTER)%に説いてくる
+PRINTFORMW 伴随着让人觉得非常疯狂的笑容……
+;TranslatedMark とても正気だとは思えない笑顔と一緒に……
+PRINTFORMW 自警团员脸上浮现出了难以言喻的笑容，「如果有熟人参加的话就放心了，也不会寂寞吧！」道
+;TranslatedMark 自警団員は得たいのしれない笑みを浮かべ、「知り合いが参加しているとなれば安心だし、さみしくもないだろう！」と言ってきた
+PRINTFORMW 好像把握住了曾经和%ANAME(知り合い参加者:0, 知り合い参加数)%相识的「过往」……
+;TranslatedMark かつて%ANAME(知り合い参加者:0, 知り合い参加数)%と知り合い「だった」ことを、掴んでいるようだ……
+PRINTFORMW 在此之后，当团员说今天大家也要一起研修时，%ANAME(知り合い参加者:0, 知り合い参加数)%就顺顺顺当当地打开了双腿……
+;TranslatedMark さて、今日も皆で研修を行おうと団員が言うと、%ANAME(知り合い参加者:0, 知り合い参加数)%は従順に股を開いた……
+
+
+;-------------------------------------------------
+;参加者選択アルゴリズム
+;-------------------------------------------------
+@VIGILANTE_REV_TRAIN_CHOOSE_PARTICIPANT(勢力)
+#DIM 勢力
+FOR LOCAL:0, 0, 4
+	;確率で犬豚が対象に
+	FOR LOCAL:1, 0, CHARANUM
+		IF TALENT:(LOCAL:1):特殊勢力素質 == 特殊勢力_自警団 && !CFLAG:(LOCAL:1):調教参加フラグ && CFLAG:(LOCAL:1):所属 == 勢力
+			CFLAG:(LOCAL:1):調教参加フラグ = 1
+			CFLAG:(LOCAL:1):TEXT_LAST非表示 = 1
+			BREAK
+		ENDIF
+	NEXT
+NEXT

@@ -1,0 +1,62 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_DAIJOBU_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_DAIJOBU_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_DAIJOBU(対象)
+#DIM 対象
+PRINTFORML 探索的時候、遇到了一個穿着白衣看起来很可疑的人
+PRINTFORML 他自稱是医生、問能不能配合他做個実験
+PRINTFORML 很奇怪、不知為何有種奇妙的説服力
+PRINTFORMW 怎麼辦？
+
+PRINTL
+CALL ASK_YN("接受", "拒绝")
+IF RESULT == 1
+	PRINTFORML 不行、果然還是不想参与這種可疑的実験
+	PRINTFORMW %ANAME(対象)%果断拒絶後離開了
+	RETURN 1
+ENDIF
+
+PRINTFORML 有趣
+PRINTFORML 於是答応了接受実験
+PRINTFORMW 博士見状高興的手足舞蹈、拉着%ANAME(対象)%的手腕就往附近的小屋跑去
+PRINTFORML 
+PRINTFORML 昏暗的小屋中坐在椅子上的%ANAME(対象)%頭上戴着一個奇怪的装置
+PRINTFORML 因為什麼都看不見所以感覚很不安、而且還被皮帯給固定了無法動弾
+PRINTFORML 博士打開一個開関之後眼前変得一片空白、%ANAME(対象)%失去了意識
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+IF RAND:3 == 0
+	PRINTFORML 実験成功了！
+	PRINTFORML 感覺身体充滿了力量
+	PRINTFORML %ANAME(対象)%向博士道謝之後離開了這裡
+	CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:10 + 1, 1)
+	CALL PRINT_ADD_EXP(対象, "知略経験値", RAND:10 + 1, 1)
+	CALL PRINT_ADD_EXP(対象, "政治経験値", RAND:10 + 1, 1)
+ELSE
+	PRINTFORML 実験失敗了
+	PRINTFORML 一種全身乏力身体力量被抽空的感覚襲来
+	PRINTFORMW 博士趕緊離開了
+	SIF MAXBASE:対象:体力 - 100 < 1000
+		RETURN 1
+	MAXBASE:対象:体力 -= 100
+	CALL ICPRINT(@"体力最大値下降了<100>、変成了<{MAXBASE:対象:体力}>", "W", カラー_注意)
+ENDIF
+
+RETURN 1
+

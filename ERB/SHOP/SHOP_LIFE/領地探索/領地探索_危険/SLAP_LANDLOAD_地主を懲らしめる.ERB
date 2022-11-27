@@ -1,0 +1,100 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_SLAP_LANDLOAD_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_SLAP_LANDLOAD_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_SLAP_LANDLOAD(対象)
+#DIM 対象
+
+PRINTFORML 领民因为附近残暴的地主感到困扰
+PRINTFORML 被拜託想想辦法
+PRINTL
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "政治"))
+CALL ASK_YN("懲戒地主", "放棄")
+
+IF RESULT == 1
+	PRINTFORML 是麻烦的傢伙、自己也沒有辦法
+	PRINTFORMW %ANAME(対象)%回到了拠点
+	RETURN 1
+ENDIF
+
+PRINTFORML 這種可恶的家伙、不能原諒
+PRINTFORMW %ANAME(対象)%为了惩戒地主实施了策略
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+IF LIMIT(ABL:対象:政治, 30, 100) > RAND:100
+	IF IS_MALE(対象) || !CONFIG:203
+		PRINTFORML 成功了！
+		PRINTFORML %ANAME(対象)%成功的惩戒了地主！
+		PRINTFORMW 在領民的感謝中返回了拠点
+		CALL PRINT_ADD_EXP(対象, "政治経験値", RAND:10 + 1, 1)
+		RETURN 1
+	ELSE
+	PRINTFORML 成功了！
+	PRINTFORMW 看著徹底失敗的地主跪倒面前、%ANAME(対象)%露出一絲不易察覺的微笑
+	PRINTFORML
+	PRINTFORML 捉住地主的%ANAME(対象)%用調教代替了刑罰
+	PRINTFORML 舔着因为对%ANAME(対象)%的恐懼感而颤抖的肥碩軀體、%ANAME(対象)%用細嫩的手指责弄着肉棒和菊穴
+	PRINTFORML 高超的技巧、讓地主渐渐的发出了不像话的粗重喘息声
+	PRINTFORML 然后阴茎被强行塞入%STR_BODY("膣：欲情", 対象)%之后、男人发出了愉悦的呻吟声
+	PRINTFORMW 恐懼感被压倒性的快感驱除、男人变成了%ANAME(対象)%的性奴隶满足的被逆侵犯着
+	CALL FUCK(対象, "欲望, 奉仕, 性交, 精愛, Ｖ, Ｂ, Ｃ, Ａ, 接吻, 口淫, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 接吻喪失, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("地主"), @"地主的\@RAND:2 ? 肉棒 # 嘴唇\@", "地主", "", "名爲刑罰的逆侵犯")
+	PRINTFORML
+	PRINTFORML 地主被狠狠的侵犯后、%ANAME(対象)%總算放過了他
+	PRINTFORMW 在領民的感謝中返回了拠点
+	CALL PRINT_ADD_EXP(対象, "政治経験値", RAND:10 + 1, 1)
+	ENDIF
+	RETURN 1
+ENDIF
+
+IF IS_MALE(対象)
+	PRINTFORML 失败了！
+	PRINTFORMW 地主比想象中还要狡猾、%ANAME(対象)%被反过来骗走了金钱
+	CALL COLOR_PRINTW(@"失去了<{MIN(MONEY, 5000)}>金", カラー_警告)
+	MONEY -= MIN(MONEY, 5000)
+	RETURN 1
+ENDIF
+
+PRINTFORML 失败了！
+PRINTFORMW 地主比想象中还要狡猾、%ANAME(対象)%不仅被反过来骗走了金钱还被捉住了
+PRINTFORML
+
+IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+	PRINTFORML 抓住%ANAME(対象)%的地主，把她当做女仆扔给了自己的女儿
+	PRINTFORML 喜欢恶作剧的女儿，在%ANAME(対象)%的乳头和阴蒂上都装上了跳蛋
+	PRINTFORML 跳蛋的遥控器在女儿的手里，根据她的心情，随时随地决定开关的启闭
+	PRINTFORML 无论是睡觉、买东西、还是招待客人的时候，不知何时会有刺激从敏感的地方传来，所以%ANAME(対象)%一天到晚都提心吊胆地干着活
+	PRINTFORML 在别人面前高潮就会受到惩罚，小穴上被贴上封条，在一小时里不能弄坏，在那之前跳蛋会一保持开着的状态
+	PRINTFORMW 但封条是用纸做成的，碰到水就会变得非常柔软，被跳蛋刺激得洪水泛滥的小穴，无法忍受不去自慰的%ANAME(対象)%，只能不断不断接受着惩罚……
+	CALL FUCK(対象, "欲望, 露出, 百合, 自慰")
+	PRINTFORML
+	PRINTFORMW 几天之后，实在忍受不了的%ANAME(対象)%终于逃了出来
+ELSE
+	PRINTFORML 捉住%ANAME(対象)%的地主用調教代替了刑罰
+	PRINTFORML 舔着因为对地主的厌恶感而颤抖的%ANAME(対象)%全身、用粗糙的手指玩弄着%STR_BODY("膣", 対象)%和%STR_BODY("胸：短", 対象)%
+	PRINTFORML 与相貌不同的非常高超的技巧、%ANAME(対象)%渐渐的发出了不像话的喘息声
+	PRINTFORML 然后%STR_BODY("膣：欲情", 対象)%被阴茎插入之后、发出了愉悦的呻吟声
+	PRINTFORMW 厌恶感被压倒性的快感驱除、%ANAME(対象)%变成了男人的性奴隶满足的被侵犯着
+	CALL FUCK(対象, "欲望, 奉仕, 性交, 精愛, Ｖ, Ｂ, Ｃ, Ａ, 接吻, 口淫, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 接吻喪失, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("地主"), @"地主的\@RAND:2 ? 肉棒 # 嘴唇\@", "地主", "", "調教")
+	PRINTFORML
+	PRINTFORMW %ANAME(対象)%被狠狠的侵犯后、總算逃回来了
+ENDIF
+
+CALL COLOR_PRINTW(@"失去了<{MIN(MONEY, 5000)}>金", カラー_警告)
+MONEY -= MIN(MONEY, 5000)
+
+RETURN 1

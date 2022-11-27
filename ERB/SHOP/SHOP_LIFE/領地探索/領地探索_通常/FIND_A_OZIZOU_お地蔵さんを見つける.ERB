@@ -1,0 +1,48 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_FIND_A_OZIZOU_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_FIND_A_OZIZOU_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_FIND_A_OZIZOU(対象)
+#DIM 対象
+
+PRINTFORML 在遠離村落的道路上、発現了一個衰敗的地藏像
+PRINTFORML 因為是行人很少的道路、所以被遺忘在這裡了吧
+
+PRINTL
+CALL ASK_MULTI("打掃干浄", "奉上貢品", "不管")
+
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORML 這樣下去太可憐了
+		PRINTFORML %ANAME(対象)%決定為它打掃一下
+		PRINTFORML ……雖然很累但是比剛才干淨多了
+		PRINTFORMW 心情愉快地返回了拠点
+		CALL ADD_COOLTIME(対象, 1)
+		MAXBASE:対象:体力 += 100
+		CALL COLOR_PRINTW(@"体力最大値提高了100、変成了{MAXBASE:対象:体力}", カラー_注意)
+	CASE 1
+		PRINTFORML 把帯着的点心供上後双手合十拜了拜
+		PRINTFORMW …是心理作用麼感覚心情変好了一点
+		MAXBASE:対象:体力 += 50
+		CALL COLOR_PRINTW(@"体力最大値提高了50、変成了{MAXBASE:対象:体力}", カラー_注意)
+	CASE 2
+		PRINTFORML 太麻煩了懶得管
+		PRINTFORMW 姑且双手合十拜了拜、然後就離開了那個地方
+ENDSELECT
+
+RETURN 1
+

@@ -1,0 +1,747 @@
+﻿;-------------------------------------------------
+;会談性的
+;-------------------------------------------------
+@SELECT_CHARA_LIST_SHOW_LOGIC_DIPLOMACY_TALK_SEX(対象)
+#DIM 対象
+RETURN CFLAG:対象:行動不能状態 != 行動不能_子供 && CFLAG:対象:所属 == CFLAG:MASTER:所属 && !IS_ANIMAL(対象)
+
+@SELECT_CHARA_LIST_SELECT_LOGIC_DIPLOMACY_TALK_SEX(対象)
+#DIM 対象
+RETURN IS_FREE(対象) && CFLAG:対象:捕虜先 == 0 && TALK_CAN_GIVE_SEX(対象)
+
+;---------------------------
+;会談にて女を用意した場合
+;---------------------------
+@DIPLOMACY_TALK_SEX(提供先)
+#DIM プレイ内容
+#DIM 提供先
+#DIM 提供元
+#DIM 満足度
+#DIM FIRST_LINE
+#DIM CONST 相互口交 = 0
+#DIM CONST 相互插入 = 1
+#DIM CONST 相互肛交 = 2
+#DIM CONST 給対方口交 = 3
+#DIM CONST 被対方口交 = 4
+#DIM CONST 上了対方 = 5
+#DIM CONST 被対方上 = 6
+#DIM CONST 爆対方菊花 = 7
+#DIM CONST 被対方爆菊 = 8
+#DIM CONST 舐対方小穴 = 9
+#DIM CONST 被対方舐陰 = 10
+#DIM CONST 磨鏡 = 11
+#DIM CONST 接吻 = 12
+#DIM CONST 乱交 = 13
+#DIM CONST 被提供給士兵 = 14
+#DIM CONST 表演舞蹈 = 15
+#DIM CONST 汎用 = 16
+VARSET 満足度
+$SELECT_CHARA
+CALL SINGLE_DRAWLINE
+PRINTFORML %ANAME(MASTER)%打算提供「快感」
+PRINTFORML 沒有足夠的性知識的話無法進行、
+PRINTFORML 如果命令其他人送上身体的話至少也需要那個角色屈服
+PRINTFORML 或者、不抵抗対其他人送出身体的蕩貨也可以……
+PRINTFORML 那麼、要派出誰……
+CALL SINGLE_DRAWLINE
+CALL SELECT_CHARA_LIST("DIPLOMACY_TALK_SEX", "DIPLOMACY_TALK_SEX", "DEFAULT", "欲望", "性技", "奉仕", "性交", "政治")
+SIF RESULT == -1
+	RETURN -1
+提供元 = RESULT
+CALL SELECT_PLAY_LIST(提供元, 提供先)
+SIF RESULT == -1
+	GOTO SELECT_CHARA
+プレイ内容 = RESULT
+SELECTCASE プレイ内容
+	CASE 相互口交
+		IF HAS_PENIS(提供先) && HAS_PENIS(提供元)
+			PRINTFORML %ANAME(提供先)%馬上、脱掉了%ANAME(提供元)%的衣服、也脱掉了自己的衣服
+			PRINTFORML 兩人双腿之間的肉棒、期待着快感很快就勃起了……
+			PRINTFORML %ANAME(提供先)%把自己的肉棒貼住了%ANAME(提供元)%的那話兒、軽軽地動着腰
+			PRINTFORML 兩個人的肉棒、已経分泌出了一点点先走汁……
+			PRINTFORML 之後%ANAME(提供先)%讓%ANAME(提供元)%仰躺着、在他身上交錯着圧了上去
+			PRINTFORML 讓%ANAME(提供元)%進行着奉仕的同時、自己也含弄這%ANAME(提供元)%的肉棒……
+			CALL FUCK(提供先, "欲望, 奉仕, 性技, Ｃ, 射精, 口淫, 精愛", "接吻喪失, 口内射精", 0, @"%ANAME(提供元)%的肉棒", "", "", "為了維持外交関係的和姦")
+			CALL FUCK(提供元, "欲望, 奉仕, 性技, Ｃ, 射精, 口淫, 精愛", "接吻喪失, 口内射精", 0, @"%ANAME(提供先)%的肉棒", "", "", "為了維持外交関係的和姦")
+			PRINTFORML 這樣的行為讓兩個人射精了好幾次、持續互相対彼此的臉上発射着汁液……
+		ELSE
+			GOTO SELECT_CHARA
+		ENDIF
+	CASE 相互插入
+		IF HAS_VAGINA(提供先) && HAS_PENIS(提供先) && HAS_VAGINA(提供元) && HAS_PENIS(提供元)
+			PRINTFORML %ANAME(提供先)%馬上、脱掉了%ANAME(提供元)%的衣服、也脱掉了自己的衣服
+			PRINTFORML 兩人双腿之間的肉棒、期待着快感很快就勃起了……
+			PRINTFORML %ANAME(提供先)%把自己的肉棒貼住了%ANAME(提供元)%的那話兒、軽軽地動着腰
+			PRINTFORML 兩個人的肉棒、已経分泌出了一点点先走汁……
+			SELECTCASE RAND:7
+				CASE 0
+					PRINTFORML 接着%ANAME(提供先)%、讓%ANAME(提供元)%四肢着地趴着、從後面插入了小穴
+				CASE 1
+					PRINTFORML 接着%ANAME(提供先)%、讓%ANAME(提供元)%仰躺着、圧在上面插進了小穴
+				CASE 2
+					PRINTFORML 接着%ANAME(提供先)%、讓%ANAME(提供元)%扶着墻翹起屁股、從後面插入了小穴
+				CASE 3
+					PRINTFORML 接着%ANAME(提供先)%、抱住%ANAME(提供元)%、就這樣站着插入了小穴
+				CASE 4
+					PRINTFORML 接着%ANAME(提供先)%坐了下来、讓%ANAME(提供元)%対着她跨坐上来、在下面往上頂着腰
+				CASE 5
+					PRINTFORML 接着%ANAME(提供先)%坐了下来、讓%ANAME(提供元)%背対着她跨坐上来、在下面往上頂着腰
+				CASE 6
+					PRINTFORML 接着%ANAME(提供先)%仰着躺了下去、讓%ANAME(提供元)%跨坐在自己身上、扭動着自己的腰
+			ENDSELECT
+			PRINTFORML 不久之後%ANAME(提供先)%、在%ANAME(提供元)%的腔内直接射精了
+			SELECTCASE RAND:7
+				CASE 0
+					PRINTFORML 然後這次是自己把屁股対着%ANAME(提供元)%、搖着腰央求着做愛
+				CASE 1
+					PRINTFORML 然後這次是自己仰躺在地上、用食指掰開了秘縫央求着做愛
+				CASE 2
+					PRINTFORML 然後這次是自己扶住墻対%ANAME(提供元)%翹起屁股、央求着被從後面插入小穴
+				CASE 3
+					PRINTFORML 然後這次抱住了%ANAME(提供元)%、以站立的姿勢命令対方開始侵犯自己
+				CASE 4
+					PRINTFORML 之後%ANAME(提供先)%讓%ANAME(提供元)%坐着、面対着跨坐上去、要求対方在下面挺着腰
+				CASE 5
+					PRINTFORML 之後%ANAME(提供先)%讓%ANAME(提供元)%坐着、背対着跨坐上去、要求対方在下面挺着腰
+				CASE 6
+					PRINTFORML 之後%ANAME(提供先)%讓%ANAME(提供元)%仰躺着、跨坐在対方身上、用自己的小穴摩擦着亀頭
+			ENDSELECT
+			PRINTFORML 被点燃膣内射精的欲望之火的%ANAME(提供元)%、完全沒有忍住誘惑……
+			CALL FUCK(提供先, "欲望, Ｃ, Ｖ, 性交, 精愛, 射精,　Ｖ性交, Ｖ挿入", "処女喪失, 童貞喪失, 膣内射精", GET_ID(提供元), "", ANAME(提供元), @"%ANAME(提供元)%的膣道", "為了維持外交関係的和姦")
+			CALL FUCK(提供元, "欲望, Ｃ, Ｖ, 性交, 精愛, 射精,　Ｖ性交, Ｖ挿入", "処女喪失, 童貞喪失, 膣内射精", GET_ID(提供先), "", ANAME(提供元), @"%ANAME(提供先)%的膣道", "為了維持外交関係的和姦")
+			PRINTFORML 行為結束的時候、互相讓対方的身体染上一片片的白色……
+		ELSE
+			GOTO SELECT_CHARA
+		ENDIF
+	CASE 相互肛交
+		IF HAS_PENIS(提供先) && HAS_PENIS(提供元)
+			PRINTFORML %ANAME(提供先)%馬上、脱掉了%ANAME(提供元)%的衣服、也脱掉了自己的衣服
+			PRINTFORML 兩人双腿之間的肉棒、期待着快感很快就勃起了……
+			PRINTFORML %ANAME(提供先)%把自己的肉棒貼住了%ANAME(提供元)%的那話兒、軽軽地動着腰
+			PRINTFORML 兩個人的肉棒、已経分泌出了一点点先走汁……
+			SELECTCASE RAND:7
+				CASE 0
+					PRINTFORML 接着%ANAME(提供先)%、讓%ANAME(提供元)%四肢着地趴着、從後面插入了菊穴
+				CASE 1
+					PRINTFORML 接着%ANAME(提供先)%、讓%ANAME(提供元)%仰躺着、圧在上面插進了菊穴
+				CASE 2
+					PRINTFORML 接着%ANAME(提供先)%、讓%ANAME(提供元)%扶着墻翹起屁股、從後面插入了菊穴
+				CASE 3
+					PRINTFORML 接着%ANAME(提供先)%、抱住%ANAME(提供元)%、就這樣站着插入了菊穴
+				CASE 4
+					PRINTFORML 接着%ANAME(提供先)%坐了下来、讓%ANAME(提供元)%対着她跨坐上来、在下面往上頂着菊穴
+				CASE 5
+					PRINTFORML 接着%ANAME(提供先)%坐了下来、讓%ANAME(提供元)%背対着她跨坐上来、在下面往上頂着菊穴
+				CASE 6
+					PRINTFORML 接着%ANAME(提供先)%仰着躺了下去、讓%ANAME(提供元)%跨坐在自己身上、扭動着自己的腰
+			ENDSELECT
+			PRINTFORML 然後%ANAME(提供先)%、在%ANAME(提供元)%的肛内充分射精了
+			PRINTFORML 接着這次是自己把屁股対着%ANAME(提供元)%、央求着性交
+			SELECTCASE RAND:7
+				CASE 0
+					PRINTFORML 然後這次是自己把屁股対着%ANAME(提供元)%、搖着腰央求着肛交
+				CASE 1
+					PRINTFORML 然後這次是自己仰躺在地上、用食指掰開了菊穴央求着肛交
+				CASE 2
+					PRINTFORML 然後這次是自己扶住墻対%ANAME(提供元)%翹起屁股、央求着被從後面插入菊穴
+				CASE 3
+					PRINTFORML 然後這次抱住了%ANAME(提供元)%、以站立的姿勢命令対方開始侵犯自己的菊穴
+				CASE 4
+					PRINTFORML 之後%ANAME(提供先)%讓%ANAME(提供元)%坐着、面対着跨坐上去、要求対方在下面插着菊穴
+				CASE 5
+					PRINTFORML 之後%ANAME(提供先)%讓%ANAME(提供元)%坐着、背対着跨坐上去、要求対方在下面插着菊穴
+				CASE 6
+					PRINTFORML 之後%ANAME(提供先)%讓%ANAME(提供元)%仰躺着、跨坐在対方身上、用自己的菊穴摩擦着亀頭
+			ENDSELECT
+			PRINTFORML 被点燃肛内射精的欲望之火的%ANAME(提供元)%、完全沒有忍住誘惑……
+			CALL FUCK(提供先, "欲望, Ｃ, Ａ, 性交, 精愛, 射精, Ａ性交, Ａ挿入", "Ａ処女喪失, 童貞喪失, 腸内射精", 0, "", ANAME(提供元), @"%ANAME(提供元)%的肛門", "為了維持外交関係的和姦")
+			CALL FUCK(提供元, "欲望, Ｃ, Ａ, 性交, 精愛, 射精, Ａ性交, Ａ挿入", "Ａ処女喪失, 童貞喪失, 腸内射精", 0, "", ANAME(提供元), @"%ANAME(提供先)%のアナル", "為了維持外交関係的和姦")
+			PRINTFORML 行為結束的時候、互相讓対方的身体染上一片片的白色……
+		ELSE
+			GOTO SELECT_CHARA
+		ENDIF
+	CASE 乱交
+		IF HAS_VAGINA(提供先) && HAS_PENIS(提供先) && HAS_VAGINA(提供元) && HAS_PENIS(提供元)
+			PRINTFORML %ANAME(提供先)%馬上、脱掉了%ANAME(提供元)%的衣服、也脱掉了自己的衣服
+			PRINTFORML 兩人双腿之間的肉棒、期待着快感很快就勃起了……
+			PRINTFORML %ANAME(提供先)%把自己的肉棒貼住了%ANAME(提供元)%的那話兒、軽軽地動着腰
+			PRINTFORML 兩個人的肉棒、已経分泌出了一点点先走汁……
+			PRINTFORML 突然、%ANAME(提供先)%啪啪的拍起了手
+			PRINTFORML 然後、穿着淫蕩服装的男女一個接一個的進入了房間。囲在了%ANAME(提供先)%身辺
+			PRINTFORML 他們・她們也互相交合着、%ANAME(提供元)%和%ANAME(提供先)%兩個人、不管是誰都和対方做愛、名副其実的精魂殆尽了……
+			CALL FUCK(提供先, "欲望, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 排泄, 射精, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ挿入, Ａ挿入, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失, 童貞喪失, 膣内射精, 腸内射精, 口内射精", (RAND:2 ? GET_SPERM_ID("士兵") # GET_ID(提供元)), @"\@ RAND:2 ?%ANAME(提供元)%的肉棒 # %ANAME(提供先)%的私兵的肉棒\@", @"\@ RAND:2 ?%ANAME(提供元)% # %ANAME(提供先)%的私兵\@", @"\@ RAND:2 ?%ANAME(提供元)% # %ANAME(提供先)%的私兵\@的\@ RAND:2 ? 膣道 # 肛門 \@", "為了維持外交関係的輪姦")
+			CALL FUCK(提供元, "欲望, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 排泄, 射精, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ挿入, Ａ挿入, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失, 童貞喪失, 膣内射精, 腸内射精, 口内射精", (RAND:2 ? GET_SPERM_ID("士兵") # GET_ID(提供先)), @"\@ RAND:2 ?%ANAME(提供先)%的肉棒 # %ANAME(提供先)%的私兵的肉棒\@", @"\@ RAND:2 ?%ANAME(提供先)% # %ANAME(提供先)%的私兵\@", @"\@ RAND:2 ?%ANAME(提供先)% # %ANAME(提供先)%的私兵\@的\@ RAND:2 ? 膣道 # 肛門 \@", "為了維持外交関係的輪姦")
+			PRINTFORML 宴会結束的時候、兩個人全身都被染成了白色
+		ELSEIF HAS_VAGINA(提供元) && HAS_VAGINA(提供先)
+			PRINTFORML %ANAME(提供先)%馬上、脱掉了%ANAME(提供元)%的衣服、也脱掉了自己的衣服
+			PRINTFORML 二人の秘裂は、快楽への期待でとろとろになっている……
+			PRINTFORML 突然、%ANAME(提供先)%啪啪的拍起了手
+			PRINTFORML 然後、強壯的士兵一個接一個的進入了房間
+			PRINTFORML 就這樣、%ANAME(提供先)%和%ANAME(提供元)%、以慰安的名義開始和士兵們乱交……
+			PRINTFORML 之後事情終於結束了、只有全身所有洞都溢出着精液的%ANAME(提供元)%和%ANAME(提供先)%還留在那裡
+			CALL FUCK(提供先, "欲望, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 排泄, 射精, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失, 童貞喪失, 膣内射精, 腸内射精, 口内射精", (RAND:2 ? GET_SPERM_ID("士兵") # GET_ID(提供元)), @"%ANAME(提供先)%的私兵的肉棒", @"%ANAME(提供先)%的私兵", "", "為了維持外交関係的輪姦")
+			CALL FUCK(提供元, "欲望, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 排泄, 射精, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失, 童貞喪失, 膣内射精, 腸内射精, 口内射精", (RAND:2 ? GET_SPERM_ID("士兵") # GET_ID(提供先)), @"%ANAME(提供先)%的私兵的肉棒", @"%ANAME(提供先)%的私兵", "", "為了維持外交関係的輪姦")
+		ELSE
+			GOTO SELECT_CHARA
+		ENDIF
+	CASE 給対方口交
+		IF HAS_PENIS(提供先)
+			PRINTFORML %ANAME(提供先)%馬上、脱掉了%ANAME(提供元)%的衣服、也脱掉了自己的衣服
+			PRINTFORML %ANAME(提供先)%腿間的肉棒、期待着快感很快就勃起了……
+			PRINTFORML %ANAME(提供先)%讓%ANAME(提供元)%跪着、把自己的肉棒圧在%ANAME(提供元)%的臉上
+			PRINTFORML 什麼都沒有説就察覚到的%ANAME(提供元)%、馬上開始奉仕着%ANAME(提供先)%的肉棒……
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORML 濃厚的雄性気味、充満了味覚和嗅覚……
+				CASE 1
+					PRINTFORML 室内充満了舔弄肉棒的水声……
+				CASE 2
+					PRINTFORML 濃濃的雄性荷爾蒙讓%ANAME(提供元)%的腦袋発暈、垂下了眼角……
+			ENDSELECT
+			PRINTFORML 之後%ANAME(提供先)%低声呻吟。在%ANAME(提供元)%的口中直接射出了精子
+			PRINTFORML %ANAME(提供元)%责弄着自己的私処、発出声音把精液喝光了……
+			CALL FUCK(提供先, "欲望, Ｃ, 射精")
+			CALL FUCK(提供元, "奉仕, 性技, 口淫, 精愛", "接吻喪失, 口内射精", 0, @"%ANAME(提供先)%的肉棒", "", "", "為了維持外交関係的和姦")
+		ELSE
+			GOTO SELECT_CHARA
+		ENDIF
+	CASE 被対方口交
+		IF HAS_PENIS(提供元)
+			PRINTFORML %ANAME(提供先)%馬上、脱掉了%ANAME(提供元)%的衣服、也脱掉了自己的衣服
+			PRINTFORML %ANAME(提供元)%腿間的肉棒、期待着快感很快就勃起了……
+			PRINTFORML %ANAME(提供先)%非常期待的樣子、用舌頭舔了舔嘴唇
+			PRINTFORML %ANAME(提供先)%讓%ANAME(提供元)%坐在椅子上然後跪在了身辺
+			PRINTFORML %ANAME(提供元)%很知趣的張開了双腿、%ANAME(提供先)%馬上就把肉棒含住了……
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORML 濃厚的雄性気味、充満了味覚和嗅覚……
+				CASE 1
+					PRINTFORML 室内充満了舔弄肉棒的水声……
+				CASE 2
+					PRINTFORML 濃濃的雄性荷爾蒙讓%ANAME(提供先)%的腦袋発暈、垂下了眼角……
+			ENDSELECT
+			PRINTFORML 之後%ANAME(提供元)%低声呻吟。在%ANAME(提供先)%的口中直接射出了精子
+			PRINTFORML %ANAME(提供先)%责弄着自己的私処、発出声音把精液喝光了……
+			CALL FUCK(提供先, "奉仕, 性技, 口淫, 精愛", "接吻喪失, 口内射精", 0, @"%ANAME(提供元)%的肉棒", "", "", "為了維持外交関係的和姦")
+			CALL FUCK(提供元, "欲望, Ｃ, 射精")
+		ELSE
+			GOTO SELECT_CHARA
+		ENDIF
+	CASE 上了対方
+		IF HAS_PENIS(提供元) && HAS_VAGINA(提供先)
+			PRINTFORML %ANAME(提供先)%馬上、脱掉了%ANAME(提供元)%的衣服、也脱掉了自己的衣服
+			PRINTFORML %ANAME(提供元)%腿間的肉棒、期待着快感很快就勃起了……
+			PRINTFORML %ANAME(提供先)%非常期待的樣子、用舌頭舔了舔嘴唇
+			SELECTCASE RAND:7
+				CASE 0
+					PRINTFORML %ANAME(提供先)%自己把屁股対着%ANAME(提供元)%、搖着腰央求着做愛
+				CASE 1
+					PRINTFORML %ANAME(提供先)%自己仰躺在地上、用食指掰開了秘縫央求着做愛
+				CASE 2
+					PRINTFORML %ANAME(提供先)%自己扶住墻対%ANAME(提供元)%翹起屁股、央求着被從後面插入小穴
+				CASE 3
+					PRINTFORML %ANAME(提供先)%抱住了%ANAME(提供元)%、以站立的姿勢命令対方開始侵犯自己
+				CASE 4
+					PRINTFORML %ANAME(提供先)%讓%ANAME(提供元)%坐着、面対着跨坐上去、要求対方在下面挺着腰
+				CASE 5
+					PRINTFORML %ANAME(提供先)%讓%ANAME(提供元)%坐着、背対着跨坐上去、要求対方在下面挺着腰
+				CASE 6
+					PRINTFORML %ANAME(提供先)%讓%ANAME(提供元)%仰躺着、跨坐在対方身上、用自己的小穴摩擦着亀頭
+			ENDSELECT
+			PRINTFORML %ANAME(提供元)%被命令着、插入了%ANAME(提供先)%的小穴……
+			PRINTFORML 不久%ANAME(提供元)%就到了極限、就這樣在%ANAME(提供先)%的腔内射精了……
+			PRINTFORML 從拔出肉棒后的小穴内、滴下了白色的粘糊液体……
+			CALL FUCK(提供先, "欲望, Ｖ, 性交, 精愛, Ｖ性交", "処女喪失, 膣内射精", GET_ID(提供元), "", ANAME(提供元), "", "為了維持外交関係的和姦")
+			CALL FUCK(提供元, "欲望, Ｃ, 性交, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(提供先)%的膣道", "為了維持外交関係的和姦")
+		ELSE
+			GOTO SELECT_CHARA
+		ENDIF
+	CASE 被対方上
+		IF HAS_PENIS(提供先) && HAS_VAGINA(提供元)
+			PRINTFORML %ANAME(提供先)%馬上、脱掉了%ANAME(提供元)%的衣服、也脱掉了自己的衣服
+			PRINTFORML %ANAME(提供先)%腿間的肉棒、期待着快感很快就勃起了……
+			SELECTCASE RAND:7
+				CASE 0
+					PRINTFORML %ANAME(提供先)%、讓%ANAME(提供元)%四肢着地趴着、從後面插入了小穴
+				CASE 1
+					PRINTFORML %ANAME(提供先)%、讓%ANAME(提供元)%仰躺着、圧在上面插進了小穴
+				CASE 2
+					PRINTFORML %ANAME(提供先)%、讓%ANAME(提供元)%扶着墻翹起屁股、從後面插入了小穴
+				CASE 3
+					PRINTFORML %ANAME(提供先)%、抱住%ANAME(提供元)%、就這樣站着插入了小穴
+				CASE 4
+					PRINTFORML %ANAME(提供先)%坐了下来、讓%ANAME(提供元)%対着她跨坐上来、在下面往上頂着腰
+				CASE 5
+					PRINTFORML %ANAME(提供先)%坐了下来、讓%ANAME(提供元)%背対着她跨坐上来、在下面往上頂着腰
+				CASE 6
+					PRINTFORML %ANAME(提供先)%仰着躺了下去、讓%ANAME(提供元)%跨坐在自己身上、扭動着自己的腰
+			ENDSELECT
+			CALL FUCK(提供先, "欲望, Ｃ, 性交, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(提供元)%的膣道", "為了維持外交関係的和姦")
+			CALL FUCK(提供元, "欲望, Ｖ, 性交, 精愛, Ｖ性交", "処女喪失, 膣内射精", GET_ID(提供先), "", ANAME(提供先), "", "為了維持外交関係的和姦")
+			PRINTFORML 不久之後%ANAME(提供先)%、在%ANAME(提供元)%的腔内直接射精了
+			PRINTFORML 從拔出肉棒后的小穴内、滴下了白色的粘糊液体……
+		ELSE
+			GOTO SELECT_CHARA
+		ENDIF
+	CASE 爆対方菊花
+		IF HAS_PENIS(提供元)
+			PRINTFORML %ANAME(提供先)%馬上、脱掉了%ANAME(提供元)%的衣服、也脱掉了自己的衣服
+			PRINTFORML %ANAME(提供元)%腿間的肉棒、期待着快感很快就勃起了……
+			PRINTFORML %ANAME(提供先)%非常期待的樣子、用舌頭舔了舔嘴唇
+			SELECTCASE RAND:7
+				CASE 0
+					PRINTFORML %ANAME(提供先)%自己把屁股対着%ANAME(提供元)%、搖着腰央求着肛交
+				CASE 1
+					PRINTFORML %ANAME(提供先)%自己仰躺在地上、用食指掰開了菊穴央求着肛交
+				CASE 2
+					PRINTFORML %ANAME(提供先)%自己扶住墻対%ANAME(提供元)%翹起屁股、央求着被從後面插入菊穴
+				CASE 3
+					PRINTFORML %ANAME(提供先)%抱住了%ANAME(提供元)%、以站立的姿勢命令対方開始侵犯自己的菊穴
+				CASE 4
+					PRINTFORML %ANAME(提供先)%讓%ANAME(提供元)%坐着、面対着跨坐上去、要求対方在下面插着菊穴
+				CASE 5
+					PRINTFORML %ANAME(提供先)%讓%ANAME(提供元)%坐着、背対着跨坐上去、要求対方在下面插着菊穴
+				CASE 6
+					PRINTFORML %ANAME(提供先)%讓%ANAME(提供元)%仰躺着、跨坐在対方身上、用自己的菊穴摩擦着亀頭
+			ENDSELECT
+			PRINTFORML %ANAME(提供元)%被命令着、插入了%ANAME(提供先)%的菊穴……
+			CALL FUCK(提供先, "欲望, Ａ, 性交, 精愛, Ａ性交", "Ａ処女喪失, 腸内射精", 0, "", ANAME(提供元), "", "為了維持外交関係的和姦")
+			CALL FUCK(提供元, "欲望, Ｃ, 性交, 射精, Ａ挿入", "童貞喪失", 0, "", "", @"%ANAME(提供先)%のアナル", "為了維持外交関係的和姦")
+			PRINTFORML 不久%ANAME(提供元)%就到了極限、就這樣在%ANAME(提供先)%的肛内射精了……
+			PRINTFORML 從拔出肉棒后的菊穴内、滴下了白色的粘糊液体……
+		ELSE
+			GOTO SELECT_CHARA
+		ENDIF
+	CASE 被対方爆菊
+		IF HAS_PENIS(提供先)
+			PRINTFORML %ANAME(提供先)%馬上、脱掉了%ANAME(提供元)%的衣服、也脱掉了自己的衣服
+			PRINTFORML %ANAME(提供先)%腿間的肉棒、期待着快感很快就勃起了……
+			SELECTCASE RAND:7
+				CASE 0
+					PRINTFORML %ANAME(提供先)%、讓%ANAME(提供元)%四肢着地趴着、從後面插入了菊穴
+				CASE 1
+					PRINTFORML %ANAME(提供先)%、讓%ANAME(提供元)%仰躺着、圧在上面插進了菊穴
+				CASE 2
+					PRINTFORML %ANAME(提供先)%、讓%ANAME(提供元)%扶着墻翹起屁股、從後面插入了菊穴
+				CASE 3
+					PRINTFORML %ANAME(提供先)%、抱住%ANAME(提供元)%、就這樣站着插入了小穴
+				CASE 4
+					PRINTFORML %ANAME(提供先)%坐了下来、讓%ANAME(提供元)%対着她跨坐上来、在下面往上頂着菊穴
+				CASE 5
+					PRINTFORML %ANAME(提供先)%坐了下来、讓%ANAME(提供元)%背対着她跨坐上来、在下面往上頂着菊穴
+				CASE 6
+					PRINTFORML %ANAME(提供先)%仰着躺了下去、讓%ANAME(提供元)%跨坐在自己身上、扭動着自己的腰
+			ENDSELECT
+			CALL FUCK(提供先, "欲望, Ｃ, 性交, 射精, Ａ挿入", "童貞喪失", 0, "", "", @"%ANAME(提供元)%的肛門", "為了維持外交関係的和姦")
+			CALL FUCK(提供元, "欲望, Ａ, 性交, 精愛, Ａ性交", "Ａ処女喪失, 腸内射精", 0, "", ANAME(提供先), "", "為了維持外交関係的和姦")
+			PRINTFORML 然後%ANAME(提供先)%、在%ANAME(提供元)%的肛内充分射精了
+			PRINTFORML 從拔出肉棒后的菊穴内、滴下了白色的粘糊液体……
+		ELSE
+			GOTO SELECT_CHARA
+		ENDIF
+	CASE 舐対方小穴
+		IF HAS_VAGINA(提供先)
+			PRINTFORML %ANAME(提供先)%馬上、脱掉了%ANAME(提供元)%的衣服、也脱掉了自己的衣服
+			PRINTFORML %ANAME(提供先)%的秘縫、期待着快感已経変得粘糊糊的了……
+			PRINTFORML %ANAME(提供先)%讓%ANAME(提供元)%跪在眼前、自己坐在椅子上張開了双腿
+			PRINTFORML 什麼都沒有説就察覚到的%ANAME(提供元)%、馬上開始奉仕着%ANAME(提供先)%的秘縫……
+			CALL FUCK(提供先, "欲望, Ｃ")
+			CALL FUCK(提供元, "奉仕, 性技, 口淫", "接吻喪失", 0, @"%ANAME(提供先)%的陰唇", "", "", "為了維持外交関係的和姦")
+		ELSE
+			GOTO SELECT_CHARA
+		ENDIF
+	CASE 被対方舐陰
+		IF HAS_VAGINA(提供元)
+			PRINTFORML %ANAME(提供先)%馬上、脱掉了%ANAME(提供元)%的衣服、也脱掉了自己的衣服
+			PRINTFORML %ANAME(提供元)%的秘縫、期待着快感已経変得粘糊糊的了……
+			PRINTFORML %ANAME(提供先)%讓%ANAME(提供元)%坐下、張開双腿
+			PRINTFORML 然後開始用舌頭和手指责弄着秘縫和陰核……
+			CALL FUCK(提供先, "奉仕, 性技, 口淫", "接吻喪失", 0, @"%ANAME(提供元)%的陰唇", "", "", "為了維持外交関係的和姦")
+			CALL FUCK(提供元, "欲望, Ｃ")
+		ELSE
+			GOTO SELECT_CHARA
+		ENDIF
+	CASE 磨鏡
+		IF HAS_VAGINA(提供元) && HAS_VAGINA(提供先)
+			PRINTFORML %ANAME(提供先)%馬上、脱掉了%ANAME(提供元)%的衣服、也脱掉了自己的衣服
+			PRINTFORML 兩個人的秘縫、期待着快楽已経変得湿漉漉的了……
+			PRINTFORML %ANAME(提供先)%和%ANAME(提供元)%張開了双腿、把湿潤的私処重疊在一起
+			PRINTFORML 然後就這樣交纏着双脚、摩擦着小縫、互相都高潮了好幾次……
+		ELSE
+			GOTO SELECT_CHARA
+		ENDIF
+	CASE 接吻
+		PRINTFORML %ANAME(提供先)%馬上、脱掉了%ANAME(提供元)%的衣服、也脱掉了自己的衣服
+		IF RAND:2
+			PRINTFORML %ANAME(提供先)%和%ANAME(提供元)%肌膚緊貼着、進行着濃厚的接吻……
+		ELSE
+			PRINTFORML %ANAME(提供先)%命令着%ANAME(提供元)%、給自己一個濃厚的吻……
+		ENDIF
+
+		CALL FUCK(提供先, "奉仕, 性技, 接吻", "接吻喪失", 0, @"%ANAME(提供元)%的嘴唇", "", "", "為了維持外交関係的和姦")
+		CALL FUCK(提供元, "奉仕, 性技, 接吻", "接吻喪失", 0, @"%ANAME(提供元)%的嘴唇", "", "", "為了維持外交関係的和姦")
+	CASE 被提供給士兵
+		IF HAS_VAGINA(提供元)
+			PRINTFORML %ANAME(提供先)%馬上、脱掉了%ANAME(提供元)%的衣服、也脱掉了自己的衣服
+			PRINTFORML %ANAME(提供先)%腿間的肉棒、期待着快感很快就勃起了……
+			PRINTFORML 突然、%ANAME(提供先)%啪啪的拍起了手
+			PRINTFORML 然後、強壯的士兵一個接一個的進入了房間
+			PRINTFORML 就這樣、%ANAME(提供元)%、以慰安的名義被提供給了士兵們……
+			CALL FUCK(提供先, "欲望, Ｃ, Ｂ, 自慰", "")
+			CALL FUCK(提供元, "欲望, 奉仕, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 排泄, 射精, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("士兵"), @"%ANAME(提供先)%的私兵的肉棒", @"%ANAME(提供先)%的私兵", "", "為了維持外交関係的輪姦")
+			PRINTFORML 之後事情終於結束了、只有全身所有洞都溢出着精液的%ANAME(提供元)%、
+			PRINTFORML 還有以%ANAME(提供元)%的癡態為素材自慰了好幾次、已経精疲力尽的%ANAME(提供先)%
+		ELSE
+			GOTO SELECT_CHARA
+		ENDIF
+	CASE 表演舞蹈
+		PRINTFORML 昏暗的房間中、%ANAME(提供先)%坐在沙発之上愉快的等待着
+		PRINTFORML 那麼、今晚会怎麼讓自己満足呢……
+		PRINTFORML ・
+		PRINTFORML ・・
+		PRINTFORMW ・・・
+		IF !RAND:3
+			PRINTFORML %ANAME(提供元)%穿着大衣来到了%ANAME(提供先)%身辺
+			PRINTFORML %ANAME(提供元)%馬上就脱去了大衣、大衣下只披着一層薄布就這樣為%ANAME(提供先)%表演着舞蹈
+			PRINTFORML 那神秘又妖艶的美色、讓兩人之間形成了一個不可思議的空間……
+			PRINTFORML 連指尖都很細緻的動作讓%ANAME(提供先)%被魅惑住了一直凝視着
+			PRINTFORM 在薄紗下若隠若現的%ANAME(提供元)%的
+			IF GROUPMATCH(TALENT:提供元:体格, 体格_子供, 体格_小柄)
+				PRINTFORM 未成熟的肢体
+			ELSEIF GET_BUSTSIZE(提供元) > 0 || TALENT:提供元:体型 >= 体型_グラマー
+				PRINTFORM 誘人的肢体
+			ELSEIF !HAS_VAGINA(提供元) && HAS_PENIS(提供元)
+				PRINTFORM 肉体
+			ELSE
+				PRINTFORM 肢体
+			ENDIF
+			PRINTFORML 再也忍不住了、開始\@ HAS_PENIS(提供先) ? 擼動着自己的肉棒 # 责弄着自己的蜜穴 \@……
+
+		ELSEIF RAND:2
+			PRINTFORML %ANAME(提供元)%穿着艶麗的服装来到了%ANAME(提供先)%身辺
+			PRINTFORM %ANAME(提供元)%那迷人的身体扭動着、一件、又一件、令人焦急的脱着衣服露出了那
+			IF GROUPMATCH(TALENT:提供元:体格, 体格_子供, 体格_小柄)
+				PRINTFORM 幼小的肢体
+			ELSEIF GET_BUSTSIZE(提供元) > 0 || TALENT:提供元:体型 >= 体型_グラマー
+				PRINTFORM 誘人的肢体
+			ELSEIF !HAS_VAGINA(提供元) && HAS_PENIS(提供元)
+				PRINTFORM 肉体
+			ELSE
+				PRINTFORM 肢体
+			ENDIF
+			PRINTFORML ……
+			PRINTFORML %ANAME(提供先)%変得満臉通紅、興奮的一辺责弄着自己的\@ HAS_PENIS(提供先) ? 肉棒 # 秘唇 \@一辺欣賞着淫靡的舞蹈
+			IF RAND:2 && HAS_VAGINA(提供元)
+				PRINTFORM %ANAME(提供元)%的
+				IF GROUPMATCH(TALENT:提供元:体格, 体格_子供, 体格_小柄) && GET_BUSTSIZE(提供元) < 0
+					PRINTFORM 未成熟的胸部
+				ELSEIF GET_BUSTSIZE(提供元) > 0
+					PRINTFORM 搖晃的巨乳
+				ELSE
+					PRINTFORM 匀称的酥胸
+				ENDIF
+			ELSE
+				PRINTFORM 和%ANAME(提供元)%的\@ HAS_PENIS(提供元) ? 肉棒 # 蜜穴 \@一起暴露出来的那一瞬间
+			ENDIF
+			PRINTFORML 目不转睛的%ANAME(提供先)%到达了絶頂……
+
+		ELSE
+			PRINTFORML 穿着暴露皮衣的%ANAME(提供元)%来到了%ANAME(提供先)%的身辺
+			PRINTFORM %ANAME(提供元)%一辺唱着淫穢的歌曲一辺対%ANAME(提供先)%貼上了自己
+			IF GROUPMATCH(TALENT:提供元:体格, 体格_子供, 体格_小柄)
+				PRINTFORM 未成熟的肢体
+			ELSEIF GET_BUSTSIZE(提供元) > 0 || TALENT:提供元:体型 >= 体型_グラマー
+				PRINTFORM 誘人的肢体
+			ELSEIF !HAS_VAGINA(提供元) && HAS_PENIS(提供元)
+				PRINTFORM 肉体
+			ELSE
+				PRINTFORM 肢体
+			ENDIF
+			PRINTFORML 緊貼的肌膚傳遞着体温
+			PRINTFORML 像在肌膚上画画一樣、不時用指尖在肌膚上劃過的感覚引起了%ANAME(提供先)%的衝動……
+			PRINTFORML %ANAME(提供先)%的呼吸逐漸変得粗暴、有一種直接推倒%ANAME(提供元)%的衝動
+			PRINTFORML 被安静的%ANAME(提供元)%阻止、%ANAME(提供先)%焦躁的身体也慢慢平静下来
+			PRINTFORML 在背德的空気中、慢慢地、%ANAME(提供先)%的快感確実的到達了頂点……
+		ENDIF
+		CALL FUCK(提供元, "欲望, 露出", "")
+	CASE 汎用
+		PRINTFORML %ANAME(提供先)%享受了%ANAME(提供元)%的身体……
+	CASEELSE
+		GOTO SELECT_CHARA
+ENDSELECT
+
+満足度 = MIN(ABL:提供元:欲望 * 3, 15) + MIN(ABL:提供元:性技 * 2, 10) + MIN(ABL:提供元:奉仕 * 2, 10) + MIN(ABL:提供元:性交, 5)
+満足度 += MIN(ABL:提供先:欲望, 10)
+
+SIF TALENT:提供元:小悪魔
+	満足度 += 1
+SIF TALENT:提供元:魅惑
+	満足度 += 3
+SIF TALENT:提供元:謎之魅力
+	満足度 += 5
+SIF TALENT:提供元:人気
+	満足度 += 3
+SIF TALENT:提供元:美脚
+	満足度 += 2
+SIF TALENT:提供元:美臀
+	満足度 += 2
+SIF GET_HIPSIZE(提供元) >= 1
+	満足度 += 2
+SIF TALENT:提供元:崩壊
+	満足度 -= 10
+SIF TALENT:提供元:空虚
+	満足度 -= 10
+
+FOR LOCAL, 0, VARSIZE("SEX_TALENT_NAME")
+	SIF GETBIT(TALENT:提供元:淫乱系, LOCAL)
+		満足度 += 3
+NEXT
+
+;政治力による補正
+SELECTCASE ABL:提供元:政治 - ABL:提供先:政治
+	CASE IS >= 50
+		TIMES 満足度, 1.20
+	CASE IS >= 35
+		TIMES 満足度, 1.15
+	CASE IS >= 25
+		TIMES 満足度, 1.10
+	CASE IS >= 10
+		TIMES 満足度, 1.05
+	CASE IS < -10
+		TIMES 満足度, 0.95
+	CASE IS < -25
+		TIMES 満足度, 0.90
+	CASE IS < -35
+		TIMES 満足度, 0.85
+	CASE IS < -50
+		TIMES 満足度, 0.80
+	CASEELSE
+ENDSELECT
+
+;最低値保証
+満足度 = MAX(満足度, 5)
+
+IF IS_SP_CHARA(提供元)
+	CALL COLOR_PRINTL("特殊キャラを提供:満足度にペナルティ", カラー_警告)
+	満足度 = MAX(満足度 /10, 1)
+ENDIF
+
+IF CHECK_BUILDING_FUNCTION_SELECT(-1,CFLAG:MASTER:所属,建造物_永恒间) > 0
+	BUILDING_TEXT = BUILDING_TEXT_永恒间(CFLAG:MASTER:所属)
+ELSE
+	CALL ADD_COOLTIME(提供元, 1)
+ENDIF
+
+
+IF 提供元 == MASTER
+	CFLAG:提供先:面識 = 1
+ENDIF
+IF 提供元 != MASTER
+	LOCAL:1 = LIMIT(CFLAG:提供元:好感度 / 10, 200, 1000)
+	LOCAL:2 = LIMIT(CFLAG:提供元:従属度 / 10, 200, 1000)
+	IF CHECK_BUILDING_FUNCTION_SELECT(-1,CFLAG:MASTER:所属,建造物_永恒间) <= 0
+		CFLAG:提供元:好感度 -= LIMIT(CFLAG:提供元:好感度 / 10, 200, 1000)
+		CFLAG:提供元:従属度 -= LIMIT(CFLAG:提供元:従属度 / 10, 200, 1000)
+		PRINTL
+		PRINTFORM %ANAME(提供元), 8%:
+		PRINTFORM 好感度%TOSTR_SIGN(LOCAL:1 * - 1)%{ABS(LOCAL:1)}(合計:{CFLAG:提供元:好感度})
+		PRINTFORM 従属度%TOSTR_SIGN(LOCAL:2 * - 1)%{ABS(LOCAL:2)}(合計:{CFLAG:提供元:従属度})
+		PRINTL
+	ELSE
+		CFLAG:提供元:好感度 += LIMIT(CFLAG:提供元:好感度 / 10, 200, 1000)
+		CFLAG:提供元:従属度 += LIMIT(CFLAG:提供元:従属度 / 10, 200, 1000)
+		PRINTL
+		PRINTFORM %ANAME(提供元), 8%:
+		PRINTFORM 好感度%TOSTR_SIGN(LOCAL:1 * + 1)%{ABS(LOCAL:1)}(合計:{CFLAG:提供元:好感度})
+		PRINTFORM 従属度%TOSTR_SIGN(LOCAL:2 * + 1)%{ABS(LOCAL:2)}(合計:{CFLAG:提供元:従属度})
+		PRINTL
+	ENDIF
+ENDIF
+
+RETURN 満足度
+
+@TALK_CAN_GIVE_SEX(ARG:0)
+#FUNCTION
+;所属がMASTERと違うとだめ
+SIF CFLAG:(ARG:0):所属 != CFLAG:MASTER:所属
+	RETURNF 0
+;主人公以外は君主だと駄目
+SIF ARG:0 != MASTER && ARG:0 == GET_COUNTRY_BOSS(CFLAG:MASTER:所属)
+	RETURNF 0
+;性知識が必要
+SIF ABL:(ARG:0):性知識 < 3
+	RETURNF 0
+;主人公以外は「陥落系素質もちである、既成事実3、公衆便所、薬物中毒」のいずれかを満たす必要がある
+SIF ARG:0 != MASTER && !(IS_SLAVE(ARG:0) || IS_LOVER(ARG:0) || IS_SLAVED_BY(ARG:0) || MARK:(ARG:0):既成事実 == 3 || GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_精液便女) || GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_薬物中毒) || (IS_SP_COUNTRY(CFLAG:MASTER:所属) && GETBIT(TALENT:(ARG:0):特殊勢力陥落系, SP_COUNTRY_TO_CONST(CFLAG:MASTER:所属))))
+	RETURNF 0
+RETURNF 1
+
+
+;------------------------------------
+;プレイ内容の選択用
+;------------------------------------
+@SELECT_PLAY_LIST(提供元, 提供先)
+#DIM プレイ内容
+#DIMS CONST プレイ文字列 = "相互口交", "相互插入", "相互肛交", "給対方口交", "被対方口交", "上了対方", "被対方上", "爆対方菊花", "被対方爆菊", "舐対方小穴", "被対方舐陰", "磨鏡", "接吻", "乱交", "被提供給士兵", "表演舞蹈"
+#DIM CONST ふたふたプレイ配列 = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
+#DIM CONST ふた男プレイ配列 = 0, 2, 3, 4, 7, 8, 9, 12, 15
+#DIM CONST ふた女プレイ配列 = 3, 6, 9, 10, 11, 12, 14, 15
+#DIM CONST 男ふたプレイ配列 = 0, 2, 3, 4, 6, 7, 8, 10, 12, 14, 15
+#DIM CONST 男女プレイ配列 = 3, 6, 8, 10, 12, 14, 15
+#DIM CONST 男男プレイ配列 = 0, 2, 3, 4, 7, 8, 12, 15
+#DIM CONST 女ふたプレイ配列 = 4, 5, 7, 9, 10, 11, 12, 13, 14, 15
+#DIM CONST 女男プレイ配列 = 4, 5, 7, 9, 12, 15
+#DIM CONST 女女プレイ配列 = 9, 10, 11, 12, 13, 14, 15
+#DIM FIRST_LINE
+#DIM 提供元
+#DIM 提供先
+FIRST_LINE = LINECOUNT
+$SHOW_LOOP
+;ふた ふた
+IF HAS_VAGINA(提供先) && HAS_PENIS(提供先) && HAS_VAGINA(提供元) && HAS_PENIS(提供元)
+	FOR LOCAL, 0, VARSIZE("ふたふたプレイ配列")
+		PRINTFORML [{LOCAL}] %プレイ文字列:(ふたふたプレイ配列:(LOCAL:0))%
+	NEXT
+	PRINTL [99] 取消
+	INPUT
+	IF RESULT == 99
+		CLEARLINE LINECOUNT - FIRST_LINE
+		RETURN -1
+	ELSEIF INRANGE(RESULT, 0, VARSIZE("ふたふたプレイ配列"))
+		プレイ内容 = ふたふたプレイ配列:RESULT
+	ELSE
+		CLEARLINE LINECOUNT - FIRST_LINE
+		GOTO SHOW_LOOP
+	ENDIF
+;ふた　男
+ELSEIF HAS_VAGINA(提供先) && HAS_PENIS(提供先) && !HAS_VAGINA(提供元) && HAS_PENIS(提供元)
+	FOR LOCAL, 0, VARSIZE("ふた男プレイ配列")
+		PRINTFORML [{LOCAL}] %プレイ文字列:(ふた男プレイ配列:(LOCAL:0))%
+	NEXT
+	PRINTL [99] 取消
+	INPUT
+	IF RESULT == 99
+		CLEARLINE LINECOUNT - FIRST_LINE
+		RETURN -1
+	ELSEIF INRANGE(RESULT, 0, VARSIZE("ふた男プレイ配列"))
+		プレイ内容 = ふた男プレイ配列:RESULT
+	ELSE
+		CLEARLINE LINECOUNT - FIRST_LINE
+		GOTO SHOW_LOOP
+	ENDIF
+;ふた　女
+ELSEIF HAS_VAGINA(提供先) && HAS_PENIS(提供先) && HAS_VAGINA(提供元) && !HAS_PENIS(提供元)
+	FOR LOCAL, 0, VARSIZE("ふた女プレイ配列")
+		PRINTFORML [{LOCAL}] %プレイ文字列:(ふた女プレイ配列:(LOCAL:0))%
+	NEXT
+	PRINTL [99] 取消
+	INPUT
+	IF RESULT == 99
+		CLEARLINE LINECOUNT - FIRST_LINE
+		RETURN -1
+	ELSEIF INRANGE(RESULT, 0, VARSIZE("ふた女プレイ配列"))
+		プレイ内容 = ふた女プレイ配列:RESULT
+	ELSE
+		CLEARLINE LINECOUNT - FIRST_LINE
+		GOTO SHOW_LOOP
+	ENDIF
+;男　ふた
+ELSEIF !HAS_VAGINA(提供先) && HAS_PENIS(提供先) && HAS_VAGINA(提供元) && HAS_PENIS(提供元)
+	FOR LOCAL, 0, VARSIZE("男ふたプレイ配列")
+		PRINTFORML [{LOCAL}] %プレイ文字列:(男ふたプレイ配列:(LOCAL:0))%
+	NEXT
+	PRINTL [99] 取消
+	INPUT
+	IF RESULT == 99
+		CLEARLINE LINECOUNT - FIRST_LINE
+		RETURN -1
+	ELSEIF INRANGE(RESULT, 0, VARSIZE("男ふたプレイ配列"))
+		プレイ内容 = 男ふたプレイ配列:RESULT
+	ELSE
+		CLEARLINE LINECOUNT - FIRST_LINE
+		GOTO SHOW_LOOP
+	ENDIF
+;男　男
+ELSEIF !HAS_VAGINA(提供先) && HAS_PENIS(提供先) && !HAS_VAGINA(提供元) && HAS_PENIS(提供元)
+	FOR LOCAL, 0, VARSIZE("男男プレイ配列")
+		PRINTFORML [{LOCAL}] %プレイ文字列:(男男プレイ配列:(LOCAL:0))%
+	NEXT
+	PRINTL [99] 取消
+	INPUT
+	IF RESULT == 99
+		CLEARLINE LINECOUNT - FIRST_LINE
+		RETURN -1
+	ELSEIF INRANGE(RESULT, 0, VARSIZE("男男プレイ配列"))
+		プレイ内容 = 男男プレイ配列:RESULT
+	ELSE
+		CLEARLINE LINECOUNT - FIRST_LINE
+		GOTO SHOW_LOOP
+	ENDIF
+;男 女
+ELSEIF !HAS_VAGINA(提供先) && HAS_PENIS(提供先) && HAS_VAGINA(提供元) && !HAS_PENIS(提供元)
+	FOR LOCAL, 0, VARSIZE("男女プレイ配列")
+		PRINTFORML [{LOCAL}] %プレイ文字列:(男女プレイ配列:(LOCAL:0))%
+	NEXT
+	PRINTL [99] 取消
+	INPUT
+	IF RESULT == 99
+		CLEARLINE LINECOUNT - FIRST_LINE
+		RETURN -1
+	ELSEIF INRANGE(RESULT, 0, VARSIZE("男女プレイ配列"))
+		プレイ内容 = 男女プレイ配列:RESULT
+	ELSE
+		CLEARLINE LINECOUNT - FIRST_LINE
+		GOTO SHOW_LOOP
+	ENDIF
+;女 ふた
+ELSEIF HAS_VAGINA(提供先) && !HAS_PENIS(提供先) && HAS_VAGINA(提供元) && HAS_PENIS(提供元)
+	FOR LOCAL, 0, VARSIZE("女ふたプレイ配列")
+		PRINTFORML [{LOCAL}] %プレイ文字列:(女ふたプレイ配列:(LOCAL:0))%
+	NEXT
+	PRINTL [99] 取消
+	INPUT
+	IF RESULT == 99
+		CLEARLINE LINECOUNT - FIRST_LINE
+		RETURN -1
+	ELSEIF INRANGE(RESULT, 0, VARSIZE("女ふたプレイ配列"))
+		プレイ内容 = 女ふたプレイ配列:RESULT
+	ELSE
+		CLEARLINE LINECOUNT - FIRST_LINE
+		GOTO SHOW_LOOP
+	ENDIF
+;女 男
+ELSEIF HAS_VAGINA(提供先) && !HAS_PENIS(提供先) && !HAS_VAGINA(提供元) && HAS_PENIS(提供元)
+	FOR LOCAL, 0, VARSIZE("女男プレイ配列")
+		PRINTFORML [{LOCAL}] %プレイ文字列:(女男プレイ配列:(LOCAL:0))%
+	NEXT
+	PRINTL [99] 取消
+	INPUT
+	IF RESULT == 99
+		CLEARLINE LINECOUNT - FIRST_LINE
+		RETURN -1
+	ELSEIF INRANGE(RESULT, 0, VARSIZE("女男プレイ配列"))
+		プレイ内容 = 女男プレイ配列:RESULT
+	ELSE
+		CLEARLINE LINECOUNT - FIRST_LINE
+		GOTO SHOW_LOOP
+	ENDIF
+;女　女
+ELSEIF HAS_VAGINA(提供先) && !HAS_PENIS(提供先) && HAS_VAGINA(提供元) && !HAS_PENIS(提供元)
+	FOR LOCAL, 0, VARSIZE("女女プレイ配列")
+		PRINTFORML [{LOCAL}] %プレイ文字列:(女女プレイ配列:(LOCAL:0))%
+	NEXT
+	PRINTL [99] 取消
+	INPUT
+	IF RESULT == 99
+		CLEARLINE LINECOUNT - FIRST_LINE
+		RETURN -1
+	ELSEIF INRANGE(RESULT, 0, VARSIZE("女女プレイ配列"))
+		プレイ内容 = 女女プレイ配列:RESULT
+	ELSE
+		CLEARLINE LINECOUNT - FIRST_LINE
+		GOTO SHOW_LOOP
+	ENDIF
+ELSE
+	プレイ内容 = -1
+ENDIF
+RETURN プレイ内容

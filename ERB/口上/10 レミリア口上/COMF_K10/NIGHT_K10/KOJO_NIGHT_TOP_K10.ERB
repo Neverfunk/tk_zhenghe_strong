@@ -1,0 +1,1223 @@
+﻿;─────────────────────────────────────── 
+;■閨_攻め_実行前
+;　汎用台詞「KOJO_K10_共_閨_攻_汎用.ERB」を呼び出す前に
+;　特殊なコマンドを個別に表示してRETURNする
+;─────────────────────────────────────── 
+@KOJO_K10_NIGHT_BEFORE_TOP(レミリア_対象)
+#DIM レミリア
+#DIM レミリア_対象
+#DIMS レミリア機嫌
+
+IF !レミリア_対象
+	レミリア_対象 = MASTER
+ENDIF
+
+レミリア = NAME_TO_CHARA("レミリア")
+レミリア機嫌 '= TOSTR_EMOTION(レミリア)
+
+;─────────────────────────────────────── 
+;◆慰安中の攻めは煽らず曖昧に奉仕
+;─────────────────────────────────────── 
+IF FLAG:調教モード == 調教_慰安
+	PRINTFORM 「
+	IF RAND:5 == 0
+		PRINTFORM %CALLNAME_K10(レミリア_対象)%
+		PRINTFORM %SPLIT_R("……：、：。")%
+		PRINTFORM %SPLIT_R("ここ、が：こんな、感じで：は、ふ")%
+		PRINTFORM %SPLIT_R("……気持ちよくなるの？：……いいの？：……悦んでくれるの？")%
+	ENDIF
+	PRINTFORM %SPLIT_R("はふ、あ：うー：んぅ：んう")%
+	PRINTFORM %BREAK_K10("中", レミリア_対象)%
+	PRINTFORM %SPLIT_R("んっ……：んふ……：んく……：はぁ……：んぅ……：ん：はふ：ふぁ")%
+	PRINTFORM %BREAK_K10("末", レミリア_対象)%
+	PRINTFORML 」
+	RETURN 0
+ENDIF
+
+;─────────────────────────────────────── 
+;◆不機嫌時
+;─────────────────────────────────────── 
+SELECTCASE レミリア機嫌
+	CASE "恨", "怒", "憤"
+		IF PALAM:レミリア:怒主 <= PALAM:レミリア:怒外
+			PRINTDATAL
+				DATAFORM 「最近总觉得很烦躁。稍微法发脾气应该没问题吧？」
+				;TranslatedMark 「なんだかいらいらしていたの。ちょっとだけ八つ当たりしちゃってもいい？」
+				DATAFORM 「和对%CALLNAME_K10(レミリア_対象)%生气是不一样的，我只是想欺负她」
+				;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%に怒ってるのとは違うんだけど、いじめたい気分だわ」
+				DATAFORM 「我想做些过分的事情。没问题吧？」
+				;TranslatedMark 「悪いことしたい気分なの。いいでしょ？」
+				DATAFORM 「我真的很想欺负你。请问%CALLNAME_K10(レミリア_対象)%能和我交往吗？」
+				;TranslatedMark 「いじめたりしちゃいたいわ。%CALLNAME_K10(レミリア_対象)%、付き合ってくれる？」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「家畜一样的脾气」
+				;TranslatedMark 「家畜のくせに」
+				DATAFORM 「只管去后悔吧！」
+				;TranslatedMark 「後悔するといいわ」
+				DATAFORM 「请遵从我的命令」
+				;TranslatedMark 「私の命令に従いなさい」
+				DATAFORM 「我不喜欢」
+				;TranslatedMark 「気にいらないわ」
+				DATAFORM 「那么，该怎么惩罚你呢？」
+				;TranslatedMark 「お仕置きが欲しい？　そんなに」
+				DATAFORM 「不是让你的情绪兴奋起来么」
+				;TranslatedMark 「譲ってあげる気分じゃないの」
+			ENDDATA
+		ENDIF
+		RETURN 0
+
+	CASE "鬱", "悲", "憂"
+		IF PALAM:レミリア:哀主 <= PALAM:レミリア:哀外
+			PRINTDATAL
+				DATAFORM 「总觉得心情很悲伤。让我抱起%CALLNAME_K10(レミリア_対象)%」
+				;TranslatedMark 「なんだか悲しい気持ちだったの。%CALLNAME_K10(レミリア_対象)%をだっこさせて」
+				DATAFORM 「并不是讨厌%CALLNAME_K10(レミリア_対象)%，只是不感兴趣」
+				;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%が嫌なわけじゃないけど、気が乗らないの」
+				DATAFORM 「如果%CALLNAME_K10(レミリア_対象)%好好地紧紧地抱住我的话，我会变得元气满满的」
+				;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%がちゃんとぎゅうってさせてくれたら元気になるわ」
+				DATAFORM 「可以紧紧地抱着我吗？ 我现在觉得很悲伤。」
+				;TranslatedMark 「いっぱい抱きついていい？　なんだか悲しかったの」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「嗯~。手脚放老实点。」
+				;TranslatedMark 「もうっ。大人しくして」
+				DATAFORM 「你听不到我说的话吗？」
+				;TranslatedMark 「私の言うことが聞けないの？」
+				DATAFORM 「你把我当成什么了」
+				;TranslatedMark 「私を何だと思っているの」
+				DATAFORM 「那样太无聊了」
+				;TranslatedMark 「そんなの、つまんないわ」
+				DATAFORM 「让你那么讨厌的到底是什么啊？」
+				;TranslatedMark 「何がそんなに気にいらないの？」
+				DATAFORM 「…………」
+			ENDDATA
+		ENDIF
+		RETURN 0
+
+	CASE  "狂", "恐", "怯"
+		IF PALAM:レミリア:怖主 <= PALAM:レミリア:怖外
+			PRINTDATAL
+				DATAFORM 「%CALLNAME_K10(レミリア_対象)%、我不知道这种东西」
+				;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%、私こういうの知らないわ」
+				DATAFORM 「不好好抚摸%CALLNAME_K10(レミリア_対象)%的话，会发生很可怕的事情」
+				;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%がちゃんと撫でてくれないと、怖いことになるんだから」
+				DATAFORM 「那个发生了什么？%CALLNAME_K10(レミリア_対象)%，好好地粘在一起」
+				;TranslatedMark 「あれって何が起きているの？　%CALLNAME_K10(レミリア_対象)%、ちゃんとくっついてなさい」
+				DATAFORM 「为什么做那样的事呢？你觉得%CALLNAME_K10(レミリア_対象)%怎么样？」
+				;TranslatedMark 「どうしてあんなことをするのかしら？　%CALLNAME_K10(レミリア_対象)%はどう思う？」
+			ENDDATA
+		ELSE
+		PRINTDATAL
+			DATAFORM 「…………」
+			DATAFORM 「不要」
+			;TranslatedMark 「いやよ」
+			DATAFORM 「我也不太清楚」
+			;TranslatedMark 「よくわからないわ」
+			DATAFORM 「才不是那种心情呢」
+			;TranslatedMark 「そんな気分じゃないわ」
+			DATAFORM 「奇怪啊」
+			;TranslatedMark 「ヘンよ」
+		ENDDATA
+		ENDIF
+		RETURN 0
+
+	CASEELSE
+ENDSELECT
+
+;─────────────────────────────────────── 
+;◆不機嫌だと喋らない
+;─────────────────────────────────────── 
+IF !GROUPMATCH(レミリア機嫌, "恨", "怒", "憤", "鬱", "悲", "憂", "狂", "恐", "怯")
+	IF SELECTCOM == PREVCOM
+		IF RAND:10 == 0 && IS_INITIATIVE(レミリア) && CHECK_K9("活力", レミリア_対象) && (( IS_MPLY(レミリア) && MPLY_NUM == 1 )||( IS_MTAR(レミリア) && MTAR_NUM == 1 ))
+			PRINTDATA
+				DATAFORM 「嗯……
+				;TranslatedMark 「んんぅ……
+				DATAFORM 「瞧
+				;TranslatedMark 「ほらぁ
+				DATAFORM 「这样啊
+				;TranslatedMark 「こうね
+				DATAFORM 「再多点
+				;TranslatedMark 「もっとぉ
+				DATAFORM 「就这样
+				;TranslatedMark 「このまま
+				DATAFORM 「再多一点
+				;TranslatedMark 「もうちょっと
+				DATAFORM 「继续
+				;TranslatedMark 「ずうっと
+			ENDDATA
+			;実行逆転のコマンド
+			IF GROUPMATCH(SELECTCOM, 111, 101, 102, 100, 211, 130, 131, 132, 150, 151)
+				PRINTDATAL
+					DATAFORM 我的%KOJO_COM_NAME_TARGET_K10(SELECTCOM)%」
+					;TranslatedMark %KOJO_COM_NAME_TARGET_K10(SELECTCOM)%たいの」
+					DATAFORM %KOJO_COM_NAME_PLAYER_K10(SELECTCOM)%想要撒娇吗？」
+					;TranslatedMark %KOJO_COM_NAME_PLAYER_K10(SELECTCOM)%たいって甘えて？」
+				ENDDATA
+				LOCAL:0 = COM_EXP:(レミリア):(SELECTCOM+1000)
+			;実行逆転のコマンド以外
+			ELSE
+				PRINTDATAL
+					DATAFORM 我想要%KOJO_COM_NAME_PLAYER_K10(SELECTCOM)%」
+					;TranslatedMark %KOJO_COM_NAME_PLAYER_K10(SELECTCOM)%たいわ」
+					DATAFORM %KOJO_COM_NAME_TARGET_K10(SELECTCOM)%想要撒娇吗？」
+					;TranslatedMark %KOJO_COM_NAME_TARGET_K10(SELECTCOM)%たいって甘えて？」
+				ENDDATA
+				LOCAL:0 = COM_EXP:(レミリア):(SELECTCOM)
+			ENDIF
+			;性癖設定を参照して該当コマンドの経験回数をチェック
+			;NTR系で経験を稼いでいる場合に違和感が出るからどうしたものか
+			IF RAND:5 == 0
+				IF LOCAL:0 > 100
+					PRINTFORM 「已经几百次了
+					;TranslatedMark 「もう何百回も
+					PRINTDATAL
+						DATAFORM 因为我教过你了
+						;TranslatedMark 躾したんだから
+						DATAFORM 因为我做到了
+						;TranslatedMark したんだから
+						DATAFORM 因为我觉得你很可爱
+						;TranslatedMark 可愛がってるんだから
+						DATAFORM 因为一直在重复着。
+						;TranslatedMark 繰り返しているんだから
+					ENDDATA
+					PRINTFORM %BREAK_K10("中", レミリア_対象)%
+					PRINTDATAL
+						DATAFORM %CALLNAME_K10(レミリア_対象)%也已经习惯了吧？」
+						;TranslatedMark %CALLNAME_K10(レミリア_対象)%もさすがに慣れたわよね？」
+						DATAFORM 你也喜欢%CALLNAME_K10(レミリア_対象)%吧？」
+						;TranslatedMark %CALLNAME_K10(レミリア_対象)%だって好きよね？」
+						DATAFORM 如果不做的话身体就会变差吧？」
+						;TranslatedMark しないとだめな体になってくれたわよね？」
+						DATAFORM 让我想想这句话应该怎么回答呢？」
+						;TranslatedMark どう応えたらいいか、憶えてるわよね？」
+						DATAFORM 还有几万次我很感兴趣吧？」
+						;TranslatedMark あと何万回できるか興味があるわよね？」
+					ENDDATA
+				ELSEIF LOCAL:0 > 35
+					PRINTFORML 「已经做了几十次了，已经习惯了吧」
+					;TranslatedMark 「何十回もしたんだから、もう慣れてるわよね」
+				ELSE
+					PRINTFORML 「还没有到{LOCAL:0}回，所以我必须加倍训练你。」
+					;TranslatedMark 「まだ{LOCAL:0}回しかしてないから、もっとたくさん教えてあげなくちゃ」
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;─────────────────────────────────────── 
+;●レミリア_対象が攻め（主導権によるものもある）
+;─────────────────────────────────────── 
+;おねだりされる・させる
+IF SELECTCOM == 111
+	IF IS_MALE(MASTER)
+		LOCALS:0 '= "せーえき搾ってください"
+		LOCALS:1 '= "白い"
+	ELSE
+		LOCALS:0 '= "あいえき掻き出してください"
+		LOCALS:1 '= "透明"
+	ENDIF
+	PRINTDATAL
+		DATAFORM 「是%LOCALS:0%吧」
+		;TranslatedMark 「%LOCALS:0%、でしょ」
+		DATAFORM 「你想让我饮血吗？%LOCALS:1%」
+		;TranslatedMark 「血を飲んで欲しいのよね？　%LOCALS:1%のを」
+		DATAFORM 「我说了，这是我的私有物」
+		;TranslatedMark 「私のものだと言いなさい」
+		DATALIST
+			DATAFORM 「%CALLNAME_K10(レミリア_対象)%的血全部都是我最喜欢的那种血呢」
+			;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%の血は全部私の好きにしていい血よね」
+			DATAFORM 「红的、白的、透明的」
+			;TranslatedMark 「紅いのも、白いのも、透明なのも」
+		ENDLIST
+	ENDDATA
+	RETURN 0
+ENDIF
+
+;顔面騎乗 Ａ顔面騎乗する・させる（ターゲットは喋れない）
+IF SELECTCOM == 101 || SELECTCOM == 102
+	IF IS_MPLY(レミリア)
+		PRINTDATA
+			DATAFORM 「作为奖励，我的血也可以分给你」
+			;TranslatedMark 「ご褒美よ。私の血も分けてあげる」
+			DATAFORM 「请保持放松，否则的话我会下手处置你。」
+			;TranslatedMark 「気持ちよくしなさい。上手にできないとお仕置きよ」
+			DATALIST
+				DATAFORM 「毛？　……当然没有了。 奇怪？ 这很普通吧。」
+				;TranslatedMark 「毛？　……ないけど。へん？　別に普通でしょ」
+				DATAFORM 「妹妹这个部位的毛也没有那么长啊？」
+				;TranslatedMark 「妹だってこんなところ、そんなに生えてないわよ？」
+			ENDLIST
+			DATAFORM 「请务必对我进行调教。我会认真学习的」
+			;TranslatedMark 「躾をしなくちゃ。息を止めてあげる」
+		ENDDATA
+		RETURN 0
+	ENDIF
+ENDIF
+
+;自慰する・させる（触手も）
+IF SELECTCOM == 100 || SELECTCOM == 211
+	;レミリアがする
+	IF IS_MPLY(レミリア)
+		PRINTDATAL
+			DATAFORM 「%CALLNAME_K10(レミリア_対象)%请记住我怎样才会变得快乐」
+			;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%、どうしたら私が悦ぶか憶えなさい」
+			DATAFORM 「请仔细查看」
+			;TranslatedMark 「よく見ていなさい」
+			DATAFORM 「看……这样啊。%CALLNAME_K10(レミリア_対象)%」
+			;TranslatedMark 「ほら……こうよ。%CALLNAME_K10(レミリア_対象)%」
+		ENDDATA
+		PRINTDATAL
+			DATAFORM 「嗯……呋啊啊啊」
+			;TranslatedMark 「んっ……ふあぁっ」
+			DATAFORM 「啊啊啊……嗯。看吧……我做得、很好❤」
+			;TranslatedMark 「はああぁ……っ。見られてぇ……するの、いい❤」
+			DATAFORM 「嗯……感觉很舒服……啊」
+			;TranslatedMark 「んくぅ……気持ちい……あっ」
+		ENDDATA
+	;レミリアがレミリア_対象にさせる
+	ELSE
+		;ペニスあり
+		IF HAS_PENIS(レミリア_対象)
+			PRINT 「那个
+			;TranslatedMark 「その
+			;小さい
+			IF GET_PENISSIZE(レミリア_対象) < 0
+				;フタナリ
+				IF IS_FEMALE(レミリア_対象)
+					PRINTDATAL
+						DATAFORM 从%CALL_DIRTY_K10("Ｃ")%里流了精液
+						;TranslatedMark 精液の出る%CALL_DIRTY_K10("Ｃ")%
+						DATAFORM 巨大的%CALL_DIRTY_K10("Ｃ")%
+						;TranslatedMark おっきな%CALL_DIRTY_K10("Ｃ")%
+						DATAFORM 女孩子的%CALL_DIRTY_K10("Ｐ")%
+						;TranslatedMark 女の子%CALL_DIRTY_K10("Ｐ")%
+						DATAFORM 可爱的%CALL_DIRTY_K10("Ｐ")%
+						;TranslatedMark 可愛い%CALL_DIRTY_K10("Ｐ")%
+					ENDDATA
+				;おねショタ
+				ELSEIF TALENT:レミリア_対象:体格 == 体格_子供 || TALENT:レミリア_対象:幼稚 || TALENT:レミリア_対象:幼兒
+					PRINTDATAL
+						DATAFORM 孩童一样的%CALL_DIRTY_K10("Ｐ")%
+						;TranslatedMark こども%CALL_DIRTY_K10("Ｐ")%
+						DATAFORM 包茎%CALL_DIRTY_K10("Ｐ")%
+						DATAFORM 小小的%CALL_DIRTY_K10("Ｐ")%
+						;TranslatedMark ちっちゃな%CALL_DIRTY_K10("Ｐ")%
+						DATAFORM 可爱的%CALL_DIRTY_K10("Ｐ")%
+						;TranslatedMark 可愛い%CALL_DIRTY_K10("Ｐ")%
+					ENDDATA
+				;詰られたい派
+				ELSE
+					PRINTDATAL
+						DATAFORM 覆盖着包皮的%CALL_DIRTY_K10("Ｐ")%
+						;TranslatedMark 皮被り%CALL_DIRTY_K10("Ｐ")%
+						DATAFORM 小小的%CALL_DIRTY_K10("Ｐ")%
+						;TranslatedMark ちっちゃな%CALL_DIRTY_K10("Ｐ")%
+						DATAFORM 像孩子一样的%CALL_DIRTY_K10("Ｐ")%
+						;TranslatedMark 子どもみたいな%CALL_DIRTY_K10("Ｐ")%
+						DATAFORM 粗糙的%CALL_DIRTY_K10("Ｐ")%
+						;TranslatedMark 粗末な%CALL_DIRTY_K10("Ｐ")%
+					ENDDATA
+				ENDIF
+			;大きい
+			ELSEIF GET_PENISSIZE(レミリア_対象) > 0
+				;フタナリ
+				IF IS_FEMALE(レミリア_対象)
+					PRINTDATAL
+						DATAFORM 下流的%CALL_DIRTY_K10("Ｐ")%
+						;TranslatedMark いやらしい%CALL_DIRTY_K10("Ｐ")%
+						DATAFORM 巨大的%CALL_DIRTY_K10("Ｐ")%
+						;TranslatedMark おっきな%CALL_DIRTY_K10("Ｐ")%
+						DATAFORM 无论是红血还是白血，%CALL_DIRTY_K10("Ｐ")%里，满满的
+						;TranslatedMark 紅い血も白い血も、いっぱいの%CALL_DIRTY_K10("Ｐ")%
+						DATAFORM 大到变态的%CALL_DIRTY_K10("Ｐ")%
+						;TranslatedMark いつもおっきい変態%CALL_DIRTY_K10("Ｐ")%
+					ENDDATA
+				;おねショタ
+				ELSEIF TALENT:レミリア_対象:体格 == 体格_子供 || TALENT:レミリア_対象:幼稚 || TALENT:レミリア_対象:幼兒
+					PRINTDATAL
+						DATAFORM 大的可怕的%CALL_DIRTY_K10("Ｐ")%
+						;TranslatedMark そこだけおっきな%CALL_DIRTY_K10("Ｐ")%
+						DATAFORM 在那里不断变大的%CALL_DIRTY_K10("Ｐ")%
+						;TranslatedMark そこばかり育っちゃった%CALL_DIRTY_K10("Ｐ")%
+					ENDDATA
+				;おどかしたい派
+				ELSE
+					PRINTDATAL
+						DATAFORM 有压迫感的%CALL_DIRTY_K10("Ｐ")%
+						;TranslatedMark 迫力のある%CALL_DIRTY_K10("Ｐ")%
+						DATAFORM 无论是红血还是白血，%CALL_DIRTY_K10("Ｐ")%里，满满的
+						;TranslatedMark 紅い血も白い血も、いっぱいの%CALL_DIRTY_K10("Ｐ")%
+						DATAFORM 大的
+						;TranslatedMark 大きいの
+						DATAFORM 可怕的%CALL_DIRTY_K10("Ｐ")%
+						;TranslatedMark こわい%CALL_DIRTY_K10("Ｐ")%
+						DATAFORM 大得吓人的%CALL_DIRTY_K10("Ｐ")%
+						;TranslatedMark 怖いくらいおっきな%CALL_DIRTY_K10("Ｐ")%
+					ENDDATA
+				ENDIF
+			;普通
+			ELSE
+				PRINTFORM %CALL_DIRTY_K10("Ｐ")%
+			ENDIF
+			PRINTDATAL
+				DATAFORM 请好好地款待我」
+				;TranslatedMark 、確り扱いて私に御馳走して」
+				DATALIST
+					DATAFORM 这是我的」
+					;TranslatedMark は私のものよ」
+					DATAFORM 「把白血榨出。然后把你变成家畜」
+					;TranslatedMark 「白い血を搾り出しなさい。家畜になるの」
+				ENDLIST
+				DATALIST
+					DATAFORM 要努力地、狠狠地摩擦哦。」
+					;TranslatedMark 、頑張って扱くのよ」
+					DATAFORM 「%CALLNAME_K10(レミリア_対象)%是家畜，深信除了榨取以外没有存在价值」
+					;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%は家畜で、搾り出すこと以外に存在価値がないって思い込んで」
+				ENDLIST
+				DATAFORM 一边认定自己是家畜一边拼命自慰吧」
+				;TranslatedMark 、自分が家畜だと思い込みながら必死にオナニーしなさい」
+				DATAFORM 即使全都榨干也要继续摩擦」
+				;TranslatedMark 空っぽになって出なくなっても擦り続けるのよ」
+				DATALIST
+					DATAFORM 害怕着不努力摩擦就会被抛弃掉」
+					;TranslatedMark 、頑張って扱かないと捨てられるって恐れなさい」
+					DATAFORM 「不到那种程度就没意思了」
+					;TranslatedMark 「そのくらいでなくちゃ面白くないわ」
+				ENDLIST
+			ENDDATA
+		;ペニスなし
+		ELSE
+			PRINTDATAL
+				DATAFORM 「那个%CALL_DIRTY_K10("Ｃ")%，请我好好招待一下」
+				;TranslatedMark 「その%CALL_DIRTY_K10("Ｃ")%、確り扱いて私にとろとろを御馳走して」
+				DATALIST
+					DATAFORM 「%CALLNAME_K10(レミリア_対象)%的%CALL_DIRTY_K10("Ｖ")%是属于我的」
+					;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%の%CALL_DIRTY_K10("Ｖ")%は私のよ」
+					DATAFORM 「把透明的血榨出来。让后变成家畜吧！」
+					;TranslatedMark 「透明の血を搾り出しなさい。家畜になるの」
+				ENDLIST
+				DATALIST
+					DATAFORM 「请努力从%CALL_DIRTY_K10("Ｖ")%中挤出爱液」
+					;TranslatedMark 「頑張って%CALL_DIRTY_K10("Ｖ")%から愛液を掻き出しなさい」
+					DATAFORM 「我一直以为%CALLNAME_K10(レミリア_対象)%是我的家畜，没有其他的存在价值」
+					;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%は私の家畜で、他に存在価値がないって思い込んで」
+				ENDLIST
+				DATALIST
+					DATAFORM 「一边害怕被抛弃，一边继续戴着%CALL_DIRTY_K10("Ｖ")%」
+					;TranslatedMark 「捨てられることを恐れながら、イッてもイッても%CALL_DIRTY_K10("Ｖ")%を穿り続けるのよ」
+					DATAFORM 「不到那种程度就没意思了」
+					;TranslatedMark 「そのくらいでなくちゃ面白くないわ」
+				ENDLIST
+			ENDDATA
+		ENDIF
+		IF SELECTCOM == 211
+			PRINTDATAL
+				DATAFORM 「你看，让我摩擦得更激烈一些吧！」
+				;TranslatedMark 「ほら、もっと激しく擦らせなさい」
+				DATAFORM 「动作好慢啊。有好好地在做吗？再激烈一点给我看」
+				;TranslatedMark 「動きが遅いわ。ちゃんと操っているの？　もっと激しくして見せて」
+			ENDDATA
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;排泄指示
+IF GROUPMATCH(SELECTCOM, 130, 131, 132, 150, 151) && IS_MTAR(レミリア) && IS_INITIATIVE(レミリア)
+	LOCALS:0 '= ""
+	IF GROUPMATCH(SELECTCOM, 130, 131, 132)
+		LOCALS:0 '= "おしっこ"
+	ELSE
+		LOCALS:0 '= "おなら"
+	ENDIF
+	;レミリアがレミリア_対象に排泄指示
+	PRINTDATAL
+		DATAFORM 「快让%LOCALS:0%漏出来吧」
+		;TranslatedMark 「ほら早く、%LOCALS:0%をお漏らしなさい」
+		DATAFORM 「我会好好看看着你的。快给我漏出来！」
+		;TranslatedMark 「見ていてあげるわ。漏らしなさい」
+		DATAFORM 「靠自己的排泄来感受吧」
+		;TranslatedMark 「自分の排泄で感じてしまえ」
+		DATAFORM 「换气和打扫都会由女仆来做吧？ 一边抱怨着一边说 」
+		;TranslatedMark 「換気も掃除もメイドがしてくれるわよ？　文句を言いながらね」
+		DATAFORM 「在他人面前把%LOCALS:0%泄出来了？真不象话」
+		;TranslatedMark 「人前で%LOCALS:0%を漏らすのね？　みっともないわ」
+		DATAFORM 「时间用得太久了，还是需要再调教一番啊。」
+		;TranslatedMark 「ちょっと時間がかかりすぎね。躾がいるかしら」
+		DATAFORM 「太慢了。快点儿」
+		;TranslatedMark 「遅いわ。早くしなさい」
+		DATAFORM 「我的命令不许任何人犹豫对待。无论什么事情」
+		;TranslatedMark 「私が命令したら躊躇うことは許さないわ。どんなことでも」
+	ENDDATA
+ENDIF
+
+;─────────────────────────────────────── 
+;●実行が攻め
+;─────────────────────────────────────── 
+;捕虜逆調教（80～99）
+IF SELECTCOM >= 80 && SELECTCOM <= 99
+	;首締め
+	IF SELECTCOM == 94
+		IF !IS_INITIATIVE(レミリア)
+			PRINTDATAL
+				DATAFORM 「比起紧缚，我更喜欢咬你」
+				;TranslatedMark 「締めるより噛みつくほうが好きよ」
+				DATAFORM 「你就那么想死吗？我会好好考虑的」
+				;TranslatedMark 「死にたいのかしら？　考えてあげるわよ」
+				DATAFORM 「如果你喜欢痛苦的话，直到你死掉之前我都会吸着你」
+				;TranslatedMark 「苦しいのが好きなら死ぬ寸前まで吸ってあげるのに」
+			ENDDATA
+		ENDIF
+		PRINTDATAL
+			DATAFORM 「我会这样做直到你失去意识为止」
+			;TranslatedMark 「気を失うまでこうしてあげる」
+			DATAFORM 「你不是想死么。」
+			;TranslatedMark 「死ぬのが好きなのね」
+			DATAFORM 「就算是口水喝多了，肚子也会鼓起来的」
+			;TranslatedMark 「涎でも少しおなかは膨れるわね」
+		ENDDATA
+		RETURN 0
+
+	;腹パン
+	ELSEIF SELECTCOM == 97
+		IF IS_MALE(MASTER)
+			LOCALS:0 '= "さっさと射精しなさい"
+		ELSE
+			LOCALS:0 '= "さっさとぐちゃぐちゃに濡らしなさい"
+		ENDIF
+		IF !IS_INITIATIVE(レミリア)
+			PRINTDATAL
+				DATAFORM 「如果不是不想见她，我简直想把你交给我妹妹。」
+				;TranslatedMark 「妹にあげたくなるくらいマゾよね。あげたくないけど」
+				DATAFORM 「变态。%LOCALS:0%」
+				;TranslatedMark 「変態。%LOCALS:0%」
+				DATAFORM 「哈哈、这可是奖励！开心吗？」
+				;TranslatedMark 「ほぉら、ご褒美！　嬉しい？　ほらっ」
+				DATAFORM 「这可是你自己要求的%CALLNAME_K10(レミリア_対象)%，也会痛吗？」
+				;TranslatedMark 「自分から求めておいて、痛がるの？　%CALLNAME_K10(レミリア_対象)%」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「愚蠢的人只有通过痛苦的淬炼才会觉醒。%LOCALS:0%」
+				;TranslatedMark 「愚か者は痛みでしか芸を覚えないわ。%LOCALS:0%」
+				DATAFORM 「这是教育。%LOCALS:0%」
+				;TranslatedMark 「これは躾よ。%LOCALS:0%」
+			ENDDATA
+		ENDIF
+		RETURN 0
+
+	;目隠し
+	ELSEIF SELECTCOM == 84
+		IF !IS_INITIATIVE(レミリア)
+			PRINTDATAL
+				DATAFORM 「我我知道，只有在夜里的时候心情才比较好」
+				;TranslatedMark 「暗いほうがいい気持ちはわかるわ」
+				DATAFORM 「想要黑暗吧」
+				;TranslatedMark 「闇が欲しいのね」
+				DATAFORM 「喜欢夜晚呢」
+				;TranslatedMark 「夜が好きなのね」
+			ENDDATA
+		ENDIF
+		PRINTDATAL
+			DATAFORM 「给%CALLNAME_K10(レミリア_対象)%一个夜晚」
+			;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%に夜をあげる」
+			DATAFORM 「当然是遵从我的喜好来做」
+			;TranslatedMark 「私の好きにされなさい」
+			DATAFORM 「软弱的人只能恐惧地等待黑暗的降临」
+			;TranslatedMark 「か弱い人間は怯えて待つだけの闇」
+		ENDDATA
+
+	;縄
+	ELSEIF SELECTCOM == 85
+		IF !IS_INITIATIVE(レミリア)
+			PRINTDATAL
+				DATAFORM 「%CALLNAME_K10(レミリア_対象)%也想要试着被关在地牢里吗？如果你喜欢一动都不能动的生活的话。」
+				;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%も地下牢に閉じ込められてみる？　動けないのが好きなら」
+				DATAFORM 「你不会想要自己手脚瘫痪吧？ 我会注意分寸的」
+				;TranslatedMark 「手足を麻痺させて欲しいわけじゃないのよね？　手加減しなきゃ」
+				DATAFORM 「要注意不要太用力了」
+				;TranslatedMark 「力を入れ過ぎないように気を付けないとね」
+			ENDDATA
+		ENDIF
+		PRINTDATAL
+			DATAFORM 「好了、完成。真是既可怜又可爱呢」
+			;TranslatedMark 「さあ、できた。可哀想で可愛いわ」
+			DATAFORM 「拘束感觉舒不舒服？ 我不想听到肯定的回答。」
+			;TranslatedMark 「拘束って気持ちいいの？　良いって聞いてもされたくはないけど」
+			DATAFORM 「这样就不能动了」
+			;TranslatedMark 「これで動けないわよ」
+		ENDDATA
+
+	;それ以外
+	ELSEIF SELECTCOM >= 80 && SELECTCOM <= 99
+		IF !IS_INITIATIVE(レミリア)
+			PRINTDATAL
+				DATAFORM 「因为是%CALLNAME_K10(レミリア_対象)%所期望的，所以不需要手下留情」
+				;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%が望んだのだから、手加減はいらないわね」
+				DATAFORM 「想成为家畜吗？变态」
+				;TranslatedMark 「家畜になりたかったの？　変態」
+				DATAFORM 「因为是别人拜托的，所以我做得很温柔呢」
+				;TranslatedMark 「頼まれてしているのだから、優しさよ」
+				DATAFORM 「好啊」
+				;TranslatedMark 「良いのね」
+			ENDDATA
+		ENDIF
+		PRINTDATAL
+			DATAFORM 「疼吗？  为我给予你的痛苦愉悦吧！」
+			;TranslatedMark 「痛い？　悦びなさい。私の与える痛みを」
+			DATAFORM 「有点过分了？还可以吧？」
+			;TranslatedMark 「少しきつ過ぎる？　まだいいでしょ？」
+			DATAFORM 「我会好好调教你的」
+			;TranslatedMark 「躾けてあげてるの」
+			DATAFORM 「现在低下身子」
+			;TranslatedMark 「垂れ流しになりなさい」
+			DATAFORM 「诺诺诺，看看你那样子」
+			;TranslatedMark 「ほらほらっ」
+		ENDDATA
+		RETURN 0
+	ENDIF
+ENDIF
+
+;スカ系
+IF SELECTCOM >= 130 && SELECTCOM <= 159
+	;純攻め
+	IF IS_INITIATIVE(レミリア)
+		;130放尿する 131尿を掛ける 132口内放尿する
+		IF GROUPMATCH(SELECTCOM, 130, 131, 132)
+			PRINTDATAL
+				DATAFORM 「虽然很讨厌扫除，但是把东西弄脏的感觉真是太棒了！」
+				;TranslatedMark 「掃除するのは嫌いだけど、汚すのは愉しいわ」
+				DATAFORM 「我要把你弄脏」
+				;TranslatedMark 「汚してあげる」
+			ENDDATA
+		;150放屁する　151顔騎放屁する
+		ELSEIF GROUPMATCH(SELECTCOM, 150, 151)
+			PRINTDATAL
+				DATAFORM 「不太清楚，好像是这样」
+				;TranslatedMark 「よくわからないけど、こうするらしいわ」
+				DATAFORM 「像狗一样，记住味道跟过来就行了」
+				;TranslatedMark 「犬みたいに、匂いを憶えて従えばいいわ」
+			ENDDATA
+		;140利尿剤を飲ませる
+		ELSEIF SELECTCOM == 140
+			PRINTDATAL
+				DATAFORM 「给你透个底，这只是利尿剂而已」
+				;TranslatedMark 「ただの利尿剤よ。お漏らしさせてあげる」
+				DATALIST
+					DATAFORM 「它对身体没有什么害处、也不是毒药，所以不要害怕」
+					;TranslatedMark 「害があったり、中毒しちゃうお薬じゃないから怖がらないでいいわ」
+					DATAFORM 「当然，如果你会对这个要中毒的话，那也很有意思」
+					;TranslatedMark 「この薬で中毒になるなら、それも面白いけれど」
+				ENDLIST
+			ENDDATA
+		;141浣腸する
+		ELSEIF SELECTCOM == 141
+			PRINTDATAL
+				DATAFORM 「把你弄脏啊」
+				;TranslatedMark 「汚させてあげる」
+				DATAFORM 「厕所也是需要管理的吧？而且我喜欢专用的东西。」
+				;TranslatedMark 「トイレも管理が必要でしょ？　私専用だし、好きにするわ」
+				DATAFORM 「玩弄一个活生生的人偶真是太开心了」
+				;TranslatedMark 「生きた人形で遊ぶのは愉しいわ」
+				DATAFORM 「我特地插进了非常非常深的地方哟。」
+				;TranslatedMark 「特別に深く、奥の奥まで注いであげる」
+			ENDDATA
+		;142浣腸＆プラグする
+		ELSEIF SELECTCOM == 142
+			PRINTDATAL
+				DATAFORM 「放心吧，我给你选了一个大塞子，不这么做的话会擅自排泄的吧？」
+				;TranslatedMark 「こうしないと勝手に漏らすでしょ？　太い栓を選んであげたから安心して」
+				DATAFORM 「你看见了什么脏东西吗？」
+				;TranslatedMark 「みっともなく穢してあげる」
+				DATALIST
+					DATAFORM 「抽动着想要把塞子挤出来的样子，还真是可怜啊」
+					;TranslatedMark 「栓を押し出そうとして、ひくひく動いてかわいそうね」
+					DATAFORM 「徒劳的努力%CALL_DIRTY_K10("Ａ")%，不过你打起精神努力的样子很可爱哦」
+					;TranslatedMark 「無駄な努力する%CALL_DIRTY_K10("Ａ")%、健気で可愛いわ」
+				ENDLIST
+			ENDDATA
+		ELSE
+			PRINTFORML 「我要把你弄脏」
+			;TranslatedMark 「汚してあげる」
+		ENDIF
+	;奉仕攻め
+	ELSE
+		;140利尿剤を飲まさせられる
+		IF SELECTCOM == 140
+			PRINTDATAL
+				DATAFORM 「想排泄吗？只有上厕所的时候才能享受排泄的快感还真辛苦啊。」
+				;TranslatedMark 「お漏らしがしたいの？　おしっこして悦ぶなんてトイレのたびに感じて大変ね」
+				DATAFORM 「你喜欢忍耐吗？这样做的话可是很耗费体力的哦」
+				;TranslatedMark 「我慢するのが好きなの？　燃費がいいのね」
+			ENDDATA
+		;141浣腸させられる
+		ELSEIF SELECTCOM == 141
+			PRINTDATAL
+				DATAFORM 「我会清理的，到时候我会让你看看你究竟排出了多少。」
+				;TranslatedMark 「私は掃除係じゃないのよ？　見てはあげるけど」
+				DATAFORM 「你想要这个吗？你不会是爱上了肚子痛、喜欢上了受苦的感觉吧？」
+				;TranslatedMark 「これが欲しいの？　おなかが痛くて苦しいのが好きになっちゃったのね」
+				DATAFORM 「好啊。向非常非常深的地方插进去了哟」
+				;TranslatedMark 「いいわ。特別に深く、奥の奥まで注いであげる」
+				DATAFORM 「没问题。虽然我不是这里的清洁人员，但是因为是可爱的宠物，所以我会照顾它的」
+				;TranslatedMark 「いいわ。掃除係じゃないけど、可愛いペットだから管理してあげる」
+			ENDDATA
+		;142浣腸＆プラグさせられる
+		ELSEIF SELECTCOM == 142
+			PRINTDATAL
+				DATAFORM 「我会清理的，到时候我会让你看看你究竟排出了多少。」
+				;TranslatedMark 「私は掃除係じゃないのよ？　見てはあげるけど」
+				DATAFORM 「你想要这个吗？你不会是爱上了肚子痛、喜欢上了受苦的感觉吧？」
+				;TranslatedMark 「これが欲しいの？　おなかが痛くて苦しいのが好きになっちゃったのね」
+				DATAFORM 「因为是个喜欢撒娇的好孩子，所以特地塞到了很深的地方呢。」
+				;TranslatedMark 「おねだりできていい子だから、特別に奥の奥まで注いであげる」
+				DATAFORM 「没问题。虽然我不是这里的清洁人员，但是因为是可爱的宠物，所以我会照顾它的」
+				;TranslatedMark 「いいわ。掃除係じゃないけど、可愛いペットだから管理してあげる」
+				DATALIST
+					DATAFORM 「想把塞子挤出，抽动着真可怜啊」
+					;TranslatedMark 「栓を押し出そうとして、ひくひく動いて哀れね」
+					DATAFORM 「徒劳的努力%CALL_DIRTY_K10("Ａ")%，不过你打起精神努力的样子很可爱哦」
+					;TranslatedMark 「無駄な努力する%CALL_DIRTY_K10("Ａ")%、健気で可愛いわ」
+				ENDLIST
+			ENDDATA
+		ELSE
+			PRINTFORML 「你可以把它弄脏哦」
+			;TranslatedMark 「汚していいのよ」
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;触手系
+IF SELECTCOM >= 200 && SELECTCOM <= 219
+	IF SELECTCOM >= 200
+		;純攻め
+		IF IS_INITIATIVE(レミリア)
+			PRINTDATAL
+				DATAFORM 「还想要？ 让他和低级淫魔玩」
+				;TranslatedMark 「増やして欲しいんでしょ？　低級淫魔と遊ばせてあげる」
+				DATAFORM 「由我来操纵，你玩吧」
+				;TranslatedMark 「私が操るから、遊んであげなさい」
+				DATAFORM 「请和那个孩子玩。给你拿出来」
+				;TranslatedMark 「あの子と遊びなさい。出してあげる」
+			ENDDATA
+		;奉仕攻め
+		ELSE
+			PRINTDATAL
+				DATAFORM 「你喜欢我的宠物吧。让你玩吧」
+				;TranslatedMark 「私のペットがお気に入りなのね。遊ばせてあげるわ」
+				DATAFORM 「想被侵犯全身呢」
+				;TranslatedMark 「全身犯されたいのね」
+				DATAFORM 「这孩子能吃%CALLNAME_K10(レミリア_対象)%哦。和我一样」
+				;TranslatedMark 「この子、%CALLNAME_K10(レミリア_対象)%のこと食べちゃえるのよ。私と同じ」
+			ENDDATA
+		ENDIF
+	ELSE
+		;純攻め
+		IF IS_INITIATIVE(レミリア)
+			PRINTDATAL
+				DATAFORM 「习惯了的话会很可爱吧？请学会适应吧。」
+				;TranslatedMark 「慣れたら可愛いでしょ？　慣れなさい」
+				DATAFORM 「说出讨厌的话家伙真是可怜。明明本来心情很好呢。」
+				;TranslatedMark 「嫌がると可哀想でしょ。気持ち良くしてくれるのに」
+				DATAFORM 「因为是可靠的孩子，所以还可以再多加些东西。用%CALLNAME_K10(レミリア_対象)%的斧头」
+				;TranslatedMark 「頼りになる子だから、増やしてくれてもいいのよ。%CALLNAME_K10(レミリア_対象)%のオナカでね」
+			ENDDATA
+		;奉仕攻め
+		ELSE
+			PRINTDATAL
+				DATAFORM 「你喜欢我的宠物吧。就让你玩吧」
+				;TranslatedMark 「私のペットがお気に入りなのね。遊ばせてあげるわ」
+				DATAFORM 「想被侵犯全身呢」
+				;TranslatedMark 「全身犯されたいのね」
+				DATAFORM 「那个孩子能吃%CALLNAME_K10(レミリア_対象)%哦。和我一样」
+				;TranslatedMark 「その子、%CALLNAME_K10(レミリア_対象)%のこと食べちゃえるのよ。私と同じ」
+			ENDDATA
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;不機嫌な状態で話せるのはここまで
+IF GROUPMATCH(レミリア機嫌, "恨", "怒", "憤", "鬱", "悲", "憂", "狂", "恐", "怯")
+	RETURN 0
+ENDIF
+
+;─────────────────────────────────────── 
+;◆機嫌が悪いと喋らない
+;─────────────────────────────────────── 
+;ペニバン装着時は汎用攻めを喋らない
+IF SELECTCOM == 50
+	PRINT 「
+	PRINTDATA
+		DATAFORM %SPLIT_R("この：")%在和真的一模一样的%CALL_DIRTY_K10("Ｐ")%上
+		;TranslatedMark %SPLIT_R("この：")%本物そっくりの%CALL_DIRTY_K10("Ｐ")%で
+		DATAFORM 很厉害的%CALL_DIRTY_K10("Ｐ")%吧？
+		;TranslatedMark すごい%CALL_DIRTY_K10("Ｐ")%でしょ？　これで
+		DATAFORM %SPLIT_R("この：")%粗大的玩具
+		;TranslatedMark %SPLIT_R("この：")%太い玩具で
+		DATAFORM 用%SPLIT_R("この：")%蛇身粗的玩具
+		;TranslatedMark %SPLIT_R("この：")%蛇腹の玩具で
+		DATAFORM %SPLIT_R("この：")%会震动的玩具
+		;TranslatedMark %SPLIT_R("この：")%振動する玩具で
+		DATAFORM %SPLIT_R("この：")%用会动的玩具
+		;TranslatedMark %SPLIT_R("この：")%うねうね動く玩具で
+		DATAFORM 这真是个形状很奇怪的玩具呢。
+		;TranslatedMark これヘンな形の玩具よね。これで
+	ENDDATA
+	PRINTDATA
+		DATAFORM 想要被侵犯吗？
+		;TranslatedMark 犯して欲しい？
+		DATAFORM 我会好好疼爱你的
+		;TranslatedMark 可愛がってあげる
+		DATAFORM 让我抱抱
+		;TranslatedMark 抱いてあげる
+		DATAFORM 我会让你成为好孩子的
+		;TranslatedMark いいこにしてあげる
+	ENDDATA
+	PRINTFORML 」
+	RETURN 0
+ENDIF
+
+;１対１の性交系
+IF ( IS_MPLY(レミリア) && ( GROUPMATCH(SELECTCOM, 30, 31, 32, 33, 34, 35, 36)||GROUPMATCH(SELECTCOM, 40, 41, 42, 43, 44, 45, 46) ) ) || ( IS_EQUIP_PLAYER(レミリア, 30, 31, 32, 33, 34, 35, 36) || IS_EQUIP_PLAYER(レミリア, 40, 41, 42, 43, 44, 45, 46) )
+	IF HAS_PENIS(レミリア)
+		LOCALS:0 '= CALL_DIRTY_K10("Ｐ")
+		LOCALS:1 '= ""
+	ELSE
+		LOCALS:0 '= "玩具の" + CALL_DIRTY_K10("Ｐ")
+		LOCALS:1 '= "の真似を"
+	ENDIF
+	;主導権がある
+	IF IS_INITIATIVE(レミリア)
+		;陥落がある
+		IF CHECK_K10("陥落", レミリア_対象)
+			;サド素質でたまに
+			IF GETBIT(TALENT:レミリア:淫乱系, 素質_淫乱_サド) && RAND:10 == 0
+				IF IS_MALE(レミリア_対象)
+					PRINTFORML 「喜欢被女人侵犯吗？变态」
+					;TranslatedMark 「女に犯されるのが好き？　変態」
+				ELSE
+					PRINTFORML 「%LOCALS:0%的话什么都可以吗？变态」
+					;TranslatedMark 「%LOCALS:0%なら何でもいいの？　変態」
+				ENDIF
+			;サド素質でたまに
+			ELSEIF GETBIT(TALENT:レミリア:淫乱系, 素質_淫乱_サド) && RAND:10 == 0
+				IF HAS_PENIS(レミリア)
+					;Ａ挿入
+					IF GROUPMATCH(SELECTCOM, 40, 41, 42, 43, 44, 45, 46) || IS_EQUIP_PLAYER(レミリア, 40, 41, 42, 43, 44, 45, 46)
+						PRINTFORML 「交给%CALL_DIRTY_K10("Ａ")%吧」
+						;TranslatedMark 「%CALL_DIRTY_K10("Ａ")%に出してあげるっ」
+					;Ｖ挿入
+					ELSE
+						PRINTFORML 「交给%CALL_DIRTY_K10("Ｖ")%吧。请接受吸血鬼的血」
+						;TranslatedMark 「%CALL_DIRTY_K10("Ｖ")%に出してあげる。吸血鬼の血を受け止めなさいっ」
+					ENDIF
+				ENDIF
+			ELSE
+				PRINTDATAL
+					DATAFORM 「你属于我了，不要吝于表现你的开心」
+					;TranslatedMark 「おまえは私のものよ。悦びなさいっ」
+					DATAFORM 「你喜欢%LOCALS:0%吧？不要连心都堕入我的怀抱哦。」
+					;TranslatedMark 「%LOCALS:0%が好きなんでしょ？　心まで私に堕ちなさいっ」
+				ENDDATA
+			ENDIF
+		;陥落がない
+		ELSE
+			;サド素質でたまに
+			IF GETBIT(TALENT:レミリア:淫乱系, 素質_淫乱_サド) && RAND:10 == 0
+				IF IS_MALE(レミリア_対象)
+					PRINTFORML 「竟然喜欢被女人侵犯，真是少见的母狗啊」
+					;TranslatedMark 「女に犯されるのが好きだなんて、とんでもない牝犬ね」
+				ELSE
+					PRINTFORML 「%CALL_DIRTY_K10("Ｐ")%的话什么都可以吗？真是难得一见的母狗」
+					;TranslatedMark 「%CALL_DIRTY_K10("Ｐ")%なら何でもいいのかしら？　とんでもない牝犬ね」
+				ENDIF
+			ELSE
+				PRINTDATAL
+					DATAFORM 「瞧。你最喜欢%LOCALS:0%了，叫吧」
+					;TranslatedMark 「ほらほらっ。%LOCALS:0%大好きですって鳴きなさい」
+					DATAFORM 「这里好吧？瞧」
+					;TranslatedMark 「ここがいいんでしょう？　ほらっ」
+					DATAFORM 「%ANAME(レミリア_対象)%并不是为了责弄%LOCALS:0%而生的洞」
+					;TranslatedMark 「%ANAME(レミリア_対象)%は%LOCALS:0%を扱くための穴ですって言いなさいっ」
+					DATAFORM 「用%LOCALS:0%给你配种吧」
+					;TranslatedMark 「%LOCALS:0%で種付け%LOCALS:1%してあげるわっ」
+				ENDDATA
+			ENDIF
+		ENDIF
+
+	;主導権がない
+	ELSE
+		PRINTDATAL
+			DATAFORM 「啊啊。心情很好」
+			;TranslatedMark 「あぁっ。気持ちいいっ」
+			DATAFORM 「出来吧……嘿！%CALLNAME_K10(レミリア_対象, "ぁ")%……好啊❤」
+			;TranslatedMark 「出そう……っ！　%CALLNAME_K10(レミリア_対象, "ぁ")%っ……いいっ❤」
+		ENDDATA
+	ENDIF
+ENDIF
+
+;指愛撫
+IF IS_MTAR(レミリア) && GROUPMATCH(SELECTCOM, 0, 1, 3, 4, 10) || IS_EQUIP_TARGET(レミリア, 0, 1, 3, 4, 10)
+	IF CHECK_K10("陥落", レミリア_対象)
+		PRINTDATAL
+			DATAFORM 「用我的手指来享受吧」
+			;TranslatedMark 「私の指で悦びなさい」
+			DATAFORM 「用我的手指让你开心」
+			;TranslatedMark 「私の指で悦ばせてあげるわ」
+			DATAFORM 「这样做比较好吧？这样，这样」
+			;TranslatedMark 「こうされるのがいいんでしょ？　こうして」
+		ENDDATA
+	ELSE
+		PRINTDATAL
+			DATAFORM 「让我的爱抚来愉悦你吧。」
+			;TranslatedMark 「触って悦ばせてあげるわ」
+			DATAFORM 「这样做比较好吧？这样，这样」
+			;TranslatedMark 「こうされるのがいいんでしょ？　こうして」
+		ENDDATA
+	ENDIF
+ENDIF
+
+;足愛撫
+IF IS_MPLY(レミリア) && GROUPMATCH(SELECTCOM, 14) || IS_EQUIP_PLAYER(レミリア, 14)
+	IF CHECK_K10("陥落", レミリア_対象)
+		PRINTDATAL
+			DATAFORM 「因为被我的脚掌摩擦而兴奋吧」
+			;TranslatedMark 「私の足に擦られて悦びなさい」
+			DATAFORM 「让我用脚趾来让你开心开心」
+			;TranslatedMark 「足の指で悦ばせてあげるわ」
+			DATAFORM 「被踩得喘不过气来」
+			;TranslatedMark 「踏まれて悶えなさい」
+			DATAFORM 「我来踩你」
+			;TranslatedMark 「踏んであげるわ」
+			DATAFORM 「穿上鞋子？ 看来你喜欢硬一点的呢。」
+			;TranslatedMark 「靴を履く？　きついほうが好きなんでしょ」
+			DATAFORM 「这样做比较好吧？这样，这样」
+			;TranslatedMark 「こうされるのがいいんでしょ？　こうして」
+		ENDDATA
+	ELSE
+		PRINTDATAL
+			DATAFORM 「感受被践踏的乐趣吧」
+			;TranslatedMark 「踏まれて悦びなさい」
+			DATAFORM 「我来踩你」
+			;TranslatedMark 「踏んであげるわ」
+			DATAFORM 「这样做比较好吧？这样，这样」
+			;TranslatedMark 「こうされるのがいいんでしょ？　こうして」
+		ENDDATA
+	ENDIF
+ENDIF
+
+;玩具愛撫
+IF IS_MTAR(レミリア) && GROUPMATCH(SELECTCOM, 60, 61, 62, 63, 64, 65, 66) || IS_EQUIP_TARGET(レミリア, 60, 61, 62, 63, 64, 65, 66)
+	PRINTDATAL
+		DATAFORM 「玩具和娃娃很相配哦。不可爱吗」
+		;TranslatedMark 「お人形に玩具、似合うわよ。可愛いじゃない」
+		DATAFORM 「你比起我的手指更喜欢玩具吗？在丢掉这些垃圾之前先用它们来惩罚你吧」
+		;TranslatedMark 「この私の指より玩具が好き？　玩具が嫌いになるまで玩具でお仕置きよ」
+		DATAFORM 「这个玩具就像是给家畜榨血的挤奶机一样呢」
+		;TranslatedMark 「この玩具は家畜から血を搾る搾乳機みたいなものね」
+	ENDDATA
+ENDIF
+
+;─────────────────────────────────────── 
+;◆汎用攻め（コマンド番号に関わらずソースを見る）
+;─────────────────────────────────────── 
+CALL TEASE_K10(レミリア_対象)
+
+;─────────────────────────────────────── 
+;◆戻る
+;─────────────────────────────────────── 
+RETURN 0
+
+;─────────────────────────────────────── 
+;■閨_攻め_実行後
+;─────────────────────────────────────── 
+@KOJO_K10_NIGHT_AFTER_TOP(レミリア_対象)
+#DIM レミリア
+#DIM レミリア_対象
+#DIMS レミリア機嫌
+#DIM レミリア_表示フラグ
+#DIMS レミリア_最大部位称
+
+IF !レミリア_対象
+	レミリア_対象 = MASTER
+ENDIF
+
+レミリア = NAME_TO_CHARA("レミリア")
+レミリア機嫌 '= TOSTR_EMOTION(レミリア)
+
+;この辺りのDIMはSOURCE_K10系の流用
+レミリア_表示フラグ = 0
+レミリア_最大部位称 '= ""
+
+;─────────────────────────────────────── 
+;◆不機嫌
+;─────────────────────────────────────── 
+SELECTCASE レミリア機嫌
+	CASE "恨", "怒", "憤"
+		RETURN 0
+	CASE "鬱", "悲", "憂"
+		RETURN 0
+	CASE  "狂", "恐", "怯"
+		RETURN 0
+ENDSELECT
+
+;─────────────────────────────────────── 
+;◆不機嫌でない
+;─────────────────────────────────────── 
+;●Ｐ絶頂
+IF NOWEX:レミリア_対象:射精 > NOWEX:レミリア_対象:Ｃ絶頂 && NOWEX:レミリア_対象:射精 > NOWEX:レミリア_対象:Ｂ絶頂 && NOWEX:レミリア_対象:射精 > NOWEX:レミリア_対象:Ａ絶頂 && NOWEX:レミリア_対象:射精 > NOWEX:レミリア_対象:Ｍ絶頂 && NOWEX:レミリア_対象:射精 >NOWEX:レミリア_対象:Ｖ絶頂
+	レミリア_表示フラグ = 1
+	レミリア_最大部位称 '= CALL_DIRTY_K10("Ｐ")
+;●Ｃ絶頂
+ELSEIF NOWEX:レミリア_対象:Ｃ絶頂 >NOWEX:レミリア_対象:Ｖ絶頂 && NOWEX:レミリア_対象:Ｃ絶頂 > NOWEX:レミリア_対象:Ｂ絶頂 && NOWEX:レミリア_対象:Ｃ絶頂 > NOWEX:レミリア_対象:Ａ絶頂 && NOWEX:レミリア_対象:Ｃ絶頂 > NOWEX:レミリア_対象:Ｍ絶頂 && NOWEX:レミリア_対象:Ｃ絶頂 > NOWEX:レミリア_対象:射精
+	レミリア_表示フラグ = 1
+	レミリア_最大部位称 '= CALL_DIRTY_K10("Ｃ")
+;●Ｖ絶頂
+ELSEIF NOWEX:レミリア_対象:Ｖ絶頂 > NOWEX:レミリア_対象:Ｃ絶頂 &&NOWEX:レミリア_対象:Ｖ絶頂 > NOWEX:レミリア_対象:Ｂ絶頂 && NOWEX:レミリア_対象:Ｖ絶頂 > NOWEX:レミリア_対象:Ａ絶頂 && NOWEX:レミリア_対象:Ｖ絶頂 > NOWEX:レミリア_対象:Ｍ絶頂 && NOWEX:レミリア_対象:Ｖ絶頂 > NOWEX:レミリア_対象:射精
+	レミリア_表示フラグ = 1
+	レミリア_最大部位称 '= CALL_DIRTY_K10("Ｖ")
+;●Ａ絶頂
+ELSEIF NOWEX:レミリア_対象:Ａ絶頂 > NOWEX:レミリア_対象:Ｃ絶頂 && NOWEX:レミリア_対象:Ａ絶頂 > NOWEX:レミリア_対象:Ｂ絶頂 && NOWEX:レミリア_対象:Ａ絶頂 >NOWEX:レミリア_対象:Ｖ絶頂 && NOWEX:レミリア_対象:Ａ絶頂 > NOWEX:レミリア_対象:Ｍ絶頂 && NOWEX:レミリア_対象:Ａ絶頂 > NOWEX:レミリア_対象:射精
+	レミリア_表示フラグ = 1
+	レミリア_最大部位称 '= CALL_DIRTY_K10("Ａ")
+;●Ｂ絶頂
+ELSEIF NOWEX:レミリア_対象:Ｂ絶頂 > NOWEX:レミリア_対象:Ｃ絶頂 && NOWEX:レミリア_対象:Ｂ絶頂 >NOWEX:レミリア_対象:Ｖ絶頂 && NOWEX:レミリア_対象:Ｂ絶頂 > NOWEX:レミリア_対象:Ａ絶頂 && NOWEX:レミリア_対象:Ｂ絶頂 > NOWEX:レミリア_対象:Ｍ絶頂 && NOWEX:レミリア_対象:Ｂ絶頂 > NOWEX:レミリア_対象:射精
+	レミリア_表示フラグ = 1
+	レミリア_最大部位称 '= CALL_DIRTY_K10("Ｂ")
+;●Ｍ絶頂
+ELSEIF NOWEX:レミリア_対象:Ｍ絶頂 > NOWEX:レミリア_対象:Ｃ絶頂 && NOWEX:レミリア_対象:Ｍ絶頂 > NOWEX:レミリア_対象:Ｂ絶頂 && NOWEX:レミリア_対象:Ｍ絶頂 > NOWEX:レミリア_対象:Ａ絶頂 && NOWEX:レミリア_対象:Ｍ絶頂 >NOWEX:レミリア_対象:Ｖ絶頂 && NOWEX:レミリア_対象:Ｍ絶頂 > NOWEX:レミリア_対象:射精
+	レミリア_表示フラグ = 1
+	レミリア_最大部位称 '= "おくち"
+ENDIF
+
+;レミリアに主導権があれば、レミリア_対象がなんらかの絶頂を得た場合にコメントする（調子に乗って煽る）
+IF IS_INITIATIVE(レミリア) && レミリア_表示フラグ == 1
+	;レミリア_対象にＰがあり、射精した場合
+	IF HAS_PENIS(レミリア_対象) && NOWEX:レミリア_対象:射精 > 0
+		;レミリア_対象が男性
+		IF IS_MALE(レミリア_対象)
+			PRINTDATAL
+				DATAFORM 「你在%レミリア_最大部位称%吗？还可以挤出来呢」
+				;TranslatedMark 「%レミリア_最大部位称%でイッているの？　まだ絞り出せそうね」
+				DATAFORM 「%レミリア_最大部位称%就出去了呢」
+				;TranslatedMark 「%レミリア_最大部位称%でイッて出ちゃったのね」
+				DATAFORM 「你是说%レミリア_最大部位称%？那就为我再多坚持一下吧」
+				;TranslatedMark 「%レミリア_最大部位称%いったのね。私のために出し尽くしなさい」
+				DATAFORM 「香味儿。如果再欺负%レミリア_最大部位称%的话能出吗？是这样吧」
+				;TranslatedMark 「いい匂い。もっと%レミリア_最大部位称%ををいじめたら出せる？　こうでしょ」
+				DATAFORM 「作为挤出来的菜肴，白色的血液还不够多呢」
+				;TranslatedMark 「まだ足りないわ。白い血。搾り出しなさい」
+				DATAFORM 「那血全部都是我的」
+				;TranslatedMark 「その血は全部、私のものよ」
+				DATAFORM 「看，这白血吸到干涸人也不会变成尸体吧。」
+				;TranslatedMark 「この白い血は涸れるまで吸っても屍にはならないのよね。ほらっ」
+				DATAFORM 「出来了、出来了……再多来点」
+				;TranslatedMark 「出た出た……もっと出しなさい」
+				DATAFORM 「如果能更坚强一旦的话，%レミリア_最大部位称%的产量应该会更好吧。」
+				;TranslatedMark 「%レミリア_最大部位称%をこうしたらもっと出る？　もっと強くこうしたら」
+				DATAFORM 「好像很好吃的血的味道。快拿出来！」
+				;TranslatedMark 「美味しそうな血の匂い。ほらあまだ出して」
+				DATAFORM 「既然是这白血的话就可以拿出来了，即使洒出来也不会沾上污垢的。」
+				;TranslatedMark 「この白い血なら零しても染みにはならないわね。出していいわ」
+				DATAFORM 「如果责弄%レミリア_最大部位称%的话还能挤出吧？咻咻地生产出来」
+				;TranslatedMark 「%レミリア_最大部位称%を弄ればまだ搾り出せるのよね？　びゅっびゅーって出しなさい」
+				DATAFORM 「还不够，虽然我吃得很少，但是用这点白血当做一餐的的话完全不够。」
+				;TranslatedMark 「私小食だけど、この白い血で食事をすると全然足りないの。まだよ」
+				DATALIST
+					DATAFORM 「怎么了？直到刚刚为止不是一直都很高兴吗？」
+					;TranslatedMark 「どうしたの？　さっきまであんなに悦んでたでしょ」
+					DATAFORM 「%レミリア_最大部位称%继续戴上吧，东西还不够呢」
+					;TranslatedMark 「%レミリア_最大部位称%続けてあげる。まだ足りないもの」
+				ENDLIST
+				DATAFORM 「你看，就是从这里榨出来的。」
+				;TranslatedMark 「ここから出てるんでしょ？　搾ってあげる。ほらっ」
+			ENDDATA
+		;レミリア_対象が女性
+		ELSE
+			PRINTDATAL
+				DATAFORM 「你在%レミリア_最大部位称%吗？还可以挤出来呢」
+				;TranslatedMark 「%レミリア_最大部位称%でイッているの？　まだ絞り出せそうね」
+				DATAFORM 「是%レミリア_最大部位称%射精的吧」
+				;TranslatedMark 「%レミリア_最大部位称%でイッて射精したのね」
+				DATAFORM 「你是说%レミリア_最大部位称%？那就为我再多坚持一下吧」
+				;TranslatedMark 「%レミリア_最大部位称%いったのね。私のために出し尽くしなさい」
+				DATAFORM 「香味儿。如果再欺负%レミリア_最大部位称%的话能出吗？是这样吧」
+				;TranslatedMark 「いい匂い。もっと%レミリア_最大部位称%ををいじめたら出せる？　こうでしょ」
+				DATAFORM 「明明是女孩子却能射出这么多来，舒服吗？」
+				;TranslatedMark 「女の子なのにこんなに出して、気持ちいい？」
+				DATAFORM 「从女孩%レミリア_最大部位称%榨出的不白学可还是不够呢」
+				;TranslatedMark 「まだ足りないわ。白い血。女の子%レミリア_最大部位称%から搾り出しなさい」
+				DATAFORM 「那血全部都是我的」
+				;TranslatedMark 「その血は全部、私のものよ」
+				DATAFORM 「看，这白血吸到干涸人也不会变成尸体吧。」
+				;TranslatedMark 「この白い血は涸れるまで吸っても屍にはならないのよね。ほらっ」
+				DATAFORM 「是从%レミリア_最大部位称%出来的么？再多弄一点！」
+				;TranslatedMark 「出た出た……%レミリア_最大部位称%がいいの？　もっと出しなさい」
+				DATAFORM 「如果能更坚强一旦的话，%レミリア_最大部位称%的产量应该会更好吧。」
+				;TranslatedMark 「%レミリア_最大部位称%をこうしたらもっと出る？　もっと強くこうしたら」
+				DATAFORM 「好像很好吃的血的味道。快拿出来！」
+				;TranslatedMark 「美味しそうな血の匂い。ほらあまだ出して」
+				DATAFORM 「既然是这白血的话就可以拿出来了，即使洒出来也不会沾上污垢的。」
+				;TranslatedMark 「この白い血なら零しても染みにはならないわね。出していいわ」
+				DATAFORM 「如果责弄%レミリア_最大部位称%的话还能挤出吧？咻咻地生产出来」
+				;TranslatedMark 「%レミリア_最大部位称%を弄ればまだ搾り出せるのよね？　びゅっびゅーって出しなさい」
+				DATAFORM 「还不够，虽然我吃得很少，但是用这点白血当做一餐的的话完全不够。」
+				;TranslatedMark 「私小食だけど、この白い血で食事をすると全然足りないの。まだよ」
+				DATALIST
+					DATAFORM 「怎么了？直到刚刚为止不是一直都很高兴吗？」
+					;TranslatedMark 「どうしたの？　さっきまであんなに悦んでたでしょ」
+					DATAFORM 「%レミリア_最大部位称%继续戴上吧，东西还不够呢」
+					;TranslatedMark 「%レミリア_最大部位称%続けてあげる。まだ足りないもの」
+				ENDLIST
+			ENDDATA
+		ENDIF
+	;レミリア_対象にＰがあり、射精しなかった場合
+	ELSEIF HAS_PENIS(レミリア_対象)
+		;レミリア_対象が男性
+		IF IS_MALE(レミリア_対象)
+			PRINTDATAL
+				DATAFORM 「是从%レミリア_最大部位称%生产出来，可是不出来了啊」
+				;TranslatedMark 「%レミリア_最大部位称%はイッてそうなのに、出ないわね」
+				DATAFORM 「已经拿光了吗？好像已经完全排空了再也榨不出来了呢。」
+				;TranslatedMark 「もう出し尽くしちゃったの？　いったみたいなのに、出ないわね」
+				DATAFORM 「不能再榨出来了吗？这些挤出来的白雪，还不够做菜的分量呢。」
+				;TranslatedMark 「出ないの？　まだ足りないわ。白い血。搾り出しなさい」
+				DATAFORM 「真的出不来了？我的饭就只有这些？」
+				;TranslatedMark 「出なくなっちゃったの？　私のごはんはもう終わり？」
+				DATAFORM 「出不来啊。这样弄%レミリア_最大部位称%的话可以吗？再顽强努力一点能做到么？」
+				;TranslatedMark 「出ないのね。%レミリア_最大部位称%をこうしたらもっと出る？　もっと強くこうしたら？」
+				DATAFORM 「好像有很好吃的血的味道，但是没有。寡淡的味道……再多努力试试吧？」
+				;TranslatedMark 「美味しそうな血の匂いはするのに、出ないわね。薄いし……もっと頑張って？」
+				DATAFORM 「明明说好可以生产出来的，没有了么？」
+				;TranslatedMark 「出していいって言ってるのに。出せないの？」
+				DATAFORM 「真没意思。明明答应了却又做不到。快给我射精！」
+				;TranslatedMark 「つまんないわね。いってるのに出ないなんて。射精しなさい」
+				DATAFORM 「如果榨不出来的话就不要勉强了」
+				;TranslatedMark 「出なくても無理矢理搾り出しなさいっ」
+				DATAFORM 「既然榨不出来，硬是要让他榨出来应该会很害怕吧？即使不是白色的，畏惧我的人的血也很美味呢。」
+				;TranslatedMark 「出ないわ。無理矢理出させたら畏れる？　白くても私を畏れる人間の血が美味しいわ」
+				DATAFORM 「如果不能产白血的话，就吸红血。害怕的话就射精吧」
+				;TranslatedMark 「白い血を出せないなら、紅い血を吸うわ。恐ろしければ射精しなさい」
+				DATAFORM 「已经一滴都没有了吗？」
+				;TranslatedMark 「もう残ってないの？」
+				DATAFORM 「拿不出来了？已经结束了？还不够啊！」
+				;TranslatedMark 「出さないでいったの？　もう終わり？　まだ足りないわ」
+				DATAFORM 「射不出来？没有想射出来的感觉？我可是刚刚帮你撸完啊！」
+				;TranslatedMark 「出ないの？　出さない気？　私が触ってあげているのに」
+				DATAFORM 「真没意思。明明答应了却又做不到。快给我射精！」
+				;TranslatedMark 「つまんないわね。いっても出ないなんて。射精しなさい」
+				DATALIST
+					DATAFORM 「你一个人在高兴什么？快把好吃的给我拿出来！」
+					;TranslatedMark 「何をひとりで悦んでいるの？　ちゃんと美味しいのを出しなさい」
+					DATAFORM 「不然的话，我就把针插进讨厌的%レミリア_最大部位称%！」
+					;TranslatedMark 「でないと、いやらしい%レミリア_最大部位称%に針を刺してお仕置きよ」
+				ENDLIST
+				DATALIST
+					DATAFORM 「怎么了？刚才明明还那么兴奋，现在却射不出来」
+					;TranslatedMark 「どうしたの？　さっきまであんなに悦んでたのに、出ないわ」
+					DATAFORM 「%レミリア_最大部位称%继续戴上吧，东西还不够呢」
+					;TranslatedMark 「%レミリア_最大部位称%続けてあげる。まだ足りないもの」
+				ENDLIST
+			ENDDATA
+		;レミリア_対象が女性
+		ELSE
+			PRINTDATAL
+				DATAFORM 「是从%レミリア_最大部位称%生产出来，可是不出来了啊」
+				;TranslatedMark 「%レミリア_最大部位称%はイッてそうなのに、出ないわね」
+				DATAFORM 「已经拿光了吗？ 因为是女孩子所以不拿出来也可以吃吗？」
+				;TranslatedMark 「もう出し尽くしちゃったの？　女の子だから出さなくていいと思ってる？」
+				DATAFORM 「不出来吗？好不容易尝到了味道，我一定要把它榨出来！」
+				;TranslatedMark 「出ないの？　せっかくついてるんだから、搾り出しなさい」
+				DATAFORM 「真的出不来了？我的饭就只有这些？」
+				;TranslatedMark 「出なくなっちゃったの？　私のごはんはもう終わり？」
+				DATAFORM 「出不来啊。这样弄%レミリア_最大部位称%的话可以吗？再顽强努力一点能做到么？」
+				;TranslatedMark 「出ないのね。%レミリア_最大部位称%をこうしたらもっと出る？　もっと強くこうしたら？」
+				DATAFORM 「好像有很好吃的血的味道，但是没有。寡淡的味道……再多努力试试吧？」
+				;TranslatedMark 「美味しそうな血の匂いはするのに、出ないわね。薄いし……もっと頑張って？」
+				DATAFORM 「明明说好可以生产出来的，没有了么？」
+				;TranslatedMark 「出していいって言ってるのに。出せないの？」
+				DATAFORM 「真没意思。明明有那么甜蜜的味道，却没有白血。好好地给我献出来啊！」
+				;TranslatedMark 「つまんないわね。蜜の匂いはするのに、白い血が出ないわ。ちゃんと出しなさい」
+				DATAFORM 「如果榨不出来的话就不要勉强了」
+				;TranslatedMark 「出なくても無理矢理搾り出しなさいっ」
+				DATAFORM 「既然榨不出来，硬是要让他榨出来应该会很害怕吧？即使不是白色的，畏惧我的人的血也很美味呢。」
+				;TranslatedMark 「出ないわ。無理矢理出させたら畏れる？　白くても私を畏れる人間の血が美味しいわ」
+				DATAFORM 「如果不能产白血的话，就吸红血。害怕的话就射精吧」
+				;TranslatedMark 「白い血を出せないなら、紅い血を吸うわ。恐ろしければ射精しなさい」
+				DATAFORM 「已经一滴都没有了吗？」
+				;TranslatedMark 「もう残ってないの？」
+				DATAFORM 「拿不出来了？已经结束了？还不够啊！」
+				;TranslatedMark 「出さないでいったの？　もう終わり？　まだ足りないわ」
+				DATAFORM 「射不出来？没有想射出来的感觉？我可是刚刚帮你撸完啊！」
+				;TranslatedMark 「出ないの？　出さない気？　私が触ってあげているのに」
+				DATAFORM 「真没意思。明明答应了却又做不到。快给我射精！」
+				;TranslatedMark 「つまんないわね。いっても出ないなんて。射精しなさい」
+				DATALIST
+					DATAFORM 「你一个人在高兴什么？快把好吃的给我拿出来！」
+					;TranslatedMark 「何をひとりで悦んでいるの？　ちゃんと美味しいのを出しなさい」
+					DATAFORM 「不然的话，我就把针插进讨厌的%レミリア_最大部位称%！」
+					;TranslatedMark 「でないと、いやらしい%レミリア_最大部位称%に針を刺してお仕置きよ」
+				ENDLIST
+				DATALIST
+					DATAFORM 「怎么了？刚才明明还那么兴奋，现在却射不出来」
+					;TranslatedMark 「どうしたの？　さっきまであんなに悦んでたのに、出ないわ」
+					DATAFORM 「%レミリア_最大部位称%继续戴上吧，东西还不够呢」
+					;TranslatedMark 「%レミリア_最大部位称%続けてあげる。まだ足りないもの」
+				ENDLIST
+			ENDDATA
+		ENDIF
+	;レミリア_対象にＰがない場合
+	ELSE
+		PRINTDATAL
+			DATAFORM 「检查过%レミリア_最大部位称%了吗？好像还能找到呢」
+			;TranslatedMark 「%レミリア_最大部位称%でイッた？　まだ掻き出せそうね」
+			DATAFORM 「它在%レミリア_最大部位称%吗？蜜的量一下子增加了。你看，再来一点」
+			;TranslatedMark 「%レミリア_最大部位称%でイッているの？　蜜の量が一気に増えたわ。ほら、もっと出して」
+			DATAFORM 「继续下去的话会流很多透明的血吧，还不会死啦」
+			;TranslatedMark 「続けていったほうが透明な血がたくさん出るでしょ。まだいきなさい」
+			DATAFORM 「请让%レミリア_最大部位称%满身通红地用力吧。深呼吸！」
+			;TranslatedMark 「もっと%レミリア_最大部位称%真っ赤にして頑張って。深くいきなさい」
+			DATAFORM 「看到%レミリア_最大部位称%了吗？不更加激烈的话，黏糊糊的东西可不会出来哟。」
+			;TranslatedMark 「%レミリア_最大部位称%でイッた？　もっと激しくしないと、とろとろのは出ないのかしら」
+			DATAFORM 「那你就变成笨蛋吧。让%レミリア_最大部位称%继续工作下去。这是命令！」
+			;TranslatedMark 「ばかになっちゃっていいわ。%レミリア_最大部位称%いき続けなさい。命令よ」
+			DATAFORM 「再流一点。这味道好像很好吃。」
+			;TranslatedMark 「もっと垂れ流しになって。美味しそうな匂い」
+			DATAFORM 「不够啊，蜜的味道还是很寡淡。把%レミリア_最大部位称%再挖深一点」
+			;TranslatedMark 「足りないわ。蜜は薄いの。%レミリア_最大部位称%もっと深くいって」
+			DATAFORM 「粘糊糊的、有点浓厚呢。 在多给我流点蜜出来啊！」
+			;TranslatedMark 「とろとろね。少し濃いわ。もっと蜜を垂らしなさい」
+			DATAFORM 「好像很好吃的血的味道」
+			;TranslatedMark 「美味しそうな血の匂い」
+			DATAFORM 「如果责弄%レミリア_最大部位称%的话，就可以榨出蜜了。再给我流一些出来」
+			;TranslatedMark 「%レミリア_最大部位称%を弄れば蜜が搾り出せるのね。もっと垂らしなさい」
+			DATALIST
+				DATAFORM 「一个人在高兴什么？好好的把美味的蜜都弄湿了。」
+				;TranslatedMark 「何をひとりで悦んでいるの？　ちゃんと美味しい蜜を濡らしなさい」
+				DATAFORM 「不然的话，我就把针插进讨厌的%レミリア_最大部位称%！」
+				;TranslatedMark 「でないと、いやらしい%レミリア_最大部位称%に針を刺してお仕置きよ」
+			ENDLIST
+			DATALIST
+				DATAFORM 「怎么了？直到刚刚为止不是一直都很高兴吗？」
+				;TranslatedMark 「どうしたの？　さっきまであんなに悦んでたでしょ」
+				DATAFORM 「%レミリア_最大部位称%继续戴上吧，东西还不够呢」
+				;TranslatedMark 「%レミリア_最大部位称%続けてあげる。まだ足りないもの」
+			ENDLIST
+		ENDDATA
+	ENDIF
+	レミリア_表示フラグ = 0
+ENDIF
+
+
+;─────────────────────────────────────── 
+;◆戻る
+;─────────────────────────────────────── 
+RETURN 0
+

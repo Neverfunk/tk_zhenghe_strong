@@ -1,0 +1,146 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K163_KOUHIME_RAPE_RATE(対象)
+#DIM 対象
+RETURN 300
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生許可とか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方を許可ときに使う
+;---------------------
+@KOJO_DAILY_K163_KOUHIME_RAPE_DECISION(対象)
+#DIM 対象
+
+
+;陥落無し
+SIF IS_LOVER(対象) || IS_SLAVED_BY(対象)
+	RETURN 0
+
+;陰莖がないと駄目
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+	
+;対象が女不存在とだめ
+SIF !IS_FEMALE(対象)
+	RETURN 0
+	
+;対象が處女
+SIF TALENT:対象:処女 != 1
+	RETURN 0	
+
+SIF KDVAR:対象:萝莉丝_雷伊プ進行度 != 0
+	RETURN 0	
+
+;ARG:0が口上デイリー事件を実施できるかの簡易チェック関数。
+;ARG:1 0 MASTERと別勢力である 1 MASTERと同一勢力である　-1 どちらでもよい
+;ARG:2 0 俘虜不存在 1 俘虜である -1 どちらでもよい
+;ARG:3 0 面識がない 1 面識がある -1 どちらでもよい
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1) 
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K163_KOUHIME_RAPE_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;事件が発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定條件を満たすキャラから蘭ダムに一人選ぶデイリーで、そもそもその條件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K163_KOUHIME_RAPE(対象)
+#DIM 対象
+	PRINTFORML 有一天，在视野的边缘发现了正在交配的猴子
+	PRINTFORMW 那野兽的狂暴性欲性欲，展现着雄性支配雌性的力量，勾起了%ANAME(MASTER)%的某种憧憬
+	PRINTFORML 完全不考虑对方的感觉，单方面的暴力和随波逐流的快乐
+	PRINTFORML 让被溢出的欲望所覆盖的雌性意识到自己的本性，展现出向雄性献媚的姿态
+	PRINTFORMW ————自己也想那样侵犯雌性
+	PRINTFORML 反正要侵犯，对方自然得是最好的女人
+	PRINTFORML 而且，那不知道快乐颜色的少女最好
+	PRINTFORML 比如说，就是萝丽丝
+	PRINTFORMW 用最下贱的欲望污染纯洁无垢的高傲公主
+	PRINTFORML 那一定是最让人心情舒畅的事情吧
+	PRINTFORMW 对，那就是%ANAME(対象)%打算出手的对象……
+	PRINTFORMW "就这么做"
+	PRINTFORML 好像听到了哪里传来的声音
+	PRINTFORML 那虽然是幻听，却非常有力的在背后鼓舞着自己
+	PRINTFORMW 『只要按照欲望行动就好』
+	PRINTFORML 
+	PRINTFORML 
+	PRINTFORML 
+	
+	CALL ASK_YN("就这么做", "算了吧")
+	IF RESULT == 1
+		PRINTFORML 只是看到猴子交尾的程度就听到了这样的幻听，是不是积存下来的压力太大了呢
+		PRINTFORML %ANAME(MASTER)%叹了口气离开了那个地方……
+			KDVAR:対象:萝莉丝_雷伊プ進行度 = -1
+		RETURN 0
+	ENDIF
+	
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW 「%ANAME(MASTER)%？…是有什么不能说的重大发现吗，所以要保密，把我一个人叫到这里来？」
+		PRINTFORML 她身边没有警卫员。或许还有隐藏的？应该再调查一下的
+		PRINTFORMW 但是我已经忍不住了
+		PRINTFORML 深夜，被一个不是非常熟悉的男人喊出来，还是独自一人，是很危险的
+		PRINTFORMW 从背后，用布蒙住了%ANAME(対象)%的嘴，为了防止她的抵抗，给了她几拳
+		PRINTFORML 突如起来的意外，让%ANAME(対象)%有些猝不及防，就趁着那个时候，将她的衣服脱去，用绳子绑了起来
+		PRINTFORMW 在她的判断能够理解现状的那一瞬间，她那娇嫩的花朵，就已经被强硬的撑开了
+		PRINTFORMW 「唔ーーーーーーー！！！！」
+		PRINTFORML 沉重的喘息声，结合处流出的血，就像两只猴子躺在一起一样
+		PRINTFORMW 来吧，像那只猴子一样疯狂吧
+		;TranslatedMark さあ、あの猴子のようにハメ狂おう
+					
+				IF ABL:MASTER:性技 > 3
+			CALL FUCK(MASTER, "慾望, 性技, 侍奉, 性交, Ｃ, Ｖ挿入, 接吻", "童貞喪失, 接吻喪失", 0, @"%ANAME(対象)%の唇", "", @"%ANAME(対象)%の膣", "調教")
+			CALL FUCK(対象, "慾望, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 排泄, 射精, 痛苦快楽, 緊縛, 受虐, 接吻, 口淫, Ｖ性交, Ａ性交", "接吻喪失, 處女喪失, Ａ處女喪失, CFLAG減少, 膣内射精, 腸内射精, 口内射精", GET_ID(MASTER), @"%ANAME(MASTER)%の陰莖", ANAME(MASTER))			
+			PRINTFORML 
+			PRINTFORML 在第一次的犯罪结束后、感觉到了效果的%ANAME(MASTER)%在保持插入的状态解开了%ANAME(対象)%的绳子
+			PRINTFORMW 「噫啊，唔…………………为什么、为什么要做这种事　为什么」
+			PRINTFORML 在%ANAME(対象)%编制出更加刺耳的词汇之前，她那小小的身子就被抱住，夺走了嘴唇
+			PRINTFORML 至今为止，因为各种束缚而无法实现的深吻，在少女小小的口腔里尽情的肆虐着
+			PRINTFORML 每次她表现出讨厌的时候都会逼到窒息的边缘，相反，每次她变得坦率的时候，都会让她吸气
+			PRINTFORMW 不知什么时候，因为缺氧，思考力完全消失了的她已经堕落为了顺从的雌性
+			PRINTFORML 自己缠住了男人的身体，说着谄媚的话，要求着中出
+			PRINTFORMW 看着那空虚的少女的眼神被淫欲填满，%ANAME(MASTER)%更是充满了欲望……
+			FOR LOCAL, 0, 3
+				CALL FUCK(対象, "Ｃ, Ｖ, Ｂ, 慾望, 侍奉, 性交, 性技, 精愛, 痛苦快楽, 受虐, 口淫, Ｖ性交", "接吻喪失, 處女喪失, 膣内射精, 口内射精", GET_ID(MASTER), @"%ANAME(MASTER)%の\@ RAND:2 ? 陰莖 # 唇\@", ANAME(MASTER), "", "調教")
+			NEXT
+				CALL FUCK(MASTER, "慾望, 性技, 侍奉, 性交, Ｃ, Ｖ挿入, 接吻", "童貞喪失, 接吻喪失", 0, @"%ANAME(対象)%の唇", "", @"%ANAME(対象)%の膣", "調教")
+				CALL FUCK(対象, "慾望, 侍奉, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "處女喪失, 膣内射精, 接吻喪失, 口内射精", GET_ID(MASTER), @"%ANAME(MASTER)%の唇", ANAME(MASTER), "", "調教")
+				KDVAR:対象:萝莉丝_メス堕ち度 = 1
+		ELSE
+			CALL FUCK(MASTER, "慾望, 性技, 侍奉, 性交, Ｃ, Ｖ挿入, 接吻", "童貞喪失, 接吻喪失", 0, @"%ANAME(対象)%の唇", "", @"%ANAME(対象)%の膣", "調教")
+			FOR LOCAL, 0, 3
+				CALL FUCK(対象, "慾望, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 排泄, 射精, 痛苦快楽, 緊縛, 受虐, 接吻, 口淫, Ｖ性交, Ａ性交", "接吻喪失, 處女喪失, Ａ處女喪失, CFLAG減少, 膣内射精, 腸内射精, 口内射精", GET_ID(MASTER), @"%ANAME(MASTER)%の陰莖", ANAME(MASTER))
+			NEXT
+			PRINTFORML 
+			PRINTFORML 在侵犯了一段时间之后、%ANAME(MASTER)%解开了完全不抵抗的%ANAME(対象)%的绳子
+			PRINTFORMW %ANAME(対象)%虽然有着些许的丝反应、但还是用空虚的目光看着远方
+			PRINTFORML 将沾满了血的精液，证明着夺走了她的第一次的肉棒塞进了她的嘴里开始突刺
+			PRINTFORMW 一边感受着幼女的柔弱，一边清理着污渍，然后，继续在她的花蕊里肆虐
+			PRINTFORML 「………………」
+			PRINTFORML 似乎是因为心灵的抗拒吧、%ANAME(対象)%的肉体对着肆虐没有任何的反应
+			PRINTFORML 然而，拼命贯彻无表情的%ANAME(対象)%，在中出的时候，身体还是会因为恐惧而蜷缩
+			PRINTFORMW 一边嘲笑着这种反应，一边在萝莉公主的身体里播种了许多次
+				CALL FUCK(MASTER, "慾望, 性技, 侍奉, 性交, Ｃ, Ｖ挿入, 接吻", "童貞喪失, 接吻喪失", 0, @"%ANAME(対象)%の唇", "", @"%ANAME(対象)%の膣", "調教")
+				CALL FUCK(対象, "慾望, 侍奉, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "處女喪失, 膣内射精, 接吻喪失, 口内射精", GET_ID(MASTER), @"%ANAME(MASTER)%の唇", ANAME(MASTER), "", "調教")
+				CALL FUCK(対象, "Ｃ, Ｖ, Ｂ, 慾望, 侍奉, 性交, 性技, 精愛, 痛苦快楽, 受虐, 口淫, Ｖ性交", "接吻喪失, 處女喪失, 膣内射精, 口内射精", GET_ID(MASTER), @"%ANAME(MASTER)%の\@ RAND:2 ? 陰莖 # 唇\@", ANAME(MASTER), "", "調教")
+		ENDIF
+		
+PRINTFORML 
+PRINTFORMW 在此之后，将%ANAME(対象)%带到了一处无人知晓的地方，继续监禁着………
+CALL COLOR_PRINTW(@"%ANAME(対象)%行踪不明")
+KDVAR:対象:萝莉丝_雷伊プ進行度 = 1
+KDVAR:対象:萝莉丝_監禁残りターン = 5
+CALL CHANGE_COUNTRY(対象, 0)
+CFLAG:対象:特殊状態 = 0
+
+RETURN 1

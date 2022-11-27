@@ -1,0 +1,188 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_0_MIRACLE_31_EXIST
+RETURN 1
+
+@SKILL_0_MIRACLE_31_NAME
+RESULTS = 钱通鬼神
+
+;レベルは1-5まで
+@SKILL_0_MIRACLE_31_LEVEL
+RETURN 5
+
+@SKILL_0_MIRACLE_31_FROMWHO
+;0或不存在=通用 1=暴虐 2=诡术 3=腐朽 4=色欲
+RETURN 2
+
+@SKILL_0_MIRACLE_31_SELFLEARN(对象)
+#DIM 对象
+RETURN 0
+
+;対象選択
+@SKILL_0_MIRACLE_31_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 加和
+#DIM 角色
+;我方部隊対象
+
+RETURN 1
+
+
+
+;発動判定
+@SKILL_0_MIRACLE_31_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM FIRST_LINE
+対象側 = !発動側
+;本技能暂不设置AI使用
+SIF CFLAG:発動者:1 != CFLAG:MASTER:1
+	RETURN 0
+
+CALL SKILL_0_MIRACLE_31_NAME
+PRINTL
+FIRST_LINE = LINECOUNT 
+PRINTFORML %ANAME(発動者)%持有技能「%RESULTS%」,是否发动?
+PRINTBUTTON " 0[是]", 0
+PRINTL  
+PRINTBUTTON " 1[否]", 1
+PRINTL 
+INPUT
+CLEARLINE LINECOUNT - FIRST_LINE
+SIF RESULT == 0
+	RETURN 1
+RETURN 0
+
+;効果をここに記述
+@SKILL_0_MIRACLE_31_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM FIRST_LINE
+#DIM 比率
+#DIM 收买人数
+対象側 = !発動側
+比率 = MAX(12 - ABL:発動者:信仰/20,5) 
+SETCOLOR 138,43,226
+PRINTFORML 「金钱，名利，汝等所求何其简单！」
+PRINTFORML 「倘若能强加等同于性命乃至远远超过的钱财，哪怕是鬼神也会动心吧？」
+RESETCOLOR
+PRINTL 
+FIRST_LINE = LINECOUNT
+$INPUT_LOOP1
+PRINTFORML 请输入或选择你要买命的人数，当前价格为一人{比率}
+PRINTFORML 输入0或0以下的数字来取消技能
+PRINTL
+PRINTL [     0]
+IF GET_SOLDIER(対象勢力, 対象部隊) >= 500 && MONEY >= 500 * 比率
+	PRINT [   500]
+ENDIF
+LOCAL:1 = MIN(10, GET_SOLDIER(対象勢力, 対象部隊) / 1000 + 1)
+FOR LOCAL:0, 1, LOCAL:1
+	SIF MONEY <  LOCAL:0 * 1000 * 比率
+		BREAK
+	PRINTFORM [{LOCAL:0 * 1000, 6}]
+NEXT
+PRINTL 
+IF GET_SOLDIER(対象勢力, 対象部隊) >= 10000 && MONEY >= 10000 * 比率
+	LOCAL:1 = MIN(10, (GET_SOLDIER(対象勢力, 対象部隊) - 10000) / 2000 + 1)
+	FOR LOCAL:0, 0, LOCAL:1
+		SIF MONEY <  LOCAL:0 * 1000 * 比率
+			BREAK
+		PRINTFORM [{LOCAL:0 * 2000 + 10000, 6}]
+	NEXT
+	PRINTL 
+ENDIF
+IF GET_SOLDIER(対象勢力, 対象部隊) >= 30000 && MONEY >= 30000 * 比率
+	LOCAL:1 = MIN(10, (GET_SOLDIER(対象勢力, 対象部隊) - 30000) / 5000 + 1)
+	FOR LOCAL:0, 0, LOCAL:1
+		SIF MONEY <  LOCAL:0 * 1000 * 比率
+			BREAK
+		PRINTFORM [{LOCAL:0 * 5000 + 30000, 6}]
+	NEXT
+	PRINTL 
+ENDIF
+IF GET_SOLDIER(対象勢力, 対象部隊) >= 80000 && MONEY >= 80000 * 比率
+	LOCAL:1 = MIN(10, (GET_SOLDIER(対象勢力, 対象部隊) - 80000) / 10000 + 1)
+	FOR LOCAL:0, 0, LOCAL:1
+		SIF MONEY <  LOCAL:0 * 1000 * 比率
+			BREAK
+		PRINTFORM [{LOCAL:0 * 10000 + 80000, 6}]
+	NEXT
+	PRINTL 
+ENDIF
+IF GET_SOLDIER(対象勢力, 対象部隊) >= 200000 && MONEY >= 200000 * 比率
+	LOCAL:1 = MIN(10, (GET_SOLDIER(対象勢力, 対象部隊) - 200000) / 50000 + 1)
+	FOR LOCAL:0, 0, LOCAL:1
+		SIF MONEY <  LOCAL:0 * 1000 * 比率
+			BREAK
+		PRINTFORM [{LOCAL:0 * 50000 + 200000, 6}]
+	NEXT
+	PRINTL 
+ENDIF
+IF GET_SOLDIER(対象勢力, 対象部隊) >= 700000 && MONEY >= 700000 * 比率
+	LOCAL:1 = MIN(9, (GET_SOLDIER(対象勢力, 対象部隊) - 700000) / 100000 + 1)
+	FOR LOCAL:0, 0, LOCAL:1
+		SIF MONEY <  LOCAL:0 * 1000 * 比率
+			BREAK
+		PRINTFORM [{LOCAL:0 * 100000 + 700000}]
+	NEXT
+	PRINTL 
+ENDIF
+PRINTBUTTON "[剩下全部]", GET_SOLDIER(対象勢力, 対象部隊)
+INPUT
+IF RESULT <= 0
+	RETURN 0
+ELSEIF MIN(RESULT,GET_SOLDIER(対象勢力, 対象部隊)) * 比率 > MONEY
+	CLEARLINE 1
+	PRINTL 所持有资金不足以支付!
+	GOTO INPUT_LOOP1
+ELSE
+	CLEARLINE LINECOUNT - FIRST_LINE
+	收买人数 = MIN(RESULT,GET_SOLDIER(対象勢力, 対象部隊))
+	PRINTFORML 在%ANAME(発動者)%许诺的{MIN(RESULT,GET_SOLDIER(対象勢力, 対象部隊)) * 比率}金的诱惑下,敌人部队中有{RESULT}士兵冒死逃离了战场!
+	CALL DECREASE_SOLDIER(対象勢力, 対象部隊, 收买人数, 1)
+	MONEY -= MIN(RESULT,GET_SOLDIER(対象勢力, 対象部隊)) * 比率
+ENDIF
+
+
+@SKILL_0_MIRACLE_31_EXPLANATION
+RESULTS = 战斗阶段可发动,按照一定比例消耗金钱消灭对应数量的敌方部队。
+
+@SKILL_0_MIRACLE_31_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 1000

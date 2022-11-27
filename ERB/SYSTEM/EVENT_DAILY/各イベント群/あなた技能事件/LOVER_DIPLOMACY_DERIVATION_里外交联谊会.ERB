@@ -1,0 +1,222 @@
+﻿;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_LOVER_DIPLOMACY_DUMMY_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("LOVER_DIPLOMACY")
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_LOVER_DIPLOMACY_DUMMY_DECISION()
+SIF DVAR:联谊会冷却 > 0
+    DVAR:联谊会冷却 --
+RETURN 0
+
+;---------------------
+;本体 ここにはこないが安全のため
+;---------------------
+@EVENT_DAILY_DERIVATION_LOVER_DIPLOMACY_DUMMY()
+
+RETURN 1
+
+;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_LOVER_DIPLOMACY_ALTER_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("LOVER_DIPLOMACY")
+
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_DERIVATION_LOVER_DIPLOMACY_ALTER_DECISION()
+#DIM 邀请势力 = 0
+#DIM 势力数 = 0
+SIF DAY < 10
+    RETURN 0
+SIF !(IS_MALE(MASTER) && HAS_PENIS(MASTER))
+    RETURN 0
+;MASTER必须仕官/为君主
+SIF !IS_COUNTRY(CFLAG:MASTER:所属)
+    RETURN 0
+FOR LOCAL, 0, MAX_COUNTRY
+    ;是个势力
+    SIF !IS_COUNTRY(LOCAL)
+        CONTINUE
+    ;特殊势力不得入内
+    SIF IS_SP_COUNTRY(LOCAL)
+        CONTINUE
+    ;MASTER:召集
+    SIF GET_COUNTRY_BOSS(LOCAL) == MASTER
+        CONTINUE
+    ;自己人就没来的必要吧？
+    SIF CHECK_COUNTRY_RELATION_F(CFLAG:MASTER:所属, LOCAL) > 4
+        CONTINUE
+    ;需要友好
+    势力数 ++
+    IF REL_LIKE:(GET_COUNTRY_BOSS(LOCAL)):MASTER >= 300 && REL_HATE:(GET_COUNTRY_BOSS(LOCAL)):MASTER < 300
+        FOR LOCAL:1, 1, CHARANUM
+            SIF CFLAG:(LOCAL:1):所属 != LOCAL || CFLAG:(LOCAL:1):捕虜先 || !IS_FEMALE(LOCAL:1)
+                CONTINUE
+            IF CFLAG:(LOCAL:1):好感度 >= 1500 && (REL_LIKE:(LOCAL:1):MASTER - REL_HATE:(LOCAL:1):MASTER) > 0 && TALENT:(LOCAL:1):合意
+                邀请势力 ++
+                BREAK
+            ENDIF
+        NEXT
+    ENDIF
+NEXT
+;你的名声必须要好
+SIF !CHECK_SKILL_DUPLICATE(MASTER, スキル_ジャンル_PERSONAL, 0, 41) || CHECK_SKILL_DUPLICATE(MASTER, スキル_ジャンル_PERSONAL, 0, 43) || CHECK_SKILL_DUPLICATE(MASTER, スキル_ジャンル_PERSONAL, 0, 44)
+    RETURN 0
+;开废了
+SIF DVAR:联谊会历时 >= 0
+    RETURN 0
+SIF DVAR:联谊会冷却
+    RETURN 0
+RETURN 邀请势力 >= 5 || (INRANGE(势力数, 3, 10) && 邀请势力 >= 3)
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_DERIVATION_LOVER_DIPLOMACY_ALTER_SETTARGET()
+RETURN 1
+
+;---------------------
+;イベントの進行度合いに応じてイベント名を変更したい場合に利用
+;変更する必要がない場合、この関数は不要
+;---------------------
+@EVENT_DAILY_DERIVATION_LOVER_DIPLOMACY_ALTER_NAME()
+RESULTS '= @"第{(ABS(DVAR:联谊会历时) + 1)}届全幻想乡联谊大会？"
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_LOVER_DIPLOMACY_ALTER()
+#DIM 参会势力, MAX_COUNTRY
+#DIM 参会势力代表, MAX_COUNTRY
+#DIM 参会人数 = 0
+#DIM 自势力
+#DIM 对方势力
+#DIM 对方代表
+VARSET 参会势力
+VARSET 参会势力代表
+自势力 = CFLAG:MASTER:所属
+
+FOR LOCAL, 0, MAX_COUNTRY
+    ;是个势力
+    SIF !IS_COUNTRY(LOCAL)
+        CONTINUE
+    ;特殊势力不得入内
+    SIF IS_SP_COUNTRY(LOCAL)
+        CONTINUE
+    ;MASTER:召集
+    SIF GET_COUNTRY_BOSS(LOCAL) == MASTER
+        CONTINUE
+    ;自己人就没来的必要吧？
+    SIF CHECK_COUNTRY_RELATION_F(自势力, LOCAL) > 4
+        CONTINUE
+    ;需要友好
+    IF REL_LIKE:(GET_COUNTRY_BOSS(LOCAL)):MASTER >= 300 && REL_HATE:(GET_COUNTRY_BOSS(LOCAL)):MASTER < 300
+        FOR LOCAL:1, 1, CHARANUM
+            SIF CFLAG:(LOCAL:1):所属 != LOCAL || CFLAG:(LOCAL:1):捕虜先 || !IS_FEMALE(LOCAL:1)
+                CONTINUE
+            IF CFLAG:(LOCAL:1):好感度 >= 1500 && (!参会势力代表:参会人数 || CFLAG:(LOCAL:1):好感度 >= CFLAG:(参会势力代表:参会人数):好感度) && (REL_LIKE:(LOCAL:1):MASTER - REL_HATE:(LOCAL:1):MASTER) > 0 && TALENT:(LOCAL:1):合意
+                参会势力代表:参会人数 = LOCAL:1
+            ENDIF
+        NEXT
+        IF 参会势力代表:参会人数 != 0
+            参会势力:参会人数 = LOCAL
+            参会人数 ++
+        ENDIF
+
+    ENDIF
+NEXT
+
+PRINTFORML 为了与幻想乡的大家搞好关系，
+PRINTFORMW %ANAME(GET_COUNTRY_BOSS(自势力))%处举办了由%ANAME(MASTER)%\@GET_COUNTRY_BOSS(自势力) == MASTER ? 亲自出场 # 作为主办方代表\@的第{(ABS(DVAR:联谊会历时) + 1)}届全幻想乡联谊大会！
+PRINTFORMW 现在，%ANAME(MASTER)%的面前坐着——
+PRINTFORML 要详细说明一下吗？
+CALL ASK_YN
+IF !RESULT
+    PRINTFORMW 她们分别是：
+    FOR LOCAL, 0, 参会人数
+        IF GET_COUNTRY_BOSS(参会势力:LOCAL) == 参会势力代表:LOCAL
+            CALL COLOR_PRINTW(@"%ANAME(GET_COUNTRY_BOSS(参会势力:LOCAL))%本人", COUNTRY_COLOR:(参会势力:LOCAL))
+        ELSE
+            CALL COLOR_PRINTW(@"来自%ANAME(GET_COUNTRY_BOSS(参会势力:LOCAL))%势力的%ANAME(参会势力代表:LOCAL)%", COUNTRY_COLOR:(参会势力:LOCAL))
+        ENDIF
+    NEXT
+ELSE
+    PRINTFORMW 好吧……
+    PRINTFORML 总而言之，
+    FOR LOCAL, 0, 参会人数
+        CALL COLOR_PRINT(@"%ANAME(参会势力代表:LOCAL)%", COUNTRY_COLOR:(参会势力:LOCAL))
+        PRINT ，
+    NEXT
+    PRINTL
+    PRINTFORMW 这些人都出席了
+ENDIF
+PRINTFORML 作为东道主，你可以向每个人提出一个要求
+PRINTFORMW 本来是这样的……
+PRINTFORMW 但现在代表们因为你之前的胡闹，已经变得只能接受一个特别的要求了……
+CALL SINGLE_DRAWLINE("♥", カラー_ピンク)
+FOR LOCAL, 0, 参会人数
+    对方势力 = 参会势力:LOCAL
+    对方代表 = 参会势力代表:LOCAL
+    CALL COLOR_PRINT(@"%ANAME(对方代表)%", COUNTRY_COLOR:对方势力)
+    IF VIRGIN(对方代表)
+        PRINTDATAW
+            DATAFORM 「请\@(TALENT:对方代表:正妻 || TALENT:对方代表:妾) ? 夫君 # %ANAME(MASTER)%桑\@动作轻一点……」
+            DATAFORM 「我……还是第一次……」
+            DATAFORM 「请\@(TALENT:对方代表:正妻 || TALENT:对方代表:妾) ? 夫君 # %ANAME(MASTER)%桑\@成为我的第一次吧……」
+            DATAFORM 「\@(TALENT:对方代表:正妻 || TALENT:对方代表:妾) ? 夫君 # %ANAME(MASTER)%\@的……终于……♥」
+            DATAFORM 「能成为\@(TALENT:对方代表:正妻 || TALENT:对方代表:妾) ? 夫君的妻子 # %ANAME(MASTER)%的爱人\@……我最幸福了……♥」
+        ENDDATA
+    ELSEIF GETBIT(TALENT:对方代表:淫乱系, 素質_淫乱_孕みたがり) || RAND:5
+        PRINTDATAW
+            DATAFORM 「让我怀上\@(TALENT:对方代表:正妻 || TALENT:对方代表:妾) ? 夫君 # %ANAME(MASTER)%\@大人的孩子吧……」
+            DATAFORM 「就这样……♥在里面出来吧……♥」
+            DATAFORM 「啊♥肚子好热♥」
+            DATAFORM 「\@(TALENT:对方代表:正妻 || TALENT:对方代表:妾) ? 夫君 # %ANAME(MASTER)%\@……还要更多……♥」
+            DATAFORM 「肚子满满的……♥」
+        ENDDATA
+    ELSE
+        PRINTDATAW
+            DATAFORM 「\@(TALENT:对方代表:正妻 || TALENT:对方代表:妾) ? 夫君 # %ANAME(MASTER)%\@的……顶到最深处了……♥」
+            DATAFORM 「要去了……♥咿啊啊啊啊……♥」
+            DATAFORM 「啊……♥那里……♥好舒服……♥」
+            DATAFORM 「\@(TALENT:对方代表:正妻 || TALENT:对方代表:妾) ? 夫君 # %ANAME(MASTER)%\@的……进来了……♥」
+            DATAFORM 「不要停……♥腰停不下来♥」
+        ENDDATA
+    ENDIF
+    CALL FUCK_MAKELOVE(对方代表, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+    CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(对方代表)%的膣穴")
+    IF !TALENT:对方代表:合意
+        CALL COLOR_PRINTW(@"获得了%ANAME(对方代表)%的合意♥", カラー_ピンク)
+        TALENT:对方代表:合意 = 1
+        TALENT:对方代表:チョロイン = 1
+    ENDIF
+    FOR LOCAL:1, 0, CHARANUM
+        IF CFLAG:(LOCAL:1):所属 == 对方势力 && !CFLAG:(LOCAL:1):捕虜先 && !IS_ANIMAL(LOCAL:1)
+            CFLAG:(LOCAL:1):好感度 += (51 + RAND:100)
+        ENDIF
+    NEXT
+    CALL CHANGE_RELATION_C_TO_O(对方势力, MASTER, 50, -50)
+NEXT
+CALL SINGLE_DRAWLINE("♥", カラー_ピンク)
+PRINTFORMW 完事后的代表们，在下体还流着%TEXTR(@"%ANAME(MASTER)%的种子", @"%ANAME(MASTER)%的精液", "被宠幸过的证明")%的情况下红着脸向%ANAME(MASTER)%道谢后便回去了……
+PRINTFORMW 据说她们还会红着脸向同势力的伙伴宣传%ANAME(MASTER)%的事……
+IF FLAG:陥落人数 >= 60 && !CHECK_SKILL_DUPLICATE(MASTER, スキル_ジャンル_PERSONAL, 0, 42)
+    PRINTFORMW 此事过后，%ANAME(MASTER)%终于见识到了自己在整个幻想乡里的人气有多大能量……
+    CALL SKILL_LEARN(MASTER, スキル_ジャンル_PERSONAL, 0, 42)
+    CALL COLOR_PRINTW(@"%ANAME(MASTER)%领悟了足以煽动一个军队倒戈的技能！", カラー_注意)
+ENDIF
+DVAR:联谊会历时 --
+DVAR:联谊会冷却 = 5
+
+RETURN 1

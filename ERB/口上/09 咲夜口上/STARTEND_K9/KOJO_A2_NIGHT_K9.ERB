@@ -1,0 +1,460 @@
+﻿;─────────────────────────────────────── 
+;●「閨に呼ぶ」の開始時
+;─────────────────────────────────────── 
+@KOJO_TRAIN_START_A2_K9
+#DIM 咲夜_対象
+#DIM 咲夜
+
+咲夜_対象 = MASTER
+咲夜 = NAME_TO_CHARA("咲夜")
+
+;咲夜口上の使用可否設定と初期化
+SIF CFLAG:咲夜:400 == 0
+	CALL KOJO_ASK_RESET_K9
+
+;口上を不使用設定なら戻る
+SIF CFLAG:咲夜:400 == 1
+	RETURN 0
+
+SETCOLOR 咲夜_口上カラー
+
+;─────────────────────────────────────── 
+;○初回
+;─────────────────────────────────────── 
+IF CFLAG:咲夜:201 == 0
+
+	;閨に呼ぶ口上初回呼び出しフラグオン
+	CFLAG:咲夜:201 = 1
+
+	;───────────────────────────────────── 
+	;▼虚ろ
+	;───────────────────────────────────── 
+	IF TALENT:咲夜:空虚
+		PRINTFORML 「嗯……嗯……」
+		;TranslatedMark 「う……んん……」
+		PRINTFORMDL 总算等到了你的到来，%ANAME(咲夜)%却坐了下来……
+		;TranslatedMark どうにか連れて来たが、%ANAME(咲夜)%は座り込んでしまった……
+		WAIT
+		RESETCOLOR
+		RETURN 0
+	ENDIF
+
+	;───────────────────────────────────── 
+	;▼通常
+	;───────────────────────────────────── 
+	IF CHECK_K9("敬語")
+		PRINTFORML 「我是%ANAME(咲夜)%」
+		;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%、%ANAME(咲夜)%です」
+		PRINTFORML 「让您久等了。十分感谢您的邀请」
+		;TranslatedMark 「お待たせ致しました。お招きくださってありがとうございます」
+		PRINTFORMDL %ANAME(咲夜)%的脸颊泛红，用湿润且期待的眼睛看着%ANAME(咲夜_対象)%
+		;TranslatedMark %ANAME(咲夜)%は頬を紅潮させ期待に潤んだ瞳で%ANAME(咲夜_対象)%を見つめている
+	ELSEIF KDVAR:咲夜:咲夜_主の客は
+		PRINTFORML 「%CALLNAME_K9(咲夜_対象)%、%ANAME(咲夜)%。……你叫我了吧。我一直在等你」
+		;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%、%ANAME(咲夜)%よ。……呼んでくれたのね。待っていたわ」
+		PRINTFORMDL %ANAME(咲夜)%的脸颊泛红，用湿润且期待的眼睛看着%ANAME(咲夜_対象)%
+		;TranslatedMark %ANAME(咲夜)%は頬を紅潮させ期待に潤んだ瞳で%ANAME(咲夜_対象)%を見つめている
+	ELSEIF IS_LOVER(咲夜)
+		PRINTFORML 「今晚可以一起睡吗」
+		;TranslatedMark 「今夜は一緒に眠ってもいいのね」
+		PRINTFORML 「呵呵，好激动啊。要来试试摸一下吗？」
+		;TranslatedMark 「ふふ、どきどきしているわ。触って確かめる？」
+		PRINTFORMDL %ANAME(咲夜)%的脸颊泛红，用湿润且期待的眼睛看着%ANAME(咲夜_対象)%
+		;TranslatedMark %ANAME(咲夜)%は頬を紅潮させ期待に潤んだ瞳で%ANAME(咲夜_対象)%を見つめている
+	ELSEIF CFLAG:咲夜:好感度 >= 500
+		PRINTFORML 终于来了。在夜里，%CALLNAME_K9(咲夜_対象)%想和女仆做一些奇怪的事情」
+		;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%、来たわよ。夜這いに」
+		PRINTFORML 「……开玩笑的。叫我的是%CALLNAME_K9(咲夜_対象)%，对吧？」
+		;TranslatedMark 「……冗談よ。呼んだのは%CALLNAME_K9(咲夜_対象)%でしょう？」
+		PRINTFORMDL %ANAME(咲夜)%的脸颊被害羞且急切的心情染红
+		;TranslatedMark %ANAME(咲夜)%は照れくさそうに頬を染めている
+	ELSE
+		IF IS_MALE(咲夜_対象)
+			PRINTFORML 「%CALLNAME_K9(咲夜_対象)%，终于来了。呵呵。竟然叫女孩子上床……又想干什么坏事了？」
+			;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%、来たわよ。ふふっ。女をベッドに呼びつけるなんてね？」
+		ELSE
+			PRINTFORML 「%CALLNAME_K9(咲夜_対象)%，想要陪睡什么的，是寂寞得睡不着吗？」
+			;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%、来たわよ。添い寝が欲しいなんて、寂しくて眠れなかったのかしら？」
+		ENDIF
+		PRINTFORMDL %ANAME(咲夜)%的脸颊被害羞且急切的心情染红
+		;TranslatedMark %ANAME(咲夜)%は照れくさそうに頬を染めている
+	ENDIF
+
+;─────────────────────────────────────── 
+;○二回目以降
+;─────────────────────────────────────── 
+ELSE
+
+	;───────────────────────────────────── 
+	;▼虚ろ
+	;───────────────────────────────────── 
+	IF TALENT:咲夜:空虚
+		PRINTFORML 「嗯……嗯……」
+		;TranslatedMark 「う……んん……」
+		PRINTFORMDL 总算等到了你的到来，%ANAME(咲夜)%却坐了下来……
+		;TranslatedMark どうにか連れて来たが、%ANAME(咲夜)%は座り込んでしまった……
+		WAIT
+		RESETCOLOR
+		RETURN 0
+	ENDIF
+
+	;───────────────────────────────────── 
+	;▼通常
+	;───────────────────────────────────── 
+	IF IS_SLAVE(咲夜)
+		PRINTDATA
+			DATAFORM 「我是%ANAME(咲夜)%❤
+			;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%、%ANAME(咲夜)%です❤
+			DATAFORM 「%ANAME(咲夜)%在这里。
+			;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%、%ANAME(咲夜)%です。
+		ENDDATA
+		PRINTDATAL
+			DATAFORM 让您久等了」
+			;TranslatedMark お待たせいたしました」
+			DATAFORM 今晚也请多多指教」
+			;TranslatedMark 今夜もよろしくお躾ください」
+		ENDDATA
+		PRINTDATADL
+			DATAFORM 晚上的%ANAME(咲夜)%再也维持不住白天时的严肃神情，你握住了%ANAME(咲夜)%勉强遮掩住面颊的手，发现粉红色从被舐的耳尖一直蔓延到精致的锁骨
+			;TranslatedMark %ANAME(咲夜)%の白い頬がピンク色に染まっている
+			DATAFORM 打招呼的%ANAME(咲夜)%的声音已经像喘息声一样甜美，呼吸带上了混乱的桃红色气息
+			;TranslatedMark 挨拶をした%ANAME(咲夜)%の声は既に喘ぎ声のように甘く、呼吸も乱れている
+			DATAFORM %ANAME(咲夜)%微微颤抖着，眼泪汪汪，将手臂缠绕在%ANAME(咲夜_対象)%的脖子上
+			;TranslatedMark %ANAME(咲夜)%は微かに震えて涙目になっているが、%ANAME(咲夜_対象)%の首に腕を絡めてきた
+		ENDDATA
+
+	ELSEIF CHECK_K9("敬語") && IS_LOVER(咲夜)
+		PRINTDATA
+			DATAFORM 「我是%ANAME(咲夜)%❤
+			;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%、%ANAME(咲夜)%です❤
+			DATAFORM 「%ANAME(咲夜)%在这里。
+			;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%、%ANAME(咲夜)%です。
+		ENDDATA
+		PRINTDATAL
+			DATAFORM 谢谢您的邀请」
+			;TranslatedMark お招きくださってありがとうございます」
+			DATAFORM 让您久等了」
+			;TranslatedMark お待たせいたしました」
+		ENDDATA
+		PRINTDATADL
+			DATAFORM %ANAME(咲夜)%的脸颊泛红，用湿润且期待的眼睛看着%ANAME(咲夜_対象)%
+			;TranslatedMark %ANAME(咲夜)%は頬を紅潮させ期待に潤んだ瞳で%ANAME(咲夜_対象)%を見つめている
+			DATAFORM %ANAME(咲夜)%迫不及待地将手臂缠在了%ANAME(咲夜_対象)%的脖子上
+			;TranslatedMark %ANAME(咲夜)%は待ちきれない様子で%ANAME(咲夜_対象)%の首に腕を絡めてきた
+			DATAFORM %ANAME(咲夜)%将身体送到%ANAME(咲夜_対象)%怀中。在混乱的情欲煎熬下，究竟是为了撒娇的贴蹭，还是无法遏制的颤动，%ANAME(咲夜)%自己的身体也分辨不清了
+			;TranslatedMark %ANAME(咲夜)%は%ANAME(咲夜_対象)%に身を擦り寄せてきた
+			DATAFORM %ANAME(咲夜)%带着清爽的表情等待着%ANAME(咲夜_対象)%的指示，但却微微散发着不愿再忍受的雌性的气息
+			;TranslatedMark %ANAME(咲夜)%は涼しい表情で%ANAME(咲夜_対象)%の指示を待っているが微かに雌の匂いをさせている
+		ENDDATA
+
+	ELSEIF CHECK_K9("敬語")
+		PRINTDATAL
+			DATAFORM 「我是%ANAME(咲夜)%。谢谢您的邀请」
+			;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%、%ANAME(咲夜)%です。お招きくださってありがとうございます」
+			DATAFORM 「我是%ANAME(咲夜)%。让您久等了」
+			;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%、%ANAME(咲夜)%です。お待たせいたしました」
+		ENDDATA
+		PRINTDATADL
+			DATAFORM 你咬着%ANAME(咲夜)%的耳朵，“还紧张吗？”%ANAME(咲夜)%失神的瞳孔在长久的涣散后报复一般地收缩，刚刚恢复清亮的一对眸子在对视中颤动不止，泪水和欲望倾斜而出……之后，无论你再怎样舔弄耳垂，%ANAME(咲夜)%也不敢再迎上你的视线了
+			;TranslatedMark %ANAME(咲夜)%はまだ緊張しているのか視線を合わせようとしない
+			DATAFORM %ANAME(咲夜)%等待着%ANAME(咲夜_対象)%的指示而停止了行动
+			;TranslatedMark %ANAME(咲夜)%は%ANAME(咲夜_対象)%の指示を待って動きを止めている
+		ENDDATA
+
+	ELSEIF IS_LOVER(咲夜)
+		PRINT 「
+		PRINTDATA
+			DATAFORM %CALLNAME_K9(咲夜_対象)%
+			DATAFORM 来了啊
+			;TranslatedMark 来たわ
+			DATAFORM 晚上好
+			;TranslatedMark こんばんは
+			DATAFORM 让您久等了
+			;TranslatedMark お待たせ
+			DATAFORM 让您久等了吗
+			;TranslatedMark お待たせしちゃったかしら
+			DATAFORM 喂
+			;TranslatedMark ねえ
+			DATAFORM 今晚月色真美
+			;TranslatedMark 良い夜ね
+		ENDDATA
+		PRINTDATA
+			DATAFORM 、
+			DATAFORM 。
+			DATAFORM ❤　
+		ENDDATA
+		PRINTDATAL
+			DATAFORM 在夜里，爬上女仆的床？呵呵呵❤」
+			;TranslatedMark 夜這いよ。ふふっ❤」
+			DATAFORM 很想见你啊」
+			;TranslatedMark 会いたかったわ」
+			DATAFORM 您在呼唤我？一直在等……」
+			;TranslatedMark 呼んでくれるのを待っていたのよ？」
+			DATAFORM 今晚可以一起睡吗？」
+			;TranslatedMark 今夜は一緒に眠っていいのね」
+			DATAFORM ……总觉得有点害羞。奇怪吗？」
+			;TranslatedMark ……なんだか照れくさいのよ。おかしいかしら？」
+			DATAFORM 睡觉前不是一个人，真幸福……❤」
+			;TranslatedMark 眠る前に一人じゃないのって、幸せね」
+		ENDDATA
+		PRINTDATADL
+			DATAFORM %ANAME(咲夜)%的脸颊泛红，用湿润且期待的眼睛看着%ANAME(咲夜_対象)%
+			;TranslatedMark %ANAME(咲夜)%は頬を紅潮させ期待に潤んだ瞳で%ANAME(咲夜_対象)%を見つめている
+			DATAFORM %ANAME(咲夜)%迫不及待地将手臂缠在了%ANAME(咲夜_対象)%的脖子上
+			;TranslatedMark %ANAME(咲夜)%は待ちきれない様子で%ANAME(咲夜_対象)%の首に腕を絡めてきた
+			DATAFORM %ANAME(咲夜)%将身体送到%ANAME(咲夜_対象)%怀中。在混乱的情欲煎熬下，究竟是为了撒娇的贴蹭，还是无法遏制的颤动，%ANAME(咲夜)%自己的身体也分辨不清了
+			;TranslatedMark %ANAME(咲夜)%は%ANAME(咲夜_対象)%に身を擦り寄せてきた
+			DATAFORM %ANAME(咲夜)%带着清爽的表情等待着%ANAME(咲夜_対象)%的指示，但却微微散发着无法再忍耐的雌性气息
+			;TranslatedMark %ANAME(咲夜)%は涼しい表情で%ANAME(咲夜_対象)%を待っているが微かに雌の匂いをさせている
+			DATAFORM 把%ANAME(咲夜)%叫来回到自己的房间，%ANAME(咲夜)%坐在整齐的床上
+			;TranslatedMark %ANAME(咲夜)%を呼んで自室に戻ると、綺麗に整えられたベッドに%ANAME(咲夜)%が座っていた
+		ENDDATA
+		;他キャラの行動とかみ合わない可能性
+		;%ANAME(咲夜)%は早速%ANAME(咲夜_対象)%を抱きしめ、足で足を絡めとり寝台へと押し倒した
+
+	ELSEIF CFLAG:咲夜:好感度 >= 800
+		PRINTDATAL
+			DATAFORM 「%CALLNAME_K9(咲夜_対象)%终于来了。会是夜袭吗？……开玩笑的。叫我的是%CALLNAME_K9(咲夜_対象)%吧？」
+			;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%、来たわよ。夜這いに。……冗談よ。呼んだのは%CALLNAME_K9(咲夜_対象)%でしょう？」
+			DATAFORM 「您在呼唤我？一直在等……我很想见你。」
+			;TranslatedMark 「会いたかったわ。呼んでくれるのを待っていたのよ？」
+			DATAFORM 「晚上好，%CALLNAME_K9(咲夜_対象)%。一个人睡很寂寞呢」
+			;TranslatedMark 「こんばんは、%CALLNAME_K9(咲夜_対象)%。一人で寝るのは寂しいものね」
+		ENDDATA
+
+	ELSE
+		IF IS_MALE(咲夜_対象)
+			PRINTDATAL
+				DATAFORM 「%CALLNAME_K9(咲夜_対象)%来了。呵呵。既然来了，就不要马上回去哦？」
+				;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%、来たわよ。ふふっ。来たからには、すぐには帰らないわよ？」
+				DATAFORM 「%CALLNAME_K9(咲夜_対象)%，来了。叫我这样的女仆上床，你是怎么想的？」
+				;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%、来たわよ。女をベッドに呼びつけるなんて、どういうつもりかしらね？」
+				DATAFORM 「来了吗？晚上叫来孤身一人的女孩子可真让人佩服，不过……算了。和%CALLNAME_K9(咲夜_対象)%一起度过的话会睡得很好呢」
+				;TranslatedMark 「来たわよ。夜に女性を呼ぶのは感心できないけど、まぁいいわ。%CALLNAME_K9(咲夜_対象)%と過ごせばよく眠れるものね」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「%CALLNAME_K9(咲夜_対象)%，想要陪睡什么的，是寂寞得睡不着吗？」
+				;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%、来たわよ。添い寝が欲しいなんて、寂しくて眠れなかったのかしら？」
+				DATAFORM 「来了吗？%CALLNAME_K9(咲夜_対象)%。在黑暗中的话睡不着吧？呵呵呵」
+				;TranslatedMark 「来たわよ、%CALLNAME_K9(咲夜_対象)%。暗いと眠れないのかしらね？　ふふっ」
+				DATAFORM 「终于来了，%CALLNAME_K9(咲夜_対象)%。是想要被疼爱吗？」
+				;TranslatedMark 「来たわよ、%CALLNAME_K9(咲夜_対象)%。可愛がって欲しかったのかしら？」
+			ENDDATA
+		ENDIF
+	ENDIF
+ENDIF
+
+WAIT
+RESETCOLOR
+RETURN 0
+
+;─────────────────────────────────────── 
+;●「閨に呼ぶ」の終了時
+;─────────────────────────────────────── 
+@KOJO_TRAIN_END_A2_K9
+#DIM 咲夜_対象
+#DIM 咲夜
+#DIMS 咲夜機嫌
+
+咲夜_対象 = MASTER
+咲夜 = NAME_TO_CHARA("咲夜")
+咲夜機嫌 '= TOSTR_EMOTION(咲夜)
+
+;口上を不使用設定なら戻る
+SIF CFLAG:咲夜:400 == 1
+	RETURN 0
+
+SETCOLOR 咲夜_口上カラー
+
+PRINTL 
+
+;─────────────────────────────────────── 
+;行動不能
+;─────────────────────────────────────── 
+IF TALENT:咲夜:空虚
+	PRINTFORML 「嗯……嗯……」
+	;TranslatedMark 「う……んん……」
+	PRINTFORMDL %ANAME(咲夜)%似乎没有注意到%ANAME(咲夜_対象)%想要离去
+	;TranslatedMark %ANAME(咲夜)%は%ANAME(咲夜_対象)%が立ち去ろうとしていることに気付いていないようだ
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+;酒酔いによる行動不能
+IF TCVAR:咲夜:53 == 1
+	PRINTFORML 「嗯……已经……好舒服啊❤」
+	;TranslatedMark 「んはぁ……もうらめ……気持ちいいわぁ❤」
+	PRINTFORMDL 睡着的%ANAME(咲夜)%脸红红的，看来在梦中也饱受欲情困扰呢
+	;TranslatedMark %ANAME(咲夜)%はぐでんぐでんになって赤ら顔をにやつかせながら寝ている
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+;快感のあまり気絶
+IF TCVAR:咲夜:52 || BASE:咲夜:気力 <= 300
+	PRINTFORML 「嗯……啊咿❤呼啊……」
+	;TranslatedMark 「んう……ぁふ❤　ふあぁ……」
+	PRINTFORMDL %ANAME(咲夜)%四肢时不时地抽搐，恍惚地笑着，脚趾不成体统地勾起
+	;TranslatedMark %ANAME(咲夜)%はくったりした手足を時々ぴくつかせて、恍惚と笑んでいる
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+;疲労による行動不能
+IF TCVAR:咲夜:51
+	PRINTFORML 「嗯……嗯……」
+	;TranslatedMark 「う……んん……」
+	PRINTFORMDL 即使%ANAME(咲夜)%睡着了，她脸上的疲倦在也未褪去
+	;TranslatedMark %ANAME(咲夜)%は疲れ果てた顔で眠っている
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+;不機嫌
+咲夜機嫌 = %TOSTR_EMOTION(咲夜)%
+SELECTCASE 咲夜機嫌
+	CASE "恨", "怒", "憤"
+		PRINTFORML 「已经！回不去了%POLITE_K9("啊", "呜")%」
+		;TranslatedMark 「もう！　帰%POLITE_K9("るわよ", "ります")%」
+		WAIT
+		RESETCOLOR
+		RETURN 0
+	CASE "鬱", "悲", "憂"
+		PRINTFORML 「……辛苦了」
+		;TranslatedMark 「……お疲れ様%POLITE_K9("ね", "です")%」
+		WAIT
+		RESETCOLOR
+		RETURN 0
+	CASE  "狂", "恐", "怯"
+		PRINTFORML 「……对不起，对不起」
+		;TranslatedMark 「……失礼%POLITE_K9("するわ", "します")%」
+		WAIT
+		RESETCOLOR
+		RETURN 0
+ENDSELECT
+
+;既成事実獲得後・一回きり
+IF CFLAG:咲夜:200 < 4 && TALENT:合意
+	CFLAG:咲夜:200 = 4
+	PRINTFORML 「皮肤好像还粘在一起……」
+	;TranslatedMark 「まだ肌がくっついているみたい……」
+	PRINTFORML 「请不要看这边」
+	;TranslatedMark 「あまりこっちを見ないでく%POLITE_K9("れる？", "ださい")%」
+	PRINTFORML 「从刚才开始，微妙地感觉不舒服，诶……我很冷静的%POLITE_K9("啊", "……")%」
+	;TranslatedMark 「さっきから、妙に居心地が悪くて落ち着かな%POLITE_K9("いのよ", "くて")%」
+	PRINTFORML 「我……很害羞吗？」
+	;TranslatedMark 「私、恥ずかしいの%POLITE_K9("かしら", "でしょうか")%？」
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ELSEIF CFLAG:200 < 3 && TALENT:恋人
+	CFLAG:咲夜:200 = 3
+	PRINTFORML 「%CALLNAME_K9(咲夜_対象)%真厉害%POLITE_K9("啊", "……❤")%」
+	;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%ってすごい%POLITE_K9("わね", "ですね")%」
+	PRINTFORML 「不想与你分离，这句话的意思，第一次知道」
+	;TranslatedMark 「離れたくないなんて言葉の意味、初めて知%POLITE_K9("ったわ", "りました")%」
+	WAIT
+	PRINTL 
+	PRINTFORML 「即使成为恋人，%CALLNAME_K9(咲夜_対象)%还是%CALLNAME_K9(咲夜_対象)%%POLITE_K9("……对吗？", "……❤？")%」
+	;TranslatedMark 「恋人になっても、%CALLNAME_K9(咲夜_対象)%は%CALLNAME_K9(咲夜_対象)%%POLITE_K9("……よね？", "……ですよね？")%」
+	PRINTFORML 「……脑袋里想的全部是与你有关的事……晕乎乎……稍微想确认一下」
+	;TranslatedMark 「……なんでも%POLITE_K9("ないわ", "ありません")%。少し確認したくなった%POLITE_K9("だけ", "んです")%」
+	PRINTFORML 「好不容易结出果实的想法，不想破坏%POLITE_K9("……", "……无法抑制的思恋")%」
+	;TranslatedMark 「せっかく実った想い%POLITE_K9("だから", "ですから")%、壊してしまいたくない%POLITE_K9("ものね", "と思ったんです")%」
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ELSEIF CFLAG:咲夜:200 < 2 && CFLAG:250 == 1 
+	CFLAG:咲夜:200 = 2
+	PRINTFORML 「%CALLNAME_K9(咲夜_対象)%就是这种感觉%POLITE_K9("...呜", "……❤")%。呵呵呵」
+	;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%って、こんな感じ%POLITE_K9("なのね", "なんですね")%。ふふっ」
+	PRINTFORML 「总觉得好痒%POLITE_K9("わ", "ですね")%……」
+	;TranslatedMark 「何だかくすぐったい%POLITE_K9("わ", "ですね")%……」
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+IF IS_SLAVE(咲夜) || ( CHECK_K9("敬語") && IS_LOVER(咲夜) )
+	PRINTDATAL
+		DATAFORM 「晚上的邀请？随时都可以哦。晚安」
+		;TranslatedMark 「またいつでもお招きください。おやすみなさいませ」
+		DATAFORM 「呜。好寂寞啊……晚安，%CALLNAME_K9(咲夜_対象)%」
+		;TranslatedMark 「ふふっ。寂しいわ……おやすみなさいませ、%CALLNAME_K9(咲夜_対象)%」
+		DATAFORM 「谢谢您。真是对不起呢，让下一个孩子久等了，那么我先告辞了。晚安」
+		;TranslatedMark 「ありがとうございました。次の子をお待たせしたら申し訳ないので、下がります。おやすみなさいませ」
+		DATAFORM 「哎呀。已经这个时间了……可以稍微停一下吗？先说好了，并不是受不了……晚安」
+		;TranslatedMark 「あら。もうこんな時間……少し止めてもよろしいでしょうか？　ふふっ……おやすみなさいませ」
+		DATAFORM 「今晚的%CALLNAME_K9(咲夜_対象)%也很棒。晚安」
+		;TranslatedMark 「今夜も%CALLNAME_K9(咲夜_対象)%は素敵でした。おやすみなさいませ」
+		DATAFORM 「谢谢您。晚安。……哎呀。请睡吧。在因疲倦倒下之前」
+		;TranslatedMark 「ありがとうございました。おやすみなさいませ。……あら。どうぞ、眠ってください。それまでここにいます」
+		DATAFORM 「%CALLNAME_K9(咲夜_対象)%。明天的早饭好像比平时要豪华。请好好睡一觉，调整好肚子的状态」
+		;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%。明日の朝食はいつもより豪華になってしまいそうです。ゆっくり眠っておなかの調子を整えてください」
+		DATAFORM 「晚安。%CALLNAME_K9(咲夜_対象)%」
+		;TranslatedMark 「おやすみなさいませ。%CALLNAME_K9(咲夜_対象)%」
+	ENDDATA
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ELSEIF CHECK_K9("敬語")
+	PRINTDATAL
+		DATAFORM 「晚上的邀请？随时都可以哦。晚安」
+		;TranslatedMark 「またいつでもお招きください。おやすみなさいませ」
+		DATAFORM 「谢谢您。那么，明天见。晚安」
+		;TranslatedMark 「ありがとうございました。では、下がります。おやすみなさいませ」
+		DATAFORM 「哎呀。已经这个时间了……晚安」
+		;TranslatedMark 「あら。もうこんな時間……おやすみなさいませ」
+		DATAFORM 「今晚的%CALLNAME_K9(咲夜_対象)%也很棒。晚安」
+		;TranslatedMark 「今夜も%CALLNAME_K9(咲夜_対象)%は素敵でした。おやすみなさいませ」
+		DATAFORM 「谢谢您。晚安」
+		;TranslatedMark 「ありがとうございました。おやすみなさいませ」
+		DATAFORM 「晚安。%CALLNAME_K9(咲夜_対象)%」
+		;TranslatedMark 「おやすみなさいませ。%CALLNAME_K9(咲夜_対象)%」
+	ENDDATA
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ELSEIF CFLAG:咲夜:好感度 >= 800
+	PRINTDATAL
+		DATAFORM 「你在说什么呢？“回去会寂寞”？呵呵」
+		;TranslatedMark 「ふふっ。帰るのが寂しいなんてね」
+		DATAFORM 「很开心啊。下一个孩子在等着我，我要回去了。……呵呵。开玩笑的。请好好休息」
+		;TranslatedMark 「楽しかったわ。次の子が待ってそうだし、帰るわね。……ふふ。冗談よ。ゆっくり休んでちょうだい」
+		DATAFORM 「哎呀。已经这个时间了。……稍微停一下吧。不想就此结束？你是笨蛋吗？」
+		;TranslatedMark 「あら。もうこんな時間なのね。……少し止めちゃおうかしら」
+		DATAFORM 「真了不起呢，%CALLNAME_K9(咲夜_対象)%。我第一次知道不想离开这个词的意思。……晚安」
+		;TranslatedMark 「あなたってすごいわね。離れたくないなんて言葉の意味、初めて知ったわ。……おやすみなさい」
+		DATAFORM 「度过了美好的时光。多亏了%CALLNAME_K9(咲夜_対象)%」
+		;TranslatedMark 「いい時間が過ごせたわ。%CALLNAME_K9(咲夜_対象)%のおかげね」
+		DATAFORM 「晚安。%CALLNAME_K9(咲夜_対象)%」
+		;TranslatedMark 「おやすみなさい。%CALLNAME_K9(咲夜_対象)%」
+	ENDDATA
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ELSE
+	PRINTDATAL
+		DATAFORM 「那么，晚安」
+		;TranslatedMark 「じゃ、おやすみなさい」
+		DATAFORM 「哎呀。是吗？再见」
+		;TranslatedMark 「あら。そう？　さよなら」
+		DATAFORM 「呼，好困啊」
+		;TranslatedMark 「ふう、眠いわ」
+	ENDDATA
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+;─────────────────────────────────────── 
+;●終了
+;─────────────────────────────────────── 
+RESETCOLOR
+RETURN 0
+

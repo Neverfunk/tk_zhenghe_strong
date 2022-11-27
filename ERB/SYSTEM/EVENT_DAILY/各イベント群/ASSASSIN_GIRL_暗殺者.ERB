@@ -1,0 +1,152 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_ASSASSIN_GIRL_RATE()
+RETURN 30
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_ASSASSIN_GIRL_DECISION()
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+SIF DVAR:暗殺者_完了フラグ
+	RETURN 0
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_ASSASSIN_GIRL_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_ASSASSIN_GIRL
+#DIM 対象
+
+PRINTFORMW 从諜報員那得知了暗殺者的下一个目標為你
+PRINTFORML 怎麼辦？
+CALL ASK_MULTI("設置陷阱" ,"用兵固防" ,"隠藏行踪")
+IF RESULT == 2
+	PRINTFORMW 暂时将自己的行踪隠藏了起来
+	PRINTFORMW …虽然没有受到傷害，但在這期間没能行動
+	CALL ADD_COOLTIME(MASTER, 1)
+ELSEIF RESULT == 1
+	PRINTFORMW 用士兵暫時巩固了周囲的防御
+	PRINTFORMW …虽然没有受到傷害，但却被周圍称為膽小鬼
+	FOR LOCAL, 1, MAX_COUNTRY
+		CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -50, 50)
+	NEXT
+	CALL COLOR_PRINTW("因为有懦夫的将领，其他国家的评价下降了…", カラー_注意)
+ELSEIF RESULT == 0
+	PRINTFORMW 設置了陷阱
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW ・
+	LOCAL = ((ABL:MASTER:防衛 + ABL:MASTER:知略) / 10 * (RAND:6 + 1)) - (5 * (RAND:10 + 1))
+	IF LOCAL <= 0
+		PRINTFORMW 失敗了……
+		PRINTFORMW 虽然及时得到了援助，但却还是受了重傷。
+		CALL ADD_COOLTIME(MASTER, 3)
+		ABL:MASTER:武闘 = MAX(ABL:MASTER:武闘 - 2, 0)
+		CALL COLOR_PRINTW("武闘下降了2…", カラー_警告)
+	ELSEIF LOCAL < 10
+		PRINTFORMW 成功了!
+		PRINTFORMW 虽然暗殺者逃脱了，但不会再来了
+		CALL PRINT_ADD_EXP(MASTER, "防衛経験値", RAND:8 + 1, 1)
+		CALL PRINT_ADD_EXP(MASTER, "知略経験値", RAND:8 + 1, 1)
+		CALL TRAIN_AUTO_ABLUP(MASTER)
+		DVAR:暗殺者_完了フラグ = 1
+	ELSEIF LOCAL >= 10
+		PRINTFORMW 成功地抓住了暗殺者！
+		PRINTFORML 暗殺者竟然是可怜的少女
+		PRINTFORMW 被锁鏈緊緊缠绕的少女狠狠的瞪着你
+		PRINTFORML 怎麼辦？
+		CALL ASK_MULTI_JUDGE("處刑", 1,"交給士兵", 1,"侵犯", HAS_PENIS(MASTER))
+		IF RESULT == 0
+			PRINTFORMW 不能置之不理
+			PRINTFORMW 你把她処死了
+			FOR LOCAL, 1, MAX_COUNTRY
+				CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 50, -50)
+			NEXT
+			CALL COLOR_PRINTW("成功地反殺暗殺者作為你的戰功，他國的評價因而上升了", カラー_注意)
+		ELSEIF RESULT == 1
+			PRINTFORMW 交給士兵
+			PRINTFORMW 有新鲜的肉便器讓士兵们欢呼雀跃起来
+			COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 3000
+			CALL COLOR_PRINTW("她受到好评，志愿兵増加了三千人", カラー_注意)
+			PRINTFORMW
+		ELSEIF RESULT == 2
+			PRINTFORMW 作為報复你侵犯了她
+			PRINTFORML 被训练過的暗杀者，在被侵犯的时間里也緊緊的闭着嘴，一直忍耐着。
+			PRINTFORML 但是受過训练的緊致肉体十分結実、作為肉玩具讓你十分享受
+			PRINTFORML 在陰道内毫不留情的発射讓她的身体微微颤抖発出小声的呻吟
+			PRINTFORMW 从股間流出混杂着红色液体的白濁物、她依然坚強的颤抖着
+			IF !(ABL:MASTER:性技 + RAND:3 >= 4)
+				PRINTFORMW 你厌倦了她的反応，你把她売給了收藏家
+				MONEY += 10000
+				CALL COLOR_PRINT("她賣了10000金", カラー_注意)
+				PRINTFORMW 
+			ELSE
+				PRINTFORML 你无论怎麼説都想讓這孩子屈服
+				PRINTFORML 抱住她疲惫不堪的她，就搬到調教房間去了
+				PRINTFORMW 即使在調教房間里她也很坚強，但那肩膀却微微地颤抖着……
+				PRINTFORML 
+				PRINTFORMW 你把她锁起来就馬上開始調教了
+				PRINTFORML 时而激烈、时而温柔、时而使用手指、或者使用工具
+				PRINTFORML 不断的反复爱抚、毫不留情地用肉棒挖着G点
+				PRINTFORMW 服薬、精心准备接吻、給予疼痛、放置play
+				PRINTFORML 只要有空就去她的身辺，一辺改変自己的手法一辺不断的疼爱
+				PRINTFORML 她虽然也很努力的忍耐，但身体却越来越敏感了。
+				PRINTFORMW 不久身体就完全屈服了、无法控制的発出喘息并且不断扭動着身体
+				PRINTFORML 在那个情况下你猛攻她的弱点的話、就会在无法忍耐的嬌喘声里絶顶
+				PRINTFORML 対由于羞耻和屈辱発抖的少女、你温柔地慢慢地爱抚、霊敏度不断的上升
+				PRINTFORMW 然後在最後變得更激烈、為了讓她去而不斷反覆侵犯、在她內心刻上女人的快樂
+				PRINTFORMW 当天、她在反复的潮吹絶顶中、从暗杀者堕落到雌犬
+				PRINTFORML 
+				PRINTFORML 因為你的技術她完全成為了順服于你的雌犬
+				PRINTFORMW 现在自己開発自己的身体、像狗一樣不断蹭着期望获得奨励
+				PRINTFORML 怎麼辦？
+				CALL ASK_YN("売掉", "成為同伴")
+				IF RESULT == 0
+					PRINTFORMW 因為厌倦了，就売給了收藏家
+					CALL COLOR_PRINT("被調教好的她売了100000金", カラー_注意)
+					PRINTFORMW
+					MONEY += 100000
+				ELSEIF RESULT == 1
+					PRINTFORML 既然到手了就舍不得放掉了
+					PRINTFORML 你决定把她当成伙伴
+					PRINTFORMW 告诉她以后也会好好疼爱她的，她高興地點頭了
+					CALL CREATE_RANDOM_CHARA(0,0,1)
+					SIF RESULT == -1
+						RETURN 1
+					対象 = RESULT
+					ABL:対象:武闘 = 40 + RAND:30
+					ABL:対象:防衛 = 30 + RAND:20
+					ABL:対象:知略 = 30 + RAND:20
+					ABL:対象:政治 = 10 + RAND:10
+					ABL:対象:歌唱 = 15 + RAND:20
+					ABL:対象:料理 = 15 + RAND:20
+					CALL LEARN_SKILL_GENERAL_BY_NAME(対象, "偷袭＋＋")
+					TALENT:対象:合意 = 1
+					CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属, 1)
+					CFLAG:対象:好感度 = 1200
+					CFLAG:対象:依存度 = 1000
+					CFLAG:対象:従属度 = 3000
+					CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+					CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+					CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+					CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+					CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+					CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴")
+					CALL COLOR_PRINT(@"%ANAME(対象)%加入我軍了", カラー_注意)
+					PRINTFORMW
+				ENDIF
+			ENDIF
+		ENDIF
+		DVAR:暗殺者_完了フラグ = 1
+	ENDIF
+ENDIF
+RETURN 1

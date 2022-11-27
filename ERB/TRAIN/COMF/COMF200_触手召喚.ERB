@@ -1,0 +1,369 @@
+﻿;触手召喚
+
+;-------------------------------------------------
+;コマンド名称
+;-------------------------------------------------
+@COM_NAME200
+RESULTS:0 = 触手召喚
+RESULTS:1 = 触手召喚(被役)
+RESULTS:2 = 触手召喚(使役)
+RESULTS:3 = 触手召喚(被动)
+RESULTS:4 = 触手召喚(使役)
+RESULTS:5 = 触手召喚(展示)
+
+;-------------------------------------------------
+;選択可否判定
+;-------------------------------------------------
+@COM_ABLE200
+;共通部分
+CALL COM_ABLE_COMMON(200)
+SIF RESULT == 0
+	RETURN 0
+;プレイヤーは1人以上
+SIF MPLY_NUM <= 0
+	RETURN 0
+;全てのプレイヤーについて判定
+FOR LOCAL:0, 0, MPLY_NUM
+	;行動不能なら不可
+	SIF !IS_PLAYABLE(MPLY:(LOCAL:0))
+		RETURN 0
+	;妖術知識が必要
+	SIF !TALENT:(MPLY:(LOCAL:0)):妖術知識
+		RETURN 0
+	;既に触手召喚中なら不可
+	SIF IS_EQUIP_PLAYER(MPLY:(LOCAL:0), 200)
+		RETURN 0
+NEXT
+RETURN 1
+
+;-------------------------------------------------
+;メイン処理
+;-------------------------------------------------
+@COM200
+;実行判定
+CALL COM_ORDER_COMMON
+SIF RESULT == 0
+	RETURN 0
+
+;全てのプレイヤーについて判定
+FOR LOCAL:0, 0, MPLY_NUM
+	EXP:(MPLY:(LOCAL:0)):妖術経験値 += 1
+	EXP:(MPLY:(LOCAL:0)):触手経験値 += 1
+NEXT
+
+RETURN 1
+
+;-------------------------------------------------
+;継続コマンドかどうかを設定
+;-------------------------------------------------
+@COM_IS_EQUIP200
+;継続コマンドかつフィルタリング不可
+RETURN 2
+
+;-------------------------------------------------
+;継続状態の処理
+;-------------------------------------------------
+@COM_EQUIP200(ARG:0)
+
+;-------------------------------------------------
+;継続中の表示
+;-------------------------------------------------
+@EQUIP_MESSAGE200(ARG:0)
+RESULTS = %EQUIP_PLAYER_ANAME(ARG:0)%召唤了触手
+;RESULTS = %EQUIP_PLAYER_ANAME(ARG:0)%が触手を召喚中
+
+;-------------------------------------------------
+;継続中の地の文(前文)
+;-------------------------------------------------
+@COM_TEXT_BEFORE_EQUIP200(ARG:0)
+
+;-------------------------------------------------
+;継続を解除する前にやらなくちゃならんこと
+;-------------------------------------------------
+@COM_BEFORE_RELEASE_EQUIP200(ARG:0)
+;触手召喚を解除したキャラがプレイヤーとなっている全ての触手系EQUIPを解除
+FOR LOCAL:0, 0, MEQUIP_TARGET_NUM:(ARG:0)
+	FOR LOCAL:1, 201, 215
+		CALL RELEASE_EQUIP_EX(LOCAL:1, MEQUIP_PLAYER:(ARG:0):(LOCAL:0), -1)
+	NEXT
+NEXT
+
+;-------------------------------------------------
+;継続を解除したときの地の文
+;-------------------------------------------------
+@COM_TEXT_RELEASE_EQUIP200(ARG:0)
+PRINTFORMW %EQUIP_PLAYER_ANAME(ARG:0)%让触手回去了
+;TranslatedMark %EQUIP_PLAYER_ANAME(ARG:0)%は触手を戻した
+
+;-------------------------------------------------
+;固有の実行判定
+;-------------------------------------------------
+@COM_ORDER_PLAYER200(ARG:0)
+;実行値の設定
+TCVAR:(ARG:0):25 = 120
+
+;共通部分
+CALL COM_ORDER(ARG:0)
+
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲望Lv{ABL:(ARG:0):欲望}", ABL:(ARG:0):欲望 * 4)
+CALL COM_ORDER_ELEMENT(ARG:0, @"露出Lv{ABL:(ARG:0):露出}", ABL:(ARG:0):露出 * 2)
+
+IF TALENT:(ARG:0):自尊心高
+	CALL COM_ORDER_ELEMENT(ARG:0, "自尊心高", -12)
+ENDIF
+IF TALENT:(ARG:0):好奇心
+	CALL COM_ORDER_ELEMENT(ARG:0, "好奇心", 10)
+ENDIF
+IF TALENT:(ARG:0):保守的
+	CALL COM_ORDER_ELEMENT(ARG:0, "保守的", -20)
+ENDIF
+IF TALENT:(ARG:0):害羞
+	CALL COM_ORDER_ELEMENT(ARG:0, "害羞", -20)
+ENDIF
+IF TALENT:(ARG:0):不知羞恥
+	CALL COM_ORDER_ELEMENT(ARG:0, "不知羞恥", 25)
+ENDIF
+IF TALENT:(ARG:0):貞操観念
+	CALL COM_ORDER_ELEMENT(ARG:0, "貞操観念", -15)
+ENDIF
+IF TALENT:(ARG:0):不在乎貞操
+	CALL COM_ORDER_ELEMENT(ARG:0, "不在乎貞操", 15)
+ENDIF
+IF TALENT:(ARG:0):喜歡引人注目
+	CALL COM_ORDER_ELEMENT(ARG:0, "喜歡引人注目", 12)
+ENDIF
+IF TALENT:(ARG:0):否定快感
+	CALL COM_ORDER_ELEMENT(ARG:0, "否定快感", -15)
+ENDIF
+
+IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_サド) || GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_マゾ) || ABL:(ARG:0):倒錯度 >= 800
+	CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 40)
+ELSEIF ABL:(ARG:0):倒錯度 >= 500
+	CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 30)
+ELSEIF ABL:(ARG:0):倒錯度 >= 300
+	CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 20)
+ELSEIF ABL:(ARG:0):倒錯度 >= 100
+	CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 10)
+ELSE
+	CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 0)
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;地の文(前文)
+;-------------------------------------------------
+@COM_TEXT_BEFORE200
+FOR LOCAL:0, 0, MPLY_NUM
+	PRINTFORML %ANAME(MPLY:(LOCAL:0))%将触手召唤了出来
+	;TranslatedMark %ANAME(MPLY:(LOCAL:0))%は触手を召喚した
+NEXT
+WAIT
+
+;--------------------------------------------------------
+;地の文(パラメータ・刻印変動後)
+;--------------------------------------------------------
+@COM_TEXT_LAST200
+
+FOR LOCAL:0, 0, MTAR_NUM
+	LOCAL:1 = MTAR:(LOCAL:0)
+
+	IF (LOCAL:1 != MASTER || CONFIG:441) && !IS_ANIMAL(LOCAL:1)
+		IF TCVAR:(LOCAL:1):52
+	 		;気絶中
+			PRINTFORML 触手慢慢地缠上了已经失去意识的%ANAME(LOCAL:1)%的身体
+			;TranslatedMark 意識を失った%ANAME(LOCAL:1)%の体に触手はゆっくり忍び寄った
+		ELSEIF TALENT:(LOCAL:1):空虚 || TALENT:(LOCAL:1):崩壊
+	 		;虚ろ、崩壊中
+			PRINTFORML 触手慢慢地缠上了空虚的%ANAME(LOCAL:1)%那四肢无力的身体
+			;TranslatedMark 虚ろなまま四肢を放り出している%ANAME(LOCAL:1)%の体に触手はゆっくり忍び寄った
+		ELSEIF IS_EQUIP_TARGET(MTAR:0, 84)
+			;目隠し中
+			IF  TALENT:(LOCAL:1):自尊心高 ||TALENT:(LOCAL:1): 害羞 ||TALENT:(LOCAL:1): 保守的 ||TALENT:(LOCAL:1): 貞操観念 ||TALENT:(LOCAL:1): 胆怯
+				PRINTFORML 不知是不是感觉到了自身的危险，%ANAME(LOCAL:1)%的动作有些僵硬了起来
+				;TranslatedMark 身の危険を感じ取ったのか、%ANAME(LOCAL:1)%は硬く身構えた
+			ELSEIF TALENT:(LOCAL:1):好奇心 ||TALENT:(LOCAL:1): 喜歡引人注目 ||TALENT:(LOCAL:1): 楽観的 ||TALENT:(LOCAL:1): 傲慢
+				PRINTFORML 也许是在意触手发出的声音吧，%ANAME(LOCAL:1)%歪了歪头
+				;TranslatedMark 触手が立てた音が気になるのか、%ANAME(LOCAL:1)%は首を傾けている
+			ELSE
+				PRINTFORML 看不见周围的%ANAME(LOCAL:1)%看起来十分不安
+				;TranslatedMark 周りが見えない%ANAME(LOCAL:1)%は不安そうにしている
+			ENDIF
+		ELSEIF ABL:(LOCAL:1):触手 >= 10
+			;触手は恋人
+			IF TALENT:(LOCAL:1):自尊心高 || TALENT:(LOCAL:1): 傲嬌 || TALENT:(LOCAL:1): 難以越過的底線
+				PRINTFORML %ANAME(LOCAL:1)%闭上眼睛，对着面前的触手，轻轻地吻了一下
+				;TranslatedMark %ANAME(LOCAL:1)%は目を伏せると現われた触手を手に取り、軽く口付けをした
+			ELSEIF TALENT:(LOCAL:1):貞操観念 || TALENT:(LOCAL:1):害羞 || TALENT:(LOCAL:1):感情缺乏
+				PRINTFORML %ANAME(LOCAL:1)%害羞地红着脸，静静的等待着被触手袭击
+				;TranslatedMark %ANAME(LOCAL:1)%は耳まで赤くしつつ、股を触手に向けて襲われるのを待っている
+			ELSEIF TALENT:(LOCAL:1):不在乎貞操 || TALENT:(LOCAL:1):人気 || TALENT:(LOCAL:1): 喜歡引人注目
+				PRINTFORML %ANAME(LOCAL:1)%用兴奋的表情将大腿向触手张开，用手指分开秘部诱惑着它
+				;TranslatedMark %ANAME(LOCAL:1)%は上気した顔で触手に股を向け、指で秘部を開いて誘惑している
+			ELSEIF TALENT:(LOCAL:1):胆怯 || TALENT:(LOCAL:1):老実 || TALENT:(LOCAL:1): 献身的
+				PRINTFORML %ANAME(LOCAL:1)%用湿润的眼睛注视着触手。好象已经完全被俘虏了
+				;TranslatedMark %ANAME(LOCAL:1)%は潤んだ目で触手を見つめている。完全に虜になっているようだ
+			ELSEIF TALENT:(LOCAL:1):好奇心 || TALENT:(LOCAL:1): 傲慢 || TALENT:(LOCAL:1): 楽観的
+				PRINTFORML %ANAME(LOCAL:1)%一直在索求着触手来侵犯自己。好象已经完全被俘虏了
+				;TranslatedMark %ANAME(LOCAL:1)%は触手に自分を犯すようねだっている。完全に虜になっているようだ
+			ELSE
+				PRINTFORML %ANAME(LOCAL:1)%做出一副期待的表情。正在等待着被触手侵犯
+				;TranslatedMark %ANAME(LOCAL:1)%からはドキドキと鼓動の音が聞こえてくる。触手に犯される事を期待しているようだ
+			ENDIF
+		ELSEIF ABL:(LOCAL:1):触手 >= 9 || GETBIT(TALENT:(LOCAL:1):淫乱系, 素質_淫乱_苗床)
+			;触手は盟友
+			IF TALENT:(LOCAL:1):自尊心高 || TALENT:(LOCAL:1): 傲嬌 || TALENT:(LOCAL:1): 難以越過的底線
+				PRINTFORML %ANAME(LOCAL:1)%羞红着脸，自己把身体迎向了触手
+				;TranslatedMark %ANAME(LOCAL:1)%は顔を赤らめると、触手に自分の体を差し出した
+			ELSEIF TALENT:(LOCAL:1):貞操観念 || TALENT:(LOCAL:1):害羞 || TALENT:(LOCAL:1):感情缺乏
+				PRINTFORML %ANAME(LOCAL:1)%或许是正在想象接下来会发生的事情，摩擦着大腿
+				;TranslatedMark %ANAME(LOCAL:1)%はこれから行われる事を想像したのか股をもじもじしている
+			ELSEIF TALENT:(LOCAL:1):不在乎貞操 || TALENT:(LOCAL:1):人気 || TALENT:(LOCAL:1): 喜歡引人注目
+				PRINTFORML %ANAME(LOCAL:1)%装作被吓呆了一样，做出毫无防备的样子期待着被袭击
+				;TranslatedMark %ANAME(LOCAL:1)%は大げさに驚いて見せた。無防備なポーズで襲われるのを待っている
+			ELSEIF TALENT:(LOCAL:1):胆怯 || TALENT:(LOCAL:1):老実 || TALENT:(LOCAL:1): 献身的
+				PRINTFORML %ANAME(LOCAL:1)%用陶醉的眼神看着出现的触手。
+				;TranslatedMark %ANAME(LOCAL:1)%は現われた触手を陶酔したような目で見つめている。
+			ELSEIF TALENT:(LOCAL:1):好奇心 || TALENT:(LOCAL:1): 傲慢 || TALENT:(LOCAL:1): 楽観的
+				PRINTFORML %ANAME(LOCAL:1)%对出现的触手露出了秘缝
+				;TranslatedMark %ANAME(LOCAL:1)%は現われた触手に対して秘部をさらけ出した
+			ELSE
+				PRINTFORML %ANAME(LOCAL:1)%和触手很亲热的接触着
+				;TranslatedMark %ANAME(LOCAL:1)%は触手に手馴れた様子で接している
+			ENDIF
+		ELSEIF ABL:(LOCAL:1):触手 >= 7
+			;触手は主人
+			IF TALENT:(LOCAL:1):自尊心高 || TALENT:(LOCAL:1): 傲嬌 || TALENT:(LOCAL:1): 難以越過的底線
+				PRINTFORML %ANAME(LOCAL:1)%凝视着触手，像放弃了一样交出了身体
+				;TranslatedMark %ANAME(LOCAL:1)%は触手を見つめると、諦めたように身を差し出した
+			ELSEIF TALENT:(LOCAL:1):貞操観念 || TALENT:(LOCAL:1):害羞 || TALENT:(LOCAL:1):感情缺乏
+				PRINTFORML %ANAME(LOCAL:1)%将手放在胸前，轻轻的呼吸着，等待着触手的行动
+				;TranslatedMark %ANAME(LOCAL:1)%は胸に手を置いて小さく呼吸しながら、触手の行動を待っている
+			ELSEIF TALENT:(LOCAL:1):不在乎貞操 || TALENT:(LOCAL:1):人気 || TALENT:(LOCAL:1): 喜歡引人注目
+				PRINTFORML %ANAME(LOCAL:1)%对触手摆出姿势，装作被袭击的样子
+				;TranslatedMark %ANAME(LOCAL:1)%は触手に対しポーズをとって、襲われるふりをしている
+			ELSEIF TALENT:(LOCAL:1):胆怯 || TALENT:(LOCAL:1):老実 || TALENT:(LOCAL:1): 献身的
+				PRINTFORML %ANAME(LOCAL:1)%羞涩地垂下视线，向着触手张开了大腿
+				;TranslatedMark %ANAME(LOCAL:1)%は照れたように視線を斜めにすると、触手に向けて股を開いた
+			ELSEIF TALENT:(LOCAL:1):好奇心 || TALENT:(LOCAL:1): 傲慢 || TALENT:(LOCAL:1): 楽観的
+				PRINTFORML %ANAME(LOCAL:1)%正在享受着触手抚摸自己的感觉
+				;TranslatedMark %ANAME(LOCAL:1)%は自ら触手に触れて触感を楽しんでいる
+			ELSE
+				PRINTFORML %ANAME(LOCAL:1)%用充满期待和不安的眼神注视着触手
+				;TranslatedMark %ANAME(LOCAL:1)%は期待と不安が混じった目で触手を見つめている
+			ENDIF
+		ELSEIF ABL:(LOCAL:1):触手 >= 5
+			;触手はセフレ
+			IF TALENT:(LOCAL:1):自尊心高 || TALENT:(LOCAL:1): 傲嬌 || TALENT:(LOCAL:1): 難以越過的底線
+				PRINTFORML %ANAME(LOCAL:1)%一看见触手脸就立即红了起来
+				;TranslatedMark %ANAME(LOCAL:1)%は触手を見るとたちまち赤くなった
+			ELSEIF TALENT:(LOCAL:1):貞操観念 || TALENT:(LOCAL:1):害羞 || TALENT:(LOCAL:1):感情缺乏
+				PRINTFORML %ANAME(LOCAL:1)%看到触手，红着脸将视线移向旁边
+				;TranslatedMark %ANAME(LOCAL:1)%は触手を見ると、赤い顔で視線を横へずらした
+			ELSEIF TALENT:(LOCAL:1):不在乎貞操 || TALENT:(LOCAL:1):人気 || TALENT:(LOCAL:1): 喜歡引人注目
+				PRINTFORML %ANAME(LOCAL:1)%扭扭捏捏的，想向触手走去
+				;TranslatedMark %ANAME(LOCAL:1)%はもじもじしつつ、触手へ歩み寄ろうとしている
+			ELSEIF TALENT:(LOCAL:1):胆怯 || TALENT:(LOCAL:1):老実 || TALENT:(LOCAL:1): 献身的
+				PRINTFORML %ANAME(LOCAL:1)%对出现的触手，请求温柔一点
+				;TranslatedMark %ANAME(LOCAL:1)%は現われた触手に対し、優しくするよう頼み込んでいる
+			ELSEIF TALENT:(LOCAL:1):好奇心 || TALENT:(LOCAL:1): 傲慢 || TALENT:(LOCAL:1): 楽観的
+				PRINTFORML %ANAME(LOCAL:1)%用期待的眼神看着触手的动作
+				;TranslatedMark %ANAME(LOCAL:1)%は期待した目をしながら触手の動きを伺っている
+			ELSE
+				PRINTFORML %ANAME(LOCAL:1)%对出现的触手的行动感到困惑
+				;TranslatedMark %ANAME(LOCAL:1)%は現われた触手に対する行動に戸惑っている
+			ENDIF
+		ELSEIF ABL:(LOCAL:1):触手 >= 3
+			;触手は友達以上恋人未満
+			IF TALENT:(LOCAL:1):自尊心高 || TALENT:(LOCAL:1): 傲嬌 || TALENT:(LOCAL:1): 難以越過的底線
+				PRINTFORML %ANAME(LOCAL:1)%红着脸从触手的身上移开视线
+				;TranslatedMark %ANAME(LOCAL:1)%は少し赤い顔で触手から目を背けている
+			ELSEIF TALENT:(LOCAL:1):貞操観念 || TALENT:(LOCAL:1):害羞 || TALENT:(LOCAL:1):感情缺乏
+				PRINTFORML %ANAME(LOCAL:1)%带着稍许羞红的脸叹了一口气
+				;TranslatedMark %ANAME(LOCAL:1)%は少し赤い顔でため息を漏らした
+			ELSEIF TALENT:(LOCAL:1):不在乎貞操 || TALENT:(LOCAL:1):人気 || TALENT:(LOCAL:1): 喜歡引人注目
+				PRINTFORML %ANAME(LOCAL:1)%带着略微发红的表情注视着触手
+				;TranslatedMark %ANAME(LOCAL:1)%は少し赤味が掛かった顔で触手を見つめている
+			ELSEIF TALENT:(LOCAL:1):胆怯 || TALENT:(LOCAL:1):老実 || TALENT:(LOCAL:1): 献身的
+				PRINTFORML %ANAME(LOCAL:1)%红着脸，含着泪的站在那里
+				;TranslatedMark %ANAME(LOCAL:1)%は赤い顔で涙を浮かべながら立ち尽くしている
+			ELSEIF TALENT:(LOCAL:1):好奇心 || TALENT:(LOCAL:1): 傲慢 || TALENT:(LOCAL:1): 楽観的
+				PRINTFORML %ANAME(LOCAL:1)%讲着攻击性的话语来挑衅触手
+				;TranslatedMark %ANAME(LOCAL:1)%は軽口を叩きながら触手を挑発している
+			ELSE
+				PRINTFORML %ANAME(LOCAL:1)%想起了触手给予的快乐，脸慢慢的红了起来
+				;TranslatedMark %ANAME(LOCAL:1)%は触手に与えられた快楽を思い出し、顔を赤らめている
+			ENDIF
+		ELSEIF ABL:(LOCAL:1):触手 >= 2
+			;触手注意報
+			IF TALENT:(LOCAL:1):自尊心高 || TALENT:(LOCAL:1): 傲嬌 || TALENT:(LOCAL:1): 難以越過的底線
+				PRINTFORML %ANAME(LOCAL:1)%一看见触手就叹着气皱起了眉头
+				;TranslatedMark %ANAME(LOCAL:1)%は触手を見ると眉をひそめてため息をついた
+			ELSEIF TALENT:(LOCAL:1):貞操観念 || TALENT:(LOCAL:1):害羞 || TALENT:(LOCAL:1):感情缺乏
+				PRINTFORML %ANAME(LOCAL:1)%在想方设法的寻找着能逃离现状的办法
+				;TranslatedMark %ANAME(LOCAL:1)%はこの場をどうにか切り抜ける方法を探っている
+			ELSEIF TALENT:(LOCAL:1):不在乎貞操 || TALENT:(LOCAL:1):人気 || TALENT:(LOCAL:1): 喜歡引人注目
+				PRINTFORML %ANAME(LOCAL:1)%眼里含着泪水的着向触手
+				;TranslatedMark %ANAME(LOCAL:1)%は涙を浮かべつつ触手を睨んでいる
+			ELSEIF TALENT:(LOCAL:1):胆怯 || TALENT:(LOCAL:1):老実 || TALENT:(LOCAL:1): 献身的
+				PRINTFORML %ANAME(LOCAL:1)%摇着头，想和触手拉开距离
+				;TranslatedMark %ANAME(LOCAL:1)%は首をふるふる振りつつ、触手から距離を取ろうとしている
+			ELSEIF TALENT:(LOCAL:1):好奇心 || TALENT:(LOCAL:1): 傲慢 || TALENT:(LOCAL:1): 楽観的
+				PRINTFORML %ANAME(LOCAL:1)%一边流着冷汗一边警戒着触手
+				;TranslatedMark %ANAME(LOCAL:1)%は汗をかきながら触手を警戒している
+			ELSE
+				PRINTFORML %ANAME(LOCAL:1)%想起了触手给予的快乐，脸慢慢的红了起来
+				;TranslatedMark %ANAME(LOCAL:1)%は触手に与えられた快楽を思い出し、顔を赤らめている
+			ENDIF
+		ELSEIF ABL:(LOCAL:1):触手 >= 1
+			;触手は知り合い
+			IF TALENT:(LOCAL:1):自尊心高 || TALENT:(LOCAL:1): 傲嬌 || TALENT:(LOCAL:1): 難以越過的底線
+				PRINTFORML %ANAME(LOCAL:1)%盯着出现的触手，用恶劣的语言攻击着
+				;TranslatedMark %ANAME(LOCAL:1)%は現われた触手を睨み、悪態をついている
+			ELSEIF TALENT:(LOCAL:1):貞操観念 || TALENT:(LOCAL:1):害羞 || TALENT:(LOCAL:1):感情缺乏
+				PRINTFORML %ANAME(LOCAL:1)%警戒的绷紧身体，一边流着冷汗一边提防着
+				;TranslatedMark %ANAME(LOCAL:1)%は身を強張らせると、冷や汗を流しつつあとずさりをした
+			ELSEIF TALENT:(LOCAL:1):不在乎貞操 || TALENT:(LOCAL:1):人気 || TALENT:(LOCAL:1): 喜歡引人注目
+				PRINTFORML %ANAME(LOCAL:1)%想从出现的触手身旁逃走，却被抓住脚摔倒在了地上
+				;TranslatedMark %ANAME(LOCAL:1)%は現われた触手から逃げようとしたが、足を掴まれて転んだ
+			ELSEIF TALENT:(LOCAL:1):胆怯 || TALENT:(LOCAL:1):老実 || TALENT:(LOCAL:1): 献身的
+				PRINTFORML %ANAME(LOCAL:1)%似乎回忆起了上次的记忆，眼中浮出了泪水
+				;TranslatedMark %ANAME(LOCAL:1)%は以前の記憶を思い出したのか、涙を浮かべてへたり込んだ
+			ELSEIF TALENT:(LOCAL:1):好奇心 || TALENT:(LOCAL:1): 傲慢 || TALENT:(LOCAL:1): 楽観的
+				PRINTFORML %ANAME(LOCAL:1)%颤抖着注视着触手
+				;TranslatedMark %ANAME(LOCAL:1)%は震えながらも触手を睨みつけている
+			ELSE
+				PRINTFORML %ANAME(LOCAL:1)%似乎想起了被触手弄脏的经验，浑身发抖着
+				;TranslatedMark %ANAME(LOCAL:1)%は触手に汚された経験を思い出したのか、身震いしている
+			ENDIF
+		ELSE
+			;触手は化物
+			IF TALENT:(LOCAL:1):自尊心高 || TALENT:(LOCAL:1): 傲慢
+				PRINTFORML %ANAME(LOCAL:1)%被可怕的触手吓到，用锐利的目光瞪着
+				;TranslatedMark %ANAME(LOCAL:1)%はおぞましい触手の姿に驚き、鋭く睨みつけた
+			ELSEIF TALENT:(LOCAL:1):貞操観念 || TALENT:(LOCAL:1):胆怯
+				PRINTFORML %ANAME(LOCAL:1)%对拥有毛骨悚然模样的触手发出了悲鸣
+				;TranslatedMark %ANAME(LOCAL:1)%はおぞましい触手の姿に悲鳴をあげた
+			ELSE
+				PRINTFORML %ANAME(LOCAL:1)%看着突然出现的可怕的触手，思考凝住了，不知如何是好
+				;TranslatedMark %ANAME(LOCAL:1)%はおぞましい触手が現われたのに対し思わず固まっている
+			ENDIF
+		ENDIF
+	ENDIF
+NEXT
+;-------------------------------------------------
+
+;コマンド区分
+;-------------------------------------------------
+
+@COM_AVAILABLE_WHEN200
+RETURN コマンド_ウフフ
+
+;--------------------
+;性嗜好用関数
+;--------------------
+@COM_PREFERENCE_PLAYER_200()
+RETURN POWER(2, 性的嗜好_触手で犯したい)
+
+@COM_PREFERENCE_TARGET_200()
+RETURN POWER(2, 性的嗜好_触手で犯されたい)
+

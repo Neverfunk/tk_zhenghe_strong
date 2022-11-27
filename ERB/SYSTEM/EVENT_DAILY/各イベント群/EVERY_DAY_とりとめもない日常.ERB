@@ -1,0 +1,729 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_EVERY_DAY_RATE()
+RETURN 25
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_EVERY_DAY_DECISION()
+SIF DAY < 5
+	RETURN 0
+;MASTERにペニスがある
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_EVERY_DAY_SETTARGET()
+
+FOR LOCAL, 0, CHARANUM
+	;女キャラ、かつ自国所属かつ捕虜でない、かつ動物でない
+	IF IS_FEMALE(LOCAL) && CFLAG:LOCAL:所属 == CFLAG:MASTER:所属 && !CFLAG:LOCAL:捕虜先 && !IS_ANIMAL(LOCAL) && CFLAG:LOCAL:面識
+		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+		DAILY_TARGET_NUM ++
+	ENDIF
+NEXT
+
+SIF DAILY_TARGET_NUM < 11
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_EVERY_DAY_GENRE()
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_EVERY_DAY
+#DIM 対象
+
+対象 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+
+SIF CFLAG:対象:面識 == 0
+	CFLAG:対象:面識 = 1
+
+IF CFLAG:対象:好感度 < 0 
+	PRINTFORML 虽然看到了%ANAME(対象)%，但对方却主动避开了
+	PRINTFORMW 至今为止%ANAME(MASTER)%的行为、似乎给对方留下了不好的印象…
+	RETURN
+ENDIF
+
+SELECTCASE RAND:20
+	;髪型
+	CASE 0
+		PRINTFORMW 在宫殿里散步的时候遇到了%ANAME(対象)%
+		PRINTFORML 但是总觉得印象和平时不太一样…
+		PRINTFORMW 对了，发型与往常不同
+		PRINTFORML 也许是察觉到了%ANAME(MASTER)%的视线，她转过头来，靠近了这里
+		PRINTFORMW 三言两语的打了声招呼，被问到『为了转换心情所以试着换了个发型，怎么样？』
+		PRINTFORML 怎麼辦？
+		CALL ASK_MULTI("称赞很合适" ,"似乎平时的发型更好" ,"摸摸头")
+		IF RESULT == 0
+			PRINTFORML 称赞道这样的发型很适合你，她听到后噗哧地笑了
+			PRINTFORMW 之后进行了一些无聊的对话，对方回到了工作中
+			PRINTFORML 
+			PRINTFORMW 那之后，偶尔也会看到换成那时的发型的她的样子
+			IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+				CFLAG:対象:好感度 += 50
+			ELSE
+				CFLAG:対象:従属度 += 50
+			ENDIF
+		ELSEIF RESULT == 1
+			PRINTFORML 告诉她平时的发型要更加合适一点
+			PRINTFORMW 她摸着头，『是这样吗』地小声嘟囔着
+			PRINTFORMW 之后进行了一些无聊的对话，对方回到了工作中
+		ELSE
+			PRINTFORML 一边称赞着很适合她，一边把手伸向她的头
+			LOCAL = RAND:300
+			IF CFLAG:対象:好感度 + LOCAL >= 1000 || CFLAG:対象:従属度 + LOCAL >= 1000
+				PRINTFORML 抚摸着她的头，她的脸颊上微微泛起了笑容
+				PRINTFORMW 之后进行了一些无聊的对话，对方回到了工作中
+				PRINTFORML 
+				PRINTFORMW 那之后，偶尔也会看到换成那时的发型的她的样子
+				IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+					CFLAG:対象:好感度 += 80
+				ELSE
+					CFLAG:対象:従属度 += 80
+				ENDIF
+			ELSE
+				PRINTFORML 但是却被她温柔地甩开了手
+				PRINTFORMW 果然是有点过分亲昵了吧
+				PRINTFORMW 之后进行了一些无聊的对话，对方回到了工作中
+			ENDIF
+		ENDIF
+	;うとうと
+	CASE 1
+		PRINTFORML 工作中，看见了%ANAME(対象)%迷迷糊糊的样子
+		PRINTFORML 怎麼辦？
+		CALL ASK_MULTI("吓一跳" ,"让她睡觉" ,"泡咖啡")
+		IF RESULT == 0
+			PRINTFORMW 想到恶作剧的%ANAME(MASTER)%静静地绕到她背后
+			PRINTFORML 
+			PRINTFORML …哇！
+			PRINTFORMW 
+			PRINTFORML 在背后大叫了一声，她吓得尖叫着跳了起来
+			PRINTFORML 然后看见在一旁偷笑的%ANAME(MASTER)%，她生气地鼓起了两颊
+			PRINTFORMW 连忙道了道歉，结果鼓着脸的她也跟着笑了起来
+			PRINTFORMW 脑袋似乎清醒了一些，之后二人努力工作着
+		ELSEIF RESULT == 1
+			PRINTFORML 就这么一直看着，没过多久她就趴在桌子上开始打起了呼噜
+			PRINTFORML 本来想叫她起来，不过现在并没有多忙，所以决定让她继续睡觉
+			PRINTFORMW %ANAME(MASTER)%为她盖上手边的毛毯，接着就回到了工作
+			PRINTFORML 
+			PRINTFORML 不到一小时后，她终于醒了
+			PRINTFORML 听到早上好的她稍微愣了一会儿，似乎想起现在还是工作中，脸颊染上了红色
+			PRINTFORMW 她发现了身上的毛毯，不好意思地小声道谢
+			PRINTFORMW 脑袋似乎清醒了一些，之后二人努力工作着
+		ELSE
+			PRINTFORML 因为时间正好，休息的时候顺便给她泡了咖啡
+			PRINTFORMW 两个人一边喝着咖啡，一边分享着无聊的话题
+			PRINTFORML 
+			PRINTFORMW 脑袋似乎清醒了一些，之后二人努力工作着
+		ENDIF
+		IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+			CFLAG:対象:好感度 += 50
+		ELSE
+			CFLAG:対象:従属度 += 50
+		ENDIF
+	;チケット
+	CASE 2
+		PRINTFORML 抽到了马戏团的门票
+		PRINTFORMW 一共有两张票，正在想怎么办的时候，正好看到了%ANAME(対象)%
+		PRINTFORML 怎麼辦？
+		CALL ASK_MULTI("邀请她" ,"独自享受" ,"卖掉")
+		IF RESULT == 2
+			PRINTFORML 对马戏没有兴趣
+			PRINTFORMW %ANAME(MASTER)%把门票转卖掉了
+			PRINTFORMW 门票卖了1000金
+			MONEY += 1000
+		ELSEIF RESULT == 1
+			PRINTFORML 但是决定一个人享受
+			PRINTFORMW 马戏表演很有趣，连着看了两次也不觉得腻
+		ELSE
+			PRINTFORML 因为很难得，所以决定邀请她
+			PRINTFORMW %ANAME(対象)%欣喜地接受了%ANAME(MASTER)%的邀请
+			PRINTFORML 
+			PRINTFORML 马戏表演很有趣，但两个人看更加有意思
+			PRINTFORMW 回家路上，她像你表示了对邀请的感谢和满脸的笑容
+			IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+				CFLAG:対象:好感度 += 50
+			ELSE
+				CFLAG:対象:従属度 += 50
+			ENDIF
+		ENDIF
+	;麻雀
+	CASE 3
+		PRINTFORML 休息日，在自室放松的时候被%ANAME(対象)%邀请去搓麻将
+		PRINTFORMW 正好有空，所以决定应战
+		CALL ASK_MULTI("你的后背好黑啊" ,"死了就得救了…" ,"这才是内行技能的真正面目【燕返】（三句都是梗）")
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		IF RAND:2 == 0
+			PRINTFORML 毫不留情地赢了一把
+			PRINTFORMW 她泪目着从钱包里掏出了零用钱
+			PRINTFORMW 因为样子很可爱，所以至少请她吃了顿饭
+			IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+				CFLAG:対象:好感度 += 50
+			ELSE
+				CFLAG:対象:従属度 += 50
+			ENDIF
+			MONEY += 2000
+		ELSE
+			PRINTFORML 毫不留情的被赢了一波
+			PRINTFORMW 即使求饶了也没有用，一直输到了钱包空空为止
+			PRINTFORMW 她心情不错地请了顿客
+			IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+				CFLAG:対象:好感度 += 50
+			ELSE
+				CFLAG:対象:従属度 += 50
+			ENDIF
+			LOCAL = 10000
+			SIF MONEY < LOCAL
+				LOCAL = MONEY
+			MONEY -= LOCAL
+		ENDIF
+	;飲み会
+	CASE 4
+		PRINTFORML 深夜归来的时候，发现举行了宴会
+		PRINTFORML 正打算参加的时候和%ANAME(対象)%对上视线，被招手了
+		PRINTFORMW 她看起来已经有醉意了，但还在高兴地向你劝酒
+		PRINTFORML 怎麼辦？
+		CALL ASK_MULTI("敞开喝" ,"无意中触摸到身体" ,"注意不要让她做过分的事")
+		IF RESULT == 0
+			PRINTFORMW 和她一起大喝了一顿
+			PRINTFORML 
+			IF ABL:MASTER:肝臓 + RAND:3 >= 5
+				PRINTFORML %ANAME(MASTER)%喝得醉醺醺的，她也渐渐兴奋起来了
+				PRINTFORMW 那之后，二人从宴会中溜了出来，一对一地又喝了不少酒
+				IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+					CFLAG:対象:好感度 += 80
+				ELSE
+					CFLAG:対象:従属度 += 80
+				ENDIF
+			ELSE
+				PRINTFORML 得意忘形地喝了不少，结果马上就酩酊大醉了
+				PRINTFORMW 她吧%ANAME(MASTER)%放在一边，又接着回去喝酒
+				PRINTFORML 
+				PRINTFORMW 结果第二天被严重的宿醉困扰
+			ENDIF
+		ELSEIF RESULT == 2
+			PRINTFORML 决定注意着不要让她做过于出格的事情
+			PRINTFORMW 陪着喝醉了的她发着牢骚，差不多的享受了
+			IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+				CFLAG:対象:好感度 += 50
+			ELSE
+				CFLAG:対象:従属度 += 50
+			ENDIF
+		ELSE
+			PRINTFORML 不经意地把手伸向她的身体
+			PRINTFORMW 她吓了一跳似的排开了%ANAME(MASTER)%的手，用妩媚的声音说道不行哦
+			PRINTFORML 看来比想象之中还要醉得厉害
+			PRINTFORMW %ANAME(MASTER)%为了不破坏这种愉快的气氛，最终放弃了这之上的想法，决定普通地喝
+		ENDIF
+	;買い出し
+	CASE 5
+		PRINTFORML 正要出门的时候遇到了%ANAME(対象)%
+		PRINTFORMW 看样子是正要去买东西
+		LOCAL = RAND:500
+		IF (CFLAG:対象:好感度 + LOCAL >= 1000) && (CFLAG:対象:好感度 > CFLAG:対象:従属度)
+			PRINTFORML 她注意到了这里，挥了挥手走过来
+			PRINTFORML 看上去是想要一起去买东西的样子
+			PRINTFORMW 正好有空的%ANAME(MASTER)%当然选择了陪着她
+			PRINTFORMW 两人一起买东西，顺便享受了约会
+			CFLAG:対象:好感度 += 100
+		ELSEIF CFLAG:対象:従属度 + LOCAL >= 1000
+			PRINTFORML 她一注意到这里，就小跑过来握住了手
+			PRINTFORML 看上去是想要一起去买东西的样子
+			PRINTFORMW 客气地微笑着的她得到同意后，忽然露出了笑容
+			PRINTFORMW 就和普通的约会一样，她虽然有些缩手缩脚，但还是很开心的样子
+			CFLAG:対象:従属度 += 100
+		ELSE
+			PRINTFORML 她注意到%ANAME(MASTER)%，轻轻点了点头就离开了
+			PRINTFORMW %ANAME(MASTER)%目送她回到房间
+		ENDIF
+	;探し物
+	CASE 6
+		PRINTFORML 不小心丢了东西
+		PRINTFORMW 不知道丢在了那里，正在宫殿里转悠的时候遇到了%ANAME(対象)%
+		LOCAL = RAND:400
+		IF (CFLAG:対象:好感度 + LOCAL >= 800) || (CFLAG:対象:従属度 + LOCAL >= 800)
+			PRINTFORML 向她询问丢失的东西，居然还记得%ANAME(MASTER)%之前在哪里里使用过
+			PRINTFORMW 想起的确是这样的%ANAME(MASTER)%连忙道谢，她却不好意思地低着头走开了
+			PRINTFORML 平时一直关注着自己的事情，稍微有点开心了
+			PRINTFORMW 平安找到了要找的东西，下次请她吃点什么吧
+			IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+				CFLAG:対象:好感度 += 80
+			ELSE
+				CFLAG:対象:従属度 += 80
+			ENDIF
+		ELSE
+			PRINTFORML 向她询问丢失的东西，但她也不知道
+			PRINTFORMW 正好有空的她也帮忙找了一会儿，结果还是没有找到
+			PRINTFORML 但是作为帮忙寻找的谢礼，请她吃了点心
+			PRINTFORMW 她一开始还很客气，但最后还是欣然接受了这份感谢
+			IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+				CFLAG:対象:好感度 += 50
+			ELSE
+				CFLAG:対象:従属度 += 50
+			ENDIF
+		ENDIf
+	;雨の中
+	CASE 7
+		PRINTFORML 因为下雨没法出门，在宫殿里无聊地闲逛
+		PRINTFORMW 看到%ANAME(対象)%一个人眺望着被雨打湿的窗户外的景色
+		PRINTFORML 怎麼辦？
+		CALL ASK_MULTI("一起看" ,"请她玩" ,"放着不管")
+		IF RESULT == 2
+			PRINTFORML 大概是在想着什么事吧，决定悄悄地置之不理为好
+			PRINTFORMW 但是她注意到了正要离开的%ANAME(MASTER)%，向这里打来招呼
+			PRINTFORML %ANAME(MASTER)%虽然觉得多少有些尴尬，但还是询问了她在做什么
+			PRINTFORMW 她有些害羞地望着雨中的庭院，说道这样做会得到内心的治愈
+			PRINTFORMW %ANAME(MASTER)%和她两个人，在雨中的午后享受了平静的谈笑
+			IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+				CFLAG:対象:好感度 += 50
+			ELSE
+				CFLAG:対象:従属度 += 50
+			ENDIF
+		ELSEIF RESULT == 1
+			PRINTFORML 如果有空的话，邀请她出去玩
+			PRINTFORML 但她拒绝说今天没有那种悠闲的心情
+			PRINTFORMW 没有勉强邀请的必要，%ANAME(MASTER)%主动离开，前往寻找下一个对象
+		ELSE
+			PRINTFORML 在看什么呢？
+			PRINTFORMW 有些在意的%ANAME(MASTER)%悄悄靠近她，一起向外眺望着
+			PRINTFORML 她过了一会儿才注意到这里，露出了慌张的样子
+			PRINTFORMW 问她在看些什么，她害羞地回答到只是发呆而已
+			PRINTFORMW %ANAME(MASTER)%和她两个人，享受了窗外和平时不一样的风景
+			IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+				CFLAG:対象:好感度 += 50
+			ELSE
+				CFLAG:対象:従属度 += 50
+			ENDIF
+		ENDIF
+	;お昼ご飯
+	CASE 8
+		PRINTFORML 走近厨房的时候，闻到了不错的香味
+		PRINTFORMW 偷偷看了一眼，原来是%ANAME(対象)%正在做料理
+		LOCAL = RAND:300
+		IF (CFLAG:対象:好感度 + LOCAL >= 600) || (CFLAG:対象:従属度 + LOCAL >= 600)
+			PRINTFORML 闻着美味的香味，感觉肚子里的蛔虫都馋哭了
+			PRINTFORMW 她注意到那个声音，回过头来
+			PRINTFORML %ANAME(MASTER)%摆出一个敷衍微笑，她也含笑地邀请着一起吃料理
+			PRINTFORMW 当然没有拒绝的理由，那么就承蒙关照了
+			PRINTFORMW 料理十分美味！
+			IF ABL:対象:料理 >= ABL:MASTER:料理
+				PRINTFORMW 问起烹饪的诀窍，她满脸高兴的教给了%ANAME(MASTER)%
+				IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+					CFLAG:対象:好感度 += 80
+				ELSE
+					CFLAG:対象:従属度 += 80
+				ENDIF
+				CALL PRINT_ADD_EXP(対象, "料理経験値", RAND:5 + RAND:5 + 6, 1)
+			ELSE
+				PRINTFORMW 她好像也为%ANAME(MASTER)%的吃相感到高兴
+				IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+					CFLAG:対象:好感度 += 50
+				ELSE
+					CFLAG:対象:従属度 += 50
+				ENDIF
+			ENDIF
+		ELSE
+			PRINTFORML 她注意到了%ANAME(MASTER)%请求帮忙尝尝味道
+			PRINTFORMW 回答到十分美味，她的脸上浮起笑容，又请求道帮忙配餐
+			PRINTFORMW 她亲手做的料理十分美味
+			IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+				CFLAG:対象:好感度 += 30
+			ELSE
+				CFLAG:対象:従属度 += 30
+			ENDIF
+		ENDIF
+	;日記
+	CASE 9
+		PRINTFORMW 捡到了%ANAME(対象)%的日记
+		PRINTFORML 非常在意
+		PRINTFORML 不对不对，不能偷看别人的日记吧
+		PRINTFORML 但只是一点点的话…
+		PRINTFORMW 不不不不，被发现了就会被讨厌吧…
+		PRINTFORML 怎麼辦？
+		CALL ASK_YN("要看", "归还")
+		IF RESULT == 1
+			PRINTFORML 不屈服于诱惑，归还给了本人
+			PRINTFORML 她对%ANAME(MASTER)%表示十分的感谢
+			PRINTFORMW 被问到有没有看里面的东西，%ANAME(MASTER)%似乎得到了信任
+			CFLAG:対象:好感度 += 50
+		ELSE
+			PRINTFORMW 输给了诱惑，读完了
+			PRINTFORML 
+			PRINTFORML …哦吼
+			PRINTFORMW 
+			PRINTFORML 是非常有趣的内容呢
+			PRINTFORMW 读完后，将日记放在了她的桌子上
+			PRINTFORMW 那之后她不知为何有些不自然的样子
+			CFLAG:対象:従属度 += 50
+		ENDIF
+	;お団子
+	CASE 10
+		PRINTFORML 城里探索的时候，在休息的茶屋里与%ANAME(対象)%突然相遇了
+		PRINTFORML 她看到%ANAME(MASTER)%后，显得有些慌张的样子
+		PRINTFORMW 歪着头向她的旁边看去，发现几个空盘子和团子的签签重叠在一起
+		PRINTFORML 怎麼辦？
+		CALL ASK_MULTI("一起吃" ,"装作没看见" ,"开玩笑")
+		IF RESULT == 0
+			PRINTFORMW %ANAME(MASTER)%苦笑着，也点了和她相同量的团子
+			PRINTFORML 原来如此，是可以令她着迷程度的美味
+			PRINTFORMW %ANAME(MASTER)%和她一边品尝着团子的味道一边谈笑起来
+			PRINTFORML 
+			PRINTFORMW 结果两个人一边笑着说吃多了，一边给我包了几个伴手礼
+		ELSEIF RESULT == 1
+			PRINTFORML %ANAME(MASTER)%装作什么都没看见地试图起身离开
+			PRINTFORML 但是刚站起身，衣服的下摆就被她抓住了
+			PRINTFORMW 然后嘴里被她硬塞进了团子
+			PRINTFORML …原来如此，是可以令她着迷程度的美味
+			PRINTFORMW %ANAME(MASTER)%被强迫吃了和她等量以上的团子
+		ELSE
+			PRINTFORML 戏弄她吃得太多了
+			PRINTFORMW 她噗噗地鼓起了脸颊
+			PRINTFORML 继续开玩笑说，那个脸颊简直像团子一样
+			PRINTFORMW 她噗哧一声，忍不住笑了出来
+			PRINTFORMW %ANAME(MASTER)%和她一边品尝着团子的味道一边谈笑起来
+		ENDIF
+		IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+			CFLAG:対象:好感度 += 40
+		ELSE
+			CFLAG:対象:従属度 += 40
+		ENDIF
+		LOCAL = 1000
+		SIF MONEY < 1000
+			LOCAL = MONEY
+		MONEY -= LOCAL
+	;ペットの兎
+	CASE 11
+		PRINTFORML 工作的时候被%ANAME(対象)%搭话了
+		PRINTFORML 她的怀里抱着一只兔子
+		PRINTFORML 询问到怎么了，回答说好像误入了院子里
+		PRINTFORMW 是迷路的宠物吗？
+		PRINTFORML 怎麼辦？
+		CALL ASK_MULTI("照顾" ,"交给士兵" ,"炖了")
+		IF RESULT == 1
+			PRINTFORML 不能一直这样抱着啊
+			PRINTFORML %ANAME(MASTER)%劝她交给士兵
+			PRINTFORMW 她恋恋不舍地回头看了兔子好几次
+			PRINTFORML 
+			PRINTFORMW 那之后，兔子似乎顺利地回到了主人身边
+			IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+				CFLAG:対象:好感度 += 30
+			ELSE
+				CFLAG:対象:従属度 += 30
+			ENDIF
+		ELSEIF RESULT == 2
+			PRINTFORMW 做成兔肉火锅吧
+			PRINTFORMW 啪
+			PRINTFORML 被她扇了一巴掌
+			PRINTFORMW 道歉说是开玩笑，陪着她一起找主人
+		ELSE
+			PRINTFORMW 不管是扔掉的兔子还是迷路的兔子，都不能随便捡来
+			PRINTFORML 想让她放回原来的地方，但被兔子远远地眼睛一盯着，就什么也说不出来了
+			PRINTFORMW 结果被她恳求，决定在宫殿里照顾她
+			PRINTFORML 
+			PRINTFORMW 兔子因为可爱的容姿，在%ANAME(MASTER)%和她之外的士兵中也很受欢迎
+			IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+				CFLAG:対象:好感度 += 50
+			ELSE
+				CFLAG:対象:従属度 += 50
+			ENDIF
+		ENDIF
+	;流行りの服
+	CASE 12
+		PRINTFORML 看到%ANAME(対象)%在读杂志
+		PRINTFORML 从后面看上去，好像是时尚杂志
+		PRINTFORMW 注意到%ANAME(MASTER)%的她聊起了流行服饰的话题
+		PRINTFORML 怎麼辦？
+		CALL ASK_MULTI("平常的衣服比较合适" ,"偶尔那样的衣服也不错吧" ,"一起去试穿吧")
+		IF RESULT == 0
+			PRINTFORMW 平时穿的衣服更适合你哦
+			PRINTFORML 坦率地告诉她，她一瞬间僵直了，之后
+			PRINTFORMW 小声说着「是吗」，又开始继续看杂志了
+			PRINTFORMW 说了奇怪的话吗？小心的窥视着她的脸色，她的脸颊好像稍微红了一点
+			IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+				CFLAG:対象:好感度 += 30
+			ELSE
+				CFLAG:対象:従属度 += 30
+			ENDIF
+		ELSEIF RESULT == 1
+			PRINTFORMW 偶尔那样的衣服也不错吧
+			PRINTFORML 坦率地这么说道，她「是吗～」地笑声嘟囔着
+			PRINTFORMW 那之后她又询问了各种各样的关于时尚的意见
+			IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+				CFLAG:対象:好感度 += 30
+			ELSE
+				CFLAG:対象:従属度 += 30
+			ENDIF
+		ELSE
+			PRINTFORMW 一起去试穿吧？
+			PRINTFORML 无意中这么说道，她猛地抬起头，盯着%ANAME(MASTER)%
+			PRINTFORML 问道「现在吗？」，%ANAME(MASTER)%点了点头，她立刻站了起来
+			PRINTFORMW 然后刚一进屋就马上出来了，强行拉着%ANAME(MASTER)%的手腕向街上走去
+			PRINTFORMW 那一整天，在她满意之前，都在服装店里试着衣服
+			CFLAG:対象:好感度 += 60
+		ENDIF
+	;占い
+	CASE 13
+		PRINTFORML 日子经过的时候，被%ANAME(対象)%搭话了
+		PRINTFORMW 因为最近沉迷于占卜，所以想来算上一卦
+		PRINTFORML 怎麼辦？
+		CALL ASK_YN("伸出手", "拒绝")
+		IF RESULT == 1
+			PRINTFORML 不好意思，但我不相信占卜
+			PRINTFORMW %ANAME(MASTER)%拒绝了，她看起来十分遗憾
+			IF RAND:2 == 0
+				PRINTFORML 有那么有趣吗？
+				PRINTFORMW %ANAME(MASTER)%兴趣使然地问了一句，她开心地笑起来，掏出了占卜的书
+				PRINTFORMW 那天下午，从兴致勃勃的她那里上到了关于占卜的一课
+				IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+					CFLAG:対象:好感度 += 40
+				ELSE
+					CFLAG:対象:従属度 += 40
+				ENDIF
+			ENDIF
+		ELSE
+			PRINTFORML 饶有兴味地伸出了手
+			PRINTFORML 她%ANAME(MASTER)%抓着那只手，一边认真地凝视着，一边嘟囔着些什么
+			PRINTFORMW 最终她抬头看向%ANAME(MASTER)%的脸
+			IF RAND:2 == 0
+				PRINTFORMW 「有了！这个月的运势是吉！」
+			ELSE
+				PRINTFORMW 「有了！这个月的运势是凶！」
+			ENDIF
+			PRINTFORML 这么得意地说着
+			PRINTFORMW 目瞪口呆地看着她，她指着%ANAME(MASTER)%的手掌，开始这样那样的解说
+			PRINTFORMW 无法逃离兴致勃勃的她，当天下午好好上了占卜的一课
+			IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+				CFLAG:対象:好感度 += 50
+			ELSE
+				CFLAG:対象:従属度 += 50
+			ENDIF
+		ENDIF
+	;風邪気味
+	CASE 14
+		PRINTFORML 今天身体有些不舒服
+		PRINTFORML 拖着疲惫的身体工作的时候，一个杯子放到了桌子上
+		PRINTFORMW 抬起头看见了%ANAME(対象)%
+		LOCAL = RAND:200
+		IF (CFLAG:対象:好感度 + LOCAL >= 600) && (CFLAG:対象:好感度 > CFLAG:対象:従属度)
+			PRINTFORML 她微笑着说道不要太勉强自己，然后就离开了
+			PRINTFORML 杯子里乘着%ANAME(MASTER)%喜欢的热饮
+			PRINTFORMW 一边感谢着她一边慢慢喝下，感觉全身暖烘烘的
+			CFLAG:対象:好感度 += 60
+		ELSEIF CFLAG:対象:従属度 + LOCAL >= 600
+			PRINTFORML 她担心地说道不要太勉强了
+			PRINTFORML 杯子里乘着%ANAME(MASTER)%喜欢的热饮
+			PRINTFORMW 一边感谢着她一边慢慢喝下，感觉全身暖烘烘的
+			CFLAG:対象:従属度 += 60
+		ELSE
+			PRINTFORML 她说道不要太勉强，就离开了
+			PRINTFORMW 一边感谢一边和着杯子里的东西，感觉身体稍微舒服了一点
+			IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+				CFLAG:対象:好感度 += 40
+			ELSE
+				CFLAG:対象:従属度 += 40
+			ENDIF
+		ENDIF
+	;縁日
+	CASE 15
+		PRINTFORMW 今天好像城下要举办祭典
+		LOCAL = RAND:400
+		IF (CFLAG:対象:好感度 + LOCAL >= 800) || (CFLAG:対象:従属度 + LOCAL >= 800)
+			PRINTFORML 被%ANAME(対象)%邀请一起前去
+			PRINTFORMW 和平时不同，穿着浴衣的她非常漂亮
+			PRINTFORMW 为了不走散，和她手牵着手享受了祭典
+			IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+				CFLAG:対象:好感度 += 60
+			ELSE
+				CFLAG:対象:従属度 += 60
+			ENDIF
+		ELSE
+			PRINTFORML 看到了浴衣打扮的%ANAME(対象)%
+			PRINTFORMW 看样子正准备去参加祭典
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI_JUDGE("一起去", MONEY >= 1000,"目送", 1)
+			IF RESULT == 1
+				PRINTFORML 高高兴兴地目送她离开
+				PRINTFORMW 她微笑着挥了挥手，然后出门了
+				PRINTFORML 
+				PRINTFORMW 收到了金鱼和章鱼烧作为特产
+				IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+					CFLAG:対象:好感度 += 20
+				ELSE
+					CFLAG:対象:従属度 += 20
+				ENDIF
+			ELSE
+				PRINTFORML 因为有空，所以问道自己也可以一起去吗？
+				PRINTFORMW 她恶作剧一般地，会请客吧？这么笑着问道
+				PRINTFORMW 在和平时不一样的气氛中，与欢闹的她一起享受了祭典
+				IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+					CFLAG:対象:好感度 += 40
+				ELSE
+					CFLAG:対象:従属度 += 40
+				ENDIF
+				MONEY -= 1000
+			ENDIF
+		ENDIF
+	;雑談
+	CASE 16
+		PRINTFORML 正在休息的时候被%ANAME(対象)%搭话了
+		PRINTFORML 没有什么别的事情，似乎只是看到了闲着的%ANAME(MASTER)%而已
+		PRINTFORMW 她在%ANAME(MASTER)%的旁边坐下
+		PRINTFORML 怎麼辦？
+		CALL ASK_MULTI(@"战争的话题" ,"生活的话题" ,"听她的话")
+		IF RESULT == 0
+			PRINTFORML 谈论着最近战争的话题
+			PRINTFORML 她似乎厌倦了长期的战斗的样子
+			PRINTFORMW 尽管如此，还是好好听着%ANAME(MASTER)%的话
+		ELSEIF RESULT == 1
+			PRINTFORML 谈论了最近发生在身边的事情
+			PRINTFORMW 虽然是无关紧要的闲谈，但她还是很高兴地侧耳倾听着
+			PRINTFORML …
+			PRINTFORML 回过神来已经过了很长时间了
+			PRINTFORMW 因为口渴了，请她喝茶的时候她微笑着说道「多谢款待」
+		ELSE
+			PRINTFORML 因为想不出话题，所以决定听她说话
+			PRINTFORMW 她有些不好意思地说着最近发生的身边的事情
+			PRINTFORML …
+			PRINTFORML 回过神来已经过了很长时间了
+			PRINTFORMW 对能听她说话表示感谢后，她笑着离开了
+		ENDIF
+		IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+			CFLAG:対象:好感度 += 30
+		ELSE
+			CFLAG:対象:従属度 += 30
+		ENDIF
+	;少女漫画
+	CASE 17
+		PRINTFORMW 在休息室里看到了正在热心地读着什么的%ANAME(対象)%
+		PRINTFORML …看封面像少女漫画
+		PRINTFORML 该说是意外的一面吗，对她可爱的兴趣小小地笑了出来
+		PRINTFORMW 于是她也注意到了%ANAME(MASTER)%，询问起是否知道这部漫画的事情
+		PRINTFORML 怎麼辦？
+		CALL ASK_MULTI(@"不知道" ,"知道哦" ,"剧透")
+		IF RESULT == 2
+			PRINTFORML 实际上这个人物在那之前～
+			PRINTFORML 正这么说着，一个坐垫飞了过来
+			PRINTFORMW 没有躲开，被冲击从椅子砸到了地上
+			IF MONEY >= 3000
+				PRINTFORMW 那之后，为了得到生气的她的原谅，不得不买下了剩下的几卷
+				IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+					CFLAG:対象:好感度 += 20
+				ELSE
+					CFLAG:対象:従属度 += 20
+				ENDIF
+				MONEY -= 3000
+			ELSE
+				PRINTFORMW 她生气地不知跑到哪儿去了
+			ENDIF
+		ELSEIF RESULT == 1
+			PRINTFORML 一告诉她知道，她就高兴地笑了
+			PRINTFORMW 好像没有其他知道的人，所以很寂寞的样子
+			PRINTFORML 被带着平时看不到的表情的她邀请去看漫画，所以没能拒绝。
+			PRINTFORMW 由于她的邀请，两个人一边聊着漫画一边喝起了茶
+			IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+				CFLAG:対象:好感度 += 50
+			ELSE
+				CFLAG:対象:従属度 += 50
+			ENDIF
+		ELSE
+			PRINTFORML 一告诉她不知道，她就显得很失望的样子
+			PRINTFORMW 好像没有其他知道的人，所以有些寂寞
+			PRINTFORML 问到她有没有意思，她让%ANAME(MASTER)%坐下来慢慢听
+			PRINTFORMW 陪她讨论漫画直到她满意为止
+			IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+				CFLAG:対象:好感度 += 40
+			ELSE
+				CFLAG:対象:従属度 += 40
+			ENDIF
+		ENDIF
+	;巡回中
+	CASE 18
+		PRINTFORML 在和%ANAME(対象)%的巡逻任务中，被邀请休息了
+		PRINTFORML 似乎有喜欢的茶馆的样子
+		PRINTFORMW 问到她是不是经常在那儿偷懒，她微微地吐出舌头
+		PRINTFORML 怎麼辦？
+		CALL ASK_MULTI("答应" ,"继续巡逻" ,"让她请客")
+		IF RESULT == 0
+			PRINTFORML 不过%ANAME(MASTER)%正好也累了
+			PRINTFORMW 说着要对大家保密，她恶作剧般地笑了
+			PRINTFORML 被她推荐了常吃的点心
+			PRINTFORML 只是咬了一小口，甜蜜的味道治愈了劳累的身体
+			PRINTFORMW 和她悠闲地度过了一个小时左右
+			IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+				CFLAG:対象:好感度 += 40
+			ELSE
+				CFLAG:対象:従属度 += 40
+			ENDIF
+		ELSEIF RESULT == 1
+			PRINTFORML 还在巡逻途中呢
+			PRINTFORML 急忙驳回了她的提案
+			PRINTFORMW 她恋恋不舍地跟上了%ANAME(MASTER)%的步伐
+		ELSE
+			PRINTFORML 只要你请客就行
+			PRINTFORMW 这么说着，她烦恼了一瞬间就同意了
+			PRINTFORML 被她推荐了常吃的点心
+			PRINTFORML 只是咬了一小口，甜蜜的味道治愈了劳累的身体
+			PRINTFORMW 和她悠闲地度过了一个小时左右
+			IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+				CFLAG:対象:好感度 += 30
+			ELSE
+				CFLAG:対象:従属度 += 30
+			ENDIF
+		ENDIF
+	;楽器
+	CASE 19
+		PRINTFORML 和%ANAME(対象)%整理仓库的时候捡到了一件乐器
+		PRINTFORMW 什么时候出现的呢？虽然沾满灰尘，但还可以用
+		IF ABL:対象:歌唱 >= 50
+			PRINTFORML 于是她拿在手上开始演奏了起来
+			PRINTFORML 真有两下子
+			PRINTFORMW 不由得鼓掌称赞了起来，她对此害羞地笑了
+			PRINTFORMW 休息的时候向她学习了演奏
+			IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+				CFLAG:対象:好感度 += 40
+			ELSE
+				CFLAG:対象:従属度 += 40
+			ENDIF
+			CALL PRINT_ADD_EXP(対象, "歌唱経験値", RAND:15 + RAND:15 + 6, 1)
+		ELSEIF ABL:MASTER:歌唱 >= 50
+			PRINTFORML 试着演奏后响起了美妙的音色
+			PRINTFORML 奏完一首曲子，她拍着手送来了称赞
+			PRINTFORMW 心情很好的%ANAME(MASTER)%作为安可又奏了一曲
+			PRINTFORMW 她非要学习演奏的方法，在休息的时候交教给了她
+			IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+				CFLAG:対象:好感度 += 40
+			ELSE
+				CFLAG:対象:従属度 += 40
+			ENDIF
+			CALL PRINT_ADD_EXP(対象, "歌唱経験値", RAND:10 + RAND:10 + 6, 1)
+		ELSE
+			PRINTFORML 但是%ANAME(MASTER)%和她都不知道演奏的方法
+			PRINTFORML 随手弹了一下，调跑到了奇怪的地方
+			PRINTFORMW 她听到了那个音色，不由得笑了起来
+			PRINTFORMW 两个人休息的时候，顺便享受了笨拙的演奏会
+			IF CFLAG:対象:好感度 >= CFLAG:対象:従属度
+				CFLAG:対象:好感度 += 30
+			ELSE
+				CFLAG:対象:従属度 += 30
+			ENDIF
+		ENDIF
+ENDSELECT
+
+	RETURN 1

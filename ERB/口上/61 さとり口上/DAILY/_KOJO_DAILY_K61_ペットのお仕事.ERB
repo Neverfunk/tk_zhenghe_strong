@@ -1,0 +1,247 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K61_SATARI_PET_WORK_RATE(対象)
+#DIM 対象
+RETURN 100 + (KDVAR:対象:さとり_ペットのお仕事 > 0) * 50
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K61_SATARI_PET_WORK_DECISION(対象)
+#DIM 対象
+
+;主人公がお空、お燐、こいしだと駄目
+SIF GROUPMATCH(MASTER, NAME_TO_CHARA("空"), NAME_TO_CHARA("燐"), NAME_TO_CHARA("こいし"))
+	RETURN 0
+	
+;主人じゃないと駄目
+SIF !TALENT:対象:主人
+	RETURN 0
+	
+;好感度2000以下だと駄目
+SIF CFLAG:対象:好感度 <= 2000
+	RETURN 0
+	
+;最後まで行ったら発生しない
+SIF KDVAR:対象:さとり_ペットのお仕事 == -1
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K61_SATARI_PET_WORK_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K61_SATARI_PET_WORK(対象)
+#DIM 対象
+
+PRINTFORML ･･･
+SELECTCASE KDVAR:対象:さとり_ペットのお仕事
+	CASE 0
+		PRINTFORML 「%ANAME(MASTER)%。请在那里呆一会儿」
+		;TranslatedMark 「%ANAME(MASTER)%。ちょっとそこに居てちょうだい」
+		PRINTFORMW %ANAME(MASTER)%被主人%ANAME(対象)%叫了出来。叫他来的本人现在正忙于政务
+		;TranslatedMark %ANAME(MASTER)%は主人たる%ANAME(対象)%に呼び出された。呼び出した当の本人は今、忙しそうに政務に追われている
+		PRINTFORML 坐在那里。虽然这么说，但还是犹豫着，把忙于工作的主人放在后面真的好吗
+		;TranslatedMark そこに居て。　と言われたが、忙しく仕事をしているご主人様を尻目にじっとしているのも躊躇われる
+		PRINTFORMW %ANAME(MASTER)%问起有什么可以帮忙的吗。听到这话，%ANAME(対象)%温柔地微笑着
+		;TranslatedMark %ANAME(MASTER)%が　何か手伝えることは無いだろうか。　と聞くと%ANAME(対象)%は優しく微笑む
+		PRINTFORML 「谢谢你。但是这个政务是我必须做的工作」
+		;TranslatedMark 「ありがとうね%ANAME(MASTER)%。でもこの政務は私がやらなきゃならない仕事なの」
+		PRINTFORML 「但是…来这边吧？」
+		;TranslatedMark 「その代わり…ほら、こっちへ来て？」
+		PRINTFORMW %ANAME(対象)%爱抚着被说的那样接近了的%ANAME(MASTER)%的头
+		;TranslatedMark 言われるままに近づいた%ANAME(MASTER)%の頭を、%ANAME(対象)%は愛おしそうに撫でる
+		PRINTFORML 「累到不行的时候请让我碰一下。那样的话就能加油了」
+		;TranslatedMark 「疲れたり行き詰ったらちょっと触らせてね。そうしたら頑張れるから」
+		PRINTFORMW 看来%ANAME(対象)%是希望可爱的宠物%ANAME(MASTER)%来治愈工作的压力
+		;TranslatedMark どうやら%ANAME(対象)%は、可愛いペットである%ANAME(MASTER)%に仕事のストレスを癒して欲しいようだ
+		PRINTFORML 察觉到其意图的%ANAME(MASTER)%，决定在%ANAME(対象)%附近老实呆着
+		;TranslatedMark 意図を察した%ANAME(MASTER)%は、%ANAME(対象)%の近くで大人しくしていることにした
+		PRINTFORMW 「呵呵，谢谢。暂时拜托你了」
+		;TranslatedMark 「ふふ、ありがとう。しばらくお願いね」
+		PRINTFORML ・
+		PRINTFORML ・
+		;TranslatedMark ・・
+		PRINTFORMW ・・・
+		PRINTFORML …………………………
+		PRINTFORMW 勤于政务的%ANAME(対象)%，每当疲劳累积时，就抚摸附近的%ANAME(MASTER)%的头
+		;TranslatedMark 政務に勤しむ%ANAME(対象)%は、疲れが溜まるたびに近くにいる%ANAME(MASTER)%の頭を撫で、
+		PRINTFORML …………………………
+		PRINTFORMW 如果文件无法送达，就揉搓仰卧着的%ANAME(MASTER)%的侧腹
+		;TranslatedMark 書類が行き詰れば、仰向けになった%ANAME(MASTER)%のわき腹を揉み、
+		PRINTFORML …………………………
+		PRINTFORMW 如果情绪变奇怪的话，就抚摸%ANAME(MASTER)%的屁股
+		;TranslatedMark 変なテンションになれば、%ANAME(MASTER)%のお尻を撫でた
+		PRINTFORML ・
+		PRINTFORML ・
+		;TranslatedMark ・・
+		PRINTFORMW ・・・
+		PRINTFORMW 就这样，%ANAME(対象)%的工作终于结束了
+		;TranslatedMark そんなこんながあって、ようやく%ANAME(対象)%の仕事が終わった
+		PRINTFORML 「哈…终于结束了…。辛苦了。谢谢你在我身边」
+		;TranslatedMark 「はぁ…やっと終わったわ…。%ANAME(MASTER)%もお疲れ様。居てくれてありがとうね」
+		PRINTFORMW 虽然辛苦了，但是%ANAME(MASTER)%没有直接帮主人的工作，感到有点遗憾
+		;TranslatedMark 労ってくれたものの、%ANAME(MASTER)%は主人の仕事を直接手伝えなかったことが心残りのようだ
+		PRINTFORML 「已经很好了。你们是我的宠物啊，只要在我身边就能治愈我的心」
+		;TranslatedMark 「いいのよ。貴方たちペットはね、ただ居てくれるだけで私の心を癒してくれるの」
+		PRINTFORML 「只是，无论如何都想做点什么…如果这么说的话……」
+		;TranslatedMark 「ただ、どうしても何かしたい…と言うなら……」
+		PRINTFORMW %ANAME(対象)%那小小的身体紧紧地靠在了%ANAME(MASTER)%身上
+		;TranslatedMark %ANAME(対象)%は、その小さな身体を%ANAME(MASTER)%にぎゅっと押し付ける
+		PRINTFORML 「今天就这样睡吧…在那之前，请抱紧我…♥」
+		;TranslatedMark 「今日はもうこのまま寝るから…それまで、私を抱きしめてちょうだい…♥」
+		PRINTFORMW 察觉到了追求温暖的%ANAME(対象)%的心，%ANAME(MASTER)%温柔地抱住了她的身体
+		;TranslatedMark 温もりを求める%ANAME(対象)%の心を察し、%ANAME(MASTER)%はその身体を包み込むように優しく抱きしめる
+		PRINTFORMW 互相感受着全身的温暖，直到睡着为止度过了平静的聊天时间…
+		;TranslatedMark お互いがお互いに全身の温もりを感じながら、眠りにつくまで穏やかなお喋りの時間を過ごした…
+		KDVAR:対象:さとり_ペットのお仕事 = 1
+	CASE 1
+		PRINTFORML 某个休息日。%ANAME(MASTER)%被主人%ANAME(対象)%叫了出来
+		;TranslatedMark とある休日。%ANAME(MASTER)%は主人である%ANAME(対象)%に呼び出された
+		PRINTFORMW 「你来得好。其实我有个请求的」
+		;TranslatedMark 「よく来てくれたわね%ANAME(MASTER)%。実は折り入って頼みがあるの」
+		PRINTFORML %ANAME(MASTER)%像往常一样带着困倦的眼神，被笼罩在令人厌恶的气氛中的%ANAME(対象)%的声音，挺直腰板
+		;TranslatedMark いつものように眠そうな眼差しながらいやに剣呑な雰囲気を纏った%ANAME(対象)%の声に、%ANAME(MASTER)%は背筋を正す
+		PRINTFORMW 「请紧紧抱住我」
+		;TranslatedMark 「私のこと、ぎゅーって抱きしめなさい」
+		PRINTFORMW …………从统一的气氛中传来了相当不合适的要求
+		;TranslatedMark …………纏った雰囲気からだいぶ似つかわしくない要求が飛んできた
+		PRINTFORML 「…我有很多宠物吧？之前都是放任主义，现在改了」
+		;TranslatedMark 「…私、ペットが多いでしょう？　ちょっと前まで放任主義だったんだけど、今は改めてるわ」
+		PRINTFORML 「所以有时间的话会和宠物们玩。大家都是好孩子啊」
+		;TranslatedMark 「それで時間があればペット達と戯れるようにしてるの。みんないい子たちよ」
+		PRINTFORMW 「…只是，被大家撒娇照顾的话，偶尔会做些什么呢…我自己有时会变得很想撒娇。」
+		;TranslatedMark 「…ただ、みんなに甘えられて世話をしていると、偶に何ていうか…何かに無性に甘えたくなる時があるのよ。私自身が」
+		PRINTFORMW 「是因为照顾累了吗…总之现在想撒娇。我，向%ANAME(MASTER)%撒娇」
+		;TranslatedMark 「世話疲れとかそういうのなのかしら…、とにかく今は甘えたいの。私が、%ANAME(MASTER)%に」
+		PRINTFORML ……确实，%ANAME(対象)%是许多宠物的主人。宠物们向她撒娇
+		;TranslatedMark ……確かに、%ANAME(対象)%は多くのペットの飼い主だ。ペット達はみな拾ってくれた彼女に甘えてくる
+		PRINTFORMW 但是%ANAME(対象)%能够撒娇的存在至今为止都没有。因为她才是地灵殿的主人，是最重要的存在
+		;TranslatedMark だが%ANAME(対象)%の方が甘えられる存在は今までいなかった。彼女こそが地霊殿の主であり、一番の存在だったからだ
+		PRINTFORML 正因为如此，才会在心中某处寻求接受自己、娇惯自己的存在吧
+		;TranslatedMark だからこそ、自分を受け止め甘やかしてくれる存在を心のどこかで求めているのだろう
+		PRINTFORMW %ANAME(MASTER)%察觉到了%ANAME(対象)%的想法，决定全力回应主人的要求
+		;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%の思いを察し、主人の要求に全力で応えることにした
+		PRINTFORML 「啊…谢谢你。请按那个样子做」
+		;TranslatedMark 「ぁん…、ありがとう%ANAME(MASTER)%。その調子でやってちょうだい」
+		PRINTFORMW 为了犒劳%ANAME(対象)%纤细的身体，%ANAME(MASTER)%怀着亲切之情将身体紧紧抱住，然后温柔地抱住
+		;TranslatedMark %ANAME(対象)%の華奢な身体を労わるように、%ANAME(MASTER)%は親愛の情を持ってその身体を強く、そして優しく抱きしめる
+		PRINTFORML 确认了弄疼她的%ANAME(MASTER)%，用温柔的手抚摸着她的头
+		;TranslatedMark 痛がられている様子が無いことを確認した%ANAME(MASTER)%は、いつも彼女がしてくれるように優しい手つきで頭を撫でた
+		PRINTFORML 「嗯……♥」
+		;TranslatedMark 「んん……♥」
+		PRINTFORMW %ANAME(対象)%出神的样子，发出高兴的声音。似乎对%ANAME(MASTER)%充满爱情的服务很满足
+		;TranslatedMark %ANAME(対象)%はうっとりした様子で嬉しそうな声を漏らす。%ANAME(MASTER)%の愛情が篭った奉仕に満足しているようだ
+		PRINTFORMW 「呵呵，真是个好孩子呢。那么，接下来带我去床上吧？」
+		;TranslatedMark 「うふふ、本当にいい子ね%ANAME(MASTER)%は。それじゃあ、次は私を抱えてベッドへ連れて行って？」
+		PRINTFORML 「然后就那样…今天一天，请成为我的抱枕和暖炉吧…♥」
+		;TranslatedMark 「そしてそのまま…今日一日、私の抱き枕兼湯たんぽになってちょうだいね…♥」
+		PRINTFORMW %ANAME(MASTER)%无法拒绝主人可爱的请求，就这样过了一个让她随心所欲的甜蜜夜晚…
+		;TranslatedMark %ANAME(MASTER)%は愛するご主人様の可愛らしい頼みを断れず、そのまま一日彼女のなすがままに甘い夜を過ごした…
+		KDVAR:対象:さとり_ペットのお仕事 ++
+	CASE 2
+		PRINTFORML 
+		PRINTFORMW %ANAME(対象)%以性欲处理为名把%ANAME(MASTER)%叫到自己的卧室……
+		;TranslatedMark %ANAME(対象)%は性欲処理、という名目で%ANAME(MASTER)%を自らの寝室に呼び出した……
+		IF TALENT:対象:母乳体質
+			PRINTFORML 「呵呵…怎么样？主人的母乳好吃吗？可以再喝一杯哦…♥」
+			;TranslatedMark 「くすっ…、どう？　ご主人様の母乳は美味しいかしら？　もっといっぱい飲んでいいわよ…♥」
+		ELSE
+			PRINTFORML 「呵呵…怎么样？主人的乳房好吃吗？」
+			;TranslatedMark 「くすっ…、どう？　ご主人様のおっぱいは美味しい？」
+		ENDIF
+		PRINTFORML %ANAME(対象)%以喂奶般的姿势抱着头责弄着阴茎
+		;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%を授乳させるような体勢で頭を抱きかかえながらペニスを弄り倒している
+		PRINTFORMW 虽然是娇惯的姿势，但巧妙的手指却毫不留情地给%ANAME(MASTER)%带来了快乐…
+		;TranslatedMark 甘やかすような体勢ながら、その巧みな指使いは容赦なく%ANAME(MASTER)%に快楽を与えている…
+		PRINTFORML 然后在%ANAME(MASTER)%终于达到顶峰的时候，%ANAME(対象)%立刻停止了玩弄阴茎的手
+		;TranslatedMark そして%ANAME(MASTER)%がついに絶頂に達しようというところで%ANAME(対象)%はそのペニスを扱く手をピタリと止める
+		PRINTFORMW 为什么？面对包含着这样的疑问的表情的%ANAME(MASTER)%，%ANAME(対象)%微笑着说
+		;TranslatedMark 何故？　という問いを含めた表情をする%ANAME(MASTER)%に対し、%ANAME(対象)%はサディスティックに微笑む
+		PRINTFORML 「你是不是很想射、很想射出来呢？那可不行啊」
+		;TranslatedMark 「イキたい、イカせて、とか思ってたでしょう？　それじゃあダメよ」
+		PRINTFORMW 「%ANAME(対象)%大人，你只能想着我。除此之外的事情什么都不能想」
+		;TranslatedMark 「%ANAME(対象)%様、%ANAME(対象)%様、って私のことだけ考えなさい。それ以外のことは何も考えちゃ駄目」
+		PRINTFORML 「在%ANAME(MASTER)%的脑子里，只能全是我？能做到的话，我会一直让你开心到最后的…♥」
+		;TranslatedMark 「%ANAME(MASTER)%の頭の中、私でいっぱいにしなさい？　そうしたら、最後までイカせてあげるわ…♥」
+		PRINTFORMW 这样说着%ANAME(対象)%又开始处理%ANAME(MASTER)%的阴茎了
+		;TranslatedMark そういうと%ANAME(対象)%は再び%ANAME(MASTER)%のペニスを扱き始めた
+		PRINTFORML 用手掌抚摸龟头，用指尖刺激铃口，刮蹭阴茎背部，细心地玩弄
+		;TranslatedMark 掌で亀頭を撫でつけ、指先で鈴口を刺激し、カリ首や裏筋をなぞり、丁寧にねちっこく責め立てる
+		PRINTFORML 对于知道自己弱点的手淫，%ANAME(MASTER)%很快就再次有了射精感…
+		;TranslatedMark 弱い所を知り尽くした手淫に、再び%ANAME(MASTER)%は達しようとしていたが…
+		PRINTFORML 「呵呵，还不行哦？每次觉得舒服的时候，就想起我。再多想一下我…♥」
+		;TranslatedMark 「ふふ、まだダメよ？　キモチいいと感じる度に、私のこと思い浮かべて。もっともっと、私のこと考えて…♥」
+		PRINTFORMW 像是提前知道一样，停下手来，紧紧地拧住它的根部，防止射出来
+		;TranslatedMark またもお預けと言わんばかりに扱く手を止め、暴発を許さぬようにその根元をぎゅっと絞める
+		PRINTL
+		PRINTFORML －%ANAME(対象)%、%ANAME(対象)%、%ANAME(対象)%、%ANAME(対象)%、%ANAME(対象)%、%ANAME(対象)%、%ANAME(対象)%、%ANAME(対象)%……－
+		;TranslatedMark － %ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様…… －
+		PRINTL
+		PRINTFORML 在完全绝顶之波平息后，%ANAME(対象)%再次责弄般开始手淫
+		;TranslatedMark 完全に絶頂の波が収まった後に、再び%ANAME(対象)%が弄ぶように手淫を始める
+		PRINTFORMW 「呵呵呵…对了对了，状态很好。来，闭上眼睛。请吮吸我的乳房。只考虑我啊…♥」
+		;TranslatedMark 「うふふ…そうそう、良い調子よ。さあ、目を閉じて。私のおっぱいにしゃぶりついて。私のことだけ考えるのよ…♥」
+		PRINTFORML %ANAME(対象)%像是要喂奶似的抱着%ANAME(MASTER)%的头，紧紧地压在自己的胸口上
+		;TranslatedMark %ANAME(対象)%は授乳させるかのように%ANAME(MASTER)%の頭を抱きかかえ、自らの胸にぎゅぅっと押し付ける
+		PRINTFORMW %ANAME(MASTER)%也像他说的那样闭上眼睛，拼命地吸着主人给予快感的乳头
+		;TranslatedMark %ANAME(MASTER)%もまた言われたとおりに目を閉じ、快感を与えてくれるご主人様の乳首に必死で吸い付く
+		PRINTL
+		CALL COLOR_PRINTL(@"－ %ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様 －", 0xFF00FF)
+		PRINTL
+		PRINTFORMW 「啊，好啊♥就是这个样子。请再想一下我。喜欢上我吧♥」
+		;TranslatedMark 「ああ、いいわ♥　その調子よ%ANAME(MASTER)%。もっと私のこと考えてっ。私のこと大好きになって♥」
+		PRINTFORML 对着拼命呼喊%ANAME(対象)%之名的%ANAME(MASTER)%的身姿，%ANAME(対象)%的背后传来了微暗的快感
+		;TranslatedMark 必死に%ANAME(対象)%の名を心で叫ぶ%ANAME(MASTER)%の姿に、%ANAME(対象)%の背筋をゾクゾクと仄暗い快感が伝う
+		PRINTFORML 然后一边发出粗俗的声音一边处理肉棒的那只手也越来越激烈了
+		;TranslatedMark そしてぐちゅぐちゅと卑猥な音を立てながら肉棒を扱くその手もどんどんと激しさを増していく
+		PRINTFORMW 她也明显地兴奋了
+		;TranslatedMark 彼女もまた、明らかに興奮していた
+		PRINTL
+		CALL COLOR_PRINTL(@"－ %ANAME(対象)%様、%ANAME(対象)%様、好きっ、%ANAME(対象)%様、大好きっ、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、好きっ、大好きっ、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、好きっ、%ANAME(対象)%様、好きっ、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様、大好きっ、大好きっ、大好きっ、%ANAME(対象)%様、%ANAME(対象)%様、大好きっ、%ANAME(対象)%様、大好きっ、%ANAME(対象)%様、%ANAME(対象)%様、大好きっ、大好きっ、%ANAME(対象)%様、%ANAME(対象)%様、%ANAME(対象)%様 大好きっ、大好きっ、大好きっ、大好きっ、大好きっ、大好きっ、大好きっ、大好きっ、大好きっ、大好きっ、大好きっ、大好きっ、大好きっ、大好きっ、大好きっ、－", 0xFF00FF)
+		PRINTL
+		PRINTFORMW 「啊，好的♥%ANAME(MASTER)%，就这样满脑子都在想我！」
+		;TranslatedMark 「ああっ、いいっ♥　%ANAME(MASTER)%っ、そのまま私で頭いっぱいにしながらイッてぇっ！」
+		PRINTFORML 被听到心声和一心吸着乳头，%ANAME(対象)%也和%ANAME(MASTER)%一起达到了顶峰
+		;TranslatedMark 叩きつけられた心の声と一心不乱な乳首への吸い付きで、%ANAME(対象)%もまた%ANAME(MASTER)%と共に絶頂した
+		PRINTFORMW 积蓄的%ANAME(MASTER)%的爆发，是无法用言语形容的岩浆奔流般的射精
+		;TranslatedMark 溜めに溜めた%ANAME(MASTER)%のそれは、言葉にならないマグマの奔流の如き射精だった
+		PRINTFORML 直到顶峰的瞬间…不，即使在最高潮的时候，也一边想着主人一边射精
+		;TranslatedMark 絶頂の瞬間まで…いや、絶頂の最中でさえ主人を想いながらの射精は、
+		PRINTFORMW 多到无法想象是一次射精出来的程度，真是漫长的绝顶
+		;TranslatedMark 一度の射精で出たとは思えないほど多く、永い絶頂だった
+		PRINTFORMW 「啊…、哈…非常多的量和味道……♥嗯…看，看…♥」
+		;TranslatedMark 「あっ…、はぁ…すごい量と匂い……♥　ん、…ほら、見てて…♥」
+		PRINTFORML %ANAME(対象)%在%ANAME(MASTER)%面前捧出了想着自己而射出来的折服证明，开心地说着
+		;TranslatedMark %ANAME(対象)%は、自分のことを想って出された屈服の証を%ANAME(MASTER)%の目の前ですくい取り、嬉しそうに口に運ぶ
+		PRINTFORML 「呵呵…。想着我而射出的精液…非常好吃啊…♥」
+		;TranslatedMark 「うふふ…。私のことを想って出した精…とっても美味しいわ…♥」
+		PRINTFORMW %ANAME(対象)%温柔地抚摸着按照自己说的做的宠物。%ANAME(MASTER)%还迷上了这种能烧掉大脑的射精的快感…
+		;TranslatedMark 言うとおりに出来たペットを%ANAME(対象)%は優しく撫でる。当の%ANAME(MASTER)%は脳を焼かれるような射精の快感に未だ惚けていた…
+		PRINTFORMW 「嗯，完全像做梦一样。那么，今天就这样一起睡吧…♥」
+		;TranslatedMark 「くすっ、すっかり夢心地みたい。それじゃあ、今日はこのまま一緒に寝ましょうね…♥」
+		PRINTFORMW 然后两个人紧紧相拥，就这样陷入了深深的睡眠…
+		;TranslatedMark そして二人は身を寄せ合って抱き合い、そのまま深い眠りに落ちた…
+		CALL FUCK(対象, "欲望, 奉仕, 性技, 精愛, 手淫", "接吻喪失", GET_SPERM_ID("不明"), @"%ANAME(MASTER)%的阴茎", "", "", "和姦")
+		CALL FUCK(MASTER, "Ｃ, 奉仕, 精愛, 射精", "接吻喪失", GET_SPERM_ID("不明"), @"%ANAME(対象)%の手")
+		KDVAR:対象:さとり_ペットのお仕事 = -1
+ENDSELECT 
+
+
+RETURN 1

@@ -1,0 +1,176 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K2_GAMBLE_FOR_FREEDOM_RATE(対象)
+#DIM 対象
+RETURN 150
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K2_GAMBLE_FOR_FREEDOM_DECISION(対象)
+#DIM 対象
+SIF !CHECK_KOJO_DAILY_HAPPEN(対象, 0, 1)
+	RETURN 0
+
+SIF CFLAG:MASTER:所属 != CFLAG:対象:捕虜先 || IS_SLAVE(対象) || IS_LOVER(対象) || IS_SLAVED_BY(対象)
+	RETURN 0
+
+SIF KDVAR:対象:魔理沙_解放のための賭け
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K2_GAMBLE_FOR_FREEDOM_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@KOJO_DAILY_K2_GAMBLE_FOR_FREEDOM_SETTARGET(対象)
+#DIM 対象
+#DIM 霊夢
+#DIM アリス
+#DIM パチュリー
+#DIM にとり
+霊夢 = NAME_TO_CHARA("霊夢")
+アリス = NAME_TO_CHARA("アリス")
+パチュリー = NAME_TO_CHARA("パチュリー")
+にとり = NAME_TO_CHARA("にとり")
+
+IF 霊夢 > 0 && CFLAG:霊夢:捕虜先 == CFLAG:対象:捕虜先
+	DAILY_TARGET:0 = 霊夢
+	DAILY_TARGET_NUM ++
+ENDIF
+
+IF アリス > 0 && CFLAG:アリス:捕虜先 == CFLAG:対象:捕虜先
+	DAILY_TARGET:0 = アリス
+	DAILY_TARGET_NUM ++
+ENDIF
+IF パチュリー > 0 && CFLAG:パチュリー:捕虜先 == CFLAG:対象:捕虜先
+	DAILY_TARGET:0 = パチュリー
+	DAILY_TARGET_NUM ++
+ENDIF
+IF にとり > 0 && CFLAG:にとり:捕虜先 == CFLAG:対象:捕虜先
+	DAILY_TARGET:0 = にとり
+	DAILY_TARGET_NUM ++
+ENDIF
+
+RETURN DAILY_TARGET_NUM > 0
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K2_GAMBLE_FOR_FREEDOM(対象)
+#DIM 対象
+#DIM 候補
+候補 = DAILY_TARGET:0
+PRINTFORML %ANAME(MASTER)%走向牢獄的時候、%ANAME(対象)%提出了懇求
+PRINTFORMW 「那個、你、也抓住了%ANAME(候補)%吧？」
+PRINTFORML 「拜託了、能放過那個傢伙麼？」
+PRINTFORMW 「無論是什麼事情、我都可以做……拜託了」
+PRINTFORML 看来是想幇助朋友。但是沒想到会做到這種地步……
+CALL ASK_MULTI("釋放", "拒绝", "打賭")
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORMW 「誒……真的麼？」
+		PRINTFORML 当然是真的、説出的話可不会反悔
+		PRINTFORML 不相信的話就当在開玩笑吧……
+		PRINTFORMW 「不、不是的、沒想到真的会直接釋放。明明説的是這麼過分的要求」
+		PRINTFORMW 「非常感謝。你、意外的好人啊」
+		PRINTFORML 在自己都被監禁的時候、沒想到還会被説成好人
+		PRINTFORMW 總之、直接把%ANAME(候補)%釋放了……
+		CALL COLOR_PRINTW(@"%ANAME(候補)%被釋放了", カラー_注意)
+		CALL COLOR_PRINTW(@"%ANAME(対象)%的好感度上昇了", カラー_注意)
+		CALL CAPTURE(候補, 0)
+		CFLAG:対象:好感度 += 300
+	CASE 1
+		PRINTFORMW 她的友情非常美麗、但是対自己沒有任何好処
+		PRINTFORMW %ANAME(MASTER)%無視了這個請求……
+	CASE 2
+		PRINTFORML 仔細考慮了一下覚得可以接受、但直接放掉的話就太無趣了
+		PRINTFORMW 傳達了要進行一次賭博決定是否答応
+		PRINTFORML 「賭一場……？　真是奇怪的傢伙」
+		PRINTFORMW 「好啊、我答応了。那？　要賭什麼？　要讓她和剣闘士戦闘麼？」
+		PRINTFORML 当然不是、才不会讓重要的俘虜去做這種危險的事
+		PRINTFORMW 只是、在區區三十分鐘内、忍受着不高潮而已
+		PRINTFORML 忍耐住的話、%ANAME(候補)%和%ANAME(対象)%都会被釋放
+		PRINTFORMW 但是、高潮了的話、不但不会釋放%ANAME(候補)%。%ANAME(対象)%也要服從我……
+		PRINTFORMW 「啊、居然這麼卑鄙的利用我的友情……！」
+		PRINTFORML %ANAME(対象)%感到非常的憤怒
+		PRINTFORMW 拒絶的話、兩個人就一直待在牢裡吧。這麼説完後、%ANAME(対象)%非常勉強的点頭同意了
+		PRINTFORML 「……快点弄完吧」
+		PRINTFORML 這種頑強的態度能保持到最後麼、就讓我見識一下吧
+		PRINTFORMW 露出了嗜虐的笑容、%ANAME(MASTER)%推倒了%ANAME(対象)%……
+		PRINTFORMW ・
+		PRINTFORMW ・
+		PRINTFORMW ・
+		
+		LOCAL:1 = ABL:MASTER:性技 + ABL:対象:欲望 + ABL:対象:Ｃ感 + ABL:対象:Ｂ感
+		
+		SELECTCASE LOCAL:1
+			CASE IS < 6
+				PRINTFORMW 「……不行啊、你之前還那麼有自信、沒想到只讓我有那麼一点点感覚啊」
+				PRINTFORML %ANAME(MASTER)%努力了。但無論如何也無法讓%ANAME(対象)%高潮
+				PRINTFORML ……可悪、完全是技術還不行
+				PRINTFORMW 「有点掃興啊……好了、那麼、按照約定、放了我們吧」
+				PRINTFORMW 咬着牙、釋放了%ANAME(MASTER)%兩人……
+				CALL COLOR_PRINTW(@"%ANAME(候補)%被釋放了", カラー_注意)
+				CALL COLOR_PRINTW(@"釋放了%ANAME(対象)%", カラー_注意)
+				CALL CAPTURE(候補, 0)
+				CALL CAPTURE(対象, 0)
+			CASE IS < 12
+				PRINTFORMW 「啊……停下、不要、啊、嗯啊……、啊……！」
+				PRINTFORMW 「住手、真的、不能碰了……啊……啊啊啊……！」
+				PRINTFORML 還剩下十分鐘的時候、%ANAME(対象)%的身体一陣劇烈顫抖
+				PRINTFORMW 在耳辺説道高潮了吧、讓還在顫抖的%ANAME(対象)%把頭転了過去
+				PRINTFORMW 责弄着那倔強的傢伙的秘部、非常容易就知道她的身体因為高潮而痙攣了
+				PRINTFORMW 「啊……可悪、該死……」
+				PRINTFORMW 対着流泪後悔的%ANAME(対象)%、傳達了這場賭博是自己的勝利……
+				CALL FUCK(対象, "欲望, Ｃ, Ｂ")
+				CALL COLOR_PRINTW(@"%ANAME(対象)%已経屈服了", カラー_注意)
+				CFLAG:対象:従属度 = MAX(1500, CFLAG:対象:従属度)
+				CFLAG:対象:依存度 = MAX(300, CFLAG:対象:依存度)
+				TALENT:対象:服従 = 1
+			CASEELSE
+				PRINTFORMW 「啊嗯♥　嗚啊、嗯♥　啊、啊啊ー♥」
+				PRINTFORMW 「啊嗚！？　啊嗯、那裡、那裡啊……♥　啊啊嗚♥」
+				PRINTFORMW 最開始還在逞強的%ANAME(対象)%、但是被%ANAME(MASTER)%稍微责弄了一会、不知不覚間就堕落在快感之中
+				PRINTFORMW 早就過了三十分鐘了、但是%ANAME(対象)%完全沒有説住手的意思
+				PRINTFORMW 「嗚咕……♥　嗯、嗯啊……哈啊……♥」
+				PRINTFORML 吻上去的時候、她積極的伸出了自己的舌頭纏了過来
+				PRINTFORMW 那個眼中、已経看不到%ANAME(候補)%的影子了。只剩下了期待着快感的眼神。
+				PRINTFORMW 差不多時候了……這麼判断的%ANAME(MASTER)%、開始勧誘着%ANAME(対象)%
+				PRINTFORML %ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%加入我軍的話、這樣的事要做多少次就做多少次
+				PRINTFORMW 不像這次只有手指而已、還能做更舒服的事情
+				PRINTFORMW 「変成♥　変成你的東西、更舒服♥　要做更舒服的事情♥」
+				PRINTFORML %ANAME(対象)%立刻点頭答応了。真是簡単的人
+				PRINTFORMW 面対流出口水不停発出了可愛的嬌喘的她、%ANAME(MASTER)%尽情的讓她高潮了……
+				CALL FUCK(対象, "欲望, Ｃ, Ｂ, Ｍ")
+				CALL COLOR_PRINTW(@"%ANAME(対象)%已経屈服了", カラー_注意)
+				CALL COLOR_PRINTW(@"%ANAME(対象)%成為了同伴", カラー_注意)
+				CALL COLOR_PRINTW(@"%ANAME(対象)%作為女人覚醒了", カラー_注意)
+				CFLAG:対象:従属度 = MAX(3000, CFLAG:対象:従属度)
+				CFLAG:対象:依存度 = MAX(600, CFLAG:対象:依存度)
+				CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属, 1)
+				TALENT:対象:服従 = 1
+				SETBIT TALENT:対象:淫乱系, 素質_淫乱_淫乱
+		ENDSELECT
+ENDSELECT
+
+KDVAR:対象:魔理沙_解放のための賭け = 1
+RETURN 1
+

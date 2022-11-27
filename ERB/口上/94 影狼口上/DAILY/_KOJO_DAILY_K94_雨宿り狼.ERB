@@ -1,0 +1,314 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K94_KAGEROU_RAINYDAY_RATE(対象)
+#DIM 対象
+RETURN 50
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K94_KAGEROU_RAINYDAY_DECISION(対象)
+#DIM 対象
+
+;雨宿りは一回限り
+SIF KDVAR:対象:影狼_雨宿り狼
+	RETURN 0
+
+;主人公はペニスがあること
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 0, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K94_KAGEROU_RAINYDAY_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K94_KAGEROU_RAINYDAY(対象)
+#DIM 対象
+
+PRINTFORMW 听到断断续续的雨声
+;TranslatedMark ポツポツと雨音が聞こえてくる
+PRINTFORMW 好不容易有个休息日，却是个忧郁的下午
+;TranslatedMark 折角の休日なのに憂鬱な午後だ
+PRINTFORMW %ANAME(MASTER)%看着窗外叹息
+;TranslatedMark %ANAME(MASTER)%は窓の外を見ながらため息を吐く
+PRINTFORMW 从早上开始一直是这个状态
+;TranslatedMark 朝からずっとこの調子だ
+PRINTFORMW 也许是天气的关系，心情也低落了，什么也不想做
+;TranslatedMark 天気のせいか気分も落ち込み、何をする気も起きない
+PRINTFORMW 这样发呆的话，现在是战争中的话就会忘记了
+;TranslatedMark こうしてボーっとしていると今が戦争中だと忘れそうになる
+PRINTFORMW 看了一会儿雨也没看，突然注意到了什么
+;TranslatedMark しばらく雨を見るでもなく眺めていると、ふと何かに気づいた
+PRINTFORMW 窗框外，隐约有什么在窥视着
+;TranslatedMark 窓枠の外、微かに何かが覗いている
+PRINTFORMW 是什么呢？定睛一看，像是动物的耳朵
+;TranslatedMark なんだろう？目を凝らして見てみると動物の耳の様に見えた
+PRINTFORMW 但是如果是那样的话位置就奇怪了
+;TranslatedMark しかしそうだとしたら位置がおかしい
+PRINTFORMW %ANAME(MASTER)%抬起沉重的身体，走近窗边
+;TranslatedMark %ANAME(MASTER)%は重い体を起こし、窓辺に近づいた
+PRINTFORMW
+PRINTFORMW 「…啊，%ANAME(MASTER)%。你好」
+;TranslatedMark 「…あら、%ANAME(MASTER)%。こんにちは」
+PRINTFORMW 是耳朵长长的狼女
+;TranslatedMark 耳の持ち主は狼女だった
+PRINTFORMW 她一看见%ANAME(MASTER)%，就扑哧一声摇晃着大耳朵打招呼
+;TranslatedMark 彼女は%ANAME(MASTER)%を認めると、大きな耳をピクピクと揺らして挨拶してきた
+PRINTFORMW 「这里是%ANAME(MASTER)%的宅邸。嘿」
+;TranslatedMark 「ここ、%ANAME(MASTER)%の屋敷だったんだ。へぇー」
+PRINTFORMW 她好像很佩服似的眺望着房子
+;TranslatedMark 彼女は何やら感心した様に屋敷を眺める
+PRINTFORMW 「啊，我借了屋檐下。刚才伞坏了」
+;TranslatedMark 「あっ、軒下をお借りしてるわ。さっき、傘が壊れちゃってさ」
+PRINTFORMW 那只胳膊上挂着一把破破烂烂的伞
+;TranslatedMark その腕にはボロボロになった傘がぶら下げられていた
+PRINTFORMW 从什么时候开始在的呢？衣服的下摆都叫雨淋湿了
+;TranslatedMark いつからいたのだろうか？服の裾はすっかり雨に濡れている
+PRINTFORMW 瞥了一眼胸口，微微透着一点
+;TranslatedMark チラッと胸元を見ると微かに透けていた
+PRINTFORMW 「对不起，能让我再避雨一下吗？」
+;TranslatedMark 「ごめんなさいね、もう少し雨宿りさせてくれない？」
+IF CFLAG:対象:所属 != 0
+	PRINTFORMW 虽然不是佯装不知，但她是敌国的武将
+	;TranslatedMark 知らぬ顔ではないが、彼女は敵国の武将だ
+ELSE
+	PRINTFORMW 她现在确实是个流浪者
+	;TranslatedMark 彼女は確か、現在放浪の身のはずだ
+ENDIF
+PRINTFORMW 怎么办？
+;TranslatedMark どうしよう？
+CALL ASK_MULTI("带进家招待" ,"借伞给她" ,"领进家中")
+;TranslatedMark CALL ASK_MULTI("家に上げる" ,"傘を渡す" ,"家に連れ込む")
+IF RESULT == 0
+	PRINTFORMW 在雨中，不能把女性放在外面
+	;TranslatedMark 雨の中、女性を外に放置はできない
+	PRINTFORMW %ANAME(MASTER)%把她请到了家里
+	;TranslatedMark %ANAME(MASTER)%は彼女を家の中に招いた
+	PRINTFORMW 「啊，可以吗？」
+	;TranslatedMark 「えっ、いいの？」
+	PRINTFORMW 当%ANAME(MASTER)%再一次邀请她时，她高兴地吧嗒吧嗒地摇着耳朵
+	;TranslatedMark %ANAME(MASTER)%がもう一度招くと彼女は嬉しそうに耳をピクピクと揺らした
+	PRINTFORMW 「嘿嘿，谢谢。很温柔」
+	;TranslatedMark 「えへへ、ありがとう。優しいんだ」
+	PRINTFORMW 露出了与平时总有点凛然的印象不同的令人怀念的笑容
+	;TranslatedMark 普段のどことなく凛とした印象とは違う人懐っこそうな笑顔を見せた
+	PRINTFORMW 去宅邸，把毛巾递给他
+	;TranslatedMark 屋敷に上げ、タオルを渡す
+	PRINTFORMW 她小心翼翼地擦拭着那长发、耳朵和大尾巴
+	;TranslatedMark 彼女はその長い髪と耳、そして大きな尻尾を丹念に拭いていく
+	PRINTFORMW 本应该是无心的动作，但总觉得有点美艳的动作让人看得出神
+	;TranslatedMark 何気ない動作のはずだが、どことなく艶のある仕草に思わず見とれてしまう
+	PRINTFORMW 「好的，谢谢。…？怎么了？」
+	;TranslatedMark 「はい、ありがとう。…？どうかした？」
+	PRINTFORMW 我一转身接过毛巾，就把她叫进了客厅
+	;TranslatedMark ハッと我に返りタオルを受け取ると、彼女を居間に招き入れた
+	PRINTFORMW 端上热茶
+	;TranslatedMark 温かいお茶を差し出す
+	PRINTFORMW 「哇，谢谢，从什么到什么。」
+	;TranslatedMark 「わぁ、ありがと、何から何まで。」
+	PRINTFORMW 她接过茶来噗哧一声凉了之后慢慢喝了
+	;TranslatedMark 彼女はお茶を受け取るとふぅふぅと冷ましてからゆっくりと飲んだ
+	PRINTFORMW 好像在嘴里一样，发出可爱的叹息，摇着尾巴
+	;TranslatedMark どうやら口にあった様で可愛らしいため息をついて尻尾をふりふりと振っていた
+	PRINTFORMW 「呵呵呵」
+	;TranslatedMark 「ふふっ」
+	PRINTFORMW 她望着这边微微一笑
+	;TranslatedMark 彼女がこちらを見つめて小さく笑う
+	PRINTFORMW 「伞坏了怎么办呢，多亏了那个，我遇到了一件好事」
+	;TranslatedMark 「傘が壊れてどうしようかって思ってたけど、そのおかげでちょっと良い事に巡り合えたわ」
+	PRINTFORMW 「这种东西怎么说来着？…受伤的功名？」
+	;TranslatedMark 「こういうのってなんて言うんだっけ？…怪我の功名？」
+	PRINTFORMW 总觉得有点不一样
+	;TranslatedMark なんだか少し違う気がする
+	PRINTFORMW 但是她高兴了，我没有心情不好
+	;TranslatedMark しかし彼女に喜ばれて悪い気はしなかった
+	PRINTFORMW
+	PRINTFORMW 雨声淅淅沥沥的午后
+	;TranslatedMark ポツポツと雨音のする午後
+	PRINTFORMW 两个人谈了一阵笑
+	;TranslatedMark 二人でしばし談笑に興じた
+	CFLAG:対象:好感度 += 300
+	KDVAR:対象:影狼_雨宿り狼 = 1
+ELSEIF RESULT == 1
+	PRINTFORMW 不怎么亲近的人就这样纠缠下去可不行
+	;TranslatedMark それほど親しくない相手にこのまま居着かれては困る
+	PRINTFORMW %ANAME(MASTER)%无言地拿出了伞
+	;TranslatedMark %ANAME(MASTER)%は無言で傘を差し出した
+	PRINTFORMW 「啊，能借我吗？但是，下次什么时候能来这里呢…」
+	;TranslatedMark 「あら、貸してくれるの？でも、今度いつここまで来れるか…」
+	PRINTFORMW 把伞交给对方，说不还也可以
+	;TranslatedMark 返さなくて良いと半ば押し付ける様に傘を渡す
+	PRINTFORMW 「嗯，谢谢。有机会的话我会还给你的」
+	;TranslatedMark 「うん、ありがと。機会があったら返すわね」
+	PRINTFORMW 她扑通一声打开伞，在雨中走去
+	;TranslatedMark 彼女はバサッと傘を広げ、雨の中に歩き出す
+	PRINTFORMW 走了一会回头看这边，啪的一声低下头就消失在雨中了
+	;TranslatedMark しばらく歩くとこちらを振り返り、ペコッと頭を下げると雨の中へと消えていった
+	PRINTFORMW 看来不是坏孩子
+	;TranslatedMark どうやら悪い子ではないようだった
+	PRINTFORMW %ANAME(MASTER)%用胳膊肘撑着窗框，暂时呆呆地眺望着她消失的景色
+	;TranslatedMark %ANAME(MASTER)%は窓枠に肘をついて彼女が消えた景色をしばしボーっと眺めていた
+	CFLAG:対象:好感度 += 150
+	KDVAR:対象:影狼_雨宿り狼 = 1
+ELSEIF RESULT == 2
+	PRINTFORMW 看到她那扇风般的身姿，%ANAME(MASTER)%不由得不停地把她请到了家里
+	;TranslatedMark その扇情的な姿に思わずムラッと来た%ANAME(MASTER)%は彼女を家の中に招いた
+	PRINTFORMW 「啊，可以吗？」
+	;TranslatedMark 「えっ、いいの？」
+	PRINTFORMW 当%ANAME(MASTER)%再一次邀请她时，她高兴地吧嗒吧嗒地摇着耳朵
+	;TranslatedMark %ANAME(MASTER)%がもう一度招くと彼女は嬉しそうに耳をピクピクと揺らした
+	PRINTFORMW 「嘿嘿，谢谢。很温柔」
+	;TranslatedMark 「えへへ、ありがとう。優しいんだ」
+	PRINTFORMW 露出了与平时总有点凛然的印象不同的令人怀念的笑容
+	;TranslatedMark 普段のどことなく凛とした印象とは違う人懐っこそうな笑顔を見せた
+	PRINTFORMW 那个笑容再一次使人不安和劣情涌上心头
+	;TranslatedMark その笑顔にもう一度ムラムラと劣情がこみ上げてくる
+	PRINTFORMW 她去了宅邸，端出了热茶
+	;TranslatedMark 彼女を屋敷に上げ、温かいお茶を出した
+	PRINTFORMW 她毫不怀疑地宽宏大量
+	;TranslatedMark 彼女は何も疑うことなく寛いでいる
+	PRINTFORMW …
+	CALL ASK_YN("推到", "忍耐")
+	IF RESULT == 1
+		PRINTFORMW 不，还是不行
+		;TranslatedMark いや、やはりだめだ
+		PRINTFORMW %ANAME(MASTER)%被想要推倒的冲动所驱使，但忍了一下
+		;TranslatedMark %ANAME(MASTER)%は押し倒したくなる衝動にかられたが、グッと堪えた
+		PRINTFORMW 取而代之的是她那漂浮着的柔和的、像花一样的香味，我牢牢地记住了
+		;TranslatedMark 代わりに彼女から漂う柔らかい、花の様な香りをしっかりと記憶した
+		PRINTFORMW
+		PRINTFORMW 「那今天就谢谢你了。我吃饱了」
+		;TranslatedMark 「それじゃあ、今日はありがとう。ごちそうさまでした」
+		PRINTFORMW 傍晚时分，她确认雨停了之后就回去了
+		;TranslatedMark 宵の口、雨が上がったのを確認して彼女は帰っていった
+		PRINTFORMW %ANAME(MASTER)%目送着她直到看不见她的背影
+		;TranslatedMark %ANAME(MASTER)%はその後ろ姿が見えなくなるまで見送った
+		CFLAG:対象:好感度 += 300
+		KDVAR:対象:影狼_雨宿り狼 = 1
+	ELSEIF RESULT == 0
+		PRINTFORMW 达到了忍耐极限的%ANAME(MASTER)%抓住她的手臂就那样推倒了她
+		;TranslatedMark 我慢の限界に達した%ANAME(MASTER)%は彼女を腕を掴むとそのまま押し倒した
+		PRINTFORMW 惊呆了她的梦
+		;TranslatedMark ドサッと倒れ込んだ彼女は%ANAME(MASTER)%の下で驚き固まっている
+		PRINTFORMW 「诶…」
+		;TranslatedMark 「えっ…」
+		PRINTFORMW %ANAME(MASTER)%怀着兴奋的欲望将她的衣服弄到手
+		;TranslatedMark %ANAME(MASTER)%は昂る欲望のままに彼女の服に手をかけた
+		IF CFLAG:対象:好感度 > 1500
+			PRINTFORMW 「啊…」
+			;TranslatedMark 「あっ…」
+			PRINTFORMW 令人意外的是，她没有抵抗
+			;TranslatedMark 意外なことに、彼女は抵抗しなかった
+			PRINTFORMW 虽然知道接下来要做的事情，但还是面红耳赤
+			;TranslatedMark これからされる事はわかっている様だが顔を真っ赤にしつつもされるがままだ
+			PRINTFORMW 一件一件地脱下衣服，终于露出了赤裸的她
+			;TranslatedMark スルスルと服を一枚ずつ脱がし、遂に裸の彼女が露となる
+			PRINTFORMW 「…嗯，嗯。我、我…可以啊…？」
+			;TranslatedMark 「…え、えと。わ、私は…いいよ…？」
+			PRINTFORMW 她耳朵也变得通红，眼睛也湿润了，微微地颤抖着声音，这样嘟囔着
+			;TranslatedMark 耳まで真っ赤になり瞳を潤ませた彼女が、微かに声を震わせ、そう呟いた
+			PRINTFORMW 那肉体的美丽和少女般的可爱已经无法停止
+			;TranslatedMark その肉体の美しさと少女のような可愛らしさにもはや止まることは出来なかった
+			PRINTFORMW 「啊…！」
+			;TranslatedMark 「あっ…！」
+			PRINTFORMW 皮肤接触后会有像吸着一样柔软的弹性，她会小喘气
+			;TranslatedMark 肌に触れると吸い付く様な柔らかい弾力が伝わり、彼女は小さく喘いだ
+			PRINTFORMW 「啊…喂，喂…接下来是被子…想做的…」
+			;TranslatedMark 「あぅぅ…ね、ねぇ…続きは、お布団で…したいの…」
+			PRINTFORMW 她羞答答地两手捂着脸恳求
+			;TranslatedMark 彼女は恥ずかしそうに顔を両手で隠しながら懇願してきた
+			PRINTFORMW %ANAME(MASTER)%轻轻抚摸她的头，抱着她，带她进了卧室
+			;TranslatedMark %ANAME(MASTER)%は彼女の頭をそっと撫でると抱き抱え、寝室へと連れ込んだ
+			PRINTFORML
+			PRINTFORML 「♥♥♥♥♥♥♥♥」
+			PRINTFORMW
+			PRINTFORMW 在风雨交加的午后
+			;TranslatedMark ポツポツと雨音の響く午後
+			PRINTFORMW 夹杂着雨声，从房子里传来了娇艳的女人的喘息声
+			;TranslatedMark 雨音に交じって、屋敷から艶めかしい女の喘ぎが響いていた
+			CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", @"%ANAME(MASTER)%")
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, @"%ANAME(対象)%の唇", "", @"%ANAME(対象)%の膣", "和姦")
+			PRINTFORMW
+			PRINTFORMW 第二天早上醒来时她已经不在了
+			;TranslatedMark 翌朝、目覚めた時には彼女は既にいなかった
+			PRINTFORMW 但是从被子里，微微飘散着她那柔软的、像花一样的香味
+			;TranslatedMark しかし布団からは、微かに彼女のあの柔らかく、花の様な香りが漂っていた
+			CFLAG:対象:好感度 += 500
+			KDVAR:対象:影狼_雨宿り狼 = 1
+		ELSEIF ABL:MASTER:武闘 * RAND:5 + 1 <= ABL:対象:武闘 * RAND:8 + 1
+			PRINTFORMW 「讨厌！喂，住手！」
+			;TranslatedMark 「やだっ！ちょ、やめなさいよ！」
+			PRINTFORMW 但是我被她抵抗了
+			;TranslatedMark しかし彼女に抵抗されてしまった
+			PRINTFORMW 她激烈抵抗，甩开了%ANAME(MASTER)%，一溜烟地逃到了屋外
+			;TranslatedMark 彼女は激しく抵抗して%ANAME(MASTER)%を振りほどくと一目散に家の外まで逃げていった
+			PRINTFORMW 虽然想要追上去，但是对手是狼，果然还是追不上…
+			;TranslatedMark 追いかけようとしたが狼相手では流石に追いつけなかった…
+			CFLAG:対象:好感度 -= 1500
+			KDVAR:対象:影狼_雨宿り狼 = 1
+		ELSE
+			PRINTFORMW 「讨厌！喂，住手！」
+			;TranslatedMark 「やだっ！ちょ、やめなさいよ！」
+			PRINTFORMW 她当然激烈地抵抗了
+			;TranslatedMark 当然彼女は激しく抵抗してきた
+			PRINTFORMW 强行抓住梦想
+			;TranslatedMark しかし%ANAME(MASTER)%は無理矢理押さえつけると強引に服をはぎ取った
+			PRINTFORMW 「嗯…！」
+			;TranslatedMark 「っ…！」
+			PRINTFORMW 剥去所有衣服，终于露出了赤身裸体的她
+			;TranslatedMark すべての服をはぎ取ると、遂に裸の彼女が露になった
+			PRINTFORMW 她耳朵也变得通红，眼睛湿润着，在%ANAME(MASTER)%下扭动着身体
+			;TranslatedMark 彼女は耳まで真っ赤になり瞳を潤ませながら%ANAME(MASTER)%の下で身をよじらせる
+			PRINTFORMW 但是，每次身体扭曲的时候，那种女人味的肉体都会毫不犹豫地主张母体
+			;TranslatedMark しかし身をよじらせる度にその女らしい肉体が否応なく雌を主張する
+			PRINTFORMW 「这个…！」
+			;TranslatedMark 「この…！」
+			PRINTFORMW 我已经无法忍受她微微颤抖着盯着我的表情了
+			;TranslatedMark 微かに身を震わせながらも睨み付けてくる彼女の表情にもはや我慢できなかった
+			PRINTFORMW 「啊…！」
+			;TranslatedMark 「あっ…！」
+			PRINTFORMW 皮肤接触后会有像吸着一样柔软的弹性，她会小喘气
+			;TranslatedMark 肌に触れると吸い付く様な柔らかい弾力が伝わり、彼女は小さく喘いだ
+			PRINTFORMW 「这个，那个…呼…停止吧…来吧！…啊！」
+			;TranslatedMark 「こ、のぉ…ふぅ…やめっ…なさいよ！…あっ！」
+			PRINTFORMW 她羞涩地扭动着身子想要逃走，一边抱着她，一边往身上爬
+			;TranslatedMark 恥ずかしそうに身をくねらせ逃げようとする彼女を抱き止めながら体中に指を這わす
+			PRINTFORMW 可能是原本就很敏感的体质吧，身体做出了坦率的反应，配合着爱抚，可爱地颤抖着
+			;TranslatedMark 元々敏感な体質なのか、身体は素直に反応し、愛撫に合わせて可愛らしくビクビクと震えた
+			PRINTFORMW %ANAME(MASTER)%抱着暴躁的她，把她带进了卧室
+			;TranslatedMark %ANAME(MASTER)%は暴れる彼女を抱きかかえると、寝室へと連れ込んだ
+			PRINTFORMW
+			PRINTFORMW 在风雨交加的午后
+			;TranslatedMark ポツポツと雨音の響く午後
+			PRINTFORMW 伴着雨声，从屋里传来了女人的呻吟声
+			;TranslatedMark 雨音に交じって、屋敷からくぐもった女の呻き声が響いていた
+			CALL FUCK_RAPE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", @"%ANAME(MASTER)%")
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, @"%ANAME(対象)%の唇", "", @"%ANAME(対象)%の膣", "和姦")
+			PRINTFORMW
+			PRINTFORMW 充分享受之后，把她解放了
+			;TranslatedMark たっぷりと楽しませてもらった後、彼女を解放した
+			PRINTFORMW 她怨恨地盯着%ANAME(MASTER)%，然后哭着跑了出去
+			;TranslatedMark 彼女は恨めしそうに%ANAME(MASTER)%を睨みつけた後、泣きながら走り去っていった
+			CFLAG:対象:好感度 -= 1500
+			KDVAR:対象:影狼_雨宿り狼 = 1
+		ENDIF
+	ENDIF
+ENDIF
+
+RETURN 1

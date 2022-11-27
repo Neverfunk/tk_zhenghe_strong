@@ -1,0 +1,477 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_HOUSEBOAT_RATE()
+RETURN 30
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_HOUSEBOAT_DECISION()
+RETURN DAY >= 12
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_HOUSEBOAT_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_HOUSEBOAT()
+#DIM 対象
+#DIM 金額
+
+IF DVAR:屋形船_発生フラグ == 0
+	PRINTFORML 有一天，收到了屋形船的邀请函和送过来的衣物。
+	PRINTFORML 地底的温泉街是由妖怪经营的，漂亮的内部装修和充满幻想的氛围深受好评。
+	PRINTFORMW 邀请者是在幻想乡各地进行黑社会活动的流浪妖怪集团的首领
+	PRINTFORML ……虽说是邀请，其实差不多就是恐吓信一样。
+	PRINTFORML 内容是保护被土匪抢走的村姑，想要商量一下该怎么处理这件事。
+	PRINTFORML 内容很明显，其实就是她们自己抓走的吧
+	PRINTFORMW 但是如果直接拒绝的话，很难想象她们会变成怎样。
+	DVAR:屋形船_発生フラグ = 1
+ELSEIF DVAR:屋形船_発生フラグ == 2
+	PRINTFORML %ANAME(MASTER)%再次收到了屋形船的“邀请函”
+	PRINTFORML 上次应该已经杀掉了他们的首领,不过，好象有新的妖怪继承了组织。
+	PRINTFORMW 内容和上次一样，是“邀请商讨”关于领民处理的问题。
+ELSE
+	PRINTFORML %ANAME(MASTER)%再次收到了屋形船的“邀请函”
+	PRINTFORML 内容和上次一样，是“邀请商讨”关于领民处理的问题。
+	PRINTFORMW 我不想再和那些家伙扯上关系了……
+ENDIF
+$ASK_LOOP
+PRINTFORML 怎么办？
+CALL ASK_MULTI("接受邀请" ,"拒绝" ,"派遣特种部队")
+IF RESULT == 2
+	PRINTFORMW %ANAME(MASTER)%决定派遣特殊部队进入屋形船
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORML 特种部队暗杀了屋形船的首领，救出了村姑！
+	PRINTFORMW 这样一来，他们的活动也该暂时平息了吧……
+	DVAR:屋形船_発生フラグ = 2
+	RETURN 1
+ELSEIF RESULT == 1
+	PRINTFORML 没必要听这种人的话
+	PRINTFORMW %ANAME(MASTER)%撕碎了邀请函，和衣服一起丢掉了
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORML ・
+	CALL COLOR_PRINT(@"作为対%ANAME(MASTER)%的行为的惩罚，被抢走的姑娘们被妖怪们凌辱了……", カラー_警告)
+	PRINTFORMW 
+	CALL HOUSEBOAT_INSULT
+	FOR LOCAL, 1, MAX_COUNTRY
+		SIF IS_COUNTRY(LOCAL)
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:1, -50, 50)
+	NEXT
+	CALL COLOR_PRINT("抛弃领民的事情很快就被传播出去了，其他国家的评价下降了……", カラー_注意)
+	PRINTFORMW 
+	DVAR:屋形船_発生フラグ = 1
+	RETURN 1
+ELSE
+	PRINTFORML 不得已只好接受邀请
+	PRINTFORML 请柬上写着请使者务必穿上附在信内的衣服来
+	PRINTFORMW 摊开一看宛如花魁穿的衣服那样华丽的奢侈品
+	PRINTFORML 好像并不是陷阱……是东道主的爱好吗？
+	PRINTFORML 不管怎么说，如果要穿上这件衣服的话，使者就必须是女性。
+	PRINTFORMW 送谁去呢？
+	CALL SINGLE_DRAWLINE
+	CALL SELECT_CHARA_LIST_ONLY_LOGIC_SEX("HOUSEBOAT", "HOUSEBOAT")
+	IF RESULT < 0
+		PRINTFORML 还是决定重新考虑一下
+		GOTO ASK_LOOP
+	ENDIF
+	対象 = RESULT
+	IF 対象 == MASTER
+		PRINTFORML %ANAME(対象)%亲自去了
+	ELSE
+		PRINTFORML 送走了%ANAME(対象)%
+	ENDIF
+	PRINTFORMW %ANAME(対象)%换上指定的衣服后，就朝着地底走去……
+	PRINTFORML 
+	PRINTFORML 在碰头的地方一看，似乎是发信人派来的妖怪在等着
+	PRINTFORML 他看到打扮得很漂亮的%ANAME(対象)%，吹着口哨很满足地笑了
+	PRINTFORMW 他很熟练的搂着%ANAME(対象)%的肩膀，把她带进了停泊着的屋形船。
+	PRINTFORML 虽然已经做好了被大量的手下包围的觉悟，但是在被租下来的船上进行的是一対一的交谈。
+	PRINTFORML 在优雅的装饰中，摆放着豪华的饮食和酒，表面上充满了欢迎的气氛。
+	PRINTFORMW 可是%ANAME(対象)%可以感到他的视线正在讨厌的评判着自己
+	PRINTFORML %ANAME(対象)%在适当地和他交谈后提出正题，他笑眯眯地开了口
+	PRINTFORML 谈话的内容如信所述，说是因为“保护”了领内的女孩，所以希望她将其买下来。
+	PRINTFORML 问他多少钱，他一边舔着舌头一边贴近她的脸。
+	PRINTFORMW 他说“用你的身体来代替金钱”
+	PRINTFORML 那样湿润的话音让%ANAME(対象)%不由得浑身颤抖
+	PRINTFORML 不禁想说出拒绝的话,不过，考虑到女孩们的事只好把这一口气忍下来了
+	PRINTFORMW …怎么办？
+	CALL ASK_MULTI("忍耐着接受" ,"试图用金钱进行交易" ,"杀了他")
+	IF RESULT == 1
+		PRINTFORML 我不能答应那样的要求
+		PRINTFORMW %ANAME(対象)%尽可能礼貌的拒绝了他，提出用金钱进行交易
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		IF ABL:対象:政治 * (RAND:5 + 1) > 30 * (RAND:9 + 1)
+			PRINTFORMW 成功了！
+			PRINTFORML 他対%ANAME(対象)%的话感到很开心，于是同意了交易
+			金額 = 10000 + 5000 * (RAND:5) + DAY * 400
+			PRINTFORMW 作为买下女孩们的费用，要求给出{金額}的金钱
+			CALL ASK_MULTI_JUDGE("支付", MONEY >= 金額,"拒绝", 1)
+			IF RESULT == 0
+				PRINTFORML 价钱虽贵,却无法替代姑娘们的生命
+				PRINTFORML 付了钱把她们买了回来
+				PRINTFORML 他收到钱后，脸上露出卑鄙的笑容就走了
+				PRINTFORMW %ANAME(対象)%带着流泪感谢的女孩们回去了
+				MONEY -= 金額
+				CALL COLOR_PRINT(@"支付了{金額}的金钱", カラー_注意)
+				PRINTFORMW 
+			ELSE
+				PRINTFORML 我不能支付那么多的金钱
+				PRINTFORML 虽然想还价，但他很坚决地拒绝了
+				PRINTFORMW 结果没能救出村姑们
+				PRINTFORML ・
+				PRINTFORML ・
+				PRINTFORML ・
+				CALL COLOR_PRINT(@"作为対%ANAME(対象)%的行为的惩罚，姑娘们被当做怪物们的公用便器凌辱了……", カラー_警告)
+				PRINTFORMW 
+				CALL HOUSEBOAT_INSULT
+				FOR LOCAL, 1, MAX_COUNTRY
+					SIF IS_COUNTRY(LOCAL)
+						CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:1, -50, 50)
+				NEXT
+				CALL COLOR_PRINT(@"対姑娘们所做出的事很快就传播出去了，其他国家的评价下降了……", カラー_注意)
+				PRINTFORMW 
+			ENDIF
+		ELSE
+			PRINTFORMW 失败了……
+			PRINTFORML 対于%ANAME(対象)%所说的绕弯抹角的话，他感到很不耐烦，于是粗暴地推倒了她
+			PRINTFORMW 并且対不停颤抖%ANAME(対象)%露出下贱的笑容，把凶恶的肉棒在她的面前露出来了
+			CALL HOUSEBOAT_RAPE(対象)
+			PRINTFORML 他在狠狠地侵犯了%ANAME(対象)%之后，把她扔到了地底的入口
+			PRINTFORMW %ANAME(対象)%因为还留在子宫里的他的滚烫的精液而颤抖着，摇摇晃晃踏上了归途
+			PRINTFORML ・
+			PRINTFORML ・
+			PRINTFORML ・
+			CALL COLOR_PRINT(@"作为%ANAME(対象)%的行为的代价，被抢走的女孩们被怪物当做公用便器凌辱了……", カラー_警告)
+			PRINTFORMW 
+			CALL HOUSEBOAT_INSULT
+			FOR LOCAL, 1, MAX_COUNTRY
+				SIF IS_COUNTRY(LOCAL)
+					CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:1, -50, 50)
+			NEXT
+			CALL COLOR_PRINT(@"%ANAME(対象)%轻率的行为的始末很快就传播出去了，其他国家的评价下降了……", カラー_注意)
+			PRINTFORMW 
+		ENDIF
+		DVAR:屋形船_発生フラグ = 1
+	ELSEIF RESULT == 2
+		PRINTFORML 対于这样过分无礼的要求%ANAME(対象)%突然拔出了剑
+		PRINTFORMW 但他却毫无畏惧地露出可怕的笑容，向她袭去
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		SIF DVAR:屋形船_発生フラグ == 2
+			LOCAL:2 = 20
+		IF ABL:対象:武闘 * (RAND:5 + 1) > 30 * (RAND:9 + 1) + LOCAL:2
+			PRINTFORMW 胜利了！
+			PRINTFORML 虽然%ANAME(対象)%因为倒在血泊中的他感到浑身轻松，但想起女儿们的事，又清醒过来了
+			PRINTFORMW 之后慌忙地搜索她们，但最终还是没能找到。
+			PRINTFORML ・
+			PRINTFORML ・
+			PRINTFORML ・
+			CALL COLOR_PRINT(@"作为対%ANAME(対象)%的行为的惩罚，妖怪们的残党将姑娘们当做公用便器侵犯了……", カラー_警告)
+			PRINTFORMW 
+			CALL HOUSEBOAT_INSULT
+			FOR LOCAL, 1, MAX_COUNTRY
+				SIF IS_COUNTRY(LOCAL)
+					CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:1, -50, 50)
+			NEXT
+			CALL COLOR_PRINT(@"%ANAME(対象)%的行为引发了震动……", カラー_注意)
+			PRINTFORMW 
+			DVAR:屋形船_発生フラグ = 2
+		ELSE
+			PRINTFORMW 输了……
+			PRINTFORML 他俯视着衣服凌乱，露出柔软肌肤倒下的%ANAME(対象)%
+			PRINTFORMW 脸上浮现出下流的笑容，露出凶恶的肉棒向她扑过去。
+			CALL HOUSEBOAT_RAPE(対象)
+			PRINTFORML 他在狠狠地侵犯了%ANAME(対象)%之后，把她扔到了地底的入口
+			PRINTFORMW %ANAME(対象)%因为还留在子宫里的他的滚烫的精液而颤抖着，摇摇晃晃踏上了归途
+			PRINTFORML ・
+			PRINTFORML ・
+			PRINTFORML ・
+			CALL COLOR_PRINT(@"作为%ANAME(対象)%的行为的代价，被抢走的女孩们被怪物当做公用便器凌辱了……", カラー_警告)
+			PRINTFORMW 
+			CALL HOUSEBOAT_INSULT
+			FOR LOCAL, 1, MAX_COUNTRY
+				SIF IS_COUNTRY(LOCAL)
+					CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:1, -50, 50)
+			NEXT
+			CALL COLOR_PRINT(@"%ANAME(対象)%轻率的行为的始末很快就传播出去了，其他国家的评价下降了……", カラー_注意)
+			PRINTFORMW 
+			DVAR:屋形船_発生フラグ = 1
+		ENDIF
+	ELSE
+		PRINTFORML 女孩们的生命不可替代
+		PRINTFORML 狠心忍耐下来,答应了他的要求
+		PRINTFORMW 他的脸上浮现出下流的笑容，露出凶恶的肉棒向她扑过去。
+		CALL HOUSEBOAT_RAPE(対象)
+		PRINTFORML 狠狠地侵犯了%ANAME(対象)%后，满足的他终于解放了村姑们
+		PRINTFORML 她们流着泪対%ANAME(対象)%表示深深的感谢
+		PRINTFORMW %ANAME(対象)%感受着他残留在子宫里的热度，微微颤抖着身体，带着她们回去了
+		DVAR:屋形船_発生フラグ = 1
+	ENDIF
+ENDIF
+
+RETURN 1
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_HOUSEBOAT(対象)
+#DIM 対象
+RETURN CFLAG:対象:行動不能状態 != 行動不能_子供 && CFLAG:対象:所属 == CFLAG:MASTER:所属 && !IS_ANIMAL(対象) && !TALENT:対象:妊娠 && !IS_MALE(対象)
+
+@SELECT_CHARA_LIST_SELECT_LOGIC_HOUSEBOAT(対象)
+#DIM 対象
+RETURN CFLAG:対象:捕虜先 == 0
+
+
+;-----------------------------------------------------------
+;屋形船で犯される
+;-----------------------------------------------------------
+@HOUSEBOAT_RAPE(ARG:0)
+
+PRINTFORML 
+PRINTFORMW 在漆黑的黑暗中漂浮着的屋形船的窗户上，浮现出被侵犯而混乱的%ANAME(ARG:0)%的身影。
+SELECTCASE RAND:30
+	CASE 0
+		PRINTFORML 他一按下%ANAME(ARG:0)%后就粗暴地剥下她的衣服，一下子把那凶暴的肉棒深深地插了进去
+		PRINTFORML 直接插到了子宫口的肉棒，使得%ANAME(ARG:0)%的意识瞬间飞到了天外，她的身体不停的颤动着，喷出大量的淫水
+		PRINTFORML 兴奋的他借助自身的重量激烈的在阴道里插着，%ANAME(ARG:0)%每被插入一次都会感觉视野都失去，不停的呻吟着
+		PRINTFORMW 不顾流泪痉挛的%ANAME(ARG:0)%，他把肉棒插到了特别深的地方后射出了浓稠的精液
+	CASE 1
+		PRINTFORML 被他推倒了的%ANAME(ARG:0)%感受着剧烈的抽插不由得大声喘息着
+		PRINTFORML %ANAME(ARG:0)%一边流泪一边挣扎着想要逃跑,不过，因为被肉棒插到了阴道的深处所以不能成功
+		PRINTFORML 粗野的肉棒不留情地持续摩擦着阴道里的肉壁，从%ANAME(ARG:0)%的喉咙里逐渐开始露出喘息的声音
+		PRINTFORMW 不久，伴随着呻吟声他射出了大量的精液，%ANAME(ARG:0)%一边的弓起背一边剧烈的高潮了
+	CASE 2
+		PRINTFORML %ANAME(ARG:0)%敞开了和服在地上爬着，一边被他激烈地侵犯，一边发出喘息声
+		PRINTFORML 凶恶的肉棒粗暴的用龟头顶着子宫口，%ANAME(ARG:0)%的身体不由自主地有了反应，在不停的颤抖着
+		PRINTFORML 每当听到啪啪啪啪的腰互相碰撞的声音时%ANAME(ARG:0)%就感觉自己的理性正在破碎，身体和心灵都被快乐染上了颜色
+		PRINTFORMW 突然在身体深处被射进了滚烫的精子，%ANAME(ARG:0)%的脑袋变得一片空白，不由得发出很大的娇喘声
+	CASE 3
+		PRINTFORML 被推倒的%ANAME(ARG:0)%被他压着承受着他用着全身的重量进行的侵犯
+		PRINTFORML 一直感受着直接顶到子宫口的凶暴的冲击，%ANAME(ARG:0)%的身体慢慢地被调教着
+		PRINTFORML 完全沦为他的俘虏的%ANAME(ARG:0)%，只能可怜地扭动着身体，好几次都被精子直接射到子宫里
+		PRINTFORMW 充分射精后满足了的他抽出肉棒，%ANAME(ARG:0)%的脸上露出淫荡的表情躺在地上一动不动
+	CASE 4
+		PRINTFORML %ANAME(ARG:0)%一边被他深深地插进肉棒一边全身被爱抚着全身，她的身体颤抖着
+		PRINTFORML %ANAME(ARG:0)%的理性融化在了他巧妙的技巧中，即使想忍耐，喉咙还是流露出甜美的喘息声
+		PRINTFORML 他的攻势在加剧的同时%ANAME(ARG:0)%的喘息声也变大，在无意识中扭动起了身体
+		PRINTFORMW 过了一会儿，%ANAME(ARG:0)%完全变成了他的俘虏，一边露出撒娇的表情，一边淫乱地扭着腰
+	CASE 5
+		PRINTFORML 从背后被抓住腰的%ANAME(ARG:0)%一边流眼泪，一边咬紧牙关的承受着
+		PRINTFORML 想方设法地抵抗者快感，不过，被很大的肉棒被在阴道里头狠狠地插的时候眼前就会变得雪白
+		PRINTFORML 在同时%ANAME(ARG:0)%总是无意识地发出喘息声，紧紧地夹住阴道催促他射出精子
+		PRINTFORMW 为了回应那个他深深地插进了阴道里射精了，%ANAME(ARG:0)%一边晒难看的披散着头发一边达到了绝顶
+	CASE 6
+		PRINTFORML %ANAME(ARG:0)%被他从背后抓住了手，用雄壮的肉棒狠狠地侵犯着
+		PRINTFORML 感受着插进了阴道最深处的快感，%ANAME(ARG:0)%象坏掉了的人偶一样地痉挛着，露出了呻吟声
+		PRINTFORML 不断被给予的压倒性的快感逐渐将%ANAME(ARG:0)%的理性破坏掉，使得她全身都被快感所腐蚀
+		PRINTFORMW 他阴道内射被预告、%ANAME(ARG:0)%的眼中流露出了期待♥一边露出了惊慌的表情一边浑身颤抖着达到了高潮
+	CASE 7
+		PRINTFORML 她的阴道被非常大的肉棒蹂躏着，%ANAME(ARG:0)%在他面前不断地扭动着身体。
+		PRINTFORML 他那疯狂的性交行为让%ANAME(ARG:0)%向他屈服了，她变成了一只雌兽，疯狂的渴求着做爱
+		PRINTFORML 两个人都快接近极限了，他们更加激烈地扭动着身子，不久，他一边低吼着，一边用力地插进她的身体里
+		PRINTFORMW %ANAME(ARG:0)%感到他滚烫的精子在子宫中不断地流动着，全身颤抖着紧紧地抱住他
+	CASE 8
+		PRINTFORML 在激烈的肉体碰撞声中，%ANAME(ARG:0)%和他像野兽一样地激烈地交配着
+		PRINTFORML 不管是幸运或者不幸，二人的身体的相性出奇地好，他每次扭动腰的时候%ANAME(ARG:0)%就会感受到使全身都麻木的快感
+		PRINTFORML 那种强烈的快乐难以抗拒，%ANAME(ARG:0)%逐渐露出下流的表情，开始自己扭着腰
+		PRINTFORMW 被他中意的%ANAME(ARG:0)%在那之后被彻夜地疼爱着，很多次的被内射从而高潮了
+	CASE 9
+		PRINTFORML %ANAME(ARG:0)%的双臂被绑在了头上，衣服的前面被解开露出了赤裸的样子被粗暴侵犯，流着眼泪呻吟着
+		PRINTFORML 他用像是在蔑视着%ANAME(ARG:0)%的视线俯视着她，激烈地挺着腰，一直不停地用肉棒顶着子宫
+		PRINTFORML 因为屈辱感和羞耻心而咬紧牙关忍耐着的%ANAME(ARG:0)%，在这样暴力的性交下也逐渐感受到了快感露出了喘息声
+		PRINTFORMW 不久后他深深地插进肉棒在阴道里射出精子，%ANAME(ARG:0)%也强烈的绝顶到了昏迷的程度
+	CASE 10
+		PRINTFORML 他气喘吁吁地压着%ANAME(ARG:0)%，粗暴的用肉棒在阴道里摩擦着侵犯了她
+		PRINTFORML 被不断地侵犯完全调教了的%ANAME(ARG:0)%，在他的射精的同时一边狠狠地弓起了背一边绝顶了
+		PRINTFORML 剧烈的在子宫里射出粘稠的精子，%ANAME(ARG:0)%一边颤动着一边露出不正常的娇声
+		PRINTFORMW 不久后结束了射精的他再次激烈地扭动起了腰，%ANAME(ARG:0)%只能一边继续绝顶一边提高了娇喘的声音
+	CASE 11
+		PRINTFORML %ANAME(ARG:0)%一边被他抱起一边被激烈的侵犯着，由于那个冲击而忍不住地发出了喘息声
+		PRINTFORML 每次摇晃身体都会感受到仿佛要穿刺子宫的那样的快感，%ANAME(ARG:0)%的眼前变得一片空白
+		PRINTFORML 対这种野性的性爱%ANAME(ARG:0)%的大脑渐渐被快乐所填满，渐渐地发出了甜美的娇喘声
+		PRINTFORMW 不久后%ANAME(ARG:0)%完全成为他的俘虏，妖艳地扭动着腰沉浸在快乐中
+	CASE 12
+		PRINTFORML 很快就被他健壮的肉棒俘虏了的%ANAME(ARG:0)%就这样被侵犯着，疯狂的扭动着身体
+		PRINTFORML 突然他停止了腰部的动作，在不知所措的%ANAME(ARG:0)%的耳边低声私语着，要求她说出向他索求的话
+		PRINTFORML 虽然%ANAME(ARG:0)%在一瞬间犹豫不决，但下个瞬间，她又像是要紧紧地抱住他似的恳切说出了索求的话
+		PRINTFORMW 対这样的反应感到满意的他重新开始了腰上的运动，%ANAME(ARG:0)%自身的快感和雌性本能的喜悦使她陷入了快乐的深渊
+	CASE 13
+		PRINTFORML %ANAME(ARG:0)%以対面座位的姿势和他一边相対着一边被激烈地顶着，难以忍受的发出了喘息声
+		PRINTFORML 他的巨根在阴道里抽查的时候就像是在里面挖着什么一样的刺激，%ANAME(ARG:0)%的阴道里变得粘糊糊，从中流出了爱液
+		PRINTFORML 咕咚！特别深地被插了进去，%ANAME(ARG:0)%不禁一边提高娇声一边弓起身体
+		PRINTFORMW 他在责弄了一会正在不停地颤抖着，求饶着的%ANAME(ARG:0)%的身体后就一刻不停的继续侵犯着她
+	CASE 14
+		PRINTFORML 被推到后被肉棒插进了阴道里的%ANAME(ARG:0)%，浑身不停地颤抖，激烈的挣扎着
+		PRINTFORML 他就像是要把%ANAME(ARG:0)%的身心都抓住一样扭动着腰，在阴道里的各个角落里搅动着
+		PRINTFORML 在他反复地抽插下，%ANAME(ARG:0)%清楚地感到了阴道内的压倒性的快感和灼热，身体不由得颤抖起来
+		PRINTFORMW 不久后%ANAME(ARG:0)%开始自己扭腰，他满意地笑着，更深地把肉棒插进去
+	CASE 15
+		PRINTFORML 让衣服敞开的%ANAME(ARG:0)%跨坐在他的身上一边发出不知羞耻的娇声一边专心致志地扭着腰
+		PRINTFORML 因为和他做爱带来的压倒性的快感使得%ANAME(ARG:0)%的抵抗心被快乐侵蚀了，下流地披散着头发
+		PRINTFORML 突然被抓住腰感受到了就像是要贯穿大脑飞到天上去的那样的快感，%ANAME(ARG:0)%感受着这样最高级的快感达到了绝顶
+		PRINTFORMW 完全成为了快乐的俘虏的%ANAME(ARG:0)%此后也因为子宫的疼痛而疯狂的扭动着身体，被他内射了很多次
+	CASE 16
+		PRINTFORML 伴随着咕嘟咕嘟令人讨厌的蜜音一起，他的肉棒插进了%ANAME(ARG:0)%还在痉挛着的阴道里
+		PRINTFORML 没完没了地被侵犯的%ANAME(ARG:0)%，一边身体精疲力尽的躺在地上被侵犯着一边颤抖着从喉咙中露出了喘息声
+		PRINTFORML %ANAME(ARG:0)%的子宫被用肉棒顶开，子宫口就像是在渴求着他的精液一样地张开着
+		PRINTFORMW 当他把龟头顶在子宫口上往子宫里射精的时候、%ANAME(ARG:0)%的头脑变得一片空白，剧烈的绝顶了
+	CASE 17
+		PRINTFORML 被狠狠地侵犯的%ANAME(ARG:0)%已经变成了一副淫乱的雌性的样子了，跨坐在他的身上一边激烈地扭动腰一边侍奉着肉棒
+		PRINTFORML 龟头不停的刺激着阴道壁和子宫口，%ANAME(ARG:0)%不由得弓起了背部提高了声音喘息着
+		PRINTFORML 感到他的肉棒在阴道里剧烈的跳动的%ANAME(ARG:0)%，期待着精子的射出而更加淫乱的扭动着腰
+		PRINTFORMW 然后，他把粘稠的精液射进了子宫里，%ANAME(ARG:0)%一边发出欢喜的声音一边达到了高潮
+	CASE 18
+		PRINTFORML %ANAME(ARG:0)%一边被他抱着一边激烈地被从下面顶着，从颤抖的喉咙里流出不该有的娇声
+		PRINTFORML 激烈的的抽插仿佛要插进子宫似的，每插一次，%ANAME(ARG:0)%的脑袋就会跳动一下，身体不由地蜷缩起来
+		PRINTFORML 强烈的快感使得%ANAME(ARG:0)%一边痉挛着一边弓起身体，剧烈的潮吹着达到了绝顶
+		PRINTFORMW 他毫不留情地持续侵犯着在绝顶的余韵中喘不过气来的%ANAME(ARG:0)%，在她的深处不断射出大量的精液
+	CASE 19
+		PRINTFORML %ANAME(ARG:0)%以背后站立位的姿势被激烈的侵犯着，一边披散着头发一边疯狂的扭动着身体
+		PRINTFORML 粗野的肉棒每次进出龟头都会咕叽咕叽的刮着阴道壁，%ANAME(ARG:0)%的视野变得一片空白
+		PRINTFORML 被他雄性的狂野刺激着，%ANAME(ARG:0)%感觉到子宫为了渴求着精子而降了下来
+		PRINTFORMW 无法忍受子宫疼痛的%ANAME(ARG:0)%，在雌性的本能的引导下和他激烈的做爱
+	CASE 20
+		PRINTFORML 毫无遮掩地敞开了和服的%ANAME(ARG:0)%被肉棒粗暴的插进了阴道里，咯吱咯吱的扭动着腰
+		PRINTFORML 被强迫着喝下了大量的酒的%ANAME(ARG:0)%，难以抵抗的露出了苦闷的表情承受着
+		PRINTFORML %ANAME(ARG:0)%紧紧地抱住他，加紧了肉棒，说着下流的话索取着精子
+		PRINTFORMW 不久后他忍耐到了极限在她的子宫里剧烈地射出了精液，%ANAME(ARG:0)%一边绷直了脚尖一边达到了绝顶
+	CASE 21
+		PRINTFORML %ANAME(ARG:0)%被他压着，噗嗤！噗嗤！一边接受激烈的抽插一边痉挛着
+		PRINTFORML 在毫不留情地被插进粗大的肉棒被侵犯的阴道里，伴随着猥亵的声音流出了白色的精液
+		PRINTFORML 虽然已经多次射精，但他的气势却丝毫不衰，并且还在往%ANAME(ARG:0)%的子宫里射进大量的精液
+		PRINTFORMW 一直都在强忍着的%ANAME(ARG:0)%也终于因为那压倒性的灼热而绝顶了，发出了淫乱的娇喘声
+	CASE 22
+		PRINTFORML %ANAME(ARG:0)%的脸上露出了下流的表情跨坐在他的身上，披散着头发剧烈的扭着腰
+		PRINTFORML 被灌下大量的媚药全身都变得淫荡起来的%ANAME(ARG:0)%沉迷于肉棒给予的快乐而扭动着腰
+		PRINTFORML 他气势汹汹地挺起腰，仿佛被踢到子宫般的强烈冲击，让%ANAME(ARG:0)%无法抑制的达到了绝顶
+		PRINTFORMW 完全成为快乐的俘虏的%ANAME(ARG:0)%，此后也为了寻求更加强烈的快乐而一边留着口水一边沉浸在做爱中
+	CASE 23
+		PRINTFORML %ANAME(ARG:0)%被他用凶恶的肉棒激烈的侵犯着，一边用身体苦闷的承受着，一边发出娇声尖叫
+		PRINTFORML 因为妖怪的性爱带来哦的压倒性的快感而堕落的%ANAME(ARG:0)%一边下流地吐出舌头一边疯狂的扭动着腰和身体
+		PRINTFORML 每当激烈地戳到子宫时%ANAME(ARG:0)%就会大幅度地弓起身子夹紧肉棒，催促着他射精
+		PRINTFORMW 対%ANAME(ARG:0)%感到很中意的他，用着无穷的耐力不断地侵犯着她，在她的子宫里射入了满到已经要溢出的程度的精液
+	CASE 24
+		PRINTFORML 被他充分宠爱的%ANAME(ARG:0)%一边激烈地喘着气一边像是一个大字一样地从床上躺到了地上
+		PRINTFORML 尽管遭受了凌辱，但是%ANAME(ARG:0)%却露出了喜悦的雌性的表情，浑身颤抖着
+		PRINTFORML 阴道口就这样的张开着，%ANAME(ARG:0)%每次抽动的时候都会有大量的精液流出来。
+		PRINTFORMW 完全被迷住了的%ANAME(ARG:0)%在那之后也被充分地疼爱了，反复的绝顶着
+	CASE 25
+		PRINTFORML 像是要被他巨大的身体压碎一样地被激烈的侵犯着，%ANAME(ARG:0)%从颤抖的喉咙中露出了喘息声
+		PRINTFORML 粗野的肉棒撬开子宫口在子宫里狠狠地插着，%ANAME(ARG:0)%一边呜咽一边痉挛着
+		PRINTFORML 每当他扭动腰部时，那仿佛要把内脏都顶出来的冲击使得%ANAME(ARG:0)%的眼睛里都只剩下白色而看不见黑色了，浑身不停的颤抖着
+		PRINTFORMW 他无视了身体颤抖，乞求着的%ANAME(ARG:0)%，毫不留情地重复子宫奸并多次在子宫里射出精子
+	CASE 26
+		PRINTFORML 阴道口和阴道里都被他的肉棒穿透，%ANAME(ARG:0)%发出了混杂着呻吟的悲鸣浑身痉挛着
+		PRINTFORML 又粗又长的肉棒插进了子宫里，毫不留情地侵犯着子宫的里面，给%ANAME(ARG:0)%带来麻木般的快乐
+		PRINTFORML 每一次的冲击都伴随着难以忍受的快感，%ANAME(ARG:0)%就好像被玩坏了的人偶一样地露出了淫乱的表情颤抖着身体
+		PRINTFORMW %ANAME(ARG:0)%虽然自己最神圣的地方正在被蹂躏，却无法抵抗那压倒性的快乐，疯狂地扭动着身体
+	CASE 27
+		PRINTFORML 两人以面対面的姿势互相拥抱，贪婪地缠绕着舌头扭动着腰。
+		PRINTFORML 由于他的热情的性爱%ANAME(ARG:0)%的抵抗心马上被溶化，完全露出雌性的表情
+		PRINTFORML 每当被用极粗的肉棒顶起来的时候%ANAME(ARG:0)%就会感到无比的快乐在全身扩散开来。
+		PRINTFORMW 二人的腰的动作慢慢加速，%ANAME(ARG:0)%一边抱住他像是撒娇一样一边达到了高潮
+	CASE 28
+		PRINTFORML 被绳子绑住的%ANAME(ARG:0)%被他抱着猛烈地侵犯着，一边发出呻吟声一边颤抖着
+		PRINTFORML 肉棒在阴道里抽插的时候的那种仿佛要让头都炸开一样的快感不断地袭击着她，%ANAME(ARG:0)%想尽了办法地咬紧牙关忍耐着
+		PRINTFORML 但是他丝毫没有绕过%ANAME(ARG:0)%的意思持续的侵犯着她，她的理性逐渐被破坏掉，逐渐露出甜美的喘息
+		PRINTFORMW 快绕忍耐到极限的%ANAME(ARG:0)%的子宫突然被大量的精液内射，无法忍耐地达到了高潮
+	CASE 29
+		PRINTFORML 两手放在窗框上，腰被他抓住，连续的受到激烈撞击，%ANAME(ARG:0)%的身体苦闷的承受着。
+		PRINTFORML 被从外边全都看得见的那样激烈地侵犯着，%ANAME(ARG:0)%咬紧牙关想办法忍耐着不发出声音
+		PRINTFORML 可是他巧妙的腰技带来了强烈的快乐，这样过分的快感使得%ANAME(ARG:0)%的腿不停的颤抖着
+		PRINTFORMW 终于，抵抗的想法也向他屈服了，%ANAME(ARG:0)%向外面发出了很大声的娇喘，就这样的达到了绝顶
+ENDSELECT
+CALL FUCK((ARG:0), "精愛, 欲望, 性交, 性交, 性技, 接吻, Ｖ, Ｖ, Ｂ, Ｍ, Ｃ, Ａ, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 接吻喪失, 膣内射精, CFLAG減少", GET_SPERM_ID("流浪妖怪"), @"流浪妖怪的\@RAND:2 ? 肉棒 # 唇\@", @"流浪妖怪", "", "強姦")
+PRINTFORMW 
+
+RETURN 1
+
+;-----------------------------------------------------------
+;村娘たちの凌辱
+;-----------------------------------------------------------
+@HOUSEBOAT_INSULT
+
+PRINTFORML 
+SELECTCASE RAND:10
+	CASE 0
+		PRINTFORML 被当做野良妖怪们的慰安者的她们，在没有阳光的地下室被他们轮流侵犯
+		PRINTFORML 她们被毫不留情的插进了人外的异常巨大的肉棒，身体一边抽筋一边颤抖，从喉咙里发出呻吟声。
+		PRINTFORML 即使累得动弹不得，她们也不会得到任何休息时间，会被毫不留情地插进下一个肉棒。
+		PRINTFORML 一只妖怪低吼着射出灼热的精液，被侵犯的女孩挺直了身体发出了大声的悲鸣
+		PRINTFORMW 全身都被他们的精液的臭味侵染了，但対她们的凌辱却没有结束。
+	CASE 1
+		PRINTFORML 野良妖怪们把她们作为肉便器调教着，溢出的性欲让他们不停的侵犯着她们
+		PRINTFORML 各种各样的妖怪的肉棒被一个接一个的插进来射出精子，从她们的阴道里流出了大量的精液
+		PRINTFORML 一开始哭闹的她们也已经死心，很老实的含着他们的肉棒服务着
+		PRINTFORML 他们满足于这种情形，在她们全身装饰上猥亵的纹身和耳环，打扮得像肉便器一样。
+		PRINTFORMW 身心都变成了肉便器的她们，此后也一边浮现着空虚的笑容一边工作着。
+	CASE 2
+		PRINTFORML 她们被当作野良妖怪们专用的繁殖母体来饲养，光着身子像家畜一样被圈养着。
+		PRINTFORML 妖怪们为了让她们孕育而持续不断的侵犯着她们，将特浓的精液注入了子宫
+		PRINTFORML 喝了特制的排卵剂的她们，由于子宫的强烈的疼痛完全露出雌性的表情扭动着身体。
+		PRINTFORML 现在有一个女孩被射精，在下半身展开的压倒性的灼热使之一边弹起头一边剧烈的潮吹绝顶了
+		PRINTFORMW 她们在対成为妖怪的孕育工具这个现实绝望的同时，也逐渐开始焦急地等待着精子。
+	CASE 3
+		PRINTFORML 被野良妖怪们带走的她们作为妖怪们的宴会上的佳肴被众多的妖怪所侵犯
+		PRINTFORML 烂醉如泥的她们，深深地含着他们的肉棒，毫无顾忌地疯狂地扭动着身体。
+		PRINTFORML 被抱起身体展露着结合部大胆地被侵犯的女孩子们被妖怪们一边嘲笑一边辱骂着
+		PRINTFORML 可是因为快感和热情而头脑一片混沌的她们没有羞耻心和屈辱感，只是快乐地扭动身体
+		PRINTFORMW 妖怪们盛大的宴会一直持续了数日，她们的全身都被精液给弄得乱七八糟
+	CASE 4
+		PRINTFORML 她们被妖怪们带走后，就在他们经营的酒馆当雌性奴隶工作着
+		PRINTFORML 被戴上项圈，穿着裸露出下体的下流服装的女孩子们，一边颤抖着身体一边接待客人。
+		PRINTFORML 当然，不仅仅是接待客人，如果被他们要求的话，无论什么时候都必须在那个地方接受他们的肉棒
+		PRINTFORML 拒绝的话会被施以所谓的惩罚，直到失去意识为止都会被妖怪们激烈的轮奸，所以现在已经谁都不会反抗了
+		PRINTFORMW 就这样，在他们的肉棒的调教下，她们的身心都染上了与奴隶相称的色彩。
+	CASE 5
+		PRINTFORML 被野良妖怪们带走的姑娘们为了他们的活动资金，在什么地方被拍卖。
+		PRINTFORML 已经身心都被蹂躏殆尽的她们，毫无抵抗的带着空洞的表情站着。
+		PRINTFORML 为了试尝一下，她被交给了客人，她们按照他们的命令，用嘴和阴道将肉棒含进去开始服务。
+		PRINTFORML 她被训练过的身体令客人非常高兴，全身上下都被射满了黏糊糊的精液
+		PRINTFORMW 被买走的姑娘们想让买走她们的人至少対她们温柔一点，于是顺从地服务着他们，很讽刺的是这提高了妖怪们的评价。
+	CASE 6
+		PRINTFORML 被凶暴的妖怪们用力地冲击着子宫，村姑们发出不该有的声音疯狂的扭动着身体
+		PRINTFORML 被持续地给予暴力性的快乐的她们，理性被破坏了，只是委身于快乐
+		PRINTFORML 尽管被犯了，可还是露出了恍惚的表情像是撒娇一样的紧紧抱住他们浑身不停的痉挛着
+		PRINTFORMW 她们按照雌性的本能想要得到雄性的精子，淫乱地扭动身体，不停的索求着妖怪们的精液。
+	CASE 7
+		PRINTFORML 在远离村庄的山路上，被锁链锁住露出空洞的表情的女孩们被妖怪们带领着摇摇晃晃地走着。
+		PRINTFORML 她们被当作精液处理员带走，当他们想干的时候就会毫不留情地被侵犯。
+		PRINTFORML 子宫中总是充满着大量的精液，从胯股之间慢慢的流出粘稠的精液。
+		PRINTFORML 已经被彻底地折断了抵抗心的她们，为了让他们至少不要那么粗暴，自己扭着腰做着侍奉
+		PRINTFORMW 她们全身沾染着妖怪们的精液的臭味，肚子里被他们的种子扎根了。
+	CASE 8
+		PRINTFORML 在某个洞穴中大量的触手在蠕动，被侵犯的村姑们的呜咽和喘息声在回响。
+		PRINTFORML 从黑暗中伸出的多种多样的触手，从哭泣的姑娘们的全身的洞插入体内激烈地蹂躏着她们。
+		PRINTFORML 她们被妖怪们狠狠地侵犯之后，作为给他们饲养的触手的活祭被献上了
+		PRINTFORML 触手群为这样极为上等的祭品而疯狂，为了确保能够百分百孕育而轮换着在她们的子宫里不停的射出精子
+		PRINTFORMW 不久后内心已经彻底屈服的她们配合着触手的动作开始扭动身体，身心都和他们融为一体。
+	CASE 9
+		PRINTFORML 被抢走的村姑娘们因为全都非常棒，所以作为大妖怪们的专属母狗奴隶被饲养着
+		PRINTFORML 她们作为他们的妻子，每晚都被疼爱着，今晚又被凶暴的肉棒侵犯了。
+		PRINTFORML 她们的身体已经被调教成一个优秀的雌性了，肉棒插进去的时候阴道壁就会紧紧地缠住肉棒让他们感觉被包住一样
+		PRINTFORML 她用阴道含着完全勃起了的阴茎，浮现出淫靡的表情，巧妙地动着腰，使他高兴。
+		PRINTFORMW 她已经变成了单纯的雌性，为被雄性疼爱的喜悦所颤动，直到他满意为止，被内射了很多次。
+ENDSELECT
+PRINTFORML ………
+PRINTFORML 村里的姑娘们在被妖怪们一直被责弄直到厌倦了之后，像是为了给大家看看她们的样子一样被解放了
+PRINTFORMW 几乎所有的姑娘都失去了理智，其中似乎还包括了妖怪的孩子……
+
+RETURN 1

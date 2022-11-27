@@ -1,0 +1,103 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_PITFALL_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_PITFALL_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_PITFALL(対象)
+#DIM 対象
+
+PRINTFORMW %ANAME(対象)%探索的時候、腳下突然一空！
+PRINTFORMW 好像是掉進了落穴陷阱里
+PRINTFORML 連腰部都陷下去了、怎麼也拔不出來
+
+IF IS_MALE(対象)
+	PRINTFORML 向路過的人求助之後、他要求了3000金的報酬
+	PRINTFORML 
+	PRINTFORML 現在的金錢:{MONEY}
+	CALL ASK_MULTI_JUDGE("払う", MONEY >= 3000, "自力で抜け出す", 1)
+	IF RESULT == 0
+		PRINTFORML 不情願地答應了下來後、才被他救了出來
+		CALL ICPRINT("支付了<3000>金", "L", カラー_注意)
+		MONEY -= 3000
+	ELSE
+		PRINTFORML 決定靠自己的力量逃脫
+		PRINTFORMW ……結果最後到了夜晚才做到
+		CALL ADD_COOLTIME(対象, 1)
+	ENDIF
+	RETURN 1
+ENDIF
+
+IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+	PRINTFORML 向过路的少女求助之后，她狡黠地一笑
+	PRINTFORML 说道，我可不会白白帮忙哦？
+	PRINTFORML
+ELSE 
+	PRINTFORML 向路過的人求助之後、他嘿嘿一笑
+	PRINTFORML 說道、我可不會白白幫忙啊？
+	PRINTFORML 
+ENDIF
+CALL ASK_MULTI_JUDGE("付錢", MONEY >= 3000, "用手奉仕", 1, "用嘴奉仕", 1, "自己逃脫", 1)
+
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORML 不情願地答應了下來後、才被@\(CONFIG:202 == 1 && TALENT:対象:0 == 1) ? 少女 # 他@\救了出來
+		CALL ICPRINT("支付了<3000>金", "L", カラー_注意)
+		MONEY -= 3000
+	CASE 1
+		IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+			PRINTFORML 表示会用手奉仕她之后，少女立刻脱下了内裤
+			PRINTFORMW 少女娇嫩的花瓣暴露在%ANAME(対象)%眼前，立刻吸引住了她的视线
+			PRINTFORML 用双手拨弄着秘缝，从渐渐被打湿的指尖传来的热度很快让%ANAME(対象)%也兴奋了起来
+			PRINTFORMW 身体发热的%ANAME(対象)%，一边注意着不被少女发现，一边悄悄在落穴中摩擦起了自己的大腿根
+			PRINTFORML 下半身传来的刺激渐渐扩散到了全身，%ANAME(対象)%像是在掩饰一样偷偷加快了手上的动作
+			PRINTFORML 但这一切都被少女看在眼里，她主动弯下身子，把手伸进%ANAME(対象)%的衣服里，开始抚摸起%ANAME(対象)%的胸部
+			PRINTFORMW 少女达到高潮的时候，%ANAME(対象)%主动用脸接住了少女溅出的液体，同时也因为对方的回礼而走向了自己的绝顶……
+			CALL FUCK(対象, "欲望, Ｃ, Ｂ, 奉仕, 百合, 性技, 自慰")
+		ELSE 
+			PRINTFORML 表示會用手奉仕他之後、他立刻掏出了肉棒
+			PRINTFORMW %ANAME(対象)%の顔ほどもあろうかという業物だ
+			PRINTFORMW 在捋動的時候、從手掌和指尖傳來的熱度讓%ANAME(対象)%也興奮了起來
+			PRINTFORMW 欲情難耐的%ANAME(対象)%、一邊注意著不被他発現、一邊開始玩弄起落穴內的自己的下半身
+			PRINTFORMW 在自慰的時候、之前還勉勉強強的奉仕也変得熱情了起來
+			PRINTFORMW 男人射精的時候、%ANAME(対象)%主動地用臉接住了白濁……
+			CALL FUCK(対象, "欲望, Ｃ, 奉仕, 精愛, 性技, 自慰")
+		ENDIF 
+	CASE 2
+		IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+			PRINTFORML 表示会用手奉仕她之后，少女立刻脱下了内裤
+			PRINTFORMW 少女娇嫩的花瓣暴露在%ANAME(対象)%眼前，立刻吸引住了她的视线
+			PRINTFORML 舌尖舔舐着少女的穴口，温热的液体混杂着少女的体味在%ANAME(対象)%口腔中扩散开来，令她也逐渐兴奋了起来
+			PRINTFORMW 身体发热的%ANAME(対象)%，一边注意着不被发现，一边偷偷伸出手，抚摸起自己还处于落穴中的股间
+			PRINTFORML 下体传来的刺激逐渐上升到全身，%ANAME(対象)%为了不让呻吟从嘴边漏出，连忙含住了少女突起的阴蒂
+			PRINTFORML 但这一切都被少女看在眼里，她一面命令%ANAME(対象)%保持奉仕，一面伸出手挑逗起了%ANAME(対象)%挺立的乳头
+			PRINTFORMW 少女达到高潮的时候，%ANAME(対象)%一滴不剩地吸干了少女溢出的蜜液，同时也因为对方的回礼而走向了自己的绝顶……
+			CALL FUCK(対象, "欲望, Ｃ, Ｂ, 奉仕, 百合, 性技, 自慰, 口淫", "接吻喪失", 0, "偶遇的少女的秘贝")
+		ELSE
+			PRINTFORML 表示會用嘴奉仕他之後、他立刻掏出了肉棒
+			PRINTFORMW %ANAME(対象)%の顔ほどもあろうかという業物だ
+			PRINTFORMW 小心翼翼地含弄的時候、在舌頭和口腔內擴散的熱度和雄性的臭味讓%ANAME(対象)%也興奮了起來
+			PRINTFORMW 欲情難耐的%ANAME(対象)%、一邊注意著不被他発現、一邊開始玩弄起落穴內的自己的下半身
+			PRINTFORMW 在自慰的時候、之前還顯得有些厭悪的口交也変得熱情了起來
+			PRINTFORMW 男人射精的時候、%ANAME(対象)%一言不発的把白濁全呑了下去……
+			CALL FUCK(対象, "欲望, Ｃ, 奉仕, 精愛, 性技, 口淫", "接吻喪失", 0, "偶遇的男人の肉棒")
+		ENDIF
+	CASE 3
+		PRINTFORML 決定靠自己的力量逃脫
+		PRINTFORMW ……結果最後到了夜晚才做到
+		CALL ADD_COOLTIME(対象, 1)
+ENDSELECT
+
+RETURN 1

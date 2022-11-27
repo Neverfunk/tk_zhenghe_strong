@@ -1,0 +1,121 @@
+﻿;to be merged with main image file
+
+;animation system from TW
+
+
+;=========================================================
+;	連番画像アニメーション
+;
+;	sRes_Name	：リソースの名前文字列　この名前の後に連番数字を付ける
+;	iStart		：開始番号
+;	iEnd		：開始からの描画枚数
+;	iAnime_Num	：全体のアニメーション繰り返し回数 省略0でオプション設定したフラグ回数になります
+;	iRollback	：ロールバックさせるかフラグ
+;	iWait		：1枚の表示時間
+;	iSize		：一行の高さに対するサイズ％数値　縦基準　縦横比維持　省略で1000(10倍)
+;	sAlign		：align属性　省略で左寄せ　left, center, rightの三種が指定できます
+;=========================================================
+@PRINT_IMAGE_ANIMATION(sRes_Name,iStart=0,iEnd=4,iAnime_Num=0,iRollback=1,iWait=100,iSize=1000,sAlign="left")
+#DIMS sRes_Name
+#DIM iStart
+#DIM iEnd
+#DIM iAnime_Num
+#DIM iRollback
+#DIM iWait
+#DIM iSize
+#DIMS sAlign
+
+
+SIF sRes_Name == ""
+	RETURN RESULT
+
+SIF !iAnime_Num
+	iAnime_Num = 5
+	
+;reset left mouse click detection
+GETKEYTRIGGERED 0x01
+
+FOR LOCAL,0,iAnime_Num
+	FOR LOCAL:1,iStart,(iStart+iEnd)
+		CALL PRINT_IMAGE(@"%sRes_Name%{LOCAL:1}",iSize,sAlign)
+		IF (MESSKIP() || GETKEYTRIGGERED(0x01)) ;skip on left click or if text skipping was enabled prior
+			CLEARLINE iSize/100
+			GOTO SKIP
+		ENDIF
+		TWAIT iWait, 0
+		CLEARLINE iSize/100
+	NEXT
+	
+	;ロールバックさせるか
+	SIF !iRollback
+		CONTINUE
+
+	FOR LOCAL:1,(iStart+iEnd)-2,iStart-1,-1
+		CALL PRINT_IMAGE(@"%sRes_Name%{LOCAL:1}",iSize,sAlign)
+		IF (MESSKIP() || GETKEYTRIGGERED(0x01)) ;skip on left click or if text skipping was enabled prior
+			CLEARLINE iSize/100
+			GOTO SKIP
+		ENDIF
+		TWAIT iWait, 0
+		CLEARLINE iSize/100
+	NEXT
+NEXT
+$SKIP
+
+RETURN RESULT
+
+;=========================================================
+;	リソースの表示
+;	表示後サイズに合わせて改行を行う
+;	PRINT_IMG の拡張みたいな感じ　文中の挿絵的に使えると思う
+;
+;	sRes_Name	：リソースの名前文字列
+;	iSize		：一行の高さに対するサイズ％数値　縦基準　縦横比維持　省略で1000(10倍)
+;	sAlign		：align属性　省略で左寄せ　left, center, rightの三種が指定できます
+;=========================================================
+@PRINT_IMAGE(sRes_Name,iSize=1000,sAlign="left")
+#DIMS sRes_Name
+#DIM iSize
+#DIMS sAlign
+#DIMS sPrint_Text
+#DIM iEnter_Con
+#DIM iFont_Hei_mag
+
+SIF GETCONFIGS("描画インターフェース") == "WINAPI"
+	THROW Please change drawing interface to TextRenderer.
+
+SIF sRes_Name == ""
+	RETURN RESULT
+
+iEnter_Con = 0
+iFont_Hei_mag = GETCONFIG("一行の高さ") * iSize*10 / GETCONFIG("フォントサイズ")
+iFont_Hei_mag = (iFont_Hei_mag/10) + (iFont_Hei_mag%10 >= 5?1#0)
+
+HTML_PRINT @"<p align='%sAlign%'><nobr><img src='%sRes_Name%' height='{iFont_Hei_mag}'>"
+iEnter_Con++
+
+FOR LOCAL,iEnter_Con-1,(iSize/100)-1
+	HTML_PRINT "<br>"
+NEXT
+RETURN RESULT
+
+@PRINT_IMAGE_NO_ENTER(sRes_Name,iSize=1000,sAlign="left")
+#DIMS sRes_Name
+#DIM iSize
+#DIMS sAlign
+#DIMS sPrint_Text
+#DIM iEnter_Con
+#DIM iFont_Hei_mag
+
+SIF GETCONFIGS("描画インターフェース") == "WINAPI"
+	THROW Please change drawing interface to TextRenderer.
+
+SIF sRes_Name == ""
+	RETURN RESULT
+
+iFont_Hei_mag = GETCONFIG("一行の高さ") * iSize*10 / GETCONFIG("フォントサイズ")
+iFont_Hei_mag = (iFont_Hei_mag/10) + (iFont_Hei_mag%10 >= 5?1#0)
+
+HTML_PRINT @"<p align='%sAlign%'><nobr><img src='%sRes_Name%' height='{iFont_Hei_mag}'>"
+
+RETURN RESULT

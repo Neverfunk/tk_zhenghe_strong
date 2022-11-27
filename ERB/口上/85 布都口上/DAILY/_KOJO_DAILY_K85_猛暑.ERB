@@ -1,0 +1,95 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K85_TREAT_AN_ICE_RATE(対象)
+#DIM 対象
+RETURN 50
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K85_TREAT_AN_ICE_DECISION(対象)
+#DIM 対象
+
+SIF GROUPMATCH(MASTER, NAME_TO_CHARA("屠自古"), NAME_TO_CHARA("青娥"), NAME_TO_CHARA("神子"), NAME_TO_CHARA("芳香"))
+	RETURN 0
+
+;好感度500が必要
+SIF CFLAG:対象:好感度 < 500
+	RETURN 0
+
+;発動済みならキャンセル
+SIF KDVAR:対象:布都_猛暑
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K85_TREAT_AN_ICE_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K85_TREAT_AN_ICE(対象)
+#DIM 対象
+
+PRINTFORMW 「啊……真热啊，真是的，我活着的时候的天气要更凉爽一些哦？」
+;TranslatedMark 「あぁー……暑いのう、まったく、我が生きておったころはもっと涼しかったぞ？」
+PRINTFORMW 「虽说是为了治安，但搞不好也会熔化掉吧……这样的日子，就算是歹徒也只会老实呆在家里呢」
+;TranslatedMark 「治安のためとはいえ、茹だってしまうやもしれん……こんな日は、悪漢も家で大人しくしていそうなものだがなぁ」
+PRINTFORML 在街头巡视的%ANAME(MASTER)%和%ANAME(対象)%，被强烈的阳光弄得筋疲力尽
+;TranslatedMark 市街の見回りにでかけた%ANAME(MASTER)%と%ANAME(対象)%だったが、日差しがあまりにもきつい
+PRINTFORML %ANAME(対象)%大汗淋漓。……要是出门时穿得再凉爽一点就好了……
+;TranslatedMark %ANAME(対象)%は大汗をかいている。……もう少し涼しげな格好をすればよさそうなものだが……
+PRINTFORML 
+CALL ASK_YN("请你吃冰淇淋", "毕竟是维持治安")
+IF RESULT == 1
+	PRINTFORMW 「啊啊，我知道，我知道了……正因为如此，才想发发牢骚啊」
+	;TranslatedMark 「ああ、分かっておる、分かっておるとも……だからこそ、愚痴りたくもなるというものよ」
+	PRINTFORMW 「哎呀唉呀……回去的话，稍微洗个澡吧」
+	;TranslatedMark 「やれやれ……帰ったら、行水でもするとしようか」
+	PRINTFORMW 在杀人般的酷暑中继续巡视着……
+	;TranslatedMark 殺人的な暑さにうだりながら、見回りを続けた……
+ELSE
+	PRINTFORML 附近正好有甜品店，休息一下如何……
+	;TranslatedMark 近くに甘味屋があるから、休憩でもどうか……
+	PRINTFORMW 这样作出邀请，%ANAME(対象)%的双眼闪闪发光
+	;TranslatedMark そう誘うと、%ANAME(対象)%は目を輝かせた
+	PRINTFORMW 「冰淇淋！从青娥那里听说过，好像是又甜又凉又美味的东西呢？」
+	;TranslatedMark 「氷菓子！　青娥どのから聞いておるよ、大層甘くて冷たくて美味であるそうだな？」
+	PRINTFORMW 「能请客真是太好了，真是难得被叫到一次」
+	;TranslatedMark 「おごってくれるとはありがたい、折角だからお呼ばれされるとしようか」
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW 「嗯嗯……！好甜啊……！」
+	;TranslatedMark 「んんーっ……！　甘いのう……！」
+	PRINTFORMW 「哎呀哎呀，虽然早就听说很好吃……这可受不了啊」
+	;TranslatedMark 「いやはや、美味とは聞いていたが……これはたまらんな」
+	PRINTFORMW 「竟然请我吃这么美味的东西。十分感谢，%ANAME(MASTER)%大人」
+	;TranslatedMark 「こんな美味いものを食べさせてくれるとは。感謝するぞ、%ANAME(MASTER)%殿」
+	PRINTFORMW 「那么，点心也吃过了，让我们继续巡视吧？」
+	;TranslatedMark 「さあさあ、菓子もいただいたことだし、見回りを続けようではないか？」
+	PRINTFORML 多亏了冰淇淋的冷静，%ANAME(対象)%似乎忘记了炎热……
+	;TranslatedMark 氷菓子の冷たさのおかげで、%ANAME(対象)%は暑さを忘れたようだ……
+	PRINTFORMW 那之后，两个人好好地结束了巡逻
+	;TranslatedMark その後、二人でしっかりと見回りを終えた
+	CFLAG:対象:好感度 += 100
+ENDIF
+
+KDVAR:対象:布都_猛暑 = 1
+
+RETURN 1
+
+

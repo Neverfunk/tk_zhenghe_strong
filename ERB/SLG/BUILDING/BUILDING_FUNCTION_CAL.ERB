@@ -1,0 +1,133 @@
+;生成地图建筑统计
+;在产生城市易主/建筑减少增加后应该调用
+;应该调用的位置：
+; 建造建筑后
+; 外交合并后
+; 城市转让后
+; 从属国合并后
+; 生成从属国后
+; 战斗计算完成后（战斗中的城市易主不进行单独计算）
+@TMP_BUILDING_EXIST_MAP
+    #DIM CITY_ID
+    #DIM SLOT_PTR
+    VARSET TMP_BUILDING_EXIST_FLAG, 0
+    VARSET TMP_BUILDING_CNT,0
+    VARSET PREVENT_GET_POLITICS_LOOP_FLAG,0
+    FOR CITY_ID , 1 , MAX_CITY
+        IF CITY_TYPE:(CITY_ID) == 0 && CITY_OWNER:(CITY_ID)
+            FOR SLOT_PTR , 0 , MAX_BUILDING_SLOT_NUM
+                TMP_BUILDING_EXIST_FLAG:(CITY_OWNER:(CITY_ID)):(CITY_BUILDING:CITY_ID:SLOT_PTR) = 1
+                TMP_BUILDING_CNT:(CITY_OWNER:(CITY_ID)):(CITY_BUILDING:CITY_ID:SLOT_PTR)++
+            NEXT
+        ENDIF
+    NEXT
+
+;与函数@TMP_CREATE_IS_FREE_MAP功能相同
+;因为ERA无法在行内函数调用一般函数而复制原函数
+@TMP_CREATE_IS_FREE_MAP_FUNC(ARG:0 = 0)
+    #FUNCTION
+    CVARSET TMP_IS_FREE, 0, 0
+
+    FOR LOCAL:0, 0, CHARANUM
+        IF CFLAG:(LOCAL:0):捕虜先 || CFLAG:(LOCAL:0):特殊状態 || CFLAG:(LOCAL:0):行動不能状態 == 行動不能_子供
+            TMP_IS_FREE:(LOCAL:0):0 = -1
+            CONTINUE
+        ELSEIF TALENT:(LOCAL:0):触手妊娠 || TALENT:(LOCAL:0):Ａ触手妊娠 || TALENT:(LOCAL:0):Ｕ触手妊娠 || IS_ANIMAL(LOCAL:0)
+            TMP_IS_FREE:(LOCAL:0):0 = -1
+            CONTINUE
+        ELSEIF COOLTIME:(LOCAL:0):0
+            TMP_IS_FREE:(LOCAL:0):0 = -1
+        ENDIF
+    NEXT
+
+    FOR LOCAL:0, 0, MAX_CITY
+        FOR LOCAL:1, 0, 2
+            LOCAL:2 = GET_CITY_COMMANDER(LOCAL:0, LOCAL:1)
+            IF LOCAL:2 >= 0
+                TMP_IS_FREE:(LOCAL:2):0 = 2
+            ENDIF
+        NEXT
+    NEXT
+    FOR LOCAL:0, 0, MAX_COUNTRY
+        IF IS_COUNTRY(LOCAL:0)
+            FOR LOCAL:1, 0, 10
+                IF UNIT_SOLDIER:(LOCAL:0):(LOCAL:1) > 0
+                    FOR LOCAL:2, 0, 3
+                        LOCAL:3 = GET_UNIT_COMMANDER(LOCAL:0, LOCAL:1, LOCAL:2)
+                        IF LOCAL:3 >= 0
+                            TMP_IS_FREE:(LOCAL:3):0 = 1
+                        ENDIF
+                    NEXT
+                ENDIF
+            NEXT
+        ENDIF
+    NEXT
+    RETURNF 1
+
+@GET_CITY_BUILDING_NUM(CITY_ID,BUILDING_ID)
+    #FUNCTION
+    #DIM CITY_ID
+    #DIM BUILDING_ID
+    #DIM CNT
+    #DIM SLOT_PTR
+    VARSET SLOT_PTR
+    VARSET CNT
+    FOR SLOT_PTR,0,MAX_BUILDING_SLOT_NUM
+        SIF CITY_BUILDING:CITY_ID:SLOT_PTR == BUILDING_ID
+            CNT+=1
+    NEXT
+    RETURNF CNT
+
+@GET_BUILDING_COST(COUNTRY_ID,BUILDING_LEVEL_TMP,ARG:0 = 0)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    #DIM BUILDING_LEVEL_TMP
+    #DIM COST = 0
+    COST = BUILDING_LEVEL_TMP * 3000
+    SIF TECHNOLOGY_STATUS:COUNTRY_ID:TECHNOLOGY_BUILDINGS >= 3
+        TIMES COST,0.75
+    SIF CHECK_BUILDING_FUNCTION_SELECT(-1,COUNTRY_ID,建造物_国土资源局) > 0
+        COST = COST * (100-RESULT:1) /100
+    COST = COST* (100 - 50 * ARG:0)/ 100
+    RETURNF COST
+
+@GET_CITY_ECONOMY_REQ(COUNTRY_ID,BUILDING_LEVEL_TMP,ARG:0 = 0)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    #DIM BUILDING_LEVEL_TMP
+    #DIM ECONOMY_REQ
+    SELECTCASE BUILDING_LEVEL_TMP
+        CASE IS == 建造物_等级_一级建筑
+            RETURNF 0
+        CASE IS == 建造物_等级_二级建筑
+            ECONOMY_REQ = 800
+            SIF CHECK_BUILDING_FUNCTION_SELECT(-1,COUNTRY_ID,建造物_发改委) > 0
+                ECONOMY_REQ = ECONOMY_REQ * (100 - RESULT:1)/100
+            ECONOMY_REQ = ECONOMY_REQ*(100 - 30 * ARG:0)/ 100
+            SIF TECHNOLOGY_STATUS:(COUNTRY_ID):TECHNOLOGY_BUILDINGS >= 6
+                TIMES ECONOMY_REQ,0.75
+            RETURNF ECONOMY_REQ
+        CASE IS == 建造物_等级_三级建筑
+            ECONOMY_REQ = 1600
+            SIF CHECK_BUILDING_FUNCTION_SELECT(-1,COUNTRY_ID,建造物_发改委) > 0
+                ECONOMY_REQ = ECONOMY_REQ * (100 - RESULT:1)/100
+            SIF TECHNOLOGY_STATUS:(COUNTRY_ID):TECHNOLOGY_BUILDINGS >= 6
+                TIMES ECONOMY_REQ,0.75
+            ECONOMY_REQ = ECONOMY_REQ*(100 - 30 * ARG:0)/ 100
+            RETURNF ECONOMY_REQ
+    ENDSELECT
+
+
+
+@SLG_BUILDING_GET_FEMALE_BOSS_NUM()
+    #FUNCTION
+    #DIM COUNTRY_ID
+    LOCAL = 0
+    FOR COUNTRY_ID,0,MAX_COUNTRY
+        SIF !IS_COUNTRY(COUNTRY_ID) || IS_SP_COUNTRY(COUNTRY_ID)
+            CONTINUE
+        SIF IS_FEMALE(GET_COUNTRY_BOSS(COUNTRY_ID))
+            LOCAL++
+    NEXT
+    RETURNF LOCAL
+

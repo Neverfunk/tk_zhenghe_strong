@@ -1,0 +1,1060 @@
+﻿;-------------------------------------------------
+;「祷告」
+;四神
+;「暴虐与战争之神」 SETCOLOR 227,23,13
+;「诡术与希望之神」 SETCOLOR 138,43,226
+;「腐朽与绝望之神」
+;「色欲与愉悦之神」
+;取悦条件
+;暴虐：杀敌 占地 处刑 灭国
+;诡术：外交 同盟 经济增长 赠送
+;腐朽：俘虏 接纳 同化 死亡
+;色欲：陷落 调教 强迫 狂欲
+;-------------------------------------------------
+;-------战争相关----------------------------------
+@SHOP_LIFE_USERSHOP68_AWIN(势力,部队,敌势力,敌部队)
+;侵攻胜利
+;SLG_COMBAT.ERB
+#DIM 势力
+#DIM 部队
+#DIM 敌势力
+#DIM 敌部队
+#DIM 对象
+#DIM 随机数
+FOR LOCAL ,0,MAX_UNIT_COMMANDER,1
+	对象 = GET_UNIT_COMMANDER(势力,部队,LOCAL)
+	SIF 对象 == -1
+		CONTINUE
+	SELECTCASE CFLAG:对象:信仰神
+		CASE 1
+			随机数=MIN(RAND(1,2 + MAX((CFLAG:对象:杀敌数)/1000,0)),10) + CFLAG:对象:杀敌数 / 10000
+			IF FAITH_SHOW_CHANGE || CFLAG:对象:1 == CFLAG:MASTER:1
+				CALL COLOR_PRINTL(@"%ANAME(对象)%践行了暴行与胜利！契合%GOD_NAME:(CFLAG:对象:信仰神)%的教义", カラー_注意)
+				CALL PRINT_ADD_EXP(对象, "信仰值",随机数, 1)
+				CALL TRAIN_AUTO_ABLUP(对象)
+			ELSE
+				EXP:对象:信仰值 += 随机数
+				CALL TRAIN_AUTO_ABLUP(对象,1)
+			ENDIF
+			PRINTL
+		CASE 2
+		CASE 3
+			;发动技能[绝望漫延]24
+			SIF FIND_GENERAL_SKILLF(对象,24)
+				TRYCALL SKILL_0_MIRACLE_24_REALINVOKE(对象,敌势力,敌部队)
+
+		CASE 4
+	ENDSELECT
+	CFLAG:对象:杀敌数=0 ;杀敌数重置
+NEXT
+RETURN 1
+;-------------------------------------------
+@SHOP_LIFE_USERSHOP68_ALOSE(势力,部队)
+;侵攻失败
+;SLG_COMBAT.ERB
+#DIM 势力
+#DIM 部队
+#DIM 对象
+#DIM 随机数
+FOR LOCAL ,0,MAX_UNIT_COMMANDER,1
+	对象 = GET_UNIT_COMMANDER(势力,部队,LOCAL)
+	SIF 对象 == -1
+		CONTINUE
+	SELECTCASE CFLAG:对象:信仰神
+		CASE 1
+		CASE 2
+		CASE 3
+		CASE 4
+	ENDSELECT
+	CFLAG:对象:杀敌数=0 ;杀敌数重置
+NEXT
+RETURN 1
+;-------------------------------------------
+;-------------------------------------------
+@SHOP_LIFE_USERSHOP68_DLOSE(都市)
+;防守失败
+;SLG_COMBAT.ERB
+#DIM 都市
+#DIM 对象
+#DIM 随机数
+FOR LOCAL ,0,MAX_CITY_COMMANDER,1
+	对象 = GET_CITY_COMMANDER(都市,LOCAL)
+	SIF 对象 == -1
+		CONTINUE
+	SELECTCASE CFLAG:对象:信仰神
+		CASE 1
+		CASE 2
+		CASE 3
+		CASE 4
+	ENDSELECT
+	CFLAG:对象:杀敌数=0 ;杀敌数重置
+NEXT
+RETURN 1
+;-------------------------------------------------
+@SHOP_LIFE_USERSHOP68_MAKE_DEATH(势力,部队,死亡数,都市=-1)
+;制造死亡
+;SLG_COMBAT.ERB
+#DIM 势力
+#DIM 部队
+#DIM 死亡数
+#DIM 都市
+#DIM 对象
+#DIM 随机数
+SIF 死亡数 < 500
+	RETURN 1
+IF 都市 == -1
+	FOR LOCAL ,0,MAX_UNIT_COMMANDER,1
+		对象 = GET_UNIT_COMMANDER(势力,部队,LOCAL)
+		SIF 对象 == -1
+			CONTINUE
+		SELECTCASE CFLAG:对象:信仰神
+			CASE 1
+			CASE 2
+			CASE 3
+				随机数=RAND(MIN(死亡数/500,10),1+死亡数/500)+死亡数/5000
+
+				IF FAITH_SHOW_CHANGE || CFLAG:对象:1 == CFLAG:MASTER:1
+					CALL COLOR_PRINTL(@"%ANAME(对象)%践行了盛大的死亡！契合%GOD_NAME:(CFLAG:对象:信仰神)%的教义", カラー_注意)
+					CALL PRINT_ADD_EXP(对象, "信仰值",随机数, 1)
+					CALL TRAIN_AUTO_ABLUP(对象)
+				ELSE
+					EXP:对象:信仰值 += 随机数
+					CALL TRAIN_AUTO_ABLUP(对象,1)
+				ENDIF
+				PRINTL
+
+			CASE 4
+		ENDSELECT
+	NEXT
+ELSE
+	FOR LOCAL ,0,MAX_CITY_COMMANDER,1
+		对象 = GET_CITY_COMMANDER(都市,LOCAL)
+		SIF 对象 == -1
+			CONTINUE
+		SELECTCASE CFLAG:对象:信仰神
+			CASE 1
+			CASE 2
+			CASE 3
+				随机数=RAND(MIN(死亡数/500,10),1+死亡数/500)+死亡数/5000
+
+				IF FAITH_SHOW_CHANGE || CFLAG:对象:1 == CFLAG:MASTER:1
+					CALL COLOR_PRINTL(@"%ANAME(对象)%践行了盛大的死亡！契合%GOD_NAME:(CFLAG:对象:信仰神)%的教义", カラー_注意)
+					CALL PRINT_ADD_EXP(对象, "信仰值",随机数, 1)
+					CALL TRAIN_AUTO_ABLUP(对象)
+				ELSE
+					EXP:对象:信仰值 += 随机数
+					CALL TRAIN_AUTO_ABLUP(对象,1)
+				ENDIF
+				PRINTL
+			CASE 4
+		ENDSELECT
+	NEXT
+ENDIF
+
+RETURN 1
+;-------------------------------------------------
+@SHOP_LIFE_USERSHOP68_OCCUPYWIN(势力,部队,都市)
+;占领胜利
+;SLG_COMBAT.ERB
+#DIM 势力
+#DIM 部队
+#DIM 都市
+#DIM 对象
+#DIM 随机数
+FOR LOCAL ,0,MAX_UNIT_COMMANDER,1
+	对象 = GET_UNIT_COMMANDER(势力,部队,LOCAL)
+	SIF 对象 == -1
+		CONTINUE
+	SELECTCASE CFLAG:对象:信仰神
+		CASE 0
+			CONTINUE
+		CASE 1
+			随机数=RAND(2,5)
+
+			IF FAITH_SHOW_CHANGE || CFLAG:对象:1 == CFLAG:MASTER:1
+				CALL COLOR_PRINTL(@"%ANAME(对象)%践行了征服与胜利！契合%GOD_NAME:(CFLAG:对象:信仰神)%的教义", カラー_注意)
+				CALL PRINT_ADD_EXP(对象, "信仰值",随机数, 1)
+				CALL TRAIN_AUTO_ABLUP(对象)
+			ELSE
+				EXP:对象:信仰值 += 随机数
+				CALL TRAIN_AUTO_ABLUP(对象,1)
+			ENDIF
+			PRINTL
+		CASE 2
+			;发动技能[雁过拔毛]25
+			SIF FIND_GENERAL_SKILLF(对象,25)
+				CALL SKILL_0_MIRACLE_25_REALINVOKE(对象,CITY_OWNER:都市)
+
+		CASE 3
+			;发动技能[绝望漫延]24
+			SIF FIND_GENERAL_SKILLF(对象,24)
+				CALL SKILL_0_MIRACLE_24_REALINVOKE(对象,CITY_OWNER:都市,-1)
+		CASE 4
+			CONTINUE
+	ENDSELECT
+NEXT
+RETURN 1
+;-------------------------------------------------
+@SHOP_LIFE_USERSHOP68_RUINWIN(势力,部队)
+;武力覆灭
+;SLG_COMBAT.ERB
+#DIM 势力
+#DIM 部队
+#DIM 对象
+#DIM 随机数
+FOR LOCAL ,0,MAX_UNIT_COMMANDER,1
+	对象 = GET_UNIT_COMMANDER(势力,部队,LOCAL)
+	SIF 对象 == -1
+		CONTINUE
+	SELECTCASE CFLAG:对象:信仰神
+		CASE 0
+			CONTINUE
+		CASE 1
+			随机数=RAND(15,25)
+
+			IF FAITH_SHOW_CHANGE || CFLAG:对象:1 == CFLAG:MASTER:1
+				CALL COLOR_PRINTL(@"%ANAME(对象)%践行了胜利、倾覆与彻底的暴行！契合%GOD_NAME:(CFLAG:对象:信仰神)%的教义", カラー_注意)
+				CALL PRINT_ADD_EXP(对象, "信仰值",随机数, 1)
+				CALL TRAIN_AUTO_ABLUP(对象)
+			ELSE
+				EXP:对象:信仰值 += 随机数
+				CALL TRAIN_AUTO_ABLUP(对象,1)
+			ENDIF
+			PRINTL
+		CASE 2
+		CASE 3
+		CASE 4
+	ENDSELECT
+NEXT
+RETURN 1
+;-------------------------------------------------
+@SHOP_LIFE_USERSHOP68_COMBAT_DYING(将死者,凶手势力=0,凶手部队=0,归属势力=0,归属部队=0)
+;战场上将要战死时的判定事件,返回0则取消战死
+;谁有桃?华佗救我!
+#DIM 将死者
+#DIM 凶手势力
+#DIM 凶手部队
+#DIM 归属势力
+#DIM 归属部队
+
+IF FIND_GENERAL_SKILLF(将死者,0)
+	CALL SKILL_0_MIRACLE_0_REALINVOKE(将死者)
+	SIF RESULT
+		RETURN 0
+ENDIF
+RETURN 1
+;-------------------------------------------------
+@SHOP_LIFE_USERSHOP68_KILL(势力,部队,死者,主角=0)
+;击杀、处刑，信仰值与星数相关
+;SLG_COMBAT.ERB
+#DIM 势力
+#DIM 部队
+#DIM 对象
+#DIM 主角
+#DIM 死者
+#DIM 随机数
+;处刑 (未实装)
+IF 主角 ==1
+	SIF CFLAG:MASTER:信仰神 != 1
+		RETURN 1
+	随机数=RAND(1,4) + TMP_CHARA_STARS:死者
+	CALL COLOR_PRINTL(@"%ANAME(MASTER)%践行了彻底的暴行！契合「暴虐与战争之神」的教义", カラー_注意)
+	CALL PRINT_ADD_EXP(MASTER, "信仰值",随机数, 1)
+	CALL TRAIN_AUTO_ABLUP(MASTER)
+	RETURN 1
+ENDIF
+
+
+SIF 死者 == MASTER && FLAG:戦死エンドフラグ == 0
+	RETURN 0
+
+FOR LOCAL ,0,MAX_UNIT_COMMANDER,1
+	对象 = GET_UNIT_COMMANDER(势力,部队,LOCAL)
+	SIF 对象 == -1
+		CONTINUE
+	SELECTCASE CFLAG:对象:信仰神
+		CASE 0
+			CONTINUE
+		CASE 1
+			随机数=RAND(2,5) + TMP_CHARA_STARS:死者
+
+			IF FAITH_SHOW_CHANGE || CFLAG:对象:1 == CFLAG:MASTER:1
+				CALL COLOR_PRINTL(@"%ANAME(对象)%践行了彻底的暴行！契合「暴虐与战争之神」的教义", カラー_注意)
+				CALL PRINT_ADD_EXP(对象, "信仰值",随机数, 1)
+				CALL TRAIN_AUTO_ABLUP(对象)
+			ELSE
+				EXP:对象:信仰值 += 随机数
+				CALL TRAIN_AUTO_ABLUP(对象,1)
+			ENDIF
+			PRINTL
+		CASE 2
+		CASE 3
+			随机数=RAND(2,7) + TMP_CHARA_STARS:死者
+
+			IF FAITH_SHOW_CHANGE || CFLAG:对象:1 == CFLAG:MASTER:1
+				CALL COLOR_PRINTL(@"%ANAME(对象)%践行了英雄之死！契合%GOD_NAME:(CFLAG:对象:信仰神)%的教义", カラー_注意)
+				CALL PRINT_ADD_EXP(对象, "信仰值",随机数, 1)
+				CALL TRAIN_AUTO_ABLUP(对象)
+			ELSE
+				EXP:对象:信仰值 += 随机数
+				CALL TRAIN_AUTO_ABLUP(对象,1)
+			ENDIF
+			PRINTL
+		CASE 4
+	ENDSELECT
+NEXT
+RETURN 1
+;-------------------------------------------------
+@SHOP_LIFE_USERSHOP68_DEFENSEWIN(都市,敌势力,敌部队)
+;防守胜利
+#DIM 都市
+#DIM 对象
+#DIM 敌势力
+#DIM 敌部队
+#DIM 人数
+#DIM 除外
+#DIM 随机数
+除外 = 0
+人数 = 2
+FOR LOCAL ,0,MAX_CITY_COMMANDER,1
+	对象 = GET_CITY_COMMANDER(都市,LOCAL)
+	SIF 对象 == -1
+		CONTINUE
+	SELECTCASE CFLAG:对象:信仰神
+		CASE 0
+		CASE 1
+			人数--
+			除外 = 对象
+			随机数=MIN(RAND(1,2 + MAX((CFLAG:对象:杀敌数)/1000,0)),10) + CFLAG:对象:杀敌数 / 10000
+
+			IF FAITH_SHOW_CHANGE || CFLAG:对象:1 == CFLAG:MASTER:1
+				CALL COLOR_PRINTL(@"%ANAME(对象)%践行了战斗与胜利！契合%GOD_NAME:(CFLAG:对象:信仰神)%的教义", カラー_注意)
+				CALL PRINT_ADD_EXP(对象, "信仰值",随机数, 1)
+				CALL TRAIN_AUTO_ABLUP(对象)
+			ELSE
+				EXP:对象:信仰值 += 随机数
+				CALL TRAIN_AUTO_ABLUP(对象,1)
+			ENDIF
+			PRINTL
+		CASE 2
+		CASE 3
+			;发动技能[绝望漫延]
+			SIF FIND_GENERAL_SKILLF(对象,24)
+				TRYCALL SKILL_0_MIRACLE_24_REALINVOKE(对象,敌势力,敌部队)
+		CASE 4
+	ENDSELECT
+	CFLAG:对象:杀敌数=0 ;杀敌数重置
+NEXT
+SIF 人数 <= 0
+	RETURN 1
+随机数=RAND(1,3)
+SIF GET_COUNTRY_BOSS(CITY_OWNER:都市) != -1
+	CALL SHOP_LIFE_USERSHOP68_FAITHSUPPLY(CITY_OWNER:都市,随机数,3,人数,除外)
+RETURN 1
+
+;-----信仰补助提升函数--------------------------------------
+;对于AI君主或玩家做出的外交事件，将对AI君王或玩家随机三位信奉诡术之神的部下进行信仰值奖励，对玩家而言若君主信奉诡术之神则必定占据一个名额
+;用以弥补外交事件发起者都是君王和玩家的缺陷
+@SHOP_LIFE_USERSHOP68_FAITHSUPPLY(势力,经验值,神,人数=3,除外=0)
+#DIM 势力
+#DIM 经验值
+#DIM 君主
+#DIM 人数
+#DIM 除外
+#DIM 神
+#DIM 候选,500 ;取决于角色上线，总不至于突破500个吧
+#DIM 候选总数
+#DIM 随机数
+候选总数 = 0
+
+君主 = GET_COUNTRY_BOSS(势力)
+SIF 神 == 0
+	RETURN -1
+SIF 君主 == -1
+	RETURN -1
+IF 势力 == CFLAG:MASTER:所属
+	IF CFLAG:MASTER:信仰神 == 神 && MASTER != 除外
+		CALL PRINT_ADD_EXP(MASTER, "信仰值",经验值, 1)
+		CALL TRAIN_AUTO_ABLUP(MASTER)
+	ENDIF
+	IF CFLAG:君主:信仰神 == 神 && 君主 != MASTER && 君主 != 除外
+		CALL PRINT_ADD_EXP(君主, "信仰值",经验值, 1)
+		CALL TRAIN_AUTO_ABLUP(君主)
+		人数--
+	ENDIF
+ELSE
+	IF CFLAG:君主:信仰神 == 神 && 君主 != 除外
+		IF FAITH_SHOW_CHANGE
+			CALL PRINT_ADD_EXP(君主, "信仰值",经验值, 1)
+			CALL TRAIN_AUTO_ABLUP(君主)
+		ELSE
+			EXP:君主:信仰值 += 经验值
+			CALL TRAIN_AUTO_ABLUP(君主,1)
+		ENDIF
+	ENDIF
+ENDIF
+
+FOR LOCAL,0,CHARANUM,1
+	SIF CFLAG:LOCAL:1 != 势力
+		CONTINUE
+	SIF CFLAG:LOCAL:信仰神 != 神
+		CONTINUE
+	SIF LOCAL == MASTER
+		CONTINUE
+	SIF LOCAL == 君主
+		CONTINUE
+	SIF LOCAL == 除外
+		CONTINUE
+	SIF 候选总数 >= 500 ;保险起见
+		CONTINUE
+	候选总数 ++
+	候选:候选总数=LOCAL
+NEXT
+WHILE 人数 > 0 && 候选总数 > 0
+	;RAND取左不取右，RAND:100 为 0-99
+	随机数 = RAND(1,候选总数+1)
+	IF FAITH_SHOW_CHANGE || 势力 == CFLAG:MASTER:1
+		CALL PRINT_ADD_EXP(候选:随机数, "信仰值",经验值, 1)
+		CALL TRAIN_AUTO_ABLUP(候选:随机数)
+	ELSE
+		EXP:(候选:随机数):信仰值 += 经验值
+		CALL TRAIN_AUTO_ABLUP(候选:随机数,1)
+	ENDIF
+
+	候选:随机数 = 候选:候选总数
+	人数--
+	候选总数--
+WEND
+RETURN 1
+;-------------------------------------------------
+;-------都市相关----------------------------------
+
+
+@SHOP_LIFE_USERSHOP68_BOSSINVEST(对象,投资数)
+	;AI君主或玩家投资都市
+	;AI_INVESTMENT.ERB
+	;SLG_CITY_INVEST.ERB
+#DIM 对象
+#DIM 投资数
+#DIM 随机数
+IF CFLAG:对象:信仰神 == 2
+	IF 投资数 < 1000
+		IF FAITH_SHOW_CHANGE || 对象 == MASTER
+			CALL COLOR_PRINTL(@"%ANAME(对象)%践行了经营经济！", カラー_注意)
+			CALL COLOR_PRINTL(@"但是投资的太少，信仰值没有上升的样子", カラー_注意)
+		ENDIF
+		PRINTL
+		RETURN 1
+	ELSEIF 投资数 < 10000
+		随机数=RAND(1,1+投资数/1000)
+		SIF FAITH_SHOW_CHANGE || 对象 == MASTER
+			CALL COLOR_PRINTL(@"%ANAME(对象)%践行了经营经济！契合%GOD_NAME:(CFLAG:对象:信仰神)%的教义", カラー_注意)
+		PRINTL
+	ELSE
+		随机数=RAND(投资数/1000-7,投资数/1000)+ RAND(1,1+投资数/10000)
+		SIF FAITH_SHOW_CHANGE || 对象 == MASTER
+			CALL COLOR_PRINTL(@"%ANAME(对象)%践行了经营经济！契合%GOD_NAME:(CFLAG:对象:信仰神)%的教义", カラー_注意)
+		PRINTL
+	ENDIF
+ENDIF
+CALL SHOP_LIFE_USERSHOP68_FAITHSUPPLY(CFLAG:对象:1,随机数,2)
+RETURN 1
+;----------------------------------
+@SHOP_LIFE_USERSHOP68_BOSSBUILD(对象,建筑物)
+	;AI君主或玩家 建造 都市建筑
+	;CITY_DEVELOPMENT.ERB
+	;SLG_AI.ERB
+#DIM 对象
+#DIM 建筑物
+#DIM 随机数
+SELECTCASE BUILDING_TYPE:建筑物
+	CASE 建造物_类型_经济类
+			随机数=RAND(1,4)
+			SIF 对象 == MASTER && CFLAG:对象:信仰神 ==2
+				CALL COLOR_PRINTW(@"%ANAME(对象)%践行了经营经济！契合%GOD_NAME:(CFLAG:对象:信仰神)%的教义", カラー_注意)
+			SIF 对象 != MASTER && CFLAG:对象:信仰神 ==2 &&  FAITH_SHOW_CHANGE
+				CALL COLOR_PRINTL(@"%ANAME(对象)%践行了经营经济！契合%GOD_NAME:(CFLAG:对象:信仰神)%的教义", カラー_注意)
+			CALL SHOP_LIFE_USERSHOP68_FAITHSUPPLY(CFLAG:对象:1,随机数,2)
+			PRINTL
+	CASEELSE
+ENDSELECT
+RETURN 1
+;-------------------------------------------------
+;-------外交相关----------------------------------
+;外交行为中的践行者视为该势力领导者，故给予玩家或君王，以及随机三位与领导者同一信仰的部下信仰补助奖励
+;如果发起者的君王或玩家不信仰诡术之神，则不播报践行信息，但同样尝试给予信仰补助奖励
+;-------------------------------------------------
+@SHOP_LIFE_USERSHOP68_CONFERENCE(发起势力,对方势力,礼金=0)
+	;AI君主或玩家 会谈
+	;SLG_AI_DIPLOMACY.ERB
+	;SHOP_SLG41_外交2_友好_会談.ERB
+#DIM 发起势力
+#DIM 对方势力
+#DIM 礼金
+#DIM 随机数
+IF CFLAG:MASTER:所属 == 发起势力
+	SIF CFLAG:MASTER:信仰神 == 2
+		CALL COLOR_PRINTW(@"%ANAME(GET_COUNTRY_BOSS(发起势力))%势力践行了外交友好！契合%GOD_NAME:(CFLAG:MASTER:信仰神)%的教义", カラー_注意)
+ELSE
+	SIF CFLAG:GET_COUNTRY_BOSS(发起势力):信仰神 == 2 && FAITH_SHOW_CHANGE
+		CALL COLOR_PRINTL(@"%ANAME(GET_COUNTRY_BOSS(发起势力))%势力践行了外交友好！契合%GOD_NAME:(CFLAG:GET_COUNTRY_BOSS(发起势力):信仰神)%的教义", カラー_注意)
+ENDIF
+随机数 = RAND(1,2+礼金/1000)
+CALL SHOP_LIFE_USERSHOP68_FAITHSUPPLY(发起势力,随机数,2)
+PRINTL
+
+RETURN 1
+
+;----------------------------------
+@SHOP_LIFE_USERSHOP68_ALLIANCE(发起势力,对方势力,时效=0,礼金=0)
+	;AI君主或玩家 结盟 AI消耗金钱
+	;SLG_AI_DIPLOMACY.ERB
+	;SHOP_SLG41_外交1_関係_同盟申込.ERB
+#DIM 发起势力
+#DIM 对方势力
+#DIM 时效
+#DIM 礼金
+#DIM 随机数
+随机数 = 0
+IF CFLAG:MASTER:所属 == 发起势力
+	SIF CFLAG:MASTER:信仰神 == 2
+		CALL COLOR_PRINTW(@"%ANAME(GET_COUNTRY_BOSS(发起势力))%势力践行了外交结盟！契合%GOD_NAME:(CFLAG:MASTER:信仰神)%的教义", カラー_注意)
+ELSE
+	SIF CFLAG:GET_COUNTRY_BOSS(发起势力):信仰神 == 2 && FAITH_SHOW_CHANGE
+		CALL COLOR_PRINTL(@"%ANAME(GET_COUNTRY_BOSS(发起势力))%势力践行了外交结盟！契合%GOD_NAME:(CFLAG:GET_COUNTRY_BOSS(发起势力):信仰神)%的教义", カラー_注意)
+ENDIF
+随机数 = RAND(3,5+时效/3) + 礼金/1000
+CALL SHOP_LIFE_USERSHOP68_FAITHSUPPLY(发起势力,随机数,2)
+PRINTL
+RETURN 1
+;----------------------------------
+@SHOP_LIFE_USERSHOP68_CEASE_FIRE(发起势力,对方势力,时效=0,礼金=0)
+	;AI君主或玩家 停战
+	;SLG_AI_DIPLOMACY.ERB
+	;SHOP_SLG41_外交1_関係_停戦申込.ERB
+#DIM 发起势力
+#DIM 对方势力
+#DIM 时效
+#DIM 礼金
+#DIM 随机数
+随机数 = 0
+IF CFLAG:MASTER:所属 == 发起势力
+	SIF CFLAG:MASTER:信仰神 == 2
+		CALL COLOR_PRINTW(@"%ANAME(GET_COUNTRY_BOSS(发起势力))%势力践行了外交结盟！契合%GOD_NAME:(CFLAG:MASTER:信仰神)%的教义", カラー_注意)
+ELSE
+	SIF CFLAG:GET_COUNTRY_BOSS(发起势力):信仰神 == 2 && FAITH_SHOW_CHANGE
+		CALL COLOR_PRINTL(@"%ANAME(GET_COUNTRY_BOSS(发起势力))%势力践行了外交结盟！契合%GOD_NAME:(CFLAG:GET_COUNTRY_BOSS(发起势力):信仰神)%的教义", カラー_注意)
+ENDIF
+随机数 = RAND(2,3+时效/3) + 礼金/1000
+CALL SHOP_LIFE_USERSHOP68_FAITHSUPPLY(发起势力,随机数,2)
+PRINTL
+RETURN 1
+
+;----------------------------------
+@SHOP_LIFE_USERSHOP68_UNION(发起势力,对方势力,同盟数)
+	;AI专属   成功发起联合
+	;SLG_AI_DIPLOMACY.ERB
+	;
+#DIM 发起势力
+#DIM 对方势力
+#DIM 同盟数
+#DIM 随机数
+IF CFLAG:MASTER:所属 == 发起势力
+	SIF CFLAG:MASTER:信仰神 == 2
+		CALL COLOR_PRINTW(@"%ANAME(GET_COUNTRY_BOSS(发起势力))%势力践行了外交联合！契合%GOD_NAME:(CFLAG:MASTER:信仰神)%的教义", カラー_注意)
+ELSE
+	SIF CFLAG:GET_COUNTRY_BOSS(发起势力):信仰神 == 2 && FAITH_SHOW_CHANGE
+		CALL COLOR_PRINTL(@"%ANAME(GET_COUNTRY_BOSS(发起势力))%势力践行了外交联合！契合%GOD_NAME:(CFLAG:GET_COUNTRY_BOSS(发起势力):信仰神)%的教义", カラー_注意)
+ENDIF
+随机数 = RAND(8,12) + 同盟数
+CALL SHOP_LIFE_USERSHOP68_FAITHSUPPLY(发起势力,随机数,2)
+PRINTL
+
+RETURN 1
+;----------------------------------
+@SHOP_LIFE_USERSHOP68_ALLIANCE_INDIFINITE(对方势力)
+	;玩家专属 永久同盟
+	;SHOP_SLG41_外交1_関係_永久同盟.ERB
+#DIM 对方势力
+#DIM 随机数
+SIF CFLAG:MASTER:信仰神 == 2
+	CALL COLOR_PRINTW(@"%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:1))%势力践行了外交结盟！高度契合%GOD_NAME:(CFLAG:MASTER:信仰神)%的教义", カラー_注意)
+随机数 = RAND(TMP_COUNTRY_STARS:对方势力,TMP_COUNTRY_STARS:对方势力*2)+8
+CALL SHOP_LIFE_USERSHOP68_FAITHSUPPLY(CFLAG:MASTER:1,随机数,2)
+PRINTL
+RETURN 1
+;----------------------------------
+@SHOP_LIFE_USERSHOP68_PUPPET(对方势力)
+	;玩家专属 傀儡国
+	;SHOP_SLG41_外交3_要求_従属勧告.ERB
+#DIM 对方势力
+#DIM 随机数
+
+SIF CFLAG:MASTER:信仰神 == 2
+	CALL COLOR_PRINTW(@"%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:1))%势力践行了外交控制！高度契合%GOD_NAME:(CFLAG:MASTER:信仰神)%的教义", カラー_注意)
+随机数 = RAND(TMP_COUNTRY_STARS:对方势力,TMP_COUNTRY_STARS:对方势力*2)+8
+CALL SHOP_LIFE_USERSHOP68_FAITHSUPPLY(CFLAG:MASTER:1,随机数,2)
+PRINTL
+RETURN 1
+;----------------------------------
+@SHOP_LIFE_USERSHOP68_SURRENDER(对方势力)
+	;玩家专属 劝降
+	;SHOP_SLG41_外交3_要求_降伏勧告.ERB
+#DIM 对方势力
+#DIM 随机数
+
+SIF CFLAG:MASTER:信仰神 == 2
+	CALL COLOR_PRINTW(@"%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:1))%势力践行了外交吞并！高度契合%GOD_NAME:(CFLAG:MASTER:信仰神)%的教义", カラー_注意)
+随机数 = RAND(TMP_COUNTRY_STARS:对方势力,TMP_COUNTRY_STARS:对方势力*2)+15
+CALL SHOP_LIFE_USERSHOP68_FAITHSUPPLY(CFLAG:MASTER:1,随机数,2)
+PRINTL
+RETURN 1
+;----------------------------------
+@SHOP_LIFE_USERSHOP68_PERSONAL_UNION(对方势力)
+	;玩家专属 外交兼并
+	;SHOP_SLG41_外交1_関係_外交併合.ERB
+#DIM 对方势力
+#DIM 随机数
+
+SIF CFLAG:MASTER:信仰神 == 2
+	CALL COLOR_PRINTW(@"%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:1))%势力践行了外交吞并！高度契合%GOD_NAME:(CFLAG:MASTER:信仰神)%的教义", カラー_注意)
+随机数 = RAND(TMP_COUNTRY_STARS:对方势力,TMP_COUNTRY_STARS:对方势力*2) + 15
+CALL SHOP_LIFE_USERSHOP68_FAITHSUPPLY(CFLAG:MASTER:1,随机数,2)
+PRINTL
+RETURN 1
+
+;----------------------------------
+@SHOP_LIFE_USERSHOP68_SCANDAL(发起势力,对方势力,资金)
+	;AI君主或玩家 流传丑闻
+	;SLG_AI_DIPLOMACY.ERB
+	;SHOP_SLG41_外交1_関係_醜聞を流す.ERB
+#DIM 发起势力
+#DIM 对方势力
+#DIM 资金
+#DIM 随机数
+IF CFLAG:MASTER:所属 == 发起势力
+	IF 资金 < 1000
+		随机数 = 1
+	ELSE
+		随机数 = RAND(1,2+资金/1000)+资金/10000
+	ENDIF
+	SIF CFLAG:MASTER:信仰神 == 2
+		CALL COLOR_PRINTW(@"%ANAME(GET_COUNTRY_BOSS(发起势力))%势力践行了外交攻击！契合%GOD_NAME:(CFLAG:MASTER:信仰神)%的教义", カラー_注意)
+ELSE
+	随机数 = RAND(1,3)
+	SIF CFLAG:GET_COUNTRY_BOSS(发起势力):信仰神 == 2 && FAITH_SHOW_CHANGE
+		CALL COLOR_PRINTL(@"%ANAME(GET_COUNTRY_BOSS(发起势力))%势力践行了外交攻击！契合%GOD_NAME:(CFLAG:GET_COUNTRY_BOSS(发起势力):信仰神)%的教义", カラー_注意)
+ENDIF
+CALL SHOP_LIFE_USERSHOP68_FAITHSUPPLY(发起势力,随机数,2)
+PRINTL
+RETURN 1
+;----------------------------------
+@SHOP_LIFE_USERSHOP68_SABOTAGE(对方势力,人数)
+	;玩家专属 内部破坏 1人数花费1000金 根据人数发放
+	;SHOP_SLG41_外交1_関係_内部工作.ERB
+#DIM 对方势力
+#DIM 人数
+#DIM 随机数
+
+SIF CFLAG:MASTER:信仰神 == 2
+	CALL COLOR_PRINTW(@"%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:1))%势力践行了外交攻击！契合%GOD_NAME:(CFLAG:MASTER:信仰神)%的教义", カラー_注意)
+随机数 = RAND(1,1+人数)
+CALL SHOP_LIFE_USERSHOP68_FAITHSUPPLY(CFLAG:MASTER:1,随机数,2)
+PRINTL
+RETURN 1
+
+;----------------------------------
+@SHOP_LIFE_USERSHOP68_REQUEST(发起势力,对方势力,索取物,数量)
+	;AI君主或玩家 政治索取
+	;要求_兵士 = 0 要求_経済 = 1 要求_士官 = 2
+	;AI的士官索取后会直接入仕，玩家的则会成为俘虏，因此信仰值取得不同
+	;SLG_AI_DIPLOMACY.ERB
+	;SHOP_SLG41_外交3_要求_兵要求.ERB
+	;SHOP_SLG41_外交3_要求_経済力要求.ERB
+
+#DIM 发起势力
+#DIM 对方势力
+#DIM 索取物
+#DIM 数量
+#DIM 随机数
+#DIM 神
+神=0
+SELECTCASE 索取物
+	CASE 0 ;士兵
+		随机数 = RAND(1,数量/1000 + 2)
+	CASE 1;经济
+		IF CFLAG:MASTER:所属 == 发起势力
+			SIF CFLAG:MASTER:信仰神 == 2
+				CALL COLOR_PRINTW(@"%ANAME(GET_COUNTRY_BOSS(发起势力))%势力践行了外交剥削！契合%GOD_NAME:(CFLAG:MASTER:信仰神)%的教义", カラー_注意)
+		ELSE
+			SIF CFLAG:GET_COUNTRY_BOSS(发起势力):信仰神 == 2 && FAITH_SHOW_CHANGE
+				CALL COLOR_PRINTL(@"%ANAME(GET_COUNTRY_BOSS(发起势力))%势力践行了外交剥削！契合%GOD_NAME:(CFLAG:GET_COUNTRY_BOSS(发起势力):信仰神)%的教义", カラー_注意)
+		ENDIF
+		随机数 = RAND(1,数量/100 + 2)
+		CALL SHOP_LIFE_USERSHOP68_FAITHSUPPLY(发起势力,随机数,2)
+	CASE 2;士官
+		IF CFLAG:MASTER:所属 == 发起势力
+			神 = CFLAG:MASTER:信仰神
+			SIF CFLAG:MASTER:信仰神 == 3
+				CALL COLOR_PRINTW(@"%ANAME(GET_COUNTRY_BOSS(发起势力))%势力践行了同化！契合%GOD_NAME:(CFLAG:MASTER:信仰神)%的教义", カラー_注意)
+			SIF CFLAG:MASTER:信仰神 == 4
+				CALL COLOR_PRINTW(@"%ANAME(GET_COUNTRY_BOSS(发起势力))%势力践行了强迫！契合%GOD_NAME:(CFLAG:MASTER:信仰神)%的教义", カラー_注意)
+			随机数 = RAND(1,2)+ (TMP_CHARA_STARS:数量) / 2
+		ELSE
+			神 = CFLAG:GET_COUNTRY_BOSS(发起势力):信仰神
+			SIF CFLAG:GET_COUNTRY_BOSS(发起势力):信仰神 == 3 && FAITH_SHOW_CHANGE
+				CALL COLOR_PRINTL(@"%ANAME(GET_COUNTRY_BOSS(发起势力))%势力践行了同化与接纳！契合%GOD_NAME:(CFLAG:GET_COUNTRY_BOSS(发起势力):信仰神)%的教义", カラー_注意)
+			SIF CFLAG:GET_COUNTRY_BOSS(发起势力):信仰神 == 4 && FAITH_SHOW_CHANGE
+				CALL COLOR_PRINTL(@"%ANAME(GET_COUNTRY_BOSS(发起势力))%势力践行了强迫与迷惑！契合%GOD_NAME:(CFLAG:GET_COUNTRY_BOSS(发起势力):信仰神)%的教义", カラー_注意)
+			随机数 = RAND(2,4)+ (TMP_CHARA_STARS:数量)/2
+		ENDIF
+
+		CALL SHOP_LIFE_USERSHOP68_FAITHSUPPLY(发起势力,随机数,神)
+ENDSELECT
+
+PRINTL
+RETURN 1
+
+;-----------------------------------------
+@SHOP_LIFE_USERSHOP68_REQUEST_RELEASE(对方势力,人数)
+	;玩家专属 要求返还人质
+	;SHOP_SLG41_外交3_要求_人質解放.ERB
+#DIM 对方势力
+#DIM 人数
+#DIM 随机数
+
+IF CFLAG:MASTER:信仰神 == 3
+	CALL COLOR_PRINTW(@"%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:1))%势力践行了守护同伴！契合%GOD_NAME:(CFLAG:MASTER:信仰神)%的教义", カラー_注意)
+	PRINTL
+ENDIF
+随机数=RAND(1,2)+ 人数 * 2
+CALL SHOP_LIFE_USERSHOP68_FAITHSUPPLY(CFLAG:MASTER:1,随机数,3)
+RETURN 1
+
+;-------------------------------------------------
+;-------招募相关----------------------------------
+
+@SHOP_LIFE_USERSHOP68_BOSSPERSUASION(对象,士官)
+	;AI君主或玩家劝说士官成功 经验值上相当于略有难度的招募
+	;AI_PERSUASION.ERB
+	;SHOP_LIFE32_説得させる.ERB 俘虏劝说
+	;COMF551_自国に誘う.ERB 会见中劝说
+	;SLG_ESCAPE.ERB 战场上俘获登用
+#DIM 对象
+#DIM 士官
+#DIM 随机数
+IF CFLAG:对象:信仰神 == 3
+	SIF FAITH_SHOW_CHANGE || 对象 == MASTER
+		CALL COLOR_PRINTL(@"%ANAME(对象)%践行了同化与接纳！契合%GOD_NAME:(CFLAG:对象:信仰神)%的教义", カラー_注意)
+	PRINTL
+ENDIF
+随机数=RAND(1,3)+ TMP_CHARA_STARS:士官 / 2
+CALL SHOP_LIFE_USERSHOP68_FAITHSUPPLY(CFLAG:对象:1,随机数,3)
+
+IF CFLAG:对象:信仰神 == 4
+	SIF FAITH_SHOW_CHANGE || 对象 == MASTER
+		CALL COLOR_PRINTL(@"%ANAME(对象)%践行了迷惑！契合%GOD_NAME:(CFLAG:对象:信仰神)%的教义", カラー_注意)
+	PRINTL
+ENDIF
+随机数=RAND(1,3)+ TMP_CHARA_STARS:士官 / 2
+CALL SHOP_LIFE_USERSHOP68_FAITHSUPPLY(CFLAG:对象:1,随机数,4)
+
+RETURN 1
+
+;----------------------------------
+@SHOP_LIFE_USERSHOP68_BOSSRECRUITMENT(对象,士官)
+	;AI君主或玩家招募士官
+	;AI_RECRUITMENT.ERB
+	;SHOP_SLG63_スカウト.ERB
+#DIM 对象
+#DIM 士官
+#DIM 随机数
+
+IF CFLAG:对象:信仰神 == 3
+	SIF FAITH_SHOW_CHANGE || 对象 == MASTER
+		CALL COLOR_PRINTL(@"%ANAME(对象)%践行了同化与接纳！契合%GOD_NAME:(CFLAG:对象:信仰神)%的教义", カラー_注意)
+	PRINTL
+ENDIF
+随机数=RAND(1,2) + TMP_CHARA_STARS:士官 / 2
+CALL SHOP_LIFE_USERSHOP68_FAITHSUPPLY(CFLAG:对象:1,随机数,3)
+
+RETURN 1
+
+;======================================================================
+;============色欲事件=================================================
+@MIRACLE_FALLCOUNT(对象)
+;返回角色对主角的陷落代码
+#FUNCTION
+#DIM 对象
+SIF TALENT:对象:恋人
+	RETURNF 3
+SIF TALENT:对象:親愛
+	RETURNF 2
+SIF TALENT:对象:恋慕 ;浅陷落
+	RETURNF 1
+;烙印似乎不算陷落
+;SIF TALENT:对象:烙印
+;	RETURNF 6
+SIF TALENT:对象:隷属
+	RETURNF 5
+SIF TALENT:对象:服従 ;浅陷落
+	RETURNF 4
+
+SIF TALENT:对象:親友 ;浅陷落
+	RETURNF 6
+
+SIF TALENT:对象:所有者
+	RETURNF 8
+SIF TALENT:对象:主人 ;浅陷落
+	RETURNF 7
+
+RETURNF 0
+;---------------------------------------------------------------------------
+@SHOP_LIFE_USERSHOP68_LUST_COMMON(事件名,发起者,基础经验下限=2,基础经验上限=6)
+;色欲调教通用事件 等待调教结束给予反馈
+;调教结束的调用在 SYSTEM_TRAIN.ERB 的 @TRAIN_EXIT事件统一处理
+;侍寝事件 SHOP_LIFE12_閨に呼ぶ.ERB
+;夜袭事件 SHOP_LIFE21_夜這いする.ERB
+;调教俘虏 SHOP_LIFE11_会いに行く.ERB
+;会见 SHOP_LIFE11_会いに行く.ERB
+;留宿 SYSTEM_TRAIN.ERB 的 @TRAIN_EXIT
+;慰安民众 SHOP_LIFE23_民の慰安.ERB
+#DIMS 事件名
+#DIM 发起者
+#DIM 基础经验下限
+#DIM 基础经验上限
+#DIM 对象
+#DIM 后陷落 ;计数
+#DIM 后合意 ;计数
+#DIM 好感变化
+#DIM 従属变化
+#DIM 依存变化
+#DIM 支配变化
+#DIM 玩家参与 ;0=玩家参与,1=玩家参与(不一定是主导者)
+#DIM 随机数
+玩家参与 = (发起者 == MASTER)
+FOR LOCAL,1,(MIRACLE_LUST_TRAIN_TARGET:0) + 1,1 ;判断是否玩家参与
+	SIF MIRACLE_LUST_TRAIN_TARGET:LOCAL == MASTER
+		玩家参与 = 1
+NEXT
+IF 发起者 >= 0
+	SIF CFLAG:发起者:信仰神 == 4 && ((发起者==MASTER) + 玩家参与 + FAITH_SHOW_CHANGE)
+		CALL COLOR_PRINTL(@"%ANAME(发起者)%在%事件名%事件中践行了%GOD_NAME:(CFLAG:发起者:信仰神)%的教义", カラー_注意)
+ENDIF
+IF 玩家参与 && CFLAG:MASTER:信仰神 == 4
+	;调教类事件 玩家根据调教后关系进展发放经验
+	LOCAL:1 = 基础经验下限 ;给予玩家经验值下限
+	LOCAL:2 = 基础经验上限 ;给予玩家经验值上限
+	后陷落 = 0
+	后合意 = 0
+	好感变化 = 0
+	従属变化 = 0
+	依存变化 = 0
+	支配变化 = 0
+	FOR LOCAL,1,(MIRACLE_LUST_TRAIN_TARGET:0) + 1,1 ;记录从编号1开始
+		对象 = MIRACLE_LUST_TRAIN_TARGET:LOCAL
+		SIF 对象 == MASTER
+			CONTINUE
+		SIF MIRACLE_LUST_PRE_FALL:LOCAL <= 0 && MIRACLE_FALLCOUNT(对象)
+			后陷落++
+		SIF MIRACLE_LUST_PRE_MAKELOVE:LOCAL <= 0 && TALENT:对象:合意
+			后合意++
+		好感变化 += CFLAG:对象:好感度 - MIRACLE_LUST_PRE_LIKE:LOCAL
+		従属变化 += CFLAG:对象:従属度 - MIRACLE_LUST_PRE_BELONG:LOCAL
+		依存变化 += CFLAG:对象:依存度 - MIRACLE_LUST_PRE_TRUST:LOCAL
+		支配变化 += CFLAG:对象:支配度 - MIRACLE_LUST_PRE_CONTROL:LOCAL
+	NEXT
+	LOCAL:3 = 0 ;是否有关系进展
+	PRINTFORM %ANAME(MASTER)%在本次%事件名%事件中达成了:
+	IF 后陷落 > 0
+		PRINTFORM 陷落x{后陷落},
+		LOCAL:1 += 4*后陷落
+		LOCAL:2 += 6*后陷落
+		LOCAL:3 ++
+	ENDIF
+	IF 后合意 > 0
+		PRINTFORM 合意x{后合意},
+		LOCAL:1 += 4*后合意
+		LOCAL:2 += 6*后合意
+		LOCAL:3 ++
+	ENDIF
+	;播报好感度等变化
+	IF 好感变化 > 0
+		PRINTFORM 好感上升{好感变化},
+		LOCAL:1 += MAX((好感变化) / 500, 1)
+		LOCAL:2 += MAX((好感变化) / 300, 2)
+		LOCAL:3 ++
+	ENDIF
+	IF 依存变化 > 0
+		PRINTFORM 依存上升{依存变化},
+		LOCAL:1 += MAX((依存变化) / 500, 1)
+		LOCAL:2 += MAX((依存变化) / 300, 2)
+		LOCAL:3 ++
+	ENDIF
+	IF 従属变化 > 0
+		PRINTFORM 従属上升{従属变化},
+		LOCAL:1 += MAX((従属变化) / 500, 1)
+		LOCAL:2 += MAX((従属变化) / 300, 2)
+		LOCAL:3 ++
+	ENDIF
+	IF 支配变化 > 0
+		PRINTFORM 支配上升{支配变化},
+		LOCAL:1 += MAX((支配变化) / 500, 1)
+		LOCAL:2 += MAX((支配变化) / 300, 2)
+		LOCAL:3 ++
+	ENDIF
+	IF LOCAL:3 == 0
+		;没有发生有效播报时,重新发送消息
+		CLEARLINE 2
+		PRINTFORML %ANAME(MASTER)%在本次%事件名%事件中没有取得关系进展的样子...
+	ELSE
+		PRINTL
+	ENDIF
+
+	SIF LOCAL:1 + LOCAL:2 > 0 ;虽然暂时不打算设定关系降低扣除信仰,但还是可以以防万一
+		随机数=LOCAL:1 == LOCAL:2 ? LOCAL:1 # RAND(LOCAL:1,LOCAL:2)
+	IF 随机数 > 0
+		CALL PRINT_ADD_EXP(MASTER, "信仰值",随机数, 1)
+		CALL TRAIN_AUTO_ABLUP(MASTER)
+	ENDIF
+ENDIF
+
+;给其他参与角色发放经验
+FOR LOCAL,1,(MIRACLE_LUST_TRAIN_TARGET:0) + 1,1 ;记录从编号1开始
+	对象 = MIRACLE_LUST_TRAIN_TARGET:LOCAL
+	SIF 对象 == MASTER
+		CONTINUE
+	随机数= 基础经验下限 == 基础经验上限 ? 基础经验下限 # RAND(基础经验下限,基础经验上限)
+	SIF CFLAG:对象:1 != CFLAG:MASTER:1 ;AI信仰提升补正
+		随机数 += FAITH_AI_SUPPLY
+	IF CFLAG:对象:信仰神 == 4 && ((发起者==MASTER) + 玩家参与 + FAITH_SHOW_CHANGE)
+		CALL PRINT_ADD_EXP(对象, "信仰值",随机数, 1)
+		CALL TRAIN_AUTO_ABLUP(对象)
+	ELSE
+		EXP:对象:信仰值 += 随机数
+		CALL TRAIN_AUTO_ABLUP(对象,1)
+	ENDIF
+NEXT
+
+RETURN 1
+
+;---------------------------------------------------------------------------
+@SHOP_LIFE_USERSHOP68_LUST_COMMON2(事件名,发起者,对象,基础经验下限=2,基础经验上限=6)
+;色欲非调教通用事件 直接给出反馈
+;约会 2,5 SHOP_LIFE61_デート.ERB
+;接吻 1,3 _FUNCTION.ERB 的 KISS_COMMON 只存在发起者，不需要对象
+;夺取初吻 3,6 _FUNCTION.ERB 的 KISS_COMMON
+;夺取童贞 3，6  _FUNCTION.ERB
+;夺取处女 3,6  _FUNCTION.ERB
+;夺取后庭处女 3,6  _FUNCTION.ERB
+;性爱外交 2,6 SHOP_SLG41_外交2_友好_会談.ERB
+#DIMS 事件名
+#DIM 发起者
+#DIM 基础经验下限
+#DIM 基础经验上限
+#DIM 对象
+#DIM 玩家参与 ;0=玩家参与,1=玩家参与(不一定是主导者)
+#DIM 随机数
+SIF 发起者<0
+	RETURN
+玩家参与 = (发起者 == MASTER) + (对象 == MASTER)
+
+SIF CFLAG:发起者:信仰神 == 4 && (玩家参与 + FAITH_SHOW_CHANGE)
+	CALL COLOR_PRINTL(@"%ANAME(发起者)%在%事件名%事件中践行了%GOD_NAME:(CFLAG:发起者:信仰神)%的教义", カラー_注意)
+
+;无调教类事件 直接发放基础奖励
+IF 玩家参与
+	IF CFLAG:MASTER:信仰神 == 4
+		随机数= 基础经验下限 == 基础经验上限 ? 基础经验下限 # RAND(基础经验下限,基础经验上限)
+		CALL PRINT_ADD_EXP(MASTER, "信仰值",随机数, 1)
+		CALL TRAIN_AUTO_ABLUP(MASTER)
+	ENDIF
+	随机数= 基础经验下限 == 基础经验上限 ? 基础经验下限 # RAND(基础经验下限,基础经验上限)
+	IF 发起者 == MASTER
+		SIF 对象 == -1
+			RETURN 0
+		SIF CFLAG:对象:1 != CFLAG:MASTER:1 ;AI信仰提升补正
+			随机数 += FAITH_AI_SUPPLY
+		IF CFLAG:对象:信仰神 == 4
+			CALL PRINT_ADD_EXP(对象, "信仰值",随机数, 1)
+			CALL TRAIN_AUTO_ABLUP(对象)
+		ENDIF
+	ELSE
+		SIF 发起者 == -1
+			RETURN 0
+		SIF CFLAG:发起者:1 != CFLAG:MASTER:1 ;AI信仰提升补正
+			随机数 += FAITH_AI_SUPPLY
+		IF CFLAG:发起者:信仰神 == 4
+			CALL PRINT_ADD_EXP(发起者, "信仰值",随机数, 1)
+			CALL TRAIN_AUTO_ABLUP(发起者)
+		ENDIF
+	ENDIF
+ELSE
+	;发起者发放
+	随机数= 基础经验下限 == 基础经验上限 ? 基础经验下限 # RAND(基础经验下限,基础经验上限)
+	SIF CFLAG:发起者:1 != CFLAG:MASTER:1 ;AI信仰提升补正
+		随机数 += FAITH_AI_SUPPLY
+	IF CFLAG:发起者:信仰神 == 4 && ((CFLAG:发起者:1 == CFLAG:MASTER:1)+FAITH_SHOW_CHANGE)
+		CALL PRINT_ADD_EXP(发起者, "信仰值",随机数, 1)
+		CALL TRAIN_AUTO_ABLUP(发起者)
+	ELSE
+		EXP:发起者:信仰值 += 随机数
+		CALL TRAIN_AUTO_ABLUP(发起者,1)
+	ENDIF
+	;相同时退出，对象不存在则退出
+	SIF 发起者 == 对象 || 对象 == -1
+		RETURN 1
+	;对象发放
+	随机数= 基础经验下限 == 基础经验上限 ? 基础经验下限 # RAND(基础经验下限,基础经验上限)
+	SIF CFLAG:对象:1 != CFLAG:MASTER:1 ;AI信仰提升补正
+		随机数 += FAITH_AI_SUPPLY
+	IF CFLAG:对象:信仰神 == 4 && ((CFLAG:对象:1 == CFLAG:MASTER:1)+FAITH_SHOW_CHANGE)
+		CALL PRINT_ADD_EXP(对象, "信仰值",随机数, 1)
+		CALL TRAIN_AUTO_ABLUP(对象)
+	ELSE
+		EXP:对象:信仰值 += 随机数
+		CALL TRAIN_AUTO_ABLUP(对象,1)
+	ENDIF
+ENDIF
+RETURN 1
+;----------------------------------------------------
+@MIRACLE_TURNEND_QUALITY_CHECK()
+;回合末更新每个角色素质变更情况并给予奖励 合意 5,8 浅陷落 4,7 深陷落 5,8
+#DIM 随机数
+FOR LOCAL,0,CHARANUM,1
+	SIF LOCAL > 173
+	;随机角色将不会纳入计算
+		BREAK
+	SIF LOCAL == MASTER
+		CONTINUE
+	随机数 = 0
+	LOCALS =
+	IF !MIRACLE_LUST_MAKELOVE_YN:LOCAL && TALENT:LOCAL:合意
+		LOCALS += "合意,"
+		随机数 += RAND(4,7)
+	ENDIF
+	MIRACLE_LUST_MAKELOVE_YN:LOCAL = TALENT:LOCAL:合意
+
+	IF !MIRACLE_LUST_FALL_YN:LOCAL && (TALENT:LOCAL:恋慕 || TALENT:LOCAL:主人 || TALENT:LOCAL:服従 || TALENT:LOCAL:親友)
+		LOCALS += "陷落,"
+		随机数 += RAND(4,7)
+	ENDIF
+	MIRACLE_LUST_FALL_YN:LOCAL = (TALENT:LOCAL:恋慕 || TALENT:LOCAL:主人 || TALENT:LOCAL:服従 || TALENT:LOCAL:親友)
+
+	IF !MIRACLE_LUST_FALLDEEP_YN:LOCAL && (TALENT:LOCAL:親愛 || TALENT:LOCAL:所有者 || TALENT:LOCAL:隷属)
+		LOCALS += "深度陷落,"
+		随机数 += RAND(5,8)
+	ENDIF
+	MIRACLE_LUST_FALLDEEP_YN:LOCAL = (TALENT:LOCAL:親愛 || TALENT:LOCAL:所有者 || TALENT:LOCAL:隷属)
+
+	SIF 随机数 == 0
+		CONTINUE
+	SIF (CFLAG:MASTER:信仰神 == 4 || CFLAG:LOCAL:信仰神 == 4)
+		CALL COLOR_PRINTL(@"%ANAME(MASTER)%取得了%ANAME(LOCAL)%的%LOCALS%契合%GOD_NAME:(CFLAG:MASTER:信仰神)%的教义", カラー_注意)
+	SIF CFLAG:MASTER:信仰神 == 4
+		CALL PRINT_ADD_EXP(MASTER, "信仰值",随机数, 1)
+	CALL TRAIN_AUTO_ABLUP(MASTER)
+	SIF CFLAG:LOCAL:信仰神 == 4
+		CALL PRINT_ADD_EXP(LOCAL, "信仰值",随机数, 1)
+	CALL TRAIN_AUTO_ABLUP(LOCAL)
+NEXT

@@ -1,0 +1,115 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K63_KAMINARI_RATE(対象)
+#DIM 対象
+RETURN 35
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K63_KAMINARI_DECISION(対象)
+#DIM 対象
+
+SIF GROUPMATCH(MASTER, NAME_TO_CHARA("さとり"), NAME_TO_CHARA("こいし"), NAME_TO_CHARA("燐"))
+	RETURN 0
+
+SIF CFLAG:対象:依存度 < 150
+	RETURN 0
+
+SIF KDVAR:対象:空_初体験
+	RETURN 0
+
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K63_KAMINARI_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K63_KAMINARI(対象)
+#DIM 対象
+
+PRINTFORML 今晚的天気很悪劣。外面響起了雷声
+PRINTFORMW 在這種時候、%ANAME(対象)%拜訪了%ANAME(MASTER)%的房間
+PRINTFORMW 「那個……%ANAME(MASTER)%、如果可以的話、那個、想一起睡覚……」
+PRINTFORML
+CALL ASK_YN("怎麼了？", "拒绝")
+
+IF RESULT == 1
+	PRINTFORMW 還是比較習慣一個人睡覚
+	PRINTFORMW %ANAME(対象)%回去了……
+	KDVAR:対象:空_初体験 = 1
+	RETURN 1
+ENDIF
+
+PRINTFORMW 「那個……打雷、我、雖然我知道什麼是打雷」
+PRINTFORMW 「那個……覚大人和阿燐也、有告訴過我関於打雷的事」
+PRINTFORMW 「但我還是覚得、很吵、那個……很恐怖、那個、如果可以、希望能夠一起睡覚、不行嗎？」
+PRINTFORMW 原来如此、一直在地底生活的%PRONOUN(対象)%、第一次遇到打雷
+PRINTFORMW 那麼……
+PRINTFORML
+CALL ASK_YN("一起睡覚", "一個人睡")
+
+IF RESULT == 1
+	PRINTFORMW 還是比較習慣一個人睡覚
+	PRINTFORMW %ANAME(対象)%回去了……
+	KDVAR:対象:空_初体験 = 1
+	RETURN 1
+ENDIF
+
+PRINTFORMW 無法自己入睡的話就一起睡吧
+PRINTFORMW %ANAME(対象)%躺在你的床上了
+PRINTFORMW 「謝謝你、%ANAME(MASTER)%。……不会離開我吧？」
+PRINTFORMW 雖然不会離開、但%ANAME(対象)%的身体一直緊貼着自己、即使真的想離開也做不到
+PRINTFORMW %PRONOUN(対象)%胸部柔軟的触感從背後傳達過来、少女美妙的体香傳入鼻中……
+PRINTL
+CALL ASK_YN("出手", "晚安")
+
+IF RESULT == 1
+	PRINTFORMW 「唔嗯……晚安……」
+	PRINTFORMW 竭尽全力保持住理性了。%PRONOUN(対象)%因為有%ANAME(MASTER)%在所以非常安心、很快就睡着了
+	PRINTFORMW 另一方面、%ANAME(MASTER)%在欲望与理性中掙扎度過了一晚……
+	CALL ADD_COOLTIME(MASTER, 1)
+	CFLAG:対象:好感度 += 300
+	CFLAG:対象:依存度 += 50
+	KDVAR:対象:空_初体験 = 1
+	RETURN 1
+ENDIF
+
+PRINTFORMW 「唔嗯？　%ANAME(MASTER)%？」
+PRINTFORMW 向%ANAME(対象)%的睡衣伸出手。雖然%PRONOUN(対象)%很困惑、但並沒有抗拒
+PRINTFORMW 「那個、能讓我忘記打雷、讓我感到舒服的話、可以哦？」
+PRINTFORMW 「……啊、但是、請温柔一点哦？」
+PRINTFORMW 圧到了%ANAME(対象)%身上……
+
+CFLAG:対象:好感度 += 300
+;全員の調教参加フラグをクリア
+CVARSET CFLAG, 6, 0
+CFLAG:対象:調教参加フラグ = 1
+CFLAG:対象:調教中帰らない = 1
+CFLAG:対象:強制友好化 = 1
+BASE:対象:体力 = MAXBASE:対象:体力
+BASE:対象:気力 = MAXBASE:対象:気力
+;強制逆調教フラグをオン
+FLAG:ターンエンド調教 = 1
+;それ以降のデイリーイベント発生を潰す
+DAILY_CANCEL = 1
+;フラグ
+KDVAR:対象:空_初体験 = 1
+
+RETURN 1
+

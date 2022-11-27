@@ -1,0 +1,347 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_HYPNOTISM_TRAINER_RATE()
+RETURN (DVAR:催眠トレーナー_前回対象者ID > 0 ? 150 # 30)
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_HYPNOTISM_TRAINER_DECISION()
+SIF DAY < 10
+	RETURN 0
+SIF DVAR:催眠トレーナー_発生フラグ == 2
+	RETURN 0
+SIF MONEY < 20000
+	RETURN 0
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_HYPNOTISM_TRAINER_GENRE()
+RETURN デイリー_ジャンル_トレーナー
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_HYPNOTISM_TRAINER
+#DIM 対象
+#DIM 対象素質
+#DIMS TN
+
+IF DVAR:催眠トレーナー_発生フラグ == 1
+	PRINTFORMW 那个催眠师又来了
+ELSE
+	PRINTFORML 一名自称是催眠师的男子上门拜访了你。
+	PRINTFORMW 他说，如果你愿意付出一定金钱的话，可以帮你改变伙伴的人格或固有素质。
+	CALL ICPRINT(@"费用的话一次是<20000>", "L", カラー_注意)
+	PRINTFORML 虽然不是一定成功，但重复几次的话，成功几率还是很大的。
+	PRINTFORML …………………………
+	PRINTFORMW 听起来像是个诓骗人的神棍，不过男子的言语里却有一种奇异的说服力。
+ENDIF
+IF ID_TO_CHARA(DVAR:催眠トレーナー_前回対象者ID) == MASTER && IS_FEMALE(MASTER)
+	PRINTFORMW %ANAME(MASTER)%看着男子富有亲和力的脸，不知为何感觉胸口有些苦闷。
+ENDIF
+PRINTFORML 怎麼辦？
+CALL ASK_MULTI_JUDGE("请求催眠", MONEY >= 20000,"驱逐", 1,"砍了", 1)
+IF RESULT == 2
+	PRINTFORML 这个人很危险，不能任由这样的家伙存在
+	PRINTFORMW %ANAME(MASTER)%先是做出思考的样子沉默着，然后突然拔出宝剑向着男子砍去！
+	PRINTFORML 
+	IF GETBIT(TALENT:MASTER:日常系, 素質_デイリー_催眠中毒)
+		PRINTFORML ……但是，在%ANAME(MASTER)%手中的利刃挥向男子的瞬间，%ANAME(MASTER)%大脑忽然一阵空白，身体也猛地僵住，宝剑从手掉落在了地上。
+		PRINTFORMW 已经催眠中毒的%ANAME(MASTER)%早已在潜意识中彻底臣服于男子，完全无法违抗他的命令，更没办法伤害对方。
+		PRINTFORML 擦了擦额头的冷汗，男子命令%ANAME(MASTER)%自己把身上的衣服脱光。
+		PRINTFORML %ANAME(MASTER)%一脸恍惚的表情，十分顺从地除去了身上所有的衣服，把全身赤裸地展露给男子欣赏。
+		PRINTFORMW 男子呼吸变得急促起来，脸上露出低劣的笑容一边揉着%ANAME(MASTER)%丰腴的臀部，一边将%ANAME(MASTER)%带去了卧室。
+		PRINTFORML ・
+		PRINTFORML ・・
+		PRINTFORMW ・・・
+		PRINTFORML 几个小时后，%ANAME(MASTER)%走到门口目送一名男子离去。
+		PRINTFORML 奇怪，自己和那个人刚刚是有做些什么吗？
+		PRINTFORMW 脸上仍有些潮红的%ANAME(MASTER)%歪了歪脑袋，最终决定回去工作，不再想这件事了……并没有注意到一些白浊的液体正顺着自己的大腿缓缓滴落。
+	ELSE
+		PRINTFORML 男子惨叫一声，倒在了地上。
+		PRINTFORMW 搜了搜男子的身，并没有找到什么值钱或者奇怪的东西。
+		PRINTFORMW 于是%ANAME(MASTER)%把尸体交给士兵处理，自己回去工作了。
+		DVAR:催眠トレーナー_発生フラグ = 2
+	ENDIF
+	RETURN
+ELSEIF RESULT == 1
+	PRINTFORML 不凑巧呢，现在并不需要做那样的事情。
+	PRINTFORMW 男子带着奇诡的笑容离开了。
+	DVAR:催眠トレーナー_前回対象者ID = 0
+	DVAR:催眠トレーナー_発生フラグ = 1
+	RETURN
+ENDIF
+
+PRINTFORML 决定做催眠了
+PRINTFORMW 那由谁来做呢？
+CALL SINGLE_DRAWLINE
+;対象を決める
+CALL SELECT_CHARA_LIST_ONLY_LOGIC_SLG("HYPNOTISM_TRAINER", "NONE", "HYPNOTISM_TRAINER")
+対象 = RESULT
+IF 対象 == -1
+	PRINTFORMW 还是算了
+	DVAR:催眠トレーナー_発生フラグ = 1
+	RETURN 1
+ENDIF
+IF 対象 == MASTER
+	PRINTFORMW 决定亲自来体验催眠术。
+ELSE
+	PRINTFORMW 决定向%ANAME(対象)%使用催眠术。
+ENDIF
+
+IF 対象 == ID_TO_CHARA(DVAR:催眠トレーナー_前回対象者ID) && IS_FEMALE(対象)
+	SIF 対象 != MASTER
+		PRINTFORMW %ANAME(対象)%和男子的眼睛对上后就一阵恍惚，不自觉地合上了双眼。
+	DVAR:催眠トレーナー_深度 ++
+	EXP:対象:被催眠経験 += 1
+ELSE
+	IF IS_FEMALE(対象)
+		DVAR:催眠トレーナー_前回対象者ID = GET_ID(対象)
+	ELSE
+		DVAR:催眠トレーナー_前回対象者ID = 0
+	ENDIF
+	DVAR:催眠トレーナー_深度 = 1
+	DVAR:催眠トレーナー_レイプ回数 = 0
+ENDIF
+
+PRINTFORMW 那么、要进行些什么改变呢？
+CALL SINGLE_DRAWLINE
+;種類を決める
+LOCAL:3 = 0
+FOR LOCAL:0, 3, 300
+	TN = %TALENTNAME:(LOCAL:0)%
+	IF TN != ""
+		;非表示素質のスキップ
+		IF GROUPMATCH(TN, "胸囲尺寸", "陰茎尺寸")
+			CONTINUE
+		ELSEIF LOCAL:0 >= 150 && LOCAL:0 <= 179 && !GROUPMATCH(TN, "合意", "母性")
+			CONTINUE
+		ELSEIF LOCAL:0 >= 295 && LOCAL:0 <= 299
+			CONTINUE
+		ENDIF
+		LOCAL:3 ++
+	ENDIF
+NEXT
+LOCAL:3 = 0
+LOCAL:5 = 0
+FOR LOCAL:0, 3, 300
+	TN = %TALENTNAME:(LOCAL:0)%
+	IF TN != ""
+		;非表示素質のスキップ
+		IF GROUPMATCH(TN, "無接吻経験", "後庭処女", "胸囲尺寸", "陰茎尺寸")
+			CONTINUE
+		ELSEIF LOCAL:0 > 85
+			CONTINUE
+		ENDIF
+		;改行判定
+		IF LOCAL:5 % 4 == 0
+			IF LOCAL:5 >= 1
+				PRINTL 
+			ENDIF
+			PRINT   
+		ENDIF
+		LOCAL:5 ++
+		IF TALENT:対象:(LOCAL:0)
+			SETCOLOR カラー_選択中
+		ENDIF
+		PRINTBUTTON @"{LOCAL:0, 3}\{%TN, 14%\}", LOCAL:0
+		RESETCOLOR
+		PRINT    
+		LOCAL:3 ++
+	ENDIF
+NEXT
+PRINTFORML [0] 取消
+CALL SINGLE_DRAWLINE
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 0
+	PRINTFORMW 还是算了
+	RETURN
+ELSEIF  RESULT < 10 || RESULT > 85
+	GOTO INPUT_LOOP
+ELSE
+	対象素質 = RESULT
+	TN = %TALENTNAME:対象素質%
+	PRINTFORMW 选择了[%TN%]
+ENDIF
+
+PRINTFORMW 接着，男子马上将%ANAME(対象)%带进了一间不会被打扰的房间里。
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+
+IF GETBIT(TALENT:対象:日常系, 素質_デイリー_催眠中毒)
+	PRINTFORML 房间里，沉浸在催眠状态中的%ANAME(対象)%，被男子剥光衣服，毫不留情地侵犯着。
+	PRINTFORML 男子的肉棒深深地插入了%ANAME(対象)%津液肆流的小穴里。
+	PRINTFORML 每当肉棒的前端刮动阴道的肉壁时，%ANAME(対象)%就会发出理性崩坏的呻吟，嘴角淌出口水，眼睛里溢满了淫欲。
+	PRINTFORML %ANAME(対象)%已经被彻底调教成了对方的玩具，乳头和阴蒂在男子的蹂躏下淫荡又热情地勃起。
+	PRINTFORMW 当一股滚烫的精液注入%ANAME(対象)%的子宫时，%ANAME(対象)%发出了野兽般的娇声，绝顶了。
+	DVAR:催眠トレーナー_深度 ++
+	EXP:対象:被催眠経験 += 3
+ELSEIF ABL:対象:催眠 > 3
+	PRINTFORML 同样是略有小成的催眠师，%ANAME(対象)%明白对方技术的原理
+	PRINTFORMW 当然也知道这种技术还有什么“特殊”用途
+	PRINTFORML 不过，学识渊博的%ANAME(対象)%自有办法在保持疗效的同时不被催眠师完全控制
+	PRINTFORMW 甚至还可以引导这股力量，增加催眠疗法的成功率
+	DVAR:催眠トレーナー_深度 = 0
+ELSEIF EXP:対象:被催眠経験 > RAND:20 + 10 * DVAR:催眠トレーナー_深度
+	PRINTFORMW 经常被催眠的%ANAME(対象)%虽然不对催眠师的水平抱太大希望，但神志还是恍惚了
+ELSEIF DVAR:催眠トレーナー_深度 >= 3 && IS_FEMALE(対象)
+	SELECTCASE DVAR:催眠トレーナー_レイプ回数
+		CASE 0
+			PRINTFORML 「咦！这母狗的雌穴似乎是个名器呢！出乎意料啊！」
+			PRINTFORML 男子趴在%ANAME(対象)%赤裸的身体上，激烈地摇动腰部。
+			PRINTFORML “滋噗滋噗”…下流的声音充满了整个房间，男子的肉棒在%ANAME(対象)%湿成泥泞的肉穴里反复抽插。
+			PRINTFORMW 处在催眠状态的%ANAME(対象)%神色恍惚地抱着男子，随着对方的动作发出诱人的喘息声。
+			PRINTFORML 「唔！母狗，让你的雌穴紧一点！唔！！再紧些！！！」
+			PRINTFORML 被下达命令的%ANAME(対象)%没有思考，身体就自顾自地执行了，阴道紧紧缠绕着男子的肉棒。
+			PRINTFORML 「唔！唔哦！唔嗯嗯！现在，嗯、这是主人给你的奖励！子宫口打开！唔！怀孕吧！！！」
+			PRINTFORMW 男子突然猛地用力向前挺起腰部，一瞬间，大量的精液在%ANAME(対象)%的子宫内全部射了出来。
+			PRINTFORML 完全被调教好的%ANAME(対象)%的身体每一处，都因为主人精液的注入产生了无上的快感，意识瞬间被吹飞，近乎狂乱地高潮了。
+			PRINTFORML %ANAME(対象)%因为绝顶而全身痉挛，但却仍紧紧拥抱着男子不放。胎内被注入种子的感觉令%ANAME(対象)%两眼都变成了❤形。
+			PRINTFORML 「呼呼，没办法了……是还想要吗，你这淫荡的母狗？！嘿嘿、还挺可爱的，满足你！」
+			PRINTFORMW 已经将被侵犯的快感刻入潜意识的%ANAME(対象)%，自己主动向男子恳求着肉棒的蹂躏，一连又做了好几次。
+			DVAR:催眠トレーナー_レイプ回数 ++
+			EXP:対象:被催眠経験 += 3
+		CASE 1
+			PRINTFORML …%ANAME(対象)%再一次被男子肆意侵犯了。
+			PRINTFORML 「怎么样！爽不爽！说话啊，你这头母猪！爽不爽？！」
+			PRINTFORML 男子站在%ANAME(対象)%背后，一边捉着%ANAME(対象)%的头发一边用肉棒反复抽插着淫液汩汩的小穴。
+			PRINTFORMW 啪啪啪！啪啪啪！每一次肉体和肉体之间的撞击都让%ANAME(対象)%喘不过气来，只能在肉棒稍微后退时发出一声声娇吟。
+			PRINTFORML 粗暴的蹂躏加上催眠调教让%ANAME(対象)%逐渐变得狂乱起来，表情也渐渐崩坏，吐着舌头，眼瞳一阵恍惚。
+			PRINTFORML 「唔哦！摆出了一副符合母猪的表情呢！！很爽吧！呼呼，那就说出来！说！我的大肉棒是不是干你干得死去活来？！」
+			PRINTFORML %ANAME(対象)%毫无抵触地执行了命令，一边嘴角流着口水，一边不知羞耻地称赞着主人大肉棒。
+			PRINTFORMW 随着%ANAME(対象)%自己从口中吐出的淫秽的话语，%ANAME(対象)%仿佛自己催眠了自己一般，理性迅速瓦解，变得更加沉溺在快感里。
+			PRINTFORML 「唔哦哦哦！雌穴突然缠得更紧了！可恶，我也差不多了！唔！唔嗯哦哦！！」
+			PRINTFORML 男子猛烈地摇摆起腰部，开始在肉穴里加速进出。
+			PRINTFORML 与此同时，%ANAME(対象)%也感受到了主人的状态，发出一声声娇吟，子宫也因为期待而感到疼痛。
+			PRINTFORML 终于，渴望无比的精液在%ANAME(対象)%肉穴最深处释放了出来，压倒性的快感冲垮了%ANAME(対象)%的精神，一边大声淫叫一边全身痉挛起来。
+			PRINTFORMW 这一天，直到男子满意为止，%ANAME(対象)%又被狠狠地侵犯了好几次，以致意识最深处都被快乐所浸染。
+			DVAR:催眠トレーナー_レイプ回数 ++
+			EXP:対象:被催眠経験 += 3
+		CASE 2
+			PRINTFORML 「怎么样！唔！这身打扮才更适合你这头母狗吧！」
+			PRINTFORML 宫殿外的树荫下，%ANAME(対象)%赤裸着全身，白皙的颈部上戴着一个狗项圈，四肢着地趴在地上。
+			PRINTFORML %ANAME(対象)%一边被男子从身后肆意侵犯着，一边露出沉溺于快感的阿嘿颜。
+			PRINTFORMW 至今为止顺风顺水，让男子也变得胆大妄为起来，直接将%ANAME(対象)%带到了外面进行奸淫。
+			PRINTFORML 似乎是对这个随时可能被别人看到的状况起了反应，%ANAME(対象)%明显兴奋起来，主动摇摆起臀部。
+			PRINTFORML 「婊子！居然在这种状况下变得更加淫荡起来！下流的母狗！要让主人用肉棒好好教育一番才行！！唔哦哦！」
+			PRINTFORML 坚硬勃起的乳头被男子用力揉捏着，%ANAME(対象)%满脸潮红地大声呻吟起来，阴道下意识地紧紧缠向了肉棒。
+			PRINTFORMW 受到%ANAME(対象)%那越发放浪的姿态的刺激，男子更加激烈地挺动腰部，肉棒侵入了%ANAME(対象)%肉穴的更深处。
+			PRINTFORML %ANAME(対象)%已经彻底忘记自己是一个人了，在肉棒的蹂躏下，变得如同一只真正的母狗般疯狂地渴求着肉欲。
+			PRINTFORMW 淫穴里大量汁液喷溢而出，主动配合将肉棒吞入身体的更深入，狂乱地榨取精液。
+			PRINTFORML 「唔哦哦哦！你这发情的雌犬！唔嗯嗯！接受主人的精液吧！张开你的子宫！」
+			PRINTFORML 接收到主人的命令以后，%ANAME(対象)%除了身体顺从地松开子宫口，更是有意识抬起臀部，期待着精液直接射入自己的最深处。
+			PRINTFORML 最终，当男子特浓的精液强力射入%ANAME(対象)%子宫时，%ANAME(対象)%一边发出母兽般嘶哑的娇吟，一边激烈地高潮了。
+			PRINTFORMW %ANAME(対象)%接下来一整天都被作为男子的宠物，反复侵犯调教。
+			DVAR:催眠トレーナー_レイプ回数 ++
+			EXP:対象:被催眠経験 += 3
+		CASE 3
+			PRINTFORML 「喏，像往常一样打开双腿恳求我的肉棒吧！」
+			PRINTFORML 进入房间后，男子忽然对%ANAME(対象)%这么说道。
+			PRINTFORML 这个男的在说些什么呢？太过突兀的话，让%ANAME(対象)%一时愣住了。
+			PRINTFORMW 但在下一个瞬间，%ANAME(対象)%人格切换成了催眠状态，原本迷惑的脸上顿时露出了淫荡的表情。
+			PRINTFORML 眼瞳已经变成了❤形，%ANAME(対象)%如发情的雌犬般吐着舌头，向自己的主人撩起了裙子。
+			PRINTFORMW 那下面什么都没穿，暴露在空气中的淫穴期待地颤抖着，爱液汩汩而出。
+			PRINTFORML %ANAME(対象)%稍显急促地喘息着，向对方张开大腿，饥渴地恳求着。
+			PRINTFORMW 男子见状咽了咽口水，将%ANAME(対象)%押倒在地，肉棒连根没入湿润的肉穴里。
+			PRINTFORML 经过反复奸淫，%ANAME(対象)%的身体早已记住了主人肉棒的形状，一被插入就欢喜得颤抖起来。
+			PRINTFORML “滋噗滋噗”…每一下插入都会让爱液喷洒得四处都是，%ANAME(対象)%放浪的呻吟更是回响在整间屋子里。
+			PRINTFORMW %ANAME(対象)%紧紧抱着男子的身体，阴道强有力地收缩着，将肉棒引导至更深处。
+			PRINTFORML 「婊子！还是想以前一样淫乱！唔！就那么渴求我的精液吗！那就先奖励你一发吧！唔哦哦！」
+			PRINTFORML 大量的精液在%ANAME(対象)%的小穴内骤然喷发！品味着主人精液在自己体内激荡的感觉，无上的喜悦让%ANAME(対象)%大脑一片空白。
+			PRINTFORMW 一阵高潮过后，%ANAME(対象)%下意识地继续恳求着肉棒，彻底沉溺于被男子反复侵犯的快感。
+			DVAR:催眠トレーナー_レイプ回数 ++
+			DVAR:催眠トレーナー_深度 ++
+			EXP:対象:被催眠経験 += 5
+		CASEELSE
+			PRINTFORML 房间里，处于催眠状态的%ANAME(対象)%再一次被男子侵犯着。
+			PRINTFORML %ANAME(対象)%全身赤裸地面对着男子，打开了大腿，自己用手扳开了两片湿漉漉的阴唇…
+			PRINTFORML 男子挺动肉棒，毫不留情地来回贯穿了汁液肆流的小穴。
+			PRINTFORMW %ANAME(対象)%一边露出淫乱的表情,一边跟随着男子每一下的抽插发出一声声狂喜般的娇吟。
+			PRINTFORML 「好了，也差不多了。」
+			PRINTFORML 男子看着在沉溺在肉欲中的%ANAME(対象)%，脸上忽然出现了一个低劣的笑容。
+			PRINTFORML 他抬起手，在空中打了个响指。
+			PRINTFORMW 接着，%ANAME(対象)%整个人都怔住了……
+			PRINTFORMW …
+			PRINTFORMW ……
+			PRINTFORMW …………
+			PRINTFORML %ANAME(対象)%的催眠状态被解除了，以往一次次被奸淫的记忆也瞬间全部回想起来！
+			PRINTFORMW 即使过了十几秒，%ANAME(対象)%也无法缓过神来，眼睛像僵死般圆睁着，只有瞳孔在其中激烈地颤抖；嘴巴如同木偶，只有下巴在僵硬地上下颤动……
+			PRINTFORML “不会的”“不可能的”“假的”“都是骗人的”
+			PRINTFORML %ANAME(対象)%从喉咙中挤出几声微弱的嘶吼，同时激烈挣扎起来。
+			PRINTFORMW 但男子牢牢抱住了%ANAME(対象)%，并耸动腰部，继续用肉棒在仍不停溢出淫液的肉穴里、大力抽插。
+			PRINTFORML 每一下抽插都让%ANAME(対象)%如过电一般全身酥麻，让%ANAME(対象)%完全无法积蓄起挣扎的力量。
+			PRINTFORML 强烈的快感反复叩击着%ANAME(対象)%脆弱的神经。
+			PRINTFORML 很快，%ANAME(対象)%神色就变得恍惚起来，挣扎逐渐娇软无力……
+			PRINTFORML 最终，随着肉棒强力持续的蹂躏，%ANAME(対象)%不知不觉放弃了挣扎，身体蜷缩在男子怀里，不住地吐出淫媚的低喘。
+			PRINTFORMW 男子见状，越发卖力地用肉棒撞击%ANAME(対象)%的阴道深处，无法抵抗快感的%ANAME(対象)%喘息声越发高昂，最终变成了回荡在整个房间娇吟。
+			PRINTFORML %ANAME(対象)%在肉欲的冲击下，丧失了思考能力，只有被调教好的身体不受控制地疯狂发情。
+			PRINTFORML 于是，男子一边反复侵犯%ANAME(対象)%的肉体，一边发出指令。
+			PRINTFORMW 「噢噢噢！就这样！！乖乖地成为被我随意操控的催眠母狗吧！！！」
+			PRINTFORML 明明只是普通的指令，%ANAME(対象)%也没有处在催眠状态，却起到了相同的效果。
+			PRINTFORML %ANAME(対象)%仿佛是接收到了催眠指令那样，一下子狂乱起来，理性彻底地崩坏，眼瞳变成❤形，并发出一声声母兽般的呻吟。
+			PRINTFORMW 「唔哦哦！来了！！你这母猪，好好接受主人的精液吧！」
+			PRINTFORML 男子往已经解除催眠的%ANAME(対象)%的阴道内毫无顾忌地射出了大量精液。
+			PRINTFORML 这时，本应挣扎的%ANAME(対象)%却主动抱紧了男子，小穴强力收缩，在精液射入的同时潮喷着绝顶了。
+			PRINTFORMW 一连数分钟，%ANAME(対象)%都沉浸在高潮的余韵里，脑海中一片空白。
+			PRINTFORML 「起来！给我转过身像一个合格母狗一样趴好！」
+			PRINTFORML 男子忽然拔出了肉棒，对着%ANAME(対象)%说道。
+			PRINTFORML %ANAME(対象)%下意识地执行了男子的命令，如同处在催眠状态时一样。
+			PRINTFORMW %ANAME(対象)%四肢着地趴好后，更是主动地向男子挺起了臀部，精液从肉穴里滴落到地上。
+			PRINTFORML 这之后，男子又将处于清醒状态的%ANAME(対象)%反复侵犯了好几次，直到%ANAME(対象)%完全瘫软为止。
+			PRINTFORML 调教结束后，男子听到，意识微弱的%ANAME(対象)%在低声喃喃自语地叫着“主人”。
+			PRINTFORML 男子知道，%ANAME(対象)%已经彻底变成他的雌奴隶了。
+			PRINTFORMW 但为了保险起见，还是删除了%ANAME(対象)%的记忆。
+			DVAR:催眠トレーナー_深度 ++
+			DVAR:催眠トレーナー_レイプ回数 ++
+			EXP:対象:被催眠経験 += 5
+	ENDSELECT
+	CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精, CFLAG減少",  GET_SPERM_ID("催眠術師"), @"催眠術師の\@RAND:2 ? 肉棒 # 唇\@", @"催眠術師", "", "催眠中の調教")
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+
+IF RAND:10 + DVAR:催眠トレーナー_深度 + ABL:対象:催眠 >= 6
+	PRINTFORML 成功了！
+	PRINTFORMW 男子笑着接受了报酬，然后就离开了。
+	TALENT:対象:対象素質 = !TALENT:対象:対象素質
+	CALL COLOR_PRINTW(@"%ANAME(対象)%\@ TALENT:対象:対象素質 ? 得到了 # 失去了 \@[%TN%]", カラー_注意)
+	EXP:対象:被催眠経験 += 1
+ELSE
+	PRINTFORML 失败了…
+	PRINTFORMW 这样的事也是有的……男子嘴里这么说着，带着钱快步离开了。
+	EXP:対象:被催眠経験 += 1
+ENDIF
+MONEY -= 20000
+CALL COLOR_PRINTW("支付了<20000>金", カラー_注意)
+DVAR:催眠トレーナー_発生フラグ = 1
+
+IF DVAR:催眠トレーナー_深度 >= 5 && DVAR:催眠トレーナー_レイプ回数 >= 5 && !GETBIT(TALENT:対象:日常系, 素質_デイリー_催眠中毒) && IS_FEMALE(対象)
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW ・
+	PRINTFORMW 频繁的催眠，让%ANAME(対象)%觉醒了被支配的快感，从心底里屈服于催眠者了………
+	SETBIT TALENT:対象:日常系, 素質_デイリー_催眠中毒
+	CALL COLOR_PRINTW(@"%ANAME(対象)%已经催眠中毒，无法自拔了", カラー_ピンク)
+	CALL LOSE_RELATION_TALENT(対象)
+ENDIF
+
+RETURN 1
+
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_HYPNOTISM_TRAINER(対象)
+#DIM 対象
+RETURN CFLAG:対象:行動不能状態 != 行動不能_子供 && CFLAG:対象:所属 == CFLAG:MASTER:所属 && !IS_ANIMAL(対象) && CFLAG:対象:捕虜先 == 0
+
+@SELECT_CHARA_LIST_COLOR_LOGIC_HYPNOTISM_TRAINER(対象)
+#DIM 対象
+SIF 対象 == ID_TO_CHARA(DVAR:催眠トレーナー_前回対象者ID)
+	RETURN カラー_ピンク
+RETURN GETDEFCOLOR()

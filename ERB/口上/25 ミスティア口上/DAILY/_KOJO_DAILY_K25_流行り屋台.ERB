@@ -1,0 +1,100 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K25_UNAGI_STALL_RATE(対象)
+#DIM 対象
+RETURN 50
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K25_UNAGI_STALL_DECISION(対象)
+#DIM 対象
+;カルテットと天敵はだめ
+SIF GROUPMATCH(MASTER, NAME_TO_CHARA("大妖精"), NAME_TO_CHARA("チルノ"), NAME_TO_CHARA("リグル"), NAME_TO_CHARA("幽幽子"))
+	RETURN 0
+
+SIF GET_COUNTRY_BOSS(CFLAG:対象:所属) == 対象
+	RETURN 0
+
+SIF KDVAR:対象:ミスティア_屋台
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 0, 0, 0)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K25_UNAGI_STALL_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K25_UNAGI_STALL(対象)
+#DIM 対象
+PRINTFORML ……在領地巡邏時、聞到了附近有美食的香氣
+PRINTFORML 看來附近有貨攤正在營業
+PRINTFORML 印像中應該沒有発出過任何營業許可才對……
+PRINTL
+CALL ASK_YN("去看一下", "算了吧")
+
+IF RESULT == 1
+	PRINTFORML 這種事沒有必要去找人麻煩
+	PRINTFORMW 不去理會了
+	KDVAR:対象:ミスティア_屋台 = 1
+	RETURN 1
+ENDIF
+
+PRINTFORML 不能忽視未經許可的營業
+PRINTFORMW 決定去看看了……
+PRINTFORMW 「啊、是客人？　歡迎光臨！」
+PRINTFORML 穿過布簾、受到一名夜雀少女迎接
+PRINTFORML 少女自稱自己叫%NAME_FORMAL(対象)%
+PRINTFORML 看來正在烤八目鰻
+PRINTFORMW %ANAME(MASTER)%亮出自己的身份、並告知在這裏營業必須要有營業許可
+PRINTFORML 「誒！　這樣嗎？　抱歉、我不知道有這種事……」
+PRINTFORML %ANAME(対象)%微微低頭、露出歉意的表情
+PRINTFORML 這個樣子、看上去應該真的不知道
+PRINTFORMW 看來應該是沒有惡意的、該怎麼辦……
+PRINTFORML 
+CALL ASK_MULTI("要一串鰻魚", "回收營業費", "拘捕")
+
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORMW 「……謝謝你、但真的可以嗎？」
+		PRINTFORML 雖然未經許可營業是有問題、但如果不是刻意的話就沒辦法了
+		PRINTFORML 跟%ANAME(対象)%說要一串鰻魚後，%ANAME(対象)%開始面露笑容、烹調好鰻魚並遞過來
+		PRINTFORMW 「謝謝你！　請慢用，小心別燙到啊！」
+		PRINTFORMW 味道相當不錯……
+		CFLAG:対象:好感度 += 300
+	CASE 1
+		PRINTFORMW 「也對呢……嗯ー、那就沒有辦法了」
+		PRINTFORMW 儘管不是故意但規則就是規則。所以必須要回收營業費
+		PRINTFORMW 如此轉告後、%ANAME(対象)%乖乖地交出錢了……
+		CALL ICPRINT("得到了<3000>金", "W", カラー_注意)
+		MONEY += 3000
+	CASE 2
+		PRINTFORMW 「誒？　等、等等！」
+		PRINTFORMW 是否有惡意也沒有關係。違法就是違法
+		PRINTFORMW %ANAME(MASTER)%拘捕了%ANAME(対象)%、帶到牢獄之中……
+		CALL CAPTURE(対象, CFLAG:MASTER:所属)
+		CFLAG:対象:好感度 -= 500
+		CFLAG:対象:従属度 -= 500
+ENDSELECT
+
+
+CFLAG:対象:面識 = 1
+KDVAR:対象:ミスティア_屋台 = 1
+
+
+RETURN 1
+

@@ -1,0 +1,116 @@
+;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_30_PERSONAL_1_EXIST
+RETURN 1
+
+@SKILL_30_PERSONAL_1_NAME
+RESULTS = 永夜归返　-世间开明-
+
+;レベルは1-5まで
+@SKILL_30_PERSONAL_1_LEVEL
+RETURN 4
+
+;対象選択
+@SKILL_30_PERSONAL_1_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+;部隊対象
+RETURN 1
+
+;発動判定
+@SKILL_30_PERSONAL_1_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1
+
+;発動テキストをオーバライドしたいときに。
+;「誰それのスキル発動！　○○した！」の「○○した！」の部分を実装したい場合は、
+;これじゃなくてINVOKEで書けばいいです。
+;@SKILL_30_PERSONAL_1_INVOKE_TEXT(発動者, スキル, ジャンル)
+;#DIM 発動者
+;#DIM スキル
+;#DIMS ジャンル
+
+;効果をここに記述
+@SKILL_30_PERSONAL_1_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 増員量
+対象側 = !発動側
+;増員量 = 発動部隊 == -1 ? CITY_SOLDIER:発動勢力 # UNIT_SOLDIER:発動勢力:発動部隊
+PRINTFORML 「怎么回事！ 原来，停止夜晚的人……， 就是你们啊。」
+PRINTFORML 「你们所做出的这种半吊子的永远之夜……」
+PRINTFORML 「就让我用操纵永远的力量来打破给你们看。」
+SETCOLOR カラー_警告
+PRINTFORML 「生，生，生」
+PRINTFORML 「生的开始，即是黑暗」
+PRINTFORML 「死，死，死」
+PRINTFORML 「死的终结，即是幽冥」
+PRINTFORML 「永无终结的夜晚」
+PRINTFORML 「循环往复的轮回」
+PRINTFORML 「多少次」
+PRINTFORML 「多少次」
+PRINTFORML 「无论到何时」
+PRINTFORML 「无论到何处」
+PRINTFORML 「直到永远」
+RESETCOLOR
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
+	IF RAND:70 < 50
+		PRINTFORML  %ANAME(BATTLE_COMMANDER:対象側:LOCAL)%被阵法压制了…！
+		PRINTFORML  %ANAME(BATTLE_COMMANDER:対象側:LOCAL)%无法释放技能了！
+		BATTLE_SKILL_SEALED:対象側:COMBAT_SKILL_TARGET = 1
+	ELSE
+		PRINTFORML  %ANAME(BATTLE_COMMANDER:対象側:LOCAL)%抵抗住压制了！
+	ENDIF
+NEXT
+CALL INCREASE_SOLDIER(発動勢力, 発動部隊, RAND(10000, 20000), 1)
+LOCAL:1 = RAND(5, 15)
+FOR LOCAL, 0, LOCAL:1
+	CALL DECREASE_SOLDIER(対象勢力, 対象部隊, 3000, 1)
+NEXT
+
+
+@SKILL_30_PERSONAL_1_EXPLANATION
+RESULTS = 使自部隊的兵数増加。敌方兵力减少，大概率封印敌全体技能。
+
+@SKILL_30_PERSONAL_1_CANT_TELL
+
+@SKILL_30_PERSONAL_1_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 150

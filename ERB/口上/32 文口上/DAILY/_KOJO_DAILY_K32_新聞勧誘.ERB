@@ -1,0 +1,145 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K32_INVITATION_FROM_AYA_RATE(対象)
+#DIM 対象
+RETURN 40
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K32_INVITATION_FROM_AYA_DECISION(対象)
+#DIM 対象
+
+SIF KDVAR:対象:文_新聞勧誘
+	RETURN 0
+
+;主人公はペニスがあること
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+
+;主人公が君主でない
+SIF GET_COUNTRY_BOSS(CFLAG:MASTER:所属) == MASTER
+	RETURN 0
+
+;三能力の合計が200以上
+SIF ABL:MASTER:武闘 + ABL:MASTER:知略 + ABL:MASTER:政治 + ABL:MASTER:防衛 < 200
+	RETURN 0
+	
+
+SIF !IS_COUNTRY(CFLAG:対象:所属)
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 0, 0, -1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K32_INVITATION_FROM_AYA_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K32_INVITATION_FROM_AYA(対象)
+#DIM 対象
+#DIM ボス
+
+
+ボス = GET_COUNTRY_BOSS(CFLAG:MASTER:所属)
+
+
+
+PRINTFORML %ANAME(MASTER)%正在工作的時候、部下告知有客人来訪……
+PRINTFORMW 「你好！　我是清廉正直的射命丸！」
+PRINTFORMW 「要来一份報紙嗎？　現在購買的話能享受折扣優惠活動！」
+PRINTFORML 得到許可後、%ANAME(対象)%進入了房間
+PRINTFORMW %ANAME(MASTER)%命令部下退下後、讓%ANAME(対象)%坐在来客用的椅子
+PRINTFORMW 「讓部下退下嗎？　真是粗心大意呢、如果我抱有加害之心的話你該怎麼辦啊？」
+PRINTFORML 沒有那麼光明正大的暗殺者吧
+PRINTFORMW 即使有、自己也有足夠力量将暗殺者撃退……
+PRINTFORMW 這樣回答後、%ANAME(対象)%抿嘴一笑
+PRINTFORMW 「哼嗯、真是不錯的想法呢、看来我沒有白来一趟了」
+PRINTFORMW 感覚少女周囲気氛改変了。大概是錯覚吧。沒有特別在意、催促她継續話題
+PRINTFORMW 「%ANAME(MASTER)%。你是個優秀的武将対吧？」
+PRINTFORML 是否優秀姑且不論、但可以肯定自己不会比其他人差
+PRINTFORMW 「在這種時代啊、我会不惜一切方法去獲得人才」
+PRINTFORMW 「当然、我不会只出一張嘴。対呢、我会付你安家費、而且、女人如何？　正所謂英雄愛美人対吧」
+PRINTFORML %ANAME(対象)%周囲出現了与爽朗的新聞記者的印像完全相反、妖艶的気氛
+IF IS_MALE(MASTER)
+	PRINTFORMW 她口中的女人是指她自己吧
+ELSE
+	PRINTFORMW 她口中的女人是指她自己吧
+	PRINTFORMW 她從哪裡打聽到的、対于%ANAME(MASTER)%的性癖似乎也進行了調查
+ENDIF
+PRINTFORML ……話説回来、看来這次密談的目的、是想挖角拉攏自己吧
+PRINTFORML 沒什麼好奇怪的。在如此混乱的幻想郷。想存活下来必須要有優秀的人才
+PRINTFORMW 這辺也一樣、要在這乱世中倖存下来、向強大的勢力尋求庇護亦是個良策
+PRINTFORMW ……但是、如果接受的話、与現在的君主関係、会変得很棘手吧
+PRINTFORML 那麼、要怎麼辦……
+CALL SINGLE_DRAWLINE
+PRINTFORML %ANAME(対象)%的領地数:{GET_OWN_CITY(CFLAG:対象:所属)} %ANAME(ボス)%的領地数:{GET_OWN_CITY(CFLAG:MASTER:所属)}
+PRINTFORML 
+CALL ASK_YN("接受", "拒絶")
+IF RESULT == 1
+	PRINTFORMW 「……啊啦、是嗎？　真遺憾」
+	PRINTFORML 不可以背叛%ANAME(ボス)%……
+	PRINTFORMW 這樣回答後、%ANAME(対象)%意外冷静地放棄了
+	PRINTFORMW 「是嗎、這樣的話就沒有辦法了！　文文。新聞雖然是一份好報紙、但不会強迫不想要的人購買的」
+	PRINTFORMW 「那麼我就告辞了！　……祈禱我們下次再見的時候、不会是敵対関係吧？」
+	PRINTFORMW %ANAME(対象)%露出無懼的笑容、像風一樣離開了……
+	;フラグ
+	KDVAR:対象:文_新聞勧誘 = 1
+ELSE
+	PRINTFORMW 「……哼哼、我就知道你会這樣説」
+	PRINTFORMW 「從今以後、請多多指教了」
+	PRINTFORMW 握着%ANAME(対象)%伸出的手。%ANAME(対象)%給人感覚柔軟又温暖
+	LOCAL:0 = MIN((ABL:MASTER:武闘 + ABL:MASTER:知略 + ABL:MASTER:政治) * 200, 50000)
+	CALL COLOR_PRINTW(@"收到{LOCAL:0}金安家費", カラー_注意)
+	CALL COLOR_PRINTW(@"取得了%ANAME(対象)%的合意", カラー_ピンク)
+	CALL COLOR_PRINTW(@"与%ANAME(ボス)%的外交関係変得非常悪劣了", カラー_警告)
+	MONEY += LOCAL:0
+	TALENT:対象:合意 = 1
+	TALENT:対象:チョロイン = 1
+	CFLAG:対象:面識 = 1
+	CFLAG:対象:好感度 = MAX(CFLAG:対象:好感度, 800)
+	CFLAG:対象:従属度 = MAX(CFLAG:対象:従属度, 600)
+	CFLAG:対象:依存度 = MAX(CFLAG:対象:依存度, 200)
+	CALL CHANGE_RELATION_O_TO_O(ボス, 対象, -500, 500)
+	CALL CHANGE_RELATION_O_TO_O(ボス, MASTER, -500, 500)
+	CALL CHANGE_COUNTRY(MASTER, CFLAG:対象:所属, 1)
+	PRINTFORMW 「那麼、関於約定的『女人』……」
+	PRINTFORMW %ANAME(対象)%脱掉了身上的衣服
+	PRINTFORMW 「哼哼、讓你体験天狗的閨技吧……」
+	PRINTFORMW %ANAME(MASTER)%放鬆全身、将身体交給%ANAME(対象)%……
+	;天狗の閨技
+	ABL:対象:性知識 = MAX(ABL:対象:性知識, 4)
+	ABL:対象:欲望 = MAX(ABL:対象:欲望, 3)
+	ABL:対象:性技 = MAX(ABL:対象:性技, 3)
+	ABL:対象:奉仕 = MAX(ABL:対象:奉仕, 2)
+	ABL:対象:性交 = MAX(ABL:対象:性交, 2)
+	ABL:対象:精愛 = MAX(ABL:対象:精愛, 1)
+	TALENT:対象:接受快感 = 1
+	;全員の調教参加フラグをクリア
+	CVARSET CFLAG, 6, 0
+	CFLAG:対象:調教参加フラグ = 1
+	CFLAG:対象:調教中帰らない = 1
+	CFLAG:対象:強制友好化 = 1
+	BASE:対象:体力 = MAXBASE:対象:体力
+	BASE:対象:気力 = MAXBASE:対象:気力
+	;強制逆調教フラグをオン
+	FLAG:ターンエンド調教 = 1
+	;それ以降のデイリーイベント発生を潰す
+	DAILY_CANCEL = 1
+	;フラグ
+	KDVAR:対象:文_新聞勧誘 = 2
+ENDIF
+
+RETURN 1

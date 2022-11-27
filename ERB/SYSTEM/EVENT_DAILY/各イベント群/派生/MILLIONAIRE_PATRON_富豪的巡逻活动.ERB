@@ -1,0 +1,712 @@
+﻿
+;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_MILLIONAIRE_PATRON_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("MILLIONAIRE")
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_MILLIONAIRE_PATRON_DECISION()
+#DIM 対象
+
+対象 = ID_TO_CHARA(DVAR:富豪_お気に入りID)
+
+
+
+SIF 対象 == -1
+	RETURN 0
+
+;対象キャラと恋人じゃないとだめ
+SIF !IS_LOVER(対象)
+	RETURN 0
+
+;主人公が女でなく、対象が女でないとだめ
+SIF !IS_MALE(MASTER) || !IS_FEMALE(対象)
+	RETURN 0
+
+;所属が一緒で、対象が捕虜になっておらず、死亡していない
+SIF !(CFLAG:対象:所属 == CFLAG:MASTER:所属 && !CFLAG:対象:捕虜先 && CFLAG:対象:特殊状態 != 特殊状態_死亡)
+	RETURN 0
+
+SIF !(DVAR:富豪_パトロンフラグ >= 5)
+	RETURN 0
+
+SIF 富豪的类型 != 0 && 富豪的类型 != 2
+	RETURN 0
+;25％で発生
+RETURN RAND:100 < 25
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_MILLIONAIRE_PATRON()
+#DIM 対象
+
+対象 = ID_TO_CHARA(DVAR:富豪_お気に入りID)
+
+SELECTCASE DVAR:富豪_パトロンフラグ
+	;派生イベント１回目
+	CASE 5
+		PRINTFORMW 「嘿，我又来拜访了」
+		;TranslatedMark 「やあ、また来たよ」
+		PRINTFORMW 成为赞助人的富豪又来了
+		;TranslatedMark パトロンとなった例の富豪の男が尋ねてきた
+		PRINTFORMW 那种气质和第一次见面时完全不一样，总感觉变的更加友善了
+		;TranslatedMark その雰囲気は、初めて合った頃とはまるで違う、紳士然とした物だった
+		PRINTFORML 今天也要和%ANAME(対象)%做吗？　如此询问道
+		;TranslatedMark 今日も%ANAME(対象)%を抱きに来たのか？　と聞く
+		PRINTFORMW 「嘻嘻，抱歉啦，因为%ANAME(対象)%实在是太诱人了...」
+		;TranslatedMark 「いや、今日はたまたま近く通りがかったものでね。ちょっと顔を出しに来ただけだよ」
+		PRINTFORMW 富豪一般说着一般红着脸，脸上还露着羞涩的表情，甚至能从他的脸上看到歉意
+		PRINTFORMW 竟然意外的纯情...%ANAME(MASTER)%叹了一口气
+		PRINTFORML 避孕与否要遵从%ANAME(対象)%的意向哦？绝对不可以强迫她！　然后有些凝重的说道
+		PRINTFORML 似乎是想起了富豪之前没有遵守避孕约定的事情
+		PRINTFORMW 「什？！也...也就是说竟然可以中出%ANAME(対象)%吗？！」
+		PRINTFORML 那就要看%ANAME(対象)%的意思了...　%ANAME(MASTER)%有些发红的说道
+		PRINTFORMW 「那个...虽然只是猜想...但是，%ANAME(MASTER)%你不会有那种癖好吧？」
+		PRINTFORML ...什么意思？　%ANAME(MASTER)%有些疑问的问道
+		PRINTFORMW 「就是那个...绿帽癖？」
+		PRINTFORML 我只是尊重%ANAME(対象)%的意愿而已！在乱说就以后都不让你碰%ANAME(対象)%！　%ANAME(MASTER)%有些气急败坏
+		PRINTFORMW 「真的非常对不起！这次我一定会好好取得%ANAME(対象)%的同意的！」
+		PRINTFORMW 「那么...虽然不是很多，但还是请您收下吧。」
+		;TranslatedMark 「まあ、顔を出すだけというのもなんだ。少ないが、これを受け取ってくれたまえ」
+		CALL ICPRINT("金<100000>を手に入れた", "W", カラー_注意)
+		MONEY += 100000
+		PRINTFORML 真是的...%ANAME(対象)%在房间里，你自己和她说吧　%ANAME(MASTER)%微微扭头说道
+		PRINTFORMW 「那个……你要过来看看吗？」
+		PRINTFORML 气急败坏的%ANAME(MASTER)%把富豪推走，随后富豪进入了%ANAME(MASTER)%和%ANAME(対象)%的房间
+		PRINTFORML
+		PRINTFORML
+		CALL COLOR_PRINTL(@"富豪进入房间数分钟后从房间里传出%ANAME(対象)%‘好棒’、‘要去了’、那仿佛被快乐融化了一般的声音……", カラー_警告)
+		PRINTFORML 在门外的%ANAME(MASTER)%下半身不知不觉已经完全勃起了...并且在欲望的趋势下开始自慰...
+		CALL FUCK(対象, "欲望, 性技, Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, 口淫, Ｖ性交, 撮影", "接吻喪失, 処女喪失, 口内射精",GET_SPERM_ID("富豪"), @"富豪の\@RAND:2 ? 肉棒 # 唇\@", "富豪", "", "和姦")
+		CALL FUCK(対象, "欲望, 性技, Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, 口淫, Ｖ性交, 撮影", "接吻喪失, 処女喪失, 口内射精",GET_SPERM_ID("富豪"), @"富豪の\@RAND:2 ? 肉棒 # 唇\@", "富豪", "", "和姦")
+		CALL COLOR_PRINTW(@"%ANAME(対象)%的身体，似乎让富豪大大地满足了…………", カラー_注意)
+		CALL COLOR_PRINTW(@"与富豪交合，似乎让%ANAME(対象)%大大地满足了…………", カラー_注意)
+		DVAR:富豪_お気に入りID = GET_ID(対象)
+		PRINTFORML
+		PRINTFORML
+		PRINTFORML 两个小时之后，富豪独自一人从屋子里走了出来
+		PRINTFORMW 「满足了满足了...%ANAME(対象)%的身体真是太棒了...」
+		PRINTFORMW 「那个...我把刚刚和%ANAME(対象)%做爱时的视频拍下来了。」
+		PRINTFORMW 「如果有需要的话...就请您看看吧...」
+		PRINTFORMW 简简单单地寒暄一阵，交付了私下拍摄的录像之后就回去了
+		PRINTFORML
+		PRINTFORML
+		PRINTFORML 之後，當我進入房間，只看到滿身汗，愛液的%ANAME(対象)%口中喘着粗气的靠在床上……
+		PRINTFORMW 她的周圍遍布著大量已經使用完的安全套……
+		PRINTFORMW 看来富豪并没有取得%ANAME(対象)%的中出同意……
+		PRINTFORML ...那个...为什么没有同意呢...富豪的...请求?　%ANAME(MASTER)%脸色通红的说道
+		PRINTFORMW 「我的话...要看%ANAME(MASTER)%想要怎么样哦？」　%ANAME(対象)%如此说道
+		PRINTFORML 只要你愿意的话...就可以......　%ANAME(MASTER)%的脸一片通红
+		PRINTFORMW 「%ANAME(MASTER)%...喜欢我和其他人做吗？」
+		PRINTFORML 到也不是什么人都可以......　%ANAME(MASTER)%小声的说道
+		PRINTFORMW 「...我明白了...那么，以后我会自己考虑的...」
+		PRINTFORMW 「还有，今天录下的视频记得要看哦？」　%ANAME(対象)%的声音如同恶魔一般在%ANAME(MASTER)%的耳边回荡...
+		PRINTFORML
+ 		PRINTFORML
+		PRINTFORML 在此之后，%ANAME(MASTER)%在独自一人时候打开了之前富豪给予的录像带...
+		PRINTFORMW 看着自己爱慕的%ANAME(対象)%在富豪身上疯狂的扭动着腰部，发出淫乱的声音
+		PRINTFORML 被男人粗大的肉棒冲击着花心，口中不住地发出喜悦的呻吟的场景
+		PRINTFORML %ANAME(MASTER)%在自慰中射了出来...
+		DVAR:富豪_パトロンフラグ ++
+		EXP:対象:ＮＴＲ経験 += 1
+
+	;派生イベント２回目
+	CASE 6
+		PRINTFORMW 「呀，%ANAME(MASTER)%，我又来了！」
+		;TranslatedMark 「やあ、%ANAME(MASTER)%。今日明日と暇があるかね？」
+		PRINTFORML 成为赞助人的富豪又来了
+		;TranslatedMark パトロンとなった富豪の男がまた尋ねてきた
+		PRINTFORML 今天也要和%ANAME(対象)%做吗？　如此询问道
+		;TranslatedMark 確かに3日ほど予定は空いているが…
+		PRINTFORMW 「没错！今天我一定要争取到%ANAME(対象)%的内射许可！」
+		PRINTFORML 那你就好好努力吧　%ANAME(MASTER)%脸色微红，视线微微偏移的说道
+		;TranslatedMark 「ほう！　そいつは良い。実は領地の外れに、新しい風俗店が出来たようでな」
+		PRINTFORMW 「其实我有个好办法，或许可以成功哦？」
+		PRINTFORML 绝对不可以强迫和威胁%ANAME(対象)%哦！　%ANAME(MASTER)%认真的说道
+		PRINTFORMW 「算不上威胁啦，应该算是妥协在对，决定的人最后还是%ANAME(対象)%啦」
+		PRINTFORMW 「而且我要是成功了，也不能亏待兄弟你啊...要是成功了，到时候我就送一份大礼给你」
+		PRINTFORML 看着富豪好色又散发善意的笑容%ANAME(MASTER)%有些奇怪的点了点头...
+		PRINTFORMW 「那么就等着我的好消息吧！」
+		PRINTFORML 如此说着的富豪充满自信的走进了%ANAME(対象)%的房间...
+		CALL COLOR_PRINTL(@"富豪进入房间数分钟后从房间里传出%ANAME(対象)%‘好棒’、‘要去了’、那仿佛被快乐融化了一般的声音……", カラー_警告)
+		PRINTFORML 靠近门前窥听后，发现门并没有关紧...
+		PRINTFORML 在欲望的驱动下，%ANAME(MASTER)%把视线投向了房间内...
+		PRINTFORML
+		PRINTFORML
+		PRINTFORML 房间内...富豪的无套肉棒已经插進%ANAME(対象)%濕透的小穴中
+		PRINTFORMW 看來他得到了%ANAME(対象)%的同意了……
+		PRINTFORMW 「噢噢！太舒服了，这种吸附感简直是！　%ANAME(対象)%的小穴太厉害了！」
+		PRINTFORMW 被富豪的肉棒疯狂进攻的%ANAME(対象)%，用双腿夹住了富豪的肥腰
+ 		PRINTFORML 如果以这个姿势做下去，富豪绝对会射进%ANAME(対象)%的子宫里吧
+ 		PRINTFORML 而看着这一场景的%ANAME(MASTER)%，早已脱下裤子开始自慰
+		PRINTFORML 「齁噢噢！好腻害❤小穴要去了！要去了啦❤❤」%ANAME(対象)%的嘴里不断发出着甜蜜的呻吟，刺激着%ANAME(MASTER)%和富豪的精神
+		PRINTFORML 不一会儿，富豪便开始了最后的播种冲刺
+		PRINTFORMW 富豪在膣内射出種子，双腿紧紧环住富豪的%ANAME(対象)%發出最甜美的叫聲並弓起背地高潮了……
+		CALL FUCK(対象, "欲望, 性技, Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精", GET_SPERM_ID("富豪"), @"富豪の\@RAND:2 ? 肉棒 # 唇\@", "富豪", "", "和姦")
+		PRINTFORML 看着爱人被富豪播种，%ANAME(MASTER)%也开始了最后的冲刺
+		PRINTFORML 精子从%ANAME(MASTER)%的肉棒中拼命的射出，不断的撞在窥看的房门上，正在这意识飘散的时刻...房门被打开了
+		PRINTFORML 看着展开的门后露出溺爱表情，小穴不断流出富豪精子的%ANAME(対象)%和坏笑着的富豪，%ANAME(MASTER)%愣住了...
+		PRINTFORML 看到%ANAME(MASTER)%的身体一抖，富豪发出了恶作剧得逞般的笑声
+		PRINTFORMW 「希望这样让你坦率点，真是抱歉啊..哈哈，因为发现你在我每次抱%ANAME(対象)%的时候都特别兴奋...」
+		PRINTFORMW 「所以就想了这么个办法引你偷看，希望你坦率点啦」
+		PRINTFORMW 「而且为了满足你的欲望，%ANAME(対象)%竟然愿意被我内射，真是伟大的爱情啊」
+		PRINTFORMW 「话说回来，只是看着多无聊啊，而且竟然已经做过怎么多次了，要不我们来3P吧？」
+		PRINTFORMW 稍微挣扎了一下后，%ANAME(MASTER)%最终还是败倒在了欲望面前，于是，三个人开始了淫乱的交合
+		PRINTFORML
+		PRINTFORML
+		PRINTFORMW 足足过了6个小时，快乐的宴会终于结束了……
+		CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴")
+		CALL FUCK(対象, "欲望, 性技, Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, 口淫, Ｖ性交, 撮影", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("富豪"), @"富豪の\@RAND:2 ? 肉棒 # 唇\@", "富豪", "", "和姦")
+		CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+		PRINTFORML 在房间里，全身沾满强烈雄性气息白色浑浊液的%ANAME(対象)%，因为绝顶的余韵，全身都在陶醉的表情中痉挛着
+		PRINTFORMW 富豪仍然压在她的身上，腰部猛烈的抽插，似乎在做着最后的冲刺。
+		PRINTFORMW 而%ANAME(MASTER)%由于过于激烈的交合消耗了大量的体力，躺在一旁轻轻抚摸着%ANAME(対象)%的头并调整着呼吸
+		PRINTFORML 说实在都已经干了这么久看起来依旧精神饱满，仔细想想这个男人的精力真是可怕
+		PRINTFORMW 正在%ANAME(MASTER)%意识飞散的时候，突然听到%ANAME(対象)%发出了惊人的淫叫，
+		PRINTFORMW 放眼过去，身体不断抽搐的%ANAME(対象)%正用双腿紧紧夹住富豪的肥腰，迎接着男人浓厚的出轨精液
+		PRINTFORMW 而富豪则是露出了极度舒适的表情，胯下的巨物完全没入了%ANAME(対象)%通红发肿肉穴，
+		PRINTFORMW 而胯下巨大的精囊不断的收缩，在%ANAME(対象)%的子宫内射出了大量的出轨精液，将%ANAME(対象)%带向了最高峰
+		PRINTFORMW 当富豪将巨根拔出%ANAME(対象)%的肉穴后，大量的精子喷涌而出，在%ANAME(対象)%的身下慢慢的汇聚成了一摊精池
+		PRINTFORMW 似乎将射出的%ANAME(MASTER)%精液全部覆盖掉
+		PRINTFORMW 而那巨大的射精量，不免让人怀疑%ANAME(対象)%的卵子是否已经在富豪精子的进攻之下成功受孕
+		CALL FUCK(対象, "欲望, 性技, Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精",GET_SPERM_ID("富豪"), @"富豪の\@RAND:2 ? 肉棒 # 唇\@", "富豪", "", "和姦")
+		CALL FUCK(対象, "欲望, 性技, Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精",GET_SPERM_ID("富豪"), @"富豪の\@RAND:2 ? 肉棒 # 唇\@", "富豪", "", "和姦")
+		CALL FUCK(対象, "欲望, 性技, Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精",GET_SPERM_ID("富豪"), @"富豪の\@RAND:2 ? 肉棒 # 唇\@", "富豪", "", "和姦")
+		CALL FUCK(対象, "欲望, 性技, Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精",GET_SPERM_ID("富豪"), @"富豪の\@RAND:2 ? 肉棒 # 唇\@", "富豪", "", "和姦")
+		PRINTFORML
+		PRINTFORML
+		PRINTFORMW 宴会结束后，三人在一起寒暄一阵后便分别了...
+		PRINTFORMW 而富豪在临走前，留下这次的礼物
+		CALL ICPRINT("入手了金<300000>", "W", カラー_注意)
+		;TranslatedMark "金<300000>を手に入れた", "W", カラー_注意
+		MONEY += 300000
+		PRINTFORML %ANAME(MASTER)%感觉有些意犹未尽，稍稍发了会儿呆后，看向了旁边的%ANAME(対象)%
+		PRINTFORML %ANAME(対象)%对%ANAME(MASTER)%露出了溺爱的笑容，感觉到爱意的%ANAME(MASTER)%恍惚中向她发出了请求...
+		PRINTFORML 听闻%ANAME(MASTER)%的请求，%ANAME(対象)%红着脸拉起了刚刚穿上的连衣裙
+		PRINTFORML 映入眼帘的，是富豪射入%ANAME(対象)%腔内的精液顺着大腿流了下来的场景。
+		PRINTFORML 而此时，%ANAME(対象)%发觉到了%ANAME(MASTER)%已然勃起肉棒，带着笑意低声的抱怨道
+ 		PRINTFORMW 「竟然会因为看到爱人的穴内流出其他男人的精液而兴奋...变态❤」
+		PRINTFORMW ……随后，%ANAME(MASTER)%和%ANAME(対象)%牵着手一起回到了屋内
+		CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+		PRINTFORML
+		CFLAG:対象:好感度 += 1000
+		DVAR:富豪_パトロンフラグ ++
+		EXP:対象:ＮＴＲ経験 += 1
+
+	;派生イベント３回目以降３つのイベントを隨機に
+	CASE IS < 10
+				SELECTCASE RAND:4
+			CASE 0
+				PRINTFORML 「嘿，我又来拜访了」
+				PRINTFORMW 见面后，富豪马不停蹄的去见了%ANAME(対象)%
+				PRINTFORMW 似乎取得了内射的合意！
+				PRINTFORML 「%ANAME(MASTER)%也一起过来看吧❤」
+				PRINTFORMW 接受了富豪的提议...
+				PRINTFORML 「话说回来，%ANAME(対象)%真的很爱%ANAME(MASTER)%呢」
+				PRINTFORMW 男人一边夸赞着二人的感情，一边将肉棒插入了%ANAME(対象)%的雌穴
+				PRINTFORMW 粉色的蜜径在为男人口交时就已经做好插入的了准备，不断滴下的淫水在阴部连成了一条线
+				PRINTFORMW 在自己爱慕的%ANAME(MASTER)%的面前，%ANAME(対象)%无法克制地上下扭动着腰部，发出淫乱的声音
+				PRINTFORML 被男人粗大的肉棒冲击着花心，口中不住地发出喜悦的呻吟
+				PRINTFORMW 男人的肉棒仿佛要刺破子宫般，在蜜径的深处释放出自己的欲望，受到冲击的肉壁不断地紧缩、颤动
+				PRINTFORMW 两具淫秽的肉体交缠在一起，像是沉浸在欲望之中一般，腰部不断地撞击着，而二人的喘息则在持续地回荡。
+				PRINTFORMW 肉体的快乐像潮水般一波波涌来，而%ANAME(対象)%也用双腿夹紧了富豪的肥腰
+				PRINTFORMW 「快点...哦噢！射进来❤」
+				PRINTFORMW 听到这等淫秽话语的富豪重重地撞击着她的花心，龟头径直抵住了柔软的子宫口，将精子尽情地送入子宫...
+				PRINTFORMW 「齁噢噢❤好腻害❤去了❤去了啦❤卵子被出轨精子强奸了❤要怀上小宝宝了❤」
+				PRINTFORMW 抛弃了最后一丝矜持的%ANAME(対象)%，背部像弓一样紧紧地绷了起来了，不停地发出淫荡的叫声，攀上了极乐的巅峰，彻底陶醉在高潮之中…
+				CALL FUCK_RAPE_HININ(対象, @"富豪の\@ RAND:2 ? 肉棒 # 唇\@", "富豪")
+				PRINTFORML
+				PRINTFORMW 「哎呀哎呀，%ANAME(対象)%和无套做爱真的是太爽了呀」
+				PRINTFORMW 「今天真是射了个爽啊！大满足！」
+				PRINTFORMW 富豪似乎因为中出了%ANAME(対象)%而感到十分高兴，有些兴致冲冲的说道
+				PRINTFORMW 「那么，这是今日份的赞助。」
+				CALL ICPRINT("入手了金<250000>", "W", カラー_注意)
+				;TranslatedMark "金<250000>を手に入れた", "W", カラー_注意
+				MONEY += 250000
+				PRINTFORMW 「那么今天就告辞了。以后还会再来的」
+				PRINTFORMW 赞助商交了支援金回去了……
+			CASE 1
+				PRINTFORML 「嘿，我又来拜访了」
+				PRINTFORMW 见面后，富豪马不停蹄的去见了%ANAME(対象)%
+				PRINTFORMW 似乎没有取得内射的合意
+				PRINTFORML 「%ANAME(MASTER)%也一起过来看吧！」
+				PRINTFORMW 接受了富豪的提议...
+				PRINTFORMW %ANAME(対象)%向带好避孕套的富豪张开了双腿，肉穴已经湿透，
+				PRINTFORMW 于是富豪将肉棒一口气插进雌穴，巨大的快感让二人发出呻吟
+				PRINTFORMW 在富豪的攻势下%ANAME(対象)%很快被杀得丢盔卸甲，发出淫乱的声音
+				PRINTFORMW 「齁哦哦？！这个...要去了❤」
+				PRINTFORMW 听到此话的富豪开始了全力的冲刺，腰部如野狗般疯狂抽插
+				PRINTFORMW 「太..太激烈啦！要去了！要去惹咕咿咿咿咿❤❤❤」
+				PRINTFORML 数秒后，富豪猛地把巨根顶入%ANAME(対象)%的子宫口，以冲破避孕套的气势凶猛的射出了精液
+				PRINTFORMW 而%ANAME(対象)%也在此时发出淫叫，达到了最高峰
+				PRINTFORMW 富豪的精囊收缩十几次后，富豪把带着避孕套的巨根拔了出来
+				PRINTFORMW 肉棒拔出肉穴时，还发出了‘啵’的声音
+				PRINTFORMW 随后，富豪将肉棒上挂着的因为充满了精液而下垂的避孕套拔下，
+				PRINTFORMW 丢到一旁后又戴上了全新的避孕套，和开始了%ANAME(対象)%第二回合
+				PRINTFORML
+				PRINTFORMW 「哎呀哎呀，和%ANAME(対象)%做爱还是一如既往的舒畅呢」
+				PRINTFORMW 「不过要是能够不带避孕套就好了呢...哈哈」
+				PRINTFORMW 被一旁的%ANAME(対象)%用危险眼光盯着的富豪流下了冷汗，稍微尴尬的笑了两声
+				PRINTFORMW 「那么，这是今日份的赞助。」
+				CALL ICPRINT("金<150000>を手に入れた", "W", カラー_注意)
+				MONEY += 150000
+				PRINTFORMW 「那么今天就告辞了。以后还会再来的」
+				PRINTFORMW 赞助商交了支援金回去了……
+			CASE 2
+				PRINTFORML 「嘿，我又来拜访了」
+				PRINTFORMW 成为了赞助商的富豪又来了。
+				PRINTFORMW 「我们这次来4P怎么样？我把我的妻子带来了！」
+				PRINTFORML 嗯，怎么办呢……
+				;TranslatedMark ふむ、どうしようか……
+				CALL ASK_YN("我很乐意", "今天不行")
+				IF RESULT == 1
+					PRINTFORMW 今天和%ANAME(対象)%都很忙
+					;TranslatedMark 今日は%ANAME(対象)%共々忙しい
+					PRINTFORMW %ANAME(MASTER)%诚实地告诉他今天不方便
+					;TranslatedMark %ANAME(MASTER)%は正直に、今日は都合がつかないことを伝えた
+					PRINTFORML 「是吗？那太遗憾了……」
+					;TranslatedMark 「そうか。それは残念だ……」
+					PRINTFORMW 没办法，只能先许下承诺，让富豪先忍耐一段时间了。
+					PRINTFORMW 「那我就告辞了。这是这次捐款」
+					PRINTFORMW 赞助商交了支援金回去了……
+					CALL ICPRINT("入手了金<75000>", "W", カラー_注意)
+					;TranslatedMark "金<75000>を手に入れた", "W", カラー_注意
+					MONEY += 75000
+				ELSE
+					PRINTFORMW 「哦哦！那真是太好了！」
+					PRINTFORML 「那么你就过去伺候%ANAME(MASTER)%吧」
+					PRINTFORMW 他一打招呼，一个娇小的美女就迎向%ANAME(MASTER)%的面前
+					PRINTFORMW 娇小的肉体上悬挂着巨大的乳房，散发出色情的味道
+					PRINTFORMW 她揽着%ANAME(MASTER)%的手臂，一边按压丰满的乳房一边等待主人的信号
+					PRINTFORMW 而%ANAME(対象)%也去到富豪的面前，揽住他的肥腰
+					PRINTFORMW 「那么，今天大家一起享受吧」
+					PRINTFORMW 然后4个人走进了特别准备的房间……
+					PRINTFORML ・
+					PRINTFORML ・
+					PRINTFORMW ・・・
+					PRINTFORMW 在四人所待得小屋内，听到了男女激烈交融的声音……
+					PRINTFORML 曾经忍受着他的调教选择了%ANAME(MASTER)%的%ANAME(対象)%
+					PRINTFORMW 那刻在身体上的快乐印记至今仍无法忘记
+					PRINTFORMW 被所爱的%ANAME(MASTER)%看到了自己那令人惊叹的凌乱和痴态，羞耻心也越发高涨
+					PRINTFORMW 同时看着%ANAME(MASTER)%抱着表情看起来像是要被玩坏一样的不认识的女人，心里也有着相当的嫉妒
+					PRINTFORMW 它们混杂在一起，向%ANAME(対象)%传达前所未有的兴奋，使其身体更加敏感
+					PRINTFORML 另一边，看着%ANAME(対象)%过于淫荡妖艳的姿态，%ANAME(MASTER)%如同野兽般猛烈的对着富豪爱妻的子宫进行冲击
+					PRINTFORMW 而看到这些场景也开始富豪如种猪般猛烈对着%ANAME(対象)%进行播种性交
+					PRINTFORMW 在这之后又交换了几次，异样的感觉在激烈的交往仍在持续……
+					PRINTFORML
+					PRINTFORML
+					PRINTFORMW 足足过了6个小时，快乐的宴会终于结束了……
+					CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "富豪の女の唇", "", "富豪の女の膣", "和姦")
+					CALL FUCK(対象, "欲望, 性技, Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, 口淫, Ｖ性交, 撮影", "接吻喪失, 処女喪失, 口内射精", GET_SPERM_ID("富豪"), @"富豪の\@RAND:2 ? 肉棒 # 唇\@", "富豪", "", "和姦")
+					PRINTFORML 在房间里，全身沾满强烈雄性气息白色浑浊液的两个女人，不知是不是因为绝顶的余韵，全身都在陶醉的表情中痉挛着
+					PRINTFORMW %ANAME(MASTER)%由于过于激烈的交合消耗了大量的体力，一边轻轻抚摸着%ANAME(対象)%的头一边调整呼吸
+					PRINTFORMW 「哎呀哎呀，今天很开心哦」
+					PRINTFORML 都已经干成这样了看起来依旧精神饱满，仔细想想这个男人的精力真是可怕
+					PRINTFORMW 「对了，这是今日份的赞助。」
+					PRINTFORMW 「那么今天就告辞了。以后还会再来的」
+					PRINTFORMW 赞助商交了支援金回去了……
+					CALL ICPRINT("入手了金<250000>", "W", カラー_注意)
+					;TranslatedMark "金<250000>を手に入れた", "W", カラー_注意
+					MONEY += 250000
+					CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴")
+					CALL FUCK(対象, "欲望, 性技, Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 口内射精", GET_SPERM_ID("富豪"), @"富豪の\@RAND:2 ? 肉棒 # 唇\@", "富豪", "", "和姦")
+					CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+					CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "富豪の女の唇", "", "富豪の女の膣", "和姦")
+		EXP:対象:ＮＴＲ経験 += 1
+		EXP:対象:輪姦経験 += 1
+				ENDIF
+				PRINTFORML
+			CASE 3
+		PRINTFORML 今天%ANAME(MASTER)%睡醒的有些晚，起来之后，发现%ANAME(対象)%已经不在身旁
+		PRINTFORMW 出去寻找%ANAME(対象)%的时候，突然听到了淫秽的声音
+		PRINTFORMW 那么，该怎么办呢……
+		CALL ASK_YN("继续睡觉", "过去看看")
+		IF RESULT == 1
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORML 顺着声音前往了客厅
+						PRINTFORML 发现了正在和富豪交合的%ANAME(対象)%
+						PRINTFORML 「呼...呼...%ANAME(MASTER)%...你醒啦？」
+						PRINTFORMW 说话的是喘着粗气的%ANAME(対象)%，赤裸的身躯上散发着潮红
+						PRINTFORMW 赤裸的她和富豪面对面相拥，一起坐在垫着毛巾沙发上
+						PRINTFORMW 散发着性气的二人的性器紧密的贴合在一起，双唇紧贴，不断交换着唾液
+						PRINTFORMW 而处于二人身下的毛巾已经湿透，周围都是使用后的避孕套...
+						PRINTFORMW 似乎已经和富豪性爱很久了...
+						PRINTFORML 「啾溜❤噗哈..抱歉啊，因为不想打扰到你的休息，啾啾❤噗..就先私自和%ANAME(対象)%啾啾噜❤吸溜..做起来了」
+						PRINTFORMW 浑身大汗的富豪和%ANAME(対象)%接着吻，一边抽插着小穴一边断断续续的说道
+						PRINTFORMW 「啾溜~❤噗哈..那么请稍等一下，我马上就要射出来了」
+						PRINTFORMW 说完这句话后，富豪用肥舌吸住%ANAME(対象)%的舌头，						PRINTFORMW 然后把%ANAME(対象)%压在身下，开始了最后的冲刺
+						PRINTFORMW 「啾噜溜❤啵——齁噢哦哦？！太激烈啦！啾咕呜❤吸溜吸溜❤❤」
+						PRINTFORMW 而富豪完全不理会身下女人的哀求，用肥唇堵住女人的嘴，全力的猛插着腰...
+						PRINTFORML 数十秒后，富豪猛地把巨根顶入%ANAME(対象)%的子宫口，以冲破避孕套的气势凶猛的射出了精液
+						PRINTFORMW 而%ANAME(対象)%舌头和肉穴的双重进攻下，再次达到了最高峰
+						PRINTFORMW 富豪的精囊收缩十几次后，富豪把带着避孕套的巨根拔了出来
+						PRINTFORMW 肉棒拔出肉穴时，还发出了‘啵’的声音
+						PRINTFORMW 而嘴唇离开的时候，则拉出了数十条粘稠的唾液银丝...
+						PRINTFORMW 看向那肉棒上挂着的，因为巨量精液的重量而下垂的避孕套，
+						PRINTFORMW 想着要是避孕套内的精液直接射进%ANAME(対象)%的子宫里，
+						PRINTFORMW 一定会让%ANAME(対象)%成功受孕的事情，%ANAME(MASTER)%勃起了
+						CALL FUCK(対象, "欲望, 性技, Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 口内射精",GET_SPERM_ID("富豪"), @"富豪の\@RAND:2 ? 肉棒 # 唇\@", "富豪", "", "和姦")
+					CASE 1
+						PRINTFORML 顺着声音前往了厨房
+						PRINTFORML 发现了正在和富豪交合的%ANAME(対象)%
+						PRINTFORML 「呼...呼...%ANAME(MASTER)%...你醒啦？」
+						PRINTFORMW 说话的是喘着粗气的%ANAME(対象)%，正在制作料理的她脸色潮红
+						PRINTFORMW 而富豪从背后抓住%ANAME(対象)%的腰，如同种猪般猛烈的抽插着
+						PRINTFORMW 厨房的垃圾桶已经堆满了使用后的避孕套
+						PRINTFORMW 似乎已经和富豪性爱很久了...
+						PRINTFORML 「抱歉啊，因为不想打扰到你的休息，就先私自和%ANAME(対象)%做起来了」
+						PRINTFORMW 浑身大汗的富豪一边抽插着的小穴一边说道
+						PRINTFORMW 「午饭已经做好...咕呜❤...我马上盛出来❤」
+						PRINTFORMW 「这样吗？！那么请稍等一下，我马上就射出来」
+						PRINTFORMW 说完这句话后，富豪把%ANAME(対象)%压在身下，开始了最后的冲刺
+						PRINTFORMW 「等..等等！齁噢哦哦？！」
+						PRINTFORMW 承受着富豪如同种猪一般全力冲刺的%ANAME(対象)%发出了难以置信的淫叫，瞬间进入了高潮
+						PRINTFORMW 而富豪似乎完全没有听见女人哀嚎，抓住%ANAME(対象)%的腰全力的猛插着...
+						PRINTFORMW 「太..太激烈啦！要去了！要去惹咕咿咿咿咿❤❤❤」
+						PRINTFORML 数秒后，富豪猛地把巨根顶入%ANAME(対象)%的子宫口，以冲破避孕套的气势凶猛的射出了精液
+						PRINTFORMW 而%ANAME(対象)%也在此时发出淫叫，再次达到了最高峰
+						PRINTFORMW 富豪的精囊收缩十几次后，富豪把带着避孕套的巨根拔了出来
+						PRINTFORMW 肉棒拔出肉穴时，还发出了‘啵’的声音
+						PRINTFORMW 随后，富豪的肉棒上就这样挂着因为精液的重量而下垂的避孕套，
+						PRINTFORMW 把已经做好的料理端了出去，而%ANAME(MASTER)%则把瘫软的%ANAME(対象)%抱出厨房
+						PRINTFORML
+						PRINTFORML
+						PRINTFORMW 准备吃饭时，富豪让%ANAME(対象)%先等等后，走去了厨房
+						PRINTFORMW 富豪把之前使用过的避孕套拿出来了，然后在%ANAME(対象)%同意下
+						PRINTFORMW 把避孕套内的精液全部浇在了%ANAME(対象)%所要吃的料理上
+						PRINTFORMW 吃着可能让自己受孕出轨精液，%ANAME(対象)%发出色情的咀嚼声
+						PRINTFORMW 细细的品尝之后，夹紧双腿露出了高潮般的表情
+						CALL FUCK(対象, "欲望, 性技, Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 口内射精",GET_SPERM_ID("富豪"), @"富豪の\@RAND:2 ? 肉棒 # 唇\@", "富豪", "", "和姦")
+					CASE 2
+						PRINTFORML 顺着声音前往了厕所
+						PRINTFORML 发现了正在为富豪口交的%ANAME(対象)%
+						PRINTFORMW 先是面向门口的富豪发现了%ANAME(MASTER)%
+						PRINTFORMW 「齁噢哦❤%ANAME(MASTER)%，早上好，%ANAME(対象)%的技术真是绝赞啊」
+						PRINTFORMW 正在享受口交的富豪打了声招呼，同时也让%ANAME(対象)%得知了来人的身份
+						PRINTFORML 「吸溜❤啾溜❤%ANAME(MASTER)%...吸吮吸溜❤你醒啦？」
+						PRINTFORMW 说话的是口中没入巨根的%ANAME(対象)%，边说这话便不断的上下摆头
+						PRINTFORMW 厕所内的垃圾桶已经堆满了使用后的避孕套
+						PRINTFORMW 似乎已经和富豪性爱很久了...
+						PRINTFORMW 「吸溜❤是要..吸吮吸溜❤上厕所吧，稍等...吸溜❤...一下」
+						PRINTFORMW 察觉%ANAME(MASTER)%要上厕所的%ANAME(対象)%开始加快了速度
+						PRINTFORMW 「啾啾❤啾噗❤吸溜吸溜啾溜啾呜❤」
+						PRINTFORMW %ANAME(対象)%脸颊凹陷的使出了真空口交，吸出了富豪的精液牛奶
+						PRINTFORMW 细细咀嚼并吐下后，准备起身时，突然被富豪抓住，翻身压在了坐厕上
+						PRINTFORML 「等？！你干什么？」
+						PRINTFORML 「抱歉抱歉，请让我在射一发吧！」
+						PRINTFORMW 这样说着的富豪把目光看向了%ANAME(MASTER)%
+						PRINTFORMW %ANAME(MASTER)%扶了扶脑袋点了点头，表示默许
+						PRINTFORMW 看到%ANAME(MASTER)%表态的%ANAME(対象)%露出了痴态的笑容
+						PRINTFORMW 随即拿起避孕套，为富豪戴上，张开双腿意识富豪快点射出
+						PRINTFORMW 于是%ANAME(対象)%直接被富豪压在坐厕上插入
+						PRINTFORMW 「稍等一下，我马上就射出来」
+						PRINTFORMW 说完这句话后，富豪把%ANAME(対象)%压在身下，如同使用飞机杯般猛烈抽插
+						PRINTFORMW 「呜哦！！齁噢哦哦？！」
+						PRINTFORMW 承受着富豪如同种猪一般全力冲刺的%ANAME(対象)%发出了难以置信的淫叫，瞬间进入了高潮
+						PRINTFORMW 而富豪似乎被女人的淫叫声鼓舞，抓住%ANAME(対象)%的腰全力的猛插着...
+						PRINTFORMW 「太..太激烈啦！要去了！要去惹咕咿咿咿咿❤❤❤」
+						PRINTFORML 数秒后，富豪猛地把巨根顶入%ANAME(対象)%的子宫口，以冲破避孕套的气势凶猛的射出了精液
+						PRINTFORMW 而%ANAME(対象)%也在此时发出淫叫，再次达到了最高峰
+						PRINTFORMW 富豪的精囊收缩十几次后，富豪把带着避孕套的巨根拔了出来
+						PRINTFORMW 肉棒拔出肉穴时，还发出了‘啵’的声音
+						PRINTFORMW 随后，富豪的肉棒上就这样挂着因为精液的重量而下垂的避孕套摘下，
+						PRINTFORMW 绑好并丢进一旁的垃圾桶后，点头微笑与%ANAME(MASTER)%示意并抱着%ANAME(対象)%离开了厕所
+						PRINTFORML
+						PRINTFORML
+						PRINTFORMW 上完厕所后，发现富豪和%ANAME(対象)%又在楼梯上开始了新一轮的性交
+						PRINTFORMW 将楼梯上的数个避孕套拿起后，让富豪带着%ANAME(対象)%回到了房间
+						PRINTFORML
+						PRINTFORML
+						PRINTFORMW 回房间后富豪、%ANAME(MASTER)%和%ANAME(対象)%一起3P了...
+						EXP:対象:輪姦経験 += 1
+						CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴")
+						CALL FUCK(対象, "欲望, 性技, Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 口内射精", GET_SPERM_ID("富豪"), @"富豪の\@RAND:2 ? 肉棒 # 唇\@", "富豪", "", "和姦")
+						CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+				ENDSELECT
+			PRINTFORML 过了一段时间，大家都冷静了下来，于是开始了欢快的交流。
+			PRINTFORML 随后，在与富豪交谈了一段时间后，富豪留下了礼物就回去了。
+			CALL ICPRINT("入手了金<200000>", "W", カラー_注意)
+			;TranslatedMark "金<200000>を手に入れた", "W", カラー_注意
+			MONEY += 200000
+			EXP:対象:ＮＴＲ経験 += 1
+		ELSE
+			PRINTFORMW 再一次进入了梦乡...
+			CALL FUCK(対象, "欲望, 性技, Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 口内射精",GET_SPERM_ID("富豪"), @"富豪の\@RAND:2 ? 肉棒 # 唇\@", "富豪", "", "和姦")
+			PRINTFORMW 睡醒之后发现富豪已经来了...此时正坐在%ANAME(対象)%的旁边
+			PRINTFORMW 两人满身大汗，%ANAME(対象)%的脸色更是还在散发着性爱后的潮红
+			PRINTFORMW 看来是在%ANAME(MASTER)%入睡的时候进行了交合...
+			PRINTFORMW 发现%ANAME(MASTER)%到来的%ANAME(対象)%则是掀开裙子，展示了挂满了大腿的，
+			PRINTFORMW 装满了富豪精子的避孕套，以及还在散发着灼热气息，不断流出淫水的肉穴
+			PRINTFORMW 似乎是在向%ANAME(MASTER)%炫耀的同时说明做好了避孕的工作
+			PRINTFORML 之后，在与富豪交谈了一段时间后，富豪留下了礼物就回去了。
+			EXP:対象:ＮＴＲ経験 += 1
+			CALL ICPRINT("金<150000>を手に入れた", "W", カラー_注意)
+			MONEY += 150000
+		ENDIF
+		PRINTFORML
+		ENDSELECT
+	DVAR:富豪_パトロンフラグ ++
+	SIF DVAR:富豪_パトロンフラグ == 10
+		DVAR:富豪_パトロンフラグ = 6
+
+	;派生イベントラスト
+	CASE 10
+		PRINTFORMW 听说对富豪怀有怨恨的人，正筹备着刺杀的计划
+		PRINTFORMW 也许只是谣言，但听说有很多人以前就恨不得他死了
+		PRINTFORMW 那么，该怎么办呢……
+		CALL ASK_YN("派遣守卫", "放着不管")
+		IF RESULT == 1
+			SELECTCASE RAND:3
+		CASE 0
+			PRINTFORMW …没有任何确证。恐怕只是谣言吧。
+			PRINTFORMW %ANAME(MASTER)%没有特别在意，放着不管了
+			PRINTFORML ・
+			PRINTFORML ・
+			;TranslatedMark ・・
+			PRINTFORMW ・・・
+			PRINTFORMW 几天后，有报告说，那个富豪被土匪袭击，丧命了
+			PRINTFORMW 他的妻妾们好像也被土匪们一个不留地掳走了……
+			CALL COLOR_PRINTW(@"富豪的衍生日常永久结束了", カラー_警告)
+			PRINTFORML
+			DVAR:富豪_パトロンフラグ = -1
+		CASE 1
+			PRINTFORMW …没有任何确证。恐怕只是谣言吧。
+			PRINTFORMW %ANAME(MASTER)%没有特别在意，放着不管了
+			PRINTFORML ・
+			PRINTFORML ・
+			;TranslatedMark ・・
+			PRINTFORMW ・・・
+			PRINTFORMW 并没有什么事情发生...
+			PRINTFORML
+		CASE 2
+			PRINTFORMW …没有任何确证。恐怕只是谣言吧。
+			PRINTFORMW %ANAME(MASTER)%没有特别在意，放着不管了
+			PRINTFORML ・
+			PRINTFORML ・
+			;TranslatedMark ・・
+			PRINTFORMW ・・・
+			PRINTFORMW 并没有什么事情发生...
+			PRINTFORML
+			ENDSELECT
+		ELSE
+			SELECTCASE RAND:2
+		CASE 0
+			PRINTFORMW 虽然是传言的阶段，但还是应该注意的吧
+			PRINTFORMW %ANAME(MASTER)%最后决定和%ANAME(対象)%前去保护富豪
+			PRINTFORMW 如果没有发生刺杀事件，就和富豪一起去游玩一下好了...
+			PRINTFORML ・
+			PRINTFORML ・
+			;TranslatedMark ・・
+			PRINTFORMW ・・・
+			PRINTFORML 在和富豪交汇后，富豪在访问途中遭到袭击
+			PRINTFORMW 幸运的是，%ANAME(MASTER)%和%ANAME(対象)%在前来的时候带来了不少的卫兵
+			PRINTFORMW 于是三人躲在马车内部，等待着危机的离去...
+			PRINTFORML 就在这时，富豪突然当着%ANAME(MASTER)%的面，把头埋进了%ANAME(対象)%的胸口
+			PRINTFORMW 嘴上说着害怕，双手却环在了%ANAME(対象)%身上，似乎在索取女人的安慰
+			PRINTFORMW %ANAME(対象)%看着富豪幼稚的表情，脸上露出忍俊不禁而又充满溺爱的笑容，
+			PRINTFORMW 将富豪的头紧抱在胸口，摸着男人的头发开始安慰...
+			PRINTFORML 不过在安慰了一会儿后，富豪的手开始挪向了%ANAME(対象)%的臀部，
+			PRINTFORMW 腰也向着%ANAME(対象)%紧贴，开始用已经勃起的肉棒摩擦%ANAME(対象)%的身体
+			PRINTFORMW %ANAME(対象)%被富豪行为搞的有些措手不及，但身体也不由自主的开始发热...
+			PRINTFORMW %ANAME(対象)%将视线投向%ANAME(MASTER)%，得到默许后，拉下富豪的裤子，将滚烫的肉棒握在手中
+			PRINTFORMW 「真是的，只有这一次哦？」用着如同母亲教导孩子的语气告诫了富豪后
+			PRINTFORMW %ANAME(対象)%用丰满的嘴唇将富豪的嘴巴堵住，吸吮肥舌的同时开始为富豪手交...
+			PRINTFORMW 不久后，富豪将精子射在了%ANAME(対象)%身上，让%ANAME(対象)%的身体上充满了自己的气息
+			CALL FUCK_RAPE_HININ(対象, @"富豪の\@ RAND:2 ? 肉棒 # 唇\@", "富豪")
+			PRINTFORMW 之后二人将嘴巴分离，吐出热息的同时拉出了数十条粘稠的银丝。
+			PRINTFORMW 于此同时，马车外的战斗也以卫兵的压倒性胜利结束...
+			PRINTFORMW 说到底也只是不入流的土匪和刺客，根本无法和超一流的卫兵所比较...
+			PRINTFORML
+			PRINTFORML
+			PRINTFORMW 「哎呀哎呀……这次真的是多谢你们了」
+			PRINTFORMW %ANAME(MASTER)%、%ANAME(対象)%和富豪回到宫殿后，劝其最近最好还是躲着避避风头比较好
+			PRINTFORMW 「…确实是这样啊。到现在为止，好像太招人恨了…」
+			PRINTFORMW 此时，富豪的爱妻走了过来，开始抚摸富豪的背部以安慰他的心情
+			PRINTFORMW 「不过有你们这两位恩人的话，一定没问题的吧」
+			PRINTFORMW 这么说着的富豪发自内心的笑了起来，等到笑声消逝，富豪向二人发起了要请
+			PRINTFORMW 「机会难得，这次就在我家这里4P吧?」
+			PRINTFORMW %ANAME(MASTER)%和%ANAME(対象)%对视了一下，取得同意后便向富豪点了点头
+			PRINTFORML
+			PRINTFORML
+			PRINTFORMW 足足6个小时后，快乐的宴会结束了……
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "富豪の女の唇", "", "富豪の女の膣", "和姦")
+			CALL FUCK(対象, "欲望, 性技, Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, 口淫, Ｖ性交, 撮影", "接吻喪失, 処女喪失, 口内射精", GET_SPERM_ID("富豪"), @"富豪の\@RAND:2 ? 肉棒 # 唇\@", "富豪", "", "和姦")
+			PRINTFORML 在房间里，全身沾满强烈雄性气息白色浑浊液的两个女人，不知是不是因为绝顶的余韵，全身都在陶醉的表情中痉挛着
+			PRINTFORMW %ANAME(MASTER)%由于过于激烈的交合消耗了大量的体力，一边轻轻抚摸着%ANAME(対象)%的头一边调整呼吸
+			EXP:対象:ＮＴＲ経験 += 1
+			EXP:対象:輪姦経験 += 1
+			PRINTFORMW 「哎呀哎呀，今天很开心哦」
+			PRINTFORML 都已经干成这样了看起来依旧精神饱满，仔细想想这个男人的精力真是可怕
+			PRINTFORMW 「对了，这是额外的报酬，能救下我的小命真的十分感谢」
+			CALL ICPRINT("入手了金<500000>", "W", カラー_注意)
+			;TranslatedMark "金<500000>を手に入れた", "W", カラー_注意
+			MONEY += 500000
+			PRINTFORMW 拿到富豪给予的礼物和报酬后，4人寒暄了一会儿便道别了
+			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴")
+			CALL FUCK(対象, "欲望, 性技, Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 口内射精", GET_SPERM_ID("富豪"), @"富豪の\@RAND:2 ? 肉棒 # 唇\@", "富豪", "", "和姦")
+			CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "富豪の女の唇", "", "富豪の女の膣", "和姦")
+		CASE 1
+			PRINTFORMW 虽然是传言的阶段，但还是应该注意的吧
+			PRINTFORMW %ANAME(MASTER)%最后决定和%ANAME(対象)%前去保护富豪
+			PRINTFORMW 如果没有发生刺杀事件，就和富豪一起去游玩一下好了...
+			PRINTFORML ・
+			PRINTFORML ・
+			;TranslatedMark ・・
+			PRINTFORMW ・・・
+			PRINTFORML 在和富豪交汇后，富豪在访问途中并没有遭到袭击
+			PRINTFORMW 于是在富豪的邀请下，一起去到了他的家里
+			PRINTFORMW 见到了他的爱妻后，四人开始了欢快的交谈...
+			PRINTFORMW 在交谈的过程中富豪慢慢的把手揽住了的%ANAME(対象)%腰
+			PRINTFORMW %ANAME(対象)%在和%ANAME(MASTER)%对视了一下，取得同意之后，便和富豪开始了如同恋人般的舌吻
+			PRINTFORMW 而%ANAME(MASTER)%也不甘示弱，和富豪的爱妻开始相互的爱抚...
+			PRINTFORML
+			PRINTFORMW 突然，富豪提出了不戴套的提议，%ANAME(対象)%和%ANAME(MASTER)%考虑了一下后，答应了这个请求...
+			PRINTFORMW 「哦哦！那真是太好了！」
+			PRINTFORMW 「那么，今天大家一起享受吧」
+			PRINTFORMW 然后4个人走进了特别准备的房间……
+			PRINTFORML ・
+			PRINTFORML ・
+			PRINTFORMW ・・・
+			PRINTFORMW 在四人所待得小屋内，听到了男女激烈交融的声音……
+			PRINTFORML 曾经忍受着他的调教选择了%ANAME(MASTER)%的%ANAME(対象)%
+			PRINTFORMW 那刻在身体上的快乐印记至今仍无法忘记
+			PRINTFORMW 被所爱的%ANAME(MASTER)%看到了自己那令人惊叹的凌乱和痴态，羞耻心也越发高涨
+			PRINTFORMW 同时看着%ANAME(MASTER)%抱着表情看起来像是要被玩坏一样的不认识的女人，心里也有着相当的嫉妒
+			PRINTFORMW 它们混杂在一起，向%ANAME(対象)%传达前所未有的兴奋，使其身体更加敏感
+			PRINTFORML 另一边，看着%ANAME(対象)%过于淫荡妖艳的姿态，%ANAME(MASTER)%如同野兽般猛烈的对着富豪爱妻的子宫进行冲击
+			PRINTFORMW 而看到这些场景也开始富豪如种猪般猛烈对着%ANAME(対象)%进行播种性交
+			PRINTFORMW 在这之后又交换了几次，异样的感觉在激烈的交往仍在持续……
+			PRINTFORML
+			PRINTFORML
+			PRINTFORMW 足足过了6个小时，快乐的宴会终于结束了……
+			EXP:対象:ＮＴＲ経験 += 1
+			EXP:対象:輪姦経験 += 1
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "富豪の女の唇", "", "富豪の女の膣", "和姦")
+			CALL FUCK(対象, "欲望, 性技, Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, 口淫, Ｖ性交, 撮影", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("富豪"), @"富豪の\@RAND:2 ? 肉棒 # 唇\@", "富豪", "", "和姦")
+			PRINTFORML 在房间里，全身沾满强烈雄性气息白色浑浊液的两个女人，不知是不是因为绝顶的余韵，全身都在陶醉的表情中痉挛着
+			PRINTFORMW %ANAME(MASTER)%由于过于激烈的交合消耗了大量的体力，一边轻轻抚摸着%ANAME(対象)%的头一边调整呼吸
+			PRINTFORMW 而两个女人的肉穴，还源源不断的流出着热气腾腾的精液
+			PRINTFORMW 不知道这一次会不会有人意外的‘中奖’呢？
+			PRINTFORMW 「哎呀哎呀，今天很开心哦」
+			PRINTFORML 都已经干成这样了看起来依旧精神饱满，仔细想想这个男人的精力真是可怕
+			PRINTFORMW 「对了，这次能够同意我的请求真的是太感谢了」
+			PRINTFORMW 「那么要是怀孕了的话，就拜托你帮我养大咯？哈哈，当然要是我的妻子怀上了你的种，我也会帮你养大的」
+			PRINTFORMW 这么说着的富豪露出了豪爽的表情，给予了额外的礼物
+			CALL ICPRINT("入手了金<250000>", "W", カラー_注意)
+			;TranslatedMark "金<250000>を手に入れた", "W", カラー_注意
+			MONEY += 250000
+			PRINTFORMW 拿到富豪给予的众多礼物后，4人寒暄了一会儿便道别了
+			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴")
+			CALL FUCK(対象, "欲望, 性技, Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 口内射精", GET_SPERM_ID("富豪"), @"富豪の\@RAND:2 ? 肉棒 # 唇\@", "富豪", "", "和姦")
+			CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "富豪の女の唇", "", "富豪の女の膣", "和姦")
+		CASE 2
+			PRINTFORMW 虽然是传言的阶段，但还是应该注意的吧
+			PRINTFORMW %ANAME(MASTER)%最后决定和%ANAME(対象)%前去保护富豪
+			PRINTFORMW 如果没有发生刺杀事件，就和富豪一起去游玩一下好了...
+			PRINTFORML ・
+			PRINTFORML ・
+			;TranslatedMark ・・
+			PRINTFORMW ・・・
+			PRINTFORML 在和富豪交汇后，富豪在访问途中并没有遭到袭击
+			PRINTFORMW 于是在富豪的邀请下，一起去到了他的家里
+			PRINTFORMW 见到了他的爱妻后，四人开始了欢快的交谈...
+			PRINTFORMW 在交谈的过程中富豪慢慢的把手揽住了的%ANAME(対象)%腰
+			PRINTFORMW %ANAME(対象)%在和%ANAME(MASTER)%对视了一下，取得同意之后，便和富豪开始了如同恋人般的舌吻
+			PRINTFORMW 而%ANAME(MASTER)%也不甘示弱，和富豪的爱妻开始相互的爱抚...
+			PRINTFORML
+			PRINTFORMW 「机会难得，这次就在我家这里4P吧?」
+			PRINTFORMW %ANAME(MASTER)%和%ANAME(対象)%对视了一下，取得同意后便向富豪点了点头
+			PRINTFORML
+			PRINTFORML
+			PRINTFORMW 随后4个人走进了特别准备的房间……
+			PRINTFORML ・
+			PRINTFORML ・
+			PRINTFORMW ・・・
+			PRINTFORMW 在四人所待得小屋内，听到了男女激烈交融的声音……
+			PRINTFORMW 足足6个小时后，快乐的宴会结束了……
+			EXP:対象:ＮＴＲ経験 += 1
+			EXP:対象:輪姦経験 += 1
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "富豪の女の唇", "", "富豪の女の膣", "和姦")
+			CALL FUCK(対象, "欲望, 性技, Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, 口淫, Ｖ性交, 撮影", "接吻喪失, 処女喪失, 口内射精", GET_SPERM_ID("富豪"), @"富豪の\@RAND:2 ? 肉棒 # 唇\@", "富豪", "", "和姦")
+			PRINTFORML 在房间里，全身沾满强烈雄性气息白色浑浊液的两个女人，不知是不是因为绝顶的余韵，全身都在陶醉的表情中痉挛着
+			PRINTFORMW %ANAME(MASTER)%由于过于激烈的交合消耗了大量的体力，一边轻轻抚摸着%ANAME(対象)%的头一边调整呼吸
+			PRINTFORMW 「哎呀哎呀，今天很开心哦」
+			PRINTFORML 都已经干成这样了看起来依旧精神饱满，仔细想想这个男人的精力真是可怕
+			PRINTFORMW 拿到富豪给予的礼物后，4人寒暄了一会儿便道别了
+			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴")
+			CALL FUCK(対象, "欲望, 性技, Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 口内射精", GET_SPERM_ID("富豪"), @"富豪の\@RAND:2 ? 肉棒 # 唇\@", "富豪", "", "和姦")
+			CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "富豪の女の唇", "", "富豪の女の膣", "和姦")
+
+		CASE 3
+			PRINTFORMW 虽然是传言的阶段，但还是应该注意的吧
+			PRINTFORMW %ANAME(MASTER)%最后决定和%ANAME(対象)%前去保护富豪
+			PRINTFORMW 如果没有发生刺杀事件，就和富豪一起去游玩一下好了...
+			PRINTFORML ・
+			PRINTFORML ・
+			;TranslatedMark ・・
+			PRINTFORMW ・・・
+			PRINTFORML 在和富豪交汇后，富豪在访问途中并没有遭到袭击
+			PRINTFORMW 于是在富豪的邀请下，一起去到了他的家里
+			PRINTFORMW 见到了他的爱妻后，四人开始了欢快的交谈...
+			PRINTFORMW 在交谈的过程中富豪慢慢的把手揽住了的%ANAME(対象)%腰
+			PRINTFORMW %ANAME(対象)%在和%ANAME(MASTER)%对视了一下，取得同意之后，便和富豪开始了如同恋人般的舌吻
+			PRINTFORMW 而%ANAME(MASTER)%也不甘示弱，和富豪的爱妻开始相互的爱抚...
+			PRINTFORML
+			PRINTFORMW 突然，富豪提出了一个请求，说是要一个人和%ANAME(対象)%与他的爱妻交合，也就是3P
+			PRINTFORMW 看着富豪如同婴儿手臂般的巨大肉棒，%ANAME(MASTER)%咽着口水点了点头
+			PRINTFORMW 看到%ANAME(MASTER)%这种表现的%ANAME(対象)%露出了小恶魔般的微笑，将%ANAME(MASTER)%拉进了房间...
+			PRINTFORMW 4个人走进了特别准备的房间……
+			PRINTFORML ・
+			PRINTFORML ・
+			PRINTFORMW ・・・
+			PRINTFORMW 在四人所待得小屋内，听到了男女激烈交融的声音……
+			PRINTFORML %ANAME(対象)%趴在富豪的身上，蜜桃般的臀部被巨大的肉棒撞的掀起了肉浪，在快乐的震颤中与富豪双手相握
+			PRINTFORMW 而富豪的爱妻则一般与富豪进行着浓密的舌吻，一般努力挺起肉穴，迎接着粗大的手指隔着肉壁在体内摩擦的感觉
+			PRINTFORMW 而富豪每一次撞击身体的力量都会让棒子顶到子宫口伸出，闪电般的快让%ANAME(対象)%和富豪的爱妻一同高高仰起背部
+			PRINTFORMW 看着三人淫靡的表情和動作的%ANAME(MASTER)%無法把眼睛離開
+			PRINTFORMW 呑了口口水、継續在一旁窺視着三人的交合
+			PRINTFORMW 而%ANAME(MASTER)%的手早已握住了自己的肉棒、開始当場擼動起来
+			PRINTFORML
+			PRINTFORML
+			PRINTFORMW 足足6个小时后，富豪的性爱个人秀终于迎来了尾声……
+			EXP:対象:ＮＴＲ経験 += 1
+			EXP:対象:輪姦経験 += 1
+			CALL FUCK(対象, "欲望, 性技, Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, 口淫, Ｖ性交, 撮影", "接吻喪失, 処女喪失, 口内射精", GET_SPERM_ID("富豪"), @"富豪の\@RAND:2 ? 肉棒 # 唇\@", "富豪", "", "和姦")
+			PRINTFORML 在房间里，全身沾满富豪那强烈雄性气息的两个女人，不知是不是因为绝顶的余韵，全身都在陶醉的表情中痉挛着
+			PRINTFORMW 而处于众人身下的床单已经完全湿透，周围都是使用后的避孕套...
+			PRINTFORMW 同时还有散落在床单上，%ANAME(MASTER)%向空气射出的精子
+
+			PRINTFORMW 如果不是做好了避孕工作，富豪
+			PRINTFORMW 「哎呀哎呀，今天很开心哦」
+			PRINTFORML 都已经干成这样了看起来依旧精神饱满，仔细想想这个男人的精力真是可怕
+			PRINTFORMW 「对了，这次能够同意我的请求真的是太感谢了」
+			PRINTFORMW 「怎么样...看着%ANAME(対象)%和我妻子一起侍奉我？」
+			PRINTFORMW 「嘻嘻，要是能够不戴套就更好了..哈哈」
+			PRINTFORMW 这么说着的富豪露出了豪爽的表情，给予了额外的礼物
+			CALL ICPRINT("入手了金<150000>", "W", カラー_注意)
+			MONEY += 150000
+			PRINTFORMW 拿到富豪给予的众多礼物后，4人寒暄了一会儿便道别了
+			CALL FUCK(対象, "欲望, 性技, Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 口内射精", GET_SPERM_ID("富豪"), @"富豪の\@RAND:2 ? 肉棒 # 唇\@", "富豪", "", "和姦")
+			PRINTFORML
+
+			CALL ICPRINT("入手了金<150000>", "W", カラー_注意)
+			MONEY += 150000
+			CALL COLOR_PRINTW(@"%ANAME(MASTER)%暂时失去了赞助", カラー_注意)
+			;TranslatedMark @"%ANAME(MASTER)%はパトロンを失いました……", カラー_注意
+			PRINTFORML
+			ENDSELECT
+			DVAR:富豪_パトロンフラグ = 5
+		ENDIF
+	ENDSELECT
+
+	RETURN 1

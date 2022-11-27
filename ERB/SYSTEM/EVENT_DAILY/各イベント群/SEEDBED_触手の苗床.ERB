@@ -1,0 +1,150 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_SEEDBED_RATE()
+RETURN 1000
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_SEEDBED_DECISION()
+RETURN 1
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_SEEDBED_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_SEEDBED_SETTARGET()
+FOR LOCAL, 0, CHARANUM
+	;捕虜でなく、死んでおらず、苗床所持者の女で、1/3の確率
+	IF !CFLAG:LOCAL:捕虜先 && CFLAG:LOCAL:特殊状態 != 特殊状態_死亡 && GETBIT(TALENT:LOCAL:淫乱系, 素質_淫乱_苗床) && IS_FEMALE(LOCAL) && !RAND:3 && IS_APPEAR(LOCAL)
+		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+		DAILY_TARGET_NUM ++
+	ENDIF
+NEXT
+SIF DAILY_TARGET_NUM < 1
+	RETURN 0
+RETURN 1
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_SEEDBED()
+#DIM 対象
+
+FOR LOCAL, 0, DAILY_TARGET_NUM
+	対象 = DAILY_TARGET:LOCAL
+	PRINTFORMW 被改造成苗床的%ANAME(対象)%的身体，每夜每夜都因为性欲而疼痛着……
+	SELECTCASE RAND:15
+		CASE 0
+			PRINTFORML %ANAME(対象)%似乎过着和平时一样的生活
+			PRINTFORML ……但是她的脸蛋儿却红透了
+			PRINTFORML 在她的肚子里，无数的触手在蠢蠢欲动
+			PRINTFORML 寄生在她身上的触手们、时不时地侵犯着她的雌穴和臀孔
+			PRINTFORML 在别人面前，享受着肉体的欢愉。稍微疏忽的话，就会露出娇喘声而暴露
+			PRINTFORML 对此感到兴奋的同时，%ANAME(対象)%数次达到了顶峰……
+		CASE 1
+			PRINTFORML 为了抓捕最近在这附近频频作案的强奸犯，%ANAME(対象)%参加了夜间的巡查
+			PRINTFORML ……不可能找到犯人的、%ANAME(対象)%心里明白。因为她就是那个强奸犯
+			PRINTFORML 今天，又遇到了在这样的月夜里独自外出的不谨慎的姑娘
+			PRINTFORML %ANAME(対象)%展开寄生在她体内的触手，向少女袭来
+			PRINTFORML %ANAME(対象)%在这之后，作为狩猎的报酬，似乎被触手们好好地凌辱了……
+		CASE 2
+			PRINTFORML 最近好像皮肤变得更有光泽了、而且还说不出的艳丽、%ANAME(対象)%听到评价后敷衍着说这都是大家乱讲
+			PRINTFORML 实际上呢、这大概是因为、每天晚上都在自己的卧室里和触手交合的缘故
+			PRINTFORML 口中注入的浊液含有使女人的身体变得美丽、而且更加淫荡的成分
+			PRINTFORML 爱抚两个穴位和全身的文胸状触手，不仅能去除角质，还可以分泌渗透到皮肤里的美容成分
+			PRINTFORML 委身于他们，不但心情舒畅，而且作为女人也会变得美丽
+			PRINTFORML %ANAME(対象)%与触手们建立了奇妙的共生关系……
+		CASE 3
+			PRINTFORML 今天的%ANAME(対象)%穿着黑色的紧身内衣……
+			PRINTFORML ……其实并非内衣、而是拟态成内衣的触手
+			PRINTFORML %ANAME(対象)%は不顾一切地追求着，被触手吞噬着肉体的欢愉
+			PRINTFORML %ANAME(対象)%不时脸颊发红，一边喘着气，一边想尽量保持平静的模样……
+			PRINTFORML 回到自己的房间，从触手中解放出来，爱液和白浊从被堵住的两穴中滚落下来……
+		CASE 4
+			PRINTFORML 今天的%ANAME(対象)%整体上穿着宽松的服装……
+			PRINTFORML 因为触手在内侧爬来爬去，所以不得不选这种衣服
+			PRINTFORML 努力工作，与人正常的交谈.。在这些空隙中，子宫里寄生的触手乱七八糟地搅动着肉穴。
+			PRINTFORML 终于无法忍耐的%ANAME(対象)%飞快地回到自己的房间，脱下衣服
+			PRINTFORML 然后用触手充分地抚慰了她的身体……
+		CASE 5
+			PRINTFORML %ANAME(対象)%被肉制成的胶囊包裹着，睡着了
+			PRINTFORML 这是由触手做成的、特制的床
+			PRINTFORML 由于触手的粘液的效果，%ANAME(対象)%睡得非常安稳
+			PRINTFORML 在这期间，触手也调整并改造了她的肉穴、臀孔和乳房
+			PRINTFORML 在本人不知道的情况下，%ANAME(対象)%正悄悄地被转化为苗床……
+			PRINTFORML 早上醒来的%ANAME(対象)%擦拭了粘液，穿上衣服，像往常一样工作了。
+		CASE 6
+			PRINTFORML %ANAME(対象)%变得不去洗澡、也不上厕所
+			PRINTFORML 虽然这样却没有变得不干净。这两件事都有触手照顾着
+			PRINTFORML 每天晚上的性行为中，寄生在膀胱和肠子上的触手会吃掉代谢物
+			PRINTFORML 文胸状触手轻轻地擦拭皮肤，去除污垢
+			PRINTFORML 不仅很舒服，还干了这么多事。%ANAME(対象)%找不到拒绝他们的理由……
+		CASE 7
+			PRINTFORML %ANAME(対象)%在夜里，摇摇晃晃地在街上走来走去。话虽如此，但本人没有意识
+			PRINTFORML 寄生在她身上的触手从耳朵流向大脑注入电流，随意操纵着她
+			PRINTFORML 遇到了一个不够谨慎的独自一人走夜路的少女，触手操纵着%ANAME(対象)%扑向了她
+			PRINTFORML 然后抓住她，把她带到小巷子里，触手从%ANAME(対象)%的子宫内部伸出展开了自己的身体
+			PRINTFORML 触手连带着%ANAME(対象)%的肉体一起，给两个少女充分植入了自己的种子……
+		CASE 8
+			PRINTFORML %ANAME(対象)%最近在武术训练上一直没有输过
+			PRINTFORML 寄生着她的触手从耳朵进入大脑，做着行动的助理
+			PRINTFORML 而且，柔软的触手像肌肉一样收缩，使所有的行动都变得有力
+			PRINTFORML 之后，作为训练顺利的礼节，%ANAME(対象)%向他们充分地提供了肉体……
+		CASE 9
+			PRINTFORML %ANAME(対象)%肉体被触手所吞噬
+			PRINTFORML 所有的孔洞都被触手插入、全身上下同时被爱抚着
+			PRINTFORML 面对令人昏迷的快乐，%ANAME(対象)%持续发出含糊不清的娇声。
+			PRINTFORML 每当他们放出精液，那浊液中含有的催淫效果，都让%ANAME(対象)%变得更加兴奋
+			PRINTFORML 性行为越来越激烈，一直持续到天色发亮……
+		CASE 10
+			PRINTFORML 无数的触手犯了%ANAME(対象)%
+			PRINTFORML 在这之中，极细的触手，钻进了%ANAME(対象)%的尿道
+			PRINTFORML 一般情况下不会出现的固体物进出尿道的快感、让%ANAME(対象)%翻起了白眼
+			PRINTFORML 不久触手完全侵入了她的膀胱，在那里被切断，寄生在她体内……
+		CASE 11
+			PRINTFORML 长长的触手，钻进%ANAME(対象)%的臀孔
+			PRINTFORML 把她的肠子埋得满满的，然后就将自己的身体割断了
+			PRINTFORML 无视着被激起强烈便意的%ANAME(対象)%，触手就是不从那里出去
+			PRINTFORML 看来他已经决定栖息在%ANAME(対象)%的肠内了……
+		CASE 12
+			PRINTFORML 一根极细的触手，挤进正在被触手侵犯的%ANAME(対象)%的阴道孔
+			PRINTFORML 完全没有感觉到新触手插入的%ANAME(対象)%、很快就被侵入了子宫
+			PRINTFORML 原先不该有的异物带来的快感和痛苦、让%ANAME(対象)%闷声忍受着
+			PRINTFORML 触手在那里割断了自己的尖端，栖息在她的子宫里……
+		CASE 13
+			PRINTFORML %ANAME(対象)%与触手无缘的，度过平常的一天……
+			PRINTFORML ……但是、这是她从耳孔侵入大脑的触手所让她看到的幻觉
+			PRINTFORML 被放入触手特制的肉胶囊的她，全身被改造着，凌辱着
+			PRINTFORML 即便如此，她还是没有注意到这一点，在幻觉中过着从早上起床到晚上睡着的平凡一天……
+		CASE 14
+			PRINTFORML %ANAME(対象)%正在进行着日常的工作报告……
+			PRINTFORML ……突然、她的脸颊变得通红、害羞的说着、请原谅想要去摘花
+			PRINTFORML 踉跄着赶到厕所后、%ANAME(対象)%脱下下装、寄生在肛门里的触手早就伸了出了、正在肉穴里抽插着
+			PRINTFORML 不知经过了几次绝顶后、%ANAME(対象)%把满足了的触手塞回肛门、小穴中滴着白浊液离开了厕所
+	ENDSELECT
+	CALL FUCK_TENTACLE(対象, GET_SPERM_ID("触手"), @"触手", @"触手")
+
+	PRINTFORMW
+NEXT
+RETURN 1
+
+@EVENT_DAILY_SEEDBED_ALLOW_WHEN_WANDERING
+RETURN 1
+

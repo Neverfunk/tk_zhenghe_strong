@@ -1,0 +1,314 @@
+﻿;--------------------------------------
+;ターンエンド時の野盗の処理
+;--------------------------------------
+@TURNEND_BANDIT
+#DIM 土匪
+
+;-------------------------------------------------
+;野盗の追加
+;-------------------------------------------------
+@BANDIT_INIT(メッセージ = 0)
+#DIM メッセージ
+#DIM LCOUNT
+VARSET LOCAL
+
+SIF GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_野盗) != -1
+	RETURN 0
+
+SIF SP_COUNTRY_RANK:特殊勢力_野盗 == 0
+	RETURN 0
+
+SIF GET_NEW_COUNTRY() == -1
+	RETURN 0
+
+CALL CREATE_SP_COUNTRY(特殊勢力_野盗)
+LOCAL = RESULT
+CALL INIT_SP_COUNTRY(LOCAL)
+
+COUNTRY_IS_CLOSED:LOCAL = 1
+
+IF メッセージ
+	CALL SINGLE_DRAWLINE
+	SETCOLOR カラー_警告
+PRINTFORMW  随着幻想乡大战争的进行，越来越多的人流离失所，与妖怪为伍
+PRINTFORML  打家劫舍来混口饭吃的越来越多，幻想鄉的治安悪化愈发加剧。
+PRINTFORMW  然而，那些高高在上的统治者们对此仅仅只是加强了剿匪的力度，小规模的土匪根本无法承受这样的打击…………
+PRINTFORMW  于是他们联合起来了，悪棍們開始聚集在一起，成为了一股势力不小的大军阀
+	RESETCOLOR
+	CALL SINGLE_DRAWLINE
+ENDIF
+
+RETURN LOCAL
+
+;-------------------------------------------------
+;DESC  :野盗所属時に閨・捕虜調教前にアイテムを追加する処理
+;-------------------------------------------------
+@START_TRAIN_COMMON_BANDIT()
+ITEM:A_振動棒 = 1
+ITEM:A_肛用振動棒 = 1
+ITEM:A_縄 = 1
+ITEM:A_鞭 = 1
+ITEM:A_針 = 1
+ITEM:A_鼻勾 = 1
+ITEM:A_口枷 = 1
+ITEM:A_媚薬 = 99
+ITEM:A_麻薬 = 99
+
+;--------------------------------------
+;野盗が捕虜を得たときに確率で発動するエロイベント
+;--------------------------------------
+@TREAT_PRISONER_BANDIT(対象)
+#DIM 対象
+#DIM 陥落済み
+SIF !(RAND:100 < 3 && IS_FEMALE(対象))
+	RETURN 0
+IF GETBIT(TALENT:対象:特殊勢力陥落系, 特殊勢力_野盗)
+	陥落済み = 1
+ELSE
+	陥落済み = 0
+ENDIF
+
+SETCOLOR カラー_ピンク
+PRINTFORML ……
+SELECTCASE RAND:4
+	CASE 0
+		IF 陥落済み
+			PRINTFORML %ANAME(対象)%自愿被土匪抓住，将自己的%STR_BODY("身体", 対象)%交给他们处置
+			;TranslatedMark %ANAME(対象)%は野盗に自ら捕らえられ、その%STR_BODY("身体", 対象)%をゆだねてみせる
+			PRINTFORML 见到离开他们胯下还能好好活着的她，土匪们把她的衣服脱下来
+			;TranslatedMark 俺たちの下から離れてる間にナマッてねぇか見てやるよと、野盗は彼女の服を剥ぎ取っていく
+			PRINTFORML %ANAME(対象)%自己岔开双腿主动邀请着他们，兴奋的土匪们于是毫不迟疑地把自己的肉棒插进了她的股间
+			;TranslatedMark %ANAME(対象)%が自分から股を開き誘うと、興奮した野盗は一も二にもなくその股に己の一物をねじ込んだ
+			PRINTFORML 感受到侵犯着小穴的肉棒的坚硬感，%ANAME(対象)%发出了让人欲罢不能的娇声，晃动着腰身
+			;TranslatedMark 膣内を犯すモノのたくましさに、%ANAME(対象)%はたまらないという声をあげてよがり、腰を振りたくる
+			PRINTFORML 不久，%ANAME(対象)%的两穴之中，都种下了她昔日“主人”们的珍贵种子……
+			;TranslatedMark やがて、%ANAME(対象)%の両穴に、「ご主人様」の貴重な種がたっぷりと植え付けられた……
+		ELSE
+			PRINTFORML 抓住了%ANAME(対象)%的土匪，狠狠地殴打了抵抗的%ANAME(対象)%，将她压在了地上
+			;TranslatedMark %ANAME(対象)%を捕らえた野盗は、暴れる%ANAME(対象)%を殴りつけると、地面に組み敷いた
+			PRINTFORML 土匪一边说着“要是把三流女人送给老大可不行，得先尝尝”这样的话，一边把她的衣服剥下来
+			;TranslatedMark 親分に下手な女ァ差し出しちゃいけねぇ、味見しねぇとなと、服を剥ぎ取っていく
+			PRINTFORML 然后将还很抗拒的%ANAME(対象)%的双腿强行打开，将自己的肉棒插进了她的股间
+			;TranslatedMark そして嫌がる%ANAME(対象)%の両脚を無理矢理に開くと、その股に己の一物をねじ込んだ
+			PRINTFORML 在她%STR_BODY("陰唇：処女確認：修飾", 対象)%内粗暴地抽插的肉棒让她心里感到极度的恐慌，%ANAME(対象)%像是疯了一样地挣扎着试图脱开，但她却被土匪轻轻松松地按下去，只能不停地晃动着腰身
+			;TranslatedMark %STR_BODY("陰唇：処女確認：修飾", 対象)%膣内を荒らし回るおぞましいモノに、%ANAME(対象)%は半狂乱になり暴れるが、野盗はそれをあっさりと押さえ、腰を振りたくる
+			PRINTFORML 不久，%ANAME(対象)%的两穴之中，都装满了土匪们肮脏的种子……
+			;TranslatedMark やがて、%ANAME(対象)%の両穴に、野盗の汚らわしい種がたっぷりとつけられてしまった……
+		ENDIF
+	CASE 1
+		IF 陥落済み
+			PRINTFORML 将自己献身给土匪的%ANAME(対象)%，裸着身体，被戴上枷锁，跟着他们一起行军
+			;TranslatedMark 野盗に自ら身を差し出した%ANAME(対象)%は、その肌を晒し、枷を着けてもらい、彼らの行軍に付き添っている
+			PRINTFORML %ANAME(対象)%完全被当作他们的战利品来对待，时不时就会被他们顺手摸到%STR_BODY("尻", 対象)%和%STR_BODY("胸", 対象)%
+			;TranslatedMark %ANAME(対象)%はすっかり彼らのトロフィー扱いをされており、時折好き勝手に%STR_BODY("尻", 対象)%や%STR_BODY("胸", 対象)%に触れられる
+			PRINTFORML 每当他们无理由的责罚她、用手拉扯她的脸和屁股殴打她的时候，%ANAME(対象)%非但没有丝毫抗拒，而且还发出了娇媚的叫声，仿佛想要索求更多的凌辱
+			;TranslatedMark 理不尽に詰られ、頬や尻を張られ、殴られるたび、%ANAME(対象)%は嫌がるどころかもっと嬲って欲しいといわんばかりの艶やかな声を上げる
+			PRINTFORML 不久之后，他们要进行休息，%ANAME(対象)%便自告奋勇，想要给他们慰安
+			;TranslatedMark やがて彼らが休憩に入ると、%ANAME(対象)%は自ら名乗り出て、彼らの慰安役を買って出た
+			PRINTFORML 结果，%ANAME(対象)%一刻不停地被他们用来满足性欲，最后两穴再也合不上了……
+			;TranslatedMark 結局、その両穴が閉じなくなるまで、%ANAME(対象)%は彼らの欲望を満足させ続けた……
+		ELSE
+			PRINTFORML 被土匪抓住的%ANAME(対象)%衣服被剥光，全身裸露，戴着枷锁，被他们押着一起行军
+			;TranslatedMark 野盗に捕らえられた%ANAME(対象)%は裸に剥かれ、枷を着けられた状態で、彼らの行軍に付き合わされている
+			PRINTFORML %ANAME(対象)%完全被当作他们的战利品来对待，时不时就会被他们顺手摸到%STR_BODY("尻", 対象)%和%STR_BODY("胸", 対象)%
+			;TranslatedMark %ANAME(対象)%はすっかり彼らのトロフィー扱いをされており、時折好き勝手に%STR_BODY("尻", 対象)%や%STR_BODY("胸", 対象)%に触れられる
+			PRINTFORML 只要有想从他们手上逃脱的动作，就会被毫不留情地责罚，被他们用手拉扯着脸和屁股进行殴打
+			;TranslatedMark 少しでもその手から逃れようとすれば、容赦なく詰られ、頬や尻を張られ、殴られる
+			PRINTFORML 不久他们开始休息，他们理所当然地聚集在%ANAME(対象)%身边，开始侵犯她
+			;TranslatedMark やがて彼らが休憩に入ると、彼らは当然のように%ANAME(対象)%に群がり、彼女を犯し始めた
+			PRINTFORML 结果，%ANAME(対象)%一刻不停地被他们用来满足性欲，最后两穴再也合不上了……
+			;TranslatedMark 結局、その両穴が閉じなくなるまで、%ANAME(対象)%は犯され続けた……
+		ENDIF
+	CASE 2
+		IF 陥落済み
+			PRINTFORML 被带到土匪据点的%ANAME(対象)%，为了证明自己身上没有武器，被迫接受了身体检查
+			;TranslatedMark 野盗のアジトに連れ込まれた%ANAME(対象)%は、武器を持っていないことを証明するため、身体検査をしてもらった
+			PRINTFORML 所谓的检查实际上不过是他们用来进行凌辱的名义，然而%ANAME(対象)%却在他们那丝毫不顾及自己感受的爱抚手法下，主动将身体献出来配合他们
+			;TranslatedMark 検査と言っても名ばかりのもの、その実態は陵辱だが、%ANAME(対象)%は彼らの自分勝手な愛撫に、積極的己の身体を捧げている
+			PRINTFORML 说着“还没检查完”的话，那些男人把阴茎插进了她身上所有能用的三个洞，%ANAME(対象)%只能用喉咙发出呜呜的声音，激烈地绝顶了
+			;TranslatedMark まだ検査が足りないと、男達が彼女のあらゆる穴にペニスをねじ込んでいくと、%ANAME(対象)%はくぐもった声をあげながら激しく絶頂する
+			PRINTFORML %ANAME(対象)%在快乐中迷乱着，淫荡地扭动着腰，用自己的雌穴子宫接受他们的种子
+			;TranslatedMark %ANAME(対象)%は快楽にヨガりながらも淫らに腰を振り、彼らの種を己の肉畑で受け止めていく
+			PRINTFORML 不久，“检查”结束之后，%ANAME(対象)%自己进入了监牢，用手抚慰着自己还沉浸在性交余韵中兴奋着的身体，开始等待被他们再次召唤的时候……
+			;TranslatedMark やがて「検査」が終了すると、%ANAME(対象)%は自ら牢に入り、性交の余韻に昂ぶる身体を慰めながら、また呼ばれるときを待ち始めた……
+		ELSE
+			PRINTFORML 被带回土匪据点的%ANAME(対象)%，为了调查了身上是否藏有武器，被迫进行了身体检查
+			;TranslatedMark 野盗のアジトに連れ帰られた%ANAME(対象)%は、武器を隠し持っていないか調べると、身体検査にかけられた
+			PRINTFORML 所谓的检查不过是个名义，那些男人用手玩弄着她的%STR_BODY("胸：修飾", 対象)%乳房、%STR_BODY("尻", 対象)%、%STR_BODY("陰唇：処女確認：修飾", 対象)%秘部，强制性地激起她的快感
+			;TranslatedMark 検査といっても名ばかりのもので、男達の手は彼女の%STR_BODY("胸：修飾", 対象)%乳房を、%STR_BODY("尻", 対象)%を、%STR_BODY("陰唇：処女確認：修飾", 対象)%秘部を弄り、無理矢理に快楽を引き出していく
+			PRINTFORML 他们觉得光这样检查还不够，于是把自己的肉棒插进了%ANAME(対象)%的身上的所有洞里
+			;TranslatedMark それだけではまだ検査が不十分だと、彼らは己の一物を、%ANAME(対象)%のあらゆる穴にねじ込んでいく
+			PRINTFORML 将抵抗的%ANAME(対象)%强行压住，一个接一个地把他们的“种子”植入了她的体内
+			;TranslatedMark 暴れる%ANAME(対象)%を無理矢理に押さえつけては、次から次へ種を植え付けていく
+			PRINTFORML 结果，等到%ANAME(対象)%被解放，关进牢狱的时候，她已经疲惫不堪，进入了失神状态……
+			;TranslatedMark 結局、%ANAME(対象)%が解放され、牢に放り込まれたときには、彼女は疲弊しきって放心状態になっていた……
+		ENDIF
+	CASE 3
+		IF 陥落済み
+			PRINTFORML 将自己献给土匪的%ANAME(対象)%，被剥掉衣服，眼睛被蒙上，身体被锁链和绳子束缚着……不过即使没有那样的东西，她也不会反抗吧
+			;TranslatedMark 野盗に自ら身を差し出した%ANAME(対象)%は、服を剥かれ、目隠しや枷や縄で拘束された……そんなものがなくとも、抵抗しなかったろうが
+			PRINTFORML 他们抬起了%ANAME(対象)%，把她就那样放置在了流浪者们聚集的地方
+			;TranslatedMark 彼らは%ANAME(対象)%を担ぎ上げると、浮浪者の溜まり場に彼女の身柄を放置した
+			PRINTFORML 自然，%ANAME(対象)%很快就被流浪者发现了。意识到之后会被做什么的%ANAME(対象)%，在期待中不自觉流出的爱液濡湿了股间
+			;TranslatedMark 当然、%ANAME(対象)%はすぐ浮浪者に見つかった。これから何をされるか察した%ANAME(対象)%は、期待に股を濡らす
+			PRINTFORML 流浪者们一边嘲笑着露出那种痴态的她是个变态淫乱女，一边不断地把他们肮脏的阴茎插进%ANAME(対象)%身体里……
+			;TranslatedMark そんな彼女を変態だ淫乱だと嘲笑いながら、浮浪者たちは汚らしいペニスを次から次へ%ANAME(対象)%にねじ込んでいく……
+			PRINTFORML 一切都结束后，土匪们捂着鼻子，把像是坏掉一样露出阿嘿颜、满身都是白浊液被丢到垃圾场的%ANAME(対象)%带回去了。
+			;TranslatedMark だらしないアヘ顔を晒し、白濁まみれで生ゴミ捨て場に放置された%ANAME(対象)%を、野盗どもは鼻を摘まみながら連れて帰った
+		ELSE
+			PRINTFORML 被土匪抓住的%ANAME(対象)%，被他们剥掉了衣服，为了不让她进行任何的抵抗，他们把她的眼睛蒙住，用锁链和绳子拘束着她的身体
+			;TranslatedMark 野盗に捕らえられた%ANAME(対象)%は、服を剥かれ、何一つ抵抗できないよう、目隠しや枷や縄でがんじがらめに拘束された
+			PRINTFORML 土匪们抬起了%ANAME(対象)%，把她就那样放置在了流浪者们聚集的地方
+			;TranslatedMark 野盗どもは%ANAME(対象)%を担ぎ上げると、浮浪者の溜まり場に彼女の身柄を放置した
+			PRINTFORML 自然，%ANAME(対象)%很快就被流浪者发现了。与土匪们有关系的他们当然不会有想去拯救%ANAME(対象)%的那种好心
+			;TranslatedMark 当然、%ANAME(対象)%はすぐ浮浪者に見つかった。野盗とつながりのある彼らに、%ANAME(対象)%を救い出すような良心など当然ない
+			PRINTFORML 更甚的是，没怎么见过女人的他们，把他们肮脏的阴茎一个接一个地插进了%ANAME(対象)%身体里……
+			;TranslatedMark それどころか、女日照りの彼らは、汚らしいペニスを次から次へ%ANAME(対象)%にねじ込んでいく……
+			PRINTFORML 一切都结束后，土匪们捂着鼻子，把满身沾满白浊被丢到垃圾场里的%ANAME(対象)%带回去了。
+			;TranslatedMark 白濁まみれで生ゴミ捨て場に放置された%ANAME(対象)%を、野盗どもはくせぇくせぇと鼻を摘まみながら連れて帰った
+		ENDIF
+ENDSELECT
+RESETCOLOR
+CALL FUCK_GANGBANG_SP(対象, GET_SPERM_ID("土匪"), @"土匪的\@ RAND:2 ? 肉棒 # 唇\@", "土匪", GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_野盗))
+
+
+;-----------------------------------
+;野盗に捕らえられたときのイベント
+;-----------------------------------
+@MASTER_CAPTURED_BANDIT(ARG:0)
+PRINTFORMW %ANAME(MASTER)%被抓住后拖到了土匪面前…
+;TranslatedMark 捕らえられた%ANAME(MASTER)%は野盗の前に引きずり出された…
+IF IS_MALE(MASTER)
+	PRINTFORMW 土匪见了%ANAME(MASTER)%，判断他正好适合当士兵
+	;TranslatedMark 野盗は%ANAME(MASTER)%を見、兵士にちょうどいいと判断したらしい
+	PRINTFORMW “如果来我们这边的话，可以让你很舒服哦？”他们这样说着
+	;TranslatedMark 俺達の側につくなら、イイ思いをさせてやるぜ？　と言った
+	PRINTFORMW 虽然会被当做奴隶来对待，但至少待遇似乎比拒绝要好点……
+	;TranslatedMark 奴隷という扱いにはなるようだが、拒否するより待遇はマシになるようだ……
+	PRINTFORMW 要接受吗？
+	;TranslatedMark 受け入れますか？
+	CALL ASK_YN("接受", "拒絶")
+	IF RESULT == 0
+		PRINTFORMW 比被丢到监狱里要好吧。%ANAME(MASTER)%点了点头之后，土匪露出了奸笑
+		;TranslatedMark 投獄されるよりはマシだろう。%ANAME(MASTER)%が頷くと、野盗はニヤリと笑う
+		PRINTFORMW “给这个不明白我们在笑什么的%ANAME(MASTER)%弄一个奴隶的证明。”他们说出了这样的话
+		;TranslatedMark 何を笑っているのかといぶかる%ANAME(MASTER)%に、奴隷としての証をつけてやるよと彼らは言い出した
+		PRINTFORMW %ANAME(MASTER)%被戴上了坚固的项圈……
+		;TranslatedMark %ANAME(MASTER)%に、頑丈な首輪が嵌められた……
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%成为了土匪的部下
+		;TranslatedMark %ANAME(MASTER)%は野盗の配下となりました
+		RESETCOLOR
+	ELSE
+		PRINTFORMW “我和你们没什么好说的”下定决心的%ANAME(MASTER)%毅然说道
+		;TranslatedMark お前達になど手を貸すか。%ANAME(MASTER)%は毅然として言い放つ
+		PRINTFORMW “这样啊”他们对此兴致缺缺地说道，然后直接把%ANAME(MASTER)%丢进监狱里了……
+		;TranslatedMark そうかよと、彼らはそのまま興味なさげに、%ANAME(MASTER)%を投獄した……
+	ENDIF
+ELSEIF GETBIT(TALENT:MASTER:特殊勢力陥落系, 特殊勢力_野盗)
+	PRINTFORMW 一边说着“我们的肉便器酱回来了”的他们，围在%ANAME(MASTER)%身边
+	;TranslatedMark 肉便器ちゃんが戻ってきたぜと、彼らは%ANAME(MASTER)%を取り囲む
+	PRINTFORMW 看到在眼前突出来的肉棒，%ANAME(MASTER)%的秘部因为回想起被他们刻印在身体上的快乐而开始湿润
+	;TranslatedMark 眼前にペニスを突き出され、%ANAME(MASTER)%の身体は、彼らに刻み込まれた快楽を思い出して濡れてしまう
+	PRINTFORMW 当%ANAME(MASTER)%的声音开始变得妩媚淫荡时，他们问道“你要回来我们这边吗？”
+	;TranslatedMark %ANAME(MASTER)%の声が甘く蕩け始めた頃、また俺達のところに来るか？　と彼らは尋ねる
+	PRINTFORMW 要接受吗？
+	;TranslatedMark 受け入れますか？
+	CALL ASK_YN("接受", "拒絶")
+	IF RESULT == 0
+		PRINTFORMW 在他们调教下育成的雌性本能，让%ANAME(MASTER)%禁不住点头同意
+		;TranslatedMark 彼らによって育て上げられた雌の本性が、%ANAME(MASTER)%を頷かせた
+		PRINTFORMW 为了表示再次服从，%ANAME(MASTER)%对伸到她脸上的阴茎进行了热烈的亲吻……
+		;TranslatedMark 再び服従しますという意思表示として、%ANAME(MASTER)%は突き出されたペニスに熱烈なキスをした……
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%想起了自己只是个土匪性奴隶的记忆
+		;TranslatedMark %ANAME(MASTER)%は、自分が野盗の性奴隷にすぎないことを思い出した
+		RESETCOLOR
+	ELSE
+		PRINTFORMW 没想到会被拒绝的土匪们大笑起来
+		;TranslatedMark 拒否されるということは考えになかったらしく、野盗達は爆笑した
+		PRINTFORMW “你打算逞强到什么时候呢？”，说着这样的话，土匪把唾液吐到了%ANAME(MASTER)%身上
+		;TranslatedMark その強がりがいつまで続くかなと、%ANAME(MASTER)%に唾を吐きかける
+		PRINTFORMW 土匪们给%ANAME(MASTER)%戴上手铐和脚镣，关进监狱了……
+		;TranslatedMark 野盗達は%ANAME(MASTER)%に手枷と足枷を嵌め、投獄した……
+	ENDIF
+ELSE
+	PRINTFORMW 土匪用下流的眼光望着%ANAME(MASTER)%的身体
+	;TranslatedMark 野盗は%ANAME(MASTER)%の体をいやらしい目で眺める
+	PRINTFORMW 他们开始说“反正结果也是一样的，给我们当性奴隶吧”
+	;TranslatedMark どうせ結果は同じなんだから、性奴隷になっちまえよと言い始めた
+	PRINTFORMW 这是一个屈辱的提议，即便不接受，作为女人的%ANAME(MASTER)%也无法改变什么
+	;TranslatedMark 屈辱的な提案だが、受け入れずとも、女である%ANAME(MASTER)%がされることは変わるまい
+	PRINTFORMW 要接受吗？
+	;TranslatedMark 受け入れますか？
+	CALL ASK_YN("接受", "拒絶")
+	IF RESULT == 0
+		PRINTFORMW 即使不接受，也无法改变会被他们做的事
+		;TranslatedMark 受け入れなくとも、どうせされることは変わらない
+		PRINTFORMW 那么，还是表现出顺从的姿态比较好……%ANAME(MASTER)%无力地点头
+		;TranslatedMark なら、従順な姿勢を見せた方が、まだ待遇はマシなはずだ……%ANAME(MASTER)%は力なく頷く
+		PRINTFORMW 说着“真的接受了”的土匪们哈哈大笑
+		;TranslatedMark マジで受け入れやがったぜと、野盗どもはゲラゲラと笑う
+		PRINTFORMW 他们抓住了%ANAME(MASTER)%，在其下腹部，刻上了“性奴隶”三个字的印记……
+		;TranslatedMark 彼らは%ANAME(MASTER)%を取り押さえ、その下腹に、「性奴隷」の三文字の焼き印を入れた……
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%变成了土匪的性奴隶
+		;TranslatedMark %ANAME(MASTER)%は野盗の性奴隷に成り下がった
+		RESETCOLOR
+	ELSE
+		PRINTFORMW “那种事怎么可能接受”，听到了%ANAME(MASTER)%断然拒绝，土匪们哈哈大笑
+		;TranslatedMark そんなことができるか。%ANAME(MASTER)%がきっぱりと拒否すると、野盗はへらへらと笑う
+		PRINTFORMW “你打算逞强到什么时候呢？”，说着这样的话，土匪把唾液吐到了%ANAME(MASTER)%身上
+		;TranslatedMark その強がりがいつまで続くかなと、%ANAME(MASTER)%に唾を吐きかける
+		PRINTFORMW 土匪们给%ANAME(MASTER)%戴上手铐和脚镣，关进监狱了……
+		;TranslatedMark 野盗達は%ANAME(MASTER)%に手枷と足枷を嵌め、投獄した……
+	ENDIF
+ENDIF
+IF RESULT == 0
+	CALL CHANGE_COUNTRY(MASTER, ARG:0, 1)
+	IF IS_FEMALE(MASTER)
+		SETBIT TALENT:MASTER:特殊勢力陥落系, 特殊勢力_野盗
+		CALL PLAYER_FALLEN_TO_SP_COUNTRY(ARG:0)
+	ENDIF
+	CALL BANDIT_FALLEN_LEAVE_MARK(MASTER)
+	RETURN 0
+ELSE
+	CALL CAPTURE(MASTER, ARG:0)
+	RETURN 2
+ENDIF
+
+;--------------------------------------
+;エンディング
+;--------------------------------------
+@BANDIT_ENDING
+PRINTFORML 在幻想乡以迅雷之势不断扩张的土匪势力
+;TranslatedMark 幻想郷に瞬く間に広がった野盗の勢力は、
+PRINTFORMW 转眼间就覆盖了幻想乡全境
+;TranslatedMark あっという間に幻想郷全土を覆い尽くした
+PRINTFORML 他们的据点里，几个，不，几十个被捕获的少女，都被迫成为了他们性欲的牺牲品
+;TranslatedMark 彼らの拠点には何人、いや何十人という少女が捕らえられ、彼らの性欲の犠牲となっている
+PRINTFORMW 但是，没有人阻止这一切。因为反抗他们的人全部都被消灭了……
+;TranslatedMark だが、それを止める者はいない。彼らに刃向かう者は全て、滅ぼされてしまったのだから……
+IF CFLAG:MASTER:所属 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_野盗) && IS_FEMALE(MASTER)
+	PRINTFORMW 
+	PRINTFORMW 在庆祝幻想乡统一的酒宴上，也有%ANAME(MASTER)%的身影
+	;TranslatedMark 幻想郷統一を祝う酒宴に、%ANAME(MASTER)%の姿もあった
+	PRINTFORMW 作为让土匪势力能够扩张到这种程度的大功臣，她在这一军队里的待遇算是女性之中比较好的了
+	;TranslatedMark 彼女は野盗勢力がここまで広まる立役者であり、この軍において、女でありながら比較的待遇は良い
+	PRINTFORMW ……虽说如此，但一样需要接受作为女性的一些要求
+	;TranslatedMark ……女にしては、という但し書きつきであるが
+	PRINTFORML 一个喝醉了的强盗，用意味深长的眼神看着她
+	;TranslatedMark 酔っ払った野盗の一人が、意味深な目配せをする
+	PRINTFORML 于是，%ANAME(MASTER)%脱下衣服，开始吮吸他的肉棒，还发出了吮吸声
+	;TranslatedMark すると、%ANAME(MASTER)%は服を脱ぎ捨て、音をたてて彼の一物をしゃぶりはじめる
+	PRINTFORMW 看到她这个样子而兴奋的另一个男人，把肉棒插进了%ANAME(MASTER)%的秘部，%ANAME(MASTER)%因此忍不住发出妩媚的呻吟，摇动着腰身
+	;TranslatedMark その様を見て興奮した別の男が、%ANAME(MASTER)%の秘部に肉棒をねじ込むと、%ANAME(MASTER)%はたまらないといった声を上げ、腰を振る
+	PRINTFORML ……处于土匪们中心的她，脑海最深处已经染上了他们的思想
+	;TranslatedMark ……野盗の中心にいるということは、一番深く彼らの思想に染まっているということでもある
+	PRINTFORMW 女人是男人的性奴隶。这已经深深地刻在了%ANAME(MASTER)%的头脑之中……
+	;TranslatedMark 女は男の性奴隷。%ANAME(MASTER)%の頭には、それが心底まで刻み込まれているのだ……
+	CALL FUCK_SP(MASTER, "欲望, 性交, 奉仕, 精愛, 性技, Ｖ, Ｂ, Ｃ, Ａ, 口淫, 薬物依存, 輪姦, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 接吻喪失, 膣内射精, 腸内射精, 口内射精", GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_野盗), GET_SPERM_ID("土匪"), @"土匪的\@ RAND:2 ? 唇 # 肉棒 \@", "土匪", "", "輪姦")
+ENDIF
+PRINTFORML 
+PRINTFORMW 在这已经没有救世主的地方，只剩下女人的娇声和男人的骂声在不断回响……
+;TranslatedMark もはや救世主などない地に、ただただ女の嬌声と男の罵声が響き渡り続ける……

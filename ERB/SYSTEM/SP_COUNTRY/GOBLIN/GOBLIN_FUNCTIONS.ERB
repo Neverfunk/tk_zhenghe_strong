@@ -1,0 +1,371 @@
+﻿;--------------------------------------
+;ターンエンド時のホフゴブリンの処理
+;--------------------------------------
+@TURNEND_GOBLIN
+#DIM ホフゴブリン
+ホフゴブリン = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン)
+
+;兵力の増える処理
+IF DAY % 3 == 0
+	CALL SINGLE_DRAWLINE
+	LOCAL:0 = MAX(RAND:3000, 1000)
+	LOCAL:0 += RAND:500 * SP_COUNTRY_RANK:(特殊勢力_ホフゴブリン)
+	PRINTFORML 聽説只要加入哥布林就能一起分享女人的流浪妖怪們、接連地背叛到了那辺……
+	;TranslatedMark ホフゴブリンにつけばおこぼれにあずかれると聞いた野良妖怪たちが、次々と寝返っているようです……
+	PRINTFORML 哥布林的兵力増加了{LOCAL:0}
+	;TranslatedMark ホフゴブリンの兵力が{LOCAL:0}増加した
+	COUNTRY_SOLDIER:ホフゴブリン += LOCAL:0
+ENDIF
+;4ターンに1回、特別な徴兵(ホフゴブリン拡張パッチ)プレイヤー勢力であるときはスキップ
+IF STATUE_GOBLIN_COUNCIL:1
+	CALL GOBLIN_SPECIAL_REQRUITMENT(1)
+ELSEIF CFLAG:MASTER:所属 != ホフゴブリン
+	CALL GOBLIN_SPECIAL_REQRUITMENT(DAY % 4 == 0)
+ENDIF
+
+;--------------------------------------
+;滅亡時の処理
+;--------------------------------------
+@GOBLIN_DESTROY_MSG
+CALL SINGLE_DRAWLINE
+SETCOLOR カラー_注意
+PRINTFORML
+PRINTFORML
+PRINTFORML
+PRINTFORMW 遭到了毀滅性破坏的哥布林、四散逃離了
+;TranslatedMark 壊滅的な被害を受けたホフゴブリンは、ちりぢりに四散していきました
+PRINTFORMW 因為八雲紫的「消☆滅」、所以応該会老実一段時間吧……
+;TranslatedMark 八雲紫が「めっ☆（滅っ）」したようなので、しばらくは大人しくしていることでしょう……
+PRINTFORML
+PRINTFORML
+PRINTFORML
+RESETCOLOR
+
+;--------------------------------------
+;ホフゴブリンの初期化処理
+;--------------------------------------
+@GOBLIN_INIT(ARG:0)
+#DIM LCOUNT
+VARSET LOCAL
+
+SIF GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン) != -1
+	RETURN 0
+
+SIF SP_COUNTRY_RANK:特殊勢力_ホフゴブリン == 0
+	RETURN 0
+
+SIF GET_NEW_COUNTRY() == -1
+	RETURN 0
+
+CALL CREATE_SP_COUNTRY(特殊勢力_ホフゴブリン)
+LOCAL = RESULT
+CALL INIT_SP_COUNTRY(LOCAL)
+
+RETURN LOCAL
+
+;-------------------------------------------------
+;DESC  :ホフゴブリン所属時に閨・捕虜調教前にアイテムを追加する処理
+;-------------------------------------------------
+@START_TRAIN_COMMON_GOBLIN()
+ITEM:A_振動棒 = 1
+ITEM:A_肛用振動棒 = 1
+ITEM:A_縄 = 1
+ITEM:A_眼罩 = 1
+ITEM:A_口枷 = 1
+ITEM:A_鼻勾 = 1
+ITEM:A_媚薬 = 99
+ITEM:A_排卵誘発剤 = 99
+ITEM:A_精力超群丸 = 99
+
+
+@SELECT_CHARA_RANDOM_LOGIC_GOBLIN_SPECIAL_REQRUITMENT(対象)
+#DIM 対象
+#DIM ゴブリン
+
+ゴブリン = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_ホフゴブリン))
+
+;ゴブリン所属で、捕虜でなく、陥落済み
+RETURN CFLAG:対象:所属 == ゴブリン && !CFLAG:対象:捕虜先 && IS_FEMALE(対象) && GETBIT(TALENT:対象:特殊勢力陥落系, 特殊勢力_ホフゴブリン)
+
+;--------------------------------------
+;ホフゴブリンの定期イベント。
+;陥落済みキャラを使って兵数を増やす
+;--------------------------------------
+@GOBLIN_SPECIAL_REQRUITMENT(条件 = 1)
+#DIM ゴブリン
+#DIM 条件
+#DIM 対象
+#DIM メッセージ
+
+ゴブリン = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_ホフゴブリン))
+
+;ゴブリン勢力があり、条件を満たしている
+SIF ゴブリン == -1 || !条件
+	RETURN -1
+
+CALL SELECT_CHARA_RANDOM("GOBLIN_SPECIAL_REQRUITMENT")
+
+対象 = RESULT
+
+SIF 対象 == -1
+	RETURN 0
+
+
+CALL SINGLE_DRAWLINE
+SETCOLOR カラー_ピンク
+PRINTFORML 哥布林好像把%ANAME(対象)%赶出了士兵的招募活动……
+;TranslatedMark ホフゴブリンは%ANAME(対象)%を、兵士の募集活動に駆り出したようだ……
+PRINTFORML 
+メッセージ = RAND:4
+SELECTCASE メッセージ
+	CASE 0
+		PRINTFORMW 他們趕往了附近的村子
+		;TranslatedMark 彼らは近くの人里に繰り出した
+		PRINTFORML %ANAME(対象)%跟在他們的後面、亦歩亦趋
+		;TranslatedMark %ANAME(対象)%は彼らの一歩後ろを歩き、付き従っている
+		PRINTFORML 乍一看和平時一樣的她、顕得非常普通
+		;TranslatedMark ぱっと見は普段の彼女であり、いたって普通だった
+		PRINTFORMW ……但是仔細観察的話、%ANAME(対象)%有些歩履蹣跚
+		;TranslatedMark ……その足取りは、%ANAME(対象)%にしては珍しいほどふらついていたが
+		PRINTFORML 他們来到了村子中心的廣場処、開始召集村子裡的男人們
+		;TranslatedMark 彼らは里の中心、広場まで来ると、そこで里の男達をかき集めた
+		PRINTFORML 想着発生了什麼的人類和妖怪們為了看熱鬧而聚集了起来、很快廣場就被囲満了
+		;TranslatedMark 何事かと思った野次馬が人妖問わず集まり、広場はあっという間に埋まる
+		PRINTFORMW 然後哥布林、為了讓所有人都聽的清楚、開始大声的演講
+		;TranslatedMark そこでホフゴブリンは、全員によく聞こえるよう、大声でスピーチを始めた
+		PRINTFORMW 如果加入俺們的話就会有非常好的事情。今天就要展示那件事……
+		;TranslatedMark 俺たちに参加すればものすごくいいことがある。それを今日は見せてやる……
+		PRINTFORML 哥布林向%ANAME(対象)%递了個眼神、她慢慢地脱下了衣服
+		;TranslatedMark ホフゴブリンが%ANAME(対象)%に目配せすると、彼女はおもむろに服を脱ぎ捨てた
+		PRINTFORML 突然暴露出的美艶的肢体、讓所有人都死死的盯着
+		;TranslatedMark 突如として露わになる美しい肢体に、皆の目は釘付けになる
+		PRINTFORMW \@ TATTOO:(対象):タトゥー_秘部 != "" ? 在下腹部刻有「%TATTOO:対象:タトゥー_秘部%」的纹身、 # \@两个孔里都塞着粗壮的振动器
+		;TranslatedMark \@ TATTOO:(対象):タトゥー_秘部 != "" ? その下腹には「%TATTOO:対象:タトゥー_秘部%」のタトゥーが刻まれ、 # \@両穴には太いバイブがねじ込まれていた
+		PRINTFORML 這個女人是俺們的奴隸。今天只是帯来了這傢伙、其他的女人還有很多……
+		;TranslatedMark この女は俺たちの奴隷だ。今日はコイツを連れてきたが、他にも女はいくらでもいる……
+		PRINTFORML 哥布林們一辺讓%ANAME(対象)%吸吮着自己的肉棒、一辺説着勧誘的話
+		;TranslatedMark %ANAME(対象)%に己の肉棒をしゃぶらせながら、ホフゴブリンたちは勧誘の言葉を並べたてる
+		PRINTFORMW 不久後哥布林射精了、噴了%ANAME(対象)%一臉、然後抱起%ANAME(対象)%、扔到了群衆之中
+		;TranslatedMark やがてホフゴブリンは射精し、%ANAME(対象)%の顔にぶちまけると、%ANAME(対象)%を抱え、群衆の中に放り投げる
+		PRINTFORMW 這個女人就是招待。隨意使用吧
+		;TranslatedMark この女はサービスだ。好きにしていいぞ
+		PRINTFORMW 聽到哥布林這麼説後、男人們変了臉色、囲住了%ANAME(対象)%……
+		;TranslatedMark ホフゴブリンがそう言うと、男達は目の色を変え、%ANAME(対象)%に群がった……
+	CASE 1
+		CALL SET_PIERCE_RANDOM(対象, 0)
+		SIF RESULT == -1
+			RESULT = ピアス_乳首
+		PRINTFORMW 他們趕往了附近的村子
+		;TranslatedMark 彼らは近くの人里に繰り出した
+		PRINTFORML %ANAME(対象)%脖子上带着牵着绳子的项圈、在村子的大路上走着
+		;TranslatedMark %ANAME(対象)%はリードつきの首輪を嵌められ、里の目抜き通りを歩かされている
+		PRINTFORML 嘴巴里塞着滑稽的口塞球、身上穿着完全遮盖不住重要部位的奴隶服
+		;TranslatedMark 口にはギャグボールを嵌められ、羽織っているのは肝心なところをまるで隠さない奴隷用ボンデージ
+		PRINTFORML 全身上下都写满了猥琐的涂鸦。而且、%GET_PIERCE_NAME(RESULT)%上还传来圆环穿孔带来的疼痛
+		;TranslatedMark 全身にはあちこちに卑猥な落書きが施されている。さらに、%GET_PIERCE_NAME(RESULT)%に痛々しいピアスが取り付けられている
+		PRINTFORMW 在出发之前就已经被「使用」了无数次、全身都是白色的污垢。特别是那两个肉穴里、大股地流出粘稠的白浊
+		;TranslatedMark 拠点を出る前に何度も「使われて」おり、全身べっとりと白いものにまみれている。特にその両穴は、でろでろと白濁を垂れ流す
+		PRINTFORML 双手被沉重的镣铐固定住、完全无法进行抵抗
+		;TranslatedMark 腕には頑丈な枷が嵌められており、抵抗などできるはずもなかった
+		PRINTFORMW 不过、对哥布林"大人"的忠诚无比的%ANAME(対象)%、也不可能有反抗这种狂妄的念头……
+		;TranslatedMark もっとも、ホフゴブリン"様"たちの忠実なしもべである%ANAME(対象)%に、そんな大それた考えはあるまいが……
+		PRINTFORML 村里的男人们、一边踱步一边迟疑地看着他们
+		;TranslatedMark 里の男達は、練り歩く彼らをじっと眺めている
+		PRINTFORMW 准确来说、是看着%ANAME(対象)%淫荡的身姿
+		;TranslatedMark 正しくは、%ANAME(対象)%の淫らな姿を
+		PRINTFORMW 哥布林们桀桀地笑着说道
+		;TranslatedMark ホフゴブリンはニヤニヤと笑いながら言う
+		PRINTFORML 那么在意俺们的奴隶吗？加入俺们的话、还有比这更好的任你们选！
+		;TranslatedMark 俺たちの奴隷がそんなに気になるか、俺たちに参加すればコイツ以外にもヤり放題だ
+		PRINTFORMW 今天就来个特别招待、让你们先来玩一玩这个家伙……
+		;TranslatedMark 特別に今回は、お前らにコイツを好きにさせてやるよ……
+		PRINTFORMW 聽到哥布林這麼説後、男人們変了臉色、囲住了%ANAME(対象)%……
+		;TranslatedMark ホフゴブリンがそう言うと、男達は目の色を変え、%ANAME(対象)%に群がった……
+	CASE 2
+		PRINTFORMW 哥布林们把%ANAME(対象)%和其她奴隶一起、当做是肉便器来向居民们提供服务
+		;TranslatedMark 彼らは%ANAME(対象)%を、他の奴隷と一緒に肉便器として提供した
+		PRINTFORMW 她们被嵌在室外的「特設便所」的墙壁上、屁股毫无防备地暴露在墙壁的另一边
+		;TranslatedMark 彼女らは屋外に設けられた「特設便所」にて、壁尻の状態で備え付けられた
+		PRINTFORML 不论是人类还是妖怪、各色各样的男人们纷纷到来、使用着%ANAME(対象)%的两个肉穴
+		;TranslatedMark 人妖問わず、さまざまな男達が訪れては、%ANAME(対象)%の両穴を使っていく
+		PRINTFORML 就像是自慰时对着手纸射精一样轻松愉快、就那样子毫无顾虑地在阴道和肛门里射精了
+		;TranslatedMark 自らモノを扱いてちり紙に射精するときの気軽さで、簡単に膣内射精していく
+		PRINTFORMW 被当做肉便器使用虐待的快感、让%ANAME(対象)%无数次的绝顶了……
+		;TranslatedMark 使い捨てられる被虐と快楽に、%ANAME(対象)%は何度も激しく絶頂する……
+		PRINTFORMW 在肉便器活动结束后、%ANAME(対象)%的%STR_BODY("尻", 対象)%已经写满了两只手都数不过来的「正」字
+		;TranslatedMark やがてコトが終わるころには、%ANAME(対象)%の%STR_BODY("尻", 対象)%には両手に余る正の字が書き込まれていた
+		PRINTFORML 她的肉穴变成了远近闻名的宝贝
+		;TranslatedMark 彼女の穴は大変評判がよかったらしい
+		PRINTFORMW 作为对%ANAME(対象)%的「奖赏」、哥布林"大人"用肉棒喂给她了新鲜的精液……
+		;TranslatedMark %ANAME(対象)%はその「褒美」として、ホフゴブリン"様"たちのモノをたっぷりとしゃぶらせてもらった……
+	CASE 3
+		PRINTFORMW 哥布林们把%ANAME(対象)%和其她奴隶一起、当做是肉便器来向居民们提供服务
+		;TranslatedMark 彼らは%ANAME(対象)%を、他の奴隷と一緒に肉便器として提供した
+		PRINTFORML 她们被放置在室外的「特設便所」内、脸冲着墙上开出的小洞
+		;TranslatedMark 彼女らは屋外に設けられた「特設便所」にて、グローリーホールをしたようだ
+		PRINTFORMW 不论是人类还是妖怪、各色各样的男人们纷纷到来、把肉棒穿过小洞伸进墙里
+		;TranslatedMark 人妖問わず、さまざまな男達が訪れては、壁越しにペニスを突き出してくる
+		PRINTFORML 粗大的、细小的、积攒了很多包皮垢的
+		;TranslatedMark 太いもの、細いもの、逞しいものから恥垢を溜めたもの
+		PRINTFORML 无论是什么样在的肉棒、股间早已湿透的%ANAME(対象)%都带着淫荡的表情、全力舔舐着
+		;TranslatedMark それら全てを、%ANAME(対象)%は顔を蕩かし、股を濡らしながら舐めしゃぶっていく
+		PRINTFORMW 情欲之火在%ANAME(対象)%的心中熊熊燃烧、她在侍奉过程中自慰了无数回、一次接一次地绝顶了
+		;TranslatedMark 官能の炎は%ANAME(対象)%の中で激しく燃え上がり、彼女は仕事中に何度も自慰をし、絶頂した
+		PRINTFORMW 在肉便器活动结束后、上半身涂满了无数的白浊、已经找不到没有覆盖白色污垢的地方了
+		;TranslatedMark やがてコトが終わるころには、何度も白濁を受けた上半身に、白く汚れていないところはないほどになっていた
+		PRINTFORML 她的口技变得广受推崇
+		;TranslatedMark 彼女の口技は大変評判がよかったらしい
+		PRINTFORMW 作为对%ANAME(対象)%的「奖赏」、哥布林"大人"们充分「使用」了她骚痒难耐的身体……
+		;TranslatedMark %ANAME(対象)%はその「褒美」として、疼く身体をホフゴブリン"様"たちにたっぷりと使っていただいた……
+ENDSELECT
+
+PRINTFORML
+SETCOLOR カラー_注意
+LOCAL:0 = MAX(RAND:3000, 1000)
+PRINTFORML 活動得到了好評……
+;TranslatedMark キャンペーンは好評だったようだ……
+PRINTFORMW 哥布林的兵力増加了{LOCAL:0}
+;TranslatedMark ホフゴブリンの兵力が{LOCAL:0}増加した
+RESETCOLOR
+COUNTRY_SOLDIER:(ゴブリン) += LOCAL:0
+
+;-----------------------------
+;ホフゴブリンに捕らえられたときのイベント
+;-----------------------------
+@MASTER_CAPTURED_GOBLIN(ARG:0)
+PRINTFORMW 被捉住的%ANAME(MASTER)%被带到了哥布林们面前…
+;TranslatedMark 捕らえられた%ANAME(MASTER)%はホフゴブリンの前に引きずり出された…
+IF IS_MALE(MASTER)
+	PRINTFORMW 哥布林们看着%ANAME(MASTER)%、明明对男人没有兴趣、却还是嘟囔着说道
+	;TranslatedMark ホフゴブリンは%ANAME(MASTER)%を見ると、男なんて要らねぇのになと呟いた
+	PRINTFORMW 跟着俺们混吧、咋样？　大概是在表达这个意思
+	;TranslatedMark 俺達の側につくなら、イイ思いをさせてやるぜ？　と言った
+	PRINTFORMW 虽然这样意味着成为奴隶、但是总比拒绝他们后的遭遇好很多……
+	;TranslatedMark 奴隷という扱いにはなるようだが、拒否するより待遇はマシになるようだ……
+	PRINTFORMW 要接受吗？
+	;TranslatedMark 受け入れますか？
+	CALL ASK_YN("接受", "拒絶")
+	IF RESULT == 0
+		PRINTFORMW 总比被关进牢里好吧。%ANAME(MASTER)%点了点头、哥布林们嘎嘎地大笑着
+		;TranslatedMark 投獄されるよりはマシだろう。%ANAME(MASTER)%が頷くと、ホフゴブリンはゲタゲタと笑う
+		PRINTFORMW %ANAME(MASTER)%被笑的不明所以、哥布林们笑够了之后命令给%ANAME(MASTER)%打上奴隶的标志
+		;TranslatedMark 何を笑っているのかといぶかる%ANAME(MASTER)%に、奴隷としての証をつけてやるよと彼らは言い出した
+		PRINTFORMW 骗人的吧、注意到了什么的%ANAME(MASTER)%产生了恐怖的预感、肉棒就被压上了烧得通红的烙铁……
+		;TranslatedMark 用意された焼きごては、あろうことか、%ANAME(MASTER)%のペニスに押し当てられた……
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%成為了哥布林的性奴隸
+		;TranslatedMark %ANAME(MASTER)%はホフゴブリンの性奴隷となりました
+		RESETCOLOR
+	ELSE
+		PRINTFORMW 我是不会协助你们作恶的。%ANAME(MASTER)%坚毅地说到
+		;TranslatedMark お前達になど手を貸すか。%ANAME(MASTER)%は毅然として言い放つ
+		PRINTFORMW 于是乎、兴致全无的哥布林们、把%ANAME(MASTER)%投进了牢狱……
+		;TranslatedMark そうかよと、彼らはそのまま興味なさげに、%ANAME(MASTER)%を投獄した……
+	ENDIF
+ELSEIF GETBIT(TALENT:MASTER:特殊勢力陥落系, 特殊勢力_ホフゴブリン)
+	PRINTFORMW 你受的教训还不够吗、怎么又被我们抓住了？哥布林们一边把手伸向%ANAME(MASTER)%的身体一边说道
+	;TranslatedMark 懲りずに俺達の前に来たのかよと、彼らは%ANAME(MASTER)%の身体に手を這わせながらささやく
+	PRINTFORMW 仅仅是这样、%ANAME(MASTER)%的身体、就想起了被他们刻入大脑的快感、股间湿透了
+	;TranslatedMark それだけで%ANAME(MASTER)%の身体は、彼らに刻み込まれた快楽を思い出して濡れてしまう
+	PRINTFORMW %ANAME(MASTER)%的呻吟变得荡漾起来、是回来找俺们的吗？　哥布林们问道
+	;TranslatedMark %ANAME(MASTER)%の声が甘く蕩け始めた頃、また俺達のところに来るか？　と彼らは尋ねる
+	PRINTFORMW 要接受吗？
+	;TranslatedMark 受け入れますか？
+	CALL ASK_YN("接受", "拒絶")
+	IF RESULT == 0
+		PRINTFORMW 被他们调教出的雌性本能、让%ANAME(MASTER)%点了点头
+		;TranslatedMark 彼らによって育て上げられた雌の本性が、%ANAME(MASTER)%を頷かせた
+		PRINTFORMW 哥布林们一边说着“欢迎回来”之类的话、一边把象征着家畜身份的项圈带在了%ANAME(MASTER)%的脖子上……
+		;TranslatedMark おかえりという言葉を%ANAME(MASTER)%にかけると、ホフゴブリンはその首に家畜用の首輪を嵌めた……
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%想起了自己身为哥布林的性奴的身份
+		;TranslatedMark %ANAME(MASTER)%は、ホフゴブリンの性奴隷という身分を思い出した
+		RESETCOLOR
+	ELSE
+		PRINTFORMW 哥布林们完全没有想到、会被出乎意料地拒绝
+		;TranslatedMark 拒否されるということは考えになかったらしく、ホフゴブリン達はしばし意外そうにしていた
+		PRINTFORMW 表情马上变得怒不可遏、叫嚷着让%ANAME(MASTER)%去牢里好好想想自己的立场
+		;TranslatedMark やがてその表情を怒りに変えると、牢獄で自分の立場ってもんを思い出させてやるよと吐き捨てた
+		PRINTFORMW 哥布林们把%ANAME(MASTER)%的手脚带上镣铐、扔进了牢里……
+		;TranslatedMark ホフゴブリン達は%ANAME(MASTER)%に手枷と足枷を嵌め、投獄した……
+	ENDIF
+ELSE
+	PRINTFORMW 哥布林们用下流的眼神瞪着%ANAME(MASTER)%的肉体。
+	;TranslatedMark ホフゴブリンは%ANAME(MASTER)%の体をいやらしい目で眺める。
+	PRINTFORMW 发誓成为俺们的性奴隶的话、就给你比现在要多的自由……
+	;TranslatedMark 俺達の性奴隷になることを誓うなら、行動の自由をある程度は認めてやると言い始めた……
+	PRINTFORMW 虽然是屈辱的提案，但即使不接受，作为女人的%ANAME(MASTER)%的下场也是一样的吧。
+	;TranslatedMark 屈辱的な提案だが、受け入れずとも、女である%ANAME(MASTER)%の末路は同じだろう
+	PRINTFORMW 要接受吗？
+	;TranslatedMark 受け入れますか？
+	CALL ASK_YN("接受", "拒絶")
+	IF RESULT == 0
+		PRINTFORMW 即使不接受，终究还是会被侵犯的。这样想着、%ANAME(MASTER)%用力地点了点头。
+		;TranslatedMark 受け入れなくとも、どうせ犯されるのは見えているのだ。%ANAME(MASTER)%は力なく頷く。
+		PRINTFORMW 这样就对了嘛、哥布林们漏出下流的笑容
+		;TranslatedMark そうこなくちゃなと、ホフゴブリンは下卑た笑みを浮かべた
+		PRINTFORMW %ANAME(MASTER)%的身体上、被烙上了标准着性奴隷的刻印……
+		;TranslatedMark %ANAME(MASTER)%の身体に、性奴隷としての焼き印が刻まれた……
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%成為了哥布林的性奴隸
+		;TranslatedMark %ANAME(MASTER)%はホフゴブリンの性奴隷となりました
+		RESETCOLOR
+	ELSE
+		PRINTFORMW 怎么能做那种事呢。%ANAME(MASTER)%果断的拒绝了、哥布林们的脸色变得阴沉起来
+		;TranslatedMark そんなことができるか。%ANAME(MASTER)%がきっぱりと拒否すると、ホフゴブリンは顔をしかめる
+		PRINTFORMW 啊啊是吗、在牢里被操上一万回之后、你就会明白自己的立场了吧
+		;TranslatedMark ああそうかよ、牢獄で一万回くらいヤられりゃ、お前も立場ってもんが分かるだろうさと吐き捨てた
+		PRINTFORMW 哥布林们把%ANAME(MASTER)%的手脚带上镣铐、扔进了牢里……
+		;TranslatedMark ホフゴブリン達は%ANAME(MASTER)%に手枷と足枷を嵌め、投獄した……
+	ENDIF
+ENDIF
+IF RESULT == 0
+	CALL CHANGE_COUNTRY(MASTER, ARG:0, 1)
+	SETBIT TALENT:MASTER:特殊勢力陥落系, 特殊勢力_ホフゴブリン
+	CALL PLAYER_FALLEN_TO_SP_COUNTRY(ARG:0)
+	CALL GOBLIN_FALLEN_LEAVE_MARK(MASTER)
+	RETURN 0
+ELSE
+	CALL CAPTURE(MASTER, ARG:0)
+	RETURN 2
+ENDIF
+
+;--------------------------------------
+;エンディング
+;--------------------------------------
+@GOBLIN_ENDING
+PRINTFORML 哥布林们的潜力爆发出来，足以达到颠覆幻想乡的程度。
+;TranslatedMark ホフゴブリンたちの底力は、幻想郷を転覆させるほどのものだった
+PRINTFORML 原先著名的强者们在数倍于己的力量面前被打得落花流水、先后被哥布林们俘虏了
+;TranslatedMark 名だたる強者たちは数の暴力の前に駆逐され、彼らに捕らえられていった
+PRINTFORMW ……随后，他们成为幻想乡的统治者的日子，终于来到了
+;TranslatedMark ……そして、彼らが幻想郷の支配者となる日が、とうとう訪れた
+PRINTFORML 在哥布林们的据点里、到处都回响着少女们的娇喘声
+;TranslatedMark 彼らの拠点に、少女たちの嬌声が響き渡る
+PRINTFORML 起初进行了抵抗的她们，在哥布林无尽性欲的支配下，被彻底的调教了，不知何时已经完全屈服了。
+;TranslatedMark 最初は抵抗していた彼女らも、ホフゴブリンの強烈な性欲による、徹底した調教の前に、いつしか屈していた
+PRINTFORMW 如今的她们、不过是哥布林们可以随意使用的性奴罢了。再也看不出从前的样貌……
+;TranslatedMark 今や彼女らは、彼らに使える無価値な性奴隷に過ぎない。そこに、かつての面影などなかった……
+IF CFLAG:MASTER:所属 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン) && IS_FEMALE(MASTER)
+	PRINTFORMW 
+	PRINTFORML ……在奴隶之中、也看到了%ANAME(MASTER)%的身影
+	;TranslatedMark ……奴隷どものなかに、%ANAME(MASTER)%の姿もあった
+	PRINTFORMW 被哥布林们包围着，拼命地扭动着腰。
+	;TranslatedMark ホフゴブリンどもに取り囲まれながら、懸命に腰を振っている
+	PRINTFORML 小穴得到了相当高评价的她、在奴隶们之中也获得了比较好的对待
+	;TranslatedMark 膣穴がなかなかいい具合だと評判の彼女は、奴隷どもの中でも比較的ましな扱いを受けていた
+	PRINTFORMW ……虽然这样说、但是毕竟还是奴隶
+	;TranslatedMark ……奴隷にしては、という但し書きつきであるが
+	PRINTFORML 两穴里、嘴巴里都插着肉棒的她脑子里只有一个念头、被哥布林们付种、期待着怀上更多他们的孩子
+	;TranslatedMark 二穴に、そして口に肉棒を咥える彼女の頭の中には、種を付けられること、そして妊娠することへの期待しかなかった
+	PRINTFORMW 完全不顾及子宫被撞到绝顶的%ANAME(MASTER)%、哥布林还在激烈地挺着腰
+	;TranslatedMark 子宮を小突かれ絶頂する%ANAME(MASTER)%をよそに、ホフゴブリンは猛然と腰を振りたくって行く
+	PRINTFORMW %ANAME(MASTER)%无法自控地大声淫叫着、肉穴里被无数次注入浓厚的精液
+	;TranslatedMark %ANAME(MASTER)%は、たまらないといった声をあげ、何度も放たれる精液を肉穴で受け止めていく
+	PRINTFORMW 永远看不到尽头、%ANAME(MASTER)%今后也将沉浸在快感之中……
+	;TranslatedMark 終わることのない悦びに、%ANAME(MASTER)%はこれからも浸り続けるのだ……
+	CALL FUCK_SP(MASTER, "欲望, 精愛, 精愛, 性交, Ａ, Ｖ, Ｍ, 輪姦, 口淫, Ｖ性交, Ａ性交", "膣内射精, 処女喪失, Ａ処女喪失, 接吻喪失, 腸内射精, 口内射精", GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン), GET_SPERM_ID("哥布林"), @"哥布林的\@ RAND:2 ? 唇 # 肉棒 \@", "哥布林", "", "輪姦")
+ENDIF
+PRINTFORML 
+PRINTFORMW 在已经没有救世主的土地上，只有女人的娇喘声在继续回响着……
+;TranslatedMark もはや救世主などない地に、ただただ女の嬌声が響き渡り続ける……

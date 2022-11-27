@@ -1,0 +1,102 @@
+;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_1_PERSONAL_0_EXIST
+RETURN 1
+
+@SKILL_1_PERSONAL_0_NAME
+RESULTS = 宝具「阴阳鬼神玉」
+
+;レベルは1-5まで
+@SKILL_1_PERSONAL_0_LEVEL
+RETURN 4
+
+;対象選択
+@SKILL_1_PERSONAL_0_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 1
+
+;発動判定
+@SKILL_1_PERSONAL_0_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1
+
+;発動テ接吻トをオーバライドしたいときに。
+;「誰それのスキル発動！　○○した！」の「○○した！」の部分を実装したい場合は、
+;これじゃなくてINVOKEで書けばいいです。
+;@SKILL_1_PERSONAL_0_INVOKE_TEXT(発動者, スキル, ジャンル)
+;#DIM 発動者
+;#DIM スキル
+;#DIMS ジャンル
+
+;効果をここに記述
+@SKILL_1_PERSONAL_0_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+LOCAL:1 = 100
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
+	SIF HAS_TAG(BATTLE_COMMANDER:対象側:LOCAL, タグ_妖怪)
+		TIMES BATTLE_武闘パワー:対象側:LOCAL, 0.55
+NEXT
+
+PRINTFORML  “你们这帮作乱的混蛋，给我好好记住了！”
+PRINTFORML  “制裁你们这些家伙的，是我博丽灵梦的阴阳玉！”
+
+PRINTFORML  敌妖怪武斗下降！
+PRINTFORML  敌部队防御下降！
+TIMES BATTLE_防衛パワー:対象側:COMBAT_SKILL_TARGET, 0.50
+
+PRINTFORML  “欧拉(划掉)——宝具「阴阳鬼神玉」！！”
+CALL DECREASE_SOLDIER(対象勢力, 対象部隊, RAND(5000, 20000), 1)
+
+@SKILL_1_PERSONAL_0_EXPLANATION
+RESULTS = 降低敌方妖怪武斗，降低敌全员防御；对敌部队造成伤害。
+
+@SKILL_1_PERSONAL_0_CANT_TELL
+
+
+
+
+
+
+
+@SKILL_1_PERSONAL_0_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 200

@@ -1,0 +1,148 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K32_FUCKMEAT_RATE(対象)
+#DIM 対象
+RETURN 500
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K32_FUCKMEAT_DECISION(対象)
+#DIM 対象
+#DIM はたて
+
+はたて = NAME_TO_CHARA("はたて")
+
+SIF MASTER == はたて
+	RETURN 0
+
+SIF !IS_SLAVE(対象)
+	RETURN 0
+
+SIF IS_SLAVE(はたて) || IS_LOVER(はたて) || IS_SLAVED_BY(はたて)
+	RETURN 0
+
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+
+SIF KDVAR:対象:文_ダブルズボズボ淫乱
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1) && CHECK_KOJO_DAILY_HAPPEN(はたて, -1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K32_FUCKMEAT_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K32_FUCKMEAT(対象)
+#DIM 対象
+#DIM はたて
+
+はたて = NAME_TO_CHARA("はたて")
+
+PRINTFORMW 「%ANAME(MASTER)%、能稍微打擾一下嗎？」
+PRINTFORML 在自己的房間工作的時候、%ANAME(対象)%が進入了房間
+PRINTFORML 雖然%PRONOUN(対象)%有點傲慢、但經過有效的調教後、從看着這邊的眼神就能看出已經是完全順從了……
+PRINTFORMW 「無需多言也知道、我是%ANAME(MASTER)%的下僕」
+PRINTFORMW 「經過詳細考慮後、我想讓我以外的全部天狗、都向%ANAME(MASTER)%奉獻出身體」
+PRINTFORMW 「所以我將我的朋友%ANAME(はたて)%帶過來了」
+PRINTFORML 雖然搞不懂是怎麼回事、但你能看到%ANAME(対象)%背着一個袋子
+PRINTFORML 袋子裏面、有一個被蒙上眼罩戴上口塞的天狗……這應該就是%ANAME(はたて)%吧
+PRINTFORMW %ANAME(対象)%――嘛應該是這麼回事吧――大概沒有經過朋友的同意。%ANAME(はたて)%因為受到被朋友背叛的打擊而感到恐懼害怕
+PRINTFORMW 「來吧%ANAME(はたて)%、已經到了、這裏是%ANAME(MASTER)%的房間」
+PRINTFORMW 「由今日開始%ANAME(はたて)%的生存目的改變了……要成為為了%ANAME(MASTER)%而活的下僕、嗯哼哼」
+PRINTFORML 是從%ANAME(対象)%的話語察覺到朋友的瘋狂嗎、%ANAME(はたて)%扭動着身體想逃跑
+PRINTFORMW 当然、%ANAME(対象)%不會容許這種事発生
+PRINTFORMW 「%ANAME(はたて)%你真是、難得能夠被%ANAME(MASTER)%使用、現在你是什麼態度啊？」
+PRINTFORMW 「……我為我的朋友道歉、%ANAME(MASTER)%。但是、在經過你的教導後、%PRONOUN(対象)%也一定能夠理解的」
+PRINTFORMW 「現在請好好享用%ANAME(はたて)%和我吧……♥」
+PRINTFORML %ANAME(対象)%用期待和陶醉的眼神望着這邊
+PRINTFORML 那麼、該怎麼做呢……
+PRINTFORML
+CALL ASK_YN(@"侵犯%ANAME(はたて)%", @"讓她放了%ANAME(はたて)%")
+
+IF RESULT == 1
+	PRINTFORMW 無論怎麼說做出背叛朋友將其綁架這種事 實在不太好
+	PRINTFORMW 說出放了她之後、%ANAME(対象)%瞪大了眼睛
+	PRINTFORMW 「這樣好嗎？　……啊啊、原來如此」
+	PRINTFORMW 「我是特別的對吧？　……抱歉、沒有理解%ANAME(MASTER)%的深思熟慮、我真是粗心大意」
+	PRINTFORMW 「那麼、請懲罰一下我這個愚蠢的天狗吧……♥」
+	PRINTFORML 做出謝罪的表情並說着莫名其妙的話語後、%ANAME(対象)%重新將%ANAME(はたて)%塞回袋中、丟出了房間
+	PRINTFORMW 真是的、看來太順從也是個問題嗎……
+	KDVAR:対象:文_ダブルズボズボ淫乱 = 1
+	RETURN 1
+ENDIF
+
+PRINTFORMW 做得好。這樣讚賞%ANAME(対象)%後、伸出手觸碰%ANAME(はたて)%的身體
+PRINTFORMW 「唔唔唔！　唔唔、唔ーーー！」
+PRINTFORMW 然後、%ANAME(はたて)%像被雷劈中一樣掙扎着。真是無謂的掙扎啊
+PRINTFORMW 「真是的、%ANAME(はたて)%？　乖乖認命吧。很快你就能體會到%ANAME(MASTER)%美妙的地方了」
+PRINTFORMW 「你只要、好好地被%ANAME(MASTER)%充分使用後就能明白了……♥」
+PRINTFORMW 沒錯
+PRINTFORMW 對於%ANAME(対象)%偶爾也會說真心話感到欽佩後、%ANAME(MASTER)%好好地享受了%ANAME(はたて)%的身體……
+
+FOR LOCAL, 0, 3
+	CALL FUCK_RAPE(はたて, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+NEXT
+
+PRINTFORMW 「啊……♥　哈、啊嗯……♥」
+PRINTFORML 在狠狠地侵犯之後、%ANAME(MASTER)%什麼也不做用休息挑逗着%ANAME(はたて)%
+PRINTFORML 兩穴溢出白濁液體的%ANAME(はたて)%、現在就只是一個発情的雌性而已
+PRINTFORMW 幾乎已經屈服了
+PRINTFORMW 「求你……了、請繼續對我……做剛才的事……吧」
+PRINTFORMW 然後慢慢地、%ANAME(はたて)%扭動着自己被拘束的身體、開始懇求着
+PRINTFORMW 「不行哦、%ANAME(はたて)%？　要拜託人的話、需要付出代價呢」
+PRINTFORMW 「你到底、打算向%ANAME(MASTER)%獻上什麼？」
+PRINTFORML 対%ANAME(対象)%的話、%ANAME(はたて)%一開始、沒能回答
+PRINTFORMW ……但、不久、%ANAME(はたて)%低聲說出了自己的答案
+PRINTFORMW 「我……奉上我自己、像%ANAME(対象)%一樣、用身體侍奉%ANAME(MASTER)%♥」
+PRINTFORMW 「所以求你了、侵犯我吧♥」
+PRINTFORML 調教成功了。%ANAME(MASTER)%點頭後、%ANAME(対象)%解放了%ANAME(はたて)%
+PRINTFORML %ANAME(はたて)%還沒收到任何命令、就已經用陶醉的表情、含着%ANAME(MASTER)%的那話兒
+PRINTFORMW 真是個能幹的下僕……
+PRINTFORMW 「哼哼、真開心啊%ANAME(はたて)%。這樣我們就一樣了」
+PRINTFORMW 「那麼、%ANAME(MASTER)%……可以的話請同樣地好好痛愛我吧♥」
+PRINTFORMW 一開始就這樣打算的吧
+PRINTFORMW 就這樣、將手伸入%ANAME(対象)%的裙子。陰部已經濕透了
+PRINTFORMW 「啊哈♥　對了、我是%ANAME(はたて)%的前輩、所以、先插我吧……♥」
+PRINTFORMW 「啊、%ANAME(対象)%好狡猾、我明明也很想做的說」
+PRINTFORMW 看來不管是哪隻鴉天狗都很淫亂呢
+PRINTFORMW 最後一起推倒、把雙方都盡情疼愛了一番……
+
+FOR LOCAL, 0, 3
+	CALL FUCK_RAPE(はたて, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+	CALL FUCK_RAPE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+NEXT
+
+CALL COLOR_PRINTW(@"%ANAME(はたて)%陷落了", カラー_注意)
+
+SIF GET_COUNTRY_BOSS(CFLAG:はたて:所属) != はたて
+	CALL CHANGE_COUNTRY(はたて, CFLAG:MASTER:所属, 1)
+
+CFLAG:対象:従属度 += 3000
+CFLAG:対象:依存度 += 3000
+TALENT:対象:チョロイン = 1
+
+CFLAG:はたて:従属度 += 3000
+CFLAG:はたて:依存度 += 3000
+TALENT:はたて:チョロイン = 1
+TALENT:はたて:服従 = 1
+TALENT:はたて:烙印 = 1
+TALENT:はたて:合意 = 1
+KDVAR:対象:文_ダブルズボズボ淫乱 = 2
+
+RETURN 1

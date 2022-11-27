@@ -1,0 +1,188 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K94_KAGEROU_OHIRUNE_RATE(対象)
+#DIM 対象
+RETURN 30
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K94_KAGEROU_OHIRUNE_DECISION(対象)
+#DIM 対象
+
+;主人公はペニスがあること
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K94_KAGEROU_OHIRUNE_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K94_KAGEROU_OHIRUNE(対象)
+#DIM 対象
+
+IF KDVAR:対象:影狼_お昼寝狼 == 0
+	PRINTFORMW 有一天，在宫殿里走着，看到了午睡时的%ANAME(対象)%
+	;TranslatedMark ある日、宮殿を歩いているとお昼寝中の%ANAME(対象)%を見かけた
+	PRINTFORMW 在阳光普照的窗边酣睡
+	;TranslatedMark 日のあたる窓際で気持ちよさそうに眠っている
+	PRINTFORMW 那个和平时不一样的充满缝隙的样子很少见，不经意间就盯着他看了
+	;TranslatedMark いつもと違う隙だらけのその姿が珍しくついまじまじと見つめてしまう
+	PRINTFORMW 「嗯…」
+	;TranslatedMark 「んんっ…」
+	PRINTFORMW 微微地吐了一口气把身子扭了过去
+	;TranslatedMark 小さく吐息を漏らして身をよじらせた
+	PRINTFORMW 耳朵抽动了一下
+	;TranslatedMark 耳がピクピクっと動いだ
+	PRINTFORMW 像小动物一样的动作非常可爱
+	;TranslatedMark まるで小動物の様な仕草がとても可愛らしい
+	PRINTFORMW 怎么办？
+	;TranslatedMark どうしよう？
+	CALL ASK_YN("离开", "眺望")
+	IF RESULT == 0
+		PRINTFORMW 不要碍事
+		;TranslatedMark 邪魔してもいけない
+		PRINTFORMW %ANAME(MASTER)%再一次凝视她的睡颜后，披上外套悄悄离去
+		;TranslatedMark %ANAME(MASTER)%はもう一度彼女の寝顔を見つめた後、上着をかけてやりそっと立ち去った
+	ELSEIF RESULT == 1
+		PRINTFORMW 我决定再多看一会儿那难得一见的身影
+		;TranslatedMark めったに見れないその姿を、もう少し眺めていくことにした
+		PRINTFORMW %ANAME(MASTER)%悄悄地坐在她身边，在特等席上望着她的睡颜
+		;TranslatedMark %ANAME(MASTER)%はそっと彼女の近くに座り、特等席でその寝顔を眺めさせてもらった
+		PRINTFORMW 「…嗯…嗯，嗯」
+		;TranslatedMark 「…んぅ…すぅ」
+		PRINTFORMW 又有一个小小的叹息声
+		;TranslatedMark また一つ、小さな吐息を漏らした
+		PRINTFORMW 睡得无比幸福
+		;TranslatedMark この上なく幸せそうに寝ている
+		PRINTFORMW 我还以为明明是狼，居然有这么多的漏洞，怎么样
+		;TranslatedMark 狼なのにこんなに隙だらけなのはいかがなものかと思ったが
+		PRINTFORMW 她放心了，一想到证据就觉得可爱
+		;TranslatedMark 彼女が安心できて証拠だと考えれば可愛らしかった
+		PRINTFORMW 耳朵又抽动了一下
+		;TranslatedMark またピクピクっと耳が動いた
+		PRINTFORMW 你在做什么样的梦呢？
+		;TranslatedMark どんな夢を見ているのだろうか？
+		PRINTFORMW 突然嘴角上扬，口水一滴一滴地流了下来
+		;TranslatedMark ふと嬉しそうに口角が上がり、ツーッと一滴涎が垂れた
+		PRINTFORMW 看来，我明白了梦的内容
+		;TranslatedMark どうやら、見ている夢の内容はわかった
+		PRINTFORMW 怎么说呢，%ANAME(MASTER)%不由得小声笑了
+		;TranslatedMark 彼女らしいというかなんというか、%ANAME(MASTER)%は思わず小さく笑った
+		PRINTFORMW 让她享受了一会儿表情丰富的睡颜之后，披上外套悄悄离去
+		;TranslatedMark しばらく彼女の表情豊かな寝顔を楽しませてもらった後、上着をかけてやりそっと立ち去った
+	ENDIF
+	PRINTFORMW 
+	PRINTFORMW 工作结束回到房间，刚才的上衣放在那里了
+	;TranslatedMark 仕事が終わって部屋に戻ったら先程の上着が置かれていた
+	PRINTFORMW 看来是她还给我了
+	;TranslatedMark どうやら彼女が返してくれたらしい
+	PRINTFORMW 轻轻的，我感觉到了她的香味
+	;TranslatedMark ふわりと、微かに彼女の香りがした気がした
+	CFLAG:対象:好感度 += 150
+	KDVAR:対象:影狼_お昼寝狼 = 1
+ELSE
+	PRINTFORMW 在宫殿里走着，又看见了午睡时的%ANAME(対象)%
+	;TranslatedMark 宮殿を歩いているとまたお昼寝中の%ANAME(対象)%を見かけた
+	PRINTFORMW 和以前看见的地方一样
+	;TranslatedMark 以前見かけた時と同じ場所だ
+	PRINTFORMW 是喜欢的地方吗？
+	;TranslatedMark お気に入りの場所なのだろうか？
+	PRINTFORMW 确实这里暖烘烘的，感觉很舒服
+	;TranslatedMark 確かにここはポカポカしていて気持ちが良さそうだ
+	PRINTFORMW 「嗯～…？%ANAME(MASTER)%？」
+	;TranslatedMark 「んっ～…？%ANAME(MASTER)%？」
+	PRINTFORMW 哎呀，好象吵醒了
+	;TranslatedMark おっと起こしてしまったらしい
+	PRINTFORMW 看着她熟睡的脸
+	;TranslatedMark 彼女は眠そうに眼をこすりながら%ANAME(MASTER)%の顔を見てきた
+	PRINTFORMW 「嗯，那个，这个，那个…」
+	;TranslatedMark 「え、えっとぉ、これは、そのぉ…」
+	PRINTFORMW 她羞答答地扭捏着
+	;TranslatedMark 彼女は恥ずかしそうにもじもじとしている
+	PRINTFORMW 怎么办？
+	;TranslatedMark どうしよう？
+	CALL ASK_MULTI("让她睡吧" ,"一起睡" ,"捉弄")
+	IF RESULT == 2
+		PRINTFORMW %ANAME(MASTER)%终于捉弄了她
+		;TranslatedMark %ANAME(MASTER)%はつい彼女をからかった
+		PRINTFORMW 太过破绽了，看不出是个狼女
+		;TranslatedMark あまりに隙だらけで狼女には見えなかったぞ、と
+		PRINTFORMW 于是她突然竖起耳朵，脸通红，啪嗒啪嗒地打了%ANAME(MASTER)%
+		;TranslatedMark すると彼女は耳をピンと立て、顔を真っ赤にして%ANAME(MASTER)%をポカポカと殴って来た
+		PRINTFORMW 那个动作也很可爱，%ANAME(MASTER)%又笑了
+		;TranslatedMark その仕草もまた可愛らしく、%ANAME(MASTER)%はまた笑ってしまう
+		PRINTFORMW 和她和平相处了一段时间后，请她吃午饭，让她恢复了心情
+		;TranslatedMark しばらく彼女と平和なやり取りをした後、お昼ご飯を奢って機嫌を直してもらった
+	ELSEIF RESULT == 0
+		PRINTFORMW %ANAME(MASTER)%说对不起打扰你了，然后离开了那里
+		;TranslatedMark 邪魔をして悪かったと言い%ANAME(MASTER)%はその場を後にした
+		PRINTFORMW 「啊，那个…不告诉任何人吗？」
+		;TranslatedMark 「あっ、えっと…誰にも言わない？」
+		PRINTFORMW 她羞答答地向暴露了恶作剧的孩子打听
+		;TranslatedMark 彼女はまるで悪戯がばれた子供の様に恥ずかしそうに尋ねて来る
+		PRINTFORMW 约定了不说自然露出笑容的%ANAME(MASTER)%
+		;TranslatedMark 自然と笑みがこぼれた%ANAME(MASTER)%は言わないと約束した
+		PRINTFORMW 「这样啊…啊，谢谢…啊啊啊啊…」
+		;TranslatedMark 「そっか…あ、ありがと…ふぁぁっ…」
+		PRINTFORMW 她安心地打了个大哈欠，又躺下了
+		;TranslatedMark 彼女は安心したかのように大きくあくびをすると再び横になった
+		PRINTFORMW 看了一会儿那张睡脸后，%ANAME(MASTER)%离开了那个地方
+		;TranslatedMark その寝顔をひとしきり眺めた後、%ANAME(MASTER)%はその場を後にした
+	ELSEIF RESULT == 1
+		PRINTFORMW 这么说来我也相当困
+		;TranslatedMark そういえば自分もかなり眠かった
+		PRINTFORMW 正好，我问可以一起在这里睡吗
+		;TranslatedMark 丁度良いので一緒にここで寝てもいいかと尋ねる
+		PRINTFORMW 「诶？嗯，呃，虽然可以…」
+		;TranslatedMark 「えっ？え、えぇ、いいけど…」
+		PRINTFORMW 她以吃惊的样子回答
+		;TranslatedMark 彼女は吃驚した様子で答える
+		PRINTFORMW %ANAME(MASTER)%放下行李躺下
+		;TranslatedMark %ANAME(MASTER)%は荷物を置いて寝転ぶ
+		PRINTFORMW 哦，确实这里睡得很舒服
+		;TranslatedMark おぉ、確かにここは寝心地がとても良い
+		PRINTFORMW 「可以吧？是喜欢的地方啊…」
+		;TranslatedMark 「いいでしょ？お気に入りの場所なんだぁ…」
+		PRINTFORMW 旁边躺着的她好像很高兴似的说
+		;TranslatedMark 隣で横になった彼女がなんだか嬉しそうに話す
+		PRINTFORMW 已经困得迷迷糊糊的
+		;TranslatedMark すでにまた眠くなっている様でうつらうつらとしている
+		PRINTFORMW 「啊啊啊啊…」
+		;TranslatedMark 「ふあぁぁ…」
+		PRINTFORMW %ANAME(対象)%打了个大大的哈欠
+		;TranslatedMark %ANAME(対象)%が大きくあくびをした
+		PRINTFORMW 被它钓到的%ANAME(MASTER)%也打了一个哈欠
+		;TranslatedMark それに釣られて%ANAME(MASTER)%も一つ、あくびをしてしまう
+		PRINTFORMW 「嗯…」
+		;TranslatedMark 「んー…」
+		PRINTFORMW 看着睡得很幸福的她，%ANAME(MASTER)%也睡着了
+		;TranslatedMark 幸せそうな寝顔の彼女を眺めながら、%ANAME(MASTER)%も眠りに落ちた
+		PRINTFORMW 
+		PRINTFORMW 睡了一个小时左右的午觉后，醒了
+		;TranslatedMark 小一時間ほどのお昼寝の後、目を覚ました
+		PRINTFORMW 她已经不在了，只剩下她那微弱的余香
+		;TranslatedMark すでに彼女はおらず、微かに彼女の残り香だけが残っていた
+	ENDIF
+	CFLAG:対象:好感度 += 200
+ENDIF
+
+
+RETURN 1
+

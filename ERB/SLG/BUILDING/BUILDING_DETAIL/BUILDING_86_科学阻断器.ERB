@@ -1,0 +1,43 @@
+@BUILDING_GET_NAME_科学阻断器()
+    #FUNCTIONS
+    RETURNF "科学阻断器"
+
+@BUILDING_GET_EXP_科学阻断器()
+    #FUNCTIONS
+    RETURNF "回合末普通势力科技概率无法增长。"
+
+@BUILDING_SET_INFO_ID_86()
+    BUILDING_TYPE:建造物_科学阻断器 = 建造物_类型_特殊类
+    BUILDING_LEVEL:建造物_科学阻断器 = 建造物_等级_三级建筑
+    BUILDING_LIMIT_NUM:建造物_科学阻断器 = 建造物_数量限制_1
+    BUILDING_LIMIT_UNI:建造物_科学阻断器 = 0
+    BUILDING_COUNTRY_ID:建造物_科学阻断器:特殊勢力_外来人 = 1
+    BUILDING_HAVE_SKILL:建造物_科学阻断器 = 1
+    BUILDING_TOHO_REQ_ID:建造物_科学阻断器:0 = 0
+
+@CHECK_BUILDING_FUNCTION_科学阻断器(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    SIF !CHECK_BUILDING_SP_COUNTRY_LIMIT_USING(COUNTRY_ID,建造物_科学阻断器)
+        RETURNF RESULT:0
+    RESULT:1 = TMP_BUILDING_EXIST_FLAG:COUNTRY_ID:建造物_科学阻断器
+    IF RESULT:1 > 0
+        RESULT:0 = 1
+    ENDIF
+    RETURNF RESULT:0
+
+@BUILDING_TEXT_科学阻断器(COUNTRY_ID,STATUS)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    #DIM STATUS
+    SIF !CHECK_BUILDING_TEXT_OUTPUT(COUNTRY_ID)
+        RETURNF 0
+    BUILDING_TEXT = PRINT_BUILDING_TEXT_TITLE_F()
+    PRINTFORM 因为《科学阻断器》的存在，
+    PRINTFORML 通过解构科学及其相关的架构，外来人尝试阻止普通势力的科研
+    IF STATUS
+        PRINTFORML %ANAME(GET_COUNTRY_BOSS(COUNTRY_ID))%势力的科研进度被拖延了1期
+    ELSE
+        PRINTFORML 幸运的是没有生效，不过下次可以这么好运吗？
+    ENDIF
+    RETURNF 1

@@ -1,0 +1,1203 @@
+﻿;外交で相手に要求をした場合の処理
+;(ただし「降伏勧告」は DIPLOMACY_EACH.ERB)
+
+;-------------------------------------------------
+;要求時の共通処理
+;ARG:0は対象、ARG:1は判定の難易度
+;ARG:2に1を渡すと、服従系素質を持つキャラに対して判定をスキップ
+;要求が通った場合1、通らなかった場合0、処理をキャンセルした場合は-1を返す
+;-------------------------------------------------
+@DIPLOMACY_REQUEST_COMMON(ARG:0, ARG:1, ARG:2 = 0)
+LOCAL:4 = GET_COUNTRY_BOSS(CFLAG:MASTER:所属)
+LOCAL:5 = GET_COUNTRY_BOSS(ARG:0)
+
+;(従属国パッチ)相手勢力が傀儡国であるにもかかわらず相手勢力の君主に奴隷士官フラグが付与されていないとき奴隷士官フラグを付与
+IF CFLAG:(LOCAL:5):1700 != 1 && COUNTRY_Protectorate:(CFLAG:MASTER:所属) == 1 && COUNTRY_Protectorate:(ARG:0) == 4 && COUNTRY_Protectorate_REFERENCE:(ARG:0):2 == CFLAG:MASTER:所属
+	CFLAG:(LOCAL:5):1700 = 1
+ENDIF
+
+;(従属国パッチ)相手勢力の君主に奴隷士官フラグが付与されているとき(=相手勢力が傀儡国)要求は必ず通る
+IF CFLAG:(LOCAL:5):1700 == 1
+	PRINTFORMW 傀儡政権である%ANAME(LOCAL:5)%は%ANAME(MASTER)%の要求に逆らえない！
+	;関係悪化
+	CALL CHANGE_RELATION_C_TO_C(ARG:0, CFLAG:MASTER:所属, -70, 100)
+	RETURN 1
+ENDIF
+
+;●武力による脅しが通るかどうかを判定
+LOCAL:10 = 0
+
+;勢力同士の隣接関係マップを作成
+CALL TMP_CREATE_COUNTRY_NEIBORING_MAP
+
+CALL TMP_CREATE_SUM_ECONOMY_MAP
+CALL TMP_CREATE_SUM_SOLDIER_MAP
+CALL TMP_CREATE_POLITICS_POWER_MAP
+
+LOCAL:6 = TMP_SUM_ECONOMY:(CFLAG:MASTER:所属)
+LOCAL:7 = TMP_SUM_ECONOMY:(ARG:0)
+
+LOCAL:8 = 0
+FOR LOCAL:0, 1, MAX_COUNTRY
+	SIF TMP_COUNTRY_IS_NEIBORING:(CFLAG:MASTER:所属):(LOCAL:0)
+		LOCAL:8 += TMP_SUM_ECONOMY:(LOCAL:0)
+NEXT
+
+;※条件は降伏勧告より緩和、引数で要求内容辺り参照して変化できるようにしたいなぁ
+LOCAL:10 = DIPLOMACY_REQUEST_CHECK(CFLAG:MASTER:所属, ARG:0, ARG:1, 1)
+
+;既に要求を飲んだことがあり、前回と同様の方法が通用する場合
+IF (LOCAL:10 && CFLAG:(LOCAL:5):外交要求成功フラグ == 1) || ((CFLAG:(LOCAL:5):外交要求成功フラグ == 2 && (TALENT:(LOCAL:5):烙印 || TALENT:(LOCAL:5):服従 || TALENT:(LOCAL:5):隷属 || (GETBIT(TALENT:(LOCAL:5):淫乱系, 素質_淫乱_マゾ) && TALENT:(LOCAL:5):恋慕)))) || (CFLAG:(LOCAL:5):外交要求成功フラグ == 3 && GETBIT(TALENT:(LOCAL:5):淫乱系, 素質_淫乱_薬物中毒))
+	IF (CFLAG:(LOCAL:5):外交要求成功フラグ == 2) || (TALENT:(LOCAL:5):烙印 || TALENT:(LOCAL:5):服従 || TALENT:(LOCAL:5):隷属 || (GETBIT(TALENT:(LOCAL:5):淫乱系, 素質_淫乱_マゾ) && TALENT:(LOCAL:5):恋慕))
+		PRINTFORMW 雖然%ANAME(LOCAL:5)%的眼中露出了為難的神色、但是還是用着谄媚的声音答応了%ANAME(MASTER)%的要求
+		;TranslatedMark %ANAME(LOCAL:5)%は困ったように瞳を彷徨わせながらも、媚びるような声で%ANAME(MASTER)%の要求を受け入れた
+		CALL DIPLOMACY_REQUEST_GOHOUBI(ARG:0)
+	ELSEIF CFLAG:(LOCAL:5):外交要求成功フラグ == 3 && GETBIT(TALENT:(LOCAL:5):淫乱系, 素質_淫乱_薬物中毒)
+		PRINTFORMW %ANAME(LOCAL:5)%帯着空虚的眼神、対%ANAME(MASTER)%説道只要有薬的話就会服從
+		;TranslatedMark %ANAME(LOCAL:5)%は虚ろな瞳で、従うから薬をくれるよう%ANAME(MASTER)%に訴えてきた
+		CALL DIPLOMACY_REQUEST_DRUG(ARG:0)
+	ELSEIF CFLAG:(LOCAL:5):外交要求成功フラグ == 4 && GETBIT(TALENT:(LOCAL:5):淫乱系, 素質_淫乱_傀儡)
+		PRINTFORMW %ANAME(MASTER)%打了一个响指、%ANAME(LOCAL:5)%的眼神顿时变得空虚了，点了点头
+		;TranslatedMark %ANAME(MASTER)%が指を鳴らすと、%ANAME(LOCAL:5)%は虚ろな瞳になり、その言葉に頷いた
+		CALL DIPLOMACY_REQUEST_HYPNOSIS(ARG:0)
+	ELSEIF TALENT:(LOCAL:5):反抗的 || TALENT:(LOCAL:5):傲慢 || TALENT:(LOCAL:5):自尊心高
+		PRINTFORMW %ANAME(LOCAL:5)%厌恶地盯着%ANAME(MASTER)%、用充満了怒气的低沉语调答应了要求
+		;TranslatedMark %ANAME(LOCAL:5)%は%ANAME(MASTER)%を恨めしそうに睨みながら、怒気の篭った声で要求を受け入れた
+	ELSE
+		PRINTFORMW %ANAME(LOCAL:5)%露出了悲痛的表情、用疲憊的声音答応了%ANAME(MASTER)%的要求
+		;TranslatedMark %ANAME(LOCAL:5)%は悲痛な表情を浮かべると、疲れたような声で%ANAME(MASTER)%の要求を受け入れた
+	ENDIF
+	DIPLOMACY_HATE:(CFLAG:MASTER:所属) += 2
+	RETURN 1
+
+ELSEIF ARG:2 && (TALENT:(LOCAL:5):烙印 || TALENT:(LOCAL:5):服従 || TALENT:(LOCAL:5):隷属 || (GETBIT(TALENT:(LOCAL:5):淫乱系, 素質_淫乱_マゾ) && TALENT:(LOCAL:5):恋慕))
+	IF TALENT:(LOCAL:5):烙印
+		PRINTFORMW 已経被烙印，成为了%ANAME(MASTER)%的所有物的%ANAME(LOCAL:5)%、沒有拒絶地点了点頭
+		;TranslatedMark 既に%ANAME(MASTER)%に烙印を刻み付けられ所有物となった%ANAME(LOCAL:5)%は、断ることも出来ず頷いた
+		PRINTFORMW ……好像看上去有些高興
+		;TranslatedMark ……心なしか嬉しそうに見える
+		CFLAG:(LOCAL:5):外交要求成功フラグ = 2
+		CALL DIPLOMACY_REQUEST_GOHOUBI(ARG:0)
+	ELSE
+		PRINTFORMW 已经陶醉在%ANAME(MASTER)%中的%ANAME(LOCAL:5)%，移开视线点点头
+		;TranslatedMark 既に%ANAME(MASTER)%に陶酔しきった%ANAME(LOCAL:5)%は、目を逸らしながらも頷いた
+		PRINTFORMW ……好像看上去有些高興
+		;TranslatedMark ……心なしか嬉しそうに見える
+		CFLAG:(LOCAL:5):外交要求成功フラグ = 2
+		CALL DIPLOMACY_REQUEST_GOHOUBI(ARG:0)
+	ENDIF
+	DIPLOMACY_HATE:(CFLAG:MASTER:所属) += 2
+	RETURN 1
+
+;要求を飲んだことがない or 前回の方法が通用しない場合
+ELSE
+	IF ARG:2 && TALENT:(LOCAL:5):恋慕
+		PRINTFORML %ANAME(LOCAL:5)%一瞬間露出了迷茫的眼神顯得有些犹豫、
+		;TranslatedMark %ANAME(LOCAL:5)%は一瞬迷うように瞳を彷徨わせたが、
+		PRINTFORMW 但是很快就開始搖着頭、説着不可能接受那樣的事情直接拒絶了
+		;TranslatedMark すぐに我に返ったように首を振って、そんなこと出来るわけがないと断った
+	ELSEIF TALENT:(LOCAL:5):反抗的 || TALENT:(LOCAL:5):傲慢 || TALENT:(LOCAL:5):自尊心高
+		PRINTFORMW ……但是、%ANAME(LOCAL:5)%怒声道開什麼玩笑
+		;TranslatedMark ……だが、%ANAME(LOCAL:5)%は何の冗談かと笑い飛ばした
+	ELSE
+		PRINTFORMW ……但是、%ANAME(LOCAL:5)%用強烈的語気説着不可能接受那樣的事情直接拒絶了
+		;TranslatedMark ……だが、%ANAME(LOCAL:5)%はそんなこと出来るわけがないと強い口調で断った
+	ENDIF
+	LOCAL:11 = 0
+	LOCAL:12 = 0
+	PRINTFORML [0]以国力为背景威胁
+	;TranslatedMark [0] 国力を背景に脅す
+	IF TALENT:(LOCAL:5):烙印 || TALENT:(LOCAL:5):服従 || TALENT:(LOCAL:5):隷属 || (GETBIT(TALENT:(LOCAL:5):淫乱系, 素質_淫乱_マゾ) && TALENT:(LOCAL:5):恋慕)
+		PRINTFORML [1]低声道想要快感麼
+		;TranslatedMark [1] 快楽で言うことを聞かせる
+		LOCAL:11 = 1
+	ENDIF
+	IF GETBIT(TALENT:(LOCAL:5):淫乱系, 素質_淫乱_薬物中毒)
+		PRINTFORML [2]低声道想要薬物麼
+		;TranslatedMark [2] 薬物で言うことを聞かせる
+		LOCAL:12 = 1
+	ENDIF
+	IF GETBIT(TALENT:(LOCAL:5):淫乱系, 素質_淫乱_傀儡)
+		PRINTFORML [3]使用催眠术
+		;TranslatedMark [3] 催眠術をかける
+		LOCAL:13 = 1
+	ENDIF
+	PRINTFORML [4]放弃…
+	;TranslatedMark [4] 諦める…
+
+	$INPUT_LOOP
+	INPUT
+	;武力で脅す
+	IF RESULT == 0
+		IF DIPLOMACY_REQUEST_CHECK(CFLAG:MASTER:所属, ARG:0, ARG:1)
+			PRINTFORMW %ANAME(MASTER)%露骨的提出了兩国的国力之差来進行交涉
+			;TranslatedMark %ANAME(MASTER)%は露骨に両国の国力の差をチラつかせながら交渉した
+			IF TALENT:(LOCAL:5):反抗的 || TALENT:(LOCAL:5):傲慢 || TALENT:(LOCAL:5):自尊心高
+				PRINTFORMW %ANAME(LOCAL:5)%因為%ANAME(MASTER)%的話顯得有些焦急、但是在勢力圧倒性的力量差距上無法進行反駁
+				;TranslatedMark %ANAME(LOCAL:5)%は%ANAME(MASTER)%の言葉に明らかに苛立っているが、勢力の力量の圧倒的な差を前に反論できずにいる
+				PRINTFORMW ……然後、%ANAME(LOCAL:5)%圧抑着憤怒的声音、承諾会服從要求
+				;TranslatedMark ……やがて、%ANAME(LOCAL:5)%は怒りを押し殺した声で、要求に従うことを約束した
+			ELSE
+				PRINTFORMW %ANAME(LOCAL:5)%面対着%ANAME(MASTER)%如同威脅一般的話、露出了痛苦的表情保持着沈默
+				;TranslatedMark %ANAME(LOCAL:5)%は%ANAME(MASTER)%の脅しも同然の言葉の前に、苦しげな表情で押し黙っている
+				PRINTFORMW ……然後、%ANAME(LOCAL:5)%就像是放棄了一樣、承諾会服從%ANAME(MASTER)%的要求
+				;TranslatedMark ……やがて、%ANAME(LOCAL:5)%は諦めたようにして、%ANAME(MASTER)%の要求に従うことを約束した
+			ENDIF
+
+			;関係悪化
+			CALL CHANGE_RELATION_C_TO_C(ARG:0, CFLAG:MASTER:所属, -100, 150)
+
+			;性的な要求なら周囲からの評判も悪化
+			IF ARG:2
+				FOR LOCAL:0, 1, MAX_COUNTRY
+					SIF IS_COUNTRY(LOCAL:0) && LOCAL:0 != CFLAG:MASTER:所属
+						CALL CHANGE_RELATION_C_TO_C(LOCAL:0, CFLAG:MASTER:所属, -100, 50)
+				NEXT
+			ENDIF
+
+			CFLAG:(LOCAL:5):外交要求成功フラグ = 1
+			DIPLOMACY_HATE:(CFLAG:MASTER:所属) += 4
+			RETURN 1
+
+		ELSE
+			IF TALENT:(LOCAL:5):反抗的 || TALENT:(LOCAL:5):傲慢 || TALENT:(LOCAL:5):自尊心高
+				PRINTFORMW %ANAME(MASTER)%在那熱情地訴説着兩国的武力差距的話、%ANAME(LOCAL:5)%当作完全沒有聽道…
+				;TranslatedMark %ANAME(MASTER)%は両国の武力の差を熱心に語りかけたが、%ANAME(LOCAL:5)%は聞く耳を持たなかった…
+			ELSE
+				PRINTFORMW %ANAME(MASTER)%在那熱情地訴説着兩国的武力差距的話、%ANAME(LOCAL:5)%冷静的進行着反駁…
+				;TranslatedMark %ANAME(MASTER)%は両国の武力の差を熱心に語りかけたが、%ANAME(LOCAL:5)%に冷静に反論され話が進まなかった…
+			ENDIF
+
+			RETURN 0
+		ENDIF
+
+	;快楽で言うことを聞かせる
+	ELSEIF RESULT == 1 && LOCAL:11
+		;口上の表示
+		PRINTFORMW %ANAME(MASTER)%讓%ANAME(LOCAL:5)%斥退了其他無関的人
+		;TranslatedMark %ANAME(MASTER)%は%ANAME(LOCAL:5)%に人払いをするように求めた
+		PRINTFORMW ………………
+		PRINTFORML 然後%ANAME(MASTER)%急不可耐地搂了上去開始愛撫%ANAME(LOCAL:5)%的身体
+		;TranslatedMark %ANAME(MASTER)%は%ANAME(LOCAL:5)%の体を焦らすような手付きで愛撫しながら、
+		PRINTFORMW 在%ANAME(LOCAL:5)%的耳辺低声説道答応要求的話就会給你豊富的奨勵
+		;TranslatedMark 要求を飲んだらご褒美にたっぷり虐めてやると%ANAME(LOCAL:5)%の耳元で囁いた
+		PRINTL 
+
+		;●実行値の計算
+		CVARSET TCVAR, 24, -10000
+		CVARSET TCVAR, 25, 10000
+
+		;実行値の設定
+		TCVAR:(LOCAL:5):25 = 110
+
+		LOCAL:2 = 0
+		IF CFLAG:(LOCAL:5):4 < 1500
+			LOCAL:2 = MAX(CFLAG:(LOCAL:5):4 / 100, 0)
+		ELSE
+			LOCAL:2 = MIN((CFLAG:(LOCAL:5):4 - 1500) / 500 + 15, 200)
+		ENDIF
+		CALL COM_ORDER_ELEMENT(LOCAL:5, "従属度", LOCAL:2)
+
+		LOCAL:2 = 0
+		IF CFLAG:(LOCAL:5):3 < 1500
+			LOCAL:2 = MAX(CFLAG:(LOCAL:5):3 / 100, 0)
+		ELSE
+			LOCAL:2 = MIN((CFLAG:(LOCAL:5):3 - 1500) / 500 + 15, 200)
+		ENDIF
+		CALL COM_ORDER_ELEMENT(LOCAL:5, "依存度", LOCAL:2)
+
+		IF TALENT:(LOCAL:5):隷属
+			CALL COM_ORDER_ELEMENT(LOCAL:5, "隷属", 50)
+		ELSEIF TALENT:(LOCAL:5):服従
+			CALL COM_ORDER_ELEMENT(LOCAL:5, "服従", 25)
+		ENDIF
+
+		SIF TALENT:(LOCAL:5):烙印
+			CALL COM_ORDER_ELEMENT(LOCAL:5, "烙印", 15)
+
+		IF TALENT:(LOCAL:5):親愛
+			CALL COM_ORDER_ELEMENT(LOCAL:5, "親愛", 20)
+		ELSEIF TALENT:(LOCAL:5):恋慕
+			CALL COM_ORDER_ELEMENT(LOCAL:5, "恋慕", 10)
+		ENDIF
+
+		SIF GETBIT(TALENT:(LOCAL:5):淫乱系, 素質_淫乱_マゾ)
+			CALL COM_ORDER_ELEMENT(LOCAL:5, "被虐狂", 20)
+
+		CALL COM_ORDER_ELEMENT(LOCAL:5, "欲望", ABL:(LOCAL:5):欲望 * 2)
+
+		SIF TALENT:(LOCAL:5):胆怯
+			CALL COM_ORDER_ELEMENT(LOCAL:5, "胆怯", 8)
+		SIF TALENT:(LOCAL:5):反抗的
+			CALL COM_ORDER_ELEMENT(LOCAL:5, "反抗的", -5)
+		SIF TALENT:(LOCAL:5):堅強
+			CALL COM_ORDER_ELEMENT(LOCAL:5, "堅強", -10)
+		SIF TALENT:(LOCAL:5):坦率
+			CALL COM_ORDER_ELEMENT(LOCAL:5, "坦率", 5)
+		SIF TALENT:(LOCAL:5):自尊心高
+			CALL COM_ORDER_ELEMENT(LOCAL:5, "自尊心高", -15)
+		SIF TALENT:(LOCAL:5):傲慢
+			CALL COM_ORDER_ELEMENT(LOCAL:5, "傲慢", -5)
+		SIF TALENT:(LOCAL:5):自尊心低
+			CALL COM_ORDER_ELEMENT(LOCAL:5, "自尊心低", 10)
+		SIF TALENT:(LOCAL:5):自制心
+			CALL COM_ORDER_ELEMENT(LOCAL:5, "自制心", -15)
+		SIF TALENT:(LOCAL:5):難以越過的底線
+			CALL COM_ORDER_ELEMENT(LOCAL:5, "難以越過的底線", -10)
+
+		SELECTCASE CONFIG:314
+			CASE 2
+				CALL COM_ORDER_ELEMENT(LOCAL:5, "難易度補正", -5)
+			CASE 3
+				CALL COM_ORDER_ELEMENT(LOCAL:5, "難易度補正", -10)
+			CASE 4
+				CALL COM_ORDER_ELEMENT(LOCAL:5, "難易度補正", -20)
+		ENDSELECT
+
+
+		;判定結果を表示
+		PRINTFORMW  ={TCVAR:(LOCAL:5):24} %TOSTR_COMPARE(TCVAR:(LOCAL:5):24, TCVAR:(LOCAL:5):25)%执行值{TCVAR:(LOCAL:5):25}
+		;TranslatedMark = {TCVAR:(LOCAL:5):24} %TOSTR_COMPARE(TCVAR:(LOCAL:5):24, TCVAR:(LOCAL:5):25)% 実行値{TCVAR:(LOCAL:5):25}
+
+		;実行判定
+		IF TCVAR:(LOCAL:5):24 >= TCVAR:(LOCAL:5):25
+			PRINTFORMW ………………
+			PRINTFORML 持续爱抚一段时间后，%ANAME(LOCAL:5)%露出了完全陶醉的表情、
+			;TranslatedMark しばらく愛撫を続けると、%ANAME(LOCAL:5)%はすっかり陶酔した表情になり、
+			PRINTFORMW 用谄媚的態度承諾会接受%ANAME(MASTER)%的要求
+			;TranslatedMark 媚びるような態度で%ANAME(MASTER)%の要求を飲むことを約束した
+			CFLAG:(LOCAL:5):外交要求成功フラグ = 2
+			DIPLOMACY_HATE:(CFLAG:MASTER:所属) += 5
+			RETURN 2
+		ELSE
+			PRINTFORML 但是、這種条件即使是%ANAME(MASTER)%的請求也無法答応、
+			;TranslatedMark だが、いくら%ANAME(MASTER)%の頼みでもそれだけは応えることが出来ないと、
+			PRINTFORMW 感到非常抱歉的%ANAME(LOCAL:5)%閉上眼睛拒絶了要求
+			;TranslatedMark %ANAME(LOCAL:5)%は申し訳なさそうに目を伏せて拒んだ
+			RETURN 0
+		ENDIF
+	ELSEIF RESULT == 2 && LOCAL:12
+		;口上の表示
+		PRINTFORMW %ANAME(MASTER)%讓%ANAME(LOCAL:5)%斥退了其他無関的人
+		;TranslatedMark %ANAME(MASTER)%は%ANAME(LOCAL:5)%に人払いをするように求めた
+		PRINTFORMW ………………
+		PRINTFORML %ANAME(MASTER)%把薬劑放在%ANAME(LOCAL:5)%的眼前当作誘餌、
+		;TranslatedMark %ANAME(MASTER)%は%ANAME(LOCAL:5)%の眼前に錠剤をちらつかせながら、
+		PRINTFORMW 在%ANAME(LOCAL:5)%的耳辺低声説道答応要求的話這個就是你的東西了
+		;TranslatedMark 要求を飲んだらとびきりキくやつをくれてやると%ANAME(LOCAL:5)%の耳元で囁いた
+		PRINTL 
+		IF CFLAG:(LOCAL:5):薬物依存 >= REL_HATE:(LOCAL:5):(MASTER)
+			PRINTFORMW ………………
+			PRINTFORML 薬物是最重要的、%ANAME(LOCAL:5)%同意了服從的要求
+			;TranslatedMark 一にも二にもなく、要求に従うことに%ANAME(LOCAL:5)%は同意した
+			PRINTFORMW 作為服從的奨勵，%ANAME(MASTER)%把薬劑放在了%ANAME(LOCAL:5)%伸出的舌頭上……
+			;TranslatedMark %ANAME(MASTER)%は褒美として、差し出された舌の上に錠剤を載せてやった……
+			CFLAG:(LOCAL:5):外交要求成功フラグ = 3
+			CFLAG:(LOCAL:5):薬物依存 += RAND(20, 50)
+			DIPLOMACY_HATE:(CFLAG:MASTER:所属) += 5
+			RETURN 3
+		ENDIF
+	ELSEIF RESULT == 3 && LOCAL:13
+		PRINTFORMW %ANAME(MASTER)%打了一个响指、%ANAME(LOCAL:5)%的眼神顿时变得空虚了
+		;TranslatedMark %ANAME(MASTER)%が指を鳴らすと、%ANAME(LOCAL:5)%は虚ろな瞳になりうなだれた
+		PRINTFORMW ………………
+		IF EXP:(LOCAL:5):被催眠経験 >= REL_HATE:(LOCAL:5):MASTER
+			PRINTFORMW %ANAME(MASTER)%给予了强烈的暗示、作为忠实的人偶的%ANAME(LOCAL:5)%理所当然地遵从了
+			;TranslatedMark %ANAME(MASTER)%が強烈な暗示をかけてやると、忠実な人形である%ANAME(LOCAL:5)%は当然のように従った
+			CFLAG:(LOCAL:5):外交要求成功フラグ= 4
+			RETURN 4
+		ELSE
+			PRINTFORMW ……但、似乎更讨厌%ANAME(MASTER)%了……
+			;TranslatedMark ……が、%ANAME(MASTER)%を嫌悪する気持ちが上回ったようだ
+		ENDIF
+	ENDIF
+ENDIF
+
+;諦める
+RETURN -1
+
+;-------------------------------------------------
+;要求を飲んだ時のご褒美
+;-------------------------------------------------
+@DIPLOMACY_REQUEST_PRIZE(ARG:0)
+#DIM TRAIN_LIST, 20
+
+LOCAL:4 = GET_COUNTRY_BOSS(CFLAG:MASTER:所属)
+LOCAL:5 = GET_COUNTRY_BOSS(ARG:0)
+
+PRINTL 
+PRINTFORMW ………………
+PRINTFORMW %ANAME(LOCAL:5)%用帯着期待的双眼凝視着%ANAME(MASTER)%…
+;TranslatedMark %ANAME(LOCAL:5)%は期待するような瞳で%ANAME(MASTER)%を見つめている…
+
+VARSET LOCALS, "", 0, 20
+VARSET TRAIN_LIST, -1
+
+SIF HAS_VAGINA(LOCAL:5) && (HAS_PENIS(MASTER) || ITEM:穿戴式假陰茎)
+	LOCALS:0 = 侵犯雌穴
+
+SIF HAS_PENIS(MASTER) || ITEM:穿戴式假陰茎
+	LOCALS:1 = 侵犯尻穴
+
+SIF HAS_PENIS(MASTER)
+	LOCALS:2 = 侵犯小嘴
+
+;IF HAS_PENIS(LOCAL:5)
+;	LOCALS:3 = 足で虐めてやる
+;ENDIF
+
+;IF HAS_VAGINA(MASTER)
+;	LOCALS:4 = 聖水をプレゼントする
+;ENDIF
+
+SIF (!HAS_VAGINA(LOCAL:5) || (ITEM:陰蒂夾 && ITEM:振動棒 && !TALENT:(LOCAL:5):処女)) && ITEM:乳頭夾 && ITEM:肛用振動棒 && ITEM:縄
+	LOCALS:5 = 給全身用上淫具之後進行觀察
+
+SIF HAS_VAGINA(LOCAL:5) && ITEM:縄 && !TALENT:(LOCAL:5):処女
+	LOCALS:6 = 提供給士兵
+SIF HAS_VAGINA(LOCAL:5) && !TALENT:(LOCAL:5):処女
+	LOCALS:7 = 牽到宮廷散步
+;IF HAS_VAGINA(LOCAL:5) && !TALENT:(LOCAL:5):処女 && (HAS_PENIS(MASTER) || ITEM:ペニスバンド)
+;	LOCALS:6 = キスハメしてやる
+;ENDIF
+
+;IF HAS_VAGINA(MASTER) && !TALENT:(MASTER):処女 && (HAS_PENIS(LOCAL:5) || ITEM:ペニスバンド)
+;	LOCALS:7 = キスハメさせてやる
+;ENDIF
+
+LOCALS:19 = 作為奴隸実在是太傲慢了……放置！
+
+LOCAL:2 = 0
+FOR LOCAL:0, 0, 20
+	IF LOCALS:(LOCAL:0) != ""
+		PRINTBUTTON @"{LOCAL:2, 3}[%LOCALS:(LOCAL:0)%]", LOCAL:2
+		PRINTL 
+		TRAIN_LIST:(LOCAL:2) = LOCAL:0
+		LOCAL:2 ++
+	ENDIF
+NEXT
+
+$INPUT_LOOP
+INPUT
+
+IF !INRANGE(RESULT, 0, 19) || TRAIN_LIST:RESULT == -1
+	GOTO INPUT_LOOP
+ENDIF
+
+SELECTCASE TRAIN_LIST:RESULT
+	;雌穴を犯してやる
+	CASE 0
+		PRINTFORMW %ANAME(LOCAL:5)%被%ANAME(MASTER)%帯到了臥室…
+		;TranslatedMark %ANAME(LOCAL:5)%は%ANAME(MASTER)%を閨に案内した…
+		PRINTFORML %ANAME(MASTER)%立刻脱掉了%ANAME(LOCAL:5)%的衣服、想像着侵犯的事已経欲火難耐了、
+		;TranslatedMark %ANAME(MASTER)%が早速%ANAME(LOCAL:5)%の服を脱がせると、犯される想像で欲情してしまったのか、
+		PRINTFORMW %ANAME(LOCAL:5)%的小穴因為接下来要発生的事早已开始分泌淫汁，现在已経完全湿潤了
+		;TranslatedMark %ANAME(LOCAL:5)%のアソコはお漏らしでもしたのではないかと思うほどグショグショに濡れていた
+		CALL ASK_YN("真是个坦率的好孩子……要好好地対待", "真是个沒有節操的坏孩子……一辺打屁股一辺侵犯吧")
+		;TranslatedMark "素直な良い子だ……気持よくしてやる", "節操のない悪い子だ……犯しながら尻を叩く"
+		IF RESULT == 0
+			PRINTFORMW %ANAME(MASTER)%讓%ANAME(LOCAL:5)%趴了下去、立即從後面扑了上去把%BAR_NAME(MASTER)%压在身下插入了
+			;TranslatedMark %ANAME(MASTER)%は%ANAME(LOCAL:5)%を四つん這いにさせると、間髪入れずに後ろから覆い被さって%BAR_NAME(MASTER)%を挿入した
+			PRINTFORML 情欲十足的%ANAME(LOCAL:5)%因為插入的衝撃直接高潮，身体開始微微顫抖、
+			;TranslatedMark 欲情しきった%ANAME(LOCAL:5)%は挿入の衝撃だけで達してしまいガクガクと体を震わせるが、
+			PRINTFORMW %ANAME(MASTER)%不管不顧、一辺享受着%ANAME(LOCAL:5)%緊緊纏繞的膣道一辺粗暴的挺腰撞撃
+			;TranslatedMark %ANAME(MASTER)%はお構いなしに、%ANAME(LOCAL:5)%の膣の締め付けを楽しみながら乱暴に腰を打ち付ける
+			PRINTFORML %ANAME(LOCAL:5)%為了不讓因為快感忍不住高声淫叫的声音傳到外面、強行用手摀住了自己的嘴
+			;TranslatedMark 快感で狂ったように吠える%ANAME(LOCAL:5)%の声が外に漏れないように、手で無理やり%ANAME(LOCAL:5)%の口を押さえながら、
+			IF HAS_PENIS(MASTER)
+				PRINTFORMW %ANAME(MASTER)%把肉棒頂到了%ANAME(LOCAL:5)%的子宮口、直接把大量的精子射了進去
+				;TranslatedMark %ANAME(MASTER)%は%ANAME(LOCAL:5)%の子宮口にペニスを押し当て、衝動に任せて大量の子種を注ぎ込んだ
+				PRINTFORMW 之後、%ANAME(MASTER)%在精力到達極限為止一直在侵犯着%ANAME(LOCAL:5)%…
+				;TranslatedMark %ANAME(MASTER)%はその後も、精力の続く限り%ANAME(LOCAL:5)%を犯し尽くした…
+			ELSE
+				PRINTFORMW %ANAME(MASTER)%用假阴茎一次又一次地頂着%ANAME(LOCAL:5)%的子宮口
+				;TranslatedMark %ANAME(MASTER)%は%ANAME(LOCAL:5)%の子宮口を張り型で何度も小突いてやった
+				PRINTFORMW %ANAME(LOCAL:5)%在床上噗噗噗地散落着愛液、沈溺于無休止的強烈的高潮之中…
+				;TranslatedMark %ANAME(LOCAL:5)%は寝台にぶしゃぶしゃと愛液をまき散らしながら、絶え間ない強烈な絶頂に悶え狂った…
+			ENDIF
+			PRINTFORMW ………………
+			PRINTFORML 把露出幸福的啊嘿顔並且因為高潮的余韻不停顫抖的%ANAME(LOCAL:5)%留在了臥室、
+			;TranslatedMark 幸せそうなアヘ顔を晒しながら快感の余韻にビクビクと震える%ANAME(LOCAL:5)%をその場に残し、
+			PRINTFORMW %ANAME(MASTER)%離開了這裡…
+			;TranslatedMark %ANAME(MASTER)%はその場を後にした…
+			CALL FUCK(MASTER, "Ｃ, 欲望, 性交, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(LOCAL:5)%の膣", "外交要求のご褒美での調教")
+			CALL FUCK(LOCAL:5, "欲望, 奉仕, 性交, 精愛, Ｖ, Ｖ性交", "処女喪失, 膣内射精", GET_ID(MASTER), "", ANAME(MASTER), "", "外交要求のご褒美での調教")
+			CFLAG:(LOCAL:5):4 += 300
+			CFLAG:(LOCAL:5):3 += 300
+			WAIT
+		ELSE
+			PRINTFORMW %ANAME(MASTER)%讓%ANAME(LOCAL:5)%趴了下去、一辺呵斥着居然敢隨隨便便的発情、一辺用力的拍打着屁股
+			;TranslatedMark %ANAME(MASTER)%は%ANAME(LOCAL:5)%を四つん這いにさせると、勝手に発情して濡らしたことを叱責しながら、全力で尻を叩いた
+			PRINTFORMW %ANAME(LOCAL:5)%因為痛苦而発出了悲鳴、但是那個表情好像非常高興、完全看不到有在反省的樣子
+			;TranslatedMark %ANAME(LOCAL:5)%は痛みに悲鳴を上げるが、その表情はどこか嬉しそうで、とても反省しているようには見えない
+			PRINTFORMW 然後%ANAME(MASTER)%為了促使%ANAME(LOCAL:5)%反省、把%BAR_NAME(MASTER)%刺入了那発情的不停蠢動的毫無節操的雌穴
+			;TranslatedMark そこで%ANAME(MASTER)%は%ANAME(LOCAL:5)%に反省を促すべく、発情してヒクヒクと疼く節操なしの雌穴に%BAR_NAME(MASTER)%を突き入れた
+			PRINTFORML 但是、%ANAME(LOCAL:5)%只是因為插入的衝撃直接高潮了、
+			;TranslatedMark だが、%ANAME(LOCAL:5)%は挿入の衝撃だけでイってしまい、
+			PRINTFORMW 不僅沒有反省反而在快感中顫抖着発出了愉悦的呻吟
+			;TranslatedMark 反省するどころか気持ち良さそうな声を上げて快感に震えている
+			PRINTFORML %ANAME(MASTER)%激烈的怒罵着僅僅是被插入就直接高潮的%ANAME(LOCAL:5)%、
+			;TranslatedMark %ANAME(MASTER)%は挿れられただけでイってしまった%ANAME(LOCAL:5)%を激しく罵りながら、
+			PRINTFORMW 数次拍打着屁股対這不良母狗進行着教育
+			;TranslatedMark 何度となく尻を叩いて悪い雌犬への躾を行った
+			PRINTFORMW ………………
+			PRINTFORML 然後、把因為過激行為而屁股一片通紅並不停顫抖的%ANAME(LOCAL:5)%留在了臥室、
+			;TranslatedMark やがて、真っ赤になった尻を情けなくビクンビクンと跳ね上げる%ANAME(LOCAL:5)%をその場に残し、
+			PRINTFORMW %ANAME(MASTER)%離開了這裡…
+			;TranslatedMark %ANAME(MASTER)%はその場を後にした…
+			CALL FUCK(MASTER, "Ｃ, 欲望, 性交, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(LOCAL:5)%の膣", "外交要求のご褒美での調教")
+			CALL FUCK(LOCAL:5, "欲望, 奉仕, 性交, 精愛, Ｖ, 苦痛快楽, 被虐, Ｖ挿入", "処女喪失, 膣内射精", GET_ID(MASTER), "", ANAME(MASTER), "", "外交要求のご褒美での調教")
+			CFLAG:(LOCAL:5):4 += 500
+			CFLAG:(LOCAL:5):3 += 100
+		ENDIF
+
+	;尻穴を犯してやる
+	CASE 1
+		PRINTFORMW %ANAME(LOCAL:5)%被%ANAME(MASTER)%帯到了臥室…
+		;TranslatedMark %ANAME(LOCAL:5)%は%ANAME(MASTER)%を閨に案内した…
+		PRINTFORML %ANAME(MASTER)%立刻脱掉了%ANAME(LOCAL:5)%的衣服、
+		;TranslatedMark %ANAME(MASTER)%が早速%ANAME(LOCAL:5)%の服を脱がせると、
+		PRINTFORMW 完全発情的%ANAME(LOCAL:5)%自己趴在了床上、対着%ANAME(MASTER)%搖晃着屁股
+		;TranslatedMark すっかり発情しきった%ANAME(LOCAL:5)%は自ら寝台の上に四つん這いになり、こちらに尻を向けておねだりした
+		IF HAS_PENIS(LOCAL:5)
+			PRINTFORML %ANAME(MASTER)%把%ANAME(LOCAL:5)%的菊穴塗満了黏滑的潤滑液、
+			;TranslatedMark %ANAME(MASTER)%は%ANAME(LOCAL:5)%の尻穴にたっぷりとローションを塗り付けると、
+			PRINTFORMW 從後面圧在了%ANAME(LOCAL:5)%身上、把%BAR_NAME(MASTER)%刺入了菊穴当作%ANAME(LOCAL:5)%答応要求的奨勵
+			;TranslatedMark %ANAME(LOCAL:5)%の後ろから覆い被さり、要求を飲んだご褒美としてその尻穴に%BAR_NAME(MASTER)%を突き入れてやった
+			PRINTFORML 欲情十足的%ANAME(LOCAL:5)%因為插入的衝撃軽微高潮了、身体微微顫抖、
+			;TranslatedMark 欲情しきった%ANAME(LOCAL:5)%は挿入の衝撃だけで軽く達してしまい、ガクガクと体を震わせるが、
+			PRINTFORMW %ANAME(MASTER)%不管不顧、持續粗暴的挺腰撞撃%ANAME(LOCAL:5)%的菊穴
+			;TranslatedMark %ANAME(MASTER)%はお構いなしに、%ANAME(LOCAL:5)%の尻穴へと乱暴に腰を打ち付け続ける
+			IF HAS_PENIS(MASTER)
+				PRINTFORML 不久%ANAME(LOCAL:5)%的身体劇烈抖動、從肉棒中噴射出了精液
+				;TranslatedMark ほどなくして%ANAME(LOCAL:5)%の体が一際大きく震えると、その竿からどぷっとトコロテン精液が漏れ出し、
+				PRINTFORMW 同時包裹着%ANAME(MASTER)%的肉棒的菊穴緊緊地收縮
+				;TranslatedMark 同時に%ANAME(MASTER)%のペニスを咥え込んだ尻穴がきゅぅっと強く締まる
+				PRINTFORML 到達極限的%ANAME(MASTER)%在%ANAME(LOCAL:5)%的菊穴内射入了大量的精液、
+				;TranslatedMark %ANAME(MASTER)%が感極まって%ANAME(LOCAL:5)%の尻穴に大量の精液を注ぎ込んでやると、
+				PRINTFORMW 沈溺于快感的%ANAME(LOCAL:5)%非常高興的継續收縮着菊穴…
+				;TranslatedMark %ANAME(LOCAL:5)%は快感に悶え狂いながら嬉しそうに尻穴をヒクつかせた…
+				PRINTFORMW ………………
+				PRINTFORML 把沾満了兩人份的白濁還沈浸在快感的余韻中的%ANAME(LOCAL:5)%留在了臥室、
+				;TranslatedMark 二人分の白濁でドロドロになりながら快感の余韻に浸る%ANAME(LOCAL:5)%をその場に残し、
+				PRINTFORMW %ANAME(MASTER)%離開了這裡…
+				;TranslatedMark %ANAME(MASTER)%はその場を後にした…
+			ELSE
+				PRINTFORML 不久%ANAME(LOCAL:5)%的身体劇烈抖動、
+				;TranslatedMark ほどなくして%ANAME(LOCAL:5)%の体が一際大きく震えると、
+				PRINTFORMW 從完全沒有被触碰到的肉棒中噴射出了精液、弄髒了床
+				;TranslatedMark 全く触れられていない竿からどぷっとトコロテン精液が漏れ出し、寝台をべっとりと汚していった
+				PRINTFORMW 進一步的頂進了沈溺于射精的快感的%ANAME(LOCAL:5)%的菊穴、
+				;TranslatedMark 精を漏らしながら快感に悶え狂う%ANAME(LOCAL:5)%の尻穴をさらに突いてやると、
+				PRINTFORMW 讓%ANAME(LOCAL:5)%発出了野獣般的呻吟、身体非常有意思的顫動着…
+				;TranslatedMark %ANAME(LOCAL:5)%は獣のように呻き、面白いようにビクビクと体を跳ねさせた…
+				PRINTFORMW ………………
+				PRINTFORML 把沈浸在快感之中躺在被自己的白濁打湿的床上的%ANAME(LOCAL:5)%留在了臥室、
+				;TranslatedMark 自分自身の白濁に濡れた寝台の上で快感の余韻に浸る%ANAME(LOCAL:5)%をその場に残し、
+				PRINTFORMW %ANAME(MASTER)%離開了這裡…
+				;TranslatedMark %ANAME(MASTER)%はその場を後にした…
+			ENDIF
+		ELSE
+			PRINTFORML %ANAME(MASTER)%把%ANAME(LOCAL:5)%的菊穴塗満了黏滑的潤滑液、
+			;TranslatedMark %ANAME(MASTER)%は%ANAME(LOCAL:5)%の尻穴にたっぷりとローションを塗り付けると、
+			PRINTFORMW 從後面圧在了%ANAME(LOCAL:5)%身上、把%BAR_NAME(MASTER)%刺入了菊穴当作%ANAME(LOCAL:5)%答応要求的奨勵
+			;TranslatedMark %ANAME(LOCAL:5)%の後ろから覆い被さり、要求を飲んだご褒美としてその尻穴に%BAR_NAME(MASTER)%を突き入れてやった
+			PRINTFORML %ANAME(MASTER)%離開了這裡…
+			;TranslatedMark 欲情しきった%ANAME(LOCAL:5)%は挿入の衝撃だけで達してしまい、はしたなく体を震わせるが、
+			PRINTFORMW %ANAME(MASTER)%不管不顧、持續粗暴的挺腰撞撃%ANAME(LOCAL:5)%的菊穴
+			;TranslatedMark %ANAME(MASTER)%はお構いなしに、%ANAME(LOCAL:5)%の尻穴へと乱暴に腰を打ち付け続ける
+			IF HAS_PENIS(MASTER)
+				PRINTFORML %ANAME(MASTER)%每次插入菊穴、%ANAME(LOCAL:5)%的腸壁都会緊緊收縮彷彿像是在迎接一樣、
+				;TranslatedMark %ANAME(MASTER)%が尻穴を突くたび、それを迎え入れる%ANAME(LOCAL:5)%の腸壁がきゅぅきゅぅと締まり、
+				PRINTFORMW 從毫無節操的裂縫中不停流淌出来的愛液落在床上形成了無数的斑点
+				;TranslatedMark さらにワレメからは節操無くダラダラと垂れ落ちる愛液が寝台に無数のシミを作っていく
+				PRINTFORML 然後到達極限的%ANAME(MASTER)%在%ANAME(LOCAL:5)%的菊穴内射入了大量的精液、
+				;TranslatedMark やがて感極まった%ANAME(MASTER)%が%ANAME(LOCAL:5)%の尻穴に大量の精液を注ぎ込んでやると、
+				PRINTFORMW 沈溺于快感的%ANAME(LOCAL:5)%非常高興的継續收縮着菊穴…
+				;TranslatedMark %ANAME(LOCAL:5)%は快感に悶え狂いながら嬉しそうに尻穴をヒクつかせた…
+			ELSE
+				PRINTFORML %ANAME(MASTER)%每次插入菊穴都会讓%ANAME(LOCAL:5)%発出野獣一般的鳴声、
+				;TranslatedMark %ANAME(MASTER)%が尻穴を突くたびに%ANAME(LOCAL:5)%は獣のような鳴き声を上げ、
+				PRINTFORMW 從毫無節操的裂縫中不停流淌出来的愛液打湿了床鋪
+				;TranslatedMark さらにワレメから節操無くダラダラと愛液を垂れ流して寝台を濡らしてしまう
+				PRINTFORML 為了懲罰因為菊穴被插入而感到快感的変態母狗、
+				;TranslatedMark 尻穴で気持ち良くなってしまう変態雌犬にお仕置きをするべく、
+				PRINTFORML %ANAME(MASTER)%挺着腰在%ANAME(LOCAL:5)%的腸内来回転動着、
+				;TranslatedMark %ANAME(MASTER)%が腰を押し付け%ANAME(LOCAL:5)%の腸内をグリグリとかき回してやると、
+				PRINTFORMW %ANAME(LOCAL:5)%因為極大的快感弓起了背、直接潮吹了…
+				;TranslatedMark %ANAME(LOCAL:5)%はあまりの快感に海老反りになり、雌唇からぷしゃりと潮を吹いた…
+			ENDIF
+			PRINTFORMW ………………
+			PRINTFORML 把菊穴還沒有閉合的沈浸在快感之中満臉幸福的%ANAME(LOCAL:5)%留在了臥室、
+			;TranslatedMark すっかり開きっぱなしになった尻穴を晒して幸せそうに快感の余韻に浸る%ANAME(LOCAL:5)%をその場に残し、
+			PRINTFORMW %ANAME(MASTER)%離開了這裡…
+			;TranslatedMark %ANAME(MASTER)%はその場を後にした…
+		ENDIF
+		CALL FUCK(MASTER, "Ｃ, 欲望, 性交, 射精, Ａ挿入", "童貞喪失", 0, "", "", @"%ANAME(LOCAL:5)%のアナル", "外交要求のご褒美での調教")
+		CALL FUCK(LOCAL:5, "欲望, 奉仕, 性交, 精愛, Ａ, 射精, Ａ性交", "Ａ処女喪失, 腸内射精", 0, "", ANAME(MASTER), "", "外交要求のご褒美での調教")
+		CFLAG:(LOCAL:5):4 += 400
+		CFLAG:(LOCAL:5):3 += 200
+		WAIT
+	;口を犯してやる
+	CASE 2
+		PRINTFORMW %ANAME(LOCAL:5)%被%ANAME(MASTER)%帯到了臥室…
+		;TranslatedMark %ANAME(LOCAL:5)%は%ANAME(MASTER)%を閨に案内した…
+		PRINTFORML %ANAME(MASTER)%坐在床上、微微張開了双腿
+		;TranslatedMark %ANAME(MASTER)%はベッドに腰掛け、脚を僅かに開いた
+		PRINTFORMW 被仔細調教過的%ANAME(LOCAL:5)%、即使%ANAME(MASTER)%什麼也沒有説也察覚到了要做什麼
+		;TranslatedMark 入念に躾けられた%ANAME(LOCAL:5)%は、それだけで何をしろと言われたか察したようだ
+		PRINTFORML %ANAME(LOCAL:5)%跪在了%ANAME(MASTER)%面前、取出了那件東西
+		;TranslatedMark %ANAME(LOCAL:5)%は%ANAME(MASTER)%の下に跪き、その一物を露出させる
+		PRINTFORMW 然後張開嘴巴、把悶熱的肉竿含了進去
+		;TranslatedMark そしてその口内に、蒸れた肉竿を迎え入れた
+		PRINTFORML 咻咻，咻咻，特別的水声在室内回响
+		;TranslatedMark ぢゅぼ、ぢゅぽと、特有の水音が室内に響く
+		PRINTFORMW %ANAME(LOCAL:5)%用舌頭来回舐弄着亀頭、用艶麗的嘴唇吸吮着竿部、還用手擼動着堅挺
+		;TranslatedMark %ANAME(LOCAL:5)%の口内では舌が亀頭を舐め回し、艶のある唇は竿に吸い付き、扱き立てている
+		PRINTFORML ……%ANAME(LOCAL:5)%的技術確実不錯、但対於%ANAME(MASTER)%来説還是有些不足
+		;TranslatedMark ……%ANAME(LOCAL:5)%の技術は確かだが、%ANAME(MASTER)%にとってはそれでもなお不足だった
+		PRINTFORML 有些急躁的%ANAME(MASTER)%、把%ANAME(LOCAL:5)%仰面推倒在床上
+		;TranslatedMark じれったくなった%ANAME(MASTER)%は、%ANAME(LOCAL:5)%を仰向けに押し倒した
+		PRINTFORMW 然後騎了上去、用肉棒在%ANAME(LOCAL:5)%口中抽插…
+		;TranslatedMark そしてその顔面に、上からペニスを叩きつけていく…
+		PRINTFORMW ………………
+		PRINTFORML %ANAME(MASTER)%満足的時候、%ANAME(LOCAL:5)%不僅是臉上就連上半身都沾満了精液
+		;TranslatedMark %ANAME(MASTER)%が満足するころには、%ANAME(LOCAL:5)%は顔だけでなく上半身ごと精液まみれになっていた
+		PRINTFORML 嘴角粘着完整的陰毛、從鼻孔中逆流出了白濁
+		;TranslatedMark 口端には陰毛がこびりつき、鼻穴からも白濁が逆流している
+		PRINTFORML 把露出了下流的啊嘿顔並且因為缺氧而軽微痙攣的%ANAME(LOCAL:5)%留在了床上、
+		;TranslatedMark だらしのないアヘ顔をさらしながら酸欠で軽く痙攣している%ANAME(LOCAL:5)%を放置し、
+		PRINTFORMW %ANAME(MASTER)%離開了這裡…
+		;TranslatedMark %ANAME(MASTER)%はその場を後にした…
+		CALL FUCK(MASTER, "Ｃ, 欲望, 射精")
+		CALL FUCK(LOCAL:5, "欲望, 奉仕, 性技, 精愛, 口淫", "接吻喪失, 口内射精", 0, @"%ANAME(MASTER)%的肉棒", "", "", "外交要求のご褒美での調教")
+		CFLAG:(LOCAL:5):4 += 300
+		CFLAG:(LOCAL:5):3 += 300
+		WAIT
+	;全身に責め具を付けて観察してやる
+	CASE 5
+		PRINTFORMW %ANAME(LOCAL:5)%被%ANAME(MASTER)%帯到了臥室…
+		;TranslatedMark %ANAME(LOCAL:5)%は%ANAME(MASTER)%を閨に案内した…
+		IF !HAS_VAGINA(LOCAL:5)
+			PRINTFORML %ANAME(MASTER)%立刻脱掉了%ANAME(LOCAL:5)%的衣服、因為被施虐的妄想而充満了情欲、
+			;TranslatedMark %ANAME(MASTER)%が早速%ANAME(LOCAL:5)%の服を脱がせると、虐められる妄想で欲情してしまったのか、
+			PRINTFORMW %ANAME(LOCAL:5)%的肉棒完全站了起来、期待着刺激而微微顫抖着
+			;TranslatedMark %ANAME(LOCAL:5)%のペニスはすっかり固く反り立ち、刺激を求めてヒクヒクと震えている
+			PRINTFORML %ANAME(MASTER)%讓赤裸的%ANAME(LOCAL:5)%跪在床上合攏四肢、
+			;TranslatedMark %ANAME(MASTER)%は裸になった%ANAME(LOCAL:5)%をチングリ返しの姿勢で寝台に寝かせると、
+			PRINTFORMW 然後用縄子綁住了手腕脚腕並固定在床上、使%ANAME(LOCAL:5)%保持着這羞恥的姿勢無法動弾
+			;TranslatedMark 手首と足首を縄で寝台に固定し、恥ずかしい体勢のまま身動きを取れないようにした
+			PRINTFORML 以這個姿勢朝菊穴裡塞入了振動棒、並且在乳頭上安装了乳頭夾
+			;TranslatedMark その姿勢のまま尻穴にアナルバイブをねじ込み、さらに乳首にニプルキャップを取り付けてやると、
+			PRINTFORMW %ANAME(LOCAL:5)%因為同時從２点傳来的快感就像是女性一樣呻吟着
+			;TranslatedMark %ANAME(LOCAL:5)%は２点からの快楽刺激に女のような声で喘いだ
+			PRINTFORML 之後一直以這樣的状態放置着、不久堆積起来的快感讓%ANAME(LOCAL:5)%的身体開始顫抖、
+			;TranslatedMark しばらくそのままの状態で放置してやると、やがて積み重なる快感に%ANAME(LOCAL:5)%が体をピクピクと震えさせ、
+			PRINTFORMW 終於大幅度後昂着背迎来了高潮
+			;TranslatedMark ついに一際背を大きく反らしてドライオーガズムに達した
+			PRINTFORMW 但是、無需操縱的淫具継續工作着、持續刺激着因為高潮変得更加敏感的身体
+			;TranslatedMark だが、責め具は一切の手心を加えず、絶頂で敏感になった体を刺激し続ける
+			PRINTFORML %ANAME(LOCAL:5)%発出膩人的呻吟高潮了好幾次、然後因為菊穴傳来的快感從肉棒中噴射出了精液、
+			;TranslatedMark %ANAME(LOCAL:5)%は何度も甘い声を上げながら絶頂し、やがて尻穴への刺激で吹き出したトコロテン精液が、
+			PRINTFORMW 濺射到了%ANAME(LOCAL:5)%自己的臉上
+			;TranslatedMark %ANAME(LOCAL:5)%の顔にびしゃりと降り掛かった
+			PRINTFORMW ………………
+			PRINTFORML 把全身沾満了自己的白濁並且已経昏過去的%ANAME(LOCAL:5)%就這樣放置在床上、
+			;TranslatedMark 自分自身の白濁にまみれたまま気絶する%ANAME(LOCAL:5)%をそのまま放置して、
+			PRINTFORMW %ANAME(MASTER)%離開了這裡…
+			;TranslatedMark %ANAME(MASTER)%はその場を後にした…
+		ELSEIF !HAS_PENIS(LOCAL:5)
+			PRINTFORML %ANAME(MASTER)%立刻脱掉了%ANAME(LOCAL:5)%的衣服、因為被施虐的妄想而充満了情欲、
+			;TranslatedMark %ANAME(MASTER)%が早速%ANAME(LOCAL:5)%の服を脱がせると、虐められる妄想で欲情してしまったのか、
+			PRINTFORMW %ANAME(LOCAL:5)%的小穴因為接下来要発生的事早已开始分泌淫汁，现在已経完全湿潤了
+			;TranslatedMark %ANAME(LOCAL:5)%のアソコはお漏らしでもしたのではないかと思うほどグショグショに濡れていた
+			PRINTFORML %ANAME(MASTER)%讓赤裸的%ANAME(LOCAL:5)%跪在床上合攏四肢、
+			;TranslatedMark %ANAME(MASTER)%はまず裸になった%ANAME(LOCAL:5)%をマングリ返しの姿勢で寝台に寝かせると、
+			PRINTFORMW 然後用縄子綁住了手腕脚腕並固定在床上、使%ANAME(LOCAL:5)%保持着這羞恥的姿勢無法動弾
+			;TranslatedMark 手首と足首を縄で寝台に固定し、恥ずかしい体勢のまま身動きを取れないようにした
+			PRINTFORML 就這樣、%ANAME(MASTER)%同時把振動棒插入了秘唇和菊穴之中、
+			;TranslatedMark その姿勢のまま、%ANAME(MASTER)%は秘唇と尻穴の両方にバイブをねじ込み、
+			PRINTFORMW 然後在陰蒂和乳頭上安装上了会振動的夾子
+			;TranslatedMark さらにクリと乳首に振動するキャップを取り付けてやる
+			PRINTFORML 全身所有性感帯都被道具责弄的%ANAME(LOCAL:5)%、
+			;TranslatedMark 全身のあらゆる性感帯を道具で責め立てられた%ANAME(LOCAL:5)%は、
+			PRINTFORMW 完全無法忍耐住刺激、很快就迎来了高潮全身止不住的顫抖
+			;TranslatedMark 耐えることすら許されず、あっという間に絶頂に押し上げられてガクガクと体を震わせた
+			PRINTFORMW 但是、無需操縱的淫具継續工作着、持續刺激着因為高潮変得更加敏感的身体
+			;TranslatedMark だが、責め具は一切の手心を加えず、絶頂で敏感になった体を刺激し続ける
+			PRINTFORML 這強烈的快感、讓%ANAME(LOCAL:5)%後弓着背発出了語無倫次的嬌喘声、
+			;TranslatedMark あまりの快感に、%ANAME(LOCAL:5)%はわけのわからない声を上げながら背を反らし、
+			PRINTFORMW 爱液从膣壁和振動棒的空隙中洶湧的噴了出来
+			;TranslatedMark 膣壁とバイブの隙間からぷしゃりと勢い良く潮を吹き出した
+			PRINTFORMW ………………
+			PRINTFORML 把因為快感表情完全鬆弛下来並昏了過去的%ANAME(LOCAL:5)%就這樣放置在床上、
+			;TranslatedMark 快感ですっかり緩みきった表情のまま気絶する%ANAME(LOCAL:5)%をそのまま放置して、
+			PRINTFORMW %ANAME(MASTER)%離開了這裡…
+			;TranslatedMark %ANAME(MASTER)%はその場を後にした…
+		ELSE
+			PRINTFORML %ANAME(MASTER)%立刻脱掉了%ANAME(LOCAL:5)%的衣服、因為被施虐的妄想而充満了情欲、
+			;TranslatedMark %ANAME(MASTER)%が早速%ANAME(LOCAL:5)%の服を脱がせると、虐められる妄想で欲情してしまったのか、
+			PRINTFORMW %ANAME(LOCAL:5)%的肉棒完全站了起来、期待着刺激而微微顫抖着
+			;TranslatedMark %ANAME(LOCAL:5)%のペニスはすっかり固く反り立ち、刺激を求めてヒクヒクと震えている
+			PRINTFORML %ANAME(MASTER)%讓赤裸的%ANAME(LOCAL:5)%跪在床上合攏四肢、
+			;TranslatedMark %ANAME(MASTER)%はまず裸になった%ANAME(LOCAL:5)%をマングリ返しの姿勢で寝台に寝かせると、
+			PRINTFORMW 然後用縄子綁住了手腕脚腕並固定在床上、使%ANAME(LOCAL:5)%保持着這羞恥的姿勢無法動弾
+			;TranslatedMark 手首と足首を縄で寝台に固定し、恥ずかしい体勢のまま身動きを取れないようにした
+			PRINTFORML 就這樣、%ANAME(MASTER)%同時把振動棒插入了秘唇和菊穴之中、
+			;TranslatedMark その姿勢のまま、%ANAME(MASTER)%は秘唇と尻穴の両方にバイブをねじ込み、
+			PRINTFORMW 然後在陰蒂和乳頭上安装上了会振動的夾子
+			;TranslatedMark さらにクリと乳首に振動するキャップを取り付けてやる
+			PRINTFORML 全身所有性感帯都被道具责弄的%ANAME(LOCAL:5)%、
+			;TranslatedMark 全身のあらゆる性感帯を道具で責め立てられた%ANAME(LOCAL:5)%は、
+			PRINTFORMW 完全無法忍耐住刺激、很快就迎来了高潮全身止不住的顫抖
+			;TranslatedMark 耐えることすら許されず、あっという間に絶頂に押し上げられてガクガクと体を震わせた
+			PRINTFORMW 但是、無需操縱的淫具継續工作着、持續刺激着因為高潮変得更加敏感的身体
+			;TranslatedMark だが、責め具は一切の手心を加えず、絶頂で敏感になった体を刺激し続ける
+			PRINTFORML 這強烈的快感、讓%ANAME(LOCAL:5)%発出了語無倫次的嬌喘声、
+			;TranslatedMark あまりの快感に、%ANAME(LOCAL:5)%はわけのわからない声を上げてアヘりながら、
+			PRINTFORMW 從肉棒中像瀑布一樣噴射出的精液一波波的飛到了自己臉上
+			;TranslatedMark ペニスから滝のように精液を吹き出して自分自身の顔にビシャビシャと振り掛けた
+			PRINTFORMW ………………
+			PRINTFORML 把被大量白濁沾満並昏了過去的%ANAME(LOCAL:5)%就這樣放置在床上、
+			;TranslatedMark 大量の白濁にまみれたまま気絶する%ANAME(LOCAL:5)%をそのまま放置して、
+			PRINTFORMW %ANAME(MASTER)%離開了這裡…
+			;TranslatedMark %ANAME(MASTER)%はその場を後にした…
+		ENDIF
+		CALL FUCK(LOCAL:5, "欲望, Ｖ, Ｃ, Ａ, 緊縛, 苦痛快楽, 被虐", "処女喪失, Ａ処女喪失", 0, "", "振動棒", "", "外交要求のご褒美での調教")
+		CFLAG:(LOCAL:5):4 += 300
+		CFLAG:(LOCAL:5):3 += 300
+		WAIT
+	;兵士に提供する
+	CASE 6
+		PRINTFORMW %ANAME(LOCAL:5)%被%ANAME(MASTER)%帯到了臥室…
+		;TranslatedMark %ANAME(LOCAL:5)%は%ANAME(MASTER)%を閨に案内した…
+		PRINTFORML %ANAME(MASTER)%立刻脱掉了%ANAME(LOCAL:5)%的衣服、想像着侵犯的事已経欲火難耐了、
+		;TranslatedMark %ANAME(MASTER)%が早速%ANAME(LOCAL:5)%の服を脱がせると、犯される想像で欲情してしまったのか、
+		PRINTFORMW %ANAME(LOCAL:5)%的小穴因為接下来要発生的事早已开始分泌淫汁，现在已経完全湿潤了
+		;TranslatedMark %ANAME(LOCAL:5)%のアソコはお漏らしでもしたのではないかと思うほどグショグショに濡れていた
+		PRINTFORML 作為問候的替代先用手指開始了责弄、僅僅是這樣%ANAME(LOCAL:5)%無法忍耐的発出了呻吟
+		;TranslatedMark 挨拶代わりに指先で弄くってやると、%ANAME(LOCAL:5)%はそれだけでたまらないという声をあげた
+		PRINTFORML %ANAME(MASTER)%把她綁了起来、説道可以進来了
+		;TranslatedMark %ANAME(MASTER)%は彼女を縛り上げ、入ってきていいぞと伝える
+		PRINTFORMW 事前商量好了的%ANAME(MASTER)%的部下的士兵、一個接一個的進入了房間
+		;TranslatedMark 事前の打ち合わせ通り、%ANAME(MASTER)%の部下の兵士がぞろぞろと部屋に上がり込んできた
+		PRINTFORML 対着因為吃驚而張開了嘴的%ANAME(LOCAL:5)%、士兵直接掏出了自己肉棒插入了她的口中
+		;TranslatedMark 驚きに開いたままになった%ANAME(LOCAL:5)%の口内へ、兵士は露出させた己の一物を突き込む
+		PRINTFORMW 緊接着%ANAME(LOCAL:5)%已経湿潤的膣穴、收縮着的菊穴、也開始被其他的士兵分別侵犯着
+		;TranslatedMark さらには%ANAME(LOCAL:5)%の濡れそぼつ膣穴、すぼまった尻穴も、別の兵士がそれぞれ犯し始めた
+		PRINTFORML 濃厚的雄性気味、從下半身擴散到腦海的快感、讓%ANAME(LOCAL:5)%很快的就露出了啊嘿顔
+		;TranslatedMark 濃厚な雄の味、下半身から脳へ伝わる快楽に、%ANAME(LOCAL:5)%は早くもアヘ顔を晒している
+		PRINTFORMW 看到露出如此下流的母狗一樣的表情的她、士兵們越発興奮了、更加激烈的晃動着腰…
+		;TranslatedMark すっかり雌の表情になった彼女を見、兵士達はより興奮したようで、さらに激しく腰を振りたくる…
+		PRINTFORML 対他們傳達了尽情享受的命令後、%ANAME(MASTER)%離開了房間
+		;TranslatedMark 適当に楽しんでおけと彼らに伝え、%ANAME(MASTER)%は部屋を後にする
+		PRINTFORMW 從身後、傳来了沈溺于快感的女人的嬌喘声……
+		;TranslatedMark 背後から、快楽に悶え狂う女の嬌声が聞こえてきた……
+		PRINTFORMW ………………
+		PRINTFORML 迎接着返回房間的%ANAME(MASTER)%的是、瀰漫在空気中讓人喘不過気的性的気味
+		;TranslatedMark 部屋に戻った%ANAME(MASTER)%を迎えたのは、むせかえるほどの性の匂いだった
+		PRINTFORML 躺在床上的全身被染成白色的%ANAME(LOCAL:5)%、兩個洞中和口中都流出了精液
+		;TranslatedMark ベッドの上では、全身真っ白に染まった%ANAME(LOCAL:5)%が、両穴と口から子種を垂れ流しにしながら、
+		PRINTFORML 而且嘟囔着想要肉棒的話語……
+		;TranslatedMark 肉棒をねだる言葉を並べたてていた……
+		CALL FUCK(LOCAL:5, "欲望, 性交, 精愛, 奉仕, 性技, Ｖ, Ｃ, Ａ, Ｂ, Ｍ, 口淫, 緊縛, 苦痛快楽, 被虐, 輪姦, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("士兵"), "士兵的肉棒", "士兵", "", "外交要求のご褒美での輪姦")
+		WAIT
+	;宮廷を散歩する
+	CASE 7
+		PRINTFORML %ANAME(LOCAL:5)%要被%ANAME(MASTER)%帯進臥室的時候、%ANAME(MASTER)%突然停了下来
+		;TranslatedMark %ANAME(LOCAL:5)%が%ANAME(MASTER)%を閨に案内すると、%ANAME(MASTER)%はそれを止めた
+		PRINTFORMW 然後、命令%ANAME(LOCAL:5)%当場脱光……
+		;TranslatedMark そして、この場で脱ぐよう%ANAME(LOCAL:5)%に伝えた……
+		PRINTFORML 一瞬間有些躊躇的%ANAME(LOCAL:5)%、在%ANAME(MASTER)%面無表情重複了一遍命令的情況下、老実的順從了
+		;TranslatedMark 一瞬躊躇った%ANAME(LOCAL:5)%だが、%ANAME(MASTER)%が有無を言わさぬ表情で繰り返すと、大人しく従った
+		PRINTFORMW 是羞恥的緣故麼、%ANAME(LOCAL:5)%的小穴開始溢出了愛液、慢慢地打湿了大腿
+		;TranslatedMark 羞恥ゆえか、%ANAME(LOCAL:5)%のアソコは次から次へ露を溢れさせ、太腿を濡らしている
+		PRINTFORML %ANAME(MASTER)%給身無片縷的%ANAME(LOCAL:5)%戴上了項圈、開始一起在宮廷裡散步……
+		;TranslatedMark %ANAME(MASTER)%は生まれたままの姿の%ANAME(LOCAL:5)%に首輪をつけ、一緒に宮廷を散歩し始めた……
+		SELECTCASE RAND:4
+			CASE 0
+				PRINTFORML 走了一段时间、到了漫长的走廊的时候
+				;TranslatedMark しばらく歩いていると、長い廊下に行きあった
+				PRINTFORMW 遇到了一群%ANAME(LOCAL:5)%的部下、但是%ANAME(MASTER)%毫不留情的継續牽着%ANAME(LOCAL:5)%前進
+				;TranslatedMark リードをひき、%ANAME(LOCAL:5)%を容赦なく連れ歩いていると、%ANAME(LOCAL:5)%の部下の一団に出くわした
+				PRINTFORML 部下們紛紛用無法置信的眼神看了過来、然後%ANAME(MASTER)%看着%ANAME(LOCAL:5)%
+				;TranslatedMark 部下たちは信じられないものを見るような目で、%ANAME(MASTER)%を、そしてなにより%ANAME(LOCAL:5)%を見ている
+				PRINTFORML %ANAME(LOCAL:5)%在%ANAME(MASTER)%的催促下、自己屈服在脚下、説出了自己是%ANAME(MASTER)%的母狗的話
+				;TranslatedMark %ANAME(MASTER)%が促すと、%ANAME(LOCAL:5)%は、自らが%ANAME(MASTER)%に屈服し、雌となったことを報告した
+				PRINTFORML 然後在他們・她們的面前、取出了%ANAME(MASTER)%的肉棒、用嘴巴開始奉仕……
+				;TranslatedMark そして彼ら・彼女らの見ている前で、%ANAME(MASTER)%の一物を露出させ、その唇で奉仕を始めた……
+				CALL FUCK(LOCAL:5, "欲望, 精愛, 奉仕, 性技, 露出, 露出, 口淫", "接吻喪失, 口内射精", 0, @"%ANAME(MASTER)%的肉棒", "", "", "外交要求のご褒美での公衆の面前での調教")
+			CASE 1
+				PRINTFORMW %ANAME(MASTER)%来到了庭院
+				;TranslatedMark %ANAME(MASTER)%は中庭にやって来た
+				PRINTFORML %ANAME(MASTER)%把%ANAME(LOCAL:5)%帯進了不起眼的草叢的陰影処、下達了当場放尿的命令
+				;TranslatedMark %ANAME(MASTER)%は%ANAME(LOCAL:5)%を目立たない茂みの陰に連れて行き、その場で放尿するように命じた
+				PRINTFORML %ANAME(LOCAL:5)%在害羞的同時、蹲了下去、開始放出了濃厚的尿液
+				;TranslatedMark %ANAME(LOCAL:5)%は恥ずかしがりながらも、しゃああ、と濃い尿を放ち始めた
+				PRINTFORMW 地面被浸湿的越来越廣……
+				;TranslatedMark 地面に染みが広がっていく……
+				PRINTFORML %ANAME(MASTER)%進一步、命令着%ANAME(LOCAL:5)%張開大腿開始自慰
+				;TranslatedMark さらに%ANAME(MASTER)%は、大股を広げて自慰をするよう%ANAME(LOCAL:5)%に命じた
+				PRINTFORML 最初還感到羞恥的%ANAME(LOCAL:5)%、漸漸地沈浸在快感之中
+				;TranslatedMark 最初は恥ずかしがっていた%ANAME(LOCAL:5)%も、次第に快楽に我を忘れ、
+				PRINTFORMW 最後庭院中響起了沈溺于快感的%ANAME(LOCAL:5)%的嬌喘声……
+				;TranslatedMark 最後には宮廷中に響き渡るような声でイき狂った……
+				CALL FUCK(LOCAL:5, "欲望, 自慰, 自慰, 性技, 露出, 露出, 排泄, Ｃ, Ｂ")
+			CASE 2
+				PRINTFORML 散步的途中，遇到了警备兵
+				;TranslatedMark 散歩の途中、警備兵に出くわした
+				PRINTFORML 不顧処於驚慌状態的士兵、%ANAME(MASTER)%対%ANAME(LOCAL:5)%下達了去為他服務的命令
+				;TranslatedMark 驚き慌てる兵士を余所に、%ANAME(MASTER)%は%ANAME(LOCAL:5)%に、彼に奉仕するように命じた
+				PRINTFORMW 最初十分躊躇的%ANAME(LOCAL:5)%、在%ANAME(MASTER)%的再三催促下、取出了他那悶熱的肉棒、然後開始用嘴吸吮了起来……
+				;TranslatedMark 最初は躊躇った%ANAME(LOCAL:5)%だが、%ANAME(MASTER)%が再び促すと、彼の蒸れた一物を露出させ、その口で扱きあげ始めた……
+				PRINTFORML 被%ANAME(MASTER)%所調教出来的技術、很快就讓士兵無法忍耐、直接射精了
+				;TranslatedMark %ANAME(MASTER)%によって仕込まれた技術は、兵士をあっという間に昂ぶらせ、射精へと導いた
+				PRINTFORML 被射出来的白濁、%ANAME(LOCAL:5)%発出声音直接呑了下去
+				;TranslatedMark 放たれる白濁を、%ANAME(LOCAL:5)%は音を立てて飲み下していく
+				PRINTFORMW %ANAME(MASTER)%説出了可以使用%ANAME(LOCAL:5)%的膣穴后、士兵一辺感謝着一辺開始猛然地侵犯着她……
+				;TranslatedMark %ANAME(MASTER)%が%ANAME(LOCAL:5)%の膣穴を使う許可を出すと、兵士は感謝しながら彼女を猛然と犯し始めた……
+				CALL FUCK(LOCAL:5, "欲望, 精愛, 奉仕, 性交, 性技, 露出, 露出, 口淫, Ｖ感", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("士兵"), "士兵的肉棒", "士兵", "", "外交要求のご褒美での調教")
+			CASE 3
+				PRINTFORML %ANAME(LOCAL:5)%被%ANAME(MASTER)%、帯到了陰暗的走廊的陰影処
+				;TranslatedMark 人目につかない廊下の陰に、%ANAME(MASTER)%は%ANAME(LOCAL:5)%を連れ込んだ
+				PRINTFORMW %ANAME(LOCAL:5)%的乳頭、因為説不定会被其他人看見的興奮、完全変硬挺了起来
+				;TranslatedMark %ANAME(LOCAL:5)%の乳首は、見られてしまうかもしれないという興奮に、ぴぃんと硬く張り詰めている
+				PRINTFORML %ANAME(MASTER)%命令着%ANAME(LOCAL:5)%、扶在墻上抬起屁股
+				;TranslatedMark %ANAME(MASTER)%は%ANAME(LOCAL:5)%に、壁について尻を突き出すよう命令した
+				PRINTFORMW 然後為了懲罰這個沒有節操的母狗、把肉棒深深地插了進去
+				;TranslatedMark そして節操のない雌犬への罰として、肉棒を深々と突き入れた
+				PRINTFORML 忘記了可能会被其他人看見的事実、%ANAME(LOCAL:5)%高声呻吟着、沈溺于快感開始自己扭動着腰
+				;TranslatedMark 誰かに見られていることも忘れ、%ANAME(LOCAL:5)%はたまらないという声をあげ、腰を振りたくってヨガり狂っている
+				PRINTFORML 不久%ANAME(MASTER)%在腔穴的深処射精了、宮廷中迴響起了%ANAME(LOCAL:5)%高潮時的嬌喘声……
+				;TranslatedMark やがて%ANAME(MASTER)%が膣穴深くで射精すると、%ANAME(LOCAL:5)%は宮廷中に響くほどの声で絶頂した……
+				CALL FUCK(LOCAL:5, "欲望, 精愛, 奉仕, 性交, 性技, 露出, 露出, Ｖ感, Ｖ性交", "処女喪失, 膣内射精", GET_ID(MASTER), "", ANAME(MASTER), "", "外交要求のご褒美での調教")
+		ENDSELECT
+		PRINTFORMW ………………
+		PRINTFORML 之後、回到了房間的%ANAME(MASTER)%、不断地調教着因為露出的快感而変得興奮的%ANAME(LOCAL:5)%
+		;TranslatedMark その後、部屋に戻った%ANAME(MASTER)%は、露出の快楽に昂ぶったままの%ANAME(LOCAL:5)%をたっぷり躾けてやった
+		PRINTL 従属度＋200
+		PRINTL 依存度＋200
+		WAIT
+	;奴隷の分際で生意気だ……放置！
+	CASE 19
+		;自慰または触手オナニーの知識の有無を判定
+		LOCAL:0 = 0
+		CALL CHECK_COM_KNOWLEDGE(LOCAL:5, 100)
+		LOCAL:0 += RESULT
+		CALL CHECK_COM_KNOWLEDGE(LOCAL:5, 211)
+		LOCAL:0 += RESULT
+
+		PRINTFORMW %ANAME(MASTER)%無視了%ANAME(LOCAL:5)%投来的期待的視線、什麼也沒做直接離開了
+		;TranslatedMark %ANAME(MASTER)%は%ANAME(LOCAL:5)%の期待の篭った視線を無視し、何もせずにその場を後にした
+		PRINTFORML 已経因為被虐的妄想而発情的%ANAME(LOCAL:5)%的期待被背叛了、
+		;TranslatedMark 既に虐められる妄想で発情しきっていた%ANAME(LOCAL:5)%は期待を裏切られ、
+		IF !LOCAL:0
+			PRINTFORMW 就這樣悶悶不楽的度過了一天…
+			;TranslatedMark 悶々とした気分のまま一日を過ごした…
+			PRINTFORML <%ANAME(LOCAL:5)%>
+			CFLAG:(LOCAL:5):3 -= 300
+			PRINTL 依存度－300
+		ELSE
+			PRINTFORMW 在%ANAME(MASTER)%回去之後、一個人安慰着自己充満着情欲的火熱的身体…
+			;TranslatedMark %ANAME(MASTER)%が帰った後で一人、欲情に火照る体を慰めた…
+			PRINTFORML <%ANAME(LOCAL:5)%>
+			CFLAG:(LOCAL:5):3 -= 300
+			PRINTL 依存度－300
+
+			;自慰の種類と回数の決定
+			CALL CALC_SELF_PARAMETER(LOCAL:5, 0)
+			LOCAL:10 = RESULT:1
+			LOCAL:11 = RESULT:2
+
+			;ＣＢオナニー
+			IF LOCAL:10 == 0
+				CALL FUCK(LOCAL:5, "欲望, 自慰, 自慰, 性技, 射精, Ｃ, Ｂ")
+			;アナニー
+			ELSE
+				CALL FUCK(LOCAL:5, "欲望, 自慰, 自慰, 性技, 射精, Ａ")
+			ENDIF
+		ENDIF
+		WAIT
+ENDSELECT
+
+;-------------------------------------------------
+;要求を飲んだ時のご褒美（薬物）
+;-------------------------------------------------
+@DIPLOMACY_REQUEST_DRUG_USE(ARG:0)
+LOCAL:4 = GET_COUNTRY_BOSS(CFLAG:MASTER:所属)
+LOCAL:5 = GET_COUNTRY_BOSS(ARG:0)
+
+SELECTCASE RAND:100
+	CASE IS > 60
+		PRINTFORMW %ANAME(MASTER)%掏出了肉棒、在上面放上了薬片
+		;TranslatedMark %ANAME(MASTER)%はペニスを露出させると、その上に錠剤をのせた
+		PRINTFORML %ANAME(LOCAL:5)%眼神一変、直接含住了悶熱的肉棒
+		;TranslatedMark %ANAME(LOCAL:5)%は目の色を変え、蒸れた肉の棒にしゃぶりつく
+		PRINTFORMW 然後就這樣、開始発出了吸吮着堅挺的声音
+		;TranslatedMark そしてそのまま、ぢゅるぢゅると音を立ててしゃぶりたて始めた
+		PRINTFORML 咻咻，咕噜，房間中持續迴響着下流的水声
+		;TranslatedMark ぢゅぽ、ぐぽと、卑猥な水音が部屋中に響き渡る
+		PRINTFORMW %ANAME(LOCAL:5)%変得有些不太清醒、不僅僅是為了薬而継續做着這種行為
+		;TranslatedMark %ANAME(LOCAL:5)%はもはや明らかに、薬のためだけにこのような行為をしているわけではなかった
+		PRINTFORML 然後%ANAME(MASTER)%迎来了極限、在%ANAME(LOCAL:5)%的口中直接射精了、
+		;TranslatedMark やがて%ANAME(MASTER)%が限界を迎え、その精を%ANAME(LOCAL:5)%の口内に放つと、
+		PRINTFORMW %ANAME(LOCAL:5)%発出声音直接把精液呑了下去……
+		;TranslatedMark %ANAME(LOCAL:5)%は音を立ててそれを飲み下していった……
+		CALL FUCK(MASTER, "Ｃ, 欲望, 射精")
+		CALL FUCK(LOCAL:5, "欲望, 奉仕, 性技, 精愛, 口淫", "接吻喪失, 口内射精", 0, @"%ANAME(MASTER)%的肉棒", "", "", "外交要求のご褒美での薬を盛られての調教")
+	CASEELSE
+		PRINTFORML %ANAME(MASTER)%、把陷入幻覚的%ANAME(LOCAL:5)%推倒在床上
+		;TranslatedMark %ANAME(MASTER)%は、トリップする%ANAME(LOCAL:5)%をベッドの上に押し倒した
+		PRINTFORML 然後草草的結束了前戲、把肉棒插入了湿潤的小穴
+		;TranslatedMark そして前戯もそこそこに、その濡れた穴にペニスを挿入した
+		PRINTFORMW 在薬物的效果下、%ANAME(LOCAL:5)%発出了像野獣一般的低沈的呻吟
+		;TranslatedMark 薬物の効果により、%ANAME(LOCAL:5)%は獣じみたヨガり声をあげて悶えた
+		SIF TALENT:(LOCAL:5):処女
+			PRINTFORML 和那個声音一起、%ANAME(LOCAL:5)%喪失了純潔、現在她也是体験到性交快感的女性了
+			;TranslatedMark ぶぢりという音と共に、%ANAME(LOCAL:5)%の純潔は喪われたが、今の彼女にはそれすら快楽であるようだった
+		PRINTFORML 極度的快感讓%ANAME(LOCAL:5)%的身体不停顫抖直接高潮了
+		;TranslatedMark 度を超した快楽に%ANAME(LOCAL:5)%の身体はガクガクと震えて絶頂している
+		PRINTFORMW 但是、%ANAME(MASTER)%完全沒有在意這樣的事
+		;TranslatedMark だが、%ANAME(MASTER)%からしてみればそんなことは関係ない
+		PRINTFORMW %ANAME(MASTER)%抓着%ANAME(LOCAL:5)%的屁股不停的晃動着腰、在子宮的深処射精了好幾次……
+		;TranslatedMark %ANAME(MASTER)%は、くねる%ANAME(LOCAL:5)%の尻にひたすら腰を打ち付け、何度もその奥で射精してやった……
+		CALL FUCK(MASTER, "Ｃ, 欲望, 性交, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(LOCAL:5)%の膣")
+		CALL FUCK(LOCAL:5, "欲望, 奉仕, 性交, 精愛, Ｖ, 苦痛快楽, 被虐, Ｖ性交", "処女喪失, 膣内射精", GET_ID(MASTER), "", ANAME(MASTER), "", "外交要求のご褒美での薬を盛られての調教")
+		CFLAG:(LOCAL:5):4 += 300
+		CFLAG:(LOCAL:5):3 += 300
+		WAIT
+ENDSELECT
+
+;-------------------------------------------------
+;要求を飲んだ時のご褒美（催眠）
+;-------------------------------------------------
+@DIPLOMACY_REQUEST_HYPNOSIS_USE(ARG:0)
+#DIM 対象
+対象 = GET_COUNTRY_BOSS(ARG:0)
+
+CALL ASK_MULTI("就这样责弄", "只恢复意识", "变得淫乱吧", "变得认知不了自己的存在")
+;TranslatedMark "このまま弄ぶ", "意識だけ戻す", "淫乱にする", "こちらを認識できなくする"
+
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORML %ANAME(MASTER)%打算就这样责弄%ANAME(対象)%的身体
+		;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%を、このまま弄んでやることにした
+		PRINTFORMW 下达了赤裸身体的命令后，%ANAME(対象)%立刻开始脱去自己的衣服，一言不发，瞳孔中一片虚无
+		;TranslatedMark 服を脱ぐよう命じると、%ANAME(対象)%は虚ろな瞳のまま自らの衣服に手をかけ、脱ぎ捨てていく
+		PRINTFORML 很快，%ANAME(対象)%就把%STR_BODY("胸：感触", 対象)%和%STR_BODY("膣：感度", 対象)%展露出来，任%ANAME(MASTER)%肆意责弄。
+		;TranslatedMark 露わになった%STR_BODY("胸：感触", 対象)%や%STR_BODY("膣：感度", 対象)%を弄び、%STR_BODY("尻", 対象)%を撫で回してやっても、%PRONOUN(対象)%は表情一つかえない
+		PRINTFORMW 但即便%STR_BODY("尻", 対象)%被大力揉捏着，%PRONOUN(対象)%的表情仍然毫无波动
+		;TranslatedMark しかし、やはり性感を覚えているようで、雌穴の奥からはじんわりと蜜が溢れてくる
+		PRINTFORML 但是，%ANAME(対象)%被调教开发完毕的肉体却很诚实地兴奋起来，从雌穴的深处慢慢溢出蜜汁来
+		;TranslatedMark %ANAME(MASTER)%は自失したままの%ANAME(対象)%に肉棒をねじ込み、無防備なヴァギナを犯していく
+		PRINTFORMW %ANAME(MASTER)%掏出怒挺着的肉棒，“噗呲”一声插入了毫无防备的%ANAME(対象)%的身体里
+		;TranslatedMark 物言わぬ人形のようである%ANAME(対象)%相手に、何度も種を植え付けてやった……
+	CASE 1
+		PRINTFORML 恢复意识的%ANAME(対象)%惊恐地发现，自己全裸着身体，十分恭敬地跪在%ANAME(MASTER)%的脚边。
+		;TranslatedMark 意識を取り戻した%ANAME(対象)%は、自らが全裸で、%ANAME(MASTER)%のもとに跪いていることに気づく
+		PRINTFORML 虽然想要张嘴询问怎么回事，但身体完全不听自己的命令。
+		;TranslatedMark 何事か問いただそうとしたが、身体が自由に動かない
+		PRINTFORMW 不仅如此，一些卑微下流又谄媚的话，还不停的从口中流出来。
+		;TranslatedMark それどころか%ANAME(MASTER)%にへりくだり、媚びる言葉を口は並べる
+		PRINTFORML 手指更是无视了%ANAME(対象)%的意志，擅自动起来，慰弄着小穴，双腿则像是要展示什么似的大幅度打开。
+		;TranslatedMark 指は意思と関係なしに自らの身体を慰め、両脚は勝手に大きく広げられる
+		PRINTFORMW %ANAME(対象)%想要阻止自己的行为，但最终却亲自打开了%STR_BODY("膣", 対象)%，恳求起肉棒的侵犯。
+		;TranslatedMark 自ら%STR_BODY("膣", 対象)%を割り開き、肉棒をねだらされる
+		PRINTFORML 当%ANAME(MASTER)%猛地将肉棒插入后，极度的快乐冲刷了%ANAME(対象)%的神经，遗忘了所有屈辱、娇吟着沉溺其中……
+		;TranslatedMark 猛々しいペニスをねじ込まれると、屈辱すら忘れてしまうほどの快楽が全身を駆け抜ける……
+		PRINTFORMW %ANAME(対象)%就这样在意识清醒的情况下，被%ANAME(MASTER)%侵犯了好几次……
+		;TranslatedMark %ANAME(対象)%はそのまま、何度も%ANAME(MASTER)%に犯された……
+	CASE 2
+		PRINTFORML %ANAME(MASTER)%下达了强烈的暗示后，让%ANAME(対象)%恢复了意识，%PRONOUN(対象)%脸上很快浮现出一幅荡漾的表情
+		;TranslatedMark %ANAME(MASTER)%が強烈な暗示をかけた後%ANAME(対象)%の意識を戻すと、%PRONOUN(対象)%はすぐに蕩けた表情を浮かべ始めた
+		PRINTFORMW 尽管%ANAME(MASTER)%不过是一个偶然在身边的人，但喷薄而出的情欲让%ANAME(対象)%忍不住全身贴了上去，口中不断用淫靡的言辞进行诱惑。
+		;TranslatedMark 「たまたま」すぐ近くにいた男である%ANAME(MASTER)%にしなだれかかり、淫らな言葉を並べ立てて誘う
+		PRINTFORMW 火热的身体乞求着%ANAME(MASTER)%的爱抚，像是已经到了忍耐的极限一般，%ANAME(対象)%禁不住反过来将%ANAME(MASTER)%推倒了
+		;TranslatedMark %ANAME(MASTER)%が焦らすように身体を撫で回すと、我慢ならなくなったのかこちらを押し倒してきた
+		PRINTFORML 为了不浪费一分一秒，%ANAME(対象)%心急火燎地将%ANAME(MASTER)%的裤子脱了下去，把露出来的肉棒一下子吞进了嘴里
+		;TranslatedMark 合意を得る時間も勿体ないというようにこちらの下衣をずらし、露出した肉棒をしゃぶりたててくる
+		PRINTFORMW 摆出了一幅连娼妇都自愧不如的表情，%ANAME(対象)%眼神恍惚着、热情地为%ANAME(MASTER)%进行口交，并将射出来的精液全部咽进了肚子里
+		;TranslatedMark 娼婦顔負けの情熱的なフェラチオに%ANAME(MASTER)%がたっぷり射精すると、%ANAME(対象)%は目を蕩かしたまらないというように嚥下していく
+		PRINTFORMW 之后、亲自打开双腿的%ANAME(対象)%、被%ANAME(MASTER)%狠狠地侵犯了……
+		;TranslatedMark その後、自ら股を開いた%ANAME(対象)%を、%ANAME(MASTER)%はたっぷりと犯してやった……
+	CASE 3
+		PRINTFORML 苏醒过来了的%ANAME(対象)%，迷糊的揉了揉眼睛……
+		;TranslatedMark 意識を取り戻した%ANAME(対象)%は、どうやら居眠りしていたようだと考えた
+		PRINTFORML 啊呀……又打瞌睡了！
+		PRINTFORML %ANAME(対象)%摆好眼前一大堆的文件，开始一个一个的处理。
+		;TranslatedMark 目の前の書類にうんざりしながらも、一つづつ片付けていく
+		PRINTFORMW 只是……这个椅子是不是太舒服了……？%ANAME(対象)%神色有些恍惚地扭动着腰。
+		;TranslatedMark それにしても新しい椅子は座り心地がよくて気持ちいいと考えながら……
+		PRINTFORMW ……%ANAME(MASTER)%见状，猛地向上顶了%ANAME(対象)%一下。
+		;TranslatedMark ……%ANAME(MASTER)%が%ANAME(対象)%を猛然と突き上げている
+		PRINTFORMW %ANAME(対象)%娇吟了一声，又迷迷糊糊地继续着工作。
+		PRINTFORML %STR_BODY("膣：処女確認：時間経過", 対象)%被肆意侵犯着，%STR_BODY("胸：感触", 対象)%也被随意揉捏、但%ANAME(対象)%依旧无法察觉。
+		;TranslatedMark %STR_BODY("膣：処女確認：時間経過", 対象)%を犯されようとも、%STR_BODY("胸：感触", 対象)%を揉みしだかれようと、%ANAME(対象)%は気づきもしない
+		PRINTFORMW 就这样，%ANAME(MASTER)%把忙于事务的%ANAME(対象)%的小穴当作飞机杯不停地使用，将大量白浊的液体注入了子宫……
+		;TranslatedMark %ANAME(MASTER)%はそのまま、机仕事に追われる%ANAME(対象)%の子宮に、たっぷりと白濁を吐き出してやった……
+ENDSELECT
+
+CALL FUCK(対象, "欲望, 性交, 精愛, 奉仕, 性技, Ｖ, Ｃ, Ａ, Ｂ, Ｍ, 口淫, 苦痛快楽, 被虐, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 接吻喪失, 膣内射精, 腸内射精, 口内射精", GET_ID(MASTER), @"%ANAME(MASTER)%的肉棒", ANAME(MASTER), "", "外交要求のご褒美での催眠中の調教")
+CALL FUCK(MASTER, "Ｃ, 欲望, 性交, 射精, Ｖ挿入", "童貞喪失, ", 0, "", "", @"%ANAME(対象)%の膣")
+
+
+
+
+;-------------------------------------------------
+;要求を飲んだ時のご褒美（薬物）
+;-------------------------------------------------
+@DIPLOMACY_REQUEST_DRUG(ARG:0)
+
+LOCAL:4 = GET_COUNTRY_BOSS(CFLAG:MASTER:所属)
+LOCAL:5 = GET_COUNTRY_BOSS(ARG:0)
+
+CFLAG:(LOCAL:5):薬物依存 += RAND(20, 50)
+PRINTL 
+PRINTFORMW ………………
+PRINTFORMW %ANAME(LOCAL:5)%用帯着期待的双眼凝視着%ANAME(MASTER)%…
+;TranslatedMark %ANAME(LOCAL:5)%は期待するような瞳で%ANAME(MASTER)%を見つめている…
+PRINTFORMW 作為接受要求的奨勵、在伸出的舌頭上面放上了薬物…
+;TranslatedMark 要求を受け入れた褒美に、差し出された舌の上に薬を載せてやった…
+PRINTFORML
+IF HAS_VAGINA(LOCAL:5) && HAS_PENIS(MASTER)
+	PRINTFORML 要「使用」陷入幻覚的%ANAME(LOCAL:5)%麼？
+	;TranslatedMark トリップしている%ANAME(LOCAL:5)%を「使い」ますか？
+	PRINTFORML [0] 使用
+	;TranslatedMark [0] 使う
+	PRINTFORML [1] 放棄
+	;TranslatedMark [1] やめておく
+	INPUT
+	IF RESULT == 0
+		CALL DIPLOMACY_REQUEST_DRUG_USE(ARG:0)
+	ELSE
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;2回目以降の要求を飲んだ時のご褒美
+;-------------------------------------------------
+@DIPLOMACY_REQUEST_GOHOUBI(ARG:0)
+	;ご褒美の処理
+$INPUT_GOHOUBI
+PRINTFORML [0] 詢問想要獲得奨勵麼？
+;TranslatedMark [0] ご褒美に虐めてほしいか？と尋ねる
+PRINTFORML [1] 什麼也不做
+;TranslatedMark [1] 何もしない
+INPUT
+IF RESULT == 0
+	CALL DIPLOMACY_REQUEST_PRIZE(ARG:0)
+ELSEIF RESULT == 1
+
+ENDIF
+
+;-------------------------------------------------
+;2回目以降の要求を飲んだ時のご褒美
+;-------------------------------------------------
+@DIPLOMACY_REQUEST_HYPNOSIS(ARG:0)
+LOCAL:4 = GET_COUNTRY_BOSS(CFLAG:MASTER:所属)
+LOCAL:5 = GET_COUNTRY_BOSS(ARG:0)
+
+SIF !IS_FEMALE(LOCAL:5) || !HAS_PENIS(MASTER)
+	RETURN 0
+
+PRINTL 
+PRINTFORMW ………………
+PRINTFORMW %ANAME(LOCAL:5)%的眼睛变得空虚了……
+;TranslatedMark %ANAME(LOCAL:5)%は虚ろな瞳でうなだれている……
+PRINTFORML 要对%ANAME(LOCAL:5)%使用催眠術来「享乐」吗？
+;TranslatedMark %ANAME(LOCAL:5)%にさらなる催眠術をかけて「楽しみ」ますか？
+CALL ASK_YN("享乐", "放棄")
+;TranslatedMark "楽しむ", "やめておく"
+IF RESULT == 0
+	CALL DIPLOMACY_REQUEST_HYPNOSIS_USE(ARG:0)
+ELSE
+ENDIF
+
+;-------------------------------------------------
+;外交による調教要求フラグの解除判定
+;-------------------------------------------------
+@CHECK_DIPLOMACY_TRAIN_FLAG
+#DIM TRAIN_FLAG
+;勢力同士の隣接関係マップを作成
+CALL TMP_CREATE_COUNTRY_NEIBORING_MAP
+CALL TMP_CREATE_SUM_ECONOMY_MAP
+CALL TMP_CREATE_SUM_SOLDIER_MAP
+CALL TMP_CREATE_POLITICS_POWER_MAP
+
+CALL SINGLE_DRAWLINE
+PRINTFORML 外交调教报告
+;TranslatedMark 外交調教報告
+CALL COLOR_LINE
+
+FOR LOCAL:0, 0, CHARANUM
+	IF !CFLAG:(LOCAL:0):外交調教中
+		SIF CFLAG:(LOCAL:0):外交調教カウンタ > 0
+			CFLAG:(LOCAL:0):外交調教カウンタ --
+		CONTINUE
+	ENDIF
+
+	IF !IS_COUNTRY(CFLAG:(LOCAL:0):所属)
+		CFLAG:(LOCAL:0):外交調教中 = 0
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(LOCAL:0)%哪裡都不属於了、從「俘虜的調教」的調教対象中移除了…
+		;TranslatedMark %ANAME(LOCAL:0)%がどこにも所属しなくなったため、「捕虜の調教」の調教対象から外れました…
+		RESETCOLOR
+		CONTINUE
+	ENDIF
+
+	IF CFLAG:(LOCAL:0):所属 == CFLAG:MASTER:所属
+		CFLAG:(LOCAL:0):外交調教中 = 0
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(LOCAL:0)%変成了与%ANAME(MASTER)%相同的所属、從「俘虜的調教」的調教対象中移除了…
+		;TranslatedMark %ANAME(LOCAL:0)%が%ANAME(MASTER)%と所属を同じくするようになったので、「捕虜の調教」の調教対象から外れました…
+		RESETCOLOR
+		CONTINUE
+	ENDIF
+
+	;あなたがいずれの勢力にも属していなければ解除
+	;IS_COUNTRYの性質上、領土のない野盗に所属している場合は解除されず
+	IF !IS_COUNTRY(CFLAG:MASTER:所属)
+		CFLAG:(LOCAL:0):外交調教中 = 0
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(LOCAL:0)%変成了無所属、從「俘虜的調教」的調教対象中移除了…
+		;TranslatedMark %ANAME(LOCAL:0)%はあなたが無所属となったため、「捕虜の調教」の調教対象から外れました…
+		RESETCOLOR
+		CONTINUE
+	ENDIF
+
+	TRAIN_FLAG = 0
+
+	;【条件A】国力による重圧に屈している
+	;強要時より基礎判定値は下げています
+	;好感度による難易度補正の都合上判定値を引き下げ、ついでにターン経過とともに難易度が上がるように
+	SIF DIPLOMACY_REQUEST_CHECK(CFLAG:MASTER:所属, CFLAG:(LOCAL:0):所属, 300 + CFLAG:(LOCAL:0):外交調教カウンタ * 5, 1)
+		SETBIT TRAIN_FLAG, 0
+
+	;【条件B】隷従系陥落素質の所持、もしくは君主で被虐の悦楽に染まり「ご褒美」のために体を売った
+	SIF IS_SLAVE(LOCAL:0)
+		SETBIT TRAIN_FLAG, 1
+
+	SIF GET_COUNTRY_BOSS(CFLAG:(LOCAL:0):所属) == LOCAL:0 && GETBIT(TALENT:(LOCAL:0):淫乱系, 素質_淫乱_マゾ) && IS_LOVER(LOCAL:0) && CFLAG:(LOCAL:0):外交要求成功フラグ == 2
+		SETBIT TRAIN_FLAG, 1
+
+	;【条件C】君主であり、薬キメにハマって薬のために体を売っていた（ぉ
+	SIF LOCAL:0 == GET_COUNTRY_BOSS(CFLAG:(LOCAL:0):所属) && CFLAG:(LOCAL:0):薬物依存 >= REL_HATE:(LOCAL:0):(MASTER) && CFLAG:(LOCAL:0):外交要求成功フラグ == 3
+		SETBIT TRAIN_FLAG, 2
+
+	;【条件A】【条件B】【条件C】のいずれも満たさずターンが経過していたら外れる
+	IF !TRAIN_FLAG && CFLAG:(LOCAL:0):外交調教カウンタ > 4
+		CFLAG:(LOCAL:0):外交調教中 = 0
+		PRINTFORML %ANAME(LOCAL:0)%告知道再也不会讓%ANAME(MASTER)%责弄自己的身体了…
+		;TranslatedMark %ANAME(LOCAL:0)%はこれ以上%ANAME(MASTER)%に体を許すつもりはないと通告してきた…
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(LOCAL:0)%從「俘虜的調教」的調教対象中移除了…
+		;TranslatedMark %ANAME(LOCAL:0)%が「捕虜の調教」の調教対象から外れました…
+		RESETCOLOR
+		CONTINUE
+	ENDIF
+
+	;DEBUGPRINTFORML %ANAME(LOCAL:0)%:外交調教継続({CFLAG:(LOCAL:0):外交調教カウンタ}ターン目)
+	SIF CFLAG:(LOCAL:0):外交調教中
+		CFLAG:(LOCAL:0):外交調教カウンタ ++
+NEXT
+
+;-------------------------------------------------
+;キャラARG:0が射精できる最大回数を取得
+;-------------------------------------------------
+@ROUND_MAX(ARG:0)
+#FUNCTION
+;●射精による体力の消耗量を計算
+;体力消費の基本値
+LOCAL:2 = 50000
+
+;射精Lvによる補正
+SELECTCASE ABL:(ARG:0):射精
+	CASE 0
+		TIMES LOCAL:2, 1.00
+	CASE 1
+		TIMES LOCAL:2, 0.80
+	CASE 2
+		TIMES LOCAL:2, 0.60
+	CASE 3
+		TIMES LOCAL:2, 0.45
+	CASE 4
+		TIMES LOCAL:2, 0.30
+	CASEELSE
+		LOCAL:2 = LOCAL:2 / (MIN(ABL:(ARG:0):射精 - 5, 55) + 5)
+ENDSELECT
+
+;欲望Lvによる補正
+IF ABL:(ARG:0):欲望 < 5
+	LOCAL:2 = LOCAL:2 * (30 - ABL:(ARG:0):欲望) / 30
+ELSE
+	LOCAL:2 = LOCAL:2 * (130 - MIN(ABL:(ARG:0):欲望, 30)) / 150
+ENDIF
+
+LOCAL:3 = MAXBASE:(ARG:0):体力 * 100 / MAX(LOCAL:2, 1)
+LOCAL:3 = MIN(LOCAL:3, TALENT:(ARG:0):精力超群 ? 40 # 20)
+
+RETURNF LOCAL:3
+
+;----------------------------------
+;ARG:0勢力がARG:1勢力に行った要求が通るかの判定
+;TMP_CREATE_SUM_ECONOMY_MAP TMP_CREATE_SUM_SOLDIER_MAP TMP_CREATE_POLITICS_POWER_MAPの呼び出しが必要
+;----------------------------------
+@DIPLOMACY_REQUEST_CHECK(勢力, 要求先, ノルマ, 非表示フラグ)
+#FUNCTION
+#DIM 勢力
+#DIM 要求先
+#DIM 君主
+#DIM 要求先君主
+#DIM ノルマ
+#DIM 最終ノルマ
+#DIM スコア, 3
+#DIM 最終値
+#DIM 経済比
+#DIM 兵力比
+#DIM 政治力比
+#DIM 非表示フラグ
+
+君主 = GET_COUNTRY_BOSS(勢力)
+要求先君主 = GET_COUNTRY_BOSS(要求先)
+経済比 = TMP_SUM_ECONOMY:勢力 * 100 /  MAX(TMP_SUM_ECONOMY:要求先, 1)
+スコア:0 = MIN(経済比 / 10, 200)
+
+政治力比 = TMP_SUM_POLITICS_POWER:勢力 * 100 / MAX(TMP_SUM_POLITICS_POWER:要求先, 1)
+スコア:1 = MIN(政治力比 / 10, 200)
+
+兵力比 = TMP_SUM_SOLDIER:勢力 * 100 / MAX(TMP_SUM_SOLDIER:要求先, 1)
+スコア:2 = MIN(兵力比 / 10, 200)
+
+最終ノルマ = ノルマ
+最終ノルマ += DIPLOMACY_HATE:(勢力) * 15 + INDEPENDENCE_COUNTER:要求先 * 10
+
+
+最終値 = スコア:0 + スコア:1 + スコア:2
+
+SELECTCASE REL_LIKE:要求先君主:君主 - REL_HATE:要求先君主:君主
+	CASE IS > 1000
+		TIMES 最終ノルマ, 0.5
+	CASE IS > 600
+		TIMES 最終ノルマ, 0.8
+	CASE IS < -600
+		TIMES 最終ノルマ, 1.2
+	CASE IS < -1000
+		TIMES 最終ノルマ, 1.5
+ENDSELECT
+
+SELECTCASE CONFIG:314
+	CASE 2
+		TIMES 最終ノルマ, 1.1
+	CASE 3
+		TIMES 最終ノルマ, 1.2
+	CASE 4
+		TIMES 最終ノルマ, 1.5
+ENDSELECT
+
+最終ノルマ = 最終ノルマ * MAX(GET_DIFFICULTY_CORRECTION(), 100) / 100
+
+SIF !非表示フラグ
+	PRINTFORML 経済力({スコア:0}) + 政治力({スコア:1}) + 兵力({スコア:2}) = {最終値} %TOSTR_COMPARE(最終値, 最終ノルマ)% {最終ノルマ}
+
+;DEBUGPRINTFORML %ANAME(君主), MAX_CHARANAME_LENGTH%,%ANAME(要求先君主), MAX_CHARANAME_LENGTH%,{スコア:0, 3},{スコア:1, 3},{スコア:2, 3},{最終値, 3}
+
+RETURNF 最終ノルマ <= 最終値

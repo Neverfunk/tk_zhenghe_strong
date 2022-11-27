@@ -1,0 +1,792 @@
+﻿
+;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_MILLIONAIRE_VISIT_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("MILLIONAIRE")
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_MILLIONAIRE_VISIT_DECISION()
+#DIM 対象
+
+対象 = ID_TO_CHARA(DVAR:富豪_お気に入りID)
+
+SIF 対象 == -1
+	RETURN 0
+
+;対象キャラと恋人じゃないとだめ
+SIF !IS_LOVER(対象)
+	RETURN 0
+
+;主人公が女でなく、対象が女でないとだめ
+SIF !IS_MALE(MASTER) || !IS_FEMALE(対象)
+	RETURN 0
+
+;所属が一緒で、対象が捕虜になっておらず、死亡していない
+SIF !(CFLAG:対象:所属 == CFLAG:MASTER:所属 && !CFLAG:対象:捕虜先 && CFLAG:対象:特殊状態 != 特殊状態_死亡)
+	RETURN 0
+
+SIF !(DVAR:富豪_パトロンフラグ >= 5)
+	RETURN 0
+
+SIF 富豪的类型 != 1 && 富豪的类型 != 2
+	RETURN 0
+
+;25％で発生
+RETURN RAND:100 < 25
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_MILLIONAIRE_VISIT()
+#DIM 対象
+
+対象 = ID_TO_CHARA(DVAR:富豪_お気に入りID)
+
+SELECTCASE DVAR:富豪_パトロンフラグ
+	;派生イベント１回目
+	CASE 5
+		PRINTFORMW 「嘿，我又来拜访了」
+		;TranslatedMark 「やあ、また来たよ」
+		PRINTFORMW 成为赞助人的富豪又来了
+		;TranslatedMark パトロンとなった例の富豪の男が尋ねてきた
+		PRINTFORMW 那种气质和第一次见面时完全不一样，是一种绅士的气质
+		;TranslatedMark その雰囲気は、初めて合った頃とはまるで違う、紳士然とした物だった
+		PRINTFORML 今天也来抱%ANAME(対象)%了吗？　如此询问道
+		;TranslatedMark 今日も%ANAME(対象)%を抱きに来たのか？　と聞く
+		PRINTFORMW 「不，今天偶然路过附近。我只是来露个面而已」
+		;TranslatedMark 「いや、今日はたまたま近く通りがかったものでね。ちょっと顔を出しに来ただけだよ」
+		PRINTFORMW 「嘛，只是过来露个脸而已没多大事。虽然不多，但请收下这个。」
+		;TranslatedMark 「まあ、顔を出すだけというのもなんだ。少ないが、これを受け取ってくれたまえ」
+		CALL ICPRINT("入手了金<30000>", "W", カラー_注意)
+		;TranslatedMark "金<30000>を手に入れた", "W", カラー_注意
+		MONEY += 30000
+		PRINTFORMW 「…今后也请让我看看你们的恩爱记录吧。那么……」
+		;TranslatedMark 「…これからも、君たちの愛を、私に見せておくれよ。それではな……」
+		PRINTFORMW 简简单单地寒暄一阵，交付了私下自制的录像所需的现金之后就回去了(彼はそれだけ伝えると、支援金を渡して帰って行った)……
+		;TranslatedMark 彼はそれだけ伝えると、支援金を渡して帰って行った……
+		PRINTFORML
+		DVAR:富豪_パトロンフラグ ++
+
+	;派生イベント２回目
+	CASE 6
+		PRINTFORMW 「呀，%ANAME(MASTER)%。今天和明天有空吗？」
+		;TranslatedMark 「やあ、%ANAME(MASTER)%。今日明日と暇があるかね？」
+		PRINTFORML 成为赞助人的富豪又来了
+		;TranslatedMark パトロンとなった富豪の男がまた尋ねてきた
+		PRINTFORMW 确实有3天左右的预定休息日…
+		;TranslatedMark 確かに3日ほど予定は空いているが…
+		PRINTFORML 「嗬！那挺好好。其实在领地之外，好像开了一家新的风俗店。」
+		;TranslatedMark 「ほう！　そいつは良い。実は領地の外れに、新しい風俗店が出来たようでな」
+		PRINTFORMW 「听说看起来相当的高级，我想去看看那里是什么的。可以的话你也来吧？当然，钱全都让我来出就好了」
+		;TranslatedMark 「別嬪揃いの高級店と聞いて、どれ程のものか見に行こうと思ってな。良ければ君もどうだね？　無論、代金は全て出すぞ」
+		PRINTFORML ……リョウチノハズレカー。アーチョウドシサツニイコウトシテタトコロダナー、グウゼンダナー、コレハイクシカナイナー(形容女性的俚语)
+		;TranslatedMark ……リョウチノハズレカー。アーチョウドシサツニイコウトシテタトコロダナー、グウゼンダナー、コレハイクシカナイナー
+		PRINTFORMW 「啾唔…。你也喜欢这样吗。嘛，如果没那么贪求性欲的话，%ANAME(対象)%也不会跟过来吧，哈哈(君も好きだねぇ。まあこれくらい貪欲でなければ、%ANAME(対象)%のことも射止められんか)」
+		;TranslatedMark 「くっくっ…。君も好きだねぇ。まあこれくらい貪欲でなければ、%ANAME(対象)%のことも射止められんか、はははっ」
+		PRINTFORML 两个人乘坐马车去往那家听说的门店。确实在领地外附近，还地处在郁郁葱葱的森林里
+		;TranslatedMark 二人を乗せた馬車は目的の店に向かう。確かに領地の外れ付近、鬱蒼とした森の中に、その店はあった
+		PRINTFORMW 明明是在森林里，店铺的装潢风格却是与周围环境格格不入的极致奢华，周围漂浮着的甜甜的香味。
+		;TranslatedMark 森の中だというのに不釣合いなほど豪華で煌びやかな店構えで、周囲に漂う甘い香りが鼻孔をくすぐる
+		PRINTFORML 只要闻一下，血液都会向下半身聚集……那香味让人欲罢不能
+		;TranslatedMark 嗅いでいるだけで下半身に血が集まるような…とてもいい香りだ
+		PRINTFORMW 两个人正要进店的时候，被从门口跳出来的美女们来迎接了
+		;TranslatedMark 二人が店に入ろうとすると、玄関からとびきりの美女たちが出迎えてくれた
+		PRINTFORML 正如所说，都是美女。货真价实！
+		;TranslatedMark 話どおり、みんな美女揃いだ。これは大当たりかもしれない！
+		PRINTFORMW 现在正处在开业大酬宾的活动中，据说以一人费用就可以获得多名美女的服务
+		;TranslatedMark ただいま開店記念サービス中、とのことで、一人分の料金で何人でも抱き放題とのことだ
+		PRINTFORMW 富豪看起来非常开心的样子，抱着众多美女走进了店的深处……
+		;TranslatedMark 富豪の男は上機嫌で、多数の美女を抱えて店の奥に入っていった…
+		PRINTFORML 「您对哪种类型的感兴趣呢？请随意进行挑选吧」前台小姐如是接待
+		;TranslatedMark 「貴方はどうしますか？　好みの娘を選べますよ」と受付の女に尋ねられる
+		PRINTFORMW 房间完全隔音，无论多么激烈的声音都不会漏出来，所以请放心享受
+		;TranslatedMark 部屋は完全防音で、どんなに激しいプレイでも声は漏れないので安心して楽しんでほしい、とのことだ
+		PRINTFORMW 那么，怎么办呢……
+		;TranslatedMark さて、どうしよう……
+		CALL ASK_MULTI("萝莉！" , "奶子！", "我全都要！")
+		;TranslatedMark "ロリっ娘！" , "ボインちゃん！", "全部だ"
+		IF RESULT == 2
+			PRINTFORML 全部！…在说出这句话之前，%ANAME(MASTER)%身后出现了许多美少女，像是在诱惑般地抱了上来
+			;TranslatedMark 全部で！…と口にする前に、%ANAME(MASTER)%の後ろから多数の美少女が現れて、誘うように抱きついてきた
+			PRINTFORMW 虽然体格和类型各不相同，但都是一样可爱、美丽的少女们
+			;TranslatedMark 各々、体格やタイプは異なるが、みな一様に可愛く、美しい女たちだった
+			PRINTFORML 「既然这样的话、请慢慢享受吧」接待处的女人妖艳地笑着
+			;TranslatedMark 「ごゆっくり、お楽しみください」受付の女が妖艶に笑う
+			PRINTFORMW 在她们的带领下，前往里面的单间……
+			;TranslatedMark 彼女らに案内されるまま、奥の個室に向かう…
+			PRINTFORMW 一进屋，这家店周围飘散的香味就更浓郁了
+			;TranslatedMark 部屋に入るなり、この店周辺に漂っていた香りがいっそう強くなる
+			PRINTFORML 这与其说是香味，不如说是淫气
+			;TranslatedMark これはもはや香りというより淫気だ
+			PRINTFORMW 身体已经完全兴奋的%ANAME(MASTER)%，决定和眼中抛出期待目光的少女们尽情欢愉……
+			;TranslatedMark すっかり身体に火がついた%ANAME(MASTER)%は、雌の瞳で期待の表情を向ける彼女たちとのハーレムを楽しむことにした…
+			PRINTFORML
+			PRINTFORMW ・・・
+			PRINTFORMW 过了几个小时后，%ANAME(MASTER)%充分享受了和她们的侍奉…
+			;TranslatedMark 何時間ほど経っただろうか。%ANAME(MASTER)%は彼女たちとの交わりを存分に楽しんだ…
+			PRINTFORML 打算出门，可刚一站起来，就被她们团团围住，被推倒了
+			;TranslatedMark そろそろ出ようかと立ち上がった矢先、彼女たちに群がられ、押し倒される
+			PRINTFORMW 她们妖艳地笑着说："还没有满足呢，要更加努力哦。"
+			;TranslatedMark まだまだ満足していない、もっともっと精を注いでもらう、と彼女たちは妖艶に笑う
+			PRINTFORML 那瞳孔里寄宿着妖光，淫荡地摩擦着肢体，贪婪地追求着%ANAME(MASTER)%
+			;TranslatedMark その瞳に妖しい光を宿しながら淫らに肢体を擦り当て、貪欲に%ANAME(MASTER)%を求めてくる
+			PRINTFORMW …仔细一看，她们的背后有羽毛一样的东西。不仅如此，还能看到尾巴和角
+			;TranslatedMark …よく見ると、彼女らの背に羽のような物が見える。それだけではない、尻尾や角も見て取れる
+			CALL COLOR_PRINTW(@"这个风俗店是淫魔经营的梦魔之家！！", カラー_ピンク)
+			;TranslatedMark @"この風俗店は、淫魔が経営する夢魔ハウスだった！", カラー_ピンク
+			PRINTFORML 露出了作为淫魔的本性的她们，变得更加淫荡，更激烈地挥着腰肢榨取%ANAME(MASTER)%的精液
+			;TranslatedMark 淫魔としての本性を現した彼女たちは、更に淫らに、更に激しく腰を振り%ANAME(MASTER)%の精を搾り出す
+			PRINTFORMW 不管是她们丰满的乳房，还是柔弱娇嫩的小穴，全部都俘获了男人的心
+			;TranslatedMark 彼女たちの豊満な乳房も、柔らかな幼き恥丘も、全てが男の心を捕らえて放さない
+			PRINTFORMW %ANAME(MASTER)%被她们强烈的淫气所感染，失去理性，像野兽一样强烈地追求淫魔的肉体……
+			;TranslatedMark %ANAME(MASTER)%は彼女たちの濃厚な淫気に当てられ理性を失い、獣のように淫魔の肉体を激しく求めた…
+			PRINTFORMW 经过大量射精达到了极限之后，告知她们已经被彻底榨干，暂时射不出来了
+			;TranslatedMark 一体どれほど射精したことだろうか。もうこれ以上出ない、と精液の限界を告げる
+			PRINTFORML 于是，淫魔们都开始让%ANAME(MASTER)%喝自己的妹汁
+			;TranslatedMark すると、淫魔たちはこぞって自らの体液を%ANAME(MASTER)%に飲ませ始めた
+			PRINTFORMW 有一个幼小的淫魔跨上了%ANAME(MASTER)%的脸上，湿热的蜜穴中不断溢出爱蜜
+			;TranslatedMark ある幼げな淫魔は%ANAME(MASTER)%の顔面に跨り、秘裂から溢れる愛蜜を、
+			PRINTFORMW 还有一个淫魔，揉搓着丰满的乳房，给%ANAME(MASTER)%提供溢出的母乳
+			;TranslatedMark またある淫魔は、豊満な乳房を揉みしだき、溢れる母乳を%ANAME(MASTER)%に与える
+			PRINTFORMW 淫魔的爱蜜和母乳，对男人来说都是最好的甘露
+			;TranslatedMark 淫魔の愛蜜も母乳も、男にとって極上の甘露だった
+			PRINTFORMW %ANAME(MASTER)%同时品尝那些给男人带来幸福的堕落之蜜，同时也给她们带来了可以奉献一切的陶醉之意
+			;TranslatedMark それらを両方味わう。男に至福を与える堕落の蜜は、彼女たちに全てを捧げても良いと思うほどの陶酔をもたらした
+			PRINTFORML 近乎中毒上瘾的快感和浓厚的淫香让人想就这样一直品味下去，
+			;TranslatedMark このままずっと味わい続けていたい、と思わせるほどの中毒性と濃厚な淫香が、
+			PRINTFORMW 被刺激已经到了极限的睾丸，一下子就重新产生了精子。睾丸已经变得圆润肿胀起来
+			;TranslatedMark もう限界だったはずの睾丸を刺激し、さらなる精子をあっという間に作り出す。すでに玉袋はパンパンに張り詰めていた
+			PRINTFORMW 超脱理性的%ANAME(MASTER)%将身体中的水分变成精液，向她们持续放出更加浓厚的精液……
+			;TranslatedMark 理性を飛ばした%ANAME(MASTER)%は体中の水分をザーメンに変える勢いで、彼女たちに更に激しく精を放ち続ける…
+			PRINTFORMW 体会着如梦境般痴迷的极品快感地狱，一直持续到淫魔们满足为止……
+			;TranslatedMark この無限に思える極上の快楽地獄は、淫魔たちが満足するまで続いた……
+		ELSEIF RESULT == 1
+			PRINTFORML 挑选这名胸部很大的这位…在说出这句话之前，%ANAME(MASTER)%后面出现了诸多美少女，像是在邀请似的抱住了%ANAME(MASTER)%
+			;TranslatedMark おっぱいの大きい子で…と口にする前に、%ANAME(MASTER)%の後ろから多数の美女が現れて、誘うように抱きついてきた
+			PRINTFORMW 被强压在身上的乳房微微磨蹭，能体会到传达至内心的柔软感觉。虽然各类型不同，但都是拥有丰满乳房的少女们
+			;TranslatedMark 押し付けられて胸の柔らかさが伝わる。各々タイプは違うが、みな一様に豊満な乳房の持ち主だった
+			PRINTFORML 「既然这样的话、请慢慢享受吧」接待处的女人妖艳地笑着
+			;TranslatedMark 「ごゆっくり、お楽しみください」受付の女が妖艶に笑う
+			PRINTFORMW 在她们的带领下，前往里面的单间……
+			;TranslatedMark 彼女らに案内されるまま、奥の個室に向かう…
+			PRINTFORMW 一进屋，这家店周围飘散的香味就更浓郁了
+			;TranslatedMark 部屋に入るなり、この店周辺に漂っていた香りがいっそう強くなる
+			PRINTFORML 这与其说是香味，不如说是淫气
+			;TranslatedMark これはもはや香りというより淫気だ
+			PRINTFORMW 完全身体着火了的%ANAME(MASTER)%，决定和同样发情一脸淫靡表情的她们一起享受的享受……
+			;TranslatedMark すっかり身体に火がついた%ANAME(MASTER)%は、同じく発情した様子で雌の表情を向ける彼女たちと楽しむことにした…
+			PRINTFORML
+			PRINTFORMW ・・・
+			PRINTFORMW 过了若干小时之后，%ANAME(MASTER)%充分享受了少女们丰满的身体…
+			;TranslatedMark 何時間ほど経っただろうか。%ANAME(MASTER)%は美女たちの豊満な身体を存分に楽しんだ…
+			PRINTFORML 打算出门，可刚一站起来，就被她们团团围住，被推倒了
+			;TranslatedMark そろそろ出ようかと立ち上がった矢先、彼女たちに群がられ、押し倒される
+			PRINTFORMW 少女们却妖艳的说："我们还没满足哦，请您更加努力吧。"
+			;TranslatedMark まだまだ満足していない、もっともっと精を注いでもらう、と美女たちは妖艶に笑う
+			PRINTFORML 在那瞳孔里寄宿着妖艳的光芒，那些柔软的肉体不断强行压上来，贪婪地追求着%ANAME(MASTER)%的精液
+			;TranslatedMark その瞳に妖しい光を宿しながら柔らかな肢体を押し付け、貪欲に%ANAME(MASTER)%の精を求めてくる
+			PRINTFORMW …仔细一看，她们的背后有羽毛一样的东西。不仅如此，还能看到尾巴和角
+			;TranslatedMark …よく見ると、彼女らの背に羽のような物が見える。それだけではない、尻尾や角も見て取れる
+			CALL COLOR_PRINTW(@"这个风俗店是淫魔经营的梦魔之家！！", カラー_ピンク)
+			;TranslatedMark @"この風俗店は、淫魔が経営する夢魔ハウスだった！", カラー_ピンク
+			PRINTFORML 露出了作为淫魔的本性的她们，变得更加淫荡，更激烈地挥着腰肢榨取%ANAME(MASTER)%的精液
+			;TranslatedMark 淫魔としての本性を現した彼女たちは、更に淫らに、更に激しく腰を振り%ANAME(MASTER)%の精を搾り出す
+			PRINTFORMW %ANAME(MASTER)%也被她们浓厚的淫气所吸引，像野兽一样激烈地刺着肉棒
+			;TranslatedMark %ANAME(MASTER)%もまた、彼女たちの濃厚な淫気に当てられ、獣のように肉棒を激しく突きたてる
+			PRINTFORMW 经过大量射精达到了极限之后，告知她们已经被彻底榨干，暂时射不出来了
+			;TranslatedMark 一体どれほど射精したことだろうか。もうこれ以上出ない、と精液の限界を告げる
+			PRINTFORML 于是，淫魔们相拥着把自己的乳头全部放在%ANAME(MASTER)%的口中，给予母乳
+			;TranslatedMark すると、淫魔たちはこぞって自らの乳首を、%ANAME(MASTER)%の口に含ませ、母乳を与える
+			PRINTFORMW 淫魔的母乳对男人来说是最好的甘露。尝了一口之后，不愧是让男人堕落的恶魔之蜜…
+			;TranslatedMark 淫魔の母乳は男にとって極上の甘露だった。一口味わったとたん、男を堕落させる悪魔の蜜…
+			PRINTFORML 让人想一直吸着的中毒性和浓厚的淫香，
+			;TranslatedMark ずっと吸い続けていたいと思えるほどの中毒性と濃厚な淫香が、
+			PRINTFORMW 刺激已经到了极限的睾丸，一下子就产生了精子。睾丸已经变得圆浑肿胀，装满了精液。
+			;TranslatedMark もう限界だったはずの睾丸を刺激し、さらなる精子をあっという間に作り出す。すでに玉袋は精液で張り詰めていた
+			PRINTFORMW 超脱理性的%ANAME(MASTER)%以将身体中的水分变成精液，与她们一起更加激烈地互相交合……
+			;TranslatedMark 理性を飛ばした%ANAME(MASTER)%は体中の水分をザーメンに変える勢いで、彼女たちとともに更に激しく互いを貪りあう…
+			PRINTFORMW 这个无限的快乐地狱一直持续到淫魔们满足为止……
+			;TranslatedMark この無限に思える快楽地獄は、淫魔たちが満足するまで続いた……
+		ELSE
+			PRINTFORML 萝莉型的…在说完之前，%ANAME(MASTER)%后面出现了很多美少女，像撒娇一样地抱住了上来
+			;TranslatedMark ロリっ娘で…と口にする前に、%ANAME(MASTER)%の後ろから多数の美少女が現れて、甘えるように抱きついてきた
+			PRINTFORMW 皮肤白的孩子、褐色皮肤的孩子、平胸的孩子、发育过早的孩子……虽然大家的类型都不一样，但是都很可爱
+			;TranslatedMark 色白の子、褐色肌の子、つるぺたな子、膨らみかけの子…、みなタイプは違うが、一様に可愛らしかった
+			PRINTFORML 「既然这样的话、请慢慢享受吧」接待处的女人妖艳地笑着
+			;TranslatedMark 「ごゆっくり、お楽しみください」受付の女が妖艶に笑う
+			PRINTFORMW 在她们的带领下，前往里面的单间……
+			;TranslatedMark 彼女らに案内されるまま、奥の個室に向かう…
+			PRINTFORMW 一进屋，这家店周围飘散的香味就更浓郁了
+			;TranslatedMark 部屋に入るなり、この店周辺に漂っていた香りがいっそう強くなる
+			PRINTFORML 这与其说是香味，不如说是淫气
+			;TranslatedMark これはもはや香りというより淫気だ
+			PRINTFORMW 完全身体着火了的%ANAME(MASTER)%，抱着同样发情了的样子朝向雌的表情的少女们……
+			;TranslatedMark すっかり身体に火がついた%ANAME(MASTER)%は、同じく発情した様子で雌の表情を向ける少女たちを抱き寄せた…
+			PRINTFORML
+			PRINTFORMW ・・・
+			PRINTFORMW 过了若干小时之后，%ANAME(MASTER)%充分享受了少女们年幼却依然超棒的肉体……
+			;TranslatedMark 何時間ほど経っただろうか。%ANAME(MASTER)%は少女たちの未成熟な身体を存分に楽しんだ…
+			PRINTFORML 准备出门，可刚一站起来，就被萝莉们围了起来，一起扑上去被推倒了
+			;TranslatedMark そろそろ出ようかと立ち上がった矢先、少女たちに群がられ、押し倒される
+			PRINTFORMW 她们妖艳地笑着说："还没有满足呢，要更加努力哦。"
+			;TranslatedMark まだまだ満足していない、もっともっと精を注いでもらう、と少女たちは妖艶に笑う
+			PRINTFORML 在那瞳孔里寄宿着妖艳的光芒，那些幼小的肉体不断强行压上来，贪婪地追求着%ANAME(MASTER)%的精液
+			;TranslatedMark その瞳に妖しい光を宿しながら肢体を押し付け、貪欲に%ANAME(MASTER)%の精を求めてくる
+			PRINTFORMW …仔细一看，她们的背后有羽毛一样的东西。不仅如此，小尾巴和角也出来了
+			;TranslatedMark …よく見ると、彼女らの背に羽のような物が見える。それだけではない、小さいながらも尻尾や角も現れている
+			CALL COLOR_PRINTW(@"这个风俗店是淫魔经营的梦魔之家！！", カラー_ピンク)
+			;TranslatedMark @"この風俗店は、淫魔が経営する夢魔ハウスだった！", カラー_ピンク
+			PRINTFORML 露出了作为淫魔的本性的萝莉们，变得更加淫荡了，更加激烈地挥着腰榨取%ANAME(MASTER)%的精液
+			;TranslatedMark 淫魔としての本性を現した少女たちは、更に淫らに、更に激しく腰を振り%ANAME(MASTER)%の精を搾り出す
+			PRINTFORMW %ANAME(MASTER)%也被她们浓厚的淫气所吸引，像野兽一样激烈地对幼小狭窄的淫壶施加责备
+			;TranslatedMark %ANAME(MASTER)%もまた、彼女たちの濃厚な淫気に当てられ、獣のように小さな肉壷を激しく責め立てる
+			PRINTFORMW 经过大量射精达到了极限之后，告知她们已经被彻底榨干，暂时射不出来了
+			;TranslatedMark 一体どれほど射精したことだろうか。もうこれ以上出ない、と精液の限界を告げる
+			PRINTFORML 然后，萝莉们相拥跨上了%ANAME(MASTER)%的脸，
+			;TranslatedMark すると、少女たちはこぞって%ANAME(MASTER)%の顔面に跨り、
+			PRINTFORMW 将那稚嫩的秘裂中溢出妹汁，以让%ANAME(MASTER)%喝下浓香的淫魔之爱蜜
+			;TranslatedMark その幼い秘裂を押し付けて溢れる淫魔の愛蜜を飲ませ与える
+			PRINTFORML 淫魔的蜜液对男人来说是最好的甘露。那富有上瘾性质和催人发情的淫香更是让体验更加舒适
+			;TranslatedMark 淫魔の蜜は男にとって極上の甘露だった。ずっと味わっていたいと思えるほどの中毒性と濃厚な淫香が、
+			PRINTFORMW 刺激已经到了极限的睾丸，一下子就产生了精子。睾丸已经变得圆浑肿胀，装满了精液。
+			;TranslatedMark もう限界だったはずの睾丸を刺激し、さらなる精子をあっという間に作り出す。すでに玉袋は精液で張り詰めていた
+			PRINTFORMW 超脱理性的%ANAME(MASTER)%以将身体中的水分变成精液的气势，与少女们一起贪图肉欲……
+			;TranslatedMark 理性を飛ばした%ANAME(MASTER)%は体中の水分をザーメンに変える勢いで、少女たちとともに肉欲を貪りあう…
+			PRINTFORMW 这个无限的快乐地狱一直持续到淫魔们满足为止……
+			;TranslatedMark この無限に思える快楽地獄は、淫魔たちが満足するまで続いた……
+		ENDIF
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		PRINTFORML 「谢谢您。期待您的再次光临。」
+		;TranslatedMark 「ありがとうございました。またの来店を期待しております」
+		PRINTFORMW %ANAME(MASTER)%被淫魔接待小姐们用笑容送别，离开了梦魔妓院的大门
+		;TranslatedMark %ANAME(MASTER)%は受付嬢と淫魔たちに笑顔で見送られ、夢魔ハウスの玄関を出た
+		PRINTFORML 到底被榨取了多少呢。也许出了一辈子的份儿。
+		;TranslatedMark 一体どれほど搾られたことだろう。一生分出したかもしれない
+		PRINTFORMW 昨天天刚亮着就进了店，出来的时候是中午。看来玩个十二小时也不是没可能(12時間以上は確実にヤリっぱ無だった)
+		;TranslatedMark 昨日の明るいうちに店に入って、出たのが昼ごろ。12時間以上は確実にヤリっぱ無だった
+		PRINTFORML 好好地开放了，确实是一家很棒的店……暂时过着和性欲无缘的生活……
+		;TranslatedMark ちゃんと開放してくれたし、確かに素晴らしい店だったが…、しばらく性欲と無縁の生活が送れそうだ……
+		PRINTFORMW 那么说来一起来的帕特里怎么样了？正当我这么想的时候，他带着很多淫魔出来了。
+		;TranslatedMark そういえば一緒に来たパトロンはどうした？　と思った矢先、彼が多くの淫魔を従えながら出てきた
+		PRINTFORMW 淫魔们都在瞳中♥脑海中浮现出"啊，真是舍不得离别啊"的表情，将男子的肉棒一饮而尽，离不开。
+		;TranslatedMark 淫魔たちはみな瞳に♥を浮かべ、別れが惜しいのか男の肉棒にしゃぶりついて離れないほどだ
+		PRINTFORMW 「哈哈哈！这家店真不错啊。这是第一次出这么多。今后也请多多关照。」
+		;TranslatedMark 「はははっ！　ここは良い店だな。これほど出したのは初めてだ。今後も贔屓にさせてもらうよ」
+		PRINTFORMW 听到这句话，淫魔们发出了欢呼声…不，太娇媚了
+		;TranslatedMark その言葉を聞いて淫魔たちから歓声…いや、嬌声が上がる
+		PRINTFORMW ……看来这个男人连淫魔们都在一夜之间掉了
+		;TranslatedMark ……どうやらこの男は、淫魔たちすら一晩で落としてしまったようだ
+		PRINTFORML …在这样的男人的怀抱中，%ANAME(対象)%竟然能反抗。回去的时候温柔地对待你吧
+		;TranslatedMark …こんな男に抱かれて、%ANAME(対象)%はよくも抗えたものだ。帰ったら優しくしてあげよう
+		PRINTFORMW %ANAME(MASTER)%一边考虑着这样的事情一边踏上了归途
+		;TranslatedMark %ANAME(MASTER)%はそんなことを考えながら帰路に着いた
+		PRINTFORML
+		PRINTFORMW ……在那之后，他把视察领地的特产交给了他，对%ANAME(対象)%很温柔
+		;TranslatedMark ……その後、領地視察のお土産を渡したりと%ANAME(対象)%に優しくした
+		PRINTFORMW %ANAME(MASTER)%对%ANAME(MASTER)%的样子感到惊讶，似乎大家都很高兴
+		;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の様子を訝しみながらも喜んでくれたようだ
+		PRINTFORML
+		CFLAG:対象:好感度 += 300
+		DVAR:富豪_パトロンフラグ ++
+
+	;派生イベント３回目以降３つのイベントを隨機に
+	CASE IS < 10
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORMW 「呀，%ANAME(MASTER)%。正如我说的那样，你有空安排吗？」
+				;TranslatedMark 「やあ、%ANAME(MASTER)%。伝えていたとおり、予定は空けてくれていたかね？」
+				PRINTFORML 当了巡逻员的富豪又来找我了。
+				;TranslatedMark パトロンとなった富豪がまた尋ねてきた
+				PRINTFORMW 前几天他联系我说这次我想款待%ANAME(MASTER)%，所以我没有安排
+				;TranslatedMark 数日前に彼から、　今度は自分が%ANAME(MASTER)%を歓待したい　との連絡を受け、予定を空けていた
+				PRINTFORML 「那我们走吧。因为到现在为止我都是抱着你的女人的。今天请你去我的后宫吧。」
+				;TranslatedMark 「それでは行こうか。今までは君の女を抱いていたからな。今日は私のハーレムへ招待しよう」
+				PRINTFORMW 这样一来，一到男子的宅邸，就受到很多美女的欢迎，一瞬间就聚集了起来
+				;TranslatedMark そうして男の屋敷に到着するや、大勢の美女に歓迎を受け、あっという間に群がられる
+				PRINTFORML 「哈哈哈。因为我也把你的事告诉了她们。似乎大家都很感兴趣。」
+				;TranslatedMark 「はははっ。君の事は彼女らにも伝えていたからな。みな興味津々のようだ」
+				PRINTFORMW 都是让这男人折服的女人吗吗？人数太多了。光是养活这个人数就够难的了，不愧是有钱人
+				;TranslatedMark 皆この男が落とした女たちなのだろうか。すごい人数だ。この人数を養うだけでも大変だろうに、流石大金持ちだ
+				PRINTFORML 「今晚的男人只有我们两个人。让我们尽情享受吧」
+				;TranslatedMark 「今宵の男は我ら二人だけだ。存分に楽しもうじゃないか」
+				PRINTFORMW 围绕在%ANAME(MASTER)%的美女们，以喜欢男人的发情表情盼望着两人的肉棒
+				;TranslatedMark %ANAME(MASTER)%を取り囲む美女らは一様に、男好きのする発情したような表情で二人の肉棒を待ち望んでいる
+				PRINTFORMW 在与平时不同的环境中，%ANAME(MASTER)%决定尽情享受……
+				;TranslatedMark 普段と違う環境の中、%ANAME(MASTER)%は羽目を外して楽しむことにした……
+				PRINTFORML
+				PRINTFORMW
+				SELECTCASE RAND:4
+					CASE 0
+						PRINTFORML %ANAME(MASTER)%正在与两名少女欢愉着
+						;TranslatedMark %ANAME(MASTER)%は今、二人の少女とのセックスを楽しんでいる
+						PRINTFORMW 虽然是十几岁的样子，看起来还很稚嫩，不那过又少又薄的服装确实很很引人注目
+						;TranslatedMark 10代半ばといった幼さが残る顔立ちだが、実に布面積が小さい扇情的な衣装が目に付く
+						PRINTFORML 两个人好像是双胞胎，身体的反应和喘息声都很相似
+						;TranslatedMark 二人は双子のようで、身体の反応も喘ぎ声もよく似ていた
+						PRINTFORMW 躺着让姐姐跨坐在肉棒上，同时让妹妹跨在脸上，刚好能同时享受两人绝佳的肉体
+						;TranslatedMark 寝そべりながら姉の方に肉棒を、妹の方は顔面に跨らせて舌を挿し入れ、姉妹の身体を堪能する
+						PRINTFORMW %ANAME(MASTER)%将她们彻底击倒，结束的时候她们的腰部已经立不起来了…
+						;TranslatedMark %ANAME(MASTER)%は彼女らの腰が砕けるまでハメ倒した…
+					CASE 1
+						PRINTFORML %ANAME(MASTER)%现在正后入着一名少女
+						;TranslatedMark %ANAME(MASTER)%は今、一人の少女と後背位で交わっている
+						PRINTFORMW 看起来像是十多岁的样子，但是敞开胸口的衬衣和非常短的裙子却相当引人注目
+						;TranslatedMark 10代後半といった顔立ちだが、胸元を大きく開けた襯衫と非常に短い裙子が劣情を煽り立てる
+						PRINTFORML 不过的确是极品尤物，正因为如此，她兴致勃勃地享受着与%ANAME(MASTER)%的性爱
+						;TranslatedMark いかにもビッチなギャル、といった具合だが、それ故ノリノリで%ANAME(MASTER)%とのセックスを楽しんでいる
+						PRINTFORMW %ANAME(MASTER)%一边享受着她柔软的臀肉一边将肉棒刺入…
+						;TranslatedMark %ANAME(MASTER)%は彼女の柔らかい尻肉を堪能しながら肉棒を突き込んだ…
+					CASE 2
+						PRINTFORML %ANAME(MASTER)%现在与馆内的三名女仆进行交合
+						;TranslatedMark %ANAME(MASTER)%は今、この館のメイドと思しき三人とまぐわりあっている
+						PRINTFORMW 虽然都穿着女仆装，但是裙子非常短，像是刻意强调绝对领域一样
+						;TranslatedMark いずれも女僕服だが、その裙子は極端に短く、眩しい太ももを強調する
+						PRINTFORML 对那些过于淫荡、粗鲁的女仆们，好好地进行了教育
+						;TranslatedMark そのあまりに淫らでけしからん姿のメイドたちに、しっかりと躾けをしてやった
+						PRINTFORMW %ANAME(MASTER)%在她们的子宫里注满了精液，让她们事后都站不稳了…
+						;TranslatedMark %ANAME(MASTER)%は彼女らの子宮がいっぱいになるまでハメ倒した…
+					CASE 3
+						PRINTFORML %ANAME(MASTER)%现在正在和妙龄美女激烈做爱
+						;TranslatedMark %ANAME(MASTER)%は今、妙齢の美女と激しく求め合っている
+						PRINTFORMW 这丰满的肉体几乎是每个男人都梦寐以求的
+						;TranslatedMark 男ならむしゃぶりつきたくなるような豊満な肉体を己の自由にできる
+						PRINTFORMW 像是用尽了男人的福气一样
+						;TranslatedMark まさに男冥利に尽きる瞬間だった
+						PRINTFORML 她用娴熟的技巧，和外面那些妓女无法比拟的绝品名器让%ANAME(MASTER)%完全沉迷了
+						;TranslatedMark 彼女のテクニックは、そこらの娼婦とは比べ物にならない極上の物で%ANAME(MASTER)%を夢中にさせる
+						PRINTFORMW %ANAME(MASTER)%将精液用力注射进子宫里…
+						;TranslatedMark %ANAME(MASTER)%は精子が空になるまで彼女に注ぎ込んだ…
+				ENDSELECT
+				PRINTFORML
+				PRINTFORMW
+				PRINTFORMW 正因为是他调教过的女人们，所以大家都做得很好
+				;TranslatedMark 彼が調教した女たちだけあって、みな素晴らしい奉仕ぶりだった
+				PRINTFORML 也许是因为被巨根教育了，阴道的灵活性和紧致度出乎预料的棒，刚好处在让人最舒适的程度，其他部位如胸、舌头、脚、屁股、都一样舒服
+				;TranslatedMark 巨根で躾けられたためか、膣の締まりこそユルかったものの、胸や舌、脚や尻、女の身体全てを使って
+				PRINTFORMW %ANAME(MASTER)%非常开心……
+				;TranslatedMark %ANAME(MASTER)%を大いに楽しませた……
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失, Ｖ挿入", 0, "富豪の女の唇", "", "富豪の女の膣", "乱交")
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失, Ｖ挿入", 0, "富豪の女の唇", "", "富豪の女の膣", "乱交")
+				PRINTFORML ・
+				PRINTFORML ・
+				;TranslatedMark ・・
+				PRINTFORMW ・・・
+				PRINTFORMW 「哈哈哈！你好像玩得很开心呢。嘛，我不会对%ANAME(対象)%说的，放心吧」
+				;TranslatedMark 「はははっ！　楽しんでくれたようだね。まあ、%ANAME(対象)%には黙っててやるから安心するといい」
+				PRINTFORMW 「那个和这个是这次的捐款。有效地使用吧，毕竟钱可疏通天下万事」
+				;TranslatedMark 「それとこれが今回の寄付金だ。有効に使ってくれたまえよ？　金は天下の回り物だからな」
+				PRINTFORMW 富豪把%ANAME(MASTER)%送到宫殿，交付赞助费之后便回去了……
+				;TranslatedMark 富豪は%ANAME(MASTER)%を宮殿まで送った後、支援金を渡して帰って行った……
+				CALL ICPRINT("入手了金<20000>", "W", カラー_注意)
+				;TranslatedMark "金<20000>を手に入れた", "W", カラー_注意
+				PRINTFORML
+				MONEY += 20000
+			CASE 1
+				PRINTFORMW 「呀，%ANAME(MASTER)%。今天和明天有空吗？」
+				;TranslatedMark 「やあ、%ANAME(MASTER)%。今日明日と暇があるかね？」
+				PRINTFORML 那个巡逻员又来找我了。
+				;TranslatedMark 例のパトロンの男がまた尋ねてきた
+				PRINTFORMW 确实计划空着……
+				;TranslatedMark 確かに予定は空いているが…
+				PRINTFORML 「哦，那很好。其实我又想去了那个风俗店了，觉得如何？这次还是我包了」
+				;TranslatedMark 「ほう、そいつは良い。実はまた例の風俗店に行くところなんだが、君もどうだね？　代金は出すぞ」
+				PRINTFORML …那家风俗店是指某个淫魔经营的梦魔屋吧。
+				;TranslatedMark …例の風俗店、とはいつぞやの淫魔が経営する夢魔ハウスのことだろう
+				PRINTFORMW 那么，怎么办呢……
+				;TranslatedMark さて、どうしよう……
+				CALL ASK_YN("……行！", "今天还是算了吧。")
+				;TranslatedMark "…行く！", "今日は止めておく"
+				IF RESULT == 1
+					PRINTFORMW 「嗯？是吗？」
+					;TranslatedMark 「ふむ？　そうかね」
+					PRINTFORMW 「那么这次就我一个人去吧」
+					;TranslatedMark 「では今回は、私だけで行ってくるとするよ」
+					PRINTFORML 于是他一人去了梦魔妓院…
+					;TranslatedMark そういうと彼は一人で夢魔ハウスに向かった…
+					PRINTFORMW ……几天后，有传言说"某富豪把很多淫魔加到了后宫"……
+					;TranslatedMark ……数日後、「とある富豪が多くの淫魔をハーレムに加えた」との噂が流れた……
+				ELSE
+					PRINTFORMW 「哼哼哼…。我也喜欢这样厉害的你啊。嘛，作为有爱的男人不到你这种程度是不行的，哈哈(君も好きだねぇ。まあ男はそれくらいでなくてはイカンよ、はははっ)」
+					;TranslatedMark 「くっくっくっ…。君も好きだねぇ。まあ男はそれくらいでなくてはイカンよ、はははっ」
+					PRINTFORML 两个人乘坐的马车不久就到达了目的地的店。
+					;TranslatedMark 二人を乗せた馬車はほどなくして目的の店に辿り着く
+					PRINTFORMW 还是老样子，在森林里有着不相称的豪华绚丽的店面
+					;TranslatedMark 相変わらず、森の中だというのに不釣合いなほど豪華で煌びやかな店構えだ
+					PRINTFORML 然后，周围飘浮着的淫气使得鼻孔发痒，下半身不由得充血了……
+					;TranslatedMark そして周囲に漂う淫気が鼻孔をくすぐる度、下半身が甘く疼きだす…
+					PRINTFORMW 两个人一到店门口，众多淫魔便前来迎接
+					;TranslatedMark 二人が店に着くと、玄関から多くの淫魔たちが出迎えてくれた
+					PRINTFORMW 今天是两个人的包场，不管是谁都可以随便抱
+					;TranslatedMark 今日は二人の貸切で、何人でも抱き放題とのことだ
+					PRINTFORMW 富豪看起来心情很好，抱着众多淫魔进了店里面……
+					;TranslatedMark 富豪の男は上機嫌で、多数の女たちを抱えて店の奥に入っていった…
+					PRINTFORML 「您觉得哪个合胃口呢？请随意选择哦」前台接待的魅魔带着魅惑的笑容说道
+					;TranslatedMark 「貴方はどうしますか？　好みの娘を選べますよ」と受付の女に尋ねられた
+					PRINTFORMW 房间完全隔音，无论怎么喘息声音都不会漏出来，希望大家安心享受
+					;TranslatedMark 部屋は完全防音で、どんなに喘いでも声は漏れないので安心して楽しんでほしい、とのことだ
+					PRINTFORMW 那么，怎么办呢……
+					;TranslatedMark さて、どうしよう……
+					CALL ASK_MULTI("萝莉！" , "奶子！", "我全都要！")
+					;TranslatedMark "ロリっ娘！" , "ボインちゃん！", "全部だ"
+					IF RESULT == 2
+						PRINTFORML 全部！…在说出这句话之前，%ANAME(MASTER)%身后出现了许多美少女，像是在诱惑般地抱了上来
+						;TranslatedMark 全部で！…と口にする前に、%ANAME(MASTER)%の後ろから多数の美少女が現れて、誘うように抱きついてきた
+						PRINTFORMW 虽然体格和类型各不相同，但都是一样可爱、美丽的少女们
+						;TranslatedMark 各々、体格やタイプは異なるが、みな一様に可愛く、美しい女たちだった
+						PRINTFORML 「既然这样的话、请慢慢享受吧」接待处的女人妖艳地笑着
+						;TranslatedMark 「ごゆっくり、お楽しみください」受付の女が妖艶に笑う
+						PRINTFORMW 在她们的带领下，前往里面的单间……
+						;TranslatedMark 彼女らに案内されるまま、奥の個室に向かう…
+						PRINTFORMW 一进屋，这家店周围的淫荡气氛就越发强烈了
+						;TranslatedMark 部屋に入るなり、この店周辺に漂っていた淫気がいっそう強くなる
+						PRINTFORMW 身体已经完全兴奋的%ANAME(MASTER)%，决定和眼中抛出期待目光的少女们尽情欢愉……
+						;TranslatedMark すっかり身体に火がついた%ANAME(MASTER)%は、雌の瞳で期待の表情を向ける彼女たちとのハーレムを楽しむことにした…
+						PRINTFORML
+						PRINTFORMW ・・・
+						PRINTFORMW 不知道过了多长时间。%ANAME(MASTER)%充分享受着和她们的性生活
+						;TranslatedMark 何時間ほど経っただろうか。%ANAME(MASTER)%は彼女たちとのセックスを存分に楽しんでいる
+						PRINTFORML 她们不再隐藏作为魅魔的本性之后，更加淫荡了，更加激烈地摆动着腰寻求%ANAME(MASTER)%的精液
+						;TranslatedMark 淫魔としての素性を隠さなくなった彼女たちは、更に淫らに、更に激しく腰を振り%ANAME(MASTER)%の精を求める
+						PRINTFORMW 不管是她们丰满的乳房，还是柔弱娇嫩的小穴，全部都俘获了男人的心
+						;TranslatedMark 彼女たちの豊満な乳房も、柔らかな幼き恥丘も、全てが男の心を捕らえて放さない
+						PRINTFORMW %ANAME(MASTER)%被她们强烈的淫气所驱使，失去理性，像野兽一样激烈地贪图淫魔的肉体
+						;TranslatedMark %ANAME(MASTER)%は彼女たちの濃厚な淫気に当てられ理性を失い、獣のように淫魔の肉体を激しく貪る
+						PRINTFORMW 经过大量射精达到了极限之后，告知她们已经被彻底榨干，暂时射不出来了
+						;TranslatedMark 一体どれほど射精したことだろうか。もうこれ以上出ない、と精液の限界を告げる
+						PRINTFORML 之后，淫魔们争先恐后地让%ANAME(MASTER)%品尝自己的妹汁
+						;TranslatedMark すると、淫魔たちはこぞって自らの体液を%ANAME(MASTER)%飲ませ与え始めた
+						PRINTFORMW 某个幼小的淫魔跨上了%ANAME(MASTER)%的脸，蜜液在脸上垂落
+						;TranslatedMark ある幼げな淫魔は%ANAME(MASTER)%の顔面に跨り、溢れる愛蜜を、
+						PRINTFORMW 还有一个淫魔，揉搓着丰满的乳房，给%ANAME(MASTER)%提供溢出的母乳
+						;TranslatedMark またある淫魔は、豊満な乳房を揉みしだき、溢れる母乳を%ANAME(MASTER)%に与える
+						PRINTFORMW 淫魔的爱蜜和母乳，对男人来说都是最好的甘露
+						;TranslatedMark 淫魔の愛蜜も母乳も、男にとって極上の甘露だった
+						PRINTFORMW 同时品尝着上下的快感。淫魔给予的堕落之蜜是最幸福的味道，同时肉棒也给她们带来了可以奉献一切的陶醉之意
+						;TranslatedMark それらを両方味わう。淫魔が与える堕落の蜜は至福の味で、彼女たちに全てを捧げても良いと思うほどの陶酔をもたらした
+						PRINTFORML 为了不让跨在自己脸上的少女浪费妹汁，将手摸到她的腰和大腿上，使劲按住她
+						;TranslatedMark 自らの顔面に跨る少女の蜜を逃がすまいと、彼女の腰や太ももに手を廻し、ぐいぐいと押さえ込む
+						PRINTFORMW 然后把舌头插进蜜壶深处，每描划一次，少女就会发出很大的娇喘声，达到高潮，使得蜜汁更加浓郁了
+						;TranslatedMark そうして蜜壷深くまで舌を挿し入れなぞり上げるたび、少女たちは大きな艶声を上げて絶頂し、さらなる蜜を溢れさせる
+						PRINTFORMW 淫魔们在贪图幼耻丘的%ANAME(MASTER)%的脸上淋浴母乳
+						;TranslatedMark そうして幼い恥丘を貪る%ANAME(MASTER)%の顔面に、淫魔たちは母乳のシャワーを注ぐ
+						PRINTFORMW 简直是要窒息一样，每次急着吞下母乳和爱蜜时，无法形容的幸福感就像电流一样在全身蔓延
+						;TranslatedMark 窒息しないように急いで母乳と愛蜜を飲み込むたび、言いようの無い幸福感が電流のように全身を走る
+						PRINTFORML 近乎中毒上瘾的快感和浓厚的淫香让人想就这样一直品味下去，
+						;TranslatedMark このままずっと味わい続けていたい、と思わせるほどの中毒性と濃厚な淫香が、
+						PRINTFORMW 被刺激已经到了极限的睾丸，一下子就重新产生了精子。睾丸已经变得圆润肿胀起来
+						;TranslatedMark もう限界だったはずの睾丸を刺激し、さらなる精子をあっという間に作り出す。すでに玉袋はパンパンに張り詰めていた
+						PRINTFORMW 超脱理性的%ANAME(MASTER)%以将身体中的水分变成精液的气势，对她们持续注入更炽热的精液……
+						;TranslatedMark 理性を飛ばした%ANAME(MASTER)%は体中の水分をザーメンに変える勢いで、彼女たちに更に激しく精を注ぎ続ける…
+						PRINTFORMW 体会着如梦境般痴迷的极品快感地狱，一直持续到淫魔们满足为止……
+						;TranslatedMark この無限に思える極上の快楽地獄は、淫魔たちが満足するまで続いた……
+						CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失, Ｖ挿入", 0, "夢魔の唇", "", "夢魔の膣", "乱交")
+						CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失, Ｖ挿入", 0, "夢魔の唇", "", "夢魔の膣", "乱交")
+						CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失, Ｖ挿入", 0, "夢魔の唇", "", "夢魔の膣", "乱交")
+						CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失, Ｖ挿入", 0, "夢魔の唇", "", "夢魔の膣", "乱交")
+						CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失, Ｖ挿入", 0, "夢魔の唇", "", "夢魔の膣", "乱交")
+						CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失, Ｖ挿入", 0, "夢魔の唇", "", "夢魔の膣", "乱交")
+					ELSEIF RESULT == 1
+						PRINTFORML 挑选这名胸部很大的这位…在说出这句话之前，%ANAME(MASTER)%后面出现了诸多美少女，像是在邀请似的抱住了%ANAME(MASTER)%
+						;TranslatedMark おっぱいの大きい子で…と口にする前に、%ANAME(MASTER)%の後ろから多数の美女が現れて、誘うように抱きついてきた
+						PRINTFORMW 被强压在身上的乳房微微磨蹭，能体会到传达至内心的柔软感觉。虽然各类型不同，但都是拥有丰满乳房的少女们
+						;TranslatedMark 押し付けられて胸の柔らかさが伝わる。各々タイプは違うが、みな一様に豊満な乳房の持ち主だった
+						PRINTFORML 「既然这样的话、请慢慢享受吧」接待处的女人妖艳地笑着
+						;TranslatedMark 「ごゆっくり、お楽しみください」受付の女が妖艶に笑う
+						PRINTFORMW 在她们的带领下，前往里面的单间……
+						;TranslatedMark 彼女らに案内されるまま、奥の個室に向かう…
+						PRINTFORMW 一进屋，这家店周围飘散的香味就更浓郁了
+						;TranslatedMark 部屋に入るなり、この店周辺に漂っていた香りがいっそう強くなる
+						PRINTFORML 这与其说是香味，不如说是淫气
+						;TranslatedMark これはもはや香りというより淫気だ
+						PRINTFORMW 完全身体着火了的%ANAME(MASTER)%，决定和同样发情一脸淫靡表情的她们一起享受的享受……
+						;TranslatedMark すっかり身体に火がついた%ANAME(MASTER)%は、同じく発情した様子で雌の表情を向ける彼女たちと楽しむことにした…
+						PRINTFORML
+						PRINTFORMW ・・・
+						PRINTFORMW 不知道过了多长时间。%ANAME(MASTER)%充分享受着美女们丰满的身体
+						;TranslatedMark 何時間ほど経っただろうか。%ANAME(MASTER)%は美女たちの豊満な身体を存分に楽しんでいる
+						PRINTFORML 她们不再隐藏作为魅魔的本性之后，更加淫荡了，更加激烈地摆动着腰寻求%ANAME(MASTER)%的精液
+						;TranslatedMark 淫魔としての素性を隠さなくなった彼女たちは、更に淫らに、更に激しく腰を振り%ANAME(MASTER)%の精を求める
+						PRINTFORMW %ANAME(MASTER)%也被她们浓厚的淫气所感染，像野兽一样用肉棒激烈地摩擦乳肉
+						;TranslatedMark %ANAME(MASTER)%もまた、彼女たちの濃厚な淫気に当てられ、獣のように肉棒を乳肉に激しく擦りつける
+						PRINTFORMW 经过大量射精达到了极限之后，告知她们已经被彻底榨干，暂时射不出来了
+						;TranslatedMark 一体どれほど射精したことだろうか。もうこれ以上出ない、と精液の限界を告げる
+						PRINTFORML 在这之后，淫魔们争先恐后地吧乳头压在在%ANAME(MASTER)%的口中，给予母乳
+						;TranslatedMark そうすると、淫魔たちはこぞって自らの乳首を、%ANAME(MASTER)%の口に含ませ、母乳を与える
+						PRINTFORMW 淫魔的母乳对男人来说是最好的甘露。尝了一口之后，不愧是让男人堕落的恶魔之蜜…
+						;TranslatedMark 淫魔の母乳は男にとって極上の甘露だった。一口味わったとたん、男を堕落させる悪魔の蜜…
+						PRINTFORML 被淫魔们的几乎要盖住脸的柔软乳房包围着，嘴巴上贴满了流着甘露的乳头
+						;TranslatedMark 淫魔たちの、顔をうずめるほどの柔らかな乳房に包まれ、甘露を流す乳首を口いっぱいに頬張る
+						PRINTFORMW 时而用力吸吮时，时而温柔舔舐，对着淫乳不断进行索求，魅魔们，每次都交错着达到了高潮，并将母乳挤入口中
+						;TranslatedMark 強く吸い付き、時に甘噛みし、淫乳を貪るたび、彼女たちは大きな艶声を上げて絶頂し、さらに母乳を口内に流し込む
+						PRINTFORML 让人想一直吸着的中毒性和浓厚的淫香，
+						;TranslatedMark ずっと吸い続けていたいと思えるほどの中毒性と濃厚な淫香が、
+						PRINTFORMW 刺激已经到了极限的睾丸，一下子就产生了精子。睾丸已经变得圆浑肿胀，装满了精液。
+						;TranslatedMark もう限界だったはずの睾丸を刺激し、さらなる精子をあっという間に作り出す。すでに玉袋は精液で張り詰めていた
+						PRINTFORMW 超脱理性的%ANAME(MASTER)%以将身体中的水分变成精液，与她们一起更加激烈地互相交合……
+						;TranslatedMark 理性を飛ばした%ANAME(MASTER)%は体中の水分をザーメンに変える勢いで、彼女たちとともに更に激しく互いを貪りあう…
+						PRINTFORMW 这个无限的快乐地狱一直持续到淫魔们满足为止……
+						;TranslatedMark この無限に思える快楽地獄は、淫魔たちが満足するまで続いた……
+						CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失, Ｖ挿入", 0, "夢魔の唇", "", "夢魔の膣", "乱交")
+						CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失, Ｖ挿入", 0, "夢魔の唇", "", "夢魔の膣", "乱交")
+						CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失, Ｖ挿入", 0, "夢魔の唇", "", "夢魔の膣", "乱交")
+					ELSE
+						PRINTFORML 萝莉型的…在说完之前，%ANAME(MASTER)%后面出现了很多美少女，像撒娇一样地抱住了上来
+						;TranslatedMark ロリっ娘で…と口にする前に、%ANAME(MASTER)%の後ろから多数の美少女が現れて、甘えるように抱きついてきた
+						PRINTFORMW 皮肤白的孩子、褐色皮肤的孩子、平胸的孩子、发育过早的孩子……虽然大家的类型都不一样，但是都很可爱
+						;TranslatedMark 色白の子、褐色肌の子、つるぺたな子、膨らみかけの子…、みなタイプは違うが、一様に可愛らしかった
+						PRINTFORML 「既然这样的话、请慢慢享受吧」接待处的女人妖艳地笑着
+						;TranslatedMark 「ごゆっくり、お楽しみください」受付の女が妖艶に笑う
+						PRINTFORMW 在她们的带领下，前往里面的单间……
+						;TranslatedMark 彼女らに案内されるまま、奥の個室に向かう…
+						PRINTFORMW 一进屋，这家店周围飘散的香味就更浓郁了
+						;TranslatedMark 部屋に入るなり、この店周辺に漂っていた香りがいっそう強くなる
+						PRINTFORML 这与其说是香味，不如说是淫气
+						;TranslatedMark これはもはや香りというより淫気だ
+						PRINTFORMW 完全身体着火了的%ANAME(MASTER)%，抱着同样发情了的样子朝向雌的表情的少女们……
+						;TranslatedMark すっかり身体に火がついた%ANAME(MASTER)%は、同じく発情した様子で雌の表情を向ける少女たちを抱き寄せた…
+						PRINTFORML
+						PRINTFORMW ・・・
+						PRINTFORMW 过了不知道多久，%ANAME(MASTER)%充分享受着年幼淫魔们未成熟的身体
+						;TranslatedMark 何時間ほど経っただろうか。%ANAME(MASTER)%は幼い淫魔たちの未成熟な身体を存分に楽しんでいる
+						PRINTFORML 不隐藏作为淫魔的本性的她们，更加淫荡，更加激烈地摆动着腰寻求%ANAME(MASTER)%的精液
+						;TranslatedMark 淫魔としての素性を隠さなくなった少女たちは、更に淫らに、更に激しく腰を振り%ANAME(MASTER)%の精を搾り出す
+						PRINTFORMW %ANAME(MASTER)%也被她们浓厚的淫气所吸引，像野兽一样激烈地在幼小的肉壶留下肉棒的印记
+						;TranslatedMark %ANAME(MASTER)%もまた、彼女たちの濃厚な淫気に当てられ、獣のように小さな肉壷を激しくなぞり上げる
+						PRINTFORMW 经过大量射精达到了极限之后，告知她们已经被彻底榨干，暂时射不出来了
+						;TranslatedMark 一体どれほど射精したことだろうか。もうこれ以上出ない、と精液の限界を告げる
+						PRINTFORML 之后，少女们争先恐后跨上了%ANAME(MASTER)%的脸，
+						;TranslatedMark そうすると、少女たちはこぞって%ANAME(MASTER)%の顔面に跨り、
+						PRINTFORMW 将那稚嫩的秘裂中溢出妹汁，以让%ANAME(MASTER)%喝下浓香的淫魔之爱蜜
+						;TranslatedMark その幼い秘裂を押し付けて溢れる淫魔の愛蜜を飲ませ与える
+						PRINTFORMW 淫魔的蜜液对男人来说是最好的甘露
+						;TranslatedMark 淫魔の蜜は男にとって極上の甘露だった
+						PRINTFORML 为了不让跨在自己脸上的少女浪费蜜液，将手摸到她的腰和大腿上，使劲按住
+						;TranslatedMark 自らの顔面に跨る少女の蜜を逃がすまいと、彼女らの腰や太ももに手を廻し、ぐいぐいと押さえ込む
+						PRINTFORMW 然后把舌头插进蜜壶深处，每描划一次，少女就会发出很大的娇喘声，达到高潮，使得蜜汁更加浓郁了
+						;TranslatedMark そうして蜜壷深くまで舌を挿し入れなぞり上げるたび、少女たちは大きな艶声を上げて絶頂し、さらなる蜜を溢れさせる
+						PRINTFORML 专心品尝着令人上瘾却又充满淫香的蜜液
+						;TranslatedMark ずっと味わっていたいと思えるほどの中毒性と濃厚な淫香が、
+						PRINTFORMW 刺激已经到了极限的睾丸，一下子就产生了精子。睾丸已经变得圆浑肿胀，装满了精液。
+						;TranslatedMark もう限界だったはずの睾丸を刺激し、さらなる精子をあっという間に作り出す。すでに玉袋は精液で張り詰めていた
+						PRINTFORMW 超脱理性的%ANAME(MASTER)%以将身体中的水分变成精液的气势，与少女们一起贪图肉欲……
+						;TranslatedMark 理性を飛ばした%ANAME(MASTER)%は体中の水分をザーメンに変える勢いで、少女たちとともに肉欲を貪りあう…
+						PRINTFORMW 这个无限的快乐地狱一直持续到淫魔们满足为止……
+						;TranslatedMark この無限に思える快楽地獄は、淫魔たちが満足するまで続いた……
+						CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失, Ｖ挿入", 0, "夢魔の唇", "", "夢魔の膣", "乱交")
+						CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失, Ｖ挿入", 0, "夢魔の唇", "", "夢魔の膣", "乱交")
+						CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失, Ｖ挿入", 0, "夢魔の唇", "", "夢魔の膣", "乱交")
+					ENDIF
+					PRINTFORML ・
+					PRINTFORML ・
+					PRINTFORMW ・
+					PRINTFORML 「谢谢您。期待您的再次光临。」
+					;TranslatedMark 「ありがとうございました。またの来店を期待しております」
+					PRINTFORMW %ANAME(MASTER)%被淫魔接待小姐们用笑容送别，离开了梦魔妓院的大门
+					;TranslatedMark %ANAME(MASTER)%は受付嬢と淫魔たちに笑顔で見送られ、夢魔ハウスの玄関を出た
+					PRINTFORML 不管怎么说，这次估计又花了十二小时以上。在这之外暂时过着和性欲无缘的生活，毕竟榨得太猛了(今回も１２時間以上はヤリっぱ無だった。しばらく性欲と無縁の生活が送れそうだ)……
+					;TranslatedMark 何だかんだで、今回も１２時間以上はヤリっぱ無だった。しばらく性欲と無縁の生活が送れそうだ……
+					PRINTFORML 但是，感觉身体比之前来的时候更有活力了。也许是被淫魔榨取，反而锻炼了身体。
+					;TranslatedMark しかし、前に来たときよりも身体が馴れた気がする。淫魔に搾られて逆に身体が鍛えられたのかもしれない
+					MAXBASE:MASTER:体力 += 30
+					CALL COLOR_PRINTW(@"体力最大値が30上がって、{MAXBASE:MASTER:体力}になった", カラー_注意)
+					PRINTFORMW 那么说来一起来的富豪怎么样了？正当%ANAME(MASTER)%这么想的时候，他果然随着众多淫魔走了出来
+					;TranslatedMark そういえば一緒に来た彼はどうした？　と思った矢先、やはり多くの淫魔を従えながら彼が出てきた
+					PRINTFORMW 魅魔们的眼睛都浮现出♥，也许是因为舍不得离别，将嘴含在富豪的肉棒上，嘴里说「请娶走我吧」
+					;TranslatedMark 淫魔たちはみな瞳に♥を浮かべ、別れが惜しいのか男の肉棒にしゃぶりつき、「娶ってほしい」などと口にしている
+					PRINTFORMW 「哈哈，没关系！不管多少我都会照顾你的们！今后也请你们多多关照了！」
+					;TranslatedMark 「はははっ、構わん構わんっ！　いくらでも面倒を見てやろう！　今後もこの店は贔屓にさせてもらうよ」
+					PRINTFORMW 听到这句话，淫魔们发出了欢呼声…不，太娇媚了
+					;TranslatedMark その言葉を聞いて淫魔たちから歓声…いや、嬌声が上がる
+					PRINTFORMW ……这个男人的无底精力，就连淫魔们也会沦陷下去
+					;TranslatedMark ……この男の底無の精力は、淫魔たちすらも陥落させてしまえるようだ
+					PRINTFORML 并深深对%ANAME(対象)%居然没有沉沦感到敬佩起来。回去的时候得好好温柔地对待了
+					;TranslatedMark つくづく%ANAME(対象)%はよくも抗えたものだと思う。帰ったら優しくしてあげよう
+					PRINTFORMW %ANAME(MASTER)%一边考虑着这样的事情一边踏上了归途
+					;TranslatedMark %ANAME(MASTER)%はそんなことを考えながら帰路に着いた
+					PRINTFORML
+					PRINTFORMW ……在那之后，他把视察领地的特产交给了他，对%ANAME(対象)%很温柔
+					;TranslatedMark ……その後、領地視察のお土産を渡したりと%ANAME(対象)%に優しくした
+					PRINTFORMW %ANAME(MASTER)%对%ANAME(MASTER)%的样子感到惊讶，似乎大家都很高兴
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の様子を訝しみながらも喜んでくれたようだ
+					CFLAG:対象:好感度 += 300
+				ENDIF
+				PRINTFORML
+			CASE 2
+				PRINTFORML 「嘿，我又来拜访了」
+				;TranslatedMark 「やあ、また来たよ」
+				PRINTFORMW 一个当了赞助商的富豪来了。
+				;TranslatedMark パトロンとなった富豪の男が尋ねてきた
+				PRINTFORMW 那种气氛和第一次见面时完全不一样，很绅士
+				;TranslatedMark その雰囲気は、初めて合った頃とはまるで違う、紳士然としたものだった
+				PRINTFORML 「对不起，能让我再拥抱她吗？我是说是%ANAME(対象)%哦」
+				;TranslatedMark 「すまないが、また彼女を抱かせてくれるかね？　%ANAME(対象)%だよ」
+				PRINTFORMW 「怎么也忘不了那个身体呢。这次会做好避孕准备的。我保证」
+				;TranslatedMark 「どうにもあの身体が忘れられなくてね。今度はちゃんと避妊する。約束するよ」
+				PRINTFORML 「还有，这次你也一起怎么样？我也带了一个女人来。」
+				;TranslatedMark 「それと、今回は君も一緒にどうだい？　私の女も一人連れてきているんだ」
+				PRINTFORMW 「只要你愿意，4P怎么样？我觉得可以品尝到和平时不同的感觉」
+				;TranslatedMark 「君さえ良ければ、４Ｐなどどうかね？　いつもと違った感覚が味わえると思うが」
+				PRINTFORML 也就是所谓的交换吗？如果是现在的他，不会像以前那样蛮横吧
+				;TranslatedMark いわゆるスワッピングのようなものか。今の彼ならば、以前のような横暴はしないだろう
+				PRINTFORMW 「当然，如果能让我抱的话，报酬会比之前高的。这一点不用担心。」
+				;TranslatedMark 「無論、抱かせてくれるなら報酬ははずむとも。そのあたりの心配はいらんよ」
+				PRINTFORML 嗯，怎么办呢……
+				;TranslatedMark ふむ、どうしようか……
+				CALL ASK_YN("让我们来享受吧", "今天还是算了")
+				IF RESULT == 1
+					PRINTFORMW 今天和%ANAME(対象)%都很忙
+					;TranslatedMark 今日は%ANAME(対象)%共々忙しい
+					PRINTFORMW %ANAME(MASTER)%诚实地告诉他今天不方便
+					;TranslatedMark %ANAME(MASTER)%は正直に、今日は都合がつかないことを伝えた
+					PRINTFORML 「是吗？那太遗憾了……」
+					;TranslatedMark 「そうか。それは残念だ……」
+					PRINTFORMW 这次通过补偿，并开出下次一定会更好的期望，让富豪先忍耐一段时间(今度埋め合わせをすることで、今回は我慢してもらっ)
+					;TranslatedMark 今度埋め合わせをすることで、今回は我慢してもらった
+					PRINTFORMW 「那我就告辞了。这是这次捐款」
+					;TranslatedMark 「それでは私はこれで失礼するよ。これが今回の寄付金だよ」
+					PRINTFORMW 赞助商交了支援金回去了……
+					;TranslatedMark パトロンの男は支援金を渡して帰って行った……
+					CALL ICPRINT("入手了金<20000>", "W", カラー_注意)
+					;TranslatedMark "金<20000>を手に入れた", "W", カラー_注意
+					MONEY += 20000
+				ELSE
+					PRINTFORMW 「哦哦！谢谢。非常感谢！」
+					;TranslatedMark 「おお！　ありがたい。感謝するよ」
+					PRINTFORML 「那么我也介绍一下我的女人。喂，过来」
+					;TranslatedMark 「それでは私の女も紹介しよう。おい、ここへ」
+					PRINTFORMW 他一打招呼，一个美女就迎向%ANAME(MASTER)%的面前
+					;TranslatedMark 彼が声をかけると、一人の美女が%ANAME(MASTER)%の前に進み出てかしずく
+					PRINTFORMW 一眼就看出来是相当淫荡却上等的肉体，估计为了让男人们舒服而被教育的结晶
+					;TranslatedMark 一目で分かるそのいやらしい肉付きは、まさに男を喜ばせるために躾けられた成果の結晶だ
+					PRINTFORMW 她揽着%ANAME(MASTER)%的手臂，一边按压丰满的乳房一边等待主人的信号
+					;TranslatedMark 彼女は%ANAME(MASTER)%の腕を取り、豊満な乳房を押し付けながら主の合図を待っている
+					PRINTFORMW 「那么，今天大家一起享受吧」
+					;TranslatedMark 「さあ、今日はみんなで楽しもうじゃないか」
+					PRINTFORMW 然后4个人走进了特别准备的房间……
+					;TranslatedMark そうして４人は、特別に用意された部屋に入っていった……
+					PRINTFORML ・
+					PRINTFORML ・
+					;TranslatedMark ・・
+					PRINTFORMW ・・・
+					PRINTFORMW 在四人所待得小屋内，听到了男女激烈交融的声音……
+					;TranslatedMark ４人が入った部屋から、男女の激しく交わる声が聞こえてくる…
+					PRINTFORMW 在房间里格外混乱的是被赞助人抱着的%ANAME(対象)%
+					;TranslatedMark 部屋で一際乱れていたのが、パトロンの男に抱かれている%ANAME(対象)%だった
+					PRINTFORML 曾经忍受着他的调教选择了%ANAME(MASTER)%的%ANAME(対象)%
+					;TranslatedMark かつて彼の調教に耐えて%ANAME(MASTER)%を選んだ%ANAME(対象)%だが
+					PRINTFORMW 那刻在身体上的快乐印记至今仍无法忘记
+					;TranslatedMark その身体に刻まれた快楽の味は今なお忘れられるものではなかった
+					PRINTFORMW 被所爱的%ANAME(MASTER)%看到了自己那令人讨厌的凌乱和痴态，羞耻心更加沉重了，
+					;TranslatedMark そんな自分のいやらしく乱れる痴態を、愛する%ANAME(MASTER)%に見られているという羞恥心と、
+					PRINTFORMW %ANAME(MASTER)%抱着表情看起来像是要被玩坏一样的不认识的女人，心里却是有着相当的嫉妒
+					;TranslatedMark %ANAME(MASTER)%が抱く知らない女の快感に蕩けた表情が、%ANAME(MASTER)%を取られているという嫉妬心に似た感情をよび、
+					PRINTFORMW 它们混杂在一起，向%ANAME(対象)%传达前所未有的兴奋，使其身体更加敏感
+					;TranslatedMark それらが交じり合って%ANAME(対象)%をかつてない興奮に導き、その身体をさらに敏感にしていく
+					PRINTFORML 无法忍受她%ANAME(対象)%过于淫荡妖艳的姿态，%ANAME(MASTER)%如同要夺取%ANAME(対象)%般一样大力对着身下的女人进行冲击
+					;TranslatedMark そのあまりに淫らで美しい姿に我慢できず、%ANAME(MASTER)%は%ANAME(対象)%を奪い取るように交わる
+					PRINTFORMW 看那样子，男人对着被自己以外的男人抱着练色情瑜伽的女人进行严厉的教育
+					;TranslatedMark その様を見て、男もまた自分以外の男に抱かれてヨガったお気に入りの女を激しく責め立てて教育する
+					PRINTFORMW 在这之后又交换了几次，异样的感觉在激烈的交往仍在持续……
+					;TranslatedMark 互いの相手を入れ替えて、激しい交わりは尚も続いた…
+					PRINTFORML
+					PRINTFORML
+					PRINTFORMW 足足过了6个小时，快乐的宴会终于结束了……
+					;TranslatedMark たっぷり６時間ほど経ってから、ようやく快楽の宴は終わった……
+					PRINTFORML 在房间里，全身沾满强烈雄性气息白色浑浊液的两个女人，不知是不是因为绝顶的余韵，全身都在陶醉的表情中痉挛着
+					;TranslatedMark 部屋には、全身を雄の白濁液まみれにした二人の女が、絶頂の余韻からか恍惚の表情で全身を痙攣させている
+					PRINTFORMW %ANAME(MASTER)%由于过于激烈的交合消耗了大量的体力，一边轻轻抚摸着%ANAME(対象)%的头一边调整呼吸
+					;TranslatedMark %ANAME(MASTER)%もまた激しい交わりで消耗し、%ANAME(対象)%の頭をそっと撫でながら息を整える
+					PRINTFORMW 「哎呀哎呀，今天很开心哦」
+					;TranslatedMark 「いやはや、今日は楽しかったよ」
+					PRINTFORML 都已经干成这样了看起来依旧精神饱满，仔细想想这个男人的精力真是可怕
+					;TranslatedMark これだけやってまだまだ元気だとは、つくづくこの男の精力は恐ろしい物がある
+					PRINTFORMW 「说了不合理的话真是对不起。这是今日份的赞助，额外补偿已经包含在这里面了。」
+					;TranslatedMark 「無理を言って悪かったな。寄付金に色をつけておくよ」
+					PRINTFORMW 「那么今天就告辞了。以后还会再来的」
+					;TranslatedMark 「それでは今日はこれで失礼する。また来るよ」
+					PRINTFORMW 赞助商交了支援金回去了……
+					;TranslatedMark パトロンの男は支援金を渡して帰って行った……
+					CALL ICPRINT("入手了金<50000>", "W", カラー_注意)
+					;TranslatedMark "金<50000>を手に入れた", "W", カラー_注意
+					MONEY += 50000
+					CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+					CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴")
+					CALL FUCK_RAPE_HININ(対象, @"富豪の\@ RAND:2 ? 肉棒 # 唇\@", "富豪")
+					CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "富豪の女の唇", "", "富豪の女の膣", "和姦")
+				ENDIF
+				PRINTFORML
+		ENDSELECT
+	DVAR:富豪_パトロンフラグ ++
+
+	SIF DVAR:富豪_パトロンフラグ == 10
+		DVAR:富豪_パトロンフラグ = 6
+
+	;派生イベントラスト
+	CASE 10
+		PRINTFORMW 听说对富豪怀有怨恨的人，正筹备着刺杀的计划
+		;TranslatedMark 例の富豪に恨みを持つ者が、彼を襲撃する計画があるという噂を捉えた
+		PRINTFORMW 也许只是谣言，但听说有很多人以前就恨不得他死了
+		;TranslatedMark 単なる噂かもしれないが、以前の彼に恨みを持つ者は多いとも聞く
+		PRINTFORMW 那么，该怎么办呢……
+		;TranslatedMark さて、どうするべきか……
+		CALL ASK_YN("派遣护卫", "放任不管")
+		;TranslatedMark "護衛をつける", "放っておく"
+		IF RESULT == 1
+			PRINTFORMW …没有任何确证。恐怕只是谣言吧。
+			;TranslatedMark …何も確証はない。おそらく単なる噂だろう
+			PRINTFORMW %ANAME(MASTER)%没有特别在意，放着不管了
+			;TranslatedMark %ANAME(MASTER)%は特に気に留めず、放っておいた
+			PRINTFORML ・
+			PRINTFORML ・
+			;TranslatedMark ・・
+			PRINTFORMW ・・・
+			PRINTFORMW 几天后，有报告说，那个富豪被土匪袭击，丧命了
+			;TranslatedMark 数日後、例の富豪が土匪たちに襲撃され、命を落としたとの報告が入った
+			PRINTFORMW 他的妾们好像也被土匪们一个不留地掳走了……
+			;TranslatedMark 彼の妾たちも、土匪どもに一人残らず攫われたようだ…
+			CALL COLOR_PRINTW(@"%ANAME(MASTER)%永远失去了富豪的援助", カラー_警告)
+			;TranslatedMark @"%ANAME(MASTER)%はパトロンを失いました……", カラー_警告
+			PRINTFORML
+			DVAR:富豪_パトロンフラグ = -1
+		ELSE
+			PRINTFORMW 虽然是传言的阶段，但还是应该注意的吧
+			;TranslatedMark 噂の段階ではあるが、念には念を入れるべきだろう
+			PRINTFORMW %ANAME(MASTER)%叫人把这个传言告诉了那名富豪，并派了几个士兵做了护卫……
+			;TranslatedMark %ANAME(MASTER)%はこの噂をパトロンの彼に伝え、私兵を何人か護衛につかせた……
+			PRINTFORML ・
+			PRINTFORML ・
+			;TranslatedMark ・・
+			PRINTFORMW ・・・
+			PRINTFORML 几天后，有报告说，赞助人富豪在访问途中遭到袭击
+			;TranslatedMark 数日後、パトロンの富豪が訪問途中に襲撃されたという報告が入った
+			PRINTFORMW 幸运的是，经过担任护卫的士兵们有效地进行防卫，并没有酿成大事
+			;TranslatedMark 幸い、護衛につけていた士兵が奮闘した結果、大事には至らなかったようだ
+			PRINTFORML 「哎呀哎呀……吃了苦头呢」
+			;TranslatedMark 「いやはや……ひどい目にあったよ」
+			PRINTFORMW %ANAME(MASTER)%让慌张的富豪逃进宫殿避难后，劝其最近最好还是躲着避避风头比较好
+			;TranslatedMark ほうほうの体でなんとか宮殿まで逃げこめた彼に、%ANAME(MASTER)%はしばらく身を隠した方がいいと進言した
+			PRINTFORMW 「…确实是这样啊。到现在为止，好像太招人恨了…」
+			;TranslatedMark 「…たしかに、そのようだな。今まで人の恨みを買いすぎたバチが当たったようだ…」
+			PRINTFORMW 这次的袭击是被这位富豪抢走女人的男人们计划的
+			PRINTFORMW 「不过我相信你们会让这个地方和平。」
+			;TranslatedMark 「君たちがこの地を平和にしてくれると信じているよ」
+			PRINTFORMW 「那么，下次再见了。」
+			;TranslatedMark 「それでは、さらばだ。」
+			CALL ICPRINT("入手了金<30000>", "W", カラー_注意)
+			;TranslatedMark "金<30000>を手に入れた", "W", カラー_注意
+			MONEY += 30000
+			CALL COLOR_PRINTW(@"%ANAME(MASTER)%暂时失去了富豪的援助", カラー_注意)
+			;TranslatedMark @"%ANAME(MASTER)%はパトロンを失いました……", カラー_注意
+			PRINTFORML
+			DVAR:富豪_パトロンフラグ = 5
+		ENDIF
+	ENDSELECT
+
+	RETURN 1

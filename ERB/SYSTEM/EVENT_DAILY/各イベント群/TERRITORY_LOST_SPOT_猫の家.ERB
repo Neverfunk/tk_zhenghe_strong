@@ -1,0 +1,228 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_TERRITORY_LOST_SPOT_RATE()
+RETURN 50
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_TERRITORY_LOST_SPOT_DECISION()
+#DIM 迷い家
+迷い家 = GET_CITYNUMBER("マヨヒガ")
+
+SIF 迷い家 == -1
+	RETURN 0
+SIF CITY_OWNER:迷い家 != CFLAG:MASTER:所属
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_TERRITORY_LOST_SPOT_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_TERRITORY_LOST_SPOT
+#DIM 対象
+#DIM 迷い家
+迷い家 = GET_CITYNUMBER("マヨヒガ")
+
+対象 = NAME_TO_CHARA("橙")
+
+PRINTFORML 久违的假日、悠闲地在迷途之家休息
+PRINTFORMW 但这里只有猫和猫妖
+PRINTFORML 怎么办？
+CALL ASK_MULTI_JUDGE("和猫一起玩", 1,"去外面玩", 1,"去橙喵的房间", CFLAG:対象:所属 == CFLAG:MASTER:所属 && CFLAG:対象:捕虜先 == 0)
+IF RESULT == 1
+	PRINTFORML 和猫打交道也腻了
+	PRINTFORMW %ANAME(MASTER)%到镇子上去玩了
+	RETURN
+ELSEIF RESULT == 2
+	PRINTFORML 去了橙喵的房间
+	PRINTFORML 她正在艰苦地训练猫们
+	PRINTFORMW %ANAME(MASTER)%约她来打发时间，她就高高兴兴地坐了上来
+	IF (CFLAG:対象:好感度 >= 2500 || DVAR:猫大好き_発生フラグ == 1) && HAS_PENIS(MASTER)
+		IF DVAR:猫大好き_発生フラグ == 0
+			PRINTFORML 正想着要干什么，她却缠在胳膊上了
+			PRINTFORML 我惊讶地看着她，她一边蹭着身体一边发出猫叫声
+			PRINTFORMW 看样子是发情期到了…
+			PRINTFORML 都被邀请到这一步了，也没有拒绝的理由
+			PRINTFORMW %ANAME(MASTER)%一推倒她，她就发出欢悦的声音
+			$TYEN_LOST_SPOT
+			PRINTFORML 
+			PRINTFORMW 橙喵的房间里传来母猫的娇喘声
+			PRINTFORML %ANAME(MASTER)%认识到，橙喵的身体温润而成熟
+			PRINTFORML 淫荡的雌穴像生物一样蠢动着，紧紧地纠缠在肉棒上催促着射精
+			PRINTFORMW 我抱住橙喵娇小的身子，猛地往上一顶，橙喵顿时全身痉挛了，发出可爱的喘息声
+			PRINTFORML 这至高无上的感触让%ANAME(MASTER)%拼命扭动腰，把阴茎更深地塞进她的身体里
+			PRINTFORML %ANAME(MASTER)%和橙喵都忘记了时间，只是在肉欲中彼此索求着
+			PRINTFORMW 一时间，房间里只有肉体和肉体的碰撞声，还有橙喵的娇声在回荡
+			PRINTFORML 当%ANAME(MASTER)%临近射精而加速腰部运动时，橙喵的可爱地吐出了舌头
+			PRINTFORML 终于超越了那个火热而淫荡界限的%ANAME(MASTER)%尽情地朝橙喵身体的最深处射进精液
+			PRINTFORMW 橙喵夹紧了她的两条尾巴，呻吟着，她的脊背一下子变得弯曲起来
+			PRINTFORMW …%ANAME(MASTER)%一直继续着，直到筋疲力尽，才和橙喵互相拥抱着睡下了
+			DVAR:猫大好き_発生フラグ = 1
+		ELSEIF DVAR:猫大好き_発生フラグ == 1
+			PRINTFORML 她两条尾巴紧致的地缠在你的胳膊上
+			PRINTFORML 看来她忘不了之前的色色的事情
+			PRINTFORMW 她把%ANAME(MASTER)%拉进她的屋里，蹭着%ANAME(MASTER)%的身体撒娇
+			PRINTFORML 
+			SELECTCASE RAND:5
+				CASE 0
+					PRINTFORMW 我尽情地怜爱着抚摸着她那柔软而娇嫩的身体
+				CASE 1
+					PRINTFORMW 她此刻如此温柔，我和她的身体交织在一起，一整夜
+				CASE 2
+					PRINTFORMW 被她那飘荡着的浓郁雌性香味所刺激，我对她痴迷了，我在她身上不停地做爱，射精
+				CASE 3
+					PRINTFORMW 我疯狂地征伐着她的身体，她在这快感下痴狂了，不断地呻吟着
+				CASE 4
+					PRINTFORMW %ANAME(MASTER)%为了讨人喜欢而尽心尽力地为她服务
+			ENDSELECT
+		ENDIF
+		CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, @"%ANAME(対象)%的嘴唇", "", @"%ANAME(対象)%的膣穴", "和姦")
+		CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", @"%ANAME(MASTER)%", "", "和姦")
+	ELSE
+		PRINTFORMW 她骑在%ANAME(MASTER)%膝盖上天真地问要做什么
+		PRINTFORML 怎么办？
+		CALL ASK_MULTI_JUDGE("学习", 1,"去外面玩", 1,"色色的事情", HAS_PENIS(MASTER))
+		IF RESULT == 2
+			PRINTFORMW 一下子抱住她，在她耳边低声说
+			IF CFLAG:対象:好感度 + RAND:600 + (ABL:対象:欲望 * 100) >= 2000
+				PRINTFORML 她的耳朵一下子红了，不好意思地点了点头
+				PRINTFORMW %ANAME(MASTER)%轻轻地吻了一下她的额头，然后把她带进了卧室
+				GOTO TYEN_LOST_SPOT
+			ELSE
+				PRINTFORML 她的耳朵赤红了，扇了一下%ANAME(MASTER)%的脸
+				PRINTFORMW 橙完全不管全身发抖的%ANAME(MASTER)%一脸怒气地走了
+				CFLAG:対象:好感度 -= RAND:500
+			ENDIF
+		ELSEIF RESULT == 0
+			PRINTFORML 约她去学习，她露出有点失望的表情
+			PRINTFORMW 但是我说为了驯服猫我们需要学习
+			CALL PRINT_ADD_EXP(対象, "知略経験値", RAND:10 + 1, 1)
+			CALL PRINT_ADD_EXP(対象, "政治経験値", RAND:10 + 1, 1)
+			CALL PRINT_ADD_EXP(MASTER, "知略経験値", RAND:10 + 1, 1)
+			CALL PRINT_ADD_EXP(MASTER, "政治経験値", RAND:10 + 1, 1)
+			CALL TRAIN_AUTO_ABLUP(対象)
+			CALL TRAIN_AUTO_ABLUP(MASTER)
+			CFLAG:対象:好感度 += 50 + RAND:100
+		ELSEIF RESULT == 1
+			PRINTFORML 难得的好天气，就在外面玩吧
+			PRINTFORMW 橙喵和猫们在院子里追逐嬉戏
+			CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:10 + 1, 1)
+			CALL PRINT_ADD_EXP(対象, "防衛経験値", RAND:10 + 1, 1)
+			CALL PRINT_ADD_EXP(MASTER, "武闘経験値", RAND:10 + 1, 1)
+			CALL PRINT_ADD_EXP(MASTER, "防衛経験値", RAND:10 + 1, 1)
+			CALL TRAIN_AUTO_ABLUP(対象)
+			CALL TRAIN_AUTO_ABLUP(MASTER)
+			CFLAG:対象:好感度 += 50 + RAND:100
+		ENDIF
+	ENDIF
+ELSEIF RESULT == 0
+	PRINTFORMW 决定和猫们玩耍
+	PRINTFORML 想要怎么玩呢？
+	CALL ASK_MULTI("逗猫棒" ,"球" ,"木天蓼")
+	IF RESULT == 0
+		PRINTFORML 用逗猫棒和猫们一起玩
+		PRINTFORMW …出乎意料的热情
+		CALL PRINT_ADD_EXP(MASTER, "知略経験値", RAND:5 + 1, 1)
+		CALL TRAIN_AUTO_ABLUP
+	ELSEIF RESULT == 1
+		PRINTFORML 用球一起玩了
+		PRINTFORMW …出乎意料的热情
+		CALL PRINT_ADD_EXP(MASTER, "武闘経験値", RAND:5 + 1, 1)
+		CALL TRAIN_AUTO_ABLUP
+	ELSEIF RESULT == 2
+		PRINTFORML 用上了木天蓼，猫仿佛喝醉了一样摇晃起来
+		PRINTFORMW 然后它们中的一个变成了一个人形，向%ANAME(MASTER)%靠过来
+		IF IS_MALE(MASTER) || (HAS_PENIS(MASTER) && RAND:2)
+			PRINTFORML %ANAME(MASTER)%抱住了这一脸发情的猫，她发出了撒娇的声音
+			PRINTFORML 看来是受木天蓼的影响发情了
+			PRINTFORMW 要承担责任，%ANAME(MASTER)%将她抱去了蒲团那边
+			PRINTFORML 
+			SELECTCASE RAND:5
+				CASE 0
+					PRINTFORML 之后，%ANAME(MASTER)%和她一直在大汗淋漓
+					PRINTFORML 充满欲望的身体耸动着腰部，彼此交换着液体和体温，高潮了许多次
+					PRINTFORML 她在%ANAME(MASTER)%的爱抚下变得十分敏感，发出了淫荡的叫声
+					PRINTFORMW 直到太阳落山，疲惫连绵，%ANAME(MASTER)%和她相互拥抱，陷入沉睡
+				CASE 1
+					PRINTFORML 从她的房间里传来肉体碰撞的声音和猫喘气的声音
+					PRINTFORML 她跨到%ANAME(MASTER)%的身上，深深地摇晃腰肢，疯狂地将阴茎纳进身体最深处
+					PRINTFORML 我一边享受着她那淫靡美丽的肉体，一边抚摸着她的肚子，她的声音变得更加妩媚了
+					PRINTFORMW 她的眼睛里浮现出♥，身体深处不断向%ANAME(MASTER)%索求着精液
+				CASE 2
+					PRINTFORML 她变得四肢着地了，我的腰猛烈的冲击着晃动着她
+					PRINTFORML 她的身体几乎已经开始咯嘣咯嘣地作响，每一次冲刺都在颤抖着，发出可爱的喘息声
+					PRINTFORML 在那收紧的绞动的阴道里，%ANAME(MASTER)%已经无法忍耐了，在她体内一次又一次中出
+					PRINTFORMW 第二天早上，分开的时候，她把身体凑了过来，我吻了她一下，约定再会
+				CASE 3
+					PRINTFORML %ANAME(MASTER)%一边亲吻她，一边将手伸向胸前和胯部进行抚摸
+					PRINTFORML 毫无防备的秘处只是轻轻划动，就让爱液溢出来，她发出欢悦的叫声
+					PRINTFORML 再也无法忍受她淫荡的身躯，%ANAME(MASTER)%大口大口的喘着气
+					PRINTFORMW 两个人忘记了时间，像一头野兽一样激烈地交配着，直到疲惫不堪
+				CASE 4
+					PRINTFORML 刚一走进她的屋子，%ANAME(MASTER)%就被她推到了，腰部剧烈地摇晃着
+					PRINTFORML 它发出了雌性的声音，作为一只猫，能妖艳地摇摆着充满自信的肉体，这一切让%ANAME(MASTER)%感到赏心悦目
+					PRINTFORML 我轻轻地往上顶了一下，龟头便撞到了子宫，她高高抬起身子，强烈的潮吹了
+					PRINTFORMW 被她一个劲儿地骚扰，按照她的要求给她配了好几次种
+			ENDSELECT
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "猫娘の唇", "", "猫娘の膣", "和姦")
+			PRINTFORML 
+			PRINTFORML 天完全黑了
+			PRINTFORMW 温柔地抚摸着依依不舍的她离开了
+		ELSE
+			PRINTFORML 他一副发情期的样子，将%ANAME(MASTER)%推倒了
+			PRINTFORML 看来是受木天蓼的影响发情了
+			PRINTFORMW 我被这意外的发展吓了一跳，就被抱进了卧室
+			PRINTFORML 
+			SELECTCASE RAND:5
+				CASE 0
+					PRINTFORML 被按倒在地上的%ANAME(MASTER)%四肢着地着从背后被侵犯，几乎喘不过气来
+					PRINTFORML 他被欲望驱使，用野兽的性交刺激着女人的本能，%ANAME(MASTER)%露出像一只雌猫般的表情
+					PRINTFORML 噗嗤♥噗嗤♥地，每当龟头和子宫口接吻时，麻一样的快感传遍全身每一个角落，整个视野里都像是闪着光。
+					PRINTFORMW 渐渐地%ANAME(MASTER)%想不了除了性和肉棒以外的任何事情，并且变得疯狂与他交配
+				CASE 1
+					PRINTFORML 被强行推倒的%ANAME(MASTER)%还没来得及反抗就被剥掉了衣服
+					PRINTFORML 被肉欲驱使，如同野兽一般不停地扭动着腰，%ANAME(MASTER)%身体不容分说地起了反应
+					PRINTFORML 从他的腰部运动感觉到他正在认真地试图让自己怀孕，%ANAME(MASTER)%的子宫逐渐降了下来
+					PRINTFORMW 他在发情期间的兽欲是巨大的%ANAME(MASTER)%已经从子宫里涌出大量的精液
+				CASE 2
+					PRINTFORML 他一进入房间，就砰地一声压倒了%ANAME(MASTER)%，激烈地摇晃着冲刺着
+					PRINTFORML 真是像野兽一样的性交，%ANAME(MASTER)%哀嚎着扭动着身体，但是阴茎插得太深了没法逃走
+					PRINTFORML 随着他那浓烈的雄性气息和阴道被毫不留情地蹂躏的触感，%ANAME(MASTER)%的抵抗心被熔化殆尽了
+					PRINTFORMW 最后，他在%ANAME(MASTER)%的最深处射出了精液、%ANAME(MASTER)%丢脸地发出毫无遮掩的娇声
+				CASE 3
+					PRINTFORML %ANAME(MASTER)%被他熟练的技巧震惊了，就这样做爱着
+					PRINTFORML 腰被死死抓住，肉穴被撬开，%ANAME(MASTER)%把脸埋在枕头里，全身颤抖着
+					PRINTFORML 他猛地一扭腰，被挖开作为女人弱点的%ANAME(MASTER)%忍不住被插得喘不过气来
+					PRINTFORMW %ANAME(MASTER)%已经忘记了作为人的尊严，一味地央求，被猫责弄了好几次
+				CASE 4
+					PRINTFORML %ANAME(MASTER)%他们在他昏暗的卧室里像恋人一样紧紧地拥抱着
+					PRINTFORML 被他那热情的求爱行动所迷住了，%ANAME(MASTER)%积极地扭动腰发出欢愉的声音
+					PRINTFORML 舌头互相缠在一起，互相叫着名字，置身于一种灼烧般的快乐中，他们高潮了一次又一次
+					PRINTFORMW 被他抚摸下腹部的%ANAME(MASTER)%感到子宫内在颤抖，全身都在轻轻地颤抖
+			ENDSELECT
+			CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, Ｖ性交, 口淫", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("流浪妖怪"), @"猫変化の\@RAND:2 ? 肉棒 # 唇\@", "猫変化", "", "和姦")
+			PRINTFORML 
+			PRINTFORML 天完全黑了
+			PRINTFORMW 在离开的时候被他要求再见，%ANAME(MASTER)%很高兴地把联系方式给了他
+		ENDIF
+	ENDIF
+ENDIF
+
+RETURN 1

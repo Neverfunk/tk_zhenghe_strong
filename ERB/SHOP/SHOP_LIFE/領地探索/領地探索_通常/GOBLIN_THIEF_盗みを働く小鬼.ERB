@@ -1,0 +1,51 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_GOBLIN_THIEF_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_GOBLIN_THIEF_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_GOBLIN_THIEF(対象)
+#DIM 対象
+PRINTFORML 探索領地時、聽到了有小鬼出沒的傳聞
+PRINTFORML 據說有地方正因為被盜而困擾……
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "知略"))
+PRINTFORML 
+CALL ASK_MULTI("協助捜索", "不管")
+
+IF RESULT == 1
+	PRINTFORML 只是困擾的話、就是沒什麼大損失吧
+	PRINTFORML 決定放任不理
+	RETURN 1
+ENDIF
+
+PRINTFORML 有困擾就不能忽視
+PRINTFORML %ANAME(対象)%設下了陷阱、対小鬼窮追不捨
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+
+IF LIMIT(ABL:対象:知略, 50, 100) > RAND:100
+	PRINTFORMW 成功抓到了小鬼！
+	PRINTFORML 他們被偷的東西都被存放在巣穴之內
+	PRINTFORML 還給失主之後、得到了一些報酬……
+	CALL PRINT_ADD_EXP(対象, "知略経験値", 5 + RAND:5)
+	CALL ICPRINT("得到了<3000>金", "L", カラー_注意)
+	MONEY += 3000
+ELSE
+	PRINTFORML ……但是、小鬼非常狡猾聰明、被它逃走了
+	PRINTFORMW %ANAME(対象)%垂頭喪氣地返回了拠點……
+ENDIF
+
+RETURN 1

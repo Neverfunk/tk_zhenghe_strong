@@ -1,0 +1,312 @@
+﻿;--------------------------------------
+;ターンエンド時の外来兵の処理
+;--------------------------------------
+@TURNEND_GAIRAI
+#DIM 外来人
+
+外来人 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_外来人)
+
+;兵力の増える処理
+IF DAY % 3 == 0
+	CALL SINGLE_DRAWLINE
+	LOCAL:0 = MAX(RAND:3000, 1000)
+	PRINTFORML 听说参与过外来人「実験」的流浪妖怪们、一个接着一个叛变了
+	;TranslatedMark 外来人につけば「実験」のおこぼれにあずかれると聞いた野良妖怪たちが、次々と寝返っているようです……
+	PRINTFORML 外来人軍的兵力増加了{LOCAL:0}
+	;TranslatedMark 外来人軍の兵力が{LOCAL:0}増加した
+	COUNTRY_SOLDIER:外来人 += LOCAL:0
+ENDIF
+
+;5ターンに1回、ブレインコントロール
+CALL GAIRAI_BRAINCONTROL(DAY % 5 == 0)
+
+;--------------------------------------
+;滅亡時の処理
+;--------------------------------------
+@GAIRAI_DESTROY_MSG
+CALL SINGLE_DRAWLINE
+SETCOLOR カラー_注意
+PRINTFORML
+PRINTFORML
+PRINTFORMW  夕阳西下，随着太阳落下的那一刻，曾经那个拥有着令月之都畏惧的外乡帝国
+PRINTFORMW  在幻想乡联军的共同抗战下土崩瓦解
+PRINTFORMW 「守住，给我守住！别告诉我你们打不过这帮土…啊！」
+PRINTFORMW  尽管军官也亲上战场尽力督战，然而军队混乱的士兵们根本不听指挥，反而无端增添军官的伤亡罢了
+PRINTFORMW   「冲啊，解放幻想乡，活捉对方首脑！」
+PRINTFORMW   「杀光他们，让他们血债雪藏！」
+PRINTFORMW  「把他们全部斩杀，一个不留！没他们的暴行付出代价，为我们牺牲的同胞报仇！」
+PRINTFORMW  幻想乡的军队们士气高涨
+PRINTFORMW  相比外乡人的军团。已经费拉不堪，全无当年大破结界时的威风
+PRINTFORMW  帝国的余晖，无非只是那些武器罢了，他们的军队，却一触即溃，不放一枪而撤退
+PRINTFORMW  「跑！跑！跑啊！」
+PRINTFORMW  终于，外强中干的帝国彻底崩溃，前线军官撤退之时，发现他们的高层早就用着传送装置离开了幻想乡
+PRINTFORMW  军官们也不再坚持，纷纷率部投降了………
+PRINTFORMW  在幻想乡之上耀武扬威的帝国毁灭了………
+PRINTFORMW  但是，这是幻想乡的胜利！！！
+PRINTFORML   
+PRINTFORML   
+PRINTFORML    
+
+
+
+
+
+
+RESETCOLOR
+CALL SINGLE_DRAWLINE
+
+;--------------------------------------
+;外来勢力の初期化処理
+;--------------------------------------
+@GAIRAI_INIT(ARG:0)
+#DIM LCOUNT
+VARSET LOCAL
+
+SIF GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_外来人) != -1
+	RETURN 0
+
+SIF SP_COUNTRY_RANK:特殊勢力_外来人 == 0
+	RETURN 0
+
+SIF GET_NEW_COUNTRY() == -1
+	RETURN 0
+
+CALL CREATE_SP_COUNTRY(特殊勢力_外来人)
+LOCAL = RESULT
+CALL INIT_SP_COUNTRY(LOCAL)
+
+RETURN LOCAL
+
+;-------------------------------------------------
+;DESC  :外来人所属時に閨・捕虜調教前にアイテムを追加する処理
+;-------------------------------------------------
+@START_TRAIN_COMMON_GAIRAI()
+ITEM:A_振動棒 = 1
+ITEM:A_肛用振動棒 = 1
+ITEM:A_乳頭夾 = 1
+ITEM:A_陰蒂夾 = 1
+ITEM:A_搾乳機 = 1
+ITEM:A_拡張気球 = 1
+ITEM:A_媚薬 = 99
+ITEM:A_利尿剤 = 99
+ITEM:A_玩具注射器 = 1
+ITEM:A_避孕套 = 99
+
+@SELECT_CHARA_RANDOM_LOGIC_GAIRAI_BRAINCONTROL(対象)
+#DIM 対象
+#DIM 外来人
+
+外来人 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_外来人))
+
+SIF IS_SP_CHARA(対象)
+	RETURN 0
+SIF 対象 == MASTER
+	RETURN 0
+SIF 対象 == GET_COUNTRY_BOSS(CFLAG:対象:所属)
+	RETURN 0
+SIF CFLAG:対象:捕虜先 && CFLAG:対象:捕虜先 != 外来人
+	RETURN 0
+SIF CFLAG:対象:所属 == 外来人
+	RETURN 0
+SIF CFLAG:対象:特殊状態 == 特殊状態_死亡
+	RETURN 0
+SIF !CFLAG:対象:所属 && CFLAG:対象:特殊状態 != 特殊状態_放浪
+	RETURN 0
+SIF TALENT:対象:幼兒
+	RETURN 0
+
+RETURN 1
+
+;--------------------------------------
+;外来人によるブレインコントロールイベント
+;引数には発動条件を書く。書かなければ常時発動。
+;--------------------------------------
+@GAIRAI_BRAINCONTROL(条件 = 1)
+#DIM 外来
+#DIM 条件
+#DIM 対象
+#DIM メッセージ
+
+外来 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_外来人)
+
+;外来所属でなく、条件を満たしている
+SIF 外来 == -1 || !条件
+	RETURN -1
+
+CALL SELECT_CHARA_RANDOM("GAIRAI_BRAINCONTROL")
+
+対象 = RESULT
+
+SIF 対象 == -1
+	RETURN 0
+
+;(外来人拡張パッチ)MASTERが外来所属のときは第1条件を満たさないように変更
+IF CFLAG:対象:捕虜先 == 外来 && CFLAG:MASTER:所属 != 外来
+	CALL SINGLE_DRAWLINE
+	SETCOLOR カラー_ピンク
+	PRINTFORMW 外来人把这个叫做实验、将一个奇怪的安全帽样子的装置为%ANAME(対象)%盖上了……
+	;TranslatedMark 外来人たちは実験と称し、怪しげなヘルメット型装置を%ANAME(対象)%に被せた……
+	PRINTFORMW 最初还在闹腾着的%ANAME(対象)%在外来人打开装置的电源后，马上就变得老实了
+	;TranslatedMark 最初は暴れていた%ANAME(対象)%だが、外来人が装置の電源を入れると、途端に大人しくなる
+	PRINTFORML 在装置内，有他们制作的洗脑用影像和声音
+	;TranslatedMark 装置の内では、彼らの作った洗脳用ムービー・音声が流れている
+	PRINTFORML 另外，从装置还生成了从头部开始流入的微弱电流、%ANAME(対象)%的潜意识开始被改写
+	;TranslatedMark さらに、装置から頭に流れされる微弱な電流が、%ANAME(対象)%の深層心理から書き換えていく
+	PRINTFORMW 自己只不过是外来人的奴隶而已
+	;TranslatedMark 自分は外来人たちの奴隷に過ぎないのだと
+	PRINTFORML %ANAME(対象)%的心中充满了幸福感
+	;TranslatedMark %ANAME(対象)%の心が幸福感に満たされていく
+	PRINTFORMW 这么幸福的话，为什么要违抗呢？
+	;TranslatedMark こんなに幸せなのに、どうして逆らう必要があるだろう？
+	PRINTFORML 在经过一定时间之后、外来人往装置中正在播放的洗脑影像里、混入了自慰的信号
+	;TranslatedMark ある程度経過を見た後、外来人たちは装置の洗脳映像に、オナニーせよという信号を混ぜ込んだ
+	PRINTFORMW 已经成为外来人顺从的研究对象后%ANAME(対象)%不再抱有任何疑问、
+	;TranslatedMark 外来人の従順な研究対象と成り下がった%ANAME(対象)%は、何の疑問も抱かず、
+	PRINTFORMW 只是被说了就开始对自己的秘部进行了激烈的自慰……
+	;TranslatedMark ただ言われるがままに自らの秘部を激しく慰め始めた……
+	PRINTFORML
+	CALL COLOR_PRINTW(@"%ANAME(対象)%成为了外来人的奴隷", カラー_警告)
+	RESETCOLOR
+	SETBIT TALENT:対象:特殊勢力陥落系, 特殊勢力_外来人
+	CALL CHANGE_COUNTRY(対象, 外来, 1)
+ELSEIF CFLAG:対象:捕虜先 != 外来
+	CALL SINGLE_DRAWLINE
+	SETCOLOR カラー_ピンク
+	PRINTFORML 外来人将一个大型的音响设备安装到野外
+	;TranslatedMark 外来人たちは大型の音響装置を野外に持ち出した
+	PRINTFORMW 然后，从那个地方开始用大音量散播着听不见的洗脑声波
+	;TranslatedMark そして、そこから耳に聞こえない洗脳音波を大音量でながし始めた
+	PRINTFORMW 偶尔在附近散步的%ANAME(対象)%从耳朵接收到了洗脑的音波，开始朝着传出声波的方向，身躯蹒跚着向那个地方靠近……
+	;TranslatedMark たまたま近くにいた%ANAME(対象)%はそれをもろに聞いてしまい、音波の発生元へふらふらと近寄った……
+	PRINTFORML 眼神空洞地奔赴到外来人的身边%ANAME(対象)%被要求进入到笼子里
+	;TranslatedMark 虚ろな瞳で外来人の元に馳せ参じた%ANAME(対象)%は、檻に入るように言われる
+	PRINTFORMW 在音波的影响下%ANAME(対象)%顺从地听从了他们的指令
+	;TranslatedMark 音波の影響下にある%ANAME(対象)%は、言われるがまま従った
+	PRINTFORMW 确保得到了研究对象之后、外来人们就那样将%ANAME(対象)%带走了
+	;TranslatedMark 研究対象を確保できたと、外来人たちはそのまま%ANAME(対象)%を持ち帰った
+	PRINTFORMW %ANAME(対象)%回复了自我的时候，已经为时已晚
+	;TranslatedMark %ANAME(対象)%が我にかえったころには、もう手遅れだった
+	PRINTFORML
+	CALL COLOR_PRINTW(@"%ANAME(対象)%被外来人囚禁了", カラー_警告)
+	RESETCOLOR
+	CALL CAPTURE(対象, 外来)
+ENDIF
+
+;-----------------------------------
+;外来勢力に捕らえられたときのイベント
+;-----------------------------------
+@MASTER_CAPTURED_GAIRAI(ARG:0)
+PRINTFORMW 被捉住的%ANAME(MASTER)%在外来人的研究者面前被拖走了…
+;TranslatedMark 捕らえられた%ANAME(MASTER)%は外来人たちの研究者の前に引きずり出された…
+IF GETBIT(TALENT:MASTER:特殊勢力陥落系, 特殊勢力_外来人)
+	PRINTFORML 你是不是脱跑了的研究对象XXX号、很好、又回来了
+	;TranslatedMark 君は脱走した研究対象XXX番じゃないか、よく戻ってきた
+	PRINTFORMW 那么、再次进行实验吧、请把这个项圈戴上
+	;TranslatedMark さあ、また実験を行うから、この首輪をつけなさい
+	PRINTFORMW 外来人理所当然地、想让你把这个项圈重新安装好……
+	;TranslatedMark 外来人たちは当然のように、首輪を嵌めようとしてくるが……
+	CALL ASK_YN("接受", "拒絶")
+	IF RESULT == 0
+		PRINTFORMW 如果能请继续装上这个，就可以让我们再多研究一下
+		;TranslatedMark これをつければ、また沢山研究してもらえる
+		PRINTFORMW %ANAME(MASTER)%的躯体里传来痛感、自觉地接受了项圈
+		;TranslatedMark %ANAME(MASTER)%の身体は疼き、首輪を自ら受け入れてしまった
+		PRINTFORMW 一戴上了项圈、脑子里就充满了对他们绝对服从的念头
+		;TranslatedMark 途端、彼らに対しては絶対服従であるという考えが、頭の中を埋め尽くした
+		PRINTFORMW 跟随着前进、仅仅只是遵从了这样简单的命令、就感到很高兴
+		;TranslatedMark 付いてきたまえ、そんな簡単な命令に従うことにすら、深い喜びを感じる
+		PRINTFORMW 镶套了他们特制的项圈、%ANAME(MASTER)%又一次、沦落成为了奴隶……
+		;TranslatedMark 彼らの作った特殊な首輪を嵌め、%ANAME(MASTER)%は再び、奴隷に成り下がった……
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%再次成为了外来人的研究用奴隶
+		;TranslatedMark %ANAME(MASTER)%は再び、外来人たちの研究用奴隷となりました
+		RESETCOLOR
+	ELSE
+		PRINTFORMW 谁要戴上那种东西啊。%ANAME(MASTER)%躲闪着抗拒了
+		;TranslatedMark 誰がそんなもの。%ANAME(MASTER)%ははねのける
+		PRINTFORMW 外来人似乎无法理解其态度
+		;TranslatedMark 外来人たちにはその態度が理解できないようだった
+		PRINTFORMW 这是什么反应呢，这很有意思，一定要调查一下
+		;TranslatedMark どういう反応だろうかこれは、興味深いぞ、是非とも調べねば
+		PRINTFORMW 面对着开始热烈沸腾起来的外来人们、%ANAME(MASTER)%被扣押着、安上了束缚的枷锁、被投放到了研究用的牢狱之中
+		;TranslatedMark わきたつ外来人たちは、%ANAME(MASTER)%を取り押さえ、枷で縛り、研究用の牢獄へと放り込んだ……
+	ENDIF
+ELSE
+	PRINTFORML 研究者对%ANAME(MASTER)%的身体用一种看着研究对象的目光舔舐着、
+	;TranslatedMark 研究者は%ANAME(MASTER)%の体を研究対象を見る瞳で舐めるように見定めた後、
+	PRINTFORMW 你很有研究的价值啊、他低声呢喃着
+	;TranslatedMark 君は研究価値がありそうだと呟いた
+	PRINTFORMW 他说如果你能自觉的协助研究的话，就不会对你做太过分的事情……
+	;TranslatedMark 自ら研究に協力してくれるなら、手ひどい真似はしないと言っているが……
+	PRINTFORMW 接受吗？
+	;TranslatedMark 受け入れますか？
+	CALL ASK_YN("接受", "拒絶")
+	IF RESULT == 0
+		PRINTFORMW 与其被人扔进监狱、不如同意好了。%ANAME(MASTER)%点了点头、外来人看到后也满意地点点头
+		;TranslatedMark 投獄されるよりはマシだろう。%ANAME(MASTER)%が頷くと、外来人たちは満足げに頷いた
+		PRINTFORMW 那么要为你加上管理用的标识、他们说
+		;TranslatedMark では管理用タグを付けようと、彼らは言い出した
+		PRINTFORMW 「标识」要用的烙印启动了、你准备好了吗、%ANAME(MASTER)%的下腹部被印上了通红的烙铁……
+		;TranslatedMark 「タグ」として用意された焼きごては、あろうことか、%ANAME(MASTER)%の下腹に押し当てられた……
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%成为了外来人的研究用奴隶
+		;TranslatedMark %ANAME(MASTER)%は外来人たちの研究用奴隷となりました
+		RESETCOLOR
+	ELSE
+		PRINTFORMW 还要我帮你们动手吗。%ANAME(MASTER)%毅然地说出了这句话
+		;TranslatedMark お前達になど手を貸すか。%ANAME(MASTER)%は毅然として言い放つ
+		PRINTFORMW 那么没有办法、他们就那样将%ANAME(MASTER)%关到了监狱中……
+		;TranslatedMark ではしかたないと、彼らはそのまま%ANAME(MASTER)%を投獄した……
+	ENDIF
+ENDIF
+IF RESULT == 0
+	SETBIT TALENT:MASTER:特殊勢力陥落系, 特殊勢力_外来人
+	CFLAG:MASTER:所属 = ARG:0
+	CALL PLAYER_FALLEN_TO_SP_COUNTRY(ARG:0)
+	CALL GAIRAI_FALLEN_LEAVE_MARK(MASTER)
+	RETURN 0
+ELSE
+	CALL CAPTURE(MASTER, ARG:0)
+	RETURN 2
+ENDIF
+
+;--------------------------------------
+;エンディング
+;--------------------------------------
+@GAIRAI_ENDING
+PRINTFORML 外来人的幻想乡侵略计划成功了
+;TranslatedMark 外来人たちの幻想郷侵攻計画は成功した
+PRINTFORMW  幻想乡的联合军队在外乡人那宛如神明的武器下灰飞烟灭
+PRINTFORMW  很快，幻想乡便沦为了外乡人们的殖民地
+PRINTFORMW 如今，他们以科学的力量统治着整个幻想乡
+;TranslatedMark 彼らは科学の力で、幻想郷全土を支配下においた
+PRINTFORML 今天的他们也继续在使用少女们反复地开展着不人道的「实验」
+;TranslatedMark 今日も彼らは少女達を使い、非道な「実験」を繰り返している
+PRINTFORML 他们的研究所中，响起了少女的悲鸣和娇声
+;TranslatedMark 彼らの研究所には、少女の悲鳴や嬌声が響き渡る
+PRINTFORMW 但是、没有人能阻止他们了。因为反抗他们的人、全部都被毁灭了……
+;TranslatedMark だが、それを止める者はいない。彼らに刃向かう者は全て、滅ぼされてしまったのだから……
+;(外来人拡張パッチ)MASTERが堕ちていない場合スキップ
+IF CFLAG:MASTER:所属 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_外来人) && IS_FEMALE(MASTER) && GETBIT(TALENT:MASTER:特殊勢力陥落系, 特殊勢力_外来人)
+	PRINTFORMW 
+	PRINTFORMW 在研究用的奴隶们中、%ANAME(MASTER)%的身姿排列其中
+	;TranslatedMark 研究用奴隷たちのなかに、%ANAME(MASTER)%の姿もあった
+	PRINTFORMW 身为与研究所合作的模范奴隶、有着比其他人更好的待遇
+	;TranslatedMark 研究に協力的な模範的奴隷ということで、比較的待遇は良い
+	PRINTFORMW ……虽说是奴隶、但却有这种说法
+	;TranslatedMark ……奴隷にしては、という但し書きつきであるが
+	PRINTFORML 今天对她所要求的是、与异种生物的交配实验
+	;TranslatedMark 今日の彼女に課せられたのは、異種生物との交配実験だ
+	PRINTFORMW 特殊的排卵诱发剂已经预先从下腹部被注射到子宫中了%ANAME(MASTER)%对怀孕的期待使自己的腹部传来淫疼
+	;TranslatedMark 特殊な排卵誘発剤をあらかじめ下腹に子宮に注射されている%ANAME(MASTER)%は、妊娠の期待に下腹を疼かせている
+	PRINTFORML 她刚一进入实验室、一只大型狗就跑来将她压在身下、开始侵犯
+	;TranslatedMark 彼女が実験室に入るなり、大型犬が彼女を組み伏せ、犯し始める
+	PRINTFORMW %ANAME(MASTER)%发出了浪荡的娇声、膣穴重复地接收着被放出的精液
+	;TranslatedMark %ANAME(MASTER)%は、たまらないといった声をあげ、何度も放たれる精液を肉穴で受け止めていく
+	PRINTFORMW 科学家们面无表情地眺望着那里、偶尔低下头书写着记录……
+	;TranslatedMark 科学者たちは、それを無感動に眺め、時折記録をとっていた……
+	CALL FUCK_SP(MASTER, "欲望, 性交, 奉仕, 精愛, Ｖ, Ａ, Ｍ, 輪姦, 獣姦, Ｖ性交, Ａ性交", "処女喪失, 膣内射精, Ａ処女喪失, 接吻喪失, 腸内射精, 口内射精", GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_外来人), GET_SPERM_ID("犬"), "犬のペニス", "犬", "", "強姦")
+ENDIF
+PRINTFORML 
+PRINTFORMW 在已经没有救世主的地方，只有女性的痛苦地娇喘不断回响着……
+;TranslatedMark もはや救世主などない地に、ただただ女の嬌声が響き渡り続ける……

@@ -1,0 +1,96 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K22_FALL_RATE(対象)
+#DIM 対象
+RETURN 1000
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K22_FALL_DECISION(対象)
+#DIM 対象
+
+SIF KDVAR:対象:紫_強力な協力 != 2
+	RETURN 0
+
+SIF CFLAG:対象:外交調教中 == 0
+	RETURN 0
+
+SIF !TALENT:対象:服従
+	RETURN 0
+
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K22_FALL_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K22_FALL(対象)
+#DIM 対象
+PRINTFORMW 深夜……
+PRINTFORML 在约定的时间、%ANAME(対象)%来拜访了
+PRINTFORMW 平时%PRONOUN(対象)%不可能穿着的堪称淫荡的服装、现在正在%STR_BODY("身体", 対象)%身上装饰着。
+PRINTFORML 以自己的身体作为代价代替结盟、%ANAME(対象)%做好了充分的准备
+PRINTFORMW 那个成果已经显现出来了吧……
+PRINTFORMW 「今天、我有话想要对%ANAME(MASTER)%说」
+PRINTFORML 像平时一样%ANAME(MASTER)%向%ANAME(対象)%の%STR_BODY("胸：愛撫", 対象)%伸出手来、%PRONOUN(対象)%神情保持不变，自然地说着话
+PRINTFORMW 一直说着、%ANAME(対象)%嬉笑着谈着话
+PRINTFORMW 「起初我只是打算稍微转换一下心情」
+PRINTFORMW 「如果只是稍微玩一玩，势力就会富裕的话、需要钱就来找你似乎也不错」
+PRINTFORMW %STR_BODY("乳首：欲情", 対象)%在薄的几乎透明的布上揉动着、%ANAME(対象)%呼出甜热的吐息
+PRINTFORMW 脸颊变得通红，瞳孔里荡漾着水光
+PRINTFORMW 「但是，这是错误的」
+PRINTFORMW 「%ANAME(MASTER)%绝对不会允许\@ IS_MALE(MASTER) ? 男 # 女 \@这样天真的想法」
+PRINTFORMW 「八云紫会屈服，这种情况之前的我听了会怎么想呢？」
+PRINTFORMW 虽然是讽刺的口气，但声音很明显，依旧是那种带有热气的诱惑的口吻。
+PRINTFORML 她的双腿相互摩擦、%ANAME(MASTER)%自然是注意到了这一点。
+PRINTFORMW 一边说着话，一边回想到现在为止所接受的调教吧。
+PRINTFORML 不仅仅是沉浸在空想中，也要让自己尝到快乐
+PRINTFORMW 这么想的%ANAME(MASTER)%，在%ANAME(対象)%の两腿之间、把手伸进衣服里去。%ANAME(対象)%并没有什么反抗的意愿。
+PRINTFORML 本来应该保护下半身的内衣、并没有按照%ANAME(MASTER)%的吩咐穿着。
+PRINTFORML 暴露在外的%STR_BODY("膣：感度：媚薬", 対象)% 被粘稠的粘糊糊地液体浸湿，触碰就会发出淫荡的声音。
+PRINTFORMW 这是刚才在空气中传来的的雌性气味的来源
+PRINTFORMW 「啊……」
+PRINTFORML 触及自己最重要的部分，%ANAME(対象)%脸上浮现出雌性发情时特有的表情。
+PRINTFORMW 像其展示着手上%PRONOUN(対象)%的汁液、从艳丽的嘴唇中%ANAME(対象)%说出了服从的话语。
+PRINTFORMW 「请使用我、%NAME_FORMAL(対象)%好好的疼爱我、主人様……♥」
+PRINTFORMW 推倒了因被虐行为而颤抖的%ANAME(対象)%按照你所希望的那样疼爱她……
+
+CALL COLOR_PRINTW(@"%ANAME(対象)%発誓效忠了", カラー_注意)
+CALL CHANGE_RELATION_C_TO_C(CFLAG:対象:所属, CFLAG:MASTER:所属, 1500, -1500)
+
+CVARSET CFLAG, 6, 0
+
+TALENT:対象:隷属 = 1
+TALENT:対象:チョロイン = 1
+TALENT:対象:倒錯的 = 1
+TALENT:対象:自尊心高 = 0
+TALENT:対象:孤高 = 0
+TALENT:対象:難以越過的底線 = 0
+CFLAG:対象:従属度 += 10000
+CFLAG:対象:依存度 += 3000
+
+CFLAG:対象:調教参加フラグ = 1
+CFLAG:対象:調教中帰らない = 1
+CFLAG:対象:強制友好化 = 1
+BASE:対象:体力 = MAXBASE:対象:体力
+BASE:対象:気力 = MAXBASE:対象:気力
+FLAG:ターンエンド調教 = 1
+DAILY_CANCEL = 1
+KDVAR:対象:紫_強力な協力 = -1
+RETURN 1

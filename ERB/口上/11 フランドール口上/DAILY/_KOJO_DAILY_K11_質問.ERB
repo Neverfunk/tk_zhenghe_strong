@@ -1,0 +1,132 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K11_QUESTION_RATE(対象)
+#DIM 対象
+RETURN 30
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K11_QUESTION_DECISION(対象)
+#DIM 対象
+#DIM レミリア
+レミリア = NAME_TO_CHARA("レミリア")
+
+SIF KDVAR:対象:フランドール_質問
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1) && CHECK_KOJO_DAILY_HAPPEN(レミリア)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K11_QUESTION_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;------------------------------------
+;デイリーイベント本体
+;創意工夫
+;発生判定に失敗した場合（イベントが発生しない場合）はマイナス１を返すこと
+;-----------------------------------
+@KOJO_DAILY_K11_QUESTION(対象)
+#DIM 対象
+#DIM レミリア
+
+レミリア = NAME_TO_CHARA("レミリア")
+
+KDVAR:対象:フランドール_質問 = 1
+
+
+PRINTFORMW 「吶吶、%ANAME(MASTER)%」
+;TranslatedMark 「ねぇ、%ANAME(MASTER)%」
+PRINTFORMW 和%ANAME(対象)%遊玩的时候，突然被问到
+;TranslatedMark %ANAME(対象)%と遊んでいると、ふいに尋ねられた
+PRINTFORMW 「那傢伙和%ANAME(MASTER)%、誰比較強呢？」
+;TranslatedMark 「あいつと%ANAME(MASTER)%と、どっちが強いの？」
+PRINTFORML ……那傢伙大概是指%ANAME(レミリア)%吧
+;TranslatedMark ……あいつというのは、%ANAME(レミリア)%のことだろう
+PRINTFORML %ANAME(対象)%的確很強、而%PRONOUN(レミリア)%亦是実力強大的吸血鬼
+;TranslatedMark %ANAME(対象)%も大概だが、%PRONOUN(レミリア)%もずいぶん強力な吸血鬼だ
+PRINTFORML 但強也可以包含很多方面的意義、那麼……
+;TranslatedMark 強いといっても色々あろうが、さて……
+
+CALL ASK_MULTI("自己吧", @"%ANAME(レミリア)%吧", "不知道啊")
+;TranslatedMark "自分かな", @"%ANAME(レミリア)%かな", "わからないな"
+
+IF GROUPMATCH(RESULT, 1, 2)
+	PRINTFORMW 「哼ー嗯」
+	;TranslatedMark 「ふーん」
+	PRINTFORMW 看起来失去興趣的樣子
+	;TranslatedMark あまり興味を引かなかったようだ
+	PRINTFORMW 沒有再継續這個話題了……
+	;TranslatedMark 話題はそれ以上続かなかった……
+	RETURN 1
+ENDIF
+
+PRINTFORMW 「誒、真的嗎？」
+;TranslatedMark 「……大風呂敷を広げているのかな？」
+PRINTFORMW 「那麼……我們之間誰比較強、用弾幕遊戲来決定吧！」
+;TranslatedMark 「なら……私とどっちが強いか、弾幕ごっこしようよ」
+PRINTFORMW 説完這句後%ANAME(対象)%放出了認真的弾幕
+;TranslatedMark 言うなり%ANAME(対象)%は、明らかに本気の弾幕をぶっ放してきた
+PRINTFORMW 要是不認真応付的話就会受傷了……！
+;TranslatedMark こっちも真面目にやらないと怪我をする……！
+
+IF ABL:MASTER:武闘 + ABL:MASTER:知略 / 3 < ABL:対象:武闘
+	PRINTFORMW 「嗯ー、沒什麼大不了呀」
+	;TranslatedMark 「うーん、大したことなかったや」
+	PRINTFORMW 「這樣的話、大概還是那傢伙比較強吧？」
+	;TranslatedMark 「これなら、あいつの方が強いんじゃないかな？」
+	PRINTFORML ……輸了
+	;TranslatedMark ……負けてしまった
+	PRINTFORML 不愧是吸血鬼、強得不得了
+	;TranslatedMark 流石に吸血鬼、むちゃくちゃな強さだった
+	PRINTFORMW 無論如何、還是先治療一下吧……
+	;TranslatedMark とりあえず、怪我を治療することにした……
+	CALL ADD_COOLTIME(MASTER, 3)
+	RETURN 1
+ENDIF
+
+PRINTFORMW 「嗯ー……被干掉了」
+;TranslatedMark 「うーん……やられちゃった」
+PRINTFORMW 被嚇到了……
+;TranslatedMark ひやひやさせられた……
+PRINTFORML 但這種単純只靠力量的弾幕還是有辦法破解的
+;TranslatedMark 力まかせな単純な弾幕だからなんとかなった
+PRINTFORMW 如果戦闘時間再長一点的話説不定会很危險……
+;TranslatedMark もう少し理詰めで来られていたら危なかったかもしれない……
+PRINTFORMW 「的確、比那傢伙強得多了ー」
+;TranslatedMark 「確かに、あいつよりも強いみたいだね」
+PRINTFORMW 「因為我比那傢伙強、所以打贏了我的你絶対比那傢伙強」
+;TranslatedMark 「私はあいつより強い。その私に勝つんだからそうもなるか」
+PRINTFORMW 「嗯ー、我也要加油呢ー」
+;TranslatedMark 「……癪だな。もっと強くならないといけないかな」
+PRINTFORMW 雖然過程簡直是災難、但也令%ANAME(対象)%提起干勁了
+;TranslatedMark とんだ災難だったが、%ANAME(対象)%はやる気をだしたようだ
+PRINTFORMW 算是不錯的結果吧……
+;TranslatedMark ならよしとするか……
+
+CALL COLOR_PRINTW(@"%ANAME(対象)%的能力上升了", カラー_注意)
+;TranslatedMark @"%ANAME(対象)%の能力が上昇しました", カラー_注意
+
+ABL:対象:武闘 += 3
+ABL:対象:知略 += 3
+CFLAG:対象:好感度 += 100
+
+CALL SKILL_FORGET_BY_NAME(対象, スキル_ジャンル_PERSONAL, "狂气")
+SIF RESULT
+	CALL COLOR_PRINTW(@"%ANAME(対象)%遺忘了技能「狂气」！", カラー_注意)
+	;TranslatedMark @"%ANAME(対象)%はスキル「狂気」を忘れた！", カラー_注意
+
+CALL SKILL_LEARN_BY_NAME(対象, スキル_ジャンル_PERSONAL, 11, "莱瓦汀")
+SIF RESULT
+	CALL COLOR_PRINTW(@"%ANAME(対象)%学会了技能「莱瓦汀」", カラー_注意)
+	;TranslatedMark @"%ANAME(対象)%はスキル「レーヴァテイン」を習得した！", カラー_注意
+
+RETURN 1

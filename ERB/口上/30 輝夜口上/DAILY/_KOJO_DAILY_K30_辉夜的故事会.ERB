@@ -1,0 +1,240 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K30_OLDTALE_RATE(対象)
+#DIM 対象
+RETURN 100 + (KDVAR:対象:輝夜_昔話 > 0) * 50
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K30_OLDTALE_DECISION(対象)
+#DIM 対象
+
+;終わってたら発生しない
+SIF KDVAR:対象:輝夜_昔話 == -1
+	RETURN 0
+
+;恋慕系で、合意がなければだめ
+SIF !(IS_LOVER(対象) && TALENT:対象:合意)
+	RETURN 0
+
+;ARG:0が口上デイリーイベントを実施できるかの簡易チェック関数
+;ARG:1 0 MASTERと別勢力である 1 MASTERと同一勢力である　-1 どちらでもよい
+;ARG:2 0 捕虜でない 1 捕虜である -1 どちらでもよい
+;ARG:3 0 面識がない 1 面識がある -1 どちらでもよい
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K30_OLDTALE_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K30_OLDTALE(対象)
+#DIM 対象
+
+
+SELECTCASE KDVAR:対象:輝夜_昔話
+	CASE 0
+		PRINTFORMW 「啊，是%ANAME(MASTER)%大人嘛」
+		PRINTFORML 深夜，刚刚处理完今日的事务的%ANAME(MASTER)%发现%ANAME(対象)%在随意的翻阅着一本书
+		PRINTFORMW 「这个啊，是用须臾的力量看见的有可能存在的幻想乡哦」
+		PRINTFORMW 「想听听上面的故事嘛」
+		PRINTFORML 此时的%ANAME(対象)%，让人总感觉有些不真实感
+		PRINTFORMW 怎么办……
+		PRINTFORML 
+		CALL ASK_YN("是什么样的故事呢？会听的哦", "今日就算了")
+		IF RESULT == 1
+			PRINTFORML 「是吗?那太遗憾了。嗯，如果你喜欢的话，下次再说吧」
+			PRINTFORMW %ANAME(MASTER)%向%ANAME(対象)%揮手道別
+		ELSE
+			PRINTFORMW 「呵呵，那么，就一个一个听下去吧」
+			PRINTFORML 
+			PRINTFORMW %ANAME(対象)%开始缓缓讲述她曾经观测到的剧情
+			PRINTFORML “幻想乡就要毁灭了，而我们，无能为力”
+			PRINTFORMW 白玉楼之主与妖怪贤者在那个夏夜，把这件事，告知了永远亭
+			PRINTFORML “准确的说，是幻想乡在接下来一段时间里是毁灭的”
+			PRINTFORML “直到她们回到那个时代，让我们再次出现”
+			PRINTFORMW “那两个少女，要重置轮回了吗？”公主殿下这么回复道
+			PRINTFORML 是的，所以，我们希望，你们能送她们回去
+			PRINTFORMW 只有这样，幻想乡才能再次建立
+			PRINTFORML ……
+			PRINTFORML ……
+			PRINTFORML ……
+			PRINTFORML 这个世界就讲到这里吧，毕竟，秘封组和不死组在现世的剧情，可不能都告诉你
+			PRINTFORMW 公主殿下轻轻合上书
+			PRINTFORML 下次%ANAME(MASTER)%大人，还会再来的吧，要不要，猜猜下次是什么世界呢？
+			PRINTFORML 公主殿下一声轻笑，便消失不见了
+			CFLAG:対象:好感度 += 200
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了200", カラー_シアン)
+			KDVAR:対象:輝夜_昔話 = 1
+		ENDIF
+	;KDVAR:対象:輝夜_昔話 = が1でイベント発生
+	CASE 1
+		PRINTFORML 「%ANAME(MASTER)%大人，今天也来听故事吗？」
+		PRINTFORMW 又是一个深夜、在外面散步时看见了%ANAME(対象)%屋子里的灯光
+		PRINTFORML 「还是说，只是来看看？」
+		PRINTFORMW 怎么办……
+		PRINTFORML 
+		CALL ASK_YN("我想听", "今日就算了")
+		IF RESULT == 1
+			PRINTFORML 「是吗?那太遗憾了。嗯，如果你喜欢的话，下次再说吧」
+			PRINTFORMW %ANAME(MASTER)%向%ANAME(対象)%揮手道別
+		ELSE
+			PRINTFORMW 「那麼、今日就换个幻想乡缘起吧」
+			PRINTFORML 
+			PRINTFORMW %ANAME(対象)%说起了另一个幻想乡的起源
+			PRINTFORML “我们都知道，世界在没有建立的时候，是蛮荒的”
+			PRINTFORMW “但是，即使是这样的世界，也有一些伟大的存在，能够自由的活动”
+			PRINTFORML “拉普拉斯妖八云紫”“伪全知者蓬莱山辉夜”
+			PRINTFORML “上层叙事者纯狐”“命运观测者蕾米莉亚·斯卡雷特”
+			PRINTFORMW 这个世界的前因后果，过去未来，都在这些人的手里被肆意玩弄
+			PRINTFORML 「哎呀，提到那些存在的事情，被她们发现了呢」
+			PRINTFORML 得想个办法糊弄过去，咱就先走啦
+			PRINTFORML
+			PRINTFORMW 「下次再来听咱讲其他世界的幻想乡吧」
+			PRINTFORML 公主殿下这么说着，消失不见了
+			CFLAG:対象:好感度 += 200
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了200", カラー_シアン)
+			KDVAR:対象:輝夜_昔話 = 2
+		ENDIF
+	;KDVAR:対象:輝夜_昔話 = が2でイベント発生
+	CASE 2
+		PRINTFORML 「%ANAME(MASTER)%大人，又来听故事了嘛」
+		PRINTFORMW 晚上、在外面散步時見到%ANAME(対象)%在赏月。旁边空着一人的座位…
+		PRINTFORMW 怎么办……
+		PRINTFORML 
+		CALL ASK_YN("我想听", "今日就算了")
+		IF RESULT == 1
+			PRINTFORML 「是吗?那太遗憾了。嗯，如果你喜欢的话，下次再说吧」
+			PRINTFORMW %ANAME(MASTER)%向%ANAME(対象)%挥手告别
+		ELSE
+			PRINTFORMW 「嗯，%ANAME(MASTER)%大人。上次我们好像谈论到了四个不可知的存在吧」
+			PRINTFORML 
+			PRINTFORMW “今天就换一个世界，讲讲另一个幻想乡的四位吧”
+			PRINTFORML “在很久很久以前，世界被古龙与大树占领”
+			PRINTFORMW “直到有一天，在一棵树的底端出现了彷徨的灵魂”
+			PRINTFORML  “被灵魂蛊惑的存在，开始了反抗”
+			PRINTFORML “最先被灵魂找上的存在们，有着自己的力量”
+			PRINTFORMW “间隙的贤者八云紫”“魔神的女儿爱丽丝玛格特罗伊德”
+			PRINTFORML “最初的不死者蓬莱山辉夜”“还有，无人知晓的火之灰烬”
+			PRINTFORMW “八云紫让军队神出鬼没”“爱丽丝让军队获得了魔法”“不死者辉夜让他们暂时共享了不死的力量”
+			PRINTFORML “啊，还有那背叛的灵魂，西行寺幽幽子，带来了取得胜利的方法”
+			PRINTFORML 后来？后来谁知道呢，反正幻想乡是建立了。今天的故事，就讲到这里吧
+			PRINTFORMW 「%ANAME(MASTER)%大人，下次再来听故事吧」
+			CFLAG:対象:好感度 += 200
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了200", カラー_シアン)
+			KDVAR:対象:輝夜_昔話 = 3
+		ENDIF
+	;KDVAR:対象:輝夜_昔話 = が3でイベント発生
+	CASE 3
+		PRINTFORML 「阿拉，是%ANAME(MASTER)%大人嘛」
+		PRINTFORMW 晚上、在外面散步時见到了%ANAME(対象)%在喝月见酒。旁边空着一个人的座位…
+		PRINTFORML 「想听咱讲故事吗？」
+		PRINTFORMW 怎么办……
+		PRINTFORML 
+		CALL ASK_YN("我想听", "今日就算了")
+		IF RESULT == 1
+			PRINTFORML 「是吗?那太遗憾了。嗯，如果你喜欢的话，下次再说吧」
+			PRINTFORMW %ANAME(MASTER)%向%ANAME(対象)%挥手道別
+		ELSE
+			PRINTFORMW 「嗯，让咱想想，这次就给%ANAME(MASTER)%大人讲个和上一次的故事很像的世界吧」
+			PRINTFORML 
+			PRINTFORMW “火已渐熄，然位不见王影”
+			PRINTFORML “当传承火焰熄灭之时，钟声将响彻四周，进而唤醒棺木中的古老薪王们。”
+			PRINTFORMW “被间隙吞噬的神明——八云紫”“命运的监视者——芙兰不死队”
+			PRINTFORMW “以及鬼族的孤独王者——伊吹萃香”
+			PRINTFORML ・
+			PRINTFORML ・
+			PRINTFORMW “不过啊，王者们一定会舍弃王位吧，而最初的灰烬将卷土重来.....”
+			PRINTFORML “那是无名，成不了事，且被诅咒的不死人。”
+			PRINTFORMW “但这因为如此，灰烬才会如此渴求余火吧。”
+			PRINTFORML “什么？这个世界与之前的世界有什么联系吗？”
+			PRINTFORML
+			PRINTFORML “嘛，这就见仁见智了，或许%ANAME(MASTER)%大人背后的那位大人知道些什么呢？”
+			PRINTFORMW 「这本书也要读完了啊。下次的故事、就是最后了。好好期待吧♪」
+			CFLAG:対象:好感度 += 200
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了200", カラー_シアン)
+			KDVAR:対象:輝夜_昔話 = 4
+		ENDIF
+	;KDVAR:対象:輝夜_昔話 = が4でイベント発生
+	CASE 4
+		PRINTFORML 「啊、%ANAME(MASTER)%」
+		PRINTFORMW 晚上、在外面散步时见到%ANAME(対象)%在喝把玩蓬莱玉枝。旁边空着一人的座位…
+		PRINTFORML 「又來聽我說故事了嗎？」
+		PRINTFORMW 「今回就是最後了。要聽嗎？」
+		PRINTFORMW 怎麼辦……
+		PRINTFORML 
+		CALL ASK_YN("我想听", "今日就算了")
+		IF RESULT == 1
+			PRINTFORML 「是吗?那太遗憾了。嗯，如果你希望的话，下次再说吧」
+			PRINTFORMW %ANAME(MASTER)%向%ANAME(対象)%挥手道别
+		ELSE
+			PRINTFORMW 「那么，请倾听我最后的故事吧。%ANAME(MASTER)%大人」
+			PRINTFORML 
+			PRINTFORMW “在，距离现在的百兆年后”
+			PRINTFORML “全宇宙的恒星将会停止行动，宇宙，将会迎来黑暗时代”
+			PRINTFORMW “然后，又是三涧年”
+			PRINTFORML “质子崩坏发生，宇宙中存在的所有物全部毁减”
+			PRINTFORMW “即使如此，宇宙也不会毁灭”
+			PRINTFORMW “剩下的蓬莱人将会在22个无量大数年中，度过所谓的永远”
+			PRINTFORML ・
+			PRINTFORML ・
+			PRINTFORMW ・
+			PRINTFORMW 「这就是妾身，永远与须臾的罪人哦」
+			PRINTFORML 「至于之前的那些故事，是用须臾的力量看到的具有可能的未来呢？」
+			PRINTFORMW “亦或是咱以及经历过的事实呢？”
+			PRINTFORMW 「fufu，这种事情，并不是很重要呢，只是」
+			PRINTFORML
+			PRINTFORML 「有个事情，想问%ANAME(MASTER)%大人你呢。」
+			PRINTFORMW
+			PRINTFORML 「%ANAME(MASTER)%大人你，是怎么看待不死者的罪行的呢」
+			PRINTFORMW 「所谓永恒的生命，无限的力量，都是因为罪孽本身换来的」
+			PRINTFORML 「那么，%ANAME(MASTER)%大人，你是怎么样看待的呢」
+			PRINTFORML 我的意見是……
+			PRINTFORMW 
+			CALL ASK_YN("既然是整个幻想乡都无法承受的罪行，就和愿意承担的人，一起永远承担吧", "力量没有对错，将这种力量尽情的使用吧")
+			IF RESULT == 0
+				PRINTFORML 「……是吗?果然是你啊，%ANAME(MASTER)%。大人」
+				PRINTFORMW 「…嗯！那么，要和妾身一起承担这永远之罪哦，%ANAME(MASTER)%大人」
+				CALL SKILL_LEARN_BY_NAME(対象, スキル_ジャンル_PERSONAL, NO:対象, "永遠与須臾的罪人")
+				SIF RESULT
+					CALL COLOR_PRINTW(@"%ANAME(対象)%习得了技能＜永遠と須臾の罪人＞", カラー_注意)
+				CALL PRINT_ADD_EXP(対象, "武闘経験値", 500, 1)
+				CALL PRINT_ADD_EXP(対象, "防衛経験値", 400, 1)
+				CALL PRINT_ADD_EXP(対象, "知略経験値", 100, 1)
+				CALL TRAIN_AUTO_ABLUP(対象)
+			ELSE
+				PRINTFORML 「……是吗?果然是你啊，%ANAME(MASTER)%。大人」
+				PRINTFORMW 「那么，妾身就将这股力量使用出来吧」
+				PRINTFORML 「总之，今后也请多多关照，%ANAME(MASTER)%大人」
+				PRINTFORML 「我很期待和你的羁绊会变成什么样♪」
+				CALL SKILL_LEARN_BY_NAME(対象, スキル_ジャンル_TROOP, NO:対象, "艾哲红石")
+				SIF RESULT
+					CALL COLOR_PRINTW(@"%ANAME(対象)%习得了技能＜艾哲红石＞", カラー_注意)
+				CALL PRINT_ADD_EXP(対象, "武闘経験値", 400, 1)
+				CALL PRINT_ADD_EXP(対象, "防衛経験値", 300, 1)
+				CALL PRINT_ADD_EXP(対象, "知略経験値", 500, 1)
+				CALL TRAIN_AUTO_ABLUP(対象)
+			ENDIF
+			PRINTFORML 
+			KDVAR:対象:輝夜_昔話 = -1
+			CFLAG:対象:好感度 += 500
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了500", カラー_シアン)
+		ENDIF
+ENDSELECT
+
+RETURN 1

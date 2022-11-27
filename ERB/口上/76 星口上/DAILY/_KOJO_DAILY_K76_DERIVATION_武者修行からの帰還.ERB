@@ -1,0 +1,46 @@
+﻿;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@KOJO_DAILY_K76_DERIVATION_KNIGHT_ERRANT_DISABLE(対象)
+#DIM 対象
+RETURN KOJO_DAILY_GET_DISABLE_CONFIG(対象, "KNIGHT_ERRANT")
+
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K76_DERIVATION_KNIGHT_ERRANT_DECISION(対象)
+#DIM 対象
+
+SIF KDVAR:対象:星_武者修行 != 1
+	RETURN 0
+
+KDVAR:対象:星_武者修行残りターン --
+
+SIF KDVAR:対象:星_武者修行残りターン
+	RETURN 0
+
+RETURN 1
+
+
+;---------------------
+;本体
+;---------------------
+@KOJO_DAILY_K76_DERIVATION_KNIGHT_ERRANT(対象)
+#DIM 対象
+PRINTFORMW %ANAME(対象)%從武者修行中回來了……
+PRINTFORMW 從姿態之中、就能感覺到強得像是變了個人一樣
+PRINTFORMW 看來修行成果、深深地刻進%PRONOUN(対象)%的血肉裏……
+PRINTFORMW 「%ANAME(MASTER)%、能夠給我那麼貴重的機會、真是非常感謝你」
+PRINTFORMW 「作為為你帶來困擾的補償、我會好好為大家発揮作用的。請盡情，使喚我吧」
+CALL COLOR_PRINTW(@"%ANAME(対象)%的武闘,防衛,知略上升了10", カラー_注意)
+CALL COLOR_PRINTW(@"%ANAME(対象)%能夠使用技能「正义之威光」了", カラー_注意)
+ABL:対象:武闘 += 10
+ABL:対象:防衛 += 10
+ABL:対象:知略 += 10
+CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属)
+CALL SKILL_LEARN_BY_NAME(対象, スキル_ジャンル_PERSONAL, NO:対象, "正义之威光")
+
+RETURN 1
+

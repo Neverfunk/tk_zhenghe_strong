@@ -1,0 +1,69 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_DIG_A_BEER_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_DIG_A_BEER_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_DIG_A_BEER(対象)
+#DIM 対象
+
+PRINTFORML 在森林中散步的時候、在草叢的深処発現了一個不知道在挖着什麼的男人
+PRINTFORML 似乎想要挖掘出什麼
+PRINTFORMLC 很可疑……
+PRINTL
+CALL ASK_YN("打招呼", "不管")
+
+IF RESULT == 1
+	PRINTFORML 好像不是在干什麼壞事的樣子
+	PRINTFORMW 決定放任不理、離開這裡
+	RETURN 1
+ENDIF
+
+PRINTFORML 聽到声音的男人嚇了一跳
+PRINTFORML 問道在干什麼、他尷尬的笑了笑
+PRINTFORML 好像是看到鬼在這裡藏了些東西
+PRINTFORML 聽説鬼的酒是想象不到的美味……
+
+PRINTL
+CALL ASK_MULTI("幇忙", "独佔", "不管")
+
+IF RESULT == 2
+	PRINTFORML 既然不是在做什麼壞事就無所謂了
+	PRINTFORMW 離開了那個地方
+ELSEIF RESULT == 1
+	PRINTFORML 那麼美味的酒一定要好好品嘗
+	PRINTFORML 当然要独佔
+	PRINTFORML %ANAME(対象)%直接斬殺了眼前的男人
+	PRINTFORML 然後繼續在男人挖掘的地方挖掘、找到了酒瓶
+	PRINTFORML 裡面看起来就是普通的酒
+	PRINTFORML 試着喝了一口
+	PRINTFORML …超美味！
+	PRINTFORML 和男人説的一樣非常好喝
+	PRINTFORMW %ANAME(対象)%把酒瓶帯了回去、盡情享受著
+	CALL PRINT_ADD_EXP(対象, "肝臓経験値", RAND(50, 100), 1)
+ELSE
+	PRINTFORML 那樣的事我也来幇忙吧
+	PRINTFORML %ANAME(対象)%和男人兩個人一起往下挖着、不久就看到了酒瓶
+	PRINTFORML 裡面看起来就是普通的酒
+	PRINTFORML 試着喝了一口
+	PRINTFORML …超美味！
+	PRINTFORML 和男人説的一樣非常好喝
+	PRINTFORMW 兩人把酒平分了
+	ITEM:果実酒 += 3
+	CALL COLOR_PRINTW("獲得了3個果実酒", カラー_注意)
+ENDIF
+
+
+RETURN 1

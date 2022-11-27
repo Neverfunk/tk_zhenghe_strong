@@ -1,0 +1,115 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K45_TRICK_RATE(対象)
+#DIM 対象
+RETURN 60
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K45_TRICK_DECISION(対象)
+#DIM 対象
+#DIM スター
+#DIM ルナ
+#DIM 判定値
+ルナ = NAME_TO_CHARA("ルナチャイルド")
+スター = NAME_TO_CHARA("スターサファイア")
+
+SIF GROUPMATCH(MASTER, スター, ルナ, NAME_TO_CHARA("大妖精"), NAME_TO_CHARA("チルノ"), NAME_TO_CHARA("クラウンピース"))
+	RETURN 0
+
+SIF KDVAR:対象:サニー_いたずらに命をかけて == -1
+	RETURN 0
+
+SIF !ALLSAMES(CFLAG:対象:所属, CFLAG:スター:所属, CFLAG:ルナ:所属)
+	RETURN 0
+
+;上で同一勢力判定してるのでこれでいい
+SIF GROUPMATCH(GET_COUNTRY_BOSS(CFLAG:対象:所属), 対象,　スター, ルナ)
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 0, 0) && CHECK_KOJO_DAILY_HAPPEN(スター, 0, 0) && CHECK_KOJO_DAILY_HAPPEN(ルナ, 0, 0)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K45_TRICK_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K45_TRICK(対象)
+#DIM 対象
+#DIM スター
+#DIM ルナ
+#DIM 判定値
+ルナ = NAME_TO_CHARA("ルナチャイルド")
+スター = NAME_TO_CHARA("スターサファイア")
+
+判定値 = LIMIT(ABL:MASTER:知略 - (ABL:対象:知略 + ABL:ルナ:知略 + ABL:スター:知略), 20, 100)
+
+判定値 += KDVAR:対象:サニー_いたずらに命をかけて * 8
+
+
+IF KDVAR:対象:サニー_いたずらに命をかけて == 0 || 判定値 < RAND:100
+	CALL COLOR_PRINTW(@"什麼情況？？？？", カラー_警告)
+	PRINTFORML 明明走在熟悉的道路上、卻不知不覚間就失去方向了
+	PRINTFORML 当注意到了的時候、已経找不到回去的路了
+	PRINTFORMW 換句話説、迷路了……
+	PRINTFORMW 結果、返回據点時已経是黄昏了
+	PRINTFORMW 「Yeah、大成功！」
+	PRINTFORMW 「真的沒有発現我們呢ー」
+	PRINTFORMW 「想要発現我們才沒有那麼容易」
+	CALL ADD_COOLTIME(MASTER, 1)
+KDVAR:対象:サニー_いたずらに命をかけて　++
+	RETURN 1
+ENDIF
+
+PRINTFORML 明明走在熟悉的道路上、卻不知不覚間就失去方向了……
+PRINTFORML 但是%ANAME(MASTER)%知道這是妖精的悪作劇！
+PRINTFORMW 捕捉到三隻妖精！
+PRINTFORMW 「哇啊被発現了！　等等%ANAME(ルナ)%、有好好消除我們的気息嗎！？」
+PRINTFORMW 「%ANAME(対象)%才是！　　有好好控制光線隠藏我們的身影嗎！？」
+PRINTFORMW 「……」
+PRINTFORMW 「%ANAME(スター)%！　快幇我們逃跑呀！」
+PRINTFORML ……根據她們的対話、她們貌似有控制光以及声音相関的能力
+PRINTFORMW 雖然以妖精的頭腦頂多只会拿来用作悪作劇、但如果被聰明的人利用的話、多多少少会用来做不好的事情
+PRINTFORMW 危険だ。要怎麼辦……
+PRINTFORML
+CALL ASK_YN("嘛、快走吧", "打入大牢")
+
+IF RESULT == 0
+	PRINTFORMW 「誒、可以嗎？　太好了！」
+	PRINTFORMW 「謝謝你！　這個恩情……我們不会忘記的！」
+	PRINTFORMW 三隻妖精向遠処飛去……
+	CFLAG:対象:好感度 += 100
+	CFLAG:スター:好感度 += 100
+	CFLAG:ルナ:好感度 += 100
+	IF IS_COUNTRY(CFLAG:対象:所属)
+		CALL COLOR_PRINTW(@"与三隻妖精的所属勢力、%ANAME(GET_COUNTRY_BOSS(CFLAG:対象:所属))%之間的関係改善了", カラー_注意)
+		CALL CHANGE_RELATION_C_TO_C(CFLAG:対象:所属, CFLAG:MASTER:所属, 300, -300)
+	ENDIF
+ELSE
+	PRINTFORMW 「誒、放、放過我們吧！　不要ー！」
+	PRINTFORMW 将三隻妖精打入大牢了……
+	CALL CAPTURE(対象, CFLAG:MASTER:所属)
+	CALL CAPTURE(スター, CFLAG:MASTER:所属)
+	CALL CAPTURE(ルナ, CFLAG:MASTER:所属)
+ENDIF
+CFLAG:対象:面識 = 1
+CFLAG:ルナ:面識 = 1
+CFLAG:スター:面識 = 1
+KDVAR:対象:サニー_いたずらに命をかけて = -1
+
+RETURN 1

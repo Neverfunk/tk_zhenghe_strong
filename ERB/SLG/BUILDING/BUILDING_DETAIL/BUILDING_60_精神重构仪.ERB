@@ -1,0 +1,85 @@
+@BUILDING_GET_NAME_精神重构仪()
+    #FUNCTIONS
+    RETURNF "精神重构仪"
+
+@BUILDING_GET_EXP_精神重构仪()
+    #FUNCTIONS
+    RETURNF "回合末己方/被捕的崩坏角色精神恢复。"
+
+@BUILDING_SET_INFO_ID_60()
+    BUILDING_TYPE:建造物_精神重构仪 = 建造物_类型_色情类
+    BUILDING_LEVEL:建造物_精神重构仪 = 建造物_等级_二级建筑
+    BUILDING_LIMIT_NUM:建造物_精神重构仪 = 建造物_数量限制_1
+    BUILDING_LIMIT_UNI:建造物_精神重构仪 = 0
+    BUILDING_COUNTRY_ID:建造物_精神重构仪:特殊勢力_普通势力 = 1
+    BUILDING_COUNTRY_ID:建造物_精神重构仪:特殊勢力_野盗 = 1
+    BUILDING_COUNTRY_ID:建造物_精神重构仪:特殊勢力_ホフゴブリン = 1
+    BUILDING_COUNTRY_ID:建造物_精神重构仪:特殊勢力_外来人 = 1
+    BUILDING_COUNTRY_ID:建造物_精神重构仪:特殊勢力_触手 = 1
+    BUILDING_COUNTRY_ID:建造物_精神重构仪:特殊勢力_自警団 = 1
+    BUILDING_COUNTRY_ID:建造物_精神重构仪:特殊勢力_サキュバス = 1
+    BUILDING_COUNTRY_ID:建造物_精神重构仪:特殊勢力_狂信者 = 1
+    BUILDING_HAVE_SKILL:建造物_精神重构仪 = 1
+    BUILDING_TOHO_REQ_ID:建造物_精神重构仪:0 = 0
+
+@CHECK_BUILDING_FUNCTION_精神重构仪(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    RESULT:1 = TMP_BUILDING_EXIST_FLAG:COUNTRY_ID:建造物_精神重构仪
+    IF RESULT:1 > 0
+        RESULT:0 = 1
+    ENDIF
+    RETURNF RESULT:0
+
+@BUILDING_TEXT_精神重构仪(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    SIF !CHECK_BUILDING_TEXT_OUTPUT(COUNTRY_ID)
+        RETURNF 0
+    BUILDING_TEXT = PRINT_BUILDING_TEXT_TITLE_F()
+    PRINTFORM 因为《精神重构仪》的存在，
+    PRINTFORML %ANAME(GET_COUNTRY_BOSS(COUNTRY_ID))%势力中崩坏的角色精神上升了！
+    RETURNF 1
+
+@BUILDING_SKILL_精神重构仪(COUNTRY_ID)
+    #DIM COUNTRY_ID
+    PRINTFORML 发动后使一个我方角色失去<空虚>或<崩壊>
+    PRINTFORML 冷却时间3回合
+    PRINTFORML 是否发动
+    CALL ASK_YN()
+    IF !RESULT
+        PRINTFORML 发动了《精神重构仪》的技能
+        CALL BUILDING_SKILL_精神重构仪_FUNCTION()
+        IF RESULT
+            BUILDING_SKILL_COLDTIME:COUNTRY_ID:建造物_精神重构仪 = 3
+            PRINTFORMW 完毕
+        ENDIF
+    ENDIF
+
+@BUILDING_SKILL_精神重构仪_FUNCTION()
+    CALL SELECT_CHARA_LIST_ONLY_LOGIC_SEX("精神重构仪", "NONE", "精神重构仪")
+    IF RESULT == -1
+        RETURN 0
+    ENDIF
+    IF TALENT:(LOCAL:5):崩壊
+		PRINTFORMW %ANAME(LOCAL:5)%失去了<崩壊>/<空虚>
+	ELSE
+		PRINTFORMW %ANAME(LOCAL:5)%失去了<空虚>
+	ENDIF
+	RESETCOLOR
+	TALENT:(LOCAL:5):崩壊 = 0
+	TALENT:(LOCAL:5):空虚 = 0
+	CFLAG:(LOCAL:5):崩壊 = MIN(CFLAG:(LOCAL:5):崩壊, 0)
+    RETURN 1
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_精神重构仪(対象)
+#DIM 対象
+IF (CFLAG:対象:所属 == CFLAG:MASTER:所属 || CFLAG:対象:捕虜先 == CFLAG:MASTER:所属) && (TALENT:対象:空虚 || TALENT:対象:崩壊)
+    RETURN 1
+ENDIF
+
+@SELECT_CHARA_LIST_COLOR_LOGIC_精神重构仪(対象)
+#DIM 対象
+SIF TALENT:対象:崩壊
+	RETURN カラー_警告
+RETURN GETDEFCOLOR()

@@ -1,0 +1,234 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K147_DOOR_SELECT_RATE(対象)
+#DIM 対象
+RETURN 50
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K147_DOOR_SELECT_DECISION(対象)
+#DIM 対象
+#DIM 里乃
+
+里乃 = NAME_TO_CHARA("里乃")
+
+;好感度が1000以上
+SIF MAX(CFLAG:対象:好感度) < 1000
+	RETURN 0
+
+	SIF MAX(CFLAG:里乃:好感度) < 1000
+	RETURN 0
+
+;舞ちゃんは女の子です
+SIF !IS_FEMALE(対象)
+	RETURN 0
+
+;二人の欲望が3以上
+SIF !(ABL:対象:欲望 >= 2 && ABL:里乃:欲望 >= 2)
+	RETURN 0
+
+;ARG:0が口上デイリーイベントを実施できるかの簡易チェック関数
+;ARG:1 0 MASTERと別勢力である 1 MASTERと同一勢力である　-1 どちらでもよい
+;ARG:2 0 捕虜でない 1 捕虜である -1 どちらでもよい
+;ARG:3 0 面識がない 1 面識がある -1 どちらでもよい
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K147_DOOR_SELECT_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K147_DOOR_SELECT(対象)
+#DIM 対象
+#DIM 里乃
+
+里乃 = NAME_TO_CHARA("里乃")
+
+IF KDVAR:対象:舞_どっちの扉か == 0
+	PRINTFORMW 夜幕降临时，%ANAME(MASTER)%坐在那里，突然感觉到在背后大约几尺远的距离
+	;TranslatedMark 宵の口、%ANAME(MASTER)%が座っていると突然背後の約数尺ほ程離れた距離に気配を感じた
+	PRINTFORMW 从左右都能听到脚步声之类的东西…
+	;TranslatedMark 何やら足音のようなものが左右から聞こえる…
+	PRINTFORML 正当%ANAME(MASTER)%惊讶的时候，在右侧背后发出声音的主人搭话了
+	;TranslatedMark %ANAME(MASTER)%が訝しんでいると、背後右側から気配の主達が話しかけてきた
+	PRINTFORMW 「喂喂，%ANAME(MASTER)%」
+	;TranslatedMark 「ねえねえ、%ANAME(MASTER)%」
+	PRINTFORML 尚未转头，就从左侧的背后听到了声音
+	;TranslatedMark 間髪入れずに、背後左側からも声が聞こえる
+	PRINTFORML 「%ANAME(MASTER)%，以后要不要和我一起做些开心的事？」
+	;TranslatedMark 「%ANAME(MASTER)%、これから僕と『たのしいこと』しない？」
+	PRINTFORMW 看来声音的主人是舞和里乃
+	;TranslatedMark どうやら声の主は舞と里乃のようだ
+	PRINTFORML 她们交替地交谈…
+	;TranslatedMark 彼女たちは交互に語り掛けてくる…
+	PRINTFORMW 「从右边回头就是和"我"」
+	;TranslatedMark 「右から振り向けば『私』と」
+	PRINTFORML 「从左边回头的话，那就是和"我"」
+	;TranslatedMark 「左側から振り向いてくれたら、『僕』と」
+	PRINTFORMW 「因为和你一起会变得非常舒服呢」
+	;TranslatedMark 「貴方と二人ですっごく気持ちよくなれるからねー」
+	PRINTFORML 「能和你一起做些舒服的事」
+	;TranslatedMark 「君と一緒に気持ちいい事が出来るのさ」
+	PRINTFORML 从背后传来的声音渐渐靠近，变大了…
+	;TranslatedMark 徐々に背後から聞こえる声が近づき大きくなってくる…
+	PRINTFORMW 「%ANAME(MASTER)%不用说出口」
+	;TranslatedMark 「%ANAME(MASTER)%は口に出さなくていいの」
+	PRINTFORML 「只要回头就可以了。这是测试」
+	;TranslatedMark 「振り向いてくれるだけでいいんだ。これはテストさ」
+	PRINTFORMW 「如果是%ANAME(MASTER)%的话，从右边回头比较好吧？」
+	;TranslatedMark 「%ANAME(MASTER)%なら、右から振り向く方がいいよね？」
+	PRINTFORML 「明白，不过，%ANAME(MASTER)%会选择从左回头哟？」
+	;TranslatedMark 「判ってるけど、%ANAME(MASTER)%は左から振り向くよねー？」
+	PRINTFORML 从背后传来的声音渐渐靠近，变大了…
+	;TranslatedMark 徐々に背後から聞こえる声が近づき大きくなってくる…
+	PRINTFORMW 回头好像就是决定了
+	;TranslatedMark 振り向くのは決定事項のようだ
+	PRINTFORML 也许是心理作用吧，心情高涨，应该很累的身体也像刚起床一样精神起来了…
+	;TranslatedMark 心なしか、気分が高揚し、疲れていたはずの身体も寝起きのように元気になっている気がする…
+	PRINTFORML 那么，怎么办呢……
+	;TranslatedMark さて、どうしようか……
+ELSE
+	PRINTFORMW 今晚也有两个人在后面在耳边私语
+	;TranslatedMark 今夜も後ろから耳元で二人が囁いて来る
+	PRINTFORMW 「喂喂♥和我一起快乐吧？」
+	;TranslatedMark 「ねえねえ♥私と『たのしいこと』…しよ？」
+	PRINTFORML 「我和你♥不是想做吗？」
+	;TranslatedMark 「僕といーっぱい♥したいんじゃない？」
+	PRINTFORMW 「从右边回头的话就是"我"和你」
+	;TranslatedMark 「右から振り向けば『私』と貴方で」
+	PRINTFORML 「从左边回头的话就是"我"和你」
+	;TranslatedMark 「左から振り向けば『僕』が君を」
+	PRINTFORMW 「可以享受一夜♥」
+	;TranslatedMark 「一晩中楽しめるよ♥」
+	PRINTFORML 「可以独占！」
+	;TranslatedMark 「独り占め出来るのさ！」
+	PRINTFORML %ANAME(対象)%和%ANAME(里乃)%一边吐着热气，一边通过衣服抚摸着%ANAME(MASTER)%的身体…
+	;TranslatedMark 熱の籠った吐息を掛けながら、%ANAME(対象)%と%ANAME(里乃)%は服の上から%ANAME(MASTER)%の身体をまさぐっている…
+	PRINTFORMW 「右转♥右转♥」
+	;TranslatedMark 「みーぎ♥みーぎ♥」
+	PRINTFORML 「左倾♥左倾♥」
+	;TranslatedMark 「ひだり♥ひだり♥」
+	PRINTFORMW 那么，怎么办呢……
+	;TranslatedMark さて、どうしようか……
+ENDIF
+
+PRINTFORML
+CALL ASK_MULTI_JUDGE("向左转", 1, "向右转", 1, "不转身", 1, "一起抱住", 1)
+IF RESULT == 0
+    PRINTFORMW %ANAME(MASTER)%从左边转了过去
+    ;TranslatedMark %ANAME(MASTER)%は左から振り向いた
+    PRINTFORMW %ANAME(対象)%看起来很高兴…
+    ;TranslatedMark %ANAME(対象)%は嬉しそうにしている…
+    PRINTFORML 另一方面，%ANAME(里乃)%像气球一样鼓起脸颊…
+    ;TranslatedMark 反面、%ANAME(里乃)%は風船のように頬を膨らませている…
+    PRINTFORMW 「呵呵，即使猜对了也很开心呢」
+    ;TranslatedMark 「ふっ、判ってても嬉しいものだね」
+    PRINTFORMW 被%ANAME(対象)%牵着手走向地板
+    ;TranslatedMark %ANAME(対象)%に手を引かれ床へ向かった
+    PRINTFORMW 刚要往床那边走，%ANAME(里乃)%的气息就消失了
+    ;TranslatedMark ベッドの方へ向かおうとした途端に、%ANAME(里乃)%の気配は最初から居なかったかのように消えた
+    PRINTFORMW ……
+    PRINTFORML …
+    PRINTFORMW 刚一到床上，%ANAME(MASTER)%就被推倒了！
+    ;TranslatedMark ベッドに着くや否や、%ANAME(MASTER)%は押し倒された！
+    PRINTFORMW 「我♥已经等不及了♥」
+    ;TranslatedMark 「僕ッ♥もう待ちきれないよッ♥」
+    PRINTFORML 「享受我的接待吧♥在快乐的世界里♥」
+    ;TranslatedMark 「君を招待しようッ♥快楽の世界に♥」
+    CFLAG:対象:好感度 += 200
+    CALL COLOR_PRINTW(@"%ANAME(対象)%的好感度上升了200", カラー_注意)
+    KDVAR:対象:舞_舞零里弐 = -1
+ELSEIF RESULT == 1
+    PRINTFORMW %ANAME(MASTER)%从右边转了回去
+    ;TranslatedMark %ANAME(MASTER)%は右から振り向いた
+    PRINTFORMW %ANAME(里乃)%脸红了，眼睛却在发亮…
+    ;TranslatedMark %ANAME(里乃)%は顔を紅潮させ、目を輝かせている…
+    PRINTFORML 另一方面，%ANAME(対象)%好像在说"哎呀哎呀"，耸了耸肩，像是放弃了…
+    ;TranslatedMark 反面、%ANAME(対象)%はやれやれと言いたそうな風に肩を竦めている…
+    PRINTFORMW 「如果是%ANAME(MASTER)%的话，那么想一起做快乐的事啊…♥」
+    ;TranslatedMark 「%ANAME(MASTER)%ったら、そんなに私と『たのしいこと』したいんだぁ…♥」
+    PRINTFORMW %ANAME(対象)%说下次请多关照，依依不舍地离开了房间…
+    ;TranslatedMark %ANAME(対象)%は次は宜しくと告げ名残惜しそうに部屋を後にした…
+    PRINTFORMW %ANAME(MASTER)%就这样把%ANAME(里乃)%带到床上，推倒了…
+    ;TranslatedMark %ANAME(MASTER)%はそのまま%ANAME(里乃)%をベッドに連れて行き、押し倒した…
+    PRINTFORMW ……
+    PRINTFORML …
+    CFLAG:里乃:好感度 += 200
+    CALL COLOR_PRINTW(@"%ANAME(里乃)%的好感度上升了200", カラー_注意)
+    KDVAR:対象:舞_舞零里弐 = 1
+;フラグ
+KDVAR:対象:舞_どっちの扉か = 1
+ELSEIF RESULT == 2
+    PRINTFORMW 虽然感觉有了力量和体力，但是不能勉强
+    ;TranslatedMark 気力と体力が湧いてきた気がするが、無理は禁物だ
+    PRINTFORML %ANAME(MASTER)%没有回头
+    ;TranslatedMark %ANAME(MASTER)%は振り向かなかった
+    PRINTFORMW 「如果是%ANAME(MASTER)%的话，也是可以的哦」
+    ;TranslatedMark 「もー%ANAME(MASTER)%ったら、焦らさないでよー」
+    PRINTFORML 「啊，这个反应出乎意料啊」
+    ;TranslatedMark 「あちゃー、この反応は予想外だなぁ」
+    PRINTFORML 绕到眼前的不满的两个人暂时放弃了…
+    ;TranslatedMark 眼前に回り込んで来た不満そうな二人を暫く宥めた…
+    	IF KDVAR:対象:舞_どっちの扉か == 0
+		KDVAR:対象:舞_どっちの扉か = -1
+		PRINTFORMW …
+    ENDIF
+    RETURN 1
+ELSEIF RESULT == 3
+    PRINTFORMW 只选择其中一方是不可能的
+    ;TranslatedMark どちらか一方を選ぶなんてとんでもない
+    PRINTFORML %ANAME(MASTER)%迅速地把手向后转，抓住了两个人的腰
+    ;TranslatedMark %ANAME(MASTER)%は素早く手を後ろに回し、二人の腰を掴んだ
+    PRINTFORMW 「哎呀♥%ANAME(MASTER)%很贪婪呢♥」
+    ;TranslatedMark 「きゃ♥%ANAME(MASTER)%ったら、欲張りなんだから♥」
+    PRINTFORML 「明明说是要回头的，没办法啊♥」
+    ;TranslatedMark 「振り向いてって言ったのになー、仕方ないなぁ♥」
+    PRINTFORMW 比平时更有生命力、精神力和性欲的%ANAME(MASTER)%
+    ;TranslatedMark 普段より生命力と精神力と性欲を持て余した%ANAME(MASTER)%は、
+    PRINTFORML 用自己的臂力把两个人抱在两侧，带到了床上…
+    ;TranslatedMark 引き出されている膂力で二人を両脇に抱き抱え、ベッドへ連れて行った…
+    CALL COLOR_PRINTW(@"%NAME_FORMAL(対象)%和%ANAME(里乃)%的好感度上升了100", カラー_注意)
+    KDVAR:対象:舞_舞零里弐 = 0
+ENDIF
+    CVARSET CFLAG, 6, 0
+IF KDVAR:対象:舞_舞零里弐 >= 0
+CFLAG:里乃:調教参加フラグ = 1
+CFLAG:里乃:好感度 += 100
+CFLAG:里乃:調教中帰らない = 1
+CFLAG:里乃:強制友好化 = 1
+BASE:里乃:体力 = MAXBASE:里乃:体力
+BASE:里乃:気力 = MAXBASE:里乃:気力
+ENDIF
+IF KDVAR:対象:舞_舞零里弐 <= 0
+CFLAG:対象:調教参加フラグ = 1
+CFLAG:対象:好感度 += 100
+CFLAG:対象:強制友好化 = 1
+CFLAG:対象:調教中帰らない = 1
+BASE:対象:体力 = MAXBASE:対象:体力
+BASE:対象:気力 = MAXBASE:対象:気力
+ENDIF
+IF KDVAR:対象:舞_舞零里弐 == -1
+FLAG:ターンエンド調教 = 2
+;強制逆調教フラグをオン
+ELSE
+FLAG:ターンエンド調教 = 1
+ENDIF
+;それ以降のデイリーイベント発生を潰す
+DAILY_CANCEL = 1
+;フラグ
+KDVAR:対象:舞_どっちの扉か = 1
+RETURN 1
+

@@ -1,0 +1,78 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K8_HOBGOBLIN_GANGBANG_RATE(対象)
+#DIM 対象
+RETURN 300
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K8_HOBGOBLIN_GANGBANG_DECISION(対象)
+#DIM 対象
+#DIM ゴブリン
+ゴブリン = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン)
+
+SIF ゴブリン == -1 || CFLAG:対象:捕虜先 != ゴブリン || CFLAG:対象:所属 == ゴブリン
+	RETURN 0
+
+SIF KDVAR:対象:パチュリー_ケツ
+	RETURN 0
+
+SIF GETBIT(TALENT:対象:特殊勢力陥落系, 特殊勢力_ホフゴブリン)
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, -1, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K8_HOBGOBLIN_GANGBANG_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K8_HOBGOBLIN_GANGBANG(対象)
+#DIM 対象
+#DIM ゴブリン
+ゴブリン = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン)
+
+PRINTFORMW 「啾啾……啾嚕、嗯咕、呼♥」
+PRINTFORML 哥布林們侵犯正在侵犯着渾身赤裸的%ANAME(対象)%
+PRINTFORML %PRONOUN(対象)%跨坐在他們身上、扭動着腰、吸允着突起的那個
+PRINTFORMW 此時此刻、已經完全感受不到平時%ANAME(対象)%身上的知性……
+PRINTFORML 遭到俘虜的%ANAME(対象)%被關入地牢、受盡了凌辱
+PRINTFORML 哥布林們和%PRONOUN(対象)%自己都沒有想到、%ANAME(対象)%居然這麽快就接受了自己的新身份
+PRINTFORMW 俗話說百聞不如一見。實際體驗到的性交快感、遠勝於千萬本書中所描寫的、%PRONOUN(対象)%立刻就沉迷其中
+PRINTFORMW 「看招、這樣的話又如何、啊♥」
+PRINTFORML 一會兒用柔軟的乳房夾住肉棒、一會兒有用豐滿的臀部來摩擦
+PRINTFORML 與生俱來的好奇心、即使在落到了如此境地之後、還是發揮着很大的作用
+PRINTFORMW 把從各處學來的各種各樣的技巧付諸實踐、他們全都非常高興的樣子
+PRINTFORMW 「啊哈♥　小鷄鷄來了、啊、啊♥」
+PRINTFORML 被哥布林粗暴地壓着、貫穿秘裂。%PRONOUN(対象)%非但沒有抵抗、反而自發地扭動起了腰
+PRINTFORML 那受好奇心和無比強烈的欲望驅使而不停地扭動的身姿，簡直就像是哥布林的肉便器
+PRINTFORMW 就像是為了證明這一點、%PRONOUN(対象)%的脖子上被套上了結實的項圈……
+PRINTFORML 
+CALL COLOR_PRINTL(@"%ANAME(対象)%成為了哥布林的肉便器", カラー_注意)
+TRYCALLFORM %SP_COUNTRY_NAME_ENG:特殊勢力_ホフゴブリン%_FALLEN_LEAVE_MARK(対象)
+PRINTFORML 
+
+FOR LOCAL, 0, 3
+	CALL FUCK_GANGBANG_SP(対象, GET_SPERM_ID("哥布林"), "哥布林の肉棒", "哥布林", ゴブリン)
+NEXT
+
+KDVAR:対象:パチュリー_ケツ = 1
+SETBIT TALENT:対象:特殊勢力陥落系, 特殊勢力_ホフゴブリン
+CALL CHANGE_COUNTRY(対象, ゴブリン, 1)
+
+RETURN 1
+

@@ -1,0 +1,123 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K134_HITOZATO_RATE(対象)
+#DIM 対象
+RETURN 30
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K134_HITOZATO_DECISION(対象)
+#DIM 対象
+;ドレミーと所属が同じ、ドレミーが捕虜でなく、面識があり、3%
+SIF  !TALENT:対象:恋慕
+	RETURN 0
+;一回きり
+SIF KDVAR:対象:ドレミー_人里
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K134_HITOZATO_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K134_HITOZATO(対象)
+#DIM 対象
+#DIM 経験値
+;インデントもついでに修正
+
+PRINTFORMW
+PRINTFORMW 工作结束后，%ANAME(MASTER)%以巡逻的名义在城下町散步
+;TranslatedMark 仕事がひと段落し、%ANAME(MASTER)%は警邏という名目で城下町を散歩している
+PRINTFORML 环顾四周，在充满活力的店铺林立的大街上，各种各样的工人在努力地工作着……
+;TranslatedMark 周囲を見渡すと、活気のある店が立ち並ぶ大通りに様々な役人職人がけたたましく働いている……
+PRINTFORMW 听到那样的生活声音…
+;TranslatedMark そんな生活音を聞いていると…
+CALL ASK_YN("想哼一首诗", "回家练习后再说罢")
+IF RESULT == 1
+	SELECTCASE RAND:100
+		CASE IS < 40
+			経験値 = GET_EXP(GETNUM(ABL, "武闘"))
+		CASE IS < 70
+			経験値 = GET_EXP(GETNUM(ABL, "防衛"))
+		CASE IS < 90
+			経験値 = GET_EXP(GETNUM(ABL, "知略"))
+		CASEELSE
+			経験値 = GET_EXP(GETNUM(ABL, "政治"))
+	ENDSELECT
+	PRINTFORML 一个人一边重新审视自己的战斗方式一边挥舞武器……
+	;TranslatedMark 一人で自分の戦い方を見直しながら武器を振った……
+	CALL PRINT_ADD_EXP(MASTER, EXPNAME:経験値, RAND:5 + 1, 1)
+	CALL TRAIN_AUTO_ABLUP(MASTER)
+	PRINTFORML 为了保护他们也必须变强……
+	;TranslatedMark 彼らを守る為にも強くならねば……
+	PRINTFORMW %ANAME(MASTER)%回去刻苦训练
+	;TranslatedMark %ANAME(MASTER)%は帰って訓練に励んだ
+ELSE
+	PRINTFORML 『乱世三月…彩云之下』
+	;TranslatedMark 『乱世 三月…彩雲の下』
+	PRINTFORMW "背依桃花，饮尽美酒，率八百万之众，携滚滚战尘直向西…"
+	;TranslatedMark 『桃花を背に美酒を断ち、西の方…八百万を率いて戦塵に臨む…』
+	PRINTFORMW 『………』
+	PRINTFORMW 连自己都被这首抖机灵的诗逗笑了，但%ANAME(MASTER)%还是平静地品味着
+	;TranslatedMark 我ながら少し気の利いた詩にニヤケつつ、一辺の平穏を感じる%ANAME(MASTER)%
+	PRINTFORML
+	PRINTFORML 
+	PRINTFORMW 「哈哈哈，念个这么高尚的诗…有点不适合你哦？」
+	;TranslatedMark 「ははぁん、随分と高尚な事を仰られているけど…似合わないわよ？」
+	PRINTFORMW 『！？』
+	PRINTFORML 回过神来发现就在旁边，%ANAME(対象)%一边笑着一边走着
+	;TranslatedMark 気が付くと直ぐ隣で%ANAME(対象)%がニヤケながら歩いていた
+	PRINTFORMW 「啊啦，竟然漏出如此惊讶的表情，我是没想吓你一跳的 」
+	;TranslatedMark 「そんな豆鉄砲を食らった顔をされるとは…いやはや驚かすつもりは無かったのですが…」
+	PRINTFORMW  %ANAME(MASTER)%询问是什么时候过来的
+	;TranslatedMark いつから傍に居たのかと尋ねる%ANAME(MASTER)%
+	PRINTFORML 「从你开始吟诗不久」
+	;TranslatedMark 「貴方が柄でもない詩を詠いはじめる少し前からですね」
+	PRINTFORMW 「正好来找你有事…因为看到了背影所以跟着来了」
+	;TranslatedMark 「丁度、用事で来ていましてね…後ろ姿を見かけたので付いて来ていたのですよ」
+	PRINTFORML 心中充满了想要责备自己不久前竟然没有发现自己被人偷看的的心情
+	;TranslatedMark 少し前の自分の視界の狭さを咎めたい気持ちで胸が一杯だった
+	PRINTFORMW  而且是被%ANAME(対象)%看到，结果现在害羞得说不出话来，一副充满烦恼的样子
+	;TranslatedMark よりにもよって見られた相手が%ANAME(対象)%だったからか恥ずかしさで無言で悶えた……
+	PRINTFORML
+	PRINTFORML
+	PRINTFORML 「即便如此…你也戒不掉美酒吧？」
+	;TranslatedMark 「それにしても…あなた、美酒を断つなんて出来ないでしょう？」
+	PRINTFORML 「哎，这是一首满载着吐槽的、自恋强烈的诗」
+	;TranslatedMark 「えぇまぁ突っ込みどころ満載で自惚れの強い詩ですこと」
+	PRINTFORMW %ANAME(対象)%边笑边偷看%ANAME(MASTER)%的脸
+	;TranslatedMark ニヤニヤと笑いながら顔を覗いてくる%ANAME(対象)%
+	PRINTFORML 「…对了，那边有好的甜食店，一起去怎么样？」
+	;TranslatedMark 「…それはそうと、あそこに良い甘味処があるのでご一緒にどうです？」
+	PRINTFORMW 这样说来，在%ANAME(対象)%指向的方向上能看到生意兴隆的店……
+	;TranslatedMark そう言って%ANAME(対象)%が指差す方向には繁盛している店が見える……
+	PRINTFORML 「时尚诗人？」
+	;TranslatedMark 「お洒落な詩人さん？」
+	PRINTFORML 『～～～！』
+	PRINTFORMW 之后又被%ANAME(対象)%戏弄了一段时间……
+	;TranslatedMark その後もしばらく%ANAME(対象)%にからかわれた……
+	PRINTFORMW
+	CALL COLOR_PRINT("好感度上升了200", カラー_注意)
+	;TranslatedMark "好感度が 200上がった", カラー_注意
+	PRINTFORMW
+	CFLAG:対象:好感度 += 500
+	KDVAR:対象:ドレミー_人里 = 1
+ENDIF
+
+RETURN 1

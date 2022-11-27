@@ -1,0 +1,605 @@
+﻿;-------------------------------------------------
+;「奴隷市場」の名称
+;-------------------------------------------------
+@SHOP_SLG_NAME64
+RESULTS:0 '= "奴隷市場"
+
+;-------------------------------------------------
+;「奴隷市場」の選択可否
+;-------------------------------------------------
+@SHOP_SLG_CHECK64
+SIF CFLAG:MASTER:所属 == 0
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;「奴隷市場」の左カラムメニューの入力処理
+;-------------------------------------------------
+@SHOP_SLG_EVENTBUY64
+CALL SLAVEMARKET
+RETURN 1
+
+;-------------------------------------------------
+;「奴隷市場」本体
+;-------------------------------------------------
+@SLAVEMARKET
+#DIM 対象
+#DIM 対象添え字
+#DIM 売却可能
+#DIM FIRST_LINE
+
+
+;売却には特殊勢力な勢力が必要(主人公の所属していないところで)
+売却可能 = 0
+FOR LOCAL, 0, MAX_COUNTRY
+	SIF IS_SP_COUNTRY(LOCAL) && CFLAG:MASTER:所属 != LOCAL
+		売却可能 = 1
+NEXT
+
+
+FIRST_LINE = LINECOUNT
+
+CALL SINGLE_DRAWLINE
+PRINTFORML 「歡迎～光臨！　想要購買上佳的奴隸麼？」
+PRINTFORML %ANAME(MASTER)%訪問了奴隷市場
+PRINTFORML 穿着破破爛爛衣服的女人被放在籠子内、並排站着
+PRINTFORML 負責人、把能購買的奴隸的名単交給了你……
+PRINTFORML 所持金:{MONEY}
+CALL SINGLE_DRAWLINE
+
+VARSET SHOP_CHARA_LIST, -1
+FOR LOCAL, 0, VARSIZE("SLAVEMARKET_GOODS")
+	SHOP_CHARA_LIST:LOCAL = ID_TO_CHARA(SLAVEMARKET_GOODS:LOCAL)
+NEXT
+
+FOR LOCAL, 0, VARSIZE("SLAVEMARKET_GOODS")
+	LOCAL:1 = ID_TO_CHARA(SLAVEMARKET_GOODS:LOCAL)
+	SIF LOCAL:1 == -1
+		CONTINUE
+	;人質解放要求などにより既に捕虜でなくなっている場合、パージ(奴隷市場修正パッチ)プレイヤー所属勢力の捕虜である場合、パージ
+	IF (!TALENT:(LOCAL:1):奴隷市場モブ && !IS_SP_COUNTRY(CFLAG:(LOCAL:1):捕虜先) && !IS_SP_COUNTRY(CFLAG:(LOCAL:1):所属)) || CFLAG:(LOCAL:1):捕虜先 == CFLAG:MASTER:所属
+		SLAVEMARKET_GOODS:LOCAL = 0
+		CONTINUE
+	ENDIF
+	CALL SLAVEMARKET_SHOW_INFO(LOCAL:1, LOCAL)
+	CALL SINGLE_DRAWLINE
+NEXT
+
+PRINTL
+SIF 売却可能
+	PRINTFORML [98] 売却
+PRINTFORML [99] 取消
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 99
+	RETURN 0
+ELSEIF RESULT == 98
+	IF !売却可能
+		CLEARLINE 1
+		GOTO INPUT_LOOP
+	ENDIF
+	CALL SLAVEMARKET_SELL_CHARA
+	CLEARLINE FIRST_LINE - LINECOUNT
+	RESTART
+ENDIF
+
+IF RESULT < 0
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ELSEIF 100 <= RESULT && RESULT < VARSIZE("SLAVEMARKET_GOODS") + 100
+	対象添え字 = RESULT - 100
+	対象 = ID_TO_CHARA(SLAVEMARKET_GOODS:対象添え字)
+	IF 対象 == -1
+		CLEARLINE 1
+		GOTO INPUT_LOOP
+	ENDIF
+	CALL SINGLE_DRAWLINE
+	CALL SHOW_INFO_WITH_UI(対象, 1)
+	CLEARLINE LINECOUNT - FIRST_LINE
+	RESTART
+ELSEIF VARSIZE("SLAVEMARKET_GOODS") <= RESULT || MONEY < SLAVEMARKET_PRICE:RESULT
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+
+対象 = ID_TO_CHARA(SLAVEMARKET_GOODS:RESULT)
+対象添え字 = RESULT
+
+
+IF 対象 == -1
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+
+対象 = ID_TO_CHARA(SLAVEMARKET_GOODS:RESULT)
+対象添え字 = RESULT
+PRINTFORML 「呵呵、%NAME_FORMAL(対象)%那个奴隸么」
+PRINTFORML 「現在只要{SLAVEMARKET_PRICE:対象添え字}金就能賣給你」
+SIF 対象添え字 == SLAVEMARKET_SPECIALGOODS
+	PRINTFORML 「因為一点点"隠情"、所以降價特賣了」
+IF IS_LOVER(対象)
+	PRINTFORML 「……嗯？　太高了？」
+	PRINTFORML 「那是当然的、你以為我不知道這傢伙是你的"那個"么？」
+	PRINTFORML 「一点也不高、你不希望見到自己的女人被賣給其他男人吧、嘻嘻！」
+ENDIF
+PRINTFORML 「那？　要買下来么？」
+PRINTL
+CALL ASK_MULTI_JUDGE(@"買下了%ANAME(対象)%", MONEY >= SLAVEMARKET_PRICE:対象添え字, "放棄", 1)
+IF RESULT == 1
+	CLEARLINE LINECOUNT - FIRST_LINE
+	RESTART
+ENDIF
+
+MONEY -= SLAVEMARKET_PRICE:対象添え字
+CALL SLG_BUILDING_ADD_SELL_SLAVE_MARKET_MONEY(SLAVEMARKET_PRICE:対象添え字)
+PRINTFORMW 「嘻嘻、那麼商談成立」
+PRINTFORMW 「那麼、帯走吧」
+
+;確率でエロイベント　特売なら確定
+IF IS_TOHO_CHARA(対象) && IS_FEMALE(対象) && (20 > RAND:100 || 対象添え字 == SLAVEMARKET_SPECIALGOODS)
+	PRINTFORML
+	PRINTFORMW ……对男人带来的%ANAME(対象)%、%ANAME(MASTER)%抱着懷疑的眼光
+	PRINTFORML 赤裸的帯着眼罩的%ANAME(対象)%、手脚都被枷鎖銬住
+	PRINTFORMW 在那裸露的身体上、被安着看起来就讓人覚得疼痛的環
+	PRINTFORML 全身沾満着白濁、小穴中也灑落着粘糊糊的汁液
+	PRINTFORMW 到処都被写着的正字、説明了%ANAME(対象)%受到了什麼対待
+	PRINTFORMW 即使是這樣悲慘的樣子、%ANAME(対象)%也誒嘿嘿的笑着
+	PRINTFORMW ……這不是因為開心才笑出来的。受到了什麼奇怪的薬的作用吧……
+	PRINTFORML
+	PRINTFORML 「啊～、擺放上市場的時候、也在被作為奴隸使用着」
+	PRINTFORML 「雖然這麼説、但是沒有清潔服務哦」
+	PRINTFORMW 「対了、很遺憾的告訴你、不接受退貨要求」
+	SIF 対象 == SLAVEMARKET_SPECIALGOODS
+		PRINTFORMW 「啊、会特價銷售当然是有理由的啊、呵呵呵」
+	IF IS_LOVER(対象)
+		PRINTFORMW 「這些事都無所謂吧～？　和恋人享受感動的再会吧」
+		PRINTFORMW 「就当做一個教訓、更重要的是以後啊、嘻嘻嘻！」
+	ENDIF
+	PRINTFORMW 很想直接斬殺這個男人、但是這個市場里的衛兵太多了。暴露的話自己会很危險
+	PRINTFORMW 緊咬牙関、%ANAME(MASTER)%接過了%ANAME(対象)%……
+	CALL FUCK_GANGBANG(対象, GET_SPERM_ID("奴隷商人"), @"奴隷商人的\@RAND:2 ? 肉棒 # 嘴唇\@", "奴隷商人")
+	CFLAG:対象:薬物依存 += RAND(30, 50)
+	CALL SET_PIERCE_RANDOM(対象, 0)
+ENDIF
+
+IF IS_LOVER(対象)
+	PRINTFORMW 「嘻嘻、就当做一個教訓、更重要的是以後啊、嘻嘻嘻！」
+ELSE
+	PRINTFORML 「呵呵、謝謝惠顧」
+	PRINTFORMW 「好好的対待那個玩具啊！　呵呵呵」
+ENDIF
+
+
+
+PRINTFORMW 收到了%ANAME(対象)%後、離開了市場……
+;別勢力に所属（特殊勢力以外）
+IF IS_COUNTRY(CFLAG:対象:所属) && !IS_SP_COUNTRY(CFLAG:対象:所属) && CFLAG:対象:所属 != CFLAG:MASTER:所属
+	PRINTFORMW ……%ANAME(対象)%所属于%ANAME(GET_COUNTRY_BOSS(CFLAG:対象:所属))%
+	PRINTFORMW 要不要人道的送回去呢……
+	PRINTFORML 怎麼辦？
+	CALL SINGLE_DRAWLINE
+	CALL ASK_MULTI("送回去", "当做我軍的士官", "当做奴隸監禁起来")
+	IF RESULT == 0
+		PRINTFORMW %ANAME(対象)%被送回了%ANAME(GET_COUNTRY_BOSS(CFLAG:対象:所属))%勢力
+		PRINTFORMW 從%ANAME(GET_COUNTRY_BOSS(CFLAG:対象:所属))%那收到了深深的感謝……
+		CALL CHANGE_RELATION_C_TO_C(CFLAG:対象:所属, CFLAG:MASTER:所属, 600, -600)
+		CFLAG:対象:好感度 = MAX(500, CFLAG:対象:好感度 + 500)
+		CFLAG:対象:従属度 = MAX(500, CFLAG:対象:従属度 + 500)
+		CFLAG:対象:依存度 = MAX(100, CFLAG:対象:依存度 + 100)
+		CALL CAPTURE(対象, 0)
+	ELSEIF RESULT == 1
+		PRINTFORMW 花大價錢買下的東西沒有必要用来做%ANAME(GET_COUNTRY_BOSS(CFLAG:対象:所属))%的人情
+		PRINTFORMW 以士官的待遇作為条件、約定%ANAME(対象)%要協助我軍……
+		CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属, 1)
+		CFLAG:対象:好感度 = MAX(0, CFLAG:対象:好感度 + 500)
+		CFLAG:対象:従属度 = MAX(0, CFLAG:対象:従属度 + 500)
+		CFLAG:対象:依存度 = MAX(0, CFLAG:対象:依存度 + 100)
+	ELSE
+		PRINTFORMW 不行不行、花大錢買下来的、%ANAME(対象)%已経是我的東西了
+		PRINTFORMW 要怎麼樣使用呢、%ANAME(MASTER)%離開了市場……
+		CALL CHANGE_COUNTRY(対象, 0, 1)
+		CALL CAPTURE(対象, CFLAG:MASTER:所属)
+	ENDIF
+;どこにも所属していないか、特殊勢力所属
+ELSEIF CFLAG:対象:所属 != CFLAG:MASTER:所属
+	PRINTFORML ……要給%ANAME(対象)%什麼待遇？
+	CALL SINGLE_DRAWLINE
+	CALL ASK_YN("当做士官迎接", "監禁起来")
+	IF RESULT == 0
+		PRINTFORMW %ANAME(対象)%成為了%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%的士官……
+		CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属, 1)
+		CFLAG:対象:好感度 = MAX(500, CFLAG:対象:好感度 + 500)
+		CFLAG:対象:従属度 = MAX(500, CFLAG:対象:従属度 + 500)
+		CFLAG:対象:依存度 = MAX(100, CFLAG:対象:依存度 + 100)
+	ELSE
+		PRINTFORMW 無法逃脱的%ANAME(対象)%被監禁起来了……
+		CALL CHANGE_COUNTRY(対象, 0, 1)
+		CALL CAPTURE(対象, CFLAG:MASTER:所属)
+	ENDIF
+;自国の士官
+ELSE
+	CFLAG:対象:好感度 = MAX(500, CFLAG:対象:好感度 + 500)
+	CFLAG:対象:従属度 = MAX(500, CFLAG:対象:従属度 + 500)
+	CFLAG:対象:依存度 = MAX(100, CFLAG:対象:依存度 + 100)
+	CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属, 1)
+ENDIF
+
+;捕虜状態から解放、部隊から除外、買ったキャラを配列から削除
+;念のため放浪フラグを折る
+CFLAG:対象:特殊状態 = 0
+CALL FORCE_FREE(対象)
+SLAVEMARKET_GOODS:対象添え字 = 0
+
+
+;-------------------------------------------------
+;「奴隷市場」売却部分
+;-------------------------------------------------
+@SLAVEMARKET_SELL_CHARA
+#DIM 対象
+#DIM 行き先
+#DIM FIRST_LINE
+#DIM 対象売却額
+#DIM 合計額
+
+FIRST_LINE = LINECOUNT
+PRINTFORML 「嘻嘻、要賣掉誰呢？」
+PRINTFORML ※%ANAME(MASTER)%可以出售那些已经陷落的角色
+CALL SINGLE_DRAWLINE
+CALL SELECT_CHARA_LIST_MULTI_ONLY_LOGIC_SEX(-1, "SLAVEMARKET_SELL_CHARA", "SLAVEMARKET_SELL_CHARA")
+
+IF SELECTED_CHARA_NUM == 0
+	PRINTFORMW 「啊、真是太可惜了、嘻嘻」
+	RETURN 0
+ENDIF
+
+;個々の売却額表示しようかな
+;でもそれはそれでうっとうしいかな
+合計額 = 0
+FOR LOCAL, 0, SELECTED_CHARA_NUM
+	対象 = SELECTED_CHARA:LOCAL
+	対象売却額 = SLAVEMARKET_CALC_PRICE(対象) / 5
+	合計額 += 対象売却額
+NEXT
+PRINTFORML 負責人用充満着欲望的眼光仔細品定着%ANAME(対象, SELECTED_CHARA_NUM)%……
+PRINTFORML 「啊……總計能賣{合計額}金」
+
+CALL ASK_YN("売却", "放棄")
+IF RESULT == 1
+	PRINTFORMW 「呼呼、現在突然找回了良心麼？」
+	CLEARLINE FIRST_LINE - LINECOUNT
+	RESTART
+ENDIF
+
+PRINTFORML 「嘻嘻、謝謝惠顧！」
+PRINTFORML 被戴上了枷鎖的%ANAME(対象, SELECTED_CHARA_NUM)%、不知道被帯到什麼地方去了……
+
+MONEY += 合計額
+
+FOR LOCAL, 0, SELECTED_CHARA_NUM
+	対象 = SELECTED_CHARA:LOCAL
+	WHILE 1
+		行き先 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:IFRAND(@"1TO{VARSIZE("SP_COUNTRY_ID") - 1}, D{SP_COUNTRY_ID:特殊勢力_自警団}", 1))
+		SIF GROUPMATCH(行き先, -1, CFLAG:MASTER:所属)
+			CONTINUE
+		PRINTFORML %ANAME(対象)%被賣給了%ANAME(GET_COUNTRY_BOSS(行き先))%勢力……
+		CALL CHANGE_COUNTRY(対象, 0, 1)
+		CALL CAPTURE(対象, 行き先)
+		CFLAG:対象:好感度 = CFLAG:対象:好感度 / 2 - 1000
+		CFLAG:対象:依存度 = CFLAG:対象:依存度 / 2 - 1000
+		CFLAG:対象:従属度 = CFLAG:対象:従属度 / 2 - 1000
+		CFLAG:対象:支配度 = CFLAG:対象:支配度 / 2 - 1000
+		BREAK
+	WEND
+NEXT
+
+WAIT
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_SLAVEMARKET_SELL_CHARA(対象)
+#DIM 対象
+RETURN CFLAG:対象:所属 == CFLAG:MASTER:所属 && GET_COUNTRY_BOSS(CFLAG:対象:所属) != 対象 && !IS_SP_CHARA(対象) && !IS_ANIMAL(対象) && IS_FALLEN(対象) && CFLAG:対象:行動不能状態 != 行動不能_子供
+
+@SELECT_CHARA_LIST_SELECT_LOGIC_SLAVEMARKET_SELL_CHARA(対象)
+#DIM 対象
+RETURN CFLAG:対象:捕虜先 == 0
+
+
+;-------------------------------------------------
+;奴隷市場の商品の情報表示＋ボタン生成
+;-------------------------------------------------
+@SLAVEMARKET_SHOW_INFO(対象, 番号)
+#DIM 対象
+#DIM 番号
+IF MONEY >= SLAVEMARKET_PRICE:番号
+	PRINTBUTTON @"%"[" + ANAME(対象) + "]", MAX_CHARANAME_LENGTH + 2, LEFT%", 番号
+	PRINTFORM  販売額:{SLAVEMARKET_PRICE:番号, 8, LEFT}
+	PRINTBUTTON "[能力表示]", 番号 + 100
+	SIF SLAVEMARKET_SPECIALGOODS == 番号
+		CALL COLOR_PRINT("特売！", カラー_ピンク)
+ELSE
+	SETCOLOR カラー_選択不可
+	PRINTPLAINFORM %"[" + ANAME(対象) + "]", MAX_CHARANAME_LENGTH + 2, LEFT%
+	RESETCOLOR
+	PRINTFORM  販売額:{SLAVEMARKET_PRICE:番号, 8, LEFT}
+	SIF SLAVEMARKET_SPECIALGOODS == 番号
+		CALL COLOR_PRINT("特売！  ", カラー_ピンク)
+	CALL COLOR_PRINT("資金不足所以無法購買", カラー_警告)
+ENDIF
+PRINTL
+PRINT 性知識:
+PRINTFORM {ABL:対象:性知識, 2, RIGHT}
+PRINT  欲望:
+CALL PRINT_ALPHABET_RANK(ランク_その他, ABL:対象:欲望)
+PRINTFORM {ABL:対象:欲望, 2, RIGHT}
+PRINT  性技:
+CALL PRINT_ALPHABET_RANK(ランク_その他, ABL:対象:性技)
+PRINTFORM {ABL:対象:性技, 3, RIGHT}
+PRINT  奉仕:
+CALL PRINT_ALPHABET_RANK(ランク_その他, ABL:対象:奉仕)
+PRINTFORM {ABL:対象:奉仕, 3, RIGHT}
+PRINT  性交:
+CALL PRINT_ALPHABET_RANK(ランク_その他, ABL:対象:性交)
+PRINTFORM {ABL:対象:性交, 3, RIGHT}
+PRINT  精愛:
+CALL PRINT_ALPHABET_RANK(ランク_その他, ABL:対象:精愛)
+PRINTFORM {ABL:対象:精愛, 3, RIGHT}
+PRINTL
+PRINTFORM 所持素質:
+LOCAL:1 = 0
+FOR LOCAL, 0, VARSIZE("SEX_TALENT_NAME")
+	IF GETBIT(TALENT:対象:淫乱系, LOCAL)
+		PRINTFORM %SEX_TALENT_NAME:LOCAL%
+		LOCAL:1 = 1
+	ENDIF
+NEXT
+FOR LOCAL, 0, VARSIZE("SP_FALLEN_TALENT_NAME")
+	IF GETBIT(TALENT:対象:特殊勢力陥落系, LOCAL)
+		PRINTFORM %SP_FALLEN_TALENT_NAME:LOCAL%
+		LOCAL:1 = 1
+	ENDIF
+NEXT
+SIF !LOCAL:1
+	PRINT 無
+PRINTL
+
+;-------------------------------------------------
+;奴隷市場が利用できるかを返す関数
+;-------------------------------------------------
+@IS_SLAVEMARKET_AVAILABLE
+#FUNCTION
+
+;特殊勢力な勢力が必要(主人公の所属していないところで)
+FOR LOCAL, 0, MAX_COUNTRY
+	SIF IS_SP_COUNTRY(LOCAL) && CFLAG:MASTER:所属 != LOCAL
+		RETURNF 1
+NEXT
+
+;商品がいればok
+;FOR LOCAL, 0, SLAVEMARKET_MAX_GOODS
+;	SIF ID_TO_CHARA(SLAVEMARKET_GOODS:LOCAL) != -1
+;		RETURNF 1
+;NEXT
+
+RETURNF 0
+
+;-------------------------------------------------
+;奴隷市場用、奴隷の金額計算関数
+;-------------------------------------------------
+@SLAVEMARKET_CALC_PRICE(対象)
+#FUNCTION
+#DIM 対象
+#DIM 額
+#DIM 野盗_COUNTRY_ID
+;基礎値に能力とスケベ能力を加算する
+額 = MIN(ABL:対象:武闘 + ABL:対象:防衛 + ABL:対象:知略 + ABL:対象:政治 + ABL:対象:歌唱 + ABL:対象:料理, 1000) * 30
+額 += ABL:対象:性知識 * 500
+額 += MIN(ABL:対象:欲望 + ABL:対象:性技 + ABL:対象:奉仕 + ABL:対象:性交, 50) * 500
+額 += MIN(ABL:対象:露出 + ABL:対象:精愛 + ABL:対象:自慰, 10) * 300
+額 += MIN(ABL:対象:Ｃ感 + ABL:対象:Ｖ感 + ABL:対象:Ａ感 + ABL:対象:Ｂ感 + ABL:対象:Ｍ感, 40) * 300
+;自国所属と特殊勢力陥落済みは高い
+SIF CFLAG:対象:所属 == CFLAG:MASTER:所属
+	額 += 3000
+FOR LOCAL, 0, MAX_SP_COUNTRY
+	SIF GETBIT(TALENT:対象:特殊勢力陥落系, LOCAL)
+		額 += 3000
+NEXT
+
+;恋人だと足下見られる
+SIF IS_LOVER(対象)
+	額 += 10000
+
+SIF TALENT:対象:奴隷市場モブ
+	額 = LIMIT(額 / 2, 5000, 30000)
+
+額 = SLG_BUILDING_ADD_SLAVE_MARKET_PRICE(額)
+
+RETURNF 額
+
+;-------------------------------------------------
+;奴隷市場用、そのターンの商品の準備
+;-------------------------------------------------
+@SLAVEMARKET_PREPARE_GOODS
+VARSET SLAVEMARKET_GOODS
+VARSET SLAVEMARKET_SPECIALGOODS
+
+CALL CLEARN_SLAVE_MARKET_MOB()
+CALL CREATE_SLAVE_MARKET_MOB()
+
+CALL SELECT_CHARA_RANDOM_MULTI(SLAVEMARKET_MAX_GOODS, "SLAVEMARKET_PREPARE_GOODS")
+;候補がいなければなしで。
+SIF SELECTED_CHARA_NUM < 1
+	RETURN 0
+
+FOR LOCAL, 0, MIN(SELECTED_CHARA_NUM, SLAVEMARKET_MAX_GOODS)
+	SLAVEMARKET_GOODS:LOCAL = GET_ID(SELECTED_CHARA:LOCAL)
+	SLAVEMARKET_PRICE:LOCAL = SLAVEMARKET_CALC_PRICE(SELECTED_CHARA:LOCAL)
+NEXT
+
+IF !RAND:3
+	SLAVEMARKET_SPECIALGOODS = RAND:MIN(SELECTED_CHARA_NUM, SLAVEMARKET_MAX_GOODS)
+	SLAVEMARKET_PRICE:SLAVEMARKET_SPECIALGOODS /= 2
+ELSE
+	SLAVEMARKET_SPECIALGOODS = SLAVEMARKET_MAX_GOODS
+ENDIF
+RETURN 1
+
+@SELECT_CHARA_RANDOM_LOGIC_SLAVEMARKET_PREPARE_GOODS(対象)
+#DIM 対象
+;SPキャラは対象としない（野盗そのものがリストアップされるのを防ぐ
+SIF IS_SP_CHARA(対象)
+	RETURN 0
+SIF CFLAG:対象:所属 == CFLAG:MASTER:所属
+	RETURN 0
+;未購入の奴隷市場用モブ、特殊勢力の捕虜、特殊勢力所属で捕虜でない
+RETURN (TALENT:対象:奴隷市場モブ && !IS_APPEAR(対象)) || IS_SP_COUNTRY(CFLAG:対象:捕虜先) || (IS_SP_COUNTRY(CFLAG:対象:所属) && !CFLAG:対象:捕虜先)
+
+;-------------------------------------------------
+;DESC  :奴隷市場用のモブの削除
+;-------------------------------------------------
+@CLEARN_SLAVE_MARKET_MOB()
+;主人公と同一勢力じゃなくなった、もしくは前のターンで買われなかったキャラは削除
+FOR LOCAL:0, CHARANUM - 1, -1, -1
+	SIF !TALENT:LOCAL:奴隷市場モブ
+		CONTINUE
+	SIF IS_APPEAR(LOCAL) && CFLAG:LOCAL:所属 == CFLAG:MASTER:所属
+		CONTINUE
+	CALL DELETE_CHARA(LOCAL)
+NEXT
+
+;-------------------------------------------------
+;DESC  :奴隷市場用のモブの生成
+;-------------------------------------------------
+@CREATE_SLAVE_MARKET_MOB()
+#DIM 対象
+#DIMS 相手
+SKIPDISP 1
+FOR LOCAL, 0, 5
+	CALL CREATE_RANDOM_CHARA(0, 0, RAND:2)
+	対象 = RESULT
+	IF IS_FEMALE(対象)
+		FOR LOCAL:1, 1, RAND(10, 20)
+			SELECTCASE RAND:100
+				CASE 0
+					相手 = 地痞
+				CASE 1
+					相手 = 娼館的客人
+				CASE 2
+					相手 = 触手
+				CASE 3
+					相手 = 土匪
+				CASE 4
+					相手 = AV男優
+				CASE 5
+					相手 = 貴族
+				CASE 6
+					相手 = 平民
+				CASE 7
+					相手 = 偶遇的男人
+				CASE 8
+					相手 = 妖怪
+				CASE 9
+					相手 = チャラ男
+				CASE 10
+					相手 = 兵士
+				CASE 11
+					相手 = 流浪漢
+				CASE 12
+					相手 = 黑社會
+				CASE 13
+					相手 = 哥布林
+				CASE 14
+					相手 = 鬼
+				CASE 15
+					相手 = 子供
+				CASE 16
+					相手 = 犬
+				CASE 17
+					相手 = 馬
+				CASE 18
+					相手 = 豚
+				CASE 19
+					相手 = 天狗
+				CASE 20
+					相手 = 河童
+				CASE 21
+					相手 = 触手
+				CASE 22
+					相手 = 不明
+				CASEELSE
+					相手 = 調教師
+			ENDSELECT
+			SELECTCASE RAND:100
+				CASE 0 TO 19
+					CALL FUCK_GANGBANG(対象, GET_SPERM_ID(相手), @"%相手%の\@ RAND:2 ? 肉棒 # 唇\@", 相手)
+				CASE 20 TO 59
+					CALL FUCK_RAPE(対象, GET_SPERM_ID(相手), @"%相手%の\@ RAND:2 ? 肉棒 # 唇\@", 相手)
+				CASE 60 TO 64
+					CALL FUCK_BEAST(対象, GET_SPERM_ID("犬"), @"犬の\@ RAND:2 ? 肉棒 # 唇\@", "犬")
+				CASE 65 TO 69
+					CALL FUCK_BEAST(対象, GET_SPERM_ID("豚"), @"豚の\@ RAND:2 ? 肉棒 # 唇\@", "豚")
+				CASE 70 TO 74
+					CALL FUCK_BEAST(対象, GET_SPERM_ID("馬"), @"馬の\@ RAND:2 ? 肉棒 # 唇\@", "馬")
+				CASE 80 TO 84
+					CALL FUCK_TENTACLE(対象, GET_SPERM_ID("触手"), "触手", "触手")
+				CASE 85 TO 89
+					CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 売春, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("娼館的客人"), "娼館の客のペニス", "娼館的客人", "", "売春")
+				CASE 90 TO 94
+					CALL FUCK(対象, "欲望, 性技, Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, 口淫, Ｖ性交, 撮影", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("AV男優"), @"男優の\@RAND:2 ? 肉棒 # 唇\@", "AV男優", "", "和姦")
+				CASEELSE
+					CALL FUCK(対象, "欲望, 奉仕, 性技, 射精, 百合, Ｃ", "", GET_SPERM_ID("夢魔"), "", "", "", "調教")
+			ENDSELECT
+			;確率で出産経験を追加
+			IF RAND:100 < 3
+				EXP:対象:妊娠経験 = RAND(1, 5)
+				EXP:対象:出産経験 = !RAND:3
+				CALL REFRESH_PREGNANT_RECORD(対象, GET_SPERM_ID(相手), 1)
+				;確率で母乳体質を固定する
+				SIF RAND:100 < 15
+					TALENT:対象:母乳体質 = 1
+			ENDIF
+
+		NEXT
+	ELSE
+		相手 = 調教師
+		FOR LOCAL:1, 1, RAND(10, 20)
+			SELECTCASE RAND:2
+				CASE 0 TO 19
+					CALL FUCK_GANGBANG(対象, GET_SPERM_ID(相手), @"%相手%の\@ RAND:2 ? 膣 # 唇\@", 相手)
+				CASE 20 TO 39
+					CALL FUCK_RAPE(対象, GET_SPERM_ID(相手), @"%相手%の\@ RAND:2 ? 膣 # 唇\@", 相手)
+				CASEELSE
+					CALL FUCK(対象, "欲望, 技巧, 性技, 奉仕, 性交, 射精, 百合, Ｃ, Ｂ, Ｍ, Ｖ挿入, Ａ挿入", "接吻喪失, 童貞喪失", 0, "調教師の秘貝", "調教師", "調教師の膣", "調教")
+			ENDSELECT
+		NEXT
+	ENDIF
+	TALENT:対象:奴隷市場モブ = 1
+	TALENT:対象:チョロイン = 1
+	TALENT:対象:隷属 = 1
+	TALENT:対象:服従 = 1
+	TALENT:対象:合意 = 1
+	CFLAG:対象:従属度 = 10000
+	CFLAG:対象:依存度 = 3000
+	;戦闘で使い物にならなくしておく
+	TALENT:対象:成長型 = 10
+	ABL:対象:性知識 = 5
+	ABL:対象:武闘 = RAND(1, 5)
+	ABL:対象:防衛 = RAND(1, 5)
+	ABL:対象:知略 = RAND(1, 5)
+	ABL:対象:政治 = RAND(1, 5)
+	ABL:対象:料理 = RAND(1, 5)
+	ABL:対象:歌唱 = RAND(1, 5)
+	;傾向的にサドが不足気味になるので追加
+	ABL:対象:加虐 += RAND(0, 3)
+	TALENT:対象:Ｖ緊緻度 = GET_RANDOM_TIGHTNESS()
+	TALENT:対象:Ａ緊緻度 = GET_RANDOM_TIGHTNESS()
+	;FUCKで主導度がガン下がりしているのでリセット
+	CALL INIT_TENDENCY(対象)
+	;淫乱素質をつける
+	FOR LOCAL:1, 0, 5
+		SIF RAND:100 < 5
+			SETBIT TALENT:対象:淫乱系, RAND:VARSIZE("SEX_TALENT_NAME")
+	NEXT
+	CALL CLEAR_CREAMPIE_HISTORY(対象, 1)
+NEXT
+SKIPDISP 0

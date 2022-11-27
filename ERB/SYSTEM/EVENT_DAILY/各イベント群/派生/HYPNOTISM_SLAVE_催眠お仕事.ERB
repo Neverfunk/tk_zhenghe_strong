@@ -1,0 +1,596 @@
+﻿;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------_
+@EVENT_DAILY_DERIVATION_HYPNOTISM_SLAVE_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("HYPNOTISM_WORKER")
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_HYPNOTISM_SLAVE_DECISION()
+
+RETURN DVAR:催眠お仕事_状態管理フラグ > 0 && RAND:100 < 60
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_HYPNOTISM_SLAVE
+#DIM 対象
+#DIM 仕事先
+#DIM 回家
+
+回家 = 0
+
+対象 = ID_TO_CHARA(DVAR:催眠お仕事_調教対象ID)
+
+IF 対象 == -1
+	DVAR:催眠お仕事_状態管理フラグ = 0
+	DVAR:催眠お仕事_調教対象ID = 0
+	DVAR:催眠お仕事_進行度 = 0
+	RETURN 1
+ENDIF
+
+;ターゲットが女じゃなくなっていたらやめる
+IF !IS_FEMALE(対象)
+	PRINTFORMW %ANAME(対象)%已經辞职了吧、所以催眠傀儡师已经失去兴趣了。……
+	DVAR:催眠お仕事_状態管理フラグ = 0
+	DVAR:催眠お仕事_調教対象ID = 0
+	DVAR:催眠お仕事_進行度 = 0
+	RETURN 1
+ENDIF
+
+;ターゲットが捕虜になったらやめる
+IF CFLAG:対象:捕虜先
+	PRINTFORMW 因为%ANAME(対象)%被抓走了、所以催眠傀儡师放弃了调教……
+	DVAR:催眠お仕事_状態管理フラグ = 0
+	DVAR:催眠お仕事_調教対象ID = 0
+	DVAR:催眠お仕事_進行度 = 0
+	RETURN 1
+ENDIF
+
+IF CFLAG:対象:特殊状態 == 特殊状態_死亡
+	PRINTFORMW 因为%ANAME(対象)%已经死亡了、所以催眠傀儡师放弃了调教……
+	DVAR:催眠お仕事_状態管理フラグ = 0
+	DVAR:催眠お仕事_調教対象ID = 0
+	DVAR:催眠お仕事_進行度 = 0
+	RETURN 1
+ENDIF
+
+PRINTFORMW %ANAME(対象)%今天也出去“工作”了
+PRINTFORML 
+IF DVAR:催眠お仕事_進行度 > 100
+	PRINTFORMW 今天的%ANAME(対象)%是作为主人的肉奴隶服务的
+	PRINTFORML 脖子上戴着项圈的%ANAME(対象)%双腿跨在躺床上的主人身上激烈的晃动着腰肢
+	PRINTFORML 淫乱的吐着舌头，满面春光，淫乱的样子简直就像是一只母狗一样
+	PRINTFORMW 肉棒在阴道摩擦的无限快感直冲大脑、让%ANAME(対象)%不住地高声娇叫着
+	PRINTFORML 由于反复的催眠和凌辱、%ANAME(対象)%的身心都已经沉溺在了性交的快乐之中
+	PRINTFORML 轻微的催眠已经不会像以前一样导致思维混乱了，%ANAME(対象)%心满意足的笑了笑
+	PRINTFORMW 突然精液在体内爆发出来、%ANAME(対象)%被冲击的瞬间绝顶，潮吹着大大的仰起了身子
+	PRINTFORML 不要！不要❤！在子宫中滚烫精液的冲击、让她一边激烈痉挛一边不断绝顶着
+	PRINTFORML 终于在射精结束的时候%ANAME(対象)%浑身无力地摊在了主人身上
+	PRINTFORMW 在绝顶的余韵中%ANAME(対象)%一边露出销魂的淫乱表情一边大声娇喘着，低头对主人说着悄悄话
+	PRINTFORML 就在这时%ANAME(対象)%的表情忽然回归平常了、一边撑起身体一边环视四周
+	PRINTFORML 他看着少女的样子下流的笑着，用力抓住她的细腰，又用坚硬的肉棒冲撞上去
+	PRINTFORMW %ANAME(対象)%发现身体不知道被什么弄得一直在颤抖、不由得露出了不可思议的讶异表情
+	PRINTFORML 被重新认知的催眠覆盖思维的%ANAME(対象)%丝毫没有注意到正在被侵犯
+	PRINTFORML 但是肉体还是做出着反应、淫穴紧紧地收缩着，乳头已经坚挺充血起来
+	PRINTFORMW 一边被龟头刮着肉壁一边被用力揉搓着美乳的%ANAME(対象)%不知不觉的开始轻微的娇喘
+	PRINTFORML 但还是没有注意到被侵犯的事，一直歪着头就这样被侵犯着
+	PRINTFORML 然后、子宫中被射入了又热有粘稠的精液%ANAME(対象)%毫无意识的高声娇叫着绝顶了
+	PRINTFORMW %ANAME(対象)%一夜之间被他持续施展了各种各样的催眠，就再也回不到正常了……
+	PRINTFORML 
+	CALL COLOR_PRINTW(@"从这一天起、%ANAME(対象)%就永远都是催眠奴隶了", カラー_ピンク)
+	SETBIT TALENT:対象:日常系, 素質_デイリー_催眠奴隷
+	CALL LOSE_RELATION_TALENT(対象)
+	DVAR:催眠お仕事_状態管理フラグ = 0
+	DVAR:催眠お仕事_調教対象ID = 0
+	DVAR:催眠お仕事_進行度 = 0
+ELSE
+	IF 対象 == MASTER
+		PRINTFORML 今天在哪里工作呢？？
+		CALL ASK_MULTI("贵族的宅邸" ,"酒馆" ,"寺院" ,"神社" ,"贫民窟")
+		IF RESULT == 0
+			仕事先 = 0
+		ELSEIF RESULT == 1
+			仕事先 = 1
+		ELSEIF RESULT == 2
+			仕事先 = 2
+		ELSEIF RESULT == 3
+			仕事先 = 3
+		ELSEIF RESULT == 4
+			仕事先 = 4
+		ENDIF
+	ELSE
+		LOCAL = RAND:5
+		IF LOCAL == 0
+			仕事先 = 0
+		ELSEIF LOCAL == 1
+			仕事先 = 1
+		ELSEIF LOCAL == 2
+			仕事先 = 2
+		ELSEIF LOCAL == 3
+			仕事先 = 3
+		ELSEIF LOCAL == 4
+			仕事先 = 4
+		ENDIF
+	ENDIF
+	IF 仕事先 == 0
+		PRINTFORMW %ANAME(対象)%朝着贵族的宅邸去了……
+		PRINTFORML 
+		PRINTFORMW %ANAME(対象)%是作为贵族的女仆工作
+		SELECTCASE RAND:12
+			CASE 0
+				PRINTFORML 打扫时，被主人抚摸了屁股的%ANAME(対象)%发出了悦耳的娇叫声
+				PRINTFORML 他一边下流的笑着一边抚摸着她的屁股，%ANAME(対象)%一边说着一些软弱的话阻止一边却在摆动着翘臀
+				PRINTFORML 那个表情就像是完全充满期待被授种的母狗，从颤抖的喉咙里呼出了轻柔的娇喘
+				PRINTFORMW 就这样被带进卧室的%ANAME(対象)%开始为主人侍奉了
+			CASE 1
+				PRINTFORML %ANAME(対象)%穿着乳房和私处都一览无余的超短裙和露脐装，在一旁忙碌的工作着
+				PRINTFORML 即使被主人用下流的眼神盯着，%ANAME(対象)%也会以微笑回应他并且热心的工作
+				PRINTFORML 突然被从背后揉搓了乳房%ANAME(対象)%也只是小声喘着气娇笑着不反抗
+				PRINTFORMW 就这样被推到了的%ANAME(対象)%的一下午时间都在处理主人的肉棒中结束了
+			CASE 2
+				PRINTFORML 当%ANAME(対象)%趴在书桌下工作时嘴中忽然被插入了肉棒
+				PRINTFORML 随着扑哧扑哧的声音她一边发出下流的呻吟声一边露出了淫乱的表情用手抚摸着肉棒吮吸着
+				PRINTFORML 突然一股滚烫澎涌而出！被滚烫的精液塞满了整张嘴、%ANAME(対象)%慢慢地把精液都咽了下去
+				PRINTFORMW 他抱起了%ANAME(対象)%把她压倒在了桌上、这次插入了下面的嘴
+			CASE 3
+				PRINTFORML %ANAME(対象)%这次跟着主人一起到澡堂帮他清洁身体
+				PRINTFORML 和主人一边调情一边用肉体代替了海绵，把高耸的乳房贴在他的身上
+				PRINTFORML 双手抓起了勃起的肉棒，用舌头和手指从根部到龟头精心的揉搓舔舐着
+				PRINTFORMW 洗完澡之后，主人用他的精液把%ANAME(対象)%体内的每一个角落都“清洁”了一遍
+			CASE 4
+				PRINTFORML 在洗到主人的短裤时%ANAME(対象)%突然发情一样的开始了自慰
+				PRINTFORML 一边闻着内裤的味道一边用纤长的手指噗嗤噗嗤的来回插入着淫穴，嘴里发出娇喘声不停的绝顶着
+				PRINTFORML 因为自慰忘记了时间，主人突然回来了，慌忙想要掩饰一下但是已经晚了
+				PRINTFORMW %ANAME(対象)%就这样半裸着被抱进卧室，直接被他把雄性的味道擦遍全身
+			CASE 5
+				PRINTFORML 正在床上收拾着忽然被主人从后面推到了
+				PRINTFORML 「夫人马上就要来了不可以」的抵抗也在温柔的抚摸下变成了忘情的娇喘
+				PRINTFORML 他看着%ANAME(対象)%被压倒之后因为背德感而犹豫不决的样子下流的笑了笑就开始戏弄般的责弄她的肉体
+				PRINTFORMW 结果那天的工作就以在主人的房间里工作结束了
+			CASE 6
+				PRINTFORML 深夜的宅邸里回响着%ANAME(対象)%淫乱的娇叫声
+				PRINTFORML 在为主人送宵夜的时候%ANAME(対象)%就这样被他抱在怀里推倒在了桌子上
+				PRINTFORML 就在%ANAME(対象)%为突然地袭击而感到困惑时突然看到了一根粗壮的肉棒，于是就害羞的捂着脸张开了双腿
+				PRINTFORMW %ANAME(対象)%代替宵夜被主人充分的享用了
+			CASE 7
+				PRINTFORML %ANAME(対象)%正在厨房准备食材时突然被从背后用力推倒
+				PRINTFORML 正在准备料理的请求停下的理由也被无视、硬是把连屁股都遮不住的超短裙掀了起来开始了侵犯
+				PRINTFORML 面对着已经浑身无力的趴在灶台上的%ANAME(対象)%，他毫不留情的用肉棒撞击着
+				PRINTFORMW 当主人满足后被放开的时候，菜都烧焦了
+			CASE 8
+				PRINTFORML 因工作的疏忽%ANAME(対象)%被主人责罚了
+				PRINTFORML 被锁链捆在地下室用各种工具责弄、%ANAME(対象)%的淫穴不停的流出带着泡沫的精液和淫水
+				PRINTFORML 看着因为潮吹身体不停痉挛的%ANAME(対象)%主人脸上浮现出了嗜虐性的笑容、更加激烈的开始折磨
+				PRINTFORMW 在那之后%ANAME(対象)%粗心的次数突然上升、每次眼中都会流露出期待的神色
+			CASE 9
+				PRINTFORML %ANAME(対象)%在主人的卧室里跨在他的身上一边激烈的晃动着纤腰上下活动一边拼命忍住不让自己大声娇叫出来
+				PRINTFORML 就在旁边的床上睡着主人的妻子、在这样安静的夜晚就连木床摩擦的声音都显得巨大无比、不禁让她心狂跳不已
+				PRINTFORML 拼命忍耐的%ANAME(対象)%在被主人为了享受而激烈的冲撞之后反复达到了好几次绝顶
+				PRINTFORMW 对这么隐秘的性交而性奋不已的%ANAME(対象)%和主人在木床上度过了比以往更加高昂刺激的一晚
+			CASE 10
+				PRINTFORML %ANAME(対象)%在路上摔了一跤，脑袋恰好砸在石头上的%ANAME(対象)%脑袋里闪过一丝清明，明白过来后羞愤交加，一回到家就抄起武器
+				PRINTFORMW 这样的行为简直不可饶恕，%ANAME(対象)%决定
+				CALL ASK_MULTI("安全要紧，不管他了" ,"是可忍孰不可忍，必须雷霆斩杀之")
+				IF RESULT == 0
+					PRINTFORML %ANAME(対象)%脸色阴晴不定的思考了一会，平安归来的喜悦和对催眠师的惧怕使%ANAME(対象)%并不想离开安乐窝
+					PRINTFORML 便决定不去想这事，留在了家中
+					回家 = 1
+					DVAR:催眠お仕事_進行度 += RAND:15
+				ELSE
+					PRINTFORML %ANAME(対象)%咽不下这口气，也担心就算躲起来，催眠的效力是否消失也是两说
+					PRINTFORML 于是%ANAME(対象)%尽力控制自己的表情，装作无事发生的样子回到催眠师的据点
+					PRINTFORML 在他正疑惑%ANAME(対象)%为什么回来的如此迅速，方要出口询问之时，出其不意地斜砍一刀
+					PRINTFORML 催眠师便倒在血泊中，在惊疑中缓缓失去了最后一丝气息
+					CALL COLOR_PRINTW("在搜索据点时发现了催眠师的小金库，毫不客气的收下了。", カラー_注意)
+					MONEY += RAND(500,1500) * (DVAR:催眠お仕事_進行度 + RAND:10)
+					CALL COLOR_PRINTW("离开据点后，收到了对这个催眠师的赏金。", カラー_注意)
+					MONEY += 10000
+					DVAR:催眠お仕事_状態管理フラグ = 0
+					DVAR:催眠お仕事_調教対象ID = 0
+					DVAR:催眠お仕事_進行度 = 0
+					DVAR:催眠お仕事_死亡判定 = 1
+					RETURN 1
+				ENDIF
+			CASE 11
+				PRINTFORMW %ANAME(対象)%在路上摔了一跤，脑袋恰好砸在石头上的%ANAME(対象)%脑袋里闪过一丝清明，趁着催眠力量尚未回复急忙逃回了家。
+				回家 = 1
+				IF DVAR:催眠お仕事_進行度 > 11
+					DVAR:催眠お仕事_進行度 -= RAND:9 + 2
+				ELSEIF DVAR:催眠お仕事_進行度 > 1
+						DVAR:催眠お仕事_進行度 -= 2
+				ELSE
+					DVAR:催眠お仕事_進行度 = 0
+				ENDIF
+		ENDSELECT
+	ELSEIF 仕事先 == 1
+		PRINTFORMW %ANAME(対象)%朝着酒馆去了……
+		PRINTFORML 
+		PRINTFORMW %ANAME(対象)%在繁盛的酒馆里作为员工工作着
+		SELECTCASE RAND:12
+			CASE 0
+				PRINTFORML 在灯光闪亮的舞台上一边被所有人注视着一边跳着钢管舞
+				PRINTFORML 用透明的几乎是赤裸裸的衣服包裹着身体的%ANAME(対象)%在观众下流的叫喊声中跳着妖艳舞蹈
+				PRINTFORML %ANAME(対象)%因为男人们下流的视线而感到兴奋、更加想要被冲撞的子宫促使她更加刺激的跳着舞
+				PRINTFORMW 表演过后、%ANAME(対象)%被中意的客人买下、在床上跳着舞
+			CASE 1
+				PRINTFORML 身穿超短裙和吊带露脐装的%ANAME(対象)%在舞台上跳着脱衣舞
+				PRINTFORML 在眼前露出乳房和秘穴的淫乱样子、让顾客们不禁咽着口水把小费塞入了她的内衣中
+				PRINTFORML 当到达舞蹈的高潮时、%ANAME(対象)%已经把衣服脱到了全裸的程度、全场有无数的金币扔上了舞台
+				PRINTFORMW 受到无数热切视线注视着的%ANAME(対象)%诱惑了一名客人、让他“安静”了下来
+			CASE 2
+				PRINTFORML %ANAME(対象)%穿着兔女郎的服装为魔术师当助手
+				PRINTFORML 妖艳的的笑容和魔鬼的身材使得%ANAME(対象)%让观众们看的目不转睛、舞台上的气氛更加热烈
+				PRINTFORML 在最后的魔术中、一瞬间被脱到赤裸的%ANAME(対象)%整个舞台的气氛达到了最高潮
+				PRINTFORMW 工作结束之后、作为一个称职的助手被魔术师用特别的技巧享用着
+			CASE 3
+				PRINTFORML 今天的%ANAME(対象)%作为舞台上的主演被集中展示着
+				PRINTFORML 在很多客人面前被当众打了媚药的%ANAME(対象)%再被男人强行侵犯时也在淫荡地扭动着纤腰
+				PRINTFORML 被插入的时候同时被无数人注视着、这种羞耻和肉体的快乐让她的大脑一片空白，身体不断因为高潮而抖动着
+				PRINTFORMW 表演结束后也认真的将客人们勃起的肉棒一个个进行了服务
+			CASE 4
+				PRINTFORML 在酒馆边缘穿着妓女下流暴露服装的%ANAME(対象)%在跳着钢管舞
+				PRINTFORML 回旋的时候一边旋转一边在杆上摩擦着乳房和翘臀的时候、欢呼的声音更大了
+				PRINTFORML 客人的要求越来越刺激、不久就有了脱衣的呼声、%ANAME(対象)%微笑着回应那个请求
+				PRINTFORMW 舞蹈结束之后被一个客人邀请的%ANAME(対象)%就这样挽着手在淫乱的气氛下朝着一个房间走去
+			CASE 5
+				PRINTFORML 在舞台上回响着公开自慰的%ANAME(対象)%的娇叫声
+				PRINTFORML %ANAME(対象)%将两条美腿大开、让满是淫水的私|处曝露在男人面前，并用手指去掰开正在抚摸的淫穴
+				PRINTFORML %ANAME(対象)%产生了一种被他们视线所侵犯的感觉、超过自己的极限反复的自慰着潮吹的地上淫水直流
+				PRINTFORMW 心里想要被强奸的%ANAME(対象)%邀请着观众们让表演变成了强奸秀
+			CASE 6
+				PRINTFORML %ANAME(対象)%穿着兔女郎的衣服做着服务员的工作
+				PRINTFORML 经常被喝醉了的顾客性骚扰的%ANAME(対象)%露出淫乱的表情摇着屁股迎合着他们
+				PRINTFORML 服务态度很好的%ANAME(対象)%大受客人欢迎、高耸的乳房中间夹着客人们塞入的小费
+				PRINTFORMW 打烊后、店长表扬了%ANAME(対象)%的接待态度、作为奖励在子宫里注入了大量的“奖金”
+			CASE 7
+				PRINTFORML 身着豪华服装的%ANAME(対象)%在VIP房间接待着客人
+				PRINTFORML 肥猪一样的男人很喜欢%ANAME(対象)%的样子、伸出双手抓住了她的香肩
+				PRINTFORML %ANAME(対象)%在为他服务的时候发现他的胯下明显的勃起痕迹
+				PRINTFORMW 之后%ANAME(対象)%理所当然的被带进了房间、在屋内被尽情疼爱了一整晚
+			CASE 8
+				PRINTFORML 穿着裸露着乳房的暴露泳衣的%ANAME(対象)%作为服务员做着陪酒女的工作
+				PRINTFORML 在露出的乳头上贴着♥型的首饰悬挂着链子、每当%ANAME(対象)%在走动中都会发出叮叮的响声
+				PRINTFORML 当然客人们也不会视而不见、每时每刻都有手在%ANAME(対象)%的身上肆意的抚摸着
+				PRINTFORMW 已经无法忍受的客人把%ANAME(対象)%抱进了厕所、不一会从中传出了她放肆的淫叫
+			CASE 9
+				PRINTFORML %ANAME(対象)%在舞台上与妖怪进行着性交的战斗
+				PRINTFORML 以谁先高潮作为胜负标准被预先打了大量春药的%ANAME(対象)%为了胜利双眼泛白的用美腿夹紧妖怪的熊腰
+				PRINTFORML 被妖怪壮硕的肉棒所侵犯的的姿态让客人非常兴奋、在他们的面前%ANAME(対象)%绝顶潮吹了好几次
+				PRINTFORMW 在被放开的时候、瘫软在地的%ANAME(対象)%的子宫中充满着妖怪滚烫的精液
+			CASE 10
+				PRINTFORML %ANAME(対象)%在路上摔了一跤，脑袋恰好砸在石头上的%ANAME(対象)%脑袋里闪过一丝清明，明白过来后羞愤交加，一回到家就抄起武器
+				PRINTFORMW 这样的行为简直不可饶恕，%ANAME(対象)%决定
+				CALL ASK_MULTI("安全要紧，不管他了" ,"是可忍孰不可忍，必须雷霆斩杀之")
+				IF RESULT == 0
+					PRINTFORML %ANAME(対象)%脸色阴晴不定的思考了一会，平安归来的喜悦和对催眠师的惧怕使%ANAME(対象)%并不想离开安乐窝
+					PRINTFORML 便决定不去想这事，留在了家中
+					回家 = 1
+					DVAR:催眠お仕事_進行度 += RAND:15
+				ELSE
+					PRINTFORML %ANAME(対象)%咽不下这口气，也担心就算躲起来，催眠的效力是否消失也是两说
+					PRINTFORML 于是%ANAME(対象)%尽力控制自己的表情，装作无事发生的样子回到催眠师的据点
+					PRINTFORML 在他正疑惑%ANAME(対象)%为什么回来的如此迅速，方要出口询问之时，出其不意地斜砍一刀
+					PRINTFORML 催眠师便倒在血泊中，在惊疑中缓缓失去了最后一丝气息
+					CALL COLOR_PRINTW("在搜索据点时发现了催眠师的小金库，%ANAME(対象)%毫不客气的收下了。", カラー_注意)
+					MONEY += RAND(500,1500) * (DVAR:催眠お仕事_進行度 + RAND:10)
+					CALL COLOR_PRINTW("离开据点后，%ANAME(対象)%还收到了对这个催眠师的赏金。", カラー_注意)
+					MONEY += 10000
+					DVAR:催眠お仕事_状態管理フラグ = 0
+					DVAR:催眠お仕事_調教対象ID = 0
+					DVAR:催眠お仕事_進行度 = 0
+					DVAR:催眠お仕事_死亡判定 = 1
+					RETURN 1
+				ENDIF
+			CASE 11
+				PRINTFORMW %ANAME(対象)%在路上摔了一跤，脑袋恰好砸在石头上的%ANAME(対象)%脑袋里闪过一丝清明，趁着催眠力量尚未回复急忙逃回了家。
+				回家 = 1
+				IF DVAR:催眠お仕事_進行度 > 11
+					DVAR:催眠お仕事_進行度 -= RAND:9 + 2
+				ELSEIF DVAR:催眠お仕事_進行度 > 1
+						DVAR:催眠お仕事_進行度 -= 2
+				ELSE
+					DVAR:催眠お仕事_進行度 = 0
+				ENDIF
+		ENDSELECT
+	ELSEIF 仕事先 == 2
+		PRINTFORMW %ANAME(対象)%向着寺庙敝舍走去……
+		PRINTFORML 
+		PRINTFORMW %ANAME(対象)%作为一名兼职教师开始了工作
+		SELECTCASE RAND:12
+			CASE 0
+				PRINTFORML 今天的课程内容是对男孩子们的性教育
+				PRINTFORML %ANAME(対象)%将自己的身体作为样本展示在少年们的眼前、甚至连耻部都进行了详细的解说
+				PRINTFORML 咕嘟咕嘟地吞着口水的少年们那好奇的视线让%ANAME(対象)%都兴奋了起来、一边流出爱液一边继续为少年们上课
+				PRINTFORMW 讲解完之后就是实际操作了、%ANAME(対象)%热心地帮紧张的少年们的肉棒逐个脱离了童贞
+			CASE 1
+				PRINTFORML 与一位成绩不理想的少年交往了、在放学之后为他进行个人授业
+				PRINTFORML 注意到他的视线一直在胸部上游走后、%ANAME(対象)%嬉笑着故意敞开了领口的衣物挑衅了他
+				PRINTFORML 「在耳边听完课的话就会给你奖励喔」耳边的媚声让他迅速地勃起了、为了奖励他开始全力以赴地解决课题
+				PRINTFORMW 他以超乎想象的高速完成了课题、于是按照约定给予了他很多次奖励
+			CASE 2
+				PRINTFORML 为了管教对女孩施暴的少年，把他带进了指导室
+				PRINTFORML 面对胆怯又虚张声势的他，%ANAME(対象)%温柔地教导他，一点点地与他身体亲密，刺激雄性的本能。
+				PRINTFORML 当他被说教得面红耳赤、扭扭捏的时候，%ANAME(対象)%把他拉到沙发上脱了衣服。
+				PRINTFORMW 通过使用%ANAME(対象)%的身体进行的个别指导，那个少年重新做人了，以后也不再粗暴了
+			CASE 3
+				PRINTFORML %ANAME(対象)%穿着紧身的教师服作为临时教师站在讲台上
+				PRINTFORML 一边酝酿着媚气一边上课、被台下少年们直勾勾的眼光注视着让%ANAME(対象)%也逐渐娇媚地喘息起来
+				PRINTFORML 在课桌下悄悄勃起的他们一边舔着舌头、一边看着台上正在讲课的大人散发着雌性的费洛蒙
+				PRINTFORMW 放学后、%ANAME(対象)%邀请了自己喜欢的孩子们继续进行特殊授课
+			CASE 4
+				PRINTFORML 被年轻的男教师所邀约、%ANAME(対象)%在不经意间被强行拉进了厕所
+				PRINTFORML 被男教师一边用手捂住了嘴、一边激烈地侵犯着、这时正倚靠着的墙壁对面却传来了孩子们的声音
+				PRINTFORML 一旦发出声音就会被孩子们发现。即使是在这种情况下%ANAME(対象)%却还是一声不吭的颤抖着高潮了好几次
+				PRINTFORMW 一段時間后、从厕所中走出来的%ANAME(対象)%的裙子上渗出一行精液沿着裙摆流淌下来
+			CASE 5
+				PRINTFORML 被命令进行特别授课的%ANAME(対象)%素裸着站立在讲台上
+				PRINTFORML 教室里站满了男教师和男生、他们都目不转睛的注视着讲台上的%ANAME(対象)%走下讲台
+				PRINTFORML 感受到他们热情的视线、%ANAME(対象)%为了不使授课失败而干劲十足的开始了上课
+				PRINTFORMW 上完课之后、被学園長一边称赞着对于授课的热情态度、一边充分地进行了授种
+			CASE 6
+				PRINTFORML %ANAME(対象)%正在作为顾问接受学生的咨询
+				PRINTFORML 因为今天受到了欺凌虐待、所以不想去上学的学生前来寻求顾问的帮助、%ANAME(対象)%真心实意地与学生进行了交流沟通
+				PRINTFORML 因为至今仍是处男而没有自信。面对这样的学生、%ANAME(対象)%将自己的身体提供出来、手把手地教导他如何制造孩子
+				PRINTFORML 多亏用了一晚上的时间进行献身教导、他从第二天起就精神抖擞地开始上学去了
+			CASE 7
+				PRINTFORML 生物课时、%ANAME(対象)%将自己作为人体标本素裸着站在学生们的面前
+				PRINTFORML 每当男教师用指示棒顶过来的时候、%ANAME(対象)%都会喘着气配合教学打开身体、让学生能看的更清楚
+				PRINTFORML 胸部、腋下、臀部、以及膣道的深处、全都被自己张开来展示给全体学生欣赏、强烈的羞耻染红了她的脸颊
+				PRINTFORMW 在解说完之后被好奇的学生们包围起来、让他们在实际体验中亲自学习到身体的每一个角落深处
+			CASE 8
+				PRINTFORML 被任命前来与抗议的学生家长进行接触的%ANAME(対象)%去了接待室
+				PRINTFORML %ANAME(対象)%在已经配备好的床上跨坐在家长身上一边扭动着腰肢、一边向抗议的内容进行解释和说明
+				PRINTFORML 对身下激烈冲顶着自己的家长、%ANAME(対象)%全身心地向之诚恳致歉、用子宫完整地接下了他的愤怒
+				PRINTFORMW 对于%ANAME(対象)%真挚地认错态度家长们也表示接受了、停止了抗议集体离开
+			CASE 9
+				PRINTFORML 校舎里、%ANAME(対象)%正被不良学生们包围起来激烈地侵犯着
+				PRINTFORML 发现他们正在吸烟的%ANAME(対象)%出声提醒了他们、他们却嬉笑着、要让她来替代他们的烟草
+				PRINTFORML 在为了让失足学生重获新生的大义之下、%ANAME(対象)%娇喘着被他们注入了年轻浓厚的精液
+				PRINTFORMW 等到日落之后、浑身粘稠被丢弃在校舍里的%ANAME(対象)%露出了颇为满足的表情
+			CASE 10
+				PRINTFORML %ANAME(対象)%在路上摔了一跤，脑袋恰好砸在石头上的%ANAME(対象)%脑袋里闪过一丝清明，明白过来后羞愤交加，一回到家就抄起武器
+				PRINTFORMW 这样的行为简直不可饶恕，%ANAME(対象)%决定
+				CALL ASK_MULTI("安全要紧，不管他了" ,"是可忍孰不可忍，必须雷霆斩杀之")
+				IF RESULT == 0
+					PRINTFORML %ANAME(対象)%脸色阴晴不定的思考了一会，平安归来的喜悦和对催眠师的惧怕使%ANAME(対象)%并不想离开安乐窝
+					PRINTFORML 便决定不去想这事，留在了家中
+					回家 = 1
+					DVAR:催眠お仕事_進行度 += RAND:15
+				ELSE
+					PRINTFORML %ANAME(対象)%咽不下这口气，也担心就算躲起来，催眠的效力是否消失也是两说
+					PRINTFORML 于是%ANAME(対象)%尽力控制自己的表情，装作无事发生的样子回到催眠师的据点
+					PRINTFORML 在他正疑惑%ANAME(対象)%为什么回来的如此迅速，方要出口询问之时，出其不意地斜砍一刀
+					PRINTFORML 催眠师便倒在血泊中，在惊疑中缓缓失去了最后一丝气息
+					CALL COLOR_PRINTW("在搜索据点时发现了催眠师的小金库，毫不客气的收下了。", カラー_注意)
+					MONEY += RAND(500,1500) * (DVAR:催眠お仕事_進行度 + RAND:10)
+					CALL COLOR_PRINTW("离开据点后，还收到了对这个催眠师的赏金。", カラー_注意)
+					MONEY += 10000
+					DVAR:催眠お仕事_状態管理フラグ = 0
+					DVAR:催眠お仕事_調教対象ID = 0
+					DVAR:催眠お仕事_進行度 = 0
+					DVAR:催眠お仕事_死亡判定 = 1
+					RETURN 1
+				ENDIF
+			CASE 11
+				PRINTFORMW %ANAME(対象)%在路上摔了一跤，脑袋恰好砸在石头上的%ANAME(対象)%脑袋里闪过一丝清明，趁着催眠力量尚未回复急忙逃回了家。
+				回家 = 1
+				IF DVAR:催眠お仕事_進行度 > 11
+					DVAR:催眠お仕事_進行度 -= RAND:9 + 2
+				ELSEIF DVAR:催眠お仕事_進行度 > 1
+						DVAR:催眠お仕事_進行度 -= 2
+				ELSE
+					DVAR:催眠お仕事_進行度 = 0
+				ENDIF
+		ENDSELECT
+	ELSEIF 仕事先 == 3
+		PRINTFORMW %ANAME(対象)%往神社走去……
+		PRINTFORML 
+		PRINTFORMW %ANAME(対象)%开始了作为巫女的兼职工作
+		SELECTCASE RAND:12
+			CASE 0
+				PRINTFORML 在神社的院落中、%ANAME(対象)%的巫女服敞开着、露出内部穿的非常下流的服装、激烈地高潮着
+				PRINTFORML 被大神官抓紧腰部后以立体位猛烈冲顶的%ANAME(対象)%、脸上浮现的表情很难让人认为这是位神职人员
+				PRINTFORML %ANAME(対象)%连工作都忘掉了、壮硕阴茎在体内咕嗤咕嗤不断搅动的感觉让她翻起了白眼、一直高声娇喘着
+				PRINTFORMW 在大神官充分地为之注入自己的慈悲后、%ANAME(対象)%面无表情地回到了参拜游客的身边、只有地面上滴落的慈悲诉说着刚才发生的一切
+			CASE 1
+				PRINTFORML %ANAME(対象)%被任命为负责抽签的游客进行特别服务
+				PRINTFORML 将抽中上上签的客人带回家、在铺好棉被的房间里用巫女的娇躯为客人进行充分的奉仕
+				PRINTFORML 兴奋的客人激烈地侵犯着同样兴奋的%ANAME(対象)%、尽管是在工作中、但还是被客人一次又一次弄到高潮
+				PRINTFORMW 当天不知道为什么总是有幸运的客人抽到头签、一直工作到天黑为止、她为许多客人都提供了特殊服务
+			CASE 2
+				PRINTFORML 深夜、在神社里素裸的%ANAME(対象)%正在跳一支巫女的舞蹈
+				PRINTFORML 作为观众的大神官和中年参拜客大叔胯下支起帐篷、用色眯眯的眼神欣赏着%ANAME(対象)%舞动的身体
+				PRINTFORML %ANAME(対象)%对这个情景没有任何疑问、只是努力地专注于将自己那被视作荣誉的美好娇躯展现出来
+				PRINTFORMW 舞蹈完毕后、作为精彩舞蹈的奖励、观众们逐个走上前去将他们的慈爱充分地注入到她的子宫中
+			CASE 3
+				PRINTFORML %ANAME(対象)%作为帮助神明的献身者、被蒙上眼罩捆绑起来、搁置在神殿之中
+				PRINTFORML 从现在开始、即将献身于神的荣誉与期待让%ANAME(対象)%兴奋到面红耳赤地娇喘着、下腹的股间都湿透了
+				PRINTFORML 但是出现在神殿里的却是大神官、他趁着%ANAME(対象)%被蒙住双眼刚好看不到他的模样、装作神明的样子粗暴地袭击了她
+				PRINTFORMW 第二天早上、浑身沾满白浊粘液且精神恍惚的%ANAME(対象)%被他抱起从神殿中运走了
+			CASE 4
+				PRINTFORML 一位参拜者在角落里突然跪下请求要和%ANAME(対象)%做爱、于是将客人带到院落里为他套弄着鸡鸡
+				PRINTFORML 他心愿中最渴望得到的巫女陪伴着他让他极度兴奋、忍不住双手抱住%ANAME(対象)%的头将龟头猛烈地深入到她喉咙深处
+				PRINTFORML 在神圣的地方进行着不洁的行为让%ANAME(対象)%不知不觉也兴奋了起来、眼里浮现了爱♥心、仔细地将参拜者的精液全部吮吸的干干净净
+				PRINTFORMW 不洁的行为还没结束、还在持续着、这次阴茎被塞入到下面的嘴里、一次又一次地侵犯着巫女
+			CASE 5
+				PRINTFORML 在一间贴有符纸的房间中、%ANAME(対象)%跨坐在一个男人身上激烈地扭着腰肢
+				PRINTFORML 这是被称为祛除狐妖的仪式、%ANAME(対象)%正在专注而竭尽全力地帮他将身上的邪恶精气祛除掉
+				PRINTFORML 男人一边嗤笑着看着%ANAME(対象)%在身上拼命扭动的模样、一边让手指在她的胸部和肌肤上游走、来回爱抚着敏感的弱点
+				PRINTFORMW 一次又一次的射精终于平安地祛除了狐妖、男人抚摸着%ANAME(対象)%温热的下腹表达了感谢后离开了
+			CASE 6
+				PRINTFORML 在神社的正殿中、で%ANAME(対象)%被临时工同事激烈地侵犯着、快感令娇喘愈发高昂
+				PRINTFORML 外面的参拜者离这里很近、绝对不能发出声音。在这个情况下%ANAME(対象)%只能拼命忍受着随时可能被顶撞挤出来的娇喘
+				PRINTFORML 他好像很享受她这种拼命忍耐的可爱模样似的、突然开始对子宫进行猛烈地突刺、那个程度的猛烈突刺让%ANAME(対象)%一边微颤着扭动腰身一边绝顶了
+				PRINTFORMW 虽然没有被发现、但精疲力竭走不动路的%ANAME(対象)%只能被他抱起来从正殿运送出去了
+			CASE 7
+				PRINTFORML %ANAME(対象)%在神社的地下室里被粗麻绳捆绑起来、正在被大神官侵犯着
+				PRINTFORML 据说这是巫女的修行、正在进行着巫女修行的%ANAME(対象)%虽然并不反抗、但身体还是在激烈的侵犯中老老实实地痉挛了
+				PRINTFORML 大神官一边看着她下流的反应一边继续激烈地进攻着、她脸上浮现出淫乱的阿黑颜一次又一次地娇喘着
+				PRINTFORMW 修行结束之后、浑身黏糊白浊的%ANAME(対象)%一边娇声喘息着一边激动地期待着下一次修行
+			CASE 8
+				PRINTFORML %ANAME(対象)%正在进行收集对神社信仰和进贡的营业活动
+				PRINTFORML 解开巫女服的%ANAME(対象)%被神社赞助商一边双手把头按在股间、一边为他细心地吮吸着男根
+				PRINTFORML 那副下流的模样被赞助商批评着、虽然她满脸通红但还是支支吾吾地辩解这是为了神社发展的缘故
+				PRINTFORMW 被赞助商肆意疼爱和凌辱一整晚之后、总算是达成了捐赠时的承诺
+			CASE 9
+				PRINTFORML 夹杂着连绵不断地雨声、%ANAME(対象)%放荡的娇声在神社中回响着
+				PRINTFORML 为了焐暖避雨时被大雨淋湿的参拜者、将自己身体贡献出来的%ANAME(対象)%跨坐在他的身上、激烈地交合着
+				PRINTFORML 在神圣的神殿内进行下流的行为让%ANAME(対象)%兴奋不已、一边痴迷的与参拜者交缠着舌头、一边激烈地扭动腰肢、双方都在用力与对方交换着体温
+				PRINTFORMW 在大雨停歇之前都在激烈交合的%ANAME(対象)%与参拜客深深地互吻后、约好下次再会便相互告别了
+			CASE 10
+				PRINTFORML %ANAME(対象)%在路上摔了一跤，脑袋恰好砸在石头上的%ANAME(対象)%脑袋里闪过一丝清明，明白过来后羞愤交加，一回到家就抄起武器
+				PRINTFORMW 这样的行为简直不可饶恕，%ANAME(対象)%决定
+				CALL ASK_MULTI("安全要紧，不管他了" ,"是可忍孰不可忍，必须雷霆斩杀之")
+				IF RESULT == 0
+					PRINTFORML %ANAME(対象)%脸色阴晴不定的思考了一会，平安归来的喜悦和对催眠师的惧怕使%ANAME(対象)%并不想离开安乐窝
+					PRINTFORML 便决定不去想这事，留在了家中
+					回家 = 1
+					DVAR:催眠お仕事_進行度 += RAND:15
+				ELSE
+					PRINTFORML %ANAME(対象)%咽不下这口气，也担心就算躲起来，催眠的效力是否消失也是两说
+					PRINTFORML 于是%ANAME(対象)%尽力控制自己的表情，装作无事发生的样子回到催眠师的据点
+					PRINTFORML 在他正疑惑%ANAME(対象)%为什么回来的如此迅速，方要出口询问之时，出其不意地斜砍一刀
+					PRINTFORML 催眠师便倒在血泊中，在惊疑中缓缓失去了最后一丝气息
+					CALL COLOR_PRINTW("在搜索据点时发现了催眠师的小金库，毫不客气的收下了。", カラー_注意)
+					MONEY += RAND(500,1500) * (DVAR:催眠お仕事_進行度 + RAND:10)
+					CALL COLOR_PRINTW("离开据点后，还收到了对这个催眠师的赏金。", カラー_注意)
+					MONEY += 10000
+					DVAR:催眠お仕事_状態管理フラグ = 0
+					DVAR:催眠お仕事_調教対象ID = 0
+					DVAR:催眠お仕事_進行度 = 0
+					DVAR:催眠お仕事_死亡判定 = 1
+					RETURN 1
+				ENDIF
+			CASE 11
+				PRINTFORMW %ANAME(対象)%在路上摔了一跤，脑袋恰好砸在石头上的%ANAME(対象)%脑袋里闪过一丝清明，趁着催眠力量尚未回复急忙逃回了家。
+				回家 = 1
+				IF DVAR:催眠お仕事_進行度 > 11
+					DVAR:催眠お仕事_進行度 -= RAND:9 + 2
+				ELSEIF DVAR:催眠お仕事_進行度 > 1
+						DVAR:催眠お仕事_進行度 -= 2
+				ELSE
+					DVAR:催眠お仕事_進行度 = 0
+				ENDIF
+		ENDSELECT
+	ELSEIF 仕事先 == 4
+		PRINTFORMW %ANAME(対象)%向贫民窟走去……
+		PRINTFORML 
+		PRINTFORMW %ANAME(対象)%在贫民窟进行着奉仕活動
+		SELECTCASE RAND:12
+			CASE 0
+				PRINTFORML 在贫民窟某个角落的帐篷里、%ANAME(対象)%正被流浪汉侵犯着
+				PRINTFORML 恰好碰上清洗活动的流浪汉、对%ANAME(対象)%说要把鸡鸡也弄得漂漂亮亮干干净净喔、她毫不迟疑地微笑着点了点头
+				PRINTFORML 对于这个反应流浪汉非常吃惊、但一旦确认%ANAME(対象)%居然是认真的之后、一把抓住她的胳膊将她拉进自己的巢穴中、粗暴地压倒了她
+				PRINTFORMW %ANAME(対象)%作为清洗活动的一环将流浪汉的全身都弄得干干净净、不仅仅是阴茎、连身体都漂亮地弄干净了
+			CASE 1
+				PRINTFORML %ANAME(対象)%在贫民窟深处被大量流浪汉包围着进行奉仕
+				PRINTFORML 作为一次慈善活动%ANAME(対象)%为平时男多女少的他们提供了自己的身体、让他们得以释放出自己之前一直积存着的精液
+				PRINTFORML 哪怕全身都已经被白浊弄得粘稠不已、流浪汉也依然不间断地逐个前来、无论怎么捋动套弄也总会有小鸡鸡伸过来
+				PRINTFORMW 只用嘴巴和双手已经赶不上了、%ANAME(対象)%决定再用上雌穴和尻穴继续进行奉仕活动
+			CASE 2
+				PRINTFORML %ANAME(対象)%正在作为助手帮忙进行着为不幸穷人们的定量分发物资的活动
+				PRINTFORML 正笑着为流浪汉们分下饭菜的%ANAME(対象)%实际上直到刚才都还在里面和流浪汉交合
+				PRINTFORML 每当有人说出那个秘密的口号时、%ANAME(対象)%就会说想要去休息一会儿然后走向小巷深处、将男人肮脏的肉棒含入身体深处
+				PRINTFORMW 帮完忙之后、%ANAME(対象)%的子宫里流浪汉们的污垢白浊已经多到要溢出来的程度
+			CASE 3
+				PRINTFORML 被流浪汉团体包围起来的%ANAME(対象)%面前有大量阴茎顶了过来
+				PRINTFORML 对于现在的%ANAME(対象)%来说这是一件理所当然的工作、脸上毫无厌恶地吮吸着阴茎、进行着奉仕活动
+				PRINTFORML 每当肮脏的白浊喷射在嘴里、%ANAME(対象)%都会一滴不剩地全部喝下、再继续用舌头细心地为他清洗干净身下的污垢
+				PRINTFORMW 奉仕活動结束之后、和干净漂亮的小鸡鸡相反的是%ANAME(対象)%的全身都白浊弄的又黏又脏
+			CASE 4
+				PRINTFORML 在拥挤的贫民窟深处、%ANAME(対象)%被一边居民们冲顶授种一边发出高昂的娇喘
+				PRINTFORML 虽然是被粗暴地侵犯着但那副表情完全是已经发情了的样子、快感让她自觉地抱紧了他承受着肉棒的深入
+				PRINTFORML 献出自己的身体、全身心地接受贫民们的精液对于现在的%ANAME(対象)%来说完全是理所当然的工作
+				PRINTFORMW 唔呀呀呀！哪怕已经被一次又一次地次中出过了、但%ANAME(対象)%的娇躯还是在悦乐的绝顶中忍不住后仰着
+			CASE 5
+				PRINTFORML %ANAME(対象)%外面套了一件大衣、里面赤裸着走在贫民区的大街上
+				PRINTFORML 每次遇到流浪汉就敞开大衣露出里面赤裸的娇躯、引诱他在小巷里像野兽一样在体内充分地搅动膣道、然后接受他射出的精液
+				PRINTFORML 平时就没见过女性的他像猴子一样痴迷地激烈挥动着腰、%ANAME(対象)%也为被这无情又猛烈的性交对待而兴奋、数次昏迷过去、又在快感的刺激下再次醒来
+				PRINTFORMW %ANAME(対象)%无比热爱这次变态的奉仕活动、一直到日落之前为好几十个男人进行了奉仕
+			CASE 6
+				PRINTFORML 在贫民窟的深处、%ANAME(対象)%为了进行流浪汉的奉仕活动而将自己制成了壁尻
+				PRINTFORML 听闻到消息的居民们纷纷赶来这里找%ANAME(対象)%、找到了就尽情地侵犯她、毫不留情地弄脏她
+				PRINTFORML 溢出的爱液和精液已经在脚下堆积成白浊的水洼、被击打到通红的屁股高抬着、还在一颤一颤地痉挛
+				PRINTFORMW 完成了对无数男人的性处理之后、%ANAME(対象)%的下腹部被大量堆积的精液撑得膨胀起来、像孕妇一样鼓起的肚子还在颤抖着
+			CASE 7
+				PRINTFORML %ANAME(対象)%参与了当地神职人员的清洗活动、开始对贫民窟进行打扫
+				PRINTFORML 休憩时被其中一位神职人员邀请的%ANAME(対象)%被带到一间空屋子里、「请也为我奉仕吧」说着就被粗暴地压倒在地
+				PRINTFORML 但%ANAME(対象)%毫不反抗地接受了他的暴行、将伫立的肉棒猛地塞入到膣道深处、一次又一次地接受了他的射精
+				PRINTFORMW 在工作的休息时间总是被他缠着要继续做爱、最后在一次又一次的交合后结束了今天的清洗活动
+			CASE 8
+				PRINTFORML 在贫民窟的角落里、%ANAME(対象)%站在那里展示着廉价的身价牌
+				PRINTFORML 没穿内裤、身上仅裹着一块薄布的%ANAME(対象)%诱惑着经过的流浪汉以1金的低价买走自己的肉体
+				PRINTFORML 对于%ANAME(対象)%来说、这也是为了给不幸的贫民们无私奉仕活动的一个环节、无论价格多低都一定会热心地为他们进行服务
+				PRINTFORMW 完成工作后的%ANAME(対象)%下定决心、要继续被流浪汉们毫不客气地侵犯和被玷污、又一次前去追求快感
+			CASE 9
+				PRINTFORML 在作为维持秩序的治安员进行巡视活动时、遇到了专门袭击少女的强奸魔
+				PRINTFORML 只是拿刀小混混级别的敌人、虽然不是敌人但%ANAME(対象)%为了人质而没有反抗、脱下衣服替代强奸魔手上的少女成为人质
+				PRINTFORML 被他所绑架的%ANAME(対象)%顺从地奉仕着、被肮脏的阴茎一遍又一遍地奸污着身体、喜悦的娇声愈发高昂
+				PRINTFORMW 被侵犯到乱七八糟后、终于被前来巡视的卫兵救出来的%ANAME(対象)%仅是依依不舍地离开了、似乎还未爽够一般
+			CASE 10
+				PRINTFORML %ANAME(対象)%在路上摔了一跤，脑袋恰好砸在石头上的%ANAME(対象)%脑袋里闪过一丝清明，明白过来后羞愤交加，一回到家就抄起武器
+				PRINTFORMW 这样的行为简直不可饶恕，%ANAME(対象)%决定
+				CALL ASK_MULTI("安全要紧，不管他了" ,"是可忍孰不可忍，必须雷霆斩杀之")
+				IF RESULT == 0
+					PRINTFORML %ANAME(対象)%脸色阴晴不定的思考了一会，平安归来的喜悦和对催眠师的惧怕使%ANAME(対象)%并不想离开安乐窝
+					PRINTFORML 便决定不去想这事，留在了家中
+					回家 = 1
+					DVAR:催眠お仕事_進行度 += RAND:15
+				ELSE
+					PRINTFORML %ANAME(対象)%咽不下这口气，也担心就算躲起来，催眠的效力是否消失也是两说
+					PRINTFORML 于是%ANAME(対象)%尽力控制自己的表情，装作无事发生的样子回到催眠师的据点
+					PRINTFORML 在他正疑惑%ANAME(対象)%为什么回来的如此迅速，方要出口询问之时，出其不意地斜砍一刀
+					PRINTFORML 催眠师便倒在血泊中，在惊疑中缓缓失去了最后一丝气息
+					CALL COLOR_PRINTW("在搜索据点时发现了催眠师的小金库，毫不客气的收下了。", カラー_注意)
+					MONEY += RAND(500,1500) * (DVAR:催眠お仕事_進行度 + RAND:10)
+					CALL COLOR_PRINTW("离开据点后，还收到了对这个催眠师的赏金。", カラー_注意)
+					MONEY += 10000
+					DVAR:催眠お仕事_状態管理フラグ = 0
+					DVAR:催眠お仕事_調教対象ID = 0
+					DVAR:催眠お仕事_進行度 = 0
+					DVAR:催眠お仕事_死亡判定 = 1
+					RETURN 1
+				ENDIF
+			CASE 11
+				PRINTFORMW %ANAME(対象)%在路上摔了一跤，脑袋恰好砸在石头上的%ANAME(対象)%脑袋里闪过一丝清明，趁着催眠力量尚未回复急忙逃回了家。
+				回家 = 1
+				IF DVAR:催眠お仕事_進行度 > 11
+					DVAR:催眠お仕事_進行度 -= RAND:9 + 2
+				ELSEIF DVAR:催眠お仕事_進行度 > 1
+						DVAR:催眠お仕事_進行度 -= 2
+				ELSE
+					DVAR:催眠お仕事_進行度 = 0
+				ENDIF
+		ENDSELECT
+	ENDIF
+	SIF DVAR:催眠お仕事_進行度 < 0
+		DVAR:催眠お仕事_進行度 = 0
+
+	IF DVAR:催眠お仕事_進行度 == 0
+		PRINTFORMW %ANAME(対象)%终于摆脱了这一切，回到了家。
+		DVAR:催眠お仕事_状態管理フラグ = 0
+		DVAR:催眠お仕事_調教対象ID = 0
+	ELSEIF 回家 == 1
+		PRINTFORML %ANAME(対象)%在家中安全的度过了这一天。
+	ELSE 
+		CALL FUCK(対象, "欲望, 欲望, 奉仕, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 接吻, 口淫, Ｖ性交, 輪姦, Ａ性交", "処女喪失, 膣内射精, 口内射精, Ａ処女喪失, 腸内射精, CFLAG減少", GET_SPERM_ID("偶遇的男人"), @"見ず知らずの雄の\@RAND:2 ? 肉棒 # 唇\@", @"", "見ず知らずの雄", "催眠中の強姦")
+		PRINTFORML 
+		PRINTFORMW 工作结束了的%ANAME(対象)%被解除催眠放了回来
+		PRINTFORML 我到底做了什么样的工作？
+		PRINTFORML 不记得，一定是因为累了吧
+		PRINTFORMW %ANAME(対象)%就这样下了结论，为了休息回到了自己的房间
+		DVAR:催眠お仕事_進行度 += RAND:6 + 4
+	ENDIF
+ENDIF
+
+回家 = 0
+
+RETURN 1
+
+@EVENT_DAILY_DERIVATION_HYPNOTISM_SLAVE_ALLOW_WHEN_WANDERING
+RETURN 1
+

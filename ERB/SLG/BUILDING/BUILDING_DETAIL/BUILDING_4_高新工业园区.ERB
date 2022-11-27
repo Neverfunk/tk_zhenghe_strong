@@ -1,0 +1,62 @@
+@BUILDING_GET_NAME_高新工业园区()
+    #FUNCTIONS
+    RETURNF "高新工业园区"
+
+@BUILDING_GET_EXP_高新工业园区()
+    #FUNCTIONS
+    RETURNF "都市的收入增加。国内《基础工业园区》建筑的效果提高。"
+
+@BUILDING_SET_INFO_ID_4()
+    BUILDING_TYPE:建造物_高新工业园区 = 建造物_类型_经济类
+    BUILDING_LEVEL:建造物_高新工业园区 = 建造物_等级_三级建筑
+    BUILDING_LIMIT_NUM:建造物_高新工业园区 = 建造物_数量限制_1
+    BUILDING_LIMIT_UNI:建造物_高新工业园区 = 0
+    BUILDING_COUNTRY_ID:建造物_高新工业园区:特殊勢力_普通势力 = 1
+    BUILDING_HAVE_SKILL:建造物_高新工业园区 = 1
+    BUILDING_TOHO_REQ_ID:建造物_高新工业园区:0 = 0
+
+@CHECK_BUILDING_FUNCTION_高新工业园区(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    #DIM TAX
+    TAX = 0
+    IF TMP_BUILDING_EXIST_FLAG:(COUNTRY_ID):建造物_高新工业园区 == 1
+        TAX = 1000
+    ENDIF
+    RESULT:1 = TAX
+    RESULT:0 = TAX
+    RETURNF TAX
+
+@BUILDING_TEXT_高新工业园区(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    SIF !CHECK_BUILDING_TEXT_OUTPUT(COUNTRY_ID)
+        RETURNF 0
+    BUILDING_TEXT = PRINT_BUILDING_TEXT_TITLE_F()
+    PRINTFORML 因为《高新工业园区》的存在，%ANAME(GET_COUNTRY_BOSS(COUNTRY_ID))%势力获得了1000国库资金
+    RETURNF 1
+
+@BUILDING_SKILL_高新工业园区(COUNTRY_ID)
+    #DIM COUNTRY_ID
+    PRINTFORML 发动后我方势力所有都市的经济上限增加50
+    PRINTFORML 冷却时间5回合
+    PRINTFORML 是否发动
+    CALL ASK_YN()
+    IF !RESULT
+        PRINTFORML 发动了《高新工业园区》的技能
+        CALL BUILDING_SKILL_高新工业园区_FUNCTION(COUNTRY_ID)
+        BUILDING_SKILL_COLDTIME:COUNTRY_ID:建造物_高新工业园区 = 5
+    ENDIF
+    PRINTFORMW 完毕
+
+@BUILDING_SKILL_高新工业园区_FUNCTION(COUNTRY_ID)
+    #DIM COUNTRY_ID
+    #DIM CITY_ID
+    SIF !IS_COUNTRY(COUNTRY_ID)
+        RETURN
+    FOR CITY_ID,0,CITY_NUM
+        SIF CITY_OWNER:CITY_ID != COUNTRY_ID
+            CONTINUE
+        CITY_ECONOMY_LIMIT:CITY_ID = MIN(50*100+CITY_ECONOMY_LIMIT:CITY_ID,999900)
+        PRINTFORML %CITY_NAME:CITY_ID%的经济上限增加了50
+    NEXT

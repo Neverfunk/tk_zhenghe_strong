@@ -1,0 +1,102 @@
+﻿;-------------------------------------------------
+;ターン終了時の公衆便器処理
+;-------------------------------------------------
+@QuriltaiGOBLIN_PublicLavatory_TURNEND
+#DIM 性奴隷
+#DIMS 名前
+#DIM 士官フラグ
+#DIM 支持率
+#DIM 集権性
+#DIM 支持率上昇
+#DIM 集権性上昇
+
+SIF STATUE_GOBLIN_COUNCIL:0 == 1
+	RETURN
+
+CALL SINGLE_DRAWLINE("-", カラー_選択不可)
+RESETCOLOR
+PRINTFORMW 哥布林们正在使用公众便器
+PRINTFORML 
+
+支持率 = CFLAG:MASTER:1709
+集権性 = Centralization_power_GOBLIN
+支持率上昇 = 0
+集権性上昇 = 0
+
+FOR 性奴隷, 0, CHARANUM
+	CALL CHANGE_GOBLIN_subject(性奴隷)
+	SIF !CFLAG:性奴隷:1710
+		CONTINUE
+	IF GETBIT(TALENT:性奴隷:特殊勢力陥落系, 特殊勢力_ホフゴブリン) || SP_TRAIN_COUNT:性奴隷:特殊勢力_ホフゴブリン >= (TRAIN_FALLEN_TERM:2 - (CFLAG:性奴隷:所属 == CFLAG:MASTER:所属))
+		士官フラグ = 1
+	ELSE
+		士官フラグ = 0
+	ENDIF
+	
+	IF CFLAG:性奴隷:1710 == 1
+		PRINTFORML 使%ANAME(性奴隷)%进行了修养，恢复了精神
+		SP_TRAIN_COUNT:性奴隷:特殊勢力_ホフゴブリン = MAX(0, SP_TRAIN_COUNT:性奴隷:特殊勢力_ホフゴブリン - 1)
+		COOLTIME:性奴隷:0 = MAX(COOLTIME:性奴隷:0 - 1 , 0)
+	ELSEIF CFLAG:性奴隷:1710 == 2
+		CALL GOBLIN_TRAIN_MSG(性奴隷, 士官フラグ)
+		SP_TRAIN_COUNT:性奴隷:特殊勢力_ホフゴブリン ++
+		COOLTIME:性奴隷:0 = MAX(COOLTIME:性奴隷:0 - 1 , 0)
+		IF GET_COUNTRY_BOSS(CFLAG:MASTER:所属) == MASTER
+			支持率上昇 ++
+			集権性上昇 ++
+		ENDIF
+		WAIT
+	ENDIF
+	
+	IF IS_BETRAY_TO_SP_COUNTRY(性奴隷, CFLAG:MASTER:所属)
+		PRINTFORML
+		SETCOLOR カラー_警告
+		CALL GOBLIN_FALLEN_MSG(性奴隷)
+		RESETCOLOR
+		SETBIT TALENT:性奴隷:特殊勢力陥落系, 特殊勢力_ホフゴブリン
+		SIF SP_TRAIN_IS_DECREASE_CFLAG(性奴隷, CFLAG:MASTER:所属)
+			CALL LOSE_RELATION_TALENT(性奴隷)
+		CALL GOBLIN_FALLEN_LEAVE_MARK(性奴隷)
+		CALL CLOTH_RESET(性奴隷)
+		CALL SET_CLOTH_BY_NAME(性奴隷, 衣装部位_首, "奴隷項圈")
+		PRINTFORML 要将%ANAME(性奴隷)%从监狱里放出来当做士官吗？
+		
+		;はい／いいえ入力処理
+		CALL ASK_YN()
+		IF RESULT == 0
+			CALL CHANGE_COUNTRY(性奴隷, CFLAG:MASTER:所属, 1)
+		ELSE
+			CALL CHANGE_COUNTRY(性奴隷, CFLAG:MASTER:所属)
+		ENDIF
+		
+		IF 性奴隷 != MASTER && CFLAG:性奴隷:所属 == CFLAG:MASTER:所属
+			CFLAG:性奴隷:好感度 = MAX(CFLAG:性奴隷:好感度, 500)
+			CFLAG:性奴隷:従属度 = MAX(CFLAG:性奴隷:従属度, 1000)
+			CFLAG:性奴隷:依存度 = MAX(CFLAG:性奴隷:依存度, 500)
+			CFLAG:性奴隷:支配度 = MAX(CFLAG:性奴隷:支配度, 0)
+			TALENT:性奴隷:合意 = 1
+		ENDIF
+	ENDIF
+	PRINTL
+NEXT
+
+IF 支持率上昇 > 0
+	支持率上昇 = 支持率上昇 / 2
+	SIF 支持率上昇 <= 0
+		支持率上昇 = 1
+	CFLAG:MASTER:1709 += 支持率上昇
+ENDIF
+IF 集権性上昇 > 0
+	集権性上昇 = 集権性上昇 / 4
+	SIF 集権性上昇 <= 0
+		集権性上昇 = 1
+	Centralization_power_GOBLIN += 集権性上昇
+ENDIF
+
+SETCOLOR カラー_注意
+PRINTFORML 支持率：[ {支持率} ] → [ {CFLAG:MASTER:1709} ]
+PRINTFORML 
+PRINTFORMW 集权性：[ {集権性} ] → [ {Centralization_power_GOBLIN} ]
+PRINTFORML 
+RESETCOLOR
+

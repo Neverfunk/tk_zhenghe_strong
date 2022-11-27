@@ -1,0 +1,179 @@
+﻿;-------------------------------------------------
+;特殊勢力による調教
+;-------------------------------------------------
+@SP_TRAIN(勢力)
+#DIM 勢力
+#DIM 対象
+#DIM 表示フラグ
+#DIM 勢力定数
+#DIMS 勢力名
+#DIM 支持率トップ
+
+;(ホフゴブリン拡張パッチ)自勢力がホフゴブリンであって、かつ特殊勢力であることをやめた場合、ターン終了時の処理を利用して処理を終了
+CALL SET_GOBLIN_Approval_rate
+IF CFLAG:MASTER:所属 == CHANGE_Government_GOBLIN:0 && CHANGE_Government_GOBLIN:1 == 2 && 勢力 == CFLAG:MASTER:所属 && IS_COUNTRY(勢力)
+	CALL QuriltaiGOBLIN_PublicLavatory_TURNEND
+	CALL QuriltaiGOBLIN_EVENT_TURNEND
+	RETURN
+ENDIF
+
+勢力定数 = SP_COUNTRY_TO_CONST(勢力)
+
+SIF !勢力定数
+	RETURN 0
+
+勢力名 = %SP_COUNTRY_NAME_ENG:勢力定数%
+
+SIF 勢力名 == ""
+	RETURN 0
+
+表示フラグ = 0
+
+TRYCCALLFORM %勢力名%_DOES_TRAIN
+CATCH
+	RETURN
+ENDCATCH
+
+;(外来人拡張パッチ)自勢力が外来人勢力である、または外来人と研究協定を締結しているとき、研究施設を利用して処理を終了
+IF (CFLAG:MASTER:所属 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_外来人) || IS_RESEARCH_AGREEMENT_WITH_SP:(CFLAG:MASTER:所属)) && 勢力 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_外来人)
+	CALL LaboGAIRAI_TRYexperiment
+	RETURN
+ENDIF
+;(ホフゴブリン拡張パッチ)自勢力がホフゴブリンであるとき、ターン終了時の処理を利用して処理を終了
+IF CFLAG:MASTER:所属 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン) && 勢力 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン)
+	CALL SET_GOBLIN_Approval_rate
+	CALL QuriltaiGOBLIN_PublicLavatory_TURNEND
+	CALL QuriltaiGOBLIN_Predatoriness_TURNEND
+	CALL QuriltaiGOBLIN_EVENT_TURNEND
+	RETURN
+ENDIF
+;(ホフゴブリン拡張パッチ)念のためホフゴブリンが特殊勢力であることをやめた場合処理を終了
+SIF 勢力 == CHANGE_Government_GOBLIN:0 && CHANGE_Government_GOBLIN:1 == 2
+	RETURN 0
+
+FOR 対象, 0, CHARANUM
+	SIF !IS_TRAIN_BY_SP_COUNTRY(対象, 勢力)
+		CONTINUE
+	IF !表示フラグ
+		CALL SINGLE_DRAWLINE("-", カラー_選択不可)
+		RESETCOLOR
+		PRINTFORMW %SP_COUNTRY_NAME:勢力定数%調教了被囚禁的各国的士官……
+		PRINTFORML
+		表示フラグ = 1
+	ENDIF
+	TRYCALLFORM %勢力名%_TRAIN_MSG(対象, GETBIT(TALENT:対象:特殊勢力陥落系, 勢力定数) || SP_TRAIN_COUNT:対象:勢力定数 >= (TRAIN_FALLEN_TERM:2 - (CFLAG:対象:所属 == 勢力)))
+	SP_TRAIN_COUNT:対象:勢力定数 ++
+
+	IF IS_BETRAY_TO_SP_COUNTRY(対象, 勢力)
+		PRINTFORML
+		SETCOLOR カラー_警告
+		TRYCALLFORM %勢力名%_FALLEN_MSG(対象)
+		RESETCOLOR
+		SIF CFLAG:対象:所属 != 勢力
+			CALL CHANGE_COUNTRY(対象, 勢力, 1)
+		SETBIT TALENT:対象:特殊勢力陥落系, 勢力定数
+		SIF SP_TRAIN_IS_DECREASE_CFLAG(対象, 勢力)
+			CALL LOSE_RELATION_TALENT(対象)
+		TRYCALLFORM %勢力名%_FALLEN_LEAVE_MARK(対象)
+		SIF 対象 == MASTER
+			CALL PLAYER_FALLEN_TO_SP_COUNTRY(勢力)
+		CALL CLOTH_RESET(対象)
+		CALL SET_CLOTH_BY_NAME(対象, 衣装部位_首, "奴隷項圈")
+
+		IF 対象 != MASTER && CFLAG:対象:所属 == CFLAG:MASTER:所属
+			CFLAG:対象:好感度 = MAX(CFLAG:対象:好感度, 500)
+			CFLAG:対象:従属度 = MAX(CFLAG:対象:従属度, 1000)
+			CFLAG:対象:依存度 = MAX(CFLAG:対象:依存度, 500)
+			CFLAG:対象:支配度 = MAX(CFLAG:対象:支配度, 0)
+			TALENT:対象:合意 = 1
+		ENDIF
+	ENDIF
+	PRINTL
+	WAIT
+NEXT
+
+;(ホフゴブリン拡張パッチ)集権性変動
+IF CFLAG:MASTER:所属 != GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン) && 勢力 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン) && CHANGE_Government_GOBLIN:1 == 0
+	IF DAY <= 15
+		SELECTCASE RAND:10
+			CASE 0 TO 1
+				Centralization_power_GOBLIN -= 10
+			CASE 5 TO 9
+				Centralization_power_GOBLIN += 10
+		ENDSELECT
+	ELSE
+		IF Centralization_power_GOBLIN <= 100
+			Centralization_power_GOBLIN -= 10
+		ELSE
+			Centralization_power_GOBLIN += 10
+		ENDIF
+	ENDIF
+	PRINTFORML ホフゴブリンの集権性[ {Centralization_power_GOBLIN} ]
+	PRINTL
+	
+	IF Centralization_power_GOBLIN <= 0
+		SETCOLOR カラー_警告
+		PRINTFORML 哥布林宣布他们将会为所有人与妖的自由而战
+		PRINTFORML 虽然不知道有多少是真的，但是至少与幻想乡的存在方式不相容！
+		SETCOLOR カラー_注意
+		PRINTFORMW 哥布林不再是一个特殊势力
+		PRINTL
+		RESETCOLOR
+		
+		COUNTRY_EVENT_ID:勢力 = 0
+		FOR LOCAL, 0, CHARANUM
+			IF TALENT:LOCAL:特殊勢力素質 && CFLAG:LOCAL:所属 == 勢力
+				TALENT:LOCAL:特殊勢力素質 = 0
+				CFLAG:LOCAL:1713 = 1
+				CALL SKILL_LEARN_BY_NAME(LOCAL, スキル_ジャンル_TROOP, 10102, "在黑旗的指引下前进！")
+				SIF RESULT
+					CALL COLOR_PRINTW(@"%ANAME(LOCAL)%习得了技能＜在黑旗的指引下前进！＞", カラー_注意)
+			ENDIF
+			IF !IS_TOHO_CHARA(LOCAL) && CFLAG:LOCAL:所属 == 勢力
+				CALL SKILL_LEARN_BY_NAME(LOCAL, スキル_ジャンル_TROOP, 10102, "在黑旗的指引下前进！")
+				SIF RESULT
+					CALL COLOR_PRINTW(@"%ANAME(LOCAL)%习得了技能＜在黑旗的指引下前进！＞", カラー_注意)
+			ENDIF
+		NEXT
+	
+		FOR LOCAL, 0, MAX_COUNTRY
+			IF COUNTRY_Protectorate:LOCAL >= 3 && COUNTRY_Protectorate_REFERENCE:LOCAL:2 == 勢力
+				SPECIALIZATION_Protectorate:LOCAL = 3
+			ENDIF
+		NEXT
+		
+		CHANGE_Government_GOBLIN:1 = 2
+	ELSEIF Centralization_power_GOBLIN >= 200
+		SETCOLOR カラー_警告
+		PRINTFORML %ANAME(GET_COUNTRY_BOSS(勢力))%宣称自己是哥布林的王！
+		PRINTFORMW 哥布林为了统治整个幻想乡而开始了行动……
+		RESETCOLOR
+		CALL SKILL_LEARN_BY_NAME(GET_COUNTRY_BOSS(勢力), スキル_ジャンル_TROOP, 10101, "王者的威光")
+		SIF RESULT
+			CALL COLOR_PRINTW(@"%ANAME(GET_COUNTRY_BOSS(勢力))%习得了技能＜王者的威光＞", カラー_注意)
+		COUNTRY_SOLDIER:勢力 += 50000
+		PRINTL
+		
+		CHANGE_Government_GOBLIN:1 = 1
+	ENDIF
+ENDIF
+
+;(ホフゴブリン拡張パッチ)AIゴブリンの選挙イベント
+IF CFLAG:MASTER:所属 != GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン) && 勢力 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン) && DAY % 3 == 0 && CHANGE_Government_GOBLIN:1 != 1
+	支持率トップ = -1
+	FOR LOCAL, 0, CHARANUM
+		IF CFLAG:LOCAL:所属 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン) && LOCAL != MASTER
+			IF 支持率トップ < 0
+				支持率トップ = LOCAL
+			ELSEIF CFLAG:LOCAL:1709 > CFLAG:支持率トップ:1709
+				支持率トップ = LOCAL
+			ENDIF
+		ENDIF
+	NEXT
+	IF 支持率トップ != GET_COUNTRY_BOSS(GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン))
+		PRINTFORMW 哥布林的首领似乎从%ANAME(支持率トップ)%变成了%ANAME(支持率トップ)%的样子……
+		PRINTFORML
+		COUNTRY_BOSS:(GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン)) = GET_ID(支持率トップ)
+	ENDIF
+ENDIF
+

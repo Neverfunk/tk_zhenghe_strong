@@ -1,0 +1,174 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_PRECOCIOUS_BRAT_RATE()
+RETURN 30
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_PRECOCIOUS_BRAT_DECISION()
+
+SIF DVAR:マセガキ_発生フラグ != 0
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_PRECOCIOUS_BRAT_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_PRECOCIOUS_BRAT
+#DIM 対象
+
+PRINTFORML 从某貴族那裡收到了委託
+PRINTFORMW 想給他的儿子找一个家庭教师
+PRINTFORML 虽然貴族是大人物、但也是个可以商量的人，即使拒絶了也不会生气吧
+PRINTFORMW 但是他儿子十歲左右、好像很任性的樣子
+PRINTFORML 怎麼辦？
+CALL ASK_MULTI("接受", "拒絶", "子不教，父之过也")
+IF RESULT == 1
+	$CANCEL
+	PRINTFORML 不好意思现在比較忙這樣子，拒絶了
+	PRINTFORMW 貴族老実地離開了
+	RETURN
+ELSEIF RESULT == 2
+	PRINTFORML 你让士兵去打听了一下，暗中了解到，贵族的儿子似乎有奸污女官的劣迹
+	PRINTFORML 当你把证据拍在贵族面前的时候，他脸色发白，似乎也不敢相信一样
+	PRINTFORML 听说在贵族回去之后，他亲手打断了自己儿子的腿，并一个个去各国道歉
+	PRINTFORML 不过，那种事情，也和你没关系了
+	DVAR:マセガキ_発生フラグ = -1
+	RETURN
+ENDIF
+
+PRINTFORMW 决定接受了
+PRINTFORML 那麼、讓谁去呢？
+CALL SELECT_CHARA_LIST_ONLY_LOGIC_SEX("PRECOCIOUS_BRAT", "DEFAULT")
+対象 = RESULT
+IF RESULT < 0
+	GOTO CANCEL
+ELSEIF RESULT == MASTER
+	PRINTFORMW %ANAME(対象)%决定親自去教育
+ELSE
+	PRINTFORMW 把任务交給了%ANAME(対象)%
+ENDIF
+PRINTFORMW 立刻前往委托人的宅邸
+PRINTFORML 
+PRINTFORML 是在远処也非常顕眼的大宅邸
+PRINTFORML 正犹豫的时候、被非常多的佣人出来迎接了
+PRINTFORML 這里竟然是委托人的孩子专用的宅邸
+PRINTFORMW 最重要的教育対象却是看起来很傲慢的孩子
+PRINTFORML 一眼就看出来、是个想要什麼就有什麼的人
+PRINTFORML %ANAME(対象)%将這些心裏話忍住沒説出来
+PRINTFORML 他像打量着%ANAME(対象)%一樣盯着、嘟囔着「一般一般嘛」
+PRINTFORMW 馬上被领到了他的房間、開始了学習
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+IF IS_MALE(対象)
+	LOCAL = ABL:対象:奉仕 + ABL:対象:知略 / 20 + RAND:20
+	IF LOCAL >= 12
+		PRINTFORMW 他很満意所教的東西
+		PRINTFORMW 得到報酬后、離開了宅邸
+		MONEY += LOCAL * 500
+		CALL COLOR_PRINT(@"得到了{LOCAL * 500}金", カラー_注意)
+		PRINTFORMW 
+		CALL PRINT_ADD_EXP(対象, "知略経験値", RAND:15 + 6, 1)
+		CALL PRINT_ADD_EXP(対象, "奉仕経験値", RAND:15 + 6, 1)
+		CALL TRAIN_AUTO_ABLUP(対象)
+	ELSE
+		PRINTFORMW 没能讓他満意
+		PRINTFORMW 只得到了一点報酬
+		MONEY += LOCAL * 200
+		CALL COLOR_PRINT(@"得到了{LOCAL * 200}金", カラー_注意)
+		PRINTFORMW 
+	ENDIF
+	RETURN
+ENDIF
+
+PRINTFORML 教导学習之余、端来了红茶
+PRINTFORMW %ANAME(対象)%当然没有任何懷疑地喝下去了、但是不久身体就発麻了
+PRINTFORML 茶杯也握不住掉到地上、茶水弄湿了地毯、就這樣倒在了桌子上
+PRINTFORML 大腦一片混乱搞不清楚状况、一辺抬頭看他，%ANAME(対象)%看见那个笑容才明白自己被下薬了
+PRINTFORMW 他把手伸向了%ANAME(対象)%的身体、已経无法抵抗了
+PRINTFORML 
+PRINTFORML 他把%ANAME(対象)%抱到床上后、粗暴的扯下了衣服
+PRINTFORML 把身体一通爱撫之後、一辺吻着舌頭一辺喂了各种各樣的薬
+PRINTFORMW 由于薬的效果、%ANAME(対象)%很快就開始発情了、身体里面好像火一樣滚烫、秘処也開始洪水泛滥
+PRINTFORML 他一副興奋的様子、全身颤抖着扑到%ANAME(対象)%的身上、淫笑着把勃起的陰茎插了進去
+IF TALENT:対象:処女
+	PRINTFORMW 被狠狠貫穿処女膜的感覚、令少女一瞬間快要失去意識、身体猛地挺了起来
+ELSE
+	PRINTFORMW 唰的一下被贯穿了深処、%ANAME(対象)%被衝撃得快要失去意識、身体猛地挺了起来
+ENDIF
+PRINTFORML 仿佛是要刺穿大腦一樣的冲撃、那瞬間无法思考任何事、%ANAME(対象)%的秘処開始了猛烈的潮吹
+PRINTFORML 于是在絶顶的余韵中、全身颤抖着%ANAME(対象)%一辺発出像是从喉咙里挤出来似的嬌喘
+PRINTFORMW 説起来這好像还是他的第一次、在比想象更加快楽的面前只能発出悲惨的呻吟、一辺不停颤抖着
+PRINTFORML 但他又馬上回到了她的身辺、緊緊地抓住%ANAME(対象)%的腰、忘我般的激烈地摆動起腰来
+PRINTFORML 那腰技虽然不是很好、但毎一次抽插都会引起媚肉的痙攣、相互往来的快楽讓大腦快要升天一樣
+IF TALENT:対象:処女
+	PRINTFORMW 也许是薬的効果、明明先前还是个処女现在却几乎感覚不到苦痛、身体像是妓女一樣変得敏感
+ELSE
+	PRINTFORMW 也许是薬的効果、明明没有什麼経験的身体有了敏感的反応、像妓女一樣把小弟弟含在嘴里
+ENDIF
+PRINTFORML 他像猴子一樣動着腰、毎一下脸上都慢慢変成雄性的表情
+PRINTFORML %ANAME(対象)%被像雌獣那樣対待、在圧倒性的快楽面前不停嬌喘着
+PRINTFORMW 膣肉一辺痙攣着一辺緊緊地吸住了他的陰茎、渇望种子的子宫完全降了下来
+PRINTFORML 他一辺喊着%ANAME(対象)%是自己的東西、一辺慢慢加快了腰的動作
+PRINTFORML 然后他開始了人生的第一次膣内中出、%ANAME(対象)%摆出了吐着舌頭高潮的阿嘿颜、猛烈地絶顶了
+PRINTFORML 向子宫释放了气势凶猛的特濃精液、烫得%ANAME(対象)%像是腦袋快要爆発一樣、身体苦闷地颤抖着
+PRINTFORMW …長时間的射精终于結束之后、他和%ANAME(対象)%一起倒在了床上、彼此間因為絶頂的余韻而喘着气
+PRINTFORML 年軽的他的性欲并不是仅凭一発就能解决的、很快肉棒就恢复了元気、又開始了侵犯%ANAME(対象)%
+IF TALENT:対象:処女
+	PRINTFORMW 不久前还是処女的%ANAME(対象)%的身体被充分地調教了、記住了他的肉棒的感覚、就這樣被插了進来
+ELSE
+	PRINTFORMW 他那年幼而又凶暴的肉棒插了進来、%ANAME(対象)%仿佛被深深地刻印上圧倒性的快楽
+ENDIF
+CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 口内射精, CFLAG減少", GET_SPERM_ID("子供"), @"早熟小鬼的\@RAND:2 ? 肉棒 # 唇\@", @"早熟小鬼", "", "調教")
+PRINTFORML 
+PRINTFORML 被狠狠责弄之後、身体终于恢复自由的%ANAME(対象)%対他提出了抗議
+PRINTFORMW 可是他没有要回応意思、只是指了指放在暗処的攝像機
+PRINTFORML 好像刚才的行為被全程拍了下来
+PRINTFORMW 他一辺淫笑着一辺説如果不想這个被散播傳出去的話…這樣威胁道
+PRINTFORML 怎麼辦？
+CALL ASK_YN("服從", "拒絶")
+IF RESULT == 1
+	PRINTFORMW 可是%ANAME(対象)%坚决的拒絶之後離開了宅邸
+	PRINTFORML 
+	IF 対象 == MASTER
+		FOR LOCAL, 0, CHARANUM
+			IF !IS_ANIMAL(LOCAL)
+				CFLAG:(LOCAL):好感度 -= 300
+			ENDIF
+		NEXT
+		CALL COLOR_PRINT(@"之後、影片在領地内流傳令%ANAME(対象)%的評價因而大大下降了…", カラー_注意)
+		PRINTFORMW
+	ELSE
+		FOR LOCAL, 1, MAX_COUNTRY
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -150, 150)
+		NEXT
+		CALL COLOR_PRINT(@"之後、影片在幻想郷中流傳令他国評價因而大大下降了…", カラー_注意)
+		PRINTFORMW 
+	ENDIF
+ELSEIF RESULT == 0
+	PRINTFORML 成為奴隷什麼别開玩笑了！
+	PRINTFORMW 可是一想到拒絶之后会発生的事、便无法強硬起来
+	PRINTFORML 結局、%ANAME(対象)%苦悩之后只好同意成為他的奴隷了
+	PRINTFORMW 他脸上浮现出至今见過的最卑劣的笑容
+	DVAR:マセガキ_発生フラグ = 1
+	DVAR:マセガキ_奴隷ID = GET_ID(対象)
+	CALL COLOR_PRINT(@"%ANAME(対象)%与貴族的兒子結成了作為奴隷的契約", カラー_注意)
+	PRINTFORMW
+ENDIF
+
+RETURN 1
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_PRECOCIOUS_BRAT(対象)
+#DIM 対象
+CALL SELECT_CHARA_LIST_SHOW_LOGIC_DEFAULT(対象)
+RETURN RESULT && !GETBIT(TALENT:対象:日常系, 素質_デイリー_マセガキの奴隷)

@@ -1,0 +1,151 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K134_YASYOKU_RATE(対象)
+#DIM 対象
+RETURN 30
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K134_YASYOKU_DECISION(対象)
+#DIM 対象
+
+;ネトラレミー中は起きない
+SIF KDVAR:対象:ドレミー_ネトラレミー > 0
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K134_YASYOKU_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K134_YASYOKU(対象)
+#DIM 対象
+
+PRINTFORMW 因为今天有很多工作以外的事情，所以在深夜整理工作…
+;TranslatedMark 今日は仕事以外の用事が多く入った為、深夜に仕事を片付けていた…
+PRINTFORML 寂静得只能听到毛笔声的夜晚
+;TranslatedMark カリカリと、筆の音しか聞こえないくらい静かな夜
+PRINTFORMW 在微温的灯光下，一个劲地写着文件
+;TranslatedMark ほんのり暖かいランプの光の下、ひたすら書類を書き続けている%ANAME(MASTER)%
+PRINTFORML 
+PRINTFORMW 咚咚地敲门声。响应后%ANAME(対象)%进入了房间…
+;TranslatedMark コンコンと、ノックの音がする。　応答すると%ANAME(対象)%が部屋に入ってきた…
+PRINTFORMW 「辛苦了%ANAME(MASTER)%，我给你做了夜宵哦」
+;TranslatedMark 「お疲れ様です%ANAME(MASTER)%、夜食を作って来てあげましたよ」
+IF RAND:12 == 0
+	PRINTFORML 从托盘放在桌子上的是茶泡饭
+	;TranslatedMark 盆からテーブルへ置かれたのはお茶漬けだった
+	PRINTFORMW 「这是你喜欢的梅肉和叉烧茶泡饭哦」
+	;TranslatedMark 「あなたが好きそうな梅肉とチャーシューのお茶漬けですよ」
+ELSEIF RAND:12 == 0
+	PRINTFORML 盘子里放在桌子上的是粥
+	;TranslatedMark 盆からテーブルへ置かれたのはおかゆだった
+	PRINTFORMW 「因为最近有点工作繁忙，所以选择了对胃好的东西」
+	;TranslatedMark 「最近激務気味なので胃に優しいものをチョイスしてみました」
+ELSEIF RAND:12 == 0
+	PRINTFORML 从盘子放在桌子上的是饭团
+	;TranslatedMark 盆からテーブルへ置かれたのはおにぎりだった
+	PRINTFORMW 「吃了里面可是有惊喜。放心吧，里面没有奇怪的东西」
+	;TranslatedMark 「中身は食べてのお楽しみですよ。　安心してくださいよ、変な物は入ってませんから」
+ELSEIF RAND:12 == 0
+	PRINTFORML 从盘子里放在桌子上的是乌冬面
+	;TranslatedMark 盆からテーブルへ置かれたのはうどんだった
+	PRINTFORMW 「兔子的部下帮了我。对胃好像很好吧？」
+	;TranslatedMark 「兎の部下に手伝って貰いました。　胃に優しそうでしょう？」
+ELSEIF RAND:12 == 0
+	PRINTFORML 从盘子放在桌子上的是味增汤
+	;TranslatedMark 盆からテーブルへ置かれたのは味噌汁だった
+	PRINTFORMW 「配料是豆腐、葱和面筋。在看起来应该会给人一种好的感觉」
+	;TranslatedMark 「具は豆腐、葱、麩です。　持って来るまでの間に良い感じに冷めてる筈ですよ」
+ELSEIF RAND:12 == 0
+	PRINTFORML 从盘子始放在桌子上的是写着“加油”的蛋包饭
+	;TranslatedMark 盆からテーブルへ置かれたのは頑張ってと書かれたオムライスだった
+	PRINTFORMW 「音量有点太大了……」
+	;TranslatedMark 「ちょっとボリュームがあり過ぎましたね……」
+ELSEIF RAND:12 == 0
+	PRINTFORML 从盘子里放在桌子上的是团子
+	;TranslatedMark 盆からテーブルへ置かれたのは団子だった
+	PRINTFORMW 「兔子的部下帮了我。推荐草莓团子」
+	;TranslatedMark 「兎の部下に手伝って貰いました。　オススメはストロベリー団子ね」
+ELSEIF RAND:12 == 0
+	PRINTFORML 从盘子里放在桌子上的是生蛋拌饭
+	;TranslatedMark 盆からテーブルへ置かれたのは卵かけご飯だった
+	PRINTFORMW 「这个鸡蛋是什么蛋？」
+	;TranslatedMark 「この卵、何の卵だったかしら？」
+ELSEIF RAND:12 == 0
+	PRINTFORML 从盂兰盆节开始放在桌子上的是……这是什么
+	;TranslatedMark 盆からテーブルへ置かれたのは……なんだこれ
+	PRINTFORMW 「啊是这个吗？这是从一个月的熟人那里得到的固体营养食品」
+	;TranslatedMark 「あぁコレですか？　月の知り合いから貰った固形栄養食です」
+ELSEIF RAND:12 == 0
+	PRINTFORML 从盂兰盆节开始放在桌子上的是三明治
+	;TranslatedMark 盆からテーブルへ置かれたのはサンドイッチだった
+	PRINTFORMW 「还有饮料要红茶还是咖啡？」
+	;TranslatedMark 「あと飲み物は紅茶かコーヒー、どっちにします？」
+ELSEIF RAND:12 == 0
+	PRINTFORML 从盂兰盆节开始放在桌子上的是拉面
+	;TranslatedMark 盆からテーブルへ置かれたのはラーメンだった
+	PRINTFORMW 「虽然是没有配菜的素面，不过夜宵的话这样比较合适吧」
+	;TranslatedMark 「具の無い素ラーメンですが、まぁ夜食ならこれくらいが妥当でしょう」
+ELSE
+	PRINTFORML 从盘子里放在桌子上的是挂面
+	;TranslatedMark 盆からテーブルへ置かれたのは素麺だった
+	PRINTFORMW 「因为最近有点工作繁忙，所以选择了对胃好的东西」
+	;TranslatedMark 「最近激務気味なので胃に優しいものをチョイスしてみました」
+ENDIF
+PRINTFORML 
+IF TALENT:対象:恋慕
+	PRINTFORML 在表达感谢的同时，%ANAME(MASTER)%也不想吃夜宵，而是集中精力工作
+	;TranslatedMark 感謝を述べつつも%ANAME(MASTER)%は夜食を食べようとせず仕事に集中している
+	PRINTFORML 「啊，没办法啊……」
+	;TranslatedMark 「はぁ、しょうがないですねぇ……」
+	PRINTFORMW 「啊，张开嘴啊」
+	;TranslatedMark 「ホラ、口を開けてアーン」
+	PRINTFORML 对着张开嘴却停不下来笔的%ANAME(MASTER)%，一边说着"哎呀呀"一边喂它吃夜宵的%ANAME(対象)%
+	;TranslatedMark 口を開けながらも筆を止めない%ANAME(MASTER)%に、やれやれと言いながら夜食を食べさせる%ANAME(対象)%
+	PRINTFORML 一边在文件上自言自语，一边交替嘟囔着美味的一句话一边进行工作
+	;TranslatedMark 書類に関する独り言と、美味いのひと言を交互に呟きながらも仕事を進める
+	PRINTFORMW 夜宵吃完后，收拾餐具的%ANAME(対象)%
+	;TranslatedMark 夜食が食べさせ終わり、食器を片づける%ANAME(対象)%
+	PRINTFORML 「为了不影响明天，请早点结束工作」
+	;TranslatedMark 「明日に響かないように早く仕事を終わらせてくださいね」
+	PRINTFORMW 「那么晚安%ANAME(MASTER)%」
+	;TranslatedMark 「それではおやすみなさい%ANAME(MASTER)%」
+	PRINTFORMW %ANAME(対象)%离开了房间，%ANAME(MASTER)%继续工作……
+	;TranslatedMark %ANAME(対象)%は部屋を去り、%ANAME(MASTER)%は引き続き仕事を続けた……
+	CALL COLOR_PRINTW("好感度上升了200", カラー_注意)
+	;TranslatedMark "好感度が 200上がった", カラー_注意
+	PRINTFORMW
+	CFLAG:対象:好感度 += 200
+ELSE
+	PRINTFORML 「那么请继续加油。啊，还有餐具等明天来取，就这样吧」
+	;TranslatedMark 「では引き続き頑張ってくださいね。　あっ、あと食器などは明日取りに来るので、そのままで」
+	PRINTFORML 「那么晚安」
+	;TranslatedMark 「それではおやすみなさい」
+	PRINTFORMW %ANAME(対象)%离开了房间，%ANAME(MASTER)%继续工作……
+	;TranslatedMark %ANAME(対象)%は部屋を去り、%ANAME(MASTER)%は引き続き仕事を続けた……
+	CALL COLOR_PRINTW("好感度上升了50", カラー_注意)
+	;TranslatedMark "好感度が 50上がった", カラー_注意
+	PRINTFORMW
+	CFLAG:対象:好感度 += 50
+ENDIF
+
+
+RETURN 1
+

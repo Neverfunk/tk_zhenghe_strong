@@ -1,0 +1,84 @@
+﻿;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@KOJO_DAILY_K32_DERIVATION_MIZUASOBI_DISABLE(対象)
+#DIM 対象
+RETURN KOJO_DAILY_GET_DISABLE_CONFIG(対象, "MIZUASOBI")
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K32_DERIVATION_MIZUASOBI_DECISION(対象)
+#DIM 対象
+
+;対象のデイリー「水遊び」で遊んでいない、またはイベント終了済みなら駄目
+SIF KDVAR:対象:文_水遊び != 1
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;本体
+;---------------------
+@KOJO_DAILY_K32_DERIVATION_MIZUASOBI(対象)
+#DIM 対象
+
+PRINTFORML %ANAME(MASTER)%正在睡覚時、有人敲門了
+PRINTFORMW %ANAME(対象)%来探訪了
+PRINTFORMW 「啊ー……%ANAME(MASTER)%、你身体状況如何？」
+PRINTFORMW 「那個、不好意思、令你因為我的一時任性而生病了」
+PRINTFORML
+CALL ASK_YN("你真是客気了", @"這不是%ANAME(対象)%的錯")
+SELECTCASE RESULT
+	CASE 0
+		CFLAG:対象:好感度 += 100
+		PRINTFORML %ANAME(対象)%現在的態度比平時真是客気得多了
+		PRINTFORMW 這樣説後、%ANAME(対象)%嘟起嘴来
+		PRINTFORMW 「真是失禮。我是誠心誠意想道歉啊」
+		PRINTFORMW 「嘛、看来你還有精神説俏皮話呢」
+		PRINTFORMW 「比起這個、肚子餓了吧？　我做了碗粥給你。因為比較着重営養方面、所以味道不能保證」
+	CASE 1
+		PRINTFORMW 「能聽到你這樣説真是太好了」
+		PRINTFORML %ANAME(対象)%雖然嘴上這樣説、但表情一臉陰沈
+		PRINTFORMW 「那個、肚子餓了吧？　我做了碗粥給你。因為比較着重営養方面、所以味道不能保證」
+ENDSELECT
+PRINTFORML
+CALL ASK_YN("感激地吃掉", "現在肚子不餓")
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORML 謝謝你。肚子稍微有点餓呢
+		PRINTFORML %ANAME(対象)%拿起匙将粥遞到你的口中
+		PRINTFORMW 「味道如何……？」
+		PRINTFORML
+		CALL ASK_YN("好吃", "難吃")
+		SELECTCASE RESULT
+			CASE 0
+				PRINTFORML 雖然説過不能保證味道、老実説、好吃
+				PRINTFORML 這樣説後、%ANAME(対象)%的表情変得明朗起来
+				PRINTFORMW 「哼哼、対吧対吧、是我做的哦」
+				PRINTFORMW 「来来、吃了東西後、就慢慢地睡覚養精蓄鋭吧」
+				PRINTFORML 被%ANAME(対象)%強制到床上休息了……
+				CALL COLOR_PRINTW("多得文的粥、感冒治愈了", カラー_注意)
+				CALL COLOR_PRINTW("治疗時間変成0了", カラー_注意)
+				CFLAG:対象:好感度 += 300
+				COOLTIME:MASTER:0 = 0
+			CASE 1
+				PRINTFORML 雖然説過不能保證味道、老実説、難吃
+				PRINTFORML 這樣説後、%ANAME(対象)%変得面紅耳赤
+				PRINTFORMW 「呣呣呣……！　明明人家難得擔心你、你居然這樣説！」
+				PRINTFORMW 「等着吧、我絶対会做出%ANAME(MASTER)%都覚得好吃的粥出来的！」
+				PRINTFORML %ANAME(対象)%有点生気地離開房間了……
+				CALL COLOR_PRINTW(@"%ANAME(対象)%進行了料理特訓", カラー_注意)
+				CALL COLOR_PRINTW(@"%ANAME(対象)%的料理上昇了5", カラー_注意)
+				CFLAG:対象:好感度 -= 300
+				ABL:対象:料理 += 5
+		ENDSELECT
+	CASE 1
+		PRINTFORMW 「嗚、這樣嗎……」
+		PRINTFORMW 「那麼沒有辦法了。那麼、慢慢地睡覚養精蓄鋭吧」
+		PRINTFORMW %ANAME(対象)%離開了房間……
+ENDSELECT
+KDVAR:対象:文_水遊び = 2
+
+RETURN 1

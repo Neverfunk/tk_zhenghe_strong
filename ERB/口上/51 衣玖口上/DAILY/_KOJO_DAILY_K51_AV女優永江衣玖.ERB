@@ -1,0 +1,315 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K51_IKU_AV_RATE(対象)
+#DIM 対象
+RETURN 75
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K51_IKU_AV_DECISION(対象)
+#DIM 対象
+
+SIF KDVAR:対象:衣玖_AV
+    RETURN 0
+
+SIF !GETBIT(TALENT:対象:淫乱系, 素質_淫乱_ＡＶ女優)
+    RETURN 0
+
+SIF !IS_FEMALE(対象)
+    RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, -1, 0)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K51_IKU_AV_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K51_IKU_AV(対象)
+#DIM 対象
+#DIM 子供バスト
+#DIM 子供サイズ
+
+KDVAR:対象:衣玖_AV = 1
+
+子供サイズ = GET_BABY_SIZE(対象)
+子供バスト = GET_BABY_BUST(対象)
+
+PRINTFORML 在廉价旅馆的一个房间里，%ANAME(対象)%和男性坐在床上
+;TranslatedMark 安宿の一室で、%ANAME(対象)%が男性とベッドに腰掛けている
+PRINTFORMW %PRONOUN(対象)%身上穿着一层薄薄的透明纱裙睡衣，空气中弥漫着煽情的气氛……
+;TranslatedMark %PRONOUN(対象)%はうっすら透けたネグリジェを纏い、なんとも扇情的な雰囲気を漂わせている……
+PRINTFORML 完全成为了AV女优的%ANAME(対象)%，今天也出演了成人视频
+;TranslatedMark すっかりAV女優が板についた%ANAME(対象)%は、今日もアダルトビデオに出演していた
+PRINTFORML 男人一使眼色，摄像机就会在房间的一角转动
+;TranslatedMark 男が目配せをすると、部屋の隅でカメラが回される
+PRINTFORMW 配合摄影师的信号，%ANAME(対象)%对着镜头对面的某个人微笑
+;TranslatedMark カメラマンが合図するのにあわせ、%ANAME(対象)%はレンズの向こうの誰かへ笑顔を向ける
+PRINTFORMW 「大家晚上好，我是AV女优%NAME_FORMAL(対象)%」
+;TranslatedMark 「皆様こんにちは、AV女優の%NAME_FORMAL(対象)%です」
+PRINTFORMW 「请用我下流的样子，多射一些出来吧」
+;TranslatedMark 「私のいやらしい姿で、どうかたくさん、おちんちんをシコシコしてくださいね？」
+PRINTFORML 男性恭敬地低下了头，开始用手抚摸她的身体
+;TranslatedMark 恭しく頭を下げると、男性が身体に手を這わせ始める
+PRINTFORMW 就这样，开始了猥亵的采访……
+;TranslatedMark そのまま、猥褻なインタビューを始めた……
+
+IF GET_BUSTSIZE(対象) > 0
+    PRINTFORM 「好厉害的胸部啊，
+    ;TranslatedMark 「すごいおっぱいだねぇ、
+ELSE
+    PRINTFORM 「奶子很漂亮啊，
+    ;TranslatedMark 「いいおっぱいだねぇ、
+ENDIF
+
+PRINTFORMW 三围是多少？」
+;TranslatedMark スリーサイズってどれくらいなの？」
+PRINTFORML 这是一个连一点含蓄都没有的、完全是性骚扰的问题
+;TranslatedMark デリカシーの欠片もない、セクハラ丸出しの質問だ
+PRINTFORMW 但是，一想到自己的回答会被不知道多少男人当做配菜，就抑制不住下腹的疼痛。
+;TranslatedMark だが、自分の答えをオカズに何人もの男性がペニスを扱くのだと思うと、腹の疼きを抑えられない
+PRINTFORMW 「从上面往下分别是{(BASE:対象:バスト + 子供バスト) / 10}の%TOSTR_CUPSIZE(対象)%、{(BASE:対象:ウェスト + 子供サイズ) / 10}、{BASE:対象:ヒップ / 10}」
+;TranslatedMark 「上から、{(BASE:対象:バスト + 子供バスト) / 10}の%TOSTR_CUPSIZE(対象)%、{(BASE:対象:ウェスト + 子供サイズ) / 10}、{BASE:対象:ヒップ / 10}です」
+PRINTFORMW 「哇，那太厉害了。是SEX专用的身体呢」
+;TranslatedMark 「うわあ、そりゃすごい。セックス専用のカラダだね」
+PRINTFORML 在说出极度失礼的发言的同时，男演员轻轻揉搓了揉衣玖的%STR_BODY("胸：長", 対象)%，把%STR_BODY("乳首", 対象)%紧紧揪住
+;TranslatedMark 失礼極まる発言とともに、男優は衣玖の%STR_BODY("胸：長", 対象)%をゆるゆると揉み、%STR_BODY("乳首", 対象)%をきゅっと摘まむ
+PRINTFORMW %STR_BODY("尻", 対象)%被揉搓之后，伴随着甜蜜的喘息，衣玖腰部微微扭动着
+;TranslatedMark %STR_BODY("尻", 対象)%を揉みしだかれ、甘い吐息とともに腰をかるくくねらせた
+
+IF TALENT:対象:妊娠
+    PRINTFORMW 「而且这个下流的肚子。光看就勃起了」
+    ;TranslatedMark 「しかもこのいやらしいぼて腹。見てるだけで勃起しちゃうよ」
+    PRINTFORMW 「呼呼，如果里面被中出了很多就会怀上孩子了呢」
+    ;TranslatedMark 「ふふ、いっぱい中出ししてもらったらできちゃったんですよね」
+    PRINTFORMW 「那可真是个下流的妈妈啊」
+    ;TranslatedMark 「それはそれは。いやらしいママだなぁ」
+    PRINTFORML 男演员描绘着因怀孕膨胀的肚子
+    ;TranslatedMark 子を孕み膨らんだ腹を、男優はなぞる
+    PRINTFORMW %ANAME(対象)%向他投向充满期待的眼神
+    ;TranslatedMark %ANAME(対象)%が向けるのは、期待の籠もった目だった
+ELSEIF EXP:対象:出産経験 > 0
+    PRINTFORMW 「我怎么也不觉得她像是生过小孩的啊」
+    ;TranslatedMark 「経産婦だなんてとても思えないなぁ」
+    PRINTFORMW 「就算表扬我也什么都得不到哦？呵呵」
+    ;TranslatedMark 「褒めても何も出ませんよ？　ふふ」
+    PRINTFORML 男人胯下的东西，已经大幅度的膨胀起来
+    ;TranslatedMark 男の股座のモノは、既に大きく膨らんでいる
+    PRINTFORMW 似乎在说下一个孩子已经为她准备好了
+    ;TranslatedMark 次を仕込んでやるぞとでも言いたげだった
+ENDIF
+
+PRINTFORMW 「自慰呢？一周做多少次？」
+;TranslatedMark 「オナニーは？　週どれくらいするの？」
+
+SELECTCASE ABL:対象:自慰
+    CASE IS > ランク閾値:ランク_その他:ランク_A
+        PRINTFORMW 「是啊……一周可能超过7次了吧？」
+        ;TranslatedMark 「そうですね……週に7回は超えてるかもしれませんね？」
+        PRINTFORMW 「这不是每天都做吗。好厉害啊。明明看上去是一个很正经的人啊」
+        ;TranslatedMark 「毎日どころじゃないんだ。すごいえっちだね。お堅く見えるけどなあ」
+        PRINTFORMW 「人们经常对我有这种印象呢……实际上，我是个非常下流的女人哦」
+        ;TranslatedMark 「そういうイメージはもたれがちですね……でも本当は、すごくいやらしい女なんですよ」
+        PRINTFORMW 衣玖那散发着妖艳色彩的瞳孔，连专业的男优演员看到了都屏住了呼吸
+        ;TranslatedMark 妖しげな色を孕む衣玖の瞳に、プロであるはずの男優ですら息を飲む
+    CASE IS > ランク閾値:ランク_その他:ランク_C
+        PRINTFORMW 「嗯……一周5次左右吧？」
+        ;TranslatedMark 「そうですね……週に5回くらいでしょうか？」
+        PRINTFORMW 「做的不少啊，真下流呢」
+        ;TranslatedMark 「結構するんだね、いやらしいなぁ」
+        PRINTFORMW 「不过，当然还是更喜欢"正戏"」
+        ;TranslatedMark 「でも、もちろん"本番"のほうが好きですけどね」
+    CASE IS > ランク閾値:ランク_その他:ランク_E
+        PRINTFORMW 「嗯……大概一周两三次吧？」
+        ;TranslatedMark 「そうですね……週に2、3回ってところでしょうか？」
+        PRINTFORMW 「相当普通呢？明明是这么下流的身体」
+        ;TranslatedMark 「けっこう普通なんだね？　こんないやらしいカラダしてるのに」
+        PRINTFORMW 「因为，我更喜欢“正戏”啊」
+        ;TranslatedMark 「だって、本番のほうが好きなんですもの」
+        PRINTFORMW 「啊，是这样吗？真是淫乱啊」
+        ;TranslatedMark 「あっ、そういうこと？　すごい淫乱だなぁ」
+    CASEELSE
+        PRINTFORMW 「自慰吗？实际上不怎么做呢」
+        ;TranslatedMark 「オナニーですか？　実はあんまりしないんですよね」
+        PRINTFORMW 「啊，是吗？那样的话就会积累起来吧，不会欲求不满吗？」
+        ;TranslatedMark 「あ、そうなの？　そしたら溜まるでしょ、欲求不満にならない？」
+        PRINTFORMW 「是会欲求不满呢。所以才让会大家看我这样做爱的样子」
+        ;TranslatedMark 「なっちゃいますね。だからこうしてセックスしてるとこを、皆さんに見てもらってるんです」
+        PRINTFORMW 将充满色气的眼神投向摄影机
+        ;TranslatedMark 色気を孕んだ瞳をカメラに送る
+        PRINTFORMW 也许是拍到了好的画面，摄影师拍了个特写给大家看…
+        ;TranslatedMark いい画が撮れたのか、カメラマンがサムズアップしてみせた…
+ENDSELECT
+
+PRINTFORMW 「那我就不客气了，可以帮我用嘴做一下吗」
+;TranslatedMark 「じゃ早速だけど、しゃぶってくれるかな」
+PRINTFORMW 「嗯，明白了」
+;TranslatedMark 「ふふ、承りました」
+PRINTFORMW 男优坐在床上，张开腿
+;TranslatedMark 男優はベッドに腰かけると、足を広げる
+PRINTFORMW %ANAME(対象)%把脸埋在他的胯股之间，摄影机画面一下子拉近了
+;TranslatedMark %ANAME(対象)%が彼の股間に顔を埋めると、カメラがぐっと近づいてくる
+PRINTFORMW 「嗯……不错」
+;TranslatedMark 「ん……ちゅっ」
+CALL FUCK(対象, "欲望, 奉仕, 性技, 口淫, 撮影", "接吻喪失", GET_SPERM_ID("AV男優"), "AV男優のペニス", "AV男優", "", "撮影")
+PRINTFORMW 对着气势汹汹的肉棒前端的充血发红的深龟头，像对恋人一样亲吻
+;TranslatedMark いきり立つ肉棒の先端、赤黒い亀頭に、まるで恋人のように口づける
+PRINTFORMW 光是想到这些羞耻的行为都被完整地留在了影像里，心里就觉得很激动
+;TranslatedMark はしたないでは済まない行為をばっちり映像に残されていると考えるだけで、胸が高鳴っていた
+PRINTFORMW 「嗯，嗯，嗯……哈哇，呜，呜，呜，呜，呜」
+;TranslatedMark 「んくっ、くぷ……ぢゅるッ、ぐぷ、れろぉッ、ぢゅるぅう」
+PRINTFORML 作为"问候"的亲吻结束后，口交终于开始了
+;TranslatedMark キスでの「挨拶」が終われば、いよいよフェラチオの始まりだ
+PRINTFORMW 用色气的嘴唇将阴茎全部包住，开始发出吮吸的声音
+;TranslatedMark 艶やかな唇でペニス全体を包み込みながら、音を立ててしゃぶり始める
+PRINTFORMW 「哦！哦，哦，很棒哦%ANAME(対象)%，就这样，哦，哦」
+;TranslatedMark 「おっ！　おッ、お、いいよ%ANAME(対象)%さん、そのまま、おッ、おおッ」
+PRINTFORML 一边用狭窄的嘴唇压榨着阴茎，一边在口腔内用内壁摩擦，用舌头来回舔，使其沾满唾液
+;TranslatedMark 窄めた唇で幹を扱きつつ、口内では口壁を擦りつけ舌で舐め回して唾液をまぶす
+PRINTFORMW 在出演了好几部作品后磨练出来的技术，让专业人士也惊叹不已
+;TranslatedMark 何本もの作品に出演するなかで磨かれた技術は、プロをも唸らせるものだった
+PRINTFORMW 「呜呜、呜、呜、呜、呜……呜、啾、呜」
+;TranslatedMark 「ぢゅるぅッ、くぷッ、くぽっ、れろ……れるッ、ちゅッ、むちゅ、んちゅぅ」
+PRINTFORML 发出了如果是平时的%NAME_FORMAL(対象)%无法想象会发出的粗俗的声音
+;TranslatedMark 上がる音は、普段の%NAME_FORMAL(対象)%からは想像もつかぬほど下品だ
+PRINTFORMW 但同时也是激发男人欲望的声音
+;TranslatedMark だが同時に、なんとも男の欲望をかき立てる音でもあった
+PRINTFORML 接着，将白皙的手指伸向玉袋，轻轻揉搓阴囊
+;TranslatedMark さらに、白い指を玉袋に伸ばし、陰嚢をそっともみほぐしてやる
+PRINTFORMW 这样的话，即使是男优也无法忍受，低吟着将炽热的精液解放到%ANAME(対象)%的口中
+;TranslatedMark これにはいかに男優といえど堪えられず、低く呻きつつ熱い精を%ANAME(対象)%の口内へ解き放った
+CALL FUCK(対象, "欲望, 奉仕, 精愛, 口淫, 撮影", "接吻喪失,口内射精", GET_SPERM_ID("AV男優"), "AV男優のペニス", "AV男優", "", "撮影")
+PRINTFORMW 「嗯哼……嗯，嗯……♥」
+;TranslatedMark 「んふッ……、ん、んyin'huiぅ……♥」
+PRINTFORML 一边发出心醉神迷的喘息，一边为嘴里蔓延着的苦味而神情荡漾
+;TranslatedMark 恍惚の吐息を漏らしつつ、口内に広がる苦みばしった味に顔を蕩かせる
+PRINTFORMW 仅凭这一点，就可以称得上猥亵的雌性的表情，被摄像机细致地记录下来
+;TranslatedMark それだけで猥褻といえる雌の表情を、カメラは克明に記録する
+PRINTFORML 每次从口内脉动的阳具中放出粘稠的汁液时，她都会随着喉咙传来的声音将其吞咽下去
+;TranslatedMark 口内で脈動する魔羅から粘つく汁が放たれるたび、喉を鳴らして嚥下していく
+PRINTFORMW %ANAME(対象)%无法抑制兴奋，用手指抚摸着自己的大腿……
+;TranslatedMark %ANAME(対象)%は興奮を抑えられず、自らの股を指で弄っている……
+CALL FUCK(対象, "欲望, 自慰, 撮影")
+PRINTFORML 在吸取了尿道中仅剩的一点点汁液之后，%ANAME(対象)%终于松开了嘴唇
+;TranslatedMark 尿道に残った僅かな汁まで吸い上げたのち、%ANAME(対象)%はようやく唇を離す
+PRINTFORML 鸡鸡的根部附着为了今天特地挑选的唇膏
+;TranslatedMark 竿の根元に、今日のために選んできたリップが付着している
+PRINTFORMW %PRONOUN(対象)%到底深入含到了什么程度，就像吃水线一样显示着
+;TranslatedMark %PRONOUN(対象)%がどこまで深く咥え込んだか、喫水線のように示していた
+PRINTFORMW 桃色的舌头伸了出来，舔着献给雄性的嘴唇……
+;TranslatedMark 桃色の舌が這い出し、雄に捧げられた唇をれろりと舐める……
+PRINTFORMW 「啊，太好了%ANAME(対象)%。不仅仅是身体，技术也很厉害呢」
+;TranslatedMark 「いやあ、よかったよ%ANAME(対象)%さん。カラダだけじゃなくテクも凄いね」
+PRINTFORMW 「呵呵，谢谢。但是，看起来还很精神呢？」
+;TranslatedMark 「ふふ、ありがとうございます。でも、まだまだ元気そうですね？」
+PRINTFORML 还带着几分陶醉于口内射精的余韵中的眼睛，满怀期待地凝视着他的胯股之间
+;TranslatedMark まだいくらか口内射精の余韻に蕩けた瞳で、期待を込めて彼の股間を見つめる
+PRINTFORMW 好像忘记了刚刚才射精了一样，再度怒立起来
+;TranslatedMark 今まさに射精したことなど忘れたかのように、いきり立っていた
+PRINTFORMW 「那么，请到这边来……♥」
+;TranslatedMark 「では、こちらへどうぞ……♥」
+PRINTFORML 在床上趴着，自己打开双腿，裸露出自己的密缝
+;TranslatedMark ベッドの上で四つん這いになり、剥き出しの秘部を自ら割り開く
+PRINTFORMW %STR_BODY("膣：欲情", 対象)%好像在等待着被贯穿的瞬间
+;TranslatedMark %STR_BODY("膣：欲情", 対象)%はヒクついて、貫かれる瞬間を待っているかのようだった
+PRINTFORML 从平常的%ANAME(対象)%的楚楚动人的样子到现在无法想象的猥亵的姿态，都被作为影像记录下来
+;TranslatedMark 普段の%ANAME(対象)%の楚々たる様からは想像のつかない卑猥なさまは、もちろん映像として記録される
+PRINTFORMW 光是想想到底有多少人看到这个后会性奋，就抑制不住内心的骚动
+;TranslatedMark いったい何人がこれを見て興奮してくれるのだろうと考えるだけで、興奮を抑えられない
+PRINTFORMW 「好啊，那么马上……」
+;TranslatedMark 「いいねえ、それじゃ早速……」
+PRINTFORMW 「啊，啊，嗯」
+;TranslatedMark 「あはっ、あっ、んっ」
+PRINTFORML 男演员用自身的前端摩擦着%STR_BODY("膣：処女確認：感度", 対象)%
+;TranslatedMark 男優自身の先端が、%STR_BODY("膣：処女確認：感度", 対象)%に擦りつけられる
+PRINTFORMW 为了配合%ANAME(対象)%而扭动腰，摩擦处发出了猥亵声音
+;TranslatedMark %ANAME(対象)%もあわせるように腰をくねらせ、ニチッ、ニチッと卑猥な音が鳴る
+PRINTFORMW 过了一会儿，男优阴茎终于插入了衣玖的体内
+;TranslatedMark しばらくそうして素股を楽しんだ後、とうとう男優のペニスが、衣玖の体内にねじ込まれた
+CALL FUCK(対象, "欲望, Ｖ, Ｖ性交, 性交, 撮影", "処女喪失, CFLAG減少", GET_SPERM_ID("AV男優"), "AV男優のペニス", "AV男優", "", "撮影")
+PRINTFORMW 「啊啊啊啊啊啊……♥」
+;TranslatedMark 「あっはぁああッ……♥」
+PRINTFORML 由于传来的的快感，%ANAME(対象)%的喉咙里发出难以忍受的娇声
+;TranslatedMark ひりつく快楽に、%ANAME(対象)%の喉から堪えがたい嬌声があがる
+PRINTFORMW 媚肉紧紧地缠绕在男子的肉根上，吸吮着侵犯自己的东西
+;TranslatedMark 媚肉は男根にきゅうきゅうと絡みつき、自らを犯すモノにしゃぶりついた
+PRINTFORMW 「哈哈♥啊，哈哈，啊♥嗯，嗯♥啊，好♥好舒服♥」
+;TranslatedMark 「はッ♥　あ、は、あっ♥　くぅんっ♥　あは、いいっ♥　きもちいぃっ♥」
+PRINTFORML 马上活塞运动开始了，伴随着清脆的声音，男人的腰碰撞着%STR_BODY("尻：長", 対象)%
+;TranslatedMark すぐさまピストンが開始され、小気味よい音とともに男の腰が%STR_BODY("尻：長", 対象)%に打ち付けられる
+PRINTFORML 随着每次身体前后摆动，%STR_BODY("胸：長", 対象)%就会摇晃
+;TranslatedMark 身体が前後するたびに、%STR_BODY("胸：長", 対象)%が揺れる
+PRINTFORML 「哈……好♥啊哈、啊、啊啊啊啊♥」
+;TranslatedMark 「はぁ……いいッ♥　あはっ、あんッ、あぁッ、あはぁ♥」
+PRINTFORML 当然，%ANAME(対象)%现在是以自己的性行为为卖点的专业女优
+;TranslatedMark もちろん、%ANAME(対象)%とて今や己の性を売り物とする、プロの女優である
+PRINTFORML 就算沉溺于性的快乐中，也不会忘记自己的工作
+;TranslatedMark セックスの快楽に溺れながらも、自らの仕事を忘れることはない
+PRINTFORML 自己也扭动腰取悦男人
+;TranslatedMark 自らも腰をくねらせ、男を悦ばせる
+PRINTFORMW 发出平时绝对不可能发出的声音，沉溺于女性的快乐，到底浪费了多少精子呢
+;TranslatedMark 普段なら決して聞かせない声を上げ、雌の快楽によがる様で、いったいどれだけの精子が浪費されることだろう
+PRINTFORML 活塞运动的速度逐渐提高
+;TranslatedMark 次第に、ピストンのペースが上がっていく
+PRINTFORML 淫秽的水声和肉体的敲击声在室内回响
+;TranslatedMark 猥褻な水音と肉の打ち付けられる音が室内に響く
+PRINTFORMW 察觉到马上就要射精了，%ANAME(対象)%期待得更加收紧了%STR_BODY("膣", 対象)%
+;TranslatedMark 射精が近いのだと察し、%ANAME(対象)%は期待から%STR_BODY("膣", 対象)%をさらに締め付ける
+PRINTFORMW 「哦，射出来了……啊！」
+;TranslatedMark 「おおッ、出るッ……ああっ！」
+PRINTFORMW 「啊，啊啊啊啊——♥」
+;TranslatedMark 「あッ、はぁああああ――ッ♥」
+CALL FUCK(対象, "欲望, Ｖ, 性交, Ｖ性交, 撮影", "処女喪失, 膣内射精, CFLAG減少", GET_SPERM_ID("AV男優"), "AV男優のペニス", "AV男優", "", "撮影")
+PRINTFORML 男子低低地呻吟，睾丸收缩，释放出浓厚的汁液
+;TranslatedMark 男が低く呻くと、睾丸が縮み上がり、濃厚なスペルマが解き放たれる
+PRINTFORML 随着流入子宫的热感，%ANAME(対象)%也迎来了顶峰
+;TranslatedMark 子宮に流れ込む熱い感覚に、%ANAME(対象)%も絶頂を迎えた
+PRINTFORMW 摄影师一瞬间也不放过地记录下了精液狠狠地注入的样子……
+;TranslatedMark 子種をどくどくと注ぎ込まれていく様を、カメラマンは一瞬たりとも逃さず記録する……
+PRINTFORML 享受余韵后，男演员拔出阴茎
+;TranslatedMark 余韻を楽しんだ後、男優はペニスを引き抜く
+PRINTFORML 还在高潮中的%STR_BODY("膣", 対象)%，在龟头脱落的瞬间发出了砰的一声
+;TranslatedMark 未だアクメの最中にある%STR_BODY("膣", 対象)%は、亀頭が抜ける瞬間にぬぽッ、と音をたてた
+PRINTFORMW 一瞬间，从抽搐着的%STR_BODY("陰唇", 対象)%中缓缓地流出白浊的样子，也毫无保留地展现出来
+;TranslatedMark 一瞬たてて、ヒクつく%STR_BODY("陰唇", 対象)%からどろりと白濁がこぼれ落ちる様も、余すところなく映される
+PRINTFORMW 「哈……啊哈，谢谢，非常感谢……♥」
+;TranslatedMark 「はぁ……あはっ、ありがとう、ございましたぁ……♥」
+PRINTFORML 双颊通红，刘海贴在额头上，%STR_BODY("身体", 対象)%在汗水中熠熠生辉
+;TranslatedMark 頬は上気し、前髪は額にはりつき、%STR_BODY("身体", 対象)%は汗で輝いている
+PRINTFORMW 她以令人窒息般艳丽的姿态，向男演员以及最重要的摄像机后的某个人道谢
+;TranslatedMark 息を飲むほど艶めかしい姿で、男優に、そして何より見てくださっている画面の前の誰かに礼を述べた
+PRINTFORMW 「嗯哼……嗯，啾♥嗯，嗯，嗯……呜哇……♥」
+;TranslatedMark 「んふっ……んッ、ちゅ♥　ちゅ、くぷ、んふぅ……れろぉ……♥」
+CALL FUCK(対象, "欲望, 奉仕, 精愛, 口淫, 撮影", "接吻喪失,口内射精, CFLAG減少", GET_SPERM_ID("AV男優"), "AV男優のペニス", "AV男優", "", "撮影")
+PRINTFORML 把脸埋入男人的胯下，用口腔清洁让自己变得舒服的东西
+;TranslatedMark 男の股に顔を埋め、自らを気持ちよくしてくださったモノを口腔で清めていく
+PRINTFORML 不是像刚才那样为了榨取的舌头，而是为了善后而使用的舌头
+;TranslatedMark 先ほどのような搾り取る舌使いではなく、労るための舌使いだ
+PRINTFORMW 对一直舔到睾丸为止的口交行为发出回应，本应已经射精两次的东西又开始充血
+;TranslatedMark 睾丸まで舐め回すフェラチオに、既に二度射精したはずのモノがまた充血し始める
+PRINTFORMW 「啊，好像还很精神……」
+;TranslatedMark 「あら、まだお元気なようで……」
+PRINTFORMW 「如果可以的话，还有时间♥怎么样，再一次……♥」
+;TranslatedMark 「よろしければ、まだ時間もありますし♥　どうでしょうか、もう一度……♥」
+PRINTFORMW 两脚呈M的形状展开，显示出刚刚还在流出种子的%STR_BODY("陰唇", 対象)%
+;TranslatedMark 両脚をＭの形に大きく広げ、子種をこぼす%STR_BODY("陰唇", 対象)%を見せつける
+PRINTFORMW 拍摄继续进行，%ANAME(対象)%艳丽的声音再次响起……
+;TranslatedMark 撮影は続行され、%ANAME(対象)%の艶やかな声が再び響き渡った……
+
+CALL FUCK(対象, "欲望, 奉仕, 精愛, 口淫, 接吻, Ｖ, 性交, Ｖ性交, 撮影", "処女喪失, 膣内射精, 接吻喪失, 口内射精, CFLAG減少", GET_SPERM_ID("AV男優"), "AV男優のペニス", "AV男優", "", "撮影")
+
+RETURN 1

@@ -1,0 +1,164 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K62_UNDEAD_RATE(対象)
+#DIM 対象
+RETURN 50
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K62_UNDEAD_DECISION(対象)
+#DIM 対象
+
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K62_UNDEAD_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラから隨機に一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K62_UNDEAD(対象)
+#DIM 対象
+
+SELECTCASE KDVAR:対象:燐_死体旅行
+	CASE 0
+		KDVAR:対象:燐_死体旅行 = 1
+		PRINTFORMW 战争, 饥荒, 瘟疫, 死亡给幻想乡蒙上了阴霾, 或人或妖都为此感到悲痛
+		PRINTFORMW 但一部分"不吉利"的妖怪却无动于衷, 甚至樂見此事, 而她就是其中之一
+		PRINTFORMW "地狱的轮祸" -- 火焰猫燐. 栖息于火焰中的黑猫，地靈殿之主的宠物以及左右手.
+		PRINTFORMW 因为做出夺走尸体如此不吉的行当，在失去至親至愛的人們已經傷痕累累的心上火上浇油, 因此受眾生所厭惡.
+		PRINTFORMW 不过燐本人是个开朗单纯的家伙,對此毫不在意. 而且也对活着的人类不感兴趣, 也不会主动獵殺人類.
+		PRINTFORMW 再怎麼說要是被本人殺害化為怨靈，之後的對話肯定有趣不起来了.
+		PRINTFORMW 「锵锵～～」
+		PRINTFORMW 「虽然咱也知道灾难是坏事, 不过能轻易获得这么多新鲜年轻的尸体, 对咱来说实在是丰收呀」
+		PRINTFORMW 「因为咱对已经入土的尸体基本没有兴趣啦, 平时只能到葬礼上偷, 或者碰碰运气去捡路边尸」
+		PRINTFORMW 「这可真是平时没有的好机会呀~」
+		PRINTFORMW 面對因災禍而變得橫屍遍野的景象,阿燐已經食指大動了...
+	CASE 1
+		PRINTFORMW 「啊哈哈, 这种感觉真不赖. 那么, 今天也要鼓起干劲找尸体咯!」
+		PRINTFORMW 對於屍體的渴望,讓阿燐再次踏上旅程
+ENDSELECT
+	PRINTFORMW 死体之旅就此启程啦
+	CALL ASK_MULTI_JUDGE("去打扫战场", 1, "去公共墓地", 1, "去无缘塚", 1)
+	SELECTCASE RESULT
+		CASE 0
+			PRINTFORMW 「这次就去前线吧, 尸体新鮮又多, 真是个好地方呢」
+			PRINTFORMW 阿燐拉着她的猫车, 飞速向战场奔去.
+			PRINTFORMW ...
+			PRINTFORMW ..
+			PRINTFORMW .
+			SELECTCASE RAND:4
+				CASE 0
+					PRINTFORMW 去的太晚, 战场已经被胜利方打扫完毕, 尸体基本也都被烧掉了
+					PRINTFORMW 只有少数几具还有回收价值, 阿燐略微沮丧地回到了营地
+				CASE 1
+					PRINTFORMW 普通的丰收, 尸体的数量和质量还算说得过去
+					PRINTFORMW 虽然在戰火之中只能算是一般般, 但在平时已经算是运气爆棚了
+					PRINTFORMW 阿燐这样想着, 心情舒畅的回到了营地
+				CASE 2
+					PRINTFORMW 大丰收! 血染大地, 尸横遍野, 看来这里发生过一场大规模激战.
+					PRINTFORMW 空中弥漫的血腥味和尘土味, 地上还在燃烧的火焰, 都说明战斗刚刚停止不久.
+					PRINTFORMW 「哇哈哈哈, 真让人高兴, 这下可要跑好几趟了」
+					PRINTFORMW 「通通变成咱的东西吧! 」
+				CASE 3
+					PRINTFORMW 在战场上搬运尸体时触发了诡雷!
+					LOCAL:1 = RAND:2 + 1
+					LOCAL:2 = RAND:4 + 2
+					SELECTCASE RAND:2
+						CASE 0
+							PRINTFORMW 所幸, 这只是用于杀伤人类军队的道具, 对妖怪而言并无大碍
+							PRINTFORMW 「痛痛痛, 人类还真是喜欢干这种偷偷摸摸的事情」
+							PRINTFORMW 「不过, 可能要花一些时间养伤了」
+							CALL SET_COOLTIME(対象, LOCAL:1)
+						CASE 1
+							PRINTFORMW 是装满符咒的雷, 专门用来对付妖怪的道具
+							PRINTFORMW 「咳咳...这下子, 要失去意识了...不知道..能不能...得救」
+							PRINTFORMW 阿燐强行留住最后一点意识, 发动了用于紧急求救的符卡, 旋即昏死过去.
+							PRINTFORMW 好在营地及时的救援和救治保住了阿燐的性命
+							CALL SET_COOLTIME(対象, LOCAL:2)
+					ENDSELECT
+			ENDSELECT
+		CASE 1
+			PRINTFORMW 「偶尔也想看看新下葬的尸体呢」
+			PRINTFORMW 阿燐拉着她的猫车, 飞速向墓地奔去.
+			PRINTFORMW ...
+			PRINTFORMW ..
+			PRINTFORMW .
+			PRINTFORMW 「喵哈哈, 阿燐大人到, 就让咱找找看有没有新鲜的尸体吧~」
+			SELECTCASE RAND:4
+				CASE 0
+					PRINTFORMW 「嗯...这片墓地没有新动过土的痕迹呢, 看来是白跑一趟了」
+					PRINTFORMW 阿燐略微沮丧地回到了营地
+				CASE 1
+					PRINTFORMW 「嗯...虽然这里有新下葬的尸体, 但从这个气味来看」
+					PRINTFORMW 「是寿终正寝的老人呢, 平时可能会来挖挖看, 但是現在..,」
+					PRINTFORMW 「还是算了吧, 明明年轻的新鲜尸体到处都是呢~」
+				CASE 2
+					PRINTFORMW 「哦呀, 是新下葬的尸体, 而且从这个气味来看」
+					PRINTFORMW 「是个年轻的家伙呢, 阿燐的运气还不错哦, 就让咱挖挖看吧~」
+					PRINTFORMW 阿燐可以跟尸体与灵交流, 即使他们不长嘴巴, 交流也不成问题
+					PRINTFORMW 死者大多数都没有意识到自己已经死亡了, 有时还会讲起明天的预定
+					PRINTFORMW 这位也是如此, 尚未意识到自己将去往何方, 与阿燐开心地聊着
+					PRINTFORMW 直到阿燐告知真相的那一刻
+				CASE 3
+					PRINTFORMW 「哦呀, 是新下葬的尸体, 而且从这个气味来看」
+					PRINTFORMW 「是个小孩子啊, 还真是可怜呢, 明明还什么都不懂」
+					PRINTFORMW 「要是被咱带走做成怨灵, 可就没法进入轮回重新开始了呢」
+					PRINTFORMW 「既然什么都不懂, 做成怨灵大概也不厉害吧, 咱不要啦」
+			ENDSELECT
+		CASE 2
+			PRINTFORMW 「有时也会发现有趣的外界灵魂呢, 把他们变成我的手下吧」
+			PRINTFORMW 阿燐拉着她的猫车, 向无缘塚奔去.
+			SELECTCASE KDVAR:対象:燐_死体旅行_彩蛋
+				CASE 0
+					KDVAR:対象:燐_死体旅行_彩蛋 = 1
+					PRINTFORMW 「喵呼呼~ 发现有趣的灵了, 虽然是个温和腼腆的家伙, 但这感觉不一般」
+					PRINTFORMW 「喂喂, 听得到吗, 咱对你很感兴趣哦, 旅途漫漫, 就跟咱讲讲你的故事吧」
+					PRINTFORMW 「嗯? 大明朝? 皇帝? 是在说大陆吗, 那边咱不懂呢」
+					PRINTFORMW 「被自己的叔叔背叛, 还真是惨呢, 不过家里吵架慢慢总会和好的」
+					PRINTFORMW 「起兵造反? 被围城? 你还真是个不得了的大人物呢」
+					PRINTFORMW 「像大哥哥这样厉害的灵, 咱可要好好收藏呐」
+				;建文帝
+				CASE 1
+					KDVAR:対象:燐_死体旅行_彩蛋 = 2
+					PRINTFORMW 「喵呼呼~ 宝物发现, 是个野心勃勃又很努力的灵呢, 活着的时候一定很厉害吧」
+					PRINTFORMW 「喂喂, 听得到吗, 咱对你很感兴趣哦, 旅途漫漫, 就跟咱讲讲你的故事吧」
+					PRINTFORMW 「嗯? 勃艮第? 公爵? 这都什么跟什么啊」
+					PRINTFORMW 「虽然在乡里贤者大人模糊了语言的境界, 但咱还是完全听不懂呢」
+					PRINTFORMW 「路易? 法兰西? 毕生的敌人? 嗯, 看来之前很辛苦呢~」
+					PRINTFORMW 「然后失败了吗, 看来还是你的对手比较强呢~」
+					PRINTFORMW 「被手下背叛而死? 哎呀呀还真是出乎咱的意料」
+					PRINTFORMW 「大哥哥居然这么快就意识到自己已经死去了, 真是不得了呢」
+					PRINTFORMW 「但是既然落到了咱的手里, 会有怎样的下场呢」
+					PRINTFORMW 「放心啦, 像大哥哥这样厉害的灵, 咱会好好收藏的~」
+				;大胆查理
+				CASE 2
+					KDVAR:対象:燐_死体旅行_彩蛋 = 3
+					PRINTFORMW 「喵呀, 这个灵, 有着非比寻常的力量, 看来仍被生者敬仰和歌颂呢」
+					PRINTFORMW 「让咱看看, 是个充满勇气的高贵灵呢, 多半是英勇战死的将军或者皇帝吧」
+					PRINTFORMW 「像这样的灵为什么会落到无缘塚, 会不会是贤者的误算呢」
+					PRINTFORMW 「因为这里接纳的大多数被遗忘之物呢, 还被歌颂的人为何会...」
+					PRINTFORMW 「难道说, 歌颂的内容或者期待与他本人不符吗, 所以自身便被忘记」
+					PRINTFORMW 「因为被歌颂而获得力量, 因为歌颂内容的偏差而被遗忘, 真有趣呢」
+					PRINTFORMW 「喵呜呜~不管啦, 之后告诉橙喵, 让她家的贤者大人来处理吧~」
+				;君十一
+				CASE 3
+					PRINTFORMW 「喵呜~ 没什么有趣的发现呢」
+					PRINTFORMW 阿燐略微沮丧地回到了营地
+			ENDSELECT
+	ENDSELECT
+RETURN 1

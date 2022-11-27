@@ -1,0 +1,52 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_NICE_FRUIT_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_NICE_FRUIT_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_NICE_FRUIT(対象)
+#DIM 対象
+
+PRINTFORML 走在鄉間的小路上突然発現一株結出看起来已経成熟感覚很好吃的水果的樹
+PRINTFORMW 怎麼辦？
+CALL ASK_YN("取幾顆来吃", "直接通過")
+
+IF RESULT == 1
+	PRINTFORML 不能貪嘴
+	PRINTFORML 作罷
+	RETURN 1
+ENDIF
+
+PRINTFORML 機会難得還是吃看看吧
+PRINTFORMW %ANAME(対象)%伸手摘了一顆水果、咬了一口
+PRINTFORML 
+IF RAND:2
+	PRINTFORML 好吃！
+	PRINTFORML 果実又新鮮又甜
+	PRINTFORMW %ANAME(対象)%感覚気力変得充沛於是継續進行探索
+	MAXBASE:対象:体力 += 50
+	CALL ICPRINT(@"体力最大値提高了<50>、変成了<{MAXBASE:対象:体力}>", "L", カラー_注意)
+ELSE
+	PRINTFORML 難吃！
+	PRINTFORML 果肉干澀的像沙子一樣、一口下去口中襲来一股讓舌頭発麻的苦澀味
+	PRINTFORML %ANAME(対象)%丟掉了水果、把果肉慌忙的吐了出来
+	PRINTFORMW 因為口中殘留的苦味而皺着眉頭急急忙忙的走掉了
+	IF MAXBASE:対象:体力 > 50
+		MAXBASE:対象:体力 -= 50
+		CALL ICPRINT(@"体力最大値下降了<50>、変成了<{MAXBASE:対象:体力}>", "L", カラー_注意)
+	ENDIF
+ENDIF
+
+RETURN 1

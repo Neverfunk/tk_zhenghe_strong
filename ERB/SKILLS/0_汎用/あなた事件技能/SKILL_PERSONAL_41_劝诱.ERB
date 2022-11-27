@@ -1,0 +1,199 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_0_PERSONAL_41_EXIST
+RETURN 1
+
+@SKILL_0_PERSONAL_41_CANT_LEARN_FROM_SHOP
+
+@SKILL_0_PERSONAL_41_CANT_TELL
+
+@SKILL_0_PERSONAL_41_NAME
+RESULTS = 劝诱
+
+;レベルは1-5まで
+@SKILL_0_PERSONAL_41_LEVEL
+RETURN 5
+
+;対象選択
+@SKILL_0_PERSONAL_41_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 目标, 3
+#DIM 君主
+対象側 = !発動側
+VARSET 目标
+SIF BATTLE_COMMANDER_NUM:対象側 == 0
+	RETURN 0
+
+IF 対象部隊 >= 0
+    SIF !IS_COUNTRY(対象勢力)
+        RETURN
+ELSE
+    SIF !IS_COUNTRY(CITY_OWNER:対象勢力)
+        RETURN
+ENDIF
+
+IF 対象部隊 >= 0
+	君主 = GET_COUNTRY_BOSS(対象勢力)
+ELSE
+	君主 = GET_COUNTRY_BOSS(CITY_OWNER:対象勢力)
+ENDIF
+
+LOCAL:1 = 0
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
+    IF CFLAG:(BATTLE_COMMANDER:対象側:LOCAL):好感度 >= 1500 && BATTLE_COMMANDER:対象側:LOCAL != 君主 && IS_FEMALE(BATTLE_COMMANDER:対象側:LOCAL)
+        目标:(LOCAL:1) = LOCAL
+        LOCAL:1 ++
+    ENDIF
+NEXT
+COMBAT_SKILL_TARGET = 目标:(RAND:(LOCAL:1 + 1))
+RETURN !BATTLE_SUMMONED_CHARA:対象側:COMBAT_SKILL_TARGET
+
+;発動判定
+@SKILL_0_PERSONAL_41_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 人员判定 = 0
+#DIM 君主
+SIF BATTLE_COMMANDER_NUM:対象側 == 0
+	RETURN 0
+
+IF 対象部隊 >= 0
+    SIF !IS_COUNTRY(対象勢力)
+        RETURN
+ELSE
+    SIF !IS_COUNTRY(CITY_OWNER:対象勢力)
+        RETURN
+ENDIF
+
+IF 対象部隊 >= 0
+	君主 = GET_COUNTRY_BOSS(対象勢力)
+ELSE
+	君主 = GET_COUNTRY_BOSS(CITY_OWNER:対象勢力)
+ENDIF
+
+対象側 = !発動側
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
+    SIF CFLAG:(BATTLE_COMMANDER:対象側:LOCAL):好感度 >= 1500 && BATTLE_COMMANDER:対象側:LOCAL != 君主 && IS_FEMALE(BATTLE_COMMANDER:対象側:LOCAL) && BATTLE_COMMANDER_NUM:対象側
+        人员判定 ++
+NEXT
+
+RETURN 発動者 == MASTER && IS_MALE(MASTER) && 人员判定
+
+;発動テキストをオーバライドしたいときに。
+;「誰それのスキル発動！　○○した！」の「○○した！」の部分を実装したい場合は、
+;これじゃなくてINVOKEで書けばいいです。
+;@SKILL_0_PERSONAL_0_INVOKE_TEXT(発動者, スキル, ジャンル)
+;#DIM 発動者
+;#DIM スキル
+;#DIMS ジャンル
+
+;効果をここに記述
+@SKILL_0_PERSONAL_41_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 目标
+#DIM 我方君主
+#DIM 对方君主
+#DIM 恋慕因数
+対象側 = !発動側
+目标 = BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET
+
+IF 発動部隊 >= 0
+    我方君主 = GET_COUNTRY_BOSS(発動勢力)
+ELSE
+    我方君主 = GET_COUNTRY_BOSS(CITY_OWNER:発動勢力)
+ENDIF
+
+IF 対象部隊 >= 0
+    对方君主 = GET_COUNTRY_BOSS(対象勢力)
+ELSE
+    对方君主 = GET_COUNTRY_BOSS(CITY_OWNER:対象勢力)
+ENDIF
+
+恋慕因数 = (TALENT:目标:恋慕 || TALENT:目标:親愛) + TALENT:目标:恋人 + (TALENT:目标:正妻 || TALENT:目标:妾)
+
+PRINTFORMW 「好久不见～」
+PRINTFORMW 『没想到能在这场合见到你啊』
+IF 我方君主 == MASTER
+    PRINTFORMW 「我现在创了业，就靠这个过活了」
+ELSE
+    PRINTFORMW 「不才，现在在%ANAME(我方君主)%手下打工」
+ENDIF
+PRINTFORMW 「但可怜从此之后我们一直不能相会——」
+PRINTFORMW 「若你与我一起共事，我们不就可以朝夕相会了吗？」
+CALL SINGLE_DRAWLINE
+LOCAL = (REL_LIKE:目标:MASTER - REL_HATE:目标:MASTER) * 100 / 1500
+LOCAL:1 = (REL_LIKE:目标:我方君主 - REL_HATE:目标:我方君主) * 100 / 1500
+IF LOCAL < 0
+    PRINTFORMW 『呸！』
+    PRINTFORMW 『我倒不觉得你有哪怕一点想念我的心思！』
+ELSEIF LOCAL:1 < 0
+    PRINTFORMW 『住口！』
+    PRINTFORMW 『我与%ANAME(我方君主)%老贼势不两立！』
+    PRINTFORMW 『你怎能令我向%PRONOUN(我方君主)%俯首称臣！？』
+ELSEIF MIN(LOCAL, LOCAL:1) > SETTOKU_REL_EFFECT(目标, 对方君主)
+    PRINTDATAW
+        DATAFORM 『\@(TALENT:目标:正妻 || TALENT:目标:妾) ? 夫君 # %ANAME(MASTER)%\@大人的话，妾身岂敢不从？』
+        DATAFORM 『\@(TALENT:目标:正妻 || TALENT:目标:妾) ? 夫君 # %ANAME(MASTER)%\@都这么说了……』
+        DATAFORM 『只要能和\@(TALENT:目标:正妻 || TALENT:目标:妾) ? 夫君 # %ANAME(MASTER)%\@在一起的话……』
+    ENDDATA
+    PRINTFORMW 「那么……现在就过来吧♥」
+    PRINTFORMW 『好♥』
+    CALL COLOR_PRINTW(@"%ANAME(目标)%倒向了%ANAME(我方君主)%！", カラー_注意)
+    CALL BATTLE_COMMANDER_WITHDRAWAL(対象側, COMBAT_SKILL_TARGET)
+    CALL CHANGE_COUNTRY(目标, CFLAG:MASTER:所属, 1)
+ELSE
+    PRINTFORMW 『此言差矣！』
+    PRINTFORMW 『%ANAME(对方君主)%是天命之子，亏待不了\@(TALENT:目标:正妻 || TALENT:目标:妾) ? 夫君 # %ANAME(MASTER)%\@』
+    PRINTFORMW 『若是%ANAME(MASTER)%可以与我共事%ANAME(对方君主)%的话』
+    PRINTFORMW 『一可高升无忧，二可令我们重逢，岂不美哉？』
+    IF LOCAL > SETTOKU_REL_EFFECT(目标, 对方君主) - 10 * 恋慕因数
+        PRINTFORMW 『不过念在我们昔日交情的分上，我就暂且退场了』
+        CALL COLOR_PRINTW(@"%ANAME(目标)%擅自脱离了战场！", カラー_注意)
+        CALL BATTLE_COMMANDER_WITHDRAWAL(対象側, COMBAT_SKILL_TARGET)
+    ENDIF
+ENDIF
+CALL SINGLE_DRAWLINE
+
+
+@SKILL_0_PERSONAL_41_EXPLANATION
+RESULTS = 试图劝诱对面的一位女性友人在战场倒戈
+
+@SKILL_0_PERSONAL_41_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 500

@@ -1,0 +1,57 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_STRAY_DOG_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_STRAY_DOG_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_STRAY_DOG(対象)
+#DIM 対象
+
+
+PRINTFORML 探索時、発現了一隻髒兮兮的狗
+PRINTFORML 看起来以前是被飼養的狗、被主人遺棄了吧
+PRINTFORMW 怎麼辦？
+PRINTL
+CALL ASK_YN("带回去", "赶走")
+
+IF RESULT == 1
+	PRINTFORML 没有照顾这髒狗的空闲
+	PRINTFORMW 于是直接把狗赶走了
+	RETURN 1
+ENDIF
+
+PRINTFORMW 太可憐了、決定帯回去
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+IF !IS_COUNTRY(CFLAG:対象:所属)
+	PRINTFORML 是隻蠢狗……
+	RETURN 1
+ENDIF
+
+SELECTCASE RAND:3
+	CASE 0
+		PRINTFORML 変得可愛的狗成為了軍隊的吉祥物
+		PRINTFORMW 接受了部下的提議嘗試使用在廣告塔上結果讓参軍的志願者増加了
+		COUNTRY_SOLDIER:(CFLAG:対象:所属) += 3000
+		CALL ICPRINT(@"兵数增加了<3000>、変成了<{COUNTRY_SOLDIER:(CFLAG:対象:所属)}>", "W", カラー_注意)
+	CASE 1
+		PRINTFORMW 変得可愛的狗成為了城市的吉祥物
+	CASE 2
+		PRINTFORML 狗和%ANAME(対象)%很親近
+		PRINTFORMW 訓練中和工作中、在%ANAME(対象)%身旁佇立的威風凜凜的身姿獲得了很高的評價
+ENDSELECT
+
+

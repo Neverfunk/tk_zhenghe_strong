@@ -1,0 +1,215 @@
+﻿@GetGenImage(iID,mood)
+#FUNCTIONS
+#DIM iID
+#DIM mood
+
+; RETURNF correct sprite based on mood
+SELECTCASE mood
+	CASE 0,3
+		LOCALS = 顔絵_服_通常_{iID}
+	CASE 1,4
+		LOCALS = 顔絵_服_笑顔_{iID}
+	CASE 2
+		LOCALS = 顔絵_服_怒り_{iID}
+	CASE 5,8
+		LOCALS = 顔絵_裸_通常_{iID}
+	CASE 6,9
+		LOCALS = 顔絵_裸_笑顔_{iID}
+	CASE 7
+		LOCALS = 顔絵_裸_怒り_{iID}
+	CASEELSE
+		LOCALS = 顔絵_服_通常_{iID}
+ENDSELECT
+;PRINTFORML Image %LOCALS%
+RETURNF LOCALS
+
+@MobImGen(chara)
+#DIM chara
+#DIM iID
+
+SIF chara < 0
+	RETURN
+	
+iID = NO:chara
+
+IF !INRANGE(iID, 1, 200)
+	CALL SET_MOB_IMAGE_STR(chara)
+	IF RESULT == 1 || !SPRITECREATED(GetGenImage(chara,0))
+		CALL モブ子画像リセット(chara)
+		CALL モブ子生成(chara, 1)
+		;PRINTFORML {chara} generated.
+	ENDIF
+ENDIF
+RETURN
+
+
+;*******************************************************************************************************
+;モブ子画像表示用
+;*******************************************************************************************************
+;削除しました＠v.4.730.INFO改良パッチ
+
+;*******************************************************************************************************
+;モブ子画像生成用関数
+;*******************************************************************************************************
+@モブ子生成(キャラ番号, 立ち絵種類)
+#DIM キャラ番号
+#DIM 立ち絵種類
+#DIM GID
+#DIMS 生成文字列
+#DIMS 合成文字列配列, 50
+#DIMS 色合成
+#DIM 合成数
+#DIM リソースカウント
+
+;リソース作成
+;=====================================
+FOR リソースカウント, 0, モブ子素材リソース数
+	;初期化
+	GID = 0
+	VARSET LOCAL
+	VARSET 合成文字列配列,
+	合成数 = 0
+	;画像合成下地用のダミーを配置する
+	CALL 画像合成(GID,"ダミー")
+	;使うリソースの名称を配列に取得する
+	;DEBUGPRINTFORML {キャラ番号} - モブ子リソース探索(%合成文字列配列%, {合成数}, %MOBGSTR:キャラ番号:(モブ子素材MOBGSTR開始位置 + リソースカウント)%), 立ち絵種類
+	CALL モブ子リソース探索(合成文字列配列, 合成数, MOBGSTR:キャラ番号:(モブ子素材MOBGSTR開始位置 + リソースカウント), 立ち絵種類)
+	;モブ子画像は高い番号のリソースから先に合成していく必要があるので降順にソートする
+	;PRINTFORML %MOBGSTR:キャラ番号:(モブ子素材MOBGSTR開始位置 + リソースカウント)%
+	ARRAYSORT 合成文字列配列, BACK, 0, 合成数
+	;モブ子用画像を順番に合成していく
+	FOR LOCAL, 0, 合成数
+		色合成 '= ""
+		IF 合成文字列配列:LOCAL != ""
+			;色合成確認
+			FOR LOCAL:1, 0 ,モブ子素材色種別数
+				IF STRFIND(合成文字列配列:LOCAL, @"_%モブ子素材色種別:(LOCAL:1)%_") != -1 && DIC_CONTAINSKEY(MOBGSTR:キャラ番号:(モブ子素材MOBGSTR開始位置 + リソースカウント), @"%モブ子素材色種別:(LOCAL:1)%色")
+					色合成 = %DIC_GET(MOBGSTR:キャラ番号:(モブ子素材MOBGSTR開始位置 + リソースカウント), @"%モブ子素材色種別:(LOCAL:1)%色")%
+					; Hair color
+					IF LOCAL:1 == 3
+						色合成 = {TALENT:キャラ番号:髪色}
+					ENDIF
+					LOCAL:1 = モブ子素材色種別数
+				ENDIF
+			NEXT
+			CALL 画像合成(GID, 合成文字列配列:LOCAL, 0, 0, 0, 0, 色合成)
+			;PRINTFORML {GID} %合成文字列配列:LOCAL%
+		ENDIF
+	NEXT
+	;合成した画像をリソースに登録する
+	MOBGFLAG:キャラ番号:(モブ子素材MOBGFLAG開始位置 + リソースカウント) = GID
+	;汎用テンプレートで使用できるように名前を統一する
+	IF !立ち絵種類
+		SELECTCASE リソースカウント
+			CASE 0
+				CALL リソース登録(@"立ち絵_服_通常_{キャラ番号}", GID)
+			CASE 1
+				CALL リソース登録(@"立ち絵_服_笑顔_{キャラ番号}", GID)
+			CASE 2
+				CALL リソース登録(@"立ち絵_服_怒り_{キャラ番号}", GID)
+			CASE 3
+				CALL リソース登録(@"立ち絵_裸_通常_{キャラ番号}", GID)
+			CASE 4
+				CALL リソース登録(@"立ち絵_裸_笑顔_{キャラ番号}", GID)
+			CASE 5
+				CALL リソース登録(@"立ち絵_裸_怒り_{キャラ番号}", GID)
+		ENDSELECT
+	ELSE
+		SELECTCASE リソースカウント
+			CASE 0
+				CALL リソース登録(@"顔絵_服_通常_{キャラ番号}", GID)
+			CASE 1
+				CALL リソース登録(@"顔絵_服_笑顔_{キャラ番号}", GID)
+			CASE 2
+				CALL リソース登録(@"顔絵_服_怒り_{キャラ番号}", GID)
+			CASE 3
+				CALL リソース登録(@"顔絵_裸_通常_{キャラ番号}", GID)
+			CASE 4
+				CALL リソース登録(@"顔絵_裸_笑顔_{キャラ番号}", GID)
+			CASE 5
+				CALL リソース登録(@"顔絵_裸_怒り_{キャラ番号}", GID)
+		ENDSELECT
+	ENDIF
+NEXT
+
+;TEQUIP:キャラ番号:上半身着衣状況 = 1
+
+RETURN 1
+
+;*******************************************************************************************************
+;モブ子画像リソース探索用関数
+;モブ子画像のリソースを探索して配列にリソース名を格納する
+;*******************************************************************************************************
+@モブ子リソース探索(合成文字列配列, 合成数, 生成文字列, 立ち絵種類)
+#DIMS REF 合成文字列配列,0
+#DIM REF 合成数
+#DIMS 生成文字列
+#DIM 立ち絵種類
+#DIMS キー
+#DIM CN_ENDNO = 18
+#DIMS CN_NO_STR
+VARSET LOCAL
+キー =
+CN_NO_STR =
+;ゴミ取り
+生成文字列 = %REPLACE(生成文字列, "^\"\"", "")%
+;DEBUGPRINTFORML %生成文字列%
+
+FOR LOCAL, 0, モブ子素材種別数
+	IF DIC_CONTAINSKEY(生成文字列, モブ子素材種別:LOCAL)
+		FOR LOCAL:1, CN_ENDNO, -1, -1
+			;IF STRFIND(モブ子素材種別:LOCAL, "装飾") != -1
+				;装飾の場合は複数設定できるのでリソース名検索時は数値部分を削る
+			;	キー = "装飾"
+			;ELSE
+				キー = %モブ子素材種別:LOCAL%
+			;ENDIF
+			FOR LOCAL:2, 0, モブ子素材カテゴリ数
+				IF LOCAL:1 < 10
+					;0埋め
+					CN_NO_STR = CN0{LOCAL:1}
+				ELSE
+					CN_NO_STR = CN{LOCAL:1}
+				ENDIF
+				IF SPRITECREATED(@"%CN_NO_STR%_%モブ子素材カテゴリ:(LOCAL:2)%_%DIC_GET(生成文字列, キー)%")
+					IF (!立ち絵種類)
+						合成文字列配列:(合成数++) = %CN_NO_STR%_%モブ子素材カテゴリ:(LOCAL:2)%_%DIC_GET(生成文字列, キー)%
+						DEBUGPRINTFORML %CN_NO_STR%_%モブ子素材カテゴリ:(LOCAL:2)%_%DIC_GET(生成文字列, キー)%
+					ELSE
+						合成文字列配列:(合成数++) = %CN_NO_STR%_%モブ子素材カテゴリ:(LOCAL:2)%_%DIC_GET(生成文字列, キー)%_顔
+						DEBUGPRINTFORML %CN_NO_STR%_%モブ子素材カテゴリ:(LOCAL:2)%_%DIC_GET(生成文字列, キー)%_顔
+					ENDIF
+				ENDIF
+			NEXT
+		NEXT
+	ENDIF
+NEXT
+
+RETURN 1
+
+;*******************************************************************************************************
+;モブ子画像解放用関数
+;指定したキャラ番号のモブ子のグラフィックを全て破棄する
+;*******************************************************************************************************
+@モブ子画像リセット(キャラ番号)
+#DIM キャラ番号
+#DIM リソースカウント
+IF MOBGFLAG:キャラ番号:モブ子素材MOBGFLAG開始位置 != 0 && GCREATED(MOBGFLAG:キャラ番号:モブ子素材MOBGFLAG開始位置)
+	SPRITEDISPOSE @"立ち絵_服_通常_{キャラ番号}"
+	SPRITEDISPOSE @"立ち絵_服_笑顔_{キャラ番号}"
+	SPRITEDISPOSE @"立ち絵_服_怒り_{キャラ番号}"
+	SPRITEDISPOSE @"立ち絵_裸_通常_{キャラ番号}"
+	SPRITEDISPOSE @"立ち絵_裸_笑顔_{キャラ番号}"
+	SPRITEDISPOSE @"立ち絵_裸_怒り_{キャラ番号}"
+	SPRITEDISPOSE @"顔絵_服_通常_{キャラ番号}"
+	SPRITEDISPOSE @"顔絵_服_笑顔_{キャラ番号}"
+	SPRITEDISPOSE @"顔絵_服_怒り_{キャラ番号}"
+	SPRITEDISPOSE @"顔絵_裸_通常_{キャラ番号}"
+	SPRITEDISPOSE @"顔絵_裸_笑顔_{キャラ番号}"
+	SPRITEDISPOSE @"顔絵_裸_怒り_{キャラ番号}"
+	FOR リソースカウント, 0, モブ子素材リソース数
+		GDISPOSE MOBGFLAG:キャラ番号:(モブ子素材MOBGFLAG開始位置 + リソースカウント)
+		MOBGFLAG:キャラ番号:(モブ子素材MOBGFLAG開始位置 + リソースカウント) = 0
+	NEXT
+ENDIF
+RETURN 1

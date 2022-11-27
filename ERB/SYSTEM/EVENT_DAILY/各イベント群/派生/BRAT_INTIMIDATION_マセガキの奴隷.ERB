@@ -1,0 +1,483 @@
+﻿;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_BRAT_INTIMIDATION_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("PRECOCIOUS_BRAT")
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_BRAT_INTIMIDATION_DECISION()
+
+RETURN DVAR:マセガキ_発生フラグ > 0 && RAND:100 < 40
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_BRAT_INTIMIDATION
+#DIM 対象
+
+対象 = ID_TO_CHARA(DVAR:マセガキ_奴隷ID)
+
+IF 対象 == -1
+	DVAR:マセガキ_発生フラグ = 0
+	DVAR:マセガキ_奴隷ID = 0
+	DVAR:マセガキ_調教深度 = 0
+	RETURN 1
+ENDIF
+
+
+IF CFLAG:MASTER:所属 != CFLAG:対象:所属
+	PRINTFORMW %ANAME(MASTER)%几方打听后发现%ANAME(対象)%离开了这个势力，不得不放弃了这个玩具……
+	DVAR:マセガキ_発生フラグ = 0
+	DVAR:マセガキ_奴隷ID = 0
+	DVAR:マセガキ_調教深度 = 0
+	RETURN 1
+ENDIF
+
+;ターゲットが女じゃなくなっていたらやめる
+IF !IS_FEMALE(対象)
+	PRINTFORMW 因为%ANAME(対象)%的身体已经不能算是一个女性了，%ANAME(MASTER)%看到%ANAME(対象)%的样子之后瞬间失去了兴趣……
+	DVAR:マセガキ_発生フラグ = 0
+	DVAR:マセガキ_奴隷ID = 0
+	DVAR:マセガキ_調教深度 = 0
+	RETURN 1
+ENDIF
+
+;ターゲットが捕虜になったらやめる
+IF CFLAG:対象:捕虜先
+	PRINTFORMW %ANAME(対象)%似乎被谁抓走了，%ANAME(MASTER)%只能放弃接下来的调教计划……
+	DVAR:マセガキ_発生フラグ = 0
+	DVAR:マセガキ_奴隷ID = 0
+	DVAR:マセガキ_調教深度 = 0
+	RETURN 1
+ENDIF
+
+IF CFLAG:対象:特殊状態 == 特殊状態_死亡
+	PRINTFORMW %ANAME(対象)%好像已经死去了，再怎么说这小少爷也没办法对尸体调教……
+	DVAR:マセガキ_発生フラグ = 0
+	DVAR:マセガキ_奴隷ID = 0
+	DVAR:マセガキ_調教深度 = 0
+	RETURN 1
+ENDIF
+
+PRINTFORMW 今天%ANAME(対象)%又被"主人"唤去了他的宅邸……
+IF DVAR:マセガキ_調教深度 >= 7
+	PRINTFORML 但今天的脚步却不像之前一样沉重
+	PRINTFORML 即使%ANAME(対象)%是被迫接受的调教，但日久月深的调教已经让%ANAME(対象)%逐渐沉迷于其中
+	PRINTFORMW 在路上仅仅想象了会被年幼的主人如何欺负，内衣就开始变得湿润了起来
+	PRINTFORML %ANAME(対象)%见到那个小鬼时，他用和平时一样嚣张跋扈的态度要求%ANAME(対象)%主动当他的私有品
+	PRINTFORML 已经沦陷了的%ANAME(対象)%立刻就答应了下来，跪在他脚下表示忠诚的时候，瞳孔中满是♥发情♥的样记
+	PRINTFORMW 那个小少爷满足了一般的大笑着，带着%ANAME(対象)%走向了地下室
+	PRINTFORMW 这可是%ANAME(対象)%成为他的奴隶第一天，他就像拿到了新玩具一样比平时更为激烈的折腾着%ANAME(対象)%，把她无数次送上云霄
+	CALL COLOR_PRINT(@"%ANAME(対象)%成为了贵族少爷的肉奴隶", カラー_警告)
+	SETBIT TALENT:対象:日常系, 素質_デイリー_マセガキの奴隷
+	CALL LOSE_RELATION_TALENT(対象)
+	DVAR:マセガキ_発生フラグ = 0
+	DVAR:マセガキ_奴隷ID = 0
+	DVAR:マセガキ_調教深度 = 0
+	PRINTFORMW
+	RETURN
+ENDIF
+PRINTFORMW 有把柄被抓住的%ANAME(対象)%即使想逃也不敢逃，只是磨磨蹭蹭的踱向宅邸……
+PRINTFORML 
+SELECTCASE RAND:30
+	CASE 0
+		PRINTFORML %ANAME(対象)%被要求穿上女仆的衣服来侍奉他
+		PRINTFORML 作为专用的肉奴隶女仆，他要求%ANAME(対象)%随时都跟在他身边，随时都要满足他的性欲
+		PRINTFORML 打扫中，洗衣时，做饭时…随时随地都会被他突然侵犯，黏在身上的精液甚至来不及洗掉
+		PRINTFORMW 即便是晚上也不让回家，不仅要在他入寝之前为他暖床，连带还要满足他所谓“侍奉”的要求……
+	CASE 1
+		PRINTFORML %ANAME(対象)%被要求全裸着带上项圈，扮演他的宠物狗
+		PRINTFORML 被当做宠物的%ANAME(対象)%只能四脚爬行，也不让正常的说话
+		PRINTFORML 只要做出了不像是宠物狗的行为，他就会以教育宠物为名，一边从后背位侵犯%ANAME(対象)%，一边狠狠地拍打%ANAME(対象)%的屁股
+		PRINTFORML 被教育了无数次后，%ANAME(対象)%的身体终于记住了如何扮演一条母狗……
+	CASE 2
+		PRINTFORML 在宅邸的地下室里回荡着%ANAME(対象)%沉闷的呻吟声
+		PRINTFORML 今天不巧碰上少爷的心情不好，%ANAME(対象)%被他吊了起来，像是撒气一样在身体里横冲直撞
+		PRINTFORML 被戴上了眼罩和开口器的%ANAME(対象)%，除了随着他的冲刺扭动身体之外什么都做不了
+		PRINTFORMW 等到他撒完气的时候已经是第二天的中午了，被其他女仆放下来的时候全身都是红肿的痕迹……
+	CASE 3
+		PRINTFORML %ANAME(対象)%被主人按着头趴在床上，在猛烈的攻势下疯狂的高潮着
+		PRINTFORML 这小少爷像发情期的狗一样，拱动腰部一直蹂躏到阴道的最深处
+		PRINTFORML 即使已经被干到失神，子宫也感受到了本能传来的怀孕的预告，开始抽动起来
+		PRINTFORMW 在子宫抽动的痛感终于被浓烈的精液所舒缓后，%ANAME(対象)%像母狗一样拼命喘着气，完全管不上已经盖住了脸的头发……
+	CASE 4
+		PRINTFORML %ANAME(対象)%跪在少爷的双腿之中，用嘴打扫着那根刚刚还在蹂躏着自己的肉棒
+		PRINTFORML 沾满精液和爱液的肉棒散发着浓烈的淫秽的气味，把%ANAME(対象)%的思考完全夺走了
+		PRINTFORML 一想到这根肉棒在自己体内的感觉，子宫就感觉到了绞痛，让%ANAME(対象)%舔舐肉棒的动作逐渐变得激烈起来
+		PRINTFORMW 对%ANAME(対象)%逐渐狂乱起来的姿态感到满足的主人一脚把%ANAME(対象)%踹倒，又一次把肉棒压入爱液横流的肉穴之中……
+	CASE 5
+		PRINTFORML %ANAME(対象)%一脸失神的躺在床上感受着高潮的余韵，全身上下都黏着还没干透的精液
+		PRINTFORML 在%ANAME(対象)%周围散落着各种各样沾满了自己的爱液的调教玩具
+		PRINTFORML 把全部私藏品都拿出来玩到腻的主人脸上带着嗜虐的邪笑，把手指刺入了%ANAME(対象)%的阴道
+		PRINTFORMW 还没能从高潮余韵中回过神的%ANAME(対象)%发出了不像样的悲鸣，全身颤抖着把爱液涂满了床单
+	CASE 6
+		PRINTFORML 视图♥视野♥一边气势很好地精液被放出%ANAME(対象)%与hiihii喘息
+		PRINTFORML 年轻的他的性欲惊人，已经%ANAME(対象)%的子宫好几发阴道被挤满了
+		PRINTFORML 开始忍耐着的%ANAME(対象)%已经不能抵抗子宫的热，紧紧地抱住他接受着子宫的种子
+		PRINTFORMW 结束了射精的他抽出肉棒的话，gopo♥大量的精液溢出来了
+	CASE 7
+		PRINTFORML %ANAME(対象)%的人在他的命令下穿着裸体裙
+		PRINTFORML 只要稍微动一下，脸就会全露出来，脸红的%ANAME(対象)%他会笑着凝视、性骚扰
+		PRINTFORML 当然不可能仅仅满足于此，每次忍不住就被命令为“服务”
+		PRINTFORMW 事后，看到他的精液溢出%ANAME(対象)%气喘吁吁地颤抖着
+	CASE 8
+		PRINTFORML 被灌下药物而发情的%ANAME(対象)%被锁在地下室里
+		PRINTFORML 被压倒性的官能的波浪一边也袭击自我安慰的事也不能%ANAME(対象)%在发狂眼前身体苦闷
+		PRINTFORML 不久出现他的时候，%ANAME(対象)%已经叫着丢下耻辱和外界去犯
+		PRINTFORMW 那天晚上，从地下室传来不该有的女人的喘息声
+	CASE 9
+		PRINTFORML 裸露着不属于的海脸的%ANAME(対象)%忘记自己正在自慰
+		PRINTFORML 被打了通常的5倍的浓厚的发情药的%ANAME(対象)%成为了只考虑快乐的事的母狗
+		PRINTFORML 只靠手指无法满足的%ANAME(対象)%，笑嘻嘻地凝视着的他贴紧在胯股之间脸颊求慈悲
+		PRINTFORMW 看到的样子他满足地笑了%ANAME(対象)%压倒在床上，把肉棒扭进深处
+	CASE 10
+		PRINTFORML 在床上%ANAME(対象)%以邋遢的母脸让他弯着腰
+		PRINTFORML 与小孩不相称的健壮的一物到深处挖%ANAME(対象)%，被放出的精液烧焦子宫
+		PRINTFORML 被灼烧胎盘的精液触觉无可奈何地刺激着女人，无意识地摇着腰去寻找他的小孩
+		PRINTFORMW 事后，被吐出了大量的精液的%ANAME(対象)%比妊娠的恐怖都期待使之高涨着
+	CASE 11
+		PRINTFORML %ANAME(対象)%作为宠物被带到了他的朋友的宅邸
+		PRINTFORML 他的朋友也得到了同样的“发现”，于是彼此介绍宠物，引以为豪
+		PRINTFORML 看到她那母狗似的表情%ANAME(対象)%皱起眉头，但自己却没有注意到她也做出同样的表情
+		PRINTFORMW 介绍结束了的二人在项圈被连接，被排列充分地被调教
+	CASE 12
+		PRINTFORML 在被他的欲望那样狠狠地虐待了之后，%ANAME(対象)%一起沐浴着
+		PRINTFORML 精心洗净因而肿胀的肌肤的舒适刺激，不由得和身抖一起吐出了甜蜜的呼吸
+		PRINTFORML 他好象中意了那个反应，苦闷的%ANAME(対象)%的全身各个角落手指使之爬起来湿润地洗出了
+		PRINTFORMW 艳丽的%ANAME(対象)%的样子他不可能忍耐，在那个场合再次开始了乐趣
+	CASE 13
+		PRINTFORML 他脱下%ANAME(対象)%，以一件外套带走。
+		PRINTFORML %ANAME(対象)%因为被人看见的恐惧和羞耻而变得通红，双脚嘎吱嘎吱地颤抖着，一边在街上漫步
+		PRINTFORML 每一次流浪forml的时候，他们都会强制的让他们脱下外套，让他们模仿变态。
+		PRINTFORMW 充分地%ANAME(対象)%玩了之后当然被他直接凌辱了那个火照射了的身体
+	CASE 14
+		PRINTFORML 被床束缚的%ANAME(対象)%被摄像机一边拍摄一边被侵犯
+		PRINTFORML %ANAME(対象)%拼命地打算抵抗,不过，完全被把握弱点，没有那个地瑜伽了
+		PRINTFORML 在耳边被实况转播那个痴态，羞耻和快乐%ANAME(対象)%一边变得通红由于那个反动好多次去了
+		PRINTFORMW 已经开发完毕的%ANAME(対象)%在那之后也无法很好地抵抗，将痴态毫无保留地收入了相机中
+	CASE 15
+		PRINTFORML %ANAME(対象)%被穿上猥亵的衣服，在大量的孩子们面前被侵犯
+		PRINTFORML 他在聚集的朋友面前，自豪地表示100%ANAME(対象)%的拥抱感觉有多好
+		PRINTFORML 虽然被当作自豪的对象，但%ANAME(対象)%却无法抵抗，只能咬着牙苦闷着
+		PRINTFORMW 我们被和许多小孩们的视线所吸引，我们的脸达到了我们的巅峰。
+	CASE 16
+		PRINTFORML 被迫穿上女仆装的%ANAME(対象)%正在他的街上搜索
+		PRINTFORML 乍一看像是个普通的女仆，但衣服下面塞着几个跳蛋和振动棒，脚在发抖
+		PRINTFORML 他一边喘着气一边忍耐着%ANAME(対象)%的样子，一边笑眯眯的，总是在恶作剧的人气很多的地方巡视
+		PRINTFORMW 回家后，整天被带回家，身体被暴力侵犯
+	CASE 17
+		PRINTFORML %ANAME(対象)%立刻被带入地下屋接受着他的调教
+		PRINTFORML 半天一直用药物和玩具责弄%ANAME(対象)%露出一副邋遢的雌性脸痉挛着
+		PRINTFORML 只是轻轻地被责弄耻部亲吻和讨厌的蜜音回响，喘息声音提高身体苦闷了
+		PRINTFORMW 完成情况满足了的他终于取出肉棒的话，%ANAME(対象)%期待使子宫疼痛
+	CASE 18
+		PRINTFORML 今天也被%ANAME(対象)%他推倒，被问答无用的种子强奸
+		PRINTFORML 就算拼命要求避孕，他也不会接受的，最深处也会放出雄性证据
+		PRINTFORML 紧紧地被抱拥的强烈的射精，%ANAME(対象)%无我入迷地紧紧地抱住主人先生苦闷了
+		PRINTFORMW 他的年轻性欲理所当然地一次两次不能平息，之后直到失去意识为止都被狠狠地虐待
+	CASE 19
+		PRINTFORML 一被带进卧室就被他推倒，像往常一样被猛烈地侵犯
+		PRINTFORML 虽然还年幼，但雄性高昂却深深地打在了身体深处，自然地%ANAME(対象)%的哮喘中混杂着性感
+		PRINTFORML 不用说用口抵抗,不过，身体倒不如积极地依靠他快乐着的那样艳丽地使之弯曲
+		PRINTFORMW 小一小时立了的时候%ANAME(対象)%的眼睛♥漂浮完全变成雌性的脸
+	CASE 20
+		PRINTFORML %ANAME(対象)%是作为一日女仆接受他的日常照顾
+		PRINTFORML 与其说是女仆，不如说是被强迫以娼妇般的打扮来服务%ANAME(対象)%一边红着脸一边瞪着他
+		PRINTFORML 当然当然也包含着在照料中下面的帮助，工作中也常常被他要求当场被侵犯
+		PRINTFORMW 每次被侵犯时，看到大腿上写着的正字，%ANAME(対象)%脸都红了
+	CASE 21
+		PRINTFORML 在屋子最深处的主人的卧室里传来激烈男女的欢乐声
+		PRINTFORML 学会了雌性的味道的年轻的他确实象猴子一样地寻求%ANAME(対象)%，从早到晚只要有空反复做爱
+		PRINTFORML %ANAME(対象)%的身体无可否认地作为雌性被委托了那个年轻雄壮的腰操纵，禁不住喘息了
+		PRINTFORMW 离开宅邸的时候%ANAME(対象)%的子宫充满了快要溢出的精液
+	CASE 22
+		PRINTFORML 在宅邸的一角安上了项圈的%ANAME(対象)%从背后激烈地被侵犯喘息
+		PRINTFORML 他完全掌握了%ANAME(対象)%的弱点，为了训练宠物，他粗暴且准确地进攻过来
+		PRINTFORML 被小孩子们称为的屈辱和不道德感%ANAME(対象)%的性能刺激不知不觉激烈地瑜伽着
+		PRINTFORMW 以及理所当然地一边被做中出，一边%ANAME(対象)%已经相当不假思索iki疯狂了
+	CASE 23
+		PRINTFORML %ANAME(対象)%打扮得跟娼妇一样，被主人的朋友介绍了
+		PRINTFORML 他一边揉搓着因羞耻和屈辱而颤抖的%ANAME(対象)%的屁股，一边骄傲地说他是多么优秀的母奴隶
+		PRINTFORML %ANAME(対象)%让人感到讨厌的目光，身体被火烧着，不知不觉地扭扭捏捏地摩擦着胯股
+		PRINTFORMW 当他们回去，被他指示打开胯股时，已经%ANAME(対象)%无法逆转了
+	CASE 24
+		PRINTFORML 被裸体剥落的%ANAME(対象)%像宠物一样被牵引着走在夜路上
+		PRINTFORML 乳头和屁股红肿起来，从胯股之间滴落着POTA和爱液和精液成为路标
+		PRINTFORML 以羞耻和屈辱流泪的%ANAME(対象)%为对象，他硬拉着手，依次推敲着流浪汉等所在的场所前进
+		 PRINTFORMW 在他们面前，他们百分之百地公开强奸了他们讨厌的%ANAME(対象)%
+	CASE 25
+		PRINTFORML %ANAME(対象)%被强行灌下药物后被推倒在床上
+		PRINTFORML 根据强有力的媚药的效果只是轻轻地被触摸灼热一样的快感蔓延，没有办法绝顶了
+		PRINTFORML 他好象享受凄惨地身体苦闷的%ANAME(対象)%的情况，在皮肤里(上)手指一边使之爬一边故意慢慢地摇动腰
+		PRINTFORMW 作为粘稠的攻击容易地溶化%ANAME(対象)%的理性，注意到自己挥动着腰
+	CASE 26
+		PRINTFORML 被做眼罩的%ANAME(対象)%被命令为他的一物服务
+		PRINTFORML 讨厌的%ANAME(対象)%但是因为逆转的话鞭子飞过来，一边皱起脸一边也拼命使舌头爬行咬紧
+		PRINTFORML 眼睛看不见的份儿敏感地感到了那个雄臭的气味儿和味道不知不觉地扭动着腿
+		PRINTFORMW %ANAME(対象)%无意识地细心咀嚼着与他的呻吟声一起吐出的精液
+	CASE 27
+		PRINTFORML %ANAME(対象)%是作为专用的肉便器裸体地用引线连接在一起并被服从的
+		PRINTFORML 平时被象日常用品一样地杂乱对待，他的意向了的时候被性骚扰做爱的对方
+		PRINTFORML 当然每次都像理所当然那样阴道被拿出来，注意到的话从胯股之间散漫地白浊液泄漏出来
+		PRINTFORMW 像那样连日被侵犯的%ANAME(対象)%，注意到的时候会觉得没有被侵犯的时间更痛苦
+	CASE 28
+		PRINTFORML %ANAME(対象)%被强加了作为女仆在体内被安上玩具的工作
+		PRINTFORML 他特别订购的振动棒和跳蛋确实刺激%ANAME(対象)%的性感带，只是稍微走一点点shibire跑遍全身
+		PRINTFORML 在无精打采的状态下工作不可能顺利进行，每次被他挖苦的时候%ANAME(対象)%都会颤抖的声音道歉
+		PRINTFORMW 工作结束的时候身体已经完全完成了，在床上被充分地疼爱
+	CASE 29
+		PRINTFORML 一边激烈地摩擦床%ANAME(対象)%让他跨过身体一边跳跃
+		PRINTFORML 的表情就像发情了的狗一样淫乱，不认为是被强迫服从的那样积极地摇动腰
+		PRINTFORML 根据他给予的强力媚药的效果，现在的%ANAME(対象)%成为了只能考虑交尾和种子的雌狗
+		PRINTFORMW 不久，当他气势汹汹地射精时，%ANAME(対象)%一边回响着充满喜悦的声音，一边露出了不该有的Acame脸
+ENDSELECT
+CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 口内射精, CFLAG減少", GET_SPERM_ID("子供"), @"早熟小鬼的\@RAND:2 ? 肉棒 # 唇\@", @"早熟小鬼", "", "調教")
+DVAR:マセガキ_調教深度 ++
+PRINTFORML 
+IF RAND:4 == 0
+	PRINTFORML 激烈的调教之后，这个玩累了的小鬼就睡在自己旁边
+	PRINTFORMW 虽然%ANAME(対象)%现在也很累，但是这是个偷走视频解放自己的好机会
+	PRINTFORML 怎么办？
+	CALL ASK_YN("一定要找到！", "還是算了")
+	IF RESULT == 1
+		PRINTFORML 如果没找到还被抓到现行的话大概会被做更过分的事吧
+		PRINTFORMW 内心挣扎了很久的%ANAME(対象)%因为害怕被报复，决定忍下逃跑的冲动
+	ELSEIF RESULT == 0
+		PRINTFORML 不能再让这个臭小鬼随心所欲的欺负自己了
+		PRINTFORMW %ANAME(対象)%蹑手蹑脚的开始了搜索
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		IF (ABL:対象:知略 / 10) + DVAR:マセガキ_調教深度 + RAND:5 >= 12
+			PRINTFORMW 找到了！！
+			PRINTFORML %ANAME(対象)%发现了第一次来时被录下的视频
+			PRINTFORMW 然后在被他发现之前逃回了自己的据点中
+			PRINTFORML 
+			PRINTFORMW …在那之后一直提心吊胆的关注着贵族宅邸的动向，不过似乎那个臭小鬼似乎没有再追着自己了。
+			PRINTFORML 看来是平安逃脱了
+			PRINTFORMW %ANAME(対象)%松了一口气，回到了日常之中
+			DVAR:マセガキ_発生フラグ = 0
+			DVAR:マセガキ_奴隷ID = 0
+			DVAR:マセガキ_調教深度 = 0
+		ELSE
+			PRINTFORMW 有陷阱……
+			PRINTFORML 看到被应付小偷的陷阱拘束着动弹不得的%ANAME(対象)%时，那个臭小鬼扭曲的笑了起来
+			PRINTFORML 那种可怕的笑容绝对不是小孩子会做的表情。感到恐惧的%ANAME(対象)%哆哆嗦嗦的拼命磕头求饶
+			PRINTFORMW 但那卑微的姿态只是更加激起了他的嗜虐心，%ANAME(対象)%被用锁链绑住，挣扎哭喊着被拖进了地下室之中……
+			PRINTFORML 
+			PRINTFORML 昏暗的地下室里%ANAME(対象)%的悲鸣与淫叫一刻也没有停下过
+			PRINTFORML 他的调教手法比平时更加激烈，无论多么残暴的玩法和多么可怕的玩具都用在了%ANAME(対象)%的身上
+			PRINTFORMW %ANAME(対象)%被灌下了不明的药，前后庭都被极粗的振动棒扩张着，乳头和阴蒂也被夹子夹着吊上了重物
+			PRINTFORML 裸露的皮肤上被涂满了提高敏感度的油，猛烈的痛感和快感冲击着%ANAME(対象)%的大脑
+			PRINTFORML %ANAME(対象)%维持着最后的一丝理性，声音颤抖着不停的说对不起，但是他说着"烦死了"一边给%ANAME(対象)%戴上了口球
+			PRINTFORML 再也无法求饶的绝望感混着强烈到要冲破头顶的快感，%ANAME(対象)%身体猛的开始抽动，身下壮观的潮吹了
+			PRINTFORMW 这个被各种体液涂满全身的夜晚，在%ANAME(対象)%的心中留下了无法再被修复的阴影……
+			CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, Ｖ性交", "処女喪失, 膣内射精, CFLAG減少", GET_SPERM_ID("子供"), @"早熟小鬼的\@RAND:2 ? 肉棒 # 唇\@", @"早熟小鬼", "", "調教")
+			CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, Ｖ性交", "処女喪失, 膣内射精, CFLAG減少", GET_SPERM_ID("子供"), @"早熟小鬼的\@RAND:2 ? 肉棒 # 唇\@", @"早熟小鬼", "", "調教")
+			DVAR:マセガキ_調教深度 += 2
+		ENDIF
+	ENDIF
+ELSE
+	PRINTFORML 为了不会因轻易玩坏%ANAME(対象)%而受到报复，贵族的少爷决定把%ANAME(対象)%暂时先送回去
+	PRINTFORML 在离开前，他对着跪在他面前的%ANAME(対象)%威胁说你可一定得回来
+	PRINTFORMW 被小孩如此欺侮的屈辱让%ANAME(対象)%气到全身颤抖，但是不敢不听从他的要求，步履蹒跚的回到自己家中……
+ENDIF
+
+RETURN 1
+
+;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_BRAT_AFTER_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("PRECOCIOUS_BRAT")
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_BRAT_AFTER_DECISION()
+RETURN RAND:100 < 40
+
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_BRAT_AFTER_SETTARGET()
+FOR LOCAL, 0, CHARANUM
+	SIF !GETBIT(TALENT:LOCAL:日常系, 素質_デイリー_マセガキの奴隷)
+		CONTINUE
+	SIF !IS_FEMALE(LOCAL)
+		CONTINUE
+	SIF CFLAG:LOCAL:特殊状態 != 0
+		CONTINUE
+	SIF CFLAG:LOCAL:捕虜先
+		CONTINUE
+	SIF RAND:3
+		CONTINUE
+	DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+	DAILY_TARGET_NUM ++
+NEXT
+
+SIF DAILY_TARGET_NUM < 1
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_BRAT_AFTER
+#DIM 対象
+
+対象 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+
+
+PRINTFORMW %ANAME(対象)%今天也做好了侍奉小主人的准备……
+PRINTFORML 
+SELECTCASE RAND:25
+	CASE 0
+		PRINTFORML %ANAME(対象)%立刻被带入卧室从背后被粗暴侵犯
+		PRINTFORML 他把%ANAME(対象)%的头发像缰绳一样拉着，激烈地摇动着腰，向深处打上一根
+		PRINTFORML 简直像物品一样一边被对待的行为%ANAME(対象)%兴奋，每推一边提高喜悦的声音一边身体苦闷
+		PRINTFORMW 二人的猛劲没有平息，那一天作为他的玩具只顾被侵犯
+	CASE 1
+		PRINTFORML 在他的床上，%ANAME(対象)%和他搅拌着瑜伽
+		PRINTFORML 他抱着%ANAME(対象)%，一边激烈地吸着乳汁，一边像猴子一样咯吱咯吱地摇着腰
+		PRINTFORML 追求母亲的那样的动作母性被刺激了的子宫疼痛的%ANAME(対象)%紧紧地紧紧地抱住了他
+		PRINTFORMW 当将他的特浓精液注入子宫时，%ANAME(対象)%虽然充满了无比的幸福感，但还是达到了顶峰
+	CASE 2
+		PRINTFORML 穿着女仆装的%ANAME(対象)%跪在地上低声说着他的小鸡巴
+		PRINTFORML %ANAME(対象)%以恍惚的表情简直象说着最喜欢的东西一样地在梦中活动脸促进他的射精
+		PRINTFORML 当他向喉咙深处猛烈地射精时，%ANAME(対象)%只是嘴巴扩散的雄性气味就轻轻地离开了
+		PRINTFORMW 结束了服务的%ANAME(対象)%伸开胯请求奖励的话，他兴奋的那样推倒了
+	CASE 3
+		PRINTFORML %ANAME(対象)%作为他的宠物赤裸裸地过着一圈圈
+		PRINTFORML 穿着四肢爬行的样子向主人献媚似的垂下舌头粗喘气，简直像真的母狗一样行动
+		PRINTFORML 従順にふるまっていると時折ご褒美を貰え、その度に%ANAME(対象)%はあられもなく尻を振ってヨガリ狂う
+		PRINTFORMW 誇りも外聞も捨てさり彼に全てをささげる生活に%ANAME(対象)%は身も心もトロけきっていった
+	CASE 4
+		PRINTFORML 全身涂鸦下流猥亵的%ANAME(対象)%裸体走在夜晚的街上
+		PRINTFORML 从后方跟来的主人%ANAME(対象)%因为羞耻变得通红，看起来很开心地看着他颤抖的样子
+		PRINTFORML %ANAME(対象)%也因为曝光的不道德感和开放感不知不觉兴奋着，滴着爱液
+		PRINTFORMW 不久，被带到胡同里被侵犯的%ANAME(対象)%比平时更激烈地瑜伽了
+	CASE 5
+		PRINTFORML %ANAME(対象)%决定陪他去购物
+		PRINTFORML 乍一看很普通的样子，但上衣的内衣什么都没穿，取而代之的是装有振动棒和跳蛋
+		PRINTFORML 每当他打开开关的时候被调教切断了的身体敏感地作出反应，露出甜的喘息声浑身发抖了
+		PRINTFORMW 根据达到了界限的%ANAME(対象)%的恳求，下午的买东西成为中止面向宾馆的
+	CASE 6
+		PRINTFORML 一边激烈地使之摩擦%ANAME(対象)%激烈地一边疯狂高潮
+		PRINTFORML %ANAME(対象)%的身体完全变成向雄性献媚的肉穴，每次被扭进小鸡鸡的时候激烈地跳跃
+		PRINTFORML 他虽然是个小孩，但现在却做出一副雄姿标志着子宫，激烈地拍着他的腰
+		PRINTFORMW 已经没有任何可以阻止二人的东西了，将身体交给那仿佛彻夜被灼烧般的官能
+	CASE 7
+		PRINTFORML 到达了房地的%ANAME(対象)%立刻被带入卧室被他侵犯
+		PRINTFORML 他愚弄%ANAME(対象)%不检点的瑜伽ripuri，对通红的屁股激烈地打了腰
+		PRINTFORML 从早上开始一直调教的%ANAME(対象)%完全听不到骂人的声音，只是露出了难看的发型
+		PRINTFORMW 终于夜里踏上归途的%ANAME(対象)%在想起今天有多少次登顶，脸颊泛红
+	CASE 8
+		PRINTFORML %ANAME(対象)%一边淋浴一边被激烈地侵犯喘息一个劲地
+		PRINTFORML 虽然说这样不能洗澡，但他却代替回答猛烈的推上来，无需问答就被欺负了
+		PRINTFORML 与床上不同的性爱%ANAME(対象)%兴奋着，比平时更敏感使之作出身体反应使他高兴
+		PRINTFORMW 洗完淋浴后，两人一边泡在浴池里，一边享受悠闲的性爱
+	CASE 9
+		PRINTFORML 今天的%ANAME(対象)%被强迫带着狗耳朵和尾巴作为宠物度过
+		PRINTFORML 如同真的畜生一般对待%ANAME(対象)%没有屈辱感而兴奋，散漫地从胯股之间滴下了爱液
+		PRINTFORML 接到他的命令后，眼睛发出♥的叫声，舔舐他的脚，摇动屁股，作为母狗一个劲儿地谄媚
+		PRINTFORMW 满足了的他能给予奖励的时候%ANAME(対象)%成为身心都极好的母狗
+	CASE 10
+		PRINTFORML 在体内乱涂乱画的%ANAME(対象)%在夜路上晃悠悠地走着
+		PRINTFORML 那表情是羞耻心和开放感，背德感通红，乳头勃起瓶从胯股之间爱液流下
+		PRINTFORML 有时被主人命令在街角自慰，太过兴奋，最终达到了潮吹Achame
+		PRINTFORMW 几个小时后，满足于%ANAME(対象)%丑态的他，被带到胡同里，被充分地疼爱
+	CASE 11
+		PRINTFORML %ANAME(対象)%在床上喘着粗气，露出恍惚的表情
+		PRINTFORML 凭借他的年轻，以压倒性的肉欲数不清的程度被欺骗了的%ANAME(対象)%全身痉挛使之放心
+		PRINTFORML 从雌穴大量的精液与粗俗的声音一起溢出，只是那个反动%ANAME(対象)%吹潮走了
+		PRINTFORMW 暂时休息后再次被他要求的%ANAME(対象)%一边浮起眼睛♥一边高兴地打开了胯股
+	CASE 12
+		PRINTFORML %ANAME(対象)%跨过他毫无顾忌的瑜伽扭动着身体
+		PRINTFORML 每次挥动腰的时候他的小鸡挖阴道肉敲击子宫的感触%ANAME(対象)%露出象母狗一样的表情喜悦
+		PRINTFORML 他低声哼唱的话%ANAME(対象)%让期待胸口和子宫疼痛不留痕迹地一边索求一边加速了腰
+		PRINTFORMW 在子宫加满之前多次进行种植%ANAME(対象)%持续着极好的喜悦
+	CASE 13
+		PRINTFORML 昏暗的卧室里微微发出粘膜和皮肤摩擦的讨厌的声音
+		PRINTFORML 与%ANAME(対象)%他赤裸地互相拥抱轻轻地一边反复接吻一边贪婪地互相爱抚着对方的全身
+		PRINTFORML 虽然和平常不一样，但是却有着浓厚的蓬松感，兴奋和官能也提高了。
+		PRINTFORMW 一夜之间踏踏实实地被爱的%ANAME(対象)%，品味了到心深处渗入的那样的快乐
+	CASE 14
+		PRINTFORML 被迫穿了平时以上猥亵的服装的%ANAME(対象)%被带去了朋友的宅邸
+		PRINTFORML 主人向朋友们炫耀%ANAME(対象)%是如何奴隶顺从，作为女演员出色
+		PRINTFORML 尽管有人说上层的洞穴、母奴等残酷的事情%ANAME(対象)%还是很高兴，胸口发热，浑身发抖
+		PRINTFORMW 回家后，疼痛达到了极限%ANAME(対象)%搜索的话，他充分地疼爱了
+	CASE 15
+		PRINTFORML 工作中疏忽的%ANAME(対象)%被作为惩罚被侵犯
+		PRINTFORML 当然所谓惩罚是名目，被侵犯的%ANAME(対象)%的哮喘混杂着喜悦的声音
+		PRINTFORML 一边责备一边激烈地推上去，%ANAME(対象)%也配合那个一边吐出道歉的言词一边仰起身体使之仰起了头
+		PRINTFORMW 惩罚性爱入迷的%ANAME(対象)%在那之后也屡次重复粗糙的情况
+	CASE 16
+		PRINTFORML %ANAME(対象)%作为他买来的新玩具的实验台被责弄着
+		PRINTFORML 使用普通的女人使用失神物的玩具被攻击%ANAME(対象)%全身颤抖使之飞散体液
+		PRINTFORML その様子は彼の嗜虐心を煽り、実験の激しさを増していき%ANAME(対象)%がイキっぱ無になるまで続いた
+		PRINTFORMW 解放された後、%ANAME(対象)%は地べたに横たわり息を荒げながらも次の実験への期待を抱いていた
+	CASE 17
+		PRINTFORML 地下の調教室に閉じ込められた%ANAME(対象)%はベッドに縛られ激しく犯されている
+		PRINTFORML 彼は%ANAME(対象)%が仕事中に他の男と喋った事に怒り、いつもより乱暴にまるでただの肉穴の様に激しく犯す
+		PRINTFORML 疯狂的肉棒比平时更加坚硬地膨胀，被咚咚地戳到子宫转了眼
+		PRINTFORMW %ANAME(対象)%在绝顶之下被迫谢罪，身心都发誓服从他
+	CASE 18
+		PRINTFORML %ANAME(対象)%总是和主人拥抱着，激烈地扭动着
+		PRINTFORML 被胸填埋脸撒娇的他刺激母性，一边感到心跳和子宫疼痛轻地一边去了
+		PRINTFORML 被男孩子梦中要求的事%ANAME(対象)%也再变得入迷，一边露出甜的叹息一边合起腰
+		PRINTFORMW 不久，射精后，%ANAME(対象)%也同时绝顶，将他的精液在子宫里一滴不剩地喝干了
+	CASE 19
+		PRINTFORML 被他要求%ANAME(対象)%被迫扮演舞女的角色
+		PRINTFORML 看到稍微动一下就露出羞部那样极其危险的服装脸颊红的%ANAME(対象)%他使胯股之间鼓起
+		PRINTFORML %ANAME(対象)%也中意满也没有淫靡的笑容浮起象舞女一样地使之跳跃邀请了他
+		PRINTFORMW 服装也帮忙比平时热情的性他感到喜悦，好多次在%ANAME(対象)%中放出了精
+	CASE 20
+		PRINTFORML %ANAME(対象)%是他命令，用骑乘位处理雄壮的肉棒
+		PRINTFORML 对于可是拼命摇动腰的%ANAME(対象)%，他不感兴趣地看书
+		PRINTFORML 那种粗糙的待遇反而会让%ANAME(対象)%兴奋，作为忠实的肉女郎加速腰部运动
+		PRINTFORMW 在他射精的同时%ANAME(対象)%一边呼喊着对主人的爱一边仰身而过绝顶
+	CASE 21
+		PRINTFORML 现在与骄傲的宠物相伴的%ANAME(対象)%被他的朋友宣布
+		PRINTFORML 在裸体的女性面前，小孩们很兴奋，大家都知道裤裆已经膨胀%ANAME(対象)%会舔舌头
+		PRINTFORML 在主人的命令下，用自己的手和嘴将他们皮包得整齐齐地处理掉
+		PRINTFORMW 可是只有雌孔不借给任何人，他们回去之后充分地请主人做了记号
+	CASE 22
+		PRINTFORML 在床上激烈地一边挣扎，%ANAME(対象)%今天第几次放出阴道
+		PRINTFORML ♥和大量的精液被子宫打♥被，那个热传到%ANAME(対象)%疯狂♥♥
+		PRINTFORML 为了寻找子种而下来的子宫对期待的子种欣喜地抽搐着，咯吱咯吱地喝干
+		PRINTFORMW %ANAME(対象)%与hihihii一边喘息一边发誓孕育主人的小孩的事，好多次绝顶了
+	CASE 23
+		PRINTFORML 充分享受了的性爱之后，%ANAME(対象)%和主人一起泡在浴池里
+		PRINTFORML 身体靠近悠闲度过的时间，%ANAME(対象)%感到与性交不同的舒适，露出甜蜜的叹息
+		PRINTFORML 发呆的时候突然被揉胸，看到他，一边再一次放大一边抬头仰望
+		PRINTFORMW 马上从浴场传来艳丽女人的喘息声和激烈的水跳声
+	CASE 24
+		PRINTFORML 根据他的要求穿着兔女郎服装的%ANAME(対象)%跪着为一物服务
+		PRINTFORML 可能是因为%ANAME(対象)%的打扮而兴奋吧，比平时更加对冰淇淋的肉棒产生了喜悦，并热心地用嘴咬住
+		PRINTFORML 马上迎来极限的他的精液被嘴满满地放出，%ANAME(対象)%与下流的声音一起咽下
+		PRINTFORMW 他的肉棒还很明显地立着%ANAME(対象)%被命令以雌性的脸打开了胯股
+ENDSELECT
+CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 口内射精, CFLAG減少", GET_SPERM_ID("子供"), @"早熟小鬼的\@RAND:2 ? 肉棒 # 唇\@", @"早熟小鬼", "", "調教")
+PRINTFORML 
+IF RAND:5 != 0
+	PRINTFORMW 侍奉过主人后，%ANAME(対象)%恋恋不舍地离开了宅邸
+ELSE
+	PRINTFORML 侍奉过主人的%ANAME(対象)%在整理装束时，本来已经满足的主人又打开门走了进来
+	PRINTFORML %ANAME(対象)%正慌张着不知道要遮住私处还是要继续侍奉的时候，主人命令%ANAME(対象)%再留几天
+	PRINTFORMW %ANAME(対象)%还没反应过来，无意识的就点头同意了，连下面都毫无意识的开始湿润了起来
+	PRINTFORMW 主人立刻把衣衫不整的%ANAME(対象)%压倒在床上，接下来又是日夜笙歌了数天……
+	CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 口内射精, CFLAG減少", GET_SPERM_ID("子供"), @"早熟小鬼的\@RAND:2 ? 肉棒 # 唇\@", @"早熟小鬼", "", "調教")
+	CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 口内射精, CFLAG減少", GET_SPERM_ID("子供"), @"早熟小鬼的\@RAND:2 ? 肉棒 # 唇\@", @"早熟小鬼", "", "調教")
+ENDIF
+RETURN 1

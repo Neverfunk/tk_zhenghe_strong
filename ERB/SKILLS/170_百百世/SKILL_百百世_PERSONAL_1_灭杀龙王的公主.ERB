@@ -1,0 +1,100 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_170_PERSONAL_1_EXIST
+RETURN 1
+
+@SKILL_170_PERSONAL_1_NAME
+RESULTS = 灭杀龙王的公主
+
+;レベルは1-5まで
+@SKILL_170_PERSONAL_1_LEVEL
+RETURN 5
+
+;対象選択
+@SKILL_170_PERSONAL_1_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1
+
+;発動判定
+@SKILL_170_PERSONAL_1_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 随机池,10
+対象側 = !発動側
+随机池 = 0
+FOR LOCAL,0,BATTLE_COMMANDER_NUM:対象側
+	
+	IF BATTLE_武闘パワー:対象側:LOCAL < BATTLE_武闘パワー:発動側:発動番号
+		随机池++
+		随机池:(随机池:0)= LOCAL
+	ENDIF
+NEXT
+SIF 随机池 == 0
+	RETURN 0
+COMBAT_SKILL_TARGET = 随机池:(RAND:(随机池:0) + 1)
+RETURN 1
+
+;発動テキストをオーバライドしたいときに。
+;「誰それのスキル発動！　○○した！」の「○○した！」の部分を実装したい場合は、
+;これじゃなくてINVOKEで書けばいいです。
+;@SKILL_170_PERSONAL_1_INVOKE_TEXT(発動者, スキル, ジャンル)
+;#DIM 発動者
+;#DIM スキル
+;#DIMS ジャンル
+
+;効果をここに記述
+@SKILL_170_PERSONAL_1_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+
+PRINTFORML %ANAME(発動者)%无视了其他人,决定将%ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%作为对手
+PRINTFORML ......
+PRINTFORML %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%受了重伤，不能战斗了！
+CALL BATTLE_KNOCKOUT(対象側, COMBAT_SKILL_TARGET)
+
+
+@SKILL_170_PERSONAL_1_EXPLANATION
+RESULTS = 使武闘低于自身的敌方一人战斗不能。
+
+@SKILL_170_PERSONAL_1_CANT_TELL
+
+@SKILL_170_PERSONAL_1_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 500

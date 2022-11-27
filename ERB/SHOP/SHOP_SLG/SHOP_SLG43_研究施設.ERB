@@ -1,0 +1,460 @@
+﻿
+
+;-------------------------------------------------
+;「研究施設」の名称
+;-------------------------------------------------
+@SHOP_SLG_NAME43
+RESULTS:0 '= "研究设施"
+
+;-------------------------------------------------
+;「研究施設」の選択可否
+;-------------------------------------------------
+@SHOP_SLG_CHECK43
+SIF FLAG:クリアフラグ
+	RETURN 0
+SIF FLAG:観戦モード
+	RETURN 0
+SIF CFLAG:MASTER:所属 == 0
+	RETURN 0
+SIF IS_RESEARCH_AGREEMENT_WITH_SP:(CFLAG:MASTER:所属)
+	RETURN 1
+SIF CFLAG:MASTER:所属 != GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_外来人)
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;「研究施設」の左カラムメニューの入力処理
+;-------------------------------------------------
+@SHOP_SLG_EVENTBUY43
+CALL LaboGAIRAI
+RETURN 1
+
+;-------------------------------------------------
+;「研究施設」本体
+;-------------------------------------------------
+@LaboGAIRAI
+#DIM 実験対象
+#DIM 被対象者
+#DIMS 名前
+#DIM FIRST_LINE
+FIRST_LINE = LINECOUNT
+
+LOCALS:0 = 无
+LOCALS:1 = 委托进行
+LOCALS:2 = 快乐实验
+LOCALS:3 = 苦痛实验
+LOCALS:4 = 女性器实验
+LOCALS:5 = 男性器实验
+LOCALS:6 = 异种交配
+LOCALS:7 = 自体受精
+LOCALS:8 = 主实验
+LOCALS:9 = 感觉实验
+LOCALS:10 = C改造
+LOCALS:11 = P改造
+LOCALS:12 = B改造
+LOCALS:13 = V改造
+LOCALS:14 = A改造
+LOCALS:15 = U改造
+
+CALL SINGLE_DRAWLINE
+PRINTL ★研究设施
+PRINTL 　管理实验对象
+CALL SINGLE_DRAWLINE
+
+FOR 実験対象, 0, CHARANUM
+	CALL CHANGE_GAIRAI_subject(実験対象)
+	IF CFLAG:実験対象:1705 == 1
+		IF STRLENS(ANAME(実験対象)) >= MAX_CHARANAME_LENGTH
+			名前 = %SNAME(実験対象)%
+		ELSE
+			名前 = %ANAME(実験対象)%
+		ENDIF
+		IF CFLAG:実験対象:1707 == 16
+			CALL PRINTBUTTON_CENTER(@"[%名前, MAX_CHARANAME_LENGTH, LEFT%]", 実験対象, 0, 0)
+		ELSE
+			CALL PRINTBUTTON_CENTER(@"[%名前, MAX_CHARANAME_LENGTH, LEFT%]", 実験対象, 0)
+		ENDIF
+		CALL PRINT_SEX(実験対象, 1, 0, 2)
+		PRINT  
+		SELECTCASE CFLAG:実験対象:1707
+			CASE 0 TO 7, 9 TO 15
+				PRINTFORM [ %LOCALS:(CFLAG:実験対象:1707)% ]
+			CASE 8
+				被対象者 = CFLAG:実験対象:1708
+				PRINTFORM [ 和%ANAME(被対象者)%的交配 ]
+			CASE 16
+				PRINTFORM [ 交配实验中 ]
+		ENDSELECT
+		PRINTL 
+	ENDIF
+NEXT
+PRINTL
+
+CALL SINGLE_DRAWLINE
+PRINTBUTTON "[ 200][全部　实验终止]", 200
+PRINTL 
+PRINTBUTTON "[ 300][全部　委托进行]", 300
+PRINTL 
+PRINTBUTTON "[ 400][全部　快乐实验]", 400
+PRINTL 
+PRINTBUTTON "[ 500][繁殖实验室]", 500
+PRINTL 
+PRINTBUTTON "[1000][　　　取消]", 1000
+PRINTL 
+
+REDRAW 0
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 1000
+	REDRAW 1
+	RETURN
+ELSEIF RESULT == 500
+	CALL LaboGAIRAI_breedingROOM
+ELSEIF RESULT == 200
+	FOR 実験対象, 0, CHARANUM
+		IF CFLAG:実験対象:1705 == 1
+			CFLAG:実験対象:1707 = 0
+			CFLAG:実験対象:1708 = 0
+		ENDIF
+	NEXT
+ELSEIF RESULT == 300
+	FOR 実験対象, 0, CHARANUM
+		IF CFLAG:実験対象:1705 == 1
+			CFLAG:実験対象:1707 = 1
+			CFLAG:実験対象:1708 = 0
+		ENDIF
+	NEXT
+ELSEIF RESULT == 400
+	FOR 実験対象, 0, CHARANUM
+		IF CFLAG:実験対象:1705 == 1
+			CFLAG:実験対象:1707 = 2
+			CFLAG:実験対象:1708 = 0
+		ENDIF
+	NEXT
+ELSEIF CFLAG:RESULT:1705 == 1 && CFLAG:RESULT:1707 != 16
+	CALL LaboGAIRAI_experiment(RESULT)
+	
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+
+CLEARLINE LINECOUNT - FIRST_LINE
+RESTART
+
+;-------------------------------------------------
+;「研究施設」実験内容の選択
+;-------------------------------------------------
+@LaboGAIRAI_experiment(実験対象)
+#DIM 実験対象
+#DIM 選択不能フラグ, 16
+
+LOCALS:0 = 无
+LOCALS:1 = 委托进行
+LOCALS:2 = 快乐实验
+LOCALS:3 = 苦痛实验
+LOCALS:4 = 女性器实验
+LOCALS:5 = 男性器实验
+LOCALS:6 = 异种交配
+LOCALS:7 = 自体受精
+LOCALS:8 = 主实验
+LOCALS:9 = 感觉实验
+LOCALS:10 = C改造
+LOCALS:11 = P改造
+LOCALS:12 = B改造
+LOCALS:13 = V改造
+LOCALS:14 = A改造
+LOCALS:15 = U改造
+
+LOCALS:50 = 什么也不做
+LOCALS:51 = 随机进行实验
+LOCALS:52 = 以快乐责备为中心的实验
+LOCALS:53 = 以痛苦责备为中心的实验
+LOCALS:54 = 以妊娠能力为中心的实验（可能导致妊娠）
+LOCALS:55 = 以男性器为中心的实验
+LOCALS:56 = 尝试进行异种交配（兽奸・触手）
+LOCALS:57 = 以实验对象自己的精液来尝试进行交配
+LOCALS:58 = 与其他实验对象进行交配的实验
+LOCALS:59 = 对皮肤感觉的调查(不会失去处女)
+LOCALS:60 = 阴蒂的改造
+LOCALS:61 = 男性器的改造
+LOCALS:62 = 胸的改造
+LOCALS:63 = 阴道・子宮的改造
+LOCALS:64 = 肛门的改造
+LOCALS:65 = 尿道的改造
+
+;対象キャラの情報を表示
+CALL SINGLE_DRAWLINE
+CALL SHOW_HEADER(実験対象)
+
+PRINTFORML 现在的实验内容[ %LOCALS:(CFLAG:実験対象:1707)% ]  冷却时间[ {COOLTIME:実験対象:0} ]回合
+PRINTL 
+
+FOR LOCAL:0, 0, 4
+	PRINTBUTTON @"{LOCAL:0, 2}[%LOCALS:(LOCAL:0), 14%]", LOCAL:0
+	PRINTFORML 　%LOCALS:(50 + LOCAL:0)%
+NEXT
+
+IF HAS_VAGINA(実験対象)
+	PRINTBUTTON @"{4, 2}[%LOCALS:4, 14%]", 4
+	選択不能フラグ:4 = 0
+ELSE
+	SETCOLOR カラー_選択不可
+	PRINTPLAINFORM {4, 2}[%LOCALS:4, 14%]
+	RESETCOLOR
+	選択不能フラグ:4 = 1
+ENDIF
+PRINTFORML 　%LOCALS:54%
+
+IF HAS_PENIS(実験対象)
+	PRINTBUTTON @"{5, 2}[%LOCALS:5, 14%]", 5
+	選択不能フラグ:5 = 0
+ELSE
+	SETCOLOR カラー_選択不可
+	PRINTPLAINFORM {5, 2}[%LOCALS:5, 14%]
+	RESETCOLOR
+	選択不能フラグ:5 = 1
+ENDIF
+PRINTFORML 　%LOCALS:55%
+
+IF HAS_VAGINA(実験対象)
+	PRINTBUTTON @"{6, 2}[%LOCALS:6, 14%]", 6
+	選択不能フラグ:6 = 0
+ELSE
+	SETCOLOR カラー_選択不可
+	PRINTPLAINFORM {6, 2}[%LOCALS:6, 14%]
+	RESETCOLOR
+	選択不能フラグ:6 = 1
+ENDIF
+PRINTFORML 　%LOCALS:56%
+
+IF HAS_VAGINA(実験対象) && HAS_PENIS(実験対象)
+	PRINTBUTTON @"{7, 2}[%LOCALS:7, 14%]", 7
+	選択不能フラグ:7 = 0
+ELSE
+	SETCOLOR カラー_選択不可
+	PRINTPLAINFORM {7, 2}[%LOCALS:7, 14%]
+	RESETCOLOR
+	選択不能フラグ:7 = 1
+ENDIF
+PRINTFORML 　%LOCALS:57%
+
+IF HAS_PENIS(実験対象)
+	PRINTBUTTON @"{8, 2}[%LOCALS:8, 14%]", 8
+	選択不能フラグ:8 = 0
+ELSE
+	SETCOLOR カラー_選択不可
+	PRINTPLAINFORM {8, 2}[%LOCALS:8, 14%]
+	RESETCOLOR
+	選択不能フラグ:8 = 1
+ENDIF
+PRINTFORML 　%LOCALS:58%
+
+
+PRINTBUTTON @"{9, 2}[%LOCALS:9, 14%]", 9
+選択不能フラグ:9 = 0
+PRINTFORML 　%LOCALS:59%
+
+IF (TALENT:実験対象:性別 == 1 || TALENT:実験対象:性別 == 2) && COOLTIME:実験対象:0 <= 0
+	PRINTBUTTON @"{10, 2}[%LOCALS:10, 14%]", 10
+	選択不能フラグ:10 = 0
+ELSE
+	SETCOLOR カラー_選択不可
+	PRINTPLAINFORM {10, 2}[%LOCALS:10, 14%]
+	RESETCOLOR
+	選択不能フラグ:10 = 1
+ENDIF
+PRINTFORML 　%LOCALS:60%
+
+IF COOLTIME:実験対象:0 <= 0
+	PRINTBUTTON @"{11, 2}[%LOCALS:11, 14%]", 11
+	選択不能フラグ:11 = 0
+ELSE
+	SETCOLOR カラー_選択不可
+	PRINTPLAINFORM {11, 2}[%LOCALS:11, 14%]
+	RESETCOLOR
+	選択不能フラグ:11 = 1
+ENDIF
+PRINTFORML 　%LOCALS:61%
+
+IF (TALENT:実験対象:性別 == 1 || TALENT:実験対象:性別 == 2) && COOLTIME:実験対象:0 <= 0
+	PRINTBUTTON @"{12, 2}[%LOCALS:12, 14%]", 12
+	選択不能フラグ:12 = 0
+ELSE
+	SETCOLOR カラー_選択不可
+	PRINTPLAINFORM {12, 2}[%LOCALS:12, 14%]
+	RESETCOLOR
+	選択不能フラグ:12 = 1
+ENDIF
+PRINTFORML 　%LOCALS:62%
+
+IF HAS_VAGINA(実験対象) && COOLTIME:実験対象:0 <= 0
+	PRINTBUTTON @"{13, 2}[%LOCALS:13, 14%]", 13
+	選択不能フラグ:13 = 0
+ELSE
+	SETCOLOR カラー_選択不可
+	PRINTPLAINFORM {13, 2}[%LOCALS:13, 14%]
+	RESETCOLOR
+	選択不能フラグ:13 = 1
+ENDIF
+PRINTFORML 　%LOCALS:63%
+
+FOR LOCAL:0, 14, 16
+	IF COOLTIME:実験対象:0 > 0
+		SETCOLOR カラー_選択不可
+		PRINTPLAINFORM {LOCAL:0, 2}[%LOCALS:(LOCAL:0), 14%]
+		RESETCOLOR
+		選択不能フラグ:(LOCAL:0) = 1
+	ELSE
+		PRINTBUTTON @"{LOCAL:0, 2}[%LOCALS:(LOCAL:0), 14%]", LOCAL:0
+		選択不能フラグ:(LOCAL:0) = 0
+	ENDIF
+	PRINTFORML 　%LOCALS:(50 + LOCAL:0)%
+NEXT
+
+
+CALL SINGLE_DRAWLINE
+PRINTBUTTON "1000[取消]", 1000
+PRINTL 
+
+REDRAW 0
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 1000
+	REDRAW 1
+	RETURN
+	
+ELSEIF RESULT >= 0 && RESULT <= 15 && 選択不能フラグ:RESULT == 0
+	SELECTCASE RESULT
+		CASE 0
+			CFLAG:実験対象:1707 = 0
+		CASE 1
+			CFLAG:実験対象:1707 = 1
+		CASE 2
+			CFLAG:実験対象:1707 = 2
+		CASE 3
+			CFLAG:実験対象:1707 = 3
+		CASE 4
+			CFLAG:実験対象:1707 = 4
+		CASE 5
+			CFLAG:実験対象:1707 = 5
+		CASE 6
+			CFLAG:実験対象:1707 = 6
+		CASE 7
+			CFLAG:実験対象:1707 = 7
+		CASE 8
+			CALL LaboGAIRAI_experiment_crossingTEST(実験対象)
+		CASE 9
+			CFLAG:実験対象:1707 = 9
+		CASE 10
+			CFLAG:実験対象:1707 = 10
+		CASE 11
+			CFLAG:実験対象:1707 = 11
+		CASE 12
+			CFLAG:実験対象:1707 = 12
+		CASE 13
+			CFLAG:実験対象:1707 = 13
+		CASE 14
+			CFLAG:実験対象:1707 = 14
+		CASE 15
+			CFLAG:実験対象:1707 = 15
+	ENDSELECT
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+
+;「本試験」から変更する場合被対象者をリセット
+IF CFLAG:実験対象:1708 > 0 && CFLAG:実験対象:1707 != 8
+	CFLAG:(CFLAG:実験対象:1708):1707 = 0
+	CFLAG:実験対象:1708 = 0
+ENDIF
+
+;-------------------------------------------------
+;「研究施設」本試験
+;-------------------------------------------------
+@LaboGAIRAI_experiment_crossingTEST(実験対象)
+#DIM 実験対象
+#DIM 被対象者
+#DIM FIRST_LINE
+FIRST_LINE = LINECOUNT
+
+$CHARA_LIST_LOOP
+
+PRINTFORML %ANAME(実験対象)%作为父亲进行交配实验
+PRINTFORML 请选择作为母胎的实验体
+experiment_crossing_oneself = 実験対象
+CALL SINGLE_DRAWLINE
+
+CALL SELECT_CHARA_LIST_ONLY_LOGIC_SLG("crossingTEST", "NONE")
+
+
+SIF RESULT == -1
+	RETURN 0
+
+被対象者 = RESULT
+
+PRINTFORML 要选择%ANAME(被対象者)%做为母胎吗？
+
+;はい／いいえ入力処理
+CALL ASK_YN()
+IF RESULT == 1
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO CHARA_LIST_LOOP
+ENDIF
+
+CFLAG:実験対象:1707 = 8
+CFLAG:被対象者:1707 = 16
+CFLAG:実験対象:1708 = 被対象者
+
+RETURN 1
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_crossingTEST(対象)
+#DIM 対象
+RETURN CFLAG:対象:1705 == 1 && HAS_VAGINA(対象) && 対象 != experiment_crossing_oneself
+
+;-------------------------------------------------
+;「研究施設」バストサイズを変更(事業凍結)
+;-------------------------------------------------
+;@LaboGAIRAI_experiment_ChangeBust(実験対象)
+;#DIM 実験対象
+;#DIM 現在バスト
+;#DIMS 現在バスト文字
+
+;現在バスト = GET_BUSTSIZE(実験対象)
+;現在バスト文字 = TOSTR_BUSTSIZE(現在バスト)
+
+;PRINTFORML %ANAME(実験対象)%のバストサイズを変更します 現在[ %現在バスト文字% ]
+;PRINTL 
+;PRINTBUTTON "[-2  絶壁  ]", -2
+;PRINTL 
+;PRINTBUTTON "[-1  貧乳  ]", -1
+;PRINTL 
+;PRINTBUTTON "[ 0  並乳  ]", 0
+;PRINTL 
+;PRINTBUTTON "[ 1  巨乳  ]", 1
+;PRINTL 
+;PRINTBUTTON "[ 2  爆乳  ]", 2
+;PRINTL 
+;PRINTL 
+;PRINTBUTTON "[99 やめる ]", 99
+
+;REDRAW 0
+
+;$INPUT_LOOP
+;INPUT
+
+;IF RESULT == 99
+;	REDRAW 1
+;	RETURN
+;	
+;ELSEIF RESULT == 現在バスト
+;	PRINTL バストサイズを変更しません
+;	REDRAW 1
+;	RETURN
+;ELSEIF RESULT >= -2  && RESULT <= 2
+

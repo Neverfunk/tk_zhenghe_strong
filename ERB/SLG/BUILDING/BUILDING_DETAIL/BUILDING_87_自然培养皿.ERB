@@ -1,0 +1,38 @@
+@BUILDING_GET_NAME_自然培养皿()
+    #FUNCTIONS
+    RETURNF "自然培养皿"
+
+@BUILDING_GET_EXP_自然培养皿()
+    #FUNCTIONS
+    RETURNF "回合末兵数增加。"
+
+@BUILDING_SET_INFO_ID_87()
+    BUILDING_TYPE:建造物_自然培养皿 = 建造物_类型_特殊类
+    BUILDING_LEVEL:建造物_自然培养皿 = 建造物_等级_一级建筑
+    BUILDING_LIMIT_NUM:建造物_自然培养皿 = 建造物_数量限制_无
+    BUILDING_LIMIT_UNI:建造物_自然培养皿 = 0
+    BUILDING_COUNTRY_ID:建造物_自然培养皿:特殊勢力_触手 = 1
+    BUILDING_HAVE_SKILL:建造物_自然培养皿 = 0
+    BUILDING_TOHO_REQ_ID:建造物_自然培养皿:0 = 0
+
+@CHECK_BUILDING_FUNCTION_自然培养皿(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    SIF !CHECK_BUILDING_SP_COUNTRY_LIMIT_USING(COUNTRY_ID,建造物_自然培养皿)
+        RETURNF RESULT:0
+    RESULT:1 = TMP_BUILDING_CNT:COUNTRY_ID:建造物_自然培养皿
+    IF RESULT:1 > 0
+        RESULT:0 = 1
+    ENDIF
+    RETURNF RESULT:0
+
+@BUILDING_TEXT_自然培养皿(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    SIF !CHECK_BUILDING_TEXT_OUTPUT(COUNTRY_ID)
+        RETURNF 0
+    BUILDING_TEXT = PRINT_BUILDING_TEXT_TITLE_F()
+    PRINTFORM 因为《自然培养皿》的存在，
+    PRINTFORML 冒着紫烟的培养皿正在源源不断地生产触手
+    PRINTFORML %ANAME(GET_COUNTRY_BOSS(COUNTRY_ID))%势力获得了大量的兵力
+    RETURNF 1

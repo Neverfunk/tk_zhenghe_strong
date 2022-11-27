@@ -1,0 +1,426 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_SEX_TRAINER_RATE()
+RETURN 30
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_SEX_TRAINER_DECISION()
+RETURN DAY >= 15
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_SEX_TRAINER_GENRE()
+RETURN デイリー_ジャンル_トレーナー
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_SEX_TRAINER()
+#DIM 消去行
+#DIM 対象
+#DIM 表示位置
+#DIM 表示ページ
+#DIM 総ページ数
+#DIM キャラ数
+#DIM キャラカウンタ
+#DIM 表示開始位置
+#DIM 表示終了位置
+
+IF DVAR:セックストレーナー_発生フラグ == 0
+	PRINTFORML %ANAME(MASTER)%正在工作的時候、侍從通知有客來訪
+	PRINTFORML 据说是“一个极其娇媚的女人来了”
+	PRINTFORMW 不知道发生了什么事的%ANAME(MASTER)%，试着与她见面了。
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW 「你就是%ANAME(MASTER)%？　和传闻中一样，是个\@ IS_FEMALE(MASTER) ? 可爱的孩子 # 好男人 \@啊」
+	PRINTFORMW 原来如此，这个女人确实很娇媚
+	PRINTFORML 五官端正的美貌，丰满而紧致的身体，穿着单薄的衣服
+	PRINTFORML 只是坐在那里就散发出让周围人兴奋的性的魅力
+	PRINTFORMW 简直就像是淫魔一样的……或许，确实就是淫魔
+	PRINTFORML 「啊啦，你的夜生活，过得是否滋润呢？」
+	PRINTFORML 「像我这种人啊，一直在到处教导别人性方面的知识。我想让更多的人了解到性的欢愉。」
+ELSE
+	PRINTFORML 「你好啊，我又来了」
+	PRINTFORMW 「要不要试着接受，性的解放呢」
+	PRINTFORMW 那个妖艳的女人又来了
+ENDIF
+CALL ICPRINT("「怎么样？　只要给我金<20000>，我就可以亲手帮你解决一些问题」", "L", カラー_注意)
+PRINTFORML 女人的娇艳让我差点当场就做出决定，不过我慌忙摇头冷静下来
+PRINTFORMW 提出的金额绝对不便宜。应该冷静下来想一想吧
+PRINTFORMW 那麼、怎麼辦呢……
+PRINTFORML
+CALL SINGLE_DRAWLINE
+PRINTFORML 現在的金:{MONEY}
+CALL ASK_MULTI_JUDGE("请她帮忙", MONEY >= 20000, "还是算了", 1)
+
+IF RESULT == 1
+	PRINTFORML 「啊啦，是吗……那就没办法了」
+	PRINTFORMW 「我还会再来的，希望到时候能有个好的答复」
+	PRINTFORMW 那个女人离开了……
+	DVAR:セックストレーナー_発生フラグ = 1
+	RETURN 1
+ENDIF
+PRINTFORML 「我就知道你会这么说」
+PRINTFORML 「那么……该来给谁启蒙呢？」
+CALL SINGLE_DRAWLINE
+PRINTFORML 「对了对了，如果是已经非常敏感的地方，那我就没法帮忙了，非常抱歉呢」
+CALL SINGLE_DRAWLINE
+PRINTFORML %TOSTR_SPACE(23)%   Ｃ|  Ｖ|  Ａ|  Ｂ|  Ｍ %TOSTR_SPACE(26)%   Ｃ|  Ｖ|  Ａ|  Ｂ|  Ｍ 
+
+VARSET キャラ数
+FOR LOCAL, 0, CHARANUM
+	SIF CFLAG:(LOCAL:0):所属 == CFLAG:MASTER:所属
+		キャラ数 ++
+NEXT
+
+総ページ数 = (キャラ数 - 1) / 40 + 1
+表示ページ = 1
+CALL TMP_CREATE_IS_FREE_MAP
+
+$SHOW_LOOP
+VARSET 消去行
+VARSET 表示位置
+VARSET キャラカウンタ
+表示開始位置 = (表示ページ - 1) * 40
+表示終了位置 = 表示ページ * 40
+
+FOR LOCAL:0, 0, CHARANUM
+	IF CFLAG:(LOCAL:0):所属 == CFLAG:MASTER:所属 && !CFLAG:(LOCAL:0):捕虜先
+		IF 表示開始位置 <= キャラカウンタ && キャラカウンタ < 表示終了位置
+			IF 表示位置 % 2 != 0
+				PRINT 　　
+			ELSEIF 表示位置 >= 1
+				PRINTL 
+				消去行 ++
+			ENDIF
+			PRINTFORM [{LOCAL:0 + 99, 4}]%ANAME(LOCAL:0), 16, RIGHT%
+			PRINTFORM   
+			IF TALENT:(LOCAL:0):Ｃ敏感
+				PRINTFORM   
+				CALL COLOR_PRINT("敏", カラー_注意)
+			ELSEIF TALENT:(LOCAL:0):Ｃ鈍感
+				PRINTFORM   
+				CALL COLOR_PRINT("鈍", カラー_警告)
+			ELSE
+				PRINTFORM    
+				CALL COLOR_PRINT("-", カラー_選択不可)
+			ENDIF
+			PRINTFORM |
+			IF TALENT:(LOCAL:0):Ｖ敏感
+				PRINTFORM   
+				CALL COLOR_PRINT("敏", カラー_注意)
+			ELSEIF TALENT:(LOCAL:0):Ｖ鈍感
+				PRINTFORM   
+				CALL COLOR_PRINT("鈍", カラー_警告)
+			ELSE
+				PRINTFORM    
+				CALL COLOR_PRINT("-", カラー_選択不可)
+			ENDIF
+			PRINTFORM |
+			IF TALENT:(LOCAL:0):Ａ敏感
+				PRINTFORM   
+				CALL COLOR_PRINT("敏", カラー_注意)
+			ELSEIF TALENT:(LOCAL:0):Ａ鈍感
+				PRINTFORM   
+				CALL COLOR_PRINT("鈍", カラー_警告)
+			ELSE
+				PRINTFORM    
+				CALL COLOR_PRINT("-", カラー_選択不可)
+			ENDIF
+			PRINTFORM |
+			IF TALENT:(LOCAL:0):Ｂ敏感
+				PRINTFORM   
+				CALL COLOR_PRINT("敏", カラー_注意)
+			ELSEIF TALENT:(LOCAL:0):Ｂ鈍感
+				PRINTFORM   
+				CALL COLOR_PRINT("鈍", カラー_警告)
+			ELSE
+				PRINTFORM    
+				CALL COLOR_PRINT("-", カラー_選択不可)
+			ENDIF
+			PRINTFORM |
+			IF TALENT:(LOCAL:0):Ｍ敏感
+				PRINTFORM   
+				CALL COLOR_PRINT("敏", カラー_注意)
+			ELSEIF TALENT:(LOCAL:0):Ｍ鈍感
+				PRINTFORM   
+				CALL COLOR_PRINT("鈍", カラー_警告)
+			ELSE
+				PRINTFORM    
+				CALL COLOR_PRINT("-", カラー_選択不可)
+			ENDIF
+			表示位置++
+		ENDIF
+		キャラカウンタ ++
+	ENDIF
+NEXT
+
+PRINTL
+CALL SINGLE_DRAWLINE
+
+IF 総ページ数 >= 2
+	消去行 += 2
+	IF 表示ページ > 1
+		PRINT [  8] 前一頁            
+	ELSE
+		PRINT                             
+	ENDIF
+	LOCALS:0 = ページ{表示ページ}/{総ページ数}
+	PRINTPLAINFORM %LOCALS:0, 28, LEFT%
+	IF 表示ページ < 総ページ数
+		PRINT [  9] 後一頁
+	ENDIF
+	PRINTL 
+	CALL SINGLE_DRAWLINE
+ENDIF
+
+PRINTL [  0] 取消
+
+REDRAW 0
+
+消去行 += 4
+
+INPUT
+
+IF RESULT == 8 && 表示ページ > 1
+	表示ページ --
+	CLEARLINE 消去行
+	GOTO SHOW_LOOP
+ELSEIF RESULT == 9 && 表示ページ < 総ページ数
+	表示ページ ++
+	CLEARLINE 消去行
+	GOTO SHOW_LOOP
+ELSEIF RESULT == 0
+	REDRAW 1
+	RETURN 1
+ENDIF
+
+対象 = RESULT - 99
+IF 対象 > CHARANUM || 対象 < 0
+	CLEARLINE 消去行
+	GOTO SHOW_LOOP
+ELSEIF CFLAG:MASTER:所属 != CFLAG:(対象):所属 || CFLAG:(対象):捕虜先
+	CLEARLINE 消去行
+	GOTO SHOW_LOOP
+ENDIF
+
+CALL SINGLE_DRAWLINE
+PRINTFORML 「要对%ANAME(対象)%怎么办呢？」
+CALL SINGLE_DRAWLINE
+CALL ASK_MULTI_JUDGE("Ｃ的启蒙", !TALENT:対象:Ｃ敏感, "Ｖ的启蒙", !TALENT:対象:Ｖ敏感 && HAS_VAGINA(対象), "Ａ的启蒙", !TALENT:対象:Ａ敏感, "Ｂ的启蒙", !TALENT:対象:Ｂ敏感, "Ｍ的启蒙", !TALENT:対象:Ｍ敏感, "取消", 1)
+IF RESULT != 5
+	PRINTFORMW 「是吗，我知道了」
+	PRINTFORMW 「那么，%ANAME(対象)%大人，欢迎光临……♪」
+	PRINTFORMW 女人带着%ANAME(対象)%走进了卧室……
+	PRINTFORML
+	PRINTFORML
+	PRINTFORML
+ENDIF
+LOCAL:1 = RESULT
+SELECTCASE LOCAL:1
+	;Ｃのパターン
+	CASE 0
+		IF HAS_PENIS(対象)
+			PRINTFORML 女性在%ANAME(対象)%的阴茎上充分涂上润滑液，用那白皙的指尖慢慢地抚摸。
+			PRINTFORML 「这里，可是身体当中，神经最集中的地方」
+			PRINTFORML 「所以它本来就挺敏感的，但如果你有意识地刺激它......，它就会变得越来越舒服。」
+			PRINTFORML 「呵呵，看你这个样子，好像很舒服吧?能感受到雄性的喜悦吗」
+			PRINTFORML 女性紧贴着%ANAME(対象)%的身体，一边挤压着柔软的乳房，一边告诉%ANAME(対象)%使用肉棒的乐趣。
+			PRINTFORML 但是，%ANAME(対象)%达到高潮这件事情，是绝对不允许的
+			PRINTFORML 一旦出现绝顶的征兆，手上的动作就会立刻停止
+			PRINTFORML 「不行吗？　当然不行了」
+			PRINTFORML 对于终于忍不下去了，请求让他高潮的%ANAME(対象)%，她摇了摇头。
+			PRINTFORML 「我并不是在故意刁难你。只不过，我的工作就是来帮你启蒙。而不是为了让你自己来」
+			PRINTFORML 「射精是雄性的愉悦中最令人愉悦的一种。但是，只能享受一瞬间。而且，品尝之后就结束了」
+			PRINTFORML 「除此之外还有更多要体验的东西呢。要结束的话就太快了」
+			PRINTFORML 在来自下半身的刺激让%ANAME(対象)%的腰都不由自主的挺起来的时候，女人低声说道。
+			PRINTFORML 啪啦啪啦，像是想要让人听到润滑液和先走汁混合的声音一样，慢慢的摩擦着肉棒。
+			IF IS_SLAVE(対象) || IS_LOVER(対象) || IS_SLAVED_BY(対象)
+				PRINTFORML 「……而且，你有重要的人吧？」
+				PRINTFORML 「让你屈服的，那个人」
+				PRINTFORML 「所以重要的，最重要的精子，必须为那个人留着。」
+				PRINTFORML 「所以为了让重要的人满意，也为了让自己满足，一起好好学习吧……♪」
+			ENDIF
+			LOCALS:0 = 肉棒
+		ELSE
+			PRINTFORML 女性用手指和舌头在%ANAME(対象)%的阴蒂上仔细地爱抚着。
+			PRINTFORML 「这里，可是身体当中，神经最集中的地方」
+			PRINTFORML 「所以它本来就挺敏感的，但如果你有意识地刺激它......，它就会变得越来越舒服。」
+			PRINTFORML 「呵呵，看你这个样子，好像很舒服吧?能感受到身为女孩子的喜悦吗」
+			PRINTFORML 女性紧贴着%ANAME(対象)%的身体，一边挤压着柔软的乳房，一边告诉%ANAME(対象)%使用肉豆的乐趣。
+			PRINTFORML 但是，%ANAME(対象)%达到高潮这件事情，是绝对不允许的
+			PRINTFORML 一旦出现绝顶的征兆，手上的动作就会立刻停止
+			PRINTFORML 「不行吗？　当然不行了」
+			PRINTFORML 对于终于忍不下去了，请求让他高潮的%ANAME(対象)%，她摇了摇头。
+			PRINTFORML 「我并不是在故意刁难你。只不过，我的工作就是来帮你启蒙。而不是为了让你自己来」
+			PRINTFORML 「确实，高潮是性的愉悦中最让人舒服的东西。但是，只能享受一瞬间。而且，品尝之后就结束了」
+			PRINTFORML 「除此之外还有更多要体验的东西呢。要结束的话就太快了」
+			PRINTFORML 在来自下半身的刺激让%ANAME(対象)%的腰都不由自主的挺起来的时候，女人低声说道。
+			PRINTFORML 为了不让%ANAME(対象)%达到高潮，而慢慢地持续地施加刺激。
+			IF IS_SLAVE(対象) || IS_LOVER(対象) || IS_SLAVED_BY(対象)
+				PRINTFORML 「……而且，你有重要的人吧？」
+				PRINTFORML 「让你屈服的，那个人」
+				PRINTFORML 「你要为了他来保存你那兴奋的身体啊。」
+				PRINTFORML 「所以为了让重要的人满意，也为了让自己的阴蒂满足，一起好好学习吧……♪」
+			ENDIF
+			LOCALS:0 = 陰蒂
+		ENDIF
+		LOCAL = TALENT:対象:Ｃ鈍感
+		IF LOCAL
+			TALENT:対象:Ｃ鈍感 = 0
+		ELSE
+			TALENT:対象:Ｃ敏感 = 1
+		ENDIF
+	;Ｖのパターン
+	CASE 1
+		PRINTFORML 女性将手指插入%ANAME(対象)%的阴道，慢慢地、慢慢地爱抚着。
+		PRINTFORML 「这里，就是对女孩子来说最重要的地方」
+		PRINTFORML 「把喜欢的人接纳到自己的身体里，并且心情愉快的话……这是很棒的？」
+		PRINTFORML 「所以，为了那个时候准备……现在，让我们记住很多让心情变好的方法吧！」
+		PRINTFORML 那个女性自不必说，%ANAME(対象)%现在正在亲身体验来学习这种「让心情变好的方法」
+		PRINTFORML 女性那巧妙的指技，拨弄着\@ VIRGIN(対象) ? 还是处女的 # \@%ANAME(対象)%的官能，把她逼到快乐的边缘
+		PRINTFORML 但是，%ANAME(対象)%达到高潮这件事情，是绝对不允许的
+		PRINTFORML 一旦出现绝顶的征兆，手上的动作就会立刻停止
+		PRINTFORML 「不行吗？　当然不行了」
+		PRINTFORML 对着终于忍耐不住了，请求\@ VIRGIN(対象) ? 、夺走她的处女， # \@让她高潮的%ANAME(対象)%，她摇了摇头。
+		PRINTFORML 「我并不是在故意刁难你。只不过，我的工作就是来帮你启蒙。而不是为了让你自己来」
+		PRINTFORML 「确实，高潮是性的愉悦中最让人舒服的东西。但是，只能享受一瞬间。而且，品尝之后就结束了」
+		PRINTFORML 「除此之外还有更多要体验的东西呢。要结束的话就太快了」
+		PRINTFORML 在来自下半身的刺激让%ANAME(対象)%的腰都不由自主的挺起来的时候，女人低声说道。
+		PRINTFORML 为了不让%ANAME(対象)%达到高潮，而慢慢地持续地施加刺激。
+		IF VIRGIN(対象) && ( IS_SLAVE(対象) || IS_LOVER(対象) )
+			PRINTFORML 「……而且，你有重要的人吧？」
+			PRINTFORML 「不行啊，轻易就说什么给你第一次的话。」
+			PRINTFORML 「第一次的重要的性爱，必须是为那个人准备的」
+			PRINTFORML 「所以，现在，为了总有一天能让重要的人得到满足，好好学习吧……♪」
+		ENDIF
+		LOCALS:0 = 阴道
+		LOCAL = TALENT:対象:Ｖ鈍感
+		IF LOCAL
+			TALENT:対象:Ｖ鈍感 = 0
+		ELSE
+			TALENT:対象:Ｖ敏感 = 1
+		ENDIF
+	;Ａのパターン
+	CASE 2
+		PRINTFORML 女人将手指插入涂了润滑油的%ANAME(対象)%的肛门，慢慢地，慢慢地爱抚着。
+		PRINTFORML 「怎么了？　像个孩子一样不情愿。」
+		PRINTFORML 「在这里有感觉，就那么讨厌吗」
+		PRINTFORML 「像个变态一样？是啊，在世人看来，这样好像确实是变态」
+		PRINTFORML 每当听到“咔嗒、咔嗒”的声音，仿佛荡起脊梁骨的快感就会从屁穴爬上大脑
+		PRINTFORML 对于肛门产生快感的这个事实，%ANAME(対象)%产生了很大的抵触感，甚至想要逃离这个女人
+		PRINTFORML 但是，因为快感，导致手脚的力量都被剥夺了，甚至连动都动不了。
+		PRINTFORML 「世人都误会了。认定这样的性爱是正确的，那样的就是错误的。」
+		PRINTFORML 「其实，闺房中的事情绝对没有对错之分，如果有那也只有一个，那就是『心情愉快的事才是正确的』」
+		PRINTFORML 「所以，只要你觉得舒服，那就尽情地喘息，尽情地感受。」
+		SIF IS_MALE(対象)
+			PRINTFORML 「……所以，就像女孩子一样吧？　呵呵呵」
+		PRINTFORML 听到从耳边传来的女性的话语，%ANAME(対象)%抱有的抵触感渐渐消失了。
+		PRINTFORML 但是另一方面，%ANAME(対象)%达到高潮这件事情，是绝对不允许的
+		PRINTFORML 一旦出现绝顶的征兆，手上的动作就会立刻停止
+		PRINTFORML 「不行吗？　当然不行了」
+		PRINTFORML 对于终于忍不下去了，请求让她高潮的%ANAME(対象)%，她摇了摇头。
+		PRINTFORML 「我并不是在故意刁难你。只不过，我的工作就是来帮你启蒙。而不是为了让你自己来」
+		PRINTFORML 「确实，高潮是性的愉悦中最让人舒服的东西。但是，只能享受一瞬间。而且，品尝之后就结束了」
+		PRINTFORML 「除此之外还有更多要体验的东西呢。要结束的话就太快了」
+		PRINTFORML 在来自下半身的刺激让%ANAME(対象)%的腰都不由自主的挺起来的时候，女人低声说道。
+		PRINTFORML 为了不让%ANAME(対象)%达到高潮，而慢慢地持续地施加刺激。
+		IF IS_SLAVE(対象) || IS_LOVER(対象) || IS_SLAVED_BY(対象)
+			PRINTFORML 「……而且，你有重要的人吧？」
+			PRINTFORML 「让你屈服的，那个人」
+			PRINTFORML 「虽然是稀里糊涂的用了这个不净之穴，但是为了那个人也必须留着」
+			PRINTFORML 「所以为了让重要的人满意，也为了让自己的后庭满足，一起好好学习吧……♪」
+		ENDIF
+		LOCALS:0 = 肛门
+		LOCAL = TALENT:対象:Ａ鈍感
+		IF LOCAL
+			TALENT:対象:Ａ鈍感 = 0
+		ELSE
+			TALENT:対象:Ａ敏感 = 1
+		ENDIF
+	;Ｂのパターン
+	CASE 3
+		PRINTFORML 女人用手指、舌头舔舐着%ANAME(対象)%的乳房，慢慢地爱抚着。
+		PRINTFORML 「真是美丽的身体啊，简直令人着迷。」
+		PRINTFORML 「来吧，让我们变得敏感起来，甚至光靠胸部就能达到高潮……♪」
+		PRINTFORML 　她轻轻地揉搓着胸部，还用牙齿轻轻地啮咬着乳头。
+		PRINTFORML 女性的责备经常变化，不允许%ANAME(対象)%习惯快感。
+		PRINTFORML 「呵呵，看你这个样子，好像很舒服吧？你能感受到胸口的愉悦吗？」
+		PRINTFORML 女性紧贴着%ANAME(対象)%的身体，一边挤压着柔软的乳房，一边告诉%ANAME(対象)%乳房的乐趣。
+		PRINTFORML 但是，%ANAME(対象)%达到高潮这件事情，是绝对不允许的
+		PRINTFORML 一旦出现绝顶的征兆，手上的动作就会立刻停止
+		PRINTFORML 「不行吗？　当然不行了」
+		PRINTFORML 对于终于忍不下去了，请求让她高潮的%ANAME(対象)%，她摇了摇头。
+		PRINTFORML 「我并不是在故意刁难你。只不过，我的工作就是来帮你启蒙。而不是为了让你自己来」
+		PRINTFORML 「确实，高潮是性的愉悦中最让人舒服的东西。但是，只能享受一瞬间。而且，品尝之后就结束了」
+		PRINTFORML 「除此之外还有更多要体验的东西呢。要结束的话就太快了」
+		PRINTFORML 融化般的刺激让%ANAME(対象)%的身体颤抖着，女人低声说道。
+		PRINTFORML 为了不让%ANAME(対象)%达到高潮，而慢慢地持续地施加刺激。
+		IF IS_SLAVE(対象) || IS_LOVER(対象) || IS_SLAVED_BY(対象)
+			PRINTFORML 「……而且，你有重要的人吧？」
+			PRINTFORML 「让你屈服的，那个人」
+			PRINTFORML 「你要为了他来保存你那兴奋的身体啊」
+			PRINTFORML 「所以为了让重要的人满意，也为了让自己的胸部满足，一起好好学习吧……♪」
+		ENDIF
+		LOCALS:0 = 胸
+		LOCAL = TALENT:対象:Ｂ鈍感
+		IF LOCAL
+			TALENT:対象:Ｂ鈍感 = 0
+		ELSE
+			TALENT:対象:Ｂ敏感 = 1
+		ENDIF
+	;Ｍのパターン
+	CASE 4
+		PRINTFORML 女性让%ANAME(対象)%吮吸自己的手指，同时慢慢爱抚她的口内。
+		PRINTFORML 「对，没错，就是这样，慢慢地，仔细地舔」
+		PRINTFORML 「就像是和你的爱人接吻，或者给你的爱人口交，呵呵。」
+		PRINTFORML %ANAME(対象)%的嘴角有口水滴下，脸颊也慢慢变红了。
+		PRINTFORML 女人的巧妙的指技，让%ANAME(対象)%的嘴渐渐有了感觉。
+		PRINTFORML 「虽然这里通常被认为只是前戏的地方，但是其实这里也是很棒的性感带。」
+		PRINTFORML 「只要有意识地去刺激它，它就会变成一个让你连续高潮的地方」
+		PRINTFORML 「所以……呵呵，保持心情舒畅的方法，多记一些吧♪」
+		PRINTFORML 女人一边开心地说着，一边用手指在%ANAME(対象)%的嘴里舞蹈着
+		PRINTFORML 牙龈，舌头被抚摸着，%ANAME(対象)%像是被驱赶到快乐的悬崖上。
+		PRINTFORML 但是，女人对于%ANAME(対象)%达到高潮这件事情，是绝对不允许的
+		PRINTFORML 一旦看到绝顶的征兆，就会把手指从嘴里抽出来
+		PRINTFORML 「不行吗？　当然不行了」
+		PRINTFORML 对于终于忍不下去了，请求让她高潮的%ANAME(対象)%，她摇了摇头。
+		PRINTFORML 「我并不是在故意刁难你。只不过，我的工作就是来帮你启蒙。而不是为了让你自己来」
+		PRINTFORML 「确实，高潮是性的愉悦中最让人舒服的东西。但是，只能享受一瞬间。而且，品尝之后就结束了」
+		PRINTFORML 「除此之外还有更多要体验的东西呢。要结束的话就太快了」
+		PRINTFORML 融化般的刺激让%ANAME(対象)%的身体颤抖着，女人低声说道。
+		PRINTFORML 为了不让%ANAME(対象)%达到高潮，而慢慢地持续地施加刺激。
+		IF IS_SLAVE(対象) || IS_LOVER(対象) || IS_SLAVED_BY(対象)
+			PRINTFORML 「……而且，你有重要的人吧？」
+			PRINTFORML 「让你屈服的，那个人」
+			PRINTFORML 「你要为了他来保存你那兴奋的身体啊」
+			PRINTFORML 「所以为了让重要的人满意，也为了让自己满足，一起好好学习吧……♪」
+		ENDIF
+		LOCALS:0 = 口
+		LOCAL = TALENT:対象:Ｍ鈍感
+		IF LOCAL
+			TALENT:対象:Ｍ鈍感 = 0
+		ELSE
+			TALENT:対象:Ｍ敏感 = 1
+		ENDIF
+	CASE 5
+		CALL SINGLE_DRAWLINE
+		GOTO SHOW_LOOP
+ENDSELECT
+PRINTFORML 最后，在没有被允许达到高潮的情况下，%ANAME(対象)%多次品尝到了深刻的愉悦……
+CALL COLOR_PRINTW(@"%ANAME(対象)%的%LOCALS:0%变得\@ LOCAL ? 和普通人一样 # 比普通人多一倍 \@的敏感……", カラー_注意)
+MONEY -= 20000
+DVAR:セックストレーナー_発生フラグ = 1
+RETURN 1

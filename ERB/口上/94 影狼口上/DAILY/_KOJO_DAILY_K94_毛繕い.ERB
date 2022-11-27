@@ -1,0 +1,269 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K94_KAGEROU_GROOMING_RATE(対象)
+#DIM 対象
+RETURN 30
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K94_KAGEROU_GROOMING_DECISION(対象)
+#DIM 対象
+
+;主人公はペニスがあること
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K94_KAGEROU_GROOMING_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K94_KAGEROU_GROOMING(対象)
+#DIM 対象
+
+PRINTFORMW 一进休息室，影狼就在补毛
+;TranslatedMark 休憩室に入ると影狼が毛繕いをしていた
+PRINTFORMW 大尾巴上小心地梳着
+;TranslatedMark 大きな尻尾に丁寧にブラッシングをかけている
+PRINTFORMW 「～～～♪」
+IF IS_SLAVE(対象)
+	PRINTFORMW 「…？啊！主人，早上好」
+	;TranslatedMark 「…？あっ！ご主人様、おはようございます」
+	PRINTFORMW 她一发现你就急忙从沙发上站了起来
+	;TranslatedMark 彼女はあなたに気づくと慌ててソファから立ち上がった
+	PRINTFORMW 怎么办？
+	;TranslatedMark どうしよう？
+	CALL ASK_YN("给她理毛" ,"装出满不在乎的样子")
+	IF RESULT == 1
+		PRINTFORMW 她提心吊胆地再次坐在沙发上
+		;TranslatedMark 気にしない様に言うと彼女はおずおずと再びソファに座った
+		PRINTFORMW 有时会一边视线投向坐在对面的你一边继续刷头发
+		;TranslatedMark 向かいに座ったあなたに時折視線を送りながらブラッシングを続けた
+		PRINTFORMW …无所事事地看着她补发度过了平静的时光
+		;TranslatedMark …何をするでもなく彼女の毛繕いを眺め穏やかな時間を過ごした
+	ELSEIF RESULT == 0
+		IF KDVAR:対象:影狼_ブラッシング == 1
+			PRINTFORMW 隔了好久又刷了一次头发
+			;TranslatedMark 久しぶりにまたブラッシングをしてやる事にした
+			PRINTFORMW 她很客气，但是很高兴地伸出了尾巴
+			;TranslatedMark 彼女は遠慮がちに、しかし嬉しそうに尻尾を差し出してきた
+		ELSE
+			PRINTFORMW 好像打扰了
+			;TranslatedMark どうやら邪魔をしてしまったらしい
+			PRINTFORMW 本想离开，却突然想到要给他修补一下头发
+			;TranslatedMark 立ち去ろうかと思ったが、ふと毛繕いをしてやろうと思いついた
+			PRINTFORMW 「哎！哦，主人特意来了？」
+			;TranslatedMark 「えっ！ご、ご主人様がわざわざ？」
+			PRINTFORMW 「不，不！怎么会给人添麻烦…嗯…」
+			;TranslatedMark 「い、いいえ！そんな迷惑だなんて…はいっ…」
+			PRINTFORMW 影狼对你的提议感到困惑，但不久还是提心吊胆地拿出了刷子
+			;TranslatedMark あなたの申し出に影狼は戸惑っていたが、やがておずおずとブラシを差し出した
+			PRINTFORMW 轻轻抚摸着你膝盖上那略显客气的大尾巴
+			;TranslatedMark あなたの膝の上に遠慮がちにおかれた大きな尻尾を軽く撫でる
+			PRINTFORMW 「嗯…！」
+			;TranslatedMark 「んっ…！」
+			PRINTFORMW 她的喉咙里露出了微微紧张的气息
+			;TranslatedMark 彼女の喉から、微かに緊張した様な吐息が漏れた
+			PRINTFORMW 为了不受伤，温柔地慢慢地，像抚摸一样给你刷头发
+			;TranslatedMark 傷つけない様に優しくゆっくりと、撫でる様にブラッシングをしてやる
+			PRINTFORMW 「嗯…嗯……嗯…」
+			;TranslatedMark 「んんっ…んっ……ふぅん…」
+			PRINTFORMW 有时会感到她颤抖的吐息渐渐散开
+			;TranslatedMark 時折身体を震わせる彼女の吐息が徐々にほぐれていくのを感じる
+			PRINTFORMW 「诶？啊，是的！…心情很好」
+			;TranslatedMark 「えっ？あ、はい！…気持ち、いいです」
+			PRINTFORMW 问起情况，她微微露出笑容回答
+			;TranslatedMark 具合を尋ねると彼女は微かに笑顔を見せて応えた
+			KDVAR:対象:影狼_ブラッシング = 1
+		ENDIF
+		PRINTFORMW …虽然没有特别的交谈，但过了很长一段时间只有两个人的平静时光
+		;TranslatedMark …特に言葉も交わさなかったが、しばしの間二人きりの穏やかな時間を過ごせた
+		CFLAG:対象:好感度 += 40 + RAND:320
+	ENDIF
+ELSEIF IS_LOVER(対象)
+	PRINTFORMW 「…？啊，%ANAME(MASTER)%，早上好」
+	;TranslatedMark 「…？あら、%ANAME(MASTER)%、おはよう」
+	PRINTFORMW 她一发觉你，就莞尔一笑挥手来
+	;TranslatedMark 彼女はあなたに気づくとにっこりと笑って手を振って来た
+	PRINTFORMW 「这个？补毛吧…不定期做的话，就会闹得一塌糊涂」
+	;TranslatedMark 「これ？毛繕いよ…定期的にやらないとすぐぼわぼわになっちゃうの」
+	PRINTFORMW 她带着有些厌烦的表情在尾巴上刷了刷
+	;TranslatedMark ややうんざりした様な表情で彼女は尻尾にブラシをかける
+	PRINTFORMW 「难道有兴趣吗？…那么，那试试看吧？」
+	;TranslatedMark 「もしかして興味ある？…じゃ、じゃあ、やってみる？」
+	PRINTFORMW 她注意到了你的视线，连同提案一起给了我刷子
+	;TranslatedMark あなたの視線に気づいた彼女から提案と共にブラシを差し出された
+	PRINTFORMW 怎么办？
+	;TranslatedMark どうしよう？
+	CALL ASK_YN("给她理毛" ,"谢绝")
+	IF RESULT == 1
+		PRINTFORMW 不想因为不习惯的事情而受伤
+		;TranslatedMark 慣れない事で傷つけたりしたくはない
+		PRINTFORMW 「是的」
+		;TranslatedMark 「そう」
+		PRINTFORMW 你客气了，她略带遗憾地嘟囔着
+		;TranslatedMark あなたが遠慮すると彼女は少し残念そうに呟いた
+		PRINTFORMW …在她刷完头发之前，一起享受了无聊的对话
+		;TranslatedMark …彼女がブラッシングを終えるまで、共にたわいない会話を楽しんだ
+		CFLAG:対象:好感度 += 20 + RAND:160
+	ELSEIF RESULT == 0
+		IF KDVAR:対象:影狼_ブラッシング == 1
+			PRINTFORMW 决定再让我做一次
+			;TranslatedMark 再びやらせてもらう事にした
+			PRINTFORMW 她莞尔一笑，就坐在你的旁边，递出尾巴和刷子
+			;TranslatedMark 彼女はにっこりと笑うとあなたの隣に座り、尻尾とブラシを差し出してきた
+		ELSE
+			PRINTFORMW 从以前开始就对那只尾巴很感兴趣，当然决定让它来做了
+			;TranslatedMark 以前からあの尻尾には興味があった、もちろんやらせてもらう事にした
+			PRINTFORMW 「嘿嘿，温柔一点吧？」
+			;TranslatedMark 「えへへ、優しくしてね？」
+			PRINTFORMW 你一答应她，她就高兴地递来了笑刷
+			;TranslatedMark あなたが引き受けると彼女は嬉しそうに笑いブラシを渡してきた
+			PRINTFORMW 坐在她的旁边，抚摸着伸到膝盖上的大尾巴
+			;TranslatedMark 彼女の隣に座り、膝の上に差し出された大きな尻尾を撫でてやる
+			PRINTFORMW 「啊啊…喂，不能突然用手碰，会吓一跳的」
+			;TranslatedMark 「ぁんっ…い、いきなり手で触っちゃダメ、びっくりするから」
+			PRINTFORMW 向抗议的她道歉，温柔地开始刷
+			;TranslatedMark プンプンと抗議する彼女に謝り、優しくブラッシングを開始する
+			PRINTFORMW 好好修剪的尾巴轻飘飘地抚摸着也很舒服
+			;TranslatedMark よく手入れされている尻尾はふわふわで撫でていても心地よかった
+			PRINTFORMW 「嗯，是的，马马虎虎…很擅长哦」
+			;TranslatedMark 「んっ、そう、そこそこ…上手よ」
+			PRINTFORMW 她也不时地抖着身子，舒舒服服地吐气
+			;TranslatedMark 彼女も時折身体を震わせながら心地よさそうに息を吐く
+			PRINTFORMW 「嗯，这个好啊…从现在开始，给我吧？」
+			;TranslatedMark 「んー、これいいわね…えへへ、これからもやってもらおうかしら？」
+			PRINTFORMW 她笑着提议的尾巴在膝盖上轻轻摇动
+			;TranslatedMark ニコニコと笑いながら提案する彼女の尻尾は膝の上でゆらゆらと揺れていた
+			KDVAR:対象:影狼_ブラッシング = 1
+		ENDIF
+		PRINTFORMW …一边刷头发一边和她闲聊，享受了平静的时间
+		;TranslatedMark …ブラッシングをしながら彼女とたわいない会話を交わし、穏やかな時間を楽しんだ
+		CFLAG:対象:好感度 += 40 + RAND:320
+	ENDIF
+ELSEIF CFLAG:対象:好感度 >= 1000
+	PRINTFORMW 她一发现你，就嗤嗤地笑着催促坐在旁边
+	;TranslatedMark 彼女はあなたに気づくとニコッと笑って隣に座る様に促してきた
+	PRINTFORMW 你也一边和她打招呼一边坐在沙发上
+	;TranslatedMark あなたもまた彼女に挨拶をしながらソファに腰かけさせてもらった
+	PRINTFORMW 聊一会儿天气政治
+	;TranslatedMark しばらく天気や政治の話など適当な世間話をする
+	PRINTFORMW 在这期间，影狼继续用手臂摆动着，继续刷着
+	;TranslatedMark その間も影狼は腕を動かし続けブラッシングを続けていた
+	PRINTFORMW 「…那样盯着看，怎么了？」
+	;TranslatedMark 「…そんなにじっと見つめて、どうかした？」
+	PRINTFORMW 不由得被她的尾巴吸引住了眼睛，结果被她吓了一跳
+	;TranslatedMark ついつい彼女の尻尾に目を奪われていたら彼女に訝しがられた
+	PRINTFORMW 「难道你在意吗？」
+	;TranslatedMark 「もしかして気になるの？」
+	PRINTFORMW 你一肯定，她就羞答答地耸起耳朵来
+	;TranslatedMark あなたが肯定すると彼女はどこか恥ずかしそうな表情で耳をピクピクさせた
+	PRINTFORMW 「…那么，你也试着刷一下吗？」
+	;TranslatedMark 「…じゃあ、あなたもブラッシングやってみる？」
+	PRINTFORMW 提心吊胆地递出刷子
+	;TranslatedMark おずおずとブラシが差し出される
+	PRINTFORMW 怎么办？
+	;TranslatedMark どうしよう？
+	CALL ASK_YN("让我做" ,"算了吧")
+	IF RESULT == 1
+		PRINTFORMW 不想因为不习惯的事情而受伤
+		;TranslatedMark 慣れない事で傷つけたりしたくはない
+		PRINTFORMW 「是的」
+		;TranslatedMark 「そう」
+		PRINTFORMW 你客气了，她就这么说了，又刷回去了
+		;TranslatedMark あなたが遠慮すると彼女はそれだけ告げてブラッシングに戻った
+		PRINTFORMW …那之后，偶尔聊天的时间过得很慢
+		;TranslatedMark …その後は時折世間話をする程度の緩やかな時間が過ぎていった
+		CFLAG:対象:好感度 += 20 + RAND:160
+	ELSEIF RESULT == 0
+		IF KDVAR:対象:影狼_ブラッシング == 1
+			PRINTFORMW 决定再让我做一次
+			;TranslatedMark またやらせてもらう事にした
+			PRINTFORMW 她好像很高兴似的摇着尾巴
+			;TranslatedMark 彼女はどことなく嬉しそうに尻尾を揺らしていた
+		ELSE
+			PRINTFORMW 好容易才决定让我做
+			;TranslatedMark 折角なのでやらせてもらう事にした
+			PRINTFORMW 「不能太强大哦？」
+			;TranslatedMark 「あんまり強くしちゃだめよ？」
+			PRINTFORMW 你的尾巴有点害羞
+			;TranslatedMark 彼女は少し恥ずかしそうにしながら尻尾をあなたの膝の上にのせてきた
+			PRINTFORMW 直接接触后会软绵绵的，比看起来更重
+			;TranslatedMark 直接触れてみるとふわりと柔らかく見た目以上に重量がある
+			PRINTFORMW 小心别弄伤了，慢慢地刷上去
+			;TranslatedMark 傷つけないように気を使いながらゆっくりとブラシをかけてやる
+			PRINTFORMW 「嗯，对了对了…那种感觉」
+			;TranslatedMark 「ん、そうそう…そんな感じ」
+			PRINTFORMW 大概是无意识的吧，她的喉咙里微微吐出了气息
+			;TranslatedMark 恐らく無意識にだろう、彼女の喉から微かに吐息が漏れた
+			PRINTFORMW 「意外的很厉害呢，你以前养过宠物吗？」
+			;TranslatedMark 「意外と上手ね、以前ペットを飼ってたことあるの？」
+			PRINTFORMW 「啊，不能碰根哦…因为真的很敏感很害羞」
+			;TranslatedMark 「あ、付け根は触っちゃだめよ…本当に敏感で恥ずかしいから」
+			PRINTFORMW 在回应她的要求的同时，继续细心地刷
+			;TranslatedMark 彼女の注文に応えながら入念にブラッシングを続けた
+			KDVAR:対象:影狼_ブラッシング = 1
+		ENDIF
+		PRINTFORMW …两个人一边聊着无聊的话题，一边度过了平静的时间
+		;TranslatedMark …二人でたわいない会話を交わしながら、穏やかな時間を過ごした
+		CFLAG:対象:好感度 += 30 + RAND:240
+	ENDIF
+ELSE
+	PRINTFORMW 她瞥了你一眼，就又刷回去了
+	;TranslatedMark 彼女は入ってきたあなたを一瞥だけするとブラッシングに戻った
+	PRINTFORMW 怎么办？
+	;TranslatedMark どうしよう？
+	CALL ASK_YN("打声招呼" ,"离开")
+	IF RESULT == 1
+		PRINTFORMW 打扰了也不好
+		;TranslatedMark 邪魔をしても悪い
+		PRINTFORMW 你离开了休息室
+		;TranslatedMark あなたは休憩室を後にした
+	ELSEIF RESULT == 0
+		PRINTFORMW 「啊，你好」
+		;TranslatedMark 「えぇ、こんにちは」
+		PRINTFORMW 你一叫她，她就轻声答应了
+		;TranslatedMark あなたが声をかけると彼女は軽く返答をしてきた
+		PRINTFORMW 看来不碍事
+		;TranslatedMark どうやらお邪魔では無い様だ
+		PRINTFORMW 你坐在她对面的沙发上
+		;TranslatedMark あなたは彼女の向かいのソファに腰を掛けた
+		PRINTFORMW 「………？怎么了？」
+		;TranslatedMark 「………？どうかした？」
+		PRINTFORMW 望着她修补毛发的样子，我感到很惊讶
+		;TranslatedMark 毛繕いする彼女の様子を眺めていたら訝しがられた
+		PRINTFORMW 慌慌张张地回答说没什么
+		;TranslatedMark 慌てて何でもないと返す
+		PRINTFORMW 「…我告诉你，我不会让你碰的」
+		;TranslatedMark 「…言っておくけど、触らせないからね」
+		PRINTFORMW 她突然把尾巴藏起来，用湿漉漉的眼睛盯着你
+		;TranslatedMark 彼女はサッと尻尾を隠すとジトッとした目であなたを見つめてきた
+		PRINTFORMW 虽然没有那样的打算，但好像让人误解了
+		;TranslatedMark そんなつもりはなかったが誤解させてしまった様だ
+		PRINTFORMW 她辩解说你没有这个意思，又重新刷了一遍
+		;TranslatedMark あなたがそんなつもりはないと弁解すると彼女は再びブラッシングを再開した
+		PRINTFORMW …那之后，偶尔聊天的时间过得很慢
+		;TranslatedMark …その後は時折世間話をする程度の緩やかな時間が過ぎていった
+		CFLAG:対象:好感度 += 10 + RAND:80
+	ENDIF
+ENDIF
+
+RETURN 1
+
+

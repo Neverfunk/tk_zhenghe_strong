@@ -1,0 +1,519 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_GAMBLING_RATE()
+RETURN 35
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_GAMBLING_DECISION()
+RETURN DAY >= 15
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_GAMBLING_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_GAMBLING_SETTARGET()
+
+;賭けの対象にできるキャラがいるかだけ見ておく
+FOR LOCAL, 0, CHARANUM
+	SIF CFLAG:LOCAL:所属 == CFLAG:MASTER:所属 && IS_FEMALE(LOCAL)
+		GOTO FOUND
+NEXT
+RETURN 0
+
+$FOUND
+
+;賭けに負けて持っていかれたキャラがいたらダメ
+FOR LOCAL, 0, CHARANUM
+	IF GETBIT(TALENT:LOCAL:日常系, 素質_デイリー_カジノの従業員)
+		RETURN 0
+	ENDIF
+NEXT
+RETURN 1
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_GAMBLING()
+#DIM 対象
+#DIM 配当金
+
+配当金 = LIMIT(MONEY / 2, 100000, 500000)
+
+IF DVAR:賭け_初回実行済み
+	PRINTFORMW 又收到了那个赌场的请柬
+	PRINTFORML 去看看吧……
+	PRINTL
+	CALL ASK_YN()
+ELSE
+	PRINTFORMW %ANAME(MASTER)%收到了来自神秘赌场的邀请
+	PRINTFORMW 虽说是非法的，但听说回报非常高，一举千金也并非梦想。
+	PRINTFORML 去看看吧……
+	PRINTL
+	CALL ASK_YN()
+ENDIF
+
+IF RESULT == 1
+	PRINTFORMW ……不，没必要染指这种东西吧。
+	PRINTFORMW 决定不去了
+	RETURN 1
+ENDIF
+
+PRINTFORML 因为难得所以决定问一下……
+PRINTFORML 
+PRINTFORML 
+PRINTFORML 
+PRINTFORMW 「欢迎光临，恭候您的大驾。」
+PRINTFORMW 虽然想象着赌场会是怎样的场所，但却出乎意料地像是正经的建筑物。
+PRINTFORMW ……能够堂堂正正地营业，少不了和当地的统治者勾结在一起吧。
+PRINTFORMW %ANAME(MASTER)%进入里面并入席。
+CALL ICPRINT(@"「本赌场的股息是一律的<{配当金}>」", "W", カラー_注意)
+PRINTFORMW 听到像经理的男子这样说明。难道赌金不会变动吗？然后听他笑眯眯地继续说：
+PRINTFORMW 「我们赌场赌不是钱。取而代之的是赌女性的身体」
+PRINTFORMW 「赢了的话一举千金，输了的话……嗯，那位女性会作为我们的员工留下来。」
+PRINTFORMW ……真是岂有此理。
+PRINTFORMW 说是工作人员，但这里是黑市赌场。输了的话赌上的女人会被当做性奴隶吧
+PRINTFORML 但是，诱人的回报很有吸引力……
+PRINTL
+
+CALL ASK_YN("赌博", "回去吧")
+
+IF RESULT == 1
+	$CANCEL
+	PRINTFORMW 这种荒唐的赌局不能接受
+	PRINTFORMW 决定回去了……
+	RETURN 0
+ENDIF
+
+PRINTFORML 「那么，让谁去赌呢？」
+CALL SINGLE_DRAWLINE
+CALL SELECT_CHARA_LIST_ONLY_LOGIC_SEX("GAMBLING", "NONE")
+対象 = RESULT
+SIF 対象 == -1
+	GOTO CANCEL
+IF 対象 == MASTER
+	PRINTFORMW 「你自己来？……那很有趣」
+	PRINTFORMW 「是为同伴着想，还是因为刺激才燃烧，还是……」
+	PRINTFORMW 「……你是个想被侵犯的淫乱的人」
+	PRINTFORMW 「嗯，无论哪个原因都会很有意思」
+ELSE
+	PRINTFORMW 让%ANAME(対象)%去赌……
+	PRINTFORMW 就这样决定了
+ENDIF
+PRINTFORMW 「那么，接下来是赌博时间……」
+
+SELECTCASE RAND:3
+	CASE 0
+		CALL GAMBLING_SLOT
+	CASE 1
+		CALL GAMBLING_SORT
+	CASE 2
+		CALL GAMBLING_BINGO
+ENDSELECT
+
+SELECTCASE RESULT
+	CASE 1
+		PRINTFORMW 「太棒了！　%ANAME(MASTER)%赢得赌局！」
+		PRINTFORMW 「那么，这是分红金，请笑纳」
+		CALL COLOR_PRINTW(@"入手了{配当金}", カラー_注意)
+		PRINTFORMW 被经理送行，离开了赌场……
+		MONEY += 配当金
+	CASE 0
+		PRINTFORMW 「哎呀哎呀，真遗憾，看来是我们赢了啊」
+		IF 対象 == MASTER
+			PRINTFORMW 「那么，请按照约定，为我们工作哦」
+			PRINTFORMW 「工作内容就是用身体来吸引我们的客人。」
+			PRINTFORMW  赌场经理用贪婪的眼神看着%ANAME(対象)%……
+		ELSE
+			PRINTFORMW 「那么、%ANAME(対象)%我们就收下了、待遇什么的，请不用担心」
+			CALL COLOR_PRINTW(@"%ANAME(対象)%被带走了……", カラー_警告)
+			PRINTFORMW 被经理送行，离开了赌场……
+			CALL CHANGE_COUNTRY(対象, 0)
+			CFLAG:対象:特殊状態 = 0
+		ENDIF
+		SETBIT TALENT:対象:日常系, 素質_デイリー_カジノの従業員
+		CALL SET_PIERCE_RANDOM(対象, 0)
+		SIF RESULT != -1
+			CALL COLOR_PRINTW(@"%ANAME(対象)%の%GET_PIERCE_NAME(RESULT)%被穿孔道具打上了従業員的证明……", カラー_ピンク)
+	CASE 2
+		PRINTFORMW 「那么这次是我们赢了」
+		PRINTFORMW 「%ANAME(対象)%将成为我们的员工……在那之前，稍微来点惩罚吧」
+		PRINTFORMW 「请稍等……嘿嘿」
+		IF 対象 == MASTER
+			PRINTFORMW %ANAME(対象)%被警卫员带到赌场的深处……
+		ELSE
+			PRINTFORMW %ANAME(対象)%被警卫员带到赌场的深处……
+		ENDIF
+		PRINTFORML
+		PRINTFORML
+		PRINTFORML
+		CALL GAMBLING_PENALTY(対象)
+		PRINTFORML
+		PRINTFORML
+		PRINTFORML
+		PRINTFORMW 「很棒的表演哦、嘿嘿、今後也请%ANAME(対象)%继续活躍吧」
+		IF 対象 == MASTER
+			PRINTFORMW 「那么，请按照约定，为我们工作哦」
+			PRINTFORMW 「工作内容就是用身体来吸引我们的客人。」
+			PRINTFORMW  赌场经理用贪婪的眼神看着%ANAME(対象)%……
+		ELSE
+			CALL COLOR_PRINTW(@"%ANAME(対象)%被带走了……", カラー_警告)
+			PRINTFORMW 被经理送行，离开了赌场……
+		ENDIF
+		SETBIT TALENT:対象:日常系, 素質_デイリー_カジノの従業員
+		CALL SET_PIERCE_RANDOM(対象, 0)
+		SIF RESULT != -1
+			CALL COLOR_PRINTW(@"%ANAME(対象)%の%GET_PIERCE_NAME(RESULT)%被穿孔道具打上了従業員的证明……", カラー_ピンク)
+ENDSELECT
+
+
+
+DVAR:賭け_初回実行済み = 1
+
+;---------------------
+;カジノで犯ひいたとき用のペナル茶
+;---------------------
+@GAMBLING_PENALTY(対象)
+#DIM 対象
+SELECTCASE RAND:5
+	CASE 0
+		PRINTFORML %ANAME(対象)%被迫参加公开轮奸秀
+		PRINTFORML 好几个男人在舞台上抓住%ANAME(対象)%，强行搬开她的双脚
+		PRINTFORML 强行插入还未湿润的阴道，肉棒开始激烈地前后活动
+		PRINTFORML 不久，男子解放了精华、%ANAME(対象)%的喉咙里发出了悲痛的声音……
+		PRINTFORML 凌辱一直持续到舞台上的所有男人都满意为止
+		CALL FUCK(対象, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 性交, 精愛, 口淫, Ｖ性交, Ａ性交, 被虐, 輪姦", "接吻喪失, 処女喪失, Ａ処女喪失, CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精, ", GET_SPERM_ID("賭場的客人"), "賭場的客人的肉棒", "賭場的客人", "", "輪姦")
+	CASE 1
+		PRINTFORML %ANAME(対象)%被迫参加公开自慰秀
+		PRINTFORML 看着因为羞耻而用手遮住秘处和胸部的%ANAME(対象)%，客人们情绪高涨大肆叫好
+		PRINTFORML 无可奈何，%ANAME(対象)%开始了自慰、直至浑身颤抖达到高潮、男人们欣赏着她逐渐淫乱的样子
+		PRINTFORML 兴奋的他们登上舞台、开始轮奸因高潮而精疲力尽的%ANAME(対象)%……
+		CALL FUCK(対象, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 性交, 精愛, 口淫, Ｖ性交, Ａ性交, 被虐, 輪姦, 露出, 自慰", "接吻喪失, 処女喪失, Ａ処女喪失, CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精, ", GET_SPERM_ID("賭場的客人"), "賭場的客人的肉棒", "賭場的客人", "", "輪姦")
+	CASE 2
+		PRINTFORML %ANAME(対象)%被迫参加公开兽奸秀
+		PRINTFORML 大型犬强行把%ANAME(対象)%扑倒、野兽的生殖器顶进她的阴道
+		PRINTFORML 被充满野性的活塞运动征服、%PRONOUN(対象)%不顾自己的意志发出了娇喘
+		PRINTFORML 不久，在众人面前被野兽播种的同时、%ANAME(対象)%也发出了一声尖叫绝顶了……
+		CALL FUCK(対象, "Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, 口淫, Ｖ性交, Ａ性交, 被虐, 輪姦, 獣姦", "接吻喪失, 処女喪失, CFLAG減少, 性癖取得, 膣内射精, 口内射精, ", GET_SPERM_ID("犬"), "犬のペニス", "犬", "", "強姦")
+	CASE 3
+		PRINTFORML %ANAME(対象)%被迫参加公开SM秀
+		PRINTFORML 用绳子绑住并戴上眼罩、鼻勾和口枷，被粗暴地侵犯。
+		PRINTFORML 经过多次的调教，沉闷的悲鸣很快就变成了甜美的娇声了。
+		PRINTFORML 就这样，在被鞭打的过程中、%ANAME(対象)%终于被打到了绝顶……
+		CALL FUCK(対象, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 性交, 精愛, 口淫, Ｖ性交, Ａ性交, 被虐, 苦痛快楽, 緊縛, 輪姦", "接吻喪失, 処女喪失, Ａ処女喪失, CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精, ", GET_SPERM_ID("賭場的客人"), "賭場的客人的肉棒", "賭場的客人", "", "輪姦")
+	CASE 4
+		PRINTFORML %ANAME(対象)%的一夜被拿出来拍卖
+		PRINTFORML %PRONOUN(対象)%光着身子站在大家的面前，男人们用贪婪的视线看着并报出价格。
+		PRINTFORML %ANAME(対象)%中标的中年男子在大家面前开始侵犯%ANAME(対象)%
+		PRINTFORML 被客人们一边观看、%ANAME(対象)%发出悲鸣，阴道被射精了……
+		CALL FUCK(対象, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 性交, 精愛, 口淫, Ｖ性交, Ａ性交, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失, CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精, ", GET_SPERM_ID("賭場的客人"), "賭場的客人的肉棒", "賭場的客人", "", "強姦")
+ENDSELECT
+WAIT
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_GAMBLING(対象)
+#DIM 対象
+;(従属国パッチ)辺境伯はだめ
+RETURN !IS_MALE(対象) && CFLAG:対象:所属 == CFLAG:MASTER:所属 && CFLAG:対象:捕虜先 == 0 && GET_COUNTRY_BOSS(CFLAG:対象:所属) != 対象 && CFLAG:対象:行動不能状態 != 行動不能_子供 && !IS_SP_CHARA(対象) && !IS_ANIMAL(対象) && !GETBIT(TALENT:対象:日常系, 素質_デイリー_カジノの従業員) && CFLAG:対象:1702 != 1
+
+
+;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_GAMBLING_AGAIN_RATE()
+RETURN 75
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_GAMBLING_AGAIN_DECISION()
+RETURN DAY >= 15
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_GAMBLING_AGAIN_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_GAMBLING_AGAIN_SETTARGET()
+
+;賭けの対象にできるキャラがいるかだけ見ておく
+FOR LOCAL, 0, CHARANUM
+	SIF CFLAG:LOCAL:所属 == CFLAG:MASTER:所属 && IS_FEMALE(LOCAL)
+		GOTO FOUND
+NEXT
+RETURN 0
+
+$FOUND
+
+;賭けに負けて持っていかれたキャラがいる必要がある
+FOR LOCAL, 0, CHARANUM
+	IF GETBIT(TALENT:LOCAL:日常系, 素質_デイリー_カジノの従業員)
+		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+		DAILY_TARGET_NUM ++
+	ENDIF
+NEXT
+
+SIF DAILY_TARGET_NUM <= 0
+	RETURN 0
+
+RETURN 1
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_GAMBLING_AGAIN()
+#DIM 対象
+#DIM 出迎えキャラ
+#DIM 奪還予定キャラ
+
+出迎えキャラ = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+
+IF GETBIT(TALENT:MASTER:日常系, 素質_デイリー_カジノの従業員)
+	PRINTFORMW ……我不能再在赌场里工作了
+	PRINTFORML 如果以那个赌博取胜的话，好象能赎回自己。
+	PRINTFORMW 试试看吧……
+ELSE
+	PRINTFORMW ……必须夺回被那个赌场抢走的人
+	PRINTFORML 据说，用赌博取胜的红利也可以换回沦为“从业人员”的女人。
+	PRINTFORML 去试试吧……
+ENDIF
+PRINTL
+CALL ASK_YN()
+
+IF RESULT == 1
+	PRINTFORMW ……不，那样做的话，只会失去更多人才
+	PRINTFORMW 我决定放弃……
+	RETURN 1
+ENDIF
+
+PRINTFORML 除此以外没有别的办法了
+PRINTFORMW 决意进入赌场……
+PRINTFORML 
+PRINTFORML 
+PRINTFORML 
+
+IF 出迎えキャラ != MASTER
+	CALL GAMBLING_AGAIN_DEMUKAE(出迎えキャラ)
+	PRINTFORML 
+	PRINTFORML 
+	PRINTFORML 
+ENDIF
+
+IF GETBIT(TALENT:MASTER:日常系, 素質_デイリー_カジノの従業員)
+	PRINTFORMW 「嗯？怎么了？」
+	PRINTFORMW 「今天来，是要参加脱衣舞秀吗？」
+	PRINTFORMW  老板脸上露出冷笑，注视着这边。
+	PRINTFORMW 「嗯，想赎回自己？」
+ELSE
+	PRINTFORMW 「啊，欢迎，好久不见」
+	PRINTFORMW  老板笑眯眯地迎接%ANAME(MASTER)%
+	PRINTFORMW ……他的脸上放佛在说：“肥羊又来了”……
+	PRINTFORMW 「哈哈，我们想让你把之前输给你们的“从业员”还给我们」
+ENDIF
+PRINTFORMW 「好的，如果%ANAME(MASTER)%您能赢的话」
+PRINTFORML 「怎么办呢？」
+PRINTL
+
+CALL ASK_YN("赌了", "回去吧")
+
+IF RESULT == 1
+	$CANCEL
+	PRINTFORMW 「咦……？啊，啊，您回去吗，好吧」
+	PRINTFORMW 「……那你是来干什么的？」
+	PRINTFORMW  决定回去了……
+	RETURN 0
+ENDIF
+
+PRINTFORML 「那么，让谁去赌呢？」
+CALL SINGLE_DRAWLINE
+CALL SELECT_CHARA_LIST_ONLY_LOGIC_SEX("GAMBLING", "NONE")
+対象 = RESULT
+SIF 対象 == -1
+	GOTO CANCEL
+PRINTFORMW 让%ANAME(対象)%去赌……
+PRINTFORMW 就这样决定
+PRINTFORMW 「那么，你想把谁还给我？」
+
+CALL SELECT_CHARA_LIST_ONLY_LOGIC_SEX("GAMBLING_RETURN", "NONE")
+奪還予定キャラ = RESULT
+SIF 奪還予定キャラ == -1
+	GOTO CANCEL
+
+PRINTFORMW 「那么，赌博时间开始了……」
+
+SELECTCASE RAND:3
+	CASE 0
+		CALL GAMBLING_SLOT
+	CASE 1
+		CALL GAMBLING_SORT
+	CASE 2
+		CALL GAMBLING_BINGO
+ENDSELECT
+
+SELECTCASE RESULT
+	CASE 1
+		PRINTFORMW 「嗯……%ANAME(MASTER)%赢得赌局」
+		IF 奪還予定キャラ == MASTER
+			PRINTFORMW 「那么不用她工作了。」
+			CALL COLOR_PRINTW("労働契約废除了", カラー_注意)
+		ELSE
+			PRINTFORMW 「嗯、%ANAME(奪還予定キャラ)%可以带回去」
+			CALL COLOR_PRINTW(@"%ANAME(奪還予定キャラ)%带回了", カラー_注意)
+		ENDIF
+		PRINTFORMW 被经理送行，离开了赌场……
+		CALL CHANGE_COUNTRY(奪還予定キャラ, CFLAG:MASTER:所属)
+		CLEARBIT TALENT:奪還予定キャラ:日常系, 素質_デイリー_カジノの従業員
+	CASE 0
+		PRINTFORMW 「哎呀哎呀，真遗憾，看来是我们赢了啊」
+		IF 対象 == MASTER
+			PRINTFORMW 「那么，请按照约定，为我们工作哦」
+			PRINTFORMW 「工作内容就是用肉体来吸引我们的客人。」
+			PRINTFORMW  老板用贪婪的视线，看着%ANAME(対象)%……
+			CALL COLOR_PRINTW("结下了劳动契约……", カラー_警告)
+		ELSE
+			PRINTFORMW 「那么、%ANAME(対象)%也带走了哟。待遇不错，不用担心」
+			CALL COLOR_PRINTW(@"%ANAME(対象)%被带走了……", カラー_警告)
+			PRINTFORMW 被经理送行，离开了赌场……
+			CALL CHANGE_COUNTRY(対象, 0)
+			CFLAG:対象:特殊状態 = 0
+		ENDIF
+		SETBIT TALENT:対象:日常系, 素質_デイリー_カジノの従業員
+		CALL SET_PIERCE_RANDOM(対象, 0)
+		SIF RESULT != -1
+			CALL COLOR_PRINTW(@"%ANAME(対象)%の%GET_PIERCE_NAME(RESULT)%也被穿孔道具打上了従業員的证明……", カラー_ピンク)
+	CASE 2
+		PRINTFORMW 「嘿嘿、结束了，看来还是我们赢」
+		PRINTFORMW 「%ANAME(対象)%将成为我们的员工……在那之前，稍微来点惩罚吧」
+		PRINTFORMW 「请稍等……」
+		PRINTFORMW %ANAME(対象)%被警卫员带到赌场的深处……
+		PRINTFORML
+		PRINTFORML
+		PRINTFORML
+		CALL GAMBLING_PENALTY(対象)
+		PRINTFORML
+		PRINTFORML
+		PRINTFORML
+		PRINTFORMW 「很棒的表演哦、嘿嘿、今後也请%ANAME(対象)%继续活躍呢」
+		IF 対象 == MASTER
+			PRINTFORMW 「那么，请按照约定，为我们工作哦」
+			PRINTFORMW 「工作内容就是用肉体来吸引我们的客人」
+			PRINTFORMW  老板用贪婪的视线，看着%ANAME(対象)%……
+			CALL COLOR_PRINTW(@"结下了劳动契约……", カラー_警告)
+		ELSE
+			CALL COLOR_PRINTW(@"%ANAME(対象)%被带走了……", カラー_警告)
+			PRINTFORMW 被经理送行，离开了赌场……
+			CALL CHANGE_COUNTRY(対象, 0)
+			CFLAG:対象:特殊状態 = 0
+		ENDIF
+		SETBIT TALENT:対象:日常系, 素質_デイリー_カジノの従業員
+		CALL SET_PIERCE_RANDOM(対象, 0)
+		SIF RESULT != -1
+			CALL COLOR_PRINTW(@"%ANAME(対象)%の%GET_PIERCE_NAME(RESULT)%也被穿孔道具打上了従業員的证明……", カラー_ピンク)
+ENDSELECT
+
+
+;---------------------
+;お出迎え用メッセージ
+;めんどくさい、もといただのメッセージですのでFUCKはつけません
+;---------------------
+@GAMBLING_AGAIN_DEMUKAE(対象)
+#DIM 対象
+
+SELECTCASE RAND:12
+	CASE 0
+		PRINTFORML 迎接%ANAME(MASTER)%的、竟然是%ANAME(対象)%
+		PRINTFORML 身着不能称为衣服的淫乱服装，散发着女人的香气。
+		PRINTFORML 在被经理带到身边的时候，和几个男人擦肩而过
+		PRINTFORML 他们用色情的眼神看着%ANAME(対象)%、有的人好像理所当然一样抚摸着%PRONOUN(対象)%的屁股和乳房
+		PRINTFORML %ANAME(対象)%很自然地接受了……
+	CASE 1
+		PRINTFORML 迎接%ANAME(MASTER)%的是老板、还有%ANAME(対象)%
+		PRINTFORML 老板正在用指尖使劲地责弄着身着淫乱服装的%PRONOUN(対象)%的秘部
+		PRINTFORML %ANAME(対象)%看起来好像并不抵抗……
+	CASE 2
+		PRINTFORML 在被经理带领的途中，看到了舞台正在进行的表演
+		PRINTFORML ……演出者是%ANAME(対象)%
+		PRINTFORML %PRONOUN(対象)%身着淫乱的服装，表演着突出自己乳房、秘处、臀部的舞蹈
+		PRINTFORML 此时有个消瘦的男人登台，她一边熟练地咬住男子的根部，一边更加卖力地表演……
+	CASE 3
+		PRINTFORML 在被经理带路的途中，看到在大厅接待客人的%ANAME(対象)%
+		PRINTFORML ……接待客人意味着性服务
+		PRINTFORML %PRONOUN(対象)%跪在像常客一样坐着的男人身边，对着那个东西吞吐休。
+		PRINTFORML 不久，男子射出了精华，%ANAME(対象)%喉间发出一声悲鸣，被强迫喝干嘴里的液体……
+	CASE 4
+		PRINTFORML 在被经理带路的途中，看到在大厅接待客人的%ANAME(対象)%
+		PRINTFORML ……接待客人意味着性服务
+		PRINTFORML %PRONOUN(対象)%跨在常客一般的男人的膝盖上，接受着他坚挺。
+		PRINTFORML 不久，男子射出了精华、%ANAME(対象)%突然挺起背，绝顶了……
+	CASE 5
+		PRINTFORML 当%ANAME(MASTER)%来到老板房间时、居然看到他正在与%ANAME(対象)%交合着
+		PRINTFORML 从背后一边侵犯%ANAME(対象)%、一边用手揉捏着她柔软的屁股
+		PRINTFORML %ANAME(対象)%并不反抗，反而用甜美的声音接受快乐和痛苦。
+		PRINTFORML 不久后，老板向%ANAME(対象)%的体内注入浓白的精华……
+	CASE 6
+		PRINTFORML %ANAME(MASTER)%走到老板身边、他正坐在桌前工作。
+		PRINTFORML ……总觉得有什么奇怪的声音，然后看到%ANAME(対象)%从桌子下面爬出来了
+		PRINTFORML 她脸上还粘着白浊。看来是刚刚进行过服务……
+	CASE 7
+		PRINTFORML 在被经理领路的时候，看到下次表演的宣传单。
+		PRINTFORML ……据说内容是兽奸表演，演出者是%ANAME(対象)%
+		PRINTFORML 和猪抱一起、%ANAME(対象)%露出雌性的表情微笑着
+		PRINTFORML 经理笑着说，上次的轮奸秀也大受好评哟……
+	CASE 8
+		PRINTFORML 在被经理带路的途中，看到在大厅接待客人的%ANAME(対象)%
+		PRINTFORML ……接待客人意味着性服务
+		PRINTFORML 客人在订购饮料的同时、%ANAME(対象)%被无情的责弄着秘处和乳房
+		PRINTFORML %ANAME(対象)%发出令人侧目的声音绝顶，软绵绵地瘫坐在那里……
+	CASE 9
+		PRINTFORML %ANAME(MASTER)%拜见了老板，他正在看什么影像呢
+		PRINTFORML ……映出的是%ANAME(対象)%、%PRONOUN(対象)%正在被多名男性侵犯
+		PRINTFORML 据说这是上次轮奸秀的影像。
+		PRINTFORML 好像通过黑市流通，在外面广泛流传……
+	CASE 10
+		PRINTFORML 迎接%ANAME(MASTER)%的、竟然是%ANAME(対象)%
+		PRINTFORML 身着不能称为衣服的淫乱服装，散发着女人的香气
+		PRINTFORML 在被经理带到身边的时候，和几个男人擦肩而过
+		PRINTFORML 被一个男人打招呼、%ANAME(対象)%说了一句对不起等一下，就把他带走了
+		PRINTFORML ……数十分钟后返回的%ANAME(対象)%、脸颊泛红，秘部滴溜着白色的液体……
+	CASE 11
+		PRINTFORML 迎接%ANAME(MASTER)%的、竟然是%ANAME(対象)%
+		PRINTFORML 身着不能称为衣服的淫乱服装，散发着女人的香气
+		PRINTFORML 在被经理带到身边的时候，和几个男人擦肩而过
+		PRINTFORML 被一个男人打招呼、%ANAME(対象)%说了一句对不起等一下，就把他带走了
+		PRINTFORML ……数十分钟后返回的%ANAME(対象)%的脸上，沾满了白色的东西……
+ENDSELECT
+WAIT
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_GAMBLING_RETURN(対象)
+#DIM 対象
+RETURN FINDELEMENT(DAILY_TARGET, 対象) != -1

@@ -1,0 +1,141 @@
+@CITY_SLOT(CITY_ID,SLOT_PTR)
+    #DIM CITY_ID
+    #DIM FIRST_LINE
+    #DIM COUNTRY_ID
+    #DIM SLOT_PTR
+    #DIM TARGET_BUILDING
+    COUNTRY_ID = CFLAG:MASTER:所属
+    FIRST_LINE = LINECOUNT
+    $DEV_LOOP
+    CALL SINGLE_DRAWLINE
+    PRINTFORML %CITY_NAME:CITY_ID%请选择要建设的设施。
+    PRINTFORML 国庫:%NUM_FORMAT(MONEY:COUNTRY_ID)%, %CITY_NAME:CITY_ID%槽位{SLOT_PTR+1} 現在的施設:%GET_BUILDING_NAME(CITY_BUILDING:CITY_ID:SLOT_PTR)%
+    CALL PRINT_BUINDLING_LIST_TOPLINE(CITY_ID)
+    DRAWLINE
+    CALL PRINT_BUILDING_LIST(CITY_ID)
+    INPUT
+    IF RESULT >= BUILDING_START && RESULT < BUILDING_NUM
+        TARGET_BUILDING = RESULT
+        PRINTFORML {TARGET_BUILDING}
+        IF CAN_BUILD_BUILDING(CITY_ID,TARGET_BUILDING) > 0
+            SIF CITY_BUILDING:CITY_ID:SLOT_PTR
+                PRINTFORM 拆除了%GET_BUILDING_NAME(CITY_BUILDING:CITY_ID:SLOT_PTR)%
+            PRINTFORMW 建造了%GET_BUILDING_NAME(TARGET_BUILDING)%
+            CITY_BUILDING:CITY_ID:SLOT_PTR = TARGET_BUILDING
+            MONEY:(CFLAG:MASTER:所属) -= GET_BUILDING_COST(COUNTRY_ID,BUILDING_LEVEL:TARGET_BUILDING)
+            CLEARLINE FIRST_LINE - LINECOUNT
+            CALL TMP_BUILDING_EXIST_MAP
+            RETURN
+        ENDIF
+    ELSEIF RESULT >= 建造物_类型_经济类*1000 && RESULT <= 建造物_类型_特殊类*1000
+        BUILDING_PRINT_LIST_CONFIG:(RESULT/1000) = 1 - BUILDING_PRINT_LIST_CONFIG:(RESULT/1000)
+        GOTO DEV_LOOP
+    ELSEIF RESULT == -1
+        BUILDING_PRINT_LIST_CONFIG:0 = ((BUILDING_PRINT_LIST_CONFIG:0)+1) % 3
+    ELSEIF RESULT == -2
+        CALL CUSTOM_BUILDING_LIST_CONFIG
+    ELSEIF RESULT == 0
+        CLEARLINE FIRST_LINE - LINECOUNT
+            RETURN
+    ELSE
+        CLEARLINE 1
+        GOTO DEV_LOOP
+    ENDIF
+    CLEARLINE 1
+    GOTO DEV_LOOP
+
+
+@GET_BUILDING_TYPE_NAME(BUILDING_TYPE)
+    #FUNCTIONS
+    SELECTCASE BUILDING_TYPE
+        CASE 建造物_类型_经济类
+            RETURNF "经济类建筑"
+        CASE 建造物_类型_军事类
+            RETURNF "军事类建筑"
+        CASE 建造物_类型_政治类
+            RETURNF "政治类建筑"
+        CASE 建造物_类型_科技类
+            RETURNF "科技类建筑"
+        CASE 建造物_类型_防御类
+            RETURNF "防御类建筑"
+        CASE 建造物_类型_通讯类
+            RETURNF "通讯类建筑"
+        CASE 建造物_类型_色情类
+            RETURNF "色情类建筑"
+        CASE 建造物_类型_幻想类
+            RETURNF "幻想类建筑"
+        CASE 建造物_类型_特殊类
+            RETURNF "特殊类建筑"
+        CASE 建造物_类型_特殊类
+            RETURNF "特殊类建筑"
+        CASEELSE
+            RETURNF "建筑类型显示出错"
+    ENDSELECT
+
+
+@GET_CANT_BUILD_EXPLANATION(REASON_ID,BUILDING_ID)
+    #FUNCTIONS
+    #DIM REASON_ID
+    #DIM BUILDING_ID
+    #DIM CHARA_ID
+    SIF REASON_ID>0
+        RETURNF ""
+    SIF !IS_BUILDING(BUILDING_ID)
+        RETURNF
+    SELECTCASE REASON_ID
+        CASE 1
+        CASE -1
+            IF BUILDING_LEVEL:BUILDING_ID == 建造物_等级_三级建筑
+                RETURNF "需要科技《产业革命》"
+            ELSEIF BUILDING_LEVEL:BUILDING_ID == 建造物_等级_二级建筑
+                RETURNF "需要科技《工业升级》"
+            ELSE
+
+                RETURNF "不可建造原因出错：科技"
+            ENDIF
+        CASE -2
+            RETURNF @"需要国库资金{GET_BUILDING_COST(CFLAG:MASTER:所属,BUILDING_LEVEL:BUILDING_ID)}"
+        CASE -3
+            RETURNF "当前势力不能建造"
+        CASE -4
+            RETURNF "该建筑只能建造一个"
+        CASE -5
+            RETURNF @"需要城市经济{GET_CITY_ECONOMY_REQ(CFLAG:MASTER:所属,BUILDING_LEVEL:BUILDING_ID)}"
+        CASE -6
+            SIF BUILDING_TOHO_REQ_ID:BUILDING_ID:0 == 0
+                RETURNF "不可建造原因出错：角色"
+            CHARA_ID = BUILDING_TOHO_REQ_ID:BUILDING_ID:0
+            SIF CFLAG:CHARA_ID:所属 != CFLAG:MASTER:所属
+                RETURNF @"%ANAME(CHARA_ID)%不在势力中"
+            SIF CFLAG:CHARA_ID:好感度 < 0
+                RETURNF @"%ANAME(CHARA_ID)%好感度低于0"
+            IF IS_SP_COUNTRY(CFLAG:MASTER:所属)
+                SIF !GETBIT(TALENT:CHARA_ID:特殊勢力陥落系, SP_COUNTRY_TO_CONST(CFLAG:MASTER:所属))
+                    RETURNF @"%ANAME(CHARA_ID)%未获得当前特殊势力陷落"
+            ENDIF
+        CASEELSE
+            RETURNF "无法建造，出现BUG"
+    ENDSELECT
+
+@SLG_BUILDING_TURNEND_CLEAR_SP_COUNTRY_BUILDING
+    #DIM CITY_ID
+    #DIM BUILDING_ID
+    #DIM SLOT_PTR
+    FOR CITY_ID,1,CITY_NUM+1
+        SIF !IS_COUNTRY(CITY_OWNER:CITY_ID)
+            CONTINUE
+        SIF IS_SP_COUNTRY(CITY_OWNER:CITY_ID)
+            CONTINUE
+        FOR SLOT_PTR,0,MAX_BUILDING_SLOT_NUM
+            SIF !IS_BUILDING(CITY_BUILDING:CITY_ID:SLOT_PTR)
+                CONTINUE
+            IF BUILDING_TYPE:(CITY_BUILDING:CITY_ID:SLOT_PTR) == 建造物_类型_特殊类
+                LOCAL = BUILDING_LEVEL:(CITY_BUILDING:CITY_ID:SLOT_PTR)
+                MONEY:(CITY_OWNER:CITY_ID) += LOCAL*1500
+                IF CITY_OWNER:CITY_ID == CFLAG:MASTER:所属
+                    PRINTFORML 拆除了位于%CITY_NAME:CITY_ID%的%GET_BUILDING_NAME(CITY_BUILDING:CITY_ID:SLOT_PTR)%，国库增加了{LOCAL*1500}
+                ENDIF
+                CITY_BUILDING:CITY_ID:SLOT_PTR = 0
+            ENDIF
+        NEXT
+    NEXT

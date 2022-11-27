@@ -1,0 +1,53 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_FLOWER_GARDEN_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_FLOWER_GARDEN_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_FLOWER_GARDEN(対象)
+#DIM 対象
+
+PRINTFORML 探索時、遇見了漂亮的花海
+PRINTFORML 妖精們在裡面開心的跳著舞
+PRINTFORML 
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "歌唱"))
+CALL ASK_MULTI("躺下", "摘花", "唱歌")
+
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORML 直接就躺在了花海里
+		PRINTFORMW 在陽光和花香中、感到了陣陣睡意
+		PRINTFORML
+		PRINTFORML 突然注意到、妖精們都聚集在身邊
+		PRINTFORMW 似乎是被%ANAME(対象)%影響了也一起在午睡的樣子
+		PRINTFORML 天空已經完全変成黃昏
+		PRINTFORMW 揮手和天真無邪的她們告別後踏上了歸途
+	CASE 1
+		PRINTFORML 因為難得所以決定摘幾朵花
+		PRINTFORML 裝飾在拠点里吧……
+	CASE 2
+		PRINTFORMW 心情愉快地%ANAME(対象)%決定高歌一曲
+		PRINTFORML 
+		IF LIMIT(ABL:対象:歌唱 * 2, 30, 80) > RAND:100
+			PRINTFORML 不知不覺間被妖精們包圍了
+			PRINTFORML 唱完之後收到了掌聲
+			CALL PRINT_ADD_EXP(対象, "歌唱経験値", RAND:10 + 6)
+		ELSE
+			PRINTFORML ……得到了妖精們発出的噓聲
+			PRINTFORML 受到打撃後直接回去了
+		ENDIF
+ENDSELECT
+
+RETURN 1

@@ -1,0 +1,557 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_FUND_RAISING_RATE()
+RETURN (30 + INRANGE(DVAR:募金_抱いた回数, 0, 10) * 7)
+
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_FUND_RAISING_DECISION()
+SIF DAY < 10
+	RETURN 0
+;資金が50000以上の場合
+SIF MONEY < 50000
+	RETURN 0
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_FUND_RAISING_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+@EVENT_DAILY_FUND_RAISING()
+#DIM 募金額
+
+
+;募金額は現在資金の大体1割
+;抱いた回数が増えると募金額が減る（最低5%）
+;最低額を10000に設定、最大額をDAY*1000に設定
+募金額 = MAX(MONEY * MIN(((10 + RAND:11 + RAND:11) - DVAR:募金_抱いた回数)/ 2, 5) / 100, 10000)
+SIF 募金額 > 1000 * DAY
+	募金額 = 1000 * DAY
+SIF DVAR:募金_抱いた回数 > 0
+	募金額 = 募金額 / DVAR:募金_抱いた回数
+;初遭遇
+IF DVAR:募金_発生フラグ == 0
+	PRINTFORMW 正在工作的时候，被部下告知有客人来访
+	PRINTFORMW 好像是某个市民团体的成员
+	PRINTFORMW 正好工作也告一段落，决定同意会面
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW 「初次见面，请多多关照。是%ANAME(MASTER)%大人吧，真的十分感谢您能同意今天的会面」
+	PRINTFORMW 出现在面前的是一个不怎么显眼的女孩，但她脸上惹人喜爱的笑容却令人印象深刻
+	PRINTFORMW 让女孩在沙发上坐下，询问她有什么要求
+	PRINTFORML 「那个，我们是，为了不幸的孩子们而活动的团体的成员」
+	PRINTFORMW 「由于最近幻想乡混乱的局势，许多孩子们遭受了不幸」
+	PRINTFORML 「所以，我们的团体也在拼命地为他们努力着……」
+	PRINTFORMW 「原本就微薄的活动资金也越来越入不敷出了。本来，这就是基于大家的善意才能开始的活动……」
+	PRINTFORMW 原来如此，是为了寻求活动资金的援助而来的
+;20回以上抱いている場合、1/2の確率でただ抱かれに来る
+	ELSEIF DVAR:募金_抱いた回数 >= 20 && RAND:2 == 0
+		PRINTFORML 慈善团体的女孩带着自己妹妹例行前来拜访了
+		PRINTFORMW 但是和平常的样子稍微有些不同
+		PRINTFORML 「好久不见了、主人」
+		PRINTFORML 她们一看到你的脸就露出了恍惚的表情，口中发出娇媚的声音
+		PRINTFORMW 红着脸喘息着的那副样子，简直和发情中的雌犬没什么两样
+		PRINTFORML 「嗯、对不起…已经没有办法忍耐了、请您、再一次疼爱我们吧…」
+		PRINTFORML 两人不约而同的展开大衣，露出了自己那已经被你完全调教的身体
+		PRINTFORMW 没有穿内裤，晶莹的爱液已经从赤裸的秘所中滴落下来
+		PRINTFORML 「拜托了…」
+		PRINTFORMW 对于与平时“稍微不同”的请求，你一边苦笑着，一边将她们抱入怀中
+		PRINTFORML 
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORMW 充分品尝了两人被你调教的身体
+			CASE 1
+				PRINTFORMW 两人口交时，恰到好处的配合彻底满足了你的宝贝
+			CASE 2
+				PRINTFORMW 整晚疼爱了不停渴求着你的两人
+		ENDSELECT
+		PRINTFORML 
+		PRINTFORMW …第二天早晨，她们望着目送她们的你，恋恋不舍地离开了
+		RETURN -1
+;2回目以降
+ELSEIF DVAR:募金_発生フラグ == 1
+	PRINTFORML 那个慈善团体的女孩，好像又来募捐了
+	SELECTCASE DVAR:募金_抱いた回数
+	CASE IS < 2
+		PRINTFORMW 「那个，为了那些不幸的孩子们…又来拜托了」
+	CASE 2 TO 4
+		PRINTFORMW 「那个，为了那些不幸的孩子们…今天也拜托了」
+		PRINTFORMW 是在期待着些什么吗？脸颊不自觉地染上了红潮…
+	CASE 5 TO 7
+		PRINTFORMW 「那个…为了孩子们…还有以此为借口，实际上是想得到宠爱的厚颜无耻的我…又要拜托您了」
+		PRINTFORMW 没有试图隐藏脸颊的红潮、但却带着羞耻的表情向你索求着
+	CASE IS > 7
+		PRINTFORMW 「只是来到这里而已…身体就已经开始发痛了」
+		PRINTFORMW 「拜托了、为了淫乱的我……」
+		PRINTFORMW 毫无掩饰地展现自身欲望的那副姿态，携带着一股不同于娼妇的淫靡气息
+	ENDSELECT
+	PRINTFORMW 
+ENDIF
+PRINTFORM 她索求的金额是大约
+CALL COLOR_PRINT(@"{募金額}", カラー_注意)
+PRINTFORMW 的程度
+PRINTFORML 不用说是一笔巨款，也没有什么值得期待的回报
+PRINTFORMW 那么，要怎么办呢……
+CALL SINGLE_DRAWLINE
+IF DVAR:募金_抱いた回数 <= 4
+	CALL ASK_MULTI_JUDGE(@"援助金{募金額}", 1,"还是算了", 1,"作为交换让我抱你", HAS_PENIS(MASTER))
+ELSE
+	CALL ASK_MULTI_JUDGE(@"用金{募金額}换取疼爱", HAS_PENIS(MASTER),"还是算了", 1)
+ENDIF
+;断るパターン
+IF RESULT == 1
+	PRINTFORMW 「是这样啊……。真的十分可惜……」
+	IF !RAND:5 && 4 < DVAR:募金_抱いた回数
+	;レアケース、面会料のお支払い
+		PRINTFORML 「但是、依旧十分感谢您能允许这场会面。不回礼可不行」
+		PRINTFORML 一边这么说着，一边四肢着地地爬到了%ANAME(MASTER)%的脚边、
+		PRINTFORMW 脱下%ANAME(MASTER)%的裤子、用力含住了股间的东西……
+		PRINTFORML 「这是…嗯、允许会面的…回礼……呀嗯」
+		PRINTFORML 没错，这只是普通的回礼而已
+		PRINTFORML 一边这么说着，%ANAME(MASTER)%抓住了女孩想要伸向自己股间的手
+		PRINTFORMW 「啊嗯、十分抱歉…明明只是回礼而已，却变得舒服起来了…嗯唔、讨厌的涎液根本止不住啊…请原谅我」
+		PRINTFORML 直到%ANAME(MASTER)%满足为止，女孩的见面礼和淫荡的水声都没有停止…
+		PRINTFORML …
+		PRINTFORMW ……
+		PRINTFORMW 「这次是特别的哦、以后要好好地帮忙啊…嗯」
+		PRINTFORMW 女孩带着舒畅的表情踏上了归途
+	ELSE
+		PRINTFORMW 女孩垂头丧气地回去了
+	ENDIF
+;援助するパターン
+ELSEIF RESULT == 0
+	;お金が足りないパターン、無いと思うけど一応
+	IF MONEY <= 募金額
+		PRINTFORML 虽然想捐款来着，可是资金不够
+		PRINTFORMW 女孩虽然很失望，但也对你的这份心意表示了感谢，之后就离开了
+	ELSEIF DVAR:募金_抱いた回数 == 0
+		PRINTFORML 如果是为了孩子们的话，那就没办法了
+		PRINTFORMW 决定援助吧
+		PRINTFORML 「十分感谢！孩子们多亏了%ANAME(MASTER)%大人才能得救的！」
+		PRINTFORMW 女孩一下子露出了笑容，用力握紧%ANAME(MASTER)%的手表示感谢
+		PRINTFORML 
+		PRINTFORM 募得了
+		CALL COLOR_PRINT(@"{募金額}", カラー_注意)
+		PRINTFORMW 金
+		MONEY -= 募金額
+		CALL COLOR_PRINT(@"%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%的评判稍微上升了", カラー_注意)
+		PRINTFORMW
+		FOR LOCAL, 0, MAX_COUNTRY
+			SIF IS_COUNTRY(LOCAL)
+				CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 15, -15)
+		NEXT
+	ELSEIF DVAR:募金_抱いた回数 < 5
+		PRINTFORML 虽然还想再抱你，但现在没有那种心情
+		PRINTFORMW 坦率地决定了仅仅捐款而已
+		PRINTFORML 「啊…不、是的…十、十分感谢……」
+		PRINTFORMW 她不知为何有点泄气，脸上一幅无精打采的表情
+		PRINTFORML 
+		PRINTFORM 募得了
+		CALL COLOR_PRINT(@"{募金額}", カラー_注意)
+		PRINTFORMW 金
+		MONEY -= 募金額
+		CALL COLOR_PRINT(@"%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%的评判稍微上升了", カラー_注意)
+		PRINTFORMW
+		FOR LOCAL, 0, MAX_COUNTRY
+			SIF IS_COUNTRY(LOCAL)
+				CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 15, -15)
+		NEXT
+	ELSEIF DVAR:募金_抱いた回数 >= 5 && DVAR:募金_抱いた回数 < 10
+		IF RAND:20
+			PRINTFORML 「好的…今天也请让我好好地表示谢意…♥」
+			PRINTFORML 一告知要抱她，女孩就立刻喘息着浮现出恍惚的表情
+			PRINTFORMW 在前往卧室的途中，她就等不及似地紧紧搂住了%ANAME(MASTER)%的腰……
+			PRINTFORML 
+			SELECTCASE RAND:10
+				CASE 0
+					PRINTFORML 「啊♥好、好棒♥啊♥鸡鸡♥好棒啊♥啊嗯♥」
+					PRINTFORML 女孩跨坐在%ANAME(MASTER)%的身上，散乱着头发，拼命扭动着腰肢
+					PRINTFORML 在对以前的她来说无法想象的淫靡表情与诱惑的动作煽动着%ANAME(MASTER)%的兴奋之情
+					PRINTFORML 「更多♥更多ぉ♥啊啊♥那里那里♥主人♥♥啊♥啊啊♥♥♥」
+					PRINTFORMW 在少女疯狂的淫乱舞蹈的索求下，整夜充分地疼爱了她
+				CASE 1
+					PRINTFORML 「嗯♥嗯嗯♥怎么样♥啊…♥主人♥♥啊♥啊嗯♥」
+					PRINTFORML 少女仅仅抱住%ANAME(MASTER)%，配合着腰部的动作，用撒娇的声音低语着
+					PRINTFORML 用激烈的突刺代替了回答的话语，少女发出快乐的声音，高高仰起身子
+					PRINTFORML 「啊嘻♥♥♥啊…♥讨厌♥要去了…♥啊♥嗯嗯♥啊哈♥♥」
+					PRINTFORMW 一次又一次地宠幸了逐渐送来更加火热视线的少女
+				CASE 2
+					PRINTFORML 「嘻咿咿♥嘻嗯♥那里♥啊♥好激烈♥啊啊♥去了♥要去了♥♥嘻咿咿♥♥」
+					PRINTFORML 抓住腰肢猛烈地突刺了一下，少女一边痉挛着，一边发出悲鸣般的喘息声
+					PRINTFORML 每当突刺的时候膣肉都会仅仅缠绕着肉棒，将其吸引到更加深入的地方
+					PRINTFORML 「啊♥啊嗯♥讨厌、鸡鸡♥变大了呢♥♥啊嗯♥啊♥进来了♥♥」
+					PRINTFORMW 在阴道的缠绕下不由得射精了，少女也同时弓着身子迎来了绝顶
+				CASE 3
+					PRINTFORML 「啾噗♥啾噗♥嗯♥嗯嗯♥啾噜噜♥♥…呼哈♥哈啊♥哈啊♥感觉如何？」
+					PRINTFORML 结束口交的少女像是很爱惜%ANAME(MASTER)%的肉棒似的，托着脸颊看向上方
+					PRINTFORML 在称赞声中少女开心地笑了出来，像是寻求奖赏一般地伸出了屁股
+					PRINTFORML 「请看吧♥已经变得咕啾咕啾的了♥♥忍耐不下去了♥♥」
+					PRINTFORMW 按照要求一口气刺了进去，少女在欢喜的声音中迎来了潮吹
+				CASE 4
+					PRINTFORML 「啊♥啊♥不行♥啊♥去了♥已经要去了♥♥去了请原谅我啊啊啊♥♥♥」
+					PRINTFORML 达到高潮的少女由于痉挛而颤抖着，疯狂请求着你的原谅
+					PRINTFORML 但是那种拼命的表情反而非常可爱，%ANAME(MASTER)%不由得加速了腰间的动作
+					PRINTFORML 「啊嘻♥啊♥♥♥啊♥♥咿嘻♥去了♥去了♥又要去了呜呜呜♥♥♥」
+					PRINTFORMW 少女在那之后一直重复着绝顶，直到失去意识为止都被充分地虐待着
+				CASE 5
+					PRINTFORML 「啊♥嗯ー♥啊♥啊啊♥子宫好疼♥啊♥主人♥♥」
+					PRINTFORML 以对面座位激烈交缠着的少女，面向%ANAME(MASTER)%发出了甘美的吐息
+					PRINTFORML 少女望向%ANAME(MASTER)%，用双足缠绕着%ANAME(MASTER)%的腰，索求着膣内射精
+					PRINTFORML 「呐♥呐嗯♥请给我♥啊♥好难受♥♥啊♥请咻噜咻噜地射出来吧♥♥♥」
+					PRINTFORMW 无法拒绝如此可爱的请求，%ANAME(MASTER)%在少女的胎内无数次地释放了精液
+				CASE 6
+					PRINTFORML 「哈啊…♥好啊…♥诶嘿♥今天也、很厉害呢♥嗯…♥哈啊啊♥♥」
+					PRINTFORML 在%ANAME(MASTER)%怀抱中的少女带着慌乱的喘息，表情出神地嘟囔着
+					PRINTFORML 揶揄着少女直到刚才为止的热切样子，她颤抖着身子发出了热呼呼的气息。
+					PRINTFORML 「啊嗯…♥真是的♥那个样子♥都是因为你啊♥嗯嗯♥♥♥」
+					PRINTFORMW 稍事休息后，得到下一轮索求的%ANAME(MASTER)%推到了少女，进入第二轮战斗
+				CASE 7
+					PRINTFORML 「啊啊♥啊♥讨厌♥乳头好舒服♥那样的♥啊啊♥嗯♥哈啊啊嗯♥♥」
+					PRINTFORML 一边向上突刺，一边爱抚着胸部，少女像是无法忍受般地扭动着身子
+					PRINTFORML 温柔地咬啮着颤抖的乳头，少女的阴道随着她的娇声一同缠绕地更加紧致
+					PRINTFORML 「咿♥♥♥哈啊♥那样不行♥大脑变得空白了♥啊♥啊啊♥啊啊嗯♥」
+					PRINTFORMW 那之后也持续进攻着乳头，尽情享受着她可爱又乱糟糟的样子
+				CASE 8
+					PRINTFORML 「啊咿♥啊♥嗯♥嗯♥啊啊♥那里♥那里好舒服♥啊♥♥啊啊♥好棒♥」
+					PRINTFORML 少女四肢趴在地上，抓住她纤细的腰肢一个劲的突刺着
+					PRINTFORML 没回突刺都会是少女的喘息增加一分色气，蜜穴急切地缠绕着肉棒
+					PRINTFORML 「更多♥更多♥啊嘻♥那个东西♥♥一弹一弹的♥♥啊啊嗯♥啊嗯♥♥♥」
+					PRINTFORMW %ANAME(MASTER)%与少女忘记了时间，完全沉浸在野兽般浓厚的交尾中
+				CASE 9
+					PRINTFORML 「呼♥嗯♥啊啊♥呀啊♥那里不行♥要变成笨蛋了♥♥啊啊嗯♥♥♥」
+					PRINTFORML 将肉棒深深地扭了进去，用龟头一点点地刺激着少女的子宫口
+					PRINTFORML 大概是相当喜欢色色的事情吧、就连轻微地冲刺时身体都会跳动着发出喜悦的声音
+					PRINTFORML 「哈啊啊♥♥好厉害♥啊♥啊♥啊啊嗯♥又要去了呜呜呜呜♥♥」
+					PRINTFORMW 与话语相反敏感的反应着的少女的身体，染上了を%ANAME(MASTER)%爱情的颜色
+			ENDSELECT
+		ELSE
+			PRINTFORML 「一直以来谢谢您了！多亏了%ANAME(MASTER)%大人，真的有很多孩子们得到了帮助！」
+			PRINTFORMW 女孩一下子露出了笑容，用力握紧%ANAME(MASTER)%的手表示感谢
+			PRINTFORMW 「所以、偶尔也…」
+			PRINTFORML 少女的笑容渐渐变为娼妇般的微笑，将握住的手轻轻地引导到自己的裙子里
+			PRINTFORMW 「偶尔也、不想像平常那样尝尝我的味道吗？」
+			PRINTFORMW 那里感觉不到应当有的内裤的感触、反而立刻响起了淫靡的粘稠水声…
+		ENDIF
+		PRINTFORML 
+		PRINTFORM 募得了
+		CALL COLOR_PRINT(@"{募金額}", カラー_注意)
+		PRINTFORMW 金
+		DVAR:募金_抱いた回数 ++
+		MONEY -= 募金額
+		;募金したんだし評判は上げておく
+		CALL COLOR_PRINT(@"%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%的评判稍微上升了", カラー_注意)
+		PRINTFORMW
+		FOR LOCAL, 0, MAX_COUNTRY
+			SIF IS_COUNTRY(LOCAL)
+				CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 15, -15)
+		NEXT
+	ELSEIF DVAR:募金_抱いた回数 == 10
+		PRINTFORML 那个慈善团体的女孩，好像又来募捐了
+		PRINTFORML 不过，和往常一个人前来不同，她的身旁还有另一位小女孩
+		PRINTFORML 「一直以来谢谢您了！多亏了%ANAME(MASTER)%大人，真的有很多孩子们得到了帮助！」
+		PRINTFORML 女孩渐渐露出了淫靡的微笑
+		PRINTFORML 「所以、今天，把孩子有带过来…」
+		PRINTFORML 「姐姐？」
+		PRINTFORML 那个孩子似乎还没有理解这件事，带着茫然的表情看向了自己的姐姐
+		PRINTFORML 毫无性知识的她，对于接下来要发生的事，毫无察觉
+		PRINTFORML %ANAME(MASTER)%看着她纯洁的眼神，最后还是败给了自己黑暗的欲望
+		PRINTFORML 在少女的帮助下，%ANAME(MASTER)%脱下了她的衣服，开始用手指与舌头爱抚起来
+		PRINTFORML 或许是原本就有这样的潜质吧，没过多久，她的脸颊就开始泛红，吐出甜美的喘息来
+		PRINTFORML %ANAME(MASTER)%轻轻将她抱入怀中，轻而易举的用舌头，将她引入了半窒息状
+		PRINTFORML 在一旁的少女，也脱下了自己那被粘稠液体完全湿润了的内裤，一边用手爱抚这秘所，一边用舌头玩弄着自己妹妹胸口的葡萄
+		PRINTFORML %ANAME(MASTER)%缓缓将自己的肉棒，推入那未经人事的少女秘所
+		PRINTFORML 破瓜之痛让她紧紧的保住%ANAME(MASTER)%，沉重的喘息着
+		PRINTFORML 但是，在%ANAME(MASTER)%和自己姐姐的爱抚下
+		PRINTFORML 她很快就进入了状态
+		PRINTFORML 当%ANAME(MASTER)%将肉棒推入最深处之时，她的身体猛地一震
+		PRINTFORML 发出了可爱的喘息声
+		PRINTFORML 将女孩放下的时候，旁边的少女就扑了上来
+		PRINTFORML %ANAME(MASTER)%带着无奈的苦笑
+		PRINTFORML 那完全展露自己淫靡姿态的身姿，和从秘所出滴落的爱液
+		PRINTFORML 都和娼妇几乎没有任何区别
+		PRINTFORML 那一整晚，%ANAME(MASTER)%将两位少女的身心都用白浊的液体覆盖住了
+		PRINTFORML 
+		PRINTFORM 募得了
+		CALL COLOR_PRINT(@"{募金額}", カラー_注意)
+		PRINTFORMW 金
+		DVAR:募金_抱いた回数 ++
+		MONEY -= 募金額
+		;募金したんだし評判は上げておく
+		CALL COLOR_PRINT(@"%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%的评判稍微上升了", カラー_注意)
+		PRINTFORMW
+		FOR LOCAL, 0, MAX_COUNTRY
+			SIF IS_COUNTRY(LOCAL)
+				CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 15, -15)
+		NEXT
+	ELSEIF DVAR:募金_抱いた回数 == 11
+		PRINTFORML 那个慈善团体的女孩，好像又来募捐了
+		PRINTFORML 在她背后，有另一位小女孩在探头探脑的
+		PRINTFORML 「啊！主人」
+		PRINTFORML 与还稍微带有一丝理性的少女不同，女孩直接扑到了%ANAME(MASTER)%怀里
+		PRINTFORML 隔着衣服，都能感受到那孩子身上的热气，通红的脸颊，小口吐气的嘴唇，无一不显露出，她已经发情了的事实
+		PRINTFORML 「主人，你看」
+		PRINTFORML 她一边这么说着，一边缓缓掀开了衣摆
+		PRINTFORML 那晶莹的液体，缓缓从秘所渗出
+		PRINTFORML 抬起头来，那少女也是一样
+		PRINTFORML 她缓缓拎起自己裙子的下摆，没有内裤，只有那淫靡的液体缓缓滴落
+		PRINTFORML 「所以，那个，今天也来尽情疼爱我吧♥♥♥」
+		PRINTFORML 「妹妹毕竟还小，有什么♥♥♥」
+		PRINTFORML 「啊！姐姐真讨厌，又想吃独食，这次来的时候，还想把我扔下来」
+		PRINTFORML 可惜话还没有说完，就被妹妹戳穿了
+		PRINTFORML 「姐姐明明每天晚上，想念主人的时候，床单都湿透了呢」
+		PRINTFORML 抬头看向少女，她的脸已经完全红透了
+		PRINTFORML 「主人♥♥♥要对我们负责哦」
+		PRINTFORML 「把我们姐妹两个，都搞成这种样子，你到底想干什么呢」
+		PRINTFORML 一边这么说着，她一边掀开了自己的衣服
+		PRINTFORML 原来，大衣之下也是什么都没有，只有盖住胸前两点的爱心乳贴
+		PRINTFORML 「能让我们♥♥♥变成这样的，只有主人而已」
+		PRINTFORML 特等姐妹丼♥♥♥多谢款待
+		PRINTFORM 募得了
+		CALL COLOR_PRINT(@"{募金額}", カラー_注意)
+		PRINTFORMW 金
+		DVAR:募金_抱いた回数 ++
+		MONEY -= 募金額
+		;募金したんだし評判は上げておく
+		CALL COLOR_PRINT(@"%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%的评判稍微上升了", カラー_注意)
+		PRINTFORMW
+		FOR LOCAL, 0, MAX_COUNTRY
+			SIF IS_COUNTRY(LOCAL)
+				CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 15, -15)
+		NEXT
+	ELSEIF DVAR:募金_抱いた回数 >= 11
+		PRINTFORML 今天，少女也和妹妹结伴前来
+		PRINTFORML 像是带着宠物一样，用项圈，将姐妹两人带入卧室
+		PRINTFORML
+		SELECTCASE RAND:10
+				CASE 0
+					PRINTFORML 「啊♥好、好棒♥啊♥鸡鸡♥好棒啊♥啊嗯♥」
+					PRINTFORML 女孩跨坐在%ANAME(MASTER)%的身上，散乱着头发，拼命扭动着腰肢
+					PRINTFORML 在对以前的她来说无法想象的淫靡表情与诱惑的动作煽动着%ANAME(MASTER)%的兴奋之情
+					PRINTFORML 而少女则是一边舔弄着%ANAME(MASTER)%的胸口，一边爱抚着自己的下体
+					PRINTFORML 「更多♥更多ぉ♥啊啊♥那里那里♥主人♥♥啊♥啊啊♥♥♥」
+					PRINTFORMW 在两人疯狂的淫乱舞蹈的索求下，整夜充分地疼爱了她们
+				CASE 1
+					PRINTFORML 「嗯♥嗯嗯♥怎么样♥啊…♥主人♥♥啊♥啊嗯♥」
+					PRINTFORML 少女仅仅抱住%ANAME(MASTER)%，配合着腰部的动作，用撒娇的声音低语着
+					PRINTFORML 用激烈的突刺代替了回答的话语，少女发出快乐的声音，高高仰起身子
+					PRINTFORML 「啊嘻♥♥♥啊…♥讨厌♥要去了…♥啊♥嗯嗯♥啊哈♥♥」
+					PRINTFORMW 而一旁的女孩，则用完全陷入情欲的眼神，看着这一切
+				CASE 2
+					PRINTFORML 「嘻咿咿♥嘻嗯♥那里♥啊♥好激烈♥啊啊♥去了♥要去了♥♥嘻咿咿♥♥」
+					PRINTFORML 抓住腰肢猛烈地突刺了一下，少女一边痉挛着，一边发出悲鸣般的喘息声
+					PRINTFORML 每当突刺的时候膣肉都会仅仅缠绕着肉棒，将其吸引到更加深入的地方
+					PRINTFORML 「啊♥啊嗯♥讨厌、鸡鸡♥变大了呢♥♥啊嗯♥啊♥进来了♥♥」
+					PRINTFORMW 在阴道的缠绕下不由得射精了，叠在一起的两人，也同时弓着身子迎来了绝顶
+				CASE 3
+					PRINTFORML 「啾噗♥啾噗♥嗯♥嗯嗯♥啾噜噜♥♥…呼哈♥哈啊♥哈啊♥感觉如何？」
+					PRINTFORML 争着口交的两人像是很爱惜%ANAME(MASTER)%的肉棒似的，寻求奖励一样，看着上方
+					PRINTFORML 在称赞声中少女开心地笑了出来，屁股不停的摇晃着
+					PRINTFORML 「啊♥已经变得咕啾咕啾的了♥♥忍耐不下去了♥♥」
+					PRINTFORMW 按照要求用手指刺激了一下两人，两人在欢喜的声音中迎来了潮吹
+				CASE 4
+					PRINTFORML 「啊♥啊♥不行♥啊♥去了♥已经要去了♥♥去了请原谅我啊啊啊♥♥♥」
+					PRINTFORML 达到高潮的少女由于痉挛而颤抖着，疯狂请求着你的原谅
+					PRINTFORML 但是那种拼命的表情反而非常可爱，%ANAME(MASTER)%不由得加速了腰间的动作
+					PRINTFORML 「啊嘻♥啊♥♥♥啊♥♥咿嘻♥去了♥去了♥又要去了呜呜呜♥♥♥」
+					PRINTFORMW 少女在那之后一直重复着绝顶，直到失去意识为止，%ANAME(MASTER)%又开始玩弄在一旁观察了许久的女孩
+				CASE 5
+					PRINTFORML 「啊♥嗯ー♥啊♥啊啊♥子宫好疼♥啊♥主人♥♥」
+					PRINTFORML 以对面座位激烈交缠着的少女，和%ANAME(MASTER)%身后的妹妹拥吻着
+					PRINTFORML 两人共同用双脚缠绕住了对方的身子，将%ANAME(MASTER)%束缚在之中
+					PRINTFORML 「呐♥呐嗯♥请给我♥啊♥好难受♥♥啊♥请咻噜咻噜地射出来吧♥♥♥」
+					PRINTFORMW 无法拒绝如此可爱的请求，%ANAME(MASTER)%在少女的胎内无数次地释放了精液
+				CASE 6
+					PRINTFORML 「哈啊…♥好啊…♥诶嘿♥今天也、很厉害呢♥嗯…♥哈啊啊♥♥」
+					PRINTFORML 在%ANAME(MASTER)%怀抱中的少女带着慌乱的喘息，表情出神地嘟囔着
+					PRINTFORML 女孩揶揄着少女直到刚才为止的热切样子，她颤抖着身子发出了热呼呼的气息。
+					PRINTFORML 「啊嗯…♥真是的♥那个样子♥都是因为主人啊♥嗯嗯♥♥♥」
+					PRINTFORMW 稍事休息后，得到另一人索求的%ANAME(MASTER)%推到了女孩，进入第二轮战斗
+				CASE 7
+					PRINTFORML 「啊啊♥啊♥讨厌♥乳头好舒服♥那样的♥啊啊♥嗯♥哈啊啊嗯♥♥」
+					PRINTFORML 一边感受这主人的向上突刺，一边被妹妹爱抚着胸部，少女像是无法忍受般地扭动着身子
+					PRINTFORML 女孩温柔地咬啮着颤抖的乳头，少女的阴道随着她的娇声一同缠绕地更加紧致
+					PRINTFORML 「咿♥♥♥哈啊♥那样不行♥大脑变得空白了♥啊♥啊啊♥啊啊嗯♥」
+					PRINTFORMW 那之后也和女孩一起，玩弄着少女的乳头，尽情享受着她可爱又乱糟糟的样子
+				CASE 8
+					PRINTFORML 「啊咿♥啊♥嗯♥嗯♥啊啊♥那里♥那里好舒服♥啊♥♥啊啊♥好棒♥」
+					PRINTFORML 两人都像动物一样，四肢趴在地上，交替着抓住她们纤细的腰肢一个劲的突刺着
+					PRINTFORML 每回突刺都会让两人的喘息增加一分色气，蜜穴急切地缠绕着肉棒
+					PRINTFORML 「更多♥更多♥啊嘻♥那个东西♥♥一弹一弹的♥♥啊啊嗯♥啊嗯♥♥♥」
+					PRINTFORMW 三个人都忘记了时间，完全沉浸在野兽般浓厚的交尾中
+				CASE 9
+					PRINTFORML 「呼♥嗯♥啊啊♥呀啊♥那里不行♥要变成笨蛋了♥♥啊啊嗯♥♥♥」
+					PRINTFORML 将肉棒深深地扭了进去，用龟头一点点地刺激着少女的子宫口
+					PRINTFORML 大概是相当喜欢色色的事情吧、就连轻微地冲刺时身体都会跳动着发出喜悦的声音
+					PRINTFORML 「哈啊啊♥♥好厉害♥啊♥啊♥啊啊嗯♥又要去了呜呜呜呜♥♥」
+					PRINTFORMW %ANAME(MASTER)%放下已经完全失神了的少女，今夜，又是让两人身心都染上%ANAME(MASTER)%的颜色的时间呢
+		ENDSELECT
+		PRINTFORML 
+		PRINTFORM 募得了
+		CALL COLOR_PRINT(@"{募金額}", カラー_注意)
+		PRINTFORMW 金
+		DVAR:募金_抱いた回数 ++
+		MONEY -= 募金額
+		;募金したんだし評判は上げておく
+		CALL COLOR_PRINT(@"%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%的评判稍微上升了", カラー_注意)
+		PRINTFORMW
+		FOR LOCAL, 0, MAX_COUNTRY
+			SIF IS_COUNTRY(LOCAL)
+				CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 15, -15)
+		NEXT
+	ENDIF
+	DVAR:募金_発生フラグ = 1
+;身体を要求するパターン
+ELSEIF RESULT == 2
+	SELECTCASE DVAR:募金_抱いた回数
+		CASE 0
+			PRINTFORMW 作为援助的代价，让我抱你
+			PRINTFORML 在她的耳边低声细语着，女孩的身体一瞬间僵硬了
+			PRINTFORMW 慢慢把脸转向这边，难以置信地窥视%ANAME(MASTER)%的表情
+			PRINTFORMW 讓我抱你
+			PRINTFORMW 对着僵硬的女孩再度告知
+			PRINTFORMW 她的脸颊通红着咬紧嘴唇，像是含糊不清地小声骂了些什么
+			PRINTFORML 那么交谈就结束了，%ANAME(MASTER)%站起身，想要离开房间
+			PRINTFORMW 手刚接触到门把的刹那、背后传来了「请等一下」的低语声
+			PRINTFORMW 「………真、真的………可以得到、您的援助……对吧？」
+			PRINTFORMW 女孩低垂着头，结结巴巴地轻声问到
+			PRINTFORML %ANAME(MASTER)%锁上了门、渐渐走近她
+			PRINTFORMW 抱住了她的腰，　当然了，会遵守约定的　这么温柔地说道
+			PRINTFORMW 像小动物一样颤抖着的女孩，用只有身旁的%ANAME(MASTER)%才能听到的微弱声音
+			PRINTFORMW 「……我明白了」
+			PRINTFORMW 这么自语着
+			PRINTFORML %ANAME(MASTER)%强行夺走她的嘴唇
+			PRINTFORMW 将颤抖的身体推倒在了沙发上
+			PRINTFORMW ・・・
+			PRINTFORMW ・・
+			PRINTFORMW ・
+			PRINTFORMW 作为资金援助的交换，享受了女孩的身体
+			SELECTCASE RAND:4
+				CASE 0
+				PRINTFORMW 她的肉体敏感到想象不出来是小女孩的程度，给你带来极大的享受
+				CASE 1
+				PRINTFORMW 充分疼爱了发育途中还残留着些许幼稚的肉体
+				CASE 2
+				PRINTFORMW 饱尝了少女从衣服上看不出来的肉感的身体
+				CASE 3
+				PRINTFORMW 是本来就有这方面的素质吗、只是稍微抱了一下，少女就忘我地变得乱糟糟的
+			ENDSELECT
+			PRINTFORMW 
+			PRINTFORML 这之后，按照约定援助了金钱
+			PRINTFORMW 女孩像逃跑一般立刻离开了
+			PRINTFORM
+		CASE 1
+			PRINTFORMW 「……唔」
+			PRINTFORML 让我抱你
+			PRINTFORMW 这么告诉她，是想起之前的事情了吗，女孩通红着脸低下了头
+			PRINTFORMW 请不要认为有了金钱就可以随心所欲……拒绝的话语并不干脆
+			PRINTFORMW 给你的选项有两个，是离开房间还是脱掉衣服
+			PRINTFORMW 用不容分说的口气告诉她，少女沉默了
+			PRINTFORMW 「……这件事、请不要对任何人说」
+			PRINTFORMW 当然，约好了
+			PRINTFORML 得到了%ANAME(MASTER)%的同意，女孩稍微犹豫了一会儿，还是将肌肤展现给了%ANAME(MASTER)%
+			PRINTFORMW %ANAME(MASTER)%把女孩推到在沙发上，享受起她的肌肤
+			SELECTCASE RAND:4
+				CASE 0
+				PRINTFORMW 她的肉体敏感到想象不出来是小女孩的程度，给你带来极大的享受
+				CASE 1
+				PRINTFORMW 充分疼爱了发育途中还残留着些许幼稚的肉体
+				CASE 2
+				PRINTFORMW 饱尝了少女从衣服上看不出来的肉感的身体
+				CASE 3
+				PRINTFORMW 是本来就有这方面的素质吗、只是稍微抱了一下，少女就忘我地变得乱糟糟的
+			ENDSELECT
+			PRINTFORMW 
+			PRINTFORML 这之后，按照约定援助了金钱
+			PRINTFORMW 女孩像逃跑一般立刻离开了
+			PRINTFORM
+		CASE 2
+			PRINTFORMW 「……唔」
+			PRINTFORML 女孩什么话都没有说。只是低着头，无言地咬着下唇
+			PRINTFORML 既没有大声叫喊着「我不是娼妇」，也没有以要将那种要求公之于众作为威胁
+			PRINTFORMW 不错的倾向。这样的反应，是无法抵抗给予其的快感的证据
+			PRINTFORMW 对着抑制住嘴角浮起的笑容的%ANAME(MASTER)%，女孩说话了
+			PRINTFORMW 「这个、……这个仅仅是为了支援、而已。既不在那之上、也不在那之下」
+			PRINTFORML 为了支援。痛苦的辩解。但并不打算指出这件事。不如说反而要强力肯定
+			PRINTFORML %ANAME(MASTER)%抱住了女孩。对你来说，金钱是必要的，
+			PRINTFORMW 利害关系一致，并没有特意要扭曲的意思
+			PRINTFORML 如果需要支援的话，那么知道应该做什么吧？
+			PRINTFORMW 这么说着，少女自发脱下了衣服，展露出她的肌肤
+			PRINTFORMW 女孩发出的声音也是，反应也是，都比过去显得更加明显了……
+		CASE 3
+			PRINTFORMW 「明白了……那么就拜托了」
+			PRINTFORMW 女孩的回答，像是早已预测到这边的话语一样迅速
+			PRINTFORML 少女站立起来，展露出自己的肌肤。在那里，已经没有了曾经显示过的踌躇
+			PRINTFORML 另一方面，不知是否还存留着些许害羞，脸颊上依旧微微泛着红潮
+			PRINTFORMW 为了最大限度地引出她的那份羞耻，用视线充分侵犯着站立着的少女的肉体
+			PRINTFORMW 「……哈啊……」
+			PRINTFORML 少女的呼吸带上了热度，眼瞳也蒙上了一层水汽。而秘唇更是早已染上了湿度
+			PRINTFORML 那具发育途中的肉体，如同真正的女人一般，似乎在期待中之隐隐作痛
+			PRINTFORML 忍受这种状态应该会很辛苦吧，但少女却并未主动要求那样的行为
+			PRINTFORML 不是为了快乐，而是为了得到支援———为了欺骗自己而找的借口，反而成为了束缚自己的枷锁
+			PRINTFORMW 真讽刺——%ANAME(MASTER)%在内心嘲笑着，但却并没有主动踏出那一步的打算
+			PRINTFORML 如果堕落的话，不让她自己主动堕落的话，就没有意思了
+			PRINTFORMW 话虽如此，现在是否有些过于急躁了。「这一回」，似乎已经无法引出这之上的成果了
+			PRINTFORMW 如此判断的%ANAME(MASTER)%，将女孩推倒在了沙发上……
+		CASE 4
+			PRINTFORMW 「明白了……那么就拜托了」
+			PRINTFORMW 女孩的回答，像是早已预测到这边的话语一样迅速
+			PRINTFORML 少女站立起来，展露出自己的肌肤。在那里，已经没有了曾经显示过的踌躇
+			PRINTFORML  另一方面，不知是否还存留着些许害羞，脸颊上依旧微微泛着红潮
+			PRINTFORMW 为了最大限度地引出她的那份羞耻，用视线充分侵犯着站立着的少女的肉体
+			PRINTFORMW 「……哈啊……」
+			PRINTFORML 少女的呼吸带上了热度，眼瞳也蒙上了一层水汽。而秘唇更是早已染上了湿度
+			PRINTFORML 那具发育途中的肉体，如同真正的女人一般，似乎在期待中之隐隐作痛
+			PRINTFORML 忍受这种状态应该会很辛苦吧，但少女却并未主动要求那样的行为
+			PRINTFORML 不是为了快乐，而是为了得到支援———为了欺骗自己而找的借口，反而成为了束缚自己的枷锁
+			PRINTFORMW 真讽刺——%ANAME(MASTER)%在内心嘲笑着，但却并没有主动踏出那一步的打算
+			PRINTFORMW 如果堕落的话，不让她自己主动堕落的话，就没有意思了
+			PRINTFORMW 「唔唔……！」
+			PRINTFORML 她的身体，已经被%ANAME(MASTER)%完全驯服了
+			PRINTFORMW 仅仅是意识到被看着，就已经到完全可以发情的程度了
+			PRINTFORMW 之后如果让内心也堕落的话就结束了……而且，那个恐怕，就是这一回
+			PRINTFORML 怀着对收获的期待而激动的心情，为了不让少女察觉到这一点，%ANAME(MASTER)%承担着如此的任务
+			PRINTFORMW 不过，少女那边，似乎并没有能察觉到这一点的余地
+			PRINTFORMW 这样，再稍微压迫一点也没有关系。这么想着的%ANAME(MASTER)%，慢慢地站了起来
+			PRINTFORML 又要被推倒了——大概是因为这样的直觉，少女微微摆好架势。那双眼瞳已经一半染上了期待的染色，少女能感受的到吗？
+			PRINTFORML 但不管怎样，那个期待都要落空了。%ANAME(MASTER)%并没有把她推倒
+			PRINTFORMW 不仅如此，反而还背向她，摆出一副要离开房间的样子
+			PRINTFORMW 「那个……怎么了」
+			PRINTFORML 让我看到了好东西，支援金一会儿会交给部下
+			PRINTFORMW 用怀疑的声音，传来了回答
+			PRINTFORMW 「请，请稍等一下」
+			PRINTFORML 少女似乎惊呆了。这是理所当然的吧，毕竟这边的态度和一直以来的都是大相径庭
+			PRINTFORMW 这明显很可疑，正常人马上就会发觉的吧。但她却并没有注意到。被性兴奋侵蚀的少女，不可能拥有正常的判断力
+			PRINTFORMW 「怎么了吗、明明一直以来你都、和我、那个……明明已经这个样子了、为什么只有今天」
+			PRINTFORMW 那个「为什么」，并不是由于单纯的好奇心而发出的，这一点十分明显
+			PRINTFORMW 为什么偏偏，只有在被至今为止最强烈的性欲望袭击的现在这个时候，什么都不做就回去了呢？
+			PRINTFORMW 她想说的事情，就是这么回事
+			PRINTFORMW 简短地回答道今天没有那样的心情。打开门，正要出去的%ANAME(MASTER)%的后背，被少女抱住了
+			PRINTFORMW 「拜托了……今天、不要来抱我吗？」
+			PRINTFORMW 这么平淡吗。勉强忍耐涌出的笑容
+			PRINTFORMW 还没有，还没有到松气的时候。还剩下最后的一击
+			PRINTFORML 理解你自己现在在说什么吗，用生硬的语调反问道
+			PRINTFORMW 今天就算不那样做也会给你支援金。抛开金钱，即使那样也要求被抱的话，意义就变得不一样了
+			PRINTFORMW 「你可真是个、坏心眼的人呢……」
+			PRINTFORML 自己现在处于怎样的状态，明明知道却还在做，被如此委婉的责难着
+			PRINTFORMW 但是，用微笑招架了。想到现在是理性最后的抵抗的话，真是可爱啊
+			PRINTFORMW 「再一次地、拜托了。和金钱没有关系、请您、来抱我把」
+			PRINTFORML 赤裸裸地告白了。但是，是很清楚的语气
+			PRINTFORMW 与自己怀有的羞耻什么的，与那样的东西诀别了
+			PRINTFORMW %ANAME(MASTER)%理所当然地点了头，将因期待而身体发疼的女孩推倒在沙发上……
+			PRINTFORMW 也许是因为她彻底摆脱了自我吧，少女责弄地比起以往更加凌乱……
+			CALL COLOR_PRINTW("使少女沦陷了", カラー_注意)
+	ENDSELECT
+	PRINTFORM 募得了
+	CALL COLOR_PRINT(@"{募金額}", カラー_注意)
+	PRINTFORMW 金
+	MONEY -= 募金額
+	DVAR:募金_抱いた回数 ++
+	DVAR:募金_発生フラグ = 1
+ENDIF
+RETURN 1

@@ -1,0 +1,497 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_RECEPTION_RATE()
+RETURN 20
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_RECEPTION_DECISION()
+;主人公が君主ではない場合
+SIF GET_COUNTRY_BOSS(CFLAG:MASTER:所属) == MASTER
+	RETURN 0
+
+SIF DVAR:接待_発生フラグ == 3
+	RETURN 0
+
+RETURN DAY >= 5
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_RECEPTION_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+
+@EVENT_DAILY_RECEPTION()
+#DIM 対象
+#DIM 兵数
+
+IF DVAR:接待_発生フラグ == 0
+	PRINTFORMW 突然被%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%叫住，说是有事情要谈
+	PRINTFORMW %ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%一副愁眉苦脸的样子，踌躇了半天才张口
+	PRINTFORMW 似乎是附近有个特别喜欢漂亮女孩的贵族要来，点着名字要我们派人去接待他
+	PRINTFORMW 而且他还有着相当大的能量，拒绝了怕是落不到好果子吃
+	PRINTFORMW 所以想拜托%ANAME(MASTER)%来帮忙选个人
+	PRINTFORMW 不得不选一个人去见他这件事实在是让%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%头疼了好久
+	PRINTFORMW 毕竟选了谁都不太合适
+	PRINTFORMW %ANAME(MASTER)%托着腮叹了口气，开始阅读名单......
+ELSEIF GETBIT(TALENT:MASTER:日常系, 素質_デイリー_貴族の愛人)
+	PRINTFORMW 那位尊贵的大人又将莅临至此
+	PRINTFORMW 为了让他能享受到最优的待遇，一定要做好迎接的准备
+	PRINTFORMW %ANAME(MASTER)%思索着谁是最适合接待的人......
+ELSEIF DVAR:接待_発生フラグ == 1
+	PRINTFORMW 那个贵族又要来了
+	PRINTFORMW 使者说上次的接待者就很不错，所以他的主人很期待这次访问
+	PRINTFORMW 被要求选择接待对象，说实话根本不想让他再来了，但是既然来了还是要派人去迎接
+	PRINTFORMW 让谁去呢......
+ELSEIF DVAR:接待_発生フラグ == 2
+	PRINTFORMW 那个变态贵族又要来了
+	PRINTFORMW 使者带着轻蔑的表情，说他的主人对上次的接待很不满意
+	PRINTFORMW 其实根本就不想让他来，%ANAME(MASTER)%面不改色的腹诽着
+	PRINTFORMW 但是还是要选一个人去接待......
+ENDIF
+CALL SINGLE_DRAWLINE
+CALL SELECT_CHARA_LIST_ONLY_LOGIC_SEX("RECEPTION", "NONE")
+
+対象 = RESULT
+
+IF  対象 == -1
+	IF GETBIT(TALENT:MASTER:日常系, 素質_デイリー_貴族の愛人)
+		PRINTFORMW 大家都在忙碌，再不能腾出手来接待这位大人了
+		PRINTFORMW %ANAME(MASTER)%祈祷着一般的接待规格不会使那位大人不快
+	ELSE
+		PRINTFORMW 把人才用在招待上可太浪费了
+		PRINTFORMW %ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%决定还是以招待普通客人的规格来接待那位贵族
+	ENDIF
+	PRINTFORML 
+	PRINTFORMW 果然还是让他不满了
+	PRINTFORM 大街小巷里开始流传起了一些不知所谓的流言
+	CALL COLOR_PRINT(@"%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%的风评下降了", カラー_注意)
+	PRINTFORMW
+	FOR LOCAL, 1, MAX_COUNTRY
+		SIF IS_COUNTRY(LOCAL)
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -(50 + ((DVAR:接待_連続で断った回数) * 25)), 50 + ((DVAR:接待_連続で断った回数) * 25))
+	NEXT
+	;評判を下げる処理
+	DVAR:接待_発生フラグ = 2
+	DVAR:接待_連続で断った回数 += 1
+	RETURN 1
+ELSEIF 対象 == MASTER
+	IF GETBIT(TALENT:対象:日常系, 素質_デイリー_貴族の愛人)
+		PRINTFORMW 那位大人必然要由%ANAME(対象)%亲自接待啊
+		PRINTFORMW 仅仅只是想到他，身上就变得热了起来
+	ELSEIF GETBIT(TALENT:MASTER:日常系, 素質_デイリー_貴族の虜)
+		PRINTFORMW 没办法，这种事情只能由%ANAME(対象)%来做了
+		PRINTFORMW %ANAME(対象)%揉了揉开始变暖的小腹，努力不去在意
+	ELSEIF GETBIT(TALENT:MASTER:淫乱系, 素質_淫乱_精液便女)　|| GETBIT(TALENT:MASTER:淫乱系, 素質_淫乱_淫乱)
+		PRINTFORMW 这种事情当然要亲自体验
+		PRINTFORMW %ANAME(対象)%努力抑制着嘴角的笑容
+	ELSE
+		PRINTFORMW 这种事情不适合让别人来做
+		PRINTFORMW %ANAME(対象)%决意要亲自去接待那位贵族
+	ENDIF
+ELSE
+	PRINTFORMW %ANAME(対象)%大概是最适合去接待来客的了吧
+	PRINTFORMW %ANAME(MASTER)%把接待贵族这件事交给了%ANAME(対象)%来办
+	IF GETBIT(TALENT:対象:日常系, 素質_デイリー_貴族の愛人)
+		PRINTFORMW %ANAME(対象)%立刻就答应了下来，说马上就去准备
+	ELSEIF GETBIT(TALENT:対象:日常系, 素質_デイリー_貴族の虜)
+		PRINTFORMW %ANAME(対象)%的双颊泛起红霞，一副无可奈何的表情答应了下来
+	ELSEIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_精液便女)　|| GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫乱)
+		PRINTFORMW %ANAME(対象)%点了点头，说这件事确实非她不可
+	ELSE
+		PRINTFORMW %ANAME(対象)%露出了一副厌烦的表情，好说歹说终于劝她答应了下来
+	ENDIF
+ENDIF
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+PRINTFORMW 数日之后，那个贵族来了
+IF GETBIT(TALENT:MASTER:日常系, 素質_デイリー_貴族の愛人)
+	PRINTFORML %ANAME(MASTER)%如热恋中一样的抱了上去
+	PRINTFORML “你终于来了，你想要的人我已经准备好了”
+	PRINTFORMW 放任臀上那只手肆无忌惮的侵犯，%ANAME(MASTER)%领着贵族向登记处走去
+ELSEIF GETBIT(TALENT:MASTER:日常系, 素質_デイリー_貴族の虜)
+	PRINTFORML 看着个贵族的样子，%ANAME(MASTER)%发现自己已经没有了厌恶的感觉
+	PRINTFORMW %ANAME(MASTER)%按耐着兴奋的感觉，着领着那位贵族走向接待出
+ELSEIF DVAR:接待_発生フラグ == 0
+	PRINTFORML 入目的是一个用富态形容都太过单薄，肥胖到油都擦不干净的那种男人
+	PRINTFORMW 感觉到有视线在窥视 虽然笑容看起来很和善，但是细细的眼睛里似乎藏着什么恶心的东西
+ELSE
+	PRINTFORML 这男的真是看几次恶心几次
+	PRINTFORMW 但是再怎么说也算工作的一环，%ANAME(MASTER)%把他领到了接待出
+ENDIF
+IF GETBIT(TALENT:対象:日常系, 素質_デイリー_貴族の愛人)
+	PRINTFORML 
+	PRINTFORML 「你的身体今天又会给我怎样的快乐呢......」
+	PRINTFORML 还未走上多久，%ANAME(対象)%已经被手指挑逗的欲火焚身
+	PRINTFORMW 两人深深的吻着，走进了提前准备好的房子
+ELSEIF GETBIT(TALENT:対象:日常系, 素質_デイリー_貴族の虜)
+	PRINTFORML 
+	PRINTFORML 刺在背后的视线如同有实质的黏液，%ANAME(対象)%的双手微微有些发抖
+	PRINTFORML 但是%ANAME(対象)%的表情不仅是厌恶，更多更像是期待一样
+	PRINTFORMW 忍耐着在身上乱摸的咸猪手，%ANAME(対象)%把他领去了提前准备好的房子
+ELSEIF 対象 == MASTER
+	PRINTFORML 
+	PRINTFORML “今天由我来招待您，如有冒犯请多担待”
+	PRINTFORML 贵族看着%ANAME(対象)%鞠躬行礼的样子，笑的跟头猪一样
+	PRINTFORMW 他搭着%ANAME(対象)%的肩，一边走向预备好的房子，一边用眼睛舔遍了%ANAME(対象)%的全身
+ELSE
+	PRINTFORML 
+	PRINTFORML 将%ANAME(対象)%介绍给他的时候，那个男人兴奋的直哼哼
+	PRINTFORML 简直就像是觉得%ANAME(MASTER)%的介绍很麻烦一样
+	PRINTFORMW 会面刚结束，他就揽着%ANAME(対象)%的腰走向提前准备的房子去了
+ENDIF
+PRINTFORML
+PRINTFORMW
+SELECTCASE RAND:43
+CASE 0
+	PRINTFORMW %ANAME(対象)%的阴道几乎要被那巨大的肉棒撕裂了
+	PRINTFORMW 压倒性的存在感和炽热猛烈的教育着%ANAME(対象)%的子宫
+	PRINTFORMW %ANAME(対象)%随着男人的动作扭动着自己的腰，穴肉变成了他的形状
+	PRINTFORMW 随着那异于常人的浓精灌入子宫，%ANAME(対象)%不由自主的尖叫着
+CASE 1
+	PRINTFORMW %ANAME(対象)%刚一踏进屋子就被那满身肥肉的贵族压倒在地
+	PRINTFORMW 一双肥手粗暴的撕碎了衣服，喷着粘稠气息的嘴在%ANAME(対象)%的脸上到处舔着
+	IF GETBIT(TALENT:対象:日常系, 素質_デイリー_貴族の虜)
+		PRINTFORMW 就在%ANAME(対象)%开始索吻时，他掏出了胯下的肉棒就顶了进去
+	ELSE
+		PRINTFORMW 他按住%ANAME(対象)%想要推搡的手，掏出肉棒就往蜜穴里顶了进去
+	ENDIF
+	PRINTFORMW 被有三个自己那么重的人压在身下抽插，%ANAME(対象)%除了呻吟以外什么都做不到了
+CASE 2
+	PRINTFORMW 贵族骑在%ANAME(対象)%的腰上抽动着，喘的和猪一样
+	PRINTFORMW 但是每次势大力沉的冲刺都会在%ANAME(対象)%的肚子上顶起一处鼓起
+	PRINTFORMW 每一次冲击都更加的猛烈，而且每一次冲击都会让%ANAME(対象)%的喘息停滞一下
+	PRINTFORMW 子种的洪流涌入的时候，%ANAME(対象)%绷直了全身喊了起来
+CASE 3
+	PRINTFORMW 粘膜和体液摩擦的声音响彻了整个房间
+	PRINTFORMW %ANAME(対象)%跪在盘腿坐着的贵族身上，与他交换着唾液
+	IF GETBIT(TALENT:対象:日常系, 素質_デイリー_貴族の虜)
+		PRINTFORMW 两根舌头相互缠绕着，那甜蜜的感觉甚至让%ANAME(対象)%忘记扭腰
+	ELSE
+		PRINTFORMW 按在头上的手堵死了所有躲避的方法，已经被插入的下半身更是已经沦陷
+	ENDIF
+	PRINTFORMW %ANAME(対象)%在被两面同时的进攻投降前，贵族都耐心的挑逗着，等待%ANAME(対象)%自己扭起腰的那一刻
+CASE 4
+	PRINTFORMW 已经被蹂躏过一次的%ANAME(対象)%躺在床上大口喘息着
+	PRINTFORMW 两腿之间沾满了两人的爱液，溢出来的种子们还在慢慢滴落
+	PRINTFORMW 看着回来的贵族胯下的那根巨棒，%ANAME(対象)%哀求着再一小会的休息
+	PRINTFORMW 而贵族满意的笑着，又抱起了%ANAME(対象)%的双腿，屋中又响起了悲鸣声
+CASE 5
+	PRINTFORMW %ANAME(対象)%被贵族掐着下巴灌酒灌到昏迷
+	PRINTFORMW 他把%ANAME(対象)%抱到床上，把%ANAME(対象)%被汗水浸透的睡衣脱了下来
+	PRINTFORMW 迷离的%ANAME(対象)%在他精巧的舌技和指技下不知道高潮了多少次
+	PRINTFORMW 享受过了女孩子的的汗水和娇喘，那么接下来就到了该享受体内媚肉的时候了
+CASE 6
+	PRINTFORMW %ANAME(対象)%被强迫着穿上了女仆装
+	PRINTFORMW 然后骑上了贵族挺立朝天的肉棒
+	PRINTFORMW 一遍扭动着自己的要，还要抓起裙子把交合的部分展示给他看
+	IF GETBIT(TALENT:対象:日常系, 素質_デイリー_貴族の虜)
+		PRINTFORMW 穿着正符合自己身份的衣服来服侍主人的感觉让%ANAME(対象)%变得更加的敏感
+	ELSE
+		PRINTFORMW 恍惚中%ANAME(対象)%差点以为自己真的是在侍奉自己的主人
+	ENDIF
+CASE 7
+	PRINTFORMW %ANAME(対象)%被贵族领进了他的浴室
+	PRINTFORMW 两个人共用一个浴缸的结果，就是%ANAME(対象)%的敏感部位被摸了个遍
+	PRINTFORMW 一开始还在尝试抵抗的%ANAME(対象)%逐渐沦落在那个男人精妙的技巧之下
+	PRINTFORMW 享受着逐渐变得甘美的娇喘声，贵族把%ANAME(対象)%揽入怀中开始了下一阶段的攻势
+CASE 8
+	PRINTFORMW %ANAME(対象)%跪伏在床上，像飞机杯一样被抓着腰抽插着
+	PRINTFORMW 麻痹身心的电流蔓延遍了全身，仅仅只是用手肘支撑着都用尽了全力
+	IF GETBIT(TALENT:対象:日常系, 素質_デイリー_貴族の虜)
+		PRINTFORMW 每当贵族拍着%ANAME(対象)%的屁股要听狗叫时，%ANAME(対象)%都喘息着从喉咙里发出狗叫声
+	ELSE
+		PRINTFORMW %ANAME(対象)%忍耐不住被臀肉被拍打的痛楚，顺从着贵族的意愿开始努力发出汪汪的叫声
+	ENDIF
+	PRINTFORMW 无法维持思考能力的%ANAME(対象)%体内被注入白浊时，像是真的成为了宠物一般“汪呜”的叫了出来
+CASE 9
+	PRINTFORMW %ANAME(対象)%和贵族深拥着在被窝里翻滚
+	PRINTFORMW %ANAME(対象)%の頭を撫でたり胸を揉んだりしている 他扭动着腰突刺的时候，还用嘴吮着怀中%ANAME(対象)%的胸
+	PRINTFORMW 这温柔又连绵不绝的刺激让%ANAME(対象)%无法忍耐，不自觉的扭动起自己的腰
+	PRINTFORMW 贵族享受着怀中%ANAME(対象)%的媚态，逐渐加快了腰的动作
+CASE 10
+	PRINTFORMW %ANAME(対象)%被锁住了脖子侵犯
+	PRINTFORMW 虽然拼命的想把贵族的手臂掰开，但是连呼吸都困难的%ANAME(対象)%对抗不了那粗壮的胳膊
+	PRINTFORMW 即将窒息的%ANAME(対象)%连腔肉都在痉挛着，却又更让贵族兴奋了起来
+	PRINTFORMW 更加雄壮的肉棒的动作更加剧烈，而%ANAME(対象)%在肉棒和窒息的刺激下绝顶了无数次
+CASE 11
+	PRINTFORMW 贵族熟练的亲吻着%ANAME(対象)%，同时又用手刺激了%ANAME(対象)%每一处敏感点
+	PRINTFORMW 原本扭动着身体躲避着的%ANAME(対象)%在这样的骚扰下兴奋了起来
+	PRINTFORMW 被他的小兄弟顶着耻唇时，贵族威胁着%ANAME(対象)%说出想要被插入的话
+	PRINTFORMW 忍耐不下去的%ANAME(対象)%终于答应时，他像是早准备好一样把%ANAME(対象)%按倒在地，一边喊着可爱一边插了进来
+CASE 12
+	PRINTFORMW %ANAME(対象)%的小穴和后庭都淌着溢出来的精液
+	PRINTFORMW 本能让%ANAME(対象)%努力恢复着呼吸，又让身体用抽搐表现着疲劳
+	PRINTFORMW 贵族拦腰抱起失去了意识的%ANAME(対象)%，轻吻着%ANAME(対象)%的身体带入了浴室
+	PRINTFORMW 不大一会，浴室中的水声中又混入了%ANAME(対象)%的娇呼声
+CASE 13
+	PRINTFORMW 全裸的%ANAME(対象)%被同样脱光了的贵族摸遍了全身
+	PRINTFORMW 房中的熏香大概是加了料，%ANAME(対象)%每次被触碰到敏感带时都感觉比平时更敏感
+	PRINTFORMW 贵族的手指和舌头仿佛有灵一般，逐渐剥下了%ANAME(対象)%所有的心理准备
+	PRINTFORMW %ANAME(対象)%被刺激到双腿无力之后，贵族也猛喘着气压了上来
+CASE 14
+	PRINTFORMW %ANAME(対象)%的脖子上戴着项圈，像母狗一样跪着被侵犯
+	PRINTFORMW 已经感知不到除了穴中肉棒的%ANAME(対象)%双手拼命的扯着床单
+	PRINTFORMW 突然贵族把链子扯了起来，突如其来的窒息感让%ANAME(対象)%激烈的高潮了
+	PRINTFORMW 这一下激烈的反映让贵族喜欢上了这种玩法，把%ANAME(対象)%当作玩具一样玩命折腾
+CASE 15
+	PRINTFORMW 贵族在%ANAME(対象)%的身上涂满了一种奇怪的黏液
+	IF GETBIT(TALENT:対象:日常系, 素質_デイリー_貴族の虜)
+		PRINTFORMW %ANAME(対象)%期待着液体的效果，配合着贵族在身上游走的手
+	ELSE
+		PRINTFORMW %ANAME(対象)%无力的抵抗着他在身上涂抹的动作，心中还在思索着黏液的效用
+	ENDIF
+	PRINTFORMW 而黏液很快就生效了，抚上腰肢的手的触感变得异常强烈
+	PRINTFORMW 仅仅被触摸就如同被电击般，%ANAME(対象)%在这样的敏感度下被男人欺负到昏迷
+CASE 16
+	PRINTFORMW %ANAME(対象)%被迫换上了裸体围裙
+	PRINTFORMW %ANAME(対象)%被亲昵的喊着，甚至觉得他真的把自己当做了妻子
+	PRINTFORMW 贵族从身后压倒了%ANAME(対象)%，呢喃着说「今晚可别想睡哦」
+	PRINTFORMW %ANAME(対象)%沉迷在了这种夫妇play中，由着他的爱抚发出了娇喘声
+CASE 17
+	PRINTFORMW %ANAME(対象)%被贵族按在床上，用手指和舌头挑逗了好半天
+	PRINTFORMW 在数个小时的前戏中%ANAME(対象)%还被轻声示爱了无数次，即便不情愿也开始性奋了起来
+	PRINTFORMW 贵族掏出硬如磐石的肉棒插入%ANAME(対象)%爱液横流的小穴，让%ANAME(対象)%发出了娇喘声
+	PRINTFORMW 在这无尽的快感和情话中，%ANAME(対象)%扭动着身体把一切都抛之脑后了
+CASE 18
+	PRINTFORMW %ANAME(対象)%努力吞吐着贵族那巨大的肉棒，但是无论怎样都只能吞下一半
+	PRINTFORMW 被%ANAME(対象)%那拼命的样子激起了嗜虐心的贵族按住了%ANAME(対象)%的头，强行把肉棒顶入了喉咙深处
+	PRINTFORMW 无法呼吸的%ANAME(対象)%的喉咙激烈的收缩着，一下子就把精液榨了出来
+	PRINTFORMW %ANAME(対象)%翻着白眼吞下精液的样子让贵族更加的兴奋，把%ANAME(対象)%推倒在地准备享用下边的那张嘴
+CASE 19
+	PRINTFORMW %ANAME(対象)%的菊花里被塞进了巨大的自慰棒
+	PRINTFORMW 听着贵族讲模型和他的肉棒一模一样，%ANAME(対象)%咬紧牙关忍耐着后庭的疼痛感和焦热感
+	PRINTFORMW 贵族把身体还在颤抖的%ANAME(対象)%翻了过来，一边舔舐着溢出爱液的阴唇，一边开始扭动自慰棒
+	PRINTFORMW 两穴同时被欺凌的感觉让%ANAME(対象)%哭喊了起来
+CASE 20
+	PRINTFORMW %ANAME(対象)%被贵族要求穿上了站街女一样的装束
+	PRINTFORMW 红着脸试图遮挡自己暴露的身体的%ANAME(対象)%被他视奸一样看遍了全身
+	PRINTFORMW 贵族把%ANAME(対象)%逼到墙边，紧贴着身体吻了上去，同时掏出了肉棒
+	PRINTFORMW 被贵族和墙壁夹在中间的%ANAME(対象)%连闪躲的空间都没有，任由他的肉棒和咸猪手侵犯着自己
+CASE 21
+	PRINTFORMW 贵族抱着%ANAME(対象)%的腰部，从背后侵犯着%ANAME(対象)%
+	PRINTFORMW 没有支点的双手双脚拼命的架在贵族的身体上，每次被突入几乎要失去支撑的力量
+	PRINTFORMW 咬紧牙齿的%ANAME(対象)%努力憋着自己的娇喘声，然而房间中还有更为淫猥的肉体碰撞声
+	PRINTFORMW 最后，高潮了好几次的%ANAME(対象)%失去了全部的力气，耷拉着的双手双脚随着贵族的冲刺晃动着
+CASE 22
+	PRINTFORMW 贵族给%ANAME(対象)%送了一杯药水，劝说着让%ANAME(対象)%喝下去
+	IF GETBIT(TALENT:対象:日常系, 素質_デイリー_貴族の虜)
+		PRINTFORMW %ANAME(対象)%毫不犹豫的喝了下去，很快就失去了意识，变成了呆呆的表情
+	ELSE
+		PRINTFORMW 因礼节而无法推脱的%ANAME(対象)%才喝下药水没过多久，双眼就失去了焦点
+	ENDIF
+	PRINTFORMW 入梦的%ANAME(対象)%如同布偶一般任由摆布，但是肉体却擅自沉溺于快感之中，用力绞上了着体内的肉棒
+	PRINTFORMW 贵族终于享受够了怀里的温软入睡的时候，阴唇还在一张一合的一边吐着泡泡，一边吮着还未拔出的肉棒
+CASE 23
+	PRINTFORMW 贵族躺在床上，淫笑着让%ANAME(対象)%骑上他跨间挺立的那东西
+	IF GETBIT(TALENT:対象:日常系, 素質_デイリー_貴族の虜)
+		PRINTFORMW %ANAME(対象)%露出了像是外边的酒店小姐一样的笑容，张开双腿骑了上去
+	ELSE
+		PRINTFORMW %ANAME(対象)%忍耐着想要逃跑的冲动，觉得自己骑上去的这个动作简直就像是出来卖的一样
+	ENDIF
+	PRINTFORMW %ANAME(対象)%容纳肉棒的阴道不自觉的开始抽动了起来，腰的动作也逐渐加大了
+	PRINTFORMW 逐渐沉迷于性爱的%ANAME(対象)%被身下的男人万般辱骂，却还在乞求着内射
+CASE 24
+	PRINTFORMW %ANAME(対象)%被在被骚扰的时候套上了眼罩
+	PRINTFORMW 失去了视觉之后身上的咸猪手就变成了%ANAME(対象)%唯一能感觉到的东西，
+	PRINTFORMW 被迫集中感受着骚扰的%ANAME(対象)%微微的磨蹭起了大腿，就在这时%ANAME(対象)%被拍倒在地
+	PRINTFORMW 毫不留情插入大腿之间的肉棒代替了咸猪手，简直就如同全世界只有这根肉棒一样的夺走了%ANAME(対象)%所有的意识
+CASE 25
+	PRINTFORMW 鸡巴每插入一次，%ANAME(対象)%的小穴都会响起一次粘稠的水声
+	PRINTFORMW 就在%ANAME(対象)%第三次高潮的时候，贵族终于也停下了那绵延不断的攻势缴了枪
+	PRINTFORMW 龟头紧紧顶在子宫口把精液一滴不剩的吐了进去，而媚肉也随着一波又一波的射精而一下又一下的绞紧
+	PRINTFORMW 那个男人把肉棒抽出来，看着滴落着白浊液体的蜜贝抽动的样子，低声骂了一句又插了进来
+CASE 26
+	PRINTFORMW %ANAME(対象)%躺在男人的胸上，而床单已经被两人的爱液和汗液浸透了
+	PRINTFORMW 男人一手揽着%ANAME(対象)%的胸口不让她翻下去，一手去摩挲着%ANAME(対象)%的小腹，嘀咕着怀孕的事情
+	PRINTFORMW 没过一会，贵族又把%ANAME(対象)%翻到了自己身下，提着%ANAME(対象)%的屁股开始抽插
+	PRINTFORMW %ANAME(対象)%的喘息早已经杂乱不堪，只能无意识的随着贵族的动作扭动着屁股
+CASE 27
+	PRINTFORMW 贵族从身后抱住了%ANAME(対象)%的两只大腿，把腰往前拱的姿势势大力沉
+	PRINTFORMW 就连绷紧身体射入子种的势头，也沉重的无与伦比
+	PRINTFORMW 被贵族吸吮着舌头的时候还被注入精液，这样的快感简直要把脑浆都融掉
+	PRINTFORMW %ANAME(対象)%再也控制不住自己的身体，贪图起被强迫入孕的快乐
+CASE 28
+	PRINTFORMW 和贵族交谈了一小会的%ANAME(対象)%不知何时已经被他抱在了怀里
+	IF GETBIT(TALENT:対象:日常系, 素質_デイリー_貴族の虜)
+		PRINTFORMW 但是刚进入屋子的时候，%ANAME(対象)%就已经是红着脸沉重的喘息着了
+	ELSE
+		PRINTFORMW 不知不觉的，%ANAME(対象)%从刚进屋时的戒备，已经变成了只能红着脸颊喘息的样子了
+	ENDIF
+	PRINTFORMW 他那健壮的肉棒有着超乎常人的精力，只要是一个女性就不可能不屈服于他
+	PRINTFORMW 而在贵族大人满足了之后，%ANAME(対象)%还在拨开自己的臀肉，请求着接下来的蹂躏
+CASE 29
+	PRINTFORMW 贵族的的肉棒每一次挺进，%ANAME(対象)%的臀肉都会在他的肚子上拍响一下
+	PRINTFORMW 在这激烈的攻势之下，%ANAME(対象)%除了随着他的动作扭动身体以外什么都做不到
+	PRINTFORMW 吐着舌头喘息着的%ANAME(対象)%断断续续的拼出了一句求饶的话，但是却淹没在了男人更加猖狂的笑声之中
+	PRINTFORMW 在这简直是要把%ANAME(対象)%玩坏一般的游戏中，%ANAME(対象)%被注入了无数次的精液
+CASE 30
+	PRINTFORMW %ANAME(対象)%被要求穿上他带来的风情舞装，来为他跳上一支舞
+	IF GETBIT(TALENT:対象:日常系, 素質_デイリー_貴族の虜)
+		PRINTFORMW %ANAME(対象)%毫不犹豫的穿上了这宛如妓女服一般的衣服，像是诱惑他一般扭动起了腰肢
+	ELSE
+		PRINTFORMW %ANAME(対象)%花了好半天才抛弃掉廉耻心穿上了这套像是妓女才穿的衣服，红着脸跳起了舞
+	ENDIF
+	PRINTFORMW 他满足的看着跳舞跳到腿软的%ANAME(対象)%，闻着%ANAME(対象)%的汗香扑了上去
+	PRINTFORMW 手脚都已经没有力气了的%ANAME(対象)%根本无力反抗，衣服都没被撕光就被侵犯了
+CASE 31
+	PRINTFORMW 贵族要%ANAME(対象)%当着他的面自慰
+	PRINTFORMW %ANAME(対象)%红着脸，把食指伸入了自己的蜜部，每当想合上腿的时候都会被他按住膝盖
+	PRINTFORMW 当%ANAME(対象)%仰着头感受高潮的时候，蜜裂处也激烈的喷出了爱液
+	PRINTFORMW 瘫软的%ANAME(対象)%双腿之间还在滴着爱液，这香艳的场景让贵族再也无法忍耐的扑了上来
+CASE 32
+	PRINTFORMW 贵族压着%ANAME(対象)%的肩膀，把肉棒深深的插了进去
+	PRINTFORMW 带着那肥猪体重的撞击强烈的激起了%ANAME(対象)%的雌性本能
+	IF GETBIT(TALENT:対象:日常系, 素質_デイリー_貴族の虜)
+		PRINTFORMW %ANAME(対象)%的瞳孔都变成了心形，娇喘着感受体内被横冲直撞的快感
+	ELSE
+		PRINTFORMW %ANAME(対象)%把红着的脸埋进了枕头来堵住自己的娇喘，但是眼睛里逐渐浮起了粉红心心
+	ENDIF
+	PRINTFORMW 而被内射时的巨大快感让%ANAME(対象)%向后仰着头，从喉咙里发出了喜悦的呼喊声
+CASE 33
+	PRINTFORMW %ANAME(対象)%双目无光的被男人抱在怀里
+	PRINTFORMW 被灌下了迷魂药的%ANAME(対象)%在他的控制下接受了快乐的侵蚀
+	PRINTFORMW %ANAME(対象)%的大脑只能感受着来自身下的快感，无表情的脸上浮着诱惑的红潮
+	PRINTFORMW 然后贵族猛的收紧了手臂，让抽动的肉棒把白浊的液体全部吐入了%ANAME(対象)%的小腹之下
+CASE 34
+	PRINTFORMW 贵族像是猪一样喊着猛烈一顶，在%ANAME(対象)%的小穴中喷吐着他的子孙们
+	PRINTFORMW %ANAME(対象)%咬紧牙关忍耐着射精带来的爆炸般的快感
+	PRINTFORMW 但是还未等%ANAME(対象)%回过神来，贵族的腰又开始大开大合的顶了起来
+	PRINTFORMW 超出预想的精力让%ANAME(対象)%惊讶得瞪大了眼睛狂乱的求着饶，但是当贵族终于停下时，%ANAME(対象)%已经被干到失去了意识
+CASE 35
+	PRINTFORMW %ANAME(対象)%被贵族正面抱了起来侵犯着
+	PRINTFORMW 借助重力的突刺甚至在小腹上都顶起了一个小鼓包，强烈的让%ANAME(対象)%不停的痉挛着
+	PRINTFORMW %ANAME(対象)%所做的唯一的抵抗就是喘息着尽力抱紧贵族的脖子，让自己掉落得稍微慢上一点
+	PRINTFORMW 当贵族扯开抱着脖子的手，拉着%ANAME(対象)%的腰猛力向下一按时，%ANAME(対象)%高声哭喊着，一边高潮一边大声的求饶
+CASE 36
+	PRINTFORMW %ANAME(対象)%被贵族按在身下猛烈的侵犯着
+	PRINTFORMW 每一记都顶在子宫口的侵犯让%ANAME(対象)%不得不每被插入一下就绷紧一次脊柱
+	PRINTFORMW 被射入的男精量甚至多到穿过了输卵管，侵犯起了卵巢的程度
+	PRINTFORMW 被强迫接受的炽热洪流让%ANAME(対象)%除了喊着一堆无意义的字以外什么都做不了
+CASE 37
+	PRINTFORMW %ANAME(対象)%骑在贵族的身上扭动着自己的腰肢
+	IF GETBIT(TALENT:対象:日常系, 素質_デイリー_貴族の虜)
+		PRINTFORMW 身下男人用情话催促着的时候，%ANAME(対象)%红着脸回应着他的淫语
+	ELSE
+		PRINTFORMW %ANAME(対象)%身下的男人捉着她的腰说着各种下流的话，但是%ANAME(対象)%支支吾吾了半天也什么也没说出来
+	ENDIF
+	PRINTFORMW 就在习惯了他的言语挑逗时，身下猛地一沉，同时挑逗变成了强烈的求爱和辱骂
+	PRINTFORMW 短暂的恍惚中，%ANAME(対象)%就如堕落了一般乞求起了他的播种
+CASE 38
+	PRINTFORMW 贵族在享受%ANAME(対象)%的下半身时，也没有忘记去调戏%ANAME(対象)%的上半身
+	PRINTFORMW 下半身的快感混着他的手指在%ANAME(対象)%的胸脯上四处的挑逗，很快就让乳头立了起来
+	PRINTFORMW 贵族把%ANAME(対象)%的身体推到几乎对折的程度，压上来一口咬上了立起的乳头
+	PRINTFORMW 快感的电流瞬间游遍了全身，%ANAME(対象)%收紧了手臂发出了甘美的喊声
+CASE 39
+	PRINTFORMW 贵族把%ANAME(対象)%压在床上，在%ANAME(対象)%的小穴里横冲直撞
+	PRINTFORMW 压在后背上胡乱扭动这的重压和小穴里粗暴抽动的肉棒让%ANAME(対象)%发出了娇媚的求饶声
+	PRINTFORMW 但是那柔弱的声线反而让贵族的性趣更加高涨，被欺辱至此的子宫也本能的开始吸吮着不停顶上来的龟头
+	IF GETBIT(TALENT:対象:日常系, 素質_デイリー_貴族の虜)
+		PRINTFORMW %ANAME(対象)%没有再抵抗自己的本能，主动挺着屁股不让精液流出去
+	ELSE
+		PRINTFORMW 贵族压住%ANAME(対象)%四处乱抓的双手，把腰紧紧贴在%ANAME(対象)%的臀肉上，一滴精液也不让流出来
+	ENDIF
+CASE 40
+	PRINTFORMW %ANAME(対象)%跪在贵族的两腿之间，双手捧着他的子孙袋吮吸着
+	IF GETBIT(TALENT:対象:日常系, 素質_デイリー_貴族の虜)
+		PRINTFORMW 他说要射了的时候，%ANAME(対象)%一口把肉棒含到根部努力，把每一滴精液都吸到了嘴里
+	ELSE
+		PRINTFORMW 贵族突然按住%ANAME(対象)%的头，把精液全都射在了嘴里，拔出来的时候%ANAME(対象)%一边哭一边咳嗽着把精液喷了出来
+	ENDIF
+	PRINTFORMW 贵族捏着%ANAME(対象)%的下巴把手指伸进去搅了搅，拉出来了一团黏糊糊的唾液和精液的混合物
+	PRINTFORMW 贵族看着跨间红着脸喘息的%ANAME(対象)%，说「这就是我们之间的红线哦」
+CASE 41
+	PRINTFORMW 精力磅礴的贵族把%ANAME(対象)%干到自己都数不清高潮了多少次
+	PRINTFORMW 于是要求%ANAME(対象)%在高潮之前一定要先经过自己允许
+	PRINTFORMW 如果贵族不允许的话，%ANAME(対象)%就一定要忍住快感不能高潮
+	PRINTFORMW と謝罪した 如果没能憋住高潮的话，%ANAME(対象)%就必须要一边请求原谅一边被打屁股
+CASE 42
+	PRINTFORMW 在与贵族紧密相连之处，子种已经溢满了孕育生命的房间
+	PRINTFORMW 两具身躯分开之后，%ANAME(対象)%被贵族按着脑袋清扫着他的肉棒
+	PRINTFORMW 然而只是舔舐了几下，贵族又拉起了%ANAME(対象)%的腰，准备再战一回
+	IF GETBIT(TALENT:対象:日常系, 素質_デイリー_貴族の虜)
+		PRINTFORMW %ANAME(対象)%像是受够了一样的嘀咕了两句，却又把自己的阴部顶上了那根火热
+	ELSE
+		PRINTFORMW %ANAME(対象)%把脸埋到床里祈祷早点结束这场噩梦，但是腰却不受控制一样迎合着贵族的突入
+	ENDIF
+ENDSELECT
+
+;貴族的俘虜、入れ墨を入れられた後に1/3で貴族的愛人にされる
+IF (GETBIT(TALENT:対象:日常系, 素質_デイリー_貴族の虜) && RAND:3 < 1)
+	PRINTFORML 
+	PRINTFORMW %ANAME(対象)%沉迷在贵族的温柔乡之中了
+	PRINTFORMW 本来是那么讨厌的，现在却觉得被贵族抱在怀中是那么的美妙
+	PRINTFORMW 疲累到睡着前，他在%ANAME(対象)%的耳边问了要不要成为他的情妇
+	PRINTFORMW 意识朦胧间，%ANAME(対象)%说了一个好字，然后就睡在了贵族的怀里
+	PRINTFORM
+	CALL COLOR_PRINT(@"%ANAME(対象)%变成了情人", カラー_注意)
+	;TranslatedMark @"%ANAME(対象)%は愛人に成り下がりました", カラー_注意
+	PRINTFORMW
+	SETBIT TALENT:対象:日常系, 素質_デイリー_貴族の愛人
+	CALL LOSE_RELATION_TALENT(対象)
+	CFLAG:対象:好感度 = LIMIT(CFLAG:対象:好感度, -1000, 0)
+	CFLAG:対象:依存度 = LIMIT(CFLAG:対象:依存度, -1000, 0)
+	CFLAG:対象:従属度 = LIMIT(CFLAG:対象:従属度, -1000, 0)
+	CFLAG:対象:支配度 = LIMIT(CFLAG:対象:支配度, -1000, 0)
+ENDIF
+
+IF !RAND:5
+	CALL SET_TATTOO_RANDOM(対象, STR_FOR_TATTOO(-1), 0)
+	IF RESULT != -1
+		PRINTFORML
+		PRINTFORMW 为了证明%ANAME(対象)%属于他，%ANAME(対象)%被刻上了卑猥的纹身
+		PRINTFORM
+		CALL COLOR_PRINT(@"%ANAME(対象)%的%GET_TATTOO_NAME(RESULT)%上，被「%TATTOO:対象:RESULT%」刻下了纹身", カラー_注意)
+		;TranslatedMark @"%ANAME(対象)%の%GET_TATTOO_NAME(RESULT)%に、「%TATTOO:対象:RESULT%」と入れ墨を入れられた", カラー_注意
+		PRINTFORMW
+	ELSE
+		PRINTFORML
+		PRINTFORMW 为了证明%ANAME(対象)%属于他，%ANAME(対象)%被带上了他的项链
+		PRINTFORM
+	ENDIF
+	IF GETBIT(TALENT:対象:日常系, 素質_デイリー_貴族の愛人)
+		PRINTFORMW 男の所有物になった証を刻まれ、%ANAME(対象)%は悦びで頬を緩め、愛しそうに\@ RESULT != -1 ? 入れ墨 # チョーカー \@を撫でた
+	ELSE
+		PRINTFORMW %ANAME(対象)%虽然也露出了为难的表情，但又好像有点不太一样
+		;TranslatedMark %ANAME(対象)%も困った表情を見せながらも、まんざらでもなさそうだった
+		SETBIT TALENT:対象:日常系, 素質_デイリー_貴族の虜
+	ENDIF
+ENDIF
+
+CALL FUCK_RAPE(対象, GET_SPERM_ID("貴族"), @"貴族の\@ RAND:2 ? 肉棒 # 唇\@", @"貴族")
+
+PRINTFORML 
+PRINTFORMW 
+PRINTFORMW 次の日 第二天，筋疲力尽的%ANAME(対象)%被贵族拉了起来
+PRINTFORMW 他一副非常满足的表情，向%ANAME(対象)%保证一定会给予援助
+IF 対象 == MASTER
+	PRINTFORMW 「下次我再来的时候，期待你的接待哦」
+	PRINTFORMW 贵族揉弄着%ANAME(MASTER)%的臀肉，预告了下次的到来
+	IF GETBIT(TALENT:対象:日常系, 素質_デイリー_貴族の虜)
+		PRINTFORMW %ANAME(MASTER)%尚未缓过精神来，用呆呆的声音答应了下来
+	ELSE
+		PRINTFORMW 在%ANAME(MASTER)%努力启动着大脑时，他的手指侵入了后庭之中，没有防备的%ANAME(MASTER)%丢了魂一样答应了下来
+	ENDIF
+ELSE
+	PRINTFORMW 「我还会再来的，下次也要有劳你们了」
+	PRINTFORMW 贵族捏了捏%ANAME(対象)%的屁股，佯装无事的和%ANAME(MASTER)%交谈着
+	PRINTFORMW %ANAME(対象)%放任那只咸猪手在臀下肆虐，忍耐着没有喊出声来
+ENDIF
+兵数 = (RAND:9 * 1000 + 1000)
+PRINTFORM
+	CALL COLOR_PRINT(@"因为男人的支援、兵数增加了{兵数}", カラー_シアン)
+	;TranslatedMark @"男の支援により、{兵数}の兵が増えた", カラー_シアン
+	PRINTFORMW
+COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 兵数
+DVAR:接待_発生フラグ = 1
+DVAR:接待_連続で断った回数 = 0
+RETURN 1
+
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_RECEPTION(対象)
+#DIM 対象
+RETURN CFLAG:対象:行動不能状態 != 行動不能_子供 && CFLAG:対象:所属 == CFLAG:MASTER:所属 && !IS_ANIMAL(対象) && CFLAG:対象:捕虜先 == 0 && !IS_MALE(対象)

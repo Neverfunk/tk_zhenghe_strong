@@ -1,0 +1,43 @@
+@BUILDING_GET_NAME_陷阱巢穴()
+    #FUNCTIONS
+    RETURNF "陷阱巢穴"
+
+@BUILDING_GET_EXP_陷阱巢穴()
+    #FUNCTIONS
+    RETURNF "回合末征兵数增加;战斗时概率使普通势力的一个角色战斗不能。"
+
+@BUILDING_SET_INFO_ID_82()
+    BUILDING_TYPE:建造物_陷阱巢穴 = 建造物_类型_特殊类
+    BUILDING_LEVEL:建造物_陷阱巢穴 = 建造物_等级_二级建筑
+    BUILDING_LIMIT_NUM:建造物_陷阱巢穴 = 建造物_数量限制_无
+    BUILDING_LIMIT_UNI:建造物_陷阱巢穴 = 0
+    BUILDING_COUNTRY_ID:建造物_陷阱巢穴:特殊勢力_ホフゴブリン = 1
+    BUILDING_HAVE_SKILL:建造物_陷阱巢穴 = 0
+    BUILDING_TOHO_REQ_ID:建造物_陷阱巢穴:0 = 0
+
+@CHECK_BUILDING_FUNCTION_陷阱巢穴(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    SIF !CHECK_BUILDING_SP_COUNTRY_LIMIT_USING(COUNTRY_ID,建造物_陷阱巢穴)
+        RETURNF RESULT:0
+    RESULT:1 = TMP_BUILDING_CNT:COUNTRY_ID:建造物_陷阱巢穴
+    IF RESULT:1 > 0
+        RESULT:0 = 1
+    ENDIF
+    RETURNF RESULT:0
+
+@BUILDING_TEXT_陷阱巢穴(COUNTRY_ID,STATUS)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    #DIM STATUS
+    SIF !CHECK_BUILDING_TEXT_OUTPUT(COUNTRY_ID)
+        RETURNF 0
+    BUILDING_TEXT = PRINT_BUILDING_TEXT_TITLE_F()
+    PRINTFORM 因为《陷阱巢穴》的存在，
+    PRINTFORML 不用陷入就可以想象其中的场景……
+    IF STATUS
+        PRINTFORML %ANAME(GET_COUNTRY_BOSS(COUNTRY_ID))%的一个不幸的将领被困在陷阱中无法参加战斗
+    ELSE
+        PRINTFORML 幸运的是被敌方将领巧妙地避开了
+    ENDIF
+    RETURNF 1

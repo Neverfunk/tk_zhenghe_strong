@@ -1,0 +1,2306 @@
+﻿;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_LEWDNESS_CURSE_CORRUPTION_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("LEWDNESS_CURSE")
+
+
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_LEWDNESS_CURSE_CORRUPTION_DECISION()
+
+IF DVAR:淫紋_浸食中キャラID > 0 && ID_TO_CHARA(DVAR:淫紋_浸食中キャラID) == -1
+	DVAR:淫紋_浸食中キャラID = 0
+	RETURN 0
+ELSEIF DVAR:淫紋_浸食中キャラID > 0
+	RETURN 1
+ENDIF
+
+RETURN 0
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_LEWDNESS_CURSE_CORRUPTION()
+#DIM 対象
+#DIM あなたへの想い ;追加分
+#DIM 霊夢 ;追加分
+#DIM パチュリー ;追加分
+#DIM ヘカーティア ;追加分
+対象 = ID_TO_CHARA(DVAR:淫紋_浸食中キャラID)
+;追加分
+霊夢 = NAME_TO_CHARA("霊夢")
+パチュリー = NAME_TO_CHARA("パチュリー")
+ヘカーティア = NAME_TO_CHARA("ヘカーティア")
+あなたへの想い = CFLAG:対象:好感度 + CFLAG:対象:依存度 + CFLAG:対象:従属度
+
+IF CFLAG:対象:捕虜先 != 0
+	PRINTFORMW 被恶魔刻上淫纹的%ANAME(対象)%，在牢狱中苦闷地生活着……
+	RETURN 1
+ELSEIF CFLAG:対象:特殊状態 == 特殊状態_死亡
+	PRINTFORMW 因为%ANAME(対象)%死亡了，所以恶魔决定寻找别的目标
+	CLEARBIT TALENT:対象:日常系, 素質_デイリー_淫紋
+	DVAR:淫紋_浸食中キャラID = 0
+	DVAR:淫紋_浸食値 = 0
+	DVAR:淫紋_純愛フラグ = 0
+	RETURN 1
+ELSEIF CFLAG:対象:特殊状態 == 特殊状態_放浪
+	PRINTFORMW %ANAME(対象)%在流浪中遇到了驱魔者，并被解除了淫纹
+	CLEARBIT TALENT:対象:日常系, 素質_デイリー_淫紋
+	DVAR:淫紋_浸食中キャラID = 0
+	DVAR:淫紋_浸食値 = 0
+	DVAR:淫紋_純愛フラグ = 0
+	RETURN 1
+ELSEIF CFLAG:対象:所属 != CFLAG:MASTER:所属
+	PRINTFORMW 转移到其他国家的%ANAME(対象)%，好像是为了驱除恶魔的印记被解除了淫纹
+	CLEARBIT TALENT:対象:日常系, 素質_デイリー_淫紋
+	DVAR:淫紋_浸食中キャラID = 0
+	DVAR:淫紋_浸食値 = 0
+	DVAR:淫紋_純愛フラグ = 0
+	RETURN 1
+ELSEIF !IS_FEMALE(対象)
+	PRINTFORMW 因为%ANAME(対象)%不是女性，所以恶魔决定寻找别的目标
+	CLEARBIT TALENT:対象:日常系, 素質_デイリー_淫紋
+	DVAR:淫紋_浸食中キャラID = 0
+	DVAR:淫紋_浸食値 = 0
+	DVAR:淫紋_純愛フラグ = 0
+	RETURN 1
+ENDIF
+
+;消去させるパターン
+IF RAND:8 == 0
+	PRINTFORML %ANAME(対象)%来到了恶魔平常游荡的地方
+	PRINTFORML 对方一眼就看出来%ANAME(対象)%被刻上了淫纹，并提出可以帮忙解除掉
+	PRINTFORML 怎么办……
+	CALL ASK_YN("拜托了", "有点可疑……")
+	IF RESULT == 1
+		PRINTFORMW 不，感觉还是有些可疑
+		PRINTFORMW 最终还是放弃了……
+		RETURN 1
+	ELSE
+		PRINTFORMW 虽然有些怀疑，但是%ANAME(対象)%还是拜托他解咒，如果能止住子宫因为兴奋的疼痛的话
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		IF RAND:2 == 0
+			PRINTFORML 解咒成功了！
+			PRINTFORML %ANAME(対象)%的身上的淫纹消失得无影无踪，子宫的疼痛也平静下来了
+			PRINTFORMW 恶魔说不会再出现之后就离去了
+			CLEARBIT TALENT:対象:日常系, 素質_デイリー_淫紋
+			DVAR:淫紋_浸食中キャラID = 0
+			DVAR:淫紋_浸食値 = 0
+			DVAR:淫紋_純愛フラグ = 0
+			DVAR:淫紋_発生フラグ = -1
+		ELSE
+			PRINTFORML 「喂！喂！想被恶魔强奸对吧！想被万人操才上的淫纹对吧！这么淫乱的样子我看不用淫纹都一样，下贱的母狗！还是说你是想不被操坏才上的淫纹？啊？！不过你这体质倒是不错啊，极品肉便器不为过啊！」
+			PRINTFORMW 自称驱魔的男子将%ANAME(対象)%按在在床上，激烈地施以子宫难以抵抗的暴行，而子宫口则在最开始就被一击贯穿，在接下来的子宫蹂躏中除了裹紧之外只能被迫接受刺激的酷刑
+			PRINTFORML 被身上的男性如此粗暴地侵犯的%ANAME(対象)%，止不住地娇喘着，浑身也不受控制地颤抖着
+			PRINTFORMW 受淫纹发作的影响，身心都完全屈服于暴行，别说是抵抗了，阴道都已经控制不住地反复挤压并裹紧着深入下腹的巨根，浑身都完全兴奋起来，无论对着发情的身体如何蹂躏都只会让%ANAME(対象)%的身体更加索求肉棒
+			PRINTFORML 「喂，别给我松开啊！用力夹紧一点！看看你那么激烈的反应，你本来就是找恶魔挨操的对吧！要不然谁会来这种地方，还是女性，淫乱的家伙！打着幌子主动挨操！我看这淫纹在你身上刚好是锦上添花，挺适合的，自个留着吧！」
+			PRINTFORMW 每当那巨粗的肉棒顶着子宫壁并把下腹子宫位置都顶得凸起时，%ANAME(対象)%的视线和意识都会变得模糊，口水和爱液都会四处飞散着，连脚趾都下意识地时而勾紧时而伸展，被疼痛与快感双重刺激着神经下满眼春水的表情都偶尔变得扭曲了
+			PRINTFORML 「好了！让老子的精液帮你净化吧！用子宫好好接受并感谢我吧！哈！」
+			PRINTFORML %ANAME(対象)%被恶魔的肉棒完全戳入身体使得下腹鼓起来后不由得用力挺起了身体，娇喘着浑身颤抖
+			PRINTFORML 咕啾♥咕啾♥炽热的精液不断冲刷着本以敏感脆弱的子宫壁，被新一轮精液冲上后又沿着阴道内壁热度不减地与潮吹的妹汁喷溅出去，强烈的刺激使得%ANAME(対象)%的身体控制不住地扭动，像是痉挛一样手脚都像是在挣扎着什么一样乱动起来
+			PRINTFORMW …对方经过长久的射精之后拔出了肉棒，留下红肿并不断混着精液和妹汁喷溅的淫唇，伴随着高潮余韵颤抖着身体时沙哑的嗓音压不住地呻吟着
+			PRINTFORML 「…哇！这是个使用起来很舒服的小孔啊……嗯？什么啊，还想要吗？」
+			PRINTFORMW %ANAME(対象)%在高潮的余韵未散去的时候再次主动动起了了腰部，让肉棒不断把阴唇撑开着索求下一次射精
+			PRINTFORML 「嘿嘿，看来驱邪驱得不够彻底！」
+			PRINTFORMW 男子脸上浮现出卑微的笑容，双手抓住并掰开%ANAME(対象)%的臀部，再次拧进了那吓人的巨根……
+			CALL FUCK_RAPE(対象, GET_SPERM_ID("悪魔祓い"), "悪魔祓いの\@ RAND:2 ? 肉棒 # 唇\@", "悪魔祓い")
+			PRINTFORML
+			PRINTFORML 恶魔男子在终于玩腻%ANAME(対象)%之后，赶紧离开了
+			PRINTFORMW 留下被欺骗并屈辱地施以蹂躏的%ANAME(対象)%止不住地颤抖着身体，下腹的余热久散不去，脸上覆盖着一层粉红，过了好一会才恢复勉强站起来的时又不由得期待下一次像这样如此屈辱地被蹂躏着，想到这的%ANAME(対象)%让刚才子宫被狠狠蹂躏造成的疼痛更加剧烈了
+		ENDIF
+		RETURN 1
+	ENDIF
+ELSEIF DVAR:淫紋_浸食値 < 16
+	;淫紋イベント純愛ルート
+	IF DVAR:淫紋_純愛フラグ && あなたへの想い >= 10000 && DVAR:淫紋_あなた依存 >= 0 && !(対象 == MASTER)
+		PRINTFORM 刻在%ANAME(対象)%诱人下腹的淫纹
+		CALL COLOR_PRINT(@"淫紋", カラー_ピンク)
+		PRINTFORML 妖艳的光芒更加光亮了，不断给予着%ANAME(対象)%强烈的欲望……
+		SELECTCASE RAND:5
+			CASE 0
+				PRINTFORMW 子宫的疼痛难以忍受，如果不有意识地控制自己的手的话就会下意识地摸到止不住妹汁外溢的小穴去了
+			CASE 1
+				PRINTFORMW 拼命装作平静，双腿却不停地颤抖着，似乎轻轻一推就能让身体的平衡崩塌
+			CASE 2
+				PRINTFORMW %ANAME(対象)%那因为兴奋而脸红的样子，也在下意识地向周围的男性散发着充满发情信号的荷尔蒙
+			CASE 3
+				PRINTFORMW 从下腹部扩散到全身的热度，让意识难以集中，简直无法着手工作
+			CASE 4
+				PRINTFORMW 一边扭扭捏捏地磨蹭着大腿，一边被想要尽情释放性欲的冲动所驱使
+		ENDSELECT
+		PRINTFORML
+		PRINTFORML 但是%ANAME(対象)%以钢铁般的意志，强忍着自己体内涌上来的的欲望一直熬到了晚上，回到自己的房间里尽情地自慰了
+		;TranslatedMark だが%ANAME(対象)%は鋼の意思で、己の沸き起こる劣情に耐えて夜まで乗り切り、自分の部屋で思う存分自慰に耽った
+		PRINTFORMW ……但是，不管怎么自慰，%ANAME(対象)%的情欲始终无法得到平息，不断在体内积累的欲望最终突破了理性的限制
+		;TranslatedMark ……しかし、どれだけ慰めようと%ANAME(対象)%の情欲は一向に治まらず、ついに理性の限界が来ようとしていた
+		PRINTFORMW 意识被淫纹所带来的难以忍受的性欲的所侵蚀，浮现在她的脑海里的是%ANAME(MASTER)%的身姿
+		;TranslatedMark 淫紋が与える耐え難い性欲に襲われる中で、彼女の頭に浮かんだのは%ANAME(MASTER)%の姿だった
+		PRINTFORML 如果和%ANAME(MASTER)%做爱的话，这种难以忍受的冲动说不定就能得到缓解了
+		;TranslatedMark %ANAME(MASTER)%に抱かれたらこの耐え難い衝動を止められると、半ば確信めいて考えた彼女は
+		PRINTFORMW 怀着这种想法，%ANAME(対象)%一边颤抖着发热的身体，一边朝着%ANAME(MASTER)%的房间走去…
+		;TranslatedMark その火照った身体を震わせながら、%ANAME(MASTER)%の部屋に向かった…
+		PRINTFORMW ･･･
+		IF DVAR:淫紋_あなた依存 >= 1
+			PRINTFORMW %ANAME(対象)%以衣冠不整的姿态再次来到了%ANAME(MASTER)%的房间
+			;TranslatedMark %ANAME(対象)%があられもない格好で再び%ANAME(MASTER)%の部屋を訪れた
+			PRINTFORML 因淫纹而发情，以一副仿佛写着"来侵犯我"的充满雌性欲望的表情一点点向%ANAME(MASTER)%逼进…
+			;TranslatedMark 淫紋によって発情し、「自分を犯してくれ」と雌の顔で%ANAME(MASTER)%に詰め寄る…
+		ELSE
+			PRINTFORMW %ANAME(MASTER)%觉察到了来拜访自己的%ANAME(対象)%的异状
+			;TranslatedMark %ANAME(MASTER)%は、自らの部屋を訪ねてきた%ANAME(対象)%の異様な雰囲気を感じた
+			PRINTFORML 一眼就能看出来的十分明显的发情，还以充满雌性欲望的表情凝视着%ANAME(MASTER)%
+			;TranslatedMark 一目で分かるほど発情し、雌の顔で%ANAME(MASTER)%を見つめてくる
+			PRINTFORMW 恐怕是因为在那天晚上和恶魔定下了契约吧
+			;TranslatedMark おそらくは自分があの夜、悪魔との契約を交わしたことによるものだろう
+		ENDIF
+		PRINTFORMW %ANAME(MASTER)%决定……
+		;TranslatedMark %ANAME(MASTER)%は……
+		PRINTFORML
+		;断ると新ルート終了
+		CALL ASK_YN("抱她", "拒绝")
+		IF RESULT == 1
+			PRINTFORML %ANAME(MASTER)%看着有如花柳街的卖春女一样的%ANAME(対象)%表明了自己没有和这样的人做爱的意愿
+			;TranslatedMark %ANAME(MASTER)%は、売女の如き様子の%ANAME(対象)%を抱く気になれなかった
+			PRINTFORMW 被%ANAME(MASTER)%拒绝了的%ANAME(対象)%只能一个人回到房间自慰
+			;TranslatedMark %ANAME(MASTER)%に断られた%ANAME(対象)%は一人部屋に戻り、自らを慰めるしかなかった
+			PRINTFORMW 但是，由淫纹引起的躁动感逐渐转变为难以忍受的疼痛，无论怎么自慰也不见好转……
+			;TranslatedMark しかし淫紋による疼きは、どれだけ自分で慰めようと治まることはなかった……
+			DVAR:淫紋_あなた依存 = -1
+		ELSE
+			PRINTFORMW 她变成现在这样是%ANAME(MASTER)%的责任
+			;TranslatedMark 彼女がこうなったのは自分の責任だ
+			PRINTFORML %ANAME(MASTER)%决定负起责任接受她的情欲
+			;TranslatedMark %ANAME(MASTER)%は責任を持って、彼女の情欲を受け止めることにした
+			PRINTFORMW ･･･
+			SELECTCASE RAND:12
+				CASE 0
+					PRINTFORML %ANAME(対象)%被%ANAME(MASTER)%侵犯，忍不住挺起腰来，娇喘不止
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に犯されながら腰をくねらせ大きな嬌声を上げる
+					PRINTFORMW 刻在身上的淫纹给她带来了非同寻常的快感，使她比平时更加淫乱
+					;TranslatedMark 刻まれた淫紋が彼女に異常な快感を与え、いつも以上に乱れさせる
+					PRINTFORML %ANAME(MASTER)%不断用肉棒咕哩咕哩地顶着子宫口，%ANAME(対象)%忍不住颤抖着身体发出娇喘
+					;TranslatedMark %ANAME(MASTER)%がペニスでポルチオをグリグリ攻めると、%ANAME(対象)%はたまらず甘い声で喘ぎ身体を跳ねさせる
+					PRINTFORML %ANAME(対象)%在绝顶的同时，双眼满溢出爱意，张开手臂诱惑着%ANAME(MASTER)%
+					;TranslatedMark %ANAME(対象)%は絶頂しながら目をハートにしながら%ANAME(MASTER)%を見つめて、大きく手を広げて誘う
+					PRINTFORMW 被%ANAME(MASTER)%紧紧抱住的同时在膣内被注入了精液，%ANAME(対象)%身体痉挛着的同时剧烈地高潮了
+					;TranslatedMark %ANAME(MASTER)%にぎゅぅっと抱きしめられながら子種を注がれ、%ANAME(対象)%は足をピンと伸ばしながら激しく絶頂した
+				CASE 1
+					PRINTFORML %ANAME(対象)%被%ANAME(MASTER)%从背后抓住双臂，以站立后入的姿势激烈地抽插着
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に背後から両腕を掴まれ、立ちバックの姿勢で激しく小突かれている
+					PRINTFORMW 比平常做的时候更加粗暴，但是%ANAME(対象)%由于淫纹的作用而对此感到兴奋，每次插入的时候都会发出娇喘来迎合
+					;TranslatedMark 普段より乱暴なセックスにも%ANAME(対象)%は淫紋の作用により興奮し、一突き毎に悦びの声を上げてペニスを受け入れる
+					PRINTFORML %ANAME(MASTER)%被%ANAME(対象)%痴态所影响，越发激烈的活塞运动让%ANAME(対象)%的子宫不住颤抖
+					;TranslatedMark %ANAME(対象)%の反応に気を良くした%ANAME(MASTER)%は、更に激しく子宮内に響くようなストロークを繰り出し彼女を責める
+					PRINTFORMW 被渴望着精液的阴道紧紧吸附着，%ANAME(MASTER)%忍不住射精了，%ANAME(対象)%一边颤抖着一边达到了绝顶
+					;TranslatedMark 精をねだるような膣の締め付けに我慢できなくなった%ANAME(MASTER)%が射精すると、%ANAME(対象)%は体を跳ね上げながら絶頂した
+				CASE 2
+					PRINTFORML %ANAME(対象)%被%ANAME(MASTER)%用正常位以激烈的势头侵犯着
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に正常位で激しく犯されている
+					PRINTFORMW 每当%ANAME(MASTER)%将腰顶上，肉棒在膣内摩擦时，%ANAME(対象)%都会以露出欲罢不能的表情扭动着身体
+					;TranslatedMark %ANAME(MASTER)%が腰を振りペニスで膣内をなぞられる度、%ANAME(対象)%はたまらないといった表情で体をくねらせる
+					PRINTFORML 受到淫纹的影响，%ANAME(対象)%用更加淫荡的表情和动作渴求着精液
+					;TranslatedMark 淫紋により、いっそう淫らな表情と仕草で精をねだる%ANAME(対象)%
+					PRINTFORML 看着她这淫乱的姿态，%ANAME(MASTER)%也变得更加兴奋，更加激烈地晃动着腰，索求着交欢的快乐
+					;TranslatedMark その乱れぶりに%ANAME(MASTER)%の興奮も一層昂ぶり、更に激しく腰を打ちつけ快楽を貪りあう
+					PRINTFORMW 不久%ANAME(MASTER)%一边低声呻吟一边在膣内的深处射精了，%ANAME(対象)%也以一副不成体统的表情留着口水高潮了
+					;TranslatedMark やがて%ANAME(MASTER)%が低く唸り膣奥に射精すると、%ANAME(対象)%もまただらしなく涎を垂らしながら絶頂した
+				CASE 3
+					PRINTFORML %ANAME(対象)%一边被%ANAME(MASTER)%侵犯一边淫荡地扭动着身体。
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に犯されながら艶めかしく体をくねらせている
+					PRINTFORMW 由于淫纹而变得敏感的身体，感受到比平时更加强烈的快感，连绵不断的高潮吞噬了%ANAME(対象)%
+					;TranslatedMark 淫紋によって敏感になった肉体は、いつも以上に過敏に快感を感じ、絶頂の波が%ANAME(対象)%を飲み込む
+					PRINTFORML %ANAME(対象)%被这种快感所俘虏，露出恍惚的表情
+					;TranslatedMark %ANAME(対象)%はその快楽の虜になり、すっかり惚けてしまっている
+					PRINTFORML 用以平常的%ANAME(対象)%来看绝对无法想象的淫靡的表情说出淫荡的言语索求着%ANAME(MASTER)%
+					;TranslatedMark 普段の%ANAME(対象)%からは想像も出来ないような淫靡な表情で淫らな言葉を紡ぎ%ANAME(MASTER)%を求める
+					PRINTFORMW %ANAME(対象)%陶醉于%ANAME(MASTER)%给予的快乐，不断地被侵犯，将身为雌性的快乐刻入了灵魂
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に与えられる快楽に陶酔しながら、犯されるままに犯され、雌の悦びを魂に刻み込んだ
+				CASE 4
+					PRINTFORML %ANAME(対象)%被%ANAME(MASTER)%侵犯，忍不住挺起腰来，娇喘不止
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に犯されながら腰をくねらせ大きな嬌声を上げる
+					PRINTFORMW 刻在身上的淫纹给她带来了前所未有的快感，让她比平时更加淫乱
+					;TranslatedMark 刻まれた淫紋が彼女に異常な快感を与え、いつも以上に乱れさせている
+					PRINTFORML %ANAME(MASTER)%不断用肉棒咕哩咕哩地顶着子宫口，%ANAME(対象)%忍不住颤抖着身体发出娇喘
+					;TranslatedMark %ANAME(MASTER)%がペニスでポルチオをグリグリ攻めると、%ANAME(対象)%はたまらず甘い声で喘ぎ身体を跳ねさせる
+					PRINTFORML %ANAME(対象)%在绝顶的同时，双眼满溢出爱意，张开手臂诱惑着%ANAME(MASTER)%
+					;TranslatedMark %ANAME(対象)%は絶頂しながら目をハートにしながら%ANAME(MASTER)%を見つめて、大きく手を広げて誘う
+					PRINTFORMW 被%ANAME(MASTER)%紧紧抱住的同时在膣内被注入了精液，%ANAME(対象)%身体痉挛着的同时剧烈地高潮了
+					;TranslatedMark %ANAME(MASTER)%にぎゅぅっと抱きしめられながら子種を注がれ、%ANAME(対象)%は足をピンと伸ばしながら激しく絶頂した
+				CASE 5
+					PRINTFORML %ANAME(対象)%被%ANAME(MASTER)%的指技折服，沦为了快乐的俘虏
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の指使いで攻められると、すぐに虜になってしまった
+					PRINTFORML 朦胧地发着光的淫纹给她带来了难以忍受的快感，被刻下了身为雌性的喜悦
+					;TranslatedMark ぼんやりと光る淫紋が、彼女に過剰なほどの快感を与え、雌として扱われる悦びを刻んでいる
+					PRINTFORML 无法忍耐的%ANAME(対象)%摆出服从的姿势，张开被不断溢出的爱液弄的粘稠不已的秘裂向%ANAME(MASTER)%索取
+					;TranslatedMark 我慢できなくなった%ANAME(対象)%は服従のポーズになり、とろとろになった秘裂を割れ開いて%ANAME(MASTER)%におねだりする
+					PRINTFORML %ANAME(MASTER)%如她所愿取出肉棒，%ANAME(対象)%目不转睛地盯着肉棒，迫不及待地等待着插入
+					;TranslatedMark %ANAME(MASTER)%は望みどおり肉棒を取り出すと、%ANAME(対象)%の視線は釘付けになり口から涎を垂らして挿入を待ち望んでいる
+					PRINTFORMW 接受了成为雌穴的自己的%ANAME(対象)%，每次被肉棒插入的时候都会一边颤抖着子宫一边达到高潮
+					;TranslatedMark 雌穴となった自分を受け入れた%ANAME(対象)%は、肉棒を突き込まれる度に子宮を震わせながら絶頂した
+				CASE 6
+					PRINTFORML %ANAME(対象)%被压在墙壁上侵犯
+					;TranslatedMark %ANAME(対象)%は壁に寄りかかりながら犯されている
+					PRINTFORMW 被%ANAME(MASTER)%抬起一只脚，以像做瑜伽一样的脚尖着地的姿势被肉棒激烈地侵犯着
+					;TranslatedMark %ANAME(MASTER)%に片足を持ち上げられ、爪先立ちの格好でペニスを激しく出し入れされながらヨガっている
+					PRINTFORML 难以忍受的性冲动冲淡了她的理性，让她变成只知道索求快感的雌性
+					;TranslatedMark 耐え難い性の衝動が彼女の理性を消し飛ばし、ただただ快楽を貪る雌にした
+					PRINTFORML %ANAME(MASTER)%的肉棒以要将子宫挖出般的气势不停做着活塞运动，%ANAME(対象)%因为难以忍受的快感而不断颤抖
+					;TranslatedMark %ANAME(MASTER)%のペニスで子宮を抉る様に小突かれ続けて、%ANAME(対象)%はあまりの快楽にガクガクと震える
+					PRINTFORMW 当浓厚的精液被射到膣内深处后，%ANAME(対象)%一副欲罢不能的样子，摆出诶嘿颜娇喘着达到了高潮
+					;TranslatedMark 濃厚な精液を膣奥に放たれると、%ANAME(対象)%はたまらずアヘ顔で嬌声を上げて絶頂した
+				CASE 7
+					PRINTFORML %ANAME(対象)%一边以对面座位的姿势让肉棒插入体内，一边和%ANAME(MASTER)%互相交缠着舌头
+					;TranslatedMark %ANAME(対象)%は対面座位の体勢でペニスを咥えこみながら%ANAME(MASTER)%と舌を絡ませている
+					PRINTFORMW 充满着饥渴互相缠绕着舌头，阴道内的肉棒就会感觉膣内在不断颤抖
+					;TranslatedMark 貪るようにお互いの舌を絡ませていると、膣内のペニスがビクビクと震えるのを感じる
+					PRINTFORML 松开嘴唇后，两人一边互相凝视着一边不断扭动这腰，%ANAME(MASTER)%像是十分舒服一样低声呻吟着
+					;TranslatedMark 唇を離し互いを見つめあいながら腰をクイクイとくねらせると、%ANAME(MASTER)%が気持ち良さそうに呻く
+					PRINTFORML %ANAME(対象)%感觉到之前无论做什么都得不到满足的内心被与%ANAME(MASTER)%的性交所满足
+					;TranslatedMark %ANAME(対象)%は、何をしても満足できなかった心が%ANAME(MASTER)%とのセックスで満たされていくのを感じていた
+					PRINTFORMW 两人再次一边接吻一边摇晃起了腰，在激烈的交欢中迷失了自我，疯狂索求着对方
+					;TranslatedMark 二人は再びキスをしながら腰を揺すりあい、ひたすら互いを貪りあうセックスに没頭した
+				CASE 8
+					PRINTFORML %ANAME(対象)%抱紧盘腿而坐的%ANAME(MASTER)%，坐在%ANAME(MASTER)%的身上，不断摆动着腰
+					;TranslatedMark %ANAME(対象)%は、胡坐をかいた%ANAME(MASTER)%の上に座るように抱きつき腰を振っている
+					PRINTFORMW %ANAME(対象)%被%ANAME(MASTER)%玩弄着乳房，发出欲罢不能的声音，随着%ANAME(対象)%不停摆动的腰不断颤抖
+					;TranslatedMark %ANAME(MASTER)%に乳房を弄られてたまらないといった声を出し、身を震わせながらも%ANAME(対象)%は腰を動かし続ける
+					PRINTFORML 由于淫纹所引起的性冲动，使她过于淫乱
+					;TranslatedMark 淫紋による性への衝動が、彼女を過激に乱れさせている
+					PRINTFORML %ANAME(MASTER)%用牙齿咬上乳头的话，%ANAME(対象)%就会发出很大声的娇喘，同时身体不断地抖动
+					;TranslatedMark %ANAME(MASTER)%が乳首を歯で甘噛みすると、彼女は大きく嬌声をあげてビクンと身体を跳ねさせてしまう
+					PRINTFORMW 她的那副仿佛意识已经融化在快感之中的表情更加煽动了%ANAME(MASTER)%的情欲，%ANAME(MASTER)%一个劲儿地进行活塞运动，蹂躏着蜜壶
+					;TranslatedMark そんな彼女の蕩けた表情がいっそう情欲を煽り、%ANAME(MASTER)%はひたすら腰を打ちつけ、蜜壷を蹂躙した
+				CASE 9
+					PRINTFORML 躺在床上两个人互相舔着对方的性器
+					;TranslatedMark ベッドの上で二人はお互いの性器を舐めあっている
+					PRINTFORML 被淫纹所带来的情欲所囚禁而失去理性的%ANAME(対象)%，无法忍受嘴里充满着的雄性的味道和臭味
+					;TranslatedMark 淫紋の情欲に囚われて理性を失った%ANAME(対象)%が、口いっぱいに広がる雄の味と臭いを我慢できるはずもなく
+					PRINTFORMW %ANAME(対象)%的头脑中，已经充满了对即将被这根所肉棒侵犯的期待
+					;TranslatedMark すでに%ANAME(対象)%の頭の中は、この肉棒で犯される事への期待で埋め尽くされている
+					PRINTFORML %ANAME(対象)%对%ANAME(MASTER)%的肉棒不断吮吸着进行着口交，尽管%ANAME(MASTER)%已经在%ANAME(対象)%的口中射出来了好几次，%ANAME(対象)%依旧热情地进行侍奉，使%ANAME(MASTER)%的肉棒充满精神
+					;TranslatedMark %ANAME(MASTER)%の啜り上げるようなクンニで何度か達しながらも、熱心に奉仕し、%ANAME(MASTER)%のペニスをバキバキに勃起させる
+					PRINTFORMW 已经忍不住的的两人互相拥抱着开始了激烈交合，作为雌性与雄性埋头于从早到晚的交尾之中
+					;TranslatedMark 限界に達した二人は抱きしめあうと激しいセックスを開始し、ひたすら雄と雌の交尾に明け暮れた
+				CASE 10
+					PRINTFORML %ANAME(対象)%跪在%ANAME(MASTER)%的两腿之间，充满爱意地含着%ANAME(MASTER)%的肉棒
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の股の間に跪き、愛しい一物を口いっぱいに頬張っている
+					PRINTFORMW 被用舌头刺激铃口的同时不断被吮吸着肉棒，%ANAME(MASTER)%舒服地低声呻吟，感觉肉棒在%ANAME(対象)%的口中不住颤抖
+					;TranslatedMark 舌で鈴口を刺激しながら竿を吸い上げると、%ANAME(MASTER)%が気持ち良さそうに唸りペニスが痙攣するのを感じる
+					PRINTFORML 在这时中断了侍奉，一边揉着睾丸，一边恶作剧似地抬头看着%ANAME(MASTER)%的%ANAME(対象)%，突然被%ANAME(MASTER)%抓住头，被肉棒强行插入到了喉咙深处
+					;TranslatedMark そこでいったん奉仕を中断し玉を揉みながら意地悪そうに%ANAME(MASTER)%を見上げていると、突如頭を掴まれ、無理やり喉奥まで犯される
+					PRINTFORMW 但%ANAME(対象)%并没有感到厌恶，眼中满溢着爱意将肉棒吞进喉咙深处从肉棒里榨取出特浓的精液进行侍奉
+					;TranslatedMark %ANAME(対象)%は嫌がるどころか、瞳をハートにしながら喉奥まで飲み込んで奉仕し、肉棒から特濃の精液を搾り取った
+				CASE 11
+					PRINTFORML %ANAME(対象)%跨到%ANAME(MASTER)%的腰上，深深地用淫穴吞下肉棒的同时，像吸取着对方一样进行激烈的接吻
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に跨り深々とペニスを飲み込みながら、吸い付くようにキスをしている
+					PRINTFORMW 在下腹部闪耀着的淫纹给她带来了无与伦比的快感和幸福感，使她的理性荡然无存
+					;TranslatedMark 下腹部に輝く淫紋が彼女に途方も無い快感と幸福感を与え、その理性を蕩けさせた
+					PRINTFORML 如果一边被顶到膣内的深处一边饥渴地纠缠着舌头的话，脑内就会被相互交合的快感所支配
+					;TranslatedMark 膣の奥を突かれながら貪る様に舌を絡ませあっていると、互いが溶け合うような感覚に脳内を支配される
+					PRINTFORML 沉溺在这无与伦比的幸福感之中，膣内的肉壁紧紧缠了上来，感觉到%ANAME(MASTER)%的肉棒在肉壶里抖动，%ANAME(対象)%露出了十分享受的笑容
+					;TranslatedMark この上ない幸福に包まれ膣をきゅっと締めると、%ANAME(MASTER)%のペニスが肉壷の中で跳ねるのを感じ、%ANAME(対象)%は嬉しそうに笑う
+					PRINTFORMW %ANAME(対象)%扬起上半身，一边凝视着心爱的%ANAME(MASTER)%，一边为了榨取出精液激烈地扭动着腰
+					;TranslatedMark %ANAME(対象)%は上体を起こすと、愛しい%ANAME(MASTER)%を見つめながらその子種を授かろうと激しく腰を振り出した
+			ENDSELECT
+			PRINTFORML ･･･
+			PRINTFORMW 激烈的交合过后，两个人都失去意识昏了过去……
+			;TranslatedMark 激しい行為が終わった後、二人は気を失うように眠った……
+			DVAR:淫紋_あなた依存 += 1
+			DVAR:淫紋_浸食値 += RAND:2
+			CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", ANAME(MASTER))
+			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣")
+			CFLAG:対象:好感度 += 700
+			CFLAG:対象:従属度 += 700
+			CFLAG:対象:依存度 += 700
+		ENDIF
+	ELSE
+		PRINTFORM 刻在%ANAME(対象)%诱人下腹的淫纹
+		CALL COLOR_PRINT(@"淫紋", カラー_ピンク)
+		PRINTFORML 妖艳的光芒更加光亮了，不断给予着%ANAME(対象)%强烈的欲望……
+		SELECTCASE RAND:5
+			CASE 0
+				PRINTFORMW 子宫的疼痛难以忍受，如果不有意识地控制自己的手的话就会下意识地摸到止不住妹汁外溢的小穴去了
+			CASE 1
+				PRINTFORMW 拼命装作平静，双腿却不停地颤抖着，似乎轻轻一推就能让身体的平衡崩塌
+			CASE 2
+				PRINTFORMW %ANAME(対象)%那因为兴奋而脸红的样子，也在下意识地向周围的男性散发着充满发情信号的荷尔蒙
+			CASE 3
+				PRINTFORMW 从下腹部扩散到全身的热度，让意识难以集中，简直无法着手工作
+			CASE 4
+				PRINTFORMW 一边扭扭捏捏地磨蹭着大腿，一边被想要尽情释放性欲的冲动所驱使
+		ENDSELECT
+		PRINTFORML
+		SELECTCASE RAND:45
+			CASE 0
+				LOCALS = 流浪漢
+				PRINTFORML 巡回中，无法忍耐在小巷里自慰的时候被流浪汉看到了
+				PRINTFORML 他一边笑着一边接近慌张的%ANAME(対象)%，一边把手强行牵过来，被他带进了他的窝里
+				PRINTFORML 然后把%ANAME(対象)%粗暴地推倒在地板上，把勃起的肉棒放在了眼前
+				PRINTFORML 面对满是耻辱的脏东西，%ANAME(対象)%本应感到厌恶却因为淫纹的侵蚀被眼前的肉棒所散发的气味弄发情了
+				PRINTFORMW 理智被淫纹彻底压制的%ANAME(対象)%主动大开双腿，不断娇喘的同时毫无拒绝地容纳发黄的精液
+			CASE 1
+				LOCALS = 露出狂
+				PRINTFORML 巡回中，一边喘息一边环视小巷的%ANAME(対象)%遇到了曝光狂
+				PRINTFORML 那朝天伫立的雄壮肉棒就这样在眼前晃动着，%ANAME(対象)%吃惊过后想保持平静但视线还是被吸引住了
+				PRINTFORML 对与%ANAME(対象)%的反应对方还楞了一下，但逐渐意识到了什么似的带着卑鄙的笑容，一边搓着肉棒一边走了过来
+				PRINTFORML 淫纹的光辉变得更加高亮使得子宫隐隐作痛的感觉更加难以忍受，%ANAME(対象)%的大脑中被快感完全充满着，终究是为了图一时之快忍不住脱下自己的衣服
+				PRINTFORMW 在皎洁的月光下，%ANAME(対象)%和他一丝不挂地纠缠在一起，因强烈的背德感和淫纹的作用下提高了敏感度的身体被一次次顶上高潮
+			CASE 2
+				LOCALS = 搭讪男
+				;TranslatedMark ナンパ男
+				PRINTFORML 巡回中，一个男性被%ANAME(対象)%无意识散发着色气的样子吸引住了
+				PRINTFORML %ANAME(対象)%被对方勾肩搭背劝诱着，一开始是想拒绝对方邀请去旅馆的要求，
+				PRINTFORML 但由于淫纹的影响子宫早已难以忍耐地阵阵发痛，难以忍耐的欲望使得肉体看起来就像是完全发情了一样不断促使着喉咙喘息着
+				PRINTFORML 不由得找个倚靠的站稳的%ANAME(対象)%下意识地靠在男子身上，就这样被带到了附近的旅馆
+				PRINTFORMW 最后一丝理性被对方推倒后无法抵抗肉欲本能的%ANAME(対象)%被对方通宵中出着
+			CASE 3
+				LOCALS = 旅人
+				PRINTFORML 巡回中，持续压抑着兴奋的肉欲，口渴的%ANAME(対象)%在某家茶馆休息
+				PRINTFORML 喝着冷饮总算恢复了平静，然后被一位像是旅人的男性客人搭话
+				PRINTFORML 随着交谈逐渐变得自然，%ANAME(対象)%感受到从下腹蔓延至全身的欲望再次蔓延开来
+				PRINTFORML 凝视着男人的脸时，对方什么也没说，直接牵着%ANAME(対象)%的手去了附近的旅馆
+				PRINTFORMW %ANAME(対象)%沉迷于和他的性爱中，将自己置身于作为仅限一夜的恋人而激烈 地进行交合
+			CASE 4
+				LOCALS = 小混混
+				PRINTFORML 巡回中，抓住可疑的小混混风的男人进行询问的时候，突然小腹的疼痛增强了
+				PRINTFORML 渐渐地，话都说不清楚了，%ANAME(対象)%扭捏着大腿，男子担心地问着身体状况
+				PRINTFORML 表情无意识地完全变成了下贱的雌犬的样子，男人看着那诱人的表情不由得干咽了一下
+				PRINTFORML 已经无法抗拒被情欲所支配的%ANAME(対象)%，牵着他的手，带进了一条看隐蔽的小巷
+				PRINTFORMW %ANAME(対象)%搂紧着对方索求着，结果对方貌似更加兴奋的样子，动作变得更加激烈了，不一会从小巷深处传出来了阵阵娇喘
+			CASE 5
+				LOCALS = 兵
+				PRINTFORML 工作中，忍不住自慰的时候被一个士兵看见了
+				PRINTFORML 面对语无伦次辩解的%ANAME(対象)%，士兵也慌忙道歉
+				PRINTFORML 相互沉默的微妙氛围充斥着房间，%ANAME(対象)%因为羞耻和情欲连耳朵都变得通红
+				PRINTFORML 但是，被淫纹所带来的情欲压倒了理智，抓住了准备出门的士兵并恳求留下来
+				PRINTFORMW 不知所措的士兵也渐渐在能和如此极品和高攀不起的%ANAME(対象)%进行交合时变得失去理智，不断挺动着腰部让%ANAME(対象)%达到了一个又一个高潮
+			CASE 6
+				LOCALS = 部下
+				PRINTFORML 工作中，被%ANAME(対象)%下意识扭动着双腿和身躯的色气动作诱惑的部下，突然抱住了%ANAME(対象)%
+				PRINTFORML 虽然为突然的事情而慌了分寸，但还是想斥责部下并甩开，可对方却毫不理会并紧紧抱住%ANAME(対象)%抚摸着身体
+				PRINTFORML 在被早已湿透的密缝被手指突然用力划蹭一下时，犹如电击的快感快速蔓延至%ANAME(対象)%的全身，并使得身体挺起颤抖着
+				PRINTFORML 部下对着%ANAME(対象)%的反应感到非常满意，并且无视了泪眼着抗拒的动作，直接大力按在了桌上
+				PRINTFORMW 在被部下往子宫用力喷射的时候%ANAME(対象)%的理性也随着潮吹的妹汁和四散的精液流失了，被情欲充斥着大脑使得身体下意识地去索求精液和肉棒，激烈的动作下完事了的时候桌子上都到处留有精液和妹汁的痕迹
+			CASE 7
+				LOCALS = 部下
+				PRINTFORML 工作中，弄错了房间的%ANAME(対象)%和正在换衣服的部下撞见了
+				PRINTFORML %ANAME(対象)%慌慌张张地谢罪离开了房间，但是看到他强壮的肉棒不由得僵直了
+				PRINTFORML 看到了%ANAME(対象)%的反应，部下微微一笑，像是刻意把肉棒展示出来慢慢凑近了
+				PRINTFORML 然后把%ANAME(対象)%的手放在肉棒上，在耳边轻声呼唤，%ANAME(対象)%微微点了点头
+				PRINTFORMW 由于他的巧妙的性技与轮番进攻，%ANAME(対象)%与部下的立场在此刻彻底颠倒，强烈的倒错感和冲击神经的快感让子宫的亮度更加鲜艳了，一整晚都被部下亲自进行性爱训练
+			CASE 8
+				LOCALS = 部下
+				PRINTFORML 工作中，淫纹发作而使得性欲高涨让%ANAME(対象)%难以工作，突然冷不丁的从背后拍背时整个人都颤抖了起来，忍不住悲鸣，大腿也用力夹紧着，妹汁也从温热的小缝中间喷溅出来了一点点
+				PRINTFORML 对于这样的反应，部下急忙谢罪并后退了一大步，%ANAME(対象)%在此刻受到如此惊吓不由得双腿发软，往后坐在了地上(%ANAME(対象)%は全身の力が抜けてその場にヘタレ込んでしまう)
+				PRINTFORML 这一坐也将理智压得粉碎，一脸悠然的表情问着对方为何慌张的同时，%ANAME(対象)%也因为快感逐渐占据身体当场自慰起来
+				PRINTFORML 但这无论如何也满足不了%ANAME(対象)%，主动地向眼前的部下献媚
+				PRINTFORMW %ANAME(対象)%由此被对方带到了房间，平时的上下级关系被如恋人般的关系取代，不断交合
+			CASE 9
+				LOCALS = 部下
+				PRINTFORML 工作中，平时操行恶劣的部下手不以为然地摸到了%ANAME(対象)%的屁股
+				PRINTFORML 被突然刺激的%ANAME(対象)%不由得挺着身体踮起脚尖一会，忍不住声音了几下后止不住地喘气着
+				PRINTFORML %ANAME(対象)%的反应让对方惊讶，但之后便熟练地从后面抱住了%ANAME(対象)%并浑身乱摸
+				PRINTFORML 被突如其来的刺激与快感冲击的%ANAME(対象)%无法做出有效的抵抗，只能任由对方肆意责弄着自己的身体
+				PRINTFORMW 当然行为并没有因此而结束，被压到床上的%ANAME(対象)%，在他满足之前被不断地侵犯，多次被送上了高潮
+			CASE 10
+				LOCALS = 野犬
+				PRINTFORML 某个休息日，在森林里悠然散步的%ANAME(対象)%被突然从淫纹带来的情欲冲击，慌忙地躲到了旁边的树丛中坐着
+				PRINTFORML 一边滴着冷汗，一边压着小腹，想办法抑制住猛烈来袭的欲望，突然听到附近传来了响动
+				PRINTFORML %ANAME(対象)%惊呆了，往那边一看，发现那里有一只体格魁梧、眼睛发红的野狗
+				PRINTFORML 那只狗的胯股之间膨胀到了凶暴的程度，对%ANAME(対象)%发出咻咻的叫声并飞扑了过来
+				PRINTFORMW 因为被过于粗暴的动作强制进行交配，本来就处于完全发情边缘的%ANAME(対象)%很快就屈服了，简直就像一只母狗一样高兴地接受了他的配种
+			CASE 11
+				LOCALS = 部下
+				PRINTFORML 某个休息日，%ANAME(対象)%在雨声彼此起伏的屋内苦闷地压抑着淫纹，就在这时部下把之前忘了送给%ANAME(対象)%的东西送了过来
+				PRINTFORML 不能让全身湿透的部下在这场雨中回去，%ANAME(対象)%为了道谢把他送回了家
+				PRINTFORML 经过一会漫不经心的闲聊过后，昏暗的屋内似乎飘来了令人不安的氛围
+				PRINTFORML 部下主动把身体靠上%ANAME(対象)%，双手互相紧握，互相亲吻着被部下推倒了
+				PRINTFORMW 在雨停之前充分做爱之后，%ANAME(対象)%和他长时间的接吻，恋恋不舍地目送着他的背影
+			CASE 12
+				LOCALS = 痴漢
+				PRINTFORML 某个休息日，在欢乐街的人群中，%ANAME(対象)%被痴汉袭击了
+				PRINTFORML 如果是平时的话应该马上甩开，但现在被情欲所囚禁的%ANAME(対象)%只能颤抖着发出甜美的声音
+				PRINTFORML %ANAME(対象)%不抵抗行为使得色狼的行为越来越升级，最终被戏弄得一塌糊涂
+				PRINTFORML 双腿都站不稳的%ANAME(対象)%被痴汉搀扶着，就那样被带进了胡同里
+				PRINTFORMW 被痴汉强奸着的本应更加抗拒，但此刻发情的%ANAME(対象)%一脸恍惚，主动扭动着腰部索求精液
+			CASE 13
+				LOCALS = 強姦魔
+				PRINTFORML 某个休息日，在郊外探索的时候突然被一个身强力壮的男子勒住脖子，并束缚住了双臂劫走了
+				;(郊外を探索中にいきなり屈強な男に羽交い絞めされて綁劫されてしまった)
+				PRINTFORML 被口塞捂嘴(猿轡)和眼罩盖眼束缚着的%ANAME(対象)%被送到了某个昏暗的地下室
+				PRINTFORML 男子粗暴地剥下了%ANAME(対象)%的衣服，看起来简直就像个球的恶心胖子咯吱咯吱地淫笑起来
+				PRINTFORML 在感到羞耻和期待的复杂感情下喘息着的%ANAME(対象)%被对方直接用肉棒捅到了深处
+				PRINTFORMW %ANAME(対象)%很快就被肉棒和多重束缚调教得丧失了理智，完全没有了要挣脱束缚逃脱的意图，沉迷于与男性的强奸性爱当中
+			CASE 14
+				LOCALS = 兵
+				PRINTFORML 某个休息日，在街上探索的时候，偶然遇到了休假的士兵，被搭话了
+				PRINTFORML 由于情欲，接近忍耐极限的%ANAME(対象)%适当地附和了一下，准备回去的时候，被士兵抓住了手臂
+				PRINTFORML 他一边用认真的目光注视着%ANAME(対象)%，一边提议好不容易才休息，邀请一起逛街
+				PRINTFORML 听对方的话到一半就已经意识到是优秀的男性的%ANAME(対象)%深深地点了头
+				PRINTFORMW 和他约会了一天之后，理所当然地被带回家了，就像夫妻一样努力地为生孩子而奋战
+			CASE 15
+				LOCALS = 店員
+				PRINTFORML 深夜，%ANAME(対象)%路过某家店前，被店员物色了
+				PRINTFORML %ANAME(対象)%被邀请作为仅限一夜的舞者，并开出了高额工资作为条件，于是%ANAME(対象)%在期待中干咽了一下点头同意
+				PRINTFORML %ANAME(対象)%那富有魅力的身体和灵活又淫荡的舞姿让台下的观众不断发出阵阵欢呼，现场的表演空前盛况
+				PRINTFORML %ANAME(対象)%暴露在如此多男性的眼中跳着舞蹈，终于结束之后先前早已隐隐作痛的子宫更加疼了
+				PRINTFORMW 关店后，无法忍耐的%ANAME(対象)%邀请店员去酒店，得到了店员的疼爱和夸赞之后%ANAME(対象)%完全恢复了精神
+			CASE 16
+				LOCALS = 医者
+				PRINTFORML %ANAME(対象)%为了止住下腹不断奔涌的疼过而去求医
+				PRINTFORML 医生让%ANAME(対象)%平躺在床上，以治疗的借口不断摸索之后皮肤，舔舐着敏感点
+				PRINTFORML 那个行为怎么看都只是性行为，不过，被快感与欲望俘获的%ANAME(対象)%做不出任何抵抗，只能让对方继续过分地触摸着
+				PRINTFORML 完全发情的%ANAME(対象)%早已无需治疗的解开，被医生抱在怀里不断操着淫穴，沉迷于性爱下肉体的欲望不断没有缓解反而更加高涨，在刺激下达到了多次高潮
+				PRINTFORMW 虽然过后子宫的痛感依旧没有得到缓解，但相信一切都会好的%ANAME(対象)%考虑着下次依旧再来
+			CASE 17
+				LOCALS = 占卜师
+				;TranslatedMark 占い師
+				PRINTFORML %ANAME(対象)%为了想办法解决无法平息的性欲，走向了被评价很好的占卜师的身边
+				PRINTFORML 占卜师看了一会%ANAME(対象)%的样子后，说这里有不好的东西附在身上，然后顺着腰间摸向了下腹
+				PRINTFORML 简直就像是直接抚摸子宫一样的快感袭击了%ANAME(対象)%，咿啊！随着尖声呻吟%ANAME(対象)%的身体也随之颤抖挺立，强烈的刺激也使得妹汁喷溅出来了一些
+				PRINTFORML 占卜师脸上浮现出令人讨厌的笑容，以治疗的名义搀扶着双腿颤抖的%ANAME(対象)%走向店内深处
+				PRINTFORMW 当然没有进行任何治疗，%ANAME(対象)%被他一味地侵犯着，多次将精液注入痉挛的子宫
+			CASE 18
+				LOCALS = 部下
+				PRINTFORML 深夜，无法平息疼痛的%ANAME(対象)%脑子也变得不好使了，穿着内衣在宫殿里徘徊
+				PRINTFORML %ANAME(対象)%感觉到从某个房间里飘出充满雄性的诱人气息，摇摇晃晃地顺着气味走了进去
+				PRINTFORML 那里是部下的一个房间，他被半夜突然出现的%ANAME(対象)%吓了一跳，然后看了那个打扮后又吓了一跳
+				PRINTFORML 但是%ANAME(対象)%毫不在意，带着发现男性的喜悦走近他，抱着他接吻
+				PRINTFORMW 部下当然无法忍受从犹如天而降的极品长官亲临寒舍，直到天亮之前都在%ANAME(対象)%的子宫内注射一波又一波精液
+			CASE 19
+				LOCALS = 兵
+				PRINTFORML 在训练中，%ANAME(対象)%对于突然涌起的肉欲慌了神，差点无法抵抗住士兵的攻击，慌忙地进行不够完美的躲闪，然后被重重地抽打到了屁股，被下级击打屁股而产生莫名的倒错感与无法抑制的肉欲，促使着妹汁在难以察觉的瞬间喷溅出来了一些，穴口也不由得用力收紧
+				PRINTFORML 对方慌忙地一边跑过来一边道歉，但%ANAME(対象)%也只是喘气着回复对方无须担心
+				PRINTFORML 从%ANAME(対象)%那无意识流露出的色气面容和看着%ANAME(対象)%那娇躯横卧在地上的样子，士兵不由得干咽一口
+				PRINTFORML 看到士兵胯股之间鼓起来的%ANAME(対象)%也忍不住邀请他作为胜利的奖赏
+				PRINTFORMW 作为胜利的奖励，%ANAME(対象)%和士兵在屋内不断交合着，任由内射一次又一次
+			CASE 20
+				LOCALS = 農民
+				PRINTFORML 巡回中，被肉欲冲击着神经到极限的%ANAME(対象)%，决定在附近农民家休息
+				PRINTFORML 到了小屋内，%ANAME(対象)%已经无法忍耐，脱去衣服，开始自慰，也不在意声音泄漏
+				PRINTFORML 如此羞耻的姿态就像发情的母狗一样不断自慰着，过了一会才发现农民正在门外偷窥
+				PRINTFORML 但是，%ANAME(対象)%既不能责备他，也不能阻止他自慰，反而是张开大腿像引诱他一样扭动着身体
+				PRINTFORMW %ANAME(対象)%就像顺从的妻子一样热心地为他服务，在子宫里内接受了好几次精液
+			CASE 21
+				LOCALS = 黑社會
+				PRINTFORML %ANAME(対象)%被黑社会风格的男性搂住了肩膀，强行带到了街角的一间屋内
+				PRINTFORML %ANAME(対象)%因淫纹的力量而子宫持续疼痛，双腿不停地颤抖着，没有足够的力气阻止对方强行邀请
+				PRINTFORML 被推倒在床、裸露着剥下来衣服的时候，脑袋里已经充满了想被雄性侵犯的期待
+				PRINTFORML 而他那粗暴又不客气的方式，给予了%ANAME(対象)%超出期待的快感，被对方顶上多次剧烈的高潮
+				PRINTFORMW 分离的时候，%ANAME(対象)%被他抚摸了被精液灌满温热着的下腹，正好按在着淫纹纹路的地方有如直接刺激子宫一样，让%ANAME(対象)%不由得呻吟起来，紧闭着密缝的时候精液和妹汁溢出来了一些
+			CASE 22
+				LOCALS = 盗窃犯
+				;TranslatedMark ゴロツキ
+				PRINTFORML 巡回中，%ANAME(対象)%为了追踪盗窃现行犯进入了贫民窟
+				PRINTFORML 当对方被逼到贫民窟的死胡同时，下腹子宫像是被叩击一样"咚"的一声！%ANAME(対象)%的子宫开始剧烈疼痛
+				PRINTFORML %ANAME(対象)%情不自禁地发出雌性特有的妩媚的声音，扭动身体蹲在原地扭捏着
+				PRINTFORML 男子不可能放过那个间隙，上前直接对着%ANAME(対象)%因为下蹲而稍微朝前的私处猛地一踢，使得%ANAME(対象)%双眼上翻，身体向后飞出了一小段距离，强烈的疼痛和剧烈的刺激带来的双重冲击下，再加上淫纹从中作梗提高了全身的敏感度，%ANAME(対象)%用双脚脚尖踮起着身体，抬高腰部，浑身颤抖着急促娇喘，剧烈潮吹高潮了，男子看着%ANAME(対象)%如此淫乱的样貌浮现出嗜虐的笑容，按着%ANAME(対象)%在墙上之后，重拳击打了%ANAME(対象)%的腹部，而在第二次击打下腹的时候%ANAME(対象)%那激烈的反应似乎也让男子明白了什么，紧接着又重复了好几次....%ANAME(対象)%在对着无法有效抵抗的%ANAME(対象)%敏感部位进行性虐待式殴打与踢击之后，扛着倒下颤抖并还在溢出妹汁的%ANAME(対象)%带进了巢里
+				PRINTFORMW 已经无力抵抗止不住发抖的%ANAME(対象)%被对方在进行发泄完毕之前，以各种方式连插带打着惩罚着，疼痛与快感的强烈交织让阴道紧缩肉棒的同时意识也变得模糊，偶尔下意识地上翻着瞳孔，视线模糊，被对方的暴行责备着已经无力抵抗的肉体，一次又一次被快速打向高潮...
+			CASE 23
+				LOCALS = 盗窃犯
+				;TranslatedMark ゴロツキ
+				PRINTFORML 突然下起大雨的%ANAME(対象)%在山洞里避雨，突然从背后堵住了嘴，抱住了腰
+				PRINTFORML 似乎本来就有人在这，对方像被%ANAME(対象)%色情的气息所刺激到，像野兽一样喘息着
+				PRINTFORML 只是轻轻地被捏起变得敏感的乳头，快感就蔓延至了全身，娇喘声也随之高亢，在那瞬间被对方推倒了
+				PRINTFORML 虽然%ANAME(対象)%尝试着拼命抵抗，但身体还是很老实地接受着不断刺激的快感，湿热黏滑的淫穴早已不由靠着不时挤压肉棒
+				PRINTFORMW 正想要逃跑的刹那间，男子对着下腹粗暴的冲击立刻让%ANAME(対象)%身体深处的雌性本能激发出来，止不住地颤抖着身体娇喘着，随后在对方满足之前依然没有停下来过
+			CASE 24
+				LOCALS = 客
+				PRINTFORML 深夜，%ANAME(対象)%在郊外的小巷里穿着淫荡的衣服，模仿娼妇的行为
+				PRINTFORML 名义上是为了调查这个地区的治安而进行的潜入搜查，但其瞳孔里明显包含着某种期待的颜色
+				PRINTFORML 被%ANAME(対象)%所散发的荷尔蒙和富有魅力的娇躯引诱的让某个男人驻足注视，然后以相应的价格买了一夜
+				PRINTFORML 因为是模仿娼妇的样子并不是真的娼妇，所以没有必要真的买，但是在子宫疼痛的诱惑下，%ANAME(対象)%还是点了点头。
+				PRINTFORMW 和偶然的男人只是任凭肉欲的性交快感就让%ANAME(対象)%兴奋得不得了，像是真正的娼妇一样被男子内射了多次
+			CASE 25
+				LOCALS = 悪漢
+				PRINTFORML 在巡回中，%ANAME(対象)%发现了被二人组歹徒袭击的女性所发出的求助信号
+				PRINTFORML 武力毫不输于对方二人的%ANAME(対象)%激烈打击，一下子就把两人打倒，击倒之后不由得脸红着大喘气着
+				PRINTFORML 他们强烈浓厚的雄性气息冲击着%ANAME(対象)%的神经，让子宫突然发痛起来，脑中到处都是想马上被侵犯的冲动
+				PRINTFORML 在因肉欲兴起而出神的一瞬间，一个恶棍把一个女人当人质，无完全获胜把握的%ANAME(対象)%只得听从对方的命令放下武器
+				PRINTFORMW %ANAME(対象)%和路人女性一起被当成俩人的性奴隶不断侵犯，调教到最后完全发情的二人主动地为强盗侍奉，在性欲终于消散恢复理智并重新打败恶人逃离之前，俩人都被对方们各种中出了
+			CASE 26
+				LOCALS = 兵
+				PRINTFORML %ANAME(対象)%双眼黑圈，摇摇晃晃地工作着
+				PRINTFORML 为了抑制最近涌现的肉欲，每天晚上都要自慰，但不知为何为什么这么自慰都不够满足，只能不断地积累疲劳和性欲
+				PRINTFORML 士兵在向%ANAME(対象)%报告工作情况的时候%ANAME(対象)%完全没有听进去，凝视着他的胯股之间，突然就发出了想要被侵犯的请求
+				PRINTFORML 终于理性达到了极限的%ANAME(対象)%叫住了即将离开房间的他，作为工作的奖励在对方眼前脱下了衣服
+				PRINTFORMW 士兵的殷勤爱欲让%ANAME(対象)%一次次达到快乐的顶峰，在那之后一个劲地让%ANAME(対象)%达到高潮
+			CASE 27
+				LOCALS = 流浪妖怪
+				PRINTFORML 某个休息日，在山里发现温泉的%ANAME(対象)%泡了进去
+				PRINTFORML 在慢慢泡进去的时候透过浓雾才发现先前早已经在这里泡着的妖怪，%ANAME(対象)%慌张地移开视线
+				PRINTFORML %ANAME(対象)%的目光无意识地被对方粗壮的肉棒所吸引，无意识地开始责弄秘所
+				PRINTFORML 对方注视着%ANAME(対象)%诱人的身躯一会之后，突然在%ANAME(対象)%的面前站起来并把肉棒向前挺起
+				PRINTFORMW 水的跳跃声和%ANAME(対象)%的娇声很快就传开了，妖怪的无底耐力让人爱不释手
+			CASE 28
+				LOCALS = 流浪妖怪
+				PRINTFORML %ANAME(対象)%在山路上行走的途中，脚滑了一下，脚崴了
+				PRINTFORML 日暮途穷的时候，妖怪来了，抱着%ANAME(対象)%带回巢里细心地给予治疗
+				PRINTFORML %ANAME(対象)%被对方要求静下来先静养一会的时候，身体因为无法忍受充满巢穴里的雄性气息而发情了
+				PRINTFORML 以回礼的借口去诱惑着妖怪，于是对方毫不客气地抱着%ANAME(対象)%，被那粗壮的肉棒侵犯起来，%ANAME(対象)%发出喜悦的声音
+				PRINTFORMW 之后，%ANAME(対象)%的伤口痊愈了，一边感受着他在子宫内聚集在卵子上的精子，一边恋恋不舍地告别
+			CASE 29
+				LOCALS = 流浪妖怪
+				PRINTFORML 在里山巡回中，%ANAME(対象)%遇到了正在诱拐村女的流浪妖怪
+				PRINTFORML 虽然%ANAME(対象)%想拔刀惩办，但在那之前被发现，女儿被当成人质劫持，场面僵住了
+				PRINTFORML 在脑子里想办法打开局面的时候，突然他勃起的肉棒映入眼帘，子宫剧烈疼痛
+				PRINTFORML %ANAME(対象)%手抖地放下武器后掀开了裙子，微微地吐出甜美的气息，宣告用自己来代替村娘
+				PRINTFORMW 被带回他的巢穴的%ANAME(対象)%，忘记了替少女作为人质的借口，埋头于和他激烈的性交当中
+			CASE 30
+				LOCALS = 囚人
+				PRINTFORML %ANAME(対象)%为了检查犯人的和调查的况前来监狱视察
+				PRINTFORML 渴望女人的囚犯们都一样将卑微的视线投向%ANAME(対象)%，发出下流的叫声
+				PRINTFORML 虽然%ANAME(対象)%想极力抑制被他们雄厚的雄性气息所刺激发热的身体，满脑子都是被他们侵犯的妄想，注意到的时候私处早已经湿透了
+				PRINTFORML 已经无法忍耐的%ANAME(対象)%选择了几个喜欢的囚犯，让狱警押送进审问室并出去，只留下%ANAME(対象)%和囚犯们待在一起
+				PRINTFORMW %ANAME(対象)%忘记了询问的名义，一整晚被囚犯们任意侵犯，用肮脏的精液填满了子宫
+			CASE 31
+				LOCALS = 流浪漢
+				PRINTFORML 某个休息日，%ANAME(対象)%参加了在贫民窟的做饭活动
+				PRINTFORML 为了摆脱淫纹侵蚀的影响而尽力集中精神在烹饪上，突然被一个流浪汉揉了屁股，不由得呻吟起来
+				PRINTFORML 对方一边淫笑着一边要求%ANAME(対象)%无论如何都能提供性服务，被分了心的%ANAME(対象)%无法拒绝地被对方带进隐蔽的胡同
+				PRINTFORML 被肮脏的流浪汉粗暴地侵犯，被毫不客气地中出着，使%ANAME(対象)%无比兴奋和激动
+				PRINTFORMW 完成服务的%ANAME(対象)%想着被他肮脏的精液搞到孕育的话该怎么办呢♥一边兴奋着，一边若无其事地回到了煮饭的活动中
+			CASE 32
+				LOCALS = 商人
+				PRINTFORML %ANAME(対象)%在豪华酒店的一个房间里和某个商人进行会谈
+				PRINTFORML 正如和喜欢女人的传言所说，他始终用讨厌的目光盯着%ANAME(対象)%，如果有机会就会趁机揩油
+				PRINTFORML 最初拼命忍耐快感蔓延至全身的%ANAME(対象)%，由于淫纹逐渐发作提高了敏感度，每次被触碰到敏感点周围时都会被子宫微微发疼的刺激感所冲击神经，逐渐变得难以忍受
+				PRINTFORML 对方看出来了什么似的一脸淫笑着逐渐靠近一脸发情淫荡的%ANAME(対象)%，吻上那不断喘息着淫荡气息的嘴唇后直接按倒了发热的身体
+				PRINTFORMW 对方满足于极品的接待之后满足地回去了，只留下在浸湿的床单上不断颤抖的%ANAME(対象)%
+			CASE 33
+				LOCALS = 哥布林
+				PRINTFORML 下腹的淫纹发作使得身体变得发热起来，双腿时不时微微颤抖着走在山间小道上的时候，突然遭了哥布林的追杀
+				PRINTFORML 虽然不可能输给一只小鬼，但是突然被翘立在他的胯股之间雄壮粗长的男根吸引住了视线
+				PRINTFORML 要是被那个流氓侵犯了会怎么样呢…%ANAME(対象)%的头脑立刻就被这样的思考所填满
+				PRINTFORML 回过神来的时候，%ANAME(対象)%早已丢下了武器，仰面朝天地躺着大张双腿，瞳孔中早已浮现和淫纹一样高亮着的♥ 脸上的表情就像淫荡的雌犬一样，全身摆成了向对方投降的姿势
+				PRINTFORMW 被带回巢穴的%ANAME(対象)%被作为他的专用繁殖肉便器侵犯并里外玷污了个遍，无情地内射了许多次
+			CASE 34
+				LOCALS = 流氓
+				PRINTFORML %ANAME(対象)%在某民房的床上，被房东抱着，一脸出神的样子
+				PRINTFORML 在街上被搭讪的时候，%ANAME(対象)%的淫纹刚好发作使得子宫都疼痛起来，之后也被那个强壮的雄性力量所吸引。
+				PRINTFORML 虽然被男人用粗暴的语气宣布要当成宠物来收养，但是%ANAME(対象)%没有抵抗的意思，反而只顾着享受不断冲击的欢愉
+				PRINTFORML %ANAME(対象)%一脸淫荡的样子像是雌犬一样被对方要求宣誓效忠为宠物，理所当然地答应之后对方作为奖赏又一次将强壮的肉棒给推了进去
+				PRINTFORMW 之后每天晚上都会被那男的抱回家里，作为他喜欢的女人被没完没了地调教
+			CASE 35
+				LOCALS = 流氓
+				PRINTFORML 听说最近治安恶化，于是%ANAME(対象)%亲自下基层夜里巡逻着
+				PRINTFORML 走着夜路本该带着防身武器的%ANAME(対象)%却什么都没有，反而那双眼睛里能看到某种期待的颜色
+				PRINTFORML 走在夜晚的街道上，一个形迹可疑的人影从背后逼近，仿佛被%ANAME(対象)%吸引住似的
+				PRINTFORML %ANAME(対象)%刻意走进了昏暗隐蔽的小巷里，然后正如心里期待的那样被对方搂紧脖子给扛起来劫走了
+				PRINTFORMW 被捕的%ANAME(対象)%被流氓侵犯了一整晚，虽然被中出了但却多次达到了令人愉悦的高潮
+			CASE 36
+				LOCALS = 流浪妖怪
+				PRINTFORML 听到村子附近住着流浪妖怪的报告后，%ANAME(対象)%前去讨伐
+				PRINTFORML 当然，最初是打算讨伐的%ANAME(対象)%，但一看到他，那种想法就消失了
+				PRINTFORML %ANAME(対象)%被对方健硕的身躯和视奸一样的眼神给镇住了，目光被股间那翘起雄壮的肉棒所吸引
+				PRINTFORML 对方看见%ANAME(対象)%的脸上逐渐浮现出淫荡的表情之后意识到了什么，对着%ANAME(対象)%飞踢了过去，被袭击的%ANAME(対象)%难以招架，在第二次失败的躲闪并被刚好击打在下腹引发的剧烈疼痛和麻酥的快感所导致浑身乏力之后，毫无抵抗地被对方给抗了回去
+				PRINTFORMW %ANAME(対象)%一直被作为他的玩具，或者妻子，或者被当成他所解放的性奴隶一直不停地侵犯着，在注意到%ANAME(対象)%极易发情的体质后变得更加变本加厉了
+			CASE 37
+				LOCALS = 流浪漢
+				PRINTFORML %ANAME(対象)%在贫民窟的一角，穿着破旧的衣服鬼鬼祟祟地徘徊着
+				PRINTFORML 为了想被男人粗暴侵犯的%ANAME(対象)%终究无法忍耐住淫纹所带来的的肉欲，于是想到了贫民窟里不乏有着巨根并少见女人的居民们
+				PRINTFORML 如果和他们在一起的话，应该能达到相当高的期待值，并且因为缺乏女性应该能被他们饥渴难耐地毫不留情按着狠操一顿
+				PRINTFORML 怀着满心期待的心情，一个中年人立刻和%ANAME(対象)%搭话，%ANAME(対象)%发出了声音回应
+				PRINTFORMW %ANAME(対象)%在天亮之前反复被几个流浪汉抱在怀里按着狠操，享受到了超出预期的肮脏性爱
+			CASE 38
+				LOCALS = 小混混
+				PRINTFORML 噗啾一声！大量的精液倾泻在子宫里，%ANAME(対象)%颤抖着扬起身体
+				PRINTFORML 被不知道名字的小混混搭讪的%ANAME(対象)%毫不犹豫地被他邀请去了酒店
+				PRINTFORML 然后一进屋就被他推倒，被那个健壮的男根刺激了好几次，不断发出抑制不住的娇喘
+				PRINTFORML 对于和初次见面的男人进行性交这一事实，%ANAME(対象)%感到更加兴奋了，比平时更加激烈地与对方进行交合
+				PRINTFORMW 被对方拍下自己淫乱的照片为由来索要联络方式的%ANAME(対象)%，无法拒绝地遵从了命令
+			CASE 39
+				LOCALS = 男の子
+				PRINTFORML 在一个民宅里，%ANAME(対象)%和一个小男孩一起洗澡
+				PRINTFORML 被父母拜托保护孩子的%ANAME(対象)%，面对着眼前年幼活泼的孩子不由得子宫生疼，不能忍耐施予了性教育
+				PRINTFORML 小男孩学会了性的滋味，把%ANAME(対象)%推倒，像猴子一样忘情地摆动着腰，射出了精液
+				PRINTFORML 对方每一次突刺都变得越来越像真正的大人一样，%ANAME(対象)%的子宫被精液灌满弄得刺痛起来，全身都接受了他的全部欲望
+				PRINTFORMW 之后对方的父母相当满意，请求着下次再陪护在孩子身边，%ANAME(対象)%舔着嘴唇答应了
+			CASE 40
+				LOCALS = 野良犬
+				PRINTFORML %ANAME(対象)%在夜色笼罩的公园里全裸着四肢着地
+				PRINTFORML 虽然看起来像狗一样难看，但表情却是那么的灿烂，像是兴奋的样子，大口地吐着舌头
+				PRINTFORML 周围聚集着很多野狗，兴奋地吼叫着，并且都在翘立着兴奋的肉棒
+				PRINTFORML %ANAME(対象)%干咽着就摆出服从的姿势，把在夜色笼罩下将皮肤都照应着略微反光的屁股翘了起来，诱惑着兴奋的狗群
+				PRINTFORMW 天亮的时候，全身被狗的精液沾染，浑身乏力的%ANAME(対象)%幸福地躺在精液堆里
+			CASE 41
+				LOCALS = 天狗
+				PRINTFORML 在和天狗玩弹幕游戏的时候，突然被子宫的疼痛袭击的%ANAME(対象)%逐渐分心，向上躲闪的时候因为不及时而被集中了下腹位置，近乎于直击子宫的疼痛混合着剧烈的刺激感让%ANAME(対象)%被击飞出去，微微溢出的妹汁透过湿透的小缝在空中划出了一道不连续并难以察觉的银色弧线，随后重重摔在地上躺倒，挺起着腰大张着腿的样子宣告了%ANAME(対象)%
+				PRINTFORML 在当场被侵犯后，被对方给予的幸福感所迷住，然后连抱带拖地带了回去
+				PRINTFORML 每天晚上都被那无底的性欲与体力压制着性交，直到双腿发软地站不起来为止都没有听过，不断被侵犯着几乎没有时间恢复力气，很开就变成了想逃也因为无力动弹而逃不掉的局面
+				PRINTFORML 但是，就算理性地想要逃避，身体和心灵也已经被他出色的肉棒给迷住了
+				PRINTFORMW %ANAME(対象)%和天狗像是恋人一样随着时间的流逝不断交合，不知不觉中自己也沉浸在其中
+			CASE 42
+				LOCALS = 庄屋
+				PRINTFORML %ANAME(対象)%在外勤时顺路去某个村长的宅邸里留宿
+				PRINTFORML 但是，淫纹却在这种关键时刻突然发作了，子宫不断隐隐作痛，身体难受得不得了
+				PRINTFORML 终于忍不住了的%ANAME(対象)%带着迷糊地来到村长的房间，请求他的恩惠
+				PRINTFORML 他也不是能忍受这种幸运的好事，在子宫的疼痛被精液缓解足够平息之前一整晚都被中出着
+				PRINTFORMW 在和他美好的一夜之间，%ANAME(対象)%如痴如醉，约定近期再会
+			CASE 43
+				LOCALS = 流浪妖怪
+				PRINTFORML %ANAME(対象)%一个人在酒馆喝酒，被一个一看就是轻浮的男子搭话
+				PRINTFORML 想找个理由推脱开的时候却发现尾巴在后面摇晃，似乎是某只妖怪幻化成人形的样子
+				PRINTFORML 本来是应该消灭的，但是下腹的淫纹突然亮起耀眼的光辉♥ 子宫受到阵阵冲击的%ANAME(対象)%被迫发情了
+				PRINTFORML 已经满脑子H和肉棒%ANAME(対象)%，没有拒绝老实地跟在他身边
+				PRINTFORMW 被已经原形毕露的下等妖怪按着反复中出了多次，意识里知道这不应该是这样，但身体已经完全被肉棒冲击屈服了
+			CASE 44
+				LOCALS = 性骚扰的客人
+				;TranslatedMark セクハラ客
+				PRINTFORML %ANAME(対象)%傍晚时分在酒吧里穿着兔女郎装兼职服务员工作着
+				PRINTFORML 虽然打着体验领民工作的旗号，但是表情明显的却孕育着淫荡的气息，散发着超出必要的魅力
+				PRINTFORML 散发着色情气息的%ANAME(対象)%很正常地被客人们性骚扰着，%ANAME(対象)%虽然用语言来抵抗，但还是接受了一次又一次揩油行为
+				PRINTFORML 其中一名客人的性骚扰行为过于强烈，早已无法忍耐的%ANAME(対象)%在对方感到满足的时候被带进了单间
+				PRINTFORMW 结果在工作结束之前，得到了好几个客人的中出款待，一脸愉悦的接受了客人在子宫反复中出的精液
+		ENDSELECT
+		CALL FUCK_RAPE(対象, GET_SPERM_ID("偶遇的男人"), @"%LOCALS%の\@ RAND:2 ? 肉棒 # 唇\@", @"%LOCALS%")
+		PRINTFORML
+		;追加分岐
+		IF あなたへの想い >= 10000 && DVAR:淫紋_あなた依存 >= 0 && !(対象 == MASTER)
+			PRINTFORMW …但是，尽管如此，%ANAME(対象)%的情欲还是没能平息
+			;TranslatedMark …しかし、それでもなお%ANAME(対象)%の情欲は治まらなかった
+			PRINTFORMW 在被淫纹带来的恶魔的性欲支配着身体的情况下，浮现在她的脑海里的是%ANAME(MASTER)%的身姿
+			;TranslatedMark 淫紋が与える悪魔の性欲が身体を支配する中、彼女の頭に浮かんだのは%ANAME(MASTER)%の姿だった
+			PRINTFORML 如果和%ANAME(MASTER)%做爱的话，也许就可以缓解这种难以忍受的冲动了
+			;TranslatedMark %ANAME(MASTER)%に抱かれたら、この耐え難い衝動を止められるかもしれない
+			PRINTFORMW %ANAME(対象)%颤抖着身体，走向%ANAME(MASTER)%的房间…
+			;TranslatedMark %ANAME(対象)%は身体を震わせながら、%ANAME(MASTER)%の部屋に向かった…
+			PRINTFORMW ･･･
+			IF DVAR:淫紋_あなた依存 >= 1
+				PRINTFORMW %ANAME(対象)%以衣冠不整的姿态再次来到了%ANAME(MASTER)%的房间
+				;TranslatedMark %ANAME(対象)%があられもない格好で再び%ANAME(MASTER)%の部屋を訪れた
+				PRINTFORML 因淫纹而发情，以一副仿佛写着"来侵犯我"的充满雌性欲望的表情一点点向%ANAME(MASTER)%逼进…
+				;TranslatedMark 淫紋によって発情し、「自分を犯してくれ」と雌の顔で%ANAME(MASTER)%に詰め寄る…
+			ELSE
+				PRINTFORMW %ANAME(MASTER)%觉察到了来拜访自己的%ANAME(対象)%的异状
+				;TranslatedMark %ANAME(MASTER)%は、自らの部屋を訪ねてきた%ANAME(対象)%の異様な雰囲気を感じた
+				PRINTFORML 一眼就能看出来的十分明显的发情，还以充满雌性欲望的表情凝视着%ANAME(MASTER)%
+				;TranslatedMark 一目で分かるほど発情し、雌の顔で%ANAME(MASTER)%を見つめてくる
+				PRINTFORMW 恐怕是因为在那天晚上和恶魔定下了契约吧
+				;TranslatedMark おそらくは自分があの夜、悪魔との契約を交わしたことによるものだろう
+			ENDIF
+			PRINTFORMW %ANAME(MASTER)%决定……
+			;TranslatedMark %ANAME(MASTER)%は……
+			PRINTFORML
+			;断ると新ルート終了
+			CALL ASK_YN("抱她", "拒绝")
+			IF RESULT == 1
+				PRINTFORML %ANAME(MASTER)%看着有如花柳街的卖春女一样的%ANAME(対象)%表明了自己没有和这样的人做爱的意愿
+				;TranslatedMark %ANAME(MASTER)%は、売女の如き様子の%ANAME(対象)%を抱く気になれなかった
+				PRINTFORMW 被%ANAME(MASTER)%拒绝了的%ANAME(対象)%只能一个人回到房间自慰
+				;TranslatedMark %ANAME(MASTER)%に断られた%ANAME(対象)%は一人部屋に戻り、自らを慰めるしかなかった
+				PRINTFORMW 但是，由淫纹引起的躁动感逐渐转变为难以忍受的疼痛，无论怎么自慰也不见好转……
+				;TranslatedMark しかし淫紋による疼きは、どれだけ自分で慰めようと治まることはなかった……
+				DVAR:淫紋_あなた依存 = -1
+			ELSE
+				PRINTFORMW 她变成现在这样是%ANAME(MASTER)%的责任
+				;TranslatedMark 彼女がこうなったのは自分の責任だ
+				PRINTFORML %ANAME(MASTER)%决定负起责任接受她的情欲
+				;TranslatedMark %ANAME(MASTER)%は責任を持って、彼女の情欲を受け止めることにした
+				PRINTFORMW ･･･
+				SELECTCASE RAND:12
+					CASE 0
+						PRINTFORML %ANAME(対象)%被%ANAME(MASTER)%侵犯，忍不住挺起腰来，娇喘不止
+						;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に犯されながら腰をくねらせ大きな嬌声を上げる
+						PRINTFORMW 刻在身上的淫纹给她带来了非同寻常的快感，使她比平时更加淫乱
+						;TranslatedMark 刻まれた淫紋が彼女に異常な快感を与え、いつも以上に乱れさせる
+						PRINTFORML %ANAME(MASTER)%不断用肉棒咕哩咕哩地顶着子宫口，%ANAME(対象)%忍不住颤抖着身体发出娇喘
+						;TranslatedMark %ANAME(MASTER)%がペニスでポルチオをグリグリ攻めると、%ANAME(対象)%はたまらず甘い声で喘ぎ身体を跳ねさせる
+						PRINTFORML %ANAME(対象)%在绝顶的同时，双眼满溢出爱意，张开手臂诱惑着%ANAME(MASTER)%
+						;TranslatedMark %ANAME(対象)%は絶頂しながら目をハートにしながら%ANAME(MASTER)%を見つめて、大きく手を広げて誘う
+						PRINTFORMW 被%ANAME(MASTER)%紧紧抱住的同时在膣内被注入了精液，%ANAME(対象)%身体痉挛着的同时剧烈地高潮了
+						;TranslatedMark %ANAME(MASTER)%にぎゅぅっと抱きしめられながら子種を注がれ、%ANAME(対象)%は足をピンと伸ばしながら激しく絶頂した
+					CASE 1
+						PRINTFORML %ANAME(対象)%被%ANAME(MASTER)%从背后抓住双臂，以站立后入的姿势激烈地抽插着
+						;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に背後から両腕を掴まれ、立ちバックの姿勢で激しく小突かれている
+						PRINTFORMW 比平常做的时候更加粗暴，但是%ANAME(対象)%由于淫纹的作用而对此感到兴奋，每次插入的时候都会发出娇喘来迎合
+						;TranslatedMark 普段より乱暴なセックスにも%ANAME(対象)%は淫紋の作用により興奮し、一突き毎に悦びの声を上げてペニスを受け入れる
+						PRINTFORML %ANAME(MASTER)%被%ANAME(対象)%痴态所影响，越发激烈的活塞运动让%ANAME(対象)%的子宫不住颤抖
+						;TranslatedMark %ANAME(対象)%の反応に気を良くした%ANAME(MASTER)%は、更に激しく子宮内に響くようなストロークを繰り出し彼女を責める
+						PRINTFORMW 被渴望着精液的阴道紧紧吸附着，%ANAME(MASTER)%忍不住射精了，%ANAME(対象)%一边颤抖着一边达到了绝顶
+						;TranslatedMark 精をねだるような膣の締め付けに我慢できなくなった%ANAME(MASTER)%が射精すると、%ANAME(対象)%は体を跳ね上げながら絶頂した
+					CASE 2
+						PRINTFORML %ANAME(対象)%被%ANAME(MASTER)%用正常位以激烈的势头侵犯着
+						;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に正常位で激しく犯されている
+						PRINTFORMW 每当%ANAME(MASTER)%将腰顶上，肉棒在膣内摩擦时，%ANAME(対象)%都会以露出欲罢不能的表情扭动着身体
+						;TranslatedMark %ANAME(MASTER)%が腰を振りペニスで膣内をなぞられる度、%ANAME(対象)%はたまらないといった表情で体をくねらせる
+						PRINTFORML 受到淫纹的影响，%ANAME(対象)%用更加淫荡的表情和动作渴求着精液
+						;TranslatedMark 淫紋により、いっそう淫らな表情と仕草で精をねだる%ANAME(対象)%
+						PRINTFORML 看着她这淫乱的姿态，%ANAME(MASTER)%也变得更加兴奋，更加激烈地晃动着腰，索求着交欢的快乐
+						;TranslatedMark その乱れぶりに%ANAME(MASTER)%の興奮も一層昂ぶり、更に激しく腰を打ちつけ快楽を貪りあう
+						PRINTFORMW 不久%ANAME(MASTER)%一边低声呻吟一边在膣内的深处射精了，%ANAME(対象)%也以一副不成体统的表情留着口水高潮了
+						;TranslatedMark やがて%ANAME(MASTER)%が低く唸り膣奥に射精すると、%ANAME(対象)%もまただらしなく涎を垂らしながら絶頂した
+					CASE 3
+						PRINTFORML %ANAME(対象)%一边被%ANAME(MASTER)%侵犯一边淫荡地扭动着身体。
+						;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に犯されながら艶めかしく体をくねらせている
+						PRINTFORMW 由于淫纹而变得敏感的身体，感受到比平时更加强烈的快感，连绵不断的高潮吞噬了%ANAME(対象)%
+						;TranslatedMark 淫紋によって敏感になった肉体は、いつも以上に過敏に快感を感じ、絶頂の波が%ANAME(対象)%を飲み込む
+						PRINTFORML %ANAME(対象)%被这种快感所俘虏，露出恍惚的表情
+						;TranslatedMark %ANAME(対象)%はその快楽の虜になり、すっかり惚けてしまっている
+						PRINTFORML 用以平常的%ANAME(対象)%来看绝对无法想象的淫靡的表情说出淫荡的言语索求着%ANAME(MASTER)%
+						;TranslatedMark 普段の%ANAME(対象)%からは想像も出来ないような淫靡な表情で淫らな言葉を紡ぎ%ANAME(MASTER)%を求める
+						PRINTFORMW %ANAME(対象)%陶醉于%ANAME(MASTER)%给予的快乐，不断地被侵犯，将身为雌性的快乐刻入了灵魂
+						;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に与えられる快楽に陶酔しながら、犯されるままに犯され、雌の悦びを魂に刻み込んだ
+					CASE 4
+						PRINTFORML %ANAME(対象)%被%ANAME(MASTER)%侵犯，忍不住挺起腰来，娇喘不止
+						;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に犯されながら腰をくねらせ大きな嬌声を上げる
+						PRINTFORMW 刻在身上的淫纹给她带来了前所未有的快感，让她比平时更加淫乱
+						;TranslatedMark 刻まれた淫紋が彼女に異常な快感を与え、いつも以上に乱れさせている
+						PRINTFORML %ANAME(MASTER)%不断用肉棒咕哩咕哩地顶着子宫口，%ANAME(対象)%忍不住颤抖着身体发出娇喘
+						;TranslatedMark %ANAME(MASTER)%がペニスでポルチオをグリグリ攻めると、%ANAME(対象)%はたまらず甘い声で喘ぎ身体を跳ねさせる
+						PRINTFORML %ANAME(対象)%在绝顶的同时，双眼满溢出爱意，张开手臂诱惑着%ANAME(MASTER)%
+						;TranslatedMark %ANAME(対象)%は絶頂しながら目をハートにしながら%ANAME(MASTER)%を見つめて、大きく手を広げて誘う
+						PRINTFORMW 被%ANAME(MASTER)%紧紧抱住的同时在膣内被注入了精液，%ANAME(対象)%身体痉挛着的同时剧烈地高潮了
+						;TranslatedMark %ANAME(MASTER)%にぎゅぅっと抱きしめられながら子種を注がれ、%ANAME(対象)%は足をピンと伸ばしながら激しく絶頂した
+					CASE 5
+						PRINTFORML %ANAME(対象)%被%ANAME(MASTER)%的指技折服，沦为了快乐的俘虏
+						;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の指使いで攻められると、すぐに虜になってしまった
+						PRINTFORML 朦胧地发着光的淫纹给她带来了难以忍受的快感，被刻下了身为雌性的喜悦
+						;TranslatedMark ぼんやりと光る淫紋が、彼女に過剰なほどの快感を与え、雌として扱われる悦びを刻んでいる
+						PRINTFORML 无法忍耐的%ANAME(対象)%摆出服从的姿势，张开被不断溢出的爱液弄的粘稠不已的秘裂向%ANAME(MASTER)%索取
+						;TranslatedMark 我慢できなくなった%ANAME(対象)%は服従のポーズになり、とろとろになった秘裂を割れ開いて%ANAME(MASTER)%におねだりする
+						PRINTFORML %ANAME(MASTER)%如她所愿取出肉棒，%ANAME(対象)%目不转睛地盯着肉棒，迫不及待地等待着插入
+						;TranslatedMark %ANAME(MASTER)%は望みどおり肉棒を取り出すと、%ANAME(対象)%の視線は釘付けになり口から涎を垂らして挿入を待ち望んでいる
+						PRINTFORMW 接受了成为雌穴的自己的%ANAME(対象)%，每次被肉棒插入的时候都会一边颤抖着子宫一边达到高潮
+						;TranslatedMark 雌穴となった自分を受け入れた%ANAME(対象)%は、肉棒を突き込まれる度に子宮を震わせながら絶頂した
+					CASE 6
+						PRINTFORML %ANAME(対象)%被压在墙壁上侵犯
+						;TranslatedMark %ANAME(対象)%は壁に寄りかかりながら犯されている
+						PRINTFORMW 被%ANAME(MASTER)%抬起一只脚，以像做瑜伽一样的脚尖着地的姿势被肉棒激烈地侵犯着
+						;TranslatedMark %ANAME(MASTER)%に片足を持ち上げられ、爪先立ちの格好でペニスを激しく出し入れされながらヨガっている
+						PRINTFORML 难以忍受的性冲动冲淡了她的理性，让她变成只知道索求快感的雌性
+						;TranslatedMark 耐え難い性の衝動が彼女の理性を消し飛ばし、ただただ快楽を貪る雌にした
+						PRINTFORML %ANAME(MASTER)%的肉棒以要将子宫挖出般的气势不停做着活塞运动，%ANAME(対象)%因为难以忍受的快感而不断颤抖
+						;TranslatedMark %ANAME(MASTER)%のペニスで子宮を抉る様に小突かれ続けて、%ANAME(対象)%はあまりの快楽にガクガクと震える
+						PRINTFORMW 当浓厚的精液被射到膣内深处后，%ANAME(対象)%一副欲罢不能的样子，摆出诶嘿颜娇喘着达到了高潮
+						;TranslatedMark 濃厚な精液を膣奥に放たれると、%ANAME(対象)%はたまらずアヘ顔で嬌声を上げて絶頂した
+					CASE 7
+						PRINTFORML %ANAME(対象)%一边以对面座位的姿势让肉棒插入体内，一边和%ANAME(MASTER)%互相交缠着舌头
+						;TranslatedMark %ANAME(対象)%は対面座位の体勢でペニスを咥えこみながら%ANAME(MASTER)%と舌を絡ませている
+						PRINTFORMW 充满着饥渴互相缠绕着舌头，阴道内的肉棒就会感觉膣内在不断颤抖
+						;TranslatedMark 貪るようにお互いの舌を絡ませていると、膣内のペニスがビクビクと震えるのを感じる
+						PRINTFORML 松开嘴唇后，两人一边互相凝视着一边不断扭动这腰，%ANAME(MASTER)%像是十分舒服一样低声呻吟着
+						;TranslatedMark 唇を離し互いを見つめあいながら腰をクイクイとくねらせると、%ANAME(MASTER)%が気持ち良さそうに呻く
+						PRINTFORML %ANAME(対象)%感觉到，就算被多个男人所侵犯了也无法满足的内心被与%ANAME(MASTER)%的性交所满足
+						;TranslatedMark %ANAME(対象)%は、数多の男に犯されても満足できなかった心が%ANAME(MASTER)%とのセックスで満たされていくのを感じていた
+						PRINTFORMW 两人再次一边接吻一边摇晃起了腰，在激烈的交欢中迷失了自我，疯狂索求着对方
+						;TranslatedMark 二人は再びキスをしながら腰を揺すりあい、ひたすら互いを貪りあうセックスに没頭した
+					CASE 8
+						PRINTFORML %ANAME(対象)%抱紧盘腿而坐的%ANAME(MASTER)%，坐在%ANAME(MASTER)%的身上，不断摆动着腰
+						;TranslatedMark %ANAME(対象)%は、胡坐をかいた%ANAME(MASTER)%の上に座るように抱きつき腰を振っている
+						PRINTFORMW %ANAME(対象)%被%ANAME(MASTER)%玩弄着乳房，发出欲罢不能的声音，随着%ANAME(対象)%不停摆动的腰不断颤抖
+						;TranslatedMark %ANAME(MASTER)%に乳房を弄られてたまらないといった声を出し、身を震わせながらも%ANAME(対象)%は腰を動かし続ける
+						PRINTFORML 由于淫纹所引起的性冲动，使她过于淫乱
+						;TranslatedMark 淫紋による性への衝動が、彼女を過激に乱れさせている
+						PRINTFORML %ANAME(MASTER)%用牙齿咬上乳头的话，%ANAME(対象)%就会发出很大声的娇喘，同时身体不断地抖动
+						;TranslatedMark %ANAME(MASTER)%が乳首を歯で甘噛みすると、彼女は大きく嬌声をあげてビクンと身体を跳ねさせてしまう
+						PRINTFORMW 她的那副仿佛意识已经融化在快感之中的表情更加煽动了%ANAME(MASTER)%的情欲，%ANAME(MASTER)%一个劲儿地进行活塞运动，蹂躏着蜜壶
+						;TranslatedMark そんな彼女の蕩けた表情がいっそう情欲を煽り、%ANAME(MASTER)%はひたすら腰を打ちつけ、蜜壷を蹂躙した
+					CASE 9
+						PRINTFORML 躺在床上两个人互相舔着对方的性器
+						;TranslatedMark ベッドの上で二人はお互いの性器を舐めあっている
+						PRINTFORML 被淫纹所带来的情欲所囚禁而失去理性的%ANAME(対象)%，无法忍受嘴里充满着的雄性的味道和臭味
+						;TranslatedMark 淫紋の情欲に囚われて理性を失った%ANAME(対象)%が、口いっぱいに広がる雄の味と臭いを我慢できるはずもなく
+						PRINTFORMW %ANAME(対象)%的头脑中，已经充满了对即将被这根所肉棒侵犯的期待
+						;TranslatedMark すでに%ANAME(対象)%の頭の中は、この肉棒で犯される事への期待で埋め尽くされている
+						PRINTFORML %ANAME(対象)%对%ANAME(MASTER)%的肉棒不断吮吸着进行着口交，尽管%ANAME(MASTER)%已经在%ANAME(対象)%的口中射出来了好几次，%ANAME(対象)%依旧热情地进行侍奉，使%ANAME(MASTER)%的肉棒充满精神
+						;TranslatedMark %ANAME(MASTER)%の啜り上げるようなクンニで何度か達しながらも、熱心に奉仕し、%ANAME(MASTER)%のペニスをバキバキに勃起させる
+						PRINTFORMW 已经忍不住的的两人互相拥抱着开始了激烈交合，作为雌性与雄性埋头于从早到晚的交尾之中
+						;TranslatedMark 限界に達した二人は抱きしめあうと激しいセックスを開始し、ひたすら雄と雌の交尾に明け暮れた
+					CASE 10
+						PRINTFORML %ANAME(対象)%跪在%ANAME(MASTER)%的两腿之间，充满爱意地含着%ANAME(MASTER)%的肉棒
+						;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の股の間に跪き、愛しい一物を口いっぱいに頬張っている
+						PRINTFORMW 被用舌头刺激铃口的同时不断被吮吸着肉棒，%ANAME(MASTER)%舒服地低声呻吟，感觉肉棒在%ANAME(対象)%的口中不住颤抖
+						;TranslatedMark 舌で鈴口を刺激しながら竿を吸い上げると、%ANAME(MASTER)%が気持ち良さそうに唸りペニスが痙攣するのを感じる
+						PRINTFORML 在这时中断了侍奉，一边揉着睾丸，一边恶作剧似地抬头看着%ANAME(MASTER)%的%ANAME(対象)%，突然被%ANAME(MASTER)%抓住头，被肉棒强行插入到了喉咙深处
+						;TranslatedMark そこでいったん奉仕を中断し玉を揉みながら意地悪そうに%ANAME(MASTER)%を見上げていると、突如頭を掴まれ、無理やり喉奥まで犯される
+						PRINTFORMW 但%ANAME(対象)%并没有感到厌恶，眼中满溢着爱意将肉棒吞进喉咙深处从肉棒里榨取出特浓的精液进行侍奉
+						;TranslatedMark %ANAME(対象)%は嫌がるどころか、瞳をハートにしながら喉奥まで飲み込んで奉仕し、肉棒から特濃の精液を搾り取った
+					CASE 11
+						PRINTFORML %ANAME(対象)%跨到%ANAME(MASTER)%的腰上，深深地用淫穴吞下肉棒的同时，像吸取着对方一样进行激烈的接吻
+						;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に跨り深々とペニスを飲み込みながら、吸い付くようにキスをしている
+						PRINTFORMW 在下腹部闪耀着的淫纹给她带来了无与伦比的快感和幸福感，使她的理性荡然无存
+						;TranslatedMark 下腹部に輝く淫紋が彼女に途方も無い快感と幸福感を与え、その理性を蕩けさせた
+						PRINTFORML 如果一边被顶到膣内的深处一边饥渴地纠缠着舌头的话，脑内就会被相互交合的快感所支配
+						;TranslatedMark 膣の奥を突かれながら貪る様に舌を絡ませあっていると、互いが溶け合うような感覚に脳内を支配される
+						PRINTFORML 沉溺在这无与伦比的幸福感之中，膣内的肉壁紧紧缠了上来，感觉到%ANAME(MASTER)%的肉棒在肉壶里抖动，%ANAME(対象)%露出了十分享受的笑容
+						;TranslatedMark この上ない幸福に包まれ膣をきゅっと締めると、%ANAME(MASTER)%のペニスが肉壷の中で跳ねるのを感じ、%ANAME(対象)%は嬉しそうに笑う
+						PRINTFORMW %ANAME(対象)%扬起上半身，一边凝视着心爱的%ANAME(MASTER)%，一边为了榨取出精液激烈地扭动着腰
+						;TranslatedMark %ANAME(対象)%は上体を起こすと、愛しい%ANAME(MASTER)%を見つめながらその子種を授かろうと激しく腰を振り出した
+				ENDSELECT
+				PRINTFORML ･･･
+				PRINTFORMW 激烈的交合过后，两个人都失去意识昏了过去……
+				;TranslatedMark 激しい行為が終わった後、二人は気を失うように眠った……
+				DVAR:淫紋_あなた依存 += 1
+				DVAR:淫紋_浸食値 += RAND:2
+				CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", ANAME(MASTER))
+				CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣")
+				CFLAG:対象:好感度 += 700
+				CFLAG:対象:従属度 += 700
+				CFLAG:対象:依存度 += 700
+			ENDIF
+		ENDIF
+	ENDIF
+	PRINTFORMW 回过神来的%ANAME(対象)%由于自己的痴态而满脸通红
+	;TranslatedMark 我に返った%ANAME(対象)%は自らの痴態に赤面した
+	;対象キャラが特定のキャラだった場合、欲望が低いと1/2の確率で自力解呪される
+	IF !RAND:2 && ABL:対象:欲望 < 3
+		IF 対象 == (NAME_TO_CHARA("霊夢") || NAME_TO_CHARA("パチュリー") || NAME_TO_CHARA("ヘカーティア"))
+			PRINTFORML 在这时，%ANAME(対象)%发现自己的小腹上，虽然肉眼看不见，但是隐约刻着咒印般的东西
+			;TranslatedMark そうした中、%ANAME(対象)%は自らの下腹部に、今は見えないがうっすらと呪印のような物が刻まれていることに気づいた
+			PRINTFORML %ANAME(対象)%突然察觉到袭击自己的异常性冲动可能是因为这个咒印，于是挑战了解咒
+			;TranslatedMark %ANAME(対象)%は、突如として自分を襲った異常な性衝動はこの呪印が原因だと見当をつけ、解呪に挑んだ
+			IF 対象 == NAME_TO_CHARA("霊夢")
+				PRINTFORML %ANAME(対象)%带着解咒的意图触摸下腹部刻有淫纹的地方
+				;TranslatedMark %ANAME(対象)%は下腹部の淫紋が刻まれている場所を、解呪の意思を持って触る
+				PRINTFORMW 于是，随着啪啪的一声响起，刻在身体上的咒印消失了
+				;TranslatedMark すると、パチッ という音と共に、身体に刻まれた呪印は消滅した
+				PRINTFORMW 没有解不开的封印。恶魔刻下的淫纹在她面前也是一样的……
+				;TranslatedMark %ANAME(対象)%に解けない封印は無い。悪魔が刻んだ淫紋もまた、彼女の前では同じだった……
+			ELSEIF 対象 == NAME_TO_CHARA("パチュリー")
+				PRINTFORML %ANAME(対象)%发动了至今为止积累的魔道书知识，调查了这个咒印的性质
+				;TranslatedMark %ANAME(対象)%は今まで蓄えてきた魔道書の知識を動員し、この呪印の性質を調べ上げた
+				PRINTFORMW 然后调用解咒所需的各属性的魔力，在自己制作的结界中进行解咒的仪式
+				;TranslatedMark そして解呪に必要な各属性の魔力を使い、自らが作った結界の中で解呪の儀式を行った
+				PRINTFORMW 魔女的仪式结束的时候，刻在她下腹部的淫纹被分解，那个魔力的残渣成为了她的研究材料……
+				;TranslatedMark 魔女の儀式が終わる頃、彼女に刻まれた淫紋は分解され、その魔力の残滓は彼女の研究材料となった……
+			ELSEIF 対象 == NAME_TO_CHARA("ヘカーティア")
+				PRINTFORML %ANAME(対象)%啪嗒啪嗒地敲打着淫纹闪耀的地方
+				;TranslatedMark %ANAME(対象)%は淫紋が輝いていた場所を　ぺちっ　と叩く
+				PRINTFORMW 于是刻在她身上的淫纹就消失得无影无踪了
+				;TranslatedMark すると彼女に刻まれていた淫紋は跡形も無く消滅した
+				PRINTFORMW 同一时刻在远方的某个地方。刻下淫纹的恶魔突然受到神秘冲击，全身喷血倒下了……
+				;TranslatedMark 時を同じくして遠くのどこか。淫紋を刻んだ悪魔は突如謎の衝撃を受け、全身から血を噴出して倒れた……
+			ENDIF
+			PRINTFORML
+			CLEARBIT TALENT:対象:日常系, 素質_デイリー_淫紋
+			DVAR:淫紋_浸食中キャラID = 0
+			DVAR:淫紋_浸食値 = 0
+			DVAR:淫紋_純愛フラグ = 0
+			RETURN
+		ENDIF
+	ENDIF
+	DVAR:淫紋_浸食値 += RAND:2 + 1
+	CALL COLOR_PRINT(@"淫纹的光辉比刚才更强烈了……", カラー_ピンク)
+	PRINTFORMW
+	RETURN 1
+;追加分岐
+ELSEIF あなたへの想い >= 10000 && DVAR:淫紋_浸食値 >= 16 && DVAR:淫紋_あなた依存 >= 5 && !(対象 == MASTER)
+	PRINTFORML
+	IF !DVAR:淫紋_純愛フラグ
+		PRINTFORML 在回响着下流的娇喘的昏暗房间里，许多男女相互交合着
+		;TranslatedMark 淫らな嬌声が響く薄暗い部屋の中で、多数の男女が絡み合っている
+		PRINTFORML 大家都露出了恍惚的表情，身上沾满了彼此的体液，浑身都黏糊糊的
+		;TranslatedMark 皆一様に恍惚の表情を浮かべ、お互いの体液にまみれてドロドロになっている
+		PRINTFORMW 说不出话，光着身子混在一起的样子，简直就像发情的野兽群一样
+		;TranslatedMark 言葉も無く、裸でただひたすらにまぐわい続けるその様子は、まるで発情した獣の群れの様だ
+		PRINTFORML
+		CALL COLOR_PRINT(@"其中也有%ANAME(対象)%的身姿", カラー_ピンク)
+		;TranslatedMark @"その中には%ANAME(対象)%の姿もあった", カラー_ピンク
+		PRINTFORML
+		PRINTFORMW
+		PRINTFORML %ANAME(対象)%跨上了一个男人的腰，流着口水，疯狂摆动着腰
+		;TranslatedMark %ANAME(対象)%は一人の男に跨りだらしなく涎を垂らして夢中で腰を振っている
+		PRINTFORML 最初拼命抵抗着的%ANAME(対象)%，现在已经完全被肉欲所俘虏了
+		;TranslatedMark 初めは必死に抵抗していた%ANAME(対象)%も、今やすっかり肉欲の虜になってしまっていた
+		PRINTFORMW 但是她的表情充满了喜悦，已经看不到任何苦闷和后悔的影子了
+		;TranslatedMark しかしその表情には悦びが満ちており、もはや一切の苦悶も後悔の影も見当たらない
+		PRINTFORML 现在又接受了一位雄性的膣内中出，%ANAME(対象)%一边使劲地后仰着一边发出享受的声音
+		;TranslatedMark 今もまた一人の雄から膣内射精を受けて、%ANAME(対象)%は大きくのけぞりながら悦びの声を上げる
+		PRINTFORML 品尝着渗透到子宫里的精液的感觉，%ANAME(対象)%娇喘练练的同时不断达到高潮
+		;TranslatedMark 子宮に染み込んでくる子種の感覚を味わいながら、%ANAME(対象)%は嬌声を上げて何度も絶頂する
+		PRINTFORMW 当肉棒被拔出来的时候，从秘裂中溢出的大量的白浊液，说明了与%ANAME(対象)%发生关系的人数
+		;TranslatedMark ペニスが引き抜かれるとその秘所からは大量の白濁液が溢れ出て、%ANAME(対象)%がまぐわった人数を物語る
+		PRINTFORMW 但是%ANAME(対象)%的肉欲还没有平息，接着用肉壶吞入新的雄性的的肉棒，开始进一步地榨取精液…
+		;TranslatedMark しかしまだまだ%ANAME(対象)%の肉欲は収まらず、別の雄の肉棒を咥えこみ、さらなる精を貪り始める…
+		PRINTFORML
+		PRINTFORMW ･･･
+		PRINTFORML 被许多男人推倒，充满交合之欢的宴会结束后，%ANAME(対象)%的肉欲依然没有平息
+		;TranslatedMark 数多の男たちに抱かれ、快楽の宴が終わってなお、%ANAME(対象)%の肉欲は収まることはなかった
+		PRINTFORMW 无论被侵犯到何种程度，无论被中出了多少，又或是反复达到高潮，内心深处都得不到满足
+		;TranslatedMark どれほど犯され精を注がれても、絶頂を繰り返しても、どうしても心の奥底が満足することができなかったのだ
+		PRINTFORML 然后，%ANAME(対象)%想到的了%ANAME(MASTER)%
+		;TranslatedMark そして%ANAME(対象)%は、自分の心に浮かぶ人物、%ANAME(MASTER)%を思い浮かべる
+		PRINTFORML 如果是%ANAME(MASTER)%的话，也许可以止住这发狂般的肉体的痛苦…
+		;TranslatedMark %ANAME(MASTER)%なら、この発狂しそうな肉の疼きを止めてくれるかもしれないと…
+		PRINTFORMW 怀着一线希望，%ANAME(対象)%向着%ANAME(MASTER)%的房间走去
+		;TranslatedMark 一縷の望みを持って、%ANAME(対象)%は%ANAME(MASTER)%の部屋に向かった
+	ELSE
+		PRINTFORML 啾库，啾库，在淫荡的水声回响着的昏暗房间里，一个女人一个劲地自慰着
+		;TranslatedMark ちゅく、ちゅくと、淫らな水音が響く薄暗い部屋の中で、一人の女がひたすら自慰に励んでいる
+		PRINTFORML 为了止住不停溢出的爱液，毫不犹豫地将振动棒插进了肉壶里
+		;TranslatedMark 止め処なく溢れる淫蜜に蓋をするように、バイブをぐちゅぐちゅと容赦なく突き立てる
+		PRINTFORMW 一言不发，光着身子一心一意地自慰着的样子，简直就像是发情的野兽……
+		;TranslatedMark 言葉も無く、裸でただひたすら一心不乱に己を慰め続けるその様子は、まるで発情した獣の様……
+		PRINTFORML
+		CALL COLOR_PRINT(@"那是屈服于淫纹给予的情欲的%ANAME(対象)%", カラー_ピンク)
+		;TranslatedMark @"それは、淫紋が与える情欲に屈した%ANAME(対象)%であった", カラー_ピンク
+		PRINTFORML
+		PRINTFORMW
+		PRINTFORML %ANAME(対象)%的摆着诶嘿颜吐出舌头，浑身都是口水和爱液，痴迷于振动棒不停摆动着腰
+		;TranslatedMark %ANAME(対象)%はアヘ顔でだらしなく舌を出し、涎と愛液を撒き散らしながらバイブ相手に夢中で腰を振っている
+		PRINTFORML 一开始抵抗淫纹情欲的%ANAME(対象)%，现在也无法抵抗不断涌现的肉欲了
+		;TranslatedMark 初めは淫紋の情欲に抵抗していた%ANAME(対象)%も、今や湧き上がり続ける肉欲に抗うことは出来なくなってしまった
+		PRINTFORMW 但是，她的表情充满了喜悦，在淫纹给予的快乐中已经看不到任何苦闷和后悔的影子了
+		;TranslatedMark しかしその表情には悦びが満ちており、淫紋が与える快楽にもはや一切の苦悶も後悔の影も見当たらない
+		PRINTFORML 现在也用极粗的振动毫不留情地插入肉壶，直逼到子宫口，%ANAME(対象)%一边使劲地向后仰着一边发出享受的声音
+		;TranslatedMark 今もまた極太バイブで子宮口まで容赦なく突き立て、%ANAME(対象)%は大きくのけぞりながら悦びの声を上げた
+		PRINTFORMW ･･･
+		PRINTFORML 但是，尽管已经行为如此淫乱，%ANAME(対象)%的肉欲也没法得到平息……
+		;TranslatedMark しかし、これほど乱れてなお、%ANAME(対象)%の肉欲は治まることはなかった……
+		PRINTFORMW 无论怎样自慰，无论怎样不停地高潮，内心深处总是无法得到满足
+		;TranslatedMark どれほど自分を慰めても、どれだけ絶頂を繰り返しても、どうしても心の奥底が満足することは無かった
+		PRINTFORML 然后，%ANAME(対象)%想到的了%ANAME(MASTER)%
+		;TranslatedMark そして%ANAME(対象)%は、自分の心に浮かぶ人物、%ANAME(MASTER)%を思い浮かべる
+		PRINTFORML 如果是%ANAME(MASTER)%的话，也许可以止住这发狂般的肉体的痛苦…
+		;TranslatedMark %ANAME(MASTER)%なら、この発狂しそうな肉の疼きを止めてくれるかもしれないと…
+		PRINTFORMW 怀着一线希望，%ANAME(対象)%向着%ANAME(MASTER)%的房间走去
+		;TranslatedMark 一縷の望みを持って、%ANAME(対象)%は%ANAME(MASTER)%の部屋に向かった
+	ENDIF
+	PRINTFORML ･･･
+	PRINTFORMW %ANAME(MASTER)%看到来到自己房间的%ANAME(対象)%吓了一跳
+	;TranslatedMark %ANAME(MASTER)%は自らの部屋を訪ねてきた%ANAME(対象)%の姿を見て驚いた
+	PRINTFORML 一丝不挂的身体的两腿之间有爱液不断溢出，用发情的雌性的表情凝视着%ANAME(MASTER)%
+	;TranslatedMark 一糸纏わぬ身体で淫蜜を止め処なく溢れさせ、発情しきった雌の顔で%ANAME(MASTER)%を見つめてくる
+	PRINTFORMW 在她的下腹部，她被刻下的淫纹比以前更加强烈、妖艳地闪耀着
+	;TranslatedMark その下腹部には、彼女に刻まれた淫紋が今まで以上に強く、妖しく輝いていた
+	PRINTFORML 然后%ANAME(対象)%恳求%ANAME(MASTER)%在自己崩溃之前侵犯自己
+	;TranslatedMark そして%ANAME(対象)%は、%ANAME(MASTER)%に自分を壊れるまで犯して欲しいと懇願してきた
+	PRINTFORMW ……她之所以因为淫纹而感到痛苦，是因为自己听信了恶魔的甜言蜜语
+	;TranslatedMark ……彼女が淫紋の疼きに苦しむことになったのは、悪魔の甘言に乗った自分のせいだ
+	PRINTFORMW %ANAME(MASTER)%为了负起责任，决定到%ANAME(対象)%的肉欲消却为止不停地与她交合
+	;TranslatedMark %ANAME(MASTER)%は責任を取るべく、%ANAME(対象)%の気の済むまで身体を重ねることにした
+	PRINTFORML %ANAME(対象)%用充满爱意的眼神，将自己的一切交给了%ANAME(MASTER)%……
+	;TranslatedMark %ANAME(対象)%は目を♥にしながら%ANAME(MASTER)%に全てをゆだねた……
+	PRINTFORML
+	PRINTFORMW ･･･
+	PRINTFORML 从%ANAME(MASTER)%的房间里，回响着野兽般的娇喘和肉与肉相互碰撞的声音
+	;TranslatedMark %ANAME(MASTER)%の部屋から、獣のような嬌声と肉をぶつけあう音が響いている
+	PRINTFORMW %ANAME(対象)%把脚缠在%ANAME(MASTER)%的腰上，用尽全身的力气抱紧了%ANAME(MASTER)%，沉溺在和%ANAME(MASTER)%的性交
+	;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の腰に脚を絡め、全身で強く抱きついて%ANAME(MASTER)%とのセックスに溺れている
+	PRINTFORMW %ANAME(対象)%在与%ANAME(MASTER)%的交合之中满足了对难以忍受的对快感的渴望
+	;TranslatedMark %ANAME(対象)%は、耐え難い快楽への渇望が%ANAME(MASTER)%との交わりで満たされていくのを感じていた
+	PRINTFORML 然后通过在下腹部闪耀的淫纹，将成为%ANAME(MASTER)%的专用肉壶的喜悦和幸福完全刻进了灵魂里
+	;TranslatedMark そして下腹部に輝く淫紋により、%ANAME(MASTER)%のための雌穴になる悦びと幸せを、魂に完全に刻み込まれた
+	PRINTFORMW 每次子宫口被顶到，%ANAME(対象)%都会发出口齿不清的娇喘，为了榨出精液而缩紧了雌穴
+	;TranslatedMark %ANAME(対象)%は子宮口を突かれる度に、呂律の回らぬ甘えた嬌声を上げ、精を注いでもらおうと健気に雌穴を締め付けてくる
+	PRINTFORML 对于%ANAME(対象)%成为自己专属的雌性的这件事进一步感到兴奋的%ANAME(MASTER)%，用力地挺入最深处射精了
+	;TranslatedMark 自分のための雌になることを受け入れた彼女に%ANAME(MASTER)%は興奮し、さらに強く突き込んで最奥で射精してやると
+	PRINTFORMW 刻在身上的淫纹更加闪耀，%ANAME(対象)%从心底感到幸福地发出疯狂的娇喘
+	;TranslatedMark 刻まれた淫紋はいっそう輝き、%ANAME(対象)%は心底幸せそうに歓喜の嘶きを上げてイキ狂った……
+	PRINTFORML
+	PRINTFORML …激烈的交合后，%ANAME(対象)%幸福地抚摸着自己下腹闪耀的淫纹
+	;TranslatedMark …激しい行為の後、%ANAME(対象)%は自らの下腹部に輝く淫紋を幸せそうに撫でる
+	PRINTFORMW 她从心底里感到高兴并接受了这个标志，它赋予了自己在性方面的解放和成为%ANAME(MASTER)%的雌性的喜悦
+	;TranslatedMark 性の開放と、%ANAME(MASTER)%のための雌になれた悦びを授けてくれたこの印を、彼女は心底嬉しそうに受け入れた
+	PRINTFORML
+	PRINTFORML
+	IF DVAR:淫紋_純愛フラグ
+		CALL COLOR_PRINTL(@"作为表示%ANAME(MASTER)%专属雌性的标志、淫纹清晰地浮现出来、完全固定在%ANAME(対象)%的身上", カラー_ピンク)
+		;TranslatedMark @"淫紋はくっきりと浮かび上がり、%ANAME(MASTER)%の為の雌であることを示す印として、%ANAME(対象)%の身体に完全に定着した", カラー_ピンク
+		SETBIT TALENT:対象:日常系, 素質_デイリー_愛欲の淫紋
+		PRINTFORML
+		IF !GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫乱)
+			SETBIT TALENT:対象:淫乱系, 素質_淫乱_淫乱
+			CALL COLOR_PRINT(@"%ANAME(対象)%变得淫乱了", カラー_黄)
+			PRINTFORML
+		ENDIF
+		CALL TALENT_LOSE_TEISOU(対象)
+		CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", ANAME(MASTER))
+		CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣")
+		DVAR:淫紋_純愛フラグID = GET_ID(対象)
+		DVAR:淫紋_純愛フラグ = 0
+	ELSE
+		CALL COLOR_PRINTL(@"%ANAME(対象)%的淫纹已经清晰地浮现出来，完全固定在身体上了", カラー_ピンク)
+		;TranslatedMark @"%ANAME(対象)%の淫紋はもはやくっきりと浮かび上がり、完全にその身体に定着した", カラー_ピンク
+		SETBIT TALENT:対象:日常系, 素質_デイリー_淫紋
+		PRINTFORML
+		IF !GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫乱)
+			SETBIT TALENT:対象:淫乱系, 素質_淫乱_淫乱
+			CALL COLOR_PRINT(@"%ANAME(対象)%变得淫乱了", カラー_黄)
+			PRINTFORML
+		ENDIF
+		CALL TALENT_LOSE_TEISOU(対象)
+		CALL FUCK_GANGBANG(対象, GET_SPERM_ID("偶遇的男人"), @"見知らぬ男の\@ RAND:2 ? 肉棒 # 唇\@", @"%LOCALS%")
+		CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", ANAME(MASTER))
+		CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣")
+	ENDIF
+	PRINTFORML
+	PRINTFORML
+	PRINTFORMW 第二天晚上，订下了契约的恶魔再次出现在%ANAME(MASTER)%面前
+	;TranslatedMark 次の日の夜、契約を交わした悪魔が再び%ANAME(MASTER)%の前に現れた
+	PRINTFORML 「你没有履行契约。那个女人的灵魂没有落入我的手中。把交给你的力量还给我」
+	;TranslatedMark 「契約不履行だ。女の魂は我が手に堕ちなかった。渡した力は返してもらう」
+	PRINTFORMW 恶魔用不满的表情告知后，对着%ANAME(MASTER)%举起手掌，将曾经给予%ANAME(MASTER)%的力量抹去
+	;TranslatedMark 悪魔は不満そうな顔で告げると%ANAME(MASTER)%に向けて掌をかざし、かつて%ANAME(MASTER)%に与えた力を消し去った
+	LOCAL = (100 - ABL:MASTER:武闘) / 6
+	SIF LOCAL <= 0
+		LOCAL = 2
+	ABL:MASTER:武闘 -= LOCAL
+	LOCAL:1 = (100 - ABL:MASTER:知略) / 6
+	SIF LOCAL:1 <= 0
+		LOCAL:1 = 2
+	ABL:MASTER:知略 -= LOCAL:1
+	LOCAL:2 = (100 - ABL:MASTER:政治) / 6
+	SIF LOCAL:2 <= 0
+		LOCAL:2 = 2
+	ABL:MASTER:政治 -= LOCAL:2
+	LOCAL:3 = (100 - ABL:MASTER:防衛) / 6
+	SIF LOCAL:3 <= 0
+		LOCAL:3 = 2
+	ABL:MASTER:防衛 -= LOCAL:3
+	CALL COLOR_PRINT(@"%ANAME(MASTER)%的武闘値减少了{LOCAL}", カラー_オレンジ)
+	;TranslatedMark @"%ANAME(MASTER)%の武闘値が{LOCAL}減少した…", カラー_オレンジ
+	PRINTFORML
+	CALL COLOR_PRINT(@"%ANAME(MASTER)%的防衛値减少了{LOCAL:3}", カラー_オレンジ)
+	;TranslatedMark @"%ANAME(MASTER)%の防衛値が{LOCAL:3}減少した…", カラー_オレンジ
+	PRINTFORML
+	CALL COLOR_PRINT(@"%ANAME(MASTER)%的知略値减少了{LOCAL:1}", カラー_オレンジ)
+	;TranslatedMark @"%ANAME(MASTER)%の知略値が{LOCAL:1}減少した…", カラー_オレンジ
+	PRINTFORML
+	CALL COLOR_PRINT(@"%ANAME(MASTER)%的政治値减少了{LOCAL:2}", カラー_オレンジ)
+	;TranslatedMark @"%ANAME(MASTER)%の政治値が{LOCAL:2}減少した…", カラー_オレンジ
+	PRINTFORMW
+	PRINTFORML 恶魔化为黑烟消失了…
+	;TranslatedMark 悪魔は黒い靄となって消え去った…
+	PRINTFORMW 虽然赐予的力量消失了很可惜，但是%ANAME(対象)%的灵魂没有变成恶魔的东西，这样就好了
+	;TranslatedMark 授かった力が消えたのは惜しいが、%ANAME(対象)%の魂が悪魔の物にならなかっただけ良かったということにしよう
+	PRINTFORML
+	DVAR:淫紋_浸食中キャラID = 0
+	DVAR:淫紋_浸食値 = 0
+	DVAR:淫紋_あなた依存 = 0
+	DVAR:淫紋_あなた依存ID = GET_ID(対象)
+	RETURN 1
+ELSE
+	PRINTFORML
+	PRINTFORML 在回响着淫荡娇声的昏暗房间里，多名男女相互缠绕着
+	;TranslatedMark 在回响着淫荡娇声的昏暗房间里，多名男女相互缠绕着
+	PRINTFORML 大家都露出了恍惚的表情，沾满了彼此的体液，全身都黏糊糊的
+	;TranslatedMark 大家都露出了恍惚的表情，沾满了彼此的体液，全身都黏糊糊的
+	PRINTFORMW 没有语言，光着身子一个劲地在蠕动的样子，简直就像发情的野兽群一样
+	;TranslatedMark 没有语言，光着身子一个劲地在蠕动的样子，简直就像发情的野兽群一样
+	PRINTFORML
+	CALL COLOR_PRINT(@"其中也有%ANAME(対象)%的身姿", カラー_ピンク)
+	;TranslatedMark @"その中には%ANAME(対象)%の姿もあった", カラー_ピンク
+	PRINTFORML
+	PRINTFORMW
+	PRINTFORML %ANAME(対象)%跨坐在一个男人身上，流着口水，在梦中摆动着腰
+	;TranslatedMark %ANAME(対象)%跨坐在一个男人身上，流着口水，在梦中摆动着腰
+	PRINTFORML 最初拼命抵抗的%ANAME(対象)%，现在已经完全被肉欲所俘虏了
+	PRINTFORML 但是表情充满了喜悦，已经看不到任何难受和屈辱的影子了
+	;TranslatedMark 但是表情充满了喜悦，已经看不到任何难受和屈辱的影子了
+	PRINTFORMW %ANAME(対象)%意识到无论怎样保持威压，自己终究女性，对着雌穴稍加压力就能让体内的本能被完全激发并沉沦于快感之中，比起本能地进行反抗维持架子，不如完全顺从于对方，展现自己真实的一面以更加享受
+	;TranslatedMark %ANAME(対象)%意识到无论怎样保持威压，自己终究女性，对着雌穴稍加压力就能让体内的本能被完全激发并沉沦于快感之中，比起本能地进行反抗维持架子，不如完全顺从于对方，展现自己真实的一面以更加享受
+	PRINTFORML 现在又有一位健硕的男性在阴道内射精，%ANAME(対象)%一边使劲地仰着身体一边发出喜悦的娇喘声
+	;TranslatedMark 现在又有一位健硕的男性在阴道内射精，%ANAME(対象)%一边使劲地仰着身体一边发出喜悦的娇喘声
+	PRINTFORML 体味着浸入子宫的精液的的感觉，%ANAME(対象)%的脸上早已变成了高潮的样子，随着反复高潮变换着可爱又迷人的表情
+	;TranslatedMark 体味着浸入子宫的精液的的感觉，%ANAME(対象)%的脸上早已变成了高潮的样子，随着反复高潮变换着可爱又迷人的表情
+	PRINTFORML 当肉棒被拔出的时候，从秘所里溢出大量的白浊液，足以表明%ANAME(対象)%被中出的次数
+	PRINTFORMW 但是%ANAME(対象)%的肉欲还没有平息，双眼内的♥更加明亮，被别的男性抱住之后主动让湿透的淫穴对着肉棒坐了下去
+	;TranslatedMark 但是%ANAME(対象)%的肉欲还没有平息，双眼内的♥更加明亮，被别的男性抱住之后主动让湿透的淫穴对着肉棒坐了下去
+	PRINTFORML
+	PRINTFORML
+	PRINTFORML
+	CALL COLOR_PRINT(@"%ANAME(対象)%的淫紋已经清晰地浮现出来，完全固定在她的身体里了", カラー_ピンク)
+	SETBIT TALENT:対象:日常系, 素質_デイリー_淫紋
+	CALL LOSE_RELATION_TALENT(対象)
+	PRINTFORML
+	IF !GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫乱)
+		SETBIT TALENT:対象:淫乱系, 素質_淫乱_淫乱
+		CALL COLOR_PRINT(@"%ANAME(対象)%变成了淫乱", カラー_黄)
+		PRINTFORML
+	ENDIF
+	IF !GETBIT(TALENT:対象:淫乱系, 素質_淫乱_精液便女)
+		SETBIT TALENT:対象:淫乱系, 素質_淫乱_精液便女
+		CALL COLOR_PRINT(@"%ANAME(対象)%变成了精液便女", カラー_黄)
+		PRINTFORML
+	ENDIF
+	CALL TALENT_LOSE_TEISOU(対象)
+	FOR LOCAL:1, 0, 4
+		CALL SET_TATTOO_RANDOM(対象, STR_FOR_TATTOO(-1))
+		CALL SET_PIERCE_RANDOM(対象)
+		CALL FUCK_GANGBANG(対象, GET_SPERM_ID("偶遇的男人"), @"見知らぬ男の\@ RAND:2 ? 肉棒 # 唇\@", @"%LOCALS%")
+	NEXT
+	PRINTFORML
+	PRINTFORML
+	PRINTFORMW
+	DVAR:淫紋_浸食中キャラID = 0
+	DVAR:淫紋_浸食値 = 0
+	DVAR:淫紋_あなた依存 = 0
+	DVAR:淫紋_純愛フラグ = 0
+	RETURN 1
+ENDIF
+
+;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_LEWDNESS_CURSE_CORRUPTED_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("LEWDNESS_CURSE")
+
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_LEWDNESS_CURSE_CORRUPTED_DECISION()
+RETURN 1
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_DERIVATION_LEWDNESS_CURSE_CORRUPTED_SETTARGET()
+
+FOR LOCAL, 0, CHARANUM
+	SIF !IS_FEMALE(LOCAL)
+		CONTINUE
+	SIF !(GETBIT(TALENT:LOCAL:日常系, 素質_デイリー_淫紋) || GETBIT(TALENT:LOCAL:日常系, 素質_デイリー_愛欲の淫紋))
+		CONTINUE
+	SIF RAND:3
+		CONTINUE
+	DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+	DAILY_TARGET_NUM ++
+NEXT
+
+SIF DAILY_TARGET_NUM < 1
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_LEWDNESS_CURSE_CORRUPTED()
+#DIM 対象
+#DIM あなたへの想い ;追加分
+;追加分
+あなたへの想い = (CFLAG:対象:好感度 + CFLAG:対象:依存度 + CFLAG:対象:従属度)
+
+
+FOR LOCAL, 0, DAILY_TARGET_NUM
+	PRINTFORML
+	対象 = DAILY_TARGET:LOCAL
+	IF CFLAG:対象:捕虜先 != 0
+		PRINTFORMW 身上的淫纹固定了的%ANAME(対象)%，在牢狱中被令人发狂的性冲动袭击……
+		;TranslatedMark 淫紋が定着した%ANAME(対象)%は、牢獄の中で気が狂いそうな性衝動に襲われている……
+	ELSEIF CFLAG:対象:特殊状態 == 特殊状態_死亡
+		PRINTL
+	ELSEIF CFLAG:対象:特殊状態 == 特殊状態_放浪
+		PRINTL
+	ELSEIF CFLAG:対象:所属 != CFLAG:MASTER:所属
+		PRINTL
+	ELSEIF !IS_FEMALE(対象)
+		PRINTL
+	ELSEIF GETBIT(TALENT:対象:日常系, 素質_デイリー_愛欲の淫紋)
+		PRINTFORM 让淫纹在%ANAME(対象)%的身上固定下来的
+		;TranslatedMark %ANAME(対象)%に定着した
+		CALL COLOR_PRINT(@"淫紋", カラー_ピンク)
+		PRINTFORML 是煽动她淫荡的感情，让她索求自己的%ANAME(MASTER)%……
+		;TranslatedMark は、彼女を淫らな感情を煽り%ANAME(MASTER)%を求めさせる……
+		PRINTFORML %ANAME(対象)%为了从淫纹带来的影响中获得满足，前往了自己的所有者%ANAME(MASTER)%的身边…
+		;TranslatedMark %ANAME(対象)%はこの疼きを満たしてもらうため、己の所有者たる%ANAME(MASTER)%の元へ向かった…
+		PRINTFORMW 下腹部闪着淫纹来到%ANAME(MASTER)%的房间的%ANAME(対象)%被%ANAME(MASTER)%轻轻地抱住
+		;TranslatedMark そして淫紋を輝かせながら自分の部屋を訪れた%ANAME(対象)%を、%ANAME(MASTER)%はそっと抱き寄せる
+		PRINTFORML %ANAME(対象)%眼中冒出♥将自己的一切托付给了自己深爱着的雄性……
+		;TranslatedMark %ANAME(対象)%は目を♥にして愛する雄に己の全てをゆだねた……
+		PRINTFORMW
+		SELECTCASE RAND:20
+			CASE 0
+				PRINTFORML 受淫纹的影响，肉体的敏感度是平时的数倍，%ANAME(対象)%尖叫着，陷入猛烈的疯狂之中
+				;TranslatedMark 淫紋により肉体の感覚が普段の数倍も鋭敏になり、%ANAME(対象)%は絶叫してヨガリ狂う
+				PRINTFORMW %ANAME(MASTER)%每次晃动腰部，龟头都会划过敏感的壁肉
+				;TranslatedMark %ANAME(MASTER)%が腰を動かす度、亀頭が敏感になった膣肉をなぞり上げる
+				PRINTFORML 每次让人发疯的快感向%ANAME(対象)%袭来的时候，她都会拼命地抱住%ANAME(MASTER)%
+				;TranslatedMark その度に気が狂いそうな快感が%ANAME(対象)%を襲い、彼女は必死で%ANAME(MASTER)%にしがみついてイキまくる
+				PRINTFORML 仿佛冲击到子宫深处的快感，让人感觉好像脑袋要爆炸了一样
+				;TranslatedMark ガツンガツンと子宮に響くようなストロークが与える快楽に、頭の中が弾けるような感覚で塗りつぶされる
+				PRINTFORMW 不久，%ANAME(MASTER)%将大量的精液注入子宫，%ANAME(対象)%发出野兽般的喘息声，激烈的高潮了
+				;TranslatedMark やがて%ANAME(MASTER)%が大量の精を子宮に注ぐと、%ANAME(対象)%は獣のような喘ぎ声で激しく絶頂した
+			CASE 1
+				PRINTFORML %ANAME(対象)%被%ANAME(MASTER)%压在身下开始被侵犯
+				;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に覆いかぶさられながら犯されている
+				PRINTFORMW 已经固定了的淫纹对%ANAME(MASTER)%的肉棒起了反应，%ANAME(対象)%的灵敏度上升到异常的程度
+				;TranslatedMark 定着した淫紋が%ANAME(MASTER)%の肉棒に反応し、%ANAME(対象)%の感度が異常に引き上げられる
+				PRINTFORML 最初发出悲鸣般娇声的%ANAME(対象)%，现在也被让人疯狂的压倒性的快乐吞噬
+				;TranslatedMark 初めは悲鳴のような嬌声を上げていた%ANAME(対象)%も、今や圧倒的な快楽に飲み込まれヨガり狂っている
+				PRINTFORMW %ANAME(MASTER)%把肉棒深深地插入膣内射精后，%ANAME(対象)%感受到了身为雌性的幸福的同时到达了高潮
+				;TranslatedMark %ANAME(MASTER)%がペニスを奥深くねじ込んで膣内射精をすると、%ANAME(対象)%は雌の悦びと共にアクメに達した
+			CASE 2
+				PRINTFORML %ANAME(対象)%被%ANAME(MASTER)%紧紧抱住的同时被用肉棒插到了深处
+				;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に抱きしめられながら深々とペニスを突き刺されている
+				PRINTFORMW 龟头刺激着子宫口，%ANAME(対象)%发出感受到让大脑融化般的快乐的声音后痉挛了
+				;TranslatedMark 亀頭でグリグリと子宮口を刺激され、%ANAME(対象)%は脳が焼かれるような快楽であられもない声を出して痙攣する
+				PRINTFORML %ANAME(対象)%的身体因为淫纹而向雄性屈服，张开子宫口向%ANAME(MASTER)%索取精液
+				;TranslatedMark %ANAME(対象)%の身体は淫紋によって雄に屈服しており、子宮口をパクパクと開いて%ANAME(MASTER)%の種をねだっている
+				PRINTFORMW 每次在子宫内被注入精液，%ANAME(対象)%的内心就充满了身为雌性的喜悦，发出娇声接受了射精
+				;TranslatedMark そして子種を子宮に注がれる度、%ANAME(対象)%の心は雌として悦びで満たされ、嬌声を上げて射精を受け入れた
+			CASE 3
+				PRINTFORML 在%ANAME(MASTER)%的房间里回响着%ANAME(対象)%的娇声
+				;TranslatedMark %ANAME(MASTER)%の部屋中に%ANAME(対象)%の嬌声が響いている
+				PRINTFORMW %ANAME(対象)%以站立背位的姿态接受了野兽般粗暴的活塞运动，露出了不成体统的表情
+				;TranslatedMark %ANAME(対象)%は立ちバックの姿勢で獣のような荒々しいピストンを受けて、だらしない表情を見せている
+				PRINTFORML 由于淫纹带来的极大快感，%ANAME(対象)%接受了已经成为%ANAME(MASTER)%的雌穴的自己
+				;TranslatedMark 淫紋がもたらす極上の快感により、%ANAME(対象)%はすでに%ANAME(MASTER)%のための雌穴になった自分を受け入れている
+				PRINTFORMW 每当%ANAME(MASTER)%预告了中出了的时候，%ANAME(対象)%就会睁大眼睛冒出♥缩紧着膣穴，索求着精液
+				;TranslatedMark %ANAME(MASTER)%が膣内射精を予告すると、%ANAME(対象)%は目を♥にしながら膣を締め上げ子種をおねだりした
+			CASE 4
+				PRINTFORML %ANAME(対象)%被%ANAME(MASTER)%推倒，被以激烈的活塞运动侵犯着
+				;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に押し倒されて激しく犯されている
+				PRINTFORMW 因为淫纹而变得敏锐的膣肉每次被肉棒咕哩咕哩搅动的时候，%ANAME(対象)%的脑袋里都会一片空白，娇喘不断
+				;TranslatedMark 淫紋で鋭敏になった膣肉がペニスでゴリゴリと抉られる度に、%ANAME(対象)%の頭の中に火花が散って嬌声が上がる
+				PRINTFORML 由于太过舒服，%ANAME(対象)%本能地欢迎着%ANAME(MASTER)%的肉棒
+				;TranslatedMark あまりの快楽に、%ANAME(対象)%は本能のままに%ANAME(MASTER)%のペニスを悦んで受け入れている
+				PRINTFORMW 成为%ANAME(MASTER)%专用的雌穴的%ANAME(対象)%，在那之后也没有休息，一直摇着腰接受着中出
+				;TranslatedMark %ANAME(MASTER)%専用の雌穴となった%ANAME(対象)%は、その後も休むことも無く延々と腰を振って精を受け入れた
+			CASE 5
+				PRINTFORML 在%ANAME(MASTER)%的房间里回响着%ANAME(対象)%的娇声
+				;TranslatedMark %ANAME(MASTER)%の部屋中に%ANAME(対象)%の嬌声が響いている
+				PRINTFORMW 由于比平时更强力的淫纹冲动而发狂，%ANAME(対象)%跨上了%ANAME(MASTER)%疯狂地摆动着腰
+				;TranslatedMark いつも以上に強力な淫紋の衝動に狂わされ、%ANAME(対象)%は%ANAME(MASTER)%に跨り狂ったように腰を振る
+				PRINTFORML 由于淫纹的作用，膣肉会像有贪欲一样，饥渴地缠上%ANAME(MASTER)%的肉棒索求着
+				;TranslatedMark 淫紋の作用により、その膣肉は精を貪欲に貪るように%ANAME(MASTER)%のペニスを絞り上げる
+				PRINTFORMW %ANAME(MASTER)%在眼中印下了，一副诶嘿颜，流着口水，像野兽一样摆动着腰的淫猥的%ANAME(対象)%的身姿
+				;TranslatedMark アヘ顔で涎を垂らしながら獣のように腰を振る淫猥な%ANAME(対象)%の姿を、%ANAME(MASTER)%は網膜に焼き付けた
+			CASE 6
+				PRINTFORML %ANAME(対象)%骑在%ANAME(MASTER)%身上扭动着腰
+				;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に馬乗りになって腰を振っている
+				PRINTFORMW 每当沉下腰来，肉棒就会到达淫穴的最深处，%ANAME(対象)%的眼中冒出♥沉浸在身为雌性的喜悦中
+				;TranslatedMark 腰を沈める度にペニスが最奥まで届き、%ANAME(対象)%は瞳を♥にして雌の悦びに浸っている
+				PRINTFORML 在她的身体上固定下来的淫纹用快乐充满了%ANAME(対象)%的脑袋，积极地摆动着腰让%ANAME(MASTER)%索求她
+				;TranslatedMark 彼女の身体に定着した淫紋が%ANAME(対象)%の頭を快楽で塗りつぶし、積極的に腰を振らせて%ANAME(MASTER)%に依存させていく
+				PRINTFORMW 当%ANAME(MASTER)%抓住腰部，将灼热的精液释放到子宫中时，%ANAME(対象)%全身抖动，发出十分享受的声音
+				;TranslatedMark %ANAME(MASTER)%が腰を掴みながら灼熱の精液を子宮に放つと、%ANAME(対象)%は全身を跳ねさせながら悦びの声を上げた
+			CASE 7
+				PRINTFORML %ANAME(対象)%一边被%ANAME(MASTER)%抱着一边被深深地插入着肉棒
+				;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に抱えられながら深々とペニスをねじ込まれている
+				PRINTFORMW 每次插入时由于自身的重量和肉棒对子宫产生如同要将其击碎一般的冲击使她眼中浮起♥脸大声娇喘起来
+				;TranslatedMark 一突き毎に自重とペニスで子宮を潰される様な激しい抽送に彼女は瞳に♥を浮かべて大声で喘ぐ
+				PRINTFORML 由于淫纹的效果，她完全变成了%ANAME(MASTER)%专用的雌穴，传达出了已经被舌头侵犯到口齿不清的喜悦
+				;TranslatedMark 淫紋の効果によりすっかり%ANAME(MASTER)%専用の雌穴となった彼女は、もはや呂律が回らぬ舌で犯される悦びを伝えてくる
+				PRINTFORML 她那样淫乱不堪的的样子，使%ANAME(MASTER)%的下体更加隆起
+				;TranslatedMark そんな淫らに乱れきった彼女の様子が、%ANAME(MASTER)%の一物をよりいっそう隆起させる
+				PRINTFORMW 每次%ANAME(MASTER)%顶到子宫，她都会发出幸福的悲鸣，然后疯狂地抖动起来
+				;TranslatedMark %ANAME(MASTER)%が子宮まで突きこむ度、彼女は幸せそうな悲鳴を上げてヨガリ狂った
+			CASE 8
+				PRINTFORML %ANAME(対象)%以対面座位的姿势和%ANAME(MASTER)%接吻的同时下体互相连结着
+				;TranslatedMark %ANAME(対象)%は対面座位の姿勢で%ANAME(MASTER)%とキスをしながら繋がっている
+				PRINTFORMW 用连理性的碎片都感觉不到的堕落的表情，积极地缠绕着舌头的%ANAME(対象)%的蜜穴中不断地流出爱蜜
+				;TranslatedMark 理性の欠片も感じさせないほど蕩けた表情で、積極的に舌を絡める%ANAME(対象)%の蜜穴からは止め処なく愛蜜が漏れ出る
+				PRINTFORML 随着淫纹的闪耀，%ANAME(対象)%变成了身心都十分适合%ANAME(MASTER)%的一只的雌性
+				;TranslatedMark 淫紋の輝きにより、%ANAME(対象)%は身も心もすっかり%ANAME(MASTER)%のつがいにふさわしい雌となった
+				PRINTFORML 被%ANAME(MASTER)%的肉棒占领膣内，每次被蹂躏都会发出享受的声音
+				;TranslatedMark %ANAME(MASTER)%の一物で膣内を占領され蹂躙される度に悦びの声を上げてヨガる
+				PRINTFORMW 为了让她更加幸福，%ANAME(MASTER)%再次动起腰来，%ANAME(対象)%被快乐的漩涡吞噬了
+				;TranslatedMark 彼女をもっと幸せにしてやるべく%ANAME(MASTER)%は再び腰を振り出し、%ANAME(対象)%は快楽の渦に飲み込まれた
+			CASE 9
+				PRINTFORML %ANAME(対象)%被%ANAME(MASTER)%激烈地侵犯着，如同疯狂了一般地挣扎着
+				;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に激しく犯されながらヨガり狂っている
+				PRINTFORMW 被淫纹所带来的冲动所支配的%ANAME(対象)%，希望自己四肢着地被侵犯
+				;TranslatedMark 淫紋がもたらす衝動に支配された%ANAME(対象)%は、自ら四つんばいになって犯されることを望んでいた
+				PRINTFORML 然后%ANAME(MASTER)%如她所愿，从背后像野兽一样蹂躏着她
+				;TranslatedMark そして%ANAME(MASTER)%は望みどおり、後ろから獣のように彼女を蹂躙する
+				PRINTFORML %ANAME(対象)%一副平时难以想象的淫乱的姿态，和%ANAME(MASTER)%的交合让她摆出了诶嘿颜，不断地发出娇声
+				;TranslatedMark %ANAME(対象)%は普段からは想像できないほど激しく乱れ、%ANAME(MASTER)%とのセックスにアヘ顔を晒して絶え間ない嬌声を上げる
+				PRINTFORMW 然后被在胎内释放出了深爱的%ANAME(MASTER)%的浓厚的精液后，%ANAME(対象)%感受到身为雌性的愉悦的同时高潮了
+				;TranslatedMark そして愛する%ANAME(MASTER)%の濃厚な子種を胎内に放たれると、%ANAME(対象)%は雌の悦びと共に絶頂した
+			CASE 10
+				PRINTFORML %ANAME(MASTER)%一边压着%ANAME(対象)%一边用肉棒抽插着
+				;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%に圧し掛かりながらプレスする様にペニスを打ちつけている
+				PRINTFORMW %ANAME(対象)%一边接受着咚咚的如同要将子宫崩击溃般的插入，一边用力抱紧%ANAME(MASTER)%发出呻吟声
+				;TranslatedMark %ANAME(対象)%はドスンドスンと子宮が潰れるような挿入を受けながら、%ANAME(MASTER)%にしがみ付いて呻き声を上げている
+				PRINTFORML 虽然是比平时更加激烈的play，但被刻上了淫纹的身体连这些都会变成快感
+				;TranslatedMark 普段よりも激しいプレイだが、淫紋が刻み込まれた身体はそれらさえも快感に変えていく
+				PRINTFORML 在深度授种位下被激烈地蹂躏着，%ANAME(対象)%发自内心高兴地接受了成为%ANAME(MASTER)%的孕袋
+				;TranslatedMark 激しい種付けプレスで蹂躙されながら、%ANAME(対象)%の心は%ANAME(MASTER)%のための孕み袋となることを喜んで受け入れた
+				PRINTFORMW 不久，由于%ANAME(MASTER)%的大量射精而感到子宫内灼热感的%ANAME(対象)%的脑袋里被身为雌性的喜悦所填满
+				;TranslatedMark やがて%ANAME(MASTER)%の大量射精で子宮に灼熱を感じると、%ANAME(対象)%の頭の中は雌の悦びで埋め尽くされた
+			CASE 11
+				PRINTFORML %ANAME(対象)%一边接受%ANAME(MASTER)%激烈的活塞运动一边喘息
+				;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の激しいピストンを受けながら喘いでいる
+				PRINTFORMW %ANAME(対象)%被这能够满足之前自己无论怎么自慰都满足不了的欲望的充满幸福感的快乐所支配
+				;TranslatedMark 己をどれだけ慰めて満たされなかった欲求が満たされていく至福の快楽に、%ANAME(対象)%は支配されていた
+				PRINTFORML 像是要侵入子宫内部一样激烈的腰部动作使%ANAME(対象)%的脚尖直直地伸展着发出苦闷的娇喘声
+				;TranslatedMark 子宮内部に侵入されるかの様な激しい腰遣いに%ANAME(対象)%はつま先までピンと伸ばして悶える
+				PRINTFORML 不经意间接受了射入体内的充满温度的精液，%ANAME(対象)%的头脑中迸发出快感，发出娇声
+				;TranslatedMark 不意に勢いよく熱い精の放流を受け、%ANAME(対象)%は頭の中が弾けるような快感を受けて嬌声を上げる
+				PRINTFORMW 在受到%ANAME(MASTER)%的长时间射精的同时，%ANAME(対象)%意识到自己被播种而进一步高潮了
+				;TranslatedMark %ANAME(MASTER)%の長い射精を受けながら、%ANAME(対象)%は自分の中に子種が染み込んでくる感覚で更に絶頂してしまった
+			CASE 12
+				PRINTFORML %ANAME(対象)%跨在%ANAME(MASTER)%身上，用身后用手支撑着身体激烈地摆动着腰
+				;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の上に跨り、後ろ手で体を支えながら激しく腰を振っている
+				PRINTFORML 深深地将肉棒吞进秘所里，每次她上下摆动都会溢出爱液，发出猥亵的声音
+				;TranslatedMark 深々とペニスを咥えこんだ秘所からは彼女が腰を上下する度に愛液が溢れ、卑猥な音を漏らしている
+				PRINTFORML 那个已经完全是荡妇表情，接受了在淫纹的作用下被放大至数倍的快乐，不检点地垂着舌头喘息着
+				;TranslatedMark その表情はすっかり蕩けきっており、淫紋で増幅された快楽を受け入れ、だらしなく舌を垂らしながら喘いでいる
+				PRINTFORMW %ANAME(対象)%被所爱的%ANAME(MASTER)%的肉棒所贯穿而感到喜悦，整晚都不断呻吟
+				;TranslatedMark %ANAME(対象)%は愛する%ANAME(MASTER)%のペニスに貫かれる悦びで一晩中よがり続けた
+			CASE 13
+				PRINTFORML %ANAME(対象)%一边%ANAME(MASTER)%插入的同时的一边扭动着身体，发出喜悦的声音
+				;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に抱かれながら身体をくねらせ、悦びの声を上げている
+				PRINTFORMW 每次被狂野的活塞运动顶到子宫时，%ANAME(対象)%的脑子里都会一片空白，浑身颤抖
+				;TranslatedMark 荒々しい腰遣いで子宮を小突かれる度に、%ANAME(対象)%の頭の中は真っ白になり身を震わせる
+				PRINTFORML 为了不让所爱的雄性离开自己，膣肉紧紧地缠绕在肉棒上，将其往更深处引入
+				;TranslatedMark 愛する雄を離すまいと、膣肉はきつく肉棒に絡みつき、より奥深くへいざなうように蠢く
+				PRINTFORMW %ANAME(MASTER)%低声呻吟的同时，在%ANAME(対象)%体内释放出大量的精液，使她展现出雌性的表情高潮了
+				;TranslatedMark %ANAME(MASTER)%が低く唸ると共に%ANAME(対象)%の中に大量の精を放つと、彼女は雌の顔を晒しながら絶頂した
+			CASE 14
+				PRINTFORML %ANAME(対象)%在接受了不知道是第几次的中出同时，高声娇喘起来达到了高潮
+				;TranslatedMark %ANAME(対象)%は何度目かの膣内射精を受けながら、一際大きな嬌声を上げて絶頂した
+				PRINTFORMW 体内被精液填满，她像是十分幸福一样摆出诶嘿颜痉挛了
+				;TranslatedMark 胎内にたっぷりと子種を吐き出されながら、彼女は幸せそうにアヘ顔を晒して痙攣する
+				PRINTFORML 自慰之类的完全无法比拟的幸福，使其内心得到了满足
+				;TranslatedMark 自慰などとは比べ物にならない幸せで、心が満ちていくのを感じていた
+				PRINTFORML 为了改变姿势%ANAME(MASTER)%暂时拔出了肉棒，就会从其结合部溢出大量的精液
+				;TranslatedMark 体勢を変える為に%ANAME(MASTER)%がいったんペニスを引き抜くと、結合部からどぷっと大量の精液が溢れ出た
+				PRINTFORMW 看到从自己身体里流出来的精液，%ANAME(対象)%从子宫深处感受到疼痛，再次张开双腿恳求%ANAME(MASTER)%的公枪
+				;TranslatedMark 自らに放たれた子種が流れるのを見て%ANAME(対象)%は子宮が疼くのを感じ、再び身体を開いて%ANAME(MASTER)%の牡槍を懇願した
+			CASE 15
+				PRINTFORML %ANAME(対象)%紧贴着激烈摆动着腰的%ANAME(MASTER)%，发出娇声
+				;TranslatedMark %ANAME(対象)%は激しく腰を振る%ANAME(MASTER)%にしがみ付きながら嬌声を上げている
+				PRINTFORMW 摆出诶嘿颜一边娇喘着一边缩紧膣内，接着着不知道是第几次的射精之后仰起身子高潮了
+				;TranslatedMark アヘ顔を晒して喘ぎながらも膣をきつく締めつけ、何度目かの射精を受けながら背を反らして絶頂する
+				PRINTFORML 在欲望的作用下完全堕落的%ANAME(対象)%，用手搂住%ANAME(MASTER)%的脖子将其抱住
+				;TranslatedMark 欲望を叩きつけられた%ANAME(対象)%は、%ANAME(MASTER)%の首に手を回して抱きつく
+				PRINTFORML 接受了淫纹的%ANAME(対象)%，用以其平时的样子绝对无法想象的猥亵的语言，一边摇晃着腰一边撒娇
+				;TranslatedMark 淫紋を受け入れた%ANAME(対象)%は、普段の様子からは信じられない卑猥な言葉でもっともっと、と腰を揺すりながらとおねだりする
+				PRINTFORMW %ANAME(MASTER)%为了回应那淫乱的姿态，一整晚都不停侵犯着%ANAME(対象)%
+				;TranslatedMark %ANAME(MASTER)%はその淫らなおねだりに応えて、%ANAME(対象)%を一晩中犯し続けた
+			CASE 16
+				PRINTFORML 在房间的床上嘎吱嘎吱地摩擦着，%ANAME(対象)%跨上%ANAME(MASTER)%摆动着身体
+				;TranslatedMark 部屋のベッドをギシギシと軋ませながら、%ANAME(対象)%が%ANAME(MASTER)%に跨り跳ねている
+				PRINTFORMW %ANAME(対象)%的眼中冒出♥，充满爱意地用肉壶吞入肉棒，激烈地扭动身体以全身品味着女人的幸福
+				;TranslatedMark %ANAME(対象)%は目に♥を浮かべてずっぽりと愛しいペニスを咥えこみ、体を激しくくねらせ全身で女の幸せを味わっている
+				PRINTFORML 配合着骑在身上的%ANAME(対象)%，%ANAME(MASTER)%将腰向上顶起，%ANAME(対象)%猛地弓起身子发出喜悦的声音
+				;TranslatedMark リズムを合わせて%ANAME(MASTER)%が突き上げると、%ANAME(対象)%はビクンと弓なりに身体を反らせて悦びの声を上げる
+				PRINTFORML %ANAME(対象)%在快感中颤抖着的同时注视着心爱的%ANAME(MASTER)%，为了榨取出精液更加激烈地摆起腰来
+				;TranslatedMark %ANAME(対象)%は快感に震えながら愛しい%ANAME(MASTER)%を見つめて、その精を受けるべく更に腰の動きを早めていく
+				PRINTFORMW 为了回应她的期待，%ANAME(MASTER)%用力抓住了%ANAME(対象)%的腰，顶入她的最深处射精了
+				;TranslatedMark そんな彼女の期待に応えるべく、%ANAME(MASTER)%は%ANAME(対象)%の腰を強く掴み、最奥まで突き上げて射精した
+			CASE 17
+				PRINTFORML %ANAME(対象)%躺在床上，被%ANAME(MASTER)%不停得为所欲为侵犯着
+				;TranslatedMark %ANAME(対象)%はベッドに横たわり、%ANAME(MASTER)%のなすがままにひたすら犯されている
+				PRINTFORML 因淫纹而改变的肉穴被最喜欢的肉棒蹂躏着
+				;TranslatedMark 淫紋によって作り変えられた肉穴を愛しいペニスでいっぱいに蹂躙されて、
+				PRINTFORMW %ANAME(対象)%摆出不成体统的诶嘿颜垂着舌头，发出了口齿不清的喜悦之声
+				;TranslatedMark %ANAME(対象)%はだらしなく舌を垂らしてアヘ顔を晒し、呂律の回らぬ悦びの声を上げる
+				PRINTFORML 当%ANAME(MASTER)%的忍耐到达了6极限时，%ANAME(MASTER)%缩紧了膣道，子宫内被注满了白浊液，全身颤抖到达了高潮
+				;TranslatedMark %ANAME(MASTER)%が限界を訴えると%ANAME(MASTER)%は膣をきつく締め付け、白濁を子宮に放たれながら全身を震わせてアクメに達した
+				PRINTFORMW 即使已经榨出了%ANAME(MASTER)%的精液，%ANAME(対象)%还是不愿将肉棒拔出，以淫靡的表情扭动身体引诱着下一轮做爱
+				;TranslatedMark %ANAME(MASTER)%の精液を絞り終えても%ANAME(対象)%はペニスを咥えたまま離さず、淫靡な表情で身をくねらせ次を誘った
+			CASE 18
+				PRINTFORML %ANAME(対象)%被%ANAME(MASTER)%套上项圈，以匍匐的姿势接受着激烈的抽送
+				;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に首輪を嵌められて、四つん這いの姿勢で激しい抽送を受けている
+				PRINTFORML %ANAME(MASTER)%像是在训练宠物一样，配合着活塞运动拍打着屁股，每次%ANAME(対象)%都会颤抖着发出幸福地喘息
+				;TranslatedMark %ANAME(MASTER)%はペットを躾けるかの様にピストンに合わせて尻肉を叩き、その度に%ANAME(対象)%は身を震わせ幸せそうに喘ぐ
+				PRINTFORMW 扎根于下腹部的淫纹将疼痛和屈辱全部转换成快乐，把她打造成了一个出色的淫魔
+				;TranslatedMark 定着した淫紋が痛みも屈辱も全て快楽に変換し、彼女を立派な色狂いにしていた
+				PRINTFORML 一边被咚咚地敲击着子宫口一边被预告射精，%ANAME(対象)%像野兽一样吼叫着渴求着精液
+				;TranslatedMark 子宮口をずんずんと叩かれながら射精を予告されると、%ANAME(対象)%は獣の様に鳴いて種をねだった
+				PRINTFORMW 在彻夜的交配中被充分注入了主人爱的证明的%ANAME(対象)%，眼中浮现出♥摆出一副不成体统的表情
+				;TranslatedMark 夜通しの交尾でご主人様の愛の証をたっぷり注がれた%ANAME(対象)%は、目に♥を浮かべてアヘ顔を晒していた
+			CASE 19
+				PRINTFORML %ANAME(対象)%站着从背后被%ANAME(MASTER)%的肉棒贯穿
+				;TranslatedMark %ANAME(対象)%は立ちバックの体勢で、%ANAME(MASTER)%の肉棒に貫かれている
+				PRINTFORML 肉棒每次顶到阴道深处，淫纹就会强烈地闪耀着，不断提升她的敏感度
+				;TranslatedMark 肉棒が膣奥を突くたび淫紋が強く輝き、彼女の感度を際限なく引き上げていく
+				PRINTFORMW 每当%ANAME(MASTER)%激烈地摆动着腰，顶到子宫的时候，%ANAME(対象)%就会颤抖着发出野兽般的喘息声
+				;TranslatedMark %ANAME(MASTER)%が激しく腰を振り子宮を小突く度に、%ANAME(対象)%は身体を跳ねさせ獣のような喘ぎ声を上げる
+				PRINTFORML 将龟头咯吱咯吱地摩擦起深处的肉壁的话，%ANAME(対象)%就会摆出诶嘿颜伸出舌头，扭动起身体
+				;TranslatedMark 今度はカリ首でグリグリと天井をこすりあげられると、%ANAME(対象)%ははしたなく舌を出してアヘ顔を晒し身悶えした
+				PRINTFORMW 简直就像玩具一样被任意侵犯，%ANAME(対象)%却感受到喜悦，想要这样接着疯狂下去
+				;TranslatedMark まるで玩具の様に好き勝手に犯されることに%ANAME(対象)%は悦びを感じて、ただひたすらにヨガり狂い続けた
+		ENDSELECT
+		PRINTFORML
+		PRINTFORMW ……与%ANAME(MASTER)%激烈的性生活的之后，%ANAME(対象)%的内心得到了满足
+		;TranslatedMark ……%ANAME(MASTER)%との激しいセックスの末、%ANAME(対象)%の心は満たされた
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORMW %ANAME(MASTER)%轻轻抚摩着她的下腹闪耀的淫纹
+				;TranslatedMark %ANAME(MASTER)%は蕩けきった表情で恍惚としている彼女の下腹部に輝く淫紋を、そっと撫でる
+				PRINTFORMW 这之后，因为被所爱的%ANAME(MASTER)%抚摸而感到高兴，淫纹发出发出强烈而妖艳的光辉
+				;TranslatedMark すると、愛する%ANAME(MASTER)%に撫でられて嬉しがるように、淫紋が強く、妖しく輝きだす
+				PRINTFORML 由于急剧活性化的淫纹，%ANAME(対象)%的敏感度被提高了之前的数十倍
+				;TranslatedMark 急激に活性化した淫紋によって、感度を何十倍にも引き上げられた%ANAME(対象)%は
+				PRINTFORMW 只是被抚摸了一下下腹部身体就不断颤抖，潮吹着达到了顶峰……
+				;TranslatedMark 腹を撫でられただけで身体を跳ねさせ、潮を吹いて絶頂した……
+			CASE 1
+				PRINTFORMW 一脸安心沉溺于肉欲之中的%ANAME(対象)%的下腹部仍闪耀着淫纹
+				;TranslatedMark トロ顔で放心状態の%ANAME(対象)%の下腹部には今も淫紋が輝く
+				PRINTFORMW 难以忍受的情欲得到了缓解，现在的她充满了和%ANAME(MASTER)%交合的幸福感
+				;TranslatedMark 灼熱のような情欲は解消され、今は%ANAME(MASTER)%に抱かれた幸福感で満たされている
+				PRINTFORML 抚摸着看着十分幸福的%ANAME(対象)%，就这一点刺激让她忍不住发出了娇喘，全身不住颤抖
+				;TranslatedMark 幸せそうな彼女の身体を撫でるとそれだけで感じるのか、甘えた声が漏れ、全身をビクンと跳ねさせる
+				PRINTFORMW 被最喜欢的%ANAME(MASTER)%给予的快感，将她的理性和羞耻心都融化了……
+				;TranslatedMark 愛する%ANAME(MASTER)%から与えられる快感に、彼女の理性も羞恥も塗りつぶされていった……
+			CASE 2
+				PRINTFORMW 沉迷于在淫纹带来的快乐，%ANAME(対象)%身心都被融化了
+				;TranslatedMark 淫紋が与える快楽と陶酔感に、%ANAME(対象)%は心身ともに蕩けきっている
+				PRINTFORMW 是还沉迷在刚才的绝顶中还没平息吗，%ANAME(対象)%时不时全身痉挛着不断颤抖，依偎在%ANAME(MASTER)%身边撒娇
+				;TranslatedMark 今だ絶頂の波が収まらないのか、時たま全身をビクンと痙攣させ%ANAME(MASTER)%に甘えるように寄り添う
+				PRINTFORML 被她如此爱着，%ANAME(MASTER)%感觉到自己了作为雄性的本能和自尊心得到了满足
+				;TranslatedMark 彼女にこれほど愛されて、%ANAME(MASTER)%は己の雄としての本能と自尊心が満たされていくのを感じた
+				PRINTFORMW 抚摸着向自己撒娇的可爱的雌性的话，她就像很有感觉一样会用谄媚的娇声喘息……
+				;TranslatedMark 己に甘える可愛い雌を撫でてやると、彼女は媚びるような甘え声で感じ入るように喘いだ……
+		ENDSELECT
+		CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", ANAME(MASTER))
+		CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣")
+		CFLAG:対象:好感度 += 1000
+		CFLAG:対象:従属度 += 1000
+		CFLAG:対象:依存度 += 1000
+	ELSE
+		IF 対象 == ID_TO_CHARA(DVAR:淫紋_あなた依存ID) && あなたへの想い >= 10000 && !(対象 == MASTER)
+			PRINTFORM 让淫纹在%ANAME(対象)%的身上固定下来的
+			;TranslatedMark %ANAME(対象)%に定着した
+			CALL COLOR_PRINT(@"淫紋", カラー_ピンク)
+			PRINTFORML 她夜夜进行淫荡的行为……
+			;TranslatedMark は、彼女に夜な夜な淫らな行いをさせる……
+			SELECTCASE RAND:32
+				CASE 0
+					LOCALS = 客
+					PRINTFORML 子宫痛得不得了的%ANAME(対象)%工作到一半偷溜出来，迷茫地站在街角
+					;TranslatedMark 子宮が疼いて仕方がなかった%ANAME(対象)%は仕事を抜け出し、街角で立ちんぼをしていた
+					PRINTFORML 看到%ANAME(対象)%娼妇般的打扮和表情，根本就没有人能看穿她是这个国家的军官
+					;TranslatedMark 娼婦の様な格好と表情の%ANAME(対象)%を見て本来はこの国の将校なのだと見抜ける者はいないだろう
+					PRINTFORML 被她的魅力吸引而来的客人，%ANAME(対象)%很高兴地被他买走，挽着客人的胳膊走向旅馆
+					;TranslatedMark その色気に引かれて客がやって来ると、%ANAME(対象)%は悦んで彼に買われると腕を組んで宿に向かった
+					PRINTFORML 一整晚都忘记了平时的自己，作为妓女为男人尽心尽力，多次被注入了精液……
+					;TranslatedMark 一晩の間、普段の自分を忘れてただの娼婦として男に尽くして何度も慈悲を注がれた……
+				CASE 1
+					LOCALS = 外来人
+					PRINTFORML 在奇怪的地下室里，在床上被束缚着的%ANAME(対象)%被白衣男子疯狂地侵犯着
+					;TranslatedMark 怪しげな地下室でベッドに縛り付けられた%ANAME(対象)%が白衣の男に犯されヨガリ狂っている
+					PRINTFORML 有一天，%ANAME(対象)%认识了一个外来人，听说了一个奇怪的实验，作为实验体自愿报名了
+					;TranslatedMark ある日外来人と知り合った%ANAME(対象)%は怪しげな実験の話を聞いて、実験台として自ら志願した
+					PRINTFORML %ANAME(対象)%被使用了能将敏感度提示至几倍药，像失去理智的野兽一样狂吼着潮吹了
+					;TranslatedMark 性感を何倍にも引き上げる薬を投与された%ANAME(対象)%は、知性を失った獣の様に喘ぎ潮を吹きまくる
+					PRINTFORML 拿到了极佳的实验体的外来人，在%ANAME(対象)%崩坏之前一个劲地反复实验……
+					;TranslatedMark 極上の実験台を手に入れた彼らは%ANAME(対象)%が壊れる寸前までひたすら実験を繰り返した……
+				CASE 2
+					LOCALS = 大臣
+					PRINTFORML 工作中出错的%ANAME(対象)%被大臣叫去接受惩罚
+					;TranslatedMark 仕事中でミスをしてしまった%ANAME(対象)%は大臣に呼び出されてお仕置きをされている
+					PRINTFORML 按照命令将屁股伸出来，一边被插入着肉棒一边被拍到屁股红肿为止
+					;TranslatedMark 命じられるままに尻を突き出し、ペニスをねじ込まれながら尻が真っ赤に腫れるまで叩かれている
+					PRINTFORML 虽然是十分屈辱的行为，但%ANAME(対象)%还是一副雌性的表情，像是在主动要求处罚一样摇着屁股
+					;TranslatedMark 屈辱的な行為にもかかわらず%ANAME(対象)%は雌の顔をしており更なる仕置きをねだる様に尻を振る
+					PRINTFORML 随着咻咻的一声，中年大叔肮脏的精液注入了体内，%ANAME(対象)%发出娇声……
+					;TranslatedMark びゅるびゅると中年オヤジの汚らしいザーメンを注がれながら、%ANAME(対象)%は嬌声を響かせた……
+				CASE 3
+					LOCALS = 流浪漢
+					PRINTFORML %ANAME(対象)%去了河边，诱惑了流浪汉们
+					;TranslatedMark %ANAME(対象)%は河原に出かけ、浮浪者たちを誘ったようだ
+					PRINTFORML 许久没接触女色的他们立刻聚集在%ANAME(対象)%身边，开始享受那个肉体
+					;TranslatedMark 女日照りの彼らは早速%ANAME(対象)%に群がり、その肉体を堪能し始める
+					PRINTFORML 每当肉穴、尻穴、口中被注入污浊的白浊液，淫纹就会闪耀，给%ANAME(対象)%带来强烈的快感
+					;TranslatedMark 肉穴や尻穴、口に汚らしい白濁が注がれるたび、淫紋が輝き、強烈な快感を%ANAME(対象)%に与える
+					PRINTFORML %ANAME(対象)%由于性交的快感而不断高潮的同时，多次在子宫里接收了发黄的精液……
+					;TranslatedMark 性交の快感に何度も絶頂しながら、%ANAME(対象)%は黄ばんだ精液を何度も子宮で受け止めた……
+				CASE 4
+					LOCALS = 強姦魔
+					PRINTFORML %ANAME(対象)%穿着暴露的衣服到处走，故意被强奸魔推倒
+					;TranslatedMark %ANAME(対象)%は露出の高い格好で歩き回り、わざと強姦魔に押し倒された
+					PRINTFORML 对于蹩脚的演技感到兴奋，剥下了%ANAME(対象)%的衣服，突然把肉棒塞进了被期待所濡湿的秘部
+					;TranslatedMark 嫌がる演技に彼は興奮し、%ANAME(対象)%の衣装を剥ぎ取ると、期待に濡れた秘部にいきなりペニスをねじ込んだ
+					PRINTFORML 一被插进去就达到高潮了的%ANAME(対象)%开始摇晃起腰主动撒娇让男人吃了一惊，但反应过来的他得意地笑着说正好
+					;TranslatedMark 挿入られただけで絶頂し腰を振ってヨガり始めた%ANAME(対象)%に男は面食らったようだが、好都合だとニヤリと笑う
+					PRINTFORML 结果%ANAME(対象)%一直扮演慰安妇直到男人满足为止……
+					;TranslatedMark 結局%ANAME(対象)%は、男が満足するまで、慰み者にされ続けた……
+				CASE 5
+					LOCALS = 哥布林
+					PRINTFORML 在路边看到在乞讨着的哥布林的%ANAME(対象)%花钱雇佣了他，带回了宅邸
+					;TranslatedMark 道端で物乞いのゴブリンを見かけた%ANAME(対象)%は彼を雇い、屋敷に連れ帰った
+					PRINTFORML 然后%ANAME(対象)%每晚都会在床上被他压住，埋头于主从逆转的性交
+					;TranslatedMark それから%ANAME(対象)%は毎晩ベッドの上で彼に組み伏せられて、主従逆転セックスに没頭している
+					PRINTFORML 被矮小无力的哥布林的小鸡鸡所教育，%ANAME(対象)%兴奋得如他命令得摇晃屁股
+					;TranslatedMark 小柄で非力なゴブリンのちんぽで躾けられる行為に%ANAME(対象)%は興奮し彼に命ぜられるままに尻を振る
+					PRINTFORML 每天都被他那脏兮兮的精液填满的子宫，被尽情疼爱了……
+					;TranslatedMark 子宮が彼の小汚いザーメンで常に満たされているほど、毎日たっぷりと可愛がられた……
+				CASE 6
+					LOCALS = 炮友
+					;TranslatedMark セックスフレンド
+					PRINTFORML %ANAME(対象)%和一个连名字都不知道的男人前往旅馆
+					;TranslatedMark %ANAME(対象)%は名前も知らぬ男と宿で交わっている
+					PRINTFORML 只看肉棒和性技选择出的，性格最差的男人
+					;TranslatedMark ペニスとセックスのテクだけで選んだ、性格は最低の男だ
+					PRINTFORML 男人当然不会避孕，而是直接和%ANAME(対象)%交合，多次向那个子宫吐出白浊
+					;TranslatedMark 男は当然のように避妊もせず%ANAME(対象)%と交わり、その子宮になんども白濁を吐き出していく
+					PRINTFORML %ANAME(対象)%也理所当然般地接受了中出，一边摆出不成体统的表情一边不断地绝顶
+					;TranslatedMark %ANAME(対象)%も当然のようにソレを受け止め、だらしないアヘ顔を晒しながら何度も絶頂する
+					PRINTFORML 事后，男子放着在床上张开大腿，昏厥的%ANAME(対象)%离开了房间……
+					;TranslatedMark コトが終わると、男はベッドの上で大股を広げて気絶した%ANAME(対象)%を放置して部屋を立ち去った……
+				CASE 7
+					LOCALS = 兵
+					PRINTFORML %ANAME(対象)%成为了士兵们的慰安妇
+					;TranslatedMark %ANAME(対象)%は兵士達の慰み者にしてもらっている
+					PRINTFORML 白天作为武将驰名的%ANAME(対象)%，到了晚上是专门安慰士兵的肉便器，这已经是众所周知的事实了
+					;TranslatedMark 普段は武将として名をはせる%ANAME(対象)%が、夜は兵士の慰安のための穴だというのは、今や周知の事実となっていた
+					PRINTFORML 士兵们一个接一个地把肉棒插进%ANAME(対象)%的身体里，在这个雌穴中播种
+					;TranslatedMark 兵士達は次々と%ANAME(対象)%に一物をねじ込みながら、その穴に子種を吐き出していく
+				CASE 8
+					LOCALS = 露出狂
+					PRINTFORML %ANAME(対象)%和在夜路上遇到的曝光狂一起享受着露出行为
+					;TranslatedMark %ANAME(対象)%は夜道で出会った露出狂とともに、露出行為を楽しんでいる
+					PRINTFORML 和一个连名字都不知道的男人一起做的变态行为，让%ANAME(対象)%比以往更加兴奋
+					;TranslatedMark 名も知らぬ男との変態的な行為に、%ANAME(対象)%はこれ以上ない高ぶりを覚えている
+					PRINTFORML 终于无法忍受的两人，在小巷里开始了交合
+					;TranslatedMark ついに我慢できなくなった二人は、路地裏で行為に及び始めた
+				CASE 9
+					LOCALS = 部下
+					PRINTFORML %ANAME(対象)%是部下们的"宠物"
+					;TranslatedMark %ANAME(対象)%は部下達の「ペット」にしてもらっている
+					PRINTFORML 吮吸他们的肉棒，用秘部接受他们的欲望，得到部下的疼爱
+					;TranslatedMark 彼らの肉棒をしゃぶり、秘部で欲望を受け止め、可愛がってもらうのだ
+					PRINTFORML 或许是出于对%ANAME(対象)%顺从的侍奉的回报，他们积极地使用%ANAME(対象)%的肉体
+					;TranslatedMark 従順な奉仕に気をよくしたか、彼らは積極的に%ANAME(対象)%の肉体を使っていく
+					PRINTFORML 他们为了消解平日的忧愁，在%ANAME(対象)%里播种了数十次……
+					;TranslatedMark 彼らは日頃の憂さ晴らしとばかりに、何十発という種を%ANAME(対象)%に植え付けていった……
+				CASE 10
+					LOCALS = 偶遇的男人
+					PRINTFORML %ANAME(対象)%诱惑了路过的男人，把他带进了小巷
+					;TranslatedMark %ANAME(対象)%は行きずりの男を誘い、路地裏に連れ込んだ
+					PRINTFORML 跪在他面前，吮吸还散发着淫臭的肉棒，引诱他射精
+					;TranslatedMark 彼の下に跪き、洗ってもいないペニスをしゃぶり、射精へと導く
+					PRINTFORML 接着她抬起屁股，露出濡湿了的秘部，扭动着腰引诱他
+					;TranslatedMark 尻を突き出し、濡れた秘部を見せつけ、腰をくねらせて誘う
+					PRINTFORML 男子猛地开始活塞运动，在%ANAME(対象)%的子宫里数次注入了自己的子種……
+					;TranslatedMark 男は猛然と腰を振りたくり、%ANAME(対象)%の子宮に何度も子種を放った……
+				CASE 11
+					LOCALS = 客
+					PRINTFORML %ANAME(対象)%在妓院里接收了客人
+					;TranslatedMark %ANAME(対象)%は娼館で客をとった
+					PRINTFORML 买下她的男人，对能够和超出预想的美人做爱而兴奋不已
+					;TranslatedMark 彼女を買った男は、予想以上の上玉を抱けることにひどく気をよくしている
+					PRINTFORML %ANAME(対象)%亲切热心的侍奉服务让他更加高兴
+					;TranslatedMark %ANAME(対象)%の愛想の良い熱心な奉仕が、彼をさらに悦ばせた
+					PRINTFORML 他一整晚和%ANAME(対象)%无套交合，充分地用%ANAME(対象)%发泄了性欲……
+					;TranslatedMark 彼は何度も%ANAME(対象)%と避妊無しで交わり、たっぷりと性欲を吐き出していった……
+				CASE 12
+					LOCALS = 偶遇的男人
+					PRINTFORML %ANAME(対象)%陷入了壁尻的情况
+					;TranslatedMark %ANAME(対象)%は壁尻になったようだ
+					PRINTFORML 一个长什么样都不知道的男人，擅自插入%ANAME(対象)%的肉穴，在里面满满地射了出来
+					;TranslatedMark 顔も知れぬ男が、自分勝手に%ANAME(対象)%の穴に挿入しては、ちり紙感覚で射精していく
+					PRINTFORML 被一个接着一个被的肉棒插入，强烈的快感%ANAME(対象)%流着口水露陷入疯狂
+					;TranslatedMark 次から次へねじ込まれるペニスに、%ANAME(対象)%は涎を垂らしながらヨガり狂っている
+					PRINTFORML 等客人都散场的时候，只留下下半身满是白浊液，黏糊糊的%ANAME(対象)%……
+					;TranslatedMark 客が絶えるころには、その下半身は白濁でどろどろになっていた……
+				CASE 13
+					LOCALS = 犬
+					PRINTFORML %ANAME(対象)%与野狗群性交
+					;TranslatedMark %ANAME(対象)%は野良犬の群れと交わっている
+					PRINTFORML 他们似乎把%ANAME(対象)%当作族群中最下层的存在来看待，爽快地交尾后就将其放置不管
+					;TranslatedMark 彼らは%ANAME(対象)%を群れの最下層の存在として認識したらしく、気軽に交尾に使い捨てている
+					PRINTFORML 对于被像动物那样对待的屈辱和被肉棒给予的快乐，%ANAME(対象)%在快感的影响下苦闷不已
+					;TranslatedMark 畜生風情にそのような扱いをされる屈辱とペニスに与えられる快楽に、%ANAME(対象)%は身悶えしてヨガる
+					PRINTFORML 被狗注入充满野兽的味道的精液后，%ANAME(対象)%嚎叫着绝顶了……
+					;TranslatedMark 犬に獣臭いスペルマを注がれると、%ANAME(対象)%は遠吠えするように絶頂した……
+				CASE 14
+					LOCALS = 客
+					PRINTFORML %ANAME(対象)%作为脱衣舞娘工作着
+					;TranslatedMark %ANAME(対象)%はストリッパーとして働いている
+					PRINTFORML 拥有美丽肢体的她的淫荡舞蹈，俘获了观众的欢心
+					;TranslatedMark 美しい肢体をもつ彼女の淫らな踊りは、客の歓心を捕らえて放さなかった
+					PRINTFORML 表演结束后，身体疼痛不已的%ANAME(対象)%，引诱了一位惹眼的客人来疼爱她……
+					;TranslatedMark ショーが終わった後、疼きを抱えた%ANAME(対象)%は、めぼしい客を誘って可愛がってもらった……
+				CASE 15
+					LOCALS = 小混混
+					PRINTFORML %ANAME(対象)%出演了AV
+					;TranslatedMark %ANAME(対象)%はアダルトビデオに出演している
+					PRINTFORML 不仅是性交的快乐，很多男人也会被当做自慰的配菜，这一事实让她兴奋不已
+					;TranslatedMark 性交の快楽のみならず、多くの男のオナペットにされるのだという事実が彼女を昂ぶらせる
+					PRINTFORML 淫荡地弯腰，性器之间不停碰撞的画面，使这部AV成为了很少有的杰作
+					;TranslatedMark 淫らに腰をくねらせ性器をぶつけ合う映像は、滅多にない傑作となった
+					PRINTFORML %ANAME(対象)%的痴态让很多男人都感到满足，她一跃成为高人气AV女优……
+					;TranslatedMark %ANAME(対象)%の痴態は多くの男を満足させ、彼女は一躍、女優としての人気を高めていった……
+				CASE 16
+					LOCALS = 兵
+					PRINTFORML %ANAME(対象)%作为壁尻设置在兵营，负责士兵们的性处理
+					;TranslatedMark %ANAME(対象)%は壁尻として兵舎に設置され多数の兵士たちの性処理を行っている
+					PRINTFORML 因为看不见脸而不知道是%ANAME(対象)%的士兵们像对待物品一样粗暴地抽送着肉棒
+					;TranslatedMark 顔が見えない為に%ANAME(対象)%とは知らない兵士たちはまるで物のように乱暴にペニスを打ち付けて来る
+					PRINTFORML 男人们只为满足自身的性欲的毫不留情的强奸行为让%ANAME(対象)%兴奋不已
+					;TranslatedMark 容赦なく、男たちがただ性欲を満たすだけのレイプまがいの行為に%ANAME(対象)%は興奮してイキまくる
+					PRINTFORML 一直到第二天天快亮的时候才被解放的%ANAME(対象)%一边因为胎内无数的浓厚精液里感到疼痛一边返回了工作岗位……
+					;TranslatedMark 夜が白む頃に解放された%ANAME(対象)%は胎内の無数の濃い精液に子宮を疼かせながら仕事に戻った……
+				CASE 17
+					LOCALS = 偶遇的男人
+					PRINTFORML %ANAME(対象)%参加了一个可疑的派对
+					;TranslatedMark %ANAME(対象)%は怪しげなパーティに参加した
+					PRINTFORML 在众多男女的乱交的现场，%ANAME(対象)%的美貌尤其吸引周围男人的目光
+					;TranslatedMark 多数の男女が交わる中で、%ANAME(対象)%の美しさは特に男達の目を惹いたようだ
+					PRINTFORML 她委身于数个男人，仿佛痴迷于此一般不断摇晃着腰
+					;TranslatedMark 何人もの男に身をゆだねながら、彼女は夢中で腰を振り続ける
+					PRINTFORML 一次次地被中出，充满肉欲的夜晚还很长……
+					;TranslatedMark 次から次へ膣内射精されながら、彼女の夜は更けていった……
+				CASE 18
+					LOCALS = 中年男子
+					;TranslatedMark 中年の男
+					PRINTFORML 在某家店的地下，%ANAME(対象)%和挂着写着号码的项圈的裸体女人并列站着
+					;TranslatedMark とある店の地下で、首輪から番号札を下げた裸の女と共に%ANAME(対象)%が並んでいる
+					PRINTFORML 她们接下来要被拍卖，要被不认识的男人买下一个晚上
+					;TranslatedMark 彼女たちはこれからオークションにかけられ、どこぞの男に一晩を買われるのだ
+					PRINTFORML 与%ANAME(対象)%的极品的身材和砰砰地散发出的费洛蒙在拍卖会上成为十分抢手的商品…
+					;TranslatedMark %ANAME(対象)%の極上の肉体とムンムンと発せられるフェロモンに競りは大盛り上がりした…
+				CASE 19
+					LOCALS = 黑道风的男人
+					;TranslatedMark ヤクザ風の男
+					PRINTFORML %ANAME(対象)%在酒馆喝酒的时候被一个看着像是黑道的男人搭讪
+					;TranslatedMark %ANAME(対象)%が酒場で酒を飲んでいるとヤクザ風の男に声をかけられた
+					PRINTFORML 他熟练地用手在%ANAME(対象)%身上摸来摸去，%ANAME(対象)%也以一副并不是完全的没有感觉的表情让他接着摸着
+					;TranslatedMark 彼は馴れ馴れしく体に手を這わせてきて、%ANAME(対象)%も満更でもない表情でされるがままでいる
+					PRINTFORML 被诱惑说要不要两个人一起从酒馆里出去做点快乐的事情的%ANAME(対象)%用亲吻代替了回答
+					;TranslatedMark 酒場を離れて二人だけで盛り上がらないかと誘われた%ANAME(対象)%は返事代わりに彼にキスをした
+					PRINTFORML %ANAME(対象)%被带到情人旅馆，因无套種付而多次绝顶……
+					;TranslatedMark %ANAME(対象)%はラブホテルに連れ込まれ、避妊無しの種付けセックスで何度も絶頂した……
+				CASE 20
+					LOCALS = 囚人
+					PRINTFORML %ANAME(対象)%在昏暗的牢狱里被许多囚犯包围并被轮奸着
+					;TranslatedMark %ANAME(対象)%は薄暗い牢獄の中で多数の囚人に囲まれ輪姦されている
+					PRINTFORML 虽说是以讯问和慰安的名义为由，但%ANAME(対象)%的表情明显是沉迷于性交的雌性的表情
+					;TranslatedMark 尋問と慰安の為と言う名目だが、%ANAME(対象)%の表情は明らかにセックス漬けの雌のモノだ
+					PRINTFORML 许久不曾接触女色的囚犯们毫不留情地插入着肉棒，在她的体内和身体上都射满了精液
+					;TranslatedMark 女日照りの彼らは容赦なく体中にペニスをこすり付け、中にも外にも精液をぶちまけていく
+					PRINTFORML 等他们满意之后，%ANAME(対象)%的阴道里已经装满了囚犯们的精液……
+					;TranslatedMark 彼らが満足した頃には%ANAME(対象)%の膣の中は数多の囚人たちの精液でいっぱいになっていた……
+				CASE 21
+					LOCALS = 店長
+					PRINTFORML %ANAME(対象)%穿着兔女郎服在地下酒吧里服务
+					;TranslatedMark %ANAME(対象)%はバニーガール衣装で地下酒場で給仕を行っている
+					PRINTFORML 当然，这不仅仅是一个酒馆，店内到处都有客人和店员在交合，充满着喘息声和淫秽的气息
+					;TranslatedMark 無論ただの酒場ではなく、店のあちこちで客と店員が交わっており喘ぎ声と性の匂いで満ちている
+					PRINTFORML 作为店里的头牌的%ANAME(対象)%不停地被客人点名要求服务他们
+					;TranslatedMark 極上の女である%ANAME(対象)%もまたひっきりなしに客に指名されては彼らに対してサービスをしていく
+					PRINTFORML 然后店里的工作结束后，店长就理所当然地把她带回家，在她身体里注入了满满的报酬……
+					;TranslatedMark そして店が終わると当たり前のように店長にお持ち帰りされたっぷりと仕事料を注いでもらった……
+				CASE 22
+					LOCALS = 流浪漢
+					PRINTFORML %ANAME(対象)%光着身子只披上大衣在贫民窟里走着
+					;TranslatedMark %ANAME(対象)%は素っ裸にコートだけを羽織ったままスラム街を歩いている
+					PRINTFORML 一遇到流浪汉，她就带着挑逗的笑容，暴露身体，引诱他来袭击
+					;TranslatedMark 浮浪者と出会うと挑発的な笑みを浮かべて服をはだけ、裸体を晒して彼を誘い襲われる
+					PRINTFORML 当被一个流浪汉侵犯完毕后，她为了寻求下一轮的交合而在贫民窟滴着精液徘徊
+					;TranslatedMark 一人の浮浪者に犯され終えると、また次を求めて精液を垂らしたままスラムをさまよい続ける
+					PRINTFORML 天亮了之后，从贫民窟里摇摇晃晃走出来的%ANAME(対象)%的脸上露出了空虚但是又满足的笑容……
+					;TranslatedMark 夜が明けスラムからフラつきながら出てきた%ANAME(対象)%は虚ろだが満足そうな笑みを浮かべていた……
+				CASE 23
+					LOCALS = 流浪妖怪
+					PRINTFORML %ANAME(対象)%在人迹罕至的山洞里和丑陋的妖怪交合着
+					;TranslatedMark %ANAME(対象)%は人気のない洞窟でひどく醜い妖怪とまぐわっている
+					PRINTFORML 被皮肤已经开始溃烂的妖怪的人外肉棒激烈地播种，%ANAME(対象)%发出喜悦的声音
+					;TranslatedMark 爛れた様な肌を持つ妖怪の人外ちんぽで激しく種付けプレスを見舞われて%ANAME(対象)%は悦びの声を上げる
+					PRINTFORML 就这样，在休息日去拜访野外的妖怪巢穴，一个劲地被侵犯是%ANAME(対象)%最近必做的日常
+					;TranslatedMark こうして休みの日に野良妖怪の巣を訪れては、ひたすら犯されるのが最近の日課になっている
+					PRINTFORML 在这一天一整晚都被侵犯并被播种，按照雌性的本能多次达到了绝顶……
+					;TranslatedMark この日もまた一晩中ひたすら犯され種付けされ、雌の本能のままに何度もアクメに達した……
+				CASE 24
+					LOCALS = 大臣
+					PRINTFORML 在大臣的办公室里，下半身露出来的%ANAME(対象)%靠在办公桌上被侵犯
+					;TranslatedMark 大臣の執務室で下半身丸出しの%ANAME(対象)%がデスクに寄りかかりながら犯されている
+					PRINTFORML 在工作的时候，%ANAME(対象)%感受到了下流的视线，无法忍耐的她于是自己张开腿邀请他
+					;TranslatedMark 仕事中に彼のいやらしい視線を感じた%ANAME(対象)%は我慢できなくなり、自ら股を開いて彼を誘った
+					PRINTFORML 和外表一样性欲旺盛的男人激烈地喘息，向%ANAME(対象)%袭来，一个劲地晃着腰
+					;TranslatedMark 見た目通り性欲の塊の男は激しく息を荒げると、%ANAME(対象)%に襲い掛かりひたすら腰を打ち付けてきた
+					PRINTFORML 在工作场所被肮脏大叔侵犯，这种情况%ANAME(対象)%比平时更加兴奋而多次绝顶……
+					;TranslatedMark 仕事場で汚いおっさんに犯されている状況に%ANAME(対象)%はいつも以上に興奮して何度も絶頂した……
+				CASE 25
+					LOCALS = 小孩
+					;TranslatedMark 子供
+					PRINTFORML 最近的%ANAME(対象)%出任了一位贵族的儿子的家庭教师
+					;TranslatedMark 最近の%ANAME(対象)%はある貴族の息子の家庭教師をしている
+					PRINTFORML 贵族们都很满意，多亏了%ANAME(対象)%，儿子的成绩提高了
+					;TranslatedMark %ANAME(対象)%のおかげで息子の成績が上がったと貴族は満足そうだがこれには秘密があった
+					PRINTFORML 当察觉到了的他虽然年幼但充满欲望的视线时，%ANAME(対象)%每次在他取得好成绩都会给他奖励
+					;TranslatedMark 年頃の彼のエッチな視線に気づいた%ANAME(対象)%は、良い成績を出す度に"ご褒美"をあげているのだ
+					PRINTFORML %ANAME(対象)%期待着和喜欢自己的雄性见面，今天也去了宅邸……
+					;TranslatedMark すっかり自分好みの雄となった彼に会う事を楽しみにしながら%ANAME(対象)%は今日も屋敷を訪れた……
+				CASE 26
+					LOCALS = 居民
+					;TranslatedMark 領民
+					PRINTFORML 有一天，在街上丢了钱包，走投无路的时候，被一个男人捡到了还了回来
+					;TranslatedMark ある日、町で財布を落として途方に暮れていたところ一人の男性に拾ってもらった
+					PRINTFORML 被可靠的他迷住了的%ANAME(対象)%一边道谢一边抱住男人之后，发现他的股间鼓起来了
+					;TranslatedMark 逞しい彼にうっとりとした%ANAME(対象)%がお礼を言いながら抱き着くと、彼の股間が膨れ上がるのが見えた
+					PRINTFORML %ANAME(対象)%想要道谢，于是一边调戏这个男人一边卷起衣服，露出胸部，男人咕噜地吞了一口唾沫
+					;TranslatedMark %ANAME(対象)%がお礼をしたいのと囁き服をまくり上げ胸を露にすると彼はゴクリと生唾を飲んだ
+					PRINTFORML 挽着胳膊走向了酒店，%ANAME(対象)%被比想象中更硬挺的男根所宠爱了……
+					;TranslatedMark 腕を組みながらホテルに向かうと、想像以上の逞しい男根にたっぷりと可愛がられた……
+				CASE 27
+					LOCALS = 旅馆的主人
+					;TranslatedMark 宿の亭主
+					PRINTFORML %ANAME(対象)%决定住在旅途中发现的破旧的小客栈里
+					;TranslatedMark %ANAME(対象)%は旅の途中で見つけた廃れた安宿に泊まることにした
+					PRINTFORML 故意忘记带钱包的%ANAME(対象)%像少女一样举止向客栈老板低头请求原谅
+					;TranslatedMark わざと財布を忘れていた%ANAME(対象)%はしおらしい少女のようにふるまい亭主に頭を下げ許しを請う
+					PRINTFORML 看到这个样子，老板一边舔嘴唇，一边用手将其搂住，低声说那就用身体来支付
+					;TranslatedMark その姿に亭主は舌なめずりをしながら体に手を回してきて、身体で払ってもらおうと囁いてきた
+					PRINTFORML 假装被中年男子强行侵犯的少女的游戏让%ANAME(対象)%比平时更加兴奋，多次达到了高潮……
+					;TranslatedMark 中年男に無理矢理犯される少女というプレイに%ANAME(対象)%は普段以上に興奮し、何度もアクメに達した……
+				CASE 28
+					LOCALS = 兵士
+					PRINTFORML 在兵营一角进行着士兵们的模拟战斗
+					;TranslatedMark 兵舎の一角で兵士たちによる模擬戦闘が行われている
+					PRINTFORML %ANAME(対象)%身穿色情的服装，作为裁判兼战利品见证着比赛
+					;TranslatedMark %ANAME(対象)%はスケベな衣装を身にまとい、審判兼戦利品として試合を見守っている
+					PRINTFORML 长久没接触女色的士兵们为了得到%ANAME(対象)%，像野生的雄性动物一样进行激烈的战斗
+					;TranslatedMark 女日照りの兵士たちは%ANAME(対象)%を手に入れようと野生動物の雄の様に激しく戦い合う
+					PRINTFORML %ANAME(対象)%被优胜的强健士兵抱着，被带到自己的房间里，被好好疼爱了……
+					;TranslatedMark %ANAME(対象)%は優勝した逞しい兵士に抱きかかえられ自室に連れ込まれるとたっぷりと可愛がられた……
+				CASE 29
+					LOCALS = 貴族
+					PRINTFORML 被邀请参加派对的%ANAME(対象)%，作为好色贵族们的接待员工作着
+					;TranslatedMark パーティーに呼ばれた%ANAME(対象)%はエロ貴族共の接待役として仕事をした
+					PRINTFORML 被完全不想隐藏色情视线的胖大叔们连续性骚扰，%ANAME(対象)%从子宫深处感到疼痛
+					;TranslatedMark エロい視線を隠そうともしないデブ親父たちにセクハラを連発され%ANAME(対象)%は子宮を疼かせる
+					PRINTFORML 在这种状态下，一位贵族宣布要把%ANAME(対象)%带回家，%ANAME(対象)%喜悦地喘息着点了点头
+					;TranslatedMark そんな状態で一人の貴族にお持ち帰りを宣言された%ANAME(対象)%は、悦びの吐息を漏らして頷いた
+					PRINTFORML 比预期所想的更坚硬的肉棒和巧妙的技巧让%ANAME(対象)%在失去意识之前多次因为而发狂……
+					;TranslatedMark 期待以上の逞しいちんぽと巧みなテクニックに%ANAME(対象)%は気を失うまで何度もイキ狂った……
+				CASE 30
+					LOCALS = 小孩
+					;TranslatedMark 子ども
+					PRINTFORML %ANAME(対象)%在夜晚的私塾里和男孩子沉迷于激烈的性交
+					;TranslatedMark %ANAME(対象)%は夜の寺小屋で男の子と激しいセックスに没頭している
+					PRINTFORML 引诱白天看上的孩子出来，用自己的身体对对性一无所知的他进行性教育
+					;TranslatedMark 昼間に目を付けておいた子を誘惑して呼び出し、性を知らない彼に自身の身体で性教育を施す
+					PRINTFORML 被天真无邪的男孩子所索求，母性和背德感交织在一起，官能兴奋得让她神魂颠倒
+					;TranslatedMark 無垢な男の子に夢中で求められ、母性と背徳感が綯い交ぜとなって官能が昂ってヨガリ狂う
+					PRINTFORML 每次摆动腰部都露出雄性的表情的他的样子引起了子宫深处的疼痛，一整晚都激烈地交合着……
+					;TranslatedMark 腰を振る度に雄となっていく彼の様子に子宮を疼かせながら一晩中たっぷりと交わり続けた……
+				CASE 31
+					LOCALS = 触手
+					PRINTFORML 在昏暗的洞窟中，%ANAME(対象)%被大量的触手的海洋所淹没并被侵犯
+					;TranslatedMark 薄暗い洞窟の中、%ANAME(対象)%は大量の触手の海に溺れながら犯されている
+					PRINTFORML 由于驱除触手失败而被捕获的%ANAME(対象)%全身的洞都被触手插入，受到激烈的凌辱
+					;TranslatedMark 触手駆除に失敗して捕まった%ANAME(対象)%は全身の穴に触手をねじ込まれながら激しい凌辱を受ける
+					PRINTFORML 但是从一开始就以此为目的%ANAME(対象)%反而发出了喜悦的声音，疯狂沉迷于性交的快感
+					;TranslatedMark しかし最初からこうされるのが目的だった%ANAME(対象)%はむしろ悦びの声を上げてヨガリ狂っていた
+					PRINTFORML 在触手们满足之前不断被侵犯，沉溺在这世上无法想象的压倒性快乐中……
+					;TranslatedMark 彼らが満足するまで延々と犯されながら、この世のものとは思えない圧倒的な快楽に溺れた……
+			ENDSELECT
+			CALL FUCK(対象, "欲望, 性技, 性交, Ｃ, Ｖ, Ｖ性交", "処女喪失, 膣内射精" , GET_SPERM_ID(LOCALS), @"%LOCALS%の\@ RAND:2 ? 肉棒 # 唇\@", @"%LOCALS%")
+			PRINTFORML
+			PRINTFORMW ……但是无论被侵犯多少，%ANAME(対象)%的肉欲都无法治愈
+			;TranslatedMark ……しかしどれだけ犯されても、%ANAME(対象)%の肉欲は治まることはなかった
+			PRINTFORMW 无论被侵犯到何种程度，无论注入多少精液，又或是不断地达到顶峰，内心深处还是无法满足
+			;TranslatedMark どれほど犯され精を注がれても、絶頂を繰り返しても、やはり心の奥底が満足することができない
+			PRINTFORML %ANAME(対象)%为了满足这个疼痛，前往%ANAME(MASTER)%的身边…
+			;TranslatedMark %ANAME(対象)%はこの疼きを満たしてもらうため、%ANAME(MASTER)%の元へ向かった…
+			PRINTFORMW 下腹部闪着淫纹来到%ANAME(MASTER)%的房间的%ANAME(対象)%被%ANAME(MASTER)%轻轻地抱住
+			;TranslatedMark そして淫紋を輝かせながら自分の部屋を訪れた%ANAME(対象)%を、%ANAME(MASTER)%はそっと抱き寄せる
+			PRINTFORML %ANAME(対象)%眼中冒出♥将自己的一切托付给了自己深爱着的雄性……
+			;TranslatedMark %ANAME(対象)%は目を♥にして愛する雄に己の全てをゆだねた……
+			PRINTFORMW
+			SELECTCASE RAND:20
+				CASE 0
+					PRINTFORML 受淫纹的影响，肉体的敏感度是平时的数倍，%ANAME(対象)%尖叫着，陷入猛烈的疯狂之中
+					;TranslatedMark 淫紋により肉体の感覚が普段の数倍も鋭敏になり、%ANAME(対象)%は絶叫してヨガリ狂う
+					PRINTFORMW %ANAME(MASTER)%每次晃动腰部，龟头都会划过敏感的壁肉
+					;TranslatedMark %ANAME(MASTER)%が腰を動かす度、亀頭が敏感になった膣肉をなぞり上げる
+					PRINTFORML 每次让人发疯的快感向%ANAME(対象)%袭来的时候，她都会拼命地抱住%ANAME(MASTER)%
+					;TranslatedMark その度に気が狂いそうな快感が%ANAME(対象)%を襲い、彼女は必死で%ANAME(MASTER)%にしがみついてイキまくる
+					PRINTFORML 仿佛冲击到子宫深处的快感，让人感觉好像脑袋要爆炸了一样
+					;TranslatedMark ガツンガツンと子宮に響くようなストロークが与える快楽に、頭の中が弾けるような感覚で塗りつぶされる
+					PRINTFORMW 不久，%ANAME(MASTER)%将大量的精液注入子宫，%ANAME(対象)%发出野兽般的喘息声，激烈的高潮了
+					;TranslatedMark やがて%ANAME(MASTER)%が大量の精を子宮に注ぐと、%ANAME(対象)%は獣のような喘ぎ声で激しく絶頂した
+				CASE 1
+					PRINTFORML %ANAME(対象)%被%ANAME(MASTER)%压在身下开始被侵犯
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に覆いかぶさられながら犯されている
+					PRINTFORMW 已经固定了的淫纹对%ANAME(MASTER)%的肉棒起了反应，%ANAME(対象)%的灵敏度上升到异常的程度
+					;TranslatedMark 定着した淫紋が%ANAME(MASTER)%の肉棒に反応し、%ANAME(対象)%の感度が異常に引き上げられる
+					PRINTFORML 最初发出悲鸣般娇声的%ANAME(対象)%，现在也被让人疯狂的压倒性的快乐吞噬
+					;TranslatedMark 初めは悲鳴のような嬌声を上げていた%ANAME(対象)%も、今や圧倒的な快楽に飲み込まれヨガり狂っている
+					PRINTFORMW %ANAME(MASTER)%把肉棒深深地插入膣内射精后，%ANAME(対象)%感受到了身为雌性的幸福的同时到达了高潮
+					;TranslatedMark %ANAME(MASTER)%がペニスを奥深くねじ込んで膣内射精をすると、%ANAME(対象)%は雌の悦びと共にアクメに達した
+				CASE 2
+					PRINTFORML %ANAME(対象)%被%ANAME(MASTER)%紧紧抱住的同时被用肉棒插到了深处
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に抱きしめられながら深々とペニスを突き刺されている
+					PRINTFORMW 龟头刺激着子宫口，%ANAME(対象)%发出感受到让大脑融化般的快乐的声音后痉挛了
+					;TranslatedMark 亀頭でグリグリと子宮口を刺激され、%ANAME(対象)%は脳が焼かれるような快楽であられもない声を出して痙攣する
+					PRINTFORML %ANAME(対象)%的身体因为淫纹而向雄性屈服，张开子宫口向%ANAME(MASTER)%索取精液
+					;TranslatedMark %ANAME(対象)%の身体は淫紋によって雄に屈服しており、子宮口をパクパクと開いて%ANAME(MASTER)%の種をねだっている
+					PRINTFORMW 每次在子宫内被注入精液，%ANAME(対象)%的内心就充满了身为雌性的喜悦，发出娇声接受了射精
+					;TranslatedMark そして子種を子宮に注がれる度、%ANAME(対象)%の心は雌として悦びで満たされ、嬌声を上げて射精を受け入れた
+				CASE 3
+					PRINTFORML 在%ANAME(MASTER)%的房间里回响着%ANAME(対象)%的娇声
+					;TranslatedMark %ANAME(MASTER)%の部屋中に%ANAME(対象)%の嬌声が響いている
+					PRINTFORMW %ANAME(対象)%以站立背位的姿态接受了野兽般粗暴的活塞运动，露出了不成体统的表情
+					;TranslatedMark %ANAME(対象)%は立ちバックの姿勢で獣のような荒々しいピストンを受けて、だらしない表情を見せている
+					PRINTFORML 由于淫纹带来的极大快感，%ANAME(対象)%接受了已经成为%ANAME(MASTER)%的雌穴的自己
+					;TranslatedMark 淫紋がもたらす極上の快感により、%ANAME(対象)%はすでに%ANAME(MASTER)%のための雌穴になった自分を受け入れている
+					PRINTFORMW 每当%ANAME(MASTER)%预告了中出了的时候，%ANAME(対象)%就会睁大眼睛冒出♥缩紧着膣穴，索求着精液
+					;TranslatedMark %ANAME(MASTER)%が膣内射精を予告すると、%ANAME(対象)%は目を♥にしながら膣を締め上げ子種をおねだりした
+				CASE 4
+					PRINTFORML %ANAME(対象)%被%ANAME(MASTER)%推倒，被以激烈的活塞运动侵犯着
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に押し倒されて激しく犯されている
+					PRINTFORMW 因为淫纹而变得敏锐的膣肉每次被肉棒咕哩咕哩搅动的时候，%ANAME(対象)%的脑袋里都会一片空白，娇喘不断
+					;TranslatedMark 淫紋で鋭敏になった膣肉がペニスでゴリゴリと抉られる度に、%ANAME(対象)%の頭の中に火花が散って嬌声が上がる
+					PRINTFORML 由于太过舒服，%ANAME(対象)%本能地欢迎着%ANAME(MASTER)%的肉棒
+					;TranslatedMark あまりの快楽に、%ANAME(対象)%は本能のままに%ANAME(MASTER)%のペニスを悦んで受け入れている
+					PRINTFORMW 成为%ANAME(MASTER)%专用的雌穴的%ANAME(対象)%，在那之后也没有休息，一直摇着腰接受着中出
+					;TranslatedMark %ANAME(MASTER)%専用の雌穴となった%ANAME(対象)%は、その後も休むことも無く延々と腰を振って精を受け入れた
+				CASE 5
+					PRINTFORML 在%ANAME(MASTER)%的房间里回响着%ANAME(対象)%的娇声
+					;TranslatedMark %ANAME(MASTER)%の部屋中に%ANAME(対象)%の嬌声が響いている
+					PRINTFORMW 由于比平时更强力的淫纹冲动而发狂，%ANAME(対象)%跨上了%ANAME(MASTER)%疯狂地摆动着腰
+					;TranslatedMark いつも以上に強力な淫紋の衝動に狂わされ、%ANAME(対象)%は%ANAME(MASTER)%に跨り狂ったように腰を振る
+					PRINTFORML 由于淫纹的作用，膣肉会像有贪欲一样，饥渴地缠上%ANAME(MASTER)%的肉棒索求着
+					;TranslatedMark 淫紋の作用により、その膣肉は精を貪欲に貪るように%ANAME(MASTER)%のペニスを絞り上げる
+					PRINTFORMW %ANAME(MASTER)%在眼中印下了，一副诶嘿颜，流着口水，像野兽一样摆动着腰的淫猥的%ANAME(対象)%的身姿
+					;TranslatedMark アヘ顔で涎を垂らしながら獣のように腰を振る淫猥な%ANAME(対象)%の姿を、%ANAME(MASTER)%は網膜に焼き付けた
+				CASE 6
+					PRINTFORML %ANAME(対象)%骑在%ANAME(MASTER)%身上扭动着腰
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に馬乗りになって腰を振っている
+					PRINTFORMW 每当沉下腰来，肉棒就会到达淫穴的最深处，%ANAME(対象)%的眼中冒出♥沉浸在身为雌性的喜悦中
+					;TranslatedMark 腰を沈める度にペニスが最奥まで届き、%ANAME(対象)%は瞳を♥にして雌の悦びに浸っている
+					PRINTFORML 在她的身体上固定下来的淫纹用快乐充满了%ANAME(対象)%的脑袋，积极地摆动着腰让%ANAME(MASTER)%索求她
+					;TranslatedMark 彼女の身体に定着した淫紋が%ANAME(対象)%の頭を快楽で塗りつぶし、積極的に腰を振らせて%ANAME(MASTER)%に依存させていく
+					PRINTFORMW 当%ANAME(MASTER)%抓住腰部，将灼热的精液释放到子宫中时，%ANAME(対象)%全身抖动，发出十分享受的声音
+					;TranslatedMark %ANAME(MASTER)%が腰を掴みながら灼熱の精液を子宮に放つと、%ANAME(対象)%は全身を跳ねさせながら悦びの声を上げた
+				CASE 7
+					PRINTFORML %ANAME(対象)%一边被%ANAME(MASTER)%抱着一边被深深地插入着肉棒
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に抱えられながら深々とペニスをねじ込まれている
+					PRINTFORMW 每次插入时由于自身的重量和肉棒对子宫产生如同要将其击碎一般的冲击使她眼中浮起♥脸大声娇喘起来
+					;TranslatedMark 一突き毎に自重とペニスで子宮を潰される様な激しい抽送に彼女は瞳に♥を浮かべて大声で喘ぐ
+					PRINTFORML 由于淫纹的效果，她完全变成了%ANAME(MASTER)%专用的雌穴，传达出了已经被舌头侵犯到口齿不清的喜悦
+					;TranslatedMark 淫紋の効果によりすっかり%ANAME(MASTER)%専用の雌穴となった彼女は、もはや呂律が回らぬ舌で犯される悦びを伝えてくる
+					PRINTFORML 她那样淫乱不堪的的样子，使%ANAME(MASTER)%的下体更加隆起
+					;TranslatedMark そんな淫らに乱れきった彼女の様子が、%ANAME(MASTER)%の一物をよりいっそう隆起させる
+					PRINTFORMW 每次%ANAME(MASTER)%顶到子宫，她都会发出幸福的悲鸣，然后疯狂地抖动起来
+					;TranslatedMark %ANAME(MASTER)%が子宮まで突きこむ度、彼女は幸せそうな悲鳴を上げてヨガリ狂った
+				CASE 8
+					PRINTFORML %ANAME(対象)%以対面座位的姿势和%ANAME(MASTER)%接吻的同时下体互相连结着
+					;TranslatedMark %ANAME(対象)%は対面座位の姿勢で%ANAME(MASTER)%とキスをしながら繋がっている
+					PRINTFORMW 用连理性的碎片都感觉不到的堕落的表情，积极地缠绕着舌头的%ANAME(対象)%的蜜穴中不断地流出爱蜜
+					;TranslatedMark 理性の欠片も感じさせないほど蕩けた表情で、積極的に舌を絡める%ANAME(対象)%の蜜穴からは止め処なく愛蜜が漏れ出る
+					PRINTFORML 随着淫纹的闪耀，%ANAME(対象)%变成了身心都十分适合%ANAME(MASTER)%的一只的雌性
+					;TranslatedMark 淫紋の輝きにより、%ANAME(対象)%は身も心もすっかり%ANAME(MASTER)%のつがいにふさわしい雌となった
+					PRINTFORML 被%ANAME(MASTER)%的肉棒占领膣内，每次被蹂躏都会发出享受的声音
+					;TranslatedMark %ANAME(MASTER)%の一物で膣内を占領され蹂躙される度に悦びの声を上げてヨガる
+					PRINTFORMW 为了让她更加幸福，%ANAME(MASTER)%再次动起腰来，%ANAME(対象)%被快乐的漩涡吞噬了
+					;TranslatedMark 彼女をもっと幸せにしてやるべく%ANAME(MASTER)%は再び腰を振り出し、%ANAME(対象)%は快楽の渦に飲み込まれた
+				CASE 9
+					PRINTFORML %ANAME(対象)%被%ANAME(MASTER)%激烈地侵犯着，如同疯狂了一般地挣扎着
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に激しく犯されながらヨガり狂っている
+					PRINTFORMW 被淫纹所带来的冲动所支配的%ANAME(対象)%，希望自己四肢着地被侵犯
+					;TranslatedMark 淫紋がもたらす衝動に支配された%ANAME(対象)%は、自ら四つんばいになって犯されることを望んでいた
+					PRINTFORML 然后%ANAME(MASTER)%如她所愿，从背后像野兽一样蹂躏着她
+					;TranslatedMark そして%ANAME(MASTER)%は望みどおり、後ろから獣のように彼女を蹂躙する
+					PRINTFORML %ANAME(対象)%一副平时难以想象的淫乱的姿态，和%ANAME(MASTER)%的交合让她摆出了诶嘿颜，不断地发出娇声
+					;TranslatedMark %ANAME(対象)%は普段からは想像できないほど激しく乱れ、%ANAME(MASTER)%とのセックスにアヘ顔を晒して絶え間ない嬌声を上げる
+					PRINTFORMW 然后被在胎内释放出了深爱的%ANAME(MASTER)%的浓厚的精液后，%ANAME(対象)%感受到身为雌性的愉悦的同时高潮了
+					;TranslatedMark そして愛する%ANAME(MASTER)%の濃厚な子種を胎内に放たれると、%ANAME(対象)%は雌の悦びと共に絶頂した
+				CASE 10
+					PRINTFORML %ANAME(MASTER)%一边压着%ANAME(対象)%一边用肉棒抽插着
+					;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%に圧し掛かりながらプレスする様にペニスを打ちつけている
+					PRINTFORMW %ANAME(対象)%一边接受着咚咚的如同要将子宫崩击溃般的插入，一边用力抱紧%ANAME(MASTER)%发出呻吟声
+					;TranslatedMark %ANAME(対象)%はドスンドスンと子宮が潰れるような挿入を受けながら、%ANAME(MASTER)%にしがみ付いて呻き声を上げている
+					PRINTFORML 虽然是比平时更加激烈的play，但被刻上了淫纹的身体连这些都会变成快感
+					;TranslatedMark 普段よりも激しいプレイだが、淫紋が刻み込まれた身体はそれらさえも快感に変えていく
+					PRINTFORML 在深度授种位下被激烈地蹂躏着，%ANAME(対象)%发自内心高兴地接受了成为%ANAME(MASTER)%的孕袋
+					;TranslatedMark 激しい種付けプレスで蹂躙されながら、%ANAME(対象)%の心は%ANAME(MASTER)%のための孕み袋となることを喜んで受け入れた
+					PRINTFORMW 不久，由于%ANAME(MASTER)%的大量射精而感到子宫内灼热感的%ANAME(対象)%的脑袋里被身为雌性的喜悦所填满
+					;TranslatedMark やがて%ANAME(MASTER)%の大量射精で子宮に灼熱を感じると、%ANAME(対象)%の頭の中は雌の悦びで埋め尽くされた
+				CASE 11
+					PRINTFORML %ANAME(対象)%一边接受%ANAME(MASTER)%激烈的活塞运动一边喘息
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の激しいピストンを受けながら喘いでいる
+					PRINTFORMW 满足了被其他男人侵犯却不满足的内心，满足的幸福快乐支配着%ANAME(対象)%
+					;TranslatedMark 他の男たちに犯されても満たされなかった心が、満たされていく至福の快楽が%ANAME(対象)%を支配していた
+					PRINTFORML 像是要侵入子宫内部一样激烈的腰部动作使%ANAME(対象)%的脚尖直直地伸展着发出苦闷的娇喘声
+					;TranslatedMark 子宮内部に侵入されるかの様な激しい腰遣いに%ANAME(対象)%はつま先までピンと伸ばして悶える
+					PRINTFORML 不经意间接受了射入体内的充满温度的精液，%ANAME(対象)%的头脑中迸发出快感，发出娇声
+					;TranslatedMark 不意に勢いよく熱い精の放流を受け、%ANAME(対象)%は頭の中が弾けるような快感を受けて嬌声を上げる
+					PRINTFORMW 在受到%ANAME(MASTER)%的长时间射精的同时，%ANAME(対象)%意识到自己被播种而进一步高潮了
+					;TranslatedMark %ANAME(MASTER)%の長い射精を受けながら、%ANAME(対象)%は自分の中に子種が染み込んでくる感覚で更に絶頂してしまった
+				CASE 12
+					PRINTFORML %ANAME(対象)%跨在%ANAME(MASTER)%身上，用身后用手支撑着身体激烈地摆动着腰
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の上に跨り、後ろ手で体を支えながら激しく腰を振っている
+					PRINTFORML 深深地将肉棒吞进秘所里，每次她上下摆动都会溢出爱液，发出猥亵的声音
+					;TranslatedMark 深々とペニスを咥えこんだ秘所からは彼女が腰を上下する度に愛液が溢れ、卑猥な音を漏らしている
+					PRINTFORML 那个已经完全是荡妇表情，接受了在淫纹的作用下被放大至数倍的快乐，不检点地垂着舌头喘息着
+					;TranslatedMark その表情はすっかり蕩けきっており、淫紋で増幅された快楽を受け入れ、だらしなく舌を垂らしながら喘いでいる
+					PRINTFORMW %ANAME(対象)%被最喜欢的%ANAME(MASTER)%的肉棒贯穿着一整晚都因为快感而发狂
+					;TranslatedMark %ANAME(対象)%は愛する%ANAME(MASTER)%のペニスに貫かれる悦びで一晩中ヨガり続けた
+				CASE 13
+					PRINTFORML %ANAME(対象)%一边%ANAME(MASTER)%插入的同时的一边扭动着身体，发出喜悦的声音
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に抱かれながら身体をくねらせ、悦びの声を上げている
+					PRINTFORMW 每次被狂野的活塞运动顶到子宫时，%ANAME(対象)%的脑子里都会一片空白，浑身颤抖
+					;TranslatedMark 荒々しい腰遣いで子宮を小突かれる度に、%ANAME(対象)%の頭の中は真っ白になり身を震わせる
+					PRINTFORML 为了不让所爱的雄性离开自己，膣肉紧紧地缠绕在肉棒上，将其往更深处引入
+					;TranslatedMark 愛する雄を離すまいと、膣肉はきつく肉棒に絡みつき、より奥深くへいざなうように蠢く
+					PRINTFORMW %ANAME(MASTER)%低声呻吟的同时，在%ANAME(対象)%体内释放出大量的精液，使她展现出雌性的表情高潮了
+					;TranslatedMark %ANAME(MASTER)%が低く唸ると共に%ANAME(対象)%の中に大量の精を放つと、彼女は雌の顔を晒しながら絶頂した
+				CASE 14
+					PRINTFORML %ANAME(対象)%在接受了不知道是第几次的中出同时，高声娇喘起来达到了高潮
+					;TranslatedMark %ANAME(対象)%は何度目かの膣内射精を受けながら、一際大きな嬌声を上げて絶頂した
+					PRINTFORMW 体内被精液填满，她像是十分幸福一样摆出诶嘿颜痉挛了
+					;TranslatedMark 胎内にたっぷりと子種を吐き出されながら、彼女は幸せそうにアヘ顔を晒して痙攣する
+					PRINTFORML 和至今为止被奇奇怪怪的人侵犯的快感相比无法比拟的幸福，她感觉到了自己的内心充满了喜悦
+					;TranslatedMark 今までの有象無象に犯されてる快感とは比べ物にならない幸せで、心が満ちていくのを感じていた
+					PRINTFORML 为了改变姿势%ANAME(MASTER)%暂时拔出了肉棒，就会从其结合部溢出大量的精液
+					;TranslatedMark 体勢を変える為に%ANAME(MASTER)%がいったんペニスを引き抜くと、結合部からどぷっと大量の精液が溢れ出た
+					PRINTFORMW 看到从自己身体里流出来的精液，%ANAME(対象)%从子宫深处感受到疼痛，再次张开双腿恳求%ANAME(MASTER)%的公枪
+					;TranslatedMark 自らに放たれた子種が流れるのを見て%ANAME(対象)%は子宮が疼くのを感じ、再び身体を開いて%ANAME(MASTER)%の牡槍を懇願した
+				CASE 15
+					PRINTFORML %ANAME(対象)%紧贴着激烈摆动着腰的%ANAME(MASTER)%，发出娇声
+					;TranslatedMark %ANAME(対象)%は激しく腰を振る%ANAME(MASTER)%にしがみ付きながら嬌声を上げている
+					PRINTFORMW 摆出诶嘿颜一边娇喘着一边缩紧膣内，接着着不知道是第几次的射精之后仰起身子高潮了
+					;TranslatedMark アヘ顔を晒して喘ぎながらも膣をきつく締めつけ、何度目かの射精を受けながら背を反らして絶頂する
+					PRINTFORML %ANAME(対象)%用手搂住射精结束后的%ANAME(MASTER)%的脖子
+					;TranslatedMark %ANAME(対象)%は射精を終えた%ANAME(MASTER)%の首に手を回して抱きつく
+					PRINTFORML 接受了淫纹的%ANAME(対象)%，用以平时的样子无法想象的猥亵的言语索求着，一边摇晃着屁股一边撒娇
+					;TranslatedMark 淫紋を受け入れた%ANAME(対象)%は、普段の様子からは信じられない卑猥な言葉でもっともっと、腰を揺すりながらとおねだりする
+					PRINTFORMW %ANAME(MASTER)%为了回应那淫乱的姿态，一整晚都不停侵犯着%ANAME(対象)%
+					;TranslatedMark %ANAME(MASTER)%はその淫らなおねだりに応えて、%ANAME(対象)%を一晩中犯し続けた
+				CASE 16
+					PRINTFORML 在房间的床上嘎吱嘎吱地摩擦着，%ANAME(対象)%跨上%ANAME(MASTER)%摆动着身体
+					;TranslatedMark 部屋のベッドをギシギシと軋ませながら、%ANAME(対象)%が%ANAME(MASTER)%に跨り跳ねている
+					PRINTFORMW %ANAME(対象)%的眼中冒出♥，充满爱意地用肉壶吞入肉棒，激烈地扭动身体以全身品味着女人的幸福
+					;TranslatedMark %ANAME(対象)%は目に♥を浮かべてずっぽりと愛しいペニスを咥えこみ、体を激しくくねらせ全身で女の幸せを味わっている
+					PRINTFORML 配合着骑在身上的%ANAME(対象)%，%ANAME(MASTER)%将腰向上顶起，%ANAME(対象)%猛地弓起身子发出喜悦的声音
+					;TranslatedMark リズムを合わせて%ANAME(MASTER)%が突き上げると、%ANAME(対象)%はビクンと弓なりに身体を反らせて悦びの声を上げる
+					PRINTFORML %ANAME(対象)%在快感中颤抖着的同时注视着心爱的%ANAME(MASTER)%，为了榨取出精液更加激烈地摆起腰来
+					;TranslatedMark %ANAME(対象)%は快感に震えながら愛しい%ANAME(MASTER)%を見つめて、その精を受けるべく更に腰の動きを早めていく
+					PRINTFORMW 为了回应她的期待，%ANAME(MASTER)%用力抓住了%ANAME(対象)%的腰，顶入她的最深处射精了
+					;TranslatedMark そんな彼女の期待に応えるべく、%ANAME(MASTER)%は%ANAME(対象)%の腰を強く掴み、最奥まで突き上げて射精した
+				CASE 17
+					PRINTFORML %ANAME(対象)%躺在床上，被%ANAME(MASTER)%不停得为所欲为侵犯着
+					;TranslatedMark %ANAME(対象)%はベッドに横たわり、%ANAME(MASTER)%のなすがままにひたすら犯されている
+					PRINTFORML 因淫纹而改变的肉穴被最喜欢的肉棒蹂躏着
+					;TranslatedMark 淫紋によって作り変えられた肉穴を愛しいペニスでいっぱいに蹂躙されて、
+					PRINTFORMW %ANAME(対象)%摆出不成体统的诶嘿颜垂着舌头，发出了口齿不清的喜悦之声
+					;TranslatedMark %ANAME(対象)%はだらしなく舌を垂らしてアヘ顔を晒し、呂律の回らぬ悦びの声を上げる
+					PRINTFORML 当%ANAME(MASTER)%的忍耐到达了6极限时，%ANAME(MASTER)%缩紧了膣道，子宫内被注满了白浊液，全身颤抖到达了高潮
+					;TranslatedMark %ANAME(MASTER)%が限界を訴えると%ANAME(MASTER)%は膣をきつく締め付け、白濁を子宮に放たれながら全身を震わせてアクメに達した
+					PRINTFORMW 即使榨出了%ANAME(MASTER)%的精液，%ANAME(対象)%还是不愿意让肉棒拔出来，以淫靡的表情扭动身体引诱着下一轮交合
+					;TranslatedMark %ANAME(MASTER)%の精液を絞り終えても%ANAME(対象)%ははペニスを咥えたまま離さず、淫靡な表情で身をくねらせ次を誘った
+				CASE 18
+					PRINTFORML %ANAME(対象)%被%ANAME(MASTER)%套上项圈，以匍匐的姿势接受着激烈的抽送
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に首輪を嵌められて、四つん這いの姿勢で激しい抽送を受けている
+					PRINTFORML %ANAME(MASTER)%像是在训练宠物一样，配合着活塞运动拍打着屁股，每次%ANAME(対象)%都会颤抖着发出幸福地喘息
+					;TranslatedMark %ANAME(MASTER)%はペットを躾けるかの様にピストンに合わせて尻肉を叩き、その度に%ANAME(対象)%は身を震わせ幸せそうに喘ぐ
+					PRINTFORMW 扎根于下腹部的淫纹将疼痛和屈辱全部转换成快乐，把她打造成了一个出色的淫魔
+					;TranslatedMark 定着した淫紋が痛みも屈辱も全て快楽に変換し、彼女を立派な色狂いにしていた
+					PRINTFORML 一边被咚咚地敲击着子宫口一边被预告射精，%ANAME(対象)%像野兽一样吼叫着渴求着精液
+					;TranslatedMark 子宮口をずんずんと叩かれながら射精を予告されると、%ANAME(対象)%は獣の様に鳴いて種をねだった
+					PRINTFORMW 在彻夜的交配中被充分注入了主人爱的证明的%ANAME(対象)%，眼中浮现出♥摆出一副不成体统的表情
+					;TranslatedMark 夜通しの交尾でご主人様の愛の証をたっぷり注がれた%ANAME(対象)%は、目に♥を浮かべてアヘ顔を晒していた
+				CASE 19
+					PRINTFORML %ANAME(対象)%站着从背后被%ANAME(MASTER)%的肉棒贯穿
+					;TranslatedMark %ANAME(対象)%は立ちバックの体勢で、%ANAME(MASTER)%の肉棒に貫かれている
+					PRINTFORML 肉棒每次顶到阴道深处，淫纹就会强烈地闪耀着，不断提升她的敏感度
+					;TranslatedMark 肉棒が膣奥を突くたび淫紋が強く輝き、彼女の感度を際限なく引き上げていく
+					PRINTFORMW 每当%ANAME(MASTER)%激烈地摆动着腰，顶到子宫的时候，%ANAME(対象)%就会颤抖着发出野兽般的喘息声
+					;TranslatedMark %ANAME(MASTER)%が激しく腰を振り子宮を小突く度に、%ANAME(対象)%は身体を跳ねさせ獣のような喘ぎ声を上げる
+					PRINTFORML 将龟头咯吱咯吱地摩擦起深处的肉壁的话，%ANAME(対象)%就会摆出诶嘿颜伸出舌头，扭动起身体
+					;TranslatedMark 今度はカリ首でグリグリと天井をこすりあげられると、%ANAME(対象)%ははしたなく舌を出してアヘ顔を晒し身悶えした
+					PRINTFORMW 简直就像玩具一样被任意侵犯，%ANAME(対象)%却感受到喜悦，想要这样接着疯狂下去
+					;TranslatedMark まるで玩具の様に好き勝手に犯されることに%ANAME(対象)%は悦びを感じて、ただひたすらにヨガり狂い続けた
+			ENDSELECT
+			PRINTFORML
+			PRINTFORML ……与%ANAME(MASTER)%激烈的性生活的之后，%ANAME(対象)%的内心得到了满足
+			;TranslatedMark ……%ANAME(MASTER)%との激しいセックスの末、%ANAME(対象)%の心は満たされた
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORMW %ANAME(MASTER)%轻轻抚摩着她的下腹闪耀的淫纹
+					;TranslatedMark %ANAME(MASTER)%は蕩けきった表情で恍惚としている彼女の下腹部に輝く淫紋を、そっと撫でる
+					PRINTFORMW 这之后，因为被所爱的%ANAME(MASTER)%抚摸而感到高兴，淫纹发出发出强烈而妖艳的光辉
+					;TranslatedMark すると、愛する%ANAME(MASTER)%に撫でられて嬉しがるように、淫紋が強く、妖しく輝きだす
+					PRINTFORML 由于急剧活性化的淫纹，%ANAME(対象)%的敏感度被提高了之前的数十倍
+					;TranslatedMark 急激に活性化した淫紋によって、感度を何十倍にも引き上げられた%ANAME(対象)%は
+					PRINTFORMW 只是被抚摸了一下下腹部身体就不断颤抖，潮吹着达到了顶峰……
+					;TranslatedMark 腹を撫でられただけで身体を跳ねさせ、潮を吹いて絶頂した……
+				CASE 1
+					PRINTFORMW 一脸安心沉溺于肉欲之中的%ANAME(対象)%的下腹部仍闪耀着淫纹
+					;TranslatedMark トロ顔で放心状態の%ANAME(対象)%の下腹部には今も淫紋が輝く
+					PRINTFORMW 难以忍受的情欲得到了缓解，现在的她充满了和%ANAME(MASTER)%交合的幸福感
+					;TranslatedMark 灼熱のような情欲は解消され、今は%ANAME(MASTER)%に抱かれた幸福感で満たされている
+					PRINTFORML 抚摸着看着十分幸福的%ANAME(対象)%，就这一点刺激让她忍不住发出了娇喘，全身不住颤抖
+					;TranslatedMark 幸せそうな彼女の身体を撫でるとそれだけで感じるのか、甘えた声が漏れ、全身をビクンと跳ねさせる
+					PRINTFORMW 被最喜欢的%ANAME(MASTER)%给予的快感，将她的理性和羞耻心都融化了……
+					;TranslatedMark 愛する%ANAME(MASTER)%から与えられる快感に、彼女の理性も羞恥も塗りつぶされていった……
+				CASE 2
+					PRINTFORMW 沉迷于在淫纹带来的快乐，%ANAME(対象)%身心都被融化了
+					;TranslatedMark 淫紋が与える快楽と陶酔感に、%ANAME(対象)%は心身ともに蕩けきっている
+					PRINTFORMW 是还沉迷在刚才的绝顶中还没平息吗，%ANAME(対象)%时不时全身痉挛着不断颤抖，依偎在%ANAME(MASTER)%身边撒娇
+					;TranslatedMark 今だ絶頂の波が収まらないのか、時たま全身をビクンと痙攣させ%ANAME(MASTER)%に甘えるように寄り添う
+					PRINTFORML 被她如此爱着，%ANAME(MASTER)%感觉到自己了作为雄性的本能和自尊心得到了满足
+					;TranslatedMark 彼女にこれほど愛されて、%ANAME(MASTER)%は己の雄としての本能と自尊心が満たされていくのを感じた
+					PRINTFORMW 抚摸着向自己撒娇的可爱的雌性的话，她就像很有感觉一样会用谄媚的娇声喘息……
+					;TranslatedMark 己に甘える可愛い雌を撫でてやると、彼女は媚びるような甘え声で感じ入るように喘いだ……
+			ENDSELECT
+			CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", ANAME(MASTER))
+			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣")
+			CFLAG:対象:好感度 += 1000
+			CFLAG:対象:従属度 += 1000
+			CFLAG:対象:依存度 += 1000
+		ELSE
+			PRINTFORM 让淫纹在%ANAME(対象)%的身上固定下来的
+			;TranslatedMark %ANAME(対象)%に定着した
+			CALL COLOR_PRINT(@"淫紋", カラー_ピンク)
+			PRINTFORML 她夜夜进行淫荡的行为……
+			;TranslatedMark は、彼女に夜な夜な淫らな行いをさせる……
+			SELECTCASE RAND:40
+				CASE 0
+					LOCALS = 悪魔
+					PRINTFORML %ANAME(対象)%被向自己施加了淫纹的恶魔拥抱着
+					PRINTFORML 在非人类的并有如接受女性拳交一般的极粗超长肉棒上，%ANAME(対象)%一边上翻着瞳孔一边高声声音着
+					PRINTFORML %ANAME(対象)%的雌穴早已被操成了对方肉棒的形状，充满愉悦的身体只需肉棒微微一动就能引起颤抖，极品水嫩的名器小穴就像对方肉枪的枪套一样如此完美地搭配
+					PRINTFORML 不久，随着冲击着子宫壁的肉棒完全戳进%ANAME(対象)%的肉壶，并把%ANAME(対象)%的下腹子宫位置顶得凸起，射出巨量的精液之后，%ANAME(対象)%的腰部用力地挺了起来，浑身颤抖的同时阴道也不忘下意识地裹紧肉棒并剧烈潮吹，娇喘着睁大视野模糊眼冒♥的眼睛，俩人都几乎同一时刻达到了高潮
+					PRINTFORML 有如对着子宫施予宫击酷刑的暴行结束之后的，%ANAME(対象)%的肚子被精液灌满得鼓了起来……
+				CASE 1
+					LOCALS = 悪魔
+					PRINTFORML %ANAME(対象)%为对自己施加了淫纹的恶魔侍奉
+					PRINTFORML 面对带来压倒理智快乐的肉棒，%ANAME(対象)%完全沉沦在女性本能的说不出话，控制不住地不断娇喘
+					PRINTFORML %ANAME(対象)%不断地舔舐着肉棒，温柔地揉搓着睾丸，细心着进行侍奉
+					PRINTFORML 不久后恶魔将肉棒戳进%ANAME(対象)%嘴里内射精并快速抽出来，以此让精液也覆盖在%ANAME(対象)%的脸上，不久后就把肉棒深深捅入了早在口交就已经在排卵的%ANAME(対象)%的淫壶里……
+				CASE 2
+					LOCALS = 悪魔
+					PRINTFORML %ANAME(対象)%为对自己施加了淫纹的恶魔侍奉
+					PRINTFORML 舔舐着对方的菊穴与脚，并谦卑地让对方给予「慈悲」
+					PRINTFORML 享受着%ANAME(対象)%那专心侍奉并感到满足的恶魔，让%ANAME(対象)%跪趴翘起屁股，从后面深深地将肉棒贯穿下腹，把肚子的凸起顶得都快贴合地面
+					PRINTFORML 被至高无上并性技过人的优秀男性所赞美不禁心感喜悦，%ANAME(対象)%不由得发出魅惑的娇喘声，并被向下按着顶到了高潮……
+				CASE 3
+					LOCALS = 流浪漢
+					PRINTFORML %ANAME(対象)%去往河边，以相当色情诱人的样子引诱着流浪汉
+					PRINTFORML 被光天化日下出现的尤物所诱惑的他们立刻聚集在%ANAME(対象)%旁边，开始享受难得一见的极品肉体
+					PRINTFORML 肉穴、尻穴、口中每次被注入污浊的白浊液时，淫纹都会变得闪耀，同时给予%ANAME(対象)%无法抑制的剧烈快感
+					PRINTFORML 在多次因快感而被顶上高潮的同时，%ANAME(対象)%的子宫里多次接射进了发黄的精液……
+				CASE 4
+					LOCALS = 強姦魔
+					PRINTFORML %ANAME(対象)%穿着暴露的衣服到处走，故意暗诱着某人对着自己强奸，之后如愿以偿地被强奸魔按着推倒了
+					PRINTFORML 对方被%ANAME(対象)%那故意抗拒的反应弄兴奋了，剥下了%ANAME(対象)%的衣服，突然把肉棒戳进了充满期待并早已黏滑湿热的秘部
+					PRINTFORML 对方看着被插入就剧烈颤抖着潮吹高潮的%ANAME(対象)%不禁惊讶起来，但也淫笑着表示这刚好是个极佳的机会
+					PRINTFORML 结果%ANAME(対象)%一直被安慰到男人满足为止……
+				CASE 5
+					LOCALS = 悪魔
+					PRINTFORML %ANAME(対象)%被向自己施加了淫纹的恶魔拥抱着
+					PRINTFORML 通过性交，交合而产生的能量都通过淫纹被恶魔吸收了
+					PRINTFORML 在能量回收结束的时候，被侵犯的%ANAME(対象)%已经精疲力尽了
+					PRINTFORML %ANAME(対象)%与恶魔约好，为了自己也可以享受极致的愉悦，今后也会和不认识的男人一起交合着收集能量，并将其献给他……
+				CASE 6
+					LOCALS = 炮友
+					;TranslatedMark セックスフレンド
+					PRINTFORML %ANAME(対象)%和不知道名字的男性在旅馆做爱
+					PRINTFORML 男人除了肉棒的尺寸和性爱的技巧令人满意，性格完全让人大失所望
+					PRINTFORML 男人无视避孕的请求直接对着%ANAME(対象)%一顿猛攻，多次向那个子宫射出精液
+					PRINTFORML %ANAME(対象)%没有办法地接受了对方的动作，一边露出色情的表情一边不断地达到高潮
+					PRINTFORML 事情结束后，男子把双腿大张在床上，被操到失去意识的%ANAME(対象)%丢在水渍里出去了
+				CASE 7
+					LOCALS = 兵
+					PRINTFORML %ANAME(対象)%作为士兵们的安慰者进行巡视
+					PRINTFORML 平日里作为知名武将和众人爱戴的长官驰名的%ANAME(対象)%，到了晚上则作为士兵们提供慰安服务的从者，这已经是众所周知的事实了
+					PRINTFORML 士兵们一个接一个地把肉棒塞进%ANAME(対象)%淫壶里，对着子宫一顿内射
+					PRINTFORML %ANAME(対象)%的"「工作」一直持续到天亮，事后结束的时候已经没有一处不被精液所染白的地方了……
+				CASE 8
+					LOCALS = 露出狂
+					PRINTFORML %ANAME(対象)%在与走夜路遇到的露出狂一起享受露出行为
+					PRINTFORML 对于和一个连名字都不知道的男人的变态行为，%ANAME(対象)%被完全挑逗兴奋了
+					PRINTFORML 终于无法忍受的两人，在小巷里开始了行动
+					PRINTFORML 行动结束后，%ANAME(対象)%迈着颤抖的双腿，毫无意识地留下犹如路径标记一样的精液痕迹回到了据点……
+				CASE 9
+					LOCALS = 部下
+					PRINTFORML %ANAME(対象)%被部下当做宠物调教着
+					PRINTFORML 不断地吮吸对方的肉棒，将秘处交于肉棒以平息欲望，一副可爱的样子进行交合着
+					PRINTFORML 或许是出于对积极侍奉的%ANAME(対象)%感到十分满意，他们高兴地尽情享用那极致的肉体
+					PRINTFORML 为了消除平日的忧愁，他们在%ANAME(対象)%里种下了几十发种子……
+				CASE 10
+					LOCALS = 偶遇的男人
+					PRINTFORML %ANAME(対象)%邀请了偶遇的男人，把他带进了胡同里
+					PRINTFORML 跪在他的下面，吮吸没洗过的肉棒，引导他射精
+					PRINTFORML 翘起屁股，露出湿透的秘部，扭动腰引诱对方
+					PRINTFORML 男子用力地抽动着腰部，在%ANAME(対象)%的子宫里多次射出精液……
+				CASE 11
+					LOCALS = 客
+					PRINTFORML %ANAME(対象)%在妓院招揽客人
+					PRINTFORML 男子买下%ANAME(対象)%之后，对能得到超出预期一大截的极品尤物感到满意
+					PRINTFORML %ANAME(対象)%的热情服务让他更加高兴
+					PRINTFORML 对方完全不管避孕的要求，与%ANAME(対象)%进行着多次无套中出性交活动……
+				CASE 12
+					LOCALS = 偶遇的男人
+					PRINTFORML %ANAME(対象)%的腰部被卡在了墙里，屁股动不了地翘在外面
+					PRINTFORML 随后一个脸都没能看见的男人凑到了后面，不管是否同意就擅自插入了%ANAME(対象)%的淫穴里，像是要戳破子宫壁一样大力抽插
+					PRINTFORML 在一次又一次被各类巨物捅入下腹无套中出之后，%ANAME(対象)%的瞳孔中心亮出了和淫纹一样妖艳的♥ 微微颤抖着不断娇喘
+					PRINTFORML 客人绝迹的时候，下半身已经被精液完全覆盖，仅存的衣物早已被精液弄湿透了……
+				CASE 13
+					LOCALS = 犬
+					PRINTFORML %ANAME(対象)%与野狗群性交
+					PRINTFORML 他们似乎把%ANAME(対象)%当作群中最下层的存在来看待，轻松愉快地在交尾后就随意丢弃了
+					PRINTFORML 对于被畜生风情那样对待的屈辱和肉棒所给予的快乐，%ANAME(対象)%苦闷不已
+					PRINTFORML 被狗注入有野兽味道的精液后，%ANAME(対象)%像远吠一般绝顶了……
+				CASE 14
+					LOCALS = 客
+					PRINTFORML %ANAME(対象)%作为脱衣舞者工作
+					PRINTFORML 她那拥有美丽肢体的淫荡舞蹈，俘获了观众的欢心
+					PRINTFORML 表演结束后，怀着子宫疼痛的%ANAME(対象)%，邀请了落单的客人来疼爱自己……
+				CASE 15
+					LOCALS = 小混混
+					PRINTFORML %ANAME(対象)%出演成人视频拍摄
+					PRINTFORML 不仅是性交的快乐，很多男人也会将录像当成自慰的极佳素材重复使用，这一事实让%ANAME(対象)%兴奋不已
+					PRINTFORML 淫荡地弓起身体被肉棒刺激得连连娇喘的样子，是难得少有的杰作
+					PRINTFORML %ANAME(対象)%的痴态让很多男性感到满足，一跃成为与正式女优毫不落下风的人气尤物，人气不断提高……
+				CASE 16
+					LOCALS = 小混混
+					PRINTFORML %ANAME(対象)%被路上的小混混给搭讪了
+					PRINTFORML 小混混把%ANAME(対象)%带到事务所，和伙伴们一起开始轮奸play
+					PRINTFORML 肉棒一个接一个地在下腹涌动，让%ANAME(対象)%颤抖着身体感到满足
+					PRINTFORML 就这样持续了整整三天，被他们轮番教育着……
+				CASE 17
+					LOCALS = 偶遇的男人
+					PRINTFORML %ANAME(対象)%参加了可疑的派对
+					PRINTFORML 在众多男女的交合中，%ANAME(対象)%的美丽尤其吸引了男人们的目光
+					PRINTFORML %ANAME(対象)%将身体托付给了好几个男人进行使用，但仍无法满足，继续摆动着腰部
+					PRINTFORML 精液一次又一次地冲刷着阴道壁，%ANAME(対象)%的夜晚变得更加昏暗了……
+				CASE 18
+					LOCALS = 中年男子
+					;TranslatedMark 中年の男
+							PRINTFORML 在某家店的地下，%ANAME(対象)%的脖子被套上牌子并全裸着与其他相同遭遇的女性并排站在一起
+					PRINTFORML %ANAME(対象)%与她们都被强制向前挺着身体束缚固定在橡木住上(彼女たちはこれから橡木ションにかけられ)，给予想要购买一夜鱼水之欢的男人参考
+					PRINTFORML %ANAME(対象)%比上等还要上等的极佳娇躯和散发出来令人感到兴奋的荷尔蒙，让%ANAME(対象)%在一众脱颖而出
+					PRINTFORML 结果，%ANAME(対象)%的一夜被某位中年男性买下，彻夜被疼爱着……
+				CASE 19
+					LOCALS = 黑社會風の男
+					PRINTFORML %ANAME(対象)%在酒馆独饮时被黑社会样貌的男性搭讪了
+					PRINTFORML 对方亲昵地用手搭上身体温热地抚摸，同时又不让刺激过于剧烈，让%ANAME(対象)%因为难以忍耐而表露出不满的表情
+					PRINTFORML %ANAME(対象)%被邀请离开酒吧以求二人独处享受更加愉快的交融，于是%ANAME(対象)%用接吻代替回答了他
+					PRINTFORML %ANAME(対象)%被带到情人旅馆，因无套性交而让对方兴奋进行了多次中出，被送上了多次高潮……
+				CASE 20
+					LOCALS = 囚人
+					PRINTFORML %ANAME(対象)%在昏暗的监狱中被多数囚犯包围并轮奸的
+					PRINTFORML 虽说是为了讯问和慰安的名义，但%ANAME(対象)%的表情明显是沉迷于轮奸的快感中
+					PRINTFORML 难得一遇女性的他们毫不留情地往身上蹭肉棒，里里外外都对着喷射了浓厚的精液
+					PRINTFORML 在他们满意的时候%ANAME(対象)%的阴道里装满了许多囚犯们的精液……
+				CASE 21
+					LOCALS = 店長
+					PRINTFORML %ANAME(対象)%穿着兔女郎服在地下酒馆工作
+					PRINTFORML 当然，这不仅仅是一个普通酒馆，相同着装的店员们随处可见地与客人们交合，充满着喘息声和性交的气息
+					PRINTFORML 各方面都拥有优良素质的%ANAME(対象)%多次被客人们指名，对他们进行侍奉
+					PRINTFORML 最终关店的时候，店长把%ANAME(対象)%毫不介意地带回家，然后对着子宫注入了今日份的薪资……
+				CASE 22
+					LOCALS = 流浪漢
+					PRINTFORML %ANAME(対象)%披着大外套的同时里面全裸着走向贫民窟
+					PRINTFORML 遇到目标流浪汉之后，对着对方表露出诱惑的表情，将大衣拉开露出裸露的身体来引诱对方袭击自己
+					PRINTFORML 被第一个流浪汉侵犯结束后，又继续在贫民窟里徘徊，不断寻求下一发精液
+					PRINTFORML 待到天明，从贫民窟里颤抖着走出来的%ANAME(対象)%虽然眼神空虚但却露出了满足的笑容……
+				CASE 23
+					LOCALS = 流浪妖怪
+					PRINTFORML %ANAME(対象)%在人烟罕至的洞窟里与丑陋的妖怪进行交合
+					PRINTFORML %ANAME(対象)%被皮肤褶皱丑陋无比的非人妖怪压在身下不断中出，浑身颤抖着潮吹着
+					PRINTFORML 就这样每逢休息日到访流浪妖怪的巢穴，接受被侵犯的行为与调教成为了最近的必修课
+					PRINTFORML 这一天一整晚都被侵犯并被中出，被完全激发女性的本能多次达到了高潮……
+				CASE 24
+					LOCALS = 大臣
+					PRINTFORML 在大臣的办公室里，下半身裸露出来的%ANAME(対象)%被按在在办公桌上一顿猛操
+					PRINTFORML 在工作中，%ANAME(対象)%感受到了他令人厌恶的视线，无法忍耐，于是自己张开腿诱惑起来
+					PRINTFORML 和外表一样性欲旺盛的男人激烈地喘息，向%ANAME(対象)%袭来，用力地挺动腰部
+					PRINTFORML 在工作场所被肮脏的大叔侵犯的情况着，%ANAME(対象)%的快感在淫纹与羞耻的加持下更加剧烈，多次超强绝顶……
+				CASE 25
+					LOCALS = 小孩
+					PRINTFORML %ANAME(対象)%最近是一位贵族儿子的家庭教师
+					PRINTFORML 多亏了%ANAME(対象)%，儿子的成绩提高了，贵族们似乎很满意，但这其中的秘密他们并不知道
+					PRINTFORML 当察觉到对方与自己是同龄人并带着热情的目光看着自己的时候，%ANAME(対象)%的性欲也被激起，并答应每次在他获得好成绩的时候就给予奖励
+					PRINTFORML %ANAME(対象)%期待着和喜欢自己的男友见面，今天又去了那宅邸进行课后辅导……
+				CASE 26
+					LOCALS = 居民
+					;TranslatedMark 領民
+					PRINTFORML 有一天，%ANAME(対象)%在街上丢了钱包，走投无路的时候，被一个男的救助了
+					PRINTFORML 被他健硕的身体迷住了的%ANAME(対象)%给予了拥抱表示感谢，不过也刚好看到他的胯股之间鼓起来了
+					PRINTFORML %ANAME(対象)%为了想表达进一步充分感谢，喃喃细语卷起了衣服，露出乳房，对方见状不由得干咽了一口
+					PRINTFORML 抱着胳膊走向酒店，被比想象中更家富有男性气概的动作所宠爱着……
+				CASE 27
+					LOCALS = 旅馆的主人
+					;TranslatedMark 宿の亭主
+					PRINTFORML %ANAME(対象)%在旅途中发现了一个看起来被废弃的旅店
+					PRINTFORML 故意忘记带钱包的%ANAME(対象)%此刻就像可爱而又羞涩的少女一样，扭捏地向屋主寻求帮助
+					PRINTFORML 看到%ANAME(対象)%这幅样子的屋主舔了舔嘴唇，手不停在身上轻轻抚摸着，要求用那副身体进行回报
+					PRINTFORML 被中年男子进行着强奸play %ANAME(対象)%感到比平时更加兴奋，多次达到了高潮……
+				CASE 28
+					LOCALS = 士兵
+					PRINTFORML 在兵营的一角士兵们进行着模拟战斗
+					PRINTFORML %ANAME(対象)%穿着色情的服装，作为裁判兼战利品看守着比赛
+					PRINTFORML 士兵们为了得到作为奖品的%ANAME(対象)%，像野兽一样激烈地战斗着
+					PRINTFORML 最终%ANAME(対象)%被优胜的强壮士兵抱在怀里，带进自己的房间，给对方奖励了一个难忘的夜晚……
+				CASE 29
+					LOCALS = 悪魔の子
+					PRINTFORML %ANAME(対象)%被小孩子一样的恶魔侵犯了
+					PRINTFORML 根据恶魔的说法，好像是用从%ANAME(対象)%的子宫中获得的能量来加强自身
+					PRINTFORML 虽然身材矮小，但拥有凶暴肉棒的他，像是掌握了%ANAME(対象)%的弱点一般，反复对着阴道肉壁进行挖掘
+					PRINTFORML 被比自己还小的男孩侵犯所产生的的背德感使得%ANAME(対象)%的感官变得敏感，身体变得火热的同时颤抖着……
+				CASE 30
+					LOCALS = 小孩
+					;TranslatedMark 子ども
+					PRINTFORML %ANAME(対象)%在夜晚的寺小屋/寺子屋和男孩子沉迷于激烈的性爱活动
+					PRINTFORML 白天的时候引诱孩子们出来活动，用自己的身体向对性知识一无所知的孩子们进行性教育
+					PRINTFORML 被天真无邪的男孩子所追求着，母性和背德感交织在一起，感官都兴奋得令人着迷
+					PRINTFORML 每次被那尚处年少的肉棒搅动阴道时，子宫都忍不住隐隐作痛起来，一整晚都在充分的交合着……
+				CASE 31
+					LOCALS = 流浪妖怪
+					PRINTFORML %ANAME(対象)%赤裸着带着项圈，像是刻意暴露自己一样不时扭动身体站着(%ANAME(対象)%は素っ裸に項圈をつけた格好で里の外で立ちんぼの様に突っ立っている)
+					PRINTFORML 看到有个流浪妖怪路过的时候心跳不由得加快了
+					PRINTFORML 他被%ANAME(対象)%的样子吓了一跳，但一看那个表情，脸上露出了卑微的笑容，直接拉着细嫩的胳膊扯过来
+					PRINTFORML 被带进妖怪巢穴的%ANAME(対象)%作为慰问者被粗暴侵犯了一整晚……
+				CASE 32
+					LOCALS = 大臣
+					PRINTFORML 工作中出错的%ANAME(対象)%被大臣叫去惩罚
+					PRINTFORML 奉命将屁股翘出来，湿透的淫壶被肉棒不断搅动的同时，作为惩罚屁股也被不停抽打得变红了
+					PRINTFORML 虽然是相当屈辱的惩罚行为，但%ANAME(対象)%却一脸雌犬的样子，体内暗藏的受虐欲望被完全激发了出来，疼痛与快感混着羞耻让意识都变得模糊，像是要求更多惩罚似的下意识扭动屁股
+					PRINTFORML 噗啾的一声，中年大叔肮脏的精液射了进来，%ANAME(対象)%被精液的热度刺激子宫达到潮吹高潮的同时忍不住娇喘着……
+				CASE 33
+					LOCALS = 触手
+					PRINTFORML 在昏暗的洞窟中，%ANAME(対象)%被大量的触手之海所淹没并被侵犯
+					PRINTFORML 由于触手驱除失败而被捕的%ANAME(対象)%，全身上下多出穴位都被触手反复涌入，进行着激烈的凌辱行
+					PRINTFORML 但是从一开始就以被这样做为目的的%ANAME(対象)%反而发出了喜悦的声音，身体控制不住地颤抖
+					PRINTFORML 在他们满足之前不断被侵犯，沉溺在这世上无法想象的压倒性快乐中……
+				CASE 34
+					LOCALS = 兵
+					PRINTFORML %ANAME(対象)%作为壁尻设置在兵营中，让多数士兵进行性处理
+					PRINTFORML %ANAME(対象)%被脸都看不到的士兵们粗暴地反复捅入，肆意侵犯着
+					PRINTFORML 可以说士兵们毫不客气，%ANAME(対象)%满足于士兵们跟强奸没什么区别的行为，和作为本该主导场面却被下级完全控制住，以下犯上进行凌辱的倒错感，反而变得更加兴奋了
+					PRINTFORML 经过一夜的侍奉，待到白天的时候得到解放的%ANAME(対象)%胎内被注入了无数炽热的精液，得不到满足的欲望和隐隐作痛的子宫不断刺激着身体，%ANAME(対象)%带着发情的肉体去开展新一天的工作了，一路上精液毫无意识地滴了一地……
+				CASE 35
+					LOCALS = 客
+					PRINTFORML 子宫疼痛得不得了的%ANAME(対象)%从工作中脱身出来，站在街角等待机会
+					PRINTFORML 看到娼妇般的打扮和表情的%ANAME(対象)%，根本没人相信这回事这个国家的军官吧
+					PRINTFORML 其中一个客人被%ANAME(対象)%相当具有魅力的样貌吸引了，高兴地买下%ANAME(対象)%之后搂着腰带去宾馆
+					PRINTFORML 一夜之间，忘记了平时自己作为高官的身份，作为下贱的妓女为男人尽心尽力侍奉，多次被注入了精液……
+				CASE 36
+					LOCALS = 外来人
+					PRINTFORML 在奇怪的地下室里，被床束缚着的%ANAME(対象)%被白衣男子侵犯，浑身都狂乱地不停颤抖
+					PRINTFORML 有一天，%ANAME(対象)%认识了一个外来人，听到了一个奇怪的实验，然后自告奋勇地当实验対象
+					PRINTFORML %ANAME(対象)%被使用了提高身体敏感度近原来几倍的媚药，像是失去了理智一样控制不住地剧烈颤抖，不断在强烈的刺激下大量潮吹
+					PRINTFORML 得到了极佳实验対象的白衣人们，在%ANAME(対象)%被彻底玩坏失去意识之前进行着各类试验……
+				CASE 37
+					LOCALS = 流浪妖怪
+					PRINTFORML %ANAME(対象)%来到了传说中流浪妖怪聚集的洞窟
+					PRINTFORML 目的不是为了讨伐，而是为了让他们侵犯，一副妓女打扮的样子手无寸铁地接近了他们
+					PRINTFORML 流浪妖怪们坦率地接受了%ANAME(対象)%充满魅力的邀请，并给予%ANAME(対象)%超出期待的粗暴对待进行性交
+					PRINTFORML 被狠狠地侵犯后按住脖子并胁迫%ANAME(対象)%要再来的一次，眼冒♥的%ANAME(対象)%沉浸于近乎性虐待的凌辱中无法自拔，顺从地点了头……
+				CASE 38
+					LOCALS = 哥布林
+					PRINTFORML 在路边看到乞讨哥布林的%ANAME(対象)%雇佣了他，带回了宅邸
+					PRINTFORML 然后%ANAME(対象)%每晚都会在床上被他按着猛操，沉浸于主从逆转的欢愉中
+					PRINTFORML 被看起来小只无力的哥布林进行大力教育的%ANAME(対象)%控制不住地颤抖着身体，倒错感被与性欲被完全激发出来，翘着屁股以求对方更加严厉地教育淫乱的自己
+					PRINTFORML %ANAME(対象)%性交时的样子实在太过于可爱，让对方每天都将污浊的精液填满的子宫……
+				CASE 39
+					LOCALS = 貴族
+					PRINTFORML 被邀请参加派对的%ANAME(対象)%，作为色情贵族们的接待者工作着
+					PRINTFORML 被毫不掩饰色情视线的胖大叔们(親父)视奸全身，让%ANAME(対象)%的子宫不禁隐隐作痛起来
+					PRINTFORML 在这种状态下，%ANAME(対象)%被一位贵族宣布要带回家，%ANAME(対象)%压抑着喜悦的感情点了点头
+					PRINTFORML 比预期更加粗壮的肉棒和巧妙的技巧让%ANAME(対象)%在失去意识之前多次因剧烈的高潮痉挛……
+			ENDSELECT
+			CALL FUCK_GANGBANG(対象, GET_SPERM_ID(LOCALS), @"%LOCALS%の\@ RAND:2 ? 肉棒 # 唇\@", @"%LOCALS%")
+		ENDIF
+	ENDIF
+	PRINTFORMW
+NEXT
+
+
+RETURN 1

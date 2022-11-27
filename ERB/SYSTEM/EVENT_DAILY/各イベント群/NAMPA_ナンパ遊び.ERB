@@ -1,0 +1,140 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_NAMPA_RATE()
+RETURN 45
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_NAMPA_DECISION()
+SIF DAY < 10
+	RETURN 0
+
+SIF DVAR:援助交際_発生フラグ > 0
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ターゲットをランダム決定
+;---------------------
+@EVENT_DAILY_NAMPA_SETTARGET()
+
+CALL SELECT_CHARA_RANDOM("DAILY_NAMPA")
+
+SIF RESULT == -1
+	RETURN 0
+DAILY_TARGET:0 = RESULT
+RETURN 1
+
+@SELECT_CHARA_RANDOM_LOGIC_DAILY_NAMPA(対象)
+#DIM 対象
+RETURN CFLAG:対象:所属 == CFLAG:MASTER:所属 && !CFLAG:対象:捕虜先 && CFLAG:対象:特殊状態 != 特殊状態_死亡 && !(GETBIT(TALENT:対象:日常系, 素質_デイリー_援交少女)) && IS_FEMALE(対象) && ABL:対象:性知識 > 0
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_NAMPA_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_NAMPA()
+#DIM 対象
+
+対象 = DAILY_TARGET:0
+
+PRINTFORML %ANAME(対象)%在街上散步的时候被一名男性打招呼了
+PRINTFORMW 穿着西服，身材很好，是典型的中年成功男性风貌
+PRINTFORML %ANAME(対象)%问他有什么事的时候，他一边说着很可爱%ANAME(対象)%一边慢慢接近了
+PRINTFORML 警戒想要保持距离的时候被抓住了手臂，被拉住了
+PRINTFORMW %ANAME(対象)%被搭讪了
+PRINTFORML 盯着他的脸一看，温和的笑容里露出了色鬼的本心
+PRINTFORMW 而且左手的无名指上有闪闪发光的戒指
+PRINTFORML …怎么办？
+CALL ASK_YN("跟他玩玩" ,"拒绝")
+IF RESULT == 1
+	PRINTFORML 懒得搭理
+	PRINTFORMW 甩开他走了
+ELSEIF RESULT == 0
+	IF TALENT:対象:処女 == 1
+		LOCAL = 1
+	ELSE
+		LOCAL = 0
+	ENDIF
+	PRINTFORML 现在正好闲着
+	PRINTFORMW 好奇心驱使的%ANAME(対象)%决定和他交往
+	PRINTFORML 于是他开心地笑着，握着%ANAME(対象)%的手自我介绍
+	PRINTFORML 听到%ANAME(対象)%，他亲昵地叫了一声「%ANAME(対象)%酱」
+	PRINTFORML 虽说是别有用心的大叔，但也没感觉多坏，脸上微微露出了笑容
+	PRINTFORMW 就这样被他牵着手，带去了推荐的店……
+	PRINTFORML 
+	PRINTFORML 在村子里巡视的时候被偶遇的男人搭讪了
+	PRINTFORMW 他比想象中还要合得来，谈话也很起劲，开心得甚至忘记了时间
+	PRINTFORML 夜深了，正想着差不多该回去的时候，却被带到了陌生的街道上
+	PRINTFORML 挂着粉红色招牌的酒店鳞次栉比，这是欢乐街的一角
+	PRINTFORMW 当然，%ANAME(対象)%察觉到了男人的意图，抬头一看，他抱着%ANAME(対象)%的肩膀投来了目光
+	PRINTFORML …怎么办？
+	CALL ASK_YN("点了点头" ,"离开")
+	IF RESULT == 1
+		PRINTFORML 到底还是不能和今天刚见面的男人一起睡
+		PRINTFORMW 不管对方如何纠缠自己，总算是甩开回家了
+	ELSEIF RESULT == 0
+		PRINTFORML …被他抱着也许也不错
+		PRINTFORMW 笑颜绽开的%ANAME(対象)%接受了他的邀请，点了点头
+		PRINTFORML 他又浮出那个好色的笑容，轻轻地亲了一下
+		PRINTFORMW 然后抱着%ANAME(対象)%的肩膀，走向其中一家酒店……
+		PRINTFORML 
+		PRINTFORMW 在酒店的一个房间里，%ANAME(対象)%被他压着，进行非常激烈的交融
+		IF LOCAL == 1
+			PRINTFORML 虽然刚才还是处女，但表情却完全变成了臣服于肉棒下，一脸女性独有的魅惑表情，浑身随着激烈动作扭动着
+			PRINTFORMW 从结合部扑通扑通地发出令人讨厌的声音，与此同时血和爱液也随之溢出
+		ELSE
+			PRINTFORML 吞入才认识一天的男人的肉棒，%ANAME(対象)%颤抖着身体忍耐着快感
+			PRINTFORMW 每当他压下来的时候，就会让%ANAME(対象)%发出令人讨厌的色情娇喘，连接部就会不断涌出爱液
+		ENDIF
+		PRINTFORML %ANAME(対象)%的身体与反应都相合出众，完全沉溺于蜂拥而来的快乐中了
+		PRINTFORML 虽然他很粗暴，但热情的腰姿刺激了%ANAME(対象)%的雌性本能，身心都得到了满足
+		PRINTFORMW 每次粗壮的的肉棒毫不留情地挖掘阴道肉壁的时候，蔓延至全身的快感都会使得身体挺起颤抖，双脚用力地伸直着
+		PRINTFORML 忍不住紧紧抱住他，与对方沉浸地吻在了一起
+		PRINTFORML 不断地缠绕着舌头交换着彼此的唾液，脑中充满了他的味道
+		IF LOCAL == 1
+			PRINTFORML 不仅因为过于冲动而丧失了处女，而且对方的性技与肉棒也相当出色，%ANAME(対象)%接受了事实后子宫蔓延开的疼痛感变得更加明显了
+		ELSE
+			PRINTFORML 沉迷于和丑陋中年大叔的不伦行为的事实，让%ANAME(対象)%兴奋得子宫发痛
+		ENDIF
+		PRINTFORMW %ANAME(対象)%为了忘记这一切，尽情享受着对方不断进行冲击，慢慢被顶上了高潮
+		PRINTFORML 「%ANAME(対象)%酱！%ANAME(対象)%酱！太棒了！我要射了！」
+		PRINTFORML 他在耳边喃喃细语的时候腰部也加快了速度，%ANAME(対象)%不由得颤抖起来
+		PRINTFORMW 然后他发出野兽般的呻吟声，深深地顶了一下肉棒，尽情地释放出了那份精液
+		PRINTFORML 透过避孕套也能感受到那边大量精液的热度，%ANAME(対象)%被刺激高潮了
+		PRINTFORML 噗啾！噗啾！和%ANAME(対象)%体内的避孕套，被大量地注入了浓厚的精液
+		PRINTFORML 他抱着%ANAME(対象)%全身颤抖，一边发出下流的声音，一边继续着长长的射精
+		PRINTFORMW %ANAME(対象)%喘气着感受他那给予身体深处的热度，因为高潮的余韵又被反复刺激高潮了两次三次
+		PRINTFORML …高潮结束的%ANAME(対象)%不由得大口喘息着，但他兴奋的感觉却完全没有消散，立刻摇着腰动起了准备射出下一发
+		PRINTFORMW %ANAME(対象)%也微笑着让对方抱在怀里以各种体味进行做爱，最后连菊穴也被使用了……
+		CALL FUCK(対象, "Ｃ, Ｂ, Ｖ, Ｍ, Ａ, Ｖ性交, Ａ性交, 性交, 性技, 奉仕, 精愛, 口淫, 欲望", "接吻喪失, 処女喪失, Ａ処女喪失, 口内射精", 0, @"援交親父の\@RAND:2 ? 肉棒 # 唇\@", "援交親父", "", "売春")
+		CALL FUCK(対象, "Ｃ, Ｂ, Ｖ, Ｍ, Ａ, Ｖ性交, Ａ性交, 性交, 性技, 奉仕, 精愛, 口淫, 欲望", "接吻喪失, 処女喪失, Ａ処女喪失, 口内射精", 0, @"援交親父の\@RAND:2 ? 肉棒 # 唇\@", "援交親父", "", "売春")
+		PRINTFORML 
+		PRINTFORMW 天亮的时候，%ANAME(対象)%迈着蹒跚的步子被他支撑着离开了酒店
+		IF LOCAL == 1
+			PRINTFORML 享受了初体验冲击的%ANAME(対象)%带着恍惚的表情靠在他旁边
+		ELSE
+			PRINTFORML 太过兴奋的%ANAME(対象)%还带着像做梦一样的表情靠着他
+		ENDIF
+		PRINTFORMW %ANAME(対象)%像是恋恋不舍似的，无意识地用悲伤的眼神望着他
+		PRINTFORML 也许是感受到了视线，他再次浮现出笑容，提出了援助交际的申请
+		PRINTFORML %ANAME(対象)%对突然的提案感到惊讶，但还是欣然同意了，与他交换了联系方式
+		PRINTFORML 然后在最后充分交换了唾液之后，他离开了
+		PRINTFORMW %ANAME(対象)%目送着那个背影，回想起刚才为止的行为后颤抖着双腿回去了……
+		PRINTFORML 
+		CALL COLOR_PRINTW(@"%ANAME(対象)%决定进行援交", カラー_ピンク)
+		;TranslatedMark @"%ANAME(対象)%は援助交際をする事になった", カラー_ピンク
+		DVAR:援助交際_対象ID = GET_ID(対象)
+		DVAR:援助交際_発生フラグ = 1
+	ENDIF
+ENDIF
+
+RETURN 1

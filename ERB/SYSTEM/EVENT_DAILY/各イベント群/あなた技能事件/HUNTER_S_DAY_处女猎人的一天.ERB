@@ -1,0 +1,324 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_HUNTER_S_DAY_RATE()
+RETURN ABL:MASTER:欲望 * 25
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_HUNTER_S_DAY_DECISION()
+SIF DAY < 5
+	RETURN 0
+;MASTERがペニスを持っている
+SIF !(HAS_PENIS(MASTER))
+	RETURN 0
+SIF ABL:MASTER:性技 < 3
+	RETURN 0
+SIF !IS_COUNTRY(CFLAG:MASTER:所属)
+	RETURN 0
+;技能只能习得一次，只能习得一系，除非全部遗忘
+SIF CHECK_SKILL_DUPLICATE(MASTER, スキル_ジャンル_PERSONAL, 0, 41) || CHECK_SKILL_DUPLICATE(MASTER, スキル_ジャンル_PERSONAL, 0, 42)
+	RETURN 0
+
+RETURN 1
+
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_HUNTER_S_DAY_SETTARGET()
+
+FOR LOCAL, 1, CHARANUM
+	SIF !IS_FEMALE(LOCAL)
+		CONTINUE
+	;曾经被MASTER强奸破处
+	IF STRFIND(SEXUAL_EXPERIENCE:LOCAL:初体験_処女, @"%ANAME(MASTER)%") && STRFIND(SEXUAL_EXPERIENCE_SITUATION:LOCAL:初体験_処女, "強姦")
+		DAILY_TARGET_NUM ++
+	ENDIF
+NEXT
+
+SIF DAILY_TARGET_NUM < 10 && !CHECK_SKILL_DUPLICATE(MASTER, スキル_ジャンル_PERSONAL, 0, 43)
+	RETURN 0
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_HUNTER_S_DAY_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_HUNTER_S_DAY
+#DIM 模式 ;阵营/监狱/奴隶
+#DIM 候选, MAX_CHARA_NUM
+#DIM 对象
+VARSET 候选, 0
+PRINTFORML 某日，一位侍女正路过%ANAME(MASTER)%的书房
+PRINTFORMW 突然，%ANAME(MASTER)%捂住她的嘴巴，把她强行带到了书房……
+PRINTFORML
+PRINTFORML 不知道让侍女高潮了几次后，%ANAME(MASTER)%剥下她的内裤，把它塞在了已经没有力气喊叫的侍女嘴里
+PRINTFORMW %ANAME(MASTER)%急不可耐地露出因兽欲而坚挺的肉棒，不断用龟头调戏着已经湿透了的蜜穴
+PRINTFORMW 无视侍女的挣扎，%ANAME(MASTER)%张开她的双腿，把肉棒插进了那从未被人涉足过的领域……
+CALL FUCK(MASTER, "欲望, 性技, 性交, 加虐, Ｃ, 射精, 露出, Ｖ挿入", "童貞喪失", 0, "", "", "侍女的小穴", "強姦")
+PRINTFORML
+PRINTFORMW 尽情享受完连名字都不知道叫什么的侍女的肉体后，%ANAME(MASTER)%把沾满精液的她丢在一旁，思考着下一个泄欲对象……
+$TARGETSELECT
+CALL ASK_MULTI("给新来的士官开苞", "听说监狱里有……", "把之前的那位叫进来")
+模式 = RESULT
+LOCAL:1 = 0
+SELECTCASE 模式
+	CASE 0
+	;本阵营里的处女士官
+		FOR LOCAL, 1, CHARANUM
+			SIF !IS_FEMALE(LOCAL)
+				CONTINUE
+			SIF CFLAG:LOCAL:所属 != CFLAG:MASTER:所属 || GET_COUNTRY_BOSS(CFLAG:LOCAL:所属) == LOCAL
+				CONTINUE
+			IF VIRGIN(LOCAL) && !CFLAG:LOCAL:捕虜先 && !IS_ANIMAL(LOCAL) && CFLAG:LOCAL:行動不能状態 != 行動不能_子供
+				候选:(LOCAL:1) = LOCAL
+				LOCAL:1 ++
+			ENDIF
+		NEXT
+	CASE 1
+	;监狱里的处女囚犯
+		FOR LOCAL, 1, CHARANUM
+			SIF !IS_FEMALE(LOCAL)
+				CONTINUE
+			IF VIRGIN(LOCAL) && CFLAG:LOCAL:捕虜先 == CFLAG:MASTER:所属 && !IS_ANIMAL(LOCAL) && CFLAG:LOCAL:行動不能状態 != 行動不能_子供
+				候选:(LOCAL:1) = LOCAL
+				LOCAL:1 ++
+			ENDIF
+		NEXT
+	CASE 2
+	;本阵营里的奴隶
+		FOR LOCAL, 1, CHARANUM
+			SIF !IS_FEMALE(LOCAL)
+				CONTINUE
+			SIF CFLAG:LOCAL:所属 != CFLAG:MASTER:所属
+				CONTINUE
+			IF IS_SLAVE(LOCAL) && !CFLAG:LOCAL:捕虜先 && !IS_ANIMAL(LOCAL) && CFLAG:LOCAL:行動不能状態 != 行動不能_子供 && !GETBIT(TALENT:LOCAL:日常系, 素質_デイリー_专属奴隶)
+				候选:(LOCAL:1) = LOCAL
+				LOCAL:1 ++
+			ENDIF
+		NEXT
+ENDSELECT
+IF !LOCAL:1
+	PRINTFORMW 实在想不到谁了
+	PRINTFORMW 可能本来就没合适的人选吧……
+	CALL ASK_YN("那就算了吧", "再想想")
+	SIF RESULT
+		GOTO TARGETSELECT
+	RETURN 1
+ENDIF
+CALL FISHER_YATES_SHAFFLE(MIN(LOCAL:1, MAX_CHARA_NUM))
+对象 = 候选:(SHAFFLE_ARRAY:(RAND:(LOCAL:1)))
+SELECTCASE 模式
+	CASE 0
+		PRINTFORMW 那就叫%ANAME(对象)%进来“学习”吧……
+		PRINTFORML
+		PRINTFORMW %ANAME(对象)%一进来就看到了瘫倒在地、两腿之间不断涌出掺和丝红血液的精子的侍女
+		PRINTFORMW 理解了发生什么事的%ANAME(对象)%转身正欲逃跑，但%ANAME(MASTER)%已经在后面锁上了门
+		PRINTFORMW 看着%ANAME(对象)%害怕地一步步后退，%ANAME(MASTER)%顿时兽欲大发，扑倒了%ANAME(对象)%……
+		PRINTFORML
+		PRINTFORMW %ANAME(MASTER)%强行夺走了%ANAME(对象)%的嘴唇，同时用手暴力地爱抚着%ANAME(对象)%的秘裂，一次次的引导%ANAME(对象)%高潮
+		PRINTFORMW 直到确认%ANAME(对象)%已经没有反抗的力气之后，%ANAME(MASTER)%才放心地掰开她的双腿，用还沾有血的勃起肉棒贯穿了她的纯洁……
+		PRINTFORMW 被夺去处女的%ANAME(对象)%流出了眼泪，但早已无济于事……
+		PRINTFORML
+		SELECTCASE RAND:5
+			CASE 0
+				PRINTFORMW %ANAME(MASTER)%把%ANAME(对象)%按在身下，毫不留情地蹂躏着%ANAME(对象)%的雌穴
+				PRINTFORMW 面对%ANAME(对象)%毫不示弱地咬紧牙关的姿态，%ANAME(MASTER)%选择进一步向深处突进
+				PRINTFORMW 未经人事的%ANAME(对象)%哪里受得了这般猛攻，才过了一会便不自觉的跟着%ANAME(MASTER)%的动作扭着腰肢
+				PRINTFORMW %ANAME(MASTER)%一边伏在%ANAME(对象)%耳边夸赞她的雌穴，一边在最深处释放了浓厚的精液……
+			CASE 1
+				PRINTFORMW %ANAME(MASTER)%试图让%ANAME(对象)%学会「新的礼仪」
+				PRINTFORMW 一边命令%ANAME(对象)%跨上来自己动，一边教导着「这就是以后见到我就要做的事哦」
+				PRINTFORMW %ANAME(对象)%扭腰的同时拼命的忍耐快感，但%ANAME(对象)%的身体还未等%ANAME(MASTER)%射精就先高潮了
+				PRINTFORMW 作为惩罚，%ANAME(对象)%被%ANAME(MASTER)%的毫不留情的抽插弄得高潮迭起……
+			CASE 2
+				PRINTFORMW %ANAME(MASTER)%把%ANAME(对象)%扒光推到窗台边，打开窗户，以后背位的体位侵犯着
+				PRINTFORMW 一边抽插，一边在%ANAME(对象)%耳边小声说道「现在呼救的话就会有人看到你哦」
+				PRINTFORMW 被侵犯的%ANAME(对象)%想要呼救，但又害怕自己的窘态被别人看光，就在这种纠结的情况下%ANAME(对象)%便迎来了绝顶
+				PRINTFORMW 结果直到%ANAME(MASTER)%的精液已经充满了子宫，%ANAME(对象)%也没有大声呼救……
+			CASE 3
+				PRINTFORMW %ANAME(MASTER)%在%ANAME(对象)%体内射精之后歇了一会，%ANAME(对象)%便乘机跑到了门前试图撬开门锁
+				PRINTFORMW 结果正当%ANAME(对象)%跪着开锁的时候，%ANAME(MASTER)%冲了上来又把肉棒插进了还流着血与精液的混合物的小穴
+				PRINTFORMW 在抽插的同时，%ANAME(MASTER)%一边挑逗%ANAME(对象)%的乳头，一边把一串钥匙扣递给了%ANAME(对象)%的同时说着「自己把门打开就可以出去哦」
+				PRINTFORMW 可是%ANAME(对象)%还没等到把正确的钥匙插进钥匙孔里，自己就因为被中出而绝顶了……
+			CASE 4
+				PRINTFORMW %ANAME(MASTER)%一边用背面座位侵犯%ANAME(对象)%，一边讲述自己以前是如何如何夺走了多少人的处女
+				PRINTFORMW 每当讲到激情之处，便伸手爱抚起%ANAME(对象)%的敏感带逼得她顺势高潮
+				PRINTFORMW 过了一会，哪怕%ANAME(MASTER)%没有爱抚，%ANAME(对象)%的身体也会反射一般随着剧情的高潮而迎来绝顶
+				PRINTFORMW 为了奖赏新训练出来的飞机杯，%ANAME(MASTER)%在子宫内注入了足以怀孕的精液……
+		ENDSELECT
+	CASE 1
+		PRINTFORMW 先给%ANAME(对象)%普及下这里的规矩吧……
+		PRINTFORML
+		IF CFLAG:对象:軟禁中
+			PRINTFORMW %ANAME(对象)%被带到了%ANAME(MASTER)%的书房
+			PRINTFORMW %ANAME(对象)%一进来就看到了瘫倒在地、两腿之间不断涌出掺和丝红血液的精子的侍女
+			PRINTFORMW 理解了发生什么事的%ANAME(对象)%后退了几步，但%ANAME(MASTER)%威胁道「如果不听话的话就把你丢到男囚房里去」
+			PRINTFORMW %ANAME(对象)%见状，只好默默忍受%ANAME(MASTER)%的暴行……
+			PRINTFORML
+			SELECTCASE RAND:5
+				CASE 0
+					PRINTFORMW %ANAME(MASTER)%把%ANAME(对象)%按在身下，毫不留情地蹂躏着%ANAME(对象)%的雌穴
+					PRINTFORMW 面对%ANAME(对象)%毫不示弱地咬紧牙关的姿态，%ANAME(MASTER)%选择进一步向深处突进
+					PRINTFORMW 未经人事的%ANAME(对象)%哪里受得了这般猛攻，才过了一会便不自觉的跟着%ANAME(MASTER)%的动作扭着腰肢
+					PRINTFORMW %ANAME(MASTER)%一边伏在%ANAME(对象)%耳边夸赞她的雌穴，一边在最深处释放了浓厚的精液……
+				CASE 1
+					PRINTFORMW %ANAME(MASTER)%试图让%ANAME(对象)%学会「新的礼仪」
+					PRINTFORMW 一边命令%ANAME(对象)%跨上来自己动，一边教导着「这就是以后见到我就要做的事哦」
+					PRINTFORMW %ANAME(对象)%扭腰的同时拼命的忍耐快感，但%ANAME(对象)%的身体还未等%ANAME(MASTER)%射精就先高潮了
+					PRINTFORMW 作为惩罚，%ANAME(对象)%被%ANAME(MASTER)%的毫不留情的抽插弄得高潮迭起……
+				CASE 2
+					PRINTFORMW %ANAME(MASTER)%把%ANAME(对象)%扒光推到窗台边，打开窗户，以后背位的体位侵犯着
+					PRINTFORMW 一边抽插，一边在%ANAME(对象)%耳边小声说道「现在呼救的话就会有人看到你哦」
+					PRINTFORMW 被侵犯的%ANAME(对象)%想要呼救，但又害怕自己的窘态被别人看光，就在这种纠结的情况下%ANAME(对象)%便迎来了绝顶
+					PRINTFORMW 直到%ANAME(MASTER)%的精液已经充满了子宫，%ANAME(对象)%再也没有大声呼救……
+				CASE 3
+					PRINTFORMW %ANAME(MASTER)%在%ANAME(对象)%体内射精之后歇了一会，%ANAME(对象)%便乘机跑到了门前试图撬开门锁
+					PRINTFORMW 结果正当%ANAME(对象)%跪着开锁的时候，%ANAME(MASTER)%冲了上来又把肉棒插进了还流着血与精液的混合物的小穴
+					PRINTFORMW 在抽插的同时，%ANAME(MASTER)%一边挑逗%ANAME(对象)%的乳头，一边把一串钥匙扣递给了%ANAME(对象)%的同时说着「自己把门打开就可以出去哦」
+					PRINTFORMW 可是%ANAME(对象)%还没等到把正确的钥匙插进钥匙孔里，自己就因为被中出而绝顶了……
+				CASE 4
+					PRINTFORMW %ANAME(对象)%在一次次绝顶和被内射之后渐渐失去了意识
+					PRINTFORMW 等到醒来的时候，%ANAME(对象)%发现自己和刚才那个侍女被绑在了一起，二人嘴里还被一根双头龙同时堵住了
+					PRINTFORMW %ANAME(对象)%用余光看见%ANAME(MASTER)%的身影之后才明白一切都是%ANAME(MASTER)%的恶作剧
+					PRINTFORMW 而此时的%ANAME(MASTER)%已经着手使用起自己制作的「双头穴」……
+			ENDSELECT
+		ELSE
+			PRINTFORMW 晚上，%ANAME(MASTER)%来到了%ANAME(对象)%所处的牢房
+			PRINTFORMW 来的路上还顺手迷晕了路过的另一个侍女当作自己的自慰套
+			PRINTFORMW %ANAME(对象)%眼睁睁的看着%ANAME(MASTER)%把被大量中出的侍女扔在一旁，打开了牢门
+			PRINTFORMW 看到这一幕的%ANAME(对象)%害怕地一步步后退，但身为囚犯的%ANAME(对象)%除了乖乖被%ANAME(MASTER)%侵犯以外没有任何选择……
+			PRINTFORML
+			SELECTCASE RAND:5
+				CASE 0
+					PRINTFORMW 被蒙眼且紧缚着的%ANAME(对象)%就这样被%ANAME(MASTER)%像飞机杯一样侵犯
+					PRINTFORMW %ANAME(对象)%的每一次挣扎，阴道内壁都会舒服的刺激着%ANAME(MASTER)%的阴茎
+					PRINTFORMW 随着%ANAME(MASTER)%运动的力度越来越大，%ANAME(对象)%按耐不住发出了连绵不断的呻吟
+					PRINTFORMW 等到%ANAME(MASTER)%的滚烫精液源源不断流到子宫的时候，%ANAME(对象)%的浪叫声更是响彻整个牢房……
+				CASE 1
+					PRINTFORMW %ANAME(对象)%被绑到了工字刑架上
+					PRINTFORMW 被刑架束缚着的%ANAME(对象)%的双腿一字岔开，这个姿态能让%ANAME(MASTER)%的肉棒尽可能的深入蜜穴
+					PRINTFORMW 但也有副作用——肉棒插进去的瞬间%ANAME(对象)%比预想中的还要痛苦万分
+					PRINTFORMW %ANAME(MASTER)%一边听着%ANAME(对象)%痛苦的叫声，一边尽情蹂躏着刚刚还是处女的蜜穴……
+				CASE 2
+					PRINTFORMW %ANAME(MASTER)%跟%ANAME(对象)%说「如果你能主动奉献的话那就可以考虑释放你」
+					PRINTFORMW %ANAME(对象)%当然知道「奉献」指的是什么，可身为阶下囚的事实让她只能乖乖就范
+					PRINTFORMW %ANAME(对象)%一边在上方扭腰，一边还要忍痛向%ANAME(MASTER)%展示着溢出血来的结合部
+					PRINTFORMW 然而，几轮高潮过后，%ANAME(对象)%便已经全无寻乐以外的念头……
+				CASE 3
+					PRINTFORMW %ANAME(MASTER)%抱住%ANAME(对象)%，一口气将阴茎捅到了最深处，而后便开始动起腰身抽插着
+					PRINTFORMW %ANAME(对象)%因为从未体验过的疼痛，露出了痛苦到扭曲的表情，一边呻吟一边抓住%ANAME(MASTER)%的双肩
+					PRINTFORMW %ANAME(MASTER)%享受着突进从未被开发过的最深处的快感，腰部的动作也越来越大
+					PRINTFORMW 而随着%ANAME(MASTER)%的射精，%ANAME(对象)%也体会到了此前从未有过的快乐……
+				CASE 4
+					PRINTFORMW %ANAME(对象)%在一次次绝顶和被内射之后渐渐失去了意识
+					PRINTFORMW 等到醒来的时候，%ANAME(对象)%发现自己和刚才那个侍女被绑在了一起，二人嘴里还被一根双头龙同时堵住了
+					PRINTFORMW %ANAME(对象)%用余光看见%ANAME(MASTER)%的身影之后才明白一切都是%ANAME(MASTER)%的恶作剧
+					PRINTFORMW 而此时的%ANAME(MASTER)%已经着手使用起自己制作的「双头穴」……
+			ENDSELECT
+		ENDIF
+	CASE 2
+		PRINTFORMW 果然还得是%ANAME(对象)%啊
+		PRINTFORMW 今天就和她玩点好玩的吧～
+		PRINTFORML
+		PRINTFORMW %ANAME(对象)%一进来就看到了瘫倒在地、两腿之间不断涌出掺和丝红血液的精子的侍女
+		PRINTFORMW 但是%ANAME(对象)%丝毫没有要逃跑的样子
+		PRINTFORMW 「真不愧是%ANAME(对象)%啊～」%ANAME(MASTER)%绕到后面，边夸赞边揉搓着%ANAME(对象)%的屁股，然后突然把她推倒在地……
+		PRINTFORML
+		PRINTFORMW %ANAME(对象)%半推半就地迎合着%ANAME(MASTER)%的动作
+		PRINTFORMW 但是%ANAME(MASTER)%正因为%ANAME(对象)%没有应有的反应而苦恼着……
+		PRINTFORMW %ANAME(对象)%正想引导%ANAME(MASTER)%的肉棒插入自己的小穴，突然就被%ANAME(MASTER)%打了一巴掌
+		PRINTFORMW 一头雾水的%ANAME(对象)%还没来得及解释，%ANAME(MASTER)%就强行把她的身体翻转，猛地把肉棒插了进去……
+		PRINTFORML
+		SELECTCASE RAND:5
+			CASE 0
+				PRINTFORMW %ANAME(MASTER)%用后背位激烈地侵犯%ANAME(对象)%的同时，还不断拍打着%ANAME(对象)%的屁股
+				PRINTFORMW 每打一次屁股，阴道就会收紧，从而紧紧地夹住正在里面抽插的肉棒
+				PRINTFORMW %ANAME(对象)%这回理解了%ANAME(MASTER)%的心意，顿时开始用哭腔乞求%ANAME(MASTER)%原谅
+				PRINTFORMW %ANAME(MASTER)%口中责骂%ANAME(对象)%，但内心里对%ANAME(对象)%能读懂自己的心意感到欣慰
+				PRINTFORMW %ANAME(MASTER)%紧紧抓住她的腰，往子宫内满满地射进了表示奖赏的精液……
+			CASE 1
+				PRINTFORMW %ANAME(MASTER)%深感普通的play已经达不到他想要的效果了
+				PRINTFORMW 于是%ANAME(MASTER)%保持与%ANAME(对象)%连接的状态，从后面抱起她便出了门
+				PRINTFORMW 被公开展示的%ANAME(对象)%试图用双手遮住自己的脸，但是随之就被%ANAME(MASTER)%强行把手掰到两边
+				PRINTFORMW 对%ANAME(对象)%今天的表现颇为满意，%ANAME(MASTER)%抱着已经因多次内射和高潮而昏迷不醒的她回到书房，准备连侍女一起侵犯……
+			CASE 2
+				PRINTFORMW %ANAME(MASTER)%对%ANAME(对象)%的反应仍然不满意，于是%ANAME(MASTER)%转而将目光投向刚刚被他夺走处女的侍女
+				PRINTFORMW 侍女一睁开眼睛，就发现自己仍然和昏迷前一样被%ANAME(MASTER)%激烈地强奸着
+				PRINTFORMW 只是这次多了个全身赤裸的观众在聚精会神地学习自己的神情
+				PRINTFORMW 在学到了「被突然强奸应该是什么反应」之后，%ANAME(对象)%便做出了自己的实践……
+			CASE 3
+				PRINTFORMW 被突然侵犯的%ANAME(对象)%对%ANAME(MASTER)%很是诧异
+				PRINTFORMW 仍然不理解%ANAME(MASTER)%的意图，%ANAME(对象)%屏住呼吸，试图不发出任何声音
+				PRINTFORMW 但%ANAME(对象)%的身体经过良久的调教，已经无法拒绝%ANAME(MASTER)%给予的快感
+				PRINTFORMW 很快她就如%ANAME(MASTER)%所想开始不断的娇喘
+				PRINTFORMW 在子宫射入精液后，仍然不满意的%ANAME(MASTER)%便用肉棒继续教导%ANAME(对象)%应该怎么表现……
+			CASE 4
+				PRINTFORMW %ANAME(MASTER)%命令%ANAME(对象)%用舌头清理瘫在一旁的侍女的秘穴
+				PRINTFORMW 每当%ANAME(对象)%的舌尖触及阴蒂的时候，昏迷的侍女都会无意识地娇喘着
+				PRINTFORMW 直到侍女苏醒之后发现自己正被一个被后入的女人舔舐自己的秘穴
+				PRINTFORMW 她正欲趁%ANAME(MASTER)%射精后的空当逃跑，却被%ANAME(MASTER)%抓了回来
+				PRINTFORMW 为了惩罚这个侍女，%ANAME(MASTER)%把她连同%ANAME(对象)%一起推倒，轮流侵犯着……
+		ENDSELECT
+ENDSELECT
+CALL FUCK_RAPE(对象, GET_ID(MASTER), @"%ANAME(MASTER)%的肉棒", @"%ANAME(MASTER)%")
+CALL FUCK(MASTER, "欲望, 性技, 性交, 加虐, Ｃ, 射精, 露出, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(对象)%的小穴", "強姦")
+PRINTFORML
+IF 模式 < 2
+	PRINTFORMW 就这样，这些被捕捉的猎物们就这样被%ANAME(MASTER)%一直侵犯到天亮
+	PRINTFORML 虽然现在她们已经没有了反抗的意识，但%ANAME(MASTER)%还是不放心
+	PRINTFORMW 于是%ANAME(MASTER)%私下任命她们为贴身仆人，每日在%ANAME(MASTER)%的府邸里穿着下流的服装任由%ANAME(MASTER)%侵犯……
+	IF !IS_SLAVE(对象)
+		CALL COLOR_PRINTW(@"%ANAME(对象)%成为了%ANAME(MASTER)%的性奴隶！", カラー_注意)
+		TALENT:对象:合意 = 1
+		TALENT:对象:服従 = 1
+		CALL TALENT_CHECK(对象)
+		TALENT:对象:チョロイン = 1
+		CFLAG:对象:従属度 = MAX(CFLAG:对象:従属度 + 1500, 1500)
+		CFLAG:对象:依存度 = MAX(CFLAG:对象:依存度 + 300, 300)
+	ENDIF
+	SIF CFLAG:对象:捕虜先
+		CALL CHANGE_COUNTRY(对象, CFLAG:MASTER:所属, 1)
+	SETBIT TALENT:对象:日常系, 素質_デイリー_专属奴隶
+	REPEAT 3
+		CALL FUCK(对象, "Ｃ, Ｖ, Ｂ, 欲望, 精愛, 奉仕, 奉仕, 性交, 接吻, 口淫, Ｖ性交", "膣内射精, 接吻喪失, 処女喪失, 口内射精",　GET_ID(MASTER), @"%ANAME(MASTER)%的阴茎", ANAME(MASTER), "", "調教")
+		CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(对象)%的小穴", "調教")
+	REND
+ELSE
+	PRINTFORMW 就这样，%ANAME(对象)%和侍女就这样被%ANAME(MASTER)%一直侵犯到天亮……
+	PRINTFORMW 虽然体验不怎么样，但%ANAME(MASTER)%意外发现了又一个名器……
+	PRINTFORMW 事后，%ANAME(MASTER)%又用了一夜来调教那个侍女，终于把她收入囊中……
+	CALL COLOR_PRINTW(@"%ANAME(对象)%成为了%ANAME(MASTER)%的性奴隶！", カラー_注意)
+	SETBIT TALENT:对象:日常系, 素質_デイリー_专属奴隶
+	REPEAT 3
+		CALL FUCK(对象, "Ｃ, Ｖ, Ｂ, 欲望, 精愛, 奉仕, 奉仕, 性交, 接吻, 口淫, Ｖ性交", "膣内射精, 接吻喪失, 処女喪失, 口内射精",　GET_ID(MASTER), @"%ANAME(MASTER)%的阴茎", ANAME(MASTER), "", "調教")
+		CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(对象)%的小穴", "調教")
+	REND
+	CALL CREATE_RANDOM_CHARA(0,0,1)
+	SIF RESULT == -1
+		RETURN 1
+	LOCAL:2 = RESULT
+	CALL CHANGE_COUNTRY(LOCAL:2, CFLAG:MASTER:所属, 1)
+	TALENT:(LOCAL:2):合意 = 1
+	TALENT:(LOCAL:2):服従 = 1
+	CALL TALENT_CHECK(LOCAL:2)
+	TALENT:(LOCAL:2):チョロイン = 1
+	CFLAG:(LOCAL:2):従属度 = 1500
+	CFLAG:(LOCAL:2):依存度 = 500
+	SETBIT TALENT:(LOCAL:2):日常系, 素質_デイリー_专属奴隶
+	CALL COLOR_PRINTW(@"%ANAME(LOCAL:2)%被提拔为了%ANAME(MASTER)%的性奴隶！", カラー_注意)
+	CALL FUCK(LOCAL:2, "Ｃ, Ｖ, Ｂ, 欲望, 精愛, 奉仕, 奉仕, 性交, 接吻, 口淫, Ｖ性交", "膣内射精, 接吻喪失, 処女喪失, 口内射精",　GET_ID(MASTER), @"%ANAME(MASTER)%的阴茎", ANAME(MASTER), "", "強姦")
+	REPEAT 2
+		CALL FUCK(LOCAL:2, "Ｃ, Ｖ, Ｂ, 欲望, 精愛, 奉仕, 奉仕, 性交, 接吻, 口淫, Ｖ性交", "膣内射精, 接吻喪失, 処女喪失, 口内射精",　GET_ID(MASTER), @"%ANAME(MASTER)%的阴茎", ANAME(MASTER), "", "調教")
+		CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(LOCAL:2)%的小穴", "調教")
+	REND
+ENDIF
+RETURN 1

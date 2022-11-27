@@ -1,0 +1,105 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K12_FALL_ON_THE_STREET_RATE(対象)
+#DIM 対象
+RETURN 50
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K12_FALL_ON_THE_STREET_DECISION(対象)
+#DIM 対象
+
+SIF CFLAG:対象:特殊状態 != 特殊状態_放浪
+	RETURN 0
+
+SIF KDVAR:対象:レティ_行き倒れ
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 0, 0, -1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K12_FALL_ON_THE_STREET_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K12_FALL_ON_THE_STREET(対象)
+#DIM 対象
+
+PRINTFORML 炎炎夏日、発現一位女性倒在了路邊
+PRINTFORML 難道是中暑了麼……
+PRINTFORML
+CALL ASK_YN("救助", "置之不理")
+
+IF RESULT == 1
+	PRINTFORML 不去管她
+	KDVAR:対象:レティ_行き倒れ = 1
+	RETURN 1
+ENDIF
+
+PRINTFORML 不能置之不理
+PRINTFORML 決定在拠点照顧她
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+PRINTFORML 「不好意思、讓你看到了丟人的地方」
+PRINTFORML 「但是很謝謝你、救助了我」
+PRINTFORML 女性自稱是%NAME_FORMAL(対象)%
+PRINTFORMW 平時應該像是冬眠一樣「夏眠」、偶然出去走走的時候被熱氣襲撃了
+PRINTFORMW 「雖然平時一直很冷靜、但是這事真是太丟人了」
+PRINTFORMW 「対了、能讓我做点什麼好感謝你麼？」
+PRINTFORML
+CALL ASK_MULTI("成為同伴", "給我錢", "和我来一発！", "不用了")
+
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORML 「同伴？　嗯、好啊、交給我吧」
+		PRINTFORMW 「我可是能以一敵百的」
+		CALL COLOR_PRINTW(@"%ANAME(対象)%成為了同伴", カラー_注意)
+		CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属)
+	CASE 1
+		PRINTFORML 「嗯、好的」
+		PRINTFORMW 「雖說如此、因為我也沒有那麼多財產……只有這些的話能原諒我麼？」
+		CALL ICPRINT("得到了<10000>金", "W", カラー_注意)
+		MONEY += 10000
+	CASE 2
+		PRINTFORML 	「誒、誒誒？」
+		PRINTFORMW 「我沒有聽錯吧、能再說一遍麼？」
+		PRINTFORML 再次說道、請和我来一発
+		PRINTFORMW 聽到%ANAME(MASTER)%的話、%ANAME(対象)%滿臉通紅
+		PRINTFORMW 「嗯、那個……我也、并不是沒有経験」
+		PRINTFORMW 「但是、請手下留情」
+		PRINTFORML %ANAME(対象)%把手伸向了衣服、脫了下來
+		PRINTFORMW 露出了有着%STR_BODY("胸：愛撫", 対象)%和%STR_BODY("尻：感触",　対象)%的充滿魅力的肉体
+		PRINTFORMW 温柔的把身体有些僵硬的%ANAME(対象)%推倒在了床上……
+		IF HAS_PENIS(MASTER)
+			CALL FUCK(MASTER, "欲望, 性技, 奉仕, 性交, Ｃ, Ｖ挿入, 接吻", "童貞喪失, 接吻喪失", 0, @"%ANAME(対象)%的嘴唇", "", @"%ANAME(対象)%的膣穴", "和姦")
+			CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER), "", "和姦")
+		ELSE
+			CALL FUCK(MASTER, "欲望, 性技, 奉仕, 性交, Ｃ, Ｂ, Ｍ, 百合, 接吻", "接吻喪失", 0, @"%ANAME(対象)%的嘴唇", "", "", "和姦")
+			CALL FUCK(対象,   "欲望, 性技, 奉仕, 性交, Ｃ, Ｂ, Ｍ, 百合, 接吻", "接吻喪失", 0, @"%ANAME(MASTER)%的嘴唇", "", "", "和姦")
+		ENDIF
+	CASE 3
+		PRINTFORML 「啊、是麼？　真是抱歉」
+		PRINTFORMW 「那麼至少、請讓我說聲謝謝」
+		PRINTFORMW 「非常感謝您的幫助、再見」
+		CFLAG:対象:好感度 += 300
+ENDSELECT
+
+CFLAG:対象:面識 = 1
+KDVAR:対象:レティ_行き倒れ = 1
+
+RETURN 1

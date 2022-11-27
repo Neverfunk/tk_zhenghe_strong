@@ -1,0 +1,161 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K94_KAGEROU_FUROAGARI_RATE(対象)
+#DIM 対象
+RETURN 30
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K94_KAGEROU_FUROAGARI_DECISION(対象)
+#DIM 対象
+
+;主人公はペニスがあること
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K94_KAGEROU_FUROAGARI_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K94_KAGEROU_FUROAGARI(対象)
+#DIM 対象
+
+PRINTFORMW 有事去房间一看，被洗完澡的影狼迎接了
+;TranslatedMark 用事があって部屋を訪ねるとお風呂上りの影狼に出迎えられた
+PRINTFORMW 像是慌慌张张爬上来的样子，长而漂亮的头发上还滴水着
+;TranslatedMark 慌てて上がってきた様で、長く綺麗な髪からはまだ水が滴っている
+IF CFLAG:対象:好感度 <= 1200
+	PRINTFORMW 「现在不能放手，在外面等着吧」
+	;TranslatedMark 「ちょっと今は手を離せないから、外で待ってて」
+	PRINTFORMW 慌慌张张的她把我赶出了房间
+	;TranslatedMark 慌てた彼女に部屋の外に追い出されてしまった
+	PRINTFORMW 嘛，也没办法吧
+	;TranslatedMark まぁ仕方ないだろう
+	PRINTFORMW 一边回忆着微微飘散的洗发水的香味，一边暂时在门前等着
+	;TranslatedMark 微かに漂ったシャンプーの香りを思い出しながらしばし扉の前で待っていた
+ELSE
+	IF IS_SLAVE(対象)
+		PRINTFORMW 「对不起，主人…正好洗了个澡…」
+		;TranslatedMark 「ごめんなさい、ご主人様…丁度お風呂に入ってて…」
+	ELSE
+		PRINTFORMW 「现在正在洗澡…有什么事吗？」
+		;TranslatedMark 「今ちょうどお風呂に入ってて…何か用かしら？」
+	ENDIF
+	PRINTFORMW 香波的香味扑鼻而来
+	;TranslatedMark ふわっとシャンプーの良い香りが鼻腔をくすぐった
+	PRINTFORMW 也许是洗完澡后的缘故，看上去比平时更妖艳
+	;TranslatedMark お風呂上りだからか、いつもよりも色っぽく見える
+	PRINTFORMW 怎么办？
+	;TranslatedMark どうしよう？
+	CALL ASK_MULTI("帮忙" ,"晚点再来" ,"推倒")
+	IF RESULT == 1
+		PRINTFORMW 我才是个碍事的人
+		;TranslatedMark こちらこそ邪魔をしてしまった様だ
+		PRINTFORMW 又不是急事，所以决定再来
+		;TranslatedMark 急ぐ用事ではないし、出直す事にした
+		PRINTFORMW 「是吗？得救了，谢谢」
+		;TranslatedMark 「そう？助かるわ、ありがとう」
+		PRINTFORMW 你一边回忆着微微飘散的香味，一边离开了影狼的房间
+		;TranslatedMark 微かに漂った香りを思い出しながら、あなたは影狼の部屋を後にした
+		CFLAG:対象:好感度 += 100 + RAND:50
+	ELSEIF RESULT == 0
+		PRINTFORMW 但是再看一下是长发，一个人擦这个很麻烦吧
+		;TranslatedMark しかし改めてみると長い髪だ、これを一人で拭くのは大変だろう
+		PRINTFORMW 你心血来潮地帮我吹干头发
+		;TranslatedMark あなたは気まぐれに髪を乾かすのを手伝う事にした
+		PRINTFORMW 「诶？%ANAME(MASTER)%？」
+		;TranslatedMark 「えっ？%ANAME(MASTER)%が？」
+		PRINTFORMW 「嗯…嗯！…那么，让我来做吧？」
+		;TranslatedMark 「う～ん…うん！…じゃあ、やってもらおうかな？」
+		PRINTFORMW 对你的建议她虽然畏首畏尾，但马上就露出了无法满足的表情
+		;TranslatedMark あなたの提案に彼女はキョトンとしていたが、すぐに満更でもなさそうな表情になった
+		PRINTFORMW 她给你毛巾就坐在椅子上
+		;TranslatedMark 彼女はあなたにタオルを渡すと椅子に座る
+		PRINTFORMW 她的头发在附近一看比平时更漂亮
+		;TranslatedMark 彼女の髪は近くで見ると普段よりもより一層綺麗だった
+		PRINTFORMW 「嗯…呼…」
+		;TranslatedMark 「んんっ…ふぅ…」
+		PRINTFORMW 温柔细心地擦拭，她发出了悦耳的声音
+		;TranslatedMark 優しく丹念に拭いてやると彼女は気持ちよさそうな声を漏らした
+		PRINTFORMW …一边交谈着无心的话题，一边享受着一段平静的时光
+		;TranslatedMark …何気ない会話を交わしながら、一時の穏やかな時間を楽しんだ
+		CFLAG:対象:好感度 += 200 + RAND:100
+	ELSEIF RESULT == 2
+		PRINTFORMW 突然来的你忍不住往房间里推，把她推倒了
+		;TranslatedMark ムラッと来たあなたは我慢できずに部屋に押し入ると、彼女を押し倒した
+		PRINTFORMW 「啊！？」
+		;TranslatedMark 「きゃっ！？」
+		IF IS_SLAVE(対象) || IS_LOVER(対象) || TALENT:対象:合意 == 1
+			PRINTFORMW 从倒在床上的她身上，飘溢着淡淡的香味，更能刺激到一种东西
+			;TranslatedMark ベッドに倒れた彼女から、ふわりと良い香りが漂いさらに一物を刺激される
+			PRINTFORMW 她一瞬间露出吃惊的表情，但马上露出了似乎还没有完全满足的诱惑的表情
+			;TranslatedMark 彼女は一瞬驚いた顔を見せたが、すぐに満更でもなさそうな誘う様な表情となった
+			PRINTFORMW 你再也忍不住了，勉强堵住她的嘴唇，之后就停不下来了
+			;TranslatedMark もはやあなたも我慢できず無理矢理彼女の唇を塞ぐと、後はもう止まらなかった
+		ELSE
+			PRINTFORMW 倒在床上的她尖叫着，像害怕一样抬头看你
+			;TranslatedMark ベッドに倒れた彼女は悲鳴を上げると、怯えた様にあなたを見上げてきた
+			PRINTFORMW 那张脸上一瞬间涌起了罪恶感，但一股淡淡的香味再次刺激了我
+			;TranslatedMark その顔に一瞬罪悪感が湧き上がったが、ふわりと良い香りに再び一物が刺激された
+			PRINTFORMW 她想要说什么，用嘴唇强行堵住了她的嘴，之后就再也停不下来了
+			;TranslatedMark 何かを言おうとした彼女の口を唇で無理矢理ふさぐと、後はもう止まらなかった
+		ENDIF
+		PRINTFORML 
+		SELECTCASE RAND:4
+			CASE 0
+				PRINTFORML 你们忘记了时间，一直交往到流汗为止
+				;TranslatedMark あなた達は時間を忘れ、汗だくになるまで交わり続けた
+				PRINTFORMW 结果在那之后两个人又一起洗了个澡
+				;TranslatedMark 結局その後二人で一緒に再びシャワーを浴びる事になった
+			CASE 1
+				PRINTFORML 因为肥皂的香味而兴奋的你紧紧地抱住了她
+				;TranslatedMark 石鹸の香りに興奮したあなたは激しく彼女を抱きまくった
+				PRINTFORMW 事后，她目瞪口呆地抱着躺着的她再次去了浴室
+				;TranslatedMark 事後、呆けた様に横たわる彼女を抱え再び風呂場に向かった
+			CASE 2
+				PRINTFORML 我迷恋上了她那种火辣敏感的反应
+				;TranslatedMark すっかり火照って敏感に反応する彼女に夢中になってしまった
+				PRINTFORMW 对于粗暴的行为，她一边抱怨，一边尾巴缓慢地摇动着
+				;TranslatedMark 乱暴な行為に彼女は文句を言いつつも尻尾は緩やかに揺れていた
+			CASE 3
+				PRINTFORML 你把事情也忘了，像盛着的野兽一样继续挥着腰
+				;TranslatedMark あなたは用事も忘れてまるで盛った獣の様に腰を振り続けた
+				PRINTFORMW 渐渐地她也开始自己的腰，纠缠着你
+				;TranslatedMark 次第に彼女も自ら腰を振り出し、あなたに絡みついてきていた
+		ENDSELECT
+		CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", @"%ANAME(MASTER)%")
+		CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, @"%ANAME(対象)%の唇", "", @"%ANAME(対象)%の膣", "和姦")
+		IF !(IS_SLAVE(対象) || IS_LOVER(対象) || IS_SLAVED_BY(対象) || TALENT:対象:合意 == 1)
+			PRINTFORML 
+			PRINTFORMW …从房间出来的时候，她叫住了我，轻轻地吻了我的脸颊
+			;TranslatedMark …部屋から出る時、彼女に呼び止められ軽く頬にキスをされた
+			PRINTFORMW 「嗯…明天见吧？」
+			;TranslatedMark 「えっと…また明日ね？」
+			PRINTFORMW 正因为如此她害羞地回了房间
+			;TranslatedMark 彼女は恥ずかしそうにそれだけ告げると部屋に引っ込んでしまった
+			PRINTFORMW 你回想起刚才接触过的她的触感，回到了自己的房间
+			;TranslatedMark あなたは先程まで触れていた彼女の感触を思い出しながら自室に戻った
+		ENDIF
+	ENDIF
+ENDIF
+
+RETURN 1
+
+

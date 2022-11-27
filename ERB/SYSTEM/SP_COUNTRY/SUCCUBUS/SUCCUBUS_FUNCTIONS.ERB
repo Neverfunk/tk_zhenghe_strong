@@ -1,0 +1,286 @@
+﻿;--------------------------------------
+;ターンエンド時のサキュバスの処理
+;--------------------------------------
+@TURNEND_SUCCUBUS
+;3ターンに1回、ドレイン
+CALL SUCCUBUS_DRAIN(DAY % 3 == 0)
+
+
+;--------------------------------------
+;滅亡時の処理
+;--------------------------------------
+@SUCCUBUS_DESTROY_MSG
+CALL SINGLE_DRAWLINE
+SETCOLOR カラー_注意
+PRINTFORML
+PRINTFORML
+PRINTFORML
+PRINTFORMW  尽管很多人不愿意梦魔就此被击败，毕竟能与幻想乡少女随心所欲地做爱是最好不过的
+PRINTFORMW  但是理性克制住了欲望，再加贤者们软硬兼施下，幻想乡的军队最终攻克了梦魔的老巢
+PRINTFORMW 遭到了毀滅性破壞的夢魔、遭到的贤者们的清洗
+PRINTFORMW  为了不被消減而向哆来咪寻求庇护的它们，被关押至专属夢之世界的地狱
+PRINTFORMW 以防万一哆来咪·苏伊特牢牢鎖住了通往夢之世界的道路、現在應該沒問題了……
+PRINTFORMW  现在，它们应该得到了它们应有的审判了罢………
+PRINTFORML
+PRINTFORML
+PRINTFORML
+RESETCOLOR
+
+;--------------------------------------
+;サキュバスの初期化処理
+;--------------------------------------
+@SUCCUBUS_INIT(ARG:0)
+#DIM LCOUNT
+VARSET LOCAL
+
+SIF GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_サキュバス) != -1
+	RETURN 0
+
+SIF SP_COUNTRY_RANK:特殊勢力_サキュバス == 0
+	RETURN 0
+
+SIF GET_NEW_COUNTRY() == -1
+	RETURN 0
+
+CALL CREATE_SP_COUNTRY(特殊勢力_サキュバス)
+LOCAL = RESULT
+CALL INIT_SP_COUNTRY(LOCAL)
+
+RETURN LOCAL
+
+;-------------------------------------------------
+;DESC  :サキュバス所属時に閨・捕虜調教前にアイテムを追加する処理
+;-------------------------------------------------
+@START_TRAIN_COMMON_SUCCUBUS()
+ITEM:A_振動棒 = 1
+ITEM:A_肛用振動棒 = 1
+ITEM:A_乳頭夾 = 1
+ITEM:A_陰蒂夾 = 1
+ITEM:A_双頭龍 = 1
+ITEM:A_穿戴式假陰茎 = 1
+ITEM:A_媚薬 = 99
+ITEM:A_潤滑液 = 99
+ITEM:A_眼罩 = 1
+
+
+@SELECT_CHARA_RANDOM_LOGIC_SUCCUBUS_DRAIN(対象)
+#DIM 対象
+#DIM 夢魔
+
+夢魔 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_サキュバス))
+
+;MASTERはサキュバスで特殊勢力スタートした場合は除外
+SIF 対象 == MASTER && SP_COUNTRY_START:特殊勢力_サキュバス
+	RETURN 0
+;サキュバス所属で捕虜でない　またはサキュバス勢力の捕虜　念のためSPキャラを除外
+RETURN ((CFLAG:対象:所属 == 夢魔 && !CFLAG:対象:捕虜先) || CFLAG:対象:捕虜先 == 夢魔) && !IS_SP_CHARA(対象)
+
+;-----------------------------
+;サキュバスの定期イベント
+;-----------------------------
+@SUCCUBUS_DRAIN(条件)
+#DIM 夢魔
+#DIM 条件
+#DIM 対象, 2
+#DIM メッセージ
+#DIM 吸収候補, 5
+#DIM 吸収対象
+#DIM 吸収値
+
+夢魔 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_サキュバス))
+
+
+;サキュバス勢力があり、条件を満たしている
+SIF 夢魔 == -1 || !条件
+	RETURN -1
+
+CALL SELECT_CHARA_RANDOM("SUCCUBUS_DRAIN")
+
+対象 = RESULT
+
+SIF 対象 == -1
+	RETURN 0
+
+吸収候補:0 = (RAND:(MAX(ABL:対象:武闘, 1)))
+吸収候補:1 = (RAND:(MAX(ABL:対象:知略, 1)))
+吸収候補:2 = (RAND:(MAX(ABL:対象:政治, 1)))
+吸収候補:3 = (RAND:(MAX(ABL:対象:歌唱, 1)))
+吸収候補:4 = (RAND:(MAX(ABL:対象:料理, 1)))
+
+吸収対象 = FINDELEMENT(吸収候補, MAXARRAY(吸収候補))
+SELECTCASE 吸収対象
+	CASE 0
+		吸収対象 = GETNUM(ABL, "武闘")
+	CASE 1
+		吸収対象 = GETNUM(ABL, "知略")
+	CASE 2
+		吸収対象 = GETNUM(ABL, "政治")
+	CASE 3
+		吸収対象 = GETNUM(ABL, "歌唱")
+	CASE 4
+		吸収対象 = GETNUM(ABL, "料理")
+ENDSELECT
+
+SIF ABL:対象:吸収対象 < 10
+	RETURN -1
+
+吸収値 = LIMIT(ABL:対象:吸収対象 / 10, 1, 3)
+
+対象:1 = GET_COUNTRY_BOSS(夢魔)
+
+SIF 対象:1 == -1
+	RETURN -1
+
+CALL SINGLE_DRAWLINE
+SETCOLOR カラー_ピンク
+PRINTFORMW 夢魔從%ANAME(対象)%那吸收了精気……
+;TranslatedMark サキュバスは%ANAME(対象)%から精気を吸収している……
+PRINTFORML 
+SETCOLOR カラー_警告
+PRINTFORMW 夢魔奪取了%ANAME(対象)%的能力！
+;TranslatedMark サキュバスは%ANAME(対象)%の能力を奪い取った！
+PRINTFORMW %ANAME(対象)%的%ABLNAME:吸収対象%降低了{吸収値}！
+;TranslatedMark %ANAME(対象)%の%ABLNAME:吸収対象%が{吸収値}下がった！
+PRINTFORMW %ANAME(対象:1)%的%ABLNAME:吸収対象%提高了{吸収値}！
+;TranslatedMark %ANAME(対象:1)%の%ABLNAME:吸収対象%が{吸収値}上がった！
+RESETCOLOR
+PRINTFORML 
+ABL:(対象:0):吸収対象 -= 吸収値
+ABL:(対象:1):吸収対象 += 吸収値
+
+
+;-----------------------------
+;サキュバスに捕らえられたときのイベント
+;-----------------------------
+@MASTER_CAPTURED_SUCCUBUS(ARG:0)
+PRINTFORMW 被抓住地%ANAME(MASTER)%被人帯到了夢魔的面前…
+;TranslatedMark 捕らえられた%ANAME(MASTER)%はサキュバスの前に引きずり出された…
+IF IS_MALE(MASTER)
+	PRINTFORMW 夢魔看見%ANAME(MASTER)%的時候、低聲嘟噥道真是個好男人
+	;TranslatedMark サキュバスは%ANAME(MASTER)%を見ると、いい男ねと呟く
+	PRINTFORMW 邀請道、不成為我們的眷屬、一起做很多舒服的事麼？
+	;TranslatedMark 私たちの眷属になって、たくさんイイコトをしない？　と誘ってきた
+	PRINTFORMW 那就意味著要成為夢魔吧、但是怎麼也比拒絕後的待遇要好……
+	;TranslatedMark それはつまり夢魔になるということだが、拒否するより待遇はマシになるようだ……
+	PRINTFORMW 要接受吗？
+	;TranslatedMark 受け入れますか？
+	CALL ASK_YN("接受", "拒絶")
+	IF RESULT == 0
+		PRINTFORMW 怎麼也比被関進監獄要好。%ANAME(MASTER)%點頭的時候、夢魔露出了微笑
+		;TranslatedMark 投獄されるよりはマシだろう。%ANAME(MASTER)%が頷くと、サキュバスはにっこりと笑う
+		PRINTFORMW 接著他們直接就包囲住了%ANAME(MASTER)%、開始愛撫%ANAME(MASTER)%的身体
+		;TranslatedMark そのまま彼女らは%ANAME(MASTER)%を取り囲み、その身体を愛撫し始めた
+		PRINTFORMW 在那令人恍惚的快感之中、%ANAME(MASTER)%的意識沉入了夢中……
+		;TranslatedMark 気が遠くなるほどの快楽の中で、%ANAME(MASTER)%の意識は夢に蕩けていった……
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%変成了淫魔
+		;TranslatedMark %ANAME(MASTER)%は淫魔になりました
+		RESETCOLOR
+	ELSE
+		PRINTFORMW 我是不会协助你们作恶的。%ANAME(MASTER)%坚毅地说到
+		;TranslatedMark お前達になど手を貸すか。%ANAME(MASTER)%は毅然として言い放つ
+		PRINTFORMW 她們露出了苦笑、把%ANAME(MASTER)%関進了監獄……
+		;TranslatedMark 彼女らは苦笑しながらも、%ANAME(MASTER)%を投獄した……
+	ENDIF
+ELSEIF GETBIT(TALENT:MASTER:特殊勢力陥落系, 特殊勢力_サキュバス)
+	PRINTFORMW 又來了呢、她們一邊輕撫著%ANAME(MASTER)%的身体一邊低聲説道
+	;TranslatedMark また来てくれたのねと、彼女らは%ANAME(MASTER)%の身体に手を這わせながらささやく
+	PRINTFORMW 仅仅是这样、%ANAME(MASTER)%的身体、就想起了被他们刻入大脑的快感、股间湿透了
+	;TranslatedMark それだけで%ANAME(MASTER)%の身体は、彼らに刻み込まれた快楽を思い出して濡れてしまう
+	PRINTFORMW 在%ANAME(MASTER)%開始発出甘甜喘息的時候、她們尋問道、又想和我們做舒服的事麼？
+	;TranslatedMark %ANAME(MASTER)%の声が甘く蕩け始めた頃、また私たちとイイコトをする？　と彼女らは尋ねる
+	PRINTFORMW 要接受吗？
+	;TranslatedMark 受け入れますか？
+	CALL ASK_YN("接受", "拒絶")
+	IF RESULT == 0
+		PRINTFORMW 完全被她們発掘出的女人的本性、讓%ANAME(MASTER)%點了點頭
+		;TranslatedMark 彼らによって育て上げられた女の本性が、%ANAME(MASTER)%を頷かせた
+		PRINTFORMW 対%ANAME(MASTER)%説完歡迎回來後、夢魔開始愛撫起%ANAME(MASTER)%……
+		;TranslatedMark おかえりという言葉を%ANAME(MASTER)%にかけると、サキュバスは%ANAME(MASTER)%を愛撫しはじめた……
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%再一次、成為了夢之世界的居民
+		;TranslatedMark %ANAME(MASTER)%は再び、夢の世界の住人となった
+		RESETCOLOR
+	ELSE
+		PRINTFORMW 夢魔們似乎沒有想過居然會被拒絕、都感到非常意外
+		;TranslatedMark 拒否されるということは考えになかったらしく、サキュバス達はしばし意外そうにしていた
+		PRINTFORMW 露出無畏的笑容説道、既然這樣、那就讓你回憶一下夢之世界的美妙之処吧
+		;TranslatedMark それならそれで、夢の世界の素晴らしさを思い出させてあげると、不敵に笑う
+		PRINTFORMW 夢魔們把%ANAME(MASTER)%関進了監獄……
+		;TranslatedMark サキュバス達は%ANAME(MASTER)%を投獄した……
+	ENDIF
+ELSE
+	PRINTFORMW 夢魔慢慢打量著%ANAME(MASTER)%的身体。
+	;TranslatedMark サキュバスは%ANAME(MASTER)%の体をじっくりと眺める。
+	PRINTFORMW 邀請道、不成為我們的眷屬、一起做很多舒服的事麼？
+	;TranslatedMark 私たちの眷属になって、たくさんイイコトをしない？　と誘ってきた
+	PRINTFORMW 虽然是荒唐的提议，但就算拒绝，也要说服对方接受吧
+	;TranslatedMark とんでもない提案だが、拒否しようと、受け入れるように仕向けてくるのだろう
+	PRINTFORMW 要接受吗？
+	;TranslatedMark 受け入れますか？
+	CALL ASK_YN("接受", "拒絶")
+	IF RESULT == 0
+		PRINTFORMW 反正被做的事是不会改变的。%ANAME(MASTER)%無力地點頭答應了
+		;TranslatedMark どうせされることは変わらないのだ。%ANAME(MASTER)%は力なく頷く
+		PRINTFORMW 這樣才対嘛、夢魔露出了淫蕩的笑容
+		;TranslatedMark そうこなくちゃと、サキュバスは淫蕩な笑みを浮かべた
+		PRINTFORMW %ANAME(MASTER)%、転生為夢魔了……
+		;TranslatedMark %ANAME(MASTER)%は、夢魔として生まれ変わっていく……
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%変成了夢魔
+		;TranslatedMark %ANAME(MASTER)%はサキュバスになりました
+		RESETCOLOR
+	ELSE
+		PRINTFORMW 竟然能做到這種事麼。當%ANAME(MASTER)%斷然拒絕的時候、夢魔露出了吃驚的表情
+		;TranslatedMark そんなことができるか。%ANAME(MASTER)%がきっぱりと拒否すると、サキュバスは驚いた顔をする
+		PRINTFORMW 為什麼？　和只知道做舒服的事情的她們、無法擁有同樣的価値観
+		;TranslatedMark どうして？　こんなに気持ちいいのにという彼女らとは、価値観を共有できそうもない
+		PRINTFORMW 夢魔們把%ANAME(MASTER)%関進了監獄……
+		;TranslatedMark サキュバス達は%ANAME(MASTER)%を投獄した……
+	ENDIF
+ENDIF
+IF RESULT == 0
+	CALL CHANGE_COUNTRY(MASTER, ARG:0, 1)
+	SETBIT TALENT:MASTER:特殊勢力陥落系, 特殊勢力_サキュバス
+	CALL PLAYER_FALLEN_TO_SP_COUNTRY(ARG:0)
+	CALL SUCCUBUS_FALLEN_LEAVE_MARK(MASTER)
+
+	RETURN 0
+ELSE
+	CALL CAPTURE(MASTER, ARG:0)
+	RETURN 2
+ENDIF
+
+;--------------------------------------
+;エンディング
+;--------------------------------------
+@SUCCUBUS_ENDING
+
+PRINTFORML 在梦魔们释放的淫气面前，幻想乡的少女与贤者们束手无策
+;TranslatedMark 夢魔達の放つ淫気の前に、幻想郷の少女たちはなすすべもなかった
+PRINTFORML 每个人都屈服于甜蜜的快乐，变成了梦魔
+;TranslatedMark 誰も彼もが甘い快楽の前に屈し、夢魔へと成り果てていった
+PRINTFORMW ……不久，魅魔支配了幻想乡全境
+PRINTFORMW  无尽的快感之中，贤者们都堕落为了公用肉便器
+PRINTFORMW  昔日傲气凌人的大妖，也不顾自身身份，全天在淫乱之中成为了最没有贞操与尊严的，下体没有停止流精液的性奴隶
+PRINTFORMW  梦境的管理者哆来咪也堕落于此，成为了最淫荡的，被万人骑的荡妇
+;TranslatedMark ……やがて、サキュバスは幻想郷全土を支配した
+PRINTFORMW 现在幻想乡变成了巨大的乱交会场，男女们在各处随意的交配着，享受着快乐。
+;TranslatedMark 今や幻想郷は巨大な乱交会場となっており、あちこちで男女がまぐわい、快楽を楽しんでいる
+PRINTFORML 贞操这个概念，在那里已经不复存在了……
+;TranslatedMark 貞操という概念など、そこにはもはや存在していない……
+IF CFLAG:MASTER:所属 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_サキュバス) && IS_FEMALE(MASTER)
+	PRINTFORMW 
+	PRINTFORML ……其中也有%ANAME(MASTER)%的身影
+	;TranslatedMark ……その中に、%ANAME(MASTER)%の姿もあった
+	PRINTFORMW 穿着淫荡的衣服的%PRONOUN(MASTER)%和其他的少女们在一起，互相交配着。
+	;TranslatedMark 淫らな衣装に身を包んだ%PRONOUN(MASTER)%は、他の少女たちと一緒になり、交わりあっている
+	PRINTFORMW 对现在的%ANAME(MASTER)%来说，只有黏膜互相摩擦的快感才是真实的，其他的都无所谓
+	;TranslatedMark 今の%ANAME(MASTER)%にとっては粘膜のこすれあう快感のみが真実であり、それ以外などどうでもよかった
+	PRINTFORMW 就这样，一直沉浸在快乐的海洋里……
+	;TranslatedMark そうしてずっと、心地よい快楽の海に溺れ続けるのだ……
+	CALL FUCK_SP(MASTER, "欲望, 奉仕, 性技, 性交, 射精, 精愛, 百合, 接吻, 口淫, Ｃ, Ｖ, Ｍ, Ｖ挿入, Ｖ性交", "童貞喪失, 処女喪失, 接吻喪失, 口内射精", GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_サキュバス), GET_SPERM_ID("夢魔"), "梦魔的阴茎", "夢魔", "梦魔的膣", "強姦")
+ENDIF
+PRINTFORML 
+PRINTFORMW 少女们淫荡的声音，永远回荡在幻想乡……
+;TranslatedMark 少女達の淫らな声が、いつまでも幻想郷に響き続けていた……

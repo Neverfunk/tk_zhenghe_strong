@@ -1,0 +1,73 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_SLAVE_MERCHANT_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_SLAVE_MERCHANT_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_SLAVE_MERCHANT(対象)
+#DIM 対象
+
+PRINTFORML 在領地内巡視的時候、遇到了帯着鎖鏈捆起来的小孩的男人
+PRINTFORML 把他叫過来問話、似乎是奴隸商人
+PRINTFORML 抓住了無依無靠的孤兒打算賣掉
+PRINTFORML 而且竟然直接問道、要不要買奴隸
+
+PRINTL
+CALL ASK_MULTI_JUDGE("花3000金買一人", MONEY >= 3000, "花10000金買下全員", MONEY >= 10000, "不管", 1)
+
+SELECTCASE RESULT
+	CASE 0
+	PRINTFORML 交渉之後、決定買下一人
+	CALL ICPRINT("支付了<3000>金", "L", カラー_注意)
+	MONEY -= 3000
+	
+	IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+		PRINTFORML
+		PRINTFORML 未熟的少女，对于这种事情还一无所知
+		PRINTFORML 就算是命令她脱下衣服时，也只是疑惑的歪了歪头，就毫不犹豫地照做了
+		PRINTFORML 手指贴上她平坦的胸部，陌生的感觉显然吓了少女一跳。她轻轻咬着嘴唇，试图压抑着差点脱口而出的呻吟
+		PRINTFORML %ANAME(対象)%笑了笑，用舌头撬开了她的嘴唇。望着少女睁大的双眼，%ANAME(対象)%什么也没说，只是默默地加大了手部的动作
+		PRINTFORML 新鲜的快感很快就征服了少女的心灵，她不再压抑自己，身体也开始随着%ANAME(対象)%的动作而一起一伏，主动渴求更进一步的快乐
+		PRINTFORMW 看到时机成熟的%ANAME(対象)%也放弃了忍耐，将自己的身体和重叠在了少女身上……
+	ENDIF
+	
+	PRINTFORML
+	PRINTFORMW 迅速把她帯進了自己的房間、盡情享受著少女的身体
+	IF HAS_PENIS(対象)
+		CALL FUCK(対象, "性技, 性交, Ｃ, 射精, Ｖ挿入" + (IS_FEMALE(対象) ? ", Ｂ, Ｖ, 百合" # "") , "童貞喪失, 接吻喪失", 0, "奴隷少女的嘴唇", "", "奴隷少女的膣穴", "和姦")
+	ELSE
+		CALL FUCK(対象, "性技, 性交, Ｃ, Ｂ, Ｍ, 百合 ,接吻", "接吻喪失", 0, "奴隷少女的嘴唇", "", "", "和姦")
+	ENDIF
+	CASE 1
+		PRINTFORML 花了一大筆錢、買下了所有人
+	 	CALL ICPRINT("支付了<10000>金", "L", カラー_注意)
+	 	MONEY -= 10000
+		PRINTFORMW 命令部下把買下的孩子送去了孤兒院
+		IF IS_COUNTRY(CFLAG:対象:所属)
+			FOR LOCAL, 1, MAX_COUNTRY
+				CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:対象:所属, 100, -100)
+			NEXT
+	 		CALL COLOR_PRINTW("這個消息傳開之後、讓勢力的評價提高了", カラー_注意)
+	 	ELSE
+			FOR LOCAL, 1, CHARANUM
+				CFLAG:LOCAL:好感度 += 200
+			NEXT
+			CALL ICPRINT("這個消息傳開之後、讓大家的好感度提高了<200>", "L", カラー_注意)
+		ENDIF
+	CASE 2
+		PRINTFORML 沒有興趣
+		PRINTFORML 由他去了
+ENDSELECT
+RETURN 1

@@ -1,0 +1,167 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_LEWDNESS_CURSE_RATE()
+RETURN 30
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_LEWDNESS_CURSE_DECISION()
+SIF DVAR:淫紋_発生フラグ < 0
+	RETURN 0
+SIF DVAR:淫紋_浸食中キャラID
+	RETURN 0
+RETURN 12 <= DAY
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_LEWDNESS_CURSE_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_LEWDNESS_CURSE
+#DIM 対象
+
+IF DVAR:淫紋_発生フラグ == 0
+	PRINTFORML 有一天在%ANAME(MASTER)%的夢中，惡魔現身了
+	PRINTFORML 那個惡魔低聲說道，要是跟他契約的話能賜予給你強大的力量
+	PRINTFORML 他的話語莫名其妙地充滿說服力…
+	DVAR:淫紋_発生フラグ = 1
+ELSEIF DVAR:淫紋_発生フラグ == 1 && GETBIT(TALENT:MASTER:日常系, 素質_デイリー_淫紋)
+	PRINTFORML 惡魔再度現身
+	PRINTFORML 再次見到惡魔的%ANAME(MASTER)%感到子宮疼痛、將雌犬一樣發情
+	PRINTFORML 見到%ANAME(MASTER)%這副姿態後悪魔滿足地笑著、來回撫摸著下腹部
+	PRINTFORML 在微微震顫的%ANAME(MASTER)%的耳邊強迫做更進一步的契約
+ELSE
+	PRINTFORML 惡魔再度現身
+	PRINTFORML 從腦袋中響起聲音強迫進行契約…
+ENDIF
+PRINTFORMW 怎麼辦？
+IF GETBIT(TALENT:MASTER:日常系, 素質_デイリー_淫紋)
+	CALL ASK_MULTI_JUDGE("進行契約" , 1, "拒絕" , 1, "請侵犯我吧", IS_FEMALE(MASTER))
+ELSE
+	CALL ASK_YN("進行契約", "拒絕")
+ENDIF
+IF RESULT == 1
+	PRINTFORML 不可能接受這種契約
+	PRINTFORML %ANAME(MASTER)%拒絕後悪魔發出彷彿從地底傳來的笑聲
+	PRINTFORMW 告知以後會再來後惡魔周圍浮現出黑霧並消失了
+	RETURN 1
+ELSEIF RESULT == 2
+	PRINTFORML 無法停止疼痛的%ANAME(MASTER)%纏著悪魔要求侵犯自己
+	PRINTFORML 悪魔歪嘴、然後輕輕一笑降到%ANAME(MASTER)%面前
+	PRINTFORML 然後一根空我的肉棒出現在慌張失措的%ANAME(MASTER)%眼前
+	PRINTFORML 紅黑色形狀奇特的肉棒噗通噗通地激烈脈動著
+	PRINTFORMW %ANAME(MASTER)%嗅到到過於濃厚的雄性臭味後感覺到自己的子宮開始排卵、用恍惚的表情親吻肉棒
+	PRINTFORML 
+	PRINTFORML 被悪魔的肉棒深深地插入令%ANAME(MASTER)%像要発狂一樣摇着頭不停嬌喘著
+	PRINTFORML 和悪魔的性愛感受到難以形容的無上快樂、每次突刺都令%ANAME(MASTER)%感覺到理性快要崩潰
+	PRINTFORML 但對於現在的%ANAME(MASTER)%而言感覺非常棒，一心一意地沉溺於令自己發狂的快樂快感之中
+	PRINTFORMW 肉棒哆啾！一聲深入到胎内、令%ANAME(MASTER)%強烈地弓起背高潮了
+	PRINTFORML %ANAME(MASTER)%露出阿黑顏身體微微震顫著、但他完全不在意更激烈地進行活塞運動
+	PRINTFORML 正在高潮的%ANAME(MASTER)%因為肉棒陣激烈地抽插而更強烈地高潮、全身痙攣吐白沫
+	PRINTFORML 強烈的快樂令%ANAME(MASTER)%流淚求饒、已回答%ANAME(MASTER)%請求的是連綿不斷的高潮
+	PRINTFORMW %ANAME(MASTER)%完全成為悪魔的玩具、一晩中身心屈服於他暴力的性愛
+	CALL FUCK_RAPE(MASTER, GET_SPERM_ID("悪魔"), @"悪魔の\@ RAND:2 ? 肉棒 # 唇\@", @"悪魔")
+	PRINTFORML 
+	PRINTFORML 翌日、醒來的%ANAME(MASTER)%因從子宮傳來的強烈快樂而情不自禁地高潮了
+	PRINTFORMW 氣息荒亂地摸摸下腹、感覺裏面充滿了惡魔的精液
+	RETURN 1
+ELSE
+	PRINTFORML 無法抵抗力量的誘惑、%ANAME(MASTER)%進行契約了
+	PRINTFORML 悪魔點頭並說道、作為契約的代價必須獻出一个女人
+	PRINTFORML %ANAME(MASTER)%询问到底是什么意思，但是悪魔只是自顾自的笑着
+	PRINTFORML 那无言的压迫力让我咽了一口口水
+	PRINTFORMW 要選誰？
+	CALL SELECT_CHARA_LIST_ONLY_LOGIC_SEX("LEWDNESS_CURSE", "NONE")
+	対象 = RESULT
+	IF 対象 == -1
+		PRINTFORML ……不、果然不可能接受這種契約
+		PRINTFORML %ANAME(MASTER)%拒絕後悪魔發出彷彿從地底傳來的笑聲
+		PRINTFORMW 告知以後會再來後惡魔周圍浮現出黑霧並消失了
+		RETURN 1
+	ELSE
+		IF 対象 == MASTER
+			PRINTFORMW %ANAME(MASTER)%用震抖的聲音說要獻出自己的身體
+			PRINTFORML 惡魔露出令人毛骨悚然的笑容同意了
+			PRINTFORML 他摸一摸%ANAME(MASTER)%的下腹部後、%ANAME(MASTER)%因為下腹傳來強烈的熱感忍不住按著肚子跪下了
+			PRINTFORML 「已經接受貢品了、這樣契約就成立了」
+			PRINTFORMW 不知所措的%ANAME(MASTER)%想捉住惡魔時、%ANAME(MASTER)%突然感到自己的身體充滿力量！
+		ELSE
+			PRINTFORML ……悪魔的契約。事到如今，真的没问题吗……
+			CALL ASK_YN("相信她", "即便如此也想要力量")
+			IF RESULT == 0
+				PRINTFORML ……相信她不会被魔鬼摆布
+				DVAR:淫紋_純愛フラグ = 1
+			ELSE
+				PRINTFORML 虽然有些不安，但对力量的欲望是无法抑制的……
+			ENDIF
+			PRINTFORMW %ANAME(対象)%的名字告诉悪魔了
+			PRINTFORML 惡魔臉帶滿足的笑容、打了一個響指
+			PRINTFORML 「已經接受貢品了、這樣契約就成立了」
+			PRINTFORMW 不知所措的%ANAME(MASTER)%想捉住惡魔時、%ANAME(MASTER)%突然感到自己的身體充滿力量！
+		ENDIF
+		LOCAL = (100 - ABL:MASTER:武闘) / 6
+		SIF LOCAL <= 0
+			LOCAL = 2
+		ABL:MASTER:武闘 += LOCAL
+		LOCAL:1 = (100 - ABL:MASTER:知略) / 6
+		SIF LOCAL:1 <= 0
+			LOCAL:1 = 2
+		ABL:MASTER:知略 += LOCAL:1
+		LOCAL:2 = (100 - ABL:MASTER:政治) / 6
+		SIF LOCAL:2 <= 0
+			LOCAL:2 = 2
+		ABL:MASTER:政治 += LOCAL:2
+		LOCAL:3 = (100 - ABL:MASTER:防衛) / 6
+		SIF LOCAL:3 <= 0
+			LOCAL:3 = 2
+		ABL:MASTER:防衛 += LOCAL:3
+		CALL COLOR_PRINT(@"%ANAME(MASTER)%的武闘値上升了{LOCAL}！", カラー_オレンジ)
+		PRINTFORML 
+		CALL COLOR_PRINT(@"%ANAME(MASTER)%的防衛値上升了{LOCAL:3}！", カラー_オレンジ)
+		PRINTFORML 
+		CALL COLOR_PRINT(@"%ANAME(MASTER)%的知略値上升了{LOCAL:1}！", カラー_オレンジ)
+		PRINTFORML 
+		CALL COLOR_PRINT(@"%ANAME(MASTER)%的政治値上升了{LOCAL:2}！", カラー_オレンジ)
+		PRINTFORMW 
+		PRINTFORML 惡魔化成黑煙消失了
+		IF 対象 == MASTER
+			PRINTFORMW %ANAME(MASTER)%情緒高漲、意識再次在睡夢之中消散了
+			PRINTFORML 
+			PRINTFORML …翠日、醒來的%ANAME(MASTER)%撫摸自己的下腹部
+			PRINTFORML 沒有任何變化嗎、想起那個時候的灼熱感%ANAME(MASTER)%恐懼地抬頭
+			PRINTFORML 但當%ANAME(MASTER)%壓下不安感從床上起來，並為了換衣服脫掉睡衣
+			PRINTFORMW 在下腹部、悪魔的契約刻印慢慢地顯露……
+			CALL COLOR_PRINT(@"%ANAME(対象)%被刻上淫紋了", カラー_ピンク)
+			PRINTFORMW 
+		ELSE
+			PRINTFORMW %ANAME(MASTER)%情緒高漲、意識再次在睡夢之中消散了
+			PRINTFORML 
+			PRINTFORML …同一時間、%ANAME(対象)%因為下腹部強烈的灼熱感而猛然起床
+			PRINTFORML 滿身汗的%ANAME(対象)%撫摸自己下腹部查看怎麼回事時，剛才的灼熱感就像幻覺一樣消失了
+			PRINTFORMW 疑惑地以為是錯覺的少女重新躺在床上、悪魔的契約刻印慢慢地顯露……
+			CALL COLOR_PRINT(@"%ANAME(対象)%被刻上淫紋了", カラー_ピンク)
+			PRINTFORMW 
+		ENDIF
+		DVAR:淫紋_浸食中キャラID = GET_ID(対象)
+		DVAR:淫紋_浸食値 = 1
+	ENDIF
+ENDIF
+RETURN 1
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_LEWDNESS_CURSE(対象)
+#DIM 対象
+RETURN CFLAG:対象:行動不能状態 != 行動不能_子供 && CFLAG:対象:所属 == CFLAG:MASTER:所属 && !IS_ANIMAL(対象) && CFLAG:対象:捕虜先 == 0 && !IS_MALE(対象) && !GETBIT(TALENT:対象:日常系, 素質_デイリー_淫紋)

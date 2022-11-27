@@ -1,0 +1,135 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_ENCOUNT_ROBBERY_2_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_ENCOUNT_ROBBERY_2_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_ENCOUNT_ROBBERY_2(対象)
+#DIM 対象
+
+PRINTFORML 從小巷里抄近道的時候、背後被刀頂住了
+PRINTFORML 被威脅把值錢的東西都交出來……
+PRINTL
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "知略"))
+
+CALL ASK_MULTI_JUDGE("給錢", 1, "抵抗", 1, "説服他", 1, "獻出身体", IS_FEMALE(対象), "逃走", 1)
+
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORML 生命是最重要的
+		PRINTFORML 老實地給錢了
+		LOCAL = MIN(MONEY, 5000)
+		CALL ICPRINT(@"失去了<{LOCAL}>金", "L", カラー_注意)
+		MONEY -= LOCAL
+	CASE 1
+		PRINTFORML %ANAME(対象)%決定抵抗！
+		IF LIMIT(ABL:対象:武闘, 30, 100) >= RAND:100
+			PRINTFORML 判断無法得手後、強盜逃走了……
+			CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:10 + 5)
+		ELSE
+			PRINTFORML ……但是、反而被強盜打敗了！
+			IF IS_FEMALE(対象)
+				PRINTFORML 憤怒的強盗、打暈了%ANAME(対象)%、帯回了藏身処……
+				CALL TERRITORY_EVENT_ENCOUNT_ROBBERY_2_FUCK(対象)
+			ENDIF
+			PRINTFORML 被強盜用力毆打後、%ANAME(対象)%受傷了
+			CALL ADD_COOLTIME(対象, 3)
+		ENDIF
+	CASE 2
+		PRINTFORML %ANAME(対象)%試著説服強盜！
+		IF LIMIT(ABL:対象:知略, 30, 100) >= RAND:100
+			PRINTFORML 被%ANAME(対象)%説服的強盜、直接離開了……
+			CALL PRINT_ADD_EXP(対象, "知略経験値", RAND:10 + 5)
+		ELSE
+			PRINTFORML ……但是、起到了反效果！
+			IF IS_FEMALE(対象)
+				PRINTFORML 憤怒的強盗、打暈了%ANAME(対象)%、帯回了藏身処……
+				CALL TERRITORY_EVENT_ENCOUNT_ROBBERY_2_FUCK(対象)
+			ENDIF
+			PRINTFORML 被強盜用力毆打後、%ANAME(対象)%受傷了
+			CALL ADD_COOLTIME(対象, 3)
+		ENDIF        
+	CASE 3
+		PRINTFORML 能獻出身体希望能放過自己
+		PRINTFORML 這麼請求後、強盗用品定的眼光打量著%ANAME(対象)%
+		PRINTFORML 是看上眼了吧、他把%ANAME(対象)%帯到了藏身処……
+		CALL TERRITORY_EVENT_ENCOUNT_ROBBERY_2_FUCK(対象)
+	CASE 4
+		PRINTFORML %ANAME(対象)%決定逃走！
+		IF IS_FEMALE(対象)
+			PRINTFORML ……但是、被抓住了！
+			PRINTFORML 憤怒的強盗、打暈了%ANAME(対象)%、帯回了藏身処……
+			CALL TERRITORY_EVENT_ENCOUNT_ROBBERY_2_FUCK(対象)
+			PRINTFORML 被強盜用力毆打後、%ANAME(対象)%受傷了
+			CALL ADD_COOLTIME(対象, 3)
+		ENDIF
+ENDSELECT
+
+RETURN 1
+;想法 → 被救了、受害者少女、在马车上
+@TERRITORY_EVENT_ENCOUNT_ROBBERY_2_FUCK(対象)
+#DIM 対象
+
+PRINTFORML 
+
+IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+	PRINTFORMW 迷迷糊糊醒来的%ANAME(対象)%本以为会遭到侵犯，却发现等待她的是一只友好的手
+	PRINTFORML 好像这个强盗之前也诱拐过别的少女，所以被村民请来冒险家给解决掉了
+	PRINTFORML 被当成受害者的%ANAME(対象)%，和另一位受害者的少女一起被送上马车，向村子的方向驶去
+	PRINTFORML 少女似乎是遭到了强盗非人的虐待，两眼几乎完全失去了神采，一被送上马车，就不发一语地缩在了墙角
+	PRINTFORMW 少女可怜的样子激起了%ANAME(対象)%的同情，%ANAME(対象)%悄悄挪到她的身边，试图用身体的温暖安慰她的心灵……
+	PRINTFORML
+	PRINTFORML 一只手轻轻抱住少女的肩膀，少女的转过头看了%ANAME(対象)%一眼，随即立刻回到了原来的状态
+	PRINTFORMW %ANAME(対象)%试着向她搭话，但少女始终没有回应，%ANAME(対象)%苦闷着怎么让她接受自己
+	PRINTFORML 马车忽然猛地颠簸了一下，%ANAME(対象)%手碰巧擦过少女的胸部，她娇小的身体微微颤抖了一下
+	PRINTFORMW 看来她身上还残留着被调教时的感觉，想到这点的%ANAME(対象)%决定用快乐打开她的心扉
+	PRINTFORML
+	PRINTFORML %ANAME(対象)%温柔地抚摸起少女的乳房，充满弹性的肌肤吸引着%ANAME(対象)%的手掌
+	PRINTFORMW 被充分调教过的少女对刺激异常敏感，没过多久她的脸颊就染上了一片薄红
+	PRINTFORML %ANAME(対象)%的指尖偶尔扫过她渐渐挺起的乳头，几声细微的呻吟从少女嘴边泄漏出来
+	PRINTFORML 和强盗粗暴的侵犯完全不同，%ANAME(対象)%的手指十分轻柔，莫名给她一种安心的感觉
+	PRINTFORMW 在%ANAME(対象)%温和的刺激之下，少女不由自主地向她身上贴了过来
+	PRINTFORML
+	PRINTFORML 看到自己的努力起了效果，感到一丝成就感的%ANAME(対象)%将手慢慢向少女的股间伸去
+	PRINTFORMW 少女起初对此还有一些抗拒，%ANAME(対象)%的指尖刚一碰到她红肿的下体，少女猛地缩了缩身子，像是要逃开%ANAME(対象)%的手
+	PRINTFORML %ANAME(対象)%在耳边轻声安慰着她，一点点卸下了少女的防备，但她的身体还是显得有些僵硬
+	PRINTFORML 指腹慢慢按压着秘所的周围，一点点向缝隙处逼近。跟随着%ANAME(対象)%手指的动作，少女的身体因紧张而在%ANAME(対象)%怀中扭动着
+	PRINTFORMW 指尖碰到了小小的阴蒂，突如其来的刺激让少女弓起了身体。粘稠的液体从微张的裂缝中缓缓流出，逐渐沾湿了少女的衣角
+	PRINTFORML 无法抑制喉中溢出的呻吟，少女的喘息回荡在狭窄的车厢里，即使在在马车行驶时吵闹的噪音下也能听得一清二楚
+	PRINTFORML 手指沿着秘缝上下滑动着，不时磨蹭一下柔软的穴口，%ANAME(対象)%逐渐加快了手上的动作
+	PRINTFORMW 少女敏感的身体无法承受如此强烈的刺激，在一阵阵袭来的快感中无助地颤抖着，眼角也渐渐浮现出了点点泪花
+	PRINTFORML 突然，少女向后绷紧了身子，浑身的肌肉也因猛地收缩而抽搐了起来，一道晶莹的爱液从她的股间喷出，溅满了%ANAME(対象)%的手掌
+	PRINTFORMW 高潮的快感过去之后，少女无力地倒在了%ANAME(対象)%身上，胸腔因渴求空气而上下剧烈起伏着
+	PRINTFORML %ANAME(対象)%把少女抱在怀里，温柔地抚摸着少女的头发，等待她从绝顶的余波中恢复
+	PRINTFORML 过了一会儿，少女终于恢复了过来，抬起脑袋望向%ANAME(対象)%。让%ANAME(対象)%感到欣慰的是，她的眼神这次变得明亮了许多，嘴角也露出一抹腼腆的微笑
+	PRINTFORMW 可被%ANAME(対象)%挑起情欲的少女，身体上的热度却丝毫没有减退。她盯着%ANAME(対象)%的双眼，不由自主地摩擦起了双腿……
+	PRINTFORMW 没有办法，%ANAME(対象)%只能再一次满足起少女的欲望。到马车停在村口那刻为止，二人的身体始终没有片刻分离……
+	CALL FUCK(対象, "欲望, 奉仕, 性技, Ｃ, Ｂ, Ｍ, 百合", "接吻喪失",0, "村女的嘴唇", "", "","安抚心灵时的意外")
+	PRINTFORML
+	PRINTFORML 下车之后，不知道为什么，少女始终躲在%ANAME(対象)%，不让任何人跟她靠近
+	PRINTFORMW 没有办法，%ANAME(対象)%只好亲自把她送回了家。在少女家人的感谢声中离开时，少女也满脸通红地对她说了声谢谢
+ELSE
+	PRINTFORMW 在強盗的藏身処、%ANAME(対象)%正被他調教著
+	PRINTFORML 被不断揉搓著%STR_BODY("胸：感触", 対象)%、拍打著%STR_BODY("臀部", 対象)%
+	PRINTFORML 被挿入了数次的%STR_BODY("陰唇：処女確認：時間経過", 対象)%、已經合不上了
+	PRINTFORML 屈服于暴力和快感的%ANAME(対象)%、自己扭動腰肢向男人索求著
+	PRINTFORML 為了表揚%ANAME(対象)%的主動求歡、男人在%ANAME(対象)%的膣内再一次射精了……
+	PRINTFORML 
+	CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, Ｖ性交, Ａ性交, 口淫", "処女喪失, Ａ処女喪失, 接吻喪失, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("強盗"), @"強盗的\@RAND:2 ? 肉棒 # 嘴唇\@", "強盗", "","ねぐらでの調教")
+	PRINTFORML 
+	PRINTFORML 最後總算是逃出去了、但是身体已經完全無法忘記那快感了
+ENDIF
+

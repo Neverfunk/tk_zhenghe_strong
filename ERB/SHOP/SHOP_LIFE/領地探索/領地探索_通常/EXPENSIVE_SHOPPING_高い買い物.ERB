@@ -1,0 +1,100 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_EXPENSIVE_SHOPPING_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_EXPENSIVE_SHOPPING_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_EXPENSIVE_SHOPPING(対象)
+#DIM 対象
+
+PRINTFORML 因為有新到的武器、%ANAME(対象)%去了店裡
+PRINTFORML 雖然発現了易於使用的武器、但是價格有點高
+CALL ICPRINT("説是賣<5000>金……", "L", カラー_注意)
+PRINTFORML
+PRINTFORML 所持金:{MONEY}
+CALL ASK_MULTI("払う", "放棄", "口で払う", "身体で払う")
+
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORML 人身安全是無可代替的
+		PRINTFORMW 決定付錢
+		CALL ICPRINT("金<5000>を支払った", "L", カラー_注意)
+		CALL PRINT_ADD_EXP(対象, "防衛経験値", 10 + RAND:5)
+	CASE 1
+		PRINTFORML 價格實在抬高了
+		PRINTFORML 決定放棄
+	CASE 2
+		PRINTFORML 能讓我用嘴來支付麼……
+		PRINTFORMW 店主目不轉睛地頂著%ANAME(対象)%看了一會、然後把%ANAME(対象)%帯到了店的最裡面
+		PRINTFORML 
+		IF IS_MALE(対象) || RAND:2 || (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+			PRINTFORMW %ANAME(対象)%発出嗶咭嗶咭的聲音、舔舐著女店主的秘唇
+			PRINTFORML 每當活動舌頭時、雌性的味道都會在口中擴散、讓頭陣陣発暈
+			PRINTFORML 雖然最開始只是為了交易而已、但是不知不覺間也変得入迷了
+			PRINTFORMW 店主高聲嬌喘著潮吹了、%ANAME(対象)%閉著眼睛被噴了一臉……
+			CALL FUCK(対象, "欲望, 性技, 奉仕, 口淫" + (IS_FEMALE(対象) ? ",百合" # ""), "接吻喪失", 0, "店主の秘貝", "", "", "売春")
+		ELSE
+			PRINTFORMW %ANAME(対象)%発出啾嚕啾嚕的聲音、嗍著店主的肉棒
+			PRINTFORML 每當用嘴唇捋動肉竿時、雄性的味道都會在肺部擴散、讓頭陣陣発暈
+			PRINTFORML 雖然最開始只是為了交易而已、但是不知不覺間也変得入迷了
+			PRINTFORMW 店主一聲低吟、在%ANAME(対象)%的口中射出了精液、%ANAME(対象)%露出迷離的眼神把精液全呑了下去……
+			CALL FUCK(対象, "欲望, 性技, 奉仕, 口淫, 精愛", "接吻喪失, 口内射精", 0, "店主的肉棒", "", "", "売春")
+			PRINTFORML 
+			IF ABL:対象:性技 + ABL:対象:奉仕 > RAND:8
+				PRINTFORML %ANAME(対象)%的奉仕讓店主很満意
+				PRINTFORMW 把武器白送給了%ANAME(対象)%
+				CALL PRINT_ADD_EXP(対象, "防衛経験値", 15)
+			ELSE
+				PRINTFORML %ANAME(対象)%的奉仕完全沒有讓店主滿意
+				PRINTFORMW 要求被拒絕了……
+			ENDIF
+		ENDIF
+	CASE 3
+		PRINTFORML 願意用身体來支付……
+		IF (HAS_PENIS(対象) && RAND:2) || IS_MALE(対象)
+			PRINTFORMW 女店主一臉驚訝的樣子、面紅耳赤地打量著%ANAME(対象)%的身体、然後帯到了店的最裡面
+			PRINTFORML 
+			PRINTFORMW 店主的嬌声在不断回響
+			PRINTFORML %ANAME(対象)%從後面挿入了店主、前後晃動著腰
+			PRINTFORML 二人身体間的相性非常好、已經交合了好幾次
+			PRINTFORMW 用力的揉搓著那顫動的乳房、她的膣穴也緊緊的收縮著
+			PRINTFORMW 無法忍耐的%ANAME(対象)%射精的時候、店主也弓著背高潮了……
+			CALL FUCK(対象, "欲望, 性交, 奉仕, 性技, Ｃ, 射精" + (IS_FEMALE(対象) ? ", 百合, Ｂ, Ｖ" # ""), "接吻喪失, 童貞喪失", 0, @"店主的\@ RAND:2 ? 嘴唇 # 秘貝\@", "", "店主的膣穴", "売春")
+		ELSEIF RAND:2 || (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+			PRINTFORMW 女店主一臉驚訝的樣子、面紅耳赤地打量著%ANAME(対象)%的身体、然後帯到了店的最裡面
+			PRINTFORML 
+			PRINTFORMW 兩個女人的嬌声在不断回響
+			PRINTFORML %ANAME(対象)%和店主的身體重疊再一次、分享著快楽
+			PRINTFORML 互相接觸摩擦著%STR_BODY("胸：感度", 対象)%や%STR_BODY("陰唇：欲情", 対象)%、已經高潮了好幾次
+			PRINTFORMW %ANAME(対象)%嘴唇微張的時候、店主自己主動親吻上去伸出了舌頭
+			PRINTFORMW 兩個人又一起、同時弓著背高潮了……
+			CALL FUCK(対象, "欲望, 性交, 奉仕, 性技, Ｂ, Ｖ, Ｍ, Ｃ, 百合, 接吻", "接吻喪失", 0, @"店主的\@ RAND:2 ? 嘴唇 # 秘貝\@", "", "", "売春")
+		ELSE
+			PRINTFORMW 店主一臉驚訝的樣子、目不轉睛地盯著%ANAME(対象)%的身体、然後帯到了店的最裡面
+			PRINTFORML 
+			PRINTFORMW %ANAME(対象)%的嬌声在不断回響
+			PRINTFORMW 店主從後面挿入了%ANAME(対象)%的%STR_BODY("膣：処女確認：時間経過：Ｖ挿入：絶頂", 対象)%、前後晃動著腰
+			PRINTFORMW 二人身体間的相性非常好、已經用兩個穴交合了好幾次
+			PRINTFORMW 每次被玩弄%STR_BODY("胸：性交：後背位", 対象)%和%STR_BODY("アナル：感度")%、%ANAME(対象)%都會受不了的発出嬌喘　
+			PRINTFORMW 不久後店主在膣内盡情射精的時候、讓%ANAME(対象)%全身顫抖著高潮了……
+			CALL FUCK(対象, "欲望, 性交, 奉仕, 性技, Ｂ, Ｖ, Ｍ, Ｃ, Ａ, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精", GET_SPERM_ID("店主"), @"店主的\@ RAND:2 ? 嘴唇 # 肉棒\@", "店主", "", "売春")
+		ENDIF
+		PRINTFORML 
+		PRINTFORMW 店主対%ANAME(対象)%的身体感到非常滿意
+		PRINTFORMW 免費把武器送給了%ANAME(対象)%
+		CALL PRINT_ADD_EXP(対象, "防衛経験値", 15)        
+ENDSELECT
+
+RETURN 1

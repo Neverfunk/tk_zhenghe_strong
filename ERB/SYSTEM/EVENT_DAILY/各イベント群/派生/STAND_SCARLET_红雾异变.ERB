@@ -1,0 +1,398 @@
+﻿;---------------------
+;対応するデイリーのDISABLEを返す。设定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_STAND_SCARLET_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("STAND")
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_STAND_SCARLET_DECISION()
+
+RETURN DVAR:觉醒_替身 > 0 && RAND:100 < 10 && DVAR:异变_红雾 == 1 && DAY > 100
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_STAND_SCARLET
+#DIM 判定値
+
+PRINTFORMW	「真是个平静的下午！！」好不容易从文件地狱中摆脱出来的%ANAME(MASTER)%，一边舒展着身体，一边望着窗外感叹道
+PRINTFORML	------------------------------------------------
+PRINTFORMW	------------------------------------------------
+PRINTFORMW	「幻想乡正是吾等追寻之地，人类、妖怪的命运皆握于吾手，黑夜将于此处降临.....!」
+PRINTFORMW	「一切如您所愿，大小姐!」
+PRINTFORML	------------------------------------------------
+PRINTFORMW	------------------------------------------------
+PRINTFORMW	「%ANAME(MASTER)%!灵梦！异变！发生异变了da☆ze!!」
+PRINTFORMW	随着天空逐渐被不知是红雾还是云朵的东西笼罩，%ANAME(MASTER)%意识到平静的生活正在离自己远去。
+PRINTFORML	------------------------------------------------
+PRINTFORMW	------------------------------------------------
+PRINTFORMW	「那么，异变的源头就是这座突然出现在湖边的的洋馆了吧。不过.......好大啊，这些该死的有钱人」灵梦一反常态，突然充满了干劲。
+PRINTFORMW	「那我们就冲进去把幕后黑手好好揍一顿da☆ze!!不过...确实挺大，不如我们分头行动吧，灵梦，你去哪边？」
+PRINTFORMW	「我？哪里都一样了啊！」
+PRINTFORMW	「那么，%ANAME(MASTER)%，你先选一下吧da☆ze!」
+PRINTFORMW	确实，如此庞大的一座洋馆，还是分开探索比较有效率
+PRINTFORMW	那么该从哪入手呢
+CALL ASK_MULTI_JUDGE("先审问一下门口那个似乎在睡觉的门卫吧", 0,"从窗户潜入", 0,"从正门突入", 1,"一般财宝总是藏在地下", 0,"天台离红雾最为接近", 1)
+IF RESULT == 2
+	PRINTFORMW	「那么就比一比谁先解决这场异变吧，行动da☆ze!!」
+	PRINTFORMW	既然选择了正面突破，%ANAME(MASTER)%毫不掩饰地推开了洋馆的大门，一时间吱吱呀呀的声音掩去了其余二人的动静
+	PRINTFORMW	%ANAME(MASTER)%谨慎地扫视着门内的大厅，和奢华的外表一样，洋馆内部的装饰也十分考究
+	PRINTFORMW	目光在二楼平台处的一个人影处停下，古怪的姿势让人生疑
+	PRINTFORMW	是敌人吗？虽然由于阴影的缘故无法看清，但那身影却带着某种古怪的魅力，让人不得不心生恐惧
+	PRINTFORMW 「哼，恭喜你啊，巫女的同伙，居然能突破美玲，平安无事地来到这里」
+	PRINTFORML 她到底在说些什么，路上明明并未受到阻拦，美玲又是谁。无视了心中的不安，%ANAME(MASTER)%直视向那道身影
+	PRINTFORMW 「给你一个机会吧，退下两阶台阶，就放你一马；而反过来，你想领死的话，就向前登上楼梯吧」
+	CALL ASK_YN("登上楼梯", "退下台阶")
+	IF RESULT == 1
+		PRINTFORMW 「是嘛是嘛，%ANAME(MASTER)%，呵呵，你还是走下去了啊，你害怕了啊」
+		PRINTFORMW 这个敌人不是我所能够对付的，还是暂时退却吧，反正还有灵梦她们在
+		CALL COLOR_PRINTW(@"%ANAME(MASTER)%离开了洋馆", カラー_警告)
+		PRINTFORMW 不久之后，灵梦她们果然解决的异变，因此%ANAME(MASTER)%被她们笑话了好几天
+		DVAR:异变_红雾 = 2
+		RETURN 1
+	ENDIF
+	PRINTFORMW 「是嘛是嘛，%ANAME(MASTER)%，呵呵，你还是走下去了啊，你还是想成为我们的同伴是吗」
+	PRINTFORML 怎么回事？%ANAME(MASTER)%诧异地发现原本应该登上楼梯的自己居然退下了台阶
+	PRINTFORMW 「怎么了，你好像动摇了，%ANAME(MASTER)%。动摇，不就意味着你感到恐惧了吗。」
+	PRINTFORMW 「还是说，你虽然心里想着必须爬上台阶，但因为太过恐惧,所以下意识地退了下去吗」
+	PRINTFORML 不可能，我刚刚应该是向上才对，%ANAME(MASTER)%再次试图登上台阶，但却再一次失败了
+	PRINTFORMW 「%ANAME(MASTER)%，你有想过人类是为什么而活的吗。所有人都是为了克服恐惧，获得安心而活着。」
+	PRINTFORMW 「追寻安心，才是人类活着的最终目的。那么，被大小姐统治，到底哪里会让你感到不安呢」
+	PRINTFORMW 「明明被统治的话，就能轻松获得压倒一切的安心感」
+	PRINTFORMW 「但像你这样抱着必死地觉悟来挑战我，这难道不会让你感到不安吗。何不抛弃博丽的巫女，来获得永远地安心感呢」
+	CALL ASK_YN("跳上平台", "退下台阶")
+	IF RESULT == 1
+		PRINTFORMW 「是嘛是嘛，%ANAME(MASTER)%，呵呵，你还是走下去了啊，你害怕了啊」
+		PRINTFORMW 这个敌人不是我所能够对付的，还是暂时退却吧，反正还有灵梦她们在
+		CALL COLOR_PRINTW(@"%ANAME(MASTER)%离开了洋馆", カラー_警告)
+		PRINTFORMW 不久之后，灵梦她们果然解决的异变，因此%ANAME(MASTER)%被她们笑话了好几天
+		DVAR:异变_红雾 = 2
+		RETURN 1
+	ENDIF	
+	PRINTFORMW 「那就没办法了，你只能去死了，%ANAME(MASTER)%」
+	PRINTFORML 该怎么办，对方拥有着神秘的力量，应该怎么战斗
+	CALL ASK_YN("使用法术", "近身格斗")
+	IF RESULT == 1
+		PRINTFORMW 不管她的能力是什么，我所要做的就是用这双拳头狠狠地揍她
+		PRINTFORMW 「哼，贫弱贫弱，幻世「The World」」
+		PRINTFORML -----------------------------------
+		PRINTFORMW -----------THE----WORLD------------
+		PRINTFORML -----------------------------------
+		PRINTFORMW 「这就是我的能力，不过，对于时间停止的你来说，是既无法看到，也无法感受的吧」
+		PRINTFORMW 「去死吧，%ANAME(MASTER)%」
+		PRINTFORML 在停止的时间中，咲夜轻易地躲过了%ANAME(MASTER)%的攻击，并丢出了大量飞刀
+		PRINTFORMW 「你就连自己即将死去的事都注意不到，也不可能知道到底发生了什么。」
+		PRINTFORMW 「倒数一秒」
+		PRINTFORMW 「零」
+		PRINTFORML -----------------------------------
+		PRINTFORMW -----------THE----WORLD------------
+		PRINTFORML -----------------------------------	
+		PRINTFORML 面对突然包围了自己的银制飞刀，%ANAME(MASTER)%虽然勉强逃了出来，但也身负重伤
+		CALL ADD_COOLTIME(MASTER, 5)
+		PRINTFORMW 不久之后，灵梦她们解决的异变，因此%ANAME(MASTER)%被她们笑话了好几天
+		DVAR:异变_红雾 = 2
+		RETURN 1
+	ENDIF
+	PRINTFORML 在对面能力不明确的情况下，近身战斗无疑并不明智
+	PRINTFORMW 「你？再稍微让我见识一下吧.........最终的回合」
+	PRINTFORML 来不及了，只能在咲夜靠近前尽量准备咒语了
+	判定値 = ABL:MASTER:妖術
+	IF 判定値 < 90
+		PRINTFORMW 「嗯，结界？」
+		PRINTFORML 过于自信的咲夜果然中了%ANAME(MASTER)%预先埋设下结界
+		PRINTFORML 碰到就会自动触发的结界，已经充满了咲夜周围半径20米的空间，咲夜的动作已经可以清楚的掌握到了
+		PRINTFORMW 「蠢材，让你见识一下，我真正的能力，可是名副其实的支配世界的能力啊，幻世「The World」」
+		PRINTFORML -----------------------------------
+		PRINTFORMW -----------花京院处刑曲------------
+		PRINTFORML -----------------------------------
+		PRINTFORMW 「这就是我的能力，不过，对于时间停止的你来说，是既无法看到，也无法感受的吧」
+		PRINTFORMW 「去死吧，%ANAME(MASTER)%」
+		PRINTFORML 在停止的时间中，咲夜丢出了大量飞刀
+		PRINTFORMW 「你就连自己即将死去的事都注意不到，也不可能知道到底发生了什么。」
+		PRINTFORMW 「倒数一秒」
+		PRINTFORMW 「零」
+		PRINTFORML -----------------------------------
+		PRINTFORMW -----------花京院处刑曲------------
+		PRINTFORML -----------------------------------
+		PRINTFORML 面对突然包围了自己的银制飞刀，%ANAME(MASTER)%虽然勉强逃了出来，但也身负重伤
+		CALL ADD_COOLTIME(MASTER, 5)
+		PRINTFORMW 不久之后，灵梦她们解决的异变，因此%ANAME(MASTER)%被她们笑话了好几天
+		DVAR:异变_红雾 = 2
+		RETURN 1
+	ENDIF
+	PRINTFORMW 「嗯，结界？」
+	PRINTFORML 过于自信的咲夜果然踏入了%ANAME(MASTER)%预先埋设下结界
+	PRINTFORML 碰到就会自动触发的结界，已经充满了咲夜周围半径20米的空间，咲夜的动作已经可以清楚的掌握到了
+	PRINTFORMW 「蠢材，让你见识一下，我真正的能力，可是名副其实的支配世界的能力啊，幻世「The World」」
+	PRINTFORML -----------------------------------
+	PRINTFORMW -----------花京院处刑曲------------
+	PRINTFORML -----------------------------------
+	PRINTFORMW 「这就是我的能力，不过，对于时间停止的你来说，是既无法看到，也无法感受的吧」
+	PRINTFORMW 「去死吧，%ANAME(MASTER)%」
+	PRINTFORML 在停止的时间中，咲夜轻易地躲过了%ANAME(MASTER)%的攻击，并丢出了大量飞刀
+	PRINTFORMW 「你就连自己即将死去的事都注意不到，也不可能知道到底发生了什么。」
+	PRINTFORMW 「倒数一秒」
+	PRINTFORMW 「时间开始流动」
+	PRINTFORML -----------------------------------
+	PRINTFORMW -----------花京院处刑曲------------
+	PRINTFORML -----------------------------------
+	PRINTFORMW 「纳尼？」
+	PRINTFORML 已经被飞刀刺穿的身体变成了符咒飞向咲夜
+	IF DVAR:觉醒_替身 == 2
+		PRINTFORML 看着被飞刀撕碎的符咒人偶，%ANAME(MASTER)%疑惑着
+		PRINTFORML 结界的感应功能告诉他，在一瞬间咲夜同时做出了多次投掷飞刀的动作
+		PRINTFORML 为什么不是一次次，为什么中间没有时间差
+		PRINTFORML 连万分之一秒的间隔都没有，就同时扔出了这么多飞刀？
+		PRINTFORML 为什么？连半点时间差都没有
+		PRINTFORML 为什么，是同时
+		PRINTFORML 为什么？连半点时间差都没有
+		PRINTFORML 时间差......
+		PRINTFORML 时间.....
+		PRINTFORML 「时间」
+		PRINTFORML 居然是这样吗，也只有这个可能了
+		PRINTFORMW 咲夜的能力竟然是停止「时间」吗
+		PRINTFORMW 「嘛，现在你的符咒也没了，你还有时间再来一次吗」解决了干扰的符咒后，咲夜讥讽道
+		PRINTFORMW 「哼，就算是能够停止时间，。」%ANAME(MASTER)%一边思考着对策，一边答道
+		PRINTFORML 「你已经理解我的能力了啊，那我就稍微表扬你一下吧。不过那又如何，理解了你又能做什么」
+		PRINTFORML 「接下来，%ANAME(MASTER)%，就轮到你了」咲夜撕碎了手中的最后一张符咒
+		PRINTFORML 「吼，居然朝我走过来了。」
+		PRINTFORMW 「你不转身逃走 反而还在靠近我咲夜啊，难得你能破解了我的能力之谜，却还做出如此不智的行为」
+		PRINTFORMW 「你和我一样，不也只是个人类嘛」%ANAME(MASTER)%放出了自己的替身白金之星
+		PRINTFORMW 「吼吼，既然如此，那不妨再走近点。」
+		PRINTFORML 两人逐渐接近	
+		PRINTFORML 「这次真的是最后一次停止时间了，我会在接下来的静止时间里，一口气解决你。」
+		PRINTFORMW 幻世「The World」
+		PRINTFORML -----------------------------------
+		PRINTFORMW -----------THE----WORLD------------
+		PRINTFORML -----------------------------------
+		PRINTFORML 「飞刀的效果有限，不如.....」咲夜并未向之前一样向%ANAME(MASTER)%丢出飞刀,反而将视线转向了天花板
+		PRINTFORML 她不断地向上方丢出飞刀
+		PRINTFORML 随着不断受到攻击，巨大的吊灯渐渐无法支撑自己的重量，从上方坠落下来
+		PRINTFORMW 「这下你就逃不掉了」看着%ANAME(MASTER)%完全被吊灯掩埋，咲夜笑道
+		PRINTFORML 「成了，终于结束了」
+		PRINTFORML 「%ANAME(MASTER)%终于败在了我的「The World」的手下」
+		PRINTFORML 「这下就没有人能干扰大小姐的计划了，大小姐终将统治幻想乡，在她的威严面前，俯首称臣吧」
+		PRINTFORMW 「接下来就去解决其他入侵者吧，时间开始流动」
+		PRINTFORML 「怎么了，我身体的动作....变迟缓了？」
+		PRINTFORML 「不 ...不对，不是动作变迟缓了，而..而是动不了了，怎..怎么可能」
+		PRINTFORMW 「身...身体完全动不了了」
+		PRINTFORML 「是我停止了时间，就在你结束的那一刹那，也逃了出来」%ANAME(MASTER)%出现在咲夜的身后
+		CALL COLOR_PRINTL(@"%ANAME(MASTER)%的替身Star Platinum（白金之星）成长为Star Platinum · The World（白金之星·世界）", カラー_注意)
+		PRINTFORMW 「呀嘞呀嘞daze，真是够了，接下来我打倒你连一秒钟时间也不用」
+		PRINTFORMW 「怎...怎么可能，你竟然停止了时间，在时间开始流动的瞬间」
+		PRINTFORMW 「欧拉欧拉欧拉欧拉欧拉欧拉欧拉欧拉欧拉欧拉」%ANAME(MASTER)%的替身Star Platinum（白金之星）使出了连打
+		PRINTFORMW 「时间开始流动」
+		PRINTFORML -----------------------------------
+		PRINTFORMW ----STAR-PLATINUM-THE-WORLD--------
+		PRINTFORML -----------------------------------	
+		CALL COLOR_PRINTL(@"十六夜咲夜再起不能", カラー_注意)
+		CALL SKILL_LEARN_BY_NAME(MASTER, スキル_ジャンル_PERSONAL, NO:MASTER, "白金之星·世界")	
+	ELSE
+		PRINTFORMW 「怎么了，我身体的动作....变迟缓了？」
+		PRINTFORMW 「呀嘞呀嘞daze」%ANAME(MASTER)%的身影在咲夜旁边显现
+		PRINTFORMW 「接招吧，半径20米空间的八方鬼缚阵！」随着%ANAME(MASTER)%的宣告，原本的结界终于现出了全貌
+		PRINTFORMW 「我不能动了，不....不可能，身..身体完全不能动了」
+		PRINTFORMW 「咲夜，你失败的原因只有一个.....一个很简单的原因」
+		PRINTFORMW 「%ANAME(MASTER)%，你小子......」咲夜想要再次发动能力，但在结界的作用下完全无法动弹
+		PRINTFORMW 「因为你惹火了我」
+		PRINTFORMW 「我有的只是很简单的想法，胜利，然后为大小姐献上一切」原以为被完全束缚的咲夜，突然挣扎着丢出了飞刀
+		PRINTFORMW 「呀嘞呀嘞daze，真是够了，接下来我打倒你连一秒钟时间也不用」
+		PRINTFORML 轻松闪过咲夜的攻击，%ANAME(MASTER)%使用了名为Star Platinum的符卡
+		PRINTFORMW 「不可能，我咲夜...!!!」
+		CALL COLOR_PRINTL(@"十六夜咲夜再起不能", カラー_注意)
+		LOCAL = (150 - ABL:MASTER:武闘) / 6
+		SIF LOCAL <= 0
+			LOCAL = 2
+		ABL:MASTER:武闘 += LOCAL
+		LOCAL:1 = (150 - ABL:MASTER:知略) / 6
+		SIF LOCAL:1 <= 0
+			LOCAL:1 = 2
+		ABL:MASTER:知略 += LOCAL:1
+		LOCAL:2 = (150 - ABL:MASTER:政治) / 6
+		SIF LOCAL:2 <= 0
+			LOCAL:2 = 2
+		ABL:MASTER:政治 += LOCAL:2
+		LOCAL:3 = (150 - ABL:MASTER:防衛) / 6
+		SIF LOCAL:3 <= 0
+			LOCAL:3 = 2
+		ABL:MASTER:防衛 += LOCAL:3
+		CALL COLOR_PRINT(@"%ANAME(MASTER)%的武闘値上升了{LOCAL}！", カラー_オレンジ)
+		PRINTFORML 
+		CALL COLOR_PRINT(@"%ANAME(MASTER)%的防衛値上升了{LOCAL:3}！", カラー_オレンジ)
+		PRINTFORML 
+		CALL COLOR_PRINT(@"%ANAME(MASTER)%的知略値上升了{LOCAL:1}！", カラー_オレンジ)
+		PRINTFORML 
+		CALL COLOR_PRINT(@"%ANAME(MASTER)%的政治値上升了{LOCAL:2}！", カラー_オレンジ)
+	ENDIF
+	PRINTFORMW 「接下来得去找灵梦她们了」整理了因战斗而凌乱的服装后，%ANAME(MASTER)%再次出发
+	PRINTFORML -----------------------------------
+	PRINTFORMW -------------姐妹战斗中------------
+	PRINTFORML -----------------------------------	
+	PRINTFORMW 「梦想封印！！」
+	PRINTFORMW 「这就是博丽的巫女的力量吗！！」
+	PRINTFORMW 「姐姐大人！！」
+	PRINTFORMW 在巨大的阴阳玉的力量下，永远鲜红的幼月的野望与红魔馆一起被摧毁了
+	PRINTFORMW 「那么....作为庆祝，来开宴会吧」
+	CFLAG:NAME_TO_CHARA("咲夜"):好感度 += 200 + RAND:200
+	CALL COLOR_PRINTL(@"咲夜好感度增加", カラー_注意)
+	CFLAG:NAME_TO_CHARA("霊夢"):好感度 += 200 + RAND:200
+	CALL COLOR_PRINTL(@"霊夢好感度增加", カラー_注意)	
+	CFLAG:NAME_TO_CHARA("魔理沙"):好感度 += 200 + RAND:200
+	CALL COLOR_PRINTL(@"魔理沙好感度增加", カラー_注意)	
+	CALL COLOR_PRINTL(@"红雾异变---结束", カラー_注意)
+	CALL COLOR_PRINTL(@"To be continued", カラー_注意)
+	DVAR:异变_红雾 = 2
+ENDIF
+	
+IF RESULT == 4
+	PRINTFORMW	「那么就比一比谁先解决这场异变吧，行动da☆ze!!」
+	PRINTFORMW	与其他两人不同，%ANAME(MASTER)%直接来到了高空
+	PRINTFORMW	通过直接俯视整座洋馆，%ANAME(MASTER)%很快确定了红雾的源头---一座奢华的天台
+	PRINTFORMW	「傻瓜才按部就班地刷副本呢，看我先去把这个打扰我平静生活地家伙揍一顿!!」
+	PRINTFORML -----------------------------------
+	PRINTFORMW -------------降落中------------
+	PRINTFORML -----------------------------------	
+	PRINTFORMW	「上天注定的命运任谁都无法违抗」
+	PRINTFORMW	「等待你们的下场只有毁灭」	
+	PRINTFORMW	幕后黑手并不难找，实际上，在%ANAME(MASTER)%靠近后就不断说着中二台词的她很难让人忽略
+	PRINTFORMW	要不要打断她呢？	
+	CALL ASK_YN("打断她", "听她说完")	
+	IF RESULT == 0
+		PRINTFORMW 「呀卡吗洗，我听到女人吵闹就不爽」
+		PRINTFORMW 「唯有......诶！？」似乎被突如其来的话吓了一跳，蕾米莉亚发出了可爱的声音
+		CFLAG:NAME_TO_CHARA("レミリア"):従属度 += 100 + RAND:200
+		CALL COLOR_PRINTL(@"蕾米莉亚从属度增加", カラー_注意)
+	ELSE
+		PRINTFORMW 还是先听她说完吧，，说不定可以得到什么线索
+		PRINTFORMW	「唯有我才能伫立于永恒的巅峰」	
+		PRINTFORMW	「在命中注定的世界里 咏唱哀歌吧」
+		PRINTFORMW 在她说完后，全场一片寂静
+		PRINTFORMW ...............
+		PRINTFORMW .........
+		PRINTFORML ....
+		CFLAG:NAME_TO_CHARA("レミリア"):好感度 += 100 + RAND:200
+		CALL COLOR_PRINTL(@"蕾米莉亚好感度增加", カラー_注意)
+		PRINTFORML 见%ANAME(MASTER)%丝毫没有要开口的意思，蕾米莉亚终于开口道
+	ENDIF
+	PRINTFORMW	「咳，虽然不是博丽的巫女，不过作为征服幻想乡的前奏也算凑活吧」	
+	PRINTFORMW	「那么自我介绍一下，我是这红魔馆之主，高贵的吸血鬼，蕾米莉亚·斯卡雷特」	
+	PRINTFORMW	大意了，没有准备洋葱，现在应该是来不及了。不过还是得先好好回应一下对面的自我介绍。
+	PRINTFORMW	「我的名字是%ANAME(MASTER)%，年龄33岁，住在人之里东南方的博丽神社，没有结婚」
+	PRINTFORMW	「在军队工作，每天最晚下午之前都会完成工作，不抽烟，酒也是浅尝辄止，晚上11点上床睡觉」	
+	PRINTFORMW	「每天一定要睡满8个小时，睡前会喝一杯热牛奶，做二十分钟床上运动，让身体舒展开来才睡觉」	
+	PRINTFORMW	「这样就几乎都是一觉到天亮，早上醒来就像是小婴儿一样，不留半点疲劳和压力，医生也说我很健康」	
+	PRINTFORMW	「你到底在说什么啊」终于蕾米莉亚忍不住打断道
+	PRINTFORMW	「这是在说明我这个人希望过着内心平静的生活，不过真要动手，我也不会输给任何人就是了」		
+	PRINTFORMW	「也就是说蕾米莉亚，你是妨碍我睡眠的麻烦，是我的敌人。」	
+	PRINTFORMW	「在红雾扩散之前，我要先把你收拾掉，这样我今晚也能睡个好觉」
+	PRINTFORMW	「哼，睡个好觉？你也知道我们吸血鬼的弱点是太阳吧，在阳光被红雾遮蔽的当下，我终于 终于胜过太阳了」	
+	PRINTFORMW	「.......没错，这也就是说，幻想乡已经等于落入了我的手中，你不过只是命运的木偶罢了」
+	PRINTFORMW	「神罰「幼きデーモンロード」」红之恶魔展开了他的符卡
+	PRINTFORMW	随着巨大魔法阵一起出现的是无数既炫目又致命的弹幕，现在恐怕没有多余的精力反驳她了
+	PRINTFORMW	虽然很恐怖，但应该还是勉强能躲过吧？
+	PRINTFORMW	...............
+	PRINTFORMW	纷涌而至的魔弹虽然可怕，但其中也存在着大大小小的缝隙，足以供久经战斗的%ANAME(MASTER)%躲避
+	PRINTFORMW	..........本应如此.........	
+	PRINTFORMW	「这就是命运的力量吗？」在第14次因为各种各样的原因被魔弹击中后，%ANAME(MASTER)%忍不住吐槽道
+	PRINTFORMW	接着因此分心的他又被两发魔弹部分命中..........
+	判定値 = ABL:MASTER:防衛
+	IF 判定値 < 90
+		PRINTFORMW 虽然并不致命，但是积累的伤势也逐渐影响了%ANAME(MASTER)%，终于一发正面命中的魔弹将他击下了天台
+		PRINTFORMW 随后赶来的灵梦她们击败了蕾米莉亚，解决了异变，因此%ANAME(MASTER)%被她们笑话了好几天
+		CALL ADD_COOLTIME(MASTER, 3)
+		DVAR:异变_红雾 = 2
+		RETURN 1
+	ENDIF
+	IF DVAR:觉醒_替身 == 3
+		PRINTFORML 不过好在拥有黄金体验的%ANAME(MASTER)%可以不断治疗因魔弹产生的伤口
+		PRINTFORMW 「吼，治疗的能力吗，嘛，热身也差不多该到此为止了」
+		PRINTFORMW 「治疗对于死人是没有意义的，神枪「Spear the Gungnir」」
+		PRINTFORML 巨大的枪状光束迎面而来，来不及闪躲了！！！
+		PRINTFORMW 「Gold Experience」%ANAME(MASTER)%强行催化了袋子里的树种，拔地而起的巨树载着他躲过了必杀的光束
+		PRINTFORML 但是随着巨树的底部被洞穿，来不及调整姿势的%ANAME(MASTER)%又一头栽了下来
+		PRINTFORMW 「真是奇怪的能力，看来不能因为胜券在握就掉以轻心.....嗯？你受伤了？」
+		PRINTFORML 大概落地时的震动，一直被随身携带那支箭掉了出来，轻易的捅破了黄金体验的的防御，血如泉涌
+		PRINTFORMW 「嘛，无所谓了，是时候结束了，冈格尼尔命中的命运已经确定，神枪「Spear the Gungnir」」
+		PRINTFORML 巨大的光束喷薄而出，吞没了%ANAME(MASTER)%
+		PRINTFORMW 「真实的巅峰就存在于我的能力之中，命运仍旧屈服于我.......」
+		PRINTFORMW 「不、、不可能，我是在做梦吗？命运明明已经........」
+		PRINTFORML 虽然难以接受，但远处依然站着的%ANAME(MASTER)%，自己手上尚未发动的符卡都在提醒着蕾米莉亚
+		PRINTFORMW 「我从一开始就没有采取任何行动！！！」		
+		PRINTFORMW 「这就是「镇魂曲」」因祸得福，一直在原地体验着自己的替身进化过程的%ANAME(MASTER)%终于开口了
+		PRINTFORMW 「你所看到的确实是「真实」，你的能力确实已经引导出了实际已发生的动作」	
+		PRINTFORMW 「但是你永远无法到达实际会发生的「真实」，不管你拥有什么能力，只要在我面前就绝不可能实现」		
+		PRINTFORMW 「这就是Gold Experience Requiem（黄金体验·镇魂曲）」	
+		PRINTFORML ...............
+		PRINTFORML .........
+		PRINTFORMW ....
+		PRINTFORMW 「已经解决了吗，那家伙偶尔还是挺能干的嘛」望着窗外像是倒放一样逐渐回涌的红雾，灵梦仿佛一瞬间被抽干了干劲
+		PRINTFORMW 「只是借用一下啦，恋符「Master Spark」」此时的魔理沙依然在“探险”的路上
+		CALL COLOR_PRINTL(@"%ANAME(MASTER)%的替身Gold Experience（黄金体验）进化为Gold Experience Requiem（黄金体验·镇魂曲）", カラー_注意)	
+		CALL SKILL_LEARN_BY_NAME(MASTER, スキル_ジャンル_PERSONAL, NO:MASTER, "黄金体验镇魂曲")		
+		CFLAG:NAME_TO_CHARA("レミリア"):好感度 += 200 + RAND:200
+		CALL COLOR_PRINTL(@"蕾米莉亚好感度增加", カラー_注意)
+		CFLAG:NAME_TO_CHARA("霊夢"):好感度 += 200 + RAND:200
+		CALL COLOR_PRINTL(@"霊夢好感度增加", カラー_注意)	
+		CFLAG:NAME_TO_CHARA("魔理沙"):好感度 += 200 + RAND:200
+		CALL COLOR_PRINTL(@"魔理沙好感度增加", カラー_注意)	
+		CALL COLOR_PRINTL(@"红雾异变---结束", カラー_注意)
+		CALL COLOR_PRINTL(@"To be continued", カラー_注意)
+		DVAR:异变_红雾 = 2
+		RETURN 1
+	ENDIF
+	PRINTFORML 不过好在这些伤口还不至于影响行动，%ANAME(MASTER)%默默地等待着反击的机会
+	PRINTFORML 「不愧是巫女的同伴，这种程度的攻击看来是无法打败你的」终于蕾米莉亚停下了手中的符卡
+	PRINTFORML 「命运的硬币已经落下，此乃必中之击，神枪「Spear the Gungnir」」
+	PRINTFORML 	躲不过，看到巨大枪状光束的一瞬间，%ANAME(MASTER)%
+	PRINTFORML 	那么就只能上了，%ANAME(MASTER)%将全部力量汇聚成魔炮
+	PRINTFORML 	两道光束不偏不倚地撞在一起，开始相互角力
+	PRINTFORMW ...............
+	PRINTFORMW .........
+	PRINTFORML ....	
+	判定値 = ABL:MASTER:妖術
+	IF 判定値 < 90
+		PRINTFORML	最终胜利天平开始向蕾米莉亚倾斜，光束的交汇处缓慢而又不可阻挡地向%ANAME(MASTER)%靠近
+		PRINTFORML	%ANAME(MASTER)%只能眼睁睁地看见他被轰飞.......坠落.....
+		PRINTFORML	直到一只手接住了他，「%ANAME(MASTER)%，你的「觉悟」比冉冉升起的太阳还要光辉耀眼，照亮了这条「光辉道路」」
+		PRINTFORML	「博丽灵梦，正如你所知是博丽的巫女，现在立刻收起那个雾，还是说你想要被我退治呢？」
+		PRINTFORML	「那么，决战吧，博丽的巫女！胜者能获得的  便是这幻想乡的一切！」		
+		PRINTFORMW ...............
+		PRINTFORMW .........
+		PRINTFORML ....		
+		PRINTFORMW 「梦想封印！！」
+		PRINTFORMW 「这就是...博丽的巫女的力量！！」
+		PRINTFORMW 在巨大的阴阳玉的力量下，永远鲜红的幼月的野望与红魔馆一起被摧毁了
+		PRINTFORMW 「那么....作为庆祝，来开宴会吧」
+		CFLAG:NAME_TO_CHARA("霊夢"):好感度 += 200 + RAND:200
+		CALL COLOR_PRINTL(@"霊夢好感度增加", カラー_注意)
+		CALL COLOR_PRINTL(@"红雾异变---结束", カラー_注意)
+		CALL COLOR_PRINTL(@"To be continued", カラー_注意)
+		DVAR:异变_红雾 = 2
+	ELSE
+		PRINTFORML	「不、不可能.....」最终光束的交汇处缓慢而又不可阻挡地向蕾米莉亚靠近
+		PRINTFORML	「绝对命中又如何，必杀 认真系列 ，认真一炮」%ANAME(MASTER)%解放了最后的力量
+		PRINTFORML	「这种力量......仅仅是博丽巫女的同伴就有着如此的力量吗」看着逐步逼近的光束，蕾米莉亚像是认命般地叹了口气
+		PRINTFORMW ...............
+		PRINTFORMW .........
+		PRINTFORML ....	
+		PRINTFORML 「已经解决了吗，你这家伙偶尔还是挺能干的嘛」
+		CFLAG:NAME_TO_CHARA("レミリア"):好感度 += 200 + RAND:200
+		CALL COLOR_PRINTL(@"蕾米莉亚好感度增加", カラー_注意)
+		CFLAG:NAME_TO_CHARA("霊夢"):好感度 += 200 + RAND:200
+		CALL COLOR_PRINTL(@"霊夢好感度增加", カラー_注意)	
+		CFLAG:NAME_TO_CHARA("魔理沙"):好感度 += 200 + RAND:200
+		CALL COLOR_PRINTL(@"魔理沙好感度增加", カラー_注意)			
+		CALL COLOR_PRINTL(@"红雾异变---结束", カラー_注意)
+		CALL COLOR_PRINTL(@"To be continued", カラー_注意)
+		DVAR:异变_红雾 = 2
+	ENDIF
+ENDIF	
+	
+	
+	
+	
+RETURN 1

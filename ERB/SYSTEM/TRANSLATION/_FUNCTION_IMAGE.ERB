@@ -1,0 +1,785 @@
+﻿;Show amount of participants on scene
+@GET_TARGETNUM(ARG)
+#FUNCTION
+VARSET LOCAL
+FOR LOCAL:0, 1, CHARANUM
+	SIF IS_PARTICIPATE_TRAIN(LOCAL:0)
+		LOCAL:1 ++
+NEXT
+RETURNF LOCAL:1
+
+
+;-------------------------------------------------------------
+;SHOW_INFOの画像処理 (from RanceK)
+;-------------------------------------------------------------
+@SHOW_HEADER_WITH_IMAGE(iID, iSize=800)
+#DIM iSize
+#DIMS sPrint_Text
+#DIM iFont_Hei_mag
+#DIM iEnter_Con
+#DIM iSpace
+#DIMS String
+#DIM Integer
+#DIM iID
+
+iFont_Hei_mag = GETCONFIG("一行の高さ") * iSize*10 / GETCONFIG("フォントサイズ")
+iFont_Hei_mag = (iFont_Hei_mag/10) + (iFont_Hei_mag%10 >= 5? 1#0)
+
+iSpace = iSize + 150
+CALL MobImGen(iID)
+;名前の表示
+IF CSTR:(iID):0 == "" && CSTR:(iID):1 == "" && NAME:(iID) == CALLNAME:(iID)
+	String = %ANAME(iID)%
+ELSE
+	String =%CSTR:(iID):1%
+	SIF CSTR:(iID):6 != "" && CSTR:(iID):1 != CSTR:(iID):6
+		String = %String%(%TOHALF(CSTR:(iID):6)%)
+	SIF String != ""
+		String = %String + " "%
+	String = %String%%CSTR:(iID):0%
+	SIF CSTR:(iID):5 != "" && CSTR:(iID):0 != CSTR:(iID):5
+		String = %String%(%TOHALF(CSTR:(iID):5)%)
+ENDIF
+;show chara id in debug
+[IF_DEBUG]
+String += @" id:{iID}, no:{NO:(iID)}"
+[ENDIF]
+
+sPrint_Text = <p align='left'><shape type='space' param='{iSpace}'>〇%String%<br>
+
+String =
+;タグ表示
+FOR Integer, 0, MAX_TAG
+	SIF TAG:(iID):Integer == -1
+		CONTINUE
+	String = %String%[%TAG_NAME:(TAG:(iID):Integer)%]
+NEXT
+SIF STRLENS(String)
+	sPrint_Text += @"<shape type='space' param='{iSpace}'>%String%　"
+
+;現在地表示
+;SIF iID != MASTER
+;	sPrint_Text += @"Location:%CITY_NAME:(CFLAG:(iID):現在地)%"
+
+Integer = GET_COUNTRY_BOSS(CFLAG:(iID):所属)
+IF Integer >= 0
+	String = %ANAME(Integer), MAX_CHARANAME_LENGTH, LEFT%
+ELSE
+	String = %"----", MAX_CHARANAME_LENGTH, LEFT%
+ENDIF
+PRINTFORM
+
+sPrint_Text += @"<br><br><shape type='space' param='{iSpace}'>隶属: %String%<br>"
+
+Integer = GET_COUNTRY_BOSS(CFLAG:(iID):捕虜先)
+IF Integer >= 0
+	String = %ANAME(Integer)%
+ELSE
+	String = %"----"%
+ENDIF
+IF Integer >= 0
+	IF CFLAG:(iID):軟禁中 == 0
+		String = %String+"(Captive)"%
+	ELSE
+		String = %String+"(Hostage)"%
+	ENDIF
+ENDIF
+sPrint_Text += @"<shape type='space' param='{iSpace}'>俘虏: %String%<br>"
+HTML_PRINT sPrint_Text
+
+iSpace = 100
+sPrint_Text = <p align='left'><shape type='space' param='{iSpace}'>
+sPrint_Text += @"<button value='999' title='Click to change'>"
+sPrint_Text += @"<img src='%GetImageName(iID)%' height='{iFont_Hei_mag}'"
+
+iEnter_Con = 5
+sPrint_Text += @"ypos='-{iEnter_Con * 100}'>"
+sPrint_Text += @"</button>"
+HTML_PRINT sPrint_Text
+
+iEnter_Con++
+sPrint_Text =  <p align='left'><nobr>
+sPrint_Text += @"<shape type='space' param='{iSpace}'><img src='Border_Normal' height='{iFont_Hei_mag}'"
+sPrint_Text += @"ypos='-{iEnter_Con * 100}'>"
+HTML_PRINT sPrint_Text
+
+PRINTFORM %TOSTR_SPACE(19)%
+
+CALL PRINT_SEX(iID, 0, 0, 10)
+
+PRINT 类型:
+IF iID != MASTER
+	IF IS_TOHO_CHARA(iID)
+		SETCOLOR カラー_注意
+		String = 东方 
+	ELSEIF IS_RANDOM_CHARA(iID)
+		SETCOLOR カラー_シアン
+		String = 通用
+	ELSEIF IS_CHILD(iID)
+		SETCOLOR 0x00FF80
+		String = 孩童 
+	ELSEIF TALENT:(iID):カスタムキャラ
+		SETCOLOR カラー_オレンジ
+		String = 自定义
+	ELSE
+		SETCOLOR カラー_オレンジ
+		String = 特殊
+	ENDIF
+ENDIF
+PRINTFORM %String%
+RESETCOLOR
+
+;★Show if character is dead
+IF CFLAG:(iID):特殊状態 == 特殊状態_死亡
+	SETCOLOR カラー_赤
+	PRINTFORM   (死亡)
+	RESETCOLOR
+ENDIF
+
+;★Show if it's a player character
+IF (iID) == MASTER
+	SETCOLOR カラー_黄
+	PRINTFORM   (玩家)
+	RESETCOLOR
+ENDIF
+
+PRINTL
+
+CALL SINGLE_DRAWLINE, "─"
+
+
+@PRINT_DIPLO_IMAGE(iID,iSize=1000,mood=0,spacing=100)
+#DIM iID
+#DIM iSize
+#DIM mood
+#DIM spacing
+#DIMS sPrint_Text
+#DIM iFont_Hei_mag
+#DIM iEnter_Con
+#DIMS ChkSprite
+
+SIF !CONFIG:555
+	RETURN
+
+iFont_Hei_mag = GETCONFIG("一行の高さ") * iSize*10 / GETCONFIG("フォントサイズ")
+iFont_Hei_mag = (iFont_Hei_mag/10) + (iFont_Hei_mag%10 >= 5?1#0)
+
+CALL MobImGen(iID)
+sPrint_Text = <p align='right'>
+sPrint_Text += @"<img src='%GetImageName(iID,mood)%' height='{iFont_Hei_mag}'>"
+sPrint_Text += @"<shape type = 'space' param = '{spacing}'>"
+
+HTML_PRINT sPrint_Text
+iEnter_Con = 1
+
+RETURN RESULT
+
+
+@PRINT_ARENA_IMAGE(ARG:0,ARG:1,ARG:2)
+#DIM iID
+#DIM iSize
+#DIM mood
+#DIM spacing
+#DIMS sPrint_Text
+#DIM iFont_Hei_mag
+#DIM iEnter_Con
+#DIMS ChkSprite
+
+spacing = 100
+iSize = 900
+mood = 0
+
+SIF !CONFIG:555
+	RETURN
+
+iFont_Hei_mag = GETCONFIG("一行の高さ") * iSize*10 / GETCONFIG("フォントサイズ")
+iFont_Hei_mag = (iFont_Hei_mag/10) + (iFont_Hei_mag%10 >= 5?1#0)
+CALL MobImGen(ARG:0)
+CALL MobImGen(ARG:1)
+CALL MobImGen(ARG:2)
+sPrint_Text = <p align='right'>
+sPrint_Text += @"<img src='%GetImageName(ARG:0,mood)%' height='{iFont_Hei_mag}' ypos='200'>"
+sPrint_Text += @"<shape type = 'space' param = '{spacing}'>"
+sPrint_Text += @"<img src='%GetImageName(ARG:1,mood)%' height='{iFont_Hei_mag}' ypos='200'>"
+sPrint_Text += @"<shape type = 'space' param = '{spacing}'>"
+sPrint_Text += @"<img src='%GetImageName(ARG:2,mood)%' height='{iFont_Hei_mag}' ypos='200'>"
+sPrint_Text += @"<shape type = 'space' param = '{spacing}'>"
+
+HTML_PRINT sPrint_Text
+iEnter_Con = 1
+
+RETURN RESULT
+
+
+@PRINT_FUCK_FACE(iID,iSize=1000,mood=5,spacing=100)
+#DIM iID
+#DIM iSize
+#DIM mood
+#DIM spacing
+#DIMS sPrint_Text
+#DIM iFont_Hei_mag
+#DIM iEnter_Con
+#DIMS ChkSprite
+
+SIF !CONFIG:555
+	RETURN
+
+iFont_Hei_mag = GETCONFIG("一行の高さ") * iSize*10 / GETCONFIG("フォントサイズ")
+iFont_Hei_mag = (iFont_Hei_mag/10) + (iFont_Hei_mag%10 >= 5?1#0)
+
+CALL MobImGen(iID)
+sPrint_Text = <p align='center'>
+sPrint_Text += @"<img src='%GetImageName(iID,mood)%' height='{iFont_Hei_mag}' ypos='-400'>"
+sPrint_Text += @"<shape type = 'space' param = '{spacing}'>"
+HTML_PRINT sPrint_Text
+sPrint_Text = <p align='center'>
+sPrint_Text += @"<img src='%GetBlushName(iID,1)%' height='{iFont_Hei_mag}' ypos='-500'>"
+sPrint_Text += @"<shape type = 'space' param = '{spacing}'>"
+HTML_PRINT sPrint_Text
+sPrint_Text = <p align='center'>
+sPrint_Text += @"<img src='%GetPuffName(iID,1)%' height='{iFont_Hei_mag}' ypos='-600'>"
+sPrint_Text += @"<shape type = 'space' param = '{spacing}'>"
+HTML_PRINT sPrint_Text
+
+iEnter_Con = 3
+
+RETURN RESULT
+
+
+@PRINT_IMAGE_IN_TRAINING
+#DIMS sPrint_Text
+#DIM iFont_Hei_mag
+#DIM iEnter_Con
+#DIM iSize
+
+SIF !CONFIG:555
+	RETURN
+
+
+
+iFont_Hei_mag = GETCONFIG("一行の高さ") * (isModifier+500)*10 / GETCONFIG("フォントサイズ")
+iFont_Hei_mag = (iFont_Hei_mag/10) + (iFont_Hei_mag%10 >= 5?1#0)
+sPrint_Text = <p align='center'>
+iEnter_Con = 0
+sPrint_Text += @"<button value='3106' title='画像大小－'>[－]</button>"
+sPrint_Text += @"画像大小[{isModifier/10+100}％]"
+sPrint_Text += @"<button value='3107' title='表示人数＋'>[＋]</button>"
+sPrint_Text += "<br>"
+FOR LOCAL:0, 0, CHARANUM
+	IF CFLAG:(LOCAL:0):調教参加フラグ && TCVAR:(LOCAL:0):53 != 3
+		CALL MobImGen(LOCAL:0)
+		sPrint_Text += @"<img src='%GetImageName(LOCAL:0,GetImageMood(LOCAL:0))%' height='{iFont_Hei_mag}'>"
+
+	ENDIF
+NEXT
+
+HTML_PRINT sPrint_Text
+
+sPrint_Text = <p align='center'>
+FOR LOCAL:0, 0, CHARANUM
+	IF CFLAG:(LOCAL:0):調教参加フラグ && TCVAR:(LOCAL:0):53 != 3
+		sPrint_Text += @"<img src='%GetBlushName(LOCAL:0)%' height='{iFont_Hei_mag}' ypos='-100'>"
+	ENDIF
+NEXT
+HTML_PRINT sPrint_Text
+
+sPrint_Text = <p align='center'>
+FOR LOCAL:0, 0, CHARANUM
+	IF CFLAG:(LOCAL:0):調教参加フラグ && TCVAR:(LOCAL:0):53 != 3
+		sPrint_Text += @"<img src='%GetPuffName(LOCAL:0)%' height='{iFont_Hei_mag}' ypos='-200'>"
+	ENDIF
+NEXT
+HTML_PRINT sPrint_Text
+
+iEnter_Con = 3
+
+FOR LOCAL, iEnter_Con+1, ((isModifier+500)/100 + 1)
+	HTML_PRINT "<br>"
+NEXT
+RETURN
+
+@PRINT_IMAGE_SLG_COMBAT(ARG:0, ARG:1, ARG:2, ARG:3, iSize = 800)
+#DIMS sPrint_Text
+#DIM index
+#DIM iFont_Hei_mag
+#DIM iEnter_Con
+#DIM iSize
+
+SIF !CONFIG:555
+	RETURN
+
+iFont_Hei_mag = GETCONFIG("一行の高さ") * 10 * iSize / GETCONFIG("フォントサイズ")
+iFont_Hei_mag = (iFont_Hei_mag/10) + (iFont_Hei_mag%10 >= 5?1#0)
+sPrint_Text = <p align='center'>
+iEnter_Con = 0
+
+FOR LOCAL:0, 0, MAX_UNIT_COMMANDER
+	LOCAL:1 = GET_UNIT_COMMANDER(ARG:0, ARG:1, LOCAL:0)
+	IF LOCAL:1 >= 0
+		CALL MobImGen(LOCAL:1)
+		sPrint_Text += @"<img src='%GetImageName(LOCAL:1,2)%' height='{iFont_Hei_mag}'>"
+		iEnter_Con ++
+	ELSE
+		sPrint_Text += @"<shape type = 'space' param = '{iFont_Hei_mag}'>"
+	ENDIF
+NEXT
+sPrint_Text += @"    VS    "
+FOR LOCAL:0, 0, MAX_UNIT_COMMANDER
+	LOCAL:1 = GET_UNIT_COMMANDER(ARG:2, ARG:3, LOCAL:0)
+	IF LOCAL:1 >= 0
+		CALL MobImGen(LOCAL:1)
+		sPrint_Text += @"<img src='%GetImageName(LOCAL:1,2)%' height='{iFont_Hei_mag}'>"
+		iEnter_Con ++
+	ELSE
+		sPrint_Text += @"<shape type = 'space' param = '{iFont_Hei_mag}'>"
+	ENDIF
+NEXT
+
+HTML_PRINT sPrint_Text
+iEnter_Con = 1
+
+FOR LOCAL, iEnter_Con+1, (iSize/100 + 1)
+	HTML_PRINT "<br>"
+NEXT
+RETURN RESULT
+
+
+@PRINT_IMAGE_SLG_COMBAT_CITY(ARG:0, ARG:1, ARG:2, iSize = 800)
+#DIMS sPrint_Text
+#DIM iFont_Hei_mag
+#DIM iEnter_Con
+#DIM iSize
+#DIM index
+
+SIF !CONFIG:555
+	RETURN
+
+iFont_Hei_mag = GETCONFIG("一行の高さ") * 10 * iSize / GETCONFIG("フォントサイズ")
+iFont_Hei_mag = (iFont_Hei_mag/10) + (iFont_Hei_mag%10 >= 5?1#0)
+sPrint_Text = <p align='center'>
+iEnter_Con = 0
+
+FOR LOCAL:0, 0, MAX_UNIT_COMMANDER
+	LOCAL:1 = GET_UNIT_COMMANDER(ARG:0, ARG:1, LOCAL:0)
+	IF LOCAL:1 >= 0
+		CALL MobImGen(LOCAL:1)
+		sPrint_Text += @"<img src='%GetImageName(LOCAL:1,2)%' height='{iFont_Hei_mag}'>"
+		iEnter_Con ++
+	ELSE
+		sPrint_Text += @"<shape type = 'space' param = '{iFont_Hei_mag}'>"
+	ENDIF
+NEXT
+sPrint_Text += @"<shape type = 'space' param = '200'>"
+FOR LOCAL:0, 0, MAX_CITY_COMMANDER
+	LOCAL:1 = GET_CITY_COMMANDER(ARG:2, LOCAL:0)
+	IF LOCAL:1 >= 0
+		CALL MobImGen(LOCAL:1)
+		sPrint_Text += @"<img src='%GetImageName(LOCAL:1,2)%' height='{iFont_Hei_mag}'>"
+		iEnter_Con ++
+	ELSE
+		sPrint_Text += @"<shape type = 'space' param = '{iFont_Hei_mag}'>"
+	ENDIF
+NEXT
+sPrint_Text += @"<shape type = 'space' param = '{iFont_Hei_mag}'>"
+HTML_PRINT sPrint_Text
+iEnter_Con = 1
+
+FOR LOCAL, iEnter_Con+1, (iSize/100 + 1)
+	HTML_PRINT "<br>"
+NEXT
+RETURN RESULT
+
+
+@PRINT_IMAGE_SLG(ARG:0, ARG:1, iSize = 500)
+#DIMS sPrint_Text
+#DIM iFont_Hei_mag
+#DIM iEnter_Con
+#DIM iSize
+
+SIF !CONFIG:555
+	RETURN
+
+iFont_Hei_mag = GETCONFIG("一行の高さ") * 10 * iSize / GETCONFIG("フォントサイズ")
+iFont_Hei_mag = (iFont_Hei_mag/10) + (iFont_Hei_mag%10 >= 5?1#0)
+sPrint_Text = <p align='right'>
+iEnter_Con = 0
+
+FOR LOCAL:0, 0, MAX_UNIT_COMMANDER
+	LOCAL:1 = GET_UNIT_COMMANDER(ARG:0, ARG:1, LOCAL:0)
+	IF LOCAL:1 >= 0
+		CALL MobImGen(LOCAL:1)
+		sPrint_Text += @"<img src='%GetImageName(LOCAL:1,2)%' height='{iFont_Hei_mag}' ypos='-100'>"
+		iEnter_Con ++
+	ENDIF
+NEXT
+sPrint_Text += @"<shape type = 'space' param = '1000'>"
+HTML_PRINT sPrint_Text
+iEnter_Con = 1
+
+FOR LOCAL,iEnter_Con+1,(iSize/100)
+	HTML_PRINT "<br>"
+NEXT
+RETURN RESULT
+
+
+@GetImageName(iID, mood=0)
+#FUNCTIONS
+#DIM iID
+#DIM Chara
+#DIM mood
+#DIMS ChkSprite
+#DIMS iName
+
+IF iID < 0
+	iName = No_Image
+	RETURNF iName
+ENDIF
+
+Chara = iID
+iID = NO:iID
+;JVN: Child portrait
+IF CUSTOM_PORTRAITS:Chara:CP_Child != 0 && TALENT:Chara:131
+	iName = c{CUSTOM_PORTRAITS:Chara:CP_Child}
+;JVN: Male portrait
+ELSEIF CUSTOM_PORTRAITS:Chara:CP_Male != 0 && IS_MALE(Chara)
+	iName = c{CUSTOM_PORTRAITS:Chara:CP_Male}
+;JVN: Female portrait
+ELSEIF CUSTOM_PORTRAITS:Chara:CP_Female != 0 && IS_FEMALE(Chara)
+	iName = c{CUSTOM_PORTRAITS:Chara:CP_Female}
+;If everything else fail, use custom generated portrait
+ELSEIF !INRANGE(iID, 1, 200) && TALENT:Chara:性別 != 0
+	;iName = No_Image
+	iName = %GetGenImage(Chara,mood)%
+ELSE
+	iName = %GetImageMoodName(iID,mood,CheckBust(Chara),CheckEX(Chara))%
+	;iName = Face_{iID}
+ENDIF
+
+ChkSprite = %iName%
+
+IF !SPRITECREATED(ChkSprite)
+	; Add male or female image here if available
+	IF (iID) == MASTER && IS_MALE(Chara)
+		iName = Image_Player
+	ELSEIF IS_MALE(Chara)
+		iName = Image_Male
+	ELSEIF IS_FEMALE(Chara)
+		iName = Image_Female
+	ELSE
+		iName = No_Image
+	ENDIF
+ENDIF
+
+RETURNF iName
+
+
+@GetImageMoodName(iID, mood=0, checkbust=0,checkEX=0)
+#FUNCTIONS
+#DIM iID
+#DIM mood
+#DIM checkbust
+#DIM checkEX
+#DIMS ChkSprite
+#DIMS bustname
+#DIMS EXename
+;default or 0 is normal, 1 is happy, 2 is angry, 3 is sad, 4 is aphrodisiac
+; 5 is nude, 6 is happy nude, 7 is angry nude, 8 is sad nude 9 is aphrodisiac nude
+; sad is mostly not implemented yet
+SELECTCASE mood
+	CASE 0
+		LOCALS = Face_{iID}
+	CASE 1
+		LOCALS = Face_{iID}_happy
+	CASE 2
+		LOCALS = Face_{iID}_angry
+	CASE 3
+		LOCALS = Face_{iID}_sad
+	CASE 4
+		LOCALS = Face_{iID}_lust
+	CASE 5
+		LOCALS = Face_{iID}_nude
+	CASE 6
+		LOCALS = Face_{iID}_happy_nude
+	CASE 7
+		LOCALS = Face_{iID}_angry_nude
+	CASE 8
+		LOCALS = Face_{iID}_sad
+	CASE 9
+		LOCALS = Face_{iID}_lust_nude
+	CASEELSE
+		LOCALS = Face_{iID}
+ENDSELECT
+;check State
+IF checkEX == 1
+	EXename = %LOCALS%_EX
+	IF SPRITECREATED(EXename)
+		LOCALS = %EXename%
+	ENDIF
+ENDIF
+ChkSprite = %LOCALS%
+; check bust
+IF checkbust
+	bustname = %LOCALS%_Huge
+	IF SPRITECREATED(bustname)
+		LOCALS = %bustname%
+	ENDIF
+ENDIF
+ChkSprite = %LOCALS%
+
+;如果当前没有实装则返回普通表情
+IF !SPRITECREATED(ChkSprite)
+	IF FLAG:ウフフフラグ
+		LOCALS = Face_{iID}_nude
+	ELSE
+		LOCALS = Face_{iID}
+	ENDIF
+	ChkSprite = %LOCALS%
+	IF !SPRITECREATED(ChkSprite)
+		LOCALS = Face_{iID}
+	ENDIF
+ENDIF
+RETURNF LOCALS
+
+
+@GetBlushName(iID,nocheck=0)
+#FUNCTIONS
+#DIM iID
+#DIM Chara
+#DIM nocheck
+#DIMS ChkSprite
+#DIMS iName
+
+IF iID < 0
+	iName = ダミー
+	RETURNF iName
+ENDIF
+
+Chara = iID
+iID = NO:iID
+iName = ダミー
+;JVN: Child portrait
+IF CUSTOM_PORTRAITS:Chara:CP_Child != 0 && TALENT:Chara:131
+	iName = ダミー
+;JVN: Male portrait
+ELSEIF CUSTOM_PORTRAITS:Chara:CP_Male != 0 && IS_MALE(Chara)
+	iName = ダミー
+;JVN: Female portrait
+ELSEIF CUSTOM_PORTRAITS:Chara:CP_Female != 0 && IS_FEMALE(Chara)
+	iName = ダミー
+;JVN: If everything else fails, use hardcoded portraits
+ELSEIF !INRANGE(iID, 1, 159)
+	iName = ダミー
+ELSE
+	IF CheckMoodBlush(Chara)
+		iName = Face_{iID}_blush
+	ELSEIF nocheck
+		iName = Face_{iID}_blush
+	ENDIF
+ENDIF
+
+ChkSprite = %iName%
+
+IF !SPRITECREATED(ChkSprite)
+	iName = ダミー
+ENDIF
+RETURNF iName
+
+
+@GetPuffName(iID, nocheck=0)
+#FUNCTIONS
+#DIM iID
+#DIM Chara
+#DIM nocheck
+#DIMS ChkSprite
+#DIMS iName
+
+IF iID < 0
+	iName = ダミー
+	RETURNF iName
+ENDIF
+
+Chara = iID
+iID = NO:iID
+iName = ダミー
+;JVN: Child portrait
+IF CUSTOM_PORTRAITS:Chara:CP_Child != 0 && TALENT:Chara:131
+	iName = ダミー
+;JVN: Male portrait
+ELSEIF CUSTOM_PORTRAITS:Chara:CP_Male != 0 && IS_MALE(Chara)
+	iName = ダミー
+;JVN: Female portrait
+ELSEIF CUSTOM_PORTRAITS:Chara:CP_Female != 0 && IS_FEMALE(Chara)
+	iName = ダミー
+;JVN: If everything else fails, use hardcoded portraits
+ELSEIF !INRANGE(iID, 1, 159)
+	iName = ダミー
+ELSE
+	IF CheckMoodPuff(Chara)
+		iName = Face_{iID}_puff
+	ELSEIF nocheck
+		iName = Face_{iID}_puff
+	ENDIF
+ENDIF
+
+ChkSprite = %iName%
+
+IF !SPRITECREATED(ChkSprite)
+	iName = ダミー
+ENDIF
+RETURNF iName
+
+
+@GetImageMood(ARG:0)
+#FUNCTION
+#DIM mood
+
+LOCAL:1 = PALAM:(ARG:0):怒主 + PALAM:(ARG:0):怒外
+LOCAL:2 = PALAM:(ARG:0):哀主 + PALAM:(ARG:0):哀外
+LOCAL:3 = PALAM:(ARG:0):怖主 + PALAM:(ARG:0):怖外
+LOCAL:0 = MAX(LOCAL:1, LOCAL:2, LOCAL:3)
+
+;default or 0 is normal, 1 is happy, 2 is angry, 3 is sad, 4 is aphrodisiac
+; 5 is nude, 6 is happy nude, 7 is angry nude, 8 is sad nude 9 is aphrodisiac nude
+mood = 0
+
+;aphrodisiac TCVAR:60
+IF CheckMoodLust(ARG:0)
+	mood = 4
+ELSEIF LOCAL:0 < 100
+	IF LOCAL:0 < -100
+		mood = 1
+	ELSE
+		mood = 0
+	ENDIF
+;angry
+ELSEIF LOCAL:0 == LOCAL:1
+		mood = 2
+;sad
+ELSEIF LOCAL:0 == LOCAL:2
+		mood = 3
+ELSE
+;fear
+	IF LOCAL:0 >= 5000
+		mood = 3
+	ELSEIF LOCAL:0 >= 500
+		mood = 3
+	ELSE
+		mood = 0
+	ENDIF
+ENDIF
+
+IF FLAG:ウフフフラグ
+	mood += 5
+ENDIF
+
+RETURNF mood
+
+
+@CheckBust(chara)
+#FUNCTION
+#DIM chara
+#DIM id
+id = NO:chara
+SIF !INRANGE(id, 1, 200)
+	RETURNF 0
+IF (TALENT:chara:GETNUM(TALENT, "胸囲尺寸") > CSVTALENT(id,GETNUM(TALENT, "胸囲尺寸"))) && TALENT:chara:GETNUM(TALENT, "胸囲尺寸") > 0
+	RETURNF 1
+ENDIF
+
+RETURNF 0
+
+@CheckEX(chara)
+#FUNCTION
+#DIM chara
+#DIM id
+id = NO:chara
+SIF id !=3
+	RETURNF 0
+IF id==3 && KDVAR:3:ルーミア_EXルーミア >= 7
+	RETURNF 1
+ENDIF
+
+
+@CheckMoodLust(ARG:0)
+#FUNCTION
+#DIM lustlevel
+lustlevel = GET_PALAMLV(PALAM:(ARG:0):20)
+
+;aphrodisiac TCVAR:60
+IF TCVAR:(ARG:0):67 && lustlevel >= 5
+	RETURNF 1
+ELSEIF TCVAR:(ARG:0):60 && lustlevel >= 5
+	RETURNF 1
+ELSEIF TCVAR:(ARG:0):69 > 0 && lustlevel >= 5
+	RETURNF 1
+ELSEIF lustlevel >= 10
+	RETURNF 1
+ELSEIF PALAM:(ARG:0):50 >= 6000 && lustlevel >= 5
+	RETURNF 1
+ELSE
+	RETURNF 0
+ENDIF
+
+
+@CheckMoodBlush(ARG:0)
+#FUNCTION
+#DIM lustlevel
+lustlevel = GET_PALAMLV(PALAM:(ARG:0):20)
+
+IF CheckMoodLust(ARG:0)
+	RETURNF 0
+ELSEIF TCVAR:(ARG:0):60
+	RETURNF 1
+ELSEIF lustlevel >= 10
+	RETURNF 1
+ELSEIF PALAM:(ARG:0):50 >= 500
+	RETURNF 1
+ENDIF
+
+RETURNF 0
+
+
+@CheckMoodPuff(ARG:0)
+#FUNCTION
+
+FOR LOCAL, 0, VARSIZE("EX")
+	SIF EX:(ARG:0):LOCAL >= 1
+		RETURNF 1
+NEXT
+
+RETURNF 0
+
+
+@GetDiplomacyMood(ARG:0, ARG:1)
+#FUNCTION
+LOCAL:10 = REL_LIKE:(ARG:0):(ARG:1)
+LOCAL:11 = REL_HATE:(ARG:0):(ARG:1)
+;little like = 1, lots of like = 2, no like = 0
+LOCAL:12 = (LOCAL:10 >= 800) + (LOCAL:10 >= 300)
+;little hate = 1, lots of hate = 2, no like = 0
+LOCAL:13 = (LOCAL:11 >= 800) + (LOCAL:11 >= 300)
+
+IF ARG:0 == ARG:1
+	RETURNF 0
+ELSEIF CFLAG:(ARG:0):1 == CFLAG:MASTER:1
+	RETURNF 0
+ELSEIF LOCAL:12 == 2 && LOCAL:13 == 2
+	RETURNF 2
+ELSEIF LOCAL:12 == 2 && LOCAL:13 == 1
+	RETURNF 0
+ELSEIF LOCAL:12 == 2 && LOCAL:13 == 0
+	RETURNF 1
+ELSEIF LOCAL:12 == 1 && LOCAL:13 == 2
+	RETURNF 2
+ELSEIF LOCAL:12 == 1 && LOCAL:13 == 1
+	RETURNF 0
+ELSEIF LOCAL:12 == 1 && LOCAL:13 == 0
+	RETURNF 0
+ELSEIF LOCAL:12 == 0 && LOCAL:13 == 2
+	RETURNF 2
+ELSEIF LOCAL:12 == 0 && LOCAL:13 == 1
+	RETURNF 0
+ELSE
+; To do, add sex slave
+	RETURNF 0
+ENDIF

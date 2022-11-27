@@ -1,0 +1,330 @@
+﻿;-------------------------------------------------
+;「研究施設」繁殖実験室
+;-------------------------------------------------
+@LaboGAIRAI_breedingROOM
+#DIM FIRST_LINE
+FIRST_LINE = LINECOUNT
+
+CALL SINGLE_DRAWLINE
+PRINTL ★繁殖实验室
+PRINTL 　使用「生命之素」来人工繁殖生命
+CALL SINGLE_DRAWLINE
+
+PRINTBUTTON "{1}[ 　　提取生命之素 ]", 1
+PRINTL
+PRINTL
+PRINTBUTTON "{2}[ 　　　　　培养槽 ]", 2
+PRINTL
+PRINTL
+PRINTBUTTON "{9}[ 　　　　　　取消 ]", 9
+
+REDRAW 0
+
+$INPUT_LOOP
+INPUT
+
+SELECTCASE RESULT
+	CASE 9
+		REDRAW 1
+		RETURN
+	CASE 1
+		CALL LaboGAIRAI_breedingROOM_extractingFETUS
+	CASE 2
+		CALL LaboGAIRAI_breedingROOM_CULTUREVESSEL
+	CASEELSE
+		CLEARLINE 1
+		GOTO INPUT_LOOP
+ENDSELECT
+
+CLEARLINE LINECOUNT - FIRST_LINE
+RESTART
+
+;-------------------------------------------------
+;「繁殖実験室」生命の素の取り出し
+;-------------------------------------------------
+@LaboGAIRAI_breedingROOM_extractingFETUS
+#DIM 実験対象
+#DIMS 名前
+#DIM 取り出し元
+#DIM 加工元識別ナンバー
+#DIM FIRST_LINE
+FIRST_LINE = LINECOUNT
+
+CALL SINGLE_DRAWLINE
+PRINTL 　从实验对象中提取生命之素
+PRINTL 　（妊娠状态会被接触）
+CALL SINGLE_DRAWLINE
+
+FOR 実験対象, 0, CHARANUM
+	IF CFLAG:実験対象:1705 == 1 && CFLAG:実験対象:妊娠期間 >= 1
+		IF STRLENS(ANAME(実験対象)) >= MAX_CHARANAME_LENGTH
+			名前 = %SNAME(実験対象)%
+		ELSE
+			名前 = %ANAME(実験対象)%
+		ENDIF
+		CALL PRINTBUTTON_CENTER(@"[%名前, MAX_CHARANAME_LENGTH, LEFT%]", 実験対象, 0)
+		PRINTL
+	ENDIF
+NEXT
+PRINTL
+
+CALL SINGLE_DRAWLINE
+PRINTBUTTON "1000[取消]", 1000
+PRINTL
+
+REDRAW 0
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 1000
+	REDRAW 1
+	RETURN
+
+ELSEIF CFLAG:RESULT:1705 == 1 && CFLAG:RESULT:妊娠期間 >= 1
+	取り出し元 = RESULT
+	PRINTFORML 要从%ANAME(取り出し元)%身上提取生命之素吗？
+
+	;はい／いいえ入力処理
+	CALL ASK_YN()
+	IF RESULT == 0
+		;空いている加工元識別ナンバーを検索・割り当て
+		FOR LOCAL:0, 0, 999
+			IF IS_GOODS_EXECUTED:(LOCAL:0) == 0
+				加工元識別ナンバー = LOCAL:0
+				BREAK
+			ENDIF
+		NEXT
+
+		IS_GOODS_EXECUTED:加工元識別ナンバー = 1
+		NAME_BEFORE_GOODS_EXECUTED:加工元識別ナンバー = 取り出し元
+
+		NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:7 = 从「%ANAME(取り出し元)%」身上提取的生命之素
+		TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:0 = 1
+		HAVE_GOODS_EXECUTED:7 += 1
+		NAME_FATHER_FETUS:加工元識別ナンバー = CFLAG:取り出し元:子の父親
+
+		CFLAG:取り出し元:行動不能状態 = 0
+		CFLAG:取り出し元:妊娠期間 = 0
+		CFLAG:取り出し元:子の父親 = 0
+		TALENT:取り出し元:妊娠 = 0
+		CALL MOTHER_SHRINK_BUSTSIZE(取り出し元)
+		CALL MOTHER_STOP_MILKING(取り出し元)
+
+		PRINTFORMW 从%ANAME(取り出し元)%处获得了★纪念品[生命之素]
+
+	ENDIF
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+
+CLEARLINE LINECOUNT - FIRST_LINE
+RESTART
+
+;-------------------------------------------------
+;「繁殖実験室」培養槽
+;-------------------------------------------------
+@LaboGAIRAI_breedingROOM_CULTUREVESSEL
+#DIM 加工元識別ナンバー
+#DIM FATHER
+#DIM 父親ID
+#DIMS 父親名
+#DIM FIRST_LINE
+FIRST_LINE = LINECOUNT
+
+CALL SINGLE_DRAWLINE
+PRINTL 　战略回合结束时培养生命之素
+PRINTL 　每次点击都会切换状态
+CALL SINGLE_DRAWLINE
+
+FOR 加工元識別ナンバー, 0, 999
+	IF TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:0 > 0 || TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:1 > 0
+		PRINTBUTTON @"{加工元識別ナンバー}[%NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:7%]", 加工元識別ナンバー
+
+		父親ID = NAME_FATHER_FETUS:加工元識別ナンバー
+		FATHER = ID_TO_CHARA(父親ID)
+		IF FATHER == -1
+			父親名 = 不明
+		ELSE
+			父親名 = %ANAME(FATHER)%
+		ENDIF
+		SIF 父親名 == ""
+			父親名 = 不明
+		PRINTFORM 　父:%父親名%
+		IF Incubate_FETUS:加工元識別ナンバー == 1
+			SETCOLOR カラー_緑
+			PRINT [ 培养中 ]
+			RESETCOLOR
+		ENDIF
+		PRINTL
+	ENDIF
+NEXT
+PRINTL
+
+CALL SINGLE_DRAWLINE
+PRINTBUTTON "1000[取消]", 1000
+PRINTL
+
+REDRAW 0
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 1000
+	REDRAW 1
+	RETURN
+
+ELSEIF TYPE_GOODS_EXECUTED:RESULT:7:0 > 0 || TYPE_GOODS_EXECUTED:RESULT:7:1 > 0
+	SELECTCASE Incubate_FETUS:RESULT
+		CASE 0
+			Incubate_FETUS:RESULT = 1
+		CASE 1
+			Incubate_FETUS:RESULT = 0
+	ENDSELECT
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+
+CLEARLINE LINECOUNT - FIRST_LINE
+RESTART
+
+;-------------------------------------------------
+;「繁殖実験室」培養槽 戦略ターン終了時の処理
+;-------------------------------------------------
+@LaboGAIRAI_breedingROOM_CULTUREVESSEL_TURNEND
+#DIM 種類
+#DIM 加工元識別ナンバー
+#DIM MOTHER
+#DIM FATHER
+#DIM 父親ID
+#DIM 新生児
+#DIM 外来人勢力
+#DIM 識別ナンバーカウント
+
+SIF !HAVE_GOODS_EXECUTED:7
+	RETURN
+
+CALL SINGLE_DRAWLINE("-", カラー_選択不可)
+PRINTFORMW 开始进行繁殖实验
+
+外来人勢力 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_外来人)
+
+FOR 加工元識別ナンバー, 0, 999
+	IF (TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:0 > 0 || TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:1 > 0) && Incubate_FETUS:加工元識別ナンバー == 1
+		MOTHER = NAME_BEFORE_GOODS_EXECUTED:加工元識別ナンバー
+		父親ID = NAME_FATHER_FETUS:加工元識別ナンバー
+		FATHER = ID_TO_CHARA(父親ID)
+
+		;ターゲットを退避
+		LOCAL:0 = TARGET
+
+		;キャラを追加
+		ADDVOIDCHARA
+
+		;作成したキャラをターゲットにする
+		TARGET = CHARANUM - 1
+
+		;NOの設定
+		NO = FLAG:子供カウント + MIN_NO_CHILD
+		FLAG:子供カウント ++
+
+		;父親・母親のIDを設定
+		CFLAG:母親 = GET_ID(MOTHER)
+		CFLAG:父親 = 父親ID
+
+		;素質と能力の決定
+		CALL CHILD_SETTING
+
+		;初期設定(※素質決定後に行う)
+		CALL INIT_NEWCHARA(TARGET)
+
+		CALL RANDOM_CHARA_SKILL_SETTING
+		CALL CHILD_SKILL_SETTING
+		CALL RANDOM_CHARA_CLOTH_SETTING()
+		CALL CHILD_TAG_SETTING()
+		;ターゲットの再設定
+		TARGET = LOCAL:0
+
+		新生児 = CHARANUM - 1
+		CALL CHANGE_COUNTRY(新生児, CFLAG:MASTER:所属, 1)
+
+		PRINTFORMW 生命之素培养成功！
+
+		FLAG:能力表示モード = 0
+		CALL SHOW_INFO_WITH_UI(新生児, 0, 0)
+		CALL SINGLE_DRAWLINE
+
+		PRINTFORMW 你要培养这个孩子吗？
+		CALL ASK_YN("培养", "不培养")
+		IF RESULT == 1
+			CALL DELETE_CHARA(新生児)
+			PRINTFORMW 被其他研究员抱走了
+			NAME_BEFORE_GOODS_EXECUTED:加工元識別ナンバー = 0
+			NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:7 = ""
+			TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:0 = 0
+			TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:1 = 0
+			HAVE_GOODS_EXECUTED:7 = MAX(HAVE_GOODS_EXECUTED:7 - 1, 0)
+			NAME_FATHER_FETUS:加工元識別ナンバー = 0
+
+			識別ナンバーカウント = 0
+			FOR 種類, 1, 7
+				IF TYPE_GOODS_EXECUTED:加工元識別ナンバー:種類:0 == 1 || TYPE_GOODS_EXECUTED:加工元識別ナンバー:種類:1 == 1
+					識別ナンバーカウント ++
+				ENDIF
+			NEXT
+			IF TYPE_GOODS_EXECUTED:加工元識別ナンバー:8:0 == 1 || TYPE_GOODS_EXECUTED:加工元識別ナンバー:8:1 == 1
+				識別ナンバーカウント ++
+			ENDIF
+			IF 識別ナンバーカウント == 0
+				IS_GOODS_EXECUTED:加工元識別ナンバー = 0
+			ENDIF
+
+			CONTINUE
+		ENDIF
+
+		PRINTFORMW 要作为实验对象监禁起来吗？
+		CALL ASK_YN("监禁", "不监禁")
+		IF RESULT == 0
+			;CFLAG:新生児:捕虜先 = CFLAG:MASTER:所属
+			CALL CAPTURE(新生児,CFLAG:MASTER:所属)
+			CFLAG:新生児:1703 = 1
+			PRINTFORMW 被关进了监狱
+		ENDIF
+		PRINTFORML 要自己取名麼？
+		CALL ASK_YN("手動命名", "隨機命名")
+		IF RESULT == 0
+			;手動での命名処理
+			CALL INPUT_CHILD_NAME(新生児)
+		ELSE
+			;ランダムに命名
+			CALL RANDOM_CHILD_NAMING(新生児)
+			PRINTFORMW 這個孩子的姓名就決定是「%CSTR:(新生児):1%」\@ CSTR:(新生児):2 != "" ? 、字「%CSTR:(新生児):2%」 # \@了
+			CALL SINGLE_EMPTY_LINE()
+		ENDIF
+
+		CFLAG:新生児:行動不能状態 = 行動不能_子供
+
+		NAME_BEFORE_GOODS_EXECUTED:加工元識別ナンバー = 0
+		NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:7 = ""
+		TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:0 = 0
+		TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:1 = 0
+		HAVE_GOODS_EXECUTED:7 = MAX(HAVE_GOODS_EXECUTED:7 - 1, 0)
+		NAME_FATHER_FETUS:加工元識別ナンバー = 0
+
+		識別ナンバーカウント = 0
+		FOR 種類, 1, 7
+			IF TYPE_GOODS_EXECUTED:加工元識別ナンバー:種類:0 == 1 || TYPE_GOODS_EXECUTED:加工元識別ナンバー:種類:1 == 1
+				識別ナンバーカウント ++
+			ENDIF
+		NEXT
+		IF TYPE_GOODS_EXECUTED:加工元識別ナンバー:8:0 == 1 || TYPE_GOODS_EXECUTED:加工元識別ナンバー:8:1 == 1
+			識別ナンバーカウント ++
+		ENDIF
+		IF 識別ナンバーカウント == 0
+			IS_GOODS_EXECUTED:加工元識別ナンバー = 0
+		ENDIF
+	ENDIF
+NEXT
+

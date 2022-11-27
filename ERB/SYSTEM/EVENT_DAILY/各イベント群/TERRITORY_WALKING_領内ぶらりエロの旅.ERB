@@ -1,0 +1,1292 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_TERRITORY_WALKING_RATE()
+RETURN 50
+
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_TERRITORY_WALKING_DECISION()
+
+;勢力に所属していないか捕虜だと駄目
+SIF CFLAG:MASTER:所属 == 0 || CFLAG:MASTER:捕虜先 != 0
+	RETURN 0
+
+SIF DAY < 7
+	RETURN 0
+
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_TERRITORY_WALKING_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_TERRITORY_WALKING_SETTARGET()
+;遭遇キャラの選出、該当キャラが見つからない場合はキャンセル
+FOR LOCAL, 0, CHARANUM
+	;同勢力に所属しているキャラ
+	IF LOCAL != MASTER && CFLAG:(LOCAL):所属 == CFLAG:MASTER:所属 && !CFLAG:(LOCAL):捕虜先 && !IS_ANIMAL(LOCAL)
+		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+		DAILY_TARGET_NUM ++
+	ENDIF
+NEXT
+SIF DAILY_TARGET_NUM < 1
+	RETURN 0
+
+RETURN 1
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_TERRITORY_WALKING()
+#DIM 対象
+
+対象 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+
+PRINTFORMW 某天。休息日特別無聊、沒什麼事情做……
+PRINTFORMW %ANAME(MASTER)%為了消磨時間、決定在領地內一邊視察一邊閒逛
+PRINTFORMW 那麼、要去哪裡呢……
+PRINTFORML
+CALL ASK_MULTI("酒吧（人妻）", "歡樂街（亂交派對）", "在街上閒逛（多條路線）", "夜晚的繁華街道（賣淫競拍）", "花街（妓女）", "貧民窟（流鶯）", "還是算了")
+SELECTCASE RESULT
+	;酒吧（人妻路線）
+	CASE 0
+		PRINTFORMW 去酒吧看看吧
+		PRINTFORML …
+		PRINTFORMW ……
+		;1/4で酒場で飲んでるキャラと遭遇
+		IF !RAND:4
+			PRINTFORMW 到了酒吧、%ANAME(対象)%正在店裡面喝著酒
+			SIF CFLAG:対象:面識 == 0
+				CFLAG:対象:面識 = 1
+			PRINTFORMW …哎呀。%ANAME(対象)%現在應該在工作才對呀……
+			PRINTFORML %ANAME(対象)%看到%ANAME(MASTER)%之後
+			PRINTFORMW 招手邀請%ANAME(MASTER)%來自己身邊
+			PRINTFORML %ANAME(対象)%看起來已經完全喝醉了
+			PRINTFORMW 於是%ANAME(MASTER)%和%ANAME(対象)%親密地喝著酒交流著……
+			CALL PRINT_ADD_EXP(MASTER, "肝臓経験値", RAND(5, 15), 1)
+			CALL PRINT_ADD_EXP(対象, "肝臓経験値", RAND(10, 30), 1)
+			CALL TRAIN_AUTO_ABLUP(MASTER)
+			CALL TRAIN_AUTO_ABLUP(対象)
+			CFLAG:対象:好感度 += 80
+			RETURN
+		ENDIF
+		;愛人化以降
+		IF DVAR:領内ぶらりエロの旅_人妻 == 8
+			PRINTFORML 成为%ANAME(MASTER)%的爱人的人妻好像平安生下了%ANAME(MASTER)%的孩子
+			;TranslatedMark %ANAME(MASTER)%の愛人となった人妻は%ANAME(MASTER)%の子供を無事出産したらしい
+			PRINTFORML 在候车室的她的丈夫来到了生完孩子的她身边
+			;TranslatedMark 出産を終えた彼女の元へ、待合室にいた彼女の夫がやってきた
+			PRINTFORML 丈夫对自己的孩子深信不疑，温柔地抱着抱着刚出生的婴儿的她
+			;TranslatedMark 夫は自分の子供だと信じて疑わない、生まれたばかりの赤ん坊を抱いている彼女を優しく包むように抱きしめた
+			PRINTFORMW 在时间允许的范围内，期待着父子三人的一刻，高兴地回去了
+			;TranslatedMark 時間の許す限り親子三人のひと時を楽しみ、嬉しそうな様子で帰っていった
+			PRINTL
+			PRINTFORML 目送丈夫的她温柔地抱起开始磨蹭的婴儿，开始喝母乳
+			;TranslatedMark 夫を見送った彼女はぐずり始めた赤ん坊を優しく抱き上げ母乳を飲ませ始めた
+			PRINTFORMW 也许是连自己的孩子吮吸乳头的触感都感到快感吧，她漏出了小小的吐气，让孩子喂奶
+			;TranslatedMark わが子が乳首を吸い上げる感触にすら快感を覚えるのか、彼女は小さな吐息を漏らし授乳させている
+			PRINTL
+			PRINTFORML 几分钟后，收到她的联络的%ANAME(MASTER)%静静地来了
+			;TranslatedMark 数分後、彼女から連絡を受けた%ANAME(MASTER)%が静かにやって来る
+			PRINTFORML 看到%ANAME(MASTER)%的脸，哺乳中的她恶作剧般地笑着说："爸爸也想吃吗？"探问
+			;TranslatedMark %ANAME(MASTER)%の顔を見ると、授乳中の彼女は悪戯っぽく笑い、「お父さんものみたかった？」と尋ねてきた
+			PRINTFORML 看到%ANAME(MASTER)%点头，她把婴儿放在床上，把衣服踢到皮肤上，把乳头伸到%ANAME(MASTER)%的嘴边
+			;TranslatedMark %ANAME(MASTER)%が頷いたのを見ると彼女はベッドに赤ん坊を寝かせ服を肌蹴け、%ANAME(MASTER)%の口元に乳首を差し出した
+			PRINTFORML 她把%ANAME(MASTER)%的头抱在怀里，希望能更多地吸着母乳的乳头
+			;TranslatedMark 母乳を吹き出す乳首にもっと吸い付いてほしいと、彼女は%ANAME(MASTER)%の頭を胸に抱いた
+			PRINTFORMW %ANAME(MASTER)%为了回应它，吸了吸乳头后，她表情荡漾，气势汹汹地喷出母乳，达到了顶峰
+			;TranslatedMark %ANAME(MASTER)%がそれに応えるように乳首を吸い上げると、彼女は表情を蕩けさせ、勢いよく母乳を噴き出しながら絶頂に達した
+			PRINTL
+			PRINTFORML 喷乳绝顶的她完全变成了发情的雌性，想要生完孩子的奖励
+			;TranslatedMark 噴乳絶頂した彼女はすっかり発情した雌の貌となり、出産を終えたご褒美が欲しいと、
+			PRINTFORML 淫乱地微笑着打开双脚，看到了湿透的秘部，邀请到了%ANAME(MASTER)%
+			;TranslatedMark 淫らに微笑みながら足を開くとびしょびしょになった秘部を見せ%ANAME(MASTER)%に誘ってきた
+			PRINTFORML 没能战胜那个诱惑，把她抱过来，对准备好的秘部怒不可遏。
+			;TranslatedMark その誘惑に勝てずに彼女を抱き寄せると準備の整っていた秘部に怒張をねじ込んだ。
+			PRINTFORML 用粗暴的腰使她尝到了用不认为生了孩子的那样的勒紧给予快感的阴道
+			;TranslatedMark 子供を産んだとは思えないほどの締め付けで快感を与えてくる彼女の膣を荒々しい腰使いで味わった
+			PRINTFORMW 无法抑制的两人在梦中互相寻求，一夜相爱
+			;TranslatedMark 抑えの利かなくなった二人は夢中になって互いを求め、一晩中愛し合った
+			CALL FUCK(MASTER, "欲望, 性技, Ｃ, Ｍ, 射精, キス, Ｖ挿入", "キス喪失, 童貞喪失", 0, @"愛人の人妻の唇", "", @"愛人の人妻の膣", "和姦")
+			PRINTFORML
+			PRINTFORML 充分享受之后，黎明前离开了病房
+			;TranslatedMark たっぷり楽しんだ後、夜明け前に病室を出た
+			PRINTFORMW 她吻了%ANAME(MASTER)%很长时间，说"请让我再怀孕吧"，抱着孩子目送%ANAME(MASTER)%……
+			;TranslatedMark 彼女は%ANAME(MASTER)%に長いキスをして「また、私を孕ませてください」と告げ、子供を抱きかかえながら%ANAME(MASTER)%を見送った……
+			DVAR:領内ぶらりエロの旅_人妻 = 4
+		ELSEIF DVAR:領内ぶらりエロの旅_人妻 == 7
+			PRINTFORML %ANAME(MASTER)%来到了即将分娩的妻子住院的医院
+			;TranslatedMark %ANAME(MASTER)%は出産間近の愛人となった人妻が入院している病院を訪れた
+			PRINTFORML 在去她房间的路上，看到了在走廊向这边走来的她的丈夫
+			;TranslatedMark 彼女の部屋に向かう途中、廊下をこちら側へと歩いてくる彼女の夫を見かけた
+			PRINTFORMW 好像是会面结束后正要回去，她的丈夫不介意这边，向门口走去
+			;TranslatedMark 面会を終わらせ帰るところだったらしく、彼女の夫はこちらを気にすることもなく玄関の方へ歩き去っていった
+			PRINTL
+			PRINTFORMW %ANAME(MASTER)%一边这样想着，一边把手伸向她房间的门……
+			;TranslatedMark 病室にいるところを見られない限り問題はないだろう、そう考えながら%ANAME(MASTER)%は彼女の部屋の扉に手を伸ばした……
+			PRINTL
+			PRINTFORML 躺在床上的她看到%ANAME(MASTER)%的脸，像是被鼓励了似的露出了笑容
+			;TranslatedMark ベッドに寝転がる彼女が%ANAME(MASTER)%の顔を見ると、元気づけられたように笑顔を向けてきた
+			PRINTFORMW %ANAME(MASTER)%从心底鼓励对必须欺骗丈夫抚养孩子感到不安的她
+			;TranslatedMark %ANAME(MASTER)%は、夫を騙して育児せねばならないことに不安を感じている彼女を心の底から励ました
+			PRINTFORML
+			PRINTFORMW 她躺在床上与%ANAME(MASTER)%接吻，温柔地抚摸着大肚子，挥手送别%ANAME(MASTER)%……
+			;TranslatedMark 彼女はベッドの上に横たわったまま%ANAME(MASTER)%と濃厚なキスを交わしと、大きなお腹を優しく撫でてながら手を振って%ANAME(MASTER)%を見送った……
+			DVAR:領内ぶらりエロの旅_人妻 += 1
+		ELSEIF DVAR:領内ぶらりエロの旅_人妻 == 6
+			PRINTFORML 成为%ANAME(MASTER)%情人的人妻在酒馆里悠闲地喝茶
+			;TranslatedMark %ANAME(MASTER)%の愛人となった人妻は酒場でのんびりとお茶を飲んでいた
+			PRINTFORML 看到%ANAME(MASTER)%的她露出笑容挥手致意
+			;TranslatedMark %ANAME(MASTER)%を見た彼女は笑顔を見せて手を振ってきた
+			PRINTFORML 现在，在她一眼就能看出来的大膨胀的肚子里，不是丈夫而是%ANAME(MASTER)%的孩子在呼吸
+			;TranslatedMark 今、彼女の一目でわかるほどに大きく膨れたお腹の中では、夫じゃなく%ANAME(MASTER)%の子が息づいていた
+			PRINTFORML 她高兴地微笑着告诉她要照顾自己的身体
+			;TranslatedMark 身重の体をいたわるように伝えると彼女は嬉しそうに微笑んだ
+			PRINTFORML 那就算了，她像撒娇一样缠在%ANAME(MASTER)%里
+			;TranslatedMark それはそれとして、と彼女は甘える様に%ANAME(MASTER)%に絡んできた
+			PRINTFORMW %ANAME(MASTER)%苦笑着决定和这个可爱又色情的人妻交往
+			;TranslatedMark %ANAME(MASTER)%は苦笑をしながらもこの可愛くてエッチな人妻に付き合うことにした
+			PRINTFORML
+			PRINTFORML %ANAME(MASTER)%他们在旅馆的一个房间里，一边摩擦着床，一边骑着，像恋人一样热情地相爱着
+			;TranslatedMark %ANAME(MASTER)%達は、宿の一室にてベッドを軋ませながら騎乗位で恋人の様に情熱的な愛し合っている
+			PRINTFORML 每当她摆动腰部时，肚子上下都会摇晃，胸部充满了母乳
+			;TranslatedMark 彼女が腰を振る度にお腹が上下に揺れ、胸からは母乳が溢れ出ている
+			PRINTFORML 被%ANAME(MASTER)%吸了母乳，发出甜蜜的娇声，吓得发抖
+			;TranslatedMark %ANAME(MASTER)%に母乳を吸い上げられたまらず甘い嬌声を上げて身震いしてしまった
+			PRINTFORML 在她怀着爱人的孩子，并体会着被抱着的女人的幸福的眼睛里
+			;TranslatedMark 愛する人の子を妊娠し、そして抱かれるという女の幸せをかみしめる彼女の目には、
+			PRINTFORML 似乎只映出了比丈夫爱得更深的%ANAME(MASTER)%
+			;TranslatedMark 夫よりも深く愛するようになった%ANAME(MASTER)%しか映っていないようだ
+			PRINTFORMW 那张脸因快感而荡漾，不是丈夫，而是多次呼唤%ANAME(MASTER)%的名字，多次登顶
+			;TranslatedMark その顔は快感に蕩けきっており、夫ではなく%ANAME(MASTER)%の名を何度も呼びながら何度も絶頂する
+			PRINTFORMW 在那之后，跨越%ANAME(MASTER)%，互相热情的亲吻，两人更加激烈地交往着……
+			;TranslatedMark その後も%ANAME(MASTER)%に跨り情熱的なキスを交わしながら、二人はなお激しく交わっていく……
+			CALL FUCK(MASTER, "欲望, 性技, Ｃ, Ｍ, 射精, キス, Ｖ挿入", "キス喪失, 童貞喪失", 0, @"愛人の人妻の唇", "", @"愛人の人妻の膣", "和姦")
+			PRINTFORML
+			PRINTFORML 充分享受之后，黎明前离开了旅馆
+			;TranslatedMark たっぷり楽しんだ後、夜明け前に宿を出た
+			PRINTFORMW 她吻了%ANAME(MASTER)%一个长吻，说"请再抱我"，抱着大肚子挥手送别%ANAME(MASTER)%……
+			;TranslatedMark 彼女は%ANAME(MASTER)%に長いキスをして「また、私を抱いてください」と告げ、大きなお腹を抱えながら手を振って%ANAME(MASTER)%を見送った……
+			SIF RAND:4 == 0
+				DVAR:領内ぶらりエロの旅_人妻 += 1
+		;寝取られ孕ませ人妻
+		ELSEIF DVAR:領内ぶらりエロの旅_人妻 == 5
+			PRINTFORML 成为%ANAME(MASTER)%情人的人妻难得喝了一杯，表情复杂地对着虚空叹气
+			;TranslatedMark %ANAME(MASTER)%の愛人となった人妻が珍しく飲んでなっかた、複雑そうな表情で虚空に向かってふぅとため息をつく
+			PRINTFORML 一打招呼，她就拿出她喜欢的酒，给她看了酒，她尴尬地移开了视线
+			;TranslatedMark 声をかけてみると彼女のお気に入り酒を差し出し、酒を見せると彼女は気まずそうに目を逸らした
+			PRINTFORMW 「我想暂时停止喝酒……比起那个，希望你早点抱我"
+			;TranslatedMark 「酒は暫く止めようと思って……それより、早く抱いてほしい」と答え
+			PRINTFORML 为了满足她的要求，%ANAME(MASTER)%把她抱到一起，带到了旅馆
+			;TranslatedMark 彼女の要望に応えるべく、%ANAME(MASTER)%は彼女を抱き寄せ、連れ込み宿宿へと連れ込んだ
+			PRINTFORML 她脱下衣服后，虽然还不太显眼，但确实会露出膨胀的肚子，这也表明了她克制饮酒的理由
+			;TranslatedMark 彼女が服を脱ぐと、まだ目立たないでも確実に膨れたお腹が露になり、飲酒を自制する理由も明らかだ
+			PRINTFORMW 或许，%ANAME(MASTER)%这么一说，她带着非常高兴的表情微微点头，请求抚摸
+			;TranslatedMark もしかして、と%ANAME(MASTER)%が言うと、彼女はとても嬉しそうな顔で小さく頷い、撫でて欲しいと頼んできた
+			PRINTFORML
+			PRINTFORML 当然，她的怀孕不可能瞒着丈夫
+			;TranslatedMark 当然のことながら、彼女の妊娠は夫に隠し通せるはずはなく
+			PRINTFORML 试着问丈夫如何说明%ANAME(MASTER)%怀孕了
+			;TranslatedMark %ANAME(MASTER)%が妊娠したことを夫にどう説明するかと尋ねてみる
+			PRINTFORML 「不需要说明什么的，到了之后随便让他中出的话会擅自误解的……他以为有了自己的孩子很高兴」
+			;TranslatedMark 「説明なんていらないね、デきた後で適当に中出しさせれば勝手に勘違いするよ…彼は自分の子供ができたと思い喜んでいた」
+			PRINTFORMW 她报告丈夫认为肚子里的孩子是自己的孩子，并要求奖励让她骗了自己
+			;TranslatedMark 彼女が夫はお腹の子が自分の子供だと思っていることを報告し、ちゃんと騙せたことへのご褒美をねだる
+			PRINTFORML
+			PRINTFORML %ANAME(MASTER)%他们在旅馆的一个房间里，一边摩擦着床，一边骑着，像恋人一样热情地相爱着
+			;TranslatedMark %ANAME(MASTER)%達は、宿の一室にてベッドを軋ませながら騎乗位で恋人の様に情熱的な愛し合っている
+			PRINTFORML 每次被推起已经有孩子的肚子都会摇晃，浮现出讨厌的欢喜表情
+			;TranslatedMark 既に子を宿したお腹を突き上げられる度に揺らし、いやらしい歓喜の表情を浮かべている
+			PRINTFORML 一边温柔地抚摸着肚子一边低语着爱，雌性的本能很痛
+			;TranslatedMark 優しくお腹を撫でられながら愛を囁かれ雌の本能が疼きイってしまった
+			PRINTFORMW 和孕育了自己的%ANAME(MASTER)%的性爱让她的心充满幸福
+			;TranslatedMark 自分を孕ませた%ANAME(MASTER)%とのセックスが彼女の心を幸せで満たしていく
+			PRINTFORMW 那张脸因快感而荡漾，不是丈夫，而是多次呼唤%ANAME(MASTER)%的名字，多次登顶
+			;TranslatedMark その顔は快感に蕩けきっており、夫ではなく%ANAME(MASTER)%の名を何度も呼びながら何度も絶頂する
+			PRINTFORMW 在那之后，跨越%ANAME(MASTER)%，互相热情的亲吻，两人更加激烈地交往着……
+			;TranslatedMark その後も%ANAME(MASTER)%に跨り情熱的なキスを交わしながら、二人はなお激しく交わっていく……
+			CALL FUCK(MASTER, "欲望, 性技, Ｃ, Ｍ, 射精, キス, Ｖ挿入", "キス喪失, 童貞喪失", 0, @"愛人の人妻の唇", "", @"愛人の人妻の膣", "和姦")
+			PRINTFORML
+			PRINTFORML 充分享受之后，黎明前离开了旅馆
+			;TranslatedMark たっぷり楽しんだ後、夜明け前に宿を出た
+			PRINTFORMW 她吻了%ANAME(MASTER)%很长时间，说"请再抱着我"，挥手送别了%ANAME(MASTER)%……
+			;TranslatedMark 彼女は%ANAME(MASTER)%に長いキスをして「また、私を抱いてください」と告げ、手を振って%ANAME(MASTER)%を見送った……
+			DVAR:領内ぶらりエロの旅_人妻 += 1
+		ELSEIF DVAR:領内ぶらりエロの旅_人妻 >= 4
+			PRINTFORML 今天也和已經成為了%ANAME(MASTER)%情婦的人妻喝酒
+			PRINTFORMW 試著打了聲招呼、她露出非常高興的笑容迎接%ANAME(MASTER)%
+			PRINTFORML 暫時享受著和她毫無關係的交流…
+			PRINTFORMW 隨後當太陽開始下山、她熱情地抱著%ANAME(MASTER)%在他的耳邊喃喃低語、請求%ANAME(MASTER)%的再次疼愛
+			PRINTFORML 好像每天都在這裡等待著、期待能被%ANAME(MASTER)%疼愛
+			PRINTFORML 為了回應她如此勇敢的要求、%ANAME(MASTER)%把她抱在了懷裡、把她帶到旅館做愛
+			PRINTFORMW 之後在和%ANAME(MASTER)%做愛之前、她把無名指上的戒指摘了下來……
+			PRINTFORML
+			SELECTCASE RAND:4
+				CASE 0
+					PRINTFORMW %ANAME(MASTER)%和她、在旅館裡的床上一邊彼此愛撫一邊像野獸一樣激烈相愛交合
+					PRINTFORML 她的眼睛裡浮現著❤、激烈地扭動著腰肢、反復呼喊著%ANAME(MASTER)%的名字
+					PRINTFORMW 被激烈扭動的腰肢刺激著、%ANAME(MASTER)%忍不住緊緊抓住了她的腰、深深地插進了她的肉壺裡面
+					PRINTFORML 和%ANAME(MASTER)%的性愛滿足了她作為女人的喜悅、她感到非常幸福
+					PRINTFORMW 在射精的瞬間、她緊緊地抱住了%ANAME(MASTER)%、用子宮迎接著%ANAME(MASTER)%精液的注入……
+				CASE 1
+					PRINTFORMW %ANAME(MASTER)%和她、在旅館裡的床上一邊深深地舌吻一邊像野獸一樣激烈地相愛交合
+					PRINTFORML 比起沒有把自己當作女人看待的男人、和可以滿足自己淫亂本性的%ANAME(MASTER)%做愛、
+					PRINTFORMW 令她感到了極致的幸福、這種幸福感讓她的肉體變得更加敏感
+					PRINTFORMW %ANAME(MASTER)%也為一名女人選擇了自己而不是她的丈夫這個背德的事實、令肉棒更加脹大堅挺、更加渴求著她
+					PRINTFORMW 兩人互相探索著彼此、不斷挺動著腰肢貪求著背德的快感……
+				CASE 2
+					PRINTFORMW %ANAME(MASTER)%和她、在旅館裡的床上一邊愛撫著彼此一邊以騎乘位激烈地相愛交合著
+					PRINTFORML 她把手放在心愛的%ANAME(MASTER)%的肚子上、一邊發出狂野的喘息聲一邊激烈地上下扭動著腰肢
+					PRINTFORMW 和能夠接受自己淫蕩的雌性本性的%ANAME(MASTER)%做愛令她的心裡充滿了幸福
+					PRINTFORMW 已經完全沉浸在了快感之中的那張臉露出了陶醉的表情、一邊不斷呼喊著並非丈夫的%ANAME(MASTER)%的名字一邊不斷地高潮
+					PRINTFORMW 之後也跨坐在%ANAME(MASTER)%的身上熱情地深吻著、兩人更加激烈地交合起來……
+				CASE 3
+					PRINTFORMW %ANAME(MASTER)%和她、在旅館裡的床上以正常位激烈相愛交合著
+					PRINTFORML 她好像對和%ANAME(MASTER)%做愛感到滿足、用面對愛人的方式進行著熱情的深吻
+					PRINTFORMW 她好像從心底裡愛著、能夠滿足她作為女人的下流慾望的%ANAME(MASTER)%
+					PRINTFORML 每當%ANAME(MASTER)%的肉棒插入、她的雙腿都會緊緊地纏著%ANAME(MASTER)%的腰、把肉棒迎接進膣穴的最深處
+					PRINTFORMW 隨後在高潮的瞬間、她緊緊地抱著%ANAME(MASTER)%、緊緊地貼著、用子宮迎接著精液的注入……
+			ENDSELECT
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失, Ｖ挿入", 0, "情婦的嘴唇", "", "情婦的膣穴", "和姦")
+			PRINTFORML
+			PRINTFORML 充分享受了性愛之後、在天亮前離開了旅館
+			PRINTFORMW 她和%ANAME(MASTER)%在一個長長的深吻之後說「今後、還請疼愛我」、隨後揮手送別了%ANAME(MASTER)%……
+
+		;4回目で愛人になる
+		ELSEIF DVAR:領内ぶらりエロの旅_人妻 == 3
+			PRINTFORML 今天準備去和打過幾次炮的人妻喝酒
+			PRINTFORMW 試著打了聲招呼、她露出高興的笑容迎接%ANAME(MASTER)%
+			PRINTFORML 這次沒怎麼喝醉、安穩地享受著交流的樂趣…
+			PRINTFORMW 當這段歡樂的時光結束之後、她抱著%ANAME(MASTER)%在他的耳邊熱情低語、請求%ANAME(MASTER)%的疼愛
+			PRINTFORML
+			PRINTFORMW 說起來、也許是因為和%ANAME(MASTER)%性愛之後肉體的欲火得到了滿足吧、
+			PRINTFORMW 和丈夫之間的爭吵也減少了、表面上的關係變好了
+			PRINTFORMW 但是、只有%ANAME(MASTER)%會把自己當作女人來疼愛。只有%ANAME(MASTER)%能夠滿足自己的慾望
+			PRINTFORMW 所以、想要成為%ANAME(MASTER)%的女人……
+			PRINTFORML
+			PRINTFORML 她用水盈盈的眼睛仰望著%ANAME(MASTER)%。那表情就像是戀愛中的少女
+			PRINTFORML ･･･
+			PRINTFORMW 如此充滿了魅力的女人不被當作女人來看待、真是殘酷啊
+			PRINTFORMW 那就遵從她的願望、把她變成自己的女人吧
+			PRINTFORML %ANAME(MASTER)%把她抱在了懷裡、決定把她帶到旅館做愛
+			PRINTFORMW 之後在和%ANAME(MASTER)%做愛之前、她把無名指上的戒指摘了下來……
+			PRINTFORML
+			SELECTCASE RAND:4
+				CASE 0
+					PRINTFORMW %ANAME(MASTER)%和她、在旅館裡的床上一邊彼此愛撫一邊像野獸一樣激烈交合
+					PRINTFORML 她的眼睛裡浮現著❤、激烈地扭動著腰肢、反復呼喊著%ANAME(MASTER)%的名字
+					PRINTFORMW 被激烈扭動的腰肢刺激著、%ANAME(MASTER)%忍不住緊緊抓住了她的腰、用力地插進了她的肉壺裡面
+					PRINTFORML 和%ANAME(MASTER)%的性愛滿足了她作為女人的喜悅、她感到非常幸福
+					PRINTFORMW 在射精的瞬間、她緊緊地抱住了%ANAME(MASTER)%、用子宮迎接著%ANAME(MASTER)%精液的注入……
+				CASE 1
+					PRINTFORMW %ANAME(MASTER)%和她、在旅館裡的床上一邊深深地舌吻一邊像野獸一樣激烈地交合
+					PRINTFORML 比起沒有把自己當作女人看待的男人、和可以滿足自己淫亂本性的%ANAME(MASTER)%做愛、
+					PRINTFORMW 令她感到了極致的幸福、這種幸福感讓她的肉體變得更加敏感
+					PRINTFORMW %ANAME(MASTER)%也為一名女人選擇了自己而不是她的丈夫這個背德的事實、令肉棒更加脹大堅挺、更加渴求著她
+					PRINTFORMW 兩人互相探索著彼此、不斷挺動著腰肢貪求著背德的快感……
+				CASE 2
+					PRINTFORMW %ANAME(MASTER)%和她、在旅館裡的床上一邊愛撫著彼此一邊以騎乘位激烈地交合著
+					PRINTFORML 她把手放在心愛的%ANAME(MASTER)%的肚子上、一邊發出狂野的喘息聲一邊激烈地上下扭動著腰肢
+					PRINTFORMW 和能夠接受自己淫蕩的雌性本性的%ANAME(MASTER)%做愛令她的心裡充滿了幸福
+					PRINTFORMW 已經完全沉浸在了快感之中的那張臉露出了陶醉的表情、一邊不斷呼喊著並非丈夫的%ANAME(MASTER)%的名字一邊反復地高潮
+					PRINTFORMW 之後也跨坐在%ANAME(MASTER)%的身上熱情地深吻著、兩人更加激烈地交合起來……
+				CASE 3
+					PRINTFORMW %ANAME(MASTER)%和她、在旅館裡的床上以正常位激烈交合著
+					PRINTFORML 她好像對和%ANAME(MASTER)%做愛感到滿足、用面對愛人的方式進行著熱情的深吻
+					PRINTFORMW 她好像從心底裡愛著、能夠滿足她作為女人的下流慾望的%ANAME(MASTER)%
+					PRINTFORML 每當%ANAME(MASTER)%的肉棒插入、她的雙腿都會緊緊地纏著%ANAME(MASTER)%的腰、把肉棒迎接進膣穴的最深處
+					PRINTFORMW 隨後在高潮的瞬間、她緊緊地抱著%ANAME(MASTER)%、緊緊地貼著、用子宮迎接著精液的注入……
+			ENDSELECT
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失, Ｖ挿入", 0, "情婦的嘴唇", "", "情婦的膣穴", "和姦")
+			PRINTFORML
+			PRINTFORML 充分享受了性愛之後、在天亮前離開了旅館
+			PRINTFORMW 她和%ANAME(MASTER)%在一個長長的深吻之後說「今後、還請疼愛我」、隨後揮手送別了%ANAME(MASTER)%……
+			PRINTFORMW 人妻成為了%ANAME(MASTER)%的情婦
+			DVAR:領内ぶらりエロの旅_人妻 += 1
+
+		;2回目以降
+		ELSEIF DVAR:領内ぶらりエロの旅_人妻 >= 1
+			PRINTFORMW 說起來、之前有過一夜情的人妻給了我聯繫方式
+			PRINTFORML 去上面寫著的酒吧裡面、看到她正在裡面喝著酒
+			PRINTFORML 今天也一起喝酒吧、試著打了聲招呼
+			PRINTFORMW 這次也喝醉了、倒在了酒瓶堆裡
+			PRINTFORML 之前和%ANAME(MASTER)%做愛、讓她的身體再次感受到了性愛的快感
+			PRINTFORML 她的丈夫對於夜生活毫不關心、所以她對於經常沒有姓生活這點非常的不滿
+			PRINTFORMW 聽說今天也吵架了
+			PRINTFORMW 被爛醉如泥的她抱著的%ANAME(MASTER)%、決定這次也陪著她一起喝酒
+			PRINTFORML ･･･
+			PRINTFORMW ･･････
+			PRINTFORMW %ANAME(MASTER)%這次也被醉醺醺的她請求、決定就這樣和她到旅館裡做愛……
+			PRINTFORML
+			SELECTCASE RAND:4
+				CASE 0
+					PRINTFORML %ANAME(MASTER)%和她、在旅館裡的床上一邊彼此愛撫一邊像野獸一樣交合
+					PRINTFORMW 她披頭散髮激烈地扭動著腰、一直喊著%ANAME(MASTER)%的名字
+					PRINTFORMW 被激烈扭動的腰肢刺激著、%ANAME(MASTER)%忍不住緊緊抓住了她的腰
+					PRINTFORMW 忍耐不住的按照她的要求躺在床上任由她扭動著腰、一次又一次的在她的膣穴之中射出濃稠的精液……
+				CASE 1
+					PRINTFORML %ANAME(MASTER)%和她、在旅館裡的床上一邊激烈地舌吻一邊像野獸一樣交合
+					PRINTFORMW 把丈夫拋到腦後、誘惑其他男人做愛這樣不忠貞的行為、讓她感到興奮不已、身體變得更加敏感了
+					PRINTFORMW %ANAME(MASTER)%也同樣もまた、因為和人妻做愛的背德感混合著醉意、這種禁忌和興奮令肉棒比以往更加粗大和堅挺
+					PRINTFORMW 兩人互相探索著彼此、不斷挺動著腰肢貪求著背德的快感……
+				CASE 2
+					PRINTFORMW %ANAME(MASTER)%和她、在旅館裡的床上一邊愛撫著彼此一邊以騎乘位激烈地交合著
+					PRINTFORMW 她把手放在%ANAME(MASTER)%的肚子上、自己激烈地上下扭動著腰肢
+					PRINTFORMW 已經完全沉浸在了快感之中的那張臉露出了陶醉的表情、一邊不斷呼喊著並非丈夫的%ANAME(MASTER)%的名字一邊高潮了
+					PRINTFORMW 因為接受了自己那淫亂的本性而感到性福、兩人激烈地交合著……
+				CASE 3
+					PRINTFORML %ANAME(MASTER)%和她、在旅館裡的床上以正常位激烈交合著
+					PRINTFORMW 她好像很享受和%ANAME(MASTER)%做愛的樣子、就像情人一樣進行著熱情的舌吻
+					PRINTFORMW 因為丈夫滿足不了女人的欲求、她愛上了代替丈夫滿足她的%ANAME(MASTER)%
+					PRINTFORMW 她在高潮的瞬間、緊緊地抱住%ANAME(MASTER)%、把精液引進了子宮裡面……
+			ENDSELECT
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失", 0, "", "", "路人人妻的膣穴", "和姦")
+			PRINTFORML
+			PRINTFORMW 充分享受了性愛之後、在天亮前離開了旅館
+			PRINTFORMW 最後她和%ANAME(MASTER)%擁吻之後說「下次、再見吧」、然後離開了……
+			DVAR:領内ぶらりエロの旅_人妻 += 1
+
+		;1回目
+		ELSE
+			PRINTFORMW 要陪一個在酒吧喝酒的女人一起喝
+			PRINTFORML 該怎麼辦？
+			PRINTL
+			CALL ASK_YN("打招呼" ,"放著不管")
+			IF RESULT == 1
+				PRINTFORML 看來醉得很厲害
+				PRINTFORMW 因為覺得麻煩所以離開了
+				RETURN
+			ENDIF
+			PRINTFORMW 為什麼要一個人喝酒、試著問了下
+			PRINTFORMW 她醉得很厲害、倒在了酒瓶堆裡
+			PRINTFORML 聽她說她和她丈夫的關係似乎非常冷漠
+			PRINTFORMW 今天也因為吵架而自暴自棄的來這裡喝酒
+			PRINTFORMW 被爛醉如泥的她緊緊抱著的%ANAME(MASTER)%沒辦法、只好陪著她一起喝酒
+			PRINTFORML ･･･
+			PRINTFORMW ･･････
+			PRINTFORML 在那之後%ANAME(MASTER)%醉醺醺地按照她的要求帶著她去了旅館
+			PRINTFORMW %ANAME(MASTER)%和她在旅館的房間裡像野獸一般貪婪交合
+			PRINTFORMW 她披頭散髮激烈地扭動著腰、一直喊著%ANAME(MASTER)%的名字
+			PRINTFORMW 被激烈扭動的腰肢刺激著、%ANAME(MASTER)%忍不住緊緊抓住了她的腰
+			PRINTFORMW 忍耐不住的按照她的要求躺在床上任由她扭動著腰、一次又一次的在她的膣穴之中射出濃稠的精液……
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失", 0, "", "", "路人人妻的膣穴", "和姦")
+			PRINTFORML
+			PRINTFORMW 充分享受了性愛之後、在天亮前離開了旅館
+			PRINTFORMW 她最後和%ANAME(MASTER)%激烈地舌吻之後交換了彼此的聯絡方式之後就匆匆離開了
+			DVAR:領内ぶらりエロの旅_人妻 = 1
+		ENDIF
+	;歓楽街（乱交パーティー)
+	CASE 1
+		PRINTFORMW 去歡樂街看看吧
+		PRINTFORML …
+		PRINTFORMW ……
+		;1/4で歓楽街で遊んでいるキャラと遭遇
+		IF !RAND:4
+			PRINTFORMW 在歡樂街和%ANAME(対象)%相遇了
+			SIF CFLAG:対象:面識 == 0
+				CFLAG:対象:面識 = 1
+			PRINTFORML 看來%ANAME(対象)%も、也在享受著悠閒的假日
+			PRINTFORMW 因為剛好也有空。所以提出了一起散步的邀請、%ANAME(対象)%欣然同意
+			PRINTFORMW 兩人在街上愉快地一邊交談一邊散步了……
+			CFLAG:対象:好感度 += 50
+			RETURN
+		ENDIF
+		IF DVAR:領内ぶらりエロの旅_乱交パーティー >= 1
+			PRINTFORMW 在歡樂街散步時、以前搭訕過的奇怪女人接近了%ANAME(MASTER)%
+			PRINTFORML 和上次一樣的派對，要來嗎
+			PRINTFORMW ……那家店裡面、好像又有亂交派對了
+			PRINTFORMW 因為沒有拒絕的理由、所以接受了女人的邀請
+			PRINTFORMW 知悉後、女人露出了淫猥的笑容再次把%ANAME(MASTER)%帶到了那家店的地下室內
+			PRINTFORML ･･･
+			PRINTFORMW ･･････
+			SELECTCASE RAND:5
+				CASE 0
+					PRINTFORMW 那裡依舊亂糟糟地擠滿了無數赤身裸體的女人
+					PRINTFORML 伴隨著巨大的音樂聲、房間內響起了下流的喘息呻吟聲
+					PRINTFORMW 整個地下室內充滿了濃郁的雌性氣息讓人不禁回想起上一次的亂交派對、%ANAME(MASTER)%也感覺到體內的欲火燃燒了起來
+					PRINTFORMW 上次和%ANAME(MASTER)%性交的少女、再次找上了%ANAME(MASTER)%、抱住了他。一邊愛撫著彼此一邊把衣服脫了下來
+					PRINTFORML 完全硬挺起來的%ANAME(MASTER)%一邊粗暴地堵住了少女的嘴唇和少女舌吻、一邊把衣服都脫光了
+				CASE 1
+					PRINTFORMW %ANAME(MASTER)%再次參加了有著無數女人的亂交派對
+					PRINTFORML 這個空間充滿了濃郁的雌性氣息以及巨大的音樂、令人感到非常的迷幻
+					PRINTFORMW %ANAME(MASTER)%脫掉了自己的衣服、化為了一匹雄性野獸撲到了面前的雌性身上
+					PRINTFORMW 擁有著小麥色皮膚的少女高興地嬌喘著、享受著和%ANAME(MASTER)%的性愛
+					PRINTFORML 那可愛的嬌喘聲以及緊緻的肌膚令%ANAME(MASTER)%更加興奮
+				CASE 2
+					PRINTFORMW 再次參加亂交派對、%ANAME(MASTER)%感到非常爽
+					PRINTFORML 在那些解放了慾望的女人之中、有一名非常引人注目的女性
+					PRINTFORMW 她有著濃密的尾巴、頭上有著直立的獸耳。看起來像是狐妖娘的樣子
+					PRINTFORML 看來這個派對裡面有平時不能明目張膽的襲擊男人的妖怪娘
+					PRINTFORMW 而這個派對就成為了一場能明目張膽相遇的活動
+					PRINTFORMW %ANAME(MASTER)%立馬上前和她搭訕、充分享受了她那毛茸茸的尾巴和妖怪小穴
+				CASE 3
+					PRINTFORMW 再次參加亂交派對、%ANAME(MASTER)%感到非常爽
+					PRINTFORML 在那些解放了慾望的女人之中、有一名嬌喘聲非常大的少女
+					PRINTFORMW 她有一團蓬鬆的小尾巴、如果揉起來肯定很舒服。頭上長著長長的獸耳。看起來是兔妖娘的樣子
+					PRINTFORML 看來這個亂交派對上都是無法壓抑自己發情的女性、來這裡尋找男人做愛配種
+					PRINTFORMW %ANAME(MASTER)%立馬和她搭訕、和兔妖娘性愛了許多次
+					PRINTFORMW 不愧是兔妖、雖然身形嬌小、但卻很輕易地把肉棒插了就去、她劇烈地上下扭動著腰肢
+				CASE 4
+					PRINTFORMW %ANAME(MASTER)%再次參加了無數無數女人赤裸著亂交的快樂派對
+					PRINTFORML 這個空間充滿了濃郁的雌性氣息以及巨大的音樂、、簡直就像是與日常世界分離的異世界一樣
+					PRINTFORMW %ANAME(MASTER)%現在正在和兩名少女性愛
+					PRINTFORML 兩人的肉體都非常豐滿、享受著被%ANAME(MASTER)%蹂躪的樂趣
+					PRINTFORMW 看來她們都是亂交派對的常客、通過熟練的雙重接吻、雙重口交、雙重乳交不斷地榨取著精液
+					PRINTFORMW 在那柔軟的肌膚和芳醇的技巧之中、%ANAME(MASTER)%射到渾身發軟…
+			ENDSELECT
+			PRINTFORMW %ANAME(MASTER)%整晚都和她們一起沉溺在肉慾的歡宴之中、在彼此索求之下不斷地做愛
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失, Ｖ挿入", 0, "路人少女的嘴唇", "", "路人少女的膣穴", "乱交")
+			PRINTFORML
+			PRINTFORMW 徹底滿足了的%ANAME(MASTER)%表達了希望下一次亂交派對也繼續參加的意願之後離開了
+		;1回目
+		ELSE
+			PRINTFORMW 在歡樂街中散著步的時候、一名奇怪的女人走了過來
+			PRINTFORML 不來做舒服的事情嗎、這麼問道
+			PRINTFORMW 對此感到奇怪的%ANAME(MASTER)%詢問了詳細情況
+			PRINTFORMW 原來這家店的地下面聚集著很多女人、在做著很下流的事情
+			PRINTFORMW ……也就是說、聚集著許多亂交派對的參與者、卻缺少了一名必須的男人
+			PRINTFORMW 雖說是歡樂街、但卻沒想到在白天也能接受到這種邀請……
+			PRINTFORML
+			CALL ASK_MULTI("參加一下", "抓住這個女人", "不要")
+			IF RESULT == 2
+				PRINTFORML 沒興趣
+				PRINTFORML 應付了一下這個女人就走了……
+				RETURN
+			ELSEIF RESULT == 1
+				PRINTFORML 你做的事情是無法原諒的！
+				PRINTFORML %ANAME(MASTER)%表明身份抓住了女人、交給了士兵……
+				RETURN
+			ELSE
+				PRINTFORML 很感興趣
+				PRINTFORMW %ANAME(MASTER)%決定接受女人的邀請
+				PRINTFORMW 知悉後、女人露出了淫猥的笑容把%ANAME(MASTER)%帶到了那家店的地下室內
+				PRINTFORML
+				PRINTFORMW 那裡亂糟糟地擠滿了無數赤身裸體的女人
+				PRINTFORML 伴隨著巨大的音樂聲、房間內響起了下流的喘息呻吟聲
+				PRINTFORMW 整個地下室內充滿了濃郁的雌性氣息、%ANAME(MASTER)%也感覺到體內的欲火燃燒了起來
+				PRINTFORMW 一名赤裸的少女過來把%ANAME(MASTER)%緊緊抱住、一邊愛撫著彼此一邊把衣服脫了下來
+				PRINTFORML 完全硬挺起來的%ANAME(MASTER)%一邊粗暴地堵住了少女的嘴唇和少女舌吻、一邊把衣服都脫光了
+				PRINTFORMW %ANAME(MASTER)%整晚都和她們一起沉溺在肉慾的歡宴之中、在彼此索求之下不斷地做愛
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失, Ｖ挿入", 0, "路人少女的嘴唇", "", "路人少女的膣穴", "乱交")
+				PRINTFORML
+				PRINTFORMW 徹底滿足了的%ANAME(MASTER)%表達了希望下一次亂交派對也繼續參加的意願之後離開了
+				DVAR:領内ぶらりエロの旅_乱交パーティー = 1
+			ENDIF
+		ENDIF
+
+	;町中をぶらぶら（複数パターンあり）
+	CASE 2
+		PRINTFORMW 在街上閒逛吧
+		PRINTFORML …
+		PRINTFORML ……
+		;1/4で町をぶらついているキャラと遭遇
+		IF !RAND:4
+			PRINTFORMW 在街上閒逛著的時候、突然遇到了%ANAME(対象)%
+			SIF CFLAG:対象:面識 == 0
+				CFLAG:対象:面識 = 1
+			PRINTFORML 好像正在閒逛著、準備找點吃的
+			PRINTFORMW …說起來自己的肚子也餓了
+			PRINTFORML 於是%ANAME(MASTER)%決定和%ANAME(対象)%一起去吃東西
+			PRINTFORML …
+			PRINTDATAW
+			DATAFORM 和%ANAME(対象)%一起吃了盖饭
+			DATAFORM 和%ANAME(対象)%一起吃了天婦羅蕎麥麵
+			DATAFORM 和%ANAME(対象)%一起吃了稻荷壽司
+			DATAFORM 和%ANAME(対象)%一起在茶館吃了各種各樣的丸子
+			DATAFORM 和%ANAME(対象)%一起吃了油炸豆腐面
+			DATAFORM 在高檔咖啡店、和%ANAME(対象)%一起享受了午餐
+			ENDDATA
+			PRINTFORMW 午餐結束之後、和%ANAME(対象)%揮手道別……
+			CFLAG:対象:好感度 += 70
+			RETURN
+		ENDIF
+		SELECTCASE RAND:3
+			;恋文
+			CASE 0
+				IF DVAR:領内ぶらりエロの旅_恋文 >= 4
+					PRINTFORMW 去接受了告白、已經成為了戀人的少女家裡玩吧
+					PRINTFORML 在少女家門口、看到了%ANAME(MASTER)%的少女滿臉笑容
+					PRINTFORMW 今天約會吧
+					PRINTFORMW 她欣然同意、決定兩人一起出去約會
+					PRINTFORML 兩人度過了一段歡樂的時光……
+					PRINTFORMW ･･･
+					PRINTFORML 在把她送到家門口的時候、她滿臉通紅地抱著%ANAME(MASTER)%、雙眼濕潤地望著他、
+					PRINTFORMW 今天父母都不在家
+					PRINTFORMW %ANAME(MASTER)%理解了她的想法、把她抱起來走進了她的房間裡面……
+					PRINTFORML
+					SELECTCASE RAND:3
+						CASE 0
+							PRINTFORMW 她的身體還是那麼的柔軟緊緻、已經真正變成了%ANAME(MASTER)%喜愛的肉體
+							PRINTFORMW 在%ANAME(MASTER)%的調教之下身體的敏感度變得更高了、可愛的身體在刺激下不斷扭動著、令%ANAME(MASTER)%大飽眼福
+							PRINTFORMW 和撒嬌般地緊緊纏住自己的少女深深地接吻著、在她的期待之下把精子射進了她的肉體深處……
+						CASE 1
+							PRINTFORMW 她在%ANAME(MASTER)%的愛撫下嬌喘不已、不斷襲來的快感令身體不斷跳動著
+							PRINTFORMW 在%ANAME(MASTER)%的懷抱裡、原本就很敏感的肉體變得更加敏感了、還發出了下流的雌性喘息聲
+							PRINTFORMW 隨後%ANAME(MASTER)%在她的蜜壺深處射出了她已經成為了自己女人證明的精液……
+						CASE 2
+							PRINTFORMW 她用著充滿了愛意的淫蕩表情奉仕著%ANAME(MASTER)%的肉棒
+							PRINTFORMW 因為被%ANAME(MASTER)%不斷的調教、現在已經可以輕鬆地用喉嚨深處榨取精液了
+							PRINTFORMW 撫摸著她那因為美味而把精液完全吞下去的頭、%ANAME(MASTER)%決定用那依舊怒挺著的不斷跳動著的肉棒讓她感受作為女人的快感……
+					ENDSELECT
+					CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失, 接吻喪失", 0, "成為戀人的少女的嘴唇", "", "成為戀人的少女的膣穴", "和姦")
+					PRINTFORML
+					PRINTFORMW …兩人做愛一直做到了深夜
+					PRINTFORMW 隨後分別的時候、兩人久久地深吻著、約定了下次繼續見面……
+
+				ELSEIF DVAR:領内ぶらりエロの旅_恋文 >= 2
+					PRINTFORMW 去之前進行了告白的少女家裡玩吧
+					PRINTFORML ……
+					PRINTFORMW 走在街上、來到了給%ANAME(MASTER)%情書的少女的家門前
+					PRINTFORML 剛叫門、她就滿臉通紅地出現在了門口
+					PRINTFORMW 今天也為了互相了解而約會吧
+					PRINTFORMW 她欣然同意、決定兩人一起出去約會
+					PRINTFORML 兩人度過了一段歡樂的時光……
+					PRINTFORMW ･･･
+					PRINTFORMW 在經過旅館門前的時候、她滿臉通紅地抱著%ANAME(MASTER)%、雙眼濕潤地望著他
+					PRINTFORMW %ANAME(MASTER)%答應了她的請求、摟著她的肩膀走進了旅館裡面……
+					PRINTFORML
+					SELECTCASE RAND:3
+						CASE 0
+							PRINTFORMW 她的身體還是那麼的柔軟緊緻、實在是%ANAME(MASTER)%喜愛的肉體
+							PRINTFORMW 肉體敏感到讓人無法想象之前還是處女、可愛的身體在刺激下不斷扭動著、令%ANAME(MASTER)%大飽眼福
+							PRINTFORMW %ANAME(MASTER)%把自己的烙印和濃濃的愛意深深地刻印在了撒嬌般地緊緊纏住自己的少女體內……
+						CASE 1
+							PRINTFORMW 她在%ANAME(MASTER)%的愛撫下嬌喘不已、不斷襲來的快感令身體不斷跳動著
+							PRINTFORMW 肉體敏感到讓人無法想象之前還是處女、可愛的嬌喘聲令人耳朵都酥了
+							PRINTFORMW %ANAME(MASTER)%把自己的肉棒狠狠地貫穿了撒嬌般地緊緊纏住自己的少女的秘裂、教給了她作為女人快樂……
+						CASE 2
+							PRINTFORMW 她雖然磕磕絆絆但卻非常認真地奉仕著%ANAME(MASTER)%的肉棒
+							PRINTFORMW 她那舔舐著男人的感覺令人不敢相信她之前還是個處女
+							PRINTFORMW 被她的奉仕而感動的%ANAME(MASTER)%撫摸著她的頭、決定讓她更加的舒服……
+					ENDSELECT
+					DVAR:領内ぶらりエロの旅_恋文 += 1
+					CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失, 接吻喪失", 0, "路過的少女的嘴唇", "", "路過的少女的膣穴", "和姦")
+					PRINTFORML
+					PRINTFORMW 兩人更加深刻地了解了彼此…
+					SIF DVAR:領内ぶらりエロの旅_恋文 == 4
+						PRINTFORML 兩人通過肉體的交合、成為了戀人
+					PRINTFORMW %ANAME(MASTER)%約好了再會之後、向她告別了
+					PRINTFORMW 她紅著臉揮舞著手、直到看不到%ANAME(MASTER)%的身影為止
+
+				;恋文を受け取った場合
+				ELSEIF DVAR:領内ぶらりエロの旅_恋文 == 1
+					PRINTFORMW 說起來、上次收到了情書
+					PRINTFORML 去向她作出回答吧
+					PRINTFORML ……
+					PRINTFORMW 走在街上、來到了給%ANAME(MASTER)%情書的少女的家門前
+					PRINTFORML 剛叫門、她就滿臉通紅地出現在了門口
+					PRINTFORMW 她扭扭捏捏地等待著結果…
+					PRINTFORML 讀完了信的%ANAME(MASTER)%告訴少女、在沒有相互了解的情況下不會答應交往
+					PRINTFORMW 所以、對著不知所措的少女提議、要更多的相互了解
+					PRINTFORMW 理解了話裡意思的她、滿臉通紅地帶著%ANAME(MASTER)%進入了自己家裡……
+					PRINTFORMW
+					PRINTFORMW 她的肉體非常的柔軟緊緻、%ANAME(MASTER)%非常喜歡
+					PRINTFORMW 雖然是處女但卻非常的敏感、可愛的身體在刺激下不斷扭動著、令%ANAME(MASTER)%大飽眼福
+					PRINTFORMW 於是%ANAME(MASTER)%在呻吟著的少女身體裡、刻印上了自己的烙印……
+					CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失, 接吻喪失", 0, "路過的少女的嘴唇", "", "路過的少女的膣穴", "和姦")
+					PRINTFORML
+					PRINTFORMW 約好了再會之後、和她道別了
+					DVAR:領内ぶらりエロの旅_恋文 += 1
+
+				;1回目
+				ELSE
+					PRINTFORMW %ANAME(MASTER)%正在街上散步的時候、突然被一名少女大聲叫住了
+					PRINTFORML %ANAME(MASTER)%詢問到底有什麼事情、少女遞了封信過來
+					PRINTFORMW 好像是情書啊
+					PRINTFORMW 少女的臉漲得通紅……
+					PRINTFORML
+					CALL ASK_MULTI("姑且接受", "拒絕", "帶進旅館")
+					IF RESULT == 0
+						PRINTFORML 因為太過於突然了所以不能馬上回答、但是會把情書先收下來
+						PRINTFORMW %ANAME(MASTER)%說完之後、她微微點了點頭快步離開了
+						DVAR:領内ぶらりエロの旅_恋文 = 1
+					ELSEIF RESULT == 1
+						PRINTFORML 真是可惜，不能如願了
+						PRINTFORMW 說著、她垂頭喪氣地離開了
+					ELSE
+						PRINTFORML 讀完了信的%ANAME(MASTER)%告訴少女、在沒有相互了解的情況下不會答應交往
+						PRINTFORMW 所以、對著不知所措的少女提議、要更多的相互了解
+						PRINTFORMW 理解了話裡意思的她、滿臉通紅地被%ANAME(MASTER)%帶進了旅館裡面……
+						PRINTFORMW
+						PRINTFORMW 她的肉體非常的柔軟緊緻、%ANAME(MASTER)%非常喜歡
+						PRINTFORMW 雖然是處女但卻非常的敏感、可愛的身體在刺激下不斷扭動著、令%ANAME(MASTER)%大飽眼福
+						PRINTFORMW 於是%ANAME(MASTER)%在呻吟著的少女身體裡、刻印上了自己的烙印……
+						CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失, 接吻喪失", 0, "路過的少女的嘴唇", "", "路過的少女的膣穴", "和姦")
+						PRINTFORML
+						PRINTFORMW 約好了再會之後、和她道別了
+						DVAR:領内ぶらりエロの旅_恋文 = 2
+					ENDIF
+				ENDIF
+			;逆ナンパ
+			CASE 1
+				IF DVAR:領内ぶらりエロの旅_ナンパ >= 4
+					PRINTFORMW 說起來、上次被搭訕的炮友就在這附近
+					PRINTFORMW 難得來一次、去見個面吧
+					PRINTFORML …
+					PRINTFORMW ……
+					PRINTFORMW 她就在約定好的地方等著。依舊是那個符合%ANAME(MASTER)%性癖的好女人
+					PRINTFORML 她看見%ANAME(MASTER)%之後、對著%ANAME(MASTER)%飛吻誘惑著他
+					PRINTFORMW %ANAME(MASTER)%接受了她的邀請、被她拉著手進入了她的家裡…
+					PRINTFORMW
+					SELECTCASE RAND:3
+						CASE 0
+							PRINTFORMW 兩人的身體非常的契合、在床上激烈地彼此索求著
+							PRINTFORML 她膣穴內的肉壁、就像要和肉棒融合起來一般緊緊吸住龜頭、每當%ANAME(MASTER)%抽插都會有過電般的強烈快感
+							PRINTFORMW 她的膣穴已經緊緊貼合到記住了%ANAME(MASTER)%肉棒的形狀、每當子宮口被撞擊就會發出淫媚的嬌喘聲
+							PRINTFORMW 兩人多次高潮、享受了一夜的性愛……
+						CASE 1
+							PRINTFORMW 兩人在她房間的床上、互相激烈地貪求著彼此的身體
+							PRINTFORML 她跨坐在%ANAME(MASTER)%的臉上、一邊暴露著自己的秘所一邊用嘴含住了%ANAME(MASTER)%的肉棒
+							PRINTFORMW %ANAME(MASTER)%也不甘示弱、用舌頭不斷舔弄著她的秘裂
+							PRINTFORMW 舌頭不斷地來回摩擦著陰唇、親吻著陰蒂、陰道的肉壁因為渴求著%ANAME(MASTER)%的肉棒而蠢蠢欲動著
+							PRINTFORMW 在兩人充分享受了互相奉仕之後、進行了多次的性交、享受了一夜的性愛……
+						CASE 2
+							PRINTFORMW 兩人在床上激烈地交合著、不顧家附近的人可能會聽到聲音
+							PRINTFORMW %ANAME(MASTER)%以後立體位的姿勢緊緊抓著她的腰仿佛在阻止她的逃跑、用力地挺動著腰肢撞擊著她的子宮
+							PRINTFORMW 她的手趴在墻壁上、配合著肉棒的抽插激烈地扭動著腰、好令自己能夠更清晰地感受子宮被撞擊的快感
+							PRINTFORML 房間裡迴蕩著因為激烈的侵犯而不斷發出的淫蕩的雌性呻吟聲
+							PRINTFORMW 兩人在不斷的高潮之中激烈地貪求著彼此……
+					ENDSELECT
+					CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失, 接吻喪失", 0, "女炮友的嘴唇", "", "女炮友的膣穴", "和姦")
+					PRINTFORML
+					IF DVAR:領内ぶらりエロの旅_ナンパ == 4
+						PRINTFORMW 在激烈的性愛結束之後、她難得地說還想要見面
+						PRINTFORML 沒有比這副身體更契合的對象了。和%ANAME(MASTER)%的性愛能夠滿足自己的心靈…和
+						PRINTFORMW 聽了她說的話之後、%ANAME(MASTER)%緊抱著她、兩人深深地接吻著
+						PRINTFORMW 就像是要把對方的味道銘刻在身體裡一樣、兩人在分別前一直擁抱著、久久地深吻著……
+						RETURN
+					ENDIF
+					PRINTFORMW 結束了激烈的性愛的兩人進行了激烈的接吻、約好了再會之後分手了……
+
+				ELSEIF DVAR:領内ぶらりエロの旅_ナンパ >= 1
+					PRINTFORMW 說起來、上次在這裡被一位女人搭訕了、還互相交換了聯繫方式
+					PRINTFORMW 難得來一次、再去和她見個面吧
+					PRINTFORML …
+					PRINTFORMW ……
+					PRINTFORMW 她就在約好的地方。依舊是哪個符合%ANAME(MASTER)%性癖的女人
+					PRINTFORML 她看到向她走過去的%ANAME(MASTER)%、美艷地展示著自己的肉體、誘惑著%ANAME(MASTER)%
+					PRINTFORMW %ANAME(MASTER)%接受了她的邀請、被她抱著手臂走進了附近的旅店…
+					PRINTFORMW
+					SELECTCASE RAND:3
+						CASE 0
+							PRINTFORMW 兩人的身體果然非常的契合、在床上激烈地彼此索求著
+							PRINTFORML 她膣穴內的肉壁、就像要和肉棒融合起來一般緊緊吸住龜頭、每當%ANAME(MASTER)%抽插都會有過電般的強烈快感
+							PRINTFORMW 她的膣穴已經緊緊貼合到記住了%ANAME(MASTER)%肉棒的形狀、每當子宮口被撞擊就會發出淫媚的嬌喘聲
+							PRINTFORMW 兩人多次高潮、享受了一夜的性愛……
+						CASE 1
+							PRINTFORMW 兩人在旅館的床上、互相激烈地探求著彼此的身體
+							PRINTFORML 她跨坐在%ANAME(MASTER)%的臉上、一邊暴露著自己的秘所一邊用嘴含住了%ANAME(MASTER)%的肉棒
+							PRINTFORMW %ANAME(MASTER)%也不甘示弱、用舌頭不斷舔弄著她的秘裂
+							PRINTFORMW 舌頭不斷地來回摩擦著陰唇、親吻著陰蒂、陰道的肉壁因為渴求著%ANAME(MASTER)%的肉棒而蠢蠢欲動著
+							PRINTFORMW 在兩人充分享受了互相奉仕之後、進行了多次的性交、享受了一夜的性愛……
+						CASE 2
+							PRINTFORMW 兩人在床上激烈地交合著、不顧隔壁的人可能會聽到聲音
+							PRINTFORMW %ANAME(MASTER)%以後立體位的姿勢緊緊抓著她的腰仿佛在阻止她的逃跑、用力地挺動著腰肢撞擊著她的子宮
+							PRINTFORMW 她的手趴在墻壁上、配合著肉棒的抽插激烈地扭動著腰、好令自己能夠更清晰地感受子宮被撞擊的快感
+							PRINTFORML 房間裡迴蕩著因為激烈的侵犯而不斷發出的淫蕩的雌性呻吟聲
+							PRINTFORMW 兩人在不斷的高潮之中激烈地貪求著彼此……
+					ENDSELECT
+					DVAR:領内ぶらりエロの旅_ナンパ += 1
+					CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失, 接吻喪失", 0, "路過女人的嘴唇", "", "路過女人的膣穴", "和姦")
+					PRINTFORML
+					SIF DVAR:領内ぶらりエロの旅_ナンパ == 4
+						PRINTFORML 兩人完全確立了追求彼此肉體的炮友關係
+					PRINTFORMW 結束了性愛的兩人、用深吻代替語言進行了告別
+				;1回目
+				ELSE
+					PRINTFORMW 在街上散步的時候、被搭訕了
+					PRINTFORML 是符合%ANAME(MASTER)%性癖的女人
+					PRINTFORMW 她美艷地展示著自己的肉體、誘惑著%ANAME(MASTER)%
+					PRINTFORMW 怎麼辦？
+					PRINTFORML
+					CALL ASK_YN("接受邀請", "拒絕邀請")
+					IF RESULT == 1
+						PRINTFORML 真不巧、我現在心情不好
+						PRINTFORMW 把糾纏不休的對方甩開之後繼續散步了……
+						RETURN
+					ENDIF
+					PRINTFORMW %ANAME(MASTER)%接受了她的邀請、被她抱著手臂走進了附近的旅店
+					PRINTFORML
+					PRINTFORMW 和她的身體契合度非常的高、在享受了一整晚的性愛之中連續高潮了好多次
+					CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失, 接吻喪失", 0, "路過女人的嘴唇", "", "路過女人的膣穴", "和姦")
+					PRINTFORML
+					PRINTFORMW 和對方相互交換了聯繫方式之後、用深吻代替語言進行了告別
+					DVAR:領内ぶらりエロの旅_ナンパ = 1
+				ENDIF
+			;賣花的少女
+			CASE 2
+				IF DVAR:領内ぶらりエロの旅_花売り >= 1
+					PRINTFORMW 在街上閒逛的時候、被曾經買過身體的賣花少女搭訕了
+					PRINTFORML 還能再買我一次嗎？　這麼說著、少女扭扭捏捏地紅著臉…
+					PRINTFORML
+					CALL ASK_MULTI_JUDGE("買下她", MONEY >= 1000, "拒絕", 1)
+					IF RESULT == 1
+						PRINTFORML 今天心情不好
+						PRINTFORML 被拒絕之後、少女悲傷地轉身離開了……
+						RETURN
+					ENDIF
+					PRINTFORMW 那就把你買了吧
+					PRINTFORML 雖然少女有些害羞、但還是有些開心的樣子
+					PRINTFORMW 少女抱著%ANAME(MASTER)%的手臂、帶到了自己家裡
+					PRINTFORML
+					SELECTCASE RAND:3
+						CASE 0
+							PRINTFORMW 少女一副熟練的樣子開始奉仕著%ANAME(MASTER)%
+							PRINTFORML 雖然青澀卻努力奉仕的樣子刺激著%ANAME(MASTER)%的情慾
+							PRINTFORMW %ANAME(MASTER)%花了很長時間、享受著少女那嬌嫩的肉體……
+						CASE 1
+							PRINTFORMW 少女用熟練的動作奉仕著%ANAME(MASTER)%の的肉棒
+							PRINTFORML 用櫻桃小嘴含著肉棒、舌尖不斷舔弄著馬眼。那技巧絲毫不遜色於身經百戰的妓女
+							PRINTFORMW 這次%ANAME(MASTER)%決定用硬邦邦勃起的肉棒、好好享受她的膣穴……
+						CASE 3
+							PRINTFORMW 在她的房間裡面、兩人像野獸一樣交合著
+							PRINTFORML %ANAME(MASTER)%以後背位緊緊抓著她的腰、重重地把肉棒刺了進去射出精液
+							PRINTFORMW 她因為子宮感受到滿滿的精液射了進來、嬌喘著高潮了……
+					ENDSELECT
+					CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入" + (IS_FEMALE(MASTER) ? ", Ｂ, Ｖ, 百合" # "") , "童貞喪失, 接吻喪失", 0, "賣花少女的嘴唇", "", "賣花少女的膣穴", "和姦")
+					PRINTFORML
+					PRINTFORMW 別れ際に、少女は%ANAME(MASTER)%に口づけてきた
+					DVAR:領内ぶらりエロの旅_花売り += 1
+					; CALL ICPRINT("金<1000>を支払った", "L", カラー_注意)
+					CALL ICPRINT(@"支付了金<{1000}>", "L", カラー_注意)
+					MONEY -= 1000
+				;1回目
+				ELSE
+					PRINTFORMW 在街上閒逛的時候、被少女搭訕了
+					PRINTFORML 請問你願意花10金買下我的花嗎？
+					PRINTFORML
+					CALL ASK_MULTI_JUDGE("買", MONEY >= 10, "把她也買下", MONEY >= 1000, "不需要", 1)
+					IF RESULT == 0
+						PRINTFORML 來都來了
+						PRINTFORML 買了一朵花
+						;CALL ICPRINT("金<10>を支払った", "L", カラー_注意)
+						CALL ICPRINT("支付了金<10>", "L", カラー_注意)
+						MONEY -= 10
+						PRINTFORML 少女道謝後離開了
+					ELSEIF RESULT == 1
+						PRINTFORMW 連你也一起買下來吧
+						PRINTFORML 告知少女之後她臉紅了、但是沒有拒絕
+						PRINTFORMW 少女抱著%ANAME(MASTER)%的手臂、帶到了自己家裡
+						PRINTFORML
+						PRINTFORMW 少女似乎已經習慣了這樣的事情
+						PRINTFORMW 雖然青澀卻努力奉仕的樣子刺激著%ANAME(MASTER)%的情慾
+						PRINTFORMW %ANAME(MASTER)%花了很長時間、享受著少女那嬌嫩的肉體
+						CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入" + (IS_FEMALE(MASTER) ? ", Ｂ, Ｖ, 百合" # "") , "童貞喪失, 接吻喪失", 0, "賣花少女的嘴唇", "", "賣花少女的膣穴", "和姦")
+						PRINTFORML
+						PRINTFORMW 分别之际，少女亲吻了%ANAME(MASTER)%
+						; PRINTFORMW 別れ際に、少女は%ANAME(MASTER)%に口づけてきた
+						DVAR:領内ぶらりエロの旅_花売り = 1
+						CALL ICPRINT("支付了金<1000>", "L", カラー_注意)
+						; CALL ICPRINT("金<1000>を支払った", "L", カラー_注意)
+						MONEY -= 1000
+					ELSE
+						PRINTFORML 因為不需要所以拒絕了
+						PRINTFORMW %ANAME(MASTER)%繼續在街上閒逛著……
+					ENDIF
+				ENDIF
+		ENDSELECT
+	;夜の繁華街
+	CASE 3
+		PRINTFORMW 晚上的時候去繁華的街道上逛逛吧
+		PRINTFORML …
+		PRINTFORMW ……
+		;1/4で繁華街をうろつくキャラと遭遇
+		IF !RAND:4
+			PRINTFORMW
+			SIF CFLAG:対象:面識 == 0
+				CFLAG:対象:面識 = 1
+			PRINTFORMW 在繁華街閒逛的時候、遇到了已經結束工作的%ANAME(対象)%
+			PRINTFORML %ANAME(対象)%買了些小吃一邊閒逛一邊吃
+			PRINTFORMW 難得來一次決定和對方一起閒逛
+			PRINTFORMW ……一起享受了繁華街的喧囂……
+			CFLAG:対象:好感度 += 50
+			RETURN
+		ENDIF
+		IF DVAR:領内ぶらりエロの旅_セックスオークション >= 3
+			PRINTFORMW 說起來、上次賣淫競拍的妹子給了我特別的聯繫方式
+			PRINTFORMW 要去見她嗎？
+			PRINTFORML
+			CALL ASK_YN("去見她" ,"算了")
+			IF RESULT == 1
+				PRINTFORMW 今天還是算了吧
+				PRINTFORMW %ANAME(MASTER)%在熱鬧的繁華街上閒逛著……
+				RETURN
+			ENDIF
+			PRINTFORMW 難得來一次、決定去寫在聯絡方式上的地址去看看
+			IF DVAR:領内ぶらりエロの旅_セックスオークション == 3
+				PRINTFORMW 聯絡地點的建築物並不像上次一樣、反而是一座普通的額民宅
+				PRINTFORML 叫門之後她就出來了、原來這裡是她的家
+				PRINTFORMW 她看到%ANAME(MASTER)%之後、很開心地招待著%ANAME(MASTER)%進屋
+				PRINTFORML 聽她說、她已經辭掉了賣淫競拍的工作
+				PRINTFORMW 然後、因為想和%ANAME(MASTER)%「個人交往」而把自己的聯繫方式給了%ANAME(MASTER)%
+				PRINTFORMW …既然如此、那麼以後就按照你的願望交往吧
+				PRINTFORML %ANAME(MASTER)%溫柔地把她抱住在她的耳邊輕聲呢喃道
+			ELSEIF DVAR:領内ぶらりエロの旅_セックスオークション >= 4
+				PRINTFORMW %ANAME(MASTER)%去了她家
+				PRINTFORMW 她看到%ANAME(MASTER)%之後、很開心地招待著%ANAME(MASTER)%進屋
+				PRINTFORML 稍微聊了會天之後、她就把身體靠了過來
+				PRINTFORML %ANAME(MASTER)%察覺到她的想法之後溫柔地把她抱在了懷裡
+			ENDIF
+			PRINTFORMW 她仿佛等待了很久似也開心地抱住了%ANAME(MASTER)%的身體、似乎這就是她最喜愛的東西
+			PRINTFORMW 於是%ANAME(MASTER)%摟著已經發情的她的腰在床上開始了「個人交往」…
+			PRINTFORML
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORMW %ANAME(MASTER)%緊緊地抱著她、不斷愛撫著她的全身、揉捏著充滿彈性的柔軟肌膚、溫柔地咬著她的乳頭
+					PRINTFORML 她開心地一邊嬌喘著一邊扭動著身體、緊緊地抱住了%ANAME(MASTER)%
+					PRINTFORMW 兩人無法再忍耐地倒在了床上、%ANAME(MASTER)%把肉棒插進了早已濕透了的秘所裡面
+					PRINTFORMW 「啊嗯❤啊嗯❤不要❤太激烈了❤啊嗯❤」
+					PRINTFORML 在%ANAME(MASTER)%激烈的挺腰抽插下她瘋狂地扭動著自己的身體、不斷收緊的蜜肉刺激著%ANAME(MASTER)%的男根
+					PRINTFORMW %ANAME(MASTER)%不斷轉動著腰部刺激著她的膣肉及陰核、她大幅度地反弓著自己的身體顫抖著發出了呻吟聲
+					PRINTFORMW %ANAME(MASTER)%被她纏著做了一次又一次、徹底享受到了極樂的歡愉
+				CASE 1
+					PRINTFORMW 因為激烈的性愛而變得渾身黏糊糊的兩人、決定洗個澡休息一下
+					PRINTFORML …但是她卻在身上塗滿了沐浴露、緊緊地貼在%ANAME(MASTER)%身上、心醉神迷地摩擦著身體
+					PRINTFORMW 「啊…❤這裡、摩擦到乳頭了…❤好舒服…❤」
+					PRINTFORMW 一邊接吻一邊相互愛撫著彼此的性器、漸漸的兩人忍不住開始性愛
+					PRINTFORMW 結果兩人一邊洗澡一邊激烈地做愛、最後%ANAME(MASTER)%在她的膣穴深處把滿滿的精液注入了進去
+				CASE 2
+					PRINTFORMW 她的膣穴緊緊地把%ANAME(MASTER)%的肉棒整根吞下、以對面座位的方式抱著對方不斷挺動著腰肢
+					PRINTFORML 不斷抽搐的子宮口被龜頭刺激著、她一邊流著口水一邊大聲呻吟
+					PRINTFORMW 「啊嗯❤啊っ❤好舒服❤真的好舒服啊ぉ❤」
+					PRINTFORMW 持續著讓肉體緊緊貼合的激烈性愛、兩人的快感漸漸逼近了極限
+					PRINTFORMW 最後馬眼緊緊貼合著子宮口開始了射精、兩人的腦袋裡充斥著高潮的歡愉
+			ENDSELECT
+			PRINTFORMW %ANAME(MASTER)%充分享受了和她的個人性愛……
+			DVAR:領内ぶらりエロの旅_セックスオークション += 1
+			PRINTFORML
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失, 接吻喪失", 0, "炮友少女的嘴唇", "", "炮友少女的膣穴", "和姦")
+			PRINTFORMW 臨別之際、她一邊親吻著%ANAME(MASTER)%一邊開心地說著、下次再來
+
+		ELSEIF DVAR:領内ぶらりエロの旅_セックスオークション >= 1
+			PRINTFORMW 說起來、上次賣淫競拍的妹子給了我聯繫方式
+			PRINTFORMW 要去見她嗎？
+			PRINTFORML
+			CALL ASK_YN("去見她" ,"算了")
+			IF RESULT == 1
+				PRINTFORMW 今天還是算了吧
+				PRINTFORMW %ANAME(MASTER)%在熱鬧的繁華街上閒逛著……
+				RETURN
+			ENDIF
+			PRINTFORMW 難得來一次、決定先去寫在聯絡方式上的地址去看看
+			PRINTFORMW 在進入聯絡方式上的說的樓里才發現、那裡也在進行著性愛競拍
+			PRINTFORML 看來這不是固定的店、而是會頻繁地改變地點
+			PRINTFORMW 脖子上懸掛著金屬板的女人們渾身赤裸地站在舞台上
+			PRINTFORML 上次被%ANAME(MASTER)%競拍到的女人就在那之中
+			PRINTFORMW 她一看到%ANAME(MASTER)%、就很開心地投了個飛吻過來
+			PRINTFORML …依舊是那副%ANAME(MASTER)%喜歡的美好身體
+			PRINTFORMW %ANAME(MASTER)%決定這次也競拍她
+			PRINTFORMW
+			PRINTFORML …競價雖然非常激烈、但最後還是得到了她
+			PRINTFORMW 她滿臉通紅、氣喘吁吁地被%ANAME(MASTER)%摟著腰進入了準備好的房間裡…
+			PRINTFORML
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORMW %ANAME(MASTER)%一進入了房間就立刻抱住了她、不斷愛撫著她的全身、揉捏著充滿彈性的柔軟肌膚
+					PRINTFORML 她開心地喘息著、不斷扭動著身體誘惑著%ANAME(MASTER)%
+					PRINTFORMW 兩人無法再忍耐地倒在了床上、%ANAME(MASTER)%把肉棒插進了早已濕透了的秘所裡面
+					PRINTFORMW 「啊嗯❤啊嗯❤不要❤太激烈了❤啊嗯❤」
+					PRINTFORML 在%ANAME(MASTER)%激烈的挺腰抽插下她瘋狂地扭動著自己的身體、不斷收緊的蜜肉刺激著%ANAME(MASTER)%的男根
+					PRINTFORMW %ANAME(MASTER)%不斷轉動著腰部刺激著她的膣肉及陰核、她大幅度地反弓著自己的身體顫抖著發出了呻吟聲
+					PRINTFORMW %ANAME(MASTER)%被她纏著做了一次又一次、徹底享受到了超出費用以上的歡愉……
+				CASE 1
+					PRINTFORMW 因為激烈的性愛而變得渾身黏糊糊的兩人、決定洗個澡休息一下
+					PRINTFORML …但是她卻在身上塗滿了沐浴露、緊緊地貼在%ANAME(MASTER)%身上、心醉神迷地摩擦著身體
+					PRINTFORMW 「啊…❤這裡、摩擦到乳頭了…❤好舒服…❤」
+					PRINTFORMW 一邊接吻一邊相互愛撫著彼此的性器、漸漸的兩人忍不住開始性愛
+					PRINTFORMW 結果兩人一邊洗澡一邊激烈地做愛、最後%ANAME(MASTER)%在她的膣穴深處把滿滿的精液注入了進去……
+				CASE 2
+					PRINTFORMW 她的膣穴緊緊地把%ANAME(MASTER)%的肉棒整根吞下、被%ANAME(MASTER)%用立位的姿勢抱著腰不斷地抽插著
+					PRINTFORML 不斷抽搐的子宮口被龜頭刺激著、她一邊流著口水一邊大聲呻吟
+					PRINTFORMW 「啊嗯❤啊っ❤好舒服❤真的好舒服啊ぉ❤」
+					PRINTFORMW 持續著讓肉體緊緊貼合的激烈性愛、兩人的快感漸漸逼近了極限
+					PRINTFORMW 最後馬眼緊緊貼合著子宮口開始了射精、兩人的腦袋裡充斥著高潮的歡愉……
+			ENDSELECT
+			PRINTFORML
+			PRINTFORMW %ANAME(MASTER)%充分享受了和她做愛的歡愉
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失", 0, "", "", "商品少女的膣穴", "和姦")
+			DVAR:領内ぶらりエロの旅_セックスオークション += 1
+			IF DVAR:領内ぶらりエロの旅_セックスオークション == 3
+				PRINTFORMW 離開會場的時候、她偷偷地把特別的聯繫方式寫在紙上遞給了%ANAME(MASTER)%「下次來這裡」
+			ELSE
+				PRINTFORMW 離開會場的時候、她又偷偷地把聯繫方式寫在紙上遞給了%ANAME(MASTER)%
+			ENDIF
+		;1回目
+		ELSE
+			PRINTFORMW 在夜晚的繁華街上閒逛的時候有個男人搭訕了
+			PRINTFORML 據說在前面的店裡面有有趣的東西
+			PRINTFORMW 怎麼辦？
+			PRINTFORML
+			CALL ASK_YN("去看看" ,"離開")
+			IF RESULT == 1
+				PRINTFORMW 因為有點可疑、所以無視他離開了
+				RETURN
+			ENDIF
+			PRINTFORML 輸給了好奇心決定去看看
+			PRINTFORMW 在男人的帶領下進入了地下酒吧
+			PRINTFORML
+			PRINTFORMW 竟然在這裡舉行著性愛競拍
+			PRINTFORML 脖子上懸掛著金屬板的女人們渾身赤裸地站在舞台上
+			PRINTFORMW 客人們用下流的視線望著、一個個地掃視著
+			PRINTFORMW 男人在%ANAME(MASTER)%的耳邊低聲詢問著參不參加
+			PRINTFORML 怎麼辦？
+			PRINTL
+			CALL ASK_YN("參加" ,"離開")
+			IF RESULT == 1
+				PRINTFORML 這種低俗的活動我不參加
+				PRINTFORMW %ANAME(MASTER)%快步離開了
+				RETURN
+			ENDIF
+			PRINTFORMW 決定參加
+			PRINTFORML %ANAME(MASTER)%認真地打量著女人們
+			PRINTFORMW 最後%ANAME(MASTER)%相中了那其中的一個中意的女孩
+			PRINTFORML …競價雖然非常激烈、但最後還是得到了她
+			PRINTFORMW 她滿臉通紅、氣喘吁吁地被%ANAME(MASTER)%摟著腰進入了準備好的房間裡…
+			PRINTFORML
+			PRINTFORMW %ANAME(MASTER)%一進入了房間就立刻抱住了她、不斷愛撫著她的全身、揉捏著充滿彈性的柔軟肌膚
+			PRINTFORML 她開心地喘息著、不斷扭動著身體誘惑著%ANAME(MASTER)%
+			PRINTFORMW 兩人無法再忍耐地倒在了床上、%ANAME(MASTER)%把肉棒插進了早已濕透了的秘所裡面
+			PRINTFORMW 「啊嗯❤啊嗯❤不要❤太激烈了❤啊嗯❤」
+			PRINTFORML 在%ANAME(MASTER)%激烈的挺腰抽插下她瘋狂地扭動著自己的身體、不斷收緊的蜜肉刺激著%ANAME(MASTER)%的男根
+			PRINTFORMW %ANAME(MASTER)%不斷轉動著腰部刺激著她的膣肉及陰核、她大幅度地反弓著自己的身體顫抖著發出了呻吟聲
+			PRINTFORMW %ANAME(MASTER)%被她纏著做了一次又一次、徹底享受到了超出費用以上的歡愉……
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失", 0, "", "", "商品少女的膣穴", "売春")
+			PRINTFORML
+			PRINTFORMW 離開會場的時候、她偷偷地把聯繫方式寫在紙上遞給了%ANAME(MASTER)%
+			DVAR:領内ぶらりエロの旅_セックスオークション = 1
+		ENDIF
+	;色町
+	CASE 4
+		PRINTFORMW 到花街看看吧
+		PRINTFORML …
+		PRINTFORML ……
+		;1/7で色町にいるキャラを発見
+		IF !RAND:7
+			PRINTFORMW 在花街閒逛的時候、在妓女使用的旅館前面發現了%ANAME(対象)%的身影
+			PRINTFORML 好像沒注意到這邊的樣子。%ANAME(MASTER)%為了不被發現躲在了暗處
+			PRINTFORMW …%ANAME(対象)%直接進入了裡面…
+			PRINTFORML 難道%ANAME(対象)%是！？　正這麼想著的時候、就看到%ANAME(対象)%滿臉通紅地跑了出來
+			PRINTFORMW …好像沒注意到這裡是花街的樣子……
+			RETURN
+		ENDIF
+		IF DVAR:領内ぶらりエロの旅_色町の娼婦 >= 4
+			PRINTFORMW 在花街上閒逛的時候、被%ANAME(MASTER)%的專屬妓女搭訕了
+			PRINTFORMW 希望你再和我做愛、以特別価格哦
+			PRINTFORML
+			CALL ASK_YN("答應對方", "拒絕")
+			IF RESULT == 1
+				PRINTFORML 因為現在心情不好所以拒絕了
+				PRINTFORMW 她哇的一聲以一副備受打擊的樣子目送著%ANAME(MASTER)%離開
+				PRINTFORMW %ANAME(MASTER)%一邊看著繁華的街道一邊閒逛著……
+				RETURN
+			ENDIF
+			PRINTFORML 想起了以前和她在一起的夜晚
+			PRINTFORMW 她的美貌和技巧都無可挑剔、就連肉體也完全喜歡上了%ANAME(MASTER)%。那麼就再和她做吧
+			PRINTFORMW %ANAME(MASTER)%點頭同意了、她把%PRONOUN(MASTER)%帶到了附近的旅館裡面
+			PRINTFORML ･･･
+			SELECTCASE RAND:5
+				CASE 0
+					PRINTFORMW 被%ANAME(MASTER)%侵犯著的她露出了恍惚的表情
+					PRINTFORMW 數次被%ANAME(MASTER)%侵犯、連續高潮了好多次的她已經徹底上癮了
+					PRINTFORML 理所當然地被膣內中出了好多次、從那秘所之中流出了黏糊糊的精液
+					PRINTFORMW 當她被%ANAME(MASTER)%再次渴求的時候、她兩指掰開了陰唇、子宮口不斷開合著要求配種……
+				CASE 1
+					PRINTFORMW 一進屋就做了好幾次的兩人抱在一起喘著氣
+					PRINTFORML 被%ANAME(MASTER)%撫摸著因為數次膣內射精而膨脹的下腹部、她感覺到她的卵巢開始漲痛
+					PRINTFORMW 如果懷孕了怎麼辦？　被%ANAME(MASTER)%在耳邊詢問之後、她想象著懷上了他的孩子的事情、不由自主地笑了出來
+					PRINTFORMW 隨後跨坐在了%ANAME(MASTER)%的身上、讓自己的膣穴把他的肉棒深深地吞了進去、「我還要更多❤」　一邊索求著一邊扭動著腰肢……
+				CASE 2
+					PRINTFORMW 她深深地迷戀著與%ANAME(MASTER)%性愛
+					PRINTFORMW 經過數次性愛、身體變得更加敏感、每當肉棒抽插的時候、過電般的快感在兩人的肉體間奔騰著
+					PRINTFORML 她氣喘吁吁地抱著%ANAME(MASTER)%、說著下流的話語渴求更大的快感
+					PRINTFORMW %ANAME(MASTER)%也忘我地在她的淫壺里拼命抽插著、兩人一直沉迷在肉慾之中……
+				CASE 3
+					PRINTFORMW %ANAME(MASTER)%緊緊抓住她的腰肢激烈地侵犯著她
+					PRINTFORML 每一次插入那從下腹部往上蔓延的快感、令她陷入了恍惚之中
+					PRINTFORMW 雖然那對於妓女來說可能是恥辱。但是現在、和%ANAME(MASTER)%做愛的她只感到了作為一名女人的幸福
+					PRINTFORML 每當%ANAME(MASTER)%把臉靠近伸出舌頭、她就會像母狗一樣伸出舌頭緊緊纏著%ANAME(MASTER)%的舌頭
+					PRINTFORMW 已經變成只想著和%ANAME(MASTER)%做愛的她、之後也繼續奉獻著身體……
+				CASE 4
+					PRINTFORMW %ANAME(MASTER)%和她像戀人享受著甜蜜的性愛
+					PRINTFORML 兩人互相緊握著雙手挺動著腰、共享著歡愉
+					PRINTFORMW 她為了尋求%ANAME(MASTER)%的子種汁、一邊緊縮著膣穴一邊扭動著腰肢、把肉棒引導到更深處那已經張開了的子宮口
+					PRINTFORMW 到達了極限的%ANAME(MASTER)%為了讓她懷孕把濃厚的精液全部射進了她的子宮裡面……
+			ENDSELECT
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失, 接吻喪失", 0, "專屬妓女的嘴唇", "", "專屬妓女的膣穴", "和姦")
+			LOCAL = MIN(MONEY, 1500)
+			MONEY -= LOCAL
+			; CALL ICPRINT(@"金<{LOCAL}>を支払った", "L", カラー_注意)
+			CALL ICPRINT(@"支付了金<{LOCAL}>", "L", カラー_注意)
+			PRINTFORML
+			PRINTFORML 兩人整夜都在享受著充滿愛意的性交
+			PRINTFORMW %ANAME(MASTER)%因為和成為了自己的專屬妓女的她做了一晚、滿意地踏上了歸途……
+		ELSEIF DVAR:領内ぶらりエロの旅_色町の娼婦 >= 1
+			PRINTFORMW 在花街上走著的時候、被上次的妓女搭訕了
+			PRINTFORMW 和我再來一晚上可以嗎？
+			PRINTFORML
+			CALL ASK_YN("答應對方", "拒絕")
+			IF RESULT == 1
+				PRINTFORML 因為現在心情不好所以拒絕了
+				PRINTFORMW 真是遺憾、她聳拉著肩膀目送著%ANAME(MASTER)%離開了
+				PRINTFORMW %ANAME(MASTER)%一邊看著繁華的街道一邊閒逛著……
+				RETURN
+			ENDIF
+			PRINTFORML 想起了上次和她在一起的夜晚
+			PRINTFORMW 她不僅長得漂亮、技術也很好。那就再和她做吧
+			PRINTFORMW %ANAME(MASTER)%點頭同意了、她把%PRONOUN(MASTER)%帶到了附近的旅館裡面
+			PRINTFORML
+			SELECTCASE RAND:4
+				CASE 0
+					PRINTFORMW 她的肉體和技術依舊很棒、%ANAME(MASTER)%已經射精了好幾次了
+					PRINTFORMW 每一次抽插她都會忍不住發出嬌喘聲、妖艷地扭動著身體
+					PRINTFORMW %ANAME(MASTER)%像野獸一般地和她持續交合著……
+				CASE 1
+					PRINTFORMW 她跨坐在躺著的%ANAME(MASTER)%身上努力挺動著腰肢
+					PRINTFORML 每當腰肢上下挺動肉棒都會插入她的膣穴深處、令她一邊痙攣一邊嬌喘
+					PRINTFORMW 沉溺在性愛中的%ANAME(MASTER)%抓住她的腰也開始挺動自己的腰肢進行抽插、以此獲得更大的快感
+					PRINTFORMW 她也回應著更加激烈地扭動著腰肢、兩人徹夜享受著性愛……
+				CASE 2
+					PRINTFORML 她跪坐在%ANAME(MASTER)%的雙腿之間、一口把肉棒吞了下去
+					PRINTFORML 被她一邊吸吮著肉棒一邊用舌尖刺激著馬眼、%ANAME(MASTER)%舒服得呻吟著、肉棒不斷跳動
+					PRINTFORML 這時她突然停止了奉仕、一邊揉搓著蛋蛋一邊惡作劇般地微笑著仰望%ANAME(MASTER)%
+					PRINTFORMW 隨後握住肉棒的根部、挺動著艷麗的腰肢把%ANAME(MASTER)%的肉棒迎進了自己的秘裂裡面……
+				CASE 3
+					PRINTFORML 不知道已經是第幾次高潮的兩人相互擁抱著躺在床上
+					PRINTFORML 她氣喘吁吁地趴在%ANAME(MASTER)%的胸前、神色恍惚地顫抖著身體
+					PRINTFORML 問她覺得舒服嗎、還有作為妓女的驕傲嗎。她羞答答地點了點頭
+					PRINTFORMW 短暫的休息過後、不知道是誰主動的接吻、再次開始了激烈的性愛……
+			ENDSELECT
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失, 接吻喪失", 0, "妓女的嘴唇", "", "妓女的膣穴", "和姦")
+			DVAR:領内ぶらりエロの旅_色町の娼婦 += 1
+			LOCAL = MIN(MONEY, 3000)
+			MONEY -= LOCAL
+			; CALL ICPRINT(@"金<{LOCAL}>を支払った", "L", カラー_注意)
+			CALL ICPRINT(@"支付了金<{LOCAL}>", "L", カラー_注意)
+			PRINTFORML
+			SIF DVAR:領内ぶらりエロの旅_色町の娼婦 == 4
+				PRINTFORMW 她完全喜歡上了%ANAME(MASTER)%、聽她說下次要作為%ANAME(MASTER)%的專屬妓女來陪著%ANAME(MASTER)%
+			PRINTFORMW %ANAME(MASTER)%因為一流的妓女技巧滿意地踏上了歸途……
+		;1回目
+		ELSE
+			PRINTFORMW 在逛著花街的時候、被妓女搭訕了
+			PRINTFORMW 要來一晚嗎？
+			PRINTFORML
+			CALL ASK_YN("答應對方", "拒絕")
+			IF RESULT == 1
+				PRINTFORML 因為心情不好所以拒絕了
+				PRINTFORMW %ANAME(MASTER)%一邊看著繁華的街道一邊閒逛著……
+				RETURN
+			ENDIF
+			PRINTFORMW 她長得很漂亮
+			PRINTFORMW %ANAME(MASTER)%點頭同意了、她把%PRONOUN(MASTER)%帶到了附近的旅館裡面
+			PRINTFORML
+			PRINTFORMW 她的肉體和技術都很棒、%ANAME(MASTER)%已經射精了好幾次了
+			PRINTFORMW 每一次抽插她都會忍不住發出嬌喘聲、妖艷地扭動著身體
+			PRINTFORMW %ANAME(MASTER)%像野獸一般地和她持續交合著……
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失, 接吻喪失", 0, "妓女的嘴唇", "", "妓女的膣穴", "和姦")
+			LOCAL = MIN(MONEY, 3000)
+			MONEY -= LOCAL
+			; CALL ICPRINT(@"金<{LOCAL}>を支払った", "L", カラー_注意)
+			CALL ICPRINT(@"支付了金<{LOCAL}>", "L", カラー_注意)
+			DVAR:領内ぶらりエロの旅_色町の娼婦 = 1
+			PRINTFORMW %ANAME(MASTER)%因為一流的妓女技巧滿意地踏上了歸途……
+		ENDIF
+
+	;スラム街
+	CASE 5
+		PRINTFORML 說起來、最近貧民窟的治安好像很有問題
+		PRINTFORMW %ANAME(MASTER)%決定去巡邏貧民窟
+		PRINTFORML …
+		PRINTFORML ……
+		;1/4で遇到了巡邏中的角色
+		IF !RAND:4
+			PRINTFORMW 剛來到貧民窟、就和正在巡邏的%ANAME(対象)%碰到了一起
+			SIF CFLAG:対象:面識 == 0
+				CFLAG:対象:面識 = 1
+			PRINTFORML %ANAME(対象)%好像也很在意這個地區的治安、在這裡巡邏
+			PRINTFORMW 順便一起巡邏了、就遇到了搶劫現場！
+			PRINTFORML 兩人立刻就去抓人了！
+			PRINTFORML
+			PRINTFORMW ･･･
+			PRINTFORML
+			PRINTFORMW 順利抓住了搶劫犯
+			PRINTFORML %ANAME(MASTER)%把犯人交給了士兵
+			PRINTFORMW 看到了這一幕的貧民窟少女們、紛紛向%ANAME(MASTER)%表達了感激之情……
+			CFLAG:対象:好感度 += 70
+			RETURN
+		ENDIF
+		;4回目以降
+		IF DVAR:領内ぶらりエロの旅_スラム街の娼婦 >= 4
+			PRINTFORMW 再次來到站滿了穿著下流衣服的流鶯的小巷子裡
+			PRINTFORML 這是之前和少女性愛的流鶯聚集的地方
+			PRINTFORMW 隨後、%ANAME(MASTER)%喜歡的少女正在等待著他
+			PRINTFORMW 她妖媚地瞇起眼睛、像是在誘惑著%ANAME(MASTER)%般地望著他…
+			PRINTFORMW 被那動作吸引了的%ANAME(MASTER)%、決定再和她做愛
+			;1/3で後宮遊戲
+			IF !RAND:3
+				PRINTFORML 在開始之前、她提出了建議
+				PRINTFORMW 今天不只是我一個人、而是大家一起喲…
+				PRINTFORML 話音剛落、突然出現了一群少女抱住了%ANAME(MASTER)%
+				PRINTFORMW 她們都像少女一樣有著青澀的身體、用同樣下流的動作誘惑著%ANAME(MASTER)%
+				PRINTFORMW %ANAME(MASTER)%被眾多的流鶯包圍著進入了附近的小屋裡面…
+				PRINTFORML ･･･
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORMW 少女們都用著與年齡不相符的技巧取悅著%ANAME(MASTER)%的身體、貪婪地榨取著精液
+						PRINTFORML 她們聚在一起用柔軟的皮膚摩擦著仰躺的%ANAME(MASTER)%、
+						PRINTFORMW 一邊發出下流的呻吟、一邊在%ANAME(MASTER)%的身上塗滿淫蕩的愛蜜…
+						PRINTFORMW 她們那極度淫蕩的行為讓%ANAME(MASTER)%理性盡失、毫不猶豫地在年少的流鶯的膣穴內射精
+						PRINTFORML 每當滾燙的精液射出、她們就會嬌聲大喊 「接下來該輪到我了！」 拼命爭奪著%ANAME(MASTER)%的肉棒
+						PRINTFORMW %ANAME(MASTER)%沉溺在和她們的背德性愛之中無可自拔……
+					CASE 1
+						PRINTFORMW 少女們用舌頭舔舐著%ANAME(MASTER)%全身
+						PRINTFORML 不僅僅是肉棒、乳頭、腋下、肚臍、耳朵、肛門這些部位都被少女們的舌頭舔舐著
+						PRINTFORMW 她們雖然身體青澀但卻是專業的妓女。用靈巧的舌頭準確地舔舐著%ANAME(MASTER)%的敏感點
+						PRINTFORML %ANAME(MASTER)%一邊沉溺在複數舌吻中、一邊在少女的嘴裡射出了子種汁
+						PRINTFORMW 用小嘴接滿了精液的少女、伸出舌頭在%ANAME(MASTER)%的面前展示了一下、帶著恍惚的表情把精液吞了下去
+						PRINTFORMW 看到少女那淫蕩的樣子之後、%ANAME(MASTER)%的肉棒再次膨脹了起來、對著她們射出了無數次精液……
+					CASE 2
+						PRINTFORMW 少女們在%ANAME(MASTER)%的面前排成一排翹起屁股、像是在等待著插入一般搖晃著
+						PRINTFORML 她們那搖晃著屁股的下流樣子、讓人相信她們即使年少也是專業的妓女
+						PRINTFORMW 於是%ANAME(MASTER)%抓住其中一人的桃尻、用手指撥開陰唇之後把肉棒插入了那窄小的膣穴之中
+						PRINTFORML 狹窄的肉壺緊緊地纏繞著肉棒、貪婪地榨取著精液
+						PRINTFORMW %ANAME(MASTER)%在那淫蕩的肉壺中盡情地射精、少女嬌喘著達到了高潮
+						PRINTFORML 隨後　「接下來請使用我吧」、其他的少女拼命搖晃著屁股渴求著%ANAME(MASTER)%的肉棒
+						PRINTFORMW %ANAME(MASTER)%如願以償的地幹翻了所有少女、充分享受了背德的後宮性愛……
+				ENDSELECT
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失", 0, "", "", "流鶯的膣穴", "売春")
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失", 0, "", "", "流鶯的膣穴", "売春")
+				DVAR:領内ぶらりエロの旅_スラム街の娼婦 += 1
+				PRINTFORML
+				LOCAL = MIN(MONEY, 4500)
+				MONEY -= LOCAL
+				; CALL ICPRINT(@"金<{LOCAL}>を彼女らに支払った", "L", カラー_注意)
+				CALL ICPRINT(@"付给了少女金<{LOCAL}>", "L", カラー_注意)
+			;通常プレイ
+			ELSE
+				PRINTFORML ･･･
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORMW 她的技巧依然和以前一樣專業、巧妙地用快感挑逗著%ANAME(MASTER)%
+						PRINTFORML 稍微狹窄的膣穴緊緊纏繞著肉棒、配合著她的腰肢扭動給予了%ANAME(MASTER)%極好的刺激快感
+						PRINTFORMW 她一邊享受著快樂、一邊伸出舌頭和%ANAME(MASTER)%津津有味地交換著彼此的唾液
+						PRINTFORML 不久當%ANAME(MASTER)%快要射精的時候、她用手指緊緊地抓住了肉竿的根部
+						PRINTFORMW 隨後在%ANAME(MASTER)%耳邊輕聲低語。　「加錢的話、我就會讓你在裡面滿滿地射出來哦❤」…
+						PRINTFORMW 完全被迷住的%ANAME(MASTER)%加了錢、一整晚都和她沉溺在性愛之中……
+					CASE 1
+						PRINTFORMW 她雙手雙腳緊緊纏著%ANAME(MASTER)%、不斷濕吻著
+						PRINTFORML 雖然身體青澀、但卻像專業妓女一樣扭動著腰、令%ANAME(MASTER)%享受到了極大的快感
+						PRINTFORMW 她撒嬌般地抱住%ANAME(MASTER)%、膣穴深處緊緊地纏繞著%ANAME(MASTER)%的肉棒
+						PRINTFORMW 她在%ANAME(MASTER)%的耳邊熱情呢喃道　「加錢的話、無論中出多少次都可以哦❤」
+						PRINTFORMW %ANAME(MASTER)%回應道只要是你的話無論多少錢我都會給、隨後往她的膣穴深處不斷地注入子種汁……
+					CASE 2
+						PRINTFORMW 她跨坐在%ANAME(MASTER)%的身上用肉壺吞下了肉棒、一邊扭動著腰一邊發出淫蕩的呻吟聲
+						PRINTFORML 雖然動作不是十分激烈、但卻確實刺激著%ANAME(MASTER)%的敏感點
+						PRINTFORMW 從%ANAME(MASTER)%發出的喘息聲可以知道、少女的技巧絲毫不遜色於專業妓女
+						PRINTFORML %ANAME(MASTER)%沉浸在快感中的時候、她突然停止了動作、告訴%ANAME(MASTER)%時間已經到了
+						PRINTFORMW 她邊親吻著%ANAME(MASTER)%的耳朵邊呢喃道「給錢加鐘才會讓你射出來哦❤」
+						PRINTFORML %ANAME(MASTER)%毫不反抗地讓她繼續。這讓她更加性奮了
+						PRINTFORMW 她一邊因為支配了比自己大的男人而感到喜悅、一邊不斷榨取著%ANAME(MASTER)%的精液……
+				ENDSELECT
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失", 0, "", "", "流鶯的膣穴", "売春")
+				DVAR:領内ぶらりエロの旅_スラム街の娼婦 += 1
+				PRINTFORML
+				LOCAL = MIN(MONEY, 2500)
+				MONEY -= LOCAL
+				; CALL ICPRINT(@"金<{LOCAL}>を彼女に支払った", "L", カラー_注意)
+				CALL ICPRINT(@"付给了少女金<{LOCAL}>", "L", カラー_注意)
+			ENDIF
+			PRINTFORMW 性愛結束之後、她在%ANAME(MASTER)%的耳邊嫵媚地低聲細語
+			PRINTFORML 再帶更多錢來、和我做愛吧…❤　…
+			PRINTFORMW 告訴她還會再來的、少女露出了妖艷的笑容和%ANAME(MASTER)%深深地吻別了……
+		;2回目以降
+		ELSEIF DVAR:領内ぶらりエロの旅_スラム街の娼婦 >= 1
+			PRINTFORMW 再次來到站滿了穿著下流衣服的流鶯的小巷子裡
+			PRINTFORML 這是之前和少女做愛的流鶯聚集的地方
+			PRINTFORMW 隨後、之前的少女也來了
+			PRINTFORMW 她滿臉通紅地望著%ANAME(MASTER)%…
+			PRINTFORML 怎麼辦？
+			CALL ASK_YN("和她做愛" ,"離開")
+			IF RESULT == 1
+				PRINTFORMW 可惜今天心情不好。%ANAME(MASTER)%離開了
+				RETURN
+			ENDIF
+			PRINTFORMW 被她的動作打動的%ANAME(MASTER)%、決定再次和她做愛
+			PRINTFORML ･･･
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORMW 少女雖然青澀、但還是像專業的妓女一樣給予了%ANAME(MASTER)%快樂
+					PRINTFORML 稍微狹窄的膣穴緊緊地纏繞著肉棒、配合著她的腰部扭動給予了%ANAME(MASTER)%極大的快感
+					PRINTFORMW 揉捏她胸部的時候她扭動著身體發出了可愛的呻吟聲、撒嬌般地抱住了%ANAME(MASTER)%
+					PRINTFORMW 完全被迷住了的%ANAME(MASTER)%加了鐘、和她度過了歡愉的一晚……
+				CASE 1
+					PRINTFORMW 她雙手雙腳緊緊纏著%ANAME(MASTER)%、不斷濕吻著
+					PRINTFORML 雖然身體青澀、但卻像專業妓女一樣扭動著腰、令%ANAME(MASTER)%享受到了極大的快感
+					PRINTFORMW 她撒嬌般地抱住%ANAME(MASTER)%、膣穴深處緊緊地纏繞著%ANAME(MASTER)%的肉棒
+					PRINTFORML 她用熱情的聲音在%ANAME(MASTER)%的耳邊呢喃著讓他追加中出費用
+					PRINTFORMW %ANAME(MASTER)%一邊問她需要加多少錢、一邊多次在她的膣穴中射入了精液……
+				CASE 2
+					PRINTFORMW 她跨坐在%ANAME(MASTER)%的身上用肉壺吞下了肉棒、一邊扭動著腰一邊發出淫蕩的呻吟聲
+					PRINTFORML 雖然動作不是十分激烈、但卻確實刺激著%ANAME(MASTER)%的敏感點
+					PRINTFORMW 從%ANAME(MASTER)%發出的喘息聲可以知道、少女的技巧絲毫不遜色於專業妓女
+					PRINTFORML %ANAME(MASTER)%沉浸在快感中的時候、她突然停止了動作、告訴%ANAME(MASTER)%時間已經到了
+					PRINTFORMW 她在%ANAME(MASTER)%的耳邊低聲呢喃著「如果不加鐘的話就不讓你射精哦」
+					PRINTFORML %ANAME(MASTER)%十分堅定地懇求她繼續做下去
+					PRINTFORMW 她一邊因為支配了比自己大的男人而感到喜悅、一邊用自己的子宮接受了%ANAME(MASTER)%的精液……
+			ENDSELECT
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失", 0, "", "", "流鶯的膣穴", "売春")
+			DVAR:領内ぶらりエロの旅_スラム街の娼婦 += 1
+			PRINTFORML
+			LOCAL = MIN(MONEY, 2000)
+			MONEY -= LOCAL
+			; CALL ICPRINT(@"金<{LOCAL}>を彼女に支払った", "L", カラー_注意)
+			CALL ICPRINT(@"付给了少女金<{LOCAL}>", "L", カラー_注意)
+			PRINTFORMW 離開時告訴她還會再來、少女用和她年齡不符的妖艷笑容送別了%ANAME(MASTER)%……
+			;4回目でロリ娼婦にハマる
+			SIF DVAR:領内ぶらりエロの旅_スラム街の娼婦 == 4
+				PRINTFORMW %ANAME(MASTER)%完全沉迷在和她的性愛之中……
+		;1回目
+		ELSE
+			PRINTFORMW 走到了一條小巷裡面、裡面的女人全部穿著下流的衣服站成了一排
+			PRINTFORML 這裡好像是流鶯站街的地方
+			PRINTFORMW 從衣服都可以看出她們的身材都很好
+			PRINTFORML 怎麼辦？
+			CALL ASK_YN("點一個人" ,"立刻離開")
+			IF RESULT == 1
+				PRINTFORMW 但是現在心情不好。%ANAME(MASTER)%離開了那個地方
+				RETURN
+			ENDIF
+			PRINTFORMW %ANAME(MASTER)%點了一名少女
+			PRINTFORML
+			PRINTFORMW 少女雖然青澀、但還是像專業的妓女一樣給予了%ANAME(MASTER)%快樂
+			PRINTFORML 稍微狹窄的膣穴緊緊地纏繞著肉棒、配合著她的腰部扭動給予了%ANAME(MASTER)%極大的快感
+			PRINTFORMW 揉捏她胸部的時候她扭動著身體發出了可愛的呻吟聲、撒嬌般地抱住了%ANAME(MASTER)%
+			PRINTFORMW 完全被迷住了的%ANAME(MASTER)%加了鐘、和她度過了歡愉的一晚……
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失", 0, "", "", "ロリ娼婦の膣", "売春")
+			PRINTFORML
+			LOCAL = MIN(MONEY, 500)
+			MONEY -= LOCAL
+			; CALL ICPRINT(@"金<{LOCAL}>を彼女に支払った", "L", カラー_注意)
+			CALL ICPRINT(@"给了那个女孩金<{LOCAL}>った", "L", カラー_注意)
+			PRINTFORMW 離開的時候她紅著臉乞求著%ANAME(MASTER)%下次再來……
+			DVAR:領内ぶらりエロの旅_スラム街の娼婦 = 1
+		ENDIF
+	;止める
+	CASE 6
+		PRINTFORMW …算了、就這樣打發時間吧
+		PRINTFORMW %ANAME(MASTER)%決定今天一整天都在自己的房間裡閒著……
+ENDSELECT
+
+RETURN 0

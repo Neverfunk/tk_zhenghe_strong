@@ -1,0 +1,369 @@
+﻿;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_ENKOU_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("NAMPA")
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_ENKOU_DECISION()
+RETURN DVAR:援助交際_発生フラグ > 0 && RAND:2 == 0
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_ENKOU()
+#DIM 対象
+#DIM 金額
+
+対象 = ID_TO_CHARA(DVAR:援助交際_対象ID)
+
+IF 対象 == -1
+	PRINTFORMW 因为对方不在了，援交父亲好像放弃了更进一步的交往……
+	DVAR:援助交際_対象ID = 0
+	DVAR:援助交際_発生フラグ = 0
+	DVAR:援助交際_生ハメ許可 = 0
+	RETURN 1
+ENDIF
+;ターゲットが女じゃなくなっていたらやめる
+IF !IS_FEMALE(対象)
+	PRINTFORMW 因为%ANAME(対象)%的人放弃了女性的身份，所以援交父亲好像失去了兴趣……
+	DVAR:援助交際_対象ID = 0
+	DVAR:援助交際_発生フラグ = 0
+	DVAR:援助交際_生ハメ許可 = 0
+	RETURN 1
+ENDIF
+
+;ターゲットが捕虜になったらやめる
+IF CFLAG:対象:捕虜先
+	PRINTFORMW 因为%ANAME(対象)%被捉住了，援交父亲好象放弃了以上的交往……
+	DVAR:援助交際_対象ID = 0
+	DVAR:援助交際_発生フラグ = 0
+	DVAR:援助交際_生ハメ許可 = 0
+	RETURN 1
+ENDIF
+
+IF CFLAG:対象:特殊状態 == 特殊状態_死亡
+	PRINTFORMW 因为%ANAME(対象)%死亡了，援交父亲好像放弃了更进一步的交往……
+	DVAR:援助交際_対象ID = 0
+	DVAR:援助交際_発生フラグ = 0
+	DVAR:援助交際_生ハメ許可 = 0
+	RETURN 1
+ENDIF
+
+PRINTFORML "爸爸"发来了约会的邀请
+PRINTFORML 今晚正好没有什么安排
+PRINTFORMW %ANAME(対象)%回答OK后，就去约会地点了……
+PRINTFORML 
+SELECTCASE RAND:4
+	CASE 0
+		PRINTFORMW 和对方会合的%ANAME(対象)%抱着胳膊走向酒店街
+		PRINTFORML 
+		SELECTCASE RAND:10
+			CASE 0
+				PRINTFORML 一进屋就被对方推倒了
+				PRINTFORML 兴奋的对方无视了%ANAME(対象)%劝解的话，直接把肉棒就戳了进来
+				PRINTFORMW 被那激进的做法所触动，腰部也不禁地开始扭动起来
+			CASE 1
+				PRINTFORML 坐在床上一边被舔一边被人责弄。
+				PRINTFORML 对中年父亲那粘糊糊的爱抚感到厌恶感和比这更快乐的感觉，身体不禁发抖起来
+				PRINTFORMW 无法忍耐的%ANAME(対象)%在索求时被很有气势地推倒了
+			CASE 2
+				PRINTFORML 结束了第一次交合的%ANAME(対象)%们身体贴着躺在一起
+				PRINTFORML 被对方那黏黏的腰弄得浑身无力的%ANAME(対象)%像撒娇一样被对方抱在怀里
+				PRINTFORMW 在短暂的舔舐之后，被对方要求再做一次的%ANAME(対象)%高兴地敞开了身体
+			CASE 3
+				PRINTFORML 粉红色的房间里响起了%ANAME(対象)%的娇声。
+				PRINTFORML 趴在床上的%ANAME(対象)%被激烈的肉棒冲击使得身体不断颤抖着。
+				PRINTFORML 对方那无底的耐力，反复兴奋的表情，简直就是性欲狂魔
+				PRINTFORMW 好几次要将子宫冲击坏掉的动作进行了一整夜
+			CASE 4
+				PRINTFORML 由于对方的要求，面对面坐在一起了。
+				PRINTFORML 互相吐着舌头揉搓着胸部，用粗大的肉棒戳着子宫，不由得呻吟起来。
+				PRINTFORML 对于那激烈的动作，%ANAME(対象)%身心都荡漾开来，紧紧抱住对方，追求快乐
+				IF DVAR:援助交際_生ハメ許可 == 1
+					PRINTFORMW 在对方满足之前一个劲地冲击着下腹，好几次都接受了对方的精液。
+				ELSE
+					PRINTFORMW 在对方满足之前一个劲地冲击着下腹，终于结束了之后用过的避孕套丢了一地
+				ENDIF
+			CASE 5
+				PRINTFORML %ANAME(対象)%被激烈地责备只顾着娇喘
+				PRINTFORML 每次被粗壮的肉棒刺到身体深处都会感到愉悦♥啾(キュッ)♥地勒紧阴道催促着射精
+				IF DVAR:援助交際_生ハメ許可 == 1
+					PRINTFORMW 然后对方感到射精的欲望之后将灼热的精液子宫的，使得%ANAME(対象)%仰面朝天浑身颤抖着喷溅妹汁和装不下子宫的精液。
+				ELSE
+					PRINTFORMW 然后对方一边感受着射精后即使穿过橡胶也能传来的灼热，一边仰面朝天
+				ENDIF
+			CASE 6
+				PRINTFORML 一进房间就边亲嘴边朝床走去
+				PRINTFORML %ANAME(対象)%对着已经勃起的肉棒，红着脸张开双手迎接对方
+				PRINTFORMW 身体还是那么的投缘，两人不断地重复着绝顶
+			CASE 7
+				PRINTFORML 根据对方的要求，不用脱衣服就可以做了。
+				PRINTFORML 对于自己那bitch一样的身姿而变得更加兴奋的%ANAME(対象)%更加卖力地服侍着对方
+				PRINTFORMW 一脸发情母狗样貌的%ANAME(対象)%正在舔对方的肉棒
+			CASE 8
+				PRINTFORML 一副雌犬样貌的%ANAME(対象)%舔着对方的肉棒
+				IF DVAR:援助交際_生ハメ許可 == 1
+					PRINTFORML 从%ANAME(対象)%温热黏滑的股间不时溢出来子宫内装不下的参与精液
+				ELSE
+					PRINTFORML 周围散落着大量使用过的避孕套，足以说明%ANAME(対象)%被内射的次数
+				ENDIF
+				PRINTFORML 经过精心的服务，那雄壮的肉棒很快就恢复了全盛时期的硬度，%ANAME(対象)%看着不禁哽咽了一下。
+				PRINTFORMW %ANAME(対象)%要求着再来一次，然后一边舔着自己的嘴唇一边又含上了肉棒
+				;(%ANAME(対象)%が次を求めると彼は舌なめずりをしながら覆い被さって来た)
+			CASE 9
+				PRINTFORML %ANAME(対象)%以爬行的姿势被侵犯并呻吟着。
+				PRINTFORML 对方抓住%ANAME(対象)%的腰，激烈地冲击着臀部，啪的一声抽打一下屁股
+				PRINTFORML 每次被抽打带来的痛苦而变得更加兴奋的%ANAME(対象)%，阴道也不禁地用力裹紧着下腹雄壮的肉棒，像雌犬一样不断发出娇喘声
+				PRINTFORMW %ANAME(対象)%的屁股在被抽打到冒红之前，一直被惩罚地欺负着，脸上露出喜悦的表情
+		ENDSELECT
+	CASE 1
+		PRINTFORMW 和对方会合的%ANAME(対象)%被抱着腰带进了小巷
+		PRINTFORML 
+		SELECTCASE RAND:10
+			CASE 0
+				PRINTFORML 被逼着站在墙角，裤子一放下来，就对方被狠狠地捅入了肉棒
+				PRINTFORML 在野外的性行为，对方带着兴奋的样子比平时更加激烈地推了上来
+				PRINTFORMW %ANAME(対象)%也感觉到了那个野性的活塞运动，不禁地喘息着无法忍耐的娇声
+			CASE 1
+				PRINTFORML 一进胡同就被掀起裙子来，然后被狠狠地侵犯了
+				PRINTFORML 前方数米处就不时有行人经过，%ANAME(対象)%一边以难以忍受的表情喘息着一边拼命抑制泄露的娇声
+				PRINTFORMW しかし彼は容赦せずに突き上げてきて、%ANAME(対象)%は快楽と理性の間で狂いそうになった
+			CASE 2
+				PRINTFORML 在小巷里，%ANAME(対象)%跪在对方身上吮吸着肉棒
+				PRINTFORML 忍不住prpr的肉棒突然向上顶了一下，使得嘴里充满了雄的味道
+				PRINTFORMW 然后射出了极其浓厚的精液，发出淫荡的声音一滴不剩地喝干了。
+			CASE 3
+				PRINTFORML 在人迹罕至的的小巷里被戏弄全身的话会遇到流浪汉的
+				PRINTFORML 虽然着急地提议换个地方，但对方笑了笑，就这样继续做了
+				PRINTFORMW 无视着流浪汉的目光，拥抱着不断向上挺着腰部，一次又一次地被刺激高潮了
+			CASE 4
+				PRINTFORML 刚到酒店就被无法忍耐的对方压倒，抽出肉棒后直接激烈地戳了进来
+				PRINTFORML 被一个令人窒息的丑陋中年父亲侵犯的事实使%ANAME(対象)%兴奋得直喘
+				PRINTFORML %ANAME(対象)%的人忘记了现在是在哪，继续纠缠在一起，
+				IF DVAR:援助交際_生ハメ許可 == 1
+					PRINTFORMW %ANAME(対象)%的人忘记了现在所处的位置，感受着子宫不断被精液填充的快感
+				ELSE
+					PRINTFORMW %ANAME(対象)%的人忘记了现在所处的位置，在用完自备的避孕套之前都没用停下来过
+				ENDIF
+			CASE 5
+				PRINTFORML 被侵犯得浑身乏力的%ANAME(対象)%瘫倒在地上
+				IF DVAR:援助交際_生ハメ許可 == 1
+					PRINTFORML 那淫荡的身姿不断抽搐着，大量的精液混着精液喷溅出来，表明了子宫内被内射的程度
+				ELSE
+					PRINTFORML %ANAME(対象)%周围有大量使用完的避孕套，说明了内射的次数
+				ENDIF
+				PRINTFORMW 男子把那副难看的样子好好地藏在照片里，然后再次抓住腰把肉棒顶了进去
+			CASE 6
+				PRINTFORML 从昏暗的小巷里传来了%ANAME(対象)%的呻吟声
+				PRINTFORML 被剥下衣服强行赤裸着的%ANAME(対象)%被肉棒狠狠冲击着口腔和喉咙
+				PRINTFORML 简直像是暴露狂一样的行为刺激了%ANAME(対象)%的性欲，比平时兴奋的刺激感让子宫更加隐隐作痛起来
+				IF DVAR:援助交際_生ハメ許可 == 1
+					PRINTFORMW 在阴道内受到几次射精的同时，%ANAME(対象)%又激烈地被送上了顶峰
+				ELSE
+					PRINTFORMW 然后一边感受着透过避孕套的灼热感，%ANAME(対象)%又激烈的被送上了高潮
+				ENDIF
+			CASE 7
+				PRINTFORML 一进到胡同里，对方就抱住了%ANAME(対象)%，把舌头紧紧地缠绕在一起
+				PRINTFORML %ANAME(対象)%一边被强行摆弄着全身，一边看着那邀请着自己的表情，于是无法拒绝地接受了
+				PRINTFORMW 无法忍耐的%ANAME(対象)%们中止了去酒店的行程，就地性交了许多次
+			CASE 8
+				PRINTFORML %ANAME(対象)%在流浪汉面前公开做爱
+				PRINTFORML 在完全看得见结合部的状态下被激烈地不断向上推，%ANAME(対象)%因羞耻而战战兢兢地身体不断发抖着
+				PRINTFORML 对方也以比往常更兴奋的样子，深深地挥着腰，冲击着%ANAME(対象)%。
+				PRINTFORMW 然后在流浪汉们的视线中暴露出一副高潮无力的表情
+			CASE 9
+				PRINTFORML 在小巷深处，%ANAME(対象)%靠着墙壁被对方拥抱着
+				PRINTFORML 在不知道什么时候会有人来的地方工作着变兴奋的%ANAME(対象)%无意识地扭动着身体喘息着
+				PRINTFORMW 被故意延长时间缠绵着做爱的方式，使%ANAME(対象)%被刺激着几乎失去意识
+		ENDSELECT
+	CASE 2
+		PRINTFORMW 和对方会合的%ANAME(対象)%在轻微约会后被邀请到自己家里
+		PRINTFORML 
+		SELECTCASE RAND:10
+			CASE 0
+				PRINTFORML 一到家就被带到卧室里推倒了。
+				PRINTFORML 平日里对方和妻子睡在床上的行为刺激了对方的不道德感，让对方喘了起来
+				PRINTFORMW 在不知不觉中比平时更加紧紧地抱住对方，自己摇着腰寻求着
+			CASE 1
+				PRINTFORML 在与对方家人同住的屋里，由于没有人所以激烈地做爱着
+				PRINTFORML 如果现在对方的妻子回来的话……光是这样想，子宫就微微作痛，变得热起来
+				PRINTFORMW 浑身温热的%ANAME(対象)%们无视时间享受着不伦性爱直到极限
+			CASE 2
+				PRINTFORML 激烈的性交过后，%ANAME(対象)%们在床上不断prpr着
+				PRINTFORML 两个人一起享受如同真的夫妇般甜蜜的时光，尽情地亲吻
+				IF DVAR:援助交際_生ハメ許可 == 1
+					PRINTFORML 被对方从上面抚摸下腹子宫位置的时候，之前还感受不到子宫精液热度的下腹随机就变得隐隐作痛温热起来。
+				ELSE
+					PRINTFORML 被展示了满满注入了精液的避孕套的%ANAME(対象)%不由得脸红了
+				ENDIF
+				PRINTFORMW 被告知离妻子回家还有时间的%ANAME(対象)%很高兴地再次跨上了对方(妻子が取消までまだ時間があると言われた%ANAME(対象)%は悦んで再び彼に跨った)
+			CASE 3
+				PRINTFORML 一进门就被对方从背后抱住，被全身到处抚摸着
+				PRINTFORML %ANAME(対象)%一边发出愉悦的声音一边被对方顶着一边扭动身体
+				PRINTFORML 对那个动作很兴奋的样子的对方粗暴地脱掉了%ANAME(対象)%的衣服走向了卧室
+				PRINTFORMW 被兴奋的中年肉棒激烈地捅入抱在怀里
+			CASE 4
+				PRINTFORML 第一次射精结束后，%ANAME(対象)%给对方做了料理
+				PRINTFORML 在对方的要求下，赤身露体的%ANAME(対象)%像新妻一样勤快地服务着
+				PRINTFORML 「今天晚上家人都不会回来哟，可以好好疼爱如此可爱的你了」
+				PRINTFORMW 在被低声细语的声音传达到脑海中的%ANAME(対象)%眼中中间浮现出♥，身体也期待地变得发热兴奋起来
+			CASE 5
+				PRINTFORML 被邀请到自家的%ANAME(対象)%首先被邀请去吃晚饭
+				PRINTFORML 被prpr地舔舐、触碰早已变得火热的身体时，麻酥的快感就被激发出来，发出娇声
+				PRINTFORMW 嘴唇被堵住之后被推倒了，激烈地一边缠绕全身一边享受性交
+			CASE 6
+				PRINTFORML %ANAME(対象)%被对方拜托穿女儿的衣服
+				PRINTFORML 被对方那变态的禁断欲望刺激到自己，身体也不禁微微发抖起来
+				IF DVAR:援助交際_生ハメ許可 == 1
+					PRINTFORMW 对方一边喊着女儿的名字，一边用激烈的动作反复射出浓厚的精力
+				ELSE
+					PRINTFORMW %ANAME(対象)%被对方逼着穿上妻子的衣服并抱在怀里
+				ENDIF
+			CASE 7
+				PRINTFORML %ANAME(対象)%穿上了对方妻子的衣服之后就被抱在了怀里
+				PRINTFORML 被粘糊糊地吮吸舌头的同时激烈地抽插着，%ANAME(対象)%也融入了角色中忘我的交合着
+				PRINTFORMW 作为一夜为限的夫妻，对方尽情地干了个爽
+			CASE 8
+				PRINTFORML 被带进卧室的%ANAME(対象)%激烈拥抱着喘息着
+				PRINTFORML 每次冲击的时候床都会嘎吱地响起来，眼睛被强烈的冲击不由得上翻，由子宫起而散发到全身的快感使得身体痉挛不已
+				PRINTFORMW 被对方在床上遗留的气味冲击着神经，理智都快完全消散掉
+			CASE 9
+				PRINTFORML 在书房里交合的时候，对方的家人回来了
+				PRINTFORML 为了不暴露出来，对方压住了声音，但好像没能平息似的，还是希望能继续坐下去
+				PRINTFORMW 想到要被家人发现而兴奋的%ANAME(対象)%也请求继续做了下去
+		ENDSELECT
+	CASE 3
+		PRINTFORMW 和对方汇合的%ANAME(対象)%被带去了对家人保密的温泉旅行
+		PRINTFORML 
+		SELECTCASE RAND:10
+			CASE 0
+				PRINTFORML 慢慢地浸泡在温泉里，对方的手臂伸了过来
+				PRINTFORML %ANAME(対象)%用笑容迎接了带着厌恶的笑容逼近的对方
+				PRINTFORMW 一边在水里交合着溅起水花一边充分享受着热水的舒适
+			CASE 1
+				PRINTFORML 享受温泉后，被带到了房间里推倒
+				PRINTFORML 被摸到火热的身体时，就会感到那股敏感不已的刺激感，呼吸随机变得急促起来
+				IF DVAR:援助交際_生ハメ許可 == 1
+					PRINTFORMW %ANAME(対象)%穿着浴衣，被反复地抽插着，就算精液将子宫堵得凸起也依旧不停地抽插着
+				ELSE
+					PRINTFORMW %ANAME(対象)%穿着浴衣，被反复地抽插着，直到避孕套用完了才真正停下来
+				ENDIF
+			CASE 2
+				PRINTFORML 登记入住后马上就做了一次，然后两个人泡在温泉里
+				PRINTFORML 一边悠闲地享受温泉，一边责弄彼此的身体一边亲热地度过了美好的夜晚
+				PRINTFORMW 无法立刻忍耐的对方向索求着再做一次，%ANAME(対象)%微笑着点了点头
+			CASE 3
+				PRINTFORML %ANAME(対象)%们在豪华的房间里像恋人一样亲热地度过了
+				PRINTFORML 温泉、交合、温泉、做爱、散步、性交…一味地重复着喷射欲望的动作
+				PRINTFORMW 虽然知道这是不好的事情，但还是让享受了一段虽短但直的不伦旅行
+			CASE 4
+				PRINTFORML 被看着换上浴衣的%ANAME(対象)%变得兴奋的对方推倒了
+				PRINTFORML 在到温泉之前来一发…如此说着，对方一边压着%ANAME(対象)%，一边尽情释放着欲望的白浊液
+				PRINTFORMW 抱着抽插到筋疲力尽为止，然后筋疲力尽地被对方带去了温泉
+			CASE 5
+				PRINTFORML 马上换上浴衣，两个人像恋人一样亲热地逛了温泉
+				PRINTFORML 在尽情享受温泉和料理之后，铺上被子激烈地又做了起来
+				PRINTFORML 在温泉旅馆的不伦旅行让%ANAME(対象)%更加兴奋，比平时更敏感
+				PRINTFORMW 用粗壮的肉棒和有力的动作蹂躏着使得%ANAME(対象)%快被顶得失去了意识
+			CASE 6
+				PRINTFORML 一起泡完热水后对方提议按摩
+				PRINTFORML 虽然注意到了邪念，但还是同意了，躺在被子里，之后果然被对方责弄着全身
+				PRINTFORML 被爱抚着火热的身体的%ANAME(対象)%马上变得无法忍耐向对方索求
+				PRINTFORMW 于是对方雄壮的肉棒也强势地冲了过来
+			CASE 7
+				PRINTFORML 被对方带着去了大叔们聚集的混浴温泉
+				PRINTFORML 然后一边暴露在客人的视线里，一边被客人骄傲的样子紧紧拥抱着
+				IF DVAR:援助交際_生ハメ許可 == 1
+					PRINTFORMW %ANAME(対象)%在其对方客人观看的同时被多次内射，露出一脸淫荡的表情
+				ELSE
+					PRINTFORMW 对方回应客人的要求，反复更换避孕套进行公开混浴交合
+				ENDIF
+			CASE 8
+				PRINTFORML 两个人享受了温泉巡游之后，被对方推倒在了房间里
+				PRINTFORML 被剥下衣服露出了赤裸的皮肤之后，推着雄壮的肉棒直冲冲地插了进来，剧烈的刺激使得头和身体都不禁微微挺起
+				PRINTFORMW 交合到满身是汗之后，又被对方抱回了浴室
+			CASE 9
+				PRINTFORML 两个人泡在温泉里，%ANAME(対象)%被对方抱在怀里
+				PRINTFORML %ANAME(対象)%被对方操得不断扭动着那淫荡的身姿，扬起阵阵水花
+				PRINTFORMW 待到欲望终于释放完毕之后，回到房间，又被重新激起的欲望激战到天明
+		ENDSELECT
+ENDSELECT
+IF DVAR:援助交際_生ハメ許可 == 1
+	CALL FUCK(対象, "Ｃ, Ｂ, Ｖ, Ｍ, Ａ, Ｖ性交, Ａ性交, 性交, 性技, 奉仕, 精愛, 口淫, 欲望, 売春", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精, CFLAG減少", GET_SPERM_ID("援交親父"), "援交親父の唇", "援交親父", "", "売春")
+	CALL FUCK(対象, "Ｃ, Ｂ, Ｖ, Ｍ, Ａ, Ｖ性交, Ａ性交, 性交, 性技, 奉仕, 精愛, 口淫, 欲望, 売春", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精, CFLAG減少", GET_SPERM_ID("援交親父"), "援交親父の唇", "援交親父", "", "売春")
+ELSE
+	CALL FUCK(対象, "Ｃ, Ｂ, Ｖ, Ｍ, Ａ, Ｖ性交, Ａ性交, 性交, 性技, 奉仕, 精愛, 口淫, 欲望, 売春", "接吻喪失, 処女喪失, Ａ処女喪失, 口内射精, CFLAG減少", 0, @"援交親父の\@RAND:2 ? 肉棒 # 唇\@", "援交親父", "", "売春")
+	CALL FUCK(対象, "Ｃ, Ｂ, Ｖ, Ｍ, Ａ, Ｖ性交, Ａ性交, 性交, 性技, 奉仕, 精愛, 口淫, 欲望, 売春", "接吻喪失, 処女喪失, Ａ処女喪失, 口内射精, CFLAG減少", 0, @"援交親父の\@RAND:2 ? 肉棒 # 唇\@", "援交親父", "", "売春")
+ENDIF
+PRINTFORML 
+IF RAND:4 == 0 && DVAR:援助交際_生ハメ許可 != 1
+	PRINTFORML 分手的时候，对方说下次想无套中出
+	PRINTFORML 对那个提议%ANAME(対象)%一边踌躇着一边感到身体因期待而隐隐作痛
+	PRINTFORMW 虽然那样的话给的钱也会更多……
+	PRINTFORML 怎么办？
+	CALL ASK_YN("了解" ,"拒绝")
+	IF RESULT == 1
+		PRINTFORML 想了想还是不可用
+		PRINTFORMW 听到了%ANAME(対象)%拒绝的回答之后无奈地耸了耸肩
+		DVAR:援助交際_生ハメ許可 = 0
+	ELSEIF RESULT == 0
+		PRINTFORML 都到了这种程度了，还有什么可犹豫的吗
+		PRINTFORML %ANAME(対象)%无法抵抗并期待着接下里的无套中出所带来的快乐，直率地点了头
+		PRINTFORMW 对方满面笑容，进行了热烈的接吻
+		DVAR:援助交際_生ハメ許可 = 1
+	ENDIF
+ELSE
+	SELECTCASE RAND:7
+		CASE 0
+			PRINTFORMW 被低声私语着比平时更加激烈的%ANAME(対象)%红着脸低着头
+		CASE 1
+			PRINTFORMW 和恋恋不舍的对方亲密地接吻后约定再会后分开了
+		CASE 2
+			PRINTFORMW 在分别之前，好好地打扫了肉棒
+		CASE 3
+			PRINTFORMW 看到了自己被拍了照片的%ANAME(対象)%露出了满满的笑容
+		CASE 4
+			PRINTFORMW 因为很开心所以又被说要做的%ANAME(対象)%深深地点了点头
+		CASE 5
+			PRINTFORMW 被拿走内裤的%ANAME(対象)%下体保持着裸露的状态回家了
+		CASE 6
+			PRINTFORMW 过几天约好见面，临别接吻后就分手了
+	ENDSELECT
+ENDIF
+金額 = LIMIT(1000 + (ABL:対象:性技 + ABL:対象:奉仕 + ABL:対象:性交) * 100 * (1 + DVAR:援助交際_生ハメ許可), 1000, 5000)
+MONEY += 金額
+CALL COLOR_PRINTW(@"お小遣い{金額}を手に入れた", カラー_注意)
+
+DVAR:援助交際_発生フラグ ++
+
+IF DVAR:援助交際_発生フラグ >= 8 && DVAR:援助交際_生ハメ許可 == 1
+	PRINTFORMW ………
+	PRINTFORML %ANAME(対象)%完全沉迷于援助交际中
+	PRINTFORML 并成为了生活的一部分，再也不能考虑要放弃了
+	PRINTFORMW 一边踏上回家的路，一边焦急地等待着对方的下一个呼叫，子宫不由得兴奋地隐隐作痛起来，股间逐渐垂下了发情的妹汁……
+	CALL COLOR_PRINTW(@"%ANAME(対象)%は<援交少女>となった", カラー_ピンク)
+	SETBIT TALENT:対象:日常系, 素質_デイリー_援交少女
+	CALL LOSE_RELATION_TALENT(対象)
+	CFLAG:対象:好感度 = LIMIT(CFLAG:対象:好感度, -1000, 0)
+	CFLAG:対象:依存度 = LIMIT(CFLAG:対象:依存度, -1000, 0)
+	CFLAG:対象:従属度 = LIMIT(CFLAG:対象:従属度, -1000, 0)
+	CFLAG:対象:支配度 = LIMIT(CFLAG:対象:支配度, -1000, 0)
+	DVAR:援助交際_対象ID = 0
+	DVAR:援助交際_発生フラグ = 0
+	DVAR:援助交際_生ハメ許可 = 0
+ENDIF
+
+IF DVAR:援助交際_生ハメ許可 < -3
+	PRINTFORML 不管拒绝了多少次，%ANAME(対象)%都厌倦了对方一次又一次的拜访
+	PRINTFORMW 当攒够足够的资金之后，就把跟对方准备的女礼服给扔掉了
+	DVAR:援助交際_対象ID = 0
+	DVAR:援助交際_発生フラグ = 0
+	DVAR:援助交際_生ハメ許可 = 0
+ENDIF
+
+RETURN 1

@@ -1,0 +1,79 @@
+@BUILDING_GET_NAME_发改委()
+    #FUNCTIONS
+    RETURNF "发改委"
+
+@BUILDING_GET_EXP_发改委()
+    #FUNCTIONS
+    RETURNF "降低二级和三级建筑的城市经济要求。"
+
+@BUILDING_SET_INFO_ID_23()
+    BUILDING_TYPE:建造物_发改委 = 建造物_类型_政治类
+    BUILDING_LEVEL:建造物_发改委 = 建造物_等级_三级建筑
+    BUILDING_LIMIT_NUM:建造物_发改委 = 建造物_数量限制_1
+    BUILDING_LIMIT_UNI:建造物_发改委 = 0
+    BUILDING_COUNTRY_ID:建造物_发改委:特殊勢力_普通势力 = 1
+    BUILDING_HAVE_SKILL:建造物_发改委 = 1
+    BUILDING_TOHO_REQ_ID:建造物_发改委:0 = 0
+
+@CHECK_BUILDING_FUNCTION_发改委(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    #DIM POLITICS
+    RESULT:1 = TMP_BUILDING_EXIST_FLAG:COUNTRY_ID:建造物_发改委
+    IF RESULT:1 > 0
+        SIF TMP_CREATE_IS_FREE_MAP_FUNC() > 0
+            POLITICS = SQRT(MAX(TMP_GET_POLITICS_POWER(CFLAG:MASTER:所属),0))/30
+        RESULT:1 = MIN(30,POLITICS)
+        RESULT:0 = 1
+    ENDIF
+    RETURNF RESULT:0
+
+@BUILDING_SKILL_发改委(COUNTRY_ID)
+    #DIM COUNTRY_ID
+    PRINTFORML 发动后将一座城市的经济上限提升至三级建筑要求
+    PRINTFORML 冷却时间5回合
+    PRINTFORML 是否发动
+    CALL ASK_YN()
+    IF !RESULT
+        CALL SINGLE_DRAWLINE
+        PRINTFORML 发动了《发改委》的技能
+        CALL BUILDING_SKILL_发改委_FUNCTION(COUNTRY_ID)
+        IF RESULT
+            BUILDING_SKILL_COLDTIME:COUNTRY_ID:建造物_发改委 = 5
+            PRINTFORMW 完毕
+        ENDIF
+    ENDIF
+@BUILDING_SKILL_发改委_FUNCTION(COUNTRY_ID)
+    #DIM CITY_ID
+    #DIM COUNTRY_ID
+    CALL SET_CITY_COLOR_COUNTRY
+    CALL SET_CITY_COLOR_UNIT
+    CALL DRAWMAP
+    CALL RESET_CITY_COLOR
+    CALL SINGLE_DRAWLINE
+
+    PRINTFORML 请选择要提升的城市
+    PRINTBUTTON " 0[取消]", 0
+    PRINTL
+    $INPUT_LOOP0
+    INPUT
+
+    IF RESULT == 0
+        RETURN 0
+    ELSEIF RESULT >= 1001 && RESULT <= 1001 + CITY_NUM
+        CITY_ID = RESULT - 1000
+        IF CITY_OWNER:(CITY_ID) == COUNTRY_ID
+            PRINTFORML 将%CITY_NAME:CITY_ID%的经济上限提升至三级建筑要求？
+        ELSE
+            RESTART
+        ENDIF
+        CALL ASK_YN()
+        IF !RESULT
+            CITY_ECONOMY_LIMIT:CITY_ID = MAX(GET_CITY_ECONOMY_REQ(COUNTRY_ID,建造物_等级_三级建筑) * 100,CITY_ECONOMY_LIMIT:CITY_ID)
+            RETURN 1
+        ELSE
+            RESTART
+        ENDIF
+    ELSE
+        GOTO INPUT_LOOP0
+    ENDIF

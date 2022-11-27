@@ -1,0 +1,120 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K9_DO_NOT_HURT_YOURSELF_RATE(対象)
+#DIM 対象
+RETURN 1000
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K9_DO_NOT_HURT_YOURSELF_DECISION(対象)
+#DIM 対象
+
+;奴隷か恋人のときのみ
+SIF !IS_SLAVE(対象) && !IS_LOVER(対象)
+	RETURN 0
+
+;一回きり
+SIF KDVAR:対象:咲夜_ケガをしないで
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K9_DO_NOT_HURT_YOURSELF_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K9_DO_NOT_HURT_YOURSELF(対象)
+#DIM 対象
+#DIM 咲夜_対象
+咲夜_対象 = MASTER
+SETCOLOR 咲夜_口上カラー
+
+IF CHECK_K9("敬語")
+	PRINTFORML 「%CALLNAME_K9(咲夜_対象)%，这个季度您有什么计划？」
+	;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%、今期はいかがなさるご予定でしょう」
+	PRINTFORMDW 在巡视据点的时候，被%ANAME(対象)%叫住了
+	;TranslatedMark 拠点の見回りをしていると、%ANAME(対象)%に呼びとめられた
+	PRINTL 
+	PRINTFORML 「请不要受伤。因为%CALLNAME_K9(咲夜_対象)%是我们的支柱」
+	;TranslatedMark 「どうかおケガをなさらずに。%CALLNAME_K9(咲夜_対象)%は私達の支えですから」
+	PRINTFORMW 「奇怪吗?您总是陪我练刀，我却嘱咐您不要受伤。」
+	;TranslatedMark 「変でしょうか？　いつもナイフの訓練にお付き合い頂くのに、おケガをなさらないよう申し上げるのは」
+	PRINTL 
+	PRINTFORML 「那……如果能让%CALLNAME_K9(咲夜_対象)%从危险的前线退下来的话。」
+	;TranslatedMark 「それは……%CALLNAME_K9(咲夜_対象)%に危険な前線から退いて頂けるのでしたら」
+	PRINTFORML 「至少有一点擦伤，干脆用我的手去弄吧——」
+	;TranslatedMark 「かすり傷ひとつくらい、いっそ私の手でつけてしまえば――と」
+	PRINTFORMDW %ANAME(対象)%凝视着%CALLNAME_K9(咲夜_対象)%露出了妖艳的微笑
+	;TranslatedMark %ANAME(対象)%は%CALLNAME_K9(咲夜_対象)%を見つめて妖しい微笑を浮かべた
+	PRINTL 
+	PRINTFORML 「我没考虑那么严重的事情，请放心。嗯，只是偶尔」
+	;TranslatedMark 「そんな大それたことは考えておりませんので、ご安心ください。えぇ、たまにしか」
+	PRINTFORML 「老实说，我相信我的小刀是绝对不会伤害%CALLNAME_K9(咲夜_対象)%的」
+	;TranslatedMark 「正直に申し上げると、私ごときのナイフでは%CALLNAME_K9(咲夜_対象)%を決して傷つけられないと信じていたいのです」
+	PRINTFORMDW 表情变成了明朗的笑容，%ANAME(対象)%转过身去
+	;TranslatedMark 表情を明るい笑顔に変えると、%ANAME(対象)%はくるりと踵を返した
+	PRINTL 
+	PRINTFORML 「请让%ANAME(対象)%对%CALLNAME_K9(咲夜_対象)%有用」
+	;TranslatedMark 「%ANAME(対象)%を%CALLNAME_K9(咲夜_対象)%のお役に立たせてくださいませ」
+	PRINTFORMDL 转身走了几步，深深地鞠了一躬，%ANAME(対象)%走了
+	;TranslatedMark 数歩離れて向き直り、深々と一礼して%ANAME(対象)%は立ち去った
+ELSE
+	PRINTFORML 「%CALLNAME_K9(咲夜_対象)%，这个季度您有什么计划？」
+	;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%、今期はどうする予定かしら」
+	PRINTFORMDW 在巡视据点的时候，被%ANAME(対象)%叫住了
+	;TranslatedMark 拠点の見回りをしていると、%ANAME(対象)%に呼びとめられた
+	PRINTL 
+	PRINTFORML 「不要受伤哦。%CALLNAME_K9(咲夜_対象)%倒下的话，我们都会忧心忡忡，瞻前顾后，不敢战斗」
+	;TranslatedMark 「ケガだけはしないでね。%CALLNAME_K9(咲夜_対象)%が倒れたら、みんな心配で前を向いて戦えないわ」
+	PRINTFORMW 「哎呀，奇怪吗？是啊。我总是让他陪我练刀」
+	;TranslatedMark 「あら、おかしいかしら？　そうね。いつもナイフの訓練に付き合ってもらっているもの」
+	PRINTL 
+	PRINTFORML 「那个呢。如果能让%CALLNAME_K9(咲夜_対象)%从危险的前线退下来的话」
+	;TranslatedMark 「あれはね。%CALLNAME_K9(咲夜_対象)%に危険な前線から退いてもらえるなら」
+	PRINTFORML 「至少有一点擦伤，干脆用我的手去弄吧——」
+	;TranslatedMark 「かすり傷ひとつくらい、いっそ私の手でつけてしまえば――」
+	PRINTFORMDW %ANAME(対象)%触摸了%CALLNAME_K9(咲夜_対象)%的脸颊，露出了妖艳的微笑
+	;TranslatedMark %ANAME(対象)%は%CALLNAME_K9(咲夜_対象)%の頬に触れて妖しい微笑を浮かべた
+	PRINTL 
+	PRINTFORML 「别担心，我只是偶尔会想到一些可怕的事情」
+	;TranslatedMark 「なんて怖いことはたまにしか思わないから、安心して」
+	PRINTFORML 「老实说，我相信我的小刀伤不了%CALLNAME_K9(咲夜_対象)%」
+	;TranslatedMark 「正直に言うと、私のナイフじゃ%CALLNAME_K9(咲夜_対象)%を傷つけられないって信じたいのよ」
+	PRINTFORML 「如果你被不出其不意的东西击中，很容易被敌人抓住吧？」
+	;TranslatedMark 「不意打ちでもないのに当たっちゃうようじゃ、簡単に敵に捕まえられちゃうでしょう？」
+	PRINTFORMDW 脸上浮现了灿烂的笑容，在我被摸过的脸颊对面亲了一下
+	;TranslatedMark 表情を明るい笑顔に変えると、触れた頬とは反対側の頬にキスをしてきた
+	PRINTL 
+	PRINTFORML 「请让我帮你的忙。无论是做饭还是侵略」
+	;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%のお役に立たせてちょうだい。炊事でも、侵略でも」
+	PRINTFORMDW %ANAME(対象)%即使离开了脸，还是闭着眼睛喃喃细语
+	;TranslatedMark %ANAME(対象)%は顔を離しても目を瞑ったまま恍惚と囁いている
+	PRINTL 
+	PRINTFORMDL 在%ANAME(咲夜_対象)%回话之前，%ANAME(対象)%转身离去
+	;TranslatedMark %ANAME(咲夜_対象)%が何か言葉を返す前に、%ANAME(対象)%はくるりと踵を返して立ち去った
+ENDIF
+WAIT
+RESETCOLOR
+CFLAG:対象:好感度 = CFLAG:対象:好感度 + 100
+CFLAG:対象:依存度 = CFLAG:対象:依存度 + 100
+CFLAG:対象:従属度 = CFLAG:対象:従属度 + 100
+KDVAR:対象:咲夜_ケガをしないで = 1
+
+RETURN 1
+

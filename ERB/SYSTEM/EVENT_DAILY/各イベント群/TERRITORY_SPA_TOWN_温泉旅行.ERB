@@ -1,0 +1,218 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_TERRITORY_SPA_TOWN_RATE()
+RETURN 50
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_TERRITORY_SPA_TOWN_DECISION()
+#DIM 温泉街
+温泉街 = GET_CITYNUMBER("旧都温泉街")
+
+SIF 温泉街 == -1
+	RETURN 0
+SIF CITY_OWNER:温泉街 != CFLAG:MASTER:所属
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_TERRITORY_SPA_TOWN_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_TERRITORY_SPA_TOWN
+#DIM 対象
+
+対象 = 0
+
+PRINTFORML 拿到了温泉打折劵
+PRINTFORML 最近因战争和政治的忙碌而积压着很多疲惫
+PRINTFORMW 偶尔放松一下没关系吧
+PRINTFORML 怎麼辦？
+CALL ASK_MULTI("一个人去" ,"邀请谁" ,"果然还是算了")
+IF RESULT == 2
+	PRINTFORML 今天还有很多事情
+	PRINTFORMW %ANAME(MASTER)%把温泉劵丢在了桌子上
+	RETURN
+ELSEIF RESULT == 0
+	PRINTFORML 一个人悠闲的享受吧
+	PRINTFORMW %ANAME(MASTER)%兴奋的走向了温泉街
+ELSEIF RESULT == 1
+	PRINTFORML 機会難得就邀請下別人吧
+	PRINTFORMW 要邀请谁？
+	CALL SELECT_CHARA_LIST_ONLY_LOGIC_SEX("DAILY_TERRITORY_SPA_TOWN", "DAILY_TERRITORY_SPA_TOWN")
+	IF RESULT == -1
+		PRINTFORMW 还是决定一个人去了
+	ELSE
+		対象 = RESULT
+		PRINTFORML 決定邀請%ANAME(対象)%
+		PRINTFORM 面对%ANAME(MASTER)%的邀请
+		IF IS_FEMALE(対象)
+			PRINTFORMW 她很開心的答応了
+		ELSE
+			PRINTFORMW 他很開心的答応了
+		ENDIF
+	ENDIF
+ENDIF
+IF 対象 != 0
+	PRINTFORMW 两个人一起度过了愉快的旅行
+	IF (HAS_PENIS(MASTER) && IS_FEMALE(対象)) || (IS_FEMALE(MASTER) && IS_MALE(対象))
+		IF HAS_PENIS(MASTER) && (IS_SLAVE(対象) || IS_LOVER(対象) || IS_SLAVED_BY(対象))
+			PRINTFORML 两个人一起享受了露天温泉
+			PRINTFORML 她红着脸用期待的目光看过来
+			PRINTFORMW 双方的身体慢慢靠近、重叠起来
+			PRINTFORML
+			SELECTCASE RAND:5
+				CASE 0
+					PRINTFORML %ANAME(MASTER)%一边泡在温泉中、一边和她激烈的做着
+					PRINTFORML 她挂在%ANAME(MASTER)%身上、在比往常更厉害的攻势下喘不过气来
+					PRINTFORML 爱抚着乳头时不禁发出了喜悦的声音、小穴也缩紧了
+					PRINTFORMW 体内和体外传来的温度也让%ANAME(MASTER)%非常享受
+				CASE 1
+					PRINTFORML 液体飞散的声音和她的喘气声在周围回响
+					PRINTFORML 肉棒在她体内比以往更深的插入进去、
+					PRINTFORML 仅仅是一点刺激就会全身颤抖的高潮
+					PRINTFORMW 在她美妙的体内连续做了好几次
+				CASE 2
+					PRINTFORML %ANAME(MASTER)%两人紧紧的抱着一起亲吻着
+					PRINTFORML 只是缓缓的动着腰部、敏感的小穴也让她发出了微小的喘息
+					PRINTFORML 舌头在口腔内缠绕、温泉的热度也让人头晕脑胀
+					PRINTFORMW 在混杂着水蒸气的欲望中、%ANAME(MASTER)%两人不断追求着彼此
+				CASE 3
+					PRINTFORML %ANAME(MASTER)%两人在浴缸中充分的享受了彼此
+					PRINTFORML 看到她洗浴后满足的吐息、%ANAME(MASTER)%再次涌来了欲火
+					PRINTFORML %ANAME(MASTER)%抱住了她的腰、她虽然很困扰的样子、但是身体也开始配合起来
+					PRINTFORMW 两人一边互相追求着身体、一边这样进入第二回合
+				CASE 4
+					PRINTFORML 将她推在温泉的边上、从背后猛烈的冲刺
+					PRINTFORML 因为温泉晕乎乎的她每次冲击都在强烈的快感下痉挛着
+					PRINTFORML 表情已经失去了平时的样子、只是在不停的索求更多
+					PRINTFORMW %ANAME(MASTER)%也做到筋疲力尽了
+			ENDSELECT
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, @"%ANAME(対象)%の唇", "", @"%ANAME(対象)%の膣", "和姦")
+			CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_ID(MASTER), @"%ANAME(MASTER)%の唇", @"%ANAME(MASTER)%", "", "和姦")
+		ELSE
+			PRINTFORMW 稍微有点害羞、但是两人悠闲地享受了露天温泉
+		ENDIF
+	ELSE
+		PRINTFORMW 一边泡在温泉里一边聊着日常的抱怨和兴趣
+	ENDIF
+	CFLAG:対象:好感度 += 100 + RAND:200
+ELSEIF IS_MALE(MASTER) || (HAS_PENIS(MASTER) && RAND:2) || (HAS_PENIS(MASTER) && TALENT:MASTER:討厭男人)
+	PRINTFORML 与一个人泡温泉的女性相识了
+	PRINTFORML 她因为与丈夫关系太冷淡于是一个人很寂寞的旅行着
+	PRINTFORMW 在她说话时、%ANAME(MASTER)%已经被她吸引住了
+	PRINTFORML
+	SELECTCASE RAND:5
+		CASE 0
+			PRINTFORML %ANAME(MASTER)%一边泡温泉一边与她更深的交流
+			PRINTFORML 人妻特有的成熟肉体让%ANAME(MASTER)%热血沸腾
+			PRINTFORML 在久违的做爱中、她也无所顾忌的拼命追求着%ANAME(MASTER)%的肉体
+			PRINTFORMW 淫乱的气氛中、%ANAME(MASTER)%激烈的动着腰、在温泉中不停射在她体内
+		CASE 1
+			PRINTFORML 他们在温泉旅馆中激烈的度过了一天
+			PRINTFORML 衣服下的肉体让%ANAME(MASTER)%难以自拔
+			PRINTFORML 积攒了相当多欲望的她也陷入了疯狂的快乐之中
+			PRINTFORMW %ANAME(MASTER)%也品尝到了她成熟的肉体
+		CASE 2
+			PRINTFORML 在温泉聊的很投缘的%ANAME(MASTER)%两人晚上也一起睡了
+			PRINTFORML 她与%ANAME(MASTER)%的相性非常好、忘我般贪婪地继续寻求彼此
+			PRINTFORML 骑在身上、披着浴衣、头发散乱的她让%ANAME(MASTER)%着迷的扭动腰部
+			PRINTFORMW 汗流浃背的%ANAME(MASTER)%两人洗完澡后再次亲吻后、便告别了
+		CASE 3
+			PRINTFORML 在一起享受了温泉之后、%ANAME(MASTER)%把她邀请到了旅馆
+			PRINTFORML 一开始她虽然因为背德感犹豫不决、但是再次邀请时也露出了笑容
+			PRINTFORML 一进入房间就开始激烈的亲吻起来、身体也相互交缠着倒在床上
+			PRINTFORMW %ANAME(MASTER)%两人度过一夜的激情后、交换了联系方式就告别了
+		CASE 4
+			PRINTFORML 流れのままに宿を共にした%ANAME(MASTER)%達は一緒に横になっている
+			PRINTFORML 久しぶりのまぐわいだった彼女は非常に乱れその熟れた肉体で存分に楽しませてくれた
+			PRINTFORML 布団の中で彼女の熱い視線を感じ、軽くキスをしてやると足を絡ませながら次を求めてきた
+			PRINTFORMW %ANAME(MASTER)%達は他の事はすべて忘れ、一晩中ただひたすら灼ける様な快楽に身を委ねた
+	ENDSELECT
+	CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "人妻の唇", "", "人妻の膣", "和姦")
+ELSE
+	PRINTFORML 与同样是一个人享受温泉的男性相识了
+	PRINTFORML 他因为与妻子关系太冷淡于是一个人很寂寞的旅行着
+	PRINTFORML 听了他的话，%ANAME(MASTER)%完全放开了，握着他的手
+	;TranslatedMark 彼の話を聞いている内に%ANAME(MASTER)%はすっかりほだされその手を握っていた
+	PRINTFORML
+	SELECTCASE RAND:5
+		CASE 0
+			PRINTFORML %ANAME(MASTER)%一被带到旅馆就被推倒，一边被侵犯一边喘着气
+			;TranslatedMark %ANAME(MASTER)%は宿に連れ込まれるなり押し倒され、犯されながらあられもなく喘いでいる
+			PRINTFORML 用粗壮的阴茎刺激子宫口的话，就什么都看不见，全身都在痉挛着
+			;TranslatedMark 野太いペニスでグリグリと子宮口を刺激されると視界が真っ白になり全身にシビレが走る
+			PRINTFORML 他为了享受这个可爱的反应，不断地进攻着，%ANAME(MASTER)%的身体就这样被训练成了雌性
+			;TranslatedMark 彼はその反応を楽しむ様にねっとりと攻めを繰り返し、%ANAME(MASTER)%の身体は雌として躾けられてしまった
+			PRINTFORMW 一夜过后被他迷住的%ANAME(MASTER)%在分别时被要求提供联系方式时，显得高兴地给予了
+			;TranslatedMark 一晩かけて彼にメロメロにされた%ANAME(MASTER)%は別れ際連絡先を聞かれ、悦んで交換した
+		CASE 1
+			PRINTFORML %ANAME(MASTER)%被他邀请一边泡温泉一边被激烈地抱着，口中发出喜悦的声音
+			;TranslatedMark %ANAME(MASTER)%は彼に誘われ温泉に浸かりながら激しく抱かれて悦びの声を響かせている
+			PRINTFORML 充满热情的身体比平时更敏感，能直接感受到深深刺入的阴茎的触感
+			;TranslatedMark 熱のこもった身体は何時もより敏感で、深々と突き刺さったペニスの感触を直に感じてしまう
+			PRINTFORML 每当有肉棒进出的时候，%ANAME(MASTER)%就会有被剜肉的刺激
+			;TranslatedMark じゅぷじゅぷと肉棒が出入りする度に肉を抉られる感覚に%ANAME(MASTER)%は無様にアヘ顔を晒してヨガリ狂った
+			PRINTFORMW 被侵犯到浑身颤抖后被带进他的房间，在那里也受到了充分的疼爱
+			;TranslatedMark のぼせるまで犯された後彼の部屋に連れ込まれ、そこでもたっぷりと可愛がられた
+		CASE 2
+			PRINTFORML 被他邀请一起住宿的%ANAME(MASTER)%一起泡着温泉一边调情
+			;TranslatedMark 彼に誘われて宿を共にした%ANAME(MASTER)%は一緒に温泉に浸かりながらイチャイチャしている
+			PRINTFORML 一边接吻一边全身被紧紧地爱抚着，加上温泉的热度，头变得晕晕的
+			;TranslatedMark キスを交わしながら全身をねっとりと愛撫され、温泉の熱も相まって頭がボーっとしてくる
+			PRINTFORML 在他命令下，%ANAME(MASTER)%喘着气，满怀期待地把手撑住了浴缸的边缘，向他露出了屁股
+			;TranslatedMark 彼に命ぜられた%ANAME(MASTER)%は息を荒げて期待に胸を高まらせながら浴槽の縁に手をついて尻を突き出した
+			PRINTFORMW %ANAME(MASTER)%被他那健壮的阴茎弄得七零八落，身心都作为他的爱人而喜悦
+			;TranslatedMark %ANAME(MASTER)%は彼の逞しいペニスで散々イかされまくり、身も心も彼の愛人として悦んだ
+		CASE 3
+			PRINTFORML 两个人一起享受了温泉之旅之后，%ANAME(MASTER)%被邀请到他的房间，就这样激烈地交合着
+			;TranslatedMark 二人で温泉巡りを楽しんだ後、%ANAME(MASTER)%は彼の部屋に誘われそのまま激しく交わっていた
+			PRINTFORML 沉溺在不伦性生活的背德感中，%ANAME(MASTER)%汗流浃背激烈地任他摆布着
+			;TranslatedMark 不倫セックスをしている背徳感に官能がうずき、%ANAME(MASTER)%達は汗だくになって激しくまぐわう
+			PRINTFORML 只穿浴衣的%ANAME(MASTER)%一边被猛烈地撞击着，一边被诉说着爱意
+			;TranslatedMark %ANAME(MASTER)%は激しく突き上げられながら浴衣をはだけさせて、イキっぱなしのまま愛の言葉を並べたてた
+			PRINTFORMW 一直交合到天亮后，约定下一次在温泉里做爱后才分别
+			;TranslatedMark 夜が明けるまで交わった後、もう一度温泉で汗を流してから再会を約束して別れた
+		CASE 4
+			PRINTFORML 不知道去哪的%ANAME(MASTER)%决定和他一起去温泉，就这样进入了他的房间
+			;TranslatedMark どちらからともなく%ANAME(MASTER)%達は一緒に温泉を巡ることにし、そのまま彼の宿に入った
+			PRINTFORML 他熟练的技巧和强壮的男子根很快就迷倒了%ANAME(MASTER)%，在无数次高潮中理解了雌的喜悦
+			;TranslatedMark 彼の熟練のテクニックと逞しい男根はすぐに%ANAME(MASTER)%を魅了し幾度となく雌の悦びに達する
+			PRINTFORML 好久不见的他像猴子一样激烈地挥着腰，%ANAME(MASTER)%也在渴求的事实让他高兴到发狂
+			;TranslatedMark ご無沙汰だった彼は猿の様に激しく腰を振り続け、また%ANAME(MASTER)%も求められる事に悦んでヨガリ狂った
+			PRINTFORMW 子宫充满了子种的%ANAME(MASTER)%红着脸想象着怀上他孩子的未来
+			;TranslatedMark 子宮から溢れる程種付けされた%ANAME(MASTER)%は彼の子供を孕んだらどうしようと頬を染めた
+	ENDSELECT
+	CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, Ｖ性交, 口淫", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("偶遇的男人"), @"偶遇的男人的\@RAND:2 ? 肉棒 # 唇\@", "偶遇的男人", "", "和姦")
+ENDIF
+PRINTFORML
+PRINTFORML 愉快的旅行完全消除了疲劳
+PRINTFORMW 以后再来吧
+SIF COOLTIME:MASTER:0 > 0
+	COOLTIME:MASTER:0 = 0
+
+RETURN 1
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_DAILY_TERRITORY_SPA_TOWN(対象)
+#DIM 対象
+RETURN 対象 != MASTER && CFLAG:対象:所属 == CFLAG:MASTER:所属 && CFLAG:対象:行動不能状態 != 4 && !IS_ANIMAL(対象)
+
+@SELECT_CHARA_LIST_SELECT_LOGIC_DAILY_TERRITORY_SPA_TOWN(対象)
+#DIM 対象
+RETURN CFLAG:対象:捕虜先 == 0

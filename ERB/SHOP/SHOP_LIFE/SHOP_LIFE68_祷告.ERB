@@ -1,0 +1,490 @@
+﻿;-------------------------------------------------
+;「祷告」の名称
+;-------------------------------------------------
+@SHOP_LIFE_NAME68
+RESULTS:0 '= "祷告"
+
+;-------------------------------------------------
+;「祷告」の选择可否
+;-------------------------------------------------
+@SHOP_LIFE_CHECK68
+SIF CFLAG:MASTER:捕虜先
+	RETURN 0
+RETURN 1
+;-------------------------------------------------
+;「祷告」の选择可能キャラ存在判定
+;-------------------------------------------------
+@SHOP_LIFE_CHECKCHARA68(ARG:0)
+;本势力的角色
+IF CFLAG:MASTER:信仰神 
+	RETURN CFLAG:(ARG:0):1 == CFLAG:MASTER:1
+ELSE ;还未确定主角信仰
+	RETURN ARG:0 == MASTER
+ENDIF
+
+
+;-------------------------------------------------
+;「祷告」左列菜单的输入处理
+;-------------------------------------------------
+@SHOP_LIFE_EVENTBUY68
+FLAG:拠点フェイズページ = 1
+FLAG:夜這い = 0
+RETURN 0
+
+;-------------------------------------------------
+;「祷告」右列表示处理
+;-------------------------------------------------
+@SHOP_LIFE_EVENTBUY_SHOW68
+CALL COLUMN_RIGHT_TITLE("请选择要祈祷或者被传教的角色", "0", "1", "0", "", "")
+CALL COLUMN_RIGHT_PRINTL
+CALL COLUMN_RIGHT_LINE
+CALL COLUMN_RIGHT_PRINTL
+;标准的角色列表和页面移动
+CALL COLUMN_RIGHT_CHARALIST
+RETURN
+
+
+
+;-------------------------------------------------
+;「祷告」
+; 成为信徒的角色右侧显示标记“信”
+;-------------------------------------------------
+@SHOP_LIFE_BUTTON_ADD68(对象)
+#DIM 对象
+PRINTPLAIN  
+
+SELECTCASE CFLAG:对象:信仰神
+	CASE 1
+		PRINTFORM 暴虐
+	CASE 2
+		PRINTFORM 诡术
+	CASE 3
+		PRINTFORM 腐朽
+	CASE 4
+		PRINTFORM 色欲
+	CASEELSE
+		PRINTFORM     
+ENDSELECT
+
+RETURN 1
+
+
+
+;-------------------------------------------------
+;「祷告」
+;四神
+;「暴虐与战争之神」 SETCOLOR 227,23,13
+;「诡术与希望之神」 SETCOLOR 138,43,226
+;「腐朽与绝望之神」 SETCOLOR 107,142,35
+;「色欲与愉悦之神」 SETCOLOR 255,110,180
+;取悦条件
+;暴虐：杀敌 占地 处刑 灭国
+;诡术：外交 同盟 劝降 赠送 
+;腐朽：俘虏 背叛 接纳 索取
+;色欲：陷落 调教 强迫 狂欲 
+;-------------------------------------------------
+
+
+;------------------------------------------------------
+@SHOP_LIFE_USERSHOP68(对象)
+#DIM 对象
+#DIM FIRST_LINE
+
+
+IF 对象==MASTER
+	IF CFLAG:对象:信仰神 == 0 ;选择信仰
+		CLEARLINE LINECOUNT
+		PRINTFORMW 你触碰了来自混沌宇宙的神秘力量...
+		PRINTL
+		PRINTFORMW 你的意识仿佛沉入无底深渊，呓语声从你的耳旁响起，你看见了世界的真实
+		PRINTL
+		PRINTL 
+		PRINTFORML 做出选择吧！
+		PRINTL  
+		PRINTBUTTON " 0[接触暴虐与战争之神]", 0
+		PRINTL  
+		PRINTL 
+		PRINTBUTTON " 1[接触诡术与希望之神]", 1
+		PRINTL  
+		PRINTL 
+		PRINTBUTTON " 2[接触腐朽与绝望之神]", 2
+		PRINTL  
+		PRINTL 
+		PRINTBUTTON " 3[接触色欲与愉悦之神]", 3
+		PRINTL  
+		PRINTL 
+		SETCOLOR 128,138,135
+		PRINTPLAIN  4[我全都要!]
+		RESETCOLOR
+		PRINTL
+		PRINTL 
+		PRINTL  
+		PRINTBUTTON " 6[说明]", 6
+		PRINTL 
+		PRINTBUTTON " 9[取消]", 9
+		PRINTL 
+		FIRST_LINE = LINECOUNT
+		$INPUT_LOOP_S1
+		INPUT
+		SELECTCASE RESULT
+			CASE 0 ;暴虐与战争之神
+				PRINTL  
+				PRINTFORMW 你感受到了一股强烈而充满战意的意念，那声音轰如雷鸣，似万千金铁交击，让你心中热血上涌
+				PRINTL 
+				PRINTL 
+				SETCOLOR 227,23,13
+				PRINTFORMW 「弱小的人类啊，吾所渴求之物乃是贯彻一切的暴行与冠绝天下的武力！」
+				PRINTL  
+				PRINTL 
+				PRINTFORMW 「挑战强者，践踏弱者，倾覆王权，肆意横行，执掌霸业」
+				PRINTL  
+				PRINTL 
+				PRINTFORMW 「汝愿成为吾行走于地上的锋刃么？」
+				RESETCOLOR
+				PRINTL 
+				PRINTL  
+				PRINTFORML 你的回答是？
+				PRINTL  
+				PRINTPLAIN
+				PRINTBUTTON "0  [我的荣幸]", 0
+				PRINTL 
+				PRINTL
+				PRINTL		
+				PRINTPLAIN				
+				PRINTBUTTON "1  [容我三思]", 1
+				PRINTL 
+				INPUT
+				IF RESULT == 0
+					PRINTL
+					PRINTFORML 你的选择让祂感到满意，那声音大笑着离去，你的手背上浮现出专属于祂的印记
+					PRINTL  
+					SETCOLOR 227,23,13
+					PRINTFORMW 「去吧，让吾见证汝的伟业！」
+					RESETCOLOR
+					PRINTL  
+					CFLAG:对象:信仰神= 1
+				ELSE
+					CLEARLINE LINECOUNT
+					GOTO INPUT_LOOP_S1
+				ENDIF
+			;诡术与希望之神
+			CASE 1 ;诡术与希望之神
+				PRINTL  
+				PRINTFORMW 你感受到了一种奇异的注视感，在祂平和的外表下潜藏着恶意与混沌，祂朗声说道
+				PRINTL 
+				PRINTL 
+				SETCOLOR 138,43,226
+				PRINTFORMW 「我是温和的野心家，是狡诈的同盟者，是行使诡术的谋士，是陷入绝境的希望」
+				PRINTL  
+				PRINTL 
+				PRINTFORMW 「人类！我欣赏你的狡猾与忠厚，机敏与愚钝，团结与背叛，堂皇与卑贱」
+				PRINTL  
+				PRINTL 
+				PRINTFORMW 「你天生就当是我的信徒！」
+				RESETCOLOR
+				PRINTL 
+				PRINTL  
+				PRINTFORML 你的回答是？
+				PRINTL  
+				PRINTPLAIN
+				PRINTBUTTON "0  [诚如所言]", 0
+				PRINTL 
+				PRINTL
+				PRINTL		
+				PRINTPLAIN				
+				PRINTBUTTON "1  [容我三思]", 1
+				PRINTL 
+				INPUT
+				IF RESULT == 0
+					PRINTL
+					PRINTFORML 祂颔首嘉许，混沌的面容似乎有千种情绪混融。你的手背上浮现出专属于祂的印记
+					PRINTL  
+					SETCOLOR 138,43,226
+					PRINTFORMW 「我将注视你带来的希望」
+					RESETCOLOR
+					PRINTL  
+					CFLAG:对象:信仰神= 2
+				ELSE
+					CLEARLINE LINECOUNT
+					GOTO INPUT_LOOP_S1
+				ENDIF
+			CASE 2 ;腐朽与绝望之神
+				PRINTL  
+				PRINTFORMW 祂的声音如垂垂老者，低沉、平稳，又有一种将死的腐朽。
+				PRINTL 
+				PRINTL 
+				SETCOLOR 107,142,35
+				PRINTFORMW 「活物，我将接纳你，如人之亲子，如道边槁木，你与它物在我眼中并无不同」
+				PRINTL  
+				PRINTL 
+				PRINTFORMW 「我是万物终焉之所，一切都将向我走来，我同化他们，守护他们，壮大他们」
+				PRINTL  
+				PRINTL 
+				PRINTFORMW 「人们畏惧我，称我为绝望，只因腐朽不可接受，何等的傲慢！」
+				PRINTL  
+				PRINTL 
+				PRINTFORMW 「你要在地上代行我的职责，叫你的敌人学会敬畏腐朽与绝望」
+				RESETCOLOR
+				PRINTL 
+				PRINTL  
+				PRINTFORML 你的回答是？
+				PRINTL  
+				PRINTPLAIN
+				PRINTBUTTON "0  [荣幸之至]", 0
+				PRINTL 
+				PRINTL
+				PRINTL		
+				PRINTPLAIN				
+				PRINTBUTTON "1  [容我三思]", 1
+				PRINTL 
+				INPUT
+				IF RESULT == 0
+					PRINTL
+					PRINTFORML 祂发出低哑的笑声，你的手背上浮现出专属于祂的印记
+					PRINTL  
+					SETCOLOR 107,142,35
+					PRINTFORMW 「我将欣赏你带来的绝望」
+					RESETCOLOR
+					PRINTL  
+					CFLAG:对象:信仰神= 2
+				ELSE
+					CLEARLINE LINECOUNT
+					GOTO INPUT_LOOP_S1
+				ENDIF
+			CASE 3 ;色欲与愉悦之神
+				PRINTL  
+				PRINTFORMW 祂的声音轻佻而诱惑，中性且空灵，形象瞬息万变，但都让你怦然心动。
+				PRINTL 
+				PRINTL 
+				SETCOLOR 255,110,180
+				PRINTFORMW 「我是爱与欲之神，是纯爱的保护者与践踏者，是众生欢愉的见证者，是堕落的诱惑之源」
+				PRINTL  
+				PRINTL 
+				PRINTFORMW 「人类，你们的爱意、欲念、堕落、寝取、纯爱都让我感到无上愉悦！」
+				PRINTL  
+				PRINTL 
+				PRINTFORMW 「作为我的信徒，你将拥有惑乱一方的魅力与诱人陷落的爱欲♡♡♡」
+				RESETCOLOR
+				PRINTL 
+				PRINTL  
+				PRINTFORML 你的回答是？
+				PRINTL  
+				PRINTPLAIN
+				PRINTBUTTON "0  [荣幸之至]", 0
+				PRINTL
+				PRINTBUTTON "0  [必然如此]", 0
+				PRINTL
+				PRINTBUTTON "0  [LSP来力]", 0
+				PRINTL 
+				PRINTL
+				PRINTL		
+				PRINTPLAIN				
+				PRINTBUTTON "1  [容我三思]", 1
+				PRINTL 
+				INPUT
+				IF RESULT == 0
+					PRINTL
+					PRINTFORML 你仿佛看到祂向你眨了眨眼，狂乱的魅意让你几乎不能移开目光
+					PRINTL  
+					SETCOLOR 255,110,180
+					PRINTFORMW 「♡加油哟，我的信徒♡」
+					RESETCOLOR
+					PRINTL  
+					CFLAG:对象:信仰神= 4
+				ELSE
+					CLEARLINE LINECOUNT
+					GOTO INPUT_LOOP_S1
+				ENDIF
+			CASE 4
+			;画饼
+			CASE 6 ;说明
+				CALL SINGLE_DRAWLINE
+				PRINTL 
+				CALL COLOR_PRINTL(@"只有在确定主角的信仰后,本插件的功能才会生效,直至玩家达成统一",カラー_注意)
+				PRINTL 
+				CALL COLOR_PRINTL(@"对于不熟悉这四位神的玩家,请在分别对话后,根据自身的意愿自由选择,但注意决定后不可更换",カラー_注意)
+				PRINTL 
+				CALL COLOR_PRINTL(@"四位神各自拥有不同的可学习神术,一般而言角色无法习得其他信仰的专属神术",カラー_注意)
+				PRINTL 
+				CALL COLOR_PRINTL(@"四位神各自拥有不同的教义,如果行为与教义完全不沾边就很难提升信仰,请谨慎选择",カラー_注意)
+				PRINTL 
+				CALL COLOR_PRINTW(@"初次游玩,对于喜欢征服的玩家推荐暴虐或者腐朽,喜欢外交则推荐诡术,只想H的推荐色欲",カラー_注意)
+				PRINTL 
+				CLEARLINE LINECOUNT - FIRST_LINE
+				GOTO INPUT_LOOP_S1
+			CASE 9
+				RETURN 1
+			CASEELSE
+				CLEARLINE LINECOUNT - FIRST_LINE
+				GOTO INPUT_LOOP_S1
+		ENDSELECT
+		SIF !CFLAG:对象:信仰神
+			RETURN 1
+		CALL COLOR_PRINTL(@"%ANAME(对象)%获得了新的信仰 %GOD_NAME:(CFLAG:对象:信仰神)%！", カラー_注意)
+		PRINTL
+		CALL COLOR_PRINTL(@"%GOD_NAME:(CFLAG:对象:信仰神)%的教义为 %GOD_CREED:(CFLAG:对象:信仰神)%！",カラー_注意)
+		PRINTL
+		ABL:对象:信仰 += 10
+		CALL COLOR_PRINTW(@"%ANAME(对象)%的信仰上升了10", カラー_注意)
+		
+		MIRACLE_OPEN = 1;开启神迹
+		;老档检测
+		IF SKILL_NO_SLOT:对象:5:1 == SKILL_NO_SLOT:对象:5:2 && SKILL_NO_SLOT:对象:5:1 == 0
+			FOR LOCAL,0,CHARANUM,1
+				FOR LOCAL:1, 0, MAX_SKILL_SLOT
+					SKILL_NO_SLOT:LOCAL:5:(LOCAL:1) = -1
+					SKILL_ID_SLOT:LOCAL:5:(LOCAL:1)= -1
+				NEXT
+			NEXT
+		ENDIF
+		;记录合意
+		FOR LOCAL,0,CHARANUM,1
+			MIRACLE_LUST_MAKELOVE_YN:LOCAL = TALENT:LOCAL:合意
+		NEXT
+		;发放玩家奖励
+		CALL SHOP_LIFE_USERSHOP68_GIFT(对象)
+		RETURN 1
+	ENDIF
+	;已有信仰
+	CLEARLINE LINECOUNT
+	PRINTFORM %TOSTR_SPACE(2)%
+	PRINTFORML 你的思维再次回到了这片广袤、混沌、无序的空间中...
+	FIRST_LINE = LINECOUNT
+	REDRAW 2
+	$INPUT_LOOP_S2
+	CALL SINGLE_DRAWLINE
+	PRINTFORM %TOSTR_SPACE(2)%
+	PRINTFORML 你想做什么？
+	CALL SINGLE_DRAWLINE
+	PRINTL  
+	PRINTFORM %TOSTR_SPACE(2)%
+	PRINTBUTTON "[查看教义]", 0
+	PRINTL  
+	CALL COLOR_LINE
+	PRINTL 
+	PRINTFORM %TOSTR_SPACE(2)%
+	IF PRAY_DONE
+		SETCOLOR 128,138,135
+		PRINTPLAIN [祷告]
+		PRINTL
+		RESETCOLOR
+	ELSE
+		PRINTBUTTON "[祷告]", 1
+	ENDIF
+	PRINTL  
+	CALL COLOR_LINE
+	PRINTL 
+	PRINTFORM %TOSTR_SPACE(2)%
+	IF MIRACLE_SACRIFICE_COOLTIME
+		SETCOLOR 128,138,135
+		PRINTPLAIN [献祭(未完成)] 
+		PRINTFORML   冷却:{MIRACLE_SACRIFICE_COOLTIME}
+		RESETCOLOR
+	ELSE
+		PRINTBUTTON "[献祭(未完成)]", 2
+	ENDIF
+	PRINTL  
+	CALL COLOR_LINE
+	PRINTL 
+	PRINTFORM %TOSTR_SPACE(2)%
+	PRINTBUTTON "[信仰商店]",3
+	PRINTL  
+	CALL COLOR_LINE
+	PRINTL 
+	CALL SINGLE_DRAWLINE
+	PRINTFORM %TOSTR_SPACE(2)%
+	PRINTBUTTON "[帮助]", 6
+	PRINTFORM %TOSTR_SPACE(2)%
+	PRINTBUTTON "[DEBUG]", 7
+	PRINTFORM %TOSTR_SPACE(2)%
+	PRINTBUTTON "[离开]", 9
+	PRINTL  
+	CALL SINGLE_DRAWLINE
+	INPUT
+	SELECTCASE RESULT
+		CASE 0 ;教义
+			CALL COLOR_PRINTW(@"%GOD_NAME:(CFLAG:对象:信仰神)%的教义为 %GOD_CREED:(CFLAG:对象:信仰神)%！",カラー_注意)
+		CASE 1 ;祷告
+			IF ABL:对象:信仰 < 30
+				CALL COLOR_PRINTW(@"%ANAME(对象)%的信仰不足30，无法进行祷告！",カラー_注意)
+			ELSE
+				IF CFLAG:对象:信仰奖励<4 && CFLAG:对象:信仰奖励 *10 + 30 <= ABL:对象:信仰 && ABL:对象:信仰 <= 100
+					;给予重要奖励
+					CALLFORM SHOP_LIFE_USERSHOP68_S{CFLAG:对象:信仰神}(对象)
+				ELSE
+					;给予普通奖励
+					CALLFORM SHOP_LIFE_USERSHOP68_N{CFLAG:对象:信仰神}(对象)
+				ENDIF
+				PRAY_DONE = 1
+				SHOP_TIME ++
+				BEGIN TURNEND
+			ENDIF
+		CASE 2 ;献祭
+			IF MIRACLE_SACRIFICE_COOLTIME
+				CALL COLOR_PRINTW(@"献祭功能还在冷却当中！",カラー_注意)
+			ELSE
+				CALLFORM SHOP_LIFE_USERSHOP68_SACRIFICE(对象)
+			ENDIF
+		CASE 3 ;信仰商店
+			CALLFORM SHOP_LIFE_USERSHOP68_SHOP(对象)
+		CASE 6 ;帮助
+			CALL SINGLE_DRAWLINE
+			PRINTL 
+			CALL COLOR_PRINTL(@"「信仰」是本功能的核心属性，其提升主要依靠：「祷告」、「传教」和对「教义」的践行",カラー_注意)
+			PRINTL 
+			CALL COLOR_PRINTL(@"「教义」具体对应的行为请自行理解，将依照程度与难度给予「信仰」经验值奖励",カラー_注意)
+			PRINTL 
+			CALL COLOR_PRINTL(@"「祷告」将会依据信仰神的特点和自身信仰高低给予随机奖励，消耗一点行动力",カラー_注意)
+			PRINTL 
+			CALL COLOR_PRINTL(@"「献祭」功能使用后会进入冷却，每5回合可以使用一次",カラー_注意)
+			PRINTL 
+			CALL COLOR_PRINTW(@"「信仰商店」可以提升你的神术等级，并出售特殊道具",カラー_注意)
+			PRINTL 
+		CASE 7 ;设定
+			CALL SHOP_LIFE_USERSHOP68_DEBUG(对象)
+		CASE 9
+			RETURN 1
+		CASEELSE
+	ENDSELECT
+	CLEARLINE LINECOUNT - FIRST_LINE
+	GOTO INPUT_LOOP_S2
+ELSE
+	;其他角色祷告
+	$INPUT_LOOP_S3
+	CLEARLINE LINECOUNT
+	CALL SINGLE_DRAWLINE
+	CALL COLOR_PRINTL(@"「%ANAME(MASTER)%」的信仰为{ABL:MASTER:信仰},信仰神为%GOD_NAME:(CFLAG:MASTER:信仰神)%", カラー_注意)
+	CALL COLOR_PRINTL(@"「%ANAME(对象)%」的信仰为{ABL:对象:信仰},信仰神为%GOD_NAME:(CFLAG:对象:信仰神)%", カラー_注意)
+	PRINTL 
+	PRINTL  
+	PRINTL  
+	PRINTL  
+	PRINTPLAIN
+	PRINTBUTTON " 0[传教(消耗行动次数)]", 0
+	PRINTL  
+	PRINTL 
+	PRINTPLAIN
+	;PRINTBUTTON " 1[特殊行动(消耗行动次数)]", 1
+	PRINTL  
+	PRINTL 
+	PRINTPLAIN
+	PRINTBUTTON " 9[取消]", 9
+	PRINTL  
+	PRINTL 
+	CALL SINGLE_DRAWLINE
+	INPUT
+	SELECTCASE RESULT
+		CASE 0
+			CALL SHOP_LIFE_USERSHOP68_PREACH(对象)
+			SHOP_TIME ++
+			BEGIN TURNEND
+		CASE 1
+			;暂未完成
+		CASE 9
+			RETURN 1
+		CASEELSE
+	ENDSELECT
+	GOTO INPUT_LOOP_S3
+ENDIF
+RETURN 1
+

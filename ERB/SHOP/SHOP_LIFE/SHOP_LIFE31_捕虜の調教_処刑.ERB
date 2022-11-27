@@ -1,0 +1,1049 @@
+﻿;-------------------------------------------------
+;「捕虜の調教」処刑(処刑拡張パッチ)大幅改変・加筆
+;-------------------------------------------------
+@EXECUTION(ARG:0)
+#DIM 妊婦フラグ
+#DIM 選択番号
+#DIM FIRST_LINE
+IF TALENT:(ARG:0):妊娠 == 1
+	妊婦フラグ = 1
+ENDIF
+
+;主人公の場合とそれ以外の時は処理を分ける
+;主人公の場合は選択肢を表示せず、記念品も入手しない
+IF ARG:0 == MASTER
+	IF CFLAG:(ARG:0):行動不能状態 == 行動不能_子供 && IS_MALE(ARG:0)
+		選択番号 = RAND:4 + 10
+	ELSEIF TALENT:(ARG:0):性別 == 4 || TALENT:(ARG:0):性別 == 5
+		選択番号 = RAND:4 + 20
+	ELSEIF IS_MALE(ARG:0)
+		選択番号 = RAND:3 + 30
+	ELSEIF CFLAG:(ARG:0):行動不能状態 == 行動不能_子供
+		選択番号 = RAND:5 + 40
+	ELSE
+		選択番号 = RAND:5 + 50
+	ENDIF
+	
+ELSEIF CFLAG:(ARG:0):行動不能状態 == 行動不能_子供 && IS_MALE(ARG:0)
+	$INPUT_LOOP1
+	FIRST_LINE = LINECOUNT
+	CALL SINGLE_DRAWLINE
+	[IF_DEBUG]
+		PRINT 子供
+	[ENDIF]
+	PRINTFORML 要以怎样的方式处刑？
+	;TranslatedMark どのような形で処刑しますか？
+	PRINTL [100] 磔刑
+	;TranslatedMark [100] 磔にする
+	PRINTL [101] 调教成为性奴隶，任意蹂躏
+	;TranslatedMark [101] 性奴隷に堕として好きに使わせる
+	PRINTL [102] 让他的男根变得超敏感
+	;TranslatedMark [102] 男根を超感度にする
+	PRINTL [103] 送给民众
+	;TranslatedMark [103] 払い下げる
+	PRINTL [109] 绞刑
+	;TranslatedMark [109] 縛り首にする
+	CALL SINGLE_DRAWLINE
+	SELECTCASE 選択番号
+		CASE 110
+			PRINTL 磔刑
+			;TranslatedMark 「磔にする」
+			PRINTL 说明：将对象绑在十字架上，悬挂在街上的广场上
+			;TranslatedMark 説明：対象を磔にして、街の広場で掲げる
+			PRINTL 　　　获得纪念品「十字架像」(復活可能)
+			;TranslatedMark 記念品「磔刑像」(復活可能)を取得する
+			PRINTL 　　　在导入从属国补丁后，可以在「外务省」的「特殊区划」中使用
+			;TranslatedMark 従属国パッチ導入時、「外務省」の「特殊区画」で使用可能
+			PRINTBUTTON "[处刑]", 0
+			;TranslatedMark "[処刑する]", 0
+		CASE 111
+			PRINTL 「调教成为性奴隶，任意蹂躏」
+			;TranslatedMark 「性奴隷に堕として好きに使わせる」
+			PRINTL 说明：将对象贬为性奴隶，给士兵慰安
+			;TranslatedMark 説明：対象を性奴隷に堕として、兵士に慰安させる
+			PRINTL 　　　取得纪念品「性奴隶」（复活可能）
+			;TranslatedMark 記念品「性奴隷」(復活可能)を取得する
+			PRINTL 　　　在导入从属国补丁后，可以在「外务省」的「特殊区划」中使用
+			;TranslatedMark 従属国パッチ導入時、「外務省」の「特殊区画」で使用可能
+			PRINTBUTTON "[处刑]", 1
+			;TranslatedMark "[処刑する]", 1
+		CASE 112
+			PRINTL 「使男根变得超敏感」
+			;TranslatedMark 「男根を超感度にする」
+			PRINTL 说明：是对象以阴茎常时发情的状态被监禁
+			;TranslatedMark 説明：対象のペニスを常時発情させ、監禁する
+			PRINTL 　　　获得纪念品「射精地狱」(復活可能)
+			;TranslatedMark 記念品「射精地獄」(復活可能)を取得する
+			PRINTL 　　　在导入从属国补丁后，可以在「外务省」的「特殊区划」中使用
+			;TranslatedMark 従属国パッチ導入時、「外務省」の「特殊区画」で使用可能
+			PRINTBUTTON "[处刑]", 2
+			;TranslatedMark "[処刑する]", 2
+		CASE 113
+			PRINTL 「送给民众」
+			;TranslatedMark 「払い下げる」
+			PRINTL 说明：将对象在街上的广场公开凌辱后，赠送给居民
+			;TranslatedMark 説明：対象を街の広場で公開凌辱した後、住民へ払い下げる
+			PRINTL 　　　获得国家资金1000
+			;TranslatedMark 国家資金1000を取得する
+			PRINTBUTTON "[处刑]",3
+			;TranslatedMark "[処刑する]", 3
+		CASE 119
+			PRINTL 「绞刑」
+			;TranslatedMark 「縛り首にする」
+			PRINTL 说明：将对象处以绞刑后，将遗体特殊处理
+			;TranslatedMark 説明：対象を絞首刑に処した後、亡骸を剥製にする
+			PRINT 　　　纪念品「标本」
+			;TranslatedMark 記念品「剥製」
+			SETCOLOR カラー_注意
+			PRINT （无法复活）
+			;TranslatedMark (蘇生不能)
+			RESETCOLOR
+			PRINTL 取得
+			;TranslatedMark を取得する
+			PRINTBUTTON "[处刑]", 9
+			;TranslatedMark "[処刑する]", 9
+	ENDSELECT
+	
+	INPUT
+	
+	選択番号 = RESULT + 10
+	IF (RESULT > 3 || RESULT < 0) && RESULT != 9
+		CLEARLINE LINECOUNT - FIRST_LINE
+		GOTO INPUT_LOOP1
+	ENDIF
+ELSEIF TALENT:(ARG:0):性別 == 4 || TALENT:(ARG:0):性別 == 5
+	$INPUT_LOOP2
+	FIRST_LINE = LINECOUNT
+	CALL SINGLE_DRAWLINE
+	PRINTFORML 要以怎样的方式处刑？
+	;TranslatedMark どのような形で処刑しますか？
+	PRINTL [100] 磔刑
+	;TranslatedMark [100] 磔にする
+	PRINTL [101] 调教成为性奴隶，任意蹂躏
+	;TranslatedMark [101] 性奴隷に堕として好きに使わせる
+	PRINTL [102] 让他的男根变得超敏感
+	;TranslatedMark [102] 男根を超感度にする
+	PRINTL [103] 送给民众
+	;TranslatedMark [103] 払い下げる
+	PRINTL [109] 绞刑
+	;TranslatedMark [109] 縛り首にする
+	CALL SINGLE_DRAWLINE
+	SELECTCASE 選択番号
+		CASE 120
+			PRINTL 磔刑
+			;TranslatedMark 「磔にする」
+			PRINTL 说明：将对象绑在十字架上，悬挂在街上的广场上
+			;TranslatedMark 説明：対象を磔にして、街の広場で掲げる
+			PRINTL 　　　获得纪念品「十字架像」(復活可能)
+			;TranslatedMark 記念品「磔刑像」(復活可能)を取得する
+			PRINTL 　　　在导入从属国补丁后，可以在「外务省」的「特殊区划」中使用
+			;TranslatedMark 従属国パッチ導入時、「外務省」の「特殊区画」で使用可能
+			PRINTBUTTON "[处刑]", 0
+			;TranslatedMark "[処刑する]", 0
+		CASE 121
+			PRINTL 「调教成为性奴隶，任意蹂躏」
+			;TranslatedMark 「性奴隷に堕として好きに使わせる」
+			PRINTL 说明：将对象贬为性奴隶，给士兵慰安
+			;TranslatedMark 説明：対象を性奴隷に堕として、兵士に慰安させる
+			PRINTL 　　　取得纪念品「性奴隶」（复活可能）
+			;TranslatedMark 記念品「性奴隷」(復活可能)を取得する
+			PRINTL 　　　在导入从属国补丁后，可以在「外务省」的「特殊区划」中使用
+			;TranslatedMark 従属国パッチ導入時、「外務省」の「特殊区画」で使用可能
+			PRINTBUTTON "[处刑]", 1
+			;TranslatedMark "[処刑する]", 1
+		CASE 122
+			PRINTL 「使男根变得超敏感」
+			;TranslatedMark 「男根を超感度にする」
+			PRINTL 说明：是对象以阴茎常时发情的状态被监禁
+			;TranslatedMark 説明：対象のペニスを常時発情させ、監禁する
+			PRINTL 　　　获得纪念品「射精地狱」(復活可能)
+			;TranslatedMark 記念品「射精地獄」(復活可能)を取得する
+			PRINTL 　　　在导入从属国补丁后，可以在「外务省」的「特殊区划」中使用
+			;TranslatedMark 従属国パッチ導入時、「外務省」の「特殊区画」で使用可能
+			PRINTBUTTON "[处刑]", 2
+			;TranslatedMark "[処刑する]", 2
+		CASE 123
+			PRINTL 「送给民众」
+			;TranslatedMark 「払い下げる」
+			PRINTL 说明：将对象在街上的广场公开凌辱后，赠送给居民
+			;TranslatedMark 説明：対象を街の広場で公開凌辱した後、住民へ払い下げる
+			PRINTL 　　　取得国家资金500
+			;TranslatedMark 国家資金500を取得する
+			PRINTBUTTON "[处刑]",3
+			;TranslatedMark "[処刑する]", 3
+		CASE 129
+			PRINTL 「绞刑」
+			;TranslatedMark 「縛り首にする」
+			PRINTL 说明：将对象处以绞刑后，将遗体特殊处理
+			;TranslatedMark 説明：対象を絞首刑に処した後、亡骸を剥製にする
+			PRINT 　　　纪念品「标本」
+			;TranslatedMark 記念品「剥製」
+			SETCOLOR カラー_注意
+			PRINT （无法苏生）
+			;TranslatedMark (蘇生不能)
+			RESETCOLOR
+			PRINTL 取得
+			;TranslatedMark を取得する
+			PRINTBUTTON "[处刑]", 9
+			;TranslatedMark "[処刑する]", 9
+	ENDSELECT
+	
+	INPUT
+	
+	選択番号 = RESULT + 20
+	IF (RESULT > 3 || RESULT < 0) && RESULT != 9
+		CLEARLINE LINECOUNT - FIRST_LINE
+		GOTO INPUT_LOOP2
+	ENDIF
+ELSEIF IS_MALE(ARG:0)
+	
+	$INPUT_LOOP3
+	FIRST_LINE = LINECOUNT
+	CALL SINGLE_DRAWLINE
+	PRINTFORML 要以怎样的方式处刑？
+	;TranslatedMark どのような形で処刑しますか？
+	PRINTL [100] 磔刑
+	;TranslatedMark [100] 磔にする
+	PRINTL [101] 调教成为性奴隶，任意蹂躏
+	;TranslatedMark [101] 性奴隷に堕として好きに使わせる
+	PRINTL [102] 让他的男根变得超敏感
+	;TranslatedMark [102] 男根を超感度にする
+	PRINTL [109] 绞刑
+	;TranslatedMark [109] 縛り首にする
+	CALL SINGLE_DRAWLINE
+	SELECTCASE 選択番号
+		CASE 130
+			PRINTL 磔刑
+			;TranslatedMark 「磔にする」
+			PRINTL 说明：将对象绑在十字架上，悬挂在街上的广场上
+			;TranslatedMark 説明：対象を磔にして、街の広場で掲げる
+			PRINTL 　　　获得纪念品「十字架像」(復活可能)
+			;TranslatedMark 記念品「磔刑像」(復活可能)を取得する
+			PRINTL 　　　在导入从属国补丁后，可以在「外务省」的「特殊区划」中使用
+			;TranslatedMark 従属国パッチ導入時、「外務省」の「特殊区画」で使用可能
+			PRINTBUTTON "[处刑]", 0
+			;TranslatedMark "[処刑する]", 0
+		CASE 131
+			PRINTL 「调教成为性奴隶，任意蹂躏」
+			;TranslatedMark 「性奴隷に堕として好きに使わせる」
+			PRINTL 说明：将对象贬为性奴隶，给士兵慰安
+			;TranslatedMark 説明：対象を性奴隷に堕として、兵士に慰安させる
+			PRINTL 　　　取得纪念品「性奴隶」（复活可能）
+			;TranslatedMark 記念品「性奴隷」(復活可能)を取得する
+			PRINTL 　　　在导入从属国补丁后，可以在「外务省」的「特殊区划」中使用
+			;TranslatedMark 従属国パッチ導入時、「外務省」の「特殊区画」で使用可能
+			PRINTBUTTON "[处刑]", 1
+			;TranslatedMark "[処刑する]", 1
+		CASE 132
+			PRINTL 「使男根变得超敏感」
+			;TranslatedMark 「男根を超感度にする」
+			PRINTL 说明：是对象以阴茎常时发情的状态被监禁
+			;TranslatedMark 説明：対象のペニスを常時発情させ、監禁する
+			PRINTL 　　　获得纪念品「射精地狱」(復活可能)
+			;TranslatedMark 記念品「射精地獄」(復活可能)を取得する
+			PRINTL 　　　在导入从属国补丁后，可以在「外务省」的「特殊区划」中使用
+			;TranslatedMark 従属国パッチ導入時、「外務省」の「特殊区画」で使用可能
+			PRINTBUTTON "[处刑]", 2
+			;TranslatedMark "[処刑する]", 2
+		CASE 139
+			PRINTL 「绞刑」
+			;TranslatedMark 「縛り首にする」
+			PRINTL 说明：将对象处以绞刑后，将遗体特殊处理
+			;TranslatedMark 説明：対象を絞首刑に処した後、亡骸を剥製にする
+			PRINT 　　　纪念品「标本」
+			;TranslatedMark 記念品「剥製」
+			SETCOLOR カラー_注意
+			PRINT （无法苏生）
+			;TranslatedMark (蘇生不能)
+			RESETCOLOR
+			PRINTL 取得
+			;TranslatedMark を取得する
+			PRINTBUTTON "[处刑]", 9
+			;TranslatedMark "[処刑する]", 9
+	ENDSELECT
+	
+	INPUT
+	
+	選択番号 = RESULT + 30
+	IF (RESULT > 2 || RESULT < 0) && RESULT != 9
+		CLEARLINE LINECOUNT - FIRST_LINE
+		GOTO INPUT_LOOP3
+	ENDIF
+ELSEIF CFLAG:(ARG:0):行動不能状態 == 行動不能_子供
+	$INPUT_LOOP4
+	FIRST_LINE = LINECOUNT
+	CALL SINGLE_DRAWLINE
+	[IF_DEBUG]
+		PRINT 子供
+		PRINTFORM {CFLAG:(ARG:0):行動不能状態}
+	[ENDIF]
+	PRINTFORML 要以怎样的方式处刑？
+	;TranslatedMark どのような形で処刑しますか？
+	PRINTL [100] 磔刑
+	;TranslatedMark [100] 磔にする
+	PRINTL [101] 调教成为性奴隶，任意蹂躏
+	;TranslatedMark [101] 性奴隷に堕として好きに使わせる
+	IF HAS_PENIS(ARG:0)
+		PRINTL [102] 让他的男根变得超敏感
+		;TranslatedMark [102] 男根を超感度にする
+	ELSE
+		PRINTL [102] 生出超敏感的男根
+		;TranslatedMark [102] 超感度の男根を生やす
+	ENDIF
+	PRINTL [103] 送给民众
+	;TranslatedMark [103] 払い下げる
+	PRINTL [104]做成肉便器
+	;TranslatedMark [104] 肉便器にする
+	PRINTL [109] 绞刑
+	;TranslatedMark [109] 縛り首にする
+	CALL SINGLE_DRAWLINE
+	SELECTCASE 選択番号
+		CASE 140
+			PRINTL 磔刑
+			;TranslatedMark 「磔にする」
+			PRINTL 说明：将对象绑在十字架上，悬挂在街上的广场上
+			;TranslatedMark 説明：対象を磔にして、街の広場で掲げる
+			PRINTL 　　　获得纪念品「十字架像」(復活可能)
+			;TranslatedMark 記念品「磔刑像」(復活可能)を取得する
+			PRINTL 　　　在导入从属国补丁后，可以在「外务省」的「特殊区划」中使用
+			;TranslatedMark 従属国パッチ導入時、「外務省」の「特殊区画」で使用可能
+			PRINTBUTTON "[处刑]", 0
+			;TranslatedMark "[処刑する]", 0
+		CASE 141
+			PRINTL 「调教成为性奴隶，任意蹂躏」
+			;TranslatedMark 「性奴隷に堕として好きに使わせる」
+			PRINTL 说明：将对象贬为性奴隶，给士兵慰安
+			;TranslatedMark 説明：対象を性奴隷に堕として、兵士に慰安させる
+			PRINTL 　　　取得纪念品「性奴隶」（复活可能）
+			;TranslatedMark 記念品「性奴隷」(復活可能)を取得する
+			PRINTL 　　　在导入从属国补丁后，可以在「外务省」的「特殊区划」中使用
+			;TranslatedMark 従属国パッチ導入時、「外務省」の「特殊区画」で使用可能
+			PRINTBUTTON "[处刑]", 1
+			;TranslatedMark "[処刑する]", 1
+		CASE 142
+			PRINTL 「生出超敏感的男根」
+			;TranslatedMark 「超感度の男根を生やす」
+			PRINTL 说明：是对象以阴茎常时发情的状态被监禁
+			;TranslatedMark 説明：対象のペニスを常時発情させ、監禁する
+			PRINTL 　　　获得纪念品「射精地狱」(復活可能)
+			;TranslatedMark 記念品「射精地獄」(復活可能)を取得する
+			PRINTL 　　　在导入从属国补丁后，可以在「外务省」的「特殊区划」中使用
+			;TranslatedMark 従属国パッチ導入時、「外務省」の「特殊区画」で使用可能
+			PRINTBUTTON "[处刑]", 2
+			;TranslatedMark "[処刑する]", 2
+		CASE 143
+			PRINTL 「送给民众」
+			;TranslatedMark 「払い下げる」
+			PRINTL 说明：将对象在街上的广场公开凌辱后，赠送给居民
+			;TranslatedMark 説明：対象を街の広場で公開凌辱した後、住民へ払い下げる
+			PRINTL 　　　获得国家资金1000
+			;TranslatedMark 国家資金1000を取得する
+			PRINTBUTTON "[处刑]",3
+			;TranslatedMark "[処刑する]", 3
+		CASE 144
+			PRINTL 「做成肉便器」
+			;TranslatedMark 「肉便器にする」
+			PRINTL 说明：把对象作为生殖士兵的母体…表面是这种说法，实质上是堕落为性奴隶
+			;TranslatedMark 説明：対象を兵士を養殖する母胎として利用…の名目で性奴隷に堕とす
+			PRINTL 　　　取得纪念品「肉便器」(復活可能)
+			;TranslatedMark 記念品「肉便器」(復活可能)を取得する
+			PRINTL 　　　在导入从属国补丁后，可以在「外务省」的「特殊区划」中使用
+			;TranslatedMark 従属国パッチ導入時、「外務省」の「特殊区画」で使用可能
+			PRINTBUTTON "[处刑]", 4
+			;TranslatedMark "[処刑する]", 4
+		CASE 149
+			PRINTL 「绞刑」
+			;TranslatedMark 「縛り首にする」
+			PRINTL 说明：将对象处以绞刑后，将遗体特殊处理
+			;TranslatedMark 説明：対象を絞首刑に処した後、亡骸を剥製にする
+			PRINT 　　　纪念品「标本」
+			;TranslatedMark 記念品「剥製」
+			SETCOLOR カラー_注意
+			PRINT （无法苏生）
+			;TranslatedMark (蘇生不能)
+			RESETCOLOR
+			PRINTL 取得
+			;TranslatedMark を取得する
+			PRINTBUTTON "[处刑]", 9
+			;TranslatedMark "[処刑する]", 9
+	ENDSELECT
+	
+	INPUT
+	
+	選択番号 = RESULT + 40
+	IF (RESULT > 4 || RESULT < 0) && RESULT != 9
+		CLEARLINE LINECOUNT - FIRST_LINE
+		GOTO INPUT_LOOP4
+	ENDIF
+	
+ELSE
+	$INPUT_LOOP5
+	FIRST_LINE = LINECOUNT
+	CALL SINGLE_DRAWLINE
+	PRINTFORML 要以怎样的方式处刑？
+	;TranslatedMark どのような形で処刑しますか？
+	PRINTL [100] 磔刑
+	;TranslatedMark [100] 磔にする
+	PRINTL [101] 调教成为性奴隶，任意蹂躏
+	;TranslatedMark [101] 性奴隷に堕として好きに使わせる
+	IF HAS_PENIS(ARG:0)
+		PRINTL [102] 让他的男根变得超敏感
+		;TranslatedMark [102] 男根を超感度にする
+	ELSE
+		PRINTL [102] 生出超敏感的男根
+		;TranslatedMark [102] 超感度の男根を生やす
+	ENDIF
+	PRINTL [103] 送给民众
+	;TranslatedMark [103] 払い下げる
+	PRINTL [104]做成肉便器
+	;TranslatedMark [104] 肉便器にする
+	PRINTL [109] 绞刑
+	;TranslatedMark [109] 縛り首にする
+	CALL SINGLE_DRAWLINE
+	SELECTCASE 選択番号
+		CASE 150
+			PRINTL 磔刑
+			;TranslatedMark 「磔にする」
+			PRINTL 说明：将对象绑在十字架上，悬挂在街上的广场上
+			;TranslatedMark 説明：対象を磔にして、街の広場で掲げる
+			PRINTL 　　　获得纪念品「十字架像」(復活可能)
+			;TranslatedMark 記念品「磔刑像」(復活可能)を取得する
+			PRINTL 　　　在导入从属国补丁后，可以在「外务省」的「特殊区划」中使用
+			;TranslatedMark 従属国パッチ導入時、「外務省」の「特殊区画」で使用可能
+			PRINTBUTTON "[处刑]", 0
+			;TranslatedMark "[処刑する]", 0
+		CASE 151
+			PRINTL 「调教成为性奴隶，任意蹂躏」
+			;TranslatedMark 「性奴隷に堕として好きに使わせる」
+			PRINTL 说明：将对象贬为性奴隶，给士兵慰安
+			;TranslatedMark 説明：対象を性奴隷に堕として、兵士に慰安させる
+			PRINTL 　　　取得纪念品「性奴隶」（复活可能）
+			;TranslatedMark 記念品「性奴隷」(復活可能)を取得する
+			PRINTL 　　　在导入从属国补丁后，可以在「外务省」的「特殊区划」中使用
+			;TranslatedMark 従属国パッチ導入時、「外務省」の「特殊区画」で使用可能
+			PRINTBUTTON "[处刑]", 1
+			;TranslatedMark "[処刑する]", 1
+		CASE 152
+			PRINTL 「生出超敏感的男根」
+			;TranslatedMark 「超感度の男根を生やす」
+			PRINTL 说明：是对象以阴茎常时发情的状态被监禁
+			;TranslatedMark 説明：対象のペニスを常時発情させ、監禁する
+			PRINTL 　　　获得纪念品「射精地狱」(復活可能)
+			;TranslatedMark 記念品「射精地獄」(復活可能)を取得する
+			PRINTL 　　　在导入从属国补丁后，可以在「外务省」的「特殊区划」中使用
+			;TranslatedMark 従属国パッチ導入時、「外務省」の「特殊区画」で使用可能
+			PRINTBUTTON "[处刑]", 2
+			;TranslatedMark "[処刑する]", 2
+		CASE 153
+			PRINTL 「送给民众」
+			;TranslatedMark 「払い下げる」
+			PRINTL 说明：将对象在街上的广场公开凌辱后，赠送给居民
+			;TranslatedMark 説明：対象を街の広場で公開凌辱した後、住民へ払い下げる
+			PRINTL 　　　取得国家资金500
+			;TranslatedMark 国家資金500を取得する
+			PRINTBUTTON "[处刑]",3
+			;TranslatedMark "[処刑する]", 3
+		CASE 154
+			PRINTL 「做成肉便器」
+			;TranslatedMark 「肉便器にする」
+			PRINTL 说明：将对象作为繁殖士兵的母体
+			;TranslatedMark 説明：対象を兵士を養殖する母胎として利用する
+			PRINTL 　　　取得纪念品「肉便器」(復活可能)
+			;TranslatedMark 記念品「肉便器」(復活可能)を取得する
+			PRINTL 　　　在导入从属国补丁后，可以在「外务省」的「特殊区划」中使用
+			;TranslatedMark 従属国パッチ導入時、「外務省」の「特殊区画」で使用可能
+			PRINTBUTTON "[处刑]", 4
+			;TranslatedMark "[処刑する]", 4
+		CASE 159
+			PRINTL 「绞刑」
+			;TranslatedMark 「縛り首にする」
+			PRINTL 说明：将对象处以绞刑后，将遗体特殊处理
+			;TranslatedMark 説明：対象を絞首刑に処した後、亡骸を剥製にする
+			PRINT 　　　纪念品「标本」
+			;TranslatedMark 記念品「剥製」
+			SETCOLOR カラー_注意
+			PRINT （无法苏生）
+			;TranslatedMark (蘇生不能)
+			RESETCOLOR
+			PRINTL 取得
+			;TranslatedMark を取得する
+			PRINTBUTTON "[处刑]", 9
+			;TranslatedMark "[処刑する]", 9
+	ENDSELECT
+	
+	INPUT
+	
+	選択番号 = RESULT + 50
+	IF (RESULT > 4 || RESULT < 0) && RESULT != 9
+		CLEARLINE LINECOUNT - FIRST_LINE
+		GOTO INPUT_LOOP5
+	ENDIF
+ENDIF
+
+
+IF 選択番号 == 11
+	SELECTCASE RAND:3
+		CASE 0
+				PRINTFORML 昏暗的房间中、传来了男女之间交合的水声、呻吟娇喘声……
+				PRINTFORML 被「処刑」的%ANAME(ARG:0)%、被「使用」来发泄女官的性欲
+				PRINTFORML %ANAME(ARG:0)%还没有迎来遗精，女官们就给他喂了药，给了他超强的性欲
+				PRINTFORML 跨坐在他身上的女官用力按住了他的腰，%ANAME(ARG:0)%再一次达到了高潮…
+		CASE 1
+				PRINTFORML 昏暗的房间中、传来了少年的呻吟声和女人们的欢笑声……
+				PRINTFORML 被「処刑」的%ANAME(ARG:0)%、被「使用」来发泄女官积累起来的闷气
+				PRINTFORML %ANAME(ARG:0)%粗暴的喘息着、把自己束缚在墙上的鎖鏈摇晃着发出了响声
+				PRINTFORML 那个未成熟的阴茎勃起得很厉害。女官们给他吃的药，使他的性欲异常高涨
+				PRINTFORML 女官们一边用让人无法达到高潮的绝妙手法玩弄着他的阴茎，一边嘲笑他的浅薄……
+			CASE 2
+				PRINTFORML 暗的房间中、回荡着少年的尖叫声和女人们的欢笑声……
+				PRINTFORML 被「処刑」的%ANAME(ARG:0)%、被「使用」来发泄女官积累起来的闷气
+				PRINTFORML 女人笑着摇动着腰，%ANAME(ARG:0)%的菊穴、被与他年龄完全不相称的穿戴式假陰茎插入了
+				PRINTFORML 女人不停地进行这活塞运动，发出刺耳的声音，先走汁从他那尚未遗精过的阴茎前端滴落下来
+				PRINTFORML 被女人爆菊還射精的樣子、女官們紛紛嘲笑、一次又一次凌辱着他……
+	ENDSELECT
+		CALL FUCK(ARG:0, "欲望, 性技, 精愛, 性交, Ｃ, Ｂ, Ｍ, Ａ, 苦痛快楽, 苦痛快楽, 緊縛, 被虐, 被虐, 輪姦, 口淫, Ａ性交, Ｖ挿入, 露出, Ａ拡張", "童貞喪失, Ａ処女喪失, 接吻喪失, CFLAG減少, 性癖取得", 0, "女官", "女官的假阴茎", "女官", "処刑")
+		CALL FUCK(ARG:0, "欲望, 性技, 精愛, 性交, Ｃ, Ｂ, Ｍ, Ａ, 苦痛快楽, 苦痛快楽, 緊縛, 被虐, 被虐, 輪姦, 口淫, Ａ性交, Ｖ挿入, 露出, Ａ拡張", "童貞喪失, Ａ処女喪失, 接吻喪失, CFLAG減少, 性癖取得", 0, "女官", "女官的假阴茎", "女官", "処刑")
+		CALL FUCK(ARG:0, "欲望, 性技, 精愛, 性交, Ｃ, Ｂ, Ｍ, Ａ, 苦痛快楽, 苦痛快楽, 緊縛, 被虐, 被虐, 輪姦, 口淫, Ａ性交, Ｖ挿入, 露出, Ａ拡張", "童貞喪失, Ａ処女喪失, 接吻喪失, CFLAG減少, 性癖取得", 0, "女官", "女官的假阴茎", "女官", "処刑")
+		CALL FUCK(ARG:0, "欲望, 性技, 精愛, 性交, Ｃ, Ｂ, Ｍ, Ａ, 苦痛快楽, 苦痛快楽, 緊縛, 被虐, 被虐, 輪姦, 口淫, Ａ性交, Ｖ挿入, 露出, Ａ拡張", "童貞喪失, Ａ処女喪失, 接吻喪失, CFLAG減少, 性癖取得", 0, "女官", "女官的假阴茎", "女官", "処刑")
+	PRINTL 
+	SIF ARG:0 != MASTER
+		CALL GET_GOODS_EXECUTED(ARG:0, 3, 1, 妊婦フラグ)
+ELSEIF 選択番号 == 10
+	PRINTFORML 在街道中央的广场中设置的十字架上，回归了出生时装扮的%ANAME(ARG:0)%被高高挂起
+	PRINTFORML 阴茎形状的长枪，深深地扎进那幼小的屁股里
+	PRINTFORML 一直持续到%ANAME(ARG:0)%的反应完全消失才停止，贯穿了无数次……
+	CALL FUCK(ARG:0, "欲望, Ａ, Ａ, 苦痛快楽, 緊縛, 被虐, 苦痛快楽, 緊縛, 被虐, Ａ拡張, Ａ拡張, Ａ拡張, 露出", "Ａ処女喪失, CFLAG減少, 性癖取得", 0, "", "假阴茎", "", "処刑")
+	CALL FUCK(ARG:0, "欲望, Ａ, Ａ, 苦痛快楽, 緊縛, 被虐, 苦痛快楽, 緊縛, 被虐, Ａ拡張, Ａ拡張, Ａ拡張, 露出", "Ａ処女喪失, CFLAG減少, 性癖取得", 0, "", "假阴茎", "", "処刑")
+	CALL FUCK(ARG:0, "欲望, Ａ, Ａ, 苦痛快楽, 緊縛, 被虐, 苦痛快楽, 緊縛, 被虐, Ａ拡張, Ａ拡張, Ａ拡張, 露出", "Ａ処女喪失, CFLAG減少, 性癖取得", 0, "", "假阴茎", "", "処刑")
+	CALL FUCK(ARG:0, "欲望, Ａ, Ａ, 苦痛快楽, 緊縛, 被虐, 苦痛快楽, 緊縛, 被虐, Ａ拡張, Ａ拡張, Ａ拡張, 露出", "Ａ処女喪失, CFLAG減少, 性癖取得", 0, "", "假阴茎", "", "処刑")
+	PRINTL 
+	SIF ARG:0 != MASTER
+		CALL GET_GOODS_EXECUTED(ARG:0, 1, 1, 妊婦フラグ)
+ELSEIF 選択番号 == 12
+	PRINTFORML 昏暗的房間中、響起了瘋狂的嬌喘声
+	PRINTFORML 通过「処刑」使阴茎变得超敏感的%ANAME(ARG:0)%一个劲的抚摸着自己幼小的阴茎
+	PRINTFORML 虽然还不知道射精的事，但是这个年龄不应该经受的快感，反复向他传来，丝毫没有减轻的样子
+	PRINTFORML 他的背用力地向后仰，还未成熟的阴茎剧烈地跳动着，拼命地想要将绝对射不出来的白浊射出去……
+	TALENT:(ARG:0):Ｃ鈍感 = 0
+	TALENT:(ARG:0):Ｃ敏感 = 1
+	TALENT:(ARG:0):容易自慰 = 1
+	CALL FUCK(ARG:0, "欲望, 精愛, 被虐, Ｃ, Ｃ, 自慰, 自慰, 苦痛快楽, 苦痛快楽, 被虐", "CFLAG減少, 性癖取得")
+	CALL FUCK(ARG:0, "欲望, 精愛, 被虐, Ｃ, Ｃ, 自慰, 自慰, 苦痛快楽, 苦痛快楽, 被虐", "CFLAG減少, 性癖取得")
+	CALL FUCK(ARG:0, "欲望, 精愛, 被虐, Ｃ, Ｃ, 自慰, 自慰, 苦痛快楽, 苦痛快楽, 被虐", "CFLAG減少, 性癖取得")
+	CALL FUCK(ARG:0, "欲望, 精愛, 被虐, Ｃ, Ｃ, 自慰, 自慰, 苦痛快楽, 苦痛快楽, 被虐", "CFLAG減少, 性癖取得")
+	PRINTL 
+	SIF ARG:0 != MASTER
+		CALL GET_GOODS_EXECUTED(ARG:0, 4, 1, 妊婦フラグ)
+ELSEIF 選択番号 == 13
+	SELECTCASE RAND:4
+		CASE 0
+			PRINTFORML 在街道的主干道上、軍隊正在遊行
+			PRINTFORML 在中心有着全裸被上了枷鎖的%ANAME(ARG:0)%
+			PRINTFORML 街道上的居民們、看見幼小的%ANAME(ARG:0)%現在淒慘的模樣開始嘲笑、謾罵、扔石頭
+			PRINTFORML 之後%ANAME(ARG:0)%交給了街道上的居民們「処理」、用那個肉体補償他們……
+			CALL FUCK(ARG:0, "欲望, 露出, 露出")
+			CALL FUCK(ARG:0, "欲望, 露出, 露出")
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ａ, Ｂ, Ｍ, Ｕ, Ａ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ挿入, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 童貞喪失, Ａ処女喪失, CFLAG減少, 性癖取得, 腸内射精, 口内射精", GET_SPERM_ID("領民"), "市民的阴茎", "市民", "市民", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ａ, Ｂ, Ｍ, Ｕ, Ａ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ挿入, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 童貞喪失, Ａ処女喪失, CFLAG減少, 性癖取得, 腸内射精, 口内射精", GET_SPERM_ID("領民"), "市民的阴茎", "市民", "市民", "処刑")
+		CASE 1
+			PRINTFORML 讓%ANAME(ARG:0)%站在了街道的中央廣場上特設的処刑台上
+			PRINTFORML 在街道的居民們面前被士兵們輪姦
+			PRINTFORML 街道上的居民們、看見幼小的%ANAME(ARG:0)%現在淒慘的模樣開始嘲笑、謾罵、扔石頭
+			PRINTFORML 之後%ANAME(ARG:0)%交給了街道上的居民們「処理」、用那個肉体補償他們……
+			CALL FUCK(ARG:0, "欲望, 性技, Ｃ, Ａ, Ｂ, Ｍ, Ｕ, Ａ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ挿入, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 童貞喪失, Ａ処女喪失, CFLAG減少, 性癖取得, 腸内射精, 口内射精", GET_SPERM_ID("領民"), "士兵的阴茎", "兵士", "女兵士", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, Ｃ, Ａ, Ｂ, Ｍ, Ｕ, Ａ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ挿入, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 童貞喪失, Ａ処女喪失, CFLAG減少, 性癖取得, 腸内射精, 口内射精", GET_SPERM_ID("領民"), "士兵的阴茎", "兵士", "女兵士", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ａ, Ｂ, Ｍ, Ｕ, Ａ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ挿入, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 童貞喪失, Ａ処女喪失, CFLAG減少, 性癖取得, 腸内射精, 口内射精", GET_SPERM_ID("兵士"), "市民的阴茎", "市民", "市民", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ａ, Ｂ, Ｍ, Ｕ, Ａ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ挿入, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 童貞喪失, Ａ処女喪失, CFLAG減少, 性癖取得, 腸内射精, 口内射精", GET_SPERM_ID("兵士"), "市民的阴茎", "市民", "市民", "処刑")
+		CASE 2
+			PRINTFORML 讓%ANAME(ARG:0)%站在了街道的中央廣場上特設的処刑台上
+			PRINTFORML 然后在街道上所有人的注视下，在还不理解是什么意思的情况下被强迫自慰
+			PRINTFORML 街道上的居民們、看見幼小的%ANAME(ARG:0)%現在淒慘的模樣開始嘲笑、謾罵、扔石頭
+			PRINTFORML 之後%ANAME(ARG:0)%交給了街道上的居民們「処理」、用那個肉体補償他們……
+			CALL FUCK(ARG:0, "欲望, 精愛, 苦痛快楽, Ｃ, Ｂ, 自慰, 露出, 露出, 露出, 被虐, ＢＬ")
+			CALL FUCK(ARG:0, "欲望, 精愛, 苦痛快楽, Ｃ, Ｂ, 自慰, 露出, 露出, 露出, 被虐, ＢＬ")
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ａ, Ｂ, Ｍ, Ｕ, Ａ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ挿入, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 童貞喪失, Ａ処女喪失, CFLAG減少, 性癖取得, 腸内射精, 口内射精", GET_SPERM_ID("領民"), "市民的阴茎", "市民", "市民", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ａ, Ｂ, Ｍ, Ｕ, Ａ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ挿入, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 童貞喪失, Ａ処女喪失, CFLAG減少, 性癖取得, 腸内射精, 口内射精", GET_SPERM_ID("領民"), "市民的阴茎", "市民", "市民", "処刑")
+		CASE 3
+			PRINTFORML 讓%ANAME(ARG:0)%站在了街道的中央廣場上特設的処刑台上
+			PRINTFORML 在街道的居民們面前和狗性交
+			PRINTFORML 街道上的居民們、看見幼小的%ANAME(ARG:0)%現在淒慘的模樣開始嘲笑、謾罵、扔石頭
+			PRINTFORML 之後%ANAME(ARG:0)%交給了街道上的居民們「処理」、用那個肉体補償他們……
+			CALL FUCK(ARG:0, "欲望, 性技, Ｃ, Ａ, Ｂ, Ｍ, Ｕ, Ａ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 獣姦, Ｖ挿入, Ａ性交, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, Ａ処女喪失, CFLAG減少, 性癖取得, 腸内射精, 口内射精", GET_SPERM_ID("犬"), "犬的阴茎", "犬", "", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, Ｃ, Ａ, Ｂ, Ｍ, Ｕ, Ａ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 獣姦, Ｖ挿入, Ａ性交, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, Ａ処女喪失, CFLAG減少, 性癖取得, 腸内射精, 口内射精", GET_SPERM_ID("犬"), "犬的阴茎", "犬", "", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ａ, Ｂ, Ｍ, Ｕ, Ａ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ挿入, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 童貞喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 腸内射精, 口内射精", GET_SPERM_ID("領民"), "市民的阴茎", "市民", "市民", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ａ, Ｂ, Ｍ, Ｕ, Ａ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ挿入, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 童貞喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 腸内射精, 口内射精", GET_SPERM_ID("領民"), "市民的阴茎", "市民", "市民", "処刑")
+	ENDSELECT
+	IF ARG:0 != MASTER
+		MONEY:(CFLAG:MASTER:所属) += 1000
+		PRINTL
+		PRINTFORML 获得了国库资金1000
+	ENDIF
+
+ELSEIF 選択番号 == 21 || 選択番号 == 31
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORML 昏暗的房间中、传来了男女之间交合的水声、呻吟娇喘声……
+			PRINTFORML 被「処刑」的%ANAME(ARG:0)%、被「使用」来发泄女官的性欲
+			PRINTFORML %ANAME(ARG:0)%已经射了几十发了。女官们灌下的药、给予了他超常的性欲
+			PRINTFORML 按着跨坐在他身上的女官晃动的腰部、%ANAME(ARG:0)%忍不住又射了……
+		CASE 1
+			PRINTFORML 昏暗的房间中、传来了男人的呻吟声、和女性的笑声……
+			PRINTFORML 被「処刑」的%ANAME(ARG:0)%、被「使用」来发泄女官积累起来的闷气
+			PRINTFORML %ANAME(ARG:0)%粗暴的喘息着、把自己束缚在墙上的鎖鏈摇晃着发出了响声
+			PRINTFORML 阴茎充分的勃起了。女官们灌下的药、让他的性欲异常高涨
+			PRINTFORML 女官们责弄着阴茎而且绝妙的手法让他无法射精、纷纷嘲笑着这羞耻的姿态……
+		CASE 2
+			PRINTFORML 昏暗的房间中、传来了男人粗壮的声音、和女性的笑声……
+			PRINTFORML 被「処刑」的%ANAME(ARG:0)%、被「使用」来发泄女官积累起来的闷气
+			PRINTFORML 女人边笑着、边扶着%ANAME(ARG:0)%的腰晃动着。他的菊穴、被最粗的穿戴式假陰茎插入了
+			PRINTFORML 発出了不堪入耳的声音、女人反復進行着活塞運動、有白濁的液体從他的陰茎滴落下来
+			PRINTFORML 被女人爆菊還射精的樣子、女官們紛紛嘲笑、一次又一次凌辱着他……
+	ENDSELECT
+	CALL FUCK(ARG:0, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, Ａ性交, Ｖ挿入, 露出", "童貞喪失, Ａ処女喪失, 接吻喪失, CFLAG減少, 性癖取得", 0, "女官", "女官的假阴茎", "女官", "処刑")
+	CALL FUCK(ARG:0, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, Ａ性交, Ｖ挿入, 露出", "童貞喪失, Ａ処女喪失, 接吻喪失, CFLAG減少, 性癖取得", 0, "女官", "女官的假阴茎", "女官", "処刑")
+	CALL FUCK(ARG:0, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, Ａ性交, Ｖ挿入, 露出", "童貞喪失, Ａ処女喪失, 接吻喪失, CFLAG減少, 性癖取得", 0, "女官", "女官的假阴茎", "女官", "処刑")
+	CALL FUCK(ARG:0, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, Ａ性交, Ｖ挿入, 露出", "童貞喪失, Ａ処女喪失, 接吻喪失, CFLAG減少, 性癖取得", 0, "女官", "女官的假阴茎", "女官", "処刑")
+	PRINTL 
+	SIF ARG:0 != MASTER
+		CALL GET_GOODS_EXECUTED(ARG:0, 3, 0, 妊婦フラグ)
+ELSEIF 選択番号 == 20 || 選択番号 == 30
+	PRINTFORML 在街道中央的广场中设置的十字架上，赤裸的%ANAME(ARG:0)%被高高挂起
+	PRINTFORML 将阴茎形状的长枪深深扎进他的屁股里
+	PRINTFORML 之后持续了好几次，一直到%ANAME(ARG:0)%的反应完全消失……
+	CALL FUCK(ARG:0, "欲望, 射精, Ａ, Ａ, 苦痛快楽, 緊縛, 被虐, 苦痛快楽, 緊縛, 被虐, Ａ拡張, Ａ拡張, 露出", "Ａ処女喪失, CFLAG減少, 性癖取得", 0, "", "假阴茎", "", "処刑")
+	CALL FUCK(ARG:0, "欲望, 射精, Ａ, Ａ, 苦痛快楽, 緊縛, 被虐, 苦痛快楽, 緊縛, 被虐, Ａ拡張, Ａ拡張, 露出", "Ａ処女喪失, CFLAG減少, 性癖取得", 0, "", "假阴茎", "", "処刑")
+	CALL FUCK(ARG:0, "欲望, 射精, Ａ, Ａ, 苦痛快楽, 緊縛, 被虐, 苦痛快楽, 緊縛, 被虐, Ａ拡張, Ａ拡張, 露出", "Ａ処女喪失, CFLAG減少, 性癖取得", 0, "", "假阴茎", "", "処刑")
+	CALL FUCK(ARG:0, "欲望, 射精, Ａ, Ａ, 苦痛快楽, 緊縛, 被虐, 苦痛快楽, 緊縛, 被虐, Ａ拡張, Ａ拡張, 露出", "Ａ処女喪失, CFLAG減少, 性癖取得", 0, "", "假阴茎", "", "処刑")
+	PRINTL 
+	SIF ARG:0 != MASTER
+		CALL GET_GOODS_EXECUTED(ARG:0, 1, 0, 妊婦フラグ)
+ELSEIF 選択番号 == 22 || 選択番号 == 32
+	IF TALENT:(ARG:0):性別 == 4 || TALENT:(ARG:0):性別 == 5
+		PRINTFORML 昏暗的房間中、響起了瘋狂的嬌喘声
+	ELSE
+		PRINTFORML 昏暗的房間中、響起了瘋狂的尖叫声
+	ENDIF
+	PRINTFORML 通过「処刑」而使得阴茎变得超级敏感的%ANAME(ARG:0)%一个劲地撸动着自己的阴茎
+	PRINTFORML 精力被大大增加的它已经射了好几发了，连地板上都形成了白色的水洼，但是仍然看不到萎靡的迹象
+	PRINTFORML 他用力的向后仰起身子，铃口处气势汹汹的喷出了一股黏糊糊的白浊，弄脏了他的身体……
+	TALENT:(ARG:0):Ｃ鈍感 = 0
+	TALENT:(ARG:0):Ｃ敏感 = 1
+	TALENT:(ARG:0):容易自慰 = 1
+	CALL FUCK(ARG:0, "欲望, 精愛, 射精, Ｃ, Ｃ, 自慰, 自慰, 射精, 苦痛快楽, 被虐", "CFLAG減少, 性癖取得")
+	CALL FUCK(ARG:0, "欲望, 精愛, 射精, Ｃ, Ｃ, 自慰, 自慰, 射精, 苦痛快楽, 被虐", "CFLAG減少, 性癖取得")
+	CALL FUCK(ARG:0, "欲望, 精愛, 射精, Ｃ, Ｃ, 自慰, 自慰, 射精, 苦痛快楽, 被虐", "CFLAG減少, 性癖取得")
+	CALL FUCK(ARG:0, "欲望, 精愛, 射精, Ｃ, Ｃ, 自慰, 自慰, 射精, 苦痛快楽, 被虐", "CFLAG減少, 性癖取得")
+	PRINTL 
+	SIF ARG:0 != MASTER
+		CALL GET_GOODS_EXECUTED(ARG:0, 4, 0, 妊婦フラグ)
+ELSEIF 選択番号 == 23
+	SELECTCASE RAND:4
+		CASE 0
+			PRINTFORML 在街道的主干道上、軍隊正在遊行
+			PRINTFORML 在中心有着全裸被上了枷鎖的%ANAME(ARG:0)%
+			PRINTFORML 街道上的居民們、看見可怕敵将%ANAME(ARG:0)%現在淒慘的模樣開始嘲笑、謾罵、扔石頭
+			PRINTFORML 之後%ANAME(ARG:0)%交給了街道上的居民們「処理」、用那個肉体補償他們……
+			CALL FUCK(ARG:0, "欲望, 露出, 露出, ＢＬ")
+			CALL FUCK(ARG:0, "欲望, 露出, 露出, ＢＬ")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("領民"), "市民的阴茎", "市民")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("領民"), "市民的阴茎", "市民")
+		CASE 1
+			PRINTFORML 讓%ANAME(ARG:0)%站在了街道的中央廣場上特設的処刑台上
+			PRINTFORML 在街道的居民們面前被士兵們輪姦
+			PRINTFORML 街道上的居民們、看見可怕敵将%ANAME(ARG:0)%現在淒慘的模樣開始嘲笑、謾罵、扔石頭
+			PRINTFORML 之後%ANAME(ARG:0)%交給了街道上的居民們「処理」、用那個肉体補償他們……
+			CALL FUCK(ARG:0, "欲望, 露出, 露出, ＢＬ, ＢＬ, ＢＬ, ＢＬ")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("領民"), "市民的阴茎", "市民")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("領民"), "市民的阴茎", "市民")
+		CASE 2
+			PRINTFORML 讓%ANAME(ARG:0)%站在了街道的中央廣場上特設的処刑台上
+			PRINTFORML 在街道的居民們面前被強迫自慰
+			PRINTFORML 街道上的居民們、看見可怕敵将%ANAME(ARG:0)%現在淒慘的模樣開始嘲笑、謾罵、扔石頭
+			PRINTFORML 之後%ANAME(ARG:0)%交給了街道上的居民們「処理」、用那個肉体補償他們……
+			CALL FUCK(ARG:0, "欲望, 精愛, 射精, Ｃ, Ｂ, 自慰, 露出, 露出, 露出, 被虐, ＢＬ")
+			CALL FUCK(ARG:0, "欲望, 精愛, 射精, Ｃ, Ｂ, 自慰, 露出, 露出, 露出, 被虐, ＢＬ")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("領民"), "市民的阴茎", "市民")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("領民"), "市民的阴茎", "市民")
+		CASE 3
+			PRINTFORML 讓%ANAME(ARG:0)%站在了街道的中央廣場上特設的処刑台上
+			PRINTFORML 在街道的居民們面前和狗性交
+			PRINTFORML 街道上的居民們、看見可怕敵将%ANAME(ARG:0)%現在淒慘的模樣開始嘲笑、謾罵、扔石頭
+			PRINTFORML 之後%ANAME(ARG:0)%交給了街道上的居民們「処理」、用那個肉体補償他們……
+			CALL FUCK(ARG:0, "欲望, 露出, 露出, ＢＬ, ＢＬ")
+			CALL FUCK_BEAST(ARG:0, GET_SPERM_ID("犬"), "犬的阴茎", "犬")
+			CALL FUCK_BEAST(ARG:0, GET_SPERM_ID("犬"), "犬的阴茎", "犬")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("領民"), "市民的阴茎", "市民")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("領民"), "市民的阴茎", "市民")
+	ENDSELECT
+	IF ARG:0 != MASTER
+		MONEY:(CFLAG:MASTER:所属) += 500
+		PRINTL
+		PRINTFORML 获得了国库资金500
+	ENDIF
+
+ELSEIF 選択番号 == 40
+	PRINTFORML 在街道中央的广场中设置的十字架上，回归了出生时装扮的%ANAME(ARG:0)%被高高挂起
+	PRINTFORML 阴茎形状的长枪，向着还未成熟的两个穴内深深地突刺着
+	PRINTFORML 一直持续到%ANAME(ARG:0)%的反应完全消失才停止，贯穿了无数次……
+	CALL FUCK(ARG:0, "欲望, Ａ拡張, Ｖ拡張, Ａ, Ａ, 苦痛快楽, 緊縛, 被虐, Ｖ, Ｖ, 苦痛快楽, 緊縛, 被虐, Ａ拡張, Ａ拡張, Ｖ拡張, Ｖ拡張, 露出", "処女喪失, Ａ処女喪失, CFLAG減少, 性癖取得", 0, "", "假阴茎", "", "処刑")
+	CALL FUCK(ARG:0, "欲望, Ａ拡張, Ｖ拡張, Ａ, Ａ, 苦痛快楽, 緊縛, 被虐, Ｖ, Ｖ, 苦痛快楽, 緊縛, 被虐, Ａ拡張, Ａ拡張, Ｖ拡張, Ｖ拡張, 露出", "処女喪失, Ａ処女喪失, CFLAG減少, 性癖取得", 0, "", "假阴茎", "", "処刑")
+	CALL FUCK(ARG:0, "欲望, Ａ拡張, Ｖ拡張, Ａ, Ａ, 苦痛快楽, 緊縛, 被虐, Ｖ, Ｖ, 苦痛快楽, 緊縛, 被虐, Ａ拡張, Ａ拡張, Ｖ拡張, Ｖ拡張, 露出", "処女喪失, Ａ処女喪失, CFLAG減少, 性癖取得", 0, "", "假阴茎", "", "処刑")
+	CALL FUCK(ARG:0, "欲望, Ａ拡張, Ｖ拡張, Ａ, Ａ, 苦痛快楽, 緊縛, 被虐, Ｖ, Ｖ, 苦痛快楽, 緊縛, 被虐, Ａ拡張, Ａ拡張, Ｖ拡張, Ｖ拡張, 露出", "処女喪失, Ａ処女喪失, CFLAG減少, 性癖取得", 0, "", "假阴茎", "", "処刑")
+	PRINTL 
+	SIF ARG:0 != MASTER
+		CALL GET_GOODS_EXECUTED(ARG:0, 1, 1, 妊婦フラグ)
+ELSEIF 選択番号 == 41
+	SELECTCASE RAND:5
+		CASE 0
+			PRINTFORML 昏暗的房間中、交替傳来了女性的悲鳴、和男人的罵声……
+			PRINTFORML 被「処刑」的%ANAME(ARG:0)%尽管还是个孩子，却被「使用」来処理士兵的性欲
+			PRINTFORML %ANAME(ARG:0)%的所有穴都被射了幾十発精液、幼小的全身都被染成了白色
+			PRINTFORML 压在她身上的士兵呻吟声变大，再一次在%ANAME(ARG:0)%还未成熟的膣内射精了……
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士", "", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士", "", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士", "", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士", "", "処刑")
+		CASE 1
+			PRINTFORML 昏暗的房間中、交替傳来了女性的悲鳴、和男人的罵声……
+			PRINTFORML 被「処刑」的%ANAME(ARG:0)%尽管还是个孩子，却成為了所有犯人的慰安用奴隸
+			PRINTFORML %ANAME(ARG:0)%的所有穴都被射了幾十発精液、被施暴的幼小的身体已経破破爛爛了
+			PRINTFORML 聚集来的犯人絡繹不絶、在%ANAME(ARG:0)%的未成熟的肉体上、不断地享受小穴的奉仕……
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("ならず者"), "囚犯的阴茎", "囚犯", "", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("ならず者"), "囚犯的阴茎", "囚犯", "", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("ならず者"), "囚犯的阴茎", "囚犯", "", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("ならず者"), "囚犯的阴茎", "囚犯", "", "処刑")
+		CASE 2
+			PRINTFORML 軍隊的畜舍、響起了豬的鳴叫声和幼女的悲鳴
+			PRINTFORML 被「処刑」的%ANAME(ARG:0)%、被安排成為了照料動物的角色……
+			PRINTFORML 她被綁在繁殖臺上、豬圧在身上、不停搖動着腰
+			PRINTFORML 还未成熟的肉体无法感受到快乐，而像花蕾一样的洞穴被畜生蹂躏的痛苦和恐惧让%ANAME(ARG:0)%哭号着。
+			PRINTFORML 但是豬根本不会在意這些事、把黏糊的精液射進了她的腔内……
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 獣姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("豚"), "猪的阴茎", "猪", "", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 獣姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("豚"), "猪的阴茎", "猪", "", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 獣姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("豚"), "猪的阴茎", "猪", "", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 獣姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("豚"), "猪的阴茎", "猪", "", "処刑")
+		CASE 3
+			PRINTFORML 軍隊的野営地、響起了男人猥瑣的笑声和幼女的悲鳴声
+			PRINTFORML 被「処刑」的%ANAME(ARG:0)%，虽然还是个孩子，却被強行帯去当慰安婦……
+			PRINTFORML 男人們以凌辱%ANAME(ARG:0)%当做下酒菜、喝着酒
+			PRINTFORML 她的幼小的身体已経被射了幾十発精液了、変得黏黏糊糊的
+			PRINTFORML 結局、在現在的部隊中、她也一直在被侵犯着……
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士", "", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士", "", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士", "", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士", "", "処刑")
+		CASE 4
+			PRINTFORML 昏暗的房間中、響起了女人們的笑声和嬌喘声
+			PRINTFORML 被「処刑」的%ANAME(ARG:0)%、被用来发泄女官积累起来的闷气
+			PRINTFORML 同樣是女人、女官用熟悉的手法愛撫着%ANAME(ARG:0)%，连性欲是什么都不理解的%ANAME(ARG:0)%的快感也被提升着
+			PRINTFORML 但是、絶対不碰G点、也不讓她到達高潮
+			PRINTFORML 不明所以的%ANAME(ARG:0)%哭喊着，女官却没有停下她的手，继续玩弄着她那未成熟的肉体……
+			CALL FUCK(ARG:0, "欲望, 欲望, 精愛, 露出, Ｃ, Ｃ, Ｖ, Ｖ, Ｂ, Ｂ, Ａ, Ａ, Ｍ, Ｍ, Ｕ, Ｕ, 緊縛, 百合, 排泄, 苦痛快楽, 被虐", "CFLAG減少, 性癖取得")
+			CALL FUCK(ARG:0, "欲望, 欲望, 精愛, 露出, Ｃ, Ｃ, Ｖ, Ｖ, Ｂ, Ｂ, Ａ, Ａ, Ｍ, Ｍ, Ｕ, Ｕ, 緊縛, 百合, 排泄, 苦痛快楽, 被虐", "CFLAG減少, 性癖取得")
+			CALL FUCK(ARG:0, "欲望, 欲望, 精愛, 露出, Ｃ, Ｃ, Ｖ, Ｖ, Ｂ, Ｂ, Ａ, Ａ, Ｍ, Ｍ, Ｕ, Ｕ, 緊縛, 百合, 排泄, 苦痛快楽, 被虐", "CFLAG減少, 性癖取得")
+			CALL FUCK(ARG:0, "欲望, 欲望, 精愛, 露出, Ｃ, Ｃ, Ｖ, Ｖ, Ｂ, Ｂ, Ａ, Ａ, Ｍ, Ｍ, Ｕ, Ｕ, 緊縛, 百合, 排泄, 苦痛快楽, 被虐", "CFLAG減少, 性癖取得")
+	ENDSELECT
+	PRINTL 
+	SIF ARG:0 != MASTER
+		CALL GET_GOODS_EXECUTED(ARG:0, 3, 1, 妊婦フラグ)
+ELSEIF 選択番号 == 42
+	PRINTFORML 昏暗的房間中、響起了瘋狂的嬌喘声
+	IF HAS_PENIS(ARG:0)
+		PRINTFORML 通过「処刑」而使得阴茎变得超级敏感的%ANAME(ARG:0)%一个劲地撸动着自己的阴茎
+		PRINTFORML 连「那个」是为了什么而存在的都不清楚，但却因在这个年龄不可能知道的快乐而挣扎着
+	ELSE
+		PRINTFORML 被「処刑」長出男根的%ANAME(ARG:0)%、一心一意的责弄着自己的陰茎
+		PRINTFORML 连「阴茎」的存在都不清楚，还沉浸在「那个」所传达过来的未知的快感中
+	ENDIF
+	PRINTFORML 她的背用力地向后仰，还未成熟的阴茎剧烈地跳动着，拼命地想要将绝对射不出来的白浊射出去……
+	TALENT:(ARG:0):性別 = 2
+	TALENT:(ARG:0):Ｃ鈍感 = 0
+	TALENT:(ARG:0):Ｃ敏感 = 1
+	TALENT:(ARG:0):容易自慰 = 1
+	CALL FUCK(ARG:0, "欲望, 精愛, 被虐, Ｃ, Ｃ, 自慰, 自慰, 苦痛快楽, 苦痛快楽, 被虐", "CFLAG減少, 性癖取得")
+	CALL FUCK(ARG:0, "欲望, 精愛, 被虐, Ｃ, Ｃ, 自慰, 自慰, 苦痛快楽, 苦痛快楽, 被虐", "CFLAG減少, 性癖取得")
+	CALL FUCK(ARG:0, "欲望, 精愛, 被虐, Ｃ, Ｃ, 自慰, 自慰, 苦痛快楽, 苦痛快楽, 被虐", "CFLAG減少, 性癖取得")
+	CALL FUCK(ARG:0, "欲望, 精愛, 被虐, Ｃ, Ｃ, 自慰, 自慰, 苦痛快楽, 苦痛快楽, 被虐", "CFLAG減少, 性癖取得")
+	PRINTL 
+	SIF ARG:0 != MASTER
+		CALL GET_GOODS_EXECUTED(ARG:0, 4, 1, 妊婦フラグ)
+ELSEIF 選択番号 == 43
+	SELECTCASE RAND:5
+		CASE 0
+			PRINTFORML 在街道的主干道上、軍隊正在遊行
+			PRINTFORML 在中心有着全裸被上了枷鎖的%ANAME(ARG:0)%
+			PRINTFORML 街道上的居民們、看見幼小的%ANAME(ARG:0)%現在淒慘的模樣開始嘲笑、謾罵、扔石頭
+			PRINTFORML 之後%ANAME(ARG:0)%交給了街道上的居民們「処理」、用那個肉体補償他們……
+			CALL FUCK(ARG:0, "欲望, 露出, 露出")
+			CALL FUCK(ARG:0, "欲望, 露出, 露出")
+			CALL FUCK(ARG:0, "欲望, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("領民"), "市民的阴茎", "市民", "", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("領民"), "市民的阴茎", "市民", "", "処刑")
+		CASE 1
+			PRINTFORML 讓%ANAME(ARG:0)%站在了街道的中央廣場上特設的処刑台上
+			PRINTFORML 在街道的居民們面前被士兵們輪姦
+			PRINTFORML 街道上的居民們、看見幼小的%ANAME(ARG:0)%現在淒慘的模樣開始嘲笑、謾罵、扔石頭
+			PRINTFORML 之後%ANAME(ARG:0)%交給了街道上的居民們「処理」、用那個肉体補償他們……
+			CALL FUCK(ARG:0, "欲望, 露出, 露出")
+			CALL FUCK(ARG:0, "欲望, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士", "", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士", "", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("領民"), "市民的阴茎", "市民", "", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("領民"), "市民的阴茎", "市民", "", "処刑")
+		CASE 2
+			PRINTFORML 讓%ANAME(ARG:0)%站在了街道的中央廣場上特設的処刑台上
+			PRINTFORML 然后在街道上所有人的注视下，在还不理解是什么意思的情况下被强迫自慰
+			PRINTFORML 街道上的居民們、看見幼小的%ANAME(ARG:0)%現在淒慘的模樣開始嘲笑、謾罵、扔石頭
+			PRINTFORML 之後%ANAME(ARG:0)%交給了街道上的居民們「処理」、用那個肉体補償他們……
+			CALL FUCK(ARG:0, "欲望, 精愛, 射精, Ｃ, Ｂ, 自慰, 露出, 露出, 露出, 被虐")
+			CALL FUCK(ARG:0, "欲望, 精愛, 射精, Ｃ, Ｂ, 自慰, 露出, 露出, 露出, 被虐")
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("領民"), "市民的阴茎", "市民", "", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("領民"), "市民的阴茎", "市民", "", "処刑")
+		CASE 3
+			PRINTFORML 讓%ANAME(ARG:0)%站在了街道的中央廣場上特設的処刑台上
+			PRINTFORML 在街道的居民們面前和狗性交
+			PRINTFORML 街道上的居民們、看見幼小的%ANAME(ARG:0)%現在淒慘的模樣開始嘲笑、謾罵、扔石頭
+			PRINTFORML 之後%ANAME(ARG:0)%交給了街道上的居民們「処理」、用那個肉体補償他們……
+			CALL FUCK(ARG:0, "欲望, 露出, 露出")
+			CALL FUCK(ARG:0, "欲望, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 獣姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("犬"), "犬的阴茎", "犬", "", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 獣姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("犬"), "犬的阴茎", "犬", "", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("領民"), "市民的阴茎", "市民", "", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, 奉仕, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("領民"), "市民的阴茎", "市民", "", "処刑")
+		CASE 4
+			PRINTFORML 昏暗的房間中、響起了瘋狂的笑声
+			PRINTFORML 被「処刑」的%ANAME(ARG:0)%、賣給了着名的科学狂人
+			PRINTFORML 男人使用実験中創造出来的触手生物责弄着她
+			PRINTFORML 如同苦瓜一樣粗的触手、在她的兩穴中激烈的抽插
+			PRINTFORML 但是、触手分泌的液体圧制了痛覚、圧倒性的快感襲向了%ANAME(ARG:0)%
+			PRINTFORML %ANAME(ARG:0)%就這樣、直到失去意識為止、持續的被触手侵犯着……
+			CALL FUCK(ARG:0, "欲望, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 触手, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("犬"), "犬的阴茎", "犬", "", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 触手, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("犬"), "犬的阴茎", "犬", "", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 触手, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("犬"), "犬的阴茎", "犬", "", "処刑")
+			CALL FUCK(ARG:0, "欲望, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 触手, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("犬"), "犬的阴茎", "犬", "", "処刑")
+	ENDSELECT
+	IF ARG:0 != MASTER
+		MONEY:(CFLAG:MASTER:所属) += 1000
+		PRINTL
+		PRINTFORML 获得了国库资金1000
+	ENDIF
+ELSEIF 選択番号 == 44
+	PRINTFORML 昏暗的房間中、響起了幼女的悲鳴
+	PRINTFORML 被「処刑」的%ANAME(ARG:0)%、被当做製作次世代士兵的苗床
+	PRINTFORML 但是，尚未迎来初潮的身体是不可能怀孕的。不过帰根結底、就是一個好用的肉便器
+	PRINTFORML 被縄子綁住的她、沈默的士兵不停晃動着腰部、射精了
+	PRINTFORML 陰茎從被扩张的与年龄完全不符的蜜穴中拔出、被内射了幾十発的小穴、不知道属於誰的種子滴落下来……
+	CALL FUCK(ARG:0, "欲望, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士", "", "処刑")
+	CALL FUCK(ARG:0, "欲望, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士", "", "処刑")
+	CALL FUCK(ARG:0, "欲望, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士", "", "処刑")
+	CALL FUCK(ARG:0, "欲望, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｕ, Ｖ拡張, Ａ拡張, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 露出, 排泄, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交, ＢＬ, 排泄, 苦痛快楽, 緊縛, 被虐", "接吻喪失, 処女喪失, Ａ処女喪失,  CFLAG減少, 性癖取得, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士", "", "処刑")
+	PRINTL 
+	SIF ARG:0 != MASTER
+		CALL GET_GOODS_EXECUTED(ARG:0, 2, 1, 妊婦フラグ)
+
+ELSEIF 選択番号 == 50
+	PRINTFORML 在街道中央的广场中设置的十字架上，赤裸的%ANAME(ARG:0)%被高高挂起
+	PRINTFORML 阴茎形状的长枪，向着两穴内深深地深深地突刺着
+	PRINTFORML 一直持续到%ANAME(ARG:0)%的反应完全消失才停止，贯穿了无数次……
+	CALL FUCK(ARG:0, "欲望, 射精, Ａ, Ａ, 苦痛快楽, 緊縛, 被虐, Ｖ, Ｖ, 苦痛快楽, 緊縛, 被虐, Ａ拡張, Ａ拡張, Ｖ拡張, Ｖ拡張, 露出", "処女喪失, Ａ処女喪失, CFLAG減少, 性癖取得", 0, "", "假阴茎", "", "処刑")
+	CALL FUCK(ARG:0, "欲望, 射精, Ａ, Ａ, 苦痛快楽, 緊縛, 被虐, Ｖ, Ｖ, 苦痛快楽, 緊縛, 被虐, Ａ拡張, Ａ拡張, Ｖ拡張, Ｖ拡張, 露出", "処女喪失, Ａ処女喪失, CFLAG減少, 性癖取得", 0, "", "假阴茎", "", "処刑")
+	CALL FUCK(ARG:0, "欲望, 射精, Ａ, Ａ, 苦痛快楽, 緊縛, 被虐, Ｖ, Ｖ, 苦痛快楽, 緊縛, 被虐, Ａ拡張, Ａ拡張, Ｖ拡張, Ｖ拡張, 露出", "処女喪失, Ａ処女喪失, CFLAG減少, 性癖取得", 0, "", "假阴茎", "", "処刑")
+	CALL FUCK(ARG:0, "欲望, 射精, Ａ, Ａ, 苦痛快楽, 緊縛, 被虐, Ｖ, Ｖ, 苦痛快楽, 緊縛, 被虐, Ａ拡張, Ａ拡張, Ｖ拡張, Ｖ拡張, 露出", "処女喪失, Ａ処女喪失, CFLAG減少, 性癖取得", 0, "", "假阴茎", "", "処刑")
+	PRINTL 
+	SIF ARG:0 != MASTER
+		CALL GET_GOODS_EXECUTED(ARG:0, 1, 0, 妊婦フラグ)
+ELSEIF 選択番号 == 51
+	SELECTCASE RAND:5
+		CASE 0
+			PRINTFORML 昏暗的房間中、交替傳来了女性的悲鳴、和男人的罵声……
+			PRINTFORML 被「処刑」的%ANAME(ARG:0)%、被「使用」来処理士兵的性欲
+			PRINTFORML %ANAME(ARG:0)%的所有穴都被射了幾十発精液、全身都被染成了白色
+			PRINTFORML 圧在她身上的士兵呻吟声変大了、%ANAME(ARG:0)%的又被腔内射精了……
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士")
+		CASE 1
+			PRINTFORML 昏暗的房間中、交替傳来了女性的悲鳴、和男人的罵声……
+			PRINTFORML 被「処刑」的%ANAME(ARG:0)%、成為了所有犯人的慰安用奴隸
+			PRINTFORML %ANAME(ARG:0)%的所有穴都被射了幾十発精液、被施暴的身体已経破破爛爛了
+			PRINTFORML 聚集来的犯人絡繹不絶、在%ANAME(ARG:0)%的肉体上、不断地享受小穴的奉仕……
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("ならず者"), "囚犯的阴茎", "囚犯")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("ならず者"), "囚犯的阴茎", "囚犯")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("ならず者"), "囚犯的阴茎", "囚犯")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("ならず者"), "囚犯的阴茎", "囚犯")
+		CASE 2
+			PRINTFORML 軍隊的畜舍、響起了豬的鳴叫声和女人的悲鳴
+			PRINTFORML 被「処刑」的%ANAME(ARG:0)%、被安排成為了照料動物的角色……
+			PRINTFORML 她被綁在繁殖臺上、豬圧在身上、不停搖動着腰
+			PRINTFORML 被畜生侵犯的事実、其中還感到了快感、讓她開始動搖
+			PRINTFORML 但是豬根本不会在意這些事、把黏糊的精液射進了她的腔内……
+			CALL FUCK_BEAST(ARG:0, GET_SPERM_ID("豚"), "豚的阴茎", "豚")
+			CALL FUCK_BEAST(ARG:0, GET_SPERM_ID("豚"), "豚的阴茎", "豚")
+			CALL FUCK_BEAST(ARG:0, GET_SPERM_ID("豚"), "豚的阴茎", "豚")
+			CALL FUCK_BEAST(ARG:0, GET_SPERM_ID("豚"), "豚的阴茎", "豚")
+		CASE 3
+			PRINTFORML 軍隊的野営地、響起了男人猥瑣的笑声和女人的悲鳴声
+			PRINTFORML 被「処刑」的%ANAME(ARG:0)%、被強行帯去当慰安婦……
+			PRINTFORML 男人們以凌辱%ANAME(ARG:0)%当做下酒菜、喝着酒
+			PRINTFORML 她的身体已経被射了幾十発精液了、変得黏黏糊糊的
+			PRINTFORML 結局、在現在的部隊中、她也一直在被侵犯着……
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士")
+		CASE 4
+			PRINTFORML 昏暗的房間中、響起了女人們的笑声和嬌喘声
+			PRINTFORML 被「処刑」的%ANAME(ARG:0)%、被用来发泄女官积累起来的闷气
+			PRINTFORML 同樣是女人、女官用熟悉的手法愛撫着%ANAME(ARG:0)%、提昇着快感
+			PRINTFORML 但是、絶対不碰G点、也不讓她到達高潮
+			PRINTFORML 女官完全不聽%ANAME(ARG:0)%哭着懇求高潮、継續责弄着她……
+			CALL FUCK(ARG:0, "欲望, 欲望, 精愛, 露出, Ｃ, Ｃ, Ｖ, Ｖ, Ｂ, Ｂ, Ａ, Ａ, Ｍ, Ｍ, Ｕ, Ｕ, 緊縛, 百合, 排泄, 苦痛快楽, 被虐", "CFLAG減少, 性癖取得")
+			CALL FUCK(ARG:0, "欲望, 欲望, 精愛, 露出, Ｃ, Ｃ, Ｖ, Ｖ, Ｂ, Ｂ, Ａ, Ａ, Ｍ, Ｍ, Ｕ, Ｕ, 緊縛, 百合, 排泄, 苦痛快楽, 被虐", "CFLAG減少, 性癖取得")
+			CALL FUCK(ARG:0, "欲望, 欲望, 精愛, 露出, Ｃ, Ｃ, Ｖ, Ｖ, Ｂ, Ｂ, Ａ, Ａ, Ｍ, Ｍ, Ｕ, Ｕ, 緊縛, 百合, 排泄, 苦痛快楽, 被虐", "CFLAG減少, 性癖取得")
+			CALL FUCK(ARG:0, "欲望, 欲望, 精愛, 露出, Ｃ, Ｃ, Ｖ, Ｖ, Ｂ, Ｂ, Ａ, Ａ, Ｍ, Ｍ, Ｕ, Ｕ, 緊縛, 百合, 排泄, 苦痛快楽, 被虐", "CFLAG減少, 性癖取得")
+	ENDSELECT
+	PRINTL 
+	SIF ARG:0 != MASTER
+		CALL GET_GOODS_EXECUTED(ARG:0, 3, 0, 妊婦フラグ)
+ELSEIF 選択番号 == 52
+	PRINTFORML 昏暗的房間中、響起了瘋狂的嬌喘声
+	IF HAS_PENIS(ARG:0)
+		PRINTFORML 通过「処刑」而使得阴茎变得超级敏感的%ANAME(ARG:0)%一个劲地撸动着自己的阴茎
+		PRINTFORML 精力被大大增加的它已经射了好几发了，连地板上都形成了白色的水洼，但是仍然看不到萎靡的迹象
+	ELSE
+		PRINTFORML 被「処刑」長出男根的%ANAME(ARG:0)%、一心一意的责弄着自己的陰茎
+		PRINTFORML 不知道射了多少発、地板上已経積起了一片白色的水窪、即使這樣也沒有萎下去的樣子
+	ENDIF
+	PRINTFORML 她高高地仰着背、黏糊的白濁液從铃口噴出、玷汚了她自己的肉体……
+	TALENT:(ARG:0):性別 = 2
+	TALENT:(ARG:0):Ｃ鈍感 = 0
+	TALENT:(ARG:0):Ｃ敏感 = 1
+	TALENT:(ARG:0):容易自慰 = 1
+	CALL FUCK(ARG:0, "欲望, 精愛, 射精, Ｃ, Ｃ, 自慰, 自慰, 射精, 苦痛快楽, 被虐", "CFLAG減少, 性癖取得")
+	CALL FUCK(ARG:0, "欲望, 精愛, 射精, Ｃ, Ｃ, 自慰, 自慰, 射精, 苦痛快楽, 被虐", "CFLAG減少, 性癖取得")
+	CALL FUCK(ARG:0, "欲望, 精愛, 射精, Ｃ, Ｃ, 自慰, 自慰, 射精, 苦痛快楽, 被虐", "CFLAG減少, 性癖取得")
+	CALL FUCK(ARG:0, "欲望, 精愛, 射精, Ｃ, Ｃ, 自慰, 自慰, 射精, 苦痛快楽, 被虐", "CFLAG減少, 性癖取得")
+	PRINTL 
+	SIF ARG:0 != MASTER
+		CALL GET_GOODS_EXECUTED(ARG:0, 4, 0, 妊婦フラグ)
+ELSEIF 選択番号 == 53
+	SELECTCASE RAND:6
+		CASE 0
+			PRINTFORML 在街道的主干道上、軍隊正在遊行
+			PRINTFORML 在中心有着全裸被上了枷鎖的%ANAME(ARG:0)%
+			PRINTFORML 街道上的居民們、看見可怕敵将%ANAME(ARG:0)%現在淒慘的模樣開始嘲笑、謾罵、扔石頭
+			PRINTFORML 之後%ANAME(ARG:0)%交給了街道上的居民們「処理」、用那個肉体補償他們……
+			CALL FUCK(ARG:0, "欲望, 露出, 露出")
+			CALL FUCK(ARG:0, "欲望, 露出, 露出")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("領民"), "市民的阴茎", "市民")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("領民"), "市民的阴茎", "市民")
+		CASE 1
+			PRINTFORML 讓%ANAME(ARG:0)%站在了街道的中央廣場上特設的処刑台上
+			PRINTFORML 在街道的居民們面前被士兵們輪姦
+			PRINTFORML 街道上的居民們、看見可怕敵将%ANAME(ARG:0)%現在淒慘的模樣開始嘲笑、謾罵、扔石頭
+			PRINTFORML 之後%ANAME(ARG:0)%交給了街道上的居民們「処理」、用那個肉体補償他們……
+			CALL FUCK(ARG:0, "欲望, 露出, 露出")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("領民"), "市民的阴茎", "市民")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("領民"), "市民的阴茎", "市民")
+		CASE 2
+			PRINTFORML 讓%ANAME(ARG:0)%站在了街道的中央廣場上特設的処刑台上
+			PRINTFORML 在街道的居民們面前被強迫自慰
+			PRINTFORML 街道上的居民們、看見可怕敵将%ANAME(ARG:0)%現在淒慘的模樣開始嘲笑、謾罵、扔石頭
+			PRINTFORML 之後%ANAME(ARG:0)%交給了街道上的居民們「処理」、用那個肉体補償他們……
+			CALL FUCK(ARG:0, "欲望, 精愛, 射精, Ｃ, Ｂ, 自慰, 露出, 露出, 露出, 被虐")
+			CALL FUCK(ARG:0, "欲望, 精愛, 射精, Ｃ, Ｂ, 自慰, 露出, 露出, 露出, 被虐")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("領民"), "市民的阴茎", "市民")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("領民"), "市民的阴茎", "市民")
+		CASE 3
+			PRINTFORML 讓%ANAME(ARG:0)%站在了街道的中央廣場上特設的処刑台上
+			PRINTFORML 在街道的居民們面前和狗性交
+			PRINTFORML 街道上的居民們、看見可怕敵将%ANAME(ARG:0)%現在淒慘的模樣開始嘲笑、謾罵、扔石頭
+			PRINTFORML 之後%ANAME(ARG:0)%交給了街道上的居民們「処理」、用那個肉体補償他們……
+			CALL FUCK(ARG:0, "欲望, 露出, 露出")
+			CALL FUCK_BEAST(ARG:0, GET_SPERM_ID("犬"), "犬的阴茎", "犬")
+			CALL FUCK_BEAST(ARG:0, GET_SPERM_ID("犬"), "犬的阴茎", "犬")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("領民"), "市民的阴茎", "市民")
+			CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("領民"), "市民的阴茎", "市民")
+		CASE 4
+			PRINTFORML 昏暗的房間中、響起了瘋狂的笑声
+			PRINTFORML 被「処刑」的%ANAME(ARG:0)%、賣給了着名的科学狂人
+			PRINTFORML 男人用薬品讓她沈睡、在這期間肉体和大腦接受了「改良」手術
+			PRINTFORML %ANAME(ARG:0)%醒来的時候、身体已経変成了誘惑男人需求男人的東西了
+			PRINTFORML 這麼想着、被男人改造成了淫乱的侍奉男人淫娃
+			PRINTFORML 很快的、她已経想用小穴奉仕眼前男人的陰茎了……
+			TALENT:(ARG:0):Ｃ敏感 = 1
+			TALENT:(ARG:0):Ｖ敏感 = 1
+			TALENT:(ARG:0):Ａ敏感 = 1
+			TALENT:(ARG:0):Ｂ敏感 = 1
+			TALENT:(ARG:0):Ｍ敏感 = 1
+			TALENT:(ARG:0):Ｕ敏感 = 1
+			TALENT:(ARG:0):母乳体質 = 1
+			CALL FUCK_MAKELOVE(ARG:0, GET_SPERM_ID("領民"), "科学狂人的阴茎", "科学者")
+			CALL FUCK_MAKELOVE(ARG:0, GET_SPERM_ID("領民"), "科学狂人的阴茎", "科学者")
+			CALL FUCK_MAKELOVE(ARG:0, GET_SPERM_ID("領民"), "科学狂人的阴茎", "科学者")
+			CALL FUCK_MAKELOVE(ARG:0, GET_SPERM_ID("領民"), "科学狂人的阴茎", "科学者")
+		CASE 5
+			PRINTFORML 昏暗的房間中、響起了瘋狂的笑声
+			PRINTFORML 被「処刑」的%ANAME(ARG:0)%、賣給了着名的科学狂人
+			PRINTFORML 男人使用実験中創造出来的触手生物责弄着她
+			PRINTFORML 如同苦瓜一樣粗的触手、在她的兩穴中激烈的抽插
+			PRINTFORML 但是、触手分泌的液体圧制了痛覚、圧倒性的快感襲向了%ANAME(ARG:0)%
+			PRINTFORML %ANAME(ARG:0)%就這樣、直到失去意識為止、持續的被触手侵犯着……
+			CALL FUCK_TENTACLE(ARG:0, GET_SPERM_ID("触手"), "触手", "触手")
+			CALL FUCK_TENTACLE(ARG:0, GET_SPERM_ID("触手"), "触手", "触手")
+			CALL FUCK_TENTACLE(ARG:0, GET_SPERM_ID("触手"), "触手", "触手")
+			CALL FUCK_TENTACLE(ARG:0, GET_SPERM_ID("触手"), "触手", "触手")
+	ENDSELECT
+	IF ARG:0 != MASTER
+		MONEY:(CFLAG:MASTER:所属) += 500
+		PRINTL
+		PRINTFORML 获得了国库资金500
+	ENDIF
+ELSEIF 選択番号 == 54
+	PRINTFORML 昏暗的房間中、響起了女人的悲鳴
+	PRINTFORML 被「処刑」的%ANAME(ARG:0)%、被当做製作次世代士兵的苗床
+	PRINTFORML 帰根結底、就是一個好用的肉便器……
+	PRINTFORML 被縄子綁住的她、沈默的士兵不停晃動着腰部、射精了
+	PRINTFORML 陰茎從蜜穴中拔出、被内射了幾十発的小穴、不知道属於誰的種子滴落下来……
+	CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士")
+	CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士")
+	CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士")
+	CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("兵士"), "士兵的阴茎", "兵士")
+	PRINTL 
+	SIF ARG:0 != MASTER
+		CALL GET_GOODS_EXECUTED(ARG:0, 2, 0, 妊婦フラグ)
+ELSEIF 選択番号 == 19 || 選択番号 == 49
+	PRINTFORML %ANAME(ARG:0)%被吊在了街边广场的绞架上……
+	;TranslatedMark %ANAME(ARG:0)%は、街の広場に置かれた絞首台に生まれたままの姿で吊るされた……
+	CALL FUCK(ARG:0, "苦痛快楽, 緊縛, 被虐, 苦痛快楽, 緊縛, 被虐, 露出, 露出, 排泄")
+	CALL FUCK(ARG:0, "苦痛快楽, 緊縛, 被虐, 苦痛快楽, 緊縛, 被虐, 露出, 露出, 排泄")
+	CALL FUCK(ARG:0, "苦痛快楽, 緊縛, 被虐, 苦痛快楽, 緊縛, 被虐, 露出, 露出, 排泄")
+	CALL FUCK(ARG:0, "苦痛快楽, 緊縛, 被虐, 苦痛快楽, 緊縛, 被虐, 露出, 露出, 排泄")
+	CALL FUCK(ARG:0, "苦痛快楽, 緊縛, 被虐, 苦痛快楽, 緊縛, 被虐, 露出, 露出, 排泄")
+	EXP:(ARG:0):心創経験 += 400
+	EXP:(ARG:0):異常経験 += 40
+	EXP:(ARG:0):失禁経験 += 10
+	PRINTL 
+	SIF ARG:0 != MASTER
+		CALL GET_GOODS_EXECUTED(ARG:0, 8, 1, 妊婦フラグ)
+ELSEIF 選択番号 == 29 || 選択番号 == 39 || 選択番号 == 59
+	PRINTFORML %ANAME(ARG:0)%被全裸吊在了广场上的绞架上……
+	;TranslatedMark %ANAME(ARG:0)%は、街の広場に置かれた絞首台に全裸で吊るされた……
+	CALL FUCK(ARG:0, "苦痛快楽, 緊縛, マゾ, 苦痛快楽, 緊縛, マゾ, 露出, 露出, 排泄")
+	CALL FUCK(ARG:0, "苦痛快楽, 緊縛, マゾ, 苦痛快楽, 緊縛, マゾ, 露出, 露出, 排泄")
+	CALL FUCK(ARG:0, "苦痛快楽, 緊縛, マゾ, 苦痛快楽, 緊縛, マゾ, 露出, 露出, 排泄")
+	CALL FUCK(ARG:0, "苦痛快楽, 緊縛, マゾ, 苦痛快楽, 緊縛, マゾ, 露出, 露出, 排泄")
+	CALL FUCK(ARG:0, "苦痛快楽, 緊縛, マゾ, 苦痛快楽, 緊縛, マゾ, 露出, 露出, 排泄")
+	EXP:(ARG:0):心創経験 += 400
+	EXP:(ARG:0):異常経験 += 40
+	EXP:(ARG:0):失禁経験 += 10
+	PRINTL 
+	SIF ARG:0 != MASTER
+		CALL GET_GOODS_EXECUTED(ARG:0, 8, 0, 妊婦フラグ)
+ENDIF
+EXP:(ARG:0):心創経験 += 100
+EXP:(ARG:0):異常経験 += 10
+CFLAG:(ARG:0):崩壊 += 2000
+CALL TALENT_CHECK(ARG:0)

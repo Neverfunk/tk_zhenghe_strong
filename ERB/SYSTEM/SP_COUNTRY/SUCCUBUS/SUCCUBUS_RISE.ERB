@@ -1,0 +1,60 @@
+﻿;--------------------------------------
+;蜂起イベントが発生するかの判定
+;--------------------------------------
+@SUCCUBUS_RISE_RATE()
+
+;既に出現しているか、勢力なし設定なら発動しない
+SIF SP_COUNTRY_APPEARED:特殊勢力_サキュバス || !SP_COUNTRY_RANK:(特殊勢力_サキュバス)
+	RETURN 0
+
+;いっぱいなら駄目
+SIF GET_NEW_COUNTRY() == -1
+	RETURN 0
+
+
+SIF !CHECK_SP_COUNTRY_RISE(特殊勢力_サキュバス)
+	RETURN 0
+RETURN 1
+
+;--------------------------------------
+;サキュバス出現イベント
+;出現できたら1、できなければ0をかえす
+;--------------------------------------
+@SUCCUBUS_RISE(都市 = 0)
+#DIM 夢魔
+#DIM 都市
+
+;サキュバス勢力を作成
+CALL SUCCUBUS_INIT()
+夢魔 = RESULT
+;作れなかったら戻す
+SIF 夢魔 == 0
+	RETURN 0
+
+CALL SP_COUNTRY_RISE(夢魔, 都市)
+
+SIF !RESULT
+	RETURN 0
+
+SP_COUNTRY_APPEARED:特殊勢力_サキュバス = 1
+RETURN 夢魔
+
+;--------------------------------------
+;蜂起イベント用メッセージ関数
+;--------------------------------------
+@SUCCUBUS_RISE_MSG(勢力, 対象)
+#DIM 勢力
+#DIM 対象
+
+CALL SINGLE_DRAWLINE
+SETCOLOR カラー_警告
+PRINTFORMW 居住在夢之世界的夢魔們、突然來到了幻想鄉！
+;TranslatedMark 夢の世界の住人であるサキュバス達が、突如として幻想郷に流れ込んできました！
+PRINTFORMW  幻想乡大战争的爆发，幻想乡各地都乱成了一锅粥
+PRINTFORMW  在这种军阀割据的时代，梦之世界的梦魔们也来凑了一份热闹
+PRINTFORMW  想要把幻想鄉改造為淫亂世界的她們、佔領了%CITY_NAME:(対象)%\@ GET_OWN_CITY(勢力) > 1 ? 等地 # \@
+PRINTFORMW  「在美妙的淫梦里永远地沉沦吧~」
+PRINTFORMW  幻想乡众贤者不会让幻想乡变成淫乱的妓院
+PRINTFORMW  据说梦境管理者哆来咪也参与的镇压行动当中
+PRINTFORMW  不过这些梦魇可不会就此罢休
+RESETCOLOR

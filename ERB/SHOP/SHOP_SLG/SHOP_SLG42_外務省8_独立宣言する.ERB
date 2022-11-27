@@ -1,0 +1,73 @@
+﻿;-------------------------------------------------
+;独立宣言する
+;-------------------------------------------------
+@Colonial_Office_Declaration_independence
+#DIM 宗主国勢力
+#DIM 宗主国勢力名
+#DIM 自国勢力
+#DIM 自国勢力名
+#DIMS 従属国種別
+#DIM その他従属国
+
+自国勢力 = CFLAG:MASTER:所属
+自国勢力名 = GET_COUNTRY_BOSS(自国勢力)
+
+FOR LOCAL:0, 0, MAX_TREATY_CO
+	;(従属国パッチ)植民地である場合
+	IF TREATY_CO_COUNTRY:(LOCAL:0):0:0 == 自国勢力 && TREATY_CO_COUNTRY:(LOCAL:0):1:1 >= 1
+		宗主国勢力 = TREATY_CO_COUNTRY:(LOCAL:0):1:1
+		従属国種別 = 植民地
+		BREAK
+	;(従属国パッチ)傀儡国である場合
+	ELSEIF TREATY_P_COUNTRY:(LOCAL:0):0:0 == 自国勢力 && TREATY_P_COUNTRY:(LOCAL:0):1:1 >= 1
+		宗主国勢力 = TREATY_P_COUNTRY:(LOCAL:0):1:1
+		従属国種別 = 傀儡国
+		BREAK
+	ENDIF
+NEXT
+
+宗主国勢力名 = GET_COUNTRY_BOSS(宗主国勢力)
+
+CALL SINGLE_DRAWLINE
+PRINTFORML 发表独立宣言 声明成为[%ANAME(宗主国勢力名)%]势力的[%従属国種別%]
+;TranslatedMark 独立宣言する 現在[%ANAME(宗主国勢力名)%]勢力の[%従属国種別%]です
+CALL SINGLE_DRAWLINE
+
+PRINTL 
+PRINTL 宣布独立的话，旧宗主国的评价会严重恶化
+;TranslatedMark 独立を宣言すると旧宗主国からの評価がかなり悪化します
+PRINTL 另外，与旧宗主国的从属国的永久同盟被废弃
+;TranslatedMark また旧宗主国の従属国との永久同盟は破棄されます
+PRINTL 
+PRINTFORML 从%ANAME(宗主国勢力名)%势力独立吗？
+;TranslatedMark %ANAME(宗主国勢力名)%勢力から独立しますか？
+
+;はい／いいえ入力処理
+CALL ASK_YN()
+IF RESULT == 1
+	REDRAW 1
+	RETURN
+	
+ELSE
+	CALL INIT_Protectorate_RENOUNCE(自国勢力, 宗主国勢力)
+	CALL INIT_Union_RENOUNCE(自国勢力)
+	CALL DIPLOMACY_WORSEN_RELATION(宗主国勢力, 500)
+	
+	;宗主国勢力のその他従属国のうち独立宣言勢力との関係がより良好であるときその従属国も独立
+	その他従属国 = 0
+	FOR LOCAL:0, 0, MAX_COUNTRY
+		IF (COUNTRY_Protectorate_REFERENCE:(LOCAL:0):0 == 3 || COUNTRY_Protectorate_REFERENCE:(LOCAL:0):0 == 4) && COUNTRY_Protectorate_REFERENCE:(LOCAL:0):2 == 宗主国勢力 && IS_COUNTRY(LOCAL:0) && LOCAL:0 != 自国勢力
+			その他従属国 = LOCAL:0
+			IF REL_HATE:(GET_COUNTRY_BOSS(その他従属国)):宗主国勢力名 > REL_HATE:(GET_COUNTRY_BOSS(その他従属国)):自国勢力名 && REL_LIKE:(GET_COUNTRY_BOSS(その他従属国)):宗主国勢力名 < REL_LIKE:(GET_COUNTRY_BOSS(その他従属国)):自国勢力名 && REL_HATE:(GET_COUNTRY_BOSS(その他従属国)):宗主国勢力名 > 100
+				CALL COLOR_PRINTW(@"%NAME_FORMAL(GET_COUNTRY_BOSS(その他従属国))%也从%NAME_FORMAL(GET_COUNTRY_BOSS(宗主国勢力))%的势力中宣布独立了！", カラー_警告)
+				CALL INIT_Protectorate_RENOUNCE(その他従属国, 宗主国勢力)
+				CALL INIT_Union_RENOUNCE(その他従属国)
+				CALL CHANGE_RELATION_C_TO_C(その他従属国, 宗主国勢力, -500, 500)
+				CALL CHANGE_RELATION_C_TO_C(宗主国勢力, その他従属国, -500, 500)
+			ENDIF
+		ENDIF
+	NEXT
+	
+	RETURN
+ENDIF
+

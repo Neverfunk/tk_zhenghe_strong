@@ -1,0 +1,39 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_VISIT_TO_GRAVE_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_VISIT_TO_GRAVE_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_VISIT_TO_GRAVE(対象)
+#DIM 対象
+PRINTFORML 在沒有人煙的墓地里、看見有位女性站在那邊
+PRINTFORML 好像是、她的丈夫的墳墓也在這裡
+PRINTFORML 是個簡陋的墳墓、好像連建個気派点的墳墓的余裕都沒有
+
+PRINTL
+CALL ASK_MULTI_JUDGE("什麼也不做", 1,"幇她建個正式点的墳墓", MONEY >= 3000)
+
+IF RESULT == 0
+	PRINTFORML %ANAME(対象)%対此也無能為力
+	PRINTFORML 只能是対女性説些安慰的話、然後返回拠点
+ELSEIF RESULT == 1
+	PRINTFORML 如果自己死了也会被葬在這樣的墳墓裡麼
+	PRINTFORML 感到一絲空虚的%ANAME(対象)%投入自己的財産、修葺了這個墓
+	MONEY -= 3000
+	CALL COLOR_PRINTW("支付了3000金", カラー_注意)
+ENDIF
+
+
+RETURN 1

@@ -1,0 +1,99 @@
+;---------------------------------------
+;这里是概率，数值的话是  设定值/100  哦
+;设定值越高的话就会越频繁
+;---------------------------------------
+@KOJO_DAILY_K62_CATINMONTH_RATE(対象)
+#DIM 対象
+RETURN 15
+
+;----------------------------------------------------------------------------
+;此处的话是设置概率以外的触发情况，灵梦有很多独立函数干这个，不过我不会（悲）
+;----------------------------------------------------------------------------
+@KOJO_DAILY_K62_CATINMONTH_DECISION(対象)
+#DIM 対象
+
+SIF GROUPMATCH(MASTER, NAME_TO_CHARA("さとり"), NAME_TO_CHARA("こいし"))
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------------------------------------------------
+;此段用于配置设置。不过我还是不会（悲）
+;---------------------------------------------------------------
+@KOJO_DAILY_K62_CATINMONTH_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------------------------------------------------
+;是本体哦。发生的话返回1，没发生就是0，和True，False是一样的呢
+;---------------------------------------------------------------
+@KOJO_DAILY_K62_CATINMONTH(対象)
+#DIM 対象
+
+SELECTCASE KDVAR:対象:燐_月下之猫
+        CASE 0
+                KDVAR:対象:燐_月下之猫 = 3
+                PRINTFORMW 睡到深夜的时候，%ANAME(MASTER)%隐约听见了清脆的猫叫声
+                PRINTFORMW 追寻着声音，看到了不得了的景象
+                PRINTFORMW 满月之下，阿燐蹲坐在屋顶上，红发飘舞在月光之中，尽情地叫着
+                PRINTFORMW 「喵呜——————」
+                PRINTFORMW 没听过午夜猫叫声音的人决计想不到
+                PRINTFORMW 那是何等婉转、清脆、悠长、有力的声音
+                PRINTFORMW 猫咪小小的身体中，居然能发出那样的叫声啊
+        CASE 1
+                PRINTFORMW 隐约能看到阿燐的脸上挂着汗珠，她真的很卖力……
+ENDSELECT
+
+        PRINTFORMW %ANAME(MASTER)%不由得屏住了呼吸……
+        PRINTFORMW 阿燐似乎相当享受的样子,可是这样会打扰大家睡觉
+        PRINTFORMW 那么，要怎么做呢？
+        CALL ASK_MULTI_JUDGE("叫住阿燐", 1, "静观其变", 1)
+        SELECTCASE RESULT
+                CASE 0
+                        PRINTFORMW 虽然阿燐舒服到连胡须都在发抖
+                        PRINTFORMW 但这样大家都会被吵醒的
+                        PRINTFORMW 只好委屈阿燐啦
+                        PRINTFORMW %ANAME(MASTER)%轻轻接近阿燐，伸出手捏住她的后颈
+                        PRINTFORMW 「喵——————！！！」
+                        PRINTFORMW 阿燐打了个哆嗦，回过头来幽怨地看着%ANAME(MASTER)%
+                        PRINTFORMW %ANAME(MASTER)%觉得愧对这样的目光
+                        PRINTFORMW 轻轻地把阿燐抱进怀里，小心地挠着肚子和后颈
+                        PRINTFORMW 阿燐闭上眼睛显得很享受的样子
+                        CALL ASK_MULTI_JUDGE("送回房间", 1, "在月下共度春宵", 1)
+                        SELECTCASE RESULT
+                                CASE 0
+                                        PRINTFORMW 稍微哄了一会之后，阿燐睡着了
+                                        PRINTFORMW 就这样把她送回房间吧
+                                        CFLAG:対象:好感度 += 100
+                                CASE 1
+                                        PRINTFORMW %ANAME(MASTER)%看着阿燐的脸不由得食指大动
+                                        PRINTFORMW 轻轻抚摸着阿燐的敏感部位
+                                        PRINTFORMW 阿燐扭动着身体，呼吸逐渐变得灼热了起来
+                                        PRINTFORMW 阿燐睁开了眼睛，目光中是挑逗的意味
+                                        PRINTFORMW 「一起在月光下，享受一番吧~」
+                                        GOTO START
+                        ENDSELECT
+                CASE 1
+                        PRINTFORMW 阿燐在月光下尽情地释放着自己的欲望
+                        PRINTFORMW 不一会儿就精疲力竭，直接在屋顶上睡着了
+                        PRINTFORMW %ANAME(MASTER)%看着阿燐的脸不由得食指大动
+                        PRINTFORMW 就这样在睡着的时候侵犯她吧~
+                        $START
+                        CVARSET CFLAG, 6, 0
+                        CFLAG:対象:調教参加フラグ = 1
+                        CFLAG:対象:調教中帰らない = 1
+                        CFLAG:対象:強制友好化 = 1
+                        CFLAG:対象:好感度 += 100
+                        BASE:対象:体力 = MAXBASE:対象:体力
+                        BASE:対象:気力 = MAXBASE:対象:気力
+                        FLAG:ターンエンド調教 = 1
+        ENDSELECT
+
+RETURN 1
+
+
+
+
+
+
+

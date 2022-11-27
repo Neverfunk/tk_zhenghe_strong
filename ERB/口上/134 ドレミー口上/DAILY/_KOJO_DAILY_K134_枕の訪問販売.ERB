@@ -1,0 +1,423 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K134_DOOR_SALE_RATE(対象)
+#DIM 対象
+RETURN 300
+
+;ごちゃごちゃし過ぎた
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K134_DOOR_SALE_DECISION(対象)
+#DIM 対象
+;ドレミーと所属が別、ドレミーが捕虜でなく、面識は問わない、プレイヤーのクールタイムが2以上蓄積している、30%
+
+;マスターにペニスがないと出ない
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+
+;一回きり
+SIF KDVAR:対象:ドレミー_枕の訪問販売
+	RETURN 0
+
+;放浪してないとだめ
+SIF CFLAG:対象:特殊状態 != 特殊状態_放浪
+	RETURN 0
+
+SIF IS_SP_COUNTRY(CFLAG:MASTER:所属)
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 0, 0, -1) && COOLTIME:MASTER:0 >= 2
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K134_DOOR_SALE_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K134_DOOR_SALE(対象)
+#DIM 対象
+#DIM 枕代
+#DIM 膝枕代
+#DIM 判定値
+
+;先にイベントで必要な金額を決める
+枕代 = RAND(DAY *100, DAY * 300)
+膝枕代 = 枕代 * 5
+
+PRINTFORML %ANAME(MASTER)%在工作的时候，部下告知有客人来了……
+;TranslatedMark %ANAME(MASTER)%が仕事をしていると、部下が来客を告げた……
+PRINTFORMW 据说什么都是"枕头上门销售"
+;TranslatedMark なんでも「枕の訪問販売」だそうだ
+PRINTFORMW %ANAME(MASTER)%为了改善心情，决定见面
+;TranslatedMark 気分転換に%ANAME(MASTER)%は、会うことにしてみた
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW 「你好\@ CFLAG:対象:面識 ? 是%ANAME(対象)% # 我叫%NAME_FORMAL(対象)% \@」
+;TranslatedMark 「どうもこんにちは、\@ CFLAG:対象:面識 ? %ANAME(対象)%です # 私は%NAME_FORMAL(対象)%と申します \@」
+PRINTFORMW 「最近睡得好吗？起得舒服吗？」
+;TranslatedMark 「最近よく眠れてますか？　気持ち良く起きれてますか？」
+PRINTFORML 「如果成为%ANAME(MASTER)%大人那样的人，一定会很忙吧」
+;TranslatedMark 「きっと%ANAME(MASTER)%様ほどの方になられると、何かと忙しいでしょう」
+PRINTFORMW 「人的一生中三分之一都在睡觉，那么睡眠也需要质量吧」
+;TranslatedMark 「生涯の3分の1は睡眠に充てられる以上、睡眠にも質を求めたいものですね」
+PRINTFORML 这样说着，%ANAME(対象)%不知从哪里拿出了枕头
+;TranslatedMark そう言って%ANAME(対象)%は、どこからともなく枕を出してきた
+PRINTFORMW 特别是外表没有变化的样子，非常普通的枕头……
+;TranslatedMark とくに見た目が変わった様子もなく、至って普通の枕だが……
+PRINTFORML
+PRINTFORML
+PRINTFORML 「呼，这是一个甜美的安眠枕头。这是我监修的最好的枕头」
+;TranslatedMark 「フフッ、これはスイート安眠枕。　私が監修して作らせた極上の枕です」
+PRINTFORMW 「这种手感、触感、大小都能让人接受的终极枕头」
+;TranslatedMark 「この肌触り、感触に大きさどれをとっても万人受けする究極の枕」
+PRINTFORML %ANAME(対象)%自己把脸埋在枕头里，发出了奇怪的声音……
+;TranslatedMark %ANAME(対象)%は自ら枕に顔を埋もれさせ、ふぉぉぉと変な声をあげている……
+PRINTFORML 「哎呀不行不行，要是用了这个甜美的安眠枕，不仅晚上会很舒适，白天也会很清爽！」
+;TranslatedMark 「おっといけないいけない……このスイート安眠枕！　これで夜はグッスリ！　朝はパッチリ！」
+PRINTFORMW 「哎呀，不行不行，不小心就要睡着了……咳咳，如果用了这个美妙的安眠枕，不仅晚上会很舒适，白天也会很清爽……」
+;TranslatedMark 「貴方に素敵な安眠と、快適な目覚めを約束するこのスイート安眠枕……」
+PRINTFORMW 「现在的话{枕代}でのご提供！　怎么样？　想要吗？　非常想要对吧？」
+;TranslatedMark 「なんと今なら{枕代}でのご提供！　どうです？　欲しいでしょう？　欲しくなっちゃいましたよね？」
+PRINTFORML %ANAME(対象)%兴高采烈地持续着推售谈话，但有点可疑
+;TranslatedMark 意気揚々とセールストークを続ける%ANAME(対象)%だが、少々胡散臭い
+PRINTFORMW 但是最近工作有点紧张，提高睡眠质量是很有吸引力的……
+;TranslatedMark しかしここ最近激務気味だ、睡眠の質を向上させるのは魅力的な話だ……
+PRINTFORML
+PRINTFORML 当前资金:{MONEY}　スイート安眠枕:{枕代}
+;TranslatedMark 現在の資金:{MONEY}　スイート安眠枕:{枕代}
+PRINTFORMW ……意外地不便宜，怎么回事
+;TranslatedMark ……意外と安くない、どうしたものか
+PRINTFORML
+CALL ASK_MULTI_JUDGE("枕头……我要了！", MONEY >= 枕代, "不需要那种可疑的东西", 1,"相比之下还是你的膝盖更好", 1)
+IF RESULT == 0
+	PRINTFORMW 如果睡眠质量要求多少投资也是必要的，%ANAME(MASTER)%买了枕头
+	;TranslatedMark 睡眠に質を求めるならば多少の投資も必要だ、%ANAME(MASTER)%は枕を購入した
+	PRINTFORMW 「感谢惠顾！那么，希望你能有个好梦……」
+	;TranslatedMark 「まいどあり！　それでは貴方に吉夢が訪れんことを……」
+	PRINTFORMW 这样说着微笑着，%ANAME(対象)%离开了……
+	;TranslatedMark そう言って微笑み、%ANAME(対象)%は立ち去った……
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORML ・
+	CALL COLOR_PRINTW(@"睡得很香！		%ANAME(MASTER)%的冷却时间恢复了！", カラー_注意)
+	;TranslatedMark @"ぐっすり眠れた！　%ANAME(MASTER)%はクールタイムから回復した！", カラー_注意
+	COOLTIME:MASTER:0 = 0
+	CFLAG:対象:好感度 += 100
+	KDVAR:対象:ドレミー_枕の訪問販売 = 1
+	MONEY -= 枕代
+ELSEIF RESULT == 1
+	PRINTFORMW 不打算买可疑的枕头，%ANAME(MASTER)%拒绝了购买
+	;TranslatedMark 胡散臭い枕を買うつもりはない、%ANAME(MASTER)%は購入を断った
+	PRINTFORMW 「是吗，那太遗憾了。是个好枕头呢。嘛，对于现在的你来说可能是不需要的吧」
+	;TranslatedMark 「そうですか、それは残念です。良い枕なんですけどねぇ。　まぁ今の貴方には不要なのかもしれませんね」
+	PRINTFORMW 「那么我先告辞了。那么下一家又在哪里……」
+	;TranslatedMark 「それでは失礼します。　ではまた何処かで……」
+	PRINTFORMW 这样说着微笑着，%ANAME(対象)%离开了……
+	;TranslatedMark そう言って微笑み、%ANAME(対象)%は立ち去った……
+	CFLAG:対象:好感度 += 10
+	KDVAR:対象:ドレミー_枕の訪問販売 = 1
+ELSEIF RESULT == 2
+	PRINTFORMW 消除疲劳的话，比起无机质的枕头，人的皮肤更好
+	;TranslatedMark 疲れを取るなら無機質な枕より人肌が良い
+	PRINTFORMW 「哈哈，又是开玩笑的人呢」
+	;TranslatedMark 「ははぁん、また面白い冗談を言う方ですねぇ」
+	PRINTFORMW 「是啊……{膝枕代}金的话我就考虑一下哦」
+	;TranslatedMark 「そうですねぇ……{膝枕代}ほど頂けたら考えてもイイですよ」
+	PRINTFORML
+	PRINTFORML
+	PRINTFORML 当前资金:{MONEY}　膝枕价格:{膝枕代}
+	;TranslatedMark 現在の資金:{MONEY}　膝枕代:{膝枕代}
+	PRINTFORMW ……人家吹嘘得挺厉害，怎么啦
+	;TranslatedMark ……かなり吹っ掛けられているがどうしたものか
+	PRINTFORML
+	CALL ASK_MULTI_JUDGE("来让我枕在膝盖上", MONEY >= 膝枕代, "太穷了算了吧", 1,"这么贵索性直接霸王硬上弓", 1)
+	IF RESULT == 0
+		PRINTFORMW 睡在那个枕上，一定能解乏吧
+		;TranslatedMark あの膝枕で寝ればさぞ疲れが取れるだろう
+		PRINTFORMW %ANAME(MASTER)%把%ANAME(対象)%引入了自己的房间
+		;TranslatedMark %ANAME(MASTER)%は自室に、%ANAME(対象)%を誘い込んだ
+		PRINTFORMW 「（呵呵，如果只拿一个膝盖枕就够了的话，倒不如开个膝盖枕店比较好。）」
+		;TranslatedMark 「(ふふふ、一回の膝枕でこれだけ貰えるなら、いっそ膝枕屋を開業した方が良いかもしれませんね)」
+		PRINTFORML 马上把头放在%ANAME(対象)%的膝盖上睡觉
+		;TranslatedMark さっそく%ANAME(対象)%の膝に頭を乗せ寝てみる
+		PRINTFORML 哦，这是恰到好处的合身程度，还有柔软的肌肤和体温……太棒了
+		;TranslatedMark おぉこれは良いフィット具合、そして柔らかな人肌と体温……素晴らしい
+		PRINTFORML %ANAME(MASTER)%就这样睡得很香……
+		;TranslatedMark %ANAME(MASTER)%はそのままグッスリと眠った……
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW 「哎呀哎呀，已经睡了吗，真快啊」
+		;TranslatedMark 「おやおやもう寝てしまわれたのですか、早いですねぇ」
+		PRINTFORMW 「……啊，怎么办，在起床之前我都动不了……」
+		;TranslatedMark 「……あっどうしよう、私この方が起きるまで動けないじゃない……」
+		CALL COLOR_PRINTW(@"%ANAME(MASTER)%从冷却时间中恢复了！", カラー_注意)
+		;TranslatedMark @"%ANAME(MASTER)%はクールタイムから回復した！", カラー_注意
+		COOLTIME:MASTER:0 = 0
+		CFLAG:対象:好感度 += 300
+		KDVAR:対象:ドレミー_枕の訪問販売 = 1
+		MONEY -= 膝枕代
+	ELSEIF RESULT == 1
+		PRINTFORMW 果然付不起那么多钱……算了吧
+		;TranslatedMark 流石にそんな大金は払えない……やめておこう
+		PRINTFORMW 「呵呵，真遗憾啊」
+		;TranslatedMark 「ふふふ、そうですか残念ですね」
+		PRINTFORMW 「那么我先告辞了。那么下一家又在哪里……」
+		;TranslatedMark 「それでは失礼します。　ではまた何処かで……」
+		PRINTFORMW 这样说着微笑着，%ANAME(対象)%离开了……
+		;TranslatedMark そう言って微笑み、%ANAME(対象)%は立ち去った……
+		CFLAG:対象:好感度 += 50
+		KDVAR:対象:ドレミー_枕の訪問販売 = 1
+	ELSEIF RESULT == 2
+		;ドレミーからあなた武闘を引いた数×5%
+		判定値 = (ABL:MASTER:武闘 - ABL:対象:武闘) * 5
+		IF RAND:100 > 判定値
+			PRINTFORMW 胡说八道，还敢过来嘤嘤狂吠，真是个好胆量
+			;TranslatedMark 胡散臭い上に吹っ掛けて来るとは良い度胸だ
+			PRINTFORMW 「诶，什么……啊！？」
+			;TranslatedMark 「えっ、なに……きゃ！？」
+			PRINTFORMW %ANAME(MASTER)%强行将%ANAME(対象)%拉进自己的房间
+			;TranslatedMark %ANAME(MASTER)%は無理やり、%ANAME(対象)%を自室に引き込もうとする
+			PRINTFORMW 「滚开……啊！」
+			;TranslatedMark 「は、離して……ッ！」
+			PRINTFORMW 但是，对于激烈抵抗的%ANAME(対象)%，%ANAME(MASTER)%力败
+			;TranslatedMark だが、激しく抵抗する%ANAME(対象)%に、%ANAME(MASTER)%は力負けしてしまった
+			PRINTFORMW 就这样，%ANAME(対象)%逃走了……
+			;TranslatedMark そのまま%ANAME(対象)%は逃げ帰ってしまった……
+			PRINTFORML
+			PRINTFORMW 在那之后的几天里，%ANAME(MASTER)%被噩梦所困扰，更加疲倦了
+			;TranslatedMark それから数日間、%ANAME(MASTER)%は悪夢に悩まされ、さらに疲れてしまった
+			CALL ADD_COOLTIME(MASTER, 2)
+			CFLAG:対象:好感度 -= 500
+			KDVAR:対象:ドレミー_枕の訪問販売 = 1
+		ELSE
+			PRINTFORMW 胡说八道，还敢过来嘤嘤狂吠，真是个好胆量
+			;TranslatedMark 胡散臭い上に吹っ掛けて来るとは良い度胸だ
+			PRINTFORMW 「诶，什么……啊！？」
+			;TranslatedMark 「えっ、なに……きゃ！？」
+			PRINTFORMW %ANAME(MASTER)%强行将%ANAME(対象)%引入自己的房间
+			;TranslatedMark %ANAME(MASTER)%は無理やり、%ANAME(対象)%を自室に引き込んだ
+			PRINTFORMW 「喂，做这样的事……！不要认为这可是免费的！」
+			;TranslatedMark 「こっ、こんなことをして……！　タダで済むと思わない方が！」
+			PRINTFORMW 将抵抗的%ANAME(対象)%推到床上的%ANAME(MASTER)%，%ANAME(対象)%一点一点地因恐惧而扭曲着脸……
+			;TranslatedMark 抵抗する%ANAME(対象)%をベッドに突き飛ばす%ANAME(MASTER)%、%ANAME(対象)%は少しずつ恐怖で顔を歪めている……
+			PRINTFORMW 「现在的停止话就免费给你枕头！原谅我！拜托帮帮我！」
+			;TranslatedMark 「い、今なら枕なんてタダであげるから！　許して！　お願い助けて！」
+			PRINTFORML 虽然%ANAME(対象)%想大叫着逃走，但这里完全是%ANAME(MASTER)%的房间，不会有人来救你
+			;TranslatedMark 叫び逃げようとする%ANAME(対象)%だが、ここは完全に%ANAME(MASTER)%のスペースだ、助けは来ない
+			PRINTFORMW %ANAME(MASTER)%可能是对自己的行为开始兴奋了吧，在股间把裤子顶起来像一个帐篷
+			;TranslatedMark %ANAME(MASTER)%は自らの行いに興奮し始めたのか、股間に大きなテントを張っている
+			PRINTFORML
+			PRINTFORML
+			PRINTFORMW 「不……讨厌！不要来！别来了！！」
+			;TranslatedMark 「い……嫌っ！　来ないで！　来ないでったら！！」
+			PRINTFORML %ANAME(対象)%一边在床上倒退，一边把放在床上的枕头扔向%ANAME(MASTER)%
+			;TranslatedMark ベッドの上で後ずさりしつつ、ベッドに置いてある枕を%ANAME(MASTER)%に投げつける%ANAME(対象)%
+			PRINTFORMW %ANAME(MASTER)%毫不动摇地将%ANAME(対象)%推倒强行脱下裙子
+			;TranslatedMark %ANAME(MASTER)%は動じる事無く%ANAME(対象)%を組み敷いて強引にスカートを脱がせ始める
+			PRINTFORML 「啊啊啊啊啊！啊啊啊啊啊啊啊！！！！」
+			;TranslatedMark 「いやぁあああああ！　いやぁああああああああ！！！！」
+			PRINTFORML 虽然是哭喊乱闹%ANAME(対象)%但还是无法从%ANAME(MASTER)%的腕力中逃脱
+			;TranslatedMark 泣き叫び暴れる%ANAME(対象)%だが、%ANAME(MASTER)%の腕力から逃れられない
+			PRINTFORMW 裙子被扔到床外，暴露的下半身变得更结实……
+			;TranslatedMark スカートがベッドの外に捨てられ、晒された下半身がより強張っていく……
+			PRINTFORML %ANAME(MASTER)%将手搭在%ANAME(対象)%的内裤上强行脱下
+			;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%のパンツに手を掛け、無理やり引き剝がす
+			PRINTFORMW 被抓住暴力的脚而敞开的女性器暴露的%ANAME(対象)%
+			;TranslatedMark 暴れる足をホールドされたまま開かれ女性器を晒す%ANAME(対象)%
+			PRINTFORMW 「呜呜呜……」
+			;TranslatedMark 「うぅううう……」
+			PRINTFORML 面对用手臂遮住脸哭泣的%ANAME(対象)%，%ANAME(MASTER)%脱掉裤子
+			;TranslatedMark 腕で顔を隠して泣く%ANAME(対象)%に、%ANAME(MASTER)%はズボンを脱ぎ捨てる
+			PRINTFORMW %ANAME(MASTER)%用阴茎的尖端对着完全没有润滑的%ANAME(対象)%的阴道
+			;TranslatedMark 一切の潤滑が無い%ANAME(対象)%のヴァギナに、%ANAME(MASTER)%はペニスの先端をあてがう
+			PRINTFORMW 「……至少」
+			;TranslatedMark 「……せめて」
+			PRINTFORMW 「至少温柔一点……温柔点……拜托了……」
+			;TranslatedMark 「せめて優しく……優しくして……お願い……」
+			PRINTFORMW 好几次好几次，像说梦话一样静静地哭着恳求的%ANAME(対象)%
+			;TranslatedMark 何度も何度も、うわ言のように静かに泣きながら懇願する%ANAME(対象)%
+			PRINTFORML
+			PRINTFORML
+			;優しくしないパターンも需要あるんだろうけど、なんか書けない
+			PRINTFORML %ANAME(MASTER)%开始爱抚%ANAME(対象)%的身体……
+			;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%の身体を愛撫し始めた……
+			PRINTFORMW 但是不管怎么爱抚，%ANAME(対象)%的抵制也不会消失
+			;TranslatedMark しかしどれだけ愛撫しようが、%ANAME(対象)%の強張りは無くならない
+			PRINTFORMW 「嗯……嗯……」
+			;TranslatedMark 「うぅ……ひっくっ……」
+			PRINTFORML %ANAME(MASTER)%推开了遮盖着脸的%ANAME(対象)%的手臂，强行吻了她
+			;TranslatedMark %ANAME(MASTER)%は、顔を隠す%ANAME(対象)%の腕を払い除け無理矢理口づけする
+			PRINTFORMW 强行将嘴唇按在嘴唇上，%ANAME(対象)%虽然不抵抗，但似乎连接受都没有
+			;TranslatedMark 唇に無理やり唇を押し付ける、%ANAME(対象)%は抵抗こそしないが受け入れさえもしないようだ
+			PRINTFORML 在互相粗暴的鼻息中，%ANAME(MASTER)%的舌头想要潜入%ANAME(対象)%的唇间
+			;TranslatedMark 互いの荒い鼻息が当たるなか、%ANAME(MASTER)%の舌は%ANAME(対象)%の唇の隙間に潜り込もうとする
+			PRINTFORMW 另一方面，被驱除的%ANAME(対象)%的手臂，像失去了力量一样掉落在床上，双手着地
+			;TranslatedMark 一方で払い除けられていた%ANAME(対象)%の腕は、力を失ったように落ちてベッドに両手着いている
+			PRINTFORMW 「嗯……呼、呼」
+			;TranslatedMark 「んっ……ふーっ、ふーっ」
+			PRINTFORML 不久，%ANAME(対象)%的嘴唇，原谅了%ANAME(MASTER)%舌头的侵入
+			;TranslatedMark やがて%ANAME(対象)%の唇は、%ANAME(MASTER)%の舌の侵入を許してしまう
+			PRINTFORMW %ANAME(MASTER)%的舌头就那样在%ANAME(対象)%的牙齿和嘴唇的背面咕噜咕噜地舔着……
+			;TranslatedMark %ANAME(MASTER)%の舌は、そのまま%ANAME(対象)%の歯や唇の裏側をねちっこく舐めまわす……
+			PRINTFORML
+			PRINTFORML
+			PRINTFORMW 一边接吻一边持续爱抚的话，稍微从%ANAME(対象)%的大腿传达湿气
+			;TranslatedMark キスをしながらしばらく愛撫を続けていると、僅かに%ANAME(対象)%の太腿から湿り気が伝わってくる
+			PRINTFORML 温柔地抚摸大腿，越过衣服温柔地揉搓丰满的胸围
+			;TranslatedMark 太腿を優しく撫で、豊満なバストを服越しに優しく揉みしだく
+			PRINTFORMW 从腰到衣服入手，把手伸向胸膛……胸罩的坚硬触感很适合手
+			;TranslatedMark 腰から服に手を入れ、胸に手を伸ばす……ブラの固い触り心地が手に当たる
+			PRINTFORML 将文胸向下拨开，轻轻将勃起的乳头露出衣服下面
+			;TranslatedMark ブラを下にズラし、軽く勃起した乳首を服の下に露出させる
+			PRINTFORMW 上下弹一弹，用手指描绘乳轮，爱抚%ANAME(対象)%的心
+			;TranslatedMark 上下にピンと弾いたり、乳輪を指でなぞったりして%ANAME(対象)%の胸を愛撫する
+			PRINTFORMW 「……嗯，嗯」
+			;TranslatedMark 「……んんっ」
+			PRINTFORML 稍微挺直身子的%ANAME(対象)%，好像开始一点一点地感觉到了快感
+			;TranslatedMark 少しピンっと背を伸ばす%ANAME(対象)%、どうやら少しずつ感じ始めているようだ
+			PRINTFORMW 与此同时，在%ANAME(対象)%的嘴唇深处，嘴巴微微张开
+			;TranslatedMark それと同時に%ANAME(対象)%の唇の奥で、口が僅かに開いた
+			PRINTFORML %ANAME(MASTER)%立刻把舌头伸到里面，爱抚着无法动弹的%ANAME(対象)%的舌头
+			;TranslatedMark すかさず%ANAME(MASTER)%は更に舌を奥へと差し込み、動かない%ANAME(対象)%の舌上を愛撫する
+			PRINTFORMW 用舌头和她舌头交缠了好几次，把自己的唾液流了进去
+			;TranslatedMark 何度も舌上や舌裏を愛撫し、自身の唾液を流し込んだ
+			PRINTFORML
+			PRINTFORML
+			PRINTFORMW 开始停止哭泣的%ANAME(対象)%的身体，一点一点地被解开了……
+			;TranslatedMark 泣き止み始めた%ANAME(対象)%の身体の強張りは、少しずつ解れている……
+			PRINTFORML %ANAME(MASTER)%再次将手放在%ANAME(対象)%的阴道身上
+			;TranslatedMark %ANAME(MASTER)%は再度、%ANAME(対象)%のヴァギナに手を当てる
+			PRINTFORMW 被手爱抚后下面变的湿润，%ANAME(MASTER)%的阴茎因为期待而更加膨胀
+			;TranslatedMark しっとりと確実な水気が手に触れる、%ANAME(MASTER)%のペニスは期待からか一段と大きく膨らむ
+			PRINTFORML %ANAME(MASTER)%把%ANAME(対象)%推倒在床上
+			;TranslatedMark %ANAME(MASTER)%は、%ANAME(対象)%をベッドに寝かせるように倒した
+			PRINTFORMW 用龟头里側摩擦阴蒂 用尿道口探索着阴道
+			;TranslatedMark カリ裏をクリトリスに擦りつけ、鈴口でヴァギナを探る……
+			PRINTFORML %ANAME(MASTER)%的舌头暂时从%ANAME(対象)%的口中脱出
+			;TranslatedMark %ANAME(MASTER)%の舌は一旦、%ANAME(対象)%の口から抜け出した
+			PRINTFORMW 松开嘴后，望着%ANAME(対象)%的脸。对%ANAME(対象)%的脸很兴奋，背过了眼睛
+			;TranslatedMark 顔を離し、%ANAME(対象)%の顔を眺める。　%ANAME(対象)%の顔を上気し、目を背けている
+			PRINTFORML %ANAME(MASTER)%说着“我要进去了”，听到了微弱的声音"嗯"的回答……
+			;TranslatedMark %ANAME(MASTER)%が入れるぞと呟くと、微かな声の「うん」という返事が聞こえた……
+			PRINTFORMW 阴茎慢慢地穿过裂缝……
+			;TranslatedMark ゆっくりとペニスが、割れ目を貫いていく……
+			PRINTFORML
+			PRINTFORML
+			PRINTFORMW 从阴茎插入稍长一半的状态开始，%ANAME(MASTER)%开始慢慢地插入
+			;TranslatedMark ペニスが半分より少し長く挿入した状態から、%ANAME(MASTER)%はゆっくりとインサートし始める
+			PRINTFORMW %ANAME(MASTER)%再床上嘎吱嘎吱地做着，一边开始爱抚%ANAME(対象)%
+			;TranslatedMark ベッドが軋まないくらい、ゆっくりとしたインサートをしつつ%ANAME(MASTER)%は%ANAME(対象)%への愛撫を再開する
+			PRINTFORML 「嗯……呼……」
+			;TranslatedMark 「んっ……ふぅ……」
+			PRINTFORMW 感觉到%ANAME(対象)%不在忍住快感
+			;TranslatedMark 感じているのを、少しずつ隠さなくなり始める%ANAME(対象)%
+			PRINTFORML 阴道也开始浸湿爱液，开始得到充分的润滑
+			;TranslatedMark 次第にヴァギナも愛液に濡れ始め、十分な潤滑を得始めた
+			PRINTFORMW 看到这于是开始反复快速抽插，用龟头突向她的G点。
+			;TranslatedMark それを見てインサートも少しずつ早め、カリ先で%ANAME(対象)%の弱点を探る
+			PRINTFORMW 「啊…啊……嗯，嗯」
+			;TranslatedMark 「あっ…あっ……んんんっっ」
+			PRINTFORML %ANAME(対象)%感受到快感而发出了叫声。%ANAME(MASTER)%则进一步加速了抽插
+			;TranslatedMark %ANAME(対象)%は、声を出して感じ始めている。　%ANAME(MASTER)%はインサートを更に速めた
+			PRINTFORMW 床开始吱吱作响，开始感受到彼此强烈的欢乐……
+			;TranslatedMark ベッドが軋むようになり、お互いに強い快楽を感じ始める……
+			PRINTFORML
+			PRINTFORML
+			PRINTFORMW 过了一会儿，%ANAME(対象)%的手绕到了%ANAME(MASTER)%的背上
+			;TranslatedMark しばらくすると%ANAME(対象)%の手が、%ANAME(MASTER)%の背中に回り込んだ
+			PRINTFORML 「啊……啊，嗯……嗯，嗯」
+			;TranslatedMark 「あっ……あっ、うんっ……んんっ」
+			PRINTFORMW %ANAME(対象)%似乎完全接受了%ANAME(MASTER)%的阴茎与做爱的快乐
+			;TranslatedMark %ANAME(対象)%は、完全に%ANAME(MASTER)%のペニスと快楽を受け入れているようだ
+			PRINTFORML %ANAME(MASTER)%再次将脸靠近%ANAME(対象)%并亲吻她
+			;TranslatedMark %ANAME(MASTER)%は再度、%ANAME(対象)%に顔を近づけキスをする
+			PRINTFORML %ANAME(対象)%只是接受了%ANAME(MASTER)%的舌头。张开嘴，靠在嘴唇上的话，配合着嘴唇按压
+			;TranslatedMark %ANAME(対象)%はただ、%ANAME(MASTER)%の舌を受け入れる。　口を開け、唇に寄られれば、それにあわせて唇を押し当てた
+			PRINTFORMW 不久，嘴唇的吸着，被唾液濡湿的舌头，吐出呼吸的嘴唇，变得激烈，呼吸也变得粗暴起来
+			;TranslatedMark やがて唇の吸い付きも、唾液に濡れた舌も、吐息を漏らす唇も、激しくなり息継ぎも荒々しさを増してきた
+			PRINTFORMW 「嗯！嗯，哈哈……呼……嗯，嗯」
+			;TranslatedMark 「んっ！　んむっ、はふっ……ふぅっ、ン……んふぅっ」
+			PRINTFORML 不仅仅是喘息，连鼻息也渐渐变强了
+			;TranslatedMark 喘ぎだけじゃなく、鼻に抜ける吐息も、次第に強くなってきた
+			PRINTFORMW 从口边滴入唾液中的脸颊。%ANAME(MASTER)%的舌头更加粗暴，激烈地搅拌着
+			;TranslatedMark 口の端からダラリと垂れる唾液に、へこむ頬。　%ANAME(MASTER)%はさらに荒々しく、激しく掻き回していく
+			PRINTFORMW %ANAME(対象)%接住伸出的舌头，试着弯曲自己的舌头
+			;TranslatedMark %ANAME(対象)%は差し出された舌を受け止め、こちらの舌を曲げてみる
+			PRINTFORML
+			PRINTFORML
+			PRINTFORMW 「（更多……再纠缠一下）」
+			;TranslatedMark 「(もっと……もっと絡ませて)」
+			PRINTFORML 嘴唇凑在一起，在被靠近的过程中，溢出的唾液在彼此的口中混合在一起
+			;TranslatedMark 唇を寄せて、寄せられてを繰り返しているうちに、あふれる唾液がお互いの口の中で混ざり合う
+			PRINTFORMW 伴随着粗暴的爱抚，腰的动作也变快了
+			;TranslatedMark 荒くなる愛撫にあわせて、腰の動きも速くなる
+			PRINTFORMW 不久，%ANAME(MASTER)%的阴茎加大力度……
+			;TranslatedMark やがて%ANAME(MASTER)%のペニスに、力が込みあがり……
+			PRINTFORMW 当%ANAME(MASTER)%注意到的时候，快感已经奔向身体深处
+			;TranslatedMark %ANAME(MASTER)%が気づいたときには、身体の芯から快感が一斉に駆け抜けた
+			PRINTFORMW 「（出来了……被从我身体里拿出来了……）」
+			;TranslatedMark 「(出てる……出されてるんだ……私)」
+			PRINTFORML 比唾液还重的粘液。嘴唇被其堵住了，白浊的汁液直喷。精液从铃口像带子一样流向上延伸
+			;TranslatedMark 熱く滴り、唾液よりも重たい粘液。　唇をふさがれたまま、白濁の汁が迸る。　精液は、鈴口から帯のように流れては上へ上へと伸びていた
+			PRINTFORMW 势如破竹的射精，不断地从瓦吉纳中溢出……
+			;TranslatedMark 勢い任せの射精は、とめどなくヴァギナから溢れていく……
+			PRINTFORML
+			PRINTFORML
+			PRINTFORMW 「哈……热……」
+			;TranslatedMark 「はぁ……熱っ……」
+			PRINTFORML 迸发而出的精液，在眼看着的过程中染红了%ANAME(対象)%的下半身
+			;TranslatedMark 迸り、流れる精液は、みるみるうちに%ANAME(対象)%の下半身を染めていく
+			PRINTFORMW 没有畏缩的样子，每次被浊液打到身上，也就懒洋洋地哈气
+			;TranslatedMark 身じろぐ様子もなく、濁液が肌身に叩きつけられるたびに、気怠い息を吐いていた
+			PRINTFORML %ANAME(対象)%满脸兴奋地抚摸着沾满了汁液的阴茎。深深地吸入弥漫着%ANAME(MASTER)%的味道和充满热气的空气
+			;TranslatedMark %ANAME(対象)%は上気した顔で、汁まみれのペニスを撫でる。　%ANAME(MASTER)%の匂いと湯気に満ちた空気を吸い込み、大きく息を継ぐ
+			PRINTFORMW 视线投向了附着在身体上的浊液
+			;TranslatedMark 身体にこびりついた濁液に、視線を向けていた
+			PRINTFORML 「还……做……？」
+			;TranslatedMark 「まだ……する……？」
+			PRINTFORMW %ANAME(MASTER)%再次覆盖在%ANAME(対象)%上
+			;TranslatedMark %ANAME(MASTER)%は再度、%ANAME(対象)%の上に覆いかぶさった
+			PRINTFORML ・
+			PRINTFORML ・
+			PRINTFORML ・
+			CALL FUCK(対象, "Ｃ, Ｖ, Ｂ, 欲望, 奉仕, 性交, 性技, 精愛, 苦痛快楽, 被虐, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_ID(MASTER), @"%ANAME(MASTER)%の\@ RAND:2 ? 肉棒 # 唇\@", ANAME(MASTER), "", "調教")
+			PRINTFORML ・
+			PRINTFORML ・
+			PRINTFORML ・
+			PRINTFORMW 从那以后，经过了好几次的交往，疲惫的%ANAME(MASTER)%睡得很香
+			;TranslatedMark あれから何度も交じり合ったのち、疲れ切っていた%ANAME(MASTER)%はグッスリと寝てしまっている
+			PRINTFORML 「哈……竟然变成这样……」
+			;TranslatedMark 「はぁ……こんなことになっちゃうだなんて……」
+			PRINTFORMW 用干涩的爱液和精液变得粘糊糊的%ANAME(対象)%，枕在%ANAME(MASTER)%的膝盖上
+			;TranslatedMark 乾いた愛液と精液でベタベタになった%ANAME(対象)%は、%ANAME(MASTER)%に膝枕している
+			PRINTFORML 「这样的话……要不要连我一起买呢，呵呵」
+			;TranslatedMark 「こうなったら……私ごと買って貰おうかしらね、フフッ」
+			PRINTFORMW %ANAME(対象)%用尾巴抚摸了%ANAME(MASTER)%的身体……
+			;TranslatedMark %ANAME(対象)%は、尻尾で%ANAME(MASTER)%の身体を撫でた……
+			PRINTFORML
+			CALL COLOR_PRINTW(@"%ANAME(対象)%成为了伙伴", カラー_注意)
+			;TranslatedMark @"%ANAME(対象)%が仲間になりました", カラー_注意
+			CFLAG:対象:好感度 += 800
+			CFLAG:対象:依存度 += 100
+			CFLAG:対象:面識 = 1
+			TALENT:対象:合意 = 1
+			CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属, 1)
+			KDVAR:対象:ドレミー_枕の訪問販売 = 1
+		ENDIF
+	ENDIF
+ENDIF
+RETURN 1

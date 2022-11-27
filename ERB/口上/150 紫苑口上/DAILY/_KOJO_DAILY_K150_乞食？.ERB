@@ -1,0 +1,115 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K150_BEGGER_RATE(対象)
+#DIM 対象
+RETURN 40
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K150_BEGGER_DECISION(対象)
+#DIM 対象
+
+SIF CFLAG:対象:特殊状態 != 特殊状態_放浪
+	RETURN 0
+
+SIF KDVAR:対象:紫苑_物乞い
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 0, 0)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K150_BEGGER_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K150_BEGGER(対象)
+#DIM 対象
+
+KDVAR:対象:紫苑_物乞い = 1
+
+PRINTFORMW 「那個……那裡的人、能幫幫我麼……？」
+PRINTFORML 走在路上的時候、從巷子里傳來了少女的聲音
+PRINTFORMW 看起來像是乞丐一樣……
+PRINTFORMW 「這一陣子、什麼都沒吃……」
+PRINTFORML 「真的很不好意思、但是有什麼吃的的話、能給我麼？」
+PRINTFORML 
+CALL ASK_YN("施捨", "現在什麼都沒有")
+
+IF RESULT == 1
+	PRINTFORML 「是麼……那也沒辦法」
+	PRINTFORML 「……肚子好餓啊」
+	PRINTFORML 留下少女、離開了那裡……
+	RETURN 1
+ENDIF
+
+CFLAG:対象:面識 = 1
+
+PRINTFORML 「真的麼？　太謝謝你了！」
+PRINTFORMW %ANAME(MASTER)%拿出食物之後、%ANAME(対象)%的眼睛一亮……
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+PRINTFORML 「真的是得救了、謝謝你」
+PRINTFORMW 「平時的話都是妹妹負責賺錢給我花的、但是現在走散了……」
+PRINTFORML 少女自稱自己叫%NAME_FORMAL(対象)%
+PRINTFORMW 作為貧乏神的%PRONOUN(対象)%、據說必然會遭受不幸
+PRINTFORMW 失去妹妹的援助正窮困潦倒的時候、%ANAME(MASTER)%剛好路過了
+PRINTFORML 「非常感謝你的幫助、作為回禮有什麼我能做的麼」
+PRINTFORML 「雖然這麼說了、但是我並不能像妹妹一樣從其他地方把錢弄来給你……」
+PRINTFORML 似乎聽到了很危險的話、那麼該怎麼辦……
+PRINTFORML 
+CALL ASK_MULTI_JUDGE("成為同伴", 1, "教點什麼", 1, "讓我上吧！", HAS_PENIS(MASTER), "不用了", 1)
+
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORML 「誒……是認真的麼？」
+		PRINTFORML 「不、並不是討厭什麼的、我可是貧乏神喲」
+		PRINTFORMW 「即使如此也可以的話……請多多関照」
+		PRINTFORMW %ANAME(対象)%提心吊膽地握住了%ANAME(MASTER)%伸出的手……
+		CALL COLOR_PRINTW(@"%ANAME(対象)%成為了同伴", カラー_注意)
+		CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属)
+		KDVAR:対象:紫苑_物乞い = 2
+		CFLAG:対象:好感度 += 500
+	CASE 1
+		PRINTFORML 「就算被這麼要求了……嗯ー」
+		PRINTFORML 「嘛、這樣的話就讓我来教導你吧」
+		CALL COLOR_PRINTW(@"%ANAME(MASTER)%的知略上升了3", カラー_注意)
+		ABL:MASTER:知略 += 3
+	CASE 2
+		PRINTFORML 「誒、誒誒？」
+		PRINTFORMW 「那個、……嘛、如果我可以的話」
+		PRINTFORMW 牽着%ANAME(対象)%的手、把%ANAME(対象)%帯進了小巷深処
+		PRINTFORML 脫下衣服、露出白色的肌膚之後、%ANAME(対象)%変得滿臉通紅
+		PRINTFORMW 親吻上害羞的%ANAME(対象)%、享受着%ANAME(対象)%的肉体……
+		CALL FUCK(MASTER, "欲望, 性技, 奉仕, 性交, Ｃ, Ｖ挿入, 接吻", "童貞喪失, 接吻喪失", 0, @"%ANAME(対象)%的嘴唇", "", @"%ANAME(対象)%的膣穴", "和姦")
+		CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_ID(MASTER), @"%ANAME(対象)%的嘴唇", ANAME(MASTER), "", "和姦")
+		PRINTFORML 
+		PRINTFORMW 「哈、啊、嗯……♥」
+		PRINTFORMW 高潮了数次的%ANAME(対象)%、癱軟在地、從秘唇中零落着點點白濁
+		PRINTFORMW 即使如此、當%ANAME(MASTER)%把肉棒伸到%ANAME(対象)%嘴邊之後、還是好好地用嘴開始了掃除口交
+		PRINTFORMW 「……呐、再見面的話還能陪我麼？」
+		PRINTFORMW 分別之際、聽到了%ANAME(対象)%詢問
+		PRINTFORMW 回答道當然、然後離開了……
+		TALENT:対象:合意 = 1
+		TALENT:対象:チョロイン = 1
+		CFLAG:対象:好感度 += 700
+	CASE 3
+		PRINTFORML 「嘛、身為貧乏神的我也沒有什麼東西能夠給你的啊……」
+		PRINTFORMW 「至少讓我再道謝一次。謝謝你」
+		PRINTFORMW 告別%ANAME(対象)%、然後離開了……
+		CFLAG:対象:好感度 += 500
+ENDSELECT

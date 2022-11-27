@@ -1,0 +1,181 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K81_GOOD_MORNING_RATE(対象)
+#DIM 対象
+RETURN (KDVAR:対象:響子_挨拶 > 0 ? 70 # 40)
+
+	
+;3回無視すると発生しない
+SIF KDVAR:対象:響子_挨拶無し >= 3
+	RETURN 0
+	
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K81_GOOD_MORNING_DECISION(対象)
+#DIM 対象
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, -1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K81_GOOD_MORNING_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K81_GOOD_MORNING(対象)
+#DIM 対象
+
+SELECTCASE KDVAR:対象:響子_挨拶
+	CASE 0 TO 1
+		PRINTFORMW 「早上好！」
+		;TranslatedMark 「おはようございまーす！」
+		PRINTFORMW %ANAME(対象)%打了招呼……
+		;TranslatedMark %ANAME(対象)%が挨拶してきた……
+		PRINTL
+		CALL ASK_YN("早上好", "无视")
+		IF RESULT == 0
+			PRINTFORMW 微笑着还了一个招呼……
+			;TranslatedMark にこやかな挨拶を返した……
+			CFLAG:対象:好感度 += 10
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了10", 0x00FFFF)
+		ELSE
+			PRINTFORML 无视后走掉了……
+			;TranslatedMark 無視して通り過ぎた……
+			KDVAR:対象:響子_挨拶無し ++
+		ENDIF
+		KDVAR:対象:響子_挨拶 ++
+	CASE 2
+		IF KDVAR:対象:響子_挨拶無し>= 2
+			PRINTFORMW 「啊……早、早上好……」
+			;TranslatedMark 「あ……、お、おはようございます……」
+			PRINTFORML %ANAME(対象)%打了招呼
+			;TranslatedMark %ANAME(対象)%が挨拶してきた
+			PRINTFORMW 至今为止经常被%ANAME(MASTER)%无视，像是在烦恼不知该不该打招呼
+			;TranslatedMark 今まで%ANAME(MASTER)%に無視されて、挨拶すべきか戸惑っているようだ
+		ELSEIF KDVAR:対象:響子_挨拶無し== 0
+			PRINTFORMW 「啊，早上好♪」
+			;TranslatedMark 「あ、おはようございまーす♪」
+			PRINTFORML %ANAME(対象)%很高兴地打了招呼
+			;TranslatedMark %ANAME(対象)%が嬉しそうに挨拶してきた
+			PRINTFORMW 一直以来%ANAME(MASTER)%都笑着还以问候，她看上去很开心
+			;TranslatedMark 今まで%ANAME(MASTER)%がにこやかに挨拶を返してくれたのが嬉しかったようだ
+		ELSE
+			PRINTFORMW 「早上好！」
+			;TranslatedMark 「おはようございまーす！」
+			PRINTFORMW %ANAME(対象)%打了招呼……
+			;TranslatedMark %ANAME(対象)%が挨拶してきた……
+		ENDIF
+		PRINTL
+		CALL ASK_YN("早上好", "无视")
+		IF RESULT == 0
+			PRINTFORMW 还了一个和颜悦色的招呼……
+			;TranslatedMark にこやかな挨拶を返した……
+			IF KDVAR:対象:響子_挨拶無し>= 2 
+				PRINTFORML 「诶？啊！早、早上好！」
+				;TranslatedMark 「え？　あ！　お、おはようございます！」
+				PRINTFORMW 明明一直以来都被无视掉来着，%ANAME(対象)%连忙回了一句问候。虽然有些不知所措，但看上去还是很开心
+				;TranslatedMark 今まで無視されていたのに急に挨拶を返され、%ANAME(対象)%は戸惑いながらも嬉しそうにしている
+			ENDIF
+			CFLAG:対象:好感度 += 20
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了20", 0x00FFFF)
+			KDVAR:対象:響子_挨拶 ++
+		ELSE
+			PRINTFORML 无视后走掉了……
+			;TranslatedMark 無視して通り過ぎた……
+			IF KDVAR:対象:響子_挨拶無し>= 2 
+				PRINTFORML 「啊………」
+				;TranslatedMark 「あ………」
+				PRINTFORMW 被再三无视问候，%ANAME(対象)%的表情变得阴沉……
+				;TranslatedMark 再三挨拶を無視されて、%ANAME(対象)%は表情を曇らせた……
+			ENDIF
+			KDVAR:対象:響子_挨拶無し ++
+		ENDIF
+	CASE 3
+		PRINTFORMW 「啊，%ANAME(MASTER)%！早上好！」
+		;TranslatedMark 「あ、%ANAME(MASTER)%！　おはようございまーす！」
+		PRINTFORML %ANAME(対象)%很高兴地打了招呼
+		;TranslatedMark %ANAME(対象)%がとても嬉しそうに挨拶してきた
+		PRINTFORMW 至今为止%ANAME(MASTER)%每次打来招呼时都有好好地回应，所以她看上去很开心的样子
+		;TranslatedMark 今まで%ANAME(MASTER)%が何度も挨拶を返してくれたのがよほど嬉しかったようだ
+		PRINTFORML 不知是否有自觉，小小的尾巴像小狗一样呼啦呼啦地摇晃着，表示着自己的喜悦
+		;TranslatedMark 自覚が有るのか無いのか、小さな尻尾を子犬のようにぱたぱたと振って喜びを表している
+		PRINTFORMW 那个样子太可爱了，回招呼的时候不由自主地摸了摸她的头
+		;TranslatedMark その様があまりにも愛らしくて、挨拶を返した際に彼女の頭をつい撫でてしまった
+		IF TALENT:対象:恋慕
+			PRINTFORML 「啊…诶嘿嘿嘿♥」
+			;TranslatedMark 「あっ、…えへへへ♥」
+			PRINTFORMW 被心心念念的%ANAME(MASTER)%抚摸着，%ANAME(対象)%看起来很开心
+			;TranslatedMark 想いを寄せている%ANAME(MASTER)%に撫でられて、%ANAME(対象)%は嬉しそうにしている
+			CFLAG:対象:好感度 += 100
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了100", 0x00FFFF)
+		ELSE
+			PRINTFORML 「？　…诶嘿嘿♪」
+			;TranslatedMark 「？　…えへへ♪」
+			PRINTFORMW 虽然不由自主地出手了，但是%ANAME(対象)%却并没有讨厌的样子，反而显得有些高兴
+			;TranslatedMark 思わず手が出てしまったが、%ANAME(対象)%は嫌がる様子は無く、むしろ喜んでいる様子だった
+			CFLAG:対象:好感度 += 50
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了50", 0x00FFFF)
+		ENDIF
+		KDVAR:対象:響子_挨拶 ++
+	CASE 4
+		PRINTDATAW
+		DATAFORM 「啊，%ANAME(MASTER)%——！早上好！！」
+		;TranslatedMark 「あ、%ANAME(MASTER)%ー！　おはよーございまーす！！」
+		DATAFORM 「啊——！%ANAME(MASTER)%——！早上好！！」
+		;TranslatedMark 「あーっ！　%ANAME(MASTER)%ーっ！　おはよーございまーす！！」
+		DATAFORM 「啊，是%ANAME(MASTER)%——！早上好！！今天天气也很好呢——♪」
+		;TranslatedMark 「あっ、%ANAME(MASTER)%だ！　おはよーっ！！　今日もいい天気だねー♪」
+		ENDDATA
+		PRINTFORML %ANAME(対象)%一看到%ANAME(MASTER)%的身影，就格外高兴地打来了招呼
+		;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の姿を見ると、一際嬉しそうに挨拶してきた
+		PRINTFORMW 「啊，吵到了吗？对不起。但是因为%ANAME(MASTER)%一直跟我打招呼，所以高兴得不知不觉就兴奋起来了♪」
+		;TranslatedMark 「あ、うるさかった？　ごめんね。でも%ANAME(MASTER)%が挨拶返してくれるから、嬉しくてつい浮かれちゃった♪」
+		PRINTFORML %ANAME(対象)%像小狗一样啪嗒啪嗒地摇着小尾巴，对%ANAME(MASTER)%露出可爱的笑容
+		;TranslatedMark %ANAME(対象)%は小さな尻尾を子犬のようにぱたぱたと振り、%ANAME(MASTER)%に愛らしい笑顔を向ける
+		PRINTFORML 一边抚摸着%ANAME(対象)%的头，一边告诉她今天也要努力修行
+		;TranslatedMark そんな%ANAME(対象)%の頭を撫でながら、今日も修行を頑張るように　と伝えた
+		PRINTFORMW 「唔嗯！会加油的！%ANAME(MASTER)%也要努力工作啊——！」
+		;TranslatedMark 「うん！　頑張る！　%ANAME(MASTER)%もお仕事頑張ってねーっ！」
+		PRINTFORML 微笑着送别%ANAME(MASTER)%的%ANAME(対象)%，干劲十足地去修行了……
+		;TranslatedMark %ANAME(MASTER)%を笑顔で見送った%ANAME(対象)%は、張り切って修行にのぞんだ……
+		SELECTCASE RAND:33
+			CASE IS < 5
+				CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:7 +1, 1)
+			CASE IS < 10
+				CALL PRINT_ADD_EXP(対象, "防衛経験値", RAND:7 +1, 1)
+			CASE IS < 15
+				CALL PRINT_ADD_EXP(対象, "知略経験値", RAND:7 +1, 1)
+			CASE IS < 20
+				CALL PRINT_ADD_EXP(対象, "政治経験値", RAND:7 +1, 1)
+			CASE IS < 25
+				CALL PRINT_ADD_EXP(対象, "料理経験値", RAND:7 +1, 1)
+			CASE IS < 30
+				CALL PRINT_ADD_EXP(対象, "歌唱経験値", RAND:7 +1, 1)
+			CASEELSE
+				CALL COLOR_PRINTW("「……！　原来如此…一切有为法…如梦幻泡影……、我…悟了！！」", 0x088A08)
+				CALL COLOR_PRINTW(@"%ANAME(対象)%好像开悟了", カラー_注意)
+				CALL PRINT_ADD_EXP(対象, "武闘経験値", 50, 1)
+				CALL PRINT_ADD_EXP(対象, "防衛経験値", 50, 1)
+				CALL PRINT_ADD_EXP(対象, "知略経験値", 50, 1)
+				CALL PRINT_ADD_EXP(対象, "政治経験値", 50, 1)
+				CALL PRINT_ADD_EXP(対象, "料理経験値", 50, 1)
+				CALL PRINT_ADD_EXP(対象, "歌唱経験値", 50, 1)
+		ENDSELECT
+		CALL TRAIN_AUTO_ABLUP(対象)
+		CFLAG:対象:好感度 += 100
+		CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了100", 0x00FFFF)
+ENDSELECT
+RETURN 1

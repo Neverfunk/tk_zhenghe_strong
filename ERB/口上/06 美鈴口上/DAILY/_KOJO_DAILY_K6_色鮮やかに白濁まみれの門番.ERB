@@ -1,0 +1,105 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K6_HOBGOBLIN_GANGBANG_RATE(対象)
+#DIM 対象
+RETURN 300
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K6_HOBGOBLIN_GANGBANG_DECISION(対象)
+#DIM 対象
+#DIM ゴブリン
+
+ゴブリン = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン)
+
+SIF !CHECK_KOJO_DAILY_HAPPEN(対象, -1, 1)
+	RETURN 0
+
+SIF ゴブリン == -1 || CFLAG:対象:捕虜先 != ゴブリン || CFLAG:対象:所属 == ゴブリン
+	RETURN 0
+
+SIF KDVAR:対象:美鈴_白濁
+	RETURN 0
+
+SIF GETBIT(TALENT:対象:特殊勢力陥落系, 特殊勢力_ホフゴブリン)
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K6_HOBGOBLIN_GANGBANG_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K6_HOBGOBLIN_GANGBANG(対象)
+#DIM 対象
+#DIM ゴブリン
+
+ゴブリン = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン)
+
+PRINTFORML 被哥布林捉住的%ANAME(対象)%、被關在牢獄中……
+PRINTFORMW 這時、哥布林們來了
+PRINTFORMW 「你們……做這種事、大小姐不會不管的……」
+PRINTFORML 雖然%ANAME(対象)%堅強地怒瞪着哥布林們、但在兩腕被拘束之下毫無壓迫力
+PRINTFORML 他們也発現了嗎、一直奸笑着嘲笑%PRONOUN(対象)%……
+PRINTFORML 堅強是好、但理解一下你自己的立場吧、他們笑着說道
+PRINTFORMW 他們解開了腰布、將勃起的肉棒露出在%PRONOUN(対象)%面前
+PRINTFORMW 「你、你讓我看見什麼東、到底想……難道、不要、停手啊！」
+PRINTFORML %ANAME(対象)%雖然抵抗、但在兩手被拘束的狀態下也做不了什麼
+PRINTFORMW 很快衣服就被扒光、無數的哥布林一個一個圍上去……
+PRINTFORML 
+PRINTFORML 
+PRINTFORML 
+FOR LOCAL, 0, 3
+	CALL FUCK_GANGBANG_SP(対象, GET_SPERM_ID("哥布林"), "哥布林の肉棒", "哥布林", ゴブリン)
+NEXT
+PRINTFORML 
+PRINTFORML 
+PRINTFORML 
+PRINTFORMW 「吚♥　啊吚、啊、啊啊、啊哈啊啊♥」
+PRINTFORMW ……大概經過半日了吧
+PRINTFORML 哥布林一個個輪流到訪監獄、「使用」%ANAME(対象)%
+PRINTFORML 最初堅強的%ANAME(対象)%、在毫不留情的凌辱下也屈服了
+PRINTFORML 即使如此他們仍然不斷侵犯着%ANAME(対象)%……現在的%PRONOUN(対象)%接受着凌辱
+PRINTFORML 「吚……噢噗♥　咕噗、唔呼、唔唔♥」
+PRINTFORML 肉棒遞到眼前後、%PRONOUN(対象)%開始陶醉地吸啜着
+PRINTFORML 與此同時両穴被激烈抽插、沾滿白濁精液的二穴発出淫蕩的水聲
+PRINTFORMW 「――啊 哈啊啊啊啊♥」
+PRINTFORML 不久後哥布林理所當然地在膣内射精後、%ANAME(対象)%発出格外妖艶的聲音高潮了
+PRINTFORML 子宮熱流湧入的感覺、比起懷孕的恐懼，%ANAME(対象)%以感受到快感
+PRINTFORML 察覺到時機適合後、看起來像領袖的哥布林向%PRONOUN(対象)%說話了
+PRINTFORMW 成為我們的肉便器的話、就能給你更多肉棒哦
+PRINTFORMW 「是、我做♥　我做你們的精液便器♥　所以請給我更多肉棒♥」
+PRINTFORML 因為激烈的凌辱而発狂的%ANAME(対象)%、完全不感到煩惱
+PRINTFORML 看見為了獲得更多快樂而下賤地出賣自己未來的%PRONOUN(対象)%、令他們哈哈大笑
+PRINTFORMW 然後他們在%PRONOUN(対象)%身上、戴上了作為便器證明、堅固的鐵頸圈……
+PRINTFORML
+CALL COLOR_PRINTL(@"%ANAME(対象)%成為了哥布林的肉便器", カラー_注意)
+TRYCALLFORM %SP_COUNTRY_NAME_ENG:特殊勢力_ホフゴブリン%_FALLEN_LEAVE_MARK(対象)
+PRINTFORML 
+PRINTFORMW 然後、他們在%ANAME(対象)%的肉体上、発洩了滿滿的慾望……
+
+FOR LOCAL, 0, 3
+	CALL FUCK_GANGBANG_SP(対象, GET_SPERM_ID("哥布林"), "哥布林の肉棒", "哥布林", ゴブリン)
+NEXT
+
+KDVAR:対象:美鈴_白濁 = 1
+SETBIT TALENT:対象:特殊勢力陥落系, 特殊勢力_ホフゴブリン
+CALL CHANGE_COUNTRY(対象, ゴブリン, 1)
+
+RETURN 1
+

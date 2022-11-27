@@ -1,0 +1,777 @@
+﻿;-------------------------------------------------
+;「祷告」
+;四神
+;「暴虐与战争之神」 SETCOLOR 227,23,13
+;「诡术与希望之神」 SETCOLOR 138,43,226
+;「腐朽与绝望之神」
+;「色欲与愉悦之神」
+;取悦条件
+;暴虐：杀敌 占地 处刑 灭国
+;诡术：外交 同盟 劝降 赠送 
+;腐朽：俘虏 背叛 接纳 索取
+;色欲：陷落 调教 强迫 狂欲 
+;-----------------------------------------------
+;-----------------------------------------------
+@SHOP_LIFE_USERSHOP68_S1(对象)
+;「暴虐与战争之神」重要奖励 
+#DIM 对象
+#DIM 随机数
+SELECTCASE CFLAG:对象:信仰奖励
+	CASE 0 ;30信仰 金钱10000
+		PRINTL  
+		PRINTFORMW 那曾留给你深刻印象的声音再次响起，带起惊雷阵阵，心神也为之震颤
+		PRINTL 
+		PRINTL 
+		SETCOLOR 227,23,13
+		PRINTFORMW 「人类啊，吾欣赏汝的虔诚！」
+		PRINTL  
+		PRINTL 
+		PRINTFORMW 「在此，赐予汝奖励！」
+		RESETCOLOR
+		PRINTL  
+		PRINTL 
+		PRINTFORMW 手上的印记散发出光芒，你的钱包鼓起来了！
+		PRINTL 
+		MONEY += 10000
+		CALL COLOR_PRINTW(@"%ANAME(对象)%获得了10000资金", カラー_注意)
+	CASE 1 ;40信仰 武闘防衛经验值10
+		PRINTL  
+		PRINTFORMW 那曾留给你深刻印象的声音再次响起，带起惊雷阵阵，心神也为之震颤
+		PRINTL 
+		PRINTL 
+		SETCOLOR 227,23,13
+		PRINTFORMW 「人类，吾认可汝的武力！」
+		PRINTL  
+		PRINTL 
+		PRINTFORMW 「在此，赐予汝光辉！」
+		RESETCOLOR
+		PRINTL  
+		PRINTL 
+		PRINTFORMW 你手上的印记散发出光芒，你感到自己的实力提升了！
+		PRINTL 
+		CALL PRINT_ADD_EXP(对象, "武闘経験値",10, 1)
+		CALL PRINT_ADD_EXP(对象, "防衛経験値",10, 1)
+		CALL TRAIN_AUTO_ABLUP(对象)
+	CASE 2 ;50信仰 武闘防衛经验值15
+		PRINTL  
+		PRINTFORMW 那曾留给你深刻印象的声音再次响起，带起惊雷阵阵，心神也为之震颤
+		PRINTL 
+		PRINTL 
+		SETCOLOR 227,23,13
+		PRINTFORMW 「人类，吾认可汝的武力！」
+		PRINTL  
+		PRINTL 
+		PRINTFORMW 「在此，赐予汝光辉！」
+		RESETCOLOR
+		PRINTL  
+		PRINTL 
+		PRINTFORMW 你手上的印记散发出光芒，你感到自己的实力提升了！
+		PRINTL 
+		CALL PRINT_ADD_EXP(对象, "武闘経験値",15, 1)
+		CALL PRINT_ADD_EXP(对象, "防衛経験値",15, 1)
+		CALL TRAIN_AUTO_ABLUP(对象)
+	CASE 3 ;60信仰 武闘防衛 + 3/2
+		PRINTL  
+		PRINTFORMW 祂的声音再度来临，与过往的震撼不同，你已然能够感受到其威严下的伟力
+		PRINTL 
+		PRINTL 
+		SETCOLOR 227,23,13
+		PRINTFORMW 「人类啊，吾欣赏汝的武力！」
+		PRINTL  
+		PRINTL 
+		PRINTFORMW 「在此，赐予汝光辉！」
+		RESETCOLOR
+		PRINTL  
+		PRINTL 
+		PRINTFORMW 你手上的印记散发出光芒，你感到自己的实力提升了！
+		PRINTL 
+		ABL:对象:武闘 += ABL:对象:武闘>80 ? 2 # 3
+		ABL:对象:防衛 += ABL:对象:防衛>80 ? 2 # 3
+		CALL COLOR_PRINTW(@"%ANAME(对象)%的武闘和防衛上升了", カラー_注意)
+	CASE 4 ;70信仰 暴虐特殊神术
+	CASE 5 ;80信仰 解锁[洗礼]
+	CASE 6 ;90信仰 武闘防衛 + 3/2
+	CASE 7 ;100信仰 赋予[神选] 信仰胜利必要条件
+ENDSELECT
+CFLAG:对象:信仰奖励 ++
+RETURN 1
+
+@SHOP_LIFE_USERSHOP68_N1(对象)
+;「暴虐与战争之神」 普通奖励
+#DIM 对象
+#DIM XP
+#DIM RN
+#DIM 随机数
+XP=(ABL:对象:信仰) / 2
+RN = RAND:100
+PRINTL  
+CALL SINGLE_DRAWLINE
+PRINTL 
+PRINTFORMW %ANAME(对象)%默念神的尊名「暴虐与战争之神」，向祂进行祷告...
+PRINTL 
+PRINTL
+IF RN <= MAX(50-XP,5) ;祷告失败
+
+	PRINTFORMW 祂似乎没有回应%ANAME(对象)%
+	PRINTL  
+ELSEIF RN <= 70 ;获得兵力
+	
+	PRINTFORMW 祂回应了%ANAME(对象)%！
+	PRINTL 
+	PRINTL
+	随机数=RAND(300,800) + XP * 100
+	;军事解禁前做限制
+	SIF DAY<= 7
+		随机数=MIN(随机数,1000) 
+	COUNTRY_SOLDIER:(CFLAG:对象:所属)+= 随机数
+	CALL COLOR_PRINTW(@"%ANAME(对象)%获得了{随机数}士兵", カラー_注意)
+ELSEIF RN <= 90 ;获得钱财
+	
+	PRINTFORMW 祂回应了%ANAME(对象)%！
+	PRINTL 
+	PRINTL
+	随机数=RAND(300,700) + XP * 10
+	MONEY += 随机数
+	CALL COLOR_PRINTW(@"%ANAME(对象)%获得了{随机数}资金", カラー_注意)
+ELSE ;提升两围
+	
+	PRINTFORMW %ANAME(对象)%获得了祂的恩泽！
+	PRINTL 
+	PRINTL
+	随机数=RAND(5,5+XP)
+	CALL PRINT_ADD_EXP(对象, "武闘経験値",随机数, 1)
+	CALL PRINT_ADD_EXP(对象, "防衛経験値",随机数, 1)
+	CALL TRAIN_AUTO_ABLUP(对象)
+ENDIF
+PRINTL 
+CALL PRINT_ADD_EXP(对象, "信仰值",RAND(1,3), 1)
+CALL TRAIN_AUTO_ABLUP(对象)
+CALL SINGLE_DRAWLINE
+RETURN 1
+
+;-----------------------------------------------
+;---------------诡术--------------------------------
+@SHOP_LIFE_USERSHOP68_S2(对象)
+;「诡术与希望之神」重要奖励 
+#DIM 对象
+#DIM 随机数
+SELECTCASE CFLAG:对象:信仰奖励
+	CASE 0 ;30信仰 金钱20000
+		PRINTL  
+		PRINTFORMW 不见其人，但闻其声，祂向你温和说道
+		PRINTL 
+		PRINTL 
+		SETCOLOR 138,43,226
+		PRINTFORMW 「祝愿这金钱能为你铺平道路」
+		RESETCOLOR
+		PRINTL  
+		PRINTL 
+		PRINTFORMW 手上的印记散发出光芒，你的身上装满了金币！
+		PRINTL 
+		MONEY += 20000
+		CALL COLOR_PRINTW(@"%ANAME(对象)%获得了20000资金", カラー_注意)
+	CASE 1 ;40信仰 政治知略经验值10
+		PRINTL  
+		PRINTFORMW 温和的声音再度响起，带着神秘的亲和感
+		PRINTL 
+		PRINTL 
+		SETCOLOR 138,43,226
+		PRINTFORMW 「祝愿你成为一位成功的商人与政客」
+		PRINTL  
+		RESETCOLOR
+		PRINTL  
+		PRINTL 
+		PRINTFORMW 你手上的印记散发出光芒，你感到自己的头脑变得清晰了！
+		PRINTL 
+		CALL PRINT_ADD_EXP(对象, "政治経験値",10, 1)
+		CALL PRINT_ADD_EXP(对象, "知略経験値",10, 1)
+		CALL TRAIN_AUTO_ABLUP(对象)
+	CASE 2 ;50信仰 政治知略经验值15
+		PRINTL  
+		PRINTFORMW 祂的声音虚无缥缈，却让人感到如沐春风
+		PRINTL 
+		PRINTL 
+		SETCOLOR 138,43,226
+		PRINTFORMW 「祝愿你的敌人放下干戈，你的朋友更加亲睦」
+		PRINTL  
+		RESETCOLOR
+		PRINTL  
+		PRINTL 
+		PRINTFORMW 你手上的印记散发出光芒，你感到自己的思维变得清晰了！
+		PRINTL 
+		CALL PRINT_ADD_EXP(对象, "政治経験値",15, 1)
+		CALL PRINT_ADD_EXP(对象, "知略経験値",15, 1)
+		CALL TRAIN_AUTO_ABLUP(对象)
+	CASE 3 ;60信仰 政治知略 + 3/2
+		PRINTL  
+		PRINTFORMW 祂的声音再度来临，温和而亲近
+		PRINTL 
+		PRINTL 
+		SETCOLOR 138,43,226
+		PRINTFORMW 「你的朋友将多如繁星，你的敌人将四面楚歌」
+		PRINTL  
+		RESETCOLOR
+		PRINTL  
+		PRINTL 
+		PRINTFORMW 你手上的印记散发出光芒，你感到自己的智识提升了！
+		PRINTL 
+		ABL:对象:政治 += ABL:对象:政治>80 ? 2 # 3
+		ABL:对象:知略 += ABL:对象:知略>80 ? 2 # 3
+		CALL COLOR_PRINTW(@"%ANAME(对象)%的政治和知略上升了", カラー_注意)
+	CASE 4 ;70信仰 诡术特殊神术
+	CASE 5 ;80信仰 解锁[洗礼]
+	CASE 6 ;90信仰 解锁[信仰同盟]
+	CASE 7 ;100信仰 赋予[神选] 信仰胜利必要条件
+ENDSELECT
+CFLAG:对象:信仰奖励 ++
+RETURN 1
+
+@SHOP_LIFE_USERSHOP68_N2(对象)
+;「诡术与希望之神」普通奖励
+#DIM 对象
+#DIM XP
+#DIM RN
+#DIM 随机数
+XP=(ABL:对象:信仰) / 2
+RN = RAND:100
+PRINTL  
+CALL SINGLE_DRAWLINE
+PRINTL 
+PRINTFORMW %ANAME(对象)%默念神的尊名「诡术与希望之神」，向祂进行祷告...
+PRINTL 
+PRINTL 
+IF RN <= MAX(50-XP,5) ;祷告失败
+
+	PRINTFORMW 祂似乎没有回应%ANAME(对象)%
+	PRINTL  
+ELSEIF RN <= 70 ;获得钱财
+	PRINTFORMW 祂回应了%ANAME(对象)%！
+	PRINTL 
+	PRINTL
+	随机数=RAND(100+XP*10,500+XP*100)
+	MONEY += 随机数
+	CALL COLOR_PRINTW(@"%ANAME(对象)%获得了{随机数}资金", カラー_注意)
+	
+ELSEIF RN <= 90 ;获得兵力
+	PRINTFORMW 祂回应了%ANAME(对象)%！
+	PRINTL 
+	PRINTL
+	随机数=RAND(100,300) + XP * 20
+	;军事解禁前做限制
+	SIF DAY<= 7
+		随机数=MIN(随机数,800) 
+	COUNTRY_SOLDIER:(CFLAG:对象:所属)+= 随机数
+	CALL COLOR_PRINTW(@"%ANAME(对象)%获得了{随机数}士兵", カラー_注意)
+	
+ELSE ;提升两围
+	
+	PRINTFORMW %ANAME(对象)%获得了祂的恩泽！
+	PRINTL 
+	PRINTL
+	随机数=RAND(5,5+XP)
+	CALL PRINT_ADD_EXP(对象, "政治経験値",随机数, 1)
+	CALL PRINT_ADD_EXP(对象, "知略経験値",随机数, 1)
+	CALL TRAIN_AUTO_ABLUP(对象)
+ENDIF
+PRINTL 
+CALL PRINT_ADD_EXP(对象, "信仰值",RAND(1,3), 1)
+CALL TRAIN_AUTO_ABLUP(对象)
+CALL SINGLE_DRAWLINE
+RETURN 1
+
+;-----------------------------------------------
+;-----------------------------------------------
+@SHOP_LIFE_USERSHOP68_S3(对象)
+;「腐朽与绝望之神」重要奖励 
+#DIM 对象
+#DIM 随机数
+SELECTCASE CFLAG:对象:信仰奖励
+	CASE 0 ;30信仰 金钱20000
+		PRINTL  
+		PRINTFORMW 祂再次出现在你眼前，低沉的声音，让人感受不到情绪
+		PRINTL 
+		PRINTL 
+		SETCOLOR 107,142,35
+		PRINTFORMW 「我感受到了你的信仰，将赐予你对等的奖励」
+		RESETCOLOR
+		PRINTL  
+		PRINTL 
+		$INPUT_LOOP_S1
+		PRINTL 
+		PRINTFORML 选择你的奖励
+		PRINTL  
+		PRINTBUTTON " 0[金钱15000]", 0
+		PRINTL  
+		PRINTL 
+		PRINTBUTTON " 1[妖術等级+1]", 1
+		PRINTL  
+		PRINTL 
+		INPUT
+		IF RESULT == 0
+			MONEY += 15000
+			CALL COLOR_PRINTW(@"%ANAME(对象)%获得了15000资金", カラー_注意)
+		ELSEIF RESULT == 1
+			ABL:对象:妖術 += 1
+			CALL COLOR_PRINTW(@"%ANAME(对象)%的妖術等级上升了1", カラー_注意)
+		ELSE
+			GOTO INPUT_LOOP_S1
+		ENDIF
+		
+	CASE 1 ;40信仰 妖术经验值15 或者 武闘知略经验值10 
+		PRINTL  
+		PRINTFORMW 祂再次出现在你眼前，低沉的声音，让人感受不到情绪
+		PRINTL 
+		PRINTL 
+		SETCOLOR 107,142,35
+		PRINTFORMW 「我感受到了你的信仰，将赐予你对等的奖励」
+		PRINTL  
+		RESETCOLOR
+		PRINTL  
+		PRINTL 
+		IF ABL:对象:妖術 > 0
+			PRINTFORMW 你手上的印记散发出光芒，你感到自己接触到了新的知识！ 
+			CALL PRINT_ADD_EXP(对象, "妖術経験値",15, 1)
+		ELSE
+			PRINTFORMW 你手上的印记散发出光芒，你感到自己的战术知识和作战能力提升了！ 
+			CALL PRINT_ADD_EXP(对象, "武闘経験値",10, 1)
+			CALL PRINT_ADD_EXP(对象, "知略経験値",10, 1)
+		ENDIF
+		PRINTL 
+		CALL TRAIN_AUTO_ABLUP(对象)
+	CASE 2 ;50信仰 妖术经验值20 或者 武闘知略经验值15 
+		PRINTL  
+		PRINTFORMW 祂再次出现在你眼前，伴随低沉平稳的声音
+		PRINTL 
+		PRINTL 
+		SETCOLOR 107,142,35
+		PRINTFORMW 「我感受到了你的信仰，将赐予你对等的奖励」
+		PRINTL  
+		RESETCOLOR
+		PRINTL  
+		PRINTL 
+		IF ABL:对象:妖術 > 0
+			PRINTFORMW 你手上的印记散发出光芒，你感到自己接触到了新的知识！ 
+			CALL PRINT_ADD_EXP(对象, "妖術経験値",20, 1)
+		ELSE
+			PRINTFORMW 你手上的印记散发出光芒，你感到自己的战术知识和作战能力提升了！ 
+			CALL PRINT_ADD_EXP(对象, "武闘経験値",15, 1)
+			CALL PRINT_ADD_EXP(对象, "知略経験値",15, 1)
+		ENDIF
+		PRINTL 
+		CALL TRAIN_AUTO_ABLUP(对象)
+	CASE 3 ;60信仰 妖术+5/3 或者 武闘知略+3/2 
+		PRINTL  
+		PRINTFORMW 祂再次出现在你眼前，伴随低沉平稳的声音
+		PRINTL 
+		PRINTL 
+		SETCOLOR 107,142,35
+		PRINTFORMW 「我感受到了你的信仰，将赐予你对等的奖励」
+		PRINTL  
+		RESETCOLOR
+		PRINTL  
+		PRINTL 
+		IF ABL:对象:妖術 > 0
+			PRINTFORMW 你手上的印记散发出光芒，你感到自己接触到了新的知识！ 
+			ABL:对象:妖術 += ABL:对象:妖術>80 ? 3 # 5
+			CALL COLOR_PRINTW(@"%ANAME(对象)%的妖術上升了", カラー_注意)
+		ELSE
+			PRINTFORMW 你手上的印记散发出光芒，你感到自己的战术知识和作战能力提升了！ 
+			ABL:对象:政治 += ABL:对象:政治>80 ? 2 # 3
+			ABL:对象:知略 += ABL:对象:知略>80 ? 2 # 3
+			CALL COLOR_PRINTW(@"%ANAME(对象)%的武闘和知略上升了", カラー_注意)
+		ENDIF
+		PRINTL 
+	CASE 4 ;70信仰 诡术特殊神术
+	CASE 5 ;80信仰 解锁[洗礼]
+	CASE 6 ;90信仰 解锁[信仰同盟]
+	CASE 7 ;100信仰 赋予[神选] 信仰胜利必要条件
+ENDSELECT
+CFLAG:对象:信仰奖励 ++
+RETURN 1
+
+@SHOP_LIFE_USERSHOP68_N3(对象)
+;「腐朽与绝望之神」普通奖励
+#DIM 对象
+#DIM XP
+#DIM RN
+#DIM 随机数
+XP=(ABL:对象:信仰) / 2
+RN = RAND:100
+PRINTL  
+CALL SINGLE_DRAWLINE
+PRINTL 
+PRINTFORMW %ANAME(对象)%默念神的尊名「腐朽与绝望之神」，向祂进行祷告...
+PRINTL 
+PRINTL
+IF RN <= MAX(50-XP,5) ;祷告失败
+
+	PRINTFORMW 祂似乎没有回应%ANAME(对象)%
+	PRINTL  
+ELSEIF RN <= 60 ;获得钱财
+	PRINTFORMW 祂回应了%ANAME(对象)%！
+	PRINTL 
+	PRINTL
+	随机数=RAND(100,300) + XP * 50
+	MONEY += 随机数
+	CALL COLOR_PRINTW(@"%ANAME(对象)%获得了{随机数}资金", カラー_注意)
+	
+ELSEIF RN <= 80 ;获得兵力
+	PRINTFORMW 祂回应了%ANAME(对象)%！
+	PRINTL 
+	PRINTL
+	随机数=RAND(100,300) + XP * 50
+	;军事解禁前做限制
+	SIF DAY<= 7
+		随机数=MIN(随机数,1000) 
+	COUNTRY_SOLDIER:(CFLAG:对象:所属)+= 随机数
+	CALL COLOR_PRINTW(@"%ANAME(对象)%获得了{随机数}士兵", カラー_注意)
+	
+ELSEIF RN <= 90;提升两围
+	
+	PRINTFORMW %ANAME(对象)%获得了祂的恩泽！
+	PRINTL 
+	PRINTL
+	随机数=RAND(5,5+XP)
+	CALL PRINT_ADD_EXP(对象, "政治経験値",随机数, 1)
+	CALL PRINT_ADD_EXP(对象, "知略経験値",随机数, 1)
+	CALL TRAIN_AUTO_ABLUP(对象)
+ELSE ;学习妖术
+	
+	PRINTFORMW %ANAME(对象)%获得了祂的恩泽！
+	PRINTL 
+	IF ABL:对象:妖術 > 0
+		随机数=RAND(1,9)
+		CALL PRINT_ADD_EXP(对象, "妖術経験値",随机数, 1)
+		CALL TRAIN_AUTO_ABLUP(对象)
+	ELSE
+		PRINTFORMW %ANAME(对象)%尝试学习祂给予的神秘知识....
+		PRINTL
+		IF RAND:100 >= 50
+			CALL COLOR_PRINTW(@"%ANAME(对象)%学会了妖術！妖術等级+5", カラー_注意)
+			PRINTL
+			ABL:对象:妖術 += 5
+		ELSE
+			CALL COLOR_PRINTW(@"%ANAME(对象)%学习失败！但信仰更加虔诚了", カラー_注意)
+			PRINTL
+			随机数 = RAND(1,9)
+			CALL PRINT_ADD_EXP(对象, "信仰值",随机数, 1)
+			CALL TRAIN_AUTO_ABLUP(对象)
+		ENDIF
+	ENDIF
+
+	
+ENDIF
+PRINTL 
+CALL PRINT_ADD_EXP(对象, "信仰值",RAND(1,3), 1)
+CALL TRAIN_AUTO_ABLUP(对象)
+CALL SINGLE_DRAWLINE
+RETURN 1
+
+;-----------------------------------------------
+;-----------------色欲与愉悦之神------------------------------
+@SHOP_LIFE_USERSHOP68_S4(对象)
+;「色欲与愉悦之神」重要奖励 
+#DIM 对象
+#DIM 随机数
+SELECTCASE CFLAG:对象:信仰奖励
+	CASE 0 ;30信仰 金钱15000 或者 催眠术等级+1
+		PRINTL  
+		PRINTFORMW 祂再次出现在你眼前，魅惑的嗓音让人沉醉
+		PRINTL 
+		PRINTL 
+		SETCOLOR 255,110,180
+		PRINTFORMW 「诶,又见到你啦♡♡♡」
+		PRINTL  
+		PRINTL 
+		PRINTFORMW 「现在是奖励时间哟」
+		RESETCOLOR
+		PRINTL  
+		PRINTL 
+		$INPUT_LOOP_S1
+		PRINTL 
+		PRINTFORML 选择你的奖励
+		PRINTL  
+		PRINTBUTTON " 0[金钱15000]", 0
+		PRINTL  
+		PRINTL 
+		PRINTBUTTON " 1[习得催眠术]", 1
+		PRINTL  
+		PRINTL 
+		INPUT
+		IF RESULT == 0
+			MONEY += 15000
+			CALL COLOR_PRINTW(@"%ANAME(对象)%获得了15000资金", カラー_注意)
+			
+			SETCOLOR 255,110,180
+			PRINTFORMW 「嗯嗯，钱也是魅力的重要加分项呢~」
+			PRINTL  
+			RESETCOLOR
+		ELSEIF RESULT == 1
+			ITEM:GETNUM(ITEM, "催眠術") = 1
+			CALL COLOR_PRINTW(@"%ANAME(对象)%习得了催眠术！", カラー_注意)
+			SETCOLOR 255,110,180
+			PRINTFORMW 「选这个就对啦！好感度会UpUp哦~」
+			PRINTL  
+			RESETCOLOR
+		ELSE
+			GOTO INPUT_LOOP_S1
+		ENDIF
+		
+		
+	CASE 1 ;40信仰 催眠经验值15 或者 体力気力上升
+		PRINTL  
+		PRINTFORMW 祂再次出现在你眼前，魅惑的嗓音让人心动
+		PRINTL 
+		PRINTL 
+		SETCOLOR 255,110,180
+		PRINTFORMW 「诶,又见到你啦♡♡♡」
+		PRINTL  
+		PRINTL 
+		PRINTFORMW 「现在是奖励时间哟♡♡♡」
+		RESETCOLOR
+		PRINTL  
+		PRINTL 
+		$INPUT_LOOP_S2
+		PRINTL 
+		IF ITEM:GETNUM(ITEM, "催眠術") == 1
+			PRINTFORML 选择你的奖励
+			PRINTL  
+			PRINTBUTTON " 0[催眠术经验值+15]", 0
+			PRINTL  
+			PRINTL 
+			PRINTBUTTON " 1[体力+50 気力+50]", 1
+			PRINTL  
+			PRINTL 
+			INPUT
+			IF RESULT == 0
+				CALL PRINT_ADD_EXP(对象, "催眠経験値",15, 1)
+				SETCOLOR 255,110,180
+				PRINTFORMW 「嗯嗯，俘虏女孩子更容易啦~」
+				PRINTL  
+				RESETCOLOR
+			ELSEIF RESULT == 1
+				MAXBASE:对象:体力 += 50
+				MAXBASE:对象:気力 += 50
+				CALL COLOR_PRINTW(@"%ANAME(对象)%的体力和気力上升了50", カラー_注意)
+				SETCOLOR 255,110,180
+				PRINTFORMW 「嗯嗯，调教时会更方便呢~」
+				PRINTL  
+				RESETCOLOR
+			ELSE
+				GOTO INPUT_LOOP_S2
+			ENDIF
+		ELSE
+			MAXBASE:对象:体力 += 50
+			MAXBASE:对象:気力 += 50
+			CALL COLOR_PRINTW(@"%ANAME(对象)%的体力和気力上升了50", カラー_注意)
+			SETCOLOR 255,110,180
+			PRINTFORMW 「嗯嗯，调教时会更方便呢~」
+			PRINTL  
+			RESETCOLOR
+		ENDIF
+	CASE 2 ;50信仰 催眠经验值20 或者 体力気力上升 
+		PRINTL  
+		PRINTFORMW 祂再次出现在你眼前，妩媚的眼神令人热血上涌
+		PRINTL 
+		PRINTL 
+		SETCOLOR 255,110,180
+		PRINTFORMW 「♡♡♡又见到你啦♡♡♡」
+		PRINTL  
+		PRINTL 
+		PRINTFORMW 「这次想要什么奖励呢~」
+		RESETCOLOR
+		PRINTL  
+		PRINTL 
+		$INPUT_LOOP_S3
+		PRINTL 
+		IF ITEM:GETNUM(ITEM, "催眠術") == 1
+			PRINTFORML 选择你的奖励
+			PRINTL  
+			PRINTBUTTON " 0[催眠术经验值+20]", 0
+			PRINTL  
+			PRINTL 
+			PRINTBUTTON " 1[体力+100 気力+100]", 1
+			PRINTL  
+			PRINTL 
+			INPUT
+			IF RESULT == 0
+				CALL PRINT_ADD_EXP(对象, "催眠経験値",20, 1)
+				SETCOLOR 255,110,180
+				PRINTFORMW 「嗯嗯，俘虏女孩子更容易啦♡♡」
+				PRINTL  
+				RESETCOLOR
+			ELSEIF RESULT == 1
+				MAXBASE:对象:体力 += 100
+				MAXBASE:对象:気力 += 100
+				CALL COLOR_PRINTW(@"%ANAME(对象)%的体力和気力上升了100", カラー_注意)
+				SETCOLOR 255,110,180
+				PRINTFORMW 「嗯嗯，调教时会更方便呢~」
+				PRINTL  
+				RESETCOLOR
+			ELSE
+				GOTO INPUT_LOOP_S3
+			ENDIF
+		ELSE
+			MAXBASE:对象:体力 += 100
+			MAXBASE:对象:気力 += 100
+			CALL COLOR_PRINTW(@"%ANAME(对象)%的体力和気力上升了100", カラー_注意)
+			SETCOLOR 255,110,180
+			PRINTFORMW 「嗯嗯，调教时会更方便呢♡♡」
+			PRINTL  
+			RESETCOLOR
+		ENDIF
+	CASE 3 ;60信仰 催眠+3 或者 体力気力上升
+		PRINTL  
+		PRINTFORMW 祂再次出现在你眼前，妩媚的眼神令人热血上涌
+		PRINTL 
+		PRINTL 
+		SETCOLOR 255,110,180
+		PRINTFORMW 「♡♡♡你又来啦♡♡♡」
+		PRINTL  
+		PRINTL 
+		PRINTFORMW 「让我想一想~」
+		RESETCOLOR
+		PRINTL  
+		PRINTL 
+		$INPUT_LOOP_S4
+		PRINTL 
+		IF ITEM:GETNUM(ITEM, "催眠術") == 1
+			PRINTFORML 选择你的奖励
+			PRINTL  
+			PRINTBUTTON " 0[催眠术等级+3]", 0
+			PRINTL  
+			PRINTL 
+			PRINTBUTTON " 1[体力+100 気力+100]", 1
+			PRINTL  
+			PRINTL 
+			INPUT
+			IF RESULT == 0
+				ABL:对象:催眠 += 3
+				CALL COLOR_PRINTW(@"%ANAME(对象)%的催眠上升了3", カラー_注意)
+				SETCOLOR 255,110,180
+				PRINTFORMW 「选这个就对啦，俘虏女孩子更容易了♡♡」
+				PRINTL  
+				RESETCOLOR
+			ELSEIF RESULT == 1
+				MAXBASE:对象:体力 += 100
+				MAXBASE:对象:気力 += 100
+				CALL COLOR_PRINTW(@"%ANAME(对象)%的体力和気力上升了100", カラー_注意)
+				SETCOLOR 255,110,180
+				PRINTFORMW 「嗯嗯，调教时会更方便呢~」
+				PRINTL  
+				RESETCOLOR
+			ELSE
+				GOTO INPUT_LOOP_S4
+			ENDIF
+		ELSE
+			MAXBASE:对象:体力 += 100
+			MAXBASE:对象:気力 += 100
+			CALL COLOR_PRINTW(@"%ANAME(对象)%的体力和気力上升了100", カラー_注意)
+			SETCOLOR 255,110,180
+			PRINTFORMW 「嗯嗯，调教时会更方便呢♡♡」
+			PRINTL  
+			RESETCOLOR
+		ENDIF
+	CASE 4 ;70信仰 诡术特殊神术
+	CASE 5 ;80信仰 解锁[洗礼]
+	CASE 6 ;90信仰 解锁[信仰同盟]
+	CASE 7 ;100信仰 赋予[神选] 信仰胜利必要条件
+ENDSELECT
+CFLAG:对象:信仰奖励 ++
+RETURN 1
+
+@SHOP_LIFE_USERSHOP68_N4(对象)
+;「色欲与愉悦之神」普通奖励
+#DIM 对象
+#DIM XP
+#DIM RN
+#DIM 随机数
+XP=(ABL:对象:信仰) / 2
+RN = RAND:100
+PRINTL  
+CALL SINGLE_DRAWLINE
+PRINTL 
+PRINTFORMW %ANAME(对象)%默念神的尊名「色欲与愉悦之神」，向祂进行祷告...
+PRINTL 
+PRINTL
+IF RN <= MAX(50-XP,5) ;祷告失败
+
+	PRINTFORMW 祂似乎没有回应%ANAME(对象)%
+	PRINTL  
+ELSEIF RN <= 60 ;获得钱财
+	PRINTFORMW 祂回应了%ANAME(对象)%！
+	PRINTL 
+	PRINTL
+	随机数=RAND(100,300) + XP * 50
+	MONEY += 随机数
+	CALL COLOR_PRINTW(@"%ANAME(对象)%获得了{随机数}资金", カラー_注意)
+	SETCOLOR 255,110,180
+	PRINTFORMW 「钱财也是魅力的一部分哦~」
+	PRINTL  
+	RESETCOLOR
+ELSEIF RN <= 80 ;获得随机女性角色好感度
+	PRINTFORMW 祂回应了%ANAME(对象)%！
+	PRINTL 
+	PRINTL
+	SETCOLOR 255,110,180
+	PRINTFORMW 「♡♡这是丘比特之箭哦♡♡」
+	PRINTL  
+	RESETCOLOR
+	LOCAL = -1
+	WHILE LOCAL == -1
+		随机数 = RAND:CHARANUM
+		SIF 随机数 != MASTER && TALENT:随机数:1 == 1
+			LOCAL = 随机数
+	WEND
+	随机数 = RAND(250,350) + XP
+	CFLAG:LOCAL:2 += 随机数
+	CALL COLOR_PRINTW(@"%ANAME(LOCAL)%对%ANAME(对象)%的好感度上升了{随机数}", カラー_注意)
+	
+ELSEIF RN <= 90;提升体力和気力
+	
+	PRINTFORMW %ANAME(对象)%获得了祂的恩泽！
+	PRINTL 
+	PRINTL
+	随机数=RAND(20,30) + XP
+	MAXBASE:对象:体力 += 随机数
+	MAXBASE:对象:気力 += 随机数
+	CALL COLOR_PRINTW(@"%ANAME(对象)%的体力和気力上升了{随机数}", カラー_注意)
+ELSE ;学习催眠术
+	
+	PRINTFORMW %ANAME(对象)%获得了祂的恩泽！
+	PRINTL 
+	IF ITEM:GETNUM(ITEM, "催眠術") == 1
+		随机数=RAND(1,9)
+		CALL PRINT_ADD_EXP(对象, "催眠経験値",随机数, 1)
+		CALL TRAIN_AUTO_ABLUP(对象)
+		SETCOLOR 255,110,180
+		PRINTFORMW 「涩涩是可以的~」
+		PRINTL  
+		RESETCOLOR
+	ELSE
+		PRINTFORMW %ANAME(对象)%尝试学习祂给予的色欲知识....
+		PRINTL
+		IF RAND:100 >= 50 && 对象 == MASTER
+			CALL COLOR_PRINTW(@"%ANAME(对象)%学会了催眠术！", カラー_注意)
+			PRINTL
+			ITEM:GETNUM(ITEM, "催眠術") = 1
+			SETCOLOR 255,110,180
+			PRINTFORMW 「涩涩是可以的！」
+			PRINTL  
+			RESETCOLOR
+		ELSE
+			CALL COLOR_PRINTW(@"%ANAME(对象)%学习失败！但信仰更加虔诚了", カラー_注意)
+			PRINTL
+			随机数 = RAND(1,9)
+			CALL PRINT_ADD_EXP(对象, "信仰值",随机数, 1)
+			CALL TRAIN_AUTO_ABLUP(对象)
+		ENDIF
+	ENDIF
+
+	
+ENDIF
+PRINTL 
+CALL PRINT_ADD_EXP(对象, "信仰值",RAND(1,3), 1)
+CALL TRAIN_AUTO_ABLUP(对象)
+CALL SINGLE_DRAWLINE
+RETURN 1

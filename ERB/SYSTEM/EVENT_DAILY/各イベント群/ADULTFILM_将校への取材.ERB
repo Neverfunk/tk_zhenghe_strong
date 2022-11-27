@@ -1,0 +1,437 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_ADULTFILM_RATE()
+RETURN (DVAR:AV撮影_進行度 > 0 ? 330 # 30)
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_ADULTFILM_DECISION()
+#DIM 対象
+
+対象 = 0
+
+SIF DAY < 10
+	RETURN 0
+SIF DVAR:AV撮影_進行度 == 10
+	RETURN 0
+SIF DVAR:AV撮影_進行度 == -1
+	RETURN 0
+FOR LOCAL, 0, CHARANUM
+	;捕虜でなく、死んでおらず、AV女優未所持者の女が自国にいるかどうか判定
+	SIF !CFLAG:LOCAL:捕虜先 && CFLAG:LOCAL:特殊状態 != 特殊状態_死亡 && !(GETBIT(TALENT:LOCAL:淫乱系, 素質_淫乱_ＡＶ女優)) && IS_FEMALE(LOCAL)
+		対象 ++
+NEXT
+SIF 対象 < 1
+	RETURN 0
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_ADULTFILM_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_ADULTFILM
+#DIM 対象
+
+IF DVAR:AV撮影_進行度 > 0
+	対象 = ID_TO_CHARA(DVAR:AV撮影_対象ID)
+	IF 対象 == -1 || CFLAG:対象:特殊状態 == 特殊状態_死亡
+		DVAR:AV撮影_対象ID = 0
+		DVAR:AV撮影_中毒進行度 = 0
+		DVAR:AV撮影_進行度 = 0
+	ENDIF
+ENDIF
+
+IF DVAR:AV撮影_進行度 == 0
+	;%ANAME(MASTER)%が堕ちている場合
+	IF GETBIT(TALENT:MASTER:淫乱系, 素質_淫乱_ＡＶ女優) && IS_FEMALE(MASTER) && DVAR:AV撮影_発生フラグ == 1
+		PRINTFORML   那位制作人又找到了%ANAME(MASTER)%
+		PRINTFORMW  他一只手搂着%ANAME(MASTER)%的屁股，淫笑着挑逗其他敏感的地方
+		PRINTFORML  %ANAME(MASTER)%双目含春的紧贴上面前的男性身体，举起双手任由两只咸猪手游走在肌肤上
+		PRINTFORML 「又来叨扰您了，观众可是对每一位★偶★像★都有着期待呢」
+		PRINTFORMW  耳边如调情般的低语如电流一样窜过%ANAME(MASTER)%的脊髓，瘫软在导演的怀里
+	;２回目以降
+	ELSEIF DVAR:AV撮影_発生フラグ == 1
+		PRINTFORMW  那个自称为制作人的男人又来申请采访了
+		PRINTFORML 「接受我们的采访一定会有收益！您肯定已经感受过了对吧！」
+		PRINTFORMW 制作人先生微笑着等待着回应......
+	;初めての場合
+	ELSE 
+		PRINTFORML 有人以采访为名申请会见
+		PRINTFORML 这个人似乎想要拍摄一些将领文官之类的写真
+		PRINTFORML 「我们发布的文章必定会大卖！然后就会变成您的势力的最好宣传！」
+		PRINTFORMW 这个自称为制作人的男人赔着笑脸努力劝说着......
+	ENDIF
+	PRINTFORML 怎麼辦？
+	CALL ASK_MULTI("接受" ,"拒绝","敌国窃取机密之人？带走！")
+	IF RESULT == 1
+		$OKOTOWARI
+		;%ANAME(MASTER)%が堕ちている場合
+		IF GETBIT(TALENT:MASTER:淫乱系, 素質_淫乱_ＡＶ女優) && DVAR:AV撮影_発生フラグ == 1
+			PRINTFORML "最近战事繁忙无暇顾及您的请求，恕我无法回应您的期待"
+			PRINTFORML %ANAME(MASTER)%做了一个抱歉的动作拒绝了他的请求，然后听到了响亮的一声咋舌
+			IF HAS_VAGINA(MASTER)
+				PRINTFORMW 然后把%ANAME(MASTER)%带进卧室，像是要发疯似的，经行了好几次无责任中出
+				;TranslatedMark そして腹いせとばかりに%ANAME(MASTER)%を寝室に連れ込むと、無責任に何度も種付けをしていった
+				CALL FUCK(MASTER, "Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, 奉仕, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精, CFLAG減少", GET_SPERM_ID("AV男優"), @"男優の\@RAND:2 ? 肉棒 # 唇\@", "AV男優", "", "強姦")
+			ENDIF
+		ELSE
+			PRINTFORML 有可能会不小心被这些家伙把军事机密套出来
+			PRINTFORMW 这次还是拒绝了比较好
+			SIF DVAR:AV撮影_発生フラグ != 1
+				DVAR:AV撮影_発生フラグ = 1
+		ENDIF
+		RETURN
+	ELSEIF RESULT == 0
+		;%ANAME(MASTER)%が堕ちている場合
+		IF GETBIT(TALENT:MASTER:淫乱系, 素質_淫乱_ＡＶ女優) && DVAR:AV撮影_発生フラグ == 1
+			PRINTFORMW 毫无疑问接受这次采访的价值很高
+			PRINTFORML 那么由谁出镜呢？
+		ELSE
+			PRINTFORML  同意了采访之后，制作人的微笑似乎灿烂得有点恶心的程度
+			PRINTFORML 「明智的选择！我就知道您必然会接受这个邀请！」
+			PRINTFORML 「那么我们能够采访哪一位呢？」
+			PRINTFORMW 「对了，让女性来接受采访的话会更受到观众们的欢迎，所以希望您能选择一位女官！」
+			PRINTFORML 制作人双手合十请求着，该决定由谁来出镜了
+		ENDIF
+		CALL SINGLE_DRAWLINE
+		CALL SELECT_CHARA_LIST_ONLY_LOGIC_SEX("ADULTFILM", "ADULTFILM")
+		対象 = RESULT
+		IF RESULT < 0
+			GOTO OKOTOWARI
+		ELSEIF 対象 == MASTER
+			PRINTFORMW %ANAME(対象)%决定亲自接受制作人的取材
+		ELSE
+			PRINTFORMW 决定由%ANAME(対象)%来接受制作人的采访
+		ENDIF
+		PRINTFORML  制作人了解了一下%ANAME(対象)%的工作，又看了看%ANAME(対象)%的形象，微微撇了一下嘴
+		PRINTFORMW 然后催促着%ANAME(対象)%赶快进入取材的流程
+	ELSEIF RESULT == 2
+		PRINTFORML 你下令要求士兵将他们全都带走
+		PRINTFORML 几天以后，有消息传来，说是他们虽然不是间谍，但是似乎暗中会对女官下手
+		PRINTFORML 于是你暗中下令将他们全都斩首了，也搜刮到了他们存留下的一些金钱
+		CALL COLOR_PRINTW("得到了50000金", カラー_注意)
+		MONEY += 5000
+		DVAR:AV撮影_発生フラグ = -1
+			RETURN 0
+	ENDIF
+	PRINTFORML 
+	PRINTFORMW  ...拍到了那些虽然紧张，但是也毫无波澜的镜头
+	PRINTFORML 在调查了士兵们平日的军旅生活后
+	PRINTFORML 认真的拍摄了很多他们巡逻和训练的照片
+	PRINTFORML 取材的过程中也对话过几次，互相有些交好
+	PRINTFORMW %ANAME(対象)%与他约好了下一次的取材日后就分开了
+	PRINTFORML 
+	FOR LOCAL, 1, MAX_COUNTRY
+		CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 15, -15)
+	NEXT
+	CALL COLOR_PRINTW("那天的文章发布后势力的评价提升了", カラー_注意)
+	MONEY += 5000
+	CALL COLOR_PRINTW("得到了5000金的出演费用", カラー_注意)
+	DVAR:AV撮影_進行度 ++
+	DVAR:AV撮影_対象ID = GET_ID(対象)
+	DVAR:AV撮影_発生フラグ = 1
+ELSEIF DVAR:AV撮影_進行度 == 1
+	PRINTFORMW 那个制作人又来申请采访了
+	PRINTFORML 本以为会像上次一样随意的回答几个问题就好的
+	PRINTFORML 「不过在这样的环境下，作为一个女人不会有各种各样的困扰吗？」
+	PRINTFORML 突如其来意外的问题断掉了%ANAME(対象)%的思路，刚才还对答如流的嘴就那样微张着说不出一个字
+	PRINTFORMW 比如说男人们对你额外的注意之类，或者你的生理需求什么的......」
+	PRINTFORML 制作人露骨的追问让%ANAME(対象)%羞得脸都红了
+	CALL ASK_YN("冷静地回答" ,"生气地责骂")
+	IF RESULT == 0
+		PRINTFORML %ANAME(対象)%深吸了一口气，努力稳定好自己的情绪然后开口道
+		PRINTFORML "嘛...确实如此，作为一名女性在军中确实有那么一些不便......"
+		PRINTFORMW 察觉到制作人的问题逐渐变得轻浮的%ANAME(対象)%装作平静的回答着问题
+	ELSEIF RESULT == 1
+		PRINTFORML 刻意针对性别的提问让%ANAME(対象)%羞得怒气冲头
+		PRINTFORML "这都是什么问题！不要在问题里做手脚好吗！"
+		PRINTFORML 这可是为了女性的观众而提的问题，如果愿意来任官的女性变多你不也会受益吗。」
+		PRINTFORMW 我们才需要您来发声，这可是很重要的问题呢，就是这样」
+		PRINTFORML 他微笑着安慰%ANAME(対象)%，说明着自己的意图
+		PRINTFORML  ...确实如他所说
+		PRINTFORMW %ANAME(対象)%为刚才冲动的回应而表达了歉意，并且开始回答他接下来的问题
+	ENDIF
+	PRINTFORML  ...在那之后，那种"女性观众向"问题就变得没完没了了
+	PRINTFORML 但是默认了这样的问题的情况下，被问到特别隐私的问题%ANAME(対象)%也只能通红着脸认真回答
+	PRINTFORML 取材结束之后，制作人先生翻着照片说着这次真是拍到了相当不错的东西
+	PRINTFORMW 而%ANAME(対象)%则在确认了下次取材的日期后，带着心中的那团乱麻慌慌张张地送走了制作人。
+	PRINTFORML 
+	COUNTRY_SOLDIER:(CFLAG:対象:所属) += 500 + 100 * (RAND:10 + RAND:10 + 6)
+	CALL COLOR_PRINTW("那天的文章发布后志願兵的数量增加了", カラー_注意)
+	MONEY += 5000
+	CALL COLOR_PRINTW("得到了5000金的出演费用", カラー_注意)
+	DVAR:AV撮影_進行度 ++
+ELSEIF DVAR:AV撮影_進行度 == 2
+	PRINTFORMW 写杂志的那位先生又来了
+	PRINTFORML 制作人先生带着那一如往常的微笑走近了%ANAME(対象)%
+	PRINTFORML 为了以防再现上次的发展，%ANAME(対象)%用十二分精神来警戒着他的提问
+	PRINTFORMW ...但是他并没有问出那种"女性观众向"的问题来
+	PRINTFORML 简直就像上次什么事情也没发生一样的正常的交流和拍摄，%ANAME(対象)%惋惜着在这里浪费的经历
+	PRINTFORML 询问的部分结束之后，%ANAME(対象)%回屋要换回工作时的装束，但是制作人却跟了上来
+	PRINTFORML 「为了更多的在这篇文章中展示您的风采，我们想拍摄一下您房中的收藏和摆设，将您日常生活的样子发布出去」
+	PRINTFORMW 「不会出问题的，我们会认真甄选每一张照片，涉及到您隐私的部分我们会剔除的，就是这样」
+	PRINTFORML 他对着%ANAME(対象)%的抗议充耳不闻，用一种理所应当的表情解释着
+	PRINTFORML 那强硬的态度让%ANAME(対象)%放弃了抗议，把他让进了屋中
+	PRINTFORML 看着他以取材的名义翻箱倒柜，%ANAME(対象)%害羞的坐在一旁
+	PRINTFORMW 结果他又回来催促着让%ANAME(対象)%更换一身生活装来拍照
+	PRINTFORML %ANAME(対象)%张口结舌，那四处翻找的背影从来也不像给了争辩机会的样子
+	PRINTFORML 结果%ANAME(対象)%就背对着制作人先生在自己房间的一角开始更衣
+	PRINTFORML %ANAME(対象)%努力不发出声响的换着衣服，没有察觉到他的视线和疯狂连拍的照相机
+	PRINTFORMW ...而那之后刊登的文章里到处都是%ANAME(対象)%暴露的肌肤和令人羞耻的情景
+	PRINTFORML 
+	COUNTRY_SOLDIER:(CFLAG:対象:所属) += 500 + 100 * (RAND:10 + RAND:10 + 6)
+	CALL COLOR_PRINTW("那天的文章发布后志願兵的数量增加了", カラー_注意)
+	MONEY += 5000
+	CALL COLOR_PRINTW("得到了5000金的出演费用", カラー_注意)
+	CALL PRINT_ADD_EXP(対象, "露出経験値", RAND:20 + 1, 1)
+	CALL TRAIN_AUTO_ABLUP(対象)
+	DVAR:AV撮影_進行度 ++
+ELSEIF DVAR:AV撮影_進行度 == 3
+	PRINTFORMW 那位先生又来取材了
+	PRINTFORML 还是那一如既往的微笑和令%ANAME(対象)%感到强烈不安的步伐
+	PRINTFORMW 事到如今%ANAME(対象)%已经不知道如何面对这个人了。
+	PRINTFORML 还要不要接受取材？
+	CALL ASK_YN("继续" ,"拒絶")
+	IF RESULT == 1
+		PRINTFORML "这么过分的采访我已经不想再继续了"
+		PRINTFORML %ANAME(対象)%向他低着头，会客室中的温度骤降
+		PRINTFORMW 「你这是要毁约！我可是有很多你不想让人看到的羞耻照片在手，要让全世界人看看吗？」
+		PRINTFORML 制片人表情狰狞的瞪着%ANAME(対象)%低下的头
+		CALL ASK_YN("继续取材" ,"拒绝取材并毁约")
+		IF RESULT == 1
+			PRINTFORML "果然还是不能再继续下去了"
+			PRINTFORML 那个制片人在%ANAME(対象)%的头上啐了一口
+			PRINTFORMW 看着他气冲冲的离开，%ANAME(対象)%终于松了一口气
+			PRINTFORML 
+			FOR LOCAL, 1, MAX_COUNTRY
+				CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -50, 50)
+			NEXT
+			CALL COLOR_PRINTW(@"后来，无数张%ANAME(対象)%的隐私照片被曝光，%ANAME(対象)%的风评一落千丈", カラー_注意)
+			;しかしその後しばらくすると%ANAME(対象)%のあられもない映像が流れだし、他国の評判は大きく落ちる事になった
+			DVAR:AV撮影_中毒進行度 = 0
+			DVAR:AV撮影_進行度 = 0
+			DVAR:AV撮影_対象ID = 0
+			RETURN
+		ELSEIF RESULT == 0
+			PRINTFORML %ANAME(対象)%没耐住那恐怖的压力，在那一如既往的笑脸前又接受了采访
+			PRINTFORML 「%ANAME(対象)%果然是明智之人！很好很好！」
+			PRINTFORML 「那么，让我们开始今天的采访吧！」
+			PRINTFORMW 就在%ANAME(対象)%想要说些什么之前，他就强硬的推着%ANAME(対象)%进到了%ANAME(対象)%的闺房中
+		ENDIF
+	ELSEIF RESULT == 0
+		PRINTFORML 但是协议已经签了，实在是不能毁了这个约...
+		PRINTFORMW %ANAME(対象)%决定还是在自己的屋中接受采访
+	ENDIF
+	PRINTFORML 
+	PRINTFORMW 制作人对%ANAME(対象)%不停的描述着上次的写真如何大卖特卖
+	PRINTFORML 看着他甩着的那一大沓粉丝信，%ANAME(対象)%
+	PRINTFORML 而其中尽是请求着阴唇写真的信
+	PRINTFORML 制作人也表示印有%ANAME(対象)%的日历和壁纸的人气都很高
+	PRINTFORMW 被怒涛般的推荐和催促冲昏了头脑的%ANAME(対象)%毫无自觉的就落入了制作人的套路
+	PRINTFORML ...结果就变成了在自己的房间里被照相机对准了屁股的样子
+	PRINTFORML 听从着制片人的指示，%ANAME(対象)%从军装到家居服换了个遍，让制片人拍了个爽
+	PRINTFORML 僵硬的表情也因为习惯了而放松了下来，甚至还能对相机摆出诱惑的姿态来
+	PRINTFORMW 在制片人变着花的赞美中%ANAME(対象)%感觉自己似乎喜欢上了这种感觉
+	PRINTFORML 
+	COUNTRY_SOLDIER:(CFLAG:対象:所属) += 500 + 100 * (RAND:10 + RAND:10 + 6)
+	CALL COLOR_PRINTW("那天的文章发布后志願兵的数量增加了", カラー_注意)
+	MONEY += 5000
+	CALL COLOR_PRINTW("得到了5000金的出演费用", カラー_注意)
+	CALL PRINT_ADD_EXP(対象, "露出経験値", RAND:20 + 1, 1)
+	DVAR:AV撮影_進行度 ++
+ELSEIF DVAR:AV撮影_進行度 == 4
+	PRINTFORMW 又到了约定好的取材时间
+	PRINTFORML 制作人就像往常一样敲开了%ANAME(対象)%的门
+	PRINTFORMW 但是%ANAME(対象)%真的不知道还要不要继续这种耻刑一样的交易
+	PRINTFORML 怎麼辦？
+	CALL ASK_YN("继续" ,"中止")
+	IF RESULT == 1
+		PRINTFORML "对不起，这样的事真的不能再继续下去了"
+		PRINTFORML 制作人先生把眯起了眼睛，向下瞄着%ANAME(対象)%
+		PRINTFORMW %ANAME(対象)%，这样真的好吗？上次我们拍到了什么样的照片我想你应该不会不知道吧？」
+		PRINTFORML 回想起当时自己的行为，%ANAME(対象)%的脸红的就像要烧起来一样
+		CALL ASK_YN("继续接受取材" ,"坚决不再继续")
+		IF RESULT == 1
+			PRINTFORML %ANAME(対象)%抬起自己羞红的脸，然后再次鞠了一躬
+			PRINTFORML "这次真的不能再继续了"
+			PRINTFORMW 看着制作人骂骂咧咧的离开，%ANAME(対象)%如释重负
+			PRINTFORML 
+			FOR LOCAL, 1, MAX_COUNTRY
+				CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -50, 50)
+			NEXT
+			CALL COLOR_PRINTW(@"后来，无数张%ANAME(対象)%的隐私照片被曝光，%ANAME(対象)%的风评一落千丈", カラー_注意)
+			DVAR:AV撮影_中毒進行度 = 0
+			DVAR:AV撮影_進行度 = 0
+			DVAR:AV撮影_対象ID = 0
+			RETURN
+		ELSEIF RESULT == 0
+			PRINTFORML 被他捏住的把柄实在太多了，%ANAME(対象)%还是放弃了送客的想法
+			PRINTFORML 「这才对嘛，您是只要好好谈一谈就能听懂的人真是帮大忙了」
+			PRINTFORML 「快，咱们开始吧」
+			PRINTFORMW %ANAME(対象)%本想再说些什么，却已经被他推回了房间里
+		ENDIF
+	ELSEIF RESULT == 0
+		PRINTFORML 但是协议已经签了，实在是不能毁了这个约...
+		PRINTFORMW %ANAME(対象)%把制作人请入了自己的房间
+	ENDIF
+	PRINTFORML 
+	PRINTFORMW 上次的被拍的耻照火遍了全城
+	PRINTFORML 读者们送来的信里除了对下次发布的期待以外就是穷尽赞美之词的褒奖
+	PRINTFORML %ANAME(対象)%虽然羞怯着，但是这种因被人渴求而产生的喜悦却像写在了脸上一样
+	PRINTFORMW 这次的取材是由对方决定的主题
+	PRINTFORML 这次要由他们决定%ANAME(対象)%要在写真里穿什么样的衣服
+	PRINTFORML 尺度爆表的睡衣，绳子一样的泳衣，必须要裸体穿着的紧身衣.....%ANAME(対象)%见都没见过的衣服摆了满满一床
+	PRINTFORMW %ANAME(対象)%呆站在床边，穿上这些东西肯定会羞得难以见人
+	PRINTFORML 真的要穿吗......
+	CALL ASK_YN("穿上吧" ,"不想穿")
+	IF RESULT == 1
+		PRINTFORMW 就在%ANAME(対象)%想回头说什么的时候，制片人按住了%ANAME(対象)%的肩膀先出了声
+		PRINTFORML 「不要太担心，这些对于我们的读者来说都是再正常不过的衣服」
+		PRINTFORML 「在我们看来这可都是非常适合你的服饰」
+		PRINTFORML 「在让你这样的女性展现魅力这方面，我们可是专业的，放心吧」
+		PRINTFORMW 被他的花言巧语绕蒙了的%ANAME(対象)%迷茫着点了点头
+	ELSEIF RESULT == 0
+		PRINTFORML 再怎么说这也属于工作的范畴
+		PRINTFORMW %ANAME(対象)%听着制作人的鼓励，换上了那些衣服
+	ENDIF
+	PRINTFORML 
+	PRINTFORMW 这次拍摄的要求变得更过分了
+	PRINTFORML 「表情再艳点！那种让男人会兴奋的表情！」「对对！很好！」
+	PRINTFORML 「再显得更羞涩一点！对！侧脸瞟着点这边！」「这可真是棒极了，这一张！」
+	PRINTFORML 「右腿再抬一点，不对，向外，再开一点！」「好！这张色气的感觉都要溢出来了！」
+	PRINTFORMW 「把那件换上！拿着这个，那个等会再拿！继续！」
+	PRINTFORML ...这次的拍照怎么看都已经越来越奇怪了了，但是%ANAME(対象)%已经沉浸于这样的气氛中
+	PRINTFORML 一刻也未停过的赞美之词让%ANAME(対象)%沉迷于摄影之中，主动摆出了各种各样的姿态
+	PRINTFORMW %ANAME(対象)%的呼吸中都带上了情欲，胸脯的起伏越来越强烈
+	PRINTFORML ...以至于拍完照片后%ANAME(対象)%全身都在发烫，把人送走之后就回到房间里回想着被人看着的感觉自慰了起来
+	PRINTFORMW ......以至于没有察觉到藏在从书之中的那面镜头......
+	PRINTFORML 
+	COUNTRY_SOLDIER:(CFLAG:対象:所属) += 500 + 100 * (RAND:10 + RAND:10 + 6)
+	CALL COLOR_PRINTW("那天的文章发布后志願兵的数量增加了", カラー_注意)
+	CALL PRINT_ADD_EXP(対象, "露出経験値", RAND:20 + 1, 1)
+	DVAR:AV撮影_進行度 ++
+ELSEIF DVAR:AV撮影_進行度 == 5
+	PRINTFORMW %ANAME(対象)%推掉了今天左右的预约
+	PRINTFORML 制作人就坐在面前，带着意味深长的表情看着%ANAME(対象)%
+	PRINTFORMW %ANAME(対象)%的双手摩挲着裙子，犹豫着是否还要继续合作
+	PRINTFORML 怎麼辦？
+	CALL ASK_YN("继续" ,"中止")
+	IF RESULT == 1
+		PRINTFORML 这种尺度的写真已经远远超出了%ANAME(対象)%能接受的程度
+		PRINTFORML 制作人却不慌不忙的摆出了一份%ANAME(対象)%自慰的视频
+		PRINTFORMW 「真的要结束吗？虽然这段视频我觉得也已经够我的本钱了」
+		PRINTFORML %ANAME(対象)%看着这段视频，心中不由得一紧，又开始害怕了起来
+		CALL ASK_YN("不能让这段视频流出去..." ,"就算坏了名声也不能继续了...")
+		IF RESULT == 1
+			PRINTFORML 无论如何必须要停下了
+			PRINTFORML %ANAME(対象)%低下头，恳求着即使中止了合作也不要把视频放出
+			PRINTFORMW 听着制作人毫无回应的走远，%ANAME(対象)%哭了起来
+			PRINTFORML 
+			FOR LOCAL, 1, MAX_COUNTRY
+				CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 50, -50)
+			NEXT
+			CALL COLOR_PRINTW(@"从那以后%ANAME(対象)%自慰的影像传到了几乎所有人的手里，但意外的获得了大家的好评", カラー_注意)
+			DVAR:AV撮影_中毒進行度 = 0
+			DVAR:AV撮影_進行度 = 0
+			DVAR:AV撮影_対象ID = 0
+			RETURN
+		ELSEIF RESULT == 0
+			PRINTFORML %ANAME(対象)%恳求着对方不要把视频放出去
+			PRINTFORML 「不会的，%ANAME(対象)%小姐，只要你不会背弃我们的契约的话」
+			PRINTFORML 「我希望以后不要再出现这样的要求，好吗？」
+			PRINTFORMW 制作人搂着%ANAME(対象)%，走进了旁边的房间
+		ENDIF
+	ELSEIF RESULT == 0
+		PRINTFORML ...契约绝对不能随便中止
+		PRINTFORMW 思前想后的%ANAME(対象)%没有办法，只好把制作人请入了自己的房间
+	ENDIF
+	PRINTFORML 
+	PRINTFORML 「你的穴可真是个宝，我眼光从来都没错过」
+	PRINTFORML   %ANAME(対象)%没想到这个男人进了自己的房间后第一句话居然是这个
+	PRINTFORMW   不安分的手在%ANAME(対象)%的肩上轻抚，制作人的脸上笑容尽现
+	PRINTFORML 「你这姿色可是为征兵贡献无边呢，嗯？」
+	PRINTFORML 「啊，之前说好的纪录片？在做了在做了」
+	PRINTFORML 「不过今天还是来拍你的，懂吧？上次结束的可太不是地方了」
+	PRINTFORMW %ANAME(対象)%红着脸避开了他的搂抱
+	PRINTFORML 但是全身上下都已经被拍了个遍，逃也无路可逃，%ANAME(対象)%没有再抵抗又一次拐上自己肩膀的手臂
+	PRINTFORML 制作人又摆出几件暴露的衣服，让%ANAME(対象)%自己挑选
+	PRINTFORML 但是这次他没再遮掩，就让%ANAME(対象)%当着他的面换
+	PRINTFORMW 看着%ANAME(対象)%为难的表情，制作人和他的助手小声谈了几句，然后回过头来说
+	PRINTFORML 哦呀，我觉得你可能需要这个，是能让自己冷静下来的药哦」
+	PRINTFORML 半强制的被要求着吃下这个药，%ANAME(対象)%迷茫看着制作人的眼睛
+	PRINTFORMW 然后制作人和他的助手就坏笑着看着%ANAME(対象)%吞下药丸
+	PRINTFORML ...而后，燃尽心性的火焰烧遍了全身
+	PRINTFORML %ANAME(対象)%在这股欲火中竭尽全力稳定自己的理性，全身都开始渗出汗液
+	PRINTFORML 一只手突然绕过自己的身侧，箍着半身抓住了自己的胸部
+	PRINTFORMW 一股电流从那只手瞬间窜过%ANAME(対象)%的身体，打乱了%ANAME(対象)%的呼和吸
+	PRINTFORML 还未等%ANAME(対象)%反应过来，另一只手又绕过了左臂，把%ANAME(対象)%圈在怀里
+	PRINTFORML 抓着乳房的手攻势不减，另一只手又沿着小腹伸向了%ANAME(対象)%两腿之间
+	PRINTFORML 蜜裂被搅得春水横流，一波波的快感在脊髓上不断游走
+	PRINTFORMW 被圈在怀中的%ANAME(対象)%失去了挣扎的力气，拼命的喘息着
+	PRINTFORML ......回过神时，%ANAME(対象)%才察觉到摄影机正对着自己
+	PRINTFORML 已经被折腾得连手指都动不了的%ANAME(対象)%用细不可闻的声音求着饶
+	PRINTFORML 但是在自己下身肆虐的那两根手指立刻把%ANAME(対象)%带上了天国
+	PRINTFORML 在绝顶前的最后一秒，乳头和阴蒂被猛力的捏住，强烈的痛感化作惊涛般的快感冲上了头顶
+	PRINTFORMW %ANAME(対象)%因强烈的高潮而扭曲的面容和抽搐的身姿被永远的留在了摄影机里
+	PRINTFORML 
+	PRINTFORML 看着%ANAME(対象)%瘫软在地上，制作人招来了待命已久的助手
+	PRINTFORML 助手把还沉溺在高潮余韵中的%ANAME(対象)%分开双腿抱了起来
+	PRINTFORMW 然后转过了身，把%ANAME(対象)%的阴户和面容都放在摄影机的取景框中
+	PRINTFORML 耸立着的雄壮的肉棒，正在阴唇上搓擦着
+	PRINTFORML 被龟头顶着的阴户回忆起了雌性的本能，如鱼的嘴巴一样呼吸了起来
+	PRINTFORMW 然后助手先生轻轻一托，借着%ANAME(対象)%落下的势头一下直接穿刺到了肉穴最深处
+	IF TALENT:対象:処女 == 1
+		PRINTFORML 象征这纯洁的薄膜一瞬就破裂，痛感带出了%ANAME(対象)%响亮的哭喊声
+		PRINTFORML 而后紧随而来的快感又把%ANAME(対象)%的身体向后弯折过去
+		PRINTFORMW 彻底变得空无一物的大脑忘记了一切，任凭这双手在空中四处乱抓
+	ELSE
+		PRINTFORML 太过猛烈的一击夺去了%ANAME(対象)%全部的意识，满溢着情欲的娇呼充满了整间屋子
+		PRINTFORML 冲破脑髓的快感带走了所有的理性，任由身体在快感中颤抖
+		PRINTFORMW 在那空无一物的视界中，只留下了%ANAME(対象)%那失去焦点的瞳孔
+	ENDIF
+	PRINTFORML 制作人看着摄影机里%ANAME(対象)%的丢人样子，连指示都带上了侮辱的以为
+	PRINTFORML 即便在绝顶中，%ANAME(対象)%的腰也随着肉棒的进入而扭动这
+	PRINTFORMW 水声不断，在狂风暴雨的袭击中，%ANAME(対象)%就像失去了吊线的人偶一般甩动着四肢
+	IF TALENT:対象:処女 == 1
+		PRINTFORML 首次品尝到了禁果的子宫沉醉于快感之中，将自己的小嘴向肉棒张开
+	ELSE
+		PRINTFORML 子宫在这猛烈的快感中逐渐迷醉，向肉棒敞开了自己的怀抱
+	ENDIF
+	PRINTFORML 摄像机忠实的存下了%ANAME(対象)%那混乱的呼吸和杂乱不堪的面容
+	PRINTFORMW 随着活塞运动逐渐猛烈，子宫也在每次肉棒的顶入时发出了欢愉的信号
+	PRINTFORML 助手最后如重锤一般的一击猛的顶在最深处的红唇上，高亢的娇呼声伴着下身的洪水爆发了出来
+	PRINTFORML 敏感的宫内被灼热的精液清洗，强烈的刺激让%ANAME(対象)%失去了最后的意志
+	PRINTFORMW 制片人俯在%ANAME(対象)%的耳边，轻声赞赏着这次的“摄影”
+	PRINTFORMW 在下一道指示之后，%ANAME(対象)%被仰放在了床上，又开始了新一轮的摄影..............
+	PRINTFORML 
+	PRINTFORML ...等到意识恢复后，制片人和他的助手都离开了%ANAME(対象)%的闺房
+	PRINTFORML 沾满全身的精液甚至粘住了头发，两腿之间夹着湿漉漉的录像带和一封信
+	PRINTFORML %ANAME(対象)%读过已经脏掉的信后，疯狂的诅咒着自己的愚蠢和懦弱
+	PRINTFORMW 「若是不想这次的事情尽人皆知的话，以后还请多多指教了哦」
+	PRINTFORML 发展到这种程度，除了如他所愿以外已经无路可走，也无人能救
+	PRINTFORML ...但是心中似乎又涌起了奇妙的悸动，从双腿间拿出了那卷录像带
+	PRINTFORML 就如同猜想一般，那里边录着%ANAME(対象)%在肉棒的猛攻下婉转娇啼的记录
+	PRINTFORMW 那是不同于平日镜中的，放弃了理性的自己
+	PRINTFORMW 视线不自觉的锁在了录像带中的影响中，双手又伸向了自己的乳房和肉丘......
+	CALL FUCK(対象, "Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("AV男優"), @"男優的\@RAND:2 ? 肉棒 # 嘴唇\@", "AV男優", "", "撮影中の強姦")
+	PRINTFORML 
+	CALL COLOR_PRINTW(@"%ANAME(対象)%为录像所胁迫，成为了AV女优", カラー_注意)
+	DVAR:AV撮影_進行度  = 10
+ENDIF
+
+RETURN 1
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_ADULTFILM(対象)
+#DIM 対象
+RETURN CFLAG:対象:行動不能状態 != 行動不能_子供 && CFLAG:対象:所属 == CFLAG:MASTER:所属 && !IS_ANIMAL(対象) && !IS_MALE(対象) && ABL:対象:性知識 > 0 && !(GETBIT(TALENT:対象:淫乱系, 素質_淫乱_ＡＶ女優))
+
+@SELECT_CHARA_LIST_SELECT_LOGIC_ADULTFILM(対象)
+#DIM 対象
+RETURN CFLAG:対象:捕虜先 == 0

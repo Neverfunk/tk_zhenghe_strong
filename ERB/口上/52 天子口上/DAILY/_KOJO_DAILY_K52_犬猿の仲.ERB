@@ -1,0 +1,87 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K52_FUCK_YOU_RATE(対象)
+#DIM 対象
+RETURN 300
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K52_FUCK_YOU_DECISION(対象)
+#DIM 対象
+#DIM 紫
+
+紫 = NAME_TO_CHARA("紫")
+
+SIF KDVAR:対象:天子_犬猿の仲
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, -1) && CHECK_KOJO_DAILY_HAPPEN(紫, 1, 0, -1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K52_FUCK_YOU_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K52_FUCK_YOU(対象)
+#DIM 対象
+#DIM 紫
+
+紫 = NAME_TO_CHARA("紫")
+
+CFLAG:対象:面識 = 1
+CFLAG:紫:面識 = 1
+
+KDVAR:対象:天子_犬猿の仲 = 1
+
+PRINTFORML 「%ANAME(MASTER)%ーーーーーー！」
+PRINTFORMW 正当在想発生了什麼事情時、%ANAME(対象)%怒気沖天地跑過来了
+PRINTFORMW 旁辺还有%ANAME(紫)%……
+PRINTFORMW 「為什麼這家伙会在這里！？　這種性格悪劣、行蹤可疑，欸ー哆，無法信任的傢伙！」
+PRINTFORMW 「那是我的台詞呢。為什麼像你這樣的不良会在這里？」
+PRINTFORMW ……看来関系相当不好
+PRINTFORML 因為现在是同伴了，所以不希望他们太過仇視対方……
+CALL ASK_MULTI(@"偏袒%ANAME(対象)%", @"偏袒%ANAME(紫)%", "敷衍一番了事", "誰都不支持")
+
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORML 「哎呀、要偏袒那個不良啊」
+		PRINTFORMW 「看来我有点看錯你了？」
+		PRINTFORML 「嘿嘿、隨你説吧隙間妖怪！」
+		PRINTFORMW 「不愧是%ANAME(MASTER)%、我就知道你会明白我的！」
+		PRINTFORMW 好像得罪了%ANAME(紫)%……
+		CFLAG:紫:好感度 -= 300
+		CFLAG:対象:好感度 += 300
+	CASE 1
+		PRINTFORML 「蛤！？　為什麼你這傢伙要偏袒她！？」
+		PRINTFORMW 「难以置信！！　我看錯你了！」
+		PRINTFORML 「什麼看錯了的、你思考一下自己平時的品行吧」
+		PRINTFORMW 「否則就無法継續跟隨%ANAME(MASTER)%了、対吧？」
+		PRINTFORMW 好像得罪了%ANAME(対象)%……
+		CFLAG:紫:好感度 += 300
+		CFLAG:対象:好感度 -= 300
+	CASE 2
+		PRINTFORMW 「……%ANAME(MASTER)%、你知道我最討厌這樣的吗？」
+		PRINTFORMW 「居然和這個不良一個等級、這讓我覺得有點生氣啊」
+		PRINTFORMW 好像同時得罪双方了……
+		CFLAG:紫:好感度 -= 300
+		CFLAG:対象:好感度 -= 300
+	CASE 3
+		PRINTFORML 還請別将我卷進来
+		PRINTFORMW 丢開不管了……
+ENDSELECT
+		
+RETURN 1

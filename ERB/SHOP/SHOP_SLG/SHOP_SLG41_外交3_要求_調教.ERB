@@ -1,0 +1,27 @@
+﻿;-------------------------------------------------
+;調教する
+;-------------------------------------------------
+@DIPLOMACY_REQUEST_TRAIN(ARG:0)
+LOCAL:4 = GET_COUNTRY_BOSS(CFLAG:MASTER:所属)
+LOCAL:5 = GET_COUNTRY_BOSS(ARG:0)
+
+IF COUNTRY_EVENT_ID:(ARG:0) == SP_COUNTRY_ID:(特殊勢力_野盗)
+	PRINTFORMW 因为是土匪所以直接被拒绝了
+	RETURN 0
+ENDIF
+
+
+PRINTFORMW %ANAME(MASTER)%对%ANAME(LOCAL:5)%提出了想要对方身体的要求
+
+CALL DIPLOMACY_REQUEST_COMMON(ARG:0, 300 + 20 * CFLAG:(LOCAL:5):外交調教カウンタ, 1)
+LOCAL:2 = RESULT
+SIF LOCAL:2 <= 0
+	RETURN 0
+
+SETCOLOR カラー_注意
+PRINTFORML %ANAME(LOCAL:5)%可以在「捕虜の調教」项目内进行调教了
+RESETCOLOR
+PRINTFORMW (在条件满足的期限内总是可以进行调教)
+CFLAG:(LOCAL:5):外交調教中 = 1
+RETURN 1
+

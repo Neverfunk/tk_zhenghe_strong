@@ -1,0 +1,92 @@
+@BUILDING_GET_NAME_国家大妓院()
+    #FUNCTIONS
+    RETURNF "国家大妓院"
+
+@BUILDING_GET_EXP_国家大妓院()
+    #FUNCTIONS
+    RETURNF "色情劳动的收益增加。"
+
+@BUILDING_SET_INFO_ID_41()
+    BUILDING_TYPE:建造物_国家大妓院 = 建造物_类型_色情类
+    BUILDING_LEVEL:建造物_国家大妓院 = 建造物_等级_二级建筑
+    BUILDING_LIMIT_NUM:建造物_国家大妓院 = 建造物_数量限制_1
+    BUILDING_LIMIT_UNI:建造物_国家大妓院 = 0
+    BUILDING_COUNTRY_ID:建造物_国家大妓院:特殊勢力_普通势力 = 1
+    BUILDING_COUNTRY_ID:建造物_国家大妓院:特殊勢力_野盗 = 1
+    BUILDING_COUNTRY_ID:建造物_国家大妓院:特殊勢力_ホフゴブリン = 1
+    BUILDING_COUNTRY_ID:建造物_国家大妓院:特殊勢力_外来人 = 1
+    BUILDING_COUNTRY_ID:建造物_国家大妓院:特殊勢力_触手 = 1
+    BUILDING_COUNTRY_ID:建造物_国家大妓院:特殊勢力_自警団 = 1
+    BUILDING_COUNTRY_ID:建造物_国家大妓院:特殊勢力_サキュバス = 1
+    BUILDING_COUNTRY_ID:建造物_国家大妓院:特殊勢力_狂信者 = 1
+    BUILDING_HAVE_SKILL:建造物_国家大妓院 = 1
+    BUILDING_TOHO_REQ_ID:建造物_国家大妓院:0 = 0
+
+@CHECK_BUILDING_FUNCTION_国家大妓院(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    RESULT:1 = TMP_BUILDING_EXIST_FLAG:COUNTRY_ID:建造物_国家大妓院
+    IF RESULT:1 > 0
+        RESULT:0 = 1
+    ENDIF
+    RETURNF RESULT:0
+
+@BUILDING_TEXT_国家大妓院(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    SIF !CHECK_BUILDING_TEXT_OUTPUT(COUNTRY_ID)
+        RETURNF 0
+    BUILDING_TEXT = PRINT_BUILDING_TEXT_TITLE_F(COLOR_色情建筑)
+    PRINTFORM 因为《国家大妓院》的存在，
+    PRINTFORML 这个国度娼妓的地位已经如同音乐家一样……
+    PRINTFORML %ANAME(GET_COUNTRY_BOSS(COUNTRY_ID))%国内士官色情劳动的收入增加了！
+    RETURNF 1
+
+@BUILDING_SKILL_国家大妓院(COUNTRY_ID)
+    #DIM COUNTRY_ID
+    PRINTFORML 发动后使一名主角势力陷落角色获得所有《淫乱》特质
+    PRINTFORML 冷却时间3回合
+    PRINTFORML 是否发动
+    CALL ASK_YN()
+    IF !RESULT
+        PRINTFORML 发动了《国家大妓院》的技能
+        CALL BUILDING_SKILL_国家大妓院_FUNCTION(COUNTRY_ID)
+        IF RESULT > 0
+            BUILDING_SKILL_COLDTIME:COUNTRY_ID:建造物_国家大妓院 = 3
+            PRINTFORMW 完毕
+        ENDIF
+    ENDIF
+
+
+@BUILDING_SKILL_国家大妓院_FUNCTION(COUNTRY_ID)
+    #DIM COUNTRY_ID
+    #DIM CITY_ID
+    SIF !IS_COUNTRY(COUNTRY_ID)
+        RETURN
+    CALL SINGLE_DRAWLINE
+    PRINTFORML 请选择要获得所有淫乱系特质的角色
+    CALL SINGLE_DRAWLINE
+    CALL SELECT_CHARA_LIST_ONLY_LOGIC_SEX("国家大妓院", "NONE", "DEFAULT")
+    IF RESULT >= 0
+        CALL BUILDING_SKILL_国家大妓院_SETBIT(RESULT)
+        RETURN 1
+    ELSE
+        RETURN 0
+    ENDIF
+
+@BUILDING_SKILL_国家大妓院_SETBIT(CHARA_ID)
+    #DIM CHARA_ID
+    SIF CHARA_ID < 0
+        RETURN
+    FOR LOCAL,素質_淫乱_淫乱,素質_淫乱_尿道狂い+1
+        IF !GETBIT(TALENT:CHARA_ID:淫乱系, LOCAL)
+            SETBIT TALENT:CHARA_ID:淫乱系, LOCAL
+            CALL COLOR_PRINT(@"%ANAME(CHARA_ID)%获得了<%SEX_TALENT_NAME:LOCAL%>", カラー_ピンク)
+            PRINTFORML
+        ENDIF
+    NEXT
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_国家大妓院(CHARA_ID)
+    #DIM CHARA_ID
+    CALL SELECT_CHARA_LIST_SHOW_LOGIC_DEFAULT(CHARA_ID)
+    RETURN RESULT && IS_FALLEN(CHARA_ID)

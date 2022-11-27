@@ -1,0 +1,135 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_165_TROOP_1_EXIST
+RETURN 1
+
+@SKILL_165_TROOP_1_NAME
+RESULTS = 以烟草的烟操纵精神程度的能力
+
+;レベルは1-5まで
+@SKILL_165_TROOP_1_LEVEL
+RETURN 4
+
+;対象選択
+@SKILL_165_TROOP_1_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1
+
+;発動判定
+@SKILL_165_TROOP_1_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1
+
+;発動テキストをオーバライドしたいときに。
+;「誰それのスキル発動！　○○した！」の「○○した！」の部分を実装したい場合は、
+;これじゃなくてINVOKEで書けばいいです。
+;@SKILL_165_TROOP_1_INVOKE_TEXT(発動者, スキル, ジャンル)
+;#DIM 発動者
+;#DIM スキル
+;#DIMS ジャンル
+
+;効果をここに記述
+@SKILL_165_TROOP_1_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM FIRST_LINE
+#DIM 使用目标
+対象側 = !発動側
+IF CFLAG:発動者:1 != CFLAG:MASTER:1
+;AI使用
+	IF UNIT_TIRED_COUNT:発動勢力:発動部隊 >= 6 || !IS_COUNTRY(対象勢力)
+		PRINTFORML 我方部队的疲劳度回复了！
+		IF 発動部隊>=0
+			UNIT_TIRED_COUNT:発動勢力:発動部隊 = MAX(UNIT_TIRED_COUNT:発動勢力:発動部隊 - RAND(4, 8), 0)
+		ELSE
+			CITY_TIRED_COUNT:発動勢力 = MAX(CITY_TIRED_COUNT:発動勢力 - RAND(4, 8), 0)
+		ENDIF
+	ELSE
+		PRINTFORML 敌方部队变得疲惫了！
+		IF 対象部隊>=0
+			UNIT_TIRED_COUNT:対象勢力:対象部隊 = MIN(UNIT_TIRED_COUNT:対象勢力:対象部隊 + RAND(4, 8),100)
+		ELSE
+			CITY_TIRED_COUNT:対象勢力 = MIN(CITY_TIRED_COUNT:対象勢力 + RAND(4, 8),100)
+		ENDIF
+	ENDIF
+	RETURN
+ENDIF
+FIRST_LINE = LINECOUNT
+PRINTFORML --请选择发动效果--
+PRINTBUTTON " 0[敌军疲劳度上升]", 0
+PRINTL
+PRINTBUTTON " 1[我军疲劳度下降]", 1
+PRINTL
+$INPUT_LOOP1
+INPUT
+IF RESULT < 0 || RESULT > 1
+	CLEARLINE 1
+	GOTO INPUT_LOOP1
+ENDIF
+CLEARLINE LINECOUNT - FIRST_LINE
+使用目标 = RESULT
+IF 使用目标 || !IS_COUNTRY(対象勢力)
+;我军疲劳度下降
+	PRINTFORML 我方部队的疲劳度回复了！
+	IF 発動部隊>=0
+		UNIT_TIRED_COUNT:発動勢力:発動部隊 = MAX(UNIT_TIRED_COUNT:発動勢力:発動部隊 - RAND(4, 8), 0)
+	ELSE
+		CITY_TIRED_COUNT:発動勢力 = MAX(CITY_TIRED_COUNT:発動勢力 - RAND(4, 8), 0)
+	ENDIF
+ELSE
+;敌军疲劳度上升
+	PRINTFORML 敌方部队变得疲惫了！
+	IF 対象部隊>0
+		UNIT_TIRED_COUNT:対象勢力:対象部隊 = MIN(UNIT_TIRED_COUNT:対象勢力:対象部隊 + RAND(4, 8),100)
+	ELSE
+		CITY_TIRED_COUNT:対象勢力 = MIN(CITY_TIRED_COUNT:対象勢力 + RAND(4, 8),100)
+	ENDIF
+ENDIF
+RETURN
+
+@SKILL_165_TROOP_1_EXPLANATION
+RESULTS = 抉择：使敌军疲劳度上升/使我军疲劳度下降
+
+@SKILL_165_TROOP_1_CANT_TELL
+
+@SKILL_165_TROOP_1_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 200

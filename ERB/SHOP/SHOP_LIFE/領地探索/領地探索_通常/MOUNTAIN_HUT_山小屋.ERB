@@ -1,0 +1,98 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_MOUNTAIN_HUT_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_MOUNTAIN_HUT_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_MOUNTAIN_HUT(対象)
+#DIM 対象
+
+PRINTFORML 登山的时候、完全迷路了
+PRINTFORML 束手無策的%ANAME(対象)%、很幸運的発現了一個山中小屋
+PRINTFORMW ……好像有先來的客人
+
+IF IS_MALE(対象) || (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+	PRINTFORML 說明情況的時候女管理人用灼熱的射線看著%ANAME(対象)%、然後説道想要住宿的話需要3000金、或者陪她一晚
+	PRINTL
+	CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+	CALL ASK_MULTI_JUDGE("给钱", MONEY >= 3000, "陪她", 1, "靠自己下山", 1)
+ELSE
+	PRINTFORML 說明情況的時候山男一直盯著%ANAME(対象)%看、然後説道想要住宿的話需要3000金、或者用身体支付
+	PRINTL
+	CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+	CALL ASK_MULTI_JUDGE("付錢", MONEY >= 3000, "肉償", 1, "靠自己下山", 1)
+ENDIF
+
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORML 只能棄卒保車了……
+		PRINTFORML 付錢住了一晚
+		CALL ICPRINT("支付了<3000>金", "L", カラー_注意)
+		PRINTFORML 
+		PRINTFORMW 第二天、從被告訴的小路平安下山了
+	CASE 1
+		IF IS_FEMALE(対象)
+		
+			IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+				PRINTFORML 小屋里响起了女性的喘息声
+				PRINTFORML 女人双手按着%ANAME(対象)%的脑袋，强迫她舔舐自己洪水泛滥的小穴
+				PRINTFORML 一边努力满足对方的要求，一边品尝着她溢出的爱液，%ANAME(対象)%感觉自己的身体也逐渐变得燥热起来
+				PRINTFORML 一手揉捏着自己的胸部，另一只手则伸向了自己的股间，%ANAME(対象)%在自慰的快感中多次达到了高潮
+				PRINTFORMW 望着%ANAME(対象)%急于抚慰自身的模样，女人感到下体变得更加湿润了
+				CALL FUCK(対象, "欲望, 性技, 性交, Ｃ, Ｂ, 口淫, 奉仕, 百合", "接吻喪失", 0, "偶遇的女性的秘贝", "", "", "和姦")
+				PRINTFORML
+				PRINTFORML 翌日清晨，被她牵着手带下了山
+				RETURN 1
+			ENDIF
+			
+			PRINTFORML ……付不起錢、決定提供身体
+			PRINTFORML %ANAME(対象)%這麼説完、男人笑著把%ANAME(対象)%帯進了小屋内
+			PRINTFORML 
+			PRINTFORML 小屋中響起了女性的嬌喘声
+			PRINTFORML 已經和男人交合了好幾次的%ANAME(対象)%、現在自己跨坐在男人身上扭動著腰
+			PRINTFORML 腦海中完全被快感所填滿、抖動著%STR_BODY("胸：感度：感触", 対象)%沉醉于性愛之中
+			PRINTFORMW 山男低声呻吟的同時在%ANAME(対象)%的最深処射精了、%ANAME(対象)%後弓着背発出了格外高声的嬌喘
+			CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_SPERM_ID("山男"), @"山男的\@RAND:2 ? 肉棒 # 嘴唇\@", "山男", "", "和姦")
+			PRINTFORML 
+			PRINTFORMW 翌日清晨、在山男的帯領下平安下山了
+		ELSE
+			PRINTFORML ……付不起錢、決定陪她一晚
+			PRINTFORML %ANAME(対象)%這麼説完、女性親吻著%ANAME(対象)%、帯進了小屋內
+			PRINTFORML 
+			PRINTFORML 小屋中響起了女性的嬌喘声
+			PRINTFORML 女人貪婪的索求著%ANAME(対象)%、讓%ANAME(対象)%在自己的體內射了一次又一次
+			PRINTFORML 從結合的秘部溢出的無法容納的種子、表明已經做了好幾次了
+			PRINTFORMW %ANAME(対象)%低聲呻吟在女人深処射精的同時、她也後弓著身體大聲嬌喘著高潮了
+			CALL FUCK(対象, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失, 接吻喪失", 0, "偶遇的女性的嘴唇", "", "偶遇的女性的膣穴", "和姦")
+			PRINTFORML 
+			PRINTFORMW 翌日清晨、在她的帯領下平安下山了
+		ENDIF
+	CASE 2
+		PRINTFORML 才不付那麼多錢
+		PRINTFORMW %ANAME(対象)%試着自己找下山的路
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		IF INRANGE(ABL:対象:武闘 * 2, 50, 100) > RAND:100
+			PRINTFORMW 總算平安的下山了！
+		ELSE
+			PRINTFORML 哇啊！
+			PRINTFORML 下山的時候脚滑了一下
+			PRINTFORMW 雖然總算是想辦法下山了、但是卻受傷了…
+			CALL ADD_COOLTIME(対象:0, 2)
+		ENDIF
+ENDSELECT
+
+RETURN 1

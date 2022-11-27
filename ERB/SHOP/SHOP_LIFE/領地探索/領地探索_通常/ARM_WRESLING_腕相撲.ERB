@@ -1,0 +1,52 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_ARM_WRESLING_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_ARM_WRESLING_DECISION(対象)
+#DIM 対象
+RETURN IS_COUNTRY(CFLAG:対象:所属)
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_ARM_WRESLING(対象)
+#DIM 対象
+
+PRINTFORML 看見領地内聚集著很多人
+PRINTFORML 対腕力自豪的男人似乎正在召集腕相撲的挑戦者
+PRINTL
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+CALL ASK_YN("挑戦", "放棄")
+
+IF RESULT == 1
+	PRINTFORML 対這種事情沒有興趣
+	PRINTFORML 決定放任不理
+	RETURN 1
+ENDIF
+
+PRINTFORML 被挑起興味的%ANAME(対象)%決定挑戦男人
+PRINTFORML 男人的手腕像圓木一樣粗、只有這樣才有自信做這樣的買賣吧
+PRINTFORMW 男人面対%ANAME(対象)%提出的比試、嗤笑一聲
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+
+IF LIMIT(ABL:対象:武闘, 30, 100) > RAND:100
+	PRINTFORML %ANAME(対象)%成功地戦勝了那個男人！
+	PRINTFORMW 他果斷的認輸了、說道請一定要讓我加入你
+	COUNTRY_SOLDIER:(CFLAG:対象:所属) += 3000
+	CALL ICPRINT("依靠那個男人的力量、士兵增加了能和<3000>人匹敵的戦力", "L", カラー_注意)
+	RETURN 1
+ENDIF
+
+PRINTFORML 被打敗了…
+PRINTFORMW 男人說著并沒有那麼強嘛、嘲笑著%ANAME(対象)%
+
+RETURN 1

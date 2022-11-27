@@ -1,0 +1,58 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_DONATION_FOR_BANK_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_DONATION_FOR_BANK_DECISION(対象)
+#DIM 対象
+RETURN IS_COUNTRY(CFLAG:対象:所属)
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_DONATION_FOR_BANK(対象)
+#DIM 対象
+#DIM 対象都市
+
+CALL DAILY_EVENT_RAND_CITYSELECT(0)
+対象都市 = RESULT
+SIF 対象都市 < 0
+	RETURN 0
+PRINTFORML 在%CITY_NAME:対象都市%散步之時、遇到了因為河川的氾濫而困擾的村子
+PRINTFORML 製作堤防或許可以幫到村子、但是不一定會成功
+PRINTL
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "政治"))
+CALL ASK_MULTI_JUDGE("花5000金制作堤防", MONEY >= 5000, "不管",1)
+
+IF RESULT == 1
+	PRINTFORML 不好意思現在捨不得
+	PRINTFORMW 什麼都不説直接離開了村子
+	RETURN 1
+ENDIF
+
+PRINTFORML 不是吝嗇的時候
+PRINTFORMW %ANAME(対象)%立刻叫来了技術人員、打算製作堤防
+CALL COLOR_PRINTW("支付了5000金", カラー_注意)
+MONEY -= 5000
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+IF LIMIT(ABL:対象:政治, 50, 100) > RAND:100
+	PRINTFORML 成功了！
+	PRINTFORMW 順利的完成了堅固的堤防
+	CITY_GUARD:対象都市 += 15
+	PRINTFORMW 被村民們感謝了
+	CALL ICPRINT(@"%CITY_NAME:対象都市%的防衛率上昇了<15>、変成了<{CITY_GUARD:対象都市}>", "W", カラー_注意)
+ELSE
+	PRINTFORML 失敗了！
+	PRINTFORML 沒有成功的完成堤防
+	PRINTFORMW 像是在逃避領民們一般氣餒的離開了
+ENDIF
+RETURN 1
+

@@ -1,0 +1,96 @@
+@SLG_BUILDING_TURNEND_ADD_EXP()
+    #DIM CHARA_ID
+    #DIM COUNTRY_ID
+
+    CALL TMP_CREATE_IS_FREE_MAP
+    CHARA_ID = 0
+    VARSET SHOW_FLAG,1
+    FOR CHARA_ID, 0, CHARANUM
+        SIF TMP_IS_FREE:CHARA_ID:0 != 0
+            CONTINUE
+        COUNTRY_ID = CFLAG:CHARA_ID:所属
+        IF CHECK_BUILDING_FUNCTION_SELECT(-1,COUNTRY_ID,建造物_大学园区) > 0
+            CALL ADD_EXP_BUILDING_大学园区(GETNUM(ABL, "武闘"),CHARA_ID)
+            CALL ADD_EXP_BUILDING_大学园区(GETNUM(ABL, "防衛"),CHARA_ID)
+            CALL ADD_EXP_BUILDING_大学园区(GETNUM(ABL, "知略"),CHARA_ID)
+            SIF SHOW_FLAG:COUNTRY_ID:0
+                BUILDING_TEXT = BUILDING_TEXT_大学园区(COUNTRY_ID)
+            SHOW_FLAG:COUNTRY_ID:0 = 0
+        ENDIF
+
+        IF CHECK_BUILDING_FUNCTION_SELECT(-1,COUNTRY_ID,建造物_社会保障部) > 0
+            CALL ADD_EXP_BUILDING_社会保障部(GETNUM(ABL, "武闘"),CHARA_ID)
+            CALL ADD_EXP_BUILDING_社会保障部(GETNUM(ABL, "防衛"),CHARA_ID)
+            CALL ADD_EXP_BUILDING_社会保障部(GETNUM(ABL, "知略"),CHARA_ID)
+            CALL ADD_EXP_BUILDING_社会保障部(GETNUM(ABL, "政治"),CHARA_ID)
+            CALL ADD_EXP_BUILDING_社会保障部(GETNUM(ABL, "歌唱"),CHARA_ID)
+            CALL ADD_EXP_BUILDING_社会保障部(GETNUM(ABL, "料理"),CHARA_ID)
+            SIF SHOW_FLAG:COUNTRY_ID:1
+                BUILDING_TEXT = BUILDING_TEXT_社会保障部(COUNTRY_ID)
+            SHOW_FLAG:COUNTRY_ID:1 = 0
+        ENDIF
+
+        IF CHECK_BUILDING_FUNCTION_SELECT(-1,COUNTRY_ID,建造物_寺子屋) > 0
+            CALL ADD_EXP_BUILDING_寺子屋(GETNUM(ABL, "知略"),CHARA_ID)
+            CALL ADD_EXP_BUILDING_寺子屋(GETNUM(ABL, "政治"),CHARA_ID)
+            SIF SHOW_FLAG:COUNTRY_ID:2
+                BUILDING_TEXT = BUILDING_TEXT_寺子屋(COUNTRY_ID)
+            SHOW_FLAG:COUNTRY_ID:2 = 0
+        ENDIF
+        IF CHECK_BUILDING_FUNCTION_SELECT(-1,COUNTRY_ID,建造物_神学院) > 0
+            CALL ADD_EXP_BUILDING_神学院(GETNUM(ABL, "武闘"),CHARA_ID)
+            CALL ADD_EXP_BUILDING_神学院(GETNUM(ABL, "防衛"),CHARA_ID)
+            CALL ADD_EXP_BUILDING_神学院(GETNUM(ABL, "知略"),CHARA_ID)
+            CALL ADD_EXP_BUILDING_神学院(GETNUM(ABL, "政治"),CHARA_ID)
+            CALL ADD_EXP_BUILDING_神学院(GETNUM(ABL, "歌唱"),CHARA_ID)
+            CALL ADD_EXP_BUILDING_神学院(GETNUM(ABL, "料理"),CHARA_ID)
+            SIF SHOW_FLAG:COUNTRY_ID:3
+                BUILDING_TEXT = BUILDING_TEXT_神学院(COUNTRY_ID)
+            SHOW_FLAG:COUNTRY_ID:3 = 0
+        ENDIF
+
+    NEXT
+
+@ADD_EXP_BUILDING_神学院(成长属性,CHARA_ID)
+    #DIM 成长属性
+    #DIM CHARA_ID
+    #DIM 効果量
+    SELECTCASE ABL:CHARA_ID:(成长属性)
+        CASE IS < ランク閾値:ランク_ＳＬＧ:ランク_D
+            効果量 = MAX(ABLUP_NEED_EXP_SLG(ABL:CHARA_ID:(成长属性)) , 1)
+        CASE IS < ランク閾値:ランク_ＳＬＧ:ランク_A
+            効果量 = MAX(ABLUP_NEED_EXP_SLG(ABL:CHARA_ID:(成长属性)) * 10 / 100, 1)
+    ENDSELECT
+@ADD_EXP_BUILDING_寺子屋(成长属性,CHARA_ID)
+    #DIM 成长属性
+    #DIM CHARA_ID
+    #DIM 効果量
+    SELECTCASE ABL:CHARA_ID:(成长属性)
+        CASE IS < ランク閾値:ランク_ＳＬＧ:ランク_B
+            効果量 = MAX(ABLUP_NEED_EXP_SLG(ABL:CHARA_ID:(成长属性)) * 3 / 100, 1)
+    ENDSELECT
+
+@ADD_EXP_BUILDING_社会保障部(成长属性,CHARA_ID)
+    #DIM 成长属性
+    #DIM CHARA_ID
+    #DIM 効果量
+    SELECTCASE ABL:CHARA_ID:(成长属性)
+        CASE IS < ランク閾値:ランク_ＳＬＧ:ランク_D
+            効果量 = MAX(ABLUP_NEED_EXP_SLG(ABL:CHARA_ID:(成长属性)) * 30 / 100, 1)
+    ENDSELECT
+@ADD_EXP_BUILDING_大学园区(成长属性,CHARA_ID)
+    #DIM 成长属性
+    #DIM CHARA_ID
+    #DIM 効果量
+    SELECTCASE ABL:CHARA_ID:成长属性
+        CASE IS < ランク閾値:ランク_ＳＬＧ:ランク_B
+            効果量 = MAX(ABLUP_NEED_EXP_SLG(ABL:CHARA_ID:成长属性) / 100 , 1)
+        CASE IS < ランク閾値:ランク_ＳＬＧ:ランク_A
+            効果量 = MAX(ABLUP_NEED_EXP_SLG(ABL:CHARA_ID:成长属性) / 2 / 100 / 2, 1)
+        CASE IS < ランク閾値:ランク_ＳＬＧ:ランク_S
+            効果量 = MAX(ABLUP_NEED_EXP_SLG(ABL:CHARA_ID:成长属性) / 3 / 100 / 4, 1)
+        CASEELSE
+            効果量 = MAX(ABLUP_NEED_EXP_SLG(ABL:CHARA_ID:成长属性) / 10 / 100 / 6, 1)
+    ENDSELECT
+    EXP:CHARA_ID:GET_EXP(成长属性) += 効果量
+    CALL TRAIN_AUTO_ABLUP(CHARA_ID, CFLAG:CHARA_ID:所属 != CFLAG:MASTER:所属)

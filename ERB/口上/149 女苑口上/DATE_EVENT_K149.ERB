@@ -1,0 +1,1479 @@
+﻿;--------------------------------------------------------
+;そのキャラのデートイベント本体を呼び出すハブとなる関数
+;--------------------------------------------------------
+@DATE_EVENT_K149(場所)
+#DIM 場所
+#DIM 湖
+#DIM 山
+#DIM 森
+#DIM 人里
+#DIM 花畑
+#DIM 自宅
+#DIM 女苑
+#DIM 紫苑
+女苑 = NAME_TO_CHARA("女苑")
+紫苑 = NAME_TO_CHARA("紫苑")
+
+;面識がないとデートイベントは発生しない
+SIF CFLAG:女苑:面識 == 0
+	RETURN 0
+	
+;--------------------------
+;デートに誘ったときの反応	
+;--------------------------
+
+;好感度10000以上
+IF CFLAG:女苑:好感度 >= 10000
+	;恋慕ルート
+	IF TALENT:女苑:親愛
+		PRINTDATAL
+		DATAFORM 「…和我约会？　…呼呼♥谢谢。非常期待哦」
+		;TranslatedMark 「…私と、デート？　…ふふ♥　ありがとう。とっても楽しみよ」
+		DATAFORM 「是要和我约会吗？嘿嘿，好开心啊♥　…好好做护花使者吧？」
+		;TranslatedMark 「私とデートしてくれるの？　えへへ、嬉しいなぁ♥　…ちゃんとエスコート、してね？」
+		DATAFORM 「能邀请我约会真开心啊…♥只要和%ANAME(MASTER)%在一起，我哪里都可以去哦♥」
+		;TranslatedMark 「デートに誘ってくれるなんて嬉しいなぁ…♥　%ANAME(MASTER)%と一緒なら、何処へでも付いて行くわ♥」
+		ENDDATA
+		PRINTFORMW %ANAME(女苑)%被心爱的%ANAME(MASTER)%邀请去约会，高兴地微笑着
+		;TranslatedMark %ANAME(女苑)%は愛する%ANAME(MASTER)%にデートに誘われて、嬉しさに顔を綻ばせている
+	;それ以外
+	ELSE
+		PRINTDATAL
+		DATAFORM 「约会的邀请？啊哈哈，去吧♪不管是哪里我都会跟你一起去的♪」
+		;TranslatedMark 「デートのお誘い？　あははっ、行く行くー♪　何処にでもついて行くわ♪」
+		DATAFORM 「和我约会？嘿嘿♪好啊。当我的护花使者吧♥」
+		;TranslatedMark 「私とデートを？　えへへっ♪　良いわよ。ちゃーんとエスコートしてね♥」
+		DATAFORM 「竟然邀请身为瘟神的我去约会，真是%ANAME(MASTER)%才会做出来的事呢。还请尽情享受吧♪」
+		;TranslatedMark 「疫病神の私をデートに誘ってくれるのなんて%ANAME(MASTER)%くらいなの。だからいっぱい楽しませてねっ♪」
+		ENDDATA
+		PRINTFORMW %ANAME(女苑)%很高兴被爱慕的%ANAME(MASTER)%邀请去约会
+		;TranslatedMark %ANAME(女苑)%は、思いを寄せている%ANAME(MASTER)%にデートに誘われて嬉しそうだ
+	ENDIF
+	;自軍に紫苑がいたら1/3の確率で表示される
+	IF CFLAG:紫苑:所属 == CFLAG:MASTER:所属 &&  !(MASTER == NAME_TO_CHARA("紫苑")) && !RAND:3
+		PRINTFORML ・
+		PRINTFORML ・・
+		PRINTFORMW ・・・
+		CALL SINGLE_DRAWLINE
+		PRINTFORML 
+		PRINTFORMW 然后是约定之日的早上
+		;TranslatedMark そして約束の日の朝
+		PRINTFORML 「啊，%ANAME(女苑)%。要出去玩吗？」
+		;TranslatedMark 「あ、%ANAME(女苑)%。遊びにでも行くの？」
+		PRINTFORMW %ANAME(紫苑)%向一看就知道打扮的非常精致的%ANAME(女苑)%打招呼
+		;TranslatedMark 見るからにめかし込んだ様子の%ANAME(女苑)%に%ANAME(紫苑)%が声を掛ける
+		PRINTFORML 「啊，姐姐。是啊，现在要去和%ANAME(MASTER)%约会♪」
+		;TranslatedMark 「ああ、姉さん。そうよ、今から%ANAME(MASTER)%とのデートなの♪」
+		PRINTFORMW 因为高兴而放松了表情，%ANAME(女苑)%有些恍惚
+		;TranslatedMark 嬉しさで緩んだ表情で、%ANAME(女苑)%が惚気る
+		PRINTFORML 「啊……身为瘟神的妹妹竟然也能有这么幸福的表情……好羡慕啊~ ~把幸福分给我吧~ 」
+		;TranslatedMark 「はあ…、疫病神である妹がこんなに幸せそうな顔するなんて…。羨ましいよー、私にも幸せ分けてよー」
+		PRINTFORMW 「诶？才不要哩。作为代替，下次一起去吃烤肉吧？可以吗？」
+		;TranslatedMark 「えー？　もう、仕方ないわね。じゃあ今度一緒に焼肉でも行きましょう？　それでいい？」
+		PRINTFORML 「太好了！不愧是我引以为傲的妹妹啊！一路顺风啊」
+		;TranslatedMark 「やったー！　流石は自慢の妹だわー！　それじゃあ行ってらっしゃーい」
+		PRINTFORMW 不禁对竖起大拇指的%ANAME(紫苑)%苦笑，随后%ANAME(女苑)%蹦蹦跳跳的去和%ANAME(MASTER)%约会了
+		;TranslatedMark 調子のいい%ANAME(紫苑)%に苦笑しつつ、%ANAME(女苑)%はスキップしながら%ANAME(MASTER)%とのデートに向かった
+		PRINTFORML 
+		CALL SINGLE_DRAWLINE
+		PRINTFORMW 
+	ENDIF
+	
+	;人里デート(好感度10000以上)でアクセサリーを買ってあげたことがある場合
+	IF CFLAG:女苑:301 == 1
+		PRINTFORML ・・・
+		PRINTFORM 「啊，%ANAME(MASTER)%。
+		;TranslatedMark 「あっ、%ANAME(MASTER)%。
+		PRINTW …等、等很久了吗…・///」
+		;TranslatedMark …お、お待たせ…・///」
+		PRINTFORMW 约会当天。%ANAME(女苑)%穿着和平时完全不一样的服装出现了
+		;TranslatedMark デート当日。%ANAME(女苑)%はいつもとまるで違う服装で現れた
+		PRINTFORML 没有平时的豪华大衣和装饰品，只是朴素的无袖连衣裙。
+		;TranslatedMark 普段の豪華なコートや装飾品も無しの、質素なノースリーブワンピース。
+		PRINTFORMW 而且，她那富有特色的两侧头发也被解开了，蓬松的波浪形长发将她点缀得楚楚动人
+		;TranslatedMark そして特徴的な両サイドの髪は解かれ、ゆるいウェーブがかったロングヘアが彼女を清楚に彩る
+		PRINTFORMW 虽然是朴素的装束，但反而衬托了她自身的美貌
+		;TranslatedMark 地味めな装いではあるが、それが逆に彼女自身の器量の良さを引き立てている
+		PRINTFORML 「稍…稍微试着打扮了一下……怎么样…？」
+		;TranslatedMark 「ちょ…ちょっとおめかし…してみたんだけど…ど、どうかな…？」
+		PRINTFORMW %ANAME(女苑)%腼腆地抬着头询问的的样子非常可爱
+		;TranslatedMark はにかみながら上目遣いで尋ねる%ANAME(女苑)%の姿は大層可愛らしいものだった
+		PRINTFORML 在被那样的%ANAME(女苑)%迷住的时候，%ANAME(MASTER)%注意到了她戴着之前约会的时候在村庄买的饰品
+		;TranslatedMark そんな%ANAME(女苑)%に見蕩れている内、%ANAME(MASTER)%は前にデートした際、人里で買って上げたアクセサリーを彼女が着けてくれていることに気づいた
+		
+		PRINTDATAW
+		DATAFORM 「…呵呵，能好好注视我好开心啊…♪」
+		;TranslatedMark 「…ふふっ、ちゃんと見てくれて嬉しいなぁ…♪」
+		DATAFORM 「啊……你已经注意到了…好开心啊♥」
+		;TranslatedMark 「あっ…、ちゃんと気付いてくれたんだ…嬉しいな♥」
+		DATAFORM 「嘿嘿♪好不容易%ANAME(MASTER)%给我买的嘛。怎么样？…合适吗？」
+		;TranslatedMark 「…えへへ♪　せっかく%ANAME(MASTER)%が買ってくれたんだもの。どうかな？　…似合ってる？」
+		ENDDATA
+		
+		PRINTFORML 看来这种朴素又整洁的搭配，也是为了凸显从%ANAME(MASTER)%那里得到的首饰。
+		;TranslatedMark どうやらこの地味目で清楚なコーディネートは、%ANAME(MASTER)%に貰ったアクセサリーを際立たせるためのものでもあるようだ
+		PRINTFORMW %ANAME(MASTER)%看到他很珍惜自己送的礼物，不由得露出了笑容
+		;TranslatedMark 自分からの贈り物を大事に使ってくれている%ANAME(女苑)%の姿に、%ANAME(MASTER)%は思わず笑みがこぼれた
+		CFLAG:女苑:301 = 2
+	ENDIF
+	
+;好感度5000以上
+ELSEIF CFLAG:女苑:好感度 >= 5000
+	;恋慕ルート
+	IF TALENT:女苑:恋慕
+		PRINTDATAL
+		DATAFORM 「约会的邀请？啊哈哈，走吧走吧♪去哪里玩呢？」
+		;TranslatedMark 「デートのお誘い？　あははっ、行く行くー♪　何処で遊ぶの？」
+		DATAFORM 「想和我约会吗？呵呵♪好啊。要照顾好我哦♥」
+		;TranslatedMark 「私とデートしたい？　ふふんっ♪　良いわよ。ちゃーんとエスコートしてよね♥」
+		DATAFORM 「能邀请我这个瘟神也只有%ANAME(MASTER)%而已。所以你要好好享受哦♪」
+		;TranslatedMark 「疫病神の私を誘ってくれるのなんて%ANAME(MASTER)%くらいだわ。だからちゃんと楽しませてよねっ♪」
+		ENDDATA
+		PRINTFORMW %ANAME(女苑)%被爱慕的%ANAME(MASTER)%邀请去约会，看起来非常开心
+		;TranslatedMark %ANAME(女苑)%は、思いを寄せている%ANAME(MASTER)%にデートに誘われてとても嬉しそうだ
+	;それ以外
+	ELSE
+		PRINTDATAL
+		DATAFORM 「能和我约会的也只有%ANAME(MASTER)%吧…。当然会跟着你的」
+		;TranslatedMark 「私とデートしてくれるのなんて%ANAME(MASTER)%くらいよね…。もちろんついて行くわ」
+		DATAFORM 「你想和我一起玩吗？呵呵♪好啊。去哪里？」
+		;TranslatedMark 「私と遊びたいの？　ふふんっ♪　良いわよ。どこ行くの？」
+		DATAFORM 「想和身为瘟神的我玩的人也只有%ANAME(MASTER)%吧。嘛，好像也很有趣，所以我答应了♪」
+		;TranslatedMark 「疫病神の私と遊びたがる人なんて%ANAME(MASTER)%くらいよね。ま、それも面白そうだから良いけど♪」
+		ENDDATA
+		PRINTFORMW 被%ANAME(MASTER)%邀请去约会，%ANAME(女苑)%一副“也不坏”的表情
+		;TranslatedMark %ANAME(MASTER)%にデートに誘われて、%ANAME(女苑)%は満更でもない様子だ
+	ENDIF
+	;自軍に紫苑がいたら1/3の確率で表示される
+	IF CFLAG:紫苑:所属 == CFLAG:MASTER:所属 &&  !(MASTER == NAME_TO_CHARA("紫苑")) && !RAND:3
+		PRINTFORML ・
+		PRINTFORML ・・
+		PRINTFORMW ・・・
+		CALL SINGLE_DRAWLINE
+		PRINTFORML 
+		PRINTFORMW 然后是约定之日的早上
+		;TranslatedMark そして約束の日の朝
+		PRINTFORML 「啊，%ANAME(女苑)%。打扮得那么漂亮，要和谁一起去玩吗？」
+		;TranslatedMark 「あ、%ANAME(女苑)%。そんなめかし込んで、誰かと遊びにでも行くの？」
+		PRINTFORMW %ANAME(紫苑)%向为了和%ANAME(MASTER)%约会而鼓足干劲准备的%ANAME(女苑)%搭话
+		;TranslatedMark %ANAME(MASTER)%とのデートに向けて気合を入れて準備をしている様子の%ANAME(女苑)%に%ANAME(紫苑)%が話しかける
+		PRINTFORML 「呃，姐姐啊。…没什么。我只是出去一下」
+		;TranslatedMark 「ゲッ、姉さん。…べ、別に何でもないわよ。ちょっと出かけてくるだけ」
+		PRINTFORMW 「不，绝对是骗人的。我可没有那种只是出门就能那么开心的妹妹。话说你刚刚是不是说"约……"！」
+		;TranslatedMark 「いいや、絶対ウソ。ただのお出かけでそんな浮かれる妹じゃないわ。ていうか『ゲッ』って何よ！」
+		PRINTFORML （唔唔唔…偏偏在这种时候会被姐姐缠上…）
+		;TranslatedMark （うぐぐ…、よりによってこんな時に姉さんに絡まれるとは…）
+		PRINTFORMW （如果被知道和那家伙约会的话，不知道会被怎样骚扰纠缠，这里只能……）
+		;TranslatedMark （アイツとのデートのことを知られたらどんなウザ絡みをされるか分かったものじゃないわ、ここは一つ……）
+		PRINTFORML 「啊！在那样的地方有传说中的天人大人！！」
+		;TranslatedMark 「あっ！　あんなところに噂の天人様が！！」
+		PRINTFORML 「咦，天人大人！？在哪里！？　……谁都不在啊。咦？%ANAME(女苑)%呢？」
+		;TranslatedMark 「えっ、天人様！？　どこどこっ！？　……って誰もいないじゃない。あれ？　%ANAME(女苑)%もいない？」
+		PRINTFORML 「…………虽然是自家姐姐，但还真是让人担心。算了，趁现在溜吧」
+		;TranslatedMark 「…………我が姉ながら心配になるレベルのチョロさね。まあいいわ、今の内に、っと」
+		PRINTFORMW ……%ANAME(女苑)%用古老的方法成功地糊弄了%ANAME(紫苑)%
+		;TranslatedMark ……%ANAME(女苑)%は実に古典的な方法で%ANAME(紫苑)%を撒くことに成功したのだった
+		PRINTFORML 
+		CALL SINGLE_DRAWLINE
+		PRINTFORMW 
+	ENDIF
+	
+	;人里デートでアクセサリーを買ってあげたことがある場合
+	IF CFLAG:女苑:300 == 1
+		PRINTFORML ・・・
+		PRINTFORMW 「%ANAME(MASTER)%，让你久等了」
+		;TranslatedMark 「%ANAME(MASTER)%ー、お待たせーっ」
+		PRINTFORML 约会当天
+		;TranslatedMark デート当日
+		PRINTFORML %ANAME(MASTER)%看到%ANAME(女苑)%戴着之前约会的时候在人里买的饰品
+		;TranslatedMark %ANAME(MASTER)%は%ANAME(女苑)%の姿を見て、前にデートした際人里で買って上げたアクセサリーを着けてくれていることに気づいた
+		
+		PRINTDATAW
+		DATAFORM 「哎呀，眼神不错啊。佩服♪」
+		;TranslatedMark 「あら、ちゃんと目敏く見てくれてるようね。感心感心♪」
+		DATAFORM 「啊，你好像注意到了啊♪如果不知道的话就在装饰的地方哟~ ?」
+		;TranslatedMark 「あ、ちゃーんと気付いてくれたみたいね♪　分かんなかったらデコピンしてたとこよー？」
+		DATAFORM 「呵呵，好不容易买来的啊。怎么样？感觉不错吧♪」
+		;TranslatedMark 「ふふーん、せっかく買ってくれたものだしね。どう？　いい感じでしょー♪」
+		ENDDATA
+		
+		PRINTFORML %ANAME(女苑)%看起来很开心，在炫耀着从%ANAME(MASTER)%那里得到的饰品
+		;TranslatedMark %ANAME(女苑)%は見るからにウキウキした様子で、%ANAME(MASTER)%に貰ったアクセサリーを見せびらかしている
+		PRINTFORMW 看到她开心地使用自己送的礼物的样子，%ANAME(MASTER)%不由得露出了笑容
+		;TranslatedMark 自分からの贈り物を嬉しそうに使ってくれている%ANAME(女苑)%の姿に、%ANAME(MASTER)%は思わず笑みがこぼれた
+		CFLAG:女苑:300 = 2
+	ENDIF
+	
+;好感度1500以上
+ELSEIF CFLAG:女苑:好感度 >= 1500
+	;恋慕ルート
+	IF TALENT:女苑:恋慕
+		PRINTDATAL
+		DATAFORM 「想和瘟神约会什么的…怪里怪气也有个限度吧。…嘛，没办法，我就陪陪你吧，记得发自内心的感谢我哦？」
+		;TranslatedMark 「疫病神とデートしたいとか…変わり者にも程があるでしょ。…ま、しょうがないから付き合ってあげるわ。感謝しなさいよー？」
+		DATAFORM 「你想和我一起玩吗？呵呵♪好啊。去哪里？」
+		;TranslatedMark 「私と遊びたいの？　ふふんっ♪　良いわよ。どこ行くの？」
+		DATAFORM 「和身为瘟神的我想玩的人也只有%ANAME(MASTER)%吧。嘛，因为很有意思所以也不赖♪」
+		;TranslatedMark 「疫病神の私と遊びたがる人なんて%ANAME(MASTER)%くらいよね。ま、それも面白そうだから良いけどさ♪」
+		ENDDATA
+		PRINTFORMW %ANAME(女苑)%很高兴被爱慕的%ANAME(MASTER)%邀请去约会
+		;TranslatedMark %ANAME(女苑)%は、思いを寄せている%ANAME(MASTER)%にデートに誘われて嬉しそうだ
+	;それ以外
+	ELSE
+		PRINTDATAL
+		DATAFORM 「出去玩？好啊。一起去吃好吃的吧」
+		;TranslatedMark 「遊びに？　いいわよ。美味しい物奢ってよねー」
+		DATAFORM 「和你约会？嗯，尽可能地让我开心吧♪」
+		;TranslatedMark 「アンタとデート？　ふーん、せいぜい楽しませてよねー♪」
+		DATAFORM 「邀请瘟神约会，真是个怪人呢」
+		;TranslatedMark 「疫病神をデートに誘うって、ホント変わり者よね%ANAME(MASTER)%は」
+		ENDDATA
+		PRINTFORMW 被%ANAME(MASTER)%邀请去玩，%ANAME(女苑)%一副“也不坏”的表情
+		;TranslatedMark %ANAME(MASTER)%に遊びに誘われ、%ANAME(女苑)%は満更でもない様子だ
+	ENDIF
+	;自軍に紫苑がいたら1/3の確率で表示される
+	IF CFLAG:紫苑:所属 == CFLAG:MASTER:所属 &&  !(MASTER == NAME_TO_CHARA("紫苑")) && !RAND:3
+		PRINTFORML ・
+		PRINTFORML ・・
+		PRINTFORMW ・・・
+		CALL SINGLE_DRAWLINE
+		PRINTFORML 
+		PRINTFORMW 然后是约定之日的早上
+		;TranslatedMark そして約束の日の朝
+		PRINTFORML 「啊，%ANAME(女苑)%。那么兴奋是要去哪里？」
+		;TranslatedMark 「あ、%ANAME(女苑)%。そんなに浮かれてどこ行くの？」
+		PRINTFORMW %ANAME(紫苑)%和为准备和%ANAME(MASTER)%约会而正在努力的%ANAME(女苑)%搭话
+		;TranslatedMark %ANAME(MASTER)%とのデートの準備に勤しむ%ANAME(女苑)%に%ANAME(紫苑)%が話しかける
+		PRINTFORML 「啊，是姐姐啊。…没什么特别值得兴奋的。我只是出去一下」
+		;TranslatedMark 「あ、姉さん。…別に浮かれてなんか無いわよ。ちょっと出かけてくるだけ」
+		PRINTFORMW 「啊，真的吗？看起来很开心啊…。是去吃什么好吃的东西吗？也带我去吧」
+		;TranslatedMark 「えー、本当？　浮かれてるように見えたけど…。何か美味しい物食べに行くの？　私も連れてってよー」
+		PRINTFORML （啊，偏偏在麻烦的时候被缠上了呢…）
+		;TranslatedMark （あー、よりによって面倒な時に絡まれたわね…）
+		PRINTFORMW （事到如今要是说什么和那家伙约会了，绝对会被嘲笑的。这里只有一个办法……）
+		;TranslatedMark （今更アイツとのデートだから、何て言ったら絶対からかわれるわね。ここは一つ……）
+		PRINTFORML 「啊！那里居然有放满大福的供台！！」
+		;TranslatedMark 「あっ！　あんなところにお供え物の大福がいっぱい！！」
+		PRINTFORMW 「诶！？哪里哪里！？麻烦也给我点供品吧！」
+		;TranslatedMark 「え！？　どこどこっ！？　私にもお供え物ちょうだいっ！」
+		PRINTFORML %ANAME(紫苑)%朝着被指的方向一溜烟地跑去…
+		;TranslatedMark %ANAME(紫苑)%は指を指された方向へ一目散に向かっていった…
+		PRINTFORML 「…………虽然是自家姐姐，但还真是让人担心。嘛，趁现在溜吧」
+		;TranslatedMark 「……我が姉ながら心配になるレベルのチョロさね。まあいいわ、今の内に、っと」
+		PRINTFORMW ……%ANAME(女苑)%用似曾相识的方法成功地糊弄了%ANAME(紫苑)%
+		;TranslatedMark %ANAME(女苑)%は実に古典的な方法で%ANAME(紫苑)%を撒くことに成功した
+		PRINTFORML 
+		CALL SINGLE_DRAWLINE
+		PRINTFORMW 
+	ENDIF
+	
+;好感度500以上
+ELSEIF CFLAG:女苑:好感度 >= 500
+	PRINTDATAL
+	DATAFORM 「约会？和我？　…明明我是瘟神却来邀请我…、嗯…嗯♪」
+	;TranslatedMark 「デート？　私と？　…疫病神なのに誘ってくれるんだ…、ふーん…っ♪」
+	DATAFORM 「和你约会？嗯，尽可能让我开心吧」
+	;TranslatedMark 「アンタとデート？　ふーん、せいぜい楽しませてよね」
+	DATAFORM 「想和瘟神一起玩…。怎么说呢，奇怪的人呢」
+	;TranslatedMark 「疫病神と遊びたいって…。何ていうか、変わり者よね%ANAME(MASTER)%は」
+	ENDDATA
+	PRINTFORMW 被%ANAME(MASTER)%邀请去玩，%ANAME(女苑)%一副“也不坏”的表情
+	;TranslatedMark %ANAME(MASTER)%に遊びに誘われ、%ANAME(女苑)%は満更でもない様子だ
+	
+;好感度0以上
+ELSEIF CFLAG:女苑:好感度 >= 0
+	PRINTDATAL
+	DATAFORM 「约会？和我？　…你知道我是瘟神吗？」
+	;TranslatedMark 「デート？　この私と？　…私が疫病神だってお分かり？」
+	DATAFORM 「和你约会？　……啊，是要当我的钱包吗」
+	;TranslatedMark 「アンタとデートぉ？　……まあ、奢ってくれるのならいいか」
+	DATAFORM 「想和瘟神一起玩…。真的，怎么说呢…，你呀」
+	;TranslatedMark 「疫病神と遊びたいって…。本当何ていうか…アレね、アンタ」
+	ENDDATA
+	PRINTFORMW 被交往尚浅的%ANAME(MASTER)%邀请，%ANAME(女苑)%似乎有点不知所措…
+	;TranslatedMark まだ付き合いの浅い%ANAME(MASTER)%に誘われて、%ANAME(女苑)%は戸惑い気味のようだ…
+	
+;好感度マイナス状態
+ELSE
+	PRINTDATAL
+	DATAFORM 「……偏偏和你约会……。郁闷啊」
+	;TranslatedMark 「……よりにもよってアンタとデートだなんて……。気が滅入るわ」
+	DATAFORM 「和你约会？　……玩笑也要适可而止啊……」
+	;TranslatedMark 「アンタとデートぉ？　……冗談も程ほどにして欲しいもんだわ……」
+	DATAFORM 「你的钱拿了也没兴趣用……。但这也是工作的一部分，我就忍耐一下吧」
+	;TranslatedMark 「お金貰ったって嫌なぐらいだけど……。これも仕事の内だと思って我慢ね」
+	ENDDATA
+	PRINTFORMW 对%ANAME(MASTER)%有坏印象的%ANAME(女苑)%，露骨地讨厌着…
+	;TranslatedMark %ANAME(MASTER)%に悪印象を持っている%ANAME(女苑)%は、露骨に嫌そうにしている…
+ENDIF
+PRINTFORML …
+PRINTFORML ……
+PRINTFORML ………
+PRINTFORML
+
+;--------------------------
+;デートイベント本体へ
+;--------------------------
+SELECTCASE 場所
+	CASE 1
+		;湖に行く
+		CALL DATE_EVENT_K149_mizuumi(湖)
+	CASE 2
+		;山に行く
+		CALL DATE_EVENT_K149_yama(山)
+	CASE 3
+		;森に行く
+		CALL DATE_EVENT_K149_mori(森)
+	CASE 4
+		;人里に行く
+		CALL DATE_EVENT_K149_hitozato(人里)
+	CASE 5
+		;花畑に行く
+		CALL DATE_EVENT_K149_hanabatake(花畑)
+	CASE 6
+		;自宅に誘う
+		CALL DATE_EVENT_K149_zitaku(自宅)
+ENDSELECT
+
+;--------------------------
+;デート終了時の反応	
+;--------------------------
+PRINTFORML
+PRINTFORML …
+PRINTFORML ……
+PRINTFORML ………
+
+;好感度10000以上
+IF CFLAG:女苑:好感度 >= 10000
+	;恋慕ルート
+	IF TALENT:女苑:恋慕
+		PRINTDATAL
+		DATAFORM 「嘿嘿…、%ANAME(MASTER)%♥今天的约会非常开心♪谢谢你陪我度过这样幸福的时光…♥」
+		;TranslatedMark 「えへへ…、%ANAME(MASTER)%♥　今日のデート、すごく楽しかったよ♪　幸せな時間をありがとう…♥」
+		DATAFORM 「今天的约会非常开心…♥如果再邀请我的话…我会很高兴的♥」
+		;TranslatedMark 「今日のデート、すっごく楽しかった…♥　また誘ってくれると…嬉しいな♥」
+		DATAFORM 「啊，好开心啊…♥　……这样的时间，要是能一直持续下去就好了…」
+		;TranslatedMark 「はあー、すごく楽しかったね…♥　……こんな時間が、いつまでも続いてくれたら良いのに…」
+		ENDDATA
+		PRINTFORMW %ANAME(女苑)%和心爱的%ANAME(MASTER)%约会归来，直到分手为止一直抱着%ANAME(MASTER)%的手臂依偎在一起
+		;TranslatedMark %ANAME(女苑)%は愛する%ANAME(MASTER)%とのデートの帰り、別れの時までずっと%ANAME(MASTER)%の腕を抱くように寄り添っていた
+	;それ以外
+	ELSE
+		PRINTDATAL
+		DATAFORM 「呵呵，今天的约会真不赖♪%ANAME(MASTER)%怎么样？如果你开心的话我也会很开心的…♥」
+		;TranslatedMark 「うふふっ、今日のデートは楽しかった♪　%ANAME(MASTER)%はどうだった？　そっちも楽しかったなら嬉しいんだけどな…♥」
+		DATAFORM 「今天的约会非常开心♪希望你能再邀请我…♥」
+		;TranslatedMark 「今日のデート、すっごく楽しかったわ♪　また誘ってほしいな…♥」
+		DATAFORM 「哈哈，好高兴啊♪下次什么时候再一起出来呢？决定了的话请告诉我♥」
+		;TranslatedMark 「はあー、楽しかったーっ♪　今度はいつ行くの？　決まったら教えてちょうだいね♥」
+		ENDDATA
+		PRINTFORMW %ANAME(女苑)%结束了和以心相许的%ANAME(MASTER)%的快乐约会，直到结束都是带着笑容回去
+		;TranslatedMark %ANAME(女苑)%は心を許した%ANAME(MASTER)%との楽しいデートを終え、終始笑顔で帰っていった
+	ENDIF
+	
+;好感度5000以上
+ELSEIF CFLAG:女苑:好感度 >= 5000
+	;恋慕ルート
+	IF TALENT:女苑:恋慕
+		PRINTDATAL
+		DATAFORM 「呵呵，今天的约会很开心呢♪%ANAME(MASTER)%怎么样？如果你也开心的话我也会很高兴的…♥」
+		;TranslatedMark 「ふふーん、今日のデートは楽しかったわー♪　%ANAME(MASTER)%はどう？　そっちも楽しかったなら嬉しいんだけどなー…♥」
+		DATAFORM 「今天的约会非常开心♪下次再约我吧？绝对要约我哦♪」
+		;TranslatedMark 「今日のデート、すっごく楽しかったわ♪　また誘ってね？　絶対だからねー♪」
+		DATAFORM 「哈哈，好开心啊♪下次什么时候再约？我会空出时间等你哦♪」
+		;TranslatedMark 「はあー、楽しかったーっ♪　今度はいつ行く？　予定空けて待ってるからねー♪」
+		ENDDATA
+		PRINTFORMW %ANAME(女苑)%结束了和以心相许的%ANAME(MASTER)%的愉快约会，直到结束都是带着笑容回去
+		;TranslatedMark %ANAME(女苑)%は心許せる%ANAME(MASTER)%との楽しいデートを終え、終始笑顔で帰っていった
+	;それ以外
+	ELSE
+		PRINTDATAL
+		DATAFORM 「和我的约会怎么样？嘿嘿，我玩得很开心哦？下次再约我吧，再见♪」
+		;TranslatedMark 「私とのデートはどうだった？　えへへ、こっちは楽しかったわよ？　また誘ってよね、じゃあねーっ♪」
+		DATAFORM 「今天很开心。和%ANAME(MASTER)%还挺合得来嘛。对你刮目相看了♪」
+		;TranslatedMark 「今日は楽しかったわ。%ANAME(MASTER)%ってけっこう遊び上手なのね。ちょっと見直したわ♪」
+		DATAFORM 「啊，好开心啊♪下次再约我吧，和%ANAME(MASTER)%一起玩很开心♪」
+		;TranslatedMark 「あー楽しかった♪　また誘ってよね、%ANAME(MASTER)%と遊ぶのは楽しいからさ♪」
+		ENDDATA
+		PRINTFORMW %ANAME(女苑)%结束了和%ANAME(MASTER)%愉快的约会，高高兴兴地回去了
+		;TranslatedMark %ANAME(女苑)%は%ANAME(MASTER)%との楽しいデートを終え、上機嫌で帰っていった
+	ENDIF
+	
+;好感度1500以上
+ELSEIF CFLAG:女苑:好感度 >= 1500
+	;恋慕ルート
+	IF TALENT:女苑:恋慕
+		PRINTDATAL
+		DATAFORM 「和瘟神的约会怎么样？嘿嘿，我玩得很开心哦？下次再约我吧，再见♪」
+		;TranslatedMark 「疫病神とのデートはどうだった？　えへへ、私は楽しかったわよ？　また誘ってよね、じゃあねーっ♪」
+		DATAFORM 「今天很开心。和%ANAME(MASTER)%还挺合得来嘛。对你刮目相看了♪」
+		;TranslatedMark 「今日は楽しかったわ。%ANAME(MASTER)%ってけっこう遊び上手なのね。ちょっと見直したわ♪」
+		DATAFORM 「啊，好开心啊♪下次再约我吧，和%ANAME(MASTER)%一起玩很开心♪」
+		;TranslatedMark 「あー楽しかった♪　また誘ってよね、%ANAME(MASTER)%と遊ぶのは楽しいからさ♪」
+		ENDDATA
+		PRINTFORMW %ANAME(女苑)%结束了和%ANAME(MASTER)%愉快的约会，高高兴兴地回去了
+		;TranslatedMark %ANAME(女苑)%は%ANAME(MASTER)%との楽しいデートを終え、上機嫌で帰っていった
+	;それ以外
+	ELSE
+		PRINTDATAL
+		DATAFORM 「真是太开心了。那么，下次见」
+		;TranslatedMark 「中々楽しかったわ。それじゃあ、また今度ねー」
+		DATAFORM 「我比想象的要开心。今天一定要谢谢你」
+		;TranslatedMark 「思ってたよりかは楽しませてもらったわ。今度なんかでお礼するわね」
+		DATAFORM 「和瘟神玩得开心吗？嗯，我是…虽然很开心……。不，不！没什么！再见！」
+		;TranslatedMark 「疫病神と遊んで楽しかった？　まあ、私は…けっこう楽しかったけど……。い、いや！　何でもない！　それじゃあね！」
+		ENDDATA
+		PRINTFORMW 和%ANAME(MASTER)%约会结束后，%ANAME(女苑)%带着一半满足的样子回去了
+		;TranslatedMark %ANAME(MASTER)%とのデートを終えて、%ANAME(女苑)%は満更でもない様子で帰っていった
+	ENDIF
+	
+;好感度500以上
+ELSEIF CFLAG:女苑:好感度 >= 500
+	PRINTDATAL
+	DATAFORM 「真是太开心了。那么，下次见」
+	;TranslatedMark 「中々楽しかったわ。それじゃあ、また今度ねー」
+	DATAFORM 「我比想象的要开心。今天，谢谢你了」
+	;TranslatedMark 「思ってたよりかは楽しませてもらったわ。今度何かでお礼するわね」
+	DATAFORM 「和瘟神玩得开心吗？嗯，我是…虽然有点开心……。不，不！没什么！再见！」
+	;TranslatedMark 「疫病神と遊んで楽しかった？　まあ、私は…ちょっと楽しかったけど……。い、いや！　何でもない！　それじゃあね！」
+	ENDDATA
+	PRINTFORMW 和%ANAME(MASTER)%约会的时候，%ANAME(女苑)%好像也很享受
+	;TranslatedMark %ANAME(MASTER)%とのデートで、%ANAME(女苑)%はそれなりに楽しんでくれたようだ
+	
+;好感度0以上
+ELSEIF CFLAG:女苑:好感度 >= 0
+	PRINTDATAL
+	DATAFORM 「比想象的要开心哦。那么再见了」
+	;TranslatedMark 「思ってたよりかは楽しめたわ。それじゃあね」
+	DATAFORM 「嘛，也挺开心的。辛苦了」
+	;TranslatedMark 「まあ、それなりに楽しかったわよ。お疲れー」
+	DATAFORM 「大体上玩得很开心。每次都是这样就好了」
+	;TranslatedMark 「そこそこ楽しめたわ。毎度ありー」
+	ENDDATA
+	PRINTFORMW 和%ANAME(MASTER)%约会结束后，%ANAME(女苑)%回去了
+	;TranslatedMark %ANAME(MASTER)%とのデートを終えて、%ANAME(女苑)%は帰っていった
+	
+;好感度マイナス状態
+ELSE
+	PRINTFORML 「……终于结束了？那么，再见」
+	;TranslatedMark 「……やっと終わり？　それじゃ、さよなら」
+	PRINTFORMW 对%ANAME(MASTER)%持有不好印象的%ANAME(女苑)%慌慌张张回去了…
+	;TranslatedMark %ANAME(MASTER)%に悪印象を持っている%ANAME(女苑)%は、そそくさと帰っていった…
+ENDIF
+
+;------------------------------------
+;湖
+;-----------------------------------
+@DATE_EVENT_K149_mizuumi(湖)
+#DIM 湖
+#DIM 女苑
+女苑 = NAME_TO_CHARA("女苑")
+
+;好感度10000以上
+IF CFLAG:女苑:好感度 >= 10000
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORML 「钓鱼真好啊。我觉得悠闲地度过时间也很重要……」
+			;TranslatedMark 「釣りっていいわよね。のんびりとした時間を過ごすのも大事だって思うようになったわ……」
+			PRINTFORMW %ANAME(女苑)%坐在%ANAME(MASTER)%的旁边，惹人怜爱地扭捏着…
+			;TranslatedMark %ANAME(女苑)%は%ANAME(MASTER)%の隣に座り、いじらしくもじもじしている…
+			PRINTFORML %ANAME(MASTER)%将手绕在她的肩上，将身体靠在一起
+			;TranslatedMark %ANAME(MASTER)%はそんな彼女の肩に手を廻し、身体を寄せ合う
+			PRINTFORML 「啊…嗯♥　…%ANAME(MASTER)%啊…♥」
+			;TranslatedMark 「あ…っ♥　…%ANAME(MASTER)%ったらぁ…♥」
+			PRINTFORMW 两个人靠在一起，一边钓鱼一边愉快地聊天
+			;TranslatedMark 二人で肩をくっつけ、釣りをしながら楽しくおしゃべりをして過ごした
+		CASE 1
+			PRINTFORML 「有手划船呢。……啊？　…嗯，好啊。一起去吧♪」
+			;TranslatedMark 「手漕ぎボートがあるわね。……え？　…くすっ、もちろん。ご一緒させてもらうわね♪」
+			PRINTFORMW %ANAME(女苑)%一边红着脸颊一边拉住%ANAME(MASTER)%伸出的手，乘着小船划到了湖中心
+			;TranslatedMark %ANAME(女苑)%が頬を染めながら%ANAME(MASTER)%のエスコートを受け、ボートで湖に漕ぎ出す
+			PRINTFORML 「…嘿嘿♥这样…世界上好像只有我们两个人呢…♥」
+			;TranslatedMark 「…えへへ♥　こうしていると…世界に二人だけみたいだね…♥」
+			PRINTFORMW 两个人躺在小船上，搂在一起在湖上度过了悠闲的时光
+			;TranslatedMark ボートに二人で寝転がり、抱き合いながら湖上でゆったりとした時間を過ごした
+		CASE 2
+			PRINTFORML 「今天很热呢，适合游泳。…嗯，嗯？你就那么在意我穿泳装的样子吗？」
+			;TranslatedMark 「今日は暑いから泳ぐのにちょうどいいわね。…も、もうっ、そんなに私の水着姿が気になるの？」
+			PRINTFORMW %ANAME(女苑)%羞涩地脸颊绯红
+			;TranslatedMark %ANAME(女苑)%は恥じらうように頬を染める
+			PRINTFORML 荷叶边和白色的蕾丝边，可爱和性感并存的%ANAME(女苑)%吸引了%ANAME(MASTER)%的目光
+			;TranslatedMark 可愛いフリルとスケスケのパレオが、キュートさとセクシーさを両立して%ANAME(女苑)%を着飾り、%ANAME(MASTER)%の目を釘付けにする
+			PRINTFORML 「…虽然有点不好意思，但是…%ANAME(MASTER)%的话，可以多看一眼哦…♥」
+			;TranslatedMark 「…ちょっと恥ずかしいけど、…%ANAME(MASTER)%なら、いっぱい見てもいいよ…♥」
+			PRINTFORMW 在甜蜜的气氛中，两个人一边亲热一边尽情地玩水
+			;TranslatedMark 甘い雰囲気の中、二人でイチャイチャしながら存分に水遊びを楽しんだ
+	ENDSELECT
+	
+;好感度5000以上
+ELSEIF CFLAG:女苑:好感度 >= 5000
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORML 「靠钓鱼来决胜负。钓上最大鱼的人就赢了！输了的人有轻微的惩罚游戏怎么样？」
+			;TranslatedMark 「釣りで勝負ね。大物釣った方が勝ちよーっ！　負けた方は軽い罰ゲーム有りでどう？」
+			PRINTFORMW %ANAME(女苑)%向%ANAME(MASTER)%提议。接受这场比赛吧！
+			;TranslatedMark %ANAME(女苑)%が%ANAME(MASTER)%に提案する。その勝負、受けて立とう！
+			PRINTFORML 「…嘿嘿♪这样才有趣嘛！　……顺便说一下，惩罚游戏的话，亲吻赢了的人的脸颊就可以了♥」
+			;TranslatedMark 「…えへへー♪　そうこなくっちゃね！　……因みに罰ゲームは、勝った方のほっぺにキスってことでよろしくっ♥」
+			PRINTFORMW 这样的话，不管谁赢了都只会接吻…不，说那个就太不解风情了。%ANAME(MASTER)%享受了钓鱼的乐趣
+			;TranslatedMark それだとどっちが勝ってもキスするだけのような…いや、それは言うまい。%ANAME(MASTER)%達は釣り勝負を楽しんだ
+		CASE 1
+			PRINTFORML 「有手划船呢。……一起…坐吗？」
+			;TranslatedMark 「手漕ぎボートがあるわね。……い、一緒に、…乗る？」
+			PRINTFORMW %ANAME(女苑)%红着脸邀请%ANAME(MASTER)%。%ANAME(MASTER)%很快就答应了
+			;TranslatedMark %ANAME(女苑)%が少し顔を赤くしながら%ANAME(MASTER)%を誘う。そのいじらしい様に、%ANAME(MASTER)%は快く承諾した
+			PRINTFORML 「…嘿嘿♪这样才对嘛！」
+			;TranslatedMark 「…えへへー♪　そうこなくっちゃね！」
+			PRINTFORMW 两个人一起乘船，在湖上度过了悠闲的时光
+			;TranslatedMark 二人でボートに乗り、湖上でゆったりとした時間を過ごした
+		CASE 2
+			PRINTFORML 「今天很热，正好可以…呵呵，什么？你就那么喜欢我穿泳衣的样子吗？」
+			;TranslatedMark 「今日は暑いからちょうどいいわねー。…ふふっ、なぁに？　私の水着姿が気になるのー？」
+			PRINTFORMW %ANAME(女苑)%挑衅似的笑了。胸前的荷叶边和飘逸的裙摆，突出了可爱感，点缀着%ANAME(女苑)%的身体
+			;TranslatedMark %ANAME(女苑)%は挑発するように笑う。胸元のフリルとひらひらのパレオが、可愛らしさを強調して%ANAME(女苑)%を着飾っている
+			PRINTFORML 「呵呵♪喜欢看多久就看多久吧，说笑的♪」
+			;TranslatedMark 「ふふーんっ♪　好きなだけ見惚れてくれていいわよー、なんてね♪」
+			PRINTFORMW 在良好的氛围中，尽情地在湖里玩水
+			;TranslatedMark いい雰囲気の中、湖で存分に水遊びを楽しんだ
+	ENDSELECT
+	
+;好感度1500以上
+ELSEIF CFLAG:女苑:好感度 >= 1500
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORML 「靠钓鱼来决胜负。钓上大鱼的人就赢！」
+			;TranslatedMark 「釣りで勝負ね。大物釣った方が勝ちよーっ！」
+			PRINTFORMW %ANAME(MASTER)%享受了钓鱼的乐趣
+			;TranslatedMark %ANAME(MASTER)%達は釣り勝負を楽しんだ
+		CASE 1
+			PRINTFORML 「有手划船呢。…啊？想坐一下吗？呃，虽然不是特别想坐…如果你一定要的话…咕呶呶」
+			;TranslatedMark 「手漕ぎボートがあるわね。…え？　乗ってみたいかって？　べ、別に乗りたいわけじゃないけど…どうしてもと言うなら…ｺﾞﾆｮｺﾞﾆｮ」
+			PRINTFORMW 两个人坐着小船在湖上悠闲地聊天
+			;TranslatedMark 二人でボートに乗り、湖上でのんびり語らった
+		CASE 2
+			PRINTFORML 「今天很热，正好。……等、等一下，不要盯着瘟神穿泳衣的样子看呀，真是的…♪♪」
+			;TranslatedMark 「今日は暑いからちょうどいいわねー。……ちょ、ちょっと、疫病神の水着姿なんてじろじろ見ないでよ、もう…♪」
+			PRINTFORMW 两个人在湖里扑腾扑腾地玩水
+			;TranslatedMark 湖で二人、ぱちゃぱちゃと水遊びを楽しんだ
+	ENDSELECT
+	
+;好感度500以上
+ELSEIF CFLAG:女苑:好感度 >= 500
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORML 「虽然从旁边看人钓鱼的话，不知道有什么有趣的…做起来意外的深奥呢」
+			;TranslatedMark 「釣りって傍から見てたら何が楽しいのか分からなかったけど…、やってみると案外奥深いわね」
+			PRINTFORMW %ANAME(女苑)%模仿%ANAME(MASTER)%享受钓鱼的乐趣
+			;TranslatedMark %ANAME(MASTER)%に倣って%ANAME(女苑)%は釣りを楽しんだ
+		CASE 1
+			PRINTFORML 「这里也有妖精呢。雾之湖附近很少啊」
+			;TranslatedMark 「ここにも妖精がいるのね。霧の湖あたりは少ないんだけどねー」
+			PRINTFORMW %ANAME(女苑)%悠闲地看着天真无邪地玩耍着的妖精们
+			;TranslatedMark 無邪気に遊んでいる妖精たちを、%ANAME(女苑)%はのんびりと眺めている
+		CASE 2
+			PRINTFORML 「因为有阳光的反射，所以很热啊。……带泳衣来就好了吗」
+			;TranslatedMark 「日光の反射があるから結構暑いわね。……水着でも持って来れば良かったかしら」
+			PRINTFORMW 两个人在水边噼里啪啦地玩水
+			;TranslatedMark 水辺で二人、ぱちゃぱちゃと水遊びを楽しんだ
+	ENDSELECT
+	
+;好感度0以上
+ELSEIF CFLAG:女苑:好感度 >= 0
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORML 「…啊，真厉害啊」
+			;TranslatedMark 「…へえ、けっこう上手いものね」
+			PRINTFORMW 看到%ANAME(MASTER)%巧妙地钓上来鱼的样子，%ANAME(女苑)%发出赞叹的声音
+			;TranslatedMark %ANAME(MASTER)%が手際よく魚を釣り上げる様を見て、%ANAME(女苑)%は感心したような声を上げた
+			CFLAG:女苑:好感度 += 10
+			CALL COLOR_PRINTL(@"%ANAME(女苑)%的好感度上升了10", 0x00FFFF)
+		CASE 1
+			PRINTFORML 「看来在这里也没有商店一类的东西。……没办法，去钓鱼吧」
+			;TranslatedMark 「ここじゃショッピングも出来そうにないわね。……仕方ないから釣りでもするわ」
+			PRINTFORMW 在没有任何财产可以卷走的地方，身为瘟神的她也无所事事了起来
+			;TranslatedMark 巻き上げる富が何も無い場所で、疫病神の彼女は手持ち無沙汰にしている
+		CASE 2
+			PRINTFORML 「……我先告诉你，我不会游泳。」
+			;TranslatedMark 「……言っとくけど泳がないからね」
+			PRINTFORMW %ANAME(女苑)%接受了%ANAME(MASTER)%的视线，叮嘱地说
+			;TranslatedMark %ANAME(女苑)%は%ANAME(MASTER)%の視線を受けて、念を押すように告げた
+	ENDSELECT
+	
+;好感度マイナス状態
+ELSE
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORML 「……啊」
+			;TranslatedMark 「……へえ」
+			PRINTFORMW 看到%ANAME(MASTER)%巧妙地钓上来鱼的样子，%ANAME(女苑)%发出赞叹的声音
+			;TranslatedMark %ANAME(MASTER)%が手際よく魚を釣り上げる様を見て、%ANAME(女苑)%は感心したような声を上げた
+			CFLAG:女苑:好感度 += 10
+			CALL COLOR_PRINTL(@"%ANAME(女苑)%的好感度上升了10", 0x00FFFF)
+		CASE 1
+			PRINTFORML 「……什么都没有，这里……」
+			;TranslatedMark 「……何にも無いわ、ここ……」
+			PRINTFORMW 在没有任何财产可以卷走的地方，身为瘟神的她也无所事事了起来
+			;TranslatedMark 巻き上げる富が何も無い場所で、疫病神の彼女は手持ち無沙汰にしている
+		CASE 2
+			PRINTFORML 「…………」
+			PRINTFORMW 对%ANAME(MASTER)%的印象不好的%ANAME(女苑)%两个人在一起，空气中流溢着尴尬
+			;TranslatedMark %ANAME(MASTER)%への印象が良くない%ANAME(女苑)%と二人、気まずい空気が流れている…
+	ENDSELECT
+ENDIF
+
+;------------------------------------
+;山
+;-----------------------------------
+@DATE_EVENT_K149_yama(山)
+#DIM 山
+#DIM 女苑
+女苑 = NAME_TO_CHARA("女苑")
+
+;好感度10000以上
+IF CFLAG:女苑:好感度 >= 10000
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORML 「…在山上吃的饭，感觉比平时好吃。为什么呢？」
+			;TranslatedMark 「…山の上で食べるご飯って、普段より美味しく感じるわよね。何でだろうね？」
+			PRINTFORML 「……一定是和%ANAME(MASTER)%在一起才会这样…对吧…♥」
+			;TranslatedMark 「……きっと%ANAME(MASTER)%と一緒だから…よね…♥」
+			PRINTFORMW 两个人在山顶紧紧地靠在一起聊天
+			;TranslatedMark 山頂で二人、ピタリと身を寄せ合っておしゃべりを楽しんだ
+		CASE 1
+			PRINTFORML 「啊，发现松茸♪呵呵，看呀%ANAME(MASTER)%，发现了很多栗子♪」
+			;TranslatedMark 「あ、マツタケ発見♪　うふふ、見てみて%ANAME(MASTER)%っ、栗もいっぱい見つけたわ♪」
+			PRINTFORML 「回去的话一起做饭吧。好期待啊♥」
+			;TranslatedMark 「帰ったら一緒にご飯作ろうね。楽しみだわ♥」
+			PRINTFORMW 两个人高高兴兴地寻找着秋天的味道
+			;TranslatedMark 二人で楽しく秋の味覚を見つけて回った
+		CASE 2
+			PRINTFORML 「今天是郊游的好天气呢。…啊，那个…便当，也做了%ANAME(MASTER)%的份。如果可以的话…一起吃吧♥」
+			;TranslatedMark 「今日はハイキング日和ね。…あ、あの…お弁当、%ANAME(MASTER)%の分も作ってきたの。良かったら…一緒に食べよ♥」
+			PRINTFORMW 两个人一边亲热一边享受郊游的乐趣
+			;TranslatedMark 二人でイチャラブしながらハイキングを楽しんだ
+	ENDSELECT
+	
+;好感度5000以上
+ELSEIF CFLAG:女苑:好感度 >= 5000
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORML 「…在山顶上吃的饭，感觉比平时好吃。为什么呢」
+			;TranslatedMark 「…山のてっぺんで食べるご飯って、普段より美味しく感じるわよね。何でだろうね」
+			PRINTFORML 「虽然也有地方不同的缘故……但主要是因为和%ANAME(MASTER)%在一起…♥」
+			;TranslatedMark 「場所が特別ってのもあるだろうけど……%ANAME(MASTER)%と一緒だからだったりしてね…♥」
+			PRINTFORMW 在山顶上两个人并肩聊天
+			;TranslatedMark 山頂で二人、肩をくっつけておしゃべりを楽しんだ
+		CASE 1
+			PRINTFORML 「啊，看见松茸了！呵呵，看呀%ANAME(MASTER)%，又找到了♪」
+			;TranslatedMark 「あ、マツタケ見っけ！　ふふふ、見てみて%ANAME(MASTER)%っ、また見つけたわ♪」
+			PRINTFORMW 两个人高高兴兴地寻找着秋天的味道
+			;TranslatedMark 二人で楽しく秋の味覚を見つけて回った
+		CASE 2
+			PRINTFORML 「今天是郊游的好天气。啊？便当也给我做了吗？谢谢你♪」
+			;TranslatedMark 「今日はハイキング日和ねー。え？　お弁当、私の分も作ってくれたの？　ありがとーっ♪」
+			PRINTFORMW 两个人一边调情一边享受郊游的乐趣
+			;TranslatedMark 二人はイチャイチャしながらハイキングを楽しんだ
+	ENDSELECT
+	
+;好感度1500以上
+ELSEIF CFLAG:女苑:好感度 >= 1500
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORML 「到了红叶季节，登山也会变得开心。那个秋神也在努力呢」
+			;TranslatedMark 「紅葉の季節が来ると山歩きも楽しくなるわね。あの秋神も頑張ってるのねー」
+			PRINTFORMW %ANAME(MASTER)%们享受了秋天的郊游
+			;TranslatedMark %ANAME(MASTER)%達は秋のハイキングを楽しんだ
+		CASE 1
+			PRINTFORML 「啊，看见松茸了！呵呵，山里也埋着财富呢♪」
+			;TranslatedMark 「あ、マツタケ見っけ！　ふふふ、山にも富が埋もれてるわーっ♪」
+			PRINTFORMW 两个人寻着秋天的味道转了转
+			;TranslatedMark 二人で秋の味覚を見つけて回った
+		CASE 2
+			PRINTFORML 「…从山顶看到的景色有什么好呢。和在空中飞翔时看到的景色有点不一样吧…」
+			;TranslatedMark 「…山のてっぺんから見る景色って何かいいわよね。空を飛んでる時に見る景色ともちょっと違うっていうかさ…」
+			PRINTFORMW 在山顶上两个人愉快地交谈着
+			;TranslatedMark 山頂で二人、楽しく語りあった
+	ENDSELECT
+	
+;好感度500以上
+ELSEIF CFLAG:女苑:好感度 >= 500
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORMW 「山上潜藏着野蛮的人类和妖怪，也不能轻视啊」
+			;TranslatedMark 「山って野蛮な人間や妖怪が潜んでたりするから注意が要るのよねー」
+		CASE 1
+			PRINTFORML 「看来在这里也不能购物啊。……没办法，咱们去收集野菜吧」
+			;TranslatedMark 「ここじゃショッピングも出来そうにないわね。……仕方ないから山菜でも集めようかしら」
+			PRINTFORMW 在没有任何财产可以卷走的地方，身为瘟神的她也无所事事了起来
+			;TranslatedMark 巻き上げる富が何も無い場所で、疫病神の彼女は手持ち無沙汰にしている
+		CASE 2
+			PRINTFORML 「因为在山上没办法花钱，所以和瘟神在一起也没关系…。做得很好呢」
+			;TranslatedMark 「山ならお金を使いようが無いから疫病神と居ても大丈夫、と…。中々やるわね」
+			PRINTFORMW 总觉得%ANAME(女苑)%很佩服
+			;TranslatedMark %ANAME(女苑)%は何やらしきりに感心している
+	ENDSELECT
+	
+;好感度0以上
+ELSEIF CFLAG:女苑:好感度 >= 0
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORMW 「登山？这种时候连郊游都没时间」
+			;TranslatedMark 「山歩き？　こんな時勢にハイキングとか余裕ねー」
+		CASE 1
+			PRINTFORML 「……特意去登山？」
+			;TranslatedMark 「……わざわざ山歩き？」
+			PRINTFORMW %ANAME(女苑)%以一种有什么好开心的，这样的表情看着%ANAME(MASTER)%
+			;TranslatedMark %ANAME(女苑)%は何が楽しいのか、といった風情で%ANAME(MASTER)%を見ている
+		CASE 2
+			PRINTFORML 「…因为在山上无法花钱，所以即使和瘟神在一起也没关系…。你还挺机灵的」
+			;TranslatedMark 「…山なら金を使いようが無いから疫病神と居ても大丈夫、と…。中々できるわね」
+			PRINTFORMW %ANAME(女苑)%总觉得很佩服
+			;TranslatedMark %ANAME(女苑)%は何やら感心している
+	ENDSELECT
+	
+;好感度マイナス状態
+ELSE
+	SELECTCASE RAND:2
+		CASE 0
+			PRINTFORML 「……什么都没有，这里……」
+			;TranslatedMark 「……何にも無いわ、ここ……」
+			PRINTFORMW 在没有任何财产可以卷走的地方，身为瘟神的她也无所事事了起来
+			;TranslatedMark 巻き上げる富が何も無い場所で、疫病神の彼女は手持ち無沙汰にしている
+		CASE 1
+			PRINTFORML 「…………」
+			PRINTFORMW 对%ANAME(MASTER)%的印象不好的%ANAME(女苑)%两个人在一起，空气中流溢着尴尬
+			;TranslatedMark %ANAME(MASTER)%への印象が良くない%ANAME(女苑)%と二人、気まずい空気が流れている…
+	ENDSELECT
+ENDIF
+
+;------------------------------------
+;森
+;-----------------------------------
+@DATE_EVENT_K149_mori(森)
+#DIM 森
+#DIM 女苑
+女苑 = NAME_TO_CHARA("女苑")
+
+
+;好感度10000以上
+IF CFLAG:女苑:好感度 >= 10000
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORML 「…像这样在外面吃的饭，感觉比平时好吃。为什么呢？」
+			;TranslatedMark 「…こういう風に外で食べるご飯って、普段より美味しく感じるわよね。何でだろうね？」
+			PRINTFORML 「……一定是和%ANAME(MASTER)%在一起才会这样…对吧…♥」
+			;TranslatedMark 「……きっと%ANAME(MASTER)%と一緒だから…よね…♥」
+			PRINTFORMW 两人坐在巨大的树桩上，紧紧地靠在一起享受聊天的乐趣
+			;TranslatedMark 二人は大ぶりな切り株に座り、ピタリと身を寄せ合っておしゃべりを楽しんだ
+		CASE 1
+			PRINTFORML 「哇！好大的鬼罂粟啊！　…第一次看到这么大的，好厉害啊」
+			;TranslatedMark 「わっ！　大っきなオニフスベ！　…こんな大きなの初めて見たわ、凄いわねー」
+			PRINTFORML 「……拿回去看看？」
+			;TranslatedMark 「……持って帰ってみる？」
+			PRINTFORMW 好像要爆发了，先停下来吧……
+			;TranslatedMark 何か爆発しそうだから止めておこう……
+		CASE 2
+			PRINTFORML 「今天是散步的好天气呢。…啊，那个…便当，也做了%ANAME(MASTER)%的份。如果可以的话…一起吃吧♥」
+			;TranslatedMark 「今日はお散歩日和ね。…あ、あの…お弁当、%ANAME(MASTER)%の分も作ってきたの。良かったら…一緒に食べよ♥」
+			PRINTFORMW 两个人一边亲热地相爱一边享受森林浴
+			;TranslatedMark 二人でイチャイチャラブラブしながら森林浴を楽しんだ
+	ENDSELECT
+
+;好感度5000以上
+ELSEIF CFLAG:女苑:好感度 >= 5000
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORML 「阳光透过树叶照耀着道路。…总觉得很浪漫呢♪」
+			;TranslatedMark 「木漏れ日が連なって道を照らしてるわ。…なんだかロマンチックね♪」
+			PRINTFORMW 两个人一边调情一边享受森林浴
+			;TranslatedMark 二人でイチャイチャしながら森林浴を楽しんだ
+		CASE 1
+			PRINTFORML 「啊，好怀念这个蘑菇啊。以前姐姐吃了之后遇到了很惨的事情。……看着就很不妙了吧，为什么要吃呢…」
+			;TranslatedMark 「あ、このキノコ懐かしいわ。昔姉さんが食べて酷い目に会ってたのよ。…こんな毒々しいの、何で食べたのかしら…」
+			PRINTFORMW 两个人一边愉快地聊天一边在森林里散步度过了
+			;TranslatedMark 二人で楽しくお喋りしながら森の中を散策して過ごした
+		CASE 2
+			PRINTFORML 「外面虽然很热，但是在森林里很凉快呢。凉飕飕的很舒服。再呆一会儿吧♪」
+			;TranslatedMark 「外は暑いけど、森の中だと涼しいわね。ひんやりして気持ち良いわー。もうちょっとここに居ましょうか♪」
+			PRINTFORMW 两个人在森林里牵着手开心地散步
+			;TranslatedMark 森林で二人、手を繋ぎながら楽しく散歩した
+	ENDSELECT
+
+;好感度1500以上
+ELSEIF CFLAG:女苑:好感度 >= 1500
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORML 「啊，看一下。透过树叶的阳光像道路一样连在一起，好漂亮啊」
+			;TranslatedMark 「あっ、見て見てっ。木漏れ日が道みたいに連なってるわよ、綺麗ねー」
+			PRINTFORMW %ANAME(MASTER)%们享受了森林浴
+			;TranslatedMark %ANAME(MASTER)%達は森林浴を楽しんだ
+		CASE 1
+			PRINTFORML 「啊，看到奇怪的蘑菇了。嗯，一看就觉得是剧毒」
+			;TranslatedMark 「あ、変なキノコ見っけ。うーん、見るからに猛毒って感じね」
+			PRINTFORMW 两个人在森林里散步度过
+			;TranslatedMark 二人で森の中を散策して過ごした
+		CASE 2
+			PRINTFORML 「外面虽然很热，但是在森林里很凉快呢。凉飕飕的很舒服啊」
+			;TranslatedMark 「外は暑いけど、森の中だと涼しいわね。ひんやりして気持ち良いわー」
+			PRINTFORMW 两个人在森林里开心地散步
+			;TranslatedMark 森林で二人、楽しく散歩した
+	ENDSELECT
+
+;好感度500以上
+ELSEIF CFLAG:女苑:好感度 >= 500
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORMW 「森林里潜藏着野蛮的妖怪和妖兽，不注意不行哦？」
+			;TranslatedMark 「森の中って野蛮な妖怪や妖獣が潜んでたりするから注意しないとダメよ？」
+		CASE 1
+			PRINTFORML 「看来在这里也不能购物啊。……没办法，去找找蘑菇吧」
+			;TranslatedMark 「ここじゃショッピングも出来そうにないわね。……仕方ないからキノコでも探そうかしら」
+			PRINTFORMW 在没有任何财产可以卷走的地方，身为瘟神的她也无所事事了起来
+			;TranslatedMark 巻き上げる富が何も無い場所で、疫病神の彼女は手持ち無沙汰にしている
+		CASE 2
+			PRINTFORML 「…因为在森林里无法花钱，所以和瘟神在一起也没关系…。你在想什么呢」
+			;TranslatedMark 「…森なら金を使いようが無いから疫病神と居ても大丈夫、と…。中々考えてるわね」
+			PRINTFORMW 总觉得%ANAME(女苑)%很佩服
+			;TranslatedMark %ANAME(女苑)%は何やらしきりに感心している
+	ENDSELECT
+	
+;好感度0以上
+ELSEIF CFLAG:女苑:好感度 >= 0
+	SELECTCASE RAND:2
+		CASE 0
+			PRINTFORML 「…因为在森林里无法花钱，所以和瘟神在一起也没关系…。你在想什么呢」
+			;TranslatedMark 「…森なら金を使いようが無いから疫病神と居ても大丈夫、と…。中々考えてるわね」
+			PRINTFORMW 总觉得%ANAME(女苑)%很佩服
+			;TranslatedMark %ANAME(女苑)%は何やらしきりに感心している
+		CASE 1
+			PRINTFORML 「……暂且先说一下，什么奇怪的想法是不行的哦？」
+			;TranslatedMark 「……一応は言っておくけど、変な気は起こさないでよ？」
+			PRINTFORMW 在郁郁葱葱的森林前，%ANAME(女苑)%在%ANAME(MASTER)%的保护下
+			;TranslatedMark 鬱蒼とした森を前に、%ANAME(女苑)%は%ANAME(MASTER)%に念を押している
+	ENDSELECT
+	
+;好感度マイナス状態
+ELSE
+	SELECTCASE RAND:2
+		CASE 0
+			PRINTFORML 「……什么都没有，这里……」
+			;TranslatedMark 「……何にも無いわ、ここ……」
+			PRINTFORMW 在没有任何财产可以卷走的地方，身为瘟神的她也无所事事了起来
+			;TranslatedMark 巻き上げる富が何も無い場所で、疫病神の彼女は手持ち無沙汰にしている
+		CASE 1
+			PRINTFORML 「…………」
+			PRINTFORMW 对%ANAME(MASTER)%的印象不好的%ANAME(女苑)%两个人在一起，空气中流溢着尴尬
+			;TranslatedMark %ANAME(MASTER)%への印象が良くない%ANAME(女苑)%と二人、気まずい空気が流れている…
+	ENDSELECT
+ENDIF
+
+;------------------------------------
+;人里
+;-----------------------------------
+@DATE_EVENT_K149_hitozato(人里)
+#DIM 人里
+#DIM 女苑
+女苑 = NAME_TO_CHARA("女苑")
+
+;好感度10000以上
+IF CFLAG:女苑:好感度 >= 10000
+	SELECTCASE IFRAND("0TO2", 1, "3", MONEY >= 5000)
+		CASE 0
+			PRINTFORML 「啊，%ANAME(MASTER)%。在这里休息吗？我知道了」
+			;TranslatedMark 「あ、%ANAME(MASTER)%。ここで休憩するの？　分かったわ」
+			PRINTFORMW 约会的时候，两个人决定在茶馆休息
+			;TranslatedMark デートの最中、二人は茶屋にて休憩することにした
+			PRINTFORML 「…啊，这里…。在二楼也可以休息…♥　…难道你知道吗？」
+			;TranslatedMark 「…あ、ここ…。二階でも『休憩』できるんだ…♥　…%ANAME(MASTER)%、もしかして知ってた？」
+			PRINTFORMW %ANAME(MASTER)%等人拉着似乎在期待着什么的%ANAME(女苑)%的手，上了二楼
+			;TranslatedMark 何かを期待するような%ANAME(女苑)%の手を引き、%ANAME(MASTER)%たちは二階へと上がっていった
+			PRINTFORML 「嗯♥已经是%ANAME(MASTER)%的了♥♥」
+			;TranslatedMark 「あんっ♥　もう、%ANAME(MASTER)%ったらぁ♥♥」
+			PRINTFORMW 然后在一段时间里，没有被任何人打扰，好好地亲热了一下
+			;TranslatedMark そしてしばらくの間、誰にも邪魔されずたっぷりとイチャついた
+			CALL FUCK_MAKELOVE(女苑, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", ANAME(MASTER))
+			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(女苑)%の膣", "和姦")
+			CFLAG:女苑:好感度 += 1000
+			CALL COLOR_PRINTL(@"%ANAME(女苑)%的好感度上升了1000", 0x00FFFF)
+		CASE 1
+			PRINTFORML 「啊…%ANAME(MASTER)%，这里是……♥」
+			;TranslatedMark 「あ…、%ANAME(MASTER)%、ここって……♥」
+			PRINTFORMW %ANAME(女苑)%所说的地方，是指恋爱中的男女在"休息"时使用的，也就是所谓的"情人旅馆"
+			;TranslatedMark %ANAME(女苑)%が言う場所は、恋仲の男女が『休憩』に使う、いわゆる連れ込み宿だった
+			PRINTFORML %ANAME(MASTER)%慌忙摇头。只是碰巧在约会的路线上，并不是有这样的用心…
+			;TranslatedMark %ANAME(MASTER)%は慌ててかぶりを振る。たまたまデートコース上にあっただけでそういう下心が有った訳ではない、と…
+			PRINTFORMW 「我、我也不是不可以……要吗？」
+			;TranslatedMark 「わ、私は別に……いいよ？」
+			PRINTFORML 对于%ANAME(女苑)%意想不到的反应，%ANAME(MASTER)%也屏住了呼吸
+			;TranslatedMark %ANAME(女苑)%の思わぬ反応に、%ANAME(MASTER)%も息を呑む
+			PRINTFORMW 那个害羞的同时也期待着什么的%ANAME(女苑)%的眼神，刺激了%ANAME(MASTER)%的情欲
+			;TranslatedMark その恥じらいつつも何かを期待する%ANAME(女苑)%の上目遣いは、%ANAME(MASTER)%の情欲を刺激した
+			PRINTFORML 无法忍耐的%ANAME(MASTER)%牵着%ANAME(女苑)%的手进入了旅馆
+			;TranslatedMark 我慢できなくなった%ANAME(MASTER)%は%ANAME(女苑)%の手を引いて連れ込み宿に入った
+			PRINTFORMW 「啊♥」
+			;TranslatedMark 「あっ♥」
+			PRINTFORML ………
+			PRINTFORMW 然后两个人相爱了一段时间
+			;TranslatedMark そしてしばらくの間、二人でたっぷり愛し合った
+			CALL FUCK_MAKELOVE(女苑, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", ANAME(MASTER))
+			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(女苑)%の膣", "和姦")
+			CFLAG:女苑:好感度 += 1000
+			CALL COLOR_PRINTL(@"%ANAME(女苑)%的好感度上升了1000", 0x00FFFF)
+		CASE 2
+			PRINTFORML 「呼，来回走，肚子饿了。一起去吃点什么吧？」
+			;TranslatedMark 「ふう、歩き回ってお腹空いたね。一緒に何か食べて行かない？」
+			PRINTFORMW 接受提议，顺便去了热闹气氛的餐厅
+			;TranslatedMark 提案を受け、賑やかな雰囲気の食事処に立ち寄った
+			PRINTFORML 「…不觉得吵吗？我倒并不讨厌这样的……」
+			;TranslatedMark 「…うるさくない？　私はこういうの、嫌いじゃないんだけど……」
+			PRINTFORMW %ANAME(MASTER)%回答说，比起太过安静的情况，这样热闹一点更轻松
+			;TranslatedMark 自分も、静か過ぎるよりこういう賑やかな方が気が楽だ　と%ANAME(MASTER)%は答えた
+			PRINTFORML 「呵呵，谢谢♥我也很憧憬在这样热闹的环境中悠闲地吃饭」
+			;TranslatedMark 「ふふっ、ありがとう♥　私も、こういう賑やかな中でゆっくりご飯を食べるの、憧れてたの」
+			PRINTFORMW 「因为我周围没有什么可以一起做这种事的人……」
+			;TranslatedMark 「私たちの周りには、そういうことが出来る関係ってあんまり無かったから……」
+			PRINTFORML 「……啊，不是说姐姐不行，就是给人一种以恩人自居的感觉，所以不算数啦。」
+			;TranslatedMark 「……あ、姉さんは賑やかと言うか、恩着せがましい感じだからノーカウントでね」
+			PRINTFORML 带着寂寞表情微笑着的%ANAME(女苑)%。%ANAME(MASTER)%回应了那样的她
+			;TranslatedMark どこか寂しそうな表情で微笑む%ANAME(女苑)%。そんな彼女に、%ANAME(MASTER)%は応える
+			PRINTFORML 只要你说，我随时都可以和你一起。他一本正经地回了一句“我不会再让你感到寂寞了”
+			;TranslatedMark 言ってくれればいつでも付き合う。寂しい思いはもうさせないよ　と、キザな言葉を真顔で返した
+			PRINTFORMW 「嗯♥　…啊，真是的，果然还是觉得不好意思。……但是，谢谢你♥」
+			;TranslatedMark 「っ♥　…も、もうっ、流石にそれは恥ずかしいって。……でも、ありがとう♥」
+			PRINTFORMW 和恢复笑容的%ANAME(女苑)%一起，在热闹的气氛中享受美食
+			;TranslatedMark 笑顔を取り戻した%ANAME(女苑)%と一緒に、賑やかな雰囲気の中で食事を楽しんだ
+		CASE 3
+			PRINTFORML 「………」
+			PRINTFORMW %ANAME(女苑)%一直盯着店里摆放的漂亮饰品…
+			;TranslatedMark %ANAME(女苑)%は店に並べられた綺麗なアクセサリーをじっと見ていた…
+			PRINTFORML 我给你买吧？%ANAME(MASTER)%向%ANAME(女苑)%搭话
+			;TranslatedMark 買ってあげようか？　と%ANAME(MASTER)%は%ANAME(女苑)%に声をかける
+			PRINTFORMW 「诶，诶！？那样的…可以吗？」
+			;TranslatedMark 「えっ、え！？　そんな、…いいの？」
+			PRINTFORML …确实，虽然是很贵的东西，但一定很适合%ANAME(女苑)%吧
+			;TranslatedMark …確かに、けっこう値の張る物ではあったが、きっと%ANAME(女苑)%に似合うだろう
+			PRINTFORMW %ANAME(MASTER)%送她饰品作为礼物
+			;TranslatedMark %ANAME(MASTER)%は彼女にアクセサリーをプレゼントした
+			PRINTFORML 「啊…谢谢……♥这是%ANAME(MASTER)%送我的，我会好好珍惜的…♥」
+			;TranslatedMark 「あ…ありがとう……♥　これ、%ANAME(MASTER)%だと思って大切にするね…♥」
+			PRINTFORMW %ANAME(MASTER)%心情也很好，因为能看到这样幸福的笑容，这已经算是便宜的了
+			;TranslatedMark こんな幸せそうな笑顔を見れるなら安い買い物だったな、と%ANAME(MASTER)%もいい気分だった
+			CFLAG:女苑:好感度 += 2000
+			CALL COLOR_PRINTL(@"%ANAME(女苑)%的好感度上升了2000", 0x00FFFF)
+			CFLAG:女苑:301 = 1
+			CALL COLOR_PRINTW("支付了5000元的首饰", カラー_警告)
+			MONEY -= 5000
+	ENDSELECT
+	
+;好感度5000以上
+ELSEIF CFLAG:女苑:好感度 >= 5000
+	SELECTCASE IFRAND("0TO2", 1, "3", MONEY >= 2000)
+		CASE 0
+			PRINTFORML 「啊，%ANAME(MASTER)%。在那里休息一下吧？」
+			;TranslatedMark 「あ、%ANAME(MASTER)%。あそこで休憩していきましょ？」
+			PRINTFORMW 约会的时候，两个人决定在茶馆休息
+			;TranslatedMark デートの最中、二人は茶屋にて休憩することにした
+			PRINTFORML 「呼，有点累了呢。在这里慢慢走吧。%ANAME(MASTER)%要靠在我身上吗？」
+			;TranslatedMark 「ふう、ちょっと疲れたわね。ここで少しゆっくりしていきましょう。%ANAME(MASTER)%は何頼むの？」
+			PRINTFORMW %ANAME(女苑)%在茶馆里，和%ANAME(MASTER)%愉快地聊天
+			;TranslatedMark %ANAME(女苑)%は茶屋にて、%ANAME(MASTER)%と楽しそうにおしゃべりしている
+		CASE 1
+			PRINTFORML 「…你和身为瘟神的我在一起也会很开心的吧。…………我非常感谢你」
+			;TranslatedMark 「…アンタって疫病神の私と居ても楽しそうにしてくれるわよね。…………けっこう感謝してるわよ」
+			PRINTFORMW %ANAME(女苑)%最后的小碎碎念传到了%ANAME(MASTER)%的耳朵里
+			;TranslatedMark %ANAME(女苑)%が言った最後の小さな呟きが、%ANAME(MASTER)%の耳に届いた
+			PRINTFORML 「……是啊，我啊，说谢谢了！真是的，再也不让你听这么羞耻的话了，看，下次也一起吧」
+			;TranslatedMark 「……そうよ、感謝してるって言ってんの！　もう、恥ずかしいこと何度も言わせないのっ、ほら、次行こうっ」
+			PRINTFORMW %ANAME(女苑)%虽然脸红了，但脸上还是有点高兴的样子
+			;TranslatedMark %ANAME(女苑)%は顔を赤くしつつも、少し嬉しそうに頬を緩ませていた
+		CASE 2
+			PRINTFORML 「呼，来回走动肚子饿了呢。吃点什么去吧」
+			;TranslatedMark 「ふう、歩き回ってお腹空いたわね。何か食べて行きましょ」
+			PRINTFORMW 约会的时候，顺便去了一下有着小时尚氛围的餐厅
+			;TranslatedMark デートの最中、小洒落た雰囲気の食事処に立ち寄った
+			PRINTFORML 「今天心情很好，我请客吧。什么都可以点自己喜欢的东西哦♪」
+			;TranslatedMark 「今日は気分が良いから私が奢ってあげるわ。何でも好きな物頼んで良いわよー♪」
+			PRINTFORMW 「…嗯？怎么了？讨厌被瘟神请吗？」
+			;TranslatedMark 「…ん？　どうしたの？　疫病神から奢られるのは嫌？」
+			PRINTFORML 虽然不是这样，但是%ANAME(MASTER)%告诉%ANAME(女苑)%两个人一起吃，得让自己请客…
+			;TranslatedMark そういうわけでは無いが、二人で一緒に食べる分だし自分が出すよ　と、%ANAME(MASTER)%は%ANAME(女苑)%に告げるが…
+			PRINTFORMW 「没关系的。我认为%ANAME(MASTER)%已经对我足够好了，所以我这样做才算对等」
+			;TranslatedMark 「いいのっ。私は%ANAME(MASTER)%に充分いい思いさせてもらってるから、これで対等なのっ」
+			PRINTFORML 「瞧，别在意细节！这里就老老实实地享受吧♪」
+			;TranslatedMark 「ほらほら、細かいことは気にしない！　ここは素直に楽しんじゃいなさいって♪」
+			PRINTFORMW 看到%ANAME(女苑)%似乎很开心的笑容让我死心了，乖乖地答应了。
+			;TranslatedMark %ANAME(女苑)%のどこか嬉しそうな笑顔に観念して、大人しく奢られることにした
+		CASE 3
+			PRINTFORML 「…那么……」
+			;TranslatedMark 「…じー……」
+			PRINTFORMW %ANAME(女苑)%热心地看着店里摆放的装饰品
+			;TranslatedMark %ANAME(女苑)%は店に並べられたアクセサリーを熱心に見ている
+			PRINTFORML 「…%ANAME(MASTER)%～♥」
+			;TranslatedMark 「…ねえ%ANAME(MASTER)%～♥」
+			PRINTFORMW 然后像是在向%ANAME(MASTER)%祈求一样，用温柔的声音打招呼
+			;TranslatedMark そして%ANAME(MASTER)%に強請るような猫撫で声をかける
+			PRINTFORML ……嘛，因为不是买不起的东西，所以决定干脆买了
+			;TranslatedMark ……まあ、買えない程では無いくらいの物だったので、思い切って買ってあげることにした
+			PRINTFORML 「太好了♪谢谢你了，%ANAME(MASTER)%♪适合我吗？」
+			;TranslatedMark 「やったー♪　ありがとうね、%ANAME(MASTER)%♪　ねえねえ似合ってる？」
+			PRINTFORMW 看到她发自内心开心的笑容，%ANAME(MASTER)%感觉不坏
+			;TranslatedMark 彼女の心底嬉しそうな笑顔を見れて、%ANAME(MASTER)%も悪い気はしなかった
+			CFLAG:女苑:好感度 += 200
+			CALL COLOR_PRINTL(@"%ANAME(女苑)%的好感度上升了200", 0x00FFFF)
+			CFLAG:女苑:300 = 1
+			CALL COLOR_PRINTW("付了2000元的首饰。", カラー_警告)
+			MONEY -= 2000
+	ENDSELECT
+	
+;好感度1500以上
+ELSEIF CFLAG:女苑:好感度 >= 1500
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORML 「啊，%ANAME(MASTER)%。下一站是那里？」
+			;TranslatedMark 「あ、%ANAME(MASTER)%。次はあそこ？」
+			PRINTFORMW 约会的时候，两个人决定在茶馆休息
+			;TranslatedMark デートの最中、二人は茶屋にて休憩することにした
+			PRINTFORML 「呼，我正好累了。%ANAME(MASTER)%也变得机灵了呢♪」
+			;TranslatedMark 「ふう、ちょうど疲れてきたところだったわ。%ANAME(MASTER)%も気が利くようになったわねー♪」
+			PRINTFORMW %ANAME(女苑)%在茶馆里，和%ANAME(MASTER)%愉快地聊天
+			;TranslatedMark %ANAME(女苑)%は茶屋にて、%ANAME(MASTER)%と楽しそうにおしゃべりしている
+		CASE 1
+			PRINTFORML 「…你和我这样的人在一起也会很开心的吧。……稍微，有点感谢你…」
+			;TranslatedMark 「…アンタって私みたいなのと居ても楽しそうにしてくれるわよね。……ちょっとは感謝してるわよ…」
+			PRINTFORML %ANAME(女苑)%最后的小碎碎念没有传到%ANAME(MASTER)%的耳朵里
+			;TranslatedMark %ANAME(女苑)%が言った最後の小さな呟きは、%ANAME(MASTER)%の耳には届かなかった
+			PRINTFORMW 「嗯？说了什么？　…我什么都没说。哎呀，下一站，下一站♪」
+			;TranslatedMark 「ん？　何か言ったかって？　…何にも言ってないわよ。ほら、次に行こ、次っ♪」
+		CASE 2
+			PRINTFORML 「…居然会变成这样，%ANAME(MASTER)%和瘟神在这种地方约会呢…。胆子挺大的嘛？」
+			;TranslatedMark 「…今更だけど、%ANAME(MASTER)%って疫病神とこんな所でデートしてるのよね…。胆力すごくない？」
+			PRINTFORMW 并不觉得有什么。告诉她如果只要能和可爱的%ANAME(女苑)%约会就无论怎样都好了
+			;TranslatedMark 別に苦に感じたことは無い。可愛い%ANAME(女苑)%とのデートなら尚更だ　と彼女に告げた
+			PRINTFORML 「呀！　………啊…你竟然在街上说这种丢脸的话……笨蛋」
+			;TranslatedMark 「んなッ！　………よ…、よくもそんな恥ずかしいことを往来で言えるわね……馬鹿っ」
+			PRINTFORMW %ANAME(女苑)%红着脸，却好像很开心似的松了口气…
+			;TranslatedMark %ANAME(女苑)%は顔を赤くしながらも、どこか嬉しそうに口元を緩ませていた…
+	ENDSELECT
+	
+;好感度500以上
+ELSEIF CFLAG:女苑:好感度 >= 500
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORML 「啊，那边的团子店出了新产品。…呐～%ANAME(MASTER)%？我想吃那个呢♪」
+			;TranslatedMark 「あ、あそこの団子屋、新作出してる。…ねぇ～%ANAME(MASTER)%？　私あれが食べたいなー♪」
+			PRINTFORMW %ANAME(女苑)%用小猫一样撒娇的姿态向%ANAME(MASTER)%请求
+			;TranslatedMark %ANAME(女苑)%は猫撫で声で%ANAME(MASTER)%に甘味を強請っている
+		CASE 1
+			PRINTFORML 「……啊，那家伙现在这么穷了啊，别让那家伙看见我的脸……」
+			;TranslatedMark 「…あ、アイツ前に素寒貧にした奴だ…。顔合わせないようにしないと……」
+			PRINTFORMW %ANAME(女苑)%慌慌张张地躲在%ANAME(MASTER)%的身后
+			;TranslatedMark %ANAME(女苑)%はそそくさと、%ANAME(MASTER)%の体の後ろに身を隠した
+		CASE 2
+			PRINTFORML 「不让欲望解放不行的呀%ANAME(MASTER)%。不让欲望释放一下的话…！」
+			;TranslatedMark 「下手ねぇ%ANAME(MASTER)%。欲望の開放のさせ方が下手…！」
+			PRINTFORMW 「%ANAME(MASTER)%真正想要的是这边。但是因为在意预算，所以想换成便宜一点的那边吗…呼」
+			;TranslatedMark 「%ANAME(MASTER)%が本当に欲しいのはこっち。でも予算が気になって、安いそっちで妥協しようとしている…ッ」
+			PRINTFORML 「不行的啊%ANAME(MASTER)%。那样的妥协实在是太痛苦了…。该用钱的时候不用的话反而会积攒压力…」
+			;TranslatedMark 「ダメよ%ANAME(MASTER)%。そういう妥協は痛ましすぎ…。使うときはパァーっと使わないと逆にストレスが溜まるものよ…」
+			PRINTFORMW 天使般的瘟神的私语，悄悄解开了系住%ANAME(MASTER)%钱包的带子…
+			;TranslatedMark 天使のような疫病神の囁きが、%ANAME(MASTER)%の財布の紐を緩めようとしている…
+	ENDSELECT
+	
+;好感度0以上
+ELSEIF CFLAG:女苑:好感度 >= 0
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORML 「啊，那边新开了一家丸子店」
+			;TranslatedMark 「へえ、あそこ新しい団子屋が出来たのね」
+			PRINTFORMW %ANAME(女苑)%享受着街道的繁华
+			;TranslatedMark %ANAME(女苑)%は町の賑やかさを楽しんでいる
+		CASE 1
+			PRINTFORMW 「啊啊，瘟神的血在骚动…。不想买买买吗？」
+			;TranslatedMark 「ああ、疫病神の血が騒ぐわ…。もっと買い物したくない？」
+		CASE 2
+			PRINTFORML 「钱不能囤着哦?用了之后才能流通的嘛!♪」
+			;TranslatedMark 「お金は溜め込んでちゃ駄目よ？　使って天下に回してナンボなんだしー♪」
+			PRINTFORMW %ANAME(女苑)%想要解开%ANAME(MASTER)%钱包的带子…
+			;TranslatedMark %ANAME(女苑)%は%ANAME(MASTER)%の財布の紐を緩めようとしている…
+	ENDSELECT
+	
+;好感度マイナス状態
+ELSE
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORML 「………啊，很好吃」
+			;TranslatedMark 「………あ、美味しい」
+			PRINTFORMW 对于%ANAME(MASTER)%买来的点心，%ANAME(女苑)%率直地流露出了感想
+			;TranslatedMark %ANAME(MASTER)%が買って来たお菓子に、%ANAME(女苑)%は率直な感想が漏れた
+			CFLAG:女苑:好感度 += 10
+			CALL COLOR_PRINTL(@"%ANAME(女苑)%的好感度上升了10", 0x00FFFF)
+		CASE 1
+			PRINTFORML 「…………哈」
+			;TranslatedMark 「…………はぁっ」
+			PRINTFORMW 对%ANAME(MASTER)%的印象不好的%ANAME(女苑)%两个人在一起，空气中流溢着尴尬
+			;TranslatedMark %ANAME(MASTER)%への印象が良くない%ANAME(女苑)%と二人、気まずい空気が流れている…
+	ENDSELECT
+ENDIF
+
+;------------------------------------
+;花畑
+;-----------------------------------
+@DATE_EVENT_K149_hanabatake(花畑)
+#DIM 花畑
+#DIM 女苑
+女苑 = NAME_TO_CHARA("女苑")
+
+;好感度10000以上
+IF CFLAG:女苑:好感度 >= 10000
+	SELECTCASE RAND:2
+		CASE 0
+			PRINTFORML %ANAME(MASTER)%做了花冠，轻轻地戴在了%ANAME(女苑)%的头上
+			;TranslatedMark %ANAME(MASTER)%は花冠を作り、%ANAME(女苑)%の頭にそっと被せた
+			PRINTFORMW 「啊…谢谢你，%ANAME(MASTER)%…♥　…很适合……是吗？」
+			;TranslatedMark 「あ…ありがとう、%ANAME(MASTER)%…♥　…に、似合ってる……かな？」
+			PRINTFORML %ANAME(女苑)%害羞地腼腆地问%ANAME(MASTER)%
+			;TranslatedMark %ANAME(女苑)%は恥ずかしそうにはにかみながら%ANAME(MASTER)%に尋ねる
+			PRINTFORML %ANAME(MASTER)%回答说很可爱很适合你，%ANAME(女苑)%露出了满脸的笑容
+			;TranslatedMark 可愛らしくてとても似合っているよ　と%ANAME(MASTER)%が応えると、%ANAME(女苑)%は満面の笑みを見せた
+			PRINTFORMW 「嘿嘿…好开心啊…♥谢谢你，%ANAME(MASTER)%。这个王冠，我要收藏起来成为我的宝物♥」
+			;TranslatedMark 「えへへ…、嬉しいなぁ…♥　ありがとうね、%ANAME(MASTER)%。この冠、私の宝物にするわ♥」
+			CFLAG:女苑:好感度 += 200
+			CALL COLOR_PRINTL(@"%ANAME(女苑)%的好感度上升了200", 0x00FFFF)
+		CASE 1
+			PRINTFORML 「是的，嗯…♪呵呵，我做了很多便当，别客气了♥」
+			;TranslatedMark 「はい、あーん…♪　ふふ、いっぱいお弁当作ってきたから遠慮しないでね♥」
+			PRINTFORMW 几个妖精红着脸，兴致勃勃地看着两个人的甜蜜模样
+			;TranslatedMark 二人のラブラブぶりを、何人かの妖精が顔を赤くしながらも興味深そうに見ている
+			PRINTFORML 「……喂，%ANAME(MASTER)%。如果可以的话，也叫那些孩子们一起来吃吗？」
+			;TranslatedMark 「……ねえ、%ANAME(MASTER)%。もし良かったら、あの子達も呼んで上げる？」
+			PRINTFORMW %ANAME(女苑)%提议把周围的妖精们也加入到野餐来
+			;TranslatedMark %ANAME(女苑)%は、周りの妖精たちも団欒に加えてあげようと提案した
+			PRINTFORML 「难得的一次野餐啊。大家一起吃的话一定会很开心的」
+			;TranslatedMark 「せっかくのピクニックなんだもの。みんなで一緒に食べた方がきっと楽しいわ」
+			PRINTFORMW %ANAME(MASTER)%笑着接受了那个提案
+			;TranslatedMark %ANAME(MASTER)%は、それもそうだ　と笑顔でその提案を受け入れた
+			PRINTFORML 「喂~你们，可以的话来这边一起吧」
+			;TranslatedMark 「貴方たちーっ、良かったらこっちにいらっしゃーいっ」
+			PRINTFORML 对于%ANAME(女苑)%的召唤，妖精们兴致勃勃地聚集了过来
+			;TranslatedMark %ANAME(女苑)%の呼びかけに、妖精たちは興味津々と言った様子で集まった
+			PRINTFORMW 然后包括妖精们，大家一起享受了野餐
+			;TranslatedMark そして妖精たちも含めて、みんなでピクニックを楽しんだ
+	ENDSELECT
+
+;好感度5000以上
+ELSEIF CFLAG:女苑:好感度 >= 5000
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORML %ANAME(MASTER)%做了花冠，轻轻地戴在了%ANAME(女苑)%的头上
+			;TranslatedMark %ANAME(MASTER)%は花冠を作り、%ANAME(女苑)%の頭にそっと被せた
+			PRINTFORMW 「啊…谢谢…。但是…这样的，不适合我。……一定」
+			;TranslatedMark 「あ…ありがとう…。でも…、こういうの、私には似合わないよ。……きっと」
+			CALL ASK_YN("没那回事", "也许确实如此…")
+			IF RESULT == 0
+				PRINTFORMW 没有那样的事。%ANAME(MASTER)%告诉她很适合她很可爱
+				;TranslatedMark そんなことは無い。とても似合ってて可愛いよ　と%ANAME(MASTER)%は彼女に告げた
+				PRINTFORML 「啊～……你又做了那么丢脸的事……」
+				;TranslatedMark 「あぅ～……アンタはまたそんな恥ずかしいことを～……」
+				PRINTFORML 「但是……啊，谢谢……♥」
+				;TranslatedMark 「でも……あ、ありがと……♥」
+				PRINTFORMW %ANAME(女苑)%的耳朵都红了，但还是腼腆地面对着%ANAME(MASTER)%
+				;TranslatedMark %ANAME(女苑)%は耳まで赤くしながらも、はにかむような笑顔を%ANAME(MASTER)%に向けた
+				CFLAG:女苑:好感度 += 100
+				CALL COLOR_PRINTL(@"%ANAME(女苑)%的好感度上升了100", 0x00FFFF)
+			ELSE
+				PRINTFORMW …也许确实是那样…当%ANAME(MASTER)%这样嘟囔着的时候，%ANAME(女苑)%露骨地不高兴了
+				;TranslatedMark …確かにそうかも…　と%ANAME(MASTER)%が呟くと、 %ANAME(女苑)%は露骨に不機嫌になった
+				PRINTFORML 「……那么从一开始就不要做这种事」
+				;TranslatedMark 「……だったら最初からこんなことしないでよね」
+				PRINTFORML 「啊，反正对我来说钱比花更合适。」
+				;TranslatedMark 「はぁーあっ、どうせ私にはお花よりお金の方がお似合いですよーだっ」
+				PRINTFORMW %ANAME(MASTER)%低姿态的向%ANAME(女苑)%道歉总算得到了原谅…
+				;TranslatedMark %ANAME(MASTER)%はスネてしまった%ANAME(女苑)%に謝り倒して何とか許してもらえた…
+				CFLAG:女苑:好感度 -= 100
+				CALL COLOR_PRINTL(@"%ANAME(女苑)%の好感度が100下がった", 0xFF0080)
+			ENDIF
+		CASE 1
+			PRINTFORML 「是的，嗯…♪呵呵，野餐也很不错呢♥　…啊，喂！这儿可不是给你们闹着玩儿的！到那边去！」
+			;TranslatedMark 「はい、あーん…♪　ふふ、ピクニックも良いモノね♥　…あ、こらっ！　見世物じゃないわよっ！　あっち行きなさい！」
+			PRINTFORMW %ANAME(女苑)%被周围的妖精们嘲笑着调情的样子，红着脸赶走了它们…
+			;TranslatedMark %ANAME(女苑)%はイチャイチャしてる様を周りの妖精たちに冷やかされ、顔を赤くしながら追い払っている…
+		CASE 2
+			PRINTFORML 「今天也是暖洋洋的好天气啊。…这样的日子一起躺下吧？看吧，好吧，没关系♪」
+			;TranslatedMark 「今日もぽかぽかいい天気ねー。…こんな日は一緒に寝転がりましょ？　ほらほら、いいからいいから♪」
+			PRINTFORMW %ANAME(女苑)%枕着%ANAME(MASTER)%的手臂，抱住%ANAME(MASTER)%睡着了
+			;TranslatedMark %ANAME(女苑)%は%ANAME(MASTER)%の腕を枕にして、%ANAME(MASTER)%に抱きつくように寝そべった
+	ENDSELECT
+
+;好感度1500以上
+ELSEIF CFLAG:女苑:好感度 >= 1500
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORMW 「要说我的话，比起花，我更喜欢团子…如果是%ANAME(MASTER)%的话，我觉得花比较好♪」
+			;TranslatedMark 「私はどっちかと言うと花より団子って感じなんだけど…、%ANAME(MASTER)%とならお花の方も良いかなーって思うわ♪」
+		CASE 1
+			PRINTFORML 「偶尔在这种地方野餐也不错啊。……有很多稍微热闹一点的画廊」
+			;TranslatedMark 「たまにはこういう所でピクニックも良いものね。……ちょっと賑やかなギャラリーが多いけど」
+			PRINTFORMW 两个人无视天真无邪地玩耍着的妖精们，咂着嘴吃着便当
+			;TranslatedMark 無邪気に遊んでいる妖精たちを尻目に、二人はお弁当に舌鼓を打った
+		CASE 2
+			PRINTFORML 「天气真好啊。…嗯…。躺着的话会闻到花的香味呢。%ANAME(MASTER)%感觉怎么样？」
+			;TranslatedMark 「いい天気ねー。…えいっ、と…。寝転がるとお花のいい匂いがするわね。%ANAME(MASTER)%もどう？」
+			PRINTFORMW 在她的邀请下，%ANAME(MASTER)%也躺在了%ANAME(女苑)%的旁边
+			;TranslatedMark 彼女のお誘いを受け、%ANAME(MASTER)%も%ANAME(女苑)%の隣に寝そべった
+	ENDSELECT
+
+;好感度500以上
+ELSEIF CFLAG:女苑:好感度 >= 500
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORMW 「要说我的话，比起花，我更喜欢团子。花是花，是对花的那种喜欢」
+			;TranslatedMark 「私はどっちかと言うと花より団子って感じかなー。花は花でわりと好きなんだけどね」
+		CASE 1
+			PRINTFORML 「偶尔在这种地方野餐也不错啊。……虽然有很多妖精」
+			;TranslatedMark 「たまにはこういう所でピクニックも悪くないわね。……ちょっと小さいギャラリーが多いけど」
+			PRINTFORMW 两人无视天真无邪地玩耍着的妖精们，拿出了午餐盒
+			;TranslatedMark 無邪気に遊んでいる妖精たちを尻目に、二人はお弁当に手をつけた
+		CASE 2
+			PRINTFORML 「这里好像也不能买买买呢。……没办法，就找四叶草吧」
+			;TranslatedMark 「ここじゃショッピングも出来そうにないわね。……仕方ないから四葉のクローバーでも探そうかしら」
+			PRINTFORMW 在一无财产可以卷走的地方，作为瘟神的她也似乎无能为力……
+			;TranslatedMark 巻き上げる富が何も無い場所で、疫病神の彼女は手持ち無沙汰なようだ…
+	ENDSELECT
+
+;好感度0以上
+ELSEIF CFLAG:女苑:好感度 >= 0
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORML 「说是少女的兴趣还是怎么说呢……这个地方不适合我」
+			;TranslatedMark 「少女趣味って言うかなんと言うか……、私には似合いそうに無い所ね」
+			PRINTFORMW 在没有任何财产可以卷走的地方，身为瘟神的她也无所事事了起来
+			;TranslatedMark 巻き上げる富が何も無い場所で、疫病神の彼女は手持ち無沙汰にしている
+		CASE 1
+			PRINTFORML 「有很多妖精呢。嘛，看起来就是喜欢妖精的样子呢」
+			;TranslatedMark 「妖精がけっこう居るわね。まあ、見るからに妖精が好きそうなトコだもんね」
+			PRINTFORMW %ANAME(女苑)%悠闲地看着天真无邪地玩耍着的妖精们
+			;TranslatedMark 無邪気に遊んでいる妖精たちを、%ANAME(女苑)%はのんびりと眺めている
+		CASE 2
+			PRINTFORML 「…因为在这里无法花钱，所以和瘟神在一起也没关系…。不赖嘛你」
+			;TranslatedMark 「…ここなら金を使いようが無いから疫病神と居ても大丈夫、と…。中々できるわね」
+			PRINTFORMW 总觉得%ANAME(女苑)%很佩服
+			;TranslatedMark %ANAME(女苑)%は何やらしきりに感心している
+	ENDSELECT
+
+;好感度マイナス状態
+ELSE
+	SELECTCASE RAND:2
+		CASE 0
+			PRINTFORML 「……什么都没有，这里……」
+			;TranslatedMark 「……何にも無いわ、ここ……」
+			PRINTFORMW 在没有任何财产可以卷走的地方，身为瘟神的她也无所事事了起来
+			;TranslatedMark 巻き上げる富が何も無い場所で、疫病神の彼女は手持ち無沙汰にしている
+		CASE 1
+			PRINTFORML 「…………」
+			PRINTFORMW 对%ANAME(MASTER)%的印象不好的%ANAME(女苑)%两个人在一起，空气中流溢着尴尬
+			;TranslatedMark %ANAME(MASTER)%への印象が良くない%ANAME(女苑)%と二人、気まずい空気が流れている…
+	ENDSELECT
+ENDIF
+
+;------------------------------------
+;自宅
+;-----------------------------------
+@DATE_EVENT_K149_zitaku(自宅)
+#DIM 自宅
+#DIM 女苑
+女苑 = NAME_TO_CHARA("女苑")
+
+;好感度10000以上
+IF CFLAG:女苑:好感度 >= 10000
+	SELECTCASE RAND:4
+		CASE 0
+			PRINTFORMW 「今天只有我们两个人呢。……那么，要做的事情只有一个吧♥」
+			;TranslatedMark 「今日は私達二人っきりなのね。……じゃあ、やることは一つだよね♥」
+			PRINTFORMW 这之后乱七八糟地做爱了
+			;TranslatedMark この後めちゃくちゃセックスした
+			CALL FUCK_MAKELOVE(女苑, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", ANAME(MASTER))
+			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(女苑)%の膣", "和姦")
+			CFLAG:女苑:好感度 += 1000
+			CALL COLOR_PRINTL(@"%ANAME(女苑)%的好感度上升了1000", 0x00FFFF)
+		CASE 1
+			PRINTFORML 「啊♥嗯，嗯♥%ANAME(MASTER)%…好哦♥」
+			;TranslatedMark 「あっ♥　んんっ♥　%ANAME(MASTER)%っ…いいよぉっ♥」
+			PRINTFORMW 在自家约会的时候，气氛很好的两个人就这样开始肌肤重叠
+			;TranslatedMark 自宅デートの最中、いい雰囲気になった二人はそのまま肌を重ね始めた
+			PRINTFORML 「今天你只能有我一个人…满满地爱着你♥」
+			;TranslatedMark 「今日は私だけを…いっぱい愛して♥」
+			PRINTFORMW 结果一整天都是两个人做爱度过的…
+			;TranslatedMark 結局一日中、二人でセックスして過ごした…
+			CALL FUCK_MAKELOVE(女苑, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", ANAME(MASTER))
+			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(女苑)%の膣", "和姦")
+			CFLAG:女苑:好感度 += 1000
+			CALL COLOR_PRINTL(@"%ANAME(女苑)%的好感度上升了1000", 0x00FFFF)
+		CASE 2
+			PRINTFORML 「哈♥嗯♥中、…嗯♥」
+			;TranslatedMark 「はぁっ♥　んっ♥　ちゅ、…んん♥」
+			PRINTFORMW 在%ANAME(MASTER)%的房间里，两人专心致志地唇舌交错
+			;TranslatedMark %ANAME(MASTER)%の部屋にて、二人は一心不乱にお互いの唇を奪い合う
+			PRINTFORML 「啊，呜……。呵呵，今天一个人独占%ANAME(MASTER)%…♥很高兴…嗯…♥」
+			;TranslatedMark 「あむっ、ちゅぅ……。うふ、今日は%ANAME(MASTER)%を独り占め…♥　嬉しい…あんっ…♥」
+			PRINTFORML 并不满足于仅仅是吻的两个人，不久就连身体也重叠在了一起
+			;TranslatedMark 唇だけで済む二人ではなく、程なくして身体まで重ねあうことになった
+			PRINTFORMW 结果一整天都是两个人在一起挤奶中度过的…
+			;TranslatedMark 結局一日中、二人で乳繰り合いながら過ごした…
+			CALL FUCK_MAKELOVE(女苑, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", ANAME(MASTER))
+			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(女苑)%の膣", "和姦")
+			CFLAG:女苑:好感度 += 1000
+			CALL COLOR_PRINTL(@"%ANAME(女苑)%的好感度上升了1000", 0x00FFFF)
+		CASE 3
+			PRINTFORML %ANAME(MASTER)%因为有事稍微离开座位的时候，%ANAME(女苑)%发现了被随意脱下扔掉的上衣
+			;TranslatedMark %ANAME(MASTER)%が所用で少し席を外している時、%ANAME(女苑)%は無造作に脱ぎ捨てられた上着を見つけた
+			PRINTFORML 「啊…这个…」
+			;TranslatedMark 「あ…これ…」
+			PRINTFORMW 这是平时%ANAME(MASTER)%穿的衣服。%ANAME(女苑)%拿着那件衣服犹豫了一下，然后像下定决心一样将脸埋在那里
+			;TranslatedMark 普段%ANAME(MASTER)%が着ている服だ。%ANAME(女苑)%はその服を手に取り少し逡巡した後、意を決したようにそれに顔を埋める
+			PRINTFORML 「嘶……哈…。有%ANAME(MASTER)%的味道…♥」
+			;TranslatedMark 「すぅ……はぁ…。%ANAME(MASTER)%の匂いがする…♥」
+			PRINTFORMW 「……嘛，%ANAME(MASTER)%还没回来呢…只要一点点就好了……♥」
+			;TranslatedMark 「……ま、まだ%ANAME(MASTER)%は帰ってこないよね…ちょっとだけならいいよね……♥」
+			PRINTFORML 然后%ANAME(女苑)%脱掉自己的衣服，披上%ANAME(MASTER)%的外套。对%ANAME(女苑)%来说有些过于肥大，袖子也长了一截
+			;TranslatedMark そして%ANAME(女苑)%は自らの服も脱ぎ、%ANAME(MASTER)%の上着を羽織る。%ANAME(女苑)%には大きいようだ。ぶかぶかで袖もだいぶ余っている
+			PRINTFORMW 「嘿嘿…好像全身都被%ANAME(MASTER)%包围着…♥」
+			;TranslatedMark 「えへへ…全身%ANAME(MASTER)%に包まれているみたい…♥」
+			PRINTFORML 在%ANAME(MASTER)%的床上隐约感受到爱之人的余香包围着，%ANAME(女苑)%恍惚了一会儿…
+			;TranslatedMark %ANAME(MASTER)%のベッドの上で仄かに感じ取れる愛する人の残り香に包まれて、%ANAME(女苑)%はしばし恍惚としていた…
+			PRINTFORML 「…啊」
+			;TranslatedMark 「…あ」
+			PRINTFORMW 但是，工作结束后回来的%ANAME(MASTER)%在床上看到了那个被可爱地包裹着的身姿
+			;TranslatedMark しかし、所用を済ませて戻ってきた%ANAME(MASTER)%にベッドの上で愛くるしく包まる姿を見られてしまう
+			PRINTFORML 「呃，不是的%ANAME(MASTER)%，这个是，这个…那个……」
+			;TranslatedMark 「ちっ、違うの%ANAME(MASTER)%っ、こ、これは…そのぉ……」
+			PRINTFORMW 被看到特意赤裸着赤身露体、裹着自己的衣服等这些的状况，%ANAME(女苑)%的脸变得通红，不知所措…
+			;TranslatedMark わざわざ裸になって素肌に想い人の衣を纏っているという些か倒錯的な状況を見られ、%ANAME(女苑)%は顔を真っ赤にして狼狽する…
+			PRINTFORML 但是身材娇小的%ANAME(女苑)%，穿着尺寸完全不合适的衣服的身姿触动了%ANAME(MASTER)%的琴弦
+			;TranslatedMark だが小柄な%ANAME(女苑)%が、まるでサイズが合ってない想い人の服を羽織っているという姿は%ANAME(MASTER)%の琴線に触れた
+			PRINTFORMW 说得通俗一点，就是萌到了。情欲也被刺激了
+			;TranslatedMark 有り体に言えば、萌えた。情欲も刺激された
+			PRINTFORML %ANAME(MASTER)%推倒了那样的她，决定好好地爱她
+			;TranslatedMark %ANAME(MASTER)%は、そんな彼女を押し倒して存分に愛することにした
+			PRINTFORML 「啊，哎呀♥%ANAME(MASTER)%♥非常、激烈…嗯♥」
+			;TranslatedMark 「あっ、やぁ♥　%ANAME(MASTER)%♥　すごく、激しっ…んん♥」
+			PRINTFORMW 那天两个人在床上相爱到很晚…
+			;TranslatedMark その日はベッドの上で二人、夜遅くまで愛し合った…
+			CALL FUCK_MAKELOVE(女苑, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", ANAME(MASTER))
+			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(女苑)%の膣", "和姦")
+			CFLAG:女苑:好感度 += 2000
+			CALL COLOR_PRINTL(@"%ANAME(女苑)%的好感度上升了2000", 0x00FFFF)
+	ENDSELECT
+	
+;好感度5000以上
+ELSEIF CFLAG:女苑:好感度 >= 5000
+	SELECTCASE RAND:4
+		CASE 0
+			PRINTFORMW 「今天我们两个人在家。那么……要做的只有一件吧♥」
+			;TranslatedMark 「今日は家に私達二人。とくれば……やることは一つよね♥」
+			PRINTFORMW 这之后一塌糊涂地相爱起来了
+			;TranslatedMark この後めちゃくちゃ双六で盛り上がった
+		CASE 1
+			PRINTFORML 「偶尔这么悠闲也不错啊。…%ANAME(MASTER)%的房间，总觉得很安静…像我家一样」
+			;TranslatedMark 「まったりするのもいいわよねー。…%ANAME(MASTER)%の部屋って、何だかすごく落ち着く…我が家のようだわ」
+			PRINTFORMW 两个人在家里一边调情一边悠闲地度过
+			;TranslatedMark 自宅で二人、イチャイチャしながらまったりして過ごした
+		CASE 2
+			PRINTFORML 「喂，你在看什么？」
+			;TranslatedMark 「ねえねえ、なに読んでるの？」
+			PRINTFORMW %ANAME(MASTER)%在看书的时候，%ANAME(女苑)%突然插话过来把身体粘在了一起
+			;TranslatedMark %ANAME(MASTER)%が本を読んでいると、間に割り込むように%ANAME(女苑)%がくっついてきた
+			PRINTFORML 一起读了一会儿，%ANAME(MASTER)%把书交给了%ANAME(女苑)%，用空着的双臂从后面抱住了她
+			;TranslatedMark しばらく一緒に読んでいたが、%ANAME(MASTER)%は本を%ANAME(女苑)%に手渡し、空いた両腕で彼女を後ろから抱きしめた
+			PRINTFORML 「……呵呵呵♥」
+			;TranslatedMark 「……ふふっ♥」
+			PRINTFORMW 两个人在家里一边调情一边悠闲地度过
+			;TranslatedMark 自宅で二人、イチャイチャしながらのんびり過ごした
+		CASE 3
+			PRINTFORML 因为有急事暂时离开座位的%ANAME(MASTER)%回到了房间……
+			;TranslatedMark 急用が出来てしばし席を外していた%ANAME(MASTER)%が部屋に戻ってくると……
+			PRINTFORMW 「啊，%ANAME(MASTER)%。嘿嘿，怎么样？这样的♪」
+			;TranslatedMark 「あっ、%ANAME(MASTER)%おかえりー。えへへ、どう？　こういうの♪」
+			PRINTFORML %ANAME(女苑)%披上%ANAME(MASTER)%的上衣等着
+			;TranslatedMark %ANAME(女苑)%が%ANAME(MASTER)%の上着を羽織って待ち構えていた
+			PRINTFORML 身材娇小的%ANAME(女苑)%，披上尺寸不合适、袖子长长的%ANAME(MASTER)%的衣服
+			;TranslatedMark ちんまりとした体格の%ANAME(女苑)%が、サイズが合わず袖を余らせまくった%ANAME(MASTER)%の服を羽織って
+			PRINTFORMW 高高兴兴地炫耀的样子很可爱
+			;TranslatedMark 楽しそうに見せびらかしている姿はたいそう愛くるしい物だった
+			PRINTFORML %ANAME(MASTER)%——非常可爱。她满脸笑容地回应道"当然啦♪"
+			;TranslatedMark %ANAME(MASTER)%が、― とても可愛い。　と伝えると、彼女は『当然ね♪』と満面の笑顔で応える
+			PRINTFORMW 两个人就这样，更加亲热地度过了
+			;TranslatedMark 二人はそのまま、いっそうイチャイチャして過ごした
+	ENDSELECT
+	
+;好感度1500以上
+ELSEIF CFLAG:女苑:好感度 >= 1500
+	SELECTCASE RAND:4
+		CASE 0
+			PRINTFORMW 「如果家里只有一男一女的话……要做的事情只有一个吧…♪」
+			;TranslatedMark 「自宅に男女が二人とくれば……やることは一つよね…♪」
+			PRINTFORMW 这之后两人搞得乱七八糟
+			;TranslatedMark この後めちゃくちゃ双六した
+		CASE 1
+			PRINTFORML 「偶尔发呆也不错啊。……总觉得能冷静下来。」
+			;TranslatedMark 「たまにはまったりするのもいいわよねー。…何か落ち着くわー」
+			PRINTFORMW 两个人在家悠闲地度过了
+			;TranslatedMark 自宅で二人、のんびりまったりして過ごした
+		CASE 2
+			PRINTFORML 「收拾的很不错啊。很意外啊……有藏着色情的书吗？」
+			;TranslatedMark 「けっこう小奇麗にしてるのね。意外だわー、……エッチな本とか隠してる？」
+			PRINTFORMW %ANAME(MASTER)%嘱咐%ANAME(女苑)%不要在房子里乱翻…
+			;TranslatedMark %ANAME(MASTER)%は%ANAME(女苑)%に、家捜ししないようにと念を押した…
+		CASE 3
+			PRINTFORML 「…真讨厌。邀请我之后就放着不管啦，等会儿再好好说他。嗯？这是…」
+			;TranslatedMark 「…ったく。誘っておいて私を放っとくとか後で説教物ね。ん？　これは…」
+			PRINTFORMW 因为有急事，%ANAME(MASTER)%离开了座位，闲得无聊的%ANAME(女苑)%发现了%ANAME(MASTER)%平时穿的上衣
+			;TranslatedMark 急用が出来て%ANAME(MASTER)%が少し席を外し、暇を持て余していた%ANAME(女苑)%は%ANAME(MASTER)%が普段着ていた上着を見つけた
+			PRINTFORML 「脱了之后就放在这样的地方…真是没办法啊」
+			;TranslatedMark 「こんなとこに脱ぎ捨てて…、まったくしょうがないわね」
+			PRINTFORMW 「……………………………嗯…还没回来呢……………嗯…」
+			;TranslatedMark 「……………………………ま…まだ帰ってこないわよね……………すぅ…」
+			PRINTFORML 犹豫之后，%ANAME(女苑)%取了手，把脸埋在了手上
+			;TranslatedMark %ANAME(女苑)%は逡巡の後、手に取ったそれに顔を埋めた
+			PRINTFORMW 「……那家伙的味道，总感觉令人心情平静……………%ANAME(MASTER)%！？」
+			;TranslatedMark 「……アイツの匂いって、何でこんな落ち着くんだろ……………って%ANAME(MASTER)%ッ！？」
+			PRINTFORML 工作结束后回来的%ANAME(MASTER)%，面对的是抱着%ANAME(MASTER)%衣服的%ANAME(女苑)%的样子，在做什么呢？
+			;TranslatedMark 所用を終えて戻ってきた%ANAME(MASTER)%は、%ANAME(MASTER)%の服を抱きしめている%ANAME(女苑)%の姿に直面し、何をしているのだろうと困惑した
+			PRINTFORML 「啊，没什么大不了的!我只是确认你有没有在好好的洗衣服而已!啊，汗臭得不得了，我要好好帮你洗一洗!」
+			;TranslatedMark 「べっ、べべべ別に何でもないわよッ！　ちゃんと洗ってるのか確認しただけよッ！　あ、汗臭くてしょうがないから洗濯したげるわ！」
+			PRINTFORMW %ANAME(女苑)%红着脸，慌慌张张地抓着%ANAME(MASTER)%的衣服跑去了洗衣店…
+			;TranslatedMark %ANAME(女苑)%は顔を真っ赤にしながら、慌てて%ANAME(MASTER)%の服やら何やらを分捕って洗濯場に駆けていった…
+	ENDSELECT
+	
+;好感度500以上
+ELSEIF CFLAG:女苑:好感度 >= 500
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORMW 「确实在家约会很方便…我想至少要好好约会啊」
+			;TranslatedMark 「確かに自宅デートは手軽だけど…、デートくらいちゃんとして欲しいとも思うわ」
+		CASE 1
+			PRINTFORML 「………没有下一卷了吗？」
+			;TranslatedMark 「………次の巻ない？」
+			PRINTFORMW %ANAME(女苑)%在%ANAME(MASTER)%的家里默默地读着漫画
+			;TranslatedMark %ANAME(女苑)%は%ANAME(MASTER)%の家で黙々と漫画を読んでいる
+		CASE 2
+			PRINTFORML 「收拾的很不错啊。很意外啊……」
+			;TranslatedMark 「けっこう小奇麗にしてるのね。何か意外だわー」
+			PRINTFORMW 她想象着会见到的房间是怎样呢…
+			;TranslatedMark どんな部屋を想像していたのだろうか…
+	ENDSELECT
+	
+;好感度0以上
+ELSEIF CFLAG:女苑:好感度 >= 0
+	PRINTFORML 「总而言之…。已经是叫到家里来的关系了吧?我们开始吧」
+	;TranslatedMark 「いくら手軽といってもさ…。家に呼ぶような関係？　私達さあ」
+	PRINTFORMW 过了一会儿就无所事事，空气中微妙的流动着尴尬…
+	;TranslatedMark しばらくすると手持ち無沙汰になり、微妙な空気が流れた…
+	
+;好感度マイナス状態
+ELSE
+	PRINTFORML 「…………你想干什么？」
+	;TranslatedMark 「…………何する気？」
+	PRINTFORMW 对%ANAME(MASTER)%的印象不好的%ANAME(女苑)%两个人在一起，空气中流溢着尴尬
+	;TranslatedMark %ANAME(MASTER)%への印象が良くない%ANAME(女苑)%と二人、気まずい空気が流れている…
+ENDIF
+

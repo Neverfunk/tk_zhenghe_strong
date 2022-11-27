@@ -1,0 +1,70 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K149_MONOZUKI_RATE(対象)
+#DIM 対象
+RETURN 200
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K149_MONOZUKI_DECISION(対象)
+#DIM 対象
+#DIM 紫苑
+
+紫苑 = NAME_TO_CHARA("紫苑")
+
+SIF MASTER != NAME_TO_CHARA("あなた")
+	RETURN 0
+
+SIF KDVAR:対象:紫苑_物乞い != 2
+	RETURN 0
+
+SIF KDVAR:対象:女苑_物好き
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 0, 0, 0) && CHECK_KOJO_DAILY_HAPPEN(紫苑)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K149_MONOZUKI_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K149_MONOZUKI(対象)
+#DIM 対象
+#DIM 紫苑
+紫苑 = NAME_TO_CHARA("紫苑")
+
+PRINTFORMW 「嗯、你是%ANAME(MASTER)%？」
+PRINTFORMW 在街上巡視的時候、突然被少女搭話了
+PRINTFORMW 穿着感覺異常奢華的服装……
+CALL ICPRINT(@"啊啊、我是<%NAME_FORMAL(対象)%>。是你撿到的%ANAME(紫苑)%的妹妹喲」", "W", カラー_注意)
+PRINTFORMW 「應該知道我姐姐是什麼人吧？　貧乏神哦？　竟然會中意她還讓她成為同伴、真是奇妙」
+PRINTFORMW 「因为她一脸好奇的樣子、就帯她遊山玩水麼」
+PRINTFORMW 「嘛、既然好不容易把她拉進去了、那就好好干吧。那麼再見」
+PRINTFORMW 「……啊啊、対了対了。謝謝惠顧」
+PRINTFORMW 不擔心姐姐麼。只說了這點話、%ANAME(対象)%就離開了
+PRINTFORMW ……最後說的謝謝惠顧、到底是什麼意思……
+PRINTFORML
+PRINTFORMW 之後、%ANAME(MASTER)%非常想要散財、于是浪費了大量金錢
+LOCAL = MIN(MONEY / 5, 30000)
+MONEY -= LOCAL
+CALL ICPRINT(@"浪費了<{LOCAL}>金", "W", カラー_注意)
+CALL COLOR_PRINTW(@"結識了%ANAME(対象)%", カラー_注意)
+CFLAG:対象:面識 = 1
+KDVAR:対象:女苑_物好き = 1
+
+
+RETURN 1

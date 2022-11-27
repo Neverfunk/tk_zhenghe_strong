@@ -1,0 +1,208 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K41_DAISYOUGI_RATE(対象)
+#DIM 対象
+RETURN 40
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K41_DAISYOUGI_DECISION(対象)
+#DIM 対象
+
+;はたてとにとりは駄目
+SIF GROUPMATCH(MASTER, NAME_TO_CHARA("はたて"), NAME_TO_CHARA("にとり"))
+	RETURN 0
+
+;3回勝ったら発動しない
+SIF KDVAR:対象:椛_大将棋_勝利回数 >= 3
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K41_DAISYOUGI_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K41_DAISYOUGI(対象)
+#DIM 対象
+
+IF KDVAR:対象:椛_大将棋 == 0
+	KDVAR:対象:椛_大将棋 = 1
+	PRINTFORML 看见了%ANAME(対象)%
+	;TranslatedMark %ANAME(対象)%を見かけた
+	PRINTFORMW 在盯着放在地上的大木板……?
+	;TranslatedMark 地面に置いた大きな木の板を睨んでいるが……？
+	PRINTFORMW 「啊，%ANAME(MASTER)%」
+	;TranslatedMark 「ああ、%ANAME(MASTER)%さん」
+	PRINTFORMW 「这个吗？是大将棋啦。棋子和棋盘都比通常的将棋复杂。在天狗和河童之间很受欢迎哦」
+	;TranslatedMark 「これですか？　大将棋ですよ。通常の将棋より駒も盤も複雑な将棋です。天狗や河童の間で人気なんです」
+	PRINTFORMW 「对了，难得来了，和我来一盘怎么样？」
+	;TranslatedMark 「そうだ、折角ですから一局いかがですか、私と？」
+	PRINTFORML ……眼前的木板尺寸和将棋盘相比简直大到无法想象
+	;TranslatedMark ……目の前の木の板は、将棋盤とは到底思えないようなサイズをしている
+	PRINTFORML 试试看吧……
+	;TranslatedMark やってみようか……
+ELSEIF KDVAR:対象:椛_大将棋_勝利回数 == 2
+	PRINTFORML 看见了%ANAME(対象)%
+	;TranslatedMark %ANAME(対象)%を見かけた
+	PRINTFORMW 抱着将棋盘……
+	;TranslatedMark 将棋盤を抱えているが……
+	PRINTFORMW 「%ANAME(MASTER)%先生。之前你让我吃了不少苦」
+	;TranslatedMark 「%ANAME(MASTER)%さん。あなたにはずいぶん辛酸を舐めさせられました
+	PRINTFORMW 「但是，这次我是不会输的」
+	;TranslatedMark 「ですが、私も今度という今度は負けませんよ」
+	PRINTFORMW 「经过充分的学习，和天狗名手们战斗了好几局。这样还是输了的话，我什么都可以为你做」
+	;TranslatedMark 「たっぷり勉強して、天狗の名手たちと何局も戦ってきました。これで負けたら、何だってしてあげてもいいですよ」
+	PRINTFORMW 「来，决胜负吧！」
+	;TranslatedMark 「さあ、勝負です！」
+ELSEIF KDVAR:対象:椛_大将棋 == 1 && !KDVAR:対象:椛_大将棋_前回勝利
+	PRINTFORML 看见了%ANAME(対象)%
+	;TranslatedMark %ANAME(対象)%を見かけた
+	PRINTFORML 好像又在下将棋了……
+	;TranslatedMark また将棋をやっているようだが……
+	PRINTFORMW 「啊，%ANAME(MASTER)%」
+	;TranslatedMark 「ああ、%ANAME(MASTER)%さん」
+	PRINTFORMW 「来一局怎么样？大将棋」
+	;TranslatedMark 「どうですか？　大将棋」
+ELSE
+	PRINTFORML 看见了%ANAME(対象)%
+	;TranslatedMark %ANAME(対象)%を見かけた
+	PRINTFORML 好像又在下将棋了……
+	;TranslatedMark また将棋をやっているようだが……
+	PRINTFORMW 「啊，%ANAME(MASTER)%」
+	;TranslatedMark 「ああ、%ANAME(MASTER)%さん」
+	PRINTFORMW 「来一局怎么样？大将棋」
+	;TranslatedMark 「どうですか？　大将棋」
+	PRINTFORMW 「我也学过了，这次可不会输的」
+	;TranslatedMark 「私も勉強してきましたから、今度こそは負けませんよ」
+ENDIF
+PRINTL
+CALL ASK_YN("来吧", "算了吧")
+IF RESULT == 1
+	PRINTFORMW 「是吗？那太遗憾了」
+	;TranslatedMark 「そうですか？　それは残念」
+	PRINTFORMW 「那么，下次有机会也」
+	;TranslatedMark 「では、またの機会にでも」
+	KDVAR:対象:椛_大将棋_前回勝利 = 0
+	RETURN 1
+ENDIF
+
+PRINTFORMW 「要下吗。那么，请多多指教」
+;TranslatedMark 「やってくれますか。では、お手柔らかに」
+SIF KDVAR:対象:椛_大将棋_前回勝利
+	PRINTFORMW 「如果你认为会像以前一样，那就大错特错了。」
+	;TranslatedMark 「前のようにいくと思ったら大間違いですよ？」
+
+FOR LOCAL, 0, 5
+	PRINTFORML ・
+NEXT
+
+IF MAX(ABL:MASTER:知略 - ABL:対象:知略, 15) <= RAND:100
+	KDVAR:対象:椛_大将棋_前回勝利 = 0
+	PRINTFORML ……将死
+	;TranslatedMark ……詰みだ
+	PRINTFORMW %ANAME(MASTER)%也竭尽全力地下了，但还差一点……
+	;TranslatedMark %ANAME(MASTER)%も善戦はしたが、あと一手及ばなかった……
+	PRINTFORML 「呵呵，我赢了」
+	;TranslatedMark 「ふふふ、私の勝ちですね」
+	PRINTFORMW 「很开心。谢谢你陪我」
+	;TranslatedMark 「楽しかったです。付き合ってくださって、ありがとうございました」
+	CALL COLOR_PRINTW(@"因为思考了一番，%ANAME(対象)%的知略得到了一点锻炼。", カラー_注意)
+	CALL PRINT_ADD_EXP(対象, "知略経験値", 5, 1)
+	CALL TRAIN_AUTO_ABLUP(対象)
+	RETURN 1
+ENDIF
+
+KDVAR:対象:椛_大将棋_前回勝利 = 1
+KDVAR:対象:椛_大将棋_勝利回数 ++
+PRINTFORML ……是将军
+;TranslatedMark ……王手だ
+PRINTFORMW 虽然很厉害，但总算把%ANAME(対象)%将死了……
+;TranslatedMark 手強かったが、どうにか%ANAME(対象)%を詰ませることができた……
+PRINTFORMW 「……嗯，我输了」
+;TranslatedMark 「……むむ、参りました」
+PRINTFORMW 「我也必须要更加努力学习啊……」
+;TranslatedMark 「私も、もっと勉強しないといけませんね……」
+PRINTFORMW 「谢谢你陪我」
+;TranslatedMark 「付き合ってくださって、ありがとうございました」
+CALL COLOR_PRINTW(@"因为思考了一番，%ANAME(MASTER)%的知略得到了一点锻炼", カラー_注意)
+CALL PRINT_ADD_EXP(MASTER, "知略経験値", 5, 1)
+CALL TRAIN_AUTO_ABLUP(MASTER)
+IF KDVAR:対象:椛_大将棋_勝利回数 == 3
+	PRINTFORMW ……她说："好吧，要我做什么都可以。"
+	;TranslatedMark ……「何だってしてあげてもいい」と彼女は言っていた
+	PRINTFORMW 要遵守那个约定吗……？
+	;TranslatedMark その約束を守ってもらおうか……？
+	CALL ASK_MULTI_JUDGE("作为武将继续努力", 1, "要钱", 1, "要身体", HAS_PENIS(MASTER))
+	SELECTCASE RESULT
+		CASE 0
+			PRINTFORMW 「积累修行?如果这样就可以的话，我会努力的」
+			;TranslatedMark 「修行を積め？　そんなことでいいのなら、いくらでも」
+			PRINTFORMW 「我能够帮上忙的地方，会好好让你看看的」
+			;TranslatedMark 「お役に立てるところを、見せてさしあげますよ」
+			CALL COLOR_PRINTW(@"%ANAME(対象)%进行了修行", カラー_注意)
+			CALL COLOR_PRINTW(@"%ANAME(対象)%的武闘、知略、政治提高了5", カラー_注意)
+			ABL:対象:武闘 += 5
+			ABL:対象:知略 += 5
+			ABL:対象:政治 += 5
+		CASE 1
+			PRINTFORMW 「钱……是吗」
+			;TranslatedMark 「お金……ですか」
+			PRINTFORMW 「嗯，我也没有那么多……这样就能饶了我吗?」
+			;TranslatedMark 「うーん、私もそんなに持ってないんですが……これくらいで勘弁していただけますか？」
+			PRINTFORMW 「啊，这个月必须节约……」
+			;TranslatedMark 「はあ、今月節約しなくちゃ……」
+			CALL COLOR_PRINTW(@"从%ANAME(対象)%得到了10000金", カラー_注意)
+			MONEY += 10000
+		CASE 2
+			IF TALENT:対象:合意
+				PRINTFORMW 「身体……吗」
+				;TranslatedMark 「身体……って」
+				PRINTFORMW 「那种事，现在才不会拒绝呢」
+				;TranslatedMark 「そんなの、今さら断ったりしませんよ」
+				PRINTFORMW 「如果想做那样的事情的话，一开始就说出来就好了……」
+				;TranslatedMark 「そういうコトがしたいなら最初から言えばいいのに……」
+			ELSE
+				PRINTFORMW 「因为……、诶！诶！？」
+				;TranslatedMark 「からっ……、え！　えっ！？」
+				PRINTFORMW 「那个，那个是，男女待在同一个屋檐下……那个，是那个吧」
+				;TranslatedMark 「その、それって、アレですか、男女が閨を共にするという……その、アレですよね」
+				PRINTFORMW 「诶，诶……？」
+				;TranslatedMark 「えーっ、えーっ……？」
+				PRINTFORMW 「……哦，哦，我明白了。因为已经答应过了，所以不能失信……」
+				;TranslatedMark 「……う、うう、分かりました。一度言った手前、ひっくり返したりはできませんから……」
+				PRINTFORMW 「但是那个……还请手下留情哦？」
+				;TranslatedMark 「でもその……お手柔らかにお願いしますね？」
+			ENDIF
+			PRINTFORMW 立刻把%ANAME(対象)%带进了卧室……
+			;TranslatedMark 早速、%ANAME(対象)%を寝室に連れ込んだ……
+			CALL COLOR_PRINTW(@"%ANAME(対象)%度过了愉快的时光。", カラー_注意)
+			SIF !TALENT:対象:合意
+				CALL COLOR_PRINTW(@"%ANAME(対象)%的合意取得", カラー_注意)
+			CALL FUCK(対象, "欲望, 奉仕, 性技, Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, 射精, 接吻, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_ID(MASTER), @"%ANAME(MASTER)%の唇", ANAME(MASTER), "", "和姦")
+			CFLAG:対象:好感度 += 500
+			CFLAG:対象:従属度 += 500
+			CFLAG:対象:依存度 += 100
+			TALENT:対象:チョロイン = 1
+			TALENT:対象:合意 = 1
+	ENDSELECT
+ENDIF
+
+RETURN 1
+

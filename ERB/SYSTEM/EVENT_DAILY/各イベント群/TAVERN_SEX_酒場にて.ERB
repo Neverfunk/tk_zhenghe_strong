@@ -1,0 +1,552 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_TAVERN_SEX_RATE()
+RETURN 20
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_TAVERN_SEX_DECISION()
+RETURN DAY >= 10
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_TAVERN_SEX_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_TAVERN_SEX()
+#DIM 対象
+#DIM 請求額
+
+PRINTFORMW 为了直接听到领民的声音，悄悄地去酒吧看看吧
+;TranslatedMark 領民の声を直接聞くためにお忍びで酒場に行ってみよう
+PRINTFORMW 让谁去呢？
+;TranslatedMark 誰に行かせようか？
+
+CALL SINGLE_DRAWLINE
+CALL SELECT_CHARA_LIST_SLG()
+IF RESULT == -1
+	PRINTFORMW 还是算了吧
+	;TranslatedMark やはりやめておこう
+	RETURN 1
+ENDIF
+
+対象 = RESULT
+IF 対象 == MASTER
+	PRINTFORMW 决定自己去
+	;TranslatedMark 自分で行くことにした
+ELSE
+	PRINTFORMW 把任务交给了%ANAME(対象)%
+	;TranslatedMark 把任务交給了%ANAME(対象)%
+ENDIF
+
+PRINTFORML 
+PRINTFORML 
+
+;酒場に行ったのが男性もしくは
+IF IS_MALE(対象)
+	PRINTFORML %ANAME(対象)%在酒馆里和客人意气相投
+	;TranslatedMark %ANAME(対象)%は酒場で客と意気投合した
+	PRINTFORMW 这是一次很有意义的私访
+	;TranslatedMark 中々有意義なお忍びだった
+	;ちょっとお酒に強くなる（肝臓経験値1～5）
+	EXP:対象:肝臓経験値 += RAND:3 + RAND:3 + 1
+	CALL TRAIN_AUTO_ABLUP(対象, 0)
+	;時々請求書が回ってくる、仕方ないね
+	IF !RAND:5
+		PRINTFORML ……
+		PRINTFORML …
+		IF 対象 == MASTER
+			PRINTFORMW 而且，这笔费用也没有忘记支付
+			;TranslatedMark なお、経費で落ちなかった模様
+		ELSE
+			PRINTFORMW 为什么账单会寄到这里呢？
+			;TranslatedMark どうしてこっちに請求書が回ってきているのかな？
+		ENDIF
+		;所持金の3～7%なんて良心的な飲み代です
+		請求額 = MONEY * RAND(3, 7) / 100
+		PRINTFORMW 因为没有办法、{請求額, 6}支付了。
+		;TranslatedMark 仕方ないので、{請求額, 6}を支払った。
+		MONEY -= 請求額
+	ENDIF
+	RETURN 1
+ENDIF
+
+PRINTFORMW %ANAME(対象)%在酒馆里和一位客人意气相投
+;TranslatedMark %ANAME(対象)%は酒場で一人の客と意気投合した
+PRINTFORMW 心情很好，准备离开的时候，这位男性客人发出了暧昧的邀请
+;TranslatedMark すっかり良い気分になり店を出ようとしたところ、男に誘われた
+IF TALENT:対象:貞操観念 == 1 || TALENT:対象:恋人 == 1 || TALENT:対象:恋慕 == 1 || HAS_PENIS(対象)
+	PRINTFORMW 确实，%ANAME(対象)%虽然觉得男人很有魅力，但她觉得不能再继续下去了
+	;TranslatedMark 確かに%ANAME(対象)%は彼に魅力を感じているものの、これ以上はいけないとも思う
+	PRINTFORMW 她烦恼了一段时间…
+	;TranslatedMark 彼女はしばし悩んでいたが…
+	CALL ASK_YN("接受邀请", "果断拒绝")
+	IF RESULT == 1
+		PRINTFORMW 断然拒绝了男子的邀请
+		;TranslatedMark やがてきっぱりと男の誘いを断った
+		PRINTFORMW 男子遗憾地走了，也没再追上来
+		;TranslatedMark 男は残念そうにしながらもそれ以上迫ってくることもなく去って行った
+		RETURN 1
+	ELSE
+		PRINTFORMW 没能抑制身体的燥热，害羞地红着脸，微微点了点头
+		;TranslatedMark やがて恥ずかしそうに頬を染めながら、小さく頷いた
+		PRINTFORMW 男子高兴地搂着她的腰，两个人依偎着进了旅店
+		;TranslatedMark 男は嬉しそうに彼女の腰を抱き、二人で寄り添って宿屋へと入って行った
+	ENDIF
+ELSE
+	PRINTFORMW %ANAME(対象)%害羞却没有抵抗，像恋人一样被搂着进了旅店
+	;TranslatedMark %ANAME(対象)%は照れながらも抵抗せず、恋人の様に抱かれながら宿屋へ入って行った
+ENDIF
+PRINTFORML 
+PRINTFORML 
+
+SELECTCASE RAND:45
+	CASE 0
+		PRINTFORML %ANAME(対象)%跨坐在躺在床上的他的身体上，摆动着腰
+		;TranslatedMark %ANAME(対象)%はベッドに寝転がった彼に跨り腰を振っている
+		PRINTFORML 每次腰上下动作，阴茎都会刺入%ANAME(対象)%的深处，她发出妖媚的呻吟声，身体随之痉挛
+		;TranslatedMark 腰を上下する度にペニスが%ANAME(対象)%の奥深くを抉り、彼女は嬌声を上げて痙攣する
+		PRINTFORML 沉迷于性爱的%ANAME(対象)%为了得到更大的快乐而用淫荡的表情诱惑男人
+		;TranslatedMark セックスに夢中になっている%ANAME(対象)%は更なる快楽を得ようとみだらな表情で男を誘う
+		PRINTFORMW 男人也更加大幅度的抽插着%ANAME(対象)%，两个人彻夜体味着浓厚的性爱
+		;TranslatedMark 男もそれに応えて激しく%ANAME(対象)%を突き上げ、二人で夜通し濃厚なセックスを味わった
+	CASE 1
+		PRINTFORML 手撑在他的胸前，不检点地吐着舌头，%ANAME(対象)%摆动着腰
+		;TranslatedMark 彼の胸に手を当て、だらしなく舌を垂らしながら%ANAME(対象)%は腰を振っている
+		PRINTFORML 每次抽出阴茎把阴道的肉带出来，%ANAME(対象)%都能享受到脑子里一片空白的快乐
+		;TranslatedMark 逞しいペニスで膣肉を抉られる度に、%ANAME(対象)%は頭の中が真っ白になるような快楽を受ける
+		PRINTFORML 反复吞吐阴茎的雌穴中爱液不断溢出，阴道肉反复收缩，急切地渴求着男人的子种
+		;TranslatedMark ペニスを咥えこんだ雌穴からは愛液がとめどなく溢れ、膣肉は収縮を繰り返し男の子種を待ちわびている
+		PRINTFORMW 不久，%ANAME(対象)%一边接受期待已久的内射，一边使劲地仰着背，发出喜悦的声音，达到了顶峰
+		;TranslatedMark やがて待望の膣内射精を受けながら、%ANAME(対象)%は大きく背中を反らし悦びの声を上げて絶頂した
+	CASE 2
+		PRINTFORML %ANAME(対象)%跨坐在躺在床上的他的身体上，一边把阴茎吞进阴道一边接吻
+		;TranslatedMark %ANAME(対象)%は彼に跨りそのペニスを深々と咥えこみながらキスをしている
+		PRINTFORML 一边舌吻一边被揉弄胸部的%ANAME(対象)%，表情快乐的要融化了
+		;TranslatedMark 舌を絡ませながら胸をもみしだかれている%ANAME(対象)%は、快楽でとろけた表情になっている
+		PRINTFORML 急切的加快了腰的动作，用阴道更加激烈的吞吐着阴茎，%ANAME(対象)%突然全身颤抖起来
+		;TranslatedMark もはやたまらなくなり腰をくいくいと揺すると、ペニスが膣肉に擦れ%ANAME(対象)%はピクピクと震える
+		PRINTFORMW 两个人紧贴在一起，由于彼此的汗而变得粘稠，享受着浓厚的性爱
+		;TranslatedMark 二人は密着したままお互いの汗でどろどろになりながら濃厚なセックスを楽しんだ
+	CASE 3
+		PRINTFORML 骑在男人身上的%ANAME(対象)%淫荡地扭动着身体
+		;TranslatedMark 男の上に乗った%ANAME(対象)%は淫らに体をくねらせている
+		PRINTFORML 被吞进身体的阴茎每次顶到子宫的时候，%ANAME(対象)%就会发出甜美的娇声，露出恍惚的表情
+		;TranslatedMark 咥えこんだペニスに子宮を突き上げられる度に、%ANAME(対象)%は甘い嬌声を上げ恍惚の表情を見せた
+		PRINTFORML 男人也无法忍受紧夹着阴茎的阴道肉的感觉，把种子释放到子宫内
+		;TranslatedMark ぎゅうっとペニスを締め上げる膣肉の感触に男も我慢できなくなり、子宮内へと子種を解き放つ
+		PRINTFORMW 感受着下腹部蔓延的热量，%ANAME(対象)%一边感受着子宫的疼痛，一边沉醉于雌性的喜悦达到了顶峰
+		;TranslatedMark 下腹部に広がる熱に%ANAME(対象)%は子宮がきゅんと疼くのを感じながら、雌の悦びと共に絶頂した
+	CASE 4
+		PRINTFORML 男人在阴道内射了几次后，%ANAME(対象)%发出娇声
+		;TranslatedMark 男に抱きしめられながら何度目かの射精を受けて%ANAME(対象)%は嬌声を上げる
+		PRINTFORML 疲惫不堪的男子倒在床上，但不满足的%ANAME(対象)%再次把阴茎吞入体内，扭动着腰，催促着再次的性爱
+		;TranslatedMark 疲れ果てた男が倒れ込むが、物足りない%ANAME(対象)%はペニスを咥えこんだまま腰を揺すり次を催促する
+		PRINTFORML 被男人要求自己动的%ANAME(対象)%，浮现出淫靡的笑容，像舞女一样扭动着身体
+		;TranslatedMark 男に目で楽しませてくれと言われた%ANAME(対象)%は、淫靡な笑みを浮かべ踊り子の様に体をくねらせる
+		PRINTFORMW %ANAME(対象)%感觉到自己体内的肉棒再次滚烫起来，于是在他身上更热情地扭动身体
+		;TranslatedMark 自らの中で肉棒が再び熱を持ち出したのを感じた%ANAME(対象)%は、彼の上で更に情熱的に踊った
+	CASE 5
+		PRINTFORML %ANAME(対象)%以后背位的姿势被男人侵犯
+		;TranslatedMark %ANAME(対象)%は四つん這いの姿勢で男に犯されている
+		PRINTFORML 男人的每一次插入，柔肉互相碰撞的声音和%ANAME(対象)%的娇声都有节奏地回响
+		;TranslatedMark 男の一突き毎に、柔肉の打ち合う音と%ANAME(対象)%の嬌声がリズミカルに響く
+		PRINTFORML 脑子里面只能想着做爱，%ANAME(対象)%陷入了仿佛被男人征服的错觉
+		;TranslatedMark 脳天に響くような圧倒的なセックスに%ANAME(対象)%はまるで男に征服されるかのような錯覚に陥る
+		PRINTFORMW 但是%ANAME(対象)%却反而感到了喜悦，作为一只雌兽接受了男人的精液
+		;TranslatedMark しかし%ANAME(対象)%はむしろそれに悦びを覚え、一匹の雌として男の精を受け入れた
+	CASE 6
+		PRINTFORML %ANAME(対象)%像狗一样被男人按在床上操
+		;TranslatedMark %ANAME(対象)%は犬のような恰好で背後から突かれている
+		PRINTFORML 每当强壮的阴茎顶到最深处的时候，%ANAME(対象)%发出淫媚的声音，身体痉挛着
+		;TranslatedMark 逞しいペニスが出入りする度に天井をこすられ、%ANAME(対象)%はあられもない声を出してビクビクと痙攣する
+		PRINTFORML 当阴茎激烈地撞击着子宫的时候，%ANAME(対象)%一边仰着背一边到达了顶峰
+		;TranslatedMark 彼が激しく子宮まで届くような一突きを見舞うと、%ANAME(対象)%は大きく背を反らしながら一瞬気を飛ばす
+		PRINTFORMW 阴道紧紧包裹着男人猛烈抽插的阴茎，%ANAME(対象)%多次被绝顶
+		;TranslatedMark その時の膣の締まりを気に入った男によって激しく突かれ続け、%ANAME(対象)%は何度も絶頂させられた
+	CASE 7
+		PRINTFORML %ANAME(対象)%被男人压在身下，匍匐在地上被侵犯
+		;TranslatedMark %ANAME(対象)%は男に覆いかぶされて四つん這いで犯されている
+		PRINTFORML 进行着身体紧贴在一起猛烈打桩的充满野性的性行为，%ANAME(対象)%发出了非常强烈的喘息
+		;TranslatedMark 身体を密着させて乱暴に腰を打ちつけ合う野性的なセックスに、%ANAME(対象)%はひぃひぃ喘がされている
+		PRINTFORML 乳肉被揉捏，阴道里也接受了强烈的刺激，%ANAME(対象)%大幅度的颤动着身体，达到了绝顶
+		;TranslatedMark 胸を揉まれながらぐりぐりと膣肉を刺激され、%ANAME(対象)%は大きく身を震わせて絶頂してしまう
+		PRINTFORMW 两人的热情完全没有减弱，只是像野兽一样不断地交配
+		;TranslatedMark 二人の熱は一向に収まることを知らず、まるで獣のような交尾をひたすら繰り返した
+	CASE 8
+		PRINTFORML 男人从背后抓住%ANAME(対象)%的腰激烈地侵犯
+		;TranslatedMark 男が背後から%ANAME(対象)%の腰を掴んで激しく犯している
+		PRINTFORML %ANAME(対象)%的阴道接受着强烈的快感，她一边喘息，一边拼命忍耐不让自己脱力
+		;TranslatedMark %ANAME(対象)%はゴリゴリと膣肉を抉られだらしなく喘ぎながらも、崩れ落ちそうになるのを必死で堪えている
+		PRINTFORML 但是，由于男人巧妙的技巧，她还是丢了力气，随着绝顶一起倒在了床上
+		;TranslatedMark しかし男の巧みなテクニックによってすぐに腕に力が入らなくなり、絶頂と共にベッドに倒れ込んでしまう
+		PRINTFORMW 面对这样的%ANAME(対象)%，男子更加激烈地进攻，她整夜都被男人压在身下
+		;TranslatedMark そんな%ANAME(対象)%に対し男はさらに激しく攻めたて、彼女は夜通し躾けられてしまった
+	CASE 9
+		PRINTFORML %ANAME(対象)%被男人从背后抱住接受着男人的插入
+		;TranslatedMark %ANAME(対象)%は男に背後から抱きしめられながらペニスを咥えこんでいる
+		PRINTFORML 男人一只手握住柔软的乳肉，一只手轻轻揉搓着乳头，把头靠在%ANAME(対象)%耳边，轻轻舔着脖颈，%ANAME(対象)%在这样的刺激下身体不自觉的抖动
+		;TranslatedMark 胸を揉みしだかれ乳首をこねくり回されながらうなじを舌でなぞられ、%ANAME(対象)%はゾクゾクと震える
+		PRINTFORML 被强烈的爱抚而更想要的%ANAME(対象)%扭动着腰，男人也把手放在她的腰上温柔地抽插
+		;TranslatedMark 濃厚な愛撫に切なくなった%ANAME(対象)%が腰を揺すると男も彼女の腰に手を回し優しく突き上げてきた
+		PRINTFORMW 虽然并不激烈，但%ANAME(対象)%对缠绕在身体上的浓厚的性爱很着迷，多次绝顶
+		;TranslatedMark 決して激しくはないが身体を絡ませ合う濃厚なセックスに%ANAME(対象)%は夢中になり何度も絶頂した
+	CASE 10
+		PRINTFORML %ANAME(対象)%被男人从背后抓住双臂，以站立后背位的姿势撞击着子宫
+		;TranslatedMark %ANAME(対象)%は男に背後から両腕を掴まれ立ちバックの姿勢で子宮を小突かれている
+		PRINTFORML 粗暴的性爱让%ANAME(対象)%兴奋，每次抽插都一边喘息一边勒紧阴道刺激阴茎
+		;TranslatedMark 乱暴なセックスにしかし%ANAME(対象)%は興奮し、一突き毎に喘ぎながら膣を締め上げペニスを刺激した
+		PRINTFORML 对%ANAME(対象)%的反应很在意的男人，更加激烈地冲撞着她的子宫
+		;TranslatedMark %ANAME(対象)%の反応に気を良くした男は、更に激しく子宮内に響くようなストロークを繰り出し彼女を攻める
+		PRINTFORMW 不久，忍受不了阴道束缚的男子射精后，%ANAME(対象)%弹起身体，达到了顶峰
+		;TranslatedMark やがて膣の締め付けに我慢できなくなった男が射精すると、%ANAME(対象)%は体を跳ね上げながら絶頂した
+	CASE 11
+		PRINTFORML %ANAME(対象)%一进屋就被男人推倒，剥去了衣服
+		;TranslatedMark %ANAME(対象)%は部屋に入るなり男に押し倒されペニスをねじ込まれた
+		PRINTFORML 阴户已经变得粘稠，%ANAME(対象)%也没有抵抗就接受了男人的插入
+		;TranslatedMark しかしその秘所はすでにとろとろになっており、%ANAME(対象)%も抵抗もせずにそれを受け入れる
+		PRINTFORML 男人沉醉在%ANAME(対象)%的阴道的触感中，摆动着腰，她每次被顶到也都会发出娇声
+		;TranslatedMark 男は%ANAME(対象)%のマン肉の感触に夢中になって腰を振り、彼女もまた一突きされる度に嬌声を上げる
+		PRINTFORMW 两条长腿抬起勾住男人的腰，接受着男人射在体内的快感，%ANAME(対象)%感受到了身体燃烧般的快乐
+		;TranslatedMark 震える男の腰を両足でがっしりと掴みながら射精を受け、%ANAME(対象)%は身体が燃える様な快楽を味わった
+	CASE 12
+		PRINTFORML %ANAME(対象)%以正常位的姿势被强烈侵犯
+		;TranslatedMark %ANAME(対象)%は正常位の格好で激しく犯されている
+		PRINTFORML 每次男人摇腰用阴茎刺激阴道，%ANAME(対象)%都会露出销魂的表情弓起身体
+		;TranslatedMark 男が腰を振りペニスで膣内を刺激される度に、%ANAME(対象)%はたまらないといった表情で体をくねらせる
+		PRINTFORML 那种淫荡的表情和动作使男人更加兴奋，更激烈地撞击对方的腰，贪图快乐
+		;TranslatedMark その淫らな表情と仕草に男の興奮も一層昂ぶり、更に激しく腰を打ちつけ快楽を貪りあう
+		PRINTFORMW 不久，男子低吟射精的同时，%ANAME(対象)%也不争气的露出啊嘿颜，达到了顶峰
+		;TranslatedMark やがて男が低く唸り射精すると同時に、%ANAME(対象)%もまただらしなく涎を垂らしながら絶頂した
+	CASE 13
+		PRINTFORML %ANAME(対象)%一边接受着男人阴茎的插入一边舌吻
+		;TranslatedMark %ANAME(対象)%は男のペニスを咥えこみながら舌を絡ませている
+		PRINTFORML 每当男人依靠体重把阴茎重重插入的时候，%ANAME(対象)%就会受到让全身颤抖的快乐
+		;TranslatedMark 男が体重を乗せて腰を打ち付ける度に%ANAME(対象)%は痺れるような快楽で体を痙攣させ軽く達する
+		PRINTFORML 松开嘴唇，%ANAME(対象)%用手勾在男人的脖子上，同时阴道也会更用力勒紧阴茎
+		;TranslatedMark 唇を離しても%ANAME(対象)%は男の首に手を回したまま、もっともっととおねだりして膣を締めつける
+		PRINTFORMW 对于%ANAME(対象)%的诱惑，男人也更加激烈地摇着腰回应，两人反复贪图着这份性爱
+		;TranslatedMark %ANAME(対象)%の誘いに男もより激しく腰を振って応え、二人はお互いを貪る様なセックスを繰り返した
+	CASE 14
+		PRINTFORML %ANAME(対象)%被男人一边侵犯一边妖艳地扭动着身体
+		;TranslatedMark %ANAME(対象)%は男に犯されながら艶めかしく体をくねらせている
+		PRINTFORML 他那肥胖的身躯不停地耸动着，压在身下的%ANAME(対象)%完全被迷住了
+		;TranslatedMark 彼のねっとりとした腰遣いで攻められ続け、その虜になった%ANAME(対象)%はすっかり惚けてしまっている
+		PRINTFORML 用平常的%ANAME(対象)%无法想象的淫靡表情编织出淫荡的话语来渴求着他
+		;TranslatedMark 普段の%ANAME(対象)%からは想像も出来ないような淫靡な表情で淫らな言葉を紡ぎ彼を求めている
+		PRINTFORMW %ANAME(対象)%陶醉于男人给予的快乐，被侵犯后多次达到绝顶
+		;TranslatedMark %ANAME(対象)%は男に与えられる快楽に陶酔しながら、犯されるままに犯され何度も絶頂した
+	CASE 15
+		PRINTFORML %ANAME(対象)%趴在床上一边接受着男人的抽插一边被打着屁股
+		;TranslatedMark %ANAME(対象)%はうつ伏せの格好で男にのしかかられながら犯されている
+		PRINTFORML 每当男人把那强健的阴茎插进%ANAME(対象)%身体时，她就会配合着发出娇声
+		;TranslatedMark 男がその逞しいペニスを%ANAME(対象)%の中に出し入れする度に、彼女はそれに合わせ嬌声を上げる
+		PRINTFORML %ANAME(対象)%沉浸在被插入的快乐中，每一次撞击都会抱着枕头露出淫荡的表情		
+		;TranslatedMark %ANAME(対象)%は与えられる快楽に夢中になって、一突き毎により強く枕を抱きしめ表情を蕩けさせる
+		PRINTFORMW 当期待已久的男子的子种被注入子宫内时，%ANAME(対象)%全身痉挛着，达到了顶峰
+		;TranslatedMark 待望の男の子種を子宮内に注ぎ込まれると、%ANAME(対象)%は全身を痙攣させながら絶頂した
+	CASE 16
+		PRINTFORML %ANAME(対象)%趴在床上，把屁股高高翘起被男人侵犯
+		;TranslatedMark %ANAME(対象)%は男に尻を持ち上げられる格好で犯されている
+		PRINTFORML 因为太过快乐，%ANAME(対象)%把脸埋在枕头上一边晃动着身体，一边拼命忍耐着
+		;TranslatedMark あまりの快楽に%ANAME(対象)%は枕に顔をうずめながら身体を振るわせつつ、必死で耐えている
+		PRINTFORML 但是，当被阴茎撞到子宫口时，无法忍受地发出甜美的声音，最终达到了顶峰
+		;TranslatedMark しかしペニスに子宮口を撫でられると、耐えきれず甘える様な声を上げて絶頂してしまった
+		PRINTFORMW 对于%ANAME(対象)%可爱的反应，男人兴奋不已，更加用力的蹂躏着阴道多次使她绝顶
+		;TranslatedMark %ANAME(対象)%の可愛い反応に男は興奮し、膣内を蹂躙しながら何度も彼女を絶頂させた
+	CASE 17
+		PRINTFORML %ANAME(対象)%一边被男人侵犯一边弓着腰发出撒娇的声音
+		;TranslatedMark %ANAME(対象)%は男に犯されながら腰をくねらせ甘えた声を上げる
+		PRINTFORML 每次被阴茎插进最深处，%ANAME(対象)%会忍不住发出娇声跳跃身体
+		;TranslatedMark ペニスでボルチオをグリグリと攻められると、%ANAME(対象)%はたまらず嬌声を上げて体を跳ねる
+		PRINTFORML %ANAME(対象)%在高潮的同时，用魅惑的眼神看着男人，把手臂张开诱惑他
+		;TranslatedMark %ANAME(対象)%は絶頂しながら目をハートにしながら男を見つめて、大きく手を広げて彼を誘う
+		PRINTFORMW 被男人紧紧抱住的同时注入了种子，%ANAME(対象)%的脚一下子挺直了，再次达到了顶峰
+		;TranslatedMark 男にぎゅぅっと抱きしめられながら子種を注がれ、%ANAME(対象)%は足をピンと伸ばしながら再び絶頂した
+	CASE 18
+		PRINTFORML %ANAME(対象)%的阴户被男人的手指灵活的挑逗，很快就沦陷了
+		;TranslatedMark %ANAME(対象)%は男の巧みな指使いで攻められ、すぐに虜になってしまった
+		PRINTFORML 无法忍耐的%ANAME(対象)%摆出服从的姿势，自己把阴唇掰开，向他求爱
+		;TranslatedMark 我慢できなくなった%ANAME(対象)%は服従のポーズになり、とろとろになったまんこを割れ開きおねだりする
+		PRINTFORML 男子掏出强健的阴茎，%ANAME(対象)%的淫水就从阴道里面溢出来
+		;TranslatedMark 男が逞しいペニスを取り出すと、%ANAME(対象)%は釘付けになり秘所からさらに愛液を溢れださせる
+		PRINTFORMW 然后，在期待已久的阴茎插入的同时，%ANAME(対象)%一边颤抖一边达到了顶峰
+		;TranslatedMark そして待望のペニスをねじ込まれるとともに%ANAME(対象)%は子宮を震わせながら絶頂した
+	CASE 19
+		PRINTFORML %ANAME(対象)%靠着墙被男人侵犯
+		;TranslatedMark %ANAME(対象)%は壁に寄りかかりながら犯されている
+		PRINTFORML 被男人抬起一只脚	，另一只脚只能用脚尖支撑着身体，同时接受着男人的插入	
+		;TranslatedMark 男に片足を持ち上げられ、爪先立ちの格好でペニスを激しく出し入れされながらヨガっている
+		PRINTFORML 男人的阴茎不断的撞击着子宫，%ANAME(対象)%因为太过快乐而全身颤抖
+		;TranslatedMark 男のペニスで子宮を抉る様に小突かれ続けて、%ANAME(対象)%はあまりの快楽にガクガクと震える
+		PRINTFORMW 男人浓厚的精液射进了阴道，%ANAME(対象)%就忍不住露出啊嘿颜，达到了绝顶
+		;TranslatedMark 濃厚な精液を膣奥に放たれると、%ANAME(対象)%はたまらずアヘ顔を晒しながら絶頂した
+	CASE 20
+		PRINTFORML %ANAME(対象)%用对面座位的姿势吞没了男人的阴茎，同时和男人舌吻
+		;TranslatedMark %ANAME(対象)%は対面座位の体勢でペニスを咥えこみながら男と舌を絡ませている
+		PRINTFORML 每次像是贪图快乐一样把舌头交缠在一起，就会感觉阴道内的阴茎颤抖
+		;TranslatedMark 貪るようにお互いの舌を絡ませていると、膣内のペニスがビクビクと震えるのを感じる
+		PRINTFORML 放开嘴唇凝视着他，腰一个劲地扭动，男子舒服地呻吟着
+		;TranslatedMark 唇を離し彼を見つめながら腰をクイクイとくねらせると男が気持ち良さそうに呻く
+		PRINTFORMW 两人再次一边接吻一边摇晃着腰，沉浸于悠闲的性生活
+		;TranslatedMark 二人は再びキスをしながら腰を揺すりあい、ゆったりとしたセックスに没頭した
+	CASE 21
+		PRINTFORML 跨坐在盘腿坐着的男人身上，%ANAME(対象)%扭动着腰
+		;TranslatedMark 胡坐をかいた男の上に跨り%ANAME(対象)%は腰を振っている
+		PRINTFORML 被玩弄乳房时会发出娇媚的呻吟，身体颤抖着%ANAME(対象)%继续动着腰
+		;TranslatedMark 男に乳房を弄られてたまらないといった声を出し、身を震わせながらも%ANAME(対象)%は腰を動かし続ける
+		PRINTFORML 当乳头被轻轻咬住的时候，控制不住地发出很大的娇声，身体会剧烈的抖动一次
+		;TranslatedMark しかし乳首を舌で甘噛みされると思わず大きく嬌声をあげビクンと身体を跳ねさせてしまう
+		PRINTFORMW 虽然向男子提出了抗议，但表情却很柔和，在那之后一边爱抚一边扭动着腰
+		;TranslatedMark 男に抗議をしながらもその表情はとろけており、その後もイチャイチャしながら腰を打ちつけ合った
+	CASE 22
+		PRINTFORML 被男人的手指和舌头玩弄了很久阴户，%ANAME(対象)%无力地躺在床上
+		;TranslatedMark 男の指と舌で秘所をたっぷりと攻められ、%ANAME(対象)%は力なくベッドに横たわっている
+		PRINTFORML 阴户完全敞开了，一张一合的，爱液从里面流出来，随时准备好接受男人的插入
+		;TranslatedMark その秘所はすっかり開き切っており、愛液でとろとろになってセックスを待ちわびている
+		PRINTFORML 每次男人把阴茎在阴唇处摩擦，%ANAME(対象)%都会包含期待轻轻扭动着腰
+		;TranslatedMark 男が焦らす様に秘所にペニスを擦り付けると、%ANAME(対象)%は胸を高鳴らせて腰をくねらせおねだりする
+		PRINTFORMW 男人慢慢地沉下身子把阴茎插入，%ANAME(対象)%感受着无比的幸福，同时也达到了顶峰
+		;TranslatedMark ずぶずぶとゆっくりとペニスを沈められていくと%ANAME(対象)%はこの上ない幸せを感じながら絶頂した
+	CASE 23
+		PRINTFORML 床上两个人互相舔着性器
+		;TranslatedMark ベッドの上で二人はお互いの性器を舐めあっている
+		PRINTFORML 男人的气息在嘴里扩散开来，%ANAME(対象)%的脑袋里充满了性的事情
+		;TranslatedMark 口いっぱいに広がる雄の臭いに%ANAME(対象)%の頭の中はセックスの事で埋め尽くされていく
+		PRINTFORML 让男人的阴茎射出几次后，又积极的用舌头舔弄让阴茎重新站起来
+		;TranslatedMark 彼のねっとりとしたクンニで何度か軽く達しながらも熱心に奉仕し、彼のペニスをバキバキに勃起させる
+		PRINTFORMW 达到极限的两人互相搂抱着，开始了猛烈的抽插，两人沉溺于肉欲之中
+		;TranslatedMark 限界に達した二人は抱きしめあうと、猛烈なセックスを開始しひたすら肉欲におぼれた
+	CASE 24
+		PRINTFORML %ANAME(対象)%跪在男人的胯股之间，把男人的阴茎吞进口中
+		;TranslatedMark %ANAME(対象)%は男の股の間に跪き、逞しい一物を口いっぱいに頬張っている
+		PRINTFORML 用舌头刺激铃口舔弄着棒身，男人舒服地呻吟起来。当感觉阴茎抖动起来时
+		;TranslatedMark 舌で鈴口を刺激しながら竿を吸い上げると、男が気持ち良さそうに唸りペニスが痙攣するのを感じる
+		PRINTFORML 一度中断了服务，只是揉着睾丸，使坏地仰视男子，等着男人恳求继续下去
+		;TranslatedMark そこでいったん奉仕を中断し玉を揉みながら意地悪そうに男を見上げると続きを懇願された
+		PRINTFORMW %ANAME(対象)%睁大眼睛，用舌头从他的肉棒里榨取特浓的精液
+		;TranslatedMark %ANAME(対象)%は目をハートにしながら、ねっとりとした舌遣いで彼の肉棒から特濃の精液を搾り取った
+	CASE 25
+		PRINTFORML %ANAME(対象)%一边被男人吸着乳头，一边用手指责弄着阴茎
+		;TranslatedMark %ANAME(対象)%は男に乳首を吸われながらクリトリスを指で弄られている
+		PRINTFORML 被舌头持续攻击性感带，%ANAME(対象)%喘着气身体颤抖起来
+		;TranslatedMark ねっとりとした攻めで性感帯を攻められ続け、%ANAME(対象)%は泡を吐いて痙攣しっぱなしになっている
+		PRINTFORML 当乳头和阴蒂同时被弹起来的时候，%ANAME(対象)%发出了很大的娇声，一边潮吹一边达到了顶峰
+		;TranslatedMark 乳首とクリトリスを同時に弾かれると、%ANAME(対象)%は一際大きな嬌声を上げて潮を吹きながら絶頂した
+		PRINTFORMW 而男子则充分享受了粘稠的阴道肉，%ANAME(対象)%也沉醉在更多的快乐中
+		;TranslatedMark そして男はとろとろになった膣肉を存分に堪能し、%ANAME(対象)%もまた更なる快楽に夢中になった
+	CASE 26
+		PRINTFORML %ANAME(対象)%从母穴滴下白浊液，气喘吁吁地躺在那里
+		;TranslatedMark %ANAME(対象)%は雌穴から白濁液を垂れ流しながら、息も絶え絶えに横たわっている
+		PRINTFORML 一进房间就被男人推倒，被欺负得体无完肤，一直被种下去
+		;TranslatedMark 部屋に入ると直ぐに男に押し倒され、散々苛められて種付けされ続けたのだ
+		PRINTFORML 但是那个表情充满了幸福，偶尔回想起做爱的事会发抖，轻轻地达到
+		;TranslatedMark しかしその表情は幸福に満ちており、時折セックスの事を思い返しては身震いして軽く達している
+		PRINTFORMW 不久之后再次被男人覆盖，%ANAME(対象)%就把手放在他的头上，自己寻求继续
+		;TranslatedMark やがて再び男に覆いかぶさられると、%ANAME(対象)%は彼の首に手を回して自ら続きを求めた
+	CASE 27
+		PRINTFORML %ANAME(対象)%带着出神的表情被男人抱在怀里
+		;TranslatedMark %ANAME(対象)%はうっとりとした表情で男の腕の中に抱かれている
+		PRINTFORML 男人的性很好，被无数次完美的%ANAME(対象)%迷住了
+		;TranslatedMark 男のセックスは素晴らしく、何度も絶頂させられた%ANAME(対象)%はメロメロになってしまった
+		PRINTFORML 理所当然地被多次提出阴道，从那个秘室里流出了粘稠的精液
+		;TranslatedMark 当然のように何度も膣出しされ、その秘所からはどろりと精液が垂れ流れている
+		PRINTFORMW 再次被男人要求的话，%ANAME(対象)%自己打开秘密，拉着子宫口要求配种
+		;TranslatedMark 再び男に求められると、%ANAME(対象)%は自ら秘所を割れ開き子宮口をひくつかせて種付けをねだった
+	CASE 28
+		PRINTFORML 迎来了第几次绝顶的两个人抱在一起倒在了床上
+		;TranslatedMark 何度目かの絶頂を迎えた二人は抱き合いながらベッドに倒れ込んだ
+		PRINTFORML %ANAME(対象)%气喘吁吁地贴近男子的胸板，以恍惚的表情颤抖着身体
+		;TranslatedMark %ANAME(対象)%は息を荒げながら男の胸板に寄り添い、恍惚とした表情で体を震わせている
+		PRINTFORML 被男人问到心情好吗，他虽然有点害羞，但还是很开心地害羞地点了点头
+		;TranslatedMark 気持ちよかったかと男に問われると、やや照れながらも嬉しそうにはにかみながら頷く
+		PRINTFORMW 休息了一会儿后，不知从哪边开始了亲密的吻，两人重新开始了浓厚的性生活
+		;TranslatedMark しばし休んだ後、どちらからともなく口付けを交わすと濃厚なセックスを再開した
+	CASE 29
+		PRINTFORML 一进屋就做了好几次爱的两个人拥抱在一起喘着气
+		;TranslatedMark 部屋に入るなり何度もまぐわった二人は抱き合いながら一息ついている
+		PRINTFORML 被他一个劲地抚摸着阴道内射精的小腹，%ANAME(対象)%感到卵巢隐隐作痛
+		;TranslatedMark ひたすら膣内射精された下腹部を彼に撫でられると、%ANAME(対象)%は卵巣がきゅんと疼くのを感じた
+		PRINTFORML 如果怀孕了怎么办？听着男人这样低语的话，%ANAME(対象)%想象着自己怀上他的孩子的情况，禁不住笑了起来
+		;TranslatedMark 孕んだらどうする？と男に囁かれると、%ANAME(対象)%は彼の子供を身籠る事を想像して思わずニヤケる
+		PRINTFORMW 然后跨到男人身上，把阴茎吞入体内，还差得远呢？一声不响地摇起腰来
+		;TranslatedMark そして男に跨るとペニスを咥えこみ、まだまだしよ？とおねだりしながら腰を振りだした
+	CASE 30
+		PRINTFORML %ANAME(対象)%沉迷于被男人侵犯
+		;TranslatedMark %ANAME(対象)%は男に犯される事に夢中になっている
+		PRINTFORML 两人的身体相性很高，阴茎每次进出都会有闪电一样麻木的快乐在身体上乱窜
+		;TranslatedMark 二人の身体の相性は抜群で、ペニスが出入りする度にしびれるような快楽が身体を駆け巡った
+		PRINTFORML %ANAME(対象)%一边喘着气一边抱住他，说些下流的话，想要得到更大的快乐
+		;TranslatedMark %ANAME(対象)%はひぃひぃ喘ぎながら彼に抱きついて卑猥な言葉を連ねて更なる快楽をねだり
+		PRINTFORMW 他也在%ANAME(対象)%的身体里忘我地摆动着腰，两个人一直沉迷于肉欲之中
+		;TranslatedMark 彼もまた%ANAME(対象)%の身体に無我夢中で腰を振り、二人で肉欲におぼれ続けた
+	CASE 31
+		PRINTFORML %ANAME(対象)%的阴道被深深地插进了男人的阴茎，接受着侵犯
+		;TranslatedMark %ANAME(対象)%は男のペニスを深々と挿し込まれながら犯されている
+		PRINTFORML 在仰卧的状态下，被男人的体重压在身下，%ANAME(対象)%就狂热了起来
+		;TranslatedMark 仰向けの状態で、ずっしりと男にのしかかられたまま%ANAME(対象)%はヨガり狂う
+		PRINTFORML 每撞一次，%ANAME(対象)%都拼命地抱住他，仿佛子宫被压碎一般的激烈挤压
+		;TranslatedMark 一突き毎に子宮が押しつぶされるかのような激しいプレスに%ANAME(対象)%は必死で彼に抱きつく
+		PRINTFORMW 不久，在将种子直接注入子宫内的同时，%ANAME(対象)%伴随着喜悦的声音颤抖着
+		;TranslatedMark やがて胎内へ直接子種を注ぎ込まれながら、%ANAME(対象)%は悦びの声と共に震えあがった
+	CASE 32
+		PRINTFORML %ANAME(対象)%一边接受男人激烈的活塞一边喘息
+		;TranslatedMark %ANAME(対象)%は男の激しいピストンを受けながら喘いでいる
+		PRINTFORML 像是子宫内部被侵入一样激烈的扭腰，%ANAME(対象)%的脚尖直直地伸展着
+		;TranslatedMark 子宮内部に侵入されるかの様な激しい腰遣いに%ANAME(対象)%はつま先までピンと伸ばして悶える
+		PRINTFORML 突然阴茎抽搐了几下！很有气势的射精，%ANAME(対象)%眼前一片空白，发出娇媚的呻吟
+		;TranslatedMark 不意にびゅるるる！と勢いよく射精されて、%ANAME(対象)%は目の前が真っ白になって嬌声を上げる
+		PRINTFORMW 在他长时间的射精下，%ANAME(対象)%感觉被精液渗入，几度达到了顶峰
+		;TranslatedMark 彼の長い射精を受けながら、%ANAME(対象)%は精液が染み込んでくる感覚で更に何度か絶頂してしまった
+	CASE 33
+		PRINTFORML %ANAME(対象)%用四肢紧紧地抱住他，粘糊糊地接吻
+		;TranslatedMark %ANAME(対象)%は両手足で彼にしがみ付きながらねっとりとキスハメされている
+		PRINTFORML 感觉到他全身散发的爱意，%ANAME(対象)%的女人的本能就会痛得心发热
+		;TranslatedMark 彼に全身を存分に愛されているのを感じて、%ANAME(対象)%の女の本能が疼き胸が熱くなる
+		PRINTFORML %ANAME(対象)%更强烈地感觉到子宫在准备接受他的种子，紧紧地抱住他
+		;TranslatedMark 更に%ANAME(対象)%は子宮が彼の種を受け入れる準備をしているのを感じ、より強く彼にしがみ付く
+		PRINTFORMW 不久之后，体内被注入了盼望已久的种子，%ANAME(対象)%在受精的喜悦中颤抖着，达到了顶峰
+		;TranslatedMark やがてお待ちかねの子種を注がれて、%ANAME(対象)%は受精の悦びに震えながら絶頂した
+	CASE 34
+		PRINTFORML %ANAME(対象)%在男人的阴茎上被深深地挖出阴道肉而喘息
+		;TranslatedMark %ANAME(対象)%は男のペニスで膣肉を深く抉られて喘いでいる
+		PRINTFORML 虽然那个动作很热情但并不激烈，但确实在攻击%ANAME(対象)%的弱点
+		;TranslatedMark その動きは情熱的だが激しくはないが、%ANAME(対象)%の弱点を的確に攻め立てている
+		PRINTFORML 用他那缓缓的活塞持续使欲望高涨的%ANAME(対象)%发出甜美的声音，身体也颤抖起来
+		;TranslatedMark 彼のそのゆっくりとしたピストンで官能を昂ぶらされ続けた%ANAME(対象)%は甘えた声で身悶える
+		PRINTFORMW 不久，两人一边说着甜言蜜语，一边达到了顶峰，%ANAME(対象)%在子宫里接受了他的精子
+		;TranslatedMark やがて二人は愛の言葉を交わしながら同時に絶頂し、%ANAME(対象)%は子宮で彼の精子を受け止めた
+	CASE 35
+		PRINTFORML 疲惫不堪的两个人泡在浴池里休息着
+		;TranslatedMark まぐわい続けて疲れた二人は浴槽につかって休んでいる
+		PRINTFORML 在男人的怀抱中度过了愉快的时光，%ANAME(対象)%突然感到坚硬的东西碰到小腹
+		;TranslatedMark 男の胸に抱かれながら心地よい時間を過ごしていると、不意に下腹部に硬いものが当たる
+		PRINTFORML 她恶作剧地笑着，一边抚摸着变大的他的阴茎，一边害羞地捂着嘴唇
+		;TranslatedMark 意地悪そうに笑いながら、大きくなった彼のペニスを撫でてやると彼は照れながら唇を覆ってきた
+		PRINTFORMW 不久，浴室里响起了水溅出来的声音和男女激烈的交配声
+		;TranslatedMark やがて風呂場に水の跳ねる音と男女の激しくまぐわう音が響きだした
+	CASE 36
+		PRINTFORML 因性爱而满身是汗的两个人决定洗淋浴
+		;TranslatedMark セックスでどろどろになった二人はシャワーを浴びることにした
+		PRINTFORML %ANAME(対象)%涂满泡沫之后，紧贴在他身上一边调情一边给他清洗身体
+		;TranslatedMark %ANAME(対象)%は身体を泡立たせると彼に密着してイチャイチャしながら身体を洗ってあげる
+		PRINTFORML 一边接吻一边细心爱抚彼此的性器，渐渐变得不能忍耐，于是新一轮的做爱开始了
+		;TranslatedMark キスをしながらお互いの性器を丹念に愛撫し合っていると我慢が出来なくなりセックスが始まる
+		PRINTFORMW 一边淋浴一边激烈摩擦，在阴道深处充分地注入了他的精液
+		;TranslatedMark シャワーを浴びながら激しくまぐわい、膣の奥までたっぷりと彼の精液を注がれた
+	CASE 37
+		PRINTFORML %ANAME(対象)%被他以张开双腿的姿势侵犯
+		;TranslatedMark %ANAME(対象)%は彼に両脚を大きく開かされた格好で犯されている
+		PRINTFORML 在被阴茎激烈地抽插的同时，在耳边被低声私语着爱意，%ANAME(対象)%感到胸口发热
+		;TranslatedMark ペニスを激しく出し入れされながら耳元で愛の言葉を囁かれ、%ANAME(対象)%は胸が熱くなるのを感じる
+		PRINTFORML %ANAME(対象)%也很快乐，用恍惚的眼神凝视着他，回馈了爱的话语，阴道里不自觉的收紧
+		;TranslatedMark %ANAME(対象)%も快楽で惚けた頭で彼を見つめておねだりの言葉を返し、膣をキュッとしめる
+		PRINTFORMW 一边被他呼喊着爱，一边在阴道深处被尽情射精，%ANAME(対象)%在幸福的包围中达到了顶峰
+		;TranslatedMark 彼に愛を叫ばれながら膣奥で思い切り射精されて%ANAME(対象)%は幸せに包まれながら絶頂した
+	CASE 38
+		PRINTFORML 在床上%ANAME(対象)%一边露着啊嘿颜一边被强烈侵犯
+		;TranslatedMark ベッドの上で%ANAME(対象)%はアヘ顔を晒しながら激しく犯されている
+		PRINTFORML 由于事先喝下的媚药的效果，%ANAME(対象)%全身都变得敏感，脑子里全是粉色
+		;TranslatedMark 事前に彼に飲まされた媚薬の効果で%ANAME(対象)%は全身が敏感になり、頭の中はピンク一色になっている
+		PRINTFORML 已经失去理性了，沉溺在被给予的肉欲中，连呼淫贱的话语来催促男人的射精
+		;TranslatedMark もはや理性も吹き飛び、与えられる肉欲に溺れて卑猥な言葉を連呼して男の射精を促す
+		PRINTFORMW 男人也因为这样的%ANAME(対象)%而兴奋不已，为了满足她的子宫而反复射精
+		;TranslatedMark そんな%ANAME(対象)%に男も興奮し、彼女の子宮が満たされるほどに何度も射精を繰り返した
+	CASE 39
+		PRINTFORML %ANAME(対象)%像男人和恋人一样甜蜜地做爱
+		;TranslatedMark %ANAME(対象)%は男と恋人の様に甘いセックスをしている
+		PRINTFORML 两个人紧紧地握着双手，互相动着腰，共享着快乐
+		;TranslatedMark 二人は両手をしっかりと握りしめあいながら腰を打ちあい、快楽を共有している
+		PRINTFORML %ANAME(対象)%一边勒紧阴道一边扭动腰，诱导他的阴茎更加深入
+		;TranslatedMark %ANAME(対象)%は種付けを求めて膣を締め上げながら腰をくねらせ、彼のペニスをより深くに誘導する
+		PRINTFORMW 迎来极限的他为了让%ANAME(対象)%怀孕而释放出特浓的精液，她打开子宫口接受了
+		;TranslatedMark 限界を迎えた彼は%ANAME(対象)%を孕ませようと特濃の精液を放ち、彼女は子宮口を開いてそれを受け入れた
+	CASE 40
+		PRINTFORML %ANAME(対象)%被男人用屈曲位激烈地刺入阴茎
+		;TranslatedMark %ANAME(対象)%はまんぐり返しの姿勢で激しくペニスを突き入れられている
+		PRINTFORML 咕滋！咕滋！每次被插进子宫的时候%ANAME(対象)%都会让身体抖动而发出闷哼
+		;TranslatedMark ゴス！ゴス！と子宮が潰れる様なピストンをされる度に%ANAME(対象)%は体を跳ねさせ悶える
+		PRINTFORML 那个表情是恍惚的，为了寻求更激烈的快乐，无意识地收缩阴道刺激阴茎
+		;TranslatedMark その表情は恍惚としており、より激しい快楽を求めて無意識に膣を収縮させてペニスを刺激する
+		PRINTFORMW 在最深处接受男人的精液的同时，%ANAME(対象)%一边仰着背一边发出喜悦的声音
+		;TranslatedMark 男の精液を最奥で受け入れながら%ANAME(対象)%は大きく背を反らしながら悦びの声を上げた
+	CASE 41
+		PRINTFORML 阴茎在%ANAME(対象)%的下身激烈的进进出出，%ANAME(対象)%紧紧的抱住男人
+		;TranslatedMark %ANAME(対象)%はペニスを深々と咥えこんだまま彼に抱きつきヨガっている
+		PRINTFORML 龟头刺激了子宫口，%ANAME(対象)%忍不住用脚尖抵着床单
+		;TranslatedMark コツンコツンと子宮口を亀頭で刺激され、%ANAME(対象)%はたまらずつま先でシーツを掴みながら達する
+		PRINTFORML 身体紧贴在一起的浓厚的性爱继续，两人的欲望无比高涨
+		;TranslatedMark 身体を密着させた濃厚なセックスは続き、二人の官能はこの上なく昂ぶっていく
+		PRINTFORMW 不久，铃口和子宫口紧贴在一起，释放出男人的种子，%ANAME(対象)%感受到了让脑子空白的绝顶
+		;TranslatedMark やがて鈴口と子宮口を密着させながら男の子種を放たれ、%ANAME(対象)%は頭が弾ける様な絶頂を味わった
+	CASE 42
+		PRINTFORML %ANAME(対象)%被男人抓住腰猛烈侵犯
+		;TranslatedMark %ANAME(対象)%は男に腰を掴まれて激しく犯されている
+		PRINTFORML 每一次被插入就有一种从下身往上蔓延的快乐，让%ANAME(対象)%感受到像全身都麻木一样的喜悦
+		;TranslatedMark 一突きされる毎に下腹部からこみ上げてくる快楽に、%ANAME(対象)%は身もだえして悦ぶ
+		PRINTFORML 男人把脸靠近，命令她伸出舌头，%ANAME(対象)%像狗一样把舌头伸出来和男人的舌头交缠
+		;TranslatedMark 男が顔を近づけ舌を出すように命ずると、%ANAME(対象)%は犬の様にだらしなく舌を垂らして舌を絡ませる
+		PRINTFORMW %ANAME(対象)%已经只能考虑性的事情了，之后也一直被他疼爱着
+		;TranslatedMark もはやセックスの事しか考えられなくなった%ANAME(対象)%は、その後も彼に可愛がられ続けた
+	CASE 43
+		PRINTFORML %ANAME(対象)%已经连续一个多小时被男人用粗壮的肉棒不断侵犯
+		;TranslatedMark %ANAME(対象)%はすでに一時間以上も男の太い肉棒で犯され続けている
+		PRINTFORML 不断给予的快乐连续地使她绝顶，让%ANAME(対象)%欲仙欲死
+		;TranslatedMark 絶え間なく与えられる快楽によって連続で絶頂させられ、死んじゃう！と訴える%ANAME(対象)%だが
+		PRINTFORML 男人的动作不但没有缓和，反而更加激烈，%ANAME(対象)%发出无声的声音身体在微微颤抖
+		;TranslatedMark 男の動きは緩まるどころか更に激しくなり、%ANAME(対象)%は声にならない声を出して痙攣する
+		PRINTFORMW 在那之后，他彻夜侵犯着她，%ANAME(対象)%完全成为了他的阴茎的俘虏
+		;TranslatedMark その後も夜通し男に攻め続けられ、%ANAME(対象)%はすっかり彼のペニスの虜になっていた
+	CASE 44
+		PRINTFORML %ANAME(対象)%一边紧紧抱住激烈摆动着腰的他，一边大声的发出妖媚的呻吟
+		;TranslatedMark %ANAME(対象)%は激しく腰を振る彼にしがみ付きながら嬌声を上げている
+		PRINTFORML 一边喘息一边勒紧阴道，接受了他的几次射精，向后仰，达到绝顶
+		;TranslatedMark ひぃひぃ喘ぎながらも膣をきつく締めつけ、彼の何度目かの射精を受けながら背を反らして絶頂する
+		PRINTFORML %ANAME(対象)%用手勾住射精结束后的男人的脖子，一边扭动着着腰一边向他撒娇
+		;TranslatedMark %ANAME(対象)%は射精を終えた男の首に手を回し、腰を揺すりながらもっともっととおねだりする
+		PRINTFORMW 为了满足她的愿望，%ANAME(対象)%一整晚都被男人反复的在体内射入精子
+		;TranslatedMark おねだりに応えた男によって、%ANAME(対象)%は一晩中種付け交尾をされてしまった
+ENDSELECT
+
+CALL FUCK_MAKELOVE(対象, GET_SPERM_ID("偶遇的男人"), @"偶遇的男人的\@RAND:2 ? 肉棒 # 唇\@", @"偶遇的男人")
+
+PRINTFORML
+PRINTFORML
+PRINTFORML
+PRINTFORMW 第二天早上，%ANAME(対象)%被从窗户射进来的朝阳和小鸟的鸣叫声吵醒了
+;TranslatedMark 翌朝、窓から差し込む朝日と小鳥のさえずりで%ANAME(対象)%は目ざめた
+PRINTFORMW 因为阳光比较刺眼，%ANAME(対象)%在被子里转过身来，碰到了男人的手臂
+;TranslatedMark 眩しさに布団の中で身をよじると、男の腕に当たる
+PRINTFORMW 大概是抱在他的怀里睡着了
+;TranslatedMark どうやら彼の腕に抱かれたまま眠っていたらしい
+PRINTFORMW 她望着男人的睡颜想起了昨晚淫乱的事，不由得两颊绯红
+;TranslatedMark 彼女は男の寝顔を覗きこんで昨夜の事を思いだし、思わず頬を染めた
+PRINTFORMW 男人被下身的舒适感叫醒，原来是%ANAME(対象)%在进行早安口交
+PRINTFORMW 伴随着男人的呻吟，%ANAME(対象)%咽下了男人今天的第一发精液
+PRINTFORMW 在离开床穿衣服的时候，男人看着%ANAME(対象)%裸露的背影，刚刚软下去的阴茎再次勃起
+PRINTFORMW 从背后直接插入%ANAME(対象)%的身体，她惊讶的啊了一声，然后并没有反抗，阴道内很快分泌出爱液让男人的抽插更加顺畅
+PRINTFORMW 真色呢，听到男人调戏的话语，%ANAME(対象)%涨红了脸，说不出反驳的话，娇媚的呻吟很快在房间内响起
+PRINTFORMW 男人的种子在子宫内爆发，%ANAME(対象)%在全身颤抖的快乐中获得了今天的第一次高潮
+PRINTFORMW 还要吗？她面色绯红，轻轻的点头。男人笑了笑，把她再次推倒在床上，%ANAME(対象)%再次呻吟起来，四肢紧紧的缠住男人的身体
+PRINTFORMW 直到服务员在外面敲门提醒，男人才匆匆的射出最后一发，两人赶紧整理好衣服
+PRINTFORMW 没有好意思在这里多呆，在服务员们似笑非笑的眼神中，两人面色绯红的离开了旅店
+;TranslatedMark 男を揺すり起こすと軽く朝食を取り身支度を整えてから宿を後にした（不够色，我自己写）
+PRINTFORMW 分别的时候，不知何时，两人紧紧地拥吻在一起，嘴唇分开的时候，拉出了一个透明反光的细线。
+;TranslatedMark 別れ際、どちらからともなく濃厚な口付けを交わし、唇を離す時にまるで別れを惜しむ様に光る橋が架かった
+
+RETURN 1

@@ -1,0 +1,238 @@
+﻿;==========================================================
+;本文本整理了一个神术技能的编写可能会用到的函数和解决方案||
+;==========================================================
+
+
+;返回本技能是否存在
+@SKILL_0_MIRACLE_35_EXIST
+RETURN 1
+
+;返回本技能的技能名称,用于显示
+@SKILL_0_MIRACLE_35_NAME
+RESULTS = 心心相印
+
+;返回技能等级,决定本技能学习门槛
+@SKILL_0_MIRACLE_35_LEVEL
+RETURN 5
+
+;返回本技能属于哪一信仰
+;0或本函数不存在=通用
+;1=暴虐 2=诡术 3=腐朽 4=色欲
+@SKILL_0_MIRACLE_35_FROMWHO
+RETURN 4
+
+;返回本技能的说明文本，用于玩家理解技能效果
+;按照发动条件-发动效果来编写,尽量精简
+@SKILL_0_MIRACLE_35_EXPLANATION
+RESULTS = [增幅]队伍中存在恋人时发动,提升双方武闘防衛 [完美]同时提升知略
+
+;返回技能的发动率,神术默认100%
+@SKILL_0_MIRACLE_35_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1000
+
+;用于AI势力角色学习神术，将复杂情况量化为优先度，优先度高的技能将被优先学习。
+;不允许AI角色学的技能直接返回0或不添加本函数
+;基础技能的升级版技能也同上
+;也用于遗忘技能时的选择量化标准
+;已经列出了一些常见影响因子,可以根据技能效果自行选择
+;如果有其他判断情况，请自行决定优先度的增减，对于某些AI极难发动的技能原则上应当考虑在AI需要遗忘技能时大幅度下调本技能优先度
+@SKILL_0_MIRACLE_35_SELFLEARN(对象)
+#DIM 对象
+#DIM 优先度
+#DIM 技能ID = 35  ;本技能ID
+#DIM 上任
+;不允许AI角色学
+RETURN 0
+
+;対象選択
+@SKILL_0_MIRACLE_35_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+;我方部隊対象
+RETURN 1
+
+;战场技能発動判定，此函数编写与原版技能相同
+;由于示例技能并非战场上直接发动,所以直接返回0
+@SKILL_0_MIRACLE_35_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 角色
+対象側 = !発動側
+
+SIF CFLAG:発動者:1 != CFLAG:MASTER:1
+	RETURN 0
+SIF BATTLE_COMMANDER_NUM:発動側 == 1
+	RETURN 0
+IF 発動者 == MASTER
+;玩家发动
+	FOR LOCAL,0,(BATTLE_COMMANDER_NUM:発動側),1
+		角色 = BATTLE_COMMANDER:発動側:LOCAL
+		SIF 角色 == -1 || 角色 == MASTER
+			CONTINUE
+		SIF TALENT:角色:恋人
+			RETURN 1
+	NEXT
+ELSE
+;玩家势力其他角色发动
+	SIF !TALENT:発動者:恋人
+		RETURN 0
+	FOR LOCAL,0,(BATTLE_COMMANDER_NUM:発動側),1
+		角色 = BATTLE_COMMANDER:発動側:LOCAL
+		SIF 角色 == -1
+			CONTINUE
+		SIF 角色 == MASTER
+			RETURN 1
+	NEXT
+ENDIF
+RETURN 0
+
+;技能发动的效果代码，只用于在战斗阶段发动的神术使用
+;如果是发动时机特殊的神术，此处函数体保留返回0(,在实际发动函数中书写代码
+@SKILL_0_MIRACLE_35_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 角色
+#DIM 恋人,10
+#DIM 信仰消耗
+#DIM FIRST_LINE
+対象側 = !発動側
+FIRST_LINE = LINECOUNT
+COMBAT_SKILL_TARGET = 0
+IF 発動者 == MASTER
+;玩家发动
+	LOCAL:1 = 0 ;恋人个数
+	FOR LOCAL,0,(BATTLE_COMMANDER_NUM:発動側),1
+		角色 = BATTLE_COMMANDER:発動側:LOCAL
+		SIF 角色 == -1 || 角色 == MASTER
+			CONTINUE
+		IF TALENT:角色:恋人
+			恋人:(LOCAL:1)=角色
+			LOCAL:1 ++
+		ENDIF
+	NEXT
+	IF LOCAL:1 > 1
+	;存在复数恋人
+		PRINTFORML --请选择你要使用技能的对象--
+		PRINTL
+		FOR LOCAL,0,(LOCAL:1),1
+			PRINTBUTTON @"%ANAME(恋人:LOCAL)%", LOCAL
+			PRINTL
+		NEXT
+		$INPUT_LOOP2
+		INPUT
+		IF RESULT < 0 || RESULT >= LOCAL:1
+			CLEARLINE 1
+			GOTO INPUT_LOOP2
+		ELSE
+			COMBAT_SKILL_TARGET = 恋人:RESULT
+		ENDIF
+	ELSE
+	;只存在一个恋人
+		COMBAT_SKILL_TARGET = 恋人
+	ENDIF
+ELSE
+;玩家势力其他角色发动
+	COMBAT_SKILL_TARGET = MASTER
+ENDIF
+CLEARLINE LINECOUNT - FIRST_LINE
+PRINTFORML --请选择要消耗的信仰--
+PRINTL
+PRINTBUTTON "0[     0]",0
+PRINTL
+PRINTBUTTON "2[     2]",2
+PRINTL
+PRINTBUTTON "4[     4]",4
+PRINTL
+PRINTBUTTON "7[     7]",7
+PRINTL
+$INPUT_LOOP1
+INPUT
+信仰消耗=RESULT
+IF 信仰消耗 != 0 && 信仰消耗 != 2 && 信仰消耗 != 4 && 信仰消耗 != 7
+	CLEARLINE 1
+	GOTO INPUT_LOOP1
+ELSEIF ABL:発動者:信仰 < 信仰消耗
+	CLEARLINE 1
+	GOTO INPUT_LOOP1
+ENDIF
+;发动效果
+CLEARLINE LINECOUNT - FIRST_LINE
+
+ABL:発動者:信仰 -= 信仰消耗
+SELECTCASE 信仰消耗
+	CASE 0
+		PRINTFORML %ANAME(発動者)%与%ANAME(COMBAT_SKILL_TARGET)%发挥了恋人之间的羁绊!两人的武闘防衛上升了!
+		FOR LOCAL,0,(BATTLE_COMMANDER_NUM:発動側),1
+			角色 = BATTLE_COMMANDER:発動側:LOCAL
+			SIF 角色 != 発動者 && 角色 != COMBAT_SKILL_TARGET
+				CONTINUE
+			TIMES BATTLE_武闘パワー:発動側:LOCAL, 1.03
+			TIMES BATTLE_防衛パワー:発動側:LOCAL, 1.03
+		NEXT
+	CASE 2
+		PRINTFORML %ANAME(発動者)%与%ANAME(COMBAT_SKILL_TARGET)%借助信仰之力加深了恋人间的羁绊!两人的武闘防衛上升了!
+		FOR LOCAL,0,(BATTLE_COMMANDER_NUM:発動側),1
+			角色 = BATTLE_COMMANDER:発動側:LOCAL
+			SIF 角色 != 発動者 && 角色 != COMBAT_SKILL_TARGET
+				CONTINUE
+			TIMES BATTLE_武闘パワー:発動側:LOCAL, 1.05
+			TIMES BATTLE_防衛パワー:発動側:LOCAL, 1.05
+		NEXT
+	CASE 4
+		PRINTFORML %ANAME(発動者)%与%ANAME(COMBAT_SKILL_TARGET)%借助信仰之力加深了恋人间紧密的羁绊!两人的武闘防衛上升了!
+		FOR LOCAL,0,(BATTLE_COMMANDER_NUM:発動側),1
+			角色 = BATTLE_COMMANDER:発動側:LOCAL
+			SIF 角色 != 発動者 && 角色 != COMBAT_SKILL_TARGET
+				CONTINUE
+			TIMES BATTLE_武闘パワー:発動側:LOCAL, 1.07
+			TIMES BATTLE_防衛パワー:発動側:LOCAL, 1.07
+		NEXT
+	CASE 7
+		PRINT [完美]
+		PRINTFORML %ANAME(発動者)%与%ANAME(COMBAT_SKILL_TARGET)%在信仰之力的帮助下展现了无与伦比的配合!两人的武闘防衛知略上升了!
+		FOR LOCAL,0,(BATTLE_COMMANDER_NUM:発動側),1
+			角色 = BATTLE_COMMANDER:発動側:LOCAL
+			SIF 角色 != 発動者 && 角色 != COMBAT_SKILL_TARGET
+				CONTINUE
+			TIMES BATTLE_武闘パワー:発動側:LOCAL, 1.10
+			TIMES BATTLE_防衛パワー:発動側:LOCAL, 1.10
+			TIMES BATTLE_知略パワー:発動側:LOCAL, 1.10
+		NEXT
+ENDSELECT
+
+RETURN 0

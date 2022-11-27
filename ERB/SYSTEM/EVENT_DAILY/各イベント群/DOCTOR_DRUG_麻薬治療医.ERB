@@ -1,0 +1,148 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_DOCTOR_DRUG_RATE()
+RETURN 40
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_DOCTOR_DRUG_DECISION()
+;同勢力所属で捕虜でない薬物依存(CFLAGのほう)所持者
+LOCAL:1 = 0
+FOR LOCAL:0, 0, CHARANUM
+	SIF (CFLAG:(LOCAL:0):所属 == CFLAG:MASTER:所属 && !CFLAG:(LOCAL:0):捕虜先) && (CFLAG:(LOCAL:0):薬物依存)
+		LOCAL:1 ++
+NEXT
+SIF LOCAL:1 < 1
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_DOCTOR_DRUG_GENRE()
+RETURN デイリー_ジャンル_トレーナー
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_DOCTOR_DRUG()
+#DIM 対象
+
+CALL COLOR_PRINT("外界的医生來拜訪了", カラー_注意)
+PRINTFORML
+PRINTFORMW 「喲」
+PRINTFORMW 「聽説這裡有吃藥的人在于是我就來了。我是医生」
+PRINTFORMW 「在人生崩壊之前、趕緊和那種東西斷絕関係吧」
+PRINTFORMW 「靠俺的治疗法、可以斬断対薬物的依賴」
+PRINTFORMW 「不過、是還沒被認可的做法。怎麼樣？」
+PRINTL 
+CALL SINGLE_DRAWLINE
+
+CALL SELECT_CHARA_LIST_ONLY_LOGIC_SEX("DOCTOR_DRUG", "DEFAULT", "DOCTOR_DRUG")
+
+;治疗しない
+IF RESULT == -1
+	REDRAW 1
+	PRINTFORML %ANAME(MASTER)%拒絕了治疗
+	PRINTFORMW 「是麼。……啊、這也沒辦法」
+	RETURN 1
+ENDIF
+
+対象 = RESULT
+
+IF !IS_FEMALE(対象) || 5 < RAND:100
+	IF (対象)  != MASTER
+		PRINTFORMW 「要治疗%ANAME(対象)%麼？　明白了」
+		PRINTFORMW 「能稍微出去一下麼。很快就會結束的」
+	ELSE
+		PRINTFORMW 「要治疗你自己麼？　明白了」
+		PRINTFORMW 「請過來一下。很快就會結束的」
+	ENDIF
+	PRINTFORML
+	PRINTFORML
+	PRINTFORML
+	SETCOLOR カラー_注意
+	IF GETBIT(TALENT:(対象):淫乱系, 素質_淫乱_薬物中毒)
+		PRINTFORMW %ANAME(対象)%失去了<薬物中毒>
+	ELSE
+		PRINTFORMW %ANAME(対象)%斬断了対薬物的依賴心
+	ENDIF
+	RESETCOLOR
+	PRINTFORML
+	PRINTFORML
+	PRINTFORML
+	CLEARBIT TALENT:(対象):淫乱系, 素質_淫乱_薬物中毒
+	CFLAG:(対象):薬物依存 = 0
+	PRINTFORMW 「這也就沒問題了。……不要再去打薬了啊」
+	PRINTFORMW 医生離去了……
+	RETURN 1
+ENDIF
+
+IF 対象  != MASTER
+	PRINTFORMW 「要治疗%ANAME(対象)%麼？　明白了」
+	PRINTFORMW 「能稍微出去一下麼。很快就會結束的」
+	PRINTFORMW 雖然也有些驚訝、%ANAME(MASTER)%還是離開了座位……
+ELSE
+	PRINTFORMW 「要治疗你自己麼？　明白了」
+	PRINTFORMW 「請過來一下。很快就會結束的」
+	PRINTFORMW 雖然也有些驚訝、%ANAME(MASTER)%還是跟上去了……
+ENDIF
+PRINTFORML
+PRINTFORML
+PRINTFORML
+PRINTFORMW 「哈哈、沒想到這麼簡単就能騙到」
+PRINTFORMW 自稱為医生的男人脫掉了衣服、在診察台上猛烈晃動著腰
+PRINTFORMW 在他身下、應該在接受治疗的%ANAME(対象)%、同樣也一絲不掛的躺在那裡
+PRINTFORMW 從被肉棒激烈抽插著的秘部中、零落著已經射進去好幾発的白濁
+PRINTFORMW %ANAME(対象)%不停発出著淫靡的喘息聲、但是眼中卻一片空虚
+PRINTFORMW 「竟然能被那種話騙到、真是輕鬆……嗚」
+PRINTFORMW 男人呻吟著、在%ANAME(対象)%的最深処射精的時候、%ANAME(対象)%主動抱住了他也迎來了高潮
+PRINTFORMW 「啊啊、你真是可愛啊、下面也很緊、當俺専用的肉便器吧？　那樣的話、就能隨便打薬了哦」
+PRINTFORMW 「諾、這是追加給你的薬。這個也很有效哦？」
+PRINTFORMW 一邊説著、男人把錠剤放在了発出嬌喘的%ANAME(対象)%的舌頭上。%ANAME(対象)%順從的把它呑了下去
+PRINTFORMW 在兩人周囲、到処都是使用過的注射器和薬箱。%ANAME(対象)%被打入的是、覚醒剤或麻薬一類的薬物……
+PRINTFORMW 「哎、差不多到時間了。趕緊穿好衣服。……対了、把內袴給我」
+PRINTFORMW 「呵呵、就這樣暴露著裝滿精液的小穴、和同伴見面吧」
+PRINTFORMW 面対這人渣的要求、%ANAME(対象)%沒出息地點頭同意了……
+CALL FUCK_RAPE(対象, GET_SPERM_ID("医者"), @"闇医者的\@RAND:2 ? 肉棒 # 嘴唇\@", "闇医者")
+PRINTFORML
+PRINTFORML
+PRINTFORM
+IF 対象 != MASTER
+	PRINTFORMW 「対不起、直到結束也沒有完全治疗好%ANAME(対象)%」
+	PRINTFORMW 聽到医生的說法、%ANAME(MASTER)%很沮喪。但是、本來就是很難解決的問題、批評的話就太過苛責了
+	PRINTFORMW 「如果可以的話、今後也請讓我来。我会免費"治疗"%ANAME(対象)%」
+	PRINTFORMW 求之不得。%ANAME(MASTER)%當然點頭同意了
+	PRINTFORMW 面対離去的医生、%ANAME(対象)%深深地低下了頭……
+ELSE
+	PRINTFORMW 「対不起、直到結束也沒有完全治疗好%ANAME(対象)%」
+	PRINTFORMW 医生一臉慚愧的樣子、対部下們說明著
+	PRINTFORMW 相信他為了治疗%ANAME(対象)%而非常努力的部下們、非常沮喪、完全沒有懷疑他的說明
+	PRINTFORMW 「如果可以的話、今後也請讓我来。我会免費"治疗"%ANAME(対象)%」
+	PRINTFORMW 在部下們看不見的角度、来回撫摸著%ANAME(対象)%屁股的医生這麼説道
+	PRINTFORMW 面対離去的医生、%ANAME(対象)%深深地低下了頭……
+ENDIF
+CFLAG:(対象):薬物依存 += RAND(50, 100)
+WAIT
+RETURN 1
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_DOCTOR_DRUG(対象)
+#DIM 対象
+CALL SELECT_CHARA_LIST_SHOW_LOGIC_DEFAULT(対象)
+RETURN RESULT && CFLAG:対象:薬物依存 > 0
+
+@SELECT_CHARA_LIST_COLOR_LOGIC_DOCTOR_DRUG(対象)
+#DIM 対象
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_薬物中毒)
+	RETURN カラー_警告
+RETURN GETDEFCOLOR()

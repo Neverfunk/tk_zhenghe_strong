@@ -1,0 +1,69 @@
+﻿;-------------------------------------------------
+;調教関数存在判定
+;-------------------------------------------------
+@CULTIST_DOES_TRAIN()
+
+;-------------------------------------------------
+;調教陥落時メッセージ
+;-------------------------------------------------
+@CULTIST_FALLEN_MSG(対象)
+#DIM 対象
+IF !GETBIT(TALENT:対象:特殊勢力陥落系, 特殊勢力_狂信者)
+	PRINTFORMW 根据狂信徒的说法、%ANAME(対象)%要作为服从教导的人而重生
+	;TranslatedMark 狂信者たちの説法により、%ANAME(対象)%は教えに従う者として生まれ変わった
+	PRINTFORMW 嬉笑着、高兴地为自己缠上了法衣、面具避开讨厌的污秽尘世之气、为「儀式」献上自己的身体
+	;TranslatedMark 嬉々として法衣をまとい、覆面をして俗世の穢れた空気を嫌い、「儀式」に身をささげる
+	PRINTFORMW 今天%PRONOUN(対象)%将要成为一名出色的狂信徒
+	;TranslatedMark 今や%PRONOUN(対象)%は、狂信者たちの立派な一員となっていた……
+	IF TALENT:対象:烙印
+		PRINTFORML 在%ANAME(対象)%身上表明%ANAME(MASTER)%専用身份的烙印之上、
+		;TranslatedMark %ANAME(対象)%が%ANAME(MASTER)%専用であることを示す烙印の上から、
+		PRINTFORMW 身上被烙印下了遵从教导者的证明
+		;TranslatedMark 教えに従う者の証である焼き印が施された
+		TALENT:対象:烙印 = 0
+	ELSE
+		PRINTFORMW %ANAME(対象)%的身上、作为遵从教导者的证据被刻下了烙印……
+		;TranslatedMark %ANAME(対象)%の体に、教えに従う者の証である焼き印が施された
+	ENDIF
+	IF TALENT:(対象):自尊心高
+		PRINTL
+		PRINTFORMW 曾骄傲过%ANAME(対象)%但是，这种东西早就没有剩下了
+		;TranslatedMark かつては誇りを抱いていた%ANAME(対象)%だが、そんなものはとうに残っていない
+		PRINTFORMW %PRONOUN(対象)%与他们的「神」相比、%ANAME(対象)%骄傲的自尊这种东西是没有存在的意义的……
+		;TranslatedMark %PRONOUN(対象)%たちの「神」に比べれば、%ANAME(対象)%のプライドなどあってないようなものなのだから……
+		CALL TALENT_LOSE_PRIDE(対象, 1, 1)
+	ENDIF
+ELSE
+	PRINTFORMW 最初还在抵抗着的%ANAME(対象)%虽然是这样，但只用了一点点布道的说法，他们就让她取回了服从教导的心。
+	;TranslatedMark 最初こそ抵抗していた%ANAME(対象)%だったが、ほんの少しの説法で、教えに従う心を取り戻す
+	PRINTFORMW 每次，每次被侵犯，都会想起自己只不过是作为神的祭品。
+	;TranslatedMark 触れられるたび、犯されるたび、己が神のための贄に過ぎないことを思い出していく
+	PRINTFORMW 被持续不断的凌辱，%ANAME(対象)%接受了快感，满脸幸福的表情开始了自己的奉仕……
+	;TranslatedMark 絶え間なく続けられる陵辱に、ほどなくして%ANAME(対象)%は快感を受け入れ、幸せそうな表情で自ら奉仕を始めた……
+ENDIF
+
+;-------------------------------------------------
+;調教陥落時にピアシングしたりする場合の処理
+;-------------------------------------------------
+@CULTIST_FALLEN_LEAVE_MARK(対象)
+#DIM 対象
+SELECTCASE RAND:10
+	CASE IS < 3
+		CALL SET_PIERCE_RANDOM(対象, 0)
+		SIF RESULT != -1
+			CALL COLOR_PRINTW(@"%ANAME(対象)%の%GET_PIERCE_NAME(RESULT)%被装上了身为信徒的一员的环……", カラー_ピンク)
+	CASE IS < 7
+		CALL SET_TATTOO_RANDOM(対象, STR_FOR_TATTOO(-1), 0)
+		SIF RESULT != -1
+			CALL COLOR_PRINTW(@"%ANAME(対象)%的%GET_TATTOO_NAME(RESULT)%、被刻上了「%TATTOO:対象:RESULT%」的紋身……", カラー_ピンク)
+	CASEELSE
+		IF GET_INMOU(対象) >= 陰毛_標準 && IS_FEMALE(対象)
+		CALL COLOR_PRINTW(@"作为信徒的证明、%ANAME(対象)%的阴毛被整理成了心形……", カラー_ピンク)
+		TALENT:対象:陰毛目標値 = 陰毛_ハート型
+		TALENT:対象:陰毛現在値 = 陰毛_ハート型
+		ELSE
+			CALL COLOR_PRINTW(@"作为信徒的证明、%ANAME(対象)%的阴毛被永久脱毛了……", カラー_ピンク)
+			TALENT:対象:陰毛目標値 = 陰毛_パイパン
+			TALENT:対象:陰毛現在値 = 陰毛_パイパン
+		ENDIF
+ENDSELECT

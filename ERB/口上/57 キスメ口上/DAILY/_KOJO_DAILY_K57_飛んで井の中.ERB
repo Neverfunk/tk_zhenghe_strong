@@ -1,0 +1,110 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K57_COMPETE_RATE(対象)
+#DIM 対象
+RETURN 30
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K57_COMPETE_DECISION(対象)
+#DIM 対象
+
+;終わらせたら出ない
+SIF KDVAR:対象:キスメ_飛んで井の中
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 0, 0)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K57_COMPETE_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K57_COMPETE(対象)
+#DIM 対象
+#DIM 判定値
+
+KDVAR:対象:キスメ_飛んで井の中 = 1
+
+PRINTFORML 深夜……
+PRINTFORMW 在領地內巡邏時、突然有個吊桶掉了下來！
+
+判定値 = (ABL:MASTER:防衛 + 10 - ABL:対象:武闘) * 5
+
+IF RAND:100 > 判定値
+	PRINTFORMW %ANAME(MASTER)%未能避開、頭部被吊桶直接擊中！
+	PRINTFORMW 然後就這樣暈倒、恢復意識時就已經是早上了……
+	CALL ADD_COOLTIME(MASTER, 2)
+	RETURN 1
+ENDIF
+
+PRINTFORMW ……但、華麗地避開了！
+PRINTFORMW 「ちッ……」
+PRINTFORML 襲撃者是個與吊桶一體化的少女
+PRINTFORMW 尋問名字時、自稱自己叫%NAME_FORMAL(対象)%
+PRINTFORML 雖然看起來沒有失去幹勁、但好像沒有打算襲擊過來的樣子
+PRINTFORMW 「……隨便你吧？」
+PRINTFORMW 看來她在剛才的突襲被避開了的一刻就判斷自己贏不了的樣子
+PRINTFORML 看來已經放棄了……
+
+PRINTL
+CALL ASK_MULTI_JUDGE("讓其做部下", GET_COUNTRY_BOSS(CFLAG:対象:所属) != 対象, "投獄", GET_COUNTRY_BOSS(CFLAG:対象:所属) != 対象, "処刑", GET_COUNTRY_BOSS(CFLAG:対象:所属) != 対象,  "奪去金錢", 1, "侵犯", HAS_PENIS(MASTER))
+
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORMW 「……哈？　部下？　我？」
+		PRINTFORMW 「……嘛、反正我沒有所謂」
+		CALL COLOR_PRINTW(@"%ANAME(対象)%成為了部下", カラー_注意)
+		CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属, 1)
+		CFLAG:対象:好感度 += 500
+	CASE 1
+		PRINTFORMW 「……隨便你吧？」
+		PRINTFORMW 呼叫了支援、將%ANAME(対象)%帶走了……
+		CALL COLOR_PRINTW(@"俘虜了%ANAME(対象)%", カラー_注意)
+		CALL CAPTURE(対象, CFLAG:MASTER:所属)
+	CASE 2
+		PRINTFORMW 「……嗚！」
+		PRINTFORMW 「……隨便你吧？」
+		PRINTFORMW 呼叫了支援、將%ANAME(対象)%帶走了……
+		CALL COLOR_PRINTW(@"把%ANAME(対象)%処刑了", カラー_注意)
+		PRINTL
+		CALL EXECUTION(対象)
+		PRINTL
+		CALL CHANGE_COUNTRY(対象, 0, 1, 1)
+		CFLAG:対象:所属 = 0
+		CFLAG:対象:特殊状態 = 特殊状態_死亡
+	CASE 3
+		PRINTFORMW 「錢……」
+		PRINTFORMW 「這種程度的話就沒辦法了」
+		CALL COLOR_PRINTW(@"獲得了10000金", カラー_注意)
+		MONEY += 10000
+		PRINTFORMW %ANAME(対象)%離開了……
+	CASE 4
+		PRINTFORMW 「誒……等等、不、不要……！」
+		PRINTFORMW 強行將%ANAME(対象)%從吊桶中拉了出來、扒光她身上的衣服……
+		PRINTFORML
+		CALL FUCK_RAPE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的肉棒", @"%ANAME(MASTER)%")
+		PRINTFORML 
+		PRINTFORMW 「呼啊……啊咕、哈唔……♥」
+		PRINTFORMW 將失神痙攣着的%ANAME(対象)%棄於地上不顧、並返回據點了……
+		KDVAR:対象:キスメ_飛んで井の中 = 2
+ENDSELECT
+
+CFLAG:対象:面識 = 1
+
+RETURN 1
+

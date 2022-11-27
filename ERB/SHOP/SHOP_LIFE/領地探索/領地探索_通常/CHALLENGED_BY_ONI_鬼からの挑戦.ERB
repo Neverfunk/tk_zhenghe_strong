@@ -1,0 +1,51 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_CHALLENGED_BY_ONI_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_CHALLENGED_BY_ONI_DECISION(対象)
+#DIM 対象
+RETURN ABL:対象:武闘 > ランク閾値:ランク_ＳＬＧ:ランク_B && IS_COUNTRY(CFLAG:対象:所属)
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_CHALLENGED_BY_ONI(対象)
+#DIM 対象
+
+PRINTFORML 在郊外散步的時候、有個鬼擋在了面前
+PRINTFORML 好像是聽見了%ANAME(対象)%的傳聞找過来的、想要比試比試
+PRINTL
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+CALL ASK_YN("接受挑战", "拒绝")
+
+IF RESULT == 1
+	PRINTFORML 被拒絕後鬼一邊罵著膽小鬼一邊離開了
+	PRINTFORMW %ANAME(対象)%因為那失禮的傢伙帯着憤怒返回了宮殿
+	RETURN 1
+ENDIF
+
+PRINTFORMW 接受挑戦后鬼開心的笑着立刻就発動了攻撃
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+
+IF ABL:対象:武闘 > RAND:200
+	PRINTFORML 出色的撃敗了鬼！
+	PRINTFORML 鬼認同了%ANAME(対象)%的力量、説道要帯著手下一起加入%ANAME(対象)%
+	PRINTFORMW 非常歡迎夥伴的増加、毫不猶豫的接受了
+	COUNTRY_SOLDIER:(CFLAG:対象:所属) += 5000
+	CALL ICPRINT("兵数增加了<5000>", "L", カラー_注意)
+ELSE
+	PRINTFORML 鬼比想象中的還要強、打輸了
+	PRINTFORMW 鬼看着躺在地上的%ANAME(対象)%搖了搖頭之後離開了
+	CALL ADD_COOLTIME(対象:0, 3)
+ENDIF
+
+RETURN 1

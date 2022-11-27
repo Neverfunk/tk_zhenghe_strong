@@ -1,0 +1,90 @@
+;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_1_PERSONAL_1_EXIST
+RETURN 1
+
+@SKILL_1_PERSONAL_1_NAME
+RESULTS = 梦符「封魔阵」
+
+;レベルは1-5まで
+@SKILL_1_PERSONAL_1_LEVEL
+RETURN 2
+
+;対象選択
+@SKILL_1_PERSONAL_1_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+SIF BATTLE_COMMANDER_NUM:対象側 == 0
+	RETURN 0
+COMBAT_SKILL_TARGET = RAND:(BATTLE_COMMANDER_NUM:対象側)
+RETURN 1
+
+;発動判定
+@SKILL_1_PERSONAL_1_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1
+
+;効果をここに記述
+@SKILL_1_PERSONAL_1_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+PRINTFORML “你们这帮家伙，为什么就不能老老实实好好待着呢？”
+PRINTFORML “总想搞点大新闻，不然浑身不自在？”
+PRINTFORML “真是小人得志啊，那我就只能动用暴力了。”
+PRINTFORML “那么，要考试了，妖·怪·退·治！”
+PRINTFORML 灵梦展开了封魔阵！
+PRINTFORML %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%的攻击和防御下降！
+TIMES BATTLE_武闘:対象側:COMBAT_SKILL_TARGET, 0.65
+TIMES BATTLE_防衛:対象側:COMBAT_SKILL_TARGET, 0.65
+RETURN 1
+PRINTFORML %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%在這場戦闘中無法発動各種素質！
+BATTLE_SKILL_SEALED:対象側:COMBAT_SKILL_TARGET = 1
+RETURN 1
+
+@SKILL_1_PERSONAL_1_EXPLANATION
+RESULTS = 敌一人武闘和防衛下降；敌一人技能封印。
+
+
+
+
+@SKILL_1_PERSONAL_1_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 300

@@ -1,0 +1,377 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_0_PERSONAL_44_EXIST
+RETURN 1
+
+@SKILL_0_PERSONAL_44_CANT_LEARN_FROM_SHOP
+@SKILL_0_PERSONAL_44_CANT_TELL
+
+@SKILL_0_PERSONAL_44_NAME
+RESULTS = 乱交魔
+
+;レベルは1-5まで
+@SKILL_0_PERSONAL_44_LEVEL
+RETURN 1
+
+;対象選択
+@SKILL_0_PERSONAL_44_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1
+
+;発動判定
+@SKILL_0_PERSONAL_44_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 人员判定
+#DIM 将领人数
+対象側 = !発動側
+将领人数 = BATTLE_COMMANDER_NUM:対象側 + BATTLE_COMMANDER_NUM:発動側 - 1
+人员判定 = 0
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
+    IF BATTLE_COMMANDER:対象側:LOCAL > 0 && IS_FEMALE(BATTLE_COMMANDER:対象側:LOCAL) && !BATTLE_SUMMONED_CHARA:対象側:LOCAL
+        DEBUGPRINTFORML 入选：{BATTLE_COMMANDER:対象側:LOCAL}
+        人员判定 ++
+    ENDIF
+NEXT
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:発動側
+    IF BATTLE_COMMANDER:発動側:LOCAL > 0 && IS_FEMALE(BATTLE_COMMANDER:発動側:LOCAL) && !BATTLE_SUMMONED_CHARA:発動側:LOCAL
+        DEBUGPRINTFORML 入选：{BATTLE_COMMANDER:発動側:LOCAL}
+        人员判定 ++
+    ENDIF
+NEXT
+DEBUGPRINTFORML {人员判定} => {将领人数}
+RETURN 発動者 == MASTER && HAS_PENIS(MASTER) && 人员判定 == 将领人数 && 将领人数 > 0
+
+;発動テキストをオーバライドしたいときに。
+;「誰それのスキル発動！　○○した！」の「○○した！」の部分を実装したい場合は、
+;これじゃなくてINVOKEで書けばいいです。
+;@SKILL_0_PERSONAL_0_INVOKE_TEXT(発動者, スキル, ジャンル)
+;#DIM 発動者
+;#DIM スキル
+;#DIMS ジャンル
+
+;効果をここに記述
+@SKILL_0_PERSONAL_44_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 枚举人物
+#DIM 兵数
+#DIM 君主
+#DIM 我方势力
+#DIM 强奸数量 = 0
+#DIM 破处数量 = 0
+#DIM 恶堕数量 = 0
+#DIM 致死数量 = 0
+#DIM 俘虏数量 = 0
+#DIM 俘虏 = 0
+#DIM 性技判定
+#DIMS 称呼
+対象側 = !発動側
+
+IF 対象部隊 >= 0
+    君主 = GET_COUNTRY_BOSS(対象勢力)
+ELSE
+    君主 = GET_COUNTRY_BOSS(CITY_OWNER:対象勢力)
+ENDIF
+
+IF 発動部隊 >= 0
+    我方势力 = 発動勢力
+ELSE
+    我方势力 = CITY_OWNER:発動勢力
+ENDIF
+
+PRINTFORMW %ANAME(MASTER)%突然脱下了裤子！
+FOR LOCAL, BATTLE_COMMANDER_NUM:発動側 - 1, -1, -1
+    SIF LOCAL == 発動番号
+        CONTINUE
+    枚举人物 = BATTLE_COMMANDER:発動側:LOCAL
+    IF BATTLE_SUMMONED_CHARA:発動側:LOCAL
+        PRINTFORML %ANAME(枚举人物)%可没有和%ANAME(MASTER)%胡闹的雅兴……
+        CALL COLOR_PRINTW(@"%ANAME(枚举人物)%擅自脱离了战场！", カラー_注意)
+        CALL BATTLE_COMMANDER_WITHDRAWAL(発動側, LOCAL)
+        CONTINUE
+    ENDIF
+    IF IS_LOVER(枚举人物)
+        称呼 = 爱人
+    ELSEIF IS_SLAVE(枚举人物)
+        称呼 = 主人
+    ELSEIF IS_SLAVED_BY(枚举人物)
+        称呼 = 奴隶
+    ELSEIF GET_COUNTRY_BOSS(我方势力) == MASTER
+        称呼 = 君主
+    ELSEIF GET_COUNTRY_BOSS(我方势力) == 枚举人物
+        称呼 = 下属
+    ELSE
+        称呼 = 战友
+    ENDIF
+    CALL SINGLE_DRAWLINE
+    PRINTFORMW %ANAME(枚举人物)%被推倒了！
+    强奸数量 += 1
+    IF VIRGIN(枚举人物)
+        PRINTFORML %ANAME(MASTER)%把%ANAME(枚举人物)%抱起来，公开展示着正被猛烈抽插的向外溢出处子血的秘部
+        PRINTFORMW 每一次抽插，实际上已经无力抵抗自己的%称呼%的%ANAME(枚举人物)%都只能默默的忍受着痛苦和可能存在的快感……
+        破处数量 += 1
+    ELSE
+        PRINTFORML %ANAME(MASTER)%抱住正欲逃跑的%ANAME(枚举人物)%，把她压在身下猛烈的侵犯着
+        PRINTFORMW %ANAME(枚举人物)%面对%称呼%的霸凌只能扭动身体做着无用的反抗……
+    ENDIF
+    PRINTFORMW %ANAME(MASTER)%保持插入的同时，当着所有人的面熟练地一件件剥下%ANAME(枚举人物)%的衣服……
+    性技判定 = ABL:MASTER:性技 + ABL:MASTER:性交 - (ABL:枚举人物:欲望 + ABL:枚举人物:性交 + RAND:5)
+    CFLAG:枚举人物:好感度 -= MAX(2000 + (ABL:MASTER:性交 - ABL:枚举人物:性交 - ABL:枚举人物:欲望) * 100, 1000) - ABL:MASTER:性技 * 200
+    IF 性技判定 > 0
+        PRINTFORML 持续的凌辱之后，先前\@VIRGIN(枚举人物) ? 还是处女 # 还在反抗\@的%ANAME(枚举人物)%早已沉浸在被公开侵犯的快感之中
+        PRINTFORML 渐渐的，%ANAME(枚举人物)%就一边主动顺着%ANAME(MASTER)%的节奏扭腰一边口齿不清的大声浪叫
+        PRINTFORMW 看着它们的敌将大搞淫乱交尾现场，另一边的士兵无论男女都感到下体一热……
+        CFLAG:枚举人物:従属度 += ABL:MASTER:性技 * 200 + (ABL:MASTER:性交 - ABL:枚举人物:性交 - ABL:枚举人物:欲望) * 100
+        CFLAG:枚举人物:依存度 += ABL:MASTER:性技 * 200 + (ABL:MASTER:性交 - ABL:枚举人物:性交 - ABL:枚举人物:欲望) * 100
+        兵数 = MIN(GET_SOLDIER(対象勢力, 対象部隊) * MIN(ABL:MASTER:性技 + ABL:MASTER:性交 + ABL:枚举人物:性技 + ABL:枚举人物:性交, 20) / 20, GET_SOLDIER(対象勢力, 対象部隊) - 1)
+        CALL COLOR_PRINTW(@"\@ 君主 >= 0 ? %ANAME(君主)% # 敌\@军的士兵受到现场上演的公开凌辱实况的蛊惑，接连叛变了！", カラー_注意)
+        CALL DECREASE_SOLDIER(対象勢力, 対象部隊, 兵数, 1)
+        CALL INCREASE_SOLDIER(発動勢力, 発動部隊, 兵数, 1)
+        恶堕数量 += 1
+    ELSE
+        PRINTFORML %ANAME(枚举人物)%一边挣扎一边大声求救
+        PRINTFORML 这一下直接激发了%ANAME(MASTER)%的嗜虐心，对%ANAME(枚举人物)%做出了更加残忍的举动……
+        IF ABL:MASTER:加虐 + 性技判定 > RAND(1, 5)
+            PRINTFORMW 结果在%ANAME(MASTER)%无情的性虐待下，%ANAME(枚举人物)%竟然口吐鲜血，彻底不省人事……
+            兵数 = GET_SOLDIER(発動勢力, 発動部隊) / 3
+            PRINTFORMW 看到上级以这种方式“阵亡”，%ANAME(枚举人物)%旁边的士兵个个心惊胆战……
+            CALL COLOR_PRINTW(@"%ANAME(枚举人物)%属下士兵看到上级被公开凌辱致死的惨状，居然逃跑了！", カラー_警告)
+            CALL DECREASE_SOLDIER(発動勢力, 発動部隊, 兵数, 1)
+            PRINTFORMW 但%ANAME(MASTER)%不为所动，下令把%ANAME(枚举人物)%抬回去钉在十字架上等候观察……
+            CALL FUCK(MASTER, "欲望, 性技, 性交, 加虐, Ｃ, 射精, 露出, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(枚举人物)%的小穴", "在阵前的突然強姦")
+            CALL FUCK(枚举人物, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｖ拡張, 露出, 被虐, 苦痛快楽, Ｖ性交", "処女喪失, 膣内射精", GET_ID(MASTER), "", ANAME(MASTER), "", "在阵前的突然強姦")
+            CALL BATTLE_COMMANDER_WITHDRAWAL(発動側, LOCAL)
+            CALL GET_GOODS_EXECUTED(枚举人物, 1, CFLAG:枚举人物:行動不能状態 == 行動不能_子供, TALENT:枚举人物:妊娠 == 1)
+            EXP:枚举人物:心創経験 += 100
+            EXP:枚举人物:異常経験 += 10
+            CFLAG:枚举人物:崩壊 += 2000
+            CALL TALENT_CHECK(枚举人物)
+            CALL CHANGE_COUNTRY(枚举人物, 0, 1, 1)
+            致死数量 += 1
+            CONTINUE
+        ELSE
+            PRINTFORMW 看到上级在战前就已经“开战”，%ANAME(枚举人物)%旁边的士兵个个心惊胆战……
+            兵数 = MIN(GET_SOLDIER(発動勢力, 発動部隊) * MIN(MAX(ABL:MASTER:加虐 - (ABL:枚举人物:性技 + ABL:枚举人物:性交), 5), 10) / 30, GET_SOLDIER(発動勢力, 発動部隊) / 3)
+            CALL COLOR_PRINTW(@"%ANAME(枚举人物)%属下士兵看到上级被公开凌辱的惨状，居然逃跑了！", カラー_注意)
+            CALL DECREASE_SOLDIER(発動勢力, 発動部隊, 兵数, 1)
+        ENDIF
+    ENDIF
+    CALL FUCK(MASTER, "欲望, 性技, 性交, 加虐, Ｃ, 射精, 露出, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(枚举人物)%的小穴", "在阵前的突然強姦")
+    CALL FUCK(枚举人物, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｖ拡張, 露出, 被虐, 苦痛快楽, Ｖ性交", "処女喪失, 膣内射精", GET_ID(MASTER), "", ANAME(MASTER), "", "在阵前的突然強姦")
+    CALL COLOR_PRINTW(@"恐怕%ANAME(枚举人物)%在战后得回去疗养一段时间……", カラー_警告)
+    CALL BATTLE_COMMANDER_WITHDRAWAL(発動側, LOCAL)
+    CALL FORCE_FREE(枚举人物)
+    CALL ADD_COOLTIME(枚举人物, 5)
+NEXT
+IF !BATTLE_COMMANDER_NUM:対象側 && 强奸数量
+    CALL SINGLE_DRAWLINE("♥")
+    PRINTFORML 发泄完性欲的%ANAME(MASTER)%挺着\@破处数量 ? 还沾有血与精液的混合液的 # 尽情发射完的\@阴茎回到了阵前
+    PRINTFORMW 经此一战的%ANAME(MASTER)%感觉自己的力量变强了……
+    SELECTCASE 强奸数量 - 致死数量
+        CASE 2
+            TIMES BATTLE_武闘パワー:発動側:発動番号, 1.15
+        CASE 1
+            TIMES BATTLE_武闘パワー:発動側:発動番号, 1.1
+    ENDSELECT
+    IF 破处数量
+        SELECTCASE 破处数量
+            CASE 2
+                TIMES BATTLE_防衛パワー:発動側:発動番号, 1.15
+            CASE 1
+                TIMES BATTLE_防衛パワー:発動側:発動番号, 1.1
+        ENDSELECT
+        CALL ARENA_ADD_EXP(MASTER, ARENA_GET_POWER(MASTER) / (2 - 破处数量 + 1), 1)
+    ENDIF
+    BATTLE_SKILL_RATE:発動側:発動番号 += 10 * 恶堕数量
+    RETURN
+ENDIF
+FOR LOCAL, BATTLE_COMMANDER_NUM:対象側 - 1, -1, -1
+    枚举人物 = BATTLE_COMMANDER:対象側:LOCAL
+    IF BATTLE_SUMMONED_CHARA:対象側:LOCAL
+        PRINTFORML %ANAME(枚举人物)%可没有和%ANAME(MASTER)%胡闹的雅兴……
+        CALL COLOR_PRINTW(@"%ANAME(枚举人物)%擅自脱离了战场！", カラー_注意)
+        CALL BATTLE_COMMANDER_WITHDRAWAL(対象側, LOCAL)
+        CONTINUE
+    ENDIF
+    IF IS_LOVER(枚举人物)
+        称呼 = 爱人
+    ELSEIF IS_SLAVE(枚举人物)
+        称呼 = 主人
+    ELSEIF IS_SLAVED_BY(枚举人物)
+        称呼 = 奴隶
+    ELSEIF REL_HATE:枚举人物:MASTER >= 800 && REL_LIKE:枚举人物:MASTER < 300
+        称呼 = 天敌
+    ELSEIF REL_HATE:枚举人物:MASTER >= 800
+        称呼 = 仇敌
+    ELSE
+        称呼 = 敌人
+    ENDIF
+    CALL SINGLE_DRAWLINE
+    IF ABL:MASTER:武闘 <= ABL:枚举人物:武闘 / 2 || ABL:MASTER:防衛 <= ABL:枚举人物:防衛 / 2 || ABL:MASTER:知略 <= ABL:枚举人物:知略 / 2
+        PRINTFORML 结果连%ANAME(枚举人物)%的驾前都到不了就被击倒了……
+        PRINTFORMW 之后%ANAME(MASTER)%一站起来就跑到不知道哪里去了
+        CALL FORCE_FREE(MASTER)
+        CALL BATTLE_COMMANDER_WITHDRAWAL(発動側, 発動番号)
+        CALL ADD_COOLTIME(MASTER, 5)
+        RETURN
+    ELSE
+        PRINTFORMW %ANAME(MASTER)%突进到了%ANAME(枚举人物)%面前！
+        IF ABL:MASTER:武闘 + ABL:MASTER:防衛 + ABL:MASTER:知略 / 2 + ABL:MASTER:妖術 < ABL:枚举人物:武闘 + ABL:枚举人物:防衛 + ABL:枚举人物:知略 / 2 + ABL:枚举人物:妖術
+            PRINTFORML 然而%ANAME(MASTER)%和%ANAME(枚举人物)%僵持不下……
+            PRINTFORMW 最终%ANAME(MASTER)%被打出了战场……
+            CALL BATTLE_KNOCKOUT(発動側, 発動番号)
+            RETURN
+        ENDIF
+        PRINTFORML %ANAME(枚举人物)%还没反应过来，就被%ANAME(MASTER)%掳到了身边……
+        强奸数量 += 1
+        IF VIRGIN(枚举人物)
+            PRINTFORML %ANAME(MASTER)%扯下了%ANAME(枚举人物)%的下装，把她抱了起来，用\@破处数量 ? 还沾有血与精液的混合液的 # 勃起的\@肉棒前端抵住她那%SPLIT_R("处女的：没尝过男人滋味的：纯洁的：从未被碰触过的：少女一样的")%%SPLIT_R("小穴：膣穴：雌穴：肉壶：私处")%
+            PRINTFORMW 无力抵抗自己的%称呼%的%ANAME(枚举人物)%只能眼睁睁的看着%ANAME(MASTER)%在所有人的面前用肉棒夺走自己的纯洁……
+            破处数量 += 1
+        ELSE
+            PRINTFORML %ANAME(MASTER)%抱住正欲逃跑的%ANAME(枚举人物)%，一边侵犯%ANAME(枚举人物)%%SPLIT_R("小穴：膣穴：雌穴：肉壶：私处")%一边敞开她的衣服，让她那%STR_BODY("胸：性交：後背位", 枚举人物)%直接袒露出来
+            PRINTFORMW 在部下面前被%称呼%猛烈侵犯的%ANAME(枚举人物)%只能扭动身体做着象征性的反抗……
+        ENDIF
+        PRINTFORMW %ANAME(MASTER)%保持插入的同时，当着所有人的面熟练地把%ANAME(枚举人物)%仅剩的衣物也一件件剥下……
+        性技判定 = ABL:MASTER:性技 + ABL:MASTER:性交 - (ABL:枚举人物:欲望 + ABL:枚举人物:性交 + RAND:5)
+        CFLAG:枚举人物:好感度 -= MAX(2000 + (ABL:MASTER:性交 - ABL:枚举人物:性交 - ABL:枚举人物:欲望) * 100, 1000) - ABL:MASTER:性技 * 200
+        IF 性技判定 > 0
+            PRINTFORML 持续的凌辱之后，先前\@VIRGIN(枚举人物) ? 还是处女 # 还在反抗\@的%ANAME(枚举人物)%早已沉浸在被公开侵犯的快感之中
+            PRINTFORML 甚至%ANAME(枚举人物)%还主动跨上了身为敌将的%ANAME(MASTER)%的身体，忘我地扭动着腰肢
+            PRINTFORMW 最后在蜜壶还在滴落着\@VIRGIN(枚举人物) ? 血和 # \@爱液、精液的混合液的情况下自愿受缚，成为了%ANAME(MASTER)%的战利品……
+            CFLAG:枚举人物:従属度 += ABL:MASTER:性技 * 200 + (ABL:MASTER:性交 - ABL:枚举人物:性交 - ABL:枚举人物:欲望) * 100
+            CFLAG:枚举人物:依存度 += ABL:MASTER:性技 * 200 + (ABL:MASTER:性交 - ABL:枚举人物:性交 - ABL:枚举人物:欲望) * 100
+            CALL COLOR_PRINTW(@"%ANAME(枚举人物)%成为了%ANAME(MASTER)%的战利品！", カラー_注意)
+            CALL FUCK(MASTER, "欲望, 性技, 性交, 加虐, Ｃ, 射精, 露出, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(枚举人物)%的小穴", "在阵前的突然強姦")
+            CALL FUCK(枚举人物, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｖ拡張, 露出, 被虐, 苦痛快楽, Ｖ性交", "処女喪失, 膣内射精", GET_ID(MASTER), "", ANAME(MASTER), "", "在阵前的突然強姦")
+            CALL BATTLE_COMMANDER_WITHDRAWAL(対象側, LOCAL)
+            CALL CAPTURE(枚举人物, CFLAG:MASTER:所属)
+            恶堕数量 += 1
+            俘虏数量 += 1
+            SIF !俘虏 || RAND:3
+                俘虏 = 枚举人物
+        ELSE
+            PRINTFORML %ANAME(枚举人物)%一边挣扎一边大声求救
+            PRINTFORML 但%ANAME(枚举人物)%每一次逃跑都会被紧随其后的%ANAME(MASTER)%扑倒并继续侵犯
+            PRINTFORMW 在对着%ANAME(枚举人物)%的子宫发泄完之后，%ANAME(MASTER)%便把赤身裸体的她丢在了一旁
+            IF VIRGIN(枚举人物)
+                TIMES BATTLE_武闘パワー:発動側:発動番号, 1.3
+                TIMES BATTLE_防衛パワー:発動側:発動番号, 1.3
+            ELSE
+                TIMES BATTLE_武闘パワー:発動側:発動番号, 1.15
+                TIMES BATTLE_防衛パワー:発動側:発動番号, 1.15
+            ENDIF
+            CALL FUCK(MASTER, "欲望, 性技, 性交, 加虐, Ｃ, 射精, 露出, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(枚举人物)%的小穴", "在阵前的突然強姦")
+            CALL FUCK(枚举人物, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｖ拡張, 露出, 被虐, 苦痛快楽, Ｖ性交", "処女喪失, 膣内射精", GET_ID(MASTER), "", ANAME(MASTER), "", "在阵前的突然強姦")
+            PRINTFORML 等到%ANAME(MASTER)%远去的时候，%ANAME(枚举人物)%立刻让部下把她扶了起来
+            IF ABL:枚举人物:欲望 + ABL:枚举人物:性交 > RAND(3, 7)
+                PRINTFORML 但是部下们一看到上级赤身裸体的淫乱姿态，竟然群起而上轮奸了%ANAME(枚举人物)%！
+                PRINTFORMW 直到%ANAME(枚举人物)%满身都是精液后那群部下才把她扶起来……
+                FOR LOCAL, 0, 3
+                    CALL FUCK(枚举人物, "欲望, 奉仕, 精愛, 性技, 性交, 露出, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少", GET_SPERM_ID("下属"), @"下属的\@RAND:2 ? 肉棒 # 唇\@", "下属", "", "輪姦")
+                NEXT
+            ELSE
+                PRINTFORML 只是部下扶%ANAME(枚举人物)%起来的时候，也在有意或无意地进行着性骚扰
+            ENDIF
+            PRINTFORMW 不管如何，%ANAME(枚举人物)%又能重新战斗了……
+            CALL COLOR_PRINTW(@"这次还带着对%ANAME(MASTER)%的愤怒……", カラー_警告)
+        ENDIF
+    ENDIF
+NEXT
+IF 强奸数量
+    CALL SINGLE_DRAWLINE("♥")
+    IF 俘虏数量
+        PRINTFORML 收获颇丰的%ANAME(MASTER)%保持插入%ANAME(俘虏)%的状态回到了阵前
+    ELSE
+        PRINTFORML 发泄完性欲的%ANAME(MASTER)%挺着\@破处数量 ? 还沾有血与精液的混合液的 # 尽情发射完的\@阴茎回到了阵前
+    ENDIF
+    PRINTFORMW 经此一战的%ANAME(MASTER)%感觉自己的力量变强了……
+    SELECTCASE 强奸数量 - 致死数量
+        CASE IS > 3
+            TIMES BATTLE_武闘パワー:発動側:発動番号, 1.2
+        CASE IS > 1
+            TIMES BATTLE_武闘パワー:発動側:発動番号, 1.15
+        CASEELSE
+            TIMES BATTLE_武闘パワー:発動側:発動番号, 1.1
+    ENDSELECT
+    IF 破处数量
+        IF 强奸数量 == 破处数量
+            CALL COLOR_PRINTW(@"看到在场的少女都被刻上了自己的痕迹，%ANAME(MASTER)%的嗜虐心顿时膨胀了起来！", カラー_注意)
+            CALL PRINT_ADD_EXP(MASTER, "武闘経験値", SPECIAL_TRAIN_CALC_EFFECT(MASTER, GETNUM(ABL, "武闘")) / 2)
+            CALL PRINT_ADD_EXP(MASTER, "防衛経験値", SPECIAL_TRAIN_CALC_EFFECT(MASTER, GETNUM(ABL, "防衛")) / 2)
+            CALL PRINT_ADD_EXP(MASTER, "知略経験値", SPECIAL_TRAIN_CALC_EFFECT(MASTER, GETNUM(ABL, "知略")) / 2)
+            TIMES BATTLE_防衛パワー:発動側:発動番号, 1.2
+        ELSE
+            SELECTCASE 破处数量
+                CASE IS > 3
+                    TIMES BATTLE_防衛パワー:発動側:発動番号, 1.2
+                CASE IS > 1
+                    TIMES BATTLE_防衛パワー:発動側:発動番号, 1.15
+                CASEELSE
+                    TIMES BATTLE_防衛パワー:発動側:発動番号, 1.1
+            ENDSELECT
+        ENDIF
+        CALL ARENA_ADD_EXP(MASTER, ARENA_GET_POWER(MASTER) / (5 - 破处数量 + 1), 1)
+    ENDIF
+    CALL SINGLE_DRAWLINE("♥")
+    BATTLE_SKILL_RATE:発動側:発動番号 += 10 * 恶堕数量
+    IF 强奸数量 == 破处数量 && 恶堕数量 == 破处数量
+        CALL COLOR_PRINTW(@"能让少女的第一次变得如此“美好”，%ANAME(MASTER)%顿时充满了成就感……", カラー_注意)
+        CALL PRINT_ADD_EXP(MASTER, "知略経験値", (ABL:MASTER:性技 * 2 + 6) * 恶堕数量)
+    ENDIF
+    IF 强奸数量 == 恶堕数量
+        CALL COLOR_PRINTW(@"看着被侵犯的少女们纷纷恶堕，%ANAME(MASTER)%感觉自己的性技有所提升……", カラー_注意)
+        CALL PRINT_ADD_EXP(MASTER, "性技経験値", (ABL:MASTER:性技 * 2 + 6) * 恶堕数量)
+        CALL TRAIN_AUTO_ABLUP(MASTER, 0)
+    ENDIF
+    IF 强奸数量 == 俘虏数量
+        CALL COLOR_PRINTW(@"看到%ANAME(MASTER)%仅靠自己的阳根就俘获了敌军全体女将，士兵们的士气都异常高涨！", カラー_注意)
+        TIMES BATTLE_ATK:発動側, 2.5
+        TIMES BATTLE_DEF:発動側, 2.5
+        TIMES BATTLE_INT:発動側, 2.5
+    ENDIF
+ENDIF
+
+@SKILL_0_PERSONAL_44_EXPLANATION
+RESULTS = 当双方只有你一人为男性时触发，将在场所有女性推倒并强奸（包括自势力）
+
+@SKILL_0_PERSONAL_44_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN MIN(200 * ABL:MASTER:欲望, 1000)

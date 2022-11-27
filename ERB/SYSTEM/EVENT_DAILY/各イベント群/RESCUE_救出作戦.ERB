@@ -1,0 +1,401 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_RESCUE_RATE()
+RETURN 30
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_RESCUE_DECISION()
+LOCAL:1 = 0
+
+FOR LOCAL, 0, CHARANUM
+	SIF CFLAG:LOCAL:所属 == CFLAG:MASTER:所属 && CFLAG:LOCAL:捕虜先 != 0 && CFLAG:LOCAL:捕虜先 != CFLAG:MASTER:所属
+		RETURN 1
+NEXT
+
+RETURN 0
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_RESCUE_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_RESCUE()
+#DIM 対象
+#DIM 実行者
+#DIM 捕虜番号, MAX_CHARA_NUM
+
+PRINTFORML 有人提議實行作戰救出被敵國捕虜的同伴
+PRINTFORML 怎麼辦？
+CALL ASK_YN("實行", "還是算了")
+IF RESULT == 1
+	PRINTFORMW 太危險了、現在應該先等待機會
+	RETURN 1
+ELSE
+	PRINTFORMW 實在無法拋棄同伴、決定實行救出作戦
+	$RESCUE_LOOP
+	PRINTFORML 要救出誰？
+	CALL SINGLE_DRAWLINE
+	FOR LOCAL, 0, CHARANUM
+		IF CFLAG:LOCAL:所属 == CFLAG:MASTER:所属 && CFLAG:LOCAL:捕虜先 != 0 && CFLAG:LOCAL:捕虜先 != CFLAG:MASTER:所属
+			捕虜番号:(LOCAL:1) = LOCAL
+			PRINTFORM [{LOCAL:1}]%ANAME(LOCAL)%
+			PRINTL
+			LOCAL:1 ++
+		ENDIF
+	NEXT
+	CALL SINGLE_DRAWLINE
+	PRINTFORML [1000] 還是算了
+	$INPUT_LOOP
+	INPUT
+	IF RESULT == 1000
+		$CANCEL
+		PRINTFORMW 果然太危險了、現在應該先等待機會
+		RETURN 1
+	ELSEIF RESULT < 0 || RESULT >= LOCAL:1
+		GOTO INPUT_LOOP
+	ELSE
+		対象 = 捕虜番号:(RESULT)
+		PRINTFORMW 決定要救出%ANAME(対象)%
+		PRINTFORML 誰去實行救出作戰？
+		CALL SELECT_CHARA_LIST_ONLY_LOGIC_SLG("RESCUE", "RESCUE")
+		SIF RESULT == -1
+			GOTO CANCEL
+		実行者 = RESULT
+		IF 実行者 == MASTER
+			PRINTFORMW %ANAME(実行者)%決定自己親自執行作戰
+		ELSE
+			PRINTFORMW 決定讓%ANAME(実行者)%執行作戰
+		ENDIF
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		IF (ABL:実行者:武闘 + ABL:実行者:知略 + ABL:実行者:政治) / 10 >= RAND:30 + DAY / 10
+			PRINTFORML 完成！
+			PRINTFORML 救出作戦成功了！
+			PRINTFORMW 將被捕虜的%ANAME(対象)%帶回去了
+			; CFLAG:対象:捕虜先 = 0
+			CALL CAPTURE(対象,0)
+			IF 実行者 == MASTER
+				PRINTFORMW %ANAME(対象)%對%ANAME(実行者)%的評価大大上升了
+				CFLAG:対象:好感度 += 500
+				IF DVAR:英雄的你_进行度 == 0 && IS_FEMALE(対象)
+					CALL COLOR_PRINT(@"%ANAME(対象)%把你视为了她的英雄", カラー_注意)
+				DVAR:英雄的你_角色ID = GET_ID(対象)
+				DVAR:英雄的你_进行度 = 1
+				ENDIF
+			ENDIF
+		ELSE
+			PRINTFORML 糟糕！
+			PRINTFORMW 作戦失敗了……
+			IF IS_MALE(実行者)
+				PRINTFORML %ANAME(実行者)%拼命逃回去了
+				CALL ADD_COOLTIME(実行者, 3)
+			ELSE
+				PRINTFORML %ANAME(実行者)%被敵兵當成間諜捉住了
+				PRINTFORMW %ANAME(実行者)%非常堅強地怒視著敵兵、他們奸笑著將%ANAME(実行者)%帶走拷問了……
+				PRINTFORML
+				CALL RESCUE_RAPE(実行者)
+				PRINTFORML
+				IF RAND:3 == 0
+					PRINTFORMW 之後、%ANAME(実行者)%和%ANAME(対象)%一様、被人捕虜了
+					; CFLAG:実行者:捕虜先 = CFLAG:対象:捕虜先
+					CALL CAPTURE(実行者,CFLAG:対象:捕虜先)
+				ELSE
+					PRINTFORML %ANAME(実行者)%雖然被人狠狠地凌辱、但總算逃回來了
+					CALL ADD_COOLTIME(実行者, 3)
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+RETURN 1
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_RESCUE(対象)
+#DIM 対象
+RETURN CFLAG:対象:行動不能状態 != 行動不能_子供 && CFLAG:対象:所属 == CFLAG:MASTER:所属 && !IS_ANIMAL(対象) && !TALENT:対象:妊娠 && GET_COUNTRY_BOSS(CFLAG:対象:所属) != 対象
+
+@SELECT_CHARA_LIST_SELECT_LOGIC_RESCUE(対象)
+#DIM 対象
+RETURN CFLAG:対象:捕虜先 == 0
+
+
+;-----------------------------------------------
+;潜入失敗
+;-----------------------------------------------
+@RESCUE_RAPE(ARG:0)
+
+PRINTFORMW 被抓住的%ANAME(ARG:0)%被凌辱了…
+SELECTCASE RAND:40
+	CASE 0
+		PRINTFORML %ANAME(ARG:0)%被以大字形的樣子被人綁在床上、身體顫抖臉向後仰不斷嬌喘
+		PRINTFORML %ANAME(ARG:0)%被以訊問的名義做士兵們的慰安工作、完全不容許休息被人不斷隨意使用這副身體
+		PRINTFORML 紅腫的雌穴不斷流淌大量的白濁精液、不檢點地張開
+		PRINTFORML 毫不間斷的凌辱帶來的痛苦和快楽令%ANAME(ARG:0)%變得精神恍惚、身体不時痙攣並發出甜美的吐息
+		PRINTFORMW 平時缺乏女人的士兵們得到%ANAME(ARG:0)%如此極上的肉便器後、毫不留情地不斷強姦
+	CASE 1
+		PRINTFORML 在城鎮角落響起了%ANAME(ARG:0)%悲痛嬌喘聲以及男人們圍著嘲笑的聲音
+		PRINTFORML %ANAME(ARG:0)%不肯從實招來、為了殺雞儆猴被人設置在城鎮裏的拘束台上
+		PRINTFORML 為數不少的士兵和住民們源源不絕地過來隨意使用污辱這副身體、%ANAME(ARG:0)%全身變得黏糊糊
+		PRINTFORML 被無数的肉棒不斷塞入的陰道和後穴變得紅腫、全身沾滿白濁精液變得黏糊糊
+		PRINTFORML 其中一個男人在侵犯著時用力地打%ANAME(ARG:0)%的屁股、%ANAME(ARG:0)%發出意料之外的嬌声、周圍的人嘲笑著這副醜態
+		PRINTFORMW 這場宴會持續到晚上、被解放時%ANAME(ARG:0)%身體深處已經被刻上快樂的刻印了
+	CASE 2
+		PRINTFORML 在陰暗的牢獄之中響起了%ANAME(ARG:0)%含糊不清的呻吟聲和猥瑣的蜜音、以及肉體互相碰撞的拍拍聲
+		PRINTFORML 在獲得%ANAME(ARG:0)%這種極品的女人後士兵們無法忍耐、%ANAME(ARG:0)%被以詢問的名義作為他們的肉便器毫無休止地不斷侵犯著
+		PRINTFORML 最初抵抗的%ANAME(ARG:0)%、在經過無數次毆打和威脅後、已經完全従順地奉仕着他們
+		PRINTFORML 跨在其中一個士兵上面主動搖動著腰、拼命地使用雙手和口滿足周圍的士兵們、身體因此變得黏糊糊
+		PRINTFORMW %ANAME(ARG:0)%色情地奉仕令士兵們無法忍住肉欲、詢問一直持續到深夜
+	CASE 3
+		PRINTFORML 牢獄之中、詢問官們圍著%ANAME(ARG:0)%、將肉棒深深地插入令嬌喘連連
+		PRINTFORML 被人隨意侵犯也毫不在意的%ANAME(ARG:0)%嘻嘻地笑著主動扭動著腰、熱心地用雙手擼着肉棒
+		PRINTFORML 為了詢問被打入藥物的%ANAME(ARG:0)%腦袋沉溺在快樂之中、只想著被肉棒插和如何用口奉仕肉棒
+		PRINTFORML 肉棒每一次突進身體就會彈起來、被责弄陰蒂就下流地流著口水發出悅耳的聲音
+		PRINTFORMW %ANAME(ARG:0)%在他們滿意為止不斷不斷被侵犯著，身體深處覺醒了快樂
+	CASE 4
+		PRINTFORML 在地下深處的拷問部屋之中、響起了%ANAME(ARG:0)%混雜著嬌喘聲的悲鳴
+		PRINTFORML 被鎖懸空吊著%ANAME(ARG:0)%頭髮散亂身體震顫著、口吐泡沫不成言語地哀叫
+		PRINTFORML 両穴被塞入合共5根正在激烈震動著的極粗振動棒、一路上不斷發出震動聲，愛液和体液不斷溢出
+		PRINTFORML 悲鳴同時汗水、愛液和潮吹的体液向四周飛散、看見%ANAME(ARG:0)%這副難看的樣子後士兵們發出奸笑聲
+		PRINTFORML 散落在周圍的大量振動棒、跳蛋和刷子、顯示了之前%ANAME(ARG:0)%被人如何訊問
+		PRINTFORMW 之後即使發出悲鳴身體痙攣%ANAME(ARG:0)%仍不被放下來繼續訊問、被解放一刻身心已經變得破破爛爛了
+	CASE 5
+		PRINTFORML 訊問屋之中%ANAME(ARG:0)%和一名漂亮的女性纏綿並發出下流的嬌喘
+		PRINTFORML 少女訊問官股間長着立派的肉棒、不斷進攻著同為女人的%ANAME(ARG:0)%的弱點
+		PRINTFORML 少女連綿不斷的攻擊、忍耐著的%ANAME(ARG:0)%理性慢慢融化、無意識地扭動腰
+		PRINTFORML 被责弄乳首同時粗大的龜頭不斷挖著膣肉、%ANAME(ARG:0)%大大地弓起身體的同時喜悅地高潮了
+		PRINTFORMW 遺忘了同為女性的背德感、%ANAME(ARG:0)%放鬆身體沉迷在少女所給予的快樂中
+	CASE 6
+		PRINTFORML %ANAME(ARG:0)%被以屁股突出的姿態塞進牆壁中，被作為士兵們的肉便器使用了
+		PRINTFORML 紅腫的屁股上被劃上無數的「正」字、不斷顫動著的小腿下面形成了白濁的水塘
+		PRINTFORML 直到現在仍然有一個士兵捉住%ANAME(ARG:0)%的腰激烈地抽插著肉棒、響起了猥瑣的水聲
+		PRINTFORML %ANAME(ARG:0)%因苦痛和屈辱而歪曲的表情、膣內被肉棒毫不間斷地抽插後、現在已經露出下流的母狗表情
+		PRINTFORMW 不久後又開始已經不知第幾十次的膣内射精同時、%ANAME(ARG:0)%發出下流的聲音高潮了
+	CASE 7
+		PRINTFORML 巨大的狗趴在全身赤裸被迫戴上頸圈的%ANAME(ARG:0)%身上、像野獸一樣侵犯
+		PRINTFORML 這隻狗為捕虜訊問用而經過特別調教、那根凶悪的肉棒毫不留情地挖着%ANAME(ARG:0)%的膣肉
+		PRINTFORML 哭叫著嘗試逃跑的%ANAME(ARG:0)%在暴力的交尾之下、體力不支無法反抗就這樣讓牠為所欲為
+		PRINTFORML 被畜生侵犯的嫌悪感、很快就被雌性壓倒性的快樂蓋過、%ANAME(ARG:0)%眼前變得黑白
+		PRINTFORMW 之後%ANAME(ARG:0)%一邊哭泣一邊痙攣露出啊嘿顏的樣子令士兵們哈哈大笑、毫不留情地整夜繼續播種交尾
+	CASE 8
+		PRINTFORML %ANAME(ARG:0)%被抓住狠狠地凌辱後被帶到浴場洗澡
+		PRINTFORML 當然不可能會那麼親切、士兵們以監視的名義在浴池中一邊一起洗澡一邊责弄著%ANAME(ARG:0)%的身體
+		PRINTFORML 被粗暴對待後變得紅腫的身體泡在熱池水後漸漸地變得敏感、被輕輕地愛撫快樂就在腦中遊走令%ANAME(ARG:0)%漏出呻吟
+		PRINTFORML 因為羞恥而扭扭擰擰的反應刺激了他們的雄性慾望、逐漸更激烈地愛撫%ANAME(ARG:0)%
+		PRINTFORMW 不久已經忍耐不了的他們就這樣在浴池開始第二回合、很快浴池中響起了%ANAME(ARG:0)%大大的喘嬌聲
+	CASE 9
+		PRINTFORML %ANAME(ARG:0)%は秘部の露出した卑猥なボンデージを着せられて女尋問官に攻められながら、艶めかしい声をあげている
+		PRINTFORML 女性审问官帶著熱情的視線突然奪去%ANAME(ARG:0)%的嘴唇，用柔软的手指激烈地欺負露出在外的私處
+		PRINTFORML 突如其来的痛苦让还在彷徨中的%ANAME(ARG:0)%扭动起了身体，女性审问官用巧妙的手法準確地刺激著敏感點，让她无意识地弯着腰来
+		PRINTFORML 不管如何的忍耐，女性审问官在她一边在耳边轻声低语，一边抓住她胖乎乎的突起，過量的快樂都令她從喉嚨漏出了可憐的聲音
+		PRINTFORMW 和普通的审问不同，%ANAME(ARG:0)%的理性逐渐在这一整夜被充分疼爱的同性恋调教中被熔化了
+	CASE 10
+		PRINTFORML %ANAME(ARG:0)%在地牢里和其他女囚在接连锁着的状态下接受士兵们的审问。
+		PRINTFORML 但是审问只是名义上的，%ANAME(ARG:0)%她已经被带上口枷束缚住了，她作为士兵们的肉便器，被粗暴地侵犯
+		PRINTFORML 士兵们用下流的话来比较她们的身材， 粗暴地捉著頭髮， 理所當然地侵犯著陰道
+		PRINTFORML 女囚们露出下流的神情，自己摇动着腰部，%ANAME(ARG:0)% 看到這副樣子後，自己內心的雌性也阵阵刺痛着
+		PRINTFORMW %ANAME(ARG:0)%和她们一起作为肉便器接受着持续调教，最终，她们相互缠绕着舌头然后一起高潮了
+	CASE 11
+		PRINTFORML %ANAME(ARG:0)%被迫挺直了腰，被固定在支架上，在头发蓬乱的状态下被蒙上眼睛，不堪地发出哀嚎
+		PRINTFORML 审问官没有满足这样普通的凌辱，持续不斷攻击%ANAME(ARG:0)%的阴蒂
+		PRINTFORML 裸露的深红色肿胀的阴蒂，被审问官用电棒刺激，发出咯哧咯哧的声音，由于强烈的冲击，在%ANAME(ARG:0)%面前冒起了火花
+		PRINTFORML 雙眼被蒙上 令刺激變得更加強烈，%ANAME(ARG:0)%发不出声音来，全身痉挛并且潮吹了
+		PRINTFORML 不断的拷问，%ANAME(ARG:0)%也迎来了极限，她哭着恳求审问官，但是他看到那个样子大笑着，反而更激烈地进攻了
+		PRINTFORMW 此后%ANAME(ARG:0)%也在绝顶和昏厥和苏醒中反复轮回，解放出来的时候阴蒂已經變得又腫又痛了
+	CASE 12
+		PRINTFORML %ANAME(ARG:0)%在赤裸着的状态下被士兵们围绕着进行盘问。
+		PRINTFORML 但是其内容是性癖和喜欢的体位， 和第一次的对象等下流的问题，他们看着%ANAME(ARG:0)%的反应，轻蔑地笑着
+		PRINTFORML 她尝试着掩盖自己的身体，就会激怒士兵，被强行开放肉体，他们下流的视线，让%ANAME(ARG:0)%感到非常羞耻而變得氣息慌乱。
+		PRINTFORML 随后他们的手伸向臀部和胸部，毫不犹豫地搓揉起来，%ANAME(ARG:0)%是不允许抵抗的，身体颤抖了起来
+		PRINTFORMW 审讯结束后不久，他们为了确认那些内容是否真实，都争先恐后的向%ANAME(ARG:0)%聚集起来了
+	CASE 13
+		PRINTFORML 孩子们围住在床上的%ANAME(ARG:0)%并往她的阴道里塞那小阴茎
+		PRINTFORML 被抓之后，%ANAME(ARG:0)%被设置为士兵和当地人的孩子们的肉便器，所以每一天都在被侵犯
+		PRINTFORML 孩子们是第一次看到母亲以外的女人的肉体，都争先恐后着在%ANAME(ARG:0)%身上磨蹭着那未发育的阴茎
+		PRINTFORML 虽然耸动腰部的动作很笨拙，但是每一次突入都会露出雄性的表情，与此对应的是%ANAME(ARG:0)%子宫疼痛的感觉。
+		PRINTFORMW 性教育一直持续到所有的孩子都满意为止，到了结束的时候，%ANAME(ARG:0)%的子宫已经熟练地装满了独特的浓厚精液
+	CASE 14
+		PRINTFORML 在某一豪华的房间里，被锁在床上的%ANAME(ARG:0)%侧身蜷卧着，被中年男子侵犯着
+		PRINTFORML %ANAME(ARG:0)%被一名军官看中，以直接调查的名义被带到了他的房间，就这样连日被侵犯
+		PRINTFORML %ANAME(ARG:0)%在抱着厌恶感的同时，也为了寻找逃跑的空隙，表演式地接受他，发出令人興奮的声音。
+		PRINTFORML 但是他坚硬的阴茎和巧妙的技巧融化了她浅薄的想法，逐渐变成了认真的娇喘的样子
+		PRINTFORMW 这样的反应让他的心情很好，他的调教每天都很火热，%ANAME(ARG:0)%的肉体和心灵都因为快乐被铭刻上了他的印记
+	CASE 15
+		PRINTFORML 昏暗的地牢里，浑身粘糊精液的%ANAME(ARG:0)%面露呆滞的表情被士兵侵犯着
+		PRINTFORML 士兵的阴茎深深刺入她的私处，伴随着激烈的活塞运动，发出了下流的声音，浑浊的液体溢了出来
+		PRINTFORML 他射精之后，被狠狠地侵犯的%ANAME(ARG:0)%十分疲惫，在身体深处肆意扩散的火热，让她只能发出微弱的叹息，无法再反抗了
+		PRINTFORML 暂时释放的%ANAME(ARG:0)%被重重地扔在地板上，她一边抽搐着一边呆呆地看着自己的小腹
+		PRINTFORML 在呆滞横躺着的%ANAME(ARG:0)%的旁边，士兵们用手指着她，调笑以她会怀上谁的孩子作为赌博
+		PRINTFORMW 之后他们的赌博仍在继续 ，%ANAME(ARG:0)%的身体被无休止地交配凌辱，直到身体都染上精液的浓重腥味
+	CASE 16
+		PRINTFORML 被士兵们狠狠地凌辱后，%ANAME(ARG:0)%被带到市中心游行
+		PRINTFORML 她乳头挺立着，一边喝着从勃起的阴茎那里流出的精液，一边走着，居民们一边投注好奇的眼光，一边說出下流的話語
+		PRINTFORML 疲惫的%ANAME(ARG:0)%面对着羞耻和屈辱的奚落声，同时脸也通红，被士兵带着老实地走
+		PRINTFORML 有时，在群聚的群众面前趴到地面上，跪坐下来，一边受到唾骂，一边以那个姿势里被士兵侵犯
+		PRINTFORMW 在完成游行之后，%ANAME(ARG:0)%在城里的一个角落，被设置为肉便器，让城里的男人们肆意责弄了。
+	CASE 17
+		PRINTFORML 在士兵们聚集的酒馆里，穿着暴露服饰的%ANAME(ARG:0)%，表情痛苦地跳舞。
+		PRINTFORML %ANAME(ARG:0)%被迫做出受残酷的折磨还是取乐他们的选择，于是痛苦地决定了接受脱衣舞表演的要求
+		PRINTFORML %ANAME(ARG:0)%一边流着汗一边扭动着腰肢，为了让他们高兴，拼命地显示身体的曲线美
+		PRINTFORML 当激动的士兵脱口说出脱衣时，%ANAME(ARG:0)%满脸通红地把衣服一件一件脱下，让她身体赤裸了
+		PRINTFORML 不久，一个无法忍耐的士兵登上了舞台，把惊慌失措的%ANAME(ARG:0)%按到在地，就那样变成到了强奸表演
+		PRINTFORMW 之后，虽然%ANAME(ARG:0)%没有遭受酷刑，为之代替的是被每个酒馆的士兵们侵犯直到他们都满意为止
+	CASE 18
+		PRINTFORML 空气浑浊的地牢里，激烈的鞭打声和%ANAME(ARG:0)%的悲鸣声交替地回响着
+		PRINTFORML 审问官眼中露出暴虐的光芒，不断地鞭打着被剥光后用锁链锁着吊起来的%ANAME(ARG:0)%那娇嫩的肌肤。
+		PRINTFORML 强烈的痛苦让一直沉默的%ANAME(ARG:0)%的精神挫败了，痛哭着说着道歉的话
+		PRINTFORML 目视着眼睛红肿难看并不停求饶样子的审问官，满意地把锁链解开了，他把%ANAME(ARG:0)%放在床上，并用手指在她的肌肤上滑动
+		PRINTFORML 从鞭打变成如此温柔的爱抚，身心俱疲的%ANAME(ARG:0)%露出小狗般的表情，乖乖地接受到从肌肤传来的感觉，身体轻轻地颤抖着
+		PRINTFORMW 她敏感的身体被审问官巧妙的爱抚很快就到了高潮，%ANAME(ARG:0)%逐渐接受了他，并开始向他撒娇
+	CASE 19
+		PRINTFORML %ANAME(ARG:0)%被他们抓到兵营的一个角落，她被鬼侵犯了，一边翻着白眼一边呻吟着。
+		PRINTFORML 这群鬼其中一个开口说%ANAME(ARG:0)%是他和伙伴的性处理对象，那个凶恶的阴茎已经侵犯了她几个小时
+		PRINTFORML 坦白说出来就可以释放了，但是在蹂躏肉体的绝对性爱中，她已经无法轻易地说话了。
+		PRINTFORML 鬼也因为隔了好久才给予的这个极品的雌性而奋，毫不留情地释放了无限的性欲，这些的欲望已经多次向%ANAME(ARG:0)%释放了
+		PRINTFORMW 在被侵犯了一夜之后终于解放了的时候，%ANAME(ARG:0)%糜烂不堪的阴道扩张着，扑通扑通地流出满满的精液
+	CASE 20
+		PRINTFORML 被抓住的%ANAME(ARG:0)%被士兵投入有不同囚犯们的牢狱
+		PRINTFORML 对突然被给予的极品的女人，积存欲望很久的他们不可能忍耐，争先恐后地像野兽般聚集着
+		PRINTFORML %ANAME(ARG:0)%虽然也拼命地抵抗了，但是在饥渴已久的男人们面前简直是无力的反抗，被他们当成了肉便器
+		PRINTFORML %ANAME(ARG:0)%全身的洞都被囚犯们粗暴的凌辱侵犯着，监牢外的士兵看着这个情形，指着大笑了起来
+		PRINTFORML 她的身体就像性玩具一样，全身被囚犯们随心所欲责弄着，一个小时左右后，她全身都沾染着精液，尽管如此凌辱也没有结束
+		PRINTFORMW 从监狱被带出去的时候，凌乱不堪%ANAME(ARG:0)%被痛楚折磨的无法靠自己的力量站起来，大量的精液从她的私处滴落下来
+	CASE 21
+		PRINTFORML 被蒙住眼睛带着口枷的%ANAME(ARG:0)%锁在三角木马上，正在不断地痉挛着，发出悲痛的呻吟声。
+		PRINTFORML 一个人手臂大小的振动棒深深地进出她的秘处，她的秘处已经扩张到极限了
+		PRINTFORML 振动棒每次粗暴的进出时，都会冲击般地振动五脏六腑，%ANAME(ARG:0)%身子向后仰，从喉咙里发出野兽般的悲鸣声
+		PRINTFORML %ANAME(ARG:0)%精疲力尽的时候，振动棒终于拔了出来，她的阴道完全敞开，子宫口也可以看见了
+		PRINTFORMW 审讯官无视流泪讨饶的%ANAME(ARG:0)%，将阴茎取出，在阴道打开的时候，猛烈地将阴茎挤了进去
+	CASE 22
+		PRINTFORML %ANAME(ARG:0)%被带到审讯室，四肢着地趴着被士兵侵犯
+		PRINTFORML %ANAME(ARG:0)%在被媚药的注射后，被惩罚模仿母猪，在被侵犯的同时，发出布希布喜的下流叫声
+		PRINTFORML 士兵们一边笑着一边说要调教好这极品的牲口，狠狠地打了弯下腰，蹂躏着%ANAME(ARG:0)%的阴道
+		PRINTFORML 在肉棒进出时，媚肉完全被撕裂，出现令人麻痹的快乐，%ANAME(ARG:0)%不禁背部向后仰，发出嘶哑的声音。
+		PRINTFORMW 已经无法忍受快感的%ANAME(ARG:0)%并不是单纯的模仿，而是真心像母猪一样，在不断受种的同时鸣叫着。
+	CASE 23
+		PRINTFORML %ANAME(ARG:0)%作为他们的慰安妇，持续接受着无情的凌辱，因为大量的精液，身体内外都变得黏黏糊糊
+		PRINTFORML 什麼都不考慮純粹为了贪图肉欲而激烈地凌辱，%ANAME(ARG:0)%一边因痛苦地扭曲着脸，一边从身体的深处涌出一种火热的感觉
+		PRINTFORML 和%ANAME(ARG:0)%想要忍耐的意识相反，她的身体已经因为雌性的本能觉醒，秘处自发地紧紧缠住从后面进入身体的阴茎
+		PRINTFORML 在阴茎被紧紧缠住的同时，他们开始用手责弄阴蒂，高潮的快感让%ANAME(ARG:0)%的脚趾都伸直了
+		PRINTFORMW 他们十分喜欢%ANAME(ARG:0)%极品的蜜壶并且持续地侵犯着，肉体一再重复着不希望的高潮
+	CASE 24
+		PRINTFORML 在昏暗的讯问室里，被多个士兵包围的%ANAME(ARG:0)%发出了疯狂的呐喊
+		PRINTFORML %ANAME(ARG:0)%呈大字型全身被固定在台子上，口吐白沫眼睛翻白地全身颤抖着，床台吱吱嘎嘎响地在作响着
+		PRINTFORML 在她的胯股之间被插入了一个特大的腹腔镜，到子宫口为止都是一览无余的状态，爱液像大洪水一样溢出着
+		PRINTFORML 在这几个小时内，他们将手指和工具插入%ANAME(ARG:0)%身体的深处，给子宫口带来了强烈的刺激
+		PRINTFORML 对最敏感部位毫不留情的刺激和持续性的高潮，让%ANAME(ARG:0)%的理性很快就被破坏了，
+		PRINTFORMW 被释放后，为了确认调教的情况，他们直接将阴茎挤了进去，%ANAME(ARG:0)%高潮絕叫的同時，失神了
+	CASE 25
+		PRINTFORML %ANAME(ARG:0)%被迫穿着婚纱来玩，被士兵们一個一個轮流侵犯
+		PRINTFORML 被很多人从后面猛烈地戳弄，%ANAME(ARG:0)%满脸通红地咬着嘴唇，拼命地忍住发出声音，
+		PRINTFORML 已经被好几根的肉棒侵犯的身体已经完全觉醒雌性，每次肉棒的突刺都能将身体中的快感从子宫贯通到大脑
+		PRINTFORML 当他们向阴道内射精时，说这是婚姻的誓言，终于%ANAME(ARG:0)%的理性决堤了，娇声尖叫并绝顶了
+		PRINTFORMW 之后，直到和所有士兵的肉棒结婚仪式结束为止，婚礼都在继续举行，肚子因为不停的受种变大了
+	CASE 26
+		PRINTFORML 遍体鳞伤的%ANAME(ARG:0)%被审问官侵犯的同时还在录像
+		PRINTFORML 被好几次殴打和折磨%ANAME(ARG:0)%已经完全温驯了，趴着用嘴服侍阴茎的同时，面对摄像机露出僵硬的笑容
+		PRINTFORML 被命令说着下流的话，一边被阴道内射精一边被录像的%ANAME(ARG:0)%瞳中浮现出了眼泪。
+		PRINTFORML 乳房，口腔，屁股和阴道被他们当成为上好的精液厕所，这个样子全部被摄像机录下来了
+		PRINTFORMW 因为他们迷上了%ANAME(ARG:0)%的身体，所以整夜持续拍摄，制作了许多ＡＶ
+		CALL FUCK(ARG:0, "撮影")
+	CASE 27
+		PRINTFORML 在某个妓院的一间房间里，%ANAME(ARG:0)%和激烈地客人交合着，大声地娇喘着
+		PRINTFORML %ANAME(ARG:0)%穿着透明而艳丽的衣服，她淫荡地扭动着身体，像真正的妓女那样为客人服务
+		PRINTFORML 被逮捕的%ANAME(ARG:0)%为了逃避他们残酷的拷问，在这里做联系工作，被要求去学习做一名真正的妓女
+		PRINTFORML 客人当然也知道情况，肆意责弄%ANAME(ARG:0)%身体的同时，用轻蔑的语气要求更过分的服务
+		PRINTFORMW %ANAME(ARG:0)%面色低沉，但是还是保持着笑容，做一个晚上充分的服务，直到到他满足为止，
+	CASE 28
+		PRINTFORML 对于在审问中什么都不说的%ANAME(ARG:0)%，被交给了雌性调教专家
+		PRINTFORML %ANAME(ARG:0)%被肥胖的男人们上下夹住激烈地被侵犯着，一边痉挛一边从颤抖的喉咙里露出了呻吟
+		PRINTFORML 两条粗大的阴茎在阴道和直肠内压迫着里头的蜜肉，由于痛苦的冲击，在%ANAME(ARG:0)%的视野里，哗啦哗啦地冒着火花
+		PRINTFORML 男人面对这极品的肉穴，一边兴奋地喘着粗气，一边激烈地动起腰来，每当这时，%ANAME(ARG:0)%就会伸直脚趾，发出悲痛的声音。
+		PRINTFORML %ANAME(ARG:0)%已经讨饶，但是他们没有停下，他们大量的射精，强烈的突入感仿佛要让内脏从嘴巴飞出去了
+		PRINTFORMW 当然，调教不是一次射精就结束的，这种三明治般的受种性交直到%ANAME(ARG:0)%心灵扭曲前都没完没了的持续着
+	CASE 29
+		PRINTFORML %ANAME(ARG:0)%跨坐在审问官的身上，一边诶嘿嘿的笑着，一边扭动的腰肢，床榻也跟着晃动着
+		PRINTFORML 为了审问而被过量服用药物的%ANAME(ARG:0)%，已经失去理智，就像发情的野兽一样，只是为了追求快乐而不停地摇动着腰肢。
+		PRINTFORML 每次粗大的阴茎嘎吱嘎吱地摩擦阴道，都会带来快感，%ANAME(ARG:0)%露出了不像話的啊嘿顏
+		PRINTFORML 不经意间，男人的腰部开始往上顶，阴茎向上顶到子宫的冲击般快感向%ANAME(ARG:0)%袭来，巨大的快感让她背部仰起同时潮吹了
+		PRINTFORMW %ANAME(ARG:0)%已经完全沉浸于性爱之中，一直做爱直到失去知觉为止。
+	CASE 30
+		PRINTFORML %ANAME(ARG:0)%在床上，下流地張大雙腿跨坐在男人的身上，说着下流的台词，热情地地摆动着腰肢
+		PRINTFORML 被催眠术驱使成肉棒奴隶的%ANAME(ARG:0)%，露出了从平常的身姿中难以想象的淫靡表情
+		PRINTFORML 每次粗壮的肉棒出入阴道，%ANAME(ARG:0)%就会露出不像話的啊嘿顏，发出啊呀呀的甜美娇喘，身体颤抖着
+		PRINTFORMW 经过彻夜进行的调教审问，%ANAME(ARG:0)%从身体内部被教育成了低贱的母狗，并被主人不停的疼爱着
+	CASE 31
+		PRINTFORML %ANAME(ARG:0)%全身沾滿精液和愛液黏黏糊糊地倒在床上， 露出空虛的表情痙攣着
+		PRINTFORML %ANAME(ARG:0)% 被士兵們以審問的名義進行了無休止的凌辱， 疲倦的喘息變得越來越弱了
+		PRINTFORML 其中一名士兵用腳踩住%ANAME(ARG:0)%的下腹部，%ANAME(ARG:0)%呻吟的同時白濁液體噗一聲從小穴溢出來了
+		PRINTFORML 震顫着的%ANAME(ARG:0)% 哭著向哈哈大笑的士兵們求饒， 結果刺激了他們的嗜虐心
+		PRINTFORMW 之後以審問的名義進行的凌辱持續了一整晚，直到早上時%ANAME(ARG:0)%的身心都變得破破爛爛了
+	CASE 32
+		PRINTFORML 在充滿精液氣味的房間裏響起了肉體拍打的聲音以及%ANAME(ARG:0)%喘嬌聲
+		PRINTFORML %ANAME(ARG:0)% 被帶到這個調教房間後， 就被士兵們無休止地侵犯著
+		PRINTFORML 小穴被肉棒無間斷地插入完全沒有休息的空間， 精液不斷從結合的部位溢出
+		PRINTFORML %ANAME(ARG:0)%的身体已经被开发成雌性，在被凌辱的同时，反复的高潮使全身痉挛了
+		PRINTFORML 阴茎一边转动着进攻子宫口，一边用手抓弄把玩着阴蒂，一瞬间感受受到了足以让人失去知觉的快感，娇滴滴地发出了下流的娇媚之声
+		PRINTFORMW 即使这样，%ANAME(ARG:0)%依旧不停地被侵犯着，精液的气味布满了她的全身，露出了恍惚而欢乐表情
+	CASE 33
+		PRINTFORML 深夜，在肮脏的胡同里，全裸的%ANAME(ARG:0)%被很多流浪漢的阴茎包围着
+		PRINTFORML 顽固沉默的%ANAME(ARG:0)%被恼羞成怒的士兵们，当成余兴节目交给惊喜的流浪漢们
+		PRINTFORML 无论如何都想抵抗的%ANAME(ARG:0)%，却敌不过面对因渴望女性而气势汹汹的流浪者们，一下子就精液被玷污了全身
+		PRINTFORML 沾满包皮垢肮脏的阴茎无情地往%ANAME(ARG:0)%全身的洞挤进去，然后在那里面毫不留情地释放泛黄的精液
+		PRINTFORML 强烈雄性的味道让闻到的%ANAME(ARG:0)%刺激了自身的雌性，不管自己是否愿意，子宫和卵巢都感受到了疼痛的感觉
+		PRINTFORMW 已经不知道是第几次在阴道中射精了，失去反抗能力的%ANAME(ARG:0)%在这压倒性的快感面前大声地娇喘并且高潮了
+	CASE 34
+		PRINTFORML 在昏暗的地下牢房里，被锁链悬挂的%ANAME(ARG:0)%被一个男人的背后侵犯着，不停地发出呻吟声。
+		PRINTFORML 她的表情很疲惫，爱液和汗水滴在脚下形成的小水洼是狠狠她被长时间侵犯的证明
+		PRINTFORML 虽然，%ANAME(ARG:0)%还是表现出抵抗的情绪，但是被调教的身体已经很敏感了，为了受种而自发地缠绕阴茎
+		PRINTFORML 当肉棒激励地戳弄时，不管是否愿意，阴道都会扩张成粗壮肉棒的形状，自觉地接受肉棒，她因为已经无法忍受快感而发出了娇喘
+		PRINTFORMW 每一次突进都让她的理性消散了，压倒性的快感侵染了她的身心，她无意识地开始露出啊黑颜并且晃动着腰肢
+	CASE 35
+		PRINTFORML 酒吧里，%ANAME(ARG:0)%穿着兔女郎的衣服接待着士兵
+		PRINTFORML %ANAME(ARG:0)%脸上带着虚假的笑容，偶尔弯下身体就会被摸到屁股和胸部，也没有露出讨厌的表情，
+		PRINTFORML 药物和暗示扭曲了%ANAME(ARG:0)%的感官，在审问过程中，她被作为军妓而工作着。
+		PRINTFORML 在意識朦朧的情况下被客人要求去摇动屁股，看着摆着下流姿势的%ANAME(ARG:0)%，他们用手指着并哈哈大笑
+		PRINTFORML 不久，越来越多的客人热情地抓着%ANAME(ARG:0)%上了舞台，在其他人面前%ANAME(ARG:0)%的强奸秀开始了
+		PRINTFORMW %ANAME(ARG:0)%娇喘着毫不抵抗地接受着侵犯，那个样子让全部顾客都兴奋了，他们轮流侵犯着她
+	CASE 36
+		PRINTFORML 昏暗的地下牢狱中，有着巨大的身躯的鬼侵犯着不断惨叫的%ANAME(ARG:0)%
+		PRINTFORML 阴道快撕裂般地吞下了那巨大的阴茎，那巨大的阴茎像要捣碎子宫那样不断地挤压着，%ANAME(ARG:0)%眼珠翻白，发出痛苦的呻吟
+		PRINTFORML 士兵告诉她，如果她坦白，他就让鬼把她放开，在剧烈的冲击下，%ANAME(ARG:0)%的头脑已经一片空白了
+		PRINTFORML 鬼得到了久違的女人非常興奮，好像冲破子宫般地动着腰，巨根突然一口氣的插入, 让%ANAME(ARG:0)%肚子瞬間膨脹发出了啵呴的声音
+		PRINTFORMW 痙攣%ANAME(ARG:0)%拼命地张大嘴，但是她的声音没有任何人听到，之后也只能继续被鬼侵犯了
+	CASE 37
+		PRINTFORML 被強行扒光了身上衣服的%ANAME(ARG:0)%被大量士兵們圍住， 作為慰安婦被隨意侵犯著
+		PRINTFORML 士兵們在頑強的%ANAME(ARG:0)% 身上用了家畜用的強力媚藥後一個一個不斷侵犯着，打賭着誰能令她第一個高潮
+		PRINTFORML 雖然%ANAME(ARG:0)% 努力地忍耐、 但不斷的攻擊令身體快要失去意識、 雙眼浮現出♥形
+		PRINTFORML 不久，一名男人强烈的突刺，最终让%ANAME(ARG:0)%的理性沦陷了，不像样地高潮并潮吹了
+		PRINTFORMW 赢了赌局的男人得意洋洋的环视同事后，作为战利品把%ANAME(ARG:0)%带回了自己的房间里，一整晚被用精液侵染了
+	CASE 38
+		PRINTFORML 被作为间谍逮到的%ANAME(ARG:0)%赤裸着戴着项圈，在人们面前被侵犯了
+		PRINTFORML 大腿打开被阴茎贯穿的样子被很多男人目不转睛地凝视着，%ANAME(ARG:0)%满脸羞红地抵抗着
+		PRINTFORML 因抵抗而扭动腰部的动作让人们更兴奋了，一些人无法忍受，把阴茎掏出来开始自慰
+		PRINTFORML 看到自己被当成男人们自慰配菜的样子的%ANAME(ARG:0)%，感受到的快感让子宫疼痛起来
+		PRINTFORMW 结束凌辱的士兵把她的肉体交给男人们，他们立刻群聚在一起把%ANAME(ARG:0)%的极品肉体弄得肮脏不堪了
+	CASE 39
+		PRINTFORML 眼神迷离的%ANAME(ARG:0)%一边被审问官抱着责弄着，一边发出妖魅的娇喘
+		PRINTFORML 被催眠诱导在梦中%ANAME(ARG:0)%毫无抵抗，任由他侵犯，身体坦率地接受给予的快乐
+		PRINTFORML 审讯官对%ANAME(ARG:0)%很是喜欢，他努力的工作就是为了把他自身的存在刻在她的身心上，调教成自己的专属性奴隶る
+		PRINTFORML %ANAME(ARG:0)%陶醉于每一次被爱抚的麻痹般地快感，每次被戳弄，就会有要把脑袋冲破的快感，她不禁发出娇媚的声音
+		PRINTFORML 不久，审问官一边呻吟着，一边在阴道里面深处射出特浓的精液，这给%ANAME(ARG:0)%的子宫带来了无比愉悦，同时让她也高潮了
+		PRINTFORMW 他的调教持续了整晚，结束的时候，%ANAME(ARG:0)%神情恍惚地贴近审问官的胸口撒娇，好像迷恋上他的样子
+ENDSELECT
+CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("兵士"), @"兵士の\@RAND:2 ? 肉棒 # 唇\@", @"兵士")
+CALL FUCK_GANGBANG(ARG:0, GET_SPERM_ID("兵士"), @"兵士の\@RAND:2 ? 肉棒 # 唇\@", @"兵士")
+
+RETURN

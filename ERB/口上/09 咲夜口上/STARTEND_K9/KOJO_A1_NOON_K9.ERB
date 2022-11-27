@@ -1,0 +1,1193 @@
+﻿;─────────────────────────────────────── 
+;●「会いに行く」の開始時
+;─────────────────────────────────────── 
+@KOJO_TRAIN_START_A1_K9
+#DIM 咲夜_対象
+#DIM 咲夜
+
+咲夜_対象 = MASTER
+咲夜 = NAME_TO_CHARA("咲夜")
+
+;咲夜口上の使用可否設定と初期化
+SIF CFLAG:咲夜:400 == 0
+	CALL KOJO_ASK_RESET_K9
+
+;口上を不使用設定なら戻る
+SIF CFLAG:咲夜:400 == 1
+	RETURN 0
+
+SETCOLOR 咲夜_口上カラー
+
+;─────────────────────────────────────── 
+;○初回
+;─────────────────────────────────────── 
+IF CFLAG:咲夜:200 == 0
+
+	;会いに行く口上初回呼び出しフラグオン
+	CFLAG:咲夜:200 = 1
+
+	;───────────────────────────────────── 
+	;▼虚ろ
+	;───────────────────────────────────── 
+	IF TALENT:咲夜:空虚
+		PRINTFORML 「啊……嗯……」
+		;TranslatedMark 「あ……うー……」
+		PRINTFORMDL %ANAME(咲夜)%穿着乱糟糟的衣服，像人偶一样把手脚伸出去
+		;TranslatedMark %ANAME(咲夜)%は乱れた服装で人形のように手足を投げ出している
+		WAIT
+		RESETCOLOR
+		RETURN 0
+	ENDIF
+
+	;───────────────────────────────────── 
+	;▼通常初対面
+	;　面識がなく紅魔館メンバーや知人キャラでない場合
+	;───────────────────────────────────── 
+	IF !CHECK_K9("面識")
+		;同勢力
+		IF CFLAG:咲夜:所属 == CFLAG:(咲夜_対象):所属
+			;主人公が咲夜の君主
+			IF 咲夜_対象 == GET_COUNTRY_BOSS(CFLAG:咲夜:所属)
+				PRINTFORML 「啊，抱歉。打开了哦」
+				;TranslatedMark 「どうぞ。開いてるわ」
+				CALL KOJO_DESCRIPTION_CHARA_K9("容姿")
+				PRINTL 
+				PRINTFORML 「%CALLNAME_K9(咲夜_対象)%。谢谢您的劳步」
+				;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%。ご足労くださってありがとうございます」
+				PRINTFORML 「我是红魔馆的仆人，我叫%NAME_FORMAL(咲夜)%」
+				;TranslatedMark 「私は紅魔館で使用人を務めておりました、%NAME_FORMAL(咲夜)%と申します」
+				CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+				PRINTL 
+				PRINTFORML 「今后请多关照%CALLNAME_K9(咲夜_対象)%」
+				;TranslatedMark 「今後は%CALLNAME_K9(咲夜_対象)%のお世話になります」
+				PRINTFORML 「日常生活之类的琐事，请交付给我」
+				;TranslatedMark 「身の回りのお世話はどうぞお任せください」
+				PRINTFORML 「茶的浓度和点心的甜味都会按照%CALLNAME_K9(咲夜_対象)%的喜好来做」
+				;TranslatedMark 「お茶の濃さもお菓子の甘さも%CALLNAME_K9(咲夜_対象)%のお好み通りに致します」
+				CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+
+			;咲夜が主人公の君主
+			ELSEIF 咲夜 == GET_COUNTRY_BOSS(CFLAG:咲夜_対象:所属)
+				PRINTFORML 「啊，抱歉。打开了哦」
+				;TranslatedMark 「どうぞ。開いてるわ」
+				CALL KOJO_DESCRIPTION_CHARA_K9("容姿")
+				PRINTL 
+				PRINTFORML 「%CALLNAME_K9(咲夜_対象)%啊。你这家伙，是把我当成军士长了吗？」（眨眼间，听到狂躁的滴答声，是错觉吗？）
+				;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%ね。私に士官してくれたのでしょう？」
+				PRINTFORML 「嗯，我在听你说话哦。我是侍奉蕾米莉亚大小姐的红魔馆的女仆长……」
+				;TranslatedMark 「話は聞いているわ。私はレミリアお嬢様に仕える紅魔館のメイド長……」
+				PRINTFORML 「但是呢。情况改变了，一直到现在，都是由我掌管这里的职务」
+				;TranslatedMark 「だったのだけど。事情が変わって、今はここのあるじを務めているの」
+				PRINTFORML 「%NAME_FORMAL(咲夜)%啊。请多关照」
+				;TranslatedMark 「%NAME_FORMAL(咲夜)%よ。よろしく頼むわね」
+				CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+				PRINTL 
+				PRINTFORML 「请坐。今天我请客。那么，关于您接下来工作的学习，请不要推脱」（拒绝的话，头上会凭空出现几把银白色的飞刀吧？）
+				;TranslatedMark 「掛けてちょうだい。今日はおもてなしするわ。これからたくさん働いてもらうもの」
+				CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+
+			;共に士官で君主はレミリア
+			ELSEIF GET_COUNTRY_BOSS(CFLAG:咲夜:所属) == NAME_TO_CHARA("レミリア") 
+				PRINTFORML 「啊，抱歉。打开了哦」
+				;TranslatedMark 「どうぞ。開いてるわ」
+				CALL KOJO_DESCRIPTION_CHARA_K9("容姿")
+				PRINTL 
+				PRINTFORML 「%CALLNAME_K9(咲夜_対象)%啊。我一直在等着你」
+				;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%ね。待っていたのよ」
+				PRINTFORML 「您是被小姐雇佣的吧？嗯，我在听」
+				;TranslatedMark 「お嬢様に雇われたのでしょう？　話は聞いているわ」
+				CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+				PRINTL 
+				PRINTFORML 「我是红魔馆的女仆长，%NAME_FORMAL(咲夜)%。请多关照」
+				;TranslatedMark 「私は紅魔館のメイド長を務めている、%NAME_FORMAL(咲夜)%。よろしくね」
+				PRINTFORML 「请坐。今后的工作就拜托你聊。当然，我这边也会招待你的」
+				;TranslatedMark 「掛けてちょうだい。これからたくさん働いてもらうんだもの。おもてなしするわよ」
+				CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+
+			;共に士官
+			ELSE
+				PRINTFORML 「啊，抱歉。打开了哦」
+				;TranslatedMark 「どうぞ。開いてるわ」
+				CALL KOJO_DESCRIPTION_CHARA_K9("容姿")
+				PRINTL 
+				PRINTFORML 「%CALLNAME_K9(咲夜_対象)%啊。嗯，我在听」
+				;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%ね。話は聞いているわ」
+				PRINTFORML 「我是%NAME_FORMAL(咲夜)%。请多关照」
+				;TranslatedMark 「私は%NAME_FORMAL(咲夜)%。よろしくお願いするわね」
+				CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+				PRINTL 
+				PRINTFORML 「请坐。因为正好是休息时间。如果可以的话，我们来聊天吧」（咲夜摩挲着手中的怀表）
+				;TranslatedMark 「掛けて。ちょうど休憩時間だし良かったらお話しましょう」
+				PRINTFORML 「唔...因为是为同一个主人工作的伙伴...欢迎」
+				;TranslatedMark 「同じあるじに勤める仲間だもの。歓迎するわ」
+				CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+			ENDIF
+
+		;違勢力
+		ELSE
+			;主人公が君主かつ咲夜が君主
+			IF GET_COUNTRY_BOSS(CFLAG:咲夜_対象:所属) ==  咲夜_対象 && GET_COUNTRY_BOSS(CFLAG:咲夜:所属) == 咲夜
+				PRINTFORML 「啊，抱歉。打开了哦」
+				;TranslatedMark 「どうぞ。開いてるわ」
+				CALL KOJO_DESCRIPTION_CHARA_K9("容姿")
+				PRINTL 
+				PRINTFORML 「哎呀。%CALLNAME_K9(咲夜_対象)%。受您照顾了」
+				;TranslatedMark 「あら。%CALLNAME_K9(咲夜_対象)%。お世話になるわね」
+				PRINTFORML 「看来是再打个招呼比较好呢。我是红魔馆的女仆长%NAME_FORMAL(咲夜)%」
+				;TranslatedMark 「改めて挨拶したほうがいいかしら。私は紅魔館のメイド長を務めていた%NAME_FORMAL(咲夜)%よ」
+				PRINTFORML 「虽然现在是被雇佣的一方，但是%CALLNAME_K9(咲夜_対象)%也是这样的吧？」
+				;TranslatedMark 「今は雇う側だけれど、%CALLNAME_K9(咲夜_対象)%もそうなのでしょう？」
+				PRINTFORML 「前辈，请多关照。能和前辈商量的话，我会很高兴的」
+				;TranslatedMark 「よろしくお願いするわね、先輩。相談できると嬉しいわ」
+				CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+				PRINTL 
+				PRINTFORML 「请坐。并不是说要谢谢你，但我会好好招待你的」
+				;TranslatedMark 「掛けてちょうだい。そのお礼って訳じゃないけど、おもてなしするわよ」
+				CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+
+			;主人公が君主かつ咲夜の君主はレミリア
+			ELSEIF GET_COUNTRY_BOSS(CFLAG:咲夜_対象:所属) == 咲夜_対象 && GET_COUNTRY_BOSS(CFLAG:咲夜:所属) == NAME_TO_CHARA("レミリア")
+				PRINTFORML 「啊，抱歉。打开了哦」
+				;TranslatedMark 「どうぞ。開いてるわ」
+				CALL KOJO_DESCRIPTION_CHARA_K9("容姿")
+				PRINTL 
+				PRINTFORML 「哎呀。%CALLNAME_K9(咲夜_対象)%」
+				;TranslatedMark 「あら。%CALLNAME_K9(咲夜_対象)%」
+				PRINTFORML 「对不起，我迟到了。我是红魔馆的仆人，%NAME_FORMAL(咲夜)%是也（0*0）」
+				;TranslatedMark 「申し遅れました。私は紅魔館の使用人、%NAME_FORMAL(咲夜)%と申します」
+				CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+				PRINTL 
+				PRINTFORML 「受大小姐关照的人，就是我要关注的人」
+				;TranslatedMark 「お嬢様がお世話になる方は、私がお世話になる方です」
+				PRINTFORML 「请多关照」
+				;TranslatedMark 「なにとぞよろしくお願いします」
+				PRINTFORML 「请坐。对不起，让您久等了」
+				;TranslatedMark 「お掛けください。お待たせは致しませんわ」
+				CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+
+			;咲夜が君主
+			ELSEIF GET_COUNTRY_BOSS(CFLAG:咲夜:所属) == 咲夜
+				PRINTFORML 「啊，抱歉。打开了哦」
+				;TranslatedMark 「どうぞ。開いてるわ」
+				CALL KOJO_DESCRIPTION_CHARA_K9("容姿")
+				PRINTL 
+				PRINTFORML 「你……是谁呢？」
+				;TranslatedMark 「あなたは……どなただったかしら？」
+				PRINTFORML 「%CALLNAME_K9(咲夜_対象)%？啊。你是特意来打招呼的吧」
+				;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%？　そう。わざわざ挨拶に来てくれたのね」
+				PRINTFORML 「说晚了，我是侍奉蕾米莉亚大小姐的红魔馆的女仆长……虽然这样说」
+				;TranslatedMark 「申し遅れたけど、私はレミリアお嬢様に仕える紅魔館のメイド長……だったのだけど」
+				PRINTFORML 「不知不觉间，过往的事情已然改变。这里的主君，现在又是谁呢？……是%NAME_FORMAL(咲夜)%哦」
+				;TranslatedMark 「事情が変わって今はここのあるじを務めている、%NAME_FORMAL(咲夜)%よ」
+				PRINTFORML 「请多关照」
+				;TranslatedMark 「よろしくお願いするわね」
+				CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+				PRINTL 
+				PRINTFORML 「请坐。好不容易您能来一趟。那么由我来招待您」
+				;TranslatedMark 「掛けてちょうだい。せっかく来てくれたのだから、おもてなしするわ」
+				CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+
+			;咲夜の君主はレミリア
+			ELSEIF GET_COUNTRY_BOSS(CFLAG:咲夜:所属) == NAME_TO_CHARA("レミリア")
+				PRINTFORML 「啊，抱歉。打开了哦」
+				;TranslatedMark 「どうぞ。開いてるわ」
+				CALL KOJO_DESCRIPTION_CHARA_K9("容姿")
+				PRINTL 
+				PRINTFORML 「你……是谁呢？」
+				;TranslatedMark 「あなたは……どなただったかしら？」
+				PRINTFORML 「%CALLNAME_K9(咲夜_対象)%？是的。大小姐受您照顾了呢」
+				;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%？　そう。お嬢様がお世話になっているのね」
+				CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+				PRINTL 
+				PRINTFORML 「虽然现在说有点晚了，我是红魔馆的女仆长%NAME_FORMAL(咲夜)%」
+				;TranslatedMark 「申し遅れたけど、私は紅魔館のメイド長を務めている%NAME_FORMAL(咲夜)%」
+				PRINTFORML 「请多关照。好不容易来一趟，请随意，我会招待您的」（一瞬之间，在凭空出现的果盘上，刀刃的反光一闪而过）
+				;TranslatedMark 「よろしくね。どうぞ、せっかく来てくれたんだもの。おもてなしするわ」
+				CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+
+			;それ以外
+			ELSE
+				PRINTFORML 「啊，抱歉。打开了哦」
+				;TranslatedMark 「どうぞ。開いてるわ」
+				CALL KOJO_DESCRIPTION_CHARA_K9("容姿")
+				PRINTL 
+				PRINTFORML 「你……是谁呢？」
+				;TranslatedMark 「あなたは……どなただったかしら？」
+				PRINTFORML 「%CALLNAME_K9(咲夜_対象)%？是。请多关照」
+				;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%？　そう。よろしくね」
+				PRINTFORML 「对不起，迟到了，操控时间的女仆有时也会懈怠呢……啊，不，没什么，我是%NAME_FORMAL(咲夜)%。红魔馆的女仆长……」
+				;TranslatedMark 「申し遅れたけど、私は%NAME_FORMAL(咲夜)%。レミリアお嬢様に仕える紅魔館のメイド長……」
+				PRINTFORML 「但是呀。情况完全改变了哦，现在在这里雇佣臣子的君主，是我哟」
+				;TranslatedMark 「だったのだけど。事情が変わって、今はここで雇ってもらっている身よ」
+				CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+				PRINTL 
+				PRINTFORML 「请坐。好不容易来了，我会招待你的」（一瞬间，所有的茶具就已经摆放好了）
+				;TranslatedMark 「掛けてちょうだい。せっかく来てくれたのだし、おもてなしするわ」
+				CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+
+			ENDIF
+		ENDIF
+
+	;───────────────────────────────────── 
+	;▼通常初対面ではない
+	;　面識があるまたは紅魔館メンバーや知人キャラの場合
+	;───────────────────────────────────── 
+	ELSE
+		;同勢力
+		IF CFLAG:咲夜:所属 == CFLAG:(咲夜_対象):所属
+			;デイリーによる出会い
+			IF KDVAR:咲夜:咲夜_主の主は
+				PRINTFORMW 「啊，抱歉。打开了哦」
+				;TranslatedMark 「どうぞ。開いてるわ」
+				PRINTL 
+				PRINTFORML 「%CALLNAME_K9(咲夜_対象)%。让您久等了」（在你转头的一瞬间，急急忙忙赶过来的咲夜将裙子上的褶皱抚平了。冒冒失失的女仆在独属于自己的时间中重新找回了完美潇洒）
+				;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%。お待ちしておりました」
+				PRINTFORML 「请问您有什么命令？……立刻吗？我定不会辜负您的期望」
+				;TranslatedMark 「早速、何かご命令でしょうか？　ご期待は裏切りません」
+				CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+				PRINTL 
+				PRINTFORML 「……是闲谈吗？不，我很意外。是，我知道了」
+				;TranslatedMark 「……雑談ですか？　いえ、意外で。ええ、わかりました」
+				PRINTFORML 「请坐。马上给您准备茶」
+				;TranslatedMark 「お掛けください。すぐにお茶を用意致します」
+				PRINTFORML 「请再让我打个招呼。我是红魔馆的女仆长%NAME_FORMAL(咲夜)%」（女仆的发丝似乎和时针缠绕在了一起？是错觉吧）
+				;TranslatedMark 「改めてご挨拶を。私は紅魔館のメイド長、%NAME_FORMAL(咲夜)%と申します」
+				CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+
+			;デイリーによる出会い
+			ELSEIF KDVAR:咲夜:咲夜_主の客は
+				PRINTFORMW 「啊，抱歉。打开了哦」
+				;TranslatedMark 「どうぞ。開いてるわ」
+				PRINTL 
+				PRINTFORML 「哎呀。%CALLNAME_K9(咲夜_対象)%。按照约定，你来了」
+				;TranslatedMark 「あら。%CALLNAME_K9(咲夜_対象)%。約束通り来てくれたのね」
+				PRINTFORML 「当然，我不打算再多说什么，我改变主意了」
+				;TranslatedMark 「もちろん気が変わったなんて言うつもりはないわよ」
+				CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+				PRINTL 
+				PRINTFORML 「但是，很让人意外呢。竟然在中午来找我」
+				;TranslatedMark 「でも意外ね。昼に訪ねてきてくれるなんて」
+				PRINTFORML 「不，很高兴哦？再一次，我是担任红魔馆女仆长的%NAME_FORMAL(咲夜)%。请多关照」
+				;TranslatedMark 「いえ、嬉しいのよ？　改めて、私は紅魔館のメイド長を務めている%NAME_FORMAL(咲夜)%。よろしくね」
+				PRINTFORML 「请坐。我会尽力而为的」
+				;TranslatedMark 「掛けてちょうだい。精一杯おもてなしするわ」
+				CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+
+			;主人公が咲夜の君主
+			ELSEIF 咲夜_対象 == GET_COUNTRY_BOSS(CFLAG:咲夜:所属) 
+				;敬語対象
+				IF CHECK_K9("敬語")
+					PRINTFORML 「啊，抱歉。打开了哦」
+					;TranslatedMark 「どうぞ。開いてるわ」
+					CALL KOJO_DESCRIPTION_CHARA_K9("容姿")
+					PRINTL 
+					PRINTFORML 「是%CALLNAME_K9(咲夜_対象)%吗。对不起」
+					;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%でしたか。失礼致しました」
+					PRINTFORML 「叫我的话我马上就来。谢谢您的光临」
+					;TranslatedMark 「お呼びくださったらすぐ伺いますのに。いらしてくださってありがとうございます」
+					CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+					PRINTL 
+					PRINTFORML 「今后也请您，把身边的事情交给我吧」
+					;TranslatedMark 「今後も身の回りのお世話はどうぞお任せくださいませ」
+					PRINTFORML 「茶的浓度和点心的甜味都会按照%CALLNAME_K9(咲夜_対象)%的喜好来做」
+					;TranslatedMark 「お茶の濃さもお菓子の甘さも%CALLNAME_K9(咲夜_対象)%のお好み通りに致します」
+					CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+				;敬語対象ではなかった
+				ELSE
+					PRINTFORML 「啊，抱歉。打开了哦」
+					;TranslatedMark 「どうぞ。開いてるわ」
+					CALL KOJO_DESCRIPTION_CHARA_K9("容姿")
+					PRINTL 
+					PRINTFORML 「%CALLNAME_K9(咲夜_対象)%。谢谢您的劳步」
+					;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%。ご足労くださってありがとうございます」
+					PRINTFORML 「再一次，是%NAME_FORMAL(咲夜)%。今后请多关照%CALLNAME_K9(咲夜_対象)%」
+					;TranslatedMark 「改めて、%NAME_FORMAL(咲夜)%です。今後は%CALLNAME_K9(咲夜_対象)%のお世話になります」
+					CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+					PRINTL 
+					PRINTFORML 「虽然态度与立场转变了。但礼仪也是必要的……请多关照」
+					;TranslatedMark 「態度を改めました。折り目は必要ですので……よろしくお躾くださいませ」
+					PRINTFORML 「茶的浓度和点心的甜味都会按照%CALLNAME_K9(咲夜_対象)%的喜好来做」
+					;TranslatedMark 「お茶の濃さもお菓子の甘さも%CALLNAME_K9(咲夜_対象)%のお好み通りに致します」
+					CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+				ENDIF
+
+			;咲夜が主人公の君主
+			ELSEIF 咲夜 == GET_COUNTRY_BOSS(CFLAG:咲夜_対象:所属) 
+				;敬語対象
+				IF CHECK_K9("敬語")
+					PRINTFORML 「啊，抱歉。打开了哦」
+					;TranslatedMark 「どうぞ。開いてるわ」
+					CALL KOJO_DESCRIPTION_CHARA_K9("容姿")
+					PRINTL 
+					PRINTFORML 「%CALLNAME_K9(咲夜_対象)%。今后会给我当手下的吧……嗯？」
+					;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%。これからは私に士官してくれるのですね」
+					PRINTFORML 「立场交替，很奇怪的感觉……」
+					;TranslatedMark 「立場が入れ替わって奇妙な感じですが……」
+					CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+					PRINTL 
+					PRINTFORML 「当然，我很高兴。比起其他任何人的协助，还是我更可靠……对吧？」
+					;TranslatedMark 「もちろん、とても嬉しいです。どなたにご協力いただけるよりも頼りになります」
+					PRINTFORML 「今后也请多多关照」
+					;TranslatedMark 「今後とも、よろしくお願い致します」
+					PRINTFORML 「请坐。至少请让我像以前那样招待您」
+					;TranslatedMark 「どうぞ、お掛けください。せめてこれまで通りにおもてなしさせてくださいませ」
+					CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+				;敬語対象ではない
+				ELSE
+					PRINTFORML 「啊，抱歉。打开了哦」
+					;TranslatedMark 「どうぞ。開いてるわ」
+					CALL KOJO_DESCRIPTION_CHARA_K9("容姿")
+					PRINTL 
+					PRINTFORML 「%CALLNAME_K9(咲夜_対象)%。今后你可要给女仆我当打手哦」
+					;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%。これからは私に士官してくれるのね」
+					PRINTFORML 「事到如今，也好久没有打招呼了，请多关照」
+					;TranslatedMark 「今更挨拶もないけれど、改めてよろしく頼むわね」
+					CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+					PRINTL 
+					PRINTFORML 「请坐。今天我请客。那么，关于您接下来工作的学习，请不要推脱」（拒绝的话，头上会凭空出现几把银白色的飞刀吧？）
+					;TranslatedMark 「掛けてちょうだい。今日はおもてなしするわ。これからたくさん働いてもらうもの」
+					CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+				ENDIF
+
+			;共に士官
+			ELSE
+				;敬語対象（咲夜が奴隷の場合や主人公がレミリアやフランやパチュリーの場合）
+				IF CHECK_K9("敬語")
+					PRINTFORML 「啊，抱歉。打开了哦」
+					;TranslatedMark 「どうぞ。開いてるわ」
+					CALL KOJO_DESCRIPTION_CHARA_K9("容姿")
+					PRINTL 
+					PRINTFORML 「%CALLNAME_K9(咲夜_対象)%。对不起。感谢您的劳驾」
+					;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%。失礼致しました。ご足労くださってありがとうございます」
+					PRINTFORML 「今后也请多多关照」
+					;TranslatedMark 「今後とも、よろしくお願い致します」
+					CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+					PRINTL 
+					PRINTFORML 「非常感谢。比谁来都靠得住呢，%CALLNAME_K9(咲夜_対象)%」
+					;TranslatedMark 「ありがとうございます。どなたがが来てくださるよりも頼りになります」
+					PRINTFORML 「请坐。正在给您准备茶」
+					;TranslatedMark 「お掛けください。お茶の用意を致します」
+					CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+				;恋人
+				ELSEIF IS_LOVER(咲夜)
+					PRINTFORMW 「啊，抱歉。打开了哦」
+					;TranslatedMark 「どうぞ。開いてるわ」
+					PRINTL 
+					PRINTFORML 「哎呀。是%CALLNAME_K9(咲夜_対象)%吗？没想到是你」
+					;TranslatedMark 「あら。%CALLNAME_K9(咲夜_対象)%なの？　あなただとは思わなかったわ」
+					PRINTFORML 「是的，我很高兴哟。比起其他的谁谁谁来，我更最可靠」
+					;TranslatedMark 「そう、嬉しいわね。誰が来てくれるよりも頼りになるわ」
+					CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+					PRINTL 
+					PRINTFORML 「今后请多关照。呵呵。我不会放过你的哟？」
+					;TranslatedMark 「これからずっとよろしくね。ふふっ。もう逃がさないわよ？」
+					PRINTFORML 「请坐。让他们一起工作嘛。我会尽力而为的」
+					;TranslatedMark 「掛けてちょうだい。一緒に働いてもらうんだもの。精一杯おもてなしするわね」
+					CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+				;君主はレミリア
+				ELSEIF GET_COUNTRY_BOSS(CFLAG:咲夜:所属) == NAME_TO_CHARA("レミリア") 
+					;紅魔館住人や既知（パチェ・フランは敬語対象で判別）
+					IF ANAME(咲夜_対象) == "小悪魔" || ANAME(咲夜_対象) == "美鈴" || ANAME(咲夜_対象) == "霊夢" || ANAME(咲夜_対象) == "魔理沙" || ANAME(咲夜_対象) == "霖之助"
+						PRINTFORMW 「啊，抱歉。打开了哦」
+						;TranslatedMark 「どうぞ。開いてるわ」
+						PRINTL 
+						PRINTFORML 「哎呀。是%CALLNAME_K9(咲夜_対象)%吗？」
+						;TranslatedMark 「あら。%CALLNAME_K9(咲夜_対象)%なの？」
+						PRINTFORML 「听了大小姐的话，没想到是你」
+						;TranslatedMark 「お嬢様から話は聞いていたけれど、あなただとは思わなかったわ」
+						CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+						PRINTL 
+						PRINTFORML 「是的，我很高兴哟。比起其他的谁谁谁来，我更最可靠」
+						;TranslatedMark 「そう、嬉しいわね。誰が来てくれるよりも頼りになるわ」
+						PRINTFORML 「请坐。我会尽力而为的」
+						;TranslatedMark 「掛けてちょうだい。精一杯おもてなしするわね」
+						CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+					;紅魔館住人以外
+					ELSE
+						PRINTFORML 「啊，抱歉。打开了哦」
+						;TranslatedMark 「どうぞ。開いてるわ」
+						CALL KOJO_DESCRIPTION_CHARA_K9("容姿")
+						PRINTL 
+						PRINTFORML 「%CALLNAME_K9(咲夜_対象)%啊。我一直在等着你」
+						;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%ね。待っていたのよ」
+						PRINTFORML 「您是被小姐雇佣的吧？嗯，我在听」
+						;TranslatedMark 「お嬢様に雇われたのでしょう？　話は聞いているわ」
+						CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+						PRINTL 
+						PRINTFORML 「我是红魔馆的女仆长，%NAME_FORMAL(咲夜)%。请多关照」
+						;TranslatedMark 「私は紅魔館のメイド長を務めている、%NAME_FORMAL(咲夜)%。よろしくね」
+						PRINTFORML 「请坐。我会招待你的」
+						;TranslatedMark 「掛けてちょうだい。おもてなしするわよ」
+						CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+					ENDIF
+				;それ以外
+				ELSE
+					PRINTFORMW 「啊，抱歉。打开了哦」
+					;TranslatedMark 「どうぞ。開いてるわ」
+					PRINTL 
+					PRINTFORML 「哎呀。是%CALLNAME_K9(咲夜_対象)%吗？受您照顾了」
+					;TranslatedMark 「あら。%CALLNAME_K9(咲夜_対象)%なの？　お世話になるわね」
+					CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+					PRINTL 
+					PRINTFORML 「慢慢地、和缓地、轻柔地……这样见面是第一次吗？再一次，我是%NAME_FORMAL(咲夜)%。请多关照」
+					;TranslatedMark 「こうしてゆっくり会うのは初めてかしら。改めて、私は%NAME_FORMAL(咲夜)%。よろしくね」
+					PRINTFORML 「请坐。我会招待你的」
+					;TranslatedMark 「掛けてちょうだい。おもてなしするわ」
+					CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+				ENDIF
+			ENDIF
+
+		;違勢力で同盟以上の関係
+		ELSEIF CHECK_COUNTRY_RELATION_F(CFLAG:咲夜_対象:所属, CFLAG:咲夜:所属) >= 2
+			;咲夜が奴隷
+			IF IS_SLAVE(咲夜)
+				PRINTFORMW 「啊，抱歉。打开了哦」
+				;TranslatedMark 「どうぞ。開いてるわ」
+				PRINTL 
+				PRINTFORML 「哎呀。……%CALLNAME_K9(咲夜_対象)%？」
+				;TranslatedMark 「あら。……%CALLNAME_K9(咲夜_対象)%？」
+				PRINTFORML 「我可是吓了一跳呢。当然，很开心哦」
+				;TranslatedMark 「驚きました。もちろんとても嬉しいです」
+				CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+				PRINTL 
+				PRINTFORML 「与其他任何人的协助相比，我更可靠」
+				;TranslatedMark 「どなたにご協力いただけるよりも頼りになります」
+				PRINTFORML 「今后也请多多关照」
+				;TranslatedMark 「今後とも、よろしくお願い致します」
+				PRINTFORML 「请坐。可不能让您久等了」
+				;TranslatedMark 「お掛けください。お待たせは致しません」
+				CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+
+			;主人公が君主
+			ELSEIF GET_COUNTRY_BOSS(CFLAG:咲夜_対象:所属) == 咲夜_対象
+				PRINTFORMW 「啊，抱歉。打开了哦」
+				;TranslatedMark 「どうぞ。開いてるわ」
+				PRINTL 
+				PRINTFORML 「哎呀。是%CALLNAME_K9(咲夜_対象)%吗？」
+				;TranslatedMark 「あら。%CALLNAME_K9(咲夜_対象)%なの？」
+				PRINTFORML 「这次承蒙您的关照」
+				;TranslatedMark 「この度はお世話になります」
+				CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+				PRINTL 
+				PRINTFORML 「再一次，我叫%NAME_FORMAL(咲夜)%。请多关照」
+				;TranslatedMark 「改めて、%NAME_FORMAL(咲夜)%と申します。よろしくお願いします」
+				PRINTFORML 「请随意休息一会儿吧」
+				;TranslatedMark 「掛けてお寛ぎくださいませ」
+				PRINTFORML 「如果我可以的话，请让我来当您的对手」
+				;TranslatedMark 「私でよろしければお相手を務めさせていただきます」
+				CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+
+			;咲夜が恋人
+			ELSEIF IS_LOVER(咲夜)
+				PRINTFORMW 「啊，抱歉。打开了哦」
+				;TranslatedMark 「どうぞ。開いてるわ」
+				PRINTL 
+				PRINTFORML 「哎呀。是%CALLNAME_K9(咲夜_対象)%吗？」
+				;TranslatedMark 「あら。%CALLNAME_K9(咲夜_対象)%なの？」
+				PRINTFORML 「没想到会是你。是的，很高兴呢。也请你稍稍试着依赖我」
+				;TranslatedMark 「あなただとは思わなかったわ。そう、嬉しいわね。誰が来てくれるよりも頼りになるわ」
+				CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+				PRINTL 
+				PRINTFORML 「……干脆来我家，好吗？」
+				;TranslatedMark 「……いっそうちに来てくれないかしら？」
+				PRINTFORML 「呵呵。今后请多关照。不会放过你的」（你握住了女仆的手，两人的手掌紧紧握着一块怀表）
+				;TranslatedMark 「ふふっ。これからずっとよろしくね。逃がさないわよ？」
+				PRINTFORML 「请坐。我会全力招待你的」
+				;TranslatedMark 「掛けてちょうだい。精一杯おもてなしするわよ」
+				CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+
+			;咲夜が君主
+			ELSEIF GET_COUNTRY_BOSS(CFLAG:咲夜:所属) == 咲夜
+				PRINTFORMW 「啊，抱歉。打开了哦」
+				;TranslatedMark 「どうぞ。開いてるわ」
+				PRINTL 
+				PRINTFORML 「哎呀。是%CALLNAME_K9(咲夜_対象)%吗？是的，请帮帮我吧」
+				;TranslatedMark 「あら。%CALLNAME_K9(咲夜_対象)%なの？　そう、助けて貰うわね」
+				PRINTFORML 「再一次，我是侍奉蕾米莉亚大小姐的红魔馆的女仆长……虽然这样说」
+				;TranslatedMark 「改めて、私はレミリアお嬢様に仕える紅魔館のメイド長……だったのだけど」
+				CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+				PRINTL 
+				PRINTFORML 「情况完全变了，现在%NAME_FORMAL(咲夜)%是这里的主人」
+				;TranslatedMark 「事情が変わって、今はここのあるじを務めている%NAME_FORMAL(咲夜)%よ」
+				PRINTFORML 「请多关照」
+				;TranslatedMark 「よろしく頼むわね」
+				PRINTFORML 「请坐。我会招待你的」
+				;TranslatedMark 「掛けてちょうだい。おもてなしするわ」
+				CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+
+			;咲夜の君主はレミリア
+			ELSEIF GET_COUNTRY_BOSS(CFLAG:咲夜:所属) == NAME_TO_CHARA("レミリア")
+				PRINTFORMW 「啊，抱歉。打开了哦」
+				;TranslatedMark 「どうぞ。開いてるわ」
+				PRINTL 
+				PRINTFORML 「哎呀。是%CALLNAME_K9(咲夜_対象)%吗？」
+				;TranslatedMark 「あら。%CALLNAME_K9(咲夜_対象)%なの？」
+				PRINTFORML 「是的，听说大小姐受您的照顾了」
+				;TranslatedMark 「そう、お嬢様がお世話になるそうね」
+				CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+				PRINTL 
+				PRINTFORML 「现在说也晚了，我是红魔馆的女仆长，%NAME_FORMAL(咲夜)%」
+				;TranslatedMark 「申し遅れたけど、私は紅魔館のメイド長を務めている、%NAME_FORMAL(咲夜)%よ」
+				PRINTFORML 「请多关照」
+				;TranslatedMark 「よろしくね」
+				PRINTFORML 「请坐。我会招待你的」
+				;TranslatedMark 「掛けてちょうだい。おもてなしするわ」
+				CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+
+			;それ以外
+			ELSE
+				PRINTFORMW 「啊，抱歉。打开了哦」
+				;TranslatedMark 「どうぞ。開いてるわ」
+				PRINTL 
+				PRINTFORML 「哎呀。是%CALLNAME_K9(咲夜_対象)%吗？」
+				;TranslatedMark 「あら。%CALLNAME_K9(咲夜_対象)%なの？」
+				PRINTFORML 「受您照顾了」
+				;TranslatedMark 「お世話になるわね」
+				CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+				PRINTL 
+				PRINTFORML 「对不起，我迟到了，我是%NAME_FORMAL(咲夜)%」
+				;TranslatedMark 「申し遅れたけど、私は%NAME_FORMAL(咲夜)%よ」
+				PRINTFORML 「请多关照」
+				;TranslatedMark 「よろしくね」
+				PRINTFORML 「请坐。我会招待你的」
+				;TranslatedMark 「掛けてちょうだい。おもてなしするわ」
+				CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+			ENDIF
+
+		;違勢力で敵対関係
+		ELSE
+			;咲夜の君主がレミリア
+			IF GET_COUNTRY_BOSS(CFLAG:咲夜:所属) == NAME_TO_CHARA("レミリア")
+				PRINTFORMW 「啊，抱歉。打开了哦」
+				;TranslatedMark 「どうぞ。開いてるわ」
+				PRINTL 
+				PRINTFORML 「哎呀。是%CALLNAME_K9(咲夜_対象)%吗？」
+				;TranslatedMark 「あら。%CALLNAME_K9(咲夜_対象)%なの？」
+				PRINTFORML 「本以为和你在敌对状态中……可能是心理作用吧，对吗？」
+				;TranslatedMark 「敵対しているつもりだったのだけど、気のせいだったかしら」
+				CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+				PRINTL 
+				PRINTFORML 「再一次，我是红魔馆的女仆长，%NAME_FORMAL(咲夜)%」
+				;TranslatedMark 「改めて、私は紅魔館のメイド長を務めている、%NAME_FORMAL(咲夜)%よ」
+				PRINTFORML 「大小姐的敌人就是我的敌人，你是来商量同盟的吧？」
+				;TranslatedMark 「お嬢様の敵は私の敵なのだけど、同盟の相談にでも来たのかしらね？」
+				PRINTFORML 「可以坐哦。在茶里加入福寿草，是听了回信之后再做的吧……诶？你们那边把这个叫做献岁菊？好名字呢，人类总是惧怕衰老，你也是吗？」
+				;TranslatedMark 「座っていいわ。お茶に福寿草をいれるのは返事を聞いてからにするわね」
+				CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+
+			;咲夜が君主
+			ELSEIF GET_COUNTRY_BOSS(CFLAG:咲夜:所属) == 咲夜
+				PRINTFORMW 「啊，抱歉。打开了哦」
+				;TranslatedMark 「どうぞ。開いてるわ」
+				PRINTL 
+				PRINTFORML 「哎呀。是%CALLNAME_K9(咲夜_対象)%吗？我以为是敌人呢，可能是心理作用吧」
+				;TranslatedMark 「あら。%CALLNAME_K9(咲夜_対象)%なの？　敵対してると思っていたけど、気のせいだったかしら」
+				PRINTFORML 「再一次，我是侍奉蕾米莉亚大小姐的红魔馆的女仆长……虽然这样说」
+				;TranslatedMark 「改めて、私はレミリアお嬢様に仕える紅魔館のメイド長……だったのだけど」
+				CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+				PRINTL 
+				PRINTFORML 「情况完全变了，现在%NAME_FORMAL(咲夜)%是这里的主人」
+				;TranslatedMark 「事情が変わって、今はここのあるじを務めている%NAME_FORMAL(咲夜)%よ」
+				PRINTFORML 「请坐。今天是来商量同盟的吧？」
+				;TranslatedMark 「座っていいわ。今日は同盟の相談にでも来たのかしらね？」
+				PRINTFORML 「在茶里加入福寿草，是看了回信之后再做的吧……是顶 冰 花？奇怪的名字，又叫顶冰花又叫雪莲的...明明是黄色的金盏……“咲夜小姐也是这样，表面上冷冰冰的，实际上心里很温柔呢”哇笨蛋你在说什么」
+				;TranslatedMark 「お茶に福寿草をいれるのは返事を聞いてからにするわね」
+				CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+
+			;それ以外
+			ELSE
+				PRINTFORMW 「啊，抱歉。打开了哦」
+				;TranslatedMark 「どうぞ。開いてるわ」
+				PRINTL 
+				PRINTFORML 「哎呀。是%CALLNAME_K9(咲夜_対象)%吗？」
+				;TranslatedMark 「あら。%CALLNAME_K9(咲夜_対象)%なの？」
+				PRINTFORML 「会是敌人吗？%CALLNAME_K9(咲夜_対象)%？……可能是心理作用吧」
+				;TranslatedMark 「敵対してると思っていたけど、気のせいだったかしら」
+				CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+				PRINTL 
+				PRINTFORML 「再一次，我是%NAME_FORMAL(咲夜)%」
+				;TranslatedMark 「改めて、私は%NAME_FORMAL(咲夜)%よ」
+				PRINTFORML 「请坐。今天是来商量同盟的吧？」
+				;TranslatedMark 「座っていいわ。今日は同盟の相談にでも来たのかしらね？」
+				PRINTFORML 「在茶里加入福寿草，是看了回信之后再做的吧……是顶 冰 花？奇怪的名字，又叫顶冰花又叫雪莲的...明明是黄色的金盏……“咲夜小姐也是这样，表面上冷冰冰的，实际上心里很温柔呢”哇笨蛋你在说什么」
+				;TranslatedMark 「お茶に福寿草をいれるのは返事を聞いてからにするわね」
+				CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+
+			ENDIF
+		ENDIF
+	ENDIF
+
+;─────────────────────────────────────── 
+;○二回目以降
+;─────────────────────────────────────── 
+ELSE
+
+	;───────────────────────────────────── 
+	;▼虚ろ
+	;───────────────────────────────────── 
+	IF TALENT:咲夜:空虚
+		PRINTFORML 「啊……嗯……」
+		;TranslatedMark 「あ……うー……」
+		PRINTFORMDL %ANAME(咲夜)%穿着乱糟糟的衣服，像人偶一样把手脚伸出去
+		;TranslatedMark %ANAME(咲夜)%は乱れた服装で人形のように手足を投げ出している
+		WAIT
+		RESETCOLOR
+		RETURN 0
+	ENDIF
+
+	;───────────────────────────────────── 
+	;▼通常
+	;───────────────────────────────────── 
+	IF CHECK_K9("陥落", 咲夜_対象)
+		;敬語
+		IF CHECK_K9("敬語")
+			PRINTDATAL
+				DATAFORM 「欢迎回来，%CALLNAME_K9(咲夜_対象)%」
+				;TranslatedMark 「おかえりなさいませ、%CALLNAME_K9(咲夜_対象)%」
+				DATAFORM 「%CALLNAME_K9(咲夜_対象)%，辛苦了」
+				;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%、お疲れ様です」
+				DATAFORM 「%CALLNAME_K9(咲夜_対象)%……谢谢您的光临」
+				;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%……いらしてくださってありがとうございます」
+				DATAFORM 「请到这边来。今天可以悠闲地度过吗？就我和你」
+				;TranslatedMark 「どうぞこちらへ。今日はゆっくりできそうですか？」
+			ENDDATA
+			PRINTDATAL
+				DATAFORM 「对不起，让您久等了。请享用」
+				;TranslatedMark 「お待たせは致しませんわ。お召し上がりください」
+				DATAFORM 「希望合您的口味。请吃吧」
+				;TranslatedMark 「お口に合うと良いのですけれど。どうぞ、お召上がりくださいませ」
+				DATAFORM 「喝杯茶吧。随时为你准备好」
+				;TranslatedMark 「お茶に致しましょう。いつでも準備はできております」
+				DATAFORM 「茶已经准备好了，请享用」
+				;TranslatedMark 「お茶の用意は済ませてありますので、どうぞお召し上がりください」
+			ENDDATA
+
+		;敬語ではない
+		ELSE
+			PRINTDATAL
+				DATAFORM 「你回来啦，%CALLNAME_K9(咲夜_対象)%」
+				;TranslatedMark 「おかえりなさい、%CALLNAME_K9(咲夜_対象)%」
+				DATAFORM 「辛苦了」
+				;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%、お疲れさま」
+				DATAFORM 「%CALLNAME_K9(咲夜_対象)%……你来了啊。放心了」
+				;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%……来てくれたのね。ほっとしたわ」
+				DATAFORM 「请坐。可以悠闲地度过今天吗？和我一起」
+				;TranslatedMark 「座って。今日はゆっくりできるの？」
+			ENDDATA
+			PRINTDATAL
+				DATAFORM 「肚子饿了的话就去采摘一下。如果您能按自己的喜好来做，那就再好不过了」
+				;TranslatedMark 「おなかが減ってたら摘まんでみて。好みにできているといいのだけれど」
+				DATAFORM 「要茶吗。肚子不饿吗？」
+				;TranslatedMark 「お茶にしましょうか。おなかは減ってない？」
+				DATAFORM 「请坐。慢慢来吧」
+				;TranslatedMark 「どうぞ、座って。ゆっくりしていって」
+				DATAFORM 「新的食谱，我私下里偷偷做的，希望合您的口味」
+				;TranslatedMark 「新しいレシピを試してみたの。お口に合うといいのだけれど」
+			ENDDATA
+
+		ENDIF
+
+	;好感度がそこそこ高いとき
+	ELSEIF CFLAG:咲夜:好感度 >= 500
+		;敬語
+		IF CHECK_K9("敬語")
+			PRINTDATAL
+				DATAFORM 「啊，%CALLNAME_K9(咲夜_対象)%。欢迎光临」
+				;TranslatedMark 「あら、%CALLNAME_K9(咲夜_対象)%。いらっしゃいませ」
+				DATAFORM 「%CALLNAME_K9(咲夜_対象)%，你来了啊」
+				;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%、来てくださったんですね」
+				DATAFORM 「%CALLNAME_K9(咲夜_対象)%……请坐」
+				;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%……どうぞ、お掛けください」
+				DATAFORM 「你好。请到这边来。慢慢休息吧」
+				;TranslatedMark 「こんにちは。どうぞこちらへ。ごゆっくりお寛ぎくださいませ」
+			ENDDATA
+			PRINTDATAL
+				DATAFORM 「对不起，让您久等了。请享用」
+				;TranslatedMark 「お待たせは致しませんわ。お召し上がりください」
+				DATAFORM 「让您久等了。请吃吧」
+				;TranslatedMark 「お待ちしておりました。どうぞお召上がりください」
+				DATAFORM 「哎呀，已经这个时间了。要茶吗」
+				;TranslatedMark 「あら、もうこんな時間でしたっけ。お茶に致しましょうか」
+				DATAFORM 「现在为您准备茶」
+				;TranslatedMark 「ただいまお茶の準備を致します」
+			ENDDATA
+
+		;敬語ではない
+		ELSE
+			PRINTDATA
+				DATAFORM 「啊，%CALLNAME_K9(咲夜_対象)%。
+				;TranslatedMark 「あら、%CALLNAME_K9(咲夜_対象)%。
+				DATAFORM 「%CALLNAME_K9(咲夜_対象)%，你来了吧。
+				;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%、来てくれたのね。
+				DATAFORM 「%CALLNAME_K9(咲夜_対象)%……
+				DATAFORM 「你好，%CALLNAME_K9(咲夜_対象)%。
+				;TranslatedMark 「こんにちは、%CALLNAME_K9(咲夜_対象)%。
+			ENDDATA
+			PRINTDATAL
+				DATAFORM 请稍等一下。正在泡红茶」
+				;TranslatedMark ちょっと待ってね。紅茶を淹れるわ」
+				DATAFORM 喝杯茶吧。肚子饿了吗」
+				;TranslatedMark お茶にしましょう。おなかは減ってるかしら」
+				DATAFORM 啊，已经是这个时间了。喝杯茶吧」
+				;TranslatedMark あぁ、もういい時間だものね。お茶にしましょう」
+				DATAFORM 我在泡红茶哦。请稍等一些时候」
+				;TranslatedMark 紅茶を淹れるわ。掛けて待っていてくれるかしら」
+			ENDDATA
+
+		ENDIF
+
+	;好感度が低いとき
+	ELSE
+		;敬語
+		IF CHECK_K9("敬語")
+			PRINTDATAL
+				DATAFORM 「%CALLNAME_K9(咲夜_対象)%？」
+				DATAFORM 「哎呀。感谢您的特意前来。有什么事吗？」
+				;TranslatedMark 「あら。わざわざありがとうございます。何かご用事ですか？」
+			ENDDATA
+			PRINTDATAL
+				DATAFORM 「请坐。红茶正在泡了」
+				;TranslatedMark 「お掛けくださいませ。紅茶を淹れます」
+				DATAFORM 「那么，你想要茶了吗。现在给您泡」
+				;TranslatedMark 「さてはお茶が欲しくなりましたか。只今淹れます」
+			ENDDATA
+
+		;敬語ではない
+		ELSE
+			PRINTDATAL
+				DATAFORM 「%CALLNAME_K9(咲夜_対象)%？」
+				DATAFORM 「哎呀。欢迎光临。有什么事吗？」
+				;TranslatedMark 「あら。いらっしゃい。何かご用かしら？」
+			ENDDATA
+			PRINTDATAL
+				DATAFORM 「不是什么特别的事情？好吧，让女仆给你泡一杯好喝的红茶」
+				;TranslatedMark 「特に用事ってわけではないのね。いいわ、美味しい紅茶を淹れてあげる」
+				DATAFORM 「那么你是想要茶了吗？乖乖坐好哦」
+				;TranslatedMark 「さてはお茶が欲しくなったのね？　座って」
+			ENDDATA
+
+		ENDIF
+
+	ENDIF
+
+	;陥落済み
+	IF CHECK_K9("陥落", 咲夜_対象)
+		PRINTFORMDL %ANAME(咲夜)%站起来，在桌子上打开白色亚麻布
+		;TranslatedMark %ANAME(咲夜)%が立ち上がってテーブルに白いリネンのクロスを広げると
+		PRINTFORMDL 红茶里放糖、牛奶、盘子里放刀、叉子和果酱
+		;TranslatedMark 紅茶に砂糖やミルク、プレートにナイフとフォークとジャムの皿、
+		PRINTFORMDL 忽然出现了摆着%CAKE_K9(MARK:咲夜:既成事実)%、烤饼和三明治的蛋糕架……
+		;TranslatedMark %CAKE_K9(MARK:咲夜:既成事実)%とスコーンとサンドイッチが並ぶケーキスタンドが忽然と現れた……
+
+	;恋人や奴隷ではないが好感度が高い
+	ELSEIF CFLAG:咲夜:好感度 >= 500
+		PRINTFORMDL %ANAME(咲夜)%只是动了一动，却看不出站起来的样子
+		;TranslatedMark %ANAME(咲夜)%は身動ぎしただけで立ち上がったようには見えなかったが
+		PRINTFORMDL 刚沏好的红茶和%CAKE_K9(MARK:咲夜:既成事実)%忽然出现在眼前……
+		;TranslatedMark 淹れたての紅茶と%CAKE_K9(MARK:咲夜:既成事実)%が目の前に忽然と現れた……
+
+	;それ以外
+	ELSE
+		PRINTFORMDL %ANAME(咲夜)%拿出%CAKE_K9(MARK:咲夜:既成事実)%，开始泡红茶了……
+		;TranslatedMark %ANAME(咲夜)%は%CAKE_K9(MARK:咲夜:既成事実)%を出してきて、紅茶を淹れ始めた……
+
+	ENDIF
+ENDIF
+
+WAIT
+RESETCOLOR
+RETURN 0
+
+;─────────────────────────────────────── 
+;●「会いに行く」初回用の描写まとめ
+;　出会いシチュが多いので共通描写をまとめただけ
+;　CALL KOJO_DESCRIPTION_CHARA_K9("容姿")
+;　CALL KOJO_DESCRIPTION_CHARA_K9("能力")
+;　CALL KOJO_DESCRIPTION_CHARA_K9("職業")
+;─────────────────────────────────────── 
+@KOJO_DESCRIPTION_CHARA_K9(表示テキスト)
+#DIMS 表示テキスト
+#DIM 咲夜
+#DIM 咲夜_対象
+
+咲夜_対象 = MASTER
+咲夜 = NAME_TO_CHARA("咲夜")
+
+IF 表示テキスト == "容姿"
+	PRINTFORMDL 穿着蓝色的法式女仆装，头上装饰着白色的喀秋莎（注：来源于托尔斯泰的《复活》中的女主角的名字，因为大正时代松井须磨子出演的喀秋莎戴着这种头饰因此得名。）
+	;TranslatedMark 青いフレンチメイド服を着てホワイトブリムを頭に飾り
+	PRINTFORMDW 是一个把银发的两边编成三股辫，用绿色缎带系起来的女人
+	;TranslatedMark 銀髪ボブの両サイドを三つ編みにして緑のリボンで結んだ女だ
+
+ELSEIF 表示テキスト == "能力"
+	PRINTFORMDL 凝视着这里的%PRONOUN(咲夜)%的锐利眼睛的蓝色眼睛，一瞬间显得红光闪闪
+	;TranslatedMark こちらを見つめる%PRONOUN(咲夜)%のツリ目がちな青い瞳が、一瞬赤く光ったように見え
+	PRINTFORMDW 紧接着，冒着热气的红茶和%CAKE_K9(MARK:咲夜:既成事実)%忽然出现在桌子上
+	;TranslatedMark 直後、湯気を立てる紅茶と%CAKE_K9(MARK:咲夜:既成事実)%が忽然とテーブルに現れた
+
+ELSEIF 表示テキスト == "職業"
+	PRINTFORMDL %ANAME(咲夜)%露出微笑，用从粉扑袖里延伸出来的纤细的白色手臂将%ANAME(咲夜_対象)%请到了桌子上
+	;TranslatedMark %ANAME(咲夜)%は微笑を浮かべ、パフスリーブから伸びるほっそりとした白い腕で%ANAME(咲夜_対象)%をテーブルへと招いた
+
+ENDIF
+
+RETURN
+
+;─────────────────────────────────────── 
+;●「会いに行く」の終了時
+;─────────────────────────────────────── 
+@KOJO_TRAIN_END_A1_K9
+#DIM 咲夜_対象
+#DIM 咲夜
+#DIMS 咲夜機嫌
+
+咲夜_対象 = MASTER
+咲夜 = NAME_TO_CHARA("咲夜")
+咲夜機嫌 '= TOSTR_EMOTION(咲夜)
+
+;口上を不使用設定なら戻る
+SIF CFLAG:咲夜:400 == 1
+	RETURN 0
+
+SETCOLOR 咲夜_口上カラー
+
+PRINTL 
+
+;─────────────────────────────────────── 
+;行動不能
+;─────────────────────────────────────── 
+;離脱済み
+IF TCVAR:咲夜:53 > 1
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+IF TALENT:咲夜:空虚
+	PRINTFORML 「嗯……嗯……」
+	;TranslatedMark 「う……んん……」
+	PRINTFORMDL %ANAME(咲夜)%似乎没有注意到%ANAME(咲夜_対象)%要离去
+	;TranslatedMark %ANAME(咲夜)%は%ANAME(咲夜_対象)%が立ち去ろうとしていることに気付いていないようだ
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+;酔い限界 離脱判定時はCALL KOJO_EVENT(LOCAL:0, 32)
+IF TCVAR:咲夜:53 == 1
+	PRINTFORML 「嗯……已经……好舒服啊❤」
+	;TranslatedMark 「んはぁ……もうらめ……気持ちいいわぁ❤」
+	PRINTFORMDL %ANAME(咲夜)%睡着，脸颊带着一抹晚霞般的酡红
+	;TranslatedMark %ANAME(咲夜)%はぐでんぐでんになって赤ら顔をにやつかせながら寝ている
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+;快感のあまり気絶
+IF TCVAR:咲夜:52 || BASE:咲夜:気力 <= 300
+	PRINTFORML 「嗯……呼啾❤呼啊……」
+	;TranslatedMark 「んう……ぁふ❤　ふあぁ……」
+	PRINTFORMDL %ANAME(咲夜)%不时地用抽搐的手与足掩饰痴态，恍惚地笑着
+	;TranslatedMark %ANAME(咲夜)%はくったりした手足を時々ぴくつかせて、恍惚と笑んでいる
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+;疲労による行動不能
+IF TCVAR:咲夜:51
+	PRINTFORML 「嗯……嗯……」
+	;TranslatedMark 「う……んん……」
+	PRINTFORMDL %ANAME(咲夜)%带着疲倦的神态入睡了
+	;TranslatedMark %ANAME(咲夜)%は疲れ果てた顔で眠っている
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+;不機嫌
+SELECTCASE 咲夜機嫌
+	CASE "恨", "怒", "憤"
+		IF PALAM:咲夜:怒主 <= PALAM:咲夜:怒外
+			PRINTFORML 「对不起……回不去了」
+			;TranslatedMark 「ごめんなさいね……帰%POLITE_K9("るわね", "ります")%」
+		ELSE
+			PRINTFORML 「已经！再也回不去了」
+			;TranslatedMark 「もう！　帰%POLITE_K9("るわよ", "ります")%」
+		ENDIF
+		WAIT
+		RESETCOLOR
+		RETURN 0
+	CASE "鬱", "悲", "憂"
+		IF PALAM:咲夜:哀主 <= PALAM:咲夜:哀外
+			PRINTFORML 「对不起……辛苦了」
+			;TranslatedMark 「ごめんなさいね……お疲れ様%POLITE_K9("", "です")%」
+		ELSE
+			PRINTFORML 「……辛苦了」
+			;TranslatedMark 「……お疲れ様%POLITE_K9("", "です")%」
+		ENDIF
+		WAIT
+		RESETCOLOR
+		RETURN 0
+	CASE  "狂", "恐", "怯"
+		IF PALAM:咲夜:怖主 <= PALAM:咲夜:怖外
+			PRINTFORML 「对不起……对不起，对不起」
+			;TranslatedMark 「ごめんなさいね……失礼%POLITE_K9("するわ", "します")%」
+		ELSE
+			PRINTFORML 「……对不起，对不起」
+			;TranslatedMark 「……失礼%POLITE_K9("するわ", "します")%」
+		ENDIF
+		WAIT
+		RESETCOLOR
+		RETURN 0
+ENDSELECT
+
+;既成事実獲得後に一度だけ表示
+;Ｈした
+IF CFLAG:咲夜:200 < 4 && TALENT:合意
+	CFLAG:咲夜:200 = 4
+	PRINTFORML 「皮肤与黏膜好像还粘在一起……」（咲夜已经回不去了）
+	;TranslatedMark 「まだ肌がくっついているみたい……」
+	PRINTFORML 「请不要看这边……呜」
+	;TranslatedMark 「あまりこっちを見ないでく%POLITE_K9("れる？", "ださい")%」
+	PRINTFORML 「从刚才开始，微妙地感觉不舒服。嗯，我冷静下来了」
+	;TranslatedMark 「さっきから、妙に居心地が悪くて落ち着かな%POLITE_K9("いのよ", "くて")%」
+	PRINTFORML 「我，害羞的表情……」
+	;TranslatedMark 「私、恥ずかしいの%POLITE_K9("かしら", "でしょうか")%？」
+	WAIT
+	RESETCOLOR
+	RETURN 0
+
+;陥落済み
+ELSEIF CFLAG:200 < 3 && TALENT:恋人
+	CFLAG:咲夜:200 = 3
+	PRINTFORML 「%CALLNAME_K9(咲夜_対象)%真厉害%POLITE_K9("啊", "嗯")%。不想离开之类的话的意义，第一次知道」
+	;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%ってすごい%POLITE_K9("わね", "ですね")%。離れたくないなんて言葉の意味、初めて知%POLITE_K9("ったわ", "りました")%」
+	PRINTFORML 「纵使成为恋人，%CALLNAME_K9(咲夜_対象)%还是%CALLNAME_K9(咲夜_対象)%%POLITE_K9("……嗯？", "……对吧？")%」
+	;TranslatedMark 「恋人になっても、%CALLNAME_K9(咲夜_対象)%は%CALLNAME_K9(咲夜_対象)%%POLITE_K9("……よね？", "……ですよね？")%」
+	PRINTFORML 「……尽管那样，还是想稍微由我确认一下」
+	;TranslatedMark 「……なんでも%POLITE_K9("ないわ", "ありません")%。少し確認したくなった%POLITE_K9("だけ", "んです")%」
+	PRINTFORML 「好不容易结出果实的想法%POLITE_K9("，所以……", "……你知道的吧？")%，不想破坏%POLITE_K9("……呜", "……抑制不住的思念")%」
+	;TranslatedMark 「せっかく実った想い%POLITE_K9("だから", "ですから")%、壊してしまいたくない%POLITE_K9("ものね", "と思ったんです")%」
+	WAIT
+	RESETCOLOR
+	RETURN 0
+
+;キスした
+ELSEIF CFLAG:咲夜:200 < 2 && CFLAG:250 == 1 
+	CFLAG:咲夜:200 = 2
+	PRINTFORML 「%CALLNAME_K9(咲夜_対象)%就是这种感觉%POLITE_K9("呢", "呀")%。呵呵呵」
+	;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%って、こんな感じ%POLITE_K9("なのね", "なんですね")%。ふふっ」
+	PRINTFORML 「总觉得好痒%POLITE_K9("……嗯", "……呜")%……」
+	;TranslatedMark 「何だかくすぐったい%POLITE_K9("わ", "ですね")%……」
+	WAIT
+	RESETCOLOR
+	RETURN 0
+
+ENDIF
+
+;押し倒しや誘いでＨが発生した
+IF FLAG:ウフフフラグ
+	IF IS_SLAVE(咲夜) || ( CHECK_K9("敬語") && IS_LOVER(咲夜) )
+		PRINTDATAL
+			DATAFORM 「请随时再来。晚安」
+			;TranslatedMark 「またいつでもいらしてください。おやすみなさいませ」
+			DATALIST
+				DATAFORM 「（银铃般的笑声）。就这么一会儿就要离别了，真是寂寞……」
+				;TranslatedMark 「ふふっ。少しの間なのに、お別れするのが寂しいだなんて……」
+				DATAFORM 「撒娇的话，会因为不好看而被讨厌吧」
+				;TranslatedMark 「駄々をこねると、みっともないって嫌われてしまいますよね」
+				DATAFORM 「晚安，%CALLNAME_K9(咲夜_対象)%」
+				;TranslatedMark 「おやすみなさいませ、%CALLNAME_K9(咲夜_対象)%」
+			ENDLIST
+			DATAFORM 「哎呀。已经这个时间了……可以稍微停一下吗？喂，听话...想怎么抱随你啦……晚安」
+			;TranslatedMark 「あら。もうこんな時間……少し止めてもよろしいでしょうか？　ふふっ……おやすみなさいませ」
+			DATAFORM 「今晚的%CALLNAME_K9(咲夜_対象)%也很棒，呼呼……晚安」
+			;TranslatedMark 「今夜も%CALLNAME_K9(咲夜_対象)%は素敵でした。おやすみなさいませ」
+			DATAFORM 「谢谢您。晚安」
+			;TranslatedMark 「ありがとうございました。おやすみなさいませ」
+			DATALIST
+				DATAFORM 「%CALLNAME_K9(咲夜_対象)%。明天的早饭比平时要豪华」
+				;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%。明日の朝食はいつもより豪華になってしまいそうです」
+				DATAFORM 「请好好睡一觉，调整好肚子的状态」
+				;TranslatedMark 「ゆっくり眠って、おなかの調子を整えてくださいね」
+			ENDLIST
+			DATAFORM 「晚安。%CALLNAME_K9(咲夜_対象)%」
+			;TranslatedMark 「おやすみなさいませ。%CALLNAME_K9(咲夜_対象)%」
+		ENDDATA
+
+	ELSEIF IS_LOVER(咲夜)
+		PRINTDATAL
+			DATAFORM 「随时再来哦。晚安」
+			;TranslatedMark 「またいつでも来てね。おやすみなさい」
+			DATALIST
+				DATAFORM 「（银铃般的笑声）。就这么一会儿就要离别了，真是寂寞……」
+				;TranslatedMark 「ふふっ。少しの間なのに、お別れするのが寂しいだなんて……」
+				DATAFORM 「撒娇的话，会因为不好看而被讨厌的吧」（你拿咲夜的发带蒙住了她的眼睛，浅浅地亲了一下）
+				;TranslatedMark 「駄々こねたりしちゃ、みっともないって嫌われちゃうわよね」
+				DATAFORM 「晚安，%CALLNAME_K9(咲夜_対象)%」
+				;TranslatedMark 「おやすみなさい、%CALLNAME_K9(咲夜_対象)%」
+			ENDLIST
+			DATALIST
+				DATAFORM 「哎呀。已经这个时间了。可以稍微停一下吗？……先说好了，并不是我受不了了……你是怪物吗？」
+				;TranslatedMark 「あら。もうこんな時間。少し止めちゃってもいい？」
+				DATAFORM 「怎么样。呵呵。也许已经停止了……什么停止了？你·猜·猜·看」
+				;TranslatedMark 「どうかしら。ふふっ。止めたかもしれないわ」
+				DATAFORM 「晚安」
+				;TranslatedMark 「おやすみなさい」
+				DATAFORM 「……要是能让你除了我其他谁都找不到就好了……脖颈上另一个女孩子的印记，还没擦掉哦？」
+				;TranslatedMark 「……誰にも見つからないといいわね？　うなじの、女たらしの印」
+			ENDLIST
+			DATAFORM 「今晚也很棒。晚安」
+			;TranslatedMark 「今夜も素敵だったわ。おやすみなさい」
+			DATAFORM 「度过了美好的时光，因为和你一起。谢谢。晚安」
+			;TranslatedMark 「いい時間が過ごせたわ。ありがとう。おやすみなさい」
+			DATALIST
+				DATAFORM 「%CALLNAME_K9(咲夜_対象)%。明天的早餐会比平时豪华，不要太期待女仆的手艺哦……(夸我)」
+				;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%。明日の朝食はいつもより豪華になってしまいそう」
+				DATAFORM 「好好睡一觉，调整好肚子的状态」
+				;TranslatedMark 「ゆっくり眠って、おなかの調子を整えてね」
+			ENDLIST
+			DATAFORM 「晚安。%CALLNAME_K9(咲夜_対象)%」
+			;TranslatedMark 「おやすみなさい。%CALLNAME_K9(咲夜_対象)%」
+		ENDDATA
+
+	ELSEIF CHECK_K9("敬語")
+		PRINTDATAL
+			DATAFORM 「不要顾忌，下一次也要邀请我呀……随时都在……晚安」
+			;TranslatedMark 「またいつでもお招きください。おやすみなさいませ」
+			DATAFORM 「谢谢您。那么，晚安」
+			;TranslatedMark 「ありがとうございました。では、おやすみなさいませ」
+			DATAFORM 「哎呀。已经这个时间了……晚安」
+			;TranslatedMark 「あら。もうこんな時間……おやすみなさいませ」
+			DATAFORM 「今晚的%CALLNAME_K9(咲夜_対象)%也很棒，呼呼……晚安」
+			;TranslatedMark 「今夜も%CALLNAME_K9(咲夜_対象)%は素敵でした。おやすみなさいませ」
+			DATAFORM 「谢谢您。晚安」
+			;TranslatedMark 「ありがとうございました。おやすみなさいませ」
+			DATAFORM 「晚安。%CALLNAME_K9(咲夜_対象)%」
+			;TranslatedMark 「おやすみなさいませ。%CALLNAME_K9(咲夜_対象)%」
+		ENDDATA
+
+	ELSEIF CFLAG:咲夜:好感度 >= 800
+		PRINTDATAL
+			DATAFORM 「呵呵。说什么回去会寂寞呢」
+			;TranslatedMark 「ふふっ。帰るのが寂しいなんてね」
+			DATAFORM 「我很开心啊。请好好休息」
+			;TranslatedMark 「楽しかったわ。ゆっくり休んでちょうだい」
+			DATAFORM 「哎呀。已经这个时间了。……要不要稍微停一下？停不下来了？请不要开这种玩笑」
+			;TranslatedMark 「あら。もうこんな時間なのね。……少し止めちゃおうかしら？」
+			DATALIST
+				DATAFORM 「你真厉害啊……没有别的意思哦」
+				;TranslatedMark 「あなたってすごいわね」
+				DATAFORM 「我第一次知道，“不想离开”这句话的意思」
+				;TranslatedMark 「離れたくないなんて言葉の意味、初めて知ったわ」
+				DATAFORM 「呵呵。让你困扰了吗？　……晚安」
+				;TranslatedMark 「ふふっ。困らせちゃったかしら？　……おやすみなさい」
+			ENDLIST
+			DATAFORM 「在一起度过了美好的时光。多亏了%CALLNAME_K9(咲夜_対象)%」
+			;TranslatedMark 「いい時間が過ごせたわ。%CALLNAME_K9(咲夜_対象)%のおかげね」
+			DATAFORM 「晚安。%CALLNAME_K9(咲夜_対象)%」
+			;TranslatedMark 「おやすみなさい。%CALLNAME_K9(咲夜_対象)%」
+		ENDDATA
+
+	ELSE
+		PRINTDATAL
+			DATAFORM 「那么，晚安」
+			;TranslatedMark 「じゃ、おやすみなさい」
+			DATAFORM 「哎呀。是吗？再见」
+			;TranslatedMark 「あら。そう？　さよなら」
+			DATAFORM 「呼，好困啊……请不要跟着我一起打呵欠」
+			;TranslatedMark 「ふう、眠いわ」
+		ENDDATA
+
+	ENDIF
+
+	WAIT
+	RESETCOLOR
+	RETURN 0
+
+;Ｈ発生しなかった
+ELSE
+
+	IF IS_SLAVE(咲夜) || ( CHECK_K9("敬語") && IS_LOVER(咲夜) )
+		PRINTDATAL
+			DATAFORM 「请随时再来……❤」
+			;TranslatedMark 「またいつでもいらしてください」
+			DATAFORM 「哎呀。您要回去了吗？不，没什么，请小心」
+			;TranslatedMark 「あら。もうお帰りですか？　いえ、お気をつけて」
+			DATAFORM 「谢谢您的关心」
+			;TranslatedMark 「気にかけてくださって、ありがとうございました」
+			DATAFORM 「请随时再来。我等您……一直」
+			;TranslatedMark 「またいつでもいらしてください。お待ちしております」
+		ENDDATA
+
+	ELSEIF IS_LOVER(咲夜)
+		PRINTDATAL
+			DATAFORM 「随时再来哦」
+			;TranslatedMark 「またいつでも来てね」
+			DATAFORM 「哎呀。已经回去了吗？」
+			;TranslatedMark 「あら。もう帰っちゃうの？」
+			DATAFORM 「在一起度过了美好的时光。真的非常感谢您」
+			;TranslatedMark 「いい時間が過ごせたわ。ありがとうね」
+			DATAFORM 「随时再来哦。%CALLNAME_K9(咲夜_対象)%」
+			;TranslatedMark 「またいつでも来てね。%CALLNAME_K9(咲夜_対象)%」
+		ENDDATA
+
+	ELSEIF CHECK_K9("敬語")
+		PRINTDATAL
+			DATAFORM 「这附近有太过恶作剧的老鼠，请小心」
+			;TranslatedMark 「この辺りには悪戯の過ぎる鼠がおりますので、お気を付けて」
+			DATAFORM 「那么再见。有事请叫我」
+			;TranslatedMark 「それではまた。ご用事があればお呼びください」
+			DATAFORM 「辛苦了。%CALLNAME_K9(咲夜_対象)%」
+			;TranslatedMark 「お疲れ様です。%CALLNAME_K9(咲夜_対象)%」
+			DATAFORM 「没有命令吗。小刀快要闲下来了」
+			;TranslatedMark 「ご命令はありませんか。そろそろナイフが乾きそうです」
+			DATAFORM 「我刚打扫了房间。请随便休息一下吧」
+			;TranslatedMark 「今、お部屋を掃除して参りました。お寛ぎください」
+		ENDDATA
+
+	ELSEIF CFLAG:咲夜:好感度 >= 500
+		PRINTDATAL
+			DATAFORM 「请小心。这附近有太多太淘气的老鼠」
+			;TranslatedMark 「気を付けて。この辺りには悪戯の過ぎる鼠が多過ぎるわ」
+			DATAFORM 「好开心啊……你也是一样吗？」
+			;TranslatedMark 「楽しかったわ」
+			DATAFORM 「哎呀。已经回去了吗？留下我一个人，未免有些太过小心眼了……唔姆姆」
+			;TranslatedMark 「あら。もう帰ってしまうの？」
+			DATAFORM 「很开心。像你这样的人也很少见……“我是咲夜小姐的（所见到这样）第一个吗？”不要做一些让人误会的省略啊……真是个笨蛋」
+			;TranslatedMark 「楽しかったわ。あなたみたいな人も珍しいわね」
+			DATAFORM 「差不多该打扫了」
+			;TranslatedMark 「そろそろお掃除をしないとね」
+			DATAFORM 「完成……诶……大家不应该是在完全停滞的时间中打扫吗？……开玩笑的。好开心」
+			;TranslatedMark 「もう。すっかりお掃除が滞ったじゃない。……冗談よ。楽しかったわ」
+		ENDDATA
+
+	ELSE
+		PRINTDATAL
+			DATAFORM 「是吗？那么，小心点」
+			;TranslatedMark 「そう？　じゃ、気を付けて」
+			DATAFORM 「请再来」
+			;TranslatedMark 「また来てちょうだい」
+			DATAFORM 「哎呀。是吗？再见」
+			;TranslatedMark 「あら。そう？　さよなら」
+			DATAFORM 「意外的很开心呢。但休息也是必要的」
+			;TranslatedMark 「意外と楽しかったわ。息抜きも必要ね」
+			DATAFORM 「不好，打扫都耽误了」
+			;TranslatedMark 「いけない、すっかりお掃除が滞っちゃったわ」
+		ENDDATA
+
+	ENDIF
+
+	WAIT
+	RESETCOLOR
+	RETURN 0
+
+ENDIF
+
+;─────────────────────────────────────── 
+;●終了
+;─────────────────────────────────────── 
+RESETCOLOR
+RETURN 0
+

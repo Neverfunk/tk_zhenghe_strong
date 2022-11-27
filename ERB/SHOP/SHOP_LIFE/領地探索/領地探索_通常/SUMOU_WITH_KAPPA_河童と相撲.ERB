@@ -1,0 +1,55 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_SUMOU_WITH_KAPPA_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_SUMOU_WITH_KAPPA_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_SUMOU_WITH_KAPPA(対象)
+#DIM 対象
+
+PRINTFORML 沿著河邊散步的時候河童從河中出現了
+PRINTFORMW 他爽朗地打著招呼、邀請一起相撲
+PRINTL
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+CALL ASK_YN("答應" ,"拒絕")
+
+IF RESULT == 1
+	PRINTFORML 不想和全身濕漉漉的傢伙相撲
+	PRINTFORMW %ANAME(対象)%鄭重拒絕了
+	RETURN 1
+ENDIF
+
+PRINTFORML 看著那充滿干勁的臉實在是無法拒絕
+PRINTFORML %ANAME(対象)%対他行了個抱拳禮
+PRINTFORMW 干吧！
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+
+IF LIMIT(ABL:対象:武闘, 30, 100) >= RAND:75
+	PRINTFORML %ANAME(対象)%漂亮的贏了！
+	PRINTFORMW 服氣的他低下頭来把捕獲到的魚給了我
+	CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:10 + 1, 1)
+ELSE
+	PRINTFORML 河童太強了、輸了
+	PRINTFORMW 他開心的笑著說請給他黄瓜
+	PRINTFORMW 因為沒隨身帯著所以把他帯到了附近的農家、買給了他
+	IF MONEY >= 100
+		MONEY -= 100
+		CALL ICPRINT("支付了<100>金", "L", カラー_注意)
+	ENDIF
+ENDIF
+
+RETURN 1

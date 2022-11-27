@@ -1,0 +1,134 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_BANDIT_ARREST_RATE()
+RETURN 50
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_BANDIT_ARREST_DECISION()
+#DIM 土匪
+土匪 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_野盗))
+SIF 土匪 == -1
+	RETURN 0
+
+RETURN 1
+
+
+@EVENT_DAILY_BANDIT_ARREST_SETTARGET()
+
+;放浪中キャラからターゲットをランダム選出
+FOR LOCAL, 0, CHARANUM
+	;女で、捕虜でなく死亡もしておらず、何処にも所属していない(あなたは放浪判定じゃなくて未登場判定になってるから追加でこうする)
+	IF IS_FEMALE(LOCAL) && CFLAG:LOCAL:捕虜先 == 0 && !IS_COUNTRY(CFLAG:LOCAL:所属) && (CFLAG:LOCAL:特殊状態 == 特殊状態_放浪 || LOCAL == MASTER)
+		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+		DAILY_TARGET_NUM ++
+	ENDIF
+NEXT
+
+;候補がいなければ戻す
+SIF DAILY_TARGET_NUM < 1
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_BANDIT_ARREST_GENRE()
+RETURN デイリー_ジャンル_特殊勢力
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_BANDIT_ARREST
+#DIM 対象
+#DIM 土匪
+
+土匪 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_野盗))
+対象 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+
+PRINTFORMW %ANAME(対象)%在流浪時，突然被一群可疑的男人捉走了
+;TranslatedMark %ANAME(対象)%は放浪中、突然怪しい男たちに捕まってしまった
+PRINTFORML 
+SELECTCASE RAND:7
+	CASE 0
+		PRINTFORMW %ANAME(対象)%被那群男人帶到死胡同裡，剝光侵犯了
+		;TranslatedMark %ANAME(対象)%は男たちに路地裏に連れ込まれ、裸に剥かれて犯されている
+		PRINTFORMW %ANAME(対象)%咬緊牙關，拼死地抵抗著突然的凌辱
+		;TranslatedMark 突然の凌辱に歯を食いしばり必死で抵抗する%ANAME(対象)%だが
+		PRINTFORMW 但身體卻與其意識相反，因為那些男人不斷地對子宮進行著小幅度的突刺而喘氣
+		;TranslatedMark 幾度も子宮を小突かれ続ける内に、その意思に反して身体の奥深くがうずきだし、息を荒げてしまっている
+		PRINTFORMW 在子宮接受了幾次射精後，%ANAME(対象)%終於發出了下流的嬌喘聲高潮了
+		;TranslatedMark やがて幾度目かの射精を子宮に受けると、遂にあられもない声を上げながら絶頂してしまった
+	CASE 1
+		PRINTFORMW %ANAME(対象)%被男人們帶上小船上，運到某個地方
+		;TranslatedMark %ANAME(対象)%は男たちに小舟に乗せられ、いずこかへと運ばれている
+		PRINTFORMW 在這個上等貨的面前，那群男人完全忍耐不住，圧住掙扎的%ANAME(対象)%開始侵犯
+		;TranslatedMark 上玉を前にして男たちは我慢できず、暴れる%ANAME(対象)%を押さえつけて犯し始めた
+		PRINTFORMW %ANAME(対象)%的身體因為上面和下面的口都被肉棒粗暴地塞著而前後搖動，亦因為痛苦而哭泣和低吟
+		;TranslatedMark 上と下の口を肉棒で乱暴に塞がれたまま身体を前後に揺すられ、%ANAME(対象)%は痛みと苦しさで泣きながら呻く
+		PRINTFORMW 當到達目的地時，%ANAME(対象)%的身體已經完全被他們的精液弄髒了
+		;TranslatedMark 目的地に着く頃には、%ANAME(対象)%の体の中は彼らの精液で汚されつくしていた
+	CASE 2
+		PRINTFORMW %ANAME(対象)%被那群男人剥光了衣服，押到了暗淡無光的小屋中
+		;TranslatedMark %ANAME(対象)%は男たちによって身ぐるみを剥され、薄暗い小屋に押しこめられた
+		PRINTFORMW 那群男人包圍著膽怯的%ANAME(対象)%，如同野獸般襲撃了過去
+		;TranslatedMark 怯えている%ANAME(対象)%に男たちが群がり、獣の様に襲いかかった
+		PRINTFORMW 兩穴都被肉棒挿入不停激烈的抽插著，讓%ANAME(対象)%因為這股衝擊而不断痙攣
+		;TranslatedMark 両穴にペニスをねじ込まれながら、激しく腰を打ち付けられ、%ANAME(対象)%はその衝撃でビクンビクンと痙攣する
+		PRINTFORMW 當那些男人滿足完自己慾望而拔出肉棒時，%ANAME(対象)%的小穴和後穴都已經悲慘地合不攏了
+		;TranslatedMark 男たちが満足してペニスを抜き取る頃には、その両穴は無残に開き切ってしまっていた
+	CASE 3
+		PRINTFORMW %ANAME(対象)%被打了奇怪的藥，腦海一片模糊
+		;TranslatedMark %ANAME(対象)%は怪しい薬をうたれ、ぼんやりとしている
+		PRINTFORMW 就算被那些男人撫摸著性器官也沒有露出不悅，%ANAME(対象)%隨著刺激身体顫抖発出嬌喘
+		;TranslatedMark 男たちに性器を弄られても嫌がりもせず、刺激に合わせて身体を震わせ喘ぎ声を出す
+		PRINTFORMW 被肉棒粗暴地挿入小穴的時候、不僅沒有感到疼痛反而因為那熱度而更加想要、自己扭動起腰
+		;TranslatedMark 乱暴にペニスをねじ込まれている膣からも、痛みどころか焦がされる様な熱を感じ、自ら腰をくねらせる
+		PRINTFORMW 被男人們狠狠地玷汚之後、%ANAME(対象)%被他們帯回了據點
+		;TranslatedMark 男たちに散々汚された後、%ANAME(対象)%は彼らのアジトへと運ばれていった
+		CFLAG:対象:薬物依存 += 100
+	CASE 4
+		PRINTFORMW %ANAME(対象)%被那群男人綁着雙手，帶到了沒有人煙的叢林中侵犯了
+		;TranslatedMark %ANAME(対象)%は男たちに羽交い絞めにされ、人目につかない茂みに連れ込まれ犯されてる
+		PRINTFORMW %ANAME(対象)%被堵住了嘴，一個男人圧在%ANAME(対象)%身上、把肉棒挿入到最深処激烈的抽插著
+		;TranslatedMark 猿轡をされて、男の一人に覆い被さられ、肉棒を深々とハメられ激しいピストンをされている
+		PRINTFORMW 當男人説道要中出的時候，雖然%ANAME(対象)%拼命地搖頭並想逃脫，但結果仍然被那個男人在身體深處射精了
+		;TranslatedMark 男が中に出すぞと告げると、必死で首を振って逃れようとしたが、結局%ANAME(対象)%の奥深くで射精されてしまった
+		PRINTFORMW 對呆然的%ANAME(対象)%的凌辱尚未結束，之後亦不斷有替代的男人侵犯著她
+		;TranslatedMark 呆然とする%ANAME(対象)%だが、凌辱はそれでは終わらず、その後も代わる代わる男たちに犯されてしまった
+	CASE 5
+		PRINTFORMW %ANAME(対象)%被那些男人帶到附近的洞穴侵犯了
+		;TranslatedMark %ANAME(対象)%は手頃な洞窟に運び込まれ、男たちに犯されている
+		PRINTFORMW 他們當中有一個男人擁有著超巨大的肉棒，肉棒直搗着子宮口的交合讓%ANAME(対象)%翻起了白眼
+		;TranslatedMark 彼らの中でも特に巨大なペニスを持つ男に、ペニスを子宮口までねじ込まれて%ANAME(対象)%は目を白黒させる
+		PRINTFORMW 不斷地給予女性的重要部位兇惡的刺激，讓%ANAME(対象)%有節奏地喘息著
+		;TranslatedMark 女の急所に絶え間なく与えられる凶悪な刺激に対し、%ANAME(対象)%はリズミカルに喘ぐ
+		PRINTFORMW 終於在那個男人射精時，%ANAME(対象)%的腦海中已經忘記了逃走，完全被快感所填滿了
+		;TranslatedMark やがて男に射精されると、%ANAME(対象)%の頭の中は逃げることも忘れてしまう程に快感で埋め尽くされてしまった
+	CASE 6
+		PRINTFORMW %ANAME(対象)%被那群男人蒙著雙眼，後縛著雙手帶走了
+		;TranslatedMark %ANAME(対象)%は目隠しをされ、両手を背後に縛られた格好で男たちに連れられている
+		PRINTFORMW 在%ANAME(対象)%的大腿附近不時有白濁液體滴落，看來在被捉住的時候已經被那群男人侵犯過了
+		;TranslatedMark その足元には時折白濁液が垂れ落ちている、捕まった際に散々男たちに犯された跡だ
+		PRINTFORMW 雖然%ANAME(対象)%流著淚拼命地忍耐，但那群男人不時突然撫摸%ANAME(対象)%的身體
+		;TranslatedMark 涙を流しながらも必死で耐えようとしている%ANAME(対象)%だが、時折男たちが不意打ちの様にその身体を弄ると
+		PRINTFORMW 每一次都令%ANAME(対象)%身体一顫，発出自己並不想要的喘氣聲
+		;TranslatedMark その度に体を震わせ、望まない喘ぎ声を出させられてしまった
+ENDSELECT
+CALL FUCK_GANGBANG(対象, GET_SPERM_ID("土匪"), @"土匪の\@ RAND:2 ? 肉棒 # 唇\@", "土匪")
+PRINTFORML
+PRINTFORM
+CALL COLOR_PRINT(@"%ANAME(対象)%作為土匪的性奴隷被捉走了", カラー_警告)
+PRINTFORMW
+CALL CAPTURE(対象, 土匪)
+RETURN 1
+

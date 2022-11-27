@@ -1,0 +1,209 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_0_MIRACLE_32_EXIST
+RETURN 1
+
+@SKILL_0_MIRACLE_32_NAME
+RESULTS = 狐朋狗友
+
+;レベルは1-5まで
+@SKILL_0_MIRACLE_32_LEVEL
+RETURN 4
+
+@SKILL_0_MIRACLE_32_FROMWHO
+;0或不存在=通用 1=暴虐 2=诡术 3=腐朽 4=色欲
+RETURN 2
+
+@SKILL_0_MIRACLE_32_SELFLEARN(对象)
+#DIM 对象
+RETURN 0
+
+;対象選択
+@SKILL_0_MIRACLE_32_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 加和
+#DIM 角色
+;我方部隊対象
+
+RETURN 1
+
+
+
+;発動判定
+@SKILL_0_MIRACLE_32_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM FIRST_LINE
+対象側 = !発動側
+
+SIF	発動部隊 >= 0 && BATTLE_COMMANDER_NUM:発動側 >= MAX_UNIT_COMMANDER
+	RETURN 0
+SIF	発動部隊 < 0 && BATTLE_COMMANDER_NUM:発動側 >= MAX_CITY_COMMANDER
+	RETURN 0
+	
+;本技能暂不设置AI使用
+SIF CFLAG:発動者:1 != CFLAG:MASTER:1
+	RETURN 0
+CALL SKILL_0_MIRACLE_32_NAME
+PRINTL 
+FIRST_LINE = LINECOUNT
+PRINTFORML %ANAME(発動者)%持有技能「%RESULTS%」,是否发动?
+PRINTBUTTON " 0[是]", 0
+PRINTL  
+PRINTBUTTON " 1[否]", 1
+PRINTL 
+INPUT
+CLEARLINE LINECOUNT - FIRST_LINE
+SIF RESULT == 0
+	RETURN 1
+RETURN 0
+
+;効果をここに記述
+@SKILL_0_MIRACLE_32_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM FIRST_LINE
+#DIM 角色
+#DIM 角色番号
+#DIM 价格武闘
+#DIM 价格防衛
+#DIM 价格知略
+#DIM 价格妖術
+#DIM 价格,500
+対象側 = !発動側
+
+FOR LOCAL,0,(BATTLE_COMMANDER_NUM:発動側),1
+	角色 = BATTLE_COMMANDER:発動側:LOCAL
+	SIF 角色 == -1
+		CONTINUE
+	LOCAL:1 += ABL:角色:武闘
+	LOCAL:2+= ABL:角色:防衛
+	LOCAL:3 += ABL:角色:知略
+NEXT
+价格武闘 = MAX(130-(LOCAL:1)/(BATTLE_COMMANDER_NUM:発動側)/2,80)
+价格防衛 = MAX(130-(LOCAL:2)/(BATTLE_COMMANDER_NUM:発動側)/2,80)
+价格知略 = MAX(130-(LOCAL:3)/(BATTLE_COMMANDER_NUM:発動側)/2,80)
+价格妖術 = 110
+IF ABL:発動者:信仰 > 90 
+	TIMES 价格武闘, 0.9
+	TIMES 价格防衛, 0.9
+	TIMES 价格知略, 0.9
+	TIMES 价格妖術, 0.9
+ELSEIF ABL:発動者:信仰 < 50 
+	TIMES 价格武闘, 1.1
+	TIMES 价格防衛, 1.1
+	TIMES 价格知略, 1.1
+	TIMES 价格妖術, 1.1
+ENDIF
+FIRST_LINE = LINECOUNT
+PRINTFORML --请选择你要雇佣的士官--
+FOR LOCAL, 0, VARSIZE("SCOUT_CANDIDATES")
+	LOCAL:1 = ID_TO_CHARA(SCOUT_CANDIDATES:LOCAL)
+	IF LOCAL:1 == -1
+		CONTINUE
+	ENDIF
+	;由于某种原因（数据操作等）没有流浪的情况下，清除
+	IF CFLAG:(LOCAL:1):特殊状態 != 特殊状態_放浪
+		SCOUT_CANDIDATES:(LOCAL) = 0
+		CONTINUE
+	ENDIF
+	价格:LOCAL = (ABL:(LOCAL:1):武闘*价格武闘) + (ABL:(LOCAL:1):防衛*价格防衛) + (ABL:(LOCAL:1):知略*价格知略) + (ABL:(LOCAL:1):妖術*价格妖術)
+	IF MONEY < 价格:LOCAL
+		SETCOLOR 128,138,135
+		PRINTFORM @"[%ANAME(LOCAL:1), MAX_CHARANAME_LENGTH, LEFT%]"
+		RESETCOLOR
+	ELSE
+		PRINTBUTTON @"[%ANAME(LOCAL:1), MAX_CHARANAME_LENGTH, LEFT%]", LOCAL
+	ENDIF
+	PRINTPLAIN   
+	PRINTFORM   金:{价格:LOCAL}
+	PRINT   武:
+	CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:(LOCAL:1):武闘)
+	PRINTFORM {ABL:(LOCAL:1):武闘, 3, LEFT}
+	PRINT  防:
+	CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:(LOCAL:1):防衛)
+	PRINTFORM {ABL:(LOCAL:1):防衛, 3, LEFT}
+	PRINT  知:
+	CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:(LOCAL:1):知略)
+	PRINTFORM {ABL:(LOCAL:1):知略, 3, LEFT}
+	PRINT  妖:
+	CALL PRINT_ALPHABET_RANK(ランク_ＳＬＧ, ABL:(LOCAL:1):妖術)
+	PRINTFORM {ABL:(LOCAL:1):妖術, 3, LEFT}
+	PRINTL 
+	SETCOLOR カラー_灰色
+	CALL SINGLE_DRAWLINE
+	RESETCOLOR
+NEXT
+PRINTPLAIN  
+PRINTBUTTON @"[%"取消", MAX_CHARANAME_LENGTH, LEFT%]", 99
+$INPUT_LOOP
+INPUT
+IF RESULT == 99
+	RETURN 0
+ENDIF
+
+IF RESULT < 0
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ELSEIF VARSIZE("SCOUT_CANDIDATES") <= RESULT
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+角色 = ID_TO_CHARA(SCOUT_CANDIDATES:RESULT)
+角色番号 = RESULT
+
+IF 角色 == -1 || 价格:角色番号 > MONEY
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+
+CLEARLINE LINECOUNT - FIRST_LINE
+MONEY -= 价格:角色番号
+PRINTFORML 支付了{价格:角色番号}，%ANAME(角色)%将在本回合作为友军参战
+PRINTL
+CFLAG:角色:好感度 = MAX(100, CFLAG:角色:好感度 + 100)
+CFLAG:角色:従属度 = MAX(30, CFLAG:角色:従属度 + 30)
+CFLAG:角色:依存度 = MAX(15, CFLAG:角色:依存度 + 15)
+CALL BATTLE_ADD_MOB(発動側, 発動部隊 >= 0, ANAME(角色),ABL:角色:武闘,ABL:角色:防衛,ABL:角色:知略,ABL:角色:政治, ABL:角色:妖術, ABL:角色:料理, ABL:角色:歌唱)
+
+@SKILL_0_MIRACLE_32_EXPLANATION
+RESULTS = 己方存在将领空位时可发动，消耗金钱雇佣在野士官在本回合参战(不触发技能)
+
+@SKILL_0_MIRACLE_32_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 1000

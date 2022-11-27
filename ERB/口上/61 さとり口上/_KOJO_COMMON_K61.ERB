@@ -1,0 +1,1180 @@
+﻿;-------------------------------------------------
+;共通部分
+;-------------------------------------------------
+
+;=================================================
+;●口上の存在判定
+;=================================================
+@KOJO_EXIST_K61
+;=================================================
+;●開始時
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_TRAIN_START_K61
+
+;=================================================
+;●終了時
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_TRAIN_END_K61
+
+;=================================================
+;●コマンド実行時(このキャラがプレイヤー側のとき)
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_TARGET_K61
+
+;=================================================
+;●コマンド実行時(このキャラがプレイヤー側のとき)
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_PLAYER_K61
+
+;=================================================
+;●コマンド実行前(ターゲット・プレイヤー問わず)
+;※地の文が表示される前に実行される。戻り値に1を設定する(RETURN 1)と地の文がカットされる
+;  必要に応じてKOJO_COM_TARGETの代わりに使う
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_BEFORE_K61
+
+;ファーストキスフラグ（キス未経験だったらCFLAG:255を1にセット）
+SIF TALENT:無接吻経験
+	CFLAG:255 = 1
+;処女フラグ（処女だったらCFLAG:260を1にセット）
+SIF TALENT:処女
+	CFLAG:260 = 1
+;主人公が童貞フラグ（主人公が童貞だったらCFLAG:261を1にセット）
+SIF TALENT:MASTER:童貞
+	CFLAG:261 = 1
+	
+RETURN 0
+
+;=================================================
+;●コマンド実行後(パラメータの変動処理が終わってから呼び出される)
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_AFTER_K61
+;[虚ろ]状態の場合、口が塞がっている場合は口上を表示しない
+IF TALENT:空虚 || IS_EQUIP_CONTINUE(TARGET, "口装着")
+	RETURN 0
+ENDIF
+
+;ファーストキスフラグ（コマンド終了時にキス未経験じゃ無かったらCFLAG:255を0にセット）
+SIF !TALENT:無接吻経験
+	CFLAG:255 = 0
+;処女フラグ（コマンド終了時に処女じゃ無かったらCFLAG:260を0にセット）
+SIF !TALENT:処女
+	CFLAG:260 = 0
+;主人公が童貞フラグ（コマンド終了時に主人公が童貞じゃ無かったらCFLAG:261を0にセット）
+SIF !TALENT:MASTER:童貞
+	CFLAG:261 = 0
+	
+PRINTL
+	
+;-------------------------------------------------
+;初絶頂は使い回せそうなのでここに作成
+;-------------------------------------------------
+;-------------------------------------------------
+;初めてＣ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｃ絶頂 > 0
+	IF CFLAG:220 == 0
+		CFLAG:220 = 1
+		;恋慕
+		IF TALENT:恋慕 || TALENT:服従 
+			PRINTFORMW 「啊啊啊啊♥阴蒂、咿、咿呀呀呀————♥」
+			;TranslatedMark 「はあぁっ♥　クリっ、イ、イっちゃッぅぅっ♥」
+		;それ以外
+		ELSE
+			PRINTFORMW 「呼啊啊啊！」
+			;TranslatedMark 「ふあぁぁっ！」
+		ENDIF
+	;二回目以降
+	ELSE
+		;最強絶頂時
+		IF NOWEX:Ｃ絶頂 > 4
+			;常に表示されると多重絶頂時にうるさいので、以下適当に無言を織り交ぜておく
+			SELECTCASE RAND:8
+				CASE 0
+					PRINTFORML 「哎呀♥♥啊♥啊，啊♥啊啊啊啊♥♥♥」
+					;TranslatedMark 「ひやぁっ♥♥　あっ♥　あ゛あっ♥　あぁあ―z___ッ♥♥♥」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					PRINTFORML 「哈哈♥阴蒂、呀♥♥哈哈♥♥啊啊♥♥―z___♥♥啊♥♥」
+					;TranslatedMark 「はひぃッ♥クリでっイっ、ちゃっ♥♥　はあッ♥♥　ッッ―♥♥―z___♥♥ッ♥♥」
+				CASE 3
+					;PRINTFORML 
+				CASE 4
+					PRINTFORML 「天啊♥啊♥♥啊啊啊啊啊♥♥♥♥」
+					;TranslatedMark 「ひあ♥　あッ♥♥　はあぁあぁッッ♥♥♥♥」
+				CASE 5
+					;PRINTFORML 
+				CASE 6
+					PRINTFORML 「♥♥哎呀♥♥啊～啊♥♥♥啊♥♥」
+					;TranslatedMark 「♥♥ひぁ♥♥　あぁ～～あっッ♥♥♥　ぁッ♥♥」
+				CASE 7
+					;PRINTFORML 
+			ENDSELECT
+		;恋慕 or 服従 or 主人
+		ELSEIF TALENT:恋慕 || TALENT:服従 || TALENT:主人
+			SELECTCASE RAND:6
+				CASE 0
+					PRINTFORML 「咿呀！啊！啊啊啊啊♥」
+					;TranslatedMark 「ひあっ！　はっ！　ぁあぁっッ♥」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					PRINTFORML 「哎呀♥不行啊♥啊哈哈♥啊♥」
+					;TranslatedMark 「ひやぁっ♥　だッだめぇっ♥あッはぁ―z___♥ぁッッ♥」
+				CASE 3
+					;PRINTFORML 
+				CASE 4
+					PRINTFORML 「哈，啊！咿，好烫啊♥」
+					;TranslatedMark 「はぁっ、あっ！　イっ、イっちゃうぅっ♥」
+				CASE 5
+					;PRINTFORML 
+			ENDSELECT
+		;それ以外
+		ELSE
+			SELECTCASE RAND:6
+				CASE 0
+					PRINTFORML 「嗯～～～！嗯！啊！」
+					;TranslatedMark 「んんっ～～～！　っ！っ！」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					PRINTFORML 「哎呀！糟了…啊！」
+					;TranslatedMark 「やあっ！　イっちゃ…っ！」
+				CASE 3
+					;PRINTFORML 
+				CASE 4
+					;PRINTFORML 
+				CASE 5
+					PRINTFORML 「嗯！嗯……哈！」
+					;TranslatedMark 「んんっ！　ん……っ！」
+			ENDSELECT
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;初めてＶ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｖ絶頂 > 0
+	IF CFLAG:221 == 0
+		CFLAG:221 = 1
+		;恋慕
+		IF TALENT:恋慕 || TALENT:服従 || TALENT:主人  
+			PRINTFORML 「啊，有什么东西来了♥唔♥啊♥啊啊啊啊啊啊♥♥」
+			;TranslatedMark 「アッ、なっなにかッ来るっ♥　くッ♥　あっ♥　はあぁぁーーぁあッッ♥♥」
+			PRINTFORML %ANAME(TARGET)%的身体弯成弓形，爱液和白浊一起从阴道里喷出来
+			;TranslatedMark %ANAME(TARGET)%の肢体が弓なりにしなり、その膣内から白濁した愛液が噴き出してくる
+			PRINTFORMW 「啊啊啊啊啊…这个好厉害……这样啊……♥♥」
+			;TranslatedMark 「はあぁぁ…これ、すごいぃ……こんなぁ……♥♥」
+		;それ以外
+		ELSE
+			PRINTFORML 「啊！啊啊啊！」
+			;TranslatedMark 「あッ！　ひあぁッっ！」
+			PRINTFORML 爱液和白浊一起从%ANAME(TARGET)%的阴道里喷出来
+			;TranslatedMark %ANAME(TARGET)%の膣内から白濁した愛液が噴き出してくる
+			PRINTFORMW 「啊啊啊啊……。这个模样，被看到了…」
+			;TranslatedMark 「はあぁぁ……。みっともない姿をさらしてしまったわ…」
+		ENDIF
+	;二回目以降
+	ELSE
+		;最強絶頂時
+		IF NOWEX:Ｖ絶頂 > 4
+			;常に表示されると多重絶頂時にうるさいので、以下適当に無言を織り交ぜておく
+			SELECTCASE RAND:10
+				CASE 0
+					;PRINTFORML 
+				CASE 1
+					PRINTFORML 「啊♥咿♥♥哈哈♥啊啊啊啊啊♥♥♥♥」
+					;TranslatedMark 「あッ♥　きっ♥♥　はあ゛っ♥　あ゛ぁあ゛ぁあ―ッ♥♥♥♥」
+				CASE 2
+					;PRINTFORML 
+				CASE 3
+					PRINTFORML 「哦咿♥好啊♥嗯♥♥不，不♥嗯♥嗯♥♥♥」
+					;TranslatedMark 「おひッ♥いいっ♥ッ♥♥　いいぃぃ―z__ィッ♥ッ♥ッ♥♥♥」
+				CASE 4
+					;PRINTFORML 
+				CASE 5
+					PRINTFORML 「咿♥好厉害♥咿♥♥　…嗯，嗯♥♥嗯♥♥♥」
+					;TranslatedMark 「イッ♥　イクッ♥　イッ♥♥　…っクぅうう♥♥っっ♥♥♥」
+				CASE 6
+					;PRINTFORML 
+				CASE 7
+					PRINTFORML 「哎呀♥♥啊啊啊啊啊啊啊啊啊啊♥♥♥♥♥」」
+					;TranslatedMark 「はきゃあっ♥♥　はあ゛ぁああぁあ゛あっっ♥♥♥♥♥」」
+				CASE 8
+					;PRINTFORML 
+				CASE 9
+					PRINTFORML 「哈咿♥♥这样的话♥♥我的小穴要♥♥♥」
+					;TranslatedMark 「はひぃっ♥♥　とけりゅぅッ♥♥　私のおまんことけりゅぅうぅッッ♥♥♥」
+			ENDSELECT
+		;恋慕 or 服従 or 主人
+		ELSEIF TALENT:恋慕 || TALENT:服従 || TALENT:主人
+			SELECTCASE RAND:7
+				CASE 0
+					PRINTFORML 「噗啊♥啊啊♥要、要去了♥♥」
+					;TranslatedMark 「ふあっ♥　ああ♥　キちゃうぅっっ♥♥」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					PRINTFORML 「啊啊啊啊♥这个♥好舒服♥♥」
+					;TranslatedMark 「アぁっ♥　これぇっ♥キモチいいぃぃっ♥♥」
+				CASE 3
+					;PRINTFORML 
+				CASE 4
+					PRINTFORML 「啊啊啊啊♥啊啊啊——♥♥」
+					;TranslatedMark 「はああっ♥　あぁぁ――っ♥♥」
+				CASE 5
+					;PRINTFORML 
+				CASE 6
+					PRINTFORML 「喂，这样啊♥好厉害啊♥啊啊啊啊♥啊啊啊——♥♥」
+					;TranslatedMark 「こっ、こんなっ♥すごいのッ♥　はああっ♥　あぁぁ――っ♥♥」
+			ENDSELECT
+		;それ以外
+		ELSE
+			SELECTCASE RAND:6
+				CASE 0
+					PRINTFORML 「嗯～～～！嗯！嗯！」
+					;TranslatedMark 「んんっ～～～！っ！っ！」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					PRINTFORML 「呼！嗯，嗯！」
+					;TranslatedMark 「ふあッ！　んっ、んんッ！」
+				CASE 3
+					;PRINTFORML 
+				CASE 4
+					;PRINTFORML 
+				CASE 5
+					PRINTFORML 「啊！　～～！嗯！嗯！」
+					;TranslatedMark 「ああっ！　～～！ッ！ッ！」
+			ENDSELECT
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;初めてＡ絶頂
+;-------------------------------------------------
+IF NOWEX:Ａ絶頂 > 0
+	IF CFLAG:222 == 0
+		CFLAG:222 = 1
+		;恋慕
+		IF TALENT:恋慕 || TALENT:服従 
+			PRINTFORML 「啊啊啊啊♥噢♥用屁股……啊，呃！」
+			;TranslatedMark 「はぁあっっ♥　おっ♥お尻でぇッッ……あっ、ッッ！」
+			PRINTFORMW 「啊……哦，用屁股…好像要上瘾了……♥」
+			;TranslatedMark 「ふあぁ……お、お尻でイクの…クセになりそう……♥」
+		;それ以外
+		ELSE
+			PRINTFORMW 「啊！屁股的话…♥！」
+			;TranslatedMark 「あっ！　お尻でっ…♥！」
+		ENDIF
+	;二回目以降
+	ELSE
+		;最強絶頂時
+		IF NOWEX:Ａ絶頂 > 4
+			SELECTCASE RAND:8
+				CASE 0
+					PRINTFORML 「哦~♥哦，哦♥♥哦，真的♥♥嗯♥♥♥」
+					;TranslatedMark 「お゛ッ♥お゛お゛ッ♥♥　ほぉッ♥♥ッッ♥♥♥」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					;PRINTFORML 
+				CASE 3
+					PRINTFORML 「我♥♥要去了♥♥要去了啊啊啊♥♥♥♥♥」
+					;TranslatedMark 「イ゛ッ♥♥　イ゛グッ♥♥　イ゛グぅぅううぅうッ♥♥ッ♥♥♥」
+				CASE 4
+					;PRINTFORML 
+				CASE 5
+					;PRINTFORML 
+				CASE 6
+					PRINTFORML 「啊♥♥　…嗯♥哈~♥♥ー♥♥…♥♥ー♥♥…♥♥啊♥」
+					;TranslatedMark 「かッ♥♥　…ッ♥　はあ゛ッ♥♥　ー♥♥…♥♥ーぁッ♥♥…♥♥あッ♥」
+				CASE 7
+					;PRINTFORML 
+			ENDSELECT
+		;恋慕 or 服従 or 主人
+		ELSEIF TALENT:恋慕 || TALENT:服従 || TALENT:主人
+			SELECTCASE RAND:7
+				CASE 0
+					PRINTFORML 「哎呀♥啊啊♥一定会成功的♥♥」
+					;TranslatedMark 「やあっ♥　ああ♥　キちゃうぅっっ♥♥」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					;PRINTFORML 
+				CASE 3
+					PRINTFORML 「嗯啊啊♥好棒！好棒♥咿♥啊啊啊啊啊♥」
+					;TranslatedMark 「んあぁっ♥　あッイクッ♥　イッ♥　あああッッ♥」
+				CASE 4
+					;PRINTFORML 
+				CASE 5
+					;PRINTFORML 
+				CASE 6
+					PRINTFORML 「啊啊啊啊♥噢♥用屁股♥」
+					;TranslatedMark 「はぁあっっ♥　おっ♥お尻でぇッッ♥」
+			ENDSELECT
+		;それ以外
+		ELSE
+			SELECTCASE RAND:6
+				CASE 0
+					PRINTFORML 「嗯～～～！嗯！嗯！」
+					;TranslatedMark 「んんっ～～～！っ！っ！」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					PRINTFORML 「啊！屁股的话…♥！」
+					;TranslatedMark 「あっ！　お尻でっ…♥！」
+				CASE 3
+					;PRINTFORML 
+				CASE 4
+					;PRINTFORML 
+				CASE 5
+					PRINTFORML 「啊！　～～！嗯！呃！…」
+					;TranslatedMark 「ああっ！　～～！ッ！ッ！…」
+			ENDSELECT
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;初めてＢ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｂ絶頂 > 0
+	IF CFLAG:223 == 0
+		CFLAG:223 = 1
+		;恋慕
+		IF TALENT:恋慕 || TALENT:服従 
+			PRINTFORML 「哇！胸部♥我♥Ahhh♥Hah ...♥」
+			;TranslatedMark 「ふあぁっ！　胸でッ♥　イッ♥あああッッ♥　はあぁ……♥」
+			PRINTFORMW 「嗯，胸部竟然有这样的感觉…。再摸一下……♥」
+			;TranslatedMark 「む、胸でこんなに感じるなんて…。も、もっと触って……♥」
+		;それ以外
+		ELSE
+			PRINTFORMW 「嗯，嗯，呃♥」
+			;TranslatedMark 「ふっ、んん～っ、っ♥」
+		ENDIF
+	;二回目以降
+	ELSE
+		;最強絶頂時
+		IF NOWEX:Ｂ絶頂 > 4
+			SELECTCASE RAND:8
+				CASE 0
+					PRINTFORML 「哎呀♥啊，啊♥嗯，嗯♥♥♥♥♥」
+					;TranslatedMark 「やあっ♥　あ゛あっ♥　イ゛グぅっっ♥♥♥♥♥」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					PRINTFORML 「 哈咿♥♥啊♥♥♥♥―噗噫___♥♥♥」
+					;TranslatedMark 「はひっ♥♥　あ゛ッ♥♥　ッ♥♥―z____ッ♥♥♥」
+				CASE 3
+					;PRINTFORML 
+				CASE 4
+					PRINTFORML 「♥咿♥嗯♥咿哈♥――♥♥ー♥♥哈哈♥加油♥♥」
+					;TranslatedMark 「♥ひ♥ッ♥　ひあッ♥　―ッ♥♥ーッ♥♥　は♥ッッッッ♥♥」
+				CASE 5
+					;PRINTFORML 
+				CASE 6
+					PRINTFORML 「啊啊♥♥嗯♥嗯♥♥♥♥嗯♥♥」
+					;TranslatedMark 「ふあァっ♥♥　ッ♥ッ♥♥♥♥ッ♥♥」
+				CASE 7
+					;PRINTFORML 
+			ENDSELECT
+		;恋慕 or 服従 or 主人
+		ELSEIF TALENT:恋慕 || TALENT:服従 || TALENT:主人
+			SELECTCASE RAND:7
+				CASE 0
+					PRINTFORML 「不妙♥啊♥嗯，嗯♥♥」
+					;TranslatedMark 「ふゃあっ♥　あっ♥　イ、クぅっっ♥♥」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					;PRINTFORML 
+				CASE 3
+					PRINTFORML 「啊啊啊！胸部♥咿♥啊啊啊啊啊♥」
+					;TranslatedMark 「ふあぁっ！　胸でッ♥　イッ♥あああッッ♥」
+				CASE 4
+					;PRINTFORML 
+				CASE 5
+					;PRINTFORML 
+				CASE 6 
+				    PRINTFORML 「咿呀♥啊♥胸部♥好啊♥」
+					;TranslatedMark 「ひやっ♥あっ♥　おっぱい♥いいぃっ♥」
+			ENDSELECT
+		;それ以外
+		ELSE
+			SELECTCASE RAND:6
+				CASE 0
+					PRINTFORML 「嗯，嗯♥」
+					;TranslatedMark 「んっ、っ♥」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					PRINTFORML 「啊！胸部…♥！」
+					;TranslatedMark 「あっ！　胸でっ…♥！」
+				CASE 3
+					;PRINTFORML 
+				CASE 4
+					;PRINTFORML 
+				CASE 5
+					PRINTFORML 「啊！　…啊啊啊啊啊…♥」
+					;TranslatedMark 「ああっ！　…はあぁぁ…♥」
+			ENDSELECT
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;初めてＭ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｍ絶頂 > 0
+	IF CFLAG:224 == 0
+		CFLAG:224 = 1
+		;恋慕
+		IF TALENT:恋慕 || TALENT:服従 
+			PRINTFORML 「嗯，嗯♥嗯，呃！～～～！♥」
+			;TranslatedMark 「んんっ♥んッ、ッ！～～～ッ！♥」
+			PRINTFORMW 「嗯，用嘴唇…不…♥」
+			;TranslatedMark 「く、唇で…イっちゃうなんて…っ♥」
+		;それ以外
+		ELSE
+			PRINTFORMW 「嗯，嗯，嗯！～～～！」
+			;TranslatedMark 「ん、っんんっんッ、ッ！～～～ッ！」
+		ENDIF
+	;二回目以降
+	ELSE
+		;最強絶頂時
+		IF NOWEX:Ｍ絶頂 > 4
+			SELECTCASE RAND:8
+				CASE 0
+					PRINTFORML 「嗯~♥♥嗯，嗯♥♥」
+					;TranslatedMark 「ん゛ッ♥♥　ん゛ん゛―ッ♥♥」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					;PRINTFORML 
+				CASE 3
+					PRINTFORML 「嗯~♥♥―♥嗯♥♥♥―z♥♥嗯♥」
+					;TranslatedMark 「ん゛ッ♥♥―♥んん♥♥♥―z__ッ♥♥ッ♥」
+				CASE 4
+					;PRINTFORML 
+				CASE 5
+					;PRINTFORML 
+				CASE 6
+					PRINTFORML 「嗯♥嗯，嗯♥♥嗯♥♥―z♥嗯♥♥」
+					;TranslatedMark 「んッ♥　ん゛んッ♥♥ッ♥♥―z__ッ♥ッ♥♥」
+				CASE 7
+					;PRINTFORML 
+			ENDSELECT
+		;恋慕 or 服従 or 主人
+		ELSEIF TALENT:恋慕 || TALENT:服従 || TALENT:主人
+			SELECTCASE RAND:7
+				CASE 0
+					PRINTFORML 「嗯~♥　…呼啊啊…♥♥」
+					;TranslatedMark 「んん～っっ♥　…ふあぁ…♥♥」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					;PRINTFORML 
+				CASE 3
+					PRINTFORML 「嗯，嗯♥♥用嘴唇♥一起♥嗯，嗯♥♥」
+					;TranslatedMark 「んんっ♥♥　唇でッ♥　イッちゃッ♥　んんっっ♥♥」
+				CASE 4
+					;PRINTFORML 
+				CASE 5
+					;PRINTFORML 
+				CASE 6
+					PRINTFORML 「嗯！嗯~♥嗯♥」
+					;TranslatedMark 「んッ！　んん～～ッ♥ッ♥」
+			ENDSELECT
+		;それ以外
+		ELSE
+			SELECTCASE RAND:6
+				CASE 0
+					PRINTFORML 「呼，嗯！嗯~」
+					;TranslatedMark 「ふあっ、んっ！　んん～～ッ」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					;PRINTFORML 
+				CASE 3
+					PRINTFORML 「嗯！嗯！嗯！」
+					;TranslatedMark 「んん！　っ！っ！」
+				CASE 4
+					;PRINTFORML 
+				CASE 5
+					PRINTFORML 「嗯，嗯～！」
+					;TranslatedMark 「ん、ん～～っ！」
+			ENDSELECT
+		ENDIF
+	ENDIF
+ENDIF
+
+;=================================================
+;●単体エンディング関係
+;=================================================
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;★ここから先にはエンディングが記述されています★
+;ネタバレを避けたい方は閲覧しないようにご注意下さい。
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+@KOJO_SINGLE_ENDING_K61
+;単体エンディング
+;全都市を統一したとき、好感度5000以上かつ全キャラ中最も好感度が高いと表示される
+#DIM こいし
+#DIM お燐
+#DIM お空
+#DIM 姉妹丼フラグ
+#DIM ペット乱交フラグ
+#DIM ペット乱交2フラグ
+
+こいし = NAME_TO_CHARA("こいし")
+お燐 = NAME_TO_CHARA("燐")
+お空 = NAME_TO_CHARA("空")
+姉妹丼フラグ =  (CFLAG:こいし:好感度 + CFLAG:こいし:依存度 + CFLAG:こいし:従属度)
+ペット乱交フラグ =  ((CFLAG:お燐:好感度 + CFLAG:お燐:依存度 + CFLAG:お燐:従属度)+(CFLAG:お空:好感度 + CFLAG:お空:依存度 + CFLAG:お空:従属度)) / 2
+ペット乱交2フラグ = (TALENT:お燐:合意 && TALENT:お空:合意)
+
+SETCOLOR カラー_男
+PRINTL
+;さとりが主人で主人公がこいし、お燐、お空で無い場合
+IF TALENT:主人 && !GROUPMATCH(MASTER, NAME_TO_CHARA("お燐"), NAME_TO_CHARA("お空"), NAME_TO_CHARA("こいし"))
+	PRINTFORML …
+	PRINTFORML ……
+	PRINTFORMW ………
+	PRINTFORML 
+	PRINTFORMW ――乱世结束后，%ANAME(MASTER)%和%ANAME(TARGET)%一起开始在地灵殿生活——
+	;TranslatedMark ――― 乱世が終わった後、%ANAME(MASTER)%と%ANAME(TARGET)%は一緒に地霊殿で暮らし始めた ―――
+	PRINTFORML 
+	PRINTFORMW 然后在地灵殿的一角，%ANAME(TARGET)%的卧室里今天也响起了淫荡而娇媚的声音……
+	;TranslatedMark そして地霊殿の一角、%ANAME(TARGET)%の寝室で今日も淫らな嬌声が響いている……
+	PRINTFORML 
+	;ペットと乱交ルート
+	IF (ペット乱交フラグ >=10000) && (姉妹丼フラグ < ペット乱交フラグ) && ペット乱交2フラグ
+		PRINTFORMW 「呼喵啊啊！啊♥哦，哥哥♥这样啊，舌头都伸到那种地方了，喵啊啊♥♥」
+		;TranslatedMark 「ふにゃあああッ！　あっ♥お、おにーさんっ♥　そっ、そんなとこまで舌いれちゃっ、にゃぁああッッ♥♥」
+		PRINTFORML 
+		PRINTFORMW 「喵喵♥嗷♥再往里面，好舒服哦♥♥」
+		;TranslatedMark 「うにゃあっ♥　奥っ♥とんとんされるのぉッ、キモチいいよぉっ♥♥」
+		PRINTFORML 
+		PRINTFORMW %ANAME(MASTER)%全身赤裸仰卧在床上，燐骑在他的脸上，空跨坐在他的身上，相对而坐，阴茎没入空的阴户之中
+		;TranslatedMark 全裸で仰向けに寝転ぶ%ANAME(MASTER)%に、お燐が顔面に、お空が一物に、互いが向き合うように跨っている
+		PRINTFORML 
+		PRINTFORMW 「……呵呵呵。看起来你们玩的很快乐呢♥我也很高兴」
+		;TranslatedMark 「……うふふ。二人とも、とってもキモチ良さそうね♥　私も嬉しいわ」
+		PRINTFORML 
+		PRINTFORMW 然后这里的主人%ANAME(TARGET)%把两个人分开，跪坐在%ANAME(MASTER)%的腹部，注意到两个宠物的痴态
+		;TranslatedMark そしてここの主たる%ANAME(TARGET)%が二人に割って入るように%ANAME(MASTER)%の腹に鎮座し、ペット二人の痴態に目を細める
+		PRINTFORML 
+		PRINTFORMW 「这个孩子舌头和腰都很厉害吧？两个人都很舒服呢♥」
+		;TranslatedMark 「この子は舌使いも腰使いもスゴイでしょう？　二人ともたくさんキモチ良くなってね♥」
+		PRINTFORML 
+		PRINTFORMW 这样说着，%ANAME(TARGET)%高兴地责弄着%ANAME(MASTER)%的乳头
+		;TranslatedMark そう言いながら%ANAME(TARGET)%は%ANAME(MASTER)%の乳首を嬉しそうにこねくり回す
+		PRINTFORML 
+		PRINTFORMW 「……已经想射精了吗？还不行哦。%ANAME(MASTER)%最初的射精，不是射在我的体内是不行的哦♥」
+		;TranslatedMark 「……もう射精したい？　まだ駄目よ。%ANAME(MASTER)%の最初の射精は、私の中にじゃないと駄ー目♥」
+		PRINTFORML 
+		PRINTFORMW %ANAME(TARGET)%注视着%ANAME(MASTER)%的阴茎
+		;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%のペニスに目をやる
+		PRINTFORML 
+		PRINTFORMW 阴茎上面，从%ANAME(TARGET)%的第三眼延伸出来的触手缠绕在一起，没有%ANAME(TARGET)%的许可就无法射精
+		;TranslatedMark その根元には、%ANAME(TARGET)%のサードアイから伸びた触手が絡みつき、%ANAME(TARGET)%の許可無く射精は出来ないようになっていた
+		PRINTFORML 
+		PRINTFORMW 「…但是两个人都很在意呢。那么差不多该我来陪你了吧♥」
+		;TranslatedMark 「…でも二人とも、もうずいぶん気をやってるわね。それじゃあそろそろ、私が相手をしてあげようかしら♥」
+		PRINTFORML 
+		PRINTFORMW %ANAME(MASTER)%的脸埋在了燐丰满的下半身里，看不出表情
+		;TranslatedMark %ANAME(MASTER)%の顔は、お燐のむっちりとした下半身に埋もれてその表情はうかがい知れない
+		PRINTFORML 
+		PRINTFORML 但是，不用读%ANAME(MASTER)%的心，他的表情肯定是充满喜悦的
+		;TranslatedMark しかし%ANAME(MASTER)%の心を読むまでも無く、その表情は喜色満面に違いなかった
+		PRINTFORML 
+		PRINTFORMW 这场糜烂的乱交已经开始了不知道多久了
+		;TranslatedMark この爛れた乱交が始まってどれほど経ったか
+		PRINTFORML 
+		PRINTFORML 在这期间，不管受到什么样的刺激都一直封印着射精
+		;TranslatedMark その間、どんな刺激があろうとずっと射精を封じられてきた
+		PRINTFORML 
+		PRINTFORMW 现在，主人正试图自己去解开它。那是最幸福的了
+		;TranslatedMark それが今、ご主人様自らによって解かれようとしてるのだ。それが幸せでないはずが無かった
+		PRINTFORML 
+		PRINTFORMW 「两个人都可以休息哦。……呵呵，那么着急吗。你看，%ANAME(MASTER)%的阴茎插进来了哦……嗯，嗯♥」
+		;TranslatedMark 「二人とも休んでていいわよ。……ふふ、そんなに焦らないの。ほら、%ANAME(MASTER)%のが入っていくわよ……えいっ♥」
+		PRINTFORML 
+		PRINTFORMW %ANAME(TARGET)%像是迫切想要阴茎似的，慢慢吞入的动作一顿，深深地坐下，一口气把阴茎连根吞没
+		;TranslatedMark %ANAME(TARGET)%はペニスの亀頭を焦らすようにゆっくりとくわえ込もうとする動きを一転、腰を深く落としてペニスを一気に奥深くまで飲み込んだ
+		PRINTFORML 
+		PRINTFORMW 本来就很敏感，想射却射不出来的肉棒，怎么能忍受这个突如其来的刺激……
+		;TranslatedMark ただでさえ敏感になって出したくてたまらない肉棒が、この不意打ちに耐えられるはずも無く…
+		PRINTFORML 
+		PRINTFORMW 插入的瞬间，就在主人的体内最深处把压制了许久的精液大量地喷射而出
+		;TranslatedMark 挿入した瞬間に、焦らしに焦らされ溜まりきった精液をご主人様の奥深くに盛大に放流した
+		PRINTFORML 
+		PRINTFORMW 「啊啊啊啊♥♥好有干劲啊♥原来是那么想射出来的啊…。不用再忍耐了…♥」
+		;TranslatedMark 「ああッッ♥♥　すごい勢いっ♥　そんなに出したかったのね…。もうガマンしなくていいからね…♥」
+		PRINTFORML 
+		PRINTFORMW 虽然刚射精，%ANAME(TARGET)%却淫猥地摆动着腰，给%ANAME(MASTER)%更多的快感
+		;TranslatedMark 射精したばかりだというのにも関わらず%ANAME(TARGET)%は淫猥に腰を振り、更なる快感を%ANAME(MASTER)%に与える
+		PRINTFORML 
+		PRINTFORML 之前一直忍耐的%ANAME(MASTER)%，也不会因为一次射精而满足
+		;TranslatedMark 我慢に我慢を重ねた%ANAME(MASTER)%もまた、たった一回の射精で満足するわけも無く
+		PRINTFORMW 把象征屈服和感谢的精液多次献给主人
+		;TranslatedMark 屈服と感謝の証である精液を主人に何度も何度も献上する
+		PRINTFORML 
+		PRINTFORMW 把肉棒狠狠插入到主人最敏感的地方。真是合拍的做爱
+		;TranslatedMark ご主人様のストロークに合わせて最も感じるポイントへ肉棒を打ちつける。実に息の合ったセックスだった
+		PRINTFORML 
+		PRINTFORMW 「……呵呵呵♥满脑子都是对我的感谢和喜悦的情绪。真可爱的孩子…♥」
+		;TranslatedMark 「……ふふっ♥　私への感謝と喜びの声で頭いっぱいね。本当に可愛い子…♥」
+		PRINTFORML 
+		PRINTFORMW 主人爱宠物，宠物也爱主人。互相爱慕，正是理想的关系
+		;TranslatedMark 主人はペットを愛し、ペットもまた主人を愛する。互いを想い合う、正に理想の関係だった
+		PRINTFORML 
+		PRINTFORMW 被二人的热情性爱所感染，阿燐和阿空也开始互相亲吻
+		;TranslatedMark そんな二人の熱烈なセックスに当てられて、お燐とお空もまた交わりを始める
+		PRINTFORML 
+		PRINTFORMW 「哎呀，两个人都已经没事了呢。…来，来。我们大家一起开心吧♥」
+		;TranslatedMark 「あら、二人とももう大丈夫なのね。…ほら、来なさい。私たち皆で、キモチよくなりましょう♥」
+		PRINTFORML 
+		PRINTFORMW 被爱的主人和3个宠物在那之后也一直做爱到很晚……
+		;TranslatedMark 愛するご主人様と３人のペットは、その後も遅くまで愛し合った……
+		
+	;姉妹丼ルート
+	ELSEIF (姉妹丼フラグ >=10000) && (ペット乱交フラグ < 姉妹丼フラグ) && TALENT:こいし:合意
+		PRINTFORMW 「啊啊啊啊啊♥那里，被磨磨蹭蹭的，很舒服哦♥」
+		;TranslatedMark 「ひぁあぁんっ♥　そこっ、ぐりぐりされるのっ、キモチいいよぉ♥」
+		PRINTFORML 
+		PRINTFORMW 「呵呵…。这孩子的腰很厉害吧？　……嗯♥同时没有忘记为我服务，真了不起♥」
+		;TranslatedMark 「うふふ…。この子の腰使いはスゴイでしょう？　……んっ♥　ちゃんと私への奉仕も忘れずに偉いわね♥」
+		PRINTFORML 
+		PRINTFORMW 床上，%ANAME(TARGET)%骑乘在全裸仰面躺着的%ANAME(MASTER)%的脸上，同时还有一个女孩子跨坐在阴茎上起起伏伏，两人面对着面，面色潮红
+		;TranslatedMark ベッドの上、全裸で仰向けに寝転ぶ%ANAME(MASTER)%の顔面に%ANAME(TARGET)%が、一物にこいしが跨って互いに向き合っている
+		PRINTFORML 
+		PRINTFORMW 「咿呀♥哦，姐姐♥」
+		;TranslatedMark 「ひあんっ♥　お、お姉ちゃぁんっ♥」
+		PRINTFORML 
+		PRINTFORMW 「哎呀哎呀，你想牵手吗？呵呵，好啊。看，欢迎光临…♥」
+		;TranslatedMark 「あらあら、手を繋ぎたいの？　ふふ、いいわよ。ほら、いらっしゃい…♥」
+		PRINTFORML 
+		PRINTFORMW 在%ANAME(MASTER)%的身上，姐妹十指相交，互相亲吻，舌头也缠绕在一起
+		;TranslatedMark %ANAME(MASTER)%の上で姉妹は指を絡めて手を繋ぎ、そして熱に浮かされたように唇を求め合い、舌も絡ませ合う
+		PRINTFORML 
+		PRINTFORMW %ANAME(MASTER)%的脸埋在%ANAME(TARGET)%的小穴和大腿下面，虽然没能看到她淫靡的景象，但那并不是问题
+		;TranslatedMark %ANAME(TARGET)%の媚肉と太ももに顔を埋める%ANAME(MASTER)%には、その淫靡な光景を拝むことは出来なかったがそれは問題ではなかった
+		PRINTFORML 
+		PRINTFORMW 通过自己的服务，主人和妹妹会很开心地对我撒娇。给她们带来快乐
+		;TranslatedMark 自分の奉仕により、ご主人様とその妹がキモチよく嬌声を上げてくれる。悦んでくれている
+		PRINTFORML 
+		PRINTFORMW 这样就足够了。那就是%ANAME(MASTER)%的幸福
+		;TranslatedMark その事実があるだけで充分だった。それが%ANAME(MASTER)%の幸福だった
+		PRINTFORML 
+		PRINTFORMW 「哦，姐姐♥恋恋♥里面热热的，想要哦♥」
+		;TranslatedMark 「お、お姉ちゃぁんっ♥　こいしっ♥　中にっ、熱いのがっ、欲しいよぉっ♥」
+		PRINTFORML 
+		PRINTFORMW 「想被射在里面吗？呵呵，还不行。这孩子最初的射精，已经决定射在我的体内了♥」
+		;TranslatedMark 「中出しされたいの？　ふふ、まだ駄目よ。この子の最初の射精は、私の中にって決めてるの♥」
+		PRINTFORML 
+		PRINTFORMW %ANAME(TARGET)%注视着%ANAME(MASTER)%的阴茎
+		;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%のペニスに目をやる
+		PRINTFORML 
+		PRINTFORMW 阴茎上面，从%ANAME(TARGET)%的第三眼延伸出来的触手缠绕在一起，没有%ANAME(TARGET)%的许可就无法射精
+		;TranslatedMark その根元には、%ANAME(TARGET)%のサードアイから伸びた触手が絡みつき、%ANAME(TARGET)%の許可無く射精は出来ないようになっていた
+		PRINTFORML 
+		PRINTFORMW 「…但是无论是恋恋还是%ANAME(MASTER)%，都已经到了忍耐的极限了。那么差不多该我来陪你了吧♥」
+		;TranslatedMark 「…でもこいしも%ANAME(MASTER)%も、もう我慢の限界って感じね。それじゃあそろそろ、私が相手をしてあげようかしら♥」
+		PRINTFORML 
+		PRINTFORMW 这样说着，%ANAME(TARGET)%从%ANAME(MASTER)%的脸上抬起腰，和恋恋交换了位置
+		;TranslatedMark そういって%ANAME(TARGET)%は%ANAME(MASTER)%の顔から腰を上げ、こいしと交代する
+		PRINTFORML 
+		PRINTFORML %ANAME(MASTER)%用恍惚的表情注视着跨坐上自己阴茎的主人的身姿
+		;TranslatedMark 自分に跨りペニスを握るご主人様の姿を、%ANAME(MASTER)%は恍惚とした表情で見つめる
+		PRINTFORML 
+		PRINTFORMW 和姐妹的夜间派对开始有多久了呢
+		;TranslatedMark 姉妹との夜伽が始まってどれほど経ったか
+		PRINTFORML 
+		PRINTFORML 在这期间，不管受到什么样的刺激都一直封印着射精
+		;TranslatedMark その間、どんな刺激があろうとずっと射精を封じられてきた
+		PRINTFORML 
+		PRINTFORMW 现在，主人正试图自己去解开它。那是最幸福的了
+		;TranslatedMark それが今、ご主人様自らによって解かれようとしてるのだ。それが幸せでないはずが無かった
+		PRINTFORML 
+		PRINTFORMW 「……呵呵，你那么着急吗。你看，%ANAME(MASTER)%的插进来了………嗯，嗯♥」
+		;TranslatedMark 「……ふふ、そんなに焦らないの。ほら、%ANAME(MASTER)%のが入っていくわよ、………えいっ♥」
+		PRINTFORML 
+		PRINTFORMW %ANAME(TARGET)%像是迫切想要阴茎似的，慢慢吞入的动作一顿，深深地坐下，一口气把阴茎连根吞没
+		;TranslatedMark %ANAME(TARGET)%はペニスの亀頭を焦らすようにゆっくりとくわえ込もうとする動きを一転、腰を深く落としてペニスを一気に奥深くまで飲み込んだ
+		PRINTFORML 
+		PRINTFORMW 本来就很敏感，想射却射不出来的肉棒，怎么能忍受这个突如其来的刺激…
+		;TranslatedMark ただでさえ封を解かれ、出したくてたまらない肉棒がこの不意打ちに耐えられるはずも無く…
+		PRINTFORML 
+		PRINTFORMW %ANAME(MASTER)%插入的瞬间，就在主人的体内最深处把压制了许久的精液大量地喷射而出
+		;TranslatedMark %ANAME(MASTER)%は挿入した瞬間、焦らしに焦らされ溜まりきった精液をご主人様の奥深くに盛大に放流した
+		PRINTFORML 
+		PRINTFORMW 「啊啊啊啊♥♥很有干劲呢♥原来是那么想射出来的啊…。但是，不要再忍耐了哦…♥」
+		;TranslatedMark 「ああッッ♥♥　すごい勢いっ♥　そんなに出したかったのね…。でも、もうガマンしなくていいわよ…♥」
+		PRINTFORML 
+		PRINTFORMW 虽然刚射精，%ANAME(TARGET)%却淫猥地摆动着腰，给%ANAME(MASTER)%更多的快感
+		;TranslatedMark 射精したばかりだというのにも関わらず%ANAME(TARGET)%は淫猥に腰を振り、更なる快感を%ANAME(MASTER)%に与える
+		PRINTFORML 
+		PRINTFORML 之前一直忍耐的%ANAME(MASTER)%，也不会因为一次射精而满足
+		;TranslatedMark 我慢に我慢を重ねた%ANAME(MASTER)%もまた、たった一回の射精で満足するわけも無く
+		PRINTFORMW 把象征屈服和感谢的精液多次献给主人
+		;TranslatedMark 屈服と感謝の証である精液を主人に何度も何度も献上する
+		PRINTFORML 
+		PRINTFORMW 把肉棒狠狠插入到主人最敏感的地方。真是合拍的做爱
+		;TranslatedMark ご主人様のストロークに合わせて最も感じるポイントへ肉棒を打ちつける。実に息の合ったセックスだった
+		PRINTFORML 
+		PRINTFORMW 「……呵呵呵♥满脑子都是对我的感谢和喜悦的情绪。真可爱的孩子…♥」
+		;TranslatedMark 「……ふふっ♥　私への感謝と喜びの声で頭いっぱいね。本当に可愛い子…♥」
+		PRINTFORML 
+		PRINTFORMW 主人爱宠物，宠物也爱主人。互相爱慕，正是理想的关系
+		;TranslatedMark 主人はペットを愛し、ペットもまた主人を愛する。互いを想い合う、正に理想の関係だった
+		PRINTFORML 
+		PRINTFORMW 「啊哈哈♥姐姐，很舒服哦…。%ANAME(MASTER)%，我也很开心♥」
+		;TranslatedMark 「あはっ♥　お姉ちゃん、キモチよさそう…。ねえ%ANAME(MASTER)%、私もキモチよくしてぇ♥」
+		PRINTFORML 
+		PRINTFORMW 说着这话的恋恋跨坐在%ANAME(MASTER)%的脸上
+		;TranslatedMark そう言ってこいしが%ANAME(MASTER)%の顔に跨る
+		PRINTFORML 
+		PRINTFORMW 被二人热烈的性爱所感染，小穴里面大量的淫蜜溢出来，淅淅沥沥地淋湿了%ANAME(MASTER)%的脸…
+		;TranslatedMark 二人の熱烈なセックスに当てられて、その秘裂からは淫蜜が溢れ、しとどに濡れていた…
+		PRINTFORML 
+		PRINTFORML 是主人最爱的妹妹
+		;TranslatedMark 愛するご主人様の大事な妹だ
+		PRINTFORML 
+		PRINTFORMW %ANAME(MASTER)%就像对待主人一样，怀着爱意开始了服务
+		;TranslatedMark %ANAME(MASTER)%は主人に対するのと同じように愛情を込めて奉仕を始めた
+		PRINTFORML 
+		PRINTFORMW 「咿呀♥啊啊♥这个好厉害啊♥♥」
+		;TranslatedMark 「ふやっ♥　ああっ♥　これっ、すごいよぉっっ♥♥」
+		PRINTFORML 
+		PRINTFORMW 「嗯，恋恋也完全沉迷进来了呢。好机会啊%ANAME(MASTER)%。让恋恋的身体铭记住%ANAME(MASTER)%的感觉吧♪」
+		;TranslatedMark 「うふふ、こいしもすっかり腰砕けね。いい機会だわ%ANAME(MASTER)%。こいしの身体に%ANAME(MASTER)%の舌使いを刻んで上げなさい♪」（没中出恋恋，不开心，下面自己加的）
+		PRINTFORML 
+		PRINTFORMW ……………………
+		PRINTFORMW 「唔♥啊啊♥姐姐♥♥」
+		PRINTFORML 
+		PRINTFORMW 被%ANAME(TARGET)%压在身下的恋恋，小小的乳头也被%ANAME(TARGET)%轻轻的揉搓，恋恋神情恍惚，沉醉于和姐姐的吻，两人的舌头交缠在一起，时不时拉出透明的细线
+		PRINTFORML 
+		PRINTFORMW 她们身后，%ANAME(MASTER)%的阴茎交替插入两姐妹的小穴，每次抽插都会带出阴道里的精液和爱液。
+		PRINTFORML 
+		PRINTFORMW %ANAME(MASTER)%全身抖动了一下，突然加大力度一下插入恋恋小穴的最深处，在子宫里爆发出大量的白浆。
+		PRINTFORML 
+		PRINTFORMW 恋恋被体内滚烫的精液刺激，一下子到达了绝顶，四肢下意识的抱紧身上的姐姐，更用力的吻住了%ANAME(TARGET)%的嘴唇
+		PRINTFORML 
+		PRINTFORMW 绝顶边缘的%ANAME(TARGET)%被恋恋用力的吻住有些吃惊，就在这时%ANAME(MASTER)%仍在射精的阴茎猛地插入，身子一颤，三人一起到达了顶峰
+		PRINTFORML 
+		PRINTFORMW 三人浓密的性爱让整个房间都散发着粉色的气息
+		PRINTFORML 
+		PRINTFORMW 和敬爱的姐妹做爱，之后一直持续到深夜……
+		;TranslatedMark 敬愛する姉妹とのセックスは、その後も夜遅くまで続いた……
+		
+	;さとり様一筋ルート
+	ELSE
+		PRINTFORMW 「啊，啊…嗯，嗯♥　……噗。我的乳房那么好吃吗？」
+		;TranslatedMark 「ふあっ、あ…んんっ♥　……くすっ。私のおっぱい、そんなにおいしいの？」
+		PRINTFORML 
+		PRINTFORMW %ANAME(TARGET)%和%ANAME(MASTER)%以对面座位的体位交合着
+		;TranslatedMark %ANAME(TARGET)%と%ANAME(MASTER)%は対面座位のような体勢で向き合っている
+		PRINTFORML 
+		PRINTFORML 被%ANAME(TARGET)%把头抱在怀里的%ANAME(MASTER)%，吸着心爱的主人的乳头
+		;TranslatedMark %ANAME(TARGET)%に頭を抱きかかえられている%ANAME(MASTER)%は、愛しい主人の乳首に吸い付き
+		PRINTFORML 
+		PRINTFORMW 为了能让大家感到舒服，我会用心服务的
+		;TranslatedMark 少しでも気持ちよく感じてもらえるよう、心を込めて奉仕している
+		PRINTFORML 
+		PRINTFORMW 「……呵呵。真是可爱的孩子啊。要给表现好的孩子奖励」
+		;TranslatedMark 「……ふふっ。もう、可愛い子ね。よく出来た良い子にはご褒美を上げなくちゃね」
+		PRINTFORML 
+		PRINTFORMW 一边这样说着，%ANAME(TARGET)%一边用自己的屁股摩擦%ANAME(MASTER)%的阴茎
+		;TranslatedMark そう言いながら%ANAME(TARGET)%は自らの尻で%ANAME(MASTER)%のペニスを擦り上げる
+		PRINTFORML 
+		PRINTFORMW 「已经到极限了？　……不用读心。%ANAME(MASTER)%的阴茎，说是想射精，一抖一抖地向我的屁股索求呢♥」
+		;TranslatedMark 「もう限界？　……心を読むまでも無いわ。%ANAME(MASTER)%のおちんちん、射精したいですって、ビクンビクンして私のお尻に訴えてるわ♥」
+		PRINTFORML 
+		PRINTFORMW %ANAME(TARGET)%注视着%ANAME(MASTER)%的阴茎
+		;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%のペニスに目をやる
+		PRINTFORML 
+		PRINTFORML ―在我许可之前不能射精哦-
+		;TranslatedMark ― 私が許可するまで射精しては駄目よ ―
+		PRINTFORML 
+		PRINTFORMW %ANAME(MASTER)%遵守命令，不管怎么刺激阴茎，都会忍耐，等待主人的许可
+		;TranslatedMark %ANAME(MASTER)%はその命令を守り、どんなにペニスを刺激されても耐え、ご主人様の許可を待っていた
+		PRINTFORML 
+		PRINTFORMW 然而，由于主人细心的爱抚和责备，%ANAME(MASTER)%终于迎来了极限
+		;TranslatedMark されど愛する主人の丹念な愛撫と責めにより、%ANAME(MASTER)%はついに限界を迎えつつあった
+		PRINTFORML 
+		PRINTFORML 「如果不行的话，我想用第三眼的触手把根部绑起来……。好好地忍耐了呢」
+		;TranslatedMark 「駄目そうだったらサードアイのひもで根元を縛ってあげようかと思っていたけど……。ちゃんと我慢できたわね」
+		PRINTFORML 
+		PRINTFORMW 「努力到现在了。…真了不起♥」
+		;TranslatedMark 「よく今まで頑張ったわ。…本当に偉いわよ♥」
+		PRINTFORML 
+		PRINTFORMW 这样说着，%ANAME(TARGET)%抚摸了%ANAME(MASTER)%的头，温柔地把%ANAME(MASTER)%推倒，将阴茎引导到了自己的阴唇处
+		;TranslatedMark そう言って%ANAME(TARGET)%は%ANAME(MASTER)%の頭を一撫でした後、身体を優しく押し倒しそのペニスを自らの秘裂へ導く
+		PRINTFORML 
+		PRINTFORML %ANAME(MASTER)%用恍惚的表情注视着跨坐上自己阴茎的主人的身姿
+		;TranslatedMark 自分に跨りペニスを握るご主人様の姿を、%ANAME(MASTER)%は恍惚とした表情で見つめる
+		PRINTFORML 
+		PRINTFORMW 这种交往开始多久了
+		;TranslatedMark この交わりが始まってどれほど経ったか
+		PRINTFORML 
+		PRINTFORML 在此期间，一直被禁止对心爱的主人服从和敬爱的证明——射精
+		;TranslatedMark その間、愛しいご主人様への服従と敬愛の証である射精をずっと禁じられてきた
+		PRINTFORML 
+		PRINTFORMW 现在，主人正试图自己去解开它。那是最幸福的了
+		;TranslatedMark それが今、ご主人様自らによって解かれようとしてるのだ。それが幸せでないはずが無かった
+		PRINTFORML 
+		PRINTFORMW 「……哟，不要那么着急吗。你看，%ANAME(MASTER)%的插进来了哦……嗯，嗯♥」
+		;TranslatedMark 「……くすくすっ、そんなに焦らないの。ほら、%ANAME(MASTER)%のが入っていくわよ……えいっ♥」
+		PRINTFORML 
+		PRINTFORMW %ANAME(TARGET)%像是迫切想要阴茎似的，慢慢吞入的动作一顿，深深地坐下，一口气把阴茎连根吞没
+		;TranslatedMark %ANAME(TARGET)%はペニスの亀頭を焦らすようにゆっくりとくわえ込もうとする動きを一転、腰を深く落としてペニスを一気に奥深くまで飲み込んだ
+		PRINTFORML 
+		PRINTFORMW 本来就很敏感，想射却射不出来的肉棒，怎么能忍受这个突如其来的刺激……
+		;TranslatedMark ただでさえ敏感になって出したくてたまらない肉棒が、この不意打ちに耐えられるはずも無く…
+		PRINTFORML 
+		PRINTFORMW 插入的瞬间，就在主人的体内最深处把压制了许久的精液大量地喷射而出
+		;TranslatedMark 挿入した瞬間に、焦らしに焦らされ溜まりきった精液をご主人様の奥深くに盛大に放流した
+		PRINTFORML 
+		PRINTFORMW 「啊啊啊啊♥♥很有干劲呢♥原来是那么想射出来的啊…。但是，不要再忍耐了哦…♥」
+		;TranslatedMark 「ああッッ♥♥　すごい勢いっ♥　そんなに出したかったのね…。でも、もうガマンしなくていいわよ…♥」
+		PRINTFORML 
+		PRINTFORMW 虽然刚射精，%ANAME(TARGET)%却淫猥地摆动着腰，给%ANAME(MASTER)%更多的快感
+		;TranslatedMark 射精したばかりだというのにも関わらず%ANAME(TARGET)%は淫猥に腰を振り、更なる快感を%ANAME(MASTER)%に与える
+		PRINTFORML 
+		PRINTFORML 之前一直忍耐的%ANAME(MASTER)%，也不会因为一次射精而满足
+		;TranslatedMark 我慢に我慢を重ねた%ANAME(MASTER)%もまた、たった一回の射精で満足するわけも無く
+		PRINTFORMW 把象征屈服和感谢的精液多次献给主人
+		;TranslatedMark 屈服と感謝の証である精液を主人に何度も何度も献上する
+		PRINTFORML 
+		PRINTFORMW 把肉棒狠狠插入到主人最敏感的地方。真是合拍的做爱
+		;TranslatedMark ご主人様のストロークに合わせて最も感じるポイントへ肉棒を打ちつける。実に息の合ったセックスだった
+		PRINTFORML 
+		PRINTFORMW 「……呵呵呵♥满脑子都是对我的感谢和喜悦的情绪。真可爱的孩子…♥」
+		;TranslatedMark 「……ふふっ♥　私への感謝と喜びの声で頭いっぱいね。本当に可愛い子…♥」
+		PRINTFORML 
+		PRINTFORMW 主人爱宠物，宠物也爱主人。互相爱慕，正是理想的关系
+		;TranslatedMark 主人はペットを愛し、ペットもまた主人を愛する。互いを想い合う、正に理想の関係だった
+		PRINTFORML 
+		PRINTFORMW 「啊啊♥%ANAME(MASTER)%啊…♥啊，啊！」
+		;TranslatedMark 「あっあっ♥　%ANAME(MASTER)%、%ANAME(MASTER)%ぁ…♥　あっ、ぁんっ！」
+		PRINTFORML 
+		PRINTFORML 不知从哪边开始，两个人两手相握，十指深深地交缠在一起
+		;TranslatedMark どちらからともなく、二人は指を深く絡ませあって手を繋ぐ
+		PRINTFORML 
+		PRINTFORMW 然后%ANAME(TARGET)%趴卧在%ANAME(MASTER)%的身上，用舌头缠绕着对方的嘴唇
+		;TranslatedMark そして%ANAME(TARGET)%は倒れこむように%ANAME(MASTER)%に身体を預け、舌を絡ませて互いの唇を貪っていく
+		PRINTFORML 
+		PRINTFORMW 绝对不分开。绝对不会离开。
+		;TranslatedMark 互いに互いを、絶対に離さない。絶対に逃がさないという意思を感じさせるまぐわいだった
+		PRINTFORML 
+		PRINTFORMW 「啊！再加把劲！在我身体里♥把%ANAME(MASTER)%的全部射进来吧♥♥」
+		;TranslatedMark 「ああっ！　もっとッ！　もっと私の中にっ♥　%ANAME(MASTER)%の全てを注いでぇッッ♥♥」
+		PRINTFORML 
+		PRINTFORMW 沉醉于与敬爱的主人做爱，之后一直持续到深夜……
+		;TranslatedMark 敬愛する主人とのセックスは、その後も夜遅くまで続いた……
+	ENDIF
+	PRINTFORML ・
+	PRINTFORML ・・
+	PRINTFORMW ・・・
+	PRINTFORML 
+	PRINTFORMW 「辛苦了，%ANAME(MASTER)%。…今天好好的舒服了呢。你很努力了呢……」
+	;TranslatedMark 「お疲れ様、%ANAME(MASTER)%。…今日は本当にキモチよかったわ。よく頑張ったわね……」
+	PRINTFORML 
+	PRINTFORMW %ANAME(TARGET)%在膝枕上看护着结束之后、疲惫不堪倒下的%ANAME(MASTER)%
+	;TranslatedMark 全てが終わり、疲れ果てて倒れた%ANAME(MASTER)%を、%ANAME(TARGET)%が膝枕で介抱している
+	PRINTFORML 
+	PRINTFORMW 疲惫不堪的%ANAME(MASTER)%，每次被主人温柔的手势抚摸头部时都会心怀感激
+	;TranslatedMark 疲れ果て満足に動けない状態の%ANAME(MASTER)%は、主人の優しい手つきで頭を撫でられる度に感謝を心で話す
+	PRINTFORML 
+	PRINTFORMW 「……这么累，一句怨言也没有。嘛，%ANAME(MASTER)%也最喜欢舒服的事了…♥」
+	;TranslatedMark 「……こんなにぐったりしてるのに、恨み言の一つも出ないなんて。まあ、%ANAME(MASTER)%もキモチいいことは大好きだものね…♥」
+	PRINTFORML 
+	PRINTFORMW 每当被枕在膝上抚摸，雾霭就开始弥漫在%ANAME(MASTER)%的意识中，昏昏欲睡……
+	;TranslatedMark 膝枕で撫でられる度、%ANAME(MASTER)%の意識に靄が掛かり始め、うつらうつらとしてくる……
+	PRINTFORML 
+	PRINTFORMW 「……已经困了呢。那我陪你睡吧。来，到这边来…」
+	;TranslatedMark 「……もう眠いのね。それじゃあ私が添い寝してあげる。ほら、こっちにいらっしゃい…」
+	PRINTFORML 
+	PRINTFORMW 就像搂住可爱的孩子一样，%ANAME(TARGET)%抱着%ANAME(MASTER)%一起上床……
+	;TranslatedMark 愛しい我が子をかき抱くように、%ANAME(TARGET)%は%ANAME(MASTER)%を抱きしめて一緒にベッドに入る……
+	PRINTFORML 
+	FONTSTYLE 1
+	PRINTFORMW 「晚安，%ANAME(MASTER)%。……明天也做些开心的事吧……♥」
+	;TranslatedMark 「おやすみなさい、%ANAME(MASTER)%。……また明日もキモチいいこと、しましょうね……♥」
+	FONTSTYLE 0	
+	PRINTFORML 	
+	PRINTFORML 
+	PRINTFORMW 
+	RESETCOLOR
+	PRINTFORML ——和深爱的主人的生活才刚刚开始——
+	;TranslatedMark ―― 愛する主人との生活は、まだ始まったばかりだ ――
+	PRINTFORMW 
+	PRINTFORML 
+	PRINTFORML 　　　　　　　　　　宠物END
+	;TranslatedMark ペットＥＮＤ
+	PRINTFORMW 
+	
+;主人以外で主人公がこいし、お燐、お空で無い場合
+ELSEIF !GROUPMATCH(MASTER, NAME_TO_CHARA("お燐"), NAME_TO_CHARA("お空"), NAME_TO_CHARA("こいし"))
+	PRINTFORML …
+	PRINTFORML ……
+	PRINTFORML ………
+	PRINTFORMW 「嗯…～、嗯……」
+	;TranslatedMark 「ん…～、んん……」
+	PRINTFORML
+	PRINTFORMW 早晨。醒来的%ANAME(MASTER)%为了不惊醒睡在旁边的%ANAME(TARGET)%，开始为她准备起床后的咖啡
+	;TranslatedMark 朝。目を覚ました%ANAME(MASTER)%は隣で眠る%ANAME(TARGET)%を起こさないように抜け出し、彼女のために寝起きの珈琲を準備し始める
+	PRINTFORML 
+	PRINTFORMW ――乱世结束后，%ANAME(MASTER)%和%ANAME(TARGET)%一起开始在地灵殿生活——
+	;TranslatedMark ――― 乱世が終わった後、%ANAME(MASTER)%と%ANAME(TARGET)%は一緒に地霊殿で暮らし始めた ―――
+	PRINTFORML 
+	PRINTFORMW 为了让繁忙的%ANAME(TARGET)%能够集中在管理旧地狱的工作上，从开始进行地灵殿的琐事开始，%ANAME(MASTER)%就自然而然地早起了
+	;TranslatedMark 多忙な%ANAME(TARGET)%が旧地獄を管理する業務に集中できるように、地霊殿の細事を行い始めてから%ANAME(MASTER)%は自然と早起きになった
+	PRINTFORML 
+	PRINTFORMW 咖啡特有的香味开始飘到房间的时候，%ANAME(TARGET)%醒了
+	;TranslatedMark 部屋に珈琲特有の香りが漂い始める頃、%ANAME(TARGET)%が目を覚ました
+	PRINTFORML 
+	PRINTFORMW 「嗯…～、嗯、嗯……。早上好…。……一直以来谢谢你，%ANAME(MASTER)%…♥」
+	;TranslatedMark 「ふあ…～っ、んにゅ……。おはようございます…。……いつもありがとう、%ANAME(MASTER)%…♥」
+	PRINTFORML 
+	PRINTFORMW %ANAME(TARGET)%微笑看着%ANAME(MASTER)%那忙碌的样子，感受到让她稍微睡一会儿的关心
+	;TranslatedMark 忙しい彼女をちょっとでも寝させてあげようとする心遣いを、%ANAME(TARGET)%とニンマリとした微笑で読み取る
+	PRINTFORML 
+	PRINTFORMW 「那么，叫大家吃早饭吧。%ANAME(MASTER)%吃完饭后，请到我的书房来」
+	;TranslatedMark 「それじゃあ、皆を呼んで朝ごはんにしましょう。%ANAME(MASTER)%は食事の後、私の書斎に来てくださいね」
+	PRINTFORML 
+	PRINTFORML ・
+	PRINTFORML ・・
+	PRINTFORMW ・・・
+	PRINTFORML
+	PRINTFORMW 早饭后，磷、空等宠物们开始了各自的工作
+	;TranslatedMark 朝食の後、お燐やお空をはじめペット達は各々自分の仕事を始めた
+	PRINTFORML 
+	PRINTFORMW 把那个书房的报告书传达给旁边的%ANAME(TARGET)%。平时坐在桌子周围听，今天却坐在旁边紧紧贴着身体
+	;TranslatedMark その報告を書斎のソファーで隣にいる%ANAME(TARGET)%に伝える。普段はデスクに座って聞いているのに、今日は隣に座りぴとっ、と身体をくっつけてくる
+	PRINTFORML 
+	PRINTFORMW 「……『今天的工作顺利吗』？？呵呵。其实今天的工作昨天就已经做完了」
+	;TranslatedMark 「……『今日の仕事はいいの？』って？　ふふ。実は今日の分の仕事は昨日のうちに片付けておいたんです」
+	PRINTFORML
+	PRINTFORMW …是这样吗。怪不得昨天特别忙,%ANAME(MASTER)%明白了
+	;TranslatedMark …そういうことか。道理で昨日は特に忙しそうにしていたわけだ。　と%ANAME(MASTER)%は合点がいった
+	PRINTFORML
+	PRINTFORMW 「就是这样。所以今天两个人可以悠闲地度过哦♥」
+	;TranslatedMark 「そういうことです。だから今日は、二人でゆっくり過ごせますよ♥」
+	PRINTFORML
+	PRINTFORMW 不是地灵殿的主人，而是一个恋爱少女的脸，%ANAME(TARGET)%对%ANAME(MASTER)%微笑
+	;TranslatedMark 地霊殿の主としてではなく、一人の恋する少女の顔で、%ANAME(TARGET)%は%ANAME(MASTER)%に微笑みかける
+	PRINTFORML
+	PRINTFORMW 看到那个微笑的话，%ANAME(MASTER)%就会端正坐姿，把膝盖作为枕头提供给%ANAME(TARGET)%
+	;TranslatedMark その微笑を受け取ると、%ANAME(MASTER)%は座り方を正し、膝を枕として%ANAME(TARGET)%に提供する
+	PRINTFORML
+	PRINTFORMW 「呵呵，%ANAME(MASTER)%的读心也变厉害了呢♪那就失礼了………哈哈♥」
+	;TranslatedMark 「ふふっ、%ANAME(MASTER)%も読心が上手くなってきましたね♪　それでは失礼しますね、………はふぅっ♥」
+	PRINTFORML
+	PRINTFORMW %ANAME(TARGET)%看起来很开心地笑着，仰面躺卧在%ANAME(MASTER)%的膝盖上
+	;TranslatedMark %ANAME(TARGET)%は実に嬉しそうに緩んだ笑顔で、%ANAME(MASTER)%の膝枕にこてん、と仰向けに身を任せる
+	PRINTFORML
+	PRINTFORMW 温柔地抚摸着那柔软的头发，眯着眼睛，嗯…像小猫一样可爱的吐出一口气
+	;TranslatedMark そのふわふわな髪を優しく撫でると、目を細めて、んんっ…、と子猫のような可愛らしい吐息が漏れる
+	PRINTFORML
+	PRINTFORMW 「……"平时在大家面前这么的努力，这种时候希望能尽情的撒娇"，是吗。…呵呵，那我就不客气了♥」
+	;TranslatedMark 「……『普段はみんなの前で主として頑張ってる分、こういう時くらい好きなだけ甘えて欲しい』、ですか。…ふふ、じゃあ遠慮はしませんよ♥」
+	PRINTFORML
+	PRINTFORMW 能够看到地底妖怪们所畏惧的%ANAME(TARGET)%的这种姿态的也只有%ANAME(MASTER)%了吧
+	;TranslatedMark 地底の妖怪たちに恐れられる存在である%ANAME(TARGET)%の、こんな姿を見ることができるのは%ANAME(MASTER)%くらいだろう
+	PRINTFORML
+	PRINTFORML %ANAME(MASTER)%觉得这种事很开心
+	;TranslatedMark %ANAME(MASTER)%はそのことをとても嬉しく思っていた
+	PRINTFORML
+	PRINTFORMW 不只是一起住。是真的感受到了成为%ANAME(TARGET)%和家人一员的温暖
+	;TranslatedMark ただ一緒に住んでいるというだけではない。真に%ANAME(TARGET)%と家族の一員に成れたような温かさを感じていた
+	PRINTFORML
+	PRINTFORMW 「……感觉到了吗？%ANAME(MASTER)%。……我的热情，我的心跳……」
+	;TranslatedMark 「……感じますか？　%ANAME(MASTER)%。……私の熱、私の鼓動……」
+	PRINTFORML
+	PRINTFORMW %ANAME(TARGET)%拿起%ANAME(MASTER)%的手按在自己的胸口上
+	;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の手を取って自らの胸に押し当てる
+	PRINTFORML
+	PRINTFORMW 扑通、扑通，这样的小小的但坚定的心跳和生命的温暖，像是爱情的证明一样传达给了%ANAME(MASTER)%
+	;TranslatedMark トクン、トクン、という小さいながら確かな鼓動と生命の温かさが、愛情の証のように%ANAME(MASTER)%に伝わっていく
+	PRINTFORML
+	PRINTFORMW 「……我的想法好像好好传达了呢。很开心……♥」
+	;TranslatedMark 「……私の想いはちゃんと伝わってくれてるみたいですね。嬉しいです……♥」
+	PRINTFORML
+	PRINTFORMW %ANAME(TARGET)%仰着脸把手伸向%ANAME(MASTER)%的脸。与此同时，%ANAME(MASTER)%的脸也接近了%ANAME(TARGET)%
+	;TranslatedMark %ANAME(TARGET)%は仰向けのまま%ANAME(MASTER)%の顔に手を伸ばす。それに合わせて%ANAME(MASTER)%も%ANAME(TARGET)%に顔を近づける
+	PRINTFORML
+	PRINTFORMW 然后%ANAME(TARGET)%微微起身，抱住了%ANAME(MASTER)%的头
+	;TranslatedMark そして%ANAME(TARGET)%はわずかに身を起こし、%ANAME(MASTER)%の頭を抱きしめる
+	PRINTFORML
+	FONTSTYLE 1
+	PRINTFORMW 「%ANAME(MASTER)%……非常喜欢。…………今后也请一直支持我…♥」
+	;TranslatedMark 「%ANAME(MASTER)%……大好きです。…………これからもずっと、私を支えてください…♥」
+	FONTSTYLE 0
+	PRINTFORML 
+	PRINTFORML
+	PRINTFORMW 
+	RESETCOLOR
+	PRINTFORML ——宠物们永远守护着这样和睦的两个人——
+	;TranslatedMark ―― そんな仲睦まじい二人を、ペット達は末永く見守っていた ――
+	PRINTFORMW 
+	PRINTFORML 
+	PRINTFORML 　　　　　　　　　　甜蜜END
+	;TranslatedMark ラブラブＥＮＤ
+	PRINTFORMW 
+	
+ENDIF
+RETURN 1
+
+@KOJO_DEAD_ENDING_K61
+#DIM さとり
+さとり = NAME_TO_CHARA("さとり")
+
+SETCOLOR カラー_男
+PRINTL
+;さとりが主人で主人公がこいし、お燐、お空で無い場合
+IF TALENT:所有者&&GETBIT(TALENT:TARGET:淫乱系, 素質_淫乱_淫乱)&& !GROUPMATCH(MASTER, NAME_TO_CHARA("お燐"),NAME_TO_CHARA("お空"), NAME_TO_CHARA("こいし"))
+PRINTFORML 在%ANAME(MASTER)%的葬礼上
+PRINTFORMW
+PRINTFORML %ANAME(MASTER)%的主人古明地觉举办了重大的葬礼来纪念%ANAME(MASTER)%
+PRINTFORMW
+PRINTFORML 她的宠物们也一并来为%ANAME(MASTER)%送葬
+PRINTFORMW
+PRINTFORML 「首先呢，作为一个优秀的宠物，感谢你在幻想乡动荡的这段时期陪伴呢」
+PRINTFORMW
+PRINTFORML 「在危难之时成功救地灵殿于水火之中」
+PRINTFORMW
+PRINTFORML 「在短暂的和平之中，你也给地灵殿的大家带去不少欢乐，阿燐阿空也没少受你关照啊」
+PRINTFORMW
+PRINTFORML 「总觉得开始有些怀念你活着的时光了」
+PRINTFORMW
+	IF CFLAG:さとり:好感度 < 10000
+	PRINTFORML 「那么是时候离开了，还得找下一个宠物啊…就当作是对你的纪念……」
+	PRINTFORMW
+	PRINTFORML %ANAME(TARGET)%从士兵中挑选了一个长得还可以的陌生男子
+	PRINTFORMW
+	PRINTFORML 「就你了，新的宠物，从现在起，你就叫做%ANAME(MASTER)%吧」
+	PRINTFORMW
+	PRINTFORML 被指到的男子愣了一下，立马兴奋地答应了
+	PRINTFORMW
+	PRINTFORML 「时候差不多了，阿燐阿空该走了，对了还有%ANAME(MASTER)%，晚上可要努力啊，别侮辱了你的新名字，不要连阿琳阿空都败下阵来哦~」
+	PRINTFORMW
+	PRINTFORML 新的%ANAME(MASTER)%与%ANAME(TARGET)%一行人离开了这个墓主连名字都失去了的墓地
+	PRINTFORMW
+	ELSE
+	;悼念台词
+	PRINTFORML 「这种事果然还是会来啊…」
+	PRINTFORMW
+	PRINTFORML 「…阿燐阿空你们先回去」
+	PRINTFORMW
+	PRINTFORML …
+	PRINTFORML …
+	PRINTFORML …
+	PRINTFORMW
+	PRINTFORML 「那么，现在就我们两个人了…」
+	PRINTFORMW
+	PRINTFORML %ANAME(TARGET)%注视着墓碑，双手紧紧抓住自己的身体，露出了一副难耐的神情
+	PRINTFORMW 
+	PRINTFORML 「啧…一想起你，身体又有点燥热起来了」
+	PRINTFORMW
+	PRINTFORML 「区区宠物竟敢让我有这种感觉」
+	PRINTFORMW
+	PRINTFORML 「你擅自走了，我要去向谁发泄这份欲望啊！」
+	PRINTFORMW
+	PRINTFORML %ANAME(TARGET)%的声音变得有些抽噎了起来
+	PRINTFORMW
+	PRINTFORML 「为什么…区区宠物…明明只是区区宠物…」
+	PRINTFORMW
+	PRINTFORML 「%ANAME(MASTER)%…你的名字我会铭刻在心的…」
+	PRINTFORMW
+	PRINTFORML 「那么，再见了，空和琳她们还在等我呢」
+	PRINTFORMW
+	PRINTFORML …
+	PRINTFORML …
+	PRINTFORML …
+	PRINTFORMW
+	PRINTFORML 即使是这样华丽的坟墓，也终将随着时光的流逝烟消雾散，仅剩下一块石碑
+	PRINTFORMW
+	PRINTFORML 而直到石碑上的字都模糊不清之时
+	PRINTFORMW
+	PRINTFORML  %ANAME(TARGET)%仍然在每年%ANAME(MASTER)%忌日这天找到他的坟来扫墓
+	PRINTFORMW
+	PRINTFORML 「我又来了哦,不过这次就我一个呢，恋恋又不知道去哪里玩了」
+	PRINTFORMW
+	PRINTFORML 「阿燐阿空需要处理地灵殿的事情，所以就我一个人来了，会不会显得很没诚意呢」
+	PRINTFORMW
+	PRINTFORML 「在那之后也没有再收过宠物呢」
+	PRINTFORMW
+	PRINTFORML 「虽然说现在的性用品很发达,平时一个人也能解决这些事情」
+	PRINTFORMW
+	PRINTFORML 「但偌大的地灵殿现在总是显得很死寂呢,我打算再收几个宠物你觉得怎么样呢」
+	PRINTFORMW
+	PRINTFORML 「哈哈，当然是开玩笑啦，这么久过去了，早就习惯了」
+	PRINTFORMW
+	PRINTFORML 「不过这个碑也立了这么久了，字迹都看不清了,下次给你翻修一下怎么样」
+	PRINTFORMW
+	PRINTFORML 「…」
+	PRINTFORMW 
+	PRINTFORML 「该走了,那么,祝你忌日愉快」
+	PRINTFORMW
+	ENDIF
+RESETCOLOR
+ENDIF
+RETURN 1					
+

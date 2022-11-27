@@ -1,0 +1,99 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_GIRL_ESCAPING_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_GIRL_ESCAPING_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_GIRL_ESCAPING(対象)
+#DIM 対象
+
+PRINTFORML 在街上走着、有一個少女從巷子拐角飛奔了過来
+PRINTFORML 感覚少女的樣子有些不対勁的%ANAME(対象)%打算問一問発生了什麼
+PRINTFORMW 這時聽到了靠近這辺的男人們的怒喊声和脚歩声
+PRINTFORML
+CALL ASK_MULTI("藏起少女", "捉住少女", "不管")
+
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORML 好像正在被追趕着
+		PRINTFORML %ANAME(対象)%把她藏了起来
+		PRINTFORML 対着詢問少女的去向的追過来的男人們、指了個錯誤的方向
+		IF !RAND:3 && MONEY > 0
+			PRINTFORML 相信了這個的他們跑了過去
+			PRINTFORML 喊道已経沒事了、但是少女已経不見了
+			PRINTFORML 正驚訝于少女是在之前逃走了麼的時候、発現錢包不見了
+			PRINTFORML 看来是被剛才的少女偸走的……
+			LOCAL = MIN(MONEY, 3000)
+			MONEY -= LOCAL
+			CALL ICPRINT(@"失去了<{LOCAL}>金", "L", カラー_注意)
+			RETURN 1
+		ELSEIF IS_MALE(対象) || (HAS_PENIS(対象) && RAND:2) || (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+			PRINTFORML 相信了這個的他們跑了過去
+			PRINTFORML 告訴少女已経沒事了
+			PRINTFORML 她説道非常感謝幇助想要給出回報
+			PRINTFORML 
+			CALL ASK_MULTI("要去金錢", "要求肉償", "拒絶")
+			SELECTCASE RESULT
+				CASE 0
+					PRINTFORML 説道想要錢
+					PRINTFORML 想到会有這種事的少女、递来了一個包裹
+					CALL ICPRINT("獲得了<3000>金", "L", カラー_注意)
+					MONEY += 3000
+				CASE 1
+					PRINTFORML 説道想要她
+						IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+							PRINTFORML 尽管多少有些惊讶，但想到会有这种事的少女，顺从地被%ANAME(対象)%带走了
+							PRINTFORML 
+							PRINTFORMW 少女美丽的胴体，与%ANAME(対象)%的身体重叠在一起
+							PRINTFORMW 虽然过去没有多少关于这方面的经验，但少女的天赋不错，只是稍微点拨了一下，就立马对这种女生之间的事情熟练起来了
+							PRINTFORMW 不仅如此，本应掌握在%ANAME(対象)%手中的主导权不知何时被抢走了，少女脸上闪过着一丝狡黠的笑容，翻身将%ANAME(対象)%压在了下面
+							PRINTFORMW 面对这预料之外的发展，%ANAME(対象)%得到了不少与平时不同的快感……
+							CALL FUCK(対象, "性技, 性交, Ｃ, Ｂ ,Ｍ ,百合", "接吻喪失", 0, "小偷少女的嘴唇", "", "", "喪失_和姦")
+						ENDIF
+					PRINTFORML 想到会有這種事的少女、順從地被%ANAME(対象)%帯走了
+					PRINTFORML 
+					PRINTFORMW 她那華奢的身体、在%ANAME(対象)%身上躍動着
+					PRINTFORMW 看来少女很有天賦、只是稍微愛撫一下就立刻淫蕩起来、接受了%ANAME(対象)%
+					PRINTFORMW 表情漸漸変得像雌性一樣、自己抱緊了%ANAME(対象)%撒嬌求歡
+					PRINTFORMW 之後連續疼愛了変得完全順從的少女好幾次……
+					CALL FUCK(対象, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "小偷少女的嘴唇", "", "小偷少女的膣穴", "喪失_和姦")
+				CASE 2
+					PRINTFORML 説道不需要回報
+					PRINTFORML 少女非常驚訝、発現%ANAME(対象)%的推辞很堅決後離開了
+			ENDSELECT
+		ELSE
+			PRINTFORML ……但是、少女不小心発出了声音、被発現了
+			PRINTFORML 衝動的男人們襲撃了過来
+			PRINTFORML %ANAME(対象)%和少女雖然想要逃走、但是卻被一起抓住了……
+			PRINTFORML 
+			PRINTFORMW 在某個地下室、%ANAME(対象)%正被侵犯着
+			PRINTFORMW 他們把%ANAME(対象)%当做了上等的性奴、不停地用来慰安自己
+			PRINTFORML 現在也被一個男人膣内射精了、%ANAME(対象)%全身顫抖着到達了絶頂
+			PRINTFORMW %STR_BODY("陰唇：Ｖ挿入：中出し", 対象)%陣陣收縮、滴着精液迎接着下一次插入
+			CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, 接吻, 口淫, 緊縛, 被虐, Ｖ性交, Ａ性交, 輪姦", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精", GET_SPERM_ID("地痞"), @"地痞的\@RAND:2 ? 肉棒 # 嘴唇\@", "地痞", "", "喪失_輪姦")
+			PRINTFORML 
+			PRINTFORML 被狠狠地玷汚之後、%ANAME(対象)%總算找到了空隙和少女一起逃出去了            
+		ENDIF
+	CASE 1
+		PRINTFORML 応該是小偸吧
+		PRINTFORML 突然抓住少女、交給了男人們
+		CALL ICPRINT("獲得了抓住少女的回禮<3000>金", "L", カラー_注意)
+		MONEY += 3000
+	CASE 2
+		PRINTFORML 和自己沒有関係
+		PRINTFORML 少女跑過去之後、沒過多久有一群凶神悪煞的男人們追了上去
+ENDSELECT
+
+RETURN 1

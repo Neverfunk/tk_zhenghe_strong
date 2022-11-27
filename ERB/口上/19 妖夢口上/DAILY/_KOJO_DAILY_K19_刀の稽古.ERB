@@ -1,0 +1,234 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K19_TRAINING_RATE(対象)
+#DIM 対象
+RETURN 30
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K19_TRAINING_DECISION(対象)
+#DIM 対象
+
+;対象の武闘よりこちらの武闘の方が高いこと
+SIF ABL:MASTER:武闘 <= ABL:対象:武闘
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K19_TRAINING_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K19_TRAINING(対象)
+#DIM 対象
+
+IF GROUPMATCH(MASTER, NAME_TO_CHARA("幽幽子"), NAME_TO_CHARA("紫"))
+	LOCALS:0 = %ANAME(MASTER)%大人
+ELSE
+	LOCALS:0 = %ANAME(MASTER)%桑
+ENDIF
+
+PRINTFORMW %ANAME(MASTER)%工作的時候、%ANAME(対象)%来訪了
+SELECTCASE KDVAR:対象:妖夢_刀の稽古
+	CASE 0
+		PRINTFORMW 「%LOCALS:0%、有空的話一起来剣術練習吧？」
+		PRINTFORMW 「和比自己強的人交手、能有助自己進步」
+		PRINTFORMW 妖夢像平時一樣、面無表情
+	CASE 1
+		PRINTFORMW 「那個……要、再一起、『練習』嗎……？」
+		PRINTFORMW 「和比自己強的人交手……那個、能有助自己進步……」
+		PRINTFORMW 妖夢双眼湿潤、臉頰通紅……
+ENDSELECT
+PRINTFORML 那麼、要怎麼辦……
+PRINTL
+CALL ASK_YN("奉陪", "現在很忙")
+
+IF RESULT == 1
+	SELECTCASE KDVAR:対象:妖夢_刀の稽古
+		CASE 0
+			PRINTFORMW 「唔……這樣啊」
+			PRINTFORMW 「那麼沒有辦法了……我自己一個練習吧」
+			PRINTFORMW %ANAME(対象)%離開了……
+		CASE 1
+			PRINTFORMW 「這……這樣啊」
+			PRINTFORMW 「……以後再請、好好痛愛我吧？」
+			PRINTFORMW %ANAME(対象)%依依不捨地離開了……
+	ENDSELECT
+	RETURN 1
+ENDIF
+PRINTFORMW %ANAME(対象)%実力変強的話、我軍的戦力也能得到強化
+PRINTFORMW 答応後、%ANAME(対象)%深深地低頭
+SELECTCASE KDVAR:対象:妖夢_刀の稽古
+	CASE 0
+		PRINTFORMW 「非常感謝你、那麼快点開始吧、拜託你了」
+	CASE 1
+		PRINTFORMW 「非常感謝你。那麼……拜託你了」
+		PRINTFORMW 
+ENDSELECT
+PRINTFORMW %ANAME(MASTER)%帯%ANAME(対象)%到空地、做了充足的練習……
+CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND(1, 3), 1)
+CALL TRAIN_AUTO_ABLUP(対象)
+PRINTFORML
+PRINTFORMW 「呼、非常感謝你」
+PRINTFORMW 練習結束後、%ANAME(対象)%再次、深深地低下頭……
+IF HAS_PENIS(MASTER)
+	PRINTFORMW ……充満汗水、膚色紅潤、除了給人精力充沛的印象意外、亦令人感到色気
+	PRINTFORML 此時的%ANAME(MASTER)%有一個大胆的想法……
+	PRINTFORML
+	CALL ASK_YN("対少女出手", "什麼也不做")
+	IF RESULT == 1
+		SELECTCASE KDVAR:対象:妖夢_刀の稽古
+			CASE 0
+				PRINTFORMW 不不不、怎能対陪伴練習的対手出手呢……
+				PRINTFORMW 向疑惑的%ANAME(対象)%説什麼事都沒有後、%ANAME(MASTER)%離開了這個場所
+			CASE 1
+				PRINTFORMW 不、今天沒有興趣做這種事……
+				PRINTFORMW %ANAME(対象)%看起来有点不満
+		ENDSELECT
+		RETURN 1
+	ENDIF
+	SELECTCASE KDVAR:対象:妖夢_刀の稽古
+		CASE 0
+			PRINTFORMW 「誒？　那、那個、等等？」
+			PRINTFORMW 如此毫無防備的樣子根本就在誘惑我吧、是%ANAME(対象)%的錯哦……
+			PRINTFORMW 拉着%ANAME(対象)%的手、強行帯到自己的房間
+			PRINTFORML 然後%ANAME(MASTER)%慢慢地採集這裸盛開的花朵……
+			PRINTFORML
+			PRINTDATAW
+				DATALIST
+					DATAFORM 「啊……啊啊、哈……！」
+					DATAFORM %ANAME(MASTER)%搖動着腰部、%ANAME(対象)%無法圧抑地発出声音
+					DATAFORM 「求、求求你、了、更多……！」
+					DATAFORM %ANAME(MASTER)%的技術令%ANAME(対象)%在短時間内屈服了……
+				ENDLIST
+				DATALIST
+					DATAFORM 「唔嗚……唔唔、唔呣……！」
+					DATAFORM 堵住%ANAME(対象)%的双唇、搖動着腰部抽插着。%ANAME(対象)%想将%ANAME(対象)%推開、但身体卻無法拒絶
+					DATAFORM %ANAME(対象)%在短時間内陷落、主動伸出舌頭交纏在一起……
+				ENDLIST
+				DATALIST
+					DATAFORM 「啾嚕……唔、咻唔……唔嗯……」
+					DATAFORM 從%ANAME(対象)%的身体得到充分満足後、少女主動地将沾満\@ TALENT:対象:処女 ? 処女血和 # \@愛液的肉棒放進嘴裡舔干浄
+					DATAFORM 身体被刻下快感的%ANAME(対象)%、細心地奉仕肉棒、並用手指责弄被調教好的小穴……
+				ENDLIST
+				DATALIST
+					DATAFORM 「啊啊……！　不可以、這種事、啊、啊啊……！」
+					DATAFORM 用口舔舐%ANAME(対象)%的陰部、滔滔不絶地溢出的令蜜穴響起了水声
+					DATAFORM %ANAME(対象)%拒絶地想将%ANAME(MASTER)%的頭推開、但卻沒有気力
+					DATAFORM %ANAME(対象)%被用口好好痛愛後、高潮了幾次後、已経準備好的小穴学会了肉棒的味道……
+				ENDLIST
+				DATALIST
+					DATAFORM 「嗯嗯、好……卑鄙、這種……！」
+					DATAFORM %ANAME(MASTER)%拘束着%ANAME(対象)%的双手、然後慢慢地、温柔地、用手指在%ANAME(対象)%身体間来回愛撫
+					DATAFORM 態度剛強的%ANAME(対象)%臉色紅潤、不時発出忍耐的吐息
+					DATAFORM 這副態度隨着%ANAME(MASTER)%精心愛撫、%ANAME(対象)%変得開始焦躁了……
+				ENDLIST
+				DATALIST
+					DATAFORM 「啊……哈啊、啊啊……啊啊啊……！」
+					DATAFORM 被肉棒貫穿小穴了的%ANAME(対象)%一開始感到非常厭悪、経過兩三次高潮後、沒有再説出不満的話語了
+					DATAFORM 而且、還主動搖動着腰追求快感
+					DATAFORM 為了奨勵這個献身的態度，%ANAME(MASTER)%由下向上猛烈突刺、令%ANAME(対象)%格外大声地淫叫……
+				ENDLIST
+				DATALIST
+					DATAFORM 「不要……至少、那個、先洗個澡……嗯！」
+					DATAFORM %ANAME(MASTER)%用舌頭将%ANAME(対象)%的腋下、腹部、脖子、股間的汗水舔干浄、少女的体香和汗水微微的香気令%ANAME(MASTER)%感到満足
+					DATAFORM 感到強烈羞恥感的%ANAME(対象)%変得臉紅耳赤
+					DATAFORM 「哈啊……嗯、啊啊……！」
+					DATAFORM 羞恥感慢慢演変成快感、令%ANAME(対象)%的秘穴変得充分湿潤、%ANAME(MASTER)%将少女的蜜穴貫穿了……
+				ENDLIST
+			ENDDATA
+			PRINTFORML
+			PRINTFORMW 「哈ー……哈……哈……」
+			PRINTFORMW 大概是用尽体力了吧、完事後、%ANAME(対象)%筋疲力尽地倒下了
+			PRINTFORMW 那身体泛起紅潮、沾満了汗水、\@ TALENT:対象:処女 ? 処女的血和白濁液体混在一起 # 白濁液体 \@從秘部流出
+			PRINTFORMW 「非常……感謝你……♥」
+			PRINTFORMW 之後用湿毛巾幇%ANAME(対象)%擦着身体時、%ANAME(対象)%自言自語地嘟囔着
+			PRINTFORMW 在経過調教後、%ANAME(対象)%変得従順了……
+			TALENT:対象:自制心 = 0
+			TALENT:対象:貞操観念 = 0
+		CASE 1
+			PRINTFORMW 「啊……那個、今天也拜託你了……」
+			PRINTFORMW 「請好好痛愛%ANAME(対象)%吧……♥」
+			PRINTFORMW 牽着%ANAME(対象)%的手。少女沒有做任何抵抗
+			PRINTFORMW 帯到自己的房間後、%ANAME(MASTER)%開始仔細撫摸少女的身体……
+			PRINTFORML
+			PRINTDATAW
+				DATALIST
+					DATAFORM 「啊……♥　啊、哈啊、啊啊啊ー……♥」
+					DATAFORM %ANAME(MASTER)%慢慢搖動着腰、%ANAME(対象)%発出了甜美的声音
+					DATAFORM 「啊、哈、嗯、啊啊♥　啊啊啊嗯♥」
+					DATAFORM 外表看起来清純的少女現在卻高声淫叫、扭動着身体交合……
+				ENDLIST
+				DATALIST
+					DATAFORM 「咻唔……♥　嗯啾……嗯……♥」
+					DATAFORM 堵住%ANAME(対象)%的双唇、%ANAME(対象)%亦作出回応、舌頭交纏在一起
+					DATAFORM 在房間内響起了互相交換唾液的声音以及低沈的呼吸声……
+				ENDLIST
+				DATALIST
+					DATAFORM 「咻噜……咕姆、嘞噜、嘞嗯……嗯♥」
+					DATAFORM 「ろうれふふぁ、ひょうふに、れきてまふふぁ……？」
+					DATAFORM %ANAME(対象)%用嘴為教給身体快楽的肉棒進行清潔
+					DATAFORM %ANAME(対象)%用%ANAME(MASTER)%所教授的技術為%ANAME(MASTER)%帯来了強烈快感……
+				ENDLIST
+				DATALIST
+					DATAFORM 「啊哈……♥　啊♥　啊、啊、啊啊……♥」
+					DATAFORM 「更多、再吸更多%ANAME(対象)%的汁……啊哈♥」
+					DATAFORM 用口舔舐%ANAME(対象)%的陰部、滔滔不絶地溢出的令蜜穴響起了水声
+					DATAFORM %ANAME(対象)%為了得到更多快感将%ANAME(MASTER)%的頭用手按住
+					DATAFORM 在用口痛愛、経過幾次高潮後、完全準備好的小穴、記住了%ANAME(MASTER)%肉棒的形状……
+				ENDLIST
+				DATALIST
+					DATAFORM 「真是的……就算沒有這種東西、都不会抵抗……啊哈啊♥」
+					DATAFORM %ANAME(MASTER)%拘束着%ANAME(対象)%的双手、然後慢慢地、温柔地、用手指在%ANAME(対象)%身体間来回愛撫
+					DATAFORM 被綁着也不是不可以、%ANAME(対象)%的瞳孔中浮現出心形
+					DATAFORM %ANAME(MASTER)%精心愛撫着、令%ANAME(対象)%変得焦躁了……
+				ENDLIST
+				DATALIST
+					DATAFORM 「啊、啊♥　好舒服、舒服、好舒服啊♥」
+					DATAFORM 有着淫乱素質的%ANAME(対象)%完全沈醉於性交的快感中
+					DATAFORM 主動騎在%ANAME(MASTER)%身上、為尋求更高的快楽自己動起腰来
+					DATAFORM 「啊哈、啊♥　来了、舒服的要来了♥　啊 啊 啊、啊啊啊啊ー♥」
+					DATAFORM %ANAME(MASTER)%由下向上猛烈突刺、令%ANAME(対象)%格外大声地淫叫……
+				ENDLIST
+				DATALIST
+					DATAFORM 「不……♥　請先去洗個澡吧……唔♥　……嗯♥」
+					DATAFORM %ANAME(MASTER)%用舌頭将%ANAME(対象)%的腋下、腹部、脖子、股間的汗水舔干浄、少女的体香和汗水微微的香気令%ANAME(MASTER)%感到満足
+					DATAFORM %ANAME(対象)%感到羞恥的同時、亦感覚也不坏、完全沒有感到厭悪
+					DATAFORM 「這樣的話、我也要、反撃了……、啾嚕、咕嗚……♥」
+					DATAFORM %ANAME(対象)%開始反撃、将熱騰騰充満汗水的肉棒含到口中
+					DATAFORM 二人就這樣、互相品嚐対方的気味和味道……
+				ENDLIST
+			ENDDATA
+			PRINTFORML
+			PRINTFORMW 「唔咻……嗚嚕……唔唔……♥」
+			PRINTFORMW 完事後、%ANAME(対象)%将%ANAME(MASTER)%的肉棒細心舔舐
+			PRINTFORMW %ANAME(MASTER)%受到精心的奉仕に、原本萎縮的肉棒回復原本的堅挺状態
+			PRINTFORMW 「嚕……♥　哼哼、又変大了、請再好好地痛愛我吧♥」
+			PRINTFORMW 平時如此認真的%ANAME(対象)%、在另一方面卻意外地奔放嗎……
+			PRINTFORMW 苦笑一下後、%ANAME(MASTER)%再次将少女推倒了……
+	ENDSELECT
+	CFLAG:対象:従属度 += 200
+	CALL FUCK(対象, "Ｃ, Ｖ, Ｂ, 欲望, 奉仕, 性交, 性技, 精愛, 苦痛快楽, 被虐, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_ID(MASTER), @"%ANAME(MASTER)%の\@ RAND:2 ? 肉棒 # 唇\@", ANAME(MASTER), "", "調教")
+	SIF !RAND:5
+		TALENT:対象:解放 = 1
+	SIF !RAND:4
+		TALENT:対象:チョロイン = 1
+	KDVAR:対象:妖夢_刀の稽古 = 1
+ENDIF
+
+RETURN 1

@@ -1,0 +1,117 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_GOBLIN_THIEF_DANGER_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_GOBLIN_THIEF_DANGER_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_GOBLIN_THIEF_DANGER(対象)
+#DIM 対象
+PRINTFORML 探索領地時、聽到了有小鬼出沒的傳聞
+PRINTFORML 據說有地方正因為被盜而困擾……
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "知略"))
+PRINTFORML
+CALL ASK_MULTI("協助捜索", "不管")
+
+IF RESULT == 1
+	PRINTFORML 只是困擾的話、就是沒什麼大損失吧
+	PRINTFORML 決定放任不理
+	RETURN 1
+ENDIF
+
+PRINTFORML 有困擾就不能忽視
+PRINTFORML %ANAME(対象)%設下了陷阱、対小鬼窮追不捨
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+
+IF LIMIT(ABL:対象:知略, 50, 100) > RAND:100
+	IF IS_MALE(対象) || !CONFIG:203
+		PRINTFORMW 成功抓到了小鬼！
+		PRINTFORML 他們被偷的東西都被存放在巣穴之內
+		PRINTFORML 還給失主之後、得到了一些報酬……
+		CALL PRINT_ADD_EXP(対象, "知略経験値", 5 + RAND:5)
+		CALL ICPRINT("得到了<3000>金", "L", カラー_注意)
+		MONEY += 3000
+		RETURN 1
+	ELSE
+		PRINTFORMW 成功抓到了小鬼！
+		PRINTFORML 他們被偷的東西都被存放在巣穴之內
+		PRINTFORMW 在帶著東西離開之前、%ANAME(対象)%看著小鬼的肉棒思索了一會
+		PRINTFORML
+		PRINTFORML 巣穴中傳來小鬼的哭喊與女人狂野的笑聲
+		PRINTFORML %ANAME(対象)%將所有小鬼束縛住之後、對他們進行了野蠻的榨取
+		PRINTFORML 對小鬼的求饒毫無反應、只是跨坐在小鬼身上不停上下活動著腰
+		PRINTFORML 甚至還將兩名小鬼拖到一起、讓他們的肉棒同時在%STR_BODY("膣：Ｖ挿入：中出し", 対象)%和%STR_BODY("アナル：Ａ挿入：絶頂", 対象)%里抽插、小鬼們的求饒逐漸停止、只剩下粗重的喘息
+		PRINTFORML 他們已經完全屈服于、被強迫责弄和被給予的快感
+		PRINTFORML 汗珠從%STR_BODY("乳首：欲情", 対象)%滑落、滴在了小鬼吐出的舌頭上
+		PRINTFORML %ANAME(対象)%俯下身讓%STR_BODY("乳首：欲情", 対象)%塞進身下小鬼的嘴裏作爲獎賞
+		PRINTFORMW 在所有小鬼的精液都被榨取完之後、%ANAME(対象)%才帶著失物離開了這裏、只留下昏迷了的小鬼們
+		PRINTFORML 還給失主之後、得到了一些報酬……
+		CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精", GET_SPERM_ID("小鬼"), @"小鬼\@RAND:2 ? 肉棒 # 嘴唇\@", "小鬼", "",  "對小鬼懲罰亂交")
+		CALL PRINT_ADD_EXP(対象, "知略経験値", 5 + RAND:5)
+		CALL ICPRINT("得到了<3000>金", "L", カラー_注意)
+		MONEY += 3000
+	ENDIF
+	RETURN 1
+ELSEIF IS_MALE(対象)
+	PRINTFORML 被打敗了
+	PRINTFORML %ANAME(対象)%遍體鱗傷的返回了拠点
+	CALL ADD_COOLTIME(対象, 2)
+ELSE
+
+	IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+		PRINTFORMW 糟了！
+		PRINTFORML 由于疏忽大意，不小心掉到了自己的陷阱里
+		PRINTFORMW 拼命喊着救命也没有人回应，直到傍晚时才被路过的冒险者救了上来……
+		PRINTFORML
+		PRINTFORML 救出自己的是一位年轻的魔女，一脸坏笑地向%ANAME(対象)%索要着帮忙的报酬
+		PRINTFORML %ANAME(対象)%一摸口袋，发现钱包似乎不知何时丢失了，现在自己身上一无分文
+		PRINTFORMW 既然那样的话就帮我试验魔法吧，这么说的少女二话不说就对%ANAME(対象)%挥起了魔杖
+		PRINTFORML
+		PRINTFORML 被魔法命中的%ANAME(対象)%忽然感到十分口渴
+		PRINTFORML 嗓子像要干裂一样难受，只好立刻在四周找起了水源
+		PRINTFORML 但四周全都是森林，连一滴水都没有。走投无路的%ANAME(対象)%只好向少女讨要水喝
+		PRINTFORML 听到请求的少女什么都没说，只是轻轻掀起了裙子。难道……？
+		PRINTFORMW 如果想要喝水的话，那就自己来努力吧。少女用轻蔑的眼神看着%ANAME(対象)%说……
+		PRINTFORML
+		PRINTFORML 尽管心里很不情愿，但身体的需求无法违抗，%ANAME(対象)%只好向少女的秘部伸出舌头
+		PRINTFORML 喉咙的饥渴压迫着神经，让%ANAME(対象)%一心想着尽快得到喝的东西，她隔着内裤就粗暴的舔舐起少女的股间
+		PRINTFORMW 但内裤的布料反而增加了摩擦的感觉，没等%ANAME(対象)%攻击几下，少女的身子就颤抖了起来，内裤中央渗出一道圆形的水渍
+		PRINTFORML 好像看到沙漠的绿洲一样，%ANAME(対象)%立刻把内裤扒到一边，直接把嘴贴上去贪婪地吮吸了起来
+		PRINTFORML %ANAME(対象)%吸吮着膣内的每一滴爱液，又用舌头舔去残留在褶皱中的液滴，两种不同的刺激给予少女强大的快感，更多的液体从蜜穴深处流了出来
+		PRINTFORMW 少女的身体似乎比看上去敏感不少，她现在已经完全没有了起初的那种神态，只能拼命地咬着嘴唇，忍受着%ANAME(対象)%带给她的强烈刺激
+		PRINTFORML 随着%ANAME(対象)%的动作越来越激烈，没过多久，少女就在痉挛中达到了高潮。收缩的膣道挤出了存留的液体，充分满足了%ANAME(対象)%的欲望
+		PRINTFORMW 绝顶的刺激过去以后，少女的身体立刻失去了力量，软绵绵的坐到了地上。在快乐的影响下，一道唾液溢出她的嘴角，慢慢流到了腮边上
+		PRINTFORML 虽然%ANAME(対象)%的口渴已经得到了缓解，但摄入过多少女味道的她还是不由自主地舔起了那滴唾液，顺便送回到了少女嘴中
+		PRINTFORML %ANAME(対象)%的手指沿少女的秘缝滑动了几下，把蘸满爱液的指尖也送进了少女口中。品尝着自己爱液滋味的少女，眼神逐渐变得朦胧
+		PRINTFORMW 十分明显，此刻的主导权已经被握在了%ANAME(対象)%手中。想起一开始时少女高傲的样子，%ANAME(対象)%不禁构思起了惩罚的计划……
+		CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, Ｃ, Ｂ, Ｍ, 接吻, 口淫, 百合", "接吻喪失",0, @"魔法少女的\@RAND:2 ? 秘贝 # 嘴唇\@", "", "", "恶作剧的意外")
+		PRINTFORML
+		PRINTFORMW 好像玩得太过火了，%ANAME(対象)%最后只好把筋疲力尽的少女抱回村庄
+	ELSE
+		PRINTFORMW 糟了！
+		PRINTFORML 本來是打算追趕小鬼的、但反而被趕入了他們的巣穴
+		PRINTFORML 寡不敵眾的%ANAME(対象)%、轉眼間就被奪走了武器……
+		PRINTFORML
+		PRINTFORMW 被剝光衣服的%ANAME(対象)%、被小鬼們輪姦了
+		PRINTFORML 肉棒同時在%STR_BODY("膣：Ｖ挿入：中出し", 対象)%和%STR_BODY("アナル：Ａ挿入：絶頂", 対象)%里抽插的時候、都會身體顫抖発出嬌喘
+		PRINTFORMW 已經完全屈服于、被強迫玩弄和被給予的快感
+		PRINTFORMW %STR_BODY("乳首：欲情", 対象)%被捏住拉起、用舌頭舔弄著
+		PRINTFORMW 不久後小鬼在体内射精的時候、%ANAME(対象)%也後弓著背高潮了……
+		PRINTFORML
+		PRINTFORMW 終於被解放的%ANAME(対象)%、拖著被玩弄地破破爛爛的肉体返回了拠点
+	ENDIF
+ENDIF
+RETURN 1

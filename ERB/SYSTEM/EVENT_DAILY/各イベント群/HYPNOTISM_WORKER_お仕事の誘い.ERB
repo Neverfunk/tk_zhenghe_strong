@@ -1,0 +1,281 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_HYPNOTISM_WORKER_RATE()
+IF	DVAR:催眠お仕事_死亡判定 == 1
+	RETURN 0
+ELSE
+	RETURN 35
+ENDIF
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_HYPNOTISM_WORKER_DECISION()
+SIF CFLAG:MASTER:捕虜先 != 0
+	RETURN 0
+SIF DVAR:催眠お仕事_状態管理フラグ != 0
+	RETURN 0
+SIF GETBIT(TALENT:MASTER:日常系, 素質_デイリー_催眠奴隷) && CFLAG:MASTER:所属 == 0
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_HYPNOTISM_WORKER_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_HYPNOTISM_WORKER
+#DIM 対象
+
+IF GETBIT(TALENT:MASTER:日常系, 素質_デイリー_催眠奴隷) && CFLAG:MASTER:所属 != 0 && IS_FEMALE(MASTER)
+	PRINTFORML 正在%ANAME(MASTER)%处理事务时，主人推开屋门走了进来
+	PRINTFORML %ANAME(MASTER)%立刻放下了笔和印章，跪伏在主人的脚边
+	PRINTFORML 主人蹲下来摸着%ANAME(MASTER)%的头，说他想再要一个奴隶了
+	PRINTFORML 这种事情不需要犹豫，选择一个同事送到主人的身边吧
+	$SLAVE_SELECT
+	PRINTFORML 谁会比较适合呢？
+	CALL SINGLE_DRAWLINE
+	CALL SELECT_CHARA_LIST_ONLY_LOGIC_SEX("HYPNOTISM_WORKER", "HYPNOTISM_WORKER")
+	対象 = RESULT
+	IF RESULT < 0
+		PRINTFORML 要把那些人送到主人身边实在是有些嫉妒
+		PRINTFORML 为了被主人选上，%ANAME(MASTER)%开始编造起同事的劣迹......
+		CALL FUCK(MASTER, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 接吻, 口淫, Ｖ性交, Ａ性交", "処女喪失, 膣内射精, 口内射精, Ａ処女喪失, 腸内射精, 接吻喪失, CFLAG減少", GET_SPERM_ID("催眠術師"), @"催眠術師の\@RAND:2 ? 肉棒 # 唇\@", @"", "催眠術師", "催眠中の調教")
+		RETURN
+	ELSEIF GETBIT(TALENT:対象:日常系, 素質_デイリー_催眠奴隷)
+		PRINTFORML 她本就和%ANAME(MASTER)%都在侍奉着主人
+		PRINTFORML %ANAME(MASTER)%轻抚着%ANAME(対象)%裙下的双腿，向她传达着主人的要求
+		GOTO SLAVE_SELECT
+	ELSE
+		PRINTFORML 主人大概会中意%ANAME(対象)%的身体吧，就决定是你了
+	ENDIF
+ELSEIF CFLAG:MASTER:所属 == 0
+	PRINTFORML 放浪时偶然遇见了一个男人
+	PRINTFORML 他表示需要一些没有背景的人来帮他工作
+	PRINTFORMW 出乎意料的是，他开的条件相当的不错
+	PRINTFORML 怎麼辦？
+	CALL ASK_YN("接受" ,"拒绝")
+	IF RESULT == 1
+		PRINTFORML 不过现在就算不工作也饿不着
+		PRINTFORML %ANAME(MASTER)%不好意思的摆摆手，请他另请高明
+		RETURN
+	ELSE
+		PRINTFORML 不管做什么总要有个第一次
+		PRINTFORMW %ANAME(MASTER)%当即接下了这份工作
+		対象 = MASTER
+	ENDIF
+ELSE
+	PRINTFORML 于是%ANAME(MASTER)%被介绍到了他的部下那里
+	PRINTFORML 这里怎么看都像是个慈善机构，他大概是个慈善家吧
+	PRINTFORML 帮助他的话也许还能提高些自己的声誉
+	PRINTFORML 怎麼辦？
+	CALL ASK_YN("接受" ,"拒绝")
+	IF RESULT == 1
+		PRINTFORML 不过现在战乱太重，慈善可不是什么救人的好法子
+		PRINTFORMW %ANAME(MASTER)%表达了一下歉意，离开了慈善机构
+		RETURN
+	ELSE
+		PRINTFORML 这里似乎对那个人的评价都非常的高
+		PRINTFORMW 看起来是个可以接下的工作
+		PRINTFORML 不过他们人手也不少，没点本事大概是加入不进去
+		$WORKER_SELECT
+		PRINTFORML 要亲自加入吗？还是介绍个认识的人来？
+		CALL SELECT_CHARA_LIST_SLG()
+		対象 = RESULT
+		IF RESULT < 0
+			PRINTFORML 不过总感觉好像也没有能送到这边的人手
+			PRINTFORML 那位慈善家拍了拍%ANAME(MASTER)%，说随时欢迎再来
+			RETURN
+		ELSEIF RESULT == MASTER
+			PRINTFORML 似乎周围也没有比自己更合适的人了
+		ELSE
+			PRINTFORML %ANAME(対象)%大概会更适合这个工作吧
+			IF GETBIT(TALENT:対象:日常系, 素質_デイリー_催眠奴隷)
+				IF IS_FEMALE(対象)
+					PRINTFORML 不过她一听到这件事就摇着头拒绝了
+				ELSE
+					CALL COLOR_PRINTW("だが断る！", カラー_警告)
+					PRINTFORML 我岸边％ANAME(対象)％最喜欢的事情之一，就是向那些自以为是的家伙说，NO！
+				ENDIF
+				PRINTFORML 其他人会不会有愿意加入的呢？
+				GOTO WORKER_SELECT
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+PRINTFORML 他上下打量了一番%ANAME(対象)%，然后用力点了点头
+PRINTFORML 两个人便立刻赶往了工作的地方
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+IF (RAND:9 != 0 && !GETBIT(TALENT:MASTER:日常系, 素質_デイリー_催眠奴隷)) || IS_MALE(対象)
+	IF CFLAG:対象:所属 != 0
+		PRINTFORML %ANAME(対象)%被介绍到了他治理的地方做社会服务
+		PRINTFORML 虽然是忙到想再长几只手的程度，却有着和平日不同的充实感
+		CALL COLOR_PRINTW("因为慈善活動其他国家的评价上升了，志願兵增加了", カラー_注意)
+		COUNTRY_SOLDIER:(CFLAG:対象:所属) += 300 + (50 * (RAND:20 + 1))
+		FOR LOCAL, 1, MAX_COUNTRY
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 15, -15)
+		NEXT
+	ELSE
+		PRINTFORML %ANAME(対象)%被介绍去安抚他新接收的难民
+		PRINTFORML 结果一整天都没有闲活，%ANAME(対象)%揉了揉干涩的喉咙，恨不得长出三头六臂来
+		CALL COLOR_PRINTW("作为报酬得到了一些钱", カラー_注意)
+		MONEY += 2500 + (250 * (RAND:30 + 1))
+	ENDIF
+ELSEIF ABL:対象:催眠 > 3
+	PRINTFORML 但是他把%ANAME(対象)%径直领向了他的别墅内
+	PRINTFORML 结果还没等%ANAME(対象)%反应过来，他就颐指气使的让%ANAME(対象)%脱给他看
+	PRINTFORML 此刻在催眠上有些造诣的%ANAME(対象)%头脑感到一丝迷乱，就明白了对面也是一位催眠师
+	PRINTFORML 这突如其来的恶意让%ANAME(対象)%毫不犹豫地抽出武器，惊怒异常地猛力砍向那人
+	PRINTFORML 那个男人这才发觉%ANAME(対象)%根本不吃这一套，尚未做出应对便被一下砍翻在地，没了气息。
+	CALL COLOR_PRINTW("离开据点后收取了对这个催眠师的赏金。", カラー_注意)
+	MONEY += 10000
+	DVAR:催眠お仕事_死亡判定 = 1
+ELSEIF EXP:対象:被催眠経験 > 30 + RAND:20
+	PRINTFORML 但是他把%ANAME(対象)%径直领向了他的别墅内
+	PRINTFORML 结果还没等%ANAME(対象)%反应过来，他就颐指气使的让%ANAME(対象)%脱给他看
+	PRINTFORML 这突如其来的恶意让%ANAME(対象)%猛的一惊,手掌缓缓向腰间的武器摸去
+	PRINTFORML 那个男人发觉%ANAME(対象)%似乎并未中招，脸色微变，忽而又装出一副难为情的表情
+	PRINTFORML 「呃……由于最近治安有些动荡，我们在搜查上面确实比较严格」
+	PRINTFORML 「如果你的衣服没有夹层的话，不搜查也没有关系」
+	PRINTFORML 房间并不炎热，他流出来的冷汗却浸湿了衣襟
+	PRINTFORML %ANAME(対象)%虽然感觉非常可疑，但也没有充足的证据抓捕慈善家
+	EXP:対象:被催眠経験 += 1
+	IF CFLAG:対象:所属 != 0
+		PRINTFORML 
+		PRINTFORML 之后%ANAME(対象)%被介绍到了他治理的地方做社会服务
+		PRINTFORML 虽然是忙到想再长几只手的程度，却有着和平日不同的充实感
+		CALL COLOR_PRINTW("因为慈善活動其他国家的评价上升了，志願兵增加了", カラー_注意)
+		COUNTRY_SOLDIER:(CFLAG:対象:所属) += 300 + (50 * (RAND:20 + 1))
+		FOR LOCAL, 1, MAX_COUNTRY
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 15, -15)
+		NEXT
+	ELSE
+		PRINTFORML 之后%ANAME(対象)%被介绍去安抚他新接收的难民
+		PRINTFORML 结果一整天都没有闲活，%ANAME(対象)%揉了揉干涩的喉咙，恨不得长出三头六臂来
+		CALL COLOR_PRINTW("作为报酬得到了一些钱", カラー_注意)
+		MONEY += 2500 + (250 * (RAND:30 + 1))
+	ENDIF
+ELSE
+	PRINTFORML 但是他把%ANAME(対象)%径直领向了他的别墅内
+	PRINTFORML 结果还没等%ANAME(対象)%反应过来，他就颐指气使的让%ANAME(対象)%脱给他看
+	PRINTFORML 这突如其来的恶意让%ANAME(対象)%猛的一惊,转身就想离开
+	PRINTFORML ...但是连动一下脚趾都没能做到......
+	PRINTFORML 那个男人看着%ANAME(対象)%唯一还在变化的表情，哈哈大笑了起来
+	PRINTFORML 「不愧是催眠术，还能留下表情」
+	PRINTFORML 「我一直想看看你这副表情，这副惊慌和愤怒混合起来的美丽表情」
+	PRINTFORML 「从现在起，你只会顺从我，粘着我，还会...爱上我」
+	PRINTFORML 他说着这样那样恶心的台词，步步逼近了%ANAME(対象)%
+	IF GETBIT(TALENT:MASTER:日常系, 素質_デイリー_催眠奴隷)
+		PRINTFORML 「只要捉到一个，再想捉这一整窝都简单起来了呢」
+		PRINTFORML 他似乎在狂笑，似乎是满足了什么一样
+		PRINTFORML 但是对于%ANAME(対象)%来说这一切都发生的太突然了，甚至没来得及理解每一句话
+		PRINTFORMW 「这疑惑的表情，你肯定没想到你所侍奉的那位%ANAME(MASTER)%早已经是侍奉我很久的爱奴了吧」
+		PRINTFORML 他几乎把脸贴在了%ANAME(対象)%的脸上，那副笑容夸张的令人恶心
+		PRINTFORML 「而你就是由她送给我的新奴隶...哼嗯？不肯相信？那也和我没关系了」
+		PRINTFORML 「反正成为奴隶之后你的一切问题都将不复存在」
+		PRINTFORML 那个男人收起了笑脸，挥动起了一个不知名的道具
+	ENDIF
+	PRINTFORML 「记住，你的躯体、感觉、性格都是我的所有物，记忆也是...不过我会还给你的...」
+	PRINTFORML 房间中浮起的法术的颜色，%ANAME(対象)%的每一寸肌肉都在呼唤着逃跑
+	PRINTFORML 但是动弹不得的%ANAME(対象)%无路可逃
+	PRINTFORML 「只要这指尖一响，你就会坠入梦境...对，不需要反抗...」
+	PRINTFORML 言语如同神谕般在脑海中不断回荡着
+	PRINTFORML 「那会是令你无比深爱的...梦境....」
+	PRINTFORML 
+	PRINTFORML 
+	CALL COLOR_PRINTW("　　　                   　　　　　　　啪！", カラー_ピンク)
+	PRINTFORML 
+	PRINTFORMW 
+	PRINTFORML 在别墅的某个房间中，床上扭动这两具肉体
+	PRINTFORML 那个催眠师按着%ANAME(対象)%的头和手，激烈的扭动着腰部
+	PRINTFORML 但是%ANAME(対象)%却如同没有感知一般睁着双眼毫无动作
+	PRINTFORML 催眠师很清楚这是为什么
+	PRINTFORML 「你这！真是生了个好穴！怎么样！被按着草的感觉！」
+	PRINTFORML 下半身已经被冲的不成样子了，但%ANAME(対象)%只是挪动了一下眼球看向交合处
+	PRINTFORML 这个人在说什么？难道女孩子们每天被强奸的时候都要把舒服喊出来？
+	PRINTFORML 交合处又在喷水了，那根肉棒还在戳啊
+	PRINTFORML 「哦！一遍摆出傲慢的表情一遍用小穴掐我！继续来啊母猪！」
+	PRINTFORML %ANAME(対象)%又抬了抬眼皮看向在自己身上扭动着的发情怪物
+	PRINTFORML 跨肉和臀肉拍击的频率简直就和外面的打桩机一样，真是丢人
+	PRINTFORML  虽然想着这种奇怪的比喻，呼吸却染上了快感的颜色
+	PRINTFORML 「哦，这吸的，操，光这个逼就能买座城，你生下来就是为了挨草的吧！」
+	PRINTFORML 肉棒的每一次进出都带着%ANAME(対象)%无数声沉重的呼吸，交合处留下的也是满溢出来的白色泡沫
+	PRINTFORML 再怎么说这对身体也该有负担了，但是%ANAME(対象)%什么都没感觉到
+	PRINTFORML 在最后冲刺的阶段，%ANAME(対象)%的腰也被肉棒顶到四处乱扭
+	PRINTFORML 「操死你！操死你！要射了！我他妈射死你！」
+	PRINTFORML 这男的喊什么呢……
+	PRINTFORML 就在这句话喊完时，空前绝后的快感瞬间从下腹炸裂开来冲遍了全身
+	PRINTFORML 这是由因蓄精而鼓胀的肉棒发起的最后一次冲击
+	PRINTFORMW 被大脑切断了联系的娇躯感受着这不留余地的冲击，狂乱的扭动着
+	PRINTFORML 「妈的还能这么紧！这个穴真能吸！都给你！全都射进去！爽吗！ 」 
+	PRINTFORMW %ANAME(対象)%的双眼涣散着瞟向自己的肉穴处，而子宫已经张开了小嘴等待着.
+	PRINTFORML 
+	CALL COLOR_PRINTL("                        被精液填满                      ？", カラー_ピンク)
+	PRINTFORML 
+	CALL COLOR_PRINTL("♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥", カラー_ピンク)
+	PRINTFORMW 
+	PRINTFORML 灼热的精液清扫着子宫的空隙，也将状况外的大脑拉了回来染上了浊白的颜色
+	PRINTFORMW 那双唇也终于因触摸着卵巢的精液而发出了浪荡的娇呼声
+	PRINTFORML …就在这时，耳边又响起了一声响指。
+	PRINTFORMW 这已经不知是第几次的响指，就是那逐渐贴上%ANAME(対象)%白嫩脖颈的项圈......
+	CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 接吻, 口淫, Ｖ性交, Ａ性交", "処女喪失, 膣内射精, 口内射精, Ａ処女喪失, 腸内射精, 接吻喪失, CFLAG減少", GET_SPERM_ID("催眠術師"), @"催眠術師の\@RAND:2 ? 肉棒 # 唇\@", @"", "催眠術師", "催眠中の調教")
+	CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 接吻, 口淫, Ｖ性交, Ａ性交", "処女喪失, 膣内射精, 口内射精, Ａ処女喪失, 腸内射精, 接吻喪失, CFLAG減少", GET_SPERM_ID("催眠術師"), @"催眠術師の\@RAND:2 ? 肉棒 # 唇\@", @"", "催眠術師", "催眠中の調教")
+	EXP:対象:被催眠経験 += 3
+	PRINTFORML 
+	IF 対象 == MASTER 
+		IF CFLAG:MASTER:所属 == 0
+			PRINTFORMW %ANAME(対象)%猛的回过神来，发现自己站了之前订好的旅馆前
+			PRINTFORML "我明明记得我应该是今天去挣外快的来着……"
+			PRINTFORML 但是工作都做了些什么？
+			PRINTFORMW 抱着臂努力回忆的时候，小腹似乎有些隐隐作痛
+			PRINTFORML 但%ANAME(対象)%却只当是腹痛，又在嘀咕着自己做过什么
+			PRINTFORMW 左思右想回忆不起，只好以干活太累了哄着自己入睡
+			PRINTFORMW ...而身上那明显的红肿痕迹，却被视而不见了
+		ELSE
+			PRINTFORML %ANAME(対象)%随着自家的关门声猛地一震
+			PRINTFORML 已经回家了？工作干完了？
+			PRINTFORML 我...干了什么？
+			PRINTFORML 小腹处隐隐传来了痛感，大概是因为工作过度吧
+			PRINTFORML %ANAME(対象)%甩开了自己的鞋子躺在了床上
+			PRINTFORML 借着工作过度的理由，%ANAME(対象)%逐渐陷入了梦乡
+			PRINTFORML ...而那布满全身的红肿，就像是理所当然一样
+		ENDIF
+	ELSE
+		PRINTFORML 傍晚时，%ANAME(MASTER)%叫住了在宫中游荡着的%ANAME(対象)%
+		PRINTFORML 问到那位慈善家会提供什么工作时，但%ANAME(対象)%却是迷茫了一阵
+		PRINTFORML 然后又露出了一个意味深长的笑容？
+		PRINTFORMW 又重复问了一遍后，她才憋出了"大概是非常善良的事情哦"这样一句话
+		IF GETBIT(TALENT:MASTER:日常系, 素質_デイリー_催眠奴隷)
+			PRINTFORMW 看着她满面的笑容，%ANAME(MASTER)%也笑了起来
+		ELSE
+			PRINTFORML %ANAME(MASTER)%看着那满面的笑容，只好当刚才感受到的那个意味深长从未存在过
+			PRINTFORML 闲聊了一会后，就相互道别回到的各自的岗位上去
+			PRINTFORML ...而没能察觉到她的衣服下那些象征着暴力的红色痕迹
+		ENDIF
+	ENDIF
+	DVAR:催眠お仕事_調教対象ID = GET_ID(対象)
+	DVAR:催眠お仕事_状態管理フラグ = 1
+	DVAR:催眠お仕事_進行度 += 1
+ENDIF
+
+RETURN 1
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_HYPNOTISM_WORKER(対象)
+#DIM 対象
+RETURN CFLAG:対象:行動不能状態 != 行動不能_子供 && CFLAG:対象:所属 == CFLAG:MASTER:所属 && !IS_ANIMAL(対象) && !IS_MALE(対象) && GET_ID(対象) != GET_ID(MASTER)
+
+@SELECT_CHARA_LIST_SELECT_LOGIC_HYPNOTISM_WORKER(対象)
+#DIM 対象
+RETURN CFLAG:対象:捕虜先 == 0
+
+@EVENT_DAILY_HYPNOTISM_WORKER_ALLOW_WHEN_WANDERING
+RETURN 1
+

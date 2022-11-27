@@ -1,0 +1,52 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_CAPTURE_TUTINOKO_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_CAPTURE_TUTINOKO_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_CAPTURE_TUTINOKO(対象)
+#DIM 対象
+
+PRINTFORML 這一帯好像有土之子出沒
+PRINTFORML 有收藏家出了賞金。似乎可以賺點零花錢
+PRINTL
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "知略"))
+
+CALL ASK_YN("去试着捕获", "放棄")
+
+IF RESULT == 1
+	PRINTFORML 沒有時間去做那種事
+	PRINTFORML 作罷
+	RETURN 1
+ENDIF
+
+PRINTFORML %ANAME(対象)%立刻、就去設下了陷阱……
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+IF LIMIT(ABL:対象:知略, 50, 100) > RAND:100
+	PRINTFORML 成功了！
+	PRINTFORML %ANAME(対象)%漂亮地捕獲了土之子
+	PRINTFORMW 從收藏家那收到了賞金、返回了拠点
+	MONEY += 3000
+	CALL ICPRINT("獲得了<3000>金", "L", カラー_注意)
+	RETURN 1
+ENDIF
+
+PRINTFORML 失败了！
+PRINTFORML 只有誘餌被吃掉了
+PRINTFORMW 附近真的存在土之子麼、%ANAME(対象)%返回了拠点
+
+RETURN 1

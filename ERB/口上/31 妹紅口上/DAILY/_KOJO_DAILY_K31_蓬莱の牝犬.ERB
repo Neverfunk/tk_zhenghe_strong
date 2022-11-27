@@ -1,0 +1,261 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K31_VIGILANTE_GANGBANG_RATE(対象)
+#DIM 対象
+RETURN 1000
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K31_VIGILANTE_GANGBANG_DECISION(対象)
+#DIM 対象
+#DIM 慧音
+#DIM 自警団
+
+自警団 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_自警団)
+慧音 = NAME_TO_CHARA("慧音")
+
+SIF !IS_FEMALE(対象) || !IS_FEMALE(慧音)
+	RETURN 0
+
+SIF 自警団 == -1 || CFLAG:対象:捕虜先 != 自警団
+	RETURN 0
+
+SIF CFLAG:慧音:所属 != 自警団
+	RETURN 0
+
+SIF CFLAG:対象:所属 == 自警団
+	RETURN 0
+
+SIF KDVAR:対象:妹紅_自警団
+	RETURN 0
+
+SIF !GETBIT(TALENT:慧音:特殊勢力陥落系, 特殊勢力_自警団)
+	RETURN 0
+
+SIF GETBIT(TALENT:対象:特殊勢力陥落系, 特殊勢力_自警団)
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, -1, 1) && CHECK_KOJO_DAILY_HAPPEN(慧音, -1, 0)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K31_VIGILANTE_GANGBANG_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K31_VIGILANTE_GANGBANG(対象)
+#DIM 対象
+#DIM 慧音
+#DIM 自警団
+
+慧音 = NAME_TO_CHARA("慧音")
+
+自警団 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_自警団)
+
+PRINTFORML 「哈啊♥啊，啊♥啊啊啊♥」
+;TranslatedMark 「はぁっ♥　あっ、あっ♥　あぁんッ♥」
+PRINTFORMW 「啾♥呣啾、啾噜、咕噗、嘞咯嘞咯嘞咯……嗯呜♥」
+;TranslatedMark 「んちゅっ♥　むちゅッ、ぢゅるッ、くぷ、れろれろれろ……んぅうっ♥」
+PRINTFORML ……被自警团抓获的%ANAME(対象)%，在监狱里看到了难以置信的一幕。
+;TranslatedMark ……自警団に捕えられた%ANAME(対象)%が牢獄で目にしたのは、信じがたい光景だった
+PRINTFORML 作为挚友的%ANAME(慧音)%，在那些男人身上摆动臀部，吮吸着%BAR_NAME_GEN()%
+;TranslatedMark 友人である%ANAME(慧音)%が、男の上で腰を振り、%BAR_NAME_GEN()%をしゃぶってよがっている
+PRINTFORMW 脸上、身上、前后两个洞都被浊液染成了白色……
+;TranslatedMark 顔も身体も両穴も、真っ白に染められている……
+PRINTFORMW 「你、……你们这群混蛋！对%ANAME(慧音)%做了什么！」
+;TranslatedMark 「お、……お前ら！　%ANAME(慧音)%に何をしたんだ！」
+PRINTFORML 狂怒的%ANAME(対象)%想要推开男人们，奈何双手被死死束缚着，什么也做不了
+;TranslatedMark 怒る%ANAME(対象)%は男達を排除しようとするが、両手に枷をされては何もできない
+PRINTFORMW 更让人意外的是，那个%ANAME(慧音)%
+;TranslatedMark なにより、他ならぬ%ANAME(慧音)%がそれを止めた
+PRINTFORMW 「%ANAME(対象)%……你为什么要生气呢？」
+;TranslatedMark 「%ANAME(対象)%……何を怒っているんだ？」
+PRINTFORMW 「这是我们这些女人的责任和义务。我也是多亏了他们才学到的哦」
+;TranslatedMark 「これは私たちのような女の務め、義務なんだ。私も彼らに教えてもらったんだがな♥」
+PRINTFORMW 「而且♥，这么让人舒服的事情♥，要放弃是不可能的吧？♥」
+;TranslatedMark 「それに、こんな素晴らしく気持ちいいことをやめるなんて、できるわけがないだろう？」
+PRINTFORML 说话的%ANAME(慧音)%虽然看起来神志不清，但眼神中依然流露着理性的光芒
+;TranslatedMark 語る%ANAME(慧音)%は正気でないように見えたが、瞳には確かな理性の色があった
+PRINTFORMW 也就是说%PRONOUN(慧音)%，在知情的情况下接受了他们的轮奸……
+;TranslatedMark つまり%PRONOUN(慧音)%は、全て承知のうえで彼らからの輪姦を受け入れているのだ……
+PRINTFORMW 「嗯，我♥……我也知道第一次见♥…嗯♥…是很难接受的♥。%ANAME(対象)%可以先在那里看一会儿哦♥」
+;TranslatedMark 「まあ、初見では受け入れがたいというのも分かる。%ANAME(対象)%はしばらくそこで見ているといい」
+PRINTFORMW 「我要♥……履行我的义务……哈啊♥　嗯呣、啾噜、咕噗、呣呜呜♥」
+;TranslatedMark 「私が務めを果たすところを……あはぁッ♥　んッ、ぢゅるぅッ、くぷ、んぅうッ♥」
+PRINTFORML 口齿不清地说着的%ANAME(慧音)%被焦躁的男人们贯穿。在激烈的活塞运动中，%STR_BODY("胸：長" ,対象)%剧烈摇晃着。
+;TranslatedMark 語る%ANAME(慧音)%を、焦れた男達が貫く。激しいピストンに、%STR_BODY("胸：長" ,対象)%がぷるぷると揺れる
+PRINTFORML 只要把%BAR_NAME_GEN()%塞进发出娇声的口腔里，脸颊就会立刻缩紧来吮吸榨取
+;TranslatedMark 嬌声を漏らす口腔へ%BAR_NAME_GEN()%がねじ込まれれば、頬を窄めてしゃぶりつく
+PRINTFORMW 那副样子，比%ANAME(対象)%至今为止看到的任何东西都要淫乱……
+;TranslatedMark その様は、%ANAME(対象)%が今までに見た何よりも淫らだ……
+PRINTFORMW 「……哈♥、哈♥、啊……」
+;TranslatedMark 「……はっ、は、あぁ……」
+PRINTFORML 不知不觉中，%ANAME(対象)%被眼前的景象压得喘不过气来。
+;TranslatedMark いつしか%ANAME(対象)%は、目の前の光景にあてられ、息を荒げていた
+PRINTFORML 每当按捺不住地夹搓大腿时，湿透的%STR_BODY("陰唇：長" ,対象)%就发出咕叽咕叽的声音
+;TranslatedMark もどかしげに太腿を擦り合わせれば、濡れた%STR_BODY("陰唇：長" ,対象)%がくちくちと音を立てる
+PRINTFORMW 虽然紧咬着疼痛的嘴唇
+;TranslatedMark 疼く唇を、きゅっと噛みしめていた
+PRINTFORML 但显而易见，已经完全发情了。自警团员当然不会放过这样的机会
+;TranslatedMark 明らかな発情を、自警団員たちが見逃すはずもない
+PRINTFORMW 就在这时，阴茎被伸到了%ANAME(対象)%的眼前
+;TranslatedMark ここぞとばかりに、%ANAME(対象)%の眼前にペニスを突き出す
+PRINTFORML 完全忘记了刚才抗拒的事情，%ANAME(対象)%的视线被那根东西夺走了
+;TranslatedMark 先ほど拒んでいたことも忘れ、%ANAME(対象)%はソレに視線を奪われる
+PRINTFORMW 迷乱的眼睛追着左右摇摆的龟头移动着
+;TranslatedMark 亀頭が左右にゆらゆら揺れると、瞳がそれを追いかける
+PRINTFORMW ......过了一会儿，自己主动吻了上去
+;TranslatedMark ……やがて、自ら口づけた
+CALL KISS_COMMON(対象, "自警团员的阴茎")
+;CALL KISS_COMMON(対象, "自警団員のペニス")
+PRINTFORMW 「嗯呜……嗯、啾、呜啾、呜呜」
+;TranslatedMark 「んぅ……んっ、ちゅっ、んちゅ、んぅうっ」
+PRINTFORMW 「啾噜……呸咯♥呜、啾噜、呣呜♥」
+;TranslatedMark 「ちゅる……れろっ♥　んッ、ぢゅるっ、んぅう♥」
+PRINTFORMW 把在嘴边蹭着的肉棒含进温暖湿润的口腔，用软嫩的舌体搅动，卷拭，深深吮吸着
+;TranslatedMark 差し出されたモノを口内に迎え、舌を這わせ、しゃぶりたてる
+PRINTFORMW 口腔中充斥着的雄性的味道，带来了难以言喻的兴奋……
+;TranslatedMark 口いっぱいに広がる雄の味が、えも言われぬ興奮をもたらす……
+PRINTFORML 「啊啊♥，%ANAME(対象)%……你明白了呢」
+;TranslatedMark 「あぁ、%ANAME(対象)%……分かってくれたんだな」
+PRINTFORMW 「那么，和我一起……嘞咯，嘞咯嘞咯，啾♥」
+;TranslatedMark 「なら、私と一緒に……れろッ、れろれろッ、んちゅぅ♥」
+PRINTFORML 对于接受了自己本能的%ANAME(対象)%，%ANAME(慧音)%的眼神中流露出了喜悦
+;TranslatedMark 自らの本能を受け入れた%ANAME(対象)%に、%ANAME(慧音)%は悦びの目を向ける
+PRINTFORMW %PRONOUN(対象)%一凑上前，二人就一起开始了嘴上的侍奉……
+;TranslatedMark %PRONOUN(対象)%に近づくと、二人で一緒に口腔奉仕を始める……
+CALL FUCK_SP(対象, "性技, 欲望, 精愛, 奉仕, 口淫, Ｍ", "接吻喪失, 口内射精", 自警団, GET_SPERM_ID("自警団"), "自警団員のペニス", "自警団", "", "調教")
+CALL FUCK_SP(慧音, "性技, 欲望, 精愛, 奉仕, 口淫, Ｍ", "接吻喪失, 口内射精", 自警団, GET_SPERM_ID("自警団"), "自警団員のペニス", "自警団", "", "調教")
+PRINTFORMW 「呣呜，呜呜，嗯……咕呜，咕咚，咕咚……♥」
+;TranslatedMark 「んむッ、んッ、んぅう……んくっ、こくっ、んく……♥」
+PRINTFORML 很快，男子发出了一声低吟，在嘴里喷射出了浓稠的汁种
+;TranslatedMark やがて、男が低く唸り、口内に精を吐き出した
+PRINTFORML 先前认为苦涩腥臭的精液，对于现在的%ANAME(対象)%来说，仿佛胜过了任何甘甜的美酒
+;TranslatedMark 苦く臭いだけの汁は、いまの%ANAME(対象)%にとっては何にも勝る美酒に感じられる
+PRINTFORMW 每当咕咚咕咚地吞咽时，喉咙就会有一种纠缠的触感，简直让人无法忍受
+;TranslatedMark 音を立てて嚥下するたび喉に絡みつく感触も、たまらなかった
+PRINTFORML 「呼呼♥……呐♥，%ANAME(対象)%……」
+;TranslatedMark 「ふふ……ほら、%ANAME(対象)%……」
+PRINTFORMW 「啊，%ANAME(慧音)%……嗯，嗯……♥」
+;TranslatedMark 「あ、%ANAME(慧音)%……んッ、んぅ……♥」
+PRINTFORML 沉浸在口内射精的余韵中，与%ANAME(慧音)%双唇相扣
+;TranslatedMark 口内射精の余韻に浸っていると、%ANAME(慧音)%が唇を重ねてくる
+PRINTFORML 在激烈的湿吻中，口腔内除了唾液以外，还有被灌入的雄性的腥臭的汁液
+;TranslatedMark 熱烈なディープキスの間、口内に唾液のほかに、雄臭い汁が流し込まれる
+PRINTFORMW 这肯定是%ANAME(慧音)%用口穴榨取的汁液
+;TranslatedMark %ANAME(慧音)%が口腔で搾り取った種汁に違いなかった
+PRINTFORML 二人一边发出啾噜啾噜的声音，一边极其淫靡地交换着粘浆
+;TranslatedMark ぢゅるぢゅると二人で音を立てながら、卑猥極まるベーゼを交わす
+PRINTFORMW 在此期间，始作俑者的男人们已经做好了"教育"的准备
+;TranslatedMark その間に、男達は「教育」の用意を整えていた
+PRINTFORML 男人们用手在二人的身体上游走着，用手指揉搓刺激着她们的秘部，让这两只淫荡的雌性做好交媾的准备
+;TranslatedMark 二人の身体に手を這わせ、秘部を指で嬲り、交尾の用意を整えさせる
+PRINTFORMW 只见%ANAME(対象)%的%STR_BODY("膣" ,対象)%已经淫水泛滥，二人被要求向牲畜一样四脚着地露出自己的秘裂
+;TranslatedMark %ANAME(対象)%の%STR_BODY("膣" ,対象)%がすっかり濡れそぼち、ヒクついているのを見て、二人を四つん這いにさせた
+PRINTFORML 「哈啊……♥呐，%ANAME(対象)%，要向大家问好哦!♥」
+;TranslatedMark 「あはぁッ……♥　ほら、%ANAME(対象)%、皆に挨拶するんだ」
+PRINTFORMW 「从现在开始，作为女人，要为了能对他们做出贡献而被进行教育呢♥」
+;TranslatedMark 「これからたっぷり、オンナとして彼らに貢献できるように教育していただくんだからな♥」
+PRINTFORML 二人并排趴好，像母狗一样撅起摇摆着的屁股,%ANAME(慧音)%的眼神中，已经情欲荡然了
+;TranslatedMark 並んで牝犬の姿勢をとる%ANAME(慧音)%の瞳は、すっかり欲情して蕩けきっていた
+PRINTFORML 一想到自己也浮现出了那样的眼神就更加按捺不住了
+;TranslatedMark 自分もあのような瞳を浮かべているのだと思うとたまらなかった
+PRINTFORMW ……不由自主地毫不掩饰地说出了自己的心里话
+;TranslatedMark ……思わず、何一つ偽らざる心情を述べてしまうほどには
+PRINTFORML 「啊，我，%NAME_FORMAL(対象)%，就是一个明明看到好友被轮奸，却羡慕不已，兴奋得都湿透了的变态痴女」
+;TranslatedMark 「わ、私、%NAME_FORMAL(対象)%は、親友が輪姦されてるのに羨ましくなって、興奮して濡らしてしまう変態です」
+PRINTFORMW 「如果这样的我也可以的话，请一定要用大家的大鸡鸡，教导我女人的职责……♥」
+;TranslatedMark 「こんな私でよろしければ、どうか皆さんのおちんちんで、オンナの務めを教えてくださいッ……♥」
+PRINTFORML 自言自语的声音因兴奋而变得激昂起来。从%STR_BODY("陰唇：長", 対象)%上滴下了粘糊糊的雌汁
+;TranslatedMark 呟く言葉は、興奮により上ずっている。%STR_BODY("陰唇：長", 対象)%から粘ついた雌汁が滴った
+PRINTFORML 男人们嘻嘻哈哈地笑着，抓住二人扭动的淫臀，将"教棍"推到入口处。
+;TranslatedMark 男達はニヤニヤと笑いながら、くねる二人の腰を掴み、"教育棒"を入口へ押し当てる
+PRINTFORMW ……之后，毫不留情地捅了下去
+;TranslatedMark ……そして、容赦なく貫いた
+CALL VIRGIN_COMMON(対象, "自警団員")
+CALL VIRGIN_COMMON(慧音, "自警団員")
+PRINTFORML 「啊、哈啊啊啊啊啊啊啊啊啊啊♥」
+;TranslatedMark 「あっはぁああああああああっ♥」
+PRINTFORMW 「啊哈哈♥大鸡巴来了♥」
+;TranslatedMark 「あはぁっ♥　チンポきたぁっ♥」
+PRINTFORML 二人淫荡的娇声在监狱里回荡着
+;TranslatedMark 牢獄内に二人の声が響き渡る
+PRINTFORMW 从那为快乐而发狂的声色中，已经无法想象平时凛然的模样了
+;TranslatedMark 快楽に狂った声色からは、もはや普段の凜然とした姿など想像もつかなかった
+PRINTFORMW 「啊♥啊♥好厉害♥这个...啊♥好棒，好棒♥」
+;TranslatedMark 「あっ♥　あ♥　すごっ、♥　これ、ア♥　すごッ、すごぃいっ♥」
+PRINTFORML 所谓教育，就是扭曲摧毁女性的自我精神意识，使其成为对自己有利的傀儡的一系列操作
+;TranslatedMark 教育とはつまり、女性の精神を歪め自分たちに都合のよい傀儡に仕立て上げる一連の作業をいう
+PRINTFORML 一开始的性交当然是困难的，但活塞从一开始就毫不留情
+;TranslatedMark その始まりたる性交は当然ハードであり、ピストンは始めから容赦なかった
+PRINTFORMW 感受到自己的肉穴被鸡巴逐渐调教成了契合的形状，%ANAME(対象)%发狂般的浪叫起来
+;TranslatedMark ずこずこと自らの肉穴がペニスの形を覚え込まされていくのを感じながら、%ANAME(対象)%は狂った声をあげてよがる
+PRINTFORMW 「啊，哈，怎么样，%ANAME(対象)%他们♥啊♥很棒吧？」
+;TranslatedMark 「あッ、は、どうだ、%ANAME(対象)%？　彼らは、あんッ♥　素晴らしいだろう？」
+PRINTFORML 连回答来自%ANAME(慧音)%的询问的时间都没有
+;TranslatedMark %ANAME(慧音)%からの問い掛けに答える余裕すらなかった
+PRINTFORML 感受着%STR_BODY("膣：処女確認：時間経過", 対象)%的愉悦，流着口水，沉醉其中
+;TranslatedMark %STR_BODY("膣：処女確認：時間経過", 対象)%の悦びに、涎すら垂らして感じ入るばかりだ
+PRINTFORMW 被从后面伸出的手揉搓着%STR_BODY("胸：感度：性交", 対象)%，掐捏着%STR_BODY("乳首", 対象)%，这感觉就像做梦一样
+;TranslatedMark 後ろから伸ばされた手に%STR_BODY("胸：感度：性交", 対象)%を揉みしだかれ、%STR_BODY("乳首", 対象)%をつねられれば、もう夢見心地だ
+PRINTFORML 「啊，来了，在里面射出来了，哈啊，哈啊，啊啊啊啊啊啊啊啊啊啊啊啊啊♥」
+;TranslatedMark 「あはッ、きた、中出し、アッ、アッ、あぁああああああッ♥」
+PRINTFORMW 「来吧，我也要想%ANAME(慧音)%一样，啊啊啊啊♥」
+;TranslatedMark 「きてぇっ、わたしも%ANAME(慧音)%みたいにしてッ、あぁあああんっ♥」
+PRINTFORML ……很快，当男人抽动着将精液大量地倾泻到子宫内时，两人——不，淫荡的母牛和母狗就各自反弓起身体，撅着屁股达到高潮
+;TranslatedMark ……やがて、男がたっぷりと子宮内に精液をぶちまければ、二人――いや、牝牛と牝犬はそれぞれ背を反らし絶頂にいたる
+PRINTFORML 脑海里，伦理和道德等"无聊的东西"的东西已经不存在了
+;TranslatedMark その頭の中には、倫理や道徳といった"つまらないもの"はもはや存在しない
+PRINTFORMW 剩下的只有侍奉男人，尽心尽力地让其舒服起来
+;TranslatedMark あるのはただ、雄に尽くし、気持ちよくしていただくことばかりだ
+PRINTFORMW 「啊、啊、啊……♥」
+;TranslatedMark 「あッ、は、あぁ……♥」
+PRINTFORML 充分释放了种汁的%BAR_NAME_GEN()%从%STR_BODY("膣：処女確認：時間経過", 対象)%中拔了出来
+;TranslatedMark たっぷりと種を放った%BAR_NAME_GEN()%が、%STR_BODY("膣：処女確認：時間経過", 対象)%から引き抜かれる
+PRINTFORML 蜜裂中满溢出的白色种汁，是%ANAME(対象)%已经堕落成母狗的最有力的证据
+;TranslatedMark どろりと溢れる白い種汁は、%ANAME(対象)%が牝に堕ちた何よりの証拠だ
+PRINTFORMW %ANAME(対象)%脸颊桃红，露出了充满却意犹未尽的淫靡表情
+;TranslatedMark %ANAME(対象)%は頬を紅潮させ、幸福そのものの、しかしどこか物足りない表情を浮かべている
+PRINTFORML 「我懂的，%ANAME(対象)%……还想要吧？」
+;TranslatedMark 「分かるよ、%ANAME(対象)%……まだ足りないんだろう？」
+PRINTFORMW 「别担心，喏，看看周围」
+;TranslatedMark 「大丈夫、ほら、周りを見てみるんだ」
+PRINTFORMW 在%ANAME(慧音)%的催促下环顾四周，还有一大群的团员。换句话说，还有很多正在勃起的阴茎
+;TranslatedMark %ANAME(慧音)%に促され視線をやれば、まだまだ団員は残っていた。すなわち、勃起したペニスも沢山ある
+PRINTFORMW 「啊……啊……♥」
+;TranslatedMark 「あっ……あぁ……♥」
+PRINTFORMW 在他们全部满足之前，到底要做多少次呢？光是想想就要高潮了
+;TranslatedMark 彼ら全員が満足するまで、一体何回セックスすることになるのだろう。考えるだけで達してしまいそうだった
+PRINTFORMW 「来吧，我也好，%ANAME(慧音)%也好、尽情地享用我们地小穴吧、啊，哈啊♥」
+;TranslatedMark 「来て、私も%ANAME(慧音)%も、いっぱいおまんこしますから、あッ、あぁーッ♥」
+PRINTFORML 男人们对着那条毫无防备地暴露出来的秘裂，蜂拥而上!
+;TranslatedMark 無防備に自ら曝け出した裂け目へ、男達が群がっていく
+PRINTFORMW 凌辱之宴一直持续到两人完全失去意识为止……
+;TranslatedMark 陵辱の宴は、二人がすっかり気を失うまで続いた……
+FOR LOCAL, 0, 5
+	CALL FUCK_GANGBANG_SP(対象, GET_SPERM_ID("自警団員"), "自警団員のペニス", "自警団員", 自警団)
+NEXT
+FOR LOCAL, 0, 5
+	CALL FUCK_GANGBANG_SP(慧音, GET_SPERM_ID("自警団員"), "自警団員のペニス", "自警団員", 自警団)
+NEXT
+CALL COLOR_PRINTL(@"%ANAME(対象)%が自警団員になった", カラー_注意)
+TRYCALLFORM %SP_COUNTRY_NAME_ENG:特殊勢力_自警団%_FALLEN_LEAVE_MARK(対象)
+KDVAR:対象:妹紅_自警団 = 1
+SETBIT TALENT:対象:特殊勢力陥落系, 特殊勢力_自警団
+CALL CHANGE_COUNTRY(対象, 自警団, 1)
+
+RETURN 1
+

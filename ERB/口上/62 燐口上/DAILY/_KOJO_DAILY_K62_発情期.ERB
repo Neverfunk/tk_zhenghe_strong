@@ -1,0 +1,124 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K62_ESTRUS_RATE(対象)
+#DIM 対象
+RETURN 25
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K62_ESTRUS_DECISION(対象)
+#DIM 対象
+
+;流石にボスにはおねだりできない
+SIF GROUPMATCH(MASTER, NAME_TO_CHARA("さとり"), NAME_TO_CHARA("こいし"))
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K62_ESTRUS_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K62_ESTRUS(対象)
+#DIM 対象
+
+IF IS_SLAVE(対象)
+	LOCALS:0 = ご主人様
+ELSE
+	LOCALS:0 = %ANAME(MASTER)%
+ENDIF
+
+
+
+IF KDVAR:対象:燐_発情期 == 0
+	PRINTFORML 深夜。%ANAME(MASTER)%結束巡邏返回自己房間時、突然被什麼人推倒在地！
+	PRINTFORML 正當以為被賊人入屋搶劫而慌張時、卻発現侵入者是%ANAME(対象)%
+	PRINTFORMW 能感覺到她的臉頰通紅、氣息慌亂……
+	PRINTFORMW 「抱歉、%LOCALS:0%、雖然我真的不想做這種事」
+	PRINTFORMW 「但是、已經忍耐不……啊哈、看上去很好吃呢、%ANAME(MASTER)%你」
+	PRINTFORML %ANAME(対象)%手放在你的衣服上一邊低聲嘟嚕着、眼神帶着不尋常的光芒
+	PRINTFORMW 想吃掉我嗎、而且忍耐不了什麼、%ANAME(MASTER)%想搞清楚並詢問道
+	PRINTFORMW 「如你所知我原本是一隻猫。所以是會発情的」
+	PRINTFORMW 「嘛、這種事怎麼都好……總之、這種情況無論如何都避免不了」
+	PRINTFORMW 「但是、我可不想對不認識的男人張開雙腿……所以、幫一下我吧」
+	PRINTFORMW 幫一下我、這樣說着、但是%ANAME(対象)%並沒有等待回答
+	PRINTFORML 就已經扒了這邊的衣服、然後就脫掉自己的衣服、露出柔軟的裸體
+ELSEIF KDVAR:対象:燐_発情期 == 1
+	PRINTFORMW %ANAME(対象)%訪問你的房間了……
+	PRINTFORMW 「那個ー、又要、拜託你了……」
+	PRINTFORML 看來、又是控制不了発情的樣子
+ELSE
+	PRINTFORMW %ANAME(対象)%訪問你的房間了……
+	PRINTFORMW 「今次一定要、讓我做哦……？」
+	PRINTFORML 看來、又是控制不了発情的樣子
+ENDIF
+PRINTFORML 那麼、該怎麼做呢……
+PRINTFORML
+CALL ASK_YN("送到嘴邊的肉不吃是男人的……", "冷靜一點！")
+IF RESULT == 1
+	IF !KDVAR:対象:燐_発情期 && ABL:MASTER:武闘 < ABL:対象:武闘
+		PRINTFORMW 「不行哦、這樣胡鬧。很危險吧？」
+		PRINTFORMW 「而且、%LOCALS:0%明明應該知道、你的實力不及我的」
+		PRINTFORMW %ANAME(MASTER)%雖然嘗試讓%ANAME(対象)%冷靜下來、但被輕鬆按倒在地了
+		PRINTFORMW 「呵呵、別盯着我呀」
+		PRINTFORMW 「胡鬧過頭的話、說不定之後我要用這個手推車來運走%ANAME(MASTER)%你了哦……？」
+		PRINTFORML %ANAME(対象)%就像故意炫耀一樣、將自己的手掌遞上來
+		PRINTFORMW 如同刀刃般鋭利的利爪、展示在你的眼前
+		PRINTFORMW 「嘛、我並不打算傷害你。只是想你老實一點」
+		IF HAS_PENIS(対象)
+			PRINTFORMW 「老實一點的話、我就用我的『這個』、讓你爽到上天國……♪」
+			PRINTFORMW 在她的股間、有着連男人也自愧不如的東西……
+		ELSE
+			PRINTFORMW 「老實一點的話、我就讓你爽到上天國……♪」
+		ENDIF
+		PRINTFORMW 看來、無法讓她死心了……
+		GOTO START
+	ENDIF
+	PRINTFORMW 冷靜一點……這樣說服後、%ANAME(対象)%返回自己房間了
+	PRINTFORMW 離開時%ANAME(対象)%、帶着滿滿怨氣的表情……
+	KDVAR:対象:燐_発情期 = 2
+	RETURN 1
+ELSE
+	PRINTFORMW 「啊哈、你能這麼說我很開心呢……♪」
+	PRINTFORMW %ANAME(対象)%依偎着這邊、用舌由頭舐到胸口
+	PRINTFORMW 這樣的感覺令%ANAME(MASTER)%的身體震顫着
+	IF HAS_PENIS(対象)
+		PRINTFORMW 「好好期待吧、就用我的『這個』、讓你爽到上天國……♪」
+		PRINTFORMW 在她的股間、有着連男人也自愧不如的東西……
+	ELSE
+		PRINTFORMW 「好好期待吧、就讓你、好好地爽一爽……♪」
+	ENDIF
+	PRINTFORMW %ANAME(MASTER)%放鬆全身、將身體交給%ANAME(対象)%了……
+	$START
+	;全員の調教参加フラグをクリア
+	CVARSET CFLAG, 6, 0
+	CFLAG:対象:調教参加フラグ = 1
+	CFLAG:対象:好感度 += 200
+	CFLAG:対象:強制友好化 = 1
+	BASE:対象:体力 = MAXBASE:対象:体力
+	BASE:対象:気力 = MAXBASE:対象:気力
+	;強制逆調教フラグをオン
+	FLAG:ターンエンド調教 = 2
+	;それ以降のデイリーイベント発生を潰す
+	DAILY_CANCEL = 1
+	;フラグ
+	KDVAR:対象:燐_発情期 = 1
+	RETURN 1
+ENDIF
+RETURN 1
+

@@ -1,0 +1,233 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_YAKUZA_RATE()
+RETURN (DVAR:やくざ_繋がり > 0 ? 200 # 30)
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_YAKUZA_DECISION()
+SIF DAY < 10
+	RETURN 0
+
+SIF DVAR:やくざ_発生フラグ > 0
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_YAKUZA_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_YAKUZA()
+#DIM 対象
+#DIM 対象国君主
+
+IF GETBIT(TALENT:MASTER:日常系, 素質_デイリー_ソープ嬢)
+	PRINTFORML 黑帮的人突然找上了门来
+	PRINTFORML 这次造访实在太过突然，连随从们都担心了起来
+	PRINTFORML 不过再怎么说也不能把那样的关系暴露出来
+	PRINTFORMW 大概和以前一样，是为了那些东西的交易吧...
+ELSEIF DVAR:やくざ_遭遇 >= 1
+	PRINTFORML 黑社会的人又来了
+	PRINTFORMW 随从说他们实在很难劝走...
+ELSE 
+	PRINTFORML 随从通报说有客人来访
+	PRINTFORML 稍微调查了一下发现是最近在领土内活动很频繁的地下组织
+	PRINTFORMW 无论是为了我们还是为了他们，都有必要进行一次谈话......
+	DVAR:やくざ_遭遇 = 1
+ENDIF
+PRINTFORML 怎麼辦？
+CALL ASK_YN("见面" ,"赶走")
+IF RESULT == 1
+	IF DVAR:やくざ_遭遇 == 2
+		PRINTFORML 那些败类真是一次都不想再见到
+		PRINTFORMW %ANAME(MASTER)%让随从把那些人赶走
+		PRINTFORML 
+		PRINTFORMW ...意外的，没有引来他们的报复
+	ELSE
+		PRINTFORML 和他们没什么好聊的
+		PRINTFORMW %ANAME(MASTER)%拒绝了黑社会的访问
+	ENDIF
+	RETURN 1
+ELSEIF RESULT == 0
+	IF DVAR:やくざ_遭遇 == 2
+		PRINTFORML 简直不想再见到那些败类
+		PRINTFORML 但是他们行事阴狠，与他们结仇有害而少益
+		PRINTFORMW 斟酌了利弊之后，还是决定让随从把他们领了进来
+	ELSE
+		PRINTFORMW 让随从把他们领了进来
+	ENDIF
+	PRINTFORML 让谁去和他们交涉呢？
+	CALL SELECT_CHARA_LIST_ONLY_LOGIC_SLG("YAKUZA", "NONE")
+	対象 = RESULT
+	IF 対象 == -1
+		PRINTFORML ...不行，不管是谁都不应该与这样的组织接触
+		PRINTFORMW %ANAME(MASTER)%思前想后，还是决定让随从编个理由送客
+		DVAR:やくざ_繋がり = 0
+		RETURN 1
+	ELSEIF 対象 == MASTER
+		PRINTFORML 与地下组织的人会面也许会被要挟
+		PRINTFORMW %ANAME(対象)%决定亲自与他们交涉
+	ELSE
+		PRINTFORML 把交涉的任务交给了%ANAME(対象)%
+		PRINTFORMW %ANAME(対象)%有些不情不愿的进入了会客室
+	ENDIF
+ENDIF
+
+PRINTFORML 
+IF DVAR:やくざ_遭遇 == 2
+	PRINTFORML 在会客室里等待的那位带着一种意味深长的笑容
+	PRINTFORML %ANAME(対象)%按捺着心中的不快和他开始了交流
+	PRINTFORML 就如上次的会面一样，他们提出的条件仍然是对别国的恶意流言
+	PRINTFORML 而他们的行事效率确实很高...
+	PRINTFORMW %ANAME(対象)%被那个人盯的有点发毛
+ELSEIF DVAR:やくざ_面会 == 1
+	PRINTFORML 这次来也是那位穿着正装的鬼族
+	PRINTFORML 他那不太像黑道的谈吐实在有点让人出戏
+	PRINTFORMW 谈的话题依旧和上次一样
+ELSE
+	PRINTFORML 会客室中等待着的是一个体型巨大的鬼族
+	PRINTFORML 虽然用着黑道上的用词，但是行为却不像想象中的粗俗
+	PRINTFORML 不过流言也提到过黑社会令行禁止，相当有规矩
+	PRINTFORMW 还是得认真听一听他说什么吧
+	PRINTFORML 
+	PRINTFORMW ...总结起来的话大概就是这样的对话
+	PRINTFORML 「我们以卑微的管理者自居，做了些在地下才能做的事情」
+	PRINTFORML 「这在哪个国家都不会被允许，但是世道已经乱了」
+	PRINTFORMW 「希望您能允许我们的势力在您的领土扎根」
+	PRINTFORML 「作为交换，我们善于抓住对方的弱点和软肋，并以此来牟利」
+	PRINTFORMW 「而这份力量也能为您所用」
+	PRINTFORML 他叙述的行径每一个都下作的令人作呕
+	PRINTFORMW 不过活用这样的组织的话，确实会带来很大的利益......
+	DVAR:やくざ_面会 = 1
+ENDIF
+PRINTFORML 怎麼辦？
+CALL ASK_YN("拜托了" ,"拒绝")
+IF RESULT == 1
+	PRINTFORML 这种组织在领土内扎根绝对是个隐患
+	PRINTFORMW 掩饰着自己的厌恶把对方请了回去
+	DVAR:やくざ_繋がり = 0
+	RETURN 1
+ELSEIF RESULT == 0
+	PRINTFORML 现在已经不是要去选择手段的时候了
+	PRINTFORMW 决定让这群不知来历的家伙加入到自己的阵营
+	PRINTFORML 而他们也应该展示一下自己的价值，要败坏谁的名声呢？
+	CALL SELECT_CHARA_LIST_ONLY_LOGIC_SLG("YAKUZA_TARGET", "NONE")
+	対象国君主 = RESULT
+	IF 対象国君主 == -1
+		PRINTFORML ...不行，仔细一想黑社会可绝对没有什么信用可言
+		PRINTFORMW  决定收回前言，让对方离开这里
+		DVAR:やくざ_繋がり = 0
+		RETURN 1
+	ENDIF
+	PRINTFORML 「活来的快可是个好兆头，您等着吧」
+	PRINTFORMW  他咧嘴一笑，然后大步走出了会客厅
+	PRINTFORML …
+	PRINTFORML ……
+	PRINTFORMW ………
+	FOR LOCAL, 0 ,MAX_COUNTRY
+		SIF !IS_COUNTRY(LOCAL)
+			CONTINUE
+		SIF LOCAL != CFLAG:MASTER:所属
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:対象国君主:所属, -(RAND(50 ,150)), RAND(50 ,150))
+	NEXT
+	PRINTFORMW 仕事は成功したようだ
+	CALL ICPRINT(@"因为黑社会的工作，%ANAME(対象国君主)%勢力的丑闻流传开了……", "W", カラー_注意)
+	IF RAND:10 + 1 + DVAR:やくざ_仕事回数 <= 8
+		PRINTFORML 流言传回到国内后，允许了他们在国内的活动
+		PRINTFORML 「还不错，咱们先当个好邻居吧」
+		PRINTFORMW  %ANAME(対象)%看着豪爽的笑着的那个人，把已经涌到唇边的厌恶又吞了回去
+		DVAR:やくざ_仕事回数 ++
+		DVAR:やくざ_繋がり = 1
+	ELSE
+		DVAR:やくざ_仕事回数 = 0
+		DVAR:やくざ_繋がり = 0
+		DVAR:やくざ_遭遇 = 2
+		PRINTFORML 完成了任务之后，那位黑社会派来的交涉者又来拜访了%ANAME(対象)%
+		PRINTFORMW 但是谈话的气氛却愈加有些失控
+		PRINTFORML 「我说过的吧，我们善于抓住别人的软肋和弱点」 
+		PRINTFORML 「所以您明白的吧？和我们做过交易这件事也是你的软肋之一。」
+		PRINTFORMW %ANAME(対象)%感到寒意爬上了自己的脊背
+		PRINTFORMW 「如果不想我们把这件事捅出去的话，您懂得的......」
+		SIF IS_FEMALE(対象)
+			PRINTFORMW %ANAME(対象)%感觉自己已经变成了猎物，被他那下流的视线舔舐着全身
+		PRINTFORML 怎麼辦？
+		CALL ASK_YN("杀了他！" ,"服软吧...")
+		IF RESULT == 0
+			PRINTFORML 怎么可能向这些下作的人渣低头！
+			PRINTFORML %ANAME(対象)%一剑拔出顺势斩断了交接人的脖子
+			PRINTFORMW  滚落下来的头上还带着惊愕的表情和尚未吐出的呼救
+			PRINTFORML %ANAME(対象)%就像扔掉了什么重担一样，全身都瘫软了下来
+			PRINTFORMW  但是尸体上什么都没有，包括交易的证据......
+			PRINTFORML 
+			FOR LOCAL, 0 ,MAX_COUNTRY
+				SIF !IS_COUNTRY(LOCAL)
+					CONTINUE
+				SIF LOCAL != CFLAG:MASTER:所属
+					CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -1000, 1000)
+			NEXT
+			CALL COLOR_PRINTW("在那之后，因为与黑社会的交易被泄露到他国，导致自己的评价大幅度下降了……", カラー_注意)
+		ELSEIF RESULT == 1
+			PRINTFORML 现在只要拔出剑就能斩断和他们的联系
+			PRINTFORML 但是这样肯定会被他们的人把交易捅出去
+			PRINTFORMW  ...左思右想不得解局，%ANAME(対象)%叹了口气，答应了他的要求
+			IF IS_MALE(対象)
+				CALL ICPRINT(@"他把%ANAME(対象)%全部的钱都勒索走了......", "W", カラー_注意)
+				MONEY -= MONEY
+			ELSE
+				PRINTFORML 他舔了舔嘴唇，显然对这个回答非常满意
+				PRINTFORMW 然后搂着%ANAME(対象)%的肩，一路轻佻的带到了他的家中
+				PRINTFORML 
+				PRINTFORML  他坐在床上，大大咧咧的要%ANAME(対象)%给他跳脱衣舞
+				PRINTFORML %ANAME(対象)%忍耐着强烈的羞耻感，在他舔舐一般的视线下一件一件把衣服脱下来
+				PRINTFORMW  虽然并没有跳起舞来，但脱到最后一件时他的帐篷已经顶到了令人惊异的程度
+				PRINTFORML 口干舌燥的他抓住%ANAME(対象)%的手腕把%ANAME(対象)%按倒在地，骑在%ANAME(対象)%的身上开始疯狂的索吻
+				PRINTFORML 双手失去自由的%ANAME(対象)%连抵抗都做不到，任由粗暴的舌头和手指在身上四处肆虐
+				PRINTFORML 而在他的爱抚下拼命抵抗的%ANAME(対象)%逐渐变得香汗淋漓，也更加的敏感
+				PRINTFORMW  感受到了%ANAME(対象)%抵抗力度的微小变化，他的淫笑着把自己的宝贝逃了出来
+				PRINTFORML 简直就如鬼之名一样扭曲的巨大肉棒夺去了%ANAME(対象)%全部的注意力
+				PRINTFORML %ANAME(対象)%惊魂未定，他已经捉着%ANAME(対象)%的两条大腿抬了起来，调整位置准备突入
+				PRINTFORML 看着身下的可人儿双手乱摆着向自己求饶，他的淫笑更盛，双手一拉就把鬼棒一口气顶到了最深处
+				PRINTFORMW  啊啊啊啊啊！这一顶似是顶到了%ANAME(対象)%的脑袋里边，极端的快感掩盖了全部的感知
+				PRINTFORML 还未等%ANAME(対象)%的喉咙发出啜息，如滔天洪水般的攻势就已经来到
+				PRINTFORML 畸形的肉棒剐蹭着腔内的嫩肉，每次怼入时像要击碎子宫一样的冲击让%ANAME(対象)%的双眼连焦点都找不到
+				PRINTFORML 这单方面的虐待才刚刚开始，房屋中就只剩下了肉与肉碰撞的声音和%ANAME(対象)%随着身体的扭动而一断一续的哭喊声
+				PRINTFORMW  然而即使是如此粗暴的情爱也唤醒了%ANAME(対象)%的雌性本能
+				PRINTFORML 在这狂暴无边的性爱中%ANAME(対象)%甚至不记得自己是被哪一下突刺激到高潮
+				PRINTFORML 鬼则像是受到了鼓励一般把腰扭动的更为剧烈，似是要用龟头亲吻过穴内的每一片肉
+				PRINTFORML 大脑宕机的%ANAME(対象)%吐着舌头，随着鬼的肉棒摆动着纤腰
+				PRINTFORMW 被搓了阴蒂就扭着腰大声娇喘，被亲吻就把舌头伸到对方的嘴中
+				PRINTFORML %ANAME(対象)%就在无意识的奴役中感受着在自己穴中逐渐加速的狂龙
+				PRINTFORML 在肉棒一头撞在子宫口不再进出时，%ANAME(対象)%终于想起来抵抗
+				PRINTFORML 但是子种的洪流已经涌入了子宫，蚕食着肉棒没能没能占据的最后一个角落
+				PRINTFORMW 被灼热的精液烫伤的房间反馈着快感，%ANAME(対象)%猛烈的向后仰着大声哭叫
+				PRINTFORMW 这只是夜晚的前戏，只一次就已筋疲力尽的%ANAME(対象)%那天晚上再没有过哪怕一次反抗......
+				CALL FUCK(対象, "Ｃ, Ｂ, Ｖ, Ｍ, Ａ, Ｖ性交, Ａ性交, 性交, 性技, 奉仕, 精愛, 口淫, 欲望", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精, CFLAG減少", GET_SPERM_ID("黑社會"), "黑社會的唇", "黑社會", "", "強姦")
+				PRINTFORML 
+				PRINTFORML 第二天早上，%ANAME(対象)%枕边摆了好几张自己全身沾满了精液的照片
+				PRINTFORMW 躺在一旁的鬼嘿嘿笑着，小声提醒着%ANAME(対象)%不要想逃跑，这样的强奸还会有的......
+				CALL COLOR_PRINTW(@"%ANAME(対象)%成为了黑社會的愛人兼肉便器……", カラー_ピンク)
+				DVAR:やくざ_肉便器対象ID = GET_ID(対象)
+				DVAR:やくざ_発生フラグ = 1
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+RETURN 1
+
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_YAKUZA(対象)
+#DIM 対象
+RETURN CFLAG:対象:行動不能状態 != 行動不能_子供 && CFLAG:対象:所属 == CFLAG:MASTER:所属 && !IS_ANIMAL(対象) && CFLAG:対象:捕虜先 == 0 && !GETBIT(TALENT:対象:日常系, 素質_デイリー_ソープ嬢) && !(CFLAG:(対象):行動不能状態 == 行動不能_臨月)
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_YAKUZA_TARGET(対象)
+#DIM 対象
+RETURN GET_COUNTRY_BOSS(CFLAG:対象:所属) == 対象 && CFLAG:対象:所属 != CFLAG:MASTER:所属

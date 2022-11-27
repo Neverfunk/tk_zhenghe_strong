@@ -1,0 +1,43 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_SWIMMING_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_SWIMMING_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_SWIMMING(対象)
+#DIM 対象
+PRINTFORML 探索時、在森林的深処找到了能沐浴的干浄的水潭
+PRINTFORMW 怎麼辦？
+PRINTL
+CALL ASK_MULTI("洗个澡", "喝水")
+
+IF RESULT == 1
+	PRINTFORML 水冰冰涼、喝下之後感覚湧出了力量
+	PRINTFORMW 充分的滋潤了喉嚨的%ANAME(対象)%返回了拠点
+	RETURN 1
+ENDIF
+PRINTFORML 難得的機会於是打算洗個澡
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+IF IS_MALE(対象)
+	PRINTFORML 非常舒服
+	PRINTFORMW 渾身清爽的%ANAME(対象)%返回了拠点
+	CALL PRINT_ADD_EXP(対象, "武闘経験値", 1)
+ELSE
+	PRINTFORML ……好像有人在偷窺
+	PRINTFORML 注意到的時候那傢伙已經逃走了
+	CALL PRINT_ADD_EXP(対象, "露出経験値", 3)
+ENDIF

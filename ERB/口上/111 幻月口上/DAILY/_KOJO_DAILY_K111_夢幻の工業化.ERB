@@ -1,0 +1,307 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K111_Industrialization_RATE(対象)
+#DIM 対象
+RETURN 50
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K111_Industrialization_DECISION(対象)
+#DIM 対象
+
+;流れ的にはあなたが君主の場合であろう
+SIF GET_COUNTRY_BOSS(CFLAG:MASTER:所属) != MASTER
+	RETURN 0
+
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K111_Industrialization_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K111_Industrialization(対象)
+#DIM 対象
+#DIM 対象_都市_経済
+#DIM 経済要素
+#DIM 対象_都市
+#DIM 増減額
+#DIM 失敗
+
+;自国都市ランダム
+CALL DAILY_EVENT_RAND_CITYSELECT(0)
+対象_都市 = RESULT
+
+;SHAFFLE_ARRAY
+;MONEY:(CFLAG:MASTER:所属)
+	
+PRINTFORMW 当我像往常一样没有做文书工作的时候，%ANAME(対象)%过来了。
+
+;初見
+IF 幻月_DAILY_経済効果 == "初見"
+	PRINTFORML 听她说，现在本国的工业力量比不上其他国家？
+	PRINTFORML 事实上，即使上了战场，与对方国家的武器相比，自己军队的武器确实差了不少。
+	PRINTFORML 因为亲自参与过战争，所以我很清楚这个话里的藏着的痛苦。
+	PRINTFORML 再加上她的世界「夢幻世界」大部分时间下是封闭着的，基本没有设备和相关的经验。
+	PRINTFORMW 但是有为数不多的学者在「　%GET_CITYNAME(対象_都市)%　」中找到了工业化的方法。
+	
+ELSEIF 幻月_DAILY_経済効果 == "初見取消"
+	PRINTFORML 听她说，上次计划的「　%GET_CITYNAME(幻月_DAILY_指定都市)%　」的工业化，这次改成了在「　%GET_CITYNAME(対象_都市)%　」进行。
+	PRINTFORML 「果然还是无法放弃...」
+	PRINTFORML 「虽然投资伴随着风险，但是如果不承担风险的话是得不到回报的。」
+	PRINTFORMW 「还是...不行吗？」
+	PRINTFORML
+
+;既読
+ELSEIF 幻月_DAILY_経済効果 == "成功" ||  幻月_DAILY_経済効果 == "大成功" || 幻月_DAILY_経済効果 == "失敗"
+
+	;前回の都市と今回の都市が同一か？
+	IF 対象_都市 == 幻月_DAILY_指定都市
+		PRINTFORML 听她说，是和上次一样关于「　%GET_CITYNAME(対象_都市)%　」的工业化的话题。
+		
+	ELSE
+			
+		PRINTFORML 听她说，上次的「　%GET_CITYNAME(幻月_DAILY_指定都市)%　」的工业化，这次改成了在「　%GET_CITYNAME(対象_都市)%　」进行。
+	ENDIF
+				
+	PRINTFORML 事实上，即使上了战场，与对方国家的武器相比，自己军队的武器确实差了不少。
+	PRINTFORML 因为亲自参与过战争，所以我很清楚这个话里的藏着的痛苦。
+	;前回取消
+ELSE
+	PRINTFORML 上次我拒绝了关于工业化的话题。
+	PRINTFORML 但是在之后的调查中，我认为「　%GET_CITYNAME(対象_都市)%　」的工业化是可能的。
+ENDIF
+	
+	;前回はどのような結果だった？
+IF 幻月_DAILY_経済効果 == "取消"
+	PRINTFORML 「果然还是无法放弃...」
+	PRINTFORML 「虽然投资伴随着风险，但是如果不承担风险的话是得不到回报的」
+	PRINTFORMW 「还是...不行吗？」
+		
+ELSEIF 幻月_DAILY_経済効果 == "成功"
+	PRINTFORML 「这次，又是什么？」
+	PRINTFORML 「说实话，我很抱歉，但是在这个预算中，经济的增长是有限的。」
+	PRINTFORMW 「虽然说不是不行...但是这还不足以赶上列强。」
+			
+ELSEIF 幻月_DAILY_経済効果 == "大成功"
+	PRINTFORML 「上次的事谢谢你了。」
+	PRINTFORML 「多亏了这个，我们才能接近列强。」
+	PRINTFORML 「如果可以的话，我希望能够得到和上次一样，甚至更多的预算。」
+	PRINTFORMW 「这还远远不够。」
+		
+ELSEIF 幻月_DAILY_経済効果 == "失敗"
+	PRINTFORML 「上次的事情非常抱歉...」
+	PRINTFORML 「我知道这是一个借口，但我还是没有足够的经验。」
+	PRINTFORML 「只有这个，是用钱买不到的吧~」
+	PRINTFORML 「很多钱被花在了再开发和法律上。」
+	PRINTFORMW 「如果能够给我预算的话，拜托了。」
+	
+	;無いと思うけど
+ELSE
+	;PRINTFORML 
+ENDIF
+
+	;初回限定の選択肢
+IF KDVAR:対象:幻月_夢幻の工業化 == 0
+	PRINTFORMW 「我估算了一下第一次的花费...」
+	PRINTFORML 
+	PRINTFORML 现在的国库:"{MONEY:(CFLAG:MASTER:所属)}"
+	CALL COLOR_PRINTW(@"「　%GET_CITYNAME(対象_都市)%　」的工业化需要花费15,000", カラー_注意)
+		
+	CALL ASK_MULTI_JUDGE("投资", MONEY:(CFLAG:MASTER:所属) >= 15000, "算了", 1)
+	IF RESULT == 1
+		PRINTFORML 「啊，这样啊...真是遗憾。」
+			
+		SIF MONEY:(CFLAG:MASTER:所属) <= 15000
+		PRINTFORMW 「现在的资金没有这个余裕来进行投资。」
+			
+		PRINTFORMW 「那么，下次再说吧。」
+		PRINTFORMW 「因为我们必须一直向前。」
+
+		幻月_DAILY_指定都市 = 対象_都市
+		幻月_DAILY_経済効果 = 初見キャンセル
+			;デイリー終了
+		RETURN 1
+
+	ELSEIF RESULT == 0 && MONEY:(CFLAG:MASTER:所属) >= 15000
+			;表示される数字の100倍がCITY_ECONOMYには保存されている　つまり下二桁は実質の小数点二桁
+			;最初に100で割って100をかけるのは、実質のFLOOR
+		対象_都市_経済 = RAND(CITY_ECONOMY_LIMIT:(対象_都市) / 100 * 100 / 10 , CITY_ECONOMY_LIMIT:(対象_都市) / 100 * 100 / 10 + 1000)
+		対象_都市_経済 += 100
+		CALL MODIFY_CITY_ECONOMY(対象_都市, 対象_都市_経済)
+
+			;次回への持ち越し組
+		幻月_DAILY_経済効果 = 成功
+		幻月_DAILY_投資金額 = 15000
+		KDVAR:対象:幻月_夢幻の工業化 = 1
+
+		;ここまで来ないと思う
+	ELSE
+			;PRINTFORMW 
+	ENDIF
+
+	;初見以降
+ELSE 
+		;増減額計算
+	増減額 = 1000 * KDVAR:対象:幻月_夢幻の工業化
+	PRINTFORML 那么，该怎么办呢？
+	PRINTFORML 现在的国库:"{MONEY:(CFLAG:MASTER:所属)}"
+	PRINTFORML 投資額:"{幻月_DAILY_投資金額}"
+	PRINTFORML 
+	PRINTFORML 増減額:{増減額}
+	PRINTFORML 
+	PRINTFORML 増額後:{幻月_DAILY_投資金額 + 増減額}
+	PRINTFORML 減額後:{幻月_DAILY_投資金額 - 増減額}
+	CALL COLOR_PRINTW(@"※投资不能低于10,000", カラー_注意)
+
+	CALL ASK_MULTI_JUDGE("增加投资", MONEY:(CFLAG:MASTER:所属) >= 幻月_DAILY_投資金額 + 増減額, "减少投资", MONEY:(CFLAG:MASTER:所属) >= 幻月_DAILY_投資金額 + 増減額 && 10000 <= 幻月_DAILY_投資金額 + 増減額, "维持现状", MONEY:(CFLAG:MASTER:所属) >= 幻月_DAILY_投資金額, "中断投资", 4 )
+
+	IF RESULT == 0
+		KDVAR:対象:幻月_夢幻の工業化 += 1
+		幻月_DAILY_投資金額 += 増減額
+
+		幻月_DAILY_経済効果 = 成功
+		;大成功判定、増額すると確率が上がる
+		経済要素 = RAND:100
+
+		SIF 経済要素 <=  10 + 2 * KDVAR:対象:幻月_夢幻の工業化
+			幻月_DAILY_経済効果 = 大成功
+
+		IF 幻月_DAILY_経済効果 == "大成功"
+			CALL COLOR_PRINTW(@"%ANAME(MASTER)%的投资被%ANAME(対象)%适当地分配到「　%GET_CITYNAME(対象_都市)%　」，实现了超出预期的发展！}", カラー_注意)
+			経済要素 = 300
+			経済要素 += 5 * KDVAR:対象:幻月_夢幻の工業化
+			経済要素 += 増減額 / 10000
+
+			;通常成功
+		ELSE
+			PRINTFORML ・・・・・・・・・
+			PRINTFORML ・・・・・・
+			PRINTFORML ・・・
+			PRINTFORMW 「投资进行的很顺利，我们还可以继续战斗」
+			経済要素 = 200
+			経済要素 += 増減額 / 10000
+		ENDIF
+
+	ELSEIF RESULT == 1
+		PRINTFORML 「诶，要减少吗？」
+		PRINTFORML 「我知道财政很困难...」
+		PRINTFORML ・・・・・・・・・
+		PRINTFORML ・・・・・・
+		PRINTFORML ・・・
+
+		SIF KDVAR:対象:幻月_夢幻の工業化 == 1
+			KDVAR:対象:幻月_夢幻の工業化 += 1
+
+		KDVAR:対象:幻月_夢幻の工業化 -= 1
+		幻月_DAILY_投資金額 -= 増減額
+
+		幻月_DAILY_経済効果 = 成功
+			;失敗判定、増額すると確率が下がる(理論上8回失敗すると失敗しなくなる、すこし下でリミッターをつける)
+		経済要素 = RAND:100 
+		経済要素 += 幻月_DAILY_失敗回数 * 5
+
+		SIF 経済要素 <= 40
+			幻月_DAILY_経済効果 = 失敗
+
+		経済要素 += 増減額 / 1000
+
+		IF 幻月_DAILY_経済効果 == "失敗"
+			CALL COLOR_PRINTW(@"由于急速的工业化导致了环境的破坏，出现了灾害！", カラー_警告)
+				;減額すると補正なし
+			経済要素 += 増減額 / 1000
+
+			失敗 = RAND:20
+
+			IF CITY_GUARD:対象_都市 >= 失敗
+				CALL COLOR_PRINTW(@"　%GET_CITYNAME(対象_都市)%　的防御率下降了...", カラー_警告)
+				CITY_GUARD:対象_都市 -= 失敗
+
+			ELSEIF CITY_GUARD:対象_都市 > 3
+				CALL COLOR_PRINTW(@"　%GET_CITYNAME(対象_都市)%　的防御率下降了...", カラー_警告)
+				CITY_GUARD:対象_都市 -= 2
+
+			ELSEIF CITY_GUARD:対象_都市 > 1
+				CITY_GUARD:対象_都市 -= 1
+
+			ELSE
+				CALL COLOR_PRINTW(@"　%GET_CITYNAME(対象_都市)%　已经荒废了，所以没有特别的损失...", カラー_警告)
+			ENDIF
+
+			PRINTFORML 「嗯呃...对不起，我失败了。」
+			PRINTFORML 「我想拜托你不要削减预算...」
+			PRINTFORML 「下次我会努力不再犯同样的错误。」
+			PRINTFORMW %ANAME(対象)%好像十分消沉的样子...
+
+			SIF 幻月_DAILY_失敗回数 <= 5
+			CALL COLOR_PRINTW(@"下次投资失败的概率减少了。", カラー_注意)
+
+				;失敗リミッター
+
+			SIF 幻月_DAILY_失敗回数 <= 5
+				幻月_DAILY_失敗回数 += 1
+		ELSE
+			PRINTFORML 「工业化已经成功了。」
+			PRINTFORMW 「预算的事情，就拜托你了？」
+			経済要素 = 200
+			経済要素 += 増減額 / 10000
+
+		ENDIF
+	ELSEIF RESULT == 2
+		PRINTFORML 「和上次的额度一样吗?」
+		PRINTFORML ・・・・・・・・・
+		PRINTFORML ・・・・・・
+		PRINTFORML ・・・
+		PRINTFORML 「投资进行的很顺利，我们还可以继续战斗」
+		幻月_DAILY_経済効果 = 成功
+
+	ELSEIF RESULT == 3
+		PRINTFORML 「啊，这次是取消吗？」
+		PRINTFORML 「工业发展可能会等着我们，但是敌人不会等着我们哦。」
+		幻月_DAILY_経済効果 = 取消
+			;デイリー終了
+		RETURN 1
+
+		;たぶんないと思うけれど
+	ELSE
+		PRINTFORML ・・・・・・・・・
+		PRINTFORML ・・・・・・
+		PRINTFORML ・・・
+		PRINTFORML 「投资进行的很顺利，我们还可以继续战斗」
+		経済要素 = 100
+		経済要素 += 増減額 / 10000
+	ENDIF
+
+	;表示される数字の100倍がCITY_ECONOMYには保存されている　つまり下二桁は実質の小数点二桁
+	;最初に100で割って100をかけるのは、実質のFLOOR
+	対象_都市_経済 = RAND(CITY_ECONOMY_LIMIT:(対象_都市) / 100 * 100 / 10 , CITY_ECONOMY_LIMIT:(対象_都市) / 100 * 100 / 10 + 1000)
+	対象_都市_経済 += 経済要素
+	CALL MODIFY_CITY_ECONOMY(対象_都市, 対象_都市_経済)
+ENDIF
+	;国庫の減額計算と今回の都市IDをERHに渡す
+幻月_DAILY_指定都市 = 対象_都市
+MONEY:(CFLAG:MASTER:所属) -=  幻月_DAILY_投資金額
+PRINTFORMW 
+
+
+
+
+
+
+
+
+RETURN 1

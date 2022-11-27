@@ -1,0 +1,111 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K3_STRAY_YOUKAI_RATE(対象)
+#DIM 対象
+RETURN 35
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K3_STRAY_YOUKAI_DECISION(対象)
+#DIM 対象
+
+SIF CFLAG:対象:特殊状態 != 特殊状態_放浪
+	RETURN 0
+
+SIF KDVAR:対象:ルーミア_野良妖怪
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 0, 0)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K3_STRAY_YOUKAI_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K3_STRAY_YOUKAI(対象)
+#DIM 対象
+
+KDVAR:対象:ルーミア_野良妖怪 = 1
+CFLAG:対象:面識 = 1
+
+PRINTFORMW 「吶 吶、那邊的那位」
+PRINTFORML %ANAME(MASTER)%が在街道傳来的時候、突然有個声音在叫他
+PRINTFORMW 仔細一看、看到一名少女
+CALL ICPRINT(@"「你好、我是<%NAME_FORMAL(対象)%>、是宵闇的妖怪", "W", カラー_注意)
+PRINTFORMW 「那麼突然真是抱歉、但我現在肚子很餓」
+PRINTFORMW 「但我是個妖怪、身上沒有錢啊」
+PRINTFORMW 「如果能請我吃飯的話、我會很高興的ー」
+PRINTFORML ……沒想到會被流浪妖怪乞食
+PRINTFORML 那麼、要怎麼辦呢……
+
+CALL ASK_MULTI_JUDGE("幫一下她", MONEY >= 1000, "不行", 1)
+
+IF RESULT == 1
+	PRINTFORMW 「誒ー、真可惜」
+	PRINTFORMW 「那麼、唯有去拜託其他人吧ー」
+	PRINTFORMW 語畢、%ANAME(対象)%搖擺不定地飛向遠處了……
+	RETURN 1
+ENDIF
+
+PRINTFORMW 「真的嗎？　謝謝你呀ー」
+PRINTFORMW 「那麼帶我去餐店吧、什麼店鋪也可以哦！」
+PRINTFORMW 被%ANAME(対象)%拖到店鋪裏了……
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORML %ANAME(対象)%輕鬆地吃光了三人分量的食物
+CALL ICPRINT("金<1000>を支払いました", "W", カラー_注意)
+MONEY -= 1000
+PRINTFORMW 妖怪都是這麼厲害的嗎……
+PRINTFORMW 「呼、吃飽了吃飽了。謝謝款待」
+PRINTFORMW 「給你點回禮吧ー。你想要甚麼？」
+PRINTFORML 該怎麼辦呢……
+
+CALL ASK_MULTI_JUDGE("想要力量", 1, "教我技能", GET_EMPTY_SKILL_SLOT(MASTER, スキル_ジャンル_TROOP) != -1, "說過沒有錢了吧……", 0, "成為同伴", 1, "不需要", 1)
+
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORMW 「這樣就可以了嗎？　真是好辦呀」
+		PRINTFORMW 得到了%ANAME(対象)%的訓練……
+		CALL COLOR_PRINTW(@"%ANAME(MASTER)%的武闘上昇了3！！", カラー_注意)
+		ABL:MASTER:武闘 += 3
+	CASE 1
+		PRINTFORMW 「哼ー嗯？　我沒所謂哦」
+		PRINTFORMW 「那麼、我教你我的必殺技吧」
+		PRINTFORMW 「不要隨便乱用啊」
+		CALL SKILL_LEARN_BY_NAME(MASTER, スキル_ジャンル_TROOP, NO:対象, "月的阴暗面")
+		CALL COLOR_PRINTW(@"%ANAME(MASTER)%習得了技能「月的阴暗面」！", カラー_注意)
+	CASE 2
+		;死に分岐
+	CASE 3
+		PRINTFORMW 「啊？　你的同伴？」
+		PRINTFORMW 「可以哦、你那麼親切就當做回禮吧」
+		PRINTFORMW 「啊 但是、偶然也要請我吃飯哦？」
+		CALL COLOR_PRINTW(@"%ANAME(対象)%成為了同伴", カラー_注意)
+		CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属, 1)
+		CFLAG:対象:好感度 += 500
+		CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了500", カラー_シアン)
+		RETURN 1
+	CASE 4
+		PRINTFORMW 「誒ー？　真是謙虚ー」
+		PRINTFORMW 「……真的甚麼也不要嗎？」
+		PRINTFORMW 「嘛、這樣的話我也沒所謂」
+ENDSELECT
+
+PRINTFORMW 「那麼、再見了。謝謝你呢！」
+PRINTFORMW %ANAME(対象)%離開了……
+
+RETURN 1

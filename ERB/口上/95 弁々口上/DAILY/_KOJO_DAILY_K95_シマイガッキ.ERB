@@ -1,0 +1,151 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K95_SHIMAI_DON_RATE(対象)
+#DIM 対象
+RETURN 35
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K95_SHIMAI_DON_DECISION(対象)
+#DIM 対象
+#DIM 八橋
+
+八橋 = NAME_TO_CHARA("八橋")
+
+SIF MASTER == 八橋
+	RETURN 0
+
+SIF !(MAX(CFLAG:対象:好感度, CFLAG:対象:従属度) >= 500 && MAX(CFLAG:八橋:好感度, CFLAG:八橋:従属度) >= 500)
+	RETURN 0
+
+SIF !(ABL:対象:欲望 >= 2 && ABL:八橋:欲望 >= 2)
+	RETURN 0
+
+SIF KDVAR:対象:弁弁_シマイガッキ == -1
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1) && CHECK_KOJO_DAILY_HAPPEN(八橋, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K95_SHIMAI_DON_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K95_SHIMAI_DON(対象)
+#DIM 対象
+#DIM 八橋
+八橋 = NAME_TO_CHARA("八橋")
+
+IF KDVAR:対象:弁弁_シマイガッキ
+	PRINTFORMW %ANAME(対象)%和%ANAME(八橋)%拜访了%ANAME(MASTER)%的卧室……
+	;TranslatedMark %ANAME(対象)%と%ANAME(八橋)%が寝室を訪ねてきた……
+	PRINTFORMW 「还是不行吗……」
+	;TranslatedMark 「また、駄目かしら……」
+	PRINTFORMW 「我和%ANAME(八橋)%，两个人要在一起，呐？」
+	;TranslatedMark 「私と%ANAME(八橋)%と、二人まとめて、ね？」
+ELSE
+	PRINTFORMW 深夜。%ANAME(対象)%和%ANAME(八橋)%拜访了%ANAME(MASTER)%的卧室……
+	;TranslatedMark 深夜。%ANAME(対象)%と%ANAME(八橋)%が寝室を訪ねてきた……
+	PRINTFORMW 「%ANAME(MASTER)%，事实上我稍微有个请求」
+	;TranslatedMark 「%ANAME(MASTER)%、実はお願いがあるのだけど」
+	PRINTFORMW 「说起人类，听说是一种为了确认彼此的信赖，而将身体重合的生物？听到了这种说法」
+	;TranslatedMark 「人っていうのは、お互いの信頼を確かめ合うために、身体を重ねる？　ということをするそうね」
+	PRINTFORMW 「我和八桥是作为付丧神而一同醒来的姐妹哦。所以为了确认彼此的信赖，我们也想试试这种事情……」
+	;TranslatedMark 「私と八橋は付喪神として一緒に目覚めた姉妹よ。だから信頼を確かめ合うっていうそれをしてみたいのだけど……」
+	PRINTFORMW 大概是因为获得知性后才过了不久，所以不明白要怎么做……的样子呢
+	;TranslatedMark 知性を得てから時間が短いので、やり方が分からない、ということだろう
+	PRINTFORMW %ANAME(八橋)%接过了话题
+	;TranslatedMark %ANAME(八橋)%が言葉を引き継いだ
+	PRINTFORMW 「然后姐姐说，让%ANAME(MASTER)%教给我具体的做法」
+	;TranslatedMark 「それで%ANAME(MASTER)%に教えてもらおうって、姉さんが言うからさ」
+	PRINTFORMW 「于是两个人一起来了。那样的话，三个人应该也能做到吧？　……不可以吗？」
+	;TranslatedMark 「二人で来たってわけ。そしたら、三人でできるでしょ？　……できるよね？」
+	PRINTFORMW 「那么，如何？」
+	;TranslatedMark 「それで、どう？」
+	PRINTFORMW 「和我们一起，那个，将身体重合？……之类的事情，能帮我们吗？」
+	;TranslatedMark 「私たちとその、身体を重ねる？　っていうの、してくれるの？」
+	PRINTFORMW ……看起来这两个人对于那种行为，好像完全没有概念的样子
+	;TranslatedMark ……どうやら二人は、それがどういう行為のことなのかまるで知らないらしい
+	PRINTFORMW 那么，怎么办呢……
+	;TranslatedMark さて、どうするか……
+ENDIF
+
+PRINTFORML 
+CALL ASK_YN("同意", "果然不行")
+
+IF RESULT == 1
+	PRINTFORMW 「……是吗？真遗憾呢」
+	;TranslatedMark 「……そう？　残念ね」
+	PRINTFORMW 「那么就没办法了。打扰了呢」
+	;TranslatedMark 「それなら仕方ないわ。お邪魔したわね」
+	PRINTFORMW 两个人携手离开了……
+	;TranslatedMark 二人は立ち去った……
+	IF KDVAR:対象:弁弁_シマイガッキ == 0
+		KDVAR:対象:弁弁_シマイガッキ = -1
+	ENDIF
+	RETURN 1
+ENDIF
+
+IF KDVAR:対象:弁弁_シマイガッキ == 0
+	PRINTFORMW 「谢谢。那么，具体要怎么做呢……」
+	;TranslatedMark 「ありがとう。それでえっと、具体的にはどうしたら……」
+	PRINTFORMW 「要脱掉衣服吗？总觉得有点奇怪呢」
+	;TranslatedMark 「服を脱ぐの？　なんだか変わってるのね」
+	PRINTFORMW 把两个人招呼到床上，推倒了……
+	;TranslatedMark 二人を寝床に招き、押し倒した……
+	CALL COLOR_PRINTW(@"取得了%ANAME(対象)%的合意", カラー_注意)
+	CALL COLOR_PRINTW(@"取得了%ANAME(八橋)%的合意", カラー_注意)
+	TALENT:対象:合意 = 1
+	TALENT:八橋:合意 = 1
+	TALENT:対象:チョロイン = 1
+	TALENT:八橋:チョロイン = 1
+ELSEIF RAND:2
+	PRINTFORMW 「……不要弄痛我们哦？」
+	;TranslatedMark 「……痛くしないでよ？」
+	PRINTFORMW 把两个人招呼到床上，推倒了……
+	;TranslatedMark 二人を寝床に招き、押し倒した……
+ELSE
+	PRINTFORMW 「诶，那个……请多关照？」
+	;TranslatedMark 「ええと、その……よろしくね？」
+	PRINTFORMW 把两个人招呼到床上，推倒了……
+	;TranslatedMark 二人を寝床に招き、押し倒した……
+ENDIF
+
+;全員の調教参加フラグをクリア
+CVARSET CFLAG, 6, 0
+
+CFLAG:八橋:調教参加フラグ = 1
+CFLAG:八橋:調教中帰らない = 1
+CFLAG:八橋:強制友好化 = 1
+BASE:八橋:体力 = MAXBASE:八橋:体力
+BASE:八橋:気力 = MAXBASE:八橋:気力
+
+CFLAG:対象:調教参加フラグ = 1
+CFLAG:対象:調教中帰らない = 1
+CFLAG:対象:強制友好化 = 1
+BASE:対象:体力 = MAXBASE:対象:体力
+BASE:対象:気力 = MAXBASE:対象:気力
+
+;強制逆調教フラグをオン
+FLAG:ターンエンド調教 = 1
+;それ以降のデイリーイベント発生を潰す
+DAILY_CANCEL = 1
+;フラグ
+KDVAR:対象:弁弁_シマイガッキ = 1
+
+RETURN 1
+

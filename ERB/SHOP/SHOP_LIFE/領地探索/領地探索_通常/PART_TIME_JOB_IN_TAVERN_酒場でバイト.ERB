@@ -1,0 +1,75 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_PART_TIME_JOB_IN_TAVERN_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_PART_TIME_JOB_IN_TAVERN_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_PART_TIME_JOB_IN_TAVERN(対象)
+#DIM 対象
+
+PRINTFORMW 探索時、遇到了感到困擾的人
+PRINTFORMW 據說是店裡面的人手不足了
+PRINTFORML 然後他対%ANAME(対象)%問道、要不要來打工
+PRINTFORML
+CALL ASK_MULTI("接受", "拒绝")
+
+IF RESULT == 1
+	PRINTFORML 沒有那種時間
+	PRINTFORML 決定拒絕
+	RETURN 1
+ENDIF
+
+PRINTFORML 正好有些時間
+PRINTFORMW 接受之後、被帯到了有些成人氛圍的地下酒場
+PRINTFORML 聽店長說明了工作內容後、拿到了制服
+
+IF IS_MALE(対象)
+	PRINTFORMW 是很成熟的西装
+	PRINTFORMW %ANAME(対象)%立刻就開始工作了
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW ・
+	PRINTFORMW 順利地完成了工作
+	CALL ICPRINT("獲得了打工費<3000>金", "L", カラー_注意)
+	MONEY += 3000
+	RETURN 1
+ENDIF
+
+PRINTFORMW 発下来的居然是兔女郎服
+PRINTFORMW 雖然是預料之外的衣服、但是答應了也沒辦法
+PRINTFORMW 忍耐著羞恥去工作了
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+
+SELECTCASE RAND:2
+	CASE 0
+		PRINTFORML 工作的時候、被喝醉的客人要求跳舞
+		PRINTFORML 雖然想要拒絕、但是在客人的熱烈呼喊下不得不從了
+		PRINTFORML 在準備好的舞台上配合著音楽生硬的搖晃着身体、讓他們狂熱起来
+		PRINTFORML 在他們目不転睛的注視下、漸漸地%ANAME(対象)%的臉色変紅呼吸也変乱了
+		PRINTFORMW %ANAME(対象)%更加積極地扭動着腰身展現着淫乱的身体、讓觀衆的喝彩声変高了
+		CALL FUCK(対象, "露出")
+	CASE 1
+		PRINTFORML 看見%ANAME(対象)%的樣子、客人們都投去了下流的視線
+		PRINTFORMW 不時會被觸摸%STR_BODY("胸：感触",　対象)%和%STR_BODY("臀部", 対象)%
+		PRINTFORMW 在忍耐著喝醉的客人的性騷擾的同時、%ANAME(対象)%總算是完成了工作……
+		CALL FUCK(対象, "露出, Ｂ, Ｃ, Ａ, Ｖ")
+ENDSELECT
+
+PRINTFORMW 從店長拿受到打工費之後%ANAME(対象)%低着頭快步離開了店鋪
+CALL ICPRINT("獲得了打工費<3000>金", "L", カラー_注意)
+MONEY += 3000
+RETURN 1

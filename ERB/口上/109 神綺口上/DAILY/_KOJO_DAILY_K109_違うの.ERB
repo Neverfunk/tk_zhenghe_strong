@@ -1,0 +1,97 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K109_EXCUSE_RATE(対象)
+#DIM 対象
+RETURN 40
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K109_EXCUSE_DECISION(対象)
+#DIM 対象
+#DIM アリス
+
+アリス = NAME_TO_CHARA("アリス")
+
+SIF !TALENT:対象:合意 || !TALENT:アリス:合意
+	RETURN 0
+
+SIF KDVAR:対象:神綺_違うの
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1) && CHECK_KOJO_DAILY_HAPPEN(アリス, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K109_EXCUSE_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K109_EXCUSE(対象)
+#DIM 対象
+#DIM アリス
+アリス = NAME_TO_CHARA("アリス")
+
+KDVAR:対象:神綺_違うの = 1
+
+PRINTFORMW 「%ANAME(MASTER)%、我可以进来吗？」
+PRINTFORML 正在自己的房间工作着的时候、%ANAME(対象)%来到了房间
+PRINTFORMW 「在工作中打扰你真的非常抱歉、但是我总觉得有些不太舒服……」
+PRINTFORMW 「那么，如果可以的话，一起.。怎么样？？」
+PRINTFORML 看向她的时候、%ANAME(対象)%的脸颊染上了稀薄的红晕
+PRINTFORMW 她的嘴唇看上去是那样的艳丽……
+
+CALL ASK_YN("抱了上去", "谢绝")
+
+IF RESULT == 1
+	PRINTFORML 今天实在太累了
+	PRINTFORML 还是克制一下比较好……
+	RETURN 1
+ENDIF
+
+PRINTFORML 要是拒绝的话显得太不知趣了
+PRINTFORML 把%ANAME(対象)%抱了起来、推到在床上……
+PRINTFORMW 「%ANAME(MASTER)%？　我还有些话想说……诶」
+PRINTFORML ……%ANAME(アリス)%进入了房间
+PRINTFORML 在床上互相缠绕的二人、异常凌乱的%ANAME(対象)%的衣服
+PRINTFORML 聡明的%PRONOUN(アリス)%早已通过眼前的一切、察觉到到底发生了什么吧……
+PRINTFORMW 「啊，爱丽丝，不是的，这个，嗯」
+PRINTFORMW 不管看起来十分慌张的%ANAME(対象)%、%ANAME(アリス)%叹了口气
+
+IF ABL:アリス:欲望 < ランク閾値:ランク_その他:ランク_C
+	PRINTFORMW 「在白天就想着做那种事情、"神綺様"」
+	PRINTFORMW 「算了。。。随你便吧。」
+	PRINTFORMW 离开的%ANAME(アリス)%看向这边的目光、异常的冷漠……
+	CFLAG:アリス:好感度 -= 500
+	RETURN 1
+ENDIF
+
+PRINTFORMW 「%ANAME(MASTER)%也是、还是白天就想着那种事情……」
+PRINTFORMW 「……既然已经看到了那也没办法、我也能加入进来吗？」
+PRINTFORML 这么说着、%ANAME(アリス)%像是在撒娇似地靠了过来
+PRINTFORMW 连饭都不准备吃了。和两个人一起沉溺了进去……
+
+IF HAS_PENIS(MASTER)
+	CALL FUCK(MASTER, "欲望, Ｃ, 射精, Ｖ挿入", "童貞喪失", GET_SPERM_ID("不明"), "", "", @"%ANAME(対象)%的膣穴")
+	CALL FUCK(対象, "欲望, Ｖ, 奉仕, 性技, 精愛, Ｖ性交", "膣内射精, 処女喪失", GET_ID(MASTER), "", ANAME(MASTER), "", "乱交")
+	CALL FUCK(アリス, "欲望, Ｖ, 奉仕, 性技, 精愛, Ｖ性交", "膣内射精, 処女喪失", GET_ID(MASTER), "", ANAME(MASTER), "", "乱交")
+ELSE
+	CALL FUCK(MASTER, "欲望, 奉仕, 性技, Ｃ, Ｂ, Ｍ, 口淫, 百合", "接吻喪失", 0, @"%ANAME(対象)%の\@RAND:2 ?唇#秘貝\@", "", "", "乱交")
+	CALL FUCK(対象, "欲望, 奉仕, 性技, Ｃ, Ｂ, Ｍ, 口淫, 百合", "接吻喪失", 0, @"%ANAME(MASTER)%の\@RAND:2 ?唇#秘貝\@", "", "", "乱交")
+	CALL FUCK(アリス, "欲望, 奉仕, 性技, Ｃ, Ｂ, Ｍ, 口淫, 百合", "接吻喪失", 0, @"%ANAME(MASTER)%の\@RAND:2 ?唇#秘貝\@", "", "", "乱交")
+ENDIF
+
+RETURN 1
+

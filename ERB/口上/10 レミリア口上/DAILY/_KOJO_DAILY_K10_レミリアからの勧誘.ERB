@@ -1,0 +1,149 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K10_INVITATION_FROM_REMILLIA_RATE(対象)
+#DIM 対象
+RETURN 50
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K10_INVITATION_FROM_REMILLIA_DECISION(対象)
+#DIM 対象
+#DIM 紅魔館
+紅魔館 = GET_CITYNUMBER("紅魔館")
+
+;対象と別勢力で、捕虜でなく、面識もない 5%
+SIF CFLAG:対象:特殊状態 == 特殊状態_死亡
+	RETURN 0
+
+;一回きり
+SIF KDVAR:対象:レミリア_レミリアからの勧誘
+	RETURN 0
+
+;主人公はペニスを持っていること
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+
+;対象が君主であり、主人公が君主でない
+SIF GET_COUNTRY_BOSS(CFLAG:対象:所属) != 対象 || GET_COUNTRY_BOSS(CFLAG:MASTER:所属) == MASTER
+	RETURN 0
+
+SIF 紅魔館 == -1
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 0, 0, 0)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K10_INVITATION_FROM_REMILLIA_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;------------------------------------
+;レミリアからの勧誘
+;-----------------------------------
+@KOJO_DAILY_K10_INVITATION_FROM_REMILLIA(対象)
+#DIM ボス
+#DIM 対象
+#DIM 紅魔館
+
+紅魔館 = GET_CITYNUMBER("紅魔館")
+ボス = GET_COUNTRY_BOSS(CFLAG:MASTER:所属)
+
+
+
+PRINTFORML %ANAME(MASTER)%在工作的时候，部下带着信过来了
+PRINTFORM 发信人
+CALL COLOR_PRINT(@"%NAME_FORMAL(対象)%", カラー_注意)
+PRINTFORMW 虽然听过强大的吸血鬼，但应该没有见过面
+PRINTFORMW 我还以为是什么事呢，读了读，原来是派对的邀请
+PRINTFORML 如果是君主的话还好，会邀请像自己这样的一介士官做什么呢？……
+PRINTFORML 虽然有些疑问，但听说红魔馆是一座了不起的宅邸，说到那里的派对，各势力的高层应该会一齐出席吧。
+PRINTFORMW 出去混个脸熟也许还不错……
+PRINTFORML 那么怎么办呢……
+PRINTFORML
+CALL ASK_YN("出席", "算了吧")
+IF RESULT == 1
+	PRINTFORML 没必要陪着这些强者玩乐吧
+	PRINTFORML %ANAME(MASTER)%这样想着、作出了缺席的回答……
+	KDVAR:対象:レミリア_レミリアからの勧誘 = 1
+	RETURN 0
+ENDIF
+PRINTFORML 难得被邀请了。去看看也不错吧……
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORML 红魔馆比传闻上更加壮观。
+PRINTFORMW 更令人吃惊的是，里面比外表更宽敞。到底是什么结构呢
+PRINTFORML 暂且不说这个，派对看起来相当热闹。
+PRINTFORMW 本来以为是高层们的集会，没想到却毫无顾忌地打招呼，甚至连妖精都混到了一起。……
+PRINTFORMW 「欢迎来到红魔馆，客人。玩得开心吗？」
+PRINTFORML 一个人享受着酒，会被人打招呼。青发红瞳。背上是蝙蝠的翅膀。
+PRINTFORMW 传闻%NAME_FORMAL(対象)%就是那样的人
+PRINTFORMW 准备寒暄几句，她立即停了下来
+PRINTFORMW 「免去郑重的客套话了。比起那个我稍微说几句话吧。跟着我」
+PRINTFORML %ANAME(MASTER)%被%ANAME(対象)%拉着手、带到了阳台
+PRINTFORMW 今天晚上月亮很美，但却很冷，也许是因为这个，阳台上没有一个人
+PRINTFORMW ……是个适合密谈的地方.
+PRINTFORMW 「你不会以为我是为了快乐而开派对的吧？」
+PRINTFORML 点了点头。不管怎么社交，也不会特意向一个不认识的军官送邀请函。
+PRINTFORMW 更何况她是一种性格高傲的类型。不允许有无聊的人进入自己的宅邸。……
+PRINTFORMW 「%ANAME(MASTER)%、我听说你是个很优秀的武将」
+PRINTFORMW 「为了得到像你这样的人才，我不会吝惜金钱和精力。」
+PRINTFORMW 「怎么样？要不要来我家？待遇也是，%ANAME(ボス)%不会让你失望的」
+PRINTFORMW 「如果希望女人的话，那也……啊！」
+PRINTFORMW 「呵呵，我也是，反正要成的话最好是很优秀的孩子」
+PRINTFORML %ANAME(対象)%脸上的笑容带着与外表不相称的妖艳。
+IF IS_MALE(MASTER)
+	PRINTFORMW 所谓女人，就是指她自己吧
+ELSE
+	PRINTFORML 所谓的女人，就是指她自己吗
+	PRINTFORMW 虽然不知道是从哪里听来的，但是好像对%ANAME(MASTER)%的身体也有调查
+ENDIF
+PRINTFORMW ……话虽如此，我还以为会有什么事情呢，没想到居然被拉扯进来了。
+PRINTFORML 这也不足为奇了。幻想乡正处于混乱的时代。优秀人才是生存下去必不可少的
+PRINTFORML 即便如此，为了生存下去，尽量保持强有力的势力才是上策。
+PRINTFORML 甚至特地跑来跟我打招呼。如果听话的话，回报会很大吧？
+PRINTFORMW 另一方面，现在和主公方面的人际关系肯定会变得很僵硬吧。
+PRINTFORMW 那么，怎麽办？……
+
+CALL SINGLE_DRAWLINE
+PRINTFORML %ANAME(対象)%的領地数:{GET_OWN_CITY(CFLAG:対象:所属)} %ANAME(ボス)%的領地数:{GET_OWN_CITY(CFLAG:MASTER:所属)}
+PRINTFORML 
+CALL ASK_YN("接受", "拒绝")
+IF RESULT == 0
+	PRINTFORMW 「我想你也会这么说的」
+	PRINTFORMW 「那么……请多关照了」
+	PRINTFORMW %ANAME(MASTER)%堅定地握着%ANAME(対象)%伸出的手……
+	LOCAL:0 = MIN((ABL:MASTER:武闘 + ABL:MASTER:知略 + ABL:MASTER:政治 + ABL:MASTER:防衛) * 200, 50000)
+	CALL COLOR_PRINTW(@"收到{LOCAL:0}金安家費", カラー_注意)
+	CALL COLOR_PRINTW(@"取得了%ANAME(対象)%的合意", カラー_ピンク)
+	CALL COLOR_PRINTW(@"与%ANAME(ボス)%的外交関係変得非常悪劣了", カラー_警告)
+	MONEY += LOCAL:0
+	TALENT:対象:合意 = 1
+	TALENT:対象:チョロイン = 1
+	CFLAG:対象:面識 = 1
+	CFLAG:対象:好感度 = MAX(CFLAG:対象:好感度, 800)
+	CFLAG:対象:依存度 = MAX(CFLAG:対象:依存度, 200)
+	CALL CHANGE_RELATION_O_TO_O(ボス, 対象, -500, 500)
+	CALL CHANGE_RELATION_O_TO_O(ボス, MASTER, -500, 500)
+	CALL CHANGE_COUNTRY(MASTER, CFLAG:対象:所属, 1)
+	KDVAR:対象:レミリア_レミリアからの勧誘 = 1
+ELSE
+	PRINTFORMW 「哦，天啊」
+	PRINTFORMW 「有点意外啊。我还以为你不会拒绝呢」
+	PRINTFORMW 「嘛，没办法啊。既然如此，我就放弃吧」
+	PRINTFORML 既然拒绝了这番话，就做好了成为刀刃事件的觉悟，%ANAME(対象)%轻而易举地放弃了
+	PRINTFORMW 挺意外地想着，%ANAME(対象)%撅起了嘴唇
+	PRINTFORMW 「我可不情愿地对邀请来参加派对的客人施暴」
+	PRINTFORMW 「对不起把您带到这么冷的地方。请享受派对吧」
+	PRINTFORMW 之后我们回到了大厅、%ANAME(MASTER)%把刚才的话藏在心里，享受了聚会的乐趣……
+	KDVAR:対象:レミリア_レミリアからの勧誘 = 2
+ENDIF
+
+RETURN 1

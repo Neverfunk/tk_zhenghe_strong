@@ -1,0 +1,75 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_BOUNCER_RATE()
+RETURN 20
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_BOUNCER_DECISION()
+RETURN DAY >= 10
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_BOUNCER_GENRE()
+RETURN デイリー_ジャンル_雇用
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_BOUNCER()
+#DIM 対象
+#DIM 素質
+#DIM 料金
+
+CALL CREATE_RANDOM_CHARA()
+対象 = RESULT
+
+;生成に失敗したらRETURN 0
+SIF RESULT == -1
+	RETURN 0
+
+ABL:対象:武闘 = RAND(60, 85)
+ABL:対象:防衛 = RAND(60, 85)
+ABL:対象:知略 = RAND(60, 80)
+ABL:対象:政治 = 280 - (ABL:対象:武闘 + ABL:対象:知略 + ABL:対象:防衛)
+ABL:対象:歌唱 = RAND(20, 40)
+ABL:対象:料理 = 60 - ABL:対象:歌唱
+
+料金 = RAND(20000, 30000)
+
+PRINTFORML %ANAME(MASTER)%正在工作的時候、侍從通知有客來訪
+PRINTFORMW 好像是有対自己實力很有自信的人想要成為士官
+PRINTFORML 非常歡迎優秀的人材……如果真的是非常優秀的話
+PRINTFORMW 不管怎樣、%ANAME(MASTER)%決定先見一面……
+PRINTFORML
+PRINTFORM 客人的名字是
+CALL COLOR_PRINT(@"%ANAME(対象)%", カラー_注意)
+PRINTFORMW
+PRINTFORML %ANAME(対象)%稍微展示了一下能力、原來如此、是個不簡単的傢伙
+PRINTFORMW 這樣的話、讓其加入%ANAME(MASTER)%的勢力、肯定會非常活躍的吧……
+PRINTFORM %ANAME(対象)%、要求提供安家費
+CALL COLOR_PRINT(@"{料金}", カラー_注意)
+PRINTFORML 金
+PRINTFORMW 雖然價格不低、但是能迎來有実力的人是錢所無法代替的……
+CALL SINGLE_DRAWLINE
+PRINTFORML 現在的資金:{MONEY}
+CALL ASK_MULTI_JUDGE(@"支付{料金}金雇用", MONEY >= 料金, "拒絕", 1)
+IF RESULT == 0
+	PRINTFORMW 歡迎%ANAME(対象)%的加入……
+	CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属, 1)
+	MONEY -= 料金
+ELSE
+	PRINTFORMW 決定讓其回去……
+	CALL DELETE_CHARA(対象)
+ENDIF
+RETURN 1

@@ -1,0 +1,29 @@
+@BUILDING_GET_NAME_国土资源局()
+    #FUNCTIONS
+    RETURNF "国土资源局"
+
+@BUILDING_GET_EXP_国土资源局()
+    #FUNCTIONS
+    RETURNF "减少建造建筑消耗的国库资金。"
+
+@BUILDING_SET_INFO_ID_19()
+    BUILDING_TYPE:建造物_国土资源局 = 建造物_类型_政治类
+    BUILDING_LEVEL:建造物_国土资源局 = 建造物_等级_二级建筑
+    BUILDING_LIMIT_NUM:建造物_国土资源局 = 建造物_数量限制_1
+    BUILDING_LIMIT_UNI:建造物_国土资源局 = 0
+    BUILDING_COUNTRY_ID:建造物_国土资源局:特殊勢力_普通势力 = 1
+    BUILDING_HAVE_SKILL:建造物_国土资源局 = 0
+    BUILDING_TOHO_REQ_ID:建造物_国土资源局:0 = 0
+
+@CHECK_BUILDING_FUNCTION_国土资源局(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    #DIM POLITICS
+    RESULT:1 = TMP_BUILDING_EXIST_FLAG:COUNTRY_ID:建造物_国土资源局
+    IF RESULT:1 > 0
+        SIF TMP_CREATE_IS_FREE_MAP_FUNC() > 0
+            POLITICS = SQRT(MAX(TMP_GET_POLITICS_POWER(CFLAG:MASTER:所属),0))/20
+        RESULT:1 = MIN(50,POLITICS)
+        RESULT:0 = 1
+    ENDIF
+    RETURNF RESULT:0

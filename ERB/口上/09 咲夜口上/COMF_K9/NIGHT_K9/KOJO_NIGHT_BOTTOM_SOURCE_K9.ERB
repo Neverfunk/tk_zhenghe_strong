@@ -1,0 +1,1483 @@
+﻿;─────────────────────────────────────── 
+;●閨_受け_実行前_ソース参照　CALL MOAN_K9(MASTER)
+;─────────────────────────────────────── 
+@MOAN_K9(咲夜_対象)
+#DIM 咲夜
+#DIM 咲夜_対象
+#DIM 咲夜_今回部位値
+#DIM 咲夜_最大部位値
+#DIM 咲夜_表示フラグ
+#DIMS 咲夜_今回部位
+#DIMS 咲夜_最大部位
+#DIMS 咲夜_今回部位称
+#DIMS 咲夜_最大部位称
+
+IF !咲夜_対象
+	咲夜_対象 = MASTER
+ENDIF
+
+;初期化
+咲夜 = NAME_TO_CHARA("咲夜")
+咲夜_今回部位値 = 0
+咲夜_最大部位値 = 0
+咲夜_表示フラグ = 0
+咲夜_今回部位 = ""
+咲夜_最大部位 = ""
+咲夜_今回部位称 = ""
+咲夜_最大部位称 = ""
+
+;─────────────────────────────────────── 
+;○咲夜の快楽状態をチェック
+;─────────────────────────────────────── 
+;▼SOURCE
+;　前文の場合SOURCE・後文ならCUP・値は最大部位値との比較用なのでPALAMで保存
+;　最低1ないと刺激とみなさないPALAMには快Ｐがない
+IF SOURCE:咲夜:快Ｖ >= 1 && SOURCE:咲夜:快Ｖ >= SOURCE:咲夜:快Ｐ && SOURCE:咲夜:快Ｖ >= SOURCE:咲夜:快Ｃ && SOURCE:咲夜:快Ｖ >= SOURCE:咲夜:快Ａ && SOURCE:咲夜:快Ｖ >= SOURCE:咲夜:快Ｂ
+	咲夜_今回部位値 = PALAM:咲夜:快Ｖ
+	咲夜_今回部位 '= "Ｖ"
+	咲夜_今回部位称 '= CALL_DIRTY_K9("Ｖ")
+ELSEIF SOURCE:咲夜:快Ａ >= 1 && SOURCE:咲夜:快Ａ >= SOURCE:咲夜:快Ｐ && SOURCE:咲夜:快Ａ >= SOURCE:咲夜:快Ｃ && SOURCE:咲夜:快Ａ >= SOURCE:咲夜:快Ｖ && SOURCE:咲夜:快Ａ >= SOURCE:咲夜:快Ｂ
+	咲夜_今回部位値 = PALAM:咲夜:快Ａ
+	咲夜_今回部位 '= "Ａ"
+	咲夜_今回部位称 '= CALL_DIRTY_K9("Ａ")
+ELSEIF SOURCE:咲夜:快Ｐ >= 1 && SOURCE:咲夜:快Ｐ >= SOURCE:咲夜:快Ｖ && SOURCE:咲夜:快Ｐ >= SOURCE:咲夜:快Ａ && SOURCE:咲夜:快Ｐ >= SOURCE:咲夜:快Ｃ && SOURCE:咲夜:快Ｐ >= SOURCE:咲夜:快Ｂ
+	咲夜_今回部位値 = PALAM:咲夜:快Ｃ
+	咲夜_今回部位 '= "Ｐ"
+	咲夜_今回部位称 '= CALL_DIRTY_K9("Ｐ")
+ELSEIF SOURCE:咲夜:快Ｃ >= 1 && SOURCE:咲夜:快Ｃ >= SOURCE:咲夜:快Ｐ && SOURCE:咲夜:快Ｃ >= SOURCE:咲夜:快Ｖ && SOURCE:咲夜:快Ｃ >= SOURCE:咲夜:快Ａ && SOURCE:咲夜:快Ｃ >= SOURCE:咲夜:快Ｂ
+	IF HAS_PENIS(咲夜)
+		咲夜_今回部位値 = PALAM:咲夜:快Ｃ
+		咲夜_今回部位 '= "Ｐ"
+		咲夜_今回部位称 '= CALL_DIRTY_K9("Ｐ")
+	ELSE
+		咲夜_今回部位値 = PALAM:咲夜:快Ｃ
+		咲夜_今回部位 '= "Ｃ"
+		咲夜_今回部位称 '= CALL_DIRTY_K9("Ｃ")
+	ENDIF
+ELSEIF SOURCE:咲夜:快Ｂ >= 1 && SOURCE:咲夜:快Ｂ >= SOURCE:咲夜:快Ｐ && SOURCE:咲夜:快Ｂ >= SOURCE:咲夜:快Ｃ && SOURCE:咲夜:快Ｂ >= SOURCE:咲夜:快Ｖ && SOURCE:咲夜:快Ｂ >= SOURCE:咲夜:快Ａ
+	咲夜_今回部位値 = PALAM:咲夜:快Ｂ
+	咲夜_今回部位 '= "Ｂ"
+	咲夜_今回部位称 '= CALL_DIRTY_K9("Ｂ")
+ELSE
+	咲夜_今回部位値 = 0
+	咲夜_今回部位 '= ""
+	咲夜_今回部位称 '= ""
+ENDIF
+
+;▼PALAM
+;　PALAMは絶頂までの蓄積＆絶頂により落ち着く（LIMIT9999）
+;　最低10ないと刺激とみなさないPALAMには快Ｐがない
+IF PALAM:咲夜:快Ｖ >= 10 && PALAM:咲夜:快Ｖ >= PALAM:咲夜:快Ｃ && PALAM:咲夜:快Ｖ >= PALAM:咲夜:快Ａ && PALAM:咲夜:快Ｖ >= PALAM:咲夜:快Ｂ
+	咲夜_最大部位値 = PALAM:咲夜:快Ｖ
+	咲夜_最大部位 '= "Ｖ"
+	咲夜_最大部位称 '= CALL_DIRTY_K9("Ｖ")
+ELSEIF PALAM:咲夜:快Ａ >= 10 && PALAM:咲夜:快Ａ >= PALAM:咲夜:快Ｃ && PALAM:咲夜:快Ａ >= PALAM:咲夜:快Ｖ && PALAM:咲夜:快Ａ >= PALAM:咲夜:快Ｂ
+	咲夜_最大部位値 = PALAM:咲夜:快Ａ
+	咲夜_最大部位 '= "Ａ"
+	咲夜_最大部位称 '= CALL_DIRTY_K9("Ａ")
+ELSEIF PALAM:咲夜:快Ｃ >= 10 && PALAM:咲夜:快Ｃ >= PALAM:咲夜:快Ｖ && PALAM:咲夜:快Ｃ >= PALAM:咲夜:快Ａ && PALAM:咲夜:快Ｃ >= PALAM:咲夜:快Ｂ
+	IF HAS_PENIS(咲夜)
+		咲夜_最大部位値 = PALAM:咲夜:快Ｃ
+		咲夜_最大部位 '= "Ｐ"
+		咲夜_最大部位称 '= CALL_DIRTY_K9("Ｐ")
+	ELSE
+		咲夜_最大部位値 = PALAM:咲夜:快Ｃ
+		咲夜_最大部位 '= "Ｃ"
+		咲夜_最大部位称 '= CALL_DIRTY_K9("Ｃ")
+	ENDIF
+ELSEIF PALAM:咲夜:快Ｂ >= 10 && PALAM:咲夜:快Ｂ >= PALAM:咲夜:快Ｃ && PALAM:咲夜:快Ｂ >= PALAM:咲夜:快Ｖ && PALAM:咲夜:快Ｂ >= PALAM:咲夜:快Ａ
+	咲夜_最大部位値 = PALAM:咲夜:快Ｂ
+	咲夜_最大部位 '= "Ｂ"
+	咲夜_最大部位称 '= CALL_DIRTY_K9("Ｂ")
+ELSE
+	咲夜_最大部位値 = 0
+	咲夜_最大部位 '= ""
+	咲夜_最大部位称 '= ""
+ENDIF
+
+;─────────────────────────────────────── 
+;○台詞１_咲夜の失神疲労
+;─────────────────────────────────────── 
+;主導権がない
+IF !IS_INITIATIVE(咲夜)
+	;▼体力
+	IF BASE:咲夜:体力 <= (MAXBASE:咲夜:体力 / 3)
+		PRINT 「
+		PRINTDATA
+			DATAFORM 哈……哈
+			;TranslatedMark はぁ……はぁ
+			DATAFORM 嗯……嗯
+			;TranslatedMark んぅ……う
+			DATAFORM 啊，啊
+			;TranslatedMark はっ、あぁ
+			DATAFORM 嗯……啊，哈哈
+			;TranslatedMark ふ……ぁ、は
+			DATAFORM 也、啊……哈
+			;TranslatedMark も、はぁ……はぁ
+			DATAFORM 嗯，呃……哈
+			;TranslatedMark う、く……はぁ
+			DATAFORM 身体……太累了
+			;TranslatedMark 体が……疲れてぇ
+			DATAFORM 已经……哈、哈
+			;TranslatedMark もう……はぁ、はぁ
+			DATAFORM 太累了，啊，啊
+			;TranslatedMark も、疲れて、あ、あ
+			DATAFORM 身体已经……冰……不，我
+			;TranslatedMark もう、体が……つら……い、わ
+			DATAFORM 嗯……哈、哈
+			;TranslatedMark もうぅ……はぁ、はぁ
+			DATAFORM 呼吸啊，好痛苦……哇
+			;TranslatedMark 息がぁ、苦しい……わ
+			DATAFORM 头脑发昏……做，做
+			;TranslatedMark 頭がぼうっと……する、わ
+			DATAFORM 身体啊……不会动的
+			;TranslatedMark からだがぁ……動かない、わ
+			DATAFORM 嗯，是的
+			;TranslatedMark んく、けふっ
+		ENDDATA
+		PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+		PRINTDATA
+			DATAFORM 哈哈
+			;TranslatedMark は、ふ
+			DATAFORM 哈
+			;TranslatedMark はぁっ
+			DATAFORM 让我休息吧
+			;TranslatedMark 休ませてぇ
+			DATAFORM 头啊……木纹
+			;TranslatedMark あたまがぁ……も
+			DATAFORM 哈，嗯
+			;TranslatedMark はぁ、んぅ
+			DATAFORM 稍微休息一下……非常
+			;TranslatedMark 少し、休み……た
+			DATAFORM 界限，哟
+			;TranslatedMark 限界、よぉ
+			DATAFORM 哈……啊，是
+			;TranslatedMark はぁ……あ、ひぃ
+			DATAFORM 嗯，啊。哈哈
+			;TranslatedMark ふ、あ。は
+		ENDDATA
+		PRINTFORML %BREAK_K9("末", 咲夜_対象)%」
+
+	;▼気力
+	ELSEIF BASE:咲夜:気力 <= (MAXBASE:咲夜:気力 / 3)
+		PRINT 「
+		PRINTDATA
+			DATAFORM 哈……哈
+			;TranslatedMark はぁ……はぁ
+			DATAFORM 嗯，辛……岩石
+			;TranslatedMark んぅ、つら……いわ
+			DATAFORM 心情……好咧
+			;TranslatedMark 気持ち……よくぇ
+			DATAFORM 嗯……啊，哈哈
+			;TranslatedMark ふ……ぁ、は
+			DATAFORM 也、糖……哈
+			;TranslatedMark も、あめ……はぁ
+			DATAFORM 嗯，呃……哈
+			;TranslatedMark う、く……はぁ
+			DATAFORM 嗯……过去了
+			;TranslatedMark いき……過ぎてぇ
+			DATAFORM 已经……哈、哈
+			;TranslatedMark もう……はぁ、はぁ
+			DATAFORM 感觉累了，啊，啊
+			;TranslatedMark も、感じ疲れて、あ、あ
+			DATAFORM 身体已经……冰……不，我
+			;TranslatedMark もう、体が……つら……い、わ
+			DATAFORM 嗯……哈、哈
+			;TranslatedMark もうぅ……はぁ、はぁ
+			DATAFORM 呼吸啊，好痛苦……哇
+			;TranslatedMark 息がぁ、苦しい……わ
+			DATAFORM 呼……啊，哈
+			;TranslatedMark ひぅ……あ、はぁ
+			DATAFORM 身体啊……不会动的
+			;TranslatedMark からだがぁ……動かない、わ
+			DATAFORM 嗯，是的
+			;TranslatedMark んく、けふっ
+		ENDDATA
+		PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+		PRINTDATA
+			DATAFORM 哈哈
+			;TranslatedMark は、ふ
+			DATAFORM 哈
+			;TranslatedMark はぁっ
+			DATAFORM 让我休息吧
+			;TranslatedMark 休ませてぇ
+			DATAFORM 头啊……已经，已经
+			;TranslatedMark あたまがぁ……もぉ
+			DATAFORM 哈，嗯
+			;TranslatedMark はぁ、んぅ
+			DATAFORM 少，休息一下……嗯，嗯
+			;TranslatedMark 少しぃ、休ま……せ、ん
+			DATAFORM 界限，哟
+			;TranslatedMark 限界、よぉ
+			DATAFORM 哈……啊，是
+			;TranslatedMark はぁ……あ、ひぃ
+			DATAFORM 呼啊……嗯
+			;TranslatedMark ふあぁ……ん
+		ENDDATA
+		PRINTFORML %BREAK_K9("末", 咲夜_対象)%」
+	ENDIF
+ENDIF
+
+;─────────────────────────────────────── 
+;○台詞２_ソースに関して
+;─────────────────────────────────────── 
+咲夜_表示フラグ = 0
+;フィスト・イラマ・タトゥー・首絞め・腹パン・鞭などの強苦痛
+IF SOURCE:咲夜:苦痛 >= 100
+	咲夜_表示フラグ += 1
+	IF 咲夜_表示フラグ == 1
+		PRINTFORM 「
+	ELSEIF 咲夜_表示フラグ > 3
+		PRINTFORML %BREAK_K9("末", 咲夜_対象)%」
+		PRINTFORM 「
+	ELSE
+		PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+	ENDIF
+	PRINTDATA
+		DATAFORM 阿谀
+		;TranslatedMark あぐうぅ
+		DATAFORM 啊啊啊啊——啊啊
+		;TranslatedMark うあぁぁぁ――ぁあ
+		DATAFORM 啊啊啊啊
+		;TranslatedMark ひぁぁあぁ
+		DATAFORM 非常
+		;TranslatedMark ひいぃ
+		DATAFORM 嗯，嗯
+		;TranslatedMark ひぐぅっ、うぅ
+		DATAFORM 嗯……嘿！啊，唔
+		;TranslatedMark うくう……っ！　あ、ぐ
+		DATAFORM 啊啊啊——！嗯，啊
+		;TranslatedMark ああぁ――っ！　う、ぁ
+	ENDDATA
+;縄やスパンキングなどの苦痛
+ELSEIF SOURCE:咲夜:苦痛 >= 10
+	咲夜_表示フラグ += 1
+	IF 咲夜_表示フラグ == 1
+		PRINTFORM 「
+	ELSEIF 咲夜_表示フラグ > 3
+		PRINTFORML %BREAK_K9("末", 咲夜_対象)%」
+		PRINTFORM 「
+	ELSE
+		PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+	ENDIF
+	PRINTDATA
+		DATAFORM 啊啊……痛%POLITE_K9("わ", "です")%
+		;TranslatedMark ひぁっ……痛い%POLITE_K9("わ", "です")%
+		DATAFORM 好痛啊
+		;TranslatedMark 痛っ、あ
+		DATAFORM 啊，是啊
+		;TranslatedMark いたっ、うぁ
+		DATAFORM 有了，安
+		;TranslatedMark いた、あん
+		DATAFORM 嗯……个，嗯
+		;TranslatedMark くぅっ……つ、う
+		DATAFORM 痛……嗯，嗯
+		;TranslatedMark 痛……んくぅ
+		DATAFORM 啊，是啊，是啊
+		;TranslatedMark い、たぁ、うぅ
+	ENDDATA
+ENDIF
+
+IF SOURCE:咲夜:恐怖 >= 10 || SOURCE:咲夜:不安 >= 10
+	咲夜_表示フラグ += 1
+	IF 咲夜_表示フラグ == 1
+		PRINTFORM 「
+	ELSEIF 咲夜_表示フラグ > 3
+		PRINTFORML %BREAK_K9("末", 咲夜_対象)%」
+		PRINTFORM 「
+	ELSE
+		PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+	ENDIF
+	PRINTDATA
+		DATAFORM 不，放弃……恐怖%POLITE_K9("わ", "です")%
+		;TranslatedMark や、やめ……怖い%POLITE_K9("わ", "です")%
+		DATAFORM 好恐怖……嗯，嗯
+		;TranslatedMark 怖っ……ひ、う
+		DATAFORM 什么%POLITE_K9("するの", "なさるんですか")%……呜呜
+		;TranslatedMark 何を%POLITE_K9("するの", "なさるんですか")%……ひぅ
+		DATAFORM 嗯……不，不
+		;TranslatedMark ひっ……い、いや
+		DATAFORM 嗯……啊
+		;TranslatedMark ひぃ……ぁ
+		DATAFORM 恐怖%POLITE_K9("わ", "です")%……哎呀
+		;TranslatedMark 怖い%POLITE_K9("わ", "です")%……いやぁ
+		DATAFORM 好恐怖啊……停止
+		;TranslatedMark 怖いの、あ……やめ
+	ENDDATA
+ENDIF
+
+IF SOURCE:咲夜:反感 >= 10
+	咲夜_表示フラグ += 1
+	IF 咲夜_表示フラグ == 1
+		PRINTFORM 「
+	ELSEIF 咲夜_表示フラグ > 3
+		PRINTFORML %BREAK_K9("末", 咲夜_対象)%」
+		PRINTFORM 「
+	ELSE
+		PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+	ENDIF
+	PRINTDATA
+		DATAFORM 喂。讨厌，讨厌
+		;TranslatedMark いやっ。いや%POLITE_K9("よ", "です")%
+		DATAFORM 停止吧%POLITE_K9("", "ください")%……哎呀，%POLITE_K9("", "です")%
+		;TranslatedMark やめて%POLITE_K9("", "ください")%……いや%POLITE_K9("", "です")%
+		DATAFORM 为什么……？这样
+		;TranslatedMark どうして……？　こんな
+		DATAFORM 故意%POLITE_K9("なの", "ですか")%？为什么
+		;TranslatedMark わざと%POLITE_K9("なの", "ですか")%？　どうして
+		DATAFORM 住手
+		;TranslatedMark やめてぇ
+		DATAFORM 讨厌的POLITE K9（"啊，拜托了"，"是，请多关照"）
+		;TranslatedMark いやなのPOLITE_K9("よ、お願いだから", "です、どうか")
+	ENDDATA
+ENDIF
+
+;愛情系は陥落時のみで、苦痛が高すぎない場合かマゾのみ
+IF CHECK_K9("陥落", 咲夜_対象)
+	IF SOURCE:咲夜:苦痛 < 80 || GETBIT(TALENT:咲夜:淫乱系, 素質_淫乱_マゾ)
+		IF SOURCE:咲夜:歓楽 >= 10 || SOURCE:咲夜:愛情 >= 10 || SOURCE:咲夜:優越 >= 10 || SOURCE:咲夜:接触 >= 10 || SOURCE:咲夜:奉仕 >= 10 || SOURCE:咲夜:歓喜 >= 10 
+			咲夜_表示フラグ += 1
+			IF 咲夜_表示フラグ == 1
+				PRINTFORM 「
+			ELSEIF 咲夜_表示フラグ > 3
+				PRINTFORML %BREAK_K9("末", 咲夜_対象)%」
+				PRINTFORM 「
+			ELSE
+				PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+			ENDIF
+			PRINTDATA
+				DATAFORM %CALLNAME_K9(咲夜_対象)%%POLITE_K9("好きよ", "好きです")%❤嗯……啊
+				;TranslatedMark %CALLNAME_K9(咲夜_対象)%が%POLITE_K9("好きよ", "好きです")%❤　んんっ……あ
+				DATAFORM 嗯，中❤呵呵。喜欢
+				;TranslatedMark ん、ちゅっ❤　ふふっ。好き
+				DATAFORM 喜欢❤嗯。%CALLNAME_K9(咲夜_対象, "ぁ")%
+				;TranslatedMark 好き❤　んっ。%CALLNAME_K9(咲夜_対象, "ぁ")%
+				DATAFORM 太棒了，%CALLNAME_K9(咲夜_対象)%……呵呵呵
+				;TranslatedMark 素敵よ、%CALLNAME_K9(咲夜_対象)%……ふふっ
+				DATAFORM 啊啊❤　%POLITE_K9("好きよ", "好きです")%
+				;TranslatedMark あぁ❤　%POLITE_K9("好きよ", "好きです")%
+				DATAFORM 紧紧地……标准%POLITE_K9("ぇ", "くださいぃ")%
+				;TranslatedMark ぎゅうってぇ……して%POLITE_K9("ぇ", "くださいぃ")%
+				DATAFORM 然后是%POLITE_K9("ぇ", "くださいぃ")%。%CALLNAME_K9(咲夜_対象, "ぁ")%❤啊啊
+				;TranslatedMark して%POLITE_K9("ぇ", "くださいぃ")%。%CALLNAME_K9(咲夜_対象, "ぁ")%❤　あぁ
+			ENDDATA
+		ENDIF
+	ENDIF
+ENDIF
+
+IF SOURCE:咲夜:露出 >= 10 || SOURCE:咲夜:逸脱 >= 10
+	;あまり痛みがないと体力気力があれば恥じらう
+	IF SOURCE:咲夜:苦痛 < 80 && BASE:咲夜:気力 <= (MAXBASE:咲夜:気力 / 3) && BASE:咲夜:体力 > (MAXBASE:咲夜:体力 / 3)
+		咲夜_表示フラグ += 1
+		IF 咲夜_表示フラグ == 1
+			PRINTFORM 「
+		ELSEIF 咲夜_表示フラグ > 3
+			PRINTFORML %BREAK_K9("末", 咲夜_対象)%」
+			PRINTFORM 「
+		ELSE
+			PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+		ENDIF
+		PRINTDATA
+			DATAFORM 三……一看就讨厌
+			;TranslatedMark みっ……見たらいやぁ
+			DATAFORM 哈……害羞，害羞
+			;TranslatedMark は……恥ずかし%POLITE_K9("いわ", "いです")%
+			DATAFORM 看，别看%POLITE_K9("ぇ", "ください")%
+			;TranslatedMark み、見ないで%POLITE_K9("ぇ", "ください")%
+			DATAFORM %POLITE_K9("だめよ", "いけません")%、这样
+			;TranslatedMark %POLITE_K9("だめよ", "いけません")%、こんな
+			DATAFORM 不行，看
+			;TranslatedMark だめぇ、見ちゃ
+			DATAFORM 好害羞啊
+			;TranslatedMark は、恥ずかし
+			DATAFORM 啊……不好意思，%POLITE_K9("のよ", "んです")%
+			;TranslatedMark はっ……恥ずかしい、%POLITE_K9("のよ", "んです")%
+			DATAFORM 不，不要看
+			;TranslatedMark いやぁ、見ないでぇ
+		ENDDATA
+	;痛すぎてそれどころじゃない
+	ELSEIF SOURCE:咲夜:苦痛 >= 80
+		咲夜_表示フラグ += 1
+		IF 咲夜_表示フラグ == 1
+			PRINTFORM 「
+		ELSEIF 咲夜_表示フラグ > 3
+			PRINTFORML %BREAK_K9("末", 咲夜_対象)%」
+			PRINTFORM 「
+		ELSE
+			PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+		ENDIF
+		PRINTDATA
+			DATAFORM 哎呀
+			;TranslatedMark いやあぁ
+			DATAFORM 啊啊啊啊啊
+			;TranslatedMark やあぁぁ
+			DATAFORM 啊啊啊啊
+			;TranslatedMark やぁあぁ
+			DATAFORM 啊啊啊啊
+			;TranslatedMark いやあぁぁ
+			DATAFORM 不行啊
+			;TranslatedMark だめえぇぇ
+			DATAFORM 停止吧
+			;TranslatedMark やめてえぇ
+			DATAFORM 非常
+			;TranslatedMark ひぃぃい
+			DATAFORM 嘻哈
+			;TranslatedMark ヒッ
+			DATAFORM 石器
+			;TranslatedMark ひぐ
+			DATAFORM 啊啊啊啊
+			;TranslatedMark ひぁあぁ
+			DATAFORM 啊啊啊啊
+			;TranslatedMark うあぁぁ
+			DATAFORM 啊啊啊啊
+			;TranslatedMark やぁあぁ
+		ENDDATA
+	ENDIF
+ENDIF
+
+IF SOURCE:咲夜:解消 >= 10
+	咲夜_表示フラグ += 1
+	IF 咲夜_表示フラグ == 1
+		PRINTFORM 「
+	ELSEIF 咲夜_表示フラグ > 3
+		PRINTFORML %BREAK_K9("末", 咲夜_対象)%」
+		PRINTFORM 「
+	ELSE
+		PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+	ENDIF
+	PRINTDATA
+		DATAFORM 啊啊啊
+		;TranslatedMark ふぁあ
+		DATAFORM 啊啊啊……嗯
+		;TranslatedMark はぁぁあ……ん
+		DATAFORM 啊，哈
+		;TranslatedMark あ、はぁ
+		DATAFORM 嗯……嗯
+		;TranslatedMark んふぅ……う
+		DATAFORM 呵
+		;TranslatedMark ふぁ
+		DATAFORM 啊，哈哈
+		;TranslatedMark あ、は
+		DATAFORM 嗯哼
+		;TranslatedMark んふぁ
+	ENDDATA
+ENDIF
+
+IF SOURCE:咲夜:触手 >= 10
+	咲夜_表示フラグ += 1
+	IF 咲夜_表示フラグ == 1
+		PRINTFORM 「
+	ELSEIF 咲夜_表示フラグ > 3
+		PRINTFORML %BREAK_K9("末", 咲夜_対象)%」
+		PRINTFORM 「
+	ELSE
+		PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+	ENDIF
+	;触手は触手側を描写するとバリエーションを出しやすいが
+	;受け側の場合はプレイヤーのイメージにゆだねられるように描写しないでおく
+	PRINTDATA
+		DATAFORM 触手在
+		;TranslatedMark 触手が、ひぃっ
+		DATAFORM 不行啊。触手啊
+		;TranslatedMark だめぇっ。触手がぁ
+		DATAFORM 触手啊
+		;TranslatedMark 触手いやぁ
+		DATAFORM 原谅我。触手好恐怖啊
+		;TranslatedMark 許してぇっ。触手怖いのぉ
+		DATAFORM 拜托了，触手是%SPLIT_R("やめてぇ：許してぇ：だめぇ")%
+		;TranslatedMark お願い、触手は%SPLIT_R("やめてぇ：許してぇ：だめぇ")%
+		DATAFORM %SPLIT_R("やめてぇ：許してぇ：だめぇ")%。触手%SPLIT_R("やめてぇ：許してぇ：だめぇ")%
+		;TranslatedMark %SPLIT_R("やめてぇ：許してぇ：だめぇ")%っ。触手%SPLIT_R("やめてぇ：許してぇ：だめぇ")%
+		DATAFORM 触手%SPLIT_R("で感じちゃうなんてぇ：で気持ちよくなっちゃうの怖いぃ：にイかされるのいやぁ：でイッちゃうのいやぁ：が気持ちいいのいやよぉ")%
+	ENDDATA
+ENDIF
+
+;奉仕されてる台詞
+IF SOURCE:咲夜:不潔 >= 10
+	;あまり痛みがなく体力気力があれば
+	IF SOURCE:咲夜:苦痛 < 80 && BASE:咲夜:気力 > (MAXBASE:咲夜:気力 / 3) && BASE:咲夜:体力 > (MAXBASE:咲夜:体力 / 3)
+		咲夜_表示フラグ += 1
+		IF 咲夜_表示フラグ == 1
+			PRINTFORM 「
+		ELSEIF 咲夜_表示フラグ > 3
+			PRINTFORML %BREAK_K9("末", 咲夜_対象)%」
+			PRINTFORM 「
+		ELSE
+			PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+		ENDIF
+		PRINTDATA
+			DATAFORM 那样的……会弄脏的
+			;TranslatedMark そんな……穢しちゃうわ
+			DATAFORM 哎呀……会弄脏的
+			;TranslatedMark やっ……汚しちゃうわ
+			DATAFORM 不行%POLITE_K9("ないわ", "ません")%，那样的%POLITE_K9("こと。あっ。んぅ", "こと、なさっては……あっ。んぅ")%
+			;TranslatedMark いけ%POLITE_K9("ないわ", "ません")%、そんな%POLITE_K9("こと。あっ。んぅ", "こと、なさっては……あっ。んぅ")%
+			DATAFORM 嗯……嗯
+			;TranslatedMark うぅ……う
+			DATAFORM 不好意思……嗯，啊
+			;TranslatedMark 恥ずかし……んっ、ぁ
+			DATAFORM 呀……嗯。不行%POLITE_K9("よ", "です")%、肮脏%POLITE_K9("しちゃうわ", "れてしまいます")%
+			;TranslatedMark やぁ……う。だめ%POLITE_K9("よ", "です")%、汚%POLITE_K9("しちゃうわ", "れてしまいます")%
+			DATAFORM 啊，嗯。对不起，不好
+			;TranslatedMark あ、んぅ。ごめんなさ、い
+		ENDDATA
+	ENDIF
+ENDIF
+
+IF 咲夜_表示フラグ
+	PRINTFORML %BREAK_K9("末", 咲夜_対象)%」
+ENDIF
+
+;─────────────────────────────────────── 
+;○台詞３_咲夜の感じ具合に関して
+;─────────────────────────────────────── 
+PRINTFORM 「
+;▼～1500　あっ……ん……
+IF 咲夜_最大部位値 < 1500 || 咲夜_今回部位値 == 0
+	PRINTDATA
+		DATAFORM 啊啊
+		;TranslatedMark あぁ
+		DATAFORM 嗯，嗯
+		;TranslatedMark んぅ
+		DATAFORM 嗯……啊
+		;TranslatedMark ふ……ぁ
+		DATAFORM 嗯，嗯
+		;TranslatedMark んくぅ
+		DATAFORM 哈……豆腐
+		;TranslatedMark はぁ……ふ
+		DATAFORM 嗯，嗯
+		;TranslatedMark んう
+		DATAFORM 嗯，嗯
+		;TranslatedMark んく
+		DATAFORM 啊……嗯
+		;TranslatedMark あ……う
+		DATAFORM 啊……豆腐
+		;TranslatedMark はっ……ふ
+		DATAFORM 啊……哈哈
+		;TranslatedMark あっ……は
+		DATAFORM 啊，啊
+		;TranslatedMark あ、ふぁ
+		DATAFORM 嗯……啊
+		;TranslatedMark んぅ……あ
+		DATAFORM 痒痒……啊
+		;TranslatedMark くすぐっ……あ
+		DATAFORM 哎呀……嗯
+		;TranslatedMark ひゃ……ん
+		DATAFORM 嗯……啊
+		;TranslatedMark ふあ……あ
+		DATAFORM 嗯，嗯
+		;TranslatedMark ん、ん
+		DATAFORM 啊，嗯
+		;TranslatedMark あぁ、ん
+		DATAFORM 啊，啊
+		;TranslatedMark ふぁ、あ
+		DATAFORM 啊啊啊
+		;TranslatedMark ふぁあ
+		DATAFORM 嗯，嗯
+		;TranslatedMark んく
+	ENDDATA
+	PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+	PRINTDATA
+		DATAFORM 啊啊
+		;TranslatedMark あぁ
+		DATAFORM 嗯，嗯
+		;TranslatedMark んぅ
+		DATAFORM 哈哈
+		;TranslatedMark はふ
+		DATAFORM 嗯，嗯
+		;TranslatedMark んくぅ
+		DATAFORM 呵
+		;TranslatedMark ふぁ
+		DATAFORM 嗯，嗯
+		;TranslatedMark んう
+		DATAFORM 豆腐
+		;TranslatedMark くふ
+		DATAFORM 啊，啊
+		;TranslatedMark あぅ
+		DATAFORM 阿谀
+		;TranslatedMark ぁふ
+		DATAFORM 啊，哈哈
+		;TranslatedMark あ、は
+		DATAFORM 啊，啊
+		;TranslatedMark あ、ふぁ
+		DATAFORM 嗯，啊
+		;TranslatedMark んぅ、あ
+		DATAFORM 啊
+		;TranslatedMark あ
+		DATAFORM 哎呀，呜
+		;TranslatedMark ひゃ、う
+		DATAFORM 嗯
+		;TranslatedMark ふあ
+		DATAFORM 嗯，嗯
+		;TranslatedMark んぅ、ん
+		DATAFORM 啊，嗯
+		;TranslatedMark あぅ、ん
+		DATAFORM 啊，啊
+		;TranslatedMark あぁ、あ
+		DATAFORM 呼啊啊
+		;TranslatedMark ふあぁ
+		DATAFORM 嗯，嗯
+		;TranslatedMark ん、く
+	ENDDATA
+	PRINTFORML %BREAK_K9("末", 咲夜_対象)%」
+
+;▼1500～5000　ああっ、う、あ❤　ん……っ、ん
+ELSEIF 咲夜_最大部位値 >= 1500 && 咲夜_最大部位値 < 5000
+	PRINTDATA
+		DATAFORM 啊啊
+		;TranslatedMark ああ
+		DATAFORM 嗯
+		;TranslatedMark んん
+		DATAFORM 嗯，啊
+		;TranslatedMark う、あ
+		DATAFORM 嗯，嗯
+		;TranslatedMark んく
+		DATAFORM 啊。嗯
+		;TranslatedMark はっ。ふあ
+		DATAFORM 嗯，嗯
+		;TranslatedMark んう
+		DATAFORM 嗯，嗯
+		;TranslatedMark んく
+		DATAFORM 对，对
+		;TranslatedMark あう
+		DATAFORM 啊。豆腐
+		;TranslatedMark はっ。ふ
+		DATAFORM 啊……哈哈
+		;TranslatedMark あっ……は
+		DATAFORM 啊……呵
+		;TranslatedMark あ……ふぁ
+		DATAFORM 嗯。啊
+		;TranslatedMark んぅっ。あ
+		DATAFORM 啊
+		;TranslatedMark あ
+		DATAFORM 哎呀，你好
+		;TranslatedMark ひゃっ、あん
+		DATAFORM 啊啊啊啊
+		;TranslatedMark ふああ
+		DATAFORM 嗯~。嗯
+		;TranslatedMark ん～っ。ん
+		DATAFORM 啊啊啊
+		;TranslatedMark あぁん
+		DATAFORM 嗯
+		;TranslatedMark ふあ
+		DATAFORM 啊……哈哈
+		;TranslatedMark ふぁ……は
+		DATAFORM 试飞
+		;TranslatedMark んくう
+	ENDDATA
+	PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+	PRINTDATA
+		DATAFORM 啊啊
+		;TranslatedMark あぁ
+		DATAFORM 嗯，嗯
+		;TranslatedMark んぅ
+		DATAFORM 哈哈
+		;TranslatedMark はふ
+		DATAFORM 嗯，嗯
+		;TranslatedMark んぅ
+		DATAFORM 呵
+		;TranslatedMark ふぁ
+		DATAFORM 嗯，嗯
+		;TranslatedMark んう
+		DATAFORM 豆腐
+		;TranslatedMark くふ
+		DATAFORM 啊，啊
+		;TranslatedMark あぅ
+		DATAFORM 阿谀
+		;TranslatedMark あふ
+		DATAFORM 啊，哈哈
+		;TranslatedMark あ、は
+		DATAFORM 啊，啊
+		;TranslatedMark あ、ふぁ
+		DATAFORM 嗯，啊
+		;TranslatedMark んぅ、あ
+		DATAFORM 啊
+		;TranslatedMark あ
+		DATAFORM 哎呀，呜
+		;TranslatedMark ひゃ、う
+		DATAFORM 嗯
+		;TranslatedMark ふあ
+		DATAFORM 嗯，嗯
+		;TranslatedMark んぅう
+		DATAFORM 啊，呼
+		;TranslatedMark あぅ、ふ
+		DATAFORM 啊啊啊啊
+		;TranslatedMark あぁあ
+		DATAFORM 呼啊啊
+		;TranslatedMark ふあぁ
+		DATAFORM 嗯，嗯
+		;TranslatedMark ん、く
+		DATAFORM %CALLNAME_K9(咲夜_対象, "ぁ")%
+	ENDDATA
+	PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+	PRINTDATA
+		DATAFORM 嗯……嗯
+		;TranslatedMark んっ……ん
+		DATAFORM 啊……哈哈
+		;TranslatedMark ふぁ……は
+		DATAFORM 啊……嗯，ふ
+		;TranslatedMark あぅ……く、ふ
+		DATAFORM 嗯……啊
+		;TranslatedMark くぅん……あ
+		DATAFORM 啊……呜呜
+		;TranslatedMark ふぁ……ぅ
+		DATAFORM 嗯，嗯
+		;TranslatedMark んぅ
+		DATAFORM 嗯，嗯……阿谀
+		;TranslatedMark く、ふ……あふ
+		DATAFORM 啊……啊，啊
+		;TranslatedMark あぁ……あぅ
+		DATAFORM 啊……啊哈哈
+		;TranslatedMark あっ……あはぁ
+		DATAFORM 嗯……哈哈
+		;TranslatedMark んふぁ……は
+		DATAFORM 阿谀
+		;TranslatedMark あふ
+		DATAFORM 哈……啊啊
+		;TranslatedMark はぁっ……あぁ
+		DATAFORM 嗯……啊，嗯
+		;TranslatedMark んぁ……あ、ん
+		DATAFORM 嗯哼……豆馅儿
+		;TranslatedMark んふ……あん
+		DATAFORM 啊，哈
+		;TranslatedMark ふぁ、はぁ
+		DATAFORM 试飞
+		;TranslatedMark んくう
+		DATAFORM 嗯……呜呜
+		;TranslatedMark んっ……ふぅあ
+		DATAFORM 啊……啊啊啊啊
+		;TranslatedMark はっ……あぁあ
+		DATAFORM 啊……呵
+		;TranslatedMark あっ……ふぁ
+		DATAFORM 嗯，嗯
+		;TranslatedMark んっ、く
+	ENDDATA
+	PRINTFORML %BREAK_K9("末", 咲夜_対象)%」
+
+;▼5000～9000　あっ❤　だめっ　も、もうっ。はあぁぁん❤
+ELSEIF 咲夜_最大部位値 >= 5000 && 咲夜_最大部位値 < 9000
+	PRINTDATA
+		DATAFORM 啊啊
+		;TranslatedMark あぁ
+		DATAFORM 嗯，嗯
+		;TranslatedMark んんぅ
+		DATAFORM 啊啊
+		;TranslatedMark うあ
+		DATAFORM 嗯，嗯
+		;TranslatedMark んく
+		DATAFORM 嗯
+		;TranslatedMark ふあ
+		DATAFORM 嗯，嗯
+		;TranslatedMark んう
+		DATAFORM 嗯哼啊
+		;TranslatedMark んふあぁ
+		DATAFORM 对，对
+		;TranslatedMark あう
+		DATAFORM 哈哈
+		;TranslatedMark はふ
+		DATAFORM 啊哈哈
+		;TranslatedMark あはあ
+		DATAFORM 啊啊啊啊
+		;TranslatedMark あふぁ
+		DATAFORM 呜呜
+		;TranslatedMark んぅあ
+		DATAFORM 天啊
+		;TranslatedMark ひあ
+		DATAFORM 哎呀，啊
+		;TranslatedMark ひゃっ、あ
+		DATAFORM 啊啊啊啊
+		;TranslatedMark ふああぁ
+		DATAFORM 嗯~。嗯
+		;TranslatedMark ん～っ。ん
+		DATAFORM 啊啊啊
+		;TranslatedMark あぁん
+		DATAFORM 嗯
+		;TranslatedMark ふあ
+		DATAFORM 啊，哈哈
+		;TranslatedMark ふぁ、は
+		DATAFORM 试飞
+		;TranslatedMark んくう
+		DATAFORM %CALLNAME_K9(咲夜_対象, "ぁ")%、啊
+		;TranslatedMark %CALLNAME_K9(咲夜_対象, "ぁ")%、ふぁ
+	ENDDATA
+	PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+	PRINTDATA
+		DATAFORM 啊啊
+		;TranslatedMark あぁ
+		DATAFORM 嗯，嗯
+		;TranslatedMark んぅ
+		DATAFORM 哈哈
+		;TranslatedMark はふ
+		DATAFORM 嗯，嗯
+		;TranslatedMark んくぅ
+		DATAFORM 嗯，嗯
+		;TranslatedMark ふ、うく
+		DATAFORM 不行
+		;TranslatedMark だめ
+		DATAFORM 豆腐
+		;TranslatedMark くふ
+		DATAFORM 啊，啊
+		;TranslatedMark あぅ
+		DATAFORM 阿谀
+		;TranslatedMark あふ
+		DATAFORM 啊哈哈
+		;TranslatedMark あはぁ
+		DATAFORM 啊啊啊啊
+		;TranslatedMark あふぁ
+		DATAFORM 嗯哼啊
+		;TranslatedMark んふあぁ
+		DATAFORM 已经
+		;TranslatedMark もう
+		DATAFORM 疯了
+		;TranslatedMark きちゃう
+		DATAFORM 太厉害了，啊
+		;TranslatedMark すご、あ
+		DATAFORM 心情真好啊
+		;TranslatedMark 気持ち、よくてぇ
+		DATAFORM 好厉害啊
+		;TranslatedMark すごいの
+		DATAFORM 已经，啊
+		;TranslatedMark もう、あぁ
+		DATAFORM 不行，不行
+		;TranslatedMark だめえ
+		DATAFORM 好的
+		;TranslatedMark いい
+	ENDDATA
+	PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+	PRINTDATA
+		DATAFORM 嘿嘿
+		;TranslatedMark ひあぁ
+		DATAFORM 嗯，嗯
+		;TranslatedMark んあぅ
+		DATAFORM 啊啊啊啊啊
+		;TranslatedMark はああぁん
+		DATAFORM 嗯啊啊
+		;TranslatedMark んあぁ
+		DATAFORM 呼啊啊
+		;TranslatedMark ふあぁ
+		DATAFORM 不行啊
+		;TranslatedMark だめえぇ
+		DATAFORM 呵呵呵
+		;TranslatedMark くふあぁ
+		DATAFORM 啊哈哈
+		;TranslatedMark あはぁあん
+		DATAFORM 啊啊啊啊啊
+		;TranslatedMark あふああ
+		DATAFORM 啊，对了
+		;TranslatedMark はぁあう
+		DATAFORM 啊啊啊啊啊啊
+		;TranslatedMark あああぁあ
+		DATAFORM 嗯，啊
+		;TranslatedMark んくあぁ
+		DATAFORM 也——啊啊啊啊
+		;TranslatedMark も――ああぁ
+		DATAFORM 真恶心
+		;TranslatedMark きちゃううう
+		DATAFORM 好、啊啊啊
+		;TranslatedMark すごぉ、ああぁぁ
+		DATAFORM 心情舒畅
+		;TranslatedMark 気持ちいい
+		DATAFORM 好厉害啊
+		;TranslatedMark すごいのお
+		DATAFORM 啊啊啊啊啊
+		;TranslatedMark もうあああぁ
+		DATAFORM 不行啊
+		;TranslatedMark だめえぇぇ
+		DATAFORM 好，好
+		;TranslatedMark いいぃぃい
+	ENDDATA
+	PRINTFORML %BREAK_K9("末", 咲夜_対象)%」
+
+;▼9000～　いくうううう❤　いっちゃううっ❤
+;　割とすぐ毎ターンこの状態になるので気力体力不足で緩急を
+ELSE
+	;▽今回部位称か最大部位称がとれていないので部位表現をぼかす
+	IF 咲夜_今回部位称 == "" || 咲夜_最大部位称 == ""
+		;気力体力がある、または主導権がある
+		IF CHECK_K9("活力")
+			PRINTDATA
+				DATAFORM 胡桃
+				;TranslatedMark くるう
+				DATAFORM 啊啊啊啊啊
+				;TranslatedMark イッちゃあぁぁ
+				DATAFORM 啊啊啊
+				;TranslatedMark あぁぁ
+				DATAFORM 来吧
+				;TranslatedMark きちゃうぅ
+				DATAFORM 稻谷
+				;TranslatedMark イくう
+				DATAFORM 融化了
+				;TranslatedMark とけちゃう
+				DATAFORM %POLITE_K9("きちゃうわ", "イッてしまいます")%
+				DATAFORM 几，几
+				;TranslatedMark いくううう
+				DATAFORM 不，不行❤那里，那里
+				;TranslatedMark も、だめぇっ❤　そこぉ
+				DATAFORM 太棒了
+				;TranslatedMark 素敵ぃ
+				DATAFORM 那里，那里
+				;TranslatedMark そこぉ
+				DATAFORM 想要的%POLITE_K9("のぉ", "んですぅ")%
+				;TranslatedMark 欲しかった%POLITE_K9("のぉ", "んですぅ")%
+			ENDDATA
+			PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+			PRINTDATA
+				DATAFORM 啊啊啊啊
+				;TranslatedMark あぁあ
+				DATAFORM 已经不行了
+				;TranslatedMark もうだめぇ
+				DATAFORM 哎呀
+				;TranslatedMark もうやあ
+				DATAFORM 我要去
+				;TranslatedMark イッちゃうぅ
+				DATAFORM 呀
+				;TranslatedMark やぁ
+				DATAFORM 非常
+				;TranslatedMark すごいぃ
+				DATAFORM 那个，那个
+				;TranslatedMark それぇ
+				DATAFORM 这样啊
+				;TranslatedMark こんなぁ
+				DATAFORM 好舒服啊
+				;TranslatedMark 気持ちいいぃっ
+			ENDDATA
+			PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+			PRINTDATA
+				DATAFORM 我要去
+				;TranslatedMark イッちゃうぅ
+				DATAFORM %POLITE_K9("イッちゃうわ", "イッちゃいます")%
+				DATAFORM 好奇怪啊
+				;TranslatedMark おかしいのぉ
+				DATAFORM %POLITE_K9("おかしくなっちゃうぅ", "おかしくなっちゃいますぅ")%
+				DATAFORM 变得奇怪
+				;TranslatedMark 変になるう
+				DATAFORM 啊啊啊啊啊
+				;TranslatedMark ああぁあ
+				DATAFORM 喂，喂
+				;TranslatedMark イくうぅ
+				DATAFORM 非常
+				;TranslatedMark すごいぃ
+			ENDDATA
+		;気力体力がないかつ主導権がない
+		ELSE
+			PRINTDATA
+				DATAFORM 非常
+				;TranslatedMark ひいぃ
+				DATAFORM 我要去
+				;TranslatedMark イッちゃうぅ
+				DATAFORM 啊，啊，啊
+				;TranslatedMark あ、あぁ、あ
+				DATAFORM 已经不行了
+				;TranslatedMark もうだめよぉ
+				DATAFORM 嗯，是啊
+				;TranslatedMark イくう、ひあぁ
+				DATAFORM 神经衰弱
+				;TranslatedMark しんじゃうぅ
+				DATAFORM 不，空
+				;TranslatedMark い、くううう
+				DATAFORM 好痛苦
+				;TranslatedMark 苦しいぃ
+				DATAFORM 原谅我吧
+				;TranslatedMark 許してぇ
+				DATAFORM 在那里啊
+				;TranslatedMark そこぉもうだめぇ
+			ENDDATA
+			PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+			PRINTDATA
+				DATAFORM 啊啊啊啊
+				;TranslatedMark あぁあ
+				DATAFORM 已经不行了
+				;TranslatedMark もうだめぇ
+				DATAFORM 哎呀
+				;TranslatedMark もうやあ
+				DATAFORM 我要去
+				;TranslatedMark イッちゃうぅ
+				DATAFORM 呀
+				;TranslatedMark やぁ
+				DATAFORM 非常
+				;TranslatedMark すごいぃ
+				DATAFORM 那个，那个
+				;TranslatedMark それぇ
+				DATAFORM 这样啊
+				;TranslatedMark こんなぁ
+				DATAFORM 好舒服啊
+				;TranslatedMark 気持ちいいぃっ
+			ENDDATA
+			PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+			PRINTDATA
+				DATAFORM 嗯，啊
+				;TranslatedMark イ゛ッ、あ
+				DATAFORM 好奇怪啊
+				;TranslatedMark おかしいのぉ
+				DATAFORM 不行啊
+				;TranslatedMark だめぇ
+				DATAFORM 原谅我吧
+				;TranslatedMark 許してぇ
+				DATAFORM 坏掉了
+				;TranslatedMark 壊れるぅ
+				DATAFORM 啊啊啊啊啊
+				;TranslatedMark ああぁあ
+				DATAFORM 喂，喂
+				;TranslatedMark イくうぅ
+				DATAFORM 哎呀
+				;TranslatedMark もうぃやぁ
+			ENDDATA
+		ENDIF
+		PRINTFORML %BREAK_K9("末", 咲夜_対象)%」
+
+	;▽今回部位称と最大部位称がとれている
+	ELSE
+		;・１番気持ちいいところに触った場合
+		IF 咲夜_今回部位 == 咲夜_最大部位
+			;気力体力がある、または主導権がある
+			IF CHECK_K9("活力")
+				PRINTDATA
+					DATAFORM 胡桃
+					;TranslatedMark くるう
+					DATAFORM 啊啊啊啊啊
+					;TranslatedMark イッちゃあぁぁ
+					DATAFORM 啊啊啊
+					;TranslatedMark あぁぁ
+					DATAFORM 来吧
+					;TranslatedMark きちゃうぅ
+					DATAFORM 稻谷
+					;TranslatedMark イくう
+					DATAFORM 融化了
+					;TranslatedMark とけちゃう
+					DATAFORM %POLITE_K9("きちゃうわ", "イッてしまいます")%
+					DATAFORM 几，几
+					;TranslatedMark いくううう
+					DATAFORM 不，不行❤那里，那里
+					;TranslatedMark も、だめぇっ❤　そこぉ
+					DATAFORM 太棒了
+					;TranslatedMark 素敵ぃ
+					DATAFORM 那里，那里
+					;TranslatedMark そこぉ
+					DATAFORM 想要的%POLITE_K9("のぉ", "んですぅ")%
+					;TranslatedMark 欲しかった%POLITE_K9("のぉ", "んですぅ")%
+				ENDDATA
+				PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+			;気力体力がないかつ主導権がない
+			ELSE
+				PRINTDATA
+					DATAFORM 非常
+					;TranslatedMark ひいぃ
+					DATAFORM 我要去
+					;TranslatedMark イッちゃうぅ
+					DATAFORM 啊，啊，啊
+					;TranslatedMark あ、あぁ、あ
+					DATAFORM 已经不行了
+					;TranslatedMark もうだめよぉ
+					DATAFORM 嗯，是啊
+					;TranslatedMark イくう、ひあぁ
+					DATAFORM 神经衰弱
+					;TranslatedMark しんじゃうぅ
+					DATAFORM 不，空
+					;TranslatedMark い、くううう
+					DATAFORM 好痛苦
+					;TranslatedMark 苦しいぃ
+					DATAFORM 原谅我吧
+					;TranslatedMark 許してぇ
+					DATAFORM 在那里啊
+					;TranslatedMark そこぉもうだめぇ
+				ENDDATA
+				PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+			ENDIF
+
+			IF 咲夜_最大部位 == "Ｖ"
+				PRINTDATA
+					DATAFORM %CALL_DIRTY_K9("Ｖ", "ぁ")%深
+					;TranslatedMark %CALL_DIRTY_K9("Ｖ", "ぁ")%深いぃ
+					DATAFORM 已经不行了
+					;TranslatedMark %CALL_DIRTY_K9("Ｖ", "ぁ")%もうだめぇ
+					DATAFORM %CALL_DIRTY_K9("Ｖ", "ぁ")%
+					;TranslatedMark %CALL_DIRTY_K9("Ｖ", "ぁ")%いいぃ
+					DATAFORM %CALL_DIRTY_K9("Ｖ", "ぁ")%吧
+					;TranslatedMark %CALL_DIRTY_K9("Ｖ", "ぁ")%イッちゃうぅ
+					DATAFORM %CALL_DIRTY_K9("Ｖ")%
+					;TranslatedMark %CALL_DIRTY_K9("Ｖ")%がぁ
+					DATAFORM %CALL_DIRTY_K9("Ｖ", "ぁ")%呀
+					;TranslatedMark %CALL_DIRTY_K9("Ｖ", "ぁ")%やぁ
+					DATAFORM %CALL_DIRTY_K9("Ｖ")%已经
+					;TranslatedMark %CALL_DIRTY_K9("Ｖ")%はもう
+					DATAFORM %CALL_DIRTY_K9("Ｖ")%
+					;TranslatedMark %CALL_DIRTY_K9("Ｖ")%すごいぃ
+					DATAFORM 那个，那个❤　%CALL_DIRTY_K9("Ｖ", "ぁ")%
+					;TranslatedMark それぇ❤　%CALL_DIRTY_K9("Ｖ", "ぁ")%
+					DATAFORM 这样啊❤　%CALL_DIRTY_K9("Ｖ")%
+					;TranslatedMark こんなぁ❤　%CALL_DIRTY_K9("Ｖ")%
+					DATAFORM 好舒服啊❤　%CALL_DIRTY_K9("Ｖ", "ぁ")%
+					;TranslatedMark 気持ちいいぃっ❤　%CALL_DIRTY_K9("Ｖ", "ぁ")%
+					DATAFORM 深い❤　%CALL_DIRTY_K9("Ｖ", "ぁ")%
+					;TranslatedMark 深いぃっ❤　%CALL_DIRTY_K9("Ｖ", "ぁ")%
+					DATAFORM %CALL_DIRTY_K9("Ｖ")%❤融化吧
+					;TranslatedMark %CALL_DIRTY_K9("Ｖ")%❤　とけちゃうぅ
+					DATAFORM %CALL_DIRTY_K9("Ｖ", "ぁ")%要动了
+					;TranslatedMark %CALL_DIRTY_K9("Ｖ", "ぁ")%動いちゃうぅ
+					DATAFORM %CALL_DIRTY_K9("Ｖ", "ぁ")%热
+					;TranslatedMark %CALL_DIRTY_K9("Ｖ", "ぁ")%熱いぃ
+				ENDDATA
+				PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+
+			ELSEIF 咲夜_最大部位 == "Ａ"
+				PRINTDATA
+					DATAFORM %CALL_DIRTY_K9("Ａ", "ぁ")%
+					;TranslatedMark %CALL_DIRTY_K9("Ａ", "ぁ")%いぃ
+					DATAFORM 哎呀，太好了❤　%CALL_DIRTY_K9("Ａ", "ぁ")%
+					;TranslatedMark もぉ、やっ❤　%CALL_DIRTY_K9("Ａ", "ぁ")%
+					DATAFORM %CALL_DIRTY_K9("Ａ", "ぁ")%哎呀
+					;TranslatedMark %CALL_DIRTY_K9("Ａ", "ぁ")%いやあ
+					DATAFORM 我要去❤　%CALL_DIRTY_K9("Ａ", "ぁ")%
+					;TranslatedMark イッちゃうぅ❤　%CALL_DIRTY_K9("Ａ", "ぁ")%
+					DATAFORM %CALL_DIRTY_K9("Ａ")%
+					;TranslatedMark %CALL_DIRTY_K9("Ａ")%がぁ
+					DATAFORM %CALL_DIRTY_K9("Ａ", "ぁ")%呀
+					;TranslatedMark %CALL_DIRTY_K9("Ａ", "ぁ")%やぁ
+					DATAFORM %CALL_DIRTY_K9("Ａ")%已经
+					;TranslatedMark %CALL_DIRTY_K9("Ａ")%はもう
+					DATAFORM %CALL_DIRTY_K9("Ａ")%
+					;TranslatedMark %CALL_DIRTY_K9("Ａ")%すごいぃ
+					DATAFORM 那个，那个❤　%CALL_DIRTY_K9("Ａ", "ぁ")%
+					;TranslatedMark それぇ❤　%CALL_DIRTY_K9("Ａ", "ぁ")%
+					DATAFORM 这样啊❤　%CALL_DIRTY_K9("Ａ")%
+					;TranslatedMark こんなぁ❤　%CALL_DIRTY_K9("Ａ")%
+					DATAFORM 好舒服啊❤　%CALL_DIRTY_K9("Ａ", "ぁ")%
+					;TranslatedMark 気持ちいいぃっ❤　%CALL_DIRTY_K9("Ａ", "ぁ")%
+					DATAFORM 深い❤　%CALL_DIRTY_K9("Ａ", "ぁ")%
+					;TranslatedMark 深いぃっ❤　%CALL_DIRTY_K9("Ａ", "ぁ")%
+					DATAFORM %CALL_DIRTY_K9("Ａ")%❤融化吧
+					;TranslatedMark %CALL_DIRTY_K9("Ａ")%❤　とけちゃうぅ
+					DATAFORM %CALL_DIRTY_K9("Ａ", "ぁ")%要动了
+					;TranslatedMark %CALL_DIRTY_K9("Ａ", "ぁ")%動いちゃうぅ
+					DATAFORM %CALL_DIRTY_K9("Ａ", "ぁ")%热
+					;TranslatedMark %CALL_DIRTY_K9("Ａ", "ぁ")%熱いぃ
+				ENDDATA
+				PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+
+			ELSEIF 咲夜_最大部位 == "Ｃ"
+				PRINTDATA
+					DATAFORM %CALL_DIRTY_K9("Ｃ", "ぁ")%
+					;TranslatedMark %CALL_DIRTY_K9("Ｃ", "ぁ")%いぃ
+					DATAFORM 哎呀，太好了❤　%CALL_DIRTY_K9("Ｃ", "ぁ")%
+					;TranslatedMark もぉ、やっ❤　%CALL_DIRTY_K9("Ｃ", "ぁ")%
+					DATAFORM 已经不行了
+					;TranslatedMark %CALL_DIRTY_K9("Ｃ")%もうだめぇ
+					DATAFORM %CALL_DIRTY_K9("Ｃ", "ぁ")%
+					DATAFORM %CALL_DIRTY_K9("Ｃ")%
+					;TranslatedMark %CALL_DIRTY_K9("Ｃ")%がぁ
+					DATAFORM %CALL_DIRTY_K9("Ｃ", "ぁ")%呀
+					;TranslatedMark %CALL_DIRTY_K9("Ｃ", "ぁ")%やぁ
+					DATAFORM %CALL_DIRTY_K9("Ｃ")%
+					;TranslatedMark %CALL_DIRTY_K9("Ｃ")%はもうぅ
+					DATAFORM 那个，那个❤　%CALL_DIRTY_K9("Ｃ", "ぁ")%
+					;TranslatedMark それぇ❤　%CALL_DIRTY_K9("Ｃ", "ぁ")%
+					DATAFORM 这样啊❤　%CALL_DIRTY_K9("Ｃ")%
+					;TranslatedMark こんなぁ❤　%CALL_DIRTY_K9("Ｃ")%
+					DATAFORM 好舒服啊❤　%CALL_DIRTY_K9("Ｃ", "ぁ")%
+					;TranslatedMark 気持ちいいぃっ❤　%CALL_DIRTY_K9("Ｃ", "ぁ")%
+					DATAFORM 弹雨❤　%CALL_DIRTY_K9("Ｃ", "ぁ")%
+					;TranslatedMark 弾けるぅ❤　%CALL_DIRTY_K9("Ｃ", "ぁ")%
+				ENDDATA
+				PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+
+			ELSEIF 咲夜_最大部位 == "Ｂ"
+				PRINTDATA
+					DATAFORM %CALL_DIRTY_K9("Ｂ", "ぁ")%啊
+					;TranslatedMark %CALL_DIRTY_K9("Ｂ", "ぁ")%あぁあ
+					DATAFORM 已经不行了❤　%CALL_DIRTY_K9("Ｂ", "ぁ")%
+					;TranslatedMark もうだめぇ❤　%CALL_DIRTY_K9("Ｂ", "ぁ")%
+					DATAFORM %CALL_DIRTY_K9("Ｂ", "ぁ")%够了
+					;TranslatedMark %CALL_DIRTY_K9("Ｂ", "ぁ")%もうやあ
+					DATAFORM 我要去
+					;TranslatedMark イッちゃうぅ
+					DATAFORM %CALL_DIRTY_K9("Ｂ")%
+					;TranslatedMark %CALL_DIRTY_K9("Ｂ")%がぁ
+					DATAFORM %CALL_DIRTY_K9("Ｂ", "ぁ")%呀
+					;TranslatedMark %CALL_DIRTY_K9("Ｂ", "ぁ")%やぁ
+					DATAFORM %CALL_DIRTY_K9("Ｂ")%
+					;TranslatedMark %CALL_DIRTY_K9("Ｂ")%はもうぅ
+					DATAFORM %CALL_DIRTY_K9("Ｂ", "ぁ")%
+					;TranslatedMark %CALL_DIRTY_K9("Ｂ", "ぁ")%すごいぃ
+					DATAFORM 那个，那个❤　%CALL_DIRTY_K9("Ｂ", "ぁ")%
+					;TranslatedMark それぇ❤　%CALL_DIRTY_K9("Ｂ", "ぁ")%
+					DATAFORM 这样啊❤　%CALL_DIRTY_K9("Ｂ")%
+					;TranslatedMark こんなぁ❤　%CALL_DIRTY_K9("Ｂ")%
+					DATAFORM 好舒服啊❤　%CALL_DIRTY_K9("Ｂ", "ぁ")%
+					;TranslatedMark 気持ちいいぃっ❤　%CALL_DIRTY_K9("Ｂ", "ぁ")%
+					DATAFORM 弹雨❤　%CALL_DIRTY_K9("Ｂ", "ぁ")%
+					;TranslatedMark 弾けるぅ❤　%CALL_DIRTY_K9("Ｂ", "ぁ")%
+				ENDDATA
+				PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+			ENDIF
+
+			;気力体力がある、または主導権がある
+			IF CHECK_K9("活力")
+				PRINTDATA
+					DATAFORM 我要去
+					;TranslatedMark イッちゃうぅ
+					DATAFORM %POLITE_K9("イッちゃうわ", "イッちゃいます")%
+					DATAFORM 好奇怪啊
+					;TranslatedMark おかしいのぉ
+					DATAFORM %POLITE_K9("おかしくなっちゃうぅ", "おかしくなっちゃいますぅ")%
+					DATAFORM 变得奇怪
+					;TranslatedMark 変になるう
+					DATAFORM 啊啊啊啊啊
+					;TranslatedMark ああぁあ
+					DATAFORM 喂，喂
+					;TranslatedMark イくうぅ
+					DATAFORM 非常
+					;TranslatedMark すごいぃ
+				ENDDATA
+			;気力体力がないかつ主導権がない
+			ELSE
+				PRINTDATA
+					DATAFORM 嗯，啊
+					;TranslatedMark イ゛ッ、あ
+					DATAFORM 好奇怪啊
+					;TranslatedMark おかしいのぉ
+					DATAFORM 不行啊
+					;TranslatedMark だめぇ
+					DATAFORM 原谅我吧
+					;TranslatedMark 許してぇ
+					DATAFORM 坏掉了
+					;TranslatedMark 壊れるぅ
+					DATAFORM 啊啊啊啊啊
+					;TranslatedMark ああぁあ
+					DATAFORM 喂，喂
+					;TranslatedMark イくうぅ
+					DATAFORM 哎呀
+					;TranslatedMark もうぃやぁ
+				ENDDATA
+			ENDIF
+
+			;─────────────────────────────────────── 
+			;たまに相手が愛撫に使用している部位に言及するがここはあまり汎用的でない
+			;（コマンド番号で判断するのでCOMF変化に対応できない）
+			;─────────────────────────────────────── 
+			IF RAND:10 == 0
+				;１対１性交系
+				IF ( IS_MTAR(咲夜) && ((SELECTCOM >= 30 && SELECTCOM <= 36)||(SELECTCOM >= 40 && SELECTCOM <= 46)) ) || ( IS_EQUIP_TARGET(咲夜, 30, 31, 32, 33, 34, 35, 36) || IS_EQUIP_TARGET(咲夜, 40, 41, 42, 43, 44, 45, 46) )
+					PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+					;咲夜_対象が主人公で陥落済み
+					IF CHECK_K9("陥落", 咲夜_対象)
+						;主人公に竿あり
+						IF HAS_PENIS(MASTER)
+							PRINTDATA
+								DATAFORM %CALL_DIRTY_K9("Ｐ", "ぁ")%
+								;TranslatedMark %CALL_DIRTY_K9("Ｐ", "ぁ")%すごいぃ
+								DATAFORM %CALL_DIRTY_K9("Ｐ", "ぁ")%好
+								;TranslatedMark %CALL_DIRTY_K9("Ｐ", "ぁ")%いい
+								DATAFORM 喜欢，喜欢
+								;TranslatedMark 好きぃ
+								DATAFORM 拿出吧%BREAK_K9("中", 咲夜_対象)%%CALL_DIRTY_K9("Ｖ", "ぁ")%
+								;TranslatedMark 出してぇ%BREAK_K9("中", 咲夜_対象)%%CALL_DIRTY_K9("Ｖ", "ぁ")%
+								DATAFORM 变成洞了
+								;TranslatedMark 穴になってるぅ
+								DATAFORM 配种员
+								;TranslatedMark 種付けしてぇ
+								DATAFORM 喜欢%CALL_DIRTY_K9("Ｐ", "ぁ")%
+								;TranslatedMark %CALLNAME_K9(咲夜_対象)%の%CALL_DIRTY_K9("Ｐ", "ぁ")%好き%POLITE_K9("よぉ", "ですぅ")%
+							ENDDATA
+						ELSE
+							PRINTDATA
+								DATAFORM 粗腿
+								;TranslatedMark 太いのぉ
+								DATAFORM 好开心啊
+								;TranslatedMark 嬉しいぃ
+								DATAFORM 连接在一起的%BREAK_K9("中", 咲夜_対象)%%CALLNAME_K9(咲夜_対象)%
+								;TranslatedMark 繋がってるぅ%BREAK_K9("中", 咲夜_対象)%%CALLNAME_K9(咲夜_対象)%とぉ
+								DATAFORM %CALLNAME_K9(咲夜_対象, "ぁ")%
+							ENDDATA
+						ENDIF
+					;咲夜に主導権がない
+					ELSEIF !IS_INITIATIVE(咲夜)
+						PRINTFORM %SPLIT_R("駄目ぇ：いやぁ：やぁ")%
+					ENDIF
+				ENDIF
+
+				;指愛撫
+				IF (IS_MTAR(咲夜) && GROUPMATCH(SELECTCOM, 0, 1, 3, 4, 10)) || IS_EQUIP_TARGET(咲夜, 0, 1, 3, 4, 10)
+					PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+					;咲夜_対象が主人公で陥落済み
+					IF CHECK_K9("陥落", 咲夜_対象)
+						PRINTDATA
+							DATAFORM 手指
+							;TranslatedMark 指ぃ
+							DATAFORM 手指啊%BREAK_K9("中", 咲夜_対象)%好开心啊
+							;TranslatedMark 指がぁ%BREAK_K9("中", 咲夜_対象)%嬉しいの
+							DATAFORM %CALLNAME_K9(咲夜_対象, "ぁ")%、手指好的%POLITE_K9("のぉ", "ですぅ")%
+							;TranslatedMark %CALLNAME_K9(咲夜_対象, "ぁ")%、指いい%POLITE_K9("のぉ", "ですぅ")%
+						ENDDATA
+					;咲夜に主導権がない
+					ELSE
+						PRINTFORM %SPLIT_R("あぁ……指があ：指がぁ")%
+					ENDIF
+				ENDIF
+
+				;舌愛撫
+				IF (IS_MTAR(咲夜) && GROUPMATCH(SELECTCOM, 2, 8, 9, 11)) || IS_EQUIP_TARGET(咲夜, 2, 8, 9, 11)
+					PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+					;咲夜_対象が主人公で陥落済み
+					IF CHECK_K9("陥落", 咲夜_対象)
+						PRINTDATA
+							DATAFORM 舌头啊
+							;TranslatedMark 舌ぁ
+							DATAFORM 太好了❤温吞的
+							;TranslatedMark したぁ❤　ぬるぬるってぇ
+							DATAFORM %CALLNAME_K9(咲夜_対象, "ぁ")%，嘴唇好痛
+							;TranslatedMark %CALLNAME_K9(咲夜_対象, "ぁ")%、唇すごいぃ
+						ENDDATA
+					;咲夜に主導権がない
+					ELSE
+						PRINTFORM %SPLIT_R("舌がぁ：舌ぁ")%
+					ENDIF
+				ENDIF
+
+				;陥落ありで玩具愛撫（たまに）
+				IF (IS_MTAR(咲夜) && GROUPMATCH(SELECTCOM, 60, 61, 62, 63, 64, 65, 66)) || IS_EQUIP_TARGET(咲夜, 60, 61, 62, 63, 64, 65, 66)
+					PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+					;咲夜_対象が主人公で陥落済み
+					IF CHECK_K9("陥落", 咲夜_対象)
+						PRINTDATA
+							DATAFORM 玩具什么的
+							;TranslatedMark 玩具なんてぇ
+							DATAFORM 玩具不行。明明%CALLNAME_K9(咲夜_対象)%很好
+							;TranslatedMark おもちゃだめぇ。%CALLNAME_K9(咲夜_対象)%が良いのにぃ
+							DATAFORM 哎呀❤不要玩具
+							;TranslatedMark いやぁ❤　玩具いやぁ
+						ENDDATA
+					;咲夜に主導権がない
+					ELSE
+						PRINTDATA
+							DATAFORM 玩具什么的
+							;TranslatedMark 玩具なんてぇ
+							DATAFORM 玩具不行
+							;TranslatedMark おもちゃだめぇ
+							DATAFORM 不！不要玩具
+							;TranslatedMark いやぁっ！　玩具いやぁ
+						ENDDATA
+					ENDIF
+				ENDIF
+			ENDIF
+			PRINTFORML %BREAK_K9("末", 咲夜_対象)%」
+
+		;・１番気持ちいいところに触らなかった場合
+		ELSE
+			;最大部位値と今回部位値に7000以上差があるなら焦らされていると感じる
+			IF 咲夜_最大部位値 - 咲夜_今回部位値 >= 7000
+				;気力体力があり主導権がなく陥落があるとおねだり
+				IF ( BASE:咲夜:気力 <= (MAXBASE:咲夜:気力 / 3) && BASE:咲夜:体力 > (MAXBASE:咲夜:体力 / 3) ) && CHECK_K9("陥落", 咲夜_対象) && !IS_INITIATIVE(咲夜)
+					PRINTDATA
+						DATAFORM 啊……不要着急
+						;TranslatedMark あぁっ……焦らさないでぇ
+						DATAFORM 嗯……别使坏了
+						;TranslatedMark んっ……意地悪しないでぇ
+						DATAFORM 拜托了，哈。嗯，嗯
+						;TranslatedMark お願い、はぁっ。んぅ
+						DATAFORM 呀，嗯。喂喂
+						;TranslatedMark やぁ、んぅ。イかせてぇ
+						DATAFORM 不，不是%咲夜_今回部位称%……原谅我吧
+						;TranslatedMark いやぁ、%咲夜_今回部位称%じゃなくてぇ……許してぇ
+						DATAFORM 那么……嗯。拜托了
+						;TranslatedMark そこじゃ……っ。お願いぃ
+						DATAFORM 不是%咲夜_今回部位称%
+						;TranslatedMark %咲夜_今回部位称%じゃないのぉ
+					ENDDATA
+				;気力体力か主導権があるか陥落がない
+				ELSE
+					PRINTDATA
+						DATAFORM 啊啊……哈，嗯
+						;TranslatedMark ふぁあ……はぁ、ん
+						DATAFORM 已经……想要变得轻松
+						;TranslatedMark もぉ……楽に、なりたいぃ
+						DATAFORM 拜托了
+						;TranslatedMark お願いぃ
+						DATAFORM 要轻松……师傅
+						;TranslatedMark 楽にぃ……してぇ
+						DATAFORM 啊，啊……好痛苦啊
+						;TranslatedMark はっ、あぁ……苦しい、のぉ
+						DATAFORM 哈、哈……好痛苦啊
+						;TranslatedMark はぁ、はぁっ……苦しいわ、んく
+					ENDDATA
+				ENDIF
+				PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+
+				;気力体力があれば
+				IF BASE:咲夜:気力 > (MAXBASE:咲夜:気力 / 3) && BASE:咲夜:体力 > (MAXBASE:咲夜:体力 / 3) && CHECK_K9("陥落", 咲夜_対象)
+					PRINTFORM %SPLIT_R("苦しいのぉ：イきたいのぉ許してぇ：変になるう：おかしくなっちゃうぅ：お願いぃ")%
+				;体力か陥落がなければ
+				ELSE
+					PRINTFORM %SPLIT_R("壊れ、ちゃうぅ：許してぇ：変になる、う：お願ぁ、い")%
+				ENDIF
+				PRINTFORML %BREAK_K9("末", 咲夜_対象)%」
+
+			;最大部位値と今回部位値が3000未満の差ならあっちもこっちも気持ちいい
+			ELSE
+				;気力体力があれば
+				IF BASE:咲夜:気力 > (MAXBASE:咲夜:気力 / 3) && BASE:咲夜:体力 > (MAXBASE:咲夜:体力 / 3) && CHECK_K9("陥落", 咲夜_対象)
+					PRINTFORM %SPLIT_R("すごいのぉ：あたま変になるぅ：こんなのってぇいく、いくぅう：おかしくなるぅ：もうダメよぉ：狂っちゃうぅ")%
+				;体力か陥落がなければ
+				ELSE
+					PRINTFORM %SPLIT_R("あたま変になるぅ：こんなのってぇ：許してぇ：おかしくなるぅ：もうダメぇ：狂っちゃうぅ")%
+				ENDIF
+				PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+
+				IF 咲夜_今回部位 == "Ｐ"
+					PRINTFORM %CALL_DIRTY_K9("Ｐ")%
+				ELSEIF 咲夜_今回部位 == "Ｖ"
+					PRINTFORM %CALL_DIRTY_K9("Ｖ")%
+				ELSEIF 咲夜_今回部位 == "Ａ"
+					PRINTFORM %CALL_DIRTY_K9("Ａ")%
+				ELSEIF 咲夜_今回部位 == "Ｂ"
+					PRINTFORM %CALL_DIRTY_K9("Ｂ")%
+				ELSEIF 咲夜_今回部位 == "Ｃ"
+					PRINTFORM %CALL_DIRTY_K9("Ｃ")%
+				ENDIF
+
+				;最大部位も刺激されていれば主張
+				IF 咲夜_最大部位 == "Ｐ" && SOURCE:咲夜:快Ｃ >= 10
+					PRINTFORM 字体设计
+					;TranslatedMark も%CALL_DIRTY_K9("Ｐ")%
+					PRINTFORM %SPLIT_R("も、もうだめなのぉ：も、気持ちいいのぉ：もぉっ❤　イくぅ：もだめぇ：出るぅ：出ちゃうぅ")%
+					PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+				ELSEIF 咲夜_最大部位 == "Ｖ" && SOURCE:咲夜:快Ｖ >= 10
+					PRINTFORM 字体设计
+					;TranslatedMark も%CALL_DIRTY_K9("Ｖ")%
+					PRINTFORM %SPLIT_R("も、もうだめなのぉ：も、気持ちいいのぉ：もぉっ❤　イくぅ：もだめぇ")%
+					PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+				ELSEIF 咲夜_最大部位 == "Ａ" && SOURCE:咲夜:快Ａ >= 10
+					PRINTFORM 字体设计
+					;TranslatedMark も%CALL_DIRTY_K9("Ａ")%
+					PRINTFORM %SPLIT_R("もぉ：もすごいのぉ：も、熱いのぉ：も❤　イっちゃう：も、気持ちいぃ")%
+					PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+				ELSEIF 咲夜_最大部位 == "Ｂ" && SOURCE:咲夜:快Ｂ >= 10
+					PRINTFORM 字体设计
+					;TranslatedMark も%CALL_DIRTY_K9("Ｂ")%
+					PRINTFORM %SPLIT_R("もぉっ！　いいのぉ：も、すごいのぉ：もイイのぉ：も❤　あ、あ：もイッちゃぁう")%
+					PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+				ELSEIF 咲夜_最大部位 == "Ｃ" && SOURCE:咲夜:快Ｃ >= 10
+					PRINTFORM 字体设计
+					;TranslatedMark も%CALL_DIRTY_K9("Ｃ")%
+					PRINTFORM %SPLIT_R("もぉ❤　もうぅ：もぉ、イきそうなのぉ：も、いいのぉ：もぉ")%
+					PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+				ENDIF
+
+				;気力体力がある、または主導権がある
+				IF CHECK_K9("活力")
+					PRINTFORM %SPLIT_R("イッちゃうぅ：おかしいのぉ：おかしくなっちゃうぅ：熱いぃ：変になるう：ああぁあ：イくうぅ：弾けちゃう：頭とけちゃうぅ")%
+				;体力か陥落がなければ
+				ELSE
+					PRINTFORM %SPLIT_R("助けてぇ：もぅ、許してぇ：壊れるぅ：変に、なるう：ああぁ：いくう゛ぅ")%
+				ENDIF
+
+				PRINTFORML %BREAK_K9("末", 咲夜_対象)%」
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;─────────────────────────────────────── 
+;◆戻る
+;─────────────────────────────────────── 
+RETURN 0
+

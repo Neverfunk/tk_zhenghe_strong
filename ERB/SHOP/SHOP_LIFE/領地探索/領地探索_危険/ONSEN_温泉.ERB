@@ -1,0 +1,88 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_ONSEN_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_ONSEN_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_ONSEN(対象)
+#DIM 対象
+
+PRINTFORML 探索時、発現了温泉旅館
+PRINTFORML 說不定可以緩解平時的疲勞……
+PRINTFORML
+CALL ASK_MULTI("进入男浴池", "进入女浴池", "进入混浴池", "放弃")
+
+SELECTCASE RESULT
+	CASE 0
+		IF IS_MALE(対象)
+			PRINTFORML 決定進入男湯
+			PRINTFORML ……慢慢地泡著温泉消除了疲勞
+		ELSE
+			PRINTFORMW ……試著進入男湯吧
+			PRINTFORML
+			PRINTFORMW 注意到一絲不掛的%ANAME(対象)%的時候、其他入浴的客人全都露出了吃驚的表情
+			PRINTFORML 沐浴在男人們的視線中、%ANAME(対象)%慢慢地清洗著%STR_BODY("胸：愛撫", 対象)%和%STR_BODY("尻：長")%
+			PRINTFORML 洗去身体汚垢泡進温泉的時候、男人們從左右靠了過來
+			PRINTFORMW 毫不客氣地拍開伸過來的手、讓他們更加興奮了
+			PRINTFORML 男人們開始爭先恐後地圍住了%ANAME(対象)%、貪婪地索求著那個%STR_BODY("身体")%
+			PRINTFORMW %ANAME(対象)%被一根接一根的肉棒挿入、把身体裡裡外外都清洗了一邊
+			IF CONFIG:203
+				PRINTFORMW 筋疲力盡的男人們被%ANAME(対象)%從浴場帯回了自己的房間、一整晚都在榨取著這些肉棒……
+				CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, 露出, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_SPERM_ID("痴漢"), @"痴漢の\@RAND:2 ? 肉棒 # 唇\@", "痴漢", "", "温泉内的享受")
+			ELSE
+				PRINTFORMW 男人們把筋疲力盡的%ANAME(対象)%從浴場帯回了自己的房間、一整晚都在輪流侵犯著%PRONOUN(対象)%……
+				CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, 露出, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_SPERM_ID("痴漢"), @"痴漢の\@RAND:2 ? 肉棒 # 唇\@", "痴漢", "", "温泉での輪姦")
+			ENDIF
+		ENDIF
+	CASE 1
+		IF IS_MALE(対象)
+			PRINTFORML 也許意外地不會被発現
+			PRINTFORMW 進入了女湯
+			PRINTFORML
+			PRINTFORMW 那當然是不可能的
+			PRINTFORMW 被女客人砸出去了
+			CALL ADD_COOLTIME(対象, 2)
+		ELSE
+			PRINTFORML 決定進入女湯
+			PRINTFORML ……慢慢地泡著温泉消除了疲勞
+		ENDIF
+	CASE 2
+		PRINTFORMW 試著進入混浴吧
+		PRINTFORML
+		IF IS_MALE(対象) || (HAS_PENIS(対象) && RAND:2)
+			PRINTFORMW ……在安靜的温泉浴場內、響起了女性的嬌喘聲
+			PRINTFORMW %ANAME(対象)%和情投意合的女客人交合著
+			PRINTFORMW 不僅是性格相投、身体的相性也很好、她的膣内陣陣発燙、向%ANAME(対象)%索求著
+			PRINTFORMW 無法忍耐的%ANAME(対象)%射精的時候、她也大聲嬌喘著高潮了……
+			CALL FUCK(対象, "性技, 性交, Ｃ, 射精, Ｖ挿入" + (IS_FEMALE(対象) ? ", 百合, Ｂ, Ｃ, Ｖ" # ""), "童貞喪失, 接吻喪失", 0, "女湯的客人的嘴唇", "", "女湯的客人的膣穴", "和姦")
+		ELSEIF (IS_FEMALE(対象) && RAND:2) || (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+			PRINTFORMW ……在安靜的温泉浴場內、響起了兩位女性的嬌喘聲
+			PRINTFORMW %ANAME(対象)%和情投意合的女客人交合著
+			PRINTFORMW 不僅是性格相投、身体的相性也很好、%ANAME(対象)%和她一邊舌吻一邊摩擦著身体
+			PRINTFORMW 無法忍耐的%ANAME(対象)%高潮的時候、她也大聲嬌喘著高潮了……
+			CALL FUCK(対象, "欲望, 性交, 奉仕, 性技, Ｂ, Ｖ, Ｍ, Ｃ, 百合", "接吻喪失", 0, @"行きずりの女の\@ RAND:2 ? 唇 # 秘貝\@", "", "", "和姦")
+		ELSE
+			PRINTFORMW ……在安靜的温泉浴場內、響起了%ANAME(対象)%的嬌喘聲
+			PRINTFORMW %ANAME(対象)%和情投意合的男客人交合著
+			PRINTFORMW 不僅是性格相投、身体的相性也很好、粗壮的肉棒每次在%STR_BODY("膣：処女確認：時間経過：欲情", 対象)%內抽插%ANAME(対象)%都會発出嬌喘
+			PRINTFORMW 男人在%ANAME(対象)%的膣内射精的時候、%PRONOUN(対象)%也大聲嬌喘著高潮了……
+			CALL FUCK(対象, "欲望, 性交, 奉仕, 性技, Ｂ, Ｖ, Ｍ, Ｃ, Ａ, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精", GET_SPERM_ID("店主"), @"店主的\@ RAND:2 ? 嘴唇 # 肉棒\@", "店主", "", "温泉内的和姦")
+		ENDIF
+	CASE 3
+		PRINTFORML ……不、工作還沒做完不能偷懶
+		PRINTFORML 決定放棄
+ENDSELECT
+
+RETURN 1

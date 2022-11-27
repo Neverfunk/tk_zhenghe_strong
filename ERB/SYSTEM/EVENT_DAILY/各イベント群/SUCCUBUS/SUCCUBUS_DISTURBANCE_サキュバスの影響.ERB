@@ -1,0 +1,256 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_SUCCUBUS_DISTURBANCE_RATE()
+RETURN 55
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_SUCCUBUS_DISTURBANCE_DECISION()
+#DIM 夢魔
+夢魔 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_サキュバス))
+SIF 夢魔 == -1
+	RETURN 0
+SIF CFLAG:MASTER:所属 == 夢魔
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_SUCCUBUS_DISTURBANCE_GENRE()
+RETURN デイリー_ジャンル_特殊勢力
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_SUCCUBUS_DISTURBANCE
+#DIM 対象都市
+#DIM 夢魔
+夢魔 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_サキュバス))
+
+CALL DAILY_EVENT_RAND_CITYSELECT(0)
+対象都市 = RESULT
+SIF 対象都市 < 0
+	RETURN
+PRINTFORML 也许是受到梦魔们的影响，幻想乡最近风纪混乱……
+;TranslatedMark サキュバス達の影響か、近頃幻想郷の風紀が乱れている…
+PRINTFORML 无论热闹的大街还是荒无人烟之处，都能看到男男女女勾搭在一块儿
+;TranslatedMark 街中でも人気のない場所を覗くと男女がまぐわっていたりする
+PRINTFORMW 目前倒是没有太大危害，而且似乎对经济起了积极的作用
+;TranslatedMark 今のところ大きな害はなく、また経済には好影響が出ているようだ
+PRINTFORML 怎麼辦？
+;TranslatedMark どうしよう？
+CALL ASK_MULTI(@"严加取缔" ,"观察情况" ,"自己也卸下烦恼" ,"寻找梦魔")
+
+IF RESULT == 1
+	PRINTFORMW 决定暂时观察一下情况……
+	;TranslatedMark しばらく様子を見る事にした…
+	$SUCCUBUS_KEKKA
+	CALL MODIFY_CITY_ECONOMY(対象都市, RAND(10000, 30000))
+	FOR LOCAL, 1, MAX_COUNTRY
+		IF IS_COUNTRY(LOCAL) && LOCAL != 夢魔
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -30, 30)
+		ELSE
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 100, -100)
+		ENDIF
+	NEXT
+	CALL COLOR_PRINTL("此后一段时间风纪持续混乱，其他国家的评价下降了", カラー_注意)
+	CALL COLOR_PRINTW("但是好像被梦魔们善意地接受了", カラー_注意)
+ELSEIF RESULT == 0
+	PRINTFORMW 严加取缔
+	;TranslatedMark 厳しく取り締まった…
+	CALL MODIFY_CITY_ECONOMY(対象都市, RAND(10000, 30000) * -1)
+	FOR LOCAL, 1, MAX_COUNTRY
+		IF IS_COUNTRY(LOCAL) && LOCAL != 夢魔
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 30, -30)
+		ELSE
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -100, 100)
+		ENDIF
+	NEXT
+	CALL COLOR_PRINTL("严肃纪律的姿态影响到了别国的评价", カラー_注意)
+	CALL COLOR_PRINTW("但在梦魔们那便不受欢迎了", カラー_注意)
+ELSEIF RESULT == 3
+	PRINTFORMW %ANAME(MASTER)%寻觅着可能是元凶的梦魔
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW ・
+	PRINTFORML 但是找不到
+	PRINTFORMW 如果再深入下去的话自己也会受到梦魔的影响……
+	PRINTFORMW 怎麼辦？
+	CALL ASK_YN("仍在寻找" ,"搁置，作罢")
+	IF RESULT == 1
+		PRINTFORML 已经停止了
+		PRINTFORMW 没办法，只好暂时看看情况……
+		GOTO SUCCUBUS_KEKKA
+	ELSEIF RESULT == 0
+		PRINTFORMW 不死心仍执意寻找
+		;TranslatedMark 諦めきれずまだ探す事にした
+		PRINTFORML 
+		PRINTFORMW …当注意到的时候%ANAME(MASTER)%也已受到梦魔影响，脑中满是寻求快乐的念头
+		;TranslatedMark …気づくと%ANAME(MASTER)%もサキュバスの影響を受け頭の中は快楽を求めて一杯になっていた
+		PRINTFORMW %ANAME(MASTER)%带着发情的表情来到街上
+		;TranslatedMark %ANAME(MASTER)%は発情したような表情で街に繰り出した
+		GOTO SUCCUBUS_SEX
+	ENDIF
+ELSEIF RESULT == 2
+	PRINTFORML 看来自己也受到了梦魔的影响
+	;TranslatedMark どうやら自分もサキュバスの影響を受けてしまった様だ
+	PRINTFORMW %ANAME(MASTER)%打算趁此机会放纵一下
+	;TranslatedMark %ANAME(MASTER)%はこの状況を好ましくとらえ羽目を外す事にした
+	$SUCCUBUS_SEX
+	PRINTFORML 
+	IF IS_MALE(MASTER) || (HAS_PENIS(MASTER) && RAND:2) || (HAS_PENIS(MASTER) && TALENT:MASTER:討厭男人)
+		SELECTCASE RAND:5
+			CASE 0
+				PRINTFORML %ANAME(MASTER)%约了个当地姑娘
+				;TranslatedMark %ANAME(MASTER)%は町娘をナンパした
+				PRINTFORML 看上去的确是一位未经人事的少女，但她却兴致勃勃地接受了%ANAME(MASTER)%的邀请
+				;TranslatedMark いかにも生娘といった様子の少女だったが、彼女もまた熱に浮かされた様に%ANAME(MASTER)%の誘いに乗って来た
+				PRINTFORML 无法忍受对方炽热的视线的%ANAME(MASTER)%将手伸向她的腰部，立刻带入了宾馆
+				;TranslatedMark その熱っぽい視線に我慢できなかった%ANAME(MASTER)%は彼女の腰に手を回して早速ホテルへと連れ込んだ
+				PRINTFORMW 尽情地品尝着从未被任何人进入过的她那纯洁的身体，%ANAME(MASTER)%用一夜时间将她调教成自己中意的口味
+				;TranslatedMark 誰にも汚された事のない彼女の無垢な身体を思う存分味わい、一晩かけて%ANAME(MASTER)%好みに躾けてやった
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "路过的女人的嘴唇", "", "路过的女人的阴道", "和姦")
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "路过的女人的嘴唇", "", "路过的女人的阴道", "和姦")
+			CASE 1
+				PRINTFORML %ANAME(MASTER)%闯入某个少女的闺房
+				;TranslatedMark %ANAME(MASTER)%はある娘に夜這いを掛けた
+				PRINTFORML 白天在街上看到的时候就被抓住目光、无论如何都想拉入怀中的少女
+				;TranslatedMark 昼間に街中で見かけた時から目を奪われ、どうしても手を掛けたいと思っていた少女だ
+				PRINTFORML 少女极力抵抗，%ANAME(MASTER)%却因此更加兴奋，滚烫的阳根越发坚硬有力地侵犯她
+				;TranslatedMark 娘はひどく抵抗してきたが、%ANAME(MASTER)%はその表情に興奮しより激しく一物をいきり立たせて彼女を犯した
+				PRINTFORMW 在侵犯的过程中，她似乎受淫气侵染，最后她主动紧紧抱住%ANAME(MASTER)%乞求继续
+				;TranslatedMark 犯している内に彼女もまた淫気に当てられたのか最後には自ら%ANAME(MASTER)%にしがみついておねだりしてきた
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "路过的女人的嘴唇", "", "路过的女人的阴道", "強姦")
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "路过的女人的嘴唇", "", "路过的女人的阴道", "強姦")
+			CASE 2
+				PRINTFORML %ANAME(MASTER)%被主动找上门的少女约去宾馆
+				;TranslatedMark %ANAME(MASTER)%は逆ナンしてきた娘とホテルにいる
+				PRINTFORML 她像一条亢奋的母狗蹭在%ANAME(MASTER)%身上，表示不管何种粗暴的对待都来者不拒
+				;TranslatedMark 彼女は盛りのついた雌犬の様に%ANAME(MASTER)%に擦り寄り、乱暴に好きなように犯してほしいとねだってきた
+				PRINTFORML 毋庸置疑，%ANAME(MASTER)%把她压在床上，急不可耐地将硬挺的阳根插入
+				;TranslatedMark 勿論そのつもりの%ANAME(MASTER)%は彼女をベッドに押し倒すと、早速いきり立った一物を彼女にねじ込んだ
+				PRINTFORMW 结果那一晚，两个人只是一味地互相追求着肉欲，仿佛忘却了时间
+				;TranslatedMark 結局その日は一晩中、二人で時間を忘れてただひたすらにお互いを求めて肉欲を貪り合った
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "路过的女人的嘴唇", "", "路过的女人的阴道", "和姦")
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "路过的女人的嘴唇", "", "路过的女人的阴道", "和姦")
+			CASE 3
+				PRINTFORML %ANAME(MASTER)%正在侵犯被退治的妖怪少女
+				;TranslatedMark %ANAME(MASTER)%は退治した妖怪の少女を犯している
+				PRINTFORML 与人相比，容纳的身体是%ANAME(MASTER)%，每个回合都能发出可爱的喘息声。
+				;TranslatedMark 人間に比べ引き締まった身体は%ANAME(MASTER)%の一物を激しく締め上げ、一突き毎に可愛い喘ぎ声を上げる
+				PRINTFORML 与人类相比更紧凑的身体裹住%ANAME(MASTER)%的阳根，每一次撞击都让她发出可爱的喘息
+				;TranslatedMark 口では抵抗している彼女も淫気の影響を受けている様で、軽く小突いてやるだけで激しく身を震わせた
+				PRINTFORML 嘴上不老实的她，好像也受到淫气的影响，轻轻一击便让身体剧烈颤抖
+				;TranslatedMark 口では抵抗している彼女も淫気の影響を受けている様で、軽く小突いてやるだけで激しく身を震わせた
+				PRINTFORMW %ANAME(MASTER)%耐心地教育了她，很快她便发自真心地"悔过"变得温顺
+				;TranslatedMark %ANAME(MASTER)%は彼女が心から"改心"して従順になるまで時間を掛けてじっくりと躾けてやった
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "妖怪少女的嘴唇", "", "妖怪少女的阴道", "強姦")
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "妖怪少女的嘴唇", "", "妖怪少女的阴道", "強姦")
+			CASE 4
+				PRINTFORML %ANAME(MASTER)%正在"审问"被俘虏的女士兵
+				;TranslatedMark %ANAME(MASTER)%は捕虜の女兵士を"尋問"している
+				PRINTFORML 她起初咬紧牙关抵抗,却在本人没意识到的时候摆出一张临近高潮的母猪脸娇喘连连
+				;TranslatedMark 彼女ははじめ抵抗して必死で口をつぐんでいたが、本人も気づかぬ内に雌の顔で喘ぎだした
+				PRINTFORML 发现女人的弱点后的%ANAME(MASTER)%针对那处进攻，果然效果拔群，她被强制惊叫着同时大幅后仰绝顶
+				;TranslatedMark 女の弱点を見つけた%ANAME(MASTER)%がそこを攻め立てるとあられもなく強制を響かせながら大きく仰け反った
+				PRINTFORMW %ANAME(MASTER)%用肉棒教导她，不管经过多少锻炼，女人都不过是女人而已
+				;TranslatedMark %ANAME(MASTER)%は彼女に対しどんなに鍛えても所詮女は女なのだとペニスで教え込んでやった
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "女士兵的嘴唇", "", "女士兵的阴道", "強姦")
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "女士兵的嘴唇", "", "女士兵的阴道", "強姦")
+		ENDSELECT
+	ELSE
+		SELECTCASE RAND:5
+			CASE 0
+				PRINTFORML %ANAME(MASTER)%来到士兵的宿舍
+				;TranslatedMark %ANAME(MASTER)%は宿舎で兵士の相手をしている
+				PRINTFORML 表面上是慰安其白天的辛劳，实际上是看上了他们强壮的身体
+				;TranslatedMark 建前は日頃の苦労をねぎらう慰安として、本音としてはその逞しい身体で滅茶苦茶にしてもらう為
+				PRINTFORMW 对于积蓄着压力的士兵们来说，%ANAME(MASTER)%的到来是对他们肉体与精神上最好的奖励
+				;TranslatedMark 鬱憤がたまっている兵士にとって%ANAME(MASTER)%を抱けるのは肉体的にも精神的にも極上の褒美となった
+				PRINTFORML 很快士兵们掏出鸡巴用各种体位毫无顾忌地尽情侵犯了%ANAME(MASTER)%
+				;TranslatedMark %ANAME(MASTER)%は代わる代わるちんぽをねじ込まれ、好き放題に犯されながらあられもなくヨガりまくる
+				PRINTFORML 他们当然不会考虑避孕的事情，把积攒下来的浓郁雄汁通通注入子宫内
+				;TranslatedMark もちろん彼らが避妊など考えるはずもなくその溜まりに溜まった濃い雄汁はすべて子宮に注がれた
+				PRINTFORMW 到天亮为止与无数的士兵持续交手的%ANAME(MASTER)%，因剧烈的快感与疲劳而累得动弹不得…
+				;TranslatedMark 夜が明けるまで無数の兵士とまぐわい続けた%ANAME(MASTER)%は、快楽と疲労のあまりしばらく動けなかった…
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, Ｖ性交, Ａ性交, 接吻, 口淫, 輪姦", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("兵士"), @"兵士の\@RAND:2 ? 肉棒 # 唇\@", @"兵士", "", "輪姦")
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, Ｖ性交, Ａ性交, 接吻, 口淫, 輪姦", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("兵士"), @"兵士の\@RAND:2 ? 肉棒 # 唇\@", @"兵士", "", "輪姦")
+			CASE 1
+				PRINTFORML 在欢乐街，%ANAME(MASTER)%站在貌似黑社会的男人身旁
+				;TranslatedMark %ANAME(MASTER)%は歓楽街でヤクザらしき男と共にいる
+				PRINTFORML 穿着平时不怎么穿的服装，用一副谄媚的雌性视线缠着他
+				;TranslatedMark 普段は着ない様なあられもない衣装を身にまとい、媚びる様な雌の視線で彼に絡みつく
+				PRINTFORMW 尽管被不曾相识的人搭讪，但凭那扑鼻雄性气息就足以令男人对%ANAME(MASTER)%充满期待
+				;TranslatedMark 面識などはなく、先程口説かれたばかりの男だがその雄臭さだけで%ANAME(MASTER)%を期待させるには十分だった
+				PRINTFORML 他露出不加掩饰的猥琐笑容，将%ANAME(MASTER)%视为己物般带到宾馆
+				;TranslatedMark 彼は%ANAME(MASTER)%を自分の女の様に扱い、欲望を隠さない下卑た笑みを浮かべてホテルに連れ込んだ
+				PRINTFORML 一进房间就立刻被推倒，他用超出预料的强壮体魄与精妙技巧，一次次将作为女人最高的喜悦刻进%ANAME(MASTER)%心中
+				;TranslatedMark 部屋に入ると早速押し倒され、期待以上の逞しさと巧みさで何度も女の悦びを刻み込まれた
+				PRINTFORMW 从酒店出来的时候，完全被迷住的%ANAME(MASTER)%主动和他交换了联系方式…
+				;TranslatedMark ホテルから出るころにはすっかり彼にメロメロとなっていた%ANAME(MASTER)%は自ら彼と連絡先を交換した…
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, Ｖ性交, 接吻, 口淫", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("黑社會"), @"黑社會の\@RAND:2 ? 肉棒 # 唇\@", @"黑社會", "", "和姦")
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, Ｖ性交, 接吻, 口淫", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("黑社會"), @"黑社會の\@RAND:2 ? 肉棒 # 唇\@", @"黑社會", "", "和姦")
+			CASE 2
+				PRINTFORML 在廉价酒店，%ANAME(MASTER)%跨在男人身上扭腰
+				;TranslatedMark %ANAME(MASTER)%は安宿で男に跨り腰を振っている
+				PRINTFORML 小混混样的男人躺在下面往上顶的同时还颐指气使地表示%ANAME(MASTER)%下面太松，需要更卖力地侍奉
+				;TranslatedMark 見るからにチンピラ風の男は、もっと上手く奉仕する様に%ANAME(MASTER)%を罵倒しながら突き上げて来る
+				PRINTFORMW 体会到被小混混傲慢命令的屈辱，因此感到兴奋的%ANAME(MASTER)%服从他的指示，拼命摆动腰部
+				;TranslatedMark チンピラ風情に横柄に命令される屈辱感は興奮した%ANAME(MASTER)%は、従順に彼に従い必死で腰を振る
+				PRINTFORML 起初被搭讪时，他那轻浮的语气和露骨的欲望让上钩的%ANAME(MASTER)%子宫发疼
+				;TranslatedMark 彼にナンパされた%ANAME(MASTER)%は、そのチャラさと性欲を隠そうとしない口調に子宮を疼かせ誘われた
+				PRINTFORML 可以说是正中下怀，被当做人肉飞机杯一样对待的%ANAME(MASTER)%内心充满了喜悦，向他献媚的样子如同一条母狗
+				;TranslatedMark 期待通りにまるで肉オナホの様な扱いをされて%ANAME(MASTER)%は悦び、雌犬の様に彼に媚びヨガりまくった
+				PRINTFORMW 事后，小混混提起裤子就走，留下瘫在床上抽搐痉挛的%ANAME(MASTER)%沉浸在余韵中，吐着舌头翻白眼……
+				;TranslatedMark 事後、彼はさっさと居なくなり、%ANAME(MASTER)%はベッドの上で余韻で痙攣しながらアヘ顔を晒していた…
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, Ｖ性交, 接吻, 口淫", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("小混混"), @"小混混的\@RAND:2 ? 肉棒 # 唇\@", @"小混混", "", "和姦")
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, Ｖ性交, 接吻, 口淫", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("小混混"), @"小混混的\@RAND:2 ? 肉棒 # 唇\@", @"小混混", "", "和姦")
+			CASE 3
+				PRINTFORML %ANAME(MASTER)%走进了贫民窟
+				;TranslatedMark %ANAME(MASTER)%はスラム街に足を運んだ
+				PRINTFORML 同样受到梦魇的影响的流浪汉们眼中布满血丝，裤裆高高隆起，渐渐包围%ANAME(MASTER)%
+				;TranslatedMark そこでもサキュバスの影響が出ており、すぐに目を血走らせ股間を膨らませた浮浪者に囲まれた
+				PRINTFORMW 如果是一般的女孩子早就尖叫着逃跑了，但%ANAME(MASTER)%舔了舔嘴角，一边迎面走向他们一边宽衣解带
+				;TranslatedMark 普段なら悲鳴を上げて逃げる所だが%ANAME(MASTER)%は舌なめずりをすると自ら服を脱ぎ去って彼らを誘った
+				PRINTFORML 渴望女人的他们一窝蜂地扑向了%ANAME(MASTER)%，向那具极品身材发泄喷薄而出的肉欲
+				;TranslatedMark 女に飢えた彼らは躊躇なく%ANAME(MASTER)%に襲い掛かり、その極上の身体に容赦なく肉欲をぶつけてくる
+				PRINTFORML 被无数肮脏的鸡巴包围的%ANAME(MASTER)%瞳孔中冒出♥，用尽所有力气为它们服务
+				;TranslatedMark 無数の汚らしいペニスに囲まれた%ANAME(MASTER)%は瞳に♥を浮かべながら全身を使ってそれらに奉仕した
+				PRINTFORMW 当发黄的精液染遍全身上下里里外外，约好了再次服务时间的%ANAME(MASTER)%终于得到了解放……
+				;TranslatedMark 黄ばんだ精液で全てを汚されきった後、また奉仕に来ることを約束させられてようやく解放された…
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, Ｖ性交, Ａ性交, 接吻, 口淫, 輪姦", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("流浪漢"), @"流浪漢的\@RAND:2 ? 肉棒 # 唇\@", @"流浪漢", "", "輪姦")
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, Ｖ性交, Ａ性交, 接吻, 口淫, 輪姦", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("流浪漢"), @"流浪漢的\@RAND:2 ? 肉棒 # 唇\@", @"流浪漢", "", "輪姦")
+			CASE 4
+				PRINTFORML 披着大衣的%ANAME(MASTER)%一边走在夜路上，一边喘着粗气
+				;TranslatedMark コートを羽織った%ANAME(MASTER)%が息を荒げながら夜道を歩く
+				PRINTFORML 除了这件外套以外，%ANAME(MASTER)%的身上不着寸缕，每当与人擦肩而过时拉开外衣邀请路人做爱
+				;TranslatedMark %ANAME(MASTER)%はコートの下に何一つ身に着けておらず、人とすれ違う度に裸体を露出しセックスに誘う
+				PRINTFORMW 虽然大多数的人要么愣住不动要么落荒而逃，但他们的视线和反应仍然让%ANAME(MASTER)%无比兴奋
+				;TranslatedMark 殆どの相手はただ硬直したり逃げるだけだが、そんな彼らの視線や反応もまた%ANAME(MASTER)%を興奮させる
+				PRINTFORML 当接受邀请的男人偶尔出现时，就一起去人少的小巷里做个痛快
+				;TranslatedMark また時折誘いに乗る男が現れると共に近くの物陰に向かっては思う存分行きずりセックスを楽しむ
+				PRINTFORML 享受野外野外露出性爱的背德感与露出感，越发兴奋的%ANAME(MASTER)%的呻吟比以往高了些许分贝
+				;TranslatedMark 野外での露出セックスによる背徳感と露出感に、%ANAME(MASTER)%はいつも以上に興奮してヨガリ狂った
+				PRINTFORMW 就这样一夜之间被侵犯多次，心满意足的%ANAME(MASTER)%一脸若无其事地回到家，开始平时的工作…
+				;TranslatedMark そうして一晩かけて何度も犯され満足した%ANAME(MASTER)%は何食わぬ顔で帰宅し何時もの仕事に戻った…
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, Ｖ性交, Ａ性交, 接吻, 口淫", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("偶遇的男人"), @"偶遇的男人的\@RAND:2 ? 肉棒 # 唇\@", @"偶遇的男人", "", "和姦")
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, Ｖ性交, Ａ性交, 接吻, 口淫", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("偶遇的男人"), @"偶遇的男人的\@RAND:2 ? 肉棒 # 唇\@", @"偶遇的男人", "", "和姦")
+		ENDSELECT
+	ENDIF
+	PRINTFORMW 
+	FOR LOCAL, 1, MAX_COUNTRY
+		IF IS_COUNTRY(LOCAL) && LOCAL != 夢魔
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -45, 45)
+		ELSE
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 150, -150)
+		ENDIF
+	NEXT
+	CALL COLOR_PRINTL("此后一段时间风纪持续混乱，其他国家的评价下降了。", カラー_注意)
+	CALL COLOR_PRINTW("但是好像被梦魔们善意地接受了", カラー_注意)
+ENDIF
+
+RETURN 1

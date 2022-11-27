@@ -1,0 +1,186 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_TERRITORY_RABBIT_VILLAGE_RATE()
+RETURN 50
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_TERRITORY_RABBIT_VILLAGE_DECISION()
+#DIM 兎集落
+兎集落 = GET_CITYNUMBER("素兎の集落")
+
+SIF 兎集落 == -1
+	RETURN 0
+SIF CITY_OWNER:兎集落 != CFLAG:MASTER:所属
+	RETURN 0
+SIF DVAR:兎の宴_発生フラグ == 2
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_TERRITORY_RABBIT_VILLAGE_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_TERRITORY_RABBIT_VILLAGE
+#DIM 対象
+#DIM 金額
+
+対象 = NAME_TO_CHARA("てゐ")
+
+LOCAL:0 = 0
+
+IF DVAR:兎の宴_発生フラグ == 0
+	DVAR:兎の宴_発生フラグ = 1
+	PRINTFORML 从部下那里听到了某个传闻
+	PRINTFORML 这个时期，竹林某处的兔子村落里好像正在举行祭祀活动
+	PRINTFORMW 不仅是妖怪兔，似乎谁都可以参加……
+ELSE
+	PRINTFORML 听说现在正是兔子的宴会再次举行的时候
+	PRINTFORMW 虽然上次没能参加
+ENDIF
+PRINTFORML 怎么办？
+CALL ASK_MULTI_JUDGE("去", 1,"无视", 1,"请帝带路", CFLAG:対象:所属 == CFLAG:MASTER:所属 && CFLAG:対象:捕虜先 == 0)
+IF RESULT == 1
+	PRINTFORML 虽然有兴趣，但现在很忙
+	PRINTFORMW 决定放弃参加
+	RETURN
+ELSEIF RESULT == 0
+	PRINTFORML 兔子的节日好像很有意思
+	PRINTFORMW 产生兴趣的%ANAME(MASTER)%以村落为目标出发了
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW ・
+	SIF ABL:MASTER:知略 >= 70
+		LOCAL:0 = 1
+	IF LOCAL:0 + RAND:6 < 3
+		PRINTFORML 但是却迷路了
+		PRINTFORMW 在竹林里徘徊了一天，好不容易才回到了宫殿
+		RETURN
+	ENDIF
+ELSEIF RESULT == 2
+	金額 = MAX(MONEY / 8, 500)
+	SIF IS_SLAVE(対象)
+		金額 = 金額 / 100
+	PRINTFORML 拜托她带路，她拿出一个小赛钱箱
+	PRINTFORMW 是在说带路费吗？
+	PRINTFORML 怎么办？
+	CALL ASK_MULTI_JUDGE(@"支付{金額}带路费", 金額 <= MONEY,"还是算了", 1,"教导她主从的礼仪", HAS_PENIS(MASTER))
+	IF RESULT == 1
+		PRINTFORML 还不想做到这种地步
+		PRINTFORMW %ANAME(MASTER)%拒绝后，她很遗憾地离开了
+		RETURN
+	ELSEIF RESULT == 0
+		PRINTFORML 符合她风格的要求
+		PRINTFORMW %ANAME(MASTER)%支付了带路费后，她露出了微笑
+		MONEY -= 金額
+		PRINTFORMW …被帝领到兔子的村落去了
+	ELSEIF RESULT == 2
+		PRINTFORML 要教会这个守财奴主从的礼仪啊
+		PRINTFORMW %ANAME(MASTER)%谎称房间里有钱包，把她带进了卧室
+		PRINTFORML 
+		IF (ABL:MASTER:性技 + ABL:MASTER:性交 + RAND:5 > ABL:対象:性技 + ABL:対象:性交 + RAND:5) || IS_SLAVE(対象)
+			PRINTFORML 轻松推倒了无力的她
+			PRINTFORML %ANAME(MASTER)%充分教育了她娇小但却像果实一般甜美柔软的身体
+			PRINTFORML 最初抵抗的她也渐渐弯曲着身体露出了甜美的气息
+			PRINTFORMW 最后主动拼命地抱住%ANAME(MASTER)%，死缠烂打地索求起来
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, @"%ANAME(対象)%の唇", "", @"%ANAME(対象)%の膣", "強姦")
+			CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_ID(MASTER), @"%ANAME(MASTER)%の唇", @"%ANAME(MASTER)%", "", "強姦")
+			PRINTFORML 
+			PRINTFORML 心里舒畅了不少，就让她带路了
+			PRINTFORMW 她还是热情不减的样子，一路上偷偷地往这边看
+		ELSE
+			PRINTFORML 但还是她更加擅长的样子
+			PRINTFORMW %ANAME(MASTER)%的自尊心被打得七零八落…
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, @"%ANAME(対象)%の唇", "", @"%ANAME(対象)%の膣", "強姦")
+			CALL FUCK(対象, "欲望, 性技, 性交, Ｃ, Ｖ, Ｖ性交", "処女喪失, 膣内射精", GET_ID(MASTER), "", @"%ANAME(MASTER)%", "", "強姦")
+			RETURN
+		ENDIF
+	ENDIF
+ENDIF
+PRINTFORML 好不容易走到了兔之乡的%ANAME(MASTER)%被眼前的情景吓了一跳
+PRINTFORML 到处不是都有妖怪兔在交尾吗？
+PRINTFORML 看来祭典指的就是这件事
+PRINTFORMW 从四处的阴影和家中回想着娇艳的喘息声……
+IF IS_MALE(MASTER) || (HAS_PENIS(MASTER) && RAND:2)
+	PRINTFORML 突然和一只妖怪兔对视了
+	PRINTFORML 她红着脸大口喘息着，明显是发情的样子
+	PRINTFORML 看到%ANAME(MASTER)%的她眼睛闪着光，把裙子撩了起来
+	PRINTFORML 在那下面没有穿内衣，裂缝里满溢着诱人的蜜汁
+	PRINTFORMW %ANAME(MASTER)%无法忍受她那淫靡的身姿，抓住她带到了附近的空房子里
+	PRINTFORML 
+	PRINTFORML %ANAME(MASTER)%立刻把她推倒，打开湿透的秘所，将舌头贴了上去
+	PRINTFORML 轻轻划过美丽的裂缝，她发出略带羞涩的甜美娇声
+	PRINTFORMW 溢出的蜜非常甜美，每次着迷地舔舐时她都会浑身颤抖着喘息起来
+	PRINTFORML 终于，她紧紧抱住了%ANAME(MASTER)%下体高高耸立的那个东西
+	PRINTFORML 拥抱着她娇小的身体一口气突入进去，她立刻大大地仰起身子
+	PRINTFORMW 看样子还是个处女，薄膜破裂的感触传了过来
+	PRINTFORML 但是大概是兔子的特性吧，她好像没有什么痛苦的感觉，用呆呆的表情望了过来
+	PRINTFORML 那样的话%ANAME(MASTER)%激烈地突刺着紧致的阴道，她立刻嘻嘻笑着发出甜美的呻吟
+	PRINTFORML 狭窄的阴道良好地收缩着，像包裹住整根肉棒一样，传递出愉快的收紧感
+	PRINTFORMW 一下子深深地捅了进去，铃口撞击着子宫口，在这个冲击下她发出响亮的娇声迎来潮吹
+	PRINTFORML 连续不断地轻轻突刺着，她发出野兽般的娇声，全身持续痉挛起来
+	PRINTFORML 虽然还想更加满足可爱的反应，但已经到了忍无可忍的极限，腰不由自主地加速了
+	PRINTFORML 抱着她一边接吻一边激烈地撞击着腰肢，她阴道的收缩也变得强烈
+	PRINTFORMW %ANAME(MASTER)%两个人只是一味地追求对方而上升到快感的高峰，不约而同地达到了绝顶
+	PRINTFORMW …那之后兴奋感也没有冷却的%ANAME(MASTER)%们在天黑之前无数次地不断重复着交尾
+	CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "妖怪兎の唇", "", "妖怪兎の膣", "和姦")
+	CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "妖怪兎の唇", "", "妖怪兎の膣", "和姦")
+	PRINTFORML 
+ELSE
+	PRINTFORML %ANAME(MASTER)%呆住的时候，下摆不知被谁掀了起来
+	PRINTFORML 回头查看发生了什么事，发现一只妖怪兔抓住了%ANAME(MASTER)%衣服的下摆
+	PRINTFORML 眼睛闪闪发光，股间高高地膨胀着，一看就知道是在发情。
+	PRINTFORML 他抱住%ANAME(MASTER)%，摩擦着胯股之间，发出交尾的邀请
+	PRINTFORMW 对这个邀请想逃也逃不掉，%ANAME(MASTER)%被强行带到了他家
+	PRINTFORML 
+	PRINTFORML 他有一根从矮小的外表看上去无法想象的健壮的肉棒
+	PRINTFORML %ANAME(MASTER)%被突然伸出的凶器吓得目不转睛
+	PRINTFORMW 在%ANAME(MASTER)%胆怯的时候，被他气喘吁吁地推倒，粗暴地被抢走了衣服
+	PRINTFORML 村子中充满了做爱的味道，不知不觉间%ANAME(MASTER)%的股间就湿了
+	PRINTFORML 他和%ANAME(MASTER)%兴高采重叠起双腿，肉棒的前端分开了裂缝
+	PRINTFORML 然后不顾%ANAME(MASTER)%的制止，嗞！的一下把那个凶恶的东西狠狠地插到了根部
+	PRINTFORMW 在那强烈的冲击下，%ANAME(MASTER)%一瞬间失去了意识，高高地仰起了身子
+	IF TALENT:MASTER:処女
+		PRINTFORML 他看见从%ANAME(MASTER)%的胯股之间流出的鲜血，对能和处女交配的事发出喜悦的声音并接吻
+		PRINTFORML 但是%ANAME(MASTER)%却并非如此，而是在那冲击下脑中一片空白的不住痉挛着
+		PRINTFORMW 肉棒刺入了%ANAME(MASTER)%的阴道深处，激起了强烈的痛苦和未知的感觉
+	ELSE
+		PRINTFORML 对还潮吹着抽搐着的%ANAME(MASTER)%，他亲了一下，说她是第一次插到根部的孩子
+		PRINTFORML %ANAME(MASTER)%像狗一样一边垂着舌头一边激烈地喘息，扭曲的凶恶冲击使得眼前一片黑白
+		PRINTFORMW 肉棒刺入%ANAME(MASTER)%的阴道深处，强烈的压迫感刺激得子宫生疼
+	ENDIF
+	PRINTFORML 尽管%ANAME(MASTER)%因冲击而呻吟着，他还是加速了腰上的动作
+	PRINTFORML 每当凶恶的肉棒在体内激烈出入的时候，%ANAME(MASTER)%就会啊咿啊咿地乱糟糟地喘息
+	PRINTFORMW 肉棒拔出的时候，内脏也仿佛被一口气拔出般的冲击在全身游走
+	PRINTFORML 然后在下一次更加激烈的突刺中受到能将子宫贯穿般的攻击，视野都快飞走了
+	PRINTFORML 咚啾！咚啾！每次被撞击着腰部，爱液就会从结合部飞出来，双脚也会大幅摇晃
+	PRINTFORMW %ANAME(MASTER)%已经无法抵抗了，只能对给予的刺激喘息、颤抖、并且疯狂地呻吟着作出反应
+	PRINTFORML 渐渐他腰上的动作加速了，%ANAME(MASTER)%用雌性的本能感觉到了他射精的接近
+	PRINTFORML 身体已经接受了他，期待着配种的整块膣肉都颤抖起来，子宫也下降到了最低的地方
+	PRINTFORML 然后他在发出雄性叫声的同时把肉棒深深地刺了进去，与%ANAME(MASTER)%一起达到了绝顶
+	PRINTFORMW 他的精液有着与肉棒大小相称的量和热，只用一发就充满了胎内
+	PRINTFORMW …他好像十分中意第一次可以尽情侵犯的%ANAME(MASTER)%，直到天黑也在被不断侵犯着
+	CALL FUCK(MASTER, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, 接吻, 口淫, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精", GET_SPERM_ID("流浪妖怪"), @"妖怪兎の\@RAND:2 ? 肉棒 # 唇\@", "妖怪兎", "",  "強姦")
+	CALL FUCK(MASTER, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, 接吻, 口淫, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精", GET_SPERM_ID("流浪妖怪"), @"妖怪兎の\@RAND:2 ? 肉棒 # 唇\@", "妖怪兎", "",  "強姦")
+ENDIF
+PRINTFORML 
+PRINTFORMW 充分享受的%ANAME(MASTER)%第二天和妖怪兔道别，然后离开了村子
+DVAR:兎の宴_発生フラグ = 2
+
+RETURN 1

@@ -1,0 +1,172 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_RANDORI_RATE()
+RETURN 35
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_RANDORI_DECISION()
+RETURN !FLAG:クリアフラグ
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_RANDORI_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_RANDORI
+#DIM 兵数
+#DIM 金額
+
+PRINTFORMW 接到了占領地的士兵们正在進行略奪的報告
+PRINTFORML 怎麼辦？
+CALL ASK_MULTI("默許" ,"管制" ,"参加")
+IF RESULT == 0
+	PRINTFORML 如果因此就能減少士兵们的不満的話是很划算的
+	PRINTFORMW %ANAME(MASTER)%就装作看不见了
+	FOR LOCAL, 1, MAX_COUNTRY
+		CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -50, 50)
+	NEXT
+	CALL COLOR_PRINT(@"他国評價下降了", カラー_注意)
+	PRINTFORMW 
+	兵数 = 500 + RAND:100 * 20
+	COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 兵数
+	CALL COLOR_PRINT(@"流氓們得知後聚集起来、士兵増加了{兵数}人", カラー_注意)
+	PRINTFORMW 
+ELSEIF RESULT == 1
+	PRINTFORML 這是違反軍規
+	PRINTFORMW %ANAME(MASTER)%命令処死進行掠奪的士兵
+ELSEIF RESULT == 2
+	PRINTFORMW 機会難得、自己也加入吧
+	IF IS_FEMALE(MASTER) && !HAS_PENIS(MASTER)
+		PRINTFORML 
+		PRINTFORMW …収穫不错
+		金額 = 1000 + RAND:50 * RAND:50
+		MONEY += 金額
+		CALL COLOR_PRINT(@"得到了{金額}金", カラー_注意)
+		PRINTFORMW 
+		FOR LOCAL, 1, MAX_COUNTRY
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -75, 75)
+		NEXT
+		CALL COLOR_PRINT(@"他国評價下降了", カラー_注意)
+		PRINTFORMW 
+		兵数 = 500 + RAND:100 * 20
+		COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 兵数
+		CALL COLOR_PRINT(@"流氓們得知後聚集起来、士兵増加了{兵数}人", カラー_注意)
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 目標是什麼？
+		CALL ASK_MULTI("金" ,"武器" ,"女")
+		IF RESULT == 1
+			PRINTFORMW 寻找可以使用的武器
+			PRINTFORML …找到了一把不错的的武器
+			PRINTFORMW 旁辺有一具男人的尸体、但沒有去在意了
+			CALL PRINT_ADD_EXP(MASTER, "武闘経験値", RAND:5 + 5, 1)
+			CALL PRINT_ADD_EXP(MASTER, "防衛経験値", RAND:5 + 5, 1)
+			CALL TRAIN_AUTO_ABLUP(MASTER)
+		ELSEIF RESULT == 0
+			PRINTFORMW 去找值錢的東西了
+			PRINTFORML …有不少收获
+			PRINTFORMW 対周囲的士兵炫耀着、一辺踏上了帰路
+			金額 = 1000 + RAND:50 * RAND:50
+			MONEY += 金額
+			CALL COLOR_PRINT(@"得到了{金額}金", カラー_注意)
+			PRINTFORMW 
+		ELSEIF RESULT == 2
+			PRINTFORMW 物色着女人
+			PRINTFORML …発现了逃跑晩了的少女
+			PRINTFORML 流泪的怯生生的表情激起了%ANAME(MASTER)%的獣欲
+			PRINTFORMW %ANAME(MASTER)%拖着哭喊的她的手腕、帯到了附近的廃屋里
+			PRINTFORML 
+			SELECTCASE RAND:7
+				CASE 0
+					PRINTFORML 从附近的廃屋里傳来了悲痛的少女的呻吟
+					PRINTFORML %ANAME(MASTER)%把戦利品绑縛起来、以露出下半身的樣子粗暴地侵犯着
+					PRINTFORMW 被粗暴地貫穿的秘処変得红肿起来、作為処女证据的純血流了下来
+					PRINTFORML 向不管哭泣的她不断向上抽插着、緊致的膣穴絞緊了插入的東西并給予強烈的刺激
+					PRINTFORML 対着虽然还很年幼、但却有美丽的雌性身体的女孩子、%ANAME(MASTER)%拼命地撞着腰
+					PRINTFORMW 毎一次撞撃都会使嬌弱的肢体猛地抽搐起来、悲鸣声中夹杂着不小心漏出来的嬌喘
+					PRINTFORML 非常舒服的達到了极限的%ANAME(MASTER)%一辺加速了腰的摆動、一辺在她的耳辺預告了射精
+					PRINTFORML %ANAME(MASTER)%一把抓住了浑身颤抖着発出高昂悲鳴的她的腰、弄臓了她最重要的地方
+					PRINTFORMW 不管受到過于刺激而精神恍惚的女孩、充分享受了那个身体
+				CASE 1
+					PRINTFORML 衣服敞開的少女跨上了%ANAME(MASTER)%的身体、摆動着腰部
+					PRINTFORML 肉棒深深地插進了恥部、結合処垂落着鮮血、毎一次揺晃腰部時痛的連表情都扭曲了
+					PRINTFORMW %ANAME(MASTER)%以幇助她的家族爲代價、讓女孩爲自己主動奉仕
+					PRINTFORML 少女的表情充満了悲痛、哭着咬緊牙関上下摆動着腰部
+					PRINTFORML 可是与她的内心的意愿恰好相反、那是一个極品的敏感小穴、処女特有緊致感刺激着讓人非常舒服
+					PRINTFORML 在反复无常中逐渐加快了抽插的動作、女孩発出惨叫一下子身体向后仰変得僵硬起来
+					PRINTFORMW 対停止動作的少女説了関于家族的話、她像是被鞭打一樣身体颤抖着、再次動起了腰
+					PRINTFORML 当%ANAME(MASTER)%説了快到限界时、女孩用哭的声音哽咽着恳求抜出膣穴
+					PRINTFORML 像女孩所要求的那樣狠狠地射精了、少女発出了悲鳴全身痙攣着
+					PRINTFORMW 在那之後也讓女孩充分地奉仕了、把那个纯洁的身体尽情地弄臓了
+				CASE 2
+					PRINTFORML 啪啪啪！啪啪啪！肉体碰撞的声音从廃屋里傳来
+					PRINTFORML %ANAME(MASTER)%把作為戦利品的女孩推倒了、随心所欲地享受着纯洁少女的身体
+					PRINTFORMW 作為当地的大小姐的她、随着年龄的増長身体也逐渐豊満、身上穿着华美的衣服
+					PRINTFORML 刚開始还很精神地抵抗的女孩、如今精神恍惚地看着自己被侵犯
+					PRINTFORML 玷汚大小姐美麗的身体有着比普通調教更強烈的快感、%ANAME(MASTER)%興奮地摆動着腰
+					PRINTFORMW 雌穴被完全打開、嫩肉緊緊地把茎部绞緊了、柔軟的子宫口親吻着亀頭
+					PRINTFORML 因為太過舒服而几乎无法忍受不知道射了几次精、女孩的喉咙流漏出甜美的喘息
+					PRINTFORML 為了稍作休憩而把肉棒抜了出来、从秘処溢出了红的和白的体液
+					PRINTFORMW 在超出想像的戦果上、%ANAME(MASTER)%勃起的陰茎还没有平息、一晩上都在侵犯着女孩
+				CASE 3
+					PRINTFORML %ANAME(MASTER)%把少女随便帯進了一座馬棚里、她一直抵抗着但无法挣脱
+					PRINTFORML 在那里%ANAME(MASTER)%把她固定在配種用的木馬上、一辺责弄着那美麗的裂縫一辺威胁着要讓馬来侵犯她
+					PRINTFORMW 女孩身体軽微颤抖着、%ANAME(MASTER)%把馬的肉棒的情况説明之后、更是吓得浑身発抖哭泣起来
+					PRINTFORML 最後問她要怎麼樣呢、女孩用颤抖的声音喃喃着会听話的
+					PRINTFORML %ANAME(MASTER)%解開了拘束、命令她把手放墙上、把屁股翘起来、女孩笨拙地服从了
+					PRINTFORML 秘処都湿透了、、%ANAME(MASTER)%抓着女孩的腰、一口气插到了最里面
+					PRINTFORMW 女孩発出了悲鳴、身体猛地弾了起来、膣穴内受到衝撃而痙攣着、緊緊地绞住了陰茎
+					PRINTFORML %ANAME(MASTER)%很満意她的那种惨叫、毫不留情地挺起腰来、仿佛要讓她好好記住那个東西一樣抽插着
+					PRINTFORML 少女颤抖着揺晃的足尖一辺呻吟着、拼命支撐起身体忍受着那个衝撃
+					PRINTFORMW %ANAME(MASTER)%在她身心都従順之前、一直持續着充分的調教
+				CASE 4
+					PRINTFORML %ANAME(MASTER)%立刻推倒了她、充分享受着还残留着稚嫩的身体
+					PRINTFORML 女孩被%ANAME(MASTER)%侵犯着、因苦痛和恐怖而号啕大哭着、拼命地呼喊着父母
+					PRINTFORMW 那悲痛哭喊和泪水讓%ANAME(MASTER)%更加興奮、更深入更激烈地晃着腰
+					PRINTFORML 于是一辺抱緊了女孩、一辺往最深処的地方释放出了欲望
+					PRINTFORML 女孩一瞬間身体颤抖起来、子宫里傳来的热度讓她哭喊着身体被弄臓了
+					PRINTFORMW 射精結束后歇了口气、只见女孩用空虚的眼神喃喃着「妈妈…妈妈…」
+					PRINTFORML 那个表情刺激起了%ANAME(MASTER)%邪悪的情欲、陰茎直接膨張成了臨戦態勢
+					PRINTFORML 把女孩抱了起来、以対面座位的姿勢、全身用力地再次開始振起了腰
+					PRINTFORMW 虽然処于空虚的状态、但是身体反応却十分坦率的女孩、直到厌倦之前就這樣一直被凌辱着
+				CASE 5
+					PRINTFORML 颤抖的少女為%ANAME(MASTER)%射精直後的肉棒用小嘴奉仕着
+					PRINTFORML 女孩被%ANAME(MASTER)%命令着、用舌頭舔舐着亀頭、小手撸着肉棒、像従順的奴隷一樣行動
+					PRINTFORMW 刚開始抵抗得很厉害的她、被揍了两三次后也変得温順起来、身体也任凭摆布
+					PRINTFORML %ANAME(MASTER)%花了些時間哄了哄因為苦痛而胆怯的女孩、任性而又温柔地抱緊着她
+					PRINTFORML 原本身体就很有天赋的她、没花多少時間喉咙就漏出甘甜的吐息
+					PRINTFORMW 認識到老實一點就不会疼痛的她、為了保护自己从頭到尾都很順从
+					PRINTFORML 在笨拙而又熱心的奉仕中%ANAME(MASTER)%的肉棒很快又硬了起来
+					PRINTFORML 看到那樣的姿态、女孩虽然很害羞、但在%ANAME(MASTER)%的命令下、还是躺下用手指分開了秘処
+					PRINTFORMW %ANAME(MASTER)%対這意料不到的結果暗自偸笑、再次対女孩的身体沈下了腰
+				CASE 6
+					PRINTFORML %ANAME(MASTER)%対匍伏在地上的作為戦利品的少女粗暴地侵犯着
+					PRINTFORML 她被从背後激烈地冲撞着、在処女的第一次被奪走的打撃中呻吟着流出了泪水
+					PRINTFORMW 那张可愛的脸因毎一次冲撃而痛苦扭曲的様子讓%ANAME(MASTER)%変得興奮起来、陰茎更加凶猛地勃起了
+					PRINTFORML 用手抓住女孩的腰、比她先前更深入地沈下腰去、姑娘発出了惨叫請求宽恕
+					PRINTFORML 那樣的話、就被命令了自己動起来奉仕、女孩嗚咽着哭着一辺慢呑呑的動着
+					PRINTFORMW 那个脆弱的姿态讓%ANAME(MASTER)%加速了腰的動作、毫不留情地蹂躙着她
+					PRINTFORML 一时間肉体的碰撞声和女孩的悲鳴不断地回响、渐渐的快到了射精的時間了
+					PRINTFORML 已経到達限界的%ANAME(MASTER)%把腰沈到了女孩的最深処、尽情地射精了
+					PRINTFORMW 不管因被玷汚殆尽而茫然若失的女孩、直到日暮都在不停地侵犯着
+			ENDSELECT
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "戦災少女の唇", "", @"戦災少女の膣", "強姦")
+			PRINTFORML 
+			PRINTFORMW 満足了的%ANAME(MASTER)%把少女放置在原地、踏上了帰路
+		ENDIF
+		FOR LOCAL, 1, MAX_COUNTRY
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -75, 75)
+		NEXT
+		CALL COLOR_PRINT(@"他国評價下降了", カラー_注意)
+		PRINTFORMW 
+	ENDIF
+ENDIF
+
+RETURN 1

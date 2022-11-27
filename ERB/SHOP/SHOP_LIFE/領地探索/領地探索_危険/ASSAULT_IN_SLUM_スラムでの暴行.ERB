@@ -1,0 +1,161 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_ASSAULT_IN_SLUM_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_ASSAULT_IN_SLUM_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_ASSAULT_IN_SLUM(対象)
+#DIM 対象
+PRINTFORML 走在貧民窟的時候、突然從暗巷裡伸出了好幾隻手
+PRINTFORML 暴徒們想把因為突然被抓住而驚慌的%ANAME(対象)%給拖入暗処……！
+
+IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+	PRINTFORMW 但还没等到%ANAME(対象)%开始挣扎，就从附近冲过来一群拿着棍棒的女性，打退了肮脏的手
+	PRINTFORML 一问才知道，好像是不堪其扰的女性们自发组织起了自卫队的样子
+	PRINTFORML 道谢后的%ANAME(対象)%刚想离开，但却被对方的领队挡在了身前
+	PRINTFORMW 因为付出了努力所以想要回报，似乎是个十分合理的理由
+	PRINTFORML 不过%ANAME(対象)%一摸口袋，好像当时把钱包扔在桌子上就出门了
+	PRINTFORMW 看着窘迫的%ANAME(対象)%，对方提出也可以用“别的方式”支付酬劳……
+	PRINTL
+	CALL PRINT_ABILITY(対象, GETNUM(ABL, "知略"))
+	CALL ASK_MULTI_JUDGE("说服", 1, "委身", 1)
+ELSE
+	PRINTL
+	CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+	CALL ASK_MULTI_JUDGE("抵抗", 1, "委身", IS_FEMALE(対象))
+ENDIF
+
+IF RESULT    == 0
+
+	IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+		IF LIMIT(ABL:対象:知略, 30, 90) > RAND:100
+			PRINTFORML 因为是公益的事业所以不应该收取报酬
+			PRINTFORMW 听到这么说，觉得有道理的她们把%ANAME(対象)%放走了
+			RETURN 1
+		ENDIF
+		PRINTFORML 不管怎么解释都听不进去
+		PRINTFORMW 不耐烦的她们堵住了%ANAME(対象)%的嘴，开始强行索要报酬
+		PRINTFORML
+	ELSE
+		IF LIMIT(ABL:対象:武闘, 30, 90) > RAND:100
+			PRINTFORML 在甩開暴徒們的魔爪之後、成功的逃跑了
+			PRINTFORMW 思考着這一帯的治安不管怎樣都要趕緊処理快步離開了
+			RETURN 1
+		ENDIF
+		PRINTFORML 但是暴徒們的力気比想像中還要大
+		PRINTFORMW 拼命的掙扎也沒有用、就這樣被拖入黑暗之中了
+		PRINTFORML
+	ENDIF
+
+	IF IS_MALE(対象)
+		PRINTFORML %ANAME(対象)%頭痛的甦醒過来了
+		PRINTFORML 発覚自己臥倒在地上
+		PRINTFORML 按摩着不停暈眩的額頭、想要站起来時視線又模糊了
+		PRINTFORML 好像是被暴徒們打暈了
+		PRINTFORML 一掏兜、果然錢包被拿走了
+		PRINTFORMW 思考着這一帯的治安無論如何都得整治一番後拖着闌珊的脚步走回去了
+		LOCAL = MIN(MONEY, 3000)
+		CALL ICPRINT(@"被搶走了<{LOCAL}>金", "L", カラー_注意)
+		CALL ADD_COOLTIME(対象, 2)
+	ELSEIF CONFIG:203
+		PRINTFORMW 嘴裡塞着布条的%ANAME(対象)%被暴徒們輪姦了
+		PRINTFORML 被満是汚垢的肉棒粗暴的侵犯着、%ANAME(対象)%流着泪掙扎着想要逃跑
+		PRINTFORMW 但是長時間缺乏女人的他們怎麼可能軽易就放過這個剛得到的女人、而更加粗暴的侵犯着
+		PRINTFORML 這時侵犯着%ANAME(対象)%的男人顫抖着発出一声低吟、把肉棒深深的頂到深処尽情的射精了
+		PRINTFORMW 骯髒的精液衝撃着小穴的深処、%ANAME(対象)%身体痙攣着発出含糊不清的悲鳴
+		PRINTFORML 在男人拔出肉棒後、從%STR_BODY("陰唇：処女確認：時間経過", 対象)%中不停的溢出著大量泛黄的骯髒精液
+		PRINTFORMW 已経呆然的%ANAME(対象)%、在歹徒們発洩性欲満足以前仍被他們不停的侵犯着
+		CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, 接吻, 口淫, 輪姦, 苦痛快楽, 被虐, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精", GET_SPERM_ID("流氓"), @"暴漢的\@RAND:2 ? 肉棒 # 嘴唇\@", "暴漢", "", "小巷里的輪姦")
+		PRINTFORML
+		PRINTFORMW 最後%ANAME(対象)%被他們侵犯了将近半天之後、以淒慘的身姿被扔在了小巷子裡
+	ELSE
+
+		IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+			PRINTFORMW 无法反抗的%ANAME(対象)%，被当成了她们的自慰道具
+			PRINTFORML %ANAME(対象)%被死死压在地上，身上的每个部位都被用来满足她们饥渴的肉体
+			PRINTFORML 一个人骑乘在她的脸上，强迫她舔舐对方湿淋淋的阴唇，她的双手、双脚也被抓住，被用来抽插起她们的小穴
+			PRINTFORMW 不仅如此，还有不少人压在她的身上，在任何%ANAME(対象)%身体露出来的部位上用力摩擦着自己的下体
+			PRINTFORML 两个人抓住她%STR_BODY("胸：愛撫", 対象)%一边粗暴地揉捏着，一边用牙齿和舌头刺激着%STR_BODY("乳首：欲情", 対象)%，留下一堆潮湿的唾液
+			PRINTFORML 还有人吮吸起她%STR_BODY("陰唇：処女確認", 対象)%，用指甲磨蹭着%STR_BODY("クリ：欲情", 対象)%，顺便品尝着她滚滚涌出的爱液
+			PRINTFORMW %ANAME(対象)%被全身上下传来的快感所包裹，身体违心地燃烧起了欲望，最终在女性们拷问般的快乐刺激中，浑身颤抖地走上了剧烈的高潮
+			PRINTFORMW 过了不久，女性们也纷纷在自己的刺激下达到了绝顶，奔涌而出的爱液被涂到了%ANAME(対象)%身上，让她像座水晶雕像一般闪烁着光彩……
+			CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, 輪姦, 苦痛快楽, 被虐, 百合", "接吻喪失",0, @"女混混的\@RAND:2 ? 阴唇 # 嘴唇\@", "", "", "路地裏での輪姦")
+			PRINTFORML
+			PRINTFORMW %ANAME(対象)%好不容易才被她们解放了，浑身黏糊糊地逃回了家
+		ELSE
+			PRINTFORMW 嘴裡塞着布条的%ANAME(対象)%被暴徒們輪姦了
+			PRINTFORML 被満是汚垢的肉棒粗暴的侵犯着、%ANAME(対象)%流着泪掙扎着想要逃跑
+			PRINTFORMW 但是長時間缺乏女人的他們怎麼可能軽易就放過這個剛得到的女人、而更加粗暴的侵犯着
+			PRINTFORML 這時侵犯着%ANAME(対象)%的男人顫抖着発出一声低吟、把肉棒深深的頂到深処尽情的射精了
+			PRINTFORMW 骯髒的精液衝撃着小穴的深処、%ANAME(対象)%身体痙攣着発出含糊不清的悲鳴
+			PRINTFORML 在男人拔出肉棒後、從%STR_BODY("陰唇：処女確認：時間経過", 対象)%中不停的溢出著大量泛黄的骯髒精液
+			PRINTFORMW 已経呆然的%ANAME(対象)%、在歹徒們発洩性欲満足以前仍被他們不停的侵犯着
+			CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, 接吻, 口淫, 輪姦, 苦痛快楽, 被虐, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精", GET_SPERM_ID("流氓"), @"暴漢的\@RAND:2 ? 肉棒 # 嘴唇\@", "暴漢", "", "路地裏での輪姦")
+			PRINTFORML
+			PRINTFORMW 最後%ANAME(対象)%被他們侵犯了将近半天之後、以淒慘的身姿被扔在了小巷子裡
+		ENDIF
+
+	ENDIF
+
+ELSE
+	IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+		PRINTFORML 既然这样的话就没办法了
+		PRINTFORML 乖乖从命的%ANAME(対象)%开始默默脱起了衣服
+		PRINTFORMW 看到%ANAME(対象)%乖乖听话的女人们，也纷纷脱下衣服围绕了过来
+		PRINTFORML
+		PRINTFORMW %ANAME(対象)%奉仕起了这些饥渴的女人们
+		PRINTFORML 舌头和双手都占得满满的，同时刺激着三个人的小穴和阴核
+		PRINTFORMW 还有一个人躺在她身下的地上，%ANAME(対象)%用力扭动着腰，努力用秘部摩擦着对方的阴唇
+		PRINTFORML 但排队的人还有很多，厌倦等待的她们也纷纷对%ANAME(対象)%动起了手，同时也揉搓着自己的穴口自慰了起来
+		PRINTFORML %ANAME(対象)%身体的动作带动着%STR_BODY("胸：感触", 対象)%，像是在诱惑她们一样上下摇晃着
+		PRINTFORMW 一边给予着别人快感，一边又在对方的刺激中得到快乐的回报，%ANAME(対象)%逐渐沉迷在这种施与受的循环之中
+		PRINTFORML %ANAME(対象)%的身体激烈地颤抖着，和她侍奉的人们一起达到了高潮。但还没从余韵里恢复过来的%ANAME(対象)%的身体，立刻又被下一波使用的人们重新占据
+		PRINTFORML 注视着%ANAME(対象)%拼命满足别人的痴态，刚才高潮的人们的身体又重新变得火热，再一次加入了长长的队伍当中
+		PRINTFORMW 看来这样的循环还会持续很久，翻起白眼的%ANAME(対象)%逐渐被不同人的爱液所覆盖……
+		CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, 輪姦, 苦痛快楽, 被虐, 百合", "接吻喪失",0, @"女混混的\@RAND:2 ? 阴唇 # 嘴唇\@", "", "", "作为谢礼的輪姦")
+		PRINTFORML
+		PRINTFORMW 收下湿透的内裤作为报酬之后，%ANAME(対象)%被她们放回了家
+	ELSEIF CONFIG:203
+		PRINTFORML %ANAME(対象)%在男人們驚訝的目光中拉開自己的衣服
+		PRINTFORML %STR_BODY("身体", 対象)%主動靠上其中一名男人、用手隔著褲子撫摸著男人的肉棒
+		PRINTFORMW 明白%ANAME(対象)%是癡女後、男人們一邊揉捏著%PRONOUN(対象)%的胸部一邊把她帯回了老巣
+		PRINTFORML
+		PRINTFORMW %ANAME(対象)%在奉仕著貧民窟的男人們
+		PRINTFORML 用嘴和雙手愛撫著充滿恥垢的肉棒、享受著精液
+		PRINTFORMW 主動使用了騎乘位、%STR_BODY("膣：Ｖ挿入：中出し", 対象)%和%STR_BODY("アナル：感度", 対象)%、享受男人們的肉棒
+		PRINTFORML 男人最後盡情的把精液射到膣内的時候、%ANAME(対象)%高聲嬌喘著高潮了
+		PRINTFORML 在小穴空下來的同時、搖動著%STR_BODY("尻：精液汚れ：輪姦", 対象)%誘惑他們
+		PRINTFORMW %ANAME(対象)%直到滿足之前、一直享用著男人們的肉棒……
+		CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, 接吻, 口淫, 輪姦, 苦痛快楽, 加虐, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精", GET_SPERM_ID("流氓"), @"暴漢的\@RAND:2 ? 肉棒 # 嘴唇\@", "暴漢", "", "被帯到巢穴内的亂交")
+		PRINTFORML
+		PRINTFORMW %ANAME(対象)%和他們約定下次再來之後、滿足的離開了這裏
+	ELSE
+		PRINTFORML 逃跑的話說不定會被更加粗暴的対待
+		PRINTFORML 明白這一點的%ANAME(対象)%委身于了他們
+		PRINTFORMW 明白%ANAME(対象)%不會抵抗後、男人們一邊笑著一邊把%PRONOUN(対象)%帯回了老巣
+		PRINTFORML
+		PRINTFORMW %ANAME(対象)%在奉仕著貧民窟的男人們
+		PRINTFORML 用嘴和雙手愛撫著充滿恥垢的肉棒、承受著精液
+		PRINTFORMW %STR_BODY("膣：Ｖ挿入：中出し", 対象)%和%STR_BODY("アナル：感度", 対象)%、也被他們接連使用著
+		PRINTFORML 男人最後盡情的把精液射到膣内的時候、%ANAME(対象)%高聲嬌喘著高潮了
+		PRINTFORML 在小穴空下來的同時、搖動著%STR_BODY("尻：精液汚れ：輪姦", 対象)%誘惑他們
+		PRINTFORMW 他們在直到滿足之前、一直在使用著%ANAME(対象)%的身体……
+		CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, 接吻, 口淫, 輪姦, 苦痛快楽, 被虐, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精", GET_SPERM_ID("流氓"), @"暴漢的\@RAND:2 ? 肉棒 # 嘴唇\@", "暴漢", "", "ねぐらに連れ込まれての輪姦")
+		PRINTFORML
+		PRINTFORMW %ANAME(対象)%和他們約定下次再來之後、總算是被解放了
+	ENDIF
+
+ENDIF
+RETURN 1

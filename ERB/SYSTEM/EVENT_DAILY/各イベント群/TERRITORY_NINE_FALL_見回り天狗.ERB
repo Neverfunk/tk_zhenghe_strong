@@ -1,0 +1,183 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_TERRITORY_NINE_FALL_RATE()
+RETURN 50
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_TERRITORY_NINE_FALL_DECISION()
+#DIM 九天滝
+九天滝 = GET_CITYNUMBER("九天の滝")
+
+SIF 九天滝 == -1
+	RETURN 0
+SIF CITY_OWNER:九天滝 != CFLAG:MASTER:所属
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_TERRITORY_NINE_FALL_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_TERRITORY_NINE_FALL
+
+PRINTFORMW 在九天瀑布散歩时遇到巡逻中的天狗
+IF IS_MALE(MASTER) || (HAS_PENIS(MASTER) && RAND:2)
+	PRINTFORML 天狗少女注意到%ANAME(MASTER)%后就降落到這辺了
+	PRINTFORML 「最近這里附近不太安全請多多小心」 少女這樣忠告你了
+	PRINTFORMW 少女説完后准备回去巡逻
+	PRINTFORML 怎麼辦？
+	CALL ASK_MULTI("送別" ,"邀請散歩" ,"帯到无人処")
+	IF RESULT == 0
+		PRINTFORML 向少女説「巡逻辛苦你了」后，少女低頭行礼并飞翔而去
+		PRINTFORMW 听从少女的忠告，在卷入麻煩前回家了
+	ELSEIF RESULT == 1
+		PRINTFORML 难得有机会来一起散歩吧
+		PRINTFORMW 少女考虑了一下后点頭了
+		PRINTFORMW 一辺闲聊一辺享受山上的景色无所事事走着
+		PRINTFORML …不久后就被少女帯到少女的秘密隠居処
+		PRINTFORML 在有点高的树上，枝叶构成了自然的牆，周囲看不到里頭同时形成了惬意的空間
+		PRINTFORML 在休息躺下时少女骑了上来
+		PRINTFORML 在%ANAME(MASTER)%惊讶时少女的脸靠了過来，用情欲的視线看着你
+		PRINTFORMW …少女柔軟的触感以及炽热的气息令人无法再忍耐了
+		PRINTFORML 
+		SELECTCASE RAND:5 
+			CASE 0
+				PRINTFORML 脱掉衣服后少女露出了线条优美的肉体
+				PRINTFORML 一辺揉捏胸部一辺舐頸脖时少女身体震颤撒嬌般呻吟
+				PRINTFORML 手指慢慢地在少女身上游走，当摸到私処时発现已経湿透了
+				PRINTFORML %ANAME(MASTER)%圧在躺在落叶上的少女身上，陰茎贴近少女后在少女渇求下深入進去了
+				PRINTFORMW 尽情地享受了少女的火热和柔軟的身体
+			CASE 1
+				PRINTFORML 与少女拥抱緊緊相连同时相互缠绕着舌頭
+				PRINTFORML 雌穴変得湿潤並且軽軽地痙攣並夾住肉棒
+				PRINTFORML 感到舒畅的%ANAME(MASTER)%不禁発出了呻吟， 少女脸上露出了悪作剧的笑容，開始努力扭動着腰肢
+				PRINTFORML 毫不示弱地抓出少女的腰往向上突襲，少女発出愉快的喘息声并全身不断颤抖着
+				PRINTFORMW 在瀑布的水流声里%ANAME(MASTER)%两人互相探索着彼此
+			CASE 2
+				PRINTFORML 从四肢着地的少女的背后猛烈冲刺着
+				PRINTFORML 少女刚才威风凛凛的表情已経荡然无存，脸上充斥着欲求不満的神色
+				PRINTFORML 像狗一樣喘息着渇求着%ANAME(MASTER)%的少女令%ANAME(MASTER)%陶酔地用力扭腰
+				PRINTFORML 少女的雌穴像是生物一樣不断蠕動收缩着，渇求着精液的滋润
+				PRINTFORMW %ANAME(MASTER)%在少女身上発射了许多次直到疲惫不堪
+			CASE 3
+				PRINTFORML 少女美丽白皙的身体讓人感到愉快
+				PRINTFORML %ANAME(MASTER)%两人仿佛忘記了时間，一辺喘气一辺互相索取着，直到汗流浃背
+				PRINTFORML 少女的吐息打在%ANAME(MASTER)%的脸上，脸頬不断靠近過来
+				PRINTFORML 撫摸少女臉龐時少女歡喜又害羞地説着剛剛好舒服並開始接吻了
+				PRINTFORMW 這個動作令%ANAME(MASTER)%忍耐不住再次圧倒少女身上
+			CASE 4
+				PRINTFORML 当正在和少女疯狂的交合时，另一个天狗接近了過来
+				PRINTFORML 受到惊吓的少女請求停下来，%ANAME(MASTER)%却突然開始激烈的冲刺起来
+				PRINTFORML 在意想不到的進攻中，少女毫不犹豫地仰着身子，露出了微弱的可爱的喘息声
+				PRINTFORML 感覚拼死忍耐着嬌喘声的少女十分可爱，%ANAME(MASTER)%更加猛烈的進攻起来
+				PRINTFORMW 天狗離開后和少女一起登上了顶峰
+		ENDSELECT
+		CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "天狗娘的嘴唇", "", "天狗娘的膣穴", "和姦")
+		PRINTFORML 
+		PRINTFORML 日暮时分，在少女的引导下踏上了帰途
+		PRINTFORMW 临别时，与少女約定重逢的时間，少女脸上浮现出開心的笑容
+	ELSEIF RESULT == 2
+		PRINTFORML 隔着衣服%ANAME(MASTER)%也能模糊的看到少女身体诱人的曲线
+		PRINTFORML %ANAME(MASTER)%叫住刚想要飞走的少女，骗少女説有个可疑的家伙。
+		PRINTFORMW 少女対%ANAME(MASTER)%的話没有任何懷疑，被帯领到了陰暗的角落
+		PRINTFORML 
+		PRINTFORML 将少女帯入陰影処的%ANAME(MASTER)%从背后将其推到在地
+		PRINTFORML 粗暴的在反抗中将少女下身的衣物脱去，当触碰到裂缝时少女発出了小小的悲鸣
+		PRINTFORMW 和刚刚少女威风凛凛截然不同的哭泣的樣子讓%ANAME(MASTER)%感到更加興奋，粗暴的将下体插入
+		PRINTFORML 処女摸被突破的感覚令少女的身子高高仰起，発出不成音調的哀鸣
+		PRINTFORML 扑哧扑哧的陰道緊緊缠绕着肉棒、強烈的刺激令%ANAME(MASTER)%不禁発出低吟
+		PRINTFORMW 対少女的哭泣請求毫不在意，更加肆无忌惮的冲撃着少女纯洁无瑕的肉体
+		PRINTFORML 少女一辺呜咽抽泣着，身子一辺时不时痉挛，給肉棒帯来了舒适的刺激
+		PRINTFORML 无視哭泣的少女不断的突刺释放，直到少女精疲力尽只会茫然的自言自语
+		PRINTFORMW 但是当%ANAME(MASTER)%軽吻過来时却一辺哭泣一辺老実的将舌頭缠绕上来
+		PRINTFORMW 満意這個表情的%ANAME(MASTER)%再次使用難得的極品肉穴用到満足為止
+		CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "天狗娘的嘴唇", "", "天狗娘的膣穴", "強姦")
+		PRINTFORML 
+		PRINTFORML 那麼、在外面停留太久被流浪的妖怪盯上就不好了
+		PRINTFORMW %ANAME(MASTER)%将疲惫不堪的少女留在原地就迅速離開了
+	ENDIF
+ELSE
+	PRINTFORML 男天狗一看到%ANAME(MASTER)%就落了下来
+	PRINTFORML 「最近這里附近不太安全請多多小心」 少女這樣忠告你了
+	PRINTFORML %ANAME(MASTER)%表示感謝時他一直緊緊盯着%ANAME(MASTER)%的臉
+	PRINTFORMW 男人表示如果為此困惑可以雇用他护卫
+	PRINTFORML 怎麼辦？
+	CALL ASK_MULTI("請求护卫" ,"拒絶")
+	IF RESULT == 1
+		PRINTFORML %ANAME(MASTER)%拒絶护卫后便耸耸肩飞走了
+		PRINTFORMW %ANAME(MASTER)%目送天狗離開后听从勧告，早早的回家了
+		IF RAND:2 == 0
+			PRINTFORML ……但是，中途失足掉進了河里
+			PRINTFORMW 虽然不至于受什麼大的创伤，但是感冒了
+			CALL ADD_COOLTIME(MASTER, 1)
+		ENDIF
+	ELSEIF RESULT == 0
+		PRINTFORML 因為一个人行走不能放心，所以决定請天狗护卫
+		PRINTFORMW 一辺闲聊一辺享受山上的景色无所事事走着
+		PRINTFORML …走了一会儿他忽然説附近有推荐去的地方
+		PRINTFORML 怎麼辦？
+		CALL ASK_MULTI("拜托向导" ,"停下")
+		IF RESULT == 1
+			PRINTFORML 虽然很感谢你的推荐，但现在我该回去，我這樣回答道
+			PRINTFORMW 他虽然很失落，但还是把%ANAME(MASTER)%平安无事的送到家里去了
+		ELSEIF RESULT == 0
+			PRINTFORML 因為难的来到這里所以就拜托了，這樣回答道
+			PRINTFORMW 于是被他抓住了胳膊，拉倒在附近的茂密里去了
+			PRINTFORML 
+			SELECTCASE RAND:5
+				CASE 0
+					PRINTFORML 被帯入隠蔽処的%ANAME(MASTER)%被突然推倒在地上
+					PRINTFORML 被吓了一跳的%ANAME(MASTER)%連抵抗機会都沒有就被圧在地上、被粗暴地插入
+					PRINTFORML 被突然襲撃的%ANAME(MASTER)%因為痛苦和恐怖而呻吟，但天狗毫不在乎地挺動着腰，深深地蹂躙着
+					PRINTFORML 天狗粗壮的肉棒毫不费劲地把陰道肉挤開，在其中剜動，%ANAME(MASTER)%的身体毫不抗拒作為雌性被調教
+					PRINTFORMW 和小混混一樣的粗鲁地強奸引起了%ANAME(MASTER)%悲痛的呻吟，被内射了好几発
+				CASE 1
+					PRINTFORML %ANAME(MASTER)%一被帯到陰影処就被推倒侵犯了
+					PRINTFORML 在天狗熟练般的技巧前%ANAME(MASTER)%被強行高潮了好几次
+					PRINTFORML 即使想要逃跑，但终究是无法提起力气反抗，只能被无情的用力突刺
+					PRINTFORML 身体完全屈服于他，雌穴一直発痒渇求着肉棒塞満
+					PRINTFORMW %ANAME(MASTER)%一直被侵犯到天狗満足為止，然后就這樣一个人被放置在原地
+				CASE 2
+					PRINTFORML %ANAME(MASTER)%被一下子捆绑起来圧在地上侵犯
+					PRINTFORML 粗大的肉棒激烈地冲撞着雌穴！咚啾！肉体碰撞的声音不断响起
+					PRINTFORML 突破子宫口的一撃令%ANAME(MASTER)%発出悲鸣，眼睛向上翻白微微喘息着
+					PRINTFORML 突然天狗的精液在雌穴中爆発，%ANAME(MASTER)%的身体无法抑制的達到高潮
+					PRINTFORMW 从子宫里抽出的天狗很満足地抚摸着%ANAME(MASTER)%的下腹后飞走了
+				CASE 3
+					PRINTFORML 被天狗激烈地侵犯着的%ANAME(MASTER)%露出了下流的阿嘿顔
+					PRINTFORML 被帯進陰暗処時他突然変臉推倒並扒掉%ANAME(MASTER)%身上的衣服、粗暴地侵犯了
+					PRINTFORML %ANAME(MASTER)%拼命地掙扎逃離如同野獣般的激烈強姦，但還是徒労地被播種好幾次
+					PRINTFORML 第三次被中出時%ANAME(MASTER)%的理性之壁終於崩坏了，之後毫不抵抗乖乖接受眼前的雄性
+					PRINTFORMW 被狠狠地強姦後、%ANAME(MASTER)%主動地痛愛般対眼前的肉棒進行掃除口交
+				CASE 4
+					PRINTFORML 在陰暗処被襲撃后%ANAME(MASTER)%徒労地抵抗然後被抓住了
+					PRINTFORML 天狗将%ANAME(MASTER)%被扒光衣服帯上项圈，像狗一樣被激烈的侵犯了好几次
+					PRINTFORML 如果想抵抗或逃跑的話，就会被毫不留情地打屁股、%ANAME(MASTER)%因為疼痛和恐惧而屈服了
+					PRINTFORML 再加上天狗出色的肉棒和技巧巧妙地刺激了雌穴，%ANAME(MASTER)%的心因為快楽而融化
+					PRINTFORMW 作為原人類的%ANAME(MASTER)%成為了主人的寵物記念被満被満地责弄瘋狂高潮了
+			ENDSELECT
+			CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精", GET_SPERM_ID("天狗"), @"天狗の\@RAND:2 ? 肉棒 # 唇\@", "天狗", "", "強姦")
+		ENDIF
+		PRINTFORML 
+		PRINTFORMW 不久后、%ANAME(MASTER)%總算逃回了家
+	ENDIF
+ENDIF
+
+RETURN 1

@@ -1,0 +1,1041 @@
+﻿
+;--------------------------------------------------------
+;@STR_BODY
+;指定した部位についての描写を返す
+;--------------------------------------------------------
+@STR_BODY(ARGS , ARG)
+#FUNCTIONS
+#DIM 長さ
+#DIMS 部位
+#DIM 属性
+#DIM 文末指定
+
+文末指定 = 0
+
+VARSET 長さ
+VARSET 属性
+VARSET 文末指定
+VARSET LOCAL
+VARSET LOCALS
+
+属性 = FLAG_STRBODY(ARGS)
+部位 = %RSELECT_STRBODY(ARGS)%
+
+VARSET LOCALS
+
+IF CHECK_STRBODY("長：短：処女確認", 属性)
+	長さ = RAND(1, 3)
+ELSEIF CHECK_STRBODY("長", 属性)
+	長さ = 2
+ELSEIF CHECK_STRBODY("短", 属性)
+	長さ = 1
+ENDIF
+
+SELECTCASE 部位
+	CASE "胸"
+		IF IS_MALE(ARG)
+			IF !CHECK_STRBODY("修飾", 属性)
+				IF GROUPMATCH(TALENT:(ARG:0):体格, 体格_子供, 体格_小柄)
+					LOCALS:0 = %SPLIT_R("胸")%
+				ELSE
+					LOCALS:0 = %SPLIT_R("胸：胸板")%
+				ENDIF
+			ENDIF
+		ELSEIF 長さ == 0
+			IF IS_PIERCED(ARG, ピアス_乳首) && CHECK_STRBODY("穿孔道具", 属性)
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("用環装飾的：上了環的")%
+			ELSEIF IS_TATTOOED(ARG, タトゥー_胸) && CHECK_STRBODY("文身", 属性)
+				LOCALS:0 = %STR_BODY_MOD("文身", ARG, 属性, "胸")%
+			ELSEIF CHECK_STRBODY("感度", 属性)
+				SELECTCASE ABL:(ARG:0):Ｂ感 + TALENT:(ARG:0):Ｂ敏感 * 5 - TALENT:(ARG:0):Ｂ鈍感 * 5 + GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫乳) * 15
+					CASE IS > 30
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("感度異常的：無法違逆快感的：被完全調教的")%
+					CASE IS > 20
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("過敏的：受不了快感的：成為弱点的")%
+					CASE IS > 10
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("感度非常好的：受不了刺激的：弱点的")%
+					CASE IS > 4
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("容易有感覺的：対刺激很敏感的：反応很好的：是性感帯的")%
+					CASE IS > 1
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("在開発途中的：感度良好的")%
+				ENDSELECT
+			ELSEIF (CHECK_STRBODY("精液汚れ", 属性) || CUM_CUR_AMOUNT:ARG:射精部位_胸 ) && !RAND:2
+				IF CHECK_STRBODY("輪姦", 属性)
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("沾滿精液的：沾滿白濁的：被染上白色的")%
+				ELSE
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("被精液弄髒的：被白濁弄髒的")%
+				ENDIF
+			ELSEIF CHECK_STRBODY("性交", 属性)
+				IF GET_BUSTSIZE(ARG:0) == 2
+					IF CHECK_STRBODY_OR("騎乗位：背面騎乗位：背面座位", 属性) && !RAND:2
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("上下弾跳的：上下亂晃的：來回跳動的：大幅弾跳的")%
+					ELSE
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("激烈摇動的：顫動弾跳的：蕩漾揺動的：四溢亂晃的：來回跳動的")%
+					ENDIF
+				ELSEIF GET_BUSTSIZE(ARG:0) == 1
+					IF CHECK_STRBODY_OR("騎乗位：背面騎乗位：背面座位", 属性) && !RAND:2
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("上下弾跳的：來回跳動的：大幅弾跳的")%
+					ELSE
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("揺晃的：激烈摇動的：顫動弾跳的：蕩漾揺動的")%
+					ENDIF
+				ELSEIF GET_BUSTSIZE(ARG:0) == -1
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("顫動的：顫動不已的：顫動摇動的")%
+				ELSEIF GET_BUSTSIZE(ARG:0) != -2
+					IF CHECK_STRBODY_OR("騎乗位：背面騎乗位：背面座位", 属性) && !RAND:2
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("上下弾跳的")%
+					ELSE
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("揺晃的：顫動摇動的")%
+					ENDIF
+				ENDIF
+			ENDIF
+			IF CHECK_STRBODY("愛撫", 属性) && !RAND:2
+				IF GET_BUSTSIZE(ARG:0) == 2
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("一手無法容納的：可以抱著的")%%STR_BODY_MOD("胸＿末尾", ARG, 属性)%
+				ELSEIF GET_BUSTSIZE(ARG:0) == 1
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("會从手中溢出的")%%STR_BODY_MOD("胸＿末尾", ARG, 属性)%
+				ELSEIF GET_BUSTSIZE(ARG:0) == -1
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("一手剛好把握的")%%STR_BODY_MOD("胸＿末尾", ARG, 属性)%
+				ELSEIF GET_BUSTSIZE(ARG:0) == 0
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("和手掌大小相配的")%%STR_BODY_MOD("胸＿末尾", ARG, 属性)%
+				ENDIF
+			ELSEIF CHECK_STRBODY("感触", 属性)
+				IF GET_BUSTSIZE(ARG:0) > 0
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("柔軟的：像被吸住一般的：有重量感的：豊腴的：又弾又軟的：像年糕般柔軟的：像棉花糖一樣的")%%STR_BODY_MOD("胸＿末尾", ARG, 属性, "短")%
+				ELSEIF GET_BUSTSIZE(ARG:0) == -1
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("柔軟的：充滿張力的：脂肪稀薄的：軟軟的")%%STR_BODY_MOD("胸＿末尾", ARG, 属性, "短")%
+				ELSEIF GET_BUSTSIZE(ARG:0) == -2
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("感覺不到膨脹的：脂肪稀薄的")%%STR_BODY_MOD("胸＿末尾", ARG, 属性, "短")%
+				ELSE
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("柔軟的")%%STR_BODY_MOD("胸＿末尾", ARG, 属性, "短")%
+				ENDIF
+			ELSE
+				LOCALS:0 = %LOCALS:0%%STR_BODY_MOD("胸＿末尾", ARG, 属性)%
+			ENDIF
+		ELSE
+			IF 長さ > 1
+				IF CHECK_STRBODY("性交", 属性) && !RAND:2
+					IF GET_BUSTSIZE(ARG:0) == 2
+						IF CHECK_STRBODY_OR("騎乗位：背面騎乗位：背面座位", 属性) && !RAND:2
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("配合著上頂的節奏揺晃的：華麗上下跳動的：上下來回亂晃的")%
+						ELSEIF CHECK_STRBODY("後背位", 属性) && !RAND:2
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("趴著時被圧扁的：激烈地前後揺晃的")%
+						ELSEIF CHECK_STRBODY("対面座位", 属性) && !RAND:2
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("緊貼著被圧扁的：被圧在身下而変扁的")%
+						ELSE
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("配合著抽挿的節奏揺晃的：四溢亂晃的：激烈來回跳動的：四処亂跳的")%
+						ENDIF
+					ELSEIF GET_BUSTSIZE(ARG:0) == 1
+						IF CHECK_STRBODY_OR("騎乗位：背面騎乗位：背面座位", 属性) && !RAND:2
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("配合著上頂的節奏揺晃的：華麗上下跳動的")%
+						ELSEIF CHECK_STRBODY("後背位", 属性) && !RAND:2
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("趴著時被圧扁的：激烈地前後揺晃的")%
+						ELSEIF CHECK_STRBODY("対面座位", 属性) && !RAND:2
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("緊貼著被圧扁的：被圧在身下而変扁的")%
+						ELSE
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("配合著抽挿的節奏揺晃的：四溢亂晃的：蕩漾揺動的：激烈摇動的：華麗摇晃的")%
+						ENDIF
+					ELSEIF GET_BUSTSIZE(ARG:0) == -1
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("配合著抽挿的節奏揺晃的：顫動不已的：顫動摇動的")%
+					ELSEIF GET_BUSTSIZE(ARG:0) != -2
+						IF CHECK_STRBODY_OR("騎乗位：背面騎乗位：背面座位", 属性) && !RAND:2
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("配合著上頂的節奏揺晃的：上下弾跳的")%
+						ELSEIF CHECK_STRBODY("後背位", 属性) && !RAND:2
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("前後揺動的")%
+						ELSEIF CHECK_STRBODY("対面座位", 属性) && !RAND:2
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("緊貼著的：被圧在身下的")%
+						ELSE
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("配合著抽挿的節奏揺晃的：顫動摇動的")%
+						ENDIF
+					ENDIF
+				ELSEIF TALENT:(ARG:0):母乳体質 && !RAND:3
+					LOCALS:0 = %SPLIT_R("溢出一點母乳的：積蓄著母乳的")%
+				ENDIF
+			ENDIF
+			IF IS_PIERCED(ARG, ピアス_乳首) && (CHECK_STRBODY("穿孔道具", 属性) || 長さ > 1 && !RAND:5)
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("用環装飾的：上了環的")%%STR_BODY_MOD("胸＿末尾長", ARG, 属性)%
+			ELSEIF IS_TATTOOED(ARG, タトゥー_胸) && !CHECK_STRBODY("性交", 属性) && 長さ > 1 && !RAND:5
+				LOCALS:0 = %STR_BODY_MOD("文身", ARG, 属性, "胸")%%STR_BODY_MOD("胸＿末尾長", ARG, 属性)%
+			ELSEIF CHECK_STRBODY("感度", 属性) || !CHECK_STRBODY_OR("外見：感触", 属性) && CHECK_STRBODY_OR("愛撫", 属性) && (ABL:(ARG:0):Ｂ感 > 4 || TALENT:(ARG:0):Ｂ敏感) && !RAND:4
+				IF ABL:(ARG:0):Ｂ感 == 0 && !TALENT:(ARG:0):Ｂ敏感
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("未開発的：還沒開発過的")%
+				ELSE
+					SELECTCASE ABL:(ARG:0):Ｂ感 + TALENT:(ARG:0):Ｂ敏感 * 5 - TALENT:(ARG:0):Ｂ鈍感 * 5 + GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫乳) * 15
+						CASE IS > 30
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("被淫亂開発了的：感度異常的：無法違逆快感的：被完全調教的")%
+						CASE IS > 20
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("被教導了快楽的：過敏的：受不了快感的：成為弱点的")%
+						CASE IS > 10
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("被充分開発的：感度非常好的：受不了刺激的：弱点的")%
+						CASE IS > 4
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("記住了快感的：容易有感覺的：対刺激很敏感的：反応很好的")%
+						CASE IS > 1
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("開始記住快感的：感度良好的")%
+					ENDSELECT
+				ENDIF
+				LOCALS:0 = %LOCALS:0%%STR_BODY_MOD("胸＿末尾", ARG, 属性)%
+			ELSEIF CHECK_STRBODY("愛撫", 属性) && GET_BUSTSIZE(ARG:0) != -2 && !RAND:3
+				IF GET_BUSTSIZE(ARG:0) == 2
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("一手無法容納的：可以抱著的：軟趴趴歪著的")%
+				ELSEIF GET_BUSTSIZE(ARG:0) == 1
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("會从手中溢出的：配合著手的動作扭曲的")%
+				ELSEIF GET_BUSTSIZE(ARG:0) == -1
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("一手剛好把握的")%
+				ELSE
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("和手掌大小相配的")%
+				ENDIF
+				LOCALS:0 = %LOCALS:0%%STR_BODY_MOD("胸＿末尾", ARG, 属性, "短")%
+			ELSEIF CHECK_STRBODY("接触", 属性) && !RAND:3 || CHECK_STRBODY("感触", 属性)
+				IF GET_BUSTSIZE(ARG:0) > 0
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("柔軟的：像被吸住一般的：有重量感的：豊腴的：又弾又軟的：像年糕般柔軟的：像棉花糖一樣的")%
+				ELSEIF GET_BUSTSIZE(ARG:0) == -1
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("柔軟的：充滿張力的：脂肪稀薄的：軟軟的")%
+				ELSEIF GET_BUSTSIZE(ARG:0) == -2
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("感覺不到膨脹的：脂肪稀薄的")%
+				ELSE
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("柔軟的")%
+				ENDIF
+				LOCALS:0 = %LOCALS:0%%STR_BODY_MOD("胸＿末尾", ARG, 属性, "短")%
+			ELSE
+				IF GET_BUSTSIZE(ARG:0) == -2
+					IF TALENT:(ARG:0):体格 == 体格_子供 && !RAND:3
+						LOCALS:0 = %LOCALS:0%和外表相稱的%STR_BODY_MOD("胸＿末尾長", ARG, 属性, "長")%
+					ELSEIF TALENT:(ARG:0):体格 == 体格_小柄 && !RAND:3
+						LOCALS:0 = %LOCALS:0%就像孩子般的%STR_BODY_MOD("胸＿末尾長", ARG, 属性, "長")%
+					ELSE
+						LOCALS:0 = %SPLIT_R("沒有任何起伏的：完全沒有膨脹的：不存在起伏的")%%STR_BODY_MOD("胸＿末尾長", ARG, 属性, "短")%
+					ENDIF
+				ELSEIF GET_BUSTSIZE(ARG:0) == -1
+					IF TALENT:(ARG:0):体格 == 体格_子供 && !RAND:3
+						LOCALS:0 = %LOCALS:0%和外表相稱的%STR_BODY_MOD("胸＿末尾長", ARG, 属性, "長")%
+					ELSEIF TALENT:(ARG:0):体格 == 体格_小柄 && !RAND:3
+						LOCALS:0 = %LOCALS:0%適合嬌小身體的%STR_BODY_MOD("胸＿末尾長", ARG, 属性, "長")%
+					ELSE
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("稍微膨脹的：膨脹坡度平穩的")%%STR_BODY_MOD("胸＿末尾長", ARG, 属性, "短")%
+					ENDIF
+				ELSEIF GET_BUSTSIZE(ARG:0) == 1
+					IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫乳) && !RAND:3
+						LOCALS:0 = %LOCALS:0%淫亂成熟的%STR_BODY_MOD("胸＿末尾長", ARG, 属性)%
+					ELSEIF TALENT:(ARG:0):体格 == 体格_子供 && !RAND:3
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("和幼小外表不相稱的：不像孩子的：和身體不相稱的：発育良好的：讓大人害臊的")%%STR_BODY_MOD("胸＿末尾長", ARG, 属性)%
+					ELSEIF TALENT:(ARG:0):体格 == 体格_小柄 && !RAND:3
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("不適合嬌小身體的")%%STR_BODY_MOD("胸＿末尾長", ARG, 属性)%
+					ELSE
+						IF !RAND:2
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("有重量感的：像香瓜般的")%%STR_BODY_MOD("胸＿末尾長", ARG, 属性, "短")%
+						ELSE
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("沉甸甸的：很有存在感的")%%STR_BODY_MOD("胸＿末尾長", ARG, 属性)%
+						ENDIF
+					ENDIF
+				ELSEIF GET_BUSTSIZE(ARG:0) == 2
+					IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫乳) && !RAND:3
+						LOCALS:0 = %LOCALS:0%淫亂成熟的%STR_BODY_MOD("胸＿末尾長", ARG, 属性)%
+					ELSEIF TALENT:(ARG:0):体格 == 体格_子供 && !RAND:3
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("和幼小外表不相稱的：不像孩子的：和身體不相稱的：発育過於良好的：讓大人害臊的")%%STR_BODY_MOD("胸＿末尾長", ARG, 属性)%
+					ELSEIF TALENT:(ARG:0):体格 == 体格_小柄 && !RAND:3
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("不適合嬌小身體的：和身體不相稱的")%%STR_BODY_MOD("胸＿末尾長", ARG, 属性)%
+					ELSE
+						IF !RAND:2
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("有重量感的：就像母牛一般的：快要滿溢而出的尺寸的：尺寸非凡的：飽満的：像西瓜一般的")%%STR_BODY_MOD("胸＿末尾長", ARG, 属性, "短")%
+						ELSE
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("沉甸甸的")%%STR_BODY_MOD("胸＿末尾長", ARG, 属性)%
+						ENDIF
+					ENDIF
+				ELSE
+					IF TALENT:(ARG:0):体格 == 体格_小柄 && !RAND:3
+						LOCALS:0 = %LOCALS:0%適合小個子大小的%STR_BODY_MOD("胸＿末尾長", ARG, 属性)%
+					ELSE
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("大小合適的：充滿張力的")%%STR_BODY_MOD("胸＿末尾長", ARG, 属性)%
+					ENDIF
+				ENDIF
+			ENDIF
+		ENDIF
+	CASE "乳首"
+		IF CHECK_STRBODY("感度", 属性)
+			SELECTCASE ABL:(ARG:0):Ｂ感 + TALENT:(ARG:0):Ｂ敏感 * 5 - TALENT:(ARG:0):Ｂ鈍感 * 5 + GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫乳) * 15
+				CASE IS > 30
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("感度異常的：無法違逆快感的：被完全調教的")%
+				CASE IS > 20
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("過敏的：受不了快感的：成為弱点的")%
+				CASE IS > 10
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("感度非常好的：受不了刺激的：弱点的")%
+				CASE IS > 4
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("容易有感覺的：対刺激很敏感的：反応很好的：是性感帯的")%
+				CASE IS > 1
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("在開発途中的：感度良好的")%
+			ENDSELECT
+		ELSEIF TALENT:(ARG:0):母乳体質 && !RAND:3
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("溢出一點母乳的：流出母乳的")%
+		ELSEIF IS_PIERCED(ARG, ピアス_乳首) && !RAND:2
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("用環装飾的：上了環的")%
+		ENDIF
+		IF CHECK_STRBODY("媚薬", 属性) && !RAND:2
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("発情的：発燙的")%
+		ELSEIF CHECK_STRBODY("欲情", 属性)
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("挺立起來的：迅速挺起的：勃起的：変硬的：硬邦邦的：膨脹的")%
+		ENDIF
+		SIF !CHECK_STRBODY("修飾", 属性)
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("乳首：乳頭")%
+	CASE "尻", "尻肉" ,"臀部" 
+		IF IS_MALE(ARG)
+			SIF !CHECK_STRBODY("修飾", 属性)
+				LOCALS:0 = %部位%
+		ELSE
+			IF (CHECK_STRBODY("文身", 属性) || 長さ > 1 && !RAND:5) && IS_TATTOOED(ARG, タトゥー_尻)
+				LOCALS:0 = %STR_BODY_MOD("文身", ARG, 属性, "尻")%
+			ELSEIF (CHECK_STRBODY("精液汚れ", 属性) || CUM_CUR_AMOUNT:ARG:射精部位_尻) && !RAND:3
+				IF CHECK_STRBODY("輪姦", 属性)
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("沾滿精液的：沾滿白濁的：被染上白色的")%
+				ELSE
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("被精液滴在上面的：被白濁弄髒的")%
+				ENDIF
+			ELSEIF CHECK_STRBODY("性交", 属性) && (長さ == 0 || !RAND:2)
+				IF CHECK_STRBODY_OR("騎乗位：背面騎乗位", 属性)
+					IF GET_HIPSIZE(ARG) >= 1
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("上下跳動的：上下摇晃的：蕩漾的：発出聲音弾跳著的：華麗摇晃的：饑渴的跳動著的：激烈搖晃著的：四溢跳動的：如波潮般上下摇晃的")%
+					ELSE
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("上下跳動的：上下摇晃的：揺晃的：激烈搖晃著的")%
+					ENDIF
+				ELSE
+					IF GET_HIPSIZE(ARG) >= 1
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("蕩漾的：揺晃的：顫動的：激烈摇動的")%
+					ELSE
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("揺晃的：顫動的")%
+					ENDIF
+				ENDIF
+			ENDIF
+			IF 部位 == "尻"
+				IF 長さ == 0 || 長さ < 2 && !RAND:3
+					IF RAND:3
+						IF TALENT:ARG:体格 != 体格_子供 && !RAND:5
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("圓形的")%
+						ELSEIF TALENT:ARG:美臀
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("美麗的：漂亮的：美形的")%
+						ELSEIF GET_HIPSIZE(ARG) >= 1
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("大大的：豊満的：安産型的")%
+						ELSEIF TALENT:(ARG:0):体格 == 体格_子供
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("小小的：貧瘠的：幼小的")%
+						ELSEIF TALENT:ARG:体格 == 体格_小柄
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("小小的")%
+						ELSE
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("圓形的")%
+						ENDIF
+					ENDIF
+					SIF !CHECK_STRBODY("修飾", 属性)
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("臀部：屁股")%
+				ELSE
+					IF !RAND:2
+						IF !CHECK_STRBODY("外見", 属性) && !RAND:4 || CHECK_STRBODY("感触", 属性)
+							IF TALENT:ARG:美臀
+								LOCALS:0 = %LOCALS:0%%SPLIT_R("柔軟的：光滑的：充滿張力的" + CHECK_STRBODY_ADD("愛撫", 属性, "：手掌像被它吸住一樣的"))%
+							ELSEIF GET_HIPSIZE(ARG) >= 1
+								LOCALS:0 = %LOCALS:0%%SPLIT_R("柔軟的：軟綿綿的" + CHECK_STRBODY_ADD("愛撫", 属性, "：無法一手把握的：滿是臀浪的：在揉搓下弾動的"))%
+							ELSEIF TALENT:(ARG:0):体格 == 体格_子供
+								LOCALS:0 = %LOCALS:0%%SPLIT_R("柔軟的：充滿張力的")%
+							ELSE
+								LOCALS:0 = %LOCALS:0%%SPLIT_R("柔軟的")%
+							ENDIF
+						ELSE
+							IF TALENT:(ARG:0):体格 != 体格_子供 && !RAND:7
+								LOCALS:0 = %LOCALS:0%%SPLIT_R("渾圓的：軟和的")%
+							ELSEIF TALENT:ARG:美臀
+								LOCALS:0 = %LOCALS:0%%SPLIT_R("漂亮的：美形的：圓形的：美麗的：緊緻的：魅惑的：線條優美的：毫無瑕疵的：形状漂亮的")%
+							ELSEIF GET_HIPSIZE(ARG) >= 1
+								IF TALENT:(ARG:0):体格 == 体格_子供 && !RAND:4
+									LOCALS:0 = %LOCALS:0%%SPLIT_R("発育過於良好的：不像是孩子的")%
+								ELSE
+									LOCALS:0 = %LOCALS:0%%SPLIT_R("大大的：安産型地：圓形的：豊満的：鼓起來的：有重量感的：豊腴的：飽満的：碩大的：充满肉感的：豊腴飽満的")%
+								ENDIF
+							ELSEIF TALENT:(ARG:0):体格 == 体格_子供
+								LOCALS:0 = %LOCALS:0%%SPLIT_R("脂肪稀薄的：在発育途上的：未発育的：未成熟的：貧瘠的")%
+							ELSE
+								LOCALS:0 = %LOCALS:0%%SPLIT_R("豊腴的：渾圓的：軟和的")%
+							ENDIF
+						ENDIF
+					ENDIF
+					IF !CHECK_STRBODY("修飾", 属性)
+						IF TALENT:(ARG:0):体格 == 体格_子供 && !GET_HIPSIZE(ARG) >= 1
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("小臀：臀部：屁股")%
+						ELSEIF TALENT:ARG:美臀 && !RAND:2
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("蜜桃臀：美臀：臀部：屁股")%
+						ELSEIF GET_HIPSIZE(ARG) >= 1 && !RAND:2
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("蜜桃臀：巨臀：爆臀：臀部：屁股")%
+						ELSE
+							LOCALS:0 = %LOCALS:0%%SPLIT_R("蜜桃臀：臀部：屁股")%
+						ENDIF
+					ENDIF
+				ENDIF
+			ELSE
+				IF !CHECK_STRBODY("外見", 属性) && !RAND:3 || CHECK_STRBODY("感触", 属性)
+					IF TALENT:ARG:美臀
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("柔軟的：光滑的：充滿張力的" + CHECK_STRBODY_ADD("愛撫", 属性, "：手掌像被它吸住一樣的"))%
+					ELSEIF GET_HIPSIZE(ARG) >= 1
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("柔軟的：軟綿綿的" + CHECK_STRBODY_ADD("愛撫", 属性, "：無法一手把握的：滿是臀浪的：在揉搓下弾動的"))%
+					ELSEIF TALENT:(ARG:0):体格 == 体格_子供
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("柔軟的：充滿張力的")%
+					ELSE
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("柔軟的")%
+					ENDIF
+				ELSEIF 長さ > 0
+					IF TALENT:(ARG:0):体格 != 体格_子供 && !RAND:5
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("豊腴的：柔軟的：軟和的")%
+					ELSEIF TALENT:ARG:美臀
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("美麗的：充滿張力的：緊緻的：毫無瑕疵的：形状漂亮的")%
+					ELSEIF GET_HIPSIZE(ARG) >= 1
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("豊盈的：豊満的：鼓起來的：有重量感的：豊腴的：飽満的：碩大的：豊腴飽満的")%
+					ELSEIF TALENT:(ARG:0):体格 == 体格_子供
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("未発育的：貧瘠的")%
+					ELSE
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("豊腴的：柔軟的：軟和的")%
+					ENDIF
+				ELSE
+					IF TALENT:ARG:美臀
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("美麗的")%
+					ELSEIF GET_HIPSIZE(ARG) >= 1
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("豊盈的：豊満的")%
+					ELSEIF TALENT:(ARG:0):体格 == 体格_子供
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("未発育的：貧瘠的")%
+					ELSE
+						LOCALS:0 = %LOCALS:0%%SPLIT_R("柔軟的")%
+					ENDIF
+				ENDIF
+				SIF !CHECK_STRBODY("修飾", 属性)
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("臀肉")%
+			ENDIF
+		ENDIF
+	CASE "膣", "膣穴"
+		IF CHECK_STRBODY("処女確認", 属性) && VIRGIN(ARG)
+			IF CHECK_STRBODY("時間経過", 属性)
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("還是処女的：還沒嘗過男人滋味的：還是純潔的：還是誰也沒有使用過的：被時間変成”女人”的")%
+			ELSE
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("処女的：沒嘗過男人滋味的：純潔的：誰也沒有使用過的：少女一樣的")%
+			ENDIF
+		ENDIF
+		IF CHECK_STRBODY("感度", 属性)
+			SELECTCASE ABL:(ARG:0):Ｖ感 + TALENT:(ARG:0):Ｖ敏感 * 5 - TALENT:(ARG:0):Ｖ鈍感 * 5 + GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫壷) * 15
+				CASE IS > 30
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("感度異常的：無法違逆快感的：被完全調教的")%
+				CASE IS > 20
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("過敏的：受不了快感的：成為弱点的")%
+				CASE IS > 10
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("感度非常好的：受不了刺激的：弱点的")%
+				CASE IS > 4
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("容易有感覺的：対刺激很敏感的：反応很好的")%
+				CASE IS > 1
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("在開発途中的：感度良好的")%
+			ENDSELECT
+		ELSEIF CHECK_STRBODY("Ｖ挿入", 属性)
+			IF CHECK_STRBODY("中出し", 属性)  || CUM_CUR_AMOUNT:ARG:射精部位_膣内
+				IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫壷) || CHECK_STRBODY("欲情", 属性)
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("忘我地吸吮著精液的：為了喝光精液而蠢動的：為了榨取精液而収縮的")%
+				ELSEIF !CHECK_STRBODY("絶頂", 属性) || !RAND:2
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("被盡情授種的：被白濁填滿的")%
+				ENDIF
+			ELSEIF CHECK_STRBODY("絶頂", 属性)
+				IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫壷) || CHECK_STRBODY("欲情", 属性)
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("吸吮著陰莖的：忘我地夾緊的：品味到至福的絶頂的：持續高潮的")%
+				ELSE
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("因快感而顫動的：緊纏著男根的：激烈収縮的")%
+				ENDIF
+			ELSEIF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫壷) || CHECK_STRBODY("欲情", 属性)
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("沉迷于陰莖的：完全成為肉棒俘虜的：貪求快感的")%
+			ENDIF
+		ELSEIF CHECK_STRBODY("媚薬", 属性) && !RAND:2
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("発情的：発燙的")%
+		ELSEIF CHECK_STRBODY("欲情", 属性)
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("濕潤的：流出蜜汁的")%
+		ENDIF
+		IF GET_INMOU_LEVEL(ARG) >= 1 && RAND:2
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("茂盛的：毛茸茸的")%
+		ELSEIF GET_INMOU_LEVEL(ARG) == -2 && RAND:2
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("滑溜溜的：像小女孩一样")%
+		ENDIF
+		IF !RAND:3
+			SELECTCASE TALENT:(ARG:0):Ｖ緊緻度
+				CASE IS < 締まり_崩壊
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("被使用惯了的：使用过多而松松垮垮的：怪诞的：黑乎乎的花瓣露出来了的")%
+				CASE IS >= 締まり_名器
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("紧致的：紧致程度良好的：真正名器的：極上的")%
+				CASE 締まり_ゆるゆる TO 締まり_普通
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("放松了一点的：因为经历了一些而放松了的：稍稍松了一点的")%
+				CASE IS < 締まり_ゆるゆる
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("旷荡的：经历太多而闭不上的：再也闭不上的：一张一张的：松垮的")%
+			ENDSELECT
+		ENDIF
+		IF TALENT:(ARG:0):体格 == 体格_子供 && !RAND:2
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("幼小的：还未成熟的")%
+		ELSEIF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫壷) && !CHECK_STRBODY("感度", 属性) && !RAND:2
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("淫蕩的：淫乱的")%
+		ELSEIF TALENT:ARG:Ｖ敏感 && !CHECK_STRBODY_OR("感度：処女確認", 属性) && !RAND:2
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("敏感的：容易有感覺的")%
+		ENDIF
+		SIF !CHECK_STRBODY("修飾", 属性)
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("小穴：膣穴：雌穴：肉壺")%
+	CASE "アナル", "尻穴"
+		IF CHECK_STRBODY("感度", 属性)
+			SELECTCASE ABL:(ARG:0):Ａ感 + TALENT:(ARG:0):Ａ敏感 * 5 - TALENT:(ARG:0):Ａ鈍感 * 5 + GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_尻穴狂い) * 15
+				CASE IS > 30
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("感度異常的：無法違逆快感的：被完全調教的")%
+				CASE IS > 20
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("過敏的：受不了快感的：成為弱点的")%
+				CASE IS > 10
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("化作性器的：感度非常好的：受不了刺激的：弱点的")%
+				CASE IS > 4
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("和性器一樣的：容易有感覺的：対刺激很敏感的：反応很好的")%
+				CASE IS > 1
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("在開発途中的：感度良好的")%
+			ENDSELECT
+		ELSEIF CHECK_STRBODY("Ａ挿入", 属性)
+			IF CHECK_STRBODY("中出し", 属性) || CUM_CUR_AMOUNT:ARG:射精部位_アナル
+				IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_尻穴狂い) || CHECK_STRBODY("欲情", 属性)
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("忘我地吸吮著精液的：為了喝光精液而蠢動的：為了榨取精液而収縮的")%
+				ELSEIF !CHECK_STRBODY("絶頂", 属性) || !RAND:2
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("被盡情授種的：被白濁填滿的")%
+				ENDIF
+			ELSEIF CHECK_STRBODY("絶頂", 属性)
+				IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_尻穴狂い) || CHECK_STRBODY("欲情", 属性)
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("吸吮著陰莖的：忘我地夾緊的：品味到至福的絶頂的：持續高潮的")%
+				ELSE
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("因快感而顫動的：緊纏著男根的：激烈収縮的")%
+				ENDIF
+			ELSEIF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_尻穴狂い) || CHECK_STRBODY("欲情", 属性)
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("沉迷于陰莖的：完全成為肉棒俘虜的：貪求快感的")%
+			ENDIF
+		ENDIF
+		IF GET_INMOU_LEVEL(ARG) == 2 && !RAND:4
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("长了尻毛的")%
+		ENDIF
+		IF !RAND:3
+			SELECTCASE TALENT:(ARG:0):Ａ緊緻度
+				CASE IS >= 締まり_名器
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("紧致的：紧致程度良好的：真正名器的：極上的")%
+				CASE 締まり_ゆるゆる TO 締まり_普通
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("放松了一点的：因为经历了一些而放松了的：稍稍松了一点的")%
+				CASE IS < 締まり_ゆるゆる
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("旷荡的：经历太多而闭不上的：再也闭不上的：一张一张的：松垮的")%
+			ENDSELECT
+		ENDIF
+		IF TALENT:(ARG:0):体格 == 体格_子供 && !RAND:2
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("幼小的：小小的：狭小的")%
+		ELSEIF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_尻穴狂い) && !CHECK_STRBODY("感度", 属性) && !RAND:2
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("淫蕩的：淫乱的：開発完畢的：被完全開発的")%
+		ELSEIF TALENT:ARG:Ａ敏感 && !CHECK_STRBODY("感度", 属性) && !RAND:2
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("敏感的：容易有感覺的")%
+		ENDIF
+		SIF !CHECK_STRBODY("修飾", 属性)
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("肛門：尻穴：菊穴：菊門")%
+	CASE "腰"
+		SIF !CHECK_STRBODY("修飾", 属性)
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("腰：細腰：柳腰")%
+	CASE "陰唇"
+		IF CHECK_STRBODY("処女確認", 属性) && VIRGIN(ARG:0)
+			IF CHECK_STRBODY("時間経過", 属性)
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("還是処女的：還沒嘗過男人滋味的：還是純潔的：還是誰也沒有使用過的：被時間変成”女人”的")%
+			ELSE
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("処女的：沒嘗過男人滋味的：純潔的：誰也沒有使用過的：少女一樣的")%
+			ENDIF
+		ENDIF
+		IF GET_INMOU_LEVEL(ARG) >= 1 && RAND:2
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("茂盛的：毛茸茸的")%
+		ELSEIF GET_INMOU_LEVEL(ARG) == -2 && RAND:2
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("滑溜溜的：像小女孩一样")%
+		ENDIF
+		IF IS_PIERCED(ARG, ピアス_ラビア) && (CHECK_STRBODY("穿孔道具", 属性) || 長さ > 1 && !RAND:2)
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("用環装飾的：上了環的")%
+		ENDIF
+		IF !RAND:3
+			SELECTCASE TALENT:(ARG:0):Ａ緊緻度
+				CASE IS < 締まり_ゆるゆる
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("旷荡的：经历太多而闭不上的：再也闭不上的：一张一张的：松垮的")%
+			ENDSELECT
+		ENDIF
+		IF TALENT:(ARG:0):体格 == 体格_子供 && !RAND:2
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("幼小的：小小的：狭小的")%
+		ENDIF
+		SIF !CHECK_STRBODY("修飾", 属性)
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("秘部：秘所：陰唇：秘唇：性器：膣口")%
+	CASE "クリ"	
+		IF CHECK_STRBODY("感度", 属性)
+			SELECTCASE ABL:(ARG:0):Ｃ感 + TALENT:(ARG:0):Ｃ敏感 * 5 - TALENT:(ARG:0):Ｃ鈍感 * 5 + GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫核) * 15
+				CASE IS > 30
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("感度異常的：無法違逆快感的：被完全調教的")%
+				CASE IS > 20
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("過敏的：受不了快感的：成為弱点的")%
+				CASE IS > 10
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("感度非常好的：受不了刺激的：弱点的")%
+				CASE IS > 4
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("容易有感覺的：対刺激很敏感的：反応很好的")%
+				CASE IS > 1
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("在開発途中的：感度良好的")%
+			ENDSELECT
+		ELSEIF IS_PIERCED(ARG, ピアス_クリトリス) && (CHECK_STRBODY("穿孔道具", 属性) || 長さ > 1 && !RAND:2)
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("用環装飾的：上了環的")%
+		ENDIF
+		IF CHECK_STRBODY("媚薬", 属性) && !RAND:2
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("発情的：発燙的")%
+		ELSEIF CHECK_STRBODY("欲情", 属性)
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("迅速挺起的：充血的：勃起的：変硬的：膨脹的")%
+		ENDIF
+		IF TALENT:(ARG:0):体格 == 体格_子供 && !RAND:2
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("幼小的：未熟的：小小的")%
+		ELSEIF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_淫核) && !CHECK_STRBODY("感度", 属性) && !RAND:2
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("被完全開発的：大大的")%
+		ELSEIF TALENT:ARG:Ｃ敏感 && !CHECK_STRBODY("感度", 属性) && !RAND:2
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("敏感的：容易有感覺的")%
+		ENDIF
+		SIF !CHECK_STRBODY("修飾", 属性)
+			LOCALS:0 = %LOCALS:0%%SPLIT_R("陰核：陰蒂")%
+	CASE "尿道"
+		IF CHECK_STRBODY("感度", 属性)
+			SELECTCASE ABL:(ARG:0):Ｕ感 + GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_尿道狂い) * 15
+				CASE IS > 30
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("感度異常的：無法違逆快感的：被完全調教的")%
+				CASE IS > 20
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("過敏的：受不了快感的：成為弱点的")%
+				CASE IS > 10
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("性器化的：感度非常好的：受不了刺激的：弱点的")%
+				CASE IS > 4
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("和性器一样的：容易有感覺的：対刺激很敏感的：反応很好的")%
+				CASE IS > 1
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("在開発途中的：感度良好的")%
+			ENDSELECT
+		ENDIF
+		SIF !CHECK_STRBODY("修飾", 属性)
+			LOCALS:0 = %LOCALS:0%尿道
+
+	CASE "身体"	
+		IF IS_MALE(ARG)
+			SIF !CHECK_STRBODY("修飾", 属性)
+				LOCALS:0 = %部位%
+		ELSE
+			IF TALENT:(ARG:0):体格 == 体格_子供
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("小小的：未熟的：幼小的：嬌小的")%
+			ELSEIF TALENT:ARG:体格 == 体格_小柄
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("小小的：嬌小的")%
+			ELSEIF TALENT:ARG:体型 >= 体型_豊満
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("丰盈的：肉感的：丰满的")%
+			ELSEIF IS_BOIN(ARG) || TALENT:ARG:体型 == 体型_グラマー
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("豊満的：肉感的：男人喜歡的")%
+			ELSEIF GROUPMATCH(TALENT:ARG:体型, 体型_スレンダー, 体型_細身)
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("苗条的：纤细的：奢华的")%
+			ELSEIF GROUPMATCH(TALENT:ARG:体型, 体型_痩せすぎ)
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("纤瘦的：一碰就会折断的：纤细的：骨感的")%
+			ELSEIF TALENT:ARG:魅惑
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("魅惑的：美麗的")%
+			ENDIF
+			SIF !CHECK_STRBODY("修飾", 属性)
+				LOCALS:0 = %LOCALS:0%身体
+		ENDIF
+ENDSELECT
+RETURNF LOCALS:0
+
+;--------------------------------------------------------
+;@STR_BODY_MOD
+;--------------------------------------------------------
+@STR_BODY_MOD(ARGS:0, ARG:0 , ARG:1, ARGS:1)
+#FUNCTIONS
+#DIM 長さ
+#DIMS 部位
+#DIM 属性
+#DIM 親属性
+
+親属性 = ARG:1
+VARSET 長さ
+VARSET 属性
+VARSET LOCAL
+VARSET LOCALS
+
+IF ARGS:1 != ""
+	属性 = FLAG_STRBODY(ARGS:1)
+	部位 = %RSELECT_STRBODY(ARGS:1)%
+ELSE
+	属性 = 0
+	部位 = 
+ENDIF
+
+IF CHECK_STRBODY("長：短", 属性)
+	長さ = RAND(1, 3)
+ELSEIF CHECK_STRBODY("長", 属性)
+	長さ = 2
+ELSEIF CHECK_STRBODY("短", 属性)
+	長さ = 1
+ENDIF
+
+SELECTCASE ARGS:0
+	CASE "胸＿末尾"
+		IF GET_BUSTSIZE(ARG:0) == 2
+			IF RAND:2 && !CHECK_STRBODY("修飾", 親属性)
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("爆乳：巨乳")%
+			ELSE
+				SIF 長さ != 1
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("大大的：巨大的：豊盈的：豊満的")%
+				SIF !CHECK_STRBODY("修飾", 親属性)
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("胸部：乳房")%
+			ENDIF
+		ELSEIF GET_BUSTSIZE(ARG:0) == 1
+			IF RAND:2 && !CHECK_STRBODY("修飾", 親属性)
+				LOCALS:0 = 巨乳
+			ELSE
+				SIF 長さ != 1
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("大大的：豊盈的：豊満的")%
+				SIF !CHECK_STRBODY("修飾", 親属性)
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("胸部：乳房")%
+			ENDIF
+		ELSEIF GET_BUSTSIZE(ARG:0) == -1
+			IF 長さ != 1
+				IF TALENT:(ARG:0):体格 == 体格_子供 && !RAND:2
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("幼小的：未成熟的：未発育的")%
+				ELSEIF TALENT:(ARG:0):体格 == 体格_小柄 && !RAND:3
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("像小孩一樣的：低調的")%
+				ELSE
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("小小的：小巧的：貧瘠的")%
+				ENDIF
+			ENDIF
+			SIF !CHECK_STRBODY("修飾", 親属性)
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("胸部：乳房")%
+		ELSEIF GET_BUSTSIZE(ARG:0) == -2
+			IF 長さ != 1
+				IF TALENT:(ARG:0):体格 == 体格_子供 && !RAND:2
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("幼小的：未成熟的：未発育的")%
+				ELSE
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("沒有起伏的：平整的：平坦的")%
+				ENDIF
+			ENDIF
+			SIF !CHECK_STRBODY("修飾", 親属性)
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("胸部")%
+		ELSE
+			IF 長さ != 1
+				IF TALENT:(ARG:0):体格 == 体格_子供 && !RAND:2
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("発育良好的")%
+				ENDIF
+			ENDIF
+			SIF !CHECK_STRBODY("修飾", 親属性)
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("胸部：乳房")%
+		ENDIF
+	CASE "胸＿末尾長"
+		IF GET_BUSTSIZE(ARG:0) == 2
+			IF RAND:2 && !CHECK_STRBODY("修飾", 親属性)
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("爆乳：豊乳：巨乳：超乳")%
+			ELSE
+				SIF 長さ != 1
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("大大的：沉重的：巨大的：豊盈的：豊満的")%
+				SIF !CHECK_STRBODY("修飾", 親属性)
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("胸部：乳房：乳肉：乳塊")%
+			ENDIF
+		ELSEIF GET_BUSTSIZE(ARG:0) == 1
+			IF RAND:2 && !CHECK_STRBODY("修飾", 親属性)
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("豊乳：巨乳")%
+			ELSE
+				SIF 長さ != 1
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("大大的：沉重的：豊盈的：豊満的")%
+				SIF !CHECK_STRBODY("修飾", 親属性)
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("胸部：乳房：乳肉")%
+			ENDIF
+		ELSEIF GET_BUSTSIZE(ARG:0) == -1
+			IF 長さ == 2 || 長さ == 0 && RAND:2
+				IF TALENT:(ARG:0):体格 == 体格_子供 && !RAND:2
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("幼小的：未成熟的：未発育的：還在発育途中的")%
+				ELSEIF TALENT:(ARG:0):体格 == 体格_小柄 && !RAND:3
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("像小孩一樣的：低調的")%
+				ELSE
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("小小的：小巧的：謙虛的：貧瘠的：可愛的")%
+				ENDIF
+			ENDIF
+			SIF !CHECK_STRBODY("修飾", 親属性)
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("胸部：乳房")%
+		ELSEIF GET_BUSTSIZE(ARG:0) == -2
+			IF 長さ == 2 || 長さ == 0 && RAND:2
+				IF TALENT:(ARG:0):体格 == 体格_子供 && !RAND:2
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("幼小的：未成熟的：未発育的")%
+				ELSE
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("平整的：平坦的")%
+				ENDIF
+			ENDIF
+			SIF !CHECK_STRBODY("修飾", 親属性)
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("胸部")%
+		ELSE
+			IF 長さ == 2 || 長さ == 0 && RAND:2
+				IF TALENT:(ARG:0):魅惑 && !RAND:2
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("美麗的：勻稱的：魅惑的")%
+				ELSEIF TALENT:(ARG:0):体格 == 体格_子供 && !RAND:2
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("発育良好的")%
+				ELSEIF !RAND:3
+					LOCALS:0 = %LOCALS:0%%SPLIT_R("美形的")%
+				ENDIF
+			ENDIF
+			SIF !CHECK_STRBODY("修飾", 親属性)
+				LOCALS:0 = %LOCALS:0%%SPLIT_R("胸部：乳房")%
+		ENDIF
+	CASE "文身"
+		SELECTCASE 部位
+			CASE "胸"
+				LOCAL:1 = タトゥー_胸
+			CASE "尻"
+				LOCAL:1 = タトゥー_尻
+		ENDSELECT
+	LOCALS:0 = 『%TATTOO:(ARG:0):(LOCAL:1)%』%SPLIT_R("被刺下的：被繪下的")%的%SPLIT_R("刺青：文身")%
+ENDSELECT
+RETURNF LOCALS:0
+
+;--------------------------------------------------------
+;@NUM_STRBODY
+;指定された属性に対応するビットを返す
+;--------------------------------------------------------
+@NUM_STRBODY(ARGS)
+#FUNCTION
+
+VARSET LOCAL
+
+SELECTCASE ARGS
+	CASE "長"
+		LOCAL = 1
+	CASE "短"
+		LOCAL = 2
+	CASE "外見"
+		LOCAL = 3
+	CASE "接触"
+		LOCAL = 4
+	CASE "サイズ"
+		LOCAL = 5
+	CASE "シンプル"
+		LOCAL = 6
+	CASE "露出なし"
+		LOCAL = 7
+	CASE "欲情"
+		LOCAL = 8
+	CASE "処女確認"
+		LOCAL = 9
+	CASE "輪姦"
+		LOCAL = 10
+	CASE "事前"
+		LOCAL = 11
+	CASE "事後"
+		LOCAL = 12
+	CASE "精液汚れ"
+		LOCAL = 13
+	CASE "媚薬"
+		LOCAL = 14
+	CASE "絶頂"
+		LOCAL = 15
+	CASE "拘束"
+		LOCAL = 16
+	CASE "尻肉"
+		LOCAL = 17
+	CASE "調教中"
+		LOCAL = 18
+	CASE "時間経過"
+		LOCAL = 19
+	CASE "性交"
+		LOCAL = 20
+	CASE "正常位"
+		LOCAL = 21
+	CASE "後背位"
+		LOCAL = 22
+	CASE "騎乗位"
+		LOCAL = 23
+	CASE "背面騎乗位"
+		LOCAL = 24
+	CASE "対面座位"
+		LOCAL = 25
+	CASE "背面座位"
+		LOCAL = 26
+	CASE "感度"
+		LOCAL = 27
+	CASE "Ｖ挿入"
+		LOCAL = 28
+	CASE "Ａ挿入"
+		LOCAL = 29
+	CASE "中出し"
+		LOCAL = 30
+	CASE "穿孔道具"
+		LOCAL = 31
+	CASE "文身"
+		LOCAL = 32
+	CASE "愛撫"
+		LOCAL = 33
+	CASE "感触"
+		LOCAL = 34
+	CASE "修飾"
+		LOCAL = 35
+	CASEELSE
+		LOCAL = 0
+ENDSELECT
+
+RETURNF LOCAL
+
+;--------------------------------------------------------
+;@FLAG_STRBODY
+;各種フラグを記録
+;--------------------------------------------------------
+@FLAG_STRBODY(ARGS)
+#FUNCTION
+#DIM LCOUNT
+#DIM 分割数
+#DIMS 体位候補, 15
+#DIMS 体位
+
+VARSET 体位候補
+VARSET LOCAL
+VARSET LOCALS
+
+SPLIT ARGS, "：", LOCALS
+分割数 = RESULT
+
+FOR LCOUNT, 0, 分割数
+	LOCALS:11 = %LOCALS:LCOUNT%
+	SELECTCASE LOCALS:11
+		CASE "正常位", "後背位", "騎乗位", "背面騎乗位", "対面座位", "背面座位", "側位", "屈曲位"
+			IF LOCALS:13 == ""
+				LOCALS:13 '= LOCALS:11
+			ELSE
+				LOCALS:13 '= LOCALS:13 + "：" + LOCALS:11
+			ENDIF
+		CASEELSE
+			SETBIT LOCAL:0, NUM_STRBODY(LOCALS:11)
+	ENDSELECT
+NEXT
+
+
+;体位候補からランダムに一つを選ぶ
+IF LOCALS:13 != ""
+	SPLIT LOCALS:13, "：", 体位候補
+	LOCAL:1 = RESULT
+	体位 = %体位候補:(RAND:(LOCAL:1))%
+	SETBIT LOCAL:0, NUM_STRBODY(体位)
+ENDIF
+
+;連動するものをここで設定しておく
+SIF CHECK_STRBODY("愛撫", LOCAL:0)
+	SETBIT LOCAL:0, NUM_STRBODY("接触")	
+
+
+RETURNF LOCAL:0
+
+;--------------------------------------------------------
+;@RSELECT_STRBODY
+;指定された部位から一か所を選ぶ
+;--------------------------------------------------------
+@RSELECT_STRBODY(ARGS)
+#FUNCTIONS
+#DIM LCOUNT
+#DIMS 部位候補, 15
+#DIMS 部位
+#DIM 部位数
+#DIM 分割数
+
+VARSET 部位候補
+
+部位 = ""
+部位数 = 0
+VARSET LOCAL
+VARSET LOCALS
+
+SPLIT ARGS, "：", LOCALS
+分割数 = RESULT
+
+FOR LCOUNT, 0, 分割数
+	LOCALS:11 = %LOCALS:LCOUNT%
+	SELECTCASE LOCALS:11
+		CASE "胸", "乳首" , "尻", "膣", "アナル", "腰", "陰唇", "クリ", "尻肉", "身体"
+			部位候補:部位数 = %LOCALS:11%
+			部位数 ++
+	ENDSELECT
+NEXT
+SIF 部位数 > 0
+	部位 = %部位候補:(RAND:部位数)%
+
+RETURNF 部位
+
+
+
+;--------------------------------------------------------
+;@CHECK_STRBODY
+;特定の条件が指定されているかチェックする
+;--------------------------------------------------------
+@CHECK_STRBODY(ARGS, ARG:0)
+#FUNCTION
+#DIM LCOUNT
+#DIM 分割数
+
+VARSET 分割数
+VARSET LOCAL
+VARSET LOCALS
+
+SPLIT ARGS, "：", LOCALS
+分割数 = RESULT
+LOCAL:0 = 1
+FOR LCOUNT, 0, 分割数
+	LOCALS:11 = %LOCALS:LCOUNT%
+	SIF !GETBIT(ARG:0, (NUM_STRBODY(LOCALS:11)))
+		RETURNF 0
+NEXT
+
+RETURNF 1
+
+;--------------------------------------------------------
+;@CHECK_STRBODY_OR
+;特定の条件いずれかが指定されているかチェックする
+;--------------------------------------------------------
+@CHECK_STRBODY_OR(ARGS, ARG:0)
+#FUNCTION
+#DIM LCOUNT
+#DIM 分割数
+
+VARSET LOCALS
+
+SPLIT ARGS, "：", LOCALS
+分割数 = RESULT
+
+FOR LCOUNT, 0, 分割数
+	LOCALS:11 = %LOCALS:LCOUNT%
+	SIF GETBIT(ARG:0, (NUM_STRBODY(LOCALS:11)))
+		RETURNF 1
+NEXT
+RETURNF 0
+
+;--------------------------------------------------------
+;@CHECK_STRBODY_ADD
+;指定された条件を満たしてしていればARGS:1のテキストを返す
+;--------------------------------------------------------
+@CHECK_STRBODY_ADD(ARGS:0, ARG, ARGS:1)
+#FUNCTIONS
+#DIM LCOUNT
+#DIM 分割数
+
+VARSET LOCAL
+VARSET LOCALS
+
+SPLIT ARGS:0, "：", LOCALS
+分割数 = RESULT
+
+FOR LCOUNT, 0, 分割数
+	LOCALS:11 = %LOCALS:LCOUNT%
+	SETBIT LOCAL:0, NUM_STRBODY(LOCALS:11)
+NEXT
+
+VARSET LOCALS
+
+SIF ARG & LOCAL:0
+	LOCALS:0 = %ARGS:1%
+
+RETURNF LOCALS:0
+
+
+
+;--------------------------------------------------------
+;@SPLIT_R
+;：で区切られた文字列からランダムに一つを返す
+;--------------------------------------------------------
+@SPLIT_R(ARGS)
+#FUNCTIONS
+#DIM LCOUNT
+
+VARSET LOCAL
+VARSET LOCALS
+
+SPLIT ARGS, "：", LOCALS
+
+RETURNF LOCALS:(RAND:RESULT)
+
+
+
+

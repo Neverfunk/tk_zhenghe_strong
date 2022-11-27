@@ -1,0 +1,168 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K8_GATHER_SPERM_RATE(対象)
+#DIM 対象
+RETURN 50
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K8_GATHER_SPERM_DECISION(対象)
+#DIM 対象
+
+;東方キャラの調教中口上を利用してカウントアップしている
+;非表示の場合はカウント処理が呼ばれずバグるのでイベントを発生させない
+SIF CONFIG:40
+	RETURN 0
+
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0) && HAS_PENIS(MASTER) && CFLAG:対象:好感度 >= 1000
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K8_GATHER_SPERM_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K8_GATHER_SPERM(対象)
+#DIM 対象
+
+IF IS_SLAVE(対象)
+	LOCALS:0 = ご主人様
+ELSE
+	LOCALS:0 = %ANAME(MASTER)%
+ENDIF
+
+
+PRINTFORML 正在工作的时候、%ANAME(対象)%来访了。
+IF KDVAR:対象:パチュリー_精液採取 == 0
+	PRINTFORML 「那个、我有个特别的请求」
+	PRINTFORML 「能借一步说话吗？」
+	PRINTFORML
+	CALL ASK_YN("可以", "现在很忙")
+	IF RESULT == 1
+		PRINTFORMW 「這樣啊……」
+		PRINTFORMW 「没事，下次再说吧」
+		PRINTFORMW %ANAME(対象)%離開了……
+		RETURN 1
+	ELSE
+		PRINTFORML 没有关系……
+		PRINTFORMW %ANAME(MASTER)%屏退左右、和%ANAME(対象)%两人独处
+		PRINTFORMW 「……谢谢。那么关于刚才说的请求……该怎么说好呢……」
+		PRINTFORMW 「实际上、那个……就是说、是有些难以启齿的事情……」
+		PRINTFORMW 看起来是很难开口的事呢、%ANAME(対象)%嘀咕着
+		PRINTFORML
+		PRINTFORMW 「……精液、可以给我精液吗？」
+		PRINTFORML
+		PRINTFORML 看着一脸吃惊的%ANAME(MASTER)%、%ANAME(対象)%手忙脚乱地解释着。
+		PRINTFORMW 「不、不是啦。不是要做奇怪的事情」
+		PRINTFORMW 「但是、是魔法实验需要的」
+		PRINTFORMW 「所以说……在认识的人里面、只能拜托%LOCALS:0%了」
+		PRINTFORMW 「我也是……没想到真会有拜托别人这种蠢事的一天……」
+		PRINTFORML
+		PRINTFORMW 「当然不会让你无偿劳动的，我会根据提供样本的数量支付报酬的」
+		PRINTFORMW 「而且、那个……我也会帮忙的」
+		PRINTFORMW 「当然、不愿意的话也没关系。毕竟这本来就是很奇怪的请求吧……」
+		PRINTFORMW 「对我来说，能协助实验的话将不胜感激。能考虑一下吗？」
+		PRINTFORML 原来如此、看来并不是在恶作剧、而是真的需要精液
+		PRINTFORML 虽然听起来很荒唐、但对方似乎真的很困扰。应该帮忙吗……
+	ENDIF
+ELSE
+	PRINTFORML 「说实话，还需要更多精液」
+	PRINTFORML 「能帮忙吗？」
+ENDIF
+PRINTL
+CALL ASK_YN("帮忙", "不太方便……")
+IF RESULT == 1
+	PRINTFORMW 「……是吗。那就没办法了」
+	PRINTFORMW 「要拜托其它男人的话……感觉有点恶心、我打算尝试使用别的触媒」
+	PRINTFORMW 「抱歉说了奇怪的话。」
+	PRINTFORMW %ANAME(対象)%離開了……
+	KDVAR:対象:パチュリー_精液採取 = 2
+ELSE
+	PRINTFORMW 「……是吗。太好了」
+	CFLAG:対象:好感度 += 100
+	;全員の調教参加フラグをクリア
+	CVARSET CFLAG, 6, 0
+	CFLAG:対象:調教参加フラグ = 1
+	CFLAG:対象:調教中帰らない = 1
+	BASE:対象:体力 = MAXBASE:対象:体力
+	BASE:対象:気力 = MAXBASE:対象:気力
+	;ターンエンド調教をオン
+	FLAG:ターンエンド調教 = 1
+	;それ以降のデイリーイベント発生を潰す
+	DAILY_CANCEL = 1
+	;フラグ
+	KDVAR:対象:パチュリー_精液採取 = 1
+	KDVAR:対象:パチュリー_精液採取_調教中 = 1
+	CALL ADD_EVENTTRAIN_CALLEE("KOJO_DAILY_K8_GATHER_SPERM")
+	CALL ADD_EVENTEND_CALLEE("KOJO_DAILY_K8_GATHER_SPERM")
+	CALL SINGLE_DRAWLINE
+	PRINTFORML
+ENDIF
+
+RETURN 1
+
+
+@EVENTTRAIN_KOJO_DAILY_K8_GATHER_SPERM
+PRINTFORMW 「那么、不好意思、就拜托了」
+PRINTFORMW 「……话虽如此、但也不用太勉强哦？　需要的量也没有那么多」
+PRINTFORMW 「只要弄出来的程度就可以了」
+PRINTFORMW 「所以说、那个、……请温柔点」
+
+@EVENTEND_KOJO_DAILY_K8_GATHER_SPERM
+#DIM 対象
+#DIM 報酬
+対象 = NAME_TO_CHARA("パチュリー")
+報酬 = MIN(KDVAR:対象:パチュリー_精液採取量 * 100, 10000)
+
+PRINTFORMW 「……呼。大概就是这样了」
+PRINTFORM 「这次采集了
+CALL COLOR_PRINT(@"{KDVAR:対象:パチュリー_精液採取量}", カラー_注意)
+PRINTFORMW 呢」
+SELECTCASE KDVAR:対象:パチュリー_精液採取量
+	CASE 0
+		PRINTFORMW 「……这、你一次都没有射啊……」
+		PRINTFORMW 「既然答应了、还是希望能配合一点」
+		PRINTFORMW 「……还是说、和我在一起不舒服吗？」
+	CASE IS <= 5
+		PRINTFORMW 「……能再多提供一些就好了、现在不是很够……」
+		PRINTFORMW 「嘛、你也是在帮我就不说这种话了」
+	CASE IS <= 15
+		PRINTFORMW 「嘛、这样应该就差不多了」
+		PRINTFORMW 「有这么多的话、实验应该不会有问题」
+	CASE IS <= 25
+		PRINTFORMW 「……出来了好多、……很舒服吗？」
+		PRINTFORMW 「太多也用不完、也不是能保存的东西、说不定会有不少被浪费」
+		PRINTFORMW 「算了……如果你觉得舒服的话也不错」
+	CASEELSE
+		PRINTFORMW 「那个……虽然是我让你提供的」
+		PRINTFORMW 「身体异常吗？　射了这么多出来、可能会没命的……」
+		PRINTFORMW 「不要太乱来哦？　这么倒下的话、会做噩梦的」
+ENDSELECT
+IF KDVAR:対象:パチュリー_精液採取量 > 0
+	PRINTFORM 「那么、这个、说好的报酬
+	CALL COLOR_PRINT(@"{報酬}", カラー_注意)
+	PRINTFORMW 呢」
+	PRINTFORMW 「今后也请多多关照……」
+	PRINTFORMW %ANAME(対象)%迅速地换好了衣服、拿着装满精液的瓶子向实验室走去……
+ELSE
+	PRINTFORMW 「这种情况下怎么说都不能支付报酬」
+	PRINTFORMW 「……哎。没办法、只能寻找别的触媒了……」
+	PRINTFORMW %ANAME(対象)%迅速地换好了衣服、朝着实验室走去……
+ENDIF
+MONEY += 報酬
+KDVAR:対象:パチュリー_精液採取_調教中 = 0
+KDVAR:対象:パチュリー_精液採取量 = 0

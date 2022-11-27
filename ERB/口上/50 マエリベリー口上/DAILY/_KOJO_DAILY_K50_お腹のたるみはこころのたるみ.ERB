@@ -1,0 +1,88 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K50_YOU_ARE_FAT_RATE(対象)
+#DIM 対象
+RETURN 50
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K50_YOU_ARE_FAT_DECISION(対象)
+#DIM 対象
+
+SIF !IS_LOVER(対象)
+	RETURN 0
+
+SIF KDVAR:対象:メリー_腹回り
+	RETURN 0
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K50_YOU_ARE_FAT_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K50_YOU_ARE_FAT(対象)
+#DIM 対象
+
+KDVAR:対象:メリー_腹回り = 1
+PRINTFORMW 「呜呣……」
+PRINTFORML 什么、%ANAME(対象)%站在镜子前好像在苦恼着什么……
+CALL ASK_YN("搭話", "還是算了")
+
+IF RESULT == 1
+	PRINTFORMW 别去在意比较好
+	PRINTFORMW 不去理會了
+	RETURN 1
+ENDIF
+
+PRINTFORMW 「啊、%ANAME(MASTER)%……」
+PRINTFORMW 「不、不是　那个、最近、饭菜不是很好吃吗」
+PRINTFORMW 「因為幻想乡的食材都是天然的东西……果然和合成食材的味道不一样……」
+PRINTFORMW 「也就是因为那样、那个……呐、你知道的吧？」
+PRINTFORML 意思是、在因体重而烦恼吗。可是看上去身材没有什么变化……
+PRINTFORMW 不过在这个年纪的女生、可能都会在意那一点点的数字变化的吧
+PRINTFORMW 「虽然有了些危机感」
+PRINTFORMW 「但却不知道有什么好方法、你有什么好的建議吗？」
+PRINTFORML 這樣問我我也很為難啊、該怎麼辦呢……
+
+CALL ASK_MULTI("捏一下", "是这样啊", "運動吧")
+
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORML 虽然说是变胖了、但好像真的看不出来啊
+		PRINTFORMW 试着捏了一下%ANAME(対象)%的小腹……
+		PRINTFORMW 「呀……！　等、等下、你在干什麼啊！」
+		PRINTFORMW 「真是差勁！」
+		PRINTFORMW 好像把她给惹怒了……
+		CFLAG:対象:好感度 -= 300
+	CASE 1
+		PRINTFORML 說起來有那麼胖吗
+		PRINTFORMW 我並不這麼想……
+		PRINTFORMW 「果然令你為難了吗」
+		PRINTFORMW 「哈ー啊、該怎麼辦……」
+		PRINTFORMW 好像并不滿足這個答案……
+	CASE 2
+		PRINTFORMW 首先、從一些輕鬆的運動開始試試看如何……
+		PRINTFORMW 「没错、这是最好的！」
+		PRINTFORMW 「那么、能否陪我一起来吗？」
+		PRINTFORMW 陪着%ANAME(対象)%、在據點周圍慢跑了……
+		CALL COLOR_PRINTW("體力稍微增加了", カラー_注意)
+		MAXBASE:MASTER:体力 += 50
+		MAXBASE:対象:体力 += 50
+ENDSELECT
+
+RETURN 1

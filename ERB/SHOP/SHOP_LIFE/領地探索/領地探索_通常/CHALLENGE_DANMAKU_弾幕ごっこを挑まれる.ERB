@@ -1,0 +1,49 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_CHALLENGE_DANMAKU_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_CHALLENGE_DANMAKU_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_CHALLENGE_DANMAKU(対象)
+#DIM 対象
+PRINTFORML 走在路上的時候、突然被流浪的妖怪発起了弾幕挑戦
+PRINTFORML 如果贏了的話就得到錢……
+PRINTL
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "知略"))
+CALL ASK_YN("接受", "拒絕")
+IF RESULT == 1
+	PRINTFORML 沒那麼多時間
+	PRINTFORML 拒絕了
+	RETURN 1
+ENDIF
+
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+IF LIMIT(ABL:対象:武闘 + ABL:対象:知略, 75, 150) > RAND:150
+	PRINTFORML 漂亮的勝利了！
+	PRINTFORML 贏了比試讓自己更加自信了
+	CALL ICPRINT("獲得了賞金<5000>金", "L", カラー_注意)
+	CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:8 + 6, 1)
+	CALL PRINT_ADD_EXP(対象, "知略経験値", RAND:8 + 6, 1)
+	MONEY += 5000
+	RETURN 1
+ENDIF
+
+PRINTFORML 居然輸了
+PRINTFORMW 輸給流浪的妖怪失去信心了…
+CALL ADD_COOLTIME(対象:0, 2)
+RETURN 1

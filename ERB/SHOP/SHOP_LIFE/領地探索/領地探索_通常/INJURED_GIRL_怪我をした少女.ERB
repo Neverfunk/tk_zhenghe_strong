@@ -1,0 +1,88 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_INJURED_GIRL_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_INJURED_GIRL_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_INJURED_GIRL(対象)
+#DIM 対象
+
+PRINTFORML 在森林中散步的時候、聽見了人的呻吟声
+PRINTFORML 撥開草叢朝着声音傳来的方向走去、看見有一位倒在地上的少女
+PRINTFORML 看見%ANAME(対象)%的少女一瞬間身体緊繃起来、被告之沒有敵意才安心下來
+PRINTFORML 看来是受了傷沒有辦法行動了……
+
+PRINTL
+CALL ASK_MULTI("運送到村子", "奪走值錢的東西", "要求幇助的回報")
+
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORML 讓少女搭着肩膀送到了村子
+		PRINTFORML 少女和她的家人表達了深深的感謝
+		PRINTFORMW 心情舒暢的%ANAME(対象)%返回了宮殿
+		IF 対象 == MASTER
+			IF CFLAG:対象:所属
+				FOR LOCAL, 1, CHARANUM
+					CFLAG:LOCAL:好感度 += 100
+				NEXT
+				CALL COLOR_PRINTL("事情傳開後讓同伴的好感度提高了100", カラー_注意)
+			ENDIF
+		ENDIF
+	CASE 1
+		PRINTFORML 受傷的少女被打暈了
+		PRINTFORML 從懷中搶走值錢的東西之後離開了
+		PRINTFORML ……不知道之後她會怎麼樣
+		MONEY += 3000
+		CALL ICPRINT(@"得到了<3000>金", "L", カラー_注意)
+	CASE 2
+		PRINTFORML 請求幫助要付出報酬吧……
+		CALL ASK_YN("金", "体")
+		IF RESULT == 0
+			PRINTFORML 不可能白白幫助你
+			PRINTFORML 生命才是最重要的、她從錢包中拿出了錢……
+			MONEY += 3000
+			CALL ICPRINT(@"得到了<3000>金", "L", カラー_注意)
+		ELSE
+			PRINTFORML 不可能白白幫助你
+			PRINTFORMW 被要求肉償、她死心的敞開了自己的衣服……
+			
+			IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+				PRINTFORML
+				PRINTFORML 和穿着衣服时看起来不一太样，赤裸的少女的身材比%ANAME(対象)%想象中更加有料
+				PRINTFORML 尤其是那对丰满的胸部，少女刚一松开扣子，就迫不及待地从衣服里跳了出来
+				PRINTFORML 硕大的乳房在%ANAME(対象)%手中被捏成各种形状，果冻一般恰到好处的弹性让%ANAME(対象)%爱不释手
+				PRINTFORML 少女自暴自弃地捂着脸颊，但微微的喘息声却依然从指缝中漏了出来，呼出的气体也逐渐染上炽热
+				PRINTFORML 起初还有所抗拒的少女，没过多久就开始无意识地配合起了%ANAME(対象)%的动作
+				PRINTFORMW 透明的液体从秘密花园中流出，在少女身下汇成一滩水洼……
+				CALL FUCK(対象, "性技, 性交, Ｃ, Ｂ, Ｍ, 接吻, 百合", "接吻喪失", 0, "受傷的姑娘的嘴唇", "", "", "和姦")
+				PRINTFORML
+				PRINTFORML 之后，抱着少女送回了村庄
+				PRINTFORMW 与少女家人们道别的时候，脸颊泛红的少女扭扭捏捏地说了一声谢谢
+				RETURN 1
+			ENDIF
+			
+			PRINTFORML 
+			PRINTFORMW 充分的疼愛着少女豊満的肉体、很快少女自己也扭動着腰身発出了嬌喘声
+			IF HAS_PENIS(対象)
+				CALL FUCK(対象, "性技, 性交, Ｃ, 射精, Ｖ挿入" + (IS_FEMALE(対象) ? ", Ｂ, Ｖ, 百合" # "") , "童貞喪失, 接吻喪失", 0, "受傷的姑娘的嘴唇", "", "受傷的姑娘的膣穴", "和姦")
+			ELSE
+				CALL FUCK(対象, "性技, 性交, Ｃ, Ｂ, Ｖ, 百合", "接吻喪失", 0, "受傷的姑娘的嘴唇", "", "", "和姦")
+			ENDIF
+			PRINTFORML 
+			PRINTFORML 之後、抱着少女到了村子
+			PRINTFORMW 在少女家族的感謝、臉頰泛紅的少女視線的注視中離開了
+		ENDIF
+ENDSELECT
+RETURN 1

@@ -1,0 +1,412 @@
+﻿@TATTOO_MENU(対象, 編集モード = 0)
+#DIM 対象
+#DIM 編集モード
+#DIM FIRST_LINE, 2
+FIRST_LINE = LINECOUNT
+
+FOR LOCAL, 0, VARSIZE("TATTOO")
+	IF IS_TATTOOED(対象, LOCAL:0)
+		PRINTBUTTON @"[{LOCAL:0}] %GET_TATTOO_NAME(LOCAL:0)% : %TATTOO:(対象):(LOCAL:0)%", LOCAL:0
+		PRINTL
+	ELSE
+		PRINTBUTTON @"[{LOCAL:0}] %GET_TATTOO_NAME(LOCAL:0), 8, LEFT%", LOCAL:0
+		PRINTBUTTON @"[{LOCAL:0 + 100}] %GET_TATTOO_NAME(LOCAL:0) + "(隨機)", 20, LEFT%", LOCAL:0 + 100
+		PRINTL
+	ENDIF
+NEXT
+PRINTFORML [99] 取消
+
+INPUT
+LOCAL:1 = RESULT
+IF LOCAL:1 == 99
+	PRINTFORML 還是算了
+	RETURN 0
+ELSEIF INRANGE(LOCAL:1, 0, VARSIZE("TATTOO") - 1) && CAN_TATTOO(対象, LOCAL:1)
+	PRINTFORML 要弄什麼文身？(不輸入為取消)
+	INPUTS
+	CALL SET_TATTOO(対象, LOCAL:1, RESULTS:0)
+	IF 編集モード
+		CLEARLINE LINECOUNT - FIRST_LINE
+		RESTART
+	ELSE
+		RETURN 1
+	ENDIF
+ELSEIF INRANGE(LOCAL:1, 0, VARSIZE("TATTOO") - 1) && 編集モード
+	PRINTFORML 消除了%ANAME(対象)%的%GET_TATTOO_NAME(RESULT:0)%上的文身
+	TATTOO:(対象):RESULT = 
+	CLEARLINE LINECOUNT - FIRST_LINE
+	RESTART
+ELSEIF INRANGE(LOCAL:1, 100, 99 + VARSIZE("TATTOO")) && CAN_TATTOO(対象, LOCAL:1 - 100)
+	FIRST_LINE:1 = LINECOUNT
+	$RANDOM_LOOP_TATTOO
+	LOCALS:0 = %STR_FOR_TATTOO(LOCAL:1 - 100)%
+	PRINTFORML 文身「%LOCALS:0%」怎麼樣……
+	CALL ASK_MULTI("文身", "換一個", "放棄")
+	IF RESULT == 0
+		CALL SET_TATTOO(対象, LOCAL:1 - 100, LOCALS:0)
+		IF 編集モード
+			CLEARLINE LINECOUNT - FIRST_LINE
+			RESTART
+		ELSE
+			RETURN 1
+		ENDIF
+	ELSEIF RESULT == 1
+		CLEARLINE LINECOUNT - FIRST_LINE:1
+		GOTO RANDOM_LOOP_TATTOO
+	ELSEIF RESULT == 2
+		CLEARLINE LINECOUNT -FIRST_LINE
+		RESTART
+	ENDIF
+ENDIF
+
+CLEARLINE LINECOUNT - FIRST_LINE
+RESTART
+
+;---------------------------
+;ARG:0のARG:1番にARG:2でタトゥーを入れる関数
+;既に入っている場合は無理
+;ARG:2はメッセージを表示するフラグ
+;---------------------------
+@SET_TATTOO(ARG:0, ARG:1, ARGS:0, ARG:2 = 1)
+SIF !CAN_TATTOO(ARG:0, ARG:1)
+	RETURN 0
+SIF ARG:2
+CALL COLOR_PRINTW(@"%ANAME(ARG:0)%的%GET_TATTOO_NAME(ARG:1)%被写上了「%ARGS:0%」……", カラー_注意)
+TATTOO:(ARG:0):(ARG:1) = %ARGS:0%
+RETURN 1
+
+;---------------------------
+;ARG:0番のキャラが、ARG:1番のビットにタトゥーできるか
+;---------------------------
+@CAN_TATTOO(ARG:0, ARG:1)
+#FUNCTION
+;範囲外なら不可
+SIF ARG:1 < 0 || VARSIZE("TATTOO") <= ARG:1
+	RETURNF 0
+;装着済みなら不可
+SIF IS_TATTOOED(ARG:0, ARG:1)
+	RETURNF 0
+;それ以外は通す
+RETURNF 1
+
+;---------------------------
+;ARG:0番のキャラが、どこでもいいからタトゥーできるか
+;---------------------------
+@CAN_TATTOO_ANYWHERE(ARG:0)
+#FUNCTION
+FOR LOCAL, 0, VARSIZE("TATTOO")
+	SIF !IS_TATTOOED(ARG:0, LOCAL)
+		RETURNF 1
+NEXT
+RETURNF 0
+
+;---------------------------
+;ARG:0のARG:1ビットのタトゥーを消す関数
+;消したら1、そもそもなかったら0が返る
+;タトゥーについてはピアスと違って、ゲーム内でユーザが任意に削除できる正規の方法を与えるつもりはない。この関数はデバッグ用
+;というわけで、この関数を使用パッチを作成するつもりの方はその辺お願いします
+;---------------------------
+@REMOVE_TATTOO(ARG:0, ARG:1, ARG:2 = 1)
+IF IS_TATTOOED(ARG:0, ARG:1)
+	TATTOO:(ARG:0):(ARG:1) = 
+	RETURN 1
+ENDIF
+RETURN 0
+
+;---------------------------
+;TATTOO:キャラ名:部位　の部位の各番号に対応する部位名を返す関数
+;---------------------------
+@GET_TATTOO_NAME(ARG:0)
+#FUNCTIONS
+SELECTCASE ARG:0
+	CASE タトゥー_額
+		RETURNF "額頭"
+	CASE タトゥー_頬
+		RETURNF "臉頬"
+	CASE タトゥー_肩
+		RETURNF "肩膀"
+	CASE タトゥー_胸
+		RETURNF "胸部"
+	CASE タトゥー_背
+		RETURNF "背部"
+	CASE タトゥー_腹
+		RETURNF "腹部"
+	CASE タトゥー_秘部
+		RETURNF "秘部"
+	CASE タトゥー_尻
+		RETURNF "臀部"
+	CASE タトゥー_腿
+		RETURNF "大腿"
+	CASE タトゥー_足首
+		RETURNF "脚踝"
+	CASEELSE
+		RETURNF "不明"
+ENDSELECT
+
+;---------------------------
+;ARG:0のARG:1部位のタトゥーの有無を調べる関数
+;---------------------------
+@IS_TATTOOED(ARG:0, ARG:1)
+#FUNCTION
+SIF ARG:1 < 0 || VARSIZE("TATTOO") <= ARG:1
+	RETURNF 0
+RETURNF TATTOO:(ARG:0):(ARG:1) != ""
+
+;---------------------------
+;ARG:0に、ARG:2 ~ ARG:12番の優先順でARGS:0のタトゥーを入れる関数
+;ARG:1を1にするとメッセージを表示。
+;一部だけ設定するとかいうこともできる
+;取り付けた場合は、彫ったタトゥーの部位番号が返る
+;---------------------------
+@SET_TATTOO_RANKED(ARG:0, ARGS:0, ARG:1, ARG:2 = 99, ARG:3 = 99, ARG:4 = 99, ARG:5 = 99, ARG:6 = 99, ARG:7 = 99, ARG:8 = 99, ARG:9 = 99, ARG:10 = 99, ARG:11 = 99)
+FOR LOCAL:0, 2, VARSIZE("TATTOO") + 2
+	CALL SET_TATTOO(ARG:0, ARG:(LOCAL:0), ARGS:0, ARG:1)
+	SIF RESULT
+		RETURN ARG:(LOCAL:0)
+NEXT
+RETURN -1
+
+;---------------------------
+;ARG:0番のキャラの、ランダムな部位にタトゥーを入れる
+;ARG:1はメッセージ表示フラグ。0なら非表示。
+;戻り値は取り付けた部位番号
+;どこも空いてなかったら-1が戻ってくるので、その辺考えずに単純にRESULTをGET_TATTOO_NAMEにかけたりしないことこと
+;---------------------------
+@SET_TATTOO_RANDOM(ARG:0, ARGS:0, ARG:1  = 1)
+#DIM 空き部位, VARSIZE("TATTOO")
+#DIM 空き数
+VARSET 空き部位, -1
+VARSET 空き数
+
+FOR LOCAL, 0, VARSIZE("TATTOO")
+	IF CAN_TATTOO(ARG:0, LOCAL:0)
+		空き部位:空き数 = LOCAL:0
+		空き数 ++
+	ENDIF
+NEXT
+
+;どこも空いてなかったら-1
+SIF 空き数 == 0
+	RETURN -1
+
+LOCAL = 空き部位:(RAND:空き数)
+CALL SET_TATTOO(ARG:0, LOCAL, ARGS:0, ARG:1)
+SIF RESULT
+	RETURN LOCAL
+;多分こないはず
+RETURN -1
+;---------------------------
+;ARG:0番のキャラがつけているタトゥーについて、PRINTする
+;---------------------------
+@PRINT_TATTOO(ARG:0)
+LOCAL:1 = 0
+FOR LOCAL:0, 0, VARSIZE("TATTOO")
+	IF IS_TATTOOED(ARG:0, LOCAL:0)
+		LOCAL:1 = 1
+		BREAK
+	ENDIF
+NEXT
+
+IF !LOCAL:1
+	PRINTFORM 無
+	RETURN
+ENDIF
+
+FOR LOCAL:0, 0, VARSIZE("TATTOO")
+	IF IS_TATTOOED(ARG:0, LOCAL:0)
+		PRINTFORM <%GET_TATTOO_NAME(LOCAL:0)% : %TATTOO:(ARG:0):(LOCAL:0)%>  
+	ENDIF
+NEXT
+
+;---------------------
+;ARG:0番の部位番号に対応するランダムなタトゥー用文字列を返す
+;TATTOO_SAMPLE_LIST_COMMONに一つは入ってないとエラー落ちするので注意
+;---------------------
+@STR_FOR_TATTOO(ARG:0)
+#FUNCTIONS
+SIF ARG:0 < -1 || VARSIZE("TATTOO") <= ARG:0
+	THROW STR_FOR_TATTOOの引数に異常な数値が渡されました 引数:{ARG:0}
+IF RAND:2 && 0 < ARG:0 && TATTOO_SAMPLE_ADDRESS:(ARG:0)
+	RETURNF TATTOO_SAMPLE_LIST:(ARG:0):(RAND:(TATTOO_SAMPLE_ADDRESS:(ARG:0)))
+ELSE
+	RETURNF TATTOO_SAMPLE_LIST_COMMON:(RAND:TATTOO_SAMPLE_COMMON_ADDRESS)
+ENDIF
+
+;---------------------
+;各部位番号に対応するランダムなタトゥー用文字列を用意する
+;---------------------		
+@CREATE_TATTOO_LIST
+CALL ADD_TATTOO_SAMPLE(-1, "肉便器")
+CALL ADD_TATTOO_SAMPLE(-1, "犯罪者")
+CALL ADD_TATTOO_SAMPLE(タトゥー_額, "肉")
+CALL ADD_TATTOO_SAMPLE(-1, "娼婦")
+CALL ADD_TATTOO_SAMPLE(-1, "充气娃娃")
+CALL ADD_TATTOO_SAMPLE(-1, "公衆便所")
+CALL ADD_TATTOO_SAMPLE(-1, "性奴隷")
+CALL ADD_TATTOO_SAMPLE(-1, "婊子")
+CALL ADD_TATTOO_SAMPLE(-1, "変態")
+CALL ADD_TATTOO_SAMPLE(-1, "痴女")
+CALL ADD_TATTOO_SAMPLE(-1, "好色女")
+CALL ADD_TATTOO_SAMPLE(-1, "雌犬")
+CALL ADD_TATTOO_SAMPLE(-1, "女体飛機杯")
+CALL ADD_TATTOO_SAMPLE(-1, "被虐狂")
+CALL ADD_TATTOO_SAMPLE(-1, "真剣勝負色情大根")
+CALL ADD_TATTOO_SAMPLE(-1, "淫乱")
+CALL ADD_TATTOO_SAMPLE(-1, "精液中毒")
+CALL ADD_TATTOO_SAMPLE(-1, "性愛中毒")
+CALL ADD_TATTOO_SAMPLE(-1, "自慰猴子")
+CALL ADD_TATTOO_SAMPLE(-1, "苗床")
+CALL ADD_TATTOO_SAMPLE(-1, "慰安婦")
+CALL ADD_TATTOO_SAMPLE(-1, "淫乱家畜女")
+CALL ADD_TATTOO_SAMPLE(-1, "免  費")
+CALL ADD_TATTOO_SAMPLE(-1, "性欲狂人")
+CALL ADD_TATTOO_SAMPLE(-1, "乞食精液")
+CALL ADD_TATTOO_SAMPLE(-1, "職業：便器")
+CALL ADD_TATTOO_SAMPLE(-1, "我是家畜")
+CALL ADD_TATTOO_SAMPLE(-1, "寵物")
+CALL ADD_TATTOO_SAMPLE(タトゥー_尻, "精液浣腸")
+CALL ADD_TATTOO_SAMPLE(-1, "露出狂")
+CALL ADD_TATTOO_SAMPLE(タトゥー_尻, "肛交狂人")
+CALL ADD_TATTOO_SAMPLE(タトゥー_胸, "変態乳")
+CALL ADD_TATTOO_SAMPLE(タトゥー_頬, "口穴")
+CALL ADD_TATTOO_SAMPLE(タトゥー_胸, "乳穴")
+CALL ADD_TATTOO_SAMPLE(タトゥー_尻, "ケツまんこ")
+CALL ADD_TATTOO_SAMPLE(-1, "請不要在外面射精")
+CALL ADD_TATTOO_SAMPLE(-1, "請給我棒棒")
+CALL ADD_TATTOO_SAMPLE(タトゥー_秘部, "請使用陰蒂")
+CALL ADD_TATTOO_SAMPLE(タトゥー_秘部, "怪人")
+CALL ADD_TATTOO_SAMPLE(タトゥー_尻, "肛交最高")
+CALL ADD_TATTOO_SAMPLE(-1, "全身開発完毕")
+CALL ADD_TATTOO_SAMPLE(タトゥー_秘部, "膣内射精専用")
+CALL ADD_TATTOO_SAMPLE(タトゥー_尻, "肛门便所")
+CALL ADD_TATTOO_SAMPLE(タトゥー_秘部, "請姦子宮")
+CALL ADD_TATTOO_SAMPLE(タトゥー_秘部, "変態小穴")
+CALL ADD_TATTOO_SAMPLE(-1, "I LOVE SEX")
+CALL ADD_TATTOO_SAMPLE(-1, "储精罐")
+CALL ADD_TATTOO_SAMPLE(-1, "肉棒依存症")
+CALL ADD_TATTOO_SAMPLE(-1, "触手依存症")
+CALL ADD_TATTOO_SAMPLE(-1, "精液依存症")
+CALL ADD_TATTOO_SAMPLE(-1, "母豬")
+CALL ADD_TATTOO_SAMPLE(-1, "特技・阿黒顔")
+CALL ADD_TATTOO_SAMPLE(-1, "対不起我是醜女")
+CALL ADD_TATTOO_SAMPLE(-1, "肉人偶")
+CALL ADD_TATTOO_SAMPLE(-1, "我是変態")
+CALL ADD_TATTOO_SAMPLE(-1, "承蒙精顾♥")
+CALL ADD_TATTOO_SAMPLE(-1, "I LOVE FUCKING")
+CALL ADD_TATTOO_SAMPLE(-1, "喜歡的東西：精液")
+CALL ADD_TATTOO_SAMPLE(-1, "喜歡的東西：肉棒")
+CALL ADD_TATTOO_SAMPLE(タトゥー_腿, "正")
+CALL ADD_TATTOO_SAMPLE(タトゥー_腿, "正正")
+CALL ADD_TATTOO_SAMPLE(タトゥー_腿, "正正正")
+CALL ADD_TATTOO_SAMPLE(タトゥー_腿, "正正正正")
+CALL ADD_TATTOO_SAMPLE(タトゥー_腿, "正正正正正")
+CALL ADD_TATTOO_SAMPLE(タトゥー_腿, "正正Ｔ")
+CALL ADD_TATTOO_SAMPLE(タトゥー_腿, "正正正一")
+CALL ADD_TATTOO_SAMPLE(-1, "絶対服従与肉棒大人")
+CALL ADD_TATTOO_SAMPLE(-1, "肉棒的妻子")
+CALL ADD_TATTOO_SAMPLE(-1, "肉棒的奴隷")
+CALL ADD_TATTOO_SAMPLE(タトゥー_秘部, "FUCK ME♥")
+CALL ADD_TATTOO_SAMPLE(-1, "RAPE ME♥")
+CALL ADD_TATTOO_SAMPLE(-1, "抱歉沒有伺候好您♥")
+CALL ADD_TATTOO_SAMPLE(-1, "接种最高♥")
+CALL ADD_TATTOO_SAMPLE(-1, "一生的性奴隷♥")
+CALL ADD_TATTOO_SAMPLE(-1, "隨時都能使用哦♥")
+CALL ADD_TATTOO_SAMPLE(-1, "輪姦希望♥")
+CALL ADD_TATTOO_SAMPLE(-1, "奴隷志願♥")
+CALL ADD_TATTOO_SAMPLE(-1, "強姦歓迎♥")
+CALL ADD_TATTOO_SAMPLE(-1, "髒汚肉棒大歓迎♥")
+CALL ADD_TATTOO_SAMPLE(-1, "肉棒快来♥")
+CALL ADD_TATTOO_SAMPLE(-1, "歓迎插入♥")
+CALL ADD_TATTOO_SAMPLE(タトゥー_胸, "請讓我乳交♥")
+CALL ADD_TATTOO_SAMPLE(タトゥー_秘部, "請插入子宮♥")
+CALL ADD_TATTOO_SAMPLE(-1, "請讓我飲精♥")
+CALL ADD_TATTOO_SAMPLE(-1, "最喜歡獣姦♥")
+CALL ADD_TATTOO_SAMPLE(-1, "♥♥♥♥♥")
+CALL ADD_TATTOO_SAMPLE(タトゥー_秘部, "膣内射精専用小穴")
+CALL ADD_TATTOO_SAMPLE(-1, "請多多侵犯♥")
+CALL ADD_TATTOO_SAMPLE(-1, "目標！　做愛100万回♥")
+CALL ADD_TATTOO_SAMPLE(タトゥー_秘部, "請上媽媽♥")
+CALL ADD_TATTOO_SAMPLE(タトゥー_胸, "請责弄乳頭♥")
+CALL ADD_TATTOO_SAMPLE(タトゥー_秘部, "新品")
+CALL ADD_TATTOO_SAMPLE(タトゥー_秘部, "中古")
+CALL ADD_TATTOO_SAMPLE(タトゥー_秘部, "対不起我的陰道太鬆了♥")
+CALL ADD_TATTOO_SAMPLE(タトゥー_腹, "爸爸募集中♥")
+CALL ADD_TATTOO_SAMPLE(タトゥー_腹, "妊娠機器")
+CALL ADD_TATTOO_SAMPLE(タトゥー_秘部, "懷孕的奴隷小穴")
+CALL ADD_TATTOO_SAMPLE(-1, "白玩OK♥")
+CALL ADD_TATTOO_SAMPLE(-1, "請责弄兩穴♥")
+CALL ADD_TATTOO_SAMPLE(-1, "做愛能手")
+CALL ADD_TATTOO_SAMPLE(タトゥー_頬, "最喜歡含肉棒♥")
+CALL ADD_TATTOO_SAMPLE(-1, "最喜歡被侵犯♥")
+CALL ADD_TATTOO_SAMPLE(-1, "人間便器")
+CALL ADD_TATTOO_SAMPLE(-1, "精液便所")
+CALL ADD_TATTOO_SAMPLE(-1, "♥")
+CALL ADD_TATTOO_SAMPLE(-1, "★")
+CALL ADD_TATTOO_SAMPLE(タトゥー_秘部, "免費")
+CALL ADD_TATTOO_SAMPLE(タトゥー_尻, "免費")
+CALL ADD_TATTOO_SAMPLE(-1, "♪")
+CALL ADD_TATTOO_SAMPLE(タトゥー_秘部, "insert free")
+CALL ADD_TATTOO_SAMPLE(タトゥー_尻, "insert free")
+CALL ADD_TATTOO_SAMPLE(-1, "請您隨意使用")
+CALL ADD_TATTOO_SAMPLE(-1, "一発百円")
+CALL ADD_TATTOO_SAMPLE(-1, "一発百円(我付錢♥)")
+CALL ADD_TATTOO_SAMPLE(-1, "一発十円")
+CALL ADD_TATTOO_SAMPLE(-1, "【玫瑰】")
+CALL ADD_TATTOO_SAMPLE(-1, "【蝴蝶】")
+CALL ADD_TATTOO_SAMPLE(-1, "【骷髏】")
+CALL ADD_TATTOO_SAMPLE(-1, "【黑桃A】")
+CALL ADD_TATTOO_SAMPLE(-1, "被強姦了♥")
+CALL ADD_TATTOO_SAMPLE(-1, "【般若】")
+CALL ADD_TATTOO_SAMPLE(-1, "【昇龍】")
+CALL ADD_TATTOO_SAMPLE(-1, "小穴隨便使用")
+CALL ADD_TATTOO_SAMPLE(-1, "奴隷")
+CALL ADD_TATTOO_SAMPLE(-1, "淫乱女")
+CALL ADD_TATTOO_SAMPLE(-1, "被侵犯了♥")
+CALL ADD_TATTOO_SAMPLE(-1, "bitch")
+CALL ADD_TATTOO_SAMPLE(-1, "被虐豬")
+CALL ADD_TATTOO_SAMPLE(-1, "獣姦女")
+CALL ADD_TATTOO_SAMPLE(-1, "輪姦中毒")
+CALL ADD_TATTOO_SAMPLE(-1, "出産中")
+CALL ADD_TATTOO_SAMPLE(-1, "生産機械")
+CALL ADD_TATTOO_SAMPLE(-1, "妊娠機械")
+CALL ADD_TATTOO_SAMPLE(-1, "母狗")
+CALL ADD_TATTOO_SAMPLE(-1, "萬人騎")
+CALL ADD_TATTOO_SAMPLE(-1, "萬人斬達成！")
+CALL ADD_TATTOO_SAMPLE(-1, "公車女")
+CALL ADD_TATTOO_SAMPLE(タトゥー_秘部, "黑鮑小穴")
+CALL ADD_TATTOO_SAMPLE(タトゥー_秘部, "鬆↓的")
+CALL ADD_TATTOO_SAMPLE(タトゥー_秘部, "奶油工廠")
+CALL ADD_TATTOO_SAMPLE(-1, "三穴選一")
+CALL ADD_TATTOO_SAMPLE(-1, "前後可插♥")
+CALL ADD_TATTOO_SAMPLE(タトゥー_秘部, "由此↓進入")
+CALL ADD_TATTOO_SAMPLE(-1, "24小時開放")
+CALL ADD_TATTOO_SAMPLE(-1, "向任何人開放")
+CALL ADD_TATTOO_SAMPLE(-1, "大屌專用")
+CALL ADD_TATTOO_SAMPLE(タトゥー_頬, "專含大屌")
+CALL ADD_TATTOO_SAMPLE(タトゥー_腹, "我能插到這裏")
+CALL ADD_TATTOO_SAMPLE(-1, "easy girl")
+CALL ADD_TATTOO_SAMPLE(-1, "人盡可夫")
+CALL ADD_TATTOO_SAMPLE(-1, "大屌專用")
+CALL ADD_TATTOO_SAMPLE(-1, "閱屌無數")
+CALL ADD_TATTOO_SAMPLE(-1, "任人上")
+CALL ADD_TATTOO_SAMPLE(-1, "無套優先")
+CALL ADD_TATTOO_SAMPLE(-1, "任人上")
+CALL ADD_TATTOO_SAMPLE(-1, "洩慾工具")
+CALL ADD_TATTOO_SAMPLE(-1, "為任何人服務")
+
+
+
+;---------------------
+;各部位番号に対応するランダムなタトゥー用文字列を追加する
+;---------------------		
+@ADD_TATTOO_SAMPLE(ARG:0, ARGS:0)
+IF ARG:0 == -1 && TATTOO_SAMPLE_COMMON_ADDRESS < VARSIZE("TATTOO_SAMPLE_LIST_COMMON")
+	TATTOO_SAMPLE_LIST_COMMON:(TATTOO_SAMPLE_COMMON_ADDRESS) = %ARGS:0%
+	TATTOO_SAMPLE_COMMON_ADDRESS ++
+ELSEIF 0 <= ARG:0 && ARG:0 < VARSIZE("TATTOO_SAMPLE_LIST") && TATTOO_SAMPLE_ADDRESS:(ARG:0) < VARSIZE("TATTOO_SAMPLE_LIST", 1)
+	TATTOO_SAMPLE_LIST:(ARG:0):(TATTOO_SAMPLE_ADDRESS:(ARG:0)) = %ARGS:0%
+	TATTOO_SAMPLE_ADDRESS:(ARG:0) ++
+ELSE
+	RETURN 0
+ENDIF
+RETURN 1

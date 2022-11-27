@@ -1,0 +1,166 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_ALCOHOL_RATE()
+RETURN 30
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_ALCOHOL_DECISION()
+RETURN 1
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_ALCOHOL_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_ALCOHOL()
+#DIM 対象
+
+PRINTFORML 有了點空暇
+PRINTFORMW 手頭正好有酒…怎麼辦？
+CALL ASK_MULTI("和部下対飲" ,"和士兵們舉辦宴會" ,"邀請同伴" ,"一人獨酌")
+IF RESULT == 3
+	PRINTFORMW 決定一個人悠閒地喝酒
+ELSEIF RESULT == 1
+	PRINTFORMW 為了慰勞士兵們平常的辛苦而舉辦了宴會
+	PRINTFORMW …宴會氣氛非常地熱烈、他們也非常高興
+	IF MASTER != GET_COUNTRY_BOSS(CFLAG:MASTER:所属)
+		PRINTFORMW 宴會傳到了君主的耳中、提高了自己的評價
+		CFLAG:GET_COUNTRY_BOSS(CFLAG:MASTER:所属):好感度 += 100 + RAND:100
+	ENDIF
+ELSEIF RESULT == 0
+	PRINTFORMW 決定和部下対飲
+	PRINTFORMW …因為酒的緣故、兩人推心置腹地交談著
+	SELECTCASE RAND:4
+		CASE 0
+			CALL PRINT_ADD_EXP(MASTER, "武闘経験値", RAND(5, 10), 1)
+		CASE 1
+			CALL PRINT_ADD_EXP(MASTER, "防衛経験値", RAND(5, 10), 1)
+		CASE 2
+			CALL PRINT_ADD_EXP(MASTER, "知略経験値", RAND(5, 10), 1)
+		CASE 3
+			CALL PRINT_ADD_EXP(MASTER, "政治経験値", RAND(5, 10), 1)
+	ENDSELECT
+	PRINTFORMW 
+	IF IS_FEMALE(MASTER)
+		PRINTFORMW 
+		PRINTFORML 酔到一定程度的時候、被他不經意間觸摸到了身體
+		PRINTFORMW 抬頭一看、他把臉靠近一直凝視著%ANAME(MASTER)%
+		CALL ASK_YN("抵抗", "不抵抗")
+		IF RESULT == 0
+			PRINTFORMW 為了阻止輕輕地弾了下他的腦門、他遺憾地聳了聳肩
+		ELSE
+			PRINTFORML 同樣有了感覺的%ANAME(MASTER)%沒有抵抗靠在了他的身上
+			PRINTFORMW 他摟住%ANAME(MASTER)%的肩膀吻了上去、慢慢地推倒了%ANAME(MASTER)%
+			PRINTFORML ・
+			PRINTFORML ・
+			PRINTFORMW ・
+			PRINTFORMW 一整晚、都在被他用熱情的性愛盡情疼愛著
+			CALL FUCK(MASTER, "欲望, 奉仕, 性交, 性技, 情愛, Ｖ, Ｂ, Ｃ, Ｍ, 接吻, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("兵士"), @"部下の唇", @"部下", "", "和姦")
+		ENDIF
+	ENDIF
+ELSE
+	PRINTFORML 決定和同伴加深感情
+	PRINTFORMW 要邀請誰？
+	CALL SELECT_CHARA_LIST_ONLY_LOGIC_SEX("DAILY_ALCOHOL", "DAILY_ALCOHOL")
+	IF RESULT == -1
+		PRINTFORMW 還是決定一個人喝
+		RETURN 1
+	ENDIF
+	対象 = RESULT
+	PRINTFORML 決定邀請%ANAME(対象)%
+	IF IS_FEMALE(対象)
+		PRINTFORMW 她很開心的答應了
+	ELSE
+		PRINTFORMW 他很開心的答應了
+	ENDIF
+	PRINTFORML 
+	PRINTFORMW 兩人愉快的享用著美酒佳餚
+	CFLAG:対象:面識 = 1
+	CFLAG:対象:好感度 += 50 + RAND:50
+	IF HAS_PENIS(MASTER) && IS_FEMALE(対象)
+		PRINTFORMW …酔意発作的時候、気雰変得非常的好
+		PRINTFORML 怎麼辦？
+		CALL ASK_YN("悄悄把身體靠近", "繼續喝下去")
+		IF RESULT == 1
+			PRINTFORMW 決定悠閒地享受這種気雰
+			CFLAG:対象:好感度 += 50 + RAND:50
+		ELSE
+			PRINTFORMW %ANAME(MASTER)%悄悄地把身體靠近了%ANAME(対象)%
+			IF !(CFLAG:対象:好感度 >= 1200 + RAND:300 + (DAY * 10) || TALENT:対象:合意 == 1)
+				PRINTFORML 但是她甩開了%ANAME(MASTER)%的手
+				PRINTFORMW 気雰変得非常僵硬
+				FOR LOCAL, 0, CHARANUM
+					SIF CFLAG:(LOCAL):所属 == CFLAG:MASTER:所属 && !CFLAG:(LOCAL):捕虜先 && IS_FEMALE(LOCAL) && !IS_ANIMAL(LOCAL)
+						CFLAG:(LOCAL):好感度 -= 200
+				NEXT
+				CALL COLOR_PRINT(@"事情傳開後、在女性間的評価下降了…", カラー_注意)
+				PRINTFORMW 
+			ELSE
+				PRINTFORML 她紅著臉沒有抵抗的靠了過來
+				PRINTFORMW %ANAME(MASTER)%抱住了%ANAME(対象)%的肩膀、慢慢推倒了她
+				PRINTFORML ・
+				PRINTFORML ・
+				PRINTFORMW ・
+				IF TALENT:対象:処女 == 1
+					PRINTFORML %ANAME(MASTER)%緊緊地抱住了因為第一次而感到疼痛的她、溫柔的晃動著腰
+					PRINTFORML 最初只是因為痛楚而呻吟的%ANAME(対象)%、隨著身體的放鬆也漸漸地発出了甘甜的吐息
+					PRINTFORMW 一點點加快腰部的動作猛地頂到最深処的時候、讓她的身體猛地一跳
+					PRINTFORML 在那狹窄緊緻的膣道內很快就到達了忍耐的極限、在盡情射精的時候、%ANAME(対象)%大幅後弓著身體発出了嬌喘
+					PRINTFORML …緊緊地抱著還沉浸在高潮余韻的%ANAME(対象)%、之後拔出肉棒時從%ANAME(対象)%的小穴中溢出了紅白相間的體液
+					PRINTFORMW 結束了第一次的她呼吸粗重、流著淚露出恍惚地表情凝視著那溢出的體液
+					PRINTFORMW 之後%ANAME(MASTER)%和有些神魂顛倒的%ANAME(対象)%一整晚都在盡情地歡愛著
+				ELSE
+					SELECTCASE RAND:10
+						CASE 0
+							PRINTFORMW 盡情享用著発出可愛嬌喘的她
+						CASE 1
+							PRINTFORMW 一直像発情的野獣一般激烈地交合著
+						CASE 2
+							PRINTFORMW 被熱情索求的她盡情榨精了
+						CASE 3
+							PRINTFORMW 看到她那焦灼索求的樣子而沉溺在肉欲之中
+						CASE 4
+							PRINTFORMW 和激烈扭動地她滿身大汗地歡愛著
+						CASE 5
+							PRINTFORMW 盡情地欺負著露出挑釁表情的她
+						CASE 6
+							PRINTFORMW 盡情疼愛著漏出了甘甜吐息的她
+						CASE 7
+							PRINTFORMW 被她緊緊纏住享受著交歡
+						CASE 8
+							PRINTFORMW 盡情疼愛著下體已經黏糊糊的她
+						CASE 9
+							PRINTFORMW 盡情疼愛著渾身癱軟的她
+					ENDSELECT
+				ENDIF
+				CALL FUCK(対象, "Ｃ, Ｂ, Ｖ, Ｍ, 欲望, 性交, 奉仕, 精愛, 口淫, 接吻, Ｖ性交", "処女喪失, 接吻喪失, 膣内射精", GET_ID(MASTER), @"%ANAME(MASTER)%の\@RAND:2 ? 肉棒 # 唇\@", ANAME(MASTER), "", "和姦")
+				CALL FUCK(MASTER, "Ｃ, 射精", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣", "和姦")
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+CALL PRINT_ADD_EXP(MASTER, "肝臓経験値", RAND(50, 100), 1)
+CALL TRAIN_AUTO_ABLUP(MASTER)
+RETURN 1
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_DAILY_ALCOHOL(対象)
+#DIM 対象
+RETURN 対象 != MASTER && CFLAG:対象:所属 == CFLAG:MASTER:所属 && CFLAG:対象:行動不能状態 != 行動不能_子供 && !IS_ANIMAL(対象) && !IS_MALE(対象)
+
+@SELECT_CHARA_LIST_SELECT_LOGIC_DAILY_ALCOHOL(対象)
+#DIM 対象
+RETURN CFLAG:対象:捕虜先 == 0

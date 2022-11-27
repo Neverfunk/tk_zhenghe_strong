@@ -1,0 +1,217 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K48_PLEDGE_RATE(対象)
+#DIM 対象
+#DIM 计数
+
+IF 対象 == 1
+	计数 = 1
+ELSEIF 対象 == 2
+	计数 = 2
+ELSE
+	IF KDVAR:対象:阿求_雪至 == 1 && KDVAR:対象:阿求_誓约 != 1 && CFLAG:対象:好感度 > KDVAR:対象:阿求_上次好感
+		SIF KOJO_DAILY_K48_NOTHAVEHOUSE()
+			RETURN 0
+		RETURN 500
+	ELSE
+		RETURN 0
+	ENDIF
+ENDIF
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K48_PLEDGE_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラから隨機に一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K48_PLEDGE(対象)
+#DIM 対象
+PRINTFORMW 离上次拜访稗田家已经过了一段时间，天气也慢慢回春
+PRINTFORML 今天早早结束了工作、想去找她時却收到了「家主不在家」的回复
+PRINTFORML 当然，通过一些人脉，自然还是可以知道她在哪的
+PRINTFORML 那么，是时候动身了吗
+CALL ASK_YN("是时候了", "下次再说")
+PRINTFORMW
+IF RESULT == 1
+	PRINTFORMW 再等几天吧…现在手头的事还没处理好
+	PRINTFORML 也不急于一时，毕竟我们都需要时间再冷静一下
+	PRINTFORML 希望如此吧…
+	CFLAG:対象:好感度 -= 200
+	RETURN 1
+ELSE
+	PRINTFORMW 通过稗田家附近的店铺和居民的情报，我终于得知了阿求的去向
+	PRINTFORML 那是稗田家的私有土地，距离稗田家并不远，村子的人都知道那块土地的存在
+	PRINTFORML 平常几乎无人踏足，连稗田家族的人都很少会到那里去，这段时间却不寻常的多了一些人烟
+	PRINTFORMW
+	PRINTFORML 经过重重山路，终于来到了一片郁郁葱葱的竹林脚下
+	PRINTFORML 竹子不知道多久没砍伐过，比寻常都要高得多，茂密的竹叶将这片土地笼罩起来
+	PRINTFORML 到处都是青绿色的翠竹，路人如果缺了点方向感，很容易就迷失在这片竹林之中
+	PRINTFORML 凭着直觉走，已经走到了竹林的深处，阳光在这里更为稀疏
+	PRINTFORMW
+	PRINTFORML 而我，也看到她了
+	PRINTFORML 阿求坐在三个坟墓面前，看着袅袅升起的香火，就这么静静的发着呆
+	PRINTFORML 那张熟悉的容颜上，是说不出的落寞、哀伤
+	PRINTFORMW
+	PRINTFORML 「……是谁？」
+    PRINTFORML 枝叶被踩碎的声音，一下子就让阿求回过神来。
+	PRINTFORML 她立刻回头查看，却看到了那个她既想见、又怕见的人。
+    PRINTFORML 「是…%ANAME(MASTER)%啊… 没想到，连这里你都找得到呢」
+    PRINTFORML 阿求挤出了一丝很勉强的笑容，脸上的悲伤却掩盖不下
+	PRINTFORML 「看来你比我更配得上"阿加莎"的称号」
+	PRINTFORMW
+    PRINTFORML 这时，我突然注意到。在两个有些古旧的墓碑隔壁，第三个墓碑的崭新显得那么刺眼。
+	PRINTFORMW
+    PRINTFORML 「…对不起，不是故意要瞒着你的…父亲他，其实身体一直都很差」
+    PRINTFORML 「上次和你会面后，过了没多久就一病不起了…」
+	PRINTFORMW
+    PRINTFORML 「 "我只是一个粗人，孑然一身。只要把我葬在她们的墓旁，就可以了。" 」
+    PRINTFORML 「临走前，他千叮万嘱下来，一切从简」
+	PRINTFORMW
+    PRINTFORML 「他啊…真的是一个很固执的人呢…」
+	PRINTFORML 「母亲死后，他就打点好了一切，离开了稗田家，一个人住在荒郊野岭」
+	PRINTFORML 「平时也只有他手下的人给他送物资的时候才能见他一面」
+    PRINTFORML 「母亲希望我去弥补他，他却亲自斩断了这一切」
+	PRINTFORMW
+    PRINTFORML 「哪怕是答应了跟我回家这么段日子，他依然是深居简出」
+	PRINTFORML 阿求轻轻的抚摸那块墓碑，摘去上面的竹叶，语气中只有深深的叹息
+    PRINTFORML 「或许，对他来说，这世间早已没有了留恋吧……」
+    PRINTFORML 她很清楚，父亲远离自己，正是因为爱她
+	PRINTFORMW
+    PRINTFORML 我双手合十，向墓碑拜了三拜，阿求就在我的身后，静静的看着我
+    PRINTFORML 「好了…我在这也待得够久了，要回去了……」
+    PRINTFORML 我反手抓住了想逃离的阿求，仿佛早就知道她的反应一般
+    PRINTFORML 「…放手」
+    PRINTFORML 阿求低声的说道，瘦弱的手臂想奋力挣脱，却始终挣脱不开
+	PRINTFORMW
+    PRINTFORML "你的一切，我都知道了……所以，我们必须好好谈一次"
+	PRINTFORMW
+    PRINTFORML 「有什么…好谈的…」
+    PRINTFORML 「在你面前的，是一个连三十岁都活不到的人」
+    PRINTFORML 「每多活一天，都跟奢望一样…连明天的日出，都不知道能不能看到…」
+    PRINTFORML 「和那昙花一样，花开过后，转眼凋零…」
+	PRINTFORMW
+    PRINTFORML 阿求的脸上，早已泪流满面，断了线的泪珠溅落一片片落叶上。
+    PRINTFORML 捂住了脸，却止不住泪。
+    PRINTFORML 那身为稗田家主的骄傲早已荡然无存。
+    PRINTFORML 现在在这里的，只是一名无助的少女。
+	PRINTFORMW
+    PRINTFORML 「每天能睁开眼睛，看到你的脸，碰到你的手，嗅到你的气味，我就觉得是上天的恩赐…」
+    PRINTFORML 「但我…无法和你…白头到老，连和你生儿育女，抚养他们长大成人…都…做不到…」
+    PRINTFORML 「这样的我…有什么资格来爱你，又有什么资格被你爱呢……」
+    PRINTFORML 「%ANAME(MASTER)%，幻想乡有那么多的好女孩，她们都可以和你厮守终生…」
+    PRINTFORML 「没关系的，少了一个我而已」
+    PRINTFORML 「放开…我吧」
+	PRINTFORMW
+    PRINTFORML 她的声音早已颤抖，面前最爱的人，那近乎竭斯底里的哀求，只是为了我松开她的手
+    PRINTFORML 不愿我被这情丝缠绕，然后痛苦一生
+	PRINTFORMW
+    PRINTFORML "我不放。"
+	PRINTFORMW
+    PRINTFORML "那份失去你的恐惧，我比任何人都要强烈。"
+    PRINTFORML "但我绝不会放手。"
+    PRINTFORML "绝不会。"
+	PRINTFORMW
+    PRINTFORML 「…我也不想失去你… 可我真的好害怕…」
+    PRINTFORML 「以前从来没有过…… 害怕……再也睁不开眼睛……」
+    PRINTFORML 「究竟是家族的使命，还是命运的诅咒，我已经分不清了啊…」
+    PRINTFORML 「为什么要让我遇到你……」
+    PRINTFORML 「告诉我…我该怎么做……」
+	PRINTFORMW
+    CALL ASK_MULTI("珍惜现在", "一定会让你活下去")
+	SELECTCASE RESULT
+	CASE 0
+		PRINTFORMW "你居然也像自己的母亲一样，做出那种傻事……"
+		PRINTFORML "留下一份卷轴，希望后人能替你来爱……"
+		PRINTFORML "但是…我要的，就只是你一个人啊！"
+		PRINTFORMW
+		PRINTFORML 「原来… 父亲是把卷轴给了你啊…」
+		PRINTFORMW
+		PRINTFORML "从第二次见到你父亲，他将你托付于我，我就决定了"
+		PRINTFORMW
+		PRINTFORML 我不在乎能不能天长地久
+		PRINTFORML 我只在乎这一刻
+		PRINTFORML 有你在我身边
+		PRINTFORML 生死本就无常
+		PRINTFORMW
+		PRINTFORML 与其担心什么时候死去，还不如珍惜这一点一滴的幸福
+		PRINTFORML 我愿意与你相守一生、一年、一天、一秒都好
+		PRINTFORML 或许比起那些大妖，人类的性命不过是旦夕之间
+		PRINTFORML 但是，哪怕这个幻想乡破灭，海沽石烂之时
+		PRINTFORML 这份心情，都不会改变
+		PRINTFORMW
+		PRINTFORML "如果哪天你真的离开了，我会安顿好我们的子女，随你而去"
+		PRINTFORML "我，只想活在有你的世界"
+		PRINTFORMW
+		PRINTFORML 将内心的想法倾诉出来后，我松了一口气，这段时间的心中累积的阴霾，一扫而空
+		PRINTFORMW
+		PRINTFORML 拥抱着我的阿求，倚靠在我的胸前，泪眼婆娑的脸庞，让我无比心疼
+	    PRINTFORML 轻轻地拭去了阿求脸上的泪水，轻抚着她的脸
+		PRINTFORMW
+	    PRINTFORML 「笨蛋…无可救药的傻瓜…我…」
+	    PRINTFORML 「真的能…待在你的身边吗……」
+		PRINTFORMW
+	    PRINTFORML "你问一万次我都愿意回答……"
+	    PRINTFORML "请待在我的身边，让我们，一起走到尽头"
+		PRINTFORMW
+		PRINTFORML 阿求轻轻的搂着了我的脖子，吻在了我的唇上
+		PRINTFORMW
+	    PRINTFORML 「约好了哦…」
+	    PRINTFORML 「永远…」
+	CASE 1
+		PRINTFORMW "你居然也像自己的母亲一样，做出那种傻事……"
+		PRINTFORML "留下一份卷轴，希望后人能替你来爱……"
+		PRINTFORML "但是…我要的，就只是你一个人啊！"
+		PRINTFORMW
+		PRINTFORML 「原来… 父亲是把卷轴给了你啊…」
+		PRINTFORMW
+		PRINTFORML "从第二次见到你父亲，他将你托付于我，我就决定了"
+		PRINTFORMW
+		PRINTFORML "死神索命我就去闹阎魔厅，疾病缠身我便去求永远亭。"
+		PRINTFORML "哪怕是冥冥中的命运，我也会为你一一打破，至死方休。"
+		PRINTFORML "无论是谁，都不能将你从我身边夺走。"
+		PRINTFORMW
+		PRINTFORML 「求求你…不要为了我……」
+		PRINTFORML 「你明明能找到更好的…更幸福的活着…」
+		PRINTFORML 「我……我不值得……」
+		PRINTFORMW
+		PRINTFORML 阿求颤抖地抱着我，生怕我做出什么蠢事。
+		PRINTFORML 我也紧紧地把她搂在了怀里，抚摸着她的秀发。
+		PRINTFORMW
+		PRINTFORML "我愿意付出一切，献祭我的所有。"
+		PRINTFORML "只愿和你这一世，长相厮守。"
+		PRINTFORMW
+		PRINTFORML 将内心的想法倾诉出来后，我松了一口气，这段时间的心中累积的阴霾，一扫而空
+		PRINTFORMW
+		PRINTFORML 「呜…你…真的很蠢呢…这辈子，我就见过你这么一个最蠢的人」
+		PRINTFORML 破涕为笑的阿求，蹭着我的胸口，仿佛想把所有的悲伤都化为泪水擦干
+		PRINTFORMW
+		PRINTFORML "阿求小姐……你是把我当成大型的毛巾了吗？"
+		PRINTFORMW
+		PRINTFORML 「怎么…不行啊？」
+		PRINTFORMW
+		PRINTFORML "这是我的荣幸，况且，还要当几十年的"
+		PRINTFORMW
+		PRINTFORML 阿求轻轻的搂着了我的脖子，吻在了我的唇上
+		PRINTFORMW
+		PRINTFORML 「我…会等着的…」
+		PRINTFORML 「一定不会…丢下你…」
+		PRINTFORML 「约好了…」
+		PRINTFORMW
+	ENDSELECT
+	CFLAG:対象:好感度 += 500
+	KDVAR:対象:阿求_誓约 = 1
+ENDIF
+RETURN 1
+
+@KOJO_DAILY_K48_PLEDGE_ALLOW_WHEN_WANDERING()
+RETURN 1

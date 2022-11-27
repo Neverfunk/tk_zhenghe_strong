@@ -1,0 +1,128 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_STAND_RATE()
+RETURN 1000
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_STAND_DECISION()
+SIF DVAR:觉醒_替身 > 0
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_STAND_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_STAND
+#DIM 対象
+CALL CHANGE_COUNTRY(NAME_TO_CHARA("替身使者"), 0)
+CFLAG:NAME_TO_CHARA("替身使者"):特殊状態 = 0
+
+
+IF DVAR:箭_获得 == 0
+	PRINTFORMW 士兵带来了一名有着章鱼头发型的少年
+	PRINTFORMW 他申称自己在一处古代遗迹那挖到了一把神秘的箭，希望能卖个好价钱
+	PRINTFORMW %ANAME(MASTER)%仔细端详着他呈上的箭
+	PRINTFORMW 这其中确实蕴含着一股从未见过的力量
+	PRINTFORMW 那么是否买下这只箭呢
+	CALL ASK_MULTI_JUDGE("买下它", MONEY >= 10000,"还是不要浪费资金了", 1)
+	IF RESULT == 0
+		MONEY -= 10000
+		CALL COLOR_PRINTL("花掉了10000金", カラー_注意)
+		PRINTFORMW %ANAME(MASTER)%如愿以偿的买下了这只箭
+		PRINTFORMW 现在的问题是如何去使用它
+		DVAR:箭_获得 = 2
+	ELSEIF RESULT == 1
+		PRINTFORMW 少年失望地离开了
+		DVAR:箭_获得 = 1
+	ENDIF
+ELSEIF DVAR:箭_获得 == 1
+	PRINTFORMW 那名少年再次出现在了你面前
+	PRINTFORMW 看来他在其他地方也遭到了挫折
+	PRINTFORMW 那么是否买下这只箭呢
+		CALL ASK_MULTI_JUDGE("买下它", MONEY >= 10000,"还是不要浪费资金了", 1)
+	IF RESULT == 0
+		MONEY -= 10000
+		CALL COLOR_PRINTL("花掉了10000金", カラー_注意)
+		PRINTFORMW %ANAME(MASTER)%如愿以偿的买下了这只箭
+		PRINTFORMW 现在的问题是如何去使用它
+		DVAR:箭_获得 = 2
+	ELSEIF RESULT == 1
+		PRINTFORMW 少年失望地离开了
+		DVAR:箭_获得 = 1
+	ENDIF
+ELSEIF DVAR:箭_获得 == 2
+	PRINTFORMW 获得这只箭已经有一段时间了
+	PRINTFORMW 但是%ANAME(MASTER)%仍然没能找到使用它的方法
+	PRINTFORMW 结束一天的工作后，%ANAME(MASTER)%像往常一样研究起了这把神秘的箭
+	PRINTFORML
+	SELECTCASE RAND:2
+		CASE 0
+			PRINTFORMW 还是没能有所进展，%ANAME(MASTER)%失望地将箭收了起来
+		CASE 1
+			PRINTFORMW 还是没能有所进展，%ANAME(MASTER)%失望地将箭收起来时不小心划伤了自己
+			PRINTFORMW 意料之外的疼痛袭来，%ANAME(MASTER)%晕了过去
+			PRINTFORML
+			PRINTFORMW ~~~几小时后~~~
+			PRINTFORML
+			PRINTFORMW 转醒的%ANAME(MASTER)%发现自己身体中浮现出一个虚影
+			PRINTFORMW 看着这源自于自身的古怪存在，脑海中浮现除了一个名字，%ANAME(MASTER)%缓缓念出，自然地好像呼唤挚友一般
+			SELECTCASE RAND:5
+				CASE 0
+					PRINTFORMW 「King Crimson（绯红之王）」
+					CALL SKILL_LEARN_BY_NAME(MASTER, スキル_ジャンル_TROOP, NO:NAME_TO_CHARA("替身使者"), "绯红之王")
+					CALL SKILL_LEARN_BY_NAME(MASTER, スキル_ジャンル_PERSONAL, NO:NAME_TO_CHARA("替身使者"), "墓志铭")
+					CALL COLOR_PRINTL(@"%ANAME(MASTER)%觉醒了替身King Crimson（绯红之王）", カラー_注意)
+					DVAR:觉醒_替身 = 1
+				CASE 1
+					PRINTFORMW 「Star Platinum（白金之星）」
+					CALL SKILL_LEARN_BY_NAME(MASTER, スキル_ジャンル_PERSONAL, NO:NAME_TO_CHARA("替身使者"), "白金之星")
+					CALL COLOR_PRINTL(@"%ANAME(MASTER)%觉醒了替身Star Platinum（白金之星）", カラー_注意)
+					DVAR:觉醒_替身 = 2
+				CASE 2
+					PRINTFORMW 「Gold Experience（黄金体验）」
+					CALL SKILL_LEARN_BY_NAME(MASTER, スキル_ジャンル_PERSONAL, NO:NAME_TO_CHARA("替身使者"), "黄金体验")
+					CALL COLOR_PRINTL(@"%ANAME(MASTER)%觉醒了替身Gold Experience（黄金体验）", カラー_注意)
+					DVAR:觉醒_替身 = 3
+				CASE 3
+					PRINTFORMW 「Osiris（欧西里斯神）」
+					CALL SKILL_LEARN_BY_NAME(MASTER, スキル_ジャンル_PERSONAL, NO:NAME_TO_CHARA("替身使者"), "欧西里斯神")
+					CALL COLOR_PRINTL(@"%ANAME(MASTER)%觉醒了替身Osiris（欧西里斯神）", カラー_注意)
+					DVAR:觉醒_替身 = 4
+				CASE 4
+					PRINTFORMW 「PEARL JAM（珍珠果酱）」
+					CALL SKILL_LEARN_BY_NAME(MASTER, スキル_ジャンル_TROOP, NO:NAME_TO_CHARA("替身使者"), "珍珠果酱")
+					CALL COLOR_PRINTL(@"%ANAME(MASTER)%觉醒了替身PEARL JAM（珍珠果酱）", カラー_注意)
+					DVAR:觉醒_替身 = 5
+			ENDSELECT
+			CALL COLOR_PRINT(@"%ANAME(MASTER)%成为了替身使者", カラー_注意)
+			SETBIT TALENT:MASTER:日常系, 素質_デイリー_替身使者
+			DVAR:异变_红雾 = 1
+	ENDSELECT
+ENDIF
+
+RETURN 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

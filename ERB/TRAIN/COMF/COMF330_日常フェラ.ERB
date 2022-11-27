@@ -1,0 +1,879 @@
+﻿;フェラチオのある日常
+
+;-------------------------------------------------
+;コマンド名称
+;-------------------------------------------------
+@COM_NAME330
+SELECTCASE PREVCOM
+	CASE 303, 304, 351
+		LOCALS:0 = 桌下口交
+	CASEELSE
+		LOCALS:0 = 口交
+;フェラチオ
+ENDSELECT
+
+RESULTS:0 = %LOCALS:0%(主動)
+RESULTS:1 = %LOCALS:0%(被役)
+RESULTS:2 = %LOCALS:0%(请求)
+RESULTS:3 = %LOCALS:0%(被動)
+
+
+;-------------------------------------------------
+;選択可否判定
+;-------------------------------------------------
+@COM_ABLE330
+;共通部分
+CALL COM_ABLE_COMMON(330)
+SIF RESULT == 0
+	RETURN 0
+;ターゲットに竿が必要
+SIF !HAS_PENIS(MTAR:0)
+	RETURN 0
+;行動不能なら不可
+SIF !IS_PLAYABLE(MPLY:0)
+	RETURN 0
+;キス中は不可
+SIF IS_EQUIP(MPLY:0, 342)
+	RETURN 0
+;主人公以外が実行する場合、実行可能でなければ表示されない
+IF MPLY:0 != MASTER
+	TCVAR:(MPLY:0):24 = 0
+	SKIPDISP 1
+	CALL COM_ORDER_PLAYER330(MPLY:0)
+	SKIPDISP 0
+	SIF TCVAR:(MPLY:0):24 < TCVAR:(MPLY:0):25 
+		RETURN 0
+ENDIF
+;主導権を握っている側にフェラの知識が必要
+LOCAL:0 = 0
+IF FLAG:主導権所有者 == -1
+	CALL CHECK_COM_KNOWLEDGE(MPLY:0, 11)
+	LOCAL:0 += RESULT
+	CALL CHECK_COM_KNOWLEDGE(MTAR:0, 11)
+	LOCAL:0 += RESULT
+ELSE
+	CALL CHECK_COM_KNOWLEDGE(FLAG:主導権所有者, 11)
+	LOCAL:0 += RESULT
+ENDIF
+IF !RESULT
+	RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;快Ｍソースの倍率を取得する関数 ARG:0=PLAYERのキャラ番号
+;-------------------------------------------------
+@COM330_RATE_M(ARG:0)
+#FUNCTION
+LOCAL:5 = 1000
+SELECTCASE ABL:(ARG:0):奉仕
+	CASE 0
+		TIMES LOCAL:5, 0.00
+		;TIMES SOURCE:(LOCAL:2):不潔, 4.00
+	CASE 1
+		TIMES LOCAL:5, 0.10
+		;TIMES SOURCE:(LOCAL:2):不潔, 2.50
+	CASE 2
+		TIMES LOCAL:5, 0.30
+		;TIMES SOURCE:(LOCAL:2):不潔, 1.50
+	CASE 3
+		TIMES LOCAL:5, 0.80
+		;TIMES SOURCE:(LOCAL:2):不潔, 1.00
+	CASE 4
+		TIMES LOCAL:5, 1.00
+		;TIMES SOURCE:(LOCAL:2):不潔, 0.50
+	CASEELSE
+		LOCAL:5 = LOCAL:5 * (100 + (ABL:(ARG:0):奉仕 - 5) * 3) / 100
+		;TIMES SOURCE:(LOCAL:2):不潔, 0.10
+ENDSELECT
+
+SELECTCASE ABL:(ARG:0):性技
+	CASE 0
+		TIMES LOCAL:5, 1.00
+	CASE 1
+		TIMES LOCAL:5, 1.10
+	CASE 2
+		TIMES LOCAL:5, 1.20
+	CASE 3
+		TIMES LOCAL:5, 1.30
+	CASE 4
+		TIMES LOCAL:5, 1.40
+	CASEELSE
+		LOCAL:5 = LOCAL:5 * ((ABL:(ARG:0):性技 - 5) * 2 + 150) / 100
+ENDSELECT
+
+RETURNF LOCAL:5
+
+;-------------------------------------------------
+;メイン処理
+;-------------------------------------------------
+@COM330
+;実行判定
+CALL COM_ORDER_COMMON
+SIF RESULT == 0
+	RETURN 0
+
+;●プレイヤー側の処理
+DOWNBASE:(MPLY:0):体力 += 120
+
+EXP:(MPLY:0):性技経験値 += 1
+EXP:(MPLY:0):口淫経験 += 1
+
+SOURCE:(MPLY:0):奉仕 = SERVE_HOUSHI(MPLY:0, 400)
+SOURCE:(MPLY:0):接触 = 50
+SOURCE:(MPLY:0):快Ｍ = 300 * COM330_RATE_M(MPLY:0) / 1000
+;SOURCE:(MPLY:0):快Ｍ = 300 * COM11_RATE_M(MPLY:0) / 1000
+SOURCE:(MPLY:0):性行動 = 300
+
+;主導権に応じた優越・受動のソース追加
+CALL ADD_SOURCE_INITIATIVE_U(MPLY:0, 150, 120)
+
+;侍奉経験値を得られるコマンドのフラグ
+TCVAR:(MPLY:0):4 = 1
+
+IF HAS_PENIS(MTAR:0)
+	;ペニスへのキス
+	CALL KISS_COMMON(MPLY:0, @"%ANAME(MTAR:0)%的肉棒", GET_SITUATION_BY_TRAIN_MODE())
+ENDIF
+
+;●ターゲット側の処理
+LOCAL:4 = SENSE_HOUSHI_P(MPLY:0, MTAR:0, 1500)
+IF TALENT:(MPLY:0):舌頭霊活
+	TIMES LOCAL:4, 1.50
+ENDIF
+SOURCE:(MTAR:0):快Ｐ += LOCAL:4
+
+
+;●ソースの計算
+DOWNBASE:(MTAR:0):体力 += 60
+SOURCE:(MTAR:0):接触 = 50
+SOURCE:(MTAR:0):性行動 = 180
+;主導権に応じた優越・受動のソース追加
+CALL ADD_SOURCE_INITIATIVE_U(MTAR:0, 150, 70)
+
+;主導度変化基準値
+TFLAG:49 = 2
+
+;倒錯度変化基準値
+TFLAG:50 = 2
+
+;レズ・ＢＬ経験基準値
+TFLAG:51 = 7
+
+;フェラの知識がなければ、獲得する
+CALL SET_COM_KNOWLEDGE(MPLY:0, 11)
+CALL SET_COM_KNOWLEDGE(MTAR:0, 11)
+RETURN 1
+
+;-------------------------------------------------
+;継続コマンドかどうかを設定
+;-------------------------------------------------
+@COM_IS_EQUIP330
+RETURN 0
+
+;-------------------------------------------------
+;固有の実行判定(プレイヤー側)
+;-------------------------------------------------
+@COM_ORDER_PLAYER330(ARG:0)
+;実行値の設定
+TCVAR:(ARG:0):25 = 90
+
+;共通部分
+CALL COM_ORDER(ARG:0)
+
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲望Lv{ABL:(ARG:0):欲望}", ABL:(ARG:0):欲望 * 1)
+CALL COM_ORDER_ELEMENT(ARG:0, @"侍奉Lv{ABL:(ARG:0):奉仕}", ABL:(ARG:0):奉仕 * 4)
+CALL COM_ORDER_ELEMENT(ARG:0, @"精愛Lv{ABL:(ARG:0):精愛}", ABL:(ARG:0):精愛 * 3)
+
+LOCAL:0 = GET_PALAMLV(PALAM:(ARG:0):欲情)
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲情Lv{LOCAL:0}", MIN(LOCAL:0 * 1, 10))
+
+;ムード
+IF TFLAG:37 < 10
+	LOCAL:0 = -10
+ELSEIF TFLAG:37 < 30
+	LOCAL:0 = -5
+ELSEIF TFLAG:37 < 50
+	LOCAL:0 = 0
+ELSEIF TFLAG:37 < 100
+	LOCAL:0 = (TFLAG:37 - 50) / 10
+ELSE
+	LOCAL:0 = MIN(10, (TFLAG:37 - 100) / 50 + 5)
+ENDIF
+
+IF TALENT:(ARG:0):無接吻経験
+	CALL COM_ORDER_ELEMENT(ARG:0, "無接吻経験", -7)
+ENDIF
+IF TALENT:(ARG:0):貞操観念
+	CALL COM_ORDER_ELEMENT(ARG:0, "貞操観念", -6)
+ENDIF
+IF TALENT:(ARG:0):不在乎貞操
+	CALL COM_ORDER_ELEMENT(ARG:0, "不在乎貞操", 3)
+ENDIF
+IF TALENT:(ARG:0):害羞
+	CALL COM_ORDER_ELEMENT(ARG:0, "害羞", -1)
+ENDIF
+IF TALENT:(ARG:0):汚臭鈍感
+	CALL COM_ORDER_ELEMENT(ARG:0, "汚臭鈍感", 1)
+ENDIF
+IF TALENT:(ARG:0):汚臭敏感
+	CALL COM_ORDER_ELEMENT(ARG:0, "汚臭敏感", -3)
+ENDIF
+IF TALENT:(ARG:0):献身的
+	CALL COM_ORDER_ELEMENT(ARG:0, "献身的", 6)
+ENDIF
+IF TALENT:(ARG:0):否定快感
+	CALL COM_ORDER_ELEMENT(ARG:0, "否定快感", -1)
+ENDIF
+IF TALENT:(ARG:0):討厭男人
+	CALL COM_ORDER_ELEMENT(ARG:0, "討厭男人", -12)
+ENDIF
+IF TFLAG:54
+	CALL COM_ORDER_ELEMENT(ARG:0, "デート中", 6)
+ENDIF
+
+;合意
+IF !TALENT:(ARG:0):合意 && !TALENT:(ARG:0):親友
+	CALL COM_ORDER_ELEMENT(ARG:0, "合意無", -10)
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;固有の実行判定(ターゲット側)
+;-------------------------------------------------
+@COM_ORDER_TARGET330(ARG:0)
+;実行値の設定
+TCVAR:(ARG:0):25 = 90
+
+;共通部分
+CALL COM_ORDER(ARG:0)
+
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲望Lv{ABL:(ARG:0):欲望}", ABL:(ARG:0):欲望 * 1)
+CALL COM_ORDER_ELEMENT(ARG:0, @"侍奉Lv{ABL:(ARG:0):奉仕}", ABL:(ARG:0):奉仕 * 4)
+CALL COM_ORDER_ELEMENT(ARG:0, @"精愛Lv{ABL:(ARG:0):精愛}", ABL:(ARG:0):精愛 * 3)
+
+LOCAL:0 = GET_PALAMLV(PALAM:(ARG:0):欲情)
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲情Lv{LOCAL:0}", MIN(LOCAL:0 * 1, 10))
+
+;ムード
+IF TFLAG:37 < 10
+	LOCAL:0 = -10
+ELSEIF TFLAG:37 < 30
+	LOCAL:0 = -5
+ELSEIF TFLAG:37 < 50
+	LOCAL:0 = 0
+ELSEIF TFLAG:37 < 100
+	LOCAL:0 = (TFLAG:37 - 50) / 10
+ELSE
+	LOCAL:0 = MIN(10, (TFLAG:37 - 100) / 50 + 5)
+ENDIF
+
+IF TALENT:(ARG:0):無接吻経験
+	CALL COM_ORDER_ELEMENT(ARG:0, "無接吻経験", -7)
+ENDIF
+IF TALENT:(ARG:0):貞操観念
+	CALL COM_ORDER_ELEMENT(ARG:0, "貞操観念", -6)
+ENDIF
+IF TALENT:(ARG:0):不在乎貞操
+	CALL COM_ORDER_ELEMENT(ARG:0, "不在乎貞操", 3)
+ENDIF
+IF TALENT:(ARG:0):害羞
+	CALL COM_ORDER_ELEMENT(ARG:0, "害羞", -1)
+ENDIF
+IF TALENT:(ARG:0):汚臭鈍感
+	CALL COM_ORDER_ELEMENT(ARG:0, "汚臭鈍感", 1)
+ENDIF
+IF TALENT:(ARG:0):汚臭敏感
+	CALL COM_ORDER_ELEMENT(ARG:0, "汚臭敏感", -3)
+ENDIF
+IF TALENT:(ARG:0):献身的
+	CALL COM_ORDER_ELEMENT(ARG:0, "献身的", 6)
+ENDIF
+IF TALENT:(ARG:0):否定快感
+	CALL COM_ORDER_ELEMENT(ARG:0, "否定快感", -1)
+ENDIF
+IF TALENT:(ARG:0):討厭男人
+	CALL COM_ORDER_ELEMENT(ARG:0, "討厭男人", -12)
+ENDIF
+IF TFLAG:54
+	CALL COM_ORDER_ELEMENT(ARG:0, "デート中", 6)
+ENDIF
+
+;合意
+IF !TALENT:(ARG:0):合意 && !TALENT:(ARG:0):親友
+	CALL COM_ORDER_ELEMENT(ARG:0, "合意無", -10)
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;地の文(前文)
+;-------------------------------------------------
+@COM_TEXT_BEFORE330
+#DIMS PENIS_NAME
+;SKIPDISPしてから呼び出してRESULTを取ったら、キャラ口上からどのパターンか読める…ハズ
+LOCAL:3 = 0
+
+SELECTCASE RAND:10
+	CASE 0 TO 3
+		PENIS_NAME = 肉棒
+	CASE 4 TO 5
+		PENIS_NAME = 阴茎
+	CASE 6 TO 7
+		PENIS_NAME = 肉棒
+	CASE 8 TO 9
+		PENIS_NAME = 男根
+;普通は見れない
+	CASEELSE
+		PENIS_NAME = 勃起的鸡鸡
+		;勃起チンポ
+ENDSELECT
+
+PRINTFORM %ANAME(MPLY:0)%
+;TranslatedMark %ANAME(MPLY:0)%は
+
+
+SELECTCASE GET_COM_INITIATIVE()
+	;主導権がターゲット側
+	CASE 1
+		SELECTCASE PREVCOM
+			;机下フェラ
+			CASE 303,304,351
+				LOCAL:3 = 1
+				PRINTDATA
+					DATAFORM 被%ANAME(MTAR:0)%命令的话
+					;TranslatedMark %ANAME(MTAR:0)%に命じられると
+					DATAFORM 只凭%ANAME(MTAR:0)%的眼神察觉意图、
+					;TranslatedMark %ANAME(MTAR:0)%の目配せだけで意図を察し、
+					DATAFORM 遵从%ANAME(MTAR:0)%的招手、
+					;TranslatedMark %ANAME(MTAR:0)%の手招きに従い、
+					DATAFORM 如%ANAME(MTAR:0)%所说
+					;TranslatedMark %ANAME(MTAR:0)%が言ったとおりに
+					DATAFORM 就如同在%ANAME(MTAR:0)%中训练的那样
+					;TranslatedMark %ANAME(MTAR:0)%に仕込まれたとおりに
+				ENDDATA
+				PRINTDATAL
+					DATAFORM 潜入桌子下，对眼前竖起的%PENIS_NAME%
+					;TranslatedMark 机の下に潜り込み、眼前に突きつけられた%PENIS_NAME%を
+					DATAFORM 从挂在脸上的桌布的一端一边观察这边的情况一边对%PENIS_NAME%
+					;TranslatedMark 顔にかかったテーブルクロスの端からこちらの様子をうかがいながら%PENIS_NAME%を
+					DATAFORM 咽了一下口水，不声不响地爬到%ANAME(MTAR:0)%的脚边，对%PENIS_NAME%
+					;TranslatedMark 口を水ですすぐと音を立てずに%ANAME(MTAR:0)%の足元まで這いより%PENIS_NAME%を
+					DATAFORM 一边抚摸着途中撞到的额头，一边在桌子底下对%PENIS_NAME%
+					;TranslatedMark 途中でぶつけた額をさすりながら、机の下で%PENIS_NAME%を
+				ENDDATA
+			;蒸れフェラ
+			CASE 301, 302
+				LOCAL:3 = 2
+				PRINTDATA
+					DATAFORM 的被汗水浸湿的身体泛着光、
+					;TranslatedMark 汗でテカリ、
+					DATAFORM 因训练带来的兴奋之情还情绪高涨着、
+					;TranslatedMark 訓練の興奮で滾り、
+					DATAFORM 剧烈运动过的身体被汗液浸湿、
+					;TranslatedMark 激しい運動で蒸れ、
+					DATAFORM 训练的疲劳感让其不受控制地勃起了、
+					;TranslatedMark 訓練の疲労感に勃起し、
+				ENDDATA
+				PRINTDATAL
+					DATAFORM 将冒着蒸汽的%ANAME(MTAR:0)%的%PENIS_NAME%
+					;TranslatedMark 蒸気の上がっている%ANAME(MTAR:0)%の%PENIS_NAME%を
+					DATAFORM 将散发着雄性的臭味的%ANAME(MTAR:0)%的%PENIS_NAME%
+					;TranslatedMark 雄の臭いを撒き散らす%ANAME(MTAR:0)%の%PENIS_NAME%を
+					DATAFORM 将散发着男人的费洛蒙的%ANAME(MTAR:0)%的%PENIS_NAME%
+					;TranslatedMark 男のフェロモンを立ち上らせる%ANAME(MTAR:0)%の%PENIS_NAME%を
+					DATAFORM 将完全翘起的%ANAME(MTAR:0)%的%PENIS_NAME%
+					;TranslatedMark 激しく反り返っている%ANAME(MTAR:0)%の%PENIS_NAME%を
+				ENDDATA
+				PRINTFORML 
+			;歌唱フェラ
+			CASE 306
+				LOCAL:3 = 3
+				PRINTFORML 在弹奏歌声的双唇被%ANAME(MTAR:0)%的%PENIS_NAME%所触碰到，那之后%ANAME(MPLY:0)%
+				;TranslatedMark 歌声を奏でる唇に%ANAME(MTAR:0)%の%PENIS_NAME%を突きつけられると、そのまま
+			;お掃除フェラ
+			CASE 310,311
+				LOCAL:3 = 4
+				PRINTDATAL
+					DATAFORM 向%PENIS_NAME%的像是挂着杯壁上滴下来的水滴一般的%ANAME(MTAR:0)%伸出舌头，
+					;TranslatedMark %ANAME(MTAR:0)%が杯から垂らした雫に導かれるように%PENIS_NAME%に舌を伸ばすと
+					DATAFORM 说着要再来一杯酒，把酒倒在了%ANAME(MTAR:0)%两腿之间的%PENIS_NAME%上，
+					;TranslatedMark 酒のおかわりをやると言って己の%PENIS_NAME%に酒をぶちまけた%ANAME(MTAR:0)%の股座に顔を埋めると
+				ENDDATA
+			;実地演習
+			CASE 550
+				LOCAL:3 = 5
+				PRINTFORML 被马上就要実地演習的%ANAME(MTAR:0)%
+				;TranslatedMark 早速実践するようにと突きつけられた%ANAME(MTAR:0)%の%PENIS_NAME%を
+			;路地裏フェラ
+			CASE 305
+				LOCAL:3 = 6
+				PRINTDATAL
+					DATAFORM 带到没有人的小巷后，用露出的%PENIS_NAME%拍打了一下脸颊。%ANAME(MPLY:0)%
+					;TranslatedMark %ANAME(MTAR:0)%に人気のない路地裏へと連れ込まれ、頬を露出した%PENIS_NAME%で叩かれると
+					DATAFORM 带到没有人的小巷后，要求用嘴把%PENIS_NAME%含住。%ANAME(MPLY:0)%
+					;TranslatedMark %ANAME(MTAR:0)%に人気のない路地裏で求められ、せめて口でと、%PENIS_NAME%を頬に押しつけられる
+				ENDDATA
+			CASE 352
+				LOCAL:3 = 8
+				PRINTFORML 带到书架的后面，用露出的%PENIS_NAME%拍打了一下脸颊，%ANAME(MPLY:0)%
+				;TranslatedMark %ANAME(MTAR:0)%に本棚の陰に連れ込まれ、頬を露出した%PENIS_NAME%で叩かれると
+			;猥談
+			CASE 309
+				LOCAL:3 = 9
+				PRINTDATAL
+					DATAFORM 被淫秽故事弄兴奋了的%ANAME(MTAR:0)%要求现场演示刚才说的话，将%PENIS_NAME%摆在眼前，
+					;TranslatedMark 猥談に興奮した%ANAME(MTAR:0)%に今の話を実演するように求められ、%PENIS_NAME%を眼前に突きつけられると
+					DATAFORM 被因淫秽故事变兴奋的%ANAME(MTAR:0)%推倒后，对出现在眼前的%PENIS_NAME%
+					;TranslatedMark 猥談に興奮した%ANAME(MTAR:0)%に押し倒され、%PENIS_NAME%を眼前に突き出されると
+					DATAFORM 被因淫秽故事弄兴奋的%ANAME(MTAR:0)%拜托，让露出的%PENIS_NAME%稍微冷静一下。%ANAME(MPLY:0)%
+					;TranslatedMark 猥談に興奮した%ANAME(MTAR:0)%に、ちょっと鎮めてくれよと頼まれ、%PENIS_NAME%を露出させると
+				ENDDATA
+			CASEELSE
+				IF GET_PLACENAME(TFLAG:54) == "城下町"
+					LOCAL:3 = 6
+					PRINTDATAL
+						DATAFORM 到没有人的小巷后，用露出的%PENIS_NAME%拍打了一下脸颊。%ANAME(MPLY:0)%
+						;TranslatedMark %ANAME(MTAR:0)%に人気のない路地裏へと連れ込まれ、頬を露出した%PENIS_NAME%で叩かれると
+						DATAFORM 带到没有人的小巷后，要求用嘴把%PENIS_NAME%含住。%ANAME(MPLY:0)%
+						;TranslatedMark %ANAME(MTAR:0)%に人気のない路地裏で求められ、せめて口でと、%PENIS_NAME%を頬に押しつけられる
+					ENDDATA
+			;温泉
+				ELSEIF GET_PLACENAME(TFLAG:54) == "温泉"
+					LOCAL:3 = 10
+					PRINTDATAL
+						DATAFORM 被命令侍奉在%ANAME(MTAR:0)%的腰部竖起屹立出水面的%PENIS_NAME%。%ANAME(MPLY:0)%
+						;TranslatedMark 命じられるがまま、%ANAME(MTAR:0)%の腰を支えると水面から屹立した%PENIS_NAME%を
+						DATAFORM 被坐在浴室椅子上的%ANAME(MTAR:0)%命令侍奉他的%PENIS_NAME%。%ANAME(MPLY:0)%
+						;TranslatedMark %ANAME(MTAR:0)%に命じられ、風呂椅子に座る%ANAME(MTAR:0)%の%PENIS_NAME%を
+						DATAFORM 被坐在手边岩石上的%ANAME(MTAR:0)%拜托侍奉正在滴水的%PENIS_NAME%。%ANAME(MPLY:0)%
+						;TranslatedMark 手近な岩に腰掛けた%ANAME(MTAR:0)%に頼まれ、お湯の滴る%PENIS_NAME%を
+					ENDDATA
+				ELSEIF GET_PLACENAME(TFLAG:54) == "川辺"
+					LOCAL:3 = 11
+					PRINTDATAL
+						DATAFORM 游累了，被坐在岩石上的%ANAME(MTAR:0)%拜托侍奉正在滴水的%PENIS_NAME%。%ANAME(MPLY:0)%
+						;TranslatedMark 泳ぎ疲れ岩に腰掛ける%ANAME(MTAR:0)%に頼まれ、水の滴る%PENIS_NAME%を
+						DATAFORM 被%ANAME(MTAR:0)%带到岩石的阴影处，对被强行压在自己身上的%PENIS_NAME%，
+						;TranslatedMark %ANAME(MTAR:0)%に岩陰へ連れ込まれ、%PENIS_NAME%を頬へ押し当てられる
+						DATAFORM 被%ANAME(MTAR:0)%拜托侍奉在水中被剥出的%PENIS_NAME%。%ANAME(MPLY:0)%
+						;TranslatedMark %ANAME(MTAR:0)%に頼まれ、水中で剥き出しにされた%PENIS_NAME%を
+						DATAFORM 被%ANAME(MTAR:0)%拜托说游泳变冷了想暖和点，于是就对%PENIS_NAME%
+						;TranslatedMark 泳いで冷えたから暖めてくれと%ANAME(MTAR:0)%に頼まれ、%PENIS_NAME%を
+					ENDDATA
+				ELSEIF GET_PLACENAME(TFLAG:54) == "森林"
+					LOCAL:3 = 10
+					PRINTDATAL
+						DATAFORM 被因追猎物而感到疲劳的%ANAME(MTAR:0)%命令，跪着侍奉露出来的%PENIS_NAME%。%ANAME(MPLY:0)%
+						;TranslatedMark 獲物を追うのに飽きた%ANAME(MTAR:0)%に命じられ、跪いて%PENIS_NAME%を露出させると
+						DATAFORM 被%ANAME(MTAR:0)%带到树荫下，对出现在眼前的%PENIS_NAME%
+						;TranslatedMark %ANAME(MTAR:0)%に木陰に連れ込まれ、眼前に%PENIS_NAME%を突きつけられると
+						DATAFORM 被%ANAME(MTAR:0)%带到森林小屋，对被命令侍奉的%PENIS_NAME%
+						;TranslatedMark %ANAME(MTAR:0)%に森小屋へ連れ込まれ、%PENIS_NAME%への侍奉を命じられると
+					ENDDATA
+				ELSE
+					PRINTDATAL
+						DATAFORM 对突然露出%PENIS_NAME%的%ANAME(MTAR:0)%的行动感到困惑的同时观察着周围的情况，
+						;TranslatedMark 唐突に%PENIS_NAME%を露出させる%ANAME(MTAR:0)%の行動に戸惑いつつも、周囲の気配を伺いながら
+						DATAFORM 在%ANAME(MTAR:0)%面前，对被突然逼着去处理的%PENIS_NAME%
+						;TranslatedMark %ANAME(MTAR:0)%に、催したから処理してくれと%PENIS_NAME%を突きつけられる
+						DATAFORM 被%ANAME(MTAR:0)%带到背阴处，对出现在眼前的%PENIS_NAME%
+						;TranslatedMark %ANAME(MTAR:0)%に物陰に連れ込まれ、眼前に%PENIS_NAME%を突きつけられる
+						DATAFORM 被%ANAME(MTAR:0)%命令跪下，对要求处理的%PENIS_NAME%
+						;TranslatedMark %ANAME(MTAR:0)%に跪かされ、溜まってきたから処理してくれと%PENIS_NAME%を突き出される
+					ENDDATA
+				ENDIF
+		ENDSELECT
+		IF ABL:(MPLY:0):精愛 > 4
+			PRINTDATA
+				DATAFORM 露出像被解除绳子的狗一样狂喜的表情，
+				;TranslatedMark お預けを解かれた犬のように狂喜して、
+				DATAFORM 就像要和溢出来的唾液一起吞下去一样，
+				;TranslatedMark 溢れ出る唾と一緒に飲み込むような勢いで、
+				DATAFORM 就像是说不交给任何人一样，
+				;TranslatedMark 誰にも渡さないとばかりに、
+				DATAFORM 毫不在意从嘴角溢出来的口水，
+				;TranslatedMark 口の端からよだれが溢れるのも気にせず、
+				DATAFORM 毫不掩饰淫荡的表情，
+				;TranslatedMark 蕩かせた表情を隠すことなく、
+				DATAFORM 也许是出于侍奉的喜悦，她低垂着眼角，
+				;TranslatedMark 侍奉できる喜びからか目尻を下げ、
+				DATAFORM 脸颊泛着红晕，
+				;TranslatedMark 頬を紅潮させながら、
+				DATAFORM 因为鼻子里传来的性爱味道而兴奋不已，
+				;TranslatedMark 鼻を通りゆく性臭でスイッチが入ったのか、
+				DATAFORM 甚至没有意识到自己的表情已经被快乐击垮了，
+				;TranslatedMark 快楽に崩れた表情であることに気づかぬぐらいに、
+				DATAFORM 慢慢地露出快乐淫荡的表情，
+				;TranslatedMark 徐々に快楽に蕩けた表情を見せながら、
+				DATAFORM 也不介意发出粗俗的声音，
+				;TranslatedMark 下品な音を立てていることも気にせず、
+			ENDDATA
+		ENDIF
+		IF TALENT:(MPLY:0):体格 == 体格_小柄
+			PRINTDATA
+				DATAFORM 用无法含住的小嘴拼命地
+				;TranslatedMark %PENIS_NAME%が収まらない口で必死ながら
+				DATAFORM 用薄薄的、可爱的嘴唇。
+				;TranslatedMark 薄く可愛らしい唇で
+				DATAFORM 用小小的嘴巴拼命地
+				;TranslatedMark 小さな口で必死ながら
+				DATAFORM 
+			ENDDATA
+		ELSE
+			PRINTDATA
+				DATAFORM 用整个口腔
+				;TranslatedMark 口一杯に
+				DATAFORM 用艳丽的嘴唇
+				;TranslatedMark 艶めく唇で
+				DATAFORM 用已经变成口穴的嘴巴
+				;TranslatedMark 顔についた肉穴で
+				DATAFORM 用湿润的嘴唇
+				;TranslatedMark 濡れた唇で
+			ENDDATA
+		ENDIF
+		PRINTDATA
+			DATAFORM 含进去，
+			;TranslatedMark 咥え込み、
+			DATAFORM 张大嘴巴，
+			;TranslatedMark 頬張ると、
+			DATAFORM 塞进去，
+			;TranslatedMark むしゃぶりつき、
+		ENDDATA
+		IF ABL:(MPLY:0):性技 >= 3
+			PRINTDATA
+				DATAFORM 用巧妙的舌头
+				;TranslatedMark 巧みな舌使いで
+				DATAFORM 以几乎以为放进了别的洞的蠕动
+				;TranslatedMark 別の穴に入れたかと思うほどの蠕動で
+				DATAFORM 用巧妙的口技
+				;TranslatedMark 巧みな口使いで
+				DATAFORM 用小心而又细腻的口技
+				;TranslatedMark 丁寧かつきめ細やかな口技で
+			ENDDATA
+			SIF GETBIT(TALENT:(MPLY:0):淫乱系, 素質_淫乱_精液便女)
+				PRINTFORM 像是为了取悦男人的便女
+				;TranslatedMark 男を悦ばせるための便女らしく
+			PRINTDATAW
+				DATAFORM 让%ANAME(MTAR:0)%舒服起来…
+				;TranslatedMark %ANAME(MTAR:0)%を悦ばせた…
+				DATAFORM 招待了%ANAME(MTAR:0)%…
+				;TranslatedMark %ANAME(MTAR:0)%をもてなした…
+				DATAFORM 侍奉了%ANAME(MTAR:0)%…
+				;TranslatedMark %ANAME(MTAR:0)%に侍奉した…
+				DATAFORM 不断用变得黏糊糊的口腔吮吸着%ANAME(MTAR:0)%的%PENIS_NAME%…
+				;TranslatedMark %ANAME(MTAR:0)%の%PENIS_NAME%をねっとりしゃぶり続けた…
+			ENDDATA
+		ELSE
+			PRINTDATA
+				DATAFORM 用不习惯的舌头
+				;TranslatedMark 不慣れな舌使いで
+				DATAFORM 用笨拙的动作
+				;TranslatedMark ぎこちない動きで
+				DATAFORM 用不习惯的口技
+				;TranslatedMark 慣れない口使いで
+				DATAFORM 一边微笑着一边
+				;TranslatedMark 時々えづきながら
+			ENDDATA
+			SIF GETBIT(TALENT:(MPLY:0):淫乱系, 素質_淫乱_精液便女)
+				PRINTFORM 像是为了取悦男人的便女的便女
+				;TranslatedMark 男を悦ばせるための便女らしく
+			PRINTDATAW
+				DATAFORM 责弄了%ANAME(MTAR:0)%的%PENIS_NAME%…
+				;TranslatedMark %ANAME(MTAR:0)%の%PENIS_NAME%を責めた…
+				DATAFORM 继续侍奉着%ANAME(MTAR:0)%…
+				;TranslatedMark %ANAME(MTAR:0)%への侍奉を続けた…
+				DATAFORM 不断用变得黏糊糊的口腔吮吸着%ANAME(MTAR:0)%的%PENIS_NAME%…
+				;TranslatedMark %ANAME(MTAR:0)%の%PENIS_NAME%をしゃぶり続けた…
+			ENDDATA
+		ENDIF
+	;主導権がプレイヤー側
+	CASE 0
+		SELECTCASE PREVCOM
+			;机下フェラ
+			CASE 303,304,351
+				LOCAL:3 = 21
+				PRINTFORML 悄悄潜入桌子下，露出%ANAME(MTAR:0)%的%PENIS_NAME%
+				;TranslatedMark こっそりと机の下に潜り込み、%ANAME(MTAR:0)%の%PENIS_NAME%を露出させると
+			;蒸れフェラ
+			CASE 301,302
+				LOCAL:3 = 22
+				PRINTFORML 剥去因汗水而浸湿的%ANAME(MTAR:0)%内衣，将上升着蒸汽的%PENIS_NAME%
+				;TranslatedMark 汗で蒸れている%ANAME(MTAR:0)%の下着を剥ぎ取り、蒸気の上がっている%PENIS_NAME%を
+			;歌唱フェラ
+			CASE 306
+				LOCAL:3 = 23
+				PRINTFORML 一边继续唱歌一边把脸靠近%ANAME(MTAR:0)%的胯股之间，像是要取出%PENIS_NAME%用来唱歌一样
+				;TranslatedMark 歌を続けながら顔を%ANAME(MTAR:0)%の股間に近づけ、取り出した%PENIS_NAME%に歌いかけるように
+			;お掃除フェラ
+			CASE 310,311
+				LOCAL:3 = 24
+				PRINTFORML 故意在%ANAME(MTAR:0)%的胯股之间把剩下的\@ PREVCOM == 310 ? 酒杯 # 蜂蜜水 \@洒出来，把内衣连同%ANAME(MTAR:0)%的%PENIS_NAME%一起弄湿。然后
+				;TranslatedMark わざとらしく%ANAME(MTAR:0)%の股間に\@ PREVCOM == 310 ? 酒杯 # 蜂蜜水 \@の残りをこぼすと、濡れた下着ごと%ANAME(MTAR:0)%の%PENIS_NAME%を
+			;実地演習
+			CASE 550
+				LOCAL:3 = 25
+				PRINTFORML 立刻拿出了还在実地演習中%ANAME(MTAR:0)%的%PENIS_NAME%
+				;TranslatedMark 早速実践だとばかりに%ANAME(MTAR:0)%の%PENIS_NAME%を取り出すと
+			;路地裏フェラ
+			CASE 305
+				LOCAL:3 = 26
+				PRINTFORML 带到无人的小巷里，剥下%ANAME(MTAR:0)%的内衣，就这样把%PENIS_NAME%
+				;TranslatedMark 人気のない路地裏へと連れ込むと、%ANAME(MTAR:0)%の下着を剥ぎ取りそのまま%PENIS_NAME%を
+			CASE 352
+				LOCAL:3 = 28
+				PRINTFORML 把%ANAME(MTAR:0)%带到书架的后面，剥下%ANAME(MTAR:0)%的内衣，就这样把%PENIS_NAME%
+				;TranslatedMark %ANAME(MTAR:0)%を本棚の陰に連れ込み、%ANAME(MTAR:0)%の下着を剥ぎ取りそのまま%PENIS_NAME%を
+			;猥談
+			CASE 309
+				LOCAL:3 = 29
+				PRINTFORML 因为淫秽的故事而无法抑制兴奋，剥下%ANAME(MTAR:0)%的内衣，就这样将%PENIS_NAME%
+				;TranslatedMark 猥談に興奮を抑えられなくなり、%ANAME(MTAR:0)%の下着を剥ぎ取りそのまま%PENIS_NAME%を
+			CASEELSE
+				IF GET_PLACENAME(TFLAG:54) == "城下町"
+					LOCAL:3 = 26
+					PRINTFORML 带到没有人气的小巷里，剥下%ANAME(MTAR:0)%的内衣，就这样把%PENIS_NAME%
+					;TranslatedMark 人気のない路地裏へと連れ込むと、%ANAME(MTAR:0)%の下着を剥ぎ取りそのまま%PENIS_NAME%を
+			;温泉
+				ELSEIF GET_PLACENAME(TFLAG:54) == "温泉"
+					LOCAL:3 = 27
+					IF RAND:2 == 0
+						PRINTFORML 抬起%ANAME(MTAR:0)%的腰让%PENIS_NAME%从水面浮出后，
+						;TranslatedMark %ANAME(MTAR:0)%の腰を浮かせて%PENIS_NAME%を水面から浮上させると
+					ELSE
+						PRINTFORML 让%ANAME(MTAR:0)%坐在附近的岩石上，看到滴水的%PENIS_NAME%后，
+						;TranslatedMark %ANAME(MTAR:0)%を手近な岩に腰掛けさせると、お湯が滴る%PENIS_NAME%を
+					ENDIF
+				ELSEIF GET_PLACENAME(TFLAG:54) == "川辺"
+					LOCAL:3 = 30
+					IF RAND:3 == 0
+						PRINTFORML 抬起%ANAME(MTAR:0)%的腰让%PENIS_NAME%从水面浮出，
+						;TranslatedMark %ANAME(MTAR:0)%の腰を浮かせて%PENIS_NAME%を水面から浮上させると
+					ELSEIF RAND:2 == 0
+						PRINTFORML 和%ANAME(MTAR:0)%纠缠在一起，让%PENIS_NAME%在水中露出来后，
+						;TranslatedMark %ANAME(MTAR:0)%に絡みつき、水中で%PENIS_NAME%を露出させると
+					ELSE
+						PRINTFORML 让%ANAME(MTAR:0)%坐在附近的岩石上，看到滴水的%PENIS_NAME%后，
+						;TranslatedMark %ANAME(MTAR:0)%を手近な岩に腰掛けさせると、水が滴る%PENIS_NAME%を
+					ENDIF
+				ELSEIF GET_PLACENAME(TFLAG:54) == "森林"
+					IF RAND:3 == 0
+						PRINTFORML 喊着发现了一个大猎物，然后剥下了%ANAME(MTAR:0)%的内衣，
+						;TranslatedMark 大きな獲物があったと呟いて、%ANAME(MTAR:0)%の下着を剥ぎ取ると
+					ELSE
+						PRINTFORML 把%ANAME(MTAR:0)%带到树荫下，让%PENIS_NAME%露出来后，
+						;TranslatedMark %ANAME(MTAR:0)%を木陰に連れ込むと、%PENIS_NAME%を露出させ
+					ENDIF
+				ELSE
+					LOCAL:3 = 20
+					PRINTFORML 确认周围没有人后，让%ANAME(MTAR:0)%的%PENIS_NAME%露出来，
+					;TranslatedMark 周囲に人気がないのを確認すると、%ANAME(MTAR:0)%の%PENIS_NAME%を露出させ
+				ENDIF
+		ENDSELECT
+		IF ABL:(MPLY:0):精愛 > 4
+			PRINTDATA
+				DATAFORM 一副忍耐到了极限的表情，
+				;TranslatedMark 我慢の限界といった表情で、
+				DATAFORM 几乎狂乱地蹭了蹭之后一口气，
+				;TranslatedMark 半狂乱で頬擦りしてから一気に、
+				DATAFORM 像爱一样如雨点般不断亲吻后，
+				;TranslatedMark 愛おしむようにキスの雨を振らせてから、
+				DATAFORM 在呛人的雄香中眼睛湿润了，
+				;TranslatedMark むせかえるような雄の匂いに瞳を蕩かして、
+				DATAFORM 在上面涂抹了大量的口水。，
+				;TranslatedMark たっぷりと唾液をまぶしながら
+			ENDDATA
+		ENDIF
+		IF TALENT:(MPLY:0):体格 == 体格_小柄
+			IF RAND:2 == 0
+				PRINTFORM 用小小的嘴拼命地
+				;TranslatedMark 小さな口で必死に
+			ELSE
+				PRINTFORM 用轻薄可爱的嘴唇
+				;TranslatedMark 薄く可愛らしい唇で
+			ENDIF
+		ELSE
+			IF RAND:2 == 0
+				PRINTFORM 用整个口腔
+				;TranslatedMark 口一杯に
+			ELSE
+				PRINTFORM 用艳丽的嘴唇
+				;TranslatedMark 艶めく唇で
+			ENDIF
+		ENDIF
+		IF RAND:3 == 0
+			PRINTFORM 叼进去
+			;TranslatedMark 咥え込み
+		ELSEIF RAND:2 == 0
+			PRINTFORM 长大嘴巴，
+			;TranslatedMark 頬張り
+		ELSE
+			PRINTFORM 塞进去，
+			;TranslatedMark むしゃぶりつき
+		ENDIF
+		IF GETBIT(TALENT:(MPLY:0):淫乱系, 素質_淫乱_精液便女)
+			PRINTFORM 像是为了取悦男人的便女
+			;TranslatedMark 、男を悦ばせるための便女らしく
+		ENDIF
+		IF RAND:2 == 0
+			PRINTFORMW 侍奉着…
+			;TranslatedMark 侍奉している…
+		ELSE
+			PRINTFORMW 专心致志地品味着…
+			;TranslatedMark 一心不乱に味わっている…
+		ENDIF
+ENDSELECT
+
+PRINTL 
+
+RETURN LOCAL:3
+
+;--------------------------------------------------------
+;地の文(パラメータ・刻印変動後)
+;--------------------------------------------------------
+@COM_TEXT_LAST330
+
+LOCAL:0 = 0
+LOCAL:1 = 0
+
+;SKIPDISPしてから呼び出してRESULTを取ったら、キャラ口上からどのパターンか読める…ハズ
+
+LOCAL:3 = 0
+
+;射精させれたかどうか
+LOCAL:1 = NOWEX:(MTAR:0):射精
+
+;精愛で分岐
+IF ABL:(MPLY:0):精愛 > 4
+	LOCAL:0 = 2
+ELSEIF ABL:(MPLY:0):精愛 > 1
+	LOCAL:0 = 1
+ENDIF
+
+
+SELECTCASE PREVCOM
+	;食ザー
+	CASE 351
+		IF LOCAL:1 > 0 && LOCAL:0 > 1
+			LOCAL:3 = 10
+			PRINTFORML 仿佛什么事都没有发生般回到座位上的%ANAME(MPLY:0)%，将留在口中的%ANAME(MTAR:0)%的精液混着料理享用了
+			;TranslatedMark 何事もないかのように席に戻った%ANAME(MPLY:0)%は、口内に残した%ANAME(MTAR:0)%の精液を料理に垂らすと
+			PRINTFORMW 看起来很好吃，一口一口地吃完了
+			;TranslatedMark とても美味しそうに、一口一口味わいながら完食した
+		ELSEIF LOCAL:0 > 1
+			LOCAL:3 = 11
+			PRINTFORML 恋恋不舍地离开%ANAME(MTAR:0)%的肉棒回到座位上的%ANAME(MPLY:0)%
+			;TranslatedMark 名残惜しそうに%ANAME(MTAR:0)%のペニスから口を離して席に戻った%ANAME(MPLY:0)%は
+			PRINTFORMW 想着再添点什么，一边摆弄着剩下的菜一边吃完了
+			;TranslatedMark もう一味足したかった、と残りの料理を弄びながら食べ終えた
+		ELSEIF LOCAL:0 > 0
+			LOCAL:3 = 12
+			PRINTFORML %ANAME(MPLY:0)%回到座位上，嘴里只有%ANAME(MTAR:0)%的味道
+			;TranslatedMark %ANAME(MPLY:0)%は席に戻ると、%ANAME(MTAR:0)%の味しかしない、と
+			PRINTFORMW 就像闹别扭了一样，但又开心地一边抱怨一边品尝剩下的饭菜
+			;TranslatedMark 拗ねたように、しかし嬉しそうに愚痴りながら残りの食事を味わった
+		ELSE
+		ENDIF
+	;飲ザー
+	CASE 310,311
+		IF LOCAL:1 > 0 && LOCAL:0 > 1
+			LOCAL:3 = 20
+			IF RAND:2 == 0
+				PRINTFORML %ANAME(MPLY:0)%用杯子接住了从铃口喷出来的%ANAME(MTAR:0)%的精液，并将其送入口中。
+				;TranslatedMark %ANAME(MPLY:0)%はなおも鈴口から迸る%ANAME(MTAR:0)%の精液を杯で受け止め、口をつけた
+				PRINTFORMW 一边品尝一边咽下最后一口，小小的，然后发出艳丽的叹息
+				;TranslatedMark 味わいつつ最後の一口を飲み込むと、小さな、そして艶やかな溜息をこぼした
+			ELSE
+				PRINTFORML %ANAME(MPLY:0)%把留在口中的%ANAME(MTAR:0)%的精液
+				;TranslatedMark %ANAME(MPLY:0)%は口内に残していた%ANAME(MTAR:0)%の精液を
+				PRINTFORMW 用新的\@ PREVCOM == 310 ? 酒杯 # 蜂蜜水 \@滴在上面，时不时搅拌着享受味道的变化
+				;TranslatedMark 新たな\@ PREVCOM == 310 ? 酒杯 # 蜂蜜水 \@に垂らし、時折かき混ぜながら味の変化を楽しんだ
+			ENDIF
+		ELSEIF LOCAL:0 > 1
+			LOCAL:3 = 21
+			PRINTFORML %ANAME(MPLY:0)%品尝到了%ANAME(MTAR:0)%的肉棒
+			;TranslatedMark ふやけるほどに%ANAME(MTAR:0)%のペニスを味わい尽くした%ANAME(MPLY:0)%は
+			PRINTFORMW 在铃口前举起酒杯，想要用精液填满似的一边往上看一边恳求着
+			;TranslatedMark 鈴口の前に杯を掲げて、精液で満たして欲しそうに上目遣いで懇願してきた
+		ELSEIF LOCAL:0 > 0
+			LOCAL:3 = 22
+			PRINTFORMW %ANAME(MPLY:0)%在\@ PREVCOM == 310 ? 酒杯 # 蜂蜜水 \@中慢慢地，一口一口地品味着剩下的东西，一边陶醉着脸一边咽了下去
+			;TranslatedMark %ANAME(MPLY:0)%は\@ PREVCOM == 310 ? 酒杯 # 蜂蜜水 \@の残りをゆっくりと、一口ずつ味わっては顔を惚けさせながら飲み込んでいった
+		ELSEIF (ABL:(MPLY:0):主導度Ｕ <= -100 || CFLAG:(MPLY:0):4 >= 1500) && LOCAL:1 > 1
+			LOCAL:3 = 23
+			PRINTFORML %ANAME(MTAR:0)%在%ANAME(MPLY:0)%的杯里放满射出的精液，催促她喝下去
+			;TranslatedMark %ANAME(MTAR:0)%は%ANAME(MPLY:0)%の杯になみなみと射精し、飲み干すように促すと
+			PRINTFORMW %ANAME(MPLY:0)%颤抖着身体喝到最后一滴
+			;TranslatedMark %ANAME(MPLY:0)%は体を震わせながら最後の一滴まで飲み干した
+		ELSE
+		ENDIF
+	;なでなで
+	CASE 321
+		LOCAL:3 = 30
+		PRINTFORMW 被含着肉棒的%ANAME(MTAR:0)%抚摸着头，%ANAME(MPLY:0)%高兴地眯起了眼睛
+		;TranslatedMark ペニスを咥えたまま%ANAME(MTAR:0)%に頭を撫でられると、%ANAME(MPLY:0)%は嬉しそうに目を細めた
+	;髪で拭う
+	CASE 322,323
+		IF ABL:(MPLY:0):主導度Ｕ <= -100 || CFLAG:(MPLY:0):4 >= 1500
+			LOCAL:3 = 40
+			PRINTFORML %ANAME(MTAR:0)%不顾%ANAME(MPLY:0)%的变得粘糊糊的头发，擦掉了阴茎上的污垢
+			;TranslatedMark %ANAME(MTAR:0)%は、%ANAME(MPLY:0)%の髪がベタベタになるのも構わずペニスの汚れを拭い取った
+			PRINTFORMW %ANAME(MPLY:0)%一边擦着脸颊一边摆弄着自己散发着淫秽光泽的头发
+			;TranslatedMark 卑猥な光沢を放つ己の髪を%ANAME(MPLY:0)%は頬を染めながらいじっている
+		ENDIF
+	CASEELSE
+	;パパのミルク
+	;おっさんくさかったのでコメントアウト
+;		IF TALENT:(MPLY:0):妊娠 || (TALENT:(MPLY:0):母乳体質 && CFLAG:(MPLY:0):行動不能状態)
+;			IF LOCAL:1 > 0 && LOCAL:0 > 1
+;				IF RAND:3 == 0 && TALENT:(MPLY:0):妊娠
+;				LOCAL:3 = 50
+;					PRINTFORMW お腹の子もパパのミルクが大好きになりますように、と祈る%ANAME(MPLY:0)%は慈母そのものであった…祈りの内容以外は
+;				ELSE
+;				LOCAL:3 = 51
+;					PRINTFORMW 母乳の出が良くなる、と%ANAME(MPLY:0)%は嬉しそうに\@ TALENT:(MPLY:0):妊娠 ? お腹 # 胸 \@をさすっている
+;				ENDIF
+;			ELSEIF LOCAL:0 > 1
+;				LOCAL:3 = 52
+;				PRINTFORMW \@ TALENT:(MPLY:0):妊娠 ? お腹の子に # 子供のためにも \@パパのミルクを頂戴？と%ANAME(MPLY:0)%は妖しく微笑んだ
+;			ELSEIF LOCAL:0 > 0 && TALENT:(MPLY:0):妊娠
+;				LOCAL:3 = 53
+;				PRINTFORMW %ANAME(MPLY:0)%がお腹をさすりながら、この子も精液が好きになったらどうしよう…と呟いた
+;			ELSE
+;				LOCAL:3 = 54
+;				PRINTFORMW %ANAME(MPLY:0)%は子供の栄養のため、と%ANAME(MTAR:0)%に諭され困惑の表情を浮かべた
+;			ENDIF
+	;それ以外
+;		ELSE
+		IF LOCAL:1 > 0 && LOCAL:0 > 1
+			LOCAL:3 = 1
+			PRINTFORMW %ANAME(MPLY:0)%蠕动着嘴巴，清了清嗓子，然后在%ANAME(MTAR:0)%的耳边小声说道："我吃完了。"
+			;TranslatedMark %ANAME(MPLY:0)%は口をもごもごとさせて喉を鳴らした後、%ANAME(MTAR:0)%の耳元でご馳走様と囁いた
+		ELSEIF LOCAL:0 > 1
+			LOCAL:3 = 2
+			PRINTFORMW %ANAME(MPLY:0)%恋恋不舍地离开了%ANAME(MTAR:0)%的阴茎，用手指捂着嘴催促着给她些什么
+			;TranslatedMark 名残惜しそうに%ANAME(MTAR:0)%のペニスから口を離した%ANAME(MPLY:0)%は、指を口に当ててナニかを催促してきた
+		ELSEIF LOCAL:0 > 0
+			LOCAL:3 = 3
+			PRINTFORML %ANAME(MPLY:0)%用擦了%ANAME(MTAR:0)%肉棒的湿巾擦了擦嘴
+			;TranslatedMark %ANAME(MPLY:0)%は、%ANAME(MTAR:0)%のペニスをふきベトベトになった手巾で口を拭った
+			PRINTFORMW 双眼湿润，脸颊发红，嘴角的松弛看来暂时不会消失了
+			;TranslatedMark c
+		ELSE
+			PRINTFORMW %ANAME(MPLY:0)%用%ANAME(MTAR:0)%的肉棒和手巾擦拭自己的嘴巴，整理好仪容
+			;TranslatedMark %ANAME(MPLY:0)%は%ANAME(MTAR:0)%のペニスと、自分の口を手巾で綺麗に拭い取り身だしなみを整えた
+		ENDIF
+;		ENDIF
+ENDSELECT
+
+RETURN LOCAL:3
+
+;-------------------------------------------------
+
+;コマンド区分
+;-------------------------------------------------
+
+@COM_AVAILABLE_WHEN330
+RETURN コマンド_日常
+
+@COM_STACK_SPERM_MTAR_TO_MPLY_330()
+RETURN RAND:3 ? 射精部位_口 # 射精部位_顔

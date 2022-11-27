@@ -1,0 +1,717 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_NIGHTLIFE_RATE()
+RETURN 40
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_NIGHTLIFE_DECISION()
+SIF DAY < 5
+	RETURN 0
+;MASTERがペニスを持っている
+SIF !(HAS_PENIS(MASTER))
+	RETURN 0
+
+RETURN 1
+
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_NIGHTLIFE_SETTARGET()
+
+FOR LOCAL, 0, CHARANUM
+	SIF !IS_FEMALE(LOCAL)
+		CONTINUE
+	;自国所属かつ捕虜でない、かつ「恋慕か親愛か服従・隷属・烙印」で、2/3
+	IF CFLAG:LOCAL:所属 == CFLAG:MASTER:所属 && CFLAG:LOCAL:面識 && !CFLAG:LOCAL:捕虜先 && (IS_LOVER(LOCAL) || IS_SLAVE(LOCAL))
+		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+		DAILY_TARGET_NUM ++
+	;主人公が特殊勢力におらず、対象が特殊勢力に所属 + 陥落済み、かつ面識がある
+	ELSEIF !IS_SP_COUNTRY(CFLAG:MASTER:所属) && CFLAG:LOCAL:面識 && IS_SP_COUNTRY(CFLAG:LOCAL:所属) && IS_FALLEN_TO_SP_COUNTRY(LOCAL) && CFLAG:LOCAL:所属 != GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_自警団) && !CFLAG:LOCAL:捕虜先
+		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+		DAILY_TARGET_NUM ++
+	ENDIF
+NEXT
+
+SIF DAILY_TARGET_NUM < 1
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_NIGHTLIFE_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+
+;夜遊び
+@EVENT_DAILY_NIGHTLIFE
+#DIM 対象
+#DIM 土匪
+#DIM ゴブリン
+#DIM 外来
+
+土匪 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_野盗))
+ゴブリン = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_ホフゴブリン))
+外来 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_外来人))
+
+
+対象 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+
+;恋慕パターン
+IF IS_LOVER(対象)
+	PRINTFORMW 工作的时候，%ANAME(対象)%来到了房间……
+	;TranslatedMark 仕事をしていると、%ANAME(対象)%が部屋に訪れてきた……
+	PRINTFORML 晚上偶尔一起去散散步吧，她这么说
+	;TranslatedMark たまには夜の散歩でもしないか、ということだそうだ
+	CALL ASK_YN("出去走走", "不，我还有工作……")
+	;お前マジそれはないわ
+	IF RESULT == 1
+		PRINTFORMW 不好意思，有工作……得到这样回答后，%ANAME(対象)%很遗憾地回去了
+		;TranslatedMark 悪いけど仕事がある……そう告げると、%ANAME(対象)%は残念そうに帰って行った
+		RETURN 1
+	ELSE
+		;なんだこの平和な分岐　オラこんなの書くのはじめてよ
+		PRINTFORMW 带着%ANAME(対象)%，走在夜晚的街道上……
+		;TranslatedMark %ANAME(対象)%を連れ、夜の街に繰り出した……
+		PRINTFORML
+		LOCAL = RAND:11
+		SELECTCASE LOCAL
+			CASE 0
+				PRINTFORML %ANAME(MASTER)%带着%ANAME(対象)%去了最近很受欢迎的餐厅
+				;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%を、最近はやりのレストランに連れて行った
+				PRINTFORMW 两人吃着美食，一同度过了一段美好的时光
+				;TranslatedMark 料理に舌鼓を打ちながら、二人で楽しい時間を過ごした……
+			CASE 1
+				PRINTFORML %ANAME(MASTER)%把%ANAME(対象)%带去了剧场
+				;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%を、劇場に連れて行った
+				PRINTFORMW 两个人一起享受了很受欢迎的戏剧……
+				;TranslatedMark 人気の演劇を二人で楽しんだ……
+			CASE 2
+				PRINTFORML %ANAME(MASTER)%被%ANAME(対象)%带去购物了
+				;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%に、買い物へ連れて行かれた
+				PRINTFORMW 一边随意地说笑着，一边看了各种各样的东西……
+				;TranslatedMark あれやこれやと話しながら、色々なものを見て回った……
+			CASE 3
+				PRINTFORML %ANAME(MASTER)%把%ANAME(対象)%带到了能看见星星的山丘上
+				;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%を、星のよく見える丘に連れて行った
+				PRINTFORMW 两个人看着星星，度过了悠闲的时光……
+				;TranslatedMark 二人で星を見ながら、ゆっくりとした時間を過ごした……
+			CASE 4
+				PRINTFORML %ANAME(MASTER)%和%ANAME(対象)%一起去泡温泉
+				;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%と一緒に、温泉に浸かりにいった
+				PRINTFORMW %ANAME(対象)%出浴的样子让人心动不已，感觉精神都恢复了……
+				;TranslatedMark %ANAME(対象)%の湯上がり姿にどきりとしたりしつつ、リフレッシュした……
+			;1/10くらいの確率で花火大会って、どんだけ花火好きなのきみたち
+			CASE 5
+				PRINTFORML %ANAME(MASTER)%和%ANAME(対象)%一起去看烟花大会
+				;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%と一緒に、花火大会を見に行った
+				PRINTFORMW 被身着浴衣的%ANAME(対象)%惊艳到了……
+				;TranslatedMark 浴衣姿の%ANAME(対象)%にどきりとさせられた……
+			CASE 6
+				PRINTFORML %ANAME(MASTER)%把%ANAME(対象)%带去了马戏团
+				;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%を、サーカスへ連れて行った
+				PRINTFORMW 两个人一起度过了快乐的时光……
+				;TranslatedMark 二人で楽しい時間を過ごした……
+			CASE 7
+				PRINTFORML %ANAME(MASTER)%把%ANAME(対象)%带到了酒吧
+				;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%を、バーへと連れて行った
+				PRINTFORMW 两个人一起度过了属于大人的时光……
+				;TranslatedMark 二人で大人な時間を過ごした……
+			CASE 8
+				PRINTFORML %ANAME(MASTER)%和%ANAME(対象)%一起去看了弹幕游戏
+				;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%と一緒に、弾幕ごっこを見に行った
+				PRINTFORMW 拼命地阻止了想和其他游客一起赌博的的%ANAME(対象)%……
+				;TranslatedMark 他の観客に混じって賭博しようとする%ANAME(対象)%を一生懸命止めた……
+			CASE 9
+				PRINTFORML %ANAME(対象)%带我去了常去的酒馆
+				;TranslatedMark %ANAME(対象)%が、行きつけの飲み屋へ連れていってくれた
+				PRINTFORMW 微醉后脸色泛红的%ANAME(対象)%真是太棒了……
+				;TranslatedMark ほろ酔いで頬を赤らめる%ANAME(対象)%がなんとも素敵だった……
+			CASE 10
+				PRINTFORML %ANAME(MASTER)%和%ANAME(対象)%一起去看夜景
+				;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%と一緒に夜景を見に行った
+				PRINTFORMW 抱着%ANAME(対象)%的肩膀，度过了只属于两个人的时间……
+				;TranslatedMark %ANAME(対象)%の肩を抱きながら、二人の時間を過ごした……
+		ENDSELECT
+		;何あげりゃいいんだよこんなの
+		CFLAG:対象:好感度 += 200
+		CFLAG:対象:依存度 += 200
+	ENDIF
+
+
+ELSEIF IS_SLAVE(対象)
+	PRINTFORMW 工作的时候，%ANAME(対象)%来到了房间……
+	;TranslatedMark 仕事をしていると、%ANAME(対象)%が部屋に訪れてきた……
+	PRINTFORML 我已经忍不住了，请在“夜游”中随意“使用”我吧……
+	;TranslatedMark 疼いて仕方ないので、自分を「夜遊び」に「使って」くれないかということだ……
+	CALL ASK_YN("使用你", "不，我还有工作……")
+	IF RESULT == 1
+		PRINTFORMW 不好意思，有工作……得到这样回答后，%ANAME(対象)%很遗憾地回去了
+		;TranslatedMark 悪いけど仕事がある……そう告げると、%ANAME(対象)%は残念そうに帰って行った
+		RETURN 1
+	ELSE
+		PRINTFORMW 带着%ANAME(対象)%，走在夜晚的街道上……
+		;TranslatedMark %ANAME(対象)%を連れ、夜の街に繰り出した……
+		PRINTFORML
+		LOCAL = RAND:5
+		SELECTCASE LOCAL
+			CASE 0
+				PRINTFORML %ANAME(MASTER)%把%ANAME(対象)%带进巷子里，命令她脱掉衣服
+				;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%を路地裏に連れ込むと、服を脱ぐよう命令した
+				PRINTFORMW %ANAME(対象)%有些犹豫，却无法违抗%ANAME(MASTER)%所说的话语，只得将肌肤暴露在夜风之中
+				;TranslatedMark %ANAME(対象)%は躊躇いつつも、%ANAME(MASTER)%の言うことには逆らえず、その肌を夜風に晒す
+				PRINTFORML %ANAME(MASTER)%用强硬的语气命令%ANAME(対象)%，让她在这个不知道什么时候会有人经过的地方进行自慰
+				;TranslatedMark %ANAME(MASTER)%は強い口調で%ANAME(対象)%に命じ、誰が来るとも分からないこの場所で自慰をさせる
+				PRINTFORMW 也许是因为在意自己可能会被谁看见，%ANAME(対象)%体验到的刺激似乎比平时更强烈
+				;TranslatedMark 見られるかもしれないという意識が後押ししたのか、%ANAME(対象)%はいつも以上に激しく感じていたようだ
+				PRINTFORMW 在那之后，%ANAME(MASTER)%充分地品尝了%ANAME(対象)%躁动的身体……
+				;TranslatedMark その後、%ANAME(MASTER)%は昂ぶる%ANAME(対象)%の身体を、たっぷりと味わってやった……
+				CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%の\@ RAND:2 ? 肉棒 # 唇\@", @"%ANAME(MASTER)%")
+				CALL FUCK(MASTER, "Ｃ, 性交, 射精, 奉仕", "接吻喪失, 童貞喪失", 0, @"%ANAME(対象)%の\@ RAND:2 ? 秘貝 # 唇\@", "", @"%ANAME(対象)%の膣")
+			CASE 1
+				PRINTFORML %ANAME(MASTER)%和%ANAME(対象)%走在路上，遇到了流浪者
+				;TranslatedMark %ANAME(MASTER)%と%ANAME(対象)%が歩いていると、浮浪者に出くわした
+				PRINTFORML 他看起来很久没有碰过女人了，从他的眼睛里能看见积蓄着的欲望
+				;TranslatedMark いかにも女日照りで、欲望を溜めていそうな見た目をしている
+				PRINTFORML 让这家伙去抱%ANAME(対象)%也许会很有趣吧……
+				;TranslatedMark こいつに%ANAME(対象)%を抱かせるというのも面白いか……
+				CALL ASK_YN("让流浪汉去抱", "自己使用")
+				LOCAL:1 = RESULT
+				IF RESULT == 0
+					PRINTFORMW 向流浪者打招呼，把%ANAME(対象)%交给他
+					;TranslatedMark 浮浪者に声をかけ、%ANAME(対象)%を差し出した
+					PRINTFORMW 那男人非常兴奋，欣喜地把%ANAME(対象)%迎入自己的住所
+					;TranslatedMark 男は大興奮で、嬉々として%ANAME(対象)%を己のねぐらに迎え入れた
+					PRINTFORMW 隔着一块不知从何处捡到的破布，清晰地听到男人沉重的呼吸声和%ANAME(対象)%的娇喘
+					;TranslatedMark そこらで拾ってきたのだろう布一枚隔てて、男の激しい息遣いと、%ANAME(対象)%の嬌声が聞こえてくる
+					PRINTFORMW 告诉她完事后自己回来，%ANAME(MASTER)%就离开了那个地方……
+					;TranslatedMark コトが終わったら戻ってくるよう伝えると、%ANAME(MASTER)%はその場を後にした……
+					PRINTFORML
+					PRINTFORML 过了一会儿，%ANAME(対象)%好像什么都没发生过一样回来了
+					;TranslatedMark しばらくして、%ANAME(対象)%は何事もなかったかのように戻ってきた
+					PRINTFORMW 但是她的脸颊不自然地泛红，黄色的精液自失去了内裤的私处、顺着着大腿滴落下来
+					;TranslatedMark しかしその頬は上気し、下着を奪われた秘部から垂れる黄ばんだ精液が、太腿をつう、と伝っていた……
+					CALL FUCK_RAPE(対象, GET_SPERM_ID("流浪漢"), @"流浪漢的\@ RAND:2 ? 肉棒 # 唇\@", @"流浪漢")
+				ELSE
+					PRINTFORMW 向流浪者炫耀，让他们围观在自己胯下的%ANAME(対象)%
+					;TranslatedMark 浮浪者に声をかけ、自分が%ANAME(対象)%を使うところを見ているよう伝えた
+					PRINTFORMW 肆意玩弄她的身体，让她进行侍奉，开发着她身上的肉穴，男子用充血的眼球紧紧盯着眼前的场景
+					;TranslatedMark 彼女の身体を弄り、奉仕させ、そして穴を抉ってやると、男は血走った目でこちらを見つめてくる
+					PRINTFORMW 用手摆弄着自己肮脏的下体
+					;TranslatedMark その手は己の汚らしいモノをゴシゴシと扱き上げていた
+					PRINTFORMW %ANAME(MASTER)%释放出精液，%ANAME(対象)%同时达到了高潮，流浪汉也从自己的肮脏里喷出了黄色的精子……
+					;TranslatedMark %ANAME(MASTER)%が精を放ち、%ANAME(対象)%が絶頂すると同時に、彼もまた己のモノから黄ばんだ精子を吐き出した……
+					CALL FUCK_TRAIN(対象, GET_ID(MASTER), @"%ANAME(MASTER)%の\@ RAND:2 ? 肉棒 # 唇\@", @"%ANAME(MASTER)%")
+					CALL FUCK(MASTER, "Ｃ, 性交, 射精, 奉仕", "接吻喪失, 童貞喪失", 0, @"%ANAME(対象)%の\@ RAND:2 ? 秘貝 # 唇\@", "", @"%ANAME(対象)%の膣")
+				ENDIF
+			CASE 2
+				PRINTFORML %ANAME(MASTER)%夺走了%ANAME(対象)%所有的衣服，让她一个人走治安不好的街区
+				;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%の服を全て奪った上で、治安の悪い地区を一人で歩かせた
+				PRINTFORML 像%ANAME(対象)%这样的女人，光着身子走在这样的地方，男人是不可能坐视不理的
+				;TranslatedMark %ANAME(対象)%のような女がそのような場所を裸で歩いて、男どもが放っておくはずもない
+				PRINTFORML %ANAME(対象)%马上就要被男人们带进小巷子里了……
+				;TranslatedMark %ANAME(対象)%は早速、男どもに路地裏に連れ込まれそうになっている……
+				CALL ASK_YN("只是看着", "赶走")
+				LOCAL:1 = RESULT
+				IF RESULT == 0
+					PRINTFORML ……反正那就是本来的目的。无所谓
+					;TranslatedMark ……どうせこうなると踏んで送り出したのだ。別に構わない
+					PRINTFORML 当%ANAME(MASTER)%远远望着的时候，%ANAME(対象)%确实被带进了巷子里
+					;TranslatedMark %ANAME(MASTER)%が遠巻きに眺めていると、やがて%ANAME(対象)%は本当に路地裏に連れ込まれてしまった
+					PRINTFORMW 没过多久，巷子深处传来了发情野兽般的娇喘……
+					;TranslatedMark しばらくの後、獣のような嬌声が、路地の奥の方から反響して聞こえてきた……
+					PRINTFORML
+					PRINTFORML 过了一会儿，%ANAME(MASTER)%去带回了%ANAME(対象)%
+					;TranslatedMark しばらくして、%ANAME(MASTER)%は%ANAME(対象)%を回収しに行った
+					PRINTFORMW 浑身沾满了白浊，前后两个肉穴里都装满了精液的的%ANAME(対象)%就这样被扔到了垃圾袋堆里……
+					;TranslatedMark 全身白濁にまみれ、両穴からも子種をこぼす%ANAME(対象)%が、生ゴミの袋の山に放り捨てられていた……
+					CALL FUCK_GANGBANG(対象, GET_SPERM_ID("地痞"), @"地痞的\@ RAND:2 ? 肉棒 # 唇\@", @"地痞")
+				ELSE
+					PRINTFORMW 闯入了现场，赶走了男人们
+					;TranslatedMark その場に乱入し、男達を追い払った
+					PRINTFORML 对%ANAME(対象)%表示感谢，说会好好让他感到舒服的，之后一起进入了巷子里
+					;TranslatedMark 感謝する%ANAME(対象)%を、お前を使うのは自分だと言い、路地裏へ連れ込む
+					PRINTFORMW 然后在那里，充分地享用了%ANAME(対象)%的身体……
+					;TranslatedMark そしてそこで、たっぷりと%ANAME(対象)%を使ってやった……
+					PRINTFORMW 筋疲力尽的%ANAME(対象)%，感到十分的幸福
+					;TranslatedMark 疲弊しぐったりとする%ANAME(対象)%は、どこか幸せそうだった
+					CALL FUCK_TRAIN(対象, GET_ID(MASTER), @"%ANAME(MASTER)%の\@ RAND:2 ? 肉棒 # 唇\@", @"%ANAME(MASTER)%")
+					CALL FUCK(MASTER, "Ｃ, 性交, 射精, 奉仕", "接吻喪失, 童貞喪失", 0, @"%ANAME(対象)%の\@ RAND:2 ? 秘貝 # 唇\@", "", @"%ANAME(対象)%の膣")
+				ENDIF
+			CASE 3
+				PRINTFORML %ANAME(MASTER)%和%ANAME(対象)%一起去喝酒了
+				;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%と酒を飲みに出かけた
+				PRINTFORML 我听说这家店就是所谓的艳遇酒吧……
+				;TranslatedMark この店がいわゆるハプニングバーであることは黙っておいたが……
+				PRINTFORML ……一个好色的老头向我打招呼。他带着个漂亮女人
+				;TranslatedMark ……スケベ親父が声をかけてきた。綺麗な女を連れている
+				PRINTFORML 看来是有交换女伴的兴趣……
+				;TranslatedMark どうやらスワッピングに興味があるようだが……
+				CALL ASK_YN("自己也感兴趣", "拒绝")
+				LOCAL:1 = RESULT
+				IF RESULT == 0
+					PRINTFORML 自己也有兴趣……得到%ANAME(MASTER)%许可后，老头立刻开始玩弄%ANAME(対象)%的身体
+					;TranslatedMark 自分も興味がある……%ANAME(MASTER)%が許可を出すと、親父は早速%ANAME(対象)%の身体を弄り始める
+					PRINTFORML %ANAME(対象)%期初感到十分惊讶，但是在老头那高超的指技下，表情开始变得荡漾起来
+					;TranslatedMark 最初は驚いていた%ANAME(対象)%だったが、親父のねちっこい指技に、すぐ顔を蕩かせ始めた
+					PRINTFORMW 另一方面，%ANAME(MASTER)%也在好好疼爱老头带来的女人
+					;TranslatedMark その一方で、%ANAME(MASTER)%も、親父の連れていた女をたっぷりと可愛がってやる
+					PRINTFORMW 就在%ANAME(MASTER)%的面前发情，再加上%ANAME(MASTER)%被别的女人抢走的醋意，似乎更让她难以忍受快感
+					;TranslatedMark %ANAME(MASTER)%の目の前だということと、他の女に%ANAME(MASTER)%をとられているという嫉妬が、より彼女を昂ぶらせたようだ
+					PRINTFORMW 之后，%ANAME(MASTER)%和老头把对方的伴侣带到酒店的不同房间，享受着和平时不同的性生活……
+					;TranslatedMark その後、%ANAME(MASTER)%と親父はホテルの別々の部屋に相手のパートナーを連れ込み、普段と違うセックスをそれぞれ楽しんだ……
+					PRINTFORML
+					PRINTFORML 仿佛什么都没发生过一样，%ANAME(対象)%又回来了
+					;TranslatedMark 何事もなかったかのように、%ANAME(対象)%は戻ってきた
+					PRINTFORMW 但她的脸颊却红红的，射入腔内的精液也顺着大腿流了下来。
+					;TranslatedMark しかしその頬は上気し、たっぷりと膣内射精された精液が、太腿をつう、と伝っていた
+					PRINTFORMW ……看来相当"开心"的样子
+					;TranslatedMark ……どうやらずいぶん「楽しかった」らしい
+					PRINTFORMW %ANAME(対象)%说请再带我去那家店
+					;TranslatedMark またあのお店に連れて行って下さいと、%ANAME(対象)%は言ってきた
+					CALL FUCK_RAPE(対象, GET_SPERM_ID("おっさん"), @"スケベ親父の\@ RAND:2 ? 肉棒 # 唇\@", @"スケベ親父")
+				ELSE
+					PRINTFORMW 虽然我没有什么兴趣……谁让我们彼此相爱呢
+					;TranslatedMark 興味はないが……互いに自分のパートナーを可愛がることにしよう
+					PRINTFORMW 老头虽然有点遗憾，但还是同意了
+					;TranslatedMark 親父は少し残念そうだったが、それはそれでと納得した
+					PRINTFORML %ANAME(MASTER)%立刻开始在老头面前疼爱%ANAME(対象)%
+					;TranslatedMark %ANAME(MASTER)%は早速、親父の目の前で%ANAME(対象)%を可愛がり始める
+					PRINTFORMW 老头也开始摸摸自己带来的女人的身体……
+					;TranslatedMark 親父の方も、自分が連れていた女の身体をまさぐり始めた……
+					PRINTFORMW 之后，%ANAME(対象)%和老头把自己的伴侣带到了酒店的不同房间，享受了性生活……
+					;TranslatedMark その後%ANAME(対象)%と親父はホテルの別々の部屋に自分のパートナーを連れ込み、セックスを楽しんだ……
+					CALL FUCK_TRAIN(対象, GET_ID(MASTER), @"%ANAME(MASTER)%の\@ RAND:2 ? 肉棒 # 唇\@", @"%ANAME(MASTER)%")
+					CALL FUCK(MASTER, "Ｃ, 性交, 射精, 奉仕", "接吻喪失, 童貞喪失", 0, @"%ANAME(対象)%の\@ RAND:2 ? 秘貝 # 唇\@", "", @"%ANAME(対象)%の膣")
+				ENDIF
+			CASE 4
+				PRINTFORML %ANAME(MASTER)%带着%ANAME(対象)%去了夜之街
+				;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%を連れ、夜の街に繰り出した
+				PRINTFORML ……好色老头打了招呼
+				;TranslatedMark ……スケベ親父が声をかけてきた
+				PRINTFORML 好像对%ANAME(対象)%有兴趣
+				;TranslatedMark どうやら%ANAME(対象)%に興味があるらしい
+				PRINTFORML 很佩服他能如此堂堂正正地要求想抱别人的女人……
+				;TranslatedMark 人の女を抱かせろとは、よくも堂々と言えたものだと感心はするが……
+				CALL ASK_YN("让他抱", "拒绝")
+				LOCAL:1 = RESULT
+				IF RESULT == 0
+					PRINTFORMW 这也许会很有趣。告诉%ANAME(対象)%完事后记得回来，答应了老头的要求
+					;TranslatedMark それも面白いだろう。ことが終わったら戻ってくるよう%ANAME(対象)%に伝え、親父に許可を出してやる
+					PRINTFORML 老头抱着%ANAME(対象)%的腰，一边抚摸她着屁股一边走，把%ANAME(対象)%带进了酒店
+					;TranslatedMark 我が物顔で%ANAME(対象)%の腰を抱き、尻を撫で回して歩きながら、親父は%ANAME(対象)%をホテルへ連れ込んだ
+					PRINTFORMW 看着两个人消失在酒店，%ANAME(MASTER)%一个人回去了……
+					;TranslatedMark 二人がホテルに消えるのを眺めてから、%ANAME(MASTER)%は一人で帰った……
+					PRINTFORML
+					PRINTFORMW 仿佛什么都没发生过一样，%ANAME(対象)%又回来了
+					;TranslatedMark 何事もなかったかのように、%ANAME(対象)%は戻ってきた
+					PRINTFORML 虽然好像洗过澡了，但是身体里有着无法隐藏的偷情的气味——其他男人的气味
+					;TranslatedMark 湯浴みはしてきたようだが、その身体からは、隠しきれない情交の香りが――他の男の匂いが漂っている
+					PRINTFORMW 为了覆盖掉这种气味，%ANAME(MASTER)%抱着%ANAME(対象)%做了很多次
+					;TranslatedMark それを上書きするように、%ANAME(MASTER)%は%ANAME(対象)%をたっぷりと使ってやった
+					PRINTFORMW 也许是在比较%ANAME(MASTER)%和那个老头吧，%ANAME(対象)%的表现比平时更加激烈……
+					;TranslatedMark あの親父と%ANAME(MASTER)%を比較しているのか、%ANAME(対象)%はいつもより激しく乱れてみせた……
+					CALL FUCK_RAPE(対象, GET_SPERM_ID("おっさん"), @"スケベ親父の\@ RAND:2 ? 肉棒 # 唇\@", @"スケベ親父")
+					CALL FUCK(MASTER, "Ｃ, 性交, 射精, 奉仕", "接吻喪失, 童貞喪失", 0, @"%ANAME(対象)%の\@ RAND:2 ? 秘貝 # 唇\@", "", @"%ANAME(対象)%の膣")
+				ELSE
+					PRINTFORML 没有那种无聊的兴趣。断然拒绝了
+					;TranslatedMark 誰がお前のような冴えない奴に。きっぱりと断った
+					PRINTFORMW 于是两人握着手，%ANAME(MASTER)%把%ANAME(対象)%带进了酒店……
+					;TranslatedMark そこで指をくわえて見ていろと言い放ち、%ANAME(MASTER)%は%ANAME(対象)%をホテルに連れ込んだ……
+					PRINTFORMW ……谁会让给那样的男人，%ANAME(対象)%是属于自己的
+					;TranslatedMark ……誰があんな男にくれてやるか、%ANAME(対象)%は自分のものだ
+					PRINTFORMW 为了证实这一点，也是为了让%ANAME(対象)%用身体好好体会到，狠狠地、激烈地做了……
+					;TranslatedMark それを確かめるように、そして%ANAME(対象)%本人にも教え込むように、激しく抱いた……
+					CALL FUCK_TRAIN(対象, GET_ID(MASTER), @"%ANAME(MASTER)%の\@ RAND:2 ? 肉棒 # 唇\@", @"%ANAME(MASTER)%")
+					CALL FUCK(MASTER, "Ｃ, 性交, 射精, 奉仕", "接吻喪失, 童貞喪失", 0, @"%ANAME(対象)%の\@ RAND:2 ? 秘貝 # 唇\@", "", @"%ANAME(対象)%の膣")
+				ENDIF
+		ENDSELECT
+		CFLAG:対象:従属度 += 200
+		CFLAG:対象:依存度 += 200
+
+	ENDIF
+;本命パート
+;部下任せにすると主人公がだいぶ屈折した性嗜好を見せるぞ　大丈夫かコイツ
+ELSEIF IS_SP_COUNTRY(CFLAG:対象:所属) && IS_FALLEN_TO_SP_COUNTRY(対象) && CFLAG:対象:所属 != GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_自警団) && !CFLAG:対象:捕虜先
+	PRINTFORML 「%ANAME(MASTER)%，您有空吗？」
+	;TranslatedMark 「%ANAME(MASTER)%さん、暇じゃないッスか？」
+	PRINTFORMW 「那样的话不去玩吗？我知道一个好地方」
+	;TranslatedMark 「アレだったら遊びに行きません？　いいとこ知ってるんスよ」
+	PRINTFORML 正在做工作的时候，一个部下走过来打了招呼
+	;TranslatedMark 仕事をしていたところ、部下が声をかけてきた
+	PRINTFORML 这家伙是公认的花花公子。这个男人所称的“好地方”，通常与女人有关...
+	;TranslatedMark こいつは自他共に認める女好きだ。そんな男のいう「いいとこ」だから、大抵女がらみだろうが……
+	CALL ASK_YN("一起去", "你一个人去吧")
+	IF RESULT ==1
+		PRINTFORMW 我这边很忙，你自己去吧，我是这么跟他说的。
+		;TranslatedMark こっちは忙しいんだ、一人で行ってこい、そう伝えた
+		PRINTFORML 「诶～、好不起劲啊」
+		;TranslatedMark 「え～っ、ノリ悪ぃなぁ」
+		PRINTFORMW 「嘛，没办法啦，%ANAME(MASTER)%还有工作呢」
+		;TranslatedMark 「まぁしょうがないっスよね、%ANAME(MASTER)%さん仕事ありますもんね」
+		PRINTFORMW 他惋惜地走开了……
+		;TranslatedMark 彼は残念そうに立ち去っていった……
+		RETURN 1
+	ELSE
+		PRINTFORML 「这样正好！那么，走吧」
+		;TranslatedMark 「そうこなくっちゃ！　さ、行きましょ行きましょ」
+		PRINTFORMW 他旋即把%ANAME(MASTER)%带到了夜之街……
+		;TranslatedMark 彼は早速、%ANAME(MASTER)%を夜の街へと連れ出した……
+		PRINTFORML
+		LOCAL = RAND:4
+		SELECTCASE LOCAL
+			CASE 0
+				PRINTFORMW 部下带着%ANAME(MASTER)%去喝酒
+				;TranslatedMark 部下は%ANAME(MASTER)%を飲みに連れ出した
+				PRINTFORMW 「嘿嘿，那家店，是我常去的酒馆」
+				;TranslatedMark 「へへへ、よかったでしょあの店、おれの行きつけの飲み屋で」
+				PRINTFORML 两个人喝酒后的归途上，一个男人向我打招呼
+				;TranslatedMark 二人で酒を楽しんだ後の帰路で、男が声をかけてくる
+				PRINTFORMW 你们现在有空吗，有空的话就和我的奴隶玩玩吧
+				;TranslatedMark お前ら今暇か、暇なら俺の奴隷で遊ばないかというのだ
+				PRINTFORMW 那男人带着个女人……正确地说，是用绳索牵着女人
+				;TranslatedMark 男は女を連れていた……正しくは、リードで引いていた
+				PRINTFORML 对那个女人，%ANAME(MASTER)%有印象。或者说认识
+				;TranslatedMark その女に、%ANAME(MASTER)%は見覚えがあった。というか知っている
+				PRINTFORMW 正是之前下落不明的%ANAME(対象)%
+				;TranslatedMark それは行方知れずになっていた、%ANAME(対象)%だった
+				PRINTFORML 只不过，那不是%ANAME(MASTER)%所认识的她
+				;TranslatedMark ただ、それは%ANAME(MASTER)%の知る彼女ではなかった
+				PRINTFORML 穿着强调胸部、腰部、臀部线条的下流服装
+				;TranslatedMark 胸や腰、尻のラインを強調するような卑猥な衣装を着ている
+				PRINTFORML 露出来的肚脐附近刻着心形的刻印
+				;TranslatedMark 露わになった臍のあたりには、ハートマークの刻印が刻まれている
+				PRINTFORML 缠绵着猥亵的气氛，空气中像是散发着费洛蒙的气味
+				;TranslatedMark 纏った雰囲気は、なにかしらのフェロモンでも撒いているかのように淫らだった
+				PRINTFORML 在不在一起的时间里，似乎是就这样变成了性奴隶
+				;TranslatedMark 見ないと思ったら、どうやら性奴隷にされていたようだ
+				PRINTFORMW 她可能是在悲惨的生活中彻底忘记了我，完全没有露出惊讶的样子
+				;TranslatedMark 彼女の方は、その過酷な生活でこちらのことをすっかり忘れてしまったのか、驚いた様子などは全く見せなかった
+				PRINTFORMW 「呜哇……好厉害的女人……大叔，你说的是真的吗？」
+				;TranslatedMark 「うおー……すげぇ女だ……おっさん、マジで言ってんの？」
+				PRINTFORML 当然，男人点点头。是吗？男子对%ANAME(対象)%说，她也点了点头
+				;TranslatedMark もちろん、と男は頷く。そうだよな？　と男が%ANAME(対象)%に言うと、彼女も頷いた
+				PRINTFORMW 请随意使用我，她深深地低头说，那是我的幸福
+				;TranslatedMark どうか私をお使いくださいませ、それが私の幸せですと、深々と頭を下げてみせる
+				PRINTFORMW 「怎么办呢%ANAME(MASTER)%，那个孩子我超喜欢的」
+				;TranslatedMark 「どうしますか%ANAME(MASTER)%さん、あの子俺超好みなんスけど」
+				PRINTFORML 部下非常兴奋。 他的眼神在告诉他我，哪怕是一个人，他也一定要抱这个女人.....
+				;TranslatedMark 部下はひどく興奮している。自分一人でもこの女を抱くぞと、その目は語っている……
+				CALL ASK_YN(@"使用%ANAME(対象)%", "交给部下")
+				LOCAL:1 = RESULT
+				IF RESULT == 0
+					PRINTFORML 这个女人是一个不值钱的奴隶。认不认识她根本没有意义。
+					;TranslatedMark この女は無価値な奴隷なのだ。知り合いかどうかなど、そこには関わらない
+					PRINTFORMW 如果你同意的话，那就恭敬不如从命，让我随意的“用”她吧
+					;TranslatedMark 使わせてくれるのなら、お言葉に甘えて使わせてもらうとしよう
+					PRINTFORMW ……倒不如说，正因为是认识的人，才会有奇怪的感觉开始萌发……
+					;TranslatedMark ……むしろ、知り合いだからこそ、燃え上がるものがあるかもしれない……
+					PRINTFORMW 「嘿嘿嘿，真是个好女人啊，喂，叫什么名字啊」
+					;TranslatedMark 「っへへへ、いい女だなぁ、おい、名前なんて言うんだよ」
+					PRINTFORMW 她回答的名字虽然是假名，想必是作为奴隶的情况。我就装作不知道吧。
+					;TranslatedMark 彼女の答えた名前は偽名だったが、奴隷としての事情があるのだろう。知らない振りをしておいてやる
+					PRINTFORML 另一方面，部下完全沉溺其中，带着得意的表情表情抚摸着%ANAME(対象)%的乳房和屁股
+					;TranslatedMark 一方の部下はすっかりその気になっており、%ANAME(対象)%の乳房や尻を我が物顔で撫で回している
+					PRINTFORMW 不知是不是完全被那个男人驯服了，%ANAME(対象)%就这样露出了神魂颠倒的样子
+					;TranslatedMark あの男にすっかり手なずけられているのか、%ANAME(対象)%はそれだけで顔を蕩かしてみせた
+					PRINTFORMW %ANAME(MASTER)%和部下把%ANAME(対象)%带到附近的小巷里，在那里充分享受了她的身体……
+					;TranslatedMark %ANAME(MASTER)%と部下は%ANAME(対象)%を近くの路地裏に連れ込み、そこでたっぷりと楽しんだ……
+					CALL FUCK_GANGBANG(対象, GET_ID(MASTER), @"%ANAME(MASTER)%の\@ RAND:2 ? 肉棒 # 唇\@", @"%ANAME(MASTER)%")
+					CALL FUCK(MASTER, "Ｃ, 性交, 射精, 奉仕", "接吻喪失, 童貞喪失", 0, @"%ANAME(対象)%の\@ RAND:2 ? 秘貝 # 唇\@", "", @"%ANAME(対象)%の膣")
+				ELSE
+					PRINTFORML 果然，在这种场合把认识的人……有些过分……
+					;TranslatedMark 流石に知り合いを、そんな風に使うのはキツい……
+					PRINTFORMW 我说出了婉拒的话，部下露出难以置信的表情
+					;TranslatedMark 自分は遠慮しておくと言うと、部下は信じられないという顔を浮かべた
+					PRINTFORML 「哈！？%ANAME(MASTER)%是同性恋吗！？」
+					;TranslatedMark 「はァ！？　%ANAME(MASTER)%さんホモか何かなんですか！？」
+					PRINTFORMW 「……算了，那样的话，就算只有我一个人也会玩得很开心的」
+					;TranslatedMark 「……まぁいいや、それならそれで、俺だけでも楽しませてもらいますよ」
+					PRINTFORML 别人的奴隶被其他人怎么使用，自己都没有权力阻止
+					;TranslatedMark 他人の奴隷を他人が使うことまで、止められはしない
+					PRINTFORMW 虽然说过随他喜欢，他似乎本来就是这么打算的
+					;TranslatedMark 好きにしろと言ったが、彼はそもそもそのつもりだったようだ
+					PRINTFORMW 「嘿嘿，真是个好女人啊，喂，叫什么名字啊」
+					;TranslatedMark 「へへ、いい女だなぁ、おい、名前なんて言うんだよ」
+					PRINTFORMW 她回答的名字虽然是假名，想必是作为奴隶的情况。我就装作不知道吧。
+					;TranslatedMark 彼女の答えた名前は偽名だったが、奴隷としての事情があるのだろう。知らない振りをしておいてやる
+					PRINTFORML 另一方面，部下完全沉溺其中，带着得意的表情表情抚摸着%ANAME(対象)%的乳房和屁股
+					;TranslatedMark 一方の部下はすっかりその気になっており、%ANAME(対象)%の乳房や尻を我が物顔で撫で回している
+					PRINTFORMW 不知是不是完全被那个男人驯服了，%ANAME(対象)%就这样露出了神魂颠倒的样子
+					;TranslatedMark あの男にすっかり手なずけられているのか、%ANAME(対象)%はそれだけで顔を蕩かしてみせた
+					PRINTFORMW 「那么，我就稍微享受一下了，嘿嘿……」
+					;TranslatedMark 「それじゃ、俺ぁちょっと楽しんできますんで、へへ……」
+					PRINTFORMW 部下把%ANAME(対象)%带到附近的小巷里，好像在那里充分享受了……
+					;TranslatedMark 部下は%ANAME(対象)%を近くの路地裏に連れ込み、そこでたっぷりと楽しんだようだ……
+					CALL FUCK_RAPE(対象, GET_SPERM_ID("兵士"), @"%ANAME(MASTER)%の部下の\@ RAND:2 ? 肉棒 # 唇\@", @"%ANAME(MASTER)%の部下")
+				ENDIF
+			CASE 1
+				PRINTFORML 部下把%ANAME(MASTER)%带到了妓院
+				;TranslatedMark 部下は%ANAME(MASTER)%を娼館に連れてきた
+				PRINTFORMW 没想到会把上司带到这种地方来……稍微有点吃惊
+				;TranslatedMark まさか上司をこんなところに連れてくるとは……と、少しばかり呆れる
+				PRINTFORMW 「那个孩子是新人啊，呵呵，真可爱啊」
+				;TranslatedMark 「あれこの子新人だ、へへ、結構可愛いなァ」
+				PRINTFORML 部下指着墙上贴出的娼妇照片中的一张
+				;TranslatedMark 壁一面に張り出された娼婦の写真のうち一つを、部下は指さす
+				PRINTFORML 照片上的女人，%ANAME(MASTER)%还记得见过……是下落不明的%ANAME(対象)%
+				;TranslatedMark そこに写った女に、%ANAME(MASTER)%は見覚えがある……行方知れずになっていた%ANAME(対象)%だ
+				PRINTFORMW 名字虽然是花名，但毫无疑问是本人
+				;TranslatedMark 名前こそ源氏名になっていたが、間違いない、本人だ
+				PRINTFORML 只是，照片上的她，比起记忆中的%ANAME(MASTER)%更带有淫荡的气质
+				;TranslatedMark ただ、写真に写る彼女は、%ANAME(MASTER)%の記憶しているよりもはるかに淫らな雰囲気をまとっていた
+				PRINTFORMW 在这里工作之前，肯定发生过什么……
+				;TranslatedMark ここで働き始める前に、何かあったことは間違いない……
+				PRINTFORMW 「哇!什么都能玩，真是厉害啊，明明是这么可爱的女孩」
+				;TranslatedMark 「うはっ！　どんなプレイもオッケーってすげぇな、こんなかわいこちゃんなのに」
+				PRINTFORMW 「这孩子怎么样？%ANAME(MASTER)%，我告诉你，我的直觉是对的。」
+				;TranslatedMark 「この子どうスか%ANAME(MASTER)%さん、俺の勘が当たりだって告げてるんスよ」
+				PRINTFORMW 「如果%ANAME(MASTER)%不指名的话，我就指名吧，嘿嘿」
+				;TranslatedMark 「%ANAME(MASTER)%さんが指名しないなら俺が指名しよっかなぁ、へへへ」
+				PRINTFORML 知道是熟人之后指名到底怎么样呢。但是，如果自己不指名的话，部下会指名吧。会被谁抱这一点也不会改变
+				;TranslatedMark 流石に知り合いと知っていて指名するのはいかがなものか。しかし、自分が買わなければ部下が買うだろう。誰かに抱かれることに変わりはない
+				PRINTFORML 而且，是为了生存才变成这样的，在某种程度上已经做好觉悟了吧
+				;TranslatedMark それに、彼女とて生きていくために春をひさいでいるのだろうし、ある程度覚悟しているのではないか
+				PRINTFORML 与其像别人一样用道德情操来评判它，不如自己直接……
+				;TranslatedMark それを他人事のような道徳感情で判断するくらいなら、いっそ買ってやったほうがいいのではないか……
+				CALL ASK_YN(@"指名%ANAME(対象)%", "让给部下")
+				LOCAL:1 = RESULT
+				IF RESULT == 0
+					PRINTFORMW 就这样让其他男人抱的话，让自己来会更好，这样想着，决定指名%ANAME(対象)%……
+					;TranslatedMark 他の男に抱かれるくらいなら。そう思い、%ANAME(対象)%を指名することにした……
+					PRINTFORMW ……面前的人可以肯定是%ANAME(対象)%
+					;TranslatedMark ……通された先にいたのは、間違いなく%ANAME(対象)%だった
+					PRINTFORML 从薄的近乎透明的衣服里露出姣好的身体，比%ANAME(MASTER)%的记忆中更加诱人
+					;TranslatedMark 透けるほど薄手の衣装を身に着けた彼女の身体は、%ANAME(MASTER)%の記憶にあるよりずっといやらしくなっていた
+					PRINTFORML 在她的下腹上刻着心形的印记
+					;TranslatedMark その下腹には、ハートの刻印が刻まれている
+					PRINTFORMW 考虑到失踪的时间，不难想象她在这里工作之前的生活是什么样的。
+					;TranslatedMark ここで働くまでにどのような生活をしていたのか、行方不明となっていたことと併せて鑑みれば、想像に難くなかった
+					PRINTFORML 她恭恭敬敬地、用着妓女的腔调。像是不记得我们的样子
+					;TranslatedMark 彼女は恭しく、娼婦らしい口上を述べてみせる。こちらのことは覚えていないようだった
+					PRINTFORMW 那样的话，就这样，%ANAME(MASTER)%和%ANAME(対象)%一起，度过了客人和娼妇的炽热一夜
+					;TranslatedMark それならそれで好都合と、%ANAME(MASTER)%は%ANAME(対象)%と、客と娼婦としての熱い一夜を過ごした
+					PRINTFORMW 看着%ANAME(対象)%沉溺性爱的样子，加上与她认识的事实，让%ANAME(MASTER)%异常兴奋……
+					;TranslatedMark 激しく乱れる%ANAME(対象)%の様子と、彼女が知り合いであるという事実は、%ANAME(MASTER)%を大いに楽しませた……
+					CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%の\@ RAND:2 ? 肉棒 # 唇\@", @"%ANAME(MASTER)%")
+					CALL FUCK(MASTER, "Ｃ, 性交, 射精, 奉仕", "接吻喪失, 童貞喪失", 0, @"%ANAME(対象)%の\@ RAND:2 ? 秘貝 # 唇\@", "", @"%ANAME(対象)%の膣")
+				ELSE
+					PRINTFORML 果然熟人做很难……即便可能只是长相相似的人
+					;TranslatedMark 流石に知り合いはキツい……それが他人のそら似であっても
+					PRINTFORMW 我说出了婉拒的话，部下露出难以置信的表情
+					;TranslatedMark 自分は遠慮しておくと言うと、部下は信じられないという顔を浮かべた
+					PRINTFORML 「哎！太可惜了！这么好的女孩子一般可是买都买不到啊！」
+					;TranslatedMark 「えーっ！　勿体ねぇ！　こんないい娘フツー買えないッスよ！？」
+					PRINTFORMW 「……看起来太完美了吧，有种会是陷阱的感觉。嘛，我还是指名这位」
+					;TranslatedMark 「……あーまぁでも、良すぎて逆に地雷の香りはしますけどね。まぁ俺は指名しますけど」
+					PRINTFORML 不能阻止别人指名谁
+					;TranslatedMark 他人が誰を指名するかまで止められはしない
+					PRINTFORMW 虽然说过随他喜欢，他似乎本来就是这么打算的
+					;TranslatedMark 好きにしろと言ったが、彼はそもそもそのつもりだったようだ
+					PRINTFORMW 「嘿嘿，好期待啊，嘿嘿，嘿嘿」
+					;TranslatedMark 「へへ、楽しみだなぁ、へへへ、へへへへ」
+					PRINTFORML 部下十分在意，兴高采烈地朝指定的房间走去
+					;TranslatedMark 部下はすっかりその気になっており、うきうきしながら指定された部屋へ向かっていった
+					PRINTFORMW %ANAME(MASTER)%也指定了一个心仪的女人，朝着隔壁房间走去
+					;TranslatedMark %ANAME(MASTER)%も適当な女を指名し、部下の入った隣の部屋へ向かう
+					PRINTFORMW 从部下的房间里传来的娇喘，毫无疑问是%ANAME(対象)%的声音
+					;TranslatedMark 彼が楽しんでいる部屋から聞こえてくる嬌声は、紛れもなく%ANAME(対象)%のそれだった
+					PRINTFORML 那真的是%ANAME(対象)%吗。作为娼妇，跟各种各样的男人做了吗
+					;TranslatedMark あれは本当に、%ANAME(対象)%だったのだろうか。娼婦として、色々な男に買われているのだろうか
+					PRINTFORML 认识的人就在自己身边，作为娼妇被男人任意使用着
+					;TranslatedMark 知り合いが、自分のすぐ側で、娼婦として男に抱かれている
+					PRINTFORMW 然后就在她的旁边，自己正开心地抱着好多个妓女一起玩乐……面对这样的事实，%ANAME(MASTER)%内心荡漾不已，止不住地释放出精液……
+					;TranslatedMark そしてその横で、自分は脳天気に、一山いくらの娼婦など抱いている……その事実に、%ANAME(MASTER)%は激しく昂ぶり、何度も精を放った……
+					CALL FUCK_MAKELOVE(対象, GET_SPERM_ID("兵士"), @"%ANAME(MASTER)%の部下の\@ RAND:2 ? 肉棒 # 唇\@", @"%ANAME(MASTER)%の部下")
+					CALL FUCK(MASTER, "Ｃ, 性交, 射精, 奉仕", "接吻喪失, 童貞喪失", 0, @"娼婦の\@ RAND:2 ? 秘貝 # 唇\@", "", @"娼婦の膣")
+				ENDIF
+			CASE 2
+				PRINTFORML 部下把%ANAME(MASTER)%带到了肉便器小屋
+				;TranslatedMark 部下は%ANAME(MASTER)%を肉便器小屋に連れてきた
+				PRINTFORMW 没想到会把上司带到这种地方来……不知道该怎么说，有点吃惊
+				;TranslatedMark まさか上司をこんなところに連れてくるとは……大物というかなんというか、少しばかり呆れる
+				PRINTFORML 在小屋里，裸露下半身的女人们，以壁尻的状态整齐的排列着
+				;TranslatedMark 小屋の中には、下半身を剥き出しにした女たちが、壁尻の状態で並べられていた
+				PRINTFORMW 为了分别区分，在屁股稍微往上一点的地方贴着脸部照片。当然，也不清楚那是不是本人的照片
+				;TranslatedMark それぞれ区別がつくよう、尻の少し上のところに、顔写真が貼られている。最も、それが本当に本人の写真かは分からないわけだが
+				PRINTFORMW 「那个孩子是新人啊，呵呵，真可爱啊」
+				;TranslatedMark 「あれこの子新人だ、へへ、結構可愛いなァ」
+				PRINTFORML 注意到摆放着的"便器"中的一个
+				;TranslatedMark 並べられた「便器」の一つに、彼は注目する
+				PRINTFORML 看着那张女人的照片，%ANAME(MASTER)%有着眼熟的感觉……是行踪不明的%ANAME(対象)%
+				;TranslatedMark 顔写真に写った女に、%ANAME(MASTER)%は見覚えがある……行方知れずになっていた%ANAME(対象)%だ
+				PRINTFORMW 只是，照片上的她，比起记忆中的%ANAME(MASTER)%更带有淫荡的气质
+				;TranslatedMark ただ、写真に写る彼女は、%ANAME(MASTER)%の記憶しているよりもはるかに淫らな雰囲気をまとっていた
+				PRINTFORMW 「哇，好棒啊」
+				;TranslatedMark 「っへぇー、いいケツしてんなぁ」
+				PRINTFORML 部下理所当然般地抚摸着她的屁股，手指插进了湿润的的女性器
+				;TranslatedMark 部下は当然のように、その尻を撫で回し、濡れた女性器に指を抜き差ししている
+				PRINTFORMW 正如他所说，她的屁股是白白的，很圆润，比其他的便器更显眼，十分的下流，仿佛正在诱惑男人一样
+				;TranslatedMark 彼のいうとおり、その尻は白く、丸く、他の便器より際立っていやらしい、男を誘うようなものだった
+				PRINTFORML 另一方面，%ANAME(MASTER)%思绪有些混乱
+				;TranslatedMark 一方の%ANAME(MASTER)%は、ひどく混乱していた
+				PRINTFORML 为什么%ANAME(対象)%会在这里？不是已经失踪了吗
+				;TranslatedMark %ANAME(対象)%がどうしてこんなところに？　行方不明になっていたはずなのに
+				PRINTFORML 难道，在失踪期间，一直在这样的地方工作吗
+				;TranslatedMark もしかして、行方不明になっている間、ずっとこのようなところで働かされていたのだろうか
+				PRINTFORMW 那样的话，这个小屋的经营者，不是做了相当见不得人的事吗？
+				;TranslatedMark そうしたら、この小屋の経営者は、かなり黒いことに手を染めているのでは？
+				PRINTFORMW ……不不，这张脸照片和下半身有可能是别人的
+				;TranslatedMark ……いやいや、この顔写真と下半身とは別人の可能性だってあるのだ
+				PRINTFORMW 不过这也很可能是从别的地方偶然得来的%ANAME(対象)%的照片
+				;TranslatedMark どこかから手に入れた写真が、たまたま%ANAME(対象)%のものだったという可能性だってあるではないか
+				PRINTFORML 「啊，这个便器真好啊，就用这个射出来吧」
+				;TranslatedMark 「あー、この便器いいなぁ、これで抜こうかな」
+				PRINTFORMW 「啊，如果%ANAME(MASTER)%想用的话我就让给你，当然」
+				;TranslatedMark 「あっ、%ANAME(MASTER)%さんが使いたいっていうんならお譲りするッスよ、もちろん」
+				PRINTFORML 部下似乎想要就这样去使用%ANAME(対象)%的下半身
+				;TranslatedMark 部下はすっかり、%ANAME(対象)%とおぼしき下半身を使うつもりでいるようだ
+				PRINTFORML 但是……阻止他的话，就是要自己去使用%ANAME(対象)%……
+				;TranslatedMark だが……彼を止めるということは、自分が%ANAME(対象)%を使うということになる
+				PRINTFORML 不不不，等一下，也有不是她的可能性……
+				;TranslatedMark いやいや待て、彼女はない可能性だってあるではないか……
+				CALL ASK_YN(@"使用长得和%ANAME(対象)%很像的女人", "让给部下")
+				LOCAL:1 = RESULT
+				IF RESULT == 0
+					PRINTFORML 不可能是%ANAME(対象)%，仅凭那张照片来判断也太荒谬了
+					;TranslatedMark %ANAME(対象)%ではない、あの写真はでたらめだ
+					PRINTFORML 而且，把这么好的女人对让给部下太浪费了，还是自己使用吧
+					;TranslatedMark その上で、こんないい女は部下にはもったいない、自分が使う
+					PRINTFORMW 这样向自己辩解，把部下推到一边
+					;TranslatedMark そう己に言い訳し、部下を押しのけた
+					PRINTFORMW 「啊，真遗憾啊。算了，那我就换个便器吧……」
+					;TranslatedMark 「えー、残念だな。まぁいいや、じゃ、俺は別の便器にするんで……」
+					PRINTFORML 因为特意把部下推开了，所以只能自己用了
+					;TranslatedMark わざわざ押しのけた手前、使わないというわけにもいかない
+					PRINTFORMW 尽管思绪有些混乱，%ANAME(MASTER)%犹豫了一下，还是把阴茎插进了早就湿润的肉穴里，开始发泄自己的欲望
+					;TranslatedMark 混乱し、躊躇いつつも、%ANAME(MASTER)%は便器の濡れそぼつ肉穴にペニスを差し込み、使い始めた
+					PRINTFORMW 那只雌穴是一个很棒的名器，而且，还有可能这个肉穴属于认识的人，这让%ANAME(MASTER)%兴奋不已
+					;TranslatedMark その雌穴が素晴らしい名器だったこと、そして、それが知り合いかもしれないという事実が、%ANAME(MASTER)%を昂ぶらせる
+					PRINTFORMW %ANAME(MASTER)%忘我地发泄，在那雌穴里中出了好几次……
+					;TranslatedMark %ANAME(MASTER)%はしまいには我を忘れ、その雌穴の中に何度も子種をぶちまけた……
+					CALL FUCK_GANGBANG(対象, GET_ID(MASTER), @"%ANAME(MASTER)%の\@ RAND:2 ? 肉棒 # 唇\@", @"%ANAME(MASTER)%")
+					CALL FUCK(MASTER, "Ｃ, 性交, 射精, 奉仕", "接吻喪失, 童貞喪失", 0, @"%ANAME(対象)%の\@ RAND:2 ? 秘貝 # 唇\@", "", @"%ANAME(対象)%の膣")
+				ELSE
+					PRINTFORML 如果真的是%ANAME(対象)%的话，不忍心就这样把她……
+					;TranslatedMark もし本当に%ANAME(対象)%だったとして、それを使うなどということには堪えられない
+					PRINTFORMW 我说出了婉拒的话，部下露出难以置信的表情
+					;TranslatedMark 自分は遠慮しておくと言うと、部下は信じられないという顔を浮かべた
+					PRINTFORML 「哎！太可惜了！明明是这么好的便器」
+					;TranslatedMark 「えーっ！　勿体ねぇ！　こんないい便器なのに」
+					PRINTFORMW 「……嘛，对我来说是很难得的。嘿嘿」
+					;TranslatedMark 「……まっ、俺としてはありがたいッスけどね。へへへ」
+					PRINTFORML 部下放下外衣，露出自己的阴茎
+					;TranslatedMark 部下は下衣を下ろし、己のペニスを露出させる
+					PRINTFORMW 然后在湿淋淋的雌穴里，不客气地插入了肉棒
+					;TranslatedMark そしてその濡れそぼつ雌穴に、遠慮なく肉棒を挿入した
+					PRINTFORML 「啊~这是什么啊，好厉害的名器啊，是%ANAME(対象)%吗？真棒啊」
+					;TranslatedMark 「あ～ッ、なんだこれ、すっげぇ名器だッ、%ANAME(対象)%ちゃんだっけ？　やるじゃん、うっは」
+					PRINTFORMW 「还以为在这种地方当肉便器，会是怎样的下流的穴，没想到这么厉害啊!」
+					;TranslatedMark 「こんなとこで便器してっからどんなクソマンコかと思ったら、うっは、すげぇすげぇ」
+					PRINTFORMW 部下忘我地摆动着腰。从墙那边传来的娇喘，听起来很耳熟
+					;TranslatedMark 部下は無我夢中になって腰を振りたくる。壁の向こうから聞こえてくる嬌声は、聞き覚えのあるものだった
+					PRINTFORMW 难道真的是这样吗。%ANAME(対象)%不仅被部下使用，还被其他男人用作便器……？
+					;TranslatedMark まさか、本当にそうなのだろうか。%ANAME(対象)%が、部下のみならず他の男に便器として使われている……？
+					PRINTFORML 那样的想象，让%ANAME(MASTER)%的头开始有些昏昏沉沉
+					;TranslatedMark そのような想像は、%ANAME(MASTER)%に昏い欲望を抱かせた
+					PRINTFORMW 使用着部下旁边的便器，与其说是在意便器的情况，不如说是顺从与自己的欲望，%ANAME(MASTER)%多次射精……
+					;TranslatedMark 部下の隣の便器を使いながら、その便器の具合によってというより、己の抱いた欲望によって、%ANAME(MASTER)%は何度も射精した……
+					CALL FUCK_GANGBANG(対象, GET_SPERM_ID("兵士"), @"%ANAME(MASTER)%の部下の\@ RAND:2 ? 肉棒 # 唇\@", @"%ANAME(MASTER)%の部下")
+					CALL FUCK(MASTER, "Ｃ, 性交, 射精, 奉仕", "接吻喪失, 童貞喪失", 0, @"肉便器の\@ RAND:2 ? 秘貝 # 唇\@", "", @"肉便器の膣")
+				ENDIF
+			CASE 3
+				PRINTFORMW 部下带着%ANAME(MASTER)%去喝酒
+				;TranslatedMark 部下は%ANAME(MASTER)%を飲みに連れ出した
+				PRINTFORMW 「嘿嘿，那家店，是我常去的酒馆」
+				;TranslatedMark 「へへへ、よかったでしょあの店、おれの行きつけの飲み屋で」
+				PRINTFORML 两个人喝酒后的归途上，一个女人向我打招呼
+				;TranslatedMark 二人で酒を楽しんだ後の帰路で、女が声をかけてくる
+				PRINTFORMW 如果可以的话，可以请你跟我来吗
+				;TranslatedMark 良かったら私を買って下さいませんか、というのだ
+				PRINTFORML 站在这种地方的，一般都是便宜的妓女……但是，%ANAME(MASTER)%却停下了脚步
+				;TranslatedMark こんなところで立ちんぼとは、安い娼婦だ……だが、%ANAME(MASTER)%は立ち止まる
+				PRINTFORMW 对那个女人，%ANAME(MASTER)%有印象。或者说认识
+				;TranslatedMark その女に、%ANAME(MASTER)%は見覚えがあった。というか知っている
+				PRINTFORML 正是之前下落不明的%ANAME(対象)%
+				;TranslatedMark それは行方知れずになっていた、%ANAME(対象)%だった
+				PRINTFORML 只不过，那不是%ANAME(MASTER)%所认识的她
+				;TranslatedMark ただ、それは%ANAME(MASTER)%の知る彼女ではなかった
+				PRINTFORML 穿着突出胸部、腰部、臀部线条的下流服装
+				;TranslatedMark 胸や腰、尻のラインを強調するような卑猥な衣装を着ている
+				PRINTFORML 露出来的肚脐附近刻着心形的刻印
+				;TranslatedMark 露わになった臍のあたりには、ハートマークの刻印が刻まれている
+				PRINTFORML 缠绵着猥亵的气氛，空气中像是散发着费洛蒙的气味
+				;TranslatedMark 纏った雰囲気は、なにかしらのフェロモンでも撒いているかのように淫らだった
+				PRINTFORMW 很久没有见面了，没想到竟然在这种地方做娼妇的事……
+				;TranslatedMark 見ないと思ったら、こんなところで娼婦まがいのことをしているとは……
+				PRINTFORMW 她可能是在悲惨的生活中彻底忘记了我，完全没有露出惊讶的样子
+				;TranslatedMark 彼女の方は、その過酷な生活でこちらのことをすっかり忘れてしまったのか、驚いた様子などは全く見せなかった
+				PRINTFORMW 「呜哇……你不是很可爱吗？」
+				;TranslatedMark 「うおー……君超可愛いじゃん、マジで言ってんの？」
+				PRINTFORML 尽管%ANAME(MASTER)%有些苦恼，但部下却一副兴致勃勃的样子。
+				;TranslatedMark 困惑する%ANAME(MASTER)%をよそに、部下は興味津々だった
+				PRINTFORMW 她点点头，请一定要随意地使用我，低着头说，那就是我的幸福
+				;TranslatedMark 彼女は頷き、どうか私をお使いくださいませ、それが私の幸せですと、深々と頭を下げてみせる
+				PRINTFORMW 「怎么办呢%ANAME(MASTER)%，那个孩子我超喜欢的」
+				;TranslatedMark 「どうしますか%ANAME(MASTER)%さん、あの子俺超好みなんスけど」
+				PRINTFORML 部下非常兴奋。他的眼睛像是在说哪怕只有自己一个人也要买下这个女人的一晚……
+				;TranslatedMark 部下はひどく興奮している。自分一人でもこの女を買うと、その目は語っている……
+				CALL ASK_YN(@"买下%ANAME(対象)%", "交给部下")
+				LOCAL:1 = RESULT
+				IF RESULT == 0
+					PRINTFORML 现在的她只是个站街女。是个无所谓的不认识的人罢了
+					;TranslatedMark 今の彼女は街娼だ。知り合いかどうかなど、そこには関係がない
+					PRINTFORML 要出卖自己的身体的话，不如就让我来买吧
+					;TranslatedMark 売るというのなら、買わせてもらうだけだ
+					PRINTFORMW ……倒不如说，正因为是认识的人，才会有奇怪的感觉开始萌发……
+					;TranslatedMark ……むしろ、知り合いだからこそ、燃え上がるものがあるかもしれない……
+					PRINTFORMW 「嘿嘿嘿，真是个好女人啊，喂，叫什么名字啊」
+					;TranslatedMark 「っへへへ、いい女だなぁ、おい、名前なんて言うんだよ」
+					PRINTFORMW 她回答的名字虽然是假名，想必是作为奴隶的情况。我就装作不知道吧。
+					;TranslatedMark 彼女の答えた名前は偽名だったが、奴隷としての事情があるのだろう。知らない振りをしておいてやる
+					PRINTFORML 另一方面，部下完全沉溺其中，带着得意的表情表情抚摸着%ANAME(対象)%的乳房和屁股
+					;TranslatedMark 一方の部下はすっかりその気になっており、%ANAME(対象)%の乳房や尻を我が物顔で撫で回している
+					PRINTFORMW 不知是不是因为在日常生活中被尽情开发的了，%ANAME(対象)%的表情变成了放荡不羁的样子
+					;TranslatedMark 日頃の生活によって開発されているのか、%ANAME(対象)%はそれだけで顔を蕩かしてみせた
+					PRINTFORMW %ANAME(MASTER)%和部下把%ANAME(対象)%带到附近的酒店，在那里充分享受了……
+					;TranslatedMark %ANAME(MASTER)%と部下は%ANAME(対象)%を近くのホテルに連れ込み、そこでたっぷりと楽しんだ……
+					CALL FUCK_GANGBANG(対象, GET_ID(MASTER), @"%ANAME(MASTER)%の\@ RAND:2 ? 肉棒 # 唇\@", @"%ANAME(MASTER)%")
+					CALL FUCK(MASTER, "Ｃ, 性交, 射精, 奉仕", "接吻喪失, 童貞喪失", 0, @"%ANAME(対象)%の\@ RAND:2 ? 秘貝 # 唇\@", "", @"%ANAME(対象)%の膣")
+				ELSE
+					PRINTFORML 说到底，还是很难对着认识的人……
+					;TranslatedMark 流石に知り合いを買うのはキツい……
+					PRINTFORMW 我说出了婉拒的话，部下露出难以置信的表情
+					;TranslatedMark 自分は遠慮しておくと言うと、部下は信じられないという顔を浮かべた
+					PRINTFORML 「哈！？%ANAME(MASTER)%是同性恋吗！？」
+					;TranslatedMark 「はァ！？　%ANAME(MASTER)%さんホモか何かなんですか！？」
+					PRINTFORMW 「……算了，那样的话，就算只有我一个人也会玩得很开心的」
+					;TranslatedMark 「……まぁいいや、それならそれで、俺だけでも楽しませてもらいますよ」
+					PRINTFORML 即使是上司和部下，也没有权利干预对方的性生活
+					;TranslatedMark いくら上司と部下とはいえ、性生活に口出しする権利はない
+					PRINTFORMW 虽然说过随他喜欢，他似乎本来就是这么打算的
+					;TranslatedMark 好きにしろと言ったが、彼はそもそもそのつもりだったようだ
+					PRINTFORML 「嘿嘿，真是个好女人啊，喂，叫什么名字啊」
+					;TranslatedMark 「へへ、いい女だなぁ、おい、名前なんて言うんだよ」
+					PRINTFORMW 她回答的名字虽然是假名，想必是作为奴隶的情况。我就装作不知道吧。
+					;TranslatedMark 彼女の答えた名前は偽名だったが、奴隷としての事情があるのだろう。知らない振りをしておいてやる
+					PRINTFORML 另一方面，部下完全沉溺其中，带着得意的表情表情抚摸着%ANAME(対象)%的乳房和屁股
+					;TranslatedMark 一方の部下はすっかりその気になっており、%ANAME(対象)%の乳房や尻を我が物顔で撫で回している
+					PRINTFORMW 不知是不是因为在日常生活中被尽情地开发了，%ANAME(対象)%的表情变成了放荡不羁的样子
+					;TranslatedMark 日頃の生活によって開発されているのか、%ANAME(対象)%はそれだけで顔を蕩かしてみせた
+					PRINTFORMW 「那么，我就稍微享受一下了，嘿嘿……」
+					;TranslatedMark 「それじゃ、俺ぁちょっと楽しんできますんで、へへ……」
+					PRINTFORMW 部下把%ANAME(対象)%带到附近的酒店，好像在那里玩得很开心……
+					;TranslatedMark 部下は%ANAME(対象)%を近くのホテルに連れ込み、そこでたっぷりと楽しんだようだ……
+					CALL FUCK_RAPE(対象, GET_SPERM_ID("兵士"), @"%ANAME(MASTER)%の部下の\@ RAND:2 ? 肉棒 # 唇\@", @"%ANAME(MASTER)%の部下")
+				ENDIF
+		ENDSELECT
+
+	ENDIF
+ENDIF
+RETURN 1

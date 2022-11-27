@@ -1,0 +1,276 @@
+﻿;─────────────────────────────────────── 
+;●「捕虜調教」の開始時
+;─────────────────────────────────────── 
+@KOJO_TRAIN_START_B_K9
+#DIM 咲夜_対象
+#DIM 咲夜
+
+咲夜_対象 = MASTER
+咲夜 = NAME_TO_CHARA("咲夜")
+
+;咲夜口上の使用可否設定と初期化
+SIF CFLAG:咲夜:400 == 0
+	CALL KOJO_ASK_RESET_K9
+
+;口上を不使用設定なら戻る
+SIF CFLAG:咲夜:400 == 1
+	RETURN 0
+
+SETCOLOR 咲夜_口上カラー
+
+;─────────────────────────────────────── 
+;○初回
+;─────────────────────────────────────── 
+IF CFLAG:咲夜:202 == 0
+
+	;捕虜調教口上初回呼び出しフラグオン
+	CFLAG:咲夜:202 = 1
+
+	;───────────────────────────────────── 
+	;▼虚ろ
+	;───────────────────────────────────── 
+	IF TALENT:咲夜:空虚
+		PRINTFORML 「啊……嗯……」
+		;TranslatedMark 「あ……うー……」
+		PRINTFORMDL %ANAME(咲夜)%穿着乱糟糟的衣服像人偶一样伸出手……
+		;TranslatedMark %ANAME(咲夜)%は乱れた服装で人形のように手足を投げ出している……
+		WAIT
+		RESETCOLOR
+		RETURN 0
+	ENDIF
+
+	;───────────────────────────────────── 
+	;▼通常初対面
+	;　面識がなく紅魔館メンバーや知人キャラでない場合
+	;───────────────────────────────────── 
+	IF !CHECK_K9("面識")
+		IF CHECK_K9("敬語")
+			PRINTFORML 「%CALLNAME_K9(咲夜_対象)%……一定是什么不好的玩笑吧。你真的有这样的兴趣吗？」
+			;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%……何かの悪い冗談だと思いたいのですが。本気でこういったご趣味が？」
+			PRINTFORML 「如果是%CALLNAME_K9(咲夜_対象)%所需要的服务的话，我也可以勉为其难地将就一下……」
+			;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%に必要なご奉仕でしたら、お付き合いは致しますが……」
+			PRINTFORML 「我有搞砸了什么吗？竟然要受到这样的责备」
+			;TranslatedMark 「私はこのような責めを受けるほど何か失敗をしたのでしょうか？」
+		ELSE
+			PRINTFORML 「这到底是什么意思？」
+			;TranslatedMark 「これはいったい何のつもりなのかしら？」
+			PRINTFORML 「我可不记得你。不论是谁都可以，你已经饥渴到这种程度了？」
+			;TranslatedMark 「あなたなんて見覚えもないのだけど。誰でもいいくらい飢えているの？」
+			PRINTFORML 「不论时间有多么充裕，我的闲暇毕竟有限。还是打扫一下比较好呢」
+			;TranslatedMark 「時間がいくら無限でも、私はそれほど暇ではないわ。掃除でもしていたほうがマシね」
+			PRINTFORML 「能碰别的地方吗」
+			;TranslatedMark 「他を当たってくれるかしら」
+		ENDIF
+	;───────────────────────────────────── 
+	;▼通常初対面ではない
+	;　面識があるまたは紅魔館メンバーや知人キャラの場合
+	;───────────────────────────────────── 
+	ELSE
+		IF KDVAR:咲夜:咲夜_主の主は
+			PRINTFORML 「%CALLNAME_K9(咲夜_対象)%……请多多指教」
+			;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%……どうぞ%ANAME(咲夜)%をよろしくお躾けください」
+		ELSEIF KDVAR:咲夜:咲夜_主の客は
+			PRINTFORML 「%CALLNAME_K9(咲夜_対象)%……让我一直在等，这是怎么回事呢」
+			;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%……待ってはいたのだけれど、これはどういうことかしら」
+			PRINTFORML 「说什么武力屈从的必要性，你认为这真的有效果吗？」
+			;TranslatedMark 「力で従わせる必要なんて、ないのではなくて？」
+		ELSEIF IS_SLAVE(咲夜)
+			PRINTFORML 「%CALLNAME_K9(咲夜_対象)%……请多关照」
+			;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%……よろしくお願いします」
+			PRINTFORMDL %ANAME(咲夜)%意味深长地低下了头
+			;TranslatedMark %ANAME(咲夜)%は深く頭を垂れた
+		ELSEIF CHECK_K9("敬語") && IS_LOVER(咲夜)
+			PRINTFORML 「必须要和这样恶趣味的人交往吗？」
+			;TranslatedMark 「こういったご趣味にまでお付き合いしなくてはなりませんか？」
+			PRINTFORML 「虽然不讨厌被%CALLNAME_K9(咲夜_対象)%拥抱……」
+			;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%に抱かれるのは嫌ではありませんが……」
+			PRINTFORML 「如果认真对待游戏的话，好不容易构建起来的关系就会破坏，这是我为之不安的原因」
+			;TranslatedMark 「遊びが本気になって軽く見られると、関係が壊れてしまうことだけが私の不安材料です」
+		ELSEIF CHECK_K9("敬語")
+			PRINTFORML 「必须要和这样恶趣味的人交往吗？」
+			;TranslatedMark 「こういったご趣味にまでお付き合いしなくてはなりませんか？」
+			PRINTFORML 「担心在游戏中认真起来会被轻视」
+			;TranslatedMark 「遊びが本気になって軽く見られることは心配です」
+		ELSEIF IS_LOVER(咲夜)
+			PRINTFORML 「……你有什么打算？就算不做这种事，我也不讨厌被%CALLNAME_K9(咲夜_対象)%拥抱」
+			;TranslatedMark 「……何のつもりかしらね？　別にこんなことしなくても、%CALLNAME_K9(咲夜_対象)%に抱かれるのは嫌ではないわ」
+			PRINTFORML 「还是说，有那种不能被满足的兴趣呢」
+			;TranslatedMark 「それとも、それじゃ満足できないような趣味でもあるのかしら」
+			PRINTFORML 「好像选择了个让人困扰的人呢，我……」
+			;TranslatedMark 「困った人を選んでしまったようね、私……」
+		ELSEIF TALENT:咲夜:合意
+			PRINTFORML 「……你有什么打算？就算不做这种事，我也不讨厌被%CALLNAME_K9(咲夜_対象)%拥抱」
+			;TranslatedMark 「……何のつもりかしらね？　別にこんなことしなくても、%CALLNAME_K9(咲夜_対象)%に抱かれるのは嫌ではないわ」
+			PRINTFORML 「还是说，有那种不能被满足的兴趣呢」
+			;TranslatedMark 「それとも、それじゃ満足できないような趣味でもあるのかしら」
+			PRINTFORML 「不好意思，我们间的交往就到此为止吧？」
+			;TranslatedMark 「悪いけどそこまでは付き合いきれないわよ？」
+		ELSE
+			PRINTFORML 「你想干什么？%CALLNAME_K9(咲夜_対象)%是变态吗？」
+			;TranslatedMark 「何のつもりかしらね？　%CALLNAME_K9(咲夜_対象)%、変態なの？」
+			PRINTFORML 「不好意思，能不能碰其他的。哈……」
+			;TranslatedMark 「悪いけど他を当たってくれないかしら。はぁ……」
+		ENDIF
+	ENDIF
+	WAIT
+	RESETCOLOR
+	RETURN 0
+
+;─────────────────────────────────────── 
+;○二回目以降　デレ不足
+;─────────────────────────────────────── 
+ELSE
+
+	;───────────────────────────────────── 
+	;▼虚ろ
+	;───────────────────────────────────── 
+	IF TALENT:咲夜:空虚
+		PRINTFORML 「啊……嗯……」
+		;TranslatedMark 「あ……うー……」
+		PRINTFORMDL %ANAME(咲夜)%穿着乱糟糟的衣服像人偶一样伸出手……
+		;TranslatedMark %ANAME(咲夜)%は乱れた服装で人形のように手足を投げ出している……
+		WAIT
+		RESETCOLOR
+		RETURN 0
+	ENDIF
+
+	;───────────────────────────────────── 
+	;▼通常
+	;───────────────────────────────────── 
+	IF IS_SLAVE(咲夜)
+		PRINTFORML 「%CALLNAME_K9(咲夜_対象)%……请……请多多指教%ANAME(咲夜)%……」
+		;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%……どうぞ……%ANAME(咲夜)%をよろしくお躾けください……」
+	ELSEIF IS_LOVER(咲夜)
+		IF CHECK_K9("敬語")
+			PRINTFORML 「%CALLNAME_K9(咲夜_対象)%……这是给恋人的吗？」
+			;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%……これは恋人になさることでしょうか？」
+		ELSE
+			PRINTFORML 「%CALLNAME_K9(咲夜_対象)%……以为是恋人，是心理作用吗？」
+			;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%……恋人になったと思ったのは気のせいだったかしら？」
+		ENDIF
+	ELSE
+		IF CHECK_K9("敬語")
+			PRINTFORML 「…………」
+		ELSE
+			PRINTFORML 「……讨厌习惯了的自己」
+			;TranslatedMark 「……慣れてきている自分が嫌だわ」
+		ENDIF
+	ENDIF
+	WAIT
+	RESETCOLOR
+	RETURN 0
+
+ENDIF
+
+;─────────────────────────────────────── 
+;●「捕虜調教」の終了時
+;─────────────────────────────────────── 
+@KOJO_TRAIN_END_B_K9
+#DIM 咲夜_対象
+#DIM 咲夜
+
+咲夜_対象 = MASTER
+咲夜 = NAME_TO_CHARA("咲夜")
+
+;口上を不使用設定なら戻る
+SIF CFLAG:咲夜:400 == 1
+	RETURN 0
+
+SETCOLOR 咲夜_口上カラー
+
+PRINTL 
+
+;─────────────────────────────────────── 
+;行動不能
+;─────────────────────────────────────── 
+;離脱済み
+IF TCVAR:咲夜:53 > 1
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+;空虚
+IF TALENT:咲夜:空虚
+	PRINTFORML 「嗯……嗯……」
+	;TranslatedMark 「う……んん……」
+	PRINTFORMDL %ANAME(咲夜)%似乎没有注意到%ANAME(咲夜_対象)%要离去
+	;TranslatedMark %ANAME(咲夜)%は%ANAME(咲夜_対象)%が立ち去ろうとしていることに気付いていないようだ
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+;酒酔いによる行動不能
+IF TCVAR:咲夜:53 == 1
+	PRINTFORML 「嗯……已经……好舒服啊❤」
+	;TranslatedMark 「んはぁ……もうらめ……気持ちいいわぁ❤」
+	PRINTFORMDL %ANAME(咲夜)%即使睡着了，脸上还带着红晕
+	;TranslatedMark %ANAME(咲夜)%はぐでんぐでんになって赤ら顔をにやつかせながら寝ている
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+;快感のあまり気絶
+IF TCVAR:咲夜:52 || BASE:咲夜:気力 <= 300
+	PRINTFORML 「嗯……啊咿❤呼啊……」
+	;TranslatedMark 「んう……ぁふ❤　ふあぁ……」
+	PRINTFORMDL %ANAME(咲夜)%的四肢时不时地抽搐着，带着恍惚的笑容
+	;TranslatedMark %ANAME(咲夜)%はくったりした手足を時々ぴくつかせて、恍惚と笑んでいる
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+;疲労による行動不能
+IF TCVAR:咲夜:51
+	PRINTFORML 「嗯……嗯……」
+	;TranslatedMark 「う……んん……」
+	PRINTFORMDL %ANAME(咲夜)%脸上带着疲倦睡着了
+	;TranslatedMark %ANAME(咲夜)%は疲れ果てた顔で眠っている
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+;─────────────────────────────────────── 
+;○初回
+;─────────────────────────────────────── 
+;初めて依存度が300以上になった
+IF CFLAG:203 < 2 && CFLAG:2 >= 300
+	CFLAG:203 = 2
+	PRINTFORML 「……够了。听不见啊」
+	;TranslatedMark 「……もう、いいわ。聴こえないのね」
+
+;初回
+ELSEIF CFLAG:203 < 1
+	CFLAG:203 = 1
+	PRINTFORML 「……是什么呢……啊，好痛……好累啊……」
+	;TranslatedMark 「……何だったのかしら……あぁ、痛い……疲れたわ……」
+
+;─────────────────────────────────────── 
+;○二回目以降　デレ不足
+;─────────────────────────────────────── 
+ELSEIF IS_SLAVE(咲夜)
+	PRINTFORML 「请多关照……」
+	;TranslatedMark 「よろしくお願いします……」
+
+ELSEIF IS_LOVER(咲夜)
+	PRINTFORML 「已经……到底是什么呢」
+	;TranslatedMark 「もう……何なのかしらね」
+
+ELSEIF CFLAG:咲夜:依存度 >= 300
+	PRINTFORML 「……不论怎样抵抗，结局也是一样的吧？……真累啊……」
+	;TranslatedMark 「……抵抗するのも……疲れるものね……」
+
+ELSE
+	PRINTFORML 「……结束了呢，至今为止侍奉大小姐的人生……」
+	;TranslatedMark 「……終わったのね」
+
+ENDIF
+
+;終了
+WAIT
+RESETCOLOR
+RETURN 0
+

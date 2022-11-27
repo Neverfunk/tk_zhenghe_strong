@@ -1,0 +1,115 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_ENCOUNT_YOUKAI_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_ENCOUNT_YOUKAI_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_ENCOUNT_YOUKAI(対象)
+#DIM 対象
+
+PRINTFORML 夜晚在领地内散步的时候、遇见了流浪的妖怪
+PRINTFORML 对面也注意到了这边、摆出了架势
+PRINTL
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "知略"))
+CALL ASK_MULTI("威嚇", "友好的接觸", "脫下衣服靠了過去", "逃走")
+
+SELECTCASE RESULT
+	CASE 0
+		IF LIMIT(ABL:対象:武闘, 50, 100) > RAND:100
+			PRINTFORML 進行威嚇
+			PRINTFORML %ANAME(対象)%的威圧感讓妖怪渾身発抖、一溜煙的逃走了
+		ELSE
+			PRINTFORML 進行威嚇……
+			PRINTFORML 但是、起到了反效果！
+			PRINTFORML 從算是從襲撃過來的妖怪那逃走了、但是錢包掉了
+			CALL COLOR_PRINTL("失去了3000金", カラー_警告)
+			MONEY -= 3000
+		ENDIF
+
+	CASE 1
+		IF LIMIT(ABL:対象:知略, 70, 100) > RAND:100
+			PRINTFORML 友好的接触了
+			PRINTFORML 因为%ANAME(対象)%的态度妖怪也解除了戒备
+			PRINTFORML 在友好的気雰中平安地分別了
+		ELSE
+			PRINTFORML 友好的接触了……
+			PRINTFORML 但是、妖怪沒有理解！
+			PRINTFORML 從算是從襲撃過來的妖怪那逃走了、但是錢包掉了
+			CALL COLOR_PRINTL("失去了3000金", カラー_警告)
+			MONEY -= 3000
+		ENDIF
+	CASE 2
+	   	PRINTFORML %ANAME(対象)%脫下衣服靠了過去
+		IF RAND:2
+			RETURN 1
+		ENDIF
+		PRINTFORMW 但是因爲是男人、憤怒的妖怪襲撃了過来！
+		IF IS_MALE(対象)
+			PRINTFORMW ……想辦法逃回去了、但是錢包掉了
+			MONEY -= 3000
+			CALL COLOR_PRINTL(@"失去了3000金", カラー_警告)
+		ELSE
+			PRINTFORMW 妖怪喜悅的帶%ANAME(対象)%回到了巣穴
+			PRINTFORML
+			PRINTFORML 昏暗的巣穴中響起了%ANAME(対象)%甜美的嬌喘
+			PRINTFORML 掌握主導權的%ANAME(対象)%像是要榨乾肉棒一樣讓妖怪喘著粗氣
+			PRINTFORML 騎在妖怪身上的%ANAME(対象)%享用著深深地挿入%STR_BODY("膣")%的肉棒
+			PRINTFORML 灼熱的精液射進了子宮内、%ANAME(対象)%愉悅的俯下身獎勵妖怪吮吸著%STR_BODY("乳首：欲情", 対象)%
+			PRINTFORMW 妖怪已經快到極限了、可喝下精液補充了體力的%ANAME(対象)%沒有放過他、强行給他喂了肉棒勃起藥劑
+			PRINTFORML
+			PRINTFORML 像是一個不會倒下的騎士、%ANAME(対象)%一整晚都在榨取著妖怪
+			PRINTFORMW 明明子宮内已經溢満了対方射出的精液、然而%ANAME(対象)%仍然渴求著更多
+			CALL FUCK(対象, "欲望, 性交, 精愛, Ｖ, Ａ, 苦痛快楽, 被虐, Ｖ性交, Ａ性交", "膣内射精, 処女喪失, Ａ処女喪失, 腸内射精", GET_SPERM_ID("流浪妖怪"), @"流浪妖怪的\@RAND:2 ? 肉棒 # 嘴唇\@", "流浪妖怪", "", "誘惑后的榨取")
+			PRINTFORML
+			PRINTFORML 直到天亮后全身佈滿白濁的%ANAME(対象)%才滿足的離開了這裏
+		ENDIF
+	CASE 3
+	   	PRINTFORML %ANAME(対象)%和妖怪保持距離準備離開這裡
+		IF RAND:2
+			RETURN 1
+		ENDIF
+		PRINTFORMW 但是往後看的時候、妖怪襲撃了過来！
+		IF IS_MALE(対象)
+			PRINTFORMW ……想辦法逃回去了、但是錢包掉了
+			MONEY -= 3000
+			CALL COLOR_PRINTL(@"失去了3000金", カラー_警告)
+		ELSE
+			PRINTFORMW 後腦勺被殴打的%ANAME(対象)%昏倒了
+			PRINTFORML
+
+			IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+				PRINTFORML 被抓到妖怪巢穴里的%ANAME(対象)%，成为了妖怪的性处理工具
+				PRINTFORML 手脚被绑在一起，嘴上被堵上了口塞，眼睛也被蒙上了眼罩，使得%ANAME(対象)%完全没有逃跑的能力
+				PRINTFORML 双穴被塞进了长长的双头按摩棒，一端直插到底，另一端露在外边，上边雕刻着妖怪的名字，专为对方量身定制
+				PRINTFORML 在妖怪的体重带来强大冲击下，按摩棒每次都压迫着%ANAME(対象)%的子宫，使她始终沉浸在剧烈的高潮中
+				PRINTFORML 妖怪的性欲异常猛烈，长达几小时的性交让%ANAME(対象)%总是徘徊在失神的边缘，被汹涌而出的爱液覆盖住全身
+				PRINTFORMW 玩具被妖力所驱动，无时无刻不在发出强烈的振动，因此%ANAME(対象)%不分昼夜地处于不断绝顶中
+				CALL FUCK(対象, "欲望, 性交, Ｃ, Ｖ, Ａ, Ｖ拡張, Ａ拡張, 苦痛快楽, 緊縛, 被虐, 百合", "処女喪失, Ａ処女喪失", 0, "", "高级按摩棒", "", "敗北した末の強姦")
+				PRINTFORML
+				PRINTFORMW 过了几天，被妖怪玩腻了的%ANAME(対象)%被随意丢在了路边
+			ELSE
+				PRINTFORML 妖怪把%ANAME(対象)%帯回了巣穴、吊起来侵犯着
+				PRINTFORML 激烈的動作像是要弄坏子宮一樣讓%ANAME(対象)%流着泪呻吟着
+				PRINTFORML 即使想要掙扎着逃走、也因為深深地挿入%STR_BODY("膣")%的肉棒而無法実現
+				PRINTFORML 灼熱的精液射進了子宮内、嘴唇被粗暴的堵住的%ANAME(対象)%全身顫抖着発出了沈悶的声音
+				PRINTFORMW 妖怪圧倒性的耐力、子宮内溢満了整晚都在交尾的対方射出的精液
+				CALL FUCK(対象, "欲望, 性交, 精愛, Ｖ, Ａ, 苦痛快楽, 被虐, Ｖ性交, Ａ性交", "膣内射精, 処女喪失, Ａ処女喪失, 腸内射精", GET_SPERM_ID("流浪妖怪"), @"流浪妖怪的\@RAND:2 ? 肉棒 # 嘴唇\@", "流浪妖怪", "", "敗北した末の強姦")
+				PRINTFORML
+				PRINTFORML 被狠狠的侵犯後、全身黏糊汚穢的%ANAME(対象)%被丟在了路辺
+			ENDIF
+		ENDIF
+ENDSELECT
+RETURN 1

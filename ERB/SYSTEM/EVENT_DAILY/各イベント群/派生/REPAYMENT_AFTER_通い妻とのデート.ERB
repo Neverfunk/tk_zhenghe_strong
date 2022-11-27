@@ -1,0 +1,297 @@
+﻿;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_REPAYMENT_AFTER_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("REPAYMENT")
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_REPAYMENT_AFTER_DECISION()
+#DIM 対象
+
+対象 = ID_TO_CHARA(DVAR:恩返し_キャラID)
+
+SIF 対象 < 0
+	RETURN 0
+	
+SIF DVAR:恩返し_キャラID < 0
+	RETURN 0
+	
+;ペニスを持ってないとだめ
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+	
+;対象が女でないとだめ
+SIF !IS_FEMALE(対象)
+	RETURN 0
+
+;好感度が1500以上
+SIF MAX(CFLAG:対象:好感度) < 1500
+	RETURN 0
+	
+;所属が一緒で、対象が捕虜になっておらず、死亡していない
+SIF !(CFLAG:対象:所属 == CFLAG:MASTER:所属 && !CFLAG:対象:捕虜先 && CFLAG:対象:特殊状態 != 特殊状態_死亡)
+	RETURN 0
+	
+;15％で発生	
+RETURN RAND:100 < 15
+
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_REPAYMENT_AFTER()
+#DIM 対象
+#DIM マミゾウ
+#DIM 藍
+#DIM ナズーリン
+#DIM 影狼
+#DIM てゐ
+#DIM ミスティア
+
+対象 = ID_TO_CHARA(DVAR:恩返し_キャラID)
+マミゾウ = NAME_TO_CHARA("マミゾウ")
+藍 = NAME_TO_CHARA("藍")
+ナズーリン = NAME_TO_CHARA("ナズーリン")
+影狼 = NAME_TO_CHARA("影狼")
+てゐ = NAME_TO_CHARA("てゐ")
+ミスティア = NAME_TO_CHARA("ミスティア")
+
+SELECTCASE DVAR:恩返し_デート
+	CASE 0
+		PRINTFORML 「啊，%ANAME(MASTER)%。早上好」
+		;TranslatedMark 「あ、%ANAME(MASTER)%。おはようございます」
+		PRINTFORMW 一看到%ANAME(MASTER)%的身影，%ANAME(対象)%就高兴地打了招呼
+		;TranslatedMark %ANAME(MASTER)%の姿を見つけるや、%ANAME(対象)%が嬉しそうに挨拶してきた
+		PRINTFORML …虽然一时兴起邀请她加入了军队，但是她在这里能好好地待下去吗
+		;TranslatedMark …勢いで軍に誘ってしまったものの、ここでちゃんとやれているだろうか
+		PRINTFORMW 「是的。虽然一开始也会不安…但大家对我都很好」
+		;TranslatedMark 「はい。最初は不安もあったけど…、皆さんが良くしてくれてますから」
+		SELECTCASE 恩返し_種類:(DVAR:恩返し_動物番号)
+			CASE "狸"
+				IF CFLAG:マミゾウ:所属 == CFLAG:MASTER:所属 &&  !(MASTER == NAME_TO_CHARA("マミゾウ"))
+					PRINTFORML 「特别是猯藏大人，说是看在同为狸猫妖怪的情分上，对我很亲切」
+					;TranslatedMark 「特にマミゾウ様が、同じ化け狸のよしみと言って親身になってくれました」
+					PRINTFORMW 「…虽然有点恐怖的印象，但是是非常好的人。我想尽我所能来报答这份恩情。」
+					;TranslatedMark 「…ちょっと怖い印象を持っていたんですが、とても良い人でした。このご恩を返せるよう頑張りたいです」
+				ELSE
+					PRINTFORMW 「特别是鬼狸众的大家都很认真地来看我的样子…。也得到了很多建议」
+					;TranslatedMark 「特に化け狸衆の皆さんがこまめに様子を見に来てくださって…。色々助言も頂きました」
+				ENDIF
+			CASE "狐" 
+				IF CFLAG:藍:所属 == CFLAG:MASTER:所属 &&  !(MASTER == NAME_TO_CHARA("藍"))
+					PRINTFORML 「特别是蓝大人，对我照顾得非常周到」
+					;TranslatedMark 「特に藍様が、とても手厚く面倒を見てくれてました」
+					PRINTFORMW 「作为九尾的蓝大人，竟然会在意像我这样的废物妖孤，虽然我还是会有点害怕…」
+					;TranslatedMark 「九尾である藍様が、私みたいな木っ端妖孤を気に掛けてくれるなんて、ちょっと畏れ多いですけど…」
+					PRINTFORMW 「但是，她对我非常温柔。我也想努力成为蓝大人那样身心都美丽的妖狐！」
+					;TranslatedMark 「でも、とても優しくしてくれました。私も藍様のような、身も心も美しい妖孤になれるよう頑張ります！」
+				ELSE
+					PRINTFORMW 「特别是妖狐们经常来看我的样子…。也得到了很多建议」
+					;TranslatedMark 「特に化け狐の方々がこまめに様子を見に来てくださって…。色々助言も頂きました」
+				ENDIF
+			CASE "兎" 
+				IF CFLAG:てゐ:所属 == CFLAG:MASTER:所属 &&  !(MASTER == NAME_TO_CHARA("てゐ"))
+					PRINTFORML 「特别是帝小姐，非常热心地照顾我」
+					;TranslatedMark 「特にてゐ様が、とても熱心に面倒を見てくれました」
+					PRINTFORMW 「对于离开竹林的因幡而生活的我，也好好地给予了关注」
+					;TranslatedMark 「竹林の因幡から離れて生きてきた私にも、ちゃんと目を掛けてくれたんです」
+					PRINTFORMW 「帝小姐啊，无论何时都是我憧憬的对象呢……」
+					;TranslatedMark 「てゐ様には、何時までたっても頭が上がりませんね……」
+				ELSE
+					PRINTFORMW 「特别是妖怪兔的大家都不厌其烦地来看我…。得到了很多建议」
+					;TranslatedMark 「特に妖怪兎のみんながこまめに様子を見に来てくれて…。色々と助言も頂きました」
+				ENDIF
+			CASE "鼠" 
+				IF CFLAG:ナズーリン:所属 == CFLAG:MASTER:所属 &&  !(MASTER == NAME_TO_CHARA("ナズーリン"))
+					PRINTFORML 「特别是娜兹琳先生，一直想和我身边的人做朋友，帮助我快速融入这里」
+					;TranslatedMark 「特にナズーリンさんが、早く馴染めるようにと周りの人たちと仲を取り持ってくれたんです」
+					PRINTFORMW 「明明体型很小，却比我还要爽快，堂堂正正地说"交给我吧"…」
+					;TranslatedMark 「体は小さいのに、私よりハキハキ、堂々と『私に任せたまえ』って…」
+					PRINTFORMW 「和可爱的外表不同，是个非常帅气的人」
+					;TranslatedMark 「可愛い見た目と違って、とてもカッコいいお人でした」
+				ELSE
+					PRINTFORMW 「特别是妖怪鼠，大家都会不厌其烦地来看我…。也得到了很多建议」
+					;TranslatedMark 「特に妖怪鼠のみんながこまめに様子を見に来てくれて…。色々助言も頂きました」
+				ENDIF
+			CASE "鶴"
+				IF CFLAG:ミスティア:所属 == CFLAG:MASTER:所属 &&  !(MASTER == NAME_TO_CHARA("ミスティア"))
+					PRINTFORML 「特别是米斯蒂亚小姐看在同为鸟妖怪的情义上，给了我各种各样的建议，比如讨人喜欢的料理和接待方法」
+					;TranslatedMark 「特にミスティアさんが鳥妖怪のよしみと言って、人に喜ばれる料理とか接し方とか、色々助言してくれたんです」
+					PRINTFORMW 「也许正是因为她从不隐瞒自己是个妖怪的事情，所以她才会这样威风凛凛的吧。我也能变成那样吗……」
+					;TranslatedMark 「妖怪であることを隠さずに活動してるからか、とても堂々とした方でした。私もあんな風になれるでしょうか……」
+				ELSE
+					PRINTFORMW 「特别是鸟妖怪的大家给了我很多建议…。给了我勇气」
+					;TranslatedMark 「特に鳥妖怪の皆さんが色々と助言してくださって…。勇気付けてもらいました」
+				ENDIF
+			CASE "狼" 
+				IF CFLAG:影狼:所属 == CFLAG:MASTER:所属 &&  !(MASTER == NAME_TO_CHARA("影狼"))
+					PRINTFORML 「特别是影狼，跟我一样是狼妖怪，在很多方面都包容着我」
+					;TranslatedMark 「特に影狼さんが、同じ狼の妖怪として、色々と親身になってくれたんです」
+					PRINTFORMW 「明明是很漂亮的人，却很容易亲近……是个非常可爱的人」
+					;TranslatedMark 「綺麗な方なのに、どこか親しみやすくて……、とても可愛らしい方でした」
+				ELSE
+					PRINTFORMW 「特别是狼妖怪的大家，来看我能不能做好的样子…。给了我很多鼓励」
+					;TranslatedMark 「特に狼妖怪のみんなが、私がちゃんとやれてるか様子を見に来てくれて…。励ましてくれました」
+				ENDIF
+			CASEELSE
+				PRINTFORMW 「为了不给大家添麻烦，我会努力做自己能做的事」
+				;TranslatedMark 「みんなの迷惑にならないよう、自分に出来ることを頑張っていくつもりです」
+		ENDSELECT
+		PRINTFORMW 不管怎么说，好像过得很好真是太好了。如果还有其他困难的话请随时告诉我
+		;TranslatedMark 何はともあれ、上手くやっているようでよかった。他にも困ったことがあったらいつでも言ってほしい
+		PRINTFORML 「要说有什么困难的话……我知道这样很任性，但是会不会因为太忙而不能轻松地和%ANAME(MASTER)%见面呢……」
+		;TranslatedMark 「困ったこと、といえば……私の我侭ですけど、忙しくなって%ANAME(MASTER)%と気軽に会えないことでしょうか……」
+		PRINTFORMW 这么说着，%ANAME(対象)%脸上露出寂寞的表情，撒娇地靠近%ANAME(MASTER)%
+		;TranslatedMark そう言うと%ANAME(対象)%は%ANAME(MASTER)%に、寂しそうに、甘えるように寄り添ってきた
+		PRINTFORMW 对于让她感到寂寞这件事很难受。%ANAME(MASTER)%建议她下次要不要一起约会
+		;TranslatedMark 彼女に寂しい思いをさせっぱなしというのも心苦しい。%ANAME(MASTER)%は、今度一緒にデートしないか、と彼女に提案した
+		PRINTFORML 「！真的吗！？我很高兴！」
+		;TranslatedMark 「！　本当ですか！？　嬉しいです！」
+		PRINTFORMW 听到这个提议，%ANAME(対象)%的表情顿时明朗起来。她对于能被%ANAME(MASTER)%邀请去约会很高兴。
+		;TranslatedMark その提案を聞いて、%ANAME(対象)%はパァっと表情を明るくした。%ANAME(MASTER)%からデートに誘われたのがとても嬉しかったようだ
+		PRINTFORMW %ANAME(MASTER)%和她约好下次一起约会
+		;TranslatedMark %ANAME(MASTER)%は彼女と、今度一緒にデートするという約束を取り付けた
+		PRINTL
+		DVAR:恩返し_デート = 1
+	CASE IS >= 1
+		PRINTFORML 「啊，%ANAME(MASTER)%♥早上好」
+		;TranslatedMark 「あ、%ANAME(MASTER)%♥　おはようございます」
+		PRINTFORMW 约会那天的早晨。一发现%ANAME(MASTER)%，%ANAME(対象)%就高兴地打了招呼
+		;TranslatedMark デートの待ち合わせ。%ANAME(MASTER)%を見つけるや、%ANAME(対象)%が嬉しそうに挨拶してきた
+		IF DVAR:恩返し_デート == 1
+			PRINTFORML 「我一直期待着今天的事情」
+			;TranslatedMark 「今日の事、ずっと楽しみにしていました」
+			PRINTFORML 这么说着，她像是撒娇似的靠近了我
+			;TranslatedMark そう言うと彼女は%ANAME(MASTER)%に甘えるように寄り添ってきた
+			PRINTFORMW 「所以今天…请多多关照♥」
+			;TranslatedMark 「だから今日は…いっぱい、構ってくださいね♥」
+			PRINTFORMW 为了回应这个愿望，%ANAME(MASTER)%决定好好疼爱她
+			;TranslatedMark そのお願いに応えるため、%ANAME(MASTER)%は彼女をいっぱい可愛がることにした
+		ELSE
+			PRINTFORML 「能再次邀请我约会，我很开心♪」
+			;TranslatedMark 「またデートに誘ってくれて、とても嬉しいです♪」
+			PRINTFORML 这么说着，她像是撒娇似的靠近了我
+			;TranslatedMark そう言うと彼女は%ANAME(MASTER)%に甘えるように寄り添ってきた
+			PRINTFORMW 「所以今天也…请多多疼爱我♥」
+			;TranslatedMark 「だから今日も…いっぱい、可愛がってくださいね♥」
+			PRINTFORMW 为了回应这个愿望，%ANAME(MASTER)%决定在今天和她的约会中全力以赴。
+			;TranslatedMark そのお願いに応えるため、%ANAME(MASTER)%は今日も彼女と目一杯デートに勤しむことにした
+		ENDIF
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		SELECTCASE RAND:15
+			CASE 0
+				PRINTFORMW 「嗯♥不行啊，现在正在做饭呢♥」
+				PRINTFORML 从背后抚摸着站在厨房的%ANAME(対象)%的身体
+				PRINTFORML 虽然嘴上有点抗拒，但脸上却一脸欣喜着，身体也随着爱抚而扭动着
+				PRINTFORML 渐渐地，可爱的喘息声从口中泄漏出来，紧紧抱住了%ANAME(MASTER)%
+				PRINTFORMW 似乎已经是忍不住了，站着把肉棒吞入小穴中里，用力按了下去
+			CASE 1
+				PRINTFORMW 「嗯啊♥嗯♥嗯，嗯♥啾♥嗯啊♥」
+				PRINTFORML 啪啪啪，肉互相碰撞的声音响起
+				PRINTFORML %ANAME(MASTER)%将%ANAME(対象)%压着成跪趴的姿势，向下压着身体用力抽插
+				PRINTFORML 她每次都会颤抖着身体，紧紧抱住%ANAME(MASTER)%的脖子拼命地缠绕着舌头
+				PRINTFORMW 不久她被顶向高潮后，配合着阴道收缩的刺激，%ANAME(MASTER)%也尽情地射出精液
+			CASE 2
+				PRINTFORMW 「这、竟然在这种地方做…啊♥」
+				PRINTFORML 在散步的时候，%ANAME(MASTER)%突然来了性欲，把%ANAME(対象)%带进了附近的树丛里
+				PRINTFORML 温柔地爱抚着她并脱下衣服，她的脸因为害羞变得通红
+				PRINTFORML 虽然内心苦笑着说这样跟野外的动物有什么区别，不禁害羞起来，但还是忍不住兴奋了
+				PRINTFORMW 让她把屁股翘出来，插入完全湿了的秘所，使得她发出了甘美的喘息声
+			CASE 3
+				PRINTFORMW 「哈…♥哈…♥腰，已经，立站不起来了…♥」
+				PRINTFORML %ANAME(対象)%在%ANAME(MASTER)%的手臂中一边大喘气，一边露出恍惚的表情
+				PRINTFORML 一整晚都和她交合，累得精疲力尽，沾满了彼此的体液倒在了被子里
+				PRINTFORML 但是，她开心地蹭过来的动作和刺激鼻孔的淫香，让下半身再次聚集了热量
+				PRINTFORMW 翻过身再次将她压在身下，使得她一瞬间吓了一跳，但还是羞涩地打开了裂缝
+			CASE 4
+				PRINTFORMW 「嗯…嗯…啊！♥……哈…啊！♥……嗯，嗯♥」
+				PRINTFORML 抱住%ANAME(対象)%的身体，一边用舌头和手指慢慢地爱抚
+				PRINTFORML 时深时浅地对她的敏感带施以刺激，让她慢慢地喘息起来，身体开始慢慢扭动挺起
+				PRINTFORML 然后轻轻地将手指插入阴道，使得她用力挺起了身体达到了高潮
+				PRINTFORMW 湿润眼睛，像发情的野兽一样用渴望的目光索求%ANAME(MASTER)%，随后便被%ANAME(MASTER)%压住了
+			CASE 5
+				PRINTFORMW 「咿啊♥已经，已经♥要忍不住了啊♥啊呃♥」
+				PRINTFORML 在洗澡的时候，无法忍受%ANAME(対象)%那妖艳的身体不断扭动着，直抱住了她
+				PRINTFORML 湿吻在一起的时候抚摸着她的胸部，她也感受到刺激不由得颤抖起来靠在%ANAME(MASTER)%的怀里
+				PRINTFORML 分开嘴唇，忧郁地抬头看%ANAME(MASTER)%，她似乎也在忍耐的极限，慢慢地用身体蹭起来
+				PRINTFORMW %ANAME(MASTER)%把她带到附近岩石的阴影里，在冰冷的水中像野兽一样激烈地顶着她的子宫口
+			CASE 6
+				PRINTFORMW 「啊！♥啊！♥嗯，嗯♥好棒♥啊啊！♥种子♥请给我种子♥啊！♥」
+				PRINTFORML %ANAME(対象)%跨坐在%ANAME(MASTER)%的身上，用力扭动着腰肢
+				PRINTFORML 每次她上下腰的时候，结合部就的爱液就会随着猥亵的蜜音溢出来
+				PRINTFORML 一脸高潮的样子微微吐出舌头，像是发情一样的表情看着%ANAME(MASTER)%，索求着精液
+				PRINTFORMW 终于到了极限的%ANAME(MASTER)%向盼望已久的她的子宫里射入精液，让她剧烈颤抖起来刺激到了高潮
+			CASE 7
+				PRINTFORMW 「啊！♥啊！♥啊啊啊♥嗯啊♥咿♥咿呃♥啊！♥」
+				PRINTFORML %ANAME(MASTER)%抓住跪趴在地上的她的腰部激烈地进行抽插
+				PRINTFORML 对于蜜罐给予的极上刺激，无法停止腰的动作，像野兽交尾般激烈地向下顶
+				PRINTFORML 她也一次一次地娇声尖叫着，不断地舞动着身体
+				PRINTFORMW 贪得无厌地不断追求对方，待到终于疲惫的时候，她的子宫里充满了%ANAME(MASTER)%的种子
+			CASE 8
+				PRINTFORMW 「嗯，嗯♥哈…♥在这样的地方，啊♥被谁看见就不得了了…嗯啊♥」
+				PRINTFORML 买东西回来的时候，把她带进胡同里侵犯了
+				PRINTFORML 一开始害羞的她，可能是因为有可能被看到的羞耻心和不道德感，比平时反应更敏感
+				PRINTFORML 不久，她便自己开始积极地摆动着腰，用苦闷的表情凝视着%ANAME(MASTER)%，更进一步的动作
+				PRINTFORMW 她和舌头一边缠绕一边加速腰部的动作，两人同时达到了高潮
+			CASE 9
+				PRINTFORMW 「啊呃♥啊！♥咿呃♥啊啊！♥啊"♥啊呃♥」
+				PRINTFORML %ANAME(MASTER)%被%ANAME(対象)%压在身上，将肉棒压入阴道深处
+				PRINTFORML 用全身重量用力下压着冲击子宫深处，充分地感受着她体内深处的快感
+				PRINTFORML 粗暴地刺激着敏感的子宫口，使她发出近乎悲鸣的娇声，拼命地抱住了%ANAME(MASTER)%
+				PRINTFORMW %ANAME(MASTER)%直接将铃口顶在子宫口上，同时将全部的精液注入她的子宫
+			CASE 10
+				PRINTFORMW 「啊呃♥已经，已经不行了♥主人大人♥啊！♥啊呃♥好H♥嗯♥呼唔♥」
+				PRINTFORML 从背后抱住穿着女仆装打扫的%ANAME(対象)%，不断对着全身爱抚着，麻酥酥的刺激感使得她不由得扭动身体
+				PRINTFORML 之前某一天，她提议了想玩角色扮演的H，结果出乎意料地感兴趣的样子了过来，作为女仆度过了一天(ある日角色扮演エッチを提案してみたら彼女は思いの他乗ってきて、一日メイドとして過ごすことになった)
+				PRINTFORML 有时犯了错误，会作为惩罚而激烈地责备起来，如果工作做得好了，会作为奖赏温柔地抱在怀里给予奖励
+				PRINTFORMW 两人在那样的淫靡的场景中沉迷，像沉溺于肉欲的野兽一样多次交合
+			CASE 11
+				PRINTFORMW 「啊……啊！♥嗯，嗯♥…嗯，嗯♥…啊，哈啊♥」
+				PRINTFORML 在被窝里一边接吻一边慢慢地爱抚全身，%ANAME(対象)%吐出甜美的气息挺起了身体
+				PRINTFORML 虽然还残留着幼年的感觉，但却被散发出女性性感的气息和表情所煽动，下体的肉棒很快勃起了
+				PRINTFORML 按奈不住的她平躺着大开双腿，用手指掰开湿润的蜜穴，用喃喃细语的声音来索求
+				PRINTFORMW 已经无法忍受这个动作的%ANAME(MASTER)%按照自己男性的本能把自己的肉棒塞进了她的体内
+			CASE 12
+				PRINTFORMW 「呼…♥呼…♥这、这样子♥…好害羞啊♥…嗯♥」
+				PRINTFORML %ANAME(MASTER)%让她全裸着套上项圈在深夜带出去散步
+				PRINTFORML 她脸红着颤抖着，也许是因为露出太兴奋了吧，从她密缝里流出了爱液
+				PRINTFORML 在耳边轻声细语着她那色情的样子，使得她一下子颤抖着，一脸发情地抱了上来
+				PRINTFORMW 在她那淫靡的表情下，%ANAME(MASTER)%把她带到了隐蔽的地方，充分疼爱了
+			CASE 13
+				PRINTFORMW 「啊啊啊啊啊♥♥♥又来了♥啊！♥啊啊！♥好厉害啊♥咿啊！♥唔呃♥♥♥」
+				PRINTFORML %ANAME(MASTER)%は在几次剧烈地射精之后，和和%ANAME(対象)%一起躺在了被子里
+				PRINTFORML %ANAME(MASTER)%和她做了一整天弄得身体都变得疲惫不堪，互相拥抱在一起调整呼吸
+				PRINTFORML 看着她那恍惚又可爱的表情，刚好对上了视线，她立马微微地亲了一下脸颊，幸福地微笑着
+				PRINTFORMW 之后，%ANAME(MASTER)%为清洗掉疲惫去好好洗个澡，结果在那里也再次开始了活动
+			CASE 14
+				PRINTFORMW 「啊"♥啊"♥啊啊！♥♥咿啊♥哈啊♥♥啊啊啊♥啊唔♥停不下来了♥♥♥」
+				PRINTFORML 在弥漫着呛人淫香的卧室里，男女的肉体碰撞的声音不停地回响着
+				PRINTFORML %ANAME(対象)%极品般的肉穴不断用力裹紧%ANAME(MASTER)%的肉棒施加一阵阵刺激，挺着腰部感受巨量的快感
+				PRINTFORML 忍耐也达到了极限的时候，腰腿加快了动作，她也紧紧抱住了%ANAME(MASTER)%，主动索求精液
+				PRINTFORMW 两个人陷入了融化在粘稠中的错觉，一起向着高潮进发
+		ENDSELECT
+		CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", @"%ANAME(MASTER)%")
+		CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失, 接吻喪失", 0, @"%ANAME(対象)%の唇", "", @"%ANAME(対象)%の膣")
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		PRINTFORML 「啊啊啊啊……♥ 最棒了…♥」
+		PRINTFORMW 在床上，她带着满足的表情紧紧抱住了%ANAME(MASTER)%
+		PRINTFORML 「那个……%ANAME(MASTER)%。如果感到寂寞的话…我可以再邀请你吗？」
+		PRINTFORMW %ANAME(対象)%一脸腼腆的样子问%ANAME(MASTER)%。似乎是担心会添麻烦
+		PRINTFORML 不用客气，随时都可以邀请。反正也打算一直这样下去
+		PRINTFORML 「……我，感觉好幸福…♥」
+		PRINTFORMW 一天结束后，两人拥抱在一起幸福地入眠……
+		SIF DVAR:恩返し_デート == 1
+			DVAR:恩返し_デート = 2
+		PRINTL
+		CFLAG:対象:好感度 += 100
+ENDSELECT
+
+RETURN 1

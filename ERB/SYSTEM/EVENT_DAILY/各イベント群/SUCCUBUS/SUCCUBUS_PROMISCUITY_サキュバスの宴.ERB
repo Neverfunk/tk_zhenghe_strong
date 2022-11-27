@@ -1,0 +1,170 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_SUCCUBUS_PROMISCUITY_RATE()
+RETURN 55
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_SUCCUBUS_PROMISCUITY_DECISION()
+#DIM 夢魔
+夢魔 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_サキュバス))
+SIF 夢魔 == -1
+	RETURN 0
+SIF CFLAG:MASTER:所属 == 夢魔
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_SUCCUBUS_PROMISCUITY_GENRE()
+RETURN デイリー_ジャンル_特殊勢力
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_SUCCUBUS_PROMISCUITY
+#DIM 対象
+#DIM 夢魔
+#DIM 兵数
+
+夢魔 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_サキュバス))
+
+PRINTFORML 领地内关于梦魔的目击信息频繁发生
+;TranslatedMark 領内でサキュバスの目撃情報が頻発している
+PRINTFORML 与此同时似乎有不少年轻男女夜间出行
+;TranslatedMark 同時に複数の若い男女が夜な夜な出歩いているらしい
+PRINTFORMW 可是现在好象也没什么特殊情况出现…
+;TranslatedMark しかし今のところ何か害があるようでも無い様だが…
+PRINTFORML 怎麼辦？
+;TranslatedMark どうしよう？
+CALL ASK_MULTI(@"调查" ,"加强巡回(金消費)" ,"置之不理")
+IF RESULT == 2
+	PRINTFORMW 置之不理
+	$HOUTI_LOOP
+	兵数 = 1000 + (RAND:10 + DAY / 5) * 500
+	COUNTRY_SOLDIER:夢魔 += 兵数
+	CALL COLOR_PRINTW(@"梦魔们聚集起来了，兵数增加了{兵数}人", カラー_注意)
+ELSEIF RESULT == 1
+	PRINTFORML 若是发送伤亡就为时已晚了
+	;TranslatedMark 被害が起きてからでは遅い
+	PRINTFORMW 尽管会破费，但仍命令加强夜间巡回
+	;TranslatedMark 金はかかるが夜間の巡回の強化を命じた
+	LOCAL = 3000 + (RAND:10 + DAY / 5) * 500
+	兵数 = 1000 + (RAND:10 + DAY / 5) * 500
+	IF MONEY >= LOCAL
+		CALL COLOR_PRINTW(@"金{LOCAL}を消費した", カラー_注意)
+		MONEY -= LOCAL
+	ELSE
+		PRINTFORMW …可是钱不够
+		CALL COLOR_PRINTW(@"梦魔们聚集起来了，兵数增加了{兵数}人", カラー_注意)
+	ENDIF
+ELSEIF RESULT == 0
+	PRINTFORML 不能置之不理
+	PRINTFORMW 决定调查
+	PRINTFORML 选谁呢？
+	CALL SELECT_CHARA_LIST_SLG()
+	対象 = RESULT
+	IF RESULT < 0
+		PRINTFORMW 还是算了
+		GOTO HOUTI_LOOP
+	ELSEIF 対象 == MASTER
+		PRINTFORMW %ANAME(対象)%亲自调查
+	ELSE
+		PRINTFORMW 把任务交給了%ANAME(対象)%
+	ENDIF
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW ・
+	PRINTFORML 进行调查后，发现了年轻人在集会
+	;TranslatedMark 調査を進めると、若者たちの集会を見つけた
+	PRINTFORMW 竟然是梦魔主办的乱交派对	
+	;TranslatedMark なんとそれはサキュバス主催の乱交パーティーだった
+	PRINTFORMW 注意到%ANAME(対象)%的她放出淫气施展诱惑，妄图让%ANAME(対象)%也加入！
+	;TranslatedMark %ANAME(対象)%に気づいた彼女は宴に参加させるべく淫気を飛ばして誘惑してきた！
+	PRINTFORML 
+	IF (MAXBASE:対象:精神力 / 100) * (RAND:10 + 1) >= (10 + DAY / 8) * (RAND:10 + 1) && !GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫乱) && !GETBIT(TALENT:対象:淫乱系, 素質_淫乱_精液便女)
+		PRINTFORMW 但是%ANAME(対象)%总算忍耐住了！
+		;TranslatedMark しかし%ANAME(対象)%は何とか堪えてみせた！
+		PRINTFORMW %ANAME(対象)%扑向踌躇的梦魔，漂亮地击溃对方！
+		;TranslatedMark %ANAME(対象)%は戸惑うサキュバスに飛び掛かり、見事打倒す事に成功した！
+		FOR LOCAL, 1, MAX_COUNTRY
+			IF IS_COUNTRY(LOCAL) && LOCAL != 夢魔
+				CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:対象:所属, 50, -50)
+			ELSE
+				CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:対象:所属, -200, 200)
+			ENDIF
+		NEXT
+		CALL COLOR_PRINTL(@"因为%ANAME(対象)%的活跃表现，他国的评价上升了", カラー_注意)
+		CALL COLOR_PRINTW("而梦魇们则对此颇有微词", カラー_注意)
+	ELSE
+		PRINTFORMW %ANAME(対象)%无法抗拒梦魔的淫气…
+		;TranslatedMark %ANAME(対象)%はサキュバスの淫気に抗えなかった…
+		PRINTFORML 一转眼满脑子都是做爱
+		;TranslatedMark あっと言う間に頭の中がセックスの事でいっぱいになってしまう
+		PRINTFORML 梦魔微微一笑，在%ANAME(対象)%耳边低声细语，一起享受吧
+		;TranslatedMark サキュバスはニヤリと笑い、%ANAME(対象)%の耳元で一緒に楽しみましょうと囁いた
+		PRINTFORMW %ANAME(対象)%完全忘记了任务，服从本能般加入了眼前的宴会…
+		;TranslatedMark %ANAME(対象)%はすっかり任務の事も忘れ、本能のままに目の前の宴に混ざった…
+		IF IS_MALE(対象) || (HAS_PENIS(MASTER) && RAND:2) || (HAS_PENIS(MASTER) && TALENT:MASTER:討厭男人)
+			PRINTFORML %ANAME(対象)%被一大群饥渴难耐的女人包围住
+			;TranslatedMark %ANAME(対象)%は多数の女たちと獣の様にまぐわっている
+			PRINTFORML 她们的脸上洋溢着热情，牢牢锁定%ANAME(対象)%的鸡巴，把身体贴上来
+			;TranslatedMark 彼女たちは一様に盛りきった表情をしており、%ANAME(対象)%のチンポを求めて身体を絡めて来る
+			PRINTFORMW 每一位都将身下湿润的秘所扒开，浓郁的雌性气味飘荡而出弥漫周身
+			;TranslatedMark いずれの子もびしょ濡れの秘所をひくつかせ全身から言いようのない雌の匂いを漂わせる
+			PRINTFORML %ANAME(対象)%服从本能，推倒紧挨在身侧的女性，把身下之物使劲拧进去
+			;TranslatedMark %ANAME(対象)%は本能のままに手当たり次第に女を押し倒してははち切れんばかりの一物をねじ込む
+			PRINTFORML 无论哪个女人都长着上好的雌穴，%ANAME(対象)%尽情品味着的她们发出的迷乱娇吟
+			;TranslatedMark どの女も極上の雌穴になっており、%ANAME(対象)%は嬌声を上げて乱れる彼女達を思うが儘に味わった
+			PRINTFORMW 在一个女性体内射下子种后马上抓住下一个，而有些人则迫不及待地主动坐上去
+			;TranslatedMark 女の奥深くに子種を放ってはまた次の女を捕まえ、あるいは捕まえられて即座にまぐわう
+			PRINTFORML 这幅与野兽间的交配无二的场景，让梦魔很是欣慰地在边上旁观
+			;TranslatedMark その有様は正に本能のままの獣の交尾であり、サキュバスは嬉しそうにそれを眺めていた
+			PRINTFORMW 而%ANAME(対象)%对她的视线毫不介意，只是一味地贪恋于这片肉欲的沼泽中……
+			;TranslatedMark しかし%ANAME(対象)%は彼女の視線も気にせずに、ただひたすら貪る様に肉欲に溺れていった…
+			CALL FUCK(対象, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "路过的女人的嘴唇", "", "路过的女人的阴道", "乱交")
+			CALL FUCK(対象, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "路过的女人的嘴唇", "", "路过的女人的阴道", "乱交")
+			CALL FUCK(対象, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "路过的女人的嘴唇", "", "路过的女人的阴道", "乱交")
+		ELSE
+			PRINTFORML %ANAME(対象)%被一大群欲望喷张的男人包围住
+			;TranslatedMark %ANAME(対象)%は多数の男たちと獣の様にまぐわっている
+			PRINTFORML 他们如同丧失理智的野兽，不由分说地压上%ANAME(対象)%
+			;TranslatedMark 彼等はまさに獣の様相で、%ANAME(対象)%の事などお構いなしに押し倒してはちんこをねじ込んでくる
+			PRINTFORMW 而由于淫气的影响，%ANAME(対象)%的雌穴也早早做好被插入的准备，轻易地接受了粗暴行为
+			;TranslatedMark 淫気の影響か、%ANAME(対象)%の雌穴は最初から出来上がっており乱暴な挿入も受け入れ軽くイってしまう
+			PRINTFORML 就这样，把子宫撞得砰砰作响的激烈活塞让%ANAME(対象)%忍不住放声大叫，连身子都抽搐弹跳起来
+			;TranslatedMark 肉欲のままに子宮まで響く様な激しいピストンに%ANAME(対象)%はたまらずヨガり、身体を跳ねさせる
+			PRINTFORML 被强壮的男根贯穿的%ANAME(対象)%，脸上充满雌性的喜悦，主动抱紧他索要子种
+			;TranslatedMark 逞しい男根で貫かれる%ANAME(対象)%の表情は雌の悦びに満ちており、自ら彼にしがみついて子種をねだる
+			PRINTFORMW 不用说他们当然从未考虑避孕的事情，往%ANAME(対象)%的体内深处，将满意的欲望直接叩击进胎内
+			;TranslatedMark 勿論彼らも避妊など考えておらず、%ANAME(対象)%の奥深く、胎内に直接その欲望全てを叩きつけてきた
+			PRINTFORML 结束射精的男人退出阴道，尚沉浸在高潮余韵的%ANAME(対象)%，立刻又感受到新的肉棒插进体内
+			;TranslatedMark 射精を終えた男が退くと膣出しと絶頂の余韻に浸る間もなく、次のペニスがねじ込まれてくる
+			PRINTFORML 男人们为%ANAME(対象)%的身体而疯狂，被他们聚拢在中央的%ANAME(対象)%为无数的肉棒包围，被其所散发的雄臭深深震撼
+			;TranslatedMark 男たちは%ANAME(対象)%の身体に夢中になって群がり、無数のペニスに囲まれ雄臭さに頭がクラクラする
+			PRINTFORMW %ANAME(対象)%一面高潮不止，一面又沐浴在接连不断的欲望中、用尽全身来招待身边的讨人喜欢的男根们
+			;TranslatedMark %ANAME(対象)%はイキ狂いながらも愛おしい男根たちを全身を使って扱き、次々にその欲望を浴びせられた
+			PRINTFORML 这幅与野兽间的交配无二的场景，让梦魔很是欣慰地在边上旁观
+			;TranslatedMark その有様は正に本能のままの獣の交尾であり、サキュバスは嬉しそうにそれを眺めていた
+			PRINTFORMW 而%ANAME(対象)%对她的视线毫不介意，只是一味地贪恋于这片肉欲的沼泽中……
+			;TranslatedMark しかし%ANAME(対象)%は彼女の視線も気にせずに、ただひたすら貪る様に肉欲に溺れていった…
+			CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, Ｖ性交, 接吻, 口淫, 輪姦", "接吻喪失, 処女喪失, 膣内射精, 口内射精, CFLAG減少", GET_SPERM_ID("偶遇的男人"), @"偶遇的男人的\@RAND:2 ? 肉棒 # 唇\@", "偶遇的男人", "", "乱交")
+			CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, Ｖ性交, 接吻, 口淫, 輪姦", "接吻喪失, 処女喪失, 膣内射精, 口内射精, CFLAG減少", GET_SPERM_ID("偶遇的男人"), @"偶遇的男人的\@RAND:2 ? 肉棒 # 唇\@", "偶遇的男人", "", "乱交")
+			CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, Ｖ性交, 接吻, 口淫, 輪姦", "接吻喪失, 処女喪失, 膣内射精, 口内射精, CFLAG減少", GET_SPERM_ID("偶遇的男人"), @"偶遇的男人的\@RAND:2 ? 肉棒 # 唇\@", "偶遇的男人", "", "乱交")
+		ENDIF
+		PRINTFORML 
+		PRINTFORML 待发觉时，已经回到了宫殿前
+		;TranslatedMark 気づけば宮殿の前まで戻っていた
+		PRINTFORMW %ANAME(対象)%穿过大门，对刚才的记忆模糊不清……
+		;TranslatedMark %ANAME(対象)%はいまいち先程までの記憶があいまいなまま、門をくぐった…
+		兵数 = (1000 + (RAND:10 + DAY / 5) * 500) * 2
+		COUNTRY_SOLDIER:夢魔 += 兵数
+		CALL COLOR_PRINTW(@"梦魔们聚集起来了，兵数增加了{兵数}人", カラー_注意)
+	ENDIF
+ENDIF
+
+RETURN 1

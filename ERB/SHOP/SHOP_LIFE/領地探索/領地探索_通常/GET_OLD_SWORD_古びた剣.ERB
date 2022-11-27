@@ -1,0 +1,57 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_GET_OLD_SWORD_EXISTS()
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_GET_OLD_SWORD_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_GET_OLD_SWORD(対象)
+#DIM 対象
+PRINTFORML 探索時、発現了一把古剣
+PRINTFORML 雖然被放置了很長時間、但是打磨打磨後應該還能用
+
+PRINTL
+CALL ASK_MULTI("帯回去打磨", "賣到武器店", "丟掉")
+
+IF RESULT == 2
+	PRINTFORML 這種破爛的武器已經不能用了
+	PRINTFORMW 扔掉後返回了拠点
+	RETURN 1
+ELSEIF RESULT == 1
+	PRINTFORML 這樣的東西說不定可以賣掉
+	PRINTFORML 把剣帯到了武器屋
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW ・
+	CALL ICPRINT("剣賣了<1000>金！", "W", カラー_注意)
+	PRINTFORMW 意料之外的臨時収入讓%ANAME(対象)%一臉開心的返回了拠点
+	RETURN 1
+ENDIF
+
+PRINTFORML 說不定是好東西
+PRINTFORMW %ANAME(対象)%把劍帯回了拠点、開始打磨
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+
+IF RAND:3 == 0
+	PRINTFORML 是把不錯的寶劍
+	PRINTFORML 因為挺喜歡所以決定自己用
+	CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:5 + 1, 1)
+ELSE
+	PRINTFORML 是到処都有的普通貨
+	PRINTFORML 因為覺得自己不需要它、于是決定送給部下
+ENDIF
+
+RETURN 1
+

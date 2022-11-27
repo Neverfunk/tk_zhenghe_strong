@@ -1,0 +1,431 @@
+﻿;-------------------------------------------------
+;性的行為の要求の処理
+;ARG:0は相手の勢力番号、ARG:1は要求の重さ。要求を飲むと1、断ると0を返す
+;-------------------------------------------------
+@DIPLOMACY_REQUESTED_SEX(ARG:0, ARG:1)
+;自国・相手勢力の君主のキャラ番号をそれぞれ取得
+LOCAL:4 = GET_COUNTRY_BOSS(CFLAG:MASTER:所属)
+LOCAL:5 = GET_COUNTRY_BOSS(ARG:0)
+
+;常に主人公が対象
+IF CONFIG:307 == 1
+	LOCAL:6 = MASTER
+;常に君主が対象
+ELSEIF CONFIG:307 == 2
+	LOCAL:6 = LOCAL:4
+;対象が状況によって変化
+ELSE
+	;対象キャラ判定値。正なら君主、負なら主人公が要求の対象になる
+	LOCAL:10 = 0
+
+	;●対象キャラの決定(君主 or 主人公)
+	;君主に対するイメージが悪いほど君主を辱める方向に傾く
+	IF REL_LIKE:(LOCAL:5):(LOCAL:4) >= 800
+		LOCAL:10 -= 20
+	ELSEIF REL_LIKE:(LOCAL:5):(LOCAL:4) >= 300
+		LOCAL:10 -= 10
+	ENDIF
+	IF REL_HATE:(LOCAL:5):(LOCAL:4) >= 800
+		LOCAL:10 += 30
+	ELSEIF REL_HATE:(LOCAL:5):(LOCAL:4) >= 300
+		LOCAL:10 += 15
+	ENDIF
+
+	;主人公との関係の深さに応じて主人公の奉仕を求める方に傾く
+	IF TALENT:(LOCAL:5):親愛
+		LOCAL:10 -= 40
+	ELSEIF TALENT:(LOCAL:5):恋慕
+		LOCAL:10 -= 20
+	ELSEIF TALENT:(LOCAL:5):恋人
+		LOCAL:10 -= 10
+	ELSEIF TALENT:(LOCAL:5):親友
+		LOCAL:10 += 20
+	ELSEIF CFLAG:(LOCAL:5):2 >= 500
+		LOCAL:10 -= 5
+	ENDIF
+
+	;性別による判定
+	IF IS_MALE(LOCAL:5)
+		SIF IS_FEMALE(MASTER)
+			LOCAL:10 -= 10
+		SIF IS_FEMALE(LOCAL:4)
+			LOCAL:10 += 10
+	ENDIF
+	
+	IF IS_FEMALE(LOCAL:5)
+		SIF IS_MALE(MASTER)
+			LOCAL:10 -= 10
+		SIF IS_MALE(LOCAL:4)
+			LOCAL:10 += 10
+	ENDIF
+
+	IF LOCAL:10 >= 0
+		LOCAL:6 = LOCAL:4
+	ELSE
+		LOCAL:6 = MASTER
+	ENDIF
+ENDIF
+
+;●内容の決定(接吻、足舐め、口交・乳交・舐陰)
+LOCAL:11 = 0
+LOCAL:12 = 0
+
+SIF TALENT:(LOCAL:5):坦率
+	LOCAL:12 += 10
+SIF TALENT:(LOCAL:5):胆怯
+	LOCAL:12 += 10
+SIF TALENT:(LOCAL:5):貞操観念
+	LOCAL:12 += 10
+SIF TALENT:(LOCAL:5):不在乎貞操
+	LOCAL:12 -= 10
+SIF TALENT:(LOCAL:5):傲慢
+	LOCAL:11 += 10
+SIF TALENT:(LOCAL:5):自尊心高
+	LOCAL:11 += 10
+
+IF GETBIT(TALENT:(LOCAL:5):淫乱系, 素質_淫乱_サド)
+	LOCAL:11 += 20
+ELSEIF GETBIT(TALENT:(LOCAL:5):淫乱系, 素質_淫乱_マゾ)
+	LOCAL:11 -= 20
+ELSEIF ABL:(LOCAL:5):主導度Ｕ >= 500
+	LOCAL:11 += 15
+ELSEIF ABL:(LOCAL:5):主導度Ｕ >= 300
+	LOCAL:11 += 10
+ELSEIF ABL:(LOCAL:5):主導度Ｕ >= 100
+	LOCAL:11 += 5
+ELSEIF ABL:(LOCAL:5):主導度Ｕ > -100
+	LOCAL:11 += 0
+ELSEIF ABL:(LOCAL:5):主導度Ｕ > -300
+	LOCAL:11 -= 5
+ELSEIF ABL:(LOCAL:5):主導度Ｕ > -500
+	LOCAL:11 -= 10
+ELSE
+	LOCAL:11 -= 15
+ENDIF
+
+IF ABL:(LOCAL:5):倒錯度 >= 800
+	LOCAL:12 -= 15
+ELSEIF ABL:(LOCAL:5):倒錯度 >= 500
+	LOCAL:12 -= 10
+ELSEIF ABL:(LOCAL:5):倒錯度 >= 300
+	LOCAL:12 -= 5
+ENDIF
+
+IF ARG:1 == 1
+	LOCAL:12 -= 10
+ELSEIF ARG:1 == 2
+	LOCAL:12 -= 20
+ENDIF
+
+IF LOCAL:12 >= 5 && LOCAL:6 == MASTER
+	LOCAL:15 = 0
+ELSEIF LOCAL:11 >= 15 && RAND:2
+	LOCAL:15 = 1
+ELSEIF LOCAL:12 <= -15 && RAND:2
+	LOCAL:15 = 2
+ELSEIF !RAND:3
+	IF RAND:2 && (HAS_PENIS(LOCAL:6) && HAS_VAGINA(LOCAL:5)) || (HAS_VAGINA(LOCAL:6) && HAS_PENIS(LOCAL:5))
+		LOCAL:15 = 30
+	ELSE
+		LOCAL:15 = 50
+	ENDIF
+ELSEIF HAS_PENIS(LOCAL:5)
+	LOCAL:15 = 10
+	IF RAND:3 >= 1
+		LOCAL:15 = 11
+	ENDIF
+ELSE
+	LOCAL:15 = 20
+ENDIF
+
+SELECTCASE LOCAL:15
+	CASE 0
+		PRINTFORML %ANAME(LOCAL:5)%対%ANAME(LOCAL:6)%、提出了当場接吻的要求
+	CASE 1
+		PRINTFORML %ANAME(LOCAL:5)%対%ANAME(LOCAL:6)%、提出了当場舐自己足的要求
+	CASE 2
+		PRINTFORML %ANAME(LOCAL:5)%対%ANAME(LOCAL:6)%、提出了当場自慰的要求
+	CASE 10
+		PRINTFORML %ANAME(LOCAL:5)%対%ANAME(LOCAL:6)%、提出了幇自己口交的要求
+	CASE 11
+		PRINTFORML %ANAME(LOCAL:5)%対%ANAME(LOCAL:6)%、提出了幇自己乳交的要求
+	CASE 20
+		PRINTFORML %ANAME(LOCAL:5)%対%ANAME(LOCAL:6)%、提出了対自己舐陰奉仕的要求
+	CASE 30
+		PRINTFORML %ANAME(LOCAL:5)%対%ANAME(LOCAL:6)%、提出了当一夜%ANAME(LOCAL:5)%的慰安婦的要求
+	CASE 50
+		PRINTFORML %ANAME(LOCAL:5)%対%ANAME(LOCAL:6)%、提出了讓她和士兵們做愛的要求
+ENDSELECT
+
+CALL ASK_YN("接受", "拒绝")
+IF RESULT == 1
+	RETURN 0
+ENDIF
+
+IF LOCAL:6 != MASTER
+	PRINTFORMW %ANAME(MASTER)%説服了%ANAME(LOCAL:6)%接受了這個要求…
+	PRINTL 
+ENDIF
+
+SELECTCASE LOCAL:15
+	CASE 0
+		IF LOCAL:11 >= 20
+			PRINTFORML %ANAME(LOCAL:6)%按照要求吻上了%ANAME(LOCAL:5)%的嘴唇、%ANAME(LOCAL:5)%把手放到了%ANAME(LOCAL:6)%的腦後
+			PRINTFORMW 伸出了舌頭貪婪地在%ANAME(LOCAL:6)%的口中来回舐着
+			PRINTFORMW 呼吸困難的%ANAME(LOCAL:6)%想要逃開、但是被%ANAME(LOCAL:5)%緊緊抱住了頭而無法逃脱
+			PRINTFORMW 之後%ANAME(LOCAL:5)%還沒有満足、%ANAME(LOCAL:6)%持續被%ANAME(LOCAL:5)%緊抱着沒完沒了地接吻
+		ELSE
+			PRINTFORML %ANAME(LOCAL:6)%按照要求吻上了%ANAME(LOCAL:5)%的嘴唇、%ANAME(LOCAL:5)%直接把舌頭伸入了%ANAME(LOCAL:6)%的口中
+			PRINTFORMW 誘使着%ANAME(LOCAL:6)%的舌頭纏繞上来
+			PRINTFORMW %ANAME(LOCAL:6)%在%ANAME(LOCAL:5)%的催促下、自己把舌頭纏了上去進行着深吻
+			PRINTFORMW 当%ANAME(LOCAL:6)%把嘴唇離開的時候、%ANAME(LOCAL:5)%用完全沒有満足的表情要求着継續接吻
+			PRINTFORMW 之後%ANAME(LOCAL:5)%還沒有満足、%ANAME(LOCAL:6)%在%ANAME(LOCAL:5)%強行要求下沒完沒了地接着吻
+		ENDIF
+		IF LOCAL:6 == MASTER && (TALENT:(LOCAL:4):恋慕 || TALENT:(LOCAL:4):恋人)
+			PRINTL 
+			PRINTFORMW 感覚到背部傳来一股寒気回了頭、%ANAME(LOCAL:4)%正悪狠狠的瞪着%ANAME(LOCAL:6)%
+			PRINTFORMW 不顧正流着冷汗的%ANAME(LOCAL:6)%的感受、%ANAME(LOCAL:5)%愉快地笑了出来
+			PALAM:(LOCAL:4):怒主 += 5000
+		ENDIF
+		PRINTL 
+
+		PRINTFORML <%ANAME(LOCAL:6)%>
+		CALL PRINT_ADD_EXP(LOCAL:6, "接吻経験", 3)
+		CALL TRAIN_AUTO_ABLUP(LOCAL:6)
+		PRINTL 
+
+		PRINTFORML <%ANAME(LOCAL:5)%>
+		CALL PRINT_ADD_EXP(LOCAL:5, "接吻経験", 3)
+		CALL TRAIN_AUTO_ABLUP(LOCAL:5)
+		PRINTL 
+
+		PRINTFORMW ………………
+
+	CASE 1
+		PRINTFORMW %ANAME(LOCAL:5)%当場讓%ANAME(LOCAL:6)%在自己面前跪下、脱掉鞋子把充満気味的脚圧到了%ANAME(LOCAL:6)%的鼻子下
+		PRINTFORMW 対着因為気味転過臉去的%ANAME(LOCAL:6)%、%ANAME(LOCAL:5)%発出了開始舐的命令
+		PRINTFORMW %ANAME(LOCAL:6)%不得已、只能張開嘴巴開始舐着%ANAME(LOCAL:5)%的脚
+		PRINTFORMW 看着一般忍耐着気味一般拼命奉仕的%ANAME(LOCAL:6)%的身姿、%ANAME(LOCAL:5)%露出了満足的笑容
+		PRINTFORMW ………………
+
+	CASE 2
+		IF HAS_PENIS(LOCAL:6)
+			PRINTFORMW %ANAME(LOCAL:5)%、命令着%ANAME(LOCAL:6)%先把衣服全部脱光
+			PRINTFORMW %ANAME(LOCAL:6)%不得已、在%ANAME(LOCAL:5)%及其部下的注視下脱去了衣服暴露了裸体
+			IF LOCAL:6 != MASTER && ABL:(LOCAL:6):欲望 < 3
+				PRINTFORMW %ANAME(LOCAL:6)%忍耐着恥辱、握着自己的肉棒、開始前後擼動
+				PRINTFORML 聽着%ANAME(LOCAL:5)%及其部下在一辺発出的笑声、
+				PRINTFORMW %ANAME(LOCAL:6)%眼睛只看着自己的肉棒持續擼動着…
+				PRINTFORMW 之後、到達絶頂的%ANAME(LOCAL:6)%的肉棒、射出大量的精液落在了地上
+				PRINTFORMW 看着呼吸慌乱、因為快感和屈辱顫抖着的%ANAME(LOCAL:6)%、%ANAME(LOCAL:5)%露出了満足的笑容
+				PALAM:(LOCAL:6):怒外 += 5000
+			ELSE
+				IF ABL:(LOCAL:6):露出 >= 3
+					PRINTFORMW %ANAME(LOCAL:6)%因為羞恥変得興奮、握着自己的肉棒、開始激烈地前後擼動
+				ELSE
+					PRINTFORMW %ANAME(LOCAL:6)%握住自己的肉棒、開始慢慢地前後擼動
+				ENDIF
+				PRINTFORMW 在%ANAME(LOCAL:6)%摩擦着自己肉棒的時候、周囲響起了%ANAME(LOCAL:5)%及其部下発出的笑声、
+				PRINTFORMW 之後、%ANAME(LOCAL:6)%到達了絶頂、肉棒射出了大量精液落在了地上
+				PRINTFORMW 看着呼吸慌乱因為快感顫抖着的%ANAME(LOCAL:6)%、%ANAME(LOCAL:5)%露出了満足的笑容
+			ENDIF
+			PRINTL 
+			CALL FUCK(LOCAL:6, "露出, 自慰, 射精, 性技, 欲望")
+		ELSE
+			PRINTFORMW %ANAME(LOCAL:5)%、命令着%ANAME(LOCAL:6)%先把衣服全部脱光
+			PRINTFORMW %ANAME(LOCAL:6)%不得已、在%ANAME(LOCAL:5)%及其部下的注視下脱去了衣服暴露了裸体
+			IF LOCAL:6 != MASTER && ABL:(LOCAL:6):欲望 < 3
+				PRINTFORMW %ANAME(LOCAL:6)%忍耐着羞恥、開始用手指责弄自己的私処
+				PRINTFORMW 聽着%ANAME(LOCAL:5)%及其部下在一辺発出的笑声、
+				PRINTFORMW %ANAME(LOCAL:6)%眼角含泪拼命的継續撫慰着自己的身体…
+				PRINTFORMW 之後、%ANAME(LOCAL:6)%漏出了嬌喘声、微顫着高潮了
+				PRINTFORMW 看着呼吸慌乱、露出空虚的目光因為快感的余韻而顫抖着的%ANAME(LOCAL:6)%、%ANAME(LOCAL:5)%露出了満足的笑容
+				PALAM:(LOCAL:6):怒外 += 5000
+			ELSE
+				IF ABL:(LOCAL:6):露出 >= 3
+					PRINTFORMW %ANAME(LOCAL:6)%因羞恥変得興奮、開始用手指责弄自己的私処
+				ELSE
+					PRINTFORMW %ANAME(LOCAL:6)%忍耐着羞恥、開始用手指责弄自己的私処
+				ENDIF
+				PRINTFORMW 聽着%ANAME(LOCAL:5)%及其部下発出的笑声、
+				PRINTFORMW 過度的羞恥讓%ANAME(LOCAL:6)%的身体自然的発熱了…
+				PRINTFORMW 之後、%ANAME(LOCAL:6)%漏出了嬌喘声、在衆目睽睽之下顫抖着高潮了
+				PRINTFORMW 看着呼吸慌乱因為快感的余韻顫抖着的%ANAME(LOCAL:6)%、%ANAME(LOCAL:5)%露出了満足的笑容
+			ENDIF
+			CALL FUCK(LOCAL:6, "欲望, 自慰, Ｃ, Ｂ, 露出, 性技")
+		ENDIF
+		PRINTL 
+		PRINTFORMW ………………
+
+	CASE 10
+		PRINTFORMW %ANAME(LOCAL:6)%進入了%ANAME(LOCAL:5)%的私人房間…
+		PRINTFORMW ………………
+		PRINTFORMW %ANAME(LOCAL:5)%在床鋪辺坐下、讓%ANAME(LOCAL:6)%跪在自己眼前
+		PRINTFORMW %ANAME(LOCAL:5)%從衣服里掏出了肉棒、命令%ANAME(LOCAL:6)%用舐的方式讓自己満足
+		IF LOCAL:6 != MASTER && ABL:(LOCAL:6):欲望 < 3
+			PRINTFORMW %ANAME(LOCAL:6)%有些不知所措、於是%ANAME(LOCAL:5)%抓着%ANAME(LOCAL:6)%的頭、強行把肉棒插入了口中
+			PRINTFORMW 為了讓痛苦呻吟的%ANAME(LOCAL:6)%反省、%ANAME(LOCAL:5)%多次把肉棒插入了喉嚨深処
+			PRINTFORMW 之後%ANAME(LOCAL:5)%把肉棒插入到喉嚨深処直接射精了、被嗆到的%ANAME(LOCAL:6)%激烈的咳嗽着
+			PALAM:(LOCAL:6):怒外 += 5000
+		ELSE
+			PRINTFORMW %ANAME(LOCAL:6)%用舌頭纏繞着%ANAME(LOCAL:5)%的肉棒、%ANAME(LOCAL:5)%帯着満足的表情撫摸着%ANAME(LOCAL:6)%的頭
+			PRINTFORMW 之後到達極限的%ANAME(LOCAL:5)%抓住了%ANAME(LOCAL:6)%的頭、強行把肉棒插入了%ANAME(LOCAL:6)%的口中在裡面射精了
+			IF ABL:(LOCAL:6):精愛 >= 2
+				PRINTFORMW 被命令着一滴不剩的喝干浄的%ANAME(LOCAL:6)%、因為精液散発的気味恍惚着把%ANAME(LOCAL:5)%的精液喝了下去
+			ELSE
+				PRINTFORMW 被命令着一滴不剩的喝干浄的%ANAME(LOCAL:6)%、忍耐着精液散発的気味把%ANAME(LOCAL:5)%的精液喝了下去
+			ENDIF
+		ENDIF
+		PRINTL 
+		CALL FUCK(LOCAL:5, "Ｃ, 欲望, 射精")
+		CALL FUCK(LOCAL:6, "欲望, 奉仕, 性技, 精愛, 口淫", "接吻喪失, 口内射精", 0, @"%ANAME(LOCAL:5)%的肉棒", "", "", "為了維持外交関係的和姦")
+		PRINTFORMW ………………
+
+	CASE 11
+		PRINTFORMW %ANAME(LOCAL:6)%進入了%ANAME(LOCAL:5)%的私人房間…
+		PRINTFORMW ………………
+		PRINTFORMW %ANAME(LOCAL:5)%在床鋪辺坐下、讓%ANAME(LOCAL:6)%跪在自己眼前
+		PRINTFORMW %ANAME(LOCAL:5)%從衣服里掏出了肉棒、命令%ANAME(LOCAL:6)%用胸部讓自己満足
+		IF LOCAL:6 != MASTER && ABL:(LOCAL:6):欲望 < 3
+			;胸が普通サイズ以上
+			IF GET_BUSTSIZE(LOCAL:6) >= 0
+				PRINTFORMW %ANAME(LOCAL:6)%有些不知所措、於是%ANAME(LOCAL:5)%推倒了%ANAME(LOCAL:6)%、強行把肉棒插入了乳溝中
+				PRINTFORMW 胸部被大力抓住的%ANAME(LOCAL:6)%痛苦的呻吟着、但是%ANAME(LOCAL:5)%毫不在意継續用肉棒在%ANAME(LOCAL:6)%的乳溝中抽插
+				PRINTFORMW 之後被到達極限的%ANAME(LOCAL:5)%把大量的白濁液射在臉上、%ANAME(LOCAL:6)%因為厭悪感和屈辱流下了泪水
+			;貧乳以下
+			ELSE
+				PRINTFORMW %ANAME(LOCAL:6)%有些不知所措、於是%ANAME(LOCAL:5)%推倒了%ANAME(LOCAL:6)%、開始強行用肉棒摩擦着胸部
+				PRINTFORMW 胸部被強行圧住摩擦讓%ANAME(LOCAL:6)%痛苦的呻吟着、但是%ANAME(LOCAL:5)%毫不在意継續用肉棒使用着%ANAME(LOCAL:6)%的胸部
+				PRINTFORMW 之後被到達極限的%ANAME(LOCAL:5)%把大量的白濁液射在臉上、%ANAME(LOCAL:6)%因為厭悪感和屈辱流下了泪水
+			ENDIF
+			PALAM:(LOCAL:6):怒外 += 5000
+			PRINTL 
+		ELSE
+			;胸が普通サイズ以上
+			IF GET_BUSTSIZE(LOCAL:6) >= 0
+				PRINTFORML %ANAME(LOCAL:6)%就像説得那樣用胸部夾住%ANAME(LOCAL:5)%的肉棒摩擦着、
+				PRINTFORMW %ANAME(LOCAL:5)%露出邪悪的笑容掐住%ANAME(LOCAL:6)%的乳頭往上拉
+				PRINTFORMW %ANAME(LOCAL:6)%沒有抵抗、忍耐着乳頭傳来的快感拼命的搖動着胸部継續奉仕着%ANAME(LOCAL:5)%的肉棒
+			;貧乳以下
+			ELSE
+				PRINTFORML %ANAME(LOCAL:6)%就像説得那樣用貧瘠的胸部摩擦着%ANAME(LOCAL:5)%的肉棒、
+				PRINTFORMW %ANAME(LOCAL:5)%露出邪悪的笑容反復揉捏着%ANAME(LOCAL:6)%的乳頭
+				PRINTFORMW %ANAME(LOCAL:6)%沒有抵抗、忍耐着乳頭傳来的快感拼命用胸部摩擦着%ANAME(LOCAL:5)%的肉棒継續奉仕着
+			ENDIF
+			PRINTFORML 不久之後被達到極限的%ANAME(LOCAL:5)%把白濁液射到了臉上
+			IF TALENT:(LOCAL:6):母乳体質
+				PRINTFORMW %ANAME(LOCAL:6)%的乳頭挺立着、顫抖着身体從那噴出了大量的母乳
+			ELSE
+				PRINTFORMW %ANAME(LOCAL:6)%挺立的乳頭和身体一樣顫抖着
+			ENDIF
+			PRINTL 
+		ENDIF
+		CALL FUCK(LOCAL:5, "Ｃ, 欲望, 射精")
+		CALL FUCK(LOCAL:6, "欲望, 奉仕, 性技, 精愛, Ｂ")
+		PRINTL 
+		PRINTFORMW ………………
+
+	CASE 20
+		PRINTFORMW %ANAME(LOCAL:6)%進入了%ANAME(LOCAL:5)%的私人房間…
+		PRINTFORMW ………………
+		PRINTFORMW %ANAME(LOCAL:5)%在床鋪辺坐下、讓%ANAME(LOCAL:6)%跪在自己眼前
+		PRINTFORMW %ANAME(LOCAL:5)%張開双腿、命令着%ANAME(LOCAL:6)%一直舐到她満足為止
+		IF LOCAL:6 != MASTER && ABL:(LOCAL:6):欲望 < 3
+			PRINTFORMW %ANAME(LOCAL:6)%有些不知所措、於是%ANAME(LOCAL:5)%抓住%ANAME(LOCAL:6)%的頭、強行圧在了自己下体上
+			PRINTFORMW 簡直就像是用臉在自慰一樣、讓%ANAME(LOCAL:6)%発出了痛苦的呻吟
+			PALAM:(LOCAL:6):怒外 += 5000
+		ELSE
+			PRINTFORMW %ANAME(LOCAL:6)%伸出舌頭開始奉仕、興奮起来的%ANAME(LOCAL:5)%抓住了%ANAME(LOCAL:6)%的頭、強行圧在了股間
+			PRINTFORMW %ANAME(LOCAL:6)%的臉上沾満了%ANAME(LOCAL:5)%的愛液、在%ANAME(LOCAL:5)%満足以前持續的奉仕着
+		ENDIF
+		PRINTL 
+
+		CALL FUCK(LOCAL:5, "Ｃ, 欲望")
+		CALL FUCK(LOCAL:6, "欲望, 奉仕, 性技, 精愛, 口淫", "接吻喪失", 0, @"%ANAME(LOCAL:5)%的陰唇", "", "", "為了維持外交関係的和姦")
+
+		PRINTFORMW ………………
+	CASE 30
+		IF HAS_PENIS(LOCAL:5) && HAS_VAGINA(LOCAL:6)
+			PRINTFORML %ANAME(LOCAL:5)%馬上、脱掉了%ANAME(LOCAL:6)%的衣服、也脱掉了自己的衣服
+			PRINTFORML %ANAME(LOCAL:5)%的肉棒、期待着快感很快就勃起了……
+			SELECTCASE RAND:7
+				CASE 0
+					PRINTFORML %ANAME(LOCAL:5)%、讓%ANAME(LOCAL:6)%四肢着地趴着、從後面插入了小穴
+				CASE 1
+					PRINTFORML %ANAME(LOCAL:5)%、讓%ANAME(LOCAL:6)%仰躺着、圧在上面插進了小穴
+				CASE 2
+					PRINTFORML %ANAME(LOCAL:5)%、讓%ANAME(LOCAL:6)%扶着墻翹起屁股、從後面插入了小穴
+				CASE 3
+					PRINTFORML %ANAME(LOCAL:5)%、抱住%ANAME(LOCAL:6)%、就這樣站着插入了小穴
+				CASE 4
+					PRINTFORML %ANAME(LOCAL:5)%坐了下来、讓%ANAME(LOCAL:6)%対着她跨坐上来、在下面往上頂着腰
+				CASE 5
+					PRINTFORML %ANAME(LOCAL:5)%坐了下来、讓%ANAME(LOCAL:6)%背対着她跨坐上来、在下面往上頂着腰
+				CASE 6
+					PRINTFORML %ANAME(LOCAL:5)%仰着躺了下去、讓%ANAME(LOCAL:6)%跨坐在自己身上、扭動着自己的腰
+			ENDSELECT
+			PRINTFORML 不久之後%ANAME(LOCAL:5)%、在%ANAME(LOCAL:6)%的腔内直接射精了
+			PRINTFORML 從拔出肉棒后的小穴内、滴下了白色的粘糊液体……
+			
+			PRINTL 
+			CALL FUCK(LOCAL:5, "Ｃ, 欲望, 性交, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(LOCAL:6)%的膣道", "為了維持外交関係的和姦")
+			CALL FUCK(LOCAL:6, "欲望, 奉仕, 性交, 精愛, Ｖ, 苦痛快楽, 被虐, Ｖ性交", "処女喪失, 膣内射精", GET_ID(LOCAL:5), "", ANAME(LOCAL:5), "", "為了維持外交関係的和姦")
+
+			PRINTFORMW ………………
+		ELSEIF HAS_PENIS(LOCAL:6) && HAS_VAGINA(LOCAL:5)
+			PRINTFORML %ANAME(LOCAL:5)%馬上、脱掉了%ANAME(LOCAL:6)%的衣服、也脱掉了自己的衣服
+			PRINTFORML %ANAME(LOCAL:6)%腿間的肉棒、期待着快感很快就勃起了……
+			PRINTFORML %ANAME(LOCAL:5)%非常期待的樣子、伸出舌頭舔了舔嘴唇
+			SELECTCASE RAND:7
+				CASE 0
+					PRINTFORML %ANAME(LOCAL:5)%自己把屁股対着%ANAME(LOCAL:6)%、搖着腰央求着做愛
+				CASE 1
+					PRINTFORML %ANAME(LOCAL:5)%自己仰躺在地上、用食指掰開了秘縫央求着做愛
+				CASE 2
+					PRINTFORML %ANAME(LOCAL:5)%自己扶住墻対%ANAME(LOCAL:6)%翹起屁股、央求着被從後面插入小穴
+				CASE 3
+					PRINTFORML %ANAME(LOCAL:5)%抱住了%ANAME(LOCAL:6)%、以站立的姿勢命令対方開始侵犯自己
+				CASE 4
+					PRINTFORML %ANAME(LOCAL:5)%讓%ANAME(LOCAL:6)%坐着、面対着跨坐上去、要求対方在下面挺着腰
+				CASE 5
+					PRINTFORML %ANAME(LOCAL:5)%讓%ANAME(LOCAL:6)%坐着、背対着跨坐上去、要求対方在下面挺着腰
+				CASE 6
+					PRINTFORML %ANAME(LOCAL:5)%讓%ANAME(LOCAL:6)%仰躺着、跨坐在対方身上、用自己的小穴摩擦着亀頭
+			ENDSELECT
+			PRINTFORML %ANAME(LOCAL:6)%被命令着、插入了%ANAME(LOCAL:5)%的小穴……
+			PRINTFORML 不久%ANAME(LOCAL:6)%就到了極限、就這樣在%ANAME(LOCAL:5)%的腔内射精了……
+			PRINTFORML 肉棒を引き抜かれた淫裂からは、白い物がどろりとこぼれ落ちている……
+			
+			PRINTL 
+			CALL FUCK(LOCAL:5, "欲望, 奉仕, 性交, 精愛, Ａ, 苦痛快楽, 被虐, Ａ性交", "Ａ処女喪失, 腸内射精", GET_ID(LOCAL:6), "", ANAME(LOCAL:6), "", "為了維持外交関係的和姦")
+			CALL FUCK(LOCAL:6, "Ｃ, 欲望, 性交, 射精, Ａ挿入", "童貞喪失", 0, "", "", @"%ANAME(LOCAL:5)%のアナル", "為了維持外交関係的和姦")
+			PRINTFORMW ………………
+		ENDIF
+	CASE 50
+		IF IS_MALE(LOCAL:6)
+			PRINTFORML %ANAME(LOCAL:5)%馬上、脱掉了%ANAME(LOCAL:6)%的衣服、也脱掉了自己的衣服
+			PRINTFORML %ANAME(LOCAL:5)%的秘縫、期待着快感已経変得粘糊糊的了……
+			PRINTFORML 突然、%ANAME(LOCAL:5)%啪啪的拍起了手
+			PRINTFORML 於是、艶麗的女兵們一個接一個的進来了
+			PRINTFORML 就這樣、%ANAME(LOCAL:6)%、以慰安的名義被提供給了士兵們……
+			CALL FUCK(LOCAL:5, "欲望, Ｃ, Ｂ, 自慰", "")
+			CALL FUCK(LOCAL:6, "欲望, 奉仕, 性技, Ｃ, Ｂ, Ｍ, 射精, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ挿入, Ａ挿入", "接吻喪失, 童貞喪失", GET_SPERM_ID("士兵"), @"%ANAME(LOCAL:5)%の私兵の秘貝", "", @"%ANAME(LOCAL:5)%の私兵の膣", "為了維持外交関係的輪姦")
+			PRINTFORML 之後事情終於結束了、只有已経射精到精疲力尽肉棒徹底萎靡的%ANAME(LOCAL:6)%、
+			PRINTFORML 還有以%ANAME(LOCAL:6)%的癡態為素材自慰了好幾次、已経精疲力尽的%ANAME(LOCAL:5)%
+			PRINTL 
+		ELSEIF HAS_VAGINA(LOCAL:6)
+			PRINTFORML %ANAME(LOCAL:5)%馬上、脱掉了%ANAME(LOCAL:6)%的衣服、也脱掉了自己的衣服
+			PRINTFORML %ANAME(LOCAL:5)%的肉棒、期待着快感很快就勃起了……
+			PRINTFORML 突然、%ANAME(LOCAL:5)%啪啪的拍起了手
+			PRINTFORML 然後、強壯的士兵一個接一個的進入了房間
+			PRINTFORML 就這樣、%ANAME(LOCAL:6)%、以慰安的名義被提供給了士兵們……
+			CALL FUCK(LOCAL:5, "欲望, Ｃ, Ｂ, 自慰", "")
+			CALL FUCK(LOCAL:6, "欲望, 奉仕, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｖ拡張, Ａ拡張, 性交, 自慰, 精愛, 露出, 排泄, 射精, 苦痛快楽, 緊縛, 被虐, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("士兵"), @"%ANAME(LOCAL:5)%の私兵の肉棒", @"%ANAME(LOCAL:5)%の私兵", "", "為了維持外交関係的輪姦")
+			PRINTFORML 之後事情終於結束了、只有全身所有洞都溢出着精液的%ANAME(LOCAL:6)%、
+			PRINTFORML 還有以%ANAME(LOCAL:6)%的癡態為素材自慰了好幾次、已経精疲力尽的%ANAME(LOCAL:5)%
+			PRINTL 
+		ENDIF
+ENDSELECT
+
+RETURN 1
+

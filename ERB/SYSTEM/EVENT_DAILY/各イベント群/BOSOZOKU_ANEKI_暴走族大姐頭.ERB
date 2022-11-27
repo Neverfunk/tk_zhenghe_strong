@@ -1,0 +1,463 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_BOSOZOKU_ANEKI_RATE()
+RETURN (DVAR:暴走族大姐頭_進行度 > 0 ? 330 # 30)
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_BOSOZOKU_ANEKI_DECISION()
+#DIM 対象
+
+対象 = 0
+
+SIF !IS_FEMALE(MASTER)
+	RETURN 0
+SIF DAY < 10
+	RETURN 0
+SIF DVAR:暴走族大姐頭_進行度 == 10
+	RETURN 0
+FOR LOCAL, 0, CHARANUM
+	;捕虜でなく、死んでおらず、暴走族大姐頭未所持者の女が自国にいるかどうか判定
+	SIF !CFLAG:LOCAL:捕虜先 && CFLAG:LOCAL:特殊状態 != 特殊状態_死亡 && !(GETBIT(TALENT:LOCAL:日常系, 素質_デイリー_大家的新娘大姐頭)) && IS_FEMALE(LOCAL)
+		対象 ++
+NEXT
+SIF 対象 < 1
+	RETURN 0
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_BOSOZOKU_ANEKI_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_BOSOZOKU_ANEKI
+#DIM 対象
+
+IF DVAR:暴走族大姐頭_進行度 > 0
+	対象 = ID_TO_CHARA(DVAR:暴走族大姐頭_対象ID)
+	IF 対象 == -1 || CFLAG:対象:特殊状態 == 特殊状態_死亡
+		DVAR:暴走族大姐頭_対象ID = 0
+		DVAR:暴走族大姐頭_進行度 = 0
+	ENDIF
+ENDIF
+
+IF DVAR:暴走族大姐頭_進行度 == 0
+	;%ANAME(MASTER)%が堕ちている場合
+	IF GETBIT(TALENT:MASTER:日常系, 素質_デイリー_大家的新娘大姐頭) && IS_FEMALE(MASTER) && DVAR:暴走族大姐頭_発生フラグ == 1
+		PRINTFORML  聽説別的地方又出現暴走族了、%ANAME(MASTER)%思索著
+		PRINTFORMW  該怎麽辦呢......
+;２回目以降
+	;初めての場合
+	ELSE
+		PRINTFORML 收到報告稱最近有一夥小混混駕駛著從一種外界傳入的交通工具騷擾領民
+		PRINTFORML 他們自稱為暴走族、駕駛的是被稱爲「摩托車」的東西
+		PRINTFORMW 該怎麽辦呢......
+	ENDIF
+	PRINTFORML 怎麼辦？
+	CALL ASK_MULTI_JUDGE("過去看看『癡女向』",CONFIG:203,"推脫",1)
+	IF RESULT == 1
+		$OKOTOWARI
+		;%ANAME(MASTER)%が堕ちている場合
+		IF GETBIT(TALENT:MASTER:日常系, 素質_デイリー_大家的新娘大姐頭) && DVAR:暴走族大姐頭_発生フラグ == 1
+			PRINTFORML 還是算了吧、自己的小弟們已經夠多了
+			PRINTFORML %ANAME(MASTER)%這樣想著、隨便拉住一個正好從門前路過的小弟......
+			IF HAS_VAGINA(MASTER)
+				PRINTFORMW 然后把他带进卧室，像是要发疯似的榨取了他好几次......
+				;TranslatedMark そして腹いせとばかりに%ANAME(MASTER)%を寝室に連れ込むと、無責任に何度も種付けをしていった
+				CALL FUCK(MASTER, "Ｃ, Ｖ, Ｂ, Ｍ, 性交, 精愛, 奉仕, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精, CFLAG減少", GET_SPERM_ID("小弟"), @"小弟の\@RAND:2 ? 肉棒 # 唇\@", "小弟", "", "榨精性愛")
+			ENDIF
+		ELSE
+			PRINTFORML 還是別惹麻煩了吧
+			PRINTFORMW 以人手不夠爲由拒絕了
+			SIF DVAR:暴走族大姐頭_発生フラグ != 1
+				DVAR:暴走族大姐頭_発生フラグ = 1
+		ENDIF
+		RETURN
+	ELSEIF RESULT == 0
+		;%ANAME(MASTER)%が堕ちている場合
+		IF GETBIT(TALENT:MASTER:日常系, 素質_デイリー_大家的新娘大姐頭) && DVAR:暴走族大姐頭_発生フラグ == 1
+			PRINTFORMW 毫无疑问收服這些暴走族可以增加兵力
+		ELSE
+			PRINTFORML 果然還是不能置之不理
+		ENDIF
+			PRINTFORMW %ANAME(MASTER)%出發了
+	ENDIF
+	PRINTFORML
+	PRINTFORMW 爲了不打草驚蛇、沒穿軍服隱藏了身份的%ANAME(MASTER)%來到了暴走族的地盤、沒多久就有幾個男人圍了過來
+	PRINTFORML 男人們發出下流的笑聲對%ANAME(MASTER)%說「怎麽一個人在這裏、是來和我們約會的嗎」
+	PRINTFORML 低著頭的%ANAME(MASTER)%確認了目標就是眼前的幾個男人后擡起了頭
+	PRINTFORML 在男人們還沒反應過來前就擊倒了他們
+	PRINTFORMW %ANAME(MASTER)%教訓了男人們一頓后終於放過了他們
+	PRINTFORML
+	FOR LOCAL, 1, MAX_COUNTRY
+		CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 15, -15)
+	NEXT
+	CALL COLOR_PRINTW("因爲領民們的感謝、势力的评价提升了", カラー_注意)
+	DVAR:暴走族大姐頭_進行度 ++
+	DVAR:暴走族大姐頭_対象ID = GET_ID(対象)
+	DVAR:暴走族大姐頭_発生フラグ = 1
+ELSEIF DVAR:暴走族大姐頭_進行度 == 1
+	PRINTFORMW 領民們又來請求幫助了
+	PRINTFORML 本以为教訓了幾個暴走族后他們會安分點
+	PRINTFORML 沒想到他們又開始胡來了
+	PRINTFORML %ANAME(MASTER)%又一次到了暴走族們的地盤
+	PRINTFORMW 幾個男人看到%ANAME(MASTER)%后立即土下座了...
+	PRINTFORML 感到意外的%ANAME(MASTER)%解除了攻擊的姿勢、問他們怎麽回事
+	PRINTFORML 男人們低聲下氣解釋了原因、原來他們是受到了另一夥規模更大的暴走族團體的脅迫
+	PRINTFORML 如果不上繳金錢就會被幹掉、這才出來向領民們收取保護費的
+	PRINTFORMW %ANAME(MASTER)%明白了原因后對他們說「你們做我的小弟吧、老娘來幫你們、但是絕不能再去騷擾居民了」
+	PRINTFORML 男人們對視了一眼后飛快的同意了
+	PRINTFORML
+	CALL COLOR_PRINTW("成爲了暴走族的大姐頭", カラー_注意)
+	SETBIT TALENT:対象:日常系, 素質_デイリー_暴走族大姐頭
+	FOR LOCAL, 1, MAX_COUNTRY
+		CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 15, -15)
+	NEXT
+	CALL COLOR_PRINTW("因爲領民們的感謝、势力的评价提升了", カラー_注意)
+	DVAR:暴走族大姐頭_進行度 ++
+ELSEIF DVAR:暴走族大姐頭_進行度 == 2
+	PRINTFORML 小弟們過來報告、說是收到對方的聯絡要求上繳金錢
+	PRINTFORML 換上自製特攻服的%ANAME(MASTER)%帶著小弟們出發前去對方約定的地點了
+	PRINTFORMW 因爲出乎意料的裝扮、一路上小弟們不時的偷看%ANAME(MASTER)%...
+	PRINTFORML
+	PRINTFORML 來到約定的公園空地、數十名暴走族已經等候多時
+	PRINTFORML 看到領頭的%ANAME(MASTER)%、男人們眼神發亮的迎了過來
+	PRINTFORML 眼前的女人雖然穿著暴走族獨有的特攻服、但衣服的胸口位置卻打開著
+	PRINTFORMW 只用布條包裹住的胸部像是爲了誘惑男人一樣露出了部分乳肉...
+	PRINTFORML
+	PRINTFORML 對方的首領來到%ANAME(MASTER)%面前、對著女人身後的小弟說
+	PRINTFORMW 「你們這是保護費沒收夠、就找了個女人作爲替代品嗎」
+	PRINTFORML
+	PRINTFORML 男人還想繼續說的時候、%ANAME(MASTER)%打斷了他、用輕蔑的語氣對他說
+	PRINTFORML 「現在他們是老娘的小弟了、如果你不把地盤交給我們、就等著被幹掉吧」
+	PRINTFORMW 被激怒的男人大聲辱駡著%ANAME(MASTER)%、招呼著他的小弟們冲了過來
+	PRINTFORML
+	PRINTFORML ...男人們毫無疑問的被打倒了
+	PRINTFORML 以小混混的戰鬥力完全不是%ANAME(MASTER)%的對手
+	PRINTFORML %ANAME(MASTER)%一隻脚踩在癱軟在地的首領頭上對他説
+	PRINTFORML 「不想死的話就帶著人做老娘的小弟、而且不能再騷擾普通居民了」
+	PRINTFORML 男人喘著粗氣回答說「作爲敗者、我願意遵從勝者的命令、但是不收保護費我們就沒有收入了啊」
+	PRINTFORML %ANAME(MASTER)%想了想、收回踩著男人的腿、蹲在他面前說「金錢的話先給你們一些生活費、之後我來想辦法」
+	PRINTFORMW 男人聽後站了起來、招呼著鼻青臉腫的小弟們在%ANAME(MASTER)%身前鞠躬行禮了...
+	PRINTFORML
+	FOR LOCAL, 1, MAX_COUNTRY
+		CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 15, -15)
+	NEXT
+		CALL COLOR_PRINTW("因爲領民們的感謝、势力的评价提升了", カラー_注意)
+			MONEY -= 1000
+	CALL COLOR_PRINTW("付出了1000金作爲小弟們的生活費", カラー_注意)
+	DVAR:暴走族大姐頭_進行度 ++
+ELSEIF DVAR:暴走族大姐頭_進行度 == 3
+	PRINTFORML 過了一段時間、小弟們接到%ANAME(MASTER)%的聯絡后來到了郊外一座偏僻的莊園
+	PRINTFORMW %ANAME(MASTER)%已經等候在這裏了...
+	PRINTFORML
+	PRINTFORML %ANAME(MASTER)%對男人們說「這裏表面上是莊園、但以前卻是奴隸交易的拍賣所、當然現在已經廢棄了」
+	PRINTFORML 女人一邊介紹著、一邊帶男人們走了進去
+	PRINTFORML 雖然到處都是灰塵、但内部華麗的裝修讓男人們瞪大了眼睛
+	PRINTFORMW %ANAME(MASTER)%命令兩個小弟跟著自己走、其餘人一起動手把這裏打掃乾淨、作爲團體的根據地使用
+	PRINTFORML
+	PRINTFORML 半天過去了、男人們結束了工作、在煥然一新的房屋中休息時
+	PRINTFORML %ANAME(MASTER)%把他們叫了起來、帶他們來到了其中一個房間
+	PRINTFORMW 打開門、映入眼簾的是一排排女式衣物和已經設置好的攝影器材...
+	PRINTFORML
+	PRINTFORML 面對疑惑著的小弟們、%ANAME(MASTER)%淡然的說「因爲你們沒有收入來源、我想了個辦法」
+	PRINTFORML 「那就是販賣寫真、不僅能賺錢、還能吸引更多人加入我們團體擴大力量」
+	PRINTFORML 「至於模特、當然是作爲大姐頭的我來出演、你們商量一下、去選些受男人喜歡的衣服出來拿給我吧」
+	PRINTFORMW 出乎預料的話語讓男人們呼吸粗重了起來...
+	PRINTFORML
+	PRINTFORML 然而討論結束的小弟們并沒有動、對%ANAME(MASTER)%表示因爲是首次拍攝
+	PRINTFORML 現在她穿著的特攻服是最能代表暴走團的服裝、%ANAME(MASTER)%接受了他們的建議
+	PRINTFORML 於是%ANAME(MASTER)%在房间里被照相机对准了身體
+	PRINTFORML 听从着小弟們的建議，%ANAME(MASTER)%让男人們拍了無數照片
+	PRINTFORMW 約定好下次過來的時間后、%ANAME(MASTER)%讓小弟們回去了...
+	PRINTFORML
+	CALL COLOR_PRINTW("那天的寫真發售后、加入團體的人數增加了", カラー_注意)
+	MONEY += 5000
+	CALL COLOR_PRINTW("得到了5000金的寫真售賣收入", カラー_注意)
+	CALL PRINT_ADD_EXP(MASTER, "露出経験値", RAND:20 + 1, 1)
+	CALL PRINT_ADD_EXP(MASTER, "撮影経験", RAND:20 + 1, 1)
+	MONEY -= 1000
+	CALL COLOR_PRINTW("付出了1000金作爲小弟們的生活費", カラー_注意)
+	DVAR:暴走族大姐頭_進行度 ++
+ELSEIF DVAR:暴走族大姐頭_進行度 == 4
+	PRINTFORMW 到了约定好的拍攝时间
+	PRINTFORML %ANAME(MASTER)%來到據點、小弟們排好隊伍整齊劃一的鞠躬大喊「歡迎大姐頭」
+	PRINTFORMW 女人在男人們的簇擁下走進了拍攝房間...
+	PRINTFORML
+	PRINTFORML 房間裏已經準備好了今天拍攝要穿的服裝、都是各種職業的工作服
+	PRINTFORML %ANAME(MASTER)%輕笑道「作爲無業者、所以你們喜歡的都是這種嗎」
+	PRINTFORMW 女人走上前拿起了一套女警服、看到大姐頭準備換衣服了、小弟們主動走出房間關上了門
+	PRINTFORML
+	PRINTFORML 不多時%ANAME(MASTER)%招呼小弟們進入房間開始了拍攝
+	PRINTFORML 女人配合著客串攝影師的小弟擺出各種誘惑的姿勢
+	PRINTFORMW 在這過程中、注視著大姐頭的小弟們不由自主的勃起了...
+	PRINTFORML
+	PRINTFORML 在拍攝第二套服裝的時候、%ANAME(MASTER)%注意到了小弟們雙腿閒的突起
+	PRINTFORML 女人略微思考了一下、對他們開口問道「這就是發情了的男人嗎」
+	PRINTFORML 小弟們僵在了原地、一個個都低下頭不敢看向女人
+	PRINTFORML 忐忑不安中卻聽到%ANAME(MASTER)%接著說道「擡起頭、誰允許你們低頭的」
+	PRINTFORML 男人們這才擡起頭、看到的卻是%ANAME(MASTER)%主動打開上衣、露出了穿著内衣的%STR_BODY("胸：愛撫", 対象)%
+	PRINTFORMW %ANAME(MASTER)%對著陷入混亂的小弟們說「漂亮嗎、只要你們夠聽話、給你們一些這樣的獎勵也不是不可以」...
+	PRINTFORML
+	PRINTFORML 今天的拍攝在男人們粗重的喘息中完成了
+	PRINTFORML %ANAME(MASTER)%在離開前對小弟們說「這些衣服你們分了吧、我允許你們用我穿過的衣服自慰」
+	PRINTFORML 毫不在意身後開始的爭奪戰、女人走向了自己的住所...
+	PRINTFORML
+	PRINTFORML 第二天、儲存衣物的房間裏多了幾件嶄新的服裝
+	PRINTFORML 這是小弟們自發購入的全新衣物
+	PRINTFORMW 而之前的那些、已經在男人們各自家中了...
+	PRINTFORML
+	CALL COLOR_PRINTW("那天的寫真發售后、加入團體的人數增加了", カラー_注意)
+	MONEY += 5000
+	CALL COLOR_PRINTW("得到了5000金的寫真售賣收入", カラー_注意)
+	CALL PRINT_ADD_EXP(MASTER, "露出経験値", RAND:20 + 1, 1)
+	CALL PRINT_ADD_EXP(MASTER, "撮影経験", RAND:20 + 1, 1)
+	MONEY -= 1000
+	CALL COLOR_PRINTW("付出了1000金作爲小弟們的生活費", カラー_注意)
+	DVAR:暴走族大姐頭_進行度 ++
+ELSEIF DVAR:暴走族大姐頭_進行度 == 5
+	PRINTFORMW 又到了约定好的拍攝时间
+	PRINTFORML %ANAME(MASTER)%帶著一個可疑的箱子來到據點、小弟們雖然都產生了疑問、但沒人敢先開口
+	PRINTFORMW 女人在男人們的簇擁下走進了拍攝房間...
+	PRINTFORML
+	PRINTFORML 房間裏已經準備好了今天拍攝要穿的服裝、尺度爆表的睡衣，绳子一样的泳衣，必须要裸体穿着的紧身衣等等.....
+	PRINTFORML %ANAME(MASTER)%走上前仔細端詳著這些下流的服裝、男人們開始緊張起來、害怕因爲這些大膽的衣物而被呵斥
+	PRINTFORML 其中一名小弟抱著視死如歸一般的氣勢上前報告說拿錯衣服了、這就去換
+	PRINTFORMW 但是%ANAME(MASTER)%并沒有生氣、仍然淡然的說道「沒關係、我只是在想真難爲你們能找出這麽多暴露的服裝」
+	PRINTFORML
+	PRINTFORML 緊張不安的氣氛一掃而空、知道大姐頭同意穿這些下流服裝的小弟們興奮了起來、準備一起出去等待女人換裝
+	PRINTFORML 然而%ANAME(MASTER)%卻阻止了他們的離開、雙手抱胸的女人開口説道
+	PRINTFORMW 「最近你們表現的不錯、作爲獎勵、你們可以留在房間裏看我換衣服」
+	PRINTFORML
+	PRINTFORML 在小弟們的圍觀中、%ANAME(MASTER)%大大方方的脫下身上的特攻服、%STR_BODY("身体", 対象)%暴露在男人面前
+	PRINTFORML 赤裸著的女人故意走進了小弟們之中、對每個男人的肉棒都隔著褲子揉捏了一下
+	PRINTFORML 最後回到拍攝位置的%ANAME(MASTER)%輕笑著說「全都脫褲子、在拍攝之前對著大姐頭自慰」
+	PRINTFORML 小弟們飛快的脫下了褲子、令人喘不過氣的雄性費洛蒙彌漫在房間中
+	PRINTFORML 看著挺立起阴茎的男人們、%ANAME(MASTER)%舔了舔嘴唇、開口説道
+	PRINTFORMW 「每人去老娘帶來的箱子裏拿一個杯子、誰要是往杯子裏射的最多、大姐頭就喝掉他的精液哦」
+	PRINTFORML
+	PRINTFORML 小弟們陷入短暫的沉默后瘋狂了起來、不一會兒就都拿好了杯子開始手淫
+	PRINTFORMW 看著男人們用自己的手不断摩擦着阴茎、%ANAME(MASTER)%也用手指责弄自己的阴蒂和乳首，进行着自慰…
+	PRINTFORML
+	PRINTFORML 當最後一個男人完成自慰時、%ANAME(MASTER)%已經絕頂了數次
+	PRINTFORML 看著等在原地的小弟們、%ANAME(MASTER)%命令他們相互監督選出優勝者
+	PRINTFORMW 男人們開始了比較、只是一小會兒、那位幸運兒從人群中走到她面前
+	PRINTFORML
+	PRINTFORML %ANAME(MASTER)%才發現他竟然是最早跟著自己的幾人之一
+	PRINTFORML 女人站起身、左手撫摸著他的肉棒說道「幹得不錯、作爲元老沒丟臉呢」
+	PRINTFORML 説完就接過男人手上的杯子靠近嘴唇
+	PRINTFORMW 在小弟們的注視中、%ANAME(MASTER)%先伸出舌頭舔了下杯中的白濁、隨後一口氣將精液喝了下去...
+	PRINTFORML
+	PRINTFORML 淫亂的場面讓%ANAME(MASTER)%手中的肉棒再次堅挺起來、女人微笑著對眼前的男人說
+	PRINTFORML 「又想射精了嗎、可以哦、這次就我來幫你、但你只能站著不可以動哦」
+	PRINTFORMW 看到男人拼命點著頭、%ANAME(MASTER)%蹲下身用左手撸动起肉棒、不時地還會用右手揉捏男人的睪丸
+	PRINTFORML
+	PRINTFORML 因爲是第二次的關係、男人的肉棒很快就顫動起來、明白他要射精的%ANAME(MASTER)%擡起頭命令道
+	PRINTFORML 「在不碰到我的前提下射進老娘嘴裏」
+	PRINTFORMW 説完便張開了嘴、男人低吼著噴發而出、白濁準確的射進了女人嘴裏...
+	PRINTFORML
+	PRINTFORML 又一次品嘗完精液的%ANAME(MASTER)%站起身宣佈開始拍攝工作
+	PRINTFORML 穿上各種下流衣服的女人在閃光燈中擺出了各種誘惑的姿勢
+	PRINTFORMW 今天的拍攝也順利完成了...
+	CALL COLOR_PRINTW("那天的寫真發售后、加入團體的人數增加了", カラー_注意)
+	MONEY += 5000
+	CALL COLOR_PRINTW("得到了5000金的寫真售賣收入", カラー_注意)
+	MONEY -= 1000
+	CALL COLOR_PRINTW("付出了1000金作爲小弟們的生活費", カラー_注意)
+	CALL PRINT_ADD_EXP(MASTER, "露出経験値", RAND:20 + 1, 1)
+	CALL PRINT_ADD_EXP(MASTER, "撮影経験", RAND:20 + 1, 1)
+	CALL PRINT_ADD_EXP(MASTER, "精愛経験値", RAND:20 + 1, 1)
+	DVAR:暴走族大姐頭_進行度 ++
+ELSEIF DVAR:暴走族大姐頭_進行度 == 6
+	PRINTFORML 原本今天是拍攝的日子、但是卻接到小弟的報告說這片區域最大的一夥暴走族來挑釁了
+	PRINTFORMW 穿上特攻服的%ANAME(MASTER)%帶著小弟們前去迎戰了...
+	PRINTFORML
+	PRINTFORML 郊外的空地上、幾百輛摩托車分成兩派在原地不斷咆哮著
+	PRINTFORML 作爲大姐頭的%ANAME(MASTER)%駕駛著首領專用的摩托一個人上前準備談判
+	PRINTFORML 片刻後對方的首領也出來了、是一個身上有紋身的强壯男人
+	PRINTFORMW 他帶著下流的笑容故意大聲說道「沒想到還是個美人、投降吧、我會讓你體驗肉便器的快樂」
+	PRINTFORML
+	PRINTFORML %ANAME(MASTER)%還沒來得及開口、身後的小弟們先被激怒了
+	PRINTFORML 群情激憤的小弟們怒吼著掏出棒球棍、水管之類的工具冲了過來
+	PRINTFORML 對方的人們也不甘示弱、所有人都冲成一團混戰了起來
+	PRINTFORML %ANAME(MASTER)%只是對著面前因爲緊張而綳緊身體的男人說了兩個字「廢物」
+	PRINTFORMW 展現了出與外表不符的戰力、一脚踢翻了男人后、女人冲進了混戰著的人堆...
+	PRINTFORML
+	PRINTFORML 半天過去了、獲勝的%ANAME(MASTER)%雙手抱胸、對將敗者都控制住的小弟們喊道
+	PRINTFORML 「想得到獎勵的都給老娘滾過來」
+	PRINTFORML 男人們聼后將敗者都綁起來拖到角落后、動作飛快的在女人面前排成整齊的隊伍、隨後女人開口説道
+	PRINTFORML 「今天的表現都很好、其中最出色的是他」
+	PRINTFORML %ANAME(MASTER)%指著一個鼻青臉腫的男人、讓他走到了自己面前
+	PRINTFORML 「一個人就打倒了六個人、老娘要先給他獎勵、你們有不服氣的嗎」
+	PRINTFORMW 小弟們紛紛表示聽從大姐頭說的話
+	PRINTFORML
+	PRINTFORML %ANAME(MASTER)%命令男人脫光后躺在衣服上、自己則只脫掉了特攻服的長褲
+	PRINTFORMW 已經濕潤了的魅惑淫穴暴露在小弟們的視綫中、%ANAME(MASTER)%跨坐在男人身上開始了素股奉仕
+	PRINTFORML
+	PRINTFORML 搖動著腰部的女人抓起男人一隻手按在自己%STR_BODY("胸", 対象)%上笑著對他說道
+	PRINTFORML 「怎麽樣、大姐頭胸部的觸感舒服吧」
+	PRINTFORMW 拼命點頭的男人揉捏著%ANAME(MASTER)%的%STR_BODY("胸：愛撫", 対象)%、極上的快感讓他沒一會兒就射了出來
+	PRINTFORML
+		IF TALENT:対象:無接吻経験 == 1
+		PRINTFORML 停下動作的%ANAME(MASTER)%告訴男人還有一個特別獎勵
+		PRINTFORML 隨後擡起頭向著周圍燒紅了眼的小弟們説道「都看好了、老娘的初吻馬上就要給到他了」
+		PRINTFORML 身下陷入狂喜的男人又聽到女人說「你想要老娘親你哪裏、自己選吧」
+		PRINTFORML 男人想了一下、竟然說要大姐頭舔他的菊穴同時幫他手淫
+		PRINTFORML 出乎意料的回答讓%ANAME(MASTER)%楞了一下、隨後一邊笑著說男人真是變態一邊站起身
+		PRINTFORMW 男人站起來背對著%ANAME(MASTER)%、女人蹲下身沒有絲毫猶豫吐出舌頭舔了過去、雙手則分別玩弄著肉棒和睾丸
+	ELSE
+		PRINTFORML 停下動作的%ANAME(MASTER)%告訴男人還有一個特別獎勵
+		PRINTFORML 隨後在女人的命令下、男人跪趴在地上擡起了屁股
+		PRINTFORML 女人蹲下身吐出舌頭舔了男人的菊穴、雙手則分別玩弄著肉棒和睾丸
+	ENDIF
+		PRINTFORML
+		PRINTFORML 靈活的舌頭與雙手刺激著男人前后兩個弱點、噴發而出的白濁被%ANAME(MASTER)%的手接住了
+		PRINTFORML 結束奉仕的%ANAME(MASTER)%品嘗完手中的精液后對周圍的小弟們說
+		PRINTFORML 「不能插入老娘的三個淫穴、其餘部位隨你們用、今天的目標是在你們的大姐頭身上射滿精液」
+		PRINTFORMW 話音剛落、早已按耐不住的男人們撲了上來、散發出雄性費洛蒙的肉棒軍團包圍了%ANAME(MASTER)%...
+		PRINTFORML
+		PRINTFORML 傍晚、穿著散發出精液腥臭的特攻服、被白濁浸染了的%ANAME(MASTER)%帶著小弟們離開了
+		PRINTFORMW 戰敗的敵方暴走團在看到這場淫亂的表演后、全體加入了%ANAME(MASTER)%的隊伍...
+		PRINTFORML
+		CALL FUCK(MASTER, "奉仕, 性技, 精愛, Ｃ, Ｂ, Ｍ, 自慰, 口淫", "接吻喪失, 口内射精", 0, "流浪漢的肉棒", "", "", "巢穴中的売春")
+		CALL COLOR_PRINTW("對方全員加入了隊伍", カラー_注意)
+		CALL PRINT_ADD_EXP(MASTER, "露出経験値", RAND:20 + 1, 1)
+		CALL PRINT_ADD_EXP(MASTER, "撮影経験", RAND:20 + 1, 1)
+		CALL PRINT_ADD_EXP(MASTER, "精愛経験値", RAND:20 + 1, 1)
+		DVAR:暴走族大姐頭_進行度 ++
+ELSEIF DVAR:暴走族大姐頭_進行度 == 7
+	PRINTFORML 經過上次事件、這附近的暴走團都歸附了
+	PRINTFORMW 統治了這片區域的%ANAME(MASTER)%、通知小弟們召開一次全員參加的宴會...
+	PRINTFORML
+	PRINTFORML 在據點外的草坪上、暴走族全員設置完桌椅、一起開始了宴會
+	PRINTFORML 在宴會上%ANAME(MASTER)%宣佈了新的指令、接下去團體將會轉型為文暴走族
+	PRINTFORMW 同時坦白了自己的真實身份、女人告訴小弟們願意留下的會安排他們加入軍隊...
+	PRINTFORMW 出乎了%ANAME(MASTER)%的預料、竟然沒有一個人選擇離開
+	PRINTFORML
+	PRINTFORML 因爲男人們的忠誠、%ANAME(MASTER)%愣住了、片刻後大聲笑了起來...
+	PRINTFORML 在宴會結束后、%ANAME(MASTER)%帶領小弟們開始了摩托狂飆
+	PRINTFORMW 一馬當先的女人身後跟隨著忠誠的男人們...
+	PRINTFORML
+	PRINTFORML 傍晚、回到據點的%ANAME(MASTER)%讓小弟們在外邊等著、一個人進了屋子
+	PRINTFORMW %ANAME(MASTER)%來到存放衣物的房間、換上了某套服裝后走向屋外...
+	PRINTFORML
+	PRINTFORML 展現在男人們面前的、是用一隻戴著白色蕾絲手套的手拿著花束、另一隻手拿著攝影機、身著淫亂服裝的%ANAME(MASTER)%
+	PRINTFORML 明明應該是在神聖的婚禮上穿著的白無垢、卻被改造成了激發男人淫欲的樣子
+	PRINTFORML 上半身穿著毫無遮擋作用的半透明胸衣、挺立起的乳首和%STR_BODY("胸", 対象)%直接暴露在男人們的視綫中
+	PRINTFORML 下半身的裙子正前方是空著的、兩條穿著白色絲襪的美腿和同樣是半透明的内褲
+	PRINTFORML 脚踩高跟鞋的%ANAME(MASTER)%緩緩走到男人們面前、把攝影機交給一個男人后、對他們説道
+	PRINTFORML 「這次的攝影要開始了哦」
+	PRINTFORML 「作爲對忠誠的褒獎、今天的大姐頭是大家的新娘」
+	PRINTFORML
+	IF TALENT:対象:処女 == 1
+		PRINTFORML 「而且大姐頭還是處女呢、誰要是能接到這花誰就能得到我的純潔」
+		PRINTFORMW 説完、%ANAME(MASTER)%向已經陷入狂亂的人群中扔出了花束
+		PRINTFORML
+		PRINTFORML 最後舉著已經破爛不堪的花束來到女人面前的、是一個看上去異常青澀的少年
+		PRINTFORML %ANAME(MASTER)%帶著魅惑的笑容接過花束、順勢拉著他的手按在自己的乳肉上
+		PRINTFORMW 另一隻手隔著褲子輕捏著肉棒、用輕佻的語氣説道「就是這根肉棒要得到大姐頭的處女嗎、真是好運呢」
+		PRINTFORML
+		PRINTFORML 話音剛落、%ANAME(MASTER)%就靠了上去和少年接吻了
+		PRINTFORMW 女人和少年交換著唾液、發出了淫亂的聲響
+		PRINTFORML
+		PRINTFORML 一會兒后、%ANAME(MASTER)%放開了少年、晶瑩的唾液伴隨著分開的雙唇滴落下來
+		PRINTFORML 女人輕笑著問道「想要用什麽姿勢能奪取我的純潔呢、大姐頭允許你選擇哦」
+		PRINTFORMW 少年脫口而出、說是想要被%ANAME(MASTER)%蹂躪榨取、%ANAME(MASTER)%聽後笑著答應了
+		PRINTFORML
+		PRINTFORML %ANAME(MASTER)%讓少年躺到了一張長椅上、然後跨坐了上去
+		PRINTFORML 拉開了半透明内褲的女人將少年肉棒對準了自己的處女膣穴、擡起頭對周圍的男人們說
+		PRINTFORML 「看好了、這就是大姐頭的處女喪失、記得要拍下來哦」
+		PRINTFORML 説完便猛地坐了下去、純潔的證明順著肉棒流了下來
+		PRINTFORML 膣内充實的感覺讓%ANAME(MASTER)%完全無視了疼痛、直接開始活塞運動
+		PRINTFORMW 淫亂的水聲、少年的悶哼、女人的嬌喘和周圍男人的粗重呼吸交織在了一起...
+		PRINTFORML
+		PRINTFORML 在%ANAME(MASTER)%堪稱無情的榨取下、少年顫抖著說快到極限了
+		PRINTFORML 女人卻對少年說「沒關係、射進我的身體裏吧」
+		PRINTFORML 隨後擡頭對周圍的男人們説道「都聽到了吧、要是你們能讓我懷孕的話會有獎勵哦」
+		PRINTFORMW 「無論如何、只要是我的女兒、大姐頭都會讓她也成爲大家的新娘」
+		PRINTFORML
+		PRINTFORML 身下的少年聽到%ANAME(MASTER)%的話語后、卻挺起身子抱住了女人
+		PRINTFORML 一邊挺動著胯部一邊對%ANAME(MASTER)%想要成爲她真正的丈夫
+		PRINTFORML 楞了一下的%ANAME(MASTER)%説道「不行哦、大姐頭是大家的新娘、不能讓你獨占」
+		PRINTFORML 隨後舔了舔少年的耳朵繼續說「不過作爲大姐頭我的第一個男人、大姐頭願意優先和你做愛哦」
+		PRINTFORML 伴隨著女人的話語、少年再也堅持不住了、火熱的白濁噴湧而出、首次品尝到了禁果的子宫沉醉于快感之中，将自己的小嘴向肉棒张开
+		PRINTFORMW %ANAME(MASTER)%因爲這强烈的刺激絕頂了、抱著少年微微抽搐著
+		CALL FUCK(MASTER, "欲望, 性技, 性交, Ｃ, Ｖ, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失", GET_SPERM_ID("暴走族的少年"), @"暴走族的少年的嘴唇", @"暴走族的少年", "", "屬於大家的新娘")
+		PRINTFORML
+	ELSE
+		PRINTFORML 「誰要是能接到這花誰就能最先和大姐頭做愛哦」
+		PRINTFORMW 説完、%ANAME(MASTER)%向已經陷入狂亂的人群中扔出了花束
+		PRINTFORML
+		PRINTFORML 最後舉著已經破爛不堪的花束來到女人面前的、是一個看上去異常青澀的少年
+		PRINTFORML %ANAME(MASTER)%帶著魅惑的笑容接過花束、順勢拉著他的手按在自己的乳肉上
+		PRINTFORMW 另一隻手隔著褲子輕捏著肉棒、用輕佻的語氣説道「就是這根肉棒能最先進入大姐頭的淫穴嗎、真是好運呢」
+		PRINTFORML
+		PRINTFORML 話音剛落、%ANAME(MASTER)%就靠了上去和少年接吻了
+		PRINTFORMW 女人和少年交換著唾液、發出了淫亂的聲響
+		PRINTFORML
+		PRINTFORML 一會兒后、%ANAME(MASTER)%放開了少年、晶瑩的唾液伴隨著分開的雙唇滴落下來
+		PRINTFORML 女人輕笑著問道「想要用什麽姿勢呢、大姐頭允許你選擇哦」
+		PRINTFORMW 少年脫口而出、說是想要被%ANAME(MASTER)%蹂躪榨取、%ANAME(MASTER)%聽後笑著答應了
+		PRINTFORML
+		PRINTFORML %ANAME(MASTER)%讓少年躺到了一張長椅上、然後跨坐了上去
+		PRINTFORML 拉開了半透明内褲的女人將少年肉棒對準了自己的膣穴、擡起頭對周圍的男人們說
+		PRINTFORML 「記得要拍下來哦」
+		PRINTFORML 説完便猛地坐了下去、膣内充實的感覺讓%ANAME(MASTER)%直接開始活塞運動
+		PRINTFORMW 淫亂的水聲、少年的悶哼、女人的嬌喘和周圍男人的粗重呼吸交織在了一起...
+		PRINTFORML
+		PRINTFORML 在%ANAME(MASTER)%堪稱無情的榨取下、少年顫抖著說快到極限了
+		PRINTFORML 女人卻對少年說「沒關係、射進我的身體裏吧」
+		PRINTFORML 隨後擡頭對周圍的男人們説道「都聽到了吧、要是你們能讓我懷孕的話會有獎勵哦」
+		PRINTFORMW 「無論如何、只要是我的女兒、大姐頭都會讓她也成爲大家的新娘」
+		PRINTFORML
+		PRINTFORML 身下的少年聽到%ANAME(MASTER)%的話語后、卻挺起身子抱住了女人
+		PRINTFORML 一邊挺動著胯部一邊對%ANAME(MASTER)%想要成爲她真正的丈夫
+		PRINTFORML 楞了一下的%ANAME(MASTER)%説道「不行哦、大姐頭是大家的新娘、不能讓你獨占」
+		PRINTFORML 伴隨著女人的話語、少年再也堅持不住了、火熱的白濁噴湧而出、子宫在这猛烈的快感中逐渐迷醉，向肉棒敞开了自己的怀抱
+		PRINTFORMW %ANAME(MASTER)%因爲這强烈的刺激絕頂了、抱著少年微微抽搐著
+		CALL FUCK(MASTER, "欲望, 性技, 性交, Ｃ, Ｖ, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失", GET_SPERM_ID("暴走族的少年"), @"暴走族的少年的嘴唇", @"暴走族的少年", "", "屬於大家的新娘")
+		PRINTFORML
+	ENDIF
+	PRINTFORML
+	PRINTFORML 享受完高潮余韵的%ANAME(MASTER)%站起身來到人群之中
+	PRINTFORML 一邊愛撫著流出精液與愛液混合物的淫穴一邊對小弟們說「輪到你們了哦、大家一起來舉行「婚禮」吧」
+	PRINTFORMW 等候多時的男人們撲了上去...
+	PRINTFORML
+	PRINTFORML %ANAME(MASTER)%和每一個像動物一樣交配著
+	PRINTFORMW 身上的淫亂婚紗早已破損不堪、但是直到半夜%ANAME(MASTER)%依舊宛如永不滿足的魅魔一樣持續榨取精液
+	PRINTFORML
+	PRINTFORML 來到最後一個勉强撐起身體坐在地上的男人面前、%ANAME(MASTER)%認出他是上次事件中對方的首領
+	PRINTFORML 女人緊挨著他坐了下來、輕輕揉捏著他的龜頭問道「怎麽樣、成爲我的小弟不虧吧」
+	PRINTFORML 男人喘著粗氣點了點后、%ANAME(MASTER)%爬到他面前跪趴在地翹起了美臀、轉過頭用挑釁的語氣對他説道
+	PRINTFORMW 「來吧、再給你個征服老娘的機會」
+	PRINTFORML
+	PRINTFORML 男人猛的撲了過去、因爲受到挑釁而無比堅挺的肉棒直衝進%ANAME(MASTER)%的最深處
+	PRINTFORML %ANAME(MASTER)%投去贊賞的眼神、隨後配合男人的動作晃起了腰
+	PRINTFORMW 男人爆發出全力猛烈衝刺著、肉體的碰撞聲不絕於耳
+	PRINTFORML
+	PRINTFORML 伴隨著男人的低吼、白濁毫無阻攔的進入了子宮最深處、同時%ANAME(MASTER)%下身的洪水爆发了出来
+	PRINTFORML 精疲力竭的男人一屁股坐到了地上、而%ANAME(MASTER)%站起身説道「很可惜沒能成功呢、下次再努努力吧」
+	PRINTFORMW 隨後女人返回屋子留下一封信后、穿過橫七竪八躺倒在地的男人們離開了...
+	PRINTFORML
+	PRINTFORML 男人們醒來后發現了那封信、上面寫著
+	PRINTFORML 「今天拍攝的錄像每人複製一份帶回去、這是大姐頭給你們的獎勵」
+	PRINTFORML 「攝影的器材別忘記帶走、這可是我們的例行工作、以後也不會停」
+	PRINTFORML 「回去之後抓緊到軍營報道、已經安排好了、只要說自己是暴走族就會分配到我這裏」
+	PRINTFORMW 「當然、如果在軍營表現好的話、大姐頭還是會給你們獎勵哦」
+	PRINTFORML
+	PRINTFORML 傳閲完信的男人們離開了這裏、踏上了新生活...
+	CALL FUCK(対象, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 性交, 精愛, 口淫, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("小弟們"), @"小弟們的\@RAND:2 ? 肉棒 # 嘴唇\@", "小弟們", "", "屬於大家的新娘")
+	PRINTFORML
+	DVAR:暴走族大姐頭_進行度  = 10
+	CALL COLOR_PRINTW("成爲了大家的新娘大姐頭", カラー_注意)
+	SETBIT TALENT:対象:日常系, 素質_デイリー_大家的新娘大姐頭
+ENDIF
+
+RETURN 1
+

@@ -1,0 +1,297 @@
+﻿;尻尾Ａ挿入
+
+;-------------------------------------------------
+;コマンド名称
+;-------------------------------------------------
+@COM_NAME7
+LOCALS:0 = 尻尾Ａ挿入
+
+RESULTS:0 = %LOCALS:0%(主動)
+RESULTS:1 = %LOCALS:0%(被役)
+RESULTS:2 = %LOCALS:0%(使役)
+RESULTS:3 = %LOCALS:0%(被動)
+RESULTS:4 = %LOCALS:0%(使役)
+RESULTS:5 = %LOCALS:0%(展示)
+
+;-------------------------------------------------
+;選択可否判定
+;-------------------------------------------------
+@COM_ABLE7
+;共通部分
+CALL COM_ABLE_COMMON(7)
+SIF RESULT == 0
+	RETURN 0
+;プレイヤーは最大で1人まで
+SIF MPLY_NUM <= 0 || MPLY_NUM > 1
+	RETURN 0
+;ターゲットは最大で1人まで
+SIF MTAR_NUM <= 0 || MTAR_NUM > 1
+	RETURN 0
+;プレイヤーに尻尾が必要
+SIF !TALENT:(MPLY:0):尾巴
+	RETURN 0
+;プレイヤーが尻尾を使用中なら不可
+SIF IS_EQUIP_PLAYER(MPLY:0, 6, 7, 17)
+	RETURN 0
+;ターゲットのＶがプレイヤーの尻尾以外で埋まっているなら不可
+SIF IS_A_HOLD(MTAR:0)
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;メイン処理
+;-------------------------------------------------
+@COM7
+;実行判定
+CALL COM_ORDER_COMMON
+SIF RESULT == 0
+	RETURN 0
+
+;●プレイヤーについて処理
+EXP:(MPLY:0):性技経験値 += 1
+
+SOURCE:(MPLY:0):奉仕 = SERVE_HOUSHI(LOCAL:2, 200)
+SOURCE:(MPLY:0):接触 = 60
+SOURCE:(MPLY:0):性行動 = 60
+
+;主導権に応じた優越・屈従のソース追加
+CALL ADD_SOURCE_INITIATIVE_U(MPLY:0, 120, 50)
+
+;侍奉経験値を得られるコマンドのフラグ
+TCVAR:(MPLY:0):4 = 1
+
+;●ターゲットについて処理
+SOURCE:(MTAR:0):露出 = 50
+SOURCE:(MTAR:0):接触 = 60
+SOURCE:(MTAR:0):性行動 = 150
+SOURCE:(MTAR:0):快Ａ += SENSE_HOUSHI(MPLY:0, MTAR:0, 1400)
+
+;主導権に応じた優越・屈従のソース追加
+CALL ADD_SOURCE_INITIATIVE_U(MTAR:0, 60, 100)
+
+CALL VIRGIN_COMMON_A(MTAR:0, @"%ANAME(MPLY:0)%的尾巴", GET_SITUATION_BY_TRAIN_MODE())
+
+
+;対象の膣が緩む
+CALL TIGHTNESS_DECREASE_A(MTAR:0, RAND(1, 4))
+
+;主導度変化基準値
+TFLAG:49 = 2
+
+;倒錯度変化基準値
+TFLAG:50 = 3
+
+;レズ・ＢＬ経験基準値
+TFLAG:51 = 5
+
+RETURN 1
+
+;-------------------------------------------------
+;継続コマンドかどうかを設定
+;-------------------------------------------------
+@COM_IS_EQUIP7
+RETURN 1
+
+;-------------------------------------------------
+;継続状態の処理
+;-------------------------------------------------
+@COM_EQUIP7(ARG:0)
+LOCAL:2 = MEQUIP_PLAYER:(ARG:0):0
+LOCAL:3 = MEQUIP_TARGET:(ARG:0):0
+
+;●プレイヤーについて処理
+EXP:(LOCAL:2):性技経験値 += 1
+
+SOURCE:(LOCAL:2):奉仕 += SERVE_HOUSHI(LOCAL:2, 60)
+SOURCE:(LOCAL:2):接触 += 30
+SOURCE:(LOCAL:2):性行動 += 20
+
+;侍奉経験値を得られるコマンドのフラグ
+TCVAR:(LOCAL:2):4 = 1
+
+;●ターゲットについて処理
+SOURCE:(LOCAL:3):快Ａ += SENSE_HOUSHI(LOCAL:2, LOCAL:3, 500)
+SOURCE:(LOCAL:3):露出 += 20
+SOURCE:(LOCAL:3):接触 += 30
+SOURCE:(LOCAL:3):性行動 += 50
+
+CALL VIRGIN_COMMON_A(LOCAL:3, @"%ANAME(LOCAL:2)%的尾巴", GET_SITUATION_BY_TRAIN_MODE())
+
+;対象の膣が緩む
+CALL TIGHTNESS_DECREASE_A(LOCAL:3, RAND(1, 4))
+
+;-------------------------------------------------
+;継続中の表示
+;-------------------------------------------------
+@EQUIP_MESSAGE7(ARG:0)
+RESULTS = %EQUIP_PLAYER_ANAME(ARG:0)%用尾巴挿入%EQUIP_TARGET_ANAME(ARG:0)%的肛門中
+
+;-------------------------------------------------
+;継続中の地の文(前文)
+;-------------------------------------------------
+@COM_TEXT_BEFORE_EQUIP7(ARG:0)
+PRINTFORML %EQUIP_PLAYER_ANAME(ARG:0)%正用尾巴搔弄著%EQUIP_TARGET_ANAME(ARG:0)%的肛门…
+;TranslatedMark %EQUIP_PLAYER_ANAME(ARG:0)%正用尾巴搔弄著%EQUIP_TARGET_ANAME(ARG:0)%的肛門…
+
+;-------------------------------------------------
+;継続を解除したときの地の文
+;-------------------------------------------------
+@COM_TEXT_RELEASE_EQUIP7(ARG:0)
+
+;-------------------------------------------------
+;固有の実行判定
+;-------------------------------------------------
+@COM_ORDER_PLAYER7(ARG:0)
+;実行値の設定
+TCVAR:(ARG:0):25 = 65
+
+;共通部分
+CALL COM_ORDER(ARG:0)
+
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲望Lv{ABL:(ARG:0):欲望}", ABL:(ARG:0):欲望 * 1)
+CALL COM_ORDER_ELEMENT(ARG:0, @"侍奉Lv{ABL:(ARG:0):奉仕}", ABL:(ARG:0):奉仕 * 4)
+
+LOCAL:0 = GET_PALAMLV(PALAM:(ARG:0):欲情)
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲情Lv{LOCAL:0}", MIN(LOCAL:0 * 2, 20))
+
+IF TCVAR:(ARG:0):60
+	CALL COM_ORDER_ELEMENT(ARG:0, "媚薬", 6)
+ENDIF
+
+IF TALENT:(ARG:0):害羞
+	CALL COM_ORDER_ELEMENT(ARG:0, "害羞", -1)
+ENDIF
+IF TALENT:(ARG:0):献身的
+	CALL COM_ORDER_ELEMENT(ARG:0, "献身的", 6)
+ENDIF
+IF TALENT:(ARG:0):否定快感
+	CALL COM_ORDER_ELEMENT(ARG:0, "否定快感", -1)
+ENDIF
+
+;合意
+IF !TALENT:(ARG:0):合意 && !TALENT:(ARG:0):親友
+	CALL COM_ORDER_ELEMENT(ARG:0, "合意無", -10)
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;地の文(前文)
+;-------------------------------------------------
+@COM_TEXT_BEFORE7
+IF ABL:(MTAR:0):Ａ感 >= 3
+	LOCALS:0 = 充分开发的尻穴
+;十分に開発されたアナル
+ELSEIF ABL:(MTAR:0):Ａ感 >= 2
+	LOCALS:0 = 开发中的尻穴
+;開発途上のアナル
+ELSE
+	LOCALS:0 = 紧闭的肛门
+;キツく閉じたアナル
+ENDIF
+
+IF TALENT:(MTAR:0):美臀
+	LOCALS:1 = 掰开%STR_BODY("尻：尻肉：長：接触", MTAR:0)%、
+;%STR_BODY("尻：尻肉：長：接触", MTAR:0)%を割り開き、
+ELSEIF GET_HIPSIZE(MTAR:0) >= 1
+	LOCALS:1 = 推开%STR_BODY("尻肉：長：接触", MTAR:0)%、
+;%STR_BODY("尻肉：長：接触", MTAR:0)%をかきわけ、
+ELSE
+	LOCALS:1 = 
+ENDIF
+
+;既に尻尾を挿入中の場合
+IF SEARCH_EQUIP(7, MPLY:0, MTAR:0) >= 0
+	SELECTCASE GET_COM_INITIATIVE()
+		;プレイヤーに主導権
+		CASE 0
+			PRINTFORMW %ANAME(MPLY:0)%%LOCALS:1%在%ANAME(MTAR:0)%的肛门里用尾巴无数次地拔插，不断地责弄着%ANAME(MTAR:0)%…
+			;TranslatedMark %ANAME(MPLY:0)%は%ANAME(MTAR:0)%の%LOCALS:1%アナルに挿入された尻尾を何度も抜き挿し、%ANAME(MTAR:0)%を責め立て%TARGET_STR("た", "てきた")%…
+		;ターゲットに主導権
+		CASE 1
+			PRINTFORMW %ANAME(MPLY:0)%在%ANAME(MTAR:0)%的催促下，%LOCALS:1%移动着插在%ANAME(MTAR:0)%的肛门里的尾巴侍奉着…
+			;TranslatedMark %ANAME(MPLY:0)%は%ANAME(MTAR:0)%に促されるまま、%ANAME(MTAR:0)%の%LOCALS:1%アナルに挿入された尻尾を動かして侍奉している…
+		;第三者に主導権
+		CASEELSE
+			PRINTFORML %ANAME(TFLAG:45)%命令%ANAME(MPLY:0)%%LOCALS:1%让插在%ANAME(MTAR:0)%的尻穴里的尾巴进一步抽动起来
+			;TranslatedMark %ANAME(TFLAG:45)%は%ANAME(MPLY:0)%に%ANAME(MTAR:0)%の%LOCALS:1%尻穴に挿入された尻尾をさらに動かすように命令した
+			PRINTFORMW %ANAME(MPLY:0)%多次拔出尾巴插进去，不停地刺激%ANAME(MTAR:0)%的肛门…
+			;TranslatedMark %ANAME(MPLY:0)%は尻尾を何度も抜き挿し、%ANAME(MTAR:0)%のアナルを責め立てた…
+	ENDSELECT
+
+;それ以外
+ELSE
+	SELECTCASE GET_COM_INITIATIVE()
+		;プレイヤーに主導権
+		CASE 0
+			PRINTFORMW %ANAME(MPLY:0)%%LOCALS:1%把尾巴插入%ANAME(MTAR:0)%的%LOCALS:0%里前后抽动，不停地责弄着…
+			;TranslatedMark %ANAME(MPLY:0)%は%ANAME(MTAR:0)%の%LOCALS:1%%LOCALS:0%に尻尾を挿入し、前後に動かして責め立て%TARGET_STR("た", "てきた")%…
+		;ターゲットに主導権
+		CASE 1
+			PRINTFORMW %ANAME(MTAR:0)%%LOCALS:1%让自己的肛门插入%ANAME(MPLY:0)%的尾巴，命令她为自己进行侍奉…
+			;TranslatedMark %ANAME(MTAR:0)%は%LOCALS:1%自身的尻穴%ANAME(MPLY:0)%の尻尾を挿入させ、侍奉するように命令した…
+		;第三者に主導権
+		CASEELSE
+			PRINTFORML %ANAME(TFLAG:45)%命令%ANAME(MPLY:0)%用尾巴责弄%ANAME(MTAR:0)%的尻穴
+			;TranslatedMark %ANAME(TFLAG:45)%は%ANAME(MPLY:0)%に、尻尾で%ANAME(MTAR:0)%の尻穴を責めるように命令した
+			PRINTFORMW %ANAME(MPLY:0)%%LOCALS:1%把尾巴插入%ANAME(MTAR:0)%的%LOCALS:0%里前后抽动…
+			;TranslatedMark %ANAME(MPLY:0)%は%ANAME(MTAR:0)%の%LOCALS:1%%LOCALS:0%に尻尾を挿入し、前後に動かした…
+	ENDSELECT
+ENDIF
+
+;--------------------------------------------------------
+;地の文(パラメータ・刻印変動後)
+;--------------------------------------------------------
+@COM_TEXT_LAST7
+FOR LOCAL:0, 0, MTAR_NUM
+	LOCAL:1 = MTAR:(LOCAL:0)
+	IF (LOCAL:1 != MASTER || CONFIG:441) && !IS_ANIMAL(LOCAL:1)
+		LOCAL:2 = CUP:(LOCAL:1):快Ａ
+
+		IF TCVAR:(LOCAL:1):52
+			;気絶中
+			PRINTFORML 肛門傳來的刺激、讓%ANAME(LOCAL:1)%在失去意識的情況下発出了小聲的呻吟
+		ELSEIF LOCAL:2 < 300 
+			PRINTFORML %ANAME(LOCAL:1)%還未開発過的還不能接受異物進入的場所被责弄的時候、%ANAME(LOCAL:1)%的表情有些痛苦
+		ELSEIF LOCAL:2 < 1000
+			PRINTFORML %ANAME(LOCAL:1)%雖然有些痛苦但是那表情上能看到一絲快楽和困惑
+		ELSEIF LOCAL:2 < 3000
+			PRINTFORML %ANAME(LOCAL:1)%在無法忍耐的快感下発出了羞澀的聲音
+		ELSEIF LOCAL:2 < 6000
+			PRINTFORML %ANAME(LOCAL:1)%已經非常習慣肛門傳來的感覚了、不時會為了索求快感而主動的輕扭腰肢
+		ELSEIF LOCAL:2 < 10000
+			PRINTFORM %ANAME(LOCAL:1)%
+			IF TALENT:(LOCAL:1):圧抑 || TALENT:(LOCAL:1):孤高 || TALENT:(LOCAL:1):否定快感
+				PRINTFORML 在那無法忍耐的快感下、流著淚不停喘息著
+			ELSE
+				PRINTFORML 迎合著责弄自己的手指的動作後弓著背、在直腸傳來的刺激下発出了快楽的喘息聲
+			ENDIF
+		ELSE
+			PRINTFORML %ANAME(LOCAL:1)%淫靡的扭動著腰肢、完全沉溺于菊穴的快感之中高聲嬌喘著
+		ENDIF
+		IF TALENT:(LOCAL:1):美臀
+			PRINTFORML %STR_BODY("尻肉：長：外見", MTAR:0)%不停顫抖帯起陣陣臀浪……
+			;TranslatedMark %STR_BODY("尻肉：長：外見", MTAR:0)%がふるふると震えている……
+		ELSEIF GET_HIPSIZE(LOCAL:1) >= 1
+			PRINTFORML %STR_BODY("尻肉：長：外見", MTAR:0)%不停顫抖帯起陣陣臀浪……
+			;TranslatedMark %STR_BODY("尻肉：長：外見", MTAR:0)%がふるふると震えている……
+		ENDIF
+	ENDIF
+NEXT
+
+;-------------------------------------------------
+
+;コマンド区分
+;-------------------------------------------------
+
+@COM_AVAILABLE_WHEN7
+RETURN コマンド_ウフフ
+
+;--------------------
+;性嗜好用関数
+;--------------------
+@COM_PREFERENCE_PLAYER_7()
+RETURN POWER(2, 性的嗜好_愛撫したい)
+
+@COM_PREFERENCE_TARGET_7()
+RETURN POWER(2, 性的嗜好_愛撫されたい)
+

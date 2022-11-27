@@ -1,0 +1,57 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_SMUGGLER_EXISTS()
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_SMUGGLER_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_SMUGGLER(対象)
+#DIM 対象
+PRINTFORML 探索時、遇到了旅行的薬商
+PRINTFORML 好像有挖掘出來的薬、價格是3000金
+PRINTFORML 現在的所持金錢:{MONEY}
+PRINTL
+CALL ASK_MULTI_JUDGE("冒险买下", MONEY >= 3000,"放棄", 1)
+
+IF RESULT == 1
+	PRINTFORML 不巧现在没有生病
+	PRINTFORMW %ANAME(対象)%甩開纏人的薬商返回了拠点
+	RETURN 1
+ENDIF
+
+MONEY -= 3000
+
+CALL ICPRINT("支付了<3000>金", "W", カラー_注意)
+PRINTFORMW 買下薬品的%ANAME(対象)%、回到拠点後喝了下去
+
+SELECTCASE RAND:3
+	CASE 0
+		PRINTFORML ……但是什麼也沒有発生
+		PRINTFORML 白白浪費了錢……
+	CASE 1
+		PRINTFORML 身体很快就熱起來了
+		PRINTFORMW ……感覺自己変得更加聰明了！
+		CALL PRINT_ADD_EXP(対象, "知略経験値", 10)
+		PRINTFORML 看來是買到了不錯的東西……
+	CASE 2
+		PRINTFORML 身体很快就変得潮紅了起來
+		PRINTFORMW ……看來是媚薬那種東西
+		PRINTFORMW %ANAME(対象)%只能自慰解決了……
+		IF IS_MALE(対象)
+			CALL FUCK(対象, "自慰, Ｃ, 射精")
+		ELSE
+			CALL FUCK(対象, "自慰, Ｃ, Ｂ")
+		ENDIF
+ENDSELECT
+
+RETURN 1

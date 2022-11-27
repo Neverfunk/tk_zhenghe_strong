@@ -1,0 +1,738 @@
+﻿;─────────────────────────────────────── 
+;■日常_実行_実行前
+;─────────────────────────────────────── 
+@KOJO_K9_NOON_BEFORE_PLAYER(咲夜_対象)
+#DIM 咲夜
+#DIM 咲夜_対象
+#DIMS 咲夜機嫌
+
+IF !咲夜_対象
+	咲夜_対象 = MASTER
+ENDIF
+
+咲夜 = NAME_TO_CHARA("咲夜")
+咲夜機嫌 '= TOSTR_EMOTION(咲夜)
+
+;─────────────────────────────────────── 
+;●機嫌が悪ければ通常のコマンド口上は喋らない
+;─────────────────────────────────────── 
+SELECTCASE 咲夜機嫌
+	CASE "恨", "怒", "憤"
+		IF PALAM:咲夜:怒主 <= PALAM:咲夜:怒外
+			PRINTDATAL
+				DATALIST
+					DATAFORM 「我有点不舒服」
+					;TranslatedMark 「ちょっと気分が悪いのよ」
+					DATAFORM 「不用担心，这不是%CALLNAME_K9(咲夜_対象)%的错」
+					;TranslatedMark 「心配はいらないわ、%CALLNAME_K9(咲夜_対象)%のせいではないから」
+				ENDLIST
+				DATAFORM 「对不起，因为其他的事情有点焦躁」
+				;TranslatedMark 「ごめんなさい、少し他の事でイライラしていて」
+				DATALIST
+					DATAFORM 「啊，已经……啊。并不是对%CALLNAME_K9(咲夜_対象)%生气哦」
+					;TranslatedMark 「はぁ、もう……あ。%CALLNAME_K9(咲夜_対象)%に怒っている訳ではないのよ」
+					DATAFORM 「让你看到我不高兴的地方，对不起」
+					;TranslatedMark 「機嫌の悪いところを見せちゃってごめんなさいね」
+				ENDLIST
+				DATAFORM 「有讨厌的事情。能听我说吗」
+				;TranslatedMark 「嫌なことがあったのよ。聞いてくれるかしら」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「哈……」
+				;TranslatedMark 「はぁ……」
+				DATAFORM 「木瓜」
+				;TranslatedMark 「もうっ」
+				DATAFORM 「好焦躁啊」
+				;TranslatedMark 「イライラするわ」
+			ENDDATA
+		ENDIF
+		RETURN 0
+
+	CASE "鬱", "悲", "憂"
+		IF PALAM:咲夜:哀主 <= PALAM:咲夜:哀外
+			PRINTDATAL
+				DATAFORM 「心情有点郁闷。不，这不是%CALLNAME_K9(咲夜_対象)%的错」
+				;TranslatedMark 「ちょっと気分が塞いでいるの。いえ、%CALLNAME_K9(咲夜_対象)%のせいではないわ」
+				DATAFORM 「对不起。有点失落的事」
+				;TranslatedMark 「ごめんなさい。少し落ち込むことがあったの」
+				DATAFORM 「哈……啊。并不是向%CALLNAME_K9(咲夜_対象)%叹息。对不起」
+				;TranslatedMark 「はぁ……あ。%CALLNAME_K9(咲夜_対象)%に溜息を吐いた訳ではないのよ。ごめんなさい」
+				DATAFORM 「是啊……有点讨厌的事情，很忧郁」
+				;TranslatedMark 「そうね……ちょっと、嫌なことがあって、憂鬱だったの」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「哈……」
+				;TranslatedMark 「はぁ……」
+				DATAFORM 「真让人郁闷啊」
+				;TranslatedMark 「滅入るわね」
+				DATAFORM 「好忧郁啊」
+				;TranslatedMark 「憂鬱だわ」
+			ENDDATA
+		ENDIF
+		RETURN 0
+
+	CASE  "狂", "恐", "怯"
+		IF PALAM:咲夜:怖主 <= PALAM:咲夜:怖外
+			PRINTDATAL
+				DATAFORM 「是什么呢……不，不是指%CALLNAME_K9(咲夜_対象)%吗」
+				;TranslatedMark 「何なのかしら……いえ、%CALLNAME_K9(咲夜_対象)%のことではないの」
+				DATAFORM 「有点害怕呢……%CALLNAME_K9(咲夜_対象)%能在我身边吗」
+				;TranslatedMark 「ちょっと怖いのよね……%CALLNAME_K9(咲夜_対象)%がそばにいてくれないかしら」
+				DATAFORM 「不知道为什么……不，不是%CALLNAME_K9(咲夜_対象)%」
+				;TranslatedMark 「わけがわからないわね……いえ、%CALLNAME_K9(咲夜_対象)%ではなくて」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「是什么呢」
+				;TranslatedMark 「何なのかしら」
+				DATAFORM 「说实话，虽然很害怕」
+				;TranslatedMark 「正直、怖いのだけれど」
+				DATAFORM 「不知道为什么」
+				;TranslatedMark 「わけがわからないわね」
+			ENDDATA
+		ENDIF
+		RETURN 0
+
+	CASEELSE
+
+ENDSELECT
+
+;─────────────────────────────────────── 
+;●同一コマンド
+;─────────────────────────────────────── 
+IF SELECTCOM == PREVCOM && RAND:10 == 0
+	;咲夜に主導権なし
+	IF !IS_INITIATIVE(咲夜)
+		IF CHECK_K9("敬語")
+			PRINTDATAL
+				DATAFORM 「想要更多的%KOJO_COM_NAME_TARGET_K9(SELECTCOM, 咲夜_対象)%呢。高兴地」
+				;TranslatedMark 「もっと%KOJO_COM_NAME_TARGET_K9(SELECTCOM, 咲夜_対象)%たいのですね。喜んで」
+				DATAFORM 「就这样吗？知道了」
+				;TranslatedMark 「このままですか？　かしこまりました」
+				DATAFORM 「是的。再稍微，就这样……」
+				;TranslatedMark 「はい。もう少し、このまま……」
+				DATAFORM 「我也还想要%KOJO_COM_NAME_PLAYER_K9(SELECTCOM, 咲夜_対象)%」
+				;TranslatedMark 「私もまだ、%KOJO_COM_NAME_PLAYER_K9(SELECTCOM, 咲夜_対象)%たいです」
+				DATAFORM 「想要更多的%KOJO_COM_NAME_TARGET_K9(SELECTCOM, 咲夜_対象)%呢」
+				;TranslatedMark 「もっと%KOJO_COM_NAME_TARGET_K9(SELECTCOM, 咲夜_対象)%たいのですね」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「想要更多的%KOJO_COM_NAME_TARGET_K9(SELECTCOM, 咲夜_対象)%呢。呵呵呵」
+				;TranslatedMark 「もっと%KOJO_COM_NAME_TARGET_K9(SELECTCOM, 咲夜_対象)%たいのね。ふふっ」
+				DATAFORM 「就这样吧？我知道」
+				;TranslatedMark 「このままね？　わかっているわ」
+				DATAFORM 「是啊。再这样就好了」
+				;TranslatedMark 「そうね。もう少し、このままがいいわ」
+				DATAFORM 「我也还想要%KOJO_COM_NAME_PLAYER_K9(SELECTCOM, 咲夜_対象)%」
+				;TranslatedMark 「私もまだ、%KOJO_COM_NAME_PLAYER_K9(SELECTCOM, 咲夜_対象)%たいわ」
+				DATAFORM 「想要更多的%KOJO_COM_NAME_TARGET_K9(SELECTCOM, 咲夜_対象)%吧？」
+				;TranslatedMark 「もっと%KOJO_COM_NAME_TARGET_K9(SELECTCOM, 咲夜_対象)%たいのでしょう？」
+			ENDDATA
+		ENDIF
+	;咲夜に主導権あり
+	ELSE
+		IF CHECK_K9("敬語")
+			PRINTDATAL
+				DATAFORM 「还想要%KOJO_COM_NAME_PLAYER_K9(SELECTCOM, 咲夜_対象)%……」
+				;TranslatedMark 「まだ%KOJO_COM_NAME_PLAYER_K9(SELECTCOM, 咲夜_対象)%たいです……」
+				DATAFORM 「可以再交往一点吗？」
+				;TranslatedMark 「もう少しお付き合い頂けませんか？」
+				DATAFORM 「请就这样一起吧」
+				;TranslatedMark 「どうかこのままご一緒ください」
+				DATAFORM 「不想再多做点%KOJO_COM_NAME_TARGET_K9(SELECTCOM, 咲夜_対象)%吗？」
+				;TranslatedMark 「もっと%KOJO_COM_NAME_TARGET_K9(SELECTCOM, 咲夜_対象)%たくはありませんか？」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「我想要更多的%KOJO_COM_NAME_PLAYER_K9(SELECTCOM, 咲夜_対象)%」
+				;TranslatedMark 「もっと%KOJO_COM_NAME_PLAYER_K9(SELECTCOM, 咲夜_対象)%たいわ」
+				DATAFORM 「能不能再交往一会儿？」
+				;TranslatedMark 「もう少し付き合ってもらえるかしら？」
+				DATAFORM 「还可以吗？」
+				;TranslatedMark 「まだしてもいいかしら？」
+				DATAFORM 「不想再多做点%KOJO_COM_NAME_TARGET_K9(SELECTCOM, 咲夜_対象)%吗？」
+				;TranslatedMark 「もっと%KOJO_COM_NAME_TARGET_K9(SELECTCOM, 咲夜_対象)%たくはないかしら？」
+			ENDDATA
+		ENDIF
+	ENDIF
+;─────────────────────────────────────── 
+;●同一コマンドでない
+;─────────────────────────────────────── 
+ELSEIF RAND:10 == 0
+	;咲夜に主導権なし
+	IF !IS_INITIATIVE(咲夜)
+		IF CHECK_K9("敬語")
+			PRINTDATAL
+				DATAFORM 「真是的呢」
+				;TranslatedMark 「%KOJO_COM_NAME_TARGET_K9(SELECTCOM, 咲夜_対象)%たいのですね」
+				DATAFORM 「真想做啊。高兴地」
+				;TranslatedMark 「%KOJO_COM_NAME_TARGET_K9(SELECTCOM, 咲夜_対象)%たいのですね。喜んで」
+				DATAFORM 「真想做啊。知道了」
+				;TranslatedMark 「%KOJO_COM_NAME_TARGET_K9(SELECTCOM, 咲夜_対象)%たいのですね。かしこまりました」
+				DATAFORM 「我也想要%KOJO_COM_NAME_PLAYER_K9(SELECTCOM, 咲夜_対象)%」
+				;TranslatedMark 「私も%KOJO_COM_NAME_PLAYER_K9(SELECTCOM, 咲夜_対象)%たいです」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「真是的呢」
+				;TranslatedMark 「%KOJO_COM_NAME_TARGET_K9(SELECTCOM, 咲夜_対象)%たいのね」
+				DATAFORM 「真想做呢。呵呵。好啊」
+				;TranslatedMark 「%KOJO_COM_NAME_TARGET_K9(SELECTCOM, 咲夜_対象)%たいのね。ふふっ。いいわ」
+				DATAFORM 「真想做呢。我知道」
+				;TranslatedMark 「%KOJO_COM_NAME_TARGET_K9(SELECTCOM, 咲夜_対象)%たいのね。わかっているわ」
+				DATAFORM 「我也想要%KOJO_COM_NAME_PLAYER_K9(SELECTCOM, 咲夜_対象)%」
+				;TranslatedMark 「私も%KOJO_COM_NAME_PLAYER_K9(SELECTCOM, 咲夜_対象)%たいわ」
+			ENDDATA
+		ENDIF
+	;咲夜に主導権あり
+	ELSE
+		IF CHECK_K9("敬語")
+			PRINTDATAL
+				DATAFORM 「我想和你交往，可以吗？」
+				;TranslatedMark 「%KOJO_COM_NAME_PLAYER_K9(SELECTCOM, 咲夜_対象)%たいのですが、お付き合い頂けませんか？」
+				DATAFORM 「我想要。可以吗？」
+				;TranslatedMark 「%KOJO_COM_NAME_PLAYER_K9(SELECTCOM, 咲夜_対象)%たいです。よろしいでしょうか？」
+				DATAFORM 「不想做吗？」
+				;TranslatedMark 「%KOJO_COM_NAME_TARGET_K9(SELECTCOM, 咲夜_対象)%たくはありませんか？」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「我想要%KOJO_COM_NAME_PLAYER_K9(SELECTCOM, 咲夜_対象)%。能和我交往吗？」
+				;TranslatedMark 「%KOJO_COM_NAME_PLAYER_K9(SELECTCOM, 咲夜_対象)%たいわ。付き合ってもらえるかしら？」
+				DATAFORM 「我想要%KOJO_COM_NAME_PLAYER_K9(SELECTCOM, 咲夜_対象)%。可以吗？」
+				;TranslatedMark 「%KOJO_COM_NAME_PLAYER_K9(SELECTCOM, 咲夜_対象)%たいわ。いいかしら？」
+				DATAFORM 「不想做吗？」
+				;TranslatedMark 「%KOJO_COM_NAME_TARGET_K9(SELECTCOM, 咲夜_対象)%たくはないかしら？」
+			ENDDATA
+		ENDIF
+	ENDIF
+ENDIF
+
+;─────────────────────────────────────── 
+;●スキンシップ・背中を洗う
+;─────────────────────────────────────── 
+IF GROUPMATCH(SELECTCOM, 320, 358)
+	;咲夜に主導権なし
+	IF !IS_INITIATIVE(咲夜)
+		IF CHECK_K9("敬語")
+			PRINTDATAL
+				DATAFORM 「是这样吗……痒吗？」
+				;TranslatedMark 「こうでしょうか……くすぐったいですか？」
+				DATAFORM 「可以再靠近一点吗。我很高兴」
+				;TranslatedMark 「もっと近寄ってもいいのですね。嬉しいです」
+				DATAFORM 「这样做的话会有温柔的心情」
+				;TranslatedMark 「こうしていると優しい気持ちになれます」
+				DATAFORM 「就这些吗？」
+				;TranslatedMark 「このくらいでしょうか？」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「这样吗？　……痒吗？」
+				;TranslatedMark 「こうかしら？　……くすぐったい？」
+				DATAFORM 「这样吗？呵呵，很近呢。好可爱啊」
+				;TranslatedMark 「こう？　ふふ、近いわね。可愛いわ」
+				DATAFORM 「这样做的话就会有温柔的心情」
+				;TranslatedMark 「こうしていると優しい気持ちになれるわ」
+				DATAFORM 「就这么一点吧」
+				;TranslatedMark 「このくらいかしら」
+			ENDDATA
+		ENDIF
+	;咲夜に主導権あり
+	ELSE
+		IF CHECK_K9("敬語")
+			PRINTDATAL
+				DATAFORM 「呵呵。痒吗？」
+				;TranslatedMark 「ふふっ。くすぐったいでしょうか？」
+				DATAFORM 「想稍微靠近一点看看……失礼吗？」
+				;TranslatedMark 「少し近寄ってみたくなって……失礼でしょうか？」
+				DATAFORM 「这样的心情会变得温柔呢」
+				;TranslatedMark 「こういうのって優しい気持ちになれるんですね」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「呵呵。痒痒的吗」
+				;TranslatedMark 「ふふっ。くすぐったいかしら」
+				DATAFORM 「我有点想和你搞好关系」
+				;TranslatedMark 「ちょっと仲良くしてみたくなったのよ」
+				DATAFORM 「这样的心情会变得温柔呢」
+				;TranslatedMark 「こういうのって優しい気持ちになるのね」
+				DATAFORM 「就这么一点吧」
+				;TranslatedMark 「このくらいかしら」
+			ENDDATA
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;─────────────────────────────────────── 
+;●321頭を撫でる
+;─────────────────────────────────────── 
+IF GROUPMATCH(SELECTCOM, 321)
+	;咲夜に主導権なし
+	IF !IS_INITIATIVE(咲夜)
+		IF CHECK_K9("敬語")
+			PRINTDATAL
+				DATAFORM 「你会撒娇的吧。我很高兴」
+				;TranslatedMark 「甘えてくださるんですね。嬉しいです」
+				DATAFORM 「我觉得您已经原谅了我的心」
+				;TranslatedMark 「心を許して頂いている気がします」
+				DATAFORM 「会有温柔的心情」
+				;TranslatedMark 「優しい気持ちになれます」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「呵呵。撒娇的孩子。好可爱啊」
+				;TranslatedMark 「ふふ。甘えん坊さん。可愛いわ」
+				DATAFORM 「我觉得我的心已经被原谅了」
+				;TranslatedMark 「心を許されている気がするわ」
+				DATAFORM 「会变成温柔的心情」
+				;TranslatedMark 「優しい気持ちになれるわ」
+			ENDDATA
+		ENDIF
+	;咲夜に主導権あり
+	ELSE
+		IF CHECK_K9("敬語")
+			PRINTDATAL
+				DATAFORM 「我觉得您已经原谅了我的心」
+				;TranslatedMark 「心を許して頂けている気がします」
+				DATAFORM 「会有温柔的心情」
+				;TranslatedMark 「優しい気持ちになれます」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「我觉得我的心已经被原谅了」
+				;TranslatedMark 「心を許されている気がするわ」
+				DATAFORM 「会变成温柔的心情」
+				;TranslatedMark 「優しい気持ちになれるわ」
+			ENDDATA
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;─────────────────────────────────────── 
+;●322髪を梳く・323櫛で梳かす
+;─────────────────────────────────────── 
+IF GROUPMATCH(SELECTCOM, 322, 323)
+	;初回かつスキンヘッドならマッサージの流れを作っておく
+	;IS_COM_FIRST(1)はターゲット側の確認のためフラグを用意/一回限りなのでクリックあり
+	IF !咲夜_髪梳き初回 && TALENT:咲夜_対象:頭髮長度 == 1
+		IF !IS_INITIATIVE(咲夜)
+			IF CHECK_K9("敬語")
+				PRINTFORML 「开玩笑吧。您不是在剃须吗」
+				;TranslatedMark 「ご冗談を。%CALLNAME_K9(咲夜_対象)%は剃ってらっしゃるではありませんか」
+				PRINTFORMDW %ANAME(咲夜)%惊呆了，哧哧地笑了起来
+				;TranslatedMark %ANAME(咲夜)%は呆気にとられ、クスクスと笑い出した
+				PRINTL 
+				PRINTFORML 「没有要保养的头发。要按摩吗」
+				;TranslatedMark 「お手入れする髪がありませんよ。マッサージに致しましょうか」
+			ELSE
+				PRINTFORML 「这是什么玩笑。不是在刮吗」
+				;TranslatedMark 「なんの冗談かしら。%CALLNAME_K9(咲夜_対象)%、剃ってるじゃない」
+				PRINTFORMDW %ANAME(咲夜)%惊呆了，哧哧地笑了起来
+				;TranslatedMark %ANAME(咲夜)%は呆気にとられ、クスクスと笑い出した
+				PRINTL 
+				PRINTFORML 「没有要保养的头发。可以抚摸吗」
+				;TranslatedMark 「お手入れする髪がないわ。撫でたらいいのかしら」
+			ENDIF
+		ELSE
+			IF CHECK_K9("敬語")
+				PRINTFORML 「%CALLNAME_K9(咲夜_対象)%在剃头发呢」
+				;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%は髪を剃ってらっしゃるのですよね」
+				PRINTFORMDW %ANAME(咲夜)%用手捂着嘴唇沉思着
+				;TranslatedMark %ANAME(咲夜)%は唇に手を当てて考え込んでいる
+				PRINTL 
+				PRINTFORML 「对了对了，肩膀不酸痛吗？按摩怎么样？」
+				;TranslatedMark 「そうそう、肩は凝っていませんか？　マッサージはいかがでしょう？」
+				PRINTFORMDL 不久，他似乎灵异地点了点头，向上看了看%ANAME(咲夜_対象)%的脸
+				;TranslatedMark やがて得心がいったようにひとつ頷き、%ANAME(咲夜_対象)%の顔を上目に見つめた
+			ELSE
+				PRINTFORML 「%CALLNAME_K9(咲夜_対象)%是在剃发吧」
+				;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%って髪は剃ってるのよね」
+				PRINTFORMDW %ANAME(咲夜)%用手捂着嘴沉思着
+				;TranslatedMark %ANAME(咲夜)%は口元に手を当てて考え込んでいる
+				PRINTL 
+				PRINTFORML 「是啊。给你按摩」
+				;TranslatedMark 「そうだわ。マッサージしてあげる」
+				PRINTFORMDL 不久，他点了点头，将手伸向了%ANAME(咲夜_対象)%
+				;TranslatedMark やがて得心がいったようにひとつ頷き、%ANAME(咲夜_対象)%に手を伸ばしてきた
+			ENDIF
+		ENDIF
+	;初回でないor初回だがスキンヘッドではない
+	ELSE
+		;スキンヘッド
+		IF TALENT:咲夜_対象:頭髮長度 == 1
+			IF !IS_INITIATIVE(咲夜)
+				IF CHECK_K9("敬語")
+					PRINTFORML 「呵呵，是按摩吧」
+					;TranslatedMark 「ふふ、マッサージですね」
+				ELSE
+					PRINTFORML 「呵呵。按摩啊」
+					;TranslatedMark 「ふふ。マッサージね」
+				ENDIF
+			ELSE
+				IF CHECK_K9("敬語")
+					PRINTFORML 「呵呵。又是按摩」
+					;TranslatedMark 「ふふっ。またマッサージですけれど」
+				ELSE
+					PRINTFORML 「呵呵。虽然又变成了按摩」
+					;TranslatedMark 「ふふっ。またマッサージになっちゃうけれど」
+				ENDIF
+			ENDIF
+			IF CHECK_K9("敬語")
+				PRINTDATAL
+					DATAFORM 「我觉得您已经原谅了我的心」
+					;TranslatedMark 「心を許して頂いている気がします」
+					DATAFORM 「会有温柔的心情」
+					;TranslatedMark 「優しい気持ちになれます」
+				ENDDATA
+			ELSE
+				PRINTDATAL
+					DATAFORM 「我觉得我的心已经被原谅了」
+					;TranslatedMark 「心を許されている気がするわ」
+					DATAFORM 「会变成温柔的心情」
+					;TranslatedMark 「優しい気持ちになれるわ」
+				ENDDATA
+			ENDIF
+		;スキンヘッドではない
+		ELSE
+			IF !IS_INITIATIVE(咲夜)
+				IF CHECK_K9("敬語")
+					PRINTFORML 「呵呵，我知道了。我来给您保养一下」
+					;TranslatedMark 「ふふ、わかりました。%KOJO_HAIR_NAME(咲夜_対象)%、お手入れ致しますね」
+				ELSE
+					PRINTFORML 「呵呵。我知道了。我来给你梳一下」
+					;TranslatedMark 「ふふ。わかったわ。%KOJO_HAIR_NAME(咲夜_対象)%、梳かしてあげる」
+				ENDIF
+				PRINTFORMDW %ANAME(咲夜_対象)%拜托%ANAME(咲夜)%帮我梳了头发
+				;TranslatedMark %ANAME(咲夜_対象)%は%ANAME(咲夜)%に頼んで、髪を梳かしてもらった
+			ELSE
+				IF CHECK_K9("敬語")
+					PRINTFORML 「在%KOJO_HAIR_NAME(咲夜_対象)%里，摸着很舒服」
+					;TranslatedMark 「%KOJO_HAIR_NAME(咲夜_対象)%で、触っていて気持ちがいいんです」
+				ELSE
+					PRINTFORML 「%KOJO_HAIR_NAME(咲夜_対象)%啊。摸着舒服吗」
+					;TranslatedMark 「%KOJO_HAIR_NAME(咲夜_対象)%ね。触っていて気持ちがいいの」
+				ENDIF
+				PRINTFORMDW %ANAME(咲夜)%梳了%ANAME(咲夜_対象)%的头发
+				;TranslatedMark %ANAME(咲夜)%は%ANAME(咲夜_対象)%の髪を梳かした
+			ENDIF
+			IF CHECK_K9("敬語")
+				PRINTDATAL
+					DATAFORM 「不痒吗？」
+					;TranslatedMark 「くすぐったくはありませんか？」
+					DATAFORM 「传达了您的心意，我很平静」
+					;TranslatedMark 「心を許して頂けていることが伝わって、落ち着きます」
+					DATAFORM 「会有温柔的心情」
+					;TranslatedMark 「優しい気持ちになれます」
+				ENDDATA
+			ELSE
+				PRINTDATAL
+					DATAFORM 「痒吗？」
+					;TranslatedMark 「くすぐったいかしら？」
+					DATAFORM 「能让我碰头发，我觉得我的心是被原谅的」
+					;TranslatedMark 「髪に触らせて貰えるのって、心を許されている気がするわ」
+					DATAFORM 「这样的心情会变得温柔呢」
+					;TranslatedMark 「こういうのって優しい気持ちになるのね」
+				ENDDATA
+			ENDIF
+		ENDIF
+	ENDIF
+
+	PRINTFORMD %ANAME(咲夜)%是%ANAME(咲夜_対象)%的
+	;TranslatedMark %ANAME(咲夜)%は%ANAME(咲夜_対象)%の
+	;スキンヘッド
+	IF TALENT:咲夜_対象:頭髮長度 == 1
+		PRINTDATADL
+			DATAFORM 小心翼翼地揉搓着脖子
+			;TranslatedMark 首を大切そうに揉み解している
+			DATAFORM 胳肢着耳朵幸福地微笑着
+			;TranslatedMark 耳朶を擽って幸せそうに微笑んでいる
+			DATAFORM 手指滑在脖颈上，露出了秘密的笑容
+			;TranslatedMark うなじに指を滑らせ密かな笑みを零している
+			DATAFORM 轻轻地揉着脖子
+			;TranslatedMark 首筋をそっとほぐすように揉んでいる
+			DATAFORM 扑通一声拍着肩膀
+			;TranslatedMark 肩をとんとんと叩いている
+			DATAFORM 一把抓住肩胛骨揉开了
+			;TranslatedMark 肩甲骨をぐっとつかんで揉みほぐしている
+		ENDDATA
+	;長い
+	ELSEIF TALENT:咲夜_対象:頭髮長度 >= 5
+		PRINTDATADL
+			DATAFORM 拿着一束头发轻轻地亲着
+			;TranslatedMark 毛束を手に取りそっとキスをしている
+			DATAFORM 爱抚着头发
+			;TranslatedMark 髪を慈しむように撫でている
+			DATAFORM 把头发缠在手指上摆弄
+			;TranslatedMark 髪を指に絡めて弄んでいる
+			DATAFORM 把头发编成三股辫开始玩儿
+			;TranslatedMark 髪を三つ編みにして遊び始めている
+			DATAFORM 胳肢着耳朵幸福地微笑着
+			;TranslatedMark 耳朶を擽って幸せそうに微笑んでいる
+			DATAFORM 手指滑在脖颈上，露出了秘密的笑容
+			;TranslatedMark うなじに指を滑らせ密かな笑みを零している
+			DATAFORM 把落后的头发揪得嘎吱嘎吱地拉着玩儿
+			;TranslatedMark 遅れ毛を摘まんでつんつんと引いて遊んでいる
+			DATAFORM 头发通过手指透着空气
+			;TranslatedMark 髪に指を通して空気を含ませている
+		ENDDATA
+	;中間
+	ELSE
+		PRINTDATADL
+			DATAFORM 手上拿着发梢轻轻地亲着
+			;TranslatedMark 毛先を手に取りそっとキスをしている
+			DATAFORM 爱抚着头发
+			;TranslatedMark 髪を慈しむように撫でている
+			DATAFORM 胳肢着耳朵幸福地微笑着
+			;TranslatedMark 耳朶を擽って幸せそうに微笑んでいる
+			DATAFORM 手指滑在脖颈上，露出了秘密的笑容
+			;TranslatedMark うなじに指を滑らせ密かな笑みを零している
+			DATAFORM 掐了一根头发，一挽一挽地玩儿
+			;TranslatedMark 髪を一筋摘まんでつんつんと引いて遊んでいる
+			DATAFORM 头发通过手指透着空气
+			;TranslatedMark 髪に指を通して空気を含ませている
+		ENDDATA
+	ENDIF
+
+	;フラグ立てがまだならフラグを立てておく
+	;IS_COM_FIRST()はターゲット側の確認のためフラグ用意
+	IF !咲夜_髪梳き初回
+		咲夜_髪梳き初回 = 1
+	ENDIF
+
+	;描写オフ
+	RETURN 1
+ENDIF
+
+;─────────────────────────────────────── 
+;●見つめる・甘い言葉
+;─────────────────────────────────────── 
+IF GROUPMATCH(SELECTCOM, 324, 325)
+	IF CHECK_K9("敬語")
+		PRINTDATAL
+			DATAFORM 「……喜欢」
+			;TranslatedMark 「……好きです」
+			DATAFORM 「嗯……」
+			;TranslatedMark 「ん……」
+			DATAFORM 「和%CALLNAME_K9(咲夜_対象)%在一起的时候是最幸福的」
+			;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%と居る時が一番の幸せです」
+			DATAFORM 「我能做的事情，如果能从%CALLNAME_K9(咲夜_対象)%那里交给我的话我会很开心的」
+			;TranslatedMark 「私にできることは、%CALLNAME_K9(咲夜_対象)%からお任せ頂けると嬉しいです」
+		ENDDATA
+	ELSE
+		PRINTDATAL
+			DATAFORM 「喜欢啊」
+			;TranslatedMark 「好きよ」
+			DATAFORM 「嗯……」
+			;TranslatedMark 「ん……」
+			DATAFORM 「和%CALLNAME_K9(咲夜_対象)%在一起的时候是最幸福的」
+			;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%と居る時が一番の幸せよ」
+			DATAFORM 「我能做的事，如果能被%CALLNAME_K9(咲夜_対象)%拜托的话我会很开心的」
+			;TranslatedMark 「私にできることは、%CALLNAME_K9(咲夜_対象)%から頼ってもらえたら嬉しいわ」
+		ENDDATA
+	ENDIF
+	RETURN 0
+ENDIF
+
+;─────────────────────────────────────── 
+;●訓練系
+;─────────────────────────────────────── 
+IF GROUPMATCH(SELECTCOM, 301, 302, 303, 304, 305, 306, 307)
+	SELECTCASE SELECTCOM
+		CASE 301
+			PRINTFORML 「%POLITE_K9("的が欲しいのよ", "腕が鈍るのが心配で")%」
+			IF CHECK_K9("陥落",咲夜_対象)
+				PRINTFORML 「在%CALLNAME_K9(咲夜_対象)%里」
+				;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%に%POLITE_K9("頼むのが一番よ。最高の緊張が得られるもの", "お願いするのが一番です。最高の緊張が得られますから")%」
+			ENDIF
+		CASE 302
+			PRINTFORML 「保护身体的方法是必要的%POLITE_K9("よ", "です")%」
+			;TranslatedMark 「身を護る術は必要%POLITE_K9("よ", "です")%」
+			IF CHECK_K9("陥落",咲夜_対象)
+				PRINTFORML 「在关键时刻，只有%CALLNAME_K9(咲夜_対象)%是%POLITE_K9("逃げて欲しいもの", "無事でいて欲しいですから")%」
+				;TranslatedMark 「いざというとき、%CALLNAME_K9(咲夜_対象)%だけは%POLITE_K9("逃げて欲しいもの", "無事でいて欲しいですから")%」
+			ENDIF
+		CASE 303
+			PRINTFORML 「平时的积累很重要」
+			;TranslatedMark 「日頃の積み重ねは大事%POLITE_K9("よ", "です")%」
+			IF CHECK_K9("陥落",咲夜_対象)
+				PRINTFORML 「%CALLNAME_K9(咲夜_対象)%%POLITE_K9("を誰かにとられたら困るもの", "がどこかの愚か者に狙われることが気掛かりです")%」
+			ENDIF
+		CASE 304
+			PRINTFORML 「堆积了很多文件%POLITE_K9("いるのよ", "いて……申し訳ありません")%」
+			;TranslatedMark 「たくさん書類が溜まって%POLITE_K9("いるのよ", "いて……申し訳ありません")%」
+			IF CHECK_K9("陥落",咲夜_対象)
+				PRINTFORML 「如果是%CALLNAME_K9(咲夜_対象)%的话永远都可以坐在桌前%POLITE_K9("だもの", "です")%」
+				;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%とならいつまでも机に向かっていられそう%POLITE_K9("だもの", "です")%」
+				PRINTFORML 「外表是%POLITE_K9("しちゃうかしら？", "はしてしまうかもしれません")%」
+				;TranslatedMark 「余所見は%POLITE_K9("しちゃうかしら？", "はしてしまうかもしれません")%」
+			ENDIF
+		CASE 305
+			PRINTFORML 「想增加士兵%POLITE_K9("し", "ですし")%，店也变得活跃%POLITE_K9("わ", "ですね")%」
+			;TranslatedMark 「兵も追加したい%POLITE_K9("し", "ですし")%、店も活発になって欲しい%POLITE_K9("わ", "ですね")%」
+			IF CHECK_K9("陥落",咲夜_対象)
+				PRINTFORML 「想要保护%CALLNAME_K9(咲夜_対象)%%POLITE_K9("し", "ですし")%，一起购物也很开心%POLITE_K9("もの", "です")%」
+				;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%に護衛をつけたい%POLITE_K9("し", "ですし")%、一緒にお買い物も楽しみたい%POLITE_K9("もの", "です")%」
+			ENDIF
+		CASE 306
+			PRINTFORML 「对唱歌很有自信%POLITE_K9("はないのだけれど", "はありませんが")%……」
+			;TranslatedMark 「歌に自信%POLITE_K9("はないのだけれど", "はありませんが")%……」
+			IF CHECK_K9("陥落",咲夜_対象)
+				PRINTFORML 「想听%CALLNAME_K9(咲夜_対象)%的歌%POLITE_K9("わ", "です")%」
+				;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%の歌を聴きたい%POLITE_K9("わ", "です")%」
+			ENDIF
+		CASE 307
+			PRINTFORML 「还可以训练使用小刀的%POLITE_K9("のよね", "ので")%」
+			;TranslatedMark 「ナイフの扱いの訓練にもなる%POLITE_K9("のよね", "ので")%」
+			IF CHECK_K9("陥落",咲夜_対象)
+				PRINTFORML 「而且，如果料理做得好吃的话」
+				;TranslatedMark 「それに、料理が美味しくできたら%CALLNAME_K9(咲夜_対象)%に%POLITE_K9("食べてみてもらいたいの", "召し上がって頂きたいです")%」
+			ENDIF
+	ENDSELECT
+	RETURN 0
+ENDIF
+
+;─────────────────────────────────────── 
+;●お腹の音
+;─────────────────────────────────────── 
+IF SELECTCOM == 326
+	PRINTFORML 「婴儿……在，在」
+	;TranslatedMark 「赤ちゃんが……いる%POLITE_K9("のね", "んですね")%」
+	RETURN 0
+
+ENDIF
+
+;─────────────────────────────────────── 
+;●その他
+;─────────────────────────────────────── 
+PRINTDATAL
+	DATAFORM 「%POLITE_K9("じゃあ、こうしましょう", "ではこう致しましょう")%」
+	DATAFORM 「有益的%POLITE_K9("るわね", "ります")%」
+	;TranslatedMark 「ためにな%POLITE_K9("るわね", "ります")%」
+	DATAFORM 「%CALLNAME_K9(咲夜_対象)%，这样可以吗」
+	;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%、これでいいかしら」
+	DATAFORM 「那样，那样」
+	;TranslatedMark 「そう%POLITE_K9("なのよね", "ですね")%」
+	DATAFORM 「这样的是%POLITE_K9("どうかしら", "いかがでしょうか")%」
+	;TranslatedMark 「こんなのは%POLITE_K9("どうかしら", "いかがでしょうか")%」
+	DATAFORM 「好%POLITE_K9("わね", "ですね")%」
+	;TranslatedMark 「いい%POLITE_K9("わね", "ですね")%」
+	DATAFORM 「%POLITE_K9("そうね。ありがとう", "そうですね。ありがとうございます")%」
+ENDDATA
+RETURN 0
+
+;─────────────────────────────────────── 
+;●戻る
+;─────────────────────────────────────── 
+RETURN 0
+
+
+
+;─────────────────────────────────────── 
+;■日常_実行_実行後
+;─────────────────────────────────────── 
+@KOJO_K9_NOON_AFTER_PLAYER(咲夜_対象)
+#DIM 咲夜
+#DIM 咲夜_対象
+#DIMS 咲夜機嫌
+
+IF !咲夜_対象
+	咲夜_対象 = MASTER
+ENDIF
+
+咲夜 = NAME_TO_CHARA("咲夜")
+咲夜機嫌 '= TOSTR_EMOTION(咲夜)
+
+;─────────────────────────────────────── 
+;●機嫌が悪ければ通常のコマンド口上は喋らない
+;─────────────────────────────────────── 
+SELECTCASE 咲夜機嫌
+	CASE "恨", "怒", "憤"
+		RETURN 0
+
+	CASE "鬱", "悲", "憂"
+		RETURN 0
+
+	CASE  "狂", "恐", "怯"
+		RETURN 0
+
+	CASEELSE
+
+ENDSELECT
+
+;─────────────────────────────────────── 
+;●髪を梳く・櫛で梳かす
+;─────────────────────────────────────── 
+IF GROUPMATCH(SELECTCOM, 322, 323)
+	;描写オフ
+	RETURN 1
+ENDIF
+
+;─────────────────────────────────────── 
+;●Ｍ絶頂
+;─────────────────────────────────────── 
+IF NOWEX:咲夜:Ｍ絶頂 > NOWEX:咲夜:Ｃ絶頂 && NOWEX:咲夜:Ｍ絶頂 > NOWEX:咲夜:Ｂ絶頂 && NOWEX:咲夜:Ｍ絶頂 > NOWEX:咲夜:Ａ絶頂 && NOWEX:咲夜:Ｍ絶頂 > NOWEX:咲夜:Ｖ絶頂 && NOWEX:咲夜:Ｍ絶頂 > NOWEX:咲夜:射精
+	IF NOWEX:咲夜:Ｍ絶頂 > 0
+		PRINT 「
+
+		PRINTDATA
+			DATAFORM 嗯
+			;TranslatedMark んっ
+			DATAFORM 评论
+			;TranslatedMark んぇれ
+			DATAFORM 哈
+			;TranslatedMark はぁっ
+			DATAFORM 嗯噗
+			;TranslatedMark んぷっ
+			DATAFORM 嗯，嗯
+			;TranslatedMark んえうっ
+			DATAFORM 嗯，呼
+			;TranslatedMark うむぁ、ぷ
+		ENDDATA
+		PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+
+		PRINTDATA
+			DATAFORM 嗯，嗯
+			;TranslatedMark んぐ、んくぅっ
+			DATAFORM 啊，啊
+			;TranslatedMark あむっ
+			DATAFORM 嗯，嗯
+			;TranslatedMark ぷ、んっ
+			DATAFORM 嗯～……嗯
+			;TranslatedMark んうぅ～……っ
+			DATAFORM 呼呼
+			;TranslatedMark ふぢゅ
+			DATAFORM 「麻辣
+			;TranslatedMark 「んぐっ
+		ENDDATA
+		PRINTFORM %BREAK_K9("中", 咲夜_対象)%
+
+		PRINTDATA
+			DATAFORM 嗯，嗯
+			;TranslatedMark んく
+			DATAFORM 呻吟
+			;TranslatedMark うふぐっ
+			DATAFORM 噗
+			;TranslatedMark ふっ
+			DATAFORM 啊，啊
+			;TranslatedMark ぢゅっ
+			DATAFORM 唔
+			;TranslatedMark ううっ
+			DATAFORM 嗯，嗯
+			;TranslatedMark んんんっ
+		ENDDATA
+		PRINTFORM %BREAK_K9("末", 咲夜_対象)%
+
+		PRINTL 」
+	ENDIF
+ENDIF
+
+;─────────────────────────────────────── 
+;●戻る
+;─────────────────────────────────────── 
+RETURN 0
+

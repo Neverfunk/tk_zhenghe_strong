@@ -1,0 +1,310 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K111_TPG_RATE(対象)
+#DIM 対象
+RETURN 50
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K111_TPG_DECISION(対象)
+#DIM 夢月
+#DIM 対象
+夢月 = NAME_TO_CHARA("夢月")
+
+;何度も発生する有益なデイリーだよ
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1) && CHECK_KOJO_DAILY_HAPPEN(夢月, 1, 0, -1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K111_TPG_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K111_TPG(対象)
+#DIM 対象
+#DIM 幻月
+#DIM 幻月_対象
+幻月 = NAME_TO_CHARA("幻月")
+幻月_対象 = MASTER
+	
+;途中で関数を終了するときは
+;RETURN
+;を使う
+;
+;PRINTFORML %ANAME(幻月)%
+;PRINTFORMW 
+;RESETCOLOR
+;CALL COLORPRINT %ANAME(対象)%の", カラー_注意, "W")
+
+IF KDVAR:幻月:幻月_お茶会参加 == 0
+	PRINTFORMW 一个烈日炎炎的午后
+	PRINTFORMW 突然听到背后有人叫我
+	PRINTFORMW 今天天气很好的样子，有人想要邀请我前去喝茶。
+	PRINTFORMW 那么，该怎么办呢？
+;参加していない（断った）
+ELSEIF KDVAR:幻月:幻月_お茶会参加 == 1
+	PRINTFORMW 收到了来自%ANAME(対象)%的茶会邀请
+	PRINTFORMW 那么，该怎么办呢？
+;参加した
+ELSE
+	PRINTFORML %ANAME(対象)%好像对上次的茶会很满意
+	PRINTFORMW 再一次，%ANAME(幻月_対象)%想要邀请你去参加。
+	PRINTFORMW 那么，该怎么办呢？
+ENDIF
+
+
+
+CALL ASK_YN("如果我可以的话", "下次再说吧")
+SELECTCASE RESULT
+	;"私でよければ"
+	CASE 0 
+		
+		PRINTFORML 「呵呵，不这样可不行!」
+		PRINTFORMW %ANAME(対象)%兴高采烈。
+		PRINTFORMW 梦月好像在为我做着准备，为了不让她久等，我们一边谈笑着一边早早地走了。
+		PRINTFORMW 
+		PRINTFORMW 树荫下的小桌上准备了两人份的茶和各种小吃，甚至还有蛋糕和饼干...已经看不到梦月的身影了。
+		PRINTFORML 真是个好妹妹啊，我在心里嘀咕，不过说出来的话%ANAME(対象)%会不高兴的。
+		PRINTFORML 赶紧开始吧...
+		PRINTFORMW 
+		PRINTFORMW %ANAME(幻月_対象)%和%ANAME(対象)%吃完小吃，一边喝茶一边思考着该说什么话题。
+		PRINTFORMW 既然如此，不如就在自己完全陌生的领域来进行对话，吸取%ANAME(対象)%的知识...
+		CALL ASK_MULTI("关于战术论", "关于战略论", "关于接下来的演说", "关于歌唱技巧", "关于料理知识")
+		SELECTCASE RESULT
+			;"戦術論について"
+			CASE 0
+				;MASTERより幻月の方が武闘が高い
+				IF ABL:幻月:武闘 > ABL:幻月_対象:武闘
+					;幻月より武闘が低く、なおかつ正妻・烙印を持っているとき
+					IF TALENT:幻月:正妻 || TALENT:幻月:烙印
+						
+						PRINTFORMW 「最近，在学习一些外面世界的战术呢」
+						
+						PRINTFORMW 被称为单人最强的%ANAME(対象)%如果在用兵方面也有亮眼之处的话，就没什么好怕的了吧。
+						PRINTFORMW %ANAME(幻月_対象)%热切地听着%ANAME(対象)%的话。
+						PRINTFORMW .........
+						PRINTFORMW ......
+						PRINTFORMW ...
+						PRINTFORMW %ANAME(幻月_対象)%从%ANAME(対象)%那里学到了战术的要领。
+						CALL PRINT_ADD_EXP(幻月_対象, "武闘経験値", 5, 1)
+						CALL TRAIN_AUTO_ABLUP(幻月_対象)
+					ELSE
+						PRINTFORMW 有着幻想乡最强的称呼的%ANAME(対象)%的宝贵指导...
+						PRINTFORMW %ANAME(幻月_対象)%从%ANAME(対象)%那里学到了战术的要领。
+						PRINTFORMW %ANAME(幻月_対象)%热切地听着%ANAME(対象)%的话。
+						PRINTFORMW .........
+						PRINTFORMW ......
+						PRINTFORMW ...
+						CALL PRINT_ADD_EXP(幻月_対象, "武闘経験値", 5, 1)
+						CALL TRAIN_AUTO_ABLUP(幻月_対象)
+					ENDIF
+				;MASTERが幻月より武闘が高い
+				ELSE
+					PRINTFORMW %ANAME(対象)%专心地听着%ANAME(幻月_対象)%的战术论。
+					PRINTFORMW .........
+					PRINTFORMW ......
+					PRINTFORMW ...
+						CALL PRINT_ADD_EXP(幻月, "武闘経験値", 5, 1)
+						CALL TRAIN_AUTO_ABLUP(幻月)
+				ENDIF
+			;戦略論について
+			CASE 1
+				;MASTERより幻月の方が防衛が高い
+				IF ABL:幻月:防衛 > ABL:幻月_対象:防衛
+					;幻月より防衛が低く、なおかつ正妻・烙印を持っているとき
+					IF TALENT:幻月:正妻 || TALENT:幻月:烙印
+					
+						PRINTFORML 「我认为在黑暗中进攻会浪费时间和精力，同时也会让我们的军队疲惫不堪。」
+						PRINTFORML 「在需要防守的地方防守，在需要进攻的地方进攻。」
+						;译者注，下面一句是我自己加的，个人比较喜欢的对战争的论述，不过应该没人看得到吧？
+						PRINTFORML 「善攻者动于九天之上，善守者藏于九地之下。」
+						PRINTFORML 「更重要的是要考虑如何才能结束战争，而不是只看到眼前的战场。」
+						
+						PRINTFORMW 
+						PRINTFORMW %ANAME(幻月_対象)%认为自己看待事物的眼光应该是长远且多变的。
+						PRINTFORMW %ANAME(幻月_対象)%热切地听着%ANAME(対象)%的话。
+						PRINTFORMW .........
+						PRINTFORMW ......
+						PRINTFORMW ...
+						PRINTFORMW %ANAME(幻月_対象)%从%ANAME(対象)%那里学到了防御的要领。
+						CALL PRINT_ADD_EXP(幻月_対象, "防衛経験値", 5, 1)
+						CALL TRAIN_AUTO_ABLUP(幻月_対象)
+					ELSE
+						PRINTFORMW 有着幻想乡最强的称呼的%ANAME(対象)%的宝贵指导...
+						PRINTFORMW %ANAME(幻月_対象)%从%ANAME(対象)%那里学到了防御的要领。
+						PRINTFORMW %ANAME(幻月_対象)%热切地听着%ANAME(対象)%的话。
+						PRINTFORMW .........
+						PRINTFORMW ......
+						PRINTFORMW ...
+						CALL PRINT_ADD_EXP(幻月_対象, "防衛経験値", 5, 1)
+						CALL TRAIN_AUTO_ABLUP(幻月_対象)
+					ENDIF
+				;MASTERが幻月より防衛が高い
+				ELSE
+					PRINTFORMW %ANAME(対象)%专心地听着%ANAME(幻月_対象)%的战略论。
+					PRINTFORMW .........
+					PRINTFORMW ......
+					PRINTFORMW ...
+					CALL PRINT_ADD_EXP(幻月, "防衛経験値", 5, 1)
+					CALL TRAIN_AUTO_ABLUP(幻月)
+				ENDIF
+			;次の演説について
+			CASE 2
+				;MASTERより幻月の方が政治が高い
+				IF ABL:幻月:政治 > ABL:幻月_対象:政治
+					;幻月より政治が低く、なおかつ正妻・親愛を持っているとき
+					IF TALENT:幻月:正妻 || TALENT:幻月:親愛
+					
+						PRINTFORML 「只要赢了就好。」
+						PRINTFORML 「但是，没人能保证我们一定能赢下去。」
+						PRINTFORML 「即使输了战斗，也不能输了战争。」
+						PRINTFORML 「...但是从内部崩溃的话是会输的。」
+						PRINTFORML 「外敌更好对付，因为他们是看得见的，而内部的敌人是看不见的。」
+						
+						PRINTFORMW 
+						PRINTFORMW %ANAME(対象)%传授了一个很好的欺骗百姓的方法。
+						PRINTFORMW %ANAME(幻月_対象)%热切地听着%ANAME(対象)%的话。
+						PRINTFORMW .........
+						PRINTFORMW ......
+						PRINTFORMW ...
+						PRINTFORMW %ANAME(幻月_対象)%从%ANAME(対象)%那里学到了政治的要领。
+						CALL PRINT_ADD_EXP(幻月_対象, "政治経験値", 5, 1)
+						CALL TRAIN_AUTO_ABLUP(幻月_対象)
+					ELSE
+						PRINTFORMW 虽然%ANAME(対象)%在战场上多于在政治场上，但是政治经验还是比%ANAME(幻月_対象)%要强。
+						PRINTFORMW %ANAME(幻月_対象)%从%ANAME(対象)%那里学到了政治的要领。
+						PRINTFORMW %ANAME(幻月_対象)%热切地听着%ANAME(対象)%的话。
+						PRINTFORMW .........
+						PRINTFORMW ......
+						PRINTFORMW ...
+						CALL PRINT_ADD_EXP(幻月_対象, "政治経験値", 5, 1)
+						CALL TRAIN_AUTO_ABLUP(幻月_対象)
+					ENDIF
+				;MASTERが幻月より政治が高い
+				ELSE
+					PRINTFORMW %ANAME(対象)%专心地听着%ANAME(幻月_対象)%的政治论。
+					PRINTFORMW .........
+					PRINTFORMW ......
+					PRINTFORMW ...
+					CALL PRINT_ADD_EXP(幻月, "政治経験値", 5, 1)
+					CALL TRAIN_AUTO_ABLUP(幻月)
+				ENDIF
+			;歌うコツについて
+			CASE 3
+				;MASTERより幻月の方が歌唱が高い
+				IF ABL:幻月:歌唱 > ABL:MASTER:歌唱
+					;幻月より歌唱が低く、なおかつ正妻・烙印を持っているとき
+					IF TALENT:幻月:正妻 || TALENT:幻月:烙印
+					
+						PRINTFORML 「唱歌的技巧?」
+						PRINTFORML 「虽然我并不怎么擅长唱歌...」
+						PRINTFORML 「但是偶尔也会唱一唱」
+						
+						PRINTFORMW 
+						PRINTFORMW 从%ANAME(対象)%那里得到了发出声音的方法的建议。
+						PRINTFORMW %ANAME(幻月_対象)%热切地听着%ANAME(対象)%的话。
+						PRINTFORMW .........
+						PRINTFORMW ......
+						PRINTFORMW ...
+						PRINTFORMW %ANAME(幻月_対象)%从%ANAME(対象)%那里学到了唱歌的要领。
+						CALL PRINT_ADD_EXP(幻月_対象, "歌唱経験値", 5, 1)
+						CALL TRAIN_AUTO_ABLUP(幻月_対象)
+					ELSE
+						PRINTFORMW %ANAME(対象)%虽然没有什么唱歌的印象，但是那个歌声比%ANAME(幻月_対象)%的更美一些...
+						PRINTFORMW %ANAME(幻月_対象)%从%ANAME(対象)%那里学到了唱歌的要领。
+						PRINTFORMW .........
+						PRINTFORMW ......
+						PRINTFORMW ...
+						CALL PRINT_ADD_EXP(幻月_対象, "歌唱経験値", 5, 1)
+						CALL TRAIN_AUTO_ABLUP(幻月_対象)
+					ENDIF
+				;MASTERが幻月より歌唱が高い
+				ELSE
+					
+					PRINTFORMW 「啊，%ANAME(幻月_対象)%能唱歌吗？」
+					PRINTFORMW 「来唱一下吧！」
+					PRINTFORMW %ANAME(対象)%认真地听着%ANAME(幻月_対象)%的歌唱。
+					
+					PRINTFORMW .........
+					PRINTFORMW ......
+					PRINTFORMW ...
+					CALL PRINT_ADD_EXP(幻月, "歌唱経験値", 5, 1)
+					CALL TRAIN_AUTO_ABLUP(幻月)
+				ENDIF
+			;料理のコツ
+			CASE 4
+				;MASTERより幻月の方が料理が高い
+				IF ABL:幻月:料理 > ABL:幻月_対象:料理
+					;幻月より料理が低く、なおかつ正妻・烙印を持っているとき
+					IF TALENT:幻月:正妻 || TALENT:幻月:烙印
+					
+						PRINTFORMW 「料理?」
+						PRINTFORMW 「呵呵呵...我最近开始学做菜了。」
+						PRINTFORMW 「虽然有梦月跟厨师...」
+						PRINTFORMW 「但是我还是想让你在上战场之前吃我亲手做的料理。」
+						PRINTFORMW 
+						PRINTFORMW %ANAME(対象)%交给了我料理的食谱和技巧。
+						PRINTFORMW .........
+						PRINTFORMW ......
+						PRINTFORMW ...
+						PRINTFORMW %ANAME(幻月_対象)%从%ANAME(対象)%那里学到了料理的要领。
+						CALL PRINT_ADD_EXP(幻月_対象, "料理経験値", 5, 1)
+						CALL TRAIN_AUTO_ABLUP(幻月_対象)
+					ELSE
+						
+						PRINTFORML 「料理?」
+						PRINTFORML 「正如你所见，料理什么的都是梦月做的。」
+						PRINTFORML 「但是，我偶尔也是会做菜的，尤其是点心什么的。」
+						PRINTFORML 「你想要学吗?」
+						
+						PRINTFORMW 
+						PRINTFORMW %ANAME(幻月_対象)%从%ANAME(対象)%那里学到了料理的要领。
+						PRINTFORMW %ANAME(幻月_対象)%热切地听着%ANAME(対象)%的话。
+						PRINTFORMW .........
+						PRINTFORMW ......
+						PRINTFORMW ...
+						CALL PRINT_ADD_EXP(幻月_対象, "料理経験値", 5, 1)
+						CALL TRAIN_AUTO_ABLUP(幻月_対象)
+					ENDIF
+				;MASTERが幻月より料理が高い
+				ELSE
+					PRINTFORMW %ANAME(対象)%专心地听着%ANAME(幻月_対象)%的料理的讲述。
+					PRINTFORMW .........
+					PRINTFORMW ......
+					PRINTFORMW ...
+					CALL PRINT_ADD_EXP(幻月, "料理経験値", 5, 1)
+					CALL TRAIN_AUTO_ABLUP(幻月)
+				ENDIF
+		ENDSELECT
+		KDVAR:幻月:幻月_お茶会参加 = 2
+	;また今度
+	CASE 1
+
+		PRINTFORMW 「哦，那太遗憾了。」
+
+		PRINTFORMW 说完，她就飞到另外的地方去找别的人了。
+		KDVAR:幻月:幻月_お茶会参加 = 1
+	RETURN
+
+ENDSELECT
+
+PRINTFORMW 等我回过神来，天已经黑了，蛋糕和饼干都不见了
+PRINTFORMW 遗憾的是，今天的茶会到此结束了...
+PRINTFORMW 
+
+
+RETURN 1

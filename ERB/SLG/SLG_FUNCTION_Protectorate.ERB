@@ -1,0 +1,690 @@
+﻿;-------------------------------------------------
+;ARG:0とARG:1の勢力の間にARG:0を辺境伯,ARG:1を宗主国とする条約を成立させる関数
+;成功したら1 空きがなければ0
+;-------------------------------------------------
+@INIT_Markgraf(ARG:0, ARG:1)
+IF !IS_COUNTRY(ARG:0) || !IS_COUNTRY(ARG:1)
+	THROW 请为0号参数和1号参数分别指定正确的势力号
+ENDIF
+
+FOR LOCAL:0, 0, MAX_TREATY_M
+	IF IS_TREATY_M:(LOCAL:0) <=0
+		; 空きがあれば成立
+		; 締結
+		COUNTRY_Protectorate:(ARG:0) = 2
+		COUNTRY_Protectorate:(ARG:1) = 1
+		TREATY_M_COUNTRY:(LOCAL:0):0:0 = ARG:0
+		TREATY_M_COUNTRY:(LOCAL:0):1:1 = ARG:1
+		IS_TREATY_M:(LOCAL:0) = 1
+		CFLAG:(GET_COUNTRY_BOSS(ARG:0)):1702 = 1
+		
+		COUNTRY_Protectorate_REFERENCE:(ARG:0):0 = 2
+		COUNTRY_Protectorate_REFERENCE:(ARG:0):1 = LOCAL:0
+		COUNTRY_Protectorate_REFERENCE:(ARG:0):2 = ARG:1
+		
+		COUNTRY_Protectorate_REFERENCE:(ARG:1):0 = 1
+		
+		; 関係マップの更新
+		TMP_COUNTRY_RELATION:(ARG:0):(ARG:1) = 6
+		TMP_COUNTRY_RELATION:(ARG:1):(ARG:0) = 7
+		TMP_COUNTRY_RELATION_TERM:(ARG:0):(ARG:1) = 9999
+		TMP_COUNTRY_RELATION_TERM:(ARG:1):(ARG:0) = 9999
+		
+		CALL INIT_Union(ARG:0, ARG:1)
+		;連邦を作成,あるいはARG:1が主導する連邦にARG:0が加盟
+		
+		;対象従属国士官の特殊なフラグを消去
+		FOR LOCAL:1, 0, CHARANUM
+			IF CFLAG:(LOCAL:1):所属 == ARG:0 && CFLAG:(LOCAL:1):1700 == 1
+				CFLAG:(LOCAL:1):1700 = 0
+			ENDIF
+		NEXT
+		
+		RETURN 1
+	ENDIF
+NEXT
+RETURN 0
+
+;-------------------------------------------------
+;ARG:0とARG:1の勢力の間にARG:0を植民地,ARG:1を宗主国とする条約を成立させる関数
+;成功したら1 空きがなければ0
+;-------------------------------------------------
+@INIT_Colony(ARG:0, ARG:1)
+IF !IS_COUNTRY(ARG:0) || !IS_COUNTRY(ARG:1)
+	THROW 请为0号参数和1号参数分别指定正确的势力号
+ENDIF
+
+FOR LOCAL:0, 0, MAX_TREATY_CO
+	IF IS_TREATY_CO:(LOCAL:0) <=0
+		; 空きがあれば成立
+		; 締結
+		COUNTRY_Protectorate:(ARG:0) = 3
+		COUNTRY_Protectorate:(ARG:1) = 1
+		TREATY_CO_COUNTRY:(LOCAL:0):0:0 = ARG:0
+		TREATY_CO_COUNTRY:(LOCAL:0):1:1 = ARG:1
+		IS_TREATY_CO:(LOCAL:0) = 1
+		
+		COUNTRY_Protectorate_REFERENCE:(ARG:0):0 = 3
+		COUNTRY_Protectorate_REFERENCE:(ARG:0):1 = LOCAL:0
+		COUNTRY_Protectorate_REFERENCE:(ARG:0):2 = ARG:1
+		
+		COUNTRY_Protectorate_REFERENCE:(ARG:1):0 = 1
+		
+		; 関係マップの更新
+		TMP_COUNTRY_RELATION:(ARG:0):(ARG:1) = 6
+		TMP_COUNTRY_RELATION:(ARG:1):(ARG:0) = 8
+		TMP_COUNTRY_RELATION_TERM:(ARG:0):(ARG:1) = 9999
+		TMP_COUNTRY_RELATION_TERM:(ARG:1):(ARG:0) = 9999
+		
+		CALL INIT_Union(ARG:0, ARG:1)
+		;連邦を作成,あるいはARG:1が主導する連邦にARG:0が加盟
+		
+		;ARG:1が特殊勢力でなくなったホフゴブリン勢力である場合、特化を地方自治にする
+		SIF ARG:1 == CHANGE_Government_GOBLIN:0 && CHANGE_Government_GOBLIN:1 == 2
+			SPECIALIZATION_Protectorate:(ARG:0) = 3
+		
+		RETURN 1
+	ENDIF
+NEXT
+
+RETURN 0
+;-------------------------------------------------
+;ARG:0とARG:1の勢力の間にARG:0を傀儡国,ARG:1を宗主国とする条約を成立させる関数
+;成功したら1 空きがなければ0
+;-------------------------------------------------
+@INIT_Pupet(ARG:0, ARG:1)
+IF !IS_COUNTRY(ARG:0) || !IS_COUNTRY(ARG:1)
+	THROW 请为0号参数和1号参数分别指定正确的势力号
+ENDIF
+
+FOR LOCAL:0, 0, MAX_TREATY_P
+	IF IS_TREATY_P:(LOCAL:0) <=0
+		; 空きがあれば成立
+		; 締結
+		COUNTRY_Protectorate:(ARG:0) = 4
+		COUNTRY_Protectorate:(ARG:1) = 1
+		TREATY_P_COUNTRY:(LOCAL:0):0:0 = ARG:0
+		TREATY_P_COUNTRY:(LOCAL:0):1:1 = ARG:1
+		IS_TREATY_P:(LOCAL:0) = 1
+		
+		COUNTRY_Protectorate_REFERENCE:(ARG:0):0 = 4
+		COUNTRY_Protectorate_REFERENCE:(ARG:0):1 = LOCAL:0
+		COUNTRY_Protectorate_REFERENCE:(ARG:0):2 = ARG:1
+		
+		COUNTRY_Protectorate_REFERENCE:(ARG:1):0 = 1
+		
+		; 関係マップの更新
+		TMP_COUNTRY_RELATION:(ARG:0):(ARG:1) = 6
+		TMP_COUNTRY_RELATION:(ARG:1):(ARG:0) = 9
+		TMP_COUNTRY_RELATION_TERM:(ARG:0):(ARG:1) = 9999
+		TMP_COUNTRY_RELATION_TERM:(ARG:1):(ARG:0) = 9999
+		
+		CALL INIT_Union(ARG:0, ARG:1)
+		;連邦を作成,あるいはARG:1が主導する連邦にARG:0が加盟
+		
+		;ARG:1が特殊勢力でなくなったホフゴブリン勢力である場合、特化を地方自治にする
+		SIF ARG:1 == CHANGE_Government_GOBLIN:0 && CHANGE_Government_GOBLIN:1 == 2
+			SPECIALIZATION_Protectorate:(ARG:0) = 3
+		
+		RETURN 1
+	ENDIF
+NEXT
+
+RETURN 0
+
+;-------------------------------------------------
+;従属国ARG:0に宗主国ARG:1が締結しているものと同様の条約を成立させる関数
+;-------------------------------------------------
+@INIT_Protectorate_TREATY(ARG:0, ARG:1)
+#DIM 宗主国外交関係
+#DIM 外交関係期間
+#DIM 宗主国君主
+#DIM 従属国君主
+#DIM 相手国君主
+
+宗主国君主 = GET_COUNTRY_BOSS(ARG:1)
+従属国君主 = GET_COUNTRY_BOSS(ARG:0)
+
+IF !IS_COUNTRY(ARG:0) || !IS_COUNTRY(ARG:1)
+	THROW 请为0号参数和1号参数分别指定正确的势力号
+ENDIF
+
+FOR LOCAL:0, 0, MAX_COUNTRY
+	宗主国外交関係 = CHECK_COUNTRY_RELATION_F(ARG:1, LOCAL:0)
+	相手国君主 = GET_COUNTRY_BOSS(LOCAL:0)
+	IF 宗主国外交関係 == 1
+		;LOCAL:0がARG:1と停戦のとき
+		外交関係期間 = TMP_COUNTRY_RELATION_TERM:(ARG:1):(LOCAL:0)
+		PRINTFORML %ANAME(従属国君主)%,%ANAME(宗主国君主)%与%ANAME(相手国君主)%停战了
+		CALL INIT_CEASEFIRE(ARG:0, LOCAL:0, 外交関係期間) 
+	ELSEIF 宗主国外交関係 == 2
+		;LOCAL:0がARG:1と連合のとき,停戦条約締結
+		外交関係期間 = TMP_COUNTRY_RELATION_TERM:(ARG:1):(LOCAL:0)
+		PRINTFORML %ANAME(従属国君主)%,%ANAME(宗主国君主)%的联合与%ANAME(相手国君主)%停战了
+		CALL INIT_CEASEFIRE(ARG:0, LOCAL:0, 外交関係期間) 
+	ELSEIF 宗主国外交関係 == 3
+		;LOCAL:0がARG:1と同盟のとき
+		外交関係期間 = TMP_COUNTRY_RELATION_TERM:(ARG:1):(LOCAL:0)
+		PRINTFORML %ANAME(従属国君主)%,%ANAME(宗主国君主)%的同盟与%ANAME(相手国君主)%结成了同盟
+		CALL INIT_ALLIANCE(ARG:0, LOCAL:0, 外交関係期間)
+	ELSEIF 宗主国外交関係 == 4
+		;LOCAL:0がARG:1と永久同盟のとき
+		;本来宗主国の永久同盟国は既に宗主国と連邦を形成しているはずだが念のため
+		PRINTFORML %ANAME(従属国君主)%,%ANAME(宗主国君主)%的永久同盟，与%ANAME(相手国君主)%结成了永久同盟
+		CALL INIT_ALLIANCE(ARG:0, LOCAL:0, 9999)
+	ENDIF
+NEXT
+
+;-------------------------------------------------
+;辺境伯または植民地であるARG:0をその宗主国ARG:1から独立させ永久同盟とする条約を成立させる関数
+;成功したら1 失敗したら0
+;-------------------------------------------------
+@INIT_Protectorate_Independence(ARG:0, ARG:1)
+#DIM 宗主国君主
+#DIM 従属国君主
+
+宗主国君主 = GET_COUNTRY_BOSS(ARG:1)
+従属国君主 = GET_COUNTRY_BOSS(ARG:0)
+
+IF !IS_COUNTRY(ARG:0) || !IS_COUNTRY(ARG:1)
+	THROW 请为0号参数和1号参数分别指定正确的势力号
+ENDIF
+
+;従属関係を検索
+SELECTCASE COUNTRY_Protectorate:(ARG:0)
+	;辺境伯の場合
+	CASE 2
+		FOR LOCAL:0, 0, MAX_TREATY_M
+			IF TREATY_M_COUNTRY:(LOCAL:0):0:0 == ARG:0
+				IF TREATY_M_COUNTRY:(LOCAL:0):1:1 == ARG:1
+					COUNTRY_Protectorate:(ARG:0) = 0
+					COUNTRY_Protectorate:(ARG:1) = 0
+					TREATY_M_COUNTRY:(LOCAL:0):0:0 = 0
+					TREATY_M_COUNTRY:(LOCAL:0):1:1 = 0
+					IS_TREATY_M:(LOCAL:0) = 0
+					
+					COUNTRY_Protectorate_REFERENCE:(ARG:0):0 = 0
+					COUNTRY_Protectorate_REFERENCE:(ARG:0):1 = 0
+					COUNTRY_Protectorate_REFERENCE:(ARG:0):2 = 0
+					
+					; 関係マップの更新
+					TMP_COUNTRY_RELATION:(ARG:0):(ARG:1) = 4
+					TMP_COUNTRY_RELATION:(ARG:1):(ARG:0) = 4
+					TMP_COUNTRY_RELATION_TERM:(ARG:0):(ARG:1) = 9999
+					TMP_COUNTRY_RELATION_TERM:(ARG:1):(ARG:0) = 9999
+					
+					CALL INIT_ALLIANCE(ARG:0, ARG:1, 9999)
+					
+					;辺境伯君主を辺境伯国の所属とする
+					CFLAG:従属国君主:所属 = ARG:0
+					PRINTFORML %ANAME(従属国君主)%回到了%ANAME(従属国君主)%势力的阵营
+					
+					RETURN 1
+				ENDIF
+			ENDIF
+		NEXT
+	;植民地の場合
+	CASE 3
+		FOR LOCAL:0, 0, MAX_TREATY_CO
+			IF TREATY_CO_COUNTRY:(LOCAL:0):0:0 == ARG:0
+				IF TREATY_CO_COUNTRY:(LOCAL:0):1:1 == ARG:1
+					COUNTRY_Protectorate:(ARG:0) = 0
+					COUNTRY_Protectorate:(ARG:1) = 0
+					TREATY_CO_COUNTRY:(LOCAL:0):0:0 = 0
+					TREATY_CO_COUNTRY:(LOCAL:0):1:1 = 0
+					IS_TREATY_CO:(LOCAL:0) = 0
+					
+					COUNTRY_Protectorate_REFERENCE:(ARG:0):0 = 0
+					COUNTRY_Protectorate_REFERENCE:(ARG:0):1 = 0
+					COUNTRY_Protectorate_REFERENCE:(ARG:0):2 = 0
+					
+					; 関係マップの更新
+					TMP_COUNTRY_RELATION:(ARG:0):(ARG:1) = 4
+					TMP_COUNTRY_RELATION:(ARG:1):(ARG:0) = 4
+					TMP_COUNTRY_RELATION_TERM:(ARG:0):(ARG:1) = 9999
+					TMP_COUNTRY_RELATION_TERM:(ARG:1):(ARG:0) = 9999
+					
+					CALL INIT_ALLIANCE(ARG:0, ARG:1, 9999)
+					
+					PRINTFORML %ANAME(従属国君主)%势力与%ANAME(宗主国君主)%势力缔结了永久同盟
+					
+					RETURN 1
+				ENDIF
+			ENDIF
+		NEXT
+	;傀儡国の場合
+	CASE 4
+		FOR LOCAL:0, 0, MAX_TREATY_P
+			IF TREATY_P_COUNTRY:(LOCAL:0):0:0 == ARG:0
+				IF TREATY_P_COUNTRY:(LOCAL:0):1:1 == ARG:1
+					COUNTRY_Protectorate:(ARG:0) = 0
+					COUNTRY_Protectorate:(ARG:1) = 0
+					TREATY_P_COUNTRY:(LOCAL:0):0:0 = 0
+					TREATY_P_COUNTRY:(LOCAL:0):1:1 = 0
+					IS_TREATY_P:(LOCAL:0) = 0
+					
+					COUNTRY_Protectorate_REFERENCE:(ARG:0):0 = 0
+					COUNTRY_Protectorate_REFERENCE:(ARG:0):1 = 0
+					COUNTRY_Protectorate_REFERENCE:(ARG:0):2 = 0
+					
+					; 関係マップの更新
+					TMP_COUNTRY_RELATION:(ARG:0):(ARG:1) = 4
+					TMP_COUNTRY_RELATION:(ARG:1):(ARG:0) = 4
+					TMP_COUNTRY_RELATION_TERM:(ARG:0):(ARG:1) = 9999
+					TMP_COUNTRY_RELATION_TERM:(ARG:1):(ARG:0) = 9999
+					
+					CALL INIT_ALLIANCE(ARG:0, ARG:1, 9999)
+					
+					PRINTFORML %ANAME(従属国君主)%势力与%ANAME(宗主国君主)%势力缔结了永久同盟
+					
+					RETURN 1
+				ENDIF
+			ENDIF
+		NEXT
+ENDSELECT
+
+CALL CHECK_NON_Protectorate(ARG:1)
+
+RETURN 0
+
+;-------------------------------------------------
+;傀儡国または植民地であるARG:0をその宗主国ARG:1に統合させる関数
+;成功したら1 失敗したら0
+;-------------------------------------------------
+@INIT_Protectorate_Integrate(ARG:0, ARG:1)
+#DIM 宗主国君主
+#DIM 従属国君主
+
+宗主国君主 = GET_COUNTRY_BOSS(ARG:1)
+従属国君主 = GET_COUNTRY_BOSS(ARG:0)
+
+IF !IS_COUNTRY(ARG:0) || !IS_COUNTRY(ARG:1)
+	THROW 请为0号参数和1号参数分别指定正确的势力号
+ENDIF
+
+;兵数の移動
+CALL CLEAR_ALL_UNIT(ARG:0)
+COUNTRY_SOLDIER:(ARG:1) += COUNTRY_SOLDIER:(ARG:0)
+COUNTRY_SOLDIER:(ARG:0) = 0
+
+;領地の接収
+PRINTL 
+SETCOLOR カラー_注意
+PRINTFORML %ANAME(従属国君主)%的城市变成了%ANAME(宗主国君主)%的领地
+RESETCOLOR
+FOR LOCAL:0, 0, MAX_CITY
+	IF CITY_OWNER:(LOCAL:0) == ARG:0
+		CITY_OWNER:(LOCAL:0) = ARG:1
+		PRINTFORML %GET_CITYNAME(LOCAL:0)%被%ANAME(宗主国君主)%所支配了
+	ENDIF
+NEXT
+WAIT
+
+PRINTL 
+PRINTFORMW %ANAME(従属国君主)%军的士兵加入了我们的军队
+
+;まずCFLAG:1700が立っている士官から処理
+;傀儡士官を自動で登用
+IF CONFIG:303 == 0
+	;傀儡士官の組み込み
+	PRINTL 
+	FOR LOCAL:0, 0, CHARANUM
+		IF CFLAG:(LOCAL:0):所属 == ARG:0 && CFLAG:(LOCAL:0):1700 == 1
+			IF !CFLAG:(LOCAL:0):捕虜先 || CFLAG:(LOCAL:0):捕虜先 == ARG:1
+				CALL CHANGE_COUNTRY(LOCAL:0, ARG:1, 1)
+				CFLAG:(LOCAL:0):1700 = 0
+				PRINTFORML 登用了%ANAME(LOCAL:0)%
+			ELSE
+				CALL CHANGE_COUNTRY(LOCAL:0, ARG:1)
+				CFLAG:(LOCAL:0):1700 = 0
+				SETCOLOR カラー_シアン
+				PRINTFORML %ANAME(LOCAL:0)%被%ANAME(GET_COUNTRY_BOSS(CFLAG:(LOCAL:0):捕虜先))%囚禁了
+				RESETCOLOR
+			ENDIF
+		ENDIF
+	NEXT
+	WAIT
+
+;傀儡士官を自動で投獄
+ELSEIF CONFIG:303 == 1
+	;傀儡士官の組み込み
+	PRINTL 
+	FOR LOCAL:0, 0, CHARANUM
+		IF CFLAG:(LOCAL:0):所属 == ARG:0 && CFLAG:(LOCAL:0):1700 == 1
+			IF !CFLAG:(LOCAL:0):捕虜先 || CFLAG:(LOCAL:0):捕虜先 == ARG:1
+				CALL CHANGE_COUNTRY(LOCAL:0, 0, 1)
+				CALL CAPTURE(LOCAL:0, ARG:1)
+				CFLAG:(LOCAL:0):1700 = 0
+				PRINTFORML %ANAME(LOCAL:0)%被投入了监狱
+			ELSE
+				CALL CHANGE_COUNTRY(LOCAL:0, ARG:1)
+				CFLAG:(LOCAL:0):1700 = 0
+				SETCOLOR カラー_シアン
+				PRINTFORML %ANAME(LOCAL:0)%被%ANAME(GET_COUNTRY_BOSS(CFLAG:(LOCAL:0):捕虜先))%囚禁了
+				RESETCOLOR
+			ENDIF
+		ENDIF
+	NEXT
+	WAIT
+
+;手動で選択
+ELSE
+	FOR LOCAL:0, 0, CHARANUM
+		IF CFLAG:(LOCAL:0):所属 == ARG:0 && CFLAG:(LOCAL:0):1700 == 1
+			CALL INIT_Protectorate_Integrate_SET_TREATMENT(ARG:0, ARG:1)
+			BREAK
+		ENDIF
+	NEXT
+ENDIF
+IF CFLAG:従属国君主:1700 == 1
+	CALL CHANGE_COUNTRY(従属国君主, 0, 1)
+	CALL CAPTURE(従属国君主, ARG:1)
+	CFLAG:従属国君主:1700 = 0
+	PRINTFORML %ANAME(従属国君主)%被投入了监狱
+ENDIF
+
+;士官の組み込み
+PRINTL 
+SETCOLOR カラー_注意
+PRINTFORML 侍奉%ANAME(従属国君主)%的士官被编入了%ANAME(宗主国君主)%势力的阵营
+RESETCOLOR
+FOR LOCAL:0, 0, CHARANUM
+	IF CFLAG:(LOCAL:0):所属 == ARG:0
+		IF !CFLAG:(LOCAL:0):捕虜先 || CFLAG:(LOCAL:0):捕虜先 == ARG:1
+			CALL CHANGE_COUNTRY(LOCAL:0, ARG:1, 1)
+			PRINTFORML %ANAME(LOCAL:0)%被登用了
+		ELSE
+			CALL CHANGE_COUNTRY(LOCAL:0, ARG:1)
+			SETCOLOR カラー_シアン
+			PRINTFORML %ANAME(LOCAL:0)%被%ANAME(GET_COUNTRY_BOSS(CFLAG:(LOCAL:0):捕虜先))%囚禁了
+			RESETCOLOR
+		ENDIF
+	ENDIF
+NEXT
+WAIT
+
+;ARG:0勢力の捕虜となっていたキャラの処理
+;ARG:0勢力が捕虜持ってるか
+IF CMATCH(CFLAG:捕虜先, ARG:0)
+	PRINTL
+	LOCAL:2 = 0
+	FOR LOCAL:0, 0, CHARANUM
+		IF CFLAG:(LOCAL:0):捕虜先 == ARG:0
+			;自陣営の士官なら、そのまま元に戻る
+			IF CFLAG:(LOCAL:0):所属 == ARG:1
+				CALL CAPTURE(LOCAL:0, 0)
+				SETCOLOR カラー_注意
+				PRINTFORML 被%ANAME(従属国君主)%势力所囚禁的%ANAME(LOCAL:0)%回到了%ANAME(宗主国君主)%势力
+				RESETCOLOR
+				LOCAL:2 = 1
+			ENDIF
+		ENDIF
+	NEXT
+	IF LOCAL:2
+		WAIT
+	ENDIF
+	PRINTL
+	PRINTFORMW %ANAME(従属国君主)%的俘虏，今后由%ANAME(宗主国君主)%进行管理
+	FOR LOCAL:0, 0, CHARANUM
+		IF CFLAG:(LOCAL:0):捕虜先 == ARG:0
+			;第三勢力の士官なら、投獄
+			CALL CAPTURE(LOCAL:0, ARG:1)
+			CFLAG:(LOCAL:0):1700 = 0
+			PRINTFORML %ANAME(LOCAL:0)%被投入了监狱
+		ENDIF
+	NEXT
+ENDIF
+
+;従属国簡易変数参考のリセット
+COUNTRY_Protectorate_REFERENCE:(ARG:0):0 = 0
+COUNTRY_Protectorate_REFERENCE:(ARG:0):1 = 0
+COUNTRY_Protectorate_REFERENCE:(ARG:0):2 = 0
+
+;旧勢力の後始末
+CALL DESTROY_COUNTRY(ARG:0)
+
+CALL CHECK_NON_Protectorate(ARG:1)
+
+RETURN 1
+
+;-------------------------------------------------
+;統合された勢力のCFLAG:1700が立っている士官の処遇を個別に設定 ARG:0=統合された勢力 ARG:1=統合した勢力
+;-------------------------------------------------
+@INIT_Protectorate_Integrate_SET_TREATMENT(ARG:0, ARG:1)
+;キャラの扱い設定用変数
+#DIM COMMANDER_NUM
+Integrate_Suzerainty = ARG:1
+Integrate_Protectorate = ARG:0
+
+;●士官の人数+捕虜の人数をカウント
+COMMANDER_NUM = GET_COMMANDER_NUM(ARG:0)
+
+;士官が一人もいなければ戻る
+IF COMMANDER_NUM == 0
+	;DEBUGPRINTFORML {ARG:0}番号の%ANAME(GET_COUNTRY_BOSS(ARG:0))%勢力に士官が誰もいませんでした
+	RETURN
+ENDIF
+
+CALL SINGLE_DRAWLINE
+PRINTFORML 侍奉%ANAME(GET_COUNTRY_BOSS(ARG:0))%的傀儡士官中，请选择要登用的士官
+CALL SINGLE_DRAWLINE
+
+CALL SELECT_CHARA_LIST_MULTI_ONLY_LOGIC_SLG(-1, "Integrate_SET_TREATMENT", "Integrate_SET_TREATMENT")
+
+FOR LOCAL, 0, SELECTED_CHARA_NUM
+	LOCAL:1 = SELECTED_CHARA:(LOCAL)
+	CALL CHANGE_COUNTRY(LOCAL:1, ARG:1)
+	CFLAG:(LOCAL:0):1700 = 0
+	PRINTFORML %ANAME(LOCAL:1)%被登用了
+NEXT
+
+CALL SINGLE_DRAWLINE
+PRINTFORML 侍奉%ANAME(GET_COUNTRY_BOSS(ARG:0))%的傀儡士官中，请选择要投狱的士官
+CALL SINGLE_DRAWLINE
+
+CALL SELECT_CHARA_LIST_MULTI_ONLY_LOGIC_SLG(-1, "Integrate_SET_TREATMENT", "Integrate_SET_TREATMENT")
+
+FOR LOCAL, 0, SELECTED_CHARA_NUM
+	LOCAL:1 = SELECTED_CHARA:(LOCAL)
+	CALL CAPTURE(LOCAL:1, ARG:1)
+	CFLAG:(LOCAL:0):1700 = 0
+	PRINTFORML %ANAME(LOCAL:1)%被投入了监狱
+NEXT
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_Integrate_SET_TREATMENT(対象)
+#DIM 対象
+RETURN CFLAG:対象:所属 == Integrate_Protectorate && !IS_SP_CHARA(対象) && CFLAG:(LOCAL:0):1700 == 1
+
+@SELECT_CHARA_LIST_SELECT_LOGIC_Integrate_SET_TREATMENT(対象)
+#DIM 対象
+RETURN CFLAG:対象:捕虜先 == 0 || CFLAG:対象:捕虜先 == Integrate_Suzerainty
+
+;-------------------------------------------------
+;従属国であるARG:0をその宗主国ARG:1から独立させる関数
+;成功したら1 失敗したら0
+;-------------------------------------------------
+@INIT_Protectorate_RENOUNCE(ARG:0, ARG:1)
+#DIM 宗主国君主
+#DIM 従属国君主
+
+宗主国君主 = GET_COUNTRY_BOSS(ARG:1)
+従属国君主 = GET_COUNTRY_BOSS(ARG:0)
+
+IF !IS_COUNTRY(ARG:0) || !IS_COUNTRY(ARG:1)
+	THROW 引数0番と1番にはそれぞれ正しい勢力番号を指定してください
+ENDIF
+
+;従属関係を検索
+SELECTCASE COUNTRY_Protectorate:(ARG:0)
+	;辺境伯の場合
+	CASE 2
+		FOR LOCAL:0, 0, MAX_TREATY_M
+			IF TREATY_M_COUNTRY:(LOCAL:0):0:0 == ARG:0 && TREATY_M_COUNTRY:(LOCAL:0):1:1 == ARG:1
+				COUNTRY_Protectorate:(ARG:0) = 0
+				COUNTRY_Protectorate:(ARG:1) = 0
+				TREATY_M_COUNTRY:(LOCAL:0):0:0 = 0
+				TREATY_M_COUNTRY:(LOCAL:0):1:1 = 0
+				IS_TREATY_M:(LOCAL:0) = 0
+					
+				COUNTRY_Protectorate_REFERENCE:(ARG:0):0 = 0
+				COUNTRY_Protectorate_REFERENCE:(ARG:0):1 = 0
+				COUNTRY_Protectorate_REFERENCE:(ARG:0):2 = 0
+				
+				; 関係マップの更新
+				TMP_COUNTRY_RELATION:(ARG:0):(ARG:1) = 0
+				TMP_COUNTRY_RELATION:(ARG:1):(ARG:0) = 0
+				TMP_COUNTRY_RELATION_TERM:(ARG:0):(ARG:1) = 0
+				TMP_COUNTRY_RELATION_TERM:(ARG:1):(ARG:0) = 0
+				
+				
+				;辺境伯君主を辺境伯国の所属とする
+				CFLAG:従属国君主:所属 = ARG:0
+				PRINTFORML %ANAME(従属国君主)%回到了%ANAME(従属国君主)%所属的势力
+				;TranslatedMark %ANAME(従属国君主)%は%ANAME(従属国君主)%勢力の所属に戻りました
+				
+				RETURN 1
+			ENDIF
+		NEXT
+	;植民地の場合
+	CASE 3
+		FOR LOCAL:0, 0, MAX_TREATY_CO
+			IF TREATY_CO_COUNTRY:(LOCAL:0):0:0 == ARG:0 && TREATY_CO_COUNTRY:(LOCAL:0):1:1 == ARG:1
+				COUNTRY_Protectorate:(ARG:0) = 0
+				COUNTRY_Protectorate:(ARG:1) = 0
+				TREATY_CO_COUNTRY:(LOCAL:0):0:0 = 0
+				TREATY_CO_COUNTRY:(LOCAL:0):1:1 = 0
+				IS_TREATY_CO:(LOCAL:0) = 0
+					
+				COUNTRY_Protectorate_REFERENCE:(ARG:0):0 = 0
+				COUNTRY_Protectorate_REFERENCE:(ARG:0):1 = 0
+				COUNTRY_Protectorate_REFERENCE:(ARG:0):2 = 0
+				
+				; 関係マップの更新
+				TMP_COUNTRY_RELATION:(ARG:0):(ARG:1) = 0
+				TMP_COUNTRY_RELATION:(ARG:1):(ARG:0) = 0
+				TMP_COUNTRY_RELATION_TERM:(ARG:0):(ARG:1) = 0
+				TMP_COUNTRY_RELATION_TERM:(ARG:1):(ARG:0) = 0
+				
+				
+				PRINTFORML %ANAME(従属国君主)%势力从%ANAME(宗主国君主)%势力独立了
+				;TranslatedMark %ANAME(従属国君主)%勢力は%ANAME(宗主国君主)%勢力から独立しました
+				
+				RETURN 1
+			ENDIF
+		NEXT
+	;傀儡国の場合
+	CASE 4
+		FOR LOCAL:0, 0, MAX_TREATY_P
+			IF TREATY_P_COUNTRY:(LOCAL:0):0:0 == ARG:0 && TREATY_P_COUNTRY:(LOCAL:0):1:1 == ARG:1
+				COUNTRY_Protectorate:(ARG:0) = 0
+				COUNTRY_Protectorate:(ARG:1) = 0
+				TREATY_P_COUNTRY:(LOCAL:0):0:0 = 0
+				TREATY_P_COUNTRY:(LOCAL:0):1:1 = 0
+				IS_TREATY_P:(LOCAL:0) = 0
+					
+				COUNTRY_Protectorate_REFERENCE:(ARG:0):0 = 0
+				COUNTRY_Protectorate_REFERENCE:(ARG:0):1 = 0
+				COUNTRY_Protectorate_REFERENCE:(ARG:0):2 = 0
+				
+				; 関係マップの更新
+				TMP_COUNTRY_RELATION:(ARG:0):(ARG:1) = 0
+				TMP_COUNTRY_RELATION:(ARG:1):(ARG:0) = 0
+				TMP_COUNTRY_RELATION_TERM:(ARG:0):(ARG:1) = 0
+				TMP_COUNTRY_RELATION_TERM:(ARG:1):(ARG:0) = 0
+				
+				CFLAG:従属国君主:1700 = 0
+				
+				PRINTFORML %ANAME(従属国君主)%势力从%ANAME(宗主国君主)%势力独立了
+				;TranslatedMark %ANAME(従属国君主)%勢力と%ANAME(宗主国君主)%勢力から独立しました
+				
+				RETURN 1
+			ENDIF
+		NEXT
+ENDSELECT
+
+CALL CHECK_NON_Protectorate(ARG:1)
+
+RETURN 0
+
+;-------------------------------------------------
+;ARG:0の従属国をARG:1の植民地に変更する関数
+;-------------------------------------------------
+@INIT_Protectorate_Asset_Purchase(譲渡勢力, 譲受勢力)
+#DIM 譲渡勢力
+#DIM 譲受勢力
+#DIM 譲渡連邦ナンバー
+#DIM 譲受連邦ナンバー
+#DIM 対象従属国
+
+;譲受勢力の所属連邦を検索
+FOR LOCAL:0, 0, MAX_COUNTRY
+	FOR LOCAL:1, 0, MAX_COUNTRY
+		IF TREATY_UNI_COUNTRY:(LOCAL:0):(LOCAL:1):0 == 譲受勢力 || TREATY_UNI_COUNTRY:(LOCAL:0):(LOCAL:1):1 == 譲受勢力
+			譲受連邦ナンバー = LOCAL:0
+			BREAK
+		ENDIF
+	NEXT
+NEXT
+
+FOR LOCAL:0, 0, MAX_TREATY_M
+	IF TREATY_M_COUNTRY:(LOCAL:0):1:1 == 譲渡勢力 && TREATY_M_COUNTRY:(LOCAL:0):0:0 >= 1
+		対象従属国 = TREATY_M_COUNTRY:(LOCAL:0):0:0
+		CALL INIT_Protectorate_RENOUNCE(対象従属国, 譲渡勢力)
+		CALL INIT_Union_RENOUNCE(対象従属国)
+		CALL INIT_Colony(対象従属国, 譲受勢力)
+	ELSEIF TREATY_CO_COUNTRY:(LOCAL:0):1:1 == 譲渡勢力 && TREATY_CO_COUNTRY:(LOCAL:0):0:0 >= 1
+		対象従属国 = TREATY_CO_COUNTRY:(LOCAL:0):0:0
+		CALL INIT_Protectorate_RENOUNCE(対象従属国, 譲渡勢力)
+		CALL INIT_Union_RENOUNCE(対象従属国)
+		CALL INIT_Colony(対象従属国, 譲受勢力)
+		IF 対象従属国 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_サキュバス))
+			IS_SP_COUNTRY_IN_UNION:譲受連邦ナンバー:6 = 1
+		ELSEIF 対象従属国 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン)
+			IS_SP_COUNTRY_IN_UNION:譲受連邦ナンバー:2 = 1
+		ELSEIF 対象従属国 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_外来人)
+			PRINTFORML %ANAME(GET_COUNTRY_BOSS(譲受勢力))%势力和外来人缔结了研究协定
+			;TranslatedMark %ANAME(GET_COUNTRY_BOSS(譲受勢力))%勢力は外来人達と研究協定を結びました
+			IS_SP_COUNTRY_IN_UNION:譲受連邦ナンバー:3 = 1
+			IS_RESEARCH_AGREEMENT_WITH_SP:譲受勢力 = 1
+		ENDIF
+	ELSEIF TREATY_P_COUNTRY:(LOCAL:0):1:1 == 譲渡勢力 && TREATY_P_COUNTRY:(LOCAL:0):0:0 >= 1
+		対象従属国 = TREATY_P_COUNTRY:(LOCAL:0):0:0
+		CALL INIT_Protectorate_RENOUNCE(対象従属国, 譲渡勢力)
+		CALL INIT_Union_RENOUNCE(対象従属国)
+		
+		IF 対象従属国 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_触手)
+			CALL INIT_Pupet(対象従属国, 譲受勢力)
+			IS_SP_COUNTRY_IN_UNION:譲受連邦ナンバー:4 = 1
+			RESEARCH_UNIVERSITY_CAN_KNOWLEDGE_SP:譲受勢力:5 = 1
+			PRINTFORML %ANAME(GET_COUNTRY_BOSS(譲受勢力))%势力研究了「触手·信标」，建造了特殊区划
+			;TranslatedMark %ANAME(GET_COUNTRY_BOSS(譲受勢力))%勢力は「テンタクル・ビーコン」を研究し、特殊区画に建造しました
+		ELSE
+			CALL INIT_Colony(対象従属国, 譲受勢力)
+		ENDIF
+	ENDIF
+NEXT
+
+CALL CHECK_NON_Protectorate(譲渡勢力)
+
+;-------------------------------------------------
+;宗主国であったARG:0に従属国が存在しない場合宗主国判定をリセット
+;-------------------------------------------------
+@CHECK_NON_Protectorate(ARG:0)
+
+SIF COUNTRY_Protectorate:(ARG:0) != 1
+	RETURN
+
+;ある勢力が従属国かつその宗主国がARG:0であるとき処理を中止
+FOR LOCAL:0, 0, MAX_COUNTRY
+	SIF COUNTRY_Protectorate_REFERENCE:(LOCAL:0):0 >= 2 && COUNTRY_Protectorate_REFERENCE:(LOCAL:0):2 == ARG:0
+		RETURN
+NEXT
+
+PRINTFORML %ANAME(GET_COUNTRY_BOSS(ARG:0))%势力不再是宗主国
+;宗主国判定をリセット
+COUNTRY_Protectorate:(ARG:0) = 0
+COUNTRY_Protectorate_REFERENCE:(ARG:0):0 = 0
+COUNTRY_Protectorate_REFERENCE:(ARG:0):1 = 0
+COUNTRY_Protectorate_REFERENCE:(ARG:0):2 = 0
+
+

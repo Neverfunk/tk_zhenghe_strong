@@ -1,0 +1,564 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_MY_DAUGHTER_RATE()
+RETURN 50
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_MY_DAUGHTER_DECISION()
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+;同勢力で捕虜でないあなたの娘がいる
+LOCAL:1 = 0
+FOR LOCAL:0, 0, CHARANUM
+	SIF (CFLAG:(LOCAL:0):所属 == CFLAG:MASTER:所属 && !CFLAG:(LOCAL:0):捕虜先) && (ID_TO_CHARA(CFLAG:(LOCAL:0):父親) == MASTER && CFLAG:(LOCAL:0):特殊状態 == 0 && CFLAG:(LOCAL:0):行動不能状態 == 0 && !IS_MALE(LOCAL:0))
+		LOCAL:1 ++
+NEXT
+SIF LOCAL:1 < 1
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_MY_DAUGHTER_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_MY_DAUGHTER_SETTARGET()
+
+;同勢力で捕虜でないあなたの娘からランダム、対象がいない場合はイベントキャンセル
+FOR LOCAL, 0, CHARANUM
+	IF (CFLAG:(LOCAL:0):所属 == CFLAG:MASTER:所属 && !CFLAG:(LOCAL:0):捕虜先) && (ID_TO_CHARA(CFLAG:(LOCAL:0):父親) == MASTER && CFLAG:(LOCAL:0):特殊状態 == 0 && CFLAG:(LOCAL:0):行動不能状態 == 0 && !IS_MALE(LOCAL:0))
+		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL 
+		DAILY_TARGET_NUM ++
+	ENDIF
+NEXT
+
+SIF DAILY_TARGET_NUM == 0
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_MY_DAUGHTER()
+#DIM 対象
+
+LOCAL = 0
+
+対象 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+
+CFLAG:対象:面識 = 1
+
+
+IF TALENT:対象:合意
+	;普通の恋人ックスルート。合意あり
+	PRINTFORML 夜深了、%ANAME(MASTER)%的房间好像来了客人…
+	PRINTFORML 打开门一看、原来是女儿%ANAME(対象)%，她只穿着一件睡衣站在门外
+	PRINTFORML %ANAME(対象)%眨着水汪汪的眼睛看着%ANAME(MASTER)%,她掀起裙摆、展示着自己暴露的秘穴、
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORML 浴火缠身的她渴求着来自%ANAME(MASTER)%的抚慰…
+		CASE 1
+			PRINTFORML 希望%ANAME(MASTER)%能用手好好地管教下这越来越放荡的肉体…
+		CASE 2
+			PRINTFORML 她要求%ANAME(MASTER)%负起责任好好地调教下她那想要得发疼的雌穴…
+	ENDSELECT 
+	PRINTFORML %ANAME(MASTER)%决定……
+	CALL ASK_YN("接受" ,"拒绝")
+	IF RESULT == 0
+		PRINTFORML "真是个不让人省心的孩子呢。"，一边这么想着的%ANAME(MASTER)%将女儿邀入屋内、并关上了门。
+		PRINTFORML %ANAME(MASTER)%温柔地训斥了渴求着自己的淫荡女儿、同时挖掘着雌穴的深处
+		PRINTFORML 感受着刺激的%ANAME(対象)%边用浪荡的声音倒着歉边扭动着腰肢…
+		PRINTFORMW %ANAME(MASTER)%抽出手指，拿着梆硬的鸡儿抵住女儿的小穴
+		PRINTFORML 
+		PRINTFORML %ANAME(対象)%毕恭毕敬地跪在地上、吸允着那让母亲怀孕的刚直，用嘴唇和舌头灵巧地侍奉着
+		PRINTFORML %ANAME(MASTER)%满足地看着那出色的女儿。毫不犹豫地抓着她的头，将肉棒往喉咙的深处送去
+		PRINTFORML %ANAME(対象)%虽然觉得痛苦，但还是回应着%ANAME(MASTER)%的期待、收缩起喉咙来刺激肉棒射精
+		PRINTFORML 欣赏着女儿淫荡侍奉的身姿、%ANAME(MASTER)%感到了背德的快感、
+		PRINTFORML 精液在%ANAME(対象)%的口中肆意挥洒
+		PRINTFORML %ANAME(対象)%接着精液、咕嘟咕嘟地喝了下去、还张开嘴让%ANAME(MASTER)%检查自己的口腔
+		PRINTFORMW 被抚摸着脑袋的%ANAME(対象)%愉快地眯起了眼睛…
+		PRINTFORML 
+		PRINTFORML 当然，只做是程度的话并不足以平息两人的欲火
+		PRINTFORML %ANAME(MASTER)%将%ANAME(対象)%抱到床上，慢慢地爬上了她的身体
+		PRINTFORML 渴求着的%ANAME(対象)%主动用手指撑开秘穴、将那淫靡的肉壁完全暴露在%ANAME(MASTER)%的眼前
+		PRINTFORML %ANAME(MASTER)%回应着女儿的肉欲，将勃起的性器缓慢地沉入她的深处
+		PRINTFORMW …
+		PRINTFORML 
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 跨坐在%ANAME(MASTER)%身上的%ANAME(対象)%，浪叫着、扭动着…
+				PRINTFORML 蠢蠢欲动的小穴适应着肉棒的形状，贪婪地吞吐着
+				PRINTFORML 预感到了大喷发的到来的%ANAME(対象)%躲入%ANAME(MASTER)%的胸膛，扭动着腰肢的姿态宛若乞求子孙的舞蹈
+				PRINTFORML 见到女儿这幅可人模样的%ANAME(MASTER)%抓着屁股猛地一顶，在最深处爆发着
+				PRINTFORML 沸腾的白浊冲刷着子宫，%ANAME(対象)%的眼前仿佛已经能够看到怀上了父亲孩子的未来
+			CASE 1
+				PRINTFORML %ANAME(対象)%被粗暴地要求以手支墙、伸出屁股
+				PRINTFORML 虽也觉得害羞，但肉棒的三过家门而不入已然让她忍无可忍
+				PRINTFORML 「父亲请用肉棒狠狠地女儿淫乱的雌穴，对其加以管教吧♥」
+				PRINTFORML 看到淫荡的女儿，%ANAME(MASTER)%颤抖着把肉棒插了进去
+				PRINTFORML 被一口气贯穿到最深处的%ANAME(対象)%发出了野兽般的喘息声，身体阵阵发抖、激烈地高潮着……
+			CASE 2
+				PRINTFORML 两人激烈地交合、纠缠在一起，那狂野的气势好似要碾碎子宫才罢休
+				PRINTFORML 感受着在小穴内横冲直撞的肉棒，%ANAME(対象)%发出了无声的呜咽
+				PRINTFORML 小穴虽然被当做飞机杯似地粗暴对待，却还是元气十足地迎着肉棒吞吐着
+				PRINTFORML 被缓缓地侵犯着子宫口的%ANAME(対象)%抱紧%ANAME(MASTER)%，用那口齿不清的声音乞求着中出
+				PRINTFORML 赤裸的两人就这么抱作一团，那浓烈的精液如烟火般照耀着子宫的每一个角落…
+			ENDSELECT 
+		PRINTFORMW …
+		PRINTFORML 
+		PRINTFORML 两人就这么交合着……
+		PRINTFORML 随着爱情的欲望，%ANAME(対象)%贪婪地吸食着父亲的身体
+		PRINTFORMW 在相互渴求着的两人面前，血缘的束缚仿佛毫无意义……
+		PRINTFORML 
+		CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+		CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴")
+		CFLAG:対象:好感度 += 300
+		CFLAG:対象:従属度 += 100
+		CFLAG:対象:依存度 += 100
+	ELSEIF RESULT == 1
+		PRINTFORML %ANAME(MASTER)%以太晚了为由让女儿回自己房间
+		PRINTFORML %ANAME(対象)%似乎有些不满，但还是乖乖地听了话
+	ENDIF
+	PRINTFORMW 
+	RETURN 1
+	
+ELSEIF CFLAG:対象:好感度 < 2500
+	;普通の夜会話ルート。好感度が一定値以下(恋慕ありであっても)
+	PRINTFORML 夜深了、%ANAME(MASTER)%的房间好像来了客人…
+	PRINTFORML 打开门一看、门外是睡不着来闲聊的%ANAME(対象)%
+	PRINTFORML %ANAME(MASTER)%把女儿请进了房间
+	PRINTFORMW …
+	PRINTFORML 
+	SELECTCASE RAND:6
+		CASE 0
+			PRINTFORML %ANAME(対象)%问了不少关于战斗方面的问题
+			PRINTFORML 打铁趁热，两人去练兵场进行了练习，度过了充实的时间…
+			CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:10 + 1, 1)
+			CALL TRAIN_AUTO_ABLUP
+		CASE 1
+			PRINTFORML %ANAME(対象)%问了不少关于守护据点的问题
+			PRINTFORML %ANAME(MASTER)%使用模型向%ANAME(対象)%讲解了防卫据点的心得…
+			CALL PRINT_ADD_EXP(対象, "防衛経験値", RAND:10 + 1, 1)
+			CALL TRAIN_AUTO_ABLUP
+		CASE 2
+			PRINTFORML %ANAME(MASTER)%和%ANAME(対象)%决定下象棋
+			PRINTFORML 通过比赛，%ANAME(対象)%似乎加深了对智谋的理解…
+			CALL PRINT_ADD_EXP(対象, "知略経験値", RAND:10 + 1, 1)
+			CALL TRAIN_AUTO_ABLUP
+		CASE 3
+			PRINTFORML 同%ANAME(対象)%谈论了最近的市井情况
+			PRINTFORML 通过对话，%ANAME(対象)%似乎加深了对政治的理解…
+			CALL PRINT_ADD_EXP(対象, "政治経験値", RAND:10 + 1, 1)
+			CALL TRAIN_AUTO_ABLUP
+		CASE 4
+			PRINTFORML %ANAME(MASTER)%邀请%ANAME(対象)%离开据点，来到了深夜的美食街
+			PRINTFORML 在秘密的夜游中品尝珍馐，两人都兴高采烈，唇齿留香…
+			CALL PRINT_ADD_EXP(対象, "料理経験値", RAND:10 + 1, 1)
+			CALL TRAIN_AUTO_ABLUP
+		CASE 5
+			PRINTFORML %ANAME(MASTER)%和%ANAME(対象)%谈到了最近在市井里流行的流行歌曲
+			PRINTFORML 正值青春期的女儿似乎很喜欢这话题，喋喋不休
+			CALL PRINT_ADD_EXP(対象, "歌唱経験値", RAND:10 + 1, 1)
+			CALL TRAIN_AUTO_ABLUP
+	ENDSELECT 
+	
+	IF IS_LOVER(対象)
+		PRINTFORML %ANAME(対象)%热切地望着%ANAME(MASTER)%…
+		CFLAG:対象:好感度 += 200
+		CFLAG:対象:依存度 += 100
+		ELSE
+		CFLAG:対象:好感度 += 100
+		CFLAG:対象:依存度 += 50
+	ENDIF
+	PRINTFORMW 
+	RETURN 1
+ENDIF
+
+;ここに来るのは好感度一定以上かつ合意なし
+;通常は恋慕取得済みであることを想定する
+;好感度だけ高く依存度が低い場合は恋慕なしでも通るかもしれないがそれも一応許容する
+
+;前段：ルート決定
+
+IF ABL:対象:性知識 == 0
+	;無知ルート
+	PRINTFORML 夜深了、%ANAME(MASTER)%的房间好像来了客人…
+	PRINTFORML 打开门一看、%ANAME(対象)%孤零零地站在那里
+	PRINTFORML 仔细一看，她的脸颊像熟透的苹果般通红，而凝视着%ANAME(MASTER)%的明眸如露珠般闪耀
+	PRINTFORMW %ANAME(対象)%坦白道，最近总是想着父亲的事无法入眠
+	PRINTFORML 
+	PRINTFORML 看这样的女儿，%ANAME(MASTER)%的胸口和下腹都难受了起来
+	PRINTFORML 而且每每如此，醒来时私处都会变湿……
+	PRINTFORML 没有性知识的%ANAME(対象)%并不理解发生了什么，认为自己得了可怕的疾病
+	PRINTFORML 可怜可爱的%ANAME(対象)%似乎下一秒就会哭出来似的…
+	PRINTFORML %ANAME(MASTER)%决定……
+	CALL ASK_YN("伸出手" ,"敷衍她")
+	IF RESULT == 0
+		;後段へ
+		LOCAL = 1
+	ELSEIF RESULT == 1
+		PRINTFORML %ANAME(MASTER)%温柔地抱着%ANAME(対象)%，抚摸着她的头，告诉她这并不是生病，无需多虑
+		PRINTFORML 女儿渐渐地平静了下来、接受了先回房间的提议
+		PRINTFORML %ANAME(対象)%依依不舍地回到了自己的房间…
+		PRINTFORMW …
+		PRINTFORML 
+		PRINTFORML 但是，并不满足于%ANAME(MASTER)%给出的答复的%ANAME(対象)%似乎自行调查了很多…
+		ABL:対象:性知識 = 1
+		CFLAG:対象:好感度 += 300
+		CFLAG:対象:依存度 += 600
+		PRINTFORMW 
+		RETURN 1
+	ENDIF
+	
+ELSEIF CFLAG:対象:依存度 >= 3000 && (MAX(CFLAG:対象:好感度, CFLAG:対象:従属度) <= CFLAG:対象:依存度 * 3)
+	;ヤンデレルート
+	PRINTFORML 深夜、%ANAME(MASTER)%从睡梦中醒来…
+	PRINTFORML 不知怎么，感觉身上有点重，挣扎時发现%ANAME(対象)%正骑在自己身上
+	PRINTFORML 而自己居然被绑在了床上！
+	PRINTFORML 注意到%ANAME(MASTER)%苏醒的%ANAME(対象)%，露出了和蔼得渗人的微笑
+	PRINTFORMW 那表情仿佛是责弄猎物的捕食者，眼中闪烁着危险的光芒…
+	PRINTFORML 
+	PRINTFORML %ANAME(対象)%把脸颊贴在冷汗淋漓的%ANAME(MASTER)%的胸膛上，一遍又一遍地诉说着她对%ANAME(MASTER)%的思念…
+	PRINTFORML 耳畔的爱语是那么真挚，充斥着最原始最浓厚的情感，仿佛能灌耳入脑
+	PRINTFORML "亲人"的关系在%ANAME(対象)%的面前毫无意义，现在的她只是一只渴求着%ANAME(MASTER)%的雌性
+	PRINTFORML %ANAME(MASTER)%不容反抗，只能接受%ANAME(対象)%的想法…
+	PRINTFORMW …
+	PRINTFORML 
+	;後段へ
+	LOCAL = 2
+	
+ELSEIF CFLAG:対象:従属度 < 500
+	;逆夜這いルート
+	PRINTFORML 深夜、%ANAME(MASTER)%从睡梦中醒来…
+	PRINTFORML 不知怎么，感觉身上有点重，挣扎時发现%ANAME(対象)%正骑在自己身上
+	PRINTFORML 被发现的%ANAME(対象)%虽然露出了尴尬的表情，但仍然压在%ANAME(MASTER)%身上
+	PRINTFORMW 被质问来意的女儿用平静但强硬的语气回答着…
+	PRINTFORML 
+	PRINTFORML 原本只是寻常的亲子之爱……
+	PRINTFORML 不知何时起发酵为了爱恋之情
+	PRINTFORML 她苦恼着，徒劳地告诫自己这是不可为之事。但纸终究包不住火
+	PRINTFORML 就这样，她乘着夜色袭击了%ANAME(MASTER)%，希望可以一锤定音
+	PRINTFORML 虽然女儿的行为有些越界了，但必须要给予回应
+	PRINTFORML %ANAME(対象)%依然骑在身上，在自己答复之前是不会离开的吧
+	PRINTFORML %ANAME(MASTER)%决定……
+
+	CALL ASK_YN("接受" ,"反抗")
+	IF RESULT == 0
+		PRINTFORML 毕竟女儿苦恼的原因，正是自己暧昧的态度
+		PRINTFORML %ANAME(MASTER)%下定决心接受了女儿的思念，%ANAME(対象)%的脸上顿时绽放出了灿烂的笑容
+		PRINTFORML 只见%ANAME(対象)%缓缓地从%ANAME(MASTER)%身上滑下来，像小猫撒娇似地把脸在他身上蹭来蹭去
+		PRINTFORML %ANAME(MASTER)%苦笑着，思考起了今后该怎么与女儿相处…
+		CALL ASK_YN("温柔一点" ,"粗暴对待")
+		IF RESULT == 0
+			PRINTFORML 不管怎么说都是自己心爱的女儿,。第一次还是温柔点吧
+			PRINTFORML %ANAME(MASTER)%先让%ANAME(対象)%冷静下来，然后温柔地抱着肩膀把她放倒在床上
+			PRINTFORMW …
+			PRINTFORML 
+			;後段へ
+			LOCAL = 3
+		ELSEIF RESULT == 1
+			PRINTFORML 不管是什么原因，都有必要好好管教那些袭击家长的孩子
+			PRINTFORML %ANAME(MASTER)%抓着女儿的腰强行易位，粗暴地把她推倒在床上
+			PRINTFORMW …
+			PRINTFORML 
+			;後段へ
+			LOCAL = 4
+		ENDIF
+	ELSEIF RESULT == 1
+		PRINTFORML 虽然挺高兴的，但是还是不能就这么触碰禁忌
+		PRINTFORMW %ANAME(MASTER)%尝试着逃离%ANAME(対象)%的束缚…
+		PRINTFORML 
+		IF ABL:MASTER:武闘 > (ABL:対象:武闘 + 15)
+			PRINTFORML 被推开的%ANAME(対象)%好像还不能接受，望向%ANAME(MASTER)%的双眸泪光婆娑
+			PRINTFORML 看着哭泣的女儿，多少有些罪恶感的%ANAME(MASTER)%告诉她，自己还是把她当作女儿疼爱的
+			PRINTFORML 为了让双方都能冷静地思考，%ANAME(MASTER)%建议%ANAME(対象)%先回房间去……
+			PRINTFORML %ANAME(対象)%依恋地望了一会%ANAME(MASTER)%后，点了点头离开了…
+			PRINTFORMW …
+			PRINTFORML 
+			PRINTFORML 但是，%ANAME(対象)%眼中的爱火非但没有熄灭，反而更强烈地燃烧了起来…
+			CFLAG:対象:好感度 += 500
+			CFLAG:対象:依存度 += 1500
+			PRINTFORMW 
+			RETURN 1
+		ELSE
+			PRINTFORML 但是比想象中成长得更多的%ANAME(対象)%，一旦消除了%ANAME(MASTER)%的阻力，反而更强地压制住了
+			PRINTFORML 被拒绝的%ANAME(対象)%面露愠色
+			PRINTFORML 甚至为了防止%ANAME(MASTER)%反抗，还用绳子把他绑在了床上…
+			PRINTFORML %ANAME(対象)%傲睨得志地俯视着任人宰割的%ANAME(MASTER)%
+			PRINTFORML 笑里藏刀的%ANAME(対象)%慢慢地靠了上来……
+			PRINTFORMW …
+			PRINTFORML 
+			;後段へ
+			LOCAL = 2
+		ENDIF
+	ENDIF
+
+ELSE
+	;ノーマルルート
+	PRINTFORML 夜深了、%ANAME(MASTER)%的房间好像来了客人…
+	PRINTFORML 打开门一看、%ANAME(対象)%孤零零地站在那里
+	PRINTFORML 看到是女儿的%ANAME(MASTER)%便抱了过去
+	PRINTFORML 被温柔地拥抱着的%ANAME(対象)%似乎并不快乐，反而更多的是一种不甘
+	PRINTFORMW 她用哀求的声音倾诉着，比起“女儿”、她更希望被父亲当做“女人”对待
+	PRINTFORML 
+	PRINTFORML 原本只是寻常的亲子之爱……
+	PRINTFORML 不知何时起发酵为了爱恋之情
+	PRINTFORML 她苦恼着，徒劳地告诫自己这是不可为之事。但纸终究包不住火
+	PRINTFORML 毫无计划地来到了这里，自暴自弃地诉说着心意……
+	PRINTFORML %ANAME(MASTER)%决定……
+	CALL ASK_YN("接受" ,"拒绝")
+	IF RESULT == 0
+		PRINTFORML %ANAME(MASTER)%就这么抱着%ANAME(対象)%，伸手抬起了她的脸庞，将自己的爱意印在了唇上
+		PRINTFORML 美梦成真的%ANAME(対象)%喜极而泣，痴痴地回应着%ANAME(MASTER)%
+		PRINTFORML 已经决定跨入禁忌的%ANAME(MASTER)%该怎么做呢…
+		CALL ASK_YN("温柔一点" ,"粗暴对待")
+		IF RESULT == 0
+			PRINTFORML 有那么点成长、又这么的熟悉，她就是我可爱的女儿啊。第一次还是温柔点吧
+			PRINTFORML 下定决心的%ANAME(MASTER)%缓缓分开双唇，温柔地褪去%ANAME(対象)%的外衣，让女儿躺在床上
+			PRINTFORMW …
+			;後段へ
+			LOCAL = 3
+		ELSEIF RESULT == 1
+			PRINTFORML 男女关系可不比父女柔情
+			PRINTFORML 有必要教导她何为雄性的情欲
+			PRINTFORML 下定决心的%ANAME(MASTER)%将%ANAME(対象)%推倒在床，爬上了她的躯体……
+			PRINTFORMW …
+			;後段へ
+			LOCAL = 4
+		ENDIF
+	ELSEIF RESULT == 1
+		PRINTFORML %ANAME(MASTER)%告诉女儿，虽然很高兴听到她的想法，但父女之间是不该有那种关系的
+		PRINTFORML 就这么抱着女儿的%ANAME(MASTER)%温柔地抚摸着她的头，希望她今天回去能冷静地思考一下
+		PRINTFORML %ANAME(対象)%看起来很沮丧，但还是点了点头
+		PRINTFORML %ANAME(対象)%依依不舍地回到了自己的房间…
+		PRINTFORMW …
+		PRINTFORML 
+		PRINTFORML 但是，%ANAME(対象)%眼中的爱火非但没有熄灭，反而更强烈地燃烧了起来…
+		CFLAG:対象:好感度 += 300
+		CFLAG:対象:依存度 += 1000
+		PRINTFORMW 
+		RETURN 1
+	ENDIF
+ENDIF
+
+;後段：プレイ内容分岐
+SELECTCASE LOCAL
+	CASE 1
+		;性知識0
+		PRINTFORML 看着逐渐觉醒了作为女人的一面的女儿，%ANAME(MASTER)%隐隐地感到了快意，决定投身于这份感情…
+		PRINTFORML %ANAME(MASTER)%把门关上，并让女儿抬起头来，以迅雷不及掩耳之势吻住了她的唇
+		PRINTFORML %ANAME(対象)%没有反抗、只是配合着%ANAME(MASTER)%
+		PRINTFORML %ANAME(MASTER)%温柔地地舔舐着口腔，吸允着唾液，爱抚着肉体
+		PRINTFORMW "交给我就好了，哪里不懂会教你的"  %ANAME(対象)%茫然地点了点头
+		PRINTFORML 
+		PRINTFORML %ANAME(MASTER)%先自己脱了衣服又为%ANAME(対象)%宽衣解带，两人坦诚相见
+		PRINTFORML %ANAME(対象)%注视着与小时候一起洗澡时截然不同的勃起肉棒
+		PRINTFORML 也许是出于雌性的本能，她虽然不明白，但也无法将视线移开
+		PRINTFORML %ANAME(MASTER)%把女儿抱上了床，再一次接吻，再一次爱抚
+		PRINTFORMW 秘处已经开始变湿的%ANAME(対象)%，就算是最轻微的触摸都能让她敏感地喘息
+		PRINTFORML 
+		PRINTFORML 龟头贴上了湿润的秘列，%ANAME(対象)%哆嗦了一下，抬头看着%ANAME(MASTER)%
+		PRINTFORML 那眼中糅杂着期待和恐惧，虽然不明白、但似乎又本能地理解了即将发生的事情
+		PRINTFORML %ANAME(MASTER)%告诉了%ANAME(対象)%，她身体的变化就是想要交合的证据……
+		PRINTFORML 也告诉了她，父母和孩子之间不该做这种事……
+		PRINTFORMW 选择权在她……
+		PRINTFORML 
+		PRINTFORML 似懂非懂的%ANAME(対象)%沉默了一会儿，然后发出了呜呜的苦恼声，最终下定决心似的点了点头
+		PRINTFORML %ANAME(MASTER)%高兴地颤抖着，毫不留情地刺穿了为自己量身定制的女儿小穴
+		PRINTFORML 全身颤抖的%ANAME(対象)%娇喘着，仿佛能感受到刺痛的电流贯穿脊椎，不由得睁大双眼
+		PRINTFORML %ANAME(MASTER)%毫不留情地挖掘着未成熟的阴道，在女儿身上刻下了属于自己的印记
+		PRINTFORMW …
+		PRINTFORML 
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 痛苦是暂时的，小穴渐渐地习惯了肉棒的存在
+				PRINTFORML 女儿紧绷着的小穴虽不成熟，但却有着让人想往更深处探索的魔力，%ANAME(MASTER)%已然陶醉其中
+				PRINTFORML 另一方面，%ANAME(対象)%的意识渐渐地跟不上身体的变化，每一次冲击都伴随着甜蜜的悲鸣
+				PRINTFORML %ANAME(対象)%就像是要溺水了一般，死死地抱着父亲的脖子不放
+				PRINTFORML %ANAME(MASTER)%一边哄着可爱的女儿，另一边继续向她幼小的子宫发起了冲锋…
+			CASE 1
+				PRINTFORML %ANAME(MASTER)%就这么缓缓地抽插着
+				PRINTFORML %ANAME(対象)%把脸埋入枕头，忍受着从背脊直冲脑髓的未知感觉
+				PRINTFORML 突然，被击中弱点的%ANAME(対象)%仰面朝后，发出了甜蜜的哀鸣
+				PRINTFORML 抑制不住娇喘声的%ANAME(対象)%达到了高潮
+				PRINTFORML 而%ANAME(MASTER)%也受不了女儿紧绷的雌穴，白浊夺孔而出…
+			CASE 2
+				PRINTFORML 把脸埋在%ANAME(MASTER)%胯下的%ANAME(対象)%用那虽不熟练，但可爱满分的嘴唇和舌头侍奉着…
+				PRINTFORML 虽然技巧还很生疏，但被亲生女儿侍奉着的事实却带来了非同寻常的快感
+				PRINTFORML 酥麻快感使得%ANAME(MASTER)%很快就射精了
+				PRINTFORML 虽然有点被吓到，但%ANAME(対象)%还是按照指示将精液咽了下去
+				PRINTFORML 看着自豪地展示着小穴的女儿，按耐不住的%ANAME(MASTER)%扑了上去…
+		ENDSELECT
+		PRINTFORMW …
+		PRINTFORML 
+		PRINTFORML 被调教过的%ANAME(対象)%跨坐在%ANAME(MASTER)%身上，叫喊着、扭动着…
+		PRINTFORML 逆来顺受的女儿毫不犹豫地衔着肉棒
+		PRINTFORML 她用那撒娇般的表情向父亲讨要“糖果”
+		PRINTFORML %ANAME(MASTER)%自然不忍心拒绝女儿，他将浓稠的蜜汁灌注进容器…
+		PRINTFORML 过往父女情，至此合欢皮肉。交媾，交媾，不觉一天时候…
+	CASE 2
+		;ヤンデレ逆レイプ
+		PRINTFORML %ANAME(対象)%手脚麻利地将自己与父亲的衣物一并褪去
+		PRINTFORML 她不羞不臊，自满地展示着父亲所养育的酮体
+		PRINTFORML 月亮唯恐她着凉了，将如绸的月光披落在那楚楚动人的娇躯上
+		PRINTFORML %ANAME(対象)%眯起眼睛，仔细地感受着那架曾来往于故乡的列车
+		PRINTFORML 她用着不知何处学来的灵活技巧，擦拭着最前端的控制台…
+		PRINTFORMW 随着时刻表的逼近，列车蓄势待发。%ANAME(対象)%咽了口口水，缓缓地将它驶入隧道
+		PRINTFORML 
+		PRINTFORML 随着逐渐加速的列车飞驰而过，隧道中的积水四处飞溅……
+		PRINTFORML 虽然%ANAME(MASTER)%的理性想要阻止这一切，但张大了嘴也说不出话语，转动了脖子却移不开视线
+		PRINTFORML 看着涨红了脸的父亲，%ANAME(対象)%噗地笑了出来，并完成了最后的冲刺
+		PRINTFORML 列车就这么生生地撞进了月台。%ANAME(対象)%的身体痛苦着，可内心却是掩不住得欢喜
+		PRINTFORML 摩擦产生的高温好像要融化似的，%ANAME(MASTER)%强作镇定着
+		PRINTFORMW 但他的努力根本不被%ANAME(対象)%放在眼里，她只是舞蹈似地摇曳
+		PRINTFORML 
+		PRINTFORML 碰撞摩擦声不绝于耳，气喘吁吁的%ANAME(対象)%大声宣告着对父亲的爱
+		PRINTFORML 她眼中噙着泪水，蠕动着、舔舐着
+		PRINTFORML 正因是禁忌，爱才更热烈。轻声呜咽，渴求着更多……
+		PRINTFORML 察觉到%ANAME(MASTER)%已是一触即发的%ANAME(対象)%，更加主动地煽动着，在他耳畔媚语着
+		PRINTFORML 终于，%ANAME(MASTER)%再也无力控制，一股股人流从车门推搡奔逃涌入站台
+		PRINTFORMW %ANAME(対象)%如痴如醉地感受着这冲击，她的心仿佛以飞向了夜空的深处……
+		PRINTFORML 
+		PRINTFORML 许久，两人都享受着这份宁静。但对%ANAME(対象)%来说似乎才只是刚刚开始
+		PRINTFORML %ANAME(対象)%无视了%ANAME(MASTER)%的徒劳挣扎，熟练地操弄着
+		PRINTFORML 每当发现%ANAME(MASTER)%恢复了精神，%ANAME(対象)%又是一轮新的律动
+		PRINTFORML 她总也不腻，那脸上写满了喜悦
+		PRINTFORML %ANAME(MASTER)%已然做好了被爱女榨干的准备……
+		PRINTFORMW …
+		PRINTFORML 
+		PRINTFORML 交合复交合，何时%ANAME(MASTER)%的束缚被解开了都没注意到
+		PRINTFORML 现在，女儿枕在父亲的胸前，呼噜着睡着了…
+		PRINTFORML 在做什么梦呢？那天真无邪的样子，和刚才简直判若两人
+		PRINTFORML 虽然女儿刚才所行之事的确过于极端，但对于自己被这么深沉地爱着也并不反感
+		PRINTFORML 作为一名男性，已经沉迷于自己所养育的女儿的肉体……
+		PRINTFORML 两人的越界行为已是不争的事实
+		PRINTFORML %ANAME(MASTER)%温柔地抚摸着女儿的头，同时考量着未来的道路……
+	CASE 3
+		;温柔一点
+		PRINTFORML %ANAME(MASTER)%啄食似的亲吻着，一片一片地脱去女儿的衣服
+		PRINTFORML 片衣不着的%ANAME(対象)%，虽然有些害羞，但还是选择委身于%ANAME(MASTER)%
+		PRINTFORML 为了消除女儿的紧张感，%ANAME(MASTER)%用嘴唇和手指在她的全身游走着
+		PRINTFORMW 感觉时机成熟后便用肉棒抵上了洞口，并向%ANAME(対象)%询问是否做好了准备
+		PRINTFORML 
+		PRINTFORML 她颔首而许，%ANAME(MASTER)%便慢慢沉下身去
+		PRINTFORML 终于，迈出了关键一步的%ANAME(対象)%感受着被填满的安心感，深深地吐了一口气…
+		PRINTFORML 同女儿十指相扣的%ANAME(MASTER)%也慢慢地运动起了腰部
+		PRINTFORML 温润如玉的小穴包裹着刚直，流出了银丝般的爱液，将两者连为一体
+		PRINTFORML 或许因为血缘关系，身体的相性也特别好，%ANAME(MASTER)%忍受着酥麻快感细细品味着女儿的嫩肉…
+		PRINTFORMW …
+		PRINTFORML 
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 浸润了粘液的小穴紧紧地压着肉棒，似乎不想让它运动的太快
+				PRINTFORML 每次冲击%ANAME(対象)%都会发出可爱的尖叫声，眼泪汪汪地看着%ANAME(MASTER)%
+				PRINTFORML 看着可爱的女儿%ANAME(MASTER)%一边接吻，一边加快了腰部速度
+				PRINTFORML 快感如惊涛骇浪席卷而来，%ANAME(対象)%紧紧抱着父亲，強忍住泪水
+				PRINTFORML 两人同时达到了顶峰，%ANAME(MASTER)%在快要整个腰部融化的快感下，把热乎乎的精液射进了女儿的子宫…
+			CASE 1
+				PRINTFORML %ANAME(対象)%面对面地坐在父亲的腿上，两人相互凝望着
+				PRINTFORML 不久前还是个孩子呢，现已然一副亭亭少女态
+				PRINTFORML %ANAME(対象)%慢慢地吞没了肉棒，摆动腰部、乞求子种，希望能被怀上父亲的孩子…
+				PRINTFORML 身为父女的关系更让那欲望加速，%ANAME(対象)%现在的浪荡模样与平时简直判若两人
+				PRINTFORML %ANAME(MASTER)%也因这离经叛道之行而暗暗兴奋，将满腔热情化作精气注入了女儿的小穴…
+			CASE 2
+				PRINTFORML 几个回合后，%ANAME(対象)%突然问自己比母亲如何
+				PRINTFORML 可以说是女人的对抗心，即使是母女，但现在也是争夺%ANAME(MASTER)%的竞争对手了
+				PRINTFORML 这种想法真是傲慢得可笑又可爱……看来有必要让她识得厉害
+				PRINTFORML 如她所愿，%ANAME(MASTER)%将曾用在她母亲身上的技巧也全部如法炮制，倾囊相与
+				PRINTFORML %ANAME(対象)%的大脑似乎无法处理瞬间涌入的快感，呆呆地吐出舌头翻起白眼，不断地高潮着……
+		ENDSELECT
+		PRINTFORMW …
+		PRINTFORML 
+		PRINTFORML 刚结束了第一发，%ANAME(対象)%就把脸埋进了%ANAME(MASTER)%的胯下，用舌头仔细地清洁着肉棒的每个角落…
+		PRINTFORML %ANAME(MASTER)%抚摸着女儿的头，幸福地享受着侍奉
+		PRINTFORML 紧紧地，肉棒在女儿的精心侍奉下又挺立了起来
+		PRINTFORML 带着陶醉的表情的%ANAME(対象)%M字开腿，有分开了阴唇诱惑着父亲
+		PRINTFORML %ANAME(MASTER)%看着淫荡的女儿苦笑连连，"真不知道你是像谁。"，边说着边贯穿了那秘裂
+		PRINTFORML 感受着那根带自己来到人世的挺拔，%ANAME(対象)%喜悦地颤抖着，渴望着精液
+		PRINTFORML 想象着让自己女儿怀孕的快感让%ANAME(MASTER)%陶醉了，他整晚好似一台性爱机器般在子宫内不知疲倦地释放着…
+	CASE 4
+		;粗暴对待
+		PRINTFORML %ANAME(MASTER)%把%ANAME(対象)%逼到床边，夺过嘴唇，扒开胸衣，压倒。大手向女儿的私处盖去
+		PRINTFORML 一时间没反应过来的%ANAME(対象)%整个人都僵住了，完全没有反抗的意图
+		PRINTFORML 她大口喘息着，只能在%ANAME(MASTER)%的怀里扭动身子
+		PRINTFORML 不久，阴道突然绷紧，察觉到%ANAME(対象)%的颤抖的%ANAME(MASTER)%稍稍起身，欣赏起了女儿的酮体
+		PRINTFORMW 被粗暴地扒光衣服的%ANAME(対象)%在父亲的面前暴露着一切，在月光的照耀下她每一颗汗珠都好似闪耀的宝石…
+		PRINTFORML 
+		PRINTFORML %ANAME(MASTER)%满意地点了点头，又下令让%ANAME(対象)%张开双腿。她微微点头服从了指挥
+		PRINTFORML 被那不安又期待的视线盯着，%ANAME(MASTER)%下定决心一口气直捣黄龙
+		PRINTFORML 子宫口被猛烈撞击的%ANAME(対象)%，后仰起身子叫了起来
+		PRINTFORML 小穴紧缩挤压着肉棒，本能让她不愿就这么放走%ANAME(MASTER)%
+		PRINTFORML 冲击和快感交织着，%ANAME(対象)%的大脑一片空白。%ANAME(MASTER)%坚定地牵起了她的手
+		PRINTFORMW 默默地感受着在肚子里咕噜咕噜地捅来捅去的那一根，她也渐渐习惯了起来
+		PRINTFORML 
+		PRINTFORML %ANAME(対象)%一面用娇喘声回应着%ANAME(MASTER)%，一面将肉棒迎向最深处
+		PRINTFORML 看着亭亭长成的女儿，%ANAME(MASTER)%十分感动，然后射了
+		PRINTFORML 子宫紧紧地贴上肉棒，一滴不漏地将它们全部吸入
+		PRINTFORMW 子宫深深地刻上了父亲的烙印，%ANAME(対象)%也露出了享受的表情…
+		PRINTFORML 
+		PRINTFORML 当然，只是这样还远远不够……再度挺立起来的老二又是一轮耕耘
+		PRINTFORML 高潮不止的%ANAME(対象)%被粗暴地训斥着，但她似乎更加兴奋了
+		PRINTFORMW …
+		PRINTFORML 
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 两人便如同野兽般匍匐着交合……
+				PRINTFORML 许久，满足了的%ANAME(MASTER)%问女儿是不是该休息了。只见她回过头来，一脸不可置信地看着%ANAME(MASTER)%
+				PRINTFORML 她也不说话，就这么直勾勾地盯着%ANAME(MASTER)%看，像小动物似地摇晃着屁股
+				PRINTFORML 明明都已经给了好几回了居然还想要……
+				PRINTFORML 惊讶于女儿的贪婪的%ANAME(MASTER)%无可奈何地苦笑着，他抓起了那纤细的腰部，重新开始了运动
+			CASE 1
+				PRINTFORML 就像是小时候玩的游戏一样，他托着女儿，一高一低、一上一下……
+				PRINTFORML 子宫被不断冲击，%ANAME(対象)%连气都喘不过来，只能不停地发出可爱的尖叫声
+				PRINTFORML 视线逐渐模糊，身体只能像布偶般晃动
+				PRINTFORML 但当%ANAME(MASTER)%稍有怠慢，她还是会不辞辛苦地扭动着以求快感
+				PRINTFORML %ANAME(MASTER)%机械般地运动着，只是赏她泪眼朦胧，尝她爱穴娇嫩…
+			CASE 2
+				PRINTFORML %ANAME(MASTER)%搬来了面镜子，让女儿像小时候一样坐在自己腿上…
+				PRINTFORML 镜面上映出从正下方被未成熟的雌穴贯穿的、没有%ANAME(対象)%的身影
+				PRINTFORML 看着自己下流的姿态的%ANAME(対象)%兴奋了起来，像狗一样伸出舌头喘着气
+				PRINTFORML %ANAME(MASTER)%粗暴地抓起她的腰，用力一顶，白浊便从那接合处满溢而出……
+				PRINTFORML 镜中映射出%ANAME(対象)%那颤抖着的模样，白浊便从接合处满溢而出……
+		ENDSELECT
+		PRINTFORMW …
+		PRINTFORML 
+		PRINTFORML 交合之后又交合，此时的%ANAME(対象)%无论是身心内外都已挂满白霜
+		PRINTFORML 经过了一夜地开发，现在已经完全变成了专供%ANAME(MASTER)%享用的雌性
+		PRINTFORML 然而，好似这才是真正的幸福一般。%ANAME(対象)%的脸上洋溢着快乐的表情
+		PRINTFORML 肚子被注入的精液塞得鼓鼓囊囊，看上去就好像已经怀上了
+		PRINTFORML 刚将沾满粘液的肉棒送到眼前，%ANAME(対象)%就立马像婴儿一样吸允了起来
+		PRINTFORML %ANAME(対象)%毫不羞耻地用那熟练的舌技舔舐着，整个口腔都在热情地服务
+		PRINTFORML %ANAME(MASTER)%满意地抚摸着爱女的头，往喉咙里灌入了作为奖赏的精液
+		PRINTFORML %ANAME(対象)%也就这么一滴不漏地喝了下去，脸上挂着满足了爱欲的微笑……
+ENDSELECT
+
+IF ABL:対象:性知識 == 0
+	ABL:対象:性知識 = 1
+ENDIF
+CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴")
+CFLAG:対象:好感度 += 800
+CFLAG:対象:従属度 += 300
+CFLAG:対象:依存度 += 300
+TALENT:対象:合意 = 1
+PRINTFORMW 
+
+RETURN 1

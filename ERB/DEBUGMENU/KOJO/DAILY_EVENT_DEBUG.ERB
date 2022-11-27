@@ -1,0 +1,531 @@
+@DAILY_EVENT_KOJO_DEBUG_MENU
+    $KOJO_LOOP
+    CALL SINGLE_DRAWLINE
+    PRINTFORML 口上debug
+    CALL SINGLE_DRAWLINE
+    PRINTBUTTON " 0[检测日常口上]", 0
+    PRINTL
+    PRINTBUTTON " 1[检测角色日常口上]", 1
+    PRINTL
+    CALL SINGLE_DRAWLINE
+    PRINTBUTTON " 99[取消]", 99
+    PRINTL
+
+    REDRAW 0
+
+    $INPUT_LOOP
+    INPUT
+
+    IF RESULT == 99
+        REDRAW 1
+        RETURN
+    ELSEIF RESULT == 0
+        REDRAW 1
+        CALL DAILY_EVENT_DEBUG
+        FORCEWAIT
+        GOTO KOJO_LOOP
+     ELSEIF RESULT == 1
+        REDRAW 1
+        CALL KOJO_DAILY_EVENT_DEBUG_CHARA_SELECT
+        FORCEWAIT
+        GOTO KOJO_LOOP
+    ELSE
+        REDRAW 1
+        GOTO INPUT_LOOP
+    ENDIF
+
+@DAILY_EVENT_DEBUG
+    #DIMS KOJO_NAME
+    PRINTFORML 请输入要检测口上的英文名称
+    RESULTS = ""
+    INPUTS
+    IF RESULTS == ""
+        PRINTFORML 空输入
+    ELSE
+        KOJO_NAME = %RESULTS%
+        CALL DAILY_EVENT_DEBUG_DETAIL(KOJO_NAME)
+    ENDIF
+
+@DAILY_EVENT_DEBUG_DETAIL(KOJO_NAME)
+    #DIMS KOJO_NAME
+    #DIM EVENT_ID
+    #DIM EVENT_NUM
+    EVENT_NUM = VARSIZE("DAILY_EVENT_NAME_ENG", 1)
+    EVENT_ID = -1
+    FOR LOCAL, 0, EVENT_NUM
+        IF KOJO_NAME == DAILY_EVENT_NAME_ENG:デイリー_通常:LOCAL
+            EVENT_ID = LOCAL
+        ENDIF
+    NEXT
+    IF EVENT_ID != -1
+        PRINTFORML 日常口上ID为：{EVENT_ID} 类型为通常
+        CALL DAILY_EVENT_DEBUG_DETAIL_NORMAL(EVENT_ID)
+        RETURN
+    ENDIF
+    FOR LOCAL, 0, EVENT_NUM
+        IF KOJO_NAME == DAILY_EVENT_NAME_ENG:デイリー_通常派生:LOCAL
+            EVENT_ID = LOCAL
+        ENDIF
+    NEXT
+    IF EVENT_ID != -1
+        PRINTFORML 日常口上ID为：{EVENT_ID} 类型为派生
+        CALL DAILY_EVENT_DEBUG_DETAIL_DERIVATION(EVENT_ID)
+        RETURN
+    ENDIF
+    PRINTFORML 未找到该口上
+
+@DAILY_EVENT_DEBUG_DETAIL_NORMAL(EVENT_ID)
+    #DIMS KOJO_NAME
+    #DIM EVENT_ID
+    #DIMS NAME_ENG
+    #DIM CAN_USE
+    CAN_USE = 1
+    DAILY_CANCEL = 0
+    CALL SINGLE_DRAWLINE
+    NAME_ENG = %DAILY_EVENT_NAME_ENG:デイリー_通常:EVENT_ID%
+    PRINTFORML 输出日常口上通常信息
+    PRINTFORML
+    RESULTS '= ""
+    TRYCALLFORM EVENT_DAILY_%NAME_ENG%_NAME()
+	IF RESULTS == ""
+        KOJO_NAME = %DAILY_EVENT_NAME:デイリー_通常:EVENT_ID%
+	ELSE
+        KOJO_NAME = %RESULTS%
+	ENDIF
+    PRINTFORML 当前口上名称为：%KOJO_NAME%
+    PRINTFORML
+
+    IF DAILY_GET_DISABLE_CONFIG(NAME_ENG)
+		PRINTFORML 日常口上%KOJO_NAME% 处在关闭状态
+        CAN_USE = 0
+    ELSE
+        PRINTFORML 日常口上%KOJO_NAME% 处在开启状态
+    ENDIF
+    PRINTFORML
+
+	TRYCCALLFORM EVENT_DAILY_%NAME_ENG%_RATE()
+        PRINTFORML 日常口上%KOJO_NAME% 基础触发概率为 {RESULT}(千分率)
+        PRINTFORML 日常口上触发倍率为 {DAILY_EVENT_ODDS}
+        PRINTFORML 触发概率为 基础触发概率 X 触发倍率 = {RESULT * DAILY_EVENT_ODDS }(千分率)
+		PRINTFORML
+
+        RESULT = 0
+		TRYCALLFORM EVENT_DAILY_%NAME_ENG%_ALLOW_WHEN_WANDERING()
+		IF RESULT == 0
+			PRINTFORML 日常口上%KOJO_NAME% 在玩家放浪时无法触发
+            IF CFLAG:MASTER:所属 == 0
+                CAN_USE = 0
+            ENDIF
+        ELSE
+            PRINTFORML 日常口上%KOJO_NAME% 在玩家放浪时可以触发
+        ENDIF
+        PRINTFORML
+
+		RESULT = 1
+		TRYCALLFORM EVENT_DAILY_%NAME_ENG%_DECISION()
+		IF RESULT == 0
+			PRINTFORML 日常口上%KOJO_NAME% 不满足触发条件
+            CAN_USE = 0
+        ELSE
+            PRINTFORML 日常口上%KOJO_NAME% 满足触发条件
+        ENDIF
+        PRINTFORML
+
+		VARSET DAILY_TARGET, -1
+		VARSET DAILY_TARGET_NUM
+		RESULT = 1
+		TRYCALLFORM EVENT_DAILY_%NAME_ENG%_SETTARGET()
+		IF RESULT == 0
+			PRINTFORML 日常口上%KOJO_NAME% 没有可选择的目标
+            CAN_USE = 0
+        ELSE
+            IF DAILY_TARGET_NUM != 0
+                PRINTFORML 日常口上%KOJO_NAME% 目标如下
+                FOR LOCAL,0,DAILY_TARGET_NUM
+                    PRINTFORML %ANAME(DAILY_TARGET:LOCAL)% ID:{DAILY_TARGET:LOCAL}
+                NEXT
+            ELSE
+                PRINTFORML 日常口上%KOJO_NAME% 不需要目标
+            ENDIF
+        ENDIF
+        PRINTFORML 日常口上通常信息输出完毕
+        PRINTFORML ……
+        PRINTFORML ……
+        PRINTFORML ……
+        IF CAN_USE
+            PRINTFORML 日常口上满足触发条件
+            PRINTFORML 是否触发口上内容
+        ELSE
+            PRINTFORML 日常口上不满足触发条件
+            PRINTFORML 是否强制触发口上内容
+        ENDIF
+        CALL COLOR_PRINTL("警告，可能导致相关数据出现问题，请存档后再继续！",カラー_警告)
+        CALL ASK_YN()
+        IF RESULT == 0
+            CALLFORM EVENT_DAILY_%NAME_ENG%()
+            IF RESULT == 1
+                PRINTFORML 日常口上正常结束
+            ELSE
+                PRINTFORML 日常口上不正常结束
+            ENDIF
+            SIF DAILY_CANCEL
+			    PRINTFORML 后续其他日常口上无法继续触发
+        ENDIF
+	CATCH
+		;DEBUGPRINTFORML EVENT_DAILY_%NAME_ENG%_RATEみつからず
+	ENDCATCH
+
+@DAILY_EVENT_DEBUG_DETAIL_DERIVATION(EVENT_ID)
+    #DIMS KOJO_NAME
+    #DIM EVENT_ID
+    #DIMS NAME_ENG
+    #DIM CAN_USE
+    CAN_USE = 1
+    DAILY_CANCEL = 0
+    CALL SINGLE_DRAWLINE
+    NAME_ENG = %DAILY_EVENT_NAME_ENG:デイリー_通常派生:EVENT_ID%
+    PRINTFORML 输出日常口上派生信息
+    PRINTFORML
+
+    RESULTS '= ""
+    TRYCALLFORM EVENT_DAILY_DERIVATION_%NAME_ENG%_NAME()
+	IF RESULTS == ""
+        KOJO_NAME = %DAILY_EVENT_NAME:デイリー_通常派生:EVENT_ID%
+	ELSE
+        KOJO_NAME = %RESULTS%
+	ENDIF
+    PRINTFORML 当前口上名称为：%KOJO_NAME%
+    PRINTFORML
+
+	RESULT = 0
+	TRYCCALLFORM EVENT_DAILY_DERIVATION_%NAME_ENG%_DISABLE()
+		IF RESULT == 1
+            PRINTFORML 日常口上%KOJO_NAME% 处在关闭状态
+            CAN_USE = 0
+        ELSE
+            PRINTFORML 日常口上%KOJO_NAME% 处在开启状态
+        ENDIF
+        PRINTFORML
+
+		RESULT = 0
+		TRYCALLFORM EVENT_DAILY_DERIVATION_%NAME_ENG%_ALLOW_WHEN_WANDERING()
+        IF RESULT == 0
+			PRINTFORML 日常口上%KOJO_NAME% 在玩家放浪时无法触发
+            IF CFLAG:MASTER:1 == 0
+                CAN_USE = 0
+            ENDIF
+        ELSE
+            PRINTFORML 日常口上%KOJO_NAME% 在玩家放浪时可以触发
+        ENDIF
+        PRINTFORML
+
+        RESULT = 0
+		TRYCALLFORM EVENT_DAILY_DERIVATION_%NAME_ENG%_DECISION()
+		IF RESULT == 0
+			PRINTFORML 日常口上%KOJO_NAME% 不满足触发条件
+            CAN_USE = 0
+        ELSE
+            PRINTFORML 日常口上%KOJO_NAME% 满足触发条件
+        ENDIF
+        PRINTFORML
+
+		VARSET DAILY_TARGET, -1
+		VARSET DAILY_TARGET_NUM
+		RESULT = 1
+		TRYCALLFORM EVENT_DAILY_DERIVATION_%NAME_ENG%_SETTARGET()
+		IF RESULT == 0
+			PRINTFORML 日常口上%KOJO_NAME% 没有可选择的目标
+            CAN_USE = 0
+        ELSE
+            IF DAILY_TARGET_NUM != 0
+                PRINTFORML 日常口上%KOJO_NAME% 目标如下
+                FOR LOCAL,0,DAILY_TARGET_NUM
+                    PRINTFORML %ANAME(DAILY_TARGET:LOCAL)% ID:{DAILY_TARGET:LOCAL}
+                NEXT
+            ELSE
+                PRINTFORML 日常口上%KOJO_NAME% 不需要目标
+            ENDIF
+        ENDIF
+        PRINTFORML 日常口上派生信息输出完毕
+        PRINTFORML ……
+        PRINTFORML ……
+        PRINTFORML ……
+        IF CAN_USE
+            PRINTFORML 日常口上满足触发条件
+            PRINTFORML 是否触发口上内容
+        ELSE
+            PRINTFORML 日常口上不满足触发条件
+            PRINTFORML 是否强制触发口上内容
+        ENDIF
+        CALL COLOR_PRINTL("警告，可能导致相关数据出现问题，请存档后再继续！",カラー_警告)
+        CALL ASK_YN()
+        IF RESULT == 0
+            CALLFORM EVENT_DAILY_DERIVATION_%NAME_ENG%()
+            SIF DAILY_CANCEL
+			    PRINTFORML 后续其他日常口上无法继续触发
+        ENDIF
+	CATCH
+		;DEBUGPRINTFORML EVENT_DAILY_DERIVATION_%NAME_ENG%_DECISIONみつからず
+	ENDCATCH
+
+@KOJO_DAILY_EVENT_DEBUG_CHARA_SELECT
+    #DIM CHARA_ID
+    $SELECT_LOOP
+    CALL SINGLE_DRAWLINE
+    PRINTFORML 请选择角色
+    CALL SINGLE_DRAWLINE
+
+    CALL SELECT_CHARA_LIST("CONFIG_KOJO_DAILY", "NONE", "DEFAULT")
+    CHARA_ID = RESULT
+
+    IF RESULT == -1
+        RETURN
+    ENDIF
+
+    CALL KOJO_DAILY_EVENT_DEBUG(CHARA_ID)
+    GOTO SELECT_LOOP
+
+@KOJO_DAILY_EVENT_DEBUG(CHARA_ID)
+    #DIM CHARA_ID
+    #DIM CHARA_NO
+    #DIM EVENT_NUM
+    #DIMS EVENT_NAME_JAP
+    #DIMS EVENT_NAME_ENG
+
+    CHARA_NO = NO:CHARA_ID
+    LOCAL = 0
+    EVENT_NUM = KOJO_DAILY_EVENT_NUM:CHARA_NO:デイリー_通常
+    $LIST_LOOP
+    PRINTFORML 普通
+    CALL SINGLE_DRAWLINE
+    FOR LOCAL, 0, KOJO_DAILY_EVENT_NUM:CHARA_NO:デイリー_通常
+        EVENT_NAME_JAP = %KOJO_DAILY_EVENT_NAME:CHARA_NO:デイリー_通常:LOCAL%
+        EVENT_NAME_ENG = %KOJO_DAILY_EVENT_NAME_ENG:CHARA_NO:デイリー_通常:LOCAL%
+        PRINTFORML [{LOCAL}] - %EVENT_NAME_JAP, 40, LEFT%
+    NEXT
+    CALL SINGLE_DRAWLINE
+    PRINTFORML 派生
+    CALL SINGLE_DRAWLINE
+    FOR LOCAL, 0, KOJO_DAILY_EVENT_NUM:CHARA_NO:デイリー_通常派生
+        EVENT_NAME_JAP = %KOJO_DAILY_EVENT_NAME:CHARA_NO:デイリー_通常派生:LOCAL%
+        EVENT_NAME_ENG = %KOJO_DAILY_EVENT_NAME_ENG:CHARA_NO:デイリー_通常派生:LOCAL%
+        PRINTFORML [{LOCAL+1000}] - %EVENT_NAME_JAP, 40, LEFT%
+    NEXT
+    CALL SINGLE_DRAWLINE
+    PRINTFORML [{-1}] - %"返回", 40, LEFT%
+    INPUT
+    IF RESULT == -1
+        REDRAW 1
+        RETURN
+    ELSEIF RESULT >= 1000
+        REDRAW 1
+        CALL KOJO_DAILY_EVENT_DEBUG_DERIVATION(CHARA_ID,RESULT-1000)
+        FORCEWAIT
+        GOTO LIST_LOOP
+    ELSEIF RESULT >=0
+        REDRAW 1
+        CALL KOJO_DAILY_EVENT_DEBUG_NORMAL(CHARA_ID,RESULT)
+        FORCEWAIT
+        GOTO LIST_LOOP
+    ELSE
+        REDRAW 1
+        GOTO LIST_LOOP
+    ENDIF
+
+@KOJO_DAILY_EVENT_DEBUG_NORMAL(CHARA_ID,EVENT_ID)
+    #DIM CHARA_ID
+    #DIM EVENT_ID
+    #DIM CHARA_NO
+    #DIM CAN_USE
+    #DIMS NAME_ENG
+    #DIMS KOJO_NAME
+    CAN_USE = 1
+    DAILY_CANCEL = 0
+    CHARA_NO = NO:CHARA_ID
+	NAME_ENG '= KOJO_DAILY_EVENT_NAME_ENG:CHARA_NO:デイリー_通常:(EVENT_ID)
+
+    RESULTS =
+	TRYCALLFORM KOJO_DAILY_K{CHARA_NO}_%NAME_ENG%_NAME(CHARA_ID)
+	IF RESULTS == ""
+        KOJO_NAME = %KOJO_DAILY_EVENT_NAME:CHARA_NO:デイリー_通常:(EVENT_ID)%
+	ELSE
+        KOJO_NAME = %RESULTS%
+	ENDIF
+    PRINTFORML 当前口上名称为：%KOJO_NAME%
+    PRINTFORML
+
+	IF KOJO_DAILY_GET_DISABLE_CONFIG(CHARA_ID, NAME_ENG)
+        PRINTFORML 角色日常口上%KOJO_NAME% 处在关闭状态
+        CAN_USE = 0
+    ELSE
+        PRINTFORML 角色日常口上%KOJO_NAME% 处在开启状态
+    ENDIF
+    PRINTFORML
+
+	TRYCCALLFORM KOJO_DAILY_K{CHARA_NO}_%NAME_ENG%_RATE(CHARA_ID)
+		PRINTFORML 角色日常口上%KOJO_NAME% 基础触发概率为 {RESULT}(千分率)
+        PRINTFORML 角色日常口上触发倍率为 {KOJO_DAILY_EVENT_ODDS}
+        PRINTFORML 触发概率为 基础触发概率 X 触发倍率 = {RESULT * DAILY_EVENT_ODDS }(千分率)
+		PRINTFORML
+
+		TRYCALLFORM KOJO_DAILY_K{CHARA_NO}_%NAME_ENG%_ALLOW_WHEN_WANDERING()
+		IF RESULT == 0
+			PRINTFORML 角色日常口上%KOJO_NAME% 在玩家放浪时无法触发
+            IF CFLAG:MASTER:所属 == 0
+                CAN_USE = 0
+            ENDIF
+        ELSE
+            PRINTFORML 角色日常口上%KOJO_NAME% 在玩家放浪时可以触发
+        ENDIF
+        PRINTFORML
+
+		RESULT = 1
+		TRYCALLFORM KOJO_DAILY_K{CHARA_NO}_%NAME_ENG%_DECISION(CHARA_ID)
+		IF RESULT == 0
+			PRINTFORML 角色日常口上%KOJO_NAME% 不满足触发条件
+            CAN_USE = 0
+        ELSE
+            PRINTFORML 角色日常口上%KOJO_NAME% 满足触发条件
+        ENDIF
+        PRINTFORML
+
+		VARSET DAILY_TARGET, -1
+		VARSET DAILY_TARGET_NUM
+		RESULT = 1
+		TRYCALLFORM KOJO_DAILY_K{CHARA_NO}_%NAME_ENG%_SETTARGET(CHARA_ID)
+		IF RESULT == 0
+			PRINTFORML 角色日常口上%KOJO_NAME% 没有可选择的目标
+            CAN_USE = 0
+        ELSE
+            IF DAILY_TARGET_NUM != 0
+                PRINTFORML 角色日常口上%KOJO_NAME% 目标如下
+                FOR LOCAL,0,DAILY_TARGET_NUM
+                    PRINTFORML %ANAME(DAILY_TARGET:LOCAL)% ID:{DAILY_TARGET:LOCAL}
+                NEXT
+            ELSE
+                PRINTFORML 角色日常口上%KOJO_NAME% 不需要目标
+            ENDIF
+        ENDIF
+        PRINTFORML
+        PRINTFORML 角色日常口上通常信息输出完毕
+        PRINTFORML ……
+        PRINTFORML ……
+        PRINTFORML ……
+        IF CAN_USE
+            PRINTFORML 角色日常口上满足触发条件
+            PRINTFORML 是否触发口上内容
+        ELSE
+            PRINTFORML 角色日常口上不满足触发条件
+            PRINTFORML 是否强制触发口上内容
+        ENDIF
+        CALL COLOR_PRINTL("警告，可能导致相关数据出现问题，请存档后再继续！",カラー_警告)
+        CALL ASK_YN()
+        IF RESULT == 0
+            CALLFORM KOJO_DAILY_K{CHARA_NO}_%NAME_ENG%(CHARA_ID)
+            IF RESULT == 1
+                PRINTFORML 角色日常口上正常结束
+            ELSE
+                PRINTFORML 角色日常口上不正常结束
+            ENDIF
+            SIF DAILY_CANCEL
+			    PRINTFORML 后续其他角色日常口上无法继续触发
+        ENDIF
+	CATCH
+        ;DEBUGPRINTFORML KOJO_DAILY_{CHARA_NO}_%NAME_ENG%_RATEみつからず
+	ENDCATCH
+@KOJO_DAILY_EVENT_DEBUG_DERIVATION(CHARA_ID,EVENT_ID)
+    #DIM CHARA_ID
+    #DIM EVENT_ID
+    #DIM CHARA_NO
+    #DIMS NAME_ENG
+    #DIMS KOJO_NAME
+    #DIM CAN_USE
+    CAN_USE = 1
+    CHARA_NO = NO:CHARA_ID
+    NAME_ENG '= KOJO_DAILY_EVENT_NAME_ENG:CHARA_NO:デイリー_通常派生:EVENT_ID
+    CALL SINGLE_DRAWLINE
+    PRINTFORML 输出日常口上派生信息
+    PRINTFORML
+
+    RESULTS '= ""
+    TRYCALLFORM KOJO_DAILY_K{CHARA_NO}_DERIVATION_%NAME_ENG%_NAME(CHARA_ID)
+	IF RESULTS == ""
+        KOJO_NAME = %KOJO_DAILY_EVENT_NAME:CHARA_NO:デイリー_通常派生:EVENT_ID%
+	ELSE
+        KOJO_NAME = %RESULTS%
+	ENDIF
+    PRINTFORML 当前口上名称为：%KOJO_NAME%
+    PRINTFORML
+
+	RESULT = 0
+	TRYCCALLFORM KOJO_DAILY_K{CHARA_NO}_DERIVATION_%NAME_ENG%_DISABLE(CHARA_ID)
+		IF RESULT == 1
+            PRINTFORML 日常口上%KOJO_NAME% 处在关闭状态
+            CAN_USE = 0
+        ELSE
+            PRINTFORML 日常口上%KOJO_NAME% 处在开启状态
+        ENDIF
+        PRINTFORML
+
+		RESULT = 0
+		TRYCALLFORM KOJO_DAILY_K{CHARA_NO}_DERIVATION_%NAME_ENG%_ALLOW_WHEN_WANDERING()
+                IF RESULT == 0
+			PRINTFORML 日常口上%KOJO_NAME% 在玩家放浪时无法触发
+            IF CFLAG:MASTER:1 == 0
+                CAN_USE = 0
+            ENDIF
+        ELSE
+            PRINTFORML 日常口上%KOJO_NAME% 在玩家放浪时可以触发
+        ENDIF
+        PRINTFORML
+
+
+
+		TRYCALLFORM KOJO_DAILY_K{CHARA_NO}_DERIVATION_%NAME_ENG%_DECISION(CHARA_ID)
+		IF RESULT == 0
+			PRINTFORML 日常口上%KOJO_NAME% 不满足触发条件
+            CAN_USE = 0
+        ELSE
+            PRINTFORML 日常口上%KOJO_NAME% 满足触发条件
+        ENDIF
+        PRINTFORML
+
+		VARSET DAILY_TARGET, -1
+		VARSET DAILY_TARGET_NUM
+		RESULT = 1
+		TRYCALLFORM KOJO_DAILY_K{CHARA_NO}_DERIVATION_%NAME_ENG%_SETTARGET(CHARA_ID)
+		IF RESULT == 0
+			PRINTFORML 日常口上%KOJO_NAME% 没有可选择的目标
+            CAN_USE = 0
+        ELSE
+            IF DAILY_TARGET_NUM != 0
+                PRINTFORML 日常口上%KOJO_NAME% 目标如下
+                FOR LOCAL,0,DAILY_TARGET_NUM
+                    PRINTFORML %ANAME(DAILY_TARGET:LOCAL)% ID:{DAILY_TARGET:LOCAL}
+                NEXT
+            ELSE
+                PRINTFORML 日常口上%KOJO_NAME% 不需要目标
+            ENDIF
+        ENDIF
+        PRINTFORML 日常口上派生信息输出完毕
+        PRINTFORML ……
+        PRINTFORML ……
+        PRINTFORML ……
+        IF CAN_USE
+            PRINTFORML 日常口上满足触发条件
+            PRINTFORML 是否触发口上内容
+        ELSE
+            PRINTFORML 日常口上不满足触发条件
+            PRINTFORML 是否强制触发口上内容
+        ENDIF
+        CALL COLOR_PRINTL("警告，可能导致相关数据出现问题，请存档后再继续！",カラー_警告)
+        CALL ASK_YN()
+        IF RESULT == 0
+            CALLFORM KOJO_DAILY_K{CHARA_NO}_DERIVATION_%NAME_ENG%(CHARA_ID)
+            SIF DAILY_CANCEL
+			    PRINTFORML 后续其他日常口上无法继续触发
+        ENDIF
+
+	CATCH
+        ;DEBUGPRINTFORML KOJO_DAILY_K{CHARA_NO}_DERIVATION_%NAME_ENG%_DECISIONみつからず
+	ENDCATCH

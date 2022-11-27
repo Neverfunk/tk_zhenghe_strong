@@ -1,0 +1,181 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K134_BATH_PLAY_DREAM_RATE(対象)
+#DIM 対象
+RETURN 30
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K134_BATH_PLAY_DREAM_DECISION(対象)
+#DIM 対象
+
+SIF KDVAR:対象:ドレミー_混浴の誘い
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1) && TALENT:対象:恋慕
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K134_BATH_PLAY_DREAM_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K134_BATH_PLAY_DREAM(対象)
+#DIM 対象
+
+PRINTFORML 深夜，在自己的房间里工作的时候，有听到敲门声
+;TranslatedMark 深夜、自室で仕事をしているとドアをノックする音がした
+PRINTFORML 一边想着这个时候会是谁，一边出去一看，立着一个抱着洗浴用具的%ANAME(対象)%
+;TranslatedMark こんな時分に誰だろうかと思いながら出てみると、洗面用具を脇に抱えた%ANAME(対象)%が立っていた
+IF ABL:対象:性知識 > 0
+	PRINTFORML 也许是心理作用吧，红着脸还扭扭捏捏的有点害羞的样子
+	;TranslatedMark 心なしか頬を染めながら、もじもじとやや恥ずかしそうにしている
+	PRINTFORMW 问 她有什么事，她带着稍稍结巴的语气邀请我一起去洗澡
+	;TranslatedMark 何の用かと訪ねると、やや口ごもりながら一緒にお風呂に入らないかと誘ってきた
+ELSE
+	PRINTFORML 看到%ANAME(MASTER)%的%ANAME(対象)%露出笑容挥手
+	;TranslatedMark %ANAME(MASTER)%を見た%ANAME(対象)%は笑顔を見せて手を振ってきた
+	PRINTFORMW 当问她有什么事，她天真可爱地问要一起洗澡吗
+	;TranslatedMark 何の用かと訊ねると、一緒にお風呂に入らないかと無邪気に誘ってきた
+ENDIF
+PRINTFORML 怎么办？
+;TranslatedMark どうしよう？
+CALL ASK_YN("一起去", "礼貌地推辞了")
+IF RESULT == 1
+	PRINTFORML 对不起，我还有工作
+	;TranslatedMark 申し訳ないが、まだ仕事がある
+	PRINTFORMW 被拒绝的%ANAME(対象)%很遗憾地离开了
+	;TranslatedMark 断ると%ANAME(対象)%は残念そうに去っていった
+	RETURN 1
+ELSE
+	PRINTFORML 好不容易邀请你，让我一起去吧
+	;TranslatedMark せっかくのお誘いだ、ご一緒させてもらうことにしよう
+	PRINTFORMW 当%ANAME(MASTER)%同意后，%ANAME(対象)%开心地笑了
+	;TranslatedMark %ANAME(MASTER)%が了承すると、%ANAME(対象)%は嬉しそうに笑った
+	PRINTFORML 
+ENDIF
+PRINTFORML 因为是深夜，所以大浴场里没有人，处于包场状态
+;TranslatedMark 深夜なこともあって大浴場には誰もおらず、貸し切り状態だった
+PRINTFORML 在感觉比平时更宽敞的浴场里，%ANAME(MASTER)%和%ANAME(対象)%不知道为什么激昂了起来
+;TranslatedMark 普段よりも広く感じる浴場に%ANAME(MASTER)%と%ANAME(対象)%はなんとなくテンションが上がる
+PRINTFORML 「那我先去冲下身子……」
+;TranslatedMark 「それじゃ身体洗ってくるわね……」
+PRINTFORMW %ANAME(対象)%好像在清洗身体……
+;TranslatedMark %ANAME(対象)%は身体を洗うようだが……
+PRINTFORMW 「嗯？怎么了？%ANAME(MASTER)%？」
+;TranslatedMark 「んっ？　どうかしたの%ANAME(MASTER)%？」
+CALL ASK_YN("帮你洗下身子", "没什么，没事了")
+IF RESULT == 1
+	PRINTFORML 「？是的……」
+	;TranslatedMark 「？　そう……」
+	PRINTFORMW %ANAME(MASTER)%一边眺望着%ANAME(対象)%的身体，一边享受着泡澡的乐趣
+	;TranslatedMark %ANAME(MASTER)%達は身体を洗う%ANAME(対象)%を眺めつつお風呂を楽しんだ
+ELSE
+	PRINTFORML 「要给我洗身体吗？嗯…那就拜托你了」
+	;TranslatedMark 「身体を洗ってやる？　んー…じゃあお願いしようかしら」
+	PRINTFORML %ANAME(対象)%背向%ANAME(MASTER)%
+	;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に背を向ける
+	PRINTFORML 「…呵呵，没想到会让别人帮我洗浴呢」
+	;TranslatedMark 「…ふふっ、まさか他人に身体を洗われるなんてね…」
+	PRINTFORMW %ANAME(MASTER)%用海绵开始清洗%ANAME(対象)%的身体…
+	;TranslatedMark %ANAME(MASTER)%はスポンジで%ANAME(対象)%の身体を洗い始めた…
+	PRINTFORML 
+	PRINTFORML 
+	PRINTFORML 「…没想到洗得还很温柔呢」
+	;TranslatedMark 「…意外と優しく洗うのですね」
+	PRINTFORML 不仅不是很用力，而且还很细心，%ANAME(MASTER)%像是很重视%ANAME(対象)%的背肌再认真清洗
+	;TranslatedMark 強すぎずそれでいて繊細に、%ANAME(対象)%の背肌を大事に扱うようにスポンジで洗う%ANAME(MASTER)%
+	PRINTFORML 「诶，要站起来吗？」
+	;TranslatedMark 「えっ、立つの？」
+	PRINTFORML %ANAME(MASTER)%让%ANAME(対象)%站起来，不仅是背肌，连脚尖的指甲和手指的缝隙也用泡沫包裹着%ANAME(対象)%的身体…
+	;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%を立たせ、背肌のみならず足先の爪や指の隙間まで%ANAME(対象)%の身体を泡で包んでいく…
+	PRINTFORML 「啊……那里，那里」
+	;TranslatedMark 「あっ……そこっ」
+	PRINTFORMW %ANAME(対象)%被温柔地爱抚大腿内侧，发出性感的声音…
+	;TranslatedMark %ANAME(対象)%は太ももの内側を優しく愛撫するように洗われ、色っぽい声を漏らしてしまう…
+	PRINTFORML 
+	PRINTFORML
+	PRINTFORML 「（为什么要好好洗啊……呜）」
+	;TranslatedMark 「(な、なんでちゃんと洗うのよ……っ)」
+	PRINTFORML 仿佛全身都被泡沫灼热般的洗净方式，与泡沫不同的是，%ANAME(対象)%一边流着泪一边脸红着用手遮住了脸
+	;TranslatedMark まるで泡で全身を焦らされるような洗われ方に、泡とは違ったぬめりを垂れ流しながら%ANAME(対象)%は赤面し手で顔を隠している
+	PRINTFORML %ANAME(MASTER)%放下手中的海绵，从背后抱住%ANAME(対象)%的身体
+	;TranslatedMark %ANAME(MASTER)%は持っていたスポンジを置き、%ANAME(対象)%の身体を後ろから抱きしめた
+	PRINTFORMW 对于突然的拥抱，%ANAME(対象)%没有出声，尽管如此，她还是捂着脸惊讶不已……
+	;TranslatedMark 突然の抱き締めに%ANAME(対象)%は声を出さず、それでいて顔を抑えたまま驚いているようだ……
+	PRINTFORML 
+	PRINTFORML
+	PRINTFORML 手指像描着浮现在肩胛骨上的线一样滑了下来，然后将手臂伸入两侧紧紧抱住
+	;TranslatedMark 肩甲骨に浮き出る線をなぞるように指を滑らし、そのまま両脇に腕を入れ強く抱きしめる
+	PRINTFORML  %ANAME(MASTER)%的胸部小而柔软，这让%ANAME(対象)%的背部感觉更强烈了	
+    ;TranslatedMark %ANAME(MASTER)%の胸には、小さくて柔らかい、そんな%ANAME(対象)%の背中の感触がより一層強く感じられた
+	PRINTFORML 「……」
+	PRINTFORML 手拉手五指相扣在一起的感觉……
+	;TranslatedMark 手に手が重なる感触がする……
+	PRINTFORMW %ANAME(対象)%不再用手隐藏自己已经通红的脸，而是把手放在紧紧抱住自己的手臂上
+	;TranslatedMark %ANAME(対象)%は紅い顔を隠すのをやめ、自らを抱き締める腕の上に手を重ねている
+	PRINTFORML 
+	PRINTFORML
+	PRINTFORML 彼此的身体通过泡沫紧贴在一起，共同感受心跳和体温……
+	;TranslatedMark 互いの身体が泡越しに密着し、鼓動や体温を共有しあった……
+	PRINTFORML 「……真幸福啊」
+	;TranslatedMark 「……幸せよ」
+	PRINTFORML %ANAME(対象)%一边用手
+	;TranslatedMark 撫でるような独り言を漏らす%ANAME(対象)%
+	PRINTFORML %ANAME(MASTER)%过了一会儿后，在%ANAME(対象)%的耳朵上呼了一口气
+	;TranslatedMark %ANAME(MASTER)%はしばらくした後、%ANAME(対象)%の耳にふっと吐息を当てた
+	PRINTFORML 「噫！%ANAME(MASTER)%你啊…真是的」
+	;TranslatedMark 「ひぅ！　%ANAME(MASTER)%ったら…もうっ」
+	PRINTFORMW 在安静而柔和的氛围中，仿佛刚交往的情侣一样笑着生气的%ANAME(対象)%
+	;TranslatedMark 静かで柔らかい雰囲気から、まるで付き合いたてのカップルのように笑顔で怒る%ANAME(対象)%
+	PRINTFORML
+	PRINTFORML
+	PRINTFORML 一边拥抱，一边像开玩笑一样道歉的%ANAME(MASTER)%
+	;TranslatedMark 抱き締めながらも、茶化すように謝る%ANAME(MASTER)%
+	PRINTFORML 「呼……你这个人真是……啊呵呵」
+	;TranslatedMark 「ほんっとっ……あなたって人はもうっ……ふふふっ」
+	PRINTFORML 虽然还在笑着，%ANAME(対象)%的手却不想从抱着自己的手臂上放开
+	;TranslatedMark 笑いながらも、%ANAME(対象)%自身を包む腕から手を放そうとしない
+	PRINTFORML %ANAME(MASTER)%用手指玩弄了%ANAME(対象)%的肚脐
+	;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%のへそを指で弄んだ
+	PRINTFORML 「哎呀」
+	;TranslatedMark 「ひゃんっ」
+	PRINTFORMW %ANAME(対象)%不由得叫出声来松开手
+	;TranslatedMark 思わず声を上げ手を緩める%ANAME(対象)%
+	PRINTFORML
+	PRINTFORML
+	PRINTFORML 在那个空隙%ANAME(MASTER)%拔出一只手抓住了水龙头
+	;TranslatedMark その隙に%ANAME(MASTER)%は片腕を抜いてシャワーの首を掴んだ
+	PRINTFORML 「要冲了吗？我想再这样呆一会可以不？」
+	;TranslatedMark 「もう流しちゃうの？　私はもうちょっとこのままヌメヌメでも良いのになーっ？」
+	PRINTFORML %ANAME(対象)%抬起头，睁开眼睛开玩笑地说
+	;TranslatedMark %ANAME(対象)%は首から上だけ振り向かせ、上目遣いで冗談気味に言う
+	PRINTFORML %ANAME(MASTER)%一边开玩笑一边转淋浴器，淋浴处慢慢喷出热水
+	;TranslatedMark %ANAME(MASTER)%が冗談を受け流しつつシャワーコックを捻ると、シャワーの先から徐々に暖かい湯が噴き出す
+	PRINTFORML 稍微降低淋浴的温度，瞄准%ANAME(対象)%紧绷的乳头放热水
+	;TranslatedMark 少しシャワーの威力を下げ、%ANAME(対象)%の張り詰めた乳首を狙ってお湯を当てる
+	PRINTFORML 「啊……真是的…%ANAME(MASTER)%你啊……」
+	;TranslatedMark 「んっ……もう、%ANAME(MASTER)%ったら……」
+	PRINTFORML %ANAME(対象)%露出了似乎感到舒服般的微笑
+	;TranslatedMark 少し感じる素振りを見せつつ微笑む%ANAME(対象)%
+	PRINTFORMW %ANAME(MASTER)%就这样用淋浴的热水把%ANAME(対象)%身体的泡沫洗掉了……
+	;TranslatedMark %ANAME(MASTER)%はそのままシャワーのお湯で%ANAME(対象)%の身体の泡を落としていった……
+	CFLAG:対象:好感度 += 200
+	KDVAR:対象:ドレミー_混浴の誘い = 1
+ENDIF
+
+
+RETURN 1

@@ -1,0 +1,57 @@
+﻿;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@KOJO_DAILY_K31_DERIVATION_PLEASE_GET_BACK_MY_HOME_DISABLE(対象)
+#DIM 対象
+RETURN KOJO_DAILY_GET_DISABLE_CONFIG(対象, "PLEASE_GET_BACK_MY_HOME")
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K31_DERIVATION_PLEASE_GET_BACK_MY_HOME_DECISION(対象)
+#DIM 対象
+#DIM 妹紅宅
+
+;監視中でなければ戻る
+SIF KDVAR:対象:妹紅_おうちかえして != 1
+	RETURN 0
+
+IF CFLAG:対象:所属 != CFLAG:MASTER:所属	
+	CALL SINGLE_DRAWLINE
+	PRINTFORML 因為所属已経不同、%ANAME(対象)%撤銷了対%ANAME(MASTER)%的請求……
+	CALL SINGLE_DRAWLINE
+	KDVAR:対象:妹紅_おうちかえして = 2
+ENDIF
+
+妹紅宅 = GET_CITYNUMBER("妹紅宅")
+SIF CITY_OWNER:妹紅宅 != CFLAG:MASTER:所属
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, -1, 0)
+
+;---------------------
+;本体
+;---------------------
+@KOJO_DAILY_K31_DERIVATION_PLEASE_GET_BACK_MY_HOME(対象)
+#DIM 対象
+#DIM 妹紅宅
+妹紅宅 = GET_CITYNUMBER("妹紅宅")
+
+
+
+PRINTFORML 在房間工作時、%ANAME(対象)%過来拜訪了
+PRINTFORMW 「吶、%ANAME(MASTER)%」
+PRINTFORMW 「謝謝你幇我奪回我的家」
+PRINTFORMW 「雖然我沒有能力做什麼回報、非常地……感謝你」
+PRINTFORMW 「那個、就這樣吧。抱歉打擾你了。再見」
+PRINTFORML 語畢、%ANAME(対象)%從房間離開了
+PRINTFORML 少女的態度、変得柔和了……
+CALL COLOR_PRINTW(@"%ANAME(対象)%的好感度上昇了", カラー_注意)
+CFLAG:対象:好感度 += 1000
+CFLAG:対象:依存度 += 300
+TALENT:対象:チョロイン = 1
+TALENT:対象:反抗的 = 0
+KDVAR:対象:妹紅_おうちかえして = 2
+
+RETURN 1

@@ -1,0 +1,773 @@
+﻿;-------------------------------------------------
+;共通部分
+;-------------------------------------------------
+
+;=================================================
+;●口上の存在判定
+;=================================================
+@KOJO_EXIST_K17
+
+;=================================================
+;●開始時
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_TRAIN_START_K17
+
+;=================================================
+;●終了時
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_TRAIN_END_K17
+
+;=================================================
+;●コマンド実行時(このキャラがプレイヤー側のとき)
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_TARGET_K17
+
+;=================================================
+;●コマンド実行時(このキャラがプレイヤー側のとき)
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_PLAYER_K17
+
+;=================================================
+;●コマンド実行前(ターゲット・プレイヤー問わず)
+;※地の文が表示される前に実行される。戻り値に1を設定する(RETURN 1)と地の文がカットされる
+;  必要に応じてKOJO_COM_TARGETの代わりに使う
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_BEFORE_K17
+RETURN 0
+
+;=================================================
+;●コマンド実行後(パラメータの変動処理が終わってから呼び出される)
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_AFTER_K17
+;[虚ろ]状態の場合、口が塞がっている場合は口上を表示しない
+IF TALENT:空虚 || IS_EQUIP_CONTINUE(TARGET, "口装着")
+	RETURN 0
+ENDIF
+;-------------------------------------------------
+;初絶頂は使い回せそうなのでここに作成
+;-------------------------------------------------
+;-------------------------------------------------
+;初めてＣ絶頂　メルラン、望まないセックスがあまり想像できないので素質で分ける必要あんまないな？
+;-------------------------------------------------
+IF NOWEX:Ｃ絶頂 > 0
+	IF CFLAG:220 == 0
+		CFLAG:220 = 1
+			PRINTFORMW 「啊，就这样……嗯，去，嗯…❤」
+			;TranslatedMark 「あっあっ、そのまま……んっ、いくっ、んん…❤」
+			PRINTFORMW 在对阴蒂的爱抚下达到了顶峰，看到了%ANAME(TARGET)%苦闷的表情…理所当然地对视了。
+			;TranslatedMark クリトリスへの愛撫で絶頂に達した%ANAME(TARGET)%の切なげな顔を見ていると…当然だが目が合った。
+			PRINTFORMW 「……呵呵，什么？不要再这样了，一直盯着看，太不好意思了……♪」
+			;TranslatedMark 「……ふふっ、何ぃ？もうやめてよー、イってるのじっと見られるの恥ずかしいんだから……♪」
+			PRINTFORMW 「你很擅长触摸呢……❤呵呵，不是演技，心情非常好……再加一点❤」
+			;TranslatedMark 「キミって触るの上手だね……❤ふふっ、演技じゃないよーとっても気持ち良かった……もっとして❤」
+	;二回目以降
+	ELSE
+		;何かＶに入ってればカット
+		IF IS_V_HOLD(MTAR:0)
+			;PRINTFORMW Ｖてすと
+		;尻に入っててもカット
+		ELSEIF IS_A_HOLD(MTAR:0)
+			;PRINTFORMW Ａてすと
+		;温泉で日常クリ愛撫
+		ELSEIF SELECTCOM == 333 && TFLAG:54 == 7
+		SELECTCASE RAND:3
+		CASE 0
+			PRINTFORMW 「因为只有两个人……很多，声音都出来了……❤啊啊啊……❤再摸一下，啊！嗯……❤」
+			;TranslatedMark 「二人だけだから……いっぱい、声、出ちゃう……❤あっあぁ……❤もっとさわって、あぁ！いくぅ……❤」
+		CASE 1
+			PRINTFORMW 「好啊，心情真好啊❤更加激烈的，乱七八糟的❤」
+			;TranslatedMark 「いいよっ、きもちいいのおっ❤もっと激しくっ、ぐちゃぐちゃにしてっっ❤」
+		CASE 2
+			PRINTFORMW 「不行，不行❤在浴室里弄脏了……❤哎呀，已经不行了，走吧……❤」
+			;TranslatedMark 「だめっ、だめえっ❤お風呂の中、汚しちゃうっ……❤やっあっ、もうむりっ、いくうっ……❤」
+		ENDSELECT
+		;愛撫とクンニと日常クリ愛撫
+		ELSEIF GROUPMATCH (SELECTCOM, 0, 2, 333)
+			SELECTCASE PREVCOM
+				;仕事中
+				CASE 303 ,304
+					PRINTFORMW 「喂，嗯❤啊，啊……❤工作中，因为啊……❤」
+					;TranslatedMark 「ちょっと、んっ❤やっ、あっ……❤お仕事中、だってばぁ……❤」
+				;警邏
+				CASE 305
+					PRINTFORMW 「在这种地方……骗人啊，好，走了……❤」
+					;TranslatedMark 「こんなとこで……嘘っ、やっ、いっちゃう……❤」
+				;猥談
+				CASE 309
+					PRINTFORMW 「啊啊❤是的，就是这样的感觉……我被人逗弄了……❤」
+					;TranslatedMark 「あっあっ❤そう、そんな感じで……いかされちゃったの……❤」
+				CASEELSE
+				SELECTCASE RAND:4 
+				CASE 0
+					PRINTFORMW 「啊，就这样……嗯，去，嗯……❤」
+					;TranslatedMark 「あっあっ、そのまま……んっ、いくっ、んん……❤」
+				CASE 1
+					PRINTFORMW 「啊，啊，啊！嗯……❤嗯，啊啊啊……❤」
+					;TranslatedMark 「あっ、あっ、ああっ！んっ……❤んっ、っああぁ……❤」
+				CASE 2
+					PRINTFORMW 「一！嗯，嗯……嗯～……我走啦……❤」
+					;TranslatedMark 「いっ！ひうっ、んっ……んん～……いっちゃったぁ……❤」
+				CASE 3
+					PRINTFORMW 「更多……嗯！啊，嗯……❤好恶心……❤」
+					;TranslatedMark 「もっと……んぁ！あっ、ひうっ……❤きもちいぃ……❤」
+				ENDSELECT
+			ENDSELECT
+		;ローター
+		ELSEIF SELECTCOM == 60
+			SELECTCASE RAND:3
+			CASE 0
+				PRINTFORMW 「啊啊…！嗯，去，啊啊啊…！啊、啊、啊啊……❤」
+				;TranslatedMark 「ああっ…！っくぅ、いくっ、ああぁぁ…！はっ、はっ、あはぁぁ……❤」
+			CASE 1
+				PRINTFORMW 「嘘！一、啊啊……❤不行，不行啊，不行啊……❤」
+				;TranslatedMark 「ひっ！いっ、きゃあっ……❤それだめっ、トんじゃう、よぉ……❤」
+			CASE 2
+				PRINTFORMW 「嗯！嗯！嗯……！好了，走，走吧……❤」
+				;TranslatedMark 「んっ！んっ！んぁぁ……！もう、くるっ、いく、いくぅぅ……❤」
+			ENDSELECT
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;初めてＶ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｖ絶頂 > 0
+	IF CFLAG:221 == 0
+		CFLAG:221 = 1
+		;バイブで
+		IF IS_EQUIP_TARGET(MTAR:0, 61) || SELECTCOM == 61
+			PRINTFORMW 「嗯……嗯！啊，是啊……嗯……❤」
+			;TranslatedMark 「んっ……んぁ！あっあっ、いっ……くぅ……❤」
+			PRINTFORMW 「这个……好厉害啊……❤啊，啊，在里面动啊……❤」
+			;TranslatedMark 「これ……すごいんだねぇ……❤あぁ、あっ、中で動いてるぅ……❤」
+		;指挿入れで
+		ELSEIF SELECTCOM == 3
+			PRINTFORMW 「嗯！哈、哈……❤可以擦那个地方，动一下……❤」
+			;TranslatedMark 「んあっ！はっ、はぁぁ……❤そこ擦っていいよ、動かして……❤」
+			PRINTFORMW 「啊～……好舒服啊……走了……❤」
+			;TranslatedMark 「あぁ～……気持ちいいよぉ……いっちゃった……❤」
+		;プレイヤーの竿
+		ELSEIF GROUPMATCH(SELECTCOM , 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 52, 55, 57, 160) || IS_EQUIP_TARGET(MTAR:0, 30) || IS_EQUIP_TARGET(MTAR:0, 31) || IS_EQUIP_TARGET(MTAR:0, 32) || IS_EQUIP_TARGET(MTAR:0, 33) || IS_EQUIP_TARGET(MTAR:0, 34) || IS_EQUIP_TARGET(MTAR:0, 35) || IS_EQUIP_TARGET(MTAR:0, 36) || IS_EQUIP_TARGET(MTAR:0, 37) || IS_EQUIP_TARGET(MTAR:0, 38) || IS_EQUIP_TARGET(MTAR:0, 39) || IS_EQUIP_TARGET(MTAR:0, 52) || IS_EQUIP_TARGET(MTAR:0, 55) || IS_EQUIP_TARGET(MTAR:0, 57) || IS_EQUIP_TARGET(MTAR:0, 160)
+			PRINTFORMW 「啊～、啊～、还有……酱……来，来❤」
+			;TranslatedMark 「あ～っ、あ～っ、もっと……ずんずんって……きてえっ❤」
+			PRINTFORMW 「好啊……啊啊啊，去啊……❤好舒服啊，你的……小气鬼……❤」
+			;TranslatedMark 「いいよぉ……あっあっいくっ、いくうっ……❤気持ちいいよっ、キミの……おちんちん……❤」
+		ENDIF
+	;二回目以降
+	ELSE
+		;プレイヤーの射精を伴うときはカット
+		IF NOWEX:MASTER:射精 > 0
+		;バイブ
+		ELSEIF IS_EQUIP_TARGET(MTAR:0, 61) || SELECTCOM == 61
+			;淫壺
+			IF GETBIT(TALENT:淫乱系, 素質_淫乱_淫壷)
+				;しおふき
+				IF RAND:4 ==0 && NOWEX:潮吹 > 0
+					PRINTFORML 「那个……不行啊！啊，太好了！啊，是……！去、去、不行啊…❤」
+					;TranslatedMark 「それ……ダメだからあっ！あっ、やっ！あっあっ、いっ……！いくっ、いくっ、ダメえっ…❤」
+					PRINTFORML 「啊啊啊！好几次……那样的，啊啊，走了，啊…❤」
+					;TranslatedMark 「あっあっあっ！何回も……そんな、あんあぁあっ、いっちゃう、よぉ…❤」
+					PRINTFORMW 瞄准浅浅的天花板用振动摩擦的话，梅尔兰好像很有意思似的苦闷，反复了绝顶……
+					;TranslatedMark 浅い天井を狙ってバイブを擦り付けるとメルランは面白いように悶え、絶頂を繰り返した……
+				ELSEIF RAND:3 ==0 && NOWEX:潮吹 > 0
+					PRINTFORML 「啊呀呀呀❤因为会出来❤拔出来，啊，嗯啊啊啊❤」
+					;TranslatedMark 「あっあっやだっ❤でるっでっ、出ちゃうからっ❤抜いてっ、あっあっ、んああぁ❤」
+					PRINTFORML 「讨厌啊……停不下来啊…❤啊……哈哈……已经……嗯……❤」
+					;TranslatedMark 「やだぁぁ……止まんないよぉ…❤あぁ……はあぁ……もう……えっち……❤」
+					PRINTFORMW 梅尔兰的阴道大幅度上下调整呼吸，振动还在提高振动声音…
+					;TranslatedMark 大きく肩を上下させて呼吸を整えているメルランの膣で、バイブがなおも振動音を上げている…
+				ELSEIF RAND:2 == 0
+					PRINTFORML 「啊啊~❤好啊……就那样，就那样做吧……❤」
+					;TranslatedMark 「ああ～っ❤いいよっ……そのままっ、そのまましてっ……❤」
+					PRINTFORMW 「……嗯，去，啊啊啊啊❤不要停啊，啊啊，啊——❤」
+					;TranslatedMark 「……っくうっ、いくっ、あはあぁぁ❤止めないでえっ、あんああっ、あぁーーー❤」
+				ELSE
+					PRINTFORML 「深……这个，好的……啊，不行❤好舒服，好舒服，嗯啊啊啊……❤」
+					;TranslatedMark 「ふかい……とこっ、いいのっ……あっあっ、だめっ❤きもちいっ、いいっ、んああぁぁ……❤」
+					PRINTFORMW 「胖墩墩的❤喂，那里……❤啊啊啊啊……好了，好了……哎呀……❤」
+					;TranslatedMark 「ぐりぐりしてっ❤おくっ、そこ……❤ああぁぁ……いっちゃうよぉ、もうっ……やあぁ……❤」
+				ENDIF
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 「嗯，啊啊啊……❤啊，哈哈……好舒服啊，这个……嘿嘿…❤」
+				;TranslatedMark 「んあっ、あっああぁ……❤はあ、はあぁ……気持ちいいね、これ……えへへ…❤」
+			ELSE
+				PRINTFORMW 「嗯……嗯！啊，是啊……嗯……❤」
+				;TranslatedMark 「んっ……んぁ！あっあっ、いっ……くぅ……❤」
+				PRINTFORMW 「这个……好厉害啊…❤啊，啊，在里面动啊……❤」
+				;TranslatedMark 「これ……すごいいいよぉ…❤あぁ、あっ、中で動いてるぅ……❤」
+			ENDIF
+		;指挿入れ
+		ELSEIF SELECTCOM == 3
+			;淫壺
+			IF GETBIT(TALENT:淫乱系, 素質_淫乱_淫壷)
+				;しおふき
+				IF RAND:4 ==0 && NOWEX:潮吹 > 0
+					PRINTFORML %ANAME(MASTER)%执拗地刺激着阴道的天花板，一直爱抚到潮水出来……
+					;TranslatedMark %ANAME(MASTER)%は膣の天井を執拗に刺激し、潮が出尽くすまで愛撫を続けた……
+					PRINTFORML 「哈……哈哈……哎呀……已经……❤飞得很厉害啊……❤」
+					;TranslatedMark 「はぁ……はぁぁ……やだぁ……もぉ……❤すっごい飛び散っちゃってるよぉ……❤」
+					PRINTFORMW 「但是……好厉害啊……❤声音没有变奇怪吗？啊哈哈……真是太好了，真的……❤」
+					;TranslatedMark 「でも……すごかったぁ……❤声おかしくなってなかった？あはは……すっごい良かったもん、ほんとに……❤」
+				ELSEIF RAND:3 ==0 && NOWEX:潮吹 > 0
+					PRINTFORML 「啊啊啊～～❤啊，嗯，嗯，嗯❤啊啊啊……❤」
+					;TranslatedMark 「ああぁあぁ～～～❤あっあんっ、いっくぅ、ひうっ❤ああぁ……❤」
+					PRINTFORML 「满满的……出来了……❤啊，啊……嘿嘿……嗯……因为…❤」
+					;TranslatedMark 「いっぱい……出ちゃった……❤はあっ、はあ……えへへ……えっち……なんだから…❤」
+					PRINTFORMW 从梅尔兰的尿道中可以看到，也许是快感的余韵吧，潮水还滴答地飞溅出来…
+					;TranslatedMark メルランの尿道からは快感の余韻からか、未だに潮がぴゅっぴゅっ、と飛び出しているのが見える…
+				ELSEIF RAND:2 == 0
+					PRINTFORML 「几……哦哦哦…❤好的，呃，啊……嗯啊……❤」
+					;TranslatedMark 「いく……よぉっ…❤いいっ、ひっ、ああっ……んあぁ……❤」
+					PRINTFORMW 「等一下……还……不要拔就那样……啊……在结束之前……❤」
+					;TranslatedMark 「待って……まだ……抜かないでそのまま……あぁ……収まるまで、ね……❤」
+				ELSE
+					PRINTFORMW 「还有更多……磨手❤啊啊啊啊，去啊，好的，嗯……❤」
+					;TranslatedMark 「そこもっと……擦ってぇ❤あぁああっ、いくっいっ、いいっ、ひうぅ……❤」
+					PRINTFORMW 「嗯…❤可以吗……还剩下……嗯，嗯……呵呵…❤」
+					;TranslatedMark 「んん…❤いいの……まだ残ってるの……あんっ、んっ……ふふふ…❤」
+				ENDIF
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 「呵呵……嗯，嗯，嗯……❤被耍了，对吧……❤」
+				;TranslatedMark 「ふふ……ふぁ、ん、んん……❤イかされちゃった、ね……❤」
+			ELSE
+				PRINTFORMW 「嗯！哈、哈……❤就那样……好啊，嗯……移动一下……❤」
+				;TranslatedMark 「んあっ！はっ、はぁぁ……❤そこそのまま……いいよっ、ん……動かして……❤」
+				PRINTFORMW 「啊～……好舒服啊……走了……❤」
+				;TranslatedMark 「あぁ～……気持ちいいよぉ……いっちゃった……❤」
+			ENDIF
+		;プレイヤーの竿
+		ELSEIF GROUPMATCH(SELECTCOM , 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 52, 55, 57, 160) || IS_EQUIP_TARGET(MTAR:0, 30) || IS_EQUIP_TARGET(MTAR:0, 31) || IS_EQUIP_TARGET(MTAR:0, 32) || IS_EQUIP_TARGET(MTAR:0, 33) || IS_EQUIP_TARGET(MTAR:0, 34) || IS_EQUIP_TARGET(MTAR:0, 35) || IS_EQUIP_TARGET(MTAR:0, 36) || IS_EQUIP_TARGET(MTAR:0, 37) || IS_EQUIP_TARGET(MTAR:0, 38) || IS_EQUIP_TARGET(MTAR:0, 39) || IS_EQUIP_TARGET(MTAR:0, 52) || IS_EQUIP_TARGET(MTAR:0, 55) || IS_EQUIP_TARGET(MTAR:0, 57) || IS_EQUIP_TARGET(MTAR:0, 160)
+			;淫壺
+			IF GETBIT(TALENT:淫乱系, 素質_淫乱_淫壷)
+				;しおふき
+				IF RAND:7 == 0 && NOWEX:潮吹 > 0
+					PRINTFORML 「啊❤啊❤啊啊啊❤好舒服啊❤……嗯……骗人，很厉害……出了这么多……的？」
+					;TranslatedMark 「あーっ❤あーっ❤あぁーっ❤きもちいいよぉ❤……って……うそ、すっごい……こんなに出ちゃった……の？」
+					PRINTFORMW 「啊哈哈~……❤一直开着……完全没有注意到啊…❤小气鬼好厉害……没关系嘛……❤」
+					;TranslatedMark 「あは、あははぁ～……❤イきっぱなしで……全然気づかなかったぁ…❤おちんちんすっごい……いいんだもん……❤」
+				ELSEIF RAND:6 ==0 && NOWEX:潮吹 > 0
+					PRINTFORML 「讨厌啊……❤小气鬼……因为是我出的，所以已经……弄得乱七八糟的……❤」
+					;TranslatedMark 「やだあぁ……❤おちんちん……私が出したのでもう……ぐちゃぐちゃにしちゃったぁ……❤」
+					PRINTFORMW 「被打了……开心吗？你已经是变态了啊……❤看，里面又硬了……❤」
+					;TranslatedMark 「かけられて……嬉しいのぉ？もう、キミってば変態さんだぁ……❤ほらまた、中で硬くしてるもん……❤」
+				ELSEIF RAND:5 == 0
+					PRINTFORML 「一、好的、好的、好的、好的❤嗯，啊，啊啊❤」
+					;TranslatedMark 「いっ、いいっ、いく、よおっ❤んっんっ、あっ、ああぁ❤」
+					PRINTFORMW 「你的心情非常好❤喜欢，最喜欢了哦……❤」
+					;TranslatedMark 「キミのですっごく気持ちいいのっ❤好きっ、大好きだよおっ……❤」
+				ELSEIF RAND:4 == 0
+					PRINTFORML 「啊！啊啊，那里……❤那里，那里❤再戳一点，里面，用力推一下……嗯！嗯❤很深……❤」
+					;TranslatedMark 「あっ！ああぁ、そこっ……❤そこぉ❤もっと突いてっ、奥っ、ぐって押し込んで……んん！んっ❤深ぁい……❤」
+					PRINTFORMW 「啊，啊，啊啊啊…❤只有我……对不起…❤好舒服啊…停不下来啊……❤」
+					;TranslatedMark 「はあっ、はっあっ、っああぁ…❤私だけ……ごめんね…❤気持ちいいの…止まんないよぉ……❤」
+				ELSEIF RAND:3 == 0
+					PRINTFORML 「啊…！嗯，啊，啊！嗯……嗯，啊啊啊……❤」
+					;TranslatedMark 「あっ…！んっ、あっあっ、あっ！いくっ……いっくぅ、ふああぁぁ……❤」
+					PRINTFORMW 「……嘿嘿，你也一起玩就好了……❤那么想看我的帅哥啊…❤」
+					;TranslatedMark 「……えへへ、キミも一緒にイっちゃえばよかったのに……❤そんなに私のイくとこ、見たいんだぁ…❤」
+				ELSEIF RAND:2 == 0
+					PRINTFORML 「再去吧，走吧❤啊，嗯！啊！啊啊❤」
+					;TranslatedMark 「またいくっ、いくよおっ❤あっあっ、んあっ！あっ！ああっ❤」
+					PRINTFORMW 「真好吃❤随心而来❤伊始❤可以，可以，喜欢❤喜欢……❤」
+					;TranslatedMark 「おまんこいいのっっ❤ずんずんきてっっ❤イくからっ❤ひっいいっ、いいよっ、好きっ❤好きっ……❤」
+				ELSE
+					PRINTFORML 「嗯，嗯❤嗯❤我受不了……被戳得满满的包子，开心地往上爬……❤」
+					;TranslatedMark 「んんーっ❤んーっ❤我慢できないっ……おまんこいっぱい突かれてっ、ハッピー上がってきてるのっ……❤」
+					PRINTFORMW 「嗯，啊啊！好啊，啊啊啊❤想再做点什么❤啊，不行啊，啊——❤」
+					;TranslatedMark 「んあ、あぁあっ！いいよっ、あはぁぁ❤もっとイきたいのっ❤ああだめっ、んあっ、あぁーー❤」
+				ENDIF
+			ELSEIF RAND:3 == 0
+				PRINTFORMW 「啊啊啊…❤你也……嗯，可以啊……呵呵，你看，我会紧紧抱住你的……❤」
+				;TranslatedMark 「ああぁ…❤キミも……イって、いいんだよ……ふふっ、ほら、ぎゅってしちゃうぞ……❤」
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 「只有我……好像掉了……呵呵，对不起……❤」
+				;TranslatedMark 「私だけ……イっちゃったみたい……ふふ、ごめんね……❤」
+			ELSE
+				PRINTFORMW 「啊！啊，嗯❤要走了、嗯、啊——❤」
+				;TranslatedMark 「あっ！あっ、んあっ❤いっちゃうっ、んん、あぁーーー❤」
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;初めてＡ絶頂
+;-------------------------------------------------
+IF NOWEX:Ａ絶頂 > 0
+	IF CFLAG:222 == 0
+		CFLAG:222 = 1
+			PRINTFORML 「嗯！啊……啊？那个，讨厌，等一下……停止运转……嗯，嗯……❤」
+			;TranslatedMark 「んっ！あっ……あっ？あれっ、やだっ、待って……動かすのやめっ……んっうぅ、んん……❤」
+			PRINTFORMW 「……哈，啊……现在的……屁股，被咬了吗……？」
+			;TranslatedMark 「……はぁ、あ……今の……おしり、イっちゃったのかな……？」
+			PRINTFORMW 「啊啊啊……变成了连屁股都能变得快乐的孩子……❤啊哈哈，会不断被开发的吧……❤」
+			;TranslatedMark 「ああぁ……おしりでもハッピーになれる子になっちゃった……❤あはは、どんどん開発されちゃうね……❤」
+	;二回目以降
+	ELSE
+		;プレイヤーの射精を伴うときはカット
+		IF NOWEX:MASTER:射精 > 0
+		;アナルバイブかつ尻穴狂い
+		ELSEIF IS_EQUIP_TARGET(MTAR:0, 62) || SELECTCOM == 62 && GETBIT(TALENT:淫乱系, 素質_淫乱_尻穴狂い)
+			IF RAND:2 == 0
+				PRINTFORML 「唔、唔、唔……❤心情……好啊……❤」
+				;TranslatedMark 「うっ、んぐっ、んいぃぃ……❤きもち……いいよぉ……❤」
+				PRINTFORMW 「哈、啊哈、嗯……❤不能拔啊……在屁股里再好好一点吧……❤」
+				;TranslatedMark 「はぁっ、あはぁ、んん……❤抜いちゃやだぁ……もっとお尻の中よくしてぇ……❤」
+			ELSE
+				PRINTFORML 「嗯……有效啊，嗯，啊，啊～……❤」
+				;TranslatedMark 「ぶっといのぉ……効くっ、んっんっ、んああっ、ああ～～っ……❤」
+				PRINTFORMW 「想一直被插入啊这个啊…❤想一直保持活力……哦，真是的……嗯～…❤」
+				;TranslatedMark 「ずっと挿入れてたいよこれぇ…❤イきっぱなしになりたいの……おっ、ほぉぉ……んん～…❤」
+			ENDIF
+		;プレイヤーの竿
+		ELSEIF GROUPMATCH(SELECTCOM , 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 53, 56, 58, 161) || IS_EQUIP_TARGET(MTAR:0, 40) || IS_EQUIP_TARGET(MTAR:0, 41) || IS_EQUIP_TARGET(MTAR:0, 42) || IS_EQUIP_TARGET(MTAR:0, 43) || IS_EQUIP_TARGET(MTAR:0, 44) || IS_EQUIP_TARGET(MTAR:0, 45) || IS_EQUIP_TARGET(MTAR:0, 46) || IS_EQUIP_TARGET(MTAR:0, 47) || IS_EQUIP_TARGET(MTAR:0, 48) || IS_EQUIP_TARGET(MTAR:0, 49) || IS_EQUIP_TARGET(MTAR:0, 53) || IS_EQUIP_TARGET(MTAR:0, 56) || IS_EQUIP_TARGET(MTAR:0, 58) || IS_EQUIP_TARGET(MTAR:0, 161)
+			;尻穴狂い
+			IF GETBIT(TALENT:淫乱系, 素質_淫乱_尻穴狂い)
+				IF RAND:3 == 0
+					PRINTFORML 「哦，哦，哦，哦，嗯！我、嗯、我在、所以啊……！」
+					;TranslatedMark 「ほおっっ、おっ、おぐっ、んっうぅ！いっぐ、うぅっ、いってる、からぁぁ……！」
+					PRINTFORMW 「哎呀，已经……！发出危险的声音…❤唔！呼……再加把劲！更…强韧❤啊啊……❤」
+					;TranslatedMark 「やだぁもう……！やばい声出ちゃう…❤うっ！ふっ……もっとぉ！もっと…お˝っ❤っあぉ……❤」
+				ELSEIF RAND:2 == 0
+					PRINTFORML 「正在生气的时候……那个，会很紧吧…❤不痛吗？还是说…那个好吗？哈哈❤」
+					;TranslatedMark 「イってる時さ……その、すっごい締まるでしょ…❤痛くない？それとも…それがいいの？あはは❤」
+					PRINTFORMW 「我和你心情都很好很开心呢❤那么……嗯，呵呵……继续吗，安❤」
+					;TranslatedMark 「私もキミも気持ち良くてハッピーだね❤それじゃ……んっ、ふふ……続きしよっか、あん❤」
+				ELSE
+					PRINTFORML 「啊～啊～啊～啊啊啊…❤又……好几次啊……嗯，嗯，嗯，嗯……❤」
+					;TranslatedMark 「あ～、あぁ～、はぁぁ…❤また……いくよっ……んおっおっ、あふぅ、んっくうぅぅ……❤」
+					PRINTFORMW 「再给我点小金……❤因为很长，所以要更加……挺开心的，拉出来……❤」
+					;TranslatedMark 「おちんちんもっとちょうだい……❤ながいのでもっとぉ……きもちいいの、ひっぱり出して……❤」
+				ENDIF
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 「啊啊！嗯，呼，呼，哈，哈哈……为什么屁股会变好呢，这个……❤」
+				;TranslatedMark 「あっあっ！んっ、ふっ、ふぁ、はぁ、はあぁ……何でおしり良くなっちゃうのかな、これ……❤」
+			ELSE
+				PRINTFORMW 「回头见！嗯，嗯……❤擦个好地方……什么，这个……明明是屁股……❤」
+				;TranslatedMark 「またっ、ひうっ！んっ、くぅ……❤いいとこ擦って……なに、これ……おしりなのに……❤」
+			ENDIF
+		;それ以外
+		ELSE
+			;尻穴狂い
+			IF GETBIT(TALENT:淫乱系, 素質_淫乱_尻穴狂い)
+				IF RAND:3 == 0
+					PRINTFORMW 「哈哈，啊❤屁股……不好吧…？你看……嗯啊啊！啊，啊…❤」
+					;TranslatedMark 「はぁぁ、あぁ❤おしりっ……イくよっ…？ほら、見てて……んああぁ！あっ、あっっ…❤」
+				ELSEIF RAND:2 == 0
+					PRINTFORMW 「啊~❤啊~❤……已经放弃了啊……❤因为一开始就停不下来……❤」
+					;TranslatedMark 「あ～❤あぁ～❤……もうやめてよぉ……❤イき出すと止まんないんだからさぁ……❤」
+				ELSE
+					PRINTFORMW 「强烈……做吧！啊啊啊啊啊啊啊啊啊……好棒，好棒……啊这个……喜欢……❤」
+					;TranslatedMark 「つよく……してえっ！あっあっそこっ……イクっ、イクうっ……あぁこれっ……好きぃ……❤」
+				ENDIF
+			ELSEIF RAND:3 == 0
+				PRINTFORMW 「又被亨泰先生骗了～……啊啊啊，嗯…❤……但是我也大概啊~」
+				;TranslatedMark 「またヘンタイさんにイかされちゃうよ～……はっああっ、んん…❤……でも私も、大概かぁ～」
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 「讨厌这个……啊，啊哈哈啊…❤又是屁股，要说了……啊，啊，去，嗯…❤」
+				;TranslatedMark 「やだこれっ……あはっ、あははあっ…❤またおしり、いっちゃいそう……あ、あぁあ、いくっ、っくふぅぅ…❤」
+			ELSE
+				PRINTFORMW 「哈哈……啊，嗯，嗯……陆续……来了…❤」
+				;TranslatedMark 「はあぁ……あぁ、ふぇ、んううぅぅ……ぞくぞく……きちゃう…❤」
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;初めてＢ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｂ絶頂 > 0
+	IF CFLAG:223 == 0
+		CFLAG:223 = 1
+		PRINTFORML 「啊……稍微，胸……讨厌，摸过头了……❤好的，好的，嗯，嗯…❤」
+		;TranslatedMark 「あん……ちょっと、胸……やだ、触りすぎ……❤いいのっ、いいよ、んっ、んん～～…❤」
+		PRINTFORMW 「……已经感觉到了这种程度……我的妈妈是第一次见到你哦？豆腐皮」
+		;TranslatedMark 「……もう、こんなに感じちゃうくらい……私のおっぱいいじったのキミが初めてだよ？うふふっ」
+		PRINTFORMW 「看吧？很酸，前端变硬了……❤呵呵，我还以为能拿下来呢，怎么说呢……❤」
+		;TranslatedMark 「ほら見て？すっごい、先っぽ硬くなってるし……❤ふふ、取れちゃうかと思った、なんてね……❤」
+	;二回目以降
+	ELSE
+		;プレイヤーの射精を伴うときはカット
+		IF NOWEX:MASTER:射精 > 0
+		;何かＶに入ってればカット
+		ELSEIF IS_V_HOLD(MTAR:0)
+			;PRINTFORMW Ｖてすと
+		;尻に入っててもカット
+		ELSEIF IS_A_HOLD(MTAR:0)
+			;PRINTFORMW Ａてすと
+		;噴乳時もカット
+		ELSEIF NOWEX:噴乳 > 0
+		;温泉で日常胸愛撫
+		ELSEIF SELECTCOM == 331 && TFLAG:54 == 7
+		SELECTCASE RAND:3
+		CASE 0
+			PRINTFORMW 「因为只有两个人……很多，声音都出来了……❤啊啊啊……❤再摸一下，啊！嗯……❤」
+			;TranslatedMark 「二人だけだから……いっぱい、声、出ちゃう……❤あっあぁ……❤もっとさわって、あぁ！いくぅ……❤」
+		CASE 1
+			PRINTFORMW 「好啊，心情很好❤更多乳房……啊，去❤」
+			;TranslatedMark 「いいよっ、きもちいいっ❤おっぱいもっと……あっあっ、いくっっ❤」
+		CASE 2
+			PRINTFORMW 「不行，不行❤乳房很舒服……头晕、晕……❤」
+			;TranslatedMark 「だめっ、だめえっ❤おっぱい気持ち良くて……くらくら、しちゃう……❤」
+		ENDSELECT
+		;胸愛撫と乳首責めと日常胸愛撫
+		ELSEIF GROUPMATCH (SELECTCOM, 1, 9, 331)
+			;淫乳
+			IF GETBIT(TALENT:淫乱系, 素質_淫乱_淫乳)
+				IF RAND:3 == 0
+					PRINTFORML 「啊～啊，啊，啊啊……❤鱼糕啊，再加一点，欺负我……❤」
+					;TranslatedMark 「あぁ～、ああっ、はぁあぁ……❤ちくびいいのっ、もっとっ、もっとして、苛めてっ……❤」
+					PRINTFORMW 「我还想再试试看……❤你的……我可以再多做一点乳房……随你的便……❤」
+					;TranslatedMark 「もっとイきたいのぉっ……❤おっぱいもっとしていいからっ、キミの……好きにしてっ……❤」
+				ELSEIF RAND:2 == 0
+					PRINTFORML 「啊哈哈❤啊哈哈❤不能乳房，啊，啊啊啊啊啊啊……❤」
+					;TranslatedMark 「あはっ❤あっはあぁ❤おっぱいだめっ、へっ、へあぁぁぁ……❤」
+					PRINTFORMW 「回不去……变成……❤好舒服啊…❤」
+					;TranslatedMark 「もどれなく……なっちゃう……❤きもちいいよぉ…❤」
+				ELSE
+					PRINTFORML 「啊！……啊，嗯……嗯，嗯…❤」
+					;TranslatedMark 「あー！……あっあ、イっ……イくっ、くぅぅ…❤」
+					PRINTFORMW 「呼、呼……呵呵……❤已经……真糟糕～…❤」
+					;TranslatedMark 「ふぅー、ふぅー……ふふふ……❤もう……えっちだぁ～…❤」
+				ENDIF
+			ELSE
+				IF RAND:3 == 0
+					PRINTFORMW 「啊！啊啊啊…！鱼糕……好啊……❤」
+					;TranslatedMark 「あぁ！あっあっ…！ちくび……いいよっ……❤」
+				ELSEIF RAND:2 == 0
+					PRINTFORMW 「乳房……因为摸得太多了啊……❤」
+					;TranslatedMark 「おっぱい……触りすぎだからぁっ……❤」
+				ELSE
+					PRINTFORMW 「净是胸……嗯，嗯❤……其他也……好好干吧……❤」
+					;TranslatedMark 「胸ばっかり……んんっ、んっ❤……他も……良くしてよ……❤」
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;初めてＭ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｍ絶頂 > 0
+	IF CFLAG:224 == 0
+		CFLAG:224 = 1
+		;PRINTFORMW 
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;初めて噴乳　搾乳コマンド時のみ表示 あんまり頻出してもあれなので
+;-------------------------------------------------
+IF NOWEX:噴乳 > 0
+	IF CFLAG:225 == 0
+		CFLAG:225 = 1
+		;搾乳(胸愛撫コマンドでのみ表示)
+		IF SELECTCOM == 1
+			PRINTFORML 「不行，那样榨的话……我要出奶了，所以啊……❤」
+			;TranslatedMark 「だめっ、そんな搾ったら……おっぱい出ちゃう、からあっ……❤」
+			PRINTFORMW 「啊，出来了……❤等一下，停不下来……❤」
+			;TranslatedMark 「あっあっ、出ちゃってるっ……❤ちょっと待ってっ、止まらないっ……❤」
+		ELSE
+		ENDIF
+	;２回目以降
+	ELSE
+		;温泉で日常胸愛撫コマンド
+		IF SELECTCOM == 331 && TFLAG:54 == 7
+			;妊娠時もしくは育児期間
+			IF TALENT:妊娠 || CFLAG:育児期間 > 0
+				PRINTFORMW 「已经……不能太放松，明明不行……❤」
+				;TranslatedMark 「も、もう……あんまりハメ外しちゃ、だめなのに……❤」
+			;後天的母乳体質かつ淫乱
+			ELSEIF GETBIT(TALENT:淫乱系, 素質_淫乱_淫乱)
+			SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 从膨胀的乳头中溢出的母乳滴落到浴池里……
+				;TranslatedMark ぷっくりと膨らんだ乳頭から溢れ出した母乳が湯船の中へと滴り落ちていく……
+				PRINTFORMW 「哎呀……❤如果是在热水里洒出来也没关系，这样的事……❤」
+				;TranslatedMark 「やだぁ……❤お湯の中ならこぼしても大丈夫だからって、こんなこと……❤」
+			CASE 1
+				PRINTFORML 「嗯……啊，啊！嗯，去吧，鱼糕，紧紧地抱着……❤」
+				;TranslatedMark 「んっ……あっ、あっ！んっんっ、いくっ、ちくび、ぎゅってして……❤」
+				PRINTFORMW 「……不仅仅是母乳……那边也有汤出来……呵呵呵，搞砸了……❤」
+				;TranslatedMark 「……母乳だけじゃなくて……あそこの方からも、お汁が出ちゃってるんだけど……ふふ、やらしっ……❤」
+			CASE 2
+				PRINTFORML 「不行啊……把浴室弄脏了……❤啊不行，停不下来啊……❤」
+				;TranslatedMark 「だめだよっ……お風呂汚しちゃ……❤あっだめっ、止まんないよぉ……❤」
+				PRINTFORMW 「嗯……❤你也能让小鸡鸡勃起这么多，看……明明是在漏啊……❤」
+				;TranslatedMark 「んんっ……❤キミだって、こんなにおちんちん勃たせて、ほら……えっちなぬるぬる、漏らしてるくせにぃ……❤」
+			ENDSELECT
+			;後天的母乳体質
+			ELSE
+				PRINTFORMW 「啊，出来了……浴室很脏啊……！」
+				;TranslatedMark 「あっあっ、出ちゃうっ……お風呂、汚しちゃうよぉ……！」
+			ENDIF
+		;搾乳(胸愛撫コマンドでのみ表示)
+		ELSEIF GROUPMATCH (SELECTCOM, 1, 331)
+			;妊娠時もしくは育児期間
+			IF TALENT:妊娠 || CFLAG:育児期間 > 0
+			SELECTCASE RAND:4
+			CASE 0
+				PRINTFORML 「不行啊啊啊……明明乳房是孩子的东西……❤」
+				;TranslatedMark 「だめだよおっ……おっぱいは子供のものなのにっ……❤」
+				PRINTFORMW 「嗯……❤啊啊但是，出了很多的话总觉得……变得开心了……❤」
+				;TranslatedMark 「んっ……❤ああでも、いっぱい出るとなんだか……嬉しくなっちゃう……❤」
+			CASE 1
+				PRINTFORML 「啊啊，嗯……太可惜了，已经……❤」
+				;TranslatedMark 「あっああっ、んんっ……勿体ないよぉ、もう……❤」
+				PRINTFORMW 「不能玩乳房……！嗯，不可以榨取……❤」
+				;TranslatedMark 「おっぱいで遊んじゃダメなのっ……！んっふあっ、搾るのだめっ……❤」
+			CASE 2
+				PRINTFORML 「想喝胸部吗……？真是个吝啬的父亲……❤」
+				;TranslatedMark 「おっぱい飲みたいの……？ほんとにえっちなお父さん……❤」
+				PRINTFORMW 「没办法……好是好，但是很温柔……摸一下……？」
+				;TranslatedMark 「しょうがないんだから……いいけど優しく、んっ……触ってね……？」
+			CASE 3
+				PRINTFORML 「出来了，出来了，啊❤」
+				;TranslatedMark 「出ちゃうっ、出ちゃうっ、あっあっ❤」
+				PRINTFORMW 「真是好胸部啊……不要再一边赞扬一边紧紧抱住我了……❤」
+				;TranslatedMark 「いいおっぱいだな、って……もう、褒めながらぎゅってしないでっ……❤」
+			ENDSELECT
+			;後天的母乳体質かつ淫乱
+			ELSEIF GETBIT(TALENT:淫乱系, 素質_淫乱_淫乱)
+			SELECTCASE RAND:4
+			CASE 0
+				PRINTFORML 「嗯，嗯❤嗯❤坚强……紧紧地抱住我，嗯啊啊啊啊……❤」
+				;TranslatedMark 「んんっ❤あんっ❤強く……ぎゅってしてっ、んああぁぁ……❤」
+				PRINTFORMW 「被你挤奶的话会变得幸福……再给我一点……❤」
+				;TranslatedMark 「キミにおっぱい搾られるとハッピーになっちゃうの……もっとしてぇ……❤」
+			CASE 1
+				PRINTFORML 「啊~啊啊啊啊……露出乳房的地方，再看看……❤」
+				;TranslatedMark 「あ～っ、あはあぁぁ……おっぱい出るとこ、もっと見てぇ……❤」
+				PRINTFORMW 「你也……喜欢吧？呵呵，呵呵❤把乳轮鼓得鼓鼓的很厉害呢……❤」
+				;TranslatedMark 「キミも……好きでしょ？ふふ、ふふっ❤乳輪ぱんぱんに膨らんですっごいやらしいよね……❤」
+			CASE 2
+				PRINTFORML 「鱼糕……刚才那个……啊，紧紧地……❤」
+				;TranslatedMark 「ちくび……先の方、そこっ……あっあっ、ぎゅうって……❤」
+				PRINTFORMW 「好舒服啊……想多出点，让我多出点，啊，啊，啊❤」
+				;TranslatedMark 「気持ちいいのっ……もっと出したいっ、いっぱい出させてっ、ああっ、あっ❤」
+			CASE 3
+				PRINTFORML 「啊，啊，啊……鱼糕、奶全部……母乳粘糊糊……❤」
+				;TranslatedMark 「はあっ、はっ、あっ……ちくびも、おっぱいも全部……母乳でべとべと……❤」
+				PRINTFORMW 「充满了色情的味道……好像喝醉了……啊，啊，又在乳房里积起来了……❤」
+				;TranslatedMark 「えっちな匂いでいっぱいで……酔っちゃいそう……あっあっ、また、おっぱいに溜まってきたぁ……❤」
+			ENDSELECT
+			;後天的母乳体質
+			ELSE
+			SELECTCASE RAND:3
+			CASE 0
+				PRINTFORMW 「啊哈哈……出了奶，成了习惯……」
+				;TranslatedMark 「あはは～……おっぱい出るの、クセになっちゃってる……」
+			CASE 1
+				PRINTFORML 「呜呜、看太多乳房……看母乳出来的地方，那样的喜欢……？」
+				;TranslatedMark 「うう、おっぱい見過ぎ……母乳出るとこ見るの、そんな好き……？」
+				PRINTFORMW 「最喜欢了！这样的表情……那样的话，还可以吧……」
+				;TranslatedMark 「大好きっ！って顔してるし……それならまあ、いいかなぁ……」
+			CASE 2
+				PRINTFORML 「虽然绞尽脑汁的话会很轻松……」
+				;TranslatedMark 「絞ってくれると楽にはなるけど……」
+				PRINTFORMW 「被这样按摩的话，乳房又会变大……那也可以吗？已经」
+				;TranslatedMark 「こんなに揉まれるとまたおっぱい大きくなっちゃいそう……それもいい？もう～」
+			ENDSELECT
+			ENDIF
+		ELSE
+		ENDIF
+	ENDIF
+ENDIF
+;=================================================
+;●単体エンディング関係
+;=================================================
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;★ここから先にはエンディングが記述されています★
+;ネタバレを避けたい方は閲覧しないようにご注意下さい。
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+@KOJO_SINGLE_ENDING_K17
+#DIM メルラン
+#DIM メルラン_対象
+
+メルラン = NAME_TO_CHARA("メルラン")
+メルラン_対象 = MASTER
+;単体エンディング
+;全都市を統一したとき、好感度5000以上かつ全キャラ中最も好感度が高いと表示される
+
+;同陣営、ルナサとリリカがいる
+IF CFLAG:(メルラン):所属 == CFLAG:(メルラン_対象):所属 && CFLAG:(NAME_TO_CHARA("ルナサ")):所属 == CFLAG:(メルラン_対象):所属 && CFLAG:(NAME_TO_CHARA("リリカ")):所属 == CFLAG:(メルラン_対象):所属
+	PRINTFORML 
+	PRINTFORMW 由于异变突然改变了姿态，群雄割据纷乱的战乱之世…世界的幻想乡终于迎来了安定。
+	;TranslatedMark 異変により突如として姿を変え、群雄割拠入り乱れる戦乱の世…のような世界となった幻想郷にようやく安定が訪れる。
+	PRINTFORMW 完成这一任务的是%ANAME(MASTER)%、%ANAME(TARGET)%以及她们的姐妹们…
+	;TranslatedMark それを成し遂げたのは%ANAME(MASTER)%と、%ANAME(TARGET)%と、そしてその姉妹達だった…
+	PRINTFORML 
+	PRINTFORML %ANAME(MASTER)%擅长武力和统治，作为统治者的资质一直显示着，但是三姐妹的音乐活动
+	;TranslatedMark 武力と統治に秀で、支配者としての資質を示し続けた%ANAME(MASTER)%だったが、さらにプリズムリバー三姉妹の音楽活動が
+	PRINTFORMW 不仅得到了自己的领地，也得到了其他领土的居民的支持，这无疑是造成少摩擦的统一的主要原因。
+	;TranslatedMark 自らの領地だけでなく他領土の住民からの支持をも獲得し、摩擦の少ない統合を果たした要因となったことは間違いない。
+	PRINTFORMW 武力、经济、文化的统一…即使是狭小的幻想乡，也有可能发生…
+	;TranslatedMark 武力と経済と、そして文化による統合…狭い幻想郷でも、それは起こりうるのだ…
+	PRINTFORML 
+	PRINTFORMW 然后——
+	;TranslatedMark そして―――
+	PRINTFORML 
+	PRINTFORMW 「那么再见！纪念音乐会！一直听到最后呢～～～～好～！！！」
+	;TranslatedMark 「それじゃあ！記念コンサート！最後まで聴いていってねえ～～～♪イェイェ～～～!!!」
+	PRINTFORML 
+	PRINTFORMW 以无比明朗的%ANAME(TARGET)%的号令拉开了舞台的帷幕，三姐妹的演奏开始了。
+	;TranslatedMark 底抜けに明るい%ANAME(TARGET)%の号令でステージの幕が開き、プリズムリバー三姉妹の演奏が始まった。
+	PRINTFORMW 骚灵、付丧神、从灵气到擅长演奏乐器的妖怪，只要是能发出人类声音的生物都有
+	;TranslatedMark 騒霊、付喪神、面霊気から楽器演奏の得意な妖怪に人間まで音を出せる生物ならなんでもありの出演陣、
+	PRINTFORMW 然后，幻想乡的观众们将广阔的会场填满了每一个角落…今天是以幻想乡统一纪念为题的大规模演唱会。
+	;TranslatedMark そして広い会場を隅々まで埋めつくす幻想郷の観客達…今日は幻想郷統一記念、というお題目の大規模コンサートだ。
+	PRINTFORML 
+	PRINTFORMW 为了让巨大的活动成功，%ANAME(MASTER)%四处奔走。甚至让人误以为战乱时期还比较轻松…
+	;TranslatedMark 巨大なイベントを成功させるべく%ANAME(MASTER)%は奔走した。戦乱の頃の方がまだ楽だったと錯覚しそうなほど…
+	PRINTFORMW 露娜莎发现了任何细微的不安因素，即使没有恶意也会将%ANAME(MASTER)%无数次打入抑郁的深渊
+	;TranslatedMark どんな些細な不安要素も見つけ出し、悪気はなくとも%ANAME(MASTER)%を幾度も鬱のどん底へと叩き落としたルナサ、
+	PRINTFORMW 鼓励并支持疲惫的%ANAME(MASTER)%，对精神和肉体都相当宠爱的%ANAME(TARGET)%
+	;TranslatedMark 疲弊し切った%ANAME(MASTER)%を励まし支え、精神的にも肉体的にもかなり甘やかしてくれた%ANAME(TARGET)%、
+	PRINTFORMW 莉莉卡以天生的一丝不苟和灵巧来弥补不安，为她提供了寻找活路的手段…
+	;TranslatedMark 持ち前の几帳面さと器用さで不安点を補い、活路を見出すための手段を示してくれたリリカ…
+	PRINTFORMW 姐妹的帮助和至今为止历尽磨砺的队长的才智将周围的人团结在一起，总算是设法举办了演唱会。
+	;TranslatedMark 姉妹の助けとこれまで磨き上げたリーダーとしての才覚は周囲をまとめ上げ、何とかこうしてコンサート開催にこぎつけたのだった。
+	PRINTFORML 
+	PRINTFORMW 「之后也会有很多开心的表演哦～♪稍后再～～～！」
+	;TranslatedMark 「この後もいっぱいいっぱいハッピーなショーが続くよ～♪また後ほど～～～！」
+	PRINTFORML 
+	PRINTFORMW 结束了数首曲子的三棱镜姐妹们一次拉上来。今天姐妹的演奏、solo、和其他演员的合作都很忙。
+	;TranslatedMark 数曲終えたプリズムリバー姉妹達が一度引き上げてくる。今日は姉妹での演奏もソロも他演者とのコラボもと大忙しだ。
+	PRINTFORMW "辛苦了，看起来很健康，放心了""怎么样？很漂亮吧～"
+	;TranslatedMark 『お疲れ様、元気そうで安心した』『どうだった？ばっちしでしょ～』
+	PRINTFORMW 露娜莎和莉莉卡一边向%ANAME(MASTER)%打招呼，一边把她拉到了后台。今天的状态似乎也不错。
+	;TranslatedMark ルナサとリリカが%ANAME(MASTER)%に声をかけつつ楽屋に引き上げていく。今日も調子が良さそうだ。
+	PRINTFORML 
+	PRINTFORMW 「好热啊！明明是闹鬼～！」
+	;TranslatedMark 「ひえ～暑い暑い！騒霊なのに～！」
+	PRINTFORMW 「那不是%ANAME(MASTER)%吗！在这么近的地方看到了呢～好开心啊～♪」
+	;TranslatedMark 「あれ、%ANAME(MASTER)%じゃん！こんな近くで見てくれてたんだ～嬉しいよ～♪」
+	PRINTFORMW %ANAME(TARGET)%发现了%ANAME(MASTER)%并跑了过来…确实今天很热。看的话，虽然是很短的演出，但是却大汗淋漓…明明是骚灵。
+	;TranslatedMark %ANAME(TARGET)%が%ANAME(MASTER)%を見つけ駆け寄ってくる…確かに今日は暑い。見れば短い出演だったにも関わらずすごい汗だ…騒霊なのに。
+	PRINTFORML 「什么~看入迷了？还是苦夏？呵呵~」
+	;TranslatedMark 「なになに～見とれちゃった？それとも夏バテかな？ふふふ～」
+	PRINTFORMW 「没办法啊…❤那么，看这个也要打起精神❤」
+	;TranslatedMark 「仕方ないなぁ…❤じゃあ、これでも見て元気出そ❤」
+	PRINTFORML 
+	PRINTFORMW 在%ANAME(MASTER)%停止的不久，%ANAME(TARGET)%就在乐团服前打开，露出了自己的胸口…
+	;TranslatedMark %ANAME(MASTER)%が止める間もなく、%ANAME(TARGET)%が楽団服の前を開き自らの胸元を見せつけてきた…
+	PRINTFORMW 被汗水濡湿的白色肌肤、美丽轮廓的锁骨、滴落到脐下的水滴，还有非常丰富的乳房…
+	;TranslatedMark 汗でしっとりと濡れた白い肌、美しい輪郭の鎖骨、臍へと滑り落ちていく滴の数々、そしてとびきり豊かな乳房と…
+	PRINTFORMW 只有支撑这个重量的功能，布料很少的胸罩。要说乳头的话，那是用牛皮纸掩饰的，大的乳轮露在了露骨的地方…
+	;TranslatedMark その重さを支えるだけの機能しか持たなそうな、布地の少ないブラジャー。乳頭はといえばニプレスで申し訳程度に隠され、広い乳輪が露骨にはみ出している…
+	PRINTFORML 
+	PRINTFORMW 「好的♪到此为止～…打起精神了吗？呵呵，吓了我一跳❤」
+	;TranslatedMark 「はい♪ここまで～…元気出たかな？ふふふ、驚いてる驚いてる❤」
+	PRINTFORMW 「到底下面会变成什么样呢~❤嗯，到此为止。回头见~❤」
+	;TranslatedMark 「果たして、下の方はどうなってるでしょ～❤って、ここまでここまで。また後でね～❤」
+	PRINTFORML 
+	PRINTFORMW 什么反应都没有，就很快地整理好衣服离开了%ANAME(TARGET)%…
+	;TranslatedMark 何も反応できないまま、素早く服を整え%ANAME(TARGET)%が去っていった…
+	PRINTFORMW 被目瞪口呆的%ANAME(MASTER)%将刚才的情景深深地印在了记忆里，同时又想起了今后的计划。
+	;TranslatedMark 呆気に取られた%ANAME(MASTER)%は先程の光景を記憶に焼き付けつつ、今後の予定を思い浮かべる。
+	PRINTFORMW 今天演唱会结束后也预定要庆功宴…能不能拥有和%ANAME(TARGET)%在一起的时间？好像很难…
+	;TranslatedMark 今日はコンサートの後で打ち上げも予定されている…%ANAME(TARGET)%との時間を持つことはできるかどうか？難しそうだ…
+	PRINTFORML 
+	PRINTFORMW …话虽如此，即使今天不行，无论明天还是后天，和%ANAME(TARGET)%在一起的日子仍在继续。
+	;TranslatedMark …とはいえ今日が無理だとしても、明日も明後日も、まだまだ%ANAME(TARGET)%との日々は続いていく。
+	PRINTFORMW 今天会从%ANAME(TARGET)%们那里得到大量的快乐吧。然后两个人一起分享，为了再增加…
+	;TranslatedMark 今日は多大な量のハッピーを%ANAME(TARGET)%達から貰うことになるだろう。そしてそれを二人で分かち合い、また増やしていくために…
+	PRINTFORMW %ANAME(MASTER)%暂且先把劣情处理好，然后恢复了对急速前进的演唱会的意识…
+	;TranslatedMark ひとまず%ANAME(MASTER)%は劣情を一旦仕舞いこみ、慌ただしく進んでいくコンサートへと意識を取り戻すのだった…
+	PRINTFORML 
+	PRINTFORML 
+ELSE
+	PRINTFORML 
+	PRINTFORMW 由于异变突然改变了姿态，群雄割据纷乱的战乱之世…世界的幻想乡终于迎来了安定。
+	;TranslatedMark 異変により突如として姿を変え、群雄割拠入り乱れる戦乱の世…のような世界となった幻想郷にようやく安定が訪れる。
+	PRINTFORMW 达成这一目标的是%ANAME(MASTER)%、%ANAME(TARGET)%两人…
+	;TranslatedMark それを成し遂げたのは%ANAME(MASTER)%、%ANAME(TARGET)%、の二人だった…
+	PRINTFORML 
+	PRINTFORML %ANAME(MASTER)%擅长武力和统治，作为统治者持续显示着资质，不过，更加%ANAME(TARGET)%的音乐活动
+	;TranslatedMark 武力と統治に秀で、支配者としての資質を示し続けた%ANAME(MASTER)%だったが、さらには%ANAME(TARGET)%の音楽活動が
+	PRINTFORMW 不仅得到了自己的领地，也得到了其他领土的居民的支持，这无疑是造成少摩擦的统一的主要原因。
+	;TranslatedMark 自らの領地だけでなく他領土の住民からの支持をも獲得し、摩擦の少ない統合を果たした要因となったことは間違いない。
+	PRINTFORMW 武力、经济、文化的统一…即使是狭小的幻想乡，也有可能发生…
+	;TranslatedMark 武力と経済と、そして文化による統合…狭い幻想郷でも、それは起こりうるのだ…
+	PRINTFORML 
+ENDIF
+
+;RETURNの値を0→1に変えると、デフォルトの単体エンディングメッセージがスキップされる
+RETURN 0
+
+@KOJO_DEAD_ENDING_K17
+;斬首エンディング
+;自勢力が滅亡したときの選択肢で「……斬れ」を選択して主人公が死亡した場合に、好感度5000以上かつ全キャラ中最も好感度が高いと表示される
+PRINTFORML 
+PRINTFORML 
+PRINTFORMW 「诶，到这边来了吗……？」
+;TranslatedMark 「え、こっち側にきちゃったの……？」
+PRINTFORMW 「那就是怨灵啊……啊，没想到我已经有那么多的想法了……」
+;TranslatedMark 「それは怨霊ってやつだよ……はあ、まさかそこまで思い入れがあったなんて……」
+PRINTFORMW 「……我想我们不能长久在一起。骚灵演奏的同时也带来了怨灵，这样的话巫女也不会沉默吧」
+;TranslatedMark 「……長くは一緒にいられないと思うよ。騒霊が演奏ついでに怨霊も連れてきた、なんて話になったら巫女も黙ってないだろうし」
+PRINTFORMW 「嗯……但是现在……再待一会儿吧……」
+;TranslatedMark 「うん……でも今は……もう少しだけ、一緒にいようね……」
+PRINTFORML
+PRINTFORMW 像人的形状一样，在朦胧的影子旁，%ANAME(TARGET)%小声说"对不起"……
+;TranslatedMark 人の形のような、おぼろげな影の傍で%ANAME(TARGET)%は小さく、ごめんね、と呟いた……
+PRINTFORML 
+PRINTFORML 
+
+;RETURNの値を0→1に変えると、デフォルトの単体エンディングメッセージがスキップされる
+RETURN 0

@@ -1,0 +1,88 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K4_PICNIC_RATE(対象)
+#DIM 対象
+RETURN 30
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K4_PICNIC_DECISION(対象)
+#DIM 対象
+
+;主人公はペニスがあること
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K4_PICNIC_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+
+;---------------------
+@KOJO_DAILY_K4_PICNIC(対象)
+#DIM 対象
+IF KDVAR:対象:大妖精_野餐 == 0
+	PRINTFORMW 「%ANAME(MASTER)%在忙吗？」
+	PRINTFORMW 工作中，绿色的小脑袋，从桌子底下探了出来
+	PRINTFORMW 「今天有没有闲时间去野餐呢？」
+	PRINTFORMW 被大妖精这样问了
+	PRINTFORMW 看得见身后藏着提篮
+	PRINTFORMW 「如果不会影响到重要的事情的话...」
+	PRINTFORMW 向我投来的目光被渴望满满充斥着
+	PRINTFORMW 如果不答应的话小家伙会很失望吧，看上去像是都准备好了
+	PRINTFORMW 怎么办？
+	CALL ASK_YN("其实今天的工作也没那么着急", "抱歉，实在是抽不开身")
+	IF RESULT == 1
+		PRINTFORMW 听见这样的回答，大妖精似乎眼泪都要涌出来了
+		PRINTFORML 「抱歉，明明知道有更重要的事情，我还...」
+		PRINTFORML 红着眼眶跑出去了
+	ELSEIF RESULT == 0
+		PRINTFORMW 就算是自己放松心情也好
+		PRINTFORMW 「真的！？太好了！」
+		PRINTFORMW 大妖精献宝般的从身后拿出野餐篮
+		PRINTFORMW 「喜欢哦！%ANAME(MASTER)%最棒啦！」
+		PRINTFORMW 大妖精跳着过来搂住了%ANAME(MASTER)%的胳膊
+		PRINTFORMW 温热的触感透过单薄的连衣裙传递了过来
+		PRINTFORMW 「如果可以的话，回来以后我会帮你工作的！」
+		PRINTFORMW 看着她干劲十足的样子不由觉得自己着实有个贤内助
+		PRINTFORMW 
+		PRINTFORMW 去了林地周围的草坪
+		PRINTFORMW 大妖精亲手准备的小食算不上多么美味却十分精致
+		PRINTFORMW 躺在草地上听大妖精哼着轻快的曲子
+		PRINTFORMW 「好舒服哦！蓝天，绿地都是自然的恩赐！♥」
+		PRINTFORMW 不知怎么感觉到倦意来袭
+		PRINTFORMW 政务军务的担子全部在那个短暂的午后卸下，真想就这样自然地睡去
+		PRINTFORMW 朦胧的眼闭上之前，看见绿色的小家伙已经躺在自己的臂弯里熟睡
+		PRINTFORMW 胸膛随着缓慢的呼吸上下起伏，嘴角带着浅浅的笑意
+		PRINTFORMW 意识逐渐远去...
+		CFLAG:対象:好感度 += 500
+		KDVAR:対象:大妖精_野餐 = 1
+	ENDIF
+ELSE
+	PRINTFORMW 「野餐！还要再去嘛♪」
+	PRINTFORMW 上次去野餐似乎有段日子了
+	PRINTFORMW 大妖精这次似乎准备了更加精美的食品
+	PRINTFORMW 纯真的笑容牢牢吸引住了%ANAME(MASTER)%的目光
+	PRINTFORMW 「%ANAME(MASTER)%在看什么呢？呆呆的」
+	PRINTFORMW 大妖精歪过脑袋，对上了%ANAME(MASTER)%的视线
+	PRINTFORMW 不由分说伸手揉了揉讨人怜爱的小脑袋
+	PRINTFORMW 收拾一下就出发吧！这样回答了
+	PRINTFORMW 「今天可不能再睡着了，%ANAME(MASTER)%万一感冒可是很难办的」
+	PRINTFORMW 大妖精走在前面，手里摇晃着大大的野餐篮
+	PRINTFORMW 如果不是这样的乱世
+	PRINTFORMW 她一定每天都过得像这样...不，比这样还幸福吧？
+	CFLAG:対象:好感度 += 300
+ENDIF
+
+RETURN 1

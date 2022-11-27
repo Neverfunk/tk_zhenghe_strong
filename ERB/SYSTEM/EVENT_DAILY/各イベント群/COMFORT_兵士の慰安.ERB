@@ -1,0 +1,359 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_COMFORT_RATE()
+RETURN 30
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_COMFORT_DECISION()
+SIF !IS_COUNTRY(CFLAG:MASTER:所属) || CFLAG:MASTER:捕虜先
+	RETURN 0
+SIF IS_SP_COUNTRY(CFLAG:MASTER:所属)
+	RETURN 0
+RETURN DAY >= 12
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_COMFORT_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_COMFORT()
+#DIM 対象
+#DIM 金額
+#DIM 対象都市
+
+CALL DAILY_EVENT_RAND_CITYSELECT(0)
+対象都市 = RESULT
+
+金額 = 1000 + (500 * (RAND:8 + 1)) + (DAY * 100)
+
+PRINTFORML 长久的战事引发了%CITY_NAME:対象都市%中士兵的不满
+PRINTFORML 这样下去也许关系到士气
+PRINTFORMW 怎麼辦？
+CALL ASK_MULTI_JUDGE("举办宴会", MONEY >= 金額,"进行慰安", 1,"什么也不做", 1)
+IF RESULT == 2
+	$DO_NOTHING
+	PRINTFORML 这种程度的疲劳度应该没问题吧
+	PRINTFORMW 什么也不做
+	IF RAND:2 == 0
+		CITY_GUARD:対象都市 = MAX(CITY_GUARD:対象都市 - 20, 1)
+		CALL COLOR_PRINT(@"士兵们的不满积攒起来、%CITY_NAME:対象都市%的防卫率下降了", カラー_注意)
+		PRINTFORMW 
+	ENDIF
+ELSEIF RESULT == 0
+	PRINTFORMW 为士兵们举办盛大的宴会！
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW ・
+	IF RAND:4 != 0
+		PRINTFORML 宴会成功的结束了！
+		PRINTFORMW 他们大闹一场欢快了一场、隔了好久才缓过气来
+		MONEY -= 金額
+		CITY_GUARD:対象都市 += 15
+		CALL COLOR_PRINT(@"士兵们的不满消除了、%CITY_NAME:対象都市%的防卫率上升了", カラー_注意)
+		PRINTFORML 
+		CALL COLOR_PRINT(@"花费了{金額}金", カラー_注意)
+		PRINTFORMW 
+	ELSE
+		PRINTFORML 宴会非常的成功！
+		PRINTFORML 他们大闹一场欢快了一场、隔了好久才缓过气来
+		PRINTFORMW 另外，%ANAME(MASTER)%也跟着一起庆祝了
+		MONEY -= 金額
+		CITY_GUARD:対象都市 += 25
+		CALL COLOR_PRINT(@"士兵们的不满消除了、%CITY_NAME:対象都市%的防卫率大幅上升", カラー_注意)
+		PRINTFORML 
+		CALL COLOR_PRINT(@"花费了{金額}金", カラー_注意)
+		PRINTFORMW 
+	ENDIF
+ELSE
+	PRINTFORML 进行士兵慰安
+	PRINTFORMW 派谁去呢？
+	CALL SELECT_CHARA_LIST_ONLY_LOGIC_SLG("COMFORT", "COMFORT")
+	対象 = RESULT
+	IF RESULT == -1
+		GOTO DO_NOTHING
+	ELSEIF 対象 == MASTER
+		PRINTFORMW %ANAME(対象)%亲自前往
+	ELSE
+		PRINTFORMW 派%ANAME(対象)%过去
+	ENDIF
+	LOCAL = RAND:6 + 1
+	SIF TALENT:対象:人気 == 1
+		LOCAL += 1
+	IF IS_FEMALE(対象)
+	  IF LOCAL <= 5
+		PRINTFORML 
+		PRINTFORML 慰安活動正在进行的时候，被一个士兵搭话了
+		PRINTFORMW 他把脸靠近%ANAME(対象)%、求做一个更有女人味的慰安工作。
+		IF ABL:対象:性知識 == 0
+			PRINTFORML %ANAME(対象)%不知道他在说什么、但是考虑到士兵的感受随口同意了
+			PRINTFORMW 他高兴地要飞起来了、抓住%ANAME(対象)%的胳膊把她拉进了兵舍里
+			CALL COMFORT_SEX(対象)
+			LOCAL += 2
+			ABL:対象:性知識 = 1
+		ELSE
+			PRINTFORML %ANAME(対象)%听到这话时间石化了
+			PRINTFORML 本来应该生气的、但是看着他认真的表情却又犹豫了
+			PRINTFORML 不忍心拒绝战斗在前线的他提出的请求请求……
+			PRINTFORMW 怎麼辦？
+			CALL ASK_YN("接受", "拒絶")
+			IF RESULT == 1
+				PRINTFORML 但还是不能像那种妓女那样似的
+				PRINTFORMW 遭到拒绝的士兵垂头丧气的走了
+			ELSE
+				PRINTFORML %ANAME(対象)%低下头思考着
+				PRINTFORML 被他认真的目光所击败，决定接受慰安工作
+				PRINTFORMW 他高兴得跳起来，便拉着%ANAME(対象)%的手臂把她带进了兵营
+
+				CALL COMFORT_SEX(対象)
+				LOCAL += 2
+			ENDIF
+		ENDIF
+	  ELSE
+			PRINTFORML 
+			PRINTFORML 慰安活動正在进行的时候，被一大群士兵围住了
+			PRINTFORML 他们猥琐地笑着靠近%ANAME(対象)%、似乎在期待着什么特殊的“节目”。
+			PRINTFORMW 不等%ANAME(対象)%做出反应、士兵们就一拥而上......
+			CALL COMFORT_HARDCORESEX(対象)
+	  ENDIF
+	ENDIF
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW ・
+	IF LOCAL >= 6
+		PRINTFORML 慰安非常成功地结束了！
+		PRINTFORML 他们为%ANAME(対象)%的表演喝彩着
+		PRINTFORMW %ANAME(対象)%也看到他们高兴的脸，自然地笑了出来
+		CITY_GUARD:対象都市 += 25
+		CALL COLOR_PRINT(@"士兵们的不满消除了、%CITY_NAME:対象都市%的防卫率大幅上升", カラー_注意)
+		PRINTFORML 
+	ELSEIF LOCAL >= 4
+		PRINTFORMW 
+		PRINTFORML 慰安成功地结束了！
+		PRINTFORMW 他们为%ANAME(対象)%的表演喝彩着
+		CITY_GUARD:対象都市 += 15
+		CALL COLOR_PRINT(@"士兵们的不满消除了、%CITY_NAME:対象都市%的防卫率上升", カラー_注意)
+		PRINTFORML 
+	ELSE
+		PRINTFORML 士兵们的反应并不好
+		PRINTFORMW %ANAME(対象)%垂头丧气地回去了
+		CITY_GUARD:対象都市 -= 20
+		CALL COLOR_PRINT(@"士兵们的不满累积起来、%CITY_NAME:対象都市%的防衛率下降了", カラー_注意)
+		PRINTFORMW 
+	ENDIF
+ENDIF
+
+RETURN 1
+
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_COMFORT(対象)
+#DIM 対象
+RETURN CFLAG:対象:所属 == CFLAG:MASTER:所属 && !IS_ANIMAL(対象) && CFLAG:対象:行動不能状態 != 行動不能_子供
+
+@SELECT_CHARA_LIST_SELECT_LOGIC_COMFORT(対象)
+#DIM 対象
+RETURN CFLAG:対象:捕虜先 == 0
+;--------------------------------------------------------------------------------
+;慰安活動
+;--------------------------------------------------------------------------------
+@COMFORT_SEX(ARG:0)
+
+PRINTFORML 
+PRINTFORMW %ANAME(ARG:0)%开始了慰安活動……
+PRINTFORML 
+SELECTCASE RAND:20
+	CASE 0
+		PRINTFORML %ANAME(ARG:0)%跪在兵的肉棒前用嘴侍奉着
+		PRINTFORML 大概是积攒了很多东西吧，只要用舌头轻轻地描动阴茎根部的肌肉，他就会微微地呻吟着，肉棒发出微微的颤抖
+		PRINTFORML 她张开嘴巴，用舌头刺激着马眼，士兵一边抽搐着一边射了出来
+		PRINTFORMW 把浓浓的精液一饮而尽后肉棒仍然是硬邦邦的、于是士兵就把%ANAME(ARG:0)%推到了
+	CASE 1
+		PRINTFORML %ANAME(ARG:0)%躺在士兵身上，互相舔着彼此的性器
+		PRINTFORML 用舌头和手指细致地侍奉快胀裂了的肉棒，士兵的肉棒啪嗒啪嗒地跳动着，吐出先走液来
+		PRINTFORML 他沉浸于用舌头舔舐%ANAME(ARG:0)%的秘所，%ANAME(ARG:0)%也情不自禁地拱起腰来
+		PRINTFORMW 欲火中烧的%ANAME(ARG:0)%掰开小穴引诱着、他终于把挺着肉棒插了进去
+	CASE 2
+		PRINTFORML %ANAME(ARG:0)%横跨在他上面，身下的床吱吱嘎吱地响着
+		PRINTFORML 每次挥动腰部时肉棒都会刺激着阴道里的嫩肉，%ANAME(ARG:0)%不由自主地吐出甜蜜的气息。
+		PRINTFORML 他也一边抓住%ANAME(ARG:0)%的腰一边低声呻吟、用力把肉棒顶到子宫射精了
+		PRINTFORMW 互相忘我地贪图着肉欲，通宵反复进行浓厚的交配，无数次地绝顶了
+	CASE 3
+		PRINTFORML %ANAME(ARG:0)%双手与士兵交织着和他做着爱
+		PRINTFORML 他紧紧地握着%ANAME(ARG:0)%的手，一边呼喊着%ANAME(ARG:0)%的名字，一边着迷地挺腰抽插
+		PRINTFORML 被他激烈的活塞运动搅拌着蜜壶，%ANAME(ARG:0)%也发出了受不了的沉闷呻吟声
+		PRINTFORMW 好像恋人一样，两个人紧紧地结合着，一起登上了绝顶
+	CASE 4
+		PRINTFORML %ANAME(ARG:0)%以正常位的姿势被士兵抱着
+		PRINTFORML 他把脸埋在%ANAME(ARG:0)%的双乳上，忘我地狂热地挺着腰
+		PRINTFORML 那种撒娇般的动作刺激了%ANAME(ARG:0)%的母性本能，子宫痒的发痛，紧紧抱住他的身体
+		PRINTFORMW 不久，他忍不住放出了大量的精液，%ANAME(ARG:0)%用双脚钳住他的腰，一滴不漏地接住了
+	CASE 5
+		PRINTFORML 兵营的一间屋子里，传来男女间的肉体的搅动声和床的嘎吱声
+		PRINTFORML 他一进兵营就把%ANAME(ARG:0)%推倒，把已经快要胀爆的肉棒塞了进去
+		PRINTFORML 起初感到十分疼痛的%ANAME(ARG:0)%，因为子宫被不断粗暴的撞击，马上露出了喘息声
+		PRINTFORMW 不久，子宫内被排入大量的特浓精液后，%ANAME(ARG:0)%发出了无可救药的声音，达到了绝顶
+	CASE 6
+		PRINTFORML 兵舍的一间屋子里响起了黏膜碰撞的下流声音
+		PRINTFORML %ANAME(ARG:0)%的双腿挂在坐在床边的士兵的腰上，上下涌动着主动使肉棒在小穴内抽插
+		PRINTFORML 一边亲吻一边慢慢地扭动腰部，阴道肉被摩擦着，传来令人头晕的快乐
+		PRINTFORMW 感觉到他的肉棒肿胀起来而紧紧地夹起了阴道，下腹部扩散来了灼热的感觉，%ANAME(ARG:0)%忍不住闷声呻吟了起来
+	CASE 7
+		PRINTFORML %ANAME(ARG:0)%跨在士兵身上摇摆着
+		PRINTFORML 每当阴道肉在交合时发出啪嗒啪嗒的声音、就产生了令%ANAME(ARG:0)%大脑麻痹的快感、桃色的喘息声越来愈大
+		PRINTFORML 为了让他更舒服而扭动着身体，露出淫靡的表情，感觉阴道里的肉棒更加膨胀起来
+		PRINTFORMW 完全沉迷于为他服务的快感、%ANAME(ARG:0)%忘记时间一般的享受着与他交合的肉欲
+	CASE 8
+		PRINTFORML %ANAME(ARG:0)%被士兵压在身上、激烈的抽动着肉棒
+		PRINTFORML 他对久违的女体感到异常兴奋，粗暴地用全身的重量猛烈地进行活塞运动
+		PRINTFORML %ANAME(ARG:0)%阴道肉被撕裂般的冲击使她双眼发黑的同时，也刺激了雌性的本能，发出娇滴滴的甜美声音
+		PRINTFORMW 不久，他在%ANAME(ARG:0)%的深处释放了积蓄已久的欲望，%ANAME(ARG:0)%一边发出喜悦的声音一边全身痉挛
+	CASE 9
+		PRINTFORML %ANAME(ARG:0)%被士兵抱在怀里说着枕边话
+		PRINTFORML %ANAME(ARG:0)%用子宫中承接住他积蓄已久的精液后，作为一只雌性已经被炙热的刺激“咬“的破破烂烂了
+		PRINTFORML 紧靠着那健壮的胸膛，听到他甜蜜的低语，子宫不由得又收缩起来
+		PRINTFORMW 不久，他的肉棒复活了，这次%ANAME(ARG:0)%自动张开双臂，喜悦地接受了他
+	CASE 10
+		PRINTFORML %ANAME(ARG:0)%以四肢着地的姿势被他侵犯了
+		PRINTFORML 雄壮的肉棒出入时阴道壁被咯吱咯吱地咬着，%ANAME(ARG:0)%不得的身体颤抖着发出娇喘声
+		PRINTFORML %ANAME(ARG:0)%的膣肉无意识的完全打开迎合着肉棒、他插到了更深的地方
+		PRINTFORMW 然后，他低声地吼叫着，射出滚烫的浊流，%ANAME(ARG:0)%发出了无可救药的声音，达到了绝顶。
+	CASE 11
+		PRINTFORML %ANAME(ARG:0)%被他侵犯着、眼睛冒着♥、喘着粗气
+		PRINTFORML 每次被他粗壮的肉棒搅动肉穴时，%ANAME(ARG:0)%以一副失神的表情、喉咙振动着，发出甜蜜的呻吟
+		PRINTFORML 腰部的动作逐渐加快，子宫被粗暴地撞击着，过电般的快感，让眼前变得雪白
+		PRINTFORMW 感觉到他的肉棒的跳动后、%ANAME(ARG:0)%用下流的语言向他索求着精液
+	CASE 12
+		PRINTFORML %ANAME(ARG:0)%坐在士兵身上双手交叉后腰扭动着身体
+		PRINTFORML 每次被剧烈地顶起来，%ANAME(ARG:0)%都带着不检点的表情发出娇喘
+		PRINTFORML 被他的肉棒摩擦着阴道壁，%ANAME(ARG:0)%脑子里火花四溅，更加着迷地摇晃着脑袋
+		PRINTFORMW 突然间，士兵射了出来，%ANAME(ARG:0)%的背部大大地向后仰，达到了绝顶
+	CASE 13
+		PRINTFORML 感受着阴道内猛烈的射精，%ANAME(ARG:0)%抓住枕头痛苦挣扎
+		PRINTFORML 精液注入子宫的感觉，%ANAME(ARG:0)%视野模糊起来、呼哧呼哧地喘着气
+		PRINTFORML 不久，他结束长射精后拔出肉棒，由于其冲击，%ANAME(ARG:0)%达到了轻微的高潮，不由自主地发出喘息声
+		PRINTFORMW 被注入了大量积蓄已久的精液，%ANAME(ARG:0)%一边看着从雌穴中滴下白浊液、一边痴痴地媚笑着
+	CASE 14
+		PRINTFORML %ANAME(ARG:0)%以站立后入式的姿势被肉棒狠狠地冲击着
+		PRINTFORML 两臂被抓住、秘穴里被肉棒搅动着、%ANAME(ARG:0)%以这样的姿势发狂一般的享受着
+		PRINTFORML 强有力的活塞运动咚呲咚呲地挤压着子宫口、%ANAME(ARG:0)%感到自己的子宫口慢慢打开了
+		PRINTFORMW 突然，砰！肉棒在狠狠撞击到深处的同时射出了浓厚的精液、大量地注入到%ANAME(ARG:0)%的子宫里
+	CASE 15
+		PRINTFORML %ANAME(ARG:0)%骑在他身上，带着轻浮的表情扭动着腰
+		PRINTFORML 根据他的要求，被迫穿着像妓女一样的下流服装进行着侍奉
+		PRINTFORML 一开始因为羞耻心而有些不自然的%ANAME(ARG:0)%也逐渐变得快乐起来，头脑也变得模糊，更加积极地让身体进入淫靡的状态
+		PRINTFORMW 不久他忍不住射精了，%ANAME(ARG:0)%哆哆嗦嗦地颤抖着，发出喜悦的声音
+	CASE 16
+		PRINTFORML %ANAME(ARG:0)%象只狗似趴着的，压得他得喘不过气来
+		PRINTFORML 像发情的母狗一样沉迷其中肉棒的抽插中，%ANAME(ARG:0)%也逐渐露出了像母狗一样地不检点的表情
+		PRINTFORML 每当肉体碰撞的声响传来，快感就会直冲头顶，挥动着双臂用快要崩坏的身体的勉强支撑着
+		PRINTFORMW 然后，子宫里被灌注了他的子种，%ANAME(ARG:0)%因为被强壮雄性赋种的喜悦，发出了难以置信的愉悦呻吟
+	CASE 17
+		PRINTFORML %ANAME(ARG:0)%被他从背后抱住，深深地用肉棒抽插着
+		PRINTFORML 来来回回地晃动着腰，刺激着阴道。被深情地爱抚着胸部和脖子，%ANAME(ARG:0)%全身不停地震动着
+		PRINTFORML 被不断给予的温柔的快乐所包围，%ANAME(ARG:0)%无意识地发出对雄性而已无比魅惑的甜美声音。
+		PRINTFORMW 不久，当他说着要在腔内射精时，%ANAME(ARG:0)%失魂落魄地垂着口水点了点头
+	CASE 18
+		PRINTFORML %ANAME(ARG:0)%用雌穴深深的吞入士兵的肉棒、发出娇滴滴的呻吟
+		PRINTFORML 被他绵绵不断地挺腰攻击着，身心都被顶成了一团乱麻，带着不检点的表情呻吟着
+		PRINTFORML 他在她耳边喃喃低语地描述着%ANAME(ARG:0)%的痴态，%ANAME(ARG:0)%虽然连耳朵都羞得通红，但是阴道却收的更加紧了
+		PRINTFORMW 之后又被他狠狠地折腾了好几次，每次都一起达到了快感的顶峰
+	CASE 19
+		PRINTFORML %ANAME(ARG:0)%一边喘着粗气、躺在士兵的身上
+		PRINTFORML 他的肉棒插进紧贴着的秘裂处，不断地注入精液
+		PRINTFORML 充分地吐出精气后、心满意足的士兵抚摸着她头、温柔地吻着嘴唇，%ANAME(ARG:0)%的胸口变得火热
+		PRINTFORMW %ANAME(ARG:0)%默默地注视着士兵，他像回应一样，再次挺起腰，%ANAME(ARG:0)%发出喜悦的声音
+	CASE 20
+		PRINTFORML 他一到房间就推翻了%ANAME(ARG:0)%
+		PRINTFORML 不停责弄着%ANAME(ARG:0)%的全身，把勃起的肉棒取出并贴到小穴旁边
+		PRINTFORML %ANAME(ARG:0)%呼吸急促地兴奋地抚摸着他的脸颊，催促他把肉棒塞进阴道深处
+		PRINTFORMW 完全本能的粗暴抽送，让%ANAME(ARG:0)%也变成了一只简单的雌性，发出娇媚的呻吟声
+	CASE 21
+		PRINTFORML %ANAME(ARG:0)%被士兵的粗大肉棒深深地蹂躏着
+		PRINTFORML 肉穴被挤压着，只要他稍微动动一下，%ANAME(ARG:0)%的大脑就会因为快乐而弹跳，痉挛
+		PRINTFORML 配合他的悠闲动作、%ANAME(ARG:0)%拼命地紧紧抱住他，一心一意地侍奉着
+		PRINTFORMW 他用巨大的肉棒挤进腔内深处射了出来，%ANAME(ARG:0)%发出了巨大的娇喘声，达到了绝顶
+	CASE 22
+		PRINTFORML %ANAME(ARG:0)%双手环抱住士兵的脖子、下半身狠狠的碰撞着
+		PRINTFORML 他猛烈地向着%ANAME(ARG:0)%的子宫冲击着、像是要服从着雄性的本能留下种子一般
+		PRINTFORML %ANAME(ARG:0)%在那个肉棒的雄风和强烈的活塞运动下、逐渐显现出作为雌性的本能、迎合他摆动着腰
+		PRINTFORMW 他吼叫着射出精液，%ANAME(ARG:0)%身体向后弯成弓形、伸直了脚尖绝顶了。
+	CASE 23
+		PRINTFORML %ANAME(ARG:0)%被他压在身下，低着头被他侵犯着
+		PRINTFORML 每当他用粗大的肉棒狠狠地摩擦阴道的天花板时，%ANAME(ARG:0)%就会因快乐而浑身颤抖
+		PRINTFORML 当他抱起%ANAME(ARG:0)%向胎内猛烈射精时，%ANAME(ARG:0)%露出不检点的表情，达到了绝顶
+		PRINTFORMW 一次射精后就完全被他俘虏了，后来%ANAME(ARG:0)%也反复被他注入了白浊的种子
+	CASE 24
+		PRINTFORML %ANAME(ARG:0)%被他抓住腰，深深地插入肉棒
+		PRINTFORML G点咕噜咕噜地刺激着、%ANAME(ARG:0)%身体反射般的弹跳着发出响亮的呻吟
+		PRINTFORML 像是享受这样的反应般，他用肉棒继续刺激着女人的弱点，每次%ANAME(ARG:0)%无法抵抗压倒性的快乐而发出娇声
+		PRINTFORMW %ANAME(ARG:0)%完全被他打得神魂颠倒，整夜都被他责弄着
+	CASE 25
+		PRINTFORML %ANAME(ARG:0)%被他抱起一条腿、用肉棒抽插着
+		PRINTFORML 每当肉棒咕啾咕啾地进出时、%ANAME(ARG:0)%就会眼前一片漆黑地嘿~嘿~地呻吟着
+		PRINTFORML 持续被肉棒侵犯激发出了的雌性的本能，子宫震颤着，涌上来的快感的浪潮让%ANAME(ARG:0)%快要发疯了
+		PRINTFORMW 不久，他在她的深处放出了特浓的精液，%ANAME(ARG:0)%无声的尖叫着，达到了极度的顶峰
+	CASE 26
+		PRINTFORML %ANAME(ARG:0)%以四肢着地的姿势被士兵压在身上、下半身紧密的交合在一起
+		PRINTFORML 表情非常低贱，配合着肉棒的抽插流出口水，一边发出娇声的样子，简直就像是一只母狗一样
+		PRINTFORML 每次子宫被雄壮的肉棒重重的撞击时，%ANAME(ARG:0)%会咯吱咯吱地颤抖着紧紧抓住床单
+		PRINTFORMW 不久，作为被征服雄性的证据，在精液被射入的同时，%ANAME(ARG:0)%随着弹跳着的快感发出了极大的娇吟声
+	CASE 27
+		PRINTFORML %ANAME(ARG:0)%依依着他紧紧地拥抱在一起，深情地亲吻着
+		PRINTFORML 浓厚的交合虽不剧烈，但却无比缠绵，%ANAME(ARG:0)%的头脑发呆，从感到快乐涌上心头
+		PRINTFORML 感受到她忍不住开始扭动着腰身，士兵也开始悠闲地挺动起腰部，%ANAME(ARG:0)%由于像在空中飞翔一样的快感，吐出甜蜜的呻吟
+		PRINTFORMW 像恋人一样甜蜜的做爱，两人在一起度过了一整晚
+	CASE 28
+		PRINTFORML %ANAME(ARG:0)%一边有雌穴吞吐着肉棒、一边与士兵激烈的热吻着
+		PRINTFORML 舌头在嘴里舔来舔去，%ANAME(ARG:0)%因为太舒服了，心脏都颤抖着，背部肌肉不停的打着哆嗦
+		PRINTFORML 一旦松开嘴唇凝视着他的脸%ANAME(ARG:0)%的表情就完全融化了，简直像只母狗一样垂着舌头，喘不过气来
+		PRINTFORMW 忍耐不住地再次索吻，%ANAME(ARG:0)%和他一起沉浸在浓厚的性爱中
+	CASE 29
+		PRINTFORML %ANAME(ARG:0)%向他叉开双腿，发出无药可救的娇媚声音
+		PRINTFORML 被他巧妙的技巧责弄的乱七八糟，%ANAME(ARG:0)%的脑海中奔跑着强烈的快感
+		PRINTFORML 最初只是例行公事般的%ANAME(ARG:0)%现在也变成单纯的雌性，快乐地扭动着身体
+		PRINTFORMW %ANAME(ARG:0)%已经忘记了怀孕的风险，一整晚都在索求着他的种子
+ENDSELECT
+CALL FUCK_MAKELOVE(ARG:0, GET_SPERM_ID("士兵"), @"士兵的\@RAND:2 ? 肉棒 # 嘴唇\@", @"士兵")
+
+RETURN 1
+
+;--------------------------------------------------------------------------------
+;慰安活動hardcore
+;--------------------------------------------------------------------------------
+@COMFORT_HARDCORESEX(ARG:0)
+PRINTFORML 
+PRINTFORMW %ANAME(ARG:0)%被欲火中烧的男人们包围了……
+PRINTFORML 
+SELECTCASE RAND:2
+	CASE 0 
+		PRINTFORML 数个士兵挺着积蓄已久的肉棒、把%ANAME(ARG:0)%围在中间
+		PRINTFORML %ANAME(ARG:0)%的双乳被粗暴的揉捏着、双手和嘴巴分别侍奉着肿胀的肉棒
+		PRINTFORML 侵犯着她嘴巴的士兵突然双手抓住%ANAME(ARG:0)%的头发、激烈的开始冲刺、龟头不断顶着%ANAME(ARG:0)%的喉管
+		PRINTFORMW 不久后、士兵大吼着在%ANAME(ARG:0)%的喉咙里射出浓厚的精液，同时被%ANAME(ARG:0)%用手侍奉着的肉棒液发射了
+	CASE 1 
+		PRINTFORML 数个士兵挺着积蓄已久的肉棒、把%ANAME(ARG:0)%按在地上
+		PRINTFORML 刚刚发射过的肉棒从%ANAME(ARG:0)%的肉穴里退出、马上就有新的一根硬邦邦的肉棒接替上来
+		PRINTFORML 持续不断的蹂躏让%ANAME(ARG:0)%反复高潮了无数次、如今只能双眼无神的发出低微的呻吟声
+		PRINTFORMW 很久之后、参加轮奸的士兵们终于全部得到了满足离开了、丢下了红肿的小穴中不断溢出白浊精液的%ANAME(ARG:0)%
+
+ENDSELECT
+CALL FUCK_MAKELOVE(ARG:0, GET_SPERM_ID("兵士"), @"兵士の\@RAND:2 ? 肉棒 # 唇\@", @"兵士")
+
+RETURN 1
+
+@EVENT_DAILY_COMFORT_ALLOW_WHEN_WANDERING
+RETURN 1
+

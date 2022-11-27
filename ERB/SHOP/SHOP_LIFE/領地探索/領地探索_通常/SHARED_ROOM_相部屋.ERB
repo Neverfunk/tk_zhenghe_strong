@@ -1,0 +1,91 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_SHARED_ROOM_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_SHARED_ROOM_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_SHARED_ROOM(対象)
+#DIM 対象
+
+PRINTFORMW 因為已經太晚了、所以決定住旅館
+PRINTFORMW 但是很不巧的是客人太多了、只有合租房間才有空位
+PRINTFORML 
+CALL ASK_MULTI("放棄", "与人同住")
+
+IF RESULT == 0
+	PRINTFORML 只能放棄住宿了
+	PRINTFORMW 回到拠点的時候、已經完全進入深夜了
+	RETURN 1
+ENDIF
+
+PRINTFORMW 只是住一晚的話還可以接受
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+
+IF IS_MALE(対象) || (HAS_PENIS(対象) && RAND:2) || (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+	PRINTFORMW 同一房間內的是一位美麗的女性
+	PRINTFORMW 聊得很起勁、氣氛越來越好了……
+	PRINTFORML 
+	CALL ASK_YN("出手", "睡覺")
+	IF RESULT == 1
+		PRINTFORMW 明天還要早起
+		PRINTFORML 決定直接睡覺
+		RETURN 1
+	ENDIF
+	PRINTFORMW 抱住女性的時候、期待已久的她直接解開了衣服……
+	PRINTFORML
+
+	IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+		PRINTFORML 二人激烈地缠绵在一起
+		PRINTFORML 女性身上充满的成熟的雌性气息，不知不觉地为%ANAME(対象)%带来了热量
+		PRINTFORML 身经百战的手指刺激着%ANAME(対象)%的花瓣，令她在快乐的浪潮中不住地颤抖着
+		PRINTFORML 温柔地把%ANAME(対象)%的头埋在自己丰满的乳房里，女人的脸上露出了母性的微笑
+		PRINTFORML 相互摩擦着炽热的性器，二人的体液在粘稠的水声中混杂在一起
+		PRINTFORMW 一阵电击般剧烈的快感袭来，两人高声呻吟着同时达到了高潮
+		CALL FUCK(対象, "性技, 性交, Ｃ, Ｂ, Ｍ, 射精, Ｖ挿入, 百合", "接吻喪失", 0, "偶遇的女性的嘴唇", "", "", "和姦")
+		PRINTFORML
+		PRINTFORMW 翌日清晨，和她热情地吻别了
+		RETURN 1
+	ENDIF 
+	
+	PRINTFORML 房間內響起了嬌喘聲
+	PRINTFORML %ANAME(対象)%和她之間的身体相性很好、已經射了好幾次了
+	PRINTFORMW 每次抽插的時候、無法容納的精子都會從膣穴中溢出
+	PRINTFORMW %ANAME(対象)%低聲呻吟在女人深処射精的同時、她也後弓著身體大聲嬌喘著高潮了
+	CALL FUCK(対象, "性技, 性交, Ｃ, 射精, Ｖ挿入" + (IS_FEMALE(対象) ? ", 百合, Ｂ, Ｖ" # ""), "童貞喪失, 接吻喪失", 0, "偶遇的女性的嘴唇", "", "偶遇的女性的膣穴", "和姦")
+	PRINTFORML 
+	PRINTFORMW 翌日清晨、和她熱情的吻別了
+ELSE
+	PRINTFORMW 同一房間內的是一位精悍的男性
+	PRINTFORMW 聊得很起勁、氣氛越來越好了……
+	PRINTFORML 
+	CALL ASK_YN("诱惑", "睡觉")
+	IF RESULT == 1
+		PRINTFORMW 明天還要早起
+		PRINTFORML 決定直接睡覺
+		RETURN 1
+	ENDIF
+	PRINTFORMW 倚靠在男性身上的時候、期待已久的他直接脫去了%ANAME(対象)%的衣服……
+	PRINTFORMW 
+	PRINTFORML 小屋中響起了女性的嬌喘声
+	PRINTFORML 男人用力的圧在%ANAME(対象)%身上、享受著那%STR_BODY("身体", 対象)%
+	PRINTFORML 腦海中完全被快感所填滿、抖動著%STR_BODY("胸：感度：感触", 対象)%沉醉于性愛之中
+	PRINTFORMW 山男低声呻吟的同時在%ANAME(対象)%的最深処射精了、%ANAME(対象)%後弓着背発出了格外高声的嬌喘
+	CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_SPERM_ID("偶遇的男人"), @"偶遇的男人的\@RAND:2 ? 肉棒 # 嘴唇\@", "偶遇的男人", "", "和姦")
+	PRINTFORML 
+	PRINTFORMW 翌日清晨、和他熱情的吻別了
+ENDIF
+RETURN 1

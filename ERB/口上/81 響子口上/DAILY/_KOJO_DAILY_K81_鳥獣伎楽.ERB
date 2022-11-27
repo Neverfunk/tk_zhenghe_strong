@@ -1,0 +1,291 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K81_TYOUJUUGIGAKU_RATE(対象)
+#DIM 対象
+RETURN 40
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K81_TYOUJUUGIGAKU_DECISION(対象)
+#DIM 対象
+#DIM ミスティア
+ミスティア = NAME_TO_CHARA("ミスティア")
+
+;ミスティアが自軍にいないと駄目
+SIF !(CFLAG:ミスティア:所属 == CFLAG:MASTER:所属)
+	RETURN 0
+
+;主人公がミスティアだと駄目
+SIF MASTER == NAME_TO_CHARA("ミスティア")
+	RETURN 0
+
+;対象が女でないとだめ
+SIF !IS_FEMALE(対象)
+	RETURN 0
+
+;主人公と同一勢力で捕虜でなく、好感度500以上
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0) && CFLAG:対象:好感度 >= 500
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K81_TYOUJUUGIGAKU_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K81_TYOUJUUGIGAKU(対象)
+#DIM 対象
+#DIM 対象都市
+#DIM ミスティア
+ミスティア = NAME_TO_CHARA("ミスティア")
+
+;自国都市ランダム
+CALL DAILY_EVENT_RAND_CITYSELECT(0)
+対象都市 = RESULT
+SIF 対象都市 < 0
+	RETURN 0
+;MARK
+PRINTFORML
+IF KDVAR:対象:響子_鳥獣伎楽 == 0
+	PRINTFORML 「啊，%ANAME(MASTER)%——！今天晚上有安排吗？」
+	;TranslatedMark 「あ、%ANAME(MASTER)%ー！　今日の夕方って予定ある？」
+	PRINTFORMW 工作结束后，%ANAME(対象)%被打了招呼。没有什么特别的计划，有什么事呢？
+	;TranslatedMark 仕事終わりに%ANAME(対象)%が声をかけてきた。特に予定は無いが、何だろう？
+	PRINTFORML 「那就太好了。其实呢？我和米斯蒂亚一起组成了乐队。名字叫"鸟兽伎乐"」
+	;TranslatedMark 「ならちょうど良かった。実はね？　わたし、ミスティアと一緒にバンド組んでるの。『鳥獣伎楽』って言うんだけど」
+	PRINTFORMW 「然后呢？今天正好要开演唱会！如果可以的话来看看吧！」
+	;TranslatedMark 「それでね？　今日ちょうどライブやるの！　もし良かったら見に来てちょうだい！」
+	PRINTFORML %ANAME(対象)%带着明朗的笑容开心地说道。如果被用这样的笑容邀请的话，拒绝大概是不可能的吧
+	;TranslatedMark 朗らかな笑顔で嬉しそうに話す%ANAME(対象)%。こんな笑顔で誘われたら、断るのも憚られるというものだ
+	PRINTFORMW 反正也没有事情。就去看看%ANAME(対象)%的演唱会吧
+	;TranslatedMark どうせ予定は無い。%ANAME(対象)%のライブを見に行ってみよう
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW ・
+	PRINTFORMW ……鸟兽伎乐的演唱会盛况空前
+	;TranslatedMark ……鳥獣伎楽のライブは盛況だった
+	PRINTFORML 两人的身体被与平时不同的黑色基调的稍短的衣装包裹着，伴随着巨大的爆音，呐喊着意味深长的歌词…
+	;TranslatedMark 二人とも、普段と違う黒を基調としたやや丈の短い衣装に身を包み、凄まじい爆音に乗って意味深な歌詞が叫ばれる…
+	PRINTFORMW 与普莉兹姆利巴幻乐团演奏的完善的音乐不同，是一种向年轻人发泄不满和热情的狂野之物
+	;TranslatedMark プリズムリバー幻樂団の完成された音楽とは一味違う、若者の不満や熱意をぶちまけたようなワイルドな物だった
+	PRINTFORMW 「啊！%ANAME(MASTER)%，你来了啊！我们的演唱会怎么样？」
+	;TranslatedMark 「あ！　%ANAME(MASTER)%、来てくれてたんだね！　わたし達のライブ、どうだったかな？」
+ELSE
+	PRINTFORML 「啊，%ANAME(MASTER)%！正好」
+	;TranslatedMark 「あ、%ANAME(MASTER)%ー！　ちょうど良かった」
+	PRINTFORMW 「我们今天也要开演唱会！如果可以的话，请再来看看吧！」
+	;TranslatedMark 「わたし達、今日もライブやるの！　もし良かったら、また見に来てちょうだい！」
+	PRINTFORML %ANAME(対象)%依然用开心的笑容邀请道。如果被用这样的笑容邀请的话，拒绝大概是不可能的吧
+	;TranslatedMark 相変わらず嬉しそうな笑顔で話す%ANAME(対象)%。この笑顔で誘われたら、断るのも憚られるというものだ
+	PRINTFORMW 反正也没有事情。再去看看%ANAME(対象)%的演唱会吧
+	;TranslatedMark どうせ予定も無いし。また%ANAME(対象)%のライブを見に行ってみよう
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW ・
+	PRINTFORMW ……今天鸟兽伎乐的演唱会也很热闹
+	;TranslatedMark ……今日も鳥獣伎楽のライブは盛況だった
+	PRINTFORML 大概是因为年轻人的共鸣吧，会场今天也充满了狂热的气氛
+	;TranslatedMark 若者たちの共感を集めているのか、会場は今日も熱狂に包まれていた
+	SELECTCASE RAND:8
+		CASE 0
+			CALL COLOR_PRINTL("什么都不要！！都可以扔掉！！", 0x088A08)
+			;TranslatedMark "要らないッ、何もッ！　捨ててしまおうッ！！", 0x088A08
+			PRINTFORMW %ANAME(対象)%把断舍离唱成了摇滚…
+			;TranslatedMark %ANAME(対象)%は断捨離をロックに歌い上げている…
+		CASE 1
+			CALL COLOR_PRINTL("必--杀--，居然瞄准的是我吗--", 0x088A08)
+			;TranslatedMark "必殺のーッ、技が討つのは我が身なのかとーッ！！", 0x088A08
+			PRINTFORMW %ANAME(対象)%唱出了自己弹幕游戏时的失败经历…
+			;TranslatedMark %ANAME(対象)%は跳ね返ってきた自分の弾幕に当たった失敗談を歌い上げている…
+		CASE 2
+			CALL COLOR_PRINTL("虽然没有名字，但那是爱着你我守护着你我之物啊！！", 0x088A08)
+			;TranslatedMark "無意味に見えた物に貴方も私もッ、守られていたり、知らずに愛されているのッ！！", 0x088A08
+			PRINTFORMW %ANAME(対象)%唱出了彼此间意想不到的羁绊的重要性…
+			;TranslatedMark %ANAME(対象)%は誰かとの思いがけない絆の大切さを説いている…
+		CASE 3
+			CALL COLOR_PRINTL("一路走来的事，累得让人后悔！！", 0x088A08)
+			;TranslatedMark "出会ったことをーッ、悔やみたくなるくらいに疲れてるよッ！！", 0x088A08
+			PRINTFORMW %ANAME(対象)%拼命歌唱着在寺庙修行的艰辛…
+			;TranslatedMark %ANAME(対象)%はお寺での修行のハードさを必死に歌い上げている…
+		CASE 4
+			CALL COLOR_PRINTL("你我的歌声重叠在一起的话一定能成功的！", 0x088A08)
+			;TranslatedMark "君の声と、私の声がッ、重なり合えばきっと行けるッ！！", 0x088A08
+			PRINTFORMW %ANAME(対象)%用身体表现了唱歌的快乐…
+			;TranslatedMark %ANAME(対象)%は歌うことの楽しさを身体いっばいに表現している…
+		CASE 5
+			CALL COLOR_PRINTL("只有一次，生命是好机会！！", 0x088A08)
+			;TranslatedMark "たった一度与えられたーッ、命は好機だーからッ！！", 0x088A08
+			PRINTFORMW %ANAME(対象)%热情歌唱着不能错过只有一次的机会…
+			;TranslatedMark %ANAME(対象)%は一度しかないチャンスを逃してはならないと熱唱している…
+		CASE 6
+			CALL COLOR_PRINTL("“每个人都梦想着幻想乡的明天，我武者罗，那眼泪和勇气都会溢出！！", 0x088A08)
+			;TranslatedMark "誰もがこの郷の明日を夢見るからーッ、我武者羅なっ、その涙とこの勇気あふれ出すーッ！！", 0x088A08
+			PRINTFORMW %ANAME(対象)%热情歌唱着对和平的祈祷…
+			;TranslatedMark %ANAME(対象)%は平和への祈りを熱く歌い上げている…
+		CASE 7
+			CALL COLOR_PRINTL("像笨蛋一样活着，活着的一个笨蛋，baby！我要像笨蛋一样活下去！！", 0x088A08)
+			;TranslatedMark "馬鹿生存者ッ、生きのこれこれ馬鹿生存者ッ、ベイベーッ！　ワタシイズムで馬鹿生存者ーッ！！", 0x088A08
+			PRINTFORMW %ANAME(対象)%唱着表达有时像个傻瓜一样享乐也是很重要的这件事…
+			;TranslatedMark %ANAME(対象)%は、時には馬鹿になってハジケることも大切だということを歌い上げている…
+	ENDSELECT
+	PRINTFORML ・
+	PRINTFORMW ・
+	PRINTFORMW 「啊！%ANAME(MASTER)%，你来了啊！今天的演唱会怎么样？」
+	;TranslatedMark 「あ！　%ANAME(MASTER)%、来てくれてたんだね！　今日のライブはどうだったかな？」
+ENDIF
+CALL ASK_YN("呀，太棒了！太感动了！！", "现在的我无法理解（翻译并感）")
+;TranslatedMark "いやーすごかった！　感動した！", "今の僕には理解できない"
+IF RESULT == 0
+	PRINTFORML 爆音带来的震动和高信息量的歌词结合，真是场非常有感情的演唱会！
+	;TranslatedMark 爆音が与える振動とメッセージ性の高い歌詞が合わさって、実にエモいライブだった！
+	PRINTFORMW %ANAME(MASTER)%向%ANAME(対象)%传达了非常好的感想
+	;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%に、とても良かったという感想を伝えた
+	PRINTFORML 「果然是这样！？诶嘿嘿嘿♪被%ANAME(MASTER)%这么一说，好像得到了点自信呢♪」
+	;TranslatedMark 「やっぱりそう！？　えへへへー♪　%ANAME(MASTER)%に言われると、何だか自信ついちゃうなー♪」
+	;響子が淫乱取得済みで主人公がペニス持ち
+	IF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫乱) && HAS_PENIS(MASTER)
+		PRINTFORMW %ANAME(対象)%抱住了%ANAME(MASTER)%，将微微出汗的大腿压了过来
+		;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に抱きつきながら、ほのかに汗ばんだ太ももを押し付ける
+		PRINTFORML 和平时不一样，身体被略短的黑色服装包裹住的%ANAME(対象)%，比平时更加散发着女人的魅力
+		;TranslatedMark 普段と違う、丈の短い黒の衣装に身を包んだ%ANAME(対象)%は、いつもより女を感じさせた
+		PRINTFORML 「是LIVE之后的原因吗……总觉得身体有点发热呢…♥ %ANAME(MASTER)%，今后能和我交往吗？」
+		;TranslatedMark 「ライブの後だからかな。何だか身体が火照っちゃった…♥　%ANAME(MASTER)%、これから付き合ってくれる？」
+		PRINTFORMW 她看上去着期待和%ANAME(MASTER)%的行为，双眼中闪烁着的情欲的灯火
+		;TranslatedMark その瞳には%ANAME(MASTER)%との行為を期待する情欲の灯が燈っていた
+		PRINTL
+		;ミスティアとも懇ろな場合
+		IF TALENT:ミスティア:恋慕 && TALENT:ミスティア:合意
+			CALL COLOR_PRINTL("啊！等下啊响子！一个人这样好狡猾啊！", 0xF781F3)
+			;TranslatedMark "あーっ！　ちょっと響子！　一人だけズルイわよーっ！", 0xF781F3
+			PRINTFORMW 一边这样说着，作为响子的搭档的米斯蒂亚也紧紧抱住了%ANAME(MASTER)%，就像是要把她那灼热的嫩肉压在身上似的。
+			;TranslatedMark そう言いながら、響子の相方であるミスティアもまた、火照った柔肉を押し付けるように%ANAME(MASTER)%に抱きついてきた
+			CALL COLOR_PRINTL("我在演唱会之后也很兴奋呢。…不要把同伴排除在外呀？", 0xF781F3)
+			;TranslatedMark "私だってライブの後で興奮してるんだもん。…仲間外れはイヤよ？", 0xF781F3
+			PRINTFORMW 与身高不相称的柔软的肉体和火辣辣的炽热，煽动了%ANAME(MASTER)%的情欲
+			;TranslatedMark 背丈に似合わぬむっちりとした肉体の柔らかさと火照りの熱が、%ANAME(MASTER)%の%ANAME(MASTER)%の劣情を煽っていく
+			PRINTFORML 「嘿嘿，是啊…。喂，%ANAME(MASTER)%。干脆三个人一起做些舒服的事吧…♥」
+			;TranslatedMark 「えへへ、そうだね…。ねえ、%ANAME(MASTER)%。どうせなら三人一緒に、イイコトしよ…♥」
+			PRINTFORML 两个人虽然看起来体格小却能让人感受到雌性的美丽。%ANAME(MASTER)%一边咽着唾沫一边将两个人紧紧抱住…
+			;TranslatedMark 二人の視線は体格は小さくても立派に牝を感じさせるモノだった。%ANAME(MASTER)%は生唾を飲み込みつつ二人を抱き寄せる…
+			CALL COLOR_PRINT("呼呼呼、就是应该这样♪", 0xF781F3)
+			;TranslatedMark "うふふー、そうこなくっちゃね♪", 0xF781F3
+			CALL COLOR_PRINTL(@"只献给%ANAME(MASTER)%的演唱会♥，尽情享受吧♥",  0x088A08)
+			;TranslatedMark @"　%ANAME(MASTER)%にだけのライブ、楽しんでね♥",  0x088A08
+			PRINTFORMW 那天晚上…三个人一起尽情燃烧了自己的欲望
+			;TranslatedMark その夜…、三人ともども大いに燃え上がった
+			CALL FUCK(対象, "Ｖ, 奉仕, 性交, 欲望, 性技, Ｖ性交", "膣内射精, 処女喪失", GET_ID(MASTER), "", ANAME(MASTER), "", "和姦")
+			CALL FUCK(ミスティア, "Ｖ, 奉仕, 性交, 欲望, 性技, Ｖ性交", "膣内射精, 処女喪失", GET_ID(MASTER), "", ANAME(MASTER), "", "和姦")
+			CALL FUCK(MASTER, "Ｃ, 射精, 欲望, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(ミスティア)%の膣", "和姦")
+			CALL FUCK(MASTER, "Ｃ, 射精, 欲望, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣", "和姦")
+			CFLAG:対象:好感度 += 300
+			CFLAG:ミスティア:好感度 += 300
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了300", 0x00FFFF)
+			CALL COLOR_PRINTL(@"%ANAME(ミスティア)%的好感度上升了300", 0x00FFFF)
+		;そうでない場合
+		ELSE
+			PRINTFORML …被那样的色情的目光注视的话，也没有办法的吧。%ANAME(MASTER)%抱住了%ANAME(対象)%…
+			;TranslatedMark …そんなエロい目を向けられては仕方ない。%ANAME(MASTER)%は%ANAME(対象)%を抱き寄せる…
+			PRINTFORMW ……面对这样色情的目光也是没办法的。%ANAME(MASTER)%抱着%ANAME(対象)%…
+			;TranslatedMark その夜…、二人は大いに燃え上がった
+			CALL FUCK(対象, "Ｖ, 奉仕, 性交, 欲望, 性技, Ｖ性交", "膣内射精, 処女喪失", GET_ID(MASTER), "", ANAME(MASTER), "", "和姦")
+			CALL FUCK(MASTER, "Ｃ, 射精, 欲望, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣", "和姦")
+			CFLAG:対象:好感度 += 300
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了300", 0x00FFFF)
+		ENDIF
+	ELSE
+		PRINTFORMW %ANAME(対象)%带着一如既往明亮的笑颜，看向了%ANAME(MASTER)%
+		;TranslatedMark %ANAME(対象)%はいつもの朗らかな笑顔を%ANAME(MASTER)%に向ける
+		PRINTFORMW LIVE中可靠的样子虽然也很棒，但%ANAME(対象)%果然还是适合这样的笑容
+		;TranslatedMark ライブ中の凛々しい様子もいいが、やはり%ANAME(対象)%はこういう笑顔が似合う
+		PRINTFORML 「好——的，%ANAME(MASTER)%也一起参加庆功宴吧！今天我请客哦♪」
+		;TranslatedMark 「よーし、%ANAME(MASTER)%も一緒に打ち上げに行こうよ！　今日は奢っちゃうよ♪」
+		PRINTFORMW 之后，在米斯蒂娅的摊子上享受了庆功宴
+		;TranslatedMark その後、ミスティアの屋台で打ち上げを楽しんだ
+		CFLAG:対象:好感度 += 100
+		CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了100", 0x00FFFF)
+	ENDIF
+ELSE
+	PRINTFORML 说实话……完全不明白！现在的自己完全无法理解！
+	;TranslatedMark 正直……さっぱり分かりませんでした！　今の自分には全然！
+	PRINTFORMW %ANAME(MASTER)%向%ANAME(対象)%传达了自己不太明白的感想
+	;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%に、よく分からなかったという感想を伝えた
+	IF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫乱) && HAS_PENIS(MASTER)
+		PRINTFORML 「……是吗。对不起，让你感到无聊了吧？」
+		;TranslatedMark 「……そう。退屈させちゃってごめんね？」
+		PRINTFORMW %ANAME(対象)%一边这样说着，一边敞开了胸口的衣服，抱住%ANAME(MASTER)%后，将微微出汗的胸部压了上去
+		;TranslatedMark %ANAME(対象)%はそう言いながら胸元を肌蹴させ、%ANAME(MASTER)%に抱きつき、ほのかに汗ばんだ胸を押し付ける
+		PRINTFORML 和平时不同，身着黑色衣服的%ANAME(対象)%，比平时更能让人感受到女人的魅力
+		;TranslatedMark 普段と違う、黒い衣装に身を包んだ%ANAME(対象)%は、いつもより女を感じさせた
+		PRINTFORML 「那么接下来，就让我给你带来快乐吧…♥」
+		;TranslatedMark 「それじゃあこれから、わたしが楽しませてあげる…♥」
+		PRINTFORMW 她看上去着期待和%ANAME(MASTER)%的行为，双眼中闪烁着的情欲的灯火
+		;TranslatedMark その瞳には%ANAME(MASTER)%との行為を期待する情欲の灯が燈っていた
+		PRINTL
+		;ミスティアとも懇ろな場合
+		IF TALENT:ミスティア:恋慕 && TALENT:ミスティア:合意
+			CALL COLOR_PRINTL("啊啊！等下啊響子！　一人太狡猾了啦！", 0xF781F3)
+			PRINTFORMW 一边这样说着，作为响子的搭档的米斯蒂亚也紧紧抱住了%ANAME(MASTER)%，就像是要把她那灼热的嫩肉压在身上似的。
+			;TranslatedMark そう言いながら、響子の相方であるミスティアもまた、火照った柔肉を押し付けるように%ANAME(MASTER)%に抱きついてきた
+			CALL COLOR_PRINTL("要是不开心的话我也有责任。…不要把同伴排除在外呀？", 0xF781F3)
+			PRINTFORMW 与身高不相称的柔软的肉体和火辣辣的炽热，煽动了%ANAME(MASTER)%的情欲
+			;TranslatedMark 背丈に似合わぬむっちりとした肉体の柔らかさと火照りの熱が、%ANAME(MASTER)%の%ANAME(MASTER)%の劣情を煽っていく
+			PRINTFORML 「嘿嘿…是啊。%ANAME(MASTER)%。现在开始和我们一起做舒服的事吧…♥」
+			;TranslatedMark 「えへへ…そうだね。ねえ%ANAME(MASTER)%。これから私たちと一緒に、イイコトしよ…♥」
+			PRINTFORML 两个人虽然看起来体格小却能让人感受到雌性的美丽。%ANAME(MASTER)%一边咽着唾沫一边将两个人紧紧抱住…
+			;TranslatedMark 二人の視線は体格は小さくても立派に牝を感じさせるモノだった。%ANAME(MASTER)%は生唾を飲み込みつつ二人を抱き寄せる…
+			CALL COLOR_PRINT("呼呼呼、就是应该这样♪", 0xF781F3)
+			CALL COLOR_PRINTL(@"只献给%ANAME(MASTER)%的演唱会♥，尽情享受吧♥",  0x088A08)
+			PRINTFORMW 那天晚上…三个人一起尽情燃烧了自己的欲望
+			;TranslatedMark その夜…、三人ともども大いに燃え上がった
+			CALL FUCK(対象, "Ｖ, 奉仕, 性交, 欲望, 性技, Ｖ性交", "膣内射精, 処女喪失", GET_ID(MASTER), "", ANAME(MASTER), "", "和姦")
+			CALL FUCK(ミスティア, "Ｖ, 奉仕, 性交, 欲望, 性技, Ｖ性交", "膣内射精, 処女喪失", GET_ID(MASTER), "", ANAME(MASTER), "", "和姦")
+			CALL FUCK(MASTER, "Ｃ, 射精, 欲望, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(ミスティア)%の膣", "和姦")
+			CALL FUCK(MASTER, "Ｃ, 射精, 欲望, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣", "和姦")
+			CFLAG:対象:好感度 += 300
+			CFLAG:ミスティア:好感度 += 300
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了300", 0x00FFFF)
+			CALL COLOR_PRINTL(@"%ANAME(ミスティア)%的好感度上升了300", 0x00FFFF)
+		;そうでない場合
+		ELSE
+			PRINTFORML …被那样色情的目光注视着，自然没有拒绝的道理。%ANAME(MASTER)%把身体交给了%ANAME(対象)%…
+			;TranslatedMark …そんなエロい目を向けられて、断れるわけが無い。%ANAME(MASTER)%は%ANAME(対象)%に身を任せた…
+			PRINTFORMW ……面对这样色情的目光也是没办法的。%ANAME(MASTER)%抱着%ANAME(対象)%…
+			;TranslatedMark その夜…、二人は大いに燃え上がった
+			CALL FUCK(対象, "Ｖ, 奉仕, 性交, 欲望, 性技, Ｖ性交", "膣内射精, 処女喪失", GET_ID(MASTER), "", ANAME(MASTER), "", "和姦")
+			CALL FUCK(MASTER, "Ｃ, 射精, 欲望, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣", "和姦")
+			CFLAG:対象:好感度 += 300
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了300", 0x00FFFF)
+		ENDIF
+	ELSE
+		PRINTFORML 「……是吗」
+		;TranslatedMark 「……そう」
+		PRINTFORMW 于是%ANAME(対象)%把手搭在%ANAME(MASTER)%的肩上
+		;TranslatedMark すると%ANAME(対象)%は%ANAME(MASTER)%の肩に手を置き
+		PRINTFORML 「没关系！总有一天就连%ANAME(MASTER)%也会…理解的明天会到来的！」
+		;TranslatedMark 「大丈夫！　いつか%ANAME(MASTER)%にも…、分かる明日が来るよ！」
+		PRINTFORMW 被带着异常灿烂的笑容的%ANAME(対象)%，用高高在上的目光安慰着……
+		;TranslatedMark すごく良い笑顔の%ANAME(対象)%に、上から目線で慰められた……
+		CFLAG:対象:好感度 += 30
+		CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了30", 0x00FFFF)
+	ENDIF
+ENDIF
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORML ・
+CALL COLOR_PRINTW(@"鸟兽伎乐举办LIVE的%CITY_NAME:対象都市%好像变得繁荣一点了", カラー_注意)
+CALL MODIFY_CITY_ECONOMY(対象都市, RAND(5000, 10000))
+KDVAR:対象:響子_鳥獣伎楽 = 1
+
+RETURN 1

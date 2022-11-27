@@ -1,0 +1,2261 @@
+﻿;-------------------------------------------------
+;共通で発生させる地の文
+;-------------------------------------------------
+@KOJO_EVENT_DEFAULT(ARG)
+#DIM 効果量
+#DIM 妊婦フラグ
+;-------------------------------------------------
+;ファーストキス
+;-------------------------------------------------
+IF ARG == 1
+
+;-------------------------------------------------
+;告白成功
+;-------------------------------------------------
+ELSEIF ARG == 2
+	PRINTFORMW %ANAME(MASTER)%对%ANAME(TARGET)%表达了自己的愛意
+	;TranslatedMark %ANAME(MASTER)%は%ANAME(TARGET)%に自分の思いを告げた
+
+	IF IS_SAMESEX(MASTER, TARGET) && !TALENT:兩面通吃
+		PRINTFORMW 沒有把%ANAME(MASTER)%当做恋愛的対象的%ANAME(TARGET)%因為突然的告白非常吃驚…
+		;TranslatedMark %ANAME(MASTER)%を恋愛の対象として見ていなかった%ANAME(TARGET)%は突然の告白に驚いているようだ…
+		PRINTFORMW 稍微猶豫了一会、%ANAME(TARGET)%接受了%ANAME(MASTER)%的表白
+		;TranslatedMark 少し戸惑いながらも、%ANAME(TARGET)%は%ANAME(MASTER)%の思いを受け入れた
+	ELSEIF GET_INITIATIVE_RATE(TARGET) <= 0
+		PRINTFORMW ……%ANAME(TARGET)%、露出笑容接受了表白
+		;TranslatedMark ……%ANAME(TARGET)%は、笑顔でその思いを受け入れた
+	ELSE
+		PRINTFORMW ……%ANAME(TARGET)%红着脸接受了这份思念
+		;TranslatedMark ……%ANAME(TARGET)%は、少し顔を赤くしながらその思いを受け入れた
+	ENDIF
+
+	IF TALENT:無接吻経験
+		PRINTFORMW 成為了恋人的%ANAME(MASTER)%和%ANAME(TARGET)%、进行了長時間的熱吻
+		;TranslatedMark 恋人となった%ANAME(MASTER)%と%ANAME(TARGET)%は、長く、熱い口づけを交わした
+	ENDIF
+
+;-------------------------------------------------
+;告白失敗
+;-------------------------------------------------
+ELSEIF ARG == 3
+	PRINTFORMW %ANAME(MASTER)%对%ANAME(TARGET)%表达了自己的愛意
+	;TranslatedMark %ANAME(MASTER)%は%ANAME(TARGET)%に自分の思いを告げた
+
+	IF IS_SAMESEX(MASTER, TARGET) && !TALENT:兩面通吃
+		PRINTFORMW 沒有把%ANAME(MASTER)%当做恋愛的対象的%ANAME(TARGET)%因為突然的告白非常吃驚…
+		;TranslatedMark %ANAME(MASTER)%を恋愛の対象として見ていなかった%ANAME(TARGET)%は突然の告白に驚いているようだ…
+		PRINTFORMW 結果最後被当做了一個玩笑、簡単的把話題帯過了
+		;TranslatedMark 結局ただの冗談だと思われて、軽くあしらわれてしまった
+	ELSEIF GET_INITIATIVE_RATE(TARGET) <= 0
+		IF TALENT:恋慕
+			PRINTFORMW ……%ANAME(TARGET)%変得満臉通紅直接逃走了
+			;TranslatedMark ……%ANAME(TARGET)%は顔を真っ赤にして逃げ出してしまった
+		ELSE
+			PRINTFORMW ……%ANAME(TARGET)%露出了為難的表情、委婉地傳達了拒絶的意思
+			;TranslatedMark ……%ANAME(TARGET)%は困ったような表情を浮かべると、遠回しに拒絶の意思を伝えてきた
+		ENDIF
+	ELSE
+		IF TALENT:恋慕
+			PRINTFORMW ……%ANAME(TARGET)%変得満臉通紅慌忙地拒絶了
+			;TranslatedMark ……%ANAME(TARGET)%は顔を真っ赤にして慌てながら拒否した
+		ELSE
+			PRINTFORMW ……%ANAME(TARGET)%断然拒絶了
+			;TranslatedMark ……%ANAME(TARGET)%にきっぱりと断られてしまった
+		ENDIF
+	ENDIF
+
+;-------------------------------------------------
+;押し倒し成功(合意は得られない)
+;-------------------------------------------------
+ELSEIF ARG == 4
+	IF ABL:性知識 == 0
+		PRINTFORML %ANAME(MASTER)%対%ANAME(TARGET)%的衣服動起了手、%ANAME(TARGET)%露出了感到奇怪的表情
+		;TranslatedMark %ANAME(MASTER)%が%ANAME(TARGET)%の服に手を掛けると、%ANAME(TARGET)%は不思議そうな顔をした
+		PRINTFORMW 看来、似乎是不明白被做了什麼的樣子…
+		;TranslatedMark どうやら、これから何をするかよくわかっていないようだ…
+	ELSE
+		PRINTFORMW 已经完全喝醉了的%ANAME(TARGET)%，即使%ANAME(MASTER)%把手放在了%ANAME(TARGET)%的衣服上也只能任凭摆布…
+		;TranslatedMark すっかり酔いの回った%ANAME(TARGET)%は、%ANAME(MASTER)%が%ANAME(TARGET)%の服に手を掛けても抵抗せずなすがままだ…
+	ENDIF
+
+;-------------------------------------------------
+;押し倒し成功(合意を取得)
+;-------------------------------------------------
+ELSEIF ARG == 5
+	IF ABL:性知識 == 0
+		PRINTFORML %ANAME(MASTER)%対%ANAME(TARGET)%的衣服動起了手、%ANAME(TARGET)%露出了感到奇怪的表情
+		;TranslatedMark %ANAME(MASTER)%が%ANAME(TARGET)%の服に手を掛けると、%ANAME(TARGET)%は不思議そうな顔をした
+		PRINTFORMW 看来、似乎是不明白被做了什麼的樣子…
+		;TranslatedMark どうやら、これから何をするかよくわかっていないようだ…
+	ELSEIF TALENT:傲嬌
+		PRINTFORML 被%ANAME(MASTER)%開始脱去衣服的時候、%ANAME(TARGET)%激烈的怒罵着%ANAME(MASTER)%
+		;TranslatedMark %ANAME(MASTER)%が服を脱がせようとすると、%ANAME(TARGET)%は%ANAME(MASTER)%を激しく罵ってきた
+		PRINTFORMW ……但是、似乎沒有抵抗的打算
+		;TranslatedMark ……だが、抵抗する気はないようだ
+	ELSEIF TALENT:貞操観念
+		PRINTFORML 被%ANAME(MASTER)%開始脱去衣服的時候、%ANAME(TARGET)%打算順從的接受
+		;TranslatedMark %ANAME(MASTER)%が服を脱がせようとすると、%ANAME(TARGET)%は素直に受け入れながらも
+		PRINTFORMW 但是逼迫着対方要負起責任
+		;TranslatedMark 責任を取ってくれるよう迫っている
+	ELSE
+		PRINTFORMW 被%ANAME(MASTER)%開始脱去衣服的時候、%ANAME(TARGET)%順從的接受了
+		;TranslatedMark %ANAME(MASTER)%が服を脱がせようとすると、%ANAME(TARGET)%は素直に受け入れた
+	ENDIF
+
+;-------------------------------------------------
+;押し倒し失敗
+;-------------------------------------------------
+ELSEIF ARG == 6
+	IF TALENT:合意
+		PRINTFORMW 被%ANAME(MASTER)%開始脱去衣服的時候、%ANAME(TARGET)%以现在没有那种心情为由拒绝了
+		;TranslatedMark %ANAME(MASTER)%が服を脱がせようとすると、%ANAME(TARGET)%は今はそんな気分ではないと言って断った
+	ELSE
+		PRINTFORMW 被%ANAME(MASTER)%開始脱去衣服的時候、%ANAME(TARGET)%激烈地抵抗着
+		;TranslatedMark %ANAME(MASTER)%が服を脱がせようとすると、%ANAME(TARGET)%は激しく抵抗した
+	ENDIF
+
+;-------------------------------------------------
+;押し倒し成功(既に合意あり)
+;-------------------------------------------------
+ELSEIF ARG == 7
+
+;-------------------------------------------------
+;真名を許すイベント
+;-------------------------------------------------
+ELSEIF ARG == 10
+	;睡姦を行った場合
+	IF TFLAG:8
+		PRINTFORMW %NAME%似乎觉得受到了%ANAME(MASTER)%的照顾，对%ANAME(MASTER)%说了感谢的话
+		;TranslatedMark どうやら%NAME%は%ANAME(MASTER)%が介抱してくれたと思い込んでいるらしく、%ANAME(MASTER)%に感謝の言葉を述べた
+		PRINTFORMW %NAME%对%ANAME(MASTER)%说，今后要用真名的%CALLNAME%来称呼她
+		;TranslatedMark %NAME%は%ANAME(MASTER)%に対し、これからは真名の%CALLNAME%で呼ぶように言った
+	ELSE
+		PRINTFORMW 看来得到了%NAME%的充分信任…
+		;TranslatedMark どうやら十分に%NAME%の信頼を得たようだ…
+		PRINTFORMW %NAME%对%ANAME(MASTER)%说，今后要用真名的%CALLNAME%来称呼她
+		;TranslatedMark %NAME%は%ANAME(MASTER)%に対し、これからは真名の%CALLNAME%で呼ぶように言った
+	ENDIF
+
+;-------------------------------------------------
+;怒りの限界で追い返される
+;-------------------------------------------------
+ELSEIF ARG == 13
+	IF FLAG:ウフフフラグ || ABL:武闘 < 60
+		PRINTFORML %ANAME(TARGET)%用激烈的气势怒吼着\@ FLAG:調教モード != 調教_捕虜調教 ? 把%ANAME(MASTER)%赶走了… # 回去了… \@
+		;TranslatedMark %ANAME(TARGET)%は激しい剣幕で怒鳴りながら\@ FLAG:調教モード != 調教_捕虜調教 ? %ANAME(MASTER)%を追い返した… # 帰っていった… \@
+	ELSE
+		PRINTFORML %ANAME(TARGET)%激憤地朝着%ANAME(MASTER)%砍了過去…
+		;TranslatedMark %ANAME(TARGET)%は激高して%ANAME(MASTER)%に斬り掛かってきた…
+	ENDIF
+
+;-------------------------------------------------
+;哀しみの限界で追い返される
+;-------------------------------------------------
+ELSEIF ARG == 14
+	PRINTFORML %ANAME(TARGET)%説着想一個人呆着然後把%ANAME(MASTER)%趕走了…
+	;TranslatedMark %ANAME(TARGET)%は一人にして欲しいと言って%ANAME(MASTER)%を追い返した…
+
+;-------------------------------------------------
+;怒りの限界で勝手に帰る
+;-------------------------------------------------
+ELSEIF ARG == 15
+	PRINTFORML %ANAME(TARGET)%生気地回去了…
+	;TranslatedMark %ANAME(TARGET)%は怒って帰ってしまった…
+
+;-------------------------------------------------
+;哀しみの限界で勝手に帰る
+;-------------------------------------------------
+ELSEIF ARG == 16
+	PRINTFORML %ANAME(TARGET)%從這裡跑了回去…
+	;TranslatedMark %ANAME(TARGET)%はその場から走り去って帰ってしまった…
+
+;-------------------------------------------------
+;行動終了時に向こうからキス
+;-------------------------------------------------
+ELSEIF ARG == 20
+	PRINTFORMW %ANAME(MASTER)%打算回去的時候、突然被%ANAME(TARGET)%叫住了
+	;TranslatedMark %ANAME(MASTER)%が帰ろうとすると、突然%ANAME(TARGET)%に呼び止められた
+	IF GROUPMATCH(TALENT:性別, 0, 3)
+		IF TALENT:小悪魔
+			PRINTFORMW 回頭打算看看、在那個瞬間、%ANAME(TARGET)%強行奪走了%ANAME(MASTER)%的嘴唇
+			;TranslatedMark 振り返ってみると、その途端、%ANAME(TARGET)%は強引に%ANAME(MASTER)%の唇を奪った
+			PRINTFORMW 嘴唇分離後、%ANAME(TARGET)%就像是什麼也沒有発生一樣拉着%ANAME(MASTER)%的手開始一起走回去…
+			;TranslatedMark 唇を離すと、%ANAME(TARGET)%は何事もなかったかのように%ANAME(MASTER)%の手を取って歩き始めた…
+			PRINTL 
+		ELSEIF TALENT:傲嬌
+			PRINTFORMW 回頭打算看看、在那個瞬間、%ANAME(TARGET)%強行奪走了%ANAME(MASTER)%的嘴唇
+			;TranslatedMark 振り返ってみると、その途端、%ANAME(TARGET)%は強引に%ANAME(MASTER)%の唇を奪った
+			PRINTFORMW 嘴唇分離後、%ANAME(TARGET)%説着你可不要誤会、為了不顯露出自己的心情露出了不開心的樣子把臉転了過去…
+			;TranslatedMark 唇を離すと、%ANAME(TARGET)%は勘違いするなと言って、露骨に不機嫌そうな様子で顔を背けた…
+			PRINTL 
+		ELSE
+			PRINTFORMW 回頭一看、顯得非常緊張的%ANAME(TARGET)%站在那裡
+			;TranslatedMark 振り返ってみると、そこには緊張した面持ちの%ANAME(TARGET)%が立っていた
+			IF GET_INITIATIVE_RATE(TARGET) <= 0
+				PRINTFORMW %ANAME(TARGET)%軽軽的抱住了%ANAME(MASTER)%、用笨拙的動作吻了上来
+				;TranslatedMark %ANAME(TARGET)%はそっと%ANAME(MASTER)%を抱きしめ、ぎこちない動きで口づけた
+				PRINTL 
+			ELSE
+				PRINTFORMW %ANAME(TARGET)%強行抱住了%ANAME(MASTER)%、有些粗暴的親了上来
+				;TranslatedMark %ANAME(TARGET)%は強引に%ANAME(MASTER)%を抱きしめると、少し乱暴に口づけてきた
+				PRINTL 
+			ENDIF
+		ENDIF
+	ELSE
+		IF TALENT:小悪魔
+			PRINTFORMW 回頭打算看看、在那個瞬間、%ANAME(TARGET)%抱了過来并奪去了%ANAME(MASTER)%的嘴唇
+			;TranslatedMark 振り返ってみると、その途端、%ANAME(TARGET)%が抱きついてきて%ANAME(MASTER)%の唇を奪った
+			PRINTFORMW 嘴唇分離後、%ANAME(TARGET)%対着%ANAME(MASTER)%露出了悪作劇成功的微笑…
+			;TranslatedMark 唇を離すと、%ANAME(TARGET)%はイタズラっぽく%ANAME(MASTER)%に微笑んだ…
+			PRINTL 
+		ELSEIF TALENT:傲嬌
+			PRINTFORMW 回頭打算看看、在那個瞬間、%ANAME(TARGET)%強行奪走了%ANAME(MASTER)%的嘴唇
+			;TranslatedMark 振り返ってみると、その途端、%ANAME(TARGET)%は強引に%ANAME(MASTER)%の唇を奪った
+			PRINTFORMW 嘴唇分離後、%ANAME(TARGET)%説着你可不要誤会、為了不顯露出自己的心情露出了不開心的樣子把臉転了過去…
+			;TranslatedMark 唇を離すと、%ANAME(TARGET)%は勘違いするなと言って、露骨に不機嫌そうな様子で顔を背けた…
+			PRINTL 
+		ELSE
+			PRINTFORMW 回頭一看、満臉通紅的%ANAME(TARGET)%低着頭站在那裡
+			;TranslatedMark 振り返ってみると、そこには顔を真っ赤にした%ANAME(TARGET)%が俯いて立っていた
+			IF GET_INITIATIVE_RATE(TARGET) <= 0
+				PRINTFORMW %ANAME(TARGET)%、慢慢地走近了、默默地吻向了%ANAME(MASTER)%的嘴唇
+				;TranslatedMark %ANAME(TARGET)%は、ゆっくりと近付いてきて、そっと%ANAME(MASTER)%に口づけた
+				PRINTL 
+			ELSE
+				PRINTFORMW %ANAME(TARGET)%、把%ANAME(MASTER)%叫到了身前、有些粗暴的親了上去
+				;TranslatedMark %ANAME(TARGET)%は、%ANAME(MASTER)%を近くに呼びつけると、少し乱暴に口づけてきた
+				PRINTL 
+			ENDIF
+		ENDIF
+	ENDIF
+
+;-------------------------------------------------
+;行動終了時に向こうから告白
+;キス未経験の場合、このタイミングで一緒にファーストキスもする
+;-------------------------------------------------
+ELSEIF ARG == 21
+	PRINTFORMW %ANAME(MASTER)%打算回去的時候、突然被%ANAME(TARGET)%叫住了
+	;TranslatedMark %ANAME(MASTER)%が帰ろうとすると、突然%ANAME(TARGET)%に呼び止められた
+	;一回目
+	IF CFLAG:44 == 0
+		PRINTFORMW 回頭一看、満臉通紅的%ANAME(TARGET)%低着頭站在那裡
+		;TranslatedMark 振り返ってみると、そこには顔を真っ赤にした%ANAME(TARGET)%が俯いて立っていた
+		IF GET_INITIATIVE_RATE(TARGET) <= 0
+			PRINTFORMW 然後%ANAME(TARGET)%、雖然非常害羞、但還是傳達了喜歡着%ANAME(MASTER)%的想法
+			;TranslatedMark そして%ANAME(TARGET)%は、恥ずかしがりながら、%ANAME(MASTER)%の事が好きだと伝えてきた
+			PRINTL  
+		ELSE
+			PRINTFORMW 然後%ANAME(TARGET)%、用有些粗暴的語気、傳達了喜歡着%ANAME(MASTER)%的想法
+			;TranslatedMark そして%ANAME(TARGET)%は、少し乱暴な口調で、%ANAME(MASTER)%の事が好きだと伝えてきた
+			PRINTL  
+		ENDIF
+	;二回目以降
+	ELSE
+		IF GET_INITIATIVE_RATE(TARGET) <= 0
+			PRINTFORMW %ANAME(TARGET)%帯着認真的表情、再次向%ANAME(MASTER)%傳達了自己的想法
+			;TranslatedMark %ANAME(TARGET)%は真剣な表情で、再び%ANAME(MASTER)%に想いを伝えてきた
+			PRINTL  
+		ELSE
+			PRINTFORMW %ANAME(TARGET)%、逼近了%ANAME(MASTER)%説着不要再敷衍了到底要不要接受我
+			;TranslatedMark %ANAME(TARGET)%は、いい加減に想いを受け入れて欲しいと%ANAME(MASTER)%に迫った
+			PRINTL  
+		ENDIF
+	ENDIF
+
+	CALL ASK_YN("接受", "拒绝")
+	;TranslatedMark "受け入れる", "断る"
+
+	IF RESULT == 0
+		IF GROUPMATCH(TALENT:性別, 0, 3)
+			PRINTFORMW %ANAME(MASTER)%接受了%ANAME(TARGET)%的告白、%ANAME(TARGET)%高興的抱緊了%ANAME(MASTER)%
+			;TranslatedMark %ANAME(MASTER)%が%ANAME(TARGET)%の想いを受け入れると、%ANAME(TARGET)%は嬉しそうに%ANAME(MASTER)%を抱きしめてきた
+		ELSE
+			PRINTFORMW %ANAME(MASTER)%接受了%ANAME(TARGET)%的告白、%ANAME(TARGET)%高興的抱住了%ANAME(MASTER)%
+			;TranslatedMark %ANAME(MASTER)%が%ANAME(TARGET)%の想いを受け入れると、%ANAME(TARGET)%は嬉しそうに%ANAME(MASTER)%に抱きついてきた
+		ENDIF
+		PRINTFORMW ……成為恋人的%ANAME(MASTER)%和%ANAME(TARGET)%、交換了長時間的熱情的吻
+		;TranslatedMark ……恋人となった%ANAME(MASTER)%と%ANAME(TARGET)%は、長く、熱い口づけを交わした
+		PRINTL 
+		;告白成功時はTFLAG:4に1を代入
+		TFLAG:4 = 1
+
+	ELSE
+		PRINTFORMW %ANAME(MASTER)%拒絶了%ANAME(TARGET)%的告白……
+		;TranslatedMark %ANAME(MASTER)%は%ANAME(TARGET)%の告白を断った……
+		PRINTL  
+		;告白成功時はTFLAG:4に0を代入
+		TFLAG:4 = 0
+	ENDIF
+
+;-------------------------------------------------
+;相手から押し倒される(合意なし)
+;-------------------------------------------------
+ELSEIF ARG == 22
+	PRINTFORMW %ANAME(MASTER)%対%ANAME(TARGET)%説出再見打算回頭離開的時候、突然被%ANAME(TARGET)%推倒了
+	;TranslatedMark %ANAME(MASTER)%が%ANAME(TARGET)%と一旦別れようとして振り返ると、突然%ANAME(TARGET)%に押し倒されてしまった
+	PRINTFORMW %ANAME(MASTER)%的衣服被一脸兴奋的%ANAME(TARGET)%一件件的脱掉了…
+	;TranslatedMark 焦る%ANAME(MASTER)%の服を%ANAME(TARGET)%は上気した顔で次々と脱がしていく…
+	PRINTFORMW 然後把%ANAME(MASTER)%的衣服完全脱掉的%ANAME(TARGET)%、自己也脱得一絲不掛了
+	;TranslatedMark そして完全に%ANAME(MASTER)%の服を脱がした%ANAME(TARGET)%は、自らも一糸纏わぬ姿になった
+	PRINTFORMW ……看来沒有其他辦法只能做好覚悟了
+	;TranslatedMark ……どうやらこれは覚悟を決めねばならないようだ
+
+;-------------------------------------------------
+;相手から押し倒される(合意なし＆酔った勢い)
+;-------------------------------------------------
+ELSEIF ARG == 23
+	PRINTFORMW %ANAME(MASTER)%対%ANAME(TARGET)%説出再見打算回頭離開的時候、突然被%ANAME(TARGET)%推倒了
+	;TranslatedMark %ANAME(MASTER)%が%ANAME(TARGET)%と一旦別れようとして振り返ると、突然%ANAME(TARGET)%に押し倒されてしまった
+	PRINTFORMW %ANAME(MASTER)%的衣服被一脸兴奋的%ANAME(TARGET)%一件件的脱掉了…
+	;TranslatedMark 焦る%ANAME(MASTER)%の服を%ANAME(TARGET)%は上気した顔で次々と脱がしていく…
+	PRINTFORMW 然後把%ANAME(MASTER)%的衣服完全脱掉的%ANAME(TARGET)%、自己也脱得一絲不掛了
+	;TranslatedMark そして完全に%ANAME(MASTER)%の服を脱がした%ANAME(TARGET)%は、自らも一糸纏わぬ姿になった
+	PRINTFORMW ……看来%ANAME(TARGET)%已経相当的醉了
+	;TranslatedMark ……どうやら%ANAME(TARGET)%はかなり酔っているようだ
+	PRINTFORMW 既然這樣也只能做好覚悟了
+	;TranslatedMark ここは覚悟を決めるしかないだろう
+
+;-------------------------------------------------
+;相手から押し倒される(合意あり)
+;-------------------------------------------------
+ELSEIF ARG == 24
+	PRINTFORMW %ANAME(MASTER)%在%ANAME(TARGET)%説出再見打算離開的時候、被%ANAME(TARGET)%強行推倒了…
+	;TranslatedMark %ANAME(MASTER)%が%ANAME(TARGET)%と一旦別れようとすると、%ANAME(TARGET)%に強引に押し倒されてしまった…
+
+;-------------------------------------------------
+;相手から押し倒される(合意あり＆酔った勢い)
+;-------------------------------------------------
+ELSEIF ARG == 25
+	PRINTFORMW %ANAME(MASTER)%在%ANAME(TARGET)%説出再見打算離開的時候、被喝醉的%ANAME(TARGET)%強行推倒了
+	;TranslatedMark %ANAME(MASTER)%が%ANAME(TARGET)%と一旦別れようとすると、酔った%ANAME(TARGET)%に強引に押し倒されてしまった…
+
+;-------------------------------------------------
+;相手からおねだりされる(合意なし)
+;-------------------------------------------------
+ELSEIF ARG == 26
+	PRINTFORMW %ANAME(MASTER)%対%ANAME(TARGET)%説出再見打算離開的時候、被%ANAME(TARGET)%拉住了
+	;TranslatedMark %ANAME(MASTER)%が%ANAME(TARGET)%と一旦別れようとすると、%ANAME(TARGET)%に引き止められた
+	IF TALENT:傲嬌
+		PRINTFORMW %ANAME(TARGET)%彷徨着视线、説道想被%ANAME(MASTER)%抱…
+		;TranslatedMark %ANAME(TARGET)%は視線を彷徨わせながら、%ANAME(MASTER)%に自分を抱けと要求した…
+	ELSE
+		PRINTFORMW %ANAME(TARGET)%用熱情的双眼凝視着%ANAME(MASTER)%、央求%ANAME(MASTER)%抱自己…
+		;TranslatedMark %ANAME(TARGET)%は熱を帯びた瞳で%ANAME(MASTER)%を見つめながら、%ANAME(MASTER)%に抱いて欲しいとねだった…
+	ENDIF
+
+;-------------------------------------------------
+;相手からおねだりされる(合意なし＆酔った勢い)
+;-------------------------------------------------
+ELSEIF ARG == 27
+	PRINTFORMW %ANAME(MASTER)%対%ANAME(TARGET)%説出再見打算離開的時候、被%ANAME(TARGET)%拉住了
+	;TranslatedMark %ANAME(MASTER)%が%ANAME(TARGET)%と一旦別れようとすると、%ANAME(TARGET)%に引き止められた
+	PRINTFORMW 喝的相当醉的%ANAME(TARGET)%、用熱情的双眼凝視着%ANAME(MASTER)%、央求%ANAME(MASTER)%抱自己…
+	;TranslatedMark かなり酔った様子の%ANAME(TARGET)%は、熱を帯びた瞳で%ANAME(MASTER)%を見つめながら、%ANAME(MASTER)%に抱いて欲しいとねだった…
+
+;-------------------------------------------------
+;相手からおねだりされる(合意あり)
+;-------------------------------------------------
+ELSEIF ARG == 28
+	PRINTFORMW %ANAME(MASTER)%対%ANAME(TARGET)%説出再見打算離開的時候、%ANAME(TARGET)%説出了希望被%ANAME(MASTER)%抱
+	;TranslatedMark %ANAME(MASTER)%が%ANAME(TARGET)%と一旦別れようとすると、%ANAME(TARGET)%は%ANAME(MASTER)%に抱いて欲しいとねだってきた
+
+;-------------------------------------------------
+;酔い限界で倒れる
+;-------------------------------------------------
+ELSEIF ARG == 32
+	PRINTFORML 完全喝醉的%ANAME(TARGET)%突然就倒下了…
+	;TranslatedMark %ANAME(TARGET)%はすっかり酔いが回ってバッタリと倒れてしまった…
+
+;-------------------------------------------------
+;妊娠発覚
+;-------------------------------------------------
+ELSEIF ARG == 40
+	;崩壊
+	IF TALENT:崩壊
+	;捕虜調教
+	ELSEIF CFLAG:9 == CFLAG:MASTER:1
+		;父親不明
+		IF CFLAG:23 == 0
+			IF ABL:出産 >= 3
+				PRINTFORMW %ANAME(TARGET)%因為懷上了連父親都不知道是誰的孩子的喜悦而渾身顫抖…
+				;TranslatedMark %ANAME(TARGET)%は父親が誰かもわからない子を孕んで悦びに打ち震えている…
+			ELSE
+				PRINTFORMW %ANAME(TARGET)%因為懷上了連父親都不知道是誰的孩子的恐懼而渾身顫抖…
+				;TranslatedMark %ANAME(TARGET)%は父親が誰かもわからない子を孕んだ恐怖に震えている…
+			ENDIF
+		;主人公の子を孕んだ
+		ELSEIF CFLAG:23 == GET_ID(MASTER)
+			IF TALENT:親愛 || TALENT:隷属 || TALENT:所有者
+				PRINTFORMW 懷上%ANAME(MASTER)%的孩子的%ANAME(TARGET)%幸福的撫摸着小腹…
+				;TranslatedMark %ANAME(MASTER)%の子を宿した%ANAME(TARGET)%は幸せそうにお腹を撫でた…
+			ELSEIF TALENT:恋慕 || TALENT:服従 || TALENT:親友 || TALENT:主人
+				PRINTFORMW 懷上%ANAME(MASTER)%的孩子讓%ANAME(TARGET)%非常開心…
+				;TranslatedMark %ANAME(MASTER)%の子を宿した%ANAME(TARGET)%は嬉しそうにしている…
+			ELSEIF TALENT:恋人 || TALENT:烙印
+				PRINTFORMW 懷上%ANAME(MASTER)%的孩子的%ANAME(TARGET)%用怨恨的眼神緊盯着%ANAME(MASTER)%…
+				;TranslatedMark %ANAME(MASTER)%の子を宿した%ANAME(TARGET)%は恨めしそうに%ANAME(MASTER)%を睨んだ…
+			ELSE
+				IF ABL:出産 >= 3
+					PRINTFORMW 懷上%ANAME(MASTER)%的孩子的%ANAME(TARGET)%、臉上怨恨的表情因為身為母親的喜悦而漸漸舒緩…
+					;TranslatedMark %ANAME(MASTER)%に孕まされた%ANAME(TARGET)%は、恨めしそうにしながらも雌の悦楽に顔を緩ませてしまっている…
+				ELSEIF CFLAG:崩壊 < 1000
+					PRINTFORMW 懷上%ANAME(MASTER)%的孩子的%ANAME(TARGET)%用充満殺意的眼神緊盯着%ANAME(MASTER)%…
+					;TranslatedMark %ANAME(MASTER)%に孕まされた%ANAME(TARGET)%は殺意を込めて%ANAME(MASTER)%を睨んだ…
+				ELSE
+					PRINTFORMW 懷上%ANAME(MASTER)%的孩子的事実讓%ANAME(TARGET)%受到了劇烈的打撃…
+					;TranslatedMark %ANAME(MASTER)%に孕まされた%ANAME(TARGET)%は激しいショックを受けているようだ…
+				ENDIF
+			ENDIF
+		;触手の子を孕んだ
+		ELSEIF CFLAG:23 == GET_SPERM_ID("触手")
+			;★
+		;他の士官の子を孕んだ
+		ELSE
+			;★
+		ENDIF
+	;捕虜調教以外
+	ELSE
+		;父親不明
+		IF CFLAG:23 == 0
+			IF ABL:出産 >= 3
+				PRINTFORMW %ANAME(TARGET)%因為懷上了連父親都不知道是誰的孩子的喜悦而渾身顫抖…
+				;TranslatedMark %ANAME(TARGET)%は父親が誰かもわからない子を孕んで悦びに打ち震えている…
+			ELSE
+				PRINTFORMW %ANAME(TARGET)%因為不知道孩子的父親是誰而有些不安…
+				;TranslatedMark %ANAME(TARGET)%は父親が誰かわからず不安そうだ…
+			ENDIF
+		;主人公の子を孕んだ
+		ELSEIF CFLAG:23 == GET_ID(MASTER)
+			IF TALENT:親愛 || TALENT:隷属 || TALENT:所有者
+				PRINTFORMW 懷上%ANAME(MASTER)%的孩子的%ANAME(TARGET)%幸福的撫摸着小腹…
+				;TranslatedMark %ANAME(MASTER)%の子を宿した%ANAME(TARGET)%は幸せそうにお腹を撫でた…
+			ELSEIF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				PRINTFORMW 懷上%ANAME(MASTER)%的孩子讓%ANAME(TARGET)%非常開心…
+				;TranslatedMark %ANAME(MASTER)%の子を宿した%ANAME(TARGET)%は嬉しそうにしている…
+			ELSEIF TALENT:恋人 || TALENT:烙印
+				PRINTFORMW 懷上%ANAME(MASTER)%的孩子的%ANAME(TARGET)%有些為難…
+				;TranslatedMark %ANAME(MASTER)%の子を宿した%ANAME(TARGET)%は少し困惑しているようだ…
+			ELSE
+				PRINTFORMW 懷上%ANAME(MASTER)%的孩子的%ANAME(TARGET)%用帯着\@ RAND:2 == 0 ? 看不負責任的男人 # 怨恨 \@的眼神緊盯着%ANAME(MASTER)%…
+				;TranslatedMark %ANAME(MASTER)%の子を宿した%ANAME(TARGET)%は\@ RAND:2 == 0 ? 無責任な # 恨めしそうに \@%ANAME(MASTER)%を睨んだ…
+			ENDIF
+		;触手の子を孕んだ
+		ELSEIF CFLAG:23 == GET_SPERM_ID("触手")
+			;★
+		;他の士官の子を孕んだ
+		ELSE
+			;★
+		ENDIF
+	ENDIF
+
+;-------------------------------------------------
+;臨月に入った
+;-------------------------------------------------
+ELSEIF ARG == 41
+	PRINTFORML %ANAME(TARGET)%已経進入了臨産月
+	;TranslatedMark %ANAME(TARGET)%は臨月に入りました
+	PRINTFORMW 需要静養一段時間
+	;TranslatedMark しばらくの間は安静が必要です
+
+;-------------------------------------------------
+;子供を出産した
+;-------------------------------------------------
+ELSEIF ARG == 42
+	;父親のキャラ番号を取得
+	LOCAL:0 = ID_TO_CHARA(CFLAG:23)
+
+	IF LOCAL:0 == MASTER && CFLAG:所属 == CFLAG:MASTER:所属
+		PRINTFORM 在%ANAME(MASTER)%的守候下、
+		;TranslatedMark %ANAME(MASTER)%に見守られながら、
+	ENDIF
+	PRINTFORMW %ANAME(TARGET)%平安的結束了分娩
+	;TranslatedMark %ANAME(TARGET)%は無事に出産を終えました
+
+;-------------------------------------------------
+;主人公に自分の子供を産ませた
+;-------------------------------------------------
+ELSEIF ARG == 43
+	SIF CFLAG:所属 == CFLAG:MASTER:所属
+		PRINTFORM 在%ANAME(TARGET)%的守候下、
+		;TranslatedMark %ANAME(TARGET)%に見守られながら、
+	PRINTFORMW %ANAME(MASTER)%平安的結束了分娩
+	;TranslatedMark %ANAME(MASTER)%は無事に出産を終えました
+
+;-------------------------------------------------
+;触手の子供を出産した
+;-------------------------------------------------
+ELSEIF ARG == 44
+	
+	IF CFLAG:1 >= 1 && CFLAG:1 == CFLAG:MASTER:1 && ITEM:触手部屋
+	;同一勢力で触手部屋がある
+		PRINTFORM 在写着触手分娩室的房間内%ANAME(TARGET)%
+		;TranslatedMark 触手分娩室と書かれた部屋で%ANAME(TARGET)%は
+		SELECTCASE RAND:13
+		CASE 0
+			PRINTL 在触手們的支撐下、保持着坐姿……
+			;TranslatedMark 触手達に支えられ、座位になっていた……
+			PRINTFORML 柔軟的触手纏繞着手腕和脚腕、不時会擔心的撫摸着身体
+			;TranslatedMark 腕と足にはゆるく触手が絡み付いており、時折気遣うように身体を撫でている
+		CASE 1
+			PRINTL 仰躺着、接受着触手們的按摩……
+			;TranslatedMark 仰向けのまま、触手達にマッサージを受けていた……
+			PRINTFORML 触手們小心的按摩着%ANAME(TARGET)%的小腹進行着催生
+			;TranslatedMark 触手達は%ANAME(TARGET)%のお腹を念入りに撫で回し、出産を促している
+		CASE 2
+			PRINTL 面朝下被浸泡在触手們分泌出的生殖液形成的池塘中……
+			;TranslatedMark 触手達の出した生殖液の池に四つんばいになって浸かっていた……
+			PRINTFORML 白色的生殖液、伴隨着噗噜噗噜的声音泛起了波紋
+			;TranslatedMark 白い生殖液には、ぽちゃり、ぽちゃりという音と共に波紋が立っている
+		CASE 3
+			PRINTL 坐着被触手来回撫摸着……
+			;TranslatedMark 座ったまま触手に撫で回されていた……
+			PRINTFORML 為了更容易出産触手們不停刺激着%ANAME(TARGET)%的私処、不時還会左右掰開
+			;TranslatedMark 楽に出産できるように触手達は%ANAME(TARGET)%の秘部を刺激し、時折左右に開いたりしている
+		CASE 4
+			PRINTL 在触手搖籃中搖晃着……
+			;TranslatedMark 触手のゆりかごの中で揺らされていた……
+			PRINTFORML 触手温柔的纏住了%ANAME(TARGET)%的身体、根據需要改変着%ANAME(TARGET)%的姿勢
+			;TranslatedMark 身体には触手が優しく絡みついており、必要に応じて%ANAME(TARGET)%の姿勢を変えさせている
+		CASE 5
+			PRINTL 在触手的支撐下、跪立着……
+			;TranslatedMark 触手に支えられ、膝立ちになっていた……
+			PRINTFORML 触手抓着了手腕吊了起来、靠重力幇助生産
+			;TranslatedMark 腕は触手が掴んで上に吊るされており、重力に任せて出産ができる形である
+		CASE 6
+			PRINTL 帯着触手製作的花冠、跪立着……
+			;TranslatedMark 触手の作った花冠を頭に載せて、立ち膝になっていた……
+			PRINTFORML 触手們纏住了%ANAME(TARGET)%的手、幇助%ANAME(TARGET)%保持姿勢的穩定
+			;TranslatedMark 触手達は%ANAME(TARGET)%の手を繋ぐようにして掴み、%ANAME(TARGET)%の姿勢を安定させている
+		CASE 7
+			PRINTL 被触手抱了起来、在空中形成了坐位的姿勢……
+			;TranslatedMark 触手に抱き上げられて、座位の体勢を空中でとっていた……
+			PRINTFORML 触手們撫摸着懸空的%ANAME(TARGET)%的身体、持續給予着刺激
+			;TranslatedMark 宙で触手達は%ANAME(TARGET)%の身体を撫で回し、刺激を与え続けている
+		CASE 8
+			PRINTL 周围被触手包围着，被守护着……
+			;TranslatedMark あたりを触手に囲まれ、見守られていた……
+			PRINTFORML 触手们像圆一样围绕着%ANAME(TARGET)%，注视着新伙伴的诞生
+			;TranslatedMark 円を作るようにして触手達は%ANAME(TARGET)%を取り囲み、新たなる仲間の誕生を見守っている
+		CASE 9
+			PRINTL 被辅助生产的触手包围着……
+			;TranslatedMark 出産補助用の触手に取り囲まれていた……
+			PRINTFORML 触手们舔舐着%ANAME(TARGET)%肚脐穴，想要缓和紧张感
+			;TranslatedMark %ANAME(TARGET)%の臍の穴を触手達は舐めほぐし、緊張を和らげようとしている
+		CASE 10
+			PRINTL 穿着纯白的孕妇礼服坐在那里……
+			;TranslatedMark 純白のマタニティドレスを着て座り込んでいた……
+			PRINTFORML 女仆妖精们在周围点燃了让人丧失理性的芳香
+			;TranslatedMark 辺りにはメイド妖精達により、理性を飛ばすアロマが焚かれている
+		CASE 11
+			PRINTL 在纯白的座椅上仰卧着……
+			;TranslatedMark 純白のシートの上で仰向けになっていた……
+			PRINTFORML 手脚上缠绕着粗粗的触手，为了让新生的触手更容易出生，调整了%ANAME(TARGET)%的姿势
+			;TranslatedMark 手足には太い触手が巻きつき、新たに生まれる触手が出やすいように%ANAME(TARGET)%の姿勢を整えている
+		CASE 12
+			PRINTL 手脚被触手缠住……
+			;TranslatedMark 手足を触手に絡めとられていた……
+			PRINTFORML 从%ANAME(TARGET)%的秘部中分泌出触手的孩子，粘稠的媚药滴滴答答地流下来
+			;TranslatedMark %ANAME(TARGET)%の秘部からは中に居る触手の子が分泌した、粘りの強い媚薬がドロドロと流れ落ちている
+		ENDSELECT
+	ELSEIF CFLAG:1 >= 1 && CFLAG:1 == CFLAG:MASTER:1
+	;同一勢力
+		PRINTFORM 在写着分娩室的房间里
+		;TranslatedMark 分娩室と書かれた部屋で%ANAME(TARGET)%は
+		SELECTCASE RAND:4
+		CASE 0
+			PRINTL 接受女官们的分娩按摩……
+			;TranslatedMark 女官達に出産マッサージを受けていた……
+		CASE 1
+			PRINTL 躺在白色的床上……
+			;TranslatedMark 白いベットに横たわっていた……
+		CASE 2
+			PRINTL 两手跪在地上气喘吁吁……
+			;TranslatedMark 両手両ひざをついて息を荒げていた……
+		CASE 3
+			PRINTL 泡在准备好的生产用游泳池里……
+			;TranslatedMark 用意された出産用プールに浸かっていた……
+		CASE 4
+			PRINTL 以坐着的姿势，揉着肚子……
+			;TranslatedMark 座位の姿勢になり、お腹を擦っていた……
+		ENDSELECT
+	ELSEIF CFLAG:9 == CFLAG:MASTER:1 && ITEM:触手部屋
+	;捕虜で触手部屋がある
+		PRINTFORM 在触手房间的中央%ANAME(TARGET)%
+		;TranslatedMark 触手部屋の中央で%ANAME(TARGET)%は
+		SELECTCASE RAND:13
+		CASE 0
+			PRINTL 被触手们抓住并被拘束……
+			;TranslatedMark 触手達に掴まれて拘束されていた……
+			PRINTFORML 手脚上缠绕着触手，抑制着激烈抵抗的%ANAME(TARGET)%
+			;TranslatedMark 手足には触手が絡み付いており、激しく動く%ANAME(TARGET)%を押さえつけている
+		CASE 1
+			PRINTL 就这样仰着，被触手们压着……
+			;TranslatedMark 仰向けのまま、触手達に押さえつけられていた……
+			PRINTFORML 触手们抚摸着%ANAME(TARGET)%的肚子，进行指压，促进分娩
+			;TranslatedMark 触手達は%ANAME(TARGET)%のお腹を撫で回して指圧し、出産を促している
+		CASE 2
+			PRINTL 泡在触手们分泌出的生殖液池里……
+			;TranslatedMark 触手達の出した生殖液の池に浸されていた……
+			PRINTFORML 白色的生殖液、伴隨着噗噜噗噜的声音泛起了波紋
+			;TranslatedMark 白い生殖液には、ぽちゃり、ぽちゃりという音と共に波紋が立っている
+		CASE 3
+			PRINTL 坐着被触手抚摸着……
+			;TranslatedMark 座らせられて触手に撫で回されていた……
+			PRINTFORML 触手们束缚着%ANAME(TARGET)%的手脚刺激着秘部，有时还会向左右张开
+			;TranslatedMark 触手達は%ANAME(TARGET)%の手足を拘束したまま秘部を刺激し、時折左右に開いたりしている
+		CASE 4
+			PRINTL 被触手的摇篮抓住了……
+			;TranslatedMark 触手のゆりかごに捕まっていた……
+			PRINTFORML 身体被触手紧紧地束缚着，全身被指压着
+			;TranslatedMark 身体は触手によってがんじがらめにされ、全身を指圧されている
+		CASE 5
+			PRINTL 被触手缠住，跪在地上……
+			;TranslatedMark 触手に絡めとられ、膝立ちにさせられていた……
+			PRINTFORML 手臂被触手抓住吊在上面，从%ANAME(TARGET)%的胯股之间滴滴答答地漏着体液
+			;TranslatedMark 腕は触手が掴んで上に吊るされており、%ANAME(TARGET)%の股間からはぽたぽたと体液が漏れている
+		CASE 6
+			PRINTL 头上戴着触手做成的花冠，被迫坐着……
+			;TranslatedMark 触手の作った花冠を頭に載せて、座らさせられていた……
+			PRINTFORML 触手们紧紧地束缚着%ANAME(TARGET)%的手脚，控制着%ANAME(TARGET)%
+			;TranslatedMark 触手達は%ANAME(TARGET)%の手足をしっかり縛り、%ANAME(TARGET)%を押さえつけている
+		CASE 7
+			PRINTL 被吊在触手块上，紧紧地抓在天花板附近……
+			;TranslatedMark 触手の塊に吊り上げられ、天井近くへ辛め取られていた……
+			PRINTFORML 触手们在空中强行打开%ANAME(TARGET)%的胯股，催促着生孩子
+			;TranslatedMark 宙で触手達は%ANAME(TARGET)%の股を無理やり開かせ、出産を促している
+		CASE 8
+			PRINTL 被囚禁在充满生殖液的生产用触手牢笼中……
+			;TranslatedMark 生殖液に満たされた出産用の触手檻へ囚われていた……
+			PRINTFORML 伴随着啪嗒啪嗒的声音，触手牢笼中诞生了新的生命
+			;TranslatedMark ごぽり、ごぽりと言う音を鳴らせながら、触手檻の中では新しい生命が誕生していた
+		CASE 9
+			PRINTL 被滑溜溜的触手包围着……
+			;TranslatedMark ぬめりけのある触手に取り囲まれていた……
+			PRINTFORML 触手们舔舐着%ANAME(TARGET)%的肚脐，刺激着隆起的肚子。
+			;TranslatedMark 触手達は%ANAME(TARGET)%の臍の穴を舐めほぐし、膨らんだお腹に刺激を与えている
+		CASE 10
+			PRINTL 被戴着项圈坐着……
+			;TranslatedMark 首輪に繋がれて座り込んでいた……
+			PRINTFORML 周围似乎也有同样怀有触手的妖精发出甜美的声音，产下触手。
+			;TranslatedMark 辺りには同じように触手を宿したらしい妖精達が甘い声を出して触手を出産している
+		CASE 11
+			PRINTL 手脚被埋入肉质的地面而被拘束……
+			;TranslatedMark 肉質の地面に手足を埋め込まれて拘束されていた……
+			PRINTFORML 粗壮的触手为了让触手容易生出，定期附在大腿内侧，注入催淫液。
+			;TranslatedMark 太い触手が定期的に内股へ取り付き、触手が出やすいよう催淫液を流し込んでいる
+		CASE 12
+			PRINTL 手脚被触手拘束……
+			;TranslatedMark 手足を触手に拘束されていた……
+			PRINTFORML 从秘部中可以看到里面触手的孩子分泌出来的粘性很强的媚药滴滴答答地流下来
+			;TranslatedMark 秘部からは中に居る触手の子が分泌した、粘りの強い媚薬がドロドロと流れ落ちている
+		ENDSELECT
+	ELSEIF CFLAG:9 == CFLAG:MASTER:1
+	;捕虜
+		IF CFLAG:(TARGET):軟禁中 == 0
+		;牢屋
+			PRINTFORM 在黑暗的灯光落下的牢房的一个房间里，%ANAME(TARGET)%
+			;TranslatedMark 暗く明かりの落ちた牢屋の一室で、%ANAME(TARGET)%は
+		ELSE
+		;軟禁
+			PRINTFORM 在明亮的软禁用房间里%ANAME(TARGET)%
+			;TranslatedMark 明るい軟禁用の部屋で%ANAME(TARGET)%は
+		ENDIF
+		
+		SELECTCASE RAND:7
+		CASE 0
+			PRINTL 手脚被固定着接受了女官们的助产……
+			;TranslatedMark 手足を固定されたまま女官達に助産を受けていた……
+		CASE 1
+			PRINTL 用项圈和手铐固定在床上……
+			;TranslatedMark ベットに首輪と手枷で固定させられていた……
+		CASE 2
+			PRINTL 在双手双膝被束缚的状态下气喘吁吁……
+			;TranslatedMark 両手両ひざを縛られた状態で息を荒げていた……
+		CASE 3
+			PRINTL 被捆绑在准备好的生产用游泳池里……
+			;TranslatedMark 用意された出産用プールの中へ縛り付けられていた……
+		CASE 4
+			PRINTL 赤身裸体地戴着锁链，从腰上被吊着……
+			;TranslatedMark 裸に鎖をつけた姿で腰を吊り上げていた……
+		CASE 5
+			PRINTL 手脚被铁具固定……
+			;TranslatedMark 手足を鉄具で固定させられていた……
+		CASE 6
+			PRINTL 坐在触手生产用的椅子上……
+			;TranslatedMark 触手出産用の椅子に座らされていた……
+		ENDSELECT
+	ELSE
+	;他所の子
+		PRINTFORM %ANAME(TARGET)%在自己的房间里
+		;TranslatedMark %ANAME(TARGET)%は自室で
+		SELECTCASE RAND:5
+		CASE 0
+			PRINTL 仰着头，含着泪……
+			;TranslatedMark 仰向けのまま、涙を浮かべていた……
+		CASE 1
+			PRINTL 坐在地板上气喘吁吁……
+			;TranslatedMark 床に座り込んで息を荒げていた……
+		CASE 2
+			PRINTL 用膝盖站着，瑟瑟发抖……
+			;TranslatedMark 膝立ちになり、ぶるぶると震えていた……
+		CASE 3
+			PRINTL 呼吸急促，倒在了床上……
+			;TranslatedMark 荒い息遣いをついて、ベットに倒れていた……
+		CASE 4
+			PRINTL 以坐位的姿势，拼命地用力……
+			;TranslatedMark 座位の体勢で、精一杯力んでいた……
+		ENDSELECT
+	ENDIF
+	
+	
+	
+	IF TALENT:(LOCAL:1):空虚 || TALENT:(LOCAL:1):崩壊
+		PRINTL %ANAME(TARGET)%的额头上冒着汗，
+		;TranslatedMark %ANAME(TARGET)%は額に脂汗を浮かべながら、
+	ELSEIF ABL:(TARGET):触手 >= 5
+		SELECTCASE RAND:8
+		CASE 0
+			PRINTFORM 被触手开发了的%ANAME(TARGET)%在快乐中挣扎着流下眼泪，
+			;TranslatedMark 触手に開発された%ANAME(TARGET)%は快楽に悶え涙を零しながら、
+		CASE 1
+			PRINTFORM 被触手开发了的%ANAME(TARGET)%满脸红晕，
+			;TranslatedMark 触手に開発された%ANAME(TARGET)%は顔を朱色に染めながら、
+		CASE 2
+			PRINTFORM 被触手开发了的%ANAME(TARGET)%嘴里流着口水，
+			;TranslatedMark 触手に開発された%ANAME(TARGET)%は口元から涎を零しながら、
+		CASE 3
+			PRINTFORM 被触手开发了的%ANAME(TARGET)%腰部颤抖着，
+			;TranslatedMark 触手に開発された%ANAME(TARGET)%は腰をがくがくと震わせながら、
+		CASE 4
+			PRINTFORM 被触手开发了的%ANAME(TARGET)%感受着强烈的快乐刺激，
+			;TranslatedMark 触手に開発された%ANAME(TARGET)%は強い快楽の奔流を感じながら、
+		CASE 5
+			PRINTFORM 被触手开发了的%ANAME(TARGET)%发出喘息的声音，
+			;TranslatedMark 触手に開発された%ANAME(TARGET)%はあえぎ声を上げながら、
+		CASE 6
+			PRINTFORM 被触手开发了的%ANAME(TARGET)%滴着爱液，
+			;TranslatedMark 触手に開発された%ANAME(TARGET)%は愛液を零しながら、
+		CASE 7
+			PRINTFORM 被触手开发了的%ANAME(TARGET)%漏出了甜美的喘息，
+			;TranslatedMark 触手に開発された%ANAME(TARGET)%は甘い息を洩らしながら、
+		ENDSELECT
+	ELSEIF ABL:(TARGET):触手 >= 3
+		SELECTCASE RAND:3
+		CASE 0
+			PRINTFORM %ANAME(TARGET)%的额头上冒着汗，
+			;TranslatedMark %ANAME(TARGET)%は額に脂汗を浮かべながら、
+		CASE 1
+			PRINTFORM %ANAME(TARGET)%睁大眼睛呻吟着，
+			;TranslatedMark %ANAME(TARGET)%は目を見開いて呻きながら、
+		CASE 2
+			PRINTFORM %ANAME(TARGET)%呜咽着，
+			;TranslatedMark %ANAME(TARGET)%は嗚咽を洩らしながら、
+		ENDSELECT
+	ELSE
+		SELECTCASE RAND:3
+		CASE 0
+			PRINTFORM %ANAME(TARGET)%一边哭喊，
+			;TranslatedMark %ANAME(TARGET)%は泣き叫びながら、
+		CASE 1
+			PRINTFORM %ANAME(TARGET)%不断重复着抵抗的话语，
+			;TranslatedMark %ANAME(TARGET)%は否定する言葉を繰り返しながら、
+		CASE 2
+			PRINTFORM %ANAME(TARGET)%发出悲鸣，
+			;TranslatedMark %ANAME(TARGET)%は悲鳴を上げながら、
+		ENDSELECT
+	ENDIF
+	
+	IF CFLAG:55 >= 1
+		IF CFLAG:56 >= 1
+			;両穴に産みつけられている
+			SELECTCASE RAND:14
+			CASE 0
+				PRINTL 在两个洞里产下了好几只触手的孩子…
+				;TranslatedMark 両方の穴で何匹もの触手の子を産み落としている…
+			CASE 1
+				PRINTL 在两个洞里产下了长长的触手…
+				;TranslatedMark 両方の穴で長い触手を産み落としている…
+			CASE 2
+				PRINTL 在两个洞里生出圆润的触手…
+				;TranslatedMark 両方の穴で丸まった触手を産み落としている…
+			CASE 3
+				PRINTL 在两个洞里产下了大触手的受精卵…
+				;TranslatedMark 両穴で大きな触手の受精卵を産み落としている…
+			CASE 4
+				PRINTL 在两个膨胀起来的洞里产下了好几只小触手…
+				;TranslatedMark 両穴で膨れあがった小触手を何匹も産み落としている…
+			CASE 5
+				PRINTL 在两个洞里产下沾满分泌液的触手的孩子…
+				;TranslatedMark 両穴で分泌液にまみれた触手の子を産み落としている…
+			CASE 6
+				PRINTL 在两个洞里产下了半透明的触手的孩子…
+				;TranslatedMark 両方の穴で半透明な触手の子を産み落としている…
+			CASE 7
+				PRINTL 在两个洞里产下了健康的触手…
+				;TranslatedMark 両方の穴で元気のいい触手を産み落としている…
+			CASE 8
+				PRINTL 在两个洞里产下了藤状的触手…
+				;TranslatedMark 両方の穴で蔓状の触手を産み落としている…
+			CASE 9
+				PRINTL 在两个洞里产下了有眼珠的触手…
+				;TranslatedMark 両方の穴で目玉のついた触手を産み落としている…
+			CASE 10
+				PRINTL 在两个洞里产下了奇怪的触手…
+				;TranslatedMark 両方の穴でグロテスクな触手を産み落としている…
+			CASE 11
+				PRINTL 在两个洞里产下了水灵灵的触手…
+				;TranslatedMark 両方の穴でみずみずしい触手を産み落としている…
+			CASE 12
+				PRINTL 在两个洞里产下了蠢动着的触手…
+				;TranslatedMark 両方の穴で蠢く触手を産み落としている…
+			CASE 13
+				PRINTL 在两个洞里产下了胳膊那么粗的触手…
+				;TranslatedMark 両穴で腕ほどの太さの触手を産み落としている…
+			ENDSELECT
+			LOCALS:0 = 膣和尻穴
+		ELSE
+			;膣に産みつけられている
+			SELECTCASE RAND:14
+			CASE 0
+				PRINTL 生下了好几只触手的孩子…
+				;TranslatedMark 何匹もの触手の子を産み落としている…
+			CASE 1
+				PRINTL 生下了长长的触手…
+				;TranslatedMark 長い触手を産み落としている…
+			CASE 2
+				PRINTL 产下了圆润的触手…
+				;TranslatedMark 丸まった触手を産み落としている…
+			CASE 3
+				PRINTL 产下大触手的受精卵…
+				;TranslatedMark 大きな触手の受精卵を産み落としている…
+			CASE 4
+				PRINTL 生下了好几只鼓起的小触手…
+				;TranslatedMark 膨れあがった小触手を何匹も産み落としている…
+			CASE 5
+				PRINTL 产下沾满分泌液的触手的孩子…
+				;TranslatedMark 分泌液にまみれた触手の子を産み落としている…
+			CASE 6
+				PRINTL 生下了半透明触手的孩子…
+				;TranslatedMark 半透明な触手の子を産み落としている…
+			CASE 7
+				PRINTL 生下了健康的触手…
+				;TranslatedMark 元気のいい触手を産み落としている…
+			CASE 8
+				PRINTL 生下了藤蔓状的触手…
+				;TranslatedMark 蔓状の触手を産み落としている…
+			CASE 9
+				PRINTL 生下了有眼珠的触手…
+				;TranslatedMark 目玉のついた触手を産み落としている…
+			CASE 10
+				PRINTL 生下了奇怪的触手…
+				;TranslatedMark グロテスクな触手を産み落としている…
+			CASE 11
+				PRINTL 生下了水灵灵的触手…
+				;TranslatedMark みずみずしい触手を産み落としている…
+			CASE 12
+				PRINTL 生下了蠢蠢欲动的触手…
+				;TranslatedMark 蠢く触手を産み落としている…
+			CASE 13
+				PRINTL 生下了胳膊那么粗的触手…
+				;TranslatedMark 腕ほどの太さの触手を産み落としている…
+			ENDSELECT
+			LOCALS:0 = 膣
+		ENDIF
+	ELSE
+		;アナルに産みつけられている
+		SELECTCASE RAND:14
+		CASE 0
+			PRINTL 在尻穴里生下了好几只触手的孩子…
+			;TranslatedMark 尻穴で何匹もの触手の子を産み落としている…
+		CASE 1
+			PRINTL 在尻穴产下长触手…
+			;TranslatedMark 尻穴で長い触手を産み落としている…
+		CASE 2
+			PRINTL 在尻穴里生出圆润的触手…
+			;TranslatedMark 尻穴で丸まった触手を産み落としている…
+		CASE 3
+			PRINTL 在尻穴产下大触手的受精卵…
+			;TranslatedMark 尻穴で大きな触手の受精卵を産み落としている…
+		CASE 4
+			PRINTL 产下了好几只因为屁股洞而膨胀起来的小触手…
+			;TranslatedMark 尻穴で膨れあがった小触手を何匹も産み落としている…
+		CASE 5
+			PRINTL 产下了屁股上沾满分泌液的触手的孩子…
+			;TranslatedMark 尻穴で分泌液にまみれた触手の子を産み落としている…
+		CASE 6
+			PRINTL 在尻穴产下半透明触手的孩子…
+			;TranslatedMark 尻穴で半透明な触手の子を産み落としている…
+		CASE 7
+			PRINTL 在屁股洞里生下了健康的触手…
+			;TranslatedMark 尻穴で元気のいい触手を産み落としている…
+		CASE 8
+			PRINTL 在尻穴产下了蔓状触手…
+			;TranslatedMark 尻穴で蔓状の触手を産み落としている…
+		CASE 9
+			PRINTL 在尻穴产下了有眼珠的触手…
+			;TranslatedMark 尻穴で目玉のついた触手を産み落としている…
+		CASE 10
+			PRINTL 在尻穴产下了怪异的触手…
+			;TranslatedMark 尻穴でグロテスクな触手を産み落としている…
+		CASE 11
+			PRINTL 在屁股后面生下了水灵灵的触手…
+			;TranslatedMark 尻穴でみずみずしい触手を産み落としている…
+		CASE 12
+			PRINTL 在尻穴里生出了蠢动的触手…
+			;TranslatedMark 尻穴で蠢く触手を産み落としている…
+		CASE 13
+			PRINTL 在屁股洞里产下了胳膊那么粗的触手…
+			;TranslatedMark 尻穴で腕ほどの太さの触手を産み落としている…
+		ENDSELECT
+		LOCALS:0 = 尻穴
+	ENDIF
+
+
+	IF ABL:出産 >= 3 || ABL:(TARGET):触手 >= 5
+		IF (ABL:Ｖ感 >= 5 && CFLAG:触手産卵実行者 >= 1) || (ABL:Ａ感 >= 5 && CFLAG:触手Ａ産卵実行者 >= 1)
+			SELECTCASE RAND:6
+			CASE 0
+				PRINTFORML %ANAME(TARGET)%在生孩子的喜悦中颤抖着，感受到了%LOCALS:0%被扩大的强烈的绝顶感
+				;TranslatedMark %ANAME(TARGET)%は出産の悦びに震えながら、%LOCALS:0%を押し広げられる強烈な絶頂感に
+				PRINTFORMW 发出野兽般的叫声，闷闷不乐
+				;TranslatedMark 獣のような叫び声を上げて悶え狂っている
+			CASE 1
+				PRINTFORMW 每次触手通过%LOCALS:0%，%ANAME(TARGET)%就达到了高潮，不断发出艳丽的娇声
+				;TranslatedMark %LOCALS:0%を触手が通るたびに%ANAME(TARGET)%は絶頂し、何度も艶のある嬌声を上げ続けた
+			CASE 2
+				PRINTFORMW %ANAME(TARGET)%被孕育着的触手的孩子从内侧侵犯%LOCALS:0%，身体像弓一样反张着生下了孩子
+				;TranslatedMark %ANAME(TARGET)%は孕んでいた触手の子に内側から%LOCALS:0%を犯され、弓のように身体を跳ねさせたながら出産した
+			CASE 3
+				PRINTFORML %ANAME(TARGET)%的异形从身体里爬出来，嘴却被放慢乱了
+				;TranslatedMark %ANAME(TARGET)%は異形が身体から這い出しているというのに、口を緩ませて乱れ狂っており
+				PRINTFORMW 每次从%LOCALS:0%生下一只又一只的触手都会发出艳丽的声音
+				;TranslatedMark %LOCALS:0%から一匹、また一匹と触手を産むたびに艶めかしい声を上げた
+			CASE 4
+				PRINTFORMW %ANAME(TARGET)%在腰部几次颤抖着到绝顶的同时，露出了一副融化般的表情，从%LOCALS:0%那里不断地生出触手
+				;TranslatedMark %ANAME(TARGET)%は腰を何度も跳ね上げ絶頂しながら、トロけた顔をして%LOCALS:0%から触手を産み続けた
+			CASE 5
+				PRINTFORMW %ANAME(TARGET)%被触手摩擦%LOCALS:0%而产生的快乐所折磨，痴痴的笑着，发出了淫荡的叫声
+				;TranslatedMark %ANAME(TARGET)%は%LOCALS:0%を触手が擦る事による快楽に悶え、ふやけた笑みを浮かべながら淫声を上げた
+			ENDSELECT
+		ELSE
+			SELECTCASE RAND:6
+			CASE 0
+				PRINTFORML %ANAME(TARGET)%的%LOCALS:0%被扩张，痛苦得几乎要昏过去
+				;TranslatedMark %ANAME(TARGET)%は%LOCALS:0%を押し広げられて苦痛のあまり意識を飛ばしそうになりながらも、
+				PRINTFORMW 在分娩的喜悦中露出了幸福的表情
+				;TranslatedMark 出産の悦びにどこか幸せそうな表情を浮かべている
+			CASE 1
+				PRINTFORMW 当触手通过%LOCALS:0%的时候，%ANAME(TARGET)%发出了悲鸣，但是当所有的触手都产下后，她露出了淡淡的笑容
+				;TranslatedMark 触手が%LOCALS:0%を通る事に%ANAME(TARGET)%は悲鳴を上げたが、全ての触手を産み終えるとうっすら笑みを浮かべた
+			CASE 2
+				PRINTFORMW %ANAME(TARGET)%被怀着的触手的孩子从内侧侵犯%LOCALS:0%，虽然好几次都要失去意识到但平安地生下了孩子
+				;TranslatedMark %ANAME(TARGET)%は孕んでいた触手の子に内側から%LOCALS:0%を犯され、何度か意識を飛ばしながらも無事に出産を終えた
+			CASE 3
+				PRINTFORMW 用力闭上眼睛的%ANAME(TARGET)%，虽然看起来很痛苦，但还是竭尽全力孕育出了触手
+				;TranslatedMark 強く目を瞑った%ANAME(TARGET)%は、辛そうながらも精一杯力を込めて孕まされた触手を産み落とした
+			CASE 4
+				PRINTFORMW %ANAME(TARGET)%像是坏掉了似的，腰部好几次弹跳了起来，但还是顺利地从%LOCALS:0%那里生出了触手
+				;TranslatedMark %ANAME(TARGET)%は壊れたように腰を何度も跳ね上げながらも、無事に%LOCALS:0%から触手を産み終えた
+			CASE 5
+				PRINTFORMW %ANAME(TARGET)%被触手摩擦%LOCALS:0%的灼热的感觉所折磨，脸上浮现出灿烂笑容的同时失去了意识
+				;TranslatedMark %ANAME(TARGET)%は%LOCALS:0%を触手が擦る焼ける様な感覚に悶え、ふやけた笑みを浮かべて気を失った
+			ENDSELECT
+		ENDIF
+	ELSE
+		IF (ABL:Ｖ感 >= 5 && CFLAG:触手産卵実行者 >= 1) || (ABL:Ａ感 >= 5 && CFLAG:触手Ａ産卵実行者 >= 1) 
+			SELECTCASE RAND:6
+			CASE 0
+				PRINTFORMW %ANAME(TARGET)%每次被强行扩张%LOCALS:0%，都会感受到强烈的绝顶感，发出野兽般的叫声
+				;TranslatedMark %ANAME(TARGET)%は無理やり%LOCALS:0%を押し広げられるたびに、強烈な絶頂感を味わって獣のような叫び声を上げた
+			CASE 1
+				PRINTFORMW 每次触手通过%LOCALS:0%的时候，%ANAME(TARGET)%都会无数次地达到顶峰，不断地发出娇声
+				;TranslatedMark 触手が%LOCALS:0%を通るたびに%ANAME(TARGET)%は何度も絶頂し、嬌声を上げ続けている
+			CASE 2
+				PRINTFORMW %ANAME(TARGET)%被怀着的触手的孩子从内侧侵犯%LOCALS:0%，一边发出淫声一边生孩子
+				;TranslatedMark %ANAME(TARGET)%は孕んでいた触手の子に内側から%LOCALS:0%を犯され、淫声を漏らしながら出産した
+			CASE 3
+				PRINTFORMW 每次从%LOCALS:0%生下一只又一只触手，%ANAME(TARGET)%就会发出艳丽的悲鸣
+				;TranslatedMark %LOCALS:0%から一匹、また一匹と触手を産むたびに、%ANAME(TARGET)%は艶めかしい悲鳴を上げた
+			CASE 4
+				PRINTFORMW %ANAME(TARGET)%在腰部几次跳动后达到绝顶的同时，不断地从%LOCALS:0%那里生出触手
+				;TranslatedMark %ANAME(TARGET)%は腰を何度も跳ね上げて絶頂しながら、%LOCALS:0%から触手を産み続けた
+			CASE 5
+				PRINTFORMW %ANAME(TARGET)%因触手摩擦%LOCALS:0%而达到了快乐的高潮，发出了淫荡的叫声
+				;TranslatedMark %ANAME(TARGET)%は%LOCALS:0%を触手が擦る事による快楽に絶頂し、淫声を上げた
+			ENDSELECT
+		ELSEIF ABL:(TARGET):触手 >= 1
+			SELECTCASE RAND:5
+			CASE 0
+				PRINTFORMW 由于过于强烈的刺激，%ANAME(TARGET)%长大眼睛发出悲鸣，在所有的触手都产下后无力地瘫倒了
+				;TranslatedMark あまりに強い刺激に%ANAME(TARGET)%は目を見開いて悲鳴を上げ、全ての触手を産み終えると力なく崩れ落ちた
+			CASE 1
+				PRINTFORMW %ANAME(TARGET)%被怀着的触手的孩子从内侧侵犯%LOCALS:0%，一边破烂不堪地哭着一边继续生孩子
+				;TranslatedMark %ANAME(TARGET)%は孕んでいた触手の子に内側から%LOCALS:0%を犯され、ぼろぼろ泣きながら出産を続けた
+			CASE 2
+				PRINTFORMW %ANAME(TARGET)%一边痛哭喊着，一边忍耐着长时间的持续生产
+				;TranslatedMark %ANAME(TARGET)%はぐしゃぐしゃの顔で喚きながら、長く続く出産に耐え続けた
+			CASE 3
+				PRINTFORMW %ANAME(TARGET)%像是坏掉了似的，好几次地弹起腰来，拼命地从%LOCALS:0%那里生出触手
+				;TranslatedMark %ANAME(TARGET)%は壊れたように腰を何度も跳ね上げながら、必死に%LOCALS:0%から触手を産み落とした
+			CASE 4
+				PRINTFORMW %ANAME(TARGET)%无法忍受碰触%LOCALS:0%的灼热感觉，失去了意识
+				;TranslatedMark %ANAME(TARGET)%は%LOCALS:0%を触手が擦る焼ける様な感覚に耐えられず、気を失ってしまった
+			ENDSELECT
+		ELSE
+			PRINTFORMW %ANAME(TARGET)%不知道是不是因为太痛苦而连意识都飞走了，用空虚的表情注视着别的方向
+			;TranslatedMark %ANAME(TARGET)%は苦痛のあまり意識が飛んでいるのか、虚ろな表情であらぬ方向を見つめている
+		ENDIF
+	ENDIF
+
+;-------------------------------------------------
+;母親が自分を子育て中に妊娠発覚した
+;-------------------------------------------------
+ELSEIF ARG == 45
+	PRINTFORMW 被%ANAME(ID_TO_CHARA(CFLAG:TARGET:母親))%养大的%ANAME(TARGET)%对于自己在不久前就这样在胎里这件事感到不可思议和惊讶
+	;TranslatedMark %ANAME(ID_TO_CHARA(CFLAG:TARGET:母親))%に育てられている%ANAME(TARGET)%は自分も少し前まではこうして胎の中にいたということに不思議さと驚きを感じているようだ
+
+;-------------------------------------------------
+;母親が自分を子育て中に臨月になった
+;-------------------------------------------------
+ELSEIF ARG == 46
+	PRINTFORMW 被%ANAME(ID_TO_CHARA(CFLAG:TARGET:母親))%抚养长大的%ANAME(TARGET)%，在母亲养育孩子的过程中迎来了临月，虽然感到吃惊，但还是担心着她的身体状况
+	;TranslatedMark %ANAME(ID_TO_CHARA(CFLAG:TARGET:母親))%に育てられていた%ANAME(TARGET)%は母が子育ての最中に臨月となることに驚きながらも体調を心配している
+
+;-------------------------------------------------
+;忠誠を誓わせる/成功
+;-------------------------------------------------
+ELSEIF ARG == 50
+	;自国の捕虜の場合
+	IF CFLAG:(MTAR:0):捕虜先 == CFLAG:MASTER:1
+		PRINTFORMW %ANAME(MASTER)%要%ANAME(TARGET)%成为我国的士官并宣誓忠诚
+		;TranslatedMark %ANAME(MASTER)%は、%ANAME(TARGET)%に我が国の士官となって忠誠を誓うように言った
+		IF TALENT:服従
+			PRINTFORMW ……%ANAME(TARGET)%带着空虚的表情，嬉笑着向%ANAME(MASTER)%发出了恭顺的誓言
+			;TranslatedMark ……%ANAME(TARGET)%は、どこか虚ろな表情で、嬉しそうに%ANAME(MASTER)%への恭順を誓った
+		ELSE
+			PRINTFORMW ……%ANAME(TARGET)%无力地点了点头
+			;TranslatedMark ……%ANAME(TARGET)%は、%ANAME(MASTER)%の言葉に力なく頷いた
+		ENDIF
+		SIF !TALENT:烙印 && !IS_LOVER(TARGET)
+			PRINTFORMW 作为发誓忠诚的证据，%ANAME(MASTER)%在%ANAME(TARGET)%身上烙上了不会消失的烙印
+			;TranslatedMark 忠誠を誓った証として、%ANAME(MASTER)%は%ANAME(TARGET)%の体に消えない烙印を焼き入れた
+	;それ以外
+	ELSE
+		PRINTFORMW %ANAME(MASTER)%让%ANAME(TARGET)%正对着，说出了宣誓效忠%ANAME(MASTER)%的誓言
+		;TranslatedMark %ANAME(MASTER)%は%ANAME(TARGET)%に対し、%ANAME(MASTER)%に服従し忠誠を誓うように言った
+		IF TALENT:服従
+			PRINTFORMW ……%ANAME(TARGET)%带着空虚的表情，嬉笑着向%ANAME(MASTER)%发出了恭顺的誓言
+			;TranslatedMark ……%ANAME(TARGET)%は、どこか虚ろな表情で、嬉しそうに%ANAME(MASTER)%への恭順を誓った
+		ELSE
+			PRINTFORMW ……%ANAME(TARGET)%无力地点了点头
+			;TranslatedMark ……%ANAME(TARGET)%は、%ANAME(MASTER)%の言葉に力なく頷いた
+		ENDIF
+		SIF !TALENT:烙印 && !IS_LOVER(TARGET)
+			PRINTFORMW 作为发誓忠诚的证据，%ANAME(MASTER)%在%ANAME(TARGET)%身上烙上了不会消失的烙印
+			;TranslatedMark 忠誠を誓った証として、%ANAME(MASTER)%は%ANAME(TARGET)%の体に消えない烙印を焼き入れた
+	ENDIF
+
+;-------------------------------------------------
+;忠誠を誓わせる/失敗
+;-------------------------------------------------
+ELSEIF ARG == 51
+	;自国の捕虜の場合
+	IF CFLAG:(MTAR:0):捕虜先 == CFLAG:MASTER:1
+		PRINTFORMW %ANAME(MASTER)%要%ANAME(TARGET)%成为我国的士官并宣誓忠诚
+		;TranslatedMark %ANAME(MASTER)%は、%ANAME(TARGET)%に我が国の士官となって忠誠を誓うように言った
+		IF TALENT:服従
+			PRINTFORMW ……%ANAME(TARGET)%想了一会，悲伤地摇了摇头
+			;TranslatedMark ……%ANAME(TARGET)%は少し考えた後で、悲しそうに首を振った
+		ELSE
+			PRINTFORMW ……但是，%ANAME(TARGET)%用力地瞪着%ANAME(MASTER)%，拒绝了
+			;TranslatedMark ……だが、%ANAME(TARGET)%は%ANAME(MASTER)%を力強く睨み返し、拒否した
+		ENDIF
+		PRINTFORMW 似乎调教还不够…
+		;TranslatedMark まだ調教が足りないようだ…
+	;それ以外
+	ELSE
+		PRINTFORMW %ANAME(MASTER)%让%ANAME(TARGET)%正对着，说出了宣誓效忠%ANAME(MASTER)%的誓言
+		;TranslatedMark %ANAME(MASTER)%は%ANAME(TARGET)%に対し、%ANAME(MASTER)%に服従し忠誠を誓うように言った
+		IF TALENT:服従
+			PRINTFORMW ……%ANAME(TARGET)%想了一会，悲伤地摇了摇头
+			;TranslatedMark ……%ANAME(TARGET)%は少し考えた後で、悲しそうに首を振った
+		ELSE
+			PRINTFORMW ……但是，被%ANAME(TARGET)%白了一眼
+			;TranslatedMark ……だが、%ANAME(TARGET)%に白い目で見られてしまった
+		ENDIF
+	ENDIF
+
+;-------------------------------------------------
+;自国に誘う/成功
+;-------------------------------------------------
+ELSEIF ARG == 52
+	PRINTFORMW %ANAME(MASTER)%拜托%ANAME(TARGET)%来我国
+	;TranslatedMark %ANAME(MASTER)%は、%ANAME(TARGET)%に我が国へ来て欲しいと頼んだ
+	PRINTFORMW ……%ANAME(TARGET)%烦恼了一阵，最后接受了%ANAME(MASTER)%的提案
+	;TranslatedMark ……%ANAME(TARGET)%はしばらく悩んだ末、%ANAME(MASTER)%の提案を受け入れた
+
+;-------------------------------------------------
+;自国に誘う/失敗
+;-------------------------------------------------
+ELSEIF ARG == 53
+	PRINTFORMW %ANAME(MASTER)%拜托%ANAME(TARGET)%来我国
+	;TranslatedMark %ANAME(MASTER)%は、%ANAME(TARGET)%に我が国へ来て欲しいと頼んだ
+	PRINTFORMW ……但是，%ANAME(TARGET)%摇了摇头
+	;TranslatedMark ……だが、%ANAME(TARGET)%は首を横に振った
+
+;-------------------------------------------------
+;自国に誘う/成功(捕虜会話の場合)
+;-------------------------------------------------
+ELSEIF ARG == 54
+	PRINTFORMW %ANAME(MASTER)%拜托%ANAME(TARGET)%一起来我国
+	;TranslatedMark %ANAME(MASTER)%は、%ANAME(TARGET)%に一緒に我が国へ来て欲しいと頼んだ
+	PRINTFORMW ……%ANAME(TARGET)%经过一段时间的烦恼，终于下定决心和%ANAME(MASTER)%一起离开这个国家
+	;TranslatedMark ……%ANAME(TARGET)%はしばらく悩んだ末、%ANAME(MASTER)%と共にこの国を離れる覚悟を決めたようだ
+
+;-------------------------------------------------
+;自国に誘う/失敗(捕虜会話の場合)
+;-------------------------------------------------
+ELSEIF ARG == 55
+	PRINTFORMW %ANAME(MASTER)%拜托%ANAME(TARGET)%一起来我国
+	;TranslatedMark %ANAME(MASTER)%は、%ANAME(TARGET)%に一緒に我が国へ来て欲しいと頼んだ
+	PRINTFORMW ……但是，%ANAME(TARGET)%惊讶地拒绝了
+	;TranslatedMark ……だが、%ANAME(TARGET)%は呆れた様子で断った
+
+;-------------------------------------------------
+;[恋慕]取得
+;-------------------------------------------------
+ELSEIF ARG == 60
+	PRINTFORMW 看向%ANAME(TARGET)%这边的眼神很奇怪…
+	;TranslatedMark %ANAME(TARGET)%のこちらを見る目がおかしい…
+	IF TALENT:親友
+		PRINTFORMW %ANAME(TARGET)%对%ANAME(MASTER)%抱有的友情好像变成了恋爱感情
+		;TranslatedMark %ANAME(TARGET)%が%ANAME(MASTER)%に抱いていた友情は恋愛感情へと変わったようだ
+	ELSEIF TALENT:恋人
+		PRINTFORMW %ANAME(TARGET)%终于察觉到了对%ANAME(MASTER)%的爱慕之情
+		;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%への恋心をついに自覚したようだ
+	ELSE
+		PRINTFORMW %ANAME(TARGET)%爱上了%ANAME(MASTER)%
+		;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%へと恋焦がれるようになった
+	ENDIF
+
+;-------------------------------------------------
+;[親友]取得
+;-------------------------------------------------
+ELSEIF ARG == 61
+	PRINTFORMW 看向%ANAME(TARGET)%这边的眼神变了…
+	;TranslatedMark %ANAME(TARGET)%のこちらを見る目が変わった…
+	PRINTFORMW %ANAME(TARGET)%和%ANAME(MASTER)%之间似乎感受到了强烈的羁绊
+	;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%との間に強い絆を感じているようだ
+
+;-------------------------------------------------
+;[親愛]取得
+;-------------------------------------------------
+ELSEIF ARG == 62
+	PRINTFORMW 看向%ANAME(TARGET)%这边的眼神变了…
+	;TranslatedMark %ANAME(TARGET)%のこちらを見る目が変わった…
+	PRINTFORMW %ANAME(TARGET)%似乎对%ANAME(MASTER)%有着发自内心的爱情
+	;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%に心からの愛情を感じているようだ
+
+;-------------------------------------------------
+;[服従]取得
+;-------------------------------------------------
+ELSEIF ARG == 63
+	PRINTFORMW 看向%ANAME(TARGET)%这边的眼神很奇怪…
+	;TranslatedMark %ANAME(TARGET)%のこちらを見る目がおかしい…
+	PRINTFORMW %ANAME(TARGET)%似乎完全依赖于%ANAME(MASTER)%
+	;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%にすっかり依存しきっているようだ
+
+;-------------------------------------------------
+;[隷属]取得
+;-------------------------------------------------
+ELSEIF ARG == 64
+	PRINTFORMW 看向%ANAME(TARGET)%这边的眼神变了…
+	;TranslatedMark %ANAME(TARGET)%のこちらを見る目が変わった…
+	PRINTFORMW %ANAME(TARGET)%似乎对遵从%ANAME(MASTER)%感到由衷的喜悦
+	;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%に従うことに心からの悦びを感じているようだ
+
+;-------------------------------------------------
+;[淫乱]取得
+;-------------------------------------------------
+ELSEIF ARG == 65
+	PRINTFORMW 看向%ANAME(TARGET)%这边的眼神很奇怪…
+	;TranslatedMark %ANAME(TARGET)%のこちらを見る目がおかしい…
+	PRINTFORMW %ANAME(TARGET)%好像沉溺在肉体的快乐中
+	;TranslatedMark %ANAME(TARGET)%は肉体の快楽に溺れているようだ
+
+;-------------------------------------------------
+;[主人]取得
+;-------------------------------------------------
+ELSEIF ARG == 80
+	PRINTFORMW %ANAME(MASTER)%的样子很奇怪…
+	;TranslatedMark %ANAME(MASTER)%の様子がおかしい…
+	PRINTFORMW %ANAME(MASTER)%完全依赖于%ANAME(TARGET)%
+	;TranslatedMark %ANAME(MASTER)%は%ANAME(TARGET)%にすっかり依存しきっている
+
+;-------------------------------------------------
+;[所有者]取得
+;-------------------------------------------------
+ELSEIF ARG == 81
+	PRINTFORMW 看向%ANAME(MASTER)%的%ANAME(TARGET)%的眼神变了…
+	;TranslatedMark %ANAME(MASTER)%の%ANAME(TARGET)%を見る目が変わった…
+	PRINTFORMW %ANAME(MASTER)%对遵从%ANAME(TARGET)%感到由衷的喜悦
+	;TranslatedMark %ANAME(MASTER)%は%ANAME(TARGET)%に従うことに心からの悦びを感じている
+
+
+;-------------------------------------------------
+;[酒豪]取得
+;-------------------------------------------------
+ELSEIF ARG == 74
+	PRINTFORMW %ANAME(TARGET)%的样子很奇怪…
+	;TranslatedMark %ANAME(TARGET)%の様子がおかしい…
+	PRINTFORMW %ANAME(TARGET)%似乎觉醒了喝酒的快感
+	;TranslatedMark %ANAME(TARGET)%は酒を飲む快感に目覚めたようだ
+
+;-------------------------------------------------
+;[おもらし癖]取得
+;-------------------------------------------------
+ELSEIF ARG == 76
+	PRINTFORMW %ANAME(TARGET)%的样子很奇怪…
+	;TranslatedMark %ANAME(TARGET)%の様子がおかしい…
+	PRINTFORML 在人前屡次漏尿的%ANAME(TARGET)%的心和身体
+	;TranslatedMark 人前で何度もおもらしを繰り返した%ANAME(TARGET)%の心と体には、
+	PRINTFORMW 在无意识中尿出来的习惯似乎被刻上了
+	;TranslatedMark 無意識におもらしをする癖が刻み込まれてしまったようだ
+
+;-------------------------------------------------
+;[虚ろ]取得
+;-------------------------------------------------
+ELSEIF ARG == 78
+	PRINTFORMW %ANAME(TARGET)%的样子很奇怪…
+	;TranslatedMark %ANAME(TARGET)%の様子がおかしい…
+	PRINTFORMW 由于反复的压力，%ANAME(TARGET)%的心似乎非常疲惫
+	;TranslatedMark 度重なるストレスによって%ANAME(TARGET)%の心はひどく疲弊しているようだ
+
+;-------------------------------------------------
+;[崩壊]取得
+;-------------------------------------------------
+ELSEIF ARG == 79
+	PRINTFORMW %ANAME(TARGET)%的样子很奇怪…
+	;TranslatedMark %ANAME(TARGET)%の様子がおかしい…
+	PRINTFORMW 由于反复的压力，%ANAME(TARGET)%的心好像坏了
+	;TranslatedMark 度重なるストレスによって%ANAME(TARGET)%の心は壊れてしまったようだ
+
+;-------------------------------------------------
+;婚姻の儀(選択時)
+;-------------------------------------------------
+ELSEIF ARG == 90
+	PRINTFORMW %ANAME(MASTER)%向%ANAME(TARGET)%求婚
+	;TranslatedMark %ANAME(MASTER)%は%ANAME(TARGET)%に婚姻を申し込んだ
+	PRINTFORM %ANAME(TARGET)%惊讶得瞬间僵住了
+	;TranslatedMark %ANAME(TARGET)%は驚きのあまり一瞬固まってしまったが、
+	IF TALENT:親愛
+		PRINTFORMW 脸上立刻浮现出幸福的笑容，拥抱着%ANAME(MASTER)%
+		;TranslatedMark すぐに込み上げる幸せに顔をほころばせ、%ANAME(MASTER)%を抱きしめた
+	ELSEIF TALENT:隷属
+		PRINTFORMW 没想到%ANAME(MASTER)%会被当做婚姻对象的%ANAME(TARGET)%，高兴得哭了起来…
+		;TranslatedMark %ANAME(MASTER)%に婚姻の対象と見られていると思っていなかった%ANAME(TARGET)%は、喜びのあまり泣き出してしまった…
+	ELSEIF TALENT:恋人
+		PRINTFORMW 有点害羞的微笑着接受了%ANAME(MASTER)%的提议
+		;TranslatedMark 少し照れたように微笑みながら、%ANAME(MASTER)%の申し出を受け入れた
+	ELSE
+		PRINTFORMW 轻轻地握住%ANAME(MASTER)%的手恭恭敬敬地低下头，接受了他的提议
+		;TranslatedMark そっと%ANAME(MASTER)%の手を取り恭しく頭を下げて、申し出を受け入れた
+	ENDIF
+
+;-------------------------------------------------
+;婚姻の儀(イベント)
+;-------------------------------------------------
+ELSEIF ARG == 91
+	PRINTFORMW 始终有些紧张的%ANAME(TARGET)%，顺利地结束了仪式
+	;TranslatedMark 終始緊張気味の%ANAME(TARGET)%だったが、無事に式を終えることができた
+
+;-------------------------------------------------
+;おねだりに対して「おあずけ」を選択
+;-------------------------------------------------
+ELSEIF ARG == 103
+	PRINTFORML %ANAME(MASTER)%拒绝了%ANAME(TARGET)%的邀请，对露出贪婪表情的%ANAME(TARGET)%置之不理…
+	;TranslatedMark %ANAME(MASTER)%は%ANAME(TARGET)%の誘いを断り、物欲しそうな表情を浮かべる%ANAME(TARGET)%を放置して立ち去った…
+
+;-------------------------------------------------
+;誘惑成功(合意は得られない)
+;-------------------------------------------------
+ELSEIF ARG == 104
+
+;-------------------------------------------------
+;誘惑成功(合意を取得)
+;-------------------------------------------------
+ELSEIF ARG == 105
+
+;-------------------------------------------------
+;誘惑失敗
+;-------------------------------------------------
+ELSEIF ARG == 106
+	IF TALENT:合意
+		PRINTFORMW 但是，%ANAME(TARGET)%说现在没有这种心情而拒绝了
+		;TranslatedMark だが、%ANAME(TARGET)%に今はそんな気分ではないと言われて断られてしまった
+	ELSEIF ABL:性知識 == 0
+		PRINTFORMW 但是，%ANAME(TARGET)%は%ANAME(MASTER)%无法理解你的意思，不可思议地歪着头
+		;TranslatedMark だが、%ANAME(TARGET)%は%ANAME(MASTER)%の意図が理解できず、不思議そうに首を傾げた
+	ELSE
+		PRINTFORMW 但是，被%ANAME(TARGET)%忽略了
+		;TranslatedMark だが、%ANAME(TARGET)%に無視されてしまった
+	ENDIF
+
+;-------------------------------------------------
+;誘惑成功(既に合意あり)
+;-------------------------------------------------
+ELSEIF ARG == 107
+
+;-------------------------------------------------
+;酔い潰れたところでイタズラ
+;-------------------------------------------------
+ELSEIF ARG == 110
+	IF TFLAG:54
+		IF TFLAG:54 == 1
+			PRINTFORMW %ANAME(MASTER)%把睡着的%ANAME(TARGET)%带进房间里，脱掉了%ANAME(TARGET)%的衣服…
+			;TranslatedMark %ANAME(MASTER)%は眠っている%ANAME(TARGET)%を座敷に連れ込むと、%ANAME(TARGET)%の服を脱がせていった…
+		ELSEIF TFLAG:54 == 7
+			PRINTFORMW %ANAME(MASTER)%让睡着的%ANAME(TARGET)%坐在浴池边缘，打开了%ANAME(TARGET)%的胯下…
+			;TranslatedMark %ANAME(MASTER)%は眠っている%ANAME(TARGET)%を湯船の縁に腰掛けさせると、%ANAME(TARGET)%の股を開かせた…
+		ELSE
+			PRINTFORMW %ANAME(MASTER)%把睡着的%ANAME(TARGET)%带到背阴处，脱掉了%ANAME(TARGET)%的衣服…
+			;TranslatedMark %ANAME(MASTER)%は眠っている%ANAME(TARGET)%を物陰に連れ込むと、%ANAME(TARGET)%の服を脱がせていった…
+		ENDIF
+	ELSE
+		PRINTFORMW %ANAME(MASTER)%确认%ANAME(TARGET)%完全睡着后，脱掉了%ANAME(TARGET)%的衣服…
+		;TranslatedMark %ANAME(MASTER)%は%ANAME(TARGET)%が完全に眠っているのを確認すると、%ANAME(TARGET)%の服を脱がせていった…
+	ENDIF
+
+;-------------------------------------------------
+;主人公が失神しても調教継続
+;-------------------------------------------------
+ELSEIF ARG == 111
+
+;-------------------------------------------------
+;主人公が疲労しても調教継続
+;-------------------------------------------------
+ELSEIF ARG == 112
+
+;-------------------------------------------------
+;浣腸＆プラグを実行後、プラグを引き抜く
+;-------------------------------------------------
+ELSEIF ARG == 151
+	PRINTFORML 从%ANAME(TARGET)%的屁股孔里，伴随着猥琐的声音，混浊的茶色液体被吐了出来…
+	;TranslatedMark %ANAME(TARGET)%の尻穴から、下品な音と共に茶色く濁った液体が吐き出された…
+
+;-------------------------------------------------
+;夜イベント(添い寝)
+;-------------------------------------------------
+ELSEIF ARG == 200
+	PRINTFORMW %ANAME(TARGET)%对%ANAME(MASTER)%说想一起睡
+	;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%に、一緒に寝たいと言ってきた
+
+;-------------------------------------------------
+;夜イベント(晩酌)
+;-------------------------------------------------
+ELSEIF ARG == 201
+	PRINTFORMW %ANAME(TARGET)%把拿来的酒瓶给%ANAME(MASTER)%展示，邀请她一起喝
+	;TranslatedMark %ANAME(TARGET)%は持ってきた酒瓶を%ANAME(MASTER)%に見せ、一緒に飲まないかと誘ってきた
+
+;-------------------------------------------------
+;夜イベント(談笑)
+;-------------------------------------------------
+ELSEIF ARG == 202
+	PRINTFORMW %ANAME(TARGET)%想和%ANAME(MASTER)%说两句话
+	;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%と少し話がしたいようだ
+
+;-------------------------------------------------
+;夜這い奉仕(通常)
+;-------------------------------------------------
+ELSEIF ARG == 210
+	PRINTFORML %ANAME(TARGET)%进入%ANAME(MASTER)%的被窝里、
+	;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の寝床に入り込むと、
+	PRINTFORM 说着要让你变得舒服起来
+	;TranslatedMark 気持ち良くしてあげると言って
+	IF HAS_PENIS(MASTER)
+		PRINTFORMW 取出%ANAME(MASTER)%的阴茎开始侍奉…
+		;TranslatedMark %ANAME(MASTER)%のペニスを取り出し奉仕し始めた…
+	ELSE
+		PRINTFORMW 被%ANAME(MASTER)%的身体所压住…
+		;TranslatedMark %ANAME(MASTER)%の体に覆いかぶさった…
+	ENDIF
+
+;-------------------------------------------------
+;夜這い奉仕(加虐)
+;-------------------------------------------------
+ELSEIF ARG == 211
+	PRINTFORML %ANAME(TARGET)%强行推倒了%ANAME(MASTER)%、
+	;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%を無理やり押し倒すと、
+	IF HAS_PENIS(MASTER)
+		PRINTFORMW 踩着%ANAME(MASTER)%的阴茎，带着嗜虐的表情拉开了鞭子…
+		;TranslatedMark %ANAME(MASTER)%のペニスを踏みつけながら、嗜虐的な表情で鞭を構えた…
+	ELSE
+		PRINTFORMW 束缚起%ANAME(MASTER)%的身体，带着嗜虐的表情举起鞭子…
+		;TranslatedMark %ANAME(MASTER)%の体を縛り上げ、嗜虐的な表情で鞭を構えた…
+	ENDIF
+
+;-------------------------------------------------
+;夜這い愛撫(通常)
+;-------------------------------------------------
+ELSEIF ARG == 212
+	PRINTFORML %ANAME(TARGET)%用兴奋的表情看着%ANAME(MASTER)%、
+	;TranslatedMark %ANAME(TARGET)%は上気した表情で%ANAME(MASTER)%を見つめると、
+	PRINTFORMW 把完全燥热的身体托付给他，恳求他让自己舒服起来…
+	;TranslatedMark すっかり火照った体を預け、気持ち良くして欲しいと懇願してきた…
+
+;-------------------------------------------------
+;夜這い愛撫(被虐)
+;-------------------------------------------------
+ELSEIF ARG == 213
+	PRINTFORML %ANAME(TARGET)%用兴奋的表情看着%ANAME(MASTER)%、
+	;TranslatedMark %ANAME(TARGET)%は上気した表情で%ANAME(MASTER)%を見つめると、
+	PRINTFORMW 把完全燥热的身体托付给他，恳求她尽情虐待自己…
+	;TranslatedMark すっかり火照った体を預け、思い切り虐めて欲しいと懇願してきた…
+
+;-------------------------------------------------
+;夜這い性交(対象のＶに挿入)
+;-------------------------------------------------
+ELSEIF ARG == 220
+	PRINTFORMW %ANAME(TARGET)%把身体依靠在%ANAME(MASTER)%身上，用湿润的眼睛期待着什么
+	;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%に体を預けると、何かを期待するように潤んだ瞳で見つめてきた
+	PRINTFORMW %ANAME(MASTER)%脱掉%ANAME(TARGET)%的衣服后，她的秘唇已经因期待而濡湿了…
+	;TranslatedMark %ANAME(MASTER)%が%ANAME(TARGET)%の服を脱がせると、既にその秘唇は期待に濡れていた…
+
+;-------------------------------------------------
+;夜這い性交(対象のＡに挿入)
+;-------------------------------------------------
+ELSEIF ARG == 221
+	PRINTFORMW %ANAME(TARGET)%把身体依靠在%ANAME(MASTER)%身上，用湿润的眼睛期待着什么
+	;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%に体を預けると、何かを期待するように潤んだ瞳で見つめてきた
+	PRINTFORMW %ANAME(MASTER)%脱掉%ANAME(TARGET)%的衣服后，她的秘唇已经因期待而濡湿了…
+	;TranslatedMark %ANAME(MASTER)%が%ANAME(TARGET)%の服を脱がせると、既にその秘唇は期待に濡れていた…
+
+;-------------------------------------------------
+;夜這い性交(主人公のＶに挿入)
+;-------------------------------------------------
+ELSEIF ARG == 222
+	PRINTFORMW %ANAME(TARGET)%用仿佛饥饿的野兽般的眼睛凝视着%ANAME(MASTER)%，恳求他拥抱自己
+	;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%を飢えた獣のような瞳で見つめ、抱かせて欲しいと懇願してきた
+	PRINTFORMW 当%ANAME(MASTER)%同意后，%ANAME(TARGET)%就任凭欲望粗暴地推倒了%ANAME(MASTER)%…
+	;TranslatedMark %ANAME(MASTER)%が了承すると、%ANAME(TARGET)%は欲望に任せて乱暴に%ANAME(MASTER)%を押し倒した…
+
+;-------------------------------------------------
+;夜這い性交(主人公のＡに挿入)
+;-------------------------------------------------
+ELSEIF ARG == 223
+	PRINTFORMW %ANAME(TARGET)%用仿佛饥饿的野兽般的眼睛凝视着%ANAME(MASTER)%，恳求他拥抱自己
+	;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%を飢えた獣のような瞳で見つめ、抱かせて欲しいと懇願してきた
+	PRINTFORMW 当%ANAME(MASTER)%同意后，%ANAME(TARGET)%就任凭欲望粗暴地推倒了%ANAME(MASTER)%…
+	;TranslatedMark %ANAME(MASTER)%が了承すると、%ANAME(TARGET)%は欲望に任せて乱暴に%ANAME(MASTER)%を押し倒した…
+
+;-------------------------------------------------
+;夜這い性交(レズセックス)
+;-------------------------------------------------
+ELSEIF ARG == 224
+	PRINTFORMW %ANAME(TARGET)%把身体依靠在%ANAME(MASTER)%身上，用湿润的眼睛期待着什么
+	;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%に体を預けると、何かを期待するように潤んだ瞳で見つめてきた
+	PRINTFORMW %ANAME(MASTER)%脱掉%ANAME(TARGET)%的衣服后，她的秘唇已经因期待而濡湿了…
+	;TranslatedMark %ANAME(MASTER)%が%ANAME(TARGET)%の服を脱がせると、既にその秘唇は期待に濡れていた…
+
+;-------------------------------------------------
+;夜イベント/主人公が臨月のときのお見舞い(確定父親)
+;-------------------------------------------------
+ELSEIF ARG == 230
+	PRINTFORMW %ANAME(MASTER)%和%ANAME(TARGET)%聊了关于出生的孩子的事情…
+	;TranslatedMark %ANAME(MASTER)%と%ANAME(TARGET)%は生まれてくる子供のことについて語り合った…
+
+;-------------------------------------------------
+;夜イベント/主人公が臨月のときのお見舞い(父親以外)
+;-------------------------------------------------
+ELSEIF ARG == 231
+	PRINTFORMW %ANAME(TARGET)%兴致勃勃地看着已经变大了的%ANAME(MASTER)%的肚子…
+	;TranslatedMark すっかり大きくなった%ANAME(MASTER)%のお腹を、%ANAME(TARGET)%は興味深そうに見つめている…
+
+;-------------------------------------------------
+;夜イベント/主人公が育児中のときのお見舞い(確定父親)
+;-------------------------------------------------
+ELSEIF ARG == 232
+	;子供のキャラ番号を取得
+	LOCAL:0 = ID_TO_CHARA(CFLAG:MASTER:育児対象)
+
+	IF LOCAL:0 >= 0
+		IF TALENT:(LOCAL:0):坦率
+			PRINTFORMW %ANAME(LOCAL:0)%似乎和%ANAME(TARGET)%非常亲近了，不想离开%ANAME(TARGET)%…
+			;TranslatedMark %ANAME(LOCAL:0)%はすっかり%ANAME(TARGET)%になついているようで、%ANAME(TARGET)%を中々放そうとしなかった…
+		ELSEIF TALENT:(LOCAL:0):反抗的 || TALENT:(LOCAL:0):傲慢
+			PRINTFORMW 顽皮的%ANAME(LOCAL:0)%对作为父亲的%ANAME(TARGET)%采取了反抗的态度…
+			;TranslatedMark やんちゃな%ANAME(LOCAL:0)%は、父親である%ANAME(TARGET)%に反抗的な態度を取っている…
+		ELSE
+			PRINTFORMW %ANAME(LOCAL:0)%为父亲%ANAME(TARGET)%的到来而坦率地感到高兴…
+			;TranslatedMark %ANAME(LOCAL:0)%は父親である%ANAME(TARGET)%が来てくれたことを素直に喜んでいる…
+		ENDIF
+	ENDIF
+
+;-------------------------------------------------
+;夜イベント/主人公が育児中のときのお見舞い(父親以外)
+;-------------------------------------------------
+ELSEIF ARG == 233
+	;子供のキャラ番号を取得
+	LOCAL:0 = ID_TO_CHARA(CFLAG:MASTER:育児対象)
+
+	IF LOCAL:0 >= 0
+		IF TALENT:(LOCAL:0):害羞 || TALENT:(LOCAL:0):胆怯
+			PRINTFORMW %ANAME(LOCAL:0)%好像很怕生，手里握着%ANAME(MASTER)%衣服的下摆，却不肯和%ANAME(TARGET)%打成一片…
+			;TranslatedMark %ANAME(LOCAL:0)%は人見知りしているようで、%ANAME(MASTER)%の服の裾を握ったまま中々%ANAME(TARGET)%と打ち解けようとしなかった…
+		ELSEIF TALENT:(LOCAL:0):傲慢 || TALENT:(LOCAL:0):自尊心高
+			PRINTFORMW %ANAME(TARGET)%被%ANAME(LOCAL:0)%强行陪着玩，苦笑着…
+			;TranslatedMark %ANAME(TARGET)%は%ANAME(LOCAL:0)%の遊びに無理やり付き合わされて苦笑していた…
+		ELSE
+			PRINTFORMW %ANAME(TARGET)%邀请%ANAME(LOCAL:0)%一起出去玩了…
+			;TranslatedMark %ANAME(TARGET)%は%ANAME(LOCAL:0)%を誘って、一緒に遊びに出掛けました…
+		ENDIF
+	ENDIF
+
+;-------------------------------------------------
+;夜イベント/主人公が重傷のときのお見舞い
+;-------------------------------------------------
+ELSEIF ARG == 234
+	;PRINTFORMW 
+
+;-------------------------------------------------
+;朝イベント/自ら性知識を学ぶ
+;-------------------------------------------------
+ELSEIF ARG == 240
+	PRINTFORMW %ANAME(TARGET)%似乎是为了%ANAME(MASTER)%自己学习性知识…
+	;TranslatedMark %ANAME(TARGET)%は、%ANAME(MASTER)%のために自ら性知識を学んでいるようだ…
+
+;-------------------------------------------------
+;朝イベント/自ら性知識を学ぶ(逆調教)
+;-------------------------------------------------
+ELSEIF ARG == 241
+	PRINTFORMW %ANAME(TARGET)%似乎为了调教%ANAME(MASTER)%而在学习性知识…
+	;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%を調教するための性知識を学んでいるようだ…
+
+;-------------------------------------------------
+;触手処刑される(捕虜調教画面から)(処刑拡張パッチ)大幅に改変・加筆
+;-------------------------------------------------
+ELSEIF ARG == 343
+	;※触手部屋の管理者(=触手処刑の実行者)のキャラ番号はFLAG:触手部屋管理者に格納
+	
+	妊婦フラグ = 0
+	IF TALENT:妊娠
+		妊婦フラグ = 1
+	ENDIF
+	
+	CALL SINGLE_DRAWLINE
+	PRINTFORML 要以什么样的形式处刑呢？
+	;TranslatedMark どのような形で処刑しますか？
+	PRINTL [0]为触手献出身体和心灵                    (纪念品「触手地獄」获得)
+	;TranslatedMark [0] 触手に身も心も捧げてもらう                 (記念品「触手地獄」取得)
+	PRINTL [1]和触手共存，在社会上消失                (纪念品「触手地獄」获得)
+	;TranslatedMark [1] 触手と共存させて社会的に消えてもらう       (記念品「触手地獄」取得)
+	PRINTL [2]消除记忆，成为触手房间的副管理员        (纪念品「触手部屋副管理人」获得)
+	;TranslatedMark [2] 記憶を消して触手部屋の副管理人となって貰う (記念品「触手部屋副管理人」取得)
+	PRINTL [3]将麻烦的人关起来判处无期徒刑            (纪念品「触手地獄」获得)
+	;TranslatedMark [3] 厄介者は閉じ込めて無期懲役                 (記念品「触手地獄」取得)
+	PRINTL [4]剥夺自由后卖出                          (国庫資金获得)
+	;TranslatedMark [4] 自由を奪って出荷する                       (国庫資金取得)
+	PRINTL [5]送去另一个世界                           (妖術経験値追加获得)
+	;TranslatedMark [5] 別世界送り                                 (妖術経験値を追加取得)
+	INPUT
+
+	IF RESULT == 0
+	
+		PRINTFORMW %ANAME(MASTER)%命令监牢的士兵把%ANAME(TARGET)%绑起来扔进触手房间…
+		;TranslatedMark %ANAME(MASTER)%は牢屋番の兵士に、%ANAME(TARGET)%を縛り上げて触手部屋へ放り込むように命令した…
+		PRINTW …………
+		PRINTFORML 士兵们将被拘束的%ANAME(TARGET)%踢进触手房间，关上了门、
+		;TranslatedMark 兵士たちが拘束された%ANAME(TARGET)%を触手部屋の中に蹴り出して扉を閉めると、
+		PRINTFORMW 房间里的触手好像在等待似的，一眨眼就扑了过来
+		;TranslatedMark 待ってましたとばかりに部屋中の触手が%ANAME(TARGET)%の体目掛けて殺到する
+		PRINTFORML 触手瞬间吞噬了%ANAME(TARGET)%的全身、
+		;TranslatedMark 触手はあっという間に%ANAME(TARGET)%の全身を飲み込むと、
+		IF HAS_PENIS(TARGET)
+			PRINTFORMW 一边侵犯着全身的洞，一边蠢蠢欲动地缠绕在阴茎上，想榨取精液
+			;TranslatedMark 全身の穴という穴を犯しながらペニスに絡み付き精を搾ろうと蠢いた
+			IF CFLAG:TARGET:行動不能状態 == 行動不能_子供
+				LOCALS:0 = 还未成熟的阴茎一下一下地跳跃着、
+				;LOCALS:0 = 何度も未熟なペニスを飛び跳ねさせながら
+			ELSE
+				LOCALS:0 = 一次次射着精液的同时
+				;LOCALS:0 = 何度も精を吐き出しながら
+			ENDIF
+		ELSE
+			PRINTFORMW 一边侵犯全身的洞，一边爱抚着身体
+			;TranslatedMark 全身の穴という穴を犯しながら体中を愛撫していく
+			LOCALS:0 = 因为不停地高潮身体颤抖着时
+			;LOCALS:0 = 何度も絶頂しガクガクと体を震わせながら
+			ENDIF
+
+		IF TALENT:崩壊
+			PRINTFORMW 心早已破碎的%ANAME(TARGET)%无法抵抗、
+			;TranslatedMark 既に心の壊れた%ANAME(TARGET)%は抵抗することもなく、
+			PRINTFORMW %LOCALS:0%被触手吞噬了…
+			;TranslatedMark %LOCALS:0%触手に飲み込まれていった…
+		ELSEIF TALENT:空虚
+			PRINTFORMW 已经疲惫不堪的%ANAME(TARGET)%几乎无法抵抗、
+			;TranslatedMark 既に疲弊しきった%ANAME(TARGET)%はほとんど抵抗することもできず、
+			PRINTFORMW %LOCALS:0%被触手吞噬了…
+			;TranslatedMark %LOCALS:0%触手に飲み込まれていった…
+		ELSE
+			IF ABL:触手 >= 5
+				PRINTFORML 完全被触手俘虏的%ANAME(TARGET)%，将身体交给了袭来的暴力般的快感和痛苦、
+				;TranslatedMark すっかり触手の虜になった%ANAME(TARGET)%は、襲いかかる暴力的な快感と苦痛に身を任せ、
+				IF HAS_PENIS(TARGET)
+					PRINTFORMW 激烈地痉挛着，无数次地绝顶，不断地射出精液来…
+					;TranslatedMark 激しく痙攣しながら何度となく絶頂し精を吐き出していく…
+				ELSE
+					PRINTFORMW 激烈地痉挛着，不断地绝顶…
+					;TranslatedMark 激しく痙攣しながら何度となく絶頂していく…
+				ENDIF
+				IF TALENT:妊娠
+					PRINTFORMW 甚至触手连%ANAME(TARGET)%体内寄宿的小生命都贪图殆尽
+					;TranslatedMark 更に触手は%ANAME(TARGET)%の体内に宿った小さな命まで貪り尽くすべく
+					PRINTFORMW 将%ANAME(TARGET)%的子宫口咬破，腹部不断变形，蹂躏着里面的东西
+					;TranslatedMark %ANAME(TARGET)%の子宮口を食い破り、腹をボコボコと変形させる程に中身を蹂躙するが
+					PRINTFORMW 已经连身心都沦为触手饵食的%ANAME(TARGET)%，对那种可怕的行为也能感到快感，反复绝顶…
+					;TranslatedMark 既に心身ともに触手の餌へと成り下がった%ANAME(TARGET)%には、そのおぞましい行為にすら快感をおぼえ、絶頂を繰り返す…
+				ENDIF
+				PRINTFORML 触手们确认了%ANAME(TARGET)%不会抵抗后，将%ANAME(TARGET)%的身体拖入里面
+				;TranslatedMark 触手たちは%ANAME(TARGET)%が抵抗しないのを確認すると、%ANAME(TARGET)%の体を奥へと引きずり込み、
+				PRINTFORMW 一边给予至上的快乐，一边使之与自己的一部分同化…
+				;TranslatedMark 至上の快楽を与えながら自分たちの一部へと同化させていった…
+			ELSE
+				PRINTFORML %ANAME(TARGET)%被强制给予暴力的痛苦和快感、
+				;TranslatedMark %ANAME(TARGET)%は暴力的な苦痛と快感を強制的に与えられ、
+				IF HAS_PENIS(TARGET)
+					PRINTFORMW 无计可施地无数次一边绝顶一边被榨取精液…
+					;TranslatedMark なすすべなく何度となく絶頂しながら精を搾り取られていく…
+				ELSE
+					PRINTFORMW 无计可施地无数次绝顶…
+					;TranslatedMark なすすべなく何度となく絶頂させられてしまう…
+				ENDIF
+				IF TALENT:妊娠
+					PRINTFORMW 甚至触手连%ANAME(TARGET)%体内寄宿的小生命都贪图殆尽
+					;TranslatedMark 更に触手は%ANAME(TARGET)%の体内に宿った小さな命まで貪り尽くすべく
+					PRINTFORMW 将%ANAME(TARGET)%的子宫口咬破，腹部不断变形，蹂躏着里面的东西
+					;TranslatedMark %ANAME(TARGET)%の子宮口を食い破り、腹をボコボコと変形させる程に中身を蹂躙していく
+					PRINTFORMW 被这种可怕的行为搞得半狂的%ANAME(TARGET)%，为了至少救肚子里的孩子，用尽了最后的力量
+					;TranslatedMark そのおぞましい行為に半狂乱となった%ANAME(TARGET)%は、せめてお腹の子だけは救おうと最後の力を振り絞るも
+					PRINTFORMW 徒劳的抵抗被触手无情的制裁所扭曲、粉碎…
+					;TranslatedMark 虚しい抵抗は触手からの無慈悲な制裁によってひねり潰されてしまう…
+				ENDIF
+				PRINTFORML 不久，触手将因不断的高潮而筋疲力尽的%ANAME(TARGET)%的身体拖进更深处、
+				;TranslatedMark やがて、絶え間ない絶頂で力尽きぐったりとした%ANAME(TARGET)%の体を触手がさらに奥へと引きずり込み、
+				PRINTFORMW 一边给予至上的快乐，一边使之与自己的一部分同化…
+				;TranslatedMark 至上の快楽を与えながら自分たちの一部へと同化させていった…
+			ENDIF
+		ENDIF
+		
+		PRINTL 
+		IF CFLAG:TARGET:行動不能状態 == 行動不能_子供
+			IF HAS_PENIS(TARGET)
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+			ELSE
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+			ENDIF
+			CALL GET_GOODS_EXECUTED(TARGET, 6, 1, 妊婦フラグ)
+		ELSE
+			IF HAS_PENIS(TARGET)
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+			ELSE
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+			ENDIF
+			CALL GET_GOODS_EXECUTED(TARGET, 6, 0, 妊婦フラグ)
+		ENDIF
+
+	ELSEIF RESULT == 1
+		PRINTFORMW %ANAME(MASTER)%命令调教系的女官们把%ANAME(TARGET)%扔进触手房间…
+		;TranslatedMark %ANAME(MASTER)%は調教係の女官達に、%ANAME(TARGET)%を触手部屋へ放り込むように命令した…
+		PRINTW …………
+		PRINTFORML 女官们说要解放%ANAME(TARGET)%，然后把她领到触手房间，锁上了
+		;TranslatedMark 女官達たちは%ANAME(TARGET)%を解放すると言うと、触手部屋に案内して硬く鍵を掛けた
+		PRINTFORMW 触手们缠上了惊讶地回头看的%ANAME(TARGET)%的身体，像磔刑一样束缚着
+		;TranslatedMark 驚いて振り返る%ANAME(TARGET)%の身体に触手達は巻きつき、磔刑のようにして拘束してきた
+		PRINTFORMW 到处都是欢迎新共存者的触手们…
+		;TranslatedMark 辺り一面には新しい共存者を歓迎する触手達で溢れている…
+
+		IF TALENT:妊娠
+			PRINTFORML 触手抚摸着%ANAME(TARGET)%的身体，像声纳一样感知着寄宿在体内的小生命
+			;TranslatedMark 触手は%ANAME(TARGET)%の体を撫で回すと、ソナーのように体内に宿った小さな命を感知した
+			PRINTFORMW ……为意外收获而高兴的触手们抚摸着%ANAME(TARGET)%的头
+			;TranslatedMark ……思わぬ収穫に喜んだ触手達は、%ANAME(TARGET)%の頭を撫でている
+		ELSEIF TALENT:処女 && HAS_VAGINA(TARGET)
+			PRINTFORML 触手贯穿%ANAME(TARGET)%的阴道，身为处女之证的血就流出来了
+			;TranslatedMark 触手が%ANAME(TARGET)%の膣を貫くと、処女の証である血が零れてきた
+			PRINTFORMW ……对意想不到的极品感到高兴的触手们抚摸着%ANAME(TARGET)%的头
+			;TranslatedMark ……思わぬ上玉に喜んだ触手達は、%ANAME(TARGET)%の頭を撫でている
+		ELSE
+		ENDIF
+
+		IF HAS_VAGINA(TARGET)
+			PRINTFORMW 触手们侵犯了%ANAME(TARGET)%的身体，注入了满满的高毒性的粘液……
+			;TranslatedMark 触手達は%ANAME(TARGET)%の体を犯し、中毒性の高い粘液をたっぷり注ぎ込んだ……
+			PRINTFORML 而且触手们穿破身体各处，加入细胞因子使神经同化
+			;TranslatedMark さらに触手達は身体のあちこちを穿ち、細胞因子を組み入れ神経を同化させていった
+			PRINTFORMW %ANAME(TARGET)%的身体被改造成了无法离开触手的状态！
+			;TranslatedMark %ANAME(TARGET)%は触手を身に宿していなければ生きられないように身体を組み替えられてしまった！
+			PRINTFORML 她从现在开始一直被触手们养着，被侵犯，生下新的触手，过着这样的生活
+			;TranslatedMark 彼女はこれからずっと触手達に養われ、犯され、新しい触手を産み落とす生活をする事になる
+			PRINTFORMW 随着生命体的变化，不久就会变成新的妖怪吧……
+			;TranslatedMark 次第に生命体として変化していき、やがては新しい妖怪となるだろう……
+		ELSE
+			PRINTFORML 触手们潜入%ANAME(TARGET)%的体内，加入细胞因子使神经同化
+			;TranslatedMark 触手達は%ANAME(TARGET)%の体へ潜り込み、細胞因子を組み入れ神経を同化させていった
+			PRINTFORMW %ANAME(TARGET)%的身体被改造成了无法离开触手的状态！
+			;TranslatedMark %ANAME(TARGET)%は触手を身に宿していなければ生きられないように身体を組み替えられてしまった！
+			PRINTFORML 他从现在开始一直被触手们培养，被剥夺拒绝权，过着培养触手的生活
+			;TranslatedMark 彼はこれからずっと触手達に養われ、拒否権を奪われ、触手を培養する生活を送る事になる
+			PRINTFORMW 随着生命体的变化，不久就会变成新的妖怪吧……
+			;TranslatedMark 次第に生命体として変化していき、やがては新しい妖怪となるだろう……
+		ENDIF
+
+		PRINTFORMW ………………
+			
+		IF TALENT:妊娠
+			PRINTFORML 腹中寄宿的生命被触手夺走，同样会成为产下触手的存在
+			;TranslatedMark お腹に宿った命は触手に取り上げられ、同じく触手を産み落とす存在になるようだ
+			PRINTFORMW 如果在不知道外面的情况下在这里被触手们养育长大的话，也许就不会感到不幸了……
+			;TranslatedMark 外を知らずにここで触手達に育てられれば産まれた子は不幸と感じないかもしれない……
+		ENDIF
+
+		PRINTFORML 住久了就是京城，习惯这里的日子也许会到来
+		;TranslatedMark 住めば都と言うように、ここに慣れる日が来るかもしれない
+		PRINTFORMW 但是%ANAME(TARGET)%这个存在，已经死了也是理所当然的……
+		;TranslatedMark しかし%ANAME(TARGET)%という存在は、もう死んだも当然であった……
+		
+		PRINTL 
+		IF CFLAG:TARGET:行動不能状態 == 行動不能_子供
+			IF HAS_PENIS(TARGET)
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+			ELSE
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+			ENDIF
+			CALL GET_GOODS_EXECUTED(TARGET, 6, 1, 妊婦フラグ)
+		ELSE
+			IF HAS_PENIS(TARGET)
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+			ELSE
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+			ENDIF
+			CALL GET_GOODS_EXECUTED(TARGET, 6, 0, 妊婦フラグ)
+		ENDIF
+
+	ELSEIF RESULT == 2
+		PRINTFORMW %ANAME(TARGET)%在白色的床上醒来了…
+		;TranslatedMark %ANAME(TARGET)%は白いベットの上で目を覚ました…
+		PRINTW …………
+		PRINTFORML 整理好衣服，换上侍从服，就开始了早上的工作
+		;TranslatedMark 身なりを整え、侍従服に着替えると朝の仕事を開始した
+		PRINTFORMW 首先去触手房间确认新出生的触手有多少
+		;TranslatedMark まず触手部屋へ行って新しく産まれた触手がどのぐらいかの確認
+		PRINTFORML 结束后，打扫未使用的房间，注意卫生，把洒出来的体液好好地擦干净
+		;TranslatedMark それが終わったら未使用の部屋の掃除、衛生面に気を使って零れた体液はしっかりふき取る
+		PRINTFORMW 为了让新来的孩子心情变好，事先好好清洗触手们
+		;TranslatedMark 次に新しく来た子がちゃんと気持ちよくなれるように触手達もよく洗っておく
+
+		PRINTFORML 虽然是傍晚结束的工作，但在这之前看到了没有精神的触手
+		;TranslatedMark 夕時には終わる仕事だが、ここまでの間に元気の無い触手を見かけたので
+		PRINTFORMW 必须亲自去咨询一下。
+		;TranslatedMark 親身になってカウンセリングを行ってやらなければならない。
+
+		IF HAS_VAGINA(TARGET)
+			PRINTFORMW 幸运的是%ANAME(TARGET)%是女性，可以为了触手而使用自己的身体
+			;TranslatedMark 幸いにも%ANAME(TARGET)%は女性だったので、触手の為に自分の身体を使うことにした
+			IF TALENT:妊娠
+				PRINTFORML 因为怀孕了，所以不能使用胎内、
+				;TranslatedMark 妊娠しているので胎内は使わせてあげることは出来なかったが、
+				PRINTFORMW 取而代之的是，会让屁股被一直侵犯到晚上，增强自信
+				;TranslatedMark 変わりに夜までお尻を好き勝手犯させて、自信をつけさせた
+				PRINTFORMW 侵犯%ANAME(TARGET)%的触手仿佛完全恢复了活力
+				;TranslatedMark %ANAME(TARGET)%を犯し倒した触手はすっかり元気を取り戻したようだ
+			ELSEIF TALENT:処女 && HAS_VAGINA(TARGET)
+				PRINTFORML 触手和%ANAME(TARGET)%连接在一起的时候，红色的水滴洒落了下来。触手好象侵入了子宫内
+				;TranslatedMark 触手と%ANAME(TARGET)%が繋がると、赤い雫が零れ落ちた。触手は胎内へと侵入したようだ
+				PRINTFORML ……从开始做这个工作的时候开始就有兴趣了，%ANAME(TARGET)%指示担心的触手自由行动
+				;TranslatedMark ……この仕事についた時から興味はあったのだと、%ANAME(TARGET)%は心配する触手へ自由に動くよう指示した
+				PRINTFORMW 触手得到了%ANAME(TARGET)%的第一次，好像有了自信
+				;TranslatedMark 触手は%ANAME(TARGET)%の始めてを貰って自信をつけたようだ
+			ELSE
+				PRINTFORML 在触手的头上抿了一口，用唾液湿润后引导到了阴道口……
+				;TranslatedMark 触手の頭にちょんと口をつけ、唾液で潤してから膣口へと導いてやった……
+				IF ABL:触手 >= 10
+					PRINTFORML 看到没有精神的触手被娇惯，其他触手也聚集了起来
+					;TranslatedMark 元気の無い触手が甘やかされているのを見て、他の触手も集まってきてしまった
+					PRINTFORMW 没办法，只好用手和脚使劲地蹭上去，用嘴叼着用舌头抚摸
+					;TranslatedMark 仕方ないので手や足でぐりぐり擦り上げ、口で咥えて舌で撫でる
+					PRINTFORML ……精子一齐被吐出。好像要重新打扫
+					;TranslatedMark ……一斉に精子を吐き出された。掃除のやり直しのようだ
+				ELSE
+				PRINTFORMW 确认它已经完全钻进了子宫里，决定一直连接到晚上
+				;TranslatedMark 胎内にちゃんと潜りこんだのを確認して、夜まで一緒に繋がっててやる事にした
+				PRINTFORMW 侵犯%ANAME(TARGET)%的触手仿佛完全恢复了活力
+				;TranslatedMark %ANAME(TARGET)%を犯し倒した触手はすっかり元気を取り戻したようだ
+				ENDIF
+			ENDIF
+		ELSE
+			PRINTFORMW 万一动不了的话，被侵犯的一方和被侵犯的一方都不会幸福吧
+			;TranslatedMark いざという時に動けないようでは犯された側も犯した側も幸せになれないだろう
+			PRINTFORMW 陪他到晚上，指导他找回自信……
+			;TranslatedMark 夜まで付き合ってやり、自信を取り戻すよう指導を行った……
+		ENDIF
+
+		PRINTFORMW ………………
+		PRINTFORML 回过神来的时候什么都不记得了，可是还有工作，还有触手。
+		;TranslatedMark 気がついた時には何も覚えていなかった身だが、仕事もあるし触手達も居る。
+		PRINTFORMW 过去的事怎样都无所谓。这样想着晚上就回到床上
+		;TranslatedMark 過去の事はどうでもいい。そう思って夜はベットに戻る
+		PRINTFORMW 那是连自己的名字都忘记了的%ANAME(TARGET)%的新生活……
+		;TranslatedMark それが自分の名前すらも忘れた%ANAME(TARGET)%の新しい生活となった……
+		
+		PRINTL 
+		IF CFLAG:TARGET:行動不能状態 == 行動不能_子供
+			CALL GET_GOODS_EXECUTED(TARGET, 5, 1, 妊婦フラグ)
+		ELSE
+			CALL GET_GOODS_EXECUTED(TARGET, 5, 0, 妊婦フラグ)
+		ENDIF
+
+	ELSEIF RESULT == 3
+		PRINTFORMW %ANAME(TARGET)%被封印在地下深处…
+		;TranslatedMark %ANAME(TARGET)%は地下深くへ封じ込められた…
+		PRINTW …………
+		PRINTFORMW 淫靡的声音，不停地回响着
+		;TranslatedMark グチュグチュと淫靡な音が、止まず響き渡っている
+		PRINTFORML 无数的触手侵犯了%ANAME(TARGET)%的身体
+		;TranslatedMark 幾つもの触手たちが%ANAME(TARGET)%の身体を犯していた
+		PRINTFORMW 不知为何，%ANAME(TARGET)%的身体一直保持着来时的样子
+		;TranslatedMark 何の術が掛かっているのか、%ANAME(TARGET)%の身体はずっと来た時のままを保っている
+		PRINTFORMW 不成长也不老，不饿头发也不长感觉也不衰退……
+		;TranslatedMark 成長もしない老いもしない、腹も減らず髪も伸びず感覚も衰えない……
+		PRINTFORML 在没有清晨和白昼的时间停止的世界里一直被触手们侵犯着
+		;TranslatedMark 朝も昼も無く時間が止まった世界でずっと触手達に犯され続けている
+
+		PRINTFORMW %ANAME(TARGET)%不知道已经过了多少时间了
+		;TranslatedMark もはやどのぐらいの時間が経過したのか%ANAME(TARGET)%には分からなかった
+
+		IF TARGET:0 == NAME_TO_CHARA("豊姫") || TARGET:0 == NAME_TO_CHARA("依姫") || TARGET:0 == NAME_TO_CHARA("サグメ") || TARGET:0 == NAME_TO_CHARA("レイセン") || TARGET:0 == NAME_TO_CHARA("清蘭") || TARGET:0 == NAME_TO_CHARA("鈴瑚")
+			PRINTFORMW 感受到的只有月都令人怀念的记忆以及令人心焦的侵蚀身体的快乐
+			;TranslatedMark 感じるのは月の都の懐かしい記憶と、心を焦がす程に身体を蝕んでいく快楽だけである
+		ELSEIF TARGET:0 == NAME_TO_CHARA("蓮子") || TARGET:0 == NAME_TO_CHARA("マエリベリー") || TARGET:0 == NAME_TO_CHARA("菫子") 
+			PRINTFORMW 感受到的只有外面世界令人怀念的记忆以及令人心焦的侵蚀身体的快乐
+			;TranslatedMark 感じるのは外の世界の懐かしい記憶と、心を焦がす程に身体を蝕んでいく快楽だけである
+		ELSE
+			PRINTFORMW 感受到的只有幻想乡令人怀念的记忆以及令人心焦的侵蚀身体的快乐
+			;TranslatedMark 感じるのは幻想郷の懐かしい記憶と、心を焦がす程に身体を蝕んでいく快楽だけである
+		ENDIF
+
+		PRINTFORMW 早就放弃了有人来帮忙
+		;TranslatedMark 誰かが助けに来るのはとうの昔に諦めてしまった
+
+		IF TALENT:妊娠
+			PRINTFORML 记得自己的肚子里有个孩子，但那已经无所谓了
+			;TranslatedMark 腹に誰かの子を身に宿していた記憶はあるが、それも最早どうでもいいことである
+			PRINTFORMW 在这个空间里既没有出生也没有失去
+			;TranslatedMark この空間では産まれてくる事も失われる事も無いのだ
+		ENDIF
+
+		IF HAS_VAGINA(TARGET)
+			PRINTFORML 巨大的触手伸向大腿间。%ANAME(TARGET)%为了不让身体不自然地弯曲而调整
+			;TranslatedMark 大きな触手が股間へ宛がわれた。%ANAME(TARGET)%は身体を攀じ曲げ入れるのに不自然ないよう調整した
+			PRINTFORMW 触手进入阴道口，注入了大量的精液
+			;TranslatedMark 触手は進入して膣口を打ちつけて大量の精を注ぎ込んだ
+		ELSE
+			PRINTFORML 巨大的触手伸向大腿间。%ANAME(TARGET)%为了不让身体不自然地弯曲而调整
+			;TranslatedMark 大きな触手が股間へ宛がわれた。%ANAME(TARGET)%は身体を攀じ曲げ入れるのに不自然ないよう調整した
+			PRINTFORMW 触手进入了肛门注入了大量的精液
+			;TranslatedMark 触手は進入してアナルを打ちつけて大量の精を注ぎ込んだ
+		ENDIF
+
+		IF ABL:触手 >= 5
+			PRINTFORMW %ANAME(TARGET)%接受了之后，又向触手们索要着下一次……
+			;TranslatedMark %ANAME(TARGET)%はそれを受け入れると、触手達に向かって次をおねだりした……
+			PRINTFORMW 为了从绝望中解放出来，为了感受更多的快乐……
+			;TranslatedMark この絶望から解放されるために、もっと快楽を感じるために……
+		ELSEIF TALENT:処女 && HAS_VAGINA(TARGET)
+			PRINTFORML 触手被拔出后，从%ANAME(TARGET)%中流出了红白混合的液体
+			;TranslatedMark 触手が抜かれると、%ANAME(TARGET)%から赤と白の入り混じった液体が零れ落ちた
+			PRINTFORMW 在这个空间里膜马上再生。永远的纯洁将持续被摧残
+			;TranslatedMark この空間ではすぐに膜は再生する。永遠と純潔を散らされ続けるのだ
+			PRINTFORMW 面对像是要融化身体般的疼痛，%ANAME(TARGET)%用恍惚的眼神摸了摸肚子……
+			;TranslatedMark 身を溶かすような痛みに対して、%ANAME(TARGET)%は惚けた目でお腹をさすった……
+		ELSE
+			PRINTFORMW 完全无法习惯的感觉沿着后背传来，%ANAME(TARGET)%绝顶了……
+			;TranslatedMark 全く慣れる事のできない感覚に、%ANAME(TARGET)%は背中を沿って絶頂した……
+		ENDIF
+		
+		PRINTL 
+		IF CFLAG:TARGET:行動不能状態 == 行動不能_子供
+			IF HAS_PENIS(TARGET)
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+			ELSE
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+			ENDIF
+			CALL GET_GOODS_EXECUTED(TARGET, 6, 1, 妊婦フラグ)
+		ELSE
+			IF HAS_PENIS(TARGET)
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+			ELSE
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+			ENDIF
+			CALL GET_GOODS_EXECUTED(TARGET, 6, 0, 妊婦フラグ)
+		ENDIF
+		
+	ELSEIF RESULT == 4
+		PRINTFORMW %ANAME(TARGET)%被全裸拘束，关在了小小的牢笼里…
+		;TranslatedMark %ANAME(TARGET)%は全裸のまま拘束され、小さな檻の中へ閉じ込められた…
+		PRINTW …………
+		PRINTFORMW 通过牢笼的缝隙，触手们纷纷涌向%ANAME(TARGET)%
+		;TranslatedMark 檻の隙間を通って、%ANAME(TARGET)%へと触手達が殺到した
+		PRINTFORML 从尽可能高繁殖力的触手开始，依次侵犯着下%ANAME(TARGET)%
+		;TranslatedMark 出来るだけ高い繁殖力を持つ触手から、順々に%ANAME(TARGET)%を犯していく
+		PRINTFORMW 每次被触手玩弄的声音开始回荡时，被堵住嘴的%ANAME(TARGET)%就会发出呻吟的声音
+		;TranslatedMark 触手に責め立てられ音が響く度に、さるぐつわを噛まされた%ANAME(TARGET)%は唸り声を上げていたが
+		PRINTFORML 面对不断袭来的触手，\@ RAND:2 ? 长大眼睛 # 低着头，垂着眼睛 \@老实了
+		;TranslatedMark 休む事も無く襲い掛かる触手を相手にするうちに、\@ RAND:2 ? 目を見開いたまま # 俯き目を伏せて \@大人しくなった
+		IF TALENT:妊娠
+			PRINTFORMW 从%ANAME(TARGET)%的屁股孔中流出了大量的精液
+			;TranslatedMark ごぷり、と%ANAME(TARGET)%の尻穴からはおびただしい量の精液が漏れ出している
+			PRINTFORMW ………………
+			PRINTFORMW %ANAME(TARGET)%的身体里种了好几颗种子
+			;TranslatedMark %ANAME(TARGET)%の体には幾つもの種子が植えつけられた
+		ELSE
+			IF TALENT:処女 && HAS_VAGINA(TARGET)
+				PRINTFORMW 粘糊糊的，从破瓜的%ANAME(TARGET)%的裂缝中流出了混有血的精液
+				;TranslatedMark どろり、と破瓜した%ANAME(TARGET)%の割れ目からは血が入り混じった精液が漏れ出している
+				PRINTFORMW ………………
+				PRINTFORMW 有眼珠子的触手检查了%ANAME(TARGET)%的身体，确认了着床
+				;TranslatedMark 目玉のついた触手が%ANAME(TARGET)%の体をチェックし、着床を確認した
+			ELSEIF HAS_VAGINA(TARGET)
+				PRINTFORMW 随着"噗噗"的声音，大量的精液从%ANAME(TARGET)%的雌穴中流出
+				;TranslatedMark ごぷり、と%ANAME(TARGET)%の雌穴からはおびただしい量の精液が漏れ出している
+				PRINTFORMW ………………
+				PRINTFORMW 有眼珠子的触手检查了%ANAME(TARGET)%的身体，确认了着床
+				;TranslatedMark 目玉のついた触手が%ANAME(TARGET)%の体をチェックし、着床を確認した
+			ELSE
+				PRINTFORMW 但是，%ANAME(TARGET)%体内的血管浮起，出现了拒绝反应
+				;TranslatedMark しかし%ANAME(TARGET)%の体中の血管は浮かび上がり、拒絶反応を起している
+				PRINTFORMW ………………
+				PRINTFORMW 过了一会儿，%ANAME(TARGET)%和触手似乎顺利一体化了，阴茎上缠绕着寄生的触手
+				;TranslatedMark 暫くすると%ANAME(TARGET)%と触手は無事一体化したようだ、ペニスには寄生した触手が纏わりついている
+			ENDIF
+		ENDIF
+		PRINTFORML 中途维持生命用的触手进入笼子后，笼子周围被数十张纸包住了
+		;TranslatedMark 途中の生命維持用の触手が檻に乗り込むと、檻の周りは幾十もの紙で包まれた
+		PRINTFORMW %ANAME(MASTER)%被贴上小心使用的标签和写有必要信息的纸
+		;TranslatedMark %ANAME(MASTER)%が取り扱い注意というラベルと、必要な情報を書いた紙を貼り付けると
+
+		SELECTCASE RAND:9
+		CASE 0
+			PRINTFORML 做好旅行准备的我军士兵们回收了笼子
+			;TranslatedMark 旅の支度をした我が軍の兵士達が檻を回収していった
+			PRINTFORMW %ANAME(TARGET)%为了在目的地产生战斗力而活跃
+			;TranslatedMark %ANAME(TARGET)%は行く先で戦力を生み出すために活躍してもらう事になる
+			PRINTFORMW 如果在目的地可以殖民地的话，%ANAME(LOCAL:35)%的力量也会增加吧
+			;TranslatedMark 行く先でコロニーが出来れば%ANAME(LOCAL:35)%の力もまた増すだろう
+		CASE 1
+			PRINTFORML 在隔壁房间等着的妖精们把那个回收了
+			;TranslatedMark 隣の部屋で待たせていた妖精達がそれを回収していった
+			PRINTFORMW %ANAME(TARGET)%将在目的地被骗的妖精卷入其中，一起繁殖触手
+			;TranslatedMark %ANAME(TARGET)%は行く先で騙された妖精を巻き込みながら、触手を繁栄させる事になる
+			PRINTFORMW 触手增加的话%ANAME(LOCAL:35)%的力量也会增加吧
+			;TranslatedMark 触手が増えれば%ANAME(LOCAL:35)%の力もまた増すだろう
+		CASE 2
+			PRINTFORML 强壮的鬼们轻轻地把它拿起来回收了
+			;TranslatedMark 屈強な鬼達が軽くそれを持ち上げ回収していった
+			PRINTFORMW %ANAME(TARGET)%在将来会被用作奇怪的杂耍吧
+			;TranslatedMark %ANAME(TARGET)%は行く先で変わった見世物として使われる事になるだろう
+			PRINTFORMW 用从鬼那里得到的道具来增加%ANAME(LOCAL:35)%的力量吧
+			;TranslatedMark 鬼から受け取った道具で%ANAME(LOCAL:35)%の力もまた増すだろう
+		CASE 3
+			PRINTFORML 进行幕后交易的阵营的士兵收回了笼子
+			;TranslatedMark 裏取引をした陣営の兵士が檻を回収していった
+			PRINTFORMW %ANAME(TARGET)%恐怕会对那个国家的触手相关设施做出一些贡献
+			;TranslatedMark %ANAME(TARGET)%はあちらの国の、恐らくは触手関連の施設に何らかの貢献を果たす事になる
+			PRINTFORMW 作为代价而得到的经验技术也会增加%ANAME(LOCAL:35)%的力量吧
+			;TranslatedMark 代償として手に入れたノウハウで%ANAME(LOCAL:35)%の力もまた増すだろう
+		CASE 4
+			PRINTFORML 一个形迹可疑的商人把它收走了
+			;TranslatedMark 怪しい顔をした商人がそれを回収していった
+			PRINTFORMW %ANAME(TARGET)%被商人们当作商品对待
+			;TranslatedMark %ANAME(TARGET)%は商人達に一つの商品として扱われる事になる
+			PRINTFORMW 作为回礼收到的道具，%ANAME(LOCAL:35)%的力量也会增加吧
+			;TranslatedMark 礼として受け取った術具で%ANAME(LOCAL:35)%の力もまた増すだろう
+		CASE 5
+			PRINTFORML 身穿长袍的魔法使收回了笼子
+			;TranslatedMark ローブに身を纏った魔法使いが檻を回収していった
+			PRINTFORMW %ANAME(TARGET)%要么是魔术的媒介，要么是实验台，大概就是用在这些方向吧
+			;TranslatedMark %ANAME(TARGET)%は魔術の媒体か、実験台か、多分その辺に使われる事になる
+			PRINTFORMW 用交换收到的妖术书来增加%ANAME(LOCAL:35)%的力量吧
+			;TranslatedMark 交換で受け取った妖術書で%ANAME(LOCAL:35)%の力もまた増すだろう
+		CASE 6
+			PRINTFORML 衣服上写着“Anazon”的商家把它收了回去
+			;TranslatedMark Anazonと服に書かれた業者がそれを回収して行った。
+			PRINTFORMW %ANAME(TARGET)%被送到了还没见过的新天地，用作物种的体现
+			;TranslatedMark %ANAME(TARGET)%はまだ見ぬ新天地へと届けられ、そこで種を反映させる事になる
+			PRINTFORMW 如果世界上充满了触手，%ANAME(LOCAL:35)%的力量也会增加吧
+			;TranslatedMark 世界に触手が満ちれば%ANAME(LOCAL:35)%の力も増加するだろう
+		CASE 7
+			PRINTFORML 魔方阵浮在地面上，从那里伸出的章鱼般的触手将笼子回收了
+			;TranslatedMark 地面に魔方陣が浮かび上がり、そこから出た蛸の様な触手が檻を回収していった
+			PRINTFORMW %ANAME(TARGET)%成为了不为人知的邪恶之物的贡品。运气好的话，可能会被用来配对
+			;TranslatedMark %ANAME(TARGET)%は知られざる邪悪な者の貢物となった。運が良ければつがいに使われるかもしれない
+			PRINTFORML 从他们那收到的珍贵书籍，%ANAME(LOCAL:35)%的力量也会增加吧
+			;TranslatedMark 彼らから受け取った貴重な書物で%ANAME(LOCAL:35)%の力もまた増すだろう
+		CASE 8
+			PRINTFORML 从外面世界潜入的科学家们把它回收了。
+			;TranslatedMark 外の世界から忍び込んだ科学者達がそれを回収していった。
+			PRINTFORMW %ANAME(TARGET)%作为样品被活用，被用于各种各样的实验中
+			;TranslatedMark %ANAME(TARGET)%はサンプルとして生かされ、様々な実験に使われることになる
+			PRINTFORMW 通过报酬和收到的其他技术，%ANAME(LOCAL:35)%的力量也会增加吧
+			;TranslatedMark 報酬と受け取った外の技術で%ANAME(LOCAL:35)%の力もまた増すだろう
+		ENDSELECT
+		PRINTFORMW ………虽然是不人道的事情，但这也是为了战胜战争
+		;TranslatedMark ………非人道的な事だが、これも戦いに勝つ為である
+		
+		IF CFLAG:TARGET:行動不能状態 == 行動不能_子供
+			IF HAS_PENIS(TARGET)
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+			ELSE
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+			ENDIF
+		ELSE
+			IF HAS_PENIS(TARGET)
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
+			ELSE
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+			ENDIF
+		ENDIF
+		
+		PRINTL 
+		IF CFLAG:TARGET:行動不能状態 == 行動不能_子供 || TALENT:妊娠
+			MONEY:(CFLAG:MASTER:所属) += 1000
+			PRINTFORML 国庫資金として1000得ました
+		ELSE
+			MONEY:(CFLAG:MASTER:所属) += 500
+			PRINTFORML 国庫資金として500得ました
+		ENDIF
+
+	ELSE
+		PRINTFORMW %ANAME(TARGET)%突然落到了地面上的空洞里…
+		;TranslatedMark %ANAME(TARGET)%は突然地面に空いた穴に落ちていった…
+		PRINTW …………
+		PRINTFORML 睁开眼一看，%ANAME(TARGET)%在某处洞穴般的地方
+		;TranslatedMark 目を覚ますと一見どこかの洞窟のような場所に%ANAME(TARGET)%は居た
+		PRINTFORMW 山洞里到处可见触手，让人感觉这里不是一般的地方。
+		;TranslatedMark 洞窟のあちこちには触手が見え隠れしており、ここが普通では無い事を伺わせる。
+		PRINTFORMW 一看脚下，一根棍子掉在地上……这下该怎么办?
+		;TranslatedMark 足元を調べれば一本の棍棒が落ちていた……。これでどうしろと言うのか
+
+		IF TALENT:崩壊 || TALENT:空虚
+			PRINTFORMW 用空虚的眼睛注视着周围的%ANAME(TARGET)%的头上有触手袭击!
+			;TranslatedMark 虚ろな目で辺りを見つめる%ANAME(TARGET)%の頭上から触手が襲い掛かった！
+			PRINTFORMW 已经心碎的%ANAME(TARGET)%呆呆地站在那里被抓住了……
+			;TranslatedMark 既に心が折れていた%ANAME(TARGET)%は呆然と立ち尽くしたままそれに捕らえられてしまった……
+			PRINTFORMW ………………
+		ELSEIF TALENT:妊娠
+			PRINTFORMW 触手从陷入困惑的%ANAME(TARGET)%的头上袭击了过来！
+			;TranslatedMark 困惑する%ANAME(TARGET)%の頭上から触手が襲い掛かった！
+			PRINTFORML %ANAME(TARGET)%敏捷地躲开，想用能力应战
+			;TranslatedMark 素早く横に避け、能力で応戦しようとする%ANAME(TARGET)%だったが
+			PRINTFORMW 但是孕吐袭来，被迫坐了下来……！
+			;TranslatedMark 悪阻に襲われ、座り込んでしまった……！
+			PRINTFORMW ………………
+		ELSE
+			PRINTFORMW 触手从陷入困惑的%ANAME(TARGET)%的头上袭击了过来！
+			;TranslatedMark 困惑する%ANAME(TARGET)%の頭上から触手が襲い掛かった！
+			PRINTFORML %ANAME(TARGET)%敏捷地躲开，想用能力应战
+			;TranslatedMark 素早く横に避け、能力で応戦しようとする%ANAME(TARGET)%だったが
+			PRINTFORMW 竟然没能发挥出力量……！
+			;TranslatedMark なんと、力を発揮することが出来なかった……！
+			PRINTFORMW ………………
+		ENDIF
+
+		IF HAS_VAGINA(TARGET)
+			IF TALENT:妊娠
+				PRINTFORMW ……在洞穴深处，%ANAME(TARGET)%被像糖稀一样的生物所囚禁
+				;TranslatedMark ……洞窟の奥で%ANAME(TARGET)%は水飴のような生き物に囚われていた
+				PRINTFORMW 在被触手们打败后过了很长时间，%ANAME(TARGET)%被一直侵犯
+				;TranslatedMark 触手達に敗北した後どれだけ経ったのか、%ANAME(TARGET)%は長い時間犯され続けている
+				PRINTFORMW 一个人的影子走进了。脸很像%ANAME(TARGET)%
+				;TranslatedMark 一人の影がそこへ近づいてきた。顔はよく%ANAME(TARGET)%に似ていた
+				PRINTFORMW 曾经在肚子里的孩子，被触手捕捉，成为迷宫中的一员
+				;TranslatedMark かつてお腹に居た子供は、触手に取り上げられ迷宮の一員として立派にやっているようだ
+				PRINTFORMW 今后%ANAME(TARGET)%们会变成什么样，这已经和这个世界没有关系了吧……
+				;TranslatedMark この先%ANAME(TARGET)%達がどうなるのか、それはもうこちらの世界には関係ない事だろう……
+			ELSEIF TALENT:崩壊 || TALENT:空虚
+				PRINTFORMW %ANAME(TARGET)%被带到洞窟深处，被嵌入了触手束般的生物中
+				;TranslatedMark %ANAME(TARGET)%は洞窟の奥へ連れて行かれ、触手の束のような生物に組み込まれた
+				PRINTFORMW 别的世界的生物中充满了液体，%ANAME(TARGET)%在那里一直被侵犯着
+				;TranslatedMark 別世界の生物の中は液体で満たされており、%ANAME(TARGET)%はそこで犯され続けている
+				PRINTFORMW 此后，%ANAME(TARGET)%将作为触手的苗床而生存。不会回到这边的世界吧……
+				;TranslatedMark この先、%ANAME(TARGET)%は触手の苗床として生きることになる。こちらの世界に戻ってくる事は無いだろう……
+			ELSEIF ABL:触手 >= 10
+				PRINTFORMW ……几个小时后，那里出现了为触手榨取精液的%ANAME(TARGET)%
+				;TranslatedMark ……数時間後、そこには触手から精を搾り尽くした%ANAME(TARGET)%の姿があった
+				PRINTFORMW %ANAME(TARGET)%用熟练的手势侍奉着触手们，成功地融入了环境中！
+				;TranslatedMark %ANAME(TARGET)%は慣れた手つきで触手たちへ奉仕し、環境に溶け込むことに成功したようだ！
+				PRINTFORMW 和别的世界的触手建立了共存关系的%ANAME(TARGET)%，作为触手们的女王君临天下……
+				;TranslatedMark 別世界の触手と共存関係を築いた%ANAME(TARGET)%は、触手達の女王として君臨する事になった……
+			ELSEIF ABL:触手 >= 8
+				PRINTFORMW 被触手们打败的%ANAME(TARGET)%被带回了洞窟深处……
+				;TranslatedMark 触手に敗北した%ANAME(TARGET)%は洞窟の奥へ連れ去られてしまった……
+				PRINTFORMW 而且，洞窟深处竟然有和%ANAME(TARGET)%长得一模一样的人被触手侵犯！
+				;TranslatedMark そして、洞窟の奥ではなんと%ANAME(TARGET)%と瓜二つの人物が触手に犯されていた！
+				PRINTFORMW %ANAME(TARGET)%被触手揪住，与另一个%ANAME(TARGET)%相拥，被触手刺入！
+				;TranslatedMark %ANAME(TARGET)%は触手に組み敷かれ、もう一人の%ANAME(TARGET)%と抱き合わせられて触手を突き込まれた！
+				PRINTFORMW ……此后，两个%ANAME(TARGET)%将永远在触手的手下生活
+				;TranslatedMark ……この後、二人の%ANAME(TARGET)%は末永く触手の元で暮らす事になった
+			ELSEIF ABL:触手 >= 6
+				PRINTFORMW ……%ANAME(TARGET)%未能战胜触手巧妙的动作而败北
+				;TranslatedMark ……%ANAME(TARGET)%は、触手の巧みな動きに勝てず敗北してしまった
+				PRINTFORMW 然后被带到洞窟深处，被侧壁掩埋了！
+				;TranslatedMark そして洞窟の奥へ連れて行かれ、横向きで壁に埋め込まれてしまった！
+				PRINTFORMW 成为洞穴设施的%ANAME(TARGET)%非常受欢迎，被好好管理，下半身每天都有触手聚集在一起……
+				;TranslatedMark 洞窟の施設となった%ANAME(TARGET)%は大人気で、しっかりと管理され、下半身は毎日触手が群がっている……
+				PRINTFORMW 因为是被爱着的，所以不会死，但是也不会回到这个世界吧……
+				;TranslatedMark 愛されてるようなので死ぬ事は無いだろうが、こちらの世界に戻ってくる事も無いだろう……
+			ELSEIF ABL:触手 >= 4 
+				PRINTFORMW 拼命用棍棒应战的%ANAME(TARGET)%平安无事
+				;TranslatedMark 必死に棍棒で応戦した%ANAME(TARGET)%は事なきを得た。
+				PRINTFORMW 打倒的触手掉落了和%ANAME(TARGET)%的日常服一样的衣服……
+				;TranslatedMark 倒した触手は%ANAME(TARGET)%の普段着と同じ服を落としていった……
+				PRINTFORMW 被下狱没穿正装的%ANAME(TARGET)%，虽然觉得可疑，但还是把它带到了身上！
+				;TranslatedMark 投獄されまともな服を着ていなかった%ANAME(TARGET)%は、怪しいと思いつつもそれを身につけてしまった！
+				PRINTFORMW 拟态于衣服的触手突然蠢蠢欲动，开始紧紧贴着%ANAME(TARGET)%的身体侵犯！
+				;TranslatedMark 服に擬態していた触手は突然蠢きだし、しっかりと%ANAME(TARGET)%の体へ密着して犯し始めた！
+				PRINTFORMW 挣扎的%ANAME(TARGET)%能否平安地从这个迷宫中逃脱呢。那已经和这个世界没有关系了吧……
+				;TranslatedMark 悶える%ANAME(TARGET)%は無事この迷宮を脱出できるだろうか。それはもうこちらの世界には関係ない事だろう……
+			ELSEIF ABL:触手 >= 2
+				PRINTFORMW 拼命用棍棒应战的%ANAME(TARGET)%平安无事
+				;TranslatedMark 必死に棍棒で応戦した%ANAME(TARGET)%は事なきを得た。
+				PRINTFORMW 叹了一口气的%ANAME(TARGET)%被抬到了空中，看起来像鸟一样的怪物在把自己抬起来……
+				;TranslatedMark 一息をついた%ANAME(TARGET)%は宙へ持ち上げられた、見れば鳥のような化物が自分を持ち上げている……
+				PRINTFORMW 像鸟一样的怪物飞到巢里后，马上用寄生在阴茎上的触手开始侵犯%ANAME(TARGET)%！
+				;TranslatedMark 鳥のような化物は巣まで飛ぶと、すぐさまペニスに寄生した触手で%ANAME(TARGET)%を犯し始めた！
+				PRINTFORMW 被出其不意的%ANAME(TARGET)%在这之后，直到孕育异世界的触手为止都会被侵犯
+				;TranslatedMark 不意を付かれた%ANAME(TARGET)%はこの後、異世界の触手を孕むまで犯される事となるが
+				PRINTFORMW 已经和这个世界没有关系了吧……
+				;TranslatedMark もはやこちらの世界には関係ない事だろう……
+			ELSE
+				PRINTFORMW %ANAME(TARGET)%拼命用棍棒应战所以平安无事
+				;TranslatedMark %ANAME(TARGET)%は必死に棍棒で応戦して事なきを得た
+				PRINTFORMW 虽然是非常识的情况，但一定要从这里逃出去！
+				;TranslatedMark 非常識に程がある状況だが、きっとここから脱出してみせる！
+				PRINTFORMW 在心中发誓的%ANAME(TARGET)%在洞窟中前进。……不知道这里是另一个世界
+				;TranslatedMark そう心に誓った%ANAME(TARGET)%は洞窟を進んでいった。……ここが別世界であるなどと知らずに
+			ENDIF
+		ELSE
+			PRINTFORMW %ANAME(TARGET)%拼命用棍棒应战所以平安无事
+			;TranslatedMark %ANAME(TARGET)%は必死に棍棒で応戦して事なきを得た
+			PRINTFORMW 虽然是非常识的情况，但一定要从这里逃出去！
+			;TranslatedMark 非常識に程がある状況だが、きっとここから脱出してみせる！
+			PRINTFORMW 在心中发誓的%ANAME(TARGET)%在洞窟中前进。……不知道这里是另一个世界
+			;TranslatedMark そう心に誓った%ANAME(TARGET)%は洞窟を進んでいった。……ここが別世界であるなどと知らずに
+		ENDIF
+		
+		;手に入る妖術経験値を計算して取得＆表示
+		PRINTFORML <%ANAME(ID_TO_CHARA(FLAG:触手部屋管理者))%>
+
+		効果量= (30 + BASE:(TARGET):精神力 / 20 + ABL:(TARGET):触手 * 10)
+
+		CALL PRINT_ADD_EXP(ID_TO_CHARA(FLAG:触手部屋管理者), "妖術経験値", 効果量)
+		CALL TRAIN_AUTO_ABLUP(ID_TO_CHARA(FLAG:触手部屋管理者))
+		WAIT
+		
+	ENDIF
+
+;-------------------------------------------------
+;登用に応じる(放浪イベント)
+;-------------------------------------------------
+ELSEIF ARG == 350
+	PRINTFORMW %NAME%经过思考，最后决定了到我国任职
+	;TranslatedMark %NAME%は考えた末、我が国への仕官を決めたようです
+
+;-------------------------------------------------
+;忠誠を誓わせる(逆調教)
+;-------------------------------------------------
+ELSEIF ARG == 450
+	LOCAL:5 = GET_COUNTRY_BOSS(CFLAG:1)
+	IF LOCAL:5 == TARGET
+		IF ABL:主導度Ｕ >= 500 || GETBIT(TALENT:淫乱系, 素質_淫乱_サド)
+			PRINTFORML %ANAME(TARGET)%对%ANAME(MASTER)%用强硬的语气命令她成为自己的部下
+			;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%に対して、自分の配下になるように強い口調で命令した
+		ELSE
+			PRINTFORML %ANAME(TARGET)%对%ANAME(MASTER)%说要成为自己的部下
+			;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%に対して、自分の配下になるように言い聞かせた
+		ENDIF
+	ELSE
+		IF ABL:主導度Ｕ >= 500 || GETBIT(TALENT:淫乱系, 素質_淫乱_サド)
+			PRINTFORML %ANAME(TARGET)%对%ANAME(MASTER)%用强硬的语气命令%ANAME(LOCAL:5)%做自己的仕官
+			;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%に対して、%ANAME(LOCAL:5)%に仕官するように強い口調で命令した
+		ELSE
+			PRINTFORML %ANAME(TARGET)%对%ANAME(MASTER)%说要做%ANAME(LOCAL:5)%的仕官
+			;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%に対して、%ANAME(LOCAL:5)%に仕官するように言い聞かせた
+		ENDIF
+	ENDIF
+
+;-------------------------------------------------
+;忠誠を誓わせる(逆調教)/成功
+;-------------------------------------------------
+ELSEIF ARG == 451
+	PRINTFORMW %ANAME(MASTER)%点了点头，%ANAME(TARGET)%露出满意的笑容，解开了%ANAME(MASTER)%的绳子…
+	;TranslatedMark %ANAME(MASTER)%が頷くと、%ANAME(TARGET)%は満足そうに笑みを浮かべ、%ANAME(MASTER)%の縄を解いた…
+
+;-------------------------------------------------
+;忠誠を誓わせる(逆調教)/失敗
+;-------------------------------------------------
+ELSEIF ARG == 452
+	PRINTFORMW %ANAME(TARGET)%遗憾地摇了摇头，为了再加强调教而转向%ANAME(MASTER)%
+	;TranslatedMark %ANAME(TARGET)%は残念そうに首を振ると、さらなる調教を加えるために%ANAME(MASTER)%に向き直った
+
+ENDIF
+
+RETURN 1

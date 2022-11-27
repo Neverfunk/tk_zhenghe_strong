@@ -1,0 +1,185 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K35_SABORI_RATE(対象)
+#DIM 対象
+RETURN 50 + (KDVAR:対象:小町_昼寝 > 0) * 350
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K35_SABORI_DECISION(対象)
+#DIM 対象
+#DIM 四季映姫
+四季映姫 = NAME_TO_CHARA("四季映姫")
+
+;MASTERが四季映姫だとおかしなことになるんで駄目
+SIF MASTER == NAME_TO_CHARA("四季映姫")
+	RETURN 0
+
+;終わってたら発生しない
+SIF KDVAR:対象:小町_昼寝 == -1
+	RETURN 0
+
+;サボり魔が直ってたら駄目
+SIF !TALENT:対象:懶散
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1) && CHECK_KOJO_DAILY_HAPPEN(四季映姫, 1, 0, -1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K35_SABORI_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K35_SABORI(対象)
+#DIM 対象
+#DIM 四季映姫
+四季映姫 = NAME_TO_CHARA("四季映姫")
+
+SELECTCASE KDVAR:対象:小町_昼寝
+	CASE 0
+		PRINTFORMW 「哦，这不是%ANAME(MASTER)%吗」
+		;TranslatedMark 「おっ、%ANAME(MASTER)%じゃないか」
+		PRINTFORML 有一天，在后院散步的时候，看见了%ANAME(対象)%
+		;TranslatedMark ある日、裏庭を散歩していると、%ANAME(対象)%を見かけた
+		PRINTFORMW 但是这个时间段她应该是在巡逻的……？
+		;TranslatedMark この時間帯は彼女は警邏の当番だったはずだが……？
+		PRINTFORMW 「不，你看，今天的天气很好很暖和不是吗？」
+		;TranslatedMark 「いやほら、今日はぽかぽかとしてて気持ちがいいだろう？」
+		PRINTFORMW 「在这样的日子工作是不对的。现在应该要好好休息，养精蓄锐才对」
+		;TranslatedMark 「こんな日に働くなんて間違ってるよ。ここは休息して、英気を養うべきだ」
+		PRINTFORML ……总之就是偷懒睡午觉吧
+		;TranslatedMark ……要はサボって昼寝をしようということらしい
+		PRINTFORMW 正想着这是怎么回事，%ANAME(対象)%向我招手了
+		;TranslatedMark どうしたものかと思っていると、%ANAME(対象)%は手招きしてきた
+		PRINTFORMW 「%ANAME(MASTER)%也是。工作过度不好的哦？我来给你讲解一下正确的休息方法吧」
+		;TranslatedMark 「%ANAME(MASTER)%もさ。働き過ぎはよくないよ？　あたいが正しい休息の仕方ってのをレクチャーしたげるよ」
+		PRINTFORMW 「不，我没有想过找同伙之类的事情，真的。」
+		;TranslatedMark 「いや、共犯者を得ようとかそんなこと考えてないから、マジで」
+		PRINTFORMW 这样说的%ANAME(対象)%，在地上铺上一块布，准备睡午觉。
+		;TranslatedMark そう言う%ANAME(対象)%は、地面に布を敷いて、昼寝する気まんまんでいる
+		PRINTFORML 那么，怎么办呢……
+		;TranslatedMark さて、どうしようか……
+		PRINTFORML
+		CALL ASK_MULTI("接受邀请", "算了吧", "向四季映姬报告")
+		SELECTCASE RESULT
+			CASE 0
+				PRINTFORMW 「哦，你很懂嘛」
+				;TranslatedMark 「おっ、話が分かるねぇ」
+				PRINTFORMW 「嘿，快来，我们一起睡午觉吧」
+				;TranslatedMark 「ほら、おいでよ、一緒に昼寝しようじゃないか」
+				PRINTFORML 和%ANAME(対象)%一起睡了午觉……
+				;TranslatedMark %ANAME(対象)%と一緒に昼寝した……
+				CALL COLOR_PRINTW(@"%ANAME(MASTER)%获得了素质＜懒散＞", カラー_警告)
+				;TranslatedMark @"%ANAME(MASTER)%が＜サボり魔＞になりました", カラー_警告
+				CALL COLOR_PRINTW(@"偷懒后的%ANAME(MASTER)%和%ANAME(対象)%的的武斗下降了3", カラー_警告)
+				;TranslatedMark @"サボって腕が鈍った%ANAME(MASTER)%と%ANAME(対象)%の武闘が3下がりました", カラー_警告
+				TALENT:MASTER:懶散 = 1
+				ABL:MASTER:武闘 = MIN_DECREASE(ABL:MASTER:武闘, 3, 1)
+				ABL:対象:武闘 = MIN_DECREASE(ABL:対象:武闘, 3, 1)
+				CFLAG:対象:好感度 += 50
+				KDVAR:対象:小町_昼寝 = 1
+			CASE 1
+				PRINTFORMW 「嗯……是吗？」
+				;TranslatedMark 「む……そうかい？」
+				PRINTFORMW 「那就没办法了。这里是我的秘密场所，所以请不要告诉任何人哦？」
+				;TranslatedMark 「ならしょうがないね。ここはあたいの秘密スポットだから、誰にも言わないどいとくれよ？」
+				PRINTFORMW 说完这一句，%ANAME(対象)%就开始呼呼大睡了……
+				;TranslatedMark 言うだけ言って、%ANAME(対象)%はグースカ寝始めた……
+				KDVAR:対象:小町_昼寝 = -1
+			CASE 2
+				PRINTFORMW 「等一下……不可以这样做……！」
+				;TranslatedMark 「ちょ……それは駄目だって……！」
+				PRINTFORMW 「你说什么不可以？」
+				;TranslatedMark 「何が駄目だというんです？」
+				PRINTFORMW 「哦啊啊，四季大人！！？您什么时候来的！！！！？」
+				;TranslatedMark 「おあぁ四季様！！？　いつからいらしたんです！！！！？」
+				PRINTFORMW 「只不过是听到一星半点罢了。从『哦，这不是%ANAME(MASTER)%吗』那里开始」
+				;TranslatedMark 「ほんの一部始終ですよ。『おっ、%ANAME(MASTER)%じゃないか』のくだりから」
+				PRINTFORMW 「这不是全部吗！哇，对不起，请不要对我说教！」
+				;TranslatedMark 「全部じゃないですか！　うわぁすみませんお説教は勘弁して下さい！」
+				PRINTFORMW 「多说无益！今天绝对要让你改过自新！」
+				;TranslatedMark 「だまらっしゃい！　今日という今日は改心してもらいますからね！」
+				PRINTFORMW 之后，%ANAME(対象)%似乎被%ANAME(四季映姫)%狠狠地收拾了一顿……
+				;TranslatedMark その後、%ANAME(対象)%は%ANAME(四季映姫)%にこってりとしぼられたようだ……
+				CALL COLOR_PRINTW(@"%ANAME(対象)%失去了素质＜懒散＞", カラー_注意)
+				;TranslatedMark @"%ANAME(対象)%が＜サボり魔＞ではなくなりました", カラー_注意
+				TALENT:対象:懶散 = 0
+				KDVAR:対象:小町_昼寝 = -1
+		ENDSELECT
+	CASEELSE
+		PRINTFORMW 「哦，%ANAME(MASTER)%」
+		;TranslatedMark 「おっ、%ANAME(MASTER)%」
+		PRINTFORMW 「又来睡午觉吗？」
+		;TranslatedMark 「また昼寝するかい？」
+		PRINTFORML
+		CALL ASK_YN("听从邀请", "就此打住")
+		;TranslatedMark "誘いに乗る", "やめておく"
+		SELECTCASE RESULT
+			CASE 0
+				IF KDVAR:対象:小町_昼寝 * 10 < RAND:100
+					PRINTFORMW 「就是应该这样啊」
+					;TranslatedMark 「そう来なくっちゃね」
+					PRINTFORMW 「来，过来吧，一起睡吧♪」
+					;TranslatedMark 「ささ、おいでよ、一緒に寝ようじゃないか♪」
+					PRINTFORMW 和%ANAME(対象)%一起午睡养精蓄锐……
+					;TranslatedMark %ANAME(対象)%と昼寝して英気を養った……
+					CALL COLOR_PRINTW(@"偷懒后的%ANAME(MASTER)%和%ANAME(対象)%的的武斗下降了3", カラー_警告)
+					;TranslatedMark @"サボって腕が鈍った%ANAME(MASTER)%と%ANAME(対象)%の武闘が3下がりました", カラー_警告
+					TALENT:MASTER:懶散 = 1
+					ABL:MASTER:武闘 = MIN_DECREASE(ABL:MASTER:武闘, 3, 1)
+					ABL:対象:武闘 = MIN_DECREASE(ABL:対象:武闘, 3, 1)
+					CFLAG:対象:好感度 += 50
+					KDVAR:対象:小町_昼寝 ++
+				ELSE
+					PRINTFORMW 「说什么"接受邀请"呢。两个人聚在一起说些这种话真叫人可悲」
+					;TranslatedMark 「なぁにが『誘いに乗る』ですか。二人揃って嘆かわしい」
+					PRINTFORMW ……突然，身后有人向我们搭话
+					;TranslatedMark ……ふと、後ろから声をかけられた
+					PRINTFORMW 战战兢兢地回头……是%ANAME(四季映姫)%！
+					;TranslatedMark おそるおそる振り返る……%ANAME(四季映姫)%だ！
+					PRINTFORMW 「诶 四季大人！您什么时候来的！？」
+					;TranslatedMark 「げぇっ　四季様！　いつからいらしたんです！？」
+					PRINTFORMW 「多说无益！两个人一起偷懒真是岂有此理！我会彻底纠正你们松懈的态度的！」
+					;TranslatedMark 「だまらっしゃい！　二人揃ってサボるとは言語道断です！　そのたるんだ精神を徹底的にたたき直してあげますからね！」
+					PRINTFORMW 两个人一起，被%ANAME(四季映姫)%狠狠收拾了一顿……
+					;TranslatedMark 二人揃って、%ANAME(四季映姫)%にたっぷりとしぼられた……
+					LOCAL = 3 * KDVAR:対象:小町_昼寝 + KDVAR:対象:小町_昼寝
+					;TranslatedMark 3 * KDVAR:対象:小町_昼寝 + KDVAR:対象:小町_昼寝
+					CALL COLOR_PRINTW(@"在%ANAME(四季映姫)%的说教后、两人的武斗上升了{LOCAL}", カラー_注意)
+					;TranslatedMark @"%ANAME(四季映姫)%のお説教で、二人の武闘が{LOCAL}上昇しました", カラー_注意
+					CALL COLOR_PRINTW("两人失去了素质＜懒散＞", カラー_注意)
+					;TranslatedMark "二人は＜サボり魔＞ではなくなりました", カラー_注意
+					TALENT:MASTER:懶散 = 0
+					TALENT:対象:懶散 = 0
+					ABL:MASTER:武闘 += LOCAL
+					ABL:対象:武闘 += LOCAL
+					CFLAG:対象:好感度 += 50
+					KDVAR:対象:小町_昼寝 = -1
+				ENDIF
+			CASE 1
+				PRINTFORMW 「哦呀，这样吗？」
+				;TranslatedMark 「おや、そうかい？」
+				PRINTFORMW 「那就没办法了。我一个人睡吧」
+				;TranslatedMark 「それなら仕方ない。あたい一人で寝るとするかね」
+				PRINTFORMW 说着%ANAME(対象)%开始呼呼大睡了……
+				;TranslatedMark 言うなり、%ANAME(対象)%はグースカと眠り始めた……
+				KDVAR:対象:小町_昼寝 = -1
+		ENDSELECT
+ENDSELECT
+
+RETURN 1

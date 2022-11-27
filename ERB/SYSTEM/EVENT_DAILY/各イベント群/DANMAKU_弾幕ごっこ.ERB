@@ -1,0 +1,528 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_DANMAKU_RATE()
+RETURN 30
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_DANMAKU_DECISION()
+RETURN DAY >= 5
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_DANMAKU_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_DANMAKU_SETTARGET()
+
+;あなたが女でありふたなりではない
+SIF IS_FEMALE(MASTER) && !HAS_PENIS(MASTER)
+	RETURN 1
+
+;遭遇キャラの選出
+FOR LOCAL, 0, CHARANUM
+	;別の勢力に所属している、女性キャラ
+	IF CFLAG:(LOCAL):所属 != CFLAG:MASTER:所属 && (IS_COUNTRY(CFLAG:LOCAL:1) || CFLAG:LOCAL:特殊状態 == 特殊状態_放浪) && !CFLAG:(LOCAL):捕虜先 && IS_FEMALE(LOCAL) && !IS_ANIMAL(LOCAL)
+		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+		DAILY_TARGET_NUM ++
+	ENDIF
+NEXT
+SIF DAILY_TARGET_NUM < 1
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_DANMAKU()
+#DIM 対象
+#DIM 該当能力
+#DIM 対象該当能力
+#DIM 難易度
+#DIM 金額
+
+;弾幕ごっこの該当能力決定、武闘と知略の高いに決定、同値なら武闘で
+IF ABL:MASTER:知略 > ABL:MASTER:武闘
+	該当能力 = ABL:MASTER:知略
+ELSE
+	該当能力 = ABL:MASTER:武闘
+ENDIF
+
+;あなたが男の場合。もしくはふたなりの場合50%の確率で
+IF IS_MALE(MASTER) || (HAS_PENIS(MASTER) && RAND:2)
+	対象 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+	IF ABL:対象:知略 > ABL:対象:武闘
+		対象該当能力 =  ABL:対象:知略
+	ELSE
+		対象該当能力 = ABL:対象:武闘
+	ENDIF
+	
+	PRINTFORML 偶然碰到%ANAME(対象)%向他挑戦弾幕
+	PRINTFORML 不能逃避、要正面接下対方的挑戦
+	PRINTFORML 擺好架勢後、她保持着一段距離灑出一片弾幕
+	PRINTFORMW 怎麼辦？
+	CALL ASK_MULTI("集中精神" , "瞄準衣服", "逃走")
+	IF RESULT == 2
+		PRINTFORML 不想当対手
+		PRINTFORML 直接逃跑了事
+		RETURN 1
+	ELSEIF RESULT == 1
+		PRINTFORML 她在空中飛舞的身姿相当的美麗、這麼看着不禁有点心動
+		PRINTFORML 不如做点什麼讓她看起来更加煽情吧
+		PRINTFORMW %ANAME(MASTER)%鼓起勁的以她的衣服為重点目標瞄準着
+		難易度 = 1
+	ELSE
+		PRINTFORML 這是一個不認真対付的話就会很危險的対手
+		PRINTFORMW 還是集中精神躲開弾幕吧
+		難易度 = 0
+	ENDIF
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW ・
+	IF  該当能力 / 10 >= (対象該当能力 / 10) + RAND:3 + 難易度
+		IF 難易度 == 1
+			PRINTFORML 勝利了！
+			PRINTFORML 依照瞄準的目標、她的衣服在%ANAME(MASTER)%的弾幕下変得破破爛爛的
+			PRINTFORML 現在她坐在地上不動、満臉通紅的試図用双手遮住若隠若現的細緻肌膚
+			PRINTFORMW 怎麼辦？
+			CALL ASK_MULTI("要錢" , "要酒" , "口交" , "公開自慰" , "不去理会")
+			IF RESULT == 4
+				PRINTFORML 「這是一場好比賽」説完対她伸出了手
+				PRINTFORML 她雖然看起来很失望的樣子、但是也向%ANAME(MASTER)%伸出手握着
+				PRINTFORMW 但是她発現這舉動讓她走光了、馬上抽回手、遮住露出来的肌膚慌慌張張的跑了
+				CFLAG:対象:好感度 += 300
+				CALL COLOR_PRINT(@"%ANAME(対象)%的評價提高了", カラー_注意)
+				PRINTFORMW
+			ELSEIF RESULT == 0
+				PRINTFORML 作為勝利的奨賞要求了金錢
+				PRINTFORML 她沒辦法的慫了聳肩、老老実実的拿出錢来
+				PRINTFORMW 然後她説着下次不会再輸了的復仇宣言後、遮住露出来的肌膚慌慌張張的跑了
+				金額 = 1000 + 500 * RAND:6 + 1
+				MONEY += 金額
+				CALL COLOR_PRINT(@"得到了{金額}金", カラー_注意)
+				PRINTFORML
+				CFLAG:対象:好感度 += 200
+				CALL COLOR_PRINT(@"%ANAME(対象)%的評價提高了", カラー_注意)
+				PRINTFORMW 
+			ELSEIF RESULT == 1
+				PRINTFORML 作為勝利的奨賞要求了酒
+				LOCAL = RAND:3 + 1
+				PRINTFORML 她沒辦法的慫了聳肩、拿出了清酒
+				PRINTFORMW 然後她説着下次不会再輸了的復仇宣言後、遮住露出来的肌膚慌慌張張的跑了
+				ITEM:清酒 += LOCAL
+				CALL COLOR_PRINT(@"獲得了{LOCAL}瓶清酒", カラー_注意)
+				PRINTFORML
+				CFLAG:対象:好感度 += 200
+				CALL COLOR_PRINT(@"%ANAME(対象)%的評價提高了", カラー_注意)
+				PRINTFORMW 
+			ELSEIF RESULT == 2
+				PRINTFORML 圧抑不住心中興奮的%ANAME(MASTER)%向她提出口交的要求
+				IF ABL:対象:性知識 == 0
+					PRINTFORML 但是%ANAME(対象)%一臉茫然的不知道要做什麼
+					PRINTFORML 於是%ANAME(MASTER)%拉着她到一個隠密的地方、在她面前掏出肉棒
+					PRINTFORML %ANAME(対象)%嚇了一跳、因為這是第一次看到所以忍不住盯着看
+					PRINTFORMW 然後%ANAME(MASTER)%向她説一下該怎麼做後催促她開始動作、於是她怯生生的伸出手
+					PRINTFORML 
+					PRINTFORML 她握着%ANAME(MASTER)%的肉棒用手指跟舌頭軽軽撫弄着
+					PRINTFORML 那個笨拙未経世故的表情与動作讓他更加興奮、肉棒也精神抖擻的堅挺着
+					PRINTFORML 在%ANAME(対象)%的吸允下已経忍耐不住了、於是往前頂住喉頭尽情的爆発着精液
+					PRINTFORMW 她感覚很不舒服的不停甩頭要逃開、但是被%ANAME(MASTER)%緊緊圧住頭継續的噴射着
+					PRINTFORML 她一辺発出呻吟一辺為了能呼吸而不断呑下精液的的喉嚨的動作更加舒暢的刺激着肉棒
+					PRINTFORML 過一会在射精結束後被放開的%ANAME(対象)%把被強迫灌入口中的殘余精液給吐出来
+					PRINTFORML %ANAME(MASTER)%対於剛剛粗暴的動作道歉、而%ANAME(対象)%眼眶含着泪水鼓起臉頰的瞪着他
+					PRINTFORMW 之後在連番的道歉及下次請她吃甜点的保證下、%ANAME(対象)%心情總算好起来了
+					CALL PRINT_ADD_EXP(対象, "性知識経験値", 100)
+				ELSE
+					PRINTFORML 対於%ANAME(MASTER)%的要求、%ANAME(対象)%的臉不禁抽搐了兩下
+					PRINTFORML %ANAME(MASTER)%帯着僵直的她到一個隠密的地方、然後掏出肉棒
+					PRINTFORMW 満臉通紅的%ANAME(対象)%猶豫了一下、就認命了有点胆怯的伸出手
+					PRINTFORML 
+					PRINTFORML 她握着%ANAME(MASTER)%的肉棒用手指跟舌頭軽軽撫弄着
+					IF ABL:対象:奉仕 >= 3
+						PRINTFORML 在那個霊巧的奉仕下、肉棒舒暢的快要接近極限了
+					ELSE
+						PRINTFORML 再那個尽力的奉仕下、不由得発出呻吟肉棒舒暢的跳動着
+					ENDIF
+					PRINTFORML 在%ANAME(対象)%的吸允下已経忍耐不住了、於是往前頂住喉頭尽情的爆発着精液
+					PRINTFORMW 她感覚很不舒服的不停甩頭要逃開、但是被%ANAME(MASTER)%緊緊圧住頭継續的噴射着
+					PRINTFORML 她一辺発出呻吟一辺為了能呼吸而不断呑下精液的的喉嚨的動作更加舒暢的刺激着肉棒
+					PRINTFORML 過一会在射精結束後被放開的%ANAME(対象)%把被強迫灌入口中的殘余精液給吐出来
+					PRINTFORML %ANAME(MASTER)%対於剛剛粗暴的動作道歉、而%ANAME(対象)%眼眶含着泪水鼓起臉頰的瞪着他
+					PRINTFORMW 之後在連番的道歉及下次請她吃甜点的保證下、%ANAME(対象)%心情總算好起来了
+				ENDIF
+				SETCOLOR カラー_オレンジ
+				CALL PRINT_ADD_EXP(対象, "奉仕経験値", 10)
+				CALL PRINT_ADD_EXP(対象, "性技経験値", 10)
+				RESETCOLOR
+			ELSE
+				PRINTFORML %ANAME(MASTER)%嘿嘿的笑着要求她公開手淫
+				IF ABL:対象:性知識 == 0
+					PRINTFORML 但是%ANAME(対象)%一臉茫然的不知道要做什麼
+					PRINTFORML %ANAME(MASTER)%把她帯到一個隠密的地方後説明着関於手淫的事情
+					PRINTFORML %ANAME(対象)%聽着%ANAME(MASTER)%的話後漸漸的紅起臉来
+					PRINTFORMW 扭扭捏捏的%ANAME(対象)%被催促之後、慢慢的張開双腿、怯生生的将手伸向私密処
+					PRINTFORML 
+					PRINTFORML 她笨拙的用手指在私密処上撫摸着
+					PRINTFORML 被%ANAME(MASTER)%催促着移動手指、然而酥麻的快感更強於羞澀的心情
+					PRINTFORML 而為了讓她的感覚更加興奮、%ANAME(MASTER)%從背後在耳辺説着%ANAME(対象)%現在這般可憎的姿態
+					PRINTFORMW 於是她顫抖的加快手指的動作、漸漸的漏出甜美的喘息声
+					PRINTFORML 可能是自己感覚到快楽了、即使%ANAME(MASTER)%停止実況她也忘我的撫弄着陰蒂及乳頭
+					PRINTFORML 不久之後、她発出嬌媚的喘息、扭動着身軀、顫抖的高潮了
+					PRINTFORML 第一次感受到高潮的她発出極大声的嬌吟、痙攣的沈浸在高潮的余韻裡
+					PRINTFORMW 「感謝妳給我看了這樣的好東西」%ANAME(MASTER)%説着這樣感謝的話、%ANAME(対象)%聽了從臉紅到耳根慌慌張張的跑了
+				ELSE
+					PRINTFORML 対於%ANAME(MASTER)%的要求、%ANAME(対象)%的臉不禁抽搐了兩下
+					PRINTFORML %ANAME(MASTER)%帯着僵直的她到一個隠密的地方、再度的要求着
+					PRINTFORMW 満臉通紅的%ANAME(対象)%猶豫了一下、就認命了有点胆怯的張開双腿
+					PRINTFORML 
+					PRINTFORML 她笨拙的用手指在私密処上撫摸着
+					PRINTFORML 可能是被%ANAME(MASTER)%觀看着、她沒有特別投入於自慰的快感裡
+					PRINTFORML 而為了讓她的感覚更加興奮、%ANAME(MASTER)%從背後在耳辺説着%ANAME(対象)%現在這般可憎的姿態
+					PRINTFORMW 於是她顫抖的加快手指的動作、漸漸的漏出甜美的喘息声
+					PRINTFORML 可能她已経沈浸在自慰的快感中、即使%ANAME(MASTER)%停止実況她也忘我的撫弄着陰蒂及乳頭
+					PRINTFORML 不久之後、她発出嬌媚的喘息、扭動着身軀、顫抖的高潮了
+					PRINTFORML 似乎忘記了%ANAME(MASTER)%正看着她、帯着一臉不檢点的表情沈浸在高潮的余韻中
+					PRINTFORMW 「感謝妳給我看了這樣的好東西」%ANAME(MASTER)%説着這樣感謝的話、%ANAME(対象)%聽了從臉紅到耳根慌慌張張的跑了
+				ENDIF
+				CALL FUCK(対象, "欲望, 性技, 露出, 自慰, Ｃ")
+			ENDIF
+		ELSE
+			PRINTFORML 勝利了！
+			PRINTFORML 她倒在地上認輸了
+			PRINTFORMW 有什麼要做的嗎？
+			CALL ASK_MULTI("要錢" , "要酒", "口交", "不去理会")
+			IF RESULT == 3
+				PRINTFORML 「這是一場好比賽」説完対她伸出了手
+				PRINTFORML 她雖然看起来很失望的樣子、但是也向%ANAME(MASTER)%伸出手握着
+				PRINTFORMW 之後做了一些日常談話後和她分別了
+				CFLAG:対象:好感度 += 300
+				CALL COLOR_PRINT(@"%ANAME(対象)%的評價提高了", カラー_注意)
+				PRINTFORMW
+			ELSEIF RESULT == 0
+				PRINTFORML 作為勝利的奨賞要求了金錢
+				PRINTFORML 她沒辦法的慫了聳肩、老老実実的拿出錢来
+				PRINTFORMW 然後她説着下次不会再輸了的復仇宣言後飛走了
+				金額 = 1000 + 500 * RAND:6 + 1
+				MONEY += 金額
+				CALL COLOR_PRINT(@"得到了{金額}金", カラー_注意)
+				PRINTFORML
+				CFLAG:対象:好感度 += 200
+				CALL COLOR_PRINT(@"%ANAME(対象)%的評價提高了", カラー_注意)
+				PRINTFORMW 
+			ELSEIF RESULT == 1
+				PRINTFORML 作為勝利的奨賞要求了酒
+				LOCAL = RAND:3 + 1
+				PRINTFORML 她沒辦法的慫了聳肩、拿出了清酒
+				PRINTFORMW 然後她説着下次不会再輸了的復仇宣言後飛走了
+				ITEM:清酒 += LOCAL
+				CALL COLOR_PRINT(@"獲得了{LOCAL}瓶清酒", カラー_注意)
+				PRINTFORML
+				CFLAG:対象:好感度 += 200
+				CALL COLOR_PRINT(@"%ANAME(対象)%的評價提高了", カラー_注意)
+				PRINTFORMW 
+			ELSE
+				PRINTFORML 圧抑不住心中興奮的%ANAME(MASTER)%向她提出口交的要求
+				IF ABL:対象:性知識 == 0
+					PRINTFORML 但是%ANAME(対象)%一臉茫然的不知道要做什麼
+					PRINTFORML 於是%ANAME(MASTER)%拉着她到一個隠密的地方、在她面前掏出肉棒
+					PRINTFORML %ANAME(対象)%嚇了一跳、因為這是第一次看到所以忍不住盯着看
+					PRINTFORMW 然後%ANAME(MASTER)%向她説一下該怎麼做後催促她開始動作、於是她怯生生的伸出手
+					PRINTFORML 
+					PRINTFORML 她握着%ANAME(MASTER)%的肉棒用手指跟舌頭軽軽撫弄着
+					PRINTFORML 那個笨拙未経世故的表情与動作讓他更加興奮、肉棒也精神抖擻的堅挺着
+					PRINTFORML 在%ANAME(対象)%的吸允下已経忍耐不住了、於是往前頂住喉頭尽情的爆発着精液
+					PRINTFORMW 她感覚很不舒服的不停甩頭要逃開、但是被%ANAME(MASTER)%緊緊圧住頭継續的噴射着
+					PRINTFORML 她一辺発出呻吟一辺為了能呼吸而不断呑下精液的的喉嚨的動作更加舒暢的刺激着肉棒
+					PRINTFORML 過一会在射精結束後被放開的%ANAME(対象)%把被強迫灌入口中的殘余精液給吐出来
+					PRINTFORML %ANAME(MASTER)%対於剛剛粗暴的動作道歉、而%ANAME(対象)%眼眶含着泪水鼓起臉頰的瞪着他
+					PRINTFORMW 之後在連番的道歉及下次請她吃甜点的保證下、%ANAME(対象)%心情總算好起来了
+					CALL PRINT_ADD_EXP(対象, "性知識経験値", 100)
+					CALL FUCK(対象, "欲望, 性技, 奉仕, 精愛, 口淫", "接吻喪失, 口内射精", 0, @"%ANAME(MASTER)%的肉棒", "", "", "敗北後的強姦")
+				ELSE
+					PRINTFORML 対於%ANAME(MASTER)%的要求、%ANAME(対象)%的臉不禁抽搐了兩下
+					PRINTFORML %ANAME(MASTER)%帯着僵直的她到一個隠密的地方、然後掏出肉棒
+					PRINTFORMW 満臉通紅的%ANAME(対象)%猶豫了一下、就認命了有点胆怯的伸出手
+					PRINTFORML 
+					PRINTFORML 她握着%ANAME(MASTER)%的肉棒用手指跟舌頭軽軽撫弄着
+					IF ABL:対象:奉仕 >= 3
+						PRINTFORML 在那個霊巧的奉仕下、肉棒舒暢的快要接近極限了
+					ELSE
+						PRINTFORML 再那個尽力的奉仕下、不由得発出呻吟肉棒舒暢的跳動着
+					ENDIF
+					PRINTFORML 在%ANAME(対象)%的吸允下已経忍耐不住了、於是往前頂住喉頭尽情的爆発着精液
+					PRINTFORMW 她感覚很不舒服的不停甩頭要逃開、但是被%ANAME(MASTER)%緊緊圧住頭継續的噴射着
+					PRINTFORML 她一辺発出呻吟一辺為了能呼吸而不断呑下精液的的喉嚨的動作更加舒暢的刺激着肉棒
+					PRINTFORML 過一会在射精結束後被放開的%ANAME(対象)%把被強迫灌入口中的殘余精液給吐出来
+					PRINTFORML %ANAME(MASTER)%対於剛剛粗暴的動作道歉、而%ANAME(対象)%眼眶含着泪水鼓起臉頰的瞪着他
+					PRINTFORMW 之後在連番的道歉及下次請她吃甜点的保證下、%ANAME(対象)%心情總算好起来了
+				ENDIF
+				CALL FUCK(MASTER, "Ｃ, 射精, 欲望")
+				CALL FUCK(対象, "欲望, 性技, 奉仕, 精愛, 口淫", "接吻喪失, 口内射精", 0, @"%ANAME(MASTER)%的肉棒", "", "", "敗北後的強姦")
+				RESETCOLOR
+			ENDIF
+		ENDIF
+	ELSE
+		PRINTFORML 居然輸了！
+		PRINTFORMW %ANAME(対象)%高喊着勝利的宣言後飛走了
+		CALL ADD_COOLTIME(MASTER, 2)
+		PRINTFORMW 
+	ENDIF
+	CALL TRAIN_AUTO_ABLUP(対象)
+	CFLAG:対象:面識 = 1
+;あなたが女の場合
+ELSE
+	PRINTFORML 被流浪妖怪挑戦弾幕
+	PRINTFORMW 怎麼辦？
+	CALL ASK_YN("接受", "逃走")
+	IF RESULT == 1
+		PRINTFORML 現在沒有那種心情
+		PRINTFORMW 逃跑也是勝利！
+		RETURN 1
+	ELSE
+		PRINTFORML 不能逃避、要正面接下対方的挑戦
+		PRINTFORMW 擺好架勢後、他粗暴的灑出一片弾幕
+	ENDIF
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW ・
+	IF  該当能力 * (RAND:10 + 1) >= RAND(40 ,70) * (RAND:10 + 1) + (DAY / 2)
+		PRINTFORML 勝利了！
+		PRINTFORMW 一場好勝負能更増加自信
+		CALL PRINT_ADD_EXP(MASTER, "武闘経験値", RAND:10 + 6, 1)
+		CALL PRINT_ADD_EXP(MASTER, "知略経験値", RAND:10 + 6, 1)
+
+	ELSE
+		PRINTFORML 居然輸了
+		PRINTFORMW 妖怪扛着変得破破爛爛的%ANAME(MASTER)%回他的巣穴了
+		PRINTFORML 
+		SELECTCASE RAND:40
+			CASE 0
+				PRINTFORML %ANAME(MASTER)%在巣穴中被妖怪鏈上鎖鏈侵犯了
+				PRINTFORML 呈現爬行姿勢的%ANAME(MASTER)%正被肉棒插的発出哈…哈…哈…的喘息
+				PRINTFORML 她的子宮正被肉棒抽插調教的発出啪啪啪的碰撞声響、整個腦袋被快感給填満了
+				PRINTFORMW 不久妖怪在一陣低吼声中噴射着大量的精液、%ANAME(MASTER)%後仰着背高潮了
+			CASE 1
+				PRINTFORML %ANAME(MASTER)%被妖怪圧在身上侵犯着
+				PRINTFORML 那個相比人類大上很多的肉棒、帯給%ANAME(MASTER)%的肉穴很大的圧迫感
+				PRINTFORML 一開始還在掙扎悲鳴的%ANAME(MASTER)%、漸漸的被圧倒性的快感給呑噬了
+				PRINTFORMW 之後在他的肉棒狠狠的頂進去後射精時、%ANAME(MASTER)%也隨着作為雌性的快楽一同高潮了
+			CASE 2
+				PRINTFORML %ANAME(MASTER)%被抱着深深的插進肉棒
+				PRINTFORML 肉棒狠狠的頂着子宮口、%ANAME(MASTER)%感到頭皮一陣発麻的発出愉悦的嬌吟並顫抖着
+				PRINTFORML %ANAME(MASTER)%的身体已経完全屈服於這個雄性、子宮口也打開着迎接着精液的噴射
+				PRINTFORMW 然後在精液灌注進子宮的同時、%ANAME(MASTER)%的心也完全被俘虜了、開心承受着中出
+			CASE 3
+				PRINTFORML %ANAME(MASTER)%的嬌吟声回響在妖怪的巣穴裡
+				PRINTFORML %ANAME(MASTER)%以站立背位的姿勢在妖怪粗暴的抽插下、露出一臉不檢点的表情
+				PRINTFORML 在妖怪特別粗暴的做愛下、%ANAME(MASTER)%已経成為了他的俘虜並且誠実的隨着快感迎合着
+				PRINTFORMW 不久妖怪発出要中出内射的預告時、%ANAME(MASTER)%双眼泛着♥緊緊收縮着肉穴索求着精液
+			CASE 4
+				PRINTFORML %ANAME(MASTER)%被他圧倒後激烈的侵犯着
+				PRINTFORML 被粗大的肉棒噗哧噗哧的挖着肉穴裡的嫩肉時、%ANAME(MASTER)%喘着気感覚眼前有火花不断在閃現着
+				PRINTFORML %ANAME(MASTER)%被超乎想像的快感侵蝕的漸漸忘記反抗、隨着本能任由肉棒在她的体内進出着
+				PRINTFORMW 之後深受他喜愛的%ANAME(MASTER)%連休息的時間都沒有沒完沒了的被抽插中出着
+			CASE 5
+				PRINTFORML 被侵犯多次的%ANAME(MASTER)%筋疲力尽的倒臥着
+				PRINTFORML 大量的白濁精液正從那還在一張一合的肉穴裡流淌垂落出来、説明着%ANAME(MASTER)%経歷過的事情
+				PRINTFORML 即使想逃跑身体也不聽使喚的顫抖着、精液也從肉穴裡溢出来発出咕噗咕噗的下流声音
+				PRINTFORMW 不久後妖怪回来了、隨即巣穴裡再度発出%ANAME(MASTER)%的嬌吟声
+			CASE 6
+				PRINTFORML %ANAME(MASTER)%正騎在妖怪的身上扭動着腰
+				PRINTFORML 每当沈下腰時肉棒就刺到最深処、%ANAME(MASTER)%不禁漏出甜美的喘息
+				PRINTFORML 雖然是被強迫的、但是漸漸的%ANAME(MASTER)%開始帯着媚惑的眼神積極的扭着腰
+				PRINTFORMW 不久妖怪抓着她的腰射出灼熱的精液、%ANAME(MASTER)%一陣顫抖的発出愉悦的叫声
+			CASE 7
+				PRINTFORML 她被妖怪抱起来狠狠的用肉棒從下面插了進去
+				PRINTFORML 每插一次就配合着自身的重量就像要貫穿子宮那樣激烈的抽送、使得她発出帯着哀鳴声的喘息
+				PRINTFORML 妖怪対於她現在的反応感覚相当舒暢、於是配合着她迴蕩在巣穴的嬌吟声粗暴的抽插着
+				PRINTFORMW 対她相当満意的妖怪此後也一味的责弄着並且在她体内噴射着精液
+			CASE 8
+				PRINTFORML %ANAME(MASTER)%一辺以対面坐位的姿勢做愛一辺和妖怪接吻着
+				PRINTFORML %ANAME(MASTER)%此時一臉淫靡積極的交纏着舌頭、白濁的精液也不断從蜜穴裡溢出
+				PRINTFORML 彼の逞しい一物で肉壺を占領され蹂躙されつくした%ANAME(MASTER)%は身も心もすっかり一匹の雌になっていた
+				PRINTFORMW 為了讓他能再奮力的抽插着、%ANAME(MASTER)%発出愉悦的淫叫声更加努力的扭着腰
+			CASE 9
+				PRINTFORML %ANAME(MASTER)%被妖怪激烈的圧制侵犯着
+				PRINTFORML 被帯回巣穴後、不断的被侵犯着並且宣告要讓她懷孕
+				PRINTFORML %ANAME(MASTER)%雖然一開始不停的反抗、但是之後被他的出色技巧及優秀的肉棒給征服了
+				PRINTFORMW 在那之後他在她的体内射出濃濃的白濁精液、%ANAME(MASTER)%也隨着作為雌性的快楽一起高潮了
+			CASE 10
+				PRINTFORML 妖怪抬起%ANAME(MASTER)%的双腿以一種居高臨下的樣子狠狠的往下圧制抽插着肉棒
+				PRINTFORML %ANAME(MASTER)%感覚像是要被貫穿子宮那樣承受着他的抽插嬌喘着
+				PRINTFORML 被這種圧制性的性交給蹂躙着、%ANAME(MASTER)%腦海裡浮現出的恐懼与莫名的期待不停的交織
+				PRINTFORMW 在他大量的精液噴射進子宮裡、那股灼熱的感覚讓%ANAME(MASTER)%的腦袋裡被愉悦給填満了
+			CASE 11
+				PRINTFORML %ANAME(MASTER)%被妖怪的手臂摟抱着用着撒嬌的語気貼近着他的胸膛
+				PRINTFORML 被帯回来的這幾天、被狠狠侵犯筋疲力尽的%ANAME(MASTER)%看上去像是已経屈服的一頭雌獣
+				PRINTFORML 但這是為了尋找空隙找機会逃脱的演技、不過躁熱的有些疼痛的的子宮讓%ANAME(MASTER)%有些感到混乱
+				PRINTFORMW 但是在妖怪対她的身体索求時、%ANAME(MASTER)%的煩悩被身体的愉悦給沖掉再度献上身体
+			CASE 12
+				PRINTFORML %ANAME(MASTER)%一臉癡態的騎在妖怪的身上不停扭着腰
+				PRINTFORML 原来妖怪的体液裡混有一種媚薬的成分、而現在%ANAME(MASTER)%已経変成了快楽的俘虜
+				PRINTFORML 每当精液噴射在她的肉穴時、%ANAME(MASTER)%感覚到圧倒性的快感、並向他説着淫穢的詞語
+				PRINTFORMW 現在也期待着在肉穴裡膨脹的肉棒射精、%ANAME(MASTER)%積極的收縮着肉穴扭動着腰
+			CASE 13
+				PRINTFORML %ANAME(MASTER)%現在戴着項圈及牽縄、已経成為了妖怪的性奴隸了
+				PRINTFORML 再之前被肉棒持續性的抽插着、現在她的肉穴已経変成了肉棒的形状
+				PRINTFORML 而最近%ANAME(MASTER)%的厭悪感、羞恥心已経慢慢的消失了、内心開始期待焦急着他的侵犯
+				PRINTFORMW 之後在他的要求下做愛接吻着、%ANAME(MASTER)%挺着胸興奮的縮緊了肉穴
+			CASE 14
+				PRINTFORML %ANAME(MASTER)%被妖怪用正常位的姿勢侵犯着
+				PRINTFORML 被他持續的抽插着腰刺激着肉穴、%ANAME(MASTER)%忍不住扭動身体発出嬌喘声来
+				PRINTFORML 他巧妙的攻撃%ANAME(MASTER)%的弱点、%ANAME(MASTER)%不禁説出乞求的話語
+				PRINTFORMW 這種濃厚的性愛讓%ANAME(MASTER)%忘記了要逃跑一味的沈溺在肉欲裡
+			CASE 15
+				PRINTFORML %ANAME(MASTER)%被妖怪用着爬行的姿勢侵犯
+				PRINTFORML 被肉棒不停的磨蹭着、%ANAME(MASTER)%感到身体発麻般的快感顫抖着
+				PRINTFORML 而在她自己沒有発覚的情況下表情已経変得像是一頭母狗、滴落着口水喘着気
+				PRINTFORMW 不久在妖怪深深的把肉棒頂進去噴射着大量的精液時、%ANAME(MASTER)%大声的浪叫着迎来高潮了
+			CASE 16
+				PRINTFORML 噗哧噗哧！被噴射着大量的精液、%ANAME(MASTER)%一辺向後仰着一辺嬌吟着
+				PRINTFORML 被帯回去的%ANAME(MASTER)%被妖怪沒日沒夜的持續侵犯着、現在已経変成了性愛的俘虜
+				PRINTFORML 被灌注了精液高潮好幾次的%ANAME(MASTER)%感覚一股熱度從子宮擴散到全身讓她覚得有些苦悶
+				PRINTFORMW 之後從肉穴裡流淌出已経收納不了的黏稠精液的%ANAME(MASTER)%現在的表情微微的露出一点幸福的樣子
+			CASE 17
+				PRINTFORML %ANAME(MASTER)%被兩頭妖怪夾在中間不停的侵犯着
+				PRINTFORML 同時被巨大的肉棒狠狠插着、%ANAME(MASTER)%発出浪叫痙攣着
+				PRINTFORML 每当被肉棒圧迫磨蹭着肉穴裡的嫩肉時、%ANAME(MASTER)%被這快感刺激的翻着白眼
+				PRINTFORMW 他們着迷的持續侵犯着這個上好的雌性、%ANAME(MASTER)%感受着精液的噴発後高潮了
+			CASE 18
+				PRINTFORML %ANAME(MASTER)%抽插的緊貼在妖怪身上喘息着
+				PRINTFORML 在妖怪那個看不見底的持久力下沒日沒夜的持續侵犯着、%ANAME(MASTER)%的身体已経被開発好了
+				PRINTFORML 而肉棒挖着裡頭的嫩肉時、那種從被貫穿全身的快感不禁讓她淫叫着、然後着迷於活塞的動作並且配合的扭動着腰
+				PRINTFORMW 不久在她腦袋一片空白時被噴射了大量的精液、%ANAME(MASTER)%発出甜美的嬌吟後高潮了
+			CASE 19
+				PRINTFORML %ANAME(MASTER)%正在舔試着妖怪優秀的肉棒
+				PRINTFORML 被他激烈的抽插中入迷的%ANAME(MASTER)%、現在作為一個順從的性奴隸奉仕着
+				PRINTFORML 当然還殘留着想要逃跑的念頭、但是被那股濃厚的雄性気味刺激的子宮微微疼痛感覚忍受不住了
+				PRINTFORMW 之後%ANAME(MASTER)%作為一個順從的性奴隸在他満意前不停的被侵犯着
+			CASE 20
+				PRINTFORML %ANAME(MASTER)%跨坐在他的身上上下起伏着
+				PRINTFORML 她的腰上下移動用着肉穴服務着他的肉棒、嘿嘿的帯着淫猥的表情索求着快楽
+				PRINTFORML 那股快感在腦海裡迴響着、讓%ANAME(MASTER)%忘記被侵犯的事情感覚快発瘋了
+				PRINTFORMW 不久肉棒狠狠的插進子宮裡中出着、%ANAME(MASTER)%大大的後仰着背高潮了
+			CASE 21
+				PRINTFORML %ANAME(MASTER)%趴伏在地上被妖怪侵犯
+				PRINTFORML 被肉棒頂進去不停的磨擦着子宮、感覚身体不自主的顫抖発出嬌喘声
+				PRINTFORML 而他反復衝刺着品嘗%ANAME(MASTER)%的身体、%ANAME(MASTER)%已経呈現出一種恍神的状態
+				PRINTFORMW 馬上的%ANAME(MASTER)%開始忍受不住向他乞求着、之後被期待已久的精液灌注着感到喜悦而顫抖
+			CASE 22
+				PRINTFORML %ANAME(MASTER)%被妖怪從背後抱住抽動着腰
+				PRINTFORML 被舔了脖子捏着乳頭、這強烈的感覚讓她哆嗦了一下不禁縮緊了肉穴
+				PRINTFORML 被賦予強烈快感変得淫靡的%ANAME(MASTER)%為了讓他高興能得到更多的快感而熱情積極的扭動腰身
+				PRINTFORMW 而%ANAME(MASTER)%熱情的奉仕讓妖怪相当満意而決定給她奨賞灌注精液、她発出歡欣的嬌吟後高潮了
+			CASE 23
+				PRINTFORML 感受着腰怪在肉穴裡噴射的精液、%ANAME(MASTER)%双眼冒着♥緊緊纏住他高潮了
+				PRINTFORML 灼熱的精液噴射在子宮裡漸漸擴散的感覚、讓%ANAME(MASTER)%心中充満着生為雌性的幸福感
+				PRINTFORML 而他一口気得把肉棒抽出来、咕噗咕噗特別濃稠的精液就從肉穴裡溢出来了
+				PRINTFORMW %ANAME(MASTER)%有点依依不捨的讓他撫弄着一辺在他耳辺説着想被中出的耳語、而子宮也微微的発痛着
+			CASE 24
+				PRINTFORML %ANAME(MASTER)%在巣穴中被妖怪一味的侵犯着
+				PRINTFORML 相当喜歡%ANAME(MASTER)%的妖怪連休息的時間都不給、像野獣般激烈的抽插着
+				PRINTFORML 而在連續的高潮中筋疲力尽的%ANAME(MASTER)%、身体卻反而越発的緊纏着他的肉棒渇求着精液
+				PRINTFORMW 結果兩個人就這麼做了一整晚、%ANAME(MASTER)%被灌注精液着到小腹明顯発脹的程度了
+			CASE 25
+				PRINTFORML 男女激烈的交合声在妖怪的巣穴裡回響着
+				PRINTFORML 与他的外貌不相符的激烈的性愛讓%ANAME(MASTER)%的心已経溶解了、整個人変成了快楽的俘虜
+				PRINTFORML 承受着他猛烈的活塞、%ANAME(MASTER)%主動的献上香吻糾纏着舌頭
+				PRINTFORMW 不久在一陣顫抖中兩隻脚纏住他的腰承受着他的爆発、%ANAME(MASTER)%有種全身快溶化的錯覚高潮了
+			CASE 26
+				PRINTFORML %ANAME(MASTER)%被從背後抓着腰激烈的侵犯着
+				PRINTFORML 被抽插発出啪啪啪啪碰的肉体碰撞声時、%ANAME(MASTER)%隨着碰撞声無奈搖晃着身体、発出淫靡的嬌喘声
+				PRINTFORML 通過它的調教%ANAME(MASTER)%的身体已経被開発完成了、身体出現無法忍耐的反応変得那樣敏感
+				PRINTFORMW 之後妖怪在肉穴裡噴射着大量的精液做為被調教完成的標記、而%ANAME(MASTER)%已経無法抵抗這樣的愉悦快感沈浸在高潮裡
+			CASE 27
+				PRINTFORML %ANAME(MASTER)%被妖怪中出内射着要讓她懷孕生下孩子
+				PRINTFORML 他激烈的活塞動作及凶悪的肉棒不容分説的刺激着子宮催促排卵、対此%ANAME(MASTER)%感到相当厭悪
+				PRINTFORML %ANAME(MASTER)%拼死抵抗着蜂擁而来的快感、但是在子宮微微的発痛時開始忍受不住漸漸発出甜美的喘息声
+				PRINTFORMW 之後在妖怪噴射出特濃的白濁精液時、%ANAME(MASTER)%已経無法抵抗這樣圧倒性的快楽一起高潮了
+			CASE 28
+				PRINTFORML %ANAME(MASTER)%被迫展示在衆多妖怪面前被侵犯着
+				PRINTFORML 抓住他的妖怪像是要炫耀極好的戦利品那樣抱住%ANAME(MASTER)%在他的朋友面前激烈的抽插着腰
+				PRINTFORML 感受着下腹部的刺激及周囲好奇的視線、%ANAME(MASTER)%頭腦裡一片空白、坦率的嬌喘着
+				PRINTFORMW 不久做為屈服的證據在体内最深処被注入大量的精液、%ANAME(MASTER)%一辺発出浪叫一辺高潮了
+			CASE 29
+				PRINTFORML %ANAME(MASTER)%被妖怪捉回巣穴用鎖鏈鏈上
+				PRINTFORML 被他当作性奴隸的%ANAME(MASTER)%沒日沒夜的被侵犯着、身心都快要屈服了
+				PRINTFORML 撫摸着殘留余温的下腹部、感受着他噴射出来填満子宮的精液顫抖着
+				PRINTFORMW 儘管%ANAME(MASTER)%在腦海某個角落還有想要逃跑的念頭、但是在這之上佔多数的卻是期待着下次的侵犯
+			CASE 30
+				PRINTFORML 巣穴裡肉体的碰撞声和%ANAME(MASTER)%的嬌吟有節奏的回響着
+				PRINTFORML %ANAME(MASTER)%被抓着双臂、用肉棒從背後狠狠的插着、讓她不禁翻着白眼抽搐着
+				PRINTFORML 每一次突刺対下腹部造成很強烈粗暴的衝撃、%ANAME(MASTER)%腦袋一片空白的感受着快感
+				PRINTFORMW 不久肉棒刺激磨蹭着子宮口後射精了、%ANAME(MASTER)%感受到極強烈的快感後仰着背高潮了
+			CASE 31
+				PRINTFORML %ANAME(MASTER)%被妖怪極粗暴的侵犯
+				PRINTFORML %ANAME(MASTER)%拼命的想要逃跑、但是在他的強烈進攻下所給予的快感讓他腦袋一片空白顫抖着
+				PRINTFORML 而她一辺被用力緊抱着、一辺被用着兇悪的肉棒抽插着肉穴、%ANAME(MASTER)%忍受不住、身軀向後仰的発出嬌吟
+				PRINTFORMW 之後%ANAME(MASTER)%主動抱着他、隨着雌性的本能開始乞求着他的精液
+			CASE 32
+				PRINTFORML %ANAME(MASTER)%帯着空洞的表情被妖怪侵犯喘息着
+				PRINTFORML 他強行讓不断抵抗的%ANAME(MASTER)%吃下薬後、変得失神的樣子毫不抵抗的接受了他
+				PRINTFORML 雖然吃了薬感覚沒有反応但其実還是能感覚到肉棒在子宮口撞撃的快感而顫抖着、漏出甜美的喘息声
+				PRINTFORMW 当%ANAME(MASTER)%清醒过来的时候，从那个蜜罐里溢出大量的精液，即使讨厌也明白自己做了什么
+				;TranslatedMark %ANAME(MASTER)%が我に返った時にはその蜜壺からは大量の精液が溢れ、自らがされた事を嫌でも理解させられた
+			CASE 33
+				PRINTFORML %ANAME(MASTER)%抱住妖怪伸直双腿的高潮了
+				PRINTFORML %ANAME(MASTER)%身体高潮的顫抖和肉穴嫩肉的蠕動刺激着他的肉棒、他忍不住的発出呻吟噴射出精液
+				PRINTFORML 被噴射着有数個人份量的灼熱精液、%ANAME(MASTER)%被刺激的連續高潮、発出不成声的浪叫
+				PRINTFORMW 結束後当他抽出肉棒時、%ANAME(MASTER)%帯着恍神愉悦的表情大字形的躺在床上
+			CASE 34
+				PRINTFORML %ANAME(MASTER)%被妖怪狠狠侵犯後帯到熱水池裡一起泡着
+				PRINTFORML 他一辺温柔的愛撫着%ANAME(MASTER)%的身軀、一辺説着作為他的妻子今後会好好疼愛的宣言
+				PRINTFORML 対於這種単方面的宣言、被大量的精液灌注在子宮裡感覚到微微発疼的%ANAME(MASTER)%臉頰有些潮紅着
+				PRINTFORMW 泡完澡後再度被妖怪帯回床上、為了生育孩子而継續奮力着、在幾次的中出後高潮了
+			CASE 35
+				PRINTFORML %ANAME(MASTER)%被妖怪的孩子們侵犯着
+				PRINTFORML 雖然説是孩子但是因為旺盛的性欲而囲在%ANAME(MASTER)%身辺、為第一次品嘗到的女体興奮的抽動着腰
+				PRINTFORML 被与歲数不相符出色的肉棒不断的刮着肉穴裡的嫩肉、%ANAME(MASTER)%的呻吟声中開始参雜着一些粉紅色的喘息
+				PRINTFORMW %ANAME(MASTER)%沒有休息的被使用着全身上下的肉洞持續侵犯着、全身上下都沾満他們的精液変得黏呼呼的
+			CASE 36
+				PRINTFORML %ANAME(MASTER)%被妖怪強迫穿上婚紗侵犯着
+				PRINTFORML 妖怪「妳的身体及心霊都是我的東西、做為我的妻子要為我生下孩子！」激烈的抽動着腰衝撃着子宮
+				PRINTFORML 被強烈的快感衝撃着的%ANAME(MASTER)%為了不屈服而咬緊牙齒拼命忍耐着、但是喘息声漸漸的從牙齒間的縫隙漏出来
+				PRINTFORMW 之後被妖怪在子宮裡噴射着精液後、%ANAME(MASTER)%已経抵抗不了這愉悦的浪潮忍不住発出嬌吟後高潮了
+			CASE 37
+				PRINTFORML %ANAME(MASTER)%跨坐在妖怪的身上拼命的扭動着腰
+				PRINTFORML 因為幾次的抵抗而被殴打着、而現在這樣無法喘息般激烈的侵犯中%ANAME(MASTER)%已経是個順從的性奴隸了
+				PRINTFORML 而熱情的奉侍感到舒暢得到妖怪的讚揚、%ANAME(MASTER)%感到胸口有種発熱発疼的感覚、不由自主的臉紅了
+				PRINTFORMW 作為奨賞在体内噴射着大量的精液、使得%ANAME(MASTER)%身体忍不住顫抖着高潮了
+			CASE 38
+				PRINTFORML 双手扶着牆壁挺着俏臀的%ANAME(MASTER)%被妖怪從背後用兇悪的肉棒侵犯着
+				PRINTFORML 啪！啪！肉体碰撞的声音帯着強烈的衝撃刺激着%ANAME(MASTER)%忍不住発出嬌喘
+				PRINTFORML 最初感覚很厭悪的%ANAME(MASTER)%也慢慢的把身体交給快感、露出淫靡的表情涎着口水被侵犯
+				PRINTFORMW 不久突然感覚到下腹部正在擴散的熱度、%ANAME(MASTER)%身体劇烈的顫抖着、攀上愉悦的頂点発出嬌吟声来
+			CASE 39
+				PRINTFORML %ANAME(MASTER)%和妖怪互相交纏深深的連接着
+				PRINTFORML 在和那兇悪的肉棒不相符温柔的要溶化的做愛中、%ANAME(MASTER)%忍耐不住的扭着腰発出甜美的喘息
+				PRINTFORML 被他射精的時候%ANAME(MASTER)%的内心已経被俘虜了、承受着期待已久的精液噴射而愉悦的大声浪叫着
+				PRINTFORMW 完全屈服的%ANAME(MASTER)%為了懷上這個雄性的孩子而努力積極的交合着
+		ENDSELECT
+		CALL FUCK_RAPE(MASTER, GET_SPERM_ID("流浪妖怪"), @"流浪妖怪的\@RAND:2 ? 肉棒 # 唇\@", @"流浪妖怪")
+		PRINTFORML 
+		PRINTFORMW %ANAME(MASTER)%被侵犯後想辦法的逃了出去
+		CALL ADD_COOLTIME(MASTER, 2)
+		PRINTFORMW 
+	ENDIF
+	CALL TRAIN_AUTO_ABLUP(MASTER)
+ENDIF
+RETURN 1
+
+@EVENT_DAILY_DANMAKU_ALLOW_WHEN_WANDERING
+RETURN 1
+

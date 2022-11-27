@@ -1,0 +1,160 @@
+﻿;==========================================================
+;本文本整理了一个神术技能的编写可能会用到的函数和解决方案||
+;==========================================================
+
+
+;返回本技能是否存在
+@SKILL_0_MIRACLE_36_EXIST
+RETURN 1
+
+;返回本技能的技能名称,用于显示
+@SKILL_0_MIRACLE_36_NAME
+RESULTS = 倾国倾城
+
+;返回技能等级,决定本技能学习门槛
+@SKILL_0_MIRACLE_36_LEVEL
+RETURN 5
+
+;返回本技能属于哪一信仰
+;0或本函数不存在=通用
+;1=暴虐 2=诡术 3=腐朽 4=色欲
+@SKILL_0_MIRACLE_36_FROMWHO
+RETURN 4
+
+;返回本技能的说明文本，用于玩家理解技能效果
+;按照发动条件-发动效果来编写,尽量精简
+@SKILL_0_MIRACLE_36_EXPLANATION
+RESULTS = [增幅]基于自身信仰高低使敌方部队减员 [完美]减少的敌军将加入我方
+
+;返回技能的发动率,神术默认100%
+@SKILL_0_MIRACLE_36_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1000
+
+;用于AI势力角色学习神术，将复杂情况量化为优先度，优先度高的技能将被优先学习。
+;不允许AI角色学的技能直接返回0或不添加本函数
+;基础技能的升级版技能也同上
+;也用于遗忘技能时的选择量化标准
+;已经列出了一些常见影响因子,可以根据技能效果自行选择
+;如果有其他判断情况，请自行决定优先度的增减，对于某些AI极难发动的技能原则上应当考虑在AI需要遗忘技能时大幅度下调本技能优先度
+@SKILL_0_MIRACLE_36_SELFLEARN(对象)
+#DIM 对象
+#DIM 优先度
+#DIM 技能ID = 36  ;本技能ID
+#DIM 上任
+;不允许AI角色学
+RETURN 0
+
+;対象選択
+@SKILL_0_MIRACLE_36_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+;我方部隊対象
+RETURN 1
+
+;战场技能発動判定，此函数编写与原版技能相同
+;由于示例技能并非战场上直接发动,所以直接返回0
+@SKILL_0_MIRACLE_36_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 角色
+対象側 = !発動側
+RETURN 1
+
+;技能发动的效果代码，只用于在战斗阶段发动的神术使用
+;如果是发动时机特殊的神术，此处函数体保留返回0(,在实际发动函数中书写代码
+@SKILL_0_MIRACLE_36_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 人数
+#DIM 信仰消耗
+#DIM FIRST_LINE
+対象側 = !発動側
+FIRST_LINE = LINECOUNT
+PRINTFORML --请选择要消耗的信仰--
+PRINTL
+PRINTBUTTON "0[     0]",0
+PRINTL
+PRINTBUTTON "1[     1]",1
+PRINTL
+PRINTBUTTON "2[     2]",2
+PRINTL
+PRINTBUTTON "3[     3]",3
+PRINTL
+PRINTBUTTON "4[     4]",4
+PRINTL
+PRINTBUTTON "6[     6]",6
+PRINTL
+$INPUT_LOOP1
+INPUT
+信仰消耗=RESULT
+IF 信仰消耗 != 0  && 信仰消耗 != 1 && 信仰消耗 != 2 && 信仰消耗 != 3 && 信仰消耗 != 4 && 信仰消耗 != 6
+	CLEARLINE 1
+	GOTO INPUT_LOOP1
+ELSEIF ABL:発動者:信仰 < 信仰消耗
+	CLEARLINE 1
+	GOTO INPUT_LOOP1
+ENDIF
+;发动效果
+CLEARLINE LINECOUNT - FIRST_LINE
+
+ABL:発動者:信仰 -= 信仰消耗
+SELECTCASE 信仰消耗
+	CASE 0
+		PRINTFORML %ANAME(発動者)%展露出倾国倾城的魅力,看得士兵们如痴如醉,一些敌军丢下武器拒绝参战了!
+		人数 = MIN(GET_SOLDIER(対象勢力, 対象部隊) * 3 / 100, 3000)
+	CASE 1
+		PRINTFORML %ANAME(発動者)%借助信仰之力,展露出倾国倾城的魅力,看得士兵们如痴如醉,一些敌军丢下武器拒绝参战了!
+		人数 = MIN(GET_SOLDIER(対象勢力, 対象部隊) * 4 / 100, 4000)
+	CASE 2
+		PRINTFORML %ANAME(発動者)%借助信仰之力,展露出倾国倾城的魅力,看得士兵们如痴如醉,敌军丢下武器拒绝参战了!
+		人数 = MIN(GET_SOLDIER(対象勢力, 対象部隊) * 5 / 100, 5000)
+	CASE 3
+		PRINTFORML %ANAME(発動者)%施展信仰之力,展露出倾国倾城的魅力,看得士兵们如痴如醉,敌军纷纷丢下武器拒绝参战了!
+		人数 = MIN(GET_SOLDIER(対象勢力, 対象部隊) * 6 / 100, 6000)
+	CASE 4
+		PRINTFORML %ANAME(発動者)%施展信仰之力,展露出倾国倾城的魅力,看得士兵们如痴如醉,敌军纷纷丢下武器拒绝参战了!
+		人数 = MIN(GET_SOLDIER(対象勢力, 対象部隊) * 7 / 100, 7000)
+	CASE 6
+		PRINT [完美]
+		PRINTFORML %ANAME(発動者)%施展信仰之力,显露出倾国倾城的魅力,举手投足间看得士兵们如痴如醉,敌军纷纷叛逃了!
+		人数 = MIN(GET_SOLDIER(対象勢力, 対象部隊) * 9 / 100, 9000)
+ENDSELECT
+CALL DECREASE_SOLDIER(対象勢力, 対象部隊, 人数, 1)
+SIF 信仰消耗==6
+	CALL INCREASE_SOLDIER(発動勢力, 発動部隊, 人数, 1)
+RETURN 0

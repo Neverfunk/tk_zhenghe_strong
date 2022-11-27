@@ -1,0 +1,717 @@
+﻿;-------------------------------------------------
+;共通部分
+;-------------------------------------------------
+
+;-------------------------------------------------
+;ARG:0番のキャラの性別を返す関数
+;-------------------------------------------------
+;本体統合の折削除
+;
+;=================================================
+;●口上の存在判定
+;=================================================
+@KOJO_EXIST_K141
+
+;=================================================
+;●開始時
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_TRAIN_START_K141
+
+;=================================================
+;●終了時
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_TRAIN_END_K141
+
+;=================================================
+;●コマンド実行前(ターゲット・プレイヤー問わず)
+;※地の文が表示される前に実行される。戻り値に1を設定する(RETURN 1)と地の文がカットされる
+;  必要に応じてKOJO_COM_TARGETの代わりに使う
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_BEFORE_K141
+RETURN 0
+
+;=================================================
+;●コマンド実行前(このキャラがターゲット側のとき)
+;※地の文が表示される前に実行される。戻り値に1を設定する(RETURN 1)と地の文がカットされる
+;  必要に応じてKOJO_COM_TARGETの代わりに使う
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_BEFORE_TARGET_K141
+RETURN 0
+
+;=================================================
+;●コマンド実行前(このキャラがプレイヤー側のとき)
+;※地の文が表示される前に実行される。戻り値に1を設定する(RETURN 1)と地の文がカットされる
+;  必要に応じてKOJO_COM_PLAYERの代わりに使う
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_BEFORE_PLAYER_K141
+RETURN 0
+
+;=================================================
+;●コマンド実行時(ターゲット・プレイヤー問わず)
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_K141
+#DIM 命蓮
+#DIM Ｃカウンタ
+#DIM Ｖカウンタ
+#DIM Ａカウンタ
+#DIM Ｂカウンタ
+#DIM Ｍカウンタ
+#DIM 多重絶頂
+#DIM BACKUP, 100
+命蓮 = NAME_TO_CHARA("命蓮")
+
+Ｃカウンタ = 0
+Ｖカウンタ = 0
+Ａカウンタ = 0
+Ｂカウンタ = 0
+Ｍカウンタ = 0
+多重絶頂 = 0
+
+;[空虚]状態の場合、口が塞がっている場合は口上を表示しない
+SIF TALENT:空虚 || IS_EQUIP_CONTINUE(TARGET, "口装着")
+	RETURN 0
+
+BACKUP = SOURCE
+CALL CALCU_NOWEX_ORGASM(命蓮)
+
+SIF NOWEX:Ｃ絶頂 > 0
+	Ｃカウンタ ++
+
+SIF NOWEX:Ｖ絶頂 > 0
+	Ｖカウンタ ++
+
+SIF NOWEX:Ａ絶頂 > 0
+	Ａカウンタ ++
+
+SIF NOWEX:Ｂ絶頂 > 0
+	Ｂカウンタ ++
+
+SIF NOWEX:Ｍ絶頂 > 0
+	Ｍカウンタ ++
+
+多重絶頂 = Ｃカウンタ + Ｖカウンタ + Ａカウンタ + Ｂカウンタ + Ｍカウンタ
+
+;-------------------------------------------------
+;多重絶頂(服従系統は現在除外)
+;-------------------------------------------------
+IF !TALENT:服従 && (多重絶頂 > 0)
+	PRINTFORML 
+	SETCOLOR 0x8B529D
+	FONTSTYLE 1
+	SELECTCASE 多重絶頂
+		;単体絶頂・二重絶頂兼用
+		CASE 1, 2
+			IF IS_EQUIP(MPLY:0, 20) || IS_EQUIP(MPLY:0, 342)
+				SELECTCASE RAND:4
+					CASE 0
+						PRINTFORML 「っっ……！　ぢゅ……、はっ……んん゛ぅっ、……っ！」
+					CASE 1
+						PRINTFORML （……いしき、が……おち……る……！）
+					CASE 2
+						PRINTFORML （っ……？？！！　こしが……抜けっ……）
+					CASE 3
+						PRINTFORML 「ふ……うぅっ！　あ、あぁ……ぁあ！　うぅうぅ！」
+				ENDSELECT
+			ELSE
+				SELECTCASE RAND:4
+					CASE 0
+						PRINTFORML 「あっ……あ、あ……あたまが……しびれ、る……ようだ……はあっ、あ……あ……っ」
+					CASE 1
+						PRINTFORML 「はあ……あ……絶頂、と……は……はあ……っ、こんなっ……ぐ……」
+					CASE 2
+						PRINTFORML 「はあ……ああ、んや、あっ……はあ、ぁっ、んっ……はあ……っ」
+					CASE 3
+						PRINTFORML 「あ……ああっ、ふっ……あ……っ……、はあっ、はあ……」
+				ENDSELECT
+			ENDIF
+			FONTSTYLE 0
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORMW  因快感而颤抖的%ANAME(TARGET)%，将荡漾的视线投向了%ANAME(MASTER)%。。。
+					;TranslatedMark 快感に身を震わせた%ANAME(TARGET)%は、蕩けた視線を%ANAME(MASTER)%に向けている...
+				CASE 1
+					PRINTFORMW  连擦拭滴落下来的汗水都忘记了，%ANAME(TARGET)%恍惚了。。。
+					;TranslatedMark 滴り落ちる汗を拭う事すら忘れ、%ANAME(TARGET)%は恍惚としている...
+				CASEELSE
+					PRINTFORMW  在不断重复的绝顶之波中，一边吐着甜美的气息，一边颤抖着身体。。。
+					;TranslatedMark 断続的に繰り返される絶頂の波に、甘い吐息を吐き出しながら、ぴくぴく身体を震わせている...
+			ENDSELECT
+
+		;三重絶頂
+		CASE 3
+			IF IS_EQUIP(MPLY:0, 20) || IS_EQUIP(MPLY:0, 342)
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORML 「っっ……！　ぢゅ、る……、はっ……んむん゛ぅっ……っ！」
+					CASE 1
+						PRINTFORML （だ、めだっ……ちから……が……入、らな……！）
+					CASE 2
+						PRINTFORML 「ふ……うぅっ！　んあ、あぁ……ぁあ！　うぅうぅ！」
+				ENDSELECT
+			ELSE
+				SELECTCASE RAND:4
+					CASE 0
+						PRINTFORML 「は、あ……っ、あ……んんっ、ぅ……はあっ、はあ、はああぁ……っ」
+					CASE 1
+						PRINTFORML 「い、あ……う……、ぅ、んぅっ、はあっ、ああ……っ」
+					CASE 2
+						PRINTFORML 「はあ……ああ、や、あっ……んあ、ぁっ、んっ……！　い、くぅ……！」
+					CASE 3
+						PRINTFORML 「あ……ああっ、ふ、ぅっ……んくぅっ……、はあっ、はあっ、あ、ああ……」
+				ENDSELECT
+			ENDIF
+			FONTSTYLE 0
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORMW  因快感而颤抖的%ANAME(TARGET)%，将荡漾的视线投向了%ANAME(MASTER)%。。。
+					;TranslatedMark 快感に身を震わせた%ANAME(TARGET)%は、蕩けた視線を%ANAME(MASTER)%に向けている...
+				CASE 1
+					PRINTFORMW  连擦拭滴落下来的汗水都忘记了，%ANAME(TARGET)%恍惚了。。。
+					;TranslatedMark 滴り落ちる汗を拭う事すら忘れ、%ANAME(TARGET)%は恍惚としている...
+				CASE 2
+					PRINTFORMW  一边向断断续续涌来的绝顶之波吐出甜美的气息，一边颤抖着身体。。。
+					;TranslatedMark 断続的に押し寄せる絶頂の波に甘い吐息を吐き出しながら、ぴくぴく身体を震わせている...
+			ENDSELECT
+
+		;四重絶頂
+		CASE 4
+			IF IS_EQUIP(MPLY:0, 20) || IS_EQUIP(MPLY:0, 342)
+				SELECTCASE RAND:4
+					CASE 0
+						PRINTFORML 「う゛っっ、ああ゛……ぢゅ、る……んむん゛ぅうっっ！　ふ、うぅっ！」
+					CASE 1
+						PRINTFORML （だめ、だっ……ちから、が……入、らな……！）
+					CASE 2
+						PRINTFORML （っ……考え、が……まとまら、ない……わから、ない……！）
+					CASE 3
+						PRINTFORML 「ふっっ、うぅっ！　あぁっっっっ、ふっっ！　うぅぅ、うぅ！」
+				ENDSELECT
+			ELSE
+				SELECTCASE RAND:4
+					CASE 0
+						PRINTFORML 「はああっっ、あ、んんっ、ぅぅ、あはあっ、はあ、ああぁ……っ！」
+					CASE 1
+						PRINTFORML 「いっっあぁ！　んぅっ、あはあっ、ああっっっい、き、ううぅぅっ！」
+					CASE 2
+						PRINTFORML 「は、あっ、ああっ、や、あっっ！　んあ、ぁっ、んぅっ……！　い、くぅ……！」
+					CASE 3
+						PRINTFORML 「あっっああっ！　ふあぅっっ、いってっ、はあっ、はあっ、あ、ああ……！」
+				ENDSELECT
+			ENDIF
+			FONTSTYLE 0
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORMW  被激烈的快乐震动了身体的%ANAME(TARGET)%，荡漾的视线和不定焦点的眼睛在晃动。。。
+					;TranslatedMark 激しい快楽に身を震わせた%ANAME(TARGET)%は、蕩けた視線と焦点定まらない瞳が揺れ動いている...
+				CASE 1
+					PRINTFORMW  一边挥洒滴落下来的体液，%ANAME(TARGET)%一边陶醉于快感。。。
+					;TranslatedMark 滴り落ちる体液を振り撒きながら、%ANAME(TARGET)%は快感に惚けている...
+				CASE 2
+					PRINTFORMW  押し寄せる絶頂の波に甘い吐息を吐き出しながら、ぴくぴく身体を震わせている...
+			ENDSELECT
+
+		;五重絶頂
+		CASE 5
+			SELECTCASE RAND:4
+				CASE 0
+					PRINTFORML 「はッ、ッッ、ああッッ！　ッ、っ！　うっ、ぁ゛！　はあ゛っ、あ゛ああ……っ！！」
+				CASE 1
+					PRINTFORML 「あ゛あ゛ぁッッッッ、くぅッッ、んぅッッ！　はあ゛、ア゛、あ゛あ……っ！！」
+				CASE 2
+					PRINTFORML 「はあ゛あ゛ッッ、あ゛、やっめ゛ッッッ、あぁ゛っ、あ！　くぅぅぅうう！」
+				CASE 3
+					PRINTFORML 「あッッ！　ッ、ああっ、ふ、ぅっ……んあぁ゛っ、はあ゛ッ、あ゛、あ、ああっ……！！」
+			ENDSELECT
+			FONTSTYLE 0
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORMW  因强烈的快感而颤抖的%ANAME(TARGET)%，将焦点不定的眼睛托付给了虚空。。。
+					;TranslatedMark 強烈な快感に身を震わせた%ANAME(TARGET)%は、焦点の定まらない瞳を虚空に預けたまま惚けている...
+				CASE 1
+					PRINTFORMW  连滴下来的唾液都不在意，零落的呜咽和颤抖让%ANAME(TARGET)%恍惚。。。
+					;TranslatedMark 滴り落ちる唾液すら気にもせず、零れる嗚咽と身震いに%ANAME(TARGET)%は恍惚としている...
+				CASE 2
+					PRINTFORMW  一边让涌来的绝顶的波浪吧嗒吧嗒嘴，一边无法抑制住颤抖的身体一边喘息着。。。
+					;TranslatedMark 押し寄せる絶頂の波に口をぱくぱくさせながら、震える身体を抑えきれずに喘いでいる...
+			ENDSELECT
+	ENDSELECT
+	RESETCOLOR
+ENDIF
+;	PRINTFORMW  check
+
+VARSET NOWEX, 0
+SOURCE = 0
+;	PRINTFORMW  check
+
+SOURCE = BACKUP
+;	PRINTFORMW  check
+
+;=================================================
+;●コマンド実行時(このキャラがプレイヤー側のとき)
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_TARGET_K141
+
+;=================================================
+;●コマンド実行時(このキャラがプレイヤー側のとき)
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_PLAYER_K141
+
+;=================================================
+;●コマンド実行後(パラメータの変動処理が終わってから呼び出される)
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_AFTER_K141
+#DIM 命蓮
+命蓮 = NAME_TO_CHARA("命蓮")
+
+;[空虚]状態の場合、口が塞がっている場合は口上を表示しない
+SIF TALENT:空虚 || IS_EQUIP_CONTINUE(TARGET, "口装着")
+	RETURN 0
+
+IF GROUPMATCH(SELECTCOM, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 52, 55, 57, 160) && CFLAG:251 && !CFLAG:300
+	;バージンロストシチュ
+	IF TALENT:正妻
+		CFLAG:300 = 1
+	ELSEIF TALENT:恋慕 || TALENT:恋人
+		CFLAG:300 = 2
+	ELSEIF TALENT:服従 || TALENT:烙印
+		CFLAG:300 = 3
+	;陥落素質無し
+	ELSE
+		CFLAG:300 = 4
+	ENDIF
+ENDIF
+
+IF !TALENT:服従
+	SETCOLOR 0x8B529D
+	FONTSTYLE 1
+	SIF NOWEX:TARGET:射精 > 0
+		CALL MULTIPLE_SPERM_VOICE_K141_B
+	SIF NOWEX:MASTER:射精 > 0
+		CALL MULTIPLE_SPERM_VOICE_K141_A
+	FONTSTYLE 0
+	RESETCOLOR
+ENDIF
+;-------------------------------------------------
+;初めてＣ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｃ絶頂 > 0
+	SIF CFLAG:220 == 0
+		CFLAG:220 = 1
+ENDIF
+
+;-------------------------------------------------
+;初めてＶ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｖ絶頂 > 0
+	SIF CFLAG:221 == 0
+		CFLAG:221 = 1
+ENDIF
+
+;-------------------------------------------------
+;初めてＡ絶頂
+;-------------------------------------------------
+IF NOWEX:Ａ絶頂 > 0
+	SIF CFLAG:222 == 0
+		CFLAG:222 = 1
+ENDIF
+
+;-------------------------------------------------
+;初めてＢ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｂ絶頂 > 0
+	SIF CFLAG:223 == 0
+		CFLAG:223 = 1
+ENDIF
+
+;-------------------------------------------------
+;初めてＭ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｍ絶頂 > 0
+	SIF CFLAG:224 == 0
+		CFLAG:224 = 1
+ENDIF
+
+
+;-------------------------------------------------
+;TARGETの射精
+;-------------------------------------------------
+@MULTIPLE_SPERM_VOICE_K141_B
+#DIM 命蓮
+命蓮 = NAME_TO_CHARA("命蓮")
+
+PRINTFORML 
+;本体ver1.28以前の方は下記の文章を切り替えてください
+;SELECTCASE TCVAR:命蓮:420
+;↑↓
+SELECTCASE GET_STACK_SPERM_TO(命蓮)
+	;膣,アナル
+	CASE 1, 2, 3, 8
+		SELECTCASE NOWEX:TARGET:射精
+			CASE 1 TO 3
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORML 「哈，啊……啊，腰……拔出来……啊，啊，啊啊」
+						;TranslatedMark 「は、あ……っ、腰が……抜け、る……あっ、はあ、はああぁ……っ」
+					CASE 1
+						PRINTFORML 「はあ……っ、はうっ……堪え、きれ……はあっ……なかった……」
+					CASE 2
+						PRINTFORML 「……は……あ……くっ……あっ……はあ……っ、ああ……っ」
+				ENDSELECT
+			;大量
+			CASE 4 TO 7
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORML 「嗯，嗯，嗯……精，但是……嗯，啊……拔出来……啊，啊啊啊」
+						;TranslatedMark 「うっ、んぅぅう……精、が……う、ああっ……抜け……はあ、はああぁ……っ」
+					CASE 1
+						PRINTFORML 「はあ……ああ……絞り……取られる……はああ……ああぁっ……！」
+					CASE 2
+						PRINTFORML 「啊……啊…啊……啊……呜……好痛苦…啊…啊…啊，啊啊啊……」
+						;TranslatedMark 「は……あ……はあ……、ぐぅっ……苦、しい……ああ……っ、あはああ……」
+				ENDSELECT
+			CASEELSE
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORML 「うあああっ、でッ……あっ、ぐああっ！！　あッ、ああっ！　これ以上はっ……！！」
+					CASE 1
+						PRINTFORML 「あっ、うあ……、全て、が……で、て……！　う、あ……！　これ以上、ああ……！」
+					CASE 2
+						PRINTFORML 「ああっ……底が……あっ……！　抜け……でないっ……はず……うああああ……！」
+				ENDSELECT
+		ENDSELECT
+	;口
+	CASE 4
+		SELECTCASE NOWEX:TARGET:射精
+			CASE 1 TO 3
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORML 「は、あ……っ、腰が……抜け、るかと……あっ、はあっ…………」
+					CASE 1
+						PRINTFORML 「はあ……っ、はあっ……すみま、せん……はああ……まだ……ああぁっ……射精、る……」
+					CASE 2
+						PRINTFORML 「はあ……なんて……人、だ……はあ……っ、またで、て……ああ……っ！」
+				ENDSELECT
+			;大量
+			CASE 4 TO 7
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORML 「ぐ、あ、ぅぅう……腰、が……は、ああっ……抜け……はあ、はああぁ……っ」
+					CASE 1
+						PRINTFORML 「はあ……ああ……絞り……とら、れ……はああ……ああぁっ……ぐ……」
+					CASE 2
+						PRINTFORML 「はあ……はあ……生気……が……ああ……っ、抜け……ああ……！」
+				ENDSELECT
+			CASEELSE
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORML 「あッ、ああっ！　だ、めだあっ……！　もう、あ、ああっ、でな……あっ、ふああっ！！」
+					CASE 1
+						PRINTFORML 「んあっ、あ……、全、て……がで、て……！　これ以上はっっ、ああ……ああぁっ……！！」
+					CASE 2
+						PRINTFORML 「ああ……で……ああっ……！　こわれ、る……！　も、お……でないっ……！」
+				ENDSELECT
+		ENDSELECT
+	;足
+	CASE 6
+		
+	;尻尾
+	CASE 7
+		
+	;髪
+	CASE 9
+		
+	;腋
+	CASE 10
+		
+	;その他
+	CASEELSE
+		SELECTCASE NOWEX:TARGET:射精
+			CASE 1 TO 3
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORML 「哈，啊……啊，腰……拔出来……啊，啊，啊啊」
+						;TranslatedMark 「は、あ……っ、腰が……抜け、る……あっ、はあ、はああぁ……っ」
+					CASE 1
+						PRINTFORML 「はあ……っ、はうっ……堪え、きれ……はあっ……なかった……」
+					CASE 2
+						PRINTFORML 「……は……あ……くっ……あっ……はあ……っ、ああ……っ」
+				ENDSELECT
+			;大量
+			CASE 4 TO 7
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORML 「うっ、んぅぅう……精、が……うああっ……抜け……はあ、はああぁ……っ」
+					CASE 1
+						PRINTFORML 「はあ……ああ……絞り……取られる……はああ……ああぁっ……！」
+					CASE 2
+						PRINTFORML 「啊……啊…啊……啊……呜……好痛苦…啊…啊…啊，啊啊啊……」
+						;TranslatedMark 「は……あ……はあ……、ぐぅっ……苦、しい……ああ……っ、あはああ……」
+				ENDSELECT
+			CASEELSE
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORML 「うあああっ、でッ……あっ、ぐああっ！！　あッ、ああっ！　これ以上はっ……！！」
+					CASE 1
+						PRINTFORML 「あっ、うあ……、全て、が……で、て……！　う、あ……！　これ以上、ああ……！」
+					CASE 2
+						PRINTFORML 「ああっ……底が……あっ……！　抜け……でないっ……はず……うああああ……！」
+				ENDSELECT
+		ENDSELECT
+ENDSELECT
+;-------------------------------------------------
+;被射精
+;-------------------------------------------------
+@MULTIPLE_SPERM_VOICE_K141_A
+PRINTFORML 
+;MASTER射精
+
+;本体ver1.28以前の方は下記の文章を切り替えてください
+;SELECTCASE TCVAR:MASTER:420
+;↑↓
+SELECTCASE GET_STACK_SPERM_TO(MASTER, TARGET)
+	;菊門…だっけ
+	CASE 2
+		;[射精量]
+		SELECTCASE NOWEX:MASTER:射精
+			;普通の量
+			CASE 1 TO 3
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORML 「はあ……っ、はあっ……あつ、い……はあっ、はああぁ……っ」
+					CASE 1
+						PRINTFORML 「うあ……っ、こんな……不浄……な……場所に……ああ……ああぁっ……」
+					CASE 2
+						PRINTFORML 「はあ……ああっ……もう……いいだろっ……うああ……っ、くあ、ん……っ」
+				ENDSELECT
+			;大量
+			CASE 4 TO 7
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORML 「うあっ、ぅぅう……あ、つ……は、あ、おなかが……熱、い……はあ、はああぁ……っ」
+					CASE 1
+						PRINTFORML 「はあ……っ、あっ……ああ……なんて……量を……はああ……ああぁっ……」
+					CASE 2
+						PRINTFORML 「ああ……はあっ……射精しすぎ……です、よ……はあ……はああ……」
+				ENDSELECT
+			;超大量・超々大量
+			CASEELSE
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORML 「ああっ！　や、めっ……！　あ、ああっ、ふじょ、うが……おなか……ああっ！！」
+					CASE 1
+						PRINTFORML 「んあっ、あ……、押し付け、るなあ……！　ああ……ぐああぁっ……！！」
+					CASE 2
+						PRINTFORML 「ああ……はいら、なああっ……！　も、お……はいら、ないっ、か……らあ……！」
+				ENDSELECT
+		ENDSELECT
+
+	;口
+	CASE 4
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「んぐぅ？！　んっ！　んぅ……ぷはあっ、はあ、はあぁ……はあ……っ」
+			CASE 1
+				PRINTFORML 「んぐっ……んく……っ、こくっ……はあっ……なんて……ことを……はあ……ああ……」
+			CASE 2
+				PRINTFORML 「ん、ぅ……ぐ、ぅ……んっ……は、あ……はあ……っ、ああ、ん……っ」
+		ENDSELECT
+	;手、胸、顔
+	CASE 3, 5, 8
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「は、あ……っ、はあ……あつ、い……はあ……はあ……」
+			CASE 1
+				PRINTFORML 「はあ……っ、あうっ……気は……済んだろう……はああ……ああぁっ……」
+			CASE 2
+				PRINTFORML 「啊……对了……啊……不，不净……全部……拿出来吧……啊」
+				;TranslatedMark 「はあ……そうだ……はあ……っ、不浄は……全部……出してしまえ……はあ……っ」
+		ENDSELECT
+	;足
+	CASE 6
+		
+	;尻尾
+	CASE 7
+		
+	;髪
+	CASE 9
+		
+	;腋
+	CASE 10
+		
+	;その他
+	CASEELSE
+		
+ENDSELECT
+
+;=================================================
+;●単体エンディング関係
+;=================================================
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;★ここから先にはエンディングが記述されています★
+;ネタバレを避けたい方は閲覧しないようにご注意下さい。
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+@KOJO_SINGLE_ENDING_K141
+;単体エンディング
+;全都市を統一したとき、好感度5000以上かつ全キャラ中最も好感度が高いと表示される
+PRINTFORML  .
+PRINTFORML  .
+PRINTFORML  .
+PRINTFORML 
+PRINTFORML  漫长的战斗结束了
+;TranslatedMark 長い戦いが終わりました
+PRINTFORMW  
+IF TALENT:正妻 || TALENT:妾
+	;PRINTFORML  
+
+ELSEIF TALENT:恋慕
+	;PRINTFORML 
+
+
+ELSEIF TALENT:服従
+	;PRINTFORML  
+
+
+;条件として出ることはないから必要無い……と思っていましたが、男あなた系で友人であれば出るでしょう
+ELSE
+	;PRINTFORML 
+
+
+ENDIF
+PRINTFORML  .
+PRINTFORML  .
+PRINTFORML  .
+PRINTFORML 
+
+;RETURNの値を0→1に変えると、デフォルトの単体エンディングメッセージがスキップされる
+RETURN 1
+
+@KOJO_DEAD_ENDING_K141
+;斬首エンディング
+;自勢力が滅亡したときの選択肢で「……斬れ」を選択して主人公が死亡した場合に、好感度5000以上かつ全キャラ中最も好感度が高いと表示される
+PRINTFORML  
+PRINTFORML  ————，一切都结束了
+;TranslatedMark ――――、全ては終わりました
+PRINTFORMW 
+PRINTFORML  虽然事情的开端只是琐碎的，但是已经开始了的战争，导致了无法挽回的结果
+;TranslatedMark 事の発端は瑣末であれど……始まってしまった戦事は、取り返しのつかない結果を招いたのです
+PRINTFORMW 
+PRINTFORML  也并不是没有考虑到有那样的结果
+;TranslatedMark その様な結果も有り得ることを、半ば考えなかったわけでもありません
+PRINTFORMW  如果是战争的话，没有比人的生死更脆弱、更容易崩溃的了
+;TranslatedMark 戦となれば、人の生死ほど儚く脆く、崩れやすいものなどありはしないのですから
+PRINTFORML 
+PRINTFORMW  很多人受伤倒下……现在，在混沌的世界里，有着新的法律秩序
+;TranslatedMark 多くの者が傷つき倒れ……今、混沌とした世界に新たな法による秩序が為されようとしています
+PRINTFORML 
+PRINTFORML 
+PRINTFORML 
+IF TALENT:正妻 || TALENT:妾
+	PRINTFORML 
+	PRINTFORML  我也……想早点来
+	;TranslatedMark 私も……、疾く参りたいと思います
+	PRINTFORMW 
+	IF MASTER == NAME_TO_CHARA("白蓮")
+		PRINTFORML  忘不了的那一天，我把姐姐大人……和今生的离别一起抛弃了
+		;TranslatedMark 忘れもしないあの日、私は姉上様を……今生の別れと共に、置き去りにしてしまった
+		PRINTFORMW  尽管担心之后的经过，但我什么也没给你做
+		;TranslatedMark その後の経過を危惧していたにも拘らず、私は何もしてあげらなかったのだ
+		PRINTFORML 
+		PRINTFORML  尽管担心之后的经过，但我什么也没给你做
+		;TranslatedMark 見送らせてばかりに、これ程辛い思いをさせていたのかと痛感し
+		PRINTFORML  把那天留下的行为
+		;TranslatedMark あの日に置いて行ってしまった仕打ちを、
+		PRINTFORMW  我不能不后悔做了多么愚蠢的事
+		;TranslatedMark なんて愚かなことをしてしまったのかと後悔せずにはいられない
+		PRINTFORML 
+		PRINTFORML  既然如此，那这次就不那么办了
+		;TranslatedMark ならば今度ばかりはそうもいきますまい
+		PRINTFORMW  不能让他抱着遗憾一个人死去
+		;TranslatedMark 無念を抱えたままに、独り逝かせる訳にはいかぬのです
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORML 
+	ELSE
+		PRINTFORMW  该做的事情已经做完了
+		;TranslatedMark 為すべきことは終えました
+		PRINTFORML  
+		PRINTFORML  啊，多么遗憾的同时，却又想掩饰那虚幻又美丽的忧愁之美
+		;TranslatedMark ああ、なんと無念でありながら、儚くも美しい憂愁の美を飾ろうとしてしまったのか
+		PRINTFORMW  为什么不明白那样的选择只会给人们留下祸根呢
+		;TranslatedMark その様な選択は、人々に禍根を残すばかりと、なぜ分かってくださらなかったのか
+		PRINTFORML 
+		PRINTFORML  哎呀，真是
+		;TranslatedMark いやはやまったく
+		PRINTFORMW  简直就像是在说要我追你一样
+		;TranslatedMark まるで私に、後を追えとでも言いたげな顔をしていらっしゃる
+		PRINTFORML 
+		PRINTFORMW  如果犯了那样的愚蠢的想法会变成什么样，你知道吗？那就没办法了
+		;TranslatedMark その様な愚考を犯せばどうなるか、分かって逝ってしまったのか？　ならば仕方無い
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORML 
+	ENDIF
+ENDIF
+PRINTFORML  对不起。请原谅我这种自私的行为。
+;TranslatedMark 申し訳ありません。この様な身勝手な振舞いを、どうかお許し頂きたい。
+PRINTFORMW 
+;CFLAG:TARGET:所属 = 0
+;CFLAG:TARGET:特殊状態 = 2
+
+
+;RETURNの値を0→1に変えると、デフォルトの単体エンディングメッセージがスキップされる
+RETURN 1

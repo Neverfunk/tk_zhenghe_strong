@@ -1,0 +1,77 @@
+﻿
+;--------------------------------------
+;蜂起イベントが発生するかの判定
+;--------------------------------------
+@CULTIST_RISE_RATE()
+;既に出現しているか、狂信者なし設定なら発動しない
+SIF SP_COUNTRY_APPEARED:特殊勢力_狂信者 || !SP_COUNTRY_RANK:(特殊勢力_狂信者)
+	RETURN 0
+
+;いっぱいなら駄目
+SIF GET_NEW_COUNTRY() == -1
+	RETURN 0
+
+SIF !CHECK_SP_COUNTRY_RISE(特殊勢力_狂信者)
+	RETURN 0
+RETURN 1
+
+
+;--------------------------------------
+;外来勢力出現イベント
+;出現できたら1、できなければ0をかえす
+;--------------------------------------
+@CULTIST_RISE(都市 = 0)
+#DIM 狂信者
+#DIM 都市
+
+;外来勢力を作成
+CALL CULTIST_INIT()
+狂信者 = RESULT
+;作れなかったら戻す
+SIF 狂信者 == -1
+	RETURN 0
+
+CALL SP_COUNTRY_RISE(狂信者, 都市)
+
+SIF !RESULT
+	RETURN 0
+
+SP_COUNTRY_APPEARED:特殊勢力_狂信者 = 1
+RETURN 狂信者
+
+;--------------------------------------
+;蜂起イベント用都市選択処理
+;--------------------------------------
+@CULTIST_RISE_SELECT_CITY()
+#DIM 神社
+#DIM 所有者
+
+神社 = GET_CITYNUMBER("守矢神社")
+IF 神社 >= 0 && (!IS_COUNTRY(CITY_OWNER:神社) || GET_OWN_CITY(CITY_OWNER:神社) >= 3)
+	LOCAL = 神社
+;そうでなければランダム
+ELSE
+	CALL SP_COUNTRY_RISE_SELECT_CITY()
+	LOCAL = RESULT
+ENDIF
+
+RETURN LOCAL
+
+
+;---------------------
+;蜂起イベント用メッセージ関数
+;---------------------
+@CULTIST_RISE_MSG(勢力, 対象)
+#DIM 勢力
+#DIM 対象
+CALL SINGLE_DRAWLINE
+SETCOLOR カラー_警告
+PRINTFORMW  天变地异，灾害群生导致人们失去了希望
+PRINTFORMW  战争频发，更是让人们从精神到物质全面崩溃
+PRINTFORML  巫女，僧侣，道士，土著神
+PRINTFORMW  其之间不断的宗教战争，也让人们感受到这些宗教的无力与虚伪
+PRINTFORML  然后，一种邪神信仰的宗教出现在幻想乡
+PRINTFORMW  并以性的方面来供奉邪神，这一点吸引了大量教徒
+PRINTFORMW  教祖「来吧，让我们的教义，在这大地之上传播，让我们把这些亵渎神的邪教们彻底清除」
+PRINTFORMW  根据传教和布道的军事作战方式、%CITY_NAME:(対象)%\@ GET_OWN_CITY(勢力) > 1 ? 等 # \@被夺取了
+RESETCOLOR

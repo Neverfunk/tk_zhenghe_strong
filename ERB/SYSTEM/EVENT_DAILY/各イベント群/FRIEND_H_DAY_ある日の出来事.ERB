@@ -1,0 +1,622 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_FRIEND_H_DAY_RATE()
+RETURN 40
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_FRIEND_H_DAY_DECISION()
+SIF !(IS_MALE(MASTER) && TALENT:MASTER:童貞 == 0)
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_FRIEND_H_DAY_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_FRIEND_H_DAY_SETTARGET()
+
+;同じ国に所属している妊娠中でも捕虜でもない女キャラ、対象がいない場合はイベントキャンセル
+FOR LOCAL, 0, CHARANUM
+	IF CFLAG:(LOCAL):所属 == CFLAG:MASTER:所属 && TALENT:LOCAL:妊娠 == 0 && !CFLAG:(LOCAL):捕虜先 && IS_FEMALE(LOCAL) && !IS_ANIMAL(LOCAL)
+		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL 
+		DAILY_TARGET_NUM ++
+	ENDIF
+NEXT
+
+SIF DAILY_TARGET_NUM == 0
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_FRIEND_H_DAY
+#DIM 対象
+#DIM 兵数
+
+LOCAL = 0
+
+対象 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+
+CFLAG:対象:面識 = 1
+SELECTCASE RAND:8
+	;軍事広報
+	CASE 0
+		PRINTFORML 被安排了為軍事宣傳而拍攝海報的工作
+		PRINTFORML 自己也不能成為模特、對此而苦惱著的時候遇到了%ANAME(対象)%
+		PRINTFORMW %ANAME(MASTER)%拜託%ANAME(対象)%成為自己的模特、雖然她有點苦惱、但還是答應了
+		PRINTFORML 
+		PRINTFORML 攝影進行得很順利
+		PRINTFORMW 她穿著泳衣拍攝的時候最開始有點困擾、但後面漸漸習慣了
+		PRINTFORML …決定暫時休息一下
+		PRINTFORML 不知道是不是因為緊張、她的臉微微發紅了、全身都在冒汗
+		PRINTFORMW 看到她那妖媚的樣子和煽情的打扮、%ANAME(MASTER)%的肉棒
+		PRINTFORML 怎麼辦？
+		CALL ASK_YN("推倒她" ,"忍耐")
+		IF RESULT == 1
+			PRINTFORML 到底在想啥呢
+			PRINTFORMW %ANAME(MASTER)%忍耐住了繼續攝影
+			兵数 = MIN(1000 * (DAY / 10), 5000)
+			SIF 兵数 == 0
+				兵数 = 1000
+			COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 兵数
+			CALL COLOR_PRINTW(@"入伍海報好評如潮、兵員增加了{兵数}人", カラー_注意)
+		ELSEIF RESULT == 0
+			PRINTFORML …管它呢
+			PRINTFORMW %ANAME(MASTER)%推倒了%ANAME(対象)%
+			IF CFLAG:対象:好感度 + RAND:400 >= 1700 
+				PRINTFORML %ANAME(対象)%被%ANAME(MASTER)%嚇到了但是並沒有抵抗
+				PRINTFORMW 確認了她的反應的%ANAME(MASTER)%堵住了她的嘴唇
+				PRINTFORMW 柔軟的嘴唇微微吐出甜美的氣息
+				PRINTFORML 輕吻結束之後凝視著滿臉通紅的她
+				PRINTFORMW 當%ANAME(MASTER)%要求繼續之後%ANAME(対象)%微微點了點頭、全身發軟
+				PRINTFORML 
+				PRINTFORMW %ANAME(MASTER)%汗水淋漓地趴在了她的身上
+				PRINTFORML 她一邊任憑%ANAME(MASTER)%责弄著一邊發出妖艷的喘息聲扭動著身體
+				PRINTFORMW 只要輕輕撫摸肌膚就會全身顫抖、一邊扭著腰一邊發出可愛的呻吟聲傳入%ANAME(MASTER)%的耳朵
+				IF TALENT:対象:処女 == 1
+					PRINTFORMW 身為處女的%ANAME(対象)%流著眼淚帶著幸福的表情和%ANAME(MASTER)%糾纏在了一起
+				ELSE
+					PRINTFORMW %ANAME(対象)%一邊用發情的表情望著%ANAME(MASTER)%一邊緊緊抱住了他
+				ENDIF
+				PRINTFORML %ANAME(MASTER)%用溫柔而濃郁的性愛增強%ANAME(対象)%的敏感度、以品嘗她的所有可愛
+				IF TALENT:対象:処女 == 1
+					PRINTFORML %ANAME(対象)%那僵硬的身體逐漸放鬆了、喘息之中夾雜著色氣
+				ELSE
+					PRINTFORML %ANAME(対象)%的身體已經完全準備好了、只需要輕輕插入就會微微顫抖達到高潮
+				ENDIF
+				PRINTFORMW 舌頭相互纏繞著、兩人緊緊抱著彼此的身體專注地扭動著腰肢貪求著快感
+				PRINTFORML %ANAME(対象)%膣穴那緊緻的感覺以及快要融化的喘息聲令就要到達極限的%ANAME(MASTER)%在她的膣穴深處射精了
+				PRINTFORMW %ANAME(対象)%一邊大聲呻吟一邊反弓著身體同時高潮了了
+				PRINTFORML …強烈的高潮結束之後%ANAME(MASTER)%和%ANAME(対象)%抱在一起倒在了床上、不停喘息
+				PRINTFORML %ANAME(対象)%那汗水的香味以及柔軟的肌膚令人心情舒暢感兩人就這樣沉浸在高潮的餘韻裡
+				PRINTFORMW 不久之後%ANAME(MASTER)%再次恢復了雄風、%ANAME(対象)%一邊吻著%ANAME(MASTER)%說著還要、一邊自己把雙腿張開了
+				CALL FUCK(対象, "Ｃ, Ｂ, Ｖ, Ｍ, 欲望, 性交, 奉仕, 精愛, 口淫, 接吻, Ｖ性交", "処女喪失, 接吻喪失, 膣内射精", GET_ID(MASTER), @"%ANAME(MASTER)%の\@RAND:2 ? 肉棒 # 唇\@", ANAME(MASTER), "", "和姦")
+				CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣", "和姦")
+				CFLAG:対象:好感度 += 300
+				PRINTFORML 
+				PRINTFORML "休息"結束之後的%ANAME(MASTER)%和%ANAME(対象)%重新開始了攝影
+				PRINTFORMW 在接下來的拍攝當中、她作為模特更加興奮了
+				兵数 = MIN(1000 * (DAY / 8), 10000)
+				SIF 兵数 == 0
+					兵数 = 1000
+				COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 兵数
+				CALL COLOR_PRINTW(@"入伍海報好評如潮、兵員增加了{兵数}人", カラー_注意)
+			ELSEIF (ABL:MASTER:武闘 / 10) * (RAND:10 + 1) > (ABL:対象:武闘 / 10) * (RAND:10 + 1)
+				PRINTFORML %ANAME(対象)%被%ANAME(MASTER)%嚇到了尖叫著進行了抵抗
+				PRINTFORMW 但是%ANAME(MASTER)%強行壓在%ANAME(対象)%的身上、奪走了她的嘴唇
+				PRINTFORML 她發出呻吟身體不停顫抖著拼命想要逃跑、但是%ANAME(MASTER)%用力地吸著她的嘴唇
+				PRINTFORML 接吻結束之後%ANAME(対象)%滿臉通紅地雙眼含淚看著%ANAME(MASTER)%
+				PRINTFORMW %ANAME(MASTER)%毫不在乎地把她按住掰開了她的泳衣
+				PRINTFORML 
+				PRINTFORMW %ANAME(MASTER)%粗暴地侵犯著穿著泳衣的%ANAME(対象)%
+				PRINTFORML %ANAME(対象)%一邊被%ANAME(MASTER)%壓在身上侵犯著、一邊苦悶地發出悲痛的呻吟
+				PRINTFORMW %ANAME(MASTER)%一邊抽插著肉棒一邊撫摸著%ANAME(対象)%的肌膚、她不禁一邊扭動著身體一邊發出小小的悲鳴
+				IF TALENT:対象:処女 == 1
+					PRINTFORML 從大腿根部流出了作為處女的證明、%ANAME(対象)%痛苦地流著眼淚顫抖著
+				ELSE
+					PRINTFORML %ANAME(MASTER)%的行為令%ANAME(対象)%流著眼淚顫抖著拼命抵抗
+				ENDIF
+				PRINTFORML %ANAME(MASTER)%為了蹂躪這樣的她而更加激烈地深深插入進去品味著她的肉體
+				IF TALENT:対象:処女 == 1
+					PRINTFORMW 每一次抽插%ANAME(対象)%都會顫抖著發出悲鳴、被撐開的秘所一邊痙攣一邊流血
+				ELSE
+					PRINTFORMW 但是%ANAME(対象)%的身體違反了她的意志、漸漸習慣了%ANAME(MASTER)%的肉棒、並緊緊纏繞著它
+				ENDIF
+				PRINTFORML 強行侵犯%ANAME(対象)%的行為令%ANAME(MASTER)%欲火高漲、用跳動勃起的肉棒一味地貪求著肉慾
+				PRINTFORML 肉體糾纏在一起、腦海里迴蕩著%ANAME(対象)%的呻吟聲的%ANAME(MASTER)%慢慢到達了極限、直接在%ANAME(対象)%的膣穴中射出了精液
+				PRINTFORMW %ANAME(対象)%因為子宮內的熱量而悲鳴著想要逃離、但卻被%ANAME(MASTER)%緊緊抓著把精液全部射了進去
+				PRINTFORML …%ANAME(MASTER)%射精結束之後吐了一口氣、為了調整呼吸把肉棒暫時拔了出來
+				PRINTFORML 無力地躺著的%ANAME(対象)%、因為被侵犯的事情而一邊流著眼淚一邊小聲呢喃著
+				PRINTFORMW 再次興奮起來的%ANAME(MASTER)%一直持續侵犯著%ANAME(対象)%、直到滿足為止
+				CALL FUCK(対象, "Ｃ, Ｂ, Ｖ, Ｍ, 欲望, 性交, 奉仕, 精愛, 口淫, 接吻, Ｖ性交", "処女喪失, 接吻喪失, 膣内射精", GET_ID(MASTER), @"%ANAME(MASTER)%の\@RAND:2 ? 肉棒 # 唇\@", ANAME(MASTER), "", "強姦")
+				CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣", "強姦")
+				PRINTFORML 
+				PRINTFORMW 滿足之後的%ANAME(MASTER)%拿起她的寫真離開了現場
+				PRINTFORML …海報大受好評
+				PRINTFORMW %ANAME(MASTER)%警惕著%ANAME(対象)%的報復、但是可能是因為被侵犯而感到羞恥、%ANAME(対象)%什麼也沒做
+				CFLAG:対象:好感度 -= 500
+			ELSE
+				PRINTFORML 但是遭到了%ANAME(対象)%的激烈抵抗、撞開了%ANAME(MASTER)%
+				PRINTFORMW 她在%ANAME(MASTER)%嚇到的間隙逃跑了…
+				PRINTFORML 
+				FOR LOCAL, 0, CHARANUM
+					SIF CFLAG:(LOCAL):所属 == CFLAG:MASTER:所属 && !CFLAG:(LOCAL):捕虜先 && !IS_ANIMAL(LOCAL)
+						CFLAG:(LOCAL):好感度 -= 300
+				NEXT
+				CALL COLOR_PRINTW("強姦未遂的傳言很快就傳開了、夥伴們的評價也大幅惡化了…", カラー_注意)
+			ENDIF
+		ENDIF
+	;夢現の宿
+	CASE 1
+		PRINTFORMW …這裡是哪裡？
+		PRINTFORML %ANAME(MASTER)%發現自己身在某個陌生的地方
+		PRINTFORML 到底是怎麼來到這個地方的？腦子像入魔了似的完全無法思考
+		PRINTFORMW 完全被那夢幻般的感覺所束縛著
+		PRINTFORML 環顧四周的時候看見了不遠處的一座旅館
+		PRINTFORML 剛才那裡有旅館嗎？啊啊、果然在做夢啊
+		PRINTFORMW 這麼理解的%ANAME(MASTER)%抱著躊躇的心情進入了旅館裡面
+		PRINTFORML …旅館裡面沒有任何店員、只有一名客人、是%ANAME(対象)%
+		PRINTFORML 她好像也和%ANAME(MASTER)%一樣誤入了這裡
+		PRINTFORMW 兩人分析了一下現狀但什麼都沒搞懂
+		PRINTFORML 沒辦法只好休息了、但是空房間只有一個
+		PRINTFORML %ANAME(MASTER)%和%ANAME(対象)%發現房間裡面只有一張床
+		PRINTFORMW 總覺得現在的氣氛有點微妙、從剛才開始兩人就相互無言地沉默著
+		PRINTFORML 怎麼辦？
+		CALL ASK_YN("推倒在床上" ,"老實休息")
+		IF RESULT == 1
+			PRINTFORMW 決定老實地休息
+			PRINTFORML 
+			PRINTFORML 回過神來的時候%ANAME(MASTER)%已經躺在了自己房間的床上了
+			PRINTFORML 那真的是夢嗎？
+			PRINTFORMW 就這樣稀里糊塗地度過了這一天
+		ELSEIF RESULT == 0
+			PRINTFORML 反正是在夢裡、那就做吧
+			PRINTFORML 這麼想著的%ANAME(MASTER)%把%ANAME(対象)%推倒在了床上
+			PRINTFORMW 她一開始扭扭捏捏的、可能同樣以為是在夢裡吧、並沒有怎麼抵抗
+			PRINTFORML 
+			PRINTFORMW %ANAME(MASTER)%汗流浹背地躺在床上…
+			PRINTFORML 臂彎中抱著同樣汗流浹背氣喘吁吁的%ANAME(対象)%
+			PRINTFORML %ANAME(MASTER)%和%ANAME(対象)%休息了一會兒就開始拼命貪求著彼此的身體、一次又一次地達到了高潮
+			PRINTFORMW 可能是因為在夢中的關係、身體比平時更加敏感、%ANAME(MASTER)%和%ANAME(対象)%都在拼命渴求著對方
+			PRINTFORML 兩人的身體緊緊貼合激烈扭動著、舌頭相互緊緊纏繞著進行濃厚的接吻
+			PRINTFORML %ANAME(MASTER)%一邊抓住趴著的%ANAME(対象)%的腰、一邊從她背後用插入她子宮的氣勢用力抽插著
+			PRINTFORMW 隨後%ANAME(対象)%跨坐在%ANAME(MASTER)%的身上、一邊露出啊嘿顏一邊激烈扭動著腰、%ANAME(MASTER)%也從下方用力地往上挺動腰部下
+			PRINTFORML 每當腰肢撞擊都會有過電般的快感傳來、%ANAME(MASTER)%忍不住在她的膣穴內射精數次
+			PRINTFORMW …%ANAME(MASTER)%和%ANAME(対象)%稍微休息了一下就再次開始了性愛、徹夜交歡…
+			CALL FUCK(対象, "Ｃ, Ｂ, Ｖ, Ｍ, 欲望, 性交, 奉仕, 精愛, 口淫, 接吻, Ｖ性交", "処女喪失, 接吻喪失, 膣内射精", GET_ID(MASTER), @"%ANAME(MASTER)%の\@RAND:2 ? 肉棒 # 唇\@", ANAME(MASTER), "", "和姦")
+			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣", "和姦")
+			PRINTFORML 
+			PRINTFORML 回過神來的時候%ANAME(MASTER)%已經躺在了自己房間的床上了
+			PRINTFORMW 那真的是夢嗎？
+			PRINTFORML 煩惱著的%ANAME(MASTER)%出門就看見了%ANAME(対象)%
+			PRINTFORMW 她一看見%ANAME(MASTER)%就滿臉通紅地快步離開了
+			CFLAG:対象:好感度 += 500
+		ENDIF
+	;武闘訓練…
+	CASE 2
+		PRINTFORMW 被%ANAME(対象)%參加武鬥訓練
+		PRINTFORML 怎麼辦？
+		CALL ASK_YN("答應她" ,"拒絕")
+		IF RESULT == 1
+			PRINTFORMW 因為太忙了所以拒絕了
+		ELSEIF RESULT == 0
+			PRINTFORML 因為正好有空所以答應了
+			PRINTFORMW 雖說是訓練、但也是為了打倒對方而進行的
+			PRINTFORML ・
+			PRINTFORML ・
+			PRINTFORMW ・
+			IF ((ABL:MASTER:武闘 / 10) + (ABL:MASTER:防衛 / 20)) * (RAND:8 + 1) <= ((ABL:対象:武闘 / 10) + (ABL:対象:防衛 / 20)) * (RAND:8 + 1)
+				PRINTFORMW 被打倒了…
+				PRINTFORMW 被少女打倒是屈辱、但也是很好的經驗
+				CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:10 + 1, 1)
+				CALL TRAIN_AUTO_ABLUP
+			ELSE
+				PRINTFORMW %ANAME(MASTER)%漂亮地打倒了%ANAME(対象)%！
+				PRINTFORML %ANAME(対象)%氣喘吁吁地躺在地上
+				PRINTFORMW 周圍一個人也沒有
+				PRINTFORML 怎麼辦？
+				CALL ASK_YN("侵犯她" ,"伸出手來")
+				IF RESULT == 1
+					PRINTFORMW 把手伸了出來
+					PRINTFORML 她帶著複雜的表情把手遞給了%ANAME(MASTER)%
+					PRINTFORMW 隨後%ANAME(MASTER)%和%ANAME(対象)%就這次訓練交換了意見
+					CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:20 + 2, 1)
+					CALL TRAIN_AUTO_ABLUP
+				ELSEIF RESULT == 0
+					PRINTFORMW %ANAME(MASTER)%再也忍不住襲擊了%ANAME(対象)%
+					IF CFLAG:対象:好感度 + RAND:400 >= 1700
+						LOCAL = 1
+						PRINTFORML 令%ANAME(MASTER)%意外的是%ANAME(対象)%沒有進行抵抗、雖然很害羞但還是接受了%ANAME(MASTER)%
+						PRINTFORML %ANAME(MASTER)%把手伸進%ANAME(対象)%的內衣裡面揉搓著她的乳房、她顫抖著身體從喉嚨裡吐出了甜美的喘息
+						PRINTFORMW %ANAME(MASTER)%一邊愛撫著、一邊舔舐著%ANAME(対象)%那帶著汗味的脖子
+					ELSE
+						PRINTFORML %ANAME(対象)%雖然驚訝地進行了抵抗、但因為太疲憊了所以力量很弱
+						PRINTFORML %ANAME(MASTER)%把手伸進%ANAME(対象)%的內衣裡面揉搓著她的乳房、她顫抖著身體從喉嚨裡發出了悲鳴聲
+						PRINTFORMW %ANAME(MASTER)%一邊愛撫著、一邊舔舐著%ANAME(対象)%那帶著汗味的脖子
+					ENDIF
+					PRINTFORML 
+					PRINTFORMW 在荒無人煙的密林深處%ANAME(MASTER)%侵犯了%ANAME(対象)%
+					PRINTFORML %ANAME(MASTER)%抓住趴著的%ANAME(対象)%的腰肢拼命抽插著、她的身體不停顫抖
+					IF TALENT:対象:処女 == 1
+						PRINTFORML 身為處女的%ANAME(対象)%的膣壺卻緊緊地纏繞著肉竿、令%ANAME(MASTER)%舒服得差不多就要射精了
+					ELSE
+						PRINTFORML 訓練之後的蜜壺非常的柔軟、緊緊地纏繞著肉棒、令%ANAME(MASTER)%舒服得差不多就要射精了
+					ENDIF
+					IF LOCAL == 1
+						IF TALENT:対象:処女 == 1
+							PRINTFORMW %ANAME(対象)%一邊被%ANAME(MASTER)%抽插著、一邊忍耐著痛苦露出了笑容
+						ELSE
+							PRINTFORMW 被%ANAME(MASTER)%责弄著的%ANAME(対象)%臉上露出了喜悅的表情沉溺在快感之中
+						ENDIF
+					ELSE
+						PRINTFORMW %ANAME(MASTER)%的所作所為令她流著眼淚呻吟著、不時顫抖著身體
+					ENDIF
+					PRINTFORML 啪啪啪啪！每次肉與肉的互相撞擊都令%ANAME(対象)%發出嬌嫩的呻吟聲
+					PRINTFORML 每當她扭動身體飛散的汗水都會散發出濃郁的雌性氣息不停刺激著%ANAME(MASTER)%的性慾
+					PRINTFORML 為了不崩潰%ANAME(対象)%渾身顫抖拼命忍耐著
+					PRINTFORMW 當龜頭頂到了子宮口、%ANAME(対象)%伴隨著更大的喘息聲打了一個寒顫
+					PRINTFORML %ANAME(MASTER)%不停蹂躪著子宮口、%ANAME(対象)%只能不停顫抖著扭動身體
+					IF LOCAL == 1
+						PRINTFORML %ANAME(対象)%猶豫了一會兒之後小聲問%ANAME(MASTER)%是要射在外面還是射在裡面
+						PRINTFORML 她那沉溺在羞恥和快樂之中的表情令%ANAME(MASTER)%再也忍耐不住在她的膣穴中不斷射出精液
+						PRINTFORMW %ANAME(対象)%發出喜悅的聲音接受了所有的精液、比%ANAME(MASTER)%更加反復地高潮
+						CALL FUCK(対象, "Ｃ, Ｂ, Ｖ, Ｍ, 欲望, 性交, 奉仕, 精愛, 口淫, 接吻, Ｖ性交", "処女喪失, 接吻喪失, 膣内射精", GET_ID(MASTER), @"%ANAME(MASTER)%の\@RAND:2 ? 肉棒 # 嘴唇\@", ANAME(MASTER), "", "和姦")
+						CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴", "和姦")
+					ELSE
+						PRINTFORML 她懇求著射在外面但是%ANAME(MASTER)%無視她的請求射在了她的膣穴裡面
+						PRINTFORML 混雜著屈辱、恐怖及快感的表情刺激了%ANAME(MASTER)%的嗜虐心、很快肉棒就又硬挺了起來
+						PRINTFORMW %ANAME(MASTER)%一直重複侵犯著%ANAME(対象)%直到她精疲力竭再也哭不出來為止
+						CALL FUCK(対象, "Ｃ, Ｂ, Ｖ, Ｍ, 欲望, 性交, 奉仕, 精愛, 口淫, 接吻, Ｖ性交", "処女喪失, 接吻喪失, 膣内射精", GET_ID(MASTER), @"%ANAME(MASTER)%の\@RAND:2 ? 肉棒 # 唇\@", ANAME(MASTER), "", "強姦")
+						CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣", "強姦")
+					ENDIF
+					PRINTFORML 
+					PRINTFORMW 結束之後、把滿身精液的%ANAME(対象)%放置好之後%ANAME(MASTER)%離開了
+					IF CFLAG:対象:好感度 + RAND:400 >= 1700
+						PRINTFORMW …幾日後和%ANAME(対象)%相見時、她邀請%ANAME(MASTER)%有機會的話再次進行訓練
+						CFLAG:対象:好感度 += 300
+					ELSE
+						PRINTFORMW …當然之後%ANAME(MASTER)%就被%ANAME(対象)%厭惡著避開了
+						CFLAG:対象:好感度 -= 300
+					ENDIF
+					CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:20 + 2, 1)
+					CALL TRAIN_AUTO_ABLUP
+				ENDIF
+			ENDIF
+		ENDIF
+	;オナニー目撃
+	CASE 3
+		PRINTFORML 工作延長到了深夜
+		PRINTFORML %ANAME(MASTER)%走在寂靜的宮殿裡
+		PRINTFORMW …不知道從哪裡傳來了微弱的呻吟聲
+		PRINTFORML 不知道在哪裡但只要側耳傾聽、就會斷斷續續地聽到
+		PRINTFORML 躡手躡腳地走向聲音傳來的方向、發現是從休息室裡面傳出來的
+		PRINTFORML 門口微微打開了一條縫隙、從裡面漏出了燈光
+		PRINTFORMW 小心翼翼靜悄悄地往裡面看去、發現%ANAME(対象)%正在裡面
+		PRINTFORMW …她竟然在沙發上忘我地自慰著
+		PRINTFORML 那是白天、大家一起坐過的沙發
+		PRINTFORML %ANAME(対象)%用手指不停摩擦著恥部、用平常看不到的表情漏出甜美的喘息
+		PRINTFORMW 這種場面、實在是不能輕易接受
+		PRINTFORML 怎麼辦？
+		CALL ASK_MULTI("闖進去" ,"繼續偷窺" ,"立刻離開")
+		IF RESULT == 2
+			PRINTFORML 不行不行
+			PRINTFORMW 偷窺是不行的、%ANAME(MASTER)%悄無聲息地離開了
+		ELSEIF RESULT == 1
+			PRINTFORML %ANAME(MASTER)%一直緊盯著%ANAME(対象)%的身影
+			PRINTFORMW %ANAME(対象)%沒有注意到%ANAME(MASTER)%的視線、暴露出了不該有的樣子
+			PRINTFORML %ANAME(対象)%一邊揉搓著自己的恥部一邊责弄著自己的乳頭、不斷發出喘息呻吟
+			PRINTFORML 那時而顫抖的身影令%ANAME(MASTER)%口水直流
+			PRINTFORMW %ANAME(MASTER)%被%ANAME(対象)%那為了不讓喘息聲漏出來、一邊忍耐一邊自慰的身影牢牢吸引住了
+			PRINTFORML 
+			PRINTFORMW 返回房間裡後、%ANAME(MASTER)%的腦海里殘留著她的身影和喘息聲自慰了好幾次
+			CALL FUCK(MASTER, "Ｃ, 射精, 自慰, 自慰", "", 0, "", "", @"",)
+		ELSEIF RESULT == 0
+			PRINTFORML %ANAME(MASTER)%微笑著慢慢打開了門
+			PRINTFORML 聽到門吱一聲打開之後%ANAME(対象)%大吃一驚抬頭看了過來
+			PRINTFORMW 看見站在房間門口的%ANAME(MASTER)%之後她慌慌張張地想要藏起來
+			PRINTFORML %ANAME(MASTER)%反手關上門慢慢靠近%ANAME(対象)%之後、%ANAME(対象)%語無倫次地想要解釋
+			PRINTFORML %ANAME(MASTER)%抓住了滿臉通紅渾身顫抖著想要解釋的%ANAME(対象)%的手
+			PRINTFORMW %ANAME(MASTER)%不管不顧地強行把她的衣服剝掉推倒在了沙發上
+			PRINTFORML 
+			PRINTFORMW %ANAME(MASTER)%在沙發上壓著%ANAME(対象)%侵犯著她
+			PRINTFORML 由於自慰而濡濕的秘所順利地接受了%ANAME(MASTER)%的肉棒插入
+			PRINTFORML 每次挺動腰肢都會響起沙發的嘎吱作響聲和%ANAME(対象)%的嬌喘聲
+			PRINTFORMW %ANAME(対象)%雖然嘴巴拼命抵抗著但是身體的反應卻非常坦率、膣肉蠢動著不停擠壓肉棒
+			PRINTFORML 「竟然在這種地方自慰、其實是希望被這麼幹吧？」%ANAME(MASTER)%低聲在她耳邊低聲私語道
+			PRINTFORML %ANAME(対象)%一邊顫抖地挺著身體一邊拼命搖頭否認
+			PRINTFORML 但是%ANAME(対象)%的膣穴卻像是在肯定這個疑問一樣更加緊地勒住了%ANAME(MASTER)%的肉棒表示歡迎
+			PRINTFORMW %ANAME(MASTER)%因為%ANAME(対象)%那白天看不到的表情和喘息性奮地激烈挺動著腰肢
+			IF CFLAG:対象:好感度 + RAND:400 >= 1700
+				LOCAL = 1
+				PRINTFORML 已經沒有抵抗的話語了、%ANAME(対象)%可愛地扭動著身體緊緊抱住了%ANAME(MASTER)%
+				PRINTFORML 她發出了嫵媚的甜美喘息聲、無意識地露出了雌性的臉望著%ANAME(MASTER)%
+			ELSE
+				PRINTFORML 她那抵抗的語言漸漸沒有了、取而代之的是可愛的喘息聲
+				PRINTFORML %ANAME(対象)%拼命咬牙想要忍耐、但是她的臉部表情已經無意識地變成了雌性的臉
+			ENDIF
+			PRINTFORMW 揉捏著她那激凸的乳頭、她發出了像要融化一般的蕩漾叫聲
+			IF LOCAL == 1
+				PRINTFORML %ANAME(MASTER)%一射精、她就發出了喜悅的聲音大幅度仰起身子高潮了
+				PRINTFORML %ANAME(対象)%雙腿緊緊纏著%ANAME(MASTER)%、子宮把精液一滴不剩地全部吞進了深處
+				PRINTFORMW %ANAME(MASTER)%迷戀著%ANAME(対象)%那可愛的雌性臉持續忘我地侵犯著她…
+				CALL FUCK(対象, "Ｃ, Ｂ, Ｖ, Ｍ, 欲望, 性交, 奉仕, 精愛, 露出, 口淫, 接吻, Ｖ性交", "処女喪失, 接吻喪失, 膣内射精", GET_ID(MASTER), @"%ANAME(MASTER)%の\@RAND:2 ? 肉棒 # 嘴唇\@", ANAME(MASTER), "", "和姦")
+				CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴", "和姦")
+				PRINTFORML 
+				PRINTFORMW 當天空泛白的時候、%ANAME(MASTER)%將無力躺著的%ANAME(対象)%帶回了房間裡面
+				PRINTFORMW …幾天後見到%ANAME(対象)%、她害羞地打了聲招呼
+				CFLAG:対象:好感度 += 500
+			ELSE
+				PRINTFORML 無視她的拼命懇求%ANAME(MASTER)%強行在她的膣穴裡面釋放了自己的慾望
+				PRINTFORML %ANAME(対象)%雙腿伸直顫抖著發出了夾雜著嬌吟的悲鳴聲大幅度仰起身子高潮了
+				PRINTFORMW 因為%ANAME(対象)%那流淚嗚咽的樣子而性奮的%ANAME(MASTER)%在那之後一直侵犯著她…
+				CALL FUCK(対象, "Ｃ, Ｂ, Ｖ, Ｍ, 欲望, 性交, 奉仕, 精愛, 露出, 口淫, 接吻, Ｖ性交", "処女喪失, 接吻喪失, 膣内射精", GET_ID(MASTER), @"%ANAME(MASTER)%の\@RAND:2 ? 肉棒 # 嘴唇\@", ANAME(MASTER), "", "強姦")
+				CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴", "強姦")
+				PRINTFORML 
+				PRINTFORMW 當天空泛白的時候、%ANAME(MASTER)%將無力躺著的%ANAME(対象)%帶回了房間裡面
+				PRINTFORMW …幾天後見到她、她滿臉通紅地瞪了眼%ANAME(MASTER)%之後離開了
+				CFLAG:対象:好感度 -= 500
+			ENDIF
+		ENDIF
+	;媚薬
+	CASE 4
+		PRINTFORMW 通過中介、從煉金術師手裡得到了自製的媚藥
+		PRINTFORML 這是吃了之後會把連性都不知道怎麼寫的清純少女立即變成淫亂婊子的危險藥物
+		PRINTFORML 請一定要確認一下藥的效果
+		PRINTFORMW 正在煩惱著該怎麼辦的時候恰巧被%ANAME(対象)%邀請去喝茶
+		PRINTFORML 怎麼辦？
+		CALL ASK_YN("餵藥" ,"什麼也不做")
+		IF RESULT == 1
+			PRINTFORML 不想用這種奇怪的藥破壞和她之間的關係
+			PRINTFORMW %ANAME(MASTER)%什麼也沒做光喝茶了
+			CFLAG:対象:好感度 += 200
+		ELSEIF RESULT == 0
+			PRINTFORML %ANAME(MASTER)%決定讓她試藥
+			PRINTFORMW 來到了%ANAME(対象)%的房間裡喝茶
+			PRINTFORML 一邊閒聊著、一邊趁機在她的茶杯裡滴了幾滴媚藥
+			PRINTFORMW 看到她毫不懷疑地把茶喝進嘴裡後%ANAME(MASTER)%的內心竊喜著
+			PRINTFORML …過了一會兒之後、%ANAME(対象)%的樣子明顯變得非常奇怪
+			PRINTFORML 她滿臉通紅、氣喘吁吁地不斷扭動著身體
+			PRINTFORML 她那樣子%ANAME(MASTER)%相信了媚藥是真的、於是站起來輕輕把手放在了%ANAME(対象)%的肩膀上
+			PRINTFORMW 於是她的身體一震發出了「唔嗯！」的煽情聲音
+			PRINTFORML %ANAME(対象)%渾身顫抖、氣喘吁吁地想要離開%ANAME(MASTER)%的身邊
+			PRINTFORML 她那想方設法保持理性卻無法忍耐的姿態喚起了%ANAME(MASTER)%的嗜虐心
+			PRINTFORML 抱住了%ANAME(対象)%之後她也沒有抵抗、摸上她的肌膚後她發出了淫蕩的喘息聲
+			PRINTFORMW %ANAME(MASTER)%把雙眼含淚顫抖著無意識靠了過來的%ANAME(対象)%搬到了床上
+			PRINTFORML 
+			PRINTFORMW 隨後從%ANAME(対象)%的臥室裡傳來了嘶啞的呻吟聲
+			PRINTFORML %ANAME(対象)%跨坐在%ANAME(MASTER)%的身上一邊露出啊嘿顏一邊上下挺動著腰肢
+			PRINTFORML 媚藥的效果非常驚人、%ANAME(MASTER)%只是稍微愛撫了一下%ANAME(対象)%就完全發情了
+			PRINTFORMW 現在的%ANAME(対象)%已經成為了一隻只會思考性愛的母狗緊緊纏著%ANAME(MASTER)%不停扭動著腰
+			IF TALENT:対象:処女 == 1
+				PRINTFORML 愛液混合著鮮血不斷從把肉棒整根吞入的結合部位流出
+				PRINTFORML 儘管之前還是處女、但是%ANAME(対象)%現在卻像是沉迷性愛的婊子一般瘋狂呻吟
+				PRINTFORMW 膣穴就像是經過了十年的調教一樣柔軟緊緻、不斷刺激著肉棒催促著射精
+			ELSE
+				PRINTFORML 結合部把肉棒盡根吞入、不斷流淌著愛液並發出淫猥的聲音
+				PRINTFORML %ANAME(対象)%的樣子是平時無法想象的、像是沉迷性愛的婊子一般瘋狂呻吟
+				PRINTFORMW 膣穴已經完全打開了、但是柔軟的內壁卻緊緊纏繞著肉棒不斷催促著射精
+			ENDIF
+			PRINTFORML %ANAME(対象)%激烈扭動著腰肢望著%ANAME(MASTER)%、嬌聲訴說著愛語
+			PRINTFORML %ANAME(MASTER)%代替回答輕輕往上挺了下腰、她就立刻仰起身子高聲呻吟
+			PRINTFORMW 膣穴緊緊纏繞著肉棒、那快要升天的快感令%ANAME(MASTER)%無法再繼續忍耐、用力挺動起腰
+			PRINTFORML %ANAME(対象)%的身體像過電般地痙攣顫抖著、臉上浮現出了高潮餘韻的啊嘿顏
+			PRINTFORML 但是很快%ANAME(対象)%就開始更加激烈地扭動腰肢渴求更大的快感和%ANAME(MASTER)%的精子
+			PRINTFORMW 比想象之中還要更加美艷淫亂的%ANAME(対象)%和%ANAME(MASTER)%沉浸在快感中、整晚都在持續交歡
+			CALL FUCK(対象, "Ｃ, Ｂ, Ｖ, Ｍ, 欲望, 性交, 奉仕, 精愛, 口淫, 接吻, Ｖ性交", "処女喪失, 接吻喪失, 膣内射精", GET_ID(MASTER), @"%ANAME(MASTER)%の\@RAND:2 ? 肉棒 # 嘴唇\@", ANAME(MASTER), "", "和姦")
+			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴", "和姦")
+			PRINTFORML 
+			PRINTFORMW 當天空再次泛白、把疲憊不堪躺在床上的%ANAME(対象)%獨自留下後%ANAME(MASTER)%離開了房間
+			PRINTFORMW …之後、當%ANAME(MASTER)%再次見到%ANAME(対象)%、她不好意思地移開了視線
+			CFLAG:対象:好感度 += 300
+		ENDIF
+	;えっちな本
+	CASE 5
+		PRINTFORML %ANAME(MASTER)%在村子裡走著的時候、發現了一家書店
+		PRINTFORMW 走進去隨便看了下書、卻發現了%ANAME(対象)%
+		PRINTFORML 想和她打招呼、但是她好像正在入迷地看著什麼書
+		PRINTFORMW 非常在意到底是什麼書的%ANAME(MASTER)%特意繞到了%ANAME(対象)%後面偷看
+		PRINTFORMW …真是好黃色的書啊
+		PRINTFORMW 看著她的側臉、她臉頰泛紅地在聚精會神看著書
+		PRINTFORML 怎麼辦？
+		CALL ASK_YN("打招呼" ,"離開")
+		IF RESULT == 1
+			PRINTFORML 還是別管了吧
+			PRINTFORMW %ANAME(MASTER)%招呼也沒打就這樣離開了
+		ELSEIF RESULT == 0
+			PRINTFORML %ANAME(MASTER)%惡作劇地向她打了聲招呼
+			PRINTFORMW %ANAME(対象)%發出了可愛的尖叫聲
+			PRINTFORML 轉過頭來發現了%ANAME(MASTER)%後她慌慌張張地想要掩飾
+			PRINTFORML 「萬一被大家發現了妳正在看這樣的書、大家會怎麼想呢？」這樣低語著
+			PRINTFORML 於是%ANAME(対象)%渾身一震、滿臉通紅吶吶無言
+			PRINTFORMW 她的樣子令%ANAME(MASTER)%確定掌握到了把柄、於是抓住她的手走出了書店
+			PRINTFORML 
+			PRINTFORMW %ANAME(MASTER)%把%ANAME(対象)%帶到了附近的情人旅館
+			PRINTFORML 她一靠近旅館就滿臉通紅、慌慌張張的、卻並沒有逃跑
+			PRINTFORML 進入房間之後、她就性奮地一邊喘息一邊望著%ANAME(MASTER)%
+			PRINTFORML 於是%ANAME(MASTER)%立刻把%ANAME(対象)%推倒在床、趴在了她的身上
+			IF TALENT:対象:処女 == 1
+				PRINTFORMW 她露出害怕的表情顫抖著出聲想要制止%ANAME(MASTER)%、但是%ANAME(MASTER)%充耳不聞想要把她的衣服脫下來
+			ELSE
+				PRINTFORMW 她露出羞恥的表情顫抖著出聲想要制止%ANAME(MASTER)%、但是%ANAME(MASTER)%充耳不聞想要把她的衣服脫下來
+			ENDIF
+			PRINTFORML 她稍微抵抗了一下、但卻像是寵物撒嬌一般、%ANAME(MASTER)%不費絲毫力氣就把她的衣服脫光了
+			PRINTFORML 脫完衣服之後露出了%ANAME(対象)%那美麗的裸體
+			PRINTFORML 不知道是因為性奮還是緊張、她全身泛紅微微顫抖著
+			PRINTFORMW 她那樣子令%ANAME(MASTER)%也興奮不已、忍耐不住脫下了衣服就把她緊緊抱在了一起
+			IF TALENT:対象:処女 == 1
+				PRINTFORML 在%ANAME(MASTER)%的愛撫下她渾身顫抖扭動著身體發出了處女般的嬌吟聲
+			ELSE
+				PRINTFORML 在%ANAME(MASTER)%的愛撫下她渾身顫抖扭動著身體發出了美艷的呻吟聲
+			ENDIF
+			PRINTFORML %ANAME(MASTER)%一邊揉搓著乳房一邊在%ANAME(対象)%的耳邊低語「你是在期待這種事情吧？」、%ANAME(対象)%的背部微微顫抖著
+			PRINTFORMW 她一邊喘息一邊露出了和平時完全不同的表情
+			PRINTFORML 想要聽見她更多的聲音、想要看見她更多表情的%ANAME(MASTER)%入迷地用手指和舌頭愛撫遍了她的全身各個角落
+			PRINTFORML %ANAME(対象)%也不再抵抗、在%ANAME(MASTER)%的下面不斷扭動喘息著
+			PRINTFORML 愛撫了一段時間之後她就一副疲憊的表情無力躺在了床上
+			PRINTFORMW 於是做完了充分前戲的%ANAME(MASTER)%準備把怒挺的肉棒插進她濡濕的秘所深處
+			IF TALENT:対象:処女 == 1
+				PRINTFORML 撫摸著不安的%ANAME(対象)%的頭接吻、她的表情立馬變得春情蕩漾
+				PRINTFORML %ANAME(MASTER)%抓住了%ANAME(対象)%的腰、龜頭慢慢的插進了她的體內
+				PRINTFORML 將那緊緊閉合如同在反抗般的處女膣肉強行頂開、一點一點地向深處挺進
+				PRINTFORMW 中間傳出了處女膜撕裂的聲音、%ANAME(対象)%發出了小小的悲鳴向上仰起了身體
+				PRINTFORML %ANAME(MASTER)%為了照顧她、慢慢地挺動著腰肢、慢慢地把腰壓了下去
+				PRINTFORML 每次她呻吟的時候膣穴都會緊緊纏繞著整根肉棒給予刺激、於是%ANAME(MASTER)%也不由得小聲呻吟了起來
+				PRINTFORML 隨後當插入到最深處的龜頭撞擊到了子宮口、她立馬發出了淫蕩的呻吟聲彈跳了起來
+				PRINTFORMW 一邊感受著下半身的舒適纏繞感、一邊看著%ANAME(対象)%、而她正喘息著流淚望著兩人的結合部位
+				PRINTFORML 無論如何已經無法再忍耐她那初嘗禁果的樣子的%ANAME(MASTER)%再次抓住了她的腰一點點開始挺動起來
+				PRINTFORML 這突然的衝擊令她發出了嬌滴滴的呻吟聲、身體像過電般痙攣著不斷仰起
+				PRINTFORML 每次抽插都緊緊纏繞著肉棒、讓肉棒有種會被吸走的強烈刺激令%ANAME(MASTER)%沉迷其中
+				PRINTFORMW 膣穴隨著愛液緩緩流出而變得更加潤滑、%ANAME(対象)%的呻吟聲也漸漸變得淫蕩了起來
+				PRINTFORML %ANAME(MASTER)%在%ANAME(対象)%耳邊低聲呢喃「明明是第一次、但是感覺這麼舒服真是色情啊」、她拼命搖頭想要否認
+				PRINTFORML %ANAME(MASTER)%入迷地抽插著、享受著她那從未向任何人展示過的表情和極品的肉體
+				PRINTFORML 當%ANAME(MASTER)%逼近極限的時候感覺膣穴變得更緊了、膣肉激烈痙攣著表明她也快要高潮了
+				PRINTFORMW 她被未知的感覺刺激著緊緊抱住了%ANAME(MASTER)%、這更加刺激了%ANAME(MASTER)%的肉棒
+				PRINTFORML 聽著她那仿佛要把大腦融化的甜美呻吟、%ANAME(MASTER)%挺動腰肢開始加速衝刺起來
+				PRINTFORML 隨後當%ANAME(対象)%大幅度仰起身體高潮的同時、%ANAME(MASTER)%也把自己的所有慾望都釋放到了她的體內最深處
+				PRINTFORML 整根肉棒在突然絞緊的膣穴裡面被緊緊纏繞著、這次的射精比以往任何一次都要猛烈、那令腰都要疲軟的快感讓兩人不斷顫抖著
+				PRINTFORML 她一邊被內射一邊用恍惚的下流表情戀慕地望著%ANAME(MASTER)%並不斷喘息著
+				PRINTFORMW 當射精結束之後%ANAME(MASTER)%拔出了肉棒、混合了血液的白濁液從秘所的縫隙處緩緩流出
+			ELSE
+				PRINTFORML 撫摸著挺起胸部的%ANAME(対象)%的頭接吻、她的表情立馬變得春情蕩漾
+				PRINTFORML %ANAME(MASTER)%抓住了%ANAME(対象)%的腰、龜頭慢慢的插進了她的體內
+				PRINTFORML 膣穴非常緊實、充滿了彈性的肉壁不斷刺激著%ANAME(MASTER)%的肉棒
+				PRINTFORMW %ANAME(MASTER)%為了享受她那欲求不滿的樣子、慢慢地挺動著腰肢、慢慢地把腰壓了下去
+				PRINTFORML 每次她呻吟的時候膣穴都會緊緊纏繞著整根肉棒給予刺激、於是%ANAME(MASTER)%也不由得小聲呻吟了起來
+				PRINTFORML 隨後當插入到最深處的龜頭撞擊到了子宮口、她立馬發出了淫蕩的呻吟聲彈跳了起來
+				PRINTFORML 一邊感受著下半身的舒適纏繞感、一邊看著%ANAME(対象)%、而她正喘息著望向兩人的結合部位
+				PRINTFORMW 第一次看見她那雌性表情的%ANAME(MASTER)%無法繼續忍耐、再次抓住了她的腰一點點開始挺動起來
+				PRINTFORML 這突然的衝擊令她發出了嬌滴滴的呻吟聲、身體像過電般痙攣著不斷仰起
+				PRINTFORML 每次抽插都緊緊纏繞著肉棒、讓肉棒有種會被吸走的強烈刺激令%ANAME(MASTER)%沉迷其中
+				PRINTFORML 膣穴隨著愛液緩緩流出而變得更加潤滑、%ANAME(対象)%的呻吟聲也漸漸變得更加淫蕩
+				PRINTFORMW %ANAME(MASTER)%在%ANAME(対象)%耳邊低聲呢喃「明明是被強迫的、感覺這麼舒服真是色情啊」、她拼命搖頭想要否認
+				PRINTFORML %ANAME(MASTER)%入迷地抽插著、享受著她那從未向任何人展示過的表情和極品的肉體
+				PRINTFORML 當%ANAME(MASTER)%逼近極限的時候感覺膣穴變得更緊了、膣肉激烈痙攣著表明她也快要高潮了
+				PRINTFORML %ANAME(対象)%隨著高潮的接近緊緊抱住了%ANAME(MASTER)%、這更加刺激了%ANAME(MASTER)%的肉棒
+				PRINTFORMW 聽著她那仿佛要把大腦融化的甜美呻吟、%ANAME(MASTER)%挺動腰肢開始加速衝刺起來
+				PRINTFORML 隨後當%ANAME(対象)%大幅度仰起身體高潮的同時、%ANAME(MASTER)%也把自己的所有慾望都釋放到了她的體內最深處
+				PRINTFORML 整根肉棒在突然絞緊的膣穴裡面被緊緊纏繞著、這次的射精比以往任何一次都要猛烈、那令腰都要疲軟的快感讓兩人不斷顫抖著
+				PRINTFORML 她一邊被內射一邊用恍惚的下流表情戀慕地望著%ANAME(MASTER)%並不斷喘息著
+				PRINTFORMW 當射精結束之後%ANAME(MASTER)%拔出了肉棒、秘所發出了下流的聲音一下子溢出了黏糊糊的白濁液
+			ENDIF
+			PRINTFORML %ANAME(対象)%不斷喘息著、露出啊嘿顏無力地躺在床上
+			PRINTFORMW 那滿足的樣子讓不安分的た%ANAME(MASTER)%緩緩撫摸著她的肌膚、令她不斷扭動著身體
+			PRINTFORML 這樣看來還可以繼續享受
+			PRINTFORMW 於是%ANAME(MASTER)%為了讓昂然的肉棒冷靜下來、抓住%ANAME(対象)%的手臂把她再次抱進了懷裡
+			CALL FUCK(対象, "Ｃ, Ｂ, Ｖ, Ｍ, 欲望, 性交, 奉仕, 精愛, 口淫, 接吻, Ｖ性交", "処女喪失, 接吻喪失, 膣内射精", GET_ID(MASTER), @"%ANAME(MASTER)%の\@RAND:2 ? 肉棒 # 嘴唇\@", ANAME(MASTER), "", "和姦")
+			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴", "和姦")
+			PRINTFORML 
+			PRINTFORML 數次交歡之後、%ANAME(MASTER)%把%ANAME(対象)%留在了旅館裡離開了
+			PRINTFORMW %ANAME(対象)%呆然地躺在床上回味著那被強行侵犯的衝擊快感
+			PRINTFORMW …幾天後、%ANAME(対象)%一副警惕著會發生什麼事的樣子、但是除了視線交匯時慌慌張張地移開視線以外、什麼也沒有發生
+			CFLAG:対象:好感度 += 300
+		ENDIF
+	;壁尻
+	CASE 6
+		PRINTFORML %ANAME(MASTER)%在宮殿裡走著的時候、聽到了模模糊糊的聲音
+		PRINTFORMW 一邊思考著這是什麼聲音一邊尋找著聲音的來源、結果在倉庫裡發現了%ANAME(対象)%
+		PRINTFORML 她被埋在倒塌的物品下面動憚不得
+		PRINTFORML 得知%ANAME(MASTER)%來到的她懇求%ANAME(MASTER)%幫她移開身上的物品
+		PRINTFORMW 但是當%ANAME(MASTER)%繞到%ANAME(対象)%背後之後卻被那突出的屁股吸引住了
+		PRINTFORML 怎麼辦？
+		CALL ASK_YN("侵犯她" ,"幫助她")
+		IF RESULT == 1
+			PRINTFORML 決定直接幫助她
+			PRINTFORMW …雖然是一堆力氣活、但最後還是順利救出了她
+			PRINTFORMW 和道謝的她一起收拾了倉庫
+			CFLAG:対象:好感度 += 150
+		ELSEIF RESULT == 0
+			PRINTFORML 每當她扭動著身體、那搖晃的屁股就在眼前誘惑著、%ANAME(MASTER)%再也忍耐不住了
+			PRINTFORML 繞到屁股後面的%ANAME(MASTER)%把裙子捲了起來
+			PRINTFORMW 於是整個身體被嚇了一跳、%ANAME(対象)%發出了悲鳴聲
+			PRINTFORML 無視了她的質問、%ANAME(MASTER)%脫掉了她的內褲
+			PRINTFORML 於是%ANAME(対象)%那像年糕一樣柔軟潔白的屁股和美麗的粉紅色秘貝就暴露在了%ANAME(MASTER)%眼前
+			PRINTFORMW 注意到衣服被脫掉的%ANAME(対象)%發出了抗議聲激烈地扭動著身體
+			PRINTFORML 但是%ANAME(MASTER)%不管不顧、緊緊抓住了屁股、準備用舌頭舔舐緊閉的秘貝
+			PRINTFORML 當舌尖觸碰到%ANAME(対象)%的秘貝、她就驚聲尖叫起來、不斷扭動屁股
+			PRINTFORML %ANAME(MASTER)%享受著這種反應、時而溫柔、時而激烈地持續舔舐著陰部
+			PRINTFORMW 不斷抗議的%ANAME(対象)%發現這樣毫無作用之後也盡量抑制住了聲音
+			PRINTFORML 但是在%ANAME(MASTER)%的不斷進攻之下、她的喉嚨情不自禁地吐出了呻吟般的喘息聲
+			PRINTFORML 愛液從秘所裡不斷溢出、確認了秘所已經濕透的%ANAME(MASTER)%移開了臉頰掏出了肉棒
+			PRINTFORML %ANAME(対象)%可能是覺得結束了吧、渾身脫力地大口喘著氣
+			PRINTFORMW 但是%ANAME(MASTER)%再次緊緊抓住了她的屁股、毫不留情地把肉棒插進了秘所的深處
+			PRINTFORML 啪！一下子插到了裡面、她的身體大跳著發出了悲鳴聲
+			IF TALENT:対象:処女 == 1
+				PRINTFORML 處女的膣穴緊緊纏繞著肉棒、從結合處傳來了撕裂幕布的感覺
+				PRINTFORML %ANAME(対象)%因為破瓜的衝擊而顫抖著、從喉嚨裡發出了嘶啞的聲音
+				PRINTFORMW %ANAME(MASTER)%不顧她的樣子把腰部沉了下去、毫不留情地蹂躪勒緊的肉穴
+				PRINTFORML 每一次抽插都讓她全身痙攣地發出夾雜著哭聲的悲鳴、雙腿不斷顫抖著
+				PRINTFORML 每一次挺動腰肢、膣肉都會緊緊纏繞著肉棒、像要把肉棒從根部都吞噬一般
+				PRINTFORML %ANAME(MASTER)%沉迷其中、持續享受著這具極好的肉穴
+				PRINTFORMW %ANAME(対象)%痛得留下了大顆的眼淚、不斷扭動著身體想要逃脫
+				PRINTFORML 不久到達了極限的%ANAME(MASTER)%不顧她的悲鳴在她的膣穴深處盡情地射精了
+			ELSE
+				PRINTFORML 在精心的舐陰下膣穴已經完全張開了、因為插入的衝擊而緊緊纏繞著肉棒
+				PRINTFORML %ANAME(対象)%由於突然的插入而瑟瑟發抖著從喉嚨裡發出了嘶啞的聲音
+				PRINTFORMW %ANAME(MASTER)%不顧她的樣子挺動著腰肢、享受柔軟的膣肉緊纏肉棒的感覺
+				PRINTFORML 每一次抽插都讓她全身痙攣地發出嬌媚的呻吟聲、雙腿不斷顫抖著
+				PRINTFORML 每一次抽插膣肉都會緊緊纏繞著整根肉棒給予強烈的刺激、稍微不注意的話就會射精
+				PRINTFORML %ANAME(MASTER)%沉迷其中、持續享受著這具極好的肉穴
+				PRINTFORMW 來了感覺的%ANAME(対象)%為了迎合快感而不斷扭動著身體發出嬌喘聲
+				PRINTFORML 不久到達了極限的%ANAME(MASTER)%不顧她的懇求在她的膣穴深處盡情地射精了
+			ENDIF
+			PRINTFORML 因為強行侵犯同伴而性奮的%ANAME(MASTER)%比平時射出了更多的精液
+			PRINTFORML 無法逃脫的%ANAME(対象)%只能一邊顫抖著身體一邊嗚咽著
+			PRINTFORMW …在那之後直到厭倦為止、%ANAME(MASTER)%一直持續享受著%ANAME(対象)%的身體
+			CALL FUCK(対象, "Ｃ, Ｂ, Ｖ, Ｍ, 欲望, 性交, 奉仕, 精愛, Ｖ性交", "処女喪失, 膣内射精", GET_ID(MASTER), @"", ANAME(MASTER), "", "強姦")
+			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣", "強姦")
+			PRINTFORML 
+			PRINTFORMW 多次射精之後終於滿足了的%ANAME(MASTER)%把%ANAME(対象)%身上的物品適當挪走後就離開了
+			FOR LOCAL, 0, CHARANUM
+				SIF CFLAG:(LOCAL):所属 == CFLAG:MASTER:所属 && !CFLAG:(LOCAL):捕虜先 && !IS_ANIMAL(LOCAL) && IS_FEMALE(LOCAL)
+					CFLAG:(LOCAL):好感度 -= 500
+			NEXT
+			CALL COLOR_PRINTW("…被她和她的女性朋友討厭了…", カラー_注意)
+		ENDIF
+	;夜遊び
+	CASE 7
+		PRINTFORML 深夜、正在工作中巡邏的時候遇到了%ANAME(対象)%
+		PRINTFORMW 少女一個人在深夜散步是危險的、但是她根本就不聽勸告
+		PRINTFORML 怎麼辦？
+		CALL ASK_MULTI("懲罰她" ,"帶她回去" ,"不管她了")
+		IF RESULT == 2
+			PRINTFORMW 不管她了
+			PRINTFORMW …之後她好像被流氓侵犯了
+			CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, Ｖ性交, 接吻, 口淫, 輪姦", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("流氓"), @"流氓の\@RAND:2 ? 肉棒 # 唇\@", @"流氓", "", "輪姦")
+		ELSEIF RESULT == 1
+			PRINTFORMW 因為很危險所以把她帶回家了
+		ELSEIF RESULT == 0
+			PRINTFORML 決定懲罰這個不聽話的孩子
+			PRINTFORMW %ANAME(MASTER)%把她帶進了旅館裡面は彼女を宿に連れ込んだ
+			PRINTFORML 
+			PRINTFORMW %ANAME(MASTER)%粗暴地侵犯了討厭的%ANAME(対象)%
+			PRINTFORML 趴在地上被堵住了嘴的她被激烈地抽插著
+			PRINTFORML 啪！啪！啪！每次肉體撞擊她都會發出呻吟聲
+			PRINTFORML 為了懲罰不知天高地厚的%ANAME(対象)%粗暴地侵犯蹂躪著肉穴
+			PRINTFORML 因為沒有前戲的強姦、秘所紅腫了起來
+			PRINTFORMW %ANAME(対象)%流著眼淚不斷懇求著原諒、但是%ANAME(MASTER)%絲毫不為所動
+			PRINTFORML 作為回答%ANAME(MASTER)%把肉棒深深地插了進去、%ANAME(対象)%顫抖著大幅度仰起了身體
+			PRINTFORML 當然沒有避孕措施、%ANAME(MASTER)%就這麼直接在%ANAME(対象)%的膣穴深處多次釋放了自己的慾望
+			PRINTFORMW 她只能流著眼淚趴在床上不斷抽搐著身體
+			CALL FUCK(対象, "Ｃ, Ｂ, Ｖ, Ｍ, 欲望, 性交, 精愛, 接吻, Ｖ性交", "処女喪失, 接吻喪失, 膣内射精", GET_ID(MASTER), @"%ANAME(MASTER)%の\@RAND:2 ? 肉棒 # 嘴唇\@", ANAME(MASTER), "", "強姦")
+			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴", "強姦")
+			PRINTFORML 
+			PRINTFORMW 懲罰結束後%ANAME(MASTER)%把滿身瘡痍的%ANAME(対象)%留在房間裡離開了
+			PRINTFORMW …為了慎重起見、%ANAME(MASTER)%一直在防備著%ANAME(対象)%的報復、但是什麼也沒有發生
+			CFLAG:対象:好感度 -= 300
+		ENDIF
+ENDSELECT
+
+RETURN 1

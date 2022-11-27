@@ -1,0 +1,50 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_WEIRD_MERCHANT_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_WEIRD_MERCHANT_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_WEIRD_MERCHANT(対象)
+#DIM 対象
+
+PRINTFORML 被行商人打了個招呼
+PRINTFORML 看来正在進行新発售的薬的試用活動
+PRINTFORML 是花了大量精力的自信作品
+PRINTL
+CALL ASK_YN("试着喝下去", "放弃")
+
+IF RESULT == 1
+	PRINTFORML 不需要那種可疑的東西
+	PRINTFORML 拒絕了
+	RETURN 1
+ENDIF
+
+PRINTFORML 有趣
+PRINTFORML 試著喝下去了
+
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+
+IF !RAND:4
+	PRINTFORML ……感覺心情変好了
+	MAXBASE:対象:気力 += 100
+	CALL ICPRINT(@"気力最大値提高了<100>、変成了{MAXBASE:対象:気力}", "L", カラー_注意)
+ELSE
+	PRINTFORML ……什麼也沒有発生
+	PRINTFORML 告知道效果因人而異後、行商人離開了
+ENDIF
+
+RETURN 1

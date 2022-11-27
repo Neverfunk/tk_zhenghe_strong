@@ -1,0 +1,392 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_ZEGEN_RATE()
+RETURN 30
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_ZEGEN_DECISION()
+RETURN 12 <= DAY && !FLAG:クリアフラグ
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_ZEGEN_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_ZEGEN()
+#DIM 対象
+#DIM 金額
+#DIM 対象都市
+#DIM 捕虜番号, MAX_CHARA_NUM
+VARSET LOCAL
+VARSET 捕虜番号
+
+PRINTFORML 掌握了一个人口拐卖组织的情报
+PRINTFORML 这个组织在国内暗中活跃着
+PRINTFORMW 怎麼辦？
+CALL ASK_MULTI("搜查" ,"交易" ,"派士兵去把他们抓起来")
+IF RESULT == 2
+	PRINTFORMW 这种组织，还是无法与军队相对抗的
+	PRINTFORMW 也算是给国内带来了一点安宁吧
+ELSEIF RESULT == 1
+	PRINTFORML 决定进行交易
+	PRINTFORMW 向这个组织提出了交易的想法
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW ・
+	PRINTFORML 一个组织内的成员被派来了
+	PRINTFORMW 怎麼辦？
+	CALL ASK_MULTI_JUDGE("贩卖村娘", 1,"希望抓捕他国的成员", 1,"我 卖 我 自 己", IS_FEMALE(MASTER) && !TALENT:MASTER:処女)
+	IF RESULT == 0
+		PRINTFORMW 贩卖村娘
+		金額 = 3000 + 1000 * (DAY / 5)
+		MONEY += 金額 
+		FOR LOCAL, 1, MAX_COUNTRY
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:1, -50, 50)
+		NEXT
+		CALL COLOR_PRINT(@"得到了{金額}金", カラー_シアン)
+		PRINTFORML 
+		CALL COLOR_PRINT("谣言传开，他国的评价下降了", カラー_警告)
+		PRINTFORMW 
+	ELSEIF RESULT == 1
+		PRINTFORML 希望抓捕他国的成员
+		$SHOW_LOOP
+		PRINTFORMW 想要抓谁？
+		FOR LOCAL, 0, CHARANUM
+			IF CFLAG:LOCAL:捕虜先 != 0 && CFLAG:LOCAL:捕虜先 != CFLAG:MASTER:所属 && !IS_SP_CHARA(LOCAL)
+				捕虜番号:(LOCAL:1) = LOCAL
+				IF SLAVE_TRADER_PRICE(LOCAL) <= MONEY
+					PRINTFORM [{LOCAL:1}]%ANAME(LOCAL), 16, RIGHT% - 金{SLAVE_TRADER_PRICE(LOCAL), 6, RIGHT}
+				ELSE
+					SETCOLOR カラー_選択不可
+					PRINTPLAINFORM [{LOCAL:1}]%ANAME(LOCAL), 16, RIGHT% - 金{SLAVE_TRADER_PRICE(LOCAL), 6, RIGHT}
+					RESETCOLOR
+				ENDIF
+				PRINTL
+				LOCAL:1 ++
+			ENDIF
+		NEXT
+		CALL SINGLE_DRAWLINE
+		PRINTFORML [1000] 還是算了
+		$INPUT_LOOP
+		INPUT
+		IF RESULT == 1000
+			PRINTFORML 还是算了吧
+			PRINTFORMW 人贩子耸耸肩就走了
+			RETURN 1
+		ELSEIF RESULT < 0 || RESULT >= LOCAL:1 || SLAVE_TRADER_PRICE(捕虜番号:RESULT) > MONEY
+			GOTO INPUT_LOOP
+		ELSE
+			対象 = 捕虜番号:(RESULT)
+			PRINTFORMW 「抓来%ANAME(対象)%就好了吗？」
+			CALL ASK_YN("拜托了", "重新考虑一下")
+			IF RESULT == 1
+				PRINTFORMW 不，还是让我再考虑一下吧
+				CALL SINGLE_DRAWLINE
+				GOTO SHOW_LOOP
+			ELSE
+				PRINTFORMW 拜托给了人贩子们
+				PRINTFORML ・
+				PRINTFORML ・
+				PRINTFORMW ・
+				PRINTFORML 他们成功地把%PRONOUN(対象)%抓了过来
+				PRINTFORMW 你满意地看着%PRONOUN(対象)%、像是花大价钱买下了一个贵重的商品一样
+				IF CFLAG:MASTER:所属 == CFLAG:対象:所属
+					CALL CAPTURE(対象, 0)
+				ELSE
+					CALL CAPTURE(対象, CFLAG:MASTER:所属)
+				ENDIF
+				MONEY -= SLAVE_TRADER_PRICE(対象)
+				CALL COLOR_PRINT(@"金{SLAVE_TRADER_PRICE(対象)}を支払った", カラー_注意)
+				PRINTFORML 
+				IF CFLAG:対象:所属 != CFLAG:MASTER:所属
+					FOR LOCAL, 1, MAX_COUNTRY
+						SIF IS_COUNTRY(LOCAL)
+							CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -100, 100)
+					NEXT
+					CALL COLOR_PRINT(@"与人贩子交涉的事情暴露了，他国的评价下降", カラー_警告)
+					PRINTFORMW
+				ENDIF
+			ENDIF
+		ENDIF
+	ELSE
+		PRINTFORML 我 卖 我 自 己
+		PRINTFORMW 在广场上卖身了
+		CALL ZEGEN_SEXWORK(MASTER)
+		金額 = 1000 + (ABL:MASTER:性交 + ABL:MASTER:性技 + ABL:MASTER:奉仕 + ABL:MASTER:Ｖ感) * 500
+		MONEY += 金額 
+		CALL COLOR_PRINT(@"得到了{金額}金", カラー_シアン)
+		PRINTFORMW
+	ENDIF
+ELSE
+	PRINTFORML 决定进行调查
+	PRINTFORML 为了不显得可疑、需要派一名女性进行调查
+	PRINTFORMW 让谁去？
+	CALL SINGLE_DRAWLINE
+	CALL SELECT_CHARA_LIST_ONLY_LOGIC_SLG("ZEGEN", "ZEGEN")
+	対象 = RESULT
+	IF RESULT == -1
+		PRINTFORMW ……不，果然很危险的样子 
+		PRINTFORMW 就先算了吧……
+		RETURN 1
+	ELSEIF 対象 == MASTER
+		PRINTFORMW %ANAME(対象)%亲自进行搜查
+	ELSE
+		PRINTFORMW 派遣%ANAME(対象)%前去搜查
+	ENDIF
+	CALL DAILY_EVENT_RAND_CITYSELECT(0)
+	対象都市 = RESULT
+	PRINTFORML 打扮成普通村娘的样子混入其中
+	PRINTFORML 和其他姑娘一起被带到了妓院里
+	PRINTFORMW 怎麼辦？
+	CALL ASK_MULTI("武力制圧" ,"从客人那里得到情报" ,"带着女孩们逃走")
+	IF RESULT == 0
+		PRINTFORMW 尝试武力压制
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		IF ABL:対象:武闘 * (RAND:5 + 1) > 40 * (RAND:9 + 1)
+			PRINTFORML 成功压制了据点！
+			PRINTFORMW 如此一来国内的人贩活动就会减轻了吧
+			IF 対象都市 > 0
+				CITY_GUARD:対象都市 += 20
+				CALL COLOR_PRINT(@"%CITY_NAME:対象都市%的防衛率上昇20、变成了{CITY_GUARD:対象都市}", カラー_シアン)
+				PRINTFORMW 
+			ENDIF
+		ELSE
+			PRINTFORML 压制失败了……
+			PRINTFORMW 被打了媚药的%ANAME(対象)%淫荡地和客人干着
+			CALL ZEGEN_SEXWORK(対象)
+			CFLAG:対象:薬物依存 += RAND(30, 60)
+			PRINTFORMW 在那之后、%ANAME(対象)%总算逃出来了
+		ENDIF
+	ELSEIF RESULT == 2
+		PRINTFORMW 带着女孩们逃走
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		IF ABL:対象:知略 * (RAND:5 + 1) > 40 * (RAND:9 + 1)
+			PRINTFORML 成功了！
+			PRINTFORMW 救出的女儿们终于和家人见面了，所有人都喜极而泣。
+			FOR LOCAL, 1, MAX_COUNTRY
+				SIF IS_COUNTRY(LOCAL)
+					CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:1, 50, -50)
+			NEXT
+			CALL COLOR_PRINT("因为救助被绑架少女、他国的评价上升了", カラー_シアン)
+			PRINTFORMW 
+		ELSE
+			PRINTFORML 救助失败了……
+			PRINTFORMW 被打了媚药的%ANAME(対象)%淫荡地和客人干着
+			CALL ZEGEN_SEXWORK(対象)
+			CFLAG:対象:薬物依存 += RAND(30, 60)
+			PRINTFORMW 在那之后、%ANAME(対象)%总算逃出来了
+		ENDIF
+	ELSE
+		PRINTFORMW 和客人做爱以套取情报
+		CALL ZEGEN_SEXWORK(対象)
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		IF (ABL:対象:性交 + ABL:対象:性技 + ABL:対象:奉仕 + ABL:対象:Ｖ感) > 10 + DAY / 10
+			PRINTFORML %ANAME(対象)%的服务让客人非常满足、喋喋不休地说出了很多情报
+			PRINTFORMW 利用这些情报%ANAME(対象)%挖出了奴隶贩子组织
+			IF 対象都市 > 0
+				CITY_GUARD:対象都市 += 25
+				CALL COLOR_PRINT(@"%CITY_NAME:対象都市%の防衛率が25上昇し、{CITY_GUARD:対象都市}になった", カラー_シアン)
+				PRINTFORML 
+			ENDIF
+			FOR LOCAL, 1, MAX_COUNTRY
+				SIF IS_COUNTRY(LOCAL)
+					CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:1, 100, -100)
+			NEXT
+			CALL COLOR_PRINT("因为挖出奴隶贩子组织，他国的评价上升了", カラー_シアン)
+			PRINTFORMW 
+		ELSE
+			PRINTFORML 但是并没有让客人感到满足、也没能套出情报
+			PRINTFORMW 在那之后、%ANAME(対象)%总算逃出来了
+		ENDIF
+	ENDIF
+ENDIF
+
+RETURN 1
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_ZEGEN(対象)
+#DIM 対象
+RETURN CFLAG:対象:行動不能状態 != 行動不能_子供 && CFLAG:対象:所属 == CFLAG:MASTER:所属 && !IS_ANIMAL(対象) && !IS_MALE(対象)
+
+@SELECT_CHARA_LIST_SELECT_LOGIC_ZEGEN(対象)
+#DIM 対象
+RETURN CFLAG:対象:捕虜先 == 0
+
+
+;-------------------------------------------------
+;遊郭での仕事
+;-------------------------------------------------
+@ZEGEN_SEXWORK(ARG:0)
+
+PRINTFORML 
+SELECTCASE RAND:6
+	CASE 0
+		PRINTFORML 客人是带着可憎的笑容的中年男人
+		PRINTFORMW 他一见到%ANAME(ARG:0)%就兴奋地舔着嘴唇、粗暴地把%ANAME(ARG:0)%推到了床上
+	CASE 1
+		PRINTFORML 客人是身材很棒的青年
+		PRINTFORMW 他一见到%ANAME(ARG:0)%就高兴地舔着吹着口哨、一边赶紧脱掉了衣服
+	CASE 2
+		PRINTFORML 客人是一只肥胖的大叔
+		PRINTFORMW 他一见到%ANAME(ARG:0)%就兴奋地喘着粗气、强行把%ANAME(ARG:0)%抱到怀里亲了起来
+	CASE 3
+		PRINTFORML 客人是一个小混混模样的青年
+		PRINTFORMW 他毫不掩饰地、在%ANAME(ARG:0)%的身体上乱摸
+	CASE 4
+		PRINTFORML 客人是一个穿着爽朗的青年
+		PRINTFORMW 他在短暂地享受了和%ANAME(ARG:0)%的对话后、温柔地把%ANAME(ARG:0)%抱到床上
+	CASE 5
+		PRINTFORML 客人看起来是个富裕的中年人
+		PRINTFORMW 带着温和的笑容、轻轻地抚摸着%ANAME(ARG:0)%
+ENDSELECT
+PRINTFORML 
+SELECTCASE RAND:31
+	CASE 0
+		PRINTFORML %ANAME(ARG:0)%骑跨在客人身上、带着淫荡的表情扭着腰
+		PRINTFORML 粗大的肉棒塞满了蜜穴、随着腰身的扭动传来一阵阵令人酥麻的快感、%ANAME(ARG:0)%口中漏出丝丝娇喘
+		PRINTFORMW %ANAME(ARG:0)%十分满足于客人坚挺的肉棒、为了尽快被注入精液而拼命侍奉着
+	CASE 1
+		PRINTFORML 子宮内被射入了白浊液、%ANAME(ARG:0)%的身体大幅地后仰
+		PRINTFORML 客人的雄性气概完全征服了身为雌性的%ANAME(ARG:0)%、在娇喘声中绝顶了一次又一次
+		PRINTFORMW 射精结束之后客人的肉棒依然硬邦邦的、%ANAME(ARG:0)%眼睛漏出♥扭着腰索求着再来一次
+	CASE 2
+		PRINTFORML 四肢着地地趴着的%ANAME(ARG:0)%伴随着身后传来撞击发出声声娇喘
+		PRINTFORML 仿佛能让大脑也振动起来的冲击使得%ANAME(ARG:0)%身体完全被征服了、
+		PRINTFORMW 突然间阴道内被射入了炙热的精液、%ANAME(ARG:0)%发出悦耳的声音、身体大幅地后仰过去
+	CASE 3
+		PRINTFORML 被子下面、客人压在%ANAME(ARG:0)%身上激烈地突刺
+		PRINTFORML 每一次抽插仿佛都能把阴道里的肉给挖出来一般、%ANAME(ARG:0)%眼前一片空白、身体颤抖着吐出快乐的喘息
+		PRINTFORMW %ANAME(ARG:0)%紧紧地抱住了客人、雌性的本能驱使着她追求着肉棒带来的欢愉
+	CASE 4
+		PRINTFORML 房间里传出肉体拍打地声音和%ANAME(ARG:0)%的娇喘声
+		PRINTFORML %ANAME(ARG:0)%以站立背入的姿势被客人干着、因为受不了如此狂风骤雨的攻势而不停娇喊着扭动着屁股
+		PRINTFORMW 那个淫荡的动作使得客人更加兴奋、攻势越来越猛、忘记了时间一般地激烈着抽插着
+	CASE 5
+		PRINTFORML %ANAME(ARG:0)%以四脚朝天的姿势被人压在身下疯狂挺腰拍打着、
+		PRINTFORML 在激烈的性交下身心都被征服了的%ANAME(ARG:0)%暴露出了一副开发完毕的淫荡表情
+		PRINTFORMW 不久之后他到达了极点猛烈地射出精液、%ANAME(ARG:0)%液被作为雌性的喜悦同时带到了绝顶
+	CASE 6
+		PRINTFORML %ANAME(ARG:0)%一边和客人缠绕着舌头一边感受着深深加入的肉棒、身体愉悦地颤抖着
+		PRINTFORML 用腰部的技巧控制着早已年黏糊糊的媚肉紧紧地夹住肉棒、催促着他早点在小穴里释放出种子
+		PRINTFORMW 被幸福感包围的%ANAME(ARG:0)%被他疯狂般的宠爱着、整整干了一夜
+	CASE 7
+		PRINTFORML %ANAME(ARG:0)%在他的怀抱中，一边说着卑鄙的话，一边埋头做爱
+		PRINTFORML 腰部激烈的动作激发出了%ANAME(ARG:0)%雌性本能的快乐、忘记了侍奉像只母兽一夜弓着腰娇吟着
+		PRINTFORMW 预感到马上会被内射的%ANAME(ARG:0)%紧紧的抱住他索求着
+	CASE 8
+		PRINTFORML 穿着透明衣服的%ANAME(ARG:0)%在客人身上淫荡的摇动着腰
+		PRINTFORML 伴随着腰部的摇动、肉棒每一次的抽插都把一部分阴道肉带了出来、%ANAME(ARG:0)%的脊背像过电一样地颤抖着、嘴巴里发出了甜美的娇喘
+		PRINTFORMW 极好的服务让客人兴奋不已，多次向着最深处释放着欲望，每次射精都把%ANAME(ARG:0)%送上顶峰。
+	CASE 9
+		PRINTFORML 把脸埋进枕头里，从背后被肉棒猛烈地攻击着
+		PRINTFORML %ANAME(ARG:0)%为了不因为过度的快乐而发出尖叫，一边紧紧抓住枕头，一边全身颤抖着拼命忍耐着。
+		PRINTFORMW 但是突然射出的灼热精液、让%ANAME(ARG:0)%再也无法忍受而高潮到昏了过去。
+	CASE 10
+		PRINTFORML %ANAME(ARG:0)%以对面坐位的姿势在温暖的怀抱里被爱抚着
+		PRINTFORML 股间深深插入的肉棒、让%ANAME(ARG:0)%不时扭动着腰发出轻轻的娇吟
+		PRINTFORMW 客人像是在享受这种反应一样减慢了攻击的速度、%ANAME(ARG:0)%的身心都被吊的瘙痒难耐
+	CASE 11
+		PRINTFORML 从浴室里从来了水花跳动的声音和%ANAME(ARG:0)%无比娇媚的叫床声
+		PRINTFORML 在浴缸里被干了很久之后、%ANAME(ARG:0)%用一副下流的样子喘着粗气
+		PRINTFORMW 洗过澡之后客人的欲火并没有平息、彻夜地侵犯着她热气腾腾的肉体
+	CASE 12
+		PRINTFORML %ANAME(ARG:0)%以像狗一样的姿势被激烈地侵犯着
+		PRINTFORML 子宫像是要被猛烈的活塞运动冲烂、%ANAME(ARG:0)%感觉自己的头都要被冲击力撞爆了、大口大口地喘着气
+		PRINTFORMW 完全变成母狗一般的%ANAME(ARG:0)%、继续沉迷在与客人的交配之中
+	CASE 13
+		PRINTFORML 一副出神表情的%ANAME(ARG:0)%被客人抱在怀里聊着天
+		PRINTFORML 被巧妙的技巧呵护着的%ANAME(ARG:0)%、像恋人一样倚进他的怀里
+		PRINTFORMW 在休息结束客人又要求来做时、%ANAME(ARG:0)%满怀期待的张开了身体
+	CASE 14
+		PRINTFORML %ANAME(ARG:0)%和客人满身大汗的拥吻在一起
+		PRINTFORML 子宫不断被肉棒顶到的快感、让%ANAME(ARG:0)%撒娇一样的缠着客人索要着更多的快乐
+		PRINTFORMW 沉醉于快感的%ANAME(ARG:0)%完全按照自己的雌性本能行动着、身体内外都变得黏黏糊糊的
+	CASE 15
+		PRINTFORML %ANAME(ARG:0)%被客人压在身下、承受着全身的体重被侵犯着
+		PRINTFORML 强烈的活塞运动让%ANAME(ARG:0)%痛苦的呻吟着、子宫因为快感而瘙痒的发痛
+		PRINTFORMW 不久之后客人用一定让她怀上孩子的气势把白浊的种子射了进去、%ANAME(ARG:0)%顿时脑子一片空白的绝顶了
+	CASE 16
+		PRINTFORML 一看到客人有着如此雄壮的肉棒、%ANAME(ARG:0)%的身体就被快感占据了
+		PRINTFORML 粗大的肉棒激烈的抽插、每次进出时都带出了阴道里的嫩肉、%ANAME(ARG:0)%抱着客人狂欢着
+		PRINTFORMW 被雄壮的肉棒搞得狼狈不堪的%ANAME(ARG:0)%之后也全身心地侍奉着直到被注入白浊的种子
+	CASE 17
+		PRINTFORML %ANAME(ARG:0)%被客人拥抱着激烈地突刺、高声地娇滴滴地叫着
+		PRINTFORML 每一次撞击都让%ANAME(ARG:0)%全身的肌肉跳动着、阴道也紧紧地夹住肉棒
+		PRINTFORMW 到达了极限的客人在阴道内释放出精液、%ANAME(ARG:0)%伸直了脚尖到达了顶点
+	CASE 18
+		PRINTFORML 粗壮的肉棒硬生生地挤进肉穴里、%ANAME(ARG:0)%的眼睛都翻了上去
+		PRINTFORML 体内被龟头撑大的%ANAME(ARG:0)%的大脑内奔走着快感的电流、开始主动扭动着腰
+		PRINTFORMW 被充满男子汉气概的肉棒征服了身心的%ANAME(ARG:0)%抱着客人的腰狂欢着
+	CASE 19
+		PRINTFORML 客人用粗大的手指巧妙的爱抚着%ANAME(ARG:0)%、她因为快感而全身颤抖着潮吹了
+		PRINTFORML 子宫因为渴望着快感而发痛的%ANAME(ARG:0)%主动张开双臂、无药可救地索求着性爱
+		PRINTFORMW 男人慢慢地插入肉棒，%ANAME(ARG:0)%一边品尝着期待已久的快乐一边激烈地绝顶了
+	CASE 20
+		PRINTFORML 客人扑在%ANAME(ARG:0)%的胸口迷恋地扭着腰
+		PRINTFORML %ANAME(ARG:0)%被他撒娇般的动作激发起了母性的本能、子宫和胸部都因为快感而疼的喘不过气来
+		PRINTFORMW 被用咕噜咕噜的气势注入精液、%ANAME(ARG:0)%身心都苏畅的绝顶了
+	CASE 21
+		PRINTFORML %ANAME(ARG:0)%被他抱在怀里，一边承受着温柔的活塞运动一边喘着气
+		PRINTFORML 子宫被咚咚咚地连续的撞击、%ANAME(ARG:0)%头晕目眩、甜蜜地娇喘着扭动着身体
+		PRINTFORMW 当被男人注入精液时、%ANAME(ARG:0)%的眼睛像♥一样、娇声淫叫着
+	CASE 22
+		PRINTFORML 随着滋噗滋噗的下流声音、%ANAME(ARG:0)%的雌穴被粗壮的肉棒抽插着
+		PRINTFORML 在精力超群的客的不停攻击下、%ANAME(ARG:0)%快乐地喘息着，全身颤抖着，就像要坏掉了一样。
+		PRINTFORMW 已经记不得是第几次内射了、%ANAME(ARG:0)%的子宫被滚烫的白浊液填满、脸上浮现出绝顶的表情
+	CASE 23
+		PRINTFORML %ANAME(ARG:0)%和客人全身颤抖着彼此舔舐着性器
+		PRINTFORML 嘴巴里的雄性腥臭和客人灵巧的舌头、让%ANAME(ARG:0)%的大脑被快感占据、子宮痒的发痛
+		PRINTFORMW 在无法忍受的%ANAME(ARG:0)%主动的索求下、客人好好的疼爱了%ANAME(ARG:0)%
+	CASE 24
+		PRINTFORML 被要求换上女仆装的%ANAME(ARG:0)%骑跨在客人身上侍奉着
+		PRINTFORML %ANAME(ARG:0)%在他的称赞声中主动的撞击着自己的子宫、在主人大人身上热气腾腾地扭动着腰肢
+		PRINTFORMW 渐渐的在侍奉中获得了发自内心的喜悦、%ANAME(ARG:0)%不知道被内射了多少次
+	CASE 25
+		PRINTFORML %ANAME(ARG:0)%突然被猛烈的向上顶着侵犯着屁股、顿时不断发出娇声
+		PRINTFORML 雄壮的肉棒狂乱的攻击慢慢顶开了子宫口、%ANAME(ARG:0)%感觉像是飞到了天上一样
+		PRINTFORMW 不久之后、龟头顶在子宫口上射出了精液、%ANAME(ARG:0)%身体大幅地后仰着绝顶了
+	CASE 26
+		PRINTFORML 客人想恋人一样温柔地抱着%ANAME(ARG:0)%、激烈的缠绵着
+		PRINTFORML 在喃喃的爱语和热情的肉棒的双重攻击下、%ANAME(ARG:0)%的内心深处都在颤抖着
+		PRINTFORMW 与他进行的浓厚的性爱让%ANAME(ARG:0)%的子宫好像都垂下来了、整个人好像飞起来一般
+	CASE 27
+		PRINTFORML 腰部温柔地撞击，全身不断的被爱抚，%ANAME(ARG:0)%发出甜蜜的呻吟。
+		PRINTFORML 在于客人四目相对的浓厚性爱中、%ANAME(ARG:0)%逐渐的融化了、露出了下流的表情
+		PRINTFORMW 两个人一心一意地扭着腰，一起进行着梦幻般的交尾
+	CASE 28
+		PRINTFORML %ANAME(ARG:0)%被客人的肉棒贯穿、倚在他身上喘着粗气
+		PRINTFORML 不断继续的激烈性爱、头晕目眩的%ANAME(ARG:0)%带着恍惚的表情贴在客人身上
+		PRINTFORMW 每当被他抚摸过、子宫就刺痛着跳动着、%ANAME(ARG:0)%打开双臂索求着再一次的快乐
+	CASE 29
+		PRINTFORML 肉棒深深地在阴道内抽插、%ANAME(ARG:0)%吐着粗重的气息
+		PRINTFORML 子宮像是被咯吱咯吱的咬着一样生疼、%ANAME(ARG:0)%大脑空白身体后仰、发出无数的绝叫高潮了
+		PRINTFORMW %ANAME(ARG:0)%在强烈的快感下头脑一片空白、身体本能的扭动着、渴求着白浊的精液
+	CASE 30
+		PRINTFORML 年少的客人一边吮吸着%ANAME(ARG:0)%的乳头、一边动作生涩的在阴道里抽插着
+		PRINTFORML 刚刚成熟的肉棒的包皮甚至还不能完全翻上去、仿佛被自己儿子侵犯的背德感让%ANAME(ARG:0)%迅速的绝顶了
+		PRINTFORMW 年少的客人颤抖着在肉穴内射精之后、依然被%ANAME(ARG:0)%用四肢紧紧的缠抱着
+ENDSELECT
+CALL FUCK((ARG:0), "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 口淫, 売春, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精, CFLAG減少", GET_SPERM_ID("娼館的客人"), "娼館的客人の肉棒", "娼館的客人", "", "売春")
+
+RETURN 1

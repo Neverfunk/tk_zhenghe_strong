@@ -1,0 +1,126 @@
+﻿;-------------------------------------------------
+;定期イベント
+;-------------------------------------------------
+@GOBLIN_REV_TRAIN_REGULAR_EVENT(勢力)
+#DIM 勢力
+
+SIF FLAG:逆調教回数 == 0 || FLAG:逆調教回数 % 4 != 0
+	RETURN 0
+
+PRINTFORML 當調教時間臨近之時、%ANAME(MASTER)%像往常一樣被拘束在調教室中、
+;TranslatedMark 調教の時間が近づくと、%ANAME(MASTER)%はいつものように調教部屋で拘束され、
+PRINTFORMW 剩下的就只是等著被哥布林們玷汚了
+;TranslatedMark あとはホフゴブリン達に汚されるのを待つのみとなった
+PRINTFORML 來到這裡的哥布林問道、怎麼樣、也差不多該成為俺們的奴隸了吧
+;TranslatedMark やってきたホフゴブリンは、どうだ、そろそろ俺達の奴隷になる気になったか、と尋ねた
+PRINTFORMW 如果承認自己是奴隸的話、還能給你一定程度上的行動自由……
+;TranslatedMark 奴隷になることを認めれば、ある程度の行動の自由はくれてやるぞ、と……
+PRINTFORML 即使一直拒絕、這些傢伙也肯定會繼續玷汚自己吧
+;TranslatedMark このまま拒否し続けても、こいつらは自分を汚し続けるだろう
+PRINTFORML 點頭的話、肯定會変得輕鬆很多
+;TranslatedMark 首を縦に振れば、いくらかは楽になれるのかもしれない
+PRINTFORMW 該怎麼辦……
+;TranslatedMark どうするべきだろうか……
+CALL ASK_YN("放棄抵抗并接受（奴隷化)", "不可能成為那些傢伙的奴隸")
+IF RESULT == 0
+	PRINTFORML %ANAME(MASTER)%點頭的時候、哥布林嘿嘿一笑
+	;TranslatedMark %ANAME(MASTER)%が頷くと、ホフゴブリンはニヤリと笑った
+	IF HAS_PENIS(MASTER)
+		CALL SET_PIERCE(MASTER, ピアス_ペニス, 0)
+		IF RESULT
+			CALL COLOR_PRINTW(@"然後那陰莖上、被安上了讓人心痛的環……", カラー_ピンク)
+		ELSE
+			CALL COLOR_PRINTW(@"然後那陰莖上、再次被刻下了不會消失的烙印……", カラー_ピンク)
+		ENDIF
+	ELSE
+		CALL SET_PIERCE(MASTER, ピアス_乳首, 0)
+		IF RESULT
+			CALL COLOR_PRINTW(@"然後那乳頭上、被安上了讓人心痛的環……", カラー_ピンク)
+		ELSE
+			CALL COLOR_PRINTW(@"然後那乳房上、再次被刻下了不會消失的烙印……", カラー_ピンク)
+		ENDIF
+	ENDIF
+	PRINTFORMW 而且在脖子上、戴上了家畜用的項圈
+	;TranslatedMark さらにその首に、家畜用の首輪が嵌められた
+	SETCOLOR カラー_注意
+	PRINTFORMW %ANAME(MASTER)%成為了哥布林的性奴隸
+	;TranslatedMark %ANAME(MASTER)%はホフゴブリンの性奴隷となりました
+	RESETCOLOR
+	SETBIT TALENT:MASTER:特殊勢力陥落系, 特殊勢力_ホフゴブリン
+	CALL CHANGE_COUNTRY(MASTER, 勢力, 1)
+	CALL PLAYER_FALLEN_TO_SP_COUNTRY(勢力)
+	RETURN 1
+ELSE
+	PRINTFORML 是麼、得到答案的哥布林並不是很在乎%ANAME(MASTER)%的拒絕
+	;TranslatedMark そうかよと、%ANAME(MASTER)%の拒否を特に気にした風でもなくホフゴブリンは受け止める
+	PRINTFORML 那就只能接著侵犯、必須要教育她有必要明白自己的立場了、那臉上露出了下流的笑容……
+	;TranslatedMark ならもっと犯して、自分の立場ってのを教えてやらなくちゃなぁと、その顔は下卑た笑みを浮かべた……
+	PRINTFORMW 他們就這樣、囲住了%ANAME(MASTER)%……
+	;TranslatedMark 彼らはそのまま、%ANAME(MASTER)%に群がっていく……
+ENDIF
+
+;-------------------------------------------------
+;知り合いがきたときのイベント
+;-------------------------------------------------
+@GOBLIN_REV_TRAIN_MSG(勢力, 知り合い参加者, 知り合い参加数)
+#DIM 勢力
+#DIM REF 知り合い参加者
+#DIM 知り合い参加数
+CALL SINGLE_DRAWLINE
+PRINTFORML 當調教時間臨近之時、%ANAME(MASTER)%像往常一樣被拘束在調教室中、
+;TranslatedMark 調教の時間が近づくと、%ANAME(MASTER)%はいつものように調教部屋で拘束され、
+PRINTFORMW 剩下的就只是等著被男人們玷汚了
+;TranslatedMark あとは男達に汚されるのを待つのみとなった
+PRINTFORMW 到來的哥布林、帯來了%ANAME(MASTER)%的熟人
+;TranslatedMark やってきたホフゴブリンは、%ANAME(MASTER)%が良く見知った相手を連れてきていた
+PRINTFORMW %ANAME(知り合い参加者:0, 知り合い参加数)%…
+PRINTFORMW 脖子上戴著家畜用的項圈、乳房上安著讓人心痛的乳環、下腹被刻下了「奴隷」字樣和心形的烙印
+;TranslatedMark 首には家畜用の首輪がかけられ、乳房には痛々しいピアス、下腹に「奴隷」の文字とハートの焼き印が押されている
+PRINTFORMW 雖然一副悲慘的樣子、但是卻露出的幸福的表情。那瞳孔中除了空虛空無一物
+;TranslatedMark 惨めな姿なのだろうが、幸せそうな表情を浮かべている。その瞳がどこか虚ろなことさえのぞけば
+PRINTFORMW 事前就被盡情侵犯過了、全身都沾滿了精液、身上所有的穴里都不停滴落著大量的白濁
+;TranslatedMark 事前にたっぷりと犯されてきたのだろう、全身精液まみれで、あらゆる穴からは大量の濁液が滴り落ちている
+IF HAS_PENIS(MASTER)
+	PRINTFORMW 那充滿性欲的視線、不是看著%ANAME(MASTER)%、而是凝聚在%ANAME(MASTER)%屹立的男根之上
+	;TranslatedMark 性欲に満ちた視線は、%ANAME(MASTER)%ではなく、%ANAME(MASTER)%のいきり立った男根に注がれている
+	PRINTFORMW ……但是、和「現在的主人」的肉棒比起來、完全不行啊……
+	;TranslatedMark ……だが、「今の主人」のモノと比べたのだろう、どこか物足りなげでもあった……
+ELSE
+	PRINTFORMW 那充滿性欲的視線、与其說是看著%ANAME(MASTER)%、不如說是在注視著%ANAME(MASTER)%的身體…
+	;TranslatedMark 性欲に満ちた視線は、%ANAME(MASTER)%というより、%ANAME(MASTER)%のカラダに対して注がれていた…
+ENDIF
+PRINTFORMW 哥布林笑著説道、也讓你使用一下俺們的奴隸吧
+;TranslatedMark ホフゴブリンはニヤニヤとしながら、俺たちの奴隷をお前にも使わせてやるよと言った
+PRINTFORMW 哥布林緊緊地抓住和「曾經」的%ANAME(知り合い参加者:0, 知り合い参加数)%認識的事不放……
+;TranslatedMark かつて%ANAME(知り合い参加者:0, 知り合い参加数)%と知り合い「だった」ことを、掴んでいるようだ……
+PRINTFORMW 張開大腿去讓%ANAME(MASTER)%使用吧、哥布林如此説道的時候、%ANAME(知り合い参加者:0, 知り合い参加数)%順従的遵従了……
+;TranslatedMark 使ってやるから股をひらけ、ホフゴブリンがそのように言うと、%ANAME(知り合い参加者:0, 知り合い参加数)%は従順に従った……
+
+
+;-------------------------------------------------
+;参加者選択アルゴリズム
+;-------------------------------------------------
+@GOBLIN_REV_TRAIN_CHOOSE_PARTICIPANT(勢力)
+#DIM 勢力
+FOR LOCAL:0, 0, 4
+	;確率で犬豚が対象に
+	IF !RAND:20
+		FOR LOCAL:1, 0, CHARANUM
+			IF CFLAG:(LOCAL:1):所属 == 勢力 && IS_ANIMAL(LOCAL:1) && !CFLAG:(LOCAL:1):調教参加フラグ
+				CFLAG:(LOCAL:1):調教参加フラグ = 1
+				BREAK
+			ENDIF
+		NEXT
+		CALL ADD_ANIMAL(勢力, RAND:3 + 1)
+		CFLAG:(CHARANUM -1):調教参加フラグ = 1
+	;普通に野盗を選出
+	ELSE
+		FOR LOCAL:1, 0, CHARANUM
+			IF TALENT:(LOCAL:1):特殊勢力素質 == 特殊勢力_ホフゴブリン && !CFLAG:(LOCAL:1):調教参加フラグ && CFLAG:(LOCAL:1):所属 == 勢力
+				CFLAG:(LOCAL:1):調教参加フラグ = 1
+				CFLAG:(LOCAL:1):TEXT_LAST非表示 = 1
+				BREAK
+			ENDIF
+		NEXT
+	ENDIF
+NEXT

@@ -1,0 +1,120 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_MEETING_WITH_ZAIYA_RATE()
+RETURN 75
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_MEETING_WITH_ZAIYA_DECISION()
+RETURN DAY >= SLG_PP:1 && CFLAG:MASTER:所属 && !IS_SP_COUNTRY(CFLAG:MASTER:所属)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_MEETING_WITH_ZAIYA_GENRE()
+RETURN デイリー_ジャンル_雇用
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_MEETING_WITH_ZAIYA_SETTARGET()
+;放浪しているキャラ。
+FOR LOCAL, 0, CHARANUM
+	SIF CFLAG:LOCAL:特殊状態 != 特殊状態_放浪
+		CONTINUE
+	SIF REL_LIKE:LOCAL:MASTER - REL_HATE:LOCAL:MASTER < -1000
+		CONTINUE
+	SIF RAND:3
+		CONTINUE
+	DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+	DAILY_TARGET_NUM ++
+NEXT
+
+SIF DAILY_TARGET_NUM < 1
+	RETURN 0
+
+RETURN 1
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_MEETING_WITH_ZAIYA()
+#DIM 対象
+#DIM 雇用額
+#DIM FIRST_LINE
+
+対象 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+
+PRINTFORMW 身為在野武将的%ANAME(対象)%提出想要會面……
+
+;特殊なパターン。ただで雇うことができる
+IF TALENT:対象:親愛 || TALENT:対象:隷属 || TALENT:対象:所有者
+	PRINTFORML 因為現在是自由的放浪之身、請求道、務必讓其陪在%ANAME(MASTER)%身邊
+	PRINTFORML 從其他勢力來這裡要求成為士官是難得的事情……
+	PRINTFORML 
+	CALL ASK_YN("接受", "拒絕")
+	IF RESULT == 0
+		PRINTFORML 沒有拒絕的道理
+		PRINTFORMW 聘用%ANAME(対象)%成為士官……
+		CALL COLOR_PRINTW(@"%ANAME(対象)%成為了同伴", カラー_注意)
+		CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属)
+	ELSE
+		PRINTFORML 不可能答應
+		PRINTFORML 斷然拒絕了……
+	ENDIF
+	RETURN 1
+ENDIF
+
+;基本安い
+雇用額 = SCOUT_CALC_PRICE_BASIS(対象) * 2 / 3
+
+;恋慕等あればさらに安く
+SIF IS_LOVER(対象) || IS_SLAVE(対象)
+	雇用額 /= 2
+
+CALL ICPRINT(@"現在是自由的放浪之身、提出可以用<{雇用額}>金雇用自己", "L", カラー_注意)
+SIF IS_FALLEN(対象)
+	PRINTFORML 対方因為有%ANAME(MASTER)%在、所以提出的金額相當的少
+PRINTFORML 從那自信満満的話來看、実力肯定不錯……
+
+FIRST_LINE = LINECOUNT
+$SHOW_LOOP
+
+CALL SHOW_SIMPLE_INFO(対象)
+
+PRINTL
+CALL ASK_MULTI_JUDGE(@"花{雇用額}金雇用 現在:{MONEY}", MONEY >= 雇用額, "放棄", 1, "顯示能力", 2)
+
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORML 戦力再多也不會嫌少
+		PRINTFORMW 聘用%ANAME(対象)%成為士官……
+		CALL COLOR_PRINTW(@"%ANAME(対象)%成為了同伴", カラー_注意)
+		CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属)
+		MONEY -= 雇用額
+	CASE 1
+		PRINTFORML 現在不需要
+		PRINTFORML 決定拒絕……
+	CASE 2
+		CALL SHOW_INFO_WITH_UI(対象, 0)
+		CLEARLINE LINECOUNT - FIRST_LINE
+		GOTO SHOW_LOOP
+ENDSELECT
+
+RETURN 1
+
+@EVENT_DAILY_MEETING_WITH_ZAIYA_ALLOW_WHEN_WANDERING
+RETURN 1
+

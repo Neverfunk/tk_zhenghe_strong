@@ -1,0 +1,263 @@
+﻿;(従属国パッチ)外務省の基本部分
+
+;-------------------------------------------------
+;「外務省」の名称
+;-------------------------------------------------
+@SHOP_SLG_NAME42
+RESULTS:0 '= "外交部"
+
+;-------------------------------------------------
+;「外務省」の選択可否
+;-------------------------------------------------
+@SHOP_SLG_CHECK42
+SIF FLAG:クリアフラグ
+	RETURN 0
+SIF FLAG:観戦モード
+	RETURN 0
+SIF CFLAG:MASTER:所属 == 0
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;「外務省」の左カラムメニューの入力処理
+;-------------------------------------------------
+@SHOP_SLG_EVENTBUY42
+CALL Colonial_Office
+RETURN 1
+
+;-------------------------------------------------
+;「外務省」本体
+;-------------------------------------------------
+@Colonial_Office
+#DIM FIRST_LINE
+FIRST_LINE = LINECOUNT
+
+;国家間の隣接関係マップの作成(処理の高速化)
+CALL TMP_CREATE_COUNTRY_NEIBORING_MAP
+;勢力関係マップを作成
+CALL TMP_CREATE_RELATION_MAP
+CALL TMP_CREATE_IS_FREE_MAP
+CALL TMP_CREATE_POLITICS_POWER_MAP
+CALL TMP_CREATE_SUM_SOLDIER_MAP
+
+CALL SINGLE_DRAWLINE
+PRINTL ★外交部
+PRINTL 　存在従属国・永久同盟国的情况下，可以使用研究・教育機関
+CALL SINGLE_DRAWLINE
+
+LOCALS:0 = 建立殖民地
+LOCALS:1 = 建立傀儡国
+LOCALS:10 = 自国士官的移籍
+LOCALS:11 = 召喚従属国的士官
+LOCALS:20 = 转让领土
+LOCALS:21 = 接收领土
+LOCALS:22 = 转让资金
+LOCALS:23 = 转让士兵
+LOCALS:24 = 接收士兵
+LOCALS:25 = 接收/转让俘虏
+LOCALS:26 = 变更従属形式
+LOCALS:27 = 从属的特化
+LOCALS:50 = 与特殊勢力的外交
+LOCALS:51 = 特殊区划
+LOCALS:52 = 研究・教育機関
+LOCALS:53 = 独立宣言
+LOCALS:54 = 寻求自治
+
+;「処刑機能拡張パッチ」連動、記念品を持っていないと選択不可
+LOCAL:151 = 1
+FOR LOCAL:0, 0, 10
+	IF HAVE_GOODS_EXECUTED:(LOCAL:0) > 0
+		LOCAL:151 = 0
+		BREAK
+	ENDIF
+NEXT
+
+;従属国・永久同盟国がいないと「研究・教育機関」は選択不可
+IF !IS_TREATY_UNI:(CFLAG:MASTER:所属)
+	LOCAL:152 = 1
+ELSE
+	LOCAL:152 = 0
+ENDIF
+
+;自勢力が特殊勢力でない、かつ特殊勢力が存在しないと「特殊勢力と外交する」は選択不可
+LOCAL:150 = 1
+IF !IS_SP_COUNTRY(CFLAG:MASTER:所属)
+	FOR LOCAL:0, 0, MAX_COUNTRY
+		IF IS_SP_COUNTRY(LOCAL:0)
+			LOCAL:150 = 0
+			BREAK
+		ENDIF
+	NEXT
+ENDIF
+
+;自勢力が植民地か傀儡国でないと「独立宣言する」「自治を求める」は選択不可
+IF COUNTRY_Protectorate:(CFLAG:MASTER:所属) < 3
+	LOCAL:153 = 1
+	LOCAL:154 = 1
+ELSE
+	LOCAL:153 = 0
+	LOCAL:154 = 0
+ENDIF
+
+PRINT ◇建立従属国◇
+FOR LOCAL:0, 0, 10
+	IF LOCALS:(LOCAL:0) != ""
+		PRINTL 
+		IF LOCAL:(LOCAL:0 + 100)
+			SETCOLOR カラー_選択不可
+			PRINTPLAINFORM {LOCAL:0, 2}[%LOCALS:(LOCAL:0), 18%]
+			RESETCOLOR
+		ELSE
+			PRINTBUTTON @"{LOCAL:0, 2}[%LOCALS:(LOCAL:0), 18%]", LOCAL:0
+		ENDIF
+	ENDIF
+NEXT
+PRINTL
+
+PRINT ◇士官的调动◇
+FOR LOCAL:0, 10, 20
+	IF LOCALS:(LOCAL:0) != ""
+		PRINTL 
+		IF LOCAL:(LOCAL:0 + 100)
+			SETCOLOR カラー_選択不可
+			PRINTPLAINFORM {LOCAL:0, 2}[%LOCALS:(LOCAL:0), 18%]
+			RESETCOLOR
+		ELSE
+			PRINTBUTTON @"{LOCAL:0, 2}[%LOCALS:(LOCAL:0), 18%]", LOCAL:0
+		ENDIF
+	ENDIF
+NEXT
+PRINTL
+
+PRINT ◇従属国資源的分配◇
+FOR LOCAL:0, 20, 30
+	IF LOCALS:(LOCAL:0) != ""
+		PRINTL 
+		IF LOCAL:(LOCAL:0 + 100)
+			SETCOLOR カラー_選択不可
+			PRINTPLAINFORM {LOCAL:0, 2}[%LOCALS:(LOCAL:0), 18%]
+			RESETCOLOR
+		ELSE
+			PRINTBUTTON @"{LOCAL:0, 2}[%LOCALS:(LOCAL:0), 18%]", LOCAL:0
+		ENDIF
+	ENDIF
+NEXT
+PRINTL
+
+;PRINT ◇管理従属国◇
+;FOR LOCAL:0, 30, 40
+;	IF LOCALS:(LOCAL:0) != ""
+;		PRINTL 
+;		IF LOCAL:(LOCAL:0 + 100)
+;			SETCOLOR カラー_選択不可
+;			PRINTPLAINFORM {LOCAL:0, 2}[%LOCALS:(LOCAL:0), 18%]
+;			RESETCOLOR
+;		ELSE
+;			PRINTBUTTON @"{LOCAL:0, 2}[%LOCALS:(LOCAL:0), 18%]", LOCAL:0
+;		ENDIF
+;	ENDIF
+;NEXT
+;PRINTL
+
+PRINT ◇特殊行動◇
+;FOR LOCAL:0, 40, 50
+;	IF LOCALS:(LOCAL:0) != ""
+;		PRINTL 
+;		IF LOCAL:(LOCAL:0 + 100)
+;			SETCOLOR カラー_選択不可
+;			PRINTPLAINFORM {LOCAL:0, 2}[%LOCALS:(LOCAL:0), 18%]
+;			RESETCOLOR
+;		ELSE
+;			PRINTBUTTON @"{LOCAL:0, 2}[%LOCALS:(LOCAL:0), 18%]", LOCAL:0
+;		ENDIF
+;	ENDIF
+;NEXT
+PRINTL
+
+PRINT ◇其他◇
+FOR LOCAL:0, 50, 60
+	IF LOCALS:(LOCAL:0) != ""
+		PRINTL 
+		IF LOCAL:(LOCAL:0 + 100)
+			SETCOLOR カラー_選択不可
+			PRINTPLAINFORM {LOCAL:0, 2}[%LOCALS:(LOCAL:0), 18%]
+			RESETCOLOR
+		ELSE
+			PRINTBUTTON @"{LOCAL:0, 2}[%LOCALS:(LOCAL:0), 18%]", LOCAL:0
+		ENDIF
+	ENDIF
+NEXT
+PRINTL
+
+PRINTL
+PRINTBUTTON "99[取消]", 99
+PRINTL 
+
+REDRAW 0
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 99
+	REDRAW 1
+	RETURN
+
+ELSEIF RESULT >= 0 && RESULT < 60 && !LOCAL:(RESULT + 100)
+	;植民地を作成する
+	IF RESULT == 0
+		CALL Colonial_Office_MAKE_colony
+	;傀儡国を作成する
+	ELSEIF RESULT == 1
+		CALL Colonial_Office_MAKE_puppet
+	;自国の士官を移籍させる
+	ELSEIF RESULT == 10
+		CALL Colonial_Office_TRANSFER_CHARA
+	;従属国の士官を召喚する
+	ELSEIF RESULT == 11
+		CALL Colonial_Office_SUMMON_CHARA
+	;領土を譲渡する
+	ELSEIF RESULT == 20
+		CALL Colonial_Office_TRANSFER_state
+	;領土を譲受ける
+	ELSEIF RESULT == 21
+		CALL Colonial_Office_ACQUISITION_state
+	;資金を譲渡する
+	ELSEIF RESULT == 22
+		CALL Colonial_Office_TRANSFER_funds
+	;兵士を譲渡する
+	ELSEIF RESULT == 23
+		CALL Colonial_Office_TRANSFER_soldier
+	;兵士を譲受ける
+	ELSEIF RESULT == 24
+		CALL Colonial_Office_ACQUISITION_soldier
+	;捕虜を譲受ける
+	ELSEIF RESULT == 25
+		CALL Colonial_Office_ACQUISITION_prisoner
+	;従属国の従属形態を変更する
+	ELSEIF RESULT == 26
+		CALL Colonial_Office_CHANGE_Protectorate
+	;役割を特化させる
+	ELSEIF RESULT == 27
+		CALL Colonial_Office_SPECIALIZATION_Protectorate
+	;特殊勢力と外交
+	ELSEIF RESULT == 50
+		CALL Colonial_Office_COMMUNICATE_SP_COUNTRY
+	;特殊区划
+	ELSEIF RESULT == 51
+		CALL Colonial_Office_GOODS_EXECUTED
+	;研究・教育機関を運営する
+	ELSEIF RESULT == 52
+		CALL Colonial_Office_university
+	;独立宣言する
+	ELSEIF RESULT == 53
+		CALL Colonial_Office_Declaration_independence
+	;独立宣言する
+	ELSEIF RESULT == 54
+		CALL Colonial_Office_Demand_autonomy
+	ENDIF
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+RESTART
+

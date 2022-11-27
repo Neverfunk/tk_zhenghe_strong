@@ -1,0 +1,1408 @@
+﻿;-------------------------------------------------
+;「祷告」
+;用于存放一些特殊函数,已经在对应事件中插入了调用代码
+;-------------------------------------------------
+;-------------------------------------------------
+@SHOP_LIFE_MIRACLE
+;是否使用了本插件
+RETURN 1
+
+
+@SHOP_LIFE_MIRACLE_VERSION
+#FUNCTIONS
+;插件版本
+RETURNF "1.0"
+;------------------------------------------------
+;------------------------------------------------
+@SHOP_LIFE_USERSHOP68_GIFT(对象)
+;设定菜单
+#DIM 对象
+#DIM 抽卡池,100
+#DIM 随机数
+#DIM 出卡
+$SHOP_LIFE_USERSHOP68_GIFT_S1
+CALL SINGLE_DRAWLINE
+PRINTL
+PRINTFORML --作为开启这场纷乱的神选之人,你可以选择一项作为奖励--
+PRINTFORML --点击查看可详细说明--
+PRINTL
+PRINTBUTTON " 0[时间管理大师]", 0
+PRINTL
+PRINTL
+PRINTBUTTON " 1[预备神选]", 1
+PRINTL
+PRINTL
+PRINTBUTTON " 2[精打细算]", 2
+PRINTL
+PRINTL
+PRINTBUTTON " 3[天生神棍]", 3
+PRINTL
+PRINTL
+PRINTBUTTON " 4[随机神术]", 4
+PRINTL
+PRINTL
+PRINTBUTTON " 5[投机分子]", 5
+PRINTL
+PRINTL
+PRINTBUTTON " 6[复制达人]", 6
+PRINTL
+PRINTL
+PRINTBUTTON " 9[我不需要]", 9
+PRINTL
+PRINTL
+CALL SINGLE_DRAWLINE
+INPUT
+SELECTCASE RESULT
+	CASE 0 ;时间管理大师
+		CALL SINGLE_DRAWLINE
+		PRINTL
+		PRINTFORML 获得专属神术[时间管理大师],据点阶段自由行动点 +2
+		PRINTL
+		PRINTBUTTON " 0[就这个！]", 0
+		PRINTL
+		PRINTBUTTON " 1[再想想~]", 1
+		PRINTL
+		CALL SINGLE_DRAWLINE
+		INPUT
+		SIF RESULT
+			GOTO SHOP_LIFE_USERSHOP68_GIFT_S1
+		SIF RESULT == 0
+			CALL SKILL_LEARN_BY_NAME(MASTER,5,0, "时间管理大师")
+	CASE 1 ;预备神选
+		CALL SINGLE_DRAWLINE
+		PRINTL
+		PRINTFORML 获得专属神术[预备神选],你可以无视神术等级学习神术
+		PRINTL
+		PRINTBUTTON " 0[就这个！]", 0
+		PRINTL
+		PRINTBUTTON " 1[再想想~]", 1
+		PRINTL
+		CALL SINGLE_DRAWLINE
+		INPUT
+		SIF RESULT
+			GOTO SHOP_LIFE_USERSHOP68_GIFT_S1
+		SIF RESULT == 0
+			CALL SKILL_LEARN_BY_NAME(MASTER,5,0, "预备神选")
+	CASE 2 ;精打细算
+		CALL SINGLE_DRAWLINE
+		PRINTL
+		PRINTFORML 获得专属神术[精打细算],你学习神术的花费减半
+		PRINTL
+		PRINTBUTTON " 0[就这个！]", 0
+		PRINTL
+		PRINTBUTTON " 1[再想想~]", 1
+		PRINTL
+		CALL SINGLE_DRAWLINE
+		INPUT
+		SIF RESULT
+			GOTO SHOP_LIFE_USERSHOP68_GIFT_S1
+		SIF RESULT == 0
+			CALL SKILL_LEARN_BY_NAME(MASTER,5,0, "精打细算")
+	CASE 3 ;天生神棍
+		CALL SINGLE_DRAWLINE
+		PRINTL
+		PRINTFORML 获得专属神术[天生神棍],每当有神迹发生时，你的信仰将会稍微上升
+		PRINTL
+		PRINTBUTTON " 0[就这个！]", 0
+		PRINTL
+		PRINTBUTTON " 1[再想想~]", 1
+		PRINTL
+		CALL SINGLE_DRAWLINE
+		INPUT
+		SIF RESULT
+			GOTO SHOP_LIFE_USERSHOP68_GIFT_S1
+		SIF RESULT == 0
+			CALL SKILL_LEARN_BY_NAME(MASTER,5,0, "天生神棍")
+	CASE 4 ;随机神术
+		CALL SINGLE_DRAWLINE
+		PRINTL
+		PRINTFORML 将会在所有5级的神术中随机抽取一个学习，无视信仰，但不包括无法从商店学习的神术。
+		PRINTL
+		PRINTBUTTON " 0[来都来了]", 0
+		PRINTL
+		PRINTBUTTON " 1[非酋再见]", 1
+		PRINTL
+		CALL SINGLE_DRAWLINE
+		INPUT
+		SIF RESULT
+			GOTO SHOP_LIFE_USERSHOP68_GIFT_S1
+		IF RESULT == 0
+			FOR LOCAL,0,MAX_SKILLS,1
+				TRYCCALLFORM SKILL_0_MIRACLE_{LOCAL}_LEVEL
+					SIF RESULT < 5
+						CONTINUE
+					TRYCCALLFORM SKILL_0_MIRACLE_{LOCAL}_CANT_LEARN_FROM_SHOP
+					;特殊神术不显示
+						CONTINUE
+					CATCH
+					ENDCATCH
+					抽卡池++
+					抽卡池:(抽卡池:0) = LOCAL
+				CATCH
+				ENDCATCH
+			NEXT
+			随机数 = RAND:(抽卡池:0) + 1
+			CALLFORM SKILL_0_MIRACLE_{抽卡池:随机数}_NAME
+			CALL SKILL_LEARN_BY_NAME(MASTER,5,0, RESULTS)
+			PRINTL
+			PRINTFORMW 哇!
+			PRINTFORMW 金色传说!
+			PRINTL
+			PRINTFORMW 你学会了技能「%RESULTS%」！
+		ENDIF
+	CASE 5 ;投机分子
+		CALL SINGLE_DRAWLINE
+		PRINTL
+		PRINTFORML 获得20个期货,初始价值30000,可以在信仰商店购买和出售
+		PRINTL
+		PRINTBUTTON " 0[就这个！]", 0
+		PRINTL
+		PRINTBUTTON " 1[再想想~]", 1
+		PRINTL
+		CALL SINGLE_DRAWLINE
+		INPUT
+		SIF RESULT
+			GOTO SHOP_LIFE_USERSHOP68_GIFT_S1
+		SIF RESULT == 0
+			MIRACLE_ITEM_NUM:1 += 20
+	CASE 6;复制达人
+		CALL SINGLE_DRAWLINE
+		PRINTL
+		PRINTFORML 获得1个复制卷轴,可从本势力角色身上复制任意一项不超过Lv4的技能或神术,在信仰商店中使用
+		PRINTL
+		PRINTBUTTON " 0[就这个！]", 0
+		PRINTL
+		PRINTBUTTON " 1[再想想~]", 1
+		PRINTL
+		CALL SINGLE_DRAWLINE
+		INPUT
+		SIF RESULT
+			GOTO SHOP_LIFE_USERSHOP68_GIFT_S1
+		SIF RESULT == 0
+			MIRACLE_ITEM_NUM:2 += 1
+	CASE 9
+		RETURN 1
+	CASEELSE
+		GOTO SHOP_LIFE_USERSHOP68_GIFT_S1
+ENDSELECT
+
+@SHOP_LIFE_USERSHOP68_DEBUG(对象)
+;设定菜单
+#DIM 对象
+$SHOP_LIFE_USERSHOP68_DEBUG_S1
+CALL SINGLE_DRAWLINE
+PRINTL
+PRINTFORML 这里可以进行本补丁的一些修改
+PRINTL
+PRINTBUTTON " 0[全体信仰修改]", 0
+PRINTL
+IF MIRACLE_OPEN
+	PRINTBUTTON " 1[关闭神迹开关]", 1
+ELSE
+	PRINTBUTTON " 1[开启神迹开关]", 1
+ENDIF
+PRINTL
+PRINTBUTTON " 2[修改神迹最低概率]", 2
+PRINTL
+IF FAITH_SHOW_CHANGE
+	PRINTBUTTON " 3[关闭AI信仰播报]", 3
+ELSE
+	PRINTBUTTON " 3[开启AI信仰播报]", 3
+ENDIF
+PRINTL
+PRINTBUTTON " 4[全体信仰值提升]", 4
+PRINTL
+PRINTBUTTON " 5[全体角色神术清空]", 5
+PRINTL
+PRINTBUTTON " 9[离开]", 9
+PRINTL
+CALL SINGLE_DRAWLINE
+INPUT
+SELECTCASE RESULT
+	CASE 0 ;全体信仰修改
+		CALL SINGLE_DRAWLINE
+		PRINTL
+		PRINTFORML 改信谁？
+		PRINTL
+		PRINTBUTTON " 0[无信仰]", 0
+		PRINTL
+		PRINTBUTTON " 1[暴虐]", 1
+		PRINTL
+		PRINTBUTTON " 2[诡术]", 2
+		PRINTL
+		PRINTBUTTON " 3[腐朽]", 3
+		PRINTL
+		PRINTBUTTON " 4[色欲]", 4
+		PRINTL
+		PRINTBUTTON " 5[随机信仰]", 5
+		PRINTL
+		PRINTBUTTON " 9[离开]", 9
+		PRINTL
+		CALL SINGLE_DRAWLINE
+		INPUT
+		IF RESULT == 0 || RESULT == 1 ||RESULT==2 || RESULT==3 || RESULT==4
+			FOR LOCAL,0,CHARANUM,1
+				CFLAG:LOCAL:信仰神=RESULT
+			NEXT
+			CALL COLOR_PRINTW(@"修改成功！", カラー_注意)
+		ELSEIF RESULT == 5
+			FOR LOCAL,0,CHARANUM,1
+				CFLAG:LOCAL:信仰神= RAND:4 + 1
+			NEXT
+			CALL COLOR_PRINTW(@"修改成功！", カラー_注意)
+		ENDIF
+	CASE 1 ;开关神迹
+		MIRACLE_OPEN = !MIRACLE_OPEN
+	CASE 2;修改神迹最低概率
+		PRINTFORM 当前神迹发生最低概率为{MIRACLE_LOWRATE}
+		PRINTL %
+		PRINTL 请输入0-100之间的整数,输入其他数字视为不更改
+		INPUT
+		IF RESULT >= 0 && RESULT <= 100
+			MIRACLE_LOWRATE = RESULT
+			CALL COLOR_PRINTW(@"修改成功！", カラー_注意)
+		ENDIF
+	CASE 3
+		FAITH_SHOW_CHANGE = !FAITH_SHOW_CHANGE
+	CASE 4 ;全体信仰值提升
+		CALL SINGLE_DRAWLINE
+		PRINTL
+		PRINTFORML 改为多少？
+		PRINTL
+		PRINTBUTTON " 30[30]", 30
+		PRINTL
+		PRINTBUTTON " 50[50]", 50
+		PRINTL
+		PRINTBUTTON " 70[70]", 70
+		PRINTL
+		PRINTBUTTON " 90[90]", 90
+		PRINTL
+		PRINTBUTTON " 999[离开]", 999
+		PRINTL
+		CALL SINGLE_DRAWLINE
+		INPUT
+		IF RESULT >= 0 && RESULT != 999
+			FOR LOCAL,0,CHARANUM,1
+				ABL:LOCAL:信仰 = RESULT
+			NEXT
+			CALL COLOR_PRINTW(@"修改成功！", カラー_注意)
+		ENDIF
+	CASE 5
+		FOR LOCAL,0,CHARANUM,1
+			FOR LOCAL:1, 0, MAX_SKILL_SLOT
+				SKILL_NO_SLOT:LOCAL:5:(LOCAL:1) = -1
+				SKILL_ID_SLOT:LOCAL:5:(LOCAL:1)= -1
+			NEXT
+		NEXT
+	CASE 9
+		RETURN 1
+	CASEELSE
+ENDSELECT
+GOTO SHOP_LIFE_USERSHOP68_DEBUG_S1
+RETURN 1
+;-------------------------------------------------
+@SHOP_LIFE_USERSHOP68_SACRIFICE(对象)
+;献祭功能
+#DIM 对象
+#DIM 要求量 ;对应 兵力数/资金数/士官ID
+#DIM FIRST_LINE
+SIF MIRACLE_SACRIFICE < 0 || MIRACLE_SACRIFICE >= MIRACLE_SACRIFICE_MAX
+	MIRACLE_SACRIFICE = RAND:MIRACLE_SACRIFICE_MAX
+SELECTCASE MIRACLE_SACRIFICE
+	CASE 0 ;兵力
+	CASE 1 ;资金
+	CASE 2 ;士官
+ENDSELECT
+RETURN 1
+;-------------------------------------------------
+@SHOP_LIFE_USERSHOP68_SHOP(当前页码=1,功能=0,排序=0,升序=1)
+;信仰商店
+;[购买]|价格|道具名|道具等级
+;[使用]|持有数|道具说明
+#DIM 功能 ;0=全部显示(默认) 1=已持有 2=未持有
+#DIM 排序 ;0=按ID排序(默认) 1=按等级排序 2=按价格排序 3=按持有数排序
+#DIM 升序 ;0=降序排列 1=升序排列(默认)
+#DIM TEMP ;临时变量
+#DIM FIRST_LINE
+#DIM ITEMNUM ;道具总数
+#DIM MIRACLE_ITEM_SHOW_LIST,MIRACLE_ITEM_MAX ;信仰道具显示列表
+#DIM MIRACLE_ITEM_LEVEL_LIST,MIRACLE_ITEM_MAX ;道具等级
+#DIM MIRACLE_ITEM_COST_LIST,MIRACLE_ITEM_MAX ;道具价格
+#DIMS MIRACLE_ITEM_NAME_LIST,MIRACLE_ITEM_MAX ;道具名称
+#DIMS MIRACLE_ITEM_TEXT_LIST,MIRACLE_ITEM_MAX ;道具说明
+#DIM CONST 项目数 = 10
+#DIM 最大页码
+#DIM 当前页码 ;从1开始
+REDRAW 2
+FIRST_LINE = LINECOUNT
+$SHOW_LOOP ;成功购买/使用/变更功能/变更页码/变更排序 后回到这里
+;--生成道具列表--
+ITEMNUM = 0
+FOR LOCAL,0,MIRACLE_ITEM_MAX
+	TRYCCALLFORM MIRACLE_ITEM_{LOCAL}_NAME
+		CALLFORM MIRACLE_ITEM_{LOCAL}_CHECK_SHOW
+		 ;检查显示条件
+			SIF !RESULT
+				CONTINUE
+		SIF 功能 == 1 && MIRACLE_ITEM_NUM:LOCAL <= 0
+			CONTINUE
+		SIF 功能 == 2 && MIRACLE_ITEM_NUM:LOCAL > 0
+			CONTINUE
+		MIRACLE_ITEM_SHOW_LIST:ITEMNUM = LOCAL
+		ITEMNUM ++
+	CATCH
+	ENDCATCH
+NEXT
+;--生成显示列表--
+;先升序排列
+FOR LOCAL,0,ITEMNUM,1
+	CALLFORM MIRACLE_ITEM_{MIRACLE_ITEM_SHOW_LIST:LOCAL}_LEVEL
+		LOCAL:2 = RESULT
+	CALLFORM MIRACLE_ITEM_{MIRACLE_ITEM_SHOW_LIST:LOCAL}_COST
+		LOCAL:4 = RESULT
+	LOCAL:6 = MIRACLE_ITEM_NUM:(MIRACLE_ITEM_SHOW_LIST:LOCAL)
+	FOR LOCAL:1,LOCAL:0 + 1,ITEMNUM,1
+		CALLFORM MIRACLE_ITEM_{MIRACLE_ITEM_SHOW_LIST:(LOCAL:1)}_LEVEL
+			LOCAL:3 = RESULT
+		CALLFORM MIRACLE_ITEM_{MIRACLE_ITEM_SHOW_LIST:(LOCAL:1)}_COST
+			LOCAL:5 = RESULT
+		LOCAL:7 = MIRACLE_ITEM_NUM:(MIRACLE_ITEM_SHOW_LIST:(LOCAL:1))
+		IF LOCAL:2 > LOCAL:3 && 排序 == 1 ;按等级排序
+			TEMP = MIRACLE_ITEM_SHOW_LIST:LOCAL
+			MIRACLE_ITEM_SHOW_LIST:LOCAL = MIRACLE_ITEM_SHOW_LIST:(LOCAL:1)
+			MIRACLE_ITEM_SHOW_LIST:(LOCAL:1) = TEMP
+		ENDIF
+		IF LOCAL:4 > LOCAL:5 && 排序 == 2 ;按价格排序
+			TEMP = MIRACLE_ITEM_SHOW_LIST:LOCAL
+			MIRACLE_ITEM_SHOW_LIST:LOCAL = MIRACLE_ITEM_SHOW_LIST:(LOCAL:1)
+			MIRACLE_ITEM_SHOW_LIST:(LOCAL:1) = TEMP
+		ENDIF
+		IF LOCAL:6 > LOCAL:7 && 排序 == 3 ;按持有数排序
+			TEMP = MIRACLE_ITEM_SHOW_LIST:LOCAL
+			MIRACLE_ITEM_SHOW_LIST:LOCAL = MIRACLE_ITEM_SHOW_LIST:(LOCAL:1)
+			MIRACLE_ITEM_SHOW_LIST:(LOCAL:1) = TEMP
+		ENDIF
+	NEXT
+NEXT
+IF !升序 ;降序则反转
+	FOR LOCAL,0,ITEMNUM/2,1
+		TEMP = MIRACLE_ITEM_SHOW_LIST:LOCAL
+		MIRACLE_ITEM_SHOW_LIST:LOCAL = MIRACLE_ITEM_SHOW_LIST:(ITEMNUM - 1 - LOCAL)
+		MIRACLE_ITEM_SHOW_LIST:(ITEMNUM - 1 - LOCAL) = TEMP
+	NEXT
+ENDIF
+FOR LOCAL,0,ITEMNUM,1
+	CALLFORM MIRACLE_ITEM_{MIRACLE_ITEM_SHOW_LIST:LOCAL}_NAME
+		MIRACLE_ITEM_NAME_LIST:LOCAL '= RESULTS
+	CALLFORM MIRACLE_ITEM_{MIRACLE_ITEM_SHOW_LIST:LOCAL}_TEXT
+		MIRACLE_ITEM_TEXT_LIST:LOCAL '= RESULTS
+	CALLFORM MIRACLE_ITEM_{MIRACLE_ITEM_SHOW_LIST:LOCAL}_LEVEL
+		MIRACLE_ITEM_LEVEL_LIST:LOCAL = RESULT
+	CALLFORM MIRACLE_ITEM_{MIRACLE_ITEM_SHOW_LIST:LOCAL}_COST
+		MIRACLE_ITEM_COST_LIST:LOCAL = RESULT
+NEXT
+
+;--显示玩家属性和金钱--
+CALL SINGLE_DRAWLINE
+CALL ICPRINT(@"<%ANAME(MASTER)%>当前信仰值:{ABL:MASTER:信仰}%TOSTR_SPACE(5)%神术等级:{CFLAG:MASTER:神术等级}%TOSTR_SPACE(5)%所持金:%NUM_FORMAT(MONEY)%", "", カラー_注意)
+PRINTL
+CALL SINGLE_DRAWLINE
+
+;--显示功能列表--
+SIF 功能 == 0
+	SETCOLOR カラー_選択中
+PRINTBUTTON @"[所有商品]", 8000
+PRINTFORM %TOSTR_SPACE(3)%
+RESETCOLOR
+SIF 功能 == 1
+	SETCOLOR カラー_選択中
+PRINTBUTTON @"[显示已拥有]", 8001
+PRINTFORM %TOSTR_SPACE(3)%
+RESETCOLOR
+SIF 功能 == 2
+	SETCOLOR カラー_選択中
+PRINTBUTTON @"[显示未拥有]", 8002
+PRINTFORM %TOSTR_SPACE(3)%
+RESETCOLOR
+PRINTL
+;--显示排序方式--
+CALL SINGLE_DRAWLINE
+PRINTFORM --物品列表--
+PRINTFORM %TOSTR_SPACE(5)%
+SELECTCASE 排序
+	CASE 0
+		PRINTBUTTON @"[排序:按照ID]", 10000
+		PRINTFORM %TOSTR_SPACE(4)%
+	CASE 1
+		PRINTBUTTON @"[排序:按照等级]", 10001
+		PRINTFORM %TOSTR_SPACE(2)%
+	CASE 2
+		PRINTBUTTON @"[排序:按照价格]", 10002
+		PRINTFORM %TOSTR_SPACE(2)%
+	CASE 3
+		PRINTBUTTON @"[排序:按照持有数]", 10003
+ENDSELECT
+PRINTFORM %TOSTR_SPACE(2)%
+IF 升序
+	PRINTBUTTON @"[升序排列]", 11000
+ELSE
+	PRINTBUTTON @"[降序排列]", 11000
+ENDIF
+PRINTL
+;--打印物品清单--
+最大页码 = MAX(ITEMNUM, 0) / 项目数 + 1
+IF 当前页码 <= 0
+	当前页码 = 最大页码
+ELSEIF 当前页码 > 最大页码
+	当前页码 = 1
+ENDIF
+CALL SINGLE_DRAWLINE
+LOCAL:1 = 0;记录当前已打印的物品数
+FOR LOCAL, (当前页码 - 1) * 项目数, MIN(当前页码 * 项目数, ITEMNUM)
+	CALL COLOR_LINE
+	LOCAL:2 = 1 ;当前物品能否购买
+	SIF MIRACLE_ITEM_COST_LIST:LOCAL > MONEY
+		LOCAL:2 = 0
+	SIF MIRACLE_ITEM_LEVEL_LIST:LOCAL > ABL:MASTER:信仰
+		LOCAL:2 = 0
+	CALLFORM MIRACLE_ITEM_{MIRACLE_ITEM_SHOW_LIST:LOCAL}_CHECK_BUY
+	SIF !RESULT
+		LOCAL:2 = 0
+	IF LOCAL:2
+		PRINTBUTTON "[购买]", LOCAL
+	ELSE
+		SETCOLOR カラー_選択不可
+		PRINTPLAIN [购买]
+		RESETCOLOR
+	ENDIF
+	;等级|价格|名称
+	PRINTFORM %TOSTR_SPACE(1)%
+	PRINTFORM Lv%NUM_FORMAT(MIRACLE_ITEM_LEVEL_LIST:LOCAL), 3, LEFT%
+	PRINTFORM 价格:%NUM_FORMAT(MIRACLE_ITEM_COST_LIST:LOCAL), 7, LEFT%
+	PRINTFORM %TOSTR_SPACE(3)%
+	PRINTFORML %MIRACLE_ITEM_NAME_LIST:LOCAL, 35, LEFT%
+	LOCAL:3 = 1;当前物品能否使用
+	SIF MIRACLE_ITEM_NUM:(MIRACLE_ITEM_SHOW_LIST:LOCAL) <= 0
+		LOCAL:3 = 0
+	CALLFORM MIRACLE_ITEM_{MIRACLE_ITEM_SHOW_LIST:LOCAL}_CHECK_USE
+	SIF !RESULT
+		LOCAL:3 = 0
+	IF LOCAL:3
+		PRINTBUTTON "[使用]", LOCAL + 4000
+	ELSE
+		SETCOLOR カラー_選択不可
+		PRINTPLAIN [使用]
+		RESETCOLOR
+	ENDIF
+	CALLFORM MIRACLE_ITEM_{MIRACLE_ITEM_SHOW_LIST:LOCAL}_MAX
+	LOCAL:4 = RESULT ;道具最大持有数
+	;持有数/最大持有数|道具说明
+	PRINTFORM %TOSTR_SPACE(1)%
+	PRINTFORM 持有数:%NUM_FORMAT(MIRACLE_ITEM_NUM:(MIRACLE_ITEM_SHOW_LIST:LOCAL)), 4, RIGHT%/%NUM_FORMAT(LOCAL:4), 4, LEFT%
+	PRINTFORM %TOSTR_SPACE(3)%
+	PRINTFORML %TOSTR_SPACE(1)%%MIRACLE_ITEM_TEXT_LIST:LOCAL%
+	LOCAL:1 ++
+NEXT
+IF 项目数 - LOCAL:1 > 0
+	FOR LOCAL, LOCAL:1, 项目数
+		PRINTL
+		PRINTL
+		SIF LOCAL != 项目数 - 1
+			PRINTL
+	NEXT
+ENDIF
+
+CALL SINGLE_DRAWLINE
+PRINTFORM {当前页码} / {最大页码}%TOSTR_SPACE(5)%
+PRINTBUTTON "[5页前]", 9002
+PRINTFORM %TOSTR_SPACE(3)%
+PRINTBUTTON "[上一页]", 9000
+PRINTFORM %TOSTR_SPACE(3)%
+PRINTBUTTON "[下一页]", 9001
+PRINTFORM %TOSTR_SPACE(3)%
+PRINTBUTTON "[5页后]", 9003
+PRINTL
+CALL SINGLE_DRAWLINE
+PRINTBUTTON "[帮助]", 66666
+PRINTFORM %TOSTR_SPACE(3)%
+PRINTBUTTON "[取消]", 99999
+CALL SINGLE_DRAWLINE
+$INPUT_LOOP ;输入无法购买/使用的道具则回到这里
+INPUT 99999
+
+TEMP = RESULT
+SELECTCASE RESULT
+	CASE 0 TO 3000 ;购买道具
+		IF TEMP >= ITEMNUM
+			CLEARLINE 1
+			GOTO INPUT_LOOP
+		ENDIF
+		CALLFORM MIRACLE_ITEM_{MIRACLE_ITEM_SHOW_LIST:TEMP}_CHECK_BUY
+		IF !RESULT || MIRACLE_ITEM_COST_LIST:TEMP > MONEY || MIRACLE_ITEM_LEVEL_LIST:TEMP > ABL:MASTER:信仰
+			CLEARLINE 1
+			GOTO INPUT_LOOP
+		ENDIF
+		CALLFORM MIRACLE_ITEM_{MIRACLE_ITEM_SHOW_LIST:TEMP}_BUY
+		MIRACLE_ITEM_NUM:(MIRACLE_ITEM_SHOW_LIST:TEMP) ++
+		MONEY -= MIRACLE_ITEM_COST_LIST:TEMP
+		TRYCCALLFORM MIRACLE_ITEM_{MIRACLE_ITEM_SHOW_LIST:TEMP}_USENOW
+			CALLFORM MIRACLE_ITEM_{MIRACLE_ITEM_SHOW_LIST:TEMP}_USE
+			MIRACLE_ITEM_NUM:(MIRACLE_ITEM_SHOW_LIST:TEMP) --
+		CATCH
+		ENDCATCH
+	CASE 4000 TO 7000 ;使用道具 -4000
+		TEMP -= 4000
+		IF TEMP >= ITEMNUM
+			CLEARLINE 1
+			GOTO INPUT_LOOP
+		ENDIF
+		CALLFORM MIRACLE_ITEM_{MIRACLE_ITEM_SHOW_LIST:TEMP}_CHECK_USE
+		IF !RESULT || !MIRACLE_ITEM_NUM:(MIRACLE_ITEM_SHOW_LIST:TEMP)
+			CLEARLINE 1
+			GOTO INPUT_LOOP
+		ENDIF
+		TRYCCALLFORM MIRACLE_ITEM_{MIRACLE_ITEM_SHOW_LIST:TEMP}_CANCEL_USE
+		;可以取消使用的道具,使用成功再扣除
+			CALLFORM MIRACLE_ITEM_{MIRACLE_ITEM_SHOW_LIST:TEMP}_USE
+			SIF RESULT > 0
+				MIRACLE_ITEM_NUM:(MIRACLE_ITEM_SHOW_LIST:TEMP) --
+		CATCH
+			CALLFORM MIRACLE_ITEM_{MIRACLE_ITEM_SHOW_LIST:TEMP}_USE
+			MIRACLE_ITEM_NUM:(MIRACLE_ITEM_SHOW_LIST:TEMP) --
+		ENDCATCH
+	CASE 8000 TO 8003
+		功能 = RESULT - 8000
+		当前页码 = 1
+	CASE 9000
+		当前页码 --
+	CASE 9001
+		当前页码 ++
+	CASE 9002
+		当前页码 -= 5
+	CASE 9003
+		当前页码 += 5
+	CASE 10000 TO 10004
+		排序 = RESULT - 10000 + 1
+		SIF 排序 >= 4
+			排序 = 0
+		CLEARLINE LINECOUNT - FIRST_LINE
+		GOTO SHOW_LOOP
+	CASE 11000
+		升序 = !升序
+		CLEARLINE LINECOUNT - FIRST_LINE
+		GOTO SHOW_LOOP
+	CASE 66666 ;帮助
+		PRINTL
+		CALL COLOR_PRINTL(@"神术等级决定角色能学习的神术最高等级，神术可在「习得技能」中学习", カラー_注意)
+		PRINTL
+		CALL COLOR_PRINTL(@"购买道具要求玩家的信仰不低于道具等级", カラー_注意)
+		PRINTL
+		CALL COLOR_PRINTL(@"带有(自动使用)描述的道具购买后自动使用", カラー_注意)
+		PRINTL
+		CALL COLOR_PRINTW(@"道具的效果各不相同,请仔细阅读说明后购买", カラー_注意)
+		PRINTL
+	CASE 99999 ;取消
+		RETURN 0
+ENDSELECT
+
+CLEARLINE LINECOUNT - FIRST_LINE
+GOTO SHOW_LOOP
+
+;------------------------------------------------
+;---------------------传教相关---------------------------
+@FAITH_LIKE_CHANGE(对象,神,喜爱度)
+;对四神的喜爱度变更 , 可以为负数 ，满之后获得信仰
+#DIM 对象
+#DIM 神
+#DIM 喜爱度
+SIF CFLAG:对象:信仰神 != 0
+	RETURN -1
+SELECTCASE 神
+	CASE 1
+		CFLAG:对象:喜爱度一 += 喜爱度
+		IF CFLAG:对象:喜爱度一 >= FAITH_LIKE_NEED(对象,神)
+			CALL COLOR_PRINTL(@"%ANAME(对象)%决定信仰%GOD_NAME:神%了!", カラー_注意)
+			CFLAG:对象:信仰神 = 神
+		ENDIF
+	CASE 2
+		CFLAG:对象:喜爱度二 += 喜爱度
+		IF CFLAG:对象:喜爱度二 >= FAITH_LIKE_NEED(对象,神)
+			CALL COLOR_PRINTL(@"%ANAME(对象)%决定信仰%GOD_NAME:神%了!", カラー_注意)
+			CFLAG:对象:信仰神 = 神
+		ENDIF
+	CASE 3
+		CFLAG:对象:喜爱度三 += 喜爱度
+		IF CFLAG:对象:喜爱度三 >= FAITH_LIKE_NEED(对象,神)
+			CALL COLOR_PRINTL(@"%ANAME(对象)%决定信仰%GOD_NAME:神%了!", カラー_注意)
+			CFLAG:对象:信仰神 = 神
+		ENDIF
+	CASE 4
+		CFLAG:对象:喜爱度四 += 喜爱度
+		IF CFLAG:对象:喜爱度四 >= FAITH_LIKE_NEED(对象,神)
+			CALL COLOR_PRINTL(@"%ANAME(对象)%决定信仰%GOD_NAME:神%了!", カラー_注意)
+			CFLAG:对象:信仰神 = 神
+		ENDIF
+ENDSELECT
+;---------------------------------------------
+@FAITH_LIKE_NEED(对象,神)
+#FUNCTION
+;返回对四神的喜爱条长度,越长则越难达到信仰
+;成长型 0=万能 1=知将 2=学士 3=両道 4=武官 5=軍師 6=文官 7=芸能 8=料理 9=天才
+;天才和万能不改变
+#DIM 对象
+#DIM 神
+LOCAL = 100
+SELECTCASE 神
+	CASE 1
+		LOCAL = 120
+		SIF ABL:对象:武闘 < 30
+			LOCAL += 20
+		SIF ABL:对象:武闘 > 80
+			LOCAL -= 10
+		SIF ABL:对象:防衛 < 30
+			LOCAL += 20
+		SIF ABL:对象:防衛 > 80
+			LOCAL -= 10
+		SIF TALENT:对象:300 == 1 ;知将
+			LOCAL -=20
+		SIF TALENT:对象:300 == 2 ; 学士
+			LOCAL +=100
+		SIF TALENT:对象:300 == 3 ; 两道
+			LOCAL -=10
+		SIF TALENT:对象:300 == 4 ; 武官
+			LOCAL -=30
+		SIF TALENT:对象:300 == 5 ; 军师
+			LOCAL -=10
+		SIF TALENT:对象:300 == 6 ; 文官
+			LOCAL -=100
+		SIF TALENT:对象:300 == 7 ; 艺能
+			LOCAL +=50
+		SIF TALENT:对象:300 == 8 ; 料理
+			LOCAL +=50
+	CASE 2
+		LOCAL = 120
+		SIF ABL:对象:知略 < 30
+			LOCAL += 20
+		SIF ABL:对象:知略 > 80
+			LOCAL -= 10
+		SIF ABL:对象:政治 < 30
+			LOCAL += 20
+		SIF ABL:对象:政治 > 80
+			LOCAL -= 10
+		SIF TALENT:对象:300 == 1
+			LOCAL -=10
+		SIF TALENT:对象:300 == 2
+			LOCAL -=20
+		SIF TALENT:对象:300 == 3
+			LOCAL -=10
+		SIF TALENT:对象:300 == 4
+			LOCAL +=100
+		SIF TALENT:对象:300 == 5
+			LOCAL +=10
+		SIF TALENT:对象:300 == 6
+			LOCAL -=50
+		SIF TALENT:对象:300 == 7
+			LOCAL +=50
+		SIF TALENT:对象:300 == 8
+			LOCAL +=50
+	CASE 3
+		LOCAL = 150
+		SIF ABL:对象:妖術 > 0
+			LOCAL -= 80
+		SIF TALENT:对象:300 == 1 ;知将
+			LOCAL -=20
+		SIF TALENT:对象:300 == 3 ; 两道
+			LOCAL -=20
+		SIF TALENT:对象:300 == 5 ; 军师
+			LOCAL -=20
+		SIF TALENT:对象:300 == 7 ; 艺能
+			LOCAL -=50
+		SIF TALENT:对象:300 == 8 ; 料理
+			LOCAL -=50
+	CASE 4
+		LOCAL = 200
+		SIF ABL:对象:性知識 > 3
+			LOCAL -= 50
+		SIF ABL:对象:欲望 >= 3
+			LOCAL -= 20
+		SIF ABL:对象:性技 >= 3
+			LOCAL -= 20
+		SIF ABL:对象:奉仕 >= 3
+			LOCAL -= 20
+		SIF ABL:对象:性交 >= 3
+			LOCAL -= 20
+		SIF ABL:对象:露出 >= 3
+			LOCAL -= 20
+		SIF ABL:对象:精愛 >= 3
+			LOCAL -= 20
+		SIF ABL:对象:加虐 >= 3
+			LOCAL -= 20
+		SIF ABL:对象:被虐 >= 3
+			LOCAL -= 20
+ENDSELECT
+RETURNF LOCAL
+;-------------------------------------------------
+@SHOP_LIFE_USERSHOP68_PREACH(对象)
+;发起者为MASTER
+#DIM 对象
+#DIM 随机值
+随机值 = 0
+IF CFLAG:对象:信仰神 != 0 &&  CFLAG:对象:信仰神 != CFLAG:MASTER:信仰神
+	CALL COLOR_PRINTW(@"双方信仰神不同,无法进行传教!", カラー_注意)
+	RETURN 1
+ENDIF
+IF CFLAG:MASTER:信仰神 == 0
+	CALL COLOR_PRINTW(@"你还未确定信仰,无法进行传教!", カラー_注意)
+	RETURN 1
+ENDIF
+IF CFLAG:对象:信仰神 != 0
+	IF ABL:对象:信仰 >= ABL:MASTER:信仰 + 20
+		PRINTFORML %ANAME(对象)%向%ANAME(MASTER)%分享了自己的心得,%ANAME(MASTER)%感到茅塞顿开
+		随机值 = RAND(ABL:MASTER:信仰/10+1,3+ABL:对象:信仰/10)
+		CALL PRINT_ADD_EXP(MASTER, "信仰值",随机值, 1)
+		CALL TRAIN_AUTO_ABLUP(MASTER)
+		CALL PRINT_ADD_EXP(对象, "信仰值",随机值, 1)
+		CALL TRAIN_AUTO_ABLUP(对象)
+		PRINTW
+	ELSEIF ABL:对象:信仰 +20  <= ABL:MASTER:信仰
+		PRINTFORML %ANAME(MASTER)%向%ANAME(对象)%分享了自己的心得,%ANAME(对象)%感到茅塞顿开
+		随机值 = RAND(ABL:对象:信仰/10+1,3+ABL:MASTER:信仰/10)
+		CALL PRINT_ADD_EXP(MASTER, "信仰值",随机值, 1)
+		CALL TRAIN_AUTO_ABLUP(MASTER)
+		CALL PRINT_ADD_EXP(对象, "信仰值",随机值, 1)
+		CALL TRAIN_AUTO_ABLUP(对象)
+		PRINTW
+	ELSE
+		PRINTFORML %ANAME(MASTER)%和%ANAME(对象)%共同探讨了对教义的理解,彼此都有所感悟
+		随机值 = RAND:4 + 5
+		CALL PRINT_ADD_EXP(MASTER, "信仰值",随机值, 1)
+		CALL TRAIN_AUTO_ABLUP(MASTER)
+		CALL PRINT_ADD_EXP(对象, "信仰值",随机值, 1)
+		CALL TRAIN_AUTO_ABLUP(对象)
+		PRINTW
+	ENDIF
+ELSE
+	PRINTFORML %ANAME(MASTER)%向%ANAME(对象)%宣讲了%GOD_NAME:(CFLAG:MASTER:信仰神)%的教义,%ANAME(对象)%对%GOD_NAME:(CFLAG:MASTER:信仰神)%的认可度上升了!
+	CALL FAITH_LIKE_CHANGE(对象,CFLAG:MASTER:信仰神,ABL:MASTER:信仰/5 + 20)
+	随机值 = RAND(2,6 + ABL:MASTER:信仰/10)
+	CALL PRINT_ADD_EXP(MASTER, "信仰值",随机值, 1)
+	CALL TRAIN_AUTO_ABLUP(MASTER)
+	PRINTW
+ENDIF
+RETURN 1
+;-----------------------------------------------------------
+;--------------每阶段结束时的信仰相关事件-----------------------
+@MIRACLE_TRUNEND_SP
+;TURNEND.ERB
+#DIM 势力
+#DIM 君主
+#DIM 势力总数
+#DIM 随机数
+IF RAND:100 >= MIN(MIRACLE_COUNT * 5,100-MIRACLE_LOWRATE) && MIRACLE_OPEN
+	;发生神迹概率递减
+	势力总数 = 0
+	FOR LOCAL, 0, MAX_COUNTRY
+		IF IS_COUNTRY(LOCAL) && !IS_SP_COUNTRY(LOCAL) ;不包括特殊势力
+			势力总数 ++
+		ENDIF
+	NEXT
+	SIF 势力总数 <= 1 ;只剩余一个势力时不再发生神迹
+		RETURN -1
+	君主 = -1
+	;PRINTFORML 势力总数{势力总数}
+	WHILE 君主 == -1 ;势力恰好在本期结算时灭亡
+		随机数 = RAND:势力总数 + 1 ;第几个势力发生
+		;PRINTFORML 随机数{随机数}
+		FOR LOCAL, 0, MAX_COUNTRY
+			SIF IS_SP_COUNTRY(LOCAL) ;神迹跳过特殊势力
+				CONTINUE
+			SIF IS_COUNTRY(LOCAL)
+				随机数 --
+			SIF 随机数==0
+				BREAK
+		NEXT
+		LOCAL--
+		势力 = LOCAL
+		君主 = GET_COUNTRY_BOSS(LOCAL)
+	WEND
+	随机数 = RAND:3 +1
+	SELECTCASE 随机数
+		CASE 1
+			;暴虐神迹
+			CALL COLOR_PRINTL(@"%GOD_NAME:随机数%在%ANAME(君主)%势力的地盘上展现了神迹,兵力增多了!", カラー_注意)
+			CALL COLOR_PRINTL(@"%ANAME(君主)%势力的无信者对%GOD_NAME:随机数%的认可度上升了!", カラー_注意)
+			COUNTRY_SOLDIER:势力 += RAND(1000,2000)
+		CASE 2
+			;诡术神迹
+			CALL COLOR_PRINTL(@"%GOD_NAME:随机数%在%ANAME(君主)%势力的地盘上展现了神迹,国库增多了!", カラー_注意)
+			CALL COLOR_PRINTL(@"%ANAME(君主)%势力的无信者对%GOD_NAME:随机数%的认可度上升了!", カラー_注意)
+			MONEY:势力 += RAND(2000,5000)
+		CASE 3
+			;腐朽神迹
+			CALL COLOR_PRINTL(@"%GOD_NAME:随机数%在%ANAME(君主)%势力的地盘上展现了神迹,无信者能力提升了!", カラー_注意)
+			CALL COLOR_PRINTL(@"%ANAME(君主)%势力的无信者对%GOD_NAME:随机数%的认可度上升了!", カラー_注意)
+			FOR LOCAL,0,CHARANUM,1
+				SIF CFLAG:LOCAL:1 != 势力
+					CONTINUE
+				SIF CFLAG:LOCAL:信仰神 != 0
+					CONTINUE
+				ABL:LOCAL:武闘 ++
+				ABL:LOCAL:防衛 ++
+				ABL:LOCAL:知略 ++
+				ABL:LOCAL:政治 ++
+			NEXT
+		CASE 4
+			;色欲神迹
+			CALL COLOR_PRINTL(@"%GOD_NAME:随机数%在%ANAME(君主)%势力的地盘上展现了神迹,无信者的性知識提升了!", カラー_注意)
+			CALL COLOR_PRINTL(@"%ANAME(君主)%势力的无信者对%GOD_NAME:随机数%的认可度上升了!", カラー_注意)
+			FOR LOCAL,0,CHARANUM,1
+				SIF CFLAG:LOCAL:1 != 势力
+					CONTINUE
+				SIF CFLAG:LOCAL:信仰神 != 0
+					CONTINUE
+				SIF ABL:LOCAL:性知識 < 5
+					ABL:LOCAL:性知識++
+			NEXT
+	ENDSELECT
+	PRINTL
+	PRINTL
+	FOR LOCAL,0,CHARANUM,1
+		;无信者增加好感度
+		SIF CFLAG:LOCAL:1 != 势力
+			CONTINUE
+		SIF CFLAG:LOCAL:信仰神 != 0
+			CONTINUE
+		SIF LOCAL == MASTER
+			CONTINUE
+		CALL FAITH_LIKE_CHANGE(LOCAL,随机数,30)
+	NEXT
+	MIRACLE_COUNT ++ ;统计发生次数
+
+	;发动玩家技能[天生神棍]30
+	SIF FIND_GENERAL_SKILLF(MASTER,30)
+		TRYCALL SKILL_0_MIRACLE_30_REALINVOKE()
+ENDIF
+RETURN 1
+;-----------------------------
+@MIRACLE_TRUNEND_SELFCHOICE
+;TURNEND.ERB
+;无信者自行选择适合自己的信仰,色欲除外，总数不超过MIRACLE_TRUNEND_SELFLEARN_MAX
+#DIM 势力
+#DIM 角色
+#DIM 角色总数
+#DIM 随机数
+#DIM 计数
+#DIM 起始数
+#DIM 终止数
+#DIM 步进
+计数 = 0
+IF RAND:100 >=50 ;随机从前往后或从后往前
+	起始数=0
+	终止数=MAX_COUNTRY
+	步进=1
+ELSE
+	起始数=MAX_COUNTRY
+	终止数=0
+	步进=-1
+ENDIF
+
+FOR LOCAL, 起始数, 终止数, 步进   ;20%每个势力随机一人
+	SIF !IS_COUNTRY(LOCAL) || GET_COUNTRY_BOSS(LOCAL) == -1;势力恰好在本期结算时灭亡
+		CONTINUE
+	;SIF IS_SP_COUNTRY(LOCAL) && RAND:2; 10%特殊势力
+	;	CONTINUE
+	SIF RAND:100 >= 80
+		CONTINUE
+	角色总数 = 0
+	FOR 角色,0,CHARANUM,1
+		SIF CFLAG:角色:1 != LOCAL
+			CONTINUE
+		SIF CFLAG:角色:信仰神 != 0
+			CONTINUE
+		SIF 角色 == MASTER
+			CONTINUE
+		角色总数 ++
+		LOCAL:角色总数 = 角色
+	NEXT
+	SIF 角色总数 == 0
+		CONTINUE
+	角色 = -1
+	WHILE 角色 == -1 && 角色总数 > 0
+		随机数 = RAND:角色总数 + 1
+		角色 = LOCAL:随机数
+	WEND
+	SIF 角色 == -1
+		CONTINUE
+	计数 ++
+	IF ABL:角色:妖術 > 0
+		CFLAG:角色:信仰神 = 3
+	ELSEIF TALENT:角色:300 == 6 ; 文官 政治
+		CFLAG:角色:信仰神 = 2
+	ELSEIF TALENT:角色:300 == 2 ; 学士 知政
+		CFLAG:角色:信仰神 = 2
+	ELSEIF TALENT:角色:300 == 5 ; 军师 知略
+		CFLAG:角色:信仰神 = 3
+	ELSEIF TALENT:角色:300 == 4 ; 武官 武防
+		CFLAG:角色:信仰神 = 1
+	ELSEIF TALENT:角色:300 == 1 ;知将 武防知
+		CFLAG:角色:信仰神 = (ABL:角色:武闘+ABL:角色:防衛)>=(ABL:角色:知略*2)?1#3
+	ELSEIF TALENT:角色:300 == 3 ; 两道 武防政
+		CFLAG:角色:信仰神 =  (ABL:角色:武闘+ABL:角色:防衛)>=(ABL:角色:政治*2)?1#2
+	ELSE
+		IF ABL:角色:武闘 + ABL:角色:防衛 >= 140
+			CFLAG:角色:信仰神 = 1
+		ELSEIF ABL:角色:政治 + ABL:角色:知略 >= 140
+			CFLAG:角色:信仰神 = 2
+		ELSEIF ABL:角色:武闘 + ABL:角色:知略 >= 140
+			CFLAG:角色:信仰神 = 3
+		ELSEIF ABL:角色:武闘 + ABL:角色:防衛 >= 100
+			CFLAG:角色:信仰神 = 1
+		ELSEIF ABL:角色:政治 + ABL:角色:知略 >= 100
+			CFLAG:角色:信仰神 = 2
+		ELSEIF ABL:角色:武闘 + ABL:角色:知略 >= 100
+			CFLAG:角色:信仰神 = 3
+		ELSEIF ABL:角色:武闘 + ABL:角色:防衛 >= 80
+			CFLAG:角色:信仰神 = 1
+		ELSEIF ABL:角色:政治 + ABL:角色:知略 >= 80
+			CFLAG:角色:信仰神 = 2
+		ELSEIF ABL:角色:武闘 + ABL:角色:知略 >= 80
+			CFLAG:角色:信仰神 = 3
+		ELSEIF ABL:角色:武闘 + ABL:角色:防衛 >= 60
+			CFLAG:角色:信仰神 = 1
+		ELSEIF ABL:角色:政治 + ABL:角色:知略 >= 60
+			CFLAG:角色:信仰神 = 2
+		ELSEIF ABL:角色:武闘 + ABL:角色:知略 >= 60
+			CFLAG:角色:信仰神 = 3
+		ELSEIF ABL:角色:武闘 + ABL:角色:防衛 >= 40
+			CFLAG:角色:信仰神 = 1
+		ELSEIF ABL:角色:政治 + ABL:角色:知略 >= 40
+			CFLAG:角色:信仰神 = 2
+		ELSEIF ABL:角色:武闘 + ABL:角色:知略 >= 40
+			CFLAG:角色:信仰神 = 3
+		ELSEIF ABL:角色:武闘 + ABL:角色:防衛 >= 20
+			CFLAG:角色:信仰神 = 1
+		ELSEIF ABL:角色:政治 + ABL:角色:知略 >= 20
+			CFLAG:角色:信仰神 = 2
+		ELSEIF ABL:角色:武闘 + ABL:角色:知略 >= 20
+			CFLAG:角色:信仰神 = 3
+		ELSE
+			CFLAG:角色:信仰神 = RAND:3 + 1
+		ENDIF
+	ENDIF
+	PRINTFORML %ANAME(角色)%根据自己的天赋选择了信仰%GOD_NAME:(CFLAG:角色:信仰神)%
+	ABL:角色:信仰 += 10
+	SIF 计数 >= MIRACLE_TRUNEND_SELFLEARN_MAX
+		RETURN 1
+NEXT
+
+
+
+
+
+;-----------------------------
+@MIRACLE_TRUNEND_EFFECTION
+;TURNEND.ERB
+;无信者被影响(除主角外)
+#DIM 势力
+#DIM 君主
+#DIM 影响
+#DIM 角色
+SIF CFLAG:MASTER:信仰神 == 0 ;未开启插件
+	RETURN 1
+CALL COLOR_PRINTL(@"无信者们受到了周围的信徒的影响...", カラー_注意)
+PRINTL
+FOR LOCAL, 0, CHARANUM
+	;无信者
+	SIF CFLAG:LOCAL:信仰神 != 0
+		CONTINUE
+	SIF LOCAL == MASTER
+		CONTINUE
+	;被俘虏的角色受俘虏方影响，否则受所属方影响
+	IF CFLAG:LOCAL:捕虜先
+		势力 = CFLAG:LOCAL:捕虜先
+	ELSE
+		势力 = CFLAG:LOCAL:1
+	ENDIF
+	;SIF IS_SP_COUNTRY(势力);不受特殊势力影响
+	;	CONTINUE
+	君主 = GET_COUNTRY_BOSS(势力)
+	;施加影响
+	FOR 角色,0,CHARANUM
+		SIF CFLAG:LOCAL:1 != 势力
+			CONTINUE
+		SIF LOCAL == 角色
+			CONTINUE
+		SIF CFLAG:角色:捕虜先
+			CONTINUE
+		SIF CFLAG:LOCAL:信仰神 == 0
+			CONTINUE
+		影响 = (ABL:角色:信仰 / 5)
+		SIF 角色 == 君主 && !CFLAG:LOCAL:捕虜先
+			;受本家君主影响更多
+			TIMES 影响,1.5
+		SIF CFLAG:LOCAL:捕虜先
+			;被俘虏时受影响更少
+			TIMES 影响,0.8
+		CALL FAITH_LIKE_CHANGE(LOCAL,CFLAG:角色:信仰神,影响)
+	NEXT
+NEXT
+RETURN 1
+;-----------------------------
+@MIRACLE_TURNEND_ACTIONG
+;TURNEND.ERB
+;角色自行践行教义 每个势力三人(除主角外)
+#DIM 势力
+#DIM 君主
+#DIM 随机数
+#DIM 角色
+#DIM 候选
+#DIM 人数
+SIF CFLAG:MASTER:信仰神 == 0 ;未开启插件
+	RETURN 1
+CALL COLOR_PRINTL(@"各个势力的信徒们都积极践行教义...", カラー_注意)
+PRINTL
+FOR LOCAL, 0, MAX_COUNTRY
+	SIF !IS_COUNTRY(LOCAL)
+		CONTINUE
+	势力 = LOCAL
+	君主 = GET_COUNTRY_BOSS(LOCAL)
+	人数 = 3
+	候选 = 0
+	FOR 角色,0,CHARANUM,1
+		SIF CFLAG:角色:1 != 势力
+			CONTINUE
+		SIF CFLAG:角色:信仰神 == 0
+			CONTINUE
+		;SIF 角色 == MASTER
+		;	CONTINUE
+		候选 ++
+		LOCAL:候选 = 角色
+	NEXT
+	CALL COLOR_PRINTL(@"※※※%ANAME(君主)%势力※※※", カラー_注意)
+	WHILE 人数 > 0 && 候选 >0
+		;践行教义
+		随机数=RAND:候选 + 1
+		角色 = LOCAL:随机数
+		LOCAL:随机数 = LOCAL:候选
+		候选 --
+		人数 --
+		SELECTCASE CFLAG:角色:信仰神
+			CASE 1
+				PRINTFORM %ANAME(角色)%
+				PRINTDATAL
+					DATA 独自进行了自我修行,有所感悟
+					DATA 向强者请教战斗经验,有所收获
+					DATA 捣毁了一处小型匪盗窝点
+					DATA 在乡里行侠仗义,武艺更加娴熟
+					DATA 拯救了陷入险境的陌生人
+					DATA 与朋友一同冒险,锻炼了意志
+					DATA 捉住了周围势力派来的的探子
+					DATA 在擂台赛中成为擂主,获得了大家的称赞
+					DATA 在比武招亲中获胜后扬长而去,引起一阵骚乱
+					DATA 荡除了乡里的匪患,赢得众人交口称赞
+				ENDDATA
+			CASE 2
+				PRINTFORM %ANAME(角色)%
+				PRINTDATAL
+					DATA 进行了自我礼仪训练,待人更加亲和了
+					DATA 将乡里的不正豪绅敲诈了一笔
+					DATA 与富商达成了一笔买卖
+					DATA 和朋友一起经商取得了成功
+					DATA 救济了陷入窘境的老朋友
+					DATA 尝试与君主进行国策探讨
+					DATA 向君主提出了对当前形势的见解
+					DATA 创办了一项民生工程,受到大家的称赞
+					DATA 对乡里的匪盗进行了招安
+					DATA 游历诸国,归来颇有感悟
+					DATA 熟读史书,潜修合纵连横之术
+				ENDDATA
+			CASE 3
+				PRINTFORM %ANAME(角色)%
+				PRINTDATAL
+					DATA 独自进行了山林狩猎,徒手搏杀野兽
+					DATA 击毙了一位意图不轨的歹徒
+					DATA 任用了一位颇为有才的民间人士
+					DATA 俘获了敌方势力派来的间谍
+					DATA 劝降了乡里流窜的匪盗
+					DATA 捉住了夜间行盗的偷儿
+					DATA 劝说敌方势力的间谍成为碟中谍
+					DATA 阅读了大量书籍,有所感悟
+					DATA 种下了许多树苗,为春天留下希望
+					DATA 号召乡邻清除了为祸田间的害虫,保证了民获
+					DATA 熟读兵法,多与好友纸上论兵
+					DATA 广交豪杰,设宴款待,赢得了江湖好名
+				ENDDATA
+			CASE 4
+				PRINTFORM %ANAME(角色)%
+				PRINTDATAL
+					DATA 流连于出售H书籍的不知名商店
+					DATA 与好友探讨了哪种体位更为舒适
+					DATA 潜心研究了房中之术,成为了老司机
+					DATA 调教了捉住的敌方间谍
+					DATA 向无知的民众普及了生理知识
+					DATA 调教了朋友捉住的小偷
+					DATA 向朋友传授闺中秘事,让其面红耳赤
+					DATA 劫掠村姑体验采花大盗,天亮再送回
+					DATA 仔细研究了神秘商店出售的媚药和性趣道具
+					DATA 捣毁了为祸一方的拐卖集团
+					DATA 拯救了被强迫的失足少女
+					DATA 游玩了大量GALGAME积累了丰富经验
+					DATA 在奇怪的论坛水贴获得胖次,XP逐渐奇怪
+					DATA 偷看了好朋友的口上文件,在床上扭来扭去
+					DATA 在私下偷偷写两位朋友的CP文
+				ENDDATA
+		ENDSELECT
+		随机数=RAND:4 + 6
+
+		IF CFLAG:角色:1 == CFLAG:MASTER:1
+			SIF 角色 == MASTER
+				随机数-=2
+			CALL PRINT_ADD_EXP(角色, "信仰值",随机数, 1)
+			CALL TRAIN_AUTO_ABLUP(角色)
+			PRINTW
+		ELSE
+			EXP:角色:信仰值 += 随机数 + FAITH_AI_SUPPLY
+			CALL TRAIN_AUTO_ABLUP(角色,1) ;隐藏消息
+		ENDIF
+
+	WEND
+NEXT
+RETURN 1
+
+@MIRACLE_TURNEND_SELFLEARN()
+;TURNEND.ERB
+;AI势力角色自行学习神术,除主角势力外所有势力随机一人
+#DIM 势力
+#DIM 角色
+#DIM 角色总数
+#DIM 技能ID
+#DIM 最优技能
+#DIM 技能优先度
+#DIM 当前技能优先度
+#DIM 随机数
+#DIM 计数 ;记录本轮已学习人数
+#DIM 起始数
+#DIM 终止数
+#DIM 步进
+;#; #DIM USETIME
+计数 = 0
+起始数=0
+终止数=MAX_COUNTRY
+步进=1
+FOR LOCAL, 起始数, 终止数, 步进   ;每个势力随机一人
+	;#; USETIME = GETMILLISECOND()
+	SIF !IS_COUNTRY(LOCAL) || GET_COUNTRY_BOSS(LOCAL) == -1;势力恰好在本期结算时灭亡
+		CONTINUE
+	SIF CFLAG:MASTER:1 == LOCAL ;跳过主角势力
+		CONTINUE
+	;#;PRINTFORML %ANAME(GET_COUNTRY_BOSS(LOCAL))%势力
+	角色总数 = 0
+	FOR 角色,0,CHARANUM,1
+		SIF CFLAG:角色:1 != LOCAL
+			CONTINUE
+		SIF CFLAG:角色:信仰神 == 0
+			CONTINUE
+		SIF 角色 == MASTER
+			CONTINUE
+		角色总数 ++
+		LOCAL:角色总数 = 角色
+	NEXT
+	SIF 角色总数 == 0
+		CONTINUE
+	角色 = -1
+	WHILE 角色 == -1 && 角色总数 > 0
+		随机数 = RAND:角色总数
+		角色 = LOCAL:随机数
+	WEND
+	;#;PRINTFORML 选中角色{角色}%ANAME(角色)%
+	SIF 角色 == -1
+		CONTINUE
+	计数 ++
+	技能优先度 = 0
+	最优技能 = 0
+	FOR 技能ID,0,MAX_SKILLS,1
+		SIF CHECK_SKILL_DUPLICATE(角色, スキル_ジャンル_MIRACLE, 0, 技能ID)
+			CONTINUE
+		当前技能优先度 = 0
+		TRYCCALLFORM SKILL_0_MIRACLE_{技能ID}_FROMWHO
+			SIF RESULT > 0 && CFLAG:角色:信仰神 != RESULT
+				CONTINUE
+		CATCH
+		ENDCATCH
+		TRYCCALLFORM SKILL_0_MIRACLE_{技能ID}_SELFLEARN(角色)
+			IF RESULT > 技能优先度
+				技能优先度 = RESULT
+				最优技能 = 技能ID
+			ENDIF
+		CATCH
+		ENDCATCH
+	NEXT
+	SIF 最优技能 == 0 || 技能优先度 == 0
+		CONTINUE
+	IF GET_EMPTY_SKILL_SLOT(角色,スキル_ジャンル_MIRACLE) == -1
+	;如果技能已满，则遗忘后学习
+		CALL MIRACLE_TURNEND_SELFFORGET(角色,最优技能,技能优先度)
+	ELSE
+		CALL SKILL_LEARN(角色,スキル_ジャンル_MIRACLE,0,最优技能)
+		CALLFORM SKILL_0_MIRACLE_{最优技能}_NAME
+		SIF FAITH_SHOW_CHANGE || CFLAG:角色:1 == CFLAG:MASTER:1
+			PRINTFORML %ANAME(角色)%习得了「%RESULTS%」
+	ENDIF
+	;#; USETIME = GETMILLISECOND() - USETIME
+	;#; PRINTFORML {USETIME}MS
+	;#;FORCEWAIT
+NEXT
+RETURN 1
+
+@MIRACLE_TURNEND_SELFFORGET(角色,新技能ID,新技能优先度)
+;TURNEND.ERB
+;在AI角色神术已满但想学习新技能的场合，遗忘优先度更低的神术
+#DIM 角色
+#DIM 新技能ID
+#DIM 新技能优先度
+#DIM 最劣技能ID
+#DIM 最劣优先度
+#DIM 随机数
+最劣技能ID = -1
+最劣优先度 = -1
+FOR LOCAL, 0, MAX_SKILL_SLOT
+	SIF SKILL_NO_SLOT:角色:スキル_ジャンル_MIRACLE:LOCAL < 0
+		CONTINUE
+	SIF SKILL_ID_SLOT:角色:スキル_ジャンル_MIRACLE:LOCAL < 0
+		CONTINUE
+	TRYCCALLFORM SKILL_0_MIRACLE_{SKILL_ID_SLOT:角色:スキル_ジャンル_MIRACLE:LOCAL}_SELFLEARN(角色)
+		IF RESULT < 最劣优先度 || 最劣优先度 == -1
+			最劣优先度 = RESULT
+			最劣技能ID = SKILL_ID_SLOT:角色:スキル_ジャンル_MIRACLE:LOCAL
+		ENDIF
+	CATCH
+		;不存在优先度函数的神术,赋予等级*20的优先度
+		TRYCCALLFORM SKILL_0_MIRACLE_{SKILL_ID_SLOT:角色:スキル_ジャンル_MIRACLE:LOCAL}_LEVEL
+			IF RESULT*20 < 最劣优先度 || 最劣优先度 == -1
+				最劣优先度 = RESULT*20
+				最劣技能ID = SKILL_ID_SLOT:角色:スキル_ジャンル_MIRACLE:LOCAL
+			ENDIF
+		CATCH
+		ENDCATCH
+	ENDCATCH
+
+NEXT
+;没有可以遗忘的技能就取消
+SIF 最劣技能ID == -1 || 最劣优先度 == -1
+	RETURN 0
+;如果都比想学的技能更适合就取消
+SIF 最劣优先度 > 新技能优先度
+	RETURN 0
+FOR LOCAL, 0, MAX_SKILL_SLOT
+	IF SKILL_ID_SLOT:角色:スキル_ジャンル_MIRACLE:LOCAL == 最劣技能ID
+		CALL SKILL_FORGET(角色, スキル_ジャンル_MIRACLE, LOCAL)
+		SIF FAITH_SHOW_CHANGE || CFLAG:角色:1 == CFLAG:MASTER:1
+			PRINTFORML %ANAME(角色)%遗忘了某个神术
+	ENDIF
+NEXT
+CALL SKILL_LEARN(角色, スキル_ジャンル_MIRACLE, 0, 新技能ID)
+
+CALLFORM SKILL_0_MIRACLE_{新技能ID}_NAME
+SIF FAITH_SHOW_CHANGE || CFLAG:角色:1 == CFLAG:MASTER:1
+	PRINTFORML %ANAME(角色)%习得了「%RESULTS%」
+RETURN 1
+
+@MIRACLE_TURNEND_SKILL_LEVELUP()
+;TURNEND.ERB
+;AI势力角色自动升级技能,除主角势力外所有角色
+#DIM 势力
+#DIM 角色
+#DIM 角色总数
+
+FOR 角色,0,CHARANUM,1
+	SIF CFLAG:角色:1 == CFLAG:MASTER:1
+		CONTINUE
+	SIF CFLAG:角色:信仰神 != 0
+		CONTINUE
+	SIF 角色 == MASTER
+		CONTINUE
+	FOR LOCAL, 0, MAX_SKILL_SLOT
+		SIF SKILL_NO_SLOT:角色:スキル_ジャンル_MIRACLE:LOCAL < 0
+			CONTINUE
+		SIF SKILL_ID_SLOT:角色:スキル_ジャンル_MIRACLE:LOCAL < 0
+			CONTINUE
+		TRYCALLFORM SKILL_{SKILL_NO_SLOT:角色:スキル_ジャンル_MIRACLE:LOCAL}_MIRACLE_{SKILL_ID_SLOT:角色:スキル_ジャンル_MIRACLE:LOCAL}_LEVELUP
+	NEXT
+NEXT
+RETURN 1
+
+@MIRACLE_TURNEND_ITEM_CHECK
+;检测道具的回合结束效果
+FOR LOCAL,0,MIRACLE_ITEM_MAX
+	TRYCALLFORM MIRACLE_ITEM_{LOCAL}_TURNEND
+NEXT
+RETURN 1
+;-------------------------------------
+;------------神术相关-----------------
+;删除基础技能,学习升级技能
+@MIRACLE_SKILL_LEVELUP(对象,基础技能,升级技能,技能NO=0,技能类型=5)
+#DIM 对象
+#DIMS 基础技能
+#DIMS 升级技能
+#DIM 技能NO ;要升级的技能所属角色NO,神术和通用为0
+#DIM 技能类型 ; 0="個人", 1="部隊", 2="捕縛", 3="逃走", 4="受動",5="神术"
+;没找到基础技能则取消升级
+CALL FIND_GENERAL_SKILL(对象,基础技能)
+SIF !RESULT
+	RETURN 0
+CALL SKILL_FORGET_BY_NAME(对象,技能类型, 基础技能)
+CALL SKILL_LEARN_BY_NAME(对象,技能类型,技能NO, 升级技能)
+
+;-------------------------------------------------
+;战斗中的神术的触发处理
+;参数0～1取计算用变量的排列编号（0or1）ARG:0=计谋发动侧ARG:1=对象侧
+;引数2:发动侧势力3:发动侧部队4:对象势力5:对象部队
+;※ARG:3、ARG:5不足0时视为防卫部队，分别使用ARG:2、ARG:4作为城市编号
+;-------------------------------------------------
+@BATTLE_MIRACLE_SKILL(発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動側
+#DIM 対象側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 発動側キャラ, 3
+#DIM 対象側キャラ, 3
+#DIM 発動キャラ
+#DIM 対象キャラ
+#DIM 発動キャラ素質
+#DIM シャッフル保存, MAX_UNIT_COMMANDER
+
+対象側 = !発動側
+
+SIF BATTLE_COMMANDER_NUM:発動側 == 0
+;如果没士官就跳过
+	RETURN
+
+CALL FISHER_YATES_SHAFFLE(BATTLE_COMMANDER_NUM:発動側)
+
+FOR LOCAL:0, 0, BATTLE_COMMANDER_NUM:発動側
+	シャッフル保存:LOCAL = SHAFFLE_ARRAY:LOCAL
+NEXT
+
+
+FOR LOCAL:0, 0, BATTLE_COMMANDER_NUM:発動側
+	発動キャラ = BATTLE_COMMANDER:(発動側):(シャッフル保存:LOCAL)
+	SIF 発動キャラ < 0 || BATTLE_SKILL_SEALED:(発動側):(シャッフル保存:LOCAL) || BATTLE_SUMMONED_CHARA:(発動側):(シャッフル保存:LOCAL)
+		CONTINUE
+	CALL SKILL_COMBAT_INVOKE(発動キャラ, シャッフル保存:LOCAL, スキル_ジャンル_MIRACLE, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+NEXT
+
+;---------------------------------
+;查找是否具有指定编号的神术
+;---------------------------------
+@FIND_GENERAL_SKILLF(発動者, 技能ID)
+#FUNCTION
+#DIM 発動者
+#DIM 技能ID
+FOR LOCAL, 0, MAX_SKILL_SLOT
+	IF SKILL_NO_SLOT:発動者:スキル_ジャンル_MIRACLE:LOCAL == 0 && SKILL_ID_SLOT:発動者:スキル_ジャンル_MIRACLE:LOCAL == 技能ID
+		RETURNF 1
+	ENDIF
+NEXT
+RETURNF 0

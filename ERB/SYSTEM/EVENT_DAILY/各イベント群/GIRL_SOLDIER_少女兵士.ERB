@@ -1,0 +1,188 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_GIRL_SOLDIER_RATE()
+RETURN 30
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_GIRL_SOLDIER_DECISION()
+SIF DAY < 10
+	RETURN 0
+;MASTERにペニスがある
+SIF !(HAS_PENIS(MASTER))
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_GIRL_SOLDIER_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_GIRL_SOLDIER
+#DIM 対象
+#DIMS CONST 少女兵士_種類 =  "鬼", "天狗", "化猫", "人狼", "妖狐"
+
+対象 = RAND(0, VARSIZE("少女兵士_種類"))
+
+PRINTFORML 在士兵的训练中，你的视线停留在了一名少女士兵上
+PRINTFORML 少女也来参军？你带着疑问思考着%ANAME(MASTER)%你试着向她发问
+PRINTFORMW %ANAME(MASTER)%说话语无伦次，你让她慢慢平静下来再回答
+PRINTFORML 其实她是人类和%少女兵士_種類:対象%的混血儿，长大之后和周围显得格格不入
+PRINTFORML 所以想要参加军队用战斗表现让人们认可她
+PRINTFORML 仔细一看，她的身体表面确实有妖怪的鳞片
+PRINTFORMW 另外额头还一直在不断地流汗，这是多么认真的在训练？
+PRINTFORML 怎麼辦？
+CALL ASK_MULTI("亲自帮助练习" ,"带到阴暗处去了" ,"鼓励她然后离开")
+IF RESULT == 2
+	PRINTFORML 鼓励她然后离开
+	PRINTFORMW %少女兵士_種類:対象%的少女十分感激，然后更加激动的开始了训练
+	FOR LOCAL, 0, CHARANUM
+		IF CFLAG:(LOCAL):所属 == CFLAG:MASTER:所属 && !CFLAG:(LOCAL):捕虜先 && !IS_ANIMAL(LOCAL)
+			CFLAG:(LOCAL):好感度 += 50 
+		ENDIF
+	NEXT
+	CALL COLORPRINT(@"这件事作为美谈在士兵之间传播、同伴的评价上升了", カラー_注意)
+	PRINTFORMW
+ELSEIF RESULT == 0
+	PRINTFORML 亲自帮助练习
+	PRINTFORMW %少女兵士_種類:対象%的少女特别感谢%ANAME(MASTER)%的指导
+	COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 3000
+	CALL COLORPRINT("她马上成为了一流的士官、在军队做出了贡献、士兵人数增加了3000人", カラー_注意)
+	PRINTFORMW
+ELSE
+	PRINTFORML 你看向她的身体
+	PRINTFORML 汗水打湿的衣服，可以看见衣服底下凸显的完美身材
+	PRINTFORMW 还没有完全发育的身体，已经可以看出一个性感少女的模样
+	PRINTFORML 看着她的身影入迷了，%ANAME(MASTER)%以锻炼臣子和勇气为由诱惑她
+	PRINTFORMW 她对这个突然的提议感到惊讶，但又很高兴地跟着%ANAME(MASTER)%来了
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW ・
+	IF ABL:MASTER:性技 + ABL:MASTER:性交 + ABL:MASTER:奉仕 < 6 + RAND:20
+		PRINTFORML %ANAME(MASTER)%没有让她满足
+		PRINTFORMW 她从心底里失望的样子,赶快回到队伍走了
+
+	ELSE
+		PRINTFORMW 在树林中可以听到士兵们操练的声音、%ANAME(MASTER)%和她在一起
+		SELECTCASE RAND:10
+			CASE 0
+				PRINTFORML 「啊～♥啊♥啊啊～♥%ANAME(MASTER)%那♥那里不行～♥啊♥那里♥很脆弱的♥」
+				PRINTFORML 抱着娇小的身体向上冲刺、少女发出可爱的喘息声身体随着跳动
+				PRINTFORML 龟头插入到更深处的子宫口、整个阴道都在收缩着渴望射精
+				PRINTFORMW 虽然是第一次、%ANAME(MASTER)%还是让她非常的快乐
+			CASE 1
+				PRINTFORML 「啊～♥射精～♥啊啊～♥啊♥慢一点～♥%ANAME(MASTER)%给我～♥还要～♥还要～～！♥」
+				PRINTFORML 她的表情十分迷人，一片恍惚%ANAME(MASTER)%的肉棒插在身体里，沉醉在一起的接吻。
+				PRINTFORML 可爱的样子让%ANAME(MASTER)%兴奋不已、更加激动的用肉棒去插入子宫，让少女的身体舒服到发抖
+				PRINTFORMW 已经不是处女的她非常激烈的渴求着交配，两个人交姌了好几次才结束
+			CASE 2
+				PRINTFORML 「啊～♥进来～♥啊♥不要啊～♥这样～♥啊～♥会不行的～♥啊～啊～♥停～下～来～♥啊啊啊～～♥」
+				PRINTFORML %ANAME(MASTER)%把她靠在树上，用肉棒顶着她，狠狠的向上插入
+				PRINTFORML 她用带着稚气的大声娇喘着，虽然浑身颤抖着，但还是忍住没有昏倒
+				PRINTFORMW 伴随着插入带出了少女淫穴的淫水发出噗嗤~噗嗤~的声音%ANAME(MASTER)%沉醉在了侵犯少女的交姌中
+			CASE 3
+				PRINTFORML 「啊～♥啊～♥里面好痒～♥我好想要～♥快插进来～♥啊啊～♥插死我～～♥呜呼～～♥」
+				PRINTFORML 渴望插入的媚肉紧紧夹住了肉棒、少女的腰随着插入不断摆动，同时让人忍不住因为动心的快乐而呻吟了起来
+				PRINTFORML 他不断的冲击着少女的淫穴，少女已经失去了说话了力气，只是随着插入不断发出可爱的呻吟~
+				PRINTFORMW %ANAME(MASTER)%忘却了时间，疯狂的交姌着、最后在少女的子宫里射出了精液
+			CASE 4
+				PRINTFORML 「我～♥我～♥啊～♥好厉害～♥%ANAME(MASTER)%的肉棒～♥啊啊～♥插得更深一点～♥啊啊～♥」
+				PRINTFORML 少女浑身赤裸着跨在%ANAME(MASTER)%的身上疯狂摇动，头发随着剧烈的晃动不断散开，腰肢随之左右摇摆
+				PRINTFORML 娇小的身体下阴部渗出精液和淫水的混合物、%ANAME(MASTER)%赏心悦目的看着少女的媚态
+				PRINTFORMW 不久就在淫穴狠狠射出了一大滩精液、少女像雌兽一样发出了愉悦的叫声，大声呻吟着绝顶
+			CASE 5
+				PRINTFORML 「啊啊～♥啊啊～♥要去了～～♥不要～不要～♥更深一点～～♥啊啊～♥干我～♥啊～♥去了～～♥♥」
+				PRINTFORML 啊随着肉棒的又一次突刺、少女的身体狠狠的后仰达到了不知道是第几次绝顶
+				PRINTFORML 绝顶的余韵让少女的淫穴不断抽搐着、腰肢不断地上下移动着，少女用自己的淫穴不断接受着肉棒的抽插
+				PRINTFORMW 少女的淫穴还像第一次一样紧实%ANAME(MASTER)%完全入迷了，和少女一起去了好几次
+			CASE 6
+				PRINTFORML 「好爽～♥好爽～～♥啊啊～♥来了…♥不行了～～、啊啊～♥啊啊啊～～～♥♥♥」
+				PRINTFORML %ANAME(MASTER)%她一边抱着一边晃动腰肢不停地哭泣，一边拼命地想要忍耐，一边颤抖着身体颤抖着绝顶。
+				PRINTFORML 这样拼命忍耐的表情，更加激起了想要激烈插入她的欲望、她流着眼泪，身体随着攻击不断抽搐着
+				PRINTFORMW 看着可爱的少女抑制不住的媚态%ANAME(MASTER)%兴奋的在她的淫穴喷射出来
+			CASE 7
+				PRINTFORML 「插我～♥啊～♥啊！！♥就是那里～♥别舔那里～♥啊～啊～♥啊啊～♥就是那～♥啊！！♥」
+				PRINTFORML 随着激烈的突刺她身上的香汗和舌头的唾液不断流出来、她的身体因为淫穴的不断收缩而颤抖不断
+				PRINTFORML 少女的体香不断升腾被吸入鼻腔，刺激到%ANAME(MASTER)%更兴奋的勃起了肉棒插入
+				PRINTFORMW 两个人都比普通的训练变得更加汗流浃背、却同时不断地互相索求对方。
+			CASE 8
+				PRINTFORML 「我～♥我要～♥啊啊～♥恩啊…啊～♥好舒服～♥啊啊、射进来♥肉棒又变大了～♥」
+				PRINTFORML 她跪下用嘴张大了嘴舔着肉棒为他清扫♥瞳孔里浮现的是%ANAME(MASTER)%的身影
+				PRINTFORML 她的脸上布满了绝顶后的红霞，淫穴里流出了已经满溢的精液
+				PRINTFORMW 和她一样没有满足的%ANAME(MASTER)%再次噗嗤一声插入了少女的淫穴，进行着第二次的咆哮
+			CASE 9
+				PRINTFORML 「あぐっ♥あっ♥あひ♥あぁ♥%ANAME(MASTER)%様♥%ANAME(MASTER)%様ぁ♥あっくぅ♥♥」
+				PRINTFORML 抱着她娇小的身体、肉棒推开紧闭的阴道插入已经流水不止的淫穴、她就像一只母狗一样发出喘息
+				PRINTFORML 她在每一次的突刺下身体都在发抖，不断地在达到高潮，同时在满足的时候呼唤着%ANAME(MASTER)%的名字
+				PRINTFORMW 她可爱又淫乱的姿态也让%ANAME(MASTER)%更加兴奋、忘记了隐藏起来的事，继续进行激烈的性交
+		ENDSELECT
+		CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失", 0, "", "", @"少女兵士の膣", "和姦")
+		PRINTFORML 
+		PRINTFORML …在满足了妖怪的蜜穴之后、%ANAME(MASTER)%带着一脸满足的样子返回了训练场
+		PRINTFORMW 训练结束后，从无数士兵中感受到了她火热的目光
+		PRINTFORML 怎麼辦？
+		CALL ASK_MULTI_JUDGE("把她作为直属下属", CAN_ADD_RANDOM_CHARA(),"无视并离开", 1)
+		IF RESULT == 1
+			PRINTFORML 虽然不好，但这只是一次的关系
+			PRINTFORMW %ANAME(MASTER)%没有理会她就走了
+		ELSE
+			PRINTFORML 对她的事很满意的%ANAME(MASTER)%决定让她成为直属部下
+			PRINTFORMW 亲自向少女介绍，她高兴得流出了眼泪。
+			SELECTCASE 少女兵士_種類:対象
+				CASE "鬼"
+					CALL CREATE_RANDOM_CHARA(0,0,1)
+					対象 = RESULT
+					CALL TAG_INIT(対象,158)
+					TALENT:対象:動物耳 = 0
+					TALENT:対象:尾巴 = 0
+				CASE "天狗"
+					CALL CREATE_RANDOM_CHARA(0,0,1)
+					対象 = RESULT
+					CALL TAG_INIT(対象,41)
+				CASEELSE
+					CALL CREATE_RANDOM_CHARA(0,0,1)
+					対象 = RESULT
+					CALL TAG_INIT(対象,27)
+					TALENT:対象:動物耳 = 1
+					TALENT:対象:尾巴 = 1
+			ENDSELECT
+			ABL:対象:武闘 = 33 + RAND:5
+			ABL:対象:防衛 = 33 + RAND:5
+			ABL:対象:知略 = 18 + RAND:5
+			ABL:対象:政治 = 13 + RAND:5
+			ABL:対象:歌唱 = 18 + RAND:5
+			ABL:対象:料理 = 13 + RAND:5
+			ABL:対象:Ｃ感 = 1
+			ABL:対象:Ｖ感 = 1
+			ABL:対象:Ｍ感 = 1
+			ABL:対象:Ｂ感 = 1
+			ABL:対象:性技 = 1
+			ABL:対象:性交 = 1
+			ABL:対象:奉仕 = 2
+			ABL:対象:自慰 = 1
+			ABL:対象:精愛 = 1
+			ABL:対象:欲望 = 1
+			ABL:対象:露出 = 1
+			ABL:対象:性知識 = 2
+			CALL LEARN_SKILL_GENERAL_BY_NAME(対象, "实干家")
+			TALENT:対象:処女 = 0
+			TALENT:対象:無接吻経験 = 0
+			TALENT:対象:合意 = 1
+			CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属, 1)
+			CFLAG:対象:好感度 = 500
+			CFLAG:対象:依存度 = 500
+			CFLAG:対象:従属度 = 500
+			CALL COLORPRINT(@"%ANAME(対象)%成为了%ANAME(MASTER)%的部下", カラー_注意)
+			PRINTFORMW 
+		ENDIF
+	ENDIF
+ENDIF
+
+RETURN 1

@@ -1,0 +1,680 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_TENTACLE_SOLDIERS_RATE()
+RETURN 20
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_TENTACLE_SOLDIERS_DECISION()
+;触手部屋が必要
+SIF !ITEM:触手部屋
+	RETURN 0
+RETURN DAY >= 10
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_TENTACLE_SOLDIERS_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_TENTACLE_SOLDIERS()
+#DIM 兵数
+#DIM 兵数2
+
+
+CALL COLOR_PRINT("饲养的触手好像到了繁殖期的样子", カラー_注意)
+PRINTFORML
+PRINTFORMW 今天触手们的饲养状态好像很好的样子……
+PRINTFORMW 给他们一个好女人的话、就能生出后代增加兵力
+PRINTL 
+CALL COLOR_PRINT("能抓住合适的女性扔给触手房间", カラー_緑)
+PRINTFORML
+CALL COLOR_PRINT("可以用繁殖出的触手来增加兵力", カラー_緑)
+PRINTFORML
+CALL COLOR_PRINT("非人的行为会造成周围的评价下降", カラー_緑)
+PRINTFORML
+PRINTFORML
+
+CALL ASK_YN("放入合适的女人", "再等等")
+IF RESULT == 0
+	;実行コスト
+	FOR LOCAL:0, 0, MAX_COUNTRY
+		CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -20, 20)
+	NEXT
+	;適当な女子を放り込む(触手おみくじ
+	PRINTFORMW %ANAME(MASTER)%命令着士兵们、抓来了合适的女人
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW ・
+				;人間だと上限が高い、妖怪だと下限が高い
+				;妖精は上限も下限も低いけど評判が下がりにくい
+		SELECTCASE RAND:13
+			CASE 0
+				;里娘
+				PRINTFORML 一个稚气未脱的、长着漂亮黑发的村娘被抓来了
+				PRINTFORMW 胆怯的村娘被扔进触手屋、触手们瞬间包围上来
+				PRINTFORML 好可怕！不要！发出痛苦呼喊的村娘的处女膜、被粗大的触手瞬间捅破了
+				PRINTFORML 在疼痛中颤抖的脚边，夹杂着红白色的液体，滴滴答答地流淌着，形成一片污迹……
+				PRINTFORMW 
+				PRINTFORML 在那之后村娘每天都被侵犯着、美丽的黑发上被涂满了白色的污迹
+				PRINTFORMW 不知多少次怀上触手、不停绝顶的村娘、触手的繁殖期结束的时候，全身的性感带都被彻底开发了……
+				PRINTFORML ・
+				PRINTFORML ・
+				PRINTFORMW ・
+				SELECTCASE RAND:5
+				CASE 0 TO 2
+					兵数 = RAND(2000, 5000)
+					PRINTFORML 触手的繁殖期结束了、村娘被放了出来
+					PRINTFORM 村娘在整个繁殖期里成产出了
+					CALL COLOR_PRINT(@"相当于{兵数}兵力的触手！", カラー_緑)
+					PRINTFORMW ！
+				CASEELSE
+					兵数 = RAND(3000, 8000)
+					PRINTFORML 村娘与触手之间的相性非常好、似乎生下了坚韧的触手后代
+					PRINTFORM 村娘在整个繁殖期里成产出了
+					CALL COLOR_PRINT(@"相当于{兵数}兵力的触手！", カラー_緑)
+					PRINTFORMW ！！
+				ENDSELECT
+				PRINTFORML 
+				SELECTCASE RAND:5
+				CASE 0 TO 2
+					PRINTFORML 村娘牢牢记住了触手给与的自己的身为女性的幸福、就这样回家了
+					PRINTFORM 理所当然的%ANAME(MASTER)%的势力的
+					CALL COLOR_PRINT(@"评价下降了", カラー_注意)
+					PRINTFORMW
+					FOR LOCAL:0, 0, MAX_COUNTRY
+						SIF IS_COUNTRY(LOCAL)
+							CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -150, 100)
+					NEXT
+				CASEELSE
+					兵数2 = RAND(1000, 3500)
+					COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 兵数2
+					PRINTFORML 村娘被释放后也停止不足呻吟、自己跑回触手屋里了
+					PRINTFORM 继续的、
+					CALL COLOR_PRINT(@"相当于{兵数2}兵力的触手", カラー_緑)
+					PRINTFORMW 被村娘生了出来！！
+				ENDSELECT
+			CASE 1
+				;里娘
+				PRINTFORML 衣着贫寒、长着雀斑的村娘被士兵们抓来了
+				PRINTFORMW 胆怯的村娘被扔进触手屋、触手们瞬间包围上来
+				PRINTFORML 触手们把里女的手脚紧紧地拘束起来，用精液浸湿的粗触棒贴在阴道上
+				PRINTFORML 放我出去！瘦弱的村娘流着眼泪反抗着……
+				PRINTFORMW 
+				PRINTFORML 几天后，被连续几晚注入生命种子的村娘、腹部微微肿胀起来
+				PRINTFORMW 为了生出新的生命，贫酸的身体被触手好好的调整了，声音和身体都变得艳丽起来……
+				PRINTFORML ・
+				PRINTFORML ・
+				PRINTFORMW ・
+				SELECTCASE RAND:5
+				CASE 0 TO 2
+					兵数 = RAND(2000, 5000)
+					PRINTFORML 触手的繁殖期结束了、村娘被放了出来
+					PRINTFORM 村娘在整个繁殖期里成产出了
+					CALL COLOR_PRINT(@"相当于{兵数}兵力的触手！", カラー_緑)
+					PRINTFORMW ！
+				CASEELSE
+					兵数 = RAND(3000, 8000)
+					PRINTFORML 村娘与触手之间的相性非常好、似乎生下了坚韧的触手后代
+					PRINTFORM 村娘在整个繁殖期里成产出了
+					CALL COLOR_PRINT(@"相当于{兵数}兵力的触手！", カラー_緑)
+					PRINTFORMW ！！
+				ENDSELECT
+				PRINTFORML 
+				SELECTCASE RAND:5
+				CASE 0 TO 2
+					PRINTFORML 村娘带着触手给与的健康身体回家了
+					PRINTFORM 但遗憾的是%ANAME(MASTER)%势力的
+					CALL COLOR_PRINT(@"评价下降了", カラー_注意)
+					PRINTFORMW
+					FOR LOCAL:0, 0, MAX_COUNTRY
+						SIF IS_COUNTRY(LOCAL)
+							CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -150, 100)
+					NEXT
+				CASEELSE
+					兵数2 = RAND(1000, 3500)
+					COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 兵数2
+					PRINTFORML 村娘沉迷于触手的魅力、被释放了重新回到了触手小屋里
+					PRINTFORM 继续的、
+					CALL COLOR_PRINT(@"相当于{兵数2}兵力的触手", カラー_緑)
+					PRINTFORMW 被村娘生了出来！！
+				ENDSELECT
+			CASE 2
+				;里娘(心綺楼)
+				PRINTFORML 有着丰满胸部、小贩模样的村娘被士兵们抓来了
+				PRINTFORMW 呆然的村娘被扔进繁殖屋、触手们瞬间就围了上来
+				PRINTFORML 无数触手伸进被被关进屋内的村娘衣下、一边分泌着媚药一边抚摸着她的胸部和屁股
+				PRINTFORML 经过了数小时的连续绝顶后、腔道被触手们一口气贯穿了……
+				PRINTFORMW 
+				PRINTFORML 在那之后村娘被触手抱住、一直不停的侵犯、连续地注入白浊的种子
+				PRINTFORMW 几天后、当触手的性欲得到平息后、村娘已经变得渴望精液了……
+				PRINTFORML ・
+				PRINTFORML ・
+				PRINTFORMW ・
+				SELECTCASE RAND:5
+				CASE 0 TO 2
+					兵数 = RAND(2000, 5000)
+					PRINTFORML 触手的繁殖期结束了、村娘被放了出来
+					PRINTFORM 村娘在整个繁殖期里成产出了
+					CALL COLOR_PRINT(@"相当于{兵数}兵力的触手！", カラー_緑)
+					PRINTFORMW ！
+				CASEELSE
+					兵数 = RAND(3000, 8000)
+					PRINTFORML 村娘与触手之间的相性非常好、似乎生下了坚韧的触手后代
+					PRINTFORM 村娘在整个繁殖期里成产出了
+					CALL COLOR_PRINT(@"相当于{兵数}兵力的触手！", カラー_緑)
+					PRINTFORMW ！！
+				ENDSELECT
+				PRINTFORML 
+				SELECTCASE RAND:5
+				CASE 0 TO 2
+					PRINTFORML 村娘带着触手们给与的侍奉教导回家了
+					PRINTFORM 但是周围势力对%ANAME(MASTER)%的
+					CALL COLOR_PRINT(@"评价下降了", カラー_注意)
+					PRINTFORMW
+					FOR LOCAL:0, 0, MAX_COUNTRY
+						SIF IS_COUNTRY(LOCAL)
+							CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -150, 100)
+					NEXT
+				CASEELSE
+					兵数2 = RAND(1000, 3500)
+					COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 兵数2
+					PRINTFORML 村娘被释放后耐受不了子宫的瘙痒、自己回到了触手繁殖屋里
+					PRINTFORM 继续的、
+					CALL COLOR_PRINT(@"相当于{兵数2}兵力的触手", カラー_緑)
+					PRINTFORMW 被村娘生了出来！！
+				ENDSELECT
+			CASE 3
+				;女中
+				PRINTFORML 士兵们抓来了最近不断犯错误的女仆
+				PRINTFORMW 女仆被扔进繁殖小屋内、一群触手瞬间围了过来
+				PRINTFORML 哭喊着求饶的女仆被触手无情地撕破了身上的衣服、捆住四肢拉成大字型
+				PRINTFORML 乳头一直被摩擦着、雌穴也发出咕噜咕噜的爱液声吞吐着肉棒……
+				PRINTFORMW 
+				PRINTFORML 在触手小屋的中间、女佣气喘吁吁地狂乱扭动着
+				PRINTFORMW 被触手捆住侵犯着，为了追求更多快感的奔流，自己主动迎合起触手的性交来……
+				PRINTFORML ・
+				PRINTFORML ・
+				PRINTFORMW ・
+				SELECTCASE RAND:5
+				CASE 0 TO 2
+					兵数 = RAND(2000, 5000)
+					PRINTFORML 触手的繁殖期终于结束了
+					PRINTFORM 在这期间、女仆产下了
+					CALL COLOR_PRINT(@"相当于{兵数}兵力的触手", カラー_緑)
+					PRINTFORMW ！
+					PRINTFORML 
+				CASEELSE
+					兵数 = RAND(3000, 8000)
+					PRINTFORML 触手和女仆的相性非常好、产下的后代非常强韧
+					PRINTFORM 在这期间、女仆产下了
+					CALL COLOR_PRINT(@"相当于{兵数}兵力的触手", カラー_緑)
+					PRINTFORMW ！！
+				ENDSELECT
+				PRINTFORML 
+				SELECTCASE RAND:5
+				CASE 0 TO 2
+					PRINTFORML 可怜的女仆在同事的帮助下从繁殖屋里逃了出来
+					PRINTFORM 事情传开了%ANAME(MASTER)%勢力的
+					CALL COLOR_PRINT(@"评价下降了", カラー_注意)
+					PRINTFORMW
+					FOR LOCAL:0, 0, MAX_COUNTRY
+						SIF IS_COUNTRY(LOCAL)
+							CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -150, 100)
+					NEXT
+				CASEELSE
+					兵数2 = RAND(1000, 3500)
+					COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 兵数2
+					PRINTFORML 女仆的心被触手俘虏了、自己偷偷返回了小屋里
+					PRINTFORM 这之后、女仆又产下了
+					CALL COLOR_PRINT(@"相当于{兵数2}兵力的触手", カラー_緑)
+					PRINTFORMW ！！
+				ENDSELECT
+			CASE 4
+				;女密偵
+				PRINTFORML 士兵们抓住了潜伏进宫内的敌国女密探
+				PRINTFORMW 把一副无畏表情的女密探扔进了触手屋、一大群触手瞬间围了上来
+				PRINTFORML 住手！干脆杀了我！被触手吊到半空中的女密探大声叫嚷着
+				PRINTFORML 沾满粘液的触手一边爱抚着乳头和秘部的突起，一边反复在腔内抽插着……
+				PRINTFORMW 
+				PRINTFORML 密探最初用意志力压制着快感、但是从早到晚不断被射入白浊的种子、她的防线最终被攻破了
+				PRINTFORMW 对艰巨任务的责任感完全反噬了、终于发出可怜的声音向触手撒娇了……
+				PRINTFORML ・
+				PRINTFORML ・
+				PRINTFORMW ・
+				SELECTCASE RAND:5
+				CASE 0 TO 2
+					兵数 = RAND(2000, 5000)
+					PRINTFORML 触手的繁殖期终于结束了
+					PRINTFORM 女密偵在此期间产下了
+					CALL COLOR_PRINT(@"相当于{兵数}兵力的触手", カラー_緑)
+					PRINTFORMW ！
+				CASEELSE
+					兵数 = RAND(3000, 8000)
+					PRINTFORML 触手与女密探的相性非常好、产下的触手相当强韧
+					PRINTFORM 女密偵在此期间产下了
+					CALL COLOR_PRINT(@"相当于{兵数}兵力的触手", カラー_緑)
+					PRINTFORMW ！！
+				ENDSELECT
+				PRINTFORML 
+				SELECTCASE RAND:5
+				CASE 0 TO 2
+					PRINTFORML 敌国不知不觉间，把女密探从屋里救走了
+					PRINTFORM 情报流出出去、%ANAME(MASTER)%勢力的
+					CALL COLOR_PRINT(@"评价下降了", カラー_注意)
+					PRINTFORMW
+					FOR LOCAL:0, 0, MAX_COUNTRY
+						SIF IS_COUNTRY(LOCAL)
+							CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -150, 100)
+					NEXT
+				CASEELSE
+					兵数2 = RAND(1000, 3500)
+					COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 兵数2
+					PRINTFORML 对敌国进行操纵情报、隐藏了密探的被俘的消息
+					PRINTFORM 无处可去的女密探继续被触手凌辱着、之后又孕育出了
+					CALL COLOR_PRINT(@"相当于{兵数2}兵力的触手", カラー_緑)
+					PRINTFORMW ！！
+				ENDSELECT
+			CASE 5
+				;外来人(女)
+				PRINTFORML 士兵们抓来了一个不知从何处误入幻想乡的少女
+				PRINTFORMW 把不停呼救的少女扔进了触手屋里、触手们马上聚集过来
+				PRINTFORML 未知恐怖支配下的少女被触手缠住、肉棒般的触手不停地在腔内激烈的抽插、粘液四处飞溅
+				PRINTFORML 触手们粘稠的精液一齐迸发，外来少女的皮肤和子宫都被染成白色，理性也被摧垮了……
+				PRINTFORMW 
+				PRINTFORML 对非人怪物的侵犯毫无抵抗力的少女、在触手们淫糜气息的驱使下、很快就丢掉了以往的道德观念
+				PRINTFORMW 少女没几天就被触手驯服了，一边露出放荡的笑容，一边继续被触手侵犯了……
+				PRINTFORML ・
+				PRINTFORML ・
+				PRINTFORMW ・
+				SELECTCASE RAND:5
+				CASE 0 TO 2
+					兵数 = RAND(2000, 5000)
+					PRINTFORML 触手们的繁殖期终于结束了
+					PRINTFORM 外来人少女在此期间产下了
+					CALL COLOR_PRINT(@"相当于{兵数}兵力的触手", カラー_緑)
+					PRINTFORMW ！
+				CASEELSE
+					兵数 = RAND(3000, 8000)
+					PRINTFORML 触手与外来少女的相性很好、产下的后代非常强韧
+					PRINTFORM 外来人少女在此期间产下了
+					CALL COLOR_PRINT(@"相当于{兵数}兵力的触手", カラー_緑)
+					PRINTFORMW ！！
+				ENDSELECT
+				PRINTFORML 
+				SELECTCASE RAND:5
+				CASE 0 TO 1
+					PRINTFORML 不知哪一天，外来的少女凭空从触手屋里消失了
+					PRINTFORM 救她出去的人把事情传开了、%ANAME(MASTER)%勢力的
+					CALL COLOR_PRINT(@"评价下降了", カラー_注意)
+					PRINTFORMW
+					FOR LOCAL:0, 0, MAX_COUNTRY
+						SIF IS_COUNTRY(LOCAL)
+							CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -150, 100)
+					NEXT
+				CASEELSE
+					兵数2 = RAND(1000, 3500)
+					COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 兵数2
+					PRINTFORML 触手和外来的少女相互喜爱着，在房间开始了共同生活
+					PRINTFORM 嫁给了触手们的外来少女、又多产下了
+					CALL COLOR_PRINT(@"相当于{兵数2}兵力的触手", カラー_緑)
+					PRINTFORMW ！！
+				ENDSELECT
+			CASE 6
+				;--ここから妖怪--
+				;モブ河童abc(茨歌仙)
+				SELECTCASE RAND:3
+				CASE 0
+					PRINTFORML 士兵把潜伏在这一带的黑发河童娘带过来了
+				CASE 1
+					PRINTFORML 士兵把潜伏在这一带的带着眼镜的河童娘带过来了
+				CASE 2
+					PRINTFORML 士兵把潜伏在这一带的金发河童娘带过来了
+				ENDSELECT
+				PRINTFORMW 不停抗议的河童娘被扔进了触手屋、触手们马上聚集过来
+				PRINTFORML 河童姑娘拿出道具大闹着，突然被抓住脚后跟一口气拖进壶状的触手中
+				PRINTFORML 在含有媚药成分的粘液堆中发出咕嘟咕嘟的声音，河童娘的两个肉穴被不停侵犯着……
+				PRINTFORMW 
+				PRINTFORML 在那之后，她每天的生活就是早上被泡在媚药池里、白天被拖出去侵犯着所有的孔穴
+				PRINTFORMW 到了夜里、触手们在河童娘已经脱力的身体里、不停倾注着白浊的种子……
+				PRINTFORML ・
+				PRINTFORML ・
+				PRINTFORMW ・
+				SELECTCASE RAND:5
+				CASE 0 TO 2
+				兵数 = RAND(3000, 4000)
+					PRINTFORML 触手们的繁殖期终于结束了
+					PRINTFORM 河童娘在此期间生出了
+					CALL COLOR_PRINT(@"兵{兵数}に相当する触手", カラー_緑)
+					PRINTFORMW ！
+				CASEELSE
+				兵数 = RAND(4000, 7000)
+					COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 兵数2
+					PRINTFORML 河童娘是拥有强大妖力的妖怪、产下了十分强韧的触手
+					PRINTFORM 河童娘在此期间生出了
+					CALL COLOR_PRINT(@"相当于{兵数}兵力的触手", カラー_緑)
+					PRINTFORMW ！！
+				ENDSELECT
+				PRINTFORML 
+				SELECTCASE RAND:5
+				CASE 0 TO 2
+					PRINTFORML 不知道哪一天、河童娘打坏了触手屋的门逃走了
+					PRINTFORM 幻想郷内传开了这件事、%ANAME(MASTER)%勢力
+					CALL COLOR_PRINT(@"评价下降了", カラー_注意)
+					PRINTFORMW
+					FOR LOCAL:0, 0, MAX_COUNTRY
+						SIF IS_COUNTRY(LOCAL)
+							CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -150, 100)
+					NEXT
+				CASEELSE
+					兵数2 = RAND(1500, 2500)
+					COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 兵数2
+					PRINTFORML 两个河童娘被触手抓住了，或许是想救出她们的同伙吧
+					PRINTFORM 触手们开始了与三名河童娘的乱交、
+					CALL COLOR_PRINT(@"相当于{兵数2}兵力的触手", カラー_緑)
+					PRINTFORMW 被生了出来！！
+				ENDSELECT
+			CASE 7
+				;化け狐(茨歌仙)
+				PRINTFORML 化身后潜入宫内的狐妖被士兵们抓住了
+				PRINTFORMW 狐妖被捆绑着扔进小屋、触手们马上聚集过来
+				PRINTFORML 触手抓住浮着泪水的狐狸娘的脚倒吊起来，从天花板向阴道刺入触手
+				PRINTFORML 触手发出咯吧！咯吧！的声音搏动着、把黏糊糊的精液注入狐妖的子宫……
+				PRINTFORMW 
+				PRINTFORML 几天后、不知道生出了多少只触手的狐妖依然保持着理性、小幅度的反抗着
+				PRINTFORMW 但是这似乎刺激了触手生下较强个体的想法，触手的繁殖期变长了……
+				PRINTFORML ・
+				PRINTFORML ・
+				PRINTFORMW ・
+				SELECTCASE RAND:5
+				CASE 0 TO 2
+				兵数 = RAND(3000, 4000)
+					PRINTFORML 触手们的繁殖期终于结束了
+					PRINTFORM 狐娘在此期间生下了
+					CALL COLOR_PRINT(@"相当于{兵数}兵力的触手", カラー_緑)
+					PRINTFORMW ！
+				CASEELSE
+				兵数 = RAND(4000, 7000)
+					COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 兵数2
+					PRINTFORML 狐女是拥有强大的妖力的妖怪、产下了十分强韧的触手
+					PRINTFORM 狐娘在此期间生下了
+					CALL COLOR_PRINT(@"相当于{兵数}兵力的触手", カラー_緑)
+					PRINTFORMW ！！
+				ENDSELECT
+				PRINTFORML 
+				SELECTCASE RAND:5
+				CASE 0 TO 2
+					PRINTFORML 不知道哪天、狐妖化作一道烟消失了
+					PRINTFORM 幻想郷里传遍了这件事、%ANAME(MASTER)%勢力的
+					CALL COLOR_PRINT(@"评价下降了", カラー_注意)
+					PRINTFORMW
+					FOR LOCAL:0, 0, MAX_COUNTRY
+						SIF IS_COUNTRY(LOCAL)
+							CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -150, 100)
+					NEXT
+				CASEELSE
+					兵数2 = RAND(1500, 2500)
+					COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 兵数2
+					PRINTFORML 触手很中意狐狸娘，和她生活在一起
+					PRINTFORM 成为房间的居民的狐娘培养了出了与触手的感情、进一步孕育了
+					CALL COLOR_PRINT(@"相当于{兵数2}兵力的触手", カラー_緑)
+					PRINTFORMW ！！
+				ENDSELECT
+			CASE 8
+				;妖怪兎
+				PRINTFORML 士兵把落入陷阱的妖怪兔娘带来了
+				PRINTFORMW 抵抗着的兔子被扔进触手屋、触手们马上聚集过来
+				PRINTFORML 触手穿过雌穴一口气侵入子宫，大量排出了炙热的媚药
+				PRINTFORML 妖怪兔娘的肚子因为发情而反复弹跳，就这样被灌进了精液……
+				PRINTFORMW 
+				PRINTFORML 原来性欲就高的兔子转眼间就淫成为苗床的快乐而堕落了
+				PRINTFORMW 在繁殖期期间，从触手房间一天到晚都传出淫糜的可爱喘息声
+				PRINTFORML ・
+				PRINTFORML ・
+				PRINTFORMW ・
+				SELECTCASE RAND:5
+				CASE 0 TO 2
+				兵数 = RAND(3000, 4000)
+					PRINTFORML 触手们的繁殖期终于结束了
+					PRINTFORM 妖怪兎娘在此期间生出了
+					CALL COLOR_PRINT(@"相当于{兵数}兵力的触手", カラー_緑)
+					PRINTFORMW ！
+				CASEELSE
+				兵数 = RAND(4000, 7000)
+					COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 兵数2
+					PRINTFORML 妖怪兔娘是持有强大妖力的妖怪、产下了十分强韧的触手
+					PRINTFORM 妖怪兎娘在此期间生出了
+					CALL COLOR_PRINT(@"相当于{兵数}兵力的触手", カラー_緑)
+					PRINTFORMW ！！
+				ENDSELECT
+				PRINTFORML 
+				SELECTCASE RAND:5
+				CASE 0 TO 2
+					PRINTFORML 有一天，妖怪兔子逃走了、留下了一串脚印
+					PRINTFORM 幻想郷里传遍了这件事、%ANAME(MASTER)%勢力的
+					CALL COLOR_PRINT(@"评价下降了", カラー_注意)
+					PRINTFORMW
+					FOR LOCAL:0, 0, MAX_COUNTRY
+						SIF IS_COUNTRY(LOCAL)
+							CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -150, 100)
+					NEXT
+				CASEELSE
+					兵数2 = RAND(1500, 2500)
+					COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 兵数2
+					PRINTFORML 一些兔女被触手抓住了，或许是想救她们的同伴吧
+					PRINTFORM 触手和新抓到的兔女进行了交配、
+					CALL COLOR_PRINT(@"相当于{兵数2}兵力的触手", カラー_緑)
+					PRINTFORMW 被生了出来！！
+				ENDSELECT
+			CASE 9
+				;座敷わらし(茨歌仙)
+				PRINTFORML 士兵带来了外面世界里的座敷童子
+				PRINTFORMW 一脸厌恶的座敷童子被扔进小屋、触手们马上聚集过来
+				PRINTFORML 触手们争先恐后地拥到裂缝边，互相缠绕形成肉棒的形状，然后强行进入阴道内
+				PRINTFORML 由于破处的疼痛，座敷童子发出了惨叫，但触手们却毫不理会地用肉棒抽打着，把精子全部射了出来……
+				PRINTFORMW 
+				PRINTFORML 数日後、座敷童子被触手们组成的巨人抱在怀里
+				PRINTFORMW 复数触手组合成的巨人大吼着、继续侵犯着被吓哭了的座敷童子……
+				PRINTFORML ・
+				PRINTFORML ・
+				PRINTFORMW ・
+				SELECTCASE RAND:5
+				CASE 0 TO 2
+					兵数 = RAND(3000, 4000)
+					PRINTFORML 触手们的繁殖期终于结束了
+					PRINTFORM 座敷童子在此期间生下了
+					CALL COLOR_PRINT(@"相当于{兵数}兵力的触手", カラー_緑)
+					PRINTFORMW ！
+				CASEELSE
+					兵数 = RAND(4000, 7000)
+					PRINTFORML 触手与座敷童子的相性非常好、产下了十分强韧的触手
+					PRINTFORM 座敷童子在此期间生下了
+					CALL COLOR_PRINT(@"相当于{兵数}兵力的触手", カラー_緑)
+					PRINTFORMW ！
+				ENDSELECT
+				PRINTFORML 
+				SELECTCASE RAND:5
+				CASE 0 TO 2
+					PRINTFORML 有一天、座敷童子莫名其妙的不见了
+					PRINTFORM 在座敷童子的能力影响下%ANAME(MASTER)%勢力的
+					CALL COLOR_PRINT(@"声誉变得非常低落", カラー_警告)
+					PRINTFORMW
+					FOR LOCAL:0, 0, MAX_COUNTRY
+						SIF IS_COUNTRY(LOCAL)
+							CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -150, 100)
+					NEXT
+				CASEELSE
+					兵数2 = RAND(1500, 2500)
+					COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 兵数2
+					PRINTFORML 触手很喜欢座敷童子，决定把她在房间里养起来
+					PRINTFORM 成为小屋居民的座敷童子逐渐与触手相互爱慕起来、进一步孕育出了
+					CALL COLOR_PRINT(@"相当于{兵数2}兵力的触手", カラー_緑)
+					PRINTFORMW ！！
+				ENDSELECT
+			CASE 10
+				;--ここから妖精--
+				;妖精's
+				兵数 = RAND(500, 1000)
+				PRINTFORML 士兵们把附近好几只妖精带过来了
+				PRINTFORMW 把妖精们一起扔进触手房、触手们马上聚集过来
+				PRINTFORML 拼命逃窜的妖精们一个个地被触手们侵犯了、浑身都裹满了粘稠的白浊
+				PRINTFORML 妖精们发出惨叫声，即使失去意识，在繁殖期中触手的动作也不会停止……
+				PRINTFORMW 
+				PRINTFORML 数日後、妖精们小小的身躯被整个房间的触角责弄着，开发出了作为雌性的感觉
+				PRINTFORMW 不知什么时候，惨叫变成了娇声，房间里响起了可爱的淫荡合唱……
+				PRINTFORML ・
+				PRINTFORML ・
+				PRINTFORMW ・
+				PRINTFORML 触手们的繁殖期终于结束了
+				PRINTFORM 妖精们在此期间生出了
+				CALL COLOR_PRINT(@"相当于{兵数}兵力的触手", カラー_緑)
+				PRINTFORMW ！
+				PRINTFORML 
+				SELECTCASE RAND:4
+				CASE 0
+					兵数2 = RAND(500, 1000)
+					COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 兵数2
+					PRINTFORML 更加兴奋的妖精们用触手互相侵犯着
+					PRINTFORM 进一步孕育出了
+					CALL COLOR_PRINT(@"相当于{兵数2}兵力的触手", カラー_緑)
+					PRINTFORMW ！
+				CASE 1
+					PRINTFORML 妖精在不知不觉间休息了一次就消失了
+					PRINTFORM 复活后的妖精们心里只有怨恨、
+					CALL COLOR_PRINT(@"评价少许下降了", カラー_注意)
+					PRINTFORMW
+					FOR LOCAL:0, 0, MAX_COUNTRY
+						SIF IS_COUNTRY(LOCAL)
+							CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -150, 100)
+					NEXT
+				CASE 2
+					PRINTFORML 妖精在不知不觉间休息了一次就消失了
+					PRINTFORMW 复活后似乎忘记了被侵犯的怨恨
+				CASE 3
+				;妖精だけしょぼいのも残念なのでロマン当たり入れとく
+					兵数2 = RAND(5000, 8000)
+					COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 兵数2
+					PRINTFORM 作为大自然化身的妖精们、体内孕育着的触手
+					CALL COLOR_PRINT(@"突然发生了変異", カラー_緑)
+					PRINTFORML ！！
+					PRINTFORM 生下的触手具备着
+					CALL COLOR_PRINT(@"相当于{兵数2}的力量", カラー_緑)
+					PRINTFORMW ！！！
+				ENDSELECT
+			CASE 11
+				;メイド妖精
+				兵数 = RAND(500, 1000)
+				PRINTFORML 士兵把身穿女仆装金发的妖精带来了
+				PRINTFORMW 把女仆妖精扔进触手屋、触手们马上聚集过来
+				PRINTFORML 抵抗着的女仆妖精的裂缝被几个细细的触手插入，把肉壁向左右打开
+				PRINTFORML 当从小穴里看到了妖精的子宫口时、数十跟触手同时插入妖精的肉穴、疯狂的凌辱起来……
+				PRINTFORMW 
+				PRINTFORML 几天后，在触手房间的中央，有个腹部鼓起的女仆妖精静坐在那里
+				PRINTFORMW 身为单纯的妖精的她因为能产下触手而感到幸福，一直等待着新生命的诞生……
+				PRINTFORML ・
+				PRINTFORML ・
+				PRINTFORMW ・
+				PRINTFORML 触手们的繁殖期终于结束了
+				PRINTFORM 女仆妖精在此期间生出了
+				CALL COLOR_PRINT(@"相当于{兵数}兵力的触手", カラー_緑)
+				PRINTFORMW ！
+				PRINTFORML 
+				SELECTCASE RAND:4
+				CASE 0
+					兵数2 = RAND(500, 1000)
+					COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 兵数2
+					PRINTFORML 女仆妖精好像被触手俘虏了、主动住进了房间
+					PRINTFORM 之后又孕育出了
+					CALL COLOR_PRINT(@"相当于{兵数2}兵力的触手", カラー_緑)
+					PRINTFORMW ！
+				CASE 1
+					PRINTFORML 妖精在不知不觉间休息了一次就消失了
+					PRINTFORM 复活后的妖精们心里只有怨恨、
+					CALL COLOR_PRINT(@"评价少许下降了", カラー_注意)
+					PRINTFORMW
+					FOR LOCAL:0, 0, MAX_COUNTRY
+						SIF IS_COUNTRY(LOCAL)
+							CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -150, 100)
+					NEXT
+				CASE 2
+					PRINTFORML 妖精在不知不觉间休息了一次就消失了
+					PRINTFORMW 复活后似乎忘记了被侵犯的怨恨
+				CASE 3
+				;妖精だけしょぼいのも残念なのでロマン当たり入れとく
+					兵数2 = RAND(5000, 8000)
+					COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 兵数2
+					PRINTFORM 作为大自然化身的妖精们、体内孕育着的触手
+					CALL COLOR_PRINT(@"突然发生了変異", カラー_緑)
+					PRINTFORML ！！
+					PRINTFORM 生下的触手具备着
+					CALL COLOR_PRINT(@"相当于{兵数2}的力量", カラー_緑)
+					PRINTFORMW ！！！
+				ENDSELECT
+			CASE 12
+				;ひまわり妖精
+				兵数 = RAND(500, 1000)
+				PRINTFORML 士兵把紧紧抱住向日葵的妖精带来了
+				PRINTFORMW 然后把摇摆不定的向日葵妖精扔进触手室、触手们马上聚集过来
+				PRINTFORML 触手钻进小雌穴，用力侵犯了蜷缩成一团的向日葵妖精
+				PRINTFORML 周围的触手不停地往雪白的女性衬衣上下雨一般地泼洒着粘稠的精子……
+				PRINTFORMW 
+				PRINTFORML 数日後、妖精被吸收了周围妖气变异成触手的向日葵缠绕着
+				PRINTFORMW 白色的女袍从胸下被撕破，露出的胖乎乎的小肚子，向日葵疼爱地抚摸着她……
+				PRINTFORML ・
+				PRINTFORML ・
+				PRINTFORMW ・
+				PRINTFORML 触手们的繁殖期终于结束了
+				PRINTFORM 向日葵妖精在此期间生出了
+				CALL COLOR_PRINT(@"相当于{兵数}兵力的触手", カラー_緑)
+				PRINTFORMW ！
+				PRINTFORML 
+				SELECTCASE RAND:4
+				CASE 0
+					兵数2 = RAND(500, 1000)
+					COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 兵数2
+					PRINTFORML 向日葵妖精好像被触手俘虏了、主动住进了房间
+					PRINTFORM 之后又孕育出了
+					CALL COLOR_PRINT(@"相当于{兵数2}兵力的触手", カラー_緑)
+					PRINTFORMW ！
+				CASE 1
+					PRINTFORML 向日葵妖精在不知不觉间休息了一次就消失了
+					PRINTFORM 复活后的妖精们心里只有怨恨、
+					CALL COLOR_PRINT(@"少し评价下降了", カラー_注意)
+					PRINTFORMW
+					FOR LOCAL:0, 0, MAX_COUNTRY
+						SIF IS_COUNTRY(LOCAL)
+							CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -150, 100)
+					NEXT
+				CASE 2
+					PRINTFORML 妖精在不知不觉间休息了一次就消失了
+					PRINTFORMW 复活后似乎忘记了被侵犯的怨恨
+				CASE 3
+				;妖精だけしょぼいのも残念なのでロマン当たり入れとく
+					兵数2 = RAND(5000, 8000)
+					COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 兵数2
+					PRINTFORM 作为大自然化身的妖精们、体内孕育着的触手
+					CALL COLOR_PRINT(@"突然发生了変異", カラー_緑)
+					PRINTFORML ！！
+					PRINTFORM 生下的触手具备着
+					CALL COLOR_PRINT(@"相当于{兵数2}的力量", カラー_緑)
+					PRINTFORMW ！！！
+			ENDSELECT
+	ENDSELECT
+	COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 兵数
+ELSEIF RESULT == 1
+	PRINTFORMW 作罷
+ENDIF
+RETURN 1

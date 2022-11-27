@@ -1,0 +1,665 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_HYPNOTISM_RAPE_RATE()
+RETURN (DVAR:恶魔催眠術 == 2 ? 150 # 30)
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_HYPNOTISM_RAPE_DECISION()
+SIF DAY < 10
+RETURN 0
+;MASTERが男
+SIF !(IS_MALE(MASTER))
+RETURN 0
+SIF DVAR:恶魔催眠術 == -1
+RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_HYPNOTISM_RAPE_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_HYPNOTISM_RAPE
+#DIM 対象
+
+;恶魔催眠術を学んでおり、実行したことがあり、確率でシスターがくる
+IF DVAR:恶魔催眠術 == 2 && DVAR:恶魔催眠経験値 > 0 && RAND:8 == 0
+CALL HYPNOTISM_RAPE_SISTER
+ELSEIF DVAR:恶魔催眠経験値 + RAND:30 > 100 && RAND:8 == 0
+	CALL HYPNOTISM_RAPE_FUMBLE
+ELSEIF GROUPMATCH(DVAR:恶魔催眠術, 0, 1)
+CALL HYPNOTISM_RAPE_CONTRACT
+SIF RESULT == 0
+	RETURN 1
+CALL HYPNOTISM_RAPE_PRACTICE(1)
+ELSEIF DVAR:恶魔催眠術 == 2
+CALL HYPNOTISM_RAPE_PRACTICE(0)
+ENDIF
+
+RETURN 1
+
+
+;--------------------
+;シスターがくるイベント
+;---------------------
+@HYPNOTISM_RAPE_SISTER
+PRINTFORML 有一天，修女来了
+PRINTFORML 她了解到%ANAME(MASTER)%与恶魔契约后得到了恶魔催眠术
+PRINTFORMW 给出了忠告，如果继续就这样的话，%ANAME(MASTER)%总有一天会遇到意想不到的遭遇
+PRINTFORML 怎么办？
+CALL ASK_MULTI("听从忠告" ,"催眠PLAY" ,"赶走她")
+IF RESULT == 2
+PRINTFORML 少管闲事
+PRINTFORMW 把她赶走了
+ELSEIF RESULT == 0
+PRINTFORML 她似乎并没有说谎
+PRINTFORML 决定听从她的忠告
+PRINTFORMW %ANAME(MASTER)%决定封印这个能力，不再使用恶魔催眠术
+DVAR:恶魔催眠術 = -1
+DVAR:恶魔催眠経験値 = 0
+ELSE
+IF DVAR:シスター == 0
+	PRINTFORML 一直在被说教的%ANAME(MASTER)%，注意力开始涣散了
+	PRINTFORMW 突然意识到她身体线条非常曼妙
+	PRINTFORML %ANAME(MASTER)%于是装作听从她的话而感动的样子，悄悄接近了她，施加了恶魔催眠术
+	PRINTFORMW …她呆然若失地陷入了催眠状态
+ELSE
+	PRINTFORML %ANAME(MASTER)%回想起上次她露出的丑态而兴奋地笑了
+	PRINTFORML 对于愤怒地冲上来的她，再次施行了催眠术
+	PRINTFORMW …她又一次呆然地陷入了催眠状态
+ENDIF
+PRINTFORML %ANAME(MASTER)%紧抱着，抚摸着她的身体，她也热呼呼地喘息着
+PRINTFORMW 接着，%ANAME(MASTER)%微笑着把她带进了卧室
+PRINTFORML
+SELECTCASE RAND:5
+	CASE 0
+		PRINTFORMW 她的身体以圣职者不应有的丰满和敏感度让%ANAME(MASTER)%感到非常快乐
+	CASE 1
+		PRINTFORMW 一边让她说出像bitch那样的台词，一边嘲笑着侵犯她
+	CASE 2
+		PRINTFORMW 一边回应着不变的持续着说教的她，一边充分享受着中出强奸
+	CASE 3
+		PRINTFORMW 为了回应像母狗一样地发情寻求着精子的她，整晚持续着调教
+	CASE 4
+		PRINTFORMW 因为身体的敏感度提升了几倍，她反复无数次地高潮了
+ENDSELECT
+CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "シスターの唇", "", @"シスターの膣", "催眠")
+PRINTFORML
+PRINTFORMW 第二天，她好像什么事也没有发生一样，与%ANAME(MASTER)%告别了
+PRINTFORMW 回去的时候抚摸了一下她被充分射精了的下腹部,不过，她只是发了一下呆
+DVAR:恶魔催眠経験値 += RAND:5 + 1
+DVAR:シスター = 1
+ENDIF
+RETURN 1
+
+;---------------------
+;確率で発動する喪失イベント
+;---------------------
+@HYPNOTISM_RAPE_FUMBLE
+PRINTFORML 有一天，%ANAME(MASTER)%厌倦了普通的催眠强奸活动，他想到要做一些很华丽的事情
+PRINTFORMW %ANAME(MASTER)%让女性们进入拥挤的澡堂，并给那个场合的全体人员挂上了催眠！
+PRINTFORML …但是不知为什么催眠术并没有发动
+PRINTFORMW 一边疑惑着一边重复发动了几次，但是什么都没有发生
+PRINTFORML 还在继续尝试的时候被女性们围住，被抓住了
+PRINTFORMW 无论怎样的辩解都没有意义，被她们打得落花流水……
+CALL ADD_COOLTIME(MASTER, 3)
+CALL COLOR_PRINTL(@"从这以后、%ANAME(MASTER)%失去了催眠的能力……", カラー_注意)
+ABL:MASTER:催眠 = 0
+CALL COLOR_PRINTW("催眠能力变成了0…", カラー_警告)
+PRINTFORMW
+DVAR:恶魔催眠術 = -1
+ITEM:催眠術 = -1
+DVAR:恶魔催眠経験値 = 0
+RETURN 1
+
+;---------------------
+;契約
+;---------------------
+@HYPNOTISM_RAPE_CONTRACT
+
+IF DVAR:恶魔催眠術 == 0
+PRINTFORML 有一天，恶魔出现在梦中
+PRINTFORMW 据说可以用巨额交换和他交换，能让所有东西服从的强有力的恶魔催眠术
+CALL ICPRINT("具体来说、需要<30000>金来交换", "W", カラー_注意)
+ELSEIF DVAR:恶魔催眠術 == 1
+PRINTFORML 那个恶魔再次出现要求契约
+PRINTFORMW 契约内容是同样的，用30000钱交换恶魔催眠术
+ENDIF
+PRINTFORML 怎么办？
+CALL ASK_MULTI_JUDGE("同意契约", MONEY >= 30000, "赶走他", 1)
+IF RESULT == 1
+PRINTFORML 并没有和恶魔定下契约的打算
+PRINTFORMW 驱逐了他
+DVAR:恶魔催眠術 = 1
+RETURN 0
+ENDIF
+PRINTFORML 败给了恶魔力量魅力的%ANAME(MASTER)%决定签约
+PRINTFORMW 恶魔微微一笑，举起了%ANAME(MASTER)%的手
+PRINTFORMW %ANAME(MASTER)%突然有着力量涌出的感觉和能够使用恶魔催眠术的自信了
+CALL COLOR_PRINTW(@"%ANAME(MASTER)%入手了【恶魔催眠术】", カラー_注意)
+CALL COLOR_PRINTW("支付了30000元", カラー_注意)
+ABL:MASTER:催眠 = MAX(ABL:MASTER:催眠 + 5, 0)
+CALL COLOR_PRINTW("催眠能力上升了5…", カラー_警告)
+PRINTFORMW
+DVAR:恶魔催眠術 = 2
+PRINTFORMW 恶魔一边令人毛骨悚然地笑着一边像雾一样消失了……
+PRINTFORMW 经过调查，钱包里钱不见了
+RETURN 1
+
+;---------------------
+;恶魔催眠実行
+;---------------------
+@HYPNOTISM_RAPE_PRACTICE(契約後)
+#DIM 契約後
+#DIM 実行メニュー
+#DIM 対象
+IF 契約後 == 1
+PRINTFORMW 立刻去尝试吗？
+ELSE
+PRINTFORML 工作告一段落
+PRINTFORMW 今天也要去催眠吗？
+ENDIF
+
+CALL ASK_YN("去催眠", "还是算了")
+
+IF RESULT == 1
+PRINTFORMW 因为今天很累所以还是放弃了
+RETURN
+ENDIF
+
+PRINTFORML 当然要享受恶魔催眠术的乐趣了
+PRINTFORMW 那么，瞄准谁呢？
+CALL SINGLE_DRAWLINE
+CALL SELECT_CHARA_LIST_ONLY_LOGIC_SEX("HYPONOTISM_RAPE", "NONE")
+IF RESULT == -1
+PRINTFORMW 因为今天累了，所以最终还是放弃了
+RETURN
+ENDIF
+対象 = RESULT
+PRINTFORML %ANAME(対象)%
+PRINTFORMW %ANAME(MASTER)%决定了目标，立刻出发了
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+PRINTFORML 正好她一个人的时候遇到了她
+PRINTFORMW %ANAME(MASTER)%对她亲切地搭话，用了恶魔催眠术
+PRINTFORML 看到光从她的眼睛里消失了，呆然伫立在那里
+PRINTFORMW 好像变成了催眠状态
+PRINTFORML 怎麼辦？
+CALL ASK_MULTI("肉体开发", "当然是强奸", "让她隷属于我吧")
+SELECTCASE RESULT
+CASE 0
+	CALL HYPNOTISM_RAPE_PRACTICE_INVESTMENT(対象)
+CASE 1
+	CALL HYPNOTISM_RAPE_PRACTICE_RAPE(対象)
+CASE 2
+	CALL HYPONOTISM_RAPE_PRACTICE_ENSLAVEMENT(対象)
+ENDSELECT
+
+RETURN
+
+
+
+;-------------------------
+;肉体開発
+;-------------------------
+@HYPNOTISM_RAPE_PRACTICE_INVESTMENT(対象)
+#DIM 対象
+#DIM 実行メニュー
+PRINTFORMW 决定按%ANAME(MASTER)%的喜好开发她的肉体
+PRINTFORML 怎么办？
+CALL ASK_MULTI("刻下文身", "安装穿孔工具", "肉体敏感化")
+実行メニュー = RESULT
+SELECTCASE 実行メニュー
+CASE 0
+	PRINTFORMW %ANAME(MASTER)%决定把%ANAME(対象)%打扮得漂漂亮亮……
+CASE 1
+	PRINTFORML %ANAME(MASTER)%决定把%ANAME(対象)%打扮得漂漂亮亮……
+CASE 2
+	PRINTFORMW 为了今后的快乐，把肉体变得敏感吧……
+ENDSELECT
+;確率判定失敗
+IF MIN(DVAR:恶魔催眠経験値) < 10
+PRINTFORML 可是接近之前她恢复了意识
+PRINTFORMW %ANAME(MASTER)%瞬间逃跑了！
+PRINTFORML
+IF RAND:5 > 0
+	PRINTFORML 顺利逃脱了……
+	PRINTFORMW 也有这样的事吧，又计划好了下次的催眠享受，返回了宫殿
+	DVAR:恶魔催眠経験値 += RAND:3 + 1
+ELSE
+	PRINTFORML 没能逃脱……
+	PRINTFORMW 被捕获的%ANAME(MASTER)%受到了盘问，全部暴露了
+	FOR LOCAL, 0, CHARANUM
+		SIF !IS_ANIMAL(LOCAL)
+			CFLAG:(LOCAL):好感度 -= 500
+	NEXT
+	CALL COLOR_PRINTL(@"这件事不仅在自己国内同样传播到了幻想乡中、%ANAME(MASTER)%的评价大幅度下降了", カラー_注意)
+	FOR LOCAL, 1, MAX_COUNTRY
+				CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -100)
+			NEXT
+	PRINTFORMW
+ENDIF
+RETURN
+ENDIF
+
+PRINTFORML 她听从%ANAME(MASTER)%的命令，老实的摆起了姿势
+
+SELECTCASE 実行メニュー
+CASE 0
+	$SHOW_LOOP
+	PRINTFORML 雕刻在哪儿呢？
+	PRINTFORML
+	FOR LOCAL, 0, VARSIZE("TATTOO")
+		IF CAN_TATTOO(対象, LOCAL)
+			PRINTBUTTON @"[{LOCAL:0}] %GET_TATTOO_NAME(LOCAL:0), 8, LEFT%", LOCAL:0
+			PRINTBUTTON @"[{LOCAL:0 + 100}] %GET_TATTOO_NAME(LOCAL:0) + "(隨機)", 20, LEFT%", LOCAL:0 + 100
+			PRINTL
+		ELSE
+			SETCOLOR カラー_選択不可
+			PRINTPLAINFORM [{LOCAL:0}] %GET_TATTOO_NAME(LOCAL:0)%那里已经有纹身了
+			RESETCOLOR
+			PRINTL
+		ENDIF
+	NEXT
+	PRINTFORML [99] 取消
+	$INPUT_LOOP
+	INPUT
+	LOCAL:1 = RESULT
+	IF LOCAL:1 == 99
+		PRINTFORMW 还是算了
+		PRINTFORMW %ANAME(MASTER)%一解开她的催眠就离开了
+		RETURN
+	ELSEIF 0 <= LOCAL:1 && LOCAL:1 < VARSIZE("TATTOO") && CAN_TATTOO(対象, LOCAL:1)
+		PRINTFORML 怎么雕刻好呢……(未输入就是取消)
+		INPUTS
+		SIF RESULTS == ""
+			GOTO SHOW_LOOP
+		CALL SET_TATTOO(対象, LOCAL:1, RESULTS:0)
+	ELSEIF 100 <= LOCAL:1 && LOCAL:1 < VARSIZE("TATTOO") + 100 && CAN_TATTOO(対象, LOCAL:1 - 100)
+		$RANDOM_LOOP
+		LOCALS:0 = %STR_FOR_TATTOO(LOCAL:1 - 100)%
+		PRINTFORML 文身「%LOCALS:0%」怎么样……
+		CALL ASK_MULTI("就这个", "换一个", "放弃")
+		IF RESULT == 0
+			CALL SET_TATTOO(対象, LOCAL:1 - 100, LOCALS:0)
+		ELSEIF RESULT == 1
+			GOTO RANDOM_LOOP
+		ELSEIF RESULT == 2
+			GOTO SHOW_LOOP
+		ENDIF
+	ELSE
+		GOTO INPUT_LOOP
+	ENDIF
+	PRINTFORML 给她添加了适合的装饰呢
+	PRINTFORMW 对自己完成的工作已经心满意足的%ANAME(MASTER)%解开了她的催眠离开了那个地方
+CASE 1
+	PRINTFORML 往哪儿安个穿孔工具？
+	PRINTFORML
+	FOR LOCAL, 0, ピアス_最大ビット + 1
+		IF IS_PIERCED(対象, LOCAL)
+			PRINTFORML [{LOCAL:0}]卸下%GET_PIERCE_NAME(LOCAL:0)%的钻孔工具
+		ELSE
+			IF IS_HOLED(対象, LOCAL)
+				SIF CAN_PIERCE(対象, LOCAL)
+					PRINTFORML [{LOCAL:0}]往%GET_PIERCE_NAME(LOCAL:0)%上面安装穿孔工具
+			ELSE
+				SIF CAN_PIERCE(対象, LOCAL)
+					PRINTFORML [{LOCAL:0}]在%GET_PIERCE_NAME(LOCAL:0)%上开孔，安装穿孔工具
+			ENDIF
+		ENDIF
+	NEXT
+	PRINTFORML [99] 取消
+	$INPUT_LOOP_02
+	INPUT
+	IF RESULT == 99
+		PRINTFORMW 还是算了
+		PRINTFORMW %ANAME(MASTER)%一解开她的恶魔催眠就离开了
+		RETURN
+	ELSEIF IS_PIERCED(対象, RESULT)
+		CALL REMOVE_PIERCE(対象, RESULT)
+		PRINTFORML 把不适合她的穿孔道具给拆掉了
+		PRINTFORMW 对自己完成的工作已经心满意足的%ANAME(MASTER)%解开了她的催眠离开了那个地方
+	ELSEIF CAN_PIERCE(対象, RESULT)
+		CALL SET_PIERCE(対象, RESULT)
+		PRINTFORML 给她穿了个合适的穿孔工具
+		PRINTFORMW 对自己完成的工作已经心满意足的%ANAME(MASTER)%解开了她的催眠离开了那个地方
+	ELSE
+		GOTO INPUT_LOOP_02
+	ENDIF
+CASE 2
+	PRINTFORML 要开发哪个部位？
+	CALL ASK_MULTI_JUDGE("口", 1, "胸", 1, "女性器", 1, "屁股", 1, "阴蒂", !HAS_PENIS(対象), "肉棒", HAS_PENIS(対象))
+	SELECTCASE RESULT
+		CASE 0
+			PRINTFORML 随着%ANAME(MASTER)%的下令，她呆呆地张开了口
+			PRINTFORML 用手指玩弄口内的同时，用催眠术反复强化着敏感度，就这样开发着
+			PRINTFORMW 渐渐地她气喘吁吁地露出了高潮的表情
+			LOCALS:0 = 口
+			LOCAL = TALENT:対象:Ｍ鈍感
+			IF LOCAL
+				TALENT:対象:Ｍ鈍感 = 0
+			ELSE
+				TALENT:対象:Ｍ敏感 = 1
+			ENDIF
+			CALL PRINT_ADD_EXP(対象, "Ｍ感経験値", RAND:5 + 6, 1)
+		CASE 1
+			PRINTFORML %ANAME(MASTER)%命令她解开胸前的扣子
+			PRINTFORML 一边揉搓着，一边用催眠术反复强化着敏感度，就这样开发着
+			PRINTFORMW 渐渐地她开始不自觉的喘气，乳头也勃起了
+			LOCALS:0 = 胸
+			LOCAL = TALENT:対象:Ｂ鈍感
+			IF LOCAL
+				TALENT:対象:Ｂ鈍感 = 0
+			ELSE
+				TALENT:対象:Ｂ敏感 = 1
+			ENDIF
+			CALL PRINT_ADD_EXP(対象, "Ｂ感経験値", RAND:5 + 6, 1)
+		CASE 2
+			PRINTFORML %ANAME(MASTER)%命令她脱下了内衣，露出了下体
+			PRINTFORML 一边用指尖刺激着敏感处，一边用催眠术反复强化着敏感度，就这样开发着
+			PRINTFORMW 渐渐地她喘起了粗气，爱液不停地流了出来
+			LOCALS:0 = ヴァギナ
+			LOCAL = TALENT:対象:Ｖ鈍感
+			IF LOCAL
+				TALENT:対象:Ｖ鈍感 = 0
+			ELSE
+				TALENT:対象:Ｖ敏感 = 1
+			ENDIF
+			CALL PRINT_ADD_EXP(対象, "Ｖ感経験値", RAND:5 + 6, 1)
+		CASE 3
+			PRINTFORML %ANAME(MASTER)%命令她脱下内衣露出屁股
+			PRINTFORML 一边用用两手激烈地揉捏着，一边用催眠术反复强化着敏感度，就这样开发着
+			PRINTFORMW 渐渐地她呼吸急促起来，身体也不自觉的抽搐着
+			LOCALS:0 = アナル
+			LOCAL = TALENT:対象:Ａ鈍感
+			IF LOCAL
+				TALENT:対象:Ａ鈍感 = 0
+			ELSE
+				TALENT:対象:Ａ敏感 = 1
+			ENDIF
+			CALL PRINT_ADD_EXP(対象, "Ａ感経験値", RAND:5 + 6, 1)
+		CASE 4
+			PRINTFORML %ANAME(MASTER)%命令她脱下内衣露出了秘部
+			PRINTFORML 让她自己触碰着自己的秘部，开发着她的身体
+			PRINTFORMW 渐渐地，她呼吸急促起来，阴蒂也勃起了
+			LOCALS:0 = クリトリス
+			LOCAL = TALENT:対象:Ｃ鈍感
+			IF LOCAL
+				TALENT:対象:Ｃ鈍感 = 0
+			ELSE
+				TALENT:対象:Ｃ敏感 = 1
+			ENDIF
+		CASE 5
+			PRINTFORML %ANAME(MASTER)%命令她脱下内衣露出了秘部
+			PRINTFORML 让她自己触碰着自己的秘部，开发着她的身体
+			PRINTFORMW 渐渐地，她呼吸急促起来，肉棒也勃起了
+			LOCALS:0 = 肉棒
+			LOCAL = TALENT:対象:Ｃ鈍感
+			IF LOCAL
+				TALENT:対象:Ｃ鈍感 = 0
+			ELSE
+				TALENT:対象:Ｃ敏感 = 1
+			ENDIF
+	ENDSELECT
+	CALL TRAIN_AUTO_ABLUP(対象)
+	CALL COLOR_PRINTW(@"%ANAME(対象)%的%LOCALS:0%敏感度提升\@ LOCAL ? 到普通水准了 # 了一倍 \@", カラー_注意)
+ENDSELECT
+PRINTFORML
+PRINTFORMW 暂且催眠结束了的%ANAME(MASTER)%让她忘记今夜的事返回了家
+PRINTFORMW 由于使用了恶魔催眠的能力，所以能力增长了
+DVAR:恶魔催眠経験値 += RAND:3 + 1
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_HYPONOTISM_RAPE(対象)
+#DIM 対象
+RETURN CFLAG:対象:行動不能状態 != 行動不能_子供  && !IS_ANIMAL(対象) && !IS_MALE(対象) && CFLAG:対象:捕虜先 == 0 && !IS_SP_CHARA(対象) && (IS_COUNTRY(CFLAG:対象:所属) || CFLAG:対象:特殊状態 == 特殊状態_放浪)
+
+
+;-------------------------
+;レイプ
+;-------------------------
+@HYPNOTISM_RAPE_PRACTICE_RAPE(対象)
+#DIM 対象
+#DIM 実行メニュー
+PRINTFORMW 看到她的身体就在自己眼前，已经无法忍受了
+PRINTFORML 在什么样的催眠情况下强奸？
+CALL ASK_MULTI("常识改变", "控制身体", "淫乱化")
+実行メニュー = RESULT
+SELECTCASE 実行メニュー
+CASE 0
+	PRINTFORMW 决定操纵记忆享受这份乐趣
+CASE 1
+	PRINTFORMW 决定掌握肉体来享受这份乐趣
+CASE 2
+	PRINTFORMW 决定让她淫乱化来享受这份乐趣
+ENDSELECT
+
+IF DVAR:恶魔催眠経験値 + RAND:30 < 20
+PRINTFORML 可是接近之前她恢复了意识
+PRINTFORMW %ANAME(MASTER)%瞬间逃跑了！
+PRINTFORML
+IF RAND:5 > 0
+	PRINTFORML 顺利逃脱了……
+	PRINTFORMW 也有这样的事吧，又计划好了下次的催眠享受，返回了宫殿
+	DVAR:恶魔催眠経験値 += RAND:3 + 1
+ELSE
+	PRINTFORML 没能逃脱……
+	PRINTFORMW 被抓住的%ANAME(MASTER)%遭到了群殴……
+	CALL COLOR_PRINTL(@"%ANAME(MASTER)%的休息时间增加了三回合", カラー_注意)
+	CALL ADD_COOLTIME(MASTER, 3)
+ENDIF
+RETURN 1
+ENDIF
+
+PRINTFORML
+PRINTFORMW %ANAME(対象)%用迷恋的表情接受了%ANAME(MASTER)%的催眠…
+SELECTCASE 実行メニュー
+CASE 0
+	PRINTFORML 给她植下了虚假的记忆
+	PRINTFORML 当意识回复时时，她用惊恐的表情环顾了%ANAME(MASTER)%的周围
+	PRINTFORMW 为了确认催眠的效果，向她确认了自己的立场
+	SELECTCASE RAND:5
+		CASE 0
+			PRINTFORML 她一边对这个问题感到疑惑一边也理所当然一样地，回答了自己是%ANAME(MASTER)%的宠物
+			PRINTFORMW %ANAME(MASTER)%得到的回答确信了催眠的成功，内心微笑着与她一起走向夜晚的街道
+			PRINTFORML
+			PRINTFORML 她赤裸裸的，只穿着项圈，四肢爬行在夜晚的道路上。
+			PRINTFORML 一边粗暴呼吸着，一边垂涎的凝视着%ANAME(MASTER)%，那个表情正是发情的母狗的样子
+			PRINTFORMW 如果按照%ANAME(MASTER)%命令那样行动了，接着便会以打算得到奖赏的撒娇的那样的声音卖媚
+			PRINTFORML 终于，%ANAME(MASTER)%拿出了肉棒，她高兴地摆出了服从的姿势
+			PRINTFORML 裸露在外的秘所贪婪地啪嗒啪嗒地抽动着，流出了爱液
+			PRINTFORMW %ANAME(MASTER)%为了能够将这令人讨厌的宠物得到更深处的身心教育，尽情的射精了
+		CASE 1
+			PRINTFORML 她一边对这个问题感到疑惑，一边理所当然地回答自己是%ANAME(MASTER)%的娼妇
+			PRINTFORMW %ANAME(MASTER)%得到的回答确信了催眠的成功、内心微笑着与她一起去了酒店
+			PRINTFORML
+			PRINTFORML 她像真正的娼妇一样用尽全身心为%ANAME(MASTER)%服务
+			PRINTFORML 她高兴地娇喘着，随着精液在阴道的注射，一次又一次的高潮了
+			PRINTFORMW 精疲力尽的%ANAME(MASTER)%一边拥抱着她，一边随意谈论着些什么
+			PRINTFORML 她出神地看着%ANAME(MASTER)%，一边索吻，一边很开心地微笑着，把身体蹭了过来
+			PRINTFORML 被那个样子再次激起了活力的%ANAME(MASTER)%迎上了张开双手索求的她
+			PRINTFORMW 和她一起被火热的情欲纠缠着，度过了极好的一夜
+		CASE 2
+			PRINTFORML 她一边对这个问题感到疑惑，一边理所当然地回答自己是%ANAME(MASTER)%的妻子
+			PRINTFORMW %ANAME(MASTER)%得到的回答确信了催眠的成功、内心微笑着与她一起回家
+			PRINTFORML
+			PRINTFORML 和她一起回家的%ANAME(MASTER)%立刻把她推倒在床上
+			PRINTFORML 她发出妩媚的声音扭动着身体，%ANAME(MASTER)%一边反复亲吻她的全身，一边脱下了她的衣服
+			PRINTFORMW 她在%ANAME(MASTER)%的怀抱中，一边疯狂的索求着精液，一边恍惚的达到了高潮
+			PRINTFORML 在性生活结束之后，也享受了和她新婚生活的乐趣
+			PRINTFORML 在做饭、吃饭、洗衣服，甚至洗澡的时候反复做爱!
+			PRINTFORMW %ANAME(MASTER)%毫不厌倦地将自己的气味和DNA覆盖到了可爱的新婚妻子的全身。
+		CASE 3
+			PRINTFORML 她一边对这个问题感到疑惑，一边理所当然地回答自己是%ANAME(MASTER)%的部下
+			PRINTFORMW %ANAME(MASTER)%得到的回答确信了催眠的成功、内心微笑着与她一起走向夜晚的街道
+			PRINTFORML
+			PRINTFORML %ANAME(MASTER)%利用自己的立场把她带到酒店，并称之为教育而犯下了罪行
+			PRINTFORML 一边斥责着她的敏感，以至于每次插入都会高潮，一边更加更加用力的突刺
+			PRINTFORMW 她的身体不停的颤抖着，一边娇喘着，一边颤抖着道歉
+			PRINTFORML 当被告知一整晚都要被这样责罚时，她不自觉的全身抽搐起来，潮喷了。
+			PRINTFORML 作为对她厚颜无耻地要求避孕的惩罚，命令她抱着%ANAME(MASTER)%达到了绝顶
+			PRINTFORMW 第二天早上宣布结束训练后，她下半身颤抖着向%ANAME(MASTER)%敬礼
+		CASE 4
+			PRINTFORML 她一边对这个问题感到疑惑，一边理所当然地回答自己是%ANAME(MASTER)%的奴隶
+			PRINTFORMW %ANAME(MASTER)%得到的回答确信了催眠的成功、内心微笑着与她一起回家
+			PRINTFORML
+			PRINTFORML %ANAME(MASTER)%一把她带到自己房间，就粗暴的推倒了她，剥下了她的衣服
+			PRINTFORML 她像个真正的奴隶一样颤抖着，却没有抵抗，羞涩地向上看
+			PRINTFORMW 那个温顺的身姿让%ANAME(MASTER)%的阴茎强烈地勃起，无法忍受的激烈地侵犯了她
+			PRINTFORML 她扭动着身体，用整个身体紧紧抱住%ANAME(MASTER)%，仿佛在向他撒娇。
+			PRINTFORML %ANAME(MASTER)%按照自己的欲望乱七八糟地侵犯了她，两人的舌头缠绕在一起达到了顶峰
+			PRINTFORMW 她那恍惚的表情让%ANAME(MASTER)%的兴奋更加无法停止、就这样中出了一整晚
+	ENDSELECT
+CASE 1
+	PRINTFORMW 控制了她的肉体
+	PRINTFORML 当意识回复时时，她用惊呆的表情环顾了%ANAME(MASTER)%的周围
+	PRINTFORMW 为了确认催眠的效果，把手伸向她的胸部，揉了揉
+	PRINTFORML 她当然惊讶地尖叫起来……但是，身体却丝毫没有动
+	PRINTFORML 无视了混乱惊慌失措的她，而充分享受了柔软的胸的感觉
+	PRINTFORMW 对催眠成功的效果确信了的%ANAME(MASTER)%，带着瞪视的她走向夜晚的街
+	SELECTCASE RAND:5
+		CASE 0
+			PRINTFORML %ANAME(MASTER)%带她前往了流浪汉的聚集地，进行了公开强奸
+			PRINTFORML 在流浪汉们眼前被侵犯的屈辱，她咬紧牙关忍受着
+			PRINTFORML 在被%ANAME(MASTER)%强制射精后，她一边流着泪一边悲鸣，一次又一次的达到了潮吹
+			PRINTFORMW 在她悲痛欲绝的表情的刺激下，%ANAME(MASTER)%在流浪者的注视下多次强奸了她。
+		CASE 1
+			PRINTFORML %ANAME(MASTER)%命令她连续自慰，使她重复着强制绝顶
+			PRINTFORML 在反复高潮的刺激下，她的口水与爱液全部肆意的流淌着，面部的痴态也完全显露出来
+			PRINTFORML 当在第几十次绝顶停止时，她痉挛着躺在地上
+			PRINTFORMW %ANAME(MASTER)%充分享受了连续绝顶的肉体
+		CASE 2
+			PRINTFORML 在小巷里，她的娇声和悲痛的悲鸣交替回响
+			PRINTFORML %ANAME(MASTER)%反复着粗暴地侵犯着她，每一次突刺都伴随着绝顶的命令
+			PRINTFORML 她拼命的抵抗，但每次被突刺的时候都会流下口水和爱液，最终还是完美地达到了顶峰
+			PRINTFORMW 她那无力抵抗的身姿和不停抽搐的阴道让%ANAME(MASTER)%非常满足、一次又一次的射精了
+		CASE 3
+			PRINTFORML 把她带入酒店的%ANAME(MASTER)%命令她带着项圈侍奉
+			PRINTFORML 她一边用泪眼瞪着%ANAME(MASTER)%一边激烈地摇动腰部，让肉棒进入更深处
+			PRINTFORML 像是开玩笑一样的拧了一下她的乳头，她便像是收到了惊吓一样，难以抵抗的高潮了，娇喘起来
+			PRINTFORMW 一边享受着拼命想要逃跑的她的表情，一边多次向子宫直接射出了精液
+		CASE 4
+			PRINTFORML %ANAME(MASTER)%把她带到酒店的一个房间里，一边录像，一边侵犯了她
+			PRINTFORML 她被%ANAME(MASTER)%举了起来，看着镜头，在他的命令下吐出猥亵的台词。
+			PRINTFORML 每次突刺时，她都会像坏掉的人偶一样绝顶，对着照相机露出阿黑颜
+			PRINTFORMW 伴随着哭泣和高潮的她的姿态被满足的录入了摄像头里
+	ENDSELECT
+CASE 2
+	PRINTFORMW 改变她的意识，让她淫乱化了
+	PRINTFORML 当意识回复时时，她用惊恐的表情环顾了%ANAME(MASTER)%的周围
+	PRINTFORMW 为了确认催眠的效果，%ANAME(MASTER)%询问是否可以强奸她
+	SELECTCASE RAND:5
+		CASE 0
+			PRINTFORML 于是她露出了发情的表情，浮现出淫靡的笑容点头
+			PRINTFORMW %ANAME(MASTER)%抱起她的腰，一边调情一边带入了宾馆
+			PRINTFORML
+			PRINTFORML %ANAME(MASTER)%正在和她进行性交
+			PRINTFORML 她兴致勃勃地在摄像机前摆着姿势，因%ANAME(MASTER)%的侵犯而疯狂绝顶
+			PRINTFORML 在她的哀求下，在她的子宫里射精了，让她在阿黑颜的状态下达到了高潮，
+			PRINTFORMW 与完全热衷于拍摄的她一整晚充分享受了性爱
+		CASE 1
+			PRINTFORML 她露出了吃惊的表情，理所当然地点了点头
+			PRINTFORMW %ANAME(MASTER)%抱着她的腰扭捏捏地走向温泉旅馆
+			PRINTFORML
+			PRINTFORML %ANAME(MASTER)%与她在温泉做爱
+			PRINTFORML 她一边艳丽地摇着腰，一边泼洒着热水，回响着喜悦的声音!
+			PRINTFORML 被欲火所点燃的她的笑容和身姿都让%ANAME(MASTER)%感觉无比的满足
+			PRINTFORMW 忍不住将肉棒撞到最里面射精了，她也全身颤抖着高潮了
+		CASE 2
+			PRINTFORML 她噘着嘴，主动和%ANAME(MASTER)%纠缠到了一起
+			PRINTFORMW %ANAME(MASTER)%和她像恋人一样，拥吻着进入了酒店
+			PRINTFORML
+			PRINTFORML 穿着兔女郎装的她在%ANAME(MASTER)%身上激烈的晃动着
+			PRINTFORML 她疯狂的摇晃着臀部，呼唤着%ANAME(MASTER)%的名字，让肉棒进入更深处!
+			PRINTFORML 当%ANAME(MASTER)%回应她的热心侍奉而用力向上突刺的时候，她像是收到惊吓一样，无法抵扣的高潮了
+			PRINTFORMW 给一心只顾向%ANAME(MASTER)%撒娇的可爱的兔子充分地给予了奖励
+		CASE 3
+			PRINTFORML 她开始吐出热气，眼里浮现出♥来
+			PRINTFORMW %ANAME(MASTER)%一边玩弄着已经变成母狗的她的身体，一边带进了自己的家
+			PRINTFORML
+			PRINTFORML %ANAME(MASTER)%给她戴上项圈和链子，像对待宠物一样强奸她。
+			PRINTFORML 从后面激烈的撞击了正在用四肢爬行的她、她也高兴地咻咻地喘息着
+			PRINTFORML 一边责备着她的淫乱一边拍打着屁股，她也一边道歉一边把阴道肉紧紧地勒紧了
+			PRINTFORMW %ANAME(MASTER)%整晚都在调教这只散漫的母狗，在子宫中充分地做了记号
+		CASE 4
+			PRINTFORML 在一瞬间僵硬后，她自己解开衣服，脱下内衣把屁股伸了出来
+			PRINTFORMW %ANAME(MASTER)%强压下当场想要体验的冲动，急急忙忙地带进了胡同里
+			PRINTFORML
+			PRINTFORML 充分享受了和她在小巷的性爱之后，%ANAME(MASTER)%决定带她去欢乐街逛逛
+			PRINTFORML 她的乳头已经勃起到透过衣服也能看见了，衣服也从下摆上滴滴答答地流出了精液
+			PRINTFORML 当嘲笑她那痴态时，她像是无法忍受一样，紧紧的抱了过来
+			PRINTFORMW 无法忍受的%ANAME(MASTER)%又把她带进小巷，侵犯了很多次
+	ENDSELECT
+ENDSELECT
+CALL FUCK_RAPE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%の\@ RAND:2 ? 肉棒 # 唇\@", @"%ANAME(MASTER)%")
+CALL FUCK(対象, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, @"%ANAME(対象)%の唇", "", @"%ANAME(対象)%の膣", "恶魔催眠")
+PRINTFORML
+PRINTFORMW 尽情享受之后，让她忘记了今晚的事，然后回家了
+PRINTFORMW 因为实行了催眠术的原因，能力增长了
+DVAR:恶魔催眠経験値 += RAND:5 + 2
+
+;-------------------------
+;隷属
+;-------------------------
+@HYPONOTISM_RAPE_PRACTICE_ENSLAVEMENT(対象)
+#DIM 対象
+
+PRINTFORML 决定让她隶属
+PRINTFORMW 使用了更加强力的催眠，让她对他的隶属深深的植入到意识之中…
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+IF DVAR:恶魔催眠経験値 + RAND:40 <= 50
+PRINTFORMW 但这对%ANAME(MASTER)%来说还是太难了，他失败了......。
+PRINTFORML 他试图逃跑，但恶魔催眠失败的反应，或者说身体无法移动的反应，让他被抓住了。
+PRINTFORMW 被捕的%ANAME(MASTER)%遭到了群殴……
+CALL ADD_COOLTIME(MASTER, 3)
+CALL COLOR_PRINTL(@"这样以后，%ANAME(MASTER)%失去了所有的催眠术", カラー_注意)
+CALL COLOR_PRINTL(@"%ANAME(MASTER)%的休息时间增加了三回合", カラー_注意)
+PRINTFORMW
+DVAR:恶魔催眠術 = -1
+ITEM:催眠術 = -1
+DVAR:恶魔催眠経験値 = 0
+RETURN 1
+ENDIF
+
+PRINTFORMW 成功了!
+PRINTFORML 由于积累了经验的强有力的催眠效果，她的身心都置于支配之下。
+PRINTFORMW 即使试图解除催眠状态，她也丝毫没有变化，而是投过来充满媚态的眼神。
+CALL COLOR_PRINTL(@"%ANAME(対象)%成为了%ANAME(MASTER)%的奴隶", カラー_ピンク)
+PRINTFORMW
+CFLAG:対象:依存度 += 1000
+CFLAG:対象:従属度 += 3000
+TALENT:対象:服従 = 1
+IF GET_COUNTRY_BOSS(CFLAG:対象:所属) != 対象
+CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属)
+CALL COLOR_PRINTL(@"%ANAME(対象)%加入了%ANAME(MASTER)%的势力", カラー_注意)
+PRINTFORMW
+ENDIF
+TALENT:対象:合意 = 1
+DVAR:恶魔催眠経験値 += RAND:7 + 3
+PRINTFORML
+PRINTFORML 得到自己想要的女人而心满意足的%ANAME(MASTER)%完全被这种能力所吸引
+PRINTFORMW 但是如果这样继续使用的话，总有一天会有报应的……
+PRINTFORML 怎么办？
+CALL ASK_MULTI("继续使用这样的能力" ,"不再使用这种能力了")
+IF RESULT == 1
+PRINTFORML 已经足够了
+PRINTFORML 这样想的%ANAME(MASTER)%废弃了能力
+PRINTFORMW 以后，恶魔催眠术全部变得不能使用了…
+DVAR:恶魔催眠術 = -1
+DVAR:恶魔催眠経験値 = 0
+ELSE
+PRINTFORML 不，还没有
+PRINTFORML 付了高价,当然要尽情享受
+PRINTFORMW %ANAME(MASTER)%哈哈笑着带她消失在夜晚的街道上
+ENDIF
+

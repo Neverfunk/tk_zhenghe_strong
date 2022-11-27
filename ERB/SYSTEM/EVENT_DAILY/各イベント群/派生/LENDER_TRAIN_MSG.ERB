@@ -1,0 +1,266 @@
+﻿;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_LENDER_TRAIN_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("LENDER")
+
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_LENDER_TRAIN_DECISION()
+SIF DVAR:金貸し_返済期限 != -1
+	RETURN 0
+SIF DVAR:金貸し_残り融資額 <= 0
+	RETURN 0
+RETURN 1
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_LENDER_TRAIN()
+#DIM 返済額
+#DIM 対象
+
+
+対象 = ID_TO_CHARA(DVAR:金貸し_カタID)
+
+CALL LENDER_TRAIN_MSG(対象)
+
+返済額 = ABL:(対象):Ｃ感 + ABL:(対象):Ｖ感 + ABL:(対象):Ａ感 + ABL:(対象):Ｂ感 + ABL:(対象):Ｍ感 + (ABL:(対象):欲望 * 3 / 2) + (ABL:(対象):性技 * 2) + ABL:(対象):性交 + ABL:(対象):奉仕
+返済額 *= 1000
+返済額 += RAND(0, DVAR:金貸し_融資総額 / 10)
+返済額 = RAND(MIN(返済額, DVAR:金貸し_融資総額 / 10 - 1), DVAR:金貸し_融資総額 / 10)
+
+DVAR:金貸し_残り融資額 = MAX(0, DVAR:金貸し_残り融資額 - 返済額)
+
+PRINTFORML
+PRINTFORM %ANAME(対象)%，今日所赚到的钱
+CALL COLOR_PRINT(@"{返済額}", カラー_注意)
+PRINTFORML 似乎是用来抵消了数额
+PRINTFORM 剩余的还款额
+CALL COLOR_PRINT(@"{DVAR:金貸し_残り融資額}", カラー_注意)
+PRINTFORML 是……
+PRINTFORMW
+
+RETURN 1
+
+@LENDER_TRAIN_MSG(対象)
+#DIMS 竿役
+#DIM 対象
+竿役 = 放貸的客人
+LOCAL = RAND:31
+SELECTCASE LOCAL
+	CASE 0
+		PRINTFORML %ANAME(対象)%被放款人安置在妓院里为客人服务
+		PRINTFORML 今天的客人是个胖中年男子
+		PRINTFORML 肥头大度的样子令人厌恶，但技术却令人意外的好，%ANAME(対象)%多次被顶上了高潮
+		PRINTFORML %ANAME(対象)%被男子压在身上后，接着推力和重力不断把下腹子宫位置顶得凸起来
+		PRINTFORML 被反复在子宫内射精和热度所刺激的%ANAME(対象)%，不断扭动着腰肢，反复陷入被动高潮……
+	CASE 1
+		PRINTFORML %ANAME(対象)%被放款人安置在妓院里为客人服务
+		PRINTFORML 今天的客人一看就知道是个小混混
+		PRINTFORML 小混混以傲慢的态度让%ANAME(対象)%侍奉
+		PRINTFORML 然后，对方毫不客气的要求%ANAME(対象)%强制和他性交
+		PRINTFORML %ANAME(対象)%虽然感到屈辱，但在男性的性技面前却多次绝顶……
+	CASE 2
+		PRINTFORML %ANAME(対象)%被放款人安置在妓院里为客人服务
+		PRINTFORML 今天的客人是一个乍一看普通得不能再普通的青年
+		PRINTFORML 青年在床上摇着腰，对%ANAME(対象)%说了好几次爱恋的话语
+		PRINTFORML 虽然知道这是虚假的爱，但出于女性的本能和模糊的意识还是相信了
+		PRINTFORML 他把精液射进了阴道里，%ANAME(対象)%就被那热度强烈地绝顶了……
+	CASE 3
+		PRINTFORML %ANAME(対象)%被放款人安置在妓院里为客人服务
+		PRINTFORML 今天的客人竟然是尚处年幼的少年
+		PRINTFORML %ANAME(対象)%虽然很困惑，但还是引导少年进一步动作
+		PRINTFORML 第一次接触到女性的美丽让他不知所措，不过也极力的在顺着引导跟进了
+		PRINTFORML 不久他在%ANAME(対象)%的阴道内顶到了底部，射出了早熟的精液，激烈的绝顶了……
+	CASE 4
+		PRINTFORML %ANAME(対象)%被放款人安置在妓院里为客人服务
+		PRINTFORML 今天的客人，一看就知道是个流浪汉
+		PRINTFORML 一进屋，就像是赶时间一样硬要直接口交服务
+		PRINTFORML 把脏了的肉棒用嘴打扫了一下，前戏也草草了事地插入了%ANAME(対象)%的淫裂中
+		PRINTFORML 结果他依旧花了很多时间，一次又一次地在%ANAME(対象)%里种下了脏兮兮的精液……
+	CASE 5
+		PRINTFORML %ANAME(対象)%被放款人安置在妓院里为客人服务
+		PRINTFORML 今天的客人，乍一看是个温柔的绅士
+		PRINTFORML 然而，他一进屋就露出嗜虐的笑容，将%ANAME(対象)%束缚住，并特地在敏感处用绳子勒紧
+		PRINTFORML 然后用鞭子、蜡烛、口枷、眼罩、针和扩阴器等来责备%ANAME(対象)%
+		PRINTFORML 最后被按着头粗暴地按着抽插着，%ANAME(対象)%一边感受着被虐的喜悦一边被一次次虐待高潮……
+	CASE 6
+		PRINTFORML %ANAME(対象)%被放款人安置在妓院里为客人服务
+		PRINTFORML 今天的客人是有着强壮身体的精悍青年。肉棒也很雄壮，可以说是理想型男性
+		PRINTFORML 光是看着就觉得身体隐隐作痛，%ANAME(対象)%像娼妇一样，为他提供淫靡的服务
+		PRINTFORML 男子也对%ANAME(対象)%的肉体非常满足，多次射出炽热的精液
+		PRINTFORML 完全被他的技巧迷住了的%ANAME(対象)%，告诉了他个人的联系方式，目送对方离开……
+	CASE 7
+		PRINTFORML %ANAME(対象)%被放款人安置在妓院里为客人服务
+		PRINTFORML 今天的客人是一个平凡无奇的男性
+		PRINTFORML 即便如此，被烧在房间里的香，和预先喝下的药，都让%ANAME(対象)%的心境逐渐发毛
+		PRINTFORML 逐渐完全发情了之后，%ANAME(対象)%热心地服务着肉棒
+		PRINTFORML 当他在%ANAME(対象)%的阴道戳到底端时，%ANAME(対象)%不由得发出了淫荡的娇喘声……
+	CASE 8
+		PRINTFORML %ANAME(対象)%被放款人安置在妓院里为客人服务
+		PRINTFORML 今天%ANAME(対象)%被分配了在店门口招揽行人的工作
+		PRINTFORML %ANAME(対象)%那充满魅力的身姿，不断吸引着过路男人们的目光
+		PRINTFORML 稍微摆出强调乳房和阴部的姿势，像是言听计从一样任由路人们扭动着娇躯(もうこちらの言いなりも同然だ）
+		PRINTFORML %ANAME(対象)%被成功招揽到的男性带到了房间内，度过了客人和妓女的热情洋溢的一夜……
+	CASE 9
+		PRINTFORML %ANAME(対象)%被放款人安置在妓院里为客人服务
+		PRINTFORML 这次有三个客人，同时都买下了%ANAME(対象)%
+		PRINTFORML 他们随意责弄%ANAME(対象)%的身体，将快感逐渐引出来
+		PRINTFORML 然后在上面捅入口穴，在下面的双口肉穴也填满，一个接一个地重复着活塞运动
+		PRINTFORML 当他们满足地离开房间的时候，%ANAME(対象)%上下三穴都溢出来了一堆装不下体内的精液……
+	CASE 10
+		PRINTFORML %ANAME(対象)%在放贷人所经营的酒馆里，做着服务员的工作
+		PRINTFORML 制服很理所当然地不是烂大街的普通款式，而是把乳房暴露出来，稍微一动就遮不住小缝的超短裙摆的专属款式
+		PRINTFORML 喝醉了酒的客人们把手伸向正在工作的%ANAME(対象)%的身体
+		PRINTFORML 先前说过不许违抗客人的意志，%ANAME(対象)%就这样被肆意责弄着
+		PRINTFORML 最终%ANAME(対象)%被兴奋的客人在大家面前侵犯了……
+	CASE 11
+		PRINTFORML %ANAME(対象)%在放贷人所经营的酒馆里，做着服务员的工作
+		PRINTFORML 一位喝醉了酒的客人开始责弄%ANAME(対象)%的身体
+		PRINTFORML 先前说过不许违抗客人的意志，%ANAME(対象)%在那娴熟的技巧下逐渐被勾引兴奋
+		PRINTFORML 客人就这样把%ANAME(対象)%带进了洗手间，充分享受了那湿滑的淫穴……
+		PRINTFORML 解放的时候，从%ANAME(対象)%偶尔微张的阴唇里溢出来了装不下的精液……
+	CASE 12
+		PRINTFORML %ANAME(対象)%在放贷人所经营的酒馆里，做着服务员的工作
+		PRINTFORML 一个客人让%ANAME(対象)%坐在旁边，进行劝酒
+		PRINTFORML 最终，%ANAME(対象)%在被醉意击垮之前一直被迫陪在客人身边
+		PRINTFORML 之后，客人将迷糊的%ANAME(対象)%搬到了房间，充分享受了那因醉意陷入沉睡的肉体
+		PRINTFORML 醒过来的%ANAME(対象)%最先看到的，是到处沾满白浊的自己的肉体……
+	CASE 13
+		PRINTFORML %ANAME(対象)%在放贷人经营的酒馆里，作为舞女工作
+		PRINTFORML 穿在身上的是强调羞耻感露出皮肤的华丽下流的服装
+		PRINTFORML 观众们对%ANAME(対象)%投来好色的目光，嘻嘻地笑着
+		PRINTFORML 明明应该是很羞耻的事情，%ANAME(対象)%却感到身体发热
+		PRINTFORML 在那之后，%ANAME(対象)%被喜欢的观众所购买，作为娼妇而服务……
+	CASE 14
+		PRINTFORML %ANAME(対象)%在放贷人经营的酒馆里，作为舞女工作
+		PRINTFORML 今天的演出相当激进，在台上表演着自慰秀
+		PRINTFORML 观众们一边对着%ANAME(対象)%害羞自慰的样子一边施以嘲讽和耻笑
+		PRINTFORML 随着快感的高涨，手指的动作变得激烈，%ANAME(対象)%激烈地达到了高潮
+		PRINTFORML 在那之后，%ANAME(対象)%被喜欢的观众所购买，作为娼妇而服务……
+	CASE 15
+		PRINTFORML %ANAME(対象)%在放贷人所经营的酒馆里，做着服务员的工作
+		PRINTFORML 喝醉了的客人露出阴茎，要求%ANAME(対象)%用嘴服务
+		PRINTFORML 因为那根肉棒太过粗壮，%ANAME(対象)%无法拒绝
+		PRINTFORML %ANAME(対象)%在桌子下为他侍奉着，当他把精液射出来的时候，%ANAME(対象)%伴随着不易察觉的呻吟全部吞了下去
+		PRINTFORML 喜欢如此热情服务的客人，就这样买了个%ANAME(対象)%，度过了一个湿热的夜晚……
+	CASE 16
+		PRINTFORML %ANAME(対象)%被强行要求为放贷人服务
+		PRINTFORML 放贷人相当中意%ANAME(対象)%的口交和乳交服务
+		PRINTFORML 他低声地呻吟着，一股热粘的浊液就被射到了口腔里
+		PRINTFORML 放贷人把因过于炽热的精液呛到的%ANAME(対象)%を推到了床上
+		PRINTFORML 彻夜享用了那极品的肉体……
+		竿役 = 放贷人
+	CASE 17
+		PRINTFORML %ANAME(対象)%被强行要求为放贷人服务
+		PRINTFORML 放款人让%ANAME(対象)%吃下媚药，以让身体更加敏感和舒服
+		PRINTFORML 由于药物的作用和强壮的肉棒，还有巧妙的活塞所影响，%ANAME(対象)%只能不断地发出阵阵娇喘
+		PRINTFORML 放款人一射精，%ANAME(対象)%就因其强烈的快乐而高声绝顶
+		PRINTFORML 房事结束的时候，%ANAME(対象)%的微张的淫裂不断溢出来过剩的精液……
+		竿役 = 放贷人
+	CASE 18
+		PRINTFORML %ANAME(対象)%被抓去给放贷人的部下侍奉了
+		PRINTFORML 部下们为了尽情享受偶尔才能遇到的「上玉」，与%ANAME(対象)%无休无止地交合着
+		PRINTFORML 口穴和身下两个肉穴都被肉棒深入相堵，%ANAME(対象)%的双眼上翻的同时沉浸于多个方向的快乐当中
+		PRINTFORML 扑哧一声注入的白浊让%ANAME(対象)%激烈潮吹绝顶了……
+		PRINTFORML 解放的时候，从%ANAME(対象)%的上下三穴里不断溢出来装不下的精液……
+		竿役 = 放贷人的部下
+	CASE 19
+		PRINTFORML %ANAME(対象)%被抓去给放贷人的部下侍奉了
+		PRINTFORML 虽说是部下，但基本上算是是小混混。他们粗暴地脱掉%ANAME(対象)%的衣服，推倒了%ANAME(対象)%
+		PRINTFORML 这种爱抚虽然非常粗暴，但技术是很娴熟，是%ANAME(対象)%无法抑制的快感
+		PRINTFORML %ANAME(対象)%多次被推向高潮之后，他们用那个又硬又粗的肉棒，将%ANAME(対象)%狠狠贯穿了
+		PRINTFORML 被粗暴的动作性交的%ANAME(対象)%，颤抖着身体的同时多次容纳了他们的精液……
+		竿役 = 放贷人的部下
+	CASE 20
+		PRINTFORML %ANAME(対象)%因为在放贷人那工作时搞砸了
+		PRINTFORML 愤怒的放贷人出于发泄，将%ANAME(対象)%作为「便器」惩罚
+		PRINTFORML 身无分文的流浪汉们来到%ANAME(対象)%所在的「便所」，用那完美的娇躯「排泄」
+		PRINTFORML 虽然很羞耻很讨厌，但是被贯穿的快感所刺激着，%ANAME(対象)%无法抑制快感蔓延至全身
+		PRINTFORML 解放的时候，%ANAME(対象)%全身沾满了白浊液……
+		竿役 = 流浪漢
+	CASE 21
+		PRINTFORML %ANAME(対象)%被放款人安置在妓院里为客人服务
+		PRINTFORML 此次接待的竟是位长相靓丽的女性客人
+		PRINTFORML 不过最让人吃惊的是，在那双腿之间凸起着不输人任何男人的粗大肉棒，看起来是不常见的扶她客人
+		PRINTFORML 本来感到怀疑的%ANAME(対象)%，在强壮的肉棒面前无法抑制女人的本能彻底折服了
+		PRINTFORML %ANAME(対象)%积极地为她侍奉，在淫壶里充分容纳着她的精液……
+	CASE 22
+		PRINTFORML %ANAME(対象)%被放贷人抓去接受工作特训
+		PRINTFORML 作为娼妇的特训，也就是说与放债者的进行性行为训练
+		PRINTFORML 放款人粗暴地把%ANAME(対象)%推倒在床上，将%ANAME(対象)%的下腹贯穿
+		PRINTFORML 每次凶狠的肉棒大幅度出入时，%ANAME(対象)%都抑制不住上翻着瞳孔发出娇喘
+		PRINTFORML 当炽热的精液注入胎内时，%ANAME(対象)%挺起身体强烈地潮吹高潮了……
+	CASE 23
+		PRINTFORML %ANAME(対象)%在放款人所经营的妓院工作
+		PRINTFORML 客人躺在床上，%ANAME(対象)%跨在客人的身上扭动着腰部
+		PRINTFORML 那美丽的身躯伴随着淫靡的姿势扭动着，%ANAME(対象)%的口中下意识地呼出阵阵呻吟声
+		PRINTFORML 男子从下面顶起腰来，%ANAME(対象)%被突然的刺激下急促娇喘起来
+		PRINTFORML 在白浊液注入子宫内时，%ANAME(対象)%发出格外淫荡的声音达到了绝顶……
+	CASE 24
+		PRINTFORML %ANAME(対象)%在放款人所经营的妓院工作
+		PRINTFORML %ANAME(対象)%用嘴为坐在床上的男人服务
+		PRINTFORML 当%ANAME(対象)%逐渐松口之后，对方的肉棒依然坚挺着翘着
+		PRINTFORML %ANAME(対象)%躺在床上，用自己的手指掰开秘唇
+		PRINTFORML 对方随即插入，在激烈的动作下，%ANAME(対象)%在快感下无意识地抬起了腰配合着对方的动作……
+	CASE 25
+		PRINTFORML %ANAME(対象)%为放贷人单独侍奉着
+		PRINTFORML %ANAME(対象)%手贴在墙上，屁股向后翘起着任由放贷人不断冲刷着淫壶
+		PRINTFORML 啪，啪，啪，每次肉体碰撞的闷响响起时，%ANAME(対象)%每次都会发出娇艳的娇喘声
+		PRINTFORML 放贷人突然顶到最深处时，%ANAME(対象)%不由得挺起了腰部，达到了高潮
+		PRINTFORML 即使%ANAME(対象)%已经被激烈的快感弄得筋疲力尽，但男子还是抱着细腰继续抽送……
+		竿役 = 放贷人
+	CASE 26
+		PRINTFORML %ANAME(対象)%为放贷人的高级客户侍奉着
+		PRINTFORML 在豪华的床上，穿着淫荡服装的%ANAME(対象)%正在向男人索求
+		PRINTFORML 一副兴奋样子的男子推倒了%ANAME(対象)%，%ANAME(対象)%用谄媚的话诱惑了他
+		PRINTFORML 在极乐的快感中，%ANAME(対象)%多次绝顶
+		PRINTFORML 男人满足的时候，从%ANAME(対象)%的淫穴随着颤抖不断溢出来过剩的精液……
+	CASE 27
+		PRINTFORML %ANAME(対象)%在放款人所经营的妓院工作
+		PRINTFORML 今天客人让%ANAME(対象)%跪趴在床上，并将全身的重量压在后背上把肉棒戳了进去
+		PRINTFORML 在%ANAME(対象)%的菊穴里，雄壮的东西一次又一次地进出
+		PRINTFORML 对于那种灼热般的快乐，%ANAME(対象)%只能抓住床单咬紧牙关忍耐着
+		PRINTFORML 男子在肠内射精之后，%ANAME(対象)%就激烈地绝顶了……
+	CASE 28
+		PRINTFORML %ANAME(対象)%为放贷人的高级客户侍奉着
+		PRINTFORML 在豪华的床上，穿着淫荡服装的%ANAME(対象)%扭动着腰肢
+		PRINTFORML 跨在男人的肉棒上的同时，自己也在充分享受着雌穴所带来的的快乐
+		PRINTFORML 男子从下面抬起腰，让%ANAME(対象)%发出难以忍受的娇喘声
+		PRINTFORML 当炽热的精液被注入进子宫时，%ANAME(対象)%不断发出淫乱的娇喘声潮吹高潮了……
+	CASE 29
+		PRINTFORML %ANAME(対象)%被强行要求为放贷人服务
+		PRINTFORML 无视了%ANAME(対象)%希望戴套做爱的请求，直接推到压在了身下
+		PRINTFORML 抵抗在激烈的抽插带来的快乐面前一瞬间就消失了
+		PRINTFORML 放贷人熟练地技巧不断刺激着%ANAME(対象)%，让%ANAME(対象)%的女性本能被完全激发出来
+		PRINTFORML 不久男子快要射精的时候，%ANAME(対象)%忘记了怀孕的风险，毫无畏惧地请求了阴道内射精……
+		竿役 = 放贷人
+	CASE 30
+		PRINTFORML %ANAME(対象)%被强行要求为放贷人服务
+		PRINTFORML 由于被男人挑逗得性欲高涨，%ANAME(対象)%的身体早已抑制不住完全兴奋着
+		PRINTFORML 在%ANAME(対象)%主动掰开粘稠的阴唇要求插入时，对方将肉棒掏了出来
+		PRINTFORML 然后深深地插入%ANAME(対象)%淫壶深处，激烈的活塞开始抽动了……
+		PRINTFORML %ANAME(対象)%用略微嘶哑的声音请求着男性在自己身体里射出精液，男人按照%ANAME(対象)%所希望的那样，把精射到了阴道内……
+		竿役 = 放贷人
+ENDSELECT
+
+CALL FUCK_GANGBANG(対象, GET_SPERM_ID("放貸的客人"), @"%竿役%的\@ RAND:2 ? 肉棒 # 唇\@", @"%竿役%")
+	
+IF IS_LOVER(対象) && CFLAG:(対象):好感度 <= 1500
+	SETCOLOR カラー_警告
+	PRINTFORML %ANAME(対象)%现在感觉作为娼妇的生活要比和%ANAME(MASTER)%的爱情生活更加舒服
+	RESETCOLOR
+	CALL LOSE_RELATION_TALENT(対象)
+ENDIF
+IF IS_SLAVE(対象) && CFLAG:(対象):従属度 <= 1500
+	SETCOLOR カラー_警告
+	PRINTFORML %ANAME(対象)%现在感觉作为娼妇的生活要比对%ANAME(MASTER)%的效忠生活更加舒服
+	RESETCOLOR
+	CALL LOSE_RELATION_TALENT(対象)
+	TALENT:(対象):烙印 = 0
+ENDIF

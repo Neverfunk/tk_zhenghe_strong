@@ -1,0 +1,182 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K42_OTAKU_RATE(対象)
+#DIM 対象
+RETURN 40 + (KDVAR:対象:早苗_鋼鉄巨人 > 0) * 310
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K42_OTAKU_DECISION(対象)
+#DIM 対象
+#DIM 神奈子
+神奈子 = NAME_TO_CHARA("神奈子")
+
+;主人公はかなすわ以外
+SIF MASTER == NAME_TO_CHARA("神奈子") || MASTER == NAME_TO_CHARA("諏訪子")
+	RETURN 0
+
+;終わってたら発生しない
+SIF KDVAR:対象:早苗_鋼鉄巨人 == -1
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1) && CHECK_KOJO_DAILY_HAPPEN(神奈子, 1, 0, -1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K42_OTAKU_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K42_OTAKU(対象)
+#DIM 対象
+#DIM 神奈子
+神奈子 = NAME_TO_CHARA("神奈子")
+
+SELECTCASE KDVAR:対象:早苗_鋼鉄巨人
+	CASE 0
+		PRINTFORMW 「钢铁的身躯～、咆哮吧～、现在是咆哮的时间、铠甲飞～拳～♪」
+		;TranslatedMark 「鋼のから～だ、唸らせて～、今こそとどろく、ガイオンパン～チ～♪」
+		PRINTFORMW 「践踏弱者的恶奴~♪用火热的拳头击碎~ ~耶~ ~♪」
+		;TranslatedMark 「弱きを踏みにじる、悪い奴を～♪　熱い拳で打ち砕け～～イエ～～♪」
+		PRINTFORMW 突然傳來了跑調的歌聲……正當以為是夜雀時、卻發現是%ANAME(対象)%！
+		PRINTFORMW 「咦、這不是%ANAME(MASTER)%桑嗎。有什麼事嗎？」
+		PRINTFORMW 就算你問我有什麼事、我也只是被剛才的迷之曲吸引而已……
+		PRINTFORML 要問一問關於剛才的歌嗎？
+		PRINTFORML
+		CALL ASK_YN("實在很在意、問一下吧", "總感覺絕對會變得很麻煩……")
+		IF RESULT == 1
+			PRINTFORMW 「？　那麼、我就這樣吧」
+			PRINTFORMW %ANAME(対象)%離開了……
+			KDVAR:対象:早苗_鋼鉄巨人 = -1
+		ELSE
+			PRINTFORMW 「嗯嗯嗯！！！！！！！！！　你有興趣吧！！！！！！！！！！？」
+			PRINTFORMW %ANAME(対象)%血红着眼睛，跑了过来。突然有一种不祥的预感…………
+			PRINTFORMW 「刚才我唱的是1992年到1995年放映的四角山公司制作的机器人动画『鋼鉄巨人战斗加安』第三季的主題歌『燃烧的灵魂之战』的第二个版本！！！！！！！！」
+			PRINTFORMW 「顺便说一下，演唱主题曲的是被称为动漫歌曲界大王的山本三郎先生！！！山本ニキ真是太厉害了！！！！！！！！」
+			PRINTFORMW 「制作人员和配音演员都启用了当时制作机器人动画的老手！！！！　『再也没有比这更精彩的动画了』评论家们无比惊讶的评价这个剧本！！！！！！！！！　可以说是位于日本的机器人动画界的金字塔尖顶上的名作！！！！！您不知道吗。！！！！！？」
+			PRINTFORML 您不知道吗?尽管问了这个问题、但是很明显%ANAME(対象)%并没有在意是否得到了回应。
+			PRINTFORMW 她兴致勃勃的回到了自己的屋子、带着一个看起来就很重的包袱回来了
+		    PRINTFORMW 「来，就是这个！」
+			PRINTFORMW 「毕竟幻想乡里是没有DVD的，所以漫画版的战斗加安一共72卷借给你！」
+			PRINTFORMW 「看完后请告诉我感想哦！」
+			PRINTFORMW 这样说着，%ANAME(対象)%离开了……
+			PRINTFORMW ……被强塞给的漫画可真是沉啊……
+			KDVAR:対象:早苗_鋼鉄巨人 = 1
+		ENDIF
+	CASE 1
+		PRINTFORMW 对了、%ANAME(対象)%似乎强塞给了很多漫画……
+		PRINTFORML 原封不动一点也不看似乎不太好啊、要看吗？
+		CALL ASK_YN("嘛、就看一卷好了……", "不感兴趣")
+		IF RESULT == 1
+			PRINTFORMW 现在很忙，算了.……
+			PRINTFORMW 以后再说吧
+		ELSE
+			PRINTFORMW 好不容易借来的、还是稍稍看一下好了……
+			PRINTFORML ?
+			PRINTFORML ?
+			PRINTFORML ?
+			PRINTFORMW 确实很有趣.。再看一卷吧.。……
+			PRINTFORML ?
+			PRINTFORML ?
+			PRINTFORML ?
+			PRINTFORMW 确实挺有意思的，再看一卷吧……
+			PRINTFORML ?
+			PRINTFORML ?
+			PRINTFORML ?
+			PRINTFORMW 原来如此，真有意思。再看一卷吧……
+			PRINTFORML ?
+			PRINTFORML ?
+			PRINTFORML ?
+			PRINTFORMW 不妙啊这个。再看一卷吧……
+			PRINTFORML ?
+			PRINTFORML ?
+			PRINTFORML ?
+			PRINTFORML ?
+			PRINTFORML ?
+			PRINTFORML ?
+			PRINTFORMW 再看一卷吧……再看一卷吧……再看一卷吧……再看一卷吧……再看一卷吧……再看一卷吧……再看一卷吧……再看一卷吧……
+			PRINTFORML ?
+			PRINTFORML ?
+			PRINTFORML ?
+			PRINTFORML ?
+			PRINTFORML ?
+			PRINTFORML ?
+			PRINTFORMW 回过神来，天黑了，天又亮了.。……
+			PRINTFORMW 当然一觉也没睡，不过，心情非常充实。去战斗吧，战斗加安！
+			CALL COLOR_PRINTW(@"一夜没睡的反作用、%ANAME(MASTER)%の武闘が3下降了", カラー_警告)
+			CALL ADD_COOLTIME(MASTER, 2)
+			ABL:MASTER:武闘 = MAX(ABL:MASTER:武闘 - 3, 1)
+			KDVAR:対象:早苗_鋼鉄巨人 ++
+		ENDIF
+	CASE IS < 5
+			PRINTFORMW 「啊、是%ANAME(MASTER)%先生！　我们来聊聊战斗加安吧！」
+		PRINTFORMW 在%ANAME(対象)%的邀请下、两人聊了一晚上的鋼鉄巨人战斗加安……
+		PRINTFORML
+		PRINTDATAW
+			DATA 「果然齐藤下士跳进北极海的那个场景真的厉害啊……」
+			DATA 「我很喜欢柳田队长哦、这样具有古典气质的大叔角色真的非常吸引人啊！」
+			DATA 「いい……」「我知道」
+			DATA 「13卷第138页第4格的战斗机的右肩部份，忘记了要塞进去的吧……」
+			DATA 「我最讨厌这个敌方的女干部法奥兰了。这个人真的超级傲慢、真是的！」
+			DATA 「呜呜呜……43巻的这个场景真的太令人感动了……」
+			DATA 「好了好了……」「别这样」
+			DATA 「健太终于成长了呢……在第五卷初登場的时候，还经常被敌人的攻击或者逃跑动作所迷惑……真的成长了不少呢……」
+			DATA 「在全篇中榊原一直都在暗中活跃着呢……明明是个反派角色，可真是了不起啊！.。！」
+			DATA 「加安里的吃飯场景画的真的非常逼真呢……肚子都看饿了，要一起去吃拉面吗？」
+			DATA 「这个场景！这个场景要是能看到动画该多好……！　为什么幻想郷没有蓝光盘呢！？」
+			DATA 「现在出击～～～～?　加安ーーーーーーーード?」
+		ENDDATA
+		PRINTFORML
+		CALL COLOR_PRINTW(@"%ANAME(対象)%的好感度上升了", カラー_注意)
+		;TranslatedMark @"%ANAME(対象)%からの好感度が上がりました", カラー_注意
+		CALL COLOR_PRINTW(@"由于熬夜，%ANAME(MASTER)%与%ANAME(対象)%的武斗下降了3", カラー_警告)
+		;TranslatedMark @"夜更かしの反動で、%ANAME(MASTER)%と%ANAME(対象)%の武闘が3下がりました", カラー_警告
+		CALL ADD_COOLTIME(MASTER, 2)
+		ABL:MASTER:武闘 = MAX(ABL:MASTER:武闘 - 3, 1)
+		CALL ADD_COOLTIME(対象, 2)
+		ABL:対象:武闘 = MAX(ABL:対象:武闘 - 3, 1)
+		CFLAG:対象:好感度 += 100
+		KDVAR:対象:早苗_鋼鉄巨人 ++
+	CASE 5
+		PRINTFORMW 「你们俩给我适可而止ーーーーーーーーッ！」
+		PRINTFORML 今天两个人正一边在热烈地讨论着关于战斗加安的话题、一边走着在进入%ANAME(対象)%的房间的那一刻
+		PRINTFORMW %ANAME(神奈子)%突然闯入进来！
+		PRINTFORMW 「真是的，两个年轻人在屋子里晚上干什么呢！　那样的话\@ TALENT:対象:正妻 || TALENT:対象:妾 ? 要适度 # 結婚之后\@我说过的吧%ANAME(対象)%！」
+		PRINTFORMW 「诶.。那个，啊！？啊，不，神奈子大人，不是你想想的那个样子！」
+		PRINTFORMW 「辩解无用！　%ANAME(MASTER)%%ANAME(MASTER)%だ、我家%ANAME(対象)%都开始学会骗人了、我不会轻易饶过你的！」
+		PRINTFORML 有种不祥的预感……预感似乎成为现实了！
+		PRINTFORMW 两人拼命阻止开始发射弹幕的%ANAME(神奈子)%……
+		PRINTFORML ?
+		PRINTFORML ?
+		PRINTFORML ?
+		PRINTFORMW 「什么、一直在聊动画的事！？」
+		PRINTFORMW 「不对、肯定是做了什么坏事……我肯定、这个、两个人一起\@ TALENT:対象:正妻 || TALENT:対象:妾 ? 是不是过着糜烂的性生活 # 存在着无法光明正大说出来的的关系吗 \@」
+		PRINTFORML 确实，在夜深人静的房间里两个人在一起待着，被误会也是没办法的事
+		PRINTFORMW 虽说如此、一旦和%ANAME(対象)%说起来战斗加安的话题就停不下来、这是不可抗力啊
+		PRINTFORMW 「算了，这个暂且不论！　你们两个！　最近一直在做那样的事、身体都变迟钝了！」
+		PRINTFORMW 「明天我一定要好好操练操练你们！　做好覚悟吧！」
+		PRINTFORMW ……总觉得、要发生什么非常麻烦的事情了
+		PRINTFORMW 看着%ANAME(対象)%、两人都一幅已经认命的神情……
+		CALL COLOR_PRINTW(@"在%ANAME(神奈子)%的操练后、%ANAME(MASTER)%与%ANAME(対象)%的武斗上升了15", カラー_注意)
+		;TranslatedMark @"%ANAME(神奈子)%にしごかれ、%ANAME(MASTER)%と%ANAME(対象)%の武闘が15上がりました", カラー_注意
+		;（差し引きすると全然上がって）ないです
+		ABL:MASTER:武闘 += 15
+		ABL:対象:武闘 += 15
+		KDVAR:対象:早苗_鋼鉄巨人 = -1
+ENDSELECT
+
+RETURN 1

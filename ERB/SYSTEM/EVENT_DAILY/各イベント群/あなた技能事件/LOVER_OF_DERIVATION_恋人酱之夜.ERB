@@ -1,0 +1,109 @@
+﻿;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_LOVER_OF_DAILY_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("LOVER_OF")
+
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_DERIVATION_LOVER_OF_DAILY_DECISION()
+SIF !(IS_MALE(MASTER) && HAS_PENIS(MASTER))
+    RETURN 0
+;MASTER必须仕官/为君主
+SIF !IS_COUNTRY(CFLAG:MASTER:所属)
+	RETURN 0
+;你的名声必须要好(私下版)
+SIF CHECK_SKILL_DUPLICATE(MASTER, スキル_ジャンル_PERSONAL, 0, 43) || CHECK_SKILL_DUPLICATE(MASTER, スキル_ジャンル_PERSONAL, 0, 44)
+    RETURN 0
+RETURN DVAR:恋人酱的后宫 && RAND:100 < 10
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_DERIVATION_LOVER_OF_DAILY_SETTARGET()
+
+FOR LOCAL, 1, CHARANUM
+	SIF !IS_FEMALE(LOCAL)
+		CONTINUE
+	;自国所属かつ捕虜でない
+	IF CFLAG:LOCAL:所属 == CFLAG:MASTER:所属 && !TALENT:LOCAL:妊娠 && !CFLAG:LOCAL:捕虜先 && CFLAG:LOCAL:面識 && IS_LOVER(LOCAL)
+		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+		DAILY_TARGET_NUM ++
+	ENDIF
+NEXT
+RETURN 1
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_LOVER_OF_DAILY()
+#DIM 数量
+#DIM 随机人物
+PRINTFORMW 晚上，一群人闯进了%ANAME(MASTER)%的寝室
+PRINTFORMW %ANAME(MASTER)%睁开眼睛，才发现是自己的恋人们
+PRINTFORML 她们穿着极其暴露的色情睡衣，等待%ANAME(MASTER)%挑选……
+CALL ASK_MULTI("随便","挑一个", "就来1/3吧", "就来1/2吧", "我全都要")
+SELECTCASE RESULT
+    CASE 0
+        PRINTFORMW 随便吧……
+        数量 = RAND(1, DAILY_TARGET_NUM)
+    CASE 1
+        PRINTFORMW %ANAME(MASTER)%决定闭上眼睛
+        PRINTFORMW 然后把手乱指一通，最后睁开眼睛——
+        PRINTFORMW 今晚就让她侍寝吧……
+        数量 = 1
+    CASE 2
+        PRINTFORMW 今晚就挑1/3的人吧……
+        数量 = DAILY_TARGET_NUM / 3
+    CASE 3
+        PRINTFORMW 今晚就挑1/2的人吧……
+        数量 = DAILY_TARGET_NUM / 2
+    CASE 4
+        PRINTFORMW 大家都那么想要的话为什么要厚此薄彼呢？
+        PRINTFORMW %ANAME(MASTER)%让少女们一个个排队，用游戏决定临幸她们的顺序……
+        数量 = DAILY_TARGET_NUM
+ENDSELECT
+CALL FISHER_YATES_SHAFFLE(DAILY_TARGET_NUM)
+CALL SINGLE_DRAWLINE("♥", カラー_ピンク)
+FOR LOCAL, 0, 数量
+	随机人物 = DAILY_TARGET:(SHAFFLE_ARRAY:LOCAL)
+	PRINTFORM %ANAME(随机人物)%
+	IF VIRGIN(随机人物)
+		PRINTDATAW
+			DATAFORM 「请\@(TALENT:随机人物:正妻 || TALENT:随机人物:妾) ? 夫君 # %ANAME(MASTER)%桑\@动作轻一点……」
+			DATAFORM 「我……还是第一次……」
+			DATAFORM 「请\@(TALENT:随机人物:正妻 || TALENT:随机人物:妾) ? 夫君 # %ANAME(MASTER)%桑\@成为我的第一次吧……」
+			DATAFORM 「\@(TALENT:随机人物:正妻 || TALENT:随机人物:妾) ? 夫君 # %ANAME(MASTER)%\@的……终于……♥」
+			DATAFORM 「能成为\@(TALENT:随机人物:正妻 || TALENT:随机人物:妾) ? 夫君的妻子 # %ANAME(MASTER)%的爱人\@……我最幸福了……♥」
+		ENDDATA
+	ELSEIF GETBIT(TALENT:随机人物:淫乱系, 素質_淫乱_孕みたがり) || RAND:5
+		PRINTDATAW
+			DATAFORM 「让我怀上\@(TALENT:随机人物:正妻 || TALENT:随机人物:妾) ? 夫君 # %ANAME(MASTER)%\@大人的孩子吧……」
+			DATAFORM 「就这样……♥在里面出来吧……♥」
+			DATAFORM 「啊♥肚子好热♥」
+			DATAFORM 「\@(TALENT:随机人物:正妻 || TALENT:随机人物:妾) ? 夫君 # %ANAME(MASTER)%\@……还要更多……♥」
+			DATAFORM 「肚子满满的……♥」
+		ENDDATA
+	ELSE
+		PRINTDATAW
+			DATAFORM 「\@(TALENT:随机人物:正妻 || TALENT:随机人物:妾) ? 夫君 # %ANAME(MASTER)%\@的……顶到最深处了……♥」
+			DATAFORM 「要去了……♥咿啊啊啊啊……♥」
+			DATAFORM 「啊……♥那里……♥好舒服……♥」
+			DATAFORM 「\@(TALENT:随机人物:正妻 || TALENT:随机人物:妾) ? 夫君 # %ANAME(MASTER)%\@的……进来了……♥」
+			DATAFORM 「不要停……♥腰停不下来♥」
+		ENDDATA
+	ENDIF
+	CALL FUCK_MAKELOVE(随机人物, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+	CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(随机人物)%的膣穴")
+	IF !TALENT:随机人物:合意
+		CALL COLOR_PRINTW(@"获得了%ANAME(随机人物)%的合意♥", カラー_ピンク)
+		TALENT:随机人物:合意 = 1
+		TALENT:随机人物:チョロイン = 1
+	ENDIF
+NEXT
+RETURN 1

@@ -1,0 +1,153 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_WORK_HELPER_RATE()
+RETURN 25
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_WORK_HELPER_DECISION()
+RETURN 15 <= DAY
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_WORK_HELPER_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_WORK_HELPER_SETTARGET()
+;遭遇キャラの選出、該当キャラが見つからない場合はキャンセル
+FOR LOCAL, 0, CHARANUM
+	;同勢力に所属しているキャラ
+	IF LOCAL != MASTER && CFLAG:(LOCAL):所属 == CFLAG:MASTER:所属 && !CFLAG:(LOCAL):捕虜先 && !IS_ANIMAL(LOCAL)
+		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+		DAILY_TARGET_NUM ++
+	ENDIF
+NEXT
+SIF DAILY_TARGET_NUM < 1
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_WORK_HELPER()
+#DIM 対象
+#DIMS 対応能力
+#DIM 対応数値
+
+対象 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+
+PRINTFORML 有一天，在宫殿里走着，看到了%ANAME(対象)%
+PRINTFORMW 好象有什么困难的样子
+PRINTFORMW 怎么办？
+CALL ASK_YN("打声招呼", "视而不见")
+IF RESULT == 1
+	PRINTFORMW 被叫人卷进麻烦事里可受不了
+	PRINTFORMW %ANAME(MASTER)%决定视而不见
+	RETURN 1
+ELSE
+	IF CFLAG:対象:面識 == 1
+		PRINTFORML 向%ANAME(対象)%打招呼
+		PRINTFORMW 然后%ANAME(対象)%说正好需要帮助而向招手%ANAME(MASTER)%
+		PRINTFORML 听%ANAME(対象)%这么一说，工作好像很棘手
+		PRINTFORMW %ANAME(対象)%表示如果能帮忙的话会很感谢的
+	ELSE
+		PRINTFORML 向%ANAME(対象)%打招呼
+		PRINTFORMW 面对初次见面的%ANAME(MASTER)%，%ANAME(対象)%稍微有些笨拙地打招呼
+		PRINTFORML 问她在干什么，%ANAME(対象)%有些犹豫
+		PRINTFORMW 因为工作棘手，毫不隐瞒地说出了想帮忙的话
+		CFLAG:対象:面識 = 1
+	ENDIF
+	PRINTFORMW 怎么办？
+	CALL ASK_YN("帮忙吧", "对不起，我拒绝")
+	IF RESULT == 1
+		PRINTFORML 对不起，我现在也有工作
+		PRINTFORMW 被这样拒绝的%ANAME(対象)%虽然看起来很遗憾，但也没有再说什么
+		RETURN 1
+	ELSE
+		PRINTFORML 听到接受帮助后%ANAME(対象)%用笑容回了礼
+		PRINTFORMW 两个人很快就动手工作了
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		SELECTCASE RAND:3
+			CASE 0
+				対応能力 = 武闘
+			CASE 1
+				対応能力 = 知略
+			CASE 2
+				対応能力 = 政治
+		ENDSELECT
+		SELECTCASE RAND:3
+			CASE 0
+				対応数値 = 200
+			CASE 1
+				対応数値 = 150
+			CASE 2
+				対応数値 = 100
+		ENDSELECT
+		IF ABL:MASTER:対応能力 * (RAND:4 + 1) >= 対応数値
+			PRINTFORML 把工作做得完美无缺！
+			PRINTFORML 对于%ANAME(MASTER)%的工作态度，%ANAME(対象)%很高兴，虽然很少，但还是拿出了钱
+			CALL ASK_MULTI_JUDGE("不客气地收下", 1, "紳士的拒绝", 1, "要求身体作为报酬", HAS_PENIS(MASTER) && IS_FEMALE(対象))
+			IF RESULT == 0
+				PRINTFORML 毫不客气地接受的话
+				PRINTFORMW %ANAME(対象)%再次道谢之后欢快地跑开了
+				MONEY += 5000
+				CFLAG:対象:好感度 += 100
+				RETURN 1
+			ELSEIF RESULT == 1
+				PRINTFORML %ANAME(MASTER)%表示既然是伙伴的话那互相帮助表示理所当然的吗
+				IF IS_FEMALE(対象)
+					PRINTFORML %ANAME(対象)%笑着表示这回答太帅气了
+				ELSE
+					PRINTFORML %ANAME(対象)%像是很佩服%ANAME(MASTER)%似的
+				ENDIF
+				PRINTFORMW 在那之后谈笑了一会儿，挥着手和%ANAME(対象)%分开了
+				CFLAG:対象:好感度 += 300
+				RETURN 1
+			ELSE
+				PRINTFORML %ANAME(MASTER)%握着%ANAME(対象)%的手把脸靠近，逼迫%ANAME(対象)%回报个更好的东西
+				PRINTFORMW %ANAME(対象)%不知道该怎么办而露出为难的表情
+				PRINTFORM %ANAME(MASTER)%凑到%PRONOUN(対象)%的耳边答道「你应该知道是什么意思吧？」 一边喃喃细语一边抚摸屁股
+				IF CFLAG:対象:好感度 > 1500 || CFLAG:対象:従属度 > 1500 || TALENT:対象:合意 == 1
+					PRINTFORMW %ANAME(対象)%对突然被抚摸屁股忍不住呻吟起来，但是没有抵抗
+					PRINTFORMW 再抚摸屁股的时候，%ANAME(対象)%颤抖着微微点了点头
+					PRINTFORMW %ANAME(MASTER)%抱着%ANAME(対象)%的腰一边带到附近的房间，充分享受了那肉体
+					CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的\@ RAND:2 ? 肉棒 # 嘴唇\@", @"%ANAME(MASTER)%")
+					CALL FUCK(MASTER, "Ｃ, 性交, 射精, 奉仕", "接吻喪失, 童貞喪失", 0, @"%ANAME(対象)%的\@ RAND:2 ? 秘貝 # 嘴唇\@", "", @"%ANAME(対象)%的膣穴")
+					CFLAG:対象:好感度 += 300
+					IF TALENT:対象:合意 == 0
+						PRINTFORMW %ANAME(MASTER)%得到了%ANAME(対象)%的合意
+						TALENT:対象:合意 = 1
+					ENDIF
+					PRINTFORMW 分别的时候，%ANAME(対象)%红着脸凝视着%ANAME(MASTER)%
+				ELSE
+					PRINTFORML 随后%ANAME(対象)%发出悲鸣把推开%ANAME(MASTER)%冲了出去
+					PRINTFORMW %ANAME(対象)%不顾被自己推倒的%ANAME(MASTER)%，害羞地跑开了
+					CFLAG:対象:好感度 -= 100
+				ENDIF
+			ENDIF
+		ELSE
+			PRINTFORML 不怎么顺利的样子……
+			PRINTFORMW 虽然%ANAME(対象)%看起来感到很遗憾，但并没有责怪%ANAME(MASTER)%
+		ENDIF
+	ENDIF
+ENDIF
+RETURN 1

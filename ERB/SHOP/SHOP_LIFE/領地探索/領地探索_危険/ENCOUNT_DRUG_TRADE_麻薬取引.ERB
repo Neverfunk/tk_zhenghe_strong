@@ -1,0 +1,138 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_ENCOUNT_DRUG_TRADE_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_ENCOUNT_DRUG_TRADE_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_ENCOUNT_DRUG_TRADE(対象)
+#DIM 対象
+
+PRINTFORML 走在小巷子里的時候、看到一個神情恍惚心神不寧的男人
+PRINTFORML 他很明顯地移開了視線。感覺非常可疑……
+PRINTFORML
+CALL ASK_MULTI("打招呼", "窺探模樣", "不管")
+
+IF RESULT == 0
+	PRINTFORMW 向男人搭話後感覚他越来越可疑了
+	PRINTFORML 在他想要逃跑的時候、立刻抓住了他
+	PRINTFORMW 然後從他懷裡搜出了薬物！
+	PRINTFORMW 看來是個麻薬販子
+	PRINTFORMW 把他扭送到了衛兵那
+	ITEM:麻薬 += 1
+	CALL COLOR_PRINTW("獲得了1個麻薬", カラー_注意)
+	RETURN 1
+ELSEIF RESULT == 2
+	PRINTFORML 這世界也是有那樣的傢伙的
+	PRINTFORMW 不管它
+	RETURN 1
+ENDIF
+
+PRINTFORML 躲在隠蔽処窺探着男人、発現他和一名男人接触了
+PRINTFORML ……看來這是薬物交易的現場
+
+IF IS_FEMALE(対象) && CFLAG:対象:薬物依存
+	PRINTFORML 只是想到了薬物而已、%ANAME(対象)%的身体就開始発熱蠢動
+	PRINTFORMW 忍不住出現在了兩個人的面前、請求他們分自己一點
+	PRINTFORMW 薬販子們大吃一驚、但看到%ANAME(対象)%様子的時候、淫笑著説道有便宜佔了、一起把%ANAME(対象)%帯到了其他地方
+	GOTO FUCK_SCENE
+ENDIF
+
+PRINTFORML
+CALL ASK_YN("逮捕", "探索情況")
+
+IF RESULT == 0
+	IF IS_MALE(対象)
+		PRINTFORML 無法容忍這種會擾亂治安的事情
+		PRINTFORMW 英姿颯爽的出現并制服了兩人、扭送給了衛兵
+		ITEM:麻薬 += 2
+		CALL COLOR_PRINTW("獲得了2個麻薬", カラー_注意)
+		RETURN 1
+	ELSEIF CONFIG:203
+		PRINTFORML 無法容忍這種會擾亂治安的事情
+		PRINTFORMW 英姿颯爽的出現并制服了兩人、把他們帶到了監獄
+		ITEM:麻薬 += 2
+		CALL COLOR_PRINTW("獲得了2個麻薬", カラー_注意)
+		GOTO FEMDOMFUCK_SCENE
+	ELSE
+		PRINTFORML 無法容忍這種會擾亂治安的事情
+		PRINTFORMW 為了逮捕他們而現身的%ANAME(対象)%、但是卻被偷襲了、吸入了薬物
+		PRINTFORMW 変得表情呆滯毫無抵抗的%ANAME(対象)%、被男人們帯到了其他地方
+		GOTO FUCK_SCENE
+	ENDIF
+ENDIF
+
+PRINTFORML 与其直接抓住他們、不如继續觀察情況
+PRINTFORML 這麼考慮的%ANAME(対象)%自己現身了、請他們賣薬給自己
+
+IF IS_MALE(対象)
+	PRINTFORML ……但是、男人們一看到%ANAME(対象)%就迅速地逃走了……
+	RETURN 1
+ENDIF
+
+PRINTFORMW 雖然男人們有些不知所措、但還是露出笑容讓%ANAME(対象)%靠近
+PRINTFORMW 在交易的時候、在一瞬間被偷襲了、%ANAME(対象)%吸入了薬物
+PRINTFORMW 変得表情呆滯毫無抵抗的%ANAME(対象)%、被男人們帯到了其他地方
+GOTO FUCK_SCENE
+
+$FEMDOMFUCK_SCENE
+
+PRINTFORML
+PRINTFORML 把藥販帶到監獄的%ANAME(対象)%、騎在男人身上扭動著腰
+PRINTFORML 并且還有另一個男人從後面圧在%ANAME(対象)%身上、挿入了菊穴
+PRINTFORML 將藥物强行喂給男人的%ANAME(対象)%、正在享用著戰利品
+PRINTFORML 因為薬力而陷入恍惚的男人們、被肉體本配支配著拼命奉仕%ANAME(対象)%
+PRINTFORMW %ANAME(対象)%毫不客氣地用膣穴和菊穴懲罰著肉棒、男人們也大聲喘息著將精液射進了%ANAME(対象)%的體内
+PRINTFORML 作為獎勵男人們又被灌下了新的薬物、変得更加興奮的男人們跪著乞求%ANAME(対象)%賜予更多的性愛
+PRINTFORMW 因為獲得了最高的肉玩具而笑著的%ANAME(対象)%、再次開始逆侵犯男人們
+CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, 接吻, 口淫, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精", GET_SPERM_ID("藥販"), @"藥販的\@RAND:2 ? 肉棒 # 嘴唇\@", "小販", "對藥販的懲罰")
+PRINTFORML
+PRINTFORML 直到男人們再起不能後%ANAME(対象)%才停了下來
+PRINTFORMW 滿溢而出的精液從大腿上滑落、%ANAME(対象)%毫不在意的離開了這裏
+RETURN 1
+
+$FUCK_SCENE
+
+IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+	PRINTFORML
+	PRINTFORML 然而刚一走出小巷，就有一群全副武装的卫兵围了过来
+	PRINTFORML 好像已经埋伏了多时，就等他们进入圈套的样子
+	PRINTFORMW 他们被下五花大绑地押向别处，但队伍中的女医生注意到%ANAME(対象)%的异状，连忙跑去搀扶住她，带入了附近的空房子……
+	PRINTFORML
+	PRINTFORML 受到药物影响的%ANAME(対象)%一动也不能动，半睁着空虚的双眼凝视着虚空
+	PRINTFORML 但药里似乎还混合了一些别的东西，%ANAME(対象)%的身体像火烧一样散发着热量，皮肤上出了一层细密的汗珠
+	PRINTFORML %ANAME(対象)%的脸颊泛起潮红，浑身上下在无名的欲望中颤抖着，眼泪唾液和爱液一同像流水一般涌了出来
+	PRINTFORML 发现不妙的医生立刻开始为%ANAME(対象)%缓解欲望，灵活的手指刺激起了她身体各个敏感部位
+	PRINTFORMW 可即使这样也无济于事，仿佛体内被抽干一样的欲火在身体上燃烧着，对快乐无底洞一般的渴求让%ANAME(対象)%的精神接近崩溃
+	PRINTFORML 不过医生也没有放弃，她迅速脱光了衣服，开始用整个身体满足起%ANAME(対象)%的灵魂
+	PRINTFORMW 在医生的努力之下，%ANAME(対象)%经历了一个又一个的高潮，但即便如此，她抽搐的身体却依然渴求着更多的快感……
+	CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 薬物依存, 百合", "接吻喪失",0, "女医生的嘴唇", "", "身体治疗")
+	PRINTFORML
+	PRINTFORML 过了许久，%ANAME(対象)%才终于从药物的效力中解放出来
+	PRINTFORMW 面对面脸通红、瘫倒在地的女医生，%ANAME(対象)%做出了真挚的感谢
+ELSE
+	PRINTFORML
+	PRINTFORML 被帯到小販的藏身処的%ANAME(対象)%、騎在男人身上扭動著腰
+	PRINTFORML 并且還有另一個男人從後面圧在%ANAME(対象)%身上、挿入了菊穴
+	PRINTFORML 明明是在被侵犯、但是因為薬力而陷入恍惚的%ANAME(対象)%、自願奉仕著他們
+	PRINTFORMW 男人們毫不客氣地在膣内和肛内射精的時候、%ANAME(対象)%也大聲嬌喘著高潮了
+	PRINTFORML 作為獎勵又被灌下了新的薬物、変得更加興奮的%ANAME(対象)%開始央求著更多的性愛
+	PRINTFORMW 因為獲得了最高的性奴隷而笑著的男人們、再次開始侵犯%ANAME(対象)%
+	CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, 接吻, 口淫, 薬物依存, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精", GET_SPERM_ID("小販"), @"小販的\@RAND:2 ? 肉棒 # 嘴唇\@", "小販", "ねぐらでの輪姦")
+	PRINTFORML
+	PRINTFORML 薬物効果結束後取回了自我的%ANAME(対象)%總算是逃出去了
+	PRINTFORMW 但是在被打入的大量薬物的影響下、身体的発熱蠢動已經停不下來了
+ENDIF
+
+RETURN 1

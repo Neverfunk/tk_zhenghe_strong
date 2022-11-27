@@ -1,0 +1,617 @@
+﻿;-------------------------------------------------
+;共通部分
+;-------------------------------------------------
+
+;=================================================
+;●口上の存在判定
+;=================================================
+@KOJO_EXIST_K158
+
+;=================================================
+;●開始時
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_TRAIN_START_K158
+
+;=================================================
+;●終了時
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_TRAIN_END_K158
+
+;=================================================
+;●コマンド実行時(このキャラがプレイヤー側のとき)
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_TARGET_K158
+
+;=================================================
+;●コマンド実行時(このキャラがプレイヤー側のとき)
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_PLAYER_K158
+
+;=================================================
+;●コマンド実行前(ターゲット・プレイヤー問わず)
+;※地の文が表示される前に実行される。戻り値に1を設定する(RETURN 1)と地の文がカットされる
+;  必要に応じてKOJO_COM_TARGETの代わりに使う
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_BEFORE_K158
+
+;ファーストキスフラグ（キス未経験だったらCFLAG:255を1にセット）
+SIF TALENT:無接吻経験
+	CFLAG:255 = 1
+;処女フラグ（処女だったらCFLAG:260を1にセット）
+SIF TALENT:処女
+	CFLAG:260 = 1
+;主人公が童貞フラグ（主人公が童貞だったらCFLAG:261を1にセット）
+SIF TALENT:MASTER:童貞
+	CFLAG:261 = 1
+	
+RETURN 0
+
+;=================================================
+;●コマンド実行後(パラメータの変動処理が終わってから呼び出される)
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_AFTER_K158
+#DIM Ｃカウンタ
+#DIM Ｖカウンタ
+#DIM Ａカウンタ
+#DIM Ｂカウンタ
+#DIM Ｍカウンタ
+
+;KOJO_AFTERが呼び出されるたびに初期化
+Ｃカウンタ = 0
+Ｖカウンタ = 0
+Ａカウンタ = 0
+Ｂカウンタ = 0
+Ｍカウンタ = 0
+
+;[虚ろ]状態の場合、口が塞がっている場合は口上を表示しない
+IF TALENT:空虚 || IS_EQUIP_CONTINUE(TARGET, "口装着")
+	RETURN 0
+ENDIF
+
+;ファーストキスフラグ（コマンド終了時にキス未経験じゃ無かったらCFLAG:255を0にセット）
+SIF !TALENT:無接吻経験
+	CFLAG:255 = 0
+;処女フラグ（コマンド終了時に処女じゃ無かったらCFLAG:260を0にセット）
+SIF !TALENT:処女
+	CFLAG:260 = 0
+;主人公が童貞フラグ（コマンド終了時に主人公が童貞じゃ無かったらCFLAG:261を0にセット）
+SIF !TALENT:MASTER:童貞
+	CFLAG:261 = 0
+	
+PRINTL
+SETCOLOR 0xF7819F
+
+;-------------------------------------------------
+;初めてＣ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｃ絶頂 > 0
+	IF CFLAG:220 == 0
+		CFLAG:220 = 1
+		IF TALENT:恋慕 || TALENT:服従 
+			PRINTFORML 「啊，嗯♥别、别在那里玩弄啊♥」
+			;TranslatedMark 「はっ、ふああッ♥　そ、そこッ弄るなァッ♥」
+		;それ以外
+		ELSE
+			PRINTFORML 「嗯，嗯！」
+			;TranslatedMark 「んっ、んんんっ！」
+		ENDIF
+	;二回目以降
+	ELSE
+		Ｃカウンタ ++
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;初めてＶ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｖ絶頂 > 0
+	IF CFLAG:221 == 0
+		CFLAG:221 = 1
+		IF TALENT:恋慕 || TALENT:服従 
+			PRINTFORML 「啊，嗯♥腰、腰部在跳动♥」
+			;TranslatedMark 「はっ、ふああッ♥　こ、腰ッ跳ねるっ♥」
+		;それ以外
+		ELSE
+			PRINTFORML 「嗯～～～！嘿！嘿！」
+			;TranslatedMark 「んんっ～～～！っ！っ！」
+		ENDIF
+	;二回目以降
+	ELSE
+		Ｖカウンタ ++
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;初めてＡ絶頂
+;-------------------------------------------------
+IF NOWEX:Ａ絶頂 > 0
+	IF CFLAG:222 == 0
+		CFLAG:222 = 1
+		IF TALENT:恋慕 || TALENT:服従 
+			PRINTFORML 「这里、这里♥怎么回事♥」
+			;TranslatedMark 「こ、こんなところがっ♥　なんでぇっ♥」
+		;それ以外
+		ELSE
+			PRINTFORML 「啊！然后，屁股…哈！」
+			;TranslatedMark 「ああっ！　し、お尻でぇ…っ！」
+		ENDIF
+	;二回目以降
+	ELSE
+		Ａカウンタ ++
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;初めてＢ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｂ絶頂 > 0
+	IF CFLAG:223 == 0
+		CFLAG:223 = 1
+		IF TALENT:恋慕 || TALENT:服従 
+			PRINTFORML 「哈哈♥啊呀♥乳房♥要去了…啊♥」
+			;TranslatedMark 「はっ♥　アあっ♥　む、胸で♥イクなんて…っ♥」
+		;それ以外
+		ELSE
+			PRINTFORML 「嗯，嗯！」
+			;TranslatedMark 「んっ、ふうっ！」
+		ENDIF
+	;二回目以降
+	ELSE
+		Ｂカウンタ ++
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;初めてＭ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｍ絶頂 > 0
+	IF CFLAG:224 == 0
+		CFLAG:224 = 1
+		IF TALENT:恋慕 || TALENT:服従 
+			PRINTFORML 「嗯，嗯♥♥　…嗯，从没想过我的嘴唇会有这么好的感觉…♥」
+			;TranslatedMark 「ふっ、んんーっ♥♥　…く、唇でこんなに感じるなんて…♥」
+		;それ以外
+		ELSE
+			PRINTFORML 「嗯，嗯……嘴唇…为什么…嗯」
+			;TranslatedMark 「んっ、っ……口で…なんで…っ」
+		ENDIF
+	;二回目以降
+	ELSE
+		Ｍカウンタ ++
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;多重絶頂(服従系統は現在除外)
+;-------------------------------------------------
+IF (Ｃカウンタ + Ｖカウンタ + Ａカウンタ + Ｂカウンタ + Ｍカウンタ) > 0
+	SELECTCASE (Ｃカウンタ + Ｖカウンタ + Ａカウンタ + Ｂカウンタ + Ｍカウンタ)
+	;単体絶頂
+	CASE 1
+		SELECTCASE RAND:4
+			CASE 0
+				PRINTFORML 「再，再来，好，好爽啊♥」
+				;TranslatedMark 「も、もっとっ、キモチよくしろぉっ♥」
+			CASE 1
+				PRINTFORML 「啊啊，我还要，继续肏我啊♥」
+				;TranslatedMark 「はああっ、もっとっ、そこいじれぇ♥」
+			CASE 2
+				PRINTFORML 「嗯啊！　…呵呵，这种感觉也很有趣呢♪」
+				;TranslatedMark 「んあぁっ！　…ふふ、こういう感覚も面白いな♪」
+			CASE 3
+				PRINTFORML 「嗯～！　…呼啊，咿咿…♥」
+				;TranslatedMark 「んん～っっ！　…ふあぁ、いいぞ…♥」
+		ENDSELECT
+		
+	;二重絶頂
+	CASE 2
+		FONTSTYLE 1
+		SELECTCASE RAND:4
+			CASE 0
+				PRINTFORML 「有啊♥啊啊♥好爽♥♥」
+				;TranslatedMark 「はあっ♥ああ♥　イクぅっっ♥♥」
+			CASE 1
+				PRINTFORML 「啊，啊♥啊啊啊…我还要嘛♥♥」
+				;TranslatedMark 「はあっ、アッ♥　はあぁぁ…も、もっとしろぉッ♥♥」
+			CASE 2
+				PRINTFORML 「来了，来了♥啊啊啊♥啊♥♥」
+				;TranslatedMark 「キタっ、キタっ♥　あぁアアッッ♥あッ♥♥」
+			CASE 3
+				PRINTFORML 「嗯，哈！要…我还要♥♥」
+				;TranslatedMark 「んあ、はぁっ！　もっとぉ…もっとしろぉ♥♥」
+		ENDSELECT
+		FONTSTYLE 0
+		RESETCOLOR
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 身体同时到达的快感使%ANAME(TARGET)%的身体颤抖
+				;TranslatedMark 身体が同時に達する快感に%ANAME(TARGET)%は身体をブルルと震わせた
+			CASE 1
+				PRINTFORML 仿佛甘愿接受身体同时达到绝顶的快乐，%ANAME(TARGET)%开心地眯起眼睛
+				;TranslatedMark 身体が同時に絶頂する快楽を甘受するように、%ANAME(TARGET)%は嬉しそうに目を細めている
+			CASE 2
+				PRINTFORML %ANAME(TARGET)%更贪婪地想得到进一步的快感。
+				;TranslatedMark %ANAME(TARGET)%はより貪欲に更なる快感を得ようとしている
+		ENDSELECT
+
+	;三重絶頂
+	CASE 3
+		FONTSTYLE 1
+		SELECTCASE RAND:5
+			CASE 0
+				PRINTFORML 「哈，哈♥♥啊，啊♥♥呜♥♥―噗噫___♥♥♥」
+				;TranslatedMark 「はひっ♥♥あ゛ッ♥♥ッ♥♥―z____ッ♥♥♥」
+			CASE 1
+				PRINTFORML 「哈哈♥♥啊♥♥加油♥♥―噗噫___♥♥嘘♥♥」
+				;TranslatedMark 「はッ♥♥あッ♥♥ッッ―♥♥―z___♥♥ッ♥♥」
+			CASE 2
+				PRINTFORML 「要♥要去♥去了♥♥…嗯，嗯♥♥嗯♥♥♥」
+				;TranslatedMark 「イッ♥イクッ♥イッ♥♥…っクぅうう♥♥っっ♥♥♥」
+			CASE 3
+				PRINTFORML 「呼呼♥啊，啊♥嗯，嗯♥♥♥♥♥」
+				;TranslatedMark 「ふやっ♥あ゛あっ♥イ゛グぅっっ♥♥♥♥♥」
+			CASE 4
+				PRINTFORML 「嗯哈哈♥♥再来呀♥我的身体♥来吧♥♥」
+				;TranslatedMark 「んはあッッ♥♥もっとぉ♥　私の身体♥　もっといじれぇっ♥♥」
+		ENDSELECT
+		FONTSTYLE 0
+		RESETCOLOR
+		SELECTCASE RAND:4
+			CASE 0
+				PRINTFORML 多处同时高潮的快感使%ANAME(TARGET)%的身体猛烈地颤抖
+				;TranslatedMark 複数個所が同時に達する快感に%ANAME(TARGET)%は身体をブルブルと震わせた
+			CASE 1
+				PRINTFORML 数百年来从未体验过的快感，使%ANAME(TARGET)%浑身颤抖，沉浸在喜悦之中
+				;TranslatedMark 数百年味わったことの無い快感に、%ANAME(TARGET)%はガクガクと腰を震わせながら法悦に浸った
+			CASE 2
+				PRINTFORML %ANAME(TARGET)%的蜷缩起身体，达到了高潮的姿态，同时为了寻求更多的快感摇晃着腰
+				;TranslatedMark %ANAME(TARGET)%は肢体を弓なりにしならせ絶頂アクメに達しながら、なおも更なる快楽を求めるように腰を揺する
+			CASE 3
+				PRINTFORML 享受着多次高潮的快感，%ANAME(TARGET)%流着口水，眼神放荡
+				;TranslatedMark 多数の絶頂快楽を甘受するように、%ANAME(TARGET)%は涎を垂らし瞳を蕩けさせている
+		ENDSELECT
+
+	;四重絶頂
+	CASE 4
+		FONTSTYLE 1
+		SELECTCASE RAND:4
+			CASE 0
+				PRINTFORML 「啊，啊，啊，啊啊啊啊♥♥♥%ANAME(MASTER)%♥♥好厉害啊♥♥♥」
+				;TranslatedMark 「はあぁアアぁああッッ♥♥♥　%ANAME(MASTER)%っ♥♥スゴイいいいッ♥♥♥」
+			CASE 1
+				PRINTFORML 「哎呀♥♥啊，啊♥这个♥不行♥♥啊，啊啊啊啊♥♥♥」
+				;TranslatedMark 「やっ♥♥あ゛あっ♥コレっ♥むりッ♥♥　はっ、あぁあ―z___ッ♥♥♥」
+			CASE 2
+				PRINTFORML 「啊♥♥%ANAME(MASTER)%♥♥啊，啊♥啊，啊♥嗯啊啊啊啊♥♥♥♥」
+				;TranslatedMark 「っあ♥♥%ANAME(MASTER)%ッッ♥♥　あ゛っ♥あ゛♥んぁああぁ♥♥♥♥」
+			CASE 3
+				PRINTFORML 「来了♥来了♥♥嗯，嗯♥啊，啊，啊啊啊啊♥♥啊♥♥」
+				;TranslatedMark 「キタっ♥キタっ♥♥　ふやっ♥あぁアアッッ♥♥あッ♥♥」
+		ENDSELECT
+		FONTSTYLE 0
+		RESETCOLOR
+		PRINTDATA
+		DATAFORM 在全身都达到高潮的快感中%ANAME(TARGET)%
+		;TranslatedMark 全身が絶頂する快楽に%ANAME(TARGET)%は
+		DATAFORM 在意识四散的快感中，%ANAME(TARGET)%
+		;TranslatedMark 意識が四散するような快楽に、%ANAME(TARGET)%は
+		DATAFORM 由眼前看到快感的火花，%ANAME(TARGET)%
+		;TranslatedMark 目の前に火花が見えるほどの快楽により、%ANAME(TARGET)%は
+		DATAFORM %ANAME(TARGET)%流着口水
+		;TranslatedMark %ANAME(TARGET)%は涎を撒き散らしながら、
+		ENDDATA
+		
+		PRINTDATAL
+		DATAFORM 身体颤抖着，一时无法从高潮的波涛中停下来…
+		;TranslatedMark 肢体をぶるぶると震わせ、しばしの間絶頂の波から降りられないでいた…
+		DATAFORM 全身颤抖着流着口水沉浸在了快感里…
+		;TranslatedMark ガクガクと全身を震わせて涎を垂らしながら法悦に浸った…
+		DATAFORM 将弓起四肢，全身达到高潮…
+		;TranslatedMark 肢体を弓なりにカクカクしならせ、全身絶頂アクメに達した…
+		DATAFORM 为冲击全身的高潮快感而疯狂…
+		;TranslatedMark 全身を襲う絶頂快楽に対して思う存分ヨガリ狂った…
+		ENDDATA
+
+	;五重絶頂
+	CASE 5
+		FONTSTYLE 1
+		SELECTCASE RAND:6
+			CASE 0
+				PRINTFORML 「不要♥不要♥♥不♥要♥要飞起来了♥啊啊啊啊啊♥♥♥」
+				;TranslatedMark 「だめッ♥だめッ♥♥ッ♥とぶッ♥とんじゃうッ♥はあアアッッ♥♥♥」
+			CASE 1
+				PRINTFORML 「哦~♥哦，哦♥♥哦，爽啊♥♥啊♥♥♥啊…♥♥♥嗯♥♥♥」
+				;TranslatedMark 「お゛ッ♥お゛お゛ッ♥♥ほぉッ♥♥アっ♥♥♥はあ…♥♥♥ッッ♥♥♥」
+			CASE 2
+				PRINTFORML 「要♥♥要去♥♥要去了呜呜呜呜♥♥哇♥♥♥」
+				;TranslatedMark 「イ゛ッ♥♥イ゛グッ♥♥イ゛グぅぅううぅうッ♥♥ッ♥♥♥」
+			CASE 3
+				PRINTFORML 「♥哈♥嘶♥哈哈♥要去了♥♥要去了♥♥咯♥哈哈♥――♥♥」
+				;TranslatedMark 「♥ひ♥ッ♥ひあッ♥―ッ♥♥ーッ♥♥かッ♥はッ♥―ーッ♥♥」
+			CASE 4
+				PRINTFORML 「咿♥咿咿♥♥咿♥啊♥♥%ANAME(MASTER)%♥♥啊，啊呼♥啊，啊♥♥啊啊啊啊啊♥♥♥」
+				;TranslatedMark 「いッ♥いいッ♥♥ッ♥っあ♥♥%ANAME(MASTER)%ッッ♥♥　あ゛っ♥あ゛♥♥アアッッ♥♥♥」
+			CASE 5
+				PRINTFORML 「嗯，嗯♥♥啊~♥哈哈♥♥嗯♥咯♥♥咯♥♥♥♥」
+				;TranslatedMark 「んオ゛っ♥♥ア゛ッ♥はあッ♥♥かっ♥ッ♥♥ッ♥♥♥♥」
+		ENDSELECT
+		FONTSTYLE 0
+		RESETCOLOR
+		PRINTDATA
+		DATAFORM 在撕裂身体般快感的浊液中的%ANAME(TARGET)%
+		;TranslatedMark 身を裂かれるほどの快感の濁流に%ANAME(TARGET)%は
+		DATAFORM 身心都迸发出一阵阵的快感的%ANAME(TARGET)%
+		;TranslatedMark 身も心も弾け飛ぶような快楽の奔流に%ANAME(TARGET)%は、
+		DATAFORM 随着快感到来，大脑像是被电击一般的%ANAME(TARGET)%
+		;TranslatedMark 脳内が火花で満ちるほどの快楽により、%ANAME(TARGET)%は
+		DATAFORM 在只有女人才能品味到的终极高潮快感中，%ANAME(TARGET)%
+		;TranslatedMark 女だけが味わえる究極の絶頂快楽に%ANAME(TARGET)%は、
+		ENDDATA
+		
+		PRINTDATAL
+		DATAFORM 全身颤抖着，流着口水疯狂地大声娇喘着…
+		;TranslatedMark 全身を震わせ、涎を垂らしながら激しく嬌声を上げた…
+		DATAFORM 全身剧烈地颤抖，双眼失神地陶醉在无尽的快感中…
+		;TranslatedMark ガクガクと全身を震わせ、焦点の定まらぬ瞳でしばし法悦に浸った…
+		DATAFORM 拱起肢体，全身都达到了高潮，眼神中充满了❤......
+		;TranslatedMark 肢体を弓なりにしならせ、目に❤を浮かばせて全身絶頂アクメに達した…
+		DATAFORM 全身颤抖着，嘴里口齿不清地发出淫荡的浪叫…
+		;TranslatedMark 全身を震わせながら呂律が怪しい口ぶりで淫楽の声を上げた…
+		ENDDATA
+
+	ENDSELECT
+ENDIF
+RESETCOLOR
+
+;=================================================
+;●単体エンディング関係
+;=================================================
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;★ここから先にはエンディングが記述されています★
+;ネタバレを避けたい方は閲覧しないようにご注意下さい。
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+@KOJO_SINGLE_ENDING_K158
+;単体エンディング
+;全都市を統一したとき、好感度5000以上かつ全キャラ中最も好感度が高いと表示される
+
+PRINTFORML
+PRINTFORML …
+PRINTFORML ……
+PRINTFORML ………
+PRINTFORML
+CALL COLOR_PRINTW(@"「……………………」", 0xF7819F)
+PRINTFORML
+PRINTFORMW 深夜。突然醒来的%ANAME(TARGET)%从她和心爱的%ANAME(MASTER)%睡觉的房间里，无声无息地溜出来
+;TranslatedMark 深夜。不意に目を覚ました%ANAME(TARGET)%は愛する%ANAME(MASTER)%と共に眠る部屋を、音も無く抜け出す
+PRINTFORML
+PRINTFORML 然后伫立在两人居住的房子外，在黑暗中凝视着虚空……
+;TranslatedMark そして二人で暮らす家の外、暗闇の中に佇み虚空を見つめる……
+PRINTFORMW
+WAIT
+CALL COLOR_PRINTW(@"「来了吗?我的本体……」", 0xF7819F)
+PRINTFORML 
+PRINTFORMW 当%ANAME(TARGET)%的话语在黑暗中回响的时候，"本体"茨木华扇出现在那里
+;TranslatedMark %ANAME(TARGET)%の言葉が闇の中に響いた時、その場に『本体』こと茨木華扇が姿を現した
+PRINTFORML
+CALL COLOR_PRINTW(@"「……好久不见了。我的搭档。和爱人的生活怎么样？」", カラー_パ赤)
+;CALL COLOR_PRINTW(@"「……久しぶりね。我が相棒。愛する者との生活はどう？」", カラー_パ赤)
+PRINTFORML
+CALL COLOR_PRINTW(@"「简直是一帆风顺。然后呢?……你现在还出现在我面前干什么、茨华仙呦」", 0xF7819F)
+;CALL COLOR_PRINTW(@"「順風満帆そのものだよ。…それで？　私の前に今更何をしに現れた、茨華仙よ」", 0xF7819F)
+PRINTFORML 
+PRINTFORMW 她用锐利的目光瞪着华扇。从那双眼中，看不出作为曾经的右臂被分离后与主体再会时的喜悦之色
+;TranslatedMark 彼女は華扇を鋭い目で睨む。その目からは、かつて分かたれた右腕として再会した時にあった喜びの色は伺えない
+PRINTFORML
+CALL COLOR_PRINTW(@"「我实话实说。差不多该回到我身边了。那个理由，你也明白吧?」", カラー_パ赤)
+;CALL COLOR_PRINTW(@"「率直に言うわ。そろそろ私の元に帰りなさい。その理由は、貴方にも分かっているでしょう？」", カラー_パ赤)
+PRINTFORML
+CALL COLOR_PRINTW(@"「………」", 0xF7819F)
+PRINTFORML
+PRINTFORMW %ANAME(TARGET)%没有回答那个问题。但是，她的眉梢微微歪斜。因为她知道这个问题的意思。
+;TranslatedMark %ANAME(TARGET)%はその問いに応えない。しかし、その眉根が僅かに歪む。問いの意味に心当たりがあるからだ
+PRINTFORML
+PRINTFORML
+CALL COLOR_PRINTW(@"「你的肉体会在不远的将来消失。肉体的本源妖力减少了。……因为你不再吃人的缘故」", カラー_パ赤)
+;CALL COLOR_PRINTW(@"「貴方の肉体はそう遠くない内に消滅する。肉体の素である妖力が減っているから。……貴方が人間を喰わなくなったから」", カラー_パ赤)
+PRINTFORML
+PRINTFORMW
+PRINTFORMW ……%ANAME(TARGET)%一言不发，眼神微微低垂。
+;TranslatedMark ……%ANAME(TARGET)%は何も言わず、僅かに目を伏せる
+PRINTFORML
+CALL COLOR_PRINTW(@"「…自从你和那个人有了特别的关系之后，你就不再吃人了。这对仙人来说是件好事，」", カラー_パ赤)
+;CALL COLOR_PRINTW(@"「…貴方があの人と特別な関係になってから貴方は人間を喰わなくなった。それは仙人としては喜ばしいことだけど」", カラー_パ赤)
+PRINTFORML
+CALL COLOR_PRINTW(@"「邪恶的鬼的特性浓厚的你…这种行为本身就是缓慢的自杀」", カラー_パ赤)
+;CALL COLOR_PRINTW(@"「邪悪な鬼の特性が濃い貴方には…、その行為は緩やかな自殺そのもの」", カラー_パ赤)
+PRINTFORML
+PRINTFORML %ANAME(TARGET)%知道。自己不是单纯的鬼
+;TranslatedMark %ANAME(TARGET)%には分かっていた。自分は単なる鬼ではない
+PRINTFORML
+PRINTFORMW 四天王之一的茨木华扇，作为鬼的本性和邪气凝聚在一条被砍下的右臂里，是一个异质的存在
+;TranslatedMark 四天王の一人である茨木華扇の、鬼としての本性と邪気を切り落とされた右腕一本に凝縮して込められた異質な存在だ
+PRINTFORML
+PRINTFORMW 人类的恐怖和恐惧，以及血肉会成为比什么都强大的力量。既然不吃那些了，那形成这具临时身体的妖力已经用尽了
+;TranslatedMark 人間の恐怖と畏怖、そして血肉が何よりの力になる。それを喰わなくなったから、この仮初の肉体を形作る妖力が尽きかけているのだ
+PRINTFORML
+CALL COLOR_PRINTW(@"「……是因为和那个人在一起吧?」", カラー_パ赤)
+;CALL COLOR_PRINTW(@"「……あの人と居るからでしょう？」", カラー_パ赤)
+PRINTFORML
+PRINTFORMW 华扇的声音一语击中%ANAME(TARGET)%的要害
+;TranslatedMark 華扇の声が%ANAME(TARGET)%の図星をつく
+PRINTFORML
+SETCOLOR 0xF7819F
+PRINTFORML —%ANAME(MASTER)%。教会了我与以往不同的世界和生活方式，比什么都重要的人——
+;TranslatedMark ― %ANAME(MASTER)%。私に今までと違う世界と生き方を教えてくれた、何よりも大切な人 ―
+PRINTFORML
+PRINTFORMW ——一开始觉得他是微不足道的存在。然后渐渐地，他在我心中的存在变多了起来
+;TranslatedMark ― 最初は取るに足らない存在だと思っていた。それがだんだんと、自分の中で存在が大きくなっていった ―
+PRINTFORML
+PRINTFORML ——比起任何人的血肉，%ANAME(MASTER)%的吻更美味。互相吸吮的舌头和唾液变成了至高无上的甘露
+;TranslatedMark ― どんな人間の血肉よりも、%ANAME(MASTER)%との口付けが美味に感じた。互いに吸い合う舌と唾液が極上の甘露になった ―
+PRINTFORML
+PRINTFORMW ——比起那种令人愉快的恐怖悲鸣，只是听到%ANAME(MASTER)%的声音心里就一直很兴奋——
+;TranslatedMark ― あれほど愉快に感じた恐怖の悲鳴よりも、%ANAME(MASTER)%の声を聞く方がずっと心が浮き立った ―
+PRINTFORML
+PRINTFORMW ——和%ANAME(MASTER)%在一起的日子，成为了我最重要的东西。吃人不再觉得很开心了
+;TranslatedMark ― %ANAME(MASTER)%との日々が、私にとって一番大事なものになった。人を喰うことを、楽しいと思えなくなった ―
+PRINTFORML
+PRINTFORMW ― 我是比谁都纯粹的鬼。鬼不会做不开心的事…… ―
+;TranslatedMark ― 私は誰よりも純粋な鬼だ。鬼は楽しくないことなどしない…… ―
+PRINTFORML
+PRINTFORMW ——所以我放弃了吃人——
+;TranslatedMark ― だから私は、人を喰うことをやめた ―
+RESETCOLOR
+PRINTFORML
+CALL COLOR_PRINTW(@"「不会在今天和明天之内消失吧。但是，那一天不久就会到来。……那是肯定的」", カラー_パ赤)
+;CALL COLOR_PRINTW(@"「今日明日の内に消える、ということは無いでしょう。でも、遠からずその日は来る。…それは間違いない」", カラー_パ赤)
+PRINTFORML
+CALL COLOR_PRINTW(@"「…和人的爱情越深，今生的分别就越痛苦。趁现在仍然还能分开」", カラー_パ赤)
+;CALL COLOR_PRINTW(@"「…人との愛情を深めるほど、今生の別れはとても辛くなるわ。今のうちならまだ割り切れるはずよ」", カラー_パ赤)
+PRINTFORML
+PRINTFORMW 这样说着，华扇像是迎接一样的伸出右手
+;TranslatedMark そう言って華扇が迎えるように右手を差し出す
+PRINTFORML
+PRINTFORMW ……与在前方等待的%ANAME(MASTER)%的分别。光是想到这一点，%ANAME(TARGET)%就感到了撕裂般的悲伤。
+;TranslatedMark ……この先に待つ%ANAME(MASTER)%との別れ。それを考えるだけで、%ANAME(TARGET)%は身が裂けそうなほどの悲しみを感じた
+PRINTFORML
+PRINTFORML そのことを思えば、傷が浅いうちに%ANAME(MASTER)%とのことを幸せな夢として終わらせようという華扇の誘いは甘美なものに見えた
+PRINTFORML
+PRINTFORMW 但是………………
+;TranslatedMark しかし………………
+PRINTFORML
+CALL COLOR_PRINTW(@"「……拒绝。我不会回到你身边」", 0xF7819F)
+;CALL COLOR_PRINTW(@"「……断る。私はお前の元には戻らない」", 0xF7819F)
+PRINTFORML
+PRINTFORMW 她没有选择回去。%ANAME(TARGET)%用坚毅的声音和眼神注视着华扇
+;TranslatedMark 彼女はそれを選ばなかった。%ANAME(TARGET)%は毅然とした声と眼差しで華扇を見据える
+PRINTFORML
+CALL COLOR_PRINTW(@"「至少现在不打算成为你所走的仙道的路标。」", 0xF7819F)
+;CALL COLOR_PRINTW(@"「少なくとも今は、お前の歩む天道の道しるべになるつもりはない」", 0xF7819F)
+PRINTFORML
+CALL COLOR_PRINTW(@"「我将以我的身份和他一起生活，直到我的身体消失。」", 0xF7819F)
+;CALL COLOR_PRINTW(@"「私は私のまま、この身体が消えるその時までアイツと共に生きる」", 0xF7819F)
+
+CALL COLOR_PRINTW(@"「……这种心情无法理解这种话我可说不出。是吧?因为你就是我……」", 0xF7819F)
+;CALL COLOR_PRINTW(@"「……この気持ちが分からぬとは言わせんぞ。そうだろう？　お前は私なのだから……」", 0xF7819F)
+
+PRINTFORML 
+PRINTFORMW 她说完就背向华扇，不听回答也不回头，回到了%ANAME(MASTER)%安睡的房间
+;TranslatedMark 彼女はそう言い切ると華扇に背を向け、答えを聞くことも振り返ることもせずに%ANAME(MASTER)%が寝入る部屋へ帰っていった
+PRINTFORML 
+CALL COLOR_PRINTW(@"「………………嗯，我知道。因为你就是我。……」", カラー_パ赤)
+;CALL COLOR_PRINTW(@"「………………ええ、分かるわ。貴方は私なのだから……」", カラー_パ赤)
+PRINTFORML 
+PRINTFORMW 然而华扇也没有再说什么，只是独自一人，背对着曾经的搭档消失了……
+;TranslatedMark そして華扇もまた、誰に聞かせるでもなく独りごちると、相棒に背を向け消え去った……
+PRINTFORML 
+PRINTFORMW 本应在坎坷命运的尽头回到一处的她们，又踏上了分别的道路
+;TranslatedMark 数奇な運命の果てに一所に戻ったはずの彼女らは、またも別れ別々の道を歩みだした
+PRINTFORML 
+PRINTFORMW 但是，她们所走的道路总有一天会再次交汇，她们也相互坚信着
+;TranslatedMark だが、その歩む道がいつか再び交わる時が来るということもまた、互いに確信していた
+PRINTFORML 
+PRINTFORMW 这样的话就不必着急了。至少现在…
+;TranslatedMark ならば急いて動くこともない。少なくとも今は…
+PRINTFORML 
+PRINTFORMW 她一边思考着这些，一边看着什么也不知道在熟睡的%ANAME(MASTER)%
+;TranslatedMark そんなことを考えながら、彼女は何も知らずに眠っている%ANAME(MASTER)%を見つめる
+PRINTFORML 
+PRINTFORMW 然后，像守护这个世界上最重要的人一样紧紧地抱住，闭上眼睛。
+;TranslatedMark そして、この世で一番大切な人を守るようにぎゅっと抱き包んで目を閉じる
+PRINTFORML 
+CALL COLOR_PRINTW(@"（%ANAME(MASTER)%啊…。选择了这样的我的可爱的人啊…。让我和你多多守在一起）", 0xF7819F)
+;CALL COLOR_PRINTW(@"（%ANAME(MASTER)%よ…。こんな私を選んでくれた愛しい人よ…。私にもっと、お前と共に居させてくれ）", 0xF7819F)
+PRINTFORML 
+CALL COLOR_PRINTW(@"（请在这新生的身体上，刻上你炽热而温柔的爱吧。让我给你生很多可爱的孩子吧）", 0xF7819F)
+;CALL COLOR_PRINTW(@"（この仮初の身体に、もっとお前の熱く優しい愛を刻んでおくれ。愛しいお前の子をいっぱいいっぱい産ませておくれ）", 0xF7819F)
+PRINTFORML 
+CALL COLOR_PRINTW(@"（…某一天当我回到那个黑暗的箱子里的时候，我会一直想起和你在一起的幸福日子…………）", 0xF7819F)
+;CALL COLOR_PRINTW(@"（…いつか私があの暗い箱の中に戻った時、お前との幸せな日々をずっと思い出せるように…………）", 0xF7819F)
+PRINTFORML 
+PRINTFORMW 即使离别的痛苦会增加…%ANAME(TARGET)%决定将自己剩下的时间献给与%ANAME(MASTER)%相爱的每一天
+;TranslatedMark たとえ別れの辛さが増すとしても…、%ANAME(TARGET)%は己に残された時間を%ANAME(MASTER)%との愛し合う日々に捧げることを決意していた
+PRINTFORML 
+CALL COLOR_PRINTW(@"「%ANAME(MASTER)%………………………………………………………………」", 0xF7819F)
+PRINTFORML 
+PRINTFORMW 为了不吵醒熟睡的%ANAME(MASTER)%，静静地低语。然后……
+;TranslatedMark 深く眠る%ANAME(MASTER)%を起こさないよう、静かに囁く。そして……
+PRINTFORML 
+CALL COLOR_PRINTW(@"「我比任何人都爱你。」", 0xF7819F)
+;CALL COLOR_PRINTW(@"「私はお前を、誰よりも愛しているよ」", 0xF7819F)
+PRINTFORML 
+PRINTFORMW 在%ANAME(MASTER)%没有防备的嘴唇上，轻轻地吻了一下。从窗外透进来的月光所照亮的身影，仿佛慈爱的女神的……
+;TranslatedMark %ANAME(MASTER)%の無防備な唇に、そっとキスを重ねる。窓から差し込む月明かりに照らされたその姿は、慈しむ女神そのもの……
+PRINTFORML 
+PRINTFORML 
+PRINTFORML 
+FONTSTYLE 1
+PRINTFORML 　　——被认为是断善修恶的恶鬼，现在却不见踪影。　――
+;TranslatedMark ――　断善修悪と恐れられる悪鬼は、もう何処にもいなかった。　――
+FONTSTYLE 0
+PRINTFORMW 
+PRINTFORML
+
+PRINTFORMW  　　　　　　　　　　　　　ＥＮＤ
+
+;RETURNの値を0→1に変えると、デフォルトの単体エンディングメッセージがスキップされる
+RETURN 1
+
+@KOJO_DEAD_ENDING_K158
+;斬首エンディング
+;自勢力が滅亡したときの選択肢で「……斬れ」を選択して主人公が死亡した場合に、好感度5000以上かつ全キャラ中最も好感度が高いと表示される
+;PRINTFORMW 
+
+;RETURNの値を0→1に変えると、デフォルトの単体エンディングメッセージがスキップされる
+RETURN 0

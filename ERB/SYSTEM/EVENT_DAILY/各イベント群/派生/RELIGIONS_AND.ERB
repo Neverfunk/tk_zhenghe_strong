@@ -1,0 +1,1121 @@
+﻿;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_RELIGIONS_PROGRESS_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("RELIGIONS")
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_RELIGIONS_PROGRESS_DECISION()
+
+IF DVAR:新興宗教_潜入中キャラID > 0 && ID_TO_CHARA(DVAR:新興宗教_潜入中キャラID) == -1
+	DVAR:新興宗教_潜入中キャラID = 0
+	RETURN 0
+ELSEIF DVAR:新興宗教_潜入中キャラID > 0
+	RETURN 1
+ENDIF
+
+RETURN 0
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_RELIGIONS_PROGRESS()
+#DIM 対象
+#DIM 満足度
+#DIM 遇见判定
+
+遇见判定 = 0
+
+対象 = ID_TO_CHARA(DVAR:新興宗教_潜入中キャラID)
+
+IF CFLAG:対象:捕虜先 != 0
+	PRINTFORMW %ANAME(対象)%在牢獄中苦悶地度過了……
+	;TranslatedMark %ANAME(対象)%は、牢獄の中で悶々と過ごしている……
+	RETURN 1
+ELSEIF CFLAG:対象:特殊状態 == 特殊状態_死亡
+	CLEARBIT TALENT:対象:日常系, 素質_デイリー_教祖様のしもべ
+	DVAR:新興宗教_潜入中キャラID = 0
+	DVAR:新興宗教_洗脳度 = 0
+	RETURN 1
+ELSEIF CFLAG:対象:特殊状態 == 特殊状態_放浪
+	PRINTFORMW %ANAME(対象)%在流浪，看起來脫離對新興宗教的潛入調查讓她逃開了教祖的洗腦
+	;TranslatedMark %ANAME(対象)%は放浪中、新興宗教への潜入捜査から離れ教祖の洗脳を逃れた様だ
+	CLEARBIT TALENT:対象:日常系, 素質_デイリー_教祖様のしもべ
+	DVAR:新興宗教_潜入中キャラID = 0
+	DVAR:新興宗教_洗脳度 = 0
+	RETURN 1
+ELSEIF CFLAG:対象:所属 != CFLAG:MASTER:所属
+	PRINTFORMW 去往他國的%ANAME(対象)%看起來脫離對新興宗教的潛入調查讓她逃開了教祖的洗腦
+	;TranslatedMark 他国に移った%ANAME(対象)%は、新興宗教への潜入捜査から離れ教祖の洗脳を逃れた様だ
+	CLEARBIT TALENT:対象:日常系, 素質_デイリー_教祖様のしもべ
+	DVAR:新興宗教_潜入中キャラID = 0
+	DVAR:新興宗教_洗脳度 = 0
+	RETURN 1
+ELSEIF !IS_FEMALE(対象)
+	PRINTFORMW 因為%ANAME(対象)%不再是女性，教祖似乎失去了興趣
+	;TranslatedMark %ANAME(対象)%が女ではなくなったので、教祖は手を引いたようだ
+	CLEARBIT TALENT:対象:日常系, 素質_デイリー_教祖様のしもべ
+	DVAR:新興宗教_潜入中キャラID = 0
+	DVAR:新興宗教_洗脳度 = 0
+	RETURN 1
+ENDIF
+PRINTFORMW %ANAME(対象)%今天也去調查教團了
+;TranslatedMark %ANAME(対象)%は今日も教団へ調査に向かった
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+IF 遇见判定 == 0
+	遇见判定 = 1
+	PRINTFORML 今天也被叫去教祖的房間了
+	;TranslatedMark 今日も教祖の部屋に呼ばれた
+	PRINTFORML 但是總有一種不好的預感…
+	;TranslatedMark しかし何だか嫌な予感がする…
+	PRINTFORMW 上次也是沒有進入他的房間之後的記憶
+	;TranslatedMark 前回も彼の部屋に入った後の記憶がなかった
+	PRINTFORML 煩惱的時候被祭司中的一人搭話了
+	;TranslatedMark 悩んでいると司祭の一人に話しかけられた
+	PRINTFORML 竟然被他知道了%ANAME(対象)%的真實身份
+	;TranslatedMark なんと彼は%ANAME(対象)%の正体を知っていた
+	PRINTFORMW 對著擺好架勢的%ANAME(対象)%，他說
+	;TranslatedMark 身構える%ANAME(対象)%に対して彼は話をつづけた
+	PRINTFORML 我會把教祖的秘密告訴你，所以我們兩個人一起好好的聊聊吧
+	;TranslatedMark 教祖の秘密を教えてあげるから二人でゆっくりで話がしたい、と
+	PRINTFORMW 他一邊說著一邊把手伸向了%ANAME(対象)%的腰
+	;TranslatedMark 彼は囁きながら%ANAME(対象)%の腰に手を回してきた
+	PRINTFORML …怎麼辦好呢？
+	;TranslatedMark …どうしよう？
+	CALL ASK_YN("交易" ,"拒绝")
+	IF RESULT == 1
+		PRINTFORMW %ANAME(対象)%拒绝了可疑的交易，去了教祖的房间
+		;TranslatedMark %ANAME(対象)%は怪しげな取引を断り、教祖の部屋へ向かった
+	ELSE
+		PRINTFORML 雖然對於那個男人的下流感到厭惡，但是現在需要更多的情報
+		;TranslatedMark 男のいやらしさに嫌悪感を覚えつつも今は有益な情報が欲しい
+		PRINTFORML %ANAME(対象)%接受了交易
+		;TranslatedMark %ANAME(対象)%は取引をする事にした
+		PRINTFORMW 他舔了舔嘴唇，抱著%ANAME(対象)%的腰帶進了自己的房間
+		;TranslatedMark 彼は舌なめずりをすると%ANAME(対象)%の腰を抱いて自分の部屋へ招き入れた
+		PRINTFORMW ………
+		CALL FUCK_RAPE(対象, GET_SPERM_ID("信者"), @"信者の\@ RAND:2 ? 肉棒 # 唇\@", "信者")
+		満足度 = ABL:対象:Ｃ感 + ABL:対象:Ｖ感 + ABL:対象:Ｂ感 + ABL:対象:Ａ感 + ABL:対象:Ｍ感
+		満足度 += ABL:対象:欲望 + ABL:対象:精愛 + ABL:対象:奉仕 + ABL:対象:性技 + ABL:対象:性交
+		IF 満足度 >= 20 + RAND:20
+			PRINTFORMW %ANAME(対象)%的技巧成功滿足了他、成功得到了情報
+			;TranslatedMark %ANAME(対象)%は彼のテクを上回り、情報を引き出す事に成功した
+			PRINTFORML 教祖竟然在利用藥和洗腦術將年輕人們當做食物
+			;TranslatedMark 何と教祖は薬と洗脳術で若者達を食い物にしているらしい
+			PRINTFORML 而且%ANAME(対象)%已經著了道
+			;TranslatedMark そして既に%ANAME(対象)%もその術中にハメられていたというのだ
+			PRINTFORMW %ANAME(対象)%把情報帶回去之後立即調動軍隊將教祖逮捕了
+			;TranslatedMark %ANAME(対象)%はその情報を持ち帰ると早速軍を動かして教祖を逮捕した
+			PRINTFORMW %ANAME(対象)%的行動成功挽救了很多年輕人
+			;TranslatedMark %ANAME(対象)%の行動により若者達は救われる事になった
+			COUNTRY_SOLDIER:(CFLAG:対象:所属) += 500 * DVAR:新興宗教_洗脳度
+			CALL COLOR_PRINTW("被解救的年輕人以及家属朋友等收到消息后踊跃参军，志願兵的数量增加了", カラー_注意)
+			MONEY += 10000 * DVAR:新興宗教_洗脳度
+			CALL COLOR_PRINTW("根据被解救的人数，得到了一些感谢费用", カラー_注意)
+			CALL COLOR_PRINTW(@"兵的数量增加了{500 * DVAR:新興宗教_洗脳度}", カラー_注意)
+			MONEY += 10000 * DVAR:新興宗教_洗脳度
+			CALL COLOR_PRINTW(@"得到了{10000 * DVAR:新興宗教_洗脳度}感谢费用", カラー_注意)
+			DVAR:新興宗教_発生フラグ = -1
+			DVAR:新興宗教_潜入中キャラID = 0
+			DVAR:新興宗教_洗脳度 = 0
+		ELSE
+			PRINTFORML 他的技術超出了想象，在引出情報之前自己就撐不住了
+			;TranslatedMark 彼のテクは想像以上で、情報を引き出す前に気をやってしまった
+			PRINTFORML 被發現的時候，%ANAME(対象)%已經被丟在了教團設施前
+			;TranslatedMark 気が付いた時には、%ANAME(対象)%は教団施設の前に放り出されていた
+			PRINTFORMW 帶著被欺騙的憤怒和性愛的餘韻搖搖晃晃地踏上了歸路
+			;TranslatedMark 騙された事への憤りとセックスの余韻でフラフラになりながら帰路についた
+		ENDIF
+		RETURN
+	ENDIF
+ELSE
+	PRINTFORML 今天也被叫去教祖的房間了
+	PRINTFORML 但是總有一種不好的預感…
+	PRINTFORMW 上次也是沒有進入他的房間之後的記憶
+	PRINTFORMW 煩惱的時候又被之前那位奇怪的祭司搭話了
+	PRINTFORML “上回还没有'聊'够你就不行了”
+	PRINTFORML “不过我意外地觉得和你很合得来”
+	PRINTFORML “只要能让我满意，我也不介意透露一点小秘密哦”
+	PRINTFORMW 他一邊說著一邊把手伸向了%ANAME(対象)%的腰
+	PRINTFORML …怎麼辦好呢？
+	;TranslatedMark …どうしよう？
+	CALL ASK_YN("交易" ,"拒绝")
+	IF RESULT == 1
+		PRINTFORMW %ANAME(対象)%拒绝了可疑的交易，去了教祖的房间
+		;TranslatedMark %ANAME(対象)%は怪しげな取引を断り、教祖の部屋へ向かった
+	ELSE
+		PRINTFORML 雖然對於那個男人的下流感到厭惡，但是現在需要更多的情報
+		;TranslatedMark 男のいやらしさに嫌悪感を覚えつつも今は有益な情報が欲しい
+		PRINTFORML %ANAME(対象)%接受了交易
+		;TranslatedMark %ANAME(対象)%は取引をする事にした
+		PRINTFORMW 他舔了舔嘴唇，抱著%ANAME(対象)%的腰帶進了自己的房間
+		;TranslatedMark 彼は舌なめずりをすると%ANAME(対象)%の腰を抱いて自分の部屋へ招き入れた
+		PRINTFORMW ………
+		CALL FUCK_RAPE(対象, GET_SPERM_ID("信者"), @"信者の\@ RAND:2 ? 肉棒 # 唇\@", "信者")
+		満足度 = ABL:対象:Ｃ感 + ABL:対象:Ｖ感 + ABL:対象:Ｂ感 + ABL:対象:Ａ感 + ABL:対象:Ｍ感
+		満足度 += ABL:対象:欲望 + ABL:対象:精愛 + ABL:対象:奉仕 + ABL:対象:性技 + ABL:対象:性交
+		IF 満足度 >= 20 + RAND:20
+			PRINTFORMW %ANAME(対象)%的技巧成功滿足了他、成功得到了情報
+			;TranslatedMark %ANAME(対象)%は彼のテクを上回り、情報を引き出す事に成功した
+			PRINTFORML 教祖竟然在利用藥和洗腦術將年輕人們當做食物
+			;TranslatedMark 何と教祖は薬と洗脳術で若者達を食い物にしているらしい
+			PRINTFORML 而且%ANAME(対象)%已經著了道
+			;TranslatedMark そして既に%ANAME(対象)%もその術中にハメられていたというのだ
+			PRINTFORMW %ANAME(対象)%把情報帶回去之後立即調動軍隊將教祖逮捕了
+			;TranslatedMark %ANAME(対象)%はその情報を持ち帰ると早速軍を動かして教祖を逮捕した
+			PRINTFORMW %ANAME(対象)%的行動成功挽救了很多年輕人
+			;TranslatedMark %ANAME(対象)%の行動により若者達は救われる事になった
+			COUNTRY_SOLDIER:(CFLAG:対象:所属) += 500 * DVAR:新興宗教_洗脳度
+			CALL COLOR_PRINTW("被解救的年輕人以及家属朋友等收到消息后踊跃参军，志願兵的数量增加了{500 * DVAR:新興宗教_洗脳度}", カラー_注意)
+			MONEY += 10000 * DVAR:新興宗教_洗脳度
+			CALL COLOR_PRINTW("根据被解救的人数，得到了{10000 * DVAR:新興宗教_洗脳度}感谢费用", カラー_注意)
+			DVAR:新興宗教_発生フラグ = -1
+			DVAR:新興宗教_潜入中キャラID = 0
+			DVAR:新興宗教_洗脳度 = 0
+		ELSE
+			PRINTFORML 他的技術超出了想象，在引出情報之前自己就撐不住了
+			;TranslatedMark 彼のテクは想像以上で、情報を引き出す前に気をやってしまった
+			PRINTFORML 被發現的時候，%ANAME(対象)%已經被丟在了教團設施前
+			;TranslatedMark 気が付いた時には、%ANAME(対象)%は教団施設の前に放り出されていた
+			PRINTFORMW 帶著被欺騙的憤怒和性愛的餘韻搖搖晃晃地踏上了歸路
+			;TranslatedMark 騙された事への憤りとセックスの余韻でフラフラになりながら帰路についた
+		ENDIF
+		RETURN
+	ENDIF
+ENDIF
+
+IF DVAR:新興宗教_洗脳度 > 10
+	PRINTFORML %ANAME(対象)%和往常一樣去教祖的房間工作
+	;TranslatedMark %ANAME(対象)%はいつも通り教祖の部屋にお勤めに向かった
+	PRINTFORML 進入房間對他對上視線的時候，突然大腦中有什麼在迴響
+	;TranslatedMark 部屋に入り彼を目にした途端、キィン…と頭の中に何かが響いた
+	PRINTFORMW 那一瞬间，%ANAME(対象)%想起了至今为止做过的一切
+	;TranslatedMark その瞬間、%ANAME(対象)%は今までされてきた事を全て思い出し絶句する
+	PRINTFORML 同時，被重複調教的肉體開始疼痛了起來，顫抖著流了很多汗
+	;TranslatedMark 同時にすっかり調教された肉体も疼きだし、ガクガクと震え汗ばみだした
+	PRINTFORML 在床上坐著的教祖只是默默地看著%ANAME(対象)%
+	;TranslatedMark ベッドに座る教祖は%ANAME(対象)%の様子をニヤニヤと眺めているだけだ
+	PRINTFORMW 想起被他的洗腦術和藥玩弄過的經歷，%ANAME(対象)%一眼瞪了過去
+	;TranslatedMark 彼の洗脳術と薬の効果で弄ばれたことを思い出した%ANAME(対象)%はキッ！と彼を睨み付けた
+	PRINTFORML
+	PRINTFORML 不過那隻是心裡想做的事
+	;TranslatedMark いや、睨み付けたつもりだった
+	PRINTFORMW
+	PRINTFORML 實際上那雙眼睛浮現出了♥，半開的嘴裡發出了喘息，兩條大腿互相摩擦著
+	;TranslatedMark しかしその目には♥が浮かび、口は半開きで息を荒げ、もじもじと股を擦り合せていた
+	PRINTFORML 這樣啊，這樣一來那些年輕人也會滿足吧，發現的時候已經完了
+	;TranslatedMark そうか、こうやって若者達も思い通りにされてきたのだと、自覚した時にはもう遅かった
+	PRINTFORMW 他以帶有侮蔑的語氣對%ANAME(対象)%說像她這樣擁有極上的肉體和精神的人已經很少了
+	;TranslatedMark 彼は%ANAME(対象)%ほどの極上に肉体と精神を持つものは稀だと侮蔑混じりの声色で賞賛する
+	PRINTFORML 但是那些話語也沒能傳達給%ANAME(対象)%，她的腦子裡已經只有對於精液的衝動了
+	;TranslatedMark しかしその言葉も%ANAME(対象)%の頭には入ってこず、抗えない精への衝動で埋め尽くされている
+	PRINTFORML 他脫下了衣服將那逸物，也就是讓%ANAME(対象)%極盡歡愉的陰莖露了出來
+	;TranslatedMark 彼は服を脱ぎその一物、今まで%ANAME(対象)%を散々悦ばせてくれた愛おしいペニスを露出した
+	PRINTFORMW 当看到那个女孩的时候，%ANAME(対象)%发现自己脱了衣服跪在他面前…吻了那个
+	;TranslatedMark ソレを目にした途端%ANAME(対象)%は気づけば自発的に服を脱ぎ彼に跪き…ソレにキスをしていた
+	PRINTFORML 腦海里出現的不是恥辱或者屈辱，而是壓倒性的作為雌性的喜悅和性愛帶來的快感
+	;TranslatedMark 思い出したのは恥辱でも屈辱でもなく、圧倒的な雌の悦びとセックスの快楽だけだった
+	PRINTFORML 完全成為他的俘虜的%ANAME(対象)%就算沒有被洗腦也會自己獻出身體
+	;TranslatedMark すっかり彼の虜になっていた%ANAME(対象)%は洗脳されていないにも拘らず自ら身体を差し出していた
+	PRINTFORMW 任务、自豪、理性，在这个雄壮的阴茎大人面前，一切都是陈腐的……
+	;TranslatedMark 任務も誇りも理性も、この雄々しいペニス様の前には、全てが陳腐だった……
+	CALL FUCK_RAPE(対象, GET_SPERM_ID("教祖様"), @"教祖様の\@ RAND:2 ? 肉棒 # 唇\@", "教祖様")
+	CALL FUCK_RAPE(対象, GET_SPERM_ID("教祖様"), @"教祖様の\@ RAND:2 ? 肉棒 # 唇\@", "教祖様")
+	PRINTFORML
+	CALL COLOR_PRINTW(@"%ANAME(対象)%はその日、教祖に身も心も人生も全て捧げ、肉奴隷になる事を宣言した", カラー_ピンク)
+	SETBIT TALENT:対象:日常系, 素質_デイリー_教祖様のしもべ
+	IF 対象 != MASTER
+		PRINTFORML
+		PRINTFORML 後萊，%ANAME(対象)%給了%ANAME(MASTER)%潛入調查的報告
+		;TranslatedMark 後日、%ANAME(対象)%は%ANAME(MASTER)%に潜入調査の報告をした
+		PRINTFORML 當然，其中的內容是被篡改過的，裡面寫著沒有什麼大問題
+		;TranslatedMark 無論内容は改ざんしており、特に問題は無いとされている
+		PRINTFORML 教團對於那些失蹤的年輕人有著別的說法，這樣說著
+		;TranslatedMark 教団は素晴らしく消えている若者については別の理由がある、と…
+		PRINTFORMW %ANAME(MASTER)%雖然感到有點奇怪但還是接受了調查報告，不久後結束了調查
+		;TranslatedMark %ANAME(MASTER)%は少し変に思いつつもその報告を受け入れ調査をひとまず終わらせた
+		PRINTFORMW …也沒有察覺到%ANAME(対象)%眼神空洞地揚旗嘴角
+		;TranslatedMark …%ANAME(対象)%が虚ろに口端を上げるのにも気づかずに
+	ENDIF
+	DVAR:新興宗教_潜入中キャラID = 0
+	DVAR:新興宗教_洗脳度 = 0
+	RETURN 1
+ELSEIF DVAR:新興宗教_洗脳度 <= 5
+	PRINTFORML 被教祖叫出來的%ANAME(対象)%再次走向了他的房間
+	;TranslatedMark 教祖に呼び出された%ANAME(対象)%は再び彼の部屋に向かった
+	PRINTFORML …但是和他面對面講話的時候%ANAME(対象)%的意識再次變得薄弱了
+	;TranslatedMark …しかしいざ彼と面と向かい話をするうちに再び%ANAME(対象)%の意識は薄れた
+	PRINTFORMW 奸笑著的教祖說了一句『脫下來』，%ANAME(対象)%順從地履行了
+	;TranslatedMark ニヤリと笑う教祖が一言『脱げ』と告げると、%ANAME(対象)%は従順にそれに従った
+ELSE
+	PRINTFORML %ANAME(対象)%什麼都沒說，就這樣無意識地走向了教祖的房間
+	;TranslatedMark %ANAME(対象)%は何も言われず無意識に教祖の部屋に向かった
+	PRINTFORML 在進入房間之前意識還是清醒的，但是進入房間後意識再次薄弱了起來
+	;TranslatedMark 部屋に入る前は意識がはっきりしていたが部屋に入るなり再び意識が薄れた
+	PRINTFORMW 然後看到教祖的%ANAME(対象)%為完成今天的『工作』脫下了自己的衣服
+	;TranslatedMark そして教祖の姿を目にした%ANAME(対象)%は今日も『お勤め』の為に自ら服を脱いだ
+ENDIF
+PRINTFORML
+SELECTCASE RAND:20
+	CASE 0
+		PRINTFORML %ANAME(対象)%跨在教祖上披頭散髮激烈地擺動著腰
+		;TranslatedMark %ANAME(対象)%は教祖に跨り髪を振り乱して激しく腰を振っている
+		PRINTFORML 被粗狂的肉棒突進時叫喊出了不像樣的聲音嗶咕嗶咕地高潮了
+		;TranslatedMark 野太いチンポで突き上げられる度に無様な声を上げてビクビクと痙攣する
+		PRINTFORMW 「哦哦，可愛的傢伙！讓我好好滿足你吧！」
+		;TranslatedMark 「おぉ、おぉ、可愛い奴め！望み通りにくれてやるぞっ！」
+		PRINTFORML 為了尋求心愛教祖的妊娠汁，%ANAME(対象)%扭腰おねだり著
+		;TranslatedMark 愛おしい教祖の孕ませ汁を求め、%ANAME(対象)%は腰をくねらせおねだりする
+		PRINTFORMW …然後緊貼著子宮口射出的種子讓她達到了頂峰
+		;TranslatedMark …そして子宮口に密着されながら射精されながら待望の種付けアクメに達した
+	CASE 1
+		PRINTFORML %ANAME(対象)%在對著教祖射精後的性器做著掃除口交
+		;TranslatedMark %ANAME(対象)%は教祖の射精したてのちんぽをお掃除フェラしている
+		PRINTFORML 專心侍奉著剛讓自己快樂過的雄性性器
+		;TranslatedMark 先程まで自分を悦ばせてくれた雄々しいおちんぽを夢中になって奉仕する
+		PRINTFORMW 濃厚的雄性氣息讓大腦顫抖並讓下腹部疼了起來
+		;TranslatedMark むせ返る雄の匂いに頭がクラクラとして下腹部がキュンキュンと疼いた
+		PRINTFORML 「變得很熟練了嘛，這樣的話必須要好好獎勵一下啊」
+		;TranslatedMark 「上手になったではないか、これはまたご褒美をくれてやらんといかんな」
+		PRINTFORMW …作為被侍奉的獎勵，%ANAME(対象)%收到了好幾次作為雌性的高潮
+		;TranslatedMark …奉仕のご褒美に再び犯されると、%ANAME(対象)%は何度も雌の悦びに達しまくった
+	CASE 2
+		PRINTFORML %ANAME(対象)%沉醉于像狗一樣趴在地上被教祖侵犯
+		;TranslatedMark %ANAME(対象)%はドギーバックの態勢で教祖に犯されヨガっている
+		PRINTFORML 戴上項圈插著尻尾汪汪叫的她簡直像是真正的母狗
+		;TranslatedMark 首輪とアナル尻尾をつけられてワンワンと鳴くその姿はまさに雌犬だ
+		PRINTFORMW 「哦哦！你這下賤的狗！我會好好疼愛你的！」
+		;TranslatedMark 「おら！おら！このいやしい犬め！おぉ！お！可愛がってやるぞぉ！」
+		PRINTFORML 在主人開始加速突進後，她顫抖著著流下了口水
+		;TranslatedMark ご主人様残しの動きが加速すると、ゾクゾクと震えながら涎を垂らした
+		PRINTFORMW …%ANAME(対象)%作為獎勵被當做他的可愛母狗被疼愛了一整晚
+		;TranslatedMark …%ANAME(対象)%は彼の可愛い雌ペットとして一晩中可愛がられご褒美を貰った
+	CASE 3
+		PRINTFORML %ANAME(対象)%被教祖壓住進行著播種
+		;TranslatedMark %ANAME(対象)%は教祖に圧し掛かられ種付けプレスを喰らっている
+		PRINTFORML 啪啪♥啪啪♥每次接受著強力衝擊的時候結合部都會溢出愛液
+		;TranslatedMark ドチュン♥ドチュン♥と激しいピストンを喰らう度に結合部から愛液が溢れる
+		PRINTFORMW 「呼、呼、呼！怎麼樣！老夫的肉棒怎麼樣！呼！」
+		;TranslatedMark 「ふっ、ふっ、ふぅ！どうじゃ！わしのちんぽはどうじゃ！ふぅ！」
+		PRINTFORML 被多次射精而不衰弱的他进攻，%ANAME(対象)%兴奋得直哆嗦
+		;TranslatedMark 何度も射精して衰えない彼の攻めに%ANAME(対象)%はイキっぱなしでヨガり狂う
+		PRINTFORMW …然後再次被釋放出了灼熱的精液，抱著他發出了陣陣嬌聲
+		;TranslatedMark …そして再び灼熱のザーメンを放たれると、彼に抱きつきながら嬌声を響かせた
+	CASE 4
+		PRINTFORML %ANAME(対象)%穿著淫蕩的舞女裝被教祖抱著
+		;TranslatedMark %ANAME(対象)%は淫らな踊子衣装を着せられて教祖に抱かれている
+		PRINTFORML 被他精妙的技巧玩弄著全身，%ANAME(対象)%一邊喘著氣一邊跳舞
+		;TranslatedMark 彼の巧みなテクで全身を弄ばれ、%ANAME(対象)%は喘ぎながら身をくねらせ踊る
+		PRINTFORMW 穿著和平時不一樣的服裝讓雙方都很興奮，汗流個不止
+		;TranslatedMark 普段と違う衣装での行為にお互い興奮しきり、汗だくになってまぐわう
+		PRINTFORML 「HO-HO！你真的有讓男人愉悅的才能啊…」
+		;TranslatedMark 「ほっほっ！お前は本当に男を悦ばせる才能があるのぉ…」
+		PRINTFORMW …%ANAME(対象)%的子宮接受了很多次來自教祖的愛，一整晚都在繼續著舞蹈
+		;TranslatedMark …教祖の愛を何度も子宮で受け止めながら%ANAME(対象)%は一晩中踊り続けた
+	CASE 5
+		PRINTFORML 眼神空洞的%ANAME(対象)%在大量的信徒面前被教祖侵犯著
+		;TranslatedMark 虚ろな瞳の%ANAME(対象)%が大勢の信者の前で教祖に犯されている
+		PRINTFORML 每次激烈的突進都會讓%ANAME(対象)%的身體跳動，糟糕的樣子被展現給了信徒們
+		;TranslatedMark 激しく突き上げられる度に%ANAME(対象)%は体を跳ねさせ、無様な姿を彼らに晒す
+		PRINTFORMW 「嚯！嚯！怎麼樣！大家都在看著呢！嚯嚯！」
+		;TranslatedMark 「ほれ！ほれ！どうじゃ！皆に見られておるぞ！ふほっ！」
+		PRINTFORML %ANAME(対象)%雖然有點吃鯨，但感受到信徒們興奮的視線讓她喘著氣潮吹了
+		;TranslatedMark %ANAME(対象)%は呆けながらも、信者達の興奮した視線を感じて息を荒げ潮を吹いた
+		PRINTFORMW …教祖播種的樣子被很多人看著，好幾次達到了高潮
+		;TranslatedMark …教祖から種付けされる様子を大勢に観られながら何度もアクメに達した
+	CASE 6
+		PRINTFORML %ANAME(対象)%在和教祖以對面座位的姿勢進行著充滿愛意的激烈交合
+		;TranslatedMark %ANAME(対象)%は教祖と対面座位の態勢で激しく愛し合っている
+		PRINTFORML 身體緊緊貼住舌頭互相纏繞下半身負距離結合一起沉溺於肉慾中
+		;TranslatedMark 身体を密着させ舌を絡ませ下半身をぶつけ合ってひたすら肉欲に溺れる
+		PRINTFORMW 儘管是沒有任何變化的性愛，但還是沉迷於那份濃厚中
+		;TranslatedMark 何も変わったことはないただのセックスだが、その濃厚さに夢中になる
+		PRINTFORML 越是相愛子宮越是疼痛，%ANAME(対象)%的饑渴似乎永無止境
+		;TranslatedMark 愛し合えば愛し合う程子宮の疼きは増し、%ANAME(対象)%はもっともっととねだる
+		PRINTFORMW …%ANAME(対象)%在被輕輕咬住乳頭的同時射精，身體大幅度仰起達到了高潮
+		;TranslatedMark …%ANAME(対象)%は乳首を甘噛みされながら射精されて大きく身を仰け反らせた
+	CASE 7
+		PRINTFORML 被繩子牽著走的%ANAME(対象)%被教祖帶到了教會內散步
+		;TranslatedMark リードで引かれた%ANAME(対象)%が教祖に連れられ教会内を歩く
+		PRINTFORML 顫抖的股間流出了大量的精液和愛液，形成了一條小路
+		;TranslatedMark 震える股間からは大量のザーメンと愛液が溢れ、道しるべになっている
+		PRINTFORMW 「喂、再走快點！今天還有各種各樣的預定要完成呢！」
+		;TranslatedMark 「ほれ、もっと早く歩け！今日は色々予定があるのだからな！」
+		PRINTFORML 他一時興起將%ANAME(対象)%當做飛機杯使用毫不猶豫地在裡面中出了
+		;TranslatedMark 彼は気まぐれに%ANAME(対象)%をオナホの様に使っては遠慮なく膣出ししていく
+		PRINTFORMW …即時是那種單方面爽的做法，%ANAME(対象)%也愉悅得不能自拔
+		;TranslatedMark …そんな都合よく使われるだけの仕打ちにも、%ANAME(対象)%は悦びに惚けていた
+	CASE 8
+		PRINTFORML 被蒙住眼睛的%ANAME(対象)%在床上艷麗地扭動著身體
+		;TranslatedMark 目隠しされた%ANAME(対象)%がベッドで艶めかしく身をくねらせる
+		PRINTFORML 「怎麼樣，比平時更有感覺吧，看招，這裡」
+		;TranslatedMark 「どうじゃあ、いつもより感じるじゃろぉ、ほれぇ、ここじゃあ」
+		PRINTFORMW 什麼都看不到的%ANAME(対象)%被教祖的激烈進攻搞得嬌喘連連
+		;TranslatedMark 何も見えない%ANAME(対象)%は教祖の激しい攻めにされるがままに嬌声を上げる
+		PRINTFORML 比平時更能感受到體內肉棒活動的她發狂了
+		;TranslatedMark 体内で暴れるチンポの感触をいつも以上に感じてしまい、ヨガリ狂う
+		PRINTFORMW …感受到精液直接接觸子宮壁的她達到了高潮
+		;TranslatedMark …ザーメンが子宮壁に注がれるのをダイレクトに感じながらアクメに達した
+	CASE 9
+		PRINTFORML %ANAME(対象)%身穿教祖交給她的兔女郎裝被他抱著
+		;TranslatedMark %ANAME(対象)%は教祖に渡されたバニースーツ姿で抱かれている
+		PRINTFORML 屁股像被鷲掴一樣被抓住突進，一邊發出愉悅的聲音一邊顫抖著
+		;TranslatedMark お尻を鷲掴みにされながら突き上げられ、悦びの声と共に身を震わせる
+		PRINTFORMW 「嚯嚯嚯！你的身體真是為了給男人抱而存在的」
+		;TranslatedMark 「ほっほっほっ！本当にお前の身体は男に抱かれるためにようじゃのぉ」
+		PRINTFORML 乳房被下流的手法揉弄著，一邊流出口水一邊仰起身子高潮了
+		;TranslatedMark いやらしい手つきで乳房を揉みしだかれ、涎を垂らしながら仰け反って悦ぶ
+		PRINTFORMW …%ANAME(対象)%就像發情的兔子一樣在他的逸物上跳動了一整晚
+		;TranslatedMark …%ANAME(対象)%は発情しきったウサギの如く彼の一物の上で一晩中跳ね続けた
+	CASE 10
+		PRINTFORML 累倒的%ANAME(対象)%和教祖一起氣喘吁吁地躺在床上
+		;TranslatedMark ヤリ疲れた%ANAME(対象)%と教祖は息を荒げベッドに横たわっている
+		PRINTFORML 一味地交往着的结合部流出了大量的爱液和精液
+		;TranslatedMark ひたすら交わりっぱなしだった結合部からは大量の愛液と精液が溢れる
+		PRINTFORMW 「呼呼…呼呼…完全被你的身體陷住了啊…」
+		;TranslatedMark 「ふぅ…ふぅっ…全くお前の身体には夢中にさせられるのぉ…」
+		PRINTFORML 一邊低語一邊撫摸著肌膚、由於之前的餘韻又迎來了輕微的高潮
+		;TranslatedMark そう囁かれて肌を撫でられると、先の余韻でまた軽くアクメってしまった
+		PRINTFORMW …很快他就要求再戰，%ANAME(対象)%的眼睛浮現出了♥然後張開了雙腿
+		;TranslatedMark …すぐに彼に次を求められると%ANAME(対象)%は目に♥を浮かべて股を開いた
+	CASE 11
+		PRINTFORML %ANAME(対象)%被教祖絞首時被激烈侵犯，發出了呻吟
+		;TranslatedMark %ANAME(対象)%は教組に首を絞められながら激しく犯され呻いでいる
+		PRINTFORML 在毫不留情地進攻下%ANAME(対象)%翻著白眼吐出白沫痉挛了
+		;TranslatedMark 容赦のない攻めに窒息しかけの%ANAME(対象)%は白目をむき泡を吹いて痙攣する
+		PRINTFORMW %ANAME(対象)%越是痛苦腔道就越是收緊，同樣他也越是激烈的擺動著腰
+		;TranslatedMark %ANAME(対象)%が苦しむ程膣の締め付けは良くなり、彼はより激しく腰を振る
+		PRINTFORML 「嚯嚯！怎麼樣！哦哦！真是緊緻啊！嘿嘿…！」
+		;TranslatedMark 「おら！おら！どうじゃ！おぉ！良く締まるわ！ひひっ…！」
+		PRINTFORMW …灼熱的精液注入時%ANAME(対象)%喘著氣潮吹了
+		;TranslatedMark …灼熱のザーメンを注がれると%ANAME(対象)%は気を飛ばしながら潮を吹いた
+	CASE 12
+		PRINTFORML %ANAME(対象)%今天一整天都在作為教祖的秘書工作著
+		;TranslatedMark %ANAME(対象)%は今日一日、教組の秘書として過ごす事になった
+		PRINTFORML 在日程管理和接待客人的間隙中像理所當然一樣進行了性處理
+		;TranslatedMark スケジュール管理や客の応対等の合間に当然の様に性処理もやらされた
+		PRINTFORMW 但是%ANAME(対象)%完全沒有表現出半點厭惡，開心地被中出了
+		;TranslatedMark しかし%ANAME(対象)%は嫌な顔一つせずに彼を受け入れ、喜んで膣出しされる
+		PRINTFORML 理所當然的晚上時肚子裡裝滿了精液，渾身散發出性愛的味道
+		;TranslatedMark 当然夕刻にはお腹の中はザーメンで満たされ性の匂いをプンプンと漂わせていた
+		PRINTFORMW …在工作結束後，作為獎勵在床上好好被疼愛了一番
+		;TranslatedMark …仕事が終わった後は、更にご褒美としてベッドでたっぷりと可愛がられた
+	CASE 13
+		PRINTFORML %ANAME(対象)%在新藥的實驗台上被教祖抱著
+		;TranslatedMark %ANAME(対象)%は新しい薬の実験台を兼ねて教祖に抱かれている
+		PRINTFORML 完全沒稀釋過的原液藥直接灌入讓%ANAME(対象)%的大腦變得一片空白而發狂了
+		;TranslatedMark 原液のまま薬をぶち込まれた%ANAME(対象)%は頭が真っ白になってヨガリ狂う
+		PRINTFORMW 「嗚嚯嚯！看看你這樣子，怎麼樣？是不是很舒服啊？」
+		;TranslatedMark 「ふほほっ！いいヨガリっぷりじゃ、どうじゃ？気持ちいいじゃろう？」
+		PRINTFORML 肉体貪婪地渴求著快樂，一被突進就讓理性完全飛走了
+		;TranslatedMark 肉体は貪欲に快楽を求めて、一突きされる度に理性がぶっ飛んでいく
+		PRINTFORMW …飽和程度的絕頂讓%ANAME(対象)%像野獸一樣感受到作為雌性的快感而嬌喘著
+		;TranslatedMark …飽和する程の絶頂に%ANAME(対象)%は獣の様にひたすら雌の悦びに喘ぐだけだった
+	CASE 14
+		PRINTFORML %ANAME(対象)%被教祖大人邀請，一起去了大浴場
+		;TranslatedMark %ANAME(対象)%は教組様に誘われて、一緒に大浴場に向かった
+		PRINTFORML 在浴池裡坐在他的腿上被执拗地愛撫著吐出甜美的氣息
+		;TranslatedMark 浴槽の中で彼の胡坐の上に腰かけながら執拗な愛撫に甘い吐息を漏らす
+		PRINTFORMW 「這滑嫩的皮膚不管什麼時候都摸著很舒服啊、嘿嘿」
+		;TranslatedMark 「このすべすべの肌はいつ撫でても良いもんじゃのぉ、ひひっ」
+		PRINTFORML 他對於%ANAME(対象)%的反應發出了嗤笑然後繼續著愛撫
+		;TranslatedMark 彼は%ANAME(対象)%の反応ににやにやと笑いながらねっとりと愛撫を続ける
+		PRINTFORMW …渾身發燙的%ANAME(対象)%在之後的性愛好幾次被玩弄到高潮
+		;TranslatedMark …火照り切った%ANAME(対象)%は、その後の激しいセックスで何度もイかされた
+	CASE 15
+		PRINTFORML %ANAME(対象)%大汗淋漓地沉迷在和教祖的性愛中
+		;TranslatedMark %ANAME(対象)%は汗だくになって教祖とのセックスに没頭している
+		PRINTFORML 一整天都在床上進行著交合，黏糊糊的體液流地到處都是
+		;TranslatedMark 一日中ひたすらベッドの上で交わり続け、体液でドロドロになっている
+		PRINTFORMW 「嗚！這個身體！不管！抱幾次！都不會膩！哦哦，要射了！」
+		;TranslatedMark 「くぅ！この体は！何度！抱いても！飽きんのぉ！おぉ、射精るぞ！」
+		PRINTFORML 無論高潮幾次，湧上的衝動都消停不了，兩人互相纏繞不斷追求著巔峰
+		;TranslatedMark 何度達しても、湧き上がる衝動は収まらず互いに絡み合いただただ求め続ける
+		PRINTFORMW …這場盛宴持續到手足失去感覺為止，高潮的次數數都數不清
+		;TranslatedMark …その宴は手足がシビレ感覚がなくなるまで続き、数え切れないほど達した
+	CASE 16
+		PRINTFORML %ANAME(対象)%被教祖侵犯時床在激烈地搖晃著
+		;TranslatedMark %ANAME(対象)%は激しくベッドを揺らしながら教祖に犯されている
+		PRINTFORML 突然的進攻！大量的精液%ANAME(対象)%身體裡發射出了
+		;TranslatedMark 不意にびゅるるる！と大量のザーメンが%ANAME(対象)%の中に放たれると
+		PRINTFORMW %ANAME(対象)%在被教祖抱著的同時大幅度仰起了身體，發出甜美的叫聲
+		;TranslatedMark %ANAME(対象)%は教組様にしがみつきながら大きく仰け反り、甘い叫びをあげた
+		PRINTFORML 他為了歇口氣把肉棒拔了出來，在秘所裡流出了很多粘稠的精液
+		;TranslatedMark 彼が一息つく為にペニスを引き抜くと秘所からドロリと精液が溢れ出る
+		PRINTFORMW …%ANAME(対象)%茫然地看著這一切，心裡充滿了對受精的期待
+		;TranslatedMark …%ANAME(対象)%は茫然としながらそれを眺め、受精の期待に胸をきゅんとさせた
+	CASE 17
+		PRINTFORML %ANAME(対象)%作為教祖大人的肉便器跟著一起外出了
+		;TranslatedMark %ANAME(対象)%は教組様の肉便器として外出に付き従う事になった
+		PRINTFORML 教祖每次籌辦的時候，她都會把前穴或者後穴給他使用
+		;TranslatedMark 教祖が催す度に膣を、もしくは尻穴を差し出して使ってもらうのだ
+		PRINTFORMW 「哦哦，又到籌辦的時候了…趕緊把屁股給我用！」
+		;TranslatedMark 「おぉ、また催してきたわ…ほれさっさとケツを出せ！」
+		PRINTFORML 就算是被當成垃圾紙一樣使用，%ANAME(対象)%也會在被用的時候發出愉悅的叫聲
+		;TranslatedMark チリ紙同然の扱いにも拘らず、%ANAME(対象)%は使われる度に悦びの声を上げる
+		PRINTFORMW …回家之後作為忠實地完成職務的獎勵，在床上又被好好疼愛了一陣子
+		;TranslatedMark …帰宅すると忠実な職務のご褒美として、ベッドの上でまた可愛がられた
+	CASE 18
+		PRINTFORML %ANAME(対象)%穿著女僕服被教祖侵犯了
+		;TranslatedMark %ANAME(対象)%はメイド服を着せられて教祖に犯されている
+		PRINTFORML 主人♥主人♥這樣叫喊著開心地接受著他的肉棒的她發狂了
+		;TranslatedMark ご主人様♥ご主人様♥と鳴きながら彼のちんぽを悦んで受け入れヨガり狂う
+		PRINTFORMW 「哦哦、哦哦、可愛的傢伙…！收下我給你的獎勵吧…呼呼！」
+		;TranslatedMark 「おぉ、おぉ、可愛い奴めっ…！ご褒美をくれてやるぞぉ…うっ！」
+		PRINTFORML %ANAME(対象)%為了不讓衣服被弄髒在腔內射出彎下了腰
+		;TranslatedMark %ANAME(対象)%は衣服を汚さない様に膣出しを懇願しながら腰をくねらせる
+		PRINTFORMW …那天一整天都在作為女僕侍奉著教祖，得到了很多次獎勵
+		;TranslatedMark …その日は一日中メイドとして教祖に仕え、何度もご褒美を注がれた
+	CASE 19
+		PRINTFORML 在床上，%ANAME(対象)%吞下了教祖大人的肉棒
+		;TranslatedMark ベッドの上で%ANAME(対象)%は教組様のちんぽをずっぽり咥え込んでいる
+		PRINTFORML 「能把我的長物到最深處，果然你有著當便器的天賦啊」
+		;TranslatedMark 「わしの長物を奥までくわえ込むとは、やはり便器がお主の天職じゃなぁ」
+		PRINTFORMW 侮蔑的話語並沒有傳達到，仿佛要擊潰子宮的衝擊に%ANAME(対象)%讓沉醉地擺動腰
+		;TranslatedMark 侮蔑も耳に入らず、子宮を潰される衝撃に%ANAME(対象)%は夢中になって腰を振る
+		PRINTFORML 一邊讚美他的男子氣概一邊擺動腰索取種子的她真像一個BITCH
+		;TranslatedMark 彼の男らしさを讃え腰をくねらせ子種をおねだりする姿はまさにビッチだった
+		PRINTFORMW …然後在被教祖的慈悲注入後身體大幅度仰起達到了高潮
+		;TranslatedMark …そして教祖のご慈悲が注がれると大きく仰け反りながら深イキに達した
+ENDSELECT
+PRINTFORML
+CALL FUCK_RAPE(対象, GET_SPERM_ID("教祖様"), @"教祖様の\@ RAND:2 ? 肉棒 # 唇\@", "教祖様")
+DVAR:新興宗教_洗脳度 ++
+PRINTFORML
+IF DVAR:新興宗教_洗脳度 <= 5
+	PRINTFORML 「辛苦了，下次也請來幫忙哦」
+	;TranslatedMark 「お勤めご苦労様、またすぐに来なさい」
+	PRINTFORMW 回過神來，%ANAME(対象)%已經在在了教團設施前面
+	;TranslatedMark 気が付けば%ANAME(対象)%は教団施設の前に居た
+	PRINTFORML 儘管已經經過了一天，但是調查的內容卻什麼都想不起來
+	;TranslatedMark 一日が経過しているが、調査の内容を何も思い出せない
+	PRINTFORML 但並沒有想太多，在感覺到教祖視線的同時踏上了歸路
+	;TranslatedMark しかし特に疑問に思う事もなく、教祖の視線を感じながら帰路についた
+	PRINTFORMW …對於子宮內殘留的灼熱精液並沒有任何感覺
+	;TranslatedMark …子宮内に残る熱と精液についても何も感じないまま
+ELSE
+	PRINTFORML 「那麼請下次再來，下次一定讓你的煩惱都消失」
+	;TranslatedMark 「それではまた来なさい、今度こそ悩みが消える様にねぇ」
+	PRINTFORMW 工作結束後%ANAME(対象)%在教祖的目送下離開了教團設施
+	;TranslatedMark お勤めを終えた%ANAME(対象)%は教祖に見送られながら教団施設を後にした
+	PRINTFORML 本來是為了調查才來的，結果完全被拋在腦後了
+	;TranslatedMark 調査の為に来たはずだがその事はすっかり頭から抜け落ちている
+	PRINTFORML 但是對於這件事沒有半點懷疑的%ANAME(対象)%踏上了歸路
+	;TranslatedMark しかしその事について疑問を持つこともなく%ANAME(対象)%は帰路についた
+	PRINTFORMW …對於子宮內殘留的灼熱精液，就算感覺到了也不會有任何疑問
+	;TranslatedMark …子宮内に残る熱と精液についても、自覚しながらも疑問も覚えずに
+ENDIF
+
+RETURN 1
+
+;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_RELIGIONS_AFTER_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("RELIGIONS")
+
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_RELIGIONS_AFTER_DECISION()
+RETURN 1
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_DERIVATION_RELIGIONS_AFTER_SETTARGET()
+FOR LOCAL, 0, CHARANUM
+	SIF !IS_FEMALE(LOCAL)
+		CONTINUE
+	SIF !GETBIT(TALENT:LOCAL:日常系, 素質_デイリー_教祖様のしもべ)
+		CONTINUE
+	SIF RAND:3
+		CONTINUE
+	DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+	DAILY_TARGET_NUM ++
+NEXT
+
+SIF DAILY_TARGET_NUM < 1
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_RELIGIONS_AFTER()
+#DIM 対象
+FOR LOCAL, 0, DAILY_TARGET_NUM
+	対象 = DAILY_TARGET:LOCAL
+	PRINTFORMW %ANAME(対象)%今天也為工作走向了教團……
+	;TranslatedMark %ANAME(対象)%は今日もお勤めの為に教団に向かった……
+	PRINTFORML
+	SELECTCASE RAND:46
+		CASE 0
+			PRINTFORML %ANAME(対象)%從教祖大人那裡拿到了娼婦一樣的色情睡袍
+			;TranslatedMark %ANAME(対象)%は教祖様から娼婦の様なスケスケのネグリジェを与えられた
+			PRINTFORML 穿著恥部幾乎被完全暴露在外的服裝，她露出了恍惚的表情呆住了
+			;TranslatedMark 殆ど恥部が丸見えの格好をさせられながら、その表情は恍惚として呆けている
+			PRINTFORMW 「嚯嚯、對於淫靡的你來說果然這種下流的服裝很適合啊」
+			;TranslatedMark 「ほっほっ、予想通り淫靡な貴様にはその下品な衣装が良く似合うのぉ」
+			PRINTFORML 侮辱的話語在%ANAME(対象)%耳中也變成了褒獎，快樂的眼瞳中浮現出♥
+			;TranslatedMark ほぼ侮辱の言葉も、%ANAME(対象)%にはお褒めの言葉にしか聞こえず瞳に♥を浮かべ悦んだ
+			PRINTFORMW …比以往更興奮的%ANAME(対象)%在被教祖大人渴求的時候發狂了
+			;TranslatedMark …いつも以上に興奮した%ANAME(対象)%は教祖様に求められるままにヨガリ狂った
+		CASE 1
+			PRINTFORML 戴著項圈的%ANAME(対象)%像狗一樣含著教祖大人的肉棒
+			;TranslatedMark 首輪をされた%ANAME(対象)%が教祖様のペニスに犬の様にしゃぶりついている
+			PRINTFORML 撅起嘴露出下流的表情發出色情的聲音侍奉著陰莖
+			;TranslatedMark 口をすぼめた下品な顔でじゅっぽじゅっぽと音を立ててチンポにご奉仕する
+			PRINTFORMW 「哦哦！哦哦！你在讓肉棒愉悅上真是一流的母狗啊、哦哦！」
+			;TranslatedMark 「おぉっ！おっ！お前はちんぽを喜ばすのにかけては一流の雌犬だのぉ、おっ！」
+			PRINTFORML 被他作為熱情的獎賞撫摸了頭，%ANAME(対象)%愉悅地輕輕高潮了一下
+			;TranslatedMark 彼にその熱心さを褒められ頭を撫でられると、%ANAME(対象)%は悦びのあまり軽く達した
+			PRINTFORML 忍耐不下的%ANAME(対象)%一おねだり就被他带着淫荡的笑容推倒了
+			;TranslatedMark もはや我慢できずに%ANAME(対象)%がおねだりすると彼はにやりと笑って押し倒してきた
+			PRINTFORMW …在作为奖赏的交尾中%ANAME(対象)%简直变成了真正的母狗，一边流着口水一边摆动着腰
+			;TranslatedMark …ご褒美交尾では%ANAME(対象)%は正に犬になりきり涎を垂らしながら腰を振りまくった
+		CASE 2
+			PRINTFORML %ANAME(対象)%和教祖在床上激烈地纠缠着
+			;TranslatedMark %ANAME(対象)%と教祖は激しくベッドをきしませながらまぐわっている
+			PRINTFORML 被压在下面使劲进行着活塞运动，%ANAME(対象)%嘿嘿地笑着
+			;TranslatedMark 下敷きにされてひたすらピストンを撃ち込まれ、%ANAME(対象)%はヒィヒィとヨガる
+			PRINTFORMW 「呼呼！呼呼、呼呼！怎么样、怎么样！老夫的肉棒怎么样！呼呼！」
+			;TranslatedMark 「ふぅ！ふぅ、ふぅ！どうじゃ、どうじゃ！ワシのチンポはどうじゃ！ふん！」
+			PRINTFORML 在仿佛要征服自己的雄性性愛中，%ANAME(対象)%用熱情的擁抱來回應他
+			;TranslatedMark まさに征服する様な雄々しいセックスに、%ANAME(対象)%はギュウッとしがみついて応えた
+			PRINTFORMW …那一天他比往常還要絕倫，一整晚的侵犯讓她好幾次昏迷過去
+			;TranslatedMark …その日の彼はいつにもまして絶倫で、一晩中犯され続け何度も気絶させられた
+		CASE 3
+			PRINTFORML 身穿兔女郎服裝的%ANAME(対象)%在教祖大人侵犯下發狂了
+			;TranslatedMark バニーガール衣装を身にまとった%ANAME(対象)%が教祖様に犯されヨガッている
+			PRINTFORML 每次擺動腰的時候耳朵和胸部都會激烈搖晃，從喉中發出了以往沒有喘叫聲
+			;TranslatedMark 腰を振る度にうさ耳と胸が激しく揺れて、喉からあられもない喘ぎが漏れる
+			PRINTFORMW 突然他發出了一聲嘶吼，強烈的熱量在子宮內發射出讓她迎來了高潮
+			;TranslatedMark 不意に彼が唸ると、びゅるるる！と強烈な熱が子宮に放たれたまらず仰け反った
+			PRINTFORML 「哦哦…一不小心就射精了、你這下流的兔子…！」
+			;TranslatedMark 「おぉぉ…思わず射精してしまったわっ、いやらしい兎めっ…！」
+			PRINTFORML 他的辱罵並沒有傳達到，%ANAME(対象)%感受子宮的餘韻呆滯地繼續扭動腰
+			;TranslatedMark 彼の罵倒も耳に入らず、%ANAME(対象)%は子宮に伝わる余韻に呆けながら腰をくねらせた
+			PRINTFORMW …沉迷於扮演兔子的%ANAME(対象)%之後一整晚都在教祖大人身上跳動著
+			;TranslatedMark …兎ごっこに夢中になった%ANAME(対象)%はその後も一晩中教祖様の上で跳ね続けた
+		CASE 4
+			PRINTFORML 深夜，從教祖大人的房間裡傳出了充滿愉悅的雌性聲音
+			;TranslatedMark 深夜の教祖様の部屋から悦びに満ちた雌の声が漏れ聞こえてくる
+			PRINTFORML 月光照射的房間裡，映現出了隨著激烈的床叫聲一起躍動的女體
+			;TranslatedMark 月明かりの部屋の中、激しくベッドがきしむ音と共に跳ねる女体の影が映る
+			PRINTFORMW 「哦哦、真是激烈啊、這麼喜歡肉棒嗎、你這淫亂女…哦哦！」
+			;TranslatedMark 「おぉっ、激しいのぉ、そんなにチンポが好きか、この淫乱め…おっ！」
+			PRINTFORML 隨著教祖大人的辱罵，%ANAME(対象)%的眼瞳裡浮現出了♥，擺動著腰渴求更多的快樂
+			;TranslatedMark 教祖様の罵倒に%ANAME(対象)%は瞳に♥を浮かべて頷き、もっともっとと腰をくねらせた
+			PRINTFORMW …那一整晚都在被疼愛著，%ANAME(対象)%的嬌聲在昏暗的房間裡迴蕩著
+			;TranslatedMark …その夜は一晩中可愛がられ、%ANAME(対象)%の嬌声が薄暗い部屋に鳴り響いた
+		CASE 5
+			PRINTFORML 在教祖大人的寢室的床上，%ANAME(対象)%氣喘吁吁地躺在那裡
+			;TranslatedMark 教祖様の寝室のベッドの上で、%ANAME(対象)%は息を荒げて横たわっている
+			PRINTFORML 在幾個小時內不斷被侵犯到絕頂的%ANAME(対象)%身體和心靈都呆滯地絕頂了
+			;TranslatedMark 何時間も休みなく犯され絶頂を繰り返した%ANAME(対象)%は身も心も呆けて痙攣している
+			PRINTFORMW 「呼呼、你真是個好雌穴、搞得我都忘記時間了」
+			;TranslatedMark 「ふぅ、本当にお前は良い雌穴だのぉ、時間を忘れて犯してしまったわ」
+			PRINTFORML 粗糙的手撫摸著%ANAME(対象)%的屁股，精液從腔內溢了出來
+			;TranslatedMark ゴツゴツした手が%ANAME(対象)%の尻を撫でるとビクンと跳ねて、膣から精液が溢れた
+			PRINTFORMW …第二天早上，醒來後的她因為肉體殘留的刺激而暫時沒能起身
+			;TranslatedMark …翌朝、目覚めた後も肉体に残ったショックでしばらく起き上がれなかった
+		CASE 6
+			PRINTFORML 今天%ANAME(対象)%作為信徒們的慰安者進行了脫衣表演
+			;TranslatedMark 今日の%ANAME(対象)%は信徒達への慰み者としてストリップショーをさせられた
+			PRINTFORML 打扮得像賣春女一樣接受了很多人的視線，%ANAME(対象)%一邊跳舞一邊好幾次輕微的高潮了
+			;TranslatedMark 売女の様な格好で多くの視線に晒され、%ANAME(対象)%は踊りながら何度か軽く達する
+			PRINTFORMW 工作結束後已經全身火熱，忍不住抱住了教祖
+			;TranslatedMark 仕事を終えた頃には全身が火照り、もはや我慢できずに教祖様に抱き着いた
+			PRINTFORML 「呼呼呼、已經無法忍耐了嗎？好好我這就給你獎勵」
+			;TranslatedMark 「ふっふっふっ、我慢できなくなったか？よしよしご褒美をやろう」
+			PRINTFORML 聽到來教祖大人的低語，%ANAME(対象)%顫抖著流下了口水
+			;TranslatedMark 教祖様にそう囁かれた%ANAME(対象)%はゾクゾクと背筋を震わせながら涎を垂らした
+			PRINTFORMW …被帶到家族大人寢室的%ANAME(対象)%比以往更激烈地躍動著
+			;TranslatedMark …教祖様の寝室に連れ込まれた%ANAME(対象)%はいつも以上に激しく踊り続けた
+		CASE 7
+			PRINTFORML 今天打扮成女僕的樣子，被命令作為僕人活動
+			;TranslatedMark 今日はメイドの格好をさせられ、召使としてふるまう様に命じられた
+			PRINTFORML 完成一项工作，每次被表扬的时候，子宫就会疼，奖赏的期待感也会增加
+			;TranslatedMark 一つ仕事をこなし褒められる度に子宮が疼き、ご褒美の期待感が増していく
+			PRINTFORMW 「非常渴望的眼神啊、忍不住了嗎？好吧、開始下一次工作」
+			;TranslatedMark 「物欲しそうな眼をしおって、我慢できんか？良かろう、次の仕事だ」
+			PRINTFORML 終於得到期待許久的陪睡命令，%ANAME(対象)%像母狗一樣開心地走向了寢室
+			;TranslatedMark 遂にお待ちかねの夜伽を命じられた%ANAME(対象)%は犬の様に悦び寝室に向かった
+			PRINTFORMW …很快寢室裡就漏出女人的喘叫聲，持續了一整晚
+			;TranslatedMark …すぐに寝室からあられもない女の声が漏れ聞こえだし、一晩中続いた
+		CASE 8
+			PRINTFORML %ANAME(対象)%在教祖大人的房間裡像發狂了一樣進行著公開自慰
+			;TranslatedMark %ANAME(対象)%は教祖様の部屋で狂ったように公開オナニーをしている
+			PRINTFORML 被下了強力的媚藥而全身火熱，不管絕頂幾次都停不下來
+			;TranslatedMark 強烈な媚薬を投与されて全身が燃え上がり、いくら絶頂しても止まらない
+			PRINTFORMW 他一隻手拿著酒，看著%ANAME(対象)%不同以往的癡態
+			;TranslatedMark 彼は酒を片手に、%ANAME(対象)%のあられもない痴態をニヤニヤと眺めている
+			PRINTFORML 「已經結束了？那麼下次就該讓我好好爽爽了」
+			;TranslatedMark 「もう終わりかのぉ？では次はワシも楽しませてもらうとするか」
+			PRINTFORML 幾個小時後，他慢慢的接近了累倒的%ANAME(対象)%
+			;TranslatedMark 数時間後、イキ疲れてぐったりとする%ANAME(対象)%に彼はゆっくりと近づいてきた
+			PRINTFORMW …像要將大腦破壞的強烈快樂，讓她一整晚在絕頂、昏迷、覺醒中不斷輪迴
+			;TranslatedMark …脳が破壊される強烈な快楽で、一晩中絶頂と気絶と覚醒を繰り返された
+		CASE 9
+			PRINTFORML 剛做過一次的%ANAME(対象)%被教祖大人命令進行掃除口交
+			;TranslatedMark 一回戦を終えた%ANAME(対象)%は教祖様に命じられお掃除フェラをしている
+			PRINTFORML 對於剛剛才讓自己爽過的逸物，%ANAME(対象)%帶著愛意熱情地侍奉著
+			;TranslatedMark 先ほどまで散々自分を抉った一物に%ANAME(対象)%は愛しさを感じて熱心に奉仕する
+			PRINTFORMW 「哦哦！你可真是喜歡肉棒啊、嗚…！」
+			;TranslatedMark 「おっおっ！お前は本当にチンポが好きだのぉ、むぅ…！」
+			PRINTFORML 看著逸物再次勃起，%ANAME(対象)%忍不住仰面おねだり下一次
+			;TranslatedMark 再び一物が勃起すると%ANAME(対象)%は我慢できずにあお向けになり次をおねだりした
+			PRINTFORMW …%ANAME(対象)%兩人像野獸一樣繼續著，夜晚時兩人都變得黏糊糊了
+			;TranslatedMark …%ANAME(対象)%達は獣の様にまぐわい続け、夜開け頃にはドロドロになっていた
+		CASE 10
+			PRINTFORML 啪啪啪！激烈的肉體擊打聲在教祖大人的寢室裡迴蕩著
+			;TranslatedMark パンパンパン！と激しく肉の打ち合う音が教祖様の寝室に響く
+			PRINTFORML %ANAME(対象)%把臉埋在枕頭上拼命地忍受著仿佛攪碎內臟的衝擊
+			;TranslatedMark 内臓ごと抉られる様なストロークに%ANAME(対象)%は枕に顔をうずめて必死に耐える
+			PRINTFORMW 「嗚、真夠緊緻的！看招、看招、這樣是不是很爽」
+			;TranslatedMark 「くぅ、良い締め付けじゃ！ほれ、ほれぇ、ここがええんじゃろぉ」
+			PRINTFORML 看到他那拼命的样子，他心情很好，更加激烈地攻击着%ANAME(対象)%
+			;TranslatedMark その必死の姿に彼は気をよくし、更に激しく%ANAME(対象)%を攻め立ててきた
+			PRINTFORMW …點燃教祖大人施虐心的%ANAME(対象)%一整晚都在被毫不留情地侵犯
+			;TranslatedMark …司教様の嗜虐心に火をつけてしまった%ANAME(対象)%は一晩中容赦なく犯された
+		CASE 11
+			PRINTFORML 今天的教祖心情不好，比平时更激烈地犯了%ANAME(対象)%
+			;TranslatedMark 今日の教祖様は機嫌が悪くいつも以上に激しく%ANAME(対象)%を犯してきた
+			PRINTFORML 「看招！看招！是這裡吧！你就喜歡被弄這裡吧！看招！」
+			;TranslatedMark 「おら！おら！ここじゃろ！ここが好きなんじゃろう！おら！」
+			PRINTFORMW 被兇惡的逸物粗暴地突入，忍不住發出了野獸一樣的喘叫聲
+			;TranslatedMark 凶悪な一物で乱暴にほじくられ、たまらず獣のような喘ぎ声をあげてしまう
+			PRINTFORML 不管怎麼說他都不願意停止、%ANAME(対象)%在瘋狂中被弄得全身黏黏糊糊
+			;TranslatedMark イってもイっても彼は収まらず、%ANAME(対象)%はヨガリ狂いドロドロになっていく
+			PRINTFORML 但是感受到的卻不算苦痛而是對於能受到他疼愛的喜悅
+			;TranslatedMark しかしそこに苦痛はなくむしろ彼を一心に受け止められる悦びに満ちていた
+			PRINTFORMW …好不容易被解放之後全身已經痙攣，變得完全動不了了
+			;TranslatedMark …ようやく解放された頃には全身が痙攣し、全く動けないほどだった
+		CASE 12
+			PRINTFORML 剛進教祖大人的房間就被推倒在床上用繩子捆住了
+			;TranslatedMark 教祖様の部屋に入るなりベッドに押し倒され縄で縛られてしまった
+			PRINTFORML 在被束縛住不能行動的狀態被隨心所欲地侵犯，迎來了激烈的痙攣喘叫著
+			;TranslatedMark 縛られ動けない状態でまるでオナホの様に犯され、激しく痙攣し喘ぐ
+			PRINTFORMW 「呼呼呼、被這樣對待都能感到興奮的你可真夠變態啊」
+			;TranslatedMark 「ふっふっふ、こんな風にされて喜ぶ都は貴様は変態だのぉ」
+			PRINTFORML 被指出自己變態之處的%ANAME(対象)%顫抖著潮吹了
+			;TranslatedMark 自らの変態さを指摘された%ANAME(対象)%はゾクゾクと背筋を震わせ潮を吹いた
+			PRINTFORMW …被滲入肌膚的疼痛刺激，身體變得比平時更敏感了
+			;TranslatedMark …肌に食い込む痛みに刺激され、いつも以上に敏感にちんぽを感じた
+		CASE 13
+			PRINTFORML %ANAME(対象)%被教祖大人壓住侵犯，讓快感刺激地發狂了
+			;TranslatedMark %ANAME(対象)%は教祖様に押しつぶされるように犯されヨガリ狂っている
+			PRINTFORML 被只要自己爽的過激性行為搞得視線一片黑白，露出了不像樣的表情
+			;TranslatedMark 一切こちらの事を考えない激しい行為に視界が白黒し、無様な顔を晒す
+			PRINTFORMW 「咕呼！咕呼！咕嚯！要上了！要上了！哦哦！哦哦！」
+			;TranslatedMark 「ぐふっ！ぐふっ！ぐほっ！いくぞ！いくぞ！おぉ！おぉぉ！」
+			PRINTFORML 感受到體內的肉棒膨脹，%ANAME(対象)%本能地抱緊了他
+			;TranslatedMark 体内のちんぽが膨らむのを感じた%ANAME(対象)%は本能的に彼にしがみ付いた
+			PRINTFORML 隨著強烈的射精，她發出下流的聲音達到了頂峰
+			;TranslatedMark そして強烈な射精と同時に、下品な声を漏らしてアクメに達した
+			PRINTFORMW …征服至子宮的感覺讓她覺醒了作為雌性的快樂，侵犯持續了一整晚
+			;TranslatedMark …子宮まで征服される感覚に雌の悦びを覚えながら一晩中犯され続けた
+		CASE 14
+			PRINTFORML 工作失敗的%ANAME(対象)%在接受教祖大人的懲罰
+			;TranslatedMark お勤めで失敗をした%ANAME(対象)%は教祖様からお仕置きを受けている
+			PRINTFORML 被綁在台上固定著，一邊被侵犯一邊被叩打著通紅的屁股
+			;TranslatedMark 晒し台の様に固定されたまま、犯されながら尻が赤くなるまで叩かれる
+			PRINTFORMW 但是那股痛苦很快就變成了快樂，悲鳴聲中混入了一些快樂的喘息
+			;TranslatedMark しかしその痛みもすぐに快楽となり、悲鳴には喘ぎ声が混ざっていた
+			PRINTFORML 「被處罰也會感到快樂嗎！你這個變態！哼哼！哼哼！」
+			;TranslatedMark 「お仕置きされて悦ぶか！この変態め！ふん！ふん！ふぅん！」
+			PRINTFORML 看著%ANAME(対象)%的反應教祖的進攻更佳激烈了，讓她潮吹了好幾次
+			;TranslatedMark %ANAME(対象)%の反応に教祖様は更に攻めを激しくし、何度も潮を吹いてしまった
+			PRINTFORMW …%ANAME(対象)%被當成母豬一樣對待，直到失去意識一直被懲罰
+			;TranslatedMark …%ANAME(対象)%はマゾ豚にふさわしい扱いで、気を失うまでお仕置きされた
+		CASE 15
+			PRINTFORML %ANAME(対象)%聽從教祖大人的命令被當做新藥的實驗台使用
+			;TranslatedMark %ANAME(対象)%は教祖様の命令で新作の薬の実験台にされることになった
+			PRINTFORML 聽說是一不小心就會讓人壞掉的強力媚藥、%ANAME(対象)%喘著氣流出了口水
+			;TranslatedMark 下手すると脳が破壊される程の媚薬と聞き、%ANAME(対象)%は息を荒げ涎を垂らした
+			PRINTFORMW 「嚯嚯嚯、如果壞掉的話就當做人肉飛機杯用到膩為止」
+			;TranslatedMark 「ほっほっほっ、壊れたら肉オナホとして飽きるまで使ってやるぞ」
+			PRINTFORML 一想到可能會那樣，%ANAME(対象)%反而期待被玩壞地被注入了藥
+			;TranslatedMark それを想像した%ANAME(対象)%はむしろ壊れたいと期待しながらクスリを打たれた
+			PRINTFORMW …那個晚上教祖大人的寢室裡迴蕩著野獸一樣的嬌喘聲
+			;TranslatedMark …その夜は教祖様の寝室から絶えることなく獣の様な嬌声が響き続けた
+		CASE 16
+			PRINTFORML 教祖大人的寢室裡，%ANAME(対象)%氣息奄奄地倒在了床上
+			;TranslatedMark 教祖様の寝室、その床に息も絶え絶えの%ANAME(対象)%が倒れ込んでいる
+			PRINTFORML 在颤抖的%ANAME(対象)%周围滚着极粗振动和旋转球等玩具
+			;TranslatedMark 震える%ANAME(対象)%の周りには極太バイブやローター等の玩具が転がっている
+			PRINTFORMW 「呼呼、偶爾來點這種玩法也挺有意思、嘿嘿」
+			;TranslatedMark 「ふぅむ、こうした趣向もたまには面白い物じゃのぉ、ふぇっふぇ」
+			PRINTFORML 滿足地笑著的他一踩上%ANAME(対象)%的屁股，她就抽搐著痙攣然後潮吹了
+			;TranslatedMark 満足気に笑う彼が%ANAME(対象)%のお尻を踏みつけると、ビクんと痙攣して潮を吹いた
+			PRINTFORML 「好了，你也爽夠了，接下來就讓我也來舒服下吧」
+			;TranslatedMark 「どれ、充分ほぐれたし次はワシも楽しませてもらうとするかの」
+			PRINTFORMW …被玩弄得十分敏感的%ANAME(対象)%這次作為他的玩具被虐待著
+			;TranslatedMark …弄られ過ぎて敏感になった%ANAME(対象)%は今度は彼の玩具として苛め抜かれた
+		CASE 17
+			PRINTFORML %ANAME(対象)%今天也在教祖大人的懷抱中發出愉悅的聲音
+			;TranslatedMark %ANAME(対象)%は今日も教祖様に抱かれながら悦びの声を上げている
+			PRINTFORML 表情呆滯的她渾身無力地被他抱住
+			;TranslatedMark その表情は既に呆け切っており力の入らない手足で彼にしがみ付いていた
+			PRINTFORMW 被知道弱点的身体一个劲地缠着，一直痉挛着
+			;TranslatedMark 弱点を知り尽くされた体を延々となぶられ、痙攣しっぱなしになっている
+			PRINTFORML 「嚯嚯、你很喜歡被這樣亂來吧？看招、看招」
+			;TranslatedMark 「ほっほっ、お前はここが好きなんじゃろう？ほれ、ほれ」
+			PRINTFORML 每當肉棒的前段騷弄著子宮，都會感受到仿佛要將全身麻痺的快感
+			;TranslatedMark チンポの先端で子宮をグリグリされると、全身に痺れるような快感が走った
+			PRINTFORMW …黏糊糊的交尾一直持續到天亮，%ANAME(対象)%高潮了無數次
+			;TranslatedMark …ねっとりとした交尾は夜明け近くまで続き%ANAME(対象)%は数え切れない程達した
+		CASE 18
+			PRINTFORML 教祖大人的寢室充滿了比平時更濃的“媚薬”的煙
+			;TranslatedMark 教祖様の寝室にいつも以上に濃い“媚薬”の煙が充満している
+			PRINTFORML 在嘎吱作響的床上，%ANAME(対象)%像野獸一樣披頭散髮地擺動著腰
+			;TranslatedMark 激しく軋むベッドの上で%ANAME(対象)%が獣の様に髪を振り乱し腰を振っていた
+			PRINTFORMW 藥的效果吹散了理性，被肉慾所只配的那個表情簡直就是淫亂本身
+			;TranslatedMark 薬の効果で理性は飛び、肉欲に支配されたその表情はまさに淫乱そのものだ
+			PRINTFORML 「嗚！嗚！嚯嚯、你還真是喜歡這個味道啊」
+			;TranslatedMark 「ぅっ！うっ！ほっほっ、お前は本当にこの匂いが大好きじゃのぉ」
+			PRINTFORML 男人的手伸向了胸部，%ANAME(対象)%像母狗一樣發出愉悅的聲音顫抖著
+			;TranslatedMark 男の手が胸に伸びると、%ANAME(対象)%は犬の様に悦びの声を上げて身をよじらせた
+			PRINTFORMW …這場淫亂之宴結束後子宮內部裝滿了他的精液和幸福感
+			;TranslatedMark …そして宴が終わる頃には子宮内部は彼の精と幸福感で満たされていた
+		CASE 19
+			PRINTFORML 兩眼被蒙住的%ANAME(対象)%被男人按住激烈地侵犯著
+			;TranslatedMark 目隠しをされた%ANAME(対象)%が男にのしかかられて激しく犯されている
+			PRINTFORML 看不见的部分感觉变得敏锐，感觉像是要把被吝啬鬼挖出的内脏全部都感觉疯了一样
+			;TranslatedMark 見えない分感覚が鋭くなりちんぽに抉られる内臓を全て感じ狂いそうになる
+			PRINTFORMW 子宮被摩擦的感覺在腦子裡回想，在冒出白沫的同時達到了高潮
+			;TranslatedMark 子宮が小突かれる感覚が脳天まで響き、泡を吹きながら絶頂してしまう
+			PRINTFORML 「嚯嚯！果然你越被虐待就越適應啊！」
+			;TranslatedMark 「ほっほっ！やはりお前は虐めれば虐めるほど具合がよくなるのぉ！」
+			PRINTFORML 他不顧因為快感而感到痛苦的%ANAME(対象)%，更快地擺動著腰
+			;TranslatedMark 彼は苦しい程の快感に%ANAME(対象)%が溺れるのを気にも留めず更に腰を加速させる
+			PRINTFORMW …在不斷的絕頂中，隱約感覺到子宮為了迎接種子而降下
+			;TranslatedMark …絶え間ない絶頂の中、種付けされる悦びに子宮が降りるのを微かに感じた
+		CASE 20
+			PRINTFORML %ANAME(対象)%披頭散髮，跨在教祖大人身上激烈地擺動著腰
+			;TranslatedMark %ANAME(対象)%は教祖様に跨り髪を振り乱して激しく腰を振っている
+			PRINTFORML 被粗狂的肉棒突進時叫喊出了不像樣的聲音嗶咕嗶咕地高潮了
+			;TranslatedMark 野太いチンポで突き上げられる度に無様な声を上げてビクビクと痙攣する
+			PRINTFORMW 「哦哦，可愛的傢伙！讓我好好滿足你吧！」
+			;TranslatedMark 「おぉ、おぉ、可愛い奴め！望み通りにくれてやるぞっ！」
+			PRINTFORML 為了尋求心愛的教祖大人的妊娠汁，%ANAME(対象)%扭腰おねだり著
+			;TranslatedMark 愛おしい教祖様の孕ませ汁を求め、%ANAME(対象)%は腰をくねらせおねだりする
+			PRINTFORMW …然後緊貼著子宮口射出的種子讓她達到了頂峰
+			;TranslatedMark …そして子宮口に密着されながら射精されながら待望の種付けアクメに達した
+		CASE 21
+			PRINTFORML %ANAME(対象)%在對著教祖大人射精後的性器做著掃除口交
+			;TranslatedMark %ANAME(対象)%は教祖様の射精したてのちんぽをお掃除フェラしている
+			PRINTFORML 專心侍奉著剛讓自己快樂過的雄性性器
+			;TranslatedMark 先程まで自分を悦ばせてくれた雄々しいおちんぽを夢中になって奉仕する
+			PRINTFORMW 濃厚的雄性氣息讓大腦顫抖並讓下腹部疼了起來
+			;TranslatedMark むせ返る雄の匂いに頭がクラクラとして下腹部がキュンキュンと疼いた
+			PRINTFORML 「變得很熟練了嘛，這樣的話必須要好好獎勵一下啊」
+			;TranslatedMark 「上手になったではないか、これはまたご褒美をくれてやらんといかんな」
+			PRINTFORMW …作為被侍奉的獎勵，%ANAME(対象)%收到了好幾次作為雌性的高潮
+			;TranslatedMark …奉仕のご褒美に再び犯されると、%ANAME(対象)%は何度も雌の悦びに達しまくった
+		CASE 22
+			PRINTFORML %ANAME(対象)%沉醉于像狗一樣趴在地上被教祖大人侵犯
+			;TranslatedMark %ANAME(対象)%はドギーバックの態勢で教祖様に犯されヨガっている
+			PRINTFORML 戴上項圈插著尻尾汪汪叫的她簡直像是真正的母狗
+			;TranslatedMark 首輪とアナル尻尾をつけられてワンワンと鳴くその姿はまさに雌犬だ
+			PRINTFORMW 「哦哦！你這下賤的狗！我會好好疼愛你的！」
+			;TranslatedMark 「おら！おら！このいやしい犬め！おぉ！お！可愛がってやるぞぉ！」
+			PRINTFORML 在主人開始加速突進後，她顫抖著著流下了口水
+			;TranslatedMark ご主人様残しの動きが加速すると、ゾクゾクと震えながら涎を垂らした
+			PRINTFORMW …%ANAME(対象)%作為獎勵被當做他的可愛母狗被疼愛了一整晚
+			;TranslatedMark …%ANAME(対象)%は彼の可愛い雌ペットとして一晩中可愛がられご褒美を貰った
+		CASE 23
+			PRINTFORML %ANAME(対象)%被教祖大人壓住進行著播種
+			;TranslatedMark %ANAME(対象)%は教祖様に圧し掛かられ種付けプレスを喰らっている
+			PRINTFORML 啪啪♥啪啪♥每次接受著強力衝擊的時候結合部都會溢出愛液
+			;TranslatedMark ドチュン♥ドチュン♥と激しいピストンを喰らう度に結合部から愛液が溢れる
+			PRINTFORMW 「呼、呼、呼！怎麼樣！老夫的肉棒怎麼樣！呼！」
+			;TranslatedMark 「ふっ、ふっ、ふぅ！どうじゃ！わしのちんぽはどうじゃ！ふぅ！」
+			PRINTFORML 被多次射精而不衰弱的他进攻，%ANAME(対象)%兴奋得直哆嗦
+			;TranslatedMark 何度も射精して衰えない彼の攻めに%ANAME(対象)%はイキっぱなしでヨガり狂う
+			PRINTFORMW …然後再次被釋放出了灼熱的精液，抱著他發出了陣陣嬌聲
+			;TranslatedMark …そして再び灼熱のザーメンを放たれると、彼に抱きつきながら嬌声を響かせた
+		CASE 24
+			PRINTFORML %ANAME(対象)%穿著淫蕩的舞女裝被教祖大人抱著
+			;TranslatedMark %ANAME(対象)%は淫らな踊子衣装を着せられて教祖様に抱かれている
+			PRINTFORML 被他精妙的技巧玩弄著全身，%ANAME(対象)%一邊喘著氣一邊跳舞
+			;TranslatedMark 彼の巧みなテクで全身を弄ばれ、%ANAME(対象)%は喘ぎながら身をくねらせ踊る
+			PRINTFORMW 穿著和平時不一樣的服裝讓雙方都很興奮，汗流個不止
+			;TranslatedMark 普段と違う衣装での行為にお互い興奮しきり、汗だくになってまぐわう
+			PRINTFORML 「HO-HO！你真的有讓男人愉悅的才能啊…」
+			;TranslatedMark 「ほっほっ！お前は本当に男を悦ばせる才能があるのぉ…」
+			PRINTFORMW …%ANAME(対象)%的子宮接受了很多次來自教祖大人的愛，一整晚都在繼續著舞蹈
+			;TranslatedMark …教祖様の愛を何度も子宮で受け止めながら%ANAME(対象)%は一晩中踊り続けた
+		CASE 25
+			PRINTFORML 空虚之瞳的%ANAME(対象)%在众多信徒面前被教祖大人侵犯
+			;TranslatedMark 虚ろな瞳の%ANAME(対象)%が大勢の信者の前で教祖様に犯されている
+			PRINTFORML 每次激烈的突進都會讓%ANAME(対象)%的身體跳動，糟糕的樣子被展現給了信徒們
+			;TranslatedMark 激しく突き上げられる度に%ANAME(対象)%は体を跳ねさせ、無様な姿を彼らに晒す
+			PRINTFORMW 「嚯！嚯！怎麼樣！大家都在看著呢！嚯嚯！」
+			;TranslatedMark 「ほれ！ほれ！どうじゃ！皆に見られておるぞ！ふほっ！」
+			PRINTFORML %ANAME(対象)%雖然有點吃鯨，但感受到信徒們興奮的視線讓她喘著氣潮吹了
+			;TranslatedMark %ANAME(対象)%は呆けながらも、信者達の興奮した視線を感じて息を荒げ潮を吹いた
+			PRINTFORMW …教祖大人播種的樣子被很多人看著，好幾次達到了高潮
+			;TranslatedMark …教祖様から種付けされる様子を大勢に観られながら何度もアクメに達した
+		CASE 26
+			PRINTFORML %ANAME(対象)%在和教祖大人以對面座位的姿勢進行著充滿愛意的激烈交合
+			;TranslatedMark %ANAME(対象)%は教祖様と対面座位の態勢で激しく愛し合っている
+			PRINTFORML 身體緊緊貼住舌頭互相纏繞下半身負距離結合一起沉溺於肉慾中
+			;TranslatedMark 身体を密着させ舌を絡ませ下半身をぶつけ合ってひたすら肉欲に溺れる
+			PRINTFORMW 儘管是沒有任何變化的性愛，但還是沉迷於那份濃厚中
+			;TranslatedMark 何も変わったことはないただのセックスだが、その濃厚さに夢中になる
+			PRINTFORML 越是相愛子宮越是疼痛，%ANAME(対象)%的饑渴似乎永無止境
+			;TranslatedMark 愛し合えば愛し合う程子宮の疼きは増し、%ANAME(対象)%はもっともっととねだる
+			PRINTFORMW …%ANAME(対象)%在被輕輕咬住乳頭的同時射精，身體大幅度仰起達到了高潮
+			;TranslatedMark …%ANAME(対象)%は乳首を甘噛みされながら射精されて大きく身を仰け反らせた
+		CASE 27
+			PRINTFORML 被繩子牽著走的%ANAME(対象)%被教祖大人帶到了教會內散步
+			;TranslatedMark リードで引かれた%ANAME(対象)%が教祖様に連れられ教会内を歩く
+			PRINTFORML 顫抖的股間流出了大量的精液和愛液，形成了一條小路
+			;TranslatedMark 震える股間からは大量のザーメンと愛液が溢れ、道しるべになっている
+			PRINTFORMW 「喂、再走快點！今天還有各種各樣的預定要完成呢！」
+			;TranslatedMark 「ほれ、もっと早く歩け！今日は色々予定があるのだからな！」
+			PRINTFORML 他一時興起將%ANAME(対象)%當做飛機杯使用毫不猶豫地在裡面中出了
+			;TranslatedMark 彼は気まぐれに%ANAME(対象)%をオナホの様に使っては遠慮なく膣出ししていく
+			PRINTFORMW …即時是那種單方面爽的做法，%ANAME(対象)%也愉悅得不能自拔
+			;TranslatedMark …そんな都合よく使われるだけの仕打ちにも、%ANAME(対象)%は悦びに惚けていた
+		CASE 28
+			PRINTFORML 被蒙住眼睛的%ANAME(対象)%在床上艷麗地扭動著身體
+			;TranslatedMark 目隠しされた%ANAME(対象)%がベッドで艶めかしく身をくねらせる
+			PRINTFORML 「怎麼樣，比平時更有感覺吧，看招，這裡」
+			;TranslatedMark 「どうじゃあ、いつもより感じるじゃろぉ、ほれぇ、ここじゃあ」
+			PRINTFORMW 什麼都看不到的%ANAME(対象)%被教祖大人的激烈進攻搞得嬌喘連連
+			;TranslatedMark 何も見えない%ANAME(対象)%は教祖様の激しい攻めにされるがままに嬌声を上げる
+			PRINTFORML 比平時更能感受到體內肉棒活動的她發狂了
+			;TranslatedMark 体内で暴れるチンポの感触をいつも以上に感じてしまい、ヨガリ狂う
+			PRINTFORMW …感受到精液直接接觸子宮壁的她達到了高潮
+			;TranslatedMark …ザーメンが子宮壁に注がれるのをダイレクトに感じながらアクメに達した
+		CASE 29
+			PRINTFORML %ANAME(対象)%身穿教祖大人交給她的兔女郎裝被他抱著
+			;TranslatedMark %ANAME(対象)%は教祖様に渡されたバニースーツ姿で抱かれている
+			PRINTFORML 屁股像被鷲掴一樣被抓住突進，一邊發出愉悅的聲音一邊顫抖著
+			;TranslatedMark お尻を鷲掴みにされながら突き上げられ、悦びの声と共に身を震わせる
+			PRINTFORMW 「嚯嚯嚯！你的身體真是為了給男人抱而存在的」
+			;TranslatedMark 「ほっほっほっ！本当にお前の身体は男に抱かれるためにようじゃのぉ」
+			PRINTFORML 乳房被下流的手法揉弄著，一邊流出口水一邊仰起身子高潮了
+			;TranslatedMark いやらしい手つきで乳房を揉みしだかれ、涎を垂らしながら仰け反って悦ぶ
+			PRINTFORMW …%ANAME(対象)%就像發情的兔子一樣在他的逸物上跳動了一整晚
+			;TranslatedMark …%ANAME(対象)%は発情しきったウサギの如く彼の一物の上で一晩中跳ね続けた
+		CASE 30
+			PRINTFORML 累倒的%ANAME(対象)%和教祖大人一起氣喘吁吁地躺在床上
+			;TranslatedMark ヤリ疲れた%ANAME(対象)%と教祖様は息を荒げベッドに横たわっている
+			PRINTFORML 一味地交往着的结合部流出了大量的爱液和精液
+			;TranslatedMark ひたすら交わりっぱなしだった結合部からは大量の愛液と精液が溢れる
+			PRINTFORMW 「呼呼…呼呼…完全被你的身體陷住了啊…」
+			;TranslatedMark 「ふぅ…ふぅっ…全くお前の身体には夢中にさせられるのぉ…」
+			PRINTFORML 一邊低語一邊撫摸著肌膚、由於之前的餘韻又迎來了輕微的高潮
+			;TranslatedMark そう囁かれて肌を撫でられると、先の余韻でまた軽くアクメってしまった
+			PRINTFORMW …很快他就要求再戰，%ANAME(対象)%的眼睛浮現出了♥然後張開了雙腿
+			;TranslatedMark …すぐに彼に次を求められると%ANAME(対象)%は目に♥を浮かべて股を開いた
+		CASE 31
+			PRINTFORML %ANAME(対象)%被教祖大人絞首時被激烈侵犯，發出了呻吟
+			;TranslatedMark %ANAME(対象)%は教組様に首を絞められながら激しく犯され呻いでいる
+			PRINTFORML 在毫不留情地進攻下%ANAME(対象)%翻著白眼吐出白沫痉挛了
+			;TranslatedMark 容赦のない攻めに窒息しかけの%ANAME(対象)%は白目をむき泡を吹いて痙攣する
+			PRINTFORMW %ANAME(対象)%越是痛苦腔道就越是收緊，同樣他也越是激烈的擺動著腰
+			;TranslatedMark %ANAME(対象)%が苦しむ程膣の締め付けは良くなり、彼はより激しく腰を振る
+			PRINTFORML 「嚯嚯！怎麼樣！哦哦！真是緊緻啊！嘿嘿…！」
+			;TranslatedMark 「おら！おら！どうじゃ！おぉ！良く締まるわ！ひひっ…！」
+			PRINTFORMW …灼熱的精液注入時%ANAME(対象)%喘著氣潮吹了
+			;TranslatedMark …灼熱のザーメンを注がれると%ANAME(対象)%は気を飛ばしながら潮を吹いた
+		CASE 32
+			PRINTFORML %ANAME(対象)%今天一整天都在作為教祖大人的秘書工作著
+			;TranslatedMark %ANAME(対象)%は今日一日、教組様の秘書として過ごす事になった
+			PRINTFORML 在日程管理和接待客人的間隙中像理所當然一樣進行了性處理
+			;TranslatedMark スケジュール管理や客の応対等の合間に当然の様に性処理もやらされた
+			PRINTFORMW 但是%ANAME(対象)%完全沒有表現出半點厭惡，開心地被中出了
+			;TranslatedMark しかし%ANAME(対象)%は嫌な顔一つせずに彼を受け入れ、喜んで膣出しされる
+			PRINTFORML 理所當然的晚上時肚子裡裝滿了精液，渾身散發出性愛的味道
+			;TranslatedMark 当然夕刻にはお腹の中はザーメンで満たされ性の匂いをプンプンと漂わせていた
+			PRINTFORMW …在工作結束後，作為獎勵在床上好好被疼愛了一番
+			;TranslatedMark …仕事が終わった後は、更にご褒美としてベッドでたっぷりと可愛がられた
+		CASE 33
+			PRINTFORML %ANAME(対象)%在新藥的實驗台上被教祖抱著
+			;TranslatedMark %ANAME(対象)%は新しい薬の実験台を兼ねて教祖に抱かれている
+			PRINTFORML 完全沒稀釋過的原液藥直接灌入讓%ANAME(対象)%的大腦變得一片空白而發狂了
+			;TranslatedMark 原液のまま薬をぶち込まれた%ANAME(対象)%は頭が真っ白になってヨガリ狂う
+			PRINTFORMW 「嗚嚯嚯！看看你這樣子，怎麼樣？是不是很舒服啊？」
+			;TranslatedMark 「ふほほっ！いいヨガリっぷりじゃ、どうじゃ？気持ちいいじゃろう？」
+			PRINTFORML 肉体貪婪地渴求著快樂，一被突進就讓理性完全飛走了
+			;TranslatedMark 肉体は貪欲に快楽を求めて、一突きされる度に理性がぶっ飛んでいく
+			PRINTFORMW …飽和程度的絕頂讓%ANAME(対象)%像野獸一樣感受到作為雌性的快感而嬌喘著
+			;TranslatedMark …飽和する程の絶頂に%ANAME(対象)%は獣の様にひたすら雌の悦びに喘ぐだけだった
+		CASE 34
+			PRINTFORML %ANAME(対象)%被教祖大人邀請，一起去了大浴場
+			;TranslatedMark %ANAME(対象)%は教組様に誘われて、一緒に大浴場に向かった
+			PRINTFORML 在浴池裡坐在他的腿上被执拗地愛撫著吐出甜美的氣息
+			;TranslatedMark 浴槽の中で彼の胡坐の上に腰かけながら執拗な愛撫に甘い吐息を漏らす
+			PRINTFORMW 「這滑嫩的皮膚不管什麼時候都摸著很舒服啊、嘿嘿」
+			;TranslatedMark 「このすべすべの肌はいつ撫でても良いもんじゃのぉ、ひひっ」
+			PRINTFORML 他對於%ANAME(対象)%的反應發出了嗤笑然後繼續著愛撫
+			;TranslatedMark 彼は%ANAME(対象)%の反応ににやにやと笑いながらねっとりと愛撫を続ける
+			PRINTFORMW …渾身發燙的%ANAME(対象)%在之後的性愛好幾次被玩弄到高潮
+			;TranslatedMark …火照り切った%ANAME(対象)%は、その後の激しいセックスで何度もイかされた
+		CASE 35
+			PRINTFORML %ANAME(対象)%大汗淋漓地沉迷在和教祖大人的性愛中
+			;TranslatedMark %ANAME(対象)%は汗だくになって教祖様とのセックスに没頭している
+			PRINTFORML 一整天都在床上進行著交合，黏糊糊的體液流地到處都是
+			;TranslatedMark 一日中ひたすらベッドの上で交わり続け、体液でドロドロになっている
+			PRINTFORMW 「嗚！這個身體！不管！抱幾次！都不會膩！哦哦，要射了！」
+			;TranslatedMark 「くぅ！この体は！何度！抱いても！飽きんのぉ！おぉ、射精るぞ！」
+			PRINTFORML 無論高潮幾次，湧上的衝動都消停不了，兩人互相纏繞不斷追求著巔峰
+			;TranslatedMark 何度達しても、湧き上がる衝動は収まらず互いに絡み合いただただ求め続ける
+			PRINTFORMW …這場盛宴持續到手足失去感覺為止，高潮的次數數都數不清
+			;TranslatedMark …その宴は手足がシビレ感覚がなくなるまで続き、数え切れないほど達した
+		CASE 36
+			PRINTFORML %ANAME(対象)%被教祖大人侵犯時床在激烈地搖晃著
+			;TranslatedMark %ANAME(対象)%は激しくベッドを揺らしながら教祖様に犯されている
+			PRINTFORML 突然的進攻！大量的精液%ANAME(対象)%身體裡發射出了
+			;TranslatedMark 不意にびゅるるる！と大量のザーメンが%ANAME(対象)%の中に放たれると
+			PRINTFORMW %ANAME(対象)%在被教祖抱著的同時大幅度仰起了身體，發出甜美的叫聲
+			;TranslatedMark %ANAME(対象)%は教組様にしがみつきながら大きく仰け反り、甘い叫びをあげた
+			PRINTFORML 他為了歇口氣把肉棒拔了出來，在秘所裡流出了很多粘稠的精液
+			;TranslatedMark 彼が一息つく為にペニスを引き抜くと秘所からドロリと精液が溢れ出る
+			PRINTFORMW …%ANAME(対象)%茫然地看著這一切，心裡充滿了對受精的期待
+			;TranslatedMark …%ANAME(対象)%は茫然としながらそれを眺め、受精の期待に胸をきゅんとさせた
+		CASE 37
+			PRINTFORML %ANAME(対象)%作為教祖大人的肉便器跟著一起外出了
+			;TranslatedMark %ANAME(対象)%は教組様の肉便器として外出に付き従う事になった
+			PRINTFORML 教祖大人每次籌辦的時候，她都會把前穴或者後穴給他使用
+			;TranslatedMark 教祖様が催す度に膣を、もしくは尻穴を差し出して使ってもらうのだ
+			PRINTFORMW 「哦哦，又到籌辦的時候了…趕緊把屁股給我用！」
+			;TranslatedMark 「おぉ、また催してきたわ…ほれさっさとケツを出せ！」
+			PRINTFORML 就算是被當成垃圾紙一樣使用，%ANAME(対象)%也會在被用的時候發出愉悅的叫聲
+			;TranslatedMark チリ紙同然の扱いにも拘らず、%ANAME(対象)%は使われる度に悦びの声を上げる
+			PRINTFORMW …回家之後作為忠實地完成職務的獎勵，在床上又被好好疼愛了一陣子
+			;TranslatedMark …帰宅すると忠実な職務のご褒美として、ベッドの上でまた可愛がられた
+		CASE 38
+			PRINTFORML %ANAME(対象)%穿著女僕服被教祖大人侵犯了
+			;TranslatedMark %ANAME(対象)%はメイド服を着せられて教祖様に犯されている
+			PRINTFORML 主人♥主人♥這樣叫喊著開心地接受著他的肉棒的她發狂了
+			;TranslatedMark ご主人様♥ご主人様♥と鳴きながら彼のちんぽを悦んで受け入れヨガり狂う
+			PRINTFORMW 「哦哦、哦哦、可愛的傢伙…！收下我給你的獎勵吧…呼呼！」
+			;TranslatedMark 「おぉ、おぉ、可愛い奴めっ…！ご褒美をくれてやるぞぉ…うっ！」
+			PRINTFORML %ANAME(対象)%為了不讓衣服被弄髒在腔內射出彎下了腰
+			;TranslatedMark %ANAME(対象)%は衣服を汚さない様に膣出しを懇願しながら腰をくねらせる
+			PRINTFORMW …那天一整天都在作為女僕侍奉著教祖大人，得到了很多次獎勵
+			;TranslatedMark …その日は一日中メイドとして教祖様に仕え、何度もご褒美を注がれた
+		CASE 39
+			PRINTFORML 在床上，%ANAME(対象)%吞下了教祖大人的肉棒
+			;TranslatedMark ベッドの上で%ANAME(対象)%は教組様のちんぽをずっぽり咥え込んでいる
+			PRINTFORML 「能把我的長物到最深處，果然你有著當便器的天賦啊」
+			;TranslatedMark 「わしの長物を奥までくわえ込むとは、やはり便器がお主の天職じゃなぁ」
+			PRINTFORMW 侮蔑的話語並沒有傳達到，仿佛要擊潰子宮的衝擊に%ANAME(対象)%讓沉醉地擺動腰
+			;TranslatedMark 侮蔑も耳に入らず、子宮を潰される衝撃に%ANAME(対象)%は夢中になって腰を振る
+			PRINTFORML 一邊讚美他的男子氣概一邊擺動腰索取種子的她真像一個BITCH
+			;TranslatedMark 彼の男らしさを讃え腰をくねらせ子種をおねだりする姿はまさにビッチだった
+			PRINTFORMW …然後在被教祖大人的慈悲注入後身體大幅度仰起達到了高潮
+			;TranslatedMark …そして教祖様のご慈悲が注がれると大きく仰け反りながら深イキに達した
+		CASE 40
+			PRINTFORML 啾啾♥啾啾♥粘膜互相接觸時發出了下流的聲音
+			;TranslatedMark にちゃ♥ちゅっ♥じゅぷ♥と粘膜の絡み合ういやらしい音がする
+			PRINTFORML %ANAME(対象)%和教祖像恋人一样重叠在一起，不断重复着粘糊糊的吻戏
+			;TranslatedMark %ANAME(対象)%と教祖様は恋人の様に重なり合い、ねっとりキスハメを繰り返している
+			PRINTFORMW 用交换过的唾液在脑子里充满了他的臭味，理性已经荡然无存了
+			;TranslatedMark 交換した唾液で頭の中は彼の臭いに満たされ、すでに理性は蕩け切っていた
+			PRINTFORML 被激烈吸着舌头的同时，被子宫小刺的话，%ANAME(対象)%会忍不住紧紧抱住他
+			;TranslatedMark 激しく舌を吸われながら子宮を小突かれると%ANAME(対象)%はたまらず彼にしがみ付く
+			PRINTFORMW …%ANAME(対象)%们直到疲惫不堪都汗流浃背地重复着浓厚的恋人交尾
+			;TranslatedMark …%ANAME(対象)%達は疲れ果てるまで汗だくになりながら濃厚な恋人交尾を繰り返した
+		CASE 41
+			PRINTFORML 床上，%ANAME(対象)%像野兽一样一边喘着气一边让身体跳跃
+			;TranslatedMark ベッドの上、%ANAME(対象)%は獣の様な喘ぎを上げながら身を跳ねさせている
+			PRINTFORML 「别管我，在这里，你的弱点是？嗯？心情舒畅吧」
+			;TranslatedMark 「ほっほっほっ、ここじゃろぉ、お前の弱点は？んん？気持ち良かろう」
+			PRINTFORMW 粗糙的手指在恥部玩弄發出了水聲，%ANAME(対象)%一直被責弄著
+			;TranslatedMark ゴツゴツした指がグチョ♥グチョ♥グチョ♥と恥部を弄り、%ANAME(対象)%を責め立てる
+			PRINTFORML 儘管很粗暴但精確命中了弱點，%ANAME(対象)%一邊咬著床單一邊喘叫
+			;TranslatedMark 乱暴だが的確に弱点を抉られ、%ANAME(対象)%はシーツを噛みながらヒィヒィと喘ぐ
+			PRINTFORML 然後隨著第幾十次的高潮，下流地索求肉棒的同時潮吹了
+			;TranslatedMark そして数十度目のアクメと共に下品にちんぽをおねだりしながら潮を吹いた
+			PRINTFORMW …那之後，直到十分敏感的身體失去意識位置一直激烈地侵犯著
+			;TranslatedMark …その後、すっかり敏感になった身体を気を失うまで激しく犯され続けた
+		CASE 42
+			PRINTFORML 為了滿足教祖大人的興趣而穿上了女僕服作為對象
+			;TranslatedMark 教祖様の趣向でメイド服を着せられ相手をさせられることになった
+			PRINTFORML 在雄壯的逸物面前，一邊聞著嗆人的雄性氣味一邊侍奉著
+			;TranslatedMark 雄々しい一物に傅き、むせ返る様なオスの臭いに息を荒げながら奉仕する
+			PRINTFORMW 「嚯嚯！哦哦！很好…果然在侍奉肉棒上你是第一名」
+			;TranslatedMark 「ほっ！おっ！いいぞぉ…流石ちんぽを弄らせたらお前が一番だのぉ」
+			PRINTFORML 讚美的話語讓%ANAME(対象)%子宮變得很疼，咕嚕嚕地將精液完全喝了下去
+			;TranslatedMark お褒めの言葉に%ANAME(対象)%は子宮を疼かせ、喉を鳴らしてザーメンを飲み干した
+			PRINTFORML 「好啊好啊、好孩子…接下來就坐在身上侍奉吧、誠心誠意地」
+			;TranslatedMark 「よしよし、良い子だ…次は上に載って奉仕しろ、誠心誠意な」
+			PRINTFORMW …命令(獎勵)讓%ANAME(対象)%的眼瞳浮現出♥，點點頭，完成了女僕的任務
+			;TranslatedMark …命令(ご褒美)に%ANAME(対象)%は瞳に♥を浮べて頷き、メイドの務めを果たした
+		CASE 43
+			PRINTFORML 聽從教祖大人的命令去進行巡視信徒們了
+			;TranslatedMark 教祖様に命じられて信者の見回りについていくことになった
+			PRINTFORML 但是並不只是陪著一起走而已，在他們看不到的地方偷偷玩弄著
+			;TranslatedMark 無論ただついて歩くだけではなく彼らに見えないギリギリで弄られる
+			PRINTFORML 一邊用左手向信徒們揮著手，一邊用右手揉弄著%ANAME(対象)%的嬌臀
+			;TranslatedMark 左手で信者達に手を振り応えながら、右手で%ANAME(対象)%のお尻を揉みしだき
+			PRINTFORMW 在進行說法時讓%ANAME(対象)%含入自己的逸物並喝下了精液
+			;TranslatedMark 説法をしながら、%ANAME(対象)%に一物を咥え込ませてザーメンを飲み干させる
+			PRINTFORML 一不小心就會暴露的背德感讓%ANAME(対象)%比以往更興奮地侍奉著
+			;TranslatedMark 一歩間違えればバレる背徳感に%ANAME(対象)%もいつも以上に興奮しご奉仕した
+			PRINTFORMW …巡視完之後被帶到寢室，好好地疼愛了一番
+			;TranslatedMark …見回りを終えるとすぐに寝室に連れ込まれ、たっぷりと可愛がってもらった
+		CASE 44
+			PRINTFORML %ANAME(対象)%遵從教祖大人的命令，被帶去了每月一次的大集會
+			;TranslatedMark %ANAME(対象)%は教祖様の命で、月に一度の大集会に連れていかれた
+			PRINTFORML 在教團的地下設施中舉行了信徒們聚集起來的亂交大會
+			;TranslatedMark 教団の地下施設で行われるそれは信者たちが入り乱れての大乱交大会だ
+			PRINTFORMW 大量的媚藥被瀰漫在空氣中，看著大量的男女互相交合，%ANAME(対象)%咽了口水
+			;TranslatedMark 大量の媚薬が炊かれた中、大勢の男女がまぐわう様に%ANAME(対象)%は唾をのんだ
+			PRINTFORML 「嚯、已經這麼濕了啊、光是看著就忍不住了嗎？」
+			;TranslatedMark 「ほぉ、もうこんなに濡らしおって、見てるだけで我慢できんのか？」
+			PRINTFORML 聽著他的低語，%ANAME(対象)%點了點頭，在命令之前就脫光了衣服
+			;TranslatedMark 彼の囁きに%ANAME(対象)%はコクコクと頷くと命ぜられる前に服を脱いでおねだりした
+			PRINTFORMW …在被很多人看著的情況下和教祖做愛讓%ANAME(対象)%比平常更迷亂了
+			;TranslatedMark …大勢に見られながらの教祖様とのセックスに、%ANAME(対象)%はいつも以上に乱れた
+		CASE 45
+			PRINTFORML 今晚要和教祖大人去附近的庭園散步
+			;TranslatedMark 今夜は教祖様の散歩の為に近くの庭園についていくことになった
+			PRINTFORML 戴著犬耳被繩子牽著並且流著口水四腳著地的姿態，簡直就是母狗
+			;TranslatedMark リードと犬耳を付けて涎を垂らし四つん這いで歩くその姿はまさに雌犬だ
+			PRINTFORMW 「你那身打扮可真合適啊、不愧是發情的雌性」
+			;TranslatedMark 「お前はその姿も良く似合っておるなぁ、流石盛った雌じゃ」
+			PRINTFORML 對侮辱的話語毫不在意的%ANAME(対象)%汪汪叫著，張開了雙腿向他獻媚
+			;TranslatedMark 侮辱の言葉にもかまわず%ANAME(対象)%はクゥンと鳴いて股を開き彼に媚を売った
+			PRINTFORML 「已經忍不住了嗎、對於下流的母狗得調教調教」
+			;TranslatedMark 「もう我慢できんのか、いやしい犬には躾が必要じゃな」
+			PRINTFORMW …作為母狗理所當然的野外交尾讓%ANAME(対象)%被快感送上了好幾次頂峰
+			;TranslatedMark …雌犬にふさわしい野外での交尾に%ANAME(対象)%は悦びのあまり何度もイキ狂った
+	ENDSELECT
+	CALL FUCK_RAPE(対象, GET_SPERM_ID("教祖様"), @"教祖様の\@ RAND:2 ? 肉棒 # 唇\@", "教祖様")
+	PRINTFORMW
+	SELECTCASE RAND:6
+		CASE 0
+			PRINTFORML %ANAME(対象)%出錢資助了教團
+			;TranslatedMark %ANAME(対象)%は教団にお布施を支払った
+			MONEY -= MONEY / 16
+		CASE 1
+			PRINTFORML %ANAME(対象)%為宣傳教團而拍攝寫真並散佈了出去
+			;TranslatedMark %ANAME(対象)%のハメ撮り写真が教団宣伝の為にばらまかれた
+			CALL PRINT_ADD_EXP(対象, "露出経験値", RAND:40 + 1, 1)
+			CALL TRAIN_AUTO_ABLUP(対象)
+		CASE 2
+			PRINTFORML %ANAME(対象)%被當做了新藥的實驗台使用
+			;TranslatedMark %ANAME(対象)%は新薬の実験台にされた
+			CFLAG:(対象):薬物依存 += RAND(50, 100)
+	ENDSELECT
+
+NEXT

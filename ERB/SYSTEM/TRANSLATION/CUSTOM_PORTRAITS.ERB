@@ -1,0 +1,266 @@
+﻿;-------------------------------------------------
+;JVN:
+;-------------------------------------------------
+@RUN_CUSTOM_PORTRAIT(Chara)
+#DIM Chara
+#DIM FIRST_LINE
+#DIM CREDRAW
+
+CREDRAW = CURRENTREDRAW()
+REDRAW 0
+
+$SHOW_LOOP
+FIRST_LINE = LINECOUNT
+
+CALL CHARACTER_EDIT_UI_PORTRAIT(Chara)
+PRINTL
+PRINTL
+PRINTL
+PRINTL
+PRINTBUTTON "[重新生成肖像]",26666
+PRINTL
+CALL SINGLE_DRAWLINE
+PRINTBUTTON "[返回]", 30000
+INPUT
+
+IF RESULT == 30000
+	REDRAW CREDRAW
+	RETURN
+ELSEIF RESULT == 26666 && !INRANGE(NO:Chara, 1, 200)
+	CALL REGENERATEPORTRAIT(Chara)
+ELSE
+	CALL CHARACTER_EDIT_INPUT_PORTRAIT(Chara,RESULT)
+ENDIF
+
+CLEARLINE LINECOUNT - FIRST_LINE
+GOTO SHOW_LOOP
+
+
+;-------------------------------------------------
+;JVN: Generate HTML for portraits
+;	Chara = Character Number
+;	pType = Type of picture. See CUSTOM_PORTRAITS_CONST.ERH for more information.
+;	iSize = Image size
+;-------------------------------------------------
+@GENERATE_PORTRAIT(Chara, pType = 0, iSize=800)
+#FUNCTIONS
+#DIM Chara
+#DIM pType
+#DIM iSize
+#DIM iFont_Hei_mag
+#DIMS sPrint_Text
+
+;Abort the mission if config is disabled
+;SIF !CONFIG:555
+;	RETURN
+
+iFont_Hei_mag = GETCONFIG("一行の高さ") * iSize*10 / GETCONFIG("フォントサイズ")
+iFont_Hei_mag = (iFont_Hei_mag/10) + (iFont_Hei_mag%10 >= 5?1#0)
+
+sPrint_Text =
+IF CUSTOM_PORTRAITS:Chara:pType != 0
+	sPrint_Text += @"<img src='c{CUSTOM_PORTRAITS:Chara:pType}' height='{iFont_Hei_mag}'"
+ELSE
+	sPrint_Text += @"<img src='%GetImageName(Chara)%' height='{iFont_Hei_mag}'"
+ENDIF
+;Vertical alignment
+sPrint_Text += @"ypos='0'>"
+;Horizontal alignment
+sPrint_Text += @"<shape type='space' param='100'>"
+
+RETURNF sPrint_Text
+
+
+;-------------------------------------------------
+; Simple function to show portrait info
+;-------------------------------------------------
+@GENERATE_PORTRAIT_INFO(Chara, pType = 0)
+#FUNCTIONS
+#DIM Chara
+#DIM pType
+#DIMS sText
+
+sText =
+IF pType < CUSTOM_PORTRAITS_TOTAL && CUSTOM_PORTRAITS:Chara:pType != 0
+	sText += @"c{CUSTOM_PORTRAITS:Chara:pType}"
+ELSEIF Chara < 0
+	sText += "没有图片"
+ELSE
+	sText += @"%GetImageName(Chara)%"
+ENDIF
+
+RETURNF sText
+
+
+;-------------------------------------------------
+;-------------------------------------------------
+@GENERATE_PORTRAIT_BORDERS(iLoop, Align = 0, iSize=800)
+#FUNCTIONS
+#DIM iLoop
+#DIM iX
+#DIM Align
+#DIM iSize
+#DIM iFont_Hei_mag
+#DIMS sAlign
+#DIMS sPrint_Text
+
+iFont_Hei_mag = GETCONFIG("一行の高さ") * iSize*10 / GETCONFIG("フォントサイズ")
+iFont_Hei_mag = (iFont_Hei_mag/10) + (iFont_Hei_mag%10 >= 5?1#0)
+
+SELECTCASE Align
+	CASE 0
+		sAlign = left
+	CASE 1
+		sAlign = left
+	CASE 2
+		sAlign = right
+	CASEELSE
+		sAlign = left
+ENDSELECT
+
+sPrint_Text = <p align='%sAlign%'>
+FOR iX,0,iLoop
+	sPrint_Text += @"<img src='Border_Normal' height='{iFont_Hei_mag}'"
+	sPrint_Text += @"ypos='-{iFont_Hei_mag / 8+1}'>"
+	sPrint_Text += @"<shape type='space' param='100'>"
+NEXT
+RETURNF sPrint_Text
+
+
+;-------------------------------------------------
+;JVN: UI for custom portraits
+;@CHARACTER_EDIT calls this function for displaying the UI
+;-------------------------------------------------
+@CHARACTER_EDIT_UI_PORTRAIT(Chara)
+#DIM Chara
+#DIM iLoop
+#DIM iLoopToo
+#DIMS sHtml
+
+PRINTL 肖像定制
+CALL COLOR_LINE
+PRINTL Resources文件夹中的 c[数字].png 的图片会被展示在这里，180x180，最多有50张
+PRINTL 这里只是一些示例，如果你想添加自己的图片，可以将图片重命名后放置在Resources文件夹中。
+PRINTL 也可以通过编辑Resources文件夹中的Custom.csv文件来使用更多功能
+PRINTL
+
+FOR iLoop, 0, CUSTOM_PORTRAITS_TOTAL
+	PRINTFORM %CENTERL(@"%CUSTOM_PORTRAITS_NAME:iLoop%肖像", 16)%
+	SIF iLoop < CUSTOM_PORTRAITS_TOTAL-1
+		PRINTFORM %"  "%
+NEXT
+PRINTL
+
+FOR iLoop, 0, CUSTOM_PORTRAITS_TOTAL
+	CALL COLOR_PRINT((CUSTOM_PORTRAITS:Chara:iLoop != 0) ? CENTERL("自定义中",16) # CENTERL("默认",16), (CUSTOM_PORTRAITS:Chara:iLoop != 0) ? 0xF0F0F0 # カラー_明灰色)
+	SIF iLoop < CUSTOM_PORTRAITS_TOTAL-1
+		PRINTFORM %"  "%
+NEXT
+PRINTL
+CALL MobImGen(Chara)
+sHtml = <p align='left'>
+FOR iLoop, 0, CUSTOM_PORTRAITS_TOTAL
+	sHtml += @"%GENERATE_PORTRAIT(Chara, iLoop)%"
+NEXT
+HTML_PRINT sHtml
+IF CONFIG:556
+	sHtml = <p align='left'>
+	sHtml = %GENERATE_PORTRAIT_BORDERS(CUSTOM_PORTRAITS_TOTAL)%
+	HTML_PRINT sHtml
+ELSE
+	PRINTL
+ENDIF
+PRINTL
+PRINTL
+PRINTL
+PRINTL
+PRINTL
+PRINTL
+
+FOR iLoop, 0, CUSTOM_PORTRAITS_TOTAL
+	PRINTFORM %GENERATE_PORTRAIT_INFO(Chara, iLoop), 16, LEFT%%"  "%
+NEXT
+PRINTL
+
+;JVN: Input/Erase button loop
+FOR iLoop, 0, CUSTOM_PORTRAITS_TOTAL
+	IF CUSTOM_PORTRAITS:Chara:iLoop > 0
+		PRINTBUTTON "[<<<]", 100 + iLoop
+	ELSE
+		CALL COLOR_PRINT("[<<<]",カラー_灰色)
+	ENDIF
+	PRINTFORM %" "%
+	IF CUSTOM_PORTRAITS:Chara:iLoop < 50
+		PRINTBUTTON "[>>>]", 200 + iLoop
+	ELSE
+		CALL COLOR_PRINT("[>>>]",カラー_灰色)
+	ENDIF
+	PRINTFORM %" "%
+	IF CUSTOM_PORTRAITS:Chara:iLoop != 0
+		PRINTBUTTON "[Ｘ]", 300 + iLoop
+	ELSE
+		CALL COLOR_PRINT("[Ｘ]",カラー_灰色)
+	ENDIF
+	SIF iLoop < CUSTOM_PORTRAITS_TOTAL-1
+		PRINTFORM %"  "%
+NEXT
+PRINTL
+
+;JVN: Copy buttons loop
+FOR iLoopToo, 0, CUSTOM_PORTRAITS_TOTAL
+	FOR iLoop, 0, CUSTOM_PORTRAITS_TOTAL
+		IF iLoop != iLoopToo
+			IF CUSTOM_PORTRAITS:Chara:iLoop != 0
+				PRINTBUTTON @"[%CENTER(@"复制到%CUSTOM_PORTRAITS_NAME:iLoopToo%",14)%]", (iLoop*100)+400+iLoopToo
+			ELSE
+				CALL COLOR_PRINT(@"[%CENTER(@"复制到%CUSTOM_PORTRAITS_NAME:iLoopToo%",14)%]", カラー_灰色)
+			ENDIF
+		ELSE
+			CALL COLOR_PRINT(@"[%"-"*14%]", カラー_灰色)
+		ENDIF
+		SIF iLoop < CUSTOM_PORTRAITS_TOTAL-1
+			PRINTFORM %"  "%
+	NEXT
+	PRINTL
+NEXT
+
+
+;-------------------------------------------------
+;JVN: Takes care of the input for custom portraits
+;@CHARACTER_EDIT calls this function for input checking
+;-------------------------------------------------
+@CHARACTER_EDIT_INPUT_PORTRAIT(Chara, Choice)
+#DIM Chara
+#DIM Choice
+#DIM Portrait
+#DIM Command
+
+Portrait = Choice % 100
+Command = (Choice - Portrait) / 100
+SELECTCASE Command
+	CASE 1
+		CUSTOM_PORTRAITS:Chara:Portrait -= 1
+	CASE 2
+		CUSTOM_PORTRAITS:Chara:Portrait += 1
+	CASE 3
+		CUSTOM_PORTRAITS:Chara:Portrait = 0
+		;edit all the 4's here to match the case if it's changed
+	CASE 4 TO (4 + CUSTOM_PORTRAITS_TOTAL - 1)
+		CUSTOM_PORTRAITS:Chara:Portrait = CUSTOM_PORTRAITS:Chara:(Command-4)
+ENDSELECT
+
+
+;-------------------------------------------------
+;JVN: Left-biased CENTER function
+;-------------------------------------------------
+@CENTERL(ARGS, ARG)
+#FUNCTIONS
+LOCAL = (ARG/2) - (STRLENS(ARGS) / 2)
+ARGS = %"", ((LOCAL+ARG%2)-(STRLENS(ARGS)%2))%%ARGS%%"", LOCAL%
+RETURNF ARGS
+
+@CENTER(ARGS, ARG)
+#FUNCTIONS
+LOCAL = (ARG/2) - (STRLENS(ARGS) / 2)
+ARGS = %"", LOCAL%%ARGS%%"", ((LOCAL+ARG%2)-(STRLENS(ARGS)%2))%
+RETURNF ARGS

@@ -1,0 +1,113 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_168_PERSONAL_1_EXIST
+RETURN 1
+
+@SKILL_168_PERSONAL_1_NAME
+RESULTS = 乘虚而入的妖狐
+
+;レベルは1-5まで
+@SKILL_168_PERSONAL_1_LEVEL
+RETURN 5
+
+;対象選択
+@SKILL_168_PERSONAL_1_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1
+
+;発動判定
+@SKILL_168_PERSONAL_1_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN BATTLE_COMMANDER_NUM:対象側 > 0 && (発動部隊 < 0 ? BATTLE_COMMANDER_NUM:発動側 <= 1 # BATTLE_COMMANDER_NUM:発動側 <= 2) 
+
+;発動テキストをオーバライドしたいときに。
+;「誰それのスキル発動！　○○した！」の「○○した！」の部分を実装したい場合は、
+;これじゃなくてINVOKEで書けばいいです。
+;@SKILL_168_PERSONAL_1_INVOKE_TEXT(発動者, スキル, ジャンル)
+;#DIM 発動者
+;#DIM スキル
+;#DIMS ジャンル
+
+;効果をここに記述
+@SKILL_168_PERSONAL_1_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 随机数
+#DIM 角色
+対象側 = !発動側
+随机数 = RAND:(BATTLE_COMMANDER_NUM:対象側)
+角色 = BATTLE_COMMANDER:対象側:随机数
+PRINTFORML %ANAME(発動者)%隐去形体,凭依在了%ANAME(角色)%的身上！
+PRINTFORML %ANAME(角色)%的灵魂受到了迷惑,难以自制地为我方战斗了！
+;CALL BATTLE_KNOCKOUT(発動側, 発動者)
+CALL BATTLE_SUMMON(発動側, 角色, 発動部隊 >= 0)
+FOR LOCAL,0,BATTLE_COMMANDER_NUM:発動側
+	SIF BATTLE_COMMANDER:発動側:LOCAL != 角色
+		CONTINUE
+	BATTLE_SKILL_RATE:発動側:LOCAL = BATTLE_SKILL_RATE:対象側:随机数 ;保留技能发动率
+	BATTLE_SKILL_SEALED:発動側:LOCAL = BATTLE_SKILL_SEALED:対象側:随机数 ;保留封魔效果
+	BATTLE_SUMMONED_CHARA:発動側:LOCAL = BATTLE_SUMMONED_CHARA:対象側:随机数 ;保留是否参与计算
+	BATTLE_武闘:発動側:LOCAL = BATTLE_武闘:対象側:随机数
+	BATTLE_防衛:発動側:LOCAL = BATTLE_防衛:対象側:随机数
+	BATTLE_知略:発動側:LOCAL = BATTLE_知略:対象側:随机数
+	BATTLE_政治:発動側:LOCAL = BATTLE_政治:対象側:随机数
+	BATTLE_歌唱:発動側:LOCAL = BATTLE_歌唱:対象側:随机数
+	BATTLE_料理:発動側:LOCAL = BATTLE_料理:対象側:随机数
+	BATTLE_妖術:発動側:LOCAL = BATTLE_妖術:対象側:随机数
+	BATTLE_武闘パワー:発動側:LOCAL = ABL_POWER(BATTLE_武闘:発動側:LOCAL, BATTLE_COMMANDER:発動側:LOCAL)
+	BATTLE_防衛パワー:発動側:LOCAL = ABL_POWER(BATTLE_防衛:発動側:LOCAL, BATTLE_COMMANDER:発動側:LOCAL)
+	BATTLE_知略パワー:発動側:LOCAL = ABL_POWER(BATTLE_知略:発動側:LOCAL, BATTLE_COMMANDER:発動側:LOCAL)
+	BATTLE_妖術パワー:発動側:LOCAL = ABL_POWER(BATTLE_妖術:発動側:LOCAL, BATTLE_COMMANDER:発動側:LOCAL)
+	BATTLE_歌唱パワー:発動側:LOCAL = ABL_POWER(BATTLE_歌唱:発動側:LOCAL, BATTLE_COMMANDER:発動側:LOCAL)
+	BATTLE_料理パワー:発動側:LOCAL = ABL_POWER(BATTLE_料理:発動側:LOCAL, BATTLE_COMMANDER:発動側:LOCAL)
+	BATTLE_妖術パワー:発動側:LOCAL = ABL_POWER(BATTLE_妖術:発動側:LOCAL, BATTLE_COMMANDER:発動側:LOCAL)
+	BREAK
+NEXT
+CALL BATTLE_KNOCKOUT(対象側, 随机数)
+
+@SKILL_168_PERSONAL_1_EXPLANATION
+RESULTS = 当我方部队存在将领空位时触发，使敌方一人叛变
+
+@SKILL_168_PERSONAL_1_CANT_TELL
+
+@SKILL_168_PERSONAL_1_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 200

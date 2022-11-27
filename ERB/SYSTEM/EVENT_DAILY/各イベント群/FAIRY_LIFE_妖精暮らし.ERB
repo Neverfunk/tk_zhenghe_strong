@@ -1,0 +1,993 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_FAIRY_LIFE_RATE()
+RETURN (DVAR:妖精暮らし_同棲フラグ > 0 ? 150 # 30)
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_FAIRY_LIFE_DECISION()
+SIF DAY < 12
+	RETURN 0
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+SIF DVAR:妖精暮らし_同棲フラグ == -1
+	RETURN 0
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_FAIRY_LIFE_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_FAIRY_LIFE
+
+;妖精との出会いイベント、同棲してる妖精がいる場合は発生しない
+IF DVAR:妖精暮らし_同棲フラグ == 0
+	SELECTCASE RAND:4
+		;畑を荒らす妖精
+		CASE 0
+			PRINTFORMW 有人在哪里听说有妖精在农田恶作剧
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI("让士兵巡视" ,"下圈套" ,"什么也不做")
+			IF RESULT == 2
+				PRINTFORML 对妖精的恶作剧不闻不问
+				PRINTFORMW 决定不听了
+			ELSEIF RESULT == 0
+				PRINTFORML 因为不能置之不理，所以我决定让士兵巡逻
+				PRINTFORML ・
+				PRINTFORML ・
+				PRINTFORMW ・
+				PRINTFORML 几天后，士兵们把妖精捉住了
+				PRINTFORML 士兵们请求将她囚禁起来
+				PRINTFORMW 因为可以减少士兵们日常的不满、于是就同意了
+				PRINTFORML …接下来的一段时间里，从监狱中听到了不分昼夜的、
+				PRINTFORMW 妖精满满的被慰藉的呻吟声
+			ELSE
+				PRINTFORML 下了圈套
+				PRINTFORML 猎人帮了他们把陷阱带到农田周围，然后看了很久
+				PRINTFORML ・
+				PRINTFORML ・
+				PRINTFORMW ・
+				PRINTFORML 几天后，我们成功抓到了一个妖精
+				PRINTFORML 她在笼子里吓得发抖
+				PRINTFORMW 说起来，好像肚子饿了，有点可怜瘦小的样子
+				PRINTFORML 怎麼辦？
+				CALL ASK_MULTI("交货" ,"藏匿" ,"侵犯")
+				IF RESULT == 2
+					PRINTFORML 看着妖精的身体，一副虽然年纪尚小但散发出漂亮女人气息的身子
+					PRINTFORML 忍不住的%ANAME(MASTER)%把她从笼子里取出，带到附近的空房里
+					PRINTFORMW 推倒她，剥去她的衣服，看到她那晶莹剔透的肌肤
+					PRINTFORML 手指向滑溜溜的皮肤一划行，像海绵一样按下去，她发出悲痛的声音
+					PRINTFORML 但经过许久的爱抚，她渐渐发出甜蜜的喘息声
+					PRINTFORML 再也不能忍受的%ANAME(MASTER)%把肉棒打进了漂亮的小巧粉红色的蜜穴里
+					PRINTFORMW 一声惨叫，挣扎在一起的她使我觉得她的阴道紧缩着%ANAME(MASTER)%的肉棒束缚过来
+					PRINTFORML 这种肉棒被包裹住的感觉，%ANAME(MASTER)%着迷地激烈抽插着
+					PRINTFORML 她痉挛地流着泪求饶的表情使%ANAME(MASTER)%激起了满满的兴奋
+					PRINTFORML 当精子即将爆发时，%ANAME(MASTER)%的动作加快，她的娇声也娇艳起来
+					PRINTFORMW 接着将欲望射精在小妖精深处，弓一般弓缩着身体的她失去了意识
+					PRINTFORMW 失去意识的妖精的小蜜穴被无数次的喂饱了精华，满足后，扔下破烂不堪的她，离开了小屋
+					CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", "妖精の膣", "強姦")
+					DVAR:妖精暮らし_同棲フラグ = -1
+				ELSEIF RESULT == 0
+					PRINTFORML 但是受灾是事实
+					PRINTFORMW %ANAME(MASTER)%把妖精送回受灾的人民那里
+					PRINTFORML 之后，妖精为了发泄百姓的怨气，被当作性奴隶
+					PRINTFORMW 虽然心中有一丝罪恶感，但是一想到要遭受凌辱的她，我的胯部就热起来了
+					DVAR:妖精暮らし_同棲フラグ = -1
+				ELSE
+					PRINTFORML 看起来不是坏孩子
+					PRINTFORML 那样想的%ANAME(MASTER)%说自己有责任，于是就把她藏了起来带回了家里
+					PRINTFORMW 她开始非常警惕，后来温柔地教导她，渐渐的她被%ANAME(MASTER)%的温柔感化，她被邀请一起生活，且保证不准对被人恶作剧的作为条件，她开心的点点头
+					CALL COLOR_PRINT(@"一个无名的妖精住在%ANAME(MASTER)%的房子里", カラー_注意)
+					PRINTFORMW 
+					DVAR:妖精暮らし_同棲フラグ = 1
+				ENDIF
+			ENDIF
+		;雨宿りする妖精
+		CASE 1
+			PRINTFORML 在家休息时，突然下起了倾盆大雨
+			PRINTFORML 雨下得越来越大，我透过窗户往外看，忽然看见房檐下有个小人影
+			PRINTFORMW 她从窗口探出身子，和妖精的少女四目相对，看来是在避雨
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI("邀到家里" ,"赶走" ,"侵犯")
+			IF RESULT == 2
+				PRINTFORML 他看着妖精的身体，一副虽然年纪尚小，但散发出漂亮女人气息的线条
+				PRINTFORML %ANAME(MASTER)%用心里话赞说和茶盘邀请她
+				PRINTFORMW 她毫无疑问地走进卧室，他硬是把她推倒在床上
+				PRINTFORML 当然，她激烈地挣扎着，她被打了两次脸颊之后，就变得老实了许多
+				PRINTFORML 一剥她的衣服，她那雪白的皮肤就像想象中那样露出诱人的身体
+				PRINTFORML 已经不能忍受了的%ANAME(MASTER)%也脱出赤裸的身子盖上她那样压倒
+				PRINTFORMW 她边哭边扭动着身体的表情让%ANAME(MASTER)%刺激兴奋，他尽情爱抚妖精全身
+				PRINTFORML 接着她也开始有反应，在性感禁带被划过之后，吓得浑身发抖，并且开始吐出甜蜜的叹息
+				PRINTFORML %ANAME(MASTER)%抓住她的腰，一丝不挂地把肉棒塞进粉红蜜穴
+				PRINTFORML 正在后背式的她痛苦地尖叫着，%ANAME(MASTER)%毫不理会的激烈抽插着的妖精的小阴道
+				PRINTFORMW 闭合的小蜜壶从全方面勒紧着肉棒，一不留神就会被刺激着射精
+				PRINTFORML 看着这一个幼小非常漂亮的蜜穴，%ANAME(MASTER)%深深地钉在腰间，细细品味着她的身体
+				PRINTFORML 她流着泪，%ANAME(MASTER)%紧紧地抱住她的手臂，将她的身体痉挛在弓箭上
+				PRINTFORML 当精子即将爆发时，%ANAME(MASTER)%动作加快，她的娇声也逐渐娇艳起来
+				PRINTFORMW 接着他将爆发的欲望射精的妖精深处，弓一般弓缩着身体的小妖精失去了意识
+				PRINTFORMW 在雨停之前，小妖精意识模糊的被他喂食了很多次极品肉棒的精华，上下两口洞被纯白的精华喂饱后，把唠唠叨叨的她甩了出去
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", "妖精の膣", "強姦")
+				DVAR:妖精暮らし_同棲フラグ = -1
+			ELSEIF RESULT == 1
+				PRINTFORML 不知道会被搞什么恶作剧
+				PRINTFORMW 唠唠叨叨的赶她离开，她一副困惑的表情在倾盆大雨中消失了
+				DVAR:妖精暮らし_同棲フラグ = -1
+			ELSE
+				PRINTFORML 在那里会感冒吧？进来吧！
+				PRINTFORML %ANAME(MASTER)%这么一叫，她大吃一惊，跳起来凝视着我
+				PRINTFORMW 对视的眼神中知道小妖精还是不敢相信，他点了点头再次邀请了她进来
+				PRINTFORML 她在屋檐门栏下待了一会儿，战战兢兢地走进了家里。%ANAME(MASTER)%看着她被雨水拍湿的脸颊和湿衣突显的诱人的身子
+				PRINTFORML 他把毛巾递给她，再倒些热茶给她暖暖身子，作为妖精的她非常有礼貌地道谢
+				PRINTFORMW 在雨声中，跟她进行片刻不停的对话
+				PRINTFORML 刚开始紧张的她似乎也习惯了，笑着给我听一个有趣的故事
+				PRINTFORML 雨终于停了，外面已经一片漆黑
+				PRINTFORMW 他叫她可以在此住宿觉，问她要一起生活么？还是...？她听到这话后开心的点头，她说想和%ANAME(MASTER)%在一起。
+				PRINTFORMW …然后她因此和%ANAME(MASTER)%在一起了！
+				CALL COLOR_PRINT(@"一个无名的妖精住在%ANAME(MASTER)%的房子里", カラー_注意)
+				DVAR:妖精暮らし_同棲フラグ = 1
+			ENDIF
+		;摘み食いする妖精
+		CASE 2
+			PRINTFORML 走在路上，碰到一个会吃地藏菩萨供品的妖精
+			PRINTFORMW 她被%ANAME(MASTER)%看到了，她嘴里塞满了馒头，全身都僵硬了
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI("给些食物" ,"捉拿" ,"离去")
+			IF RESULT == 2
+				PRINTFORML 这点问题也没有吧
+				PRINTFORMW %ANAME(MASTER)%当做什么也没看见就离开了
+				DVAR:妖精暮らし_同棲フラグ = -1
+			ELSEIF RESULT == 1
+				PRINTFORML 吃供品要受到惩罚
+				PRINTFORML %ANAME(MASTER)%伸手把她捉住
+				PRINTFORMW 小妖精恳求我的原谅
+				PRINTFORML 怎麼辦？
+				CALL ASK_YN("卖掉", "放跑")
+				IF RESULT == 1
+					PRINTFORML 仔细想想，这样一来，也不会有大问题
+					PRINTFORMW 她好像也在反省，所以放了她
+					DVAR:妖精暮らし_同棲フラグ = -1
+				ELSE
+					PRINTFORML 好不容易抓住了，别让她跑了
+					PRINTFORML 我正打算怎么办呢?这让我想起了一个喜欢妖精的人
+					PRINTFORMW %ANAME(MASTER)%把她绑起来卖给男人
+					PRINTFORML 男人非常喜欢妖精，马上就我向买了
+					PRINTFORML 也许男人会一辈子疼爱他的宠物
+					PRINTFORMW 背地里一边听着她悲痛的声音，%ANAME(MASTER)%一边数着金币一边踏上归途
+					MONEY += 5000
+					CALL COLOR_PRINTL("金", GETDEFCOLOR(), "5000", カラー_注意, "を手に入れた", GETDEFCOLOR())
+					DVAR:妖精暮らし_同棲フラグ = -1
+				ENDIF
+			ELSE
+				PRINTFORML 一定是肚子饿了吧
+				PRINTFORML %ANAME(MASTER)%把怀中剩下的点心递给她
+				PRINTFORML 她犹豫了一下，怯生生地收下了
+				PRINTFORMW %ANAME(MASTER)%满意地为她做了一件好事，告别了她，踏上了归途
+				PRINTFORML …但是她跟来了
+				PRINTFORMW 我还以为她会去某个地方，没想到她跟着我已经到家了
+				PRINTFORML 怎麼辦？
+				CALL ASK_MULTI("邀到家里" ,"赶走" ,"侵犯")
+				IF RESULT == 1
+					PRINTFORML 对不起，向妖精说声的很抱歉
+					PRINTFORMW %ANAME(MASTER)%赶她离开，妖精就露出遗憾的表情走了
+					DVAR:妖精暮らし_同棲フラグ = -1
+				ELSEIF RESULT == 2
+					PRINTFORML 回头一看，她羞涩地染着脸低下了头
+					PRINTFORML 看到她这表情那个动作，%ANAME(MASTER)%实在忍不住的抓住她的胳膊就往家里拽
+					PRINTFORMW 带入了卧室，把她一推再盖在床上
+					PRINTFORML 她好象不知道对方会做什么似的，心惊胆战地盯着我
+					PRINTFORML 感到一丝罪恶感的%ANAME(MASTER)%温柔地亲她，脱掉衣服
+					PRINTFORML 不久，她露出像雪花一样雪白的肌肤，羞得直打哆嗦
+					PRINTFORMW %ANAME(MASTER)%也脱下衣服扔掉，抱着她，温柔地爱抚她的全身
+					PRINTFORML 她羞涩地扭动着身体发出一声叹息，时不时还让身体微微颤抖
+					PRINTFORML 片刻，继续爱抚，她也渐渐有了感觉，喘了一口轻艳的气息
+					PRINTFORML 妖精粉红色的蜜穴已露出一丝丝蜜汁，确认了准备就绪的她，%ANAME(MASTER)%把勃起的肉棒放在蜜穴口上
+					PRINTFORMW 一边亲吻着她那不安地颤抖的额头，一边慢慢地把腰沉下去
+					PRINTFORML 她一边发出呻吟，一边紧紧抱住%ANAME(MASTER)%
+					PRINTFORML 一边关怀着她，一边慢慢推动蜜穴里的肉棒向里面走去
+					PRINTFORML 蜜穴很紧束让人非常有感觉，%ANAME(MASTER)%控制住自己，忍着不容易射精
+					PRINTFORMW 不一会儿，肉棒终于到了小蜜穴的深处，她长长地吐了一声娇艳的呻吟
+					PRINTFORML 还在流泪的她习惯之前，我要忍住干劲，舒展身子慢慢缓动
+					PRINTFORML 她也开始慢慢习惯，一边发出女性特有的喘息声，一边慢慢配合地扭动着身子
+					PRINTFORML %ANAME(MASTER)%马上就要爆发了，动作也加快起来，她的娇声也频繁娇艳起来
+					PRINTFORMW 接着他爆发强烈的欲望往妖精深处射精，最后她也弓身朝上，让小穴接满了使她的肚子鼓起的庞大精液
+					PRINTFORMW 经过一整夜的热恋，她约好重逢，离开了
+					CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", "妖精の膣", "和姦")
+				ELSE
+					PRINTFORML 我回头一看，她羞涩地低下头
+					PRINTFORML 看来没有恶意
+					PRINTFORMW 把这孩子赶回去也觉得挺可怜的，就让她住在家里也可以
+					PRINTFORML 开了门请她进来，她兴高采烈地跑了过来
+					PRINTFORML 那天晚上，我做了她最爱吃的汉堡
+					PRINTFORMW …早上起来，她躺在我身边，小巧的身子抱着我的手臂，那安享幸福的睡脸露出微笑，看来已经决定住在%ANAME(MASTER)%的家里打算一起生活了
+					CALL COLOR_PRINT(@"一个无名的妖精住在%ANAME(MASTER)%的房子里", カラー_注意)
+					PRINTFORMW 
+					DVAR:妖精暮らし_同棲フラグ = 1
+				ENDIF
+			ENDIF
+		;弾幕ごっこする妖精
+		CASE 3
+			PRINTFORML 买完东西，到家附近时，从上空传来声音
+			PRINTFORML 仰视着正在玩弹幕游戏的妖精和妖怪
+			PRINTFORMW 华丽的弹幕向周围飞去
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI("参战" ,"观看" ,"离去")
+			IF RESULT == 2
+				PRINTFORML 在这里是家常便饭
+				PRINTFORMW %ANAME(MASTER)%不在意地走了
+				CALL COLOR_PRINT("ドスッ！", カラー_警告)
+				PRINTFORMW 
+				PRINTFORML …我的背后被拉上了一流弹幕!
+				PRINTFORMW 受到突然的冲击，%ANAME(MASTER)%摔了一跤，受了伤
+				CALL ADD_COOLTIME(MASTER, 2)
+				DVAR:妖精暮らし_同棲フラグ = -1
+			ELSEIF RESULT == 1
+				PRINTFORML 因为是难得的机会所以决定注视胜败
+				PRINTFORML …很快，那个败了的妖精就在身边降落了
+				PRINTFORMW 当我窥视着她的样子时，妖怪也跳了下来靠近了害怕的妖精
+				PRINTFORML 妖怪兴奋得直舔嘴唇
+				PRINTFORMW 看来她是妖怪的猎物
+				PRINTFORML 怎麼辦？
+				CALL ASK_YN("帮助", "离去")
+				IF RESULT == 1
+					PRINTFORML 如果是胜负的结果，就没有办法
+					PRINTFORML %ANAME(MASTER)%无视妖精寻求帮助的视线而离去
+					PRINTFORMW 背后传来了妖精的凄惨呻吟声
+					DVAR:妖精暮らし_同棲フラグ = -1
+				ELSE
+					PRINTFORML 果然不忍看到少女遭到侵犯
+					PRINTFORML %ANAME(MASTER)%说服妖怪暂时停止行动
+					PRINTFORML 一开始生气的妖怪也慢慢枯萎了，勉勉强强地离开了
+					PRINTFORMW 她伸出手来，深深感谢
+					PRINTFORML 我叫她到家里去治疗受伤，她略带踌躇地身子跟着来了
+					PRINTFORML 我一边在家里一边听她说话，她的地盘似乎被那个妖怪给侵占了
+					PRINTFORML 向她提议，对于已经无处可去的她，还是先在家住下一会儿好
+
+
+					PRINTFORMW 毫不客气地劝说了她一会儿，她终于点了点头答应了
+					CALL COLOR_PRINT(@"一个无名的妖精住在%ANAME(MASTER)%的房子里", カラー_注意)
+					PRINTFORMW 
+					DVAR:妖精暮らし_同棲フラグ = 1
+				ENDIF
+			ELSE
+				PRINTFORML 因为是难得的机会所以决定参战
+				PRINTFORMW 它们对突然闯入的人惊奇地走过来
+				PRINTFORML ・
+				PRINTFORML ・
+				PRINTFORMW ・
+				IF ABL:MASTER:武闘 * (RAND:5 + 1) >= 40 * (RAND:8 + 1)
+					PRINTFORML 勝利した！
+					PRINTFORMW 妖怪跑开了，受伤的妖精倒在地上
+					PRINTFORML 怎麼辦？
+					CALL ASK_MULTI("领钱" ,"放跑" ,"侵犯")
+					IF RESULT == 1
+						PRINTFORML 只是多变的胜负，没有你想要的
+						PRINTFORMW 让她跑了
+					ELSEIF RESULT == 0
+						PRINTFORML 要钱，她不情愿地把金币递了过来
+						PRINTFORMW 为获得意想不到的临时收入而踏上了回家的路
+						MONEY += 5000
+						CALL COLOR_PRINTW("金", GETDEFCOLOR(), "5000", カラー_注意, "を手に入れた", GETDEFCOLOR())
+						DVAR:妖精暮らし_同棲フラグ = -1
+					ELSE
+						PRINTFORML 从败衣服上露出的白皙肌肤
+						PRINTFORML 她的身材看起来非常傲慢美满
+						PRINTFORML 当醒来时%ANAME(MASTER)%把她带到附近的树林里
+						PRINTFORMW 然后强行脱掉剩下的衣服，细细地吸舔在妖精身上
+						PRINTFORML 她虽然有抵抗，但没有力量，她那焦虑不安的表情让%ANAME(MASTER)%激起了兴奋
+						PRINTFORML 不能忍受的%ANAME(MASTER)%向流出一丝蜜汁的小穴的她前行，把肉棒塞进她的小蜜穴
+						PRINTFORML 处女的她大幅度地颤动扭动着身子，发出悲痛的叫声
+						PRINTFORMW 她的阴道把肉棒紧紧咬住，%ANAME(MASTER)%直截了腰一下子将腰突进起来
+						PRINTFORML 接着，她一边按住哭闹的她，一边缓慢地往雌洞里侵犯
+						PRINTFORML 令人痉挛的媚肉不停地缠绕在肉棒上，兴奋得不由自主地呻吟起来
+						PRINTFORML 他一边抓着她的腰，一边狠狠地转了个身，尽情地尽情地满足她那丰满的小蜜穴
+						PRINTFORMW 终于到了忍耐的极限，%ANAME(MASTER)%射精一射出，她便大大地弓起身来，昏了过去
+						PRINTFORMW 许久，她嘴巴和蜜穴已塞满了和流出掺和丝红血液的精子，满足之后把破破烂烂的她丢在原地离开了
+						CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", "妖精の膣", "強姦")
+						DVAR:妖精暮らし_同棲フラグ = -1
+					ENDIF
+				ELSE
+					PRINTFORMW 負けてしまった…
+					IF MONEY > 0
+						PRINTFORMW 財布を要求されたので大人しく差し出すしかなかった
+						LOCAL = MONEY / 4
+						SIF LOCAL > 50000
+							LOCAL = 50000
+						MONEY -= LOCAL
+						CALL COLOR_PRINTW(@"金{LOCAL}を支払った", カラー_注意)
+					ENDIF
+				ENDIF
+			ENDIF
+	ENDSELECT
+;妖精との日常イベント、発生毎に妖精暮らし_エロカウントがたまる
+ELSEIF DVAR:妖精暮らし_同棲フラグ == 1 && DVAR:妖精暮らし_エロカウント < 5
+	PRINTFORMW %ANAME(MASTER)%和一个无名的妖精住在一起…
+	PRINTFORML 
+	SELECTCASE RAND:20
+		CASE 0
+			PRINTFORMW 有一天，他往卧室里一看，发现妖精正趴在被子里
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI("扑上" ,"整理下被子" ,"放任不管")
+			IF RESULT == 2
+				PRINTFORML 无视了
+				PRINTFORML 过了一会儿，她汗流浃背地从被窝里走了出来
+				PRINTFORML 她看到被无视了感到郁闷
+				PRINTFORMW 但是一告诉她马上到吃饭的时间，她立刻露出笑容跑了过来
+			ELSEIF RESULT == 0
+				PRINTFORML %ANAME(MASTER)%一下子扑上了
+				PRINTFORML 猛然倒在被子里，但是毫无反应
+				PRINTFORML 我吓了一跳，突然壁橱打开了，妖精笑着走了出来
+				PRINTFORMW 完全中了恶作剧的%ANAME(MASTER)%只好笑了
+			ELSE
+				PRINTFORML 打算整理一下的%ANAME(MASTER)%揭开了被子
+				PRINTFORML 不出所料，被子里只有枕头，没有妖精
+				PRINTFORML …环顾四周，壁橱稍微打开了一点
+				PRINTFORML %ANAME(MASTER)%往这走来打开壁橱，她尖叫着跑了出来
+				PRINTFORMW 看穿了恶作剧的%ANAME(MASTER)%和妖精们互相抱在一起，欢笑着
+			ENDIF
+		CASE 1
+			PRINTFORMW 妖精在檐廊上和野猫嬉戏
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI("送食物" ,"赠送猫和毯" ,"看着")
+			IF RESULT == 2
+				PRINTFORML 决定密切关注她这种欢快的状态
+				PRINTFORML 她和猫一样自由自在玩耍
+				PRINTFORML 过了一会儿，她抱着猫睡着了
+				PRINTFORMW %ANAME(MASTER)%看着妖精的睡脸，苦笑着给盖上了毛毯
+			ELSEIF RESULT == 1
+				PRINTFORML %ANAME(MASTER)%把猫递给了她
+				PRINTFORML 她高兴地挥动猫的尾巴，猫就会蹦起来
+				PRINTFORML 但是得意忘形的她被猫扑到地上摔了一跤
+				PRINTFORMW 我安慰着被猫抓着要哭的小妖精，给她一个拥抱缓解了她的情绪
+			ELSE
+				PRINTFORML 把干沙丁鱼送给了她，高兴地送给猫吃了
+				PRINTFORML 看见猫在吃东西，她也吃了一些到嘴里了
+				PRINTFORML 看样子她俩非常契合了，开始吃沙丁鱼她，速度一点也不逊色于猫
+				PRINTFORML 我认为这实在是吃多了，就拿剩下的离去，结果被两头猫抗议了
+				PRINTFORMW 但他一提到吃饭的时间，她就高兴地跑到桌子上去了
+			ENDIF
+		CASE 2
+			PRINTFORMW 妖精在檐廊上蜷曲着午睡
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI("恶作剧" ,"盖毯子" ,"一起睡觉")
+			IF RESULT == 2
+				PRINTFORML 感觉很舒服所以决定一起睡
+				PRINTFORML 刚躺在她身边，她就往%ANAME(MASTER)%身边蹭了过来
+				PRINTFORML 摸她的头发出令人愉快的声音
+				PRINTFORMW 看着她那幸福的睡脸，不留意%ANAME(MASTER)%跌了一跤
+			ELSEIF RESULT == 1
+				PRINTFORML 小心感冒，给她盖上毛毯
+				PRINTFORML 她说梦话时，叫了%ANAME(MASTER)%的名字
+				PRINTFORMW 我摸着脑袋回答她，她幸福地微笑了
+			ELSE
+				PRINTFORML 如同躺在无防备状态下的肢体一般，如同梦幻一般美好
+				PRINTFORML 轻轻地抚摩她的大腿，她没有起来
+				PRINTFORML 突然她转身了，一瞬间，再次发出了均匀的鼾声
+				PRINTFORMW %ANAME(MASTER)%得意忘形的抚摸着她的身体，顺着大腿摸入裙底她的小内内，轻轻拉下小内内，抚摸着已流出一点点蜜汁的小穴享受着，期间她在流露一丝口水的睡梦中发出一丝丝呻咛
+			ENDIF
+		CASE 3
+			PRINTFORML 妖精捡来了闪闪发光的东西
+			PRINTFORMW 看样子像是玻璃碎片
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI("跟点心交换" ,"用金钱交换" ,"让她们丢掉")
+			IF RESULT == 2
+				PRINTFORML 叫她把它扔掉，她拒绝了
+				PRINTFORML 耐心的对她劝了劝，总算把它抛弃了
+				PRINTFORML 她垂头丧气的样子，真让人痛心
+				PRINTFORMW 为了取悦她，做了她喜欢的东西，终于笑了
+			ELSEIF RESULT == 1
+				PRINTFORML 因为很危险，所以决定用一笔钱和她换
+				PRINTFORML 她高兴地跳了起来，告诉我要好好利用
+				PRINTFORMW 拿着钱想着要买什么东西的样子，她嘿嘿地笑了起来
+			ELSE
+				PRINTFORML 因为危险，决定给她点心交换
+				PRINTFORML 她高兴地跳起来，津津有味地大吃点心
+				PRINTFORML 她回头看着我，她拿了一块点心递给了%ANAME(MASTER)%
+				PRINTFORMW 两个人在檐廊上开心地吃点心
+			ENDIF
+		CASE 4
+			PRINTFORML 出去玩的妖精满身是泥地回来了
+			PRINTFORMW 嘿嘿地笑的脸也满是泥
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI("泡澡" ,"淋浴" ,"训斥")
+			IF RESULT == 2
+				PRINTFORML 责备了她要就不要这样不顾一切地回家
+				PRINTFORML 觉得对无精打采的她说得过头了，便告诉她洗完身体后再做点心
+				PRINTFORML 她立刻恢复了心情，一边脱下衣服一边向浴室跑去
+				PRINTFORMW 一边苦笑看着妖精，把妖精脱下的衣服扔进备洗的篮子里
+			ELSEIF RESULT == 1
+				PRINTFORML 不能就这样走进家里，而是将她带到了院子里
+				PRINTFORML 脱下她的衣服，拿出浇花的水枪轻轻喷射着她
+				PRINTFORML 她咯吱咯吱地跑来跑去，不知不觉就沉溺于玩水
+				PRINTFORMW 结果，%ANAME(MASTER)%也开心的陪着她一起玩，直到太阳落山
+			ELSE
+				PRINTFORML 不能就这样进家，于是我抱着她走向浴室
+				PRINTFORML 我们一起脱下衣服，对浴缸放满了水，一起泡了进去
+				PRINTFORML 对着快乐地嬉闹着水的她，%ANAME(MASTER)%为了不让奇怪的事情费心而努力清醒
+				PRINTFORML 妖精没有意识到%ANAME(MASTER)%的痛苦，她用柔软的身体压着他
+				PRINTFORMW %ANAME(MASTER)%在犯错前就早早地洗完了澡，但她的裸体依然烙印在我的眼前
+			ENDIF
+		CASE 5
+			PRINTFORML 妖精在玩正在洗的衣服
+			PRINTFORMW 这样下去还得重新洗
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI("训斥" ,"一起玩儿" ,"递另一个玩具")
+			IF RESULT == 2
+				PRINTFORML 因为不忍心责罚，所以我给了她一个玩具
+				PRINTFORML 起初她很不情愿，%ANAME(MASTER)%很开心地用那个玩具玩了一下吸引着她，她渐渐感到兴趣的就跑了过来玩了
+				PRINTFORMW 对着玩具狂欢的她苦笑着，把有皱纹的衣服晾了一晾
+			ELSEIF RESULT == 1
+				PRINTFORML 哎，这样的话，咱们一起玩儿吧
+				PRINTFORML %ANAME(MASTER)%戴上床单，模仿鬼怪时，她高兴地尖叫着跑了起来
+				PRINTFORML 我抓住她，钻进那床单，开心地笑着，%ANAME(MASTER)%抱住了她，双手巧妙的抱着她的胸部，轻轻揉捏起来，妖精毫无察觉的继续开心的玩耍
+				PRINTFORMW 两个人玩了一会儿之后，又一起洗了洗衣服
+			ELSE
+				PRINTFORML 我拿起洗好的衣服，批评她，让她玩的时候换别的
+				PRINTFORML 她垂头丧气，但似乎反省了一番，又一起洗了衣服
+				PRINTFORML 看到她的样子，无奈的提议，洗好衣服就能得到点心奖励的她笑了
+				PRINTFORMW 被她催着赶快洗完的衣服晒完后，马上到客厅里面等待着奖励
+			ENDIF
+		CASE 6
+			PRINTFORML 差不多该吃午饭了，我往厨房里一看，妖精正在做饭
+			PRINTFORMW 身材矮小，一边逞强一边努力做菜
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI("看着" ,"一起做" ,"使裸体围裙")
+			IF RESULT == 2
+				PRINTFORML %ANAME(MASTER)%把一条围裙递给她了
+				PRINTFORML 必须光着身子裹上裙的要求吓到了她，说是方便被弄脏了可以直接用水进行清洗
+				PRINTFORML 她毫不起疑地穿着裸体围裙
+				PRINTFORMW 虽然感觉有点罪恶感，但是很高兴看到了她那难得一见的样子
+			ELSEIF RESULT == 1
+				PRINTFORML 因为有点危险，所以决定一起做
+				PRINTFORML 我一边牵着她的手一边给她下达了指示，她热心地去做
+				PRINTFORML …做好的菜虽然差点儿模样，但还是很好吃
+				PRINTFORMW 她笑着说，这样子有她的话就别去娶媳妇了
+			ELSE
+				PRINTFORML 决定虽然有些危险，但还是努力地看着
+				PRINTFORML 虽然有时会溅起油、碗快要掉下，啪嗒啪嗒的跳着，但好像能平安做好菜了
+				PRINTFORML %ANAME(MASTER)%当喊她的时候，她发现自己在被看着，羞涩地笑了笑
+				PRINTFORML 夸她一个人做得好，她露出高兴的笑容
+				PRINTFORMW 两个人都美味地吃了甜薄煎饼
+			ENDIF
+		CASE 7
+			PRINTFORML 当我在工作时，一个妖精坐在我的膝盖上
+			PRINTFORMW 想叫她下去，不要妨碍我
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI("赶走" ,"照原样工作" ,"恶作剧")
+			IF RESULT == 2
+				PRINTFORML 心有余念，%ANAME(MASTER)%对她决定恶作剧了
+				PRINTFORML 用手指在她柔软的手臂和大腿上沙沙作响
+				PRINTFORML 她不好意思地笑了一下，转过身来盯着我，渐渐的她羞涩的低下头来，转了回去
+				PRINTFORML 看到这样的她，手指更大胆地往身上爬，她反应也越来越强烈
+				PRINTFORMW 过了一段时间，我终于得到了少女柔嫩的肌肤，隔着薄衣的间隔，摸着她里面小小的胸部揉捏着，和在她的小裙下已被脱下一点点小内内颤漏着一丝蜜汁的小穴里揉插着手指。享受着意外快感的妖精流下一丝口水而颤抖着。
+			ELSEIF RESULT == 1
+				PRINTFORML 硬着头皮继续工作
+				PRINTFORML 她起初看起来很无聊，为了引%ANAME(MASTER)%来气来搞着恶作剧
+				PRINTFORML 我被搔痒，视线被阻隔，手臂被抓住，但我还是继续工作
+				PRINTFORMW 渐渐的，%ANAME(MASTER)%与妖精的脸上带着笑容，两个人一边谈笑一边继续作戏
+			ELSE
+				PRINTFORML 因为是打扰工作，所以赶跑了
+				PRINTFORML 她无聊地走到什么地方去了
+				PRINTFORML 没有阻碍了的%ANAME(MASTER)%暂时把精力集中在工作上
+				PRINTFORMW 工作也差不多该吃午饭了，总觉得有什么好闻的
+				PRINTFORML 我看向厨房，只见她正在认真做饭
+				PRINTFORML 她说，她注意到%ANAME(MASTER)%的时候，会觉得在工作上好像很累，于是...就打算做些什么来犒劳一下
+				PRINTFORML %ANAME(MASTER)%被她治愈了，抚摸着她的头，她嘿嘿地笑了起来
+				PRINTFORMW 虽然有点咸，但是两个人一起吃的午饭很好吃
+			ENDIF
+		CASE 8
+			PRINTFORMW 因为天气很好，有人邀请我去散步
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI("散步去" ,"在家里无所事事" ,"拜托买东西")
+			IF RESULT == 2
+				PRINTFORML 自己有工作去不了
+				PRINTFORML 决定拜托她买东西
+				PRINTFORMW 被托付工作的她果断地走了
+				PRINTFORML …过了一会儿，她就把东西买好了
+				PRINTFORMW 由于她用找剩的钱买了一些点心回来，我被她央求，决定和她一起吃点心
+			ELSEIF RESULT == 1
+				PRINTFORML 今天有点不舒服所以拒绝了
+				PRINTFORML 她不高兴了，没办法，我决定坐下来看书
+				PRINTFORML 过了一会儿，她好像心情完全好转了似的，全神贯注地一起看书
+				PRINTFORMW 度过了悠闲的一天
+			ELSE
+				PRINTFORML 不错的天气，我们一起出门
+				PRINTFORML 也没有规定目的地，被她拉着手腕
+				PRINTFORML 她说这是个秘密，带我去了妖精们的集会场
+				PRINTFORMW 仿佛小孩子们的秘密基地一样，开心地和孩子们在一起
+			ENDIF
+		CASE 9
+			PRINTFORML 有一天，隐藏了我工作的工具
+			PRINTFORMW 问她，她说，今天她让我跟她一起玩儿
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI("玩" ,"予以惩罚" ,"藏玩具")
+			IF RESULT == 2
+				PRINTFORML 为了报复把她的玩具藏起来了
+				PRINTFORML 她开始进行寻宝了，不是吗？
+				PRINTFORMW 结果，她和%ANAME(MASTER)%也一起寻宝了，最后她开心的终于找到了
+			ELSEIF RESULT == 1
+				PRINTFORML 作为惩罚，让她瞻仰了屁股
+				PRINTFORML 还没惩罚她就呜呜地道歉了
+				PRINTFORMW 为了让蛮横的她暂时搁在一边，让她反省才开始工作
+			ELSE
+				PRINTFORML 没办法，只好陪她玩了
+				PRINTFORML 她忽然笑了起来
+				PRINTFORML 那天把一天的工作忘了，和她尽情地玩
+				PRINTFORMW 虽然被她折腾得筋疲力尽，但是真的很有意义
+			ENDIF
+		CASE 10
+			PRINTFORML 月亮美丽的夜晚，她邀请我去赏月酒
+			PRINTFORMW 明天有工作
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI("一起" ,"一杯" ,"拒绝")
+			IF RESULT == 2
+				PRINTFORML 对不起，我拒绝了
+				PRINTFORMW 结束工作后我又邀请泄气的她，她笑了起来
+			ELSEIF RESULT == 1
+				PRINTFORML 我们决定只喝一杯
+				PRINTFORML 她往%ANAME(MASTER)%的杯子里倒满了酒
+				PRINTFORML 苦笑着跟她在夜风中喝着赏月酒
+			ELSE
+				PRINTFORML 难得的邀请，一起吧
+				PRINTFORML 她不知从哪儿弄来的团子也拿出来了
+				PRINTFORMW 两人在夜风中赏月喝酒
+				PRINTFORMW …第二天早上，我还是因为宿醉而睡过头了
+			ENDIF
+		CASE 11
+			PRINTFORML 发现她蹲在院子里
+			PRINTFORMW 我偷窥她在做什么，她正在观察蚂蚁的巢穴
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI("清理蚂蚁窝" ,"一起观察" ,"放任不管")
+			IF RESULT == 2
+				PRINTFORML 令人欣慰的景象
+				PRINTFORMW 为了不打扰，我离开了那里
+			ELSEIF RESULT == 1
+				PRINTFORML 决定蹲在她旁边，一起观察
+				PRINTFORML 她和%ANAME(MASTER)%一起看它，她报告了一些蚂蚁们的情况
+				PRINTFORML 一起支援了蚂蚁们拼命运送大猎物的样子
+				PRINTFORMW 暂时忘却了时间，回到了童心
+			ELSE
+				PRINTFORML 决定清理蚂蚁的窝
+				PRINTFORML 虽然她说这样很可怜，但是告诉她如果不这样会有蚁患
+				PRINTFORMW %ANAME(MASTER)%说着这句话，她歪了歪头还是很伤心的样子…
+				PRINTFORML …第二天，蚂蚁的巢穴全被摧毁了
+				PRINTFORMW 諸行無常
+			ENDIF
+		CASE 12
+			PRINTFORML 下雨天在家里发着呆，看到妖精正盯着窗外
+			PRINTFORMW 这时%ANAME(MASTER)%一边看，一边喃喃说没意思
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI("就这样发发呆" ,"打个游戏什么的" ,"一起出去")
+			IF RESULT == 2
+				PRINTFORML 偶尔也在雨中走一走吧
+				PRINTFORMW %ANAME(MASTER)%约她出去散步，她高高兴兴地拿出长靴来
+				PRINTFORMW 两人在雨中一边淋一边享受着温和刺激的散步
+			ELSEIF RESULT == 1
+				PRINTFORML 我约她去打个游戏，她和我不约而同地走了过来
+				PRINTFORML 我们玩纸牌，还研发了很多很有趣的纸牌游戏
+				PRINTFORMW 两个人一直玩到下午，玩了很多游戏
+			ELSE
+				PRINTFORML 我什么也不想做，就那样呆着
+				PRINTFORMW 不久，她也靠近%ANAME(MASTER)%坐在旁边，一起静静的发呆
+			ENDIF
+		CASE 13
+			PRINTFORML 回到家，看到妖精抱着一大堆点心跑来
+			PRINTFORMW 好像是帮助有困难的奶奶获得的奖励
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI("全部一起吃" ,"只喂一个")
+			IF RESULT == 1
+				PRINTFORML 吃了所有的东西就不能吃饭了
+				PRINTFORMW 我让她只吃一个，她一边碎念一边拿出点心来
+				PRINTFORML 但她迷惘了，无法选择那些新的，第一次看到的好吃点心
+				PRINTFORMW 在看到她烦恼了很久之后，我选择了一个给她，把剩下的点心都好好保存起来
+			ELSE
+				PRINTFORML 这下子就吃不成饭了
+				PRINTFORML 然而，她此刻正在为吃哪一种食物而发愁
+				PRINTFORMW 当我一一的给她解释这堆积如山的各个点心是什么时，她的眼睛闪闪发亮的听着
+			ENDIF
+		CASE 14
+			PRINTFORML 从院子里传来妖精的叫声，我往里一看，只见她戴着一顶大草帽
+			PRINTFORMW 是被风吹来的吗?
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI("说很合适" ,"给你买别的帽子" ,"还主去")
+			IF RESULT == 2
+				PRINTFORML 不知是谁的帽子飞过来了，劝了她寻找失主
+				PRINTFORMW 她哭着找帽子的主人，她乖乖地把帽子拿了下来给%ANAME(MASTER)%交给失主了
+				PRINTFORML …失主意外拿回自己失去的帽子，却发现了妖精满脸的失望
+				PRINTFORML 那个人接过帽子想了一会儿，又送给妖精戴上了那一顶草帽
+				PRINTFORMW 妖精吃了一惊，满脸笑容向失主道谢
+				PRINTFORMW 回来的路上，她始终心情很好
+			ELSEIF RESULT == 1
+				PRINTFORML 这顶帽子要归还失主，她好象受到了打击似地低下了头
+				PRINTFORML 无奈向可怜的她说要买别的帽子，她忽然笑了起来
+				PRINTFORMW 买了一顶她喜欢的帽子，最后把失主那帽子还回去了
+			ELSE
+				PRINTFORML 说她挺适合的，她羞涩地笑了一圈
+				PRINTFORMW 她似乎很喜欢这顶帽子，戴了很长时间
+			ENDIF
+		CASE 15
+			PRINTFORML 我偶然看见她在沙发上翻身，正吃着冰激凌不知从哪里弄来的
+			PRINTFORMW %ANAME(MASTER)%注意到她的视线，她“嘿嘿”地笑了笑，把冰淇淋递了过来
+			PRINTFORML 怎麼辦？
+			CALL ASK_YN("要一口" ,"谢绝")
+			IF RESULT == 1
+				PRINTFORML 看着被她吃了一口的冰淇淋，如果这事情她不在意的话，突然，她吧嗒吧嗒地跳起来，向我压过来举起给我
+				PRINTFORMW %ANAME(MASTER)%即使摇头拒绝，还是会一个劲地往我身上推
+				PRINTFORML 死心一开口，结果她一下子拿开了冰激凌
+				PRINTFORMW 目瞪口呆的%ANAME(MASTER)%被她淘气地作弄了，她笑了起来，吃起一大口冰淇淋，推上我的身子送到我面前而塞给我嘴里。离口时挂出了一条丝珠她羞涩的笑着看着我，我原谅她了。学着她吃了一口她手中的冰淇淋再次迎上她的嘴唇。
+			ELSE
+				PRINTFORML 要了一口冰激到嘴里
+				PRINTFORML 好吃吗?她说，我点了点头，她高兴地笑了，她也大口地吃着冰淇淋
+				PRINTFORMW 当我要求再吃一口，她递给我时，吃的不是手上的，而是她嘴唇残留的冰淇淋，细腻品尝了许久许久...
+			ENDIF
+		CASE 16
+			PRINTFORML 在休息的时候，突然吧嗒一声，我把头扭到了后面
+			PRINTFORML 回头一看，妖精手里拿着一个报纸头盔和剑
+			PRINTFORMW 她唯恐自己上前炫耀地挥舞着剑
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI("做出更厉害的剑" ,"收起剑来" ,"用水枪对抗")
+			IF RESULT == 2
+				PRINTFORML %ANAME(MASTER)%一起身就从仓库里取出水枪来
+				PRINTFORML 她慌忙想逃跑，但毫不留情地向背后射击
+				PRINTFORMW 一边喊着一边逃跑的她，我开始追逐赛跑了
+				PRINTFORMW …结果那一天，家里都被水淹没了
+			ELSEIF RESULT == 1
+				PRINTFORML 在家里胡闹会出大麻烦的
+				PRINTFORMW %ANAME(MASTER)%突然间拿起她自满的剑扔进垃圾桶
+				PRINTFORMW 那天下午，她一直抗议，她没有玩够
+			ELSE
+				PRINTFORML %ANAME(MASTER)%搓了搓鼻子一笑，拿出报纸，做了更厉害的剑
+				PRINTFORML 这让她眼睛发光，喊道给我吧！她恳求着
+				PRINTFORMW 答应给她，说出去玩吧，她高高兴兴地拿着剑往外飞去
+			ENDIF
+		CASE 17
+			PRINTFORML 从玩耍回来的妖精把四叶草递给了我
+			PRINTFORMW 仔细一看，她已经变得脏乱不堪，好像是一直在努力寻找的
+			PRINTFORML 怎麼辦？
+			CALL ASK_YN("还给她" ,"做成书签")
+			IF RESULT == 1
+				PRINTFORML 我说谢谢，她羞涩地笑了
+				PRINTFORMW 说要给她做成一条书签，她一副很有兴趣的样子
+				PRINTFORML 一起制作了四叶书签，仿佛看到了魔法一般睁大了眼睛
+				PRINTFORMW 把她的连环画插入她的画册里，她很珍惜哦!露出满脸笑容
+			ELSE
+				PRINTFORML 我说谢谢，她羞涩地笑了
+				PRINTFORML 我给她扎头发，因为是你的东西，她有些惊讶
+				PRINTFORMW 虽然有些困惑，%ANAME(MASTER)%当说很合适时，她嘿嘿地笑了
+				PRINTFORMW 她一天把四叶草当做自己的标志
+			ENDIF
+		CASE 18
+			PRINTFORML 有一天，她在院子里捡到了球
+			PRINTFORML 是从什么地方滚来的?
+			PRINTFORMW 她迷上了新玩具
+			PRINTFORML 怎麼辦？
+			CALL ASK_YN("一起玩儿" ,"看着玩儿")
+			IF RESULT == 1
+				PRINTFORML 不打搅到那令人欣慰的光景，我决定就看看
+				PRINTFORML 她以打倒堆列的石头为目标，成功击倒后像非常开心的跳起来
+				PRINTFORML 我对她出色的球技报以掌声，她开心地笑了
+			ELSE
+				PRINTFORML 因为是难得的机会所以决定一起玩
+				PRINTFORML 教了她打墙、打保龄球等各种各样的方法之后，她对每一个都着迷了
+				PRINTFORML 两个人一时忘了时间欢闹了起来
+				PRINTFORML 傍晚，她又强迫我教她另外一个游戏，没问题，约好了，她开心地笑了
+			ENDIF
+		CASE 19
+			PRINTFORML 早晨，当我在被窝里打盹的时候，她潜了进来
+			PRINTFORML 正想着发生什么事，她从被窝里钻了出来
+			PRINTFORMW 他盯着我，像是在呼吁什么
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI("准备早饭" ,"陪你玩儿" ,"但没能战胜睡意")
+			IF RESULT == 2
+				PRINTFORML 但没能战胜睡意
+				PRINTFORML %ANAME(MASTER)%抱着她，我闭上了眼睛
+				PRINTFORMW 她不高兴地在怀里嘀咕着，但不久之后%ANAME(MASTER)%和她的呼噜一起响了
+			ELSEIF RESULT == 1
+				PRINTFORML 猜想她一定是想要玩儿，%ANAME(MASTER)%直起身子起来
+				PRINTFORMW %ANAME(MASTER)%说道一起去玩，她看到事情的发生，兴高采烈地开始准备出门
+				PRINTFORML 她一脸非常高兴地准备的样子
+				PRINTFORMW %ANAME(MASTER)%抓起昏昏沉沉的脑袋，开始为她做准备
+			ELSE
+				PRINTFORML 猜想她一定是饿了，%ANAME(MASTER)%直起身子了
+				PRINTFORMW 今天的饭是?我一边打个哈欠一边回答，看了看冰箱里的东西
+				PRINTFORML 她听到后，高兴地跑到厨房去了准备
+				PRINTFORMW 苦笑的%ANAME(MASTER)%也跟在她后面
+			ENDIF
+	ENDSELECT
+	DVAR:妖精暮らし_エロカウント ++
+;妖精とのエッチイベント、妖精が淫乱になる
+ELSEIF DVAR:妖精暮らし_同棲フラグ == 1 && DVAR:妖精暮らし_エロカウント >= 5
+	PRINTFORMW %ANAME(MASTER)%和一个无名的妖精住在一起…
+	PRINTFORML 
+	PRINTFORML 有一天，在睡觉，妖精钻进了%ANAME(MASTER)%被窝里来了
+	PRINTFORML %ANAME(MASTER)%惊讶的抱着妖精，看着她湿润的眼睛
+	PRINTFORMW 她的内心深处，渴望着什么
+	PRINTFORML 怎麼辦？
+	CALL ASK_MULTI("抱她" ,"甩开" ,"安慰")
+	IF RESULT == 1
+		PRINTFORML 突然间吓了一跳的%ANAME(MASTER)%不由得把她甩开了
+		PRINTFORMW 她好像受到了很大的打击，低着头回到了自己的房间
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		PRINTFORML 第二天早上，当我回过神来，她已经不在了
+		PRINTFORMW 虽然心中有强烈的后悔，但我只能这样决定告诉自己，她原来就不存在了
+		CALL COLOR_PRINT("与妖精们的同居生活就此消失", カラー_注意)
+		PRINTFORMW 
+		DVAR:妖精暮らし_同棲フラグ = 0
+		DVAR:妖精暮らし_エロカウント = 0
+	ELSEIF RESULT == 2
+		PRINTFORML %ANAME(MASTER)%惊讶地温柔地安慰了她
+		PRINTFORMW 那天晚上，我决定抱着一脸快要哭出来的妖精一起睡
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		PRINTFORML 第二天早上，她像往常一样有精神地跟我打招呼
+		PRINTFORMW 好像又恢复了原来的活力
+		DVAR:妖精暮らし_エロカウント = 0
+	ELSE
+		PRINTFORML 对突然的事感到吃惊的%ANAME(MASTER)%，话虽如此
+		PRINTFORML 被温柔肌肤的触感和刺鼻幽香的女人气味所吸引，不由得下体勃起来了
+		PRINTFORMW 当我盯着她时，她虽然看起来很难为情，她同样一直盯着%ANAME(MASTER)%看着
+		PRINTFORML %ANAME(MASTER)%下了决心，便抱着她，接吻，脱下她的衣服
+		PRINTFORML 她赤裸着身子，恰巧躺在床上
+		PRINTFORML 看着她白皙透明的肌肤和诱人的幼女身姿，%ANAME(MASTER)%不禁咽了咽口水
+		PRINTFORMW %ANAME(MASTER)%也脱下衣服，遮盖着她又亲吻她那不安的额头
+		PRINTFORML “嘿嘿!”她抱着可爱的笑容，我将舌头和手指往她身上爬，她发出甜蜜的叹息
+		PRINTFORML 像吸吮母乳一样，刺激她的肌肤触感，她发出可爱的反应，%ANAME(MASTER)%专心继续爱抚
+		PRINTFORML 不久，她的身体开始发热，秘室里渗出的爱液也出来了
+		PRINTFORMW 确认了她已准备好了，%ANAME(MASTER)%将她平躺下来，拿出肉棒慢慢的塞进了她的秘室
+		PRINTFORML 我吻了一下心动的她，慢慢地推动着，直接捅穿了她的处女膜
+		PRINTFORML 她吓得浑身发抖，一边按住尖叫，一边紧紧抱住
+		PRINTFORML 我一边关怀着她，一边缓解紧束肉棒的阴道，一起慢慢驱动腰部
+		PRINTFORMW 肉棒缓缓前进蜜洞深处，她开始不断地痉挛
+		PRINTFORML 我一边忍耐，一边和她接吻，慢慢地慢慢地放下了身段
+		PRINTFORML 当龟头摸到最里面的时候，她轻轻地喘着气，一下子把阴道紧紧扎住了
+		PRINTFORML %ANAME(MASTER)%直到她习惯为止，都暂时停下了步伐，享受着那浓密的蜜洞带来的触感
+		PRINTFORMW 阴道开始松开，%ANAME(MASTER)%抱着她缓缓地扭动身子
+		PRINTFORML 她一边流着泪，一边像大人一般地自主的摇晃着，吐出的呼吸也混杂着甜蜜的声音
+		PRINTFORML %ANAME(MASTER)%迷上了极品的蜜穴，不顾时间贪恋着她
+		PRINTFORML 终于迎来了界限，%ANAME(MASTER)%随之的腰部动作加速，她也紧紧地抱住了
+		PRINTFORMW 然后，她仰起头来伸出吻住了%ANAME(MASTER)%，双方舌头互相缠绕，互相分享对方的唾液，最后我把所有的欲望都释放了
+		PRINTFORML 我大大注入在她体内的许多精液，她发出很大的娇声
+		PRINTFORML 紧闭的阴道吸附肉棒上的精子无法流出，不停的不停的，不断的往她的子宫里注入
+		PRINTFORML 她的腰因为被射精而颤抖，%ANAME(MASTER)%继续拥抱着她，继续享受着这段时间
+		PRINTFORMW 不久，%ANAME(MASTER)%过了一会儿把肉棒抽出来，红色和白色混合的体液溢出来
+		PRINTFORML 她第一次做爱，也是第一次横躺在床上，喘着粗气
+		PRINTFORML 然后一副愕然的表情看着自己的蜜穴，望着溢出来的白浊液
+		PRINTFORML %ANAME(MASTER)%担心地抚摸她的头时，她流着泪高兴地微笑
+		PRINTFORMW 兴奋不止于此，%ANAME(MASTER)%跟她继续一整天不停的继续激情的交合了
+		CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", "妖精の膣", "和姦")
+		PRINTFORML 
+		CALL COLOR_PRINT("妖精们有点惊讶了", カラー_ピンク)
+		DVAR:妖精暮らし_同棲フラグ = 2
+	ENDIF
+;淫乱妖精との日常イベント
+ELSEIF DVAR:妖精暮らし_同棲フラグ == 2
+	PRINTFORMW %ANAME(MASTER)%和一个无名的妖精住在一起…
+	PRINTFORML 
+	SELECTCASE RAND:10
+		CASE 0
+			PRINTFORML 妖精在檐廊上吃着饼干棒
+			PRINTFORMW 她看到我的时候含着它向我递过来
+			PRINTFORML 怎麼辦？
+			CALL ASK_YN("含饼干棒尖端", "拿着吃")
+			IF RESULT == 1
+				PRINTFORML 直接拿起来吃了
+				PRINTFORML 她鼓起脸颊生气的一巴掌下来
+				PRINTFORMW 事发突然，她为了表达歉意，亲了一下我红肿的脸颊
+			ELSE
+				PRINTFORML 含着饼干棒尖端，两个人一起吃
+				PRINTFORML 不久，饼干棒变短，和她的嘴唇接触了
+				PRINTFORML 甜甜的吻了一下，她腼腆地笑了
+				PRINTFORMW 看到她那张笑脸，一下子兴奋了，%ANAME(MASTER)%把她压倒了
+				PRINTFORMW 亲吻着她将舌头互相缠绕着，细细品味互相交换的唾液，随后拉下她小裙子里的内内拉了下来，继续品尝蜜穴产出的蜜汁，最后将肉棒贴近着她洞穴，在檐廊上进行非常激烈地运动
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", "妖精の膣", "和姦")
+			ENDIF
+		CASE 1
+			PRINTFORML 清晨，妖精在%ANAME(MASTER)%的跨上唠叨起来了
+			PRINTFORMW 一看她，竟然穿着裸体裙
+			PRINTFORML 怎麼辦？
+			CALL ASK_YN("把她拖进床里", "还有五分钟…")
+			IF RESULT == 1
+				PRINTFORML 不过睡意上来了
+				PRINTFORML 还有五分钟
+				PRINTFORMW 那样告诉她后，她就不顾一切地走了
+				PRINTFORMW …早饭总是比平时咸
+			ELSE
+				PRINTFORML 因为她那裸体炽热的触感蹭着腿，又是显出雌性妩媚的脸来诱惑，渐渐的勃起了
+				PRINTFORML 察觉到这一点的她，脸颊赤红的低下头，开心的扑通一声亲吻了我一下
+				PRINTFORMW 可不能什么都不做，%ANAME(MASTER)%把她拖到床里面去
+				PRINTFORMW 傍晚，双眼失神吐出舌头痉挛的她，嘴里不能再塞下的精液流了出来，与她那柔软的身体的蜜穴一样的状态，得到了充分的满足的我抚摸了她的小脑袋，轻轻的吻着额头在她耳边轻声道。“好好休息吧！我的小肉便器”
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", "妖精の膣", "和姦")
+			ENDIF
+		CASE 2
+			PRINTFORML 我泡在浴室里，妖精突然进来了
+			PRINTFORMW 说要来擦背，但是我已经洗完了
+			PRINTFORML 怎麼辦？
+			CALL ASK_YN("给她搓背", "一起泡在水里")
+			IF RESULT == 1
+				PRINTFORML 招呼她一起泡在浴缸里
+				PRINTFORML 她小小的身体坐在%ANAME(MASTER)%上面一会儿
+				PRINTFORML 她赤裸柔滑皮肤贴在%ANAME(MASTER)%身上，我感受着她美妙的触感，渐渐的肉棒勃起了，这时妖精的手摸到了突然勃起的巨根，她满脸赤红的低下头。她的手紧紧握住我的巨根缓缓的上下搓动着一会
+				PRINTFORML 看着她发情的表情和动作，%ANAME(MASTER)%不能忍耐的抱着她，双手揉捏着她的胸部，并刺激的捏住了她小巧的乳头，突然被这样进攻的她敏感的颤抖起来，她逐渐被空白的脑袋支配，脸上吐出痉挛的舌头享受着这份刺激
+				PRINTFORMW 我迎上她痉挛的舌头，并吐入大量唾液，即使没有命令也被她咕噜咕噜的吞了下去。缓缓恢复的她，脸上轻轻的嘿笑着。最后，我抱起她，将她的蜜穴慢慢放入我勃起的巨根。一边缓慢抽动一边和她继续互换甜美的唾液。
+				PRINTFORMW 不知不觉过了不知道多久，她的蜜穴如孕妇一般被塞满了精液，即使做了很久，可勃大的肉棒是笔直的塞着蜜穴，看着她失神诱人的神情，我的兴奋从未停止，不断的吻上缠绕她的舌头，吐入印刻属于自己印记一般的唾液，继续抽插着她正在遗漏精液的蜜穴
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", "妖精の膣", "和姦")
+			ELSE
+				PRINTFORML 决定给她洗背
+				PRINTFORML 手指在她柔软的皮肤上蠕动，她轻轻喘着气
+				PRINTFORML 对于这种反应，很兴奋的%ANAME(MASTER)%继续触动胸部和大腿，她高兴地扭动身子，突然间捏住了她小巧的乳头，她刺激性惊讶的跳了一下，用一脸怨念的眼神看着我，我无奈笑了笑说声抱歉，并轻轻的吻了她的嘴唇。她脸红心跳的低下头，就在这时，我更加出击的伸手抚摸她的蜜穴，用手指插进去抽插着，她反应可爱的发出阵阵呻咛，随之我用舌头侵入她的舌头缠绕着交换唾液。突然，我抽出抽动她蜜穴的手指，直接捏着她的阴蒂，这一瞬间，她刺激性的颤抖了一下。
+				PRINTFORMW 她低下头来沉浸了一会，突然她不知哪来的力气把我推到，为了报复的握住%ANAME(MASTER)%的巨根，用小巧的舌头舔舐肉棒顶上的尿口，不断的继续刺激，随她看到我感到一丝颤抖，她偷笑起来。继续刺激着，我可不会让她得逞，伸手握住她的脑袋，用力将肉棒强行塞进她的嘴里！她被突然的行动吓到，强行突入的肉棒让她感到一丝难受。她呜呜咽咽的用小手锤锤抗议起来。
+				PRINTFORMW 看到她这个样子让我兴奋了。%ANAME(MASTER)%无视着把肉棒继续抽插着她的嘴巴。看着她渐渐翻白了双眼，抽插的口中逐渐散露着淫乱的口水，她渐渐失态的表情让我兴奋得加快了速度。最终，爆发大量的精华插入她喉咙的深处灌了进去。之后将失神的她一起清洗了之后，抱她回到房间，看着她那诱人娇小洁白的身子，还是忍不住的将肉棒对着她的小蜜穴尽心尽责的进行交合。对着失神状态的她做个各种各样激烈的姿势，她始终无动于衷的昏睡着。不眠不夜的做到了早上，她怀着满穴精液如孕妇般的状态缓缓睁开了眼，我看到她醒来便轻轻吻了一下她额头说。“早上好！”
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", "妖精の膣", "和姦")
+			ENDIF
+		CASE 3
+			PRINTFORML 在工作的时候，妖精含着一根橡胶棒招摇诱惑着我
+			PRINTFORMW 这个妖精使我不能专注于工作…
+			PRINTFORML 怎麼辦？
+			CALL ASK_YN("到床上", "当场抱")
+			IF RESULT == 1
+				PRINTFORML 她含着橡胶棒上下抽动，抽出的橡胶棒沾满了唾液，她还在不停的舔舐着橡胶棒。这个样子太过煽情了，%ANAME(MASTER)%胯下也逐渐进入备战状态。
+				PRINTFORML 我把工作放下来，抓住她的手腕，丢开橡胶棒。将她的全身衣物粗暴的撕扯，一件不留，全身裸露的她被我当场抱了起来
+				PRINTFORML 她被粗暴地侵犯，一边也发出喜悦的声音，一边使身体颤抖
+				PRINTFORMW 然后%ANAME(MASTER)%在射精的同时，她弓直身子又发出娇声，吐出快乐的舌头
+				PRINTFORMW 比起橡胶棒果然还是觉得%ANAME(MASTER)%能让她尝到了她的生命中最好的东西
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", "妖精の膣", "和姦")
+			ELSE
+				PRINTFORML 不能忍受的%ANAME(MASTER)%把正在诱惑的她拉过来，抱到床上
+				PRINTFORML 她躺在床上，用充满期待的眼神看着%ANAME(MASTER)%
+				PRINTFORML 为了不辜负她那样的期待，%ANAME(MASTER)%立刻撕扯她的衣服，用肉棒在她蜜穴边摩擦，她颤动的感受到阴蒂被肉棒摩擦带来的快感，蜜穴也渐渐流溢出爱液。他看到她已经准备好了，毫不留情的直接突入
+				PRINTFORML %ANAME(MASTER)%的进攻使她发出无法形容的快感，煽情地扭动身体，逐渐加速起来，她的爱液也在疯狂的抽插途中不断的散落，她翻直双眼，吐出舌头。那快乐的感觉将她身体变得木麻，脑袋变得空白
+				PRINTFORMW 不知过了多久，她体内满是%ANAME(MASTER)%的精华，塞不下的往外流出。身体外也多得将她淹没，她被精液掩盖的脸颊上，鼻孔吐吸着泡沫，嘴巴也慢慢吞食
+				PRINTFORMW 这还没有结束，稍微休息了一下，继续将肉棒对着流淌精液的蜜穴堵塞住，疯狂美好的运动使我忘掉工作，与她不断的相交至疲惫不堪
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", "妖精の膣", "和姦")
+			ENDIF
+		CASE 4
+			PRINTFORML 妖精正在厨房做今天的晚饭
+			PRINTFORML 不过那不是普通的衣服，而是裸体裙
+			PRINTFORMW 摇着可爱的小屁股，一边哼着小曲一边做着菜
+			PRINTFORML 怎麼辦？
+			CALL ASK_YN("恶作剧", "享受那种景象")
+			IF RESULT == 1
+				PRINTFORML 我决定不动手来欣赏那一幕
+				PRINTFORML 如果你让一个可爱的女孩做这些事情，那将是一个大问题
+				PRINTFORML 但是这种背德感让我觉得很舒服
+				PRINTFORMW 眼睛保养以后的菜比往常更好吃
+			ELSE
+				PRINTFORML 这气氛让人受不了，%ANAME(MASTER)%决定调戏下她
+				PRINTFORML 站在做菜的她背后，按摩漂亮的屁股，她感到后颤着浑身发抖
+				PRINTFORML 她正在做饭，说等一会儿，那句话里夹杂着撒娇的声音
+				PRINTFORMW 我从背后用力推撞向水槽的妖精，她接着发出谄媚的雌性声音，拿出肉棒，直接塞入她的密室，激烈的运动使她不断的欢叫。嗯～♥嗯♥啊嗯～♥好棒好棒啊～♥啊♥啊啊～♥
+				PRINTFORMW 结果，撇开料理的我们继续做爱，晚饭却拖到很晚才吃
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", "妖精の膣", "和姦")
+			ENDIF
+		CASE 5
+			PRINTFORML 跟她一起到里买东西去了
+			PRINTFORML 买完东西后真好奇她买的是什么东西，和她说话时，我突然抢过来了
+			PRINTFORMW 从里面看到的各种各样色情的道具，看到后慢慢膨胀的%ANAME(MASTER)%被她胳膊有意的被压上了
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI("带进附近的地里" ,"忍到家里" ,"享受谈话")
+			IF RESULT == 2
+				PRINTFORML 忍住了想要袭击的冲动又回到谈话中
+				PRINTFORMW 两个人悠闲地在回家的路上一边散步，一边享受着各种各样的谈话
+		PRINTFORML 
+			ELSEIF RESULT == 1
+				PRINTFORML %ANAME(MASTER)%吞了一口口水，抓住她的胳膊急忙赶路
+				PRINTFORML 我到家后把行李放下，把她推到床上
+				PRINTFORML 她红着脸，双手敞开流露爱液的蜜穴对兴奋的%ANAME(MASTER)%继续引诱
+				PRINTFORMW 回应着她，拿出肉棒猛撞了过去她的肉穴，她兴奋的大叫一声，激烈的运动使她不断的欢叫。嗯～♥嗯♥啊嗯～♥好棒～♥啊♥啊啊～♥好喜欢～♥啊♥啊啊～♥，最后和她一起达到顶峰，开始投入精液
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", "妖精の膣", "和姦")
+			ELSE
+				PRINTFORML 不能忍受的%ANAME(MASTER)%把她带到附近的空地里去了
+				PRINTFORML 命令让她使用着购买的道具，她害羞地服从
+				PRINTFORML 秘室滴满了爱液，每个道具不断刺激着她快乐的本能
+				PRINTFORML 挑选一个跳蛋，塞入里面，直接启动最大状态，她立刻发出愉悦的声音，%ANAME(MASTER)%接受了被她那淫靡的表情所吸引
+				PRINTFORMW %ANAME(MASTER)%拿出肉棒狠狠地配合跳蛋抽插激烈的动起了腰，两种配合简直让她无法承受，她不断颤抖不断感受着她前所未有的快乐。激烈的抽插到达了极限，立刻突进，毫无疑问的射入她娇小的蜜穴。她不断颤抖着，吐出着舌头。被肉棒凸顶起的肚子下被跳蛋的颤动使她蜜穴内的精液不断的流落出来。感到可惜的他只好继续填充
+				PRINTFORMW %ANAME(MASTER)%也好，她也好，一直到天黑都不顾被人听到的危险继续交合
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", "妖精の膣", "和姦")
+			ENDIF
+		CASE 6
+			PRINTFORML 我早早的回家，想让她大吃一惊
+			PRINTFORML 家里很安静，一边想着可能出去了一边走向卧室
+			PRINTFORML 于是%ANAME(MASTER)%看到一个裸着身子自慰的妖精
+			PRINTFORML 她很着迷，好像也没有注意到%ANAME(MASTER)%回家了
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI("袭击" ,"看看" ,"当做没看见")
+			IF RESULT == 2
+				PRINTFORML 算了还是不要打扰她了
+				PRINTFORML 那样想的%ANAME(MASTER)%当做没看见就回头出门了
+			ELSEIF RESULT == 1
+				PRINTFORML 虽然心里觉得这样不好，但一副满不在乎样子的%ANAME(MASTER)%还是用眼睛盯住着看她
+				PRINTFORML 她边喊着%ANAME(MASTER)%的名字边用手指激烈地抽插着蜜汁飞溅的小穴，看着无比淫荡的她，我不禁吞了吞口水
+				PRINTFORML 不久，她达到了高潮，在海潮中瑟瑟发抖
+				PRINTFORMW 一眼就把她躺在床上的模样给人留下深刻印象，%ANAME(MASTER)%在她醒来之前先离开了
+			ELSE
+				PRINTFORML 这是个坏孩子，%ANAME(MASTER)%为了惩治走进卧室
+				PRINTFORML 意识到%ANAME(MASTER)%进来的她非常狼狈，语重心长地辩解
+				PRINTFORML 但是%ANAME(MASTER)%不听她解释，用嘴捂住她的嘴唇，又把她按倒在床上
+				PRINTFORMW 在耳边说她是个讨厌的坏孩子，只见她一副全身颤抖、发情的样子
+				PRINTFORMW 然后我一直非常疼爱她，直到小妖精满足为止
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", "妖精の膣", "和姦")
+			ENDIF
+		CASE 7
+			PRINTFORML 下班回家，她在门口接我了
+			PRINTFORML “要洗澡?要吃饭?还是我？哇、哇……哈”
+			PRINTFORMW 她满脸通红地说出不知从哪儿听来的台词
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI("浴室" ,"米饭" ,"要她")
+			IF RESULT == 0
+				PRINTFORML 被邀请了，十分抱歉，但是累了
+				PRINTFORML 先让我洗个澡，她在一瞬间失望地接过了行李
+				PRINTFORMW 我可以在浴室里悠闲地度过，吃完饭后，我当然很疼爱她，之后满足了她将她上下两口填满我赐予的精华
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", "妖精の膣", "和姦")
+			ELSEIF RESULT == 1
+				PRINTFORML 不好意思被邀请，肚子饿了
+				PRINTFORML 先点饭，她瞬间一边失望一边迅速地摆上了菜
+				PRINTFORMW 吃完美味的饭菜，我泡了个澡，不仅如此，我也很疼爱她，满足了她将她蜜穴填满如孕妇一般庞大的精液
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", "妖精の膣", "和姦")
+			ELSE
+				PRINTFORML 被邀请只能上了
+				PRINTFORML %ANAME(MASTER)%默默抱着她，把她抱到床上
+				PRINTFORML 她一边卷着裙，一边拖着满脸羞涩的样子抬头
+				PRINTFORMW 那个表情使我有个感觉，%ANAME(MASTER)%立刻接吻，把她摁倒了
+				PRINTFORMW 她说，%ANAME(MASTER)%的进攻，简直就像对待新妻般，这么说让我乐得很，没办法，不顾疲劳的与她交合到明天早上，第二天整理状态准备工作时，亲吻了一下旁边沉睡不醒如孕妇一样被填满不断溢出精液小穴的她额头，轻轻的在耳边说道。“好好睡吧！我的小肉便器”
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", "妖精の膣", "和姦")
+			ENDIF
+		CASE 8
+			PRINTFORML 她一直吵着要养宠物
+			PRINTFORMW 如果可以的话，狗说最好
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI("养狗" ,"拒绝" ,"把她当成狗")
+			IF RESULT == 0
+				PRINTFORML 那种程度的话行吗?
+				PRINTFORML 应她的要求，我改日一起去养狗了
+				PRINTFORMW 她抱着小狗高兴地道谢
+			ELSEIF RESULT == 1
+				PRINTFORML 我们没有那么富裕
+				PRINTFORML 一拒绝她就灰心丧气
+				PRINTFORMW 我约她去动物园，总算让她高兴了
+			ELSE
+				PRINTFORML 要是狗有那么好的话，你去做就行了
+				PRINTFORMW %ANAME(MASTER)%这么说着，把她拉到仓房里去了
+				PRINTFORML 
+				PRINTFORML …在深夜里的公园里，我将她一圈套套着，将她带到公园里散步
+				PRINTFORML 她满脸通红，一边哆嗦着，一边滴溜溜地发出谄媚的声音
+				PRINTFORMW 一副兴奋的样子，从秘处流出了稀稀拉拉的爱液
+				PRINTFORMW 当我把肉棒插入她这一只散漫的母狗的秘处进行调教时，它发出喜悦的声音，不顾危险的交合，快乐使她的表情渐渐变成了母狗，我欣慰的奖励了她将精液爆发在她子宫深处
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", "妖精の膣", "和姦")
+			ENDIF
+		CASE 9
+			PRINTFORML 半夜被她叫醒了
+			PRINTFORML 我问她，她说做了一个恶梦
+			PRINTFORMW 她用肿大的眼睛，请求我能否抱着枕头跟我一起睡
+			PRINTFORML 怎麼辦？
+			CALL ASK_MULTI("抱她" ,"陪睡" ,"回到自己的房间")
+			IF RESULT == 2
+				PRINTFORML 不好意思，累了
+				PRINTFORMW 劝了一把她，她失落的回到了自己的房间
+				PRINTFORML …第二天早上，因为昨晚的事上的她瞪了我一眼
+				PRINTFORMW 那天的早饭没有什么变化
+			ELSEIF RESULT == 1
+				PRINTFORML 无法拒绝，我只好陪着她睡了
+				PRINTFORML 掀开被子她高兴地进来了
+				PRINTFORML 她紧张地抱住我的身体，安心地马上睡着了
+				PRINTFORMW 一边看着她的睡脸，%ANAME(MASTER)%也进入了睡眠的世界
+			ELSE
+				PRINTFORML 我把她拉到床上，用那个方法让她忘了
+				PRINTFORML 她变得一副昂然地躺在那里的样子
+				PRINTFORML 她比平常更丰富地做着前戏，之后，我慢慢地把肉棒塞进去
+				PRINTFORMW 她娇声娇气，激烈的运动带来使她的全身湿透了，不断的强攻，不断的突入，贯穿子宫的攻击，使她不断的高潮，最后爆发的精液直接顶入子宫深处发射，满足之后还未拔出在茫茫精液的子宫里的肉棒，抱着她就这么昏昏欲睡
+				PRINTFORML …第二天早晨，妖精她恢复了往日精神百倍的状态
+				PRINTFORMW 早饭总觉得比平时豪华
+				CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", "妖精の膣", "和姦")
+			ENDIF
+	ENDSELECT
+ENDIF
+RETURN 1

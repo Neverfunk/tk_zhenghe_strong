@@ -1,0 +1,429 @@
+﻿;-------------------------------------------------
+;desc  :NPCの独立の処理
+;param :離反者:離反するキャラの番号
+;param :奪取都市数:奪う都市の数（補正が入る可能性がある）
+;param :奪取都市数固定:上記補正を切るフラグ　オンにする場合呼び出し側でチェックすること
+;param :イベント発生禁止:説得イベントの発生を禁止するフラグ
+;return:戻り値:戻り値説明
+;-------------------------------------------------
+@NPC_INDEPENDENCE(離反者, 奪取都市数 = 0, 奪取都市数固定 = 0, イベント発生禁止 = 0)
+#DIM 離反者
+#DIM 奪取都市数
+#DIM 奪取都市数固定
+#DIM 離反元君主
+#DIM 離反元勢力
+#DIM 新勢力
+#DIM 新勢力カラー
+#DIM プレイヤー対応
+#DIM イベント発生禁止
+#DIM CONST 対応_怒り = 3
+#DIM CONST 対応_拒否 = 2
+#DIM CONST 対応_受諾 = 1
+#DIM CONST 対応_無関係 = 0
+
+#DIM 武将数
+#DIM 奪取武将数
+#DIM 奪取武将
+
+;離反元君主のキャラ番号
+離反元君主 = GET_COUNTRY_BOSS(CFLAG:(離反者):所属)
+;離反元国家の番号
+離反元勢力 = CFLAG:(離反者):所属
+;新しい勢力を取得
+新勢力 = GET_NEW_COUNTRY()
+
+SIF !CAN_INDEPENDENCE(離反者, 離反元勢力)
+	RETURN -1
+
+;奪取都市数を補正する
+奪取都市数 = INDEPENDENCE_STEAL_CITY_NUM(離反元勢力, 奪取都市数, 奪取都市数固定)
+
+SIF 奪取都市数 <= 0
+	RETURN -1
+
+;国家色は関数にて自動決定
+
+;プレイヤーの態度をプレイヤー対応に格納
+プレイヤー対応 = 対応_無関係
+
+;プレイヤーが離反者の所属国家の君主でなく、かつ離反者の同僚である
+IF 離反元君主 != MASTER && CFLAG:MASTER:所属 == CFLAG:(離反者):所属 && !イベント発生禁止
+	CALL NPC_INDEPENDENCE_EVENT(離反者, 離反元君主, 新勢力)
+	SIF RESULT == -1
+		RETURN
+	プレイヤー対応 = RESULT
+ENDIF
+
+
+CALL SINGLE_DRAWLINE
+CALL COLOR_PRINTW(@"舉兵的%NAME_FORMAL(離反者)%、從%NAME_FORMAL(離反元君主)%的勢力中独立了！", カラー_警告)
+
+新勢力カラー = CHARA_COUNTRY_COLOR(離反者)
+
+COUNTRY_COLOR:新勢力 = 新勢力カラー
+COUNTRY_BOSS:新勢力  = GET_ID(離反者)
+CALL CHANGE_COUNTRY(離反者, 新勢力, 1)
+
+INDEPENDENCE_COUNTER:新勢力 = 10
+DIPLOMACY_HATE:新勢力 += 10
+
+CALL SET_COUNTRY_AI_TYPE(新勢力)
+
+;離反元勢力の都市の守将を解除
+FOR LOCAL:0, 0, MAX_CITY
+	IF CITY_OWNER:(LOCAL:0) == 離反元勢力
+		CITY_COMMANDER:(LOCAL:0) = 0
+	ENDIF
+NEXT
+
+;都市をかすめ取る
+CALL STEAL_CITIES(離反元勢力, 新勢力, 奪取都市数)
+
+;兵力をかすめ取る
+CALL STEAL_SOLDIER(離反元勢力, 新勢力)
+
+;ぜんぜんとれなかったときのことを考慮して最低限のこづかい
+COUNTRY_SOLDIER:新勢力 += MIN(DAY * 200, 5000)
+
+;武将数をカウントする
+武将数 = 0
+FOR LOCAL:0, 0, CHARANUM
+	;離反元所属でないとだめ
+	SIF CFLAG:(LOCAL:0):所属 != 離反元勢力
+		CONTINUE
+	;捕虜ならだめ
+	SIF CFLAG:(LOCAL:0):捕虜先
+		CONTINUE
+	;主人公、離反者、君主はだめ
+	SIF GROUPMATCH(LOCAL:0, MASTER, 離反者, 離反元君主)
+		CONTINUE
+	;特殊キャラもダメ
+	SIF IS_SP_CHARA(LOCAL:0)
+		CONTINUE
+	武将数 ++
+NEXT
+
+SIF 武将数 <= 0
+	GOTO STEAL_COMMANDER_END
+
+;25～50%の武将を奪う。最大10
+奪取武将数 = MIN(武将数 * RAND(25, 50) / 100, 10)
+CALL FISHER_YATES_SHAFFLE(CHARANUM)
+FOR LOCAL, 0, CHARANUM
+	SIF 奪取武将数 == 0
+		BREAK
+	奪取武将 = SHAFFLE_ARRAY:LOCAL
+	;離反元所属でないとだめ
+	SIF CFLAG:(奪取武将):所属 != 離反元勢力
+		CONTINUE
+	;捕虜ならだめ
+	SIF CFLAG:(奪取武将):捕虜先
+		CONTINUE
+	;主人公、離反者、君主はだめ
+	SIF GROUPMATCH(奪取武将, MASTER, 離反者, 離反元君主)
+		CONTINUE
+	;特殊キャラもダメ
+	SIF IS_SP_CHARA(奪取武将)
+		CONTINUE
+	;プレイヤーがかかわる場合の陥落済みキャラの扱い
+	IF IS_FALLEN(奪取武将) && プレイヤー対応 != 対応_無関係
+		;裏切る場合、陥落済みキャラはついてくる
+		IF プレイヤー対応 == 対応_受諾
+			CALL CHANGE_COUNTRY(奪取武将, 新勢力, 1)
+			奪取武将数 --
+		;怒らせた場合は拉致してくる
+		ELSEIF プレイヤー対応 == 対応_怒り
+			CALL CAPTURE(奪取武将, 新勢力)
+			奪取武将数 --
+		ENDIF
+		;拒否した場合はなにもしてこない
+	;1/2の確率で同調OR拉致
+	ELSEIF RAND:2
+		IF REL_LIKE:奪取武将:離反元君主 - REL_HATE:奪取武将:離反元君主 > 0
+			CALL CAPTURE(奪取武将, 新勢力)
+		ELSE
+			CALL CHANGE_COUNTRY(奪取武将, 新勢力, 1)
+		ENDIF
+		奪取武将数 --
+	ENDIF
+NEXT
+
+$STEAL_COMMANDER_END
+
+;離反元勢力の部隊を解散
+CALL CLEAR_ALL_UNIT(離反元勢力, 1)
+;仲はまぁ、悪くもなりますわな
+CALL CHANGE_RELATION_C_TO_C(離反元勢力, 新勢力, -200, 600)
+CALL CHANGE_RELATION_C_TO_C(新勢力, 離反元勢力, -200, 600)
+
+CALL COUNTRY_SET_TECHNOLOGY(新勢力)
+
+;離反元から技術を盗む
+FOR LOCAL, 0, TECHNOLOGY_MAX_GENRE
+	TECHNOLOGY_STATUS:新勢力:LOCAL = MAX(TECHNOLOGY_STATUS:離反元勢力:LOCAL - RAND(0, 2), 0)
+NEXT
+
+;反乱勢力の都市を表示
+FOR LOCAL:0, 0, MAX_CITY
+	IF CITY_OWNER:(LOCAL:0) == 新勢力
+		PRINTFORML %GET_CITYNAME(LOCAL:0)%処在了%ANAME(離反者)%的支配下
+	ENDIF
+NEXT
+;反乱勢力に流れた人材
+FOR LOCAL:0, 0, CHARANUM
+	IF CFLAG:(LOCAL:0):所属 == 新勢力 && LOCAL:0 != 離反者
+		PRINTFORML %ANAME(LOCAL:0)%成為了%ANAME(離反者)%的属下
+	ELSEIF CFLAG:(LOCAL:0):9 == 新勢力
+		SETCOLOR カラー_警告
+		PRINTFORML %ANAME(LOCAL:0)%被%ANAME(離反者)%綁架了
+		RESETCOLOR
+	ENDIF
+NEXT
+
+;-------------------------------------------------
+;desc  :ある離反者が離反できるかの判定
+;param :離反者
+;param :奪取都市数:奪う都市の数(補整が入る可能性あり)
+;param :奪取都市数固定:奪う都市の数を固定するかのフラグ
+;return:離反が可能なら1
+;-------------------------------------------------
+@CAN_INDEPENDENCE(離反者, 奪取都市数, 奪取都市数固定)
+#FUNCTION
+#DIM 離反者
+#DIM 奪取都市数
+#DIM 奪取都市数固定
+#DIM 離反元君主
+#DIM 離反元勢力
+#DIM 新勢力
+
+;離反元君主のキャラ番号
+離反元君主 = GET_COUNTRY_BOSS(CFLAG:(離反者):所属)
+;離反元国家の番号
+離反元勢力 = CFLAG:(離反者):所属
+;新しい勢力を取得
+新勢力 = GET_NEW_COUNTRY()
+
+
+;捕虜、無所属ならだめ
+SIF CFLAG:(離反者):捕虜先 || !IS_COUNTRY(CFLAG:(離反者):所属)
+	RETURNF 0
+
+;新勢力が作れない（すでにいっぱい）ならだめ
+SIF 新勢力 == -1
+	RETURNF 0
+
+;離反元が都市数2以上であること
+SIF GET_OWN_CITY(離反元勢力) < 2
+	RETURNF 0
+
+SIF GET_OWN_CITY(離反元勢力) < INDEPENDENCE_STEAL_CITY_NUM(離反元勢力, 奪取都市数, 奪取都市数固定)
+	RETURNF 0
+
+RETURNF 1
+
+;-------------------------------------------------
+;desc  :独立時に奪う都市数を決定する
+;param :離反元勢力:離反元の勢力番号
+;param :奪取都市数:奪う都市数（補正が入る可能性がある）
+;param :奪取都市数固定:奪う都市数を固定するフラグ　立てる場合は呼び出し側で離反元の都市数をチェックすること
+;return:奪う都市数
+;-------------------------------------------------
+@INDEPENDENCE_STEAL_CITY_NUM(離反元勢力, 奪取都市数, 奪取都市数固定)
+#FUNCTION
+#DIM 離反元勢力
+#DIM 離反元勢力都市数
+#DIM 奪取都市数
+#DIM 奪取都市数固定
+
+離反元勢力都市数 = GET_OWN_CITY(離反元勢力)
+
+;奪取都市数固定が立っていなくて、奪取都市数が離反元国家の所有都市数の半分以上なら、半分に調整する
+SIF 離反元勢力都市数 / 2 <= 奪取都市数 && !奪取都市数固定
+	奪取都市数 = 離反元勢力都市数 / 2
+
+;奪取都市数がない場合、所属勢力の1/3を持って行く（最低1)
+SIF 奪取都市数 == 0
+	奪取都市数 = MAX(離反元勢力都市数 / 3, 1)
+
+;奪取都市数が離反元国家の所有都市数以上ならやめる
+SIF 離反元勢力都市数 <= 奪取都市数
+	RETURNf 0
+
+RETURNF 奪取都市数
+
+;-------------------------------------------------
+;desc  :離反イベント
+;-------------------------------------------------
+@NPC_INDEPENDENCE_EVENT(離反者, 離反元君主, 新勢力)
+#DIM 離反者
+#DIM 離反元君主
+#DIM 新勢力
+#DIM CONST 対応_怒り = 3
+#DIM CONST 対応_拒否 = 2
+#DIM CONST 対応_受諾 = 1
+#DIM CONST 対応_無関係 = 0
+
+SIF CFLAG:離反者:好感度 <= 300
+	RETURN 0
+
+;それなりに仲が良いと、一緒に来ないかと尋ねられる
+
+CALL SINGLE_DRAWLINE
+PRINTFORML 有一天，突然被%ANAME(離反者)%叫了出来
+PRINTFORMW 在沒有其他人的%PRONOUN(離反者)%的房間、%ANAME(離反者)%説出了消息
+PRINTFORML
+PRINTFORML 自己想从%ANAME(離反元君主)%那里叛离。%ANAME(MASTER)%好像挺厉害的，要不要和她一起走。
+PRINTFORML 聽見這樣的話、因為背叛主君的話感到困惑、無法馬上回答
+PRINTFORMW 在给出答复之前不能回去。因为%ANAME(MASTER)%不一定不会向%ANAME(離反元君主)%告密……
+PRINTFORML
+PRINTFORML 聽見了不得了的大事。但是、不回答的話就無法離開
+PRINTFORMW 関係到今後的前途、請慎重選択……
+CALL ASK_MULTI(@"帮助%ANAME(離反者)%", @"留在%ANAME(離反元君主)%这里", "説服対方放棄這愚蠢的想法")
+IF RESULT == 0
+	CALL CHANGE_COUNTRY(MASTER, 新勢力, 1)
+	PRINTFORML 我就知道你会这么说……%ANAME(離反者)%的脸上浮现出了凶恶的笑容
+	PRINTFORML 一起来吧。%ANAME(離反者)%紧紧的握住了%ANAME(MASTER)%的手……
+	PRINTFORMW 總覚得加入了什麼不得了的事情。応該沒問題吧……
+	RETURN 対応_受諾
+ELSEIF RESULT == 1
+	PRINTFORMW 不能背叛%ANAME(離反元君主)%……听到这种说法，%ANAME(離反者)%露骨的流露出失望的表情。
+	PRINTFORML 既然这样的话那就快滚吧、你可不要後悔、我建立的国家、眨眼之间就能呑并掉你的国家、発出了這樣的宣告
+	PRINTFORML 就在这时%ANAME(離反者)%似乎对这边失去了兴趣，转过头去了。
+	PRINTFORMW 但是似乎没有加害%ANAME(MASTER)%的打算、不过下次见面的时候就是敌人了吧……
+	PRINTL
+	RETURN 対応_拒否
+ELSEIF RESULT == 2
+	PRINTFORM 说着什么傻话呢……
+	;何らかのあなたに対する陥落素質があれば思いとどまる
+	IF IS_FALLEN(離反者)
+		PRINTFORMW %ANAME(MASTER)%拼命的说服，%ANAME(離反者)%叹了口气
+		PRINTFORML 沒想到会被%ANAME(MASTER)%這麼説
+		PRINTFORML 但是、不想忽視%ANAME(MASTER)%説的話。沒辦法這次只好忍耐着想法
+		PRINTFORMW 作為代替、讓%ANAME(MASTER)%用各種方式満足自己……
+		PRINTFORMW 好像%ANAME(離反者)%放弃了叛离……
+		RETURN -1
+	;なければd100が現在の好感度の1/10より大きければキレる
+	ELSEIF RAND:100 > CFLAG:(離反者):好感度 / 10
+		PRINTFORMW %ANAME(MASTER)%拼命的说服、%ANAME(離反者)%的怒火上升
+		PRINTFORML 沒想到会被你這麼説
+		PRINTFORML 那樣的話%ANAME(MASTER)%已経不需要了。如果不想被捲入旋風消滅的話
+		PRINTFORMW 滾出去、從我的面前消失……
+		PRINTFORML 这么说着，愤怒的%ANAME(離反者)%把你赶出了房间
+		PRINTFORMW 下次再见%ANAME(離反者)%的时候，大概就是在战场上了……
+		PRINTL
+		RETURN 対応_怒り
+	;そうでなければ普通に別れる、なお台詞はコピペのままで終わらせたくなかったのでちょこちょこ変えてみた
+	ELSE
+		PRINTFORMW %ANAME(MASTER)%拼命的说服、%ANAME(離反者)%脸上浮现出了厌恶的表情
+		PRINTFORML 不想投靠我的話、就滾出去吧
+		PRINTFORMW 我现在已经知道了%ANAME(MASTER)%对%ANAME(離反元君主)%的忠心，但是最好趁现在多压榨一些东西吧……
+		PRINTFORMW 不对。还没等我反驳，%ANAME(離反者)%就继续说下去了
+		PRINTFORMW 很快，我会将你，以及%ANAME(離反元君主)%的国家一同毁灭掉……
+		PRINTFORML %ANAME(離反者)%毫不掩饰自己愤怒的表情，从%ANAME(MASTER)%的房间离开了
+		PRINTFORMW 和%ANAME(MASTER)%交锋的时候、彼此之间是什么样的表情呢……
+		PRINTL
+		RETURN 対応_拒否
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;汎用型ランダム街強奪候補選択関数
+;ARG:0勢力から独立したARG:1勢力がARG:2都市かっぱらう関数です。
+;ARG:0のある一都市を奪い、続いてその都市に連続しているARG:0の都市のみを奪います。
+;LOCAL 0:残り強奪予定都市数, 1:健気なカウンタ君, 2:判定する都市番号
+;RETURN 0:強奪できました♪, 1:もしかして：全部奪っても足りないか０を指定, 2:もっとおかしな何かが起きました
+;------------------------------------------------- 
+@STEAL_CITIES(独立元, 独立先, 奪取数)
+#DIM 独立元
+#DIM 独立先
+#DIM 奪取数
+#DIM 奪取残数
+#DIM 都市
+#DIM ループ, 2
+#DIM ルート
+#DIM 中継点接続先
+#DIM 奪取候補
+;都市数のチェック
+SIF MATCH(CITY_OWNER, 独立元) <= 1 || 奪取数 <= 0
+	RETURN 1
+奪取残数 = 奪取数
+;都市のシャッフル
+CALL FISHER_YATES_SHAFFLE(GET_CITY_NUM())
+FOR ループ, 0, GET_CITY_NUM()
+	都市 = SHAFFLE_ARRAY:ループ
+	SIF CITY_OWNER:都市 != 独立元
+		CONTINUE
+	CALL TAKEOVER_CITY_FROM_NO(独立先, 都市)
+	PRINTFORML %GET_CITYNAME(都市)%被奪走了
+	奪取残数 --
+	SIF 奪取残数 == 0
+		RETURN 0
+	FOR ルート, 0, VARSIZE("CITY_ROUTE", 1)
+		SIF CITY_ROUTE:都市:ルート < 1
+			BREAK
+		;中継点
+		IF CITY_TYPE:(CITY_ROUTE:都市:ルート) == 1
+			FOR ループ:1, 0, VARSIZE("CITY_ROUTE", 1)
+				中継点接続先 = CITY_ROUTE:(CITY_ROUTE:都市:ルート):(ループ:1)
+				SIF 中継点接続先 == CITY_ROUTE:都市:ルート
+					CONTINUE
+				SIF 中継点接続先 < 1
+					BREAK
+				SIF CITY_OWNER:中継点接続先 != 独立元
+					CONTINUE
+				CALL TAKEOVER_CITY_FROM_NO(独立先, 中継点接続先)
+				PRINTFORML %GET_CITYNAME(中継点接続先)%被奪走了
+				奪取残数 --
+				SIF 奪取残数 == 0
+					RETURN 0
+			NEXT
+		ELSE
+			奪取候補 = CITY_ROUTE:都市:ルート
+			SIF IS_COUNTRY(CITY_OWNER:奪取候補) && GET_OWN_CITY(CITY_OWNER:奪取候補) > 1
+				CONTINUE
+			CALL TAKEOVER_CITY_FROM_NO(独立先, 奪取候補)
+			奪取残数 --
+			SIF 奪取残数 == 0
+				RETURN 0
+		ENDIF
+	NEXT
+	RETURN 1
+NEXT
+;普通ここまできませんが念のため
+RETURN 2
+
+
+;-------------------------------------------------
+;兵力奪取関数
+;呼び出した時点で独立元と独立先は君主、都市が決まっている必要がある
+;------------------------------------------------- 
+@STEAL_SOLDIER(独立元, 独立先)
+#DIM 独立元
+#DIM 独立先
+#DIM 独立元兵数
+#DIM 独立元君主
+#DIM 独立先君主
+#DIM 独立元都市数
+#DIM 独立先都市数
+#DIM 都市数比
+#DIM 能力比
+#DIM 兵数比
+#DIM 独立先獲得兵数
+独立元君主 = GET_COUNTRY_BOSS(独立元)
+独立先君主 = GET_COUNTRY_BOSS(独立先)
+
+独立元都市数 = GET_OWN_CITY(独立元)
+独立先都市数 = GET_OWN_CITY(独立先)
+
+独立元兵数 = GET_SUM_SOLDIER(独立元)
+
+都市数比 = LIMIT(独立先都市数 * 100 / 独立元都市数, 50, 150)
+能力比 = LIMIT((ABL:独立先君主:知略 + ABL:独立先君主:政治) * 100 / (ABL:独立元君主:知略 + ABL:独立元君主:政治), 50, 150)
+
+兵数比 = (都市数比 + 能力比) / 2
+
+独立先獲得兵数 = MIN(独立元兵数, 独立元兵数 * 兵数比 / (兵数比 + 100))
+
+CALL SHIFT_SOLDIER(独立元, 独立先, 独立先獲得兵数)
+
+RETURN 1

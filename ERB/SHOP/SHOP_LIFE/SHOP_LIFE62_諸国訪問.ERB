@@ -1,0 +1,249 @@
+﻿;-------------------------------------------------
+;「諸国訪問」の名称
+;-------------------------------------------------
+@SHOP_LIFE_NAME62
+RESULTS:0 '= "訪問諸国"
+
+;-------------------------------------------------
+;「諸国訪問」の選択可否判定
+;-------------------------------------------------
+@SHOP_LIFE_CHECK62
+SIF CFLAG:MASTER:行動不能状態 == 行動不能_臨月 || COOLTIME:MASTER:0 > 1
+	RETURN 0
+SIF CFLAG:MASTER:捕虜先
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;「諸国訪問」の選択可能キャラ存在判定（行ける先）
+;-------------------------------------------------
+@SHOP_LIFE_CHECKCHARA62(ARG:0)
+;非主人公、どこかの勢力のえらいひと(自勢力以外)
+RETURN ARG:0 != MASTER && GET_COUNTRY_BOSS(CFLAG:(ARG:0):所属) == ARG:0 && CFLAG:(ARG:0):所属 != CFLAG:MASTER:所属
+
+;-------------------------------------------------
+;「諸国訪問」の左カラムメニューの入力処理
+;-------------------------------------------------
+@SHOP_LIFE_EVENTBUY62
+FLAG:拠点フェイズページ = 1
+FLAG:夜這い = 0
+RETURN 0
+
+;-------------------------------------------------
+;「諸国訪問」の右カラム表示処理
+;-------------------------------------------------
+@SHOP_LIFE_EVENTBUY_SHOW62
+;タイトル
+CALL COLUMN_RIGHT_TITLE("対象勢力選択", "", "", "1", "0")
+CALL COLUMN_RIGHT_PRINTL
+CALL COLUMN_RIGHT_LINE
+CALL COLUMN_RIGHT_PRINTL
+;標準的なキャラリストとページ移動
+CALL COLUMN_RIGHT_CHARALIST
+RETURN 0
+
+;-------------------------------------------------
+;「諸国訪問」のリスト１入力処理
+;-------------------------------------------------
+@SHOP_LIFE_USERSHOP62(訪問先君主)
+#DIM 訪問先君主
+#DIM 訪問先
+#DIM 候補, MAX_CHARA_NUM
+#DIM 人数
+#DIM 対象
+#DIM CONST VISIT_EVENT_MAX = 10
+#DIM 好感度効果量
+訪問先 = CFLAG:(訪問先君主):所属
+
+FLAG:能力表示モード = 0
+
+VARSET 候補, -1
+VARSET 人数
+FOR LOCAL, 0, CHARANUM
+	IF 訪問先 == CFLAG:LOCAL:所属 && CFLAG:LOCAL:捕虜先 == 0
+		候補:人数 = LOCAL
+		人数 ++
+	ENDIF
+NEXT
+
+対象 = 候補:(RAND:人数)
+
+CALL SINGLE_DRAWLINE
+PRINTFORMW 訪問了%ANAME(訪問先君主)%的勢力……
+PRINTFORMW ……見到了%ANAME(対象)%
+PRINTFORMW 閒聊了一段時間……
+
+IF !CFLAG:対象:面識
+	CALL COLOR_PRINTL(@"認識了%ANAME(対象)%", カラー_注意)
+	CFLAG:対象:面識 = 1
+ENDIF
+
+;300 * 1500に対する現在の好感度の割合。ただし最低でも100は入る
+好感度効果量 = MAX(300 * MAX((1500 - CFLAG:対象:好感度) / 15, 0) / 100, 100)
+CFLAG:対象:好感度 += 好感度効果量
+
+CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上昇了{好感度効果量}", カラー_注意)
+
+PRINTFORML
+
+SHOP_TIME += 1
+
+
+FOR LOCAL, 0, VISIT_EVENT_MAX
+	TRYCCALLFORM VISIT_EVENT_{LOCAL}_RATE(訪問先君主, 訪問先, 対象)
+		IF RAND:1000 < RESULT
+			CALLFORM VISIT_EVENT_{LOCAL}_DECISION(訪問先君主, 訪問先, 対象)
+			IF RESULT == 1
+				CALLFORM VISIT_EVENT_{LOCAL}(訪問先君主, 訪問先, 対象)
+				BREAK
+			ENDIF
+		ENDIF
+	CATCH
+		BREAK
+	ENDCATCH
+NEXT
+
+RESULT = 1
+LINES_SHOP = LINECOUNT
+BEGIN TURNEND
+
+
+;-------------------------------------------------
+;移籍の申し出
+;-------------------------------------------------
+@VISIT_EVENT_0_RATE(訪問先君主, 訪問先, 対象)
+#DIM 訪問先君主
+#DIM 訪問先
+#DIM 対象
+RETURN 250
+
+@VISIT_EVENT_0_DECISION(訪問先君主, 訪問先, 対象)
+#DIM 訪問先君主
+#DIM 訪問先
+#DIM 対象
+SIF !CFLAG:MASTER:所属
+	RETURN 0
+SIF !IS_SLAVE(対象) && !IS_LOVER(対象) && !IS_SLAVED_BY(対象)
+	RETURN 0
+SIF 対象 == 訪問先君主
+	RETURN 0
+SIF IS_SP_COUNTRY(CFLAG:MASTER:所属)
+	RETURN 0
+RETURN 1
+
+@VISIT_EVENT_0(訪問先君主, 訪問先, 対象)
+#DIM 訪問先君主
+#DIM 訪問先
+#DIM 対象
+PRINTFORMW ……別れ際、%ANAME(対象)%に呼び止められた
+PRINTFORMW 能投奔到我這辺来麼
+PRINTFORMW %ANAME(MASTER)%思考了一下、要捨棄%ANAME(訪問先君主)%、投奔%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%么
+PRINTFORMW 如果要移籍的話、在%ANAME(訪問先君主)%眼中一定是背叛
+PRINTFORMW 関係肯定会悪化……
+CALL ASK_YN("答应", "拒绝")
+IF RESULT == 0
+	PRINTFORML 即使外交関係悪化、也想成為%ANAME(対象)%的力量
+	PRINTFORML %ANAME(MASTER)%拉着%ANAME(対象)%的手、兩人一起回到了據点……
+	CALL COLOR_PRINTL(@"%ANAME(対象)%成為了同伴", カラー_注意)
+	CALL COLOR_PRINTL(@"与%ANAME(訪問先君主)%之間的関係悪化了", カラー_警告)
+	CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属, 1)
+	CALL CHANGE_RELATION_C_TO_O(訪問先, MASTER, -100, 100)
+ELSE
+	PRINTFORML 不能和%ANAME(訪問先君主)%的関係弄僵
+	PRINTFORML 慎重的拒絶了、%ANAME(対象)%露出寂寞的表情、理解了這個決定……
+ENDIF
+
+
+;-------------------------------------------------
+;移籍の勧誘
+;-------------------------------------------------
+@VISIT_EVENT_1_RATE(訪問先君主, 訪問先, 対象)
+#DIM 訪問先君主
+#DIM 訪問先
+#DIM 対象
+RETURN (ABL:MASTER:武闘 + ABL:MASTER:防衛 + ABL:MASTER:知略 + ABL:MASTER:政治) / 3 + MIN(CFLAG:対象:好感度 / 10, 150)
+
+@VISIT_EVENT_1_DECISION(訪問先君主, 訪問先, 対象)
+#DIM 訪問先君主
+#DIM 訪問先
+#DIM 対象
+SIF !CFLAG:MASTER:所属
+	RETURN 0
+SIF GET_COUNTRY_BOSS(CFLAG:MASTER:所属) == MASTER
+	RETURN 0
+RETURN 1
+
+@VISIT_EVENT_1(訪問先君主, 訪問先, 対象)
+#DIM 訪問先君主
+#DIM 訪問先
+#DIM 対象
+#DIM 支度金
+
+支度金 = (ABL:MASTER:武闘 + ABL:MASTER:知略 + ABL:MASTER:政治) * 50 * RAND(80, 120) / 100
+
+PRINTFORMW ……別れ際、%ANAME(対象)%に呼び止められた
+PRINTFORMW %ANAME(訪問先君主)%詢問道要不要転投自己
+PRINTFORM 很有誠意的準備了
+CALL COLOR_PRINT(@"{支度金}", カラー_注意)
+PRINTFORM 安家費、意下如何呢
+PRINTFORMW 看来是見到了%ANAME(MASTER)%的能力、想要獲得這個力量
+PRINTFORMW 答応的話、和%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%的関係会変得十分悪劣吧……？
+
+CALL ASK_YN("答应", "拒绝")
+IF RESULT == 0
+	PRINTFORML 在這個時代。良禽択木而栖才是正解
+	PRINTFORML %ANAME(MASTER)%点頭答応、%ANAME(対象)%露出了満足的笑容……
+	CALL COLOR_PRINTW(@"移籍到了%ANAME(訪問先君主)%手下", カラー_注意)
+	CALL COLOR_PRINTW(@"接受了{支度金}金的安家費", カラー_注意)
+	CALL COLOR_PRINTW(@"和%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%之間的関係悪化了", カラー_警告)
+	CALL CHANGE_RELATION_C_TO_O(CFLAG:MASTER:所属, MASTER, -300, 300)
+	CALL CHANGE_COUNTRY(MASTER, 訪問先, 1)
+	MONEY += 支度金
+ELSE
+	PRINTFORML 不能弄僵和%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%之間的関係
+	PRINTFORML 婉言拒絶了、%ANAME(対象)%露出遺憾的表情、無奈地接受了……
+ENDIF
+
+;-------------------------------------------------
+;士官の勧誘
+;-------------------------------------------------
+@VISIT_EVENT_2_RATE(訪問先君主, 訪問先, 対象)
+#DIM 訪問先君主
+#DIM 訪問先
+#DIM 対象
+RETURN (ABL:MASTER:武闘 + ABL:MASTER:防衛 + ABL:MASTER:知略 + ABL:MASTER:政治) / 3 + MIN(CFLAG:対象:好感度 / 10, 150)
+
+@VISIT_EVENT_2_DECISION(訪問先君主, 訪問先, 対象)
+#DIM 訪問先君主
+#DIM 訪問先
+#DIM 対象
+SIF CFLAG:MASTER:所属
+	RETURN 0
+RETURN 1
+
+@VISIT_EVENT_2(訪問先君主, 訪問先, 対象)
+#DIM 訪問先君主
+#DIM 訪問先
+#DIM 対象
+#DIM 支度金
+
+支度金 = (ABL:MASTER:武闘 + ABL:MASTER:知略 + ABL:MASTER:政治) * 50 * RAND(80, 120) / 100
+
+PRINTFORMW ……別れ際、%ANAME(対象)%に呼び止められた
+PRINTFORMW %ANAME(訪問先君主)%詢問道要不要転投自己
+PRINTFORM 很有誠意的準備了
+CALL COLOR_PRINT(@"{支度金}", カラー_注意)
+PRINTFORM 安家費、意下如何呢
+PRINTFORMW 看来是見到了%ANAME(MASTER)%的能力、想要登用為仕官
+
+CALL ASK_YN("答应", "拒绝")
+IF RESULT == 0
+	PRINTFORML 在這個時代。良禽択木而栖才是正解
+	PRINTFORML %ANAME(MASTER)%点頭答応、%ANAME(対象)%露出了満足的笑容……
+	CALL COLOR_PRINTW(@"移籍到了%ANAME(訪問先君主)%手下", カラー_注意)
+	CALL COLOR_PRINTW(@"接受了{支度金}金的安家費", カラー_注意)
+	CALL CHANGE_COUNTRY(MASTER, 訪問先, 1)
+	MONEY += 支度金
+ELSE
+	PRINTFORML 婉言拒絶了、%ANAME(対象)%露出遺憾的表情、無奈地接受了……
+ENDIF

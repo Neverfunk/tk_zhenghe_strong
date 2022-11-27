@@ -1,0 +1,78 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K163_DOUBLE_IMAGE_RATE(対象)
+#DIM 対象
+RETURN 750
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K163_DOUBLE_IMAGE_DECISION(対象)
+#DIM 対象
+#DIM アリス
+
+アリス = NAME_TO_CHARA("アリス")
+
+SIF アリス == -1
+    RETURN 0
+
+SIF KDVAR:対象:萝莉丝_二重影 == 1
+    RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, -1) && CHECK_KOJO_DAILY_HAPPEN(アリス, 1, 0, -1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K163_DOUBLE_IMAGE_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K163_DOUBLE_IMAGE(対象)
+#DIM 対象
+#DIM アリス
+
+アリス = NAME_TO_CHARA("アリス")
+
+PRINTFORMW （%NAME_FORMAL(アリス)%……和咱是一样的名字呢！？）
+PRINTFORMW （一般来说是同名同姓吧……但是和咱长得一模一样）
+PRINTFORMW （更像是，咱长大了的模样？……嗯嗯……要不要去问问呢）
+PRINTFORMW 说干就干，萝莉丝就准备这么冲了上去
+PRINTFORMW 要阻止她吗？
+CALL ASK_YN("拦住她", "就让她去吧")
+IF RESULT == 0
+PRINTFORMW 算了，还是拦住吧，两个人相遇，不知道会发生什么呢。
+PRINTFORMW 萝莉丝气呼呼的踢了你一脚，离开了
+		CFLAG:対象:好感度 += 10
+		RETURN 1
+ELSE
+PRINTFORMW 喂，喂，你好，我叫爱丽丝，请问你是？
+PRINTFORMW 在她转过来的一瞬间，两个人都愣住了
+PRINTFORMW 因为，两位真的是太像了
+PRINTFORMW 在所有人都没反应过来的时候，突然一道强光出现了，萝莉丝似乎和爱丽丝更像了一点
+PRINTFORMW “原来，是这样”，爱丽丝似乎理解了什么，而萝莉丝还是一脸迷惑的模样
+PRINTFORMW 萝莉丝的实力提高了
+		CALL COLOR_PRINTL(@"%ANAME(対象)%的武闘上升了10！", カラー_注意)
+		;TranslatedMark @"%ANAME(対象)%の武闘が10上がった！", カラー_注意
+		ABL:対象:武闘 += 10
+		CALL COLOR_PRINTL(@"%ANAME(対象)%的防衛上升了10！", カラー_注意)
+		;TranslatedMark @"%ANAME(対象)%の防衛が10上がった！", カラー_注意
+		ABL:対象:防衛 += 10
+		CALL COLOR_PRINTW(@"%ANAME(対象)%的知略上升了10！", カラー_注意)
+		;TranslatedMark @"%ANAME(対象)%の知略が10上がった！", カラー_注意
+		ABL:対象:知略 += 10
+ENDIF
+KDVAR:対象:萝莉丝_二重影 = 1
+
+RETURN 1

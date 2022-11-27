@@ -1,0 +1,82 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K58_CAPTURE_WEB_RATE(対象)
+#DIM 対象
+RETURN 35
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K58_CAPTURE_WEB_DECISION(対象)
+#DIM 対象
+
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+
+SIF ABL:対象:欲望 < ランク閾値:ランク_その他:ランク_D
+	RETURN 0
+
+SIF IS_SLAVE(対象)
+	RETURN 0
+
+SIF ABL:対象:主導度Ｕ + ABL:対象:主導度Ｎ < 400
+	RETURN 0
+
+SIF KDVAR:対象:ヤマメ_キャプチャーウェブ
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K58_CAPTURE_WEB_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K58_CAPTURE_WEB(対象)
+#DIM 対象
+
+PRINTFORML 深夜……
+PRINTFORML 正在睡覺的%ANAME(MASTER)%、察覺到有人的氣息
+PRINTFORMW ……但、身體卻動不了！
+PRINTFORML 看來身體被繩索之類的東西捆綁着
+PRINTFORML 為了知道賊人到底怎麼闖進來的、將視線望向周圍
+PRINTFORMW ……%ANAME(対象)%面露笑容、目不轉睛地望住這邊
+PRINTFORMW 「早上好、%ANAME(MASTER)%」
+PRINTFORMW 這到底是怎麼回事，%ANAME(MASTER)%這樣要求%ANAME(対象)%說明時、就突然被%ANAME(対象)%親吻
+PRINTFORMW 「唔呼、唔姆……呼……噗哈」
+PRINTFORMW 「啊不、沒甚麼大不了的事、只是想要肌膚之親」
+PRINTFORMW 「所以就稍微借你的身體用一下ー、之類的」
+PRINTFORMW 「啊、那個雖然只是絲、但別以為能夠切斷哦。因為這是我特製的」
+PRINTFORML %ANAME(対象)%一邊說着一邊脫掉自己的衣服、變得一絲不掛
+PRINTFORML 白皙肌膚以及%STR_BODY("胸部", 対象)%、纖細的腰在你眼前
+PRINTFORMW 然後、%ANAME(対象)%敞開%ANAME(MASTER)%的衣服、令肉棒露出在外
+PRINTFORMW 「%ANAME(MASTER)%只要看着就可以了哦。不過你也不能動了呢」
+PRINTFORMW 「放心吧，我會令你好好地舒服的……♥」
+PRINTFORML %ANAME(対象)%臉上浮現妖艶的表情、撫摸着%ANAME(MASTER)%的身体
+PRINTFORMW 胸板被親吻、下半身開始有反應了
+PRINTFORMW 「哼哼、這樣就好了哦、那麼」
+PRINTFORMW 「來吧、直到早上為止我們來快活吧？」
+PRINTFORML 雖然%ANAME(MASTER)%開始感到非常不妙、但被結實的絲線捆綁着、身體完全動不了
+PRINTFORMW 無法抵抗的%ANAME(MASTER)%、就這樣被%ANAME(対象)%壓住了
+PRINTFORMW 然後就這樣直到早上、被%PRONOUN(対象)%滿滿地榨取了……
+CALL FUCK(MASTER, "Ｃ, Ａ, Ｍ, 接吻, 欲望, 射精, 奉仕, 性交, Ｖ挿入, 緊縛, 被虐", "接吻喪失, 童貞喪失", 0, @"%ANAME(対象)%的嘴唇", "", @"%ANAME(対象)%的膣穴", "強姦")
+CALL FUCK(対象, "Ｃ, Ｂ, Ｖ, Ａ, Ｍ, 接吻, 口淫, 欲望, 奉仕, 性交, 精愛, 性技, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失", GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER), "", "強姦")
+CALL ADD_COOLTIME(MASTER, 1)
+CFLAG:対象:支配度 += 500
+ABL:対象:主導度Ｕ += 50
+KDVAR:対象:ヤマメ_キャプチャーウェブ = 1
+
+RETURN 1

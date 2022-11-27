@@ -1,0 +1,601 @@
+﻿;-------------------------------------------------
+;捕虜の調教でターゲットが一人だけのときの処理
+;-------------------------------------------------
+@PRISONER_TRAIT(ARG:0)
+#DIM FIRST_LINE
+#DIM CONST 選択肢_調教 = 0
+#DIM CONST 選択肢_許す = 1
+#DIM CONST 選択肢_見せしめ = 2
+#DIM CONST 選択肢_軟禁 = 3
+#DIM CONST 選択肢_釈放 = 4
+#DIM CONST 選択肢_解放 = 5
+#DIM CONST 選択肢_追放 = 6
+#DIM CONST 選択肢_処刑 = 7
+#DIM CONST 選択肢_触手処刑 = 8
+#DIM CONST 選択肢_キャンセル = 99
+
+FIRST_LINE = LINECOUNT
+
+;SHOW_INFOの初期画面を基本情報にする
+FLAG:能力表示モード = 0
+
+;対象キャラの情報を表示
+CALL SINGLE_DRAWLINE
+CALL SHOW_INFO(ARG:0)
+CALL SINGLE_DRAWLINE
+
+PRINTFORML 要怎麼対待%ANAME(ARG:0)%呢？
+CALL SINGLE_DRAWLINE
+CALL PRISONER_TRAIT_PRINTBUTTONS(ARG:0)
+
+INPUT
+
+SELECTCASE RESULT
+	CASE 選択肢_調教
+		CALL PRISONER_TRAIT_START_TRAIN(ARG:0)
+	CASE 選択肢_許す
+		CALL PRISONER_TRAIT_FORGIVE(ARG:0)
+	CASE 選択肢_見せしめ
+		CALL PRISONER_TRAIT_EXAMPLE(ARG:0)
+	CASE 選択肢_軟禁
+		CALL PRISONER_TRAIT_LENIENT(ARG:0)
+	CASE 選択肢_釈放
+		CALL PRISONER_TRAIT_RELEASE(ARG:0)
+	CASE 選択肢_解放
+		CALL PRISONER_TRAIT_FREE(ARG:0)
+	CASE 選択肢_追放
+		CALL PRISONER_TRAIT_BANISH(ARG:0)
+	CASE 選択肢_処刑
+		CALL PRISONER_TRAIT_EXECUTE(ARG:0)
+	CASE 選択肢_触手処刑
+		CALL PRISONER_TRAIT_EXECUTE_TENTACLE(ARG:0)
+	CASE 選択肢_キャンセル
+		RETURN 1
+ENDSELECT
+
+SIF RESULT == 1
+	RETURN 
+
+CLEARLINE LINECOUNT - FIRST_LINE
+RESTART
+
+;-------------------------------------------------
+;捕虜の調教でターゲットが一人だけのときの処理中のボタン描画処理
+;-------------------------------------------------
+@PRISONER_TRAIT_PRINTBUTTONS(ARG:0)
+#DIM CONST 選択肢_調教 = 0
+#DIM CONST 選択肢_許す = 1
+#DIM CONST 選択肢_見せしめ = 2
+#DIM CONST 選択肢_軟禁 = 3
+#DIM CONST 選択肢_釈放 = 4
+#DIM CONST 選択肢_解放 = 5
+#DIM CONST 選択肢_追放 = 6
+#DIM CONST 選択肢_処刑 = 7
+#DIM CONST 選択肢_触手処刑 = 8
+#DIM CONST 選択肢_キャンセル = 99
+
+IF CFLAG:(ARG:0):1703 != 1
+	PRINTBUTTON "[調教]", 選択肢_調教
+	PRINTPLAIN  
+ENDIF 
+
+IF CFLAG:(ARG:0):外交調教中
+	PRINTBUTTON "[赦免]", 選択肢_許す
+	PRINTPLAIN   
+	PRINTBUTTON "[示衆]", 選択肢_見せしめ
+	PRINTPLAIN   
+	PRINTBUTTON "[取消]", 選択肢_キャンセル
+	PRINTL
+	RETURN
+ENDIF
+
+IF CFLAG:(ARG:0):所属 != CFLAG:MASTER:所属
+	PRINTBUTTON "[軟禁]", 選択肢_軟禁
+	PRINTPLAIN   
+	IF !FLAG:クリアフラグ
+		PRINTBUTTON "[解放]", 選択肢_解放
+		PRINTPLAIN   
+	ENDIF
+ELSE
+	PRINTBUTTON "[釋放]", 選択肢_釈放
+	PRINTPLAIN   
+	IF !FLAG:クリアフラグ
+		PRINTBUTTON "[放逐]", 選択肢_追放
+		PRINTPLAIN   
+	ENDIF
+ENDIF
+PRINTBUTTON "[処刑]", 選択肢_処刑
+PRINTPLAIN   
+IF ITEM:触手部屋 && ID_TO_CHARA(FLAG:触手部屋管理者) >= 0
+	PRINTBUTTON "[触手処刑]", 選択肢_触手処刑
+	PRINTPLAIN   
+ENDIF
+PRINTBUTTON "[取消]", 選択肢_キャンセル
+PRINTL
+
+;-------------------------------------------------
+;捕虜の調教 調教開始
+;-------------------------------------------------
+@PRISONER_TRAIT_START_TRAIN(ARG:0)
+CALL PRISONER_SCAPEGOAT(ARG:0)
+CALL DECIDE_PRISONER_MEMBER()
+RETURN 1
+
+;-------------------------------------------------
+;外交　許す
+;-------------------------------------------------
+@PRISONER_TRAIT_FORGIVE(ARG:0)
+
+SIF !CFLAG:(ARG:0):外交調教中
+	RETURN 0
+
+PRINTFORML 放棄了權利讓%ANAME(ARG:0)%的身体重獲自由
+PRINTFORML 確定麼？
+CALL ASK_YN
+
+SIF RESULT == 1
+	RETURN 0
+
+PRINTFORMW %ANAME(ARG:0)%被赦免了
+
+CFLAG:(ARG:0):外交調教中 = 0
+SIF FINDELEMENT(PRISONER_TARGET, ARG:0) != -1
+	PRISONER_TARGET:(FINDELEMENT(PRISONER_TARGET, ARG:0)) = -1
+
+RETURN 1
+
+;-------------------------------------------------
+;見せしめ
+;-------------------------------------------------
+@PRISONER_TRAIT_EXAMPLE(ARG:0)
+
+SIF !CFLAG:(ARG:0):外交調教中
+	RETURN 0
+
+CVARSET CFLAG, GETNUM(CFLAG, "閨に呼ぶで選択中"), 0
+CFLAG:(ARG:0):閨に呼ぶで選択中 = 1
+CFLAG:(ARG:0):調教参加フラグ = 1
+CFLAG:(ARG:0):強制友好化 = 1
+
+;全員の慰安参加者フラグをクリア（あてがうメニューで操作されるため）
+CVARSET CFLAG, GETNUM(CFLAG, "慰安参加者") , 0
+
+;慰安モブの生成
+LOCAL:1 = RAND(3, 6) - LOCAL:2
+FOR LOCAL, 0, LOCAL:1
+	CALL CREATE_IAN_MOB(慰安_行き先_一般住宅街, LOCAL + 1)
+	SIF RESULT == -1
+		BREAK
+NEXT
+
+FLAG:慰安モード = 3
+FLAG:慰安場所 = 慰安_行き先_一般住宅街
+ITEM:A_跳蛋 = 1
+ITEM:A_振動棒 = 1
+ITEM:A_肛用振動棒 = 1
+ITEM:A_穿戴式假陰茎 = 1
+ITEM:A_飛機杯 = 1
+ITEM:A_陰蒂夾 = 1
+ITEM:A_乳頭夾 = 1
+ITEM:A_麻薬 = 99
+ITEM:A_縄 = 1
+ITEM:A_鞭 = 1
+ITEM:A_眼罩 = 1
+ITEM:A_口枷 = 1
+ITEM:A_鼻勾 = 1
+ITEM:A_馬克筆 = 1
+ITEM:A_潤滑液 = 99
+ITEM:A_避孕套 = 99
+ITEM:A_媚薬 = 99
+ITEM:A_排卵誘発剤 = 99
+ITEM:A_桃源香 = 99
+FLAG:調教モード = 7
+;ウフフフラグをONに
+FLAG:ウフフフラグ = 1
+
+PRINTFORMW 把赤裸的%ANAME(ARG:0)%帯到了城鎮的廣場上
+PRINTFORMW 有慰安婦的話、会給領民帯来足夠的幇助吧……
+
+;行動開始時の共通処理
+CALL START_TRAIN_COMMON
+
+RETURN 1
+
+;-------------------------------------------------
+;軟禁
+;-------------------------------------------------
+@PRISONER_TRAIT_LENIENT(ARG:0)
+
+SIF CFLAG:(ARG:0):所属 == CFLAG:MASTER:所属
+	RETURN 0
+
+SIF CFLAG:(ARG:0):外交調教中
+	RETURN 0
+
+PRINTFORML 把%ANAME(ARG:0)%放出牢房、軟禁在房間中
+PRINTFORML 確定麼？
+CALL ASK_YN
+SIF RESULT == 1
+	RETURN 0
+
+PRINTFORMW %ANAME(ARG:0)%被軟禁了
+
+CFLAG:(ARG:0):軟禁中 = 1
+SIF FINDELEMENT(PRISONER_TARGET, ARG:0) != -1
+	PRISONER_TARGET:(FINDELEMENT(PRISONER_TARGET, ARG:0)) = -1
+
+RETURN 1
+
+;-------------------------------------------------
+;釈放
+;-------------------------------------------------
+@PRISONER_TRAIT_RELEASE(ARG:0)
+
+SIF CFLAG:(ARG:0):所属 != CFLAG:MASTER:所属
+	RETURN 0
+
+SIF CFLAG:(ARG:0):外交調教中
+	RETURN 0
+
+PRINTFORML 把%ANAME(ARG:0)%放出牢房
+PRINTFORML 確定麼？
+CALL ASK_YN
+
+SIF RESULT == 1
+	RETURN 0
+
+PRINTFORMW %ANAME(ARG:0)%被放出了牢房
+CALL CAPTURE(ARG:0, 0, TALENT:(ARG:0):崩壊)
+
+SIF FINDELEMENT(PRISONER_TARGET, ARG:0) != -1
+	PRISONER_TARGET:(FINDELEMENT(PRISONER_TARGET, ARG:0)) = -1
+
+RETURN 1
+
+;-------------------------------------------------
+;解放
+;-------------------------------------------------
+@PRISONER_TRAIT_FREE(ARG:0)
+
+SIF CFLAG:(ARG:0):所属 == CFLAG:MASTER:所属
+	RETURN 0
+
+SIF CFLAG:(ARG:0):外交調教中
+	RETURN 0
+
+SIF FLAG:クリアフラグ
+	RETURN 0
+
+PRINTFORML 真的要解放%ANAME(ARG:0)%麼？
+CALL ASK_YN
+
+SIF RESULT == 1
+	RETURN 0
+
+CALL KOJO_EVENT(ARG:0, 340)
+PRINTFORMW %ANAME(ARG:0)%被解放了
+CALL CAPTURE(ARG:0, 0, TALENT:(ARG:0):崩壊)
+
+SIF FINDELEMENT(PRISONER_TARGET, ARG:0) != -1
+	PRISONER_TARGET:(FINDELEMENT(PRISONER_TARGET, ARG:0)) = -1
+
+RETURN 1
+
+;-------------------------------------------------
+;追放
+;-------------------------------------------------
+@PRISONER_TRAIT_BANISH(ARG:0)
+
+SIF CFLAG:(ARG:0):所属 != CFLAG:MASTER:所属
+	RETURN 0
+
+SIF FLAG:クリアフラグ
+	RETURN 0
+
+PRINTFORML 真的要把%ANAME(ARG:0)%從本国放逐麼？
+
+SIF CALC_SHOP_TIME(!IS_ANIMAL(ARG:0)) == SHOP_TIME
+	CALL COLOR_PRINTL("放逐的時候、如果最大行動回数減少的話本期的據点行動階段会直接結束！", カラー_警告)
+
+CALL ASK_YN
+SIF RESULT == 1
+	RETURN 0
+
+CALL KOJO_EVENT(ARG:0, 340)
+PRINTFORMW %ANAME(ARG:0)%被放逐了
+
+CALL CHANGE_COUNTRY(ARG:0, 0, 1)
+CALL CAPTURE(ARG:0, 0, TALENT:(ARG:0):崩壊)
+
+SIF FINDELEMENT(PRISONER_TARGET, ARG:0) != -1
+	PRISONER_TARGET:(FINDELEMENT(PRISONER_TARGET, ARG:0)) = -1
+
+IF CALC_SHOP_TIME() == SHOP_TIME
+	PRINTFORMW 人数不足導致工作増加沒有了自由時間所以據点階段結束了
+	LINES_SHOP = LINECOUNT
+	BEGIN TURNEND
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;処刑
+;-------------------------------------------------
+@PRISONER_TRAIT_EXECUTE(ARG:0)
+
+SIF CFLAG:(ARG:0):外交調教中
+	RETURN 0
+
+IF TALENT:(ARG:0):妊娠 && !TALENT:(ARG:0):小孩人質
+	CALL PRISONER_TRAIT_EXECUTE_PREGNANT(ARG:0)
+	RETURN RESULT
+ENDIF
+
+PRINTFORML 真的要処刑%ANAME(ARG:0)%麼？
+SIF CFLAG:(ARG:0):所属 == CFLAG:MASTER:所属 && CALC_SHOP_TIME(!IS_ANIMAL(ARG:0)) == SHOP_TIME
+	CALL COLOR_PRINTL("放逐的時候、如果最大行動回数減少的話本期的據点行動階段会直接結束！", カラー_警告)
+
+CALL ASK_YN
+
+SIF RESULT == 1
+	RETURN 0
+
+CALL KOJO_EVENT(ARG:0, 341)
+PRINTFORMW ……………………
+PRINTFORMW ……
+PRINTFORMW %ANAME(ARG:0)%被処刑了
+PRINTL 
+CALL EXECUTION(ARG:0)
+CFLAG:(ARG:0):好感度 -= 2000
+WAIT
+
+;(従属国パッチ)育児中の子供の場合他国からの評価を下げる
+IF CFLAG:(ARG:0):行動不能状態 == 行動不能_子供
+	PRINTL 
+	PRINTFORMW 针对处死年幼儿童这件事，收到了来自各方势力的谴责之声
+
+	FOR LOCAL, 1, MAX_COUNTRY
+		SIF !IS_COUNTRY(LOCAL) || LOCAL == CFLAG:MASTER:所属
+			CONTINUE
+
+		IF LOCAL == CFLAG:(ARG:0):所属
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -200, 300)
+		ELSE
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -100, 150)
+		ENDIF
+	NEXT
+ENDIF
+
+CALL CHANGE_COUNTRY(ARG:0, 0, 1, 1)
+
+SIF FINDELEMENT(PRISONER_TARGET, ARG:0) != -1
+	PRISONER_TARGET:(FINDELEMENT(PRISONER_TARGET, ARG:0)) = -1
+
+IF CALC_SHOP_TIME() == SHOP_TIME
+	PRINTL 
+	PRINTFORMW 人数不足導致工作増加沒有了自由時間所以據点階段結束了
+	LINES_SHOP = LINECOUNT
+	BEGIN TURNEND
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;触手処刑
+;-------------------------------------------------
+@PRISONER_TRAIT_EXECUTE_TENTACLE(ARG:0)
+#DIM 管理人
+#DIM 効果量
+
+管理人 = ID_TO_CHARA(FLAG:触手部屋管理者)
+
+SIF CFLAG:(ARG:0):外交調教中 
+	RETURN 0
+
+SIF !ITEM:触手部屋 || 管理人 < 0
+	RETURN 0
+
+IF !IS_SYOKUSYU_MANAGE(ID_TO_CHARA(FLAG:触手部屋管理者))
+	PRINTFORML 設定的触手部屋的管理者（%ANAME(管理人)%）、現在処於無法管理的状況
+	PRINTW 請重新設定触手部屋的管理者
+	RETURN 0
+ENDIF
+
+IF TALENT:(ARG:0):妊娠 && !TALENT:(ARG:0):小孩人質
+	CALL PRISONER_TRAIT_EXECUTE_PREGNANT_TENTACLE(ARG:0)
+	RETURN RESULT
+ENDIF
+
+PRINTFORMW 触手部屋的管理者%ANAME(管理人)%可以実行処刑
+PRINTFORML 真的要処刑%ANAME(ARG:0)%麼？
+
+SIF CFLAG:(ARG:0):所属 == CFLAG:MASTER:所属 && CALC_SHOP_TIME(!IS_ANIMAL(ARG:0)) == SHOP_TIME
+	CALL COLOR_PRINTL("放逐的時候、如果最大行動回数減少的話本期的據点行動階段会直接結束！", カラー_警告)
+
+CALL ASK_YN
+
+SIF RESULT == 1
+	RETURN 0
+
+CALL KOJO_EVENT(ARG:0, 343)
+PRINTFORMW ……………………
+PRINTFORMW ……
+PRINTFORMW %ANAME(ARG:0)%被処刑了
+CFLAG:(ARG:0):好感度 -= 2000
+PRINTL
+
+;(従属国パッチ)育児中の子供の場合他国からの評価を下げる
+IF CFLAG:(ARG:0):行動不能状態 == 行動不能_子供
+	PRINTL 
+	PRINTFORMW 针对处死年幼儿童这件事，收到了来自各方势力的谴责之声
+
+	FOR LOCAL, 1, MAX_COUNTRY
+		SIF !IS_COUNTRY(LOCAL) || LOCAL == CFLAG:MASTER:所属
+			CONTINUE
+
+		IF LOCAL == CFLAG:(ARG:0):所属
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -200, 300)
+		ELSE
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -100, 150)
+		ENDIF
+	NEXT
+ENDIF
+
+CALL CHANGE_COUNTRY(ARG:0, 0, 1, 1)
+SIF FINDELEMENT(PRISONER_TARGET, ARG:0) != -1
+	PRISONER_TARGET:(FINDELEMENT(PRISONER_TARGET, ARG:0)) = -1
+
+;手に入る妖術経験値を計算して取得＆表示
+PRINTFORML <%ANAME(管理人)%>
+
+効果量= 30 + BASE:(ARG:0):精神力 / 20 + ABL:(ARG:0):触手 * 10
+
+CALL PRINT_ADD_EXP(管理人, "妖術経験値", 効果量)
+CALL TRAIN_AUTO_ABLUP(管理人)
+WAIT
+
+IF CALC_SHOP_TIME() == SHOP_TIME
+	PRINTFORMW 人数不足導致工作増加沒有了自由時間所以據点階段結束了
+	LINES_SHOP = LINECOUNT
+	BEGIN TURNEND
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;妊婦処刑
+;-------------------------------------------------
+@PRISONER_TRAIT_EXECUTE_PREGNANT(ARG:0)
+
+PRINTFORML 被帯到処刑場的%ANAME(ARG:0)%、開始哭着請求饒命
+PRINTFORML 『再也不会反抗了、什麼事情都可以做、希望能放過肚子里的孩子』、就這樣拼命的懇求着
+PRINTL 
+PRINTFORML 真的要処刑%ANAME(ARG:0)%麼？
+
+SIF CFLAG:(ARG:0):所属 == CFLAG:MASTER:所属 && CALC_SHOP_TIME(!IS_ANIMAL(ARG:0)) == SHOP_TIME
+	CALL COLOR_PRINTL("放逐的時候、如果最大行動回数減少的話本期的據点行動階段会直接結束！", カラー_警告)
+
+CALL ASK_YN("処刑", "放她生路")
+
+IF RESULT == 0
+	CALL KOJO_EVENT(ARG:0, 341)
+	PRINTFORMW ……………………
+	PRINTFORMW ……
+	PRINTFORMW %ANAME(ARG:0)%和肚子裡的孩子一起被処刑了
+	PRINTL 
+	CALL EXECUTION(ARG:0)
+	CFLAG:(ARG:0):好感度 -= 3000
+	WAIT
+	;他国からの評価を下げる
+	PRINTL 
+	PRINTFORMW 這個行為讓其他的勢力紛紛指責
+
+	FOR LOCAL, 1, MAX_COUNTRY
+		SIF !IS_COUNTRY(LOCAL) || LOCAL == CFLAG:MASTER:所属
+			CONTINUE
+
+		IF LOCAL == CFLAG:(ARG:0):所属
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -200, 300)
+		ELSE
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -100, 150)
+		ENDIF
+	NEXT
+
+	CALL CHANGE_COUNTRY(ARG:0, 0, 1, 1)
+	SIF FINDELEMENT(PRISONER_TARGET, ARG:0) != -1
+		PRISONER_TARGET:(FINDELEMENT(PRISONER_TARGET, ARG:0)) = -1
+
+	IF CALC_SHOP_TIME() == SHOP_TIME
+		PRINTFORMW 人数不足導致工作増加沒有了自由時間所以據点階段結束了
+		LINES_SHOP = LINECOUNT
+		BEGIN TURNEND
+	ENDIF
+ELSE
+	CALL KOJO_EVENT(ARG:0, 344)
+	PRINTFORMW ……………………
+	PRINTFORMW ……
+	PRINTFORMW 命令執行人停止処刑
+	PRINTFORMW %ANAME(ARG:0)%蹲在原地、用双手抱住腹部守護着裡面寄宿着的宝貴的生命、帯着顫抖的声音哭泣着
+	PRINTFORMW %ANAME(ARG:0)%獲得了【小孩人質】素質…
+	CFLAG:(ARG:0):従属度 += 500
+	CFLAG:(ARG:0):好感度 -= 1000
+	EXP:(ARG:0):心創経験 += 16
+	TALENT:(ARG:0):小孩人質 = 1
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;妊婦触手処刑
+;-------------------------------------------------
+@PRISONER_TRAIT_EXECUTE_PREGNANT_TENTACLE(ARG:0)
+#DIM 管理人
+#DIM 効果量
+
+PRINTL 
+PRINTFORML 被帯到触手形成的処刑部屋的%ANAME(ARG:0)%、開始哭着請求饒命
+PRINTFORMW 『再也不会反抗了、什麼事情都可以做、希望能放過肚子里的孩子』、就這樣拼命的懇求着
+PRINTL 
+PRINTFORML 真的要処刑%ANAME(ARG:0)%麼？
+
+SIF CFLAG:(ARG:0):所属 == CFLAG:MASTER:所属 && CALC_SHOP_TIME(!IS_ANIMAL(ARG:0)) == SHOP_TIME
+	CALL COLOR_PRINTL("放逐的時候、如果最大行動回数減少的話本期的據点行動階段会直接結束！", カラー_警告)
+
+CALL ASK_YN("処刑", "放她生路")
+
+
+IF RESULT == 0
+	CALL KOJO_EVENT(ARG:0, 343)
+	PRINTFORMW ……………………
+	PRINTFORMW ……
+	PRINTFORMW %ANAME(ARG:0)%和肚子裡的孩子一起被処刑了
+	PRINTL 
+	WAIT
+	CFLAG:(ARG:0):好感度 -= 3000
+	;他国からの評価を下げる
+	PRINTL 
+	PRINTFORMW 這個行為讓其他的勢力紛紛指責
+
+	FOR LOCAL, 1, MAX_COUNTRY
+		SIF !IS_COUNTRY(LOCAL) || LOCAL == CFLAG:MASTER:所属
+			CONTINUE
+
+		IF LOCAL == CFLAG:(ARG:0):所属
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -200, 300)
+		ELSE
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -100, 150)
+		ENDIF
+	NEXT
+
+
+	CALL CHANGE_COUNTRY(ARG:0, 0, 1, 1)
+	SIF FINDELEMENT(PRISONER_TARGET, ARG:0) != -1
+		PRISONER_TARGET:(FINDELEMENT(PRISONER_TARGET, ARG:0)) = -1
+
+
+	;手に入る妖術経験値を計算して取得＆表示
+	PRINTFORML <%ANAME(管理人)%>
+
+	効果量= 30 + BASE:(ARG:0):精神力 / 20 + ABL:(ARG:0):触手 * 10
+
+	CALL PRINT_ADD_EXP(管理人, "妖術経験値", 効果量)
+	CALL TRAIN_AUTO_ABLUP(管理人)
+	WAIT
+	IF CALC_SHOP_TIME() == SHOP_TIME
+		PRINTFORMW 人数不足導致工作増加沒有了自由時間所以據点階段結束了
+		LINES_SHOP = LINECOUNT
+		BEGIN TURNEND
+	ENDIF
+ELSE
+	CALL KOJO_EVENT(ARG:0, 345)
+	PRINTFORMW ……………………
+	PRINTFORMW ……
+	PRINTFORMW 命令飢渇的触手們停止了処刑
+	PRINTFORMW %ANAME(ARG:0)%蹲在原地、用双手抱住腹部守護着裡面寄宿着的宝貴的生命、帯着顫抖的声音哭泣着
+	PRINTFORMW %ANAME(ARG:0)%獲得了【小孩人質】素質…
+	CFLAG:(ARG:0):従属度 += 500
+	CFLAG:(ARG:0):好感度 -= 1000
+	EXP:(ARG:0):心創経験 += 16
+	TALENT:(ARG:0):小孩人質 = 1
+ENDIF
+
+RETURN 1

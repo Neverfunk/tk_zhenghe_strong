@@ -1,0 +1,478 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_REQUEST_CHARA_RATE()
+RETURN 30
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_REQUEST_CHARA_DECISION()
+SIF DVAR:士官要求_発生禁止カウンタ > 0
+	RETURN 0
+SIF FLAG:クリアフラグ
+	RETURN 0
+
+RETURN DAY >= SLG_PP:0
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_REQUEST_CHARA_GENRE()
+RETURN デイリー_ジャンル_外交
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_REQUEST_CHARA()
+#DIM 自国経済値
+#DIM 各国経済値, MAX_COUNTRY
+#DIM 候補国, MAX_COUNTRY
+#DIM 候補数
+#DIM 結果国
+#DIM 結果君主
+#DIM 候補キャラ, MAX_CHARA_NUM
+#DIM 結果キャラ
+#DIM 土匪
+VARSET 自国経済値
+VARSET 各国経済値
+VARSET 候補国
+VARSET 候補キャラ
+VARSET 候補数
+VARSET 土匪
+
+;あらかじめ、野盗の勢力番号を保存
+土匪 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_野盗))
+
+
+;------------ここから国の選出-----------------
+
+;まず各国の経済値を保存
+FOR LOCAL, 0, MAX_COUNTRY
+	IF CFLAG:MASTER:所属 == LOCAL
+		自国経済値 = GET_SUM_ECONOMY(LOCAL)
+	ELSEIF IS_COUNTRY(LOCAL)
+		各国経済値:LOCAL = GET_SUM_ECONOMY(LOCAL)
+	ENDIF
+NEXT
+
+;野盗勢力に所属していない場合、野盗勢力の経済値は自国経済値の倍ということにしておく
+SIF 土匪 > 0 && CFLAG:MASTER:所属 != 土匪
+	各国経済値:土匪 = 自国経済値 * 2
+
+
+;自国より経済値が大きい国家を候補として記録
+FOR LOCAL, 0, MAX_COUNTRY
+	IF 自国経済値 < 各国経済値:LOCAL
+		候補国:候補数 = LOCAL
+		候補数 ++
+	ENDIF
+NEXT
+
+;候補がなかったらおわる
+IF 候補数 == 0
+	RETURN 0
+ENDIF
+
+;候補が存在するなら、ランダムで選出したものを結果国とする
+CALL FISHER_YATES_SHAFFLE(候補数)
+結果国 = 候補国:(SHAFFLE_ARRAY:0)
+結果君主 = GET_COUNTRY_BOSS(結果国)
+
+;3割の確率で強制的に野盗になる
+IF 土匪 > 0 && CFLAG:MASTER:所属 != 土匪 && RAND:100 < 30
+	結果国 = 土匪
+	結果君主 = GET_COUNTRY_BOSS(土匪)
+ENDIF
+
+;------------ここからキャラの選出-----------------
+
+;候補数をゼロクリア
+VARSET 候補数
+
+;キャラの選出
+FOR LOCAL, 0, CHARANUM
+	;MASTERではなく、MASTER所属勢力の君主でもなく、同じ国に所属。もし結果国が野盗なら女であること。動物はだめ。(従属国パッチ)辺境伯はだめ。
+	IF LOCAL != MASTER && !IS_SP_CHARA(LOCAL) && LOCAL != GET_COUNTRY_BOSS(CFLAG:MASTER:所属) && CFLAG:(LOCAL):所属 == CFLAG:MASTER:所属 && !CFLAG:(LOCAL):捕虜先 && (結果国 != 土匪 || IS_FEMALE(LOCAL)) && !IS_ANIMAL(LOCAL) && CFLAG:LOCAL:1702 != 1
+		;0 ~ 「四能力の10倍と、好感度・従属度・依存度の1/10の総和」　の乱数を保存
+		候補キャラ:LOCAL = RAND(0, MAX((ABL:LOCAL:武闘 + ABL:LOCAL:防衛 + ABL:LOCAL:知略 + ABL:LOCAL:政治) * 10 + (CFLAG:LOCAL:好感度 + CFLAG:LOCAL:従属度 + CFLAG:LOCAL:依存度 + CFLAG:(LOCAL):支配度) / 10, 1))
+		候補数 ++
+	ENDIF
+NEXT
+
+;候補がなかったら終わる
+IF 候補数 == 0
+	PRINTFORMW 虽然似乎有要求提供人才的势力，但知道这边的人才枯竭后就放弃了……
+	RETURN 0
+ENDIF
+
+;先ほど得た乱数が最大だったキャラを取得
+結果キャラ = FINDELEMENT(候補キャラ, MAXARRAY(候補キャラ))
+
+;ないはずだけど、結果キャラがみつからなかったら終わる
+SIF 結果キャラ <= 0
+	RETURN 0
+
+;ここからメッセージと各種処理
+;野盗の場合は特殊パターン
+IF 結果国 != 土匪
+	PRINTFORML %ANAME(MASTER)%在执行政务，被部下告知有来客
+	CALL COLOR_PRINT(@"%ANAME(結果君主)%", カラー_注意)
+	PRINTFORMW 说是有人派人来了
+	PRINTFORML 如果是%ANAME(結果君主)%的话，那可是领导着比我们更加庞大的势力的君主
+	PRINTFORMW 因为不能随便对待，所以%ANAME(MASTER)%决定马上见面……
+	PRINTFORML
+	PRINTFORML
+	PRINTFORML
+	PRINTFORMW %ANAME(結果君主)%使者带来的事情是这样的
+	PRINTFORML
+	PRINTFORML 近来战斗激烈，国家一直在追求有前途的人才
+	PRINTFORM 就在%ANAME(MASTER)%那里
+	CALL COLOR_PRINT(@"%ANAME(結果キャラ)%", カラー_注意)
+	PRINTFORMW 能让出来吗
+	PRINTFORMW 虽然没有什么特别能从我们这里拿出来的东西，但是对于两个势力的友好关系来说是非常有意义的交易……
+	PRINTFORML
+	PRINTFORML 当然，这是利用我方势力薄弱的弱点所提出的要求
+	PRINTFORML %ANAME(MASTER)%虽然是感到愤怒，但无奈对方的立场更强烈是事实
+	PRINTFORML 如果拒绝的话，对方会不高兴，这很可能危及%ANAME(MASTER)%势力的未来
+	PRINTFORMW 话虽如此，像这样的人质一样的任务能用%ANAME(結果キャラ)%背负吗……
+	CALL SINGLE_DRAWLINE
+	CALL ASK_YN(@"送出%ANAME(結果キャラ)%", "拒绝")
+	LOCAL = RESULT
+	IF RESULT == 0
+		PRINTFORMW 看来只能服从了。这样想着的%ANAME(MASTER)%，决定送出%ANAME(結果キャラ)%……
+		PRINTFORMW 由于遵从了要求，%ANAME(結果君主)%似乎心情变好了
+		CALL CHANGE_RELATION_C_TO_C(結果国, CFLAG:MASTER:所属, 500, -300)
+		CALL CHANGE_COUNTRY(結果キャラ, 結果国, 1)
+		CFLAG:結果キャラ:好感度 /= 2
+		CFLAG:結果キャラ:依存度 /= 2
+		CFLAG:結果キャラ:従属度 /= 2
+		CFLAG:結果キャラ:支配度 /= 2
+	ELSEIF RESULT == 1
+		PRINTFORMW 还是做不到那种事。就这样把%ANAME(結果君主)%的使者送回去了
+		PRINTFORMW %ANAME(結果君主)%因为被傲慢地拒绝了要求，似乎很生气……
+		CALL CHANGE_RELATION_C_TO_C(結果国, CFLAG:MASTER:所属, -300, 300)
+	ENDIF
+	DVAR:士官要求_発生禁止カウンタ = 10
+ELSE
+	PRINTFORML %ANAME(MASTER)%在执行政务，被部下告知有来客
+	CALL COLOR_PRINT(@"%ANAME(結果君主)%", カラー_注意)
+	PRINTFORMW 说是有人派人来了
+	PRINTFORML 要说%ANAME(結果君主)%的话，这可是是各国烦恼的対象
+	PRINTFORMW 到底是来传达什么的，%ANAME(MASTER)%立刻决定见面……
+	PRINTFORML
+	PRINTFORML
+	PRINTFORML
+	PRINTFORMW %ANAME(結果君主)%使者带来的事情是这样的
+	PRINTFORML
+	PRINTFORML 最近，寻找领地内所有的村庄，都没有找到令人满意的姑娘
+	PRINTFORML 最近没有好女人服侍的的男人们非常饥渴，对士气也有影响
+	PRINTFORM 所以这时候，听说在%ANAME(MASTER)%那里
+	CALL COLOR_PRINT(@"%ANAME(結果キャラ)%", カラー_注意)
+	PRINTFORMW 有些上等货色
+	PRINTFORML 于是就拜托你了，能不能把%ANAME(結果キャラ)%「作为俘虏」「借给我们」呢？
+	PRINTFORMW 否则，会在%ANAME(MASTER)%中产生某种「不利益」吧
+	;(さもなくば、何らかの「不利益」が%ANAME(MASTER)%に生ずることになるだろう)
+	PRINTFORML 近来，我们增强了力量，现在有了与各国平等相处的关系
+	PRINTFORMW 不过任何触及我们利益的报复行动是不可能忘记的
+	;(報復は必ず実行されることを忘れるな)
+	PRINTFORMW %ANAME(結果キャラ)%会被很有礼貌的对待，所以可以放心……
+	PRINTFORML
+	PRINTFORML 说是借郑重的对待，但他们肯定会把%ANAME(結果キャラ)%当做性奴隶的
+	PRINTFORMW 无耻老贼，多么戏弄的要求啊！
+	PRINTFORML 虽然%ANAME(MASTER)%感到愤怒，但他们也很难对付，把说过的话付诸实践也是事实
+	PRINTFORML 如果拒绝的话，对方一定会做出一些令人讨厌的事——而且没有血也没有泪的样子——这是确实的吧
+	PRINTFORMW 话虽如此，能忍下心把%ANAME(結果キャラ)%交给那些不把人当人看待的家伙吗……
+	CALL SINGLE_DRAWLINE
+	CALL ASK_MULTI(@"送出%ANAME(結果キャラ)%", "不要刺激他们、郑重地拒绝", "把使者砍了")
+	LOCAL = RESULT
+	IF RESULT == 0
+		PRINTFORMW 看来只能服从了。这样想着的%ANAME(MASTER)%，决定送出%ANAME(結果キャラ)%……
+		PRINTFORMW 使者在众人面前剥下了%ANAME(結果キャラ)%的衣服，套上项圈和手脚的枷锁，拉上链子带走了……
+		PRINTFORMW 被带回土匪们据点的%ANAME(結果キャラ)%，在土匪全体面前作为新的奴隶被当成肉便器了
+		PRINTFORMW 然后就这样，作为奴隶第一次从事"工作"……
+		CALL FORCE_FREE(結果キャラ)
+		CALL FUCK_GANGBANG(結果キャラ, GET_SPERM_ID("土匪"), @"土匪の\@ RAND:2 ? 肉棒 # 唇\@", "土匪")
+
+		CALL CHANGE_RELATION_C_TO_C(結果国, CFLAG:MASTER:所属, 500, -300)
+		CFLAG:結果キャラ:好感度 /= 2
+		CFLAG:結果キャラ:依存度 /= 2
+		CFLAG:結果キャラ:従属度 /= 2
+		CFLAG:結果キャラ:支配度 /= 2
+		CALL CAPTURE(結果キャラ, 結果国)
+	ELSEIF RESULT == 1
+		PRINTFORMW 还是做不到那种事。就这样把%ANAME(結果君主)%的使者送回去了
+		PRINTFORMW 知道有报复行为%ANAME(MASTER)%经过深思熟虑，依旧选择了郑重拒绝，不过之后没有发生什么令人讨厌的事……
+	ELSEIF RESULT == 2
+		PRINTFORMW 令人恼火，%ANAME(MASTER)%斩杀了使者！
+		PRINTFORMW 出其不意的是，使者连武器都没能拔出来就倒伏了
+		PRINTFORMW 就这样命令部下，作为对土匪们意思表示，让他们的把使者首级暴露在城门上
+		PRINTFORMW 心情有点舒畅……
+		PRINTFORML 
+		SETCOLOR カラー_警告
+		PRINTFORMW ……但是，这会带来怎样的结果呢，只有%ANAME(MASTER)%知道了……
+		RESETCOLOR
+		DVAR:士官要求_野盗斬り捨てフラグ = GET_ID(結果キャラ)
+	ENDIF
+	DVAR:士官要求_発生禁止カウンタ = 10
+ENDIF
+RETURN 1
+
+;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_REQUEST_MONEY_RATE()
+RETURN 30
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_REQUEST_MONEY_DECISION()
+SIF DVAR:資金援助要求_発生禁止カウンタ > 0
+	RETURN 0
+SIF FLAG:クリアフラグ
+	RETURN 0
+RETURN DAY >= SLG_PP:0
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_REQUEST_MONEY_GENRE()
+RETURN デイリー_ジャンル_外交
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_REQUEST_MONEY()
+#DIM 自国経済値
+#DIM 各国経済値, MAX_COUNTRY
+#DIM 候補国, MAX_COUNTRY
+#DIM 候補数
+#DIM 結果国
+#DIM 結果君主
+#DIM 候補キャラ, MAX_CHARA_NUM
+#DIM 結果キャラ
+#DIM 土匪
+#DIM 候補額
+VARSET 自国経済値
+VARSET 各国経済値
+VARSET 候補国
+VARSET 候補キャラ
+VARSET 候補数
+VARSET 土匪
+
+
+土匪 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_野盗))
+;------------ここから国の選出-----------------
+
+;まず各国の経済値を保存
+;ただし、野盗以外の特殊勢力は対象にならない
+FOR LOCAL, 0, MAX_COUNTRY
+	IF CFLAG:MASTER:所属 == LOCAL
+		自国経済値 = GET_SUM_ECONOMY(LOCAL)
+	ELSEIF IS_COUNTRY(LOCAL) && (!IS_SP_COUNTRY(LOCAL) || LOCAL == 土匪)
+		各国経済値:LOCAL = GET_SUM_ECONOMY(LOCAL)
+	ELSEIF IS_COUNTRY(LOCAL) && IS_SP_COUNTRY(LOCAL)
+		各国経済値:LOCAL = __INT_MAX__
+	ENDIF
+NEXT
+
+;野盗勢力に所属していない場合、野盗勢力の経済値は1ということにしておく
+SIF 土匪 > 0 && CFLAG:MASTER:所属 != 土匪
+	各国経済値:土匪 = 1
+
+
+;自国より経済値が小さい国家を候補として記録
+FOR LOCAL, 0, MAX_COUNTRY
+	IF IS_COUNTRY(LOCAL) && LOCAL != CFLAG:MASTER:所属 && 自国経済値 > 各国経済値:LOCAL
+		候補国:候補数 = LOCAL
+		候補数 ++
+	ENDIF
+NEXT
+
+
+;候補がなかったら終わる
+IF 候補数 == 0
+	PRINTFORMW 虽然有的势力想用人才来交换资金，但是因为人才枯竭而放弃了……
+	RETURN 0
+ENDIF
+
+
+;候補が存在するなら、ランダムで選出したものを結果国とする
+CALL FISHER_YATES_SHAFFLE(候補数)
+結果国 = 候補国:(SHAFFLE_ARRAY:0)
+結果君主 = GET_COUNTRY_BOSS(結果国)
+
+;3割の確率で強制的に野盗になる
+IF 土匪 > 0 && CFLAG:MASTER:所属 != 土匪 && RAND:100 < 30
+	結果国 = 土匪
+	結果君主 = GET_COUNTRY_BOSS(土匪)
+ENDIF
+
+;給料5ターンぶん、最低10000
+候補額 = MAX(CALC_SALARY() * 5, 10000)
+
+
+;メッセージと各種処理
+;野盗の場合は特殊パターン
+IF 結果国 != 土匪
+	;人質として差し出すキャラ選出(开始)
+	;候補数をゼロクリア
+	VARSET 候補数
+	;キャラの選出
+	FOR LOCAL, 0, CHARANUM
+		;結果国所属で、捕虜ではなく、首領ではない。かつ女である。動物はだめ。
+		IF CFLAG:LOCAL:所属 == 結果国 && !CFLAG:(LOCAL):捕虜先 && LOCAL != GET_COUNTRY_BOSS(結果国) && IS_FEMALE(LOCAL) && !IS_ANIMAL(LOCAL)
+			;0 ~ 「三能力の10倍と、好感度・従属度・依存度の1/10の総和」　の乱数を保存
+			候補キャラ:LOCAL = RAND(0, MAX((ABL:LOCAL:武闘 + ABL:LOCAL:防衛 + ABL:LOCAL:知略 + ABL:LOCAL:政治) * 10 + (CFLAG:LOCAL:好感度 + CFLAG:LOCAL:従属度 + CFLAG:LOCAL:依存度 + CFLAG:(LOCAL):支配度) / 10, 1))
+			候補数 ++
+		ENDIF
+	NEXT
+	;候補がなかったら終わる
+	IF 候補数 == 0
+		PRINTFORMW 虽然有的势力想用人才来交换资金，但是因为人才枯竭而放弃了……
+		RETURN 0
+	ENDIF
+
+	;先ほど得た乱数が最大だったキャラを取得
+	結果キャラ = FINDELEMENT(候補キャラ, MAXARRAY(候補キャラ))
+	;結果キャラがみつからなかったら終わる
+	SIF 結果キャラ <= 0
+		RETURN 0
+	PRINTFORML %ANAME(MASTER)%在执行政务，被部下告知有来客
+	CALL COLOR_PRINT(@"%ANAME(結果君主)%", カラー_注意)
+	PRINTFORMW 说是有人派人来了
+	PRINTFORML %ANAME(結果君主)%的话，是比我们地位低的势力……
+	PRINTFORMW 不管怎么说，因为不能随便对待，所以%ANAME(MASTER)%决定马上见面……
+	PRINTFORML
+	PRINTFORML
+	PRINTFORML
+	PRINTFORMW %ANAME(結果君主)%使者带来的事情是这样的
+	PRINTFORML
+	PRINTFORML 如今战争愈演愈烈，我国资金周转困难
+	CALL ICPRINT(@"那么，能不能从%ANAME(MASTER)%那里得到金<{候補額}>的援助呢？", "W", カラー_注意)
+	CALL ICPRINT(@"作为交换，会交出<%ANAME(結果キャラ)%>……", "W", カラー_注意)
+	PRINTFORML
+	PRINTFORML 经济上很严峻，甚至不得不向其他国家哭诉请求援助
+	PRINTFORML %ANAME(MASTER)%表示同情是一回事，但能不能施以援助又是另一回事。
+	PRINTFORML 援助的话%ANAME(結果君主)%会心情变好，也能得到优秀的人才……
+	PRINTFORML 围绕着这一点，也有可能成为稳定%ANAME(MASTER)%势力未来的铺垫
+	PRINTFORMW 话虽如此，钱也不是大风刮来的。并不是无限的，必须要考虑使用方法……
+	CALL SINGLE_DRAWLINE
+	PRINTFORML 現在的資金:{MONEY}
+	CALL ASK_MULTI_JUDGE(@"援助金{候補額}", MONEY >= 候補額, "拒绝", 1, "把你的身体交给我吧", MONEY >= 候補額)
+	LOCAL = RESULT
+	IF RESULT == 0
+		PRINTFORMW 深思熟虑之后，决定施以援手。%ANAME(MASTER)%决定给{候補額}
+		PRINTFORMW 通过资金援助，%ANAME(結果君主)%似乎大大地变好了
+		CALL COLOR_PRINTW(@"%ANAME(結果キャラ)%接受了", カラー_注意)
+		CALL CHANGE_RELATION_C_TO_C(結果国, CFLAG:MASTER:所属, 300, -200)
+		CALL FORCE_FREE(結果キャラ)
+		CALL CHANGE_COUNTRY(結果キャラ, CFLAG:MASTER:所属, 1)
+		MONEY -= 候補額
+	ELSEIF RESULT == 1
+		PRINTFORMW 这边也没有那样的富余。就这样把%ANAME(結果君主)%的使者送回去了
+	ELSEIF RESULT == 2
+		PRINTFORMW 让君主的身体来作为交换的条件……让使者这样传达给%ANAME(結果君主)%
+		PRINTFORMW 这番玩笑般的发言，不仅使%ANAME(結果君主)%感到震惊，也让其他势力被触动了
+		PRINTFORMW 但是尽管如此，%ANAME(結果君主)%还是不得不接受……
+		CALL COLOR_PRINTW(@"作为资金援助的交换，我得到了%ANAME(結果君主)%", カラー_注意)
+		CALL COLOR_PRINTW("与各国的关系恶化了", カラー_警告)
+		MONEY -= 候補額
+		CFLAG:(結果君主):外交調教中 = 1
+		;関係悪化
+		FOR LOCAL:0, 0, MAX_COUNTRY
+			IF IS_COUNTRY(LOCAL) && LOCAL != CFLAG:MASTER:所属
+				IF LOCAL == 結果国
+					CALL CHANGE_RELATION_C_TO_C(結果国, CFLAG:MASTER:所属, -1000, 1000)
+				ELSE
+					CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -400, 300)
+				ENDIF
+			ENDIF
+		NEXT
+	ENDIF
+	DVAR:資金援助要求_発生禁止カウンタ = 10
+ELSE
+	PRINTFORML %ANAME(MASTER)%在执行政务，被部下告知有来客
+	CALL COLOR_PRINT(@"%ANAME(結果君主)%", カラー_注意)
+	PRINTFORMW 说是有人派人来了
+	PRINTFORML 要说%ANAME(結果君主)%的话，这可是是各国烦恼的対象
+	PRINTFORMW 到底是来传达什么的，%ANAME(MASTER)%立刻决定见面……
+	PRINTFORML
+	PRINTFORML
+	PRINTFORML
+	PRINTFORMW %ANAME(結果君主)%使者带来的事情是这样的
+	PRINTFORML
+	PRINTFORML 最近，势力范围内的村庄都被扫荡一空，“税收”也没有了
+	PRINTFORML 没有钱，男人还们渴望娱乐，对士气有了影响
+	PRINTFORM 于是就被拜托，施舍钱
+	CALL COLOR_PRINT(@"{候補額}", カラー_注意)
+	PRINTFORMW 能不能给出
+	PRINTFORMW 否则，会在%ANAME(MASTER)%中产生某种「不利」吧
+	PRINTFORML 近来，我们增强了力量，现在有了与各国平等相处的关系
+	PRINTFORMW 会被报复的吧……
+	PRINTFORML
+	PRINTFORMW 无耻老贼，多么戏弄的要求啊！
+	PRINTFORML 虽然%ANAME(MASTER)%感到愤怒，但他们也很难对付，把说过的话付诸实践也是事实
+	PRINTFORML 如果拒绝的话，对方一定会做出一些令人讨厌的事——而且没有血也没有泪的样子——这是确实的吧
+	PRINTFORMW 话虽如此，怎么可能把钱交给那些对周围散布危害的家伙……
+	CALL SINGLE_DRAWLINE
+	CALL ASK_MULTI_JUDGE(@"援助金{候補額}", MONEY >= 候補額, "不要刺激，郑重的拒绝", 1, "砍了使者", 1)
+	IF RESULT == 0
+		PRINTFORMW 深思熟虑之后，决定施以援手。%ANAME(MASTER)%决定给{候補額}
+		PRINTFORMW 通过资金援助，%ANAME(結果君主)%似乎大大地变好了
+
+		CALL CHANGE_RELATION_C_TO_C(結果国, CFLAG:MASTER:所属, 300, -200)
+		MONEY -= 候補額
+	ELSEIF RESULT == 1
+		PRINTFORMW 没有钱给犯罪者们。把%ANAME(結果君主)%的使者送回去了
+		PRINTFORMW 知道有报复行为%ANAME(MASTER)%经过深思熟虑，依旧选择了郑重拒绝，不过之后没有发生什么令人讨厌的事……
+	ELSEIF RESULT == 2
+		PRINTFORMW 令人恼火，%ANAME(MASTER)%斩杀了使者！
+		PRINTFORMW 出其不意的是，使者连武器都没能拔出来就倒伏了
+		PRINTFORMW 就这样命令部下，作为对土匪们意思表示，让他们的把使者首级暴露在城门上
+		PRINTFORMW 心情有点舒畅……
+		PRINTFORML 
+		;-------資金援助要求はここでキャラ選出(开始)-------
+		;候補数をゼロクリア
+		VARSET 候補数
+		;キャラの選出
+		FOR LOCAL, 0, CHARANUM
+			;MASTERではなく、MASTER所属勢力の君主でもなく、同じ国に所属。もし結果国が野盗なら女であること。
+			IF LOCAL != MASTER && LOCAL != GET_COUNTRY_BOSS(CFLAG:MASTER:所属) && CFLAG:(LOCAL):所属 == CFLAG:MASTER:所属 && !CFLAG:(LOCAL):捕虜先 && (結果国 != 土匪 || IS_FEMALE(LOCAL)) && !IS_ANIMAL(LOCAL)
+				;0 ~ 「三能力の10倍と、好感度・従属度・依存度の1/10の総和」　の乱数を保存
+				候補キャラ:LOCAL = RAND(0, MAX((ABL:LOCAL:武闘 + ABL:LOCAL:防衛 + ABL:LOCAL:知略 + ABL:LOCAL:政治) * 10 + (CFLAG:LOCAL:好感度 + CFLAG:LOCAL:従属度 + CFLAG:LOCAL:依存度 + CFLAG:(LOCAL):支配度) / 10, 1))
+				候補数 ++
+			ENDIF
+		NEXT
+		;候補がなかったら終わる
+		SIF 候補数 == 0
+			RETURN 0
+		;先ほど得た乱数が最大だったキャラを取得
+		結果キャラ = FINDELEMENT(候補キャラ, MAXARRAY(候補キャラ))
+		;ないはずだけど、結果キャラがみつからなかったら終わる
+		SIF 結果キャラ <= 0
+			RETURN 0
+
+		SETCOLOR カラー_警告
+		PRINTFORMW ……但是，这会带来怎样的结果呢，只有%ANAME(MASTER)%知道了……
+
+		RESETCOLOR
+		DVAR:士官要求_野盗斬り捨てフラグ = GET_ID(結果キャラ)
+	ENDIF
+	DVAR:資金援助要求_発生禁止カウンタ = 10
+ENDIF
+RETURN 1
+
+

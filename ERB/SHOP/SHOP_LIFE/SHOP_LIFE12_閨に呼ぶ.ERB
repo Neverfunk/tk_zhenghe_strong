@@ -1,0 +1,284 @@
+﻿;-------------------------------------------------
+;「閨に呼ぶ」の名称
+;-------------------------------------------------
+@SHOP_LIFE_NAME12
+RESULTS:0 '= "讓人侍寢"
+
+;-------------------------------------------------
+;「閨に呼ぶ」の選択可否
+;-------------------------------------------------
+@SHOP_LIFE_CHECK12
+SIF CFLAG:MASTER:行動不能状態 == 行動不能_臨月 || COOLTIME:MASTER:0 > 1
+	RETURN 0
+SIF CFLAG:MASTER:捕虜先
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;「閨に呼ぶ」の選択可能キャラ存在判定
+;-------------------------------------------------
+@SHOP_LIFE_CHECKCHARA12(ARG:0)
+CALL SHOP_LIFE_CHECKCHARA_NEYA(ARG:0)
+RETURN RESULT
+
+;-------------------------------------------------
+;「閨に呼ぶ」の左カラムメニューの入力処理
+;-------------------------------------------------
+@SHOP_LIFE_EVENTBUY12
+FLAG:拠点フェイズページ = 1
+FLAG:夜這い = 0
+RETURN 0
+
+;-------------------------------------------------
+;「閨に呼ぶ」の右カラムキャラリスト１のボタン（関数未指定なら選択中色なし表示）
+;右列角色列表1的按钮（未指定函数时无选择颜色显示）
+;-------------------------------------------------
+@SHOP_LIFE_LIST1_BUTTON12(ARG:0, ARG:1)
+;キャラ, 選択中カラー表示フラグ, ボタン番号に追加する数値, CHECKCHARAの戻り値, 行動済みマークをオフにするフラグ
+CALL COLUMN_RIGHT_CHARALIST_BUTTON(ARG:0, CFLAG:(ARG:0):閨に呼ぶで選択中, SHOP_LIFE_LIST1_ADD_INPUT, ARG:1)
+RETURN 0
+
+;-------------------------------------------------
+;「閨に呼ぶ」の右カラム表示処理
+;“讓人侍寢”的右列显示处理
+;-------------------------------------------------
+@SHOP_LIFE_EVENTBUY_SHOW12
+#DIM 選択人数
+
+選択人数 = 0
+
+FOR LOCAL:0, 0, CHARANUM
+	;選択可能な条件を満たしているかどうか判定
+	RESULT = 0
+	TRYCALLFORM SHOP_LIFE_CHECKCHARA{FLAG:拠点フェイズ選択コマンド}(LOCAL:0)
+	IF RESULT == 1
+		;選択中の人数を数える
+		IF CFLAG:(LOCAL:0):閨に呼ぶで選択中
+			選択人数 ++
+		ENDIF
+	ELSE
+		;条件を満たしていなければ強制的にＯＦＦ
+		CFLAG:(LOCAL:0):閨に呼ぶで選択中 = 0
+	ENDIF
+NEXT
+
+;タイトル表示
+CALL COLUMN_RIGHT_TITLE("対象者選択", TOSTR(選択人数), "8", "1", "0")
+CALL COLUMN_RIGHT_PRINTL
+CALL COLUMN_RIGHT_LINE
+CALL COLUMN_RIGHT_PRINTL
+
+IF 選択人数 >= 1
+	PRINTBUTTON "[就這樣決定]", 1
+	PRINTPLAIN   
+	PRINTBUTTON "[就這樣被逆調教]", 2
+	PRINTPLAIN   
+	PRINTBUTTON "[復位]", 3
+ELSE
+	SETCOLOR カラー_選択不可
+	PRINTPLAINFORM [就這樣決定]
+	PRINTPLAIN   
+	PRINTPLAINFORM [就這樣被逆調教]
+	PRINTPLAIN   
+	PRINTPLAINFORM [復位]
+	RESETCOLOR
+ENDIF
+
+PRINTPLAIN   
+IF 8 > 選択人数
+	PRINTBUTTON "[自動選択]", 4
+ELSE
+	SETCOLOR カラー_選択不可
+	PRINTPLAINFORM [自動選択]
+	RESETCOLOR
+ENDIF
+
+CALL COLUMN_RIGHT_PRINTL
+CALL COLUMN_RIGHT_LINE
+CALL COLUMN_RIGHT_PRINTL
+
+;標準的なキャラリストとページ移動を呼ぶ
+CALL COLUMN_RIGHT_CHARALIST
+
+RETURN 0
+
+;-------------------------------------------------
+;「閨に呼ぶ」の右カラムボタンの入力処理補佐
+;　RETURN 0:CLEARLINE LINECOUNT - LINES_SHOPする
+;　RETURN 1:CLEARLINE LINECOUNT - LINES_SHOPしない
+;-------------------------------------------------
+@SHOP_LIFE_EVENTBUY_SUB12(ARG:0)
+;侍寝成员的确定
+IF ARG:0 == 1
+	CALL DECIDE_YOTOGI_MEMBER(0)
+	IF !RESULT
+		RETURN 0
+	ENDIF
+;このメンバーに逆調教
+ELSEIF ARG:0 == 2
+	CALL DECIDE_YOTOGI_MEMBER(1)
+	IF !RESULT
+		RETURN 2
+	ENDIF
+;メンバーをリセット
+ELSEIF ARG:0 == 3
+	CALL RESET_YOTOGI_MEMBER
+;メンバー自動選択
+ELSEIF ARG:0 == 4
+	CALL AUTO_YOTOGI_MEMBER
+ENDIF
+RETURN 0
+
+;-------------------------------------------------
+;「閨に呼ぶ」のリスト１入力処理
+;-------------------------------------------------
+@SHOP_LIFE_USERSHOP12(ARG:0)
+;参加キャラの数を数える
+LOCAL:5 = 0
+FOR LOCAL:0, 0, CHARANUM
+	IF CFLAG:(LOCAL:0):閨に呼ぶで選択中
+		LOCAL:5 ++
+	ENDIF
+NEXT
+IF CFLAG:(ARG:0):閨に呼ぶで選択中 || LOCAL:5 < 8
+	;調教参加フラグを反転
+	CFLAG:(ARG:0):閨に呼ぶで選択中 = !CFLAG:(ARG:0):閨に呼ぶで選択中
+ENDIF
+RETURN 0
+
+;-------------------------------------------------
+;「閨に呼ぶ」の処理(ARG:0 = 1なら逆調教）
+;-------------------------------------------------
+@DECIDE_YOTOGI_MEMBER(ARG:0)
+LOCAL:1 = 1
+FOR LOCAL:0, 0, CHARANUM
+	IF LOCAL:0 != MASTER && CFLAG:(LOCAL:0):閨に呼ぶで選択中
+		CFLAG:(LOCAL:0):調教参加フラグ  = 1
+		LOCAL:1 = 0
+		CFLAG:(LOCAL:0):閨に呼ぶで選択中 = 0
+	ENDIF
+NEXT
+IF LOCAL:1
+	;没有角色参加的话不处理,返回0
+	RETURN 0
+ENDIF
+
+IF ARG:0
+	FLAG:調教モード = 5
+	FLAG:閨逆調教 = 1
+ELSE
+	FLAG:調教モード = 1
+ENDIF
+
+;ウフフフラグをONに
+FLAG:ウフフフラグ = 1
+;--信仰--触发调教的类型 0=会见 1=调教俘虏 2=侍寝 3=夜袭  4=慰安民众 5=留宿 6=性贿赂
+MIRACLE_LUST_TRAIN_FORM = 2
+;--信仰--玩家制造色欲调教事件变量赋值--
+MIRACLE_LUST_TRAIN_TARGET:0 = 1 ;人数初始化
+MIRACLE_LUST_TRAIN_TARGET:1 = MASTER ;玩家参与
+MIRACLE_LUST_TRAIN_MAIN = MASTER
+FOR LOCAL:0, 0, CHARANUM
+	IF CFLAG:(LOCAL:0):調教参加フラグ
+		MIRACLE_LUST_TRAIN_TARGET:0 ++ ;调教人数增加
+		MIRACLE_LUST_TRAIN_TARGET:(MIRACLE_LUST_TRAIN_TARGET:0) = LOCAL:0 ;调教参与者记录
+		MIRACLE_LUST_PRE_FALL:(MIRACLE_LUST_TRAIN_TARGET:0) = MIRACLE_FALLCOUNT(LOCAL:0) ;调教前陷落代码,函数在 祷告_践行教义事件.ERB
+		MIRACLE_LUST_PRE_MAKELOVE:(MIRACLE_LUST_TRAIN_TARGET:0) = TALENT:(LOCAL:0):合意 ;调教前是否取得对象合意
+		MIRACLE_LUST_PRE_LIKE:(MIRACLE_LUST_TRAIN_TARGET:0) = CFLAG:(LOCAL:0):好感度 ;调教前对象好感度
+		MIRACLE_LUST_PRE_TRUST:(MIRACLE_LUST_TRAIN_TARGET:0) = CFLAG:(LOCAL:0):依存度 ;调教前对象依存度
+		MIRACLE_LUST_PRE_BELONG:(MIRACLE_LUST_TRAIN_TARGET:0) = CFLAG:(LOCAL:0):従属度 ;调教前对象従属度
+		MIRACLE_LUST_PRE_CONTROL:(MIRACLE_LUST_TRAIN_TARGET:0) = CFLAG:(LOCAL:0):支配度 ;调教前对象支配度
+	ENDIF
+NEXT
+;--信仰--结束--
+
+;行動開始時の共通処理
+CALL START_TRAIN_COMMON
+
+RETURN 1
+
+;-------------------------------------------------
+;「閨に呼ぶ」の選択メンバーのリセット
+;-------------------------------------------------
+@RESET_YOTOGI_MEMBER
+FOR LOCAL:0, 0, CHARANUM
+	IF LOCAL:0 != MASTER && CFLAG:(LOCAL:0):閨に呼ぶで選択中
+		CFLAG:(LOCAL:0):閨に呼ぶで選択中 = 0
+	ENDIF
+NEXT
+RETURN 0
+
+;-------------------------------------------------
+;「閨に呼ぶ」のメンバー自動選択
+;-------------------------------------------------
+@AUTO_YOTOGI_MEMBER
+#DIM 選択人数
+#DIM 候補, MAX_CHARA_NUM
+#DIM 候補値, MAX_CHARA_NUM
+#DIM 候補数
+#DIM 感最小
+;候補  ＝キャラの番号
+;候補値＝キャラの好感度
+
+VARSET 候補, -1
+VARSET 候補値, -1001
+
+選択人数 = 0
+候補数 = 0
+
+;選択中の人数をカウント
+FOR LOCAL:0, 0, CHARANUM
+	IF CFLAG:(LOCAL:0):閨に呼ぶで選択中
+		選択人数 ++
+	ENDIF
+NEXT
+
+;候補選出
+FOR LOCAL:0, 0, CHARANUM
+	;選択中、主人公の場合やり直し
+	SIF CFLAG:(LOCAL:0):閨に呼ぶで選択中 == 1 || LOCAL:0 == MASTER
+		CONTINUE
+
+	;選択可能判定
+	TRYCALLFORM SHOP_LIFE_CHECKCHARA12(LOCAL:0)
+
+	;選択可能なら候補に対象キャラ番号を入力
+	IF RESULT == 1
+		候補:候補数 = LOCAL:0
+		候補値:候補数 = ABL:(LOCAL:0):Ｃ感 + ABL:(LOCAL:0):Ｖ感 + ABL:(LOCAL:0):Ａ感 + ABL:(LOCAL:0):Ｂ感 + ABL:(LOCAL:0):Ｍ感 + ABL:(LOCAL:0):Ｕ感
+		候補数 ++
+	ENDIF
+NEXT
+
+;候補数が0ならなにもしない
+;選択中人数+候補数が8以下の場合、候補者を全員選択
+;選択中人数+候補数が9以上の場合、○感の合計が低い順（≒あまり調教されてないキャラを優先）に選択
+IF 候補数 == 0
+
+ELSEIF 候補数 + 選択人数 <=8
+	FOR LOCAL:0, 0, 候補数
+		CFLAG:(候補:(LOCAL:0)):閨に呼ぶで選択中 = 1
+	NEXT
+
+ELSE
+	WHILE 1
+		;MINARRAYだとうまくいかなかったのでゴリ押しで対象探す
+		;なにかいい方法がありましたら修正お願いします
+		感最小 = FINDELEMENT(候補値, MAXARRAY(候補値, 0, ), 0, 候補数)
+		FOR LOCAL:0, 0, 候補数
+			IF 候補値:感最小 > 候補値:(LOCAL:0) && 候補値:(LOCAL:0) >= 0
+				感最小 = LOCAL:0
+			ENDIF
+		NEXT
+
+		CFLAG:(候補:感最小):閨に呼ぶで選択中 = 1
+		選択人数 ++
+
+		;一度選択されたキャラは選ばれないように
+		候補値:感最小 = -1
+
+		SIF 選択人数 >=8
+		BREAK
+	WEND
+ENDIF
+RETURN 0

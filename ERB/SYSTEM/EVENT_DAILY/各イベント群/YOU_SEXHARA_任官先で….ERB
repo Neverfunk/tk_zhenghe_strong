@@ -1,0 +1,450 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_YOU_SEXHARA_RATE()
+RETURN 60
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_YOU_SEXHARA_DECISION()
+SIF !IS_FEMALE(MASTER)
+	RETURN 0
+SIF MAX(ABL:MASTER:武闘, ABL:MASTER:知略, ABL:MASTER:政治, ABL:MASTER:防衛) >= 70 || ABL:MASTER:武闘 + ABL:MASTER:知略 + ABL:MASTER:政治 + ABL:MASTER:防衛 >= 240
+	RETURN 0
+SIF GET_COUNTRY_BOSS(CFLAG:MASTER:所属) == MASTER || CFLAG:MASTER:捕虜先 != 0
+	RETURN 0
+RETURN 1
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_YOU_SEXHARA_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_YOU_SEXHARA()
+
+SELECTCASE RAND:100
+	;45%でセクハライベント
+	CASE IS < 45
+		PRINTFORMW 娇弱的%ANAME(MASTER)%在日常生活中被当做性骚扰的目标……
+		PRINTFORML 
+		SELECTCASE RAND:25
+			;ご褒美フェラ
+			CASE 0
+				PRINTFORML %ANAME(MASTER)%的房间里响起了湿漉漉的蜜音和痛苦的呻吟声
+				PRINTFORML 作为工作的奖赏，被部下要求口交的%ANAME(MASTER)%，无法拒绝而开始服务
+				PRINTFORMW 但是因为笨拙的动作而急不可耐的他，抓住了%ANAME(MASTER)%的头，像手淫抓着头一样粗暴地对待着
+				PRINTFORML 不久，他一边呻吟一边使劲地射精，雄性气息在口腔中散开，意识被冲击模糊了一些
+				PRINTFORML 被按着头无法松口的%ANAME(MASTER)%，只能流着泪慢慢吞咽下去
+				PRINTFORMW 就这样，虽然总算是结束了口交，但还是没能解放，被拖进了床上，连正戏都被强制要求了
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("兵士"), @"部下の\@RAND:2 ? 肉棒 # 唇\@", @"部下", "", "強姦")
+				PRINTFORMW 
+			;資料室で
+			CASE 1
+				PRINTFORML 在寂静无人的资料室里，啪啪啪地响起了妹汁溅落和肉体的碰撞声
+				PRINTFORML %ANAME(MASTER)%被推到墙上紧紧按住，被一个士兵从背后粗暴地侵犯着
+				PRINTFORMW 工作中的时候，士兵对%ANAME(MASTER)%施以邀请，还没完全拒绝的时候就被忍耐不住的士兵按住了
+				PRINTFORML %ANAME(MASTER)%被他强烈侵犯着，身体不断颤抖，为了不被人听到而拼命忍耐着声音
+				PRINTFORML 但是他好像很享受%ANAME(MASTER)%那样的样子，毫不留情地大力抽插起来
+				PRINTFORMW 在士兵射精的时候，无视了%ANAME(MASTER)%的恳求不要在小穴里射出来的要求，%ANAME(MASTER)%禁不住因为精液的热度提高了娇声
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("兵士"), @"兵士の\@RAND:2 ? 肉棒 # 唇\@", @"兵士", "", "強姦")
+				PRINTFORMW 
+			;見回り中に
+			CASE 2
+				PRINTFORML 巡回任务中，%ANAME(MASTER)%被陪同的士兵邀请到附近的旅馆休息
+				PRINTFORML 虽然很客气地拒绝了，但还是抱着腰强行带进房间，一进屋就被推倒了
+				PRINTFORMW 双手按住对方的手试图阻止对方继续拔下衣服的时候，嘴唇被粗暴地吻住了
+				PRINTFORML 面对因恐惧和紧张而浑身发抖的%ANAME(MASTER)%，对方用熟练的手势在全身抚摸
+				PRINTFORML 看到不由得露出喘息声的%ANAME(MASTER)%，他大胆地笑了一笑，拿出了那个有男子气概的东西
+				PRINTFORMW 一直被他操到满足为止，到了回家的时候天已经黑透了
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("兵士"), @"兵士の\@RAND:2 ? 肉棒 # 唇\@", @"兵士", "", "強姦")
+				PRINTFORMW 
+			;任務の帰りに
+			CASE 3
+				PRINTFORML 「哈！哈啊！平时看起来高高在上的样子！没想到是个如此废物的女人！」
+				PRINTFORML %ANAME(MASTER)%在远离村庄的旧小屋里被部下一边辱骂一边被强烈侵犯而呻吟着
+				PRINTFORMW 在任务回来的路上，为了休息在小屋里待着，结果被他突然推倒，然后就被强奸了
+				PRINTFORML 「嘿嘿！我一直在等机会！总算有机会来侵犯你了！哦，真是紧致，是这里吗！你喜欢这里对吗？」
+				PRINTFORML 对于对方粗暴地抓着腰进行大幅度抽插和对子宫口进行冲击责备的行为，%ANAME(MASTER)%疲惫的身体无法抵抗只能不断地颤抖着
+				PRINTFORML 无视了体外中出的请求直接对着子宫射了个爽，由于浸入子宫的热能，%ANAME(MASTER)%不由得被绝顶了
+				PRINTFORMW 在那之后虽然多次被侵犯，但被受到了极强的威胁，没能向任何人控诉……
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("兵士"), @"部下の\@RAND:2 ? 肉棒 # 唇\@", @"部下", "", "強姦")
+				PRINTFORMW 
+			;接待の命令
+			CASE 4
+				PRINTFORML %ANAME(MASTER)%奉大臣之命出席宴会，招待某位贵族
+				PRINTFORML 他亲昵地抱着身着女性礼服打扮的%ANAME(MASTER)%的肩膀，用下流的眼神看着
+				PRINTFORMW 虽然对那个视线感到厌恶，但还是想方设法完成任务，带着努力挤出的笑容和他交往
+				PRINTFORML 终于喜欢上了%ANAME(MASTER)%的贵族要求带她回宅邸
+				PRINTFORML 虽然想办法温和地拒绝，但大臣还是同意了，结果还是被带走了
+				PRINTFORML 被带回宅邸后，理所当然地被推倒，以无底的体力整夜调教着
+				PRINTFORMW 日后，大臣说对方给你的接待给予了好评，并拜托下一次还是由你去接待他，被这样要求后下意识地并住大腿呼出了热气……
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("貴族"), @"富豪の\@RAND:2 ? 肉棒 # 唇\@", @"富豪", "", "強姦")
+				PRINTFORMW 
+			;大臣のパワハラ
+			CASE 5
+				PRINTFORML 在一间豪华的房间里，%ANAME(MASTER)%一边喘息一边躺在床上
+				PRINTFORML 一个男人在旁边高兴地喝着红酒，这是是%ANAME(MASTER)%工作的国家的大臣
+				PRINTFORMW 被他邀请去吃饭的%ANAME(MASTER)%就这样被邀请到床上，被强行侵犯了
+				PRINTFORML 被弄得浑身疲惫的%ANAME(MASTER)%且因高潮余韵久散不去而一脸茫然的样子，望着从秘所溢出的精液
+				PRINTFORML 休息结束后的他再次盖上盖子，%ANAME(MASTER)%一边湿润着眼睛一边颤抖着，主动张开了腿
+				PRINTFORMW 第二天，在工作中遇见了他，当被对方要求下次再来的时候不由得颤抖了起来
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("貴族"), @"大臣の\@RAND:2 ? 肉棒 # 唇\@", @"大臣", "", "強姦")
+				PRINTFORMW 
+			;兵士慰安
+			CASE 6
+				PRINTFORML 深夜的自己的房间里，%ANAME(MASTER)%汗流浃背，与年轻的新兵激烈地纠缠在一起
+				PRINTFORML %ANAME(MASTER)%在听他因想家而烦恼时，受到母性本能的刺激，给予了对方些许关爱
+				PRINTFORMW 被这样的他央着给予一晚，由于无法拒绝，带回了自己房间像恋人一样相爱了好几个小时
+				PRINTFORML 他大口喘气地地沉醉在%ANAME(MASTER)%的身体里，专心致志地不断向小穴深处进发
+				PRINTFORML 他激烈地摇着腰喃喃细语着爱的话语，%ANAME(MASTER)%的禁不住子宫隐隐作痛
+				PRINTFORMW 结果被要求那样持续了一夜，在早晨的阳光中被他的手臂抱着睡着了
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("兵士"), @"兵士の\@RAND:2 ? 肉棒 # 唇\@", @"兵士", "", "和姦")
+				PRINTFORMW 
+			;酔わされて
+			CASE 7
+				PRINTFORML %ANAME(MASTER)%加深和睦的关系而接受了与士兵们，和他们一起在酒馆喝酒
+				PRINTFORML 虽然想注意分寸，但无法拒绝一个接一个送酒，结果醉到烂醉如泥
+				PRINTFORMW 于是，一个士兵站了起来，在大家面前慢慢地扒去%ANAME(MASTER)%的衣服，开始全身摸索
+				PRINTFORML 无法抵抗的%ANAME(MASTER)%伴随着爱抚的快乐，发出妖媚的喘息声，煽动着士兵们兴奋的情绪
+				PRINTFORML 最终肉棒用力戳进去的时候，完全被火光照射着的%ANAME(MASTER)%在士兵面前潮吹绝顶了
+				PRINTFORMW 在那之后%ANAME(MASTER)%被替换的其余士兵们的对手，被注入了数十发精液
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, 輪姦, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("兵士"), @"兵士の\@RAND:2 ? 肉棒 # 唇\@", @"兵士", "", "輪姦")
+				PRINTFORMW 
+			;媚薬を飲まされる
+			CASE 8
+				PRINTFORML 在办公室里，%ANAME(MASTER)%以倚靠在桌子上的姿势被士兵侵犯，不由得因为刺激时不时娇喘着
+				PRINTFORML 尽管是被强行侵犯的样子，但那恍惚的表情却相当愉悦的样子，眼睛浮现出了♥
+				PRINTFORMW 装在慰问品点心里的媚药所加害，现在的%ANAME(MASTER)%变成了脑子里只想被侵犯的雌性
+				PRINTFORML 他兴奋地侵犯了平日里一直渴望的%ANAME(MASTER)%，啪嗒啪嗒地激烈地抽插肉棒
+				PRINTFORML 在那毫不留情的冲击下，%ANAME(MASTER)%被快乐袭击使得眼睛不由得上翻，完全忘记了羞耻一脸淫荡地随着肉棒抽插颤抖身体
+				PRINTFORMW 在药效消退一直被按着中出，%ANAME(MASTER)%的小穴被迫记住了对方肉棒的形状和精液的热度
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("兵士"), @"兵士の\@RAND:2 ? 肉棒 # 唇\@", @"兵士", "", "強姦")
+				PRINTFORMW 
+			;お風呂でばったり
+			CASE 9
+				PRINTFORML 深夜，醒来的%ANAME(MASTER)%偷偷地洗了个澡，突然遇到了一个士兵
+				PRINTFORML 面对慌乱的%ANAME(MASTER)%，他带着卑微的笑容，不怀好意地不断接近
+				PRINTFORMW 然后把颤抖的%ANAME(MASTER)%逼到墙上，抓住手臂，威胁说如果吵闹的话会被人看见的
+				PRINTFORML 本想逃跑，却被他抱住，就这样被毫不客气地爱抚了全身，不由得小小地喘息了
+				PRINTFORML 耳朵被轻轻地舔舐，乳头和阴蒂却被对方娴熟地技术责弄着，%ANAME(MASTER)%一边微微颤抖一边拼命地忍耐着喘息声
+				PRINTFORML 但是没能敌得过他的技巧，浴室里水花声与%ANAME(MASTER)%甜美的娇声不断混杂在一起
+				PRINTFORMW 结果被疼爱到消火为止，身体深处都被他调教得深深地记住了热度……
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("兵士"), @"兵士の\@RAND:2 ? 肉棒 # 唇\@", @"兵士", "", "強姦")
+				PRINTFORMW 
+			;仕事中に尻揉み
+			CASE 10
+				PRINTFORML 工作的时候被悄悄从背后接近的部下突然摸到了屁股
+				PRINTFORML %ANAME(MASTER)%一边发出惊恐的叫声一边向部下提出抗议，部下却不以为然地继续揉捏屁股
+				PRINTFORMW 屁股上的臀肉被揉搓得很厉害，不由得发出喘息声，他手的动作越来越激烈了
+				PRINTFORML 虽然想办法逃脱，但他把%ANAME(MASTER)%紧紧抱在了怀里，不光是屁股，连胸部都在责弄着
+				PRINTFORML 完全沉浸在他的爱抚的节奏中，对着耳边轻轻吹气的同时一边被责备一边被爱抚，完全无视了抗议
+				PRINTFORMW 之后，被他迷上了的%ANAME(MASTER)%被强行带到卧室，让%ANAME(MASTER)%作为他肉棒的对手
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("兵士"), @"兵士の\@RAND:2 ? 肉棒 # 唇\@", @"兵士", "", "強姦")
+				PRINTFORMW 
+			;仕事のミスの代償
+			CASE 11
+				PRINTFORML 在工作中犯了重大错误的%ANAME(MASTER)%，被官吏发现并责骂了
+				PRINTFORML 被絮絮叨叨地说教而意志消沉的时候，被逼迫如果想要一笔勾销的话就用%ANAME(MASTER)%的身体让他开心
+				PRINTFORMW 完全弱势了的%ANAME(MASTER)%对那个提议犹豫了一瞬间，但不能拒绝，只能点头同意了
+				PRINTFORML 被带进房间后，被躺在床上的他命令去主动侍奉的%ANAME(MASTER)%，跨坐在他的身上，用水嫩的小穴吞入那健壮的肉棒并摆动着腰
+				PRINTFORML 他的肉棒很长，每次坐下都会被像要将子宫给贯穿一样的剧烈冲击刺激到，无法忍受地从喉咙里流出甜蜜的喘息声
+				PRINTFORML 对%ANAME(MASTER)%不满意后他又骂了一顿，随后顶起腰，突然肉棒猛地冲击到子宫口，剧烈的刺激使得%ANAME(MASTER)%不由得浑身颤抖地用力挺起
+				PRINTFORMW 被侵犯了一整晚后，终于解放了的%ANAME(MASTER)%，身心都疲惫不堪，抽泣着回到了房间
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("兵士"), @"役人の\@RAND:2 ? 肉棒 # 唇\@", @"役人", "", "強姦")
+				PRINTFORMW 
+			;写真をネタに
+			CASE 12
+				PRINTFORML 有一天，%ANAME(MASTER)%被一个卫兵叫去商量，在那里看到了一张照片
+				PRINTFORML 那张照片里拍到了%ANAME(MASTER)%在房间里沉浸在手淫中不能自拔的样子，让%ANAME(MASTER)%十分惊愕
+				PRINTFORMW 他慢慢地接近僵住的%ANAME(MASTER)%，喃喃地说：「如果想不被曝光的话，请一定要满足我哟」
+				PRINTFORML 在这种情况下不可能拒绝，%ANAME(MASTER)%不由得愤怒、悔恨、随后害羞地颤抖着身体微微点了点头
+				PRINTFORML 他和乐融融地笑了笑，把手伸向%ANAME(MASTER)%的腰，粗暴地吻住嘴唇，把%ANAME(MASTER)%带到了自己的家里
+				PRINTFORMW %ANAME(MASTER)%被要求进行新婚play和素股play(ソーププレイ)等各种各样的游戏，一整晚都和他的肉欲交往……
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("兵士"), @"兵士の\@RAND:2 ? 肉棒 # 唇\@", @"兵士", "", "強姦")
+				PRINTFORMW 
+			;馬小屋の管理人に
+			CASE 13
+				PRINTFORML 有一天，%ANAME(MASTER)%想去视察马匹的情况，于是前去巡视，遇到了那里的管理人
+				PRINTFORML 聊了一会儿家常，任何聊到马的肉棒和如何照顾的话题的时候，%ANAME(MASTER)%变得语无伦次了
+				PRINTFORMW 他一看到%ANAME(MASTER)%的反应就叽叽里咕噜地笑着，并表示他的肉棒也很大，也很难照顾
+				PRINTFORML 虽然%ANAME(MASTER)%想办法逃脱，但却被抓住了手腕说道「体会一下我平时日常劳作的辛苦吧！(日頃の労いをしてくれても良いじゃないか)」
+				PRINTFORML 然后被强行带到他的管理小屋里，被粗暴地推倒在被子上，还来不及呼救就被按住了
+				PRINTFORMW 他那和马匹一样的肉棒和无底的耐力，让%ANAME(MASTER)%完全被调教成几乎完美的交配対象了
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("兵士"), @"馬小屋の管理人の\@RAND:2 ? 肉棒 # 唇\@", @"馬小屋の管理人", "", "強姦")
+				PRINTFORMW 
+			;兵の夜這い
+			CASE 14
+				PRINTFORML 有一天深夜，当%ANAME(MASTER)%睡着的时候，一个士兵趁夜潜行进了房间
+				PRINTFORML %ANAME(MASTER)%虽然想马上逃走，但却被熟知女性弱点的她狠狠锤了一下下腹，突然强烈的刺激与疼痛使得喉咙想要呻吟也只能微微挤出细微的声音，随后对方粗暴地把肉棒戳了进来
+				PRINTFORML 他一边抓住%ANAME(MASTER)%的手臂，一边激烈地挥着腰，像是要在冲击进子宫里一样挺动着
+				PRINTFORMW 由于内脏要被击溃般的强烈冲击，%ANAME(MASTER)%呜咽着，身体一次次地让不由自主地跳跃起来
+				PRINTFORML 不久他预告了即将阴道内射精的话，%ANAME(MASTER)%用模糊颤抖的声音请求体外射精，但是被无情地往胎内注入了
+				PRINTFORML 受到多次冲击而一脸高潮变得茫然的%ANAME(MASTER)%，在那之后也继续被他强奸，内射了好几次……
+				PRINTFORMW 第二天早上%ANAME(MASTER)%恢复了意识，但是因为害羞没能和任何人商量只好哭着睡着了
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("兵士"), @"兵士の\@RAND:2 ? 肉棒 # 唇\@", @"兵士", "", "強姦")
+				PRINTFORMW 
+			;怪我のお詫び
+			CASE 15
+				PRINTFORML 在训练中，在和部下的配合中出现错误使之受伤了
+				PRINTFORML 为了表示歉意，主动去他家探望，因为被委托做积压的家务，所以很快就接受了
+				PRINTFORML 做完家务准备回家的时候，「还没有最重要的照顾吧？」，于是被拉着留下了
+				PRINTFORMW 在不知何故而发呆的%ANAME(MASTER)%面前，他将肉棒掏了出来
+				PRINTFORML 对突然的发生的事发出悲鸣的%ANAME(MASTER)%，对方则解释因为受伤所以近期不能随便玩女人了
+				PRINTFORML 流着泪用颤抖的声音请求原谅，并且固执地要求给予性服务，终于放弃了(涙目になりながら震える声で許しを請うが、彼はかたくなに奉仕を要求してきて、遂に折れてしまった)
+				PRINTFORMW 为了镇住他的猛劲儿，一整晚都像夫妻一样激烈地交缠着，并被充分地播种了……
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("兵士"), @"部下の\@RAND:2 ? 肉棒 # 唇\@", @"部下", "", "強姦")
+				PRINTFORMW 
+			;卑猥な衣装
+			CASE 16
+				PRINTFORML 「嘿嘿，我的梦想就是让你穿上那件衣服啊…哦~！哈哈，很适合你哦」
+				PRINTFORML %ANAME(MASTER)%被要求穿上了能看到半胸的并裸露着内裤的完全遮不住下体的下流超短裙水手服，因为羞耻不由得眼角带泪(パンツと胸が半分程見えている卑猥な水手服を着せられた%ANAME(MASTER)%が、涙目でモジモジしている)
+				PRINTFORMW 在工作中发现了搞砸了的%ANAME(MASTER)%，为了让他封口而迎合他的爱好来作为交换条件
+				PRINTFORML 他气喘吁吁，目不转睛地盯着，脸涨得通红，身体微微颤抖着，却一直忍耐
+				PRINTFORML 约定只是角色扮演而已，当然也不会就此结束，结果还是被兴奋的他推倒了
+				PRINTFORMW 由于过度兴奋而被肉棒的发狂地粗暴侵犯，无视避孕的请求，多次被射在里面……
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("兵士"), @"部下の\@RAND:2 ? 肉棒 # 唇\@", @"部下", "", "強姦")
+				PRINTFORMW 
+			;酒場の踊り子
+			CASE 17
+				PRINTFORML 有一天晚上，士兵们聚集在的酒馆的时候，被异样的热气和兴奋包围着
+				PRINTFORML 这也是理所当然的，今天晚上%ANAME(MASTER)%竟然在台上穿着下流的衣服跳钢管舞
+				PRINTFORMW 在余兴游戏中输了的%ANAME(MASTER)%被给予了惩罚游戏，以此来回应他们的要求
+				PRINTFORML 被多数炽热视线注视着的%ANAME(MASTER)%一边染上脸颊一边被挑逗，无意识地扭动诱惑的身姿
+				PRINTFORML 已经开始思考困难的%ANAME(MASTER)%回应了他们更加过激的要求，一直淫荡地跳舞直到天亮……
+				PRINTFORMW 舞蹈结束后的%ANAME(MASTER)%被带回到了游戏的胜利者手中，像恋人一样度过了一个炽热的一夜
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, 露出, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("兵士"), @"兵士の\@RAND:2 ? 肉棒 # 唇\@", @"兵士", "", "和姦")
+				PRINTFORMW 
+			;実験台として
+			CASE 18
+				PRINTFORML 在宫殿一角的研究室里，%ANAME(MASTER)%红着脸在床上辗转反侧
+				PRINTFORML 被研究者一再请求进行新药的临床试验的%ANAME(MASTER)%没有拒绝，被打了用于俘虏的自白剂
+				PRINTFORML 虽然有一段时间没什么大不了的，但渐渐地，灼烧般的强烈热度从子宫里涌上来，扩散到全身
+				PRINTFORMW 在压倒性的快乐浪潮中，%ANAME(MASTER)%终于忍不住了，在研究员面前开始自慰了
+				PRINTFORML 他看了那个样子，满意地笑了一下，就把肉棒伸到抽搐着仰着身体的%ANAME(MASTER)%那里
+				PRINTFORML 完全发情了的%ANAME(MASTER)%在看到那个坚强的东西的时候，毫不犹豫地开始了索求
+				PRINTFORMW %ANAME(MASTER)%在那之后一边被打了好几次药一边反复绝顶，完全被快乐俘虏了……
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("兵士"), @"研究者の\@RAND:2 ? 肉棒 # 唇\@", @"研究者", "", "強姦")
+				PRINTFORMW 
+			;エロ本を見つけて
+			CASE 19
+				PRINTFORML 在工作中，发现了部下的色情书籍，翻看的之后不知不觉被书的主人给发现了
+				PRINTFORML 看到急着找借口的%ANAME(MASTER)%，他笑嘻嘻地走近，逼到墙上
+				PRINTFORMW 虽然想办法逃跑，但却被耳边讨厌的话语所逼，不由得打了个寒战
+				PRINTFORML 随后他的手突然指钻进了裙子下，对着湿透的密缝用力一划，让%ANAME(MASTER)%吐露出了甜美的喘息声
+				PRINTFORML 脸红地浑身颤抖着，被浮现出嗜虐笑容的他强行拉着胳膊带到了床上
+				PRINTFORMW 已经无法拒绝的%ANAME(MASTER)%一反平时的形象，一整晚都被任意侵犯了
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("兵士"), @"部下の\@RAND:2 ? 肉棒 # 唇\@", @"部下", "", "強姦")
+				PRINTFORMW 
+			;部下の催眠術
+			CASE 20
+				PRINTFORML %ANAME(MASTER)%在办公室里被部下侵犯却毫无顾忌地喘息着
+				PRINTFORML 但是被侵犯却没有抵抗感，虽然表情有点困惑，但还是坦然接受了他
+				PRINTFORML 在部下学习催眠术的过程中，%ANAME(MASTER)%的认知发生了改变
+				PRINTFORMW 虽然残存的自由意识知道自己是被强奸了，但却没有拒绝的意思，反而配合着肉棒摆动了腰
+				PRINTFORML 不久预告了即将在阴道内射精，%ANAME(MASTER)%也没有丝毫拒绝，一边绝顶一边接受了精液
+				PRINTFORML 再第二次口交并拔出肉棒之后，%ANAME(MASTER)%还好奇着为什么头上会有别人的精液，思考着的时候盯着肉棒(ちんぽを引き抜かれると、%ANAME(MASTER)%は溢れる精液をの頭に？を浮かべながらただ見つめていた)
+				PRINTFORMW 被确信效果的部下带回了房间，在意识更加模糊的情况下反复进行了中出……
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("兵士"), @"部下の\@RAND:2 ? 肉棒 # 唇\@", @"部下", "", "催眠中の調教")
+				PRINTFORMW 
+			;深夜の散歩
+			CASE 21
+				PRINTFORML 深夜，全裸的%ANAME(MASTER)%在寂静的宫殿里与士兵走在一起
+				PRINTFORML 面红耳赤的%ANAME(MASTER)%脖子有项圈，被领头的士兵牵着走动
+				PRINTFORMW 不小心弄坏了他的私人物品的%ANAME(MASTER)%，被他当成了赔偿的替代品
+				PRINTFORML 因为太过羞耻，哭着恳求原谅，却被粗暴的牵着绳子继续散步
+				PRINTFORML 每次有人在周围走动的时候%ANAME(MASTER)%都会控制不住地发抖，他看到那个样子露出了嗜虐的笑容
+				PRINTFORML 不久，%ANAME(MASTER)%被兴奋的他带到了隐蔽处，粗暴地把肉棒戳了进去
+				PRINTFORMW 因为被怕别人看到的恐惧和曝光的兴奋使得头脑一片空白，一次又一次地达到了高潮
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, 露出, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("兵士"), @"兵士の\@RAND:2 ? 肉棒 # 唇\@", @"兵士", "", "強姦")
+				PRINTFORMW 
+			;贔屓の業者に
+			CASE 22
+				PRINTFORML 穿着下流服装的%ANAME(MASTER)%坐上男人的肉棒，摆动着腰喘息着
+				PRINTFORML 原本是被派去接待一位富豪，结果被对方看中的%ANAME(MASTER)%被派去做枕営業(ある富豪との接待に駆り出され、相手方に気に入られた%ANAME(MASTER)%は枕営業をさせられている)
+				PRINTFORMW 虽然对他令人厌恶的眼神感到强烈的厌恶感，但也只能无奈地像工作尽力服务
+				PRINTFORML 但是在他粗犷的肉棒大力冲击的过程中，子宫因为难以抗拒的快感而疼痛，身体也不由得颤抖
+				PRINTFORML 他一边欣赏着忍受着绝顶而颤抖的%ANAME(MASTER)%，一边黏着地责弄着乳头和阴核
+				PRINTFORMW 终于忍不住了的%ANAME(MASTER)%，像撒娇一样地搂住他，控制不住地全身扭动着颤抖
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, 売春", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("貴族"), @"富豪の\@RAND:2 ? 肉棒 # 唇\@", @"富豪", "", "売春")
+				PRINTFORMW 
+			;健康診断で
+			CASE 23
+				PRINTFORML %ANAME(MASTER)%在医务室以手贴在床上的姿势被医生侵犯，身体止不住地不断颤抖
+				PRINTFORML 打着健康检查的旗号结果被剥下衣服变成裸体的%ANAME(MASTER)%无法逃走，于是被强行推倒了
+				PRINTFORMW 黏着的腰部动作不断刺激着的性感带，僵硬的身体也渐渐被控制住了，放松了起来
+				PRINTFORML 对即使不激烈也能准确给予的刺激，四肢不由得得抖动的同时从喉咙里发出喘息声
+				PRINTFORML 突然被挖到G点的时候，像电击一样的快感蔓延至全身，抑制不住地发出淫荡的娇声
+				PRINTFORML 完全被掌握了身体的%ANAME(MASTER)%无法抵抗，一直被医生任意侵犯直到满足为止
+				PRINTFORMW …「診断」之后，医生一边揉搓屁股一边喃喃地说下次再来，身体忍不住地颤抖了一下
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交, 売春", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("兵士"), @"医者の\@RAND:2 ? 肉棒 # 唇\@", @"医者", "", "強姦")
+				PRINTFORMW 
+			;町中でデート
+			CASE 24
+				PRINTFORML %ANAME(MASTER)%穿着和平时不一样的时尚服装，被士兵抱着肩膀走在夜晚的欢乐街上
+				PRINTFORML 在对话的过程中被邀请去玩的%ANAME(MASTER)%，结果还是没有拒绝，就这样和他约会了
+				PRINTFORMW 在迷惑不解的%ANAME(MASTER)%被引领的过程中，回过神来发现是在约会的时候已经完全乐在其中了
+				PRINTFORML 快到深夜的时候，正想着差不多该回去了，却被他牵着胳膊带到了酒店街
+				PRINTFORML %ANAME(MASTER)%为了说服他放手，但他已经干劲十足，无法沟通，随后被强行带到了他身边
+				PRINTFORMW 然后%ANAME(MASTER)%作为他一夜之间的恋人被爱着，反复中出了个遍
+				CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("兵士"), @"兵士の\@RAND:2 ? 肉棒 # 唇\@", @"兵士", "", "和姦")
+				PRINTFORMW 
+		ENDSELECT
+	;40%で売春イベント
+	CASE 45 TO 90
+		PRINTFORMW 为了赚军资，%ANAME(MASTER)%不得不卖淫……
+		PRINTFORML 
+		SELECTCASE RAND:5
+			CASE 0
+				PRINTFORML 这次的客人是脂肪过多的中年人
+			CASE 1
+				PRINTFORML 这次的客人一看就是个小混混的年轻人
+			CASE 2
+				PRINTFORML 这次的客人是令人毛骨悚然地笑着的智障者
+			CASE 3
+				PRINTFORML 这次的客人是一个充满难闻味道的流浪汉
+			CASE 4
+				PRINTFORML 这次的客人是比别人身体好几倍的妖怪
+		ENDSELECT
+		SELECTCASE RAND:4
+			CASE 0
+				PRINTFORMW 他一看见%ANAME(MASTER)%就气喘吁吁，粗暴地推倒过来
+			CASE 1
+				PRINTFORMW 他用下流的眼神望着这边走了过来
+			CASE 2
+				PRINTFORMW 他一进屋就抱住%ANAME(MASTER)%，粗暴地亲了起来
+			CASE 3
+				PRINTFORMW 他抱住%ANAME(MASTER)%的腰，冷不丁舔了脖子
+		ENDSELECT
+		PRINTFORML 
+		SELECTCASE RAND:16
+			CASE 0
+				PRINTFORML %ANAME(MASTER)%以四肢爬行的姿势被猛烈的撞击，剧烈的快感使得%ANAME(MASTER)%不断喘息
+				PRINTFORML 每次肉棒进出的时候都会用龟头用力地划动阴道肉壁，身体不由得跳跃起来
+				PRINTFORMW 不久，伴随着强烈的一击，%ANAME(MASTER)%被大量中出，忘记了妊娠的恐惧，不得已达到了高潮
+			CASE 1
+				PRINTFORML %ANAME(MASTER)%跨在客人身上，激烈地摩擦着床淫荡地扭动着身体
+				PRINTFORML 每次摆动腰部都会被一个粗粗粗的东西压迫着阴道肉，从颤抖的喉咙里流出喘息的声音
+				PRINTFORMW 渐渐地，%ANAME(MASTER)%忘记了这是工作，作为只想着性爱的家伙在恍惚中扭动身体
+			CASE 2
+				PRINTFORML %ANAME(MASTER)%的手扶到墙壁上，屁股被抓住翘了起来，让客人相当满意的从后面侵犯
+				PRINTFORML 啪！啪！配合肉体碰撞声，色情喘息声也与其相互交融，有节奏地回响着
+				PRINTFORMW 不经意间，男子射出了灼热的精液，%ANAME(MASTER)%忍不住颤抖着向下挺立的腰肢颤抖着高潮了
+			CASE 3
+				PRINTFORML %ANAME(MASTER)%被客人按住着，激烈的交合声压得床声都发出了声响
+				PRINTFORML 面对如同子宫都要破裂般粗暴的活塞运动，眼前一片空白，双腿不由自主地不时胡乱抖动
+				PRINTFORMW 然后随着男人的呐喊，在胎内释放出强烈的射精时，阴道用力裹紧肉棒着剧烈潮吹高潮了
+			CASE 4
+				PRINTFORML 第一次战斗结束后，%ANAME(MASTER)%被客人抱着一起泡在浴池里
+				PRINTFORML 一边被讨厌的身体责弄一边被私语刚才的混乱样子，禁不住露出了甜美的气息
+				PRINTFORMW 不久，一个男人恢复了强硬，被要求再来一次，%ANAME(MASTER)%害羞地撅出了屁股
+			CASE 5
+				PRINTFORML %ANAME(MASTER)%在客人的怀抱中睁大眼睛♥ 一脸淫乱地娇喘
+				PRINTFORML 在他巧妙的技巧下，%ANAME(MASTER)%忘记了工作，身体完全被对方当成要调教出完美的女人一样进行教育
+				PRINTFORMW 不久接到阴道内射精的预告后，%ANAME(MASTER)%全身紧紧抱住他，开始索求精液
+			CASE 6
+				PRINTFORML %ANAME(MASTER)%跨在客人身上，一边发出甜蜜的蜜音一边淫荡地扭动着身体
+				PRINTFORML 客人的肉棒和%ANAME(MASTER)%性格相合出众，每次摩擦都会有麻酥的快感在全身散开
+				PRINTFORMW 突然被激烈地向上顶，无法忍受的达到极限%ANAME(MASTER)%颤抖着挺起了身体
+			CASE 7
+				PRINTFORML %ANAME(MASTER)%被客人强求接吻、激烈地侵犯、痛苦地呻吟着
+				PRINTFORML 像猪一样兴奋的他黏着地吐舌头，同时抱紧%ANAME(MASTER)%的身体，让%ANAME(MASTER)%的呼吸都变得困难起来
+				PRINTFORMW 当他像猪一样一边喊一边放出大量精液的时候，%ANAME(MASTER)%不由得发出了悲鸣高潮了
+			CASE 8
+				PRINTFORML %ANAME(MASTER)%汗水淋漓地躺在床上，脸上露出恍惚的表情，气喘吁吁
+				PRINTFORML 持续被精力超群的客人侵犯的%ANAME(MASTER)%，身心都被他的肉棒所折服
+				PRINTFORMW 当他再次张开%ANAME(MASTER)%的脚时，子宫无意识地疼痛起来，似乎在期待更多更剧烈的快感
+			CASE 9
+				PRINTFORML %ANAME(MASTER)%以背面坐位的姿势被抱着，与甜美的喘息声一起扭动着身体
+				PRINTFORML 一边摇晃着腰一边揉搓着乳头和阴蒂，忍不住发出撒娇般的喘息声
+				PRINTFORMW 当他开始冲刺的时候，%ANAME(MASTER)%也积极地用舌头缠绕着，一起相互刺激向高潮进发
+			CASE 10
+				PRINTFORML %ANAME(MASTER)%以正常位的姿势激烈地被肉棒冲击，强烈的快感使得喘息停不下来
+				PRINTFORML 激烈地缠绕在一起，反复地被私语着爱的话语，子宫剧烈地疼痛，紧紧地裹住了肉棒
+				PRINTFORMW 然后，他在%ANAME(MASTER)%深处用力地释射出精液，%ANAME(MASTER)%也因无比的热情和喜悦都达到了高潮
+			CASE 11
+				PRINTFORML %ANAME(MASTER)%被男人娴熟的指技责弄着全身的敏感点，被他的指技弄得浑身发软
+				PRINTFORML 从秘所出来的爱液像洪水一样溢出来着，随着手指的动作，发出了令人讨厌的蜜音
+				PRINTFORMW 迎来了忍耐的极限的%ANAME(MASTER)%，颤抖着手掏出避孕套，请求中出缓解
+			CASE 12
+				PRINTFORML %ANAME(MASTER)%被对方紧紧抱住，激烈地侵犯着
+				PRINTFORML 被他粗暴的活塞运动调教成完美的雌性的%ANAME(MASTER)%，一脸淫荡的表露着痴态
+				PRINTFORMW 不久，%ANAME(MASTER)%感觉到子宫在寻求着子种，与他的射精同时绝顶了
+			CASE 13
+				PRINTFORML 客人是一个非常强壮的男人，很快%ANAME(MASTER)%就被他的俘虏了
+				PRINTFORML 两人专心致志地交合着，啪嗒啪嗒的肉声和%ANAME(MASTER)%的娇声有节奏地回响着
+				PRINTFORMW 即使他预告了射精，%ANAME(MASTER)%毫不抵抗，一边感受着注入精液一边剧烈潮吹了
+			CASE 14
+				PRINTFORML %ANAME(MASTER)%男人从后面压倒，粗暴地抽动使得%ANAME(MASTER)%妖媚地喘息着
+				PRINTFORML 他野性粗暴的冲击声在子宫里回响，%ANAME(MASTER)%也因剧烈刺激反射性地紧紧地勒紧了阴道
+				PRINTFORMW 不久他在最深处释放出灼热的欲望，%ANAME(MASTER)%忍不住全身痉挛达到了高潮
+			CASE 15
+				PRINTFORML %ANAME(MASTER)%跨在客人身上，一边说着诱惑般的淫秽话语，一边华丽地摆动着腰
+				PRINTFORML 对于那种淫靡的动作，他也兴奋地猛冲了上来，让%ANAME(MASTER)%一下子发出了尖锐的娇声
+				PRINTFORMW 两人为了互相寻求而激烈地贪图着，淫荡的二重奏更加激烈了
+		ENDSELECT
+		PRINTFORML 
+		SELECTCASE RAND:5
+			CASE 0
+				PRINTFORMW 被他看中的%ANAME(MASTER)%被带回家后，整夜致力于生育孩子的造娃运动
+			CASE 1
+				PRINTFORMW 客人回去后，%ANAME(MASTER)%一边淋浴一边拼命地扣出体内的精液
+			CASE 2
+				PRINTFORMW 男子无视%ANAME(MASTER)%趴在床上，脸朝下，不断颤抖的样子，赶紧回去了
+			CASE 3
+				PRINTFORMW 被疼爱得不得了，完全被迷住了的%ANAME(MASTER)%，把个人的联系方式交给了他
+			CASE 4
+				PRINTFORMW 工作结束后的%ANAME(MASTER)%一边回忆着留在子宫里的他的热度，一边摇摇晃晃地踏上了归途
+		ENDSELECT
+		CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, 接吻, 口淫, 売春, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("娼館的客人"), @"娼館の客の\@RAND:2 ? 肉棒 # 唇\@", @"娼館的客人", "", "売春")
+	;5%で他国へ売られる
+	CASE 90 TO 94
+		CALL DAILY_EVENT_RAND_COUNTRYSELECT()
+		LOCAL = RESULT
+		PRINTFORML 有一天，君主叫了出来
+		PRINTFORMW 心里战战兢兢地走向她的办公室
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		PRINTFORML %ANAME(MASTER)%被关在一个昏暗的地下牢房里
+		PRINTFORMW 虽然对突然的事态目瞪口呆，但还是想起了今天早上君主说的话
+		PRINTFORML 
+		PRINTFORML 「不好意思，与其他国家交易的时候把你当成人质了」
+		PRINTFORMW 
+		PRINTFORML 光是这一句话，连抗议的时间都没有，就这样被带了过来
+		PRINTFORMW 对于到现在还不能接受现状而目瞪口呆的%ANAME(MASTER)%，监牢的士兵冷眼旁观……
+		CALL CHANGE_COUNTRY(MASTER, 0, 1)
+		CALL CAPTURE(MASTER, LOCAL)
+		DAILY_CANCEL = 1
+		CALL COLOR_PRINT(@"%ANAME(MASTER)%は%ANAME(GET_COUNTRY_BOSS(LOCAL))%勢力の捕虜になった…", カラー_注意)
+		PRINTFORMW 
+	;5%でクビになる
+	CASE IS > 94
+		PRINTFORML 有一天，突然被宣布解雇
+		PRINTFORML 不记得有私吞国库的行为
+		PRINTFORMW 看来是被被人栽赃陷害了
+		PRINTFORML 即使想辩解，可人已经走了，也没人听
+		PRINTFORMW 虽然被解雇但对不被处刑感到庆幸的%ANAME(MASTER)%，穿着衣服被扔出去了……
+		MONEY = 0
+		CALL CHANGE_COUNTRY(MASTER, 0)
+		CALL COLOR_PRINT("身上所有的钱都没了…", カラー_注意)
+		PRINTFORML 
+		CALL COLOR_PRINT(@"%ANAME(MASTER)%现在是流浪状态…", カラー_注意)
+		PRINTFORMW 
+		DAILY_CANCEL = 1
+	CASEELSE
+		PRINTFORMW 工作中，被部下摸了屁股…
+ENDSELECT
+
+RETURN 1

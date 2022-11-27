@@ -1,0 +1,124 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K5_SAIKYOU_LEGEND_RATE(対象)
+#DIM 対象
+RETURN 60
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K5_SAIKYOU_LEGEND_DECISION(対象)
+#DIM 対象
+
+;主人公は大妖精、レティ以外
+SIF GROUPMATCH(MASTER, NAME_TO_CHARA("大妖精"), NAME_TO_CHARA("レティ"))
+	RETURN 0
+
+;5能力の合計が250以上必要
+SIF ABL:MASTER:武闘 + ABL:MASTER:知略 + ABL:MASTER:政治 + ABL:MASTER:歌唱 + ABL:MASTER:料理 < 250
+	RETURN 0
+
+;一回きり
+SIF KDVAR:対象:チルノ_最強伝説
+	RETURN 0
+
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K5_SAIKYOU_LEGEND_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K5_SAIKYOU_LEGEND(対象)
+#DIM 対象
+#DIMS 答え文字列 = "左", "右", "上", "下"
+#DIM アップ能力
+#DIM 答え
+
+;上がる能力を出しておく
+SELECTCASE RAND:100
+	CASE IS < 40
+		アップ能力 = GETNUM(ABL, "武闘")
+	CASE IS < 60
+		アップ能力 = GETNUM(ABL, "知略")
+	CASE IS < 80
+		アップ能力 = GETNUM(ABL, "政治")
+	CASE IS < 90
+		アップ能力 = GETNUM(ABL, "料理")
+	CASEELSE
+		アップ能力 = GETNUM(ABL, "歌唱")
+ENDSELECT
+
+PRINTFORMW 「喂喂！　%ANAME(MASTER)%！」
+PRINTFORMW 在據点巡視的時候、突然%ANAME(対象)%撞了過来
+PRINTFORMW 「感覚到你很強啊！」
+PRINTFORMW 「但是我更強！　来一決勝負吧！」
+PRINTFORMW ……不知道為什麼、%ANAME(対象)%整個人都燃起来了
+PRINTFORML 充満了干勁……
+PRINTL
+CALL ASK_YN("奉陪", "恕不奉陪")
+IF RESULT == 1
+	PRINTFORMW 「誒？　不一決勝負麼？」
+	PRINTFORMW 「……啊！　你肯定是在恐懼着我的力量吧！」
+	PRINTFORMW 「我果然是最強的！　哈哈哈！」
+	PRINTFORMW %ANAME(対象)%昂首挺胸的丟下了這句話、離開了這裡……
+	KDVAR:対象:チルノ_最強伝説 = 1
+	RETURN 1
+ENDIF
+
+PRINTFORMW 這個想法有点危險啊。看来要好好教訓她
+PRINTFORMW %ANAME(MASTER)%点頭同意了……
+PRINTFORMW 「這才像話！　要来了！」
+PRINTFORML %ANAME(対象)%釋放了冰瀑
+
+;4回、正しい選択肢を選ぶ
+FOR LOCAL, 0, 4
+	;答えを出しておく
+	答え = RAND:4
+	CALL COLOR_PRINTL(@"向%答え文字列:答え%避開！", カラー_警告)
+	FOR LOCAL:1, 0, VARSIZE("答え文字列")
+		PRINTFORML [{LOCAL:1}] %答え文字列:(LOCAL:1)%
+	NEXT
+	TINPUT 2000, -1, 1
+	;失敗したら強制終了
+	SIF RESULT != 答え
+		BREAK
+	SIF LOCAL != 3
+		PRINTFORML 「這才像話！　再試試這個！」
+NEXT
+
+;失敗したパターン
+IF LOCAL != 4
+	PRINTFORML %ANAME(MASTER)%試図回避！
+	PRINTFORMW 但是、壯觀的弾幕命中了%ANAME(MASTER)%！
+	PRINTFORMW 「做到了！　我贏了！」
+	PRINTFORMW 「我果然是最強的！」
+	CALL COLOR_PRINTW(@"%ANAME(MASTER)%受傷了", カラー_警告)
+	CALL ADD_COOLTIME(MASTER, 3)
+ELSE
+	;成功
+	PRINTFORML 完美的回避了弾幕！
+	PRINTFORMW 「嗚……！　干的不錯……！」
+	PRINTFORMW 「哼！　這次只是我沒有認真而已！　你可不要驕傲啊！」
+	PRINTFORMW %ANAME(対象)%逃走了……
+	CALL COLOR_PRINTW(@"%ANAME(対象)%在之後、偸偸地進行了特訓", カラー_注意)
+	CALL COLOR_PRINTW(@"%ANAME(対象)%的%ABLNAME:アップ能力%提高了5", カラー_注意)
+	ABL:対象:アップ能力 += 5
+ENDIF
+
+KDVAR:対象:チルノ_最強伝説 = 1
+RETURN 1

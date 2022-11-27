@@ -1,0 +1,472 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_199_PERSONAL_0_EXIST
+RETURN 1
+
+@SKILL_199_PERSONAL_0_NAME
+RESULTS = 欧西里斯神
+
+;レベルは1-5まで
+@SKILL_199_PERSONAL_0_LEVEL
+RETURN 5
+
+;対象選択
+@SKILL_199_PERSONAL_0_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+SIF BATTLE_COMMANDER_NUM:対象側 == 0
+	RETURN 0
+COMBAT_SKILL_TARGET = RAND:(BATTLE_COMMANDER_NUM:対象側)
+RETURN 1
+
+;発動判定
+@SKILL_199_PERSONAL_0_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+SIF 発動者!=MASTER
+	RETURN 0
+PRINTFORMW 要使用Osiris吗？
+CALL ASK_MULTI_JUDGE("赌上灵魂", 1,"还是算了", 1)
+IF RESULT == 0
+	RETURN 1
+ELSE
+	RETURN 0
+ENDIF
+
+;効果をここに記述
+@SKILL_199_PERSONAL_0_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 抽牌
+#DIM 暗牌
+#DIM 明牌
+#DIM 己方手牌
+#DIM ACE
+#DIM 爆点
+#DIM 己方点数
+#DIM 对方手牌
+#DIM 对方点数
+#DIM 对方ACE
+#DIM 目标
+#DIM 第一张牌
+#DIM 第二张牌
+対象側 = !発動側
+PRINTFORMW 「压上我自己的灵魂」
+
+目标 = BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET
+抽牌 = 1
+ACE = 0
+对方ACE = 0
+爆点 = 0
+对方点数 = 0
+己方点数 = 0
+暗牌 = RAND(1, 13)
+PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%抽了一张暗牌
+明牌 = RAND(1, 13)
+IF 明牌 == 1
+	PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%的明牌，是A
+	对方ACE = 对方ACE + 1
+	对方点数 = 对方点数 + 明牌
+ELSEIF 明牌 == 11
+	PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%的明牌，是J
+	对方点数 = 对方点数 + 10
+ELSEIF 明牌 == 12
+	PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%的明牌，是Q
+	对方点数 = 对方点数 + 10
+ELSEIF 明牌 == 13
+	PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%的明牌，是K
+	对方点数 = 对方点数 + 10
+ELSE
+	PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%的明牌，是"{明牌}"
+	对方点数 = 对方点数 + 明牌
+ENDIF
+
+IF 暗牌 == 1
+	对方ACE = 对方ACE + 1
+	对方点数 = 对方点数 + 明牌
+ELSEIF 暗牌 == 11
+	对方点数 = 对方点数 + 10
+ELSEIF 暗牌 == 12
+	对方点数 = 对方点数 + 10
+ELSEIF 暗牌 == 13
+	对方点数 = 对方点数 + 10
+ELSE
+	对方点数 = 对方点数 + 暗牌
+ENDIF
+
+第一张牌 = RAND(1, 13)
+IF 第一张牌 == 1
+	ACE = ACE + 1
+	PRINTFORMW %ANAME(MASTER)%抽了第一张牌，是A
+	己方点数 = 己方点数 + 第一张牌
+ELSEIF 第一张牌 ==11
+	PRINTFORMW %ANAME(MASTER)%抽了第一张牌，是J
+	己方点数 = 己方点数 + 10
+ELSEIF 第一张牌 ==12
+	PRINTFORMW %ANAME(MASTER)%抽了第一张牌，是Q
+	己方点数 = 己方点数 + 10
+ELSEIF 第一张牌 ==13
+	PRINTFORMW %ANAME(MASTER)%抽了第一张牌，是K
+	己方点数 = 己方点数 + 10
+ELSE
+	PRINTFORMW %ANAME(MASTER)%抽了第一张牌，是"{第一张牌}"
+	己方点数 = 己方点数 + 第一张牌
+ENDIF
+
+第二张牌 = RAND(1, 13)
+IF 第二张牌 == 1
+	ACE = ACE + 1
+	PRINTFORMW %ANAME(MASTER)%抽了第二张牌，是A
+	己方点数 = 己方点数 + 第二张牌
+ELSEIF 第二张牌 ==11
+	PRINTFORMW %ANAME(MASTER)%抽了第二张牌，是J
+	己方点数 = 己方点数 + 10
+ELSEIF 第二张牌 ==12
+	PRINTFORMW %ANAME(MASTER)%抽了第二张牌，是Q
+	己方点数 = 己方点数 + 10
+ELSEIF 第二张牌 ==13
+	PRINTFORMW %ANAME(MASTER)%抽了第二张牌，是K
+	己方点数 = 己方点数 + 10
+ELSE
+	PRINTFORMW %ANAME(MASTER)%抽了第二张牌，是"{第二张牌}"
+	己方点数 = 己方点数 + 第二张牌
+ENDIF
+
+IF 对方点数 == 11 && 对方ACE == 1 && ACE != 1
+	PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%露出了笑容，翻开了底牌
+	IF 对方ACE == 0
+		PRINTFORMW 「抱歉，是A，BlackJack，这局是我赢了」
+		PRINTFORMW 「糟...糟了」
+		CALL COLOR_PRINT(@"%ANAME(MASTER)%再起不能", カラー_警告)
+		CALL BATTLE_KNOCKOUT(発動側, 発動番号)
+		CALL ADD_COOLTIME(MASTER, 5)
+		RETURN 1
+	ELSE
+		IF 暗牌 == 10
+			PRINTFORMW 「抱歉，是10，BlackJack，这局是我赢了」
+			PRINTFORMW 「糟...糟了」
+			CALL COLOR_PRINT(@"%ANAME(MASTER)%再起不能", カラー_警告)
+			CALL BATTLE_KNOCKOUT(発動側, 発動番号)
+			CALL ADD_COOLTIME(MASTER, 5)
+			RETURN 1
+		ELSEIF 暗牌 == 11
+			PRINTFORMW 「抱歉，是J，BlackJack，这局是我赢了」
+			PRINTFORMW 「糟...糟了」
+			CALL COLOR_PRINT(@"%ANAME(MASTER)%再起不能", カラー_警告)
+			CALL BATTLE_KNOCKOUT(発動側, 発動番号)
+			CALL ADD_COOLTIME(MASTER, 5)
+			RETURN 1
+		ELSEIF 暗牌 == 12
+			PRINTFORMW 「抱歉，是Q，BlackJack，这局是我赢了」
+			PRINTFORMW 「糟...糟了」
+			CALL COLOR_PRINT(@"%ANAME(MASTER)%再起不能", カラー_警告)
+			CALL BATTLE_KNOCKOUT(発動側, 発動番号)
+			CALL ADD_COOLTIME(MASTER, 5)
+			RETURN 1
+		ELSEIF 暗牌 == 13
+			PRINTFORMW 「抱歉，是K，BlackJack，这局是我赢了」
+			PRINTFORMW 「糟...糟了」
+			CALL COLOR_PRINT(@"%ANAME(MASTER)%再起不能", カラー_警告)
+			CALL BATTLE_KNOCKOUT(発動側, 発動番号)
+			CALL ADD_COOLTIME(MASTER, 5)
+			RETURN 1
+		ENDIF
+	ENDIF
+ELSEIF 己方点数 == 11 && ACE == 1 && 对方ACE != 1
+	PRINTFORMW %ANAME(MASTER)%露出了笑容
+	PRINTFORMW 「BlackJack，看来是不用再比了」
+	PRINTFORMW 「那么就请付账吧，用你的灵魂..」
+	CALL COLOR_PRINTW(@"俘虜了%ANAME(目标)%", カラー_注意)
+	CALL COLOR_PRINTW(@"夺取了%ANAME(目标)%的灵魂", カラー_注意)
+	CALL BATTLE_COMMANDER_WITHDRAWAL(対象側,COMBAT_SKILL_TARGET)
+	CFLAG:目标:従属度 = MAX(3000, CFLAG:目标:従属度)
+	CFLAG:目标:依存度 = MAX(600, CFLAG:目标:依存度)
+	CALL CAPTURE(目标, CFLAG:MASTER:所属)
+	TALENT:目标:服従 = 1
+	RETURN 1
+ELSEIF 己方点数 == 11 && ACE == 1 && 对方点数 == 11 && 对方ACE == 1
+	PRINTFORMW 「BlackJack，看来是不用再比了」
+	PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%露出了笑容，翻开了底牌
+	IF 对方ACE == 0
+		PRINTFORMW 「不愧是%ANAME(MASTER)%，不过我的底牌是A，BlackJack，看来我的运气也不差啊」
+		PRINTFORMW 「居然！！！」
+		PRINTFORMW 是平局，%ANAME(MASTER)%和%ANAME(目标)%谁也没有获胜
+		RETURN 1
+	ELSE
+		IF 暗牌 == 10
+			PRINTFORMW 「不愧是%ANAME(MASTER)%，不过我的底牌是10，BlackJack，看来我的运气也不差啊」
+			PRINTFORMW 「居然！！！」
+			PRINTFORMW 是平局，%ANAME(MASTER)%和%ANAME(目标)%谁也没有获胜
+			RETURN 1
+		ELSEIF 暗牌 == 11
+			PRINTFORMW 「不愧是%ANAME(MASTER)%，不过我的底牌是J，BlackJack，看来我的运气也不差啊」
+			PRINTFORMW 「居然！！！」
+			PRINTFORMW 是平局，%ANAME(MASTER)%和%ANAME(目标)%谁也没有获胜
+			RETURN 1
+		ELSEIF 暗牌 == 12
+			PRINTFORMW 「不愧是%ANAME(MASTER)%，不过我的底牌是Q，BlackJack，看来我的运气也不差啊」
+			PRINTFORMW 「居然！！！」
+			PRINTFORMW 是平局，%ANAME(MASTER)%和%ANAME(目标)%谁也没有获胜
+			RETURN 1
+		ELSEIF 暗牌 == 13
+			PRINTFORMW 「不愧是%ANAME(MASTER)%，不过我的底牌是K，BlackJack，看来我的运气也不差啊」
+			PRINTFORMW 「居然！！！」
+			PRINTFORMW 是平局，%ANAME(MASTER)%和%ANAME(目标)%谁也没有获胜
+			RETURN 1
+		ENDIF
+	ENDIF
+ENDIF
+
+CALL ASK_MULTI_JUDGE("继续抽", 1,"不抽了", 1)
+IF RESULT == 0
+	抽牌 = 1
+ELSE
+	抽牌 = 0
+ENDIF
+
+WHILE 抽牌 == 1
+	己方手牌 = RAND(1, 13)
+	IF 己方手牌 == 1
+		ACE = ACE + 1
+		PRINTFORMW %ANAME(MASTER)%抽了一张牌，是A
+		己方点数 = 己方点数 + 己方手牌
+	ELSEIF 己方手牌 ==11
+		PRINTFORMW %ANAME(MASTER)%抽了一张牌，是J
+		己方点数 = 己方点数 + 10
+	ELSEIF 己方手牌 ==12
+		PRINTFORMW %ANAME(MASTER)%抽了一张牌，是Q
+		己方点数 = 己方点数 + 10
+	ELSEIF 己方手牌 ==13
+		PRINTFORMW %ANAME(MASTER)%抽了一张牌，是K
+		己方点数 = 己方点数 + 10
+	ELSE
+		PRINTFORMW %ANAME(MASTER)%抽了一张牌，是"{己方手牌}"
+		己方点数 = 己方点数 + 己方手牌
+	ENDIF
+	PRINTFORMW 要继续抽牌吗
+	CALL ASK_MULTI_JUDGE("继续抽", 己方点数 < 22,"不抽了", 1)
+	IF RESULT == 0
+		抽牌 = 1
+	ELSE
+		抽牌 = 0
+	ENDIF
+WEND
+PRINTFORMW 开始计算%ANAME(MASTER)%的分数
+IF ACE > 0
+	WHILE ACE > 0 && 爆点 == 0
+		己方点数 = 己方点数 + 10
+		ACE = ACE - 1
+		IF 己方点数 > 21
+			己方点数 = 己方点数 - 10
+			爆点 = 1
+		ENDIF
+	WEND
+ENDIF
+PRINTFORMW %ANAME(MASTER)%的总点数为"{己方点数}"
+
+PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%的回合
+
+IF 对方ACE > 0 && 己方点数 > 对方点数
+	对方点数 = 对方点数 + 10
+	IF 己方点数 > 对方点数
+		对方点数 = 对方点数 - 10
+	ENDIF
+ENDIF
+IF 己方点数 < 22
+	WHILE 己方点数 > 对方点数 || 对方点数 < 17
+		对方手牌 = RAND(1, 13)
+		IF 对方手牌 == 1
+			对方ACE = 对方ACE + 1
+			PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%抽了一张牌，是A
+			对方点数 = 对方点数 + 对方手牌
+		ELSEIF 对方手牌 ==11
+			PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%抽了一张牌，是J
+			对方点数 = 对方点数 + 10
+		ELSEIF 对方手牌 ==12
+			PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%抽了一张牌，是Q
+			对方点数 = 对方点数 + 10
+		ELSEIF 对方手牌 ==13
+			PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%抽了一张牌，是K
+			对方点数 = 对方点数 + 10
+		ELSE
+			PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%抽了一张牌，是"{对方手牌}"
+			对方点数 = 对方点数 + 对方手牌
+		ENDIF
+		IF 对方ACE > 0 && 对方点数 < 21
+			对方点数 = 对方点数 + 10
+			IF 对方点数 > 21 || 己方点数 > 对方点数 || 对方点数 < 17
+				对方点数 = 对方点数 - 10
+			ENDIF
+		ENDIF
+	WEND
+ELSE
+	WHILE 对方点数 < 17
+		对方手牌 = RAND(1, 13)
+		IF 对方手牌 == 1
+			对方ACE = 对方ACE + 1
+			PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%抽了一张牌，是A
+			对方点数 = 对方点数 + 对方手牌
+		ELSEIF 对方手牌 ==11
+			PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%抽了一张牌，是J
+			对方点数 = 对方点数 + 10
+		ELSEIF 对方手牌 ==12
+			PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%抽了一张牌，是Q
+			对方点数 = 对方点数 + 10
+		ELSEIF 对方手牌 ==13
+			PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%抽了一张牌，是K
+			对方点数 = 对方点数 + 10
+		ELSE
+			PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%抽了一张牌，是"{对方手牌}"
+			对方点数 = 对方点数 + 对方手牌
+		ENDIF
+		IF 对方ACE > 0 && 对方点数 < 21
+			对方点数 = 对方点数 + 10
+			IF 对方点数 > 21 || 对方点数 < 17
+				对方点数 = 对方点数 - 10
+			ENDIF
+		ENDIF
+	WEND
+ENDIF
+
+IF 对方点数 > 21 && 己方点数 < 22
+	IF 暗牌 == 1
+		PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%翻开了自己的暗牌，是A！
+	ELSEIF 暗牌 == 11
+		PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%翻开了自己的暗牌，是J！
+	ELSEIF 暗牌 == 12
+		PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%翻开了自己的暗牌，是Q！
+	ELSEIF 暗牌 == 13
+		PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%翻开了自己的暗牌，是K！
+	ELSE
+		PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%翻开了自己的暗牌，是"{暗牌}"！
+	ENDIF
+	PRINTFORMW 所以%ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%的总点数为"{对方点数}"，爆点了
+	PRINTFORMW 「不好意思，看来是我运气比较好」
+	PRINTFORMW 「那么就请付账吧，用你的灵魂..」
+	CALL COLOR_PRINTW(@"俘虜了%ANAME(目标)%", カラー_注意)
+	CALL COLOR_PRINTW(@"夺取了%ANAME(目标)%的灵魂", カラー_注意)
+	CALL BATTLE_COMMANDER_WITHDRAWAL(対象側,COMBAT_SKILL_TARGET)
+	CFLAG:目标:従属度 = MAX(3000, CFLAG:目标:従属度)
+	CFLAG:目标:依存度 = MAX(600, CFLAG:目标:依存度)
+	CALL CAPTURE(目标, CFLAG:MASTER:所属)
+	TALENT:目标:服従 = 1
+	RETURN 1
+ELSEIF 对方点数 < 22 && 对方点数 > 己方点数
+	IF 暗牌 == 1
+		PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%翻开了自己的暗牌，是A！
+	ELSEIF 暗牌 == 11
+		PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%翻开了自己的暗牌，是J！
+	ELSEIF 暗牌 == 12
+		PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%翻开了自己的暗牌，是Q！
+	ELSEIF 暗牌 == 13
+		PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%翻开了自己的暗牌，是K！
+	ELSE
+		PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%翻开了自己的暗牌，是"{暗牌}"！
+	ENDIF
+	PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%的总点数为"{对方点数}"
+	PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%赢了
+	PRINTFORMW 「不可能.....」
+	PRINTFORMW %ANAME(MASTER)%输了
+	CALL COLOR_PRINT(@"%ANAME(MASTER)%再起不能", カラー_警告)
+	CALL BATTLE_KNOCKOUT(発動側, 発動番号)
+	CALL ADD_COOLTIME(MASTER, 5)
+	RETURN 1
+ELSEIF 对方点数 < 22 && 己方点数 > 21
+	IF 暗牌 == 1
+		PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%翻开了自己的暗牌，是A！
+	ELSEIF 暗牌 == 11
+		PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%翻开了自己的暗牌，是J！
+	ELSEIF 暗牌 == 12
+		PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%翻开了自己的暗牌，是Q！
+	ELSEIF 暗牌 == 13
+		PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%翻开了自己的暗牌，是K！
+	ELSE
+		PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%翻开了自己的暗牌，是"{暗牌}"！
+	ENDIF
+	PRINTFORMW 所以%ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%的总点数为"{对方点数}"
+	PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%赢了
+	PRINTFORMW 「输了.....」
+	PRINTFORMW %ANAME(MASTER)%输了
+	CALL COLOR_PRINT(@"%ANAME(MASTER)%再起不能", カラー_警告)
+	CALL BATTLE_KNOCKOUT(発動側, 発動番号)
+	CALL ADD_COOLTIME(MASTER, 5)
+	RETURN 1
+ELSEIF 对方点数 == 己方点数
+	IF 暗牌 == 1
+		PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%翻开了自己的暗牌，是A！
+	ELSEIF 暗牌 == 11
+		PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%翻开了自己的暗牌，是J！
+	ELSEIF 暗牌 == 12
+		PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%翻开了自己的暗牌，是Q！
+	ELSEIF 暗牌 == 13
+		PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%翻开了自己的暗牌，是K！
+	ELSE
+		PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%翻开了自己的暗牌，是"{暗牌}"！
+	ENDIF
+	PRINTFORMW 所以%ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%的总点数为"{对方点数}"，点数相同
+	PRINTFORMW 「看来是平局啊」
+	PRINTFORMW 「那么这次就到此为止了」
+	RETURN 1
+ELSE
+	IF 暗牌 == 1
+		PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%翻开了自己的暗牌，是A！
+	ELSEIF 暗牌 == 11
+		PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%翻开了自己的暗牌，是J！
+	ELSEIF 暗牌 == 12
+		PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%翻开了自己的暗牌，是Q！
+	ELSEIF 暗牌 == 13
+		PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%翻开了自己的暗牌，是K！
+	ELSE
+		PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%翻开了自己的暗牌，是"{暗牌}"！
+	ENDIF
+	PRINTFORMW 所以%ANAME(BATTLE_COMMANDER:対象側:COMBAT_SKILL_TARGET)%的总点数为"{对方点数}"，爆点了
+	PRINTFORMW 「看来是平局啊」
+	PRINTFORMW 「那么这次就到此为止了」
+	RETURN 1
+ENDIF
+
+
+@SKILL_199_PERSONAL_0_EXPLANATION
+RESULTS = 以灵魂为注的赌博
+
+@SKILL_199_PERSONAL_0_CANT_TELL
+
+@SKILL_199_PERSONAL_0_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 300

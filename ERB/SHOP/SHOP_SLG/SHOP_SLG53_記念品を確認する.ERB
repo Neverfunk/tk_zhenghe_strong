@@ -1,0 +1,264 @@
+﻿;-------------------------------------------------
+;「記念品を確認する」の名称
+;-------------------------------------------------
+@SHOP_SLG_NAME53
+RESULTS:0 '= "纪念品"
+
+;-------------------------------------------------
+;「記念品を確認する」の選択可否
+;-------------------------------------------------
+@SHOP_SLG_CHECK53
+SIF FLAG:クリアフラグ
+	RETURN 0
+SIF FLAG:観戦モード
+	RETURN 0
+SIF COUNTRY_IS_CLOSED:(CFLAG:MASTER:所属)
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;「記念品を確認する」の左カラムメニューの入力処理
+;-------------------------------------------------
+@SHOP_SLG_EVENTBUY53
+CALL CHECK_MY_GOODS_EXECUTED
+RETURN 1
+
+;-------------------------------------------------
+;「記念品を確認する」本体
+;-------------------------------------------------
+@CHECK_MY_GOODS_EXECUTED
+#DIM FIRST_LINE
+#DIM 種類
+#DIM 加工元識別ナンバー
+#DIM 選択可能フラグ, 999
+#DIM 選択対象種類, 999
+#DIM 子供フラグ, 999
+
+FIRST_LINE = LINECOUNT
+
+CALL SINGLE_DRAWLINE
+PRINTL ★纪念品的确认
+PRINTL 　可以确认到目前为止得到的「记念品」
+CALL SINGLE_DRAWLINE
+
+FOR 加工元識別ナンバー, 0, 999
+	FOR 種類, 0, 10
+		IF TYPE_GOODS_EXECUTED:加工元識別ナンバー:種類:0 > 0 && 種類 != 7
+			PRINTBUTTON @"{加工元識別ナンバー}[%NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類%]", 加工元識別ナンバー
+			選択可能フラグ:加工元識別ナンバー = 1
+			選択対象種類:加工元識別ナンバー = 種類
+			子供フラグ:加工元識別ナンバー = 0
+			PRINTL
+		ELSEIF TYPE_GOODS_EXECUTED:加工元識別ナンバー:種類:1 > 0 && 種類 != 7
+			PRINTBUTTON @"{加工元識別ナンバー}[%NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類%]", 加工元識別ナンバー
+			選択可能フラグ:加工元識別ナンバー = 1
+			選択対象種類:加工元識別ナンバー = 種類
+			子供フラグ:加工元識別ナンバー = 1
+			PRINTL
+		ENDIF
+	NEXT
+NEXT
+
+FOR 加工元識別ナンバー, 0, 999
+	IF TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:0 > 0 || TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:1 > 0
+		PRINTFORML [%NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:7%]
+	ENDIF
+NEXT
+PRINTL
+CALL SINGLE_DRAWLINE
+PRINTBUTTON "9999[取消]", 9999
+
+INPUT
+
+IF RESULT == 9999
+	RETURN
+ELSEIF 選択可能フラグ:RESULT == 1
+	CALL CHECK_MY_GOODS_EXECUTED_INFORMATION(RESULT, 選択対象種類:RESULT, 子供フラグ:RESULT)
+ENDIF
+
+CLEARLINE LINECOUNT - FIRST_LINE
+RESTART
+
+;-------------------------------------------------
+;「記念品を確認する」情報表示・復活処理
+;-------------------------------------------------
+@CHECK_MY_GOODS_EXECUTED_INFORMATION(加工元識別ナンバー, 種類, 子供フラグ)
+#DIM FIRST_LINE
+#DIM 種類
+#DIM 子供フラグ
+#DIM 加工元識別ナンバー
+#DIM 加工元士官
+#DIM 選択可能フラグ
+#DIM 選択
+#DIM 記念品使用種別
+
+FIRST_LINE = LINECOUNT
+
+選択可能フラグ = 0
+加工元士官 = NAME_BEFORE_GOODS_EXECUTED:加工元識別ナンバー
+記念品使用種別 = TYPE_GOODS_EXECUTED:加工元識別ナンバー:種類:子供フラグ
+
+;SHOW_INFOの初期画面を基本情報にする
+FLAG:能力表示モード = 0
+
+;対象キャラの情報を表示
+CALL SINGLE_DRAWLINE
+CALL SHOW_INFO(加工元士官)
+CALL SINGLE_DRAWLINE
+
+SETCOLOR カラー_ピンク
+PRINTFORML %NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類%
+RESETCOLOR
+PRINT 現在
+SELECTCASE 記念品使用種別
+	CASE 1
+		PRINTL 被严密保管
+		;TranslatedMark 厳重に保管されている
+	CASE 2
+		SELECTCASE 種類
+			CASE 1
+				IF 子供フラグ == 1
+					PRINTL 以全裸的姿态被高挂在街道的中央广场…
+					;TranslatedMark 街の中央広場に生まれたままの姿で高々と掲げられている…
+				ELSE
+					PRINTL 以全裸的姿态被高挂在街道的中央广场…
+					;TranslatedMark 街の中央広場に全裸で高々と掲げられている…
+				ENDIF
+			CASE 2
+				IF 子供フラグ == 1
+					PRINTL 作为士兵们不满的发泄口，不成熟的身体被蹂躏着…
+					;TranslatedMark 兵士達の不満のはけ口として未熟な身体を蹂躙されている…
+				ELSE
+					PRINTL 作为培养下一代士兵的苗床，被士兵们注入精种……
+					;TranslatedMark 次世代の兵士を作るための苗床として兵士たちに精を注がれている…
+				ENDIF
+			CASE 3
+				IF 子供フラグ == 1
+					PRINTL 为了慰安士兵们而用自己小小的身体奉仕着…
+					;TranslatedMark 兵士達の慰安のためにその小さな身体を使って奉仕させられている…
+				ELSE
+					PRINTL 为了慰安士兵们而全身心地奉仕着…
+					;TranslatedMark 兵士達の慰安のために全身を使って奉仕させられている…
+				ENDIF
+			CASE 4
+				IF 子供フラグ == 1
+					PRINTL 一边蹦跳着小小的身体一边操纵着尚未成熟的阴茎……
+					;TranslatedMark 小さな身体を飛び跳ねさせながら未熟なペニスを扱き立てている…
+				ELSE
+					PRINTL 一边喷出白浊一边继续运动…
+					;TranslatedMark 白濁を吹き出しながらせんずりを続けている…
+				ENDIF
+			CASE 5
+				IF 子供フラグ == 1
+					PRINTL 作为触手室副管理人努力工作着…
+					;TranslatedMark 触手部屋副管理人として一生懸命働いている…
+				ELSE
+					PRINTL 作为触手室副管理人工作着…
+					;TranslatedMark 触手部屋副管理人として働いている…
+				ENDIF
+			CASE 6
+				IF 子供フラグ == 1
+					PRINTL 被触手们侵犯着那个还不成熟的身体…
+					;TranslatedMark 触手達にその未熟な身体を犯し尽くされている…
+				ELSE
+					PRINTL 被触手们侵犯着身体…
+					;TranslatedMark 触手達にその身体を犯し尽くされている…
+				ENDIF
+		ENDSELECT
+	CASE 3
+		PRINTL 作为「触手・戴森炮」的生体零件被编入其中…
+		;TranslatedMark 「Quasi-stellar Tentacle Obliterator」の生体部品として組み込まれている…
+	CASE 4
+		PRINTL 作为「矩阵奸脑」的生物零件被编入…
+		;TranslatedMark 「マトリョーシ姦ブレイン」の生体部品として組み込まれている…
+ENDSELECT
+CALL SINGLE_DRAWLINE
+PRINTFORML 所持金 {MONEY}
+CALL SINGLE_DRAWLINE
+
+IF MONEY >= 100000 && 種類 != 8 && 種類 != 7
+	PRINTBUTTON "[回到监狱(金-100,000)]", 1
+	;TranslatedMark "[監獄に戻す(金-100,000)]", 1
+	選択可能フラグ = 1
+	PRINTPLAIN
+ELSEIF 種類 != 8 && 種類 != 7
+	SETCOLOR カラー_灰色
+	PRINT [回到监狱(金-100,000)]
+	;TranslatedMark [監獄に戻す(金-100,000)]
+	RESETCOLOR
+	PRINTPLAIN
+ELSEIF 種類 == 8 && HAS_PENIS(MASTER)
+	PRINTBUTTON "[奸尸]", 2
+	選択可能フラグ = 2
+	PRINTPLAIN
+
+ENDIF
+
+PRINTBUTTON "99[取消]",99
+;TranslatedMark "99[戻る]", 99
+
+INPUT
+
+選択 = RESULT
+IF 選択 == 1 && 選択可能フラグ == 1
+	PRINTFORML 让%ANAME(加工元士官)%作为军官归队
+	;TranslatedMark %ANAME(加工元士官)%を士官として復帰させます。
+	PRINTL 「特殊区划」会自动撤除
+	;TranslatedMark 「特殊区画」からは自動的に撤去されます。
+	PRINTFORML 要从所持金中支付100,000的经费，把%ANAME(加工元士官)%放回监狱吗？
+	;TranslatedMark 所持金から金100,000を経費として支払って、%ANAME(加工元士官)%を監獄に戻しますか？
+	CALL ASK_YN()
+	IF RESULT == 0
+		CALL CHANGE_COUNTRY(加工元士官, 0, 0, 0)
+		CFLAG:加工元士官:特殊状態 = 0
+		; CFLAG:加工元士官:捕虜先 = CFLAG:MASTER:所属
+		CALL CAPTURE(加工元士官,CFLAG:MASTER:所属)
+		IS_GOODS_EXECUTED:加工元識別ナンバー = 0
+		NAME_BEFORE_GOODS_EXECUTED:加工元識別ナンバー = 0
+		TYPE_GOODS_EXECUTED:加工元識別ナンバー:種類:子供フラグ = 0
+		CFLAG:加工元士官:1704 = 0
+
+		HAVE_GOODS_EXECUTED:種類 -= 1
+
+		NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類 =
+
+		PRINTL 把作为纪念品的%ANAME(加工元士官)%带回了监狱
+		;TranslatedMark 記念品にされていた%ANAME(加工元士官)%を監獄に連れ戻しました
+		CALL SET_COOLTIME(加工元士官, 4)
+		MONEY -= 100000
+
+		RETURN
+	ENDIF
+ELSEIF 選択 == 2 && 選択可能フラグ == 2
+	IF HAS_VAGINA(加工元士官) && (CFLAG:加工元士官:行動不能状態 == 行動不能_子供 || TALENT:加工元士官:幼兒 || TALENT:加工元士官:体格 == 体格_子供)
+		PRINTFORML %ANAME(MASTER)%向%ANAME(加工元士官)%的亡骸注入了润滑剂，一口气贯穿了还未成熟的膣穴！
+		PRINTFORMW 将%ANAME(加工元士官)%那幼小的肢体像是使用飞机杯一样玩弄着，在里面射了好几次
+		PRINTL
+		CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入, Ａ挿入", "童貞喪失", 0, "", "", @"%ANAME(加工元士官)%的膣", "死姦")
+		CALL FUCK(加工元士官, "Ａ拡張, Ａ拡張, Ｖ拡張, Ｖ拡張", "Ａ処女喪失, 処女喪失, 膣内射精, 腸内射精, 接吻喪失, 口内射精", GET_ID(MASTER), @"%ANAME(MASTER)%的阴茎", ANAME(MASTER), "", "死姦")
+	ELSEIF HAS_VAGINA(加工元士官)
+		PRINTFORML %ANAME(MASTER)%向%ANAME(加工元士官)%的亡骸注入了润滑剂，一口气贯穿了有些松弛的膣穴！
+		PRINTFORMW 腰部猛烈地撞击着%ANAME(加工元士官)%那冰冷的肢体，在里面射了好几次
+		PRINTL
+		CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ｖ挿入, Ａ挿入", "童貞喪失", 0, "", "", @"%ANAME(加工元士官)%的膣", "死姦")
+		CALL FUCK(加工元士官, "Ａ拡張, Ｖ拡張", "Ａ処女喪失, 処女喪失, 膣内射精, 腸内射精, 接吻喪失, 口内射精", GET_ID(MASTER), @"%ANAME(MASTER)%的阴茎", ANAME(MASTER), "", "死姦")
+	ELSEIF CFLAG:加工元士官:行動不能状態 == 行動不能_子供 || TALENT:加工元士官:幼兒 || TALENT:加工元士官:体格 == 体格_子供
+		PRINTFORML %ANAME(MASTER)%向%ANAME(加工元士官)%的亡骸注入了润滑剂，一口气贯穿了还未成熟的肛门！
+		PRINTFORMW 将%ANAME(加工元士官)%那幼小的肢体像是使用飞机杯一样玩弄着，在里面射了好几次
+		PRINTL
+		CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ａ挿入", "童貞喪失", 0, "", "", @"%ANAME(加工元士官)%的肛门", "死姦")
+		CALL FUCK(加工元士官, "Ａ拡張, Ａ拡張", "Ａ処女喪失, 腸内射精, 接吻喪失, 口内射精", GET_ID(MASTER), @"%ANAME(MASTER)%的阴茎", ANAME(MASTER), "", "死姦")
+	ELSE
+		PRINTFORML %ANAME(MASTER)%向%ANAME(加工元士官)%的亡骸注入了润滑剂，一口气贯穿了有些松弛的肛门！
+		PRINTFORMW 腰部猛烈地撞击着%ANAME(加工元士官)%那冰冷的肢体，在里面射了好几次
+		PRINTL
+		CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精, Ａ挿入", "童貞喪失", 0, "", "", @"%ANAME(加工元士官)%的肛门", "死姦")
+		CALL FUCK(加工元士官, "Ａ拡張", "Ａ処女喪失, 腸内射精, 接吻喪失, 口内射精", GET_ID(MASTER), "%ANAME(MASTER)%的阴茎", ANAME(MASTER), "", "死姦")
+	ENDIF
+ELSEIF 選択 == 99
+	RETURN
+ENDIF
+
+CLEARLINE LINECOUNT - FIRST_LINE
+RESTART
+

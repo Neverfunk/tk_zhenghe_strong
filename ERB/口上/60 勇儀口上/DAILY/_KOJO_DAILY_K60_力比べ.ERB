@@ -1,0 +1,163 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K60_COMPETE_RATE(対象)
+#DIM 対象
+RETURN (60 <= ABL:MASTER:武闘) * (20 + (ABL:MASTER:武闘 - 60) * 5)
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K60_COMPETE_DECISION(対象)
+#DIM 対象
+
+;おわってたら出ない
+SIF KDVAR:対象:勇儀_力比べ == -1
+	RETURN 0
+
+;勇儀が放浪してないとだめ
+SIF CFLAG:対象:特殊状態 != 特殊状態_放浪
+	RETURN 0
+
+;マスターにペニスがないと出ない
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 0, 0, 0)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K60_COMPETE_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K60_COMPETE(対象)
+#DIM 対象
+#DIM 判定値
+
+PRINTFORMW 「是叫%ANAME(MASTER)%、來着？　在不在！？」
+PRINTFORMW %ANAME(MASTER)%忙於工作時、突然有誰闖進來了
+PRINTFORML 是個有著結實的身體的金髮女性。額頭長著顯眼的角、微微露出的胸部亦引人注目
+PRINTFORMW 我就是%ANAME(MASTER)%、女性聽到後爽朗地一笑
+IF IS_MALE(MASTER)
+	PRINTFORMW 「原來如此是你嗎！　真是個不錯的男人啊、我有事來找你哦」
+ELSE
+	PRINTFORMW 「原來如此是你嗎！　作為女人卻有兩下子嘛、我有事來找你哦」
+ENDIF
+PRINTFORM 「我是%ANAME(対象)%、鬼の四天王、
+CALL COLOR_PRINT(@"%NAME_FORMAL(対象)%", カラー_注意)
+PRINTFORMW 。首先請多多指教」
+PRINTFORML 鬼。原來如此、所以才會長著那麼突出的角
+PRINTFORMW 但是一個鬼找我到底有什麼事呢
+PRINTFORMW 「沒什麼大不了的、只是我喜歡強大的傢伙、我偶然就會像這樣周圍走、拜託其他人和自己較量一番」
+PRINTFORML ……換句話説、在做武者修行嗎
+PRINTFORMW 現在工作實在很忙、原本打算這樣拒絕、%ANAME(対象)%卻不肯罷休
+PRINTFORMW 「別這麼說嘛、拜託你啦。實際上、對你都有好處的」
+PRINTFORM 「如果你贏了的話、對了……
+CALL COLOR_PRINT(@"我就接受你一個請求吧", カラー_注意)
+PRINTFORMW 」
+PRINTFORMW 「不會騙你的哦？　鬼討厭說謊的。你相信我就可以了」
+PRINTFORMW 「對了、我讓下你吧。我用一隻手拿著杯、要是酒灑出一滴就當我輸」
+CALL ICPRINT(@"「作為交換……要是我贏了、就讓我拿走<所有的錢>吧」", "W", カラー_注意)
+PRINTFORMW 如果還在想到底開什麼玩笑、但看來%ANAME(対象)%是認真的
+PRINTFORML ……說起來、根據以前的故事、鬼是對自己力量非常驕傲的妖怪。就算對方留了一手、要贏也不是那麼容易
+PRINTFORML 但是――勝利的話、可以拜託任何事。
+PRINTFORMW ……%ANAME(対象)%的臉龐、以及身體、作為女性非常有魅力。就算會輸掉所有財產、也有一賭的價值……
+PRINTL
+CALL ASK_YN("正合我意！", "現在很忙")
+IF RESULT == 1
+	PRINTFORMW 不不、現在還有工作。看看這一大堆文件。現在實在沒空
+	PRINTFORMW 「唔……。這樣嗎、真是可惜」
+	PRINTFORMW 「如果還聽說你有點實力、想請你務必和我比量下的」
+	PRINTFORMW 「算了、沒辦法。打擾你了」
+	PRINTFORMW %ANAME(対象)%離開了……
+ELSE
+	PRINTFORMW 「就是這樣！　來吧、那就快點開始吧！」
+	PRINTFORMW 被%ANAME(対象)%拉住手腕、帶到中庭……
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORML ・
+	;対象と武闘が等しいと50%。以降1勝るごとに5％。
+	判定値 = (ABL:MASTER:武闘 + 10 - ABL:対象:武闘) * 5
+	IF RAND:100 <= 判定値
+		PRINTFORMW 「哈哈哈、　我輸了！」
+		PRINTFORML 總算……勉強地勝利了
+		PRINTFORMW 鬼之拳力量超乎想像。勉勉強強地避開、才成功讓酒杯灑出一滴酒
+		PRINTFORMW 「的確是這樣啦、但也不會改變是你勝利的結果」
+		PRINTFORMW 「接下來……老實說、我沒想過會輸。就讓我聽聽、你的一個請求吧」
+		PRINTL
+		CALL ASK_MULTI("成為我的部下", "成為我的情人", "投獄", "想要力量", "想要錢")
+		SELECTCASE RESULT
+			CASE 0
+				PRINTFORMW 「啊啊、這樣的話我也很樂意」
+				PRINTFORMW 「我也很久沒遇過能夠贏過我的傢伙了。那麼首先、我們一起大干一場吧！」
+				CALL COLOR_PRINTW(@"%ANAME(対象)%成為了部下", カラー_注意)
+				CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属, 1)
+				CFLAG:対象:好感度 += 500
+			CASE 1
+				PRINTFORMW 「欸、……啊、啊啊、結果是拜託這種？」
+				PRINTFORMW 「唔ー、正所謂英雄好美人嗎……不、好吧、已經約定了、答應是會答應的」
+				PRINTFORMW 「那個……該怎麼說呢、溫柔一點哦？」
+				CALL COLOR_PRINTW(@"%ANAME(対象)%成為了部下", カラー_注意)
+				CALL COLOR_PRINTW(@"取得了%ANAME(対象)%的合意", カラー_ピンク)
+				CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属, 1)
+				TALENT:対象:合意 = 1
+				TALENT:対象:チョロイン = 1
+			CASE 2
+				PRINTFORMW 讓如此強大的人任意妄為非常危險
+				PRINTFORMW 將%ANAME(対象)%投獄了
+				PRINTFORMW 「啊？　算了、沒辦法」
+				PRINTFORMW 「希望你能給我好的待遇吧」
+				CALL COLOR_PRINTW(@"將%ANAME(対象)%投獄了", カラー_注意)
+				CALL CAPTURE(対象, CFLAG:MASTER:所属)
+			CASE 3
+				PRINTFORMW 「呵、明明已經贏了我、卻還是渴望力量嗎！　哈哈、我最喜歡像你這樣的武士了」
+				PRINTFORMW 「好吧、我就傳授你鬼流的打架方式吧」
+				CALL COLOR_PRINTW(@"被%ANAME(対象)%教授了打架的方法", カラー_注意)
+				CALL COLOR_PRINTW(@"%ANAME(MASTER)%武闘上昇了3", カラー_注意)
+				CALL LEARN_SKILL_GENERAL_BY_NAME(MASTER, "总体战＋＋")
+				SIF RESULT
+					CALL COLOR_PRINTW(@"%ANAME(MASTER)%學會了＜总体战＋＋＞", カラー_注意)
+				CFLAG:対象:好感度 += 300
+				ABL:MASTER:武闘 += 3
+				PRINTFORMW 「那麼、再見了。玩得好開心哦！」
+				PRINTFORMW %ANAME(対象)%離開了……
+			CASE 4
+				PRINTFORMW 「錢嗎。真是實際」
+				PRINTFORMW 「打倒鬼後獲得財宝、都是老故事的套路了」
+				PRINTFORMW 「好吧！　那麼、我有的錢都給你吧」
+				CALL COLOR_PRINTW("得到了100000金", カラー_注意)
+				MONEY += 100000
+				PRINTFORMW 「那麼、再見了。玩得好開心哦！」
+				PRINTFORMW %ANAME(対象)%離開了……
+		ENDSELECT
+	ELSE
+		PRINTFORMW 「哈哈哈、我贏了！」
+		PRINTFORML ……果然、贏不了鬼
+		PRINTFORMW 原本還在想只要讓杯上的酒灑出來的話應該很輕鬆、但還是不行……
+		PRINTFORMW 「好了、抱歉不過約定就是約定」
+		PRINTFORMW 「你的所有錢、我全都要了」
+		PRINTFORMW 「以前的話就連命都會拿走的、就當自己拾回一條命吧」
+		CALL COLOR_PRINTW("所持金全部被奪走了", カラー_警告)
+		PRINTFORMW 「那麼、再見了。玩得好開心哦！」
+		PRINTFORMW %ANAME(対象)%離開了……
+		MONEY = 0
+	ENDIF
+ENDIF
+
+CALL COLOR_PRINTW(@"結識了%ANAME(対象)%", カラー_注意)
+CFLAG:対象:面識 = 1
+KDVAR:対象:勇儀_力比べ = 1
+
+RETURN 1

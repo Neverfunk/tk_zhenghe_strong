@@ -1,0 +1,309 @@
+﻿;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_LENDER_REPAYMENT_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("LENDER")
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_LENDER_REPAYMENT_DECISION()
+;返済期限があればデクリメント
+IF DVAR:金貸し_返済期限 > 0
+	DVAR:金貸し_返済期限 --
+	;期限が0になったら発動
+	SIF DVAR:金貸し_返済期限 == 0
+		RETURN 1
+ENDIF
+
+RETURN 0
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_DERIVATION_LENDER_REPAYMENT_SETTARGET()
+FOR LOCAL, 0, CHARANUM
+	SIF LOCAL == MASTER
+		CONTINUE
+	SIF CFLAG:LOCAL:所属 != CFLAG:MASTER:所属
+		CONTINUE
+	SIF CFLAG:LOCAL:捕虜先
+		CONTINUE
+	SIF !IS_FEMALE(LOCAL)
+		CONTINUE
+	DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+	DAILY_TARGET_NUM ++
+NEXT
+
+
+RETURN 1
+
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_LENDER_REPAYMENT()
+#DIM LCOUNT, 3
+#DIM 返済額
+#DIM 返済期限
+#DIM 担保
+VARSET 返済額
+VARSET 返済期限
+
+IF DAILY_TARGET_NUM > 0
+	担保 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+ELSE
+	担保 = -1
+ENDIF
+
+PRINTFORMW 今天是借贷还款日
+PRINTFORMW 在预定的时刻，男子出现了……
+PRINTFORMW 「那么%ANAME(MASTER)%大人，今天是还款日，您准备好钱了吗？」
+PRINTFORMW 那么，怎么办呢……
+CALL SINGLE_DRAWLINE
+PRINTFORML 现在所拥有的的钱:{MONEY}
+
+CALL ASK_MULTI_JUDGE(@"偿还贷款{DVAR:金貸し_融資総額}金", MONEY >= DVAR:金貸し_融資総額, "告诉他付不起", 1, "有适合你的办法", (DVAR:金貸し_発生フラグ == 1 && MONEY >= DVAR:金貸し_融資総額 * 3 / 2))
+
+IF RESULT == 0 && MONEY >= DVAR:金貸し_融資総額
+	IF MONEY >= DVAR:金貸し_融資総額 * 2
+		PRINTFORMW 「哎呀，对不起。还款金额有误。」
+		PRINTFORM 「钱，一分也不能少，包括各种利息
+		CALL COLOR_PRINT(@"{DVAR:金貸し_融資総額 * 2}", カラー_注意)
+		PRINTFORMW 而且，您好像也不像是缺钱的样子，所以应该没问题吧？」
+		PRINTFORM 连"岂有此理"都还没来得及说出口的，男子就催促着连本带高利地还债了
+		CALL COLOR_PRINT(@"{DVAR:金貸し_融資総額 * 2}", カラー_注意)
+		PRINTFORMW 迫于无奈而且手头也不紧只能还了……
+		MONEY -= DVAR:金貸し_融資総額 * 2
+	ELSE
+		PRINTFORMW 「嗯。数额正确」
+		PRINTFORM 给了那男的钱
+		CALL COLOR_PRINT(@"{DVAR:金貸し_融資総額}", カラー_注意)
+		PRINTFORMW 还清了贷款……
+	ENDIF
+	PRINTFORMW 「那么我就先告辞了。今后也请多关照」
+	PRINTFORMW 男子高高兴兴地回去了……
+	DVAR:金貸し_残り融資額 = 0
+	DVAR:金貸し_融資総額 = 0
+ELSEIF RESULT == 1
+	PRINTFORMW 现在手头正紧，刚好还不了，但表示会尽快还清。%ANAME(MASTER)%诚实地向对方传达了现状
+	PRINTFORMW 「……嗯……。啊，没办法呢。不能还的话也不强求不来呀」
+	PRINTFORMW 似乎对方接受了真诚的歉意，不过手却摸上了%ANAME(MASTER)%的胸口
+
+	;担保がいる場合
+	IF 担保 >= 0
+		PRINTFORMW 「那么，作为代替偿还的方法……您因该知道我有经营着一家旅店吧？」
+		PRINTFORMW 「%ANAME(MASTER)%能把%ANAME(担保)%作为寄存在我那里来做抵押的话，就把那在那里赚的钱作为还款的金额来偿还吧」
+		PRINTFORMW 「不好意思人手不够。而且我觉得对你来说也不是什么坏事……」
+		IF IS_FEMALE(MASTER)
+			PRINTFORMW 「而且用这样的方法，%ANAME(MASTER)%大人也还可以继续不受限制地进行自己的工作，不也挺好吗」
+		ENDIF
+		PRINTFORMW 确实如此，这的确对双方来说都是不错的事情……
+		PRINTFORMW 不管怎么说，都是没有选择余地的事……
+		IF IS_FEMALE(MASTER)
+			PRINTFORMW 怎么办？
+			CALL ASK_YN(@"把%ANAME(担保)%送过去吧", "用自己来代替")
+		ELSE
+			RESULT = 0
+		ENDIF
+		IF RESULT == 0
+			PRINTFORMW %ANAME(MASTER)%决定送出%ANAME(担保)%作为抵押
+			PRINTFORMW 「那么，我就把%ANAME(担保)%作为抵押了」
+			IF GETBIT(TALENT:担保:淫乱系, 素質_淫乱_精液便女)
+				PRINTFORMW 「哼哼，反正看起来也只是个为了钱什么都可以做的贱女人，稍微粗暴地使用也没问题……」
+				PRINTFORMW 「嗯？不不，没什么。是我自言自语罢了」
+			ENDIF
+			PRINTFORMW 「好好工作还清之后我会还给您的，请不要担心……」
+		ELSE
+			担保 = MASTER
+			PRINTFORMW 决定让%ANAME(担保)%来代替自己进行还款工作
+			PRINTFORMW 「是吗，那就请您好好工作吧」
+			PRINTFORMW 「啊，还款额工作完成的话就能解放了，不用担心……」
+		ENDIF
+		PRINTFORMW 男子带着%ANAME(担保)%离开了……
+		DVAR:金貸し_返済期限 = -1
+		DVAR:金貸し_カタID = GET_ID(担保)
+		IF 担保 != MASTER
+			CALL CHANGE_COUNTRY(担保, 0)
+			CFLAG:担保:特殊状態 = 0
+		ENDIF
+	ELSE
+		PRINTFORMW 「然后，剩下的钱……嗯，嗯，没办法啊」
+		PRINTFORMW 「但是，今后请不要再发生这样的事情了。」
+		PRINTFORMW 男子离开了……
+		DVAR:金貸し_返済期限 = 0
+		DVAR:金貸し_残り融資額 = 0
+		DVAR:金貸し_融資総額 = 0
+		DVAR:金貸し_カタID = 0
+	ENDIF
+ELSEIF RESULT == 2
+	PRINTFORMW 那就如对方的愿全额足款支付吧，在对方听到如此回答显得放松的瞬间
+	PRINTFORML 吱——
+	PRINTFORML 伴随着微弱但尖锐的声音，借贷人脚边极其隐蔽的活板门逐渐打开了，随即突然大开之后借贷人就掉了下去
+	PRINTFORMW 「啊…居然掉在这种地方，如此戏弄我的话包括慰问费在内您可要至少要支付100万日元哟」
+	;TranslatedMark 「啊…居然掉在这种地方，如此戏弄我的话包括慰问费在内您可要至少要支付100万日元哟」(っつ…こんなところに落とすとは、慰謝料を含めて少なくとも1000000は支払っていただきませんと)
+	PRINTFORML 因粗暴的行为向对方表达了歉意
+	PRINTFORMW 因为按照原本支付的巨额贷款来当面还清的话在自家地盘不太好，于是额外准备了更好的地方
+	;TranslatedMark 因为按照原本支付的巨额贷款来当面还清的话在自家地盘不太好，于是额外准备了更好的地方(何分あのまま支払うには広すぎるから特別に支払い場所を作らせていただいた)
+	PRINTFORML 而且还准备了让对方的家人足以随意挥霍一大段日子的赡养费
+	;TranslatedMark 而且还准备了让对方的家人足以随意挥霍一大段日子的赡养费 (慰謝料も用意しているので望むだけ受け取っていただこう)
+	PRINTFORML 「那，那样的话确实很不错……不对，请先让我出来吧
+	PRINTFORML 在可怜的守财奴话语结束之前，先前在旁边准备好的卫兵们将袋子里的东西一起倒了进去
+	PRINTFORMW 男人的腿一瞬间就被埋没了…
+	PRINTFORMW 「啊，咕…救、救我……」
+	PRINTFORML 声音不久就变小了，从袋子里散落的货币逐渐与地面持平，散落在地上，这些都是面值最低的零钱
+	PRINTFORMW 被下了套的借贷人就这样执着于金钱，最终在钱堆里静静地窒息而亡
+	PRINTFORML 之后，装满零钱并连带着尸体的木桶在高炉里作为废旧金属融化了，
+	PRINTFORMW 没有人知道融化的金属的去向
+	PRINTFORMW ……
+	PRINTFORMW …
+	PRINTFORMW 
+	PRINTFORMW 几天后，要求赔偿房间的装修费和零钱的消息传来了(部屋の改装費と小銭の請求がきた)
+	PRINT 货款合计
+		CALL COLOR_PRINT(@"{DVAR:金貸し_融資総額 * 3 / 2}", カラー_注意)
+	PRINTW 但是……
+	MONEY -= DVAR:金貸し_融資総額 * 3 / 2
+	DVAR:金貸し_発生フラグ = -1
+ENDIF
+
+RETURN 1
+
+;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_LENDER_REPAYMENT_DONE_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("LENDER")
+
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_LENDER_REPAYMENT_DONE_DECISION()
+SIF DVAR:金貸し_返済期限 == -1 && DVAR:金貸し_残り融資額 <= 0
+	RETURN 1
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_LENDER_REPAYMENT_DONE()
+#DIM 返済額
+
+LOCAL = ID_TO_CHARA(DVAR:金貸し_カタID)
+IF LOCAL != MASTER
+	PRINTFORMW 「哎呀，%ANAME(MASTER)%大人。其实是关于%ANAME(LOCAL)%的事情」
+	PRINTFORMW 放高利贷的主动来找了。好像是有关于代理欠债人%ANAME(LOCAL)%的事情……
+	IF (IS_FALLEN(LOCAL) && RAND:3) || RAND:5
+		PRINTFORMW 「您的抵押非常幸运地完成了还款的任务。所以按照约定，我把她送还给您」
+		PRINTFORMW 男子一拍手，%ANAME(LOCAL)%就从房间外面进来了
+		PRINTFORMW 然而，%ANAME(MASTER)%在看见%ANAME(LOCAL)%的时候还怀疑是不是认错了人
+		SELECTCASE RAND:5
+			CASE 0
+				PRINTFORMW %ANAME(LOCAL)%全身都被几乎透明的色情衣服包裹着，看起来几乎和裸体无异
+				PRINTFORMW 或许是因为在那之前还在「工作」吧，两个肉穴里都沾满了爱液和精液
+				PRINTFORMW 尽管如此，或许是因为肉欲仍在隐隐作痛，%ANAME(LOCAL)%用手指在自己的阴部来回拨弄
+				PRINTFORMW 飘零的甜蜜叹息渐渐变成明确的娇声，手指的动作也变得激烈
+				PRINTFORMW 任何在强烈的刺激下%ANAME(LOCAL)%弓起身子，在%ANAME(MASTER)%的面前绝顶了
+			CASE 1
+				PRINTFORMW %ANAME(LOCAL)%是和放高利贷的那个男人一起出现的
+				PRINTFORMW ……被那个男人抱起来，把他的肉棒偷偷地吞了进去
+				PRINTFORMW 每当男子向上挺动腰部时，%ANAME(LOCAL)%就会随着刺激而颤抖起来
+				PRINTFORMW 随着抽插越来越激烈，男子最终在%ANAME(LOCAL)%的身体内中出了
+				PRINTFORMW %ANAME(LOCAL)%发出娇艳的声音，一边剧烈潮吹着一边达到了高潮
+			CASE 2
+				PRINTFORMW 「她可是相当主动的呢。您要看一下吗？」
+				PRINTFORMW 放款人一这么说，就把目光投向了%ANAME(LOCAL)%
+				PRINTFORMW 于是%ANAME(LOCAL)%就在%ANAME(MASTER)%的面前，用嘴开始为对方的肉棒服务
+				PRINTFORMW 发出咻咻的声音舔着肉棒的样子，不仅嘴里也很火热，连行为都如之前所说一样主动
+				PRINTFORMW 不久男子射出来后，%ANAME(LOCAL)%一滴不剩地全喝了下去，并嘟囔着感谢的话语
+			CASE 3
+				PRINTFORMW 「哎呀哎呀，对于工作那么上心吗，那就穿着工作服来一遍吧」
+				PRINTFORMW 放贷人嘴里所说的工作服在拿出来之后才被惊到了，这算是哪门子的工作服
+				PRINTFORMW 虽然看起来像是女仆的衣服，但是乳房是露出来一大半的，裙子的长度也很短，稍微动一下就能看到下面的小穴
+				PRINTFORMW 「那么现在，让%ANAME(MASTER)%大人好好看看你学得怎么样吧，好好展示你工作所学的技能」
+				PRINTFORMW 话音刚落，男子就在%ANAME(MASTER)%面前推倒%ANAME(LOCAL)%，开始侵犯
+				PRINTFORMW 男子发出呻吟声，将精液内射在阴道内，%ANAME(LOCAL)%不由得呻吟起来，忍耐不已的快感在喉咙发出的呻吟声中听的一清二楚
+			CASE 4
+				PRINTFORMW 「她是可是我相当忠诚的业务员呢。您要看一下吗？」
+				PRINTFORMW 男子意味深长地瞪着眼睛，%ANAME(LOCAL)%随即在地上土下座
+				PRINTFORMW 「哼哼，就这样保持这个姿势吧」
+				PRINTFORMW 随后，男子以后入的姿势不断地侵犯着%ANAME(LOCAL)%
+				PRINTFORMW 激烈的活塞运动后，男子呻吟着，在阴道内射了
+				PRINTFORMW %ANAME(LOCAL)%神情恍惚地用着那模糊颤抖的声音表达了感谢
+		ENDSELECT
+		PRINTFORMW 在把%ANAME(LOCAL)%抱回这边后，%ANAME(MASTER)%在追问这是怎么回事时，男子已经跑远了……
+		CALL COLOR_PRINTW(@"%ANAME(LOCAL)%が復帰しました", カラー_注意)
+		SETCOLOR カラー_警告
+		IF !GETBIT(TALENT:LOCAL:淫乱系, 素質_淫乱_淫乱)
+			PRINTFORML %ANAME(LOCAL)%获得了＜淫乱＞的素质
+		ENDIF
+		CALL TALENT_LOSE_PRIDE(LOCAL, 1)
+		CALL TALENT_LOSE_TEISOU(LOCAL, 1)
+		RESETCOLOR
+		CFLAG:(LOCAL):従属度 = MAX(CFLAG:(LOCAL):従属度, 500)
+		CFLAG:(LOCAL):依存度 = MAX(CFLAG:(LOCAL):依存度, 50)
+		SETBIT TALENT:LOCAL:淫乱系, 素質_淫乱_淫乱
+
+		DVAR:金貸し_返済期限 = 0
+		DVAR:金貸し_残り融資額 = 0
+		DVAR:金貸し_融資総額 = 0
+		DVAR:金貸し_カタID = 0
+		CALL CHANGE_COUNTRY(LOCAL, CFLAG:MASTER:所属)
+		CFLAG:LOCAL:特殊状態 = 0
+	ELSE
+		返済額 = RAND(100000, MAX(100001, MIN(200000, DVAR:金貸し_融資総額)))
+		PRINTFORMW 「其实是关于%ANAME(LOCAL)%的事，因为她做了相当糟糕的事情」
+		PRINTFORM 「所以又欠了一笔赔款(新たに借金が金)
+		CALL COLOR_PRINT(@"{返済額}", カラー_注意)
+		PRINTFORMW 我的意思是说，您现在又有了一笔新的欠款」
+		PRINTFORMW 怎么说呢，本想还借款，结果反而增加了欠的数目
+		PRINTFORMW 话虽如此，这也是没办法的事。%ANAME(MASTER)%只能接受了这个事实……
+
+		DVAR:金貸し_残り融資額 = 返済額
+		DVAR:金貸し_融資総額 = 返済額
+	ENDIF
+ELSE
+	IF RAND:5
+		PRINTFORMW 「%ANAME(MASTER)%殿下。其实您的工资/存款，正好可以拿来还债呀。」
+		;TranslatedMark 「%ANAME(MASTER)%殿下。其实您的工资/存款，正好可以拿来还债呀。」(%ANAME(MASTER)%殿。実はあなたの給金が、ちょうど借金と同じだけになりましてな)
+		PRINTFORMW 「这样我们的工作就结束了，太好了」
+		;TranslatedMark 「这样我们的工作就结束了，太好了(これにてうちでの仕事は終わりですぞ、よかったですなぁ)」
+		PRINTFORMW 有一天，%ANAME(MASTER)%被放贷人叫过去说要解决欠款的事情
+		PRINTFORMW 放贷人当面把欠债证明书给当面撕碎了，看来欠债的生活是真正结束了
+		PRINTFORMW 「如果受够处罚了的话，就不要再轻易借那么多钱了啊，哈哈」
+		PRINTFORMW 「嘛，如果你还是需要我的帮助，还是喜欢被我惩罚，还是两者皆有，我是不会阻止你再来找我的」
+		PRINTFORMW 被在身后的放贷人嘲笑的时候，%ANAME(MASTER)%快速跑开了……
+		PRINTFORMW 身体依旧不能平息为了追求凌辱的快感，下腹也逐渐变得温热了起来……
+		SETCOLOR カラー_警告
+		IF !GETBIT(TALENT:LOCAL:淫乱系, 素質_淫乱_淫乱)
+			PRINTFORML %ANAME(LOCAL)%获得了＜淫乱＞的素质
+		ENDIF
+		CALL TALENT_LOSE_PRIDE(LOCAL, 1)
+		CALL TALENT_LOSE_TEISOU(LOCAL, 1)
+		RESETCOLOR
+		CFLAG:(LOCAL):従属度 = MAX(CFLAG:(LOCAL):従属度, 500)
+		CFLAG:(LOCAL):依存度 = MAX(CFLAG:(LOCAL):依存度, 50)
+		SETBIT TALENT:LOCAL:淫乱系, 素質_淫乱_淫乱
+		DVAR:金貸し_返済期限 = 0
+		DVAR:金貸し_残り融資額 = 0
+		DVAR:金貸し_融資総額 = 0
+		DVAR:金貸し_カタID = 0
+	ELSE
+		返済額 = RAND(100000, MAX(100001, MIN(200000, DVAR:金貸し_融資総額)))
+		PRINTFORMW 「真不幸，搞砸了啊，%ANAME(MASTER)%大人」
+		PRINTFORMW 因工作而犯了大错误的%ANAME(MASTER)%被放贷人召唤了过去
+		PRINTFORMW 「嘛，我已经帮你把对方摆平了。不过也不是白白帮你的，该回报我点什么吧，您说对吗？
+		PRINTFORM %ANAME(MASTER)%于是，被对方要挟着报答
+		CALL COLOR_PRINT(@"{返済額}", カラー_注意)
+		PRINTFORMW 欠下了新的欠款……
+		DVAR:金貸し_残り融資額 = 返済額
+		DVAR:金貸し_融資総額 = 返済額
+	ENDIF
+ENDIF
+
+RETURN 1

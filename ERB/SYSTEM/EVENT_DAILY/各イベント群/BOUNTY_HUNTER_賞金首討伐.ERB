@@ -1,0 +1,475 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_BOUNTY_HUNTER_RATE()
+RETURN 30
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_BOUNTY_HUNTER_DECISION()
+#DIM HAVE_TARGET
+HAVE_TARGET = 0
+FOR LOCAL,0,6
+	IF DVAR:(賞金稼ぎ_討伐フラグ:LOCAL) == 0
+		HAVE_TARGET = 1
+		BREAK
+	ENDIF
+NEXT
+RETURN 15 <= DAY && HAVE_TARGET
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_BOUNTY_HUNTER_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;---------------------
+@EVENT_DAILY_BOUNTY_HUNTER()
+#DIM 対象
+#DIMS 賞金首, 6
+#DIM 賞金額, 6
+#DIM COOL_TIME
+
+賞金首:0 = 巨大的史莱姆
+賞金額:0 = 20000
+
+賞金首:1 = 小鬼の軍団
+賞金額:1 = 22500
+
+賞金首:2 = 蝦蟇蛙
+賞金額:2 = 25000
+
+賞金首:3 = 山犬
+賞金額:3 = 27500
+
+賞金首:4 = 死霊術師
+賞金額:4 = 30000
+
+賞金首:5 = 狂暴的恶鬼
+賞金額:5 = 40000
+
+
+IF DVAR:賞金稼ぎ_発生フラグ == 0
+	PRINTFORML 在工作之中，悠然自得地环顾四周，看到了一张提供悬赏的通缉单
+	PRINTFORML 向部下询问后得知，好像是悬赏着在这附近胡闹的妖怪和魔物
+	PRINTFORML 賞金額20000,25000,30000…很值钱的样子嘛
+	PRINTFORMW 如果能讨伐这些家伙的话、不仅国库会变得富裕又能给人民留下好印象
+	DVAR:賞金稼ぎ_発生フラグ = 1
+ELSE
+	PRINTFORML 悬赏的通缉令再度映入眼帘
+	PRINTFORMW 奖金金额和以前一样，看来还没有被讨伐
+ENDIF
+PRINTFORMW 怎么办?
+CALL ASK_YN("进行讨伐", "还是算了")
+IF RESULT == 1
+	$CANCEL
+	PRINTFORML 太危险了、还是算了吧
+	PRINTFORMW %ANAME(MASTER)%把一捆通缉单扔到一旁
+	RETURN 1
+ELSE
+	PRINTFORML %ANAME(MASTER)%决定进行讨伐
+ENDIF
+
+PRINTFORML 如果只是讨伐的话，似乎只要战斗力足够就可以了
+PRINTFORMW 派谁前去讨伐呢？
+CALL SINGLE_DRAWLINE
+CALL SELECT_CHARA_LIST_SLG
+SIF RESULT == -1
+	GOTO CANCEL
+対象 = RESULT
+
+IF 対象 == MASTER
+	PRINTFORML 亲自前去讨伐
+ELSE
+	PRINTFORML 派遣%ANAME(対象)%进行讨伐
+ENDIF
+
+PRINTFORML 现在、我们有几个目标可选
+PRINTFORML 奖金越高说明任务越困难
+PRINTFORMW 讨伐哪一个好呢？
+CALL SINGLE_DRAWLINE
+;討伐対象を決める
+FOR LOCAL, 0, VARSIZE("賞金首")
+	IF DVAR:(賞金稼ぎ_討伐フラグ:LOCAL) == 0
+		PRINTFORML [{LOCAL, 2, RIGHT}] %(賞金首:LOCAL), 14, LEFT% 賞金額:{賞金額:LOCAL}
+	ELSE
+		SETCOLOR カラー_選択不可
+		PRINTPLAINFORM [{LOCAL, 2, RIGHT}] %賞金首:LOCAL, 14, LEFT% 賞金額:{賞金額:LOCAL}
+		RESETCOLOR
+		PRINTL
+	ENDIF
+NEXT
+PRINTFORML [99] 还是算了吧
+$INPUT_LOOP
+INPUT
+IF RESULT == 99
+	GOTO CANCEL
+ELSEIF  RESULT < 0
+	GOTO INPUT_LOOP
+ELSE
+	LOCAL:1 = 賞金額:RESULT
+	LOCAL:2 = RESULT
+	PRINTFORML %賞金首:RESULT%に決めた
+	PRINTFORMW %ANAME(対象)%马上前去讨伐了
+	PRINTFORML ・・・
+	PRINTFORML ・・
+	PRINTFORMW ・
+	;判定処理、
+	;武闘の基準値、10%単位で最大4倍。
+	LOCAL:3 = ABL:対象:武闘 * (RAND:31 + 10) / 10
+	;知略の基準値、10%単位で最大3倍。
+	LOCAL:4 = ABL:対象:知略 * (RAND:21 + 10) / 10
+	IF LOCAL:3 + LOCAL:4 > LOCAL:1 / 100
+		PRINTFORMW %ANAME(対象)%成功讨伐了%賞金首:RESULT%！
+		PRINTFORMW 入手了賞金！
+		PRINTFORMW 同时己方势力的评价也上升了！
+		MONEY += LOCAL:1
+		DVAR:(賞金稼ぎ_討伐フラグ:RESULT) = 1
+		FOR LOCAL, 1, MAX_COUNTRY
+			SIF IS_COUNTRY(LOCAL)
+				CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, (LOCAL:1 / 200))
+		NEXT
+		RETURN 1
+	ELSE
+		PRINTFORMW %ANAME(対象)%被打得落花流水
+		IF IS_FEMALE(対象)
+			PRINTFORMW %賞金首:RESULT%把软绵绵地躺在地上的%ANAME(対象)%抓回巢穴里
+			PRINTFORML
+			PRINTFORML
+			SELECTCASE LOCAL:2
+				;スライム・未完成
+				CASE 0
+					SELECTCASE RAND:5
+						CASE 0
+							PRINTFORML 在充满霉味的泥石灰、巢穴中%ANAME(対象)%捂着肚子一边流着冷汗一边呻吟
+							PRINTFORML %ANAME(対象)%肚子就像临月一样膨胀起来，里面不时有东西在咕嘟地咕噜咕噜地动着
+							PRINTFORML 史莱姆的一部分侵入%ANAME(対象)%的子宮内狂乱的蹂躏着
+							PRINTFORMW 拼命忍耐的%ANAME(対象)%被史莱姆不停直接刺激着子宫，无法抵抗的绝顶了好几次
+							PRINTFORML 然后肚子一下子膨胀起来，大量的浑浊粘液从产道中溢出了出来
+							PRINTFORML 由于太猛烈的冲击、%ANAME(対象)%双眼翻白、一边发出娇喘一边迎来了绝顶
+							PRINTFORML 不久之后，所有的史莱姆都被生了出来、%ANAME(対象)%身体痉挛着瘫倒在地
+							PRINTFORMW 雌穴被撑的大开、连子宫口都看得清清楚楚
+						CASE 1
+							PRINTFORML %ANAME(対象)%被巨大的史莱姆吞噬着只露出脖子以上的部位
+							PRINTFORML 虽然想逃，但是被史莱姆压迫得全身都无法动弹了。
+							PRINTFORML %ANAME(対象)%渐渐地察觉到异变，全身的衣服渐渐被史莱姆溶解了
+							PRINTFORML 自己可能会就这样被消化掉的恐怖，并没有影响她的身体品味着快感
+							PRINTFORMW 赤身裸体，满脸通红地想逃避的%ANAME(対象)%下腹部感受到了突如其来的冲击
+							PRINTFORML 一边呻吟，一边看下腹部，雌穴突然被顶开，是正在被史莱姆侵犯吗？
+							PRINTFORML 史莱姆一边挤压着阴道肉，一边钻向深处、%ANAME(対象)%也跟着吓得直哆嗦
+							PRINTFORML 史莱姆一点点充满了阴道，终于到达了最深处，撬开子宫口潜入胎内
+							PRINTFORMW 这种冲击之下、%ANAME(対象)%的肚子鼓了起来，她发出了尖叫般的娇喘声绝顶了
+						CASE 2
+							PRINTFORML %ANAME(対象)%在巢穴深处被粘性史莱姆所束缚着
+							PRINTFORML 史莱姆很灵巧地把%ANAME(対象)%的衣服撕破扔掉、贴在露出了的乳房、秘所、臀部上
+							PRINTFORML 因为敏感部位被贴住而非常羞耻的%ANAME(対象)%身上、马上传来了史莱姆菇滋菇滋的刺激声
+							PRINTFORMW 对不由得发出小娇声的%ANAME(対象)%十分满意、史莱姆加大了刺激的力度
+							PRINTFORML 最初挣扎抵抗的%ANAME(対象)%被史莱姆爱抚着敏感带、渐渐地发出甜蜜的呻吟声
+							PRINTFORML 终于、阴核被紧紧挤压的%ANAME(対象)%潮吹着绝顶了、史莱姆紧贴在小穴口把喷出的爱液全部吸收了
+							PRINTFORML 喘着粗气的%ANAME(対象)%终于发现了史莱姆的目的、但马上又因为尻穴被插入而再次绝顶了
+							PRINTFORMW 责弄着徒劳忍耐着的%ANAME(対象)%、史莱姆让她数次达到高潮、继续吸取着爱液
+						CASE 3
+							PRINTFORML %ANAME(対象)%趴在史莱姆巢穴里的地面上，简直象个青虫似的狂乱地爬动着
+							PRINTFORML 史莱姆钻进她的衣服里，爱抚着她全身
+							PRINTFORML 最初%ANAME(対象)%想要赶出史莱姆、但和拿滑溜溜的粘液进行对抗是毫无作用的
+							PRINTFORMW 就好像对女体很了解似的，史莱姆的巧妙爱抚使她被折磨地高潮了好几次
+							PRINTFORML 渐渐的%ANAME(対象)%的抵抗微弱下来、史莱姆开始插入她的体内
+							PRINTFORML 史莱姆把一部分粘液硬化成棒状，一戳就同时插入她雌穴和臀孔的深处了
+							PRINTFORML 如同被肉棒插入一般的压迫感和令大脑发麻的刺激、%ANAME(対象)%身体夸张的后仰着绝顶了
+							PRINTFORML 怎么办！怎么办啊！两穴同时被激烈的侵犯着、全身也被泥浆所束缚的%ANAME(対象)%
+							PRINTFORMW 被无处可逃的快乐袭击着，只能身体跳动着发狂般的享受着
+						CASE 4
+							PRINTFORML %ANAME(対象)%被巨大的史莱姆吞噬着只露出脖子以上的部位、全身都被爱抚着
+							PRINTFORML 史莱姆巧妙的爱抚，让还没习惯的%ANAME(対象)%没一会就达到了绝顶
+							PRINTFORML 即使如此拼命地忍耐着寻找逃跑的机会的时候，身体中的欲火却渐渐燃烧起来
+							PRINTFORML 其实这个史莱姆的体液中含有春药成分，渗入了她的体内
+							PRINTFORMW 但是不知道这种事情的%ANAME(対象)%拼命的告诉自己这样是不对的、必须要忍住
+							PRINTFORML 但是强烈的媚药成分渗透到全身、%ANAME(対象)%已经变成了被摸一下就会发出娇喘的样子
+							PRINTFORML 更进一步地，史莱姆的一部分变形成肉棒的形状，插入了她的阴道，光是这样就让她尖叫着绝顶了
+							PRINTFORML 全身被束缚着，子宫不停被撞击着，经过了无数次绝顶，她的子宫口也渐渐打开了
+							PRINTFORMW 史莱姆瞄准了这一瞬间，朝着胎内释放出种子，%ANAME(対象)%被炙热的感觉冲垮了最后的理性，发出娇媚的叫喊声回应着
+					ENDSELECT
+					CALL FUCK_RAPE(対象, GET_SPERM_ID("スライム"), @"スライムの\@RAND:2 ? 肉棒 # 唇\@", @"スライム")
+					CALL FUCK_RAPE(対象, GET_SPERM_ID("スライム"), @"スライムの\@RAND:2 ? 肉棒 # 唇\@", @"スライム")
+				;小鬼の軍団
+				CASE 1
+					SELECTCASE RAND:5
+						CASE 0
+							PRINTFORML 被锁链牢牢绑住的%ANAME(対象)%，被小鬼们轮奸了
+							PRINTFORML 他们因为久违的上等货而欣喜若狂，一个接一个地轮流侵犯着她
+							PRINTFORML %ANAME(対象)%虽然抵抗着，但和他们身躯不相称的粗大肉棒一直粗暴地在体内抽插
+							PRINTFORMW 子宫已经完全坠落了，每次射精的时候，子宫口都啪嗒啪嗒地收缩着，主动接受着精液
+							PRINTFORML 小鬼们不停地责弄着她的身体，到处摩擦着肉棒，把精液涂满全身
+							PRINTFORML %ANAME(対象)%拼命忍受着渗入身体的雄性臭味恶臭
+							PRINTFORML 十分喜欢她的小鬼在耳边低声说道「我要和你生出一窝小鬼来」、她被吓得不敢喘气
+							PRINTFORMW 然后就这样突然被注入了精液、%ANAME(対象)%不由得发出娇媚的声音绝顶了
+						CASE 1
+							PRINTFORML %ANAME(対象)%作为战利品被带回巢穴轮奸着
+							PRINTFORML 小鬼们像扔进池塘里的鲤鱼一般聚集在她身上，享受着她全身带来的快乐
+							PRINTFORML %ANAME(対象)%无论是嘴巴、雌穴还是屁眼，一直被插入小鬼们的肉棒，注入的精液根本没有时间干掉
+							PRINTFORMW 子宫中被连续射精了几十发、%ANAME(対象)%的下腹部逐渐膨胀起来
+							PRINTFORML 即便如此%ANAME(対象)%也拼命忍着不接受这些家伙带来的快感
+							PRINTFORML 但身体在不知不觉中主动扭起了腰身，积极地动着舌头，卖力的侍奉着他们的肉棒
+							PRINTFORML 被他们的肉棒侵犯了的过程里，身体开始无意识地追求着快感
+							PRINTFORMW 在那之后，被他们发泄着无底无尽的性欲，不断被玷污，脸上露出了苦闷的神色，好几次达到了绝顶
+						CASE 2
+							PRINTFORML %ANAME(対象)%作为小鬼们的繁殖奴隶被饲养起来
+							PRINTFORML 穿着破破烂烂的衣服，脖子上戴着项圈，被绑在小鬼们的巢穴深处
+							PRINTFORML 一整天，小鬼们一个接一个地来给%ANAME(対象)%赋种
+							PRINTFORML %ANAME(対象)%虽然想要逃脱，却被不断赋予的快乐和被注入的雄性臭味所笼罩着
+							PRINTFORMW 一边以自己在寻找机会为借口，一边积极地放开身心接受他们的精液
+							PRINTFORML 现在又被有着与体型不相称粗大肉棒的小鬼突进了子宫，四肢无力地挣扎着
+							PRINTFORML 得意洋洋地垂着舌头，贪图快乐的姿态，正是完全沉迷于赋种的雌性的表情
+							PRINTFORML %ANAME(対象)%与小鬼互相拥抱，子宫里接纳着炙热地精液，达到了不知第几次高潮
+							PRINTFORMW 到了晚上，一边蜷缩在床上一边为白天自己的痴态羞愧地哭了起来。
+						CASE 3
+							PRINTFORML %ANAME(対象)%作为宴会的余兴正在与一个小鬼交配着
+							PRINTFORML 虽然有人说如果赢了就让她逃走，但是对于不断被侵犯的%ANAME(対象)%来说几乎不可能
+							PRINTFORML 双眼血红的小鬼紧紧抱住%ANAME(対象)%、无视她的抵抗，把肉棒塞进了小穴里
+							PRINTFORML 雌性本能被完全开放了的%ANAME(対象)%、光是被插入，腰部就失去了力气，倒了下去
+							PRINTFORMW 小鬼覆盖在她身上，以征服身体和心的气势猛烈地挥动腰部
+							PRINTFORML 看着原本非常弱小的小鬼把%ANAME(対象)%干的连连喘息、围观的小鬼们发出嘲笑声
+							PRINTFORML 被侵犯着的%ANAME(対象)%、连喘息的时间都没有、就开始了下一场“比赛”
+							PRINTFORMW 之后又被小鬼们看杂耍一样，不断被侵犯，全身都被弄得粘糊糊的
+						CASE 4
+							PRINTFORML %ANAME(対象)%以仰面朝上的姿势被捆在台子上
+							PRINTFORML 她满脸通红地瞪着小鬼们，但他们完全不在意地、一边责弄她的私处一边淫笑着
+							PRINTFORML 一只小鬼把肉棒掏出来展示给%ANAME(対象)%看、她表现出了出乎意料的慌乱
+							PRINTFORMW 一边俯视着被拘束住动弹不得的%ANAME(対象)%、小鬼把肉棒插入她的肉穴中
+							PRINTFORML 小鬼在拼命压抑着低声呻吟的%ANAME(対象)%身上激烈的扭动着腰、刺激着她的腔道
+							PRINTFORML 阴道肉在那雄壮肉棒的抽插下颤抖不止，最初咬紧牙关忍耐着的她也渐渐开始喘息起来
+							PRINTFORML 小鬼的肉棒突然膨胀起来、在%ANAME(対象)%体内最深处释放出炙热的白浊液
+							PRINTFORML 被下等生物征服的屈辱、和子宫里传来的无法形容的快感、让%ANAME(対象)%颤抖着绝顶了
+							PRINTFORMW 那之后%ANAME(対象)%继续被一群小鬼们无休无止地赋种着
+					ENDSELECT
+					CALL FUCK_GANGBANG(対象, GET_SPERM_ID("小鬼"), @"小鬼の\@RAND:2 ? 肉棒 # 唇\@", @"小鬼")
+					CALL FUCK_GANGBANG(対象, GET_SPERM_ID("小鬼"), @"小鬼の\@RAND:2 ? 肉棒 # 唇\@", @"小鬼")
+				;蝦蟇蛙・未完成
+				CASE 2
+					SELECTCASE RAND:5
+						CASE 0
+							PRINTFORML 蛙妖压在身体麻痹动弹不得的%ANAME(対象)%身上扭动着腰
+							PRINTFORML 皮肤上传来滑溜溜的恶心触感，她拼命地想逃，但那只是让蛙妖更性奋而已
+							PRINTFORML 他挺动着腰用雄壮的肉棒抽插着、%ANAME(対象)%的阴道肉被挤压着、渐渐唤醒了快感
+							PRINTFORMW 与内心的厌恶不同、%ANAME(対象)%的身体诚实地夹紧了蛙妖的肉棒、子宫口微微打开等待着种子的注入
+							PRINTFORML 不停被侵犯着的%ANAME(対象)%垂着头露出放荡的表情、渐渐地紧紧抱住了蛙妖，舌头纠缠着与他热吻
+							PRINTFORML 他低声鸣叫着在%ANAME(対象)%的体内吐出大量精液、她身体大幅地的颤抖着绝顶了
+							PRINTFORML 青蛙黏稠的精液填满子宫内、黏糊糊的触感让%ANAME(対象)%又高潮了好几次
+							PRINTFORMW 他非常喜欢%ANAME(対象)%的样子、为了确保她的卵子能够受精又侵犯了好几次
+						CASE 1
+							PRINTFORML 被青蛙咬着的%ANAME(対象)%已经被侵犯了好几次
+							PRINTFORML 虽然是被强行侵犯着、%ANAME(対象)%的喉咙里却发出了娇喘声
+							PRINTFORML 青蛙的皮肤分泌的媚药成分已经让她脑袋都要化掉了
+							PRINTFORML 刚开始只感觉到了厌恶感，但是雌穴在肉棒的抽插下开始变得湿润
+							PRINTFORMW 用伸缩自如的动作巧妙地刺激了阴道肉，现在仅仅是被擦到一次就在刺激下达到了绝顶
+							PRINTFORML 不晓得是春药成分的错，拼命否定着不断涌上来的快感的%ANAME(対象)%完全无法反抗
+							PRINTFORML 逐渐在与青蛙黏黏糊糊的性交中、身心都融化了、积极地扭动起腰来
+							PRINTFORMW 浓厚的精液注入体内深处、感到一定会怀孕的%ANAME(対象)%、大声淫叫着绝顶了
+						CASE 2
+							PRINTFORML %ANAME(対象)%奄奄一息地被青蛙抱在怀里
+							PRINTFORML 雌穴里插着、青蛙粗壮的充满爱意的肉棒
+							PRINTFORML 被带回巢穴的%ANAME(対象)%被他狠狠的侵犯、赋种了
+							PRINTFORML 起初还勉强抵抗着的她，也完全被他巧妙的技巧塑造成了完全服从本能的雌性
+							PRINTFORMW 与青蛙交配的背德感让%ANAME(対象)%无比兴奋、她时不时因为子宫里传来的触感而浑身颤抖
+							PRINTFORML 滑溜溜的皮肤和肉棒都完全融入了身体、欲火中烧的身体感到无比快乐
+							PRINTFORML %ANAME(対象)%一脸恍惚、感觉到插入自己体内深处的肉棒又膨胀起来
+							PRINTFORML 在青蛙呱呱的叫声催促下、她带着害羞的表情立起上半身、开始主动摇摆起腰部
+							PRINTFORMW %ANAME(対象)%一直和青蛙交配着、无数次高潮、直到天亮
+						CASE 3
+							PRINTFORML %ANAME(対象)%被带进了青蛙的窝里
+							PRINTFORML 害怕自己会做什么，却被迫换了像妓女穿的下流服装
+							PRINTFORML 正想着青蛙要自己穿这种东西到底想干什么，结果那只青蛙在眼前变成了人类的模样
+							PRINTFORML 是个身躯健壮的男子，根本就看不出是青蛙假扮成的了
+							PRINTFORMW 多半装扮成人类侵犯雌性是他的爱好
+							PRINTFORML 他搂住%ANAME(対象)%的肩膀、深情的亲吻着将她推到了
+							PRINTFORML 在他巧妙的连续攻击下、逐渐的%ANAME(対象)%忘记了自己在与青蛙交合、开始享受起快感
+							PRINTFORML 每一次突刺都让足以麻痹大脑的快感在体内奔走、%ANAME(対象)%的身体更加紧紧地抱住了他
+							PRINTFORMW 然后两人像恋人一般双手相握、舌头缠绕着、幸福的进行着抽送、全身颤抖地射出种子
+						CASE 4
+							PRINTFORML %ANAME(対象)%被一群年轻的青蛙围观着
+							PRINTFORML 虽说年轻但是肉棒却已经很雄壮了、性与旺盛的他们争先抱住%ANAME(対象)%侵犯起来
+							PRINTFORML 即便很受这些家伙们的喜欢、她仍然尽力挣扎着想要逃走、然而却没有任何效果
+							PRINTFORMW 青蛙们全凭一股年轻力胜的本能粗暴地刺激着腔肉、被强加了快感的%ANAME(対象)%的身体哆哆嗦嗦颤抖起来
+							PRINTFORML 之后侵犯着%ANAME(対象)%的青蛙呱呱叫着、打着哆嗦向她体内释放了浓厚的精液
+							PRINTFORML 膣内传来的黏黏糊糊的炙热感让她惨叫着疯狂挣扎、但仍是被一滴不剩灌入了全部种子
+							PRINTFORML 青蛙们嘲笑地看着曾经大叫着自己是人类的%ANAME(対象)%堕落成了完全服从本能的雌性
+							PRINTFORML 下一只青蛙开始侵犯起%ANAME(対象)%、一边说着她要和所有的青蛙交配
+							PRINTFORMW 正如他所说的那样、成群的青蛙们一个接一个地在她体内注入精液
+					ENDSELECT
+					CALL FUCK_GANGBANG(対象, GET_SPERM_ID("巨大カエル"), @"蝦蟇蛙の\@RAND:2 ? 肉棒 # 唇\@", @"蝦蟇蛙")
+					CALL FUCK_GANGBANG(対象, GET_SPERM_ID("巨大カエル"), @"蝦蟇蛙の\@RAND:2 ? 肉棒 # 唇\@", @"蝦蟇蛙")
+				;山犬・未完成
+				CASE 3
+					SELECTCASE RAND:5
+						CASE 0
+							PRINTFORML %ANAME(対象)%以四肢着地的姿势被山犬压在身下、侵犯着
+							PRINTFORML 每当如同人的胳膊一般粗的肉棒插入最深处、子宫都会因为冲击颤抖不止
+							PRINTFORML 肉棒每次抽插都像是要把阴道壁撑破一般
+							PRINTFORMW 如此野性的交配、%ANAME(対象)%逐渐得产生了自己也是只母狗的错觉、开始发出与之相称的淫荡声音
+							PRINTFORML 山犬吼叫着向%ANAME(対象)%的最深处猛烈抽插着释放出精液、她背部用力地反躬着绝顶了
+							PRINTFORML 异常大量的精液、咕噜咕噜地不断朝着%ANAME(対象)%体内注入
+							PRINTFORML 她因为下腹部传来的快感而双眼翻白、阴道不自觉的收紧把精液一滴不漏的吞下了
+							PRINTFORMW 射精结束后山犬的肉棒依然梆硬、为了确保这个雌性能够怀孕、再次抽动着侵犯起来
+						CASE 1
+							PRINTFORML %ANAME(対象)%以一副屈服的状态被侵犯着
+							PRINTFORML 明明是被强行侵犯着的%ANAME(対象)%主动抱紧了山犬的身体、收缩腔壁夹紧肉棒刺激着
+							PRINTFORML 看着那巨大的犬牙、是被吃掉还是生下他的孩子、吓破了胆的%ANAME(対象)%选择了后者
+							PRINTFORMW 公狗雄壮的肉棒不停刺激着子宫、每一次突刺都让她双眼发黑
+							PRINTFORML 咬紧牙关勉强忍耐的%ANAME(対象)%、渐渐地从齿缝中露出快乐的呻吟
+							PRINTFORML 随后、山犬猛烈地把精液注入她的子宫内、浓稠的炙热感让%ANAME(対象)%娇喘着达到了绝顶
+							PRINTFORML 长长地射精结束后、山犬把肉棒抽了出来、她带着一脸幸福的表情瘫倒在地
+							PRINTFORMW 两只发情的狗之后又交配了好几次、努力地制造着孩子
+						CASE 2
+							PRINTFORML 长长的射精终于结束了、山犬把肉棒从%ANAME(対象)%里面拔了出来
+							PRINTFORML 从精疲力尽的%ANAME(対象)%雌穴里咕噜咕噜的喷出精液、在地面上飞溅着
+							PRINTFORML %ANAME(対象)%很受野狗的中意、在进入巢穴后就被一直不停地侵犯着
+							PRINTFORMW 肚子里注满了山犬无数次射入的大量精液、她的子宫都被染成了白浊的颜色
+							PRINTFORML 最初曾经抵抗过的%ANAME(対象)%、在山犬的激烈攻势下数次绝顶
+							PRINTFORML 第三次被射精的时候起，她就主动摇摆起腰，像母狗一样下流地要种子
+							PRINTFORML 气喘吁吁的躺倒在蒂上、%ANAME(対象)%因为子宫里炙热的感觉而颤抖着绝顶了
+							PRINTFORMW 山犬像是十分体贴一般用舌头舔着她、她发出愉悦的声音打开身体迎合着他的再次插入
+						CASE 3
+							PRINTFORML 深夜、从昏暗的洞穴中传来雌性的娇喘声
+							PRINTFORML 被抓回巢穴的%ANAME(対象)%早就被山犬侵犯了、至今已经被数次注入了种子
+							PRINTFORML 比人类大得多的肉棒、让最初只能痛苦呻的%ANAME(対象)%彻底被征服了
+							PRINTFORMW 如今她主动扭动着腰、把肉棒一直吞没到根部、沉迷于梦幻般的快感中
+							PRINTFORML 不久在山犬再次射精的刺激下、身体用力向后仰着、发出大声的娇喘绝顶了
+							PRINTFORML 每当深深刺穿的肉棒颤抖着吐出种子时、%ANAME(対象)%也会随着痉挛
+							PRINTFORML 先前射进去的精液被肉棒和蜜穴结合的位置挤了出来、发出了下流的声音
+							PRINTFORMW %ANAME(対象)%已经忘记了人类的尊严，变成了山犬的妻子，完全被调教成了一个一心渴望被侵犯赋种的雌性
+						CASE 4
+							PRINTFORML 山犬压在%ANAME(対象)%身上激烈的扭动着腰
+							PRINTFORML 子宫不断被激烈的冲击着、%ANAME(対象)%喘着粗气、口水都流出来了
+							PRINTFORML 一开始因为恐怖而呻吟的%ANAME(対象)%、如今已经完全没有羞耻心了
+							PRINTFORMW 山犬的白浊精液强烈地冲刷着子宫壁、%ANAME(対象)%喜悦的大叫着绝顶了
+							PRINTFORML 大量的精液把%ANAME(対象)%下腹部顶的膨胀起来、子宮因溺水般的快感而刺痛着
+							PRINTFORML 山犬的射精结束后、完全变成了母狗%ANAME(対象)%扭动着自己的腰身索求着更多的快乐
+							PRINTFORML 十分高兴的山犬为了确保这个棒极了的雌性受精、肉棒再一次硬了起来
+							PRINTFORMW 看到这幅样子%ANAME(対象)%红着脸亲吻着他肉棒的龟头、顺从地打开了自己的身体
+					ENDSELECT
+					CALL FUCK_BEAST(対象, GET_SPERM_ID("犬"), @"山犬の\@RAND:2 ? 肉棒 # 唇\@", @"山犬")
+					CALL FUCK_BEAST(対象, GET_SPERM_ID("犬"), @"山犬の\@RAND:2 ? 肉棒 # 唇\@", @"山犬")
+				;死霊術師
+				CASE 4
+					SELECTCASE RAND:5
+						CASE 0
+							PRINTFORML %ANAME(対象)%被一大群僵尸侵犯着
+							PRINTFORML 由于腐臭和恐惧%ANAME(対象)%不停哭喊着
+							PRINTFORML 僵尸们完全服从着让眼前雌性怀孕的本能、用肉棒在腔内抽插着、不停注入精液
+							PRINTFORML 开始腐烂成红黑色的肉棒，吐出的精液也散发着污泥般的恶臭
+							PRINTFORMW 那样的恶臭液体已经无数次注入了%ANAME(対象)%的体内、她疯了似的想要逃走
+							PRINTFORML 但是他们没有慈悲之心，越发狂暴起来，更加激烈地侵犯着
+							PRINTFORML 僵尸的巨根在阴道里抽插着、她无可奈何的绝顶了、再び精を放たれる
+							PRINTFORMW 被他们不知疲惫地连夜侵犯着%ANAME(対象)%、最後笑得像坏掉了一样
+						CASE 1
+							PRINTFORML %ANAME(対象)%被小孩样子的尸鬼们按倒、侵犯着
+							PRINTFORML 他们“妈妈、妈妈”的叫着、在%ANAME(対象)%的体内不停用肉棒抽插着
+							PRINTFORML 幼年夭折的他们只有一个愿望、那就是回到母亲体内重生
+							PRINTFORMW 但是这些无关的%ANAME(対象)%却被侵犯的、因为过度的恐惧疯了一般的抵抗着
+							PRINTFORML 但是虽说是小孩，但僵尸的力量却非常之强，被压得紧紧住，无法逃脱
+							PRINTFORML 从腐烂的肉棒上喷射出大量腐臭的精液、%ANAME(対象)%因为下腹部的炙热感而痉挛了
+							PRINTFORMW 尸鬼们继续侵犯着失魂落魄的%ANAME(対象)%、整整一夜过后、她的肚子被精液填满鼓了起来
+						CASE 2
+							PRINTFORML 食尸鬼巨大的肉棒、在%ANAME(対象)%的子宮内射出大量精液
+							PRINTFORML 子宫里直接感受到了与人类不同的热度、她两眼上翻发出娇喘声、身体痉挛着绝顶了
+							PRINTFORML 死霊術師把抓来的%ANAME(対象)%当做了食尸鬼精液受精的试验品
+							PRINTFORMW 被无休止地给予的快乐的%ANAME(対象)%快要崩坏了、完全被食尸鬼的肉棒征服了
+							PRINTFORML 起初因为厌恶着食尸鬼的腐烂肉棒而不停哭喊的%ANAME(対象)%
+							PRINTFORML 不断被不知疲倦的喰种所侵犯，心和身体都被驯服了
+							PRINTFORML 当她沉浸在子宫中炙热的感觉里时、食尸鬼再次开始激烈的抽插
+							PRINTFORMW 之后食尸鬼继续凭着本能继续朝%ANAME(対象)%体内注入种子、她十分顺从地接受着
+						CASE 3
+							PRINTFORML 死灵术师把%ANAME(対象)%扔进了僵尸群中
+							PRINTFORML 僵尸们围住%ANAME(対象)%、撕裂了她的衣服、粗暴地责弄着她的肌肤
+							PRINTFORML 虽然%ANAME(対象)%在抵抗着、但还是被无数的手压住，秘所被露了出来
+							PRINTFORMW 被勃起的腐烂肉棒菇滋菇滋地操着、%ANAME(対象)%由于疼痛和厌恶感发出了惨叫
+							PRINTFORML 每当僵尸腰部抽插一次、阴道里就传来恶心的触感、%ANAME(対象)%流着泪拼命想要逃跑
+							PRINTFORML 但是只凭本能行动的他们不可能有慈悲心、继续无情的注入僵尸的白浊精液
+							PRINTFORML %ANAME(対象)%因为下腹部扩散的热度而休克了，但是没有喘息的工夫，下一个僵尸马又上入她身体
+							PRINTFORMW 之后全身的肉穴都被僵尸们沾污了、%ANAME(対象)%的表情也变成了高潮的阿黑颜
+						CASE 4
+							PRINTFORML 被无数尸鬼侵犯着的%ANAME(対象)%在地上咕噜咕噜地打着滚
+							PRINTFORML %ANAME(対象)%的雌穴里垂落出大量的精液、啪可啪可的一开一合
+							PRINTFORML 她因为自己已经被僵尸注入精液这个事实而呆呆地嘟囔着什么
+							PRINTFORML 看着这样的%ANAME(対象)%、死霊術師又把别的僵尸带来了
+							PRINTFORMW 她被僵尸们的样子吓了一跳、他们的腿间悬挂着像触手般弯弯曲曲的肉棒
+							PRINTFORML 死灵术师笑着说下次让我试一试这家伙的性能、就把僵尸扔到了面部抽搐的%ANAME(対象)%身边
+							PRINTFORML %ANAME(対象)%被奇形怪状的肉棒吓得直退、然而却毫无用处、马上就被僵尸们围住了
+							PRINTFORML 弯曲的肉棒深深插入%ANAME(対象)%的膣内、每一次摩擦都让她的阴道内产生超越人类的快感、她的小穴都要麻木了
+							PRINTFORMW %ANAME(対象)%无法抵抗，厌恶感和快乐混在一起，一直被异形肉棒侵犯着
+					ENDSELECT
+					CALL FUCK_GANGBANG(対象, GET_SPERM_ID("屍鬼"), @"屍鬼の\@RAND:2 ? 肉棒 # 唇\@", @"屍鬼")
+					CALL FUCK_GANGBANG(対象, GET_SPERM_ID("屍鬼"), @"屍鬼の\@RAND:2 ? 肉棒 # 唇\@", @"屍鬼")
+				;暴れ鬼
+				CASE 5
+					SELECTCASE RAND:5
+						CASE 0
+							PRINTFORML %ANAME(対象)%被剥下衣服、双腿大开地被抱了起来
+							PRINTFORML 恶鬼股间挺立着的巨大肉棒、在%ANAME(対象)%的秘裂上摩擦着
+							PRINTFORML 那么大的东西进不来的、%ANAME(対象)%一边哭着一边哀求道
+							PRINTFORML 恶鬼用肉棒的头部顶住她的小穴、腰部一挺就直接把肉棒插了进去
+							PRINTFORMW 超规格的冲击感让%ANAME(対象)%发出尖叫、挺直了身体不停痉挛着
+							PRINTFORML 鬼每一次摆动腰部、腹部波噗！波噗！的撞击感都让%ANAME(対象)%发出痛苦的尖叫
+							PRINTFORML 他更加猛烈的挺腰抽插、那个凶恶的肉棒在%ANAME(対象)%的子宮内进进出出
+							PRINTFORML 已经无力叫喊的%ANAME(対象)%腔道剧烈的痉挛、在这种刺激下恶鬼的肉棒释放出了浓厚的精液
+							PRINTFORMW 感受着下腹部凶恶的热量、%ANAME(対象)%尝到了全身痉挛得几乎昏迷的绝顶
+						CASE 1
+							PRINTFORML 被抓到的%ANAME(対象)%被锁链捆住、恶鬼把她当做玩物一样侵犯了
+							PRINTFORML 在人类无法相比的巨大肉棒的抽插下数次昏迷过去
+							PRINTFORML 但每次又因为更加冲击性的快感、被强行唤醒过来
+							PRINTFORML 每一次撞击让%ANAME(対象)%的脑袋都被震动了
+							PRINTFORMW 在这种刺激下子宫本能的下降、索求着雄性种子的感觉
+							PRINTFORML 就这样%ANAME(対象)%连续痉挛着绝顶了、用力夹住了鬼的肉棒
+							PRINTFORML 恶鬼发出低沉的吼叫声、用力把龟头顶进了她的子宫内
+							PRINTFORMW 然后把强劲的浊流直接射进胎内、%ANAME(対象)%感受到了雌性最高的喜悦
+						CASE 2
+							PRINTFORML %ANAME(対象)%跪在恶鬼的胯下用嘴巴和舌头侍奉着肉棒
+							PRINTFORML 从他的股间流淌出粘稠的白浊液，在脚边形成了白浊的水洼
+							PRINTFORML 鬼肉棒已经射精数次但是依然十分坚挺、%ANAME(対象)%都无法一口整根吞下
+							PRINTFORMW 但是已经在巨根的攻势下屈服了的%ANAME(対象)%、为了不被弄疼而拼命侍奉着
+							PRINTFORML 满足于侍奉的鬼低声吼叫着，肉棒更加凶恶地膨胀起来、看到这种样子%ANAME(対象)%的脸颊都羞红了
+							PRINTFORML 鬼抱起%ANAME(対象)%、把肉棒顶在秘裂上、她虽然紧致的身体僵硬、却还是选择任由摆布
+							PRINTFORML 鬼和刚才不同、因为十分重视%ANAME(対象)%而变得温和了一些
+							PRINTFORMW 昏暗的洞窟中、再次传来激烈的肉体交合声与%ANAME(対象)%的娇喘
+						CASE 3
+							PRINTFORML 鬼的窝里响起了%ANAME(対象)%的娇喘声和肉体撞击在一起的声音
+							PRINTFORML 她带着副放荡的表情、一边被侵犯着一边积极的扭动着自己的身体
+							PRINTFORML 一开始%ANAME(対象)%想要找机会逃走
+							PRINTFORMW 但是恶鬼肉棒带来的余韵、和他娴熟的技巧把这种念头完全吹走了
+							PRINTFORML 就像恋人一样温柔地被爱抚、身心都要融化了的%ANAME(対象)%的蜜穴连恶鬼巨大的肉棒都能轻易接受
+							PRINTFORML 无数次的抽插下、阴道已经变成了恶鬼肉棒的样子
+							PRINTFORML 随后%ANAME(対象)%娇滴滴地缠绵在他的身上、子宫里也被注入了他的种子
+							PRINTFORMW 等到%ANAME(対象)%回过神来的时候，已经被恶鬼射出了几十次精液，全身都浸透了鬼的臭味
+						CASE 4
+							PRINTFORML %ANAME(対象)%被恶鬼威胁着、被迫在他身上扭动着腰
+							PRINTFORML 十分痛苦的%ANAME(対象)%拼命扭动着腰、阴道里插着粗大到只能没入一般的肉棒
+							PRINTFORML 鬼不满地哼哼着、双手抓住%ANAME(対象)%的腰、用力按下去、把肉棒强行全部插入她的体内
+							PRINTFORMW 巨大的冲击让%ANAME(対象)%的背部用力的向后仰去、上气不接下气的痉挛着
+							PRINTFORML 当鬼想再挪动腰部时、%ANAME(対象)%流着泪哀求让她自己来动
+							PRINTFORML %ANAME(対象)%一边颤抖着身体、一边扭动着腰，忍受着子宫被摧毁般的冲击，拼命地侍奉着。
+							PRINTFORML 强烈的压迫感不停挤压着腔肉、喘气声逐渐代替了呻吟
+							PRINTFORMW 不久之后、鬼灼热的精液被射入子宫、%ANAME(対象)%满脸通红的绝顶了
+					ENDSELECT
+					CALL FUCK_RAPE(対象, GET_SPERM_ID("鬼"), @"鬼の\@RAND:2 ? 肉棒 # 唇\@", @"鬼")
+					CALL FUCK_RAPE(対象, GET_SPERM_ID("鬼"), @"鬼の\@RAND:2 ? 肉棒 # 唇\@", @"鬼")
+			ENDSELECT
+			PRINT 被狠狠地凌辱了之后、
+		ENDIF
+		PRINTFORML %ANAME(対象)%拖着破破烂烂的身体总算逃了回去
+		COOL_TIME = RAND(2, 3)
+		CALL ADD_COOLTIME(対象, COOL_TIME)
+		RESETCOLOR
+	ENDIF
+ENDIF
+RETURN 1

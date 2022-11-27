@@ -1,0 +1,286 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_0_PERSONAL_43_EXIST
+RETURN 1
+
+@SKILL_0_PERSONAL_43_CANT_LEARN_FROM_SHOP
+@SKILL_0_PERSONAL_43_CANT_TELL
+
+@SKILL_0_PERSONAL_43_NAME
+RESULTS = 强奸魔
+
+;レベルは1-5まで
+@SKILL_0_PERSONAL_43_LEVEL
+RETURN 5
+
+;対象選択
+@SKILL_0_PERSONAL_43_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+;0-敌方处女
+;1-敌方非处女
+;2-我方处女
+;3-我方非处女
+#DIM 目标, 4, 5
+#DIM 候选目标数
+#DIM 对象
+対象側 = !発動側
+VARSET 目标:0:0, 0
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
+    对象 = BATTLE_COMMANDER:対象側:LOCAL
+    IF 对象 > 0 && IS_FEMALE(对象)
+        IF VIRGIN(对象)
+            目标:0:(目标:0:4) = LOCAL
+            目标:0:4 ++
+        ELSE
+            目标:1:(目标:1:4) = LOCAL
+            目标:1:4 ++
+        ENDIF
+    ENDIF
+NEXT
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:発動側
+    对象 = BATTLE_COMMANDER:発動側:LOCAL
+    IF LOCAL:1 > 0 && IS_FEMALE(对象)
+        IF VIRGIN(对象)
+            目标:2:(目标:2:4) = LOCAL
+            目标:2:4 ++
+        ELSE
+            目标:3:(目标:3:4) = LOCAL
+            目标:3:4 ++
+        ENDIF
+    ENDIF
+NEXT
+候选目标数 = 目标:0:4 + 目标:1:4 + 目标:2:4 + 目标:3:4
+FOR LOCAL, 0, 4
+    IF 目标:LOCAL:4 && RAND:2
+        COMBAT_SKILL_TARGET = LOCAL * 10 + 目标:LOCAL:(RAND(目标:LOCAL:4))
+        RETURN 1
+    ELSE
+        候选目标数 -= 目标:LOCAL:4
+        IF 候选目标数 <= 0
+            IF 目标:LOCAL:4
+                COMBAT_SKILL_TARGET = LOCAL * 10 + 目标:LOCAL:(RAND(目标:LOCAL:4))
+                RETURN 1
+            ENDIF
+            BREAK
+        ENDIF
+    ENDIF
+NEXT
+RETURN 0
+
+;発動判定
+@SKILL_0_PERSONAL_43_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 人员判定 = 0
+#DIM 性技判定
+対象側 = !発動側
+SIF BATTLE_COMMANDER_NUM:対象側 == 0
+    RETURN 0
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
+    LOCAL:1 = BATTLE_COMMANDER:対象側:LOCAL
+    SIF LOCAL:1 > 0 && IS_FEMALE(LOCAL:1)
+        人员判定 ++
+NEXT
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:発動側
+    LOCAL:1 = BATTLE_COMMANDER:発動側:LOCAL
+    SIF LOCAL:1 > 0 && IS_FEMALE(LOCAL:1)
+        人员判定 ++
+NEXT
+RETURN 発動者 == MASTER && HAS_PENIS(MASTER) && 人员判定
+
+;発動テキストをオーバライドしたいときに。
+;「誰それのスキル発動！　○○した！」の「○○した！」の部分を実装したい場合は、
+;これじゃなくてINVOKEで書けばいいです。
+;@SKILL_0_PERSONAL_0_INVOKE_TEXT(発動者, スキル, ジャンル)
+;#DIM 発動者
+;#DIM スキル
+;#DIMS ジャンル
+
+;効果をここに記述
+@SKILL_0_PERSONAL_43_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 阵营
+#DIM 位置
+#DIM 目标
+#DIM 破处判定
+#DIM 兵数
+#DIM 性技判定
+対象側 = !発動側
+PRINTFORMW %ANAME(MASTER)%突然脱下了裤子！
+IF GROUPMATCH(COMBAT_SKILL_TARGET / 10, 0, 1)
+    阵营 = 対象側
+ELSE
+    阵营 = 発動側
+ENDIF
+位置 = (COMBAT_SKILL_TARGET % 10)
+破处判定 = !((COMBAT_SKILL_TARGET / 10) % 2)
+目标 = BATTLE_COMMANDER:阵营:位置
+PRINTFORMW 正当双方都在疑惑的时候，%ANAME(MASTER)%突然冲向了%ANAME(目标)%！
+IF BATTLE_SUMMONED_CHARA:阵营:位置
+    PRINTFORML 但%ANAME(目标)%快人一步，早就逃走了！
+    CALL BATTLE_COMMANDER_WITHDRAWAL(阵营, 位置)
+    RETURN
+ENDIF
+IF 阵营 == 発動側
+    PRINTFORML 和%ANAME(MASTER)%同一阵营的%ANAME(目标)%被抱住了！
+    PRINTFORMW %ANAME(MASTER)%脱掉并没收了%ANAME(目标)%的内裤，从背后用那%BAR_NAME(MASTER)%直接刺进了%ANAME(目标)%的小穴！
+    IF 破处判定
+        PRINTFORMW 众目睽睽之下，作为处女证明的破瓜血从结合部流了下来……
+        IF IS_LOVER(目标) && ABL:目标:性知識
+            PRINTFORML %ANAME(目标)%虽然之前时常幻想亲自将自己的处女献给%ANAME(MASTER)%
+            PRINTFORMW 但现在的情况已经超出了%ANAME(目标)%的一切设想
+        ELSEIF IS_SLAVE(目标) && ABL:目标:性知識
+            PRINTFORML %ANAME(目标)%虽然知道自己的处女迟早也会被%ANAME(MASTER)%收下
+            PRINTFORMW 但在这个场合被夺走处女还是吓得%ANAME(目标)%颤抖着发出了惨叫声
+        ELSE
+            PRINTFORML %ANAME(目标)%被突如其来的痛楚直接吓得脸部惨白
+            PRINTFORMW 在两军阵前被直接破处的事实让%ANAME(目标)%直接大哭了起来
+        ENDIF
+    ELSE
+        IF IS_LOVER(目标) && ABL:目标:性知識
+            PRINTFORML 等%ANAME(目标)%认识到自己的现状的时候，%ANAME(MASTER)%已经插进了最深处
+            PRINTFORMW 但%ANAME(目标)%现在除了咒骂%ANAME(MASTER)%不会看场合以外已经做不了什么了
+        ELSEIF IS_SLAVE(目标) && ABL:目标:性知識
+            PRINTFORML %ANAME(目标)%想要努力理解%ANAME(MASTER)%的突然袭击
+            PRINTFORMW 但%ANAME(目标)%还是抑制不住发出了叫声
+        ELSE
+            PRINTFORML %ANAME(目标)%被突如其来的袭击直接吓得脸部惨白
+            PRINTFORMW 在两军阵前被直接侵犯的事实让%ANAME(目标)%直接大哭了起来
+        ENDIF
+    ENDIF
+ELSE
+    IF ABL:MASTER:武闘 <= ABL:目标:武闘 / 2 || ABL:MASTER:防衛 <= ABL:目标:防衛 / 2 || ABL:MASTER:知略 <= ABL:目标:知略 / 2
+        PRINTFORML 结果连%ANAME(目标)%的驾前都到不了就被击倒了……
+        PRINTFORMW 之后%ANAME(MASTER)%一站起来就跑到不知道哪里去了
+        CALL FORCE_FREE(MASTER)
+        CALL BATTLE_COMMANDER_WITHDRAWAL(発動側, 発動番号)
+        CALL ADD_COOLTIME(MASTER, 5)
+        RETURN
+    ELSE
+        PRINTFORMW %ANAME(MASTER)%突进到了%ANAME(目标)%面前！
+        IF ABL:MASTER:武闘 + ABL:MASTER:防衛 + ABL:MASTER:知略 / 2 + ABL:MASTER:妖術 < ABL:目标:武闘 + ABL:目标:防衛 + ABL:目标:知略 / 2 + ABL:目标:妖術
+            PRINTFORML 然而%ANAME(MASTER)%和%ANAME(目标)%僵持不下……
+            PRINTFORMW 最终%ANAME(MASTER)%被打出了战场……
+            CALL BATTLE_KNOCKOUT(発動側, 発動番号)
+            RETURN
+        ENDIF
+        PRINTFORML %ANAME(目标)%还没反应过来，就被%ANAME(MASTER)%掳到了身边……
+        PRINTFORML 脱掉并没收了%ANAME(目标)%的内裤之后，%ANAME(MASTER)%二话不说，从背后用那%BAR_NAME(MASTER)%直接贯穿了%ANAME(目标)%的小穴！
+        IF 破处判定
+            PRINTFORMW 众目睽睽之下，作为处女证明的破瓜血从结合部流了下来……
+            IF IS_LOVER(目标) && ABL:目标:性知識
+                PRINTFORML %ANAME(目标)%没想到自己的处女会以这样的方式献给%ANAME(MASTER)%
+                PRINTFORMW 比起破处的痛苦，%ANAME(目标)%感到的更多是诧异
+            ELSEIF IS_SLAVE(目标) && ABL:目标:性知識
+                PRINTFORML %ANAME(目标)%知道自己作为%ANAME(MASTER)%的敌人，她的处女迟早也会被%ANAME(MASTER)%强行夺走
+                PRINTFORMW 但对%ANAME(目标)%来说现在显然太早了……
+            ELSE
+                PRINTFORML %ANAME(目标)%被突如其来的痛楚直接吓得脸部惨白
+                PRINTFORMW 在两军阵前被敌将直接破处的事实让%ANAME(目标)%直接大哭了起来
+            ENDIF
+        ELSE
+            IF IS_LOVER(目标) && ABL:目标:性知識
+                PRINTFORML %ANAME(目标)%没想到自己会这样与%ANAME(MASTER)%“重逢”
+                PRINTFORMW 但%ANAME(目标)%现在除了暗骂%ANAME(MASTER)%不会看场合以外已经做不了什么了
+            ELSEIF IS_SLAVE(目标) && ABL:目标:性知識
+                PRINTFORML %ANAME(目标)%想要努力忍受%ANAME(MASTER)%的一切行为
+                PRINTFORMW 但%ANAME(目标)%还是抑制不住发出了叫声
+            ELSE
+                PRINTFORML %ANAME(目标)%被突如其来的袭击直接吓得脸部惨白
+                PRINTFORMW 在两军阵前被敌将直接侵犯的事实让%ANAME(目标)%直接大哭了起来
+            ENDIF
+        ENDIF
+    ENDIF
+ENDIF
+PRINTFORML %ANAME(MASTER)%无视%ANAME(目标)%的反抗，剥光了%ANAME(目标)%的衣服
+PRINTFORMW 不管是%ANAME(MASTER)%方还是敌方的士兵，看到%ANAME(MASTER)%公开强奸%ANAME(目标)%的盛况无不惊恐万分
+性技判定 = ABL:MASTER:性技 + ABL:MASTER:性交 - (ABL:目标:欲望 + ABL:目标:性交 + RAND:5)
+CFLAG:目标:好感度 -= MAX(2000 + (ABL:MASTER:性交 - ABL:目标:性交 - ABL:目标:欲望) * 100, 1000) - ABL:MASTER:性技 * 200
+IF 性技判定 > 0
+    PRINTFORML 持续的凌辱之后，先前\@破处判定 ? 还是处女 # 还在反抗\@的%ANAME(目标)%已经忍受不住快感而发出了娇喘
+    PRINTFORML 渐渐的，%ANAME(目标)%便只能跟着%ANAME(MASTER)%的节奏口齿不清的大声浪叫着
+    PRINTFORMW 沉浸在多次绝顶的余韵之中，%ANAME(目标)%连反抗%ANAME(MASTER)%的意愿都随之消失……
+    CFLAG:目标:従属度 += ABL:MASTER:性技 * 200 + (ABL:MASTER:性交 - ABL:目标:性交 - ABL:目标:欲望) * 100
+    CFLAG:目标:依存度 += ABL:MASTER:性技 * 200 + (ABL:MASTER:性交 - ABL:目标:性交 - ABL:目标:欲望) * 100
+ELSE
+    PRINTFORML %ANAME(目标)%一边求救一边用力挣扎
+    PRINTFORML %ANAME(MASTER)%见状，便用更加激烈的运动进攻着子宫口
+    PRINTFORMW 效果立竿见影，在%ANAME(MASTER)%射入精液之后%ANAME(目标)%便已经无力反抗……
+ENDIF
+PRINTFORML %ANAME(MASTER)%拿出绳子，将%ANAME(目标)%的四肢都固定在%ANAME(MASTER)%背后
+PRINTFORML 等到%ANAME(目标)%恢复意识的时候，她已经被赤裸着牢牢固定在%ANAME(MASTER)%正面
+PRINTFORMW 不仅如此，从吐着\@破处判定 ? 红白混杂 # 白色\@的泡沫的结合部处可以看到%ANAME(目标)%的膣穴把%ANAME(MASTER)%的肉棒吞进了最深处
+PRINTFORMW %ANAME(MASTER)%保持这样重新让自己回到了马背上，过程中的颠簸让%ANAME(目标)%再一次发出了淫叫……
+PRINTFORMW 经过这么一折腾，%ANAME(目标)%已经彻底成为了%ANAME(MASTER)%公开玩弄的战利品……
+
+CALL FUCK(MASTER, "欲望, 性技, 性交, 加虐, Ｃ, 射精, 露出, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(目标)%的小穴", "在阵前的突然強姦")
+CALL FUCK(目标, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｖ拡張, 露出, 緊縛, 被虐, 苦痛快楽, Ｖ性交", "処女喪失, 膣内射精", GET_ID(MASTER), "", ANAME(MASTER), "", "在阵前的突然強姦")
+
+CALL COLOR_PRINTW(@"%ANAME(目标)%的面板被%ANAME(MASTER)%夺取了！", カラー_警告)
+BATTLE_武闘:発動側:発動番号 += BATTLE_武闘:阵营:位置 * MAX(5 + 性技判定, 0) / 10
+BATTLE_防衛:発動側:発動番号 += BATTLE_防衛:阵营:位置 * MAX(5 + 性技判定, 0) / 10
+BATTLE_知略:発動側:発動番号 += BATTLE_知略:阵营:位置 * MAX(5 + 性技判定, 0) / 10
+BATTLE_政治:発動側:発動番号 += BATTLE_政治:阵营:位置 * MAX(5 + 性技判定, 0) / 10
+BATTLE_妖術:発動側:発動番号 += BATTLE_妖術:阵营:位置 * MAX(5 + 性技判定, 0) / 10
+BATTLE_料理:発動側:発動番号 += BATTLE_料理:阵营:位置 * MAX(5 + 性技判定, 0) / 10
+BATTLE_歌唱:発動側:発動番号 += BATTLE_歌唱:阵营:位置 * MAX(5 + 性技判定, 0) / 10
+BATTLE_武闘パワー:発動側:発動番号 += BATTLE_武闘パワー:阵营:位置 * MAX(5 + 性技判定, 0) / 10
+BATTLE_防衛パワー:発動側:発動番号 += BATTLE_防衛パワー:阵营:位置 * MAX(5 + 性技判定, 0) / 10
+BATTLE_知略パワー:発動側:発動番号 += BATTLE_知略パワー:阵营:位置 * MAX(5 + 性技判定, 0) / 10
+BATTLE_妖術パワー:発動側:発動番号 += BATTLE_妖術パワー:阵营:位置 * MAX(5 + 性技判定, 0) / 10
+BATTLE_歌唱パワー:発動側:発動番号 += BATTLE_歌唱パワー:阵营:位置 * MAX(5 + 性技判定, 0) / 10
+BATTLE_料理パワー:発動側:発動番号 += BATTLE_料理パワー:阵营:位置 * MAX(5 + 性技判定, 0) / 10
+CALL BATTLE_COMMANDER_WITHDRAWAL(阵营, 位置)
+IF 阵营 == 対象側
+    CALL COLOR_PRINTW(@"%ANAME(目标)%这样的话已经和被俘虏无异了……", カラー_警告)
+    CALL CAPTURE(目标, CFLAG:MASTER:所属)
+ELSE
+    CALL COLOR_PRINTW(@"恐怕%ANAME(目标)%在战后得回去疗养一段时间……", カラー_警告)
+    CALL FORCE_FREE(目标)
+    CALL ADD_COOLTIME(目标, 5)
+ENDIF
+
+
+@SKILL_0_PERSONAL_43_EXPLANATION
+;万军丛中直捣上将子宫
+RESULTS = 随机强奸阵地双方一名女性将领，以敌方处女将领为最优先（实际发动概率受欲望影响）
+
+@SKILL_0_PERSONAL_43_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN MIN(100 * ABL:MASTER:欲望, 1000)

@@ -1,0 +1,62 @@
+﻿;-------------------------------------------------
+;保護を求める
+;-------------------------------------------------
+@DIPLOMACY_Protectorate(相手勢力)
+#DIM 勢力
+#DIM 相手勢力
+#DIM 君主
+#DIM 相手君主
+#DIM 相手外交計画
+#DIM 判定値
+
+勢力 = CFLAG:MASTER:所属
+君主 = GET_COUNTRY_BOSS(CFLAG:MASTER:所属)
+相手君主 = GET_COUNTRY_BOSS(相手勢力)
+
+相手外交計画 = CHECK_AI_DIPLOMACY_PLAN(相手勢力, CFLAG:MASTER:所属)
+
+;相手の外交計画内ならば、無条件で成立
+IF 相手外交計画 == AI_外交計画_同盟
+	PRINTFORMW %ANAME(MASTER)%请求保护，%ANAME(LOCAL:5)%爽快地答应了…
+	GOTO SUCCESS
+ENDIF
+
+判定値 = (REL_LIKE:相手君主:君主 - REL_HATE:相手君主:君主) * 100 / 600
+
+IF CHECK_BUILDING_FUNCTION_SELECT(-1,勢力,建造物_外交部) > 0
+	判定値 += RESULT:1
+	BUILDING_TEXT = BUILDING_TEXT_外交部(勢力)
+ENDIF
+SELECTCASE 判定値
+	CASE IS >= 50
+		PRINTFORMW %ANAME(君主)%请求保护，%ANAME(相手君主)%爽快地答应了…
+	CASE 35 TO 49
+		CALL DIPLOMACY_REQUESTED(相手勢力)
+		;要求できるものなし
+		IF RESULT == -1
+			IF INRANGE(判定値, 40, 49)
+				PRINTFORMW %ANAME(君主)%请求保护，%ANAME(相手君主)%虽然苦恼但是还是答应了…
+			ELSE
+				PRINTFORMW %ANAME(君主)%请求保护，但是%ANAME(相手君主)%苦恼地拒绝了…
+				RETURN
+			ENDIF
+		ELSEIF RESULT == 0
+			RETURN
+		ENDIF
+	CASEELSE
+		PRINTFORMW %ANAME(君主)%请求保护，%ANAME(相手君主)%拒绝了…
+		SIF !TMP_COUNTRY_IS_NEIBORING:勢力:相手勢力
+			PRINTFORMW 领地不相邻的情况下，从属比正常情况下更难…
+		RETURN
+ENDSELECT
+
+$SUCCESS
+
+CALL INIT_Colony(勢力, 相手勢力)
+
+PRINTL
+SETCOLOR カラー_注意
+PRINTFORMW 成为了%ANAME(相手君主)%的殖民地
+RESETCOLOR
+
+

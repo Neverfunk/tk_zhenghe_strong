@@ -1,0 +1,215 @@
+﻿;-------------------------------------------------
+;外交併合(开始)
+;-------------------------------------------------
+@DIPLOMACY_PERSONAL_UNION(相手勢力)
+#DIM 勢力
+#DIM 相手勢力
+#DIM 君主
+#DIM 相手君主
+#DIM 相手外交計画
+#DIM 判定値
+#DIM 期間
+#DIM スコア, 3
+勢力 = CFLAG:MASTER:所属
+
+IF CHECK_COUNTRY_RELATION_F(勢力, 相手勢力) != 3
+	PRINTFORMW 外交併合提案、只能在現在同盟中的勢力間提出
+	RETURN 0
+ENDIF
+
+IF IS_SP_COUNTRY(相手勢力)
+	PRINTFORMW 不可能和這樣的人合併在一起
+	RETURN 0
+ENDIF
+
+君主 = GET_COUNTRY_BOSS(CFLAG:MASTER:所属)
+相手君主 = GET_COUNTRY_BOSS(相手勢力)
+
+;勢力同士の隣接関係マップを作成
+CALL TMP_CREATE_COUNTRY_NEIBORING_MAP
+
+IF !TMP_COUNTRY_IS_NEIBORING:勢力:相手勢力
+	PRINTW 無法和不相鄰的勢力進行外交合併
+	RETURN 0
+ENDIF
+
+PRINTFORMW %ANAME(君主)%対着%ANAME(相手君主)%、発起了外交合併的提案
+
+
+VARSET スコア
+
+;条件1　自勢力に対する好意-敵意が1350以上。
+スコア:0 = (REL_LIKE:相手君主:君主 - (REL_HATE:相手君主:君主 + DIPLOMACY_HATE:勢力 * 30)) * 100 / 1350
+
+;条件2　相手が隷属しており、自勢力の経済力が相手勢力の8倍
+スコア:1 = GET_SUM_ECONOMY(勢力) * 100 / (GET_SUM_ECONOMY(相手勢力) * (8 + DIPLOMACY_HATE:勢力 / 3))
+
+SIF !TALENT:相手君主:隷属
+	スコア:1 = 0
+
+;条件3　自勢力の経済力ならびに政治力が、それぞれ相手勢力の4倍以上
+スコア:2 = GET_SUM_ECONOMY(勢力) * 100 / (GET_SUM_ECONOMY(相手勢力) * (4 + DIPLOMACY_HATE:勢力 / 3))
+スコア:2 = MIN(スコア:2, TMP_GET_POLITICS_POWER(勢力) * 100 > TMP_GET_POLITICS_POWER(相手勢力) * (4 + DIPLOMACY_HATE:勢力 / 3))
+
+IF スコア:0 < 100 && スコア:1 < 100 && スコア:2 < 100
+	PRINTFORMW 很遺憾、%ANAME(相手君主)%沒有答応我国的外交合併要求…
+	SELECTCASE スコア:0
+		CASE IS < 50
+			PRINTFORML 与要合并的势力之间的关系完全不够
+		CASE IS < 80
+			PRINTFORML 与要合并的势力之间的关系还有待提升
+		CASEELSE
+			PRINTFORML 如果我们再努力提升一点关系，他们就会同意合并了
+	ENDSELECT
+	IF TALENT:相手君主:隷属
+		PRINTFORM あるいは、
+		SELECTCASE スコア:1
+			CASE IS < 50
+				PRINTFORML 与要合并的势力之间的经济力差距完全不够
+			CASE IS < 80
+				PRINTFORML 与要合并的势力之间的经济力差距还有待提升
+			CASEELSE
+				PRINTFORML 如果我们再努力提升一点经济力，他们就会同意合并了
+		ENDSELECT
+	ENDIF
+	PRINTFORM もしくは、
+	SELECTCASE スコア:2
+		CASE IS < 50
+			PRINTFORML 我们的政治力和经济力完全不够
+		CASE IS < 80
+			PRINTFORML 我们的政治力和经济力还有待提升
+		CASEELSE
+			PRINTFORML 再稍稍增加一点经济力和政治力，他们就会同意合并了
+	ENDSELECT
+	WAIT
+	RETURN 1
+ENDIF
+
+
+PRINTFORMW 太好了！%ANAME(相手君主)%成為了我国的一部分
+RESETCOLOR
+
+;跳转信仰事件
+TRYCALL SHOP_LIFE_USERSHOP68_PERSONAL_UNION(相手勢力)
+
+;(従属国パッチ)対象勢力が従属国を所有している場合、自勢力の植民地に変更
+IF COUNTRY_Protectorate:相手勢力 == 1
+	CALL INIT_Protectorate_Asset_Purchase(相手勢力, 勢力)
+ENDIF
+
+;兵数の移動
+CALL CLEAR_ALL_UNIT(相手勢力)
+COUNTRY_SOLDIER:勢力 += COUNTRY_SOLDIER:相手勢力
+COUNTRY_SOLDIER:相手勢力 = 0
+
+;領地の接収
+PRINTL
+SETCOLOR カラー_注意
+PRINTFORML %ANAME(相手君主)%所佔領的城市変成了我国的領土
+RESETCOLOR
+FOR LOCAL:0, 0, MAX_CITY
+	IF CITY_OWNER:(LOCAL:0) == 相手勢力
+		CITY_OWNER:(LOCAL:0) = 勢力
+		PRINTFORML %GET_CITYNAME(LOCAL:0)%処在了我国的支配之下
+	ENDIF
+NEXT
+CALL TMP_BUILDING_EXIST_MAP
+WAIT
+
+PRINTL
+PRINTFORMW %ANAME(相手君主)%軍的士兵加入了我国的兵力之中
+
+;自動で登用
+IF CONFIG:303 == 0
+	;士官の組み込み
+	PRINTL
+	SETCOLOR カラー_注意
+	PRINTFORML 所属於%ANAME(相手君主)%的士官被編入了我国的士官
+	RESETCOLOR
+	FOR LOCAL:0, 0, CHARANUM
+		;SIF CFLAG:(LOCAL:0):捕虜先 == 相手勢力:0
+		;	CALL CHANGE_COUNTRY(LOCAL:0, 相手勢力, 1)
+		IF CFLAG:(LOCAL:0):所属 == 相手勢力
+			IF !CFLAG:(LOCAL:0):捕虜先 || CFLAG:(LOCAL:0):捕虜先 == CFLAG:MASTER:所属
+				CALL CHANGE_COUNTRY(LOCAL:0, CFLAG:MASTER:所属, 1)
+				PRINTFORML 登用了%ANAME(LOCAL:0)%
+			ELSE
+				CALL CHANGE_COUNTRY(LOCAL:0, CFLAG:MASTER:所属)
+				SETCOLOR カラー_シアン
+				PRINTFORML 囚禁了%ANAME(LOCAL:0)%的%ANAME(GET_COUNTRY_BOSS(CFLAG:(LOCAL:0):捕虜先))%
+				RESETCOLOR
+			ENDIF
+		ENDIF
+	NEXT
+	WAIT
+
+;自動で投獄
+ELSEIF CONFIG:303 == 1
+	;士官の組み込み
+	PRINTL
+	SETCOLOR カラー_注意
+	PRINTFORML 所属於%ANAME(相手君主)%的士官被投入了大牢
+	RESETCOLOR
+	FOR LOCAL:0, 0, CHARANUM
+		;SIF CFLAG:(LOCAL:0):捕虜先 == 相手勢力
+		;	CALL CHANGE_COUNTRY(LOCAL:0, 相手勢力, 1)
+		IF CFLAG:(LOCAL:0):所属 == 相手勢力
+			IF !CFLAG:(LOCAL:0):捕虜先 || CFLAG:(LOCAL:0):捕虜先 == CFLAG:MASTER:所属
+				CALL CHANGE_COUNTRY(LOCAL:0, 0, 1)
+				CALL CAPTURE(LOCAL:0, CFLAG:MASTER:所属)
+				PRINTFORML %ANAME(LOCAL:0)%被投入了大牢
+			ELSE
+				CALL CHANGE_COUNTRY(LOCAL:0, CFLAG:MASTER:所属)
+				SETCOLOR カラー_シアン
+				PRINTFORML 囚禁了%ANAME(LOCAL:0)%的%ANAME(GET_COUNTRY_BOSS(CFLAG:(LOCAL:0):捕虜先))%
+				RESETCOLOR
+			ENDIF
+		ENDIF
+	NEXT
+	WAIT
+
+;手動で選択
+ELSE
+	CALL DIPLOMACY_SURRENDER_SET_TREATMENT(相手勢力)
+ENDIF
+
+;相手勢力勢力の捕虜となっていたキャラの処理
+;相手勢力勢力が捕虜持ってるか
+IF CMATCH(CFLAG:捕虜先, 相手勢力)
+	PRINTL
+	PRINTFORMW 発現了被%ANAME(相手君主)%囚禁的俘虜
+	LOCAL:2 = 0
+	FOR LOCAL:0, 0, CHARANUM
+		IF CFLAG:(LOCAL:0):捕虜先 == 相手勢力
+			;自陣営の士官なら、そのまま元に戻る
+			IF CFLAG:(LOCAL:0):所属 == CFLAG:MASTER:所属
+				CALL CAPTURE(LOCAL:0, 0)
+				SETCOLOR カラー_注意
+				PRINTFORML 被%ANAME(相手君主)%勢力俘虜的%ANAME(LOCAL:0)%、復帰了我国
+				RESETCOLOR
+				LOCAL:2 = 1
+			ENDIF
+		ENDIF
+	NEXT
+	IF LOCAL:2
+		WAIT
+	ENDIF
+	FOR LOCAL:0, 0, CHARANUM
+		IF CFLAG:(LOCAL:0):捕虜先 == 相手勢力
+			;第三勢力の士官なら、TREAT_PRISONERで扱いを決定
+			CALL TREAT_PRISONER(LOCAL:0, 相手勢力, 勢力)
+		ENDIF
+	NEXT
+ENDIF
+
+
+
+;旧勢力の後始末
+CALL DESTROY_COUNTRY(相手勢力)
+;外交併合による外交印象の悪化
+DIPLOMACY_HATE:(CFLAG:MASTER:所属) += 1
+
+
+
+RETURN 1
+

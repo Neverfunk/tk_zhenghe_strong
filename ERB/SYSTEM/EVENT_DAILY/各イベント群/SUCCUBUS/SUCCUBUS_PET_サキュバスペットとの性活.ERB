@@ -1,0 +1,391 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_SUCCUBUS_PET_RATE()
+RETURN 150 + (DVAR:サキュバスのペット_主従逆転フラグ > 0) * 20
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_SUCCUBUS_PET_DECISION()
+#DIM 夢魔
+夢魔 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_サキュバス))
+;SIF 夢魔 == -1
+;	RETURN 0
+SIF CFLAG:MASTER:所属 == 夢魔
+	RETURN 0
+SIF DVAR:サキュバスとの戦い_お持ち帰りフラグ == 0
+	RETURN 0
+	
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_SUCCUBUS_PET_GENRE()
+RETURN デイリー_ジャンル_特殊勢力
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_SUCCUBUS_PET
+#DIM 夢魔
+夢魔 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_サキュバス))
+
+;サキュバス勢力が滅びたら終了
+IF 夢魔 == -1
+	PRINTFORMW 梦魇等人从幻想乡撤退了。与此同时，被带回家当宠物的梦魇也不知什么时候消失了…
+	;TranslatedMark サキュバスたちが幻想郷から撤退した。それに合わせてか、連れ帰ってペットにしていたサキュバスもまたいつの間にか姿を消していた…
+	IF DVAR:サキュバスのペット_主従逆転フラグ >= 5
+		PRINTFORML 被她榨精的生活结束了，%ANAME(MASTER)%虽然松了一口气，但另一方面也感到了寂寞
+		;TranslatedMark 彼女に精を搾り取られる生活が終わり%ANAME(MASTER)%はホッとしたが、反面どこか寂しさも感じた
+		PRINTFORMW 但是没有了也没办法。%ANAME(MASTER)%拼命压抑着因为渴求她带来的快乐而疼痛的肉体度过了夜晚……
+		;TranslatedMark しかしいなくなったものは仕方ない。%ANAME(MASTER)%は彼女がくれる快楽を求めて疼く肉体を必死に抑えながら夜を過ごした……
+	ELSE
+		PRINTFORMW 难得有了Win-Win的关系，真遗憾。%ANAME(MASTER)%想着希望有一天能再见到她，就在宽广的房间里睡着了……
+		;TranslatedMark せっかくＷｉｎ－Ｗｉｎの関係になれたのに残念だ。%ANAME(MASTER)%はいつかまた彼女に会いたいな、と思いながら広く感じる部屋で眠った……
+	ENDIF
+	DVAR:サキュバスとの戦い_お持ち帰りフラグ = 0
+	RETURN 1
+ENDIF
+
+;ペットと主従逆転した場合
+IF DVAR:サキュバスのペット_主従逆転フラグ >= 7
+	PRINTFORMW %ANAME(MASTER)%和成为主人的梦魇一起生活着…
+	;TranslatedMark %ANAME(MASTER)%は、主人となったサキュバスと共に過ごしている…
+	PRINTFORML 
+	SELECTCASE RAND:4
+		CASE 0
+			PRINTFORML 她慢慢地锁上了门，用淫靡的视线和表情看着%ANAME(MASTER)%
+			;TranslatedMark 彼女はおもむろにドアに鍵をかけ、淫靡な視線と表情で%ANAME(MASTER)%を見据える
+			PRINTFORMW 无法移开视线的%ANAME(MASTER)%，被她推倒在床上……
+			;TranslatedMark その瞳に目を逸らせない%ANAME(MASTER)%は、彼女にされるがままベッドへ押し倒された……
+		CASE 1
+			PRINTFORML 她跨上躺在床上的%ANAME(MASTER)%的脸，用六九的姿势开始吮吸%ANAME(MASTER)%的阴茎
+			;TranslatedMark 彼女はベッドで横になっていた%ANAME(MASTER)%の顔に跨り、シックスナインの体勢で%ANAME(MASTER)%のペニスをしゃぶり始めた
+			PRINTFORMW 虽然突如其来的事情让她有些动摇，但她却无法抗拒用自己的舌头去舔遍阴茎
+			;TranslatedMark いきなりのことに動揺するも、ペニスを嘗め回す彼女の舌使いに抵抗する力が入らない
+			PRINTFORML 她巧妙地活动着腰，隔着内裤用力使劲地摩擦媚肉，把%ANAME(MASTER)%的脸当做手淫的道具来获得快感
+			;TranslatedMark 彼女は腰を巧みに動かしパンツ越しの媚肉をぐいぐい擦り付けて、%ANAME(MASTER)%の顔をオナニーの道具にして快感を得ている
+			PRINTFORMW 然后她突然停止了颤抖，抬起腰看着%ANAME(MASTER)%的脸，妖艳地笑着。『继续吗？』这样问道
+			;TranslatedMark そして彼女は唐突にしゃぶるのを止め、腰を浮かせて%ANAME(MASTER)%の顔を見て、妖艶に笑いながら『続きをする？』と問いかける
+			PRINTFORMW 被梦魇浓厚的费洛蒙和阴茎的快乐所迷惑的%ANAME(MASTER)%，无法拒绝地索求着她……
+			;TranslatedMark サキュバスの濃厚なフェロモンとペニスへの快楽に脳を蕩けさせられた%ANAME(MASTER)%は、否応無しに彼女を求めた……
+		CASE 2
+			PRINTFORML %ANAME(MASTER)%从早上开始就一直被她用羽毛沙沙地爱抚着身体
+			;TranslatedMark %ANAME(MASTER)%は朝からずっと、彼女に身体をさわさわとフェザータッチで愛撫されている
+			PRINTFORMW 她温柔地绕着%ANAME(MASTER)%的脖颈、嘴唇、耳朵、腋下、乳头和股间，刺激着%ANAME(MASTER)%
+			;TranslatedMark 彼女は%ANAME(MASTER)%の首筋を、唇を、耳を、腋を、乳首を、そして股間を、優しくまとわりつきながら刺激する
+			PRINTFORML 但是，绝对不会让他达到高潮。只是一味地焦躁着，煽动和玩弄着%ANAME(MASTER)%的情欲
+			;TranslatedMark しかし、けして絶頂はさせない。ただひたすら焦らしに焦らし、%ANAME(MASTER)%の劣情を煽って弄んでいる
+			PRINTFORMW 终于%ANAME(MASTER)%无法忍耐，恳求他让她做到最后，她用嗜虐的笑容接受了……
+			;TranslatedMark やがて%ANAME(MASTER)%は我慢しきれずに、最後までイカせてほしいと懇願し、彼女はそれを嗜虐的な笑みで受け入れた……
+		CASE 3
+			PRINTFORML 对着坐在桌前的%ANAME(MASTER)%，她面对面地跨坐上去，开始了淫荡的行为
+			;TranslatedMark 机に向かっている%ANAME(MASTER)%に、彼女は対面するかのように跨って座り淫らな行為を始めた
+			PRINTFORMW 她在%ANAME(MASTER)%面前袒露胸部，用丰满的巨乳像包住一样紧紧抱住%ANAME(MASTER)%的脸
+			;TranslatedMark 彼女は%ANAME(MASTER)%の目の前で胸をはだけ、張りのある巨乳で%ANAME(MASTER)%の顔を包むように抱きしめる
+			PRINTFORML 蒸腾的甜香和柔软的乳肉夺去了%ANAME(MASTER)%的理性，血液和精气立刻在股间聚集，使阴茎仿佛要沸腾起来
+			;TranslatedMark 蒸れた甘い香りと柔らかな乳肉が%ANAME(MASTER)%の理性を奪い、たちまちに血液と精気が股間に集まりペニスをいきり立たせる
+			PRINTFORMW 感觉到自己的胯股之间使劲顶着的阴茎，她妖艳地笑着把%ANAME(MASTER)%带到了床上……
+			;TranslatedMark 自らの股間にぐいぐいと押し付けられるペニスを感じ、彼女は妖艶に笑いながら%ANAME(MASTER)%をベッドへ連れ込んだ……
+	ENDSELECT
+	PRINTFORML ･･･
+	PRINTFORMW ･･････
+	PRINTFORML 
+	SELECTCASE RAND:9
+		CASE 0
+			PRINTFORML 她把%ANAME(MASTER)%推倒在床上，激烈地摇起腰来
+			;TranslatedMark 彼女は%ANAME(MASTER)%をベッドへ押し倒して激しく腰を振りだした
+			PRINTFORML 发出了淫荡的雌性的声音，妖艳地摇晃着那梦魇独有的丰满的肉体，牢牢地吸引着%ANAME(MASTER)%的目光
+			;TranslatedMark 淫らな雌の声を響かせ、サキュバスらしい豊満な肉体を妖艶に揺らして%ANAME(MASTER)%の目を釘付けにする
+			PRINTFORML 她用力地吞下阴茎，用那巧妙的爱抚使%ANAME(MASTER)%长久地勃起
+			;TranslatedMark 彼女はペニスをみっちりと飲み込んだまま、その巧みな愛撫で%ANAME(MASTER)%をはしたなくヨガらせる
+			PRINTFORMW %ANAME(MASTER)%一直被淫乱的她责弄，不断地被她榨取精液…
+			;TranslatedMark %ANAME(MASTER)%はひたすら淫乱に責める彼女のされるがままとなり、何度も彼女に精を搾り取られることとなった…
+		CASE 1
+			PRINTFORML %ANAME(MASTER)%在她巧妙的进攻下，被快乐所吞噬
+			;TranslatedMark %ANAME(MASTER)%は彼女の巧みな攻めにされるがままになり、快楽に飲まれている
+			PRINTFORML 在以对面座位的姿势被紧紧抱住，阴茎被慢慢地给予了快感，%ANAME(MASTER)%把脸埋在她的胸口里，不停颤抖
+			;TranslatedMark 対面座位でがっちりと抱きしめられじっくりとペニスに快感を与えられて、%ANAME(MASTER)%は彼女の胸に顔を埋めて身を震わせる
+			PRINTFORML 她猥亵地摆动着腰，魔性的肉壶咕噜咕噜地玩弄阴茎。那个技巧使%ANAME(MASTER)%好几次发出了娇喘
+			;TranslatedMark 彼女が卑猥に腰をくねらすと魔性の肉壷がペニスをぐちゅぐちゅと弄ぶ。その技巧に%ANAME(MASTER)%は何度も喘がされてしまう
+			PRINTFORMW %ANAME(MASTER)%已经忘记了主人的尊严，不加修饰地被梦魇玩弄了好几次，被榨取着精液…
+			;TranslatedMark %ANAME(MASTER)%はもはや主人としての尊厳も忘れ、あられもなくおねだりしてサキュバスに何度もイかされ、精を搾り取られた…
+		CASE 2
+			PRINTFORML 她用骑乘位的位置跨坐在%ANAME(MASTER)%的身上，巧妙地上下摆动腰部同时像是要覆盖住似的用舌头在身体上游走
+			;TranslatedMark 彼女は%ANAME(MASTER)%に騎乗位で跨り、覆いかぶさるように舌を絡ませながら巧みに腰を上下させる
+			PRINTFORMW 被刻上了上下关系的阴茎不可能对抗她的雌穴，一跳一跳隆起的阴茎反而使她感到愉悦
+			;TranslatedMark 上下関係を刻まれたペニスが彼女の雌穴に抗えるはずも無く、ビクビクと隆起して彼女を悦ばせている
+			PRINTFORML %ANAME(MASTER)%的身体屈服于梦魇给予的快乐，无意识地抓住她的腰不放
+			;TranslatedMark %ANAME(MASTER)%のその体はサキュバスが与える快楽に屈しており、無意識に彼女の腰を掴んで離せないでいる
+			PRINTFORMW 她为了榨取精力而使阴道肉脉动并进行冲刺。对被榨精的抵抗和恐怖一点也没有…
+			;TranslatedMark 彼女が精を搾り取るべく膣肉を脈動させてスパートを駆ける。性を吸われることへの抵抗や恐怖は欠片も無かった…
+			PRINTFORMW %ANAME(MASTER)%只是喘息着，直到她满意为止，无数次将精力奉献给了子宫…
+			;TranslatedMark %ANAME(MASTER)%はただただ喘ぎながら、彼女が満足するまで子宮へ何度も精を捧げてしまった…
+		CASE 3
+			PRINTFORML 她跨坐在%ANAME(MASTER)%的腰上，把按照自己的喜好锻炼出的阴茎含到了根部
+			;TranslatedMark 彼女は胡坐をかかせた%ANAME(MASTER)%の腰に跨り、自分好みに鍛えたペニスを根元まで咥えこむ
+			PRINTFORMW 她像是在挑逗着%ANAME(MASTER)%一样，抱着%ANAME(MASTER)%，在能感受到喘息的距离里一边凝视着一边轻轻地摇着腰
+			;TranslatedMark %ANAME(MASTER)%を焦らすように、彼女は%ANAME(MASTER)%を抱き寄せ吐息がかかる距離で見つめながら揺するように軽く腰を振り始める
+			PRINTFORML 在紧贴的状态下，一边缠绕着舌头亲吻彼此的身体，一边以悠闲的性爱索求着%ANAME(MASTER)%
+			;TranslatedMark 密着したまま、舌を絡ませたりお互いの身体にキスをしながら、ゆったりとしたセックスで%ANAME(MASTER)%を追い詰める
+			PRINTFORMW 不久，当%ANAME(MASTER)%达到了极限时，将她柔软的身体紧紧抱住，用自己的意志将精液奉献给她
+			;TranslatedMark やがて%ANAME(MASTER)%が限界に達すると、彼女の柔らかな身体を思い切り抱きしめ、自らの意思で精を捧げようとする
+			PRINTFORMW 感觉舒服的她，紧紧地勒紧阴道，发出了阴道中出的许可
+			;TranslatedMark その様に気を良くした彼女は、膣をキュゥキュゥと締め付けて膣出しの許可を出した
+			PRINTFORMW %ANAME(MASTER)%将屈服和欲望的证据充分地注入她身上，将自己置身于被她榨取的快感之中…
+			;TranslatedMark %ANAME(MASTER)%は屈服と欲望の証をたっぷりと彼女に注ぎ込み、我を忘れて彼女に搾精される快感に身を任せた…
+		CASE 4
+			PRINTFORML 她蹲下身，用口内蹂躏着%ANAME(MASTER)%的阴茎
+			;TranslatedMark 彼女はしゃがみこみ、%ANAME(MASTER)%のペニスを口内で蹂躙している
+			PRINTFORMW “啊”的一声张开嘴，用隆起的阴茎塞满嘴巴，一边吮吸一边用下流的眼神抬眼看着，阴茎像是在喜悦般颤抖着
+			;TranslatedMark あーんと口を開いて隆起したペニスを頬張り、いやらしい上目遣いでしゃぶられてペニスが喜ぶようにビクビクと震える
+			PRINTFORMW 为了不让逃走，她抓住了%ANAME(MASTER)%的腰，从喉咙深处到达极限的阴茎中榨取精液
+			;TranslatedMark 彼女は逃がさないように%ANAME(MASTER)%の腰を掴み、喉奥で限界を迎えたペニスから精を搾り取った
+			PRINTFORML 她出神地喝光了浓稠的精液，但这样还不够
+			;TranslatedMark うっとりとしながら濃い精液を全て飲み干した彼女は、まだまだこれくらいじゃ足りない、と
+			PRINTFORMW 为了被抽插而拉开展示那淫荡的淫裂，为了寻求更进一步的精气而将%ANAME(MASTER)%推倒…
+			;TranslatedMark 抽挿を求めてひくつく淫らな淫裂を広げて見せ、更なる精気を求めて%ANAME(MASTER)%を押し倒した…
+		CASE 5
+			PRINTFORML %ANAME(MASTER)%被她以骑乘位的姿势激烈地侵犯
+			;TranslatedMark %ANAME(MASTER)%は騎乗位の体勢で彼女に激しく犯されている
+			PRINTFORML 她每次坐下都会向%ANAME(MASTER)%低声私语爱，但就像是捕食般蹂躏阴茎
+			;TranslatedMark 彼女は腰を打ち下ろす毎に%ANAME(MASTER)%に愛を囁き、しかし捕食するかの如くペニスを蹂躙していく
+			PRINTFORML %ANAME(MASTER)%被她的爱之言和榨取的姿态融化了身心，沉溺在肉欲中寻求她
+			;TranslatedMark %ANAME(MASTER)%は彼女の愛の言葉と搾り取るような腰振りに身も心も溶かされていき、肉欲に溺れて彼女を求める
+			PRINTFORMW 在子宫口和铃口紧贴在一起的状态下献上特浓的精，%ANAME(MASTER)%达到绝顶的同时几乎要昏了过去
+			;TranslatedMark 子宮口と鈴口を密着したまま特濃の精を捧げながら、%ANAME(MASTER)%は気を失いそうになるほどの絶頂に達した
+			PRINTFORMW 她妖艳地笑着，喃喃地说，再注入些精力让她怀孕吧，然后开始榨取精灵
+			;TranslatedMark 彼女は妖艶に笑い、もっと精を注いで孕ませてなさい、と囁いてさらに精を搾り取り始める
+			PRINTFORMW 直到她满意为止，%ANAME(MASTER)%都没有被释放，无论白天还是黑夜，就这样一直做着造人运动，整天沉迷于性生活…
+			;TranslatedMark 彼女が満足するまで%ANAME(MASTER)%は解放されず、昼も夜も無くそのままずっと子作りセックスに明け暮れた…
+		CASE 6
+			PRINTFORML %ANAME(MASTER)%在她的主导下，以后背位的姿势从她身后一个劲地扭动腰部击打着
+			;TranslatedMark %ANAME(MASTER)%は彼女に主導され、後背位の体勢で彼女の後ろからひたすら腰を打ちつけている
+			PRINTFORMW 她好像很享受曾经被%ANAME(MASTER)%打败时被侵犯的情形，每次被冲刺都会发出艳丽的声音来煽动情欲
+			;TranslatedMark 彼女はかつて%ANAME(MASTER)%に敗れた際の犯されるシチュを楽しんでいるようで、一突きされる度に艶やかな声を上げて情欲を煽る
+			PRINTFORML 深知%ANAME(MASTER)%阴茎的淫魔肉壶所给予的快感，将%ANAME(MASTER)%的脑袋涂满，夺走了正常思考的能力
+			;TranslatedMark %ANAME(MASTER)%のペニスを知り尽くした淫魔の肉壷が与える快感は、%ANAME(MASTER)%の頭の中を塗り潰しまともな思考を奪っていく
+			PRINTFORMW 每次撞击腰部时，龟头与子宫口摩擦的触感让他浑身颤抖。她愉快地看着那个样子
+			;TranslatedMark 腰を打ち付ける度に亀頭が天井に擦れる感触に身を震わせる。その様子を彼女はニマニマと楽しげに眺めている
+			PRINTFORML 不久，当%ANAME(MASTER)%接近极限时，她下令在阴道内中出，%ANAME(MASTER)%紧紧抓住她的腰，射精在了最里面
+			;TranslatedMark やがて%ANAME(MASTER)%が限界に近づくと彼女は膣出しを命じ、%ANAME(MASTER)%は彼女の腰をガッシリと掴んで最奥で射精した
+			PRINTFORMW 炽热的精液被打在了子宫上敲，她吐出甜美的气息，达到了绝顶
+			;TranslatedMark 子宮に熱い精を叩きつけられた彼女は甘い吐息を漏らして絶頂する
+			PRINTFORMW 尽管如此，她还是不满足，结果%ANAME(MASTER)%侵犯了她一整晚…
+			;TranslatedMark それでも彼女はまだまだ満足せず、結局%ANAME(MASTER)%は彼女を一晩中犯す羽目になった…
+		CASE 7
+			PRINTFORML 她带着神秘的笑容躺在床上，让%ANAME(MASTER)%以朝上的正常位侵犯她
+			;TranslatedMark 彼女は妖しい笑みを浮かべてベッドに横たわり、%ANAME(MASTER)%を上にした正常位で犯させている
+			PRINTFORMW 阴道口紧紧地拧紧整根肉竿，阴道炽热的肉壁，柔软地揉搓着龟头
+			;TranslatedMark 膣口はきつく締まり竿全体を絞り上げ、膣の肉壁は熱く、そして柔らかく亀頭を揉みしだく
+			PRINTFORML 面对能将%ANAME(MASTER)%的阴茎狠狠榨取的肉壶所给予的快感，%ANAME(MASTER)%的理性已经荡然无存，只能一昧地摇着腰部了
+			;TranslatedMark %ANAME(MASTER)%のペニスを散々に搾り取ってきた肉壷が与える快感に、%ANAME(MASTER)%の理性は蕩けもはや腰を振ることしかできない
+			PRINTFORMW 她撒娇似的搂住侵犯自己的%ANAME(MASTER)%的肩膀，缠住脚夹在腰上，不让一滴精液流出来
+			;TranslatedMark 彼女は自分を犯す%ANAME(MASTER)%の肩に甘えるようにすがりつき、脚を絡めて腰を挟み、精液を一滴も逃がさないようにしている
+			PRINTFORML 当%ANAME(MASTER)%忍不住射精的时候，她发出欢愉的声音，品味着精气，然后淫靡地扭动腰部催促下一次
+			;TranslatedMark そして%ANAME(MASTER)%が我慢できずに射精すると、彼女は悦びの声を上げて精気を味わい、そして次を促して淫靡に腰を動かす
+			PRINTFORMW 没有办法逃脱那个腰技，%ANAME(MASTER)%一个劲儿地吐出精液直到她满足为止…
+			;TranslatedMark その腰使いから逃れる術はなく、%ANAME(MASTER)%は彼女が満足するまでひたすら精を吐き出した…
+		CASE 8
+			PRINTFORML 她跨上%ANAME(MASTER)%，深深地含着阴茎，快乐地摆动着腰
+			;TranslatedMark 彼女は%ANAME(MASTER)%に跨り深々とペニスを咥えこんで楽しげに腰を振っている
+			PRINTFORMW %ANAME(MASTER)%已经无法抗拒作为梦魇的她的淫壶所给予的快感了
+			;TranslatedMark サキュバスである彼女の淫壷が与える快感は、もはや%ANAME(MASTER)%が抗えるようなものではなかった
+			PRINTFORML 她笑眯眯地盯着%ANAME(MASTER)%的脸，一边享受着她的表情，一边不停扭动着腰
+			;TranslatedMark 彼女はそんな%ANAME(MASTER)%の顔をニヤニヤと見つめながら、その表情を楽しむように腰をグラインドさせている
+			PRINTFORMW 为了进一步吸精而降下来的吸精器官——子宫口，像亲吻%ANAME(MASTER)%的铃口一样吸着
+			;TranslatedMark さらに精を吸うために降りてきた吸精器官といえる子宮口が%ANAME(MASTER)%の鈴口にキスをするように吸い付く
+			PRINTFORML 心都被吸干了似的快乐，让%ANAME(MASTER)%忍不住抬起了腰娇声尖叫起来
+			;TranslatedMark 心ごと吸われてしまうような快楽に、%ANAME(MASTER)%はたまらず嬌声を上げて腰を浮かしてしまう
+			PRINTFORML 她带着妖艳的笑容，巧妙地扭动着腰享受着%ANAME(MASTER)%的样子
+			;TranslatedMark そんな%ANAME(MASTER)%の様子を堪能するように、彼女は妖しい笑みを浮かべながら腰を巧みにくねらせ楽しんでいる
+			PRINTFORMW 结果%ANAME(MASTER)%在天亮之前一直被她榨取精…
+			;TranslatedMark 結局%ANAME(MASTER)%は、夜が明けるまでずっと彼女に精を搾り取られていた…
+	ENDSELECT
+	FOR LOCAL, 0, 2
+		CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "夢魔の唇", "", "夢魔的膣穴", "和姦")
+	NEXT
+	PRINTFORML ･･･
+	PRINTFORMW ･･････
+	PRINTFORML 
+	SELECTCASE RAND:4
+		CASE 0
+			PRINTFORMW 充分榨取%ANAME(MASTER)%的精液而满足的她，就这样抱着%ANAME(MASTER)%，一副出神的样子睡着了……
+			;TranslatedMark %ANAME(MASTER)%の精をたっぷり搾り取って満足した彼女は、そのまま%ANAME(MASTER)%を抱き枕にしてうっとりした様子で眠りについた……
+		CASE 1
+			PRINTFORML 秘裂几乎溢出来榨精的她，像是在表扬努力的%ANAME(MASTER)%的阴茎一样，轻轻地抚摸着
+			;TranslatedMark 秘裂から溢れんばかりに精を搾り取った彼女は、頑張った%ANAME(MASTER)%のペニスを褒めるようにすりすりと撫でている
+			PRINTFORMW %ANAME(MASTER)%被那甜美温柔的触感迷住了，像是失去了意识般睡着了……
+			;TranslatedMark %ANAME(MASTER)%はその甘く優しい感触に恍惚としながら、気を失うように眠りに落ちた……
+		CASE 2
+			PRINTFORML 满足于和%ANAME(MASTER)%做爱的她，开心地抱着%ANAME(MASTER)%聊天
+			;TranslatedMark %ANAME(MASTER)%とのセックスに満足した彼女は、嬉しそうにしながら%ANAME(MASTER)%に抱きついておしゃべりしている
+			PRINTFORMW 但%ANAME(MASTER)%被侵犯到了被榨取殆尽的边缘，快感在意识朦胧的状态下只能随口附和……
+			;TranslatedMark 当の%ANAME(MASTER)%は搾り尽くされる寸前まで犯されていたため、快感に意識朦朧としたまま相槌を打つことしか出来なかった……
+		CASE 3
+			PRINTFORMW 对激烈的榨精性失去意识的%ANAME(MASTER)%在做梦的时候，被出现在梦中的她推倒了
+			;TranslatedMark 激しい搾精セックスに気を失った%ANAME(MASTER)%が夢を見ていると、夢の中にまで現れた彼女に押し倒された
+			PRINTFORML － 在梦里的话，多少都能射精哦 －　她打算在梦里也要侵犯%ANAME(MASTER)%
+			;TranslatedMark － 夢の中でならいくらでも射精できるわよ －　彼女は夢の世界でも%ANAME(MASTER)%を犯し倒すつもりだ
+			PRINTFORMW 结果%ANAME(MASTER)%在醒来之前一直被她榨取……
+			;TranslatedMark 結局%ANAME(MASTER)%は、目が覚めるまでひたすら彼女に搾り取られ続けた……
+	ENDSELECT
+	IF MAXBASE:MASTER:体力 > 100
+		MAXBASE:MASTER:体力 -= 50
+		CALL COLOR_PRINTW(@"体力最大值下降了50、变成了{MAXBASE:MASTER:体力}", カラー_注意)
+	ENDIF
+;まだサキュバスと主従逆転していない状態
+ELSE
+	PRINTFORMW %ANAME(MASTER)%和作为宠物带回来的梦魇一起度过…
+	;TranslatedMark %ANAME(MASTER)%はペットとして連れ帰ったサキュバスと共に過ごしている…
+	PRINTFORML 
+	SELECTCASE RAND:4
+		CASE 0
+			PRINTFORML 在最初的工作中，她用诱惑般的动作和表情诱惑着%ANAME(MASTER)%
+			;TranslatedMark 仮初の仕事中、彼女は誘うような仕草と表情で%ANAME(MASTER)%を誘惑している
+			PRINTFORMW 就这样心醉神迷的%ANAME(MASTER)%把她叫到床上，按照她的愿望疼爱她……
+			;TranslatedMark その様にムラムラした%ANAME(MASTER)%は彼女をベッドに呼び、望みどおりに可愛がってやることにした……
+		CASE 1
+			PRINTFORML 她像是在撒娇似的央求着肌肤接触
+			;TranslatedMark 彼女は%ANAME(MASTER)%に甘えるようにスキンシップをせがんでいる
+			PRINTFORML 用可爱的方式一边揉捏着脸颊一边亲热着，慢慢地肌肤接触逐渐升级
+			;TranslatedMark その可愛らしい様に頬を緩ませながらイチャイチャしていると、しだいにスキンシップはエスカレートしていく
+			PRINTFORMW 面对不断用魅惑的肢体抵过来的她，气血上头的%ANAME(MASTER)%把她推倒在床上……
+			;TranslatedMark 魅惑的な肢体をぐいぐい押し当ててくる彼女に対し、ムラムラときた%ANAME(MASTER)%は彼女をベッドへ押し倒した……
+		CASE 2
+			PRINTFORML 听说做了点心，所以决定一起吃
+			;TranslatedMark 彼女がお菓子を作ったとのことで、一緒に食べることにした
+			PRINTFORMW 点心很好吃，被夸奖的她很高兴
+			;TranslatedMark 菓子は大変美味しく、そのことを褒めると彼女はたいそう喜んだ
+			PRINTFORML 但是，吃了点心的%ANAME(MASTER)%的身体渐渐开始发热。与此同时，她用妖艳的笑容卷起裙子
+			;TranslatedMark …しかし、菓子を食べた%ANAME(MASTER)%の体がしだいに火照り始める。それと共に、彼女は妖艶に笑いスカートをたくし上げる
+			PRINTFORMW 她说想要做得好吃的奖赏，以此诱惑着%ANAME(MASTER)%。%ANAME(MASTER)%按照她的愿望推倒了她……
+			;TranslatedMark 彼女は、美味しく作れたご褒美がほしい、と言って%ANAME(MASTER)%を誘惑する。%ANAME(MASTER)%は望みどおりに彼女を押し倒した……
+		CASE 3
+			PRINTFORML 当ANAME(MASTER)完成工作回到房间时，她正在床上自慰着。
+			;TranslatedMark %ANAME(MASTER)%が仕事を終えて部屋に戻ると、ベッドの上で彼女が己を慰める行為に勤しんでいた
+			PRINTFORMW 以背向%ANAME(MASTER)%四肢着地的姿势，毫不介意滴下来的爱液渗入床单里，行为也在不断升级
+			;TranslatedMark %ANAME(MASTER)%に背を向けた四つんばいの体勢で、滴る愛液がシーツに染み込むのもおかまいなしに行為はエスカレートする
+			PRINTFORML 最后，她一边发出很有可能被外面听到的惊艳声音，一边颤抖着身体，越过肩膀将热切的视线投向了后面的%ANAME(MASTER)%
+			;TranslatedMark やがて外に聞こえかねない艶声を上げながら身体を震わせた彼女は、後ろの%ANAME(MASTER)%へ肩越しに熱い視線を送る
+			PRINTFORML 明明知道%ANAME(MASTER)%已经回来了，但还是继续自慰，诱惑着她
+			;TranslatedMark どうやら%ANAME(MASTER)%が戻っていたことを分かりながらオナニーを続け、誘惑していたようだ
+			PRINTFORMW ……这样淫荡的邀请方式对于宠物来说是需要教育的。%ANAME(MASTER)%一边竖起肉棒一边向她靠近……
+			;TranslatedMark …こんな淫らな誘い方をするペットには躾が必要だ。%ANAME(MASTER)%は肉棒をいきり立たせながら彼女へ近づいた……
+	ENDSELECT
+	PRINTFORML ･･･
+	PRINTFORMW ･･････
+	PRINTFORML 
+	SELECTCASE RAND:8
+		CASE 0
+			PRINTFORML %ANAME(MASTER)%和她汗流浃背地做着爱
+			;TranslatedMark %ANAME(MASTER)%は彼女と汗だくになりながらひたすらセックスしている
+			PRINTFORMW 在肉欲的驱使下，用身体互相缠绕，腰部互相碰撞，交换彼此的体液和体温，多次达到高潮
+			;TranslatedMark 肉欲のままに身体を絡ませ腰を打ち付け合い、互いの体液と体温を交換して何度も絶頂する
+			PRINTFORML 对%ANAME(MASTER)%的责弄作出反应，%ANAME(MASTER)%对啊♥啊♥的艳丽喘息着的她疯狂地摇着腰
+			;TranslatedMark %ANAME(MASTER)%の責めに反応してアン♥アン♥　と艶かしく喘ぐ彼女に%ANAME(MASTER)%は夢中で腰を振る
+			PRINTFORMW 涌上来的肉欲没有衰退，结果%ANAME(MASTER)%和她一直在一起直到天黑…
+			;TranslatedMark 湧き上がる肉欲は衰えず、結局%ANAME(MASTER)%は日が暮れるまで彼女とまぐわい続けた…
+		CASE 1
+			PRINTFORML %ANAME(MASTER)%被匍匐在地上的她压着，激烈地撞击着她的腰
+			;TranslatedMark %ANAME(MASTER)%は四つん這いにした彼女に覆い被さりながら激しく腰を打ち付け犯す
+			PRINTFORMW 她猥亵地扭着桃臀，仿佛在说“再戳一下”般煽动着%ANAME(MASTER)%的抽插
+			;TranslatedMark 彼女は、もっと突いて、と言わんばかりに桃尻を卑猥にくねらせ、%ANAME(MASTER)%の抽挿を煽る
+			PRINTFORML 如所愿抓住腰刺入深处，每刺一次都会全身颤抖发出淫荡的喘息声
+			;TranslatedMark 望みどおりに腰を掴み奥底まで突き込むと、一突き毎に全身を震わせて淫らな喘ぎ声を上げる
+			PRINTFORMW 对于急速收紧的极上的膣穴，%ANAME(MASTER)%也无法忍耐，在她体内放出了好几次精液…
+			;TranslatedMark きゅうきゅうと締め付けて来る極上の膣穴に%ANAME(MASTER)%も我慢できず、彼女の中に何度も精を放った…
+		CASE 2
+			PRINTFORML 一关上房间的门，她就推倒了%ANAME(MASTER)%，激烈地摇起腰来
+			;TranslatedMark 部屋のドアを閉めるなり、彼女は%ANAME(MASTER)%を押し倒して激しく腰を振りだした
+			PRINTFORMW 发出淫荡的雌性的声音，妖艳地摇晃着梦魇那丰满的肉体，让%ANAME(MASTER)%大饱眼福
+			;TranslatedMark 淫らな雌の声を響かせ、サキュバスらしい豊満な肉体を妖艶に揺らして%ANAME(MASTER)%の目を楽しませる
+			PRINTFORML 轻轻往上推，龟头撞到子宫上，她猛地仰起身子，娇滴滴地叫出声来
+			;TranslatedMark 軽く突き上げてやると亀頭が子宮にぶつかり、彼女はビクンと大きく身を仰け反らせて嬌声を上げる
+			PRINTFORMW 一直被淫乱的她玩弄着，任凭她摆布进行了多次的配种射精
+			;TranslatedMark 淫らに乱れる彼女にされるがままになり、求められるままに何度も種付けをしてやった
+		CASE 3
+			PRINTFORML %ANAME(MASTER)%以对面座位的姿势和她一边重复着浓厚的接吻一边享受着雌穴的形状
+			;TranslatedMark %ANAME(MASTER)%は対面座位で彼女と濃厚なキスを繰り返しながらその雌穴の具合を堪能している
+			PRINTFORMW 当被梦魇粘糊糊的舌头用在嘴里责弄的时候，%ANAME(MASTER)%因为太舒服了而浑身发抖
+			;TranslatedMark サキュバスのねっとりとした舌使いで口内を責められると、%ANAME(MASTER)%はあまりの心地よさにゾクゾクと背筋を震わせてしまう
+			PRINTFORML 一旦放开嘴唇凝视她的脸。那表情就像淫荡的雌性一样，肆无忌惮地垂涎三尺，用淫荡的表情等待着继续
+			;TranslatedMark 一旦唇を離して彼女の顔を見つめる。その表情は淫らな雌そのものではしたなく舌を垂らし、蕩けた表情で続きを待っている
+			PRINTFORMW 无法忍受那种淫秽的样子再次亲吻，%ANAME(MASTER)%埋头于和她更进一步的性生活中
+			;TranslatedMark その淫猥な様に我慢出来ず再び口付けを交わすと、%ANAME(MASTER)%は彼女との更なるセックスへ没頭していった
+		CASE 4
+			PRINTFORML 她跪在%ANAME(MASTER)%的阴茎前，用嘴侍奉着
+			;TranslatedMark 彼女は%ANAME(MASTER)%のペニスに跪きながら口で奉仕している
+			PRINTFORMW “啊”的一声张开嘴，用隆起的阴茎塞满嘴巴，一边吮吸一边用下流的眼神抬眼看着，嘴里的阴茎像是在喜悦般颤抖着
+			;TranslatedMark あーんと口を開いて隆起したペニスを頬張り、いやらしい上目遣いでしゃぶられ、口内のペニスが喜ぶようにビクビクと震える
+			PRINTFORMW 接近绝顶的%ANAME(MASTER)%抓住她的头，遵从欲望射入喉咙深处
+			;TranslatedMark 絶頂が近い%ANAME(MASTER)%は彼女の頭を掴み、欲望のまま喉奥に突き込むように射精した
+			PRINTFORML 她出神地喝干了浓稠的精液，表示想得到奉仕的奖励
+			;TranslatedMark うっとりとしながら濃い精液を喉を鳴らして飲み干した彼女は、奉仕が良く出来たご褒美が欲しいと、
+			PRINTFORMW 为了被抽插而拉开展示那淫荡的淫裂，为了寻求更进一步的精气而诱惑着%ANAME(MASTER)%…
+			;TranslatedMark 抽挿を求めてひくつく淫らな淫裂を広げて見せ、更なるセックスを求めて%ANAME(MASTER)%を誘惑している…
+		CASE 5
+			PRINTFORML 她压在仰卧在床上的%ANAME(MASTER)%身上，用她火红的脸将炽热的气息吐在脸上
+			;TranslatedMark ベッドの上で仰向けの%ANAME(MASTER)%の上に、彼女はトロ顔で息を荒げながらくたりと覆い被さっている
+			PRINTFORML 从含着%ANAME(MASTER)%阴茎的秘处的缝隙中溢出的精液，让人窥见了在此之前的性爱激烈的程度
+			;TranslatedMark %ANAME(MASTER)%のペニスを咥え込んだ秘所の隙間から溢れ出た精液が、それまでの行為の激しさを窺わせる
+			PRINTFORML 充分射出精液而满足的%ANAME(MASTER)%抚摸着她的头。然后她马上一脸高兴地吻了%ANAME(MASTER)%
+			;TranslatedMark たっぷりと精を吐き出して満足した%ANAME(MASTER)%は彼女の頭を撫でる。そうすると彼女はたちまち嬉しそうな顔で%ANAME(MASTER)%にキスをする
+			PRINTFORMW 看到了这种可爱样子的%ANAME(MASTER)%，用还硬着的阴茎再次顶上，送给了她更多的欢愉
+			;TranslatedMark そんな様子が愛らしくなった%ANAME(MASTER)%は、未だ硬いままのペニスで再び突き上げ、彼女に更なる悦びをプレゼントした
+		CASE 6
+			PRINTFORML 她被%ANAME(MASTER)%抬起两脚，强烈侵犯的同时剧烈地喘息着
+			;TranslatedMark 彼女は%ANAME(MASTER)%に両足を持ち上げられながら、激しく犯されて喘いでいる
+			PRINTFORML 即使是毫无顾忌地仿佛腰剜穿阴道壁般的激烈活塞，身为梦魇的她也欣然接受。
+			;TranslatedMark ゴリュゴリュと遠慮なく膣壁をえぐる激しいピストンにも、サキュバスである彼女は悦んで受け入れている
+			PRINTFORML 不久，%ANAME(MASTER)%在阴道内释放出炽热的精液，她弓着身子发出娇声，也达到了绝顶
+			;TranslatedMark やがて%ANAME(MASTER)%が膣内に熱い精を放つと、彼女は弓なりに体を反らせて嬌声とともに絶頂した
+			PRINTFORMW 即使被激烈地使用，她也依然露出淫靡的微笑，反而把希望能继续下去的视线投向了%ANAME(MASTER)%…
+			;TranslatedMark 激しく使われても彼女は淫靡に微笑み、むしろもっと続きをしてほしいというような視線を%ANAME(MASTER)%に向けた…
+		CASE 7
+			PRINTFORML %ANAME(MASTER)%和她以正常的姿势，像恋人一样牵着手，忘我地互相拍打着腰
+			;TranslatedMark %ANAME(MASTER)%は彼女と正常位の体勢で恋人のように両手を繋ぎながら夢中で腰を打ちつけ合っている
+			PRINTFORML 啪嗒啪嗒啪嗒啪嗒地有节奏地拍打。每当%ANAME(MASTER)%的阴茎在阴道内摩擦时，她就会忍不住发出淫荡的声音
+			;TranslatedMark パンッパンッパンッとリズミカルに腰を打ち当てる。%ANAME(MASTER)%のペニスが膣内を擦り付ける度に彼女はたまらない様子で蕩けた声を漏らす
+			PRINTFORML 那个样子让%ANAME(MASTER)%兴奋起来，每刺一次都像是在强迫子种一样把阴茎压在膣穴的最深处射精
+			;TranslatedMark その様子が%ANAME(MASTER)%を昂ぶらせ、一突き毎に子種を強請るように締め付ける膣穴の最奥にペニスを押し当てて射精する
+			PRINTFORMW 被注入了炽热精液的她达到了高潮，但是完全亢奋状态的%ANAME(MASTER)%一次两次的射精无法满足，整夜都和她尽情享受
+			;TranslatedMark 熱い精を注がれてアクメに達した彼女だが、すっかり昂ぶった%ANAME(MASTER)%は一度や二度の射精では満足せず、一晩中たっぷりと彼女と楽しんだ
+	ENDSELECT
+	CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "夢魔の唇", "", "夢魔的膣穴", "和姦")
+	PRINTFORML ･･･
+	PRINTFORMW ･･････
+	PRINTFORML 
+	SELECTCASE RAND:4
+		CASE 0
+			PRINTFORMW 充分享受了她的身体的%ANAME(MASTER)%，和她紧紧地抱在一起，就这样睡着了……
+			;TranslatedMark 彼女の身体をたっぷり堪能した%ANAME(MASTER)%は、彼女と身を寄せ合って抱き合いそのまま眠ることにした……
+		CASE 1
+			PRINTFORML 满足于和%ANAME(MASTER)%的性生活的她，紧贴着身体撒着娇
+			;TranslatedMark %ANAME(MASTER)%とのセックスに満足した彼女は身体をすりすりと密着させて甘えてくる
+			PRINTFORMW 两人一边抚摸着彼此的身体感受着温暖，一边继续着平和的对话……
+			;TranslatedMark 二人は互いの身体を撫で回して温もりを感じながら、穏やかなぴロートークを続けた……
+		CASE 2
+			PRINTFORMW 被%ANAME(MASTER)%疼爱而满足的她，一边愉快地聊天一边抱住了%ANAME(MASTER)%的身体……
+			;TranslatedMark %ANAME(MASTER)%に可愛がられて満足した彼女は、楽しそうにおしゃべりしながら%ANAME(MASTER)%の身体に抱きついていた……
+		CASE 3
+			PRINTFORML %ANAME(MASTER)%把自己的阴茎伸到了刚才因性爱而恍惚的她面前
+			;TranslatedMark %ANAME(MASTER)%は先ほどのセックスで恍惚としている彼女の眼前へ、柔さを取り戻しつつある己のペニスを差し出した
+			PRINTFORMW 她痴迷地让舌头爬到%ANAME(MASTER)%的阴茎上，甜甜地咬着肉竿，一边亲吻龟头和铃口，一边精心奉仕着……
+			;TranslatedMark 彼女はうっとりとした様子で%ANAME(MASTER)%のペニスへ舌を這わせ、竿を甘噛みし、亀頭やカリ首へキスをしながら丹念に奉仕した……
+	ENDSELECT
+	DVAR:サキュバスのペット_主従逆転フラグ ++
+	IF DVAR:サキュバスのペット_主従逆転フラグ == 7
+		PRINTFORML 被本应是宠物的梦魇所刻下的快乐记忆，让%ANAME(MASTER)%的身体涌出兴奋和情欲…
+		;TranslatedMark ペットだったはずのサキュバスに刻まれた快楽の記憶が、%ANAME(MASTER)%の身体に興奮と情欲を湧き上がらせる…
+		PRINTFORMW 看着那样的%ANAME(MASTER)%的样子，她的眼睛嗜虐性地缩小。那是捕食者看到猎物的眼睛
+		;TranslatedMark そんな%ANAME(MASTER)%の様子を見て、彼女の瞳が嗜虐的に細められる。それは獲物を見る捕食者の目だった
+		PRINTFORMW %ANAME(MASTER)%成为了她所给予的快乐的俘虏……
+		;TranslatedMark %ANAME(MASTER)%は彼女に与えられる快楽の虜になってしまった……
+		CALL COLOR_PRINTW(@"%ANAME(MASTER)%和梦魇的上下级关系逆转了", カラー_注意)
+	ENDIF
+ENDIF
+
+RETURN 1

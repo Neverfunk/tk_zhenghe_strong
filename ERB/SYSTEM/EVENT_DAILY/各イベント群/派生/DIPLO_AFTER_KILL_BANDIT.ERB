@@ -1,0 +1,116 @@
+﻿;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_AFTER_KILL_BANDIT_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("REQUEST_CHARA")
+
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_AFTER_KILL_BANDIT_DECISION()
+SIF ID_TO_CHARA(DVAR:士官要求_野盗斬り捨てフラグ) != -1
+	RETURN 1
+RETURN 0
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_AFTER_KILL_BANDIT()
+#DIM 対象
+対象 = ID_TO_CHARA(DVAR:士官要求_野盗斬り捨てフラグ)
+CALL SINGLE_DRAWLINE
+IF ABL:MASTER:知略 > 40
+	PRINTFORMW 几名男子潜入了宫廷，试图躲避卫兵的视线……
+	PRINTFORMW 但马上就被另外埋伏的卫兵队包围了
+	PRINTFORMW 酷刑审问后得知是因为%ANAME(MASTER)%斩杀使者而前来报復的土匪
+	PRINTFORMW %ANAME(MASTER)%早就料到这些低智商的人渣会来报復
+	PRINTFORML
+	PRINTFORML
+	PRINTFORML
+	PRINTFORMW 于是用一种土匪们看得懂的方式表示轻蔑
+	PRINTFORMW 被捉住的土匪被阉割后剖开肚子吊在了城门上公示了几天
+	PRINTFORMW 接下来的日子里再也没有可疑的人试图潜入
+	DVAR:士官要求_野盗斬り捨てフラグ = 0
+
+	RETURN 1
+ELSE
+	PRINTFORMW 几名男子潜入了宫廷，躲避了卫兵的视线……
+	PRINTFORMW 从背后悄悄靠近走在走廊上的%ANAME(対象)%，用浸入催眠药物的布袋蒙上头
+	PRINTFORMW 把逐渐昏睡的%ANAME(対象)%塞进麻袋里，男人们从宫廷里逃了出来……
+	PRINTFORML
+	PRINTFORML
+	PRINTFORML
+	PRINTFORMW 男人们的真面目是土匪。
+	PRINTFORMW 因为%ANAME(MASTER)%的人斩杀了使者，所以为了报復把%ANAME(対象)%给绑架了
+	PRINTFORMW 回到据点的他们，剥下酣睡的%ANAME(対象)%的衣服，立刻"使用"了那个身体……
+
+	FLAG:ターンエンド調教 = 3
+	FLAG:慰安場所 = 慰安_行き先_野盗のアジト
+	CVARSET CFLAG, GETNUM(CFLAG, "慰安参加者") , 0
+	CVARSET CFLAG, GETNUM(CFLAG, "調教参加フラグ") , 0
+	CFLAG:対象:調教参加フラグ = 1
+	FOR LOCAL, 0, 5
+		CALL CREATE_IAN_MOB(慰安_行き先_野盗のアジト, LOCAL + 1)
+	NEXT
+	CALL ADD_EVENTTRAIN_CALLEE("AFTER_KILL_BANDIT_BEFORE_TRAIN")
+	CALL ADD_EVENTEND_CALLEE("AFTER_KILL_BANDIT_AFTER_TRAIN_A")
+	DAILY_CANCEL = 1
+
+	RETURN 1
+ENDIF
+
+@EVENTTRAIN_AFTER_KILL_BANDIT_BEFORE_TRAIN
+TFLAG:56 = 30
+
+@EVENTEND_AFTER_KILL_BANDIT_AFTER_TRAIN_A
+#DIM 対象
+対象 = ID_TO_CHARA(DVAR:士官要求_野盗斬り捨てフラグ)
+
+PRINTFORMW %ANAME(対象)%的人醒来后，发现那是一个陌生的房间
+PRINTFORMW 自己的身体被绳子绑住，被一群陌生的男人团团围住。
+PRINTFORMW 身上沾满白浊的皮肤，表明自己多次被这些男人凌辱……
+PRINTFORMW %ANAME(対象)%想办法逃跑，但被束缚着，而且被各种男人内射之后自己的双腿早已发软，下腹隐约温热着使得身体也在意识恢复之后变得疲乏
+PRINTFORMW 男人们一边淫荡地笑着，一边为了让没有教养的母狗屈服，再次开始侵犯她……
+
+FLAG:ターンエンド調教 = 3
+FLAG:慰安場所 = 慰安_行き先_野盗のアジト
+CVARSET CFLAG, GETNUM(CFLAG, "慰安参加者") , 0
+CVARSET CFLAG, GETNUM(CFLAG, "調教参加フラグ") , 0
+CFLAG:対象:調教参加フラグ = 1
+FOR LOCAL, 0, 5
+	CALL CREATE_IAN_MOB(慰安_行き先_野盗のアジト, LOCAL + 1)
+NEXT
+CALL ADD_EVENTTRAIN_CALLEE("AFTER_KILL_BANDIT_BEFORE_TRAIN")
+CALL ADD_EVENTEND_CALLEE("AFTER_KILL_BANDIT_AFTER_TRAIN_B")
+DAILY_CANCEL = 1
+
+RETURN 1
+
+
+
+
+@EVENTEND_AFTER_KILL_BANDIT_AFTER_TRAIN_B
+#DIM 対象
+対象 = ID_TO_CHARA(DVAR:士官要求_野盗斬り捨てフラグ)
+
+PRINTFORMW ……调教终于结束了。
+PRINTFORMW 被激烈的陵辱耗尽了精力的%ANAME(対象)%，一边从两个肉穴里滴下白浊，一边偶尔颤抖着身体
+PRINTFORML 然而，土匪们对此并不满意。
+PRINTFORML 他们给%ANAME(対象)%打了高浓度的药。于是，她的疲劳一扫而光，身体开始无比兴奋
+PRINTFORMW 像是忘记了被看到一样，男人们用手指开始咕噜咕噜地搅动雌穴的%ANAME(対象)%，嚣张地互相欢笑着
+PRINTFORML 如果作为我们的奴隶生活的话，能接受用我们的肉棒来代替薪资的条件吧？作为交换，我们会好好并充分地疼爱你的
+PRINTFORML 被那样说之后，被凌辱得失去理智的%ANAME(対象)%想也没想直接就同意了
+PRINTFORMW 满足这个答案的男人们，在%ANAME(対象)%的脖子上套上了项圈……
+PRINTFORML
+SETCOLOR カラー_警告
+PRINTFORMW %ANAME(対象)%变成了土匪性奴隶
+RESETCOLOR
+CALL SINGLE_DRAWLINE
+CALL CHANGE_COUNTRY(対象, GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_野盗)))
+EXP:対象:輪姦経験 += RAND(25, 50)
+DVAR:士官要求_野盗斬り捨てフラグ = 0
+
+RETURN 1

@@ -1,0 +1,74 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K75_FROM_THE_DEEP_RATE(対象)
+#DIM 対象
+RETURN 250
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K75_FROM_THE_DEEP_DECISION(対象)
+#DIM 対象
+#DIM 白蓮
+
+白蓮 = NAME_TO_CHARA("白蓮")
+
+;(従属国パッチ)辺境伯であるときもダメ
+SIF GET_COUNTRY_BOSS(CFLAG:対象:所属) == 対象 || CFLAG:対象:1702
+	RETURN 0
+
+;開始イベント、終了イベント後ならだめ
+SIF GROUPMATCH(KDVAR:対象:水蜜_仄暗い水の底から, 1, 2)
+	RETURN 0
+
+;爆発カウント最低4必要
+SIF KDVAR:対象:水蜜_水底爆発カウント < 4
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0) && CHECK_KOJO_DAILY_HAPPEN(白蓮, 0)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K75_FROM_THE_DEEP_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K75_FROM_THE_DEEP(対象)
+#DIM 対象
+#DIM 白蓮
+
+白蓮 = NAME_TO_CHARA("白蓮")
+
+PRINTFORML 「想沉在水底……」
+PRINTFORMW %ANAME(対象)%獨自一人在房間裡自言自語
+PRINTFORML 對於身為船幽靈的她而言、沉船等同於呼吸和吃飯
+PRINTFORML 那股不斷騷動的力量、平時一直被%ANAME(白蓮)%的力量抑制著
+PRINTFORMW 但是、現在%ANAME(白蓮)%不在了
+PRINTFORML 無論多麼強大的人也不會停止呼吸
+PRINTFORMW %ANAME(対象)%同樣如此。%PRONOUN(対象)%的忍耐已經達到了極限
+PRINTFORMW 「又是、那裡、我要過去了」
+PRINTFORML 被衝動侵蝕得頭腦發昏的%PRONOUN(対象)%自言自語道
+PRINTFORML 然後漫無目的地離開了房間、離開了據點、一個人去了某個地方
+PRINTFORMW 沉入了誰都無法找到的、能夠讓自己沉沒的昏暗地方……
+PRINTFORML 
+CALL COLOR_PRINTW(@"%ANAME(対象)%失蹤了", カラー_警告)
+KDVAR:対象:水蜜_仄暗い水の底から = 1
+KDVAR:対象:水蜜_水底滞在カウント = 5
+CALL CHANGE_COUNTRY(対象, 0)
+CFLAG:対象:特殊状態 = 0
+
+RETURN 1
+

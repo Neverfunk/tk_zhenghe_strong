@@ -1,0 +1,123 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_LOST_CHILD_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_LOST_CHILD_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_LOST_CHILD(対象)
+#DIM 対象
+
+PRINTFORML 在领地内探索時、遇到了迷路的\@ (CONFIG:202 == 1 && TALENT:対象:0 == 1) ? 女孩 # 男孩 \@
+PRINTFORML 和父母走散了、在周围的人群中没有找到
+
+PRINTL
+CALL ASK_MULTI("一起寻找父母", "交给士兵", "不管")
+
+IF RESULT == 2
+	PRINTFORML 不想給自己找麻煩
+	PRINTFORML 決定放任不理
+	RETURN 1
+ENDIF
+
+IF RESULT == 1
+	PRINTFORML 還是交給士兵比較好
+	PRINTFORML 把\@ (CONFIG:202 == 1 && TALENT:対象:0 == 1) ? 她 # 他\@託付給附近的士兵、返回了拠点
+	RETURN 1
+ENDIF
+
+PRINTFORML 一邊安慰著快要哭出來的孩子、一邊一起尋找他的父母
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+
+IF RAND:2
+	PRINTFORML 順利地找到了他的雙親！
+	PRINTFORMW 和露出笑容揮著手的孩子道別後、心情愉快地返回了拠点
+	IF 対象 == MASTER && IS_COUNTRY(CFLAG:MASTER:所属)
+		CALL COLOR_PRINTL(@"この話が仲間に広がり、好感度が100上がった", カラー_注意)
+		FOR LOCAL, 0, CHARANUM
+			SIF LOCAL == MASTER
+				CONTINUE
+			SIF CFLAG:LOCAL:所属 == CFLAG:MASTER:所属
+				CFLAG:LOCAL:好感度 += 100
+		NEXT
+	ENDIF
+	RETURN 1
+ENDIF
+
+PRINTFORML 沒能找到\@ (CONFIG:202 == 1 && TALENT:対象:0 == 1) ? 她 # 他\@的雙親……
+
+IF IS_MALE(対象)
+	PRINTFORML 已經不能再陪他找下去了、把他託付給附近的士兵後返回了拠点
+	RETURN 1
+ENDIF
+
+IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+	PRINTFORML 找不到可怎么办呢？看来只好把她托付给士兵了
+	PRINTFORML 一边安抚着哭泣的少女，一边凭记忆寻找着最近的巡逻队
+	PRINTFORML 忽然，少女停在了一片小树林边，扭扭捏捏地表示想尿尿……
+	
+	PRINTL
+	CALL ASK_YN("就地解决", "再忍一会儿")
+	
+	IF RESULT == 1
+		PRINTFORML 不管再怎么说，女孩子也不能在这种地方解决
+		PRINTFORML 继续走了几分钟，正巧在下一个转角碰到了少女的父母
+		PRINTFORML 少女立刻露出了笑容，一边向%ANAME(対象)%挥手道别，一边向双亲身边跑去
+		PRINTFORMW ……结果还是没上成厕所
+		RETURN 1
+	ENDIF
+	
+	PRINTFORML 可怜于少女忍耐的样子，%ANAME(対象)%同意给她把风，让她自己到树林里解决
+	PRINTFORML 可没过多久，树林里忽然传出一声惊叫！
+	PRINTFORML 以为出现变态的%ANAME(対象)%连忙冲了过去，却发现眼前的景象和预想中不太一样
+	PRINTFORML 看来是解决完毕的少女想站起来时不小心脚下一滑，结果正好坐到了自己的尿液上
+	PRINTFORMW 整个下体都被弄脏的少女无助地哭了起来，%ANAME(対象)%不忍心看到她这副模样，于是掏出手帕开始帮她仔细地擦拭了起来……
+	PRINTFORML
+	PRINTFORML 因为是重要的地方，所以一定要擦得认真才行，%ANAME(対象)%不愿意放过任何一个可能粘上污垢的地方
+	PRINTFORML 尤其是尿尿流出来的缝隙，一不小心就会有残留的液体，所以%ANAME(対象)%特意着重擦拭了双腿之间的地方
+	PRINTFORML 为了确认是否擦得足够干净，%ANAME(対象)%把脸伸入少女的股间，直接用鼻子寻找是否有尿液的气息
+	PRINTFORML 每当%ANAME(対象)%呼出气息时，少女的身体都会微微地颤抖一下，嘴角漏出可爱的声音
+	PRINTFORML 不知为什么，不管%ANAME(対象)%擦得如何努力，都会有新的液体不断分泌出来，令%ANAME(対象)%只好加快擦拭的频率
+	PRINTFORMW 另外，等到%ANAME(対象)%终于把少女清理干净的时候，对方只能躺在%ANAME(対象)%的怀里被抱着移动了……
+	CALL FUCK(対象, "欲望, 奉仕, 性技")
+	PRINTFORML
+	PRINTFORML 还没走出几步，正巧碰到了少女的父母
+	PRINTFORML 干脆把没法走路了的少女抱回了家，不知为何，少女坚持要留下那条脏兮兮的手帕
+ELSE
+	PRINTFORML ……本以為少年會很失望、但是他卻有些扭捏……
+
+	PRINTL
+	CALL ASK_YN("勾引", "交给士兵")
+
+	IF RESULT == 1
+		PRINTFORML 已經不能再陪他找下去了、把他託付給附近的士兵後返回了拠点
+		RETURN 1
+	ENDIF
+
+	PRINTFORML 低聲説道「讓我帯你去個好地方」
+	PRINTFORMW 拉着小孩的手进入了附近的旅馆
+	PRINTFORML 
+	PRINTFORML %ANAME(対象)%露出自己的身体、诱惑着第一次看到这种事感到困惑的纯洁的孩子
+	PRINTFORML 小孩看着展示出来充满魅力的身体呑了口口水、不由得抱住了%ANAME(対象)%
+	PRINTFORML %ANAME(対象)%兴奋的同时温柔的引领着孩子、用身体教导着性爱
+	PRINTFORMW 不久之后心情舒爽的少年喘息着射精了、%ANAME(対象)%也颤抖着身体高潮了
+	CALL FUCK(対象, "欲望, 奉仕, 性交, 性技, 接吻, 口淫, Ｖ, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("小孩"), @"小孩的\@RAND:2 ? 肉棒 # 嘴唇\@", "小孩", "", "和姦")
+	PRINTFORML 
+	PRINTFORML 充分的疼爱了小孩之后、送回了父母身边
+	PRINTFORMW 离别的时候、看见挥手道别的小孩股间膨胀了起来
+ENDIF
+	
+RETURN 1

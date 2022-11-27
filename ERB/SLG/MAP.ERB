@@ -1,0 +1,178 @@
+﻿;マップ関係
+
+;-------------------------------------------------
+;全都市の描画色をリセットする関数
+;-------------------------------------------------
+@RESET_CITY_COLOR
+VARSET CITY_COLOR, GETDEFCOLOR()
+
+;-------------------------------------------------
+;全都市の描画色を勢力の色にセットする関数
+;-------------------------------------------------
+@SET_CITY_COLOR_COUNTRY
+FOR LOCAL:0, 0, MAX_CITY
+	CITY_COLOR:(LOCAL:0) = COUNTRY_COLOR:(CITY_OWNER:(LOCAL:0))
+NEXT
+
+;-------------------------------------------------
+;兵の存在する中継地点に色を付ける関数
+;-------------------------------------------------
+@SET_CITY_COLOR_UNIT
+CALL TMP_CREATE_UNIT_MAP
+FOR LOCAL:0, 0, MAX_CITY
+	IF CITY_TYPE:(LOCAL:0) == 1
+		IF IS_STAY_MYUNIT(LOCAL:0) == 1
+			CITY_COLOR:(LOCAL:0) = COUNTRY_COLOR:(CFLAG:MASTER:所属)
+		ELSEIF IS_STAY_UNIT(LOCAL:0) == 2
+			CITY_COLOR:(LOCAL:0) = COUNTRY_COLOR:(GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_野盗)))
+		ELSEIF IS_COUNTRY(TMP_UNIT_ONCITY_CNT:(LOCAL:0):0)
+			CITY_COLOR:(LOCAL:0) = COUNTRY_COLOR:(TMP_UNIT_ONCITY_CNT:(LOCAL:0):0)
+		ENDIF
+	ENDIF
+NEXT
+
+;-------------------------------------------------
+;全都市の描画色を自勢力:青、敵勢力:赤にセットする関数
+;-------------------------------------------------
+@SET_CITY_COLOR_RELATION
+FOR LOCAL:0, 0, MAX_CITY
+	IF COUNTRY_BOSS:(CITY_OWNER:(LOCAL:0)) <= 0
+		CITY_COLOR:(LOCAL:0) = GETDEFCOLOR()
+	ELSEIF CITY_OWNER:(LOCAL:0) == CFLAG:MASTER:所属
+		CITY_COLOR:(LOCAL:0) = カラー_青
+	ELSEIF CITY_OWNER:(LOCAL:0) == CFLAG:MASTER:所属
+		CITY_COLOR:(LOCAL:0) = カラー_赤
+	ENDIF
+NEXT
+
+;-------------------------------------------------
+;都市名をボタンとして描画する関数 ARG:0=都市番号
+;-------------------------------------------------
+@DRAWCITY_BUTTON(ARG:0)
+CALL CITY_COLOR_SET(ARG:0)
+;SETCOLOR CITY_COLOR:(ARG:0)
+SIF CITY_TYPE:(ARG:0) == 0
+	FONTSTYLE IS_STAY_MYUNIT(ARG:0) * 2 + IS_STAY_ENEMY_UNIT(ARG:0) * 8
+PRINTBUTTON GET_CITYNAME_BUTTON(ARG:0), ARG:0 + 1000
+RESETCOLOR
+FONTSTYLE 0
+
+;-------------------------------------------------
+;全都市数を返す関数
+;-------------------------------------------------
+@GET_CITY_NUM()
+#FUNCTION
+RETURNF CITY_NUM
+
+;-------------------------------------------------
+;都市名を取得する関数 ボタン用 ARG:0=都市番号
+;-------------------------------------------------
+@GET_CITYNAME_BUTTON(ARG:0)
+#FUNCTIONS
+SIF ARG:0 < 0 || ARG:0 >= MAX_CITY
+	RETURNF "無名"
+RETURNF CITY_NAME_SHORT:(ARG:0)
+
+;-------------------------------------------------
+;都市名を取得する関数 ARG:0=都市番号
+;-------------------------------------------------
+@GET_CITYNAME(ARG:0)
+#FUNCTIONS
+SIF ARG:0 < 0 || ARG:0 >= MAX_CITY
+	RETURNF "無名"
+SIF CITY_TYPE:(ARG:0) == 1
+	RETURNF "●"
+RETURNF CITY_NAME:(ARG:0)
+
+;-------------------------------------------------
+;都市名から番号を取得する関数 REGISTER_ROUTEやCITY_OWNERでの糖衣化用。ARGS:0=都市名
+;-------------------------------------------------
+@GET_CITYNUMBER(ARGS:0)
+#FUNCTION
+RETURNF FINDELEMENT(CITY_NAME, ARGS:0, 0, VARSIZE("CITY_NAME"), 1)
+
+;-------------------------------------------------
+;中継地点の名称を取得する関数 ARG:0=都市番号
+;-------------------------------------------------
+@GET_RELAYNAME(ARG:0)
+#FUNCTIONS
+SIF ARG:0 < 0 || ARG:0 >= MAX_CITY
+	RETURNF "無名"
+RETURNF CITY_NAME:(ARG:0)
+
+;-------------------------------------------------
+;ルートの登録(开始)関数
+;ARG:0　登録元　ARG:1~10 登録先
+;なお既に登録されていたら無視する
+;-------------------------------------------------
+@REGISTER_ROUTE(ARG:0, ARG:1 = -99, ARG:2 = -99, ARG:3 = -99, ARG:4 = -99, ARG:5 = -99, ARG:6 = -99, ARG:7 = -99, ARG:8 = -99, ARG:9 = -99, ARG:10 = -99)
+;接続先についてカウントアップ(开始)
+FOR LOCAL:0, 1, 10
+	;-99だった場合無視
+	IF ARG:(LOCAL:0) == -99
+		BREAK
+	ENDIF
+	;接続元のCITY_ROUTEの0~10についてカウントアップ(开始)
+	FOR LOCAL:1, 0, 10
+		;フェイルセーフ。既に該当地域が登録されているならBREAK。
+		IF CITY_ROUTE:(ARG:0):(LOCAL:1) == ARG:(LOCAL:0)
+			BREAK
+		;ARG:0のCITY_ROUTEのうち、LOCAL:1番目が空であれば登録する
+		ELSEIF CITY_ROUTE:(ARG:0):(LOCAL:1) == 0
+			CITY_ROUTE:(ARG:0):(LOCAL:1) = ARG:(LOCAL:0)
+			;接続先にも接続元を登録しておく
+			FOR LOCAL:3, 0, 10
+				;フェイルセーフ。REGISTER_ROUTEを通して操作する限りありえないとは思うが。
+				IF CITY_ROUTE:(ARG:(LOCAL:0)):(LOCAL:3) == ARG:0
+					;DEBUGPRINTFORML @REGISTER_ROUTE:{ARG:(LOCAL:0)}→{ARG:0}が登録済み
+					BREAK
+				ELSEIF CITY_ROUTE:(ARG:(LOCAL:0)):(LOCAL:3) == 0
+					CITY_ROUTE:(ARG:(LOCAL:0)):(LOCAL:3) = ARG:0
+					BREAK
+				ENDIF
+			NEXT
+			BREAK
+		ENDIF
+	NEXT
+NEXT
+
+;----------------------------------------------------------------------------------------------
+;以下ラッパ
+;----------------------------------------------------------------------------------------------
+
+;-------------------------------------------------
+;都市タイプの設定
+;-------------------------------------------------
+@SET_CITY_TYPE
+CALLFORM SET_CITY_TYPE_%MAPID%
+
+;-------------------------------------------------
+;ルートの設定
+;-------------------------------------------------
+@SET_MAP_ROUTE
+CALLFORM SET_MAP_ROUTE_%MAPID%
+
+;-------------------------------------------------
+;マップの準備
+;-------------------------------------------------
+@MAPSETUP(ARG:0 = 0)
+SIF ARG:0 == 0 && MAPREADY == 1
+	RETURN
+CALLFORM SET_CITY_NUM_%MAPID%
+CALL SET_CITY_TYPE
+CALLFORM SET_CITYNAME_%MAPID%
+CALLFORM SET_SHORTCITYNAME_%MAPID%
+CALL SET_MAP_ROUTE
+MAPREADY = 1
+
+;-------------------------------------------------
+;経済や防衛などの初期化
+;-------------------------------------------------
+@MAP_INIT
+CALLFORM MAP_INIT_%MAPID%
+
+;-------------------------------------------------
+;マップの描画 ARG:0に1を指定すると軍事画面用のボタンを生成
+;-------------------------------------------------
+@DRAWMAP(ARG:0 = 0, ARG:1 = 0)
+CALLFORM DRAWMAP_%MAPID%, ARG:0, ARG:1

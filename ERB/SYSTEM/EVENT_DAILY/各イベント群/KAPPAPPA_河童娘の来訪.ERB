@@ -1,0 +1,268 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_KAPPAPPA_RATE()
+RETURN (DVAR:河童_抱いた回数 > 0 ? (120 + (DVAR:河童_抱いた回数 * 30)) # 30)
+
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_KAPPAPPA_DECISION()
+RETURN 10 <= DAY
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_KAPPAPPA_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_KAPPAPPA
+#DIM 金額
+#DIM 対象
+
+IF DVAR:河童_発生フラグ == 0
+	PRINTFORML 工作時部下告知有訪客
+	PRINTFORML 大概是河童集團
+	PRINTFORMW 妖怪来這裏做什麼？非常在意的%ANAME(MASTER)%与房客見面了
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW ・
+	PRINTFORML 「你好ー、很高興認識你ー」
+	PRINTFORML 「之前都拜訪過其他国家、但無論到哪裏都吃閉門羹啊、很過分対吧？還有ー…」
+	PRINTFORMW 眼前露出和諧可親的笑容的是一個河童少女
+	PRINTFORMW 真是個健談的人呢、%ANAME(MASTER)%催促她快点説正題、別再説廃話
+	PRINTFORML 「対対、是啊。那個ー、我們喜歡発明各種東西」
+	PRINTFORML 「但作為発明者希望除了自己以外其他人也能使用自己発明的産品很正常対吧？」
+	PRINTFORML 「所以就開始想嘗試発售産品！我是過来請求許可的ー」
+	PRINTFORML 「是怎樣的発明品？啍ー、很在意嗎？不過ー、在発售前ー、不可以向你透露太多…」
+	PRINTFORMW 少女興高采烈地持續她的談話
+	PRINTFORML 簡単来説就是希望能在領地内進行商業活動嗎
+	PRINTFORMW 他們的発明品可能会很危險…而且妖怪的話不能尽信
+	DVAR:河童_発生フラグ = 1
+ELSEIF DVAR:河童_発生フラグ == 1
+	PRINTFORML 之前的河童娘再次来訪了
+	IF DVAR:河童_抱いた回数 == 0
+		PRINTFORML 「在此之後、依然有跟其他国家交涉過、但果然還是得不到許可啊ー」
+		PRINTFORML 「只能拜託這辺了、吶？求求你了」
+		PRINTFORMW 女河童像之前一樣友好的微笑以及花言巧語
+	ELSEIF DVAR:河童_抱いた回数 > 6
+		PRINTFORML 「嗯…你好、誒嘿嘿、我又来了…」
+		PRINTFORML 「今次也一樣、行商…以及其他方面…也拜託你了、吶？」
+		PRINTFORMW 少女臉上出現了雌性的表情、発出了献媚的声音
+	ELSE
+		PRINTFORML 「那個…在此之後、雖然有跟其他国家交涉過、但果然還是得不到許可啊」
+		PRINTFORML 「所以那個…又要拜託你什麼的…」
+		PRINTFORMW 少女用着与之前不同的語調、看起来有点臉紅
+	ENDIF
+ENDIF
+PRINTFORML 那麼、怎麼辦……
+CALL SINGLE_DRAWLINE
+CALL ASK_MULTI_JUDGE("就這樣許可", 1, "要求提供金錢", 1, "要求提供身体", HAS_PENIS(MASTER), "拒絶", 1)
+;断るパターン
+IF RESULT == 3
+	IF DVAR:河童_抱いた回数 > 0
+		PRINTFORML 「嗯嗯…怎麼会這樣」
+		PRINTFORMW 少女失望地回去了
+	ELSE
+		PRINTFORML 「誒ー、真遺憾…」
+		PRINTFORMW 少女失望地回去了
+	ENDIF
+	DVAR:河童_発生フラグ = 1
+	RETURN
+;援助するパターン
+ELSEIF RESULT == 0
+	IF DVAR:河童_抱いた回数 > 5
+		PRINTFORML 「謝謝你♥但是、只是這樣…？」
+		PRINTFORML 当就這樣発出許可時、少女開始坐立不安
+		PRINTFORMW 從双眼的視線能看出她期待着什麼
+		PRINTFORML %ANAME(MASTER)%苦笑着走近少女、将手放到少女的腰部
+		PRINTFORML 「啊…」
+		PRINTFORMW 将從喉嚨微微発出喘息声的少女帯入了寢室
+		PRINTFORML ・・・
+		PRINTFORML ・・
+		PRINTFORMW ・
+		PRINTFORMW %ANAME(MASTER)%好好地痛愛了少女的身体
+	ELSEIF DVAR:河童_抱いた回数 > 0
+		PRINTFORML 「誒、嗯…可以嗎？」
+		PRINTFORMW 当就這樣発出許可時、少女発出了失望的声音
+		PRINTFORML 「那個…那個、謝謝你」
+		PRINTFORMW 少女一辺回頭偸偸看着%ANAME(MASTER)%一辺快步走了
+	ELSE
+		PRINTFORML 「真的嗎！？太好了ー！謝謝你！」
+		PRINTFORMW 少女開心得跳起来、並高興地抱着了%ANAME(MASTER)%
+		PRINTFORML 「誒嘿嘿ー、這樣就能向大家報告好消息了ー！真的謝謝你ー！」
+		PRINTFORMW 少女高興得手舞足蹈地走了
+	ENDIF
+	DVAR:河童_発生フラグ = 1
+	DVAR:河童_商売した回数 ++
+;金を要求するパターン
+ELSEIF RESULT == 1
+	金額 = 4000 + DAY * 100
+	SIF 金額 > MONEY / 4
+		金額 = MONEY / 4
+	IF DVAR:河童_抱いた回数 > 5
+		PRINTFORML 「那個、想要的只有這樣…？」
+		PRINTFORML 当要求提供金錢時少女開始坐立不安
+		PRINTFORMW 從双眼的視線能看出她期待着什麼
+		PRINTFORML %ANAME(MASTER)%苦笑着走近少女、将手放到少女的腰部
+		PRINTFORML 「啊…」
+		PRINTFORMW 将從喉嚨微微発出喘息声的少女帯入了寢室
+		PRINTFORML ・・・
+		PRINTFORML ・・
+		PRINTFORMW ・
+		PRINTFORMW %ANAME(MASTER)%好好地痛愛了少女的身体
+	ELSEIF DVAR:河童_抱いた回数 > 0
+		PRINTFORML 「誒…這樣就可以了？」
+		PRINTFORMW 当要求提供金錢時少女看起来有点失望
+		PRINTFORML 「啊、不！沒事！…嗯、我知道了」
+		PRINTFORMW 少女慌張地撤回前言、並乖乖交出金錢
+	ELSE
+		PRINTFORML 「嗯、錢嗎ー」
+		PRINTFORML 「雖然研究也需要不少金錢、嗯ー嗯ー…真沒辦法呢ー」
+		PRINTFORMW 少女看起来很苦悩、但迫於無奈還是乖乖交出金錢了
+	ENDIF
+	SETCOLOR カラー_オレンジ
+	PRINTFORMW 得到了{金額}資金
+	RESETCOLOR
+	MONEY += 金額
+	LOCAL = 1
+;身体を要求するパターン
+;1回目と2回目以降の2パターンだけ用意したけど募金娘みたいにもっといろんなパターン口上書いていいのよ！いいのよ！
+ELSEIF RESULT == 2
+	IF DVAR:河童_抱いた回数 == 0
+		PRINTFORML 想要獲得許可就讓我抱你
+		PRINTFORMW %ANAME(MASTER)%做出這樣的宣告、少女在理解到意思後身体僵直起来
+		PRINTFORML 「啊……誒……那、那個……」
+		PRINTFORMW 当理解了你的言語後、少女臉紅耳赤呑呑吐吐地説着
+		PRINTFORML 「開、開玩笑……吧？」
+		PRINTFORMW 回神過来的少女、戦戦赫赫地詢問着%ANAME(MASTER)%
+		PRINTFORML 但是%ANAME(MASTER)%還是做出相同的宣告
+		PRINTFORMW 讓我抱你
+		PRINTFORML 「嘶！！！」
+		PRINTFORML 「説、説這種事！你不会感到、羞耻嗎！？」
+		PRINTFORMW 少女非常憤怒
+		PRINTFORML 但%ANAME(MASTER)%冷静地宣佈着如果不行的話対話就到此為止了
+		PRINTFORMW 少女聽到後低頭
+		PRINTFORML 「………嗯」
+		PRINTFORMW 在経過短暫的沈默後、少女擠出了声音
+		PRINTFORML 「…我、我知道了……」
+		PRINTFORML 少女扭扭擰擰地小声同意你的要求
+		PRINTFORMW %ANAME(MASTER)%很快拉着少女的手、帯入寢室
+		PRINTFORML 「啊……但、但是……這件事……要向、大家、保密……呢……」
+		PRINTFORMW 答応了面紅耳赤的少女的要求後、関閉了寢室的門
+	ELSEIF DVAR:河童_抱いた回数 > 5
+		PRINTFORML 「…誒嘿嘿、嗯」
+		PRINTFORMW 要求提供身体後、少女看起来很開心並害羞地笑着
+		PRINTFORML 将少女抱到懷裡、责弄着少女的身体並軽咬着耳朵
+		PRINTFORMW 「啊、真是坏心眼…能対我身体做這種事的就只有%ANAME(MASTER)%而己…♥」
+		PRINTFORML 少女雖然発出抗議、但很開心地扭動着身体
+		PRINTFORMW %ANAME(MASTER)%与少女一辺調情一辺走向寝室
+	ELSE
+		PRINTFORML 「………嗯」
+		PRINTFORMW 再次要求少女提供身体時、少女仍然臉紅低着頭
+		PRINTFORML 但是預先做好了覚悟的少女、很快就臉紅着答応你的要求
+		PRINTFORMW %ANAME(MASTER)%拉着少女的手、走向寝室
+	ENDIF
+		PRINTFORML ・・・
+		PRINTFORML ・・
+		PRINTFORMW ・
+		SELECTCASE RAND:10
+			CASE 0
+				PRINTFORMW %ANAME(MASTER)%從少女背後捉住少女的腰、激烈地搖動着腰部
+				PRINTFORMW 房間響起了肉体碰撞的声音、少女発出喘息並不時混雜着呻吟声
+				PRINTFORMW 每次突進撞到子宮時、忍受着的少女的身体都会痙攣着
+				PRINTFORMW 感覚良好地釋放出精液後、少女深深地弓着背高潮了
+			CASE 1
+				PRINTFORMW %ANAME(MASTER)%從少女背後捉住少女的双臂、激烈地侵犯着
+				PRINTFORMW 激烈地搖動腰部肉棒挖着膣肉時、少女都会発出嬌媚的声音
+				PRINTFORMW 少女被突刺着発出撒嬌的声音、纏着肉棒的小穴也慢慢地收緊
+				PRINTFORMW 享受了少女陰道緊貼着的触感而高潮、在少女的深処釋放出精子
+			CASE 2
+				PRINTFORMW 将少女推倒、圧在少女身上並将肉棒深深地插入了
+				PRINTFORMW 保持着深深插入的状態、用肉棒的先端刺激着子宮頸部
+				PRINTFORMW 少女不由自主地発出嬌喘声、双腿緊緊抱着%ANAME(MASTER)%的腰
+				PRINTFORMW 緊貼着少女並在子宮内灌入了精子後、与少女緊緊地相擁
+			CASE 3
+				PRINTFORMW %ANAME(MASTER)%保持与少女相擁的姿勢、慢慢地調教少女
+				PRINTFORMW 故意令少女焦急慢慢地搖動着腰、少女於是主動地扭動着腰
+				PRINTFORMW 忍耐不住在子宮中釋放出精液時、少女因為雌性的本能而発出歡悦的声音
+				PRINTFORMW 沈溺在高潮余韻的少女用手抱着%ANAME(MASTER)%的脖子、乞求再次調教
+			CASE 4
+				PRINTFORMW %ANAME(MASTER)%坐在床辺、而少女則跨坐在上面発出了甜美的声音
+				PRINTFORMW 深深地插入的肉棒帯来的快感、令少女沈醉忘我地扭動腰部
+				PRINTFORMW 接近界限的%ANAME(MASTER)%将少女抱到懷裏、熱情地接吻並在深処射精
+				PRINTFORMW 少女的小穴收緊、双腿伸直身体痙攣着
+			CASE 5
+				PRINTFORMW 慢慢地将少女的身体全身愛撫、少女被如此寵愛後忍不住主動要求肉棒
+				PRINTFORMW 要求造出可愛的索求姿勢後、少女紅着臉用自己的手指将小穴掰開、説着誘惑的言語
+				PRINTFORMW %ANAME(MASTER)%看起来很焦急地慢慢插入、少女因此高潮了幾次
+				PRINTFORMW 少女忘記羞恥心歡悦地淫叫、慢慢地用小穴満足了
+			CASE 6
+				PRINTFORMW 少女露出淫蕩的表情、在床上扭動着腰
+				PRINTFORMW %ANAME(MASTER)%詢問少女是否感到舒服、少女口齒不清地吐出否定的話語
+				PRINTFORMW 少女精神飘忽、沈迷於肉棒所賜予的快楽
+				PRINTFORMW 少女的逞強沒堅持多久、在%ANAME(MASTER)%射精時発出雌性的嬌声而高潮了
+			CASE 7
+				PRINTFORMW 少女保持四肢着地、屁股舉起的姿勢被%ANAME(MASTER)%侵犯着
+				PRINTFORMW 将故意欺負少女一樣緩慢地搖動着腰、尋找弱点進攻着
+				PRINTFORMW 少女経過幾次高潮全身痙攣的同時、将臉埋在枕頭中為了不発出声音全力忍耐着
+				PRINTFORMW 但是在%ANAME(MASTER)%射精時、終於忍耐不住発出大大的嬌声高潮了
+			CASE 8
+				PRINTFORMW %ANAME(MASTER)%躺在床上、而少女則在上面扭動着腰
+				PRINTFORMW 撫摸着正在奉仕的少女的胸、並责弄着乳頭時、少女被嚇到令身体発抖小穴收緊了
+				PRINTFORMW 無視少女的抗議、進一步用舌頭和手指対胸部愛撫、少女忍受不住漏出了甜美的声音
+				PRINTFORMW 満足了身体変得黏糊糊的少女、再少女高潮的同時在最深処射精了
+			CASE 9
+				PRINTFORMW 從少女背後抱着她的身体、将肉棒刺入到深処
+				PRINTFORMW 用舌頭愛撫着少女的脖子並手反复揉搓胸部、少女神情恍惚漏出了甜美的声音
+				PRINTFORMW 是舒服得受不了嗎、少女主動使勁地扭動着腰刺激着陰茎
+				PRINTFORMW 在被高潮的快感融化了的少女的身体裏面、釋放了幾次精液
+		ENDSELECT
+	CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失", 0, "", "", @"河童娘の膣", "和姦")
+	PRINTFORML
+	IF DVAR:河童_抱いた回数 == 6
+		PRINTFORML 「哈啊…身体已経完全被%ANAME(MASTER)%調教了…」
+		PRINTFORMW 事後、少女抱着%ANAME(MASTER)%的手腕小声問道
+		PRINTFORML 「吶…以後可以、再来嗎？」
+		PRINTFORMW 対用湿潤的眼神望過来的少女用一個吻作為回答
+	ELSEIF DVAR:河童_抱いた回数 > 6
+		PRINTFORML 与少女充分享受後、発出了許可
+		PRINTFORML 「以後会再来的♥」
+		PRINTFORMW 離別之際、少女親吻了%ANAME(MASTER)%的臉頰
+	ELSEIF DVAR:河童_抱いた回数 >= 3
+		PRINTFORML 充分得到満足後按約定発出了許可
+		PRINTFORMW 少女双頬通紅、不自覚地露出感到可惜的表情離開了
+	ELSE
+		PRINTFORMW 放一定発出許可後少女像逃跑一樣離開了
+	ENDIF
+	DVAR:河童_発生フラグ = 1
+	SIF DVAR:河童_抱いた回数 < 7
+		DVAR:河童_抱いた回数 ++
+ENDIF
+
+LOCAL:1 = RAND:6 + LOCAL
+IF LOCAL:1 >= 3
+	PRINTFORML ………
+	PRINTFORMW 河童們的買賣引起了大事故
+	CALL DAILY_EVENT_RAND_CITYSELECT(0)
+	対象 = RESULT
+	IF 対象 > 0
+		CALL MODIFY_CITY_ECONOMY(対象, RAND(10000, 30000) * -1)
+	ENDIF
+ELSE
+	PRINTFORML ………
+	PRINTFORMW 河童們的買賣活化了領内的経済
+	CALL DAILY_EVENT_RAND_CITYSELECT(0)
+	対象 = RESULT
+	IF 対象 > 0
+		CALL MODIFY_CITY_ECONOMY(対象, RAND(10000, 30000))
+	ENDIF
+ENDIF
+
+RETURN 1

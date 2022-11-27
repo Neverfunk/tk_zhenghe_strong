@@ -1,0 +1,1306 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K148_BENTO_RATE(対象)
+#DIM 対象
+RETURN 20
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K148_BENTO_DECISION(対象)
+#DIM 対象
+;隠岐奈と面識があり、所属がおなじ、正妻であること、2%
+SIF !TALENT:対象:正妻
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K148_BENTO_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K148_BENTO(対象)
+#DIM 対象
+#DIM 経験値
+
+PRINTFORML 
+PRINTFORML 今天从早到晚有军事演习。
+;TranslatedMark 今日は朝から晩まで軍事演習がある。
+PRINTFORMW %ANAME(MASTER)%作为监督角色，必须去现场。
+;TranslatedMark %ANAME(MASTER)%は監督役として、現地に行かなくてはならない。
+PRINTFORML 
+PRINTFORML 正准备出门时，被%ANAME(対象)%叫了一声。
+;TranslatedMark 身支度を整え出かけようとした矢先に、%ANAME(対象)%に声をかけられた。
+PRINTFORML 「今天一直在外面工作吧？」
+;TranslatedMark 「%ANAME(MASTER)%、今日はずっと外で仕事なんだろう？」
+PRINTFORML 「你可以在中午吃这个。你看，收下吧」
+;TranslatedMark 「これを昼に食べると良い。ほら、受け取れ」
+PRINTFORML 似乎有些自豪的%ANAME(対象)%把包在包袱里的便当塞给了她。
+;TranslatedMark どこか誇らしげな様子の%ANAME(対象)%は、風呂敷に包まれた弁当を押し付けてきた。
+PRINTFORMW 拿在手里一看，比想象的要有重量感。
+;TranslatedMark 手に持ってみると、思ったよりも重量感がある。
+PRINTFORML 
+	;料理Lv50以上　まともだとむしろ書けないという事故
+IF ABL:対象:料理 >= 50
+	PRINTFORML %ANAME(対象)%很会做饭。
+	;TranslatedMark ああ見えて、%ANAME(対象)%は料理が上手い。
+	PRINTFORML 这个便当盒里一定装满了五颜六色的美味菜肴吧。
+	;TranslatedMark この弁当箱の中には、きっと色とりどりの美味しいおかずが詰まっているのだろう。
+	PRINTFORML 当%ANAME(MASTER)%的脸闪闪发光道谢的时候，%ANAME(対象)%害羞地笑了。
+	;TranslatedMark %ANAME(MASTER)%が顔を輝かせてお礼を言うと、%ANAME(対象)%は照れ臭そうに笑った。
+	PRINTFORMW 「呵呵！如果能让你那么高兴的话，我也有做的价值」
+	;TranslatedMark 「ふふっ！そんな風に喜んでもらえると、私としても作った甲斐があるよ」
+	PRINTFORML 
+	PRINTFORML 「……对了，%ANAME(MASTER)%，稍微弯一下」
+	;TranslatedMark 「……そうだ、%ANAME(MASTER)%、ちょっと屈んでくれ」
+	PRINTFORML 当%ANAME(MASTER)%回应的时候，%ANAME(対象)%跑过来轻轻地重叠了嘴唇。
+	;TranslatedMark %ANAME(MASTER)%が応じると、%ANAME(対象)%は駆け寄って軽く唇を重ねてきた。
+	PRINTFORML 「嗯……呵呵，走好的吻♥」
+	;TranslatedMark 「ちゅっ……ふふっ、いってらっしゃいのキスだ♥」
+	PRINTFORMW 像是恶作剧般耸耸肩膀的%ANAME(対象)%，微微地染上了脸颊。
+	;TranslatedMark くすっと悪戯っぽく肩をすくめる%ANAME(対象)%は、ほんのりと頬を染めていた。
+	PRINTFORML 
+	PRINTFORMW 在%ANAME(対象)%的目送下，%ANAME(MASTER)%一手拿着爱妻便当前往预定演习地。
+	;TranslatedMark %ANAME(対象)%に見送られながら、%ANAME(MASTER)%は愛妻弁当を片手に演習予定地へと向かっていった。
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW ・
+	PRINTFORML 午休的时间终于到了。
+	;TranslatedMark ようやく昼休みの時間がやってきた。
+	PRINTFORML 虽说才过了半天，可肚子都饿扁了。
+	;TranslatedMark まだ半日しか経っていないとはいえ、すっかりお腹はぺこぺこだ。
+	PRINTFORMW 取出便当打开包装后，一个涂有上等漆的便当盒露出了脸。
+	;TranslatedMark 弁当を取り出し包みを解いていくと、上品な漆塗りの弁当箱が顔を覗かせた。
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORML 打开盖子，映入眼帘的是有光泽的白米饭和色彩丰富的菜肴。
+			;TranslatedMark 蓋を開ければ、艶のある白飯と彩り豊かなおかずが目に飛び込んできた。
+			PRINTFORMW 要抑制住自己的意志，首先双手合十"我开动了"。
+			;TranslatedMark がっつきたくなる気持ちを抑えて、まずは両の掌を合わせて「いただきます」をする。
+			PRINTFORML 
+			PRINTFORMW 一开始决定在白米上用筷子。
+			;TranslatedMark 最初は白米に箸をつけることにした。
+			PRINTFORML 虽然还是想说米饭是刚煮好的，但我觉得便当的米饭也有其他的美味。
+			;TranslatedMark やはりコメは炊き立て、と言いたいところだが、弁当のご飯も別の美味さがあるように思う。
+			PRINTFORML 这一一贯的主张，正是现在这里的白米所证明的。
+			;TranslatedMark その持論は、今ここにある白米が証明してくれている。
+			PRINTFORML 恰到好处的硬度和温暖的甜味，让人无法忍受的心情平静下来。
+			;TranslatedMark 程よい硬さとどこか温かみのある甘さが、堪らなく心を安らげてくれるのだ。
+			PRINTFORMW 将煎好的鲑鱼块和红紫苏盐腌在一起的话，就没法再提了。
+			;TranslatedMark ほっくりと焼きあがった鮭の切り身、赤紫蘇の塩漬けを合わせれば、もう文句の言いようがない。
+			PRINTFORML 
+			PRINTFORMW %ANAME(MASTER)%满意地点了点头，接着把筷子伸向了菜的方向。
+			;TranslatedMark %ANAME(MASTER)%は満足気に頷き、次はおかずの方に箸を伸ばした。
+			PRINTFORML 
+			PRINTFORML 鸡肉丸子虽然很松软，但是软骨的刺痛感和生姜的味道都很好，非常好吃。
+			;TranslatedMark 鶏団子はふわふわしつつも、軟骨のコリコリとした感触と生姜の味が良いアクセントとなっていてとても美味しい。
+			PRINTFORML 吃得入迷了，三个团子转眼间就不见了。
+			;TranslatedMark 夢中になって食べていたら、3つ入っていた団子はあっという間になくなってしまった。
+			PRINTFORML 实在令人恋恋不舍…。下次再要的话，能做很多吗？
+			;TranslatedMark 実に名残惜しい…。今度おねだりすれば、いっぱい作ってもらえるだろうか？
+			PRINTFORMW 她一定会很高兴地答应的吧。
+			;TranslatedMark 彼女のことだ、間違いなく喜んで応じてくれるだろう。
+			PRINTFORML 
+			PRINTFORMW %ANAME(MASTER)%带着兴奋的心情，下一道菜…搞筑前煮。
+			;TranslatedMark %ANAME(MASTER)%は高揚した気分のまま、次のおかず…筑前煮に手をつける。
+			PRINTFORML 莲藕的口感、香甜的笋、弹性十足的香菇。
+			;TranslatedMark 蓮根のさっくりとした食感や、コリコリとした筍、弾力あるぷりぷりの椎茸。
+			PRINTFORML 人参的橙和扁豆的绿保持着丰富的色彩。
+			;TranslatedMark 人参の橙とさやいんげんの緑が彩りを豊かに保っている。
+			PRINTFORML 完全没有煮坏，光滑的芋头口感恰到好处，让人上瘾的美味。
+			;TranslatedMark 一切煮崩れしておらず、つるんとした里芋は程よくねっとりしていて癖になる美味しさだ。
+			PRINTFORMW 汤汁也很好地渗入进去，外观和味道都无可挑剔。
+			;TranslatedMark 出汁もきちんと染みていて、見た目も味も申し分ない。
+			PRINTFORML 
+			PRINTFORML 吃的东西都很好吃，这是多么奢侈啊。
+			;TranslatedMark 口にするものがどれもこれも美味しいというのは、なんという贅沢だろうか。
+			PRINTFORMW 而且这些都是爱妻做的料理。
+			;TranslatedMark しかもそれら全て、愛妻が作った料理である。
+			PRINTFORML 
+			PRINTFORML %ANAME(MASTER)%一边咀嚼着幸福，一边将筷子伸向最后的甜品。
+			;TranslatedMark %ANAME(MASTER)%は幸せを噛み締めながら、最後のデザートに箸を伸ばす。
+			PRINTFORML 被拆开的是栗子茶巾。
+			;TranslatedMark ばらんで仕切られているそれは、栗茶巾だ。
+			PRINTFORML 从给人柔和印象的淡黄色中，飘来一股淡淡的香味。
+			;TranslatedMark 柔らかな印象を受ける淡い黄色からは、ほんのりと良い香りが漂ってくる。
+			PRINTFORML 用筷子舀一舀放进嘴里，一转眼就融化消失了。
+			;TranslatedMark 箸でひと掬いして口に入れれば、あっという間にふわりと解けて消えてしまった。
+			PRINTFORMW 高雅的和三盆的甘甜余韵，给人一种如同独自在静谧的庭院里散步时一样的心情平静。
+			;TranslatedMark 上品な和三盆の甘い余韻が、まるで独り静かな庭園を散歩している時のような心の安らぎをもたらした。
+			PRINTFORML 
+			PRINTFORML ……真的很好吃。
+			;TranslatedMark ……本当に、美味しい。
+			PRINTFORMW %ANAME(MASTER)%闭上眼睛，以平静的表情深切地这么想…。
+			;TranslatedMark %ANAME(MASTER)%は目を瞑り、穏やかな表情でしみじみとそう思うのだった…。
+		CASE 1
+			PRINTFORML 今天的便当是用白米和洋式的菜装饰得很漂亮。
+			;TranslatedMark 今日のお弁当は白米と洋風なおかずで綺麗に彩られている。
+			PRINTFORML 在星形胡萝卜的迷你汉堡上，那不勒斯意大利面。
+			;TranslatedMark 星型のニンジンを乗せたミニハンバーグに、ナポリタンスパゲティ。
+			PRINTFORML 黄油嫩煎菠菜、鹌鹑蛋、小番茄和西兰花。
+			;TranslatedMark ほうれん草のバターソテー、うずら卵の目玉焼き、プチトマトにブロッコリー。
+			PRINTFORMW 比起大人更受孩子欢迎的阵容，反而更强调了家庭的印象。
+			;TranslatedMark 大人よりも子供ウケするようなラインナップだが、それがむしろ家庭的な印象をより強調させた。
+			PRINTFORML 
+			PRINTFORML 「哇，好漂亮的便当啊！是夫人亲手做的吗？」
+			;TranslatedMark 「わあ、素敵なお弁当ですね！奥様のお手製ですか？」
+			PRINTFORML 正想着要吃的时候，旁边的部下搭话了。
+			;TranslatedMark さて食べようと思っていたところに、傍に控えていた部下が話しかけてきた。
+			PRINTFORML 「对不起，打扰您了……因为看起来太好吃了」
+			;TranslatedMark 「っと、お邪魔してすみません……あまりに美味しそうだったのでつい」
+			PRINTFORML 被称赞爱妻亲手做的便当，我也会很开心。
+			;TranslatedMark 愛妻手製の弁当を褒められると、こちらとしても嬉しい気持ちになる。
+			PRINTFORMW %ANAME(MASTER)%露出了自豪的笑容。
+			;TranslatedMark %ANAME(MASTER)%は誇らしげな笑みを浮かべた。
+			PRINTFORML 
+			PRINTFORML 「即便如此…%ANAME(対象)%大人居然能做出这么可爱的便当」
+			;TranslatedMark 「それにしても…%ANAME(対象)%様がこんな可愛らしいお弁当を作られるなんて」
+			PRINTFORML 「我知道很失礼，但是有点意外」
+			;TranslatedMark 「失礼を承知で申しますが、ちょっと意外です」
+			PRINTFORML 嗯，确实…%ANAME(対象)%平时总给人一种被压倒的感觉。
+			;TranslatedMark まあ、確かに…%ANAME(対象)%は普段、どこか圧倒されるような雰囲気を纏っている。
+			PRINTFORMW 不露声色，时刻自大……即使被认为和为伴侣做便当的可爱无缘也没有办法。
+			;TranslatedMark 隙を見せず、常に尊大で……伴侶のためにお弁当を作るという愛らしさとは無縁に思われても仕方がない。
+			PRINTFORML 
+			PRINTFORMW 但是看，这个星球上的胡萝卜。然后想象一下%ANAME(対象)%制作这个的样子。
+			;TranslatedMark しかし見よ、このお星さまニンジンを。そして%ANAME(対象)%がこれを作っている姿を想像せよ。
+			PRINTFORMW 滑梯 。
+			;TranslatedMark す ご く か わ い い 。
+			PRINTFORML 
+			PRINTFORML 但是不只是可爱。这里面也有别的意思。
+			;TranslatedMark しかし可愛いだけではない。これには別の意味も込められている。
+			PRINTFORML 也就是说，"我是星之神！"！"的显示。
+			;TranslatedMark つまり、"私は星の神なのだぞ！"という顕示だ。
+			PRINTFORML %ANAME(対象)%是个想引人注目的人。果然很可爱。
+			;TranslatedMark %ANAME(対象)%は目立ちたがり屋さんなのである。やっぱり可愛い。
+			PRINTFORMW 「原来如此……好厉害啊，居然是星之神」
+			;TranslatedMark 「なるほど……すごいですね、星の神だなんて」
+			PRINTFORML 
+			PRINTFORML 顺带一提，%ANAME(対象)%是能乐之神，是后户之神，是障碍之神，是养蚕之神
+			;TranslatedMark ちなみに%ANAME(対象)%は能楽の神であり、後戸の神であり、障碍の神であり、養蚕の神であり、
+			PRINTFORML 被差别对待民的神、地母神、宿神、幻想乡的贤者。
+			;TranslatedMark 被差別民の神であり、地母神であり、宿神であり、幻想郷の賢者でもある。
+			PRINTFORMW 「好厉害啊…」
+			;TranslatedMark 「すごいですね…」
+			PRINTFORML 
+			PRINTFORML 但是，有很多神格的……你觉得那个本质是什么？
+			;TranslatedMark だが、多くある神格の……その本質は何だと思う？
+			PRINTFORMW 「那是…对不起，我不知道」
+			;TranslatedMark 「それは…申し訳ありません、分かりません」
+			PRINTFORML 是终极的绝对秘神。
+			;TranslatedMark 究極の絶対秘神だ。
+			PRINTFORMW 「吸气…那真厉害啊……」
+			;TranslatedMark 「きゅうきょく…それはすごいですね……」
+			PRINTFORML 
+			PRINTFORML 「啊……那个，差不多该吃便当了吧？」
+			;TranslatedMark 「あ……あの、そろそろお弁当をお食べになっては？」
+			PRINTFORML 确实是这样，%ANAME(MASTER)%吃了便当，吞了下去还继续炫耀爱妻。
+			;TranslatedMark たしかにその通りだと思い、 %ANAME(MASTER)%は弁当を食べ、飲み込んでは愛妻自慢を続ける。
+			PRINTFORMW 虽然脸上浮现出紧张的笑容，但作为认真部下的他却一直在听%ANAME(MASTER)%的话…。
+			;TranslatedMark 引きつった笑顔を浮かべつつも、真面目な部下である彼は%ANAME(MASTER)%の話を聞かされ続けた…。
+		CASE 2
+			PRINTFORML 今天的便当以菜饭为首，充满了和风的色彩。
+			;TranslatedMark 今日のお弁当は炊き込みご飯を筆頭に、和風の彩りだ。
+			PRINTFORML 小菜是汤汁鸡蛋卷、炸鸡块、炖羊栖菜、甜辣煮绿辣椒。
+			;TranslatedMark おかずはだし巻き卵、鶏のから揚げ、ひじきの煮物、ししとうがらしの甘辛煮。
+			PRINTFORMW 和%SPLIT_RAND("筍/山菜/とうもろこし/鯛/松茸/栗/銀杏/むかご/牡蠣/", 1)%一起煮的饭，光看就很能勾起食欲。
+			;TranslatedMark %SPLIT_RAND("筍/山菜/とうもろこし/鯛/松茸/栗/銀杏/むかご/牡蠣/", 1)%と一緒に炊きこまれたご飯は、見るだけでも食欲をそそる。
+			PRINTFORML 
+			PRINTFORML 顺便说一下，在羊栖菜等幻想乡买不到的食材，似乎是特意将%ANAME(対象)%带到外面的世界去采购的。
+			;TranslatedMark ちなみに、ひじきなどの幻想郷で手に入らない食材は、わざわざ%ANAME(対象)%が外の世界に出向いて仕入れているらしい。
+			PRINTFORML 虽然能吃到各种各样的东西很开心，但是因为是远离尘世的她，所以担心她会不会做危险的事情。
+			;TranslatedMark 色々なものが食べられて嬉しいものの、浮世離れした彼女のことだから、危険なことをしたりされたりしていないか心配だ。
+			PRINTFORMW …下次跟她一起去买东西吧。
+			;TranslatedMark …今度、彼女の買い物について行ってみるとしよう。
+			PRINTFORML 
+			PRINTFORMW ……总之，她的料理没有错。今天也好好吃吧。
+			;TranslatedMark ……ともかく、彼女の料理に外れはない。今日も美味しく頂こう。
+			PRINTFORML 
+			PRINTFORMW %ANAME(MASTER)%马上把筷子放到煮好的米饭上。
+			;TranslatedMark %ANAME(MASTER)%はさっそく炊き込みご飯に箸をつける。
+			PRINTFORML 像这样用汤汁煮的饭比起刚煮好的，倒不如凉了更容易知道味道。
+			;TranslatedMark このように出汁で炊いたご飯は炊き立てよりも、むしろ冷めている方が味が分かりやすくなる。
+			PRINTFORMW 也就是说，最适合做便当了。
+			;TranslatedMark つまり、お弁当に最適ということだ。
+			PRINTFORML 刚一放进嘴里，就弥漫着上等的鲣鱼和煮好的食材的香味。
+			;TranslatedMark 口に入れた途端、上品に漂う鰹とほっくり炊き上がった具材の香りがいっぱいに広がった。
+			PRINTFORMW 小心翼翼地为米饭上色的三叶，以其独特的风味丰富的味道提升了整体的味道。
+			;TranslatedMark 慎ましやかにご飯を彩っていた三つ葉が、その独特の風味豊かさで全体の味を引き上げている。
+			PRINTFORML 
+			PRINTFORML 好吃……。
+			;TranslatedMark 美味しい……。
+			PRINTFORMW 有一个很会做饭的妻子，真是幸福极了。
+			;TranslatedMark 料理上手な妻がいて、本当に幸せ極まりない。
+			PRINTFORML 
+			PRINTFORML %ANAME(MASTER)%心平气和地享受着爱妻便当，伴随着轻声细语一个部下走了过来。
+			;TranslatedMark %ANAME(MASTER)%が心穏やかに愛妻弁当を堪能していると、軽い声かけと共に部下の一人がやってきた。
+			PRINTFORMW 她大概是…是小队的指挥官吗。
+			;TranslatedMark 彼女はたしか…小隊の指揮官だっただろうか。
+			PRINTFORML 「对不起，休息的时候，我抓到了潜入演习所附近的敌人阵营的情报员…」
+			;TranslatedMark 「お休み中すみません、演習所付近に潜入していた敵陣営の諜報員を捕らえたのですが…」
+			PRINTFORML %ANAME(MASTER)%皱起眉头说想让她在饭后吃，她轻轻地叹了一口气。
+			;TranslatedMark ごはんのあとにしてほしい、と%ANAME(MASTER)%が眉をひそめると、彼女は小さく溜息を吐いた。
+			PRINTFORMW 「是的，我想您会这么说的」
+			;TranslatedMark 「ええ、そう仰ると思いましたよ」
+			PRINTFORML 
+			PRINTFORML 「……总之，现在带着监视被拘留，之后作为俘虏带回去就可以了吧？」
+			;TranslatedMark 「……とりあえず、今は監視付きで拘束、後で捕虜として連れ帰ればいいですかね？」
+			PRINTFORML 「虽然是女性。午休的时候和演习的时候，去寻问、认真地做，时间真是太浪费了」
+			;TranslatedMark 「女だったんですけれども。昼休みと演習割いて、尋問したりマワしたりってのは時間が勿体ないですし」
+			PRINTFORMW %ANAME(MASTER)%一边皱着脸说不要在吃饭的时候说那样的话，一边讯问其他人有没有同伴，一边命令搜索。
+			;TranslatedMark 食事中にそういう話するなと顔をしかめつつ、他に仲間がいないかの尋問、捜索を%ANAME(MASTER)%は命じた。
+			PRINTFORML 
+			PRINTFORML 「搜索已经开始了。讯问也大体上。只是，我不认为会简单地开口说话，休息时间也很浪费，所以"轻松"地说」
+			;TranslatedMark 「捜索はもうさせてます。尋問も一応。ただ、簡単に口を割るとは思えないし、休み時間が勿体ないので"軽く"ですが」
+			PRINTFORML 虽然态度不好，但却是个很能干的部下。
+			;TranslatedMark 態度は良いとは言えないが、なかなかデキる部下だ。
+			PRINTFORMW %ANAME(MASTER)%满意地点了点头，她也点了点头。
+			;TranslatedMark %ANAME(MASTER)%が満足気に頷くと、彼女もこくりと頷き返した。
+			PRINTFORML 
+			PRINTFORML 「但是……便当看起来很好吃。是手工制作的吗？」
+			;TranslatedMark 「ところで……お弁当、美味しそうですね。お手製ですか？」
+			PRINTFORMW %ANAME(MASTER)%就好像在等着我一样，回答是妻子亲手做的。
+			;TranslatedMark %ANAME(MASTER)%は待ってましたとばかりに、妻の手作りだと答え胸を張る。
+			PRINTFORML 「原来如此，真是羡慕得不得了」
+			;TranslatedMark 「なるほど、羨ましい限りです」
+			PRINTFORML 「我的伴侣容貌和蔼可亲，但好像不擅长做饭…」
+			;TranslatedMark 「私の伴侶は容姿も愛想も良いのですが、料理だけは苦手みたいで…」
+			PRINTFORML 「…这样的事对你来说怎样都好。那我就告辞了」
+			;TranslatedMark 「…って、こんなこと貴方にとってはどうでもいいですよね。それでは失礼します」
+			PRINTFORMW 那样说了一个礼，她稍微加快了脚步离开了。
+			;TranslatedMark そう言って一礼し、少々早足で彼女は去っていった。
+			PRINTFORML 
+			PRINTFORML 话说回来，从他的口气来看…她的伴侣是女性吗……。
+			;TranslatedMark ところで、あの口ぶりからして…彼女の伴侶は女性だろうか……。
+			PRINTFORML %ANAME(MASTER)%一边想着百合园，一边又开始大口吃爱妻便当。
+			;TranslatedMark %ANAME(MASTER)%は百合の園に思いを馳せつつ、再び愛妻弁当を頬張り始めた。
+			PRINTFORML ……一边想着别人的事情一边吃，如果被发现了的话，会被%ANAME(対象)%吃拳头。
+			;TranslatedMark ……よそ様のことを考えつつ食べていたなんてバレたら、%ANAME(対象)%に拳骨を食らいそうだ。
+			PRINTFORMW 不由得回头看身后，%ANAME(MASTER)%吃了便当。
+			;TranslatedMark 思わず背後を振り返りながらも、%ANAME(MASTER)%は弁当を平らげた。
+	ENDSELECT
+	IF MAXBASE:MASTER:体力 < 5000
+		MAXBASE:MASTER:体力 += 100
+		PRINTFORML 
+		CALL COLOR_PRINT("多亏了便当，感到充满了生命力…", カラー_注意)
+		CALL COLOR_PRINT(@"%ANAME(MASTER)%的体力上升了100！", カラー_注意)
+	ENDIF
+	PRINTFORML 
+	PRINTFORML ・
+	PRINTFORMW ・
+	PRINTFORML 「你回来了，%ANAME(MASTER)%」
+	;TranslatedMark 「おかえり、%ANAME(MASTER)%」
+	PRINTFORML 深夜回到我房间的%ANAME(MASTER)%，被微笑着的%ANAME(対象)%迎接。
+	;TranslatedMark 夜遅くに私室に戻った%ANAME(MASTER)%は、笑顔の%ANAME(対象)%に迎えられた。
+	PRINTFORMW 「今天辛苦了。晚上喝酒吗？虽然有好的酒…」
+	;TranslatedMark 「今日はお疲れ様。晩酌でもするか？良いお酒があるけれど…」
+	PRINTFORMW %ANAME(MASTER)%摇着头，抱着%ANAME(対象)%的腰坐在沙发上。
+	;TranslatedMark %ANAME(MASTER)%は首を振り、%ANAME(対象)%の腰を抱いてソファにかける。
+	PRINTFORMW 一起坐着的%ANAME(対象)%将脸颊染成%ANAME(MASTER)%。
+	;TranslatedMark 一緒に座った%ANAME(対象)%は頬を染めて%ANAME(MASTER)%にすり寄ってくる。
+	PRINTFORML 
+	PRINTFORML 「%ANAME(MASTER)%，便当怎么样…？」
+	;TranslatedMark 「%ANAME(MASTER)%、お弁当はどうだった…？」
+	PRINTFORML 
+	CALL ASK_MULTI("好吃" ,"普通" ,"再努力吧")
+	IF RESULT == 0
+		PRINTFORML 「呵呵，这是理所当然的♪因为是为了%ANAME(MASTER)%而做的…」
+		;TranslatedMark 「ふふっ、当たり前だ♪%ANAME(MASTER)%の為に作ったのだから…」
+		PRINTFORML 「而且我是你的妻子？当然不能让伴侣高兴！」
+		;TranslatedMark 「それに私はお前の妻だぞ？伴侶を喜ばせることくらい当然できなくてはな！」
+		PRINTFORML %ANAME(対象)%带着自豪的笑容这样回答。
+		;TranslatedMark %ANAME(対象)%は誇らしげな笑みを浮かべてそう答える。
+		PRINTFORMW 当%ANAME(MASTER)%更加夸奖她抚摸她的头时，%ANAME(対象)%紧紧地抱住了她。
+		;TranslatedMark %ANAME(MASTER)%がさらに褒めながら頭を撫でてあげると、%ANAME(対象)%はぎゅっと抱き着いてきた。
+		PRINTFORML 
+		PRINTFORML 「但是，能做到这种程度也是托了你的福吧」
+		;TranslatedMark 「でも、ここまで料理ができるようになったのも、貴方のおかげなのよね」
+		PRINTFORML 「谢谢你，%ANAME(MASTER)%……♥」
+		;TranslatedMark 「ありがとう、%ANAME(MASTER)%……♥」
+		PRINTFORML %ANAME(対象)%幸福地眯起眼睛，在%ANAME(MASTER)%的胸前托着腮，撒娇着。
+		;TranslatedMark %ANAME(対象)%は幸せそうに目を細め、%ANAME(MASTER)%の胸に頬ずりをして甘えてくる。
+		PRINTFORMW 当%ANAME(MASTER)%亲吻她的额头时，她微微地吐出一口气，委以柔软的肢体。
+		;TranslatedMark %ANAME(MASTER)%がその額に口づけると、彼女は小さく息を漏らして柔らかな肢体を委ねてきた。
+		PRINTFORML 
+		PRINTFORMW ……今天好像是个炎热的夜晚。
+		;TranslatedMark ……今日は熱い夜になりそうだ。
+		PRINTFORML 
+		CFLAG:対象:好感度 += 300
+		CFLAG:対象:従属度 += 300
+		経験値 = GET_EXP(GETNUM(ABL, "料理"))
+		CALL PRINT_ADD_EXP(対象, EXPNAME:経験値, RAND:5 + 1, 1)
+		CALL TRAIN_AUTO_ABLUP(対象)
+	ELSEIF RESULT == 1
+		PRINTFORML 「一般来说……说」
+		;TranslatedMark 「普通……って」
+		PRINTFORMW 「缺乏具体性呢……哪个地方很普通？」
+		;TranslatedMark 「具体性に欠けるわねぇ……どの辺が普通だったんだ？」
+		PRINTFORML %ANAME(MASTER)%对今天的便当说三道四。
+		;TranslatedMark %ANAME(MASTER)%は今日の弁当についてあれこれと論じた。
+		PRINTFORML 实际上好的地方很多，也有不好的地方要找个地方来排列…。
+		;TranslatedMark 実際は良いところが多かったが、悪いところもあら探しして並べ立てていく…。
+		PRINTFORMW 于是，随着话题的推进，表情从%ANAME(対象)%的脸上消失了。
+		;TranslatedMark すると、話が進むごとに%ANAME(対象)%の顔から表情が消えていった。
+		PRINTFORML 
+		PRINTFORML 当%ANAME(MASTER)%说完的时候，她完全没有表情，只有眼睛发出冰冷的光。
+		;TranslatedMark %ANAME(MASTER)%が話し終わったときには、すっかり彼女は無表情で、瞳だけが冷たい光を放っていた。
+		PRINTFORML 「是吗」
+		;TranslatedMark 「そうか」
+		PRINTFORML 「那么晚安」
+		;TranslatedMark 「じゃあおやすみ」
+		PRINTFORMW 完全不高兴的%ANAME(対象)%赶紧用后门回了我的房间…。
+		;TranslatedMark 完全に不機嫌になった%ANAME(対象)%は、さっさとバックドアを使って私室へ帰っていった…。
+		PRINTFORML 
+		経験値 = GET_EXP(GETNUM(ABL, "料理"))
+		CALL PRINT_ADD_EXP(対象, EXPNAME:経験値, RAND:5 + 1, 1)
+		CALL TRAIN_AUTO_ABLUP(対象)
+	ELSE
+		PRINTFORML %ANAME(MASTER)%故意吹动她，%ANAME(対象)%皱起眉头呻吟起来。
+		;TranslatedMark %ANAME(MASTER)%がわざと煽るようにそう言うと、%ANAME(対象)%は眉を寄せてむっと呻った。
+		PRINTFORML 「你是说让我朝着更高的目标前进吗？」
+		;TranslatedMark 「私に更なる高みを目指せというのか？」
+		PRINTFORML 点了点头，%ANAME(対象)%笑了…脸上浮现出粘糊糊的笑容。
+		;TranslatedMark その通りだと頷くと、%ANAME(対象)%はニヤァ…とねっとりした笑みを浮かべる。
+		PRINTFORML 「是吗是吗……这么说也没办法啊……」
+		;TranslatedMark 「そうかそうかぁ……そう言われては仕方がないわねぇ……」
+		PRINTFORML 「那么，就让他成为料理之神吧…！」
+		;TranslatedMark 「ならば、料理の神と呼ばれるようになってやろうじゃないか…！」
+		PRINTFORMW 用%ANAME(MASTER)%的话，好像着火了似的。
+		;TranslatedMark %ANAME(MASTER)%の言葉で、どうやら火がついたようだ。
+		PRINTFORML 
+		PRINTFORML 「我马上给你做点什么。你想吃什么夜宵？」
+		;TranslatedMark 「早速何かしら作ってやる。%ANAME(MASTER)%、お夜食は何が食べたい？」
+		PRINTFORMW "回答"%SPLIT_RAND("おうどん/らーめん/おじや/何でもいいから汁物/おまかせ", 1)%"后，%ANAME(対象)%充满干劲地从房间里跑了出去。
+		;TranslatedMark "%SPLIT_RAND("おうどん/らーめん/おじや/何でもいいから汁物/おまかせ", 1)%"と答えると、%ANAME(対象)%は意気込んで部屋から飛び出していった。
+		PRINTFORML 
+		CFLAG:対象:好感度 += 180
+		CFLAG:対象:従属度 += 180
+		経験値 = GET_EXP(GETNUM(ABL, "料理"))
+		CALL PRINT_ADD_EXP(対象, EXPNAME:経験値, RAND:5 + 2, 1)
+		CALL TRAIN_AUTO_ABLUP(対象)
+	ENDIF
+	;料理Lv35以上50未満
+ELSEIF ABL:対象:料理 >= 35
+	PRINTFORML 「呵呵，早上一大早就做了！怎么样？很开心吧！」
+	;TranslatedMark 「ふふん、朝イチで作ってきたんだ！どうだ？嬉しいだろう！」
+	PRINTFORMW %ANAME(対象)%一脸得意的样子，挺起胸膛。
+	;TranslatedMark %ANAME(対象)%はドヤ顔をしながら、大きく胸を張っている。
+	PRINTFORML 
+	PRINTFORML ……%ANAME(対象)%会做饭。
+	;TranslatedMark ……一応、%ANAME(対象)%は料理はできる。
+	PRINTFORML 帮忙的话当然能做出好吃的东西，一个人站在厨房也没问题。
+	;TranslatedMark 手伝ってあげれば当然美味しい物を作れるし、一人で台所に立ってもとりあえず大丈夫なレベルだ。
+	PRINTFORML %ANAME(MASTER)%微笑着说谢谢。
+	;TranslatedMark %ANAME(MASTER)%はにこりと微笑んで、ありがとうとお礼を言った。
+	PRINTFORMW 「啊，啊！不客气…！」
+	;TranslatedMark 「あ、ああ！どういたしまして…！」
+	PRINTFORML 
+	PRINTFORML 「然后，那个………%ANAME(MASTER)%」
+	;TranslatedMark 「それで、その………%ANAME(MASTER)%」
+	PRINTFORMW %ANAME(対象)%刚才那傲慢的态度不知到哪里去了，突然开始扭捏着脸颊。
+	;TranslatedMark %ANAME(対象)%は先ほどの尊大な態度はどこへやら、急に頬を染めてもじもじとし始める。
+	PRINTFORML 「我还不会做饭，但是…因为我是为了你而努力做的」
+	;TranslatedMark 「私は、料理はまだ下手だが…貴方のために頑張って作ったから」
+	PRINTFORMW 「虽然不用勉强，但是如果能好好吃的话我会很开心的」
+	;TranslatedMark 「無理はしなくていいけれど、美味しく食べてくれたら嬉しいな」
+	PRINTFORMW 被人用眼神这么说，%ANAME(MASTER)%变得无比可爱。
+	;TranslatedMark 上目遣いでそう言われ、%ANAME(MASTER)%は堪らなく愛おしい気持ちになった。
+	PRINTFORML 
+	PRINTFORMW 不由得抱住了%ANAME(対象)%，她突然跳了起来，耳朵都变得通红了。
+	;TranslatedMark 思わず%ANAME(対象)%を抱き締めると、彼女はぴくんと身を跳ねさせ、耳まで真っ赤になってしまった。
+	PRINTFORML 「也……已经！差不多该走了吧！？」
+	;TranslatedMark 「も……もう！そろそろ行かないといけないんだろう！？」
+	PRINTFORML 「不是做这种事的时候吧！」
+	;TranslatedMark 「こんなことしている場合じゃないだろうが！」
+	PRINTFORMW ……依依不舍确实是那样。
+	;TranslatedMark ……名残惜しいが確かにその通りだ。
+	PRINTFORML 
+	PRINTFORML 「路上小心。注意不要受伤！」
+	;TranslatedMark 「行ってらっしゃい。怪我をしないように、気を付けて！」
+	PRINTFORMW 在%ANAME(対象)%的目送下，%ANAME(MASTER)%一手拿着爱妻便当前往预定演习地。
+	;TranslatedMark %ANAME(対象)%に見送られながら、%ANAME(MASTER)%は愛妻弁当を片手に演習予定地へと向かっていった。
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW ・
+	PRINTFORML 午休的时间终于到了。
+	;TranslatedMark ようやく昼休みの時間がやってきた。
+	PRINTFORMW 虽说才过了半天，可肚子都饿扁了。
+	;TranslatedMark まだ半日しか経っていないとはいえ、すっかりお腹はぺこぺこだ。
+	PRINTFORML 
+	PRINTFORML 从包里拿出便当包，打开包袱，一个上乘漆漆漆漆的便当盒露出了脸。
+	;TranslatedMark 鞄から弁当の包みを取り出し、風呂敷を解いていくと、上品な漆塗りの弁当箱が顔を覗かせた。
+	PRINTFORML 慢慢打开盖子，那里是………
+	;TranslatedMark ゆっくりと蓋を開けるとそこには………
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORML 放了梅干的白米和各种各样的菜被装进去了。
+			;TranslatedMark 梅干しの乗った白米と、諸々のおかずが詰められていた。
+			PRINTFORMW 虽然是便当的经典，但正因为忠实于基本才有安心感。
+			;TranslatedMark お弁当の定番だが、むしろ基本に忠実だからこそ安心感がある。
+			PRINTFORMW 怀着平静的心情，%ANAME(MASTER)%双手合十说"我要吃了"。
+			;TranslatedMark 穏やかな気持ちで、%ANAME(MASTER)%はいただきますと両の手を合わせた。
+			PRINTFORML 
+			PRINTFORML 首先把筷子放进白米饭里。
+			;TranslatedMark まずは白飯に箸を入れる。
+			PRINTFORMW 煮得很好，因为用了更好的米所以很好吃。
+			;TranslatedMark よく炊き上がっており、さらに良い米を使っているおかげでとても美味しい。
+			PRINTFORML 想和米饭一起吃，就想把烤鲑鱼的配菜解开。
+			;TranslatedMark ご飯と一緒に食べようと、おかずの焼き鮭をほぐそうとした。
+			PRINTFORML 总觉得硬得不自然。
+			;TranslatedMark なんだか不自然に硬い。
+			PRINTFORMW 感觉不舒服，把鲑鱼翻过来一看，发现那边的面焦黑的。
+			;TranslatedMark 違和感を覚え、鮭を裏返してみると、そちらの面は焦げて真っ黒だった。
+			PRINTFORML 难道%ANAME(対象)%注意到了这里面的惨状吗…。
+			;TranslatedMark この裏面の惨状に%ANAME(対象)%は気づいていたのだろうか…。
+			PRINTFORMW 虽然抱有这样的疑问，但在充分享受了焦的苦味和不开心的香味之后，和米一起吞了进去。
+			;TranslatedMark そう疑問に思いつつ、焦げの苦みと嬉しくない香ばしさを堪能してから、米と一緒に飲み込んだ。
+			PRINTFORML 
+			PRINTFORML 接下来是肉丸子。
+			;TranslatedMark お次は肉団子だ。
+			PRINTFORML 形状整齐。是在店里买的吗？
+			;TranslatedMark 形は綺麗に整っている。店で買ったのだろうか？
+			PRINTFORMW 但是，%ANAME(対象)%看起来是那么的献身，也许是手工制作的。
+			;TranslatedMark でも、%ANAME(対象)%はああ見えて献身的だから、もしかすると手作りかもしれない。
+			PRINTFORML 
+			PRINTFORML 一边七上八下地用筷子掰开一看，里面的肉是粉红色的……没错，是半生。
+			;TranslatedMark ドキドキしながら箸で割ってみると、中の肉がピンク色……間違いない、半分生だ。
+			PRINTFORML 鸡肉和软骨看起来也在里面。
+			;TranslatedMark 鶏肉だし、軟骨も入っているように見える。
+			PRINTFORML 这个吃完了也没关系吗…？
+			;TranslatedMark これは食べてしまっても大丈夫なのだろうか…？
+			PRINTFORML ……但是，吃剩下的话很抱歉。硬着头皮说。
+			;TranslatedMark ……でも、食べ残すのは申し訳ない。思い切って口に運ぶ。
+			PRINTFORMW 幸好味道不错……我担心一会儿会坏肚子。
+			;TranslatedMark 幸いにも味付けは良かったが……後でお腹を壊してしまわないか心配だ。
+			PRINTFORML 
+			PRINTFORML 肉丸子之后还将目光转向筑前煮。
+			;TranslatedMark 肉団子の後は筑前煮にも目を向ける。
+			PRINTFORML ……总觉得错综复杂是心理作用吗。
+			;TranslatedMark ……なんとなくドロドロしているのは気のせいだろうか。
+			PRINTFORMW 也许是煮太多芋头了。
+			;TranslatedMark もしかすると、里芋を煮込みすぎてしまったのかもしれない。
+			PRINTFORML 
+			PRINTFORML 刚要捏胡萝卜，就被轻一点的力量切了。
+			;TranslatedMark 人参をつまもうとすると、すっと軽い力で切れた。
+			PRINTFORML ……不仅是芋头，其他食材也煮过头了。
+			;TranslatedMark ……里芋だけでなく、他の具材も煮込みすぎてしまったようだ。
+			PRINTFORML 而且味道很淡。只是稍微有点汤汁的味道，几乎没有咸味。
+			;TranslatedMark それに味が非常に薄い。ほんのりと出汁の風味がする程度で、ほとんど塩気がない。
+			PRINTFORML 但是，如果这样炖煮的话，食物中毒的可能性是不可能的吧。
+			;TranslatedMark だが、こうにも煮込まれているのなら、食中毒の可能性はありえないだろう。
+			PRINTFORMW 在那种意义上也许有安心感。
+			;TranslatedMark そういう意味では安心感があるかもしれない。
+			PRINTFORML 
+			PRINTFORMW 吃了一半左右有着非常抱歉程度的干木鱼腥味的水煮鱼后，再看最后的一道菜。
+			;TranslatedMark 申し訳程度の鰹節臭がする水煮を半分ほど食べた後、最後の一品を見る。
+			PRINTFORML ……淡黄色的热气腾腾的是什么。
+			;TranslatedMark ……薄黄色のねっちょりとした何かだ。
+			PRINTFORML 而且，到处可见茶色颗粒。
+			;TranslatedMark それに、茶色っぽい粒が随所に見られる。
+			PRINTFORML 用白板隔开，与其他菜肴隔离开来的，看上去就像栗子金团一样。
+			;TranslatedMark バランで仕切られ、他のおかずから隔離されたそれは、栗金団のように見えなくもない。
+			PRINTFORMW 但是，与其说是被不自然地卷起来了，不如说是为了做出像馒头一样的形状而努力的痕迹。
+			;TranslatedMark しかし、不自然に丸められているというか、饅頭っぽい形状にしようと努力した跡がある。
+			PRINTFORML 
+			PRINTFORML 或许，这不是栗子茶巾吗？
+			;TranslatedMark もしかすると、これは栗茶巾なのではないだろうか？
+			PRINTFORMW 为了确认真面目，用筷子尖捞起一把，提心吊胆地送到嘴里。
+			;TranslatedMark 正体を確かめるために、ほんのひとかけを箸の先で掬い、おずおずと口に運ぶ。
+			PRINTFORML 
+			PRINTFORML 糊状栗子的粘糯的口感和没有融化的砂糖的沙沙作响的触感真是崭新。
+			;TranslatedMark ペースト状の栗のねっとりとした食感と、溶けていない砂糖のザリザリとした感触が実に斬新だ。
+			PRINTFORMW ……为什么要用这么大的砂糖呢。
+			;TranslatedMark ……何故、粒の大きい砂糖を使ってしまったのか。
+			PRINTFORML 而且，比什么都甜。太甜了。
+			;TranslatedMark そして、何よりも甘い。甘すぎる。
+			PRINTFORML 特别是由于多余的水分而变得像糖稀一样的地方，是一种粘糊糊地残留在嘴里的强烈甜味。
+			;TranslatedMark 特に、余計な水分で水飴のようになった箇所は、口にしつこく残るような粘性のある強烈な甘さだ。
+			PRINTFORMW %ANAME(MASTER)%暂时停下筷子，为了换口喝了水壶里的茶。
+			;TranslatedMark %ANAME(MASTER)%は一旦箸を止め、口直しに水筒のお茶を飲んだ。
+			PRINTFORML 
+			PRINTFORMW 歇口气后鸟瞰整个便当。
+			;TranslatedMark 一息ついてから弁当全体を俯瞰して見る。
+			PRINTFORML 
+			PRINTFORML 饭很好吃，但除此之外不能放手。但是，也不坏。
+			;TranslatedMark ご飯は美味しいが、それ以外は手放しにそうは言えない。だが、悪くはない。
+			PRINTFORML 不过，不久前%ANAME(対象)%连菜刀都没有握过。
+			;TranslatedMark もっとも、少し前まで%ANAME(対象)%は包丁すら握ったことがなかったのだ。
+			PRINTFORML 这样的她，为了伴侣努力练习料理，甚至能做便当，真是太厉害了…。
+			;TranslatedMark そんな彼女が、伴侶のために頑張って料理の練習をして、お弁当まで作れるようになったのはすごいこと…。
+			PRINTFORMW 稍有差错就太可爱了。
+			;TranslatedMark 多少のミスなど可愛いものだ。
+			PRINTFORML 
+			PRINTFORMW 虽然说%ANAME(対象)%不必勉强吃完，但便当盒还是空着的。
+			;TranslatedMark %ANAME(対象)%は無理して完食しなくても良いとは言っていたが、もちろん弁当箱は空にさせてもらおう。
+		CASE 1
+			PRINTFORML ……总觉得整体上很茶色。
+			;TranslatedMark ……なんだか、全体的に茶色っぽかった。
+			PRINTFORMW 连白米都有酱油味的东西被侵蚀染上了颜色。
+			;TranslatedMark 白米ですら醤油っぽいものが侵食して色付いてしまっている。
+			PRINTFORML 
+			PRINTFORML 当%ANAME(対象)%完成的时候，米饭也一定是雪白漂亮的吧……。
+			;TranslatedMark きっと%ANAME(対象)%が完成させたその時には、ご飯も真っ白で綺麗に詰められていたのだろうが……。
+			PRINTFORMW 怀着复杂的心情，先说了句"我开动了"。
+			;TranslatedMark 複雑な気持ちになりながら、とりあえず"いただきます"の挨拶をした。
+			PRINTFORML 
+			PRINTFORML 首先，我决定确认一下米饭上的色素汁是什么。
+			;TranslatedMark 最初に、ご飯を着色している汁が何かを確かめることにした。
+			PRINTFORMW 用筷子捞取那个部分，送到口中。
+			;TranslatedMark 箸でその部分を掬い取り、口に運ぶ。
+			PRINTFORML ……酱油，是吗？
+			;TranslatedMark ……醤油、だろうか？
+			PRINTFORML 但是，那样的话味道有点淡，有点淡。
+			;TranslatedMark だが、それにしては少し味が薄いし水っぽい。
+			PRINTFORML 微有汤汁般的风味。
+			;TranslatedMark 微かに出汁のような風味がしなくもない。
+			PRINTFORMW 菜的种类有炸猪排的，也有类似于炖菜的，所以这些汤融合在一起了吧。
+			;TranslatedMark おかずの方にカツ的なものや、がんもどきの煮物的なものがあるので、それらの汁が融合してしまったのだろう。
+			PRINTFORML 
+			PRINTFORML 一边叹气，%ANAME(MASTER)%一边捏起了那个像炸猪排一样的东西。
+			;TranslatedMark 溜息を吐きながら、%ANAME(MASTER)%はそのカツ的なものをつまみあげる。
+			PRINTFORMW 啪嗒一声，水滴落了下来。
+			;TranslatedMark ぽたん、と水滴が落ちた。
+			PRINTFORML 看来，这也泡在了类似于癌症的汤里。
+			;TranslatedMark どうやら、これもがんもどきのおつゆに浸ってしまっていたようだ。
+			PRINTFORML 不由得笑了出来，%ANAME(MASTER)%把它放进嘴里咀嚼。
+			;TranslatedMark 思わず笑いを零しながら、%ANAME(MASTER)%はそれを口に入れて咀嚼する。
+			PRINTFORMW 完全没有松脆感的炸猪排。衣服和水滴一起融化掉了。
+			;TranslatedMark サクサク感皆無のカツだ。水滴と一緒に衣が解けて落ちた。
+			PRINTFORML 
+			PRINTFORML 那么，煮的菜也要来。
+			;TranslatedMark それでは、煮物の方も頂くとしよう。
+			PRINTFORML 咬紧充满水气的癌症后，汤汁轻轻地扩散到了嘴里。
+			;TranslatedMark 水気たっぷりのがんもどきを噛み締めると、じゅわっと出汁が口内に広がった。
+			PRINTFORMW 原来如此，味道还不错。不，很好吃。
+			;TranslatedMark なるほど、味つけは悪くない。いや、美味しい。
+			PRINTFORML 
+			PRINTFORML 但是…除去水分后，只剩下干瘪的、非常有弹性的东西了。
+			;TranslatedMark しかし…水分が抜けると、カスカスした、やたらと弾力のあるものだけが残ってしまった。
+			PRINTFORML 也就是说，这种癌症本身就是不怎么好吃的东西。
+			;TranslatedMark つまり、このがんもどき自体はあまり美味しくない代物なのだ。
+			PRINTFORML 一定是买的店不好吧。
+			;TranslatedMark きっと買った店が良くなかったのだろう。
+			PRINTFORMW 下次一定要叫他去别的店……。
+			;TranslatedMark 今度は別の店にするように言っておかなくては……。
+			PRINTFORML 
+			PRINTFORML 最后把筷子伸向甜品。
+			;TranslatedMark 最後はデザートに箸を伸ばす。
+			PRINTFORML 是变成茶色的苹果兔子。
+			;TranslatedMark 茶色く変色してしまったリンゴのうさぎさんだ。
+			PRINTFORML ……%ANAME(対象)%不知道苹果容易氧化吗。
+			;TranslatedMark ……リンゴが酸化しやすいことを、%ANAME(対象)%は知らなかったのだろうか。
+			PRINTFORML 恐怕是那样。
+			;TranslatedMark おそらくそうだ。
+			PRINTFORMW 到现在为止，部下都很机灵，为了不变色，吃了用盐水浸泡的苹果。
+			;TranslatedMark これまでは、部下が気を利かせ、変色しないように塩水に漬けたリンゴを食べていたのだから。
+			PRINTFORML 
+			PRINTFORML 兔子耳朵的皮很厚。
+			;TranslatedMark うさぎの耳となっている部分である皮がとても分厚い。
+			PRINTFORML 或许是战战兢兢地把菜刀放进去了吧，果实渐渐结出的地方也能看到。
+			;TranslatedMark 恐る恐る包丁を入れたのか、果実が段々になっている箇所も見られる。
+			PRINTFORMW 她至今为止过着没有必要拿菜刀的生活。没办法。
+			;TranslatedMark 彼女はこれまで、包丁を持つ必要のない生活を送っていたのだ。仕方がない。
+			PRINTFORML 
+			PRINTFORML 观察完苹果兔后，用筷子把它拿起来。
+			;TranslatedMark リンゴうさぎの観察を終え、箸でつまみ持ち上げる。
+			PRINTFORML …应该说是果不其然吧，酱油和癌症的混合物也滴了下来。
+			;TranslatedMark …やはりというべきか、醤油とがんも汁の混合物が滴った。
+			PRINTFORML 不经意间笑了起来，然后放进嘴里咀嚼。
+			;TranslatedMark うっかりニヤついてしまいながら、口に入れて咀嚼する。
+			PRINTFORMW 在口中，淡酱油和高汤的风味和温热的苹果的甜味扩散开来。
+			;TranslatedMark 口内に、薄い醤油と出汁の風味と生ぬるいリンゴの甘みが広がった。
+			PRINTFORML 
+			PRINTFORMW 喝了水壶里的茶后，试着俯瞰整体。
+			;TranslatedMark 口直しに水筒のお茶を飲んでから、全体を俯瞰して見る。
+			PRINTFORML 
+			PRINTFORML 外观和汤汁暂且不论，没有想象的那么坏。
+			;TranslatedMark 見た目と汁っぽさはともかく、思ったほど悪くはない。
+			PRINTFORML 有食物中毒的危险等，没有对健康造成危害的东西是好事。
+			;TranslatedMark 食中毒の危険があるなど、健康に被害が出そうなものがないのは良いことだ。
+			PRINTFORML 但是，照这个样子的话，说不定总有一天会干掉的。
+			;TranslatedMark しかし、この調子だといつかはやらかすかもしれない。
+			PRINTFORMW %ANAME(MASTER)%决定让%ANAME(対象)%更加用功，为了吃完便当再次拿起筷子。
+			;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%に更なる勉強をさせることを決め、お弁当を完食するために再び箸をとった。
+		CASE 2
+			;まともだと書けない典型例
+			PRINTFORML 烤鳗鱼横躺在白米上。
+			;TranslatedMark うなぎの蒲焼きが白米に横たわっていた。
+			PRINTFORML 美艳的白米饭和魅惑的使调味汁熠熠生辉的鳗鱼…。
+			;TranslatedMark 艶やかな白いご飯と、魅惑的にタレを輝かせるうなぎ…。
+			PRINTFORMW 便当盒上涂着漂亮的漆，简直就像真的一样。
+			;TranslatedMark 弁当箱が綺麗な漆塗りであることも相まって、まるで本物のうな重のようだ。
+			PRINTFORML 
+			PRINTFORML 光是看着就流口水，%ANAME(MASTER)%被想要快点振作的冲动所驱使。
+			;TranslatedMark 見ているだけで涎が出てきて、%ANAME(MASTER)%は早くがっつきたい衝動に駆られる。
+			PRINTFORML 但是礼仪很重要。
+			;TranslatedMark しかしお行儀は大切だ。
+			PRINTFORML 暂时抑制食欲，首先双手合十"我开动了"。
+			;TranslatedMark 食欲を一旦抑えて、まずは両の掌を合わせて「いただきます」をする。
+			PRINTFORMW 然后张大嘴巴……吃，吃。
+			;TranslatedMark そして大きく口を開け……食べる。
+			PRINTFORML 
+			PRINTFORMW 好吃！
+			;TranslatedMark 美味しい！
+			PRINTFORML 
+			PRINTFORML %ANAME(MASTER)%在梦中挨了一顿便当。
+			;TranslatedMark %ANAME(MASTER)%は夢中になって弁当を掻き寄せ食らう。
+			PRINTFORML 芳香的香味和恰到好处的甜汁让人无限地食欲大增，白米的滑腻和肥厚的鳗鱼的触感让筷子停不下来。
+			;TranslatedMark 芳しい香りと程よく甘いタレが無限に食欲を湧き立たせ、白米の滑らかさと肉厚なうなぎの触感が箸を止めることを許さない。
+			PRINTFORML 要说欲望的话，也有希望别人沾上花椒的，但那是很细小的事情。
+			;TranslatedMark 欲を言えば、山椒をつけて欲しくもあったが、そんなのは些細な事だ。
+			PRINTFORMW %ANAME(MASTER)%一边咬住幸福，一边继续动着筷子。
+			;TranslatedMark 幸せを噛み締めながら、%ANAME(MASTER)%は箸を動かし続けた。
+			PRINTFORML 
+			PRINTFORML 话说回来，这鳗鱼真的是%ANAME(対象)%烤的吗？
+			;TranslatedMark ところでこのうなぎ、本当に%ANAME(対象)%が焼いたものなのだろうか？
+			PRINTFORML 从她的厨艺来看，能做出这么好吃的东西真是令人吃惊。
+			;TranslatedMark 彼女の料理の腕から考えると、ここまで美味しい物が作れたというのは驚きだ。
+			PRINTFORMW 但是……从今天早上的那个样子来看，%ANAME(対象)%自己做的并不是谎言吧。
+			;TranslatedMark しかし……今朝のあの様子からして、%ANAME(対象)%自身が作ったのは嘘ではないだろう。
+			PRINTFORML 
+			PRINTFORML 看只剩下一口的鳗鱼便当。
+			;TranslatedMark もう一口分しか残っていないうなぎ弁当を見る。
+			PRINTFORML 把头发扎起来，围上围裙，热情地做着料理的%ANAME(対象)%…。
+			;TranslatedMark 髪をくくり、エプロンをかけ、熱心に料理をする%ANAME(対象)%…。
+			PRINTFORMW 想象她慢慢烤鳗鱼的样子，虽然有点超现实主义，但也有点可爱。
+			;TranslatedMark 彼女がうなぎをじっくり焼き上げる姿を想像するとシュールだが、ちょっと可愛くもある。
+			PRINTFORML 
+			PRINTFORMW %ANAME(MASTER)%怀着温暖的心情，吃了最后一口。
+			;TranslatedMark %ANAME(MASTER)%はほっこりと温かな気持ちになりながら、最後の一口を頂いた。
+	ENDSELECT
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW ・
+	PRINTFORML 「你回来了，%ANAME(MASTER)%」
+	;TranslatedMark 「おかえり、%ANAME(MASTER)%」
+	PRINTFORML 深夜回到我房间的%ANAME(MASTER)%，被微笑着的%ANAME(対象)%迎接。
+	;TranslatedMark 夜遅くに私室に戻った%ANAME(MASTER)%は、笑顔の%ANAME(対象)%に迎えられた。
+	PRINTFORML 「辛苦了。今天很辛苦吧？要给你按摩吗？」
+	;TranslatedMark 「お疲れ様。今日は大変だっただろう？マッサージでもしてあげようか？」
+	PRINTFORML %ANAME(MASTER)%摇着头，抱着%ANAME(対象)%的腰坐在沙发上。
+	;TranslatedMark %ANAME(MASTER)%は首を振り、%ANAME(対象)%の腰を抱いてソファにかける。
+	PRINTFORMW 一起坐着的%ANAME(対象)%将脸颊染成%ANAME(MASTER)%。
+	;TranslatedMark 一緒に座った%ANAME(対象)%は頬を染めて%ANAME(MASTER)%にすり寄ってくる。
+	PRINTFORML 
+	PRINTFORMW 「%ANAME(MASTER)%，便当怎么样…？」
+	;TranslatedMark 「%ANAME(MASTER)%、お弁当はどうだった…？」
+	PRINTFORML 
+	CALL ASK_MULTI("好吃" ,"普通" ,"再努力吧")
+	IF RESULT == 0
+		PRINTFORML 「呵呵，是吗♥ 太好了，你很高兴♥」
+		;TranslatedMark 「ふふっ、そうか♥ よかった、貴方が喜んでくれて♥」
+		PRINTFORMW 也许是因为只有两个人在房间里，%ANAME(対象)%完全被%ANAME(MASTER)%迷住了。
+		;TranslatedMark 部屋に二人きりでいるせいか、%ANAME(対象)%はすっかり%ANAME(MASTER)%にデレついている。
+		PRINTFORML 
+		PRINTFORML 「%ANAME(MASTER)%……♥」
+		PRINTFORML %ANAME(対象)%的眼睛湿润了，脸上充满了对%ANAME(MASTER)%的好奇。
+		;TranslatedMark %ANAME(対象)%は瞳を潤ませ、%ANAME(MASTER)%に上気した顔を寄せてくる。
+		PRINTFORMW %ANAME(MASTER)%吻了她的嘴唇后，她发出撒娇的声音抱住了她。
+		;TranslatedMark %ANAME(MASTER)%がその唇に口づけると、彼女は甘えた声をあげて抱き着いてきた。
+		PRINTFORML 
+		PRINTFORMW ……今天好像是个炎热的夜晚。
+		;TranslatedMark ……今日はアツい夜になりそうだ。
+		CFLAG:対象:好感度 += 300
+		CFLAG:対象:従属度 += 300
+		経験値 = GET_EXP(GETNUM(ABL, "料理"))
+		CALL PRINT_ADD_EXP(対象, EXPNAME:経験値, RAND:5 + 1, 1)
+		CALL TRAIN_AUTO_ABLUP(対象)
+	ELSEIF RESULT == 1
+		PRINTFORML 「是吗，是吗，很普通啊……」
+		;TranslatedMark 「そ、そうか、普通かぁ……」
+		PRINTFORMW 「具体来说，哪个地方比较普通？」
+		;TranslatedMark 「具体的には、どの辺が普通だった？」
+		PRINTFORML %ANAME(MASTER)%认真地评论了今天的便当。
+		;TranslatedMark %ANAME(MASTER)%は真面目に今日の弁当について評した。
+		PRINTFORML %ANAME(対象)%似乎认真地接受了那句话。
+		;TranslatedMark %ANAME(対象)%はその言葉を真摯に受け止めているようだ。
+		PRINTFORML 「原来如此，我明白了」
+		;TranslatedMark 「なるほどね、分かった」
+		PRINTFORML 「……我也要更加努力啊」
+		;TranslatedMark 「……私ももっと頑張らないとなぁ」
+		PRINTFORML %ANAME(MASTER)%向苦笑着的%ANAME(対象)%提议，这个休息日一起做料理。
+		;TranslatedMark 苦笑する%ANAME(対象)%に、今度の休日は一緒に料理を作ろうと%ANAME(MASTER)%が提案する。
+		PRINTFORMW 于是她高兴地闪着脸，点了点头。
+		;TranslatedMark すると彼女は嬉しそうに顔を輝かせ、大きく頷いた。
+		CFLAG:対象:好感度 += 180
+		CFLAG:対象:従属度 += 180
+		経験値 = GET_EXP(GETNUM(ABL, "料理"))
+		CALL PRINT_ADD_EXP(対象, EXPNAME:経験値, RAND:5 + 1, 1)
+		CALL TRAIN_AUTO_ABLUP(対象)
+	ELSE
+		PRINTFORML 「嗯…也就是说不怎么好吃……」
+		;TranslatedMark 「う…ってことはあまり美味しくなかったのか……」
+		PRINTFORML 「对不起，那样的话还是不做比较好…」
+		;TranslatedMark 「ごめんなさい、それだったら作らない方が良かったかもな…」
+		PRINTFORMW %ANAME(MASTER)%慌忙鼓励了比预想更消沉的%ANAME(対象)%。
+		;TranslatedMark 予想以上に凹んでいる%ANAME(対象)%を%ANAME(MASTER)%は慌てて励ました。
+		PRINTFORML 
+		PRINTFORML 「……那么问一下，什么不好？希望对今后有用」
+		;TranslatedMark 「……それでは聞くが、何が良くなかった？ 今後に役立てたい」
+		PRINTFORMW %ANAME(MASTER)%一边慎重地选择语言，一边传达便当的课题点。
+		;TranslatedMark %ANAME(MASTER)%は慎重に言葉を選びながら、弁当の課題点を伝える。
+		PRINTFORML 「原来如此，我明白了…」
+		;TranslatedMark 「なるほどね、分かった…」
+		PRINTFORML %ANAME(対象)%认真地接受了这个忠告。
+		;TranslatedMark %ANAME(対象)%はその忠告を真摯に受け止めているようだ。
+		PRINTFORML 
+		PRINTFORMW 然后沉思了一会儿，她提心吊胆地开口。
+		;TranslatedMark そしてしばらく考え込んだ後、彼女はおずおずと口を開く。
+		PRINTFORML 「…%ANAME(MASTER)%，能让我再做便当吗？」
+		;TranslatedMark 「…%ANAME(MASTER)%、また私にお弁当を作らせてくれないか？」
+		PRINTFORML 「如果给你添麻烦就好了，但是我想做你的妻子…」
+		;TranslatedMark 「迷惑だったらいいんだけど、少しでも貴方の妻らしくありたくて…」
+		PRINTFORML 「我会更加练习做饭的…！」
+		;TranslatedMark 「もっと料理の練習もするから…！」
+		PRINTFORMW %ANAME(MASTER)%点了点头，%ANAME(対象)%安心地微笑了。
+		;TranslatedMark %ANAME(MASTER)%が大きく頷くと、安心したように%ANAME(対象)%は微笑んだ。
+		CFLAG:対象:好感度 += 180
+		CFLAG:対象:従属度 += 180
+		経験値 = GET_EXP(GETNUM(ABL, "料理"))
+		CALL PRINT_ADD_EXP(対象, EXPNAME:経験値, RAND:5 + 1, 1)
+		CALL TRAIN_AUTO_ABLUP(対象)
+	ENDIF
+	;嫁のメシがマズい
+ELSE
+	PRINTFORML 「呵呵呵，就是所谓的爱妻便当吧！怎么样，很开心吧？」
+	;TranslatedMark 「ふっふっふ、いわゆる愛妻弁当ってやつだな！どうだ、嬉しいだろう？」
+	PRINTFORMW %ANAME(対象)%一脸得意的样子，挺起胸膛。
+	;TranslatedMark %ANAME(対象)%はドヤ顔をしながら、大きく胸を張っている。
+	PRINTFORML 
+	PRINTFORML ……但是，%ANAME(対象)%的料理技能，说实话是可以察觉的。
+	;TranslatedMark ……だが、%ANAME(対象)%の料理スキルは、正直言ってお察しのレベルだ。
+	PRINTFORML 如果有擅长做饭的人帮忙的话，应该不会很悲惨吧…
+	;TranslatedMark 誰か料理上手な人が手伝ったりしていたら、悲惨なことにはなっていないだろうが…
+	PRINTFORML 她"干透了！"！从"这样的表情来看，几乎毫无疑问是一个人做的便当吧。
+	;TranslatedMark 彼女の"やりきった！"というような表情からして、ほぼ間違いなく一人でこの弁当を作り上げているだろう。
+	PRINTFORML 那样的话，无论如何都会在意这个便当的重量。
+	;TranslatedMark そうなると、この弁当の重さがどうしても気になってくる。
+	PRINTFORMW 怎么说呢，应该是放了不得了的食材吧……？
+	;TranslatedMark よもや、とんでもない具材を入れてはいないだろうか……？
+	PRINTFORML 
+	PRINTFORML %ANAME(MASTER)%流着冷汗，脸上浮现出抽搐的笑容，道谢道。
+	;TranslatedMark %ANAME(MASTER)%は冷や汗を流しながらも、引きつった笑みを浮かべて礼を言った。
+	PRINTFORML 「呵呵，被这么感谢的话还是会害羞的」
+	;TranslatedMark 「ふふっ、そう感謝されると流石に照れるぞ」
+	PRINTFORML 「……%ANAME(MASTER)%，努力做的，如果能吃到好吃的话我会很开心的」
+	;TranslatedMark 「……%ANAME(MASTER)%、頑張って作ったんだ、美味しく食べてくれたら嬉しいな」
+	PRINTFORML %ANAME(対象)%微微染上了脸颊，腼腆地微笑着。
+	;TranslatedMark %ANAME(対象)%はほんのりと頬を染めて、はにかみながら微笑む。
+	PRINTFORMW 虽然那个动作非常可爱，但是一想到便当的完成度就无法坦率地感到喜悦…。
+	;TranslatedMark その仕草はとても可愛らしいものだったが、やはり弁当の出来栄えを想像すると素直に喜べない…。
+	PRINTFORML 
+	PRINTFORML 但是…她很认真，而且装在便当里的爱和努力是真的。
+	;TranslatedMark しかし…彼女は真剣そのものな上、弁当に詰められた愛と努力は本物だ。
+	PRINTFORML 内容和味道等，怎么都好不是吗。
+	;TranslatedMark 内容や味など、どうだって良いではないか。
+	PRINTFORMW %ANAME(MASTER)%这样想了又想，这次一定要说一句发自内心的感谢，去工作。
+	;TranslatedMark そう思い直した%ANAME(MASTER)%は、今度こそ心からのありがとうを言って、仕事へ向かうことにした。
+	PRINTFORML 
+	PRINTFORMW 「请慢走。小心点！」
+	;TranslatedMark 「%ANAME(MASTER)%、行ってらっしゃい。気を付けてな！」
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW ・
+	PRINTFORML 午休的时间终于到了。
+	;TranslatedMark ようやく昼休みの時間がやってきた。
+	PRINTFORMW 虽说才过了半天，可肚子都饿扁了。
+	;TranslatedMark まだ半日しか経っていないとはいえ、すっかりお腹はぺこぺこだ。
+	PRINTFORML 
+	PRINTFORML 从包里拿出便当包，打开包袱，一个上乘漆漆漆漆的便当盒露出了脸。
+	;TranslatedMark 鞄から弁当の包みを取り出し、風呂敷を解いていくと、上品な漆塗りの弁当箱が顔を覗かせた。
+	PRINTFORMW 筷子盒和手巾也不忘好好地放进去了。
+	;TranslatedMark 箸箱やお手拭きも忘れずきちんと入っている。
+	PRINTFORML ……到此为止是好的。
+	;TranslatedMark ……ここまでは良い。
+	PRINTFORML 这种地方端正正是%ANAME(対象)%。
+	;TranslatedMark こういうところはきちんとしているのが%ANAME(対象)%なのだ。
+	PRINTFORML 问题是内在的。
+	;TranslatedMark 問題は中身である。
+	PRINTFORMW "刚才想了"已经和味道没有关系了"……果然，不安的东西是不安的。
+	;TranslatedMark "もう味など関係ない"と先ほどは考えていたが……やはり、不安なものは不安だ。
+	PRINTFORML 
+	PRINTFORMW 战战兢兢地打开盖子………
+	;TranslatedMark 恐る恐る蓋を開けるとそこには………
+	SELECTCASE RAND:4
+		CASE 0
+			PRINTFORML ………。
+			PRINTFORMW 饭上挂着黄色的液体。因为有辛辣的味道，恐怕是咖喱。
+			;TranslatedMark ご飯に黄色っぽい液状のものがかかっている。スパイシーな臭いがするので、おそらくはカレーだ。
+			PRINTFORML 
+			PRINTFORML 为什么便当里放了气味很重的咖喱呢。
+			;TranslatedMark 何故、お弁当にニオイの強いカレーを入れてしまったのか。
+			PRINTFORML 好不容易做成的便当盒……。
+			;TranslatedMark せっかく良いお弁当箱なのに……。
+			PRINTFORML 虽然很在意物品的质量和外观，但是使用起来很粗糙…的性格表现得很好。
+			;TranslatedMark 物の質や見た目は気に掛けるが、その扱いは雑…という%ANAME(対象)%の性格がよく表れている。
+			PRINTFORMW %ANAME(MASTER)%叹了一口气，从筷子盒里拿出勺子，轻轻地舀了一汤匙吃。
+			;TranslatedMark %ANAME(MASTER)%は溜息を吐いて箸箱からスプーンを取り出し、そっと一匙すくって食べた。
+			PRINTFORML 
+			PRINTFORML 味道淡。和外表一样很水。更进一步说的话，里面有碎末，有烧焦的味道。
+			;TranslatedMark 味が薄い。見た目通り水っぽい。さらに言えば、ダマになった粉が入っているし焦げ臭い。
+			PRINTFORML 大概是不用市场上卖的咖喱粉做的吧。
+			;TranslatedMark 市販のルーを使わず、カレー粉から作ったのだろう。
+			PRINTFORML 从咖喱粉到"好吃"的咖喱很难烹饪，但是如果是不习惯料理的%ANAME(対象)%的话，那已经是不可能的领域了。
+			;TranslatedMark カレー粉から"美味しい"カレーを調理するのは難しいが、料理慣れしていない%ANAME(対象)%ならもはや不可能の領域だ。
+			PRINTFORML 为什么做了鲁莽的挑战呢。
+			;TranslatedMark 何故、無謀な挑戦をしてしまったのか。
+			PRINTFORMW 即使是再怎么终极的绝对秘神也有做不到的事情存在，或许也该让他意识到这点比较好。
+			;TranslatedMark いかに究極の絶対秘神とであろうともできないことは存在する、とそろそろ自覚させてあげた方が良いかもしれない。
+			PRINTFORML 
+			PRINTFORMW %ANAME(MASTER)%在眉间皱起了皱纹，接着往配料的方向涂上勺子。
+			;TranslatedMark %ANAME(MASTER)%は眉間に皺を寄せながら、次は具の方にスプーンをつける。
+			PRINTFORML 总觉得有点预想，但是胡萝卜和土豆都没有剥皮。
+			;TranslatedMark なんとなく予想はしていたが、ニンジンもジャガイモも皮が剥かれていない。
+			PRINTFORML 前者暂且不论，后者的芽部分有毒。
+			;TranslatedMark 前者はともかく、後者には芽の部分に毒がある。
+			PRINTFORMW 没有剥皮的话，恐怕连芽也没被去除吧。
+			;TranslatedMark 皮が剥かれていないということは、おそらく芽も取り除かれていないだろう。
+			PRINTFORML 
+			PRINTFORMW 确认了一下，果然是这样。
+			;TranslatedMark 確認してみれば、やはりそうだった。
+			PRINTFORML 不能小看至多的土豆。听说以相应的量引起食物中毒。
+			;TranslatedMark たかがジャガイモと侮ってはいけない。それなりの量で食中毒を起こすと聞く。
+			PRINTFORML 为了不吃芽的部分，%ANAME(MASTER)%把它放进了嘴里。
+			;TranslatedMark 芽の部分は食べないようにして、%ANAME(MASTER)%はそれを口に入れた。
+			PRINTFORML ……几乎是生的。每次咀嚼都会有嚼劲的口感扩散。
+			;TranslatedMark ……ほとんど生だ。噛むたびにシャクシャクとした食感が広がる。
+			PRINTFORMW 带皮的胡萝卜也一样硬。也不是不能吃，只是下巴很累很青涩。
+			;TranslatedMark 皮つきニンジンも同様に硬かった。食べられなくもないが、顎が疲れるし青臭い。
+			PRINTFORML 
+			PRINTFORML %ANAME(MASTER)%发出叹息，注视着滚落的红色肉。
+			;TranslatedMark %ANAME(MASTER)%は溜息を吐き、ころんとした赤色のお肉に目を向ける。
+			PRINTFORML 这也是生的吗。看起来像牛肉…。
+			;TranslatedMark これも生だろうか。見たところ牛肉のようだが…。
+			PRINTFORML 是吗，牛肉……那样的话不是很帅吗？
+			;TranslatedMark そうか、牛肉……ならばイケるのでは？
+			PRINTFORMW 牛肉不必像猪和鸟那样注意火候，所以也不要太在意食物中毒。大概。
+			;TranslatedMark 牛肉は豚や鳥ほど火の通りを注意しなくても良いから、そこまで食中毒も気にしなくて良いだろう。多分。
+			PRINTFORMW %ANAME(MASTER)%忘记了这肉在便当里放了半天，就把它送到了嘴里。
+			;TranslatedMark %ANAME(MASTER)%はこの肉が半日中弁当に入っていたことを失念したまま、それを口に運んだ。
+			PRINTFORML 
+			PRINTFORML 嗯，半途而废，味道不好。
+			;TranslatedMark うん、中途半端に味がついていて不味い。
+			PRINTFORML 但是脂肪本身并不坏。一定是价格很高的好肉吧。
+			;TranslatedMark でも脂の質自体は悪くない。きっと値段高めの良い肉なのだろう。
+			PRINTFORMW 好不容易做成的高级肉，比起放在这样的咖喱里，还要放其他的……不，已经什么都不说了。
+			;TranslatedMark せっかくの高級肉なら、こんなカレーに入れるよりももっと別の……いや、もはや何も言うまい。
+			PRINTFORML 
+			PRINTFORML 但是，在放咖喱的食材中，还有一些还没有在这里登场的东西。
+			;TranslatedMark ところで、カレーに入れる具材のうち、まだここでは登場していないものがある。
+			PRINTFORML 对，是洋葱。
+			;TranslatedMark そう、タマネギだ。
+			PRINTFORMW 这个%ANAME(対象)%咖喱乍一看好像没有洋葱。
+			;TranslatedMark この%ANAME(対象)%カレーには一見タマネギが入っていないように見える。
+			PRINTFORML 但是…用勺子仔细观察的话，可以发掘出黑皮一样的东西。
+			;TranslatedMark しかし…スプーンでよく探ってみれば、黒く萎びた皮のようなものが発掘できる。
+			PRINTFORMW 这是洋葱。而且这咖喱也可以说是焦味的元凶吧。
+			;TranslatedMark これがタマネギだ。そしてこのカレーにおける焦げ味の元凶ともいえるだろう。
+			PRINTFORML 可能是炒到变成糖色为止，但是烤焦了就没有意义了。
+			;TranslatedMark 飴色になるまで炒めようとでもしたのかもしれないが、焦がしてしまっては意味がない。
+			PRINTFORMW 对于料理经验少的%ANAME(対象)%来说，糖色和焦色看起来都是一样的吧…。
+			;TranslatedMark 料理経験の少ない%ANAME(対象)%にとっては、飴色も焦げ色も同じに見えたのだろうけれど…。
+			PRINTFORML 
+			PRINTFORML 那么，这个咖喱……怎么评价呢。
+			;TranslatedMark さて、このカレー……どう評価を下そうか。
+			PRINTFORML 淡水的香料汁、硬米饭、几乎生胡萝卜、带芽的土豆、烧焦的洋葱、还有生肉。
+			;TranslatedMark 薄く水っぽいスパイス汁、硬いご飯、ほぼ生のニンジン、芽付きジャガイモ、焦げきったタマネギ、そして生肉。
+			PRINTFORMW 原来如此。有不好的因素。
+			;TranslatedMark なるほど。不味い要素がそろっている。
+			PRINTFORML 但是，大体上也不是料理的形状。
+			;TranslatedMark だが、一応料理の形にはなっていなくもない。
+			PRINTFORML 如果使用菜刀、锅和火的话，那就是料理了。
+			;TranslatedMark 包丁と鍋と火を使っていれば、それは料理なのだ。
+			PRINTFORMW 然后把料理装进便当盒，那就是便当了。
+			;TranslatedMark そして料理を弁当箱に詰めれば、それは弁当なのだ。
+			PRINTFORML 
+			PRINTFORMW 但是这是…不是普通的便当。
+			;TranslatedMark だがこれは…ただの弁当ではない。
+			PRINTFORML 
+			PRINTFORML 爱妻便当。
+			;TranslatedMark 愛　妻　弁　当　だ。
+			PRINTFORMW 
+			PRINTFORMW 当然，必须要吃完。
+			;TranslatedMark 当然、完食しなくてはならない。
+			PRINTFORMW %ANAME(MASTER)%下定决心，很有气势地把咖喱塞进嘴里……。
+			;TranslatedMark %ANAME(MASTER)%は堅い決意を胸に、勢いよくカレーを口にかきこんだ……。
+			PRINTFORMW 希望肚子不要痛……。
+			;TranslatedMark 願わくば、お腹が痛くなりませんように……。
+		CASE 1
+			PRINTFORML ………这是什么。
+			;TranslatedMark ………なにこれ。
+			PRINTFORML 进入了%ANAME(MASTER)%的眼睛，是一种有着黑色皮的煮菜。仅此而已。
+			;TranslatedMark %ANAME(MASTER)%の目に入ってきたのは、黒っぽい皮のぷるんとした煮物。それだけだった。
+			PRINTFORML 
+			PRINTFORMW 想着是什么肉，用筷子摆弄看。
+			;TranslatedMark 何の肉だろうと思い、箸で弄ってみる。
+			PRINTFORMW 于是，一下子出现了黑色三角形的肉块。
+			;TranslatedMark すると、ひと際黒い三角形の肉塊が出てきた。
+			PRINTFORMW ……甲鱼的首级。
+			;TranslatedMark ……スッポンの生首だった。
+			PRINTFORMW %ANAME(MASTER)%不由得发出了悲鸣。
+			;TranslatedMark %ANAME(MASTER)%は思わず悲鳴を上げた。
+			PRINTFORML 
+			PRINTFORML 「%ANAME(MASTER)%大人，怎么了？」
+			;TranslatedMark 「%ANAME(MASTER)%様、どうかされましたか？」
+			PRINTFORMW 在附近等候的部下慌张张地向这边跑来。
+			;TranslatedMark 近くで控えていた部下が慌ててこちらに駆け寄ってきた。
+			PRINTFORML 
+			PRINTFORMW 他一看到便当里的东西，就目瞪口呆。
+			;TranslatedMark 彼は弁当の中身を見ると、唖然とした表情で固まった。
+			PRINTFORML 「…………哦，是夫人亲手做的吗？」
+			;TranslatedMark 「…………お、奥様のお手製で？」
+			PRINTFORMW %ANAME(MASTER)%颤抖着慢慢点头。
+			;TranslatedMark %ANAME(MASTER)%は震えながらゆっくりと頷く。
+			PRINTFORML 「怎么说呢，那个…看起来很有精神呢……？」
+			;TranslatedMark 「なんというか、その…精がつきそうですね……？」
+			PRINTFORMW %ANAME(MASTER)%再次点了点头。
+			;TranslatedMark %ANAME(MASTER)%は再びこくんと頷く。
+			PRINTFORML 
+			PRINTFORML 「那个，那么我就这样…」
+			;TranslatedMark 「あの、それでは私はこれで…」
+			PRINTFORMW %ANAME(MASTER)%叫住部下说"等一下"。
+			;TranslatedMark ちょっと待ちなさい、と%ANAME(MASTER)%は部下を呼び止める。
+			PRINTFORML 他吓了一跳，战战兢兢地转过身来。
+			;TranslatedMark ビクッと大きく肩を跳ねさせ、恐る恐るといったように彼は振り向いた。
+			PRINTFORML 「什、是什么呢……？」
+			;TranslatedMark 「な、何でしょう……？」
+			PRINTFORML 
+			CALL ASK_MULTI("请帮我一下忙" ,"这是命令，吃吧")
+			IF RESULT == 0
+				PRINTFORML 「那有点……对不起……」
+				;TranslatedMark 「それは、ちょっと……申し訳ないのですが……」
+				PRINTFORMW 在那里想办法。
+				;TranslatedMark そこをなんとか。
+				PRINTFORML 反复恳求"%ANAME(MASTER)%请帮帮我"。
+				;TranslatedMark %ANAME(MASTER)%は助けて下さいお願いしますと懇願を繰り返す。
+				PRINTFORMW 一直被上司低头，终于开始尴尬了吧。性格谦虚的他怯生生地点头。
+				;TranslatedMark 上司に頭を下げられ続け、いよいよ気まずくなってきたのだろう。謙虚な性格の彼はおずおずと頷いた。
+				PRINTFORMW 「我明白了……吃………」
+				;TranslatedMark 「分かりました……食べます………」
+				PRINTFORMW %ANAME(MASTER)%和感谢的话语一起给他预备的筷子。
+				;TranslatedMark %ANAME(MASTER)%は感謝の言葉をと共に予備の箸を彼に渡す。
+				PRINTFORML 
+				PRINTFORMW 「那个…我说的话，对夫人要保密……」
+				;TranslatedMark 「あの…私が口をつけたことは、奥様には内密に……」
+				PRINTFORML 当然。如果暴露了自己的头（物理上）会飞。
+				;TranslatedMark 当然だ。もしバレたら自分の首が(物理的に)飛ぶ。
+				PRINTFORMW %ANAME(MASTER)%认真地点了点头，两个人默默地开始吃炖甲鱼……。
+				;TranslatedMark %ANAME(MASTER)%は真剣な表情で頷き、二人で黙々とスッポンの煮込みを食べ始めた……。
+				PRINTFORML 
+				PRINTFORMW 准备得很甜，很臭，但也不是不能吃…。
+				;TranslatedMark 下ごしらえが甘く、かなり臭みがあったが、一応は食えないこともなかった…。
+			ELSE
+				PRINTFORML 「这样啊……」
+				;TranslatedMark 「そんなぁ……」
+				PRINTFORMW 被%ANAME(MASTER)%的职权骚扰，他差点哭出来。
+				;TranslatedMark %ANAME(MASTER)%のパワハラに彼は泣きそうになっている。
+				PRINTFORML 
+				PRINTFORML 「但是，不是爱妻便当吗？那样的，像我这样的一介人可以吃掉吗…？」
+				;TranslatedMark 「で、でも愛妻弁当でしょう？そんな、私のような一介の人間が食べてしまってよいのですか…？」
+				PRINTFORMW 即使有爱甲鱼也很难受。
+				;TranslatedMark 愛があってもスッポンはキツい。
+				PRINTFORML 「对，对了，是甲鱼哦！？夫人应该是希望%ANAME(MASTER)%大人吃的！」
+				;TranslatedMark 「そ、そうだ、スッポンですよ！？奥様は%ANAME(MASTER)%様にこそ食べて欲しいと思われているはずです！」
+				PRINTFORMW 「你看…晚上之类的，就是这样！所以说我吃了就不好了！」
+				;TranslatedMark 「ほら…夜とか、そういうので！だから私が食べたら良くないですって！」
+				PRINTFORML 虽然觉得这家伙很老练，但确实他的话有道理。
+				;TranslatedMark しぶといなコイツと思いつつも、確かに彼の言うことは一理ある。
+				PRINTFORML 特地往便当里装甲鱼，也就是说%ANAME(対象)%期待着这样的事情。
+				;TranslatedMark お弁当にわざわざスッポンを詰めるということは、つまり%ANAME(対象)%はそういうことを期待しているわけだ。
+				PRINTFORMW 一这么想着就变得可爱起来……感觉，感觉。
+				;TranslatedMark そう思うと途端に愛おしくなってきた……気がする。
+				PRINTFORML 
+				PRINTFORML 那就各吃一半吧，%ANAME(MASTER)%提议，性格认真的他无法拒绝地点了点头。
+				;TranslatedMark それじゃあ半分ずつ食べよう、と%ANAME(MASTER)%が提案すると、真面目な性格の彼は断れずに頷いた。
+				PRINTFORML 「我明白了……吃………」
+				;TranslatedMark 「分かりました……食べます………」
+				PRINTFORMW %ANAME(MASTER)%和感谢的话语一起给他预备的筷子。
+				;TranslatedMark %ANAME(MASTER)%は感謝の言葉と共に予備の箸を彼に渡す。
+				PRINTFORML 
+				PRINTFORMW 「那个…我说的话，对夫人要保密……」
+				;TranslatedMark 「あの…私が口をつけたことは、奥様には内密に……」
+				PRINTFORML 当然。如果暴露了自己的头（物理上）会飞。
+				;TranslatedMark 当然だ。もしバレたら自分の首が(物理的に)飛ぶ。
+				PRINTFORMW %ANAME(MASTER)%认真地点了点头，两个人默默地开始吃炖甲鱼……。
+				;TranslatedMark %ANAME(MASTER)%は真剣な表情で頷き、二人で黙々とスッポンの煮込みを食べ始めた……。
+				PRINTFORML 
+				PRINTFORMW 准备得很甜，很臭，但也不是不能吃…。
+				;TranslatedMark 下ごしらえが甘く、かなり臭みがあったが、一応は食えないこともなかった…。
+			ENDIF
+		CASE 2
+			PRINTFORML 装了两个相当大的饭团。
+			;TranslatedMark かなり大きめのおにぎりが2つ、詰められていた。
+			PRINTFORML 很普通。至少外表是。
+			;TranslatedMark 普通だ。少なくとも見た目は。
+			PRINTFORMW 到底，食材是什么呢。请一定要认真。
+			;TranslatedMark はたして、具は何だろうか。どうかまともであって欲しい。
+			PRINTFORML 
+			PRINTFORMW %ANAME(MASTER)%抓住饭团，豪爽地咬着。
+			;TranslatedMark %ANAME(MASTER)%はおにぎりを掴み、豪快に齧りつく。
+			PRINTFORML 
+			PRINTFORML 这个味道……是梅子酱。
+			;TranslatedMark この味は……梅ジャムだ。
+			PRINTFORMW 酸酸甜甜的，散发着清爽风味的梅酱，只要不放在米饭里就很好吃了吧。
+			;TranslatedMark 甘く酸味があり、爽やかな風味を漂わせる梅ジャムは、ご飯にさえ入れなければ美味しかっただろう。
+			PRINTFORML 但是，这种程度的话没问题。
+			;TranslatedMark しかし、この程度ならば問題はない。
+			PRINTFORML 和蜂蜜腌的甜梅干相似，当然是可以吃的范畴。
+			;TranslatedMark 蜂蜜漬けの甘い梅干しと似ているし、当然食べられる範疇だ。
+			PRINTFORMW %ANAME(MASTER)%突然改变态度，狼吞虎咽地吃了梅子果酱饭团。
+			;TranslatedMark %ANAME(MASTER)%は開き直ってむしゃむしゃと梅ジャムおにぎりを貪った。
+			PRINTFORML 
+			PRINTFORMW 那么，再来一个饭团怎么样？
+			;TranslatedMark さて、もう一つのおにぎりはどうだろう？
+			PRINTFORML 和刚才一样张着大口大口大口大口大口大口大口地咬着，一股腥味的香味和苦味在嘴里扩散开来。
+			;TranslatedMark 先ほどと同じく大口を開けてかぶりつくと、生臭い香りと苦みが口内に広がった。
+			PRINTFORML 一看，那是生鱼……是内脏。
+			;TranslatedMark 見てみると、それは生魚……と内臓であった。
+			PRINTFORMW 而且这种独特的味道…记得。香鱼。
+			;TranslatedMark そしてこの独特の臭い…覚えがある。鮎だ。
+			PRINTFORML 
+			PRINTFORML 竟然把河鱼生放进饭团里。
+			;TranslatedMark まさか、川魚を生で握り飯に入れるとは。
+			PRINTFORML 无知真是罪孽深重。
+			;TranslatedMark 無知とは、実に罪深きものである。
+			PRINTFORMW %ANAME(MASTER)%深深地点了点头。
+			;TranslatedMark %ANAME(MASTER)%はしみじみと頷いた。
+			PRINTFORML 
+			PRINTFORML ……不，不是那种悠闲的场合。
+			;TranslatedMark ……いや、そんな悠長にしている場合じゃない。
+			PRINTFORML 河鱼都是寄生虫，生吃的话可不得了。
+			;TranslatedMark 川魚は寄生虫だらけだ、生食なんてしたら大変なことになる。
+			PRINTFORMW 如果脑浆和眼球里有虫子的话……这样想象着，全身的毛都竖起来了。
+			;TranslatedMark もしも脳みそや眼球に虫が入ってきたら……と想像し、ゾワリと全身の毛が逆立った。
+			PRINTFORML 
+			PRINTFORML 虽然对%ANAME(対象)%不好，但%ANAME(MASTER)%还是悄悄地吐出了口中残留的那个。
+			;TranslatedMark %ANAME(対象)%には悪いが、まだ口内に残っていたソレを%ANAME(MASTER)%はそっと吐き出す。
+			PRINTFORML 然后用茶漱口几次。
+			;TranslatedMark そしてお茶で何度か口をゆすいだ。
+			PRINTFORML 这样可以吗…？
+			;TranslatedMark これで大丈夫だろうか…？
+			PRINTFORMW %ANAME(MASTER)%摇了摇头，消除了残留的不安，深深地叹了一口气。
+			;TranslatedMark %ANAME(MASTER)%は首を振って未だ残る不安を払い、大きく溜息を吐いた。
+			PRINTFORML 
+			PRINTFORML 总之，这个寄生虫饭团不能吃。有生命危险。
+			;TranslatedMark とりあえず、この寄生虫おにぎりは食べられない。命の危険がある。
+			PRINTFORMW 但是，扔掉太可惜了，感觉不太好。
+			;TranslatedMark でも、捨ててしまうのは勿体ないし、よろしくない気がする。
+			PRINTFORML ………让狗也吃吧。
+			;TranslatedMark ………犬にでも食べさせようか。
+			PRINTFORMW %ANAME(MASTER)%下定决心要这样做，于是用纸包住饭团离开了座位…。
+			;TranslatedMark そうしよう、と心に決めた%ANAME(MASTER)%は、そのおにぎりを紙で包んで席を立った…。
+		CASE 3
+			PRINTFORML ………。
+			PRINTFORML %ANAME(MASTER)%马上关上了便当的盖子。
+			;TranslatedMark %ANAME(MASTER)%はすぐに弁当の蓋を閉じた。
+			PRINTFORMW 但是，鼻子里还残留着浓厚的野兽气味。
+			;TranslatedMark だというのに、ムワァッとした濃厚な獣臭がまだ鼻に残っている。
+			PRINTFORML 
+			PRINTFORML 「%ANAME(MASTER)%大人，怎么了？」
+			;TranslatedMark 「%ANAME(MASTER)%様、どうかしました？」
+			PRINTFORMW 在一旁等候的部下惊讶地看着这边，那种事无所谓。
+			;TranslatedMark 傍で控えている部下が訝しげにこちらを見ているが、そんなことはどうでもいい。
+			PRINTFORML 
+			PRINTFORML 那是什么？
+			;TranslatedMark あれは、何だ？
+			PRINTFORML 只看一眼是什么也不知道的。
+			;TranslatedMark パッと見ただけでは何か分からなかった。
+			PRINTFORMW 半固态的，整体呈茶色，到处都是红黑色的混在一起的什么东西。
+			;TranslatedMark 半固形っぽくて、全体的に茶色くて、各所に赤黒い塊が混じっている何かだった。
+			PRINTFORML 
+			PRINTFORML ………应该再看一次吗。
+			;TranslatedMark ………もう一度、見るべきだろうか。
+			PRINTFORML 对了。首先不打开便当的盖子的话，连吃都吃不到。
+			;TranslatedMark そうだ。まず弁当の蓋を開けなければ食べることすらできない。
+			PRINTFORMW 轻轻打开盖子…。
+			;TranslatedMark そっと蓋を開ける…。
+			PRINTFORML 
+			PRINTFORML 刚才没有注意到，这是大米。
+			;TranslatedMark 先ほどは気づかなかったが、これは米だ。
+			PRINTFORMW 用酱料般的东西染上颜色的米上缠绕着红黑色、软乎乎的东西。
+			;TranslatedMark タレ的なもので色付いた米に、赤黒くてグニグニしたものが絡みついている。
+			PRINTFORML 这个红色物体是……是肝吧。
+			;TranslatedMark この赤い物体は……レバーだろうか。
+			PRINTFORML 从兽臭和独特的臭味来看，恐怕是这样。
+			;TranslatedMark 獣臭と独特の臭いからして、おそらくはそうだ。
+			PRINTFORMW 然后这个外表……没错儿没透过火。
+			;TranslatedMark そしてこの見た目……間違いなく火を通していない。
+			PRINTFORML 
+			PRINTFORMW 也就是说，这种来历不明的料理是将用烤肉汁或什么调味过的生肝混入白米中的一道菜…也就是说。
+			;TranslatedMark つまり、この得体のしれない料理は、焼肉のタレか何かで味付けした生レバーを、白米に混ぜこんだ一品…といったところか。
+			PRINTFORML 
+			PRINTFORMW 虽然是个很荒唐的家伙，但是就算是不擅长做饭的%ANAME(対象)%也会生成这样的东西吗？
+			;TranslatedMark とんでもないゲテモノだが、いくら料理下手な%ANAME(対象)%でもこのようなものを生成するだろうか？
+			PRINTFORML 从这个便当盒和包着它的包袱皮就可以看出，她对东西的质量和外观很讲究。
+			;TranslatedMark この弁当箱やそれを包んでいた風呂敷からも分かるが、彼女は物の質や見た目に結構拘る。
+			PRINTFORML 只有料理不可能不在意。
+			;TranslatedMark 料理に限っては気にしない、ということはあり得ない。
+			PRINTFORMW 实际上，和女朋友一起去吃饭的时候，对色彩和香味的评价也不少。
+			;TranslatedMark 実際、彼女と一緒に食事に行ったときには、彩りや香りなどを評することも少なくないのだ。
+			PRINTFORML 
+			PRINTFORML 那么为什么…？
+			;TranslatedMark では何故…？
+			PRINTFORMW 谜团越来越深。
+			;TranslatedMark 謎は深まるばかりだ。
+			PRINTFORML 
+			PRINTFORMW 但是，首先是吃完这个……能做到吗？
+			;TranslatedMark だが、まずはこれを完食……できるのだろうか？
+			PRINTFORML 或者说比起外观、味道和臭味，更应该担心的是。食物中毒了。
+			;TranslatedMark というか見た目や味や臭い以上に、もっと懸念すべきことがある。食中毒だ。
+			PRINTFORML 把本来就有危险的生肝装在细菌容易繁殖的便当里。
+			;TranslatedMark ただでさえその危険がある生レバーを、菌が繁殖しやすい弁当に詰めているのだ。
+			PRINTFORML 一定很糟糕。
+			;TranslatedMark 間違いなくヤバい。
+			PRINTFORMW 不开玩笑，有死的危险。
+			;TranslatedMark 冗談抜きで死の危険性がある。
+			PRINTFORML 
+			PRINTFORML 冷静下来思考吧。留下便当的话当然%ANAME(対象)%会伤心。
+			;TranslatedMark 冷静になって考えよう。弁当を残せばもちろん%ANAME(対象)%は悲しむ。
+			PRINTFORML 但是，自己死了的话会更伤心。
+			;TranslatedMark だが、自分が死んだらもっと悲しむ。
+			PRINTFORMW 不要勉强吃这个。
+			;TranslatedMark 無理をしてこれを食べるのはやめるべきだ。
+			PRINTFORML 
+			PRINTFORMW %ANAME(MASTER)%再次合上了便当的盖子。
+			;TranslatedMark %ANAME(MASTER)%は再び弁当の蓋を閉じた。
+			PRINTFORML 
+			PRINTFORML 「诶，不吃吗？」
+			;TranslatedMark 「えっ、食べないんです？」
+			PRINTFORMW ……刚才还在看的部下跟我说。
+			;TranslatedMark ……と、さっきまで見ているだけだった部下が話しかけてきた。
+			PRINTFORML 「太可惜了。那是夫人做的便当吧？」
+			;TranslatedMark 「勿体ないですよぉ。それ、奥様が作られたお弁当でしょう？」
+			PRINTFORMW 你以为你能吃那个吗…%ANAME(MASTER)%瞪着他，他露出苦笑。
+			;TranslatedMark お前はあれを食えると思うのか…と%ANAME(MASTER)%が睨むと、彼は苦笑いを浮かべた。
+			PRINTFORML 「哎呀，哎呀……但是你看，一口都不吃，真是太可怜了！」
+			;TranslatedMark 「いやぁ、まあ……でもほら、一口も食べないのは流石に可哀想ですよ！」
+			PRINTFORML 「明明是那么可爱的人…如果让他伤心的话会受到惩罚的！」
+			;TranslatedMark 「あんなに見た目は可愛らしいお方なのに…悲しませたら罰が当たりますって！」
+			PRINTFORMW "虽然外表上是"的，但是悲伤的地方在自己心里却是清楚的。
+			;TranslatedMark "見た目は"というのが引っかかるし、悲しむ云々の点は自分の中でケリはつけた。
+			PRINTFORML 
+			PRINTFORML 但是……还是吃一口比较好。
+			;TranslatedMark でも……やっぱり、一口くらいは食べたって良いかもしれない。
+			PRINTFORMW 虽然对自己的优柔寡断感到吃惊，但%ANAME(MASTER)%再次打开便当的盖子，拿着筷子。
+			;TranslatedMark 己の優柔不断っぷりに呆れつつも、%ANAME(MASTER)%は再度弁当の蓋を開け、箸を持つ。
+			PRINTFORML 「加油！%ANAME(MASTER)%大人～！」
+			;TranslatedMark 「頑張れ～！%ANAME(MASTER)%様～！」
+			PRINTFORMW %ANAME(MASTER)%下定决心以后再打他，吃了一口生肝拌饭。
+			;TranslatedMark こいつ後で殴る、と%ANAME(MASTER)%は心に決め、生レバー混ぜご飯を一口、食べた。
+			PRINTFORML 
+			PRINTFORML 入口的瞬间，强烈的血液和野兽的臭味扩散开来，呕吐从胃中涌上来。
+			;TranslatedMark 口に入れた瞬間、猛烈な血と獣の臭いが広がり、胃からゲロが込み上げてくる。
+			PRINTFORML 铁锈风味加上甜酱汁和若干酸味，不允许下肚。
+			;TranslatedMark 鉄さびの風味に甘いタレと若干の酸っぱさが加わり、喉に下すことを許さない。
+			PRINTFORML 煮硬了的米和猪肝的食感绝妙的不协和音演奏，连咀嚼都拒绝。
+			;TranslatedMark 硬く炊き上がった米と、レバーのもにょっとした食感が絶妙な不協和音を奏で、咀嚼すら拒ませる。
+			PRINTFORMW 用茶灌入的作战也不行。现在在这里开口的话，就会直接吐出来吧。
+			;TranslatedMark お茶で流し込む作戦も無理だ。今ここで口を開いたら、そのまま吐いてしまうだろう。
+			PRINTFORML 
+			PRINTFORMW 不能吞咽、咀嚼、呕吐，打破这种状况的方法是……。
+			;TranslatedMark 嚥下することも、咀嚼することも、嘔吐することもできない、この状況を打破する方法は……。
+			PRINTFORMW 没有吗？
+			;TranslatedMark ない？
+			PRINTFORML 
+			PRINTFORMW 不会吧。不可能有那种事。
+			;TranslatedMark まさか。そんなことはあり得ない。
+			PRINTFORML 
+			PRINTFORMW 在惊慌失措的%ANAME(MASTER)%的脑内，突然浮现出女神的身影…。
+			;TranslatedMark 狼狽する%ANAME(MASTER)%の脳内に、ふっと女神の姿が浮かびあがった…。
+			PRINTFORML 
+			PRINTFORMW "这个便当是谁做的？"
+			;TranslatedMark 『この弁当を作ったのは誰だ？』
+			PRINTFORMW 我是爱妻。
+			;TranslatedMark 愛妻です。
+			PRINTFORMW "但是，你觉得最突出本质的是什么？"
+			;TranslatedMark 『だが、一番本質を突いているのは何だと思う？』
+			PRINTFORMW …………秘神？
+			PRINTFORML 
+			PRINTFORMW %ANAME(MASTER)%理解了。为什么，%ANAME(対象)%做出了这样的一道菜。
+			;TranslatedMark %ANAME(MASTER)%は理解した。何故、%ANAME(対象)%がこのような一品を作り上げたのかを。
+			PRINTFORML 
+			PRINTFORMW 也就是说，这是她的"秘方"。
+			;TranslatedMark つまり、これは彼女の"秘儀"なのだ。
+			PRINTFORML 也就是说，名为"黑暗料理"的秘方……。
+			;TranslatedMark すなわち、"暗黒料理"と言う名の秘儀……。
+			PRINTFORML 那是有时从无机物中产生生物，有时将死亡改写成生的终极奥仪。
+			;TranslatedMark それは時に無機物から生物を生み出し、時に死を生へと塗り替える究極奥儀。
+			PRINTFORMW 然后现在，%ANAME(MASTER)%吃到的这个便当，是以吃过的人的生命为交换来证明爱的东西。
+			;TranslatedMark そして今、%ANAME(MASTER)%が口にしたこの弁当は、食した者の命と引き換えに愛を証明させる代物。
+			PRINTFORML 
+			PRINTFORMW 那么，自己应该做的事情只有一个。
+			;TranslatedMark ならば、己が為すべきことはただ一つ。
+			PRINTFORMW %ANAME(MASTER)%在心中呐喊着，抬起舌头，收缩脸颊的肌肉。
+			;TranslatedMark %ANAME(MASTER)%は心の中で雄叫びを上げながら、舌をもたげ、頬の筋肉を収縮させる。
+			PRINTFORMW 将这种亵渎性的食物，带进因拒绝感而颤抖的食道。
+			;TranslatedMark 冒涜的なその食物を、夫婦愛の明証を、拒絶感に震える食道へと運び込む。
+			PRINTFORMW 不把上来的胃液放在眼里，那个块儿一个劲地笔直地前进……
+			;TranslatedMark せり上がってきた胃液を物ともせず、その塊はひたすら真っ直ぐに進み続け……
+			PRINTFORMW 没入肚。
+			;TranslatedMark 胃袋に沈んだ。
+			PRINTFORML 
+			PRINTFORMW 「不是要做吗！%ANAME(MASTER)%大人～！」
+			;TranslatedMark 「やるじゃないですか！%ANAME(MASTER)%様ぁ～！」
+			PRINTFORML 「看了就糟糕了！不愧是毅力！！」
+			;TranslatedMark 「見るからにヤバそうだったのに！流石のガッツです！！」
+			PRINTFORML 「夫人一定会哭着高兴的！我无法想象他哭的样子！」
+			;TranslatedMark 「きっと奥様も泣いて喜ばれますよ！あの方が泣く姿なんて想像もつきませんが！」
+			PRINTFORMW %ANAME(MASTER)%用泪瞪着骚动的部下，这家伙之后打…再次下定决心。
+			;TranslatedMark %ANAME(MASTER)%は騒ぎ立てる部下を涙目で睨み、こいつ後で殴る…と再び心に決めた。
+	ENDSELECT
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW ・
+	PRINTFORML 「你回来了，%ANAME(MASTER)%」
+	;TranslatedMark 「おかえり、%ANAME(MASTER)%」
+	PRINTFORMW 深夜回到我房间的%ANAME(MASTER)%，被微笑着的%ANAME(対象)%迎接。
+	;TranslatedMark 夜遅くに私室に戻った%ANAME(MASTER)%は、笑顔の%ANAME(対象)%に迎えられた。
+	PRINTFORML 「今天辛苦了。喝点热的东西吗？」
+	;TranslatedMark 「今日はお疲れ様。何か温かい物でも飲むか？」
+	PRINTFORMW %ANAME(MASTER)%摇着头，抱着%ANAME(対象)%的腰坐在沙发上。
+	;TranslatedMark %ANAME(MASTER)%は首を振り、%ANAME(対象)%の腰を抱いてソファにかける。
+	PRINTFORMW 一起坐着的%ANAME(対象)%染上了脸颊蹭到了%ANAME(MASTER)%身上。
+	;TranslatedMark 一緒に座った%ANAME(対象)%は頬を染めて%ANAME(MASTER)%にすり寄ってきた。
+	PRINTFORML 
+	PRINTFORMW 「%ANAME(MASTER)%，便当怎么样…？」
+	;TranslatedMark 「%ANAME(MASTER)%、お弁当はどうだった…？」
+	PRINTFORMW 感觉到了爱。
+	;TranslatedMark おきなのあいをかんじたよ。
+	PRINTFORML 「呵呵，是吗♥ 太好了，你很高兴♥」
+	;TranslatedMark 「ふふっ、そうか♥ よかった、貴方が喜んでくれて♥」
+	PRINTFORMW %ANAME(対象)%这样说着就抱住了%ANAME(MASTER)%，一边娇滴滴的抚摸着脸颊。
+	;TranslatedMark %ANAME(対象)%はそう言うと%ANAME(MASTER)%に抱き着き、デレデレしながらその胸に頬を擦り付けた。
+	PRINTFORML 
+	PRINTFORMW 今天会是个炎热的夜晚吧。
+	;TranslatedMark 今日は熱い夜になるだろう。
+	PRINTFORML 但是，不能就这样。
+	;TranslatedMark だが、このままではいけない。
+	PRINTFORMW 无论如何，要想办法提高妻子的料理水平。
+	;TranslatedMark どうにかして、なんとかして妻の料理レベルを上げねば。
+	PRINTFORMW 否则总有一天会被她杀死。
+	;TranslatedMark でないといつか彼女に殺される。
+	PRINTFORML 
+	PRINTFORMW %ANAME(MASTER)%一边想象着白天的惨状，一边抚摸着紧贴在一起的%ANAME(対象)%的头。
+	;TranslatedMark %ANAME(MASTER)%は昼の惨状を思い浮かべながら、ぴったりと密着している%ANAME(対象)%の頭を撫でた。
+	PRINTFORML 
+	CFLAG:対象:好感度 += 300
+	CFLAG:対象:従属度 += 300
+	経験値 = GET_EXP(GETNUM(ABL, "料理"))
+	CALL PRINT_ADD_EXP(対象, EXPNAME:経験値, RAND:5 + 1, 1)
+	CALL TRAIN_AUTO_ABLUP(対象)
+ENDIF
+RETURN 1
+

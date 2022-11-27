@@ -1,0 +1,653 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K134_SAIKAIHATU_RATE(対象)
+#DIM 対象
+RETURN 50
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K134_SAIKAIHATU_DECISION(対象)
+#DIM 対象
+
+;ドレミーと面識があり、所属がおなじ、5%
+
+;終わってたら発生しない
+SIF KDVAR:対象:ドレミー_再開発 == -1
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K134_SAIKAIHATU_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K134_SAIKAIHATU(対象)
+#DIM 対象
+#DIM 必要額
+
+
+SELECTCASE KDVAR:対象:ドレミー_再開発
+	CASE 0
+		PRINTFORMW 工作告一段落后，%ANAME(MASTER)%以巡逻的名义在城下町散步
+		;TranslatedMark 仕事がひと段落し、%ANAME(MASTER)%は警邏という名目で城下町を散歩している
+		PRINTFORML 环顾四周，在充满活力的商店林立的大道上，形形色色的官员和工匠正在辛勤工作
+		;TranslatedMark 周囲を見渡すと、活気のある店が立ち並ぶ大通りに様々な役人職人がけたたましく働いている
+		PRINTFORMW 走了一会儿后，看到了一边记笔记一边走在废墟旁边的%ANAME(対象)%的身影……
+		;TranslatedMark しばらく歩き回っていると、メモを取りながら廃墟の傍を歩く%ANAME(対象)%の姿が見えた……
+		PRINTFORMW 「嗯……在之前的战斗中完全被毁了呢。这是再开发对象啊」
+		;TranslatedMark 「うーん……前の戦いで完全にダメにされちゃったわね。　これは再開発対象ねぇ」
+		PRINTFORMW 没有特别要做的事的%ANAME(MASTER)%，向%ANAME(対象)%打了招呼
+		;TranslatedMark やる事も特に無かった%ANAME(MASTER)%は、%ANAME(対象)%に声を掛けた
+		PRINTFORML
+		PRINTFORML 「啊拉，%ANAME(MASTER)%，怎么在这种地方？」
+		;TranslatedMark 「あら%ANAME(MASTER)%、どうしたのこんなところで？」
+		PRINTFORMW 「我？工作中啊，正在构思城下町的再开发地区计划呢」
+		;TranslatedMark 「私？　仕事中よ、城下町の再開発地区計画の構想を練ってる所ね」
+		PRINTFORMW 看了%ANAME(対象)%的笔记，现在所在的地方周边好像是再开发地区的对象
+		;TranslatedMark %ANAME(対象)%のメモを覗くと、今いる場所周辺が再開発地区の対象のようだ
+		PRINTFORMW 「这一带怎么办还没决定呢，是做餐饮街还是住宅区……」
+		;TranslatedMark 「ここ一帯をどうしようか決めかねてるのよね、飲食街にするか住宅街にするか……」
+		PRINTFORMW 似乎%ANAME(対象)%无法决定这附近的设施应该是什么样的……
+		;TranslatedMark どうやら%ANAME(対象)%は、この付近の施設をどのようなものにするか決めかねているようだ……
+		KDVAR:対象:ドレミー_再開発 = 1
+		PRINTFORML 
+		CALL ASK_MULTI("餐饮街不是挺好的吗", "增加住宅区吧", "这里就做娼婦街吧!")
+		SELECTCASE RESULT
+			CASE 0
+				PRINTFORMW 「嗯~好啊，美味的料理会让人充满活力，这一点无论是人还是妖怪都一样。」
+				;TranslatedMark 「う～ん良いですねぇ、美味しい料理は人を元気にしてくれますからね、これは人であっても妖怪であっても一緒です」
+				PRINTFORMW 「诶？我的主食确实是噩梦……不，甜点是用另一个胃啦。嗯，另一个胃」
+				;TranslatedMark 「えっ？　私の主食は確かに悪夢ですが……いや甘味は別腹です。　えぇ別腹なので」
+				PRINTFORMW %ANAME(MASTER)%在那之后一边说着想吃的料理一边继续视察……
+				;TranslatedMark %ANAME(MASTER)%はそのあとも%ANAME(対象)%と食べてみたい料理を語りながら視察を続けた……
+				KDVAR:対象:ドレミー_再開発イベント = 0
+			CASE 1
+				PRINTFORMW 「是啊……住的人变多的话，工作的人也就多了。而且我个人的食物来源增加的愿望也实现了」
+				;TranslatedMark 「そうねぇ……人が多く住めれば確かに働き手も多くなる。　それに私個人としても食源も増えて願ったり叶ったり」
+				PRINTFORMW 「嗯，这样想的话，比起娱乐，确保衣食住行更重要，所以才适合吧」
+				;TranslatedMark 「嗯嗯，这么一想，比起娱乐，衣食住行更重要，这才是合适的方案吧」
+				PRINTFORMW 在那之后，%ANAME(MASTER)%和%ANAME(対象)%一边商讨如何确保新的劳动力，一边继续视察。
+				;TranslatedMark %ANAME(MASTER)%はそのあとも%ANAME(対象)%と新たな働き手の確保について相談しながら視察を続けた……
+				KDVAR:対象:ドレミー_再開発イベント = 1
+			CASE 2
+				;恋慕と合意を持っていると発動(タイミング的に周回プレイで維持じゃないと厳しいかも&この選択肢を選ぶ覚悟)
+				IF TALENT:対象:恋慕 && TALENT:対象:合意
+					PRINTFORMW 「哎呀哎呀，那也就是说……」
+					;TranslatedMark 「おやおや、それはつまり……」
+					PRINTFORML 对这样提议的%ANAME(MASTER)%，%ANAME(対象)% 露出了笑容
+					;TranslatedMark そう提案した%ANAME(MASTER)%に、%ANAME(対象)%は笑みを浮かべた
+					PRINTFORMW 「好的，我知道了，如果您喜欢这种玩法的话，下次之前我会准备好的……」
+					;TranslatedMark 「畏まりました、そういうプレイがお好きでしたなら次までに準備しておくわ……」
+					PRINTFORMW 「呵呵，请敬请期待♥」
+					;TranslatedMark 「ふふっ、楽しみにしてて♥」
+					PRINTFORMW %ANAME(MASTER)%们继续视察，但%ANAME(対象)%却一副妖艳的表情，无法集中精神……
+					;TranslatedMark %ANAME(MASTER)%達は視察を続けたが妖艶な女の表情になった%ANAME(対象)%のせいか集中出来なかった……
+					KDVAR:対象:ドレミー_再開発イベント = 2
+				ELSE
+					PRINTFORMW 「……哈，我不太喜欢那种玩笑」
+					;TranslatedMark 「……はぁ、そういう冗談はあまり好きじゃないわ」
+					PRINTFORMW 「请认真考虑一下吧」
+					;TranslatedMark 「ったく、真面目に考えてくださいねー」
+					PRINTFORMW %ANAME(MASTER)%们继续视察，但%ANAME(対象)%却一副不高兴的样子……
+					;TranslatedMark %ANAME(MASTER)%達は視察を続けたが%ANAME(対象)%は不機嫌な様子だった……
+					;強制的に飲食街を選んだ結果となる
+					KDVAR:対象:ドレミー_再開発イベント = 0
+				ENDIF
+		ENDSELECT
+	;---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	CASE 1
+	;先にイベントで必要な金額を決める
+		必要額 = RAND(DAY *100, DAY * 300)
+	;前のイベントで選んだ選択肢によってイベントが変わる
+		PRINTFORMW 工作告一段落，%ANAME(MASTER)%来到了城下町
+		;TranslatedMark 仕事が一段落し、%ANAME(MASTER)%は城下町に訪れている
+		PRINTFORML 这么说来，上次谈到再开发的地方怎么样了呢
+		;TranslatedMark そういえば前回、再開発について話した場所はどうなっただろうか
+		PRINTFORMW %ANAME(MASTER)%决定前往再开发地区……
+		;TranslatedMark %ANAME(MASTER)%は再開発地区へ向かうことにした……
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORML ・
+		SELECTCASE KDVAR:対象:ドレミー_再開発イベント
+			;飲食街を選んだ場合
+			CASE 0
+				PRINTFORML 再开发地区好像变成了民众聚集的饮食街
+				;TranslatedMark 再開発地区は民達で賑わう飲食街となっているようだ
+				PRINTFORMW 大部分都是需要站着吃的小吃店，但是很热闹
+				;TranslatedMark 店のほとんどは立ち食いの軽食だが賑わっている
+				PRINTFORML 一些商店还为工人提供食物
+				;TranslatedMark 一部の店では労役者のための炊き出しも行われている
+				PRINTFORMW 还听到传言，有时会有粉红头发的仙人和亡灵来大吃特吃。
+				;TranslatedMark 時々ピンク髪の仙人や亡霊による大食いで賑わうなんて噂も聞こえてくる
+				PRINTFORMW ……不，我觉得这是个问题。
+				;TranslatedMark ……いやそれは問題な気がするが
+				PRINTFORMW %ANAME(MASTER)%被周围散发出的料理的香味所吸引，决定吃点小吃
+				;TranslatedMark %ANAME(MASTER)%は辺りから匂う香ばしい料理の匂いにつられ軽食を取る事にした
+				PRINTFORML 边逛边决定吃哪家店的时候%ANAME(MASTER)%遇见了%ANAME(対象)%
+				;TranslatedMark どの店にしようか歩いていると%ANAME(MASTER)%は%ANAME(対象)%と出会った
+				PRINTFORML 「现在要去吃饭吗？那么我也可以一起吗？」
+				;TranslatedMark 「今からごはん？　なら私も一緒して良いかしら？」
+				PRINTFORMW 「刚才工作告一段落了。机会难得，我想和民众们吃一样的东西。」
+				;TranslatedMark 「さっき仕事がひと段落してねー。　折角だし民の皆様と同じものを食べていきたいなぁーってね」
+				PRINTFORMW 走在饮食街上的两个人挑选了一些比较中意的店
+				;TranslatedMark 飲食街を歩く二人はある程度気になる店をピックアップしていった
+				PRINTFORMW 那么要去哪里呢……？
+				;TranslatedMark さてどこにしようか……？
+				PRINTFORML
+				CALL ASK_MULTI("团子屋", "关东煮屋", "鸡肉串屋")
+				SELECTCASE RESULT
+					CASE 0
+						PRINTFORMW 「团子！好啊，走吧！」
+						;TranslatedMark 「お団子！　イイわ、行きましょ！」
+						PRINTFORMW %ANAME(MASTER)%被%ANAME(対象)%带到了团子店……
+						;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%に連れられ団子屋に向かった……
+						PRINTFORML ・
+						PRINTFORML ・
+						PRINTFORML ・
+						PRINTFORMW 被%ANAME(対象)%带到的地方有并排开着的两家团子店
+						;TranslatedMark %ANAME(対象)%に案内され着いた場所には団子屋が二軒並んでた
+						PRINTFORML 「这么说来这里的团子店，是两个一串的吧」
+						;TranslatedMark 「そういえばここの団子屋さん、二つに分かれてるのよね」
+						PRINTFORMW 「三餐团子和糯米团子、御手洗团子和黑芝麻团子……每一个都想吃，但是4根太多了」
+						;TranslatedMark 「三食団子とずんだ団子、みたらし団子と黒胡麻団子……どれも食べたいけど4本は多いわね」
+						PRINTFORMW %ANAME(対象)%因为在意吃太多团子而烦恼，%ANAME(MASTER)%在眼前买了4种团子给她看
+						;TranslatedMark 団子の食べ過ぎに注意するあまり悩む%ANAME(対象)%、%ANAME(MASTER)%は目の前で4種類の団子を買って見せた
+						PRINTFORMW %ANAME(MASTER)%提议如果一根刺4个的话，和%ANAME(対象)%一起分享就能一个一个地全部吃到了
+						;TranslatedMark %ANAME(MASTER)%は1本に4つ刺さっているのなら%ANAME(対象)%と自分で分け合えば全部少しずつ食べられるだろうと提案した
+						IF TALENT:対象:恋慕
+							PRINTFORMW 「那是……好啊。就这么办吧」
+							;TranslatedMark 「それは……良いですねぇ。　そうしましょうか」
+							PRINTFORML %ANAME(対象)%露出笑容，牵着%ANAME(MASTER)%的手坐下
+							;TranslatedMark %ANAME(対象)%は笑みを浮かべ%ANAME(MASTER)%の手を引いて席に着いた
+							PRINTFORMW 「好啦，张开嘴，我喂你吃。啊—」
+							;TranslatedMark 「ほら口開けて、食べさせてあげるわ。　あーん」
+							PRINTFORMW %ANAME(MASTER)%回应%ANAME(対象)%似的一口吃下了团子
+							;TranslatedMark 団子を食べさせてくる%ANAME(対象)%に%ANAME(MASTER)%は答える様に団子を頬張った
+							PRINTFORMW 「你看，再来一口」
+							;TranslatedMark 「ほら、もう一口」
+							PRINTFORMW 想要再喂一口的%ANAME(対象)%，注意到了周围微妙的视线……
+							;TranslatedMark 更に一口と食べさせてくる%ANAME(対象)%、妙に周囲の目線が気になる……
+							PRINTFORMW 「接下来…那个团子让我收下吧？」
+							;TranslatedMark 「それで……その団子は私が貰っちゃおうかしら？」
+							PRINTFORMW %ANAME(対象)%将手放在咀嚼团子的%ANAME(MASTER)%的下颚上，把脸靠近
+							;TranslatedMark 団子を咀嚼する%ANAME(MASTER)%の顎に手を当てて顔を近づける%ANAME(対象)%
+							PRINTFORMW %ANAME(MASTER)%以惊人的气势咽了下去……
+							;TranslatedMark %ANAME(MASTER)%は驚いた勢いで咽てしまった……
+							PRINTFORMW 「哈哈，开玩笑的」
+							;TranslatedMark 「ふふっ冗談よ、冗談」
+							PRINTFORMW 这样说着，%ANAME(対象)%吃着剩下的团子
+							;TranslatedMark そう言って%ANAME(対象)%は残った団子を食べている
+						ELSE
+							PRINTFORMW 「……啊，你又这样坦然地做了让人害羞的事」
+							;TranslatedMark 「……あぁ、また貴方はそうやって恥ずかしい事を平然と」
+							PRINTFORMW 「不不不，也可以。只是周围的目光……」
+							;TranslatedMark 「いえいえ、良いですとも。　ただ少し周りの目が……」
+							PRINTFORML %ANAME(対象)%和%ANAME(MASTER)%到位子上开始吃团子
+							;TranslatedMark %ANAME(対象)%と%ANAME(MASTER)%席に着いて団子を食べ始めた
+							PRINTFORMW 「现在的我们……简直就像恋人一样呢」
+							;TranslatedMark 「今の私達って……まるで恋人みたいね」
+							PRINTFORMW 「呃，并不是说很高兴之类的」
+							;TranslatedMark 「べっ、別にうれしいとかそういうのじゃありませんしー」
+							PRINTFORMW 「啊，真是的，太在意旁人的视线了，都不知道味道是怎样的了……」
+							;TranslatedMark 「あーもう、周りの目が気になって味が分からないわ……」
+							PRINTFORMW 「……但是很好吃呢，%ANAME(MASTER)%」
+							;TranslatedMark 「……でも美味しいわね、%ANAME(MASTER)%」
+							PRINTFORMW %ANAME(対象)%美味地大口吃着团子
+							;TranslatedMark %ANAME(対象)%は美味しそうに団子を頬張っている
+						ENDIF
+						PRINTFORMW 两个人在那之后也享受了团子……
+						;TranslatedMark 二人はその後も団子を楽しんだ……
+						CALL COLOR_PRINTW("好感度提高了200", カラー_注意)
+						CFLAG:対象:好感度 += 200
+					CASE 1
+						PRINTFORMW 「真是个没办法的选择啊。但我喜欢%ANAME(MASTER)%那样的地方哦」
+						;TranslatedMark 「なかなか渋い選択ね。　%ANAME(MASTER)%のそういうところ好きですよ」
+						PRINTFORMW %ANAME(MASTER)%被%ANAME(対象)%带到了团子店……
+						;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%に連れられ団子屋に向かった……
+						PRINTFORML ・
+						PRINTFORML ・
+						PRINTFORML ・
+						PRINTFORML 在散发着汤汁香味的小摊前，吵闹的强壮男子们以关东煮为下酒菜喝着酒
+						;TranslatedMark 出汁の香りを漂わせる屋台の元では騒がしい屈強な男たちがおでんを肴に酒を飲んでいる
+						PRINTFORMW 这里好像是歇班的士兵和工人们的休息场所
+						;TranslatedMark ここはどうやら非番の兵士や労役者たちの憩いの場のようだ
+						PRINTFORMW %ANAME(MASTER)%和%ANAME(対象)%马上就随便点了些料理
+						;TranslatedMark さっそく%ANAME(MASTER)%と%ANAME(対象)%は適当に注文した
+						PRINTFORMW 「……」
+						PRINTFORMW 等着料理来的时候，%ANAME(対象)%惊讶地看着其他客人
+						;TranslatedMark 料理が来るのを待っていると%ANAME(対象)%が怪訝な顔で他の客を見ていた
+						PRINTFORMW %ANAME(MASTER)%怎么了?她问道。
+						;TranslatedMark %ANAME(MASTER)%はどうかしたのか？と尋ねた
+						PRINTFORML 「那边的那个人，今天不是当班吗，竟然大白天就在喝酒」
+						;TranslatedMark 「向こうの彼、確か今日は非番じゃないのに真昼間からお酒を飲んでるのよね」
+						PRINTFORMW 「哎呀呀，真没出息的部下啊，去说教一下吧」
+						;TranslatedMark 「やれやれ情けない部下ね、少し説教しに行こうかしら」
+						PRINTFORMW %ANAME(MASTER)%对打算离开座位的%ANAME(対象)%……
+						;TranslatedMark 席を立とうとする%ANAME(対象)%に%ANAME(MASTER)%は……
+						PRINTFORML
+						CALL ASK_YN("无视就可以了", "说教的话就交给我吧")
+						IF RESULT == 0
+							PRINTFORML "无视就好了"
+							;TranslatedMark 『無視すれば良い』
+							PRINTFORMW %ANAME(MASTER)%告诉了%ANAME(対象)%
+							;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%に諭した
+							PRINTFORML 「……是啊，现在是我们的休息时间」
+							;TranslatedMark 「……そうね、今は"私たちの"休憩時間ですからね」
+							PRINTFORMW 「批评之后再说，现在应该好好享受两个人的时间」
+							;TranslatedMark 「叱るのはあとにして、今は二人の時間を満喫するべきね」
+							PRINTFORMW 过了一会儿，点的菜送来了……但
+							;TranslatedMark しばらくすると注文した料理が届いた……が
+							PRINTFORML 「……话说回来」
+							;TranslatedMark 「……ねぇところで」
+							PRINTFORMW 「为什么连%ANAME(MASTER)%也点了酒呢？」
+							;TranslatedMark 「なんで%ANAME(MASTER)%までお酒を頼んでいるのかしら？」
+							PRINTFORMW 看到他们津津有味地喝酒，自己也想喝了
+							;TranslatedMark 美味しそうに酒を飲む彼等を見ていたら自分も飲みたくなったからだ
+							PRINTFORML 「啊……你就是这样」
+							;TranslatedMark 「あぁ……そうやって貴方はそう」
+							PRINTFORMW 「我也要一杯」
+							;TranslatedMark 「私にも一杯貰いますからね」
+							PRINTFORMW %ANAME(対象)%比%ANAME(MASTER)%先一步倒酒喝了
+							;TranslatedMark %ANAME(MASTER)%よりも先に酒を注いで飲む%ANAME(対象)%
+							PRINTFORML 「……哇~真好吃啊，像这样工作间隙喝的酒真是特别啊」
+							;TranslatedMark 「……はぁ～美味いわ、こうやって仕事の合間に飲むお酒は格別ね」
+							PRINTFORMW 「哈哈，之后还有再开发的讨论，喝了酒……这种背德感，真是太棒了。」
+							;TranslatedMark 「ははぁん、あとで再開発の打ち合わせあるのにお酒を飲む……この背徳感、最高ね～ぇ」
+							PRINTFORMW %ANAME(対象)%一个人喝得痛快，%ANAME(MASTER)%有点担心，所以不喝酒就只是随声附和
+							;TranslatedMark 一人でにややハイペースで飲む%ANAME(対象)%、%ANAME(MASTER)%は少し心配になり酒を飲まずに相槌を打った
+							PRINTFORML ・
+							PRINTFORML ・
+							PRINTFORML ・
+							PRINTFORMW 『咦，今天%ANAME(対象)%大人的身体状况不好吗？』
+							;TranslatedMark 『えっ、今日は%ANAME(対象)%様の体調が優れないのですか？』
+							PRINTFORMW ……所以今天是我代%ANAME(対象)%来的
+							;TranslatedMark ……だから今日は%ANAME(対象)%代理で来た
+							PRINTFORMW 『是吗。那么%ANAME(MASTER)%大人，这个开发地图——"
+							;TranslatedMark 『そうでしたか。　では%ANAME(MASTER)%様、この開発地図を――』
+							PRINTFORMW %ANAME(MASTER)%陷入了整整一天要代替被酒打败的%ANAME(対象)%来处理工作的窘境
+							;TranslatedMark %ANAME(MASTER)%は丸一日酒に潰れた%ANAME(対象)%の代わりに仕事をこなす羽目になった
+							CALL COLOR_PRINTW("好感度提高了300", カラー_注意)
+							CALL ADD_COOLTIME(MASTER, 1)
+							CALL ADD_COOLTIME(対象, 1)
+							CFLAG:対象:好感度 += 300
+						ELSE
+							PRINTFORML 『说教的话就交给我吧』
+							;TranslatedMark 『説教なら任せろ』
+							PRINTFORMW 说完后，%ANAME(MASTER)%站了起来，朝着喝着酒的%ANAME(対象)%的部下走去
+							;TranslatedMark そう言って%ANAME(MASTER)%は立ち上がり酒を飲む%ANAME(対象)%の部下の元へ向かった
+							PRINTFORML 『啊咧！？%ANAME(MASTER)%大人！？您您您您好！』
+							;TranslatedMark 『ｱﾚ！？　%ANAME(MASTER)%様！？　ﾁｮﾘｨｨｨｽｯｯｯ！』
+							PRINTFORML 『诶？俺吗？不不不不，今天的工作也很有干劲哦！』
+							;TranslatedMark 『えっ？　オレッスか？　いえいえ、今日も仕事バリバリっすよ！』
+							PRINTFORML 『不不不不！这种程度的酒我不会醉的！』
+							;TranslatedMark 『いやいや！　この程度のお酒じゃオレは酔わないッスよ！』
+							PRINTFORML 『比起这个，%ANAME(MASTER)%大人也一起喝吧！』
+							;TranslatedMark 『それより%ANAME(MASTER)%様も飲みましょうぜ！』
+							PRINTFORML 『好，多喝点啊！老板，快把酒拿来!』
+							;TranslatedMark 『良いー飲みっぷりすね！　大将、じゃんじゃん酒持って来てーっ！』
+							PRINTFORMW 请听我说啊%ANAME(MASTER)%大人！我的工作也是——"
+							;TranslatedMark 『いやー聞いてくださいよ%ANAME(MASTER)%様！　俺だってそりゃ仕事は――』
+							PRINTFORML ・
+							PRINTFORML ・
+							PRINTFORML ・
+							PRINTFORMW 「真的……在干什么呢」
+							;TranslatedMark 「ホント……何をやってるのかしら」
+							PRINTFORML %ANAME(対象)%对大白天就和部下喝得烂醉如泥的%ANAME(MASTER)%感到生气和惊讶
+							;TranslatedMark 白昼堂々と酔い潰れた部下と%ANAME(MASTER)%に怒るよりも呆れてしまった%ANAME(対象)%
+							PRINTFORMW 之后被%ANAME(対象)%狠狠地骂了一顿……
+							;TranslatedMark この後こっぴどく%ANAME(対象)%から叱られた……
+							CALL COLOR_PRINTW("好感度提高了50", カラー_注意)
+							CFLAG:対象:好感度 += 50
+						ENDIF
+					CASE 2
+						PRINTFORMW 「哎呀哎呀，%ANAME(MASTER)%也被那烟的味道吸引了吧？呵呵」
+						;TranslatedMark 「おやおや、%ANAME(MASTER)%もあの煙の匂いに惹かれたのですね？　フフッ」
+						PRINTFORMW %ANAME(MASTER)%和%ANAME(対象)%被味道牵引着去了烤鸡肉串店……
+						;TranslatedMark %ANAME(MASTER)%と%ANAME(対象)%に匂いにつられるように焼き鳥屋に向かった……
+						PRINTFORML ・
+						PRINTFORML ・
+						PRINTFORML ・
+						PRINTFORMW 两个人到了散发着肉香的小摊，但是烤鸡店本身的客人却意外地少
+						;TranslatedMark 肉の香りを漂わせる屋台に着く二人、しかし焼き鳥屋自体の客は意外に少ないようだ
+						PRINTFORML 「因为贸易和畜牧业还不发达，所以比其他店要贵。」
+						;TranslatedMark 「まだ交易と牧畜が盛んでないですからね、他の店に比べて割高なのよ」
+						PRINTFORMW 「也就是说现在的城下町的话，烤鸡肉串店是高级店哦，呵呵……」
+						;TranslatedMark 「つまり今の城下町じゃ焼き鳥屋は高級店よ、フフッ……」
+						PRINTFORML 这样说着坐在座位上的%ANAME(対象)%开始向店主传达订单
+						;TranslatedMark そう言って席に座る%ANAME(対象)%は店主に注文を伝え始める
+						PRINTFORMW 和蔼可亲的女主人爽快地应对着，开始准备点菜的东西
+						;TranslatedMark 愛想の良い女主人は気さくに受け答えながらも注文の品を用意し始めた
+						PRINTFORML %ANAME(MASTER)%也要买的话。估计是相当大的金额……要不要控制一点
+						;TranslatedMark %ANAME(MASTER)%も注文する。　かなりの額になりそうだ……控えめにしておくか
+						PRINTFORMW 「哎呀哎呀……哎呀？」
+						;TranslatedMark 「おやおや……おやぁ？」
+						PRINTFORMW 过了一会儿%ANAME(対象)%在弄自己的衣服……难道
+						;TranslatedMark しばらくしてから%ANAME(対象)%が自身の服を弄っている……まさか
+						PRINTFORML 「不行啊，好像忘记带钱包了」
+						;TranslatedMark 「いけませんねぇ、どうやら財布を忘れてしまったようで」
+						PRINTFORMW 「这可难办了，怎么办？喂？%ANAME(MASTER)%？」
+						;TranslatedMark 「これは困りましたねぇ、どうしましょう？　ねぇ？　%ANAME(MASTER)%？」
+						PRINTFORMW 用明显的态度发问的%ANAME(対象)%，好像是想让我请吃饭……
+						;TranslatedMark 明らかな態度で聞いてくる%ANAME(対象)%、どうやら奢って貰いたいようだが……
+						PRINTFORML
+						PRINTFORML  钱包里:{MONEY}　烤鸡肉串费用:{必要額}
+						;TranslatedMark 財布の中:{MONEY}　焼き鳥代:{必要額}
+						PRINTFORMW ……意外地不便宜，怎么办呢
+						;TranslatedMark ……意外と安くない、どうしようものか
+						PRINTFORML
+						CALL ASK_MULTI_JUDGE("没办法，我请客", MONEY >= 必要額, "你是笨蛋吧!", 1,"这样的话，就只能用身体来支付了", 2)
+						IF RESULT == 0
+							PRINTFORMW %ANAME(MASTER)%悄悄地确认了自己的钱包……没问题
+							;TranslatedMark %ANAME(MASTER)%はこっそり自身の財布を確認した……問題ないな
+							PRINTFORMW "没办法，我请客。"
+							;TranslatedMark 『仕方がない、奢ってやる』
+							PRINTFORMW %ANAME(MASTER)%这么一说，%ANAME(対象)%微微一笑，表情也变了
+							;TranslatedMark %ANAME(MASTER)%がそう言うと%ANAME(対象)%はニヤリと表情を変えた
+							PRINTFORML 「哎呀，谢谢你%ANAME(MASTER)%，我差点没钱吃东西。」
+							;TranslatedMark 「いやぁありがとうございます%ANAME(MASTER)%、もう少しで無銭飲食をするところでしたよ」
+							PRINTFORMW 「虽然甜味很好，但是我也很喜欢肉，和梦不一样」
+							;TranslatedMark 「甘味も良いですがお肉も大好きなの、夢とは別腹ですっ」
+							PRINTFORML 高兴地摇着尾巴的%ANAME(対象)%看着放松的%ANAME(MASTER)%
+							;TranslatedMark 尻尾を振って喜ぶ%ANAME(対象)%を見て少し和む%ANAME(MASTER)%
+							PRINTFORMW 那之后两个人享受了烤鸡肉串……
+							;TranslatedMark その後二人は焼き鳥を楽しんだ……
+							CALL COLOR_PRINTW(@"支付了{必要額}", カラー_警告)
+							MONEY -= 必要額
+							CALL COLOR_PRINTW("好感度提高了200", カラー_注意)
+							CFLAG:対象:好感度 += 200
+						ELSEIF RESULT == 1
+							PRINTFORML %ANAME(MASTER)%抽出一根放在桌子上的牙签，像投飞镖一样扔到%ANAME(対象)%的衣服上
+							;TranslatedMark %ANAME(MASTER)%はテーブルに置かれた爪楊枝を一本抜き取り、%ANAME(対象)%の服へとダーツのように投げた
+							PRINTFORMW 「哈哈，果然还是暴露了吧」
+							;TranslatedMark 「ははは、バレちゃいますよね流石に」
+							PRINTFORML 牙签漂亮地扎在%ANAME(対象)%衣服的口袋里
+							;TranslatedMark 爪楊枝は見事に%ANAME(対象)%の服のポケットに刺さっている
+							PRINTFORMW 口袋鼓得很厉害，恐怕是钱包在里面吧
+							;TranslatedMark ポケットは妙に膨らんでおり恐らく財布が入っているのだろう
+							PRINTFORML 「霍霍……最近浪费太多了，本想克制一下的，可惜啊……」
+							;TranslatedMark 「トホホ……最近少し浪費が激しいから抑えようと思ったのに残念ね……」
+							PRINTFORMW 「虽然这么说，但是做了欺骗您的事情真的很抱歉」
+							;TranslatedMark 「とはいえ、騙すような事をして申し訳ありませんでした」
+							PRINTFORMW 即使道歉了也不打算请客，%ANAME(MASTER)%再次拿起牙签一根，再次摆出像仍飞镖一样的架势
+							;TranslatedMark 謝っても奢らないからなと%ANAME(MASTER)%は、再度爪楊枝を一本抜き手に取って再びダーツのように構えた
+							PRINTFORML "让您久等了——咚——咚——"
+							;TranslatedMark 『お待たせしましたー、--と--と――です』
+							PRINTFORMW 放置在两人眼前的烤鸡肉串
+							;TranslatedMark 二人の目の前に置かれていく焼き鳥
+							PRINTFORML
+							PRINTFORML
+							PRINTFORMW 「嗯……那么从这里开始考虑怎么让%ANAME(MASTER)%请客吧？%ANAME(MASTER)%」
+							;TranslatedMark 「ふむ……それじゃあここからどうやって%ANAME(MASTER)%に奢って貰うか考えましょうか？　%ANAME(MASTER)%」
+							PRINTFORMW 这样说着，%ANAME(対象)%抓起%ANAME(MASTER)%拿着的牙签，就那样刺进了一只烤鸡
+							;TranslatedMark そう言って%ANAME(対象)%は%ANAME(MASTER)%の持つ爪楊枝を掴み取り、そのまま焼き鳥の一つに刺した
+							PRINTFORMW 「比如……是啊，像这样献媚」
+							;TranslatedMark 「たとえば……そう、こうやって媚びてみたりね」
+							PRINTFORMW 用牙签从烤串里只刺出一个烤鸡肉串，对准%ANAME(MASTER)%的面前
+							;TranslatedMark 爪楊枝で串から一つだけ焼き鳥を刺し取り、%ANAME(MASTER)%の元へ向けた
+							PRINTFORMW 「你看，啊，我喂给你吃」
+							;TranslatedMark 「ほらあーんして、食べさせてあげる」
+							PRINTFORMW %ANAME(MASTER)%大口吃着递过来的烤鸡肉串
+							;TranslatedMark %ANAME(MASTER)%はやれやれと差し出された焼き鳥を頬張った
+							PRINTFORML 「好吃吗？是吧？好吃吗？」
+							;TranslatedMark 「美味しい？　ねね？　美味しい？」
+							PRINTFORMW 「怎么样？想请客了吗？呼哧呼哧」
+							;TranslatedMark 「どう？　奢ってみたくなった？　フフッ」
+							PRINTFORMW %ANAME(MASTER)%回答虽然很好吃，但还差得远呢
+							;TranslatedMark 美味いがまだまだだなと%ANAME(MASTER)%は返した
+							PRINTFORMW 两人在这之后也一边聊着"怎么让%ANAME(MASTER)%请客"的话题，一边享受着烤鸡肉串……
+							;TranslatedMark 二人はこの後も「どうやって%ANAME(MASTER)%に奢らせるか」の話題をしながら焼き鳥を楽しんだ……
+							CALL COLOR_PRINTW("好感度提高了200", カラー_注意)
+							CFLAG:対象:好感度 += 200
+						ELSEIF RESULT == 2
+							PRINTFORMW 这样的话只能用身体支付了
+							;TranslatedMark こうなれば身体で払うしかない
+							PRINTFORMW 「……诶？」
+							;TranslatedMark 「……えっ？」
+							PRINTFORML ・
+							PRINTFORML ・
+							PRINTFORML ・
+							PRINTFORMW 之后两个人手忙脚乱地洗了一大堆碗……
+							;TranslatedMark このあと二人はめちゃくちゃ皿洗いした……
+							PRINTFORMW 「（我以为一定是H的意思，所以都做好准备了。）」
+							;TranslatedMark 「(てっきりアッチの意味かと思って身構えちゃったじゃない)」
+							CALL COLOR_PRINTW("好感度提高了50", カラー_注意)
+							CFLAG:対象:好感度 += 50
+						ENDIF
+				ENDSELECT
+			;住宅街を選んだ場合
+			CASE 1
+				PRINTFORML 再开发地区好像变成了民居的住宅区
+				;TranslatedMark 再開発地区は民達で住まう住宅街となっているようだ
+				PRINTFORMW 在鳞次栉比的长屋旁，孩子们在玩耍，在里面的井边，可以看到主妇们在谈论附近的事情
+				;TranslatedMark 立ち並ぶ長屋の傍では子供たちが遊び、奥の井戸端では近所話をする主婦たちが見える
+				PRINTFORMW 走在街上，从长屋的一个房间传来了奇怪的呻吟声
+				;TranslatedMark 通りを歩いていると、長屋の一室から妙な呻き声が聞こえて来た
+				PRINTFORML 我好奇地往那间发出声音的小屋里一看，里面蹲着一个老人
+				;TranslatedMark 気になって声のする長屋を覗いてみると、そこには一人の老人がうずくまっていた
+				PRINTFORMW %ANAME(MASTER)%急忙向蹲在地上的老人打招呼，老人痛苦地回答道
+				;TranslatedMark %ANAME(MASTER)%は急いでうずくまる老人に声を掛けると老人は苦しそうに返事を返した
+				PRINTFORMW 『哎呀痛痛痛……老毛病腰痛……这样就不能去工作了……』
+				;TranslatedMark 『あいたたた……持病の腰痛が……これじゃあ仕事に行けんわい……』
+				PRINTFORML 再进一步问一下，这个老人好像是修理城墙的泥水匠的带头人
+				;TranslatedMark 更に話を聞くとこの老人は、なんでも城壁補修の左官達のリーダーのようだ
+				PRINTFORMW 但是腰痛不能去工作，再加上赌博把医药费花掉，手头很紧张
+				;TranslatedMark だが腰痛で仕事に行けないうえ、賭博で薬代をスッたらしく手詰まりらしい
+				PRINTFORML 
+				PRINTFORML 『虽然不知道是哪里的某个人，但是有个请求……能听我说吗？』
+				;TranslatedMark 『どこのどなたか存じ上げないが頼みがある……聞いてくれんかのぉ』
+				PRINTFORML 『今天是和泥瓦匠们的会议，平时的话应该是我来主持的……这样的话好像去不成了』
+				;TranslatedMark 『今日は左官達での会議でな、普段ならワシが仕切っているのじゃが……これじゃあ行けそうに無い』
+				PRINTFORMW 『你能代替我主持会议吗……』
+				;TranslatedMark 『お前さんが代わりに会議を仕切ってくれないかのぉ……』
+				PRINTFORMW 看来是想让%ANAME(MASTER)%代他出席会议，怎么办呢……
+				;TranslatedMark どうやら%ANAME(MASTER)%に会議を代わりに出てほしいようだ、どうしようか……
+				PRINTFORML
+				PRINTFORML 现在还有买药的选择……
+				;TranslatedMark 今から薬を買う選択肢もあるが……
+				PRINTFORMW 钱包里的钱:{MONEY}　药费:{必要額}
+				;TranslatedMark 財布の中身:{MONEY}　薬代:{必要額}
+				PRINTFORML
+				CALL ASK_MULTI_JUDGE("我给你买药，你自己去吧", MONEY >= 必要額, "我替你去开会吧", 1,"你自己想办法", 2)
+				IF RESULT == 0
+					PRINTFORMW 我还没到能出席会议的程度，给你买点药吧……
+					;TranslatedMark 流石に会議に出てやれるほど暇じゃない、薬を買ってやろう……
+					PRINTFORML ・
+					PRINTFORML ・
+					PRINTFORML ・
+					PRINTFORMW 『呀，谢谢，这样好像就可以解决问题了。』
+					;TranslatedMark 『いやぁありがとう、これで何とかなりそうじゃ』
+					PRINTFORMW 给老人买了药，老人的身体渐渐好了
+					;TranslatedMark 老人に薬を買い与えると次第に老人の調子は良くなった
+					PRINTFORML 『那我就去吧，毕竟新人们在等我呢～』
+					;TranslatedMark 『それじゃあ行くかの、ひよっこ達がワシを待っているからのぉ～』
+					PRINTFORMW 『(而且今天会议结束后我还打算和泥水匠朋友一起去赌博呢)』
+					;TranslatedMark 『(それに今日は会議後に、左官仲間と博打に行く予定じゃったからな)』
+					PRINTFORMW 不管结果如何，城墙维修工作似乎都很顺利……
+					;TranslatedMark 結果はどうであれ城壁補修作業は順調なようだ……
+					CALL COLOR_PRINTW(@"支付了{必要額}", カラー_警告)
+					MONEY -= 必要額
+					CALL COLOR_PRINTW(@"%ANAME(MASTER)%の防衛が2上昇した！", カラー_注意)
+					ABL:MASTER:防衛 += 2
+				ELSEIF RESULT == 1
+					PRINTFORML 现在钱包里没钱，作为代替出席会议吧
+					;TranslatedMark 今は財布の中が寒い、代わりに会議に出るとしよう
+					PRINTFORML ・
+					PRINTFORML ・
+					PRINTFORML ・
+					PRINTFORML 『东的门要怎么修缮呢，怎么办?』
+					;TranslatedMark 『東の門はどう修繕するかなぁ、どうするー？』
+					PRINTFORML 『我不知道啊，怎么办，班长？』
+					;TranslatedMark 『わっかんねぇやぁ、どうしますハンチョー？』
+					PRINTFORML 『西门现在还连风都能灌进来』
+					;TranslatedMark 『西門なんてまだ風通し良いまんまだー』
+					PRINTFORMW "哈哈，这样的话别说老鼠了，连大象都放进去了。"
+					;TranslatedMark 『ははっ、これじゃあ鼠どころか象も入れちゃうぜー』
+					PRINTFORML ……大概是因为泥水匠都相当的粗犷吧，%ANAME(MASTER)%光是管理就相当累了
+					;TranslatedMark ……かなり奔放な左官しか居なかったからか%ANAME(MASTER)%は仕切るのにかなり疲れてしまった
+					PRINTFORMW 但是不管结果如何，城墙维修工作都很顺利……
+					;TranslatedMark しかし結果はどうであれ城壁補修作業は順調だ……
+					CALL COLOR_PRINTW(@"%ANAME(MASTER)%的政治上升了2！", カラー_注意)
+					ABL:MASTER:政治 += 2
+					CALL ADD_COOLTIME(MASTER, 1)
+				ELSEIF RESULT == 2
+					PRINTFORML 现在没有那样的余裕，自己想办法
+					;TranslatedMark 今はそんな余裕がない、自分でなんとかしろ
+					PRINTFORMW %ANAME(MASTER)%离开了老人家……
+					;TranslatedMark %ANAME(MASTER)%は老人の家を出た……
+				ENDIF
+			;小悪魔デイリーの流用、経験値アップとかはないよ
+			;どうしてこうなった、どうしてこうなった(気合と長さ)
+			CASE 2
+				PRINTFORMW 再开发地区变成了为劳役者而设置的娼妇街，这一天被%ANAME(対象)%叫了出来……
+				;TranslatedMark 再開発地区は労役者の為の娼婦街となっており、この日は%ANAME(対象)%から呼び出され訪れている……
+				PRINTFORML 妓院林立，穿着不能称之为衣服的布的女人们招揽着客人
+				;TranslatedMark 売春宿ばかりが立ち並び、服とは言えない布を纏った女郎達が客寄せし
+				PRINTFORMW 男人们把靠劳役挣来的一点点钱都花光了
+				;TranslatedMark 労役で稼いだ僅かな日銭を、貯めた日銭を男たちは使い果たす
+				PRINTFORMW 这条妓女街似乎也在这座城中作为劳役者排解郁闷的重要场所而工作着……
+				;TranslatedMark この娼婦街もこの城の中では労役者の鬱憤を晴らす重要な場所として働いているようだ……
+				PRINTFORML 独自走在街上的%ANAME(MASTER)%一一确认店名。然后%ANAME(MASTER)%找到了目的地的店
+				;TranslatedMark 通りを一人歩く%ANAME(MASTER)%は店の名前を一つ一つ確認する。　そして%ANAME(MASTER)%は目的の店は見付けた
+				PRINTFORMW 妓院『槐安之梦』是妓女街中最高级的店，其知名度甚至使其他国家的高官偷偷前来
+				;TranslatedMark 売春宿『槐安の夢』は娼婦街でも最も高級な店で知られており、その知名度は他国から高官などがお忍びで来る程だ
+				PRINTFORMW 当%ANAME(MASTER)%向站在店前的接待员打招呼时，接待员打开店门开始为%ANAME(MASTER)%带路……
+				;TranslatedMark %ANAME(MASTER)%が店前に立つ受付に声を掛けると、受付は店のドアを開き%ANAME(MASTER)%を案内し始めた……
+				PRINTFORML 店里到处都闪烁着紫色的光线，充满了令人心情平静的芳香气味
+				;TranslatedMark 店の中はどこも紫色のチカチカした光で照らされ、妙に気分が落ち着くアロマの匂いで満たされている
+				PRINTFORMW 只有前台和%ANAME(MASTER)%的脚步声在走廊回响……安静得不像是妓院
+				;TranslatedMark 受付と%ANAME(MASTER)%の足音だけが廊下に響く……売春宿とは思えないくらい静かだ
+				PRINTFORML ・
+				PRINTFORML ・
+				PRINTFORML 『就在这里，那么请慢慢来……』
+				;TranslatedMark 『こちらとなります、それではごゆっくり……』
+				PRINTFORMW 在店最里面的房间前，接待员这样说着然后就回到了店前
+				;TranslatedMark 店の最奥にある部屋前で受付はそう言って店前へと戻っていった
+				PRINTFORML %ANAME(MASTER)%打开门进了房间，里面穿着便服的%ANAME(対象)%在床上等着
+				;TranslatedMark %ANAME(MASTER)%はドアを開け部屋に入ると、そこには普段着の%ANAME(対象)%がベッドに座り待ち構えていた
+				PRINTFORML 「欢迎来到槐安之梦，我是今天%ANAME(MASTER)%的对象%ANAME(対象)%」
+				;TranslatedMark 「ようこそ『槐安の夢』へ、本日%ANAME(MASTER)%様のお相手をさせて頂きます%ANAME(対象)%です」
+				PRINTFORMW 「呵呵，不用紧张哦，%ANAME(MASTER)%。那么，今晚……一起享受吧？」
+				;TranslatedMark 「フフッ、緊張しなくて良いのよ、%ANAME(MASTER)%。　さぁ、今夜は……愉しみましょ？」
+				PRINTFORML %ANAME(対象)%这样说着，露出奇怪的笑容。拉着%ANAME(MASTER)%的手
+				;TranslatedMark %ANAME(対象)%はそう言うと、怪しく笑って見せ。　%ANAME(MASTER)%の手を取り招き入れる
+				PRINTFORMW 房间里有两张大床和镶着玻璃的浴室，比走廊更雅致
+				;TranslatedMark 部屋にはダブルサイズのベッドと、ガラス張りの風呂場があり廊下に比べてシックな雰囲気だ
+				PRINTFORMW %ANAME(対象)%立刻开始脱衣服……
+				;TranslatedMark %ANAME(対象)%はさっそく服を脱ぎ始めた……
+				;開発前提品まで入れえると流石にズルいかもしれない
+				SETCOLOR カラー_ピンク
+				PRINTFORML 作为备置品收到了以下内容
+				;TranslatedMark 備え付け品として以下が貰えました
+				PRINTFORML 避孕套……三个
+				;TranslatedMark コンドーム……3個
+				PRINTFORML 化妆水……一个
+				;TranslatedMark ローション……1個
+				PRINTFORML 媚薬……一个
+				;TranslatedMark 媚薬　　　……1個
+				PRINTFORML 絶倫丸……一个
+				;TranslatedMark 絶倫丸　　……1個
+				PRINTFORML 排卵引发剂……一个
+				;TranslatedMark 排卵誘発剤……1個
+				PRINTFORML 桃源香……一个
+				;TranslatedMark 桃源香　　……1個
+				PRINTFORMW 
+				RESETCOLOR 
+				ITEM:避孕套 += 3
+				ITEM:潤滑液 += 1
+				ITEM:媚薬 += 1
+				ITEM:精力超群丸 += 1
+				ITEM:排卵誘発剤 += 1
+				ITEM:桃源香 += 1
+				CFLAG:対象:好感度 += 100
+				;全員の調教参加フラグをクリア
+				CVARSET CFLAG, 6, 0
+				CFLAG:対象:調教参加フラグ = 1
+				CFLAG:対象:調教中帰らない = 1
+				BASE:対象:体力 = MAXBASE:対象:体力
+				BASE:対象:気力 = MAXBASE:対象:気力
+				;ターンエンド調教をオン
+				FLAG:ターンエンド調教 = 1
+				;それ以降のデイリーイベント発生を潰す
+				DAILY_CANCEL = 1
+				;フラグ
+				KDVAR:対象:ドレミー_再開発_娼館 = 1
+				CALL SINGLE_DRAWLINE
+				PRINTFORML
+				CALL ADD_EVENTTRAIN_CALLEE("KOJO_DAILY_K134_SAIKAIHATU")
+				CALL ADD_EVENTEND_CALLEE("KOJO_DAILY_K134_SAIKAIHATU")
+		ENDSELECT
+		KDVAR:対象:ドレミー_再開発 = -1
+ENDSELECT
+RETURN 1
+
+
+;娼婦街選択したときのやつ
+
+@EVENTTRAIN_KOJO_DAILY_K134_SAIKAIHATU
+#DIM 対象
+PRINTFORMW 「看得太久的话，有点不好意思」
+;TranslatedMark 「あまり見られると、少し恥ずかしいわ」
+PRINTFORML 虽然这么说，但还是忍不住看得入迷。虽然嘴上很害羞，但是被人看到了的%ANAME(対象)%，好像并不觉得不好意思。
+;TranslatedMark そう言われても、ついつい見惚れてしまう。　恥ずかしそうな口ぶりだが、%ANAME(対象)%も見られて悪い気はしてないようだ
+PRINTFORMW 证据就是毫不遮挡身体。以诱惑人的手势迅速脱掉了上衣和内衣。%ANAME(MASTER)%也跟着脱下了衣服。
+;TranslatedMark その証拠に、身体を隠しもしない。　上着も下着も、誘うような手つきでスルスルと脱いでみせる。　%ANAME(MASTER)%も後を追うように服を脱ぎ捨てた
+PRINTFORMW 「不用那么着急。来吧」
+;TranslatedMark 「そんなに慌てなくてもいいわよ。　ほらおいで」
+PRINTFORML 在%ANAME(対象)%的带领下进入了浴室，%ANAME(対象)%小心翼翼地为%ANAME(MASTER)%洗了身体
+;TranslatedMark %ANAME(対象)%に連れられ風呂場に入ると、%ANAME(対象)%は丁寧に%ANAME(MASTER)%の身体をを洗ってくれた
+PRINTFORMW 把大量的泡沫涂在身体上后，%ANAME(対象)%缠上了手臂
+;TranslatedMark たっぷりの泡を身体に塗ると、%ANAME(対象)%が腕を絡めてくる
+PRINTFORMW 扭动着沾满泡沫的身体，用自己的身体代替海绵。
+;TranslatedMark 泡にまみれた身体をくねらせ、押し当てては、自分の身体をスポンジ代わりにしてくれる
+PRINTFORMW 「呵呵，%ANAME(MASTER)%的呼吸变急促了呢」
+;TranslatedMark 「ふふっ、%ANAME(MASTER)%ったら息が荒いわ」
+PRINTFORMW 一边享受着%ANAME(対象)%柔软的乳房，一边品尝大腿和上臂的触感。%ANAME(MASTER)%的情欲也被煽动了
+;TranslatedMark %ANAME(対象)%のおっぱいの柔らかさを堪能しつつ、太ももや二の腕の感触を味わう。　%ANAME(MASTER)%の劣情が込みあがる
+PRINTFORML 洗完澡把泡沫洗掉，两个人泡在浴缸里。虽然温度还没到让人头晕的程度，但兴奋得浑身发晕
+;TranslatedMark シャワーで泡を綺麗に流し落とすと、二人は湯船に浸かる。逆上せる程の温度じゃないが、興奮してクラクラしてくる
+PRINTFORMW 垂着湿发的%ANAME(対象)%显得很性感。在浴缸里彼此的肌肤相互接触，期待更加高涨
+;TranslatedMark 濡れた髪を垂らした%ANAME(対象)%が、色っぽい。　湯船の中でお互いの肌が触れあい、期待はさらに高まっていく
+PRINTFORMW 「虽然觉得床比较好，但是好不容易，就从这里开始吧♥」
+;TranslatedMark 「ベッドの方が良いかと思っていたけど、せっかくだから、ここで始めちゃいましょ♥」
+PRINTFORMW %ANAME(対象)%贴近%ANAME(MASTER)%，把手伸向腰……
+;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に寄り添い、腰に手を伸ばしてきた……
+
+;小悪魔デイリーみたく射精量でセリフ変えたかったけど技術的に断念
+@EVENTEND_KOJO_DAILY_K134_SAIKAIHATU
+#DIM 対象
+PRINTFORML 比唾液还重的热乎乎的粘液不断滴下。虽然被嘴唇堵住，但白浊的汁液涌了出来。精液从铃口像带子一样朝上方射出
+;TranslatedMark 熱く滴り、唾液よりも重たい粘液。　唇をふさがれたまま、白濁の汁が迸る。　精液は、鈴口から帯のように流れては上へ上へと伸びていた
+PRINTFORMW 气势十足的射精，不断地溢出。从%ANAME(対象)%手指的缝隙中，也喷出了精液
+;TranslatedMark 勢い任せの射精は、とめどなく溢れていく。　%ANAME(対象)%の指の隙間からも、精液が噴き上がっていた
+PRINTFORMW 「噗啊……哈、哈……惊人的量……手都觉得很烫啊」
+;TranslatedMark 「ぷあぁっ……はぁ、はぁ……凄い量……手まで熱いわ」
+PRINTFORML 迸发而出的精液，眼看着就染上了%ANAME(対象)%的手
+;TranslatedMark 迸り、流れる精液は、みるみるうちに%ANAME(対象)%の手を染めていく
+PRINTFORMW 但并没有要避开的样子，每当浊液打到身上时，都会慢慢地吐出气息
+;TranslatedMark 飛沫を避ける様子もなく、濁液が肌身に叩きつけられるたびに、気怠い息を吐いていた
+PRINTFORML %ANAME(対象)%一脸兴奋的抚摸着沾满了汁液的阴茎。大口大口地吸入充满了%ANAME(MASTER)%的味道和热气的空气，
+;TranslatedMark %ANAME(対象)%は上気した顔で、汁まみれのペニスを撫でる。　%ANAME(MASTER)%の匂いと湯気に満ちた空気を吸い込み、大きく息を継ぐ
+PRINTFORMW 出神地看着粘在身上的浊液
+;TranslatedMark 身体にこびりついた濁液に、うっとりした視線を向けていた
+PRINTFORMW 「时间还有很多呢。来吧，别客气，一起享受吧」
+;TranslatedMark 「時間はまだまだたっぷりあるわ。　ほら遠慮しないで、一緒に愉しみましょ」
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW 听了%ANAME(対象)%的话，%ANAME(MASTER)%在那之后也享受了服务……
+;TranslatedMark %ANAME(対象)%の言葉に甘えて、%ANAME(MASTER)%はそのあとも奉仕を楽しんだ……
+KDVAR:対象:ドレミー_再開発_娼館 = 0
+KDVAR:対象:ドレミー_再開発_射精量 = 0

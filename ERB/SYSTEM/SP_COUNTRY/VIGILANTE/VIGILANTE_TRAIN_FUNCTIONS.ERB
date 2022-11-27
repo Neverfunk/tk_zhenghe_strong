@@ -1,0 +1,69 @@
+﻿;-------------------------------------------------
+;調教関数存在判定
+;-------------------------------------------------
+@VIGILANTE_DOES_TRAIN()
+
+;-------------------------------------------------
+;調教陥落時メッセージ
+;-------------------------------------------------
+@VIGILANTE_FALLEN_MSG(対象)
+#DIM 対象
+IF !GETBIT(TALENT:対象:特殊勢力陥落系, 特殊勢力_自警団)
+	PRINTFORMW 通过自警团员们热心、诚实的"说服"和"教育"，%ANAME(対象)%作为忠实的自警团员脱胎换骨了
+	;TranslatedMark 自警団員らの熱心で誠実な「説得」や「教育」によって、%ANAME(対象)%は忠実な自警団員として生まれ変わった
+	PRINTFORMW %ANAME(対象)%通过自己的衣袖，用异样闪亮的眼瞳和笑容掩饰着他们的思想
+	;TranslatedMark 支給された制服に%ANAME(対象)%は自ら袖を通し、異様にキラキラとした瞳と笑顔を浮かべて彼らの思想をそらんじる
+	PRINTFORMW 现在，%ANAME(対象)%已经作为忠实的团员被改造到了思考的最底层……
+	;TranslatedMark 今や%ANAME(対象)%は思考の根底まで、忠実な団員として作り替えられていた……
+	IF TALENT:対象:烙印
+		PRINTFORML 从表示%ANAME(対象)%是%ANAME(MASTER)%专用的烙印上、
+		;TranslatedMark %ANAME(対象)%が%ANAME(MASTER)%専用であることを示す烙印の上から、
+		PRINTFORMW 刻上了自警团员的证明
+		;TranslatedMark 自警団員の証である焼き印が施された
+		TALENT:対象:烙印 = 0
+	ELSE
+		PRINTFORMW %ANAME(対象)%的身上，印着自警团员的证明
+		;TranslatedMark %ANAME(対象)%の体に、自警団員の証である焼き印が施された
+	ENDIF
+	IF TALENT:(対象):自尊心高
+		PRINTL
+		PRINTFORMW 这是曾经引以为豪的%ANAME(対象)%，但我发现为了人们而竭尽全力的自警团员不需要那样的东西
+		;TranslatedMark かつては誇りを抱いていた%ANAME(対象)%だが、人々のため尽くす自警団員にそんなものは不要だと気づいた
+		PRINTFORMW %ANAME(対象)%的自尊心被极其激烈的"教育"彻底粉碎……
+		;TranslatedMark %ANAME(対象)%のプライドは、苛烈をきわめる「教育」によって徹底的に打ち砕かれていた……
+		CALL TALENT_LOSE_PRIDE(対象, 1, 1)
+	ENDIF
+ELSE
+	PRINTFORMW 最初抵抗的%ANAME(対象)%，如果不眠不休地接受"教育"的话，也会想起自己的立场
+	;TranslatedMark 最初は抵抗していた%ANAME(対象)%も、不眠不休で「教育」を施されれば、自らの立場を思い出す
+	PRINTFORMW 一旦屈服的心被嘲笑，就开始考虑必须服从他们
+	;TranslatedMark 一度屈した心は、嬲られるたび、彼らに従わなくてはならないと考え始める
+	PRINTFORMW 教育结束的时候，%ANAME(対象)%被改造成忠实的团员……
+	;TranslatedMark 教育が終わるころには、%ANAME(対象)%は忠実な団員として作り替えられていた……
+ENDIF
+
+;-------------------------------------------------
+;調教陥落時にピアシングしたりする場合の処理
+;-------------------------------------------------
+@VIGILANTE_FALLEN_LEAVE_MARK(対象)
+#DIM 対象
+SELECTCASE RAND:10
+	CASE IS < 3
+		CALL SET_PIERCE_RANDOM(対象, 0)
+		SIF RESULT != -1
+			CALL COLOR_PRINTW(@"%ANAME(対象)%の%GET_PIERCE_NAME(RESULT)%に、団員の一員であることを示すピアスが取り付けられた……", カラー_ピンク)
+	CASE IS < 7
+		CALL SET_TATTOO_RANDOM(対象, "無償", 0)
+		SIF RESULT != -1
+			CALL COLOR_PRINTW(@"%ANAME(対象)%の%GET_TATTOO_NAME(RESULT)%に、「無償」とタトゥーが刻まれた……", カラー_ピンク)
+	CASEELSE
+		IF GET_INMOU(対象) >= 陰毛_標準 && IS_FEMALE(対象)
+		CALL COLOR_PRINTW(@"団員の証として、%ANAME(対象)%の陰毛はハート型に整えられた……", カラー_ピンク)
+		TALENT:対象:陰毛目標値 = 陰毛_ハート型
+		TALENT:対象:陰毛現在値 = 陰毛_ハート型
+		ELSE
+			CALL COLOR_PRINTW(@"団員の証として、%ANAME(対象)%の陰毛は永久脱毛された……", カラー_ピンク)
+			TALENT:対象:陰毛目標値 = 陰毛_パイパン
+			TALENT:対象:陰毛現在値 = 陰毛_パイパン
+		ENDIF
+ENDSELECT

@@ -1,0 +1,756 @@
+﻿;-------------------------------------------------
+;共通部分
+;-------------------------------------------------
+
+;=================================================
+;●口上の存在判定
+;=================================================
+@KOJO_EXIST_K35
+;=================================================
+;●開始時
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_TRAIN_START_K35
+
+;=================================================
+;●終了時
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_TRAIN_END_K35
+
+;=================================================
+;●コマンド実行時(このキャラがプレイヤー側のとき)
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_TARGET_K35
+
+;=================================================
+;●コマンド実行時(このキャラがプレイヤー側のとき)
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_PLAYER_K35
+
+;=================================================
+;●コマンド実行前(ターゲット・プレイヤー問わず)
+;※地の文が表示される前に実行される。戻り値に1を設定する(RETURN 1)と地の文がカットされる
+;  必要に応じてKOJO_COM_TARGETの代わりに使う
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_BEFORE_K35
+
+;処女フラグ（処女だったらCFLAG:260を1にセット）
+SIF TALENT:処女
+	CFLAG:260 = 1
+;主人公が童貞フラグ（主人公が童貞だったらCFLAG:261を1にセット）
+SIF TALENT:MASTER:童貞
+	CFLAG:261 = 1
+	
+RETURN 0
+
+;=================================================
+;●コマンド実行後(パラメータの変動処理が終わってから呼び出される)
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_AFTER_K35
+#DIM 対象
+;[虚ろ]状態の場合、口が塞がっている場合は口上を表示しない
+IF TALENT:空虚 || IS_EQUIP_CONTINUE(TARGET, "口装着")
+	RETURN 0
+ENDIF
+
+;処女フラグ（コマンド終了時に処女じゃ無かったらCFLAG:260を0にセット）
+SIF !TALENT:処女
+	CFLAG:260 = 0
+;主人公が童貞フラグ（コマンド終了時に主人公が童貞じゃ無かったらCFLAG:261を0にセット）
+SIF !TALENT:MASTER:童貞
+	CFLAG:261 = 0
+	
+PRINTL
+	
+;-------------------------------------------------
+;初絶頂は使い回せそうなのでここに作成
+;-------------------------------------------------
+;-------------------------------------------------
+;初めてＣ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｃ絶頂 > 0
+	IF CFLAG:220 == 0
+		CFLAG:220 = 1
+		;恋慕
+		IF TALENT:恋慕 || TALENT:服従 
+			PRINTFORMW 「哈♥好，好棒♥」
+			;TranslatedMark 「はぁっ♥　イ、イクうぅッッ♥」
+		;それ以外
+		ELSE
+			PRINTFORMW 「哎呀♥」
+			;TranslatedMark 「ふああっ♥」
+		ENDIF
+	;二回目以降
+	ELSE
+		;最強絶頂時
+		IF NOWEX:Ｃ絶頂 > 4
+			;常に表示されると多重絶頂時にうるさいので、以下適当に無言を織り交ぜておく
+			SELECTCASE RAND:8
+				CASE 0
+					PRINTFORML 「哎呀♥♥啊♥啊，啊♥啊啊啊啊♥♥♥」
+					;TranslatedMark 「やっ♥♥　あっ♥あ゛あっ♥　あぁあ―z___ッ♥♥♥」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					PRINTFORML 「哈哈♥♥啊♥♥加油♥♥啊♥♥」
+					;TranslatedMark 「はッ♥♥　あッ♥♥　ッッ―♥♥―z___♥♥ッ♥♥」
+				CASE 3
+					;PRINTFORML 
+				CASE 4
+					PRINTFORML 「噫呀♥啊♥♥啊啊啊啊啊♥♥♥♥」
+					;TranslatedMark 「ひあ♥　あッ♥♥　はあぁあぁッッ♥♥♥♥」
+				CASE 5
+					;PRINTFORML 
+				CASE 6
+					PRINTFORML 「啊哈哈♥♥啊啊啊啊啊♥♥♥啊♥♥」
+					;TranslatedMark 「あひッ♥♥　あぁあぁぁッ♥♥♥ッ♥♥」
+				CASE 7
+					;PRINTFORML 
+			ENDSELECT
+		;恋慕 or 服従 or 親友
+		ELSEIF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+			SELECTCASE RAND:8;常に表示されると多重絶頂時にうるさいので無言を織り交ぜておく
+				CASE 0
+					PRINTFORML 「啊♥啊♥啊~ ~ ~ ~ ~ ~ ~ ~」
+					;TranslatedMark 「ひあっ♥　あっ♥　あぁあ～～～っ♥」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					;PRINTFORML 
+				CASE 3
+					PRINTFORML 「啊啊啊啊♥要去了♥」
+					;TranslatedMark 「はあぁっ♥　イっちゃうぅっ♥」
+				CASE 4
+					;PRINTFORML 
+				CASE 5
+					;PRINTFORML 
+				CASE 6
+					PRINTFORML 「嗯，嗯♥啊啊啊~♥♥」
+					;TranslatedMark 「んんっ♥　はぁあ～っっ♥♥」
+				CASE 7
+					;PRINTFORML 
+			ENDSELECT
+		;それ以外
+		ELSE
+			SELECTCASE RAND:6;常に表示されると多重絶頂時にうるさいので無言を織り交ぜておく
+				CASE 0
+					PRINTFORML 「嗯～～～！啊♥啊♥」
+					;TranslatedMark 「んんっ～～～！っ！っ！」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					PRINTFORML 「噫呀！糟了…要去----！！♥」
+					;TranslatedMark 「やあっ！　イっちゃ…っ！」
+				CASE 3
+					;PRINTFORML 
+				CASE 4
+					;PRINTFORML 
+				CASE 5
+					PRINTFORML 「嗯！嗯……啊♥」
+					;TranslatedMark 「んんっ！　ん……っ！」
+			ENDSELECT
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;初めてＶ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｖ絶頂 > 0
+	IF CFLAG:221 == 0
+		CFLAG:221 = 1
+		;恋慕
+		IF TALENT:恋慕 || TALENT:服従 
+			PRINTFORMW 「啊♥啊啊啊♥要去了、去了----♥♥」
+			;TranslatedMark 「あッ♥　ああッ♥　クるっ、キちゃうぅッッ♥♥」
+		;それ以外
+		ELSE
+			PRINTFORMW 「嗯～～～！啊♥啊♥」
+			;TranslatedMark 「んんっ～～～！っ！っ！」
+		ENDIF
+	;二回目以降
+	ELSE
+		;最強絶頂時
+		IF NOWEX:Ｖ絶頂 > 4
+			;常に表示されると多重絶頂時にうるさいので、以下適当に無言を織り交ぜておく
+			SELECTCASE RAND:10
+				CASE 0
+					;PRINTFORML 
+				CASE 1
+					PRINTFORML 「啊♥等等♥♥啊，啊♥啊，啊♥♥啊♥♥♥♥」
+					;TranslatedMark 「あッ♥きっ♥♥　あ゛っ♥あ゛あ゛♥♥ぁあ―ッ♥♥♥♥」
+				CASE 2
+					;PRINTFORML 
+				CASE 3
+					PRINTFORML 「哦♥♥♥♥♥♥啊♥♥啊♥♥♥」
+					;TranslatedMark 「おひッ♥♥♥♥　ッ♥♥ひあッ♥ッ♥ああッッ♥♥♥」
+				CASE 4
+					;PRINTFORML 
+				CASE 5
+					PRINTFORML 「我♥要♥♥♥...去了♥♥♥♥♥」
+					;TranslatedMark 「イッ♥イクッ♥イッ♥♥…っクぅうう♥♥っっ♥♥♥」
+				CASE 6
+					;PRINTFORML 
+				CASE 7
+					PRINTFORML 「啊啊♥♥♥♥啊啊啊啊啊啊啊啊啊啊啊啊♥♥♥♥♥」」
+					;TranslatedMark 「ああっ♥♥♥♥　はあぁああぁああっっ♥♥♥♥♥」」
+				CASE 8
+					;PRINTFORML 
+				CASE 9
+					PRINTFORML 「啊♥♥啊啊♥♥啊，啊♥啊，啊♥嗯啊啊啊啊♥♥♥♥」
+					;TranslatedMark 「っあ♥♥ああっ♥♥あ゛っ♥あ゛♥んぁああぁ♥♥♥♥」
+			ENDSELECT
+		;恋慕 or 服従 or 親友
+		ELSEIF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+			SELECTCASE RAND:8;常に表示されると多重絶頂時にうるさいので無言を織り交ぜておく
+				CASE 0
+					PRINTFORML 「啊♥啊啊♥有什么要来了♥♥」
+					;TranslatedMark 「あっ♥ああ♥　キちゃうぅっっ♥♥」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					;PRINTFORML 
+				CASE 3
+					PRINTFORML 「啊♥啊啊啊啊～啊啊♥♥」
+					;TranslatedMark 「あっ♥　ぁはあぁあ～～あぁッッ♥♥」
+				CASE 4
+					;PRINTFORML 
+				CASE 5
+					;PRINTFORML 
+				CASE 6
+					PRINTFORML 「啊啊♥　…啊啊啊啊……♥♥」
+					;TranslatedMark 「ああっ♥　…はあぁぁ……♥♥」
+				CASE 7
+					;PRINTFORML 
+			ENDSELECT
+		;それ以外
+		ELSE
+			SELECTCASE RAND:6;常に表示されると多重絶頂時にうるさいので無言を織り交ぜておく
+				CASE 0
+					PRINTFORML 「嗯～～～！啊♥啊♥」
+					;TranslatedMark 「んんっ～～～！っ！っ！」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					PRINTFORML 「这个！喜欢♥」
+					;TranslatedMark 「これっ！　好きぃっ♥」
+				CASE 3
+					;PRINTFORML 
+				CASE 4
+					;PRINTFORML 
+				CASE 5
+					PRINTFORML 「啊！　…啊啊啊啊……」
+					;TranslatedMark 「ああっ！　…はあぁぁ……」
+			ENDSELECT
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;初めてＡ絶頂
+;-------------------------------------------------
+IF NOWEX:Ａ絶頂 > 0
+	IF CFLAG:222 == 0
+		CFLAG:222 = 1
+		;恋慕
+		IF TALENT:恋慕 || TALENT:服従 
+			PRINTFORMW 「更多♥责弄我的屁股♥」
+			;TranslatedMark 「もっとっ♥　お尻弄ってぇ♥」
+		;それ以外
+		ELSE
+			PRINTFORMW 「屁、屁股好棒♥」
+			;TranslatedMark 「おっ、お尻でぇっ！」
+		ENDIF
+	;二回目以降
+	ELSE
+		;最強絶頂時
+		IF NOWEX:Ａ絶頂 > 4
+			SELECTCASE RAND:8
+				CASE 0
+					PRINTFORML 「哦~♥哦，哦♥♥想要更多♥♥啊♥♥♥」
+					;TranslatedMark 「お゛ッ♥お゛お゛ッ♥♥　ほぉッ♥♥ッッ♥♥♥」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					;PRINTFORML 
+				CASE 3
+					PRINTFORML 「噫♥♥要去了♥♥嗯，嗯♥♥啊♥♥♥」
+					;TranslatedMark 「イ゛ッ♥♥　イ゛グッ♥♥イ゛グぅぅううぅうッ♥♥ッ♥♥♥」
+				CASE 4
+					;PRINTFORML 
+				CASE 5
+					;PRINTFORML 
+				CASE 6
+					PRINTFORML 「嗯，嗯♥♥哦~♥哈~♥♥♥啊♥♥啊♥♥」
+					;TranslatedMark 「んオ゛っ♥♥　オ゛ッ♥はあ゛ッ♥♥♥ッ♥♥ッ♥♥」
+				CASE 7
+					;PRINTFORML 
+			ENDSELECT
+		;恋慕 or 服従 or 親友
+		ELSEIF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+			SELECTCASE RAND:8;常に表示されると多重絶頂時にうるさいので無言を織り交ぜておく
+				CASE 0
+					PRINTFORML 「噫呀♥啊啊♥要去了♥♥」
+					;TranslatedMark 「やあっ♥　ああ♥　キちゃうぅっっ♥♥」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					;PRINTFORML 
+				CASE 3
+					PRINTFORML 「嗯啊啊♥啊♥啊啊啊啊啊♥♥」
+					;TranslatedMark 「んあぁっ♥　あっ♥　ぁはあぁあぁッッ♥♥」
+				CASE 4
+					;PRINTFORML 
+				CASE 5
+					;PRINTFORML 
+				CASE 6
+					PRINTFORML 「嗯，嗯♥嗯啊啊♥啊啊啊啊啊♥」
+					;TranslatedMark 「んんっ♥　んあぁっ♥　ああぁあぁッ♥」
+				CASE 7
+					;PRINTFORML 
+			ENDSELECT
+		;それ以外
+		ELSE
+			SELECTCASE RAND:6;常に表示されると多重絶頂時にうるさいので無言を織り交ぜておく
+				CASE 0
+					PRINTFORML 「嗯～～～！啊♥啊♥」
+					;TranslatedMark 「んんっ～～～！っ！っ！」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					PRINTFORML 「啊！屁股…♥！」
+					;TranslatedMark 「あっ！　お尻でっ…♥！」
+				CASE 3
+					;PRINTFORML 
+				CASE 4
+					;PRINTFORML 
+				CASE 5
+					PRINTFORML 「啊！　…啊啊啊啊……」
+					;TranslatedMark 「ああっ！　…はあぁぁ……」
+			ENDSELECT
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;初めてＢ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｂ絶頂 > 0
+	IF CFLAG:223 == 0
+		CFLAG:223 = 1
+		;恋慕
+		IF TALENT:恋慕 || TALENT:服従 
+			PRINTFORMW 「啊♥啊♥胸部♥好棒♥♥」
+			;TranslatedMark 「あっ♥　あっ♥　おっぱいで♥イクぅっっ♥♥」
+		;それ以外
+		ELSE
+			PRINTFORMW 「嗯，嗯♥」
+			;TranslatedMark 「んっ、っ♥」
+		ENDIF
+	;二回目以降
+	ELSE
+		;最強絶頂時
+		IF NOWEX:Ｂ絶頂 > 4
+			SELECTCASE RAND:8
+				CASE 0
+					PRINTFORML 「哎呀♥啊，啊♥嗯，嗯♥♥♥♥♥」
+					;TranslatedMark 「やあっ♥あ゛あっ♥イ゛グぅっっ♥♥♥♥♥」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					PRINTFORML 「哈噫♥♥啊，啊♥♥―噗噫___♥♥♥」
+					;TranslatedMark 「はひっ♥♥あ゛ッ♥♥ッ♥♥―z____ッ♥♥♥」
+				CASE 3
+					;PRINTFORML 
+				CASE 4
+					PRINTFORML 「♥噫♥啊♥噫呀♥――♥♥啊♥哈♥――♥♥」
+					;TranslatedMark 「♥ひ♥ッ♥ひあッ♥―ッ♥♥ーッ♥♥かッ♥はッ♥―ーッ♥♥」
+				CASE 5
+					;PRINTFORML 
+				CASE 6
+					PRINTFORML 「啊啊啊♥♥啊啊♥嘘♥♥♥♥哈♥♥」
+					;TranslatedMark 「ひぁあッ♥♥アッ♥ッ♥♥♥♥ハアァッ♥♥」
+				CASE 7
+					;PRINTFORML 
+			ENDSELECT
+		;恋慕 or 服従 or 親友
+		ELSEIF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+			SELECTCASE RAND:8;常に表示されると多重絶頂時にうるさいので無言を織り交ぜておく
+				CASE 0
+					PRINTFORML 「呀♥啊啊♥好棒♥♥」
+					;TranslatedMark 「やあっ♥　ああ♥　イクぅっっ♥♥」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					;PRINTFORML 
+				CASE 3
+					PRINTFORML 「啊啊啊啊♥乳头♥要坏掉了♥♥」
+					;TranslatedMark 「ひあぁッッ♥　乳首っ♥壊れちゃうぅぅぅっ♥♥」
+				CASE 4
+					;PRINTFORML 
+				CASE 5
+					PRINTFORML 「啊♥啊♥胸部♥好棒♥♥」
+					;TranslatedMark 「あっ♥　あっ♥　おっぱいで♥イクぅっっ♥♥」
+				CASE 6
+					;PRINTFORML 
+				CASE 7
+					PRINTFORML 「再多玩弄♥我的胸部♥哎呀♥♥」
+					;TranslatedMark 「もっとぉ♥　あたいのおっぱいっ♥いじってぇっ♥♥」
+			ENDSELECT
+		;それ以外
+		ELSE
+			SELECTCASE RAND:6;常に表示されると多重絶頂時にうるさいので無言を織り交ぜておく
+				CASE 0
+					PRINTFORML 「嗯，嗯♥」
+					;TranslatedMark 「んっ、っ♥」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					PRINTFORML 「啊！胸部…♥！」
+					;TranslatedMark 「あっ！　胸でっ…♥！」
+				CASE 3
+					;PRINTFORML 
+				CASE 4
+					;PRINTFORML 
+				CASE 5
+					PRINTFORML 「啊！　…啊啊啊啊啊…♥」
+					;TranslatedMark 「ああっ！　…はあぁぁ…♥」
+			ENDSELECT
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;初めてＭ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｍ絶頂 > 0
+	IF CFLAG:224 == 0
+		CFLAG:224 = 1
+		;恋慕
+		IF TALENT:恋慕 || TALENT:服従 
+			PRINTFORMW 「嗯，嗯♥♥　…用嘴去了……♥」
+			;TranslatedMark 「んんっ♥♥　…口でイクなんて……♥」
+		;それ以外
+		ELSE
+			PRINTFORMW 「嗯，嗯♥　……用嘴…♥」
+			;TranslatedMark 「んっ、っ♥　……口で…♥」
+		ENDIF
+	;二回目以降
+	ELSE
+		;最強絶頂時
+		IF NOWEX:Ｍ絶頂 > 4
+			SELECTCASE RAND:8
+				CASE 0
+					PRINTFORML 「嗯~♥♥嗯，嗯♥♥」
+					;TranslatedMark 「ん゛ッ♥♥　ん゛ん゛―ッ♥♥」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					;PRINTFORML 
+				CASE 3
+					PRINTFORML 「嗯~♥♥―♥嗯♥♥♥―♥♥啊♥」
+					;TranslatedMark 「ん゛ッ♥♥―♥んん♥♥♥　―z__ッ♥♥ッ♥」
+				CASE 4
+					;PRINTFORML 
+				CASE 5
+					;PRINTFORML 
+				CASE 6
+					PRINTFORML 「嗯♥嗯，嗯♥♥啊♥♥啊♥♥」
+					;TranslatedMark 「んッ♥ん゛んッ♥♥　ッ♥♥―z__ッ♥ッ♥♥」
+				CASE 7
+					;PRINTFORML 
+			ENDSELECT
+		;恋慕 or 服従 or 親友
+		ELSEIF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+			SELECTCASE RAND:8;常に表示されると多重絶頂時にうるさいので無言を織り交ぜておく
+				CASE 0
+					PRINTFORML 「嗯~♥　…呼啊啊…♥♥」
+					;TranslatedMark 「んん～っっ♥　…ふあぁ…♥♥」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					;PRINTFORML 
+				CASE 3
+					PRINTFORML 「嗯，嗯♥♥　…再多，侵犯我的嘴……♥」
+					;TranslatedMark 「んんっ♥♥　…もっと、あたいの口、犯してぇ……♥」
+				CASE 4
+					;PRINTFORML 
+				CASE 5
+					;PRINTFORML 
+				CASE 6
+					PRINTFORML 「嗯~♥嗯♥　……嘴被侵犯了…♥」
+					;TranslatedMark 「んん～っ♥　んっ♥　……口の中、犯されて…♥」
+				CASE 7
+					;PRINTFORML 
+			ENDSELECT
+		;それ以外
+		ELSE
+			SELECTCASE RAND:6;常に表示されると多重絶頂時にうるさいので無言を織り交ぜておく
+				CASE 0
+					PRINTFORML 「嗯，嗯！嗯~」
+					;TranslatedMark 「んっ、っ！　んん～～」
+				CASE 1
+					;PRINTFORML 
+				CASE 2
+					;PRINTFORML 
+				CASE 3
+					PRINTFORML 「嗯！呼！啊！」
+					;TranslatedMark 「んん！　ふっ！っ！」
+				CASE 4
+					;PRINTFORML 
+				CASE 5
+					PRINTFORML 「嗯，嗯～！」
+					;TranslatedMark 「ふん、ん～～っ！」
+			ENDSELECT
+		ENDIF
+	ENDIF
+ENDIF
+
+;=================================================
+;●単体エンディング関係
+;=================================================
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;★ここから先にはエンディングが記述されています★
+;ネタバレを避けたい方は閲覧しないようにご注意下さい。
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+@KOJO_SINGLE_ENDING_K35
+
+
+;単体エンディング
+;全都市を統一したとき、好感度5000以上かつ全キャラ中最も好感度が高いと表示される
+SETCOLOR カラー_パ赤
+PRINTFORML 
+
+;恋慕ルート
+IF TALENT:恋慕
+	PRINTFORML …
+	PRINTFORML ……
+	PRINTFORMW ………
+	PRINTFORML 
+	PRINTFORMW 「到家啦，%ANAME(MASTER)%，我回来啦」
+	;TranslatedMark 「ただいまー。今帰ったよ%ANAME(MASTER)%ー」
+	PRINTFORML
+	PRINTFORMW 在%ANAME(MASTER)%刚准备好晚饭的时候，%ANAME(TARGET)%回家了
+	;TranslatedMark %ANAME(MASTER)%が夕飯の準備を丁度終えた頃に、%ANAME(TARGET)%が帰宅した
+	PRINTFORML
+	PRINTFORMW ――乱世平息后，%ANAME(MASTER)%和%ANAME(TARGET)%在中有之道上安居在一起——
+	;TranslatedMark ――― 乱世が静まった後、%ANAME(MASTER)%と%ANAME(TARGET)%は中有の道に居を構えて一緒に暮らしている ―――
+	PRINTFORML
+	PRINTFORMW 「哈，今天也好累。即使幻想乡安静下来了，三途之河仍挤满了恶党们的灵魂」
+	;TranslatedMark 「はー、今日も疲れたよ。幻想郷は静かになっても、三途の河は悪党共の人魂でまだまだ大賑わいさね」
+	PRINTFORML
+	PRINTFORMW 「即使想偷懒，同事们用充满杀气的视线盯着我…。没什么偷懒的时机……」
+	;TranslatedMark 「サボりたくても同僚たちが血走った目線を送ってきてね…。中々サボれるタイミングが無いんだ……」
+	PRINTFORML
+	IF TALENT:正妻 || TALENT:妾
+		PRINTFORMW 「啊~啊，我能感到安心的地方，就只有有我爱的丈夫等着的这个家了。喂，紧紧地拥抱我吧」
+		;TranslatedMark 「あ～あ、もうあたいが心安らげるのは、愛する旦那が待つこの家だけだよ。なあ、ぎゅ～って抱きしめとくれよー」
+		PRINTFORML
+		PRINTFORMW 回应一脸疲惫表情的%ANAME(TARGET)%，%ANAME(MASTER)%用温柔的拥抱安慰她
+		;TranslatedMark 疲れた表情の%ANAME(TARGET)%におねだりに応え、%ANAME(MASTER)%は優しいハグで慰める
+	ELSE
+		PRINTFORMW 「嗯... ...我唯一感到平静的地方就是在这个房子里和心爱的你在一起... ...」
+		;TranslatedMark 「はあ…、もうあたいが心安らげるのは、愛するあんたが居るこの家だけだよぉ…」
+		PRINTFORML
+		PRINTFORMW 为了安慰表情疲惫的%ANAME(TARGET)%，%ANAME(MASTER)%轻轻地抚摸她的头
+		;TranslatedMark 疲れた表情の%ANAME(TARGET)%を慰めるように、%ANAME(MASTER)%は彼女の頭をヨシヨシと撫でる
+	ENDIF
+	PRINTFORML
+	PRINTFORMW 为下班后筋疲力尽的%ANAME(TARGET)%，把饭和浴室的准备工作做好就是现在的%ANAME(MASTER)%的工作
+	;TranslatedMark 仕事帰りでへとへとになった%ANAME(TARGET)%のために、ご飯やお風呂の準備を完璧にするのが今の%ANAME(MASTER)%の仕事だ
+	PRINTFORML
+	PRINTFORMW 「对不起。你白天工作也累了吧」
+	;TranslatedMark 「ごめんよ。あんただって昼間働いて疲れてるだろうにさ」
+	PRINTFORML
+	PRINTFORMW ——为了%ANAME(TARGET)%这都不是什么，不用在意。%ANAME(MASTER)%传达了这样的意图
+	;TranslatedMark ― %ANAME(TARGET)%のためなら何でもないことだ。気にしないでくれ ―　と%ANAME(MASTER)%は伝えた
+	PRINTFORML
+	PRINTFORMW 「…呵呵，说了会让人开心的话呢。那么，%ANAME(MASTER)%给我做的饭，我就开动啦♪」
+	;TranslatedMark 「…ふふ、嬉しいこと言ってくれちゃってまぁ。それじゃ、%ANAME(MASTER)%が作ってくれたご飯、いただこうかね♪」
+	PRINTFORML
+	PRINTFORMW 「然后等洗澡之后…今天也在被子里好好享受吧♥」
+	;TranslatedMark 「それでお風呂の後は…、今日も布団でお楽しみといこうじゃないか♥」
+	PRINTFORML
+	PRINTFORMW 尽管已经累得精疲力尽，%ANAME(TARGET)%每天都在享受着和%ANAME(MASTER)%的夜生活
+	;TranslatedMark 疲れでへとへとだ。という割には、%ANAME(TARGET)%は毎日のように%ANAME(MASTER)%との夜の営みを楽しんでいる
+	PRINTFORML
+	PRINTFORMW 对于现在的%ANAME(TARGET)%来说，与%ANAME(MASTER)%的身心重叠、相爱才是最幸福的
+	;TranslatedMark 今の%ANAME(TARGET)%にとっては、%ANAME(MASTER)%との心と身体の重ねあい、愛し合いこそが一番の幸せのようだ
+	PRINTFORML
+	PRINTFORMW 「啊啊啊啊♥好棒♥%ANAME(MASTER)%♥%ANAME(MASTER)%♥♥再来多一点♥♥♥」
+	;TranslatedMark 「ひあぁっ♥　いいッ♥　%ANAME(MASTER)%ッ♥　%ANAME(MASTER)%ッ♥♥　もっとしておくれぇッ♥♥♥」
+	PRINTFORML
+	PRINTFORMW …今晚两个人也激烈地相爱了……
+	;TranslatedMark …今晩も二人は激しく愛し合った……
+	PRINTFORML
+	PRINTFORML ……
+	PRINTFORML
+	PRINTFORMW ………
+	PRINTFORML
+	PRINTFORMW 深夜，%ANAME(TARGET)%温柔地抚摸着相爱结束后熟睡的%ANAME(MASTER)%的头发
+	;TranslatedMark 深夜、愛し合いが終わってぐっすり眠っている%ANAME(MASTER)%の髪を、%ANAME(TARGET)%が優しく撫でる
+	PRINTFORML
+	PRINTFORMW 「…吶，能看到所爱之人的寿命，你知道是这什么心情吗……」
+	;TranslatedMark 「…ねぇ、あんた。愛する人の寿命が視えるって、どんな気持ちか分かるかい……」
+	PRINTFORML
+	PRINTFORMW %ANAME(TARGET)%并不是在问谁，而是静静地小声嘟囔着自己的想法
+	;TranslatedMark %ANAME(TARGET)%は誰に聞かそうというでもなく、静かに小さく思いを呟く
+	PRINTFORML
+	PRINTFORMW 「我好害怕…。虽然不是现在，但是总有一天会到来……」
+	;TranslatedMark 「あたいは怖いよ…。今じゃなくても、いつかは来るその日が……」
+	PRINTFORML
+	PRINTFORMW 嘟囔着的%ANAME(TARGET)%静静地将身体靠近%ANAME(MASTER)%，紧紧地抱住
+	;TranslatedMark 呟いた%ANAME(TARGET)%は静かに%ANAME(MASTER)%に身体を寄せ、すがるようにぎゅっと抱きつく
+	PRINTFORML
+	PRINTFORMW （所以%ANAME(MASTER)%…。要活得久一点哦。为了暂时消除这份不安，请给予我更多的爱）
+	;TranslatedMark （だから%ANAME(MASTER)%…。長生きしておくれ。この不安を一時でも消せるよう、あたいを愛しておくれ）
+	PRINTFORML
+	PRINTFORMW （请留下很多和%ANAME(MASTER)%有关的回忆。这样的话，我一定会努力的……）
+	;TranslatedMark （%ANAME(MASTER)%との思い出を、いっぱいいっぱい残しておくれ。そうすれば、あたいはきっと頑張れるから……）
+	PRINTFORML 
+	PRINTFORMW 然后，%ANAME(TARGET)%把自己的嘴唇重叠在沉睡的%ANAME(MASTER)%的嘴唇上
+	;TranslatedMark そして、眠る%ANAME(MASTER)%の唇に%ANAME(TARGET)%は自身の唇を重ねる
+	PRINTFORML 
+	PRINTFORMW 「%ANAME(MASTER)%…我爱你」
+	;TranslatedMark 「%ANAME(MASTER)%…、愛しているよ」
+	RESETCOLOR
+	PRINTFORML 
+	PRINTFORML 
+	PRINTFORML 
+	PRINTFORMW 　　　　　　　　　　爱慕END
+	;TranslatedMark 恋慕ＥＮＤ
+	PRINTFORML
+;服従ルート
+ELSEIF TALENT:服従
+	PRINTFORML …
+	PRINTFORML ……
+	PRINTFORMW ………
+	PRINTFORML 
+	PRINTFORMW 「嘿嘿♥哎呀♥啊♥%ANAME(MASTER)%大人♥我的胸部♥请再多吸一点♥♥」
+	;TranslatedMark 「へあぁッ♥　ひぁッ♥　あッ♥　%ANAME(MASTER)%様ぁッ♥　私のおっぱいぃっ♥　もっと吸ってくださいぃぃっ♥♥」
+	PRINTFORML 
+	PRINTFORMW 今天也在%ANAME(MASTER)%的宅邸里，卑贱的雌性的娇声回响
+	;TranslatedMark 今日も%ANAME(MASTER)%の屋敷に、卑しき牝の嬌声が響く
+	PRINTFORML
+	PRINTFORMW 乱世平息后，%ANAME(MASTER)%给了%ANAME(TARGET)%选择自己的今后出路的权力。给了她自由
+	;TranslatedMark 乱世が静まった後、%ANAME(MASTER)%は%ANAME(TARGET)%に今後のことを選ばせた。彼女に自由を与えたのだ
+	PRINTFORML
+	PRINTFORMW 如果她有那个意思的话，回到原来的生活也没问题的吧。但是她毫不犹豫地留在%ANAME(MASTER)%的身边，发誓要为了侍奉主人竭尽全力
+	;TranslatedMark その気があれば素の生活にも戻れただろう。しかし彼女はためらい無く%ANAME(MASTER)%の元に残り、尽くすことを誓った
+	PRINTFORML
+	PRINTFORMW %ANAME(TARGET)%按照自己的意志，选择了做%ANAME(MASTER)%的性奴隶
+	;TranslatedMark %ANAME(TARGET)%は自分の意思で、%ANAME(MASTER)%の性奴隷でいることを選んだのだった
+	PRINTFORML
+	PRINTFORMW 「啊♥一旦被%ANAME(MASTER)%大人触摸♥我、我的乳房、呼啊♥幸福地像是要溶化掉了♥♥」
+	;TranslatedMark 「あっ♥%ANAME(MASTER)%様に触られるとっ♥　わ、私のおっぱい、ふあぁ♥　幸せで蕩けちゃうぅッ♥♥」
+	PRINTFORML
+	PRINTFORMW 经过无数次的调教，因引渡人的工作而绷紧的肌肉变得柔软而松弛，现在完全变成了男人会喜欢的淫荡的身体
+	;TranslatedMark 数々の調教により、船頭の仕事で引き締まっていた筋肉は柔らかくほぐれ、今やすっかり男好みの淫らな肢体へと変わっていた
+	PRINTFORML
+	PRINTFORMW 在揉进大乳房的%ANAME(MASTER)%的手指上，下流的乳肉一下就吸附了上来
+	;TranslatedMark その大きな乳房を揉みこむ%ANAME(MASTER)%の指に、いやらしい乳肉がむっちりと吸い付いてくる
+	PRINTFORML
+	PRINTFORMW 「啊啊啊啊啊♥♥%ANAME(MASTER)%大人，拜托了♥请对这个肉棒专用的小穴施以恩惠♥♥」
+	;TranslatedMark 「ふあぁあぁ♥♥　%ANAME(MASTER)%様ぁ、お願いしますっ♥　このちんぽ穴にっ、お慈悲をくださいぃ♥♥」
+	PRINTFORML
+	PRINTFORMW %ANAME(TARGET)%用手指将滴下爱蜜的秘裂展开，一边展示着抽动的肉壁一边恳求插入
+	;TranslatedMark ぽたぽたと愛蜜を垂らす秘裂を自ら指で広げ、ひくつくヴァギナを見せつけながら%ANAME(TARGET)%は挿入を懇願する
+	PRINTFORML
+	PRINTFORMW %ANAME(MASTER)%如往常一样满足于自己调教的结果，为了满足她的愿望把自己生机勃勃的肉棒刺进去
+	;TranslatedMark 相変わらずの仕上がり具合に満足した%ANAME(MASTER)%は、自らのいきり立った肉棒を望み通りに突きこんでやった
+	PRINTFORML
+	PRINTFORMW 「啊啊♥♥♥♥噫哈♥♥啊啊啊啊啊啊啊啊啊♥♥♥♥♥」
+	;TranslatedMark 「ああっ♥♥♥♥　ひあぁ♥♥ああぁああっっ♥♥♥♥♥」
+	PRINTFORML
+	PRINTFORMW 如果是知道平常的%ANAME(TARGET)%的人，很难相信这轻柔甜美的娇声是她发出的
+	;TranslatedMark かつての%ANAME(TARGET)%を知る者ならば、この媚びた甘い嬌声が彼女から発せられたものだとはとても信じられないだろう
+	PRINTFORML
+	PRINTFORML 被心爱的主人索求、被侵犯的快感用一种叫作“幸福”的脑内毒品支配着她的一切。
+	;TranslatedMark 心から愛する主人に求められ、犯されるという幸福感が彼女の全てを「幸せ」という脳内麻薬で支配し、
+	PRINTFORML
+	PRINTFORMW 在这种使用药物做爱的超越理性的快乐中，理性和羞耻都已经燃烧殆尽了
+	;TranslatedMark 薬物セックスをも凌駕するほどの快楽で理性も羞恥も焼き焦がされたのだ
+	PRINTFORML
+	PRINTFORMW 被这种快乐所侵蚀的她的心灵和身体，已经无法恢复原状了吧……
+	;TranslatedMark この快楽で焼かれた彼女の心と身体は、もう元には戻らないだろう……
+	PRINTFORML
+	PRINTFORMW 「哈哈~♥♥更多♥再来一点♥♥♥把我搞得乱七八糟♥♥♥♥♥♥」
+	;TranslatedMark 「はひぃ～ッ♥♥　もっとっ♥もっとぉッ♥♥♥　私をめちゃくちゃにしてぇぇッッ♥♥♥♥♥♥」
+	PRINTFORML
+	PRINTFORML 她已经成为了没有%ANAME(MASTER)%就活不下去的人
+	;TranslatedMark もはや彼女は、%ANAME(MASTER)%無しでは生きていけない身となった
+	PRINTFORML
+	PRINTFORMW 但是这样没有任何问题
+	;TranslatedMark だがそれで何の問題も無い
+	PRINTFORML
+	PRINTFORMW 至少她在被%ANAME(MASTER)%侵犯的时候是最幸福的……
+	;TranslatedMark 少なくとも彼女は、%ANAME(MASTER)%に犯されている今が一番幸せなのだから……
+	RESETCOLOR
+	PRINTFORML 
+	PRINTFORML 
+	PRINTFORML 
+	PRINTFORMW 　　　　　　　　　　服从END
+	;TranslatedMark 服従ＥＮＤ
+	PRINTFORML
+ENDIF
+;RETURNの値を0→1に変えると、デフォルトの単体エンディングメッセージがスキップされる
+RETURN 1
+
+@KOJO_DEAD_ENDING_K35
+;斬首エンディング
+;自勢力が滅亡したときの選択肢で「……斬れ」を選択して主人公が死亡した場合に、好感度5000以上かつ全キャラ中最も好感度が高いと表示される
+;PRINTFORMW 
+
+;RETURNの値を0→1に変えると、デフォルトの単体エンディングメッセージがスキップされる
+RETURN 0

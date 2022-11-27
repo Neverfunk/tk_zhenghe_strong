@@ -1,0 +1,51 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_KARAOKE_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_KARAOKE_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_KARAOKE(対象)
+#DIM 対象
+
+PRINTFORML 路過酒場的時候、聽到裡面有些吵鬧
+PRINTFORML 詢問了一下、説是裡面在舉行歌唱大會
+PRINTFORML 好像也有獎金……
+PRINTFORML 
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "歌唱"))
+CALL ASK_YN("参加", "放棄")
+
+IF RESULT == 1
+	PRINTFORML 沒那種技術
+	PRINTFORML 決定放棄
+	RETURN 1
+ENDIF
+
+PRINTFORML 這個挺有趣的
+PRINTFORML 決定参加
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+IF LIMIT(ABL:対象:歌唱 * 2, 50, 90) > RAND:100
+	PRINTFORMW 獲勝了！
+	PRINTFORMW 拿到獎金後、一臉開心的踏上了歸途
+	CALL ICPRINT("獲得了<5000>金", "L", カラー_注意)
+	CALL PRINT_ADD_EXP(対象, "歌唱経験値", RAND:10 + 5)
+ELSE
+	PRINTFORMW 竟然输了……
+	PRINTFORMW 垂頭喪氣的踏上了歸途
+ENDIF
+
+
+RETURN 1

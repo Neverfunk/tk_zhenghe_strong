@@ -1,0 +1,56 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_STRAY_GOBLIN_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_STRAY_GOBLIN_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_STRAY_GOBLIN(対象)
+#DIM 対象
+
+
+PRINTFORML 探索時、遇見了渾身破破爛爛的哥布林
+PRINTFORML 似乎是被解雇了、懇求著我雇用他
+PRINTL
+CALL ASK_YN("雇用", "趕走")
+
+IF RESULT == 1
+	PRINTFORML 沒有那種餘地
+	PRINTFORMW 把他趕走了
+	RETURN 1
+ENDIF
+
+PRINTFORMW 太可憐了、決定雇用他
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+IF !IS_COUNTRY(CFLAG:対象:所属)
+	PRINTFORML 是個完全沒用的傢伙……
+	RETURN 1
+ENDIF
+
+SELECTCASE RAND:3
+	CASE 0
+		PRINTFORML 哥布林非常熱情的工作著
+		PRINTFORMW 把人事工作交給他後希望入伍的人增加了
+		COUNTRY_SOLDIER:(CFLAG:対象:所属) += 3000
+		CALL ICPRINT(@"兵数增加了<3000>、変成了<{COUNTRY_SOLDIER:(CFLAG:対象:所属)}>", "W", カラー_注意)
+	CASE 1
+		PRINTFORMW 是個完全沒用的傢伙……
+	CASE 2
+		PRINTFORML 哥布林作為士兵進入了部隊
+		PRINTFORMW 以訓練特別熱情而聞名
+ENDSELECT
+
+

@@ -1,0 +1,906 @@
+﻿;─────────────────────────────────────── 
+;●「会いに行く」の開始時
+;─────────────────────────────────────── 
+@KOJO_TRAIN_START_A1_K10
+#DIM レミリア_対象
+#DIM レミリア
+#DIMS レミリア機嫌
+
+レミリア_対象 = MASTER
+レミリア = NAME_TO_CHARA("レミリア")
+レミリア機嫌 = %TOSTR_EMOTION(レミリア)%
+
+;レミリア口上の使用可否設定と初期化
+SIF CFLAG:レミリア:400 == 0
+	CALL KOJO_ASK_RESET_K10
+
+;口上を不使用設定なら戻る
+SIF CFLAG:レミリア:400 == 1
+	RETURN 0
+
+SETCOLOR レミリア_口上カラー
+
+;─────────────────────────────────────── 
+;○初回
+;─────────────────────────────────────── 
+IF CFLAG:レミリア:200 == 0
+
+	;会いに行く口上初回呼び出しフラグオン
+	CFLAG:レミリア:200 = 1
+
+	;───────────────────────────────────── 
+	;▼虚ろ
+	;───────────────────────────────────── 
+	IF TALENT:レミリア:空虚
+		PRINTFORML 「啊……嗯……」
+		;TranslatedMark 「あ……うー……」
+		PRINTFORMDL %ANAME(レミリア)%穿着乱糟糟的衣服，像人偶一样把手脚伸出来
+		;TranslatedMark %ANAME(レミリア)%は乱れた服装で人形のように手足を投げ出している
+		WAIT
+		RESETCOLOR
+		RETURN 0
+	ENDIF
+
+	;───────────────────────────────────── 
+	;▼通常初対面
+	;　面識がなく紅魔館メンバーや知人キャラでない場合
+	;───────────────────────────────────── 
+	IF !CHECK_K10("面識")
+		;同勢力
+		IF CFLAG:レミリア:所属 == CFLAG:(レミリア_対象):所属
+			;レミリア君主
+			IF GET_COUNTRY_BOSS(CFLAG:レミリア:所属) == NAME_TO_CHARA("レミリア")
+				PRINTFORMW 「进来吧」
+				;TranslatedMark 「入りなさい」
+				PRINTL 
+				PRINTFORM 「%CALLNAME_K10(レミリア_対象)%啊。我是这座城的主人
+				;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%ね。私がこの城の主、
+				CALL COLOR_PRINT(@"%NAME_FORMAL(レミリア)%", カラー_赤)
+				PRINTFORML 。骄傲的吸血鬼」
+				;TranslatedMark 。誇り高き吸血鬼」
+				CALL KOJO_DESCRIPTION_CHARA_K10("容姿１")
+				PRINTL 
+				IF HAS_TAG(レミリア_対象, タグ_人間) || IS_TAG_EMPTY(レミリア_対象)
+					PRINTFORML 「虽然不知道人类能做到什么程度，但我还是会期待你大显身手的」
+					;TranslatedMark 「人間がどこまで使えるかわからないけれど、活躍に期待してあげるわ」
+					PRINTFORML 「如果只是害怕我的人而投靠过来的话，你也会被当成诱饵呢」
+					;TranslatedMark 「私を畏れるただの人間なら、餌にしてやろう」
+				ELSEIF HAS_TAG(レミリア_対象, タグ_悪魔)
+					PRINTFORML 「%CALLNAME_K10(レミリア_対象)%也是恶魔吧？我会期待你大显身手的」
+					;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%も悪魔なのでしょう？　活躍に期待してあげるわ」
+				ELSE
+					PRINTFORML 「虽然不知道%CSTR:レミリア_対象:8%能做到什么程度，但我还是会期待你大显身手的」
+					;TranslatedMark 「%CSTR:レミリア_対象:8%がどこまで使えるかわからないけれど、活躍に期待してあげるわ」
+				ENDIF
+				CALL KOJO_DESCRIPTION_CHARA_K10("容姿２")
+				PRINTL 
+				PRINTFORML 「哇~啊。嗯……」
+				;TranslatedMark 「ふわぁ～あ。んー……」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格１")
+				PRINTL 
+				PRINTFORML 「对了，有没有能让人清醒过来的有趣的故事？晚上有点困啊」
+				;TranslatedMark 「ところで、目の覚めるような面白い話はない？　宵は少し眠いのよ」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格２")
+			;あなた君主
+			ELSEIF GET_COUNTRY_BOSS(CFLAG:レミリア:所属) == レミリア_対象
+				PRINTFORMW 「可以进来哦」
+				;TranslatedMark 「入っていいわよ」
+				PRINTL 
+				PRINTFORM 「%CALLNAME_K10(レミリア_対象)%。这座城的主人啊。——是我
+				;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%。この城の主ね。――私は
+				CALL COLOR_PRINT(@"%NAME_FORMAL(レミリア)%", カラー_赤)
+				PRINTFORML 。骄傲的吸血鬼」
+				;TranslatedMark 。誇り高き吸血鬼」
+				CALL KOJO_DESCRIPTION_CHARA_K10("容姿１")
+				PRINTL 
+				PRINTFORML 「我很期待%CALLNAME_K10(レミリア_対象)%的活跃呢，所以，我会协助你的」
+				;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%の活躍には期待してるから、協力してあげるわね」
+				CALL KOJO_DESCRIPTION_CHARA_K10("容姿２")
+				PRINTL 
+				PRINTFORML 「哇~啊。嗯……」
+				;TranslatedMark 「ふわぁ～あ。んー……」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格１")
+				PRINTL 
+				PRINTFORML 「对了，有没有能让人清醒过来的有趣的故事？晚上有点困啊」
+				;TranslatedMark 「ところで、目の覚めるような面白い話はない？　宵は少し眠いのよ」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格２")
+			;ともに士官
+			ELSE
+				PRINTFORMW 「进来吧」
+				;TranslatedMark 「入りなさい」
+				PRINTL 
+				PRINTFORML 「嗯。你是谁？」
+				;TranslatedMark 「え。あんた誰？」
+				PRINTFORM 「……嗯。%CALLNAME_K10(レミリア_対象)%啊。——是我
+				;TranslatedMark 「……ふーん。%CALLNAME_K10(レミリア_対象)%ね。――私は
+				CALL COLOR_PRINT(@"%NAME_FORMAL(レミリア)%", カラー_赤)
+				PRINTFORML 。骄傲的吸血鬼」
+				;TranslatedMark 。誇り高き吸血鬼」
+				CALL KOJO_DESCRIPTION_CHARA_K10("容姿１")
+				PRINTL 
+				IF HAS_TAG(レミリア_対象, タグ_人間) || IS_TAG_EMPTY(レミリア_対象)
+					PRINTFORML 「虽然不知道人类能做到什么程度，但我还是会期待你大显身手的」
+					;TranslatedMark 「人間がどこまで使えるかわからないけれど、活躍に期待してあげるわ」
+					PRINTFORML 「如果只是害怕我的人而投靠过来的话，你也会被当成诱饵呢」
+					;TranslatedMark 「私を畏れるただの人間なら、餌にしてやろう」
+				ELSEIF HAS_TAG(レミリア_対象, タグ_悪魔)
+					PRINTFORML 「%CALLNAME_K10(レミリア_対象)%也是恶魔吧？我会期待你大显身手的」
+					;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%も悪魔なのでしょう？　活躍に期待してあげるわ」
+				ELSE
+					PRINTFORML 「虽然不知道%CSTR:レミリア_対象:8%能做到什么程度，但我还是会期待你大显身手的」
+					;TranslatedMark 「%CSTR:レミリア_対象:8%がどこまで使えるかわからないけれど、活躍に期待してあげるわ」
+				ENDIF
+				CALL KOJO_DESCRIPTION_CHARA_K10("容姿２")
+				PRINTL 
+				PRINTFORML 「哇~啊。嗯……」
+				;TranslatedMark 「ふわぁ～あ。んー……」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格１")
+				PRINTL 
+				PRINTFORML 「对了，有没有能让人清醒过来的有趣的故事？晚上有点困啊」
+				;TranslatedMark 「ところで、目の覚めるような面白い話はない？　宵は少し眠いのよ」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格２")
+			ENDIF
+		;違勢力
+		ELSE
+			;レミリア君主
+			IF GET_COUNTRY_BOSS(CFLAG:レミリア:所属) == NAME_TO_CHARA("レミリア")
+				PRINTFORMW 「进来吧」
+				;TranslatedMark 「入りなさい」
+				PRINTL 
+				PRINTFORM 「%CALLNAME_K10(レミリア_対象)%啊。我是这座城的主人
+				;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%ね。私がこの城の主、
+				CALL COLOR_PRINT(@"%NAME_FORMAL(レミリア)%", カラー_赤)
+				PRINTFORML 。骄傲的吸血鬼」
+				;TranslatedMark 。誇り高き吸血鬼」
+				CALL KOJO_DESCRIPTION_CHARA_K10("容姿１")
+				PRINTL 
+				IF HAS_TAG(レミリア_対象, タグ_人間) || IS_TAG_EMPTY(レミリア_対象)
+					PRINTFORML 「虽然不知道人类能做到什么程度，但我会期待你的协助的」
+					;TranslatedMark 「人間がどこまで使えるかわからないけれど、協力に期待してあげるわ」
+					PRINTFORML 「如果只是害怕我的人而投靠过来的话，你也会被当成诱饵呢」
+					;TranslatedMark 「私を畏れるただの人間なら、餌にしてやろう」
+				ELSEIF HAS_TAG(レミリア_対象, タグ_悪魔)
+					PRINTFORML 「%CALLNAME_K10(レミリア_対象)%也是恶魔吧？我会期待你的合作的」
+					;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%も悪魔なのでしょう？　協力に期待してあげるわ」
+				ELSE
+					PRINTFORML 「虽然不知道%CSTR:レミリア_対象:8%能做到什么程度，但我会期待你的合作的」
+					;TranslatedMark 「%CSTR:レミリア_対象:8%がどこまで使えるかわからないけれど、協力に期待してあげるわ」
+				ENDIF
+				CALL KOJO_DESCRIPTION_CHARA_K10("容姿２")
+				PRINTL 
+				PRINTFORML 「哇~啊。嗯……」
+				;TranslatedMark 「ふわぁ～あ。んー……」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格１")
+				PRINTL 
+				PRINTFORML 「对了，有没有能让人清醒过来的有趣的故事？晚上有点困啊」
+				;TranslatedMark 「ところで、目の覚めるような面白い話はない？　宵は少し眠いのよ」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格２")
+
+			;あなた君主
+			ELSEIF GET_COUNTRY_BOSS(CFLAG:レミリア:所属) == レミリア_対象
+				PRINTFORMW 「可以进来哦」
+				;TranslatedMark 「入っていいわよ」
+				PRINTL 
+				PRINTFORM 「%CALLNAME_K10(レミリア_対象)%。这座城的主人啊。——是我
+				;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%。この城の主ね。――私は
+				CALL COLOR_PRINT(@"%NAME_FORMAL(レミリア)%", カラー_赤)
+				PRINTFORML 。骄傲的吸血鬼」
+				;TranslatedMark 。誇り高き吸血鬼」
+				CALL KOJO_DESCRIPTION_CHARA_K10("容姿１")
+				PRINTL 
+				PRINTFORML 「我很期待%CALLNAME_K10(レミリア_対象)%的活跃呢，所以，我会协助你的」
+				;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%の活躍には期待してるから、協力してあげるわね」
+				CALL KOJO_DESCRIPTION_CHARA_K10("容姿１")
+				PRINTL 
+				PRINTFORML 「哇~啊。嗯……」
+				;TranslatedMark 「ふわぁ～あ。んー……」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格１")
+				PRINTL 
+				PRINTFORML 「对了，有没有能让人清醒过来的有趣的故事？晚上有点困啊」
+				;TranslatedMark 「ところで、目の覚めるような面白い話はない？　宵は少し眠いのよ」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格２")
+			;共に士官
+			ELSE
+				PRINTFORMW 「进来吧」
+				;TranslatedMark 「入りなさい」
+				PRINTL 
+				PRINTFORML 「嗯。你是谁？」
+				;TranslatedMark 「え。あんた誰？」
+				PRINTFORM 「……嗯。%CALLNAME_K10(レミリア_対象)%啊。——是我
+				;TranslatedMark 「……ふーん。%CALLNAME_K10(レミリア_対象)%ね。――私は
+				CALL COLOR_PRINT(@"%NAME_FORMAL(レミリア)%", カラー_赤)
+				PRINTFORML 。骄傲的吸血鬼」
+				;TranslatedMark 。誇り高き吸血鬼」
+				CALL KOJO_DESCRIPTION_CHARA_K10("容姿１")
+				PRINTL 
+				IF HAS_TAG(レミリア_対象, タグ_人間) || IS_TAG_EMPTY(レミリア_対象)
+					PRINTFORML 「虽然不知道人类能做到什么程度，但我会期待你的协助的」
+					;TranslatedMark 「人間がどこまで使えるかわからないけれど、協力に期待してあげるわ」
+					PRINTFORML 「如果只是害怕我的人而投靠过来的话，你也会被当成诱饵呢」
+					;TranslatedMark 「私を畏れるただの人間なら、餌にしてやろう」
+				ELSEIF HAS_TAG(レミリア_対象, タグ_悪魔)
+					PRINTFORML 「%CALLNAME_K10(レミリア_対象)%也是恶魔吧？我会期待你的合作的」
+					;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%も悪魔なのでしょう？　協力に期待してあげるわ」
+				ELSE
+					PRINTFORML 「虽然不知道%CSTR:レミリア_対象:8%能做到什么程度，但我会期待你的合作的」
+					;TranslatedMark 「%CSTR:レミリア_対象:8%がどこまで使えるかわからないけれど、協力に期待してあげるわ」
+				ENDIF
+				CALL KOJO_DESCRIPTION_CHARA_K10("容姿２")
+				PRINTL 
+				PRINTFORML 「哇~啊。嗯……」
+				;TranslatedMark 「ふわぁ～あ。んー……」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格１")
+				PRINTL 
+				PRINTFORML 「对了，有没有能让人清醒过来的有趣的故事？晚上有点困啊」
+				;TranslatedMark 「ところで、目の覚めるような面白い話はない？　宵は少し眠いのよ」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格２")
+			ENDIF
+		ENDIF
+	;───────────────────────────────────── 
+	;▼通常初対面ではない
+	;　面識があるまたは紅魔館メンバーや知人キャラの場合
+	;───────────────────────────────────── 
+	ELSE
+		;同勢力
+		IF GET_COUNTRY_BOSS(CFLAG:レミリア:所属) == GET_COUNTRY_BOSS(CFLAG:(レミリア_対象):所属)
+			;親しい知り合い
+			IF CHECK_K10("紅魔館", レミリア_対象)
+				PRINTFORMW 「进来吧」
+				;TranslatedMark 「入りなさい」
+				PRINTL 
+				PRINTFORML 「%CALLNAME_K10(レミリア_対象)%。真优秀啊。我才刚睡醒呢」
+				;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%。優秀ね。ちょうど目が覚めたところよ」
+				PRINTFORML 「能帮我换衣服吗」
+				;TranslatedMark 「着替えをとってくれるかしら」
+				PRINTFORML 「争夺阵地的游戏开始了，当然，我会赢的」
+				;TranslatedMark 「陣地取りゲームが始まったけれど、当然この私が勝つわよ」
+				PRINTFORMDW %ANAME(レミリア)%似乎对朋友的来访很放松
+				;TranslatedMark %ANAME(レミリア)%は知人の訪れに気を抜いたようだ
+				PRINTL 
+				PRINTFORML 「哇~啊。嗯……」
+				;TranslatedMark 「ふわぁ～あ。んー……」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格１")
+				PRINTL 
+				PRINTFORML 「喂，有没有能让人清醒过来的有趣的故事？」
+				;TranslatedMark 「ねえ、目の覚めるような面白い話はない？」
+				PRINTFORML 「晚上有点困啊」
+				;TranslatedMark 「宵は少し眠いのよ」
+				PRINTFORMDL %ANAME(レミリア)%露出天真无邪的微笑，微微歪着头
+				;TranslatedMark %ANAME(レミリア)%は幼い顔立ちに見合う無邪気な微笑を浮かべ小首を傾げている
+			;レミリア君主
+			ELSEIF GET_COUNTRY_BOSS(CFLAG:レミリア:所属) == NAME_TO_CHARA("レミリア")
+				PRINTFORMW 「进来吧」
+				;TranslatedMark 「入りなさい」
+				PRINTL 
+				PRINTFORML 「哎呀。欢迎来到我的城堡，%CALLNAME_K10(レミリア_対象)%」
+				;TranslatedMark 「あら。私の城へようこそ、%CALLNAME_K10(レミリア_対象)%」
+				PRINTFORML 「再说一次，我是这座城的主人%NAME_FORMAL(レミリア)%。骄傲的吸血鬼」
+				;TranslatedMark 「改めて、私はこの城の主%NAME_FORMAL(レミリア)%。誇り高き吸血鬼」
+				IF KDVAR:レミリア:レミリア_レミリアからの勧誘
+					PRINTFORML 「我会期待你的大显身手的。在我身边的话，会遇到珍贵的东西哦」
+					;TranslatedMark 「活躍に期待しているわ。私の傍に居れば珍しいものに出会えるわよ」
+				ELSE
+					PRINTFORML 「竟然自己过来了，真让人佩服」
+					;TranslatedMark 「自分から挨拶に来るなんて感心ね」
+					PRINTFORML 「虽然不知道能做到什么程度，但我会期待你大显身手的」
+					;TranslatedMark 「どこまで使えるかわからないけれど、活躍に期待してあげるわ」
+				ENDIF
+				CALL KOJO_DESCRIPTION_CHARA_K10("雰囲気")
+				PRINTL 
+				IF KDVAR:レミリア:レミリア_レミリアからの勧誘
+					PRINTFORML 「话说回来，晚上还特意来拜访，真是意外啊」
+					;TranslatedMark 「それにしても、宵にわざわざ訪ねてくれるなんて意外ね」
+				ENDIF
+				PRINTFORML 「哇~啊。嗯……」
+				;TranslatedMark 「ふわぁ～あ。んー……」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格１")
+				PRINTL 
+				PRINTFORML 「喂，有没有能让人清醒过来的有趣的故事？」
+				;TranslatedMark 「ねえ、目の覚めるような面白い話はない？」
+				PRINTFORML 「还有些困呢」
+				;TranslatedMark 「まだ少し眠いのよ」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格２")
+			;あなた君主
+			ELSEIF GET_COUNTRY_BOSS(CFLAG:レミリア:所属) == レミリア_対象
+				PRINTFORMW 「可以进来哦」
+				;TranslatedMark 「入っていいわよ」
+				PRINTL 
+				PRINTFORML 「我就是这座城的主人」
+				;TranslatedMark 「あなたがこの城の主ね」
+				PRINTFORML 「我是%NAME_FORMAL(レミリア)%。骄傲的吸血鬼」
+				;TranslatedMark 「私は%NAME_FORMAL(レミリア)%。誇り高き吸血鬼」
+				PRINTFORML 「我很期待%CALLNAME_K10(レミリア_対象)%的活跃呢，所以，我会协助你的」
+				;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%の活躍には期待してるから、協力してあげるわね」
+				CALL KOJO_DESCRIPTION_CHARA_K10("雰囲気")
+				PRINTL 
+				PRINTFORML 「哇~啊。嗯……」
+				;TranslatedMark 「ふわぁ～あ。んー……」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格１")
+				PRINTL 
+				PRINTFORML 「喂，有没有能让人清醒过来的有趣的故事？」
+				;TranslatedMark 「ねえ、目の覚めるような面白い話はない？」
+				PRINTFORML 「晚上有点困啊」
+				;TranslatedMark 「宵は少し眠いのよ」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格２")
+			;他
+			ELSE
+				PRINTFORMW 「进来吧」
+				;TranslatedMark 「入りなさい」
+				PRINTL 
+				PRINTFORML 「哎呀。欢迎光临，%CALLNAME_K10(レミリア_対象)%」
+				;TranslatedMark 「あら。ようこそ、%CALLNAME_K10(レミリア_対象)%」
+				PRINTFORML 「再说一次，我是%NAME_FORMAL(レミリア)%。骄傲的吸血鬼」
+				;TranslatedMark 「改めて、私は%NAME_FORMAL(レミリア)%。誇り高き吸血鬼」
+				PRINTFORML 「我会期待你的大显身手的」
+				;TranslatedMark 「活躍に期待しているわ」
+				CALL KOJO_DESCRIPTION_CHARA_K10("雰囲気")
+				PRINTL 
+				PRINTFORML 「话说回来，你晚上还特意来找我，真让人意外」
+				;TranslatedMark 「それにしても、宵にわざわざ訪ねて来てくれるなんて意外ね」
+				PRINTFORML 「哇~啊。嗯……」
+				;TranslatedMark 「ふわぁ～あ。んー……」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格１")
+				PRINTL 
+				PRINTFORML 「喂，有没有能让人清醒过来的有趣的故事？」
+				;TranslatedMark 「ねえ、目の覚めるような面白い話はない？」
+				PRINTFORML 「还有些困呢」
+				;TranslatedMark 「まだ少し眠いのよ」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格２")
+			ENDIF
+		;同盟
+		ELSEIF CHECK_COUNTRY_RELATION_F(CFLAG:レミリア_対象:所属, CFLAG:レミリア:所属) >= 2
+			;親しい知り合い
+			IF CHECK_K10("紅魔館", レミリア_対象)
+				PRINTFORMW 「进来吧」
+				;TranslatedMark 「入りなさい」
+				PRINTL 
+				PRINTFORML 「%CALLNAME_K10(レミリア_対象)%。为什么你不在家？」
+				;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%。なんであなたうちにいないのよ？」
+				PRINTFORML 「好像是说要带同伴过来合作，不过嘛」
+				;TranslatedMark 「仲間を連れてきて協力するって言ってるようだから、まぁいいけど」
+				PRINTFORML 「攻占阵地的游戏而已，当然，我会赢的」
+				;TranslatedMark 「陣地取りゲームくらい、当然この私が勝つわよ」
+				PRINTFORMDW %ANAME(レミリア)%似乎对朋友的来访很放松
+				;TranslatedMark %ANAME(レミリア)%は知人の訪れに気を抜いたようだ
+				PRINTL 
+				PRINTFORML 「哇~啊。嗯……」
+				;TranslatedMark 「ふわぁ～あ。んー……」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格１")
+				PRINTL 
+				PRINTFORML 「以外出许可为交换，说些让人清醒的有趣的话吧」
+				;TranslatedMark 「外出許可と引き換えに、目の覚めるような面白い話をしなさい」
+				PRINTFORML 「晚上有点困啊」
+				;TranslatedMark 「宵は少し眠いのよ」
+				PRINTFORMDL %ANAME(レミリア)%露出天真无邪的微笑，微微歪着头
+				;TranslatedMark %ANAME(レミリア)%は幼い顔立ちに見合う無邪気な微笑を浮かべ小首を傾げている
+			;レミリア君主
+			ELSEIF GET_COUNTRY_BOSS(CFLAG:レミリア:所属) == NAME_TO_CHARA("レミリア")
+				PRINTFORMW 「进来吧」
+				;TranslatedMark 「入りなさい」
+				PRINTL 
+				PRINTFORML 「哎呀。欢迎来到我的城堡，%CALLNAME_K10(レミリア_対象)%。我期待着与你的合作」
+				;TranslatedMark 「あら。私の城へようこそ、%CALLNAME_K10(レミリア_対象)%。協力に期待しているわ」
+				PRINTFORML 「你晚上还特地来找我，真让人意外」
+				;TranslatedMark 「宵にわざわざ訪ねて来てくれるなんて意外ね」
+				PRINTFORML 「再说一次，我是这座城的主人%NAME_FORMAL(レミリア)%。骄傲的吸血鬼」
+				;TranslatedMark 「改めて、私はこの城の主%NAME_FORMAL(レミリア)%。誇り高き吸血鬼」
+				CALL KOJO_DESCRIPTION_CHARA_K10("雰囲気")
+				PRINTL 
+				PRINTFORML 「哇~啊。嗯……」
+				;TranslatedMark 「ふわぁ～あ。んー……」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格１")
+				PRINTL 
+				PRINTFORML 「有什么能让我清醒过来的有趣的故事吗？」
+				;TranslatedMark 「何か目の覚めるような面白い話はない？」
+				PRINTFORML 「还有些困呢」
+				;TranslatedMark 「まだ少し眠いのよ」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格２")
+			;他
+			ELSE
+				PRINTFORMW 「进来吧」
+				;TranslatedMark 「入りなさい」
+				PRINTL 
+				PRINTFORML 「哎呀。欢迎光临，%CALLNAME_K10(レミリア_対象)%。我期待着与你的合作」
+				;TranslatedMark 「あら。ようこそ、%CALLNAME_K10(レミリア_対象)%。協力に期待しているわ」
+				PRINTFORML 「你晚上还特地来找我，真让人意外」
+				;TranslatedMark 「宵にわざわざ訪ねて来てくれるなんて意外ね」
+				PRINTFORML 「再说一次，我是这座城的主人%NAME_FORMAL(レミリア)%。骄傲的吸血鬼」
+				;TranslatedMark 「改めて、私はこの城の主%NAME_FORMAL(レミリア)%。誇り高き吸血鬼」
+				CALL KOJO_DESCRIPTION_CHARA_K10("雰囲気")
+				PRINTL 
+				PRINTFORML 「哇~啊。嗯……」
+				;TranslatedMark 「ふわぁ～あ。んー……」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格１")
+				PRINTL 
+				PRINTFORML 「有什么能让我清醒过来的有趣的故事吗？」
+				;TranslatedMark 「何か目の覚めるような面白い話はない？」
+				PRINTFORML 「还有些困呢」
+				;TranslatedMark 「まだ少し眠いのよ」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格２")
+			ENDIF
+		;違勢力
+		ELSE
+			;親しい知り合い
+			IF CHECK_K10("紅魔館", レミリア_対象)
+				PRINTFORMW 「进来吧」
+				;TranslatedMark 「入りなさい」
+				PRINTL 
+				PRINTFORML 「%CALLNAME_K10(レミリア_対象)%。为什么你不在家？」
+				;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%。なんであなたうちにいないのよ？」
+				PRINTFORML 「可以出去吗？你现在是敌人吧」
+				;TranslatedMark 「出て行ってくれる？　あなた今、敵でしょ」
+				PRINTFORML 「争夺阵地的游戏开始了，当然，我会赢的」
+				;TranslatedMark 「陣地取りゲームが始まったけれど、当然この私が勝つわよ」
+				PRINTFORMDW %ANAME(レミリア)%似乎对朋友的来访很放松
+				;TranslatedMark %ANAME(レミリア)%は知人の訪れに気を抜いたようだ
+				PRINTL 
+				PRINTFORML 「哇~啊。嗯……」
+				;TranslatedMark 「ふわぁ～あ。んー……」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格１")
+				PRINTL 
+				PRINTFORML 「如果不出去的话，至少说些有趣的话让我开心吧」
+				;TranslatedMark 「出て行かないならせめて、面白い話をして私を楽しませなさい」
+				PRINTFORML 「晚上起来就困了」
+				;TranslatedMark 「宵に起きると眠いのよ」
+				PRINTFORMDL %ANAME(レミリア)%露出天真无邪的微笑，微微歪着头
+				;TranslatedMark %ANAME(レミリア)%は幼い顔立ちに見合う無邪気な微笑を浮かべ小首を傾げている
+			;レミリア君主
+			ELSEIF GET_COUNTRY_BOSS(CFLAG:レミリア:所属) == NAME_TO_CHARA("レミリア")
+				PRINTFORML 「进来吧」
+				;TranslatedMark 「入りなさい」
+				PRINTFORML 「哎呀。欢迎来到我的城堡，%CALLNAME_K10(レミリア_対象)%」
+				;TranslatedMark 「あら。私の城へようこそ、%CALLNAME_K10(レミリア_対象)%」
+				PRINTFORML 「再说一次，我是这座城的主人%NAME_FORMAL(レミリア)%。骄傲的吸血鬼」
+				;TranslatedMark 「改めて、私はこの城の主%NAME_FORMAL(レミリア)%。誇り高き吸血鬼」
+				PRINTFORML 「可以马上出去吗？你是敌人吧。为什么还在这里啊」
+				;TranslatedMark 「早速だけど出て行ってくれる？　あなた敵でしょ。なんでここにいるのよ」
+				CALL KOJO_DESCRIPTION_CHARA_K10("雰囲気")
+				PRINTL 
+				PRINTFORML 「哇~啊。嗯……」
+				;TranslatedMark 「ふわぁ～あ。んー……」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格１")
+				PRINTL 
+				PRINTFORML 「如果不出去的话，至少说些有趣的话让我开心吧」
+				;TranslatedMark 「出て行かないならせめて、面白い話をして私を楽しませなさい」
+				PRINTFORML 「晚上起来就困了」
+				;TranslatedMark 「宵に起きると眠いのよ」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格２")
+			;他
+			ELSE
+				PRINTFORML 「进来吧」
+				;TranslatedMark 「入りなさい」
+				PRINTFORML 「哎呀。欢迎光临，%CALLNAME_K10(レミリア_対象)%」
+				;TranslatedMark 「あら。ようこそ、%CALLNAME_K10(レミリア_対象)%」
+				PRINTFORML 「再说一次，我是%NAME_FORMAL(レミリア)%。骄傲的吸血鬼」
+				;TranslatedMark 「改めて、私は%NAME_FORMAL(レミリア)%。誇り高き吸血鬼」
+				PRINTFORML 「可以马上出去吗？你是敌人吧。为什么还在这里啊」
+				;TranslatedMark 「早速だけど出て行ってくれる？　あなた敵でしょ。なんでここにいるのよ」
+				CALL KOJO_DESCRIPTION_CHARA_K10("雰囲気")
+				PRINTL 
+				PRINTFORML 「哇~啊。嗯……」
+				;TranslatedMark 「ふわぁ～あ。んー……」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格１")
+				PRINTL 
+				PRINTFORML 「如果不出去的话，至少说些有趣的话让我开心吧」
+				;TranslatedMark 「出て行かないならせめて、面白い話をして私を楽しませなさい」
+				PRINTFORML 「晚上起来就困了」
+				;TranslatedMark 「宵に起きると眠いのよ」
+				CALL KOJO_DESCRIPTION_CHARA_K10("性格２")
+			ENDIF
+		ENDIF
+	ENDIF
+
+;─────────────────────────────────────── 
+;○二回目以降
+;─────────────────────────────────────── 
+ELSE
+
+	;───────────────────────────────────── 
+	;▼虚ろ
+	;───────────────────────────────────── 
+	IF TALENT:レミリア:空虚
+		PRINTFORML 「啊……嗯……」
+		;TranslatedMark 「あ……うー……」
+		PRINTFORMDL %ANAME(レミリア)%穿着乱糟糟的衣服，像人偶一样把手脚伸出来
+		;TranslatedMark %ANAME(レミリア)%は乱れた服装で人形のように手足を投げ出している
+		WAIT
+		RESETCOLOR
+		RETURN 0
+	ENDIF
+
+	;───────────────────────────────────── 
+	;▼通常
+	;───────────────────────────────────── 
+	IF CHECK_K10("陥落", レミリア_対象)
+		IF GROUPMATCH(レミリア機嫌, "恨", "怒", "憤", "鬱", "悲", "憂", "狂", "恐", "怯")
+			PRINTDATAL
+				DATAFORM 「快点进来。……好慢啊」
+				;TranslatedMark 「はやく入りなさい。……遅いわ」
+				DATAFORM 「快点进来。……等累了」
+				;TranslatedMark 「はやく入りなさい。……待ちくたびれたわ」
+				DATAFORM 「请进。……因为已经很晚了所以很无聊」
+				;TranslatedMark 「入りなさい。……遅いからつまらなかったわ」
+				DATAFORM 「请进。……是生病了吗?好慢啊」
+				;TranslatedMark 「入りなさい。……ごきげんよう。ゆっくりだったわね」
+			ENDDATA
+			PRINTDATAL
+				DATAFORM 「今天完全清醒了」
+				;TranslatedMark 「今日はすっかり目が覚めちゃってるの」
+				DATAFORM 「你去见谁了？」
+				;TranslatedMark 「誰に会いに行っていたの？」
+				DATAFORM 「没有%CALLNAME_K10(レミリア_対象)%的话，夜晚就不算开始吧」
+				;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%がいないと夜が始まらないでしょ」
+				DATAFORM 「做了个噩梦」
+				;TranslatedMark 「嫌な夢を見ちゃったの」
+			ENDDATA
+			PRINTDATAL
+				DATAFORM 「过来这边。请坐」
+				;TranslatedMark 「こっちにきて。座りなさい」
+				DATAFORM 「我给你泡人类喝的红茶，快来这里吧」
+				;TranslatedMark 「人間用の紅茶を淹れさせるから、早くここへきて」
+				DATAFORM 「每天都要让我好好的看着呢」
+				;TranslatedMark 「ちゃんと毎日顔を見せなさい」
+				DATAFORM 「打招呼什么的不急。先坐到我身边吧」
+				;TranslatedMark 「挨拶なんていいわ。そばに来て」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「可以进来哦。……早上好」
+				;TranslatedMark 「入っていいわよ。……おはよう%CALLNAME_K10(レミリア_対象)%」
+				DATAFORM 「可以进来哦。……早上好，你终于来了」
+				;TranslatedMark 「入っていいわよ。……おはよう、やっと来たのね」
+				DATAFORM 「请进。……刚起床呢」
+				;TranslatedMark 「入りなさい。……ちょうど起きたところよ」
+				DATAFORM 「请进。……心情怎么样？」
+				;TranslatedMark 「入りなさい。……ご機嫌いかが？」
+			ENDDATA
+			PRINTDATAL
+				DATAFORM 「%CALLNAME_K10(レミリア_対象)%。有什么有趣的故事吗？」
+				;TranslatedMark 「ねぇ%CALLNAME_K10(レミリア_対象)%。何か面白い話はない？」
+				DATAFORM 「因为没有%CALLNAME_K10(レミリア_対象)%而感到无聊呢」
+				;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%がいなくて退屈していたの」
+				DATAFORM 「早餐会给我%CALLNAME_K10(レミリア_対象)%的血喝的吧？不是吗？」
+				;TranslatedMark 「朝食に%CALLNAME_K10(レミリア_対象)%の血をくれるの？　違う？」
+			ENDDATA
+			PRINTDATAL
+				DATAFORM 「天黑了想马上看到你」
+				;TranslatedMark 「暗くなったらすぐに顔を見たいわ」
+				DATAFORM 「我给你泡人类喝的红茶，快来这里吧」
+				;TranslatedMark 「人間用の紅茶を淹れさせるから、早くここへきて」
+				DATAFORM 「必须每天好好地给我看看呢」
+				;TranslatedMark 「ちゃんと毎日顔を見せなくては駄目よ」
+				DATAFORM 「快点。坐到我身边」
+				;TranslatedMark 「はやく。そばに来て」
+			ENDDATA
+		ENDIF
+	ELSEIF CFLAG:レミリア:好感度 >= 500
+		IF GROUPMATCH(レミリア機嫌, "恨", "怒", "憤", "鬱", "悲", "憂", "狂", "恐", "怯")
+			PRINTDATAL
+				DATAFORM 「请进。来晚了啊」
+				;TranslatedMark 「入りなさい。来るのが遅いわ」
+				DATAFORM 「请进。等累了呢」
+				;TranslatedMark 「入りなさい。待ちくたびれたわ」
+			ENDDATA
+			PRINTDATAL
+				DATAFORM 「今天完全清醒了」
+				;TranslatedMark 「今日はすっかり目が覚めちゃってるの」
+				DATAFORM 「做了个噩梦」
+				;TranslatedMark 「嫌な夢を見ちゃったの」
+			ENDDATA
+			PRINTDATAL
+				DATAFORM 「我给你泡人类喝的红茶，快来这里吧」
+				;TranslatedMark 「人間用の紅茶を淹れさせるから、早くここへきて」
+				DATAFORM 「每天都要让我好好的看着呢」
+				;TranslatedMark 「ちゃんと毎日顔を見せなさい」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「请进。早上好啊」
+				;TranslatedMark 「入りなさい。おはよう%CALLNAME_K10(レミリア_対象)%」
+				DATAFORM 「请进。终于来了呢」
+				;TranslatedMark 「入りなさい。やっと来たのね」
+				DATAFORM 「请进。心情怎么样？」
+				;TranslatedMark 「入りなさい。ご機嫌いかが？」
+			ENDDATA
+			PRINTDATAL
+				DATAFORM 「%CALLNAME_K10(レミリア_対象)%。有什么有趣的故事吗？」
+				;TranslatedMark 「ねぇ%CALLNAME_K10(レミリア_対象)%。何か面白い話はない？」
+				DATAFORM 「因为没有%CALLNAME_K10(レミリア_対象)%而感到无聊呢」
+				;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%がいなくて退屈していたの」
+				DATAFORM 「早餐会给我%CALLNAME_K10(レミリア_対象)%的血喝的吧？不是吗？」
+				;TranslatedMark 「朝食に%CALLNAME_K10(レミリア_対象)%の血をくれるの？　違う？」
+			ENDDATA
+			PRINTDATAL
+				DATAFORM 「天黑了想马上看到你」
+				;TranslatedMark 「暗くなったらすぐに顔を見たいわ」
+				DATAFORM 「我给你泡人类喝的红茶，快来这里吧」
+				;TranslatedMark 「人間用の紅茶を淹れさせるから、早くここへきて」
+				DATAFORM 「必须每天好好地给我看看呢」
+				;TranslatedMark 「ちゃんと毎日顔を見せなくては駄目よ」
+				DATAFORM 「快点。坐到我身边」
+				;TranslatedMark 「はやく。そばに来て」
+			ENDDATA
+		ENDIF
+	ELSE
+		PRINTDATA
+			DATAFORM 「%CALLNAME_K10(レミリア_対象)%？
+			;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%？
+			DATAFORM 「%CALLNAME_K10(レミリア_対象)%。
+		ENDDATA
+		PRINTDATAL
+			DATAFORM 有什么事吗？……好吧。说些有趣的事情吧」
+			;TranslatedMark 何の用……まあいいわ。面白い話をしなさい」
+			DATAFORM 今天做什么呢？」
+			;TranslatedMark 今日は何？」
+			DATAFORM 正无聊呢」
+			;TranslatedMark ちょうど退屈していたの」
+		ENDDATA
+	ENDIF
+	IF CHECK_K10("陥落", レミリア_対象)
+		PRINTFORMDL 在催促下，%ANAME(レミリア_対象)%沉入了沙发里，让%ANAME(レミリア)%爬到了膝盖上
+		;TranslatedMark 紅いソファに促されて%ANAME(レミリア_対象)%が身を沈めると、%ANAME(レミリア)%が膝によじ登ってきた
+		;咲夜さんが同じ勢力にいれば姿は見せずに紅茶を淹れる
+		IF CFLAG:(NAME_TO_CHARA("咲夜")):所属 == CFLAG:(NAME_TO_CHARA("レミリア")):所属
+			WAIT
+			PRINTL 
+			PRINTFORMDL %ANAME(レミリア)%坐在%ANAME(レミリア_対象)%的膝盖上，微笑着得意地按着黄铜的铃声
+			;TranslatedMark %ANAME(レミリア)%は%ANAME(レミリア_対象)%の膝に腰を落ち着けると、にっこり笑って真鍮のベルを得意気に鳴らした
+			PRINTFORMDL 在清脆的音色停止之前，热气腾腾的红茶和蛋糕忽然就这么出现在桌子上
+			;TranslatedMark その涼し気な音色が止む前に、湯気を立てる紅茶とケーキスタンドが忽然とテーブルに現れる
+			WAIT
+			PRINTL 
+			PRINTFORML 「别把我的那份放进嘴里哦。虽然我不在意，但是我的红茶和蛋糕的材料是人哦」
+			;TranslatedMark 「間違って私用のを口に入れないでね。かまわないけど、私の紅茶とケーキの素材は人間だから」
+			PRINTFORML 「吃吧。咲夜做出来的东西，对于人类来说也是美味哦」
+			;TranslatedMark 「召し上がって。咲夜は人間用も美味しく作れるらしいわよ」
+			PRINTFORMDL 吸血鬼把铃铛仍在在桌子旁的沙发上，手里拿着茶杯微笑着
+			;TranslatedMark 吸血鬼はベルをテーブルソファに転がし、ティーカップを手に微笑んでいる
+		ENDIF
+	ELSEIF CFLAG:レミリア:好感度 >= 500
+		PRINTFORMDL %ANAME(レミリア)%趴在雕刻有洛可可风格的红色沙发上
+		;TranslatedMark %ANAME(レミリア)%はロココ調の彫刻が施された紅いソファに俯せになって
+		PRINTFORMDL 只有脸朝这边，翅膀和小脚吧嗒吧嗒地抖动着
+		;TranslatedMark 顔だけこちらに向けながら羽と小さな足をパタつかせている
+	ELSE
+		PRINTFORMDL %ANAME(レミリア)%两手托着马卡龙斯椅子坐着，看起来很闲地晃荡着脚
+		;TranslatedMark %ANAME(レミリア)%はマカロンスツールに両手をついて座り、暇そうに足をパタつかせている
+	ENDIF
+ENDIF
+
+WAIT
+RESETCOLOR
+RETURN 0
+
+;─────────────────────────────────────── 
+;●「会いに行く」初回用の描写まとめ
+;　出会いシチュが多いので共通描写をまとめただけ
+;　CALL KOJO_DESCRIPTION_CHARA_K10("容姿１")
+;　CALL KOJO_DESCRIPTION_CHARA_K10("容姿２")
+;　CALL KOJO_DESCRIPTION_CHARA_K10("雰囲気")
+;　CALL KOJO_DESCRIPTION_CHARA_K10("性格１")
+;　CALL KOJO_DESCRIPTION_CHARA_K10("性格２")
+;─────────────────────────────────────── 
+@KOJO_DESCRIPTION_CHARA_K10(表示テキスト)
+#DIMS 表示テキスト
+#DIM レミリア
+
+レミリア = NAME_TO_CHARA("レミリア")
+
+IF 表示テキスト == "容姿１"
+	PRINTFORMDL 她穿着高腰宽松的褶边裙，帽子上系着红头巾
+	;TranslatedMark 彼女はハイウェストのゆったりとしたフリルドレスを着てモブキャップを赤いリボンで結んでいる
+	PRINTFORMDL 这是在维多利亚时代流行的孩子的服装呢，她轻轻披在肩上的头发像月光一样熠熠生辉
+	;TranslatedMark ヴィクトリア朝時代に流行った子どもの衣装だが、ふわりと肩にかかる癖髪は月光のように輝き
+	PRINTFORMDW 只有背上的摇曳着的蝙蝠翅膀清楚地表现出了人外的事实
+	;TranslatedMark 有機的に揺らめく背中の蝙蝠羽が人ではないことを知らせている
+
+ELSEIF 表示テキスト == "容姿２"
+	PRINTFORMDL 如果按照人的年龄估算的话，个子不到十岁吧，相貌也很年幼
+	;TranslatedMark 人であるなら十歳にも満たないような背の低さで顔立ちも幼い
+	PRINTFORMDW 但是，如果从上往下看的话，那双锐利的红眼，就可以看出与外表格格不入的气度
+	;TranslatedMark しかし上目にこちらを見る紅い瞳は鋭く、外見にそぐわない気位の高さが窺える
+
+ELSEIF 表示テキスト == "雰囲気"
+	PRINTFORMDW 与年幼的外表不相称的是，看着这边的锐利的红眼
+	;TranslatedMark 幼い外見にそぐわずこちらを見る紅い瞳は品定めするように鋭い
+
+ELSEIF 表示テキスト == "性格１"
+	PRINTFORMDW %PRONOUN(レミリア)%像猫一样伸了个懒腰，嘴角也没有遮住，而是打了个大哈欠
+	;TranslatedMark %PRONOUN(レミリア)%は猫のように伸びをして、口元を隠しもせず大欠伸をした
+
+ELSEIF 表示テキスト == "性格２"
+	PRINTFORMDL 这样说着，微微歪着头的%ANAME(レミリア)%天真无邪地微笑着，令人失望
+	;TranslatedMark そう言って小首を傾げる%ANAME(レミリア)%は拍子抜けするほど無邪気に微笑んでいた
+
+ENDIF
+
+RETURN
+
+;─────────────────────────────────────── 
+;●「会いに行く」の終了時
+;─────────────────────────────────────── 
+@KOJO_TRAIN_END_A1_K10
+#DIM レミリア_対象
+#DIM レミリア
+#DIMS レミリア機嫌
+
+レミリア_対象 = MASTER
+レミリア = NAME_TO_CHARA("レミリア")
+レミリア機嫌 '= TOSTR_EMOTION(レミリア)
+
+;口上を不使用設定なら戻る
+SIF CFLAG:レミリア:400 == 1
+	RETURN 0
+
+SETCOLOR レミリア_口上カラー
+
+PRINTL 
+
+;─────────────────────────────────────── 
+;行動不能
+;─────────────────────────────────────── 
+;離脱済み
+IF TCVAR:レミリア:53 > 1
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+IF TALENT:レミリア:空虚
+	PRINTFORML 「嗯……嗯……」
+	;TranslatedMark 「う……んん……」
+	PRINTFORMDL %ANAME(レミリア)%意识很模糊
+	;TranslatedMark %ANAME(レミリア)%はぼうっとしてる
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+;酔い限界 離脱判定時はCALL KOJO_EVENT(LOCAL:0, 32)
+IF TCVAR:レミリア:53 == 1
+	PRINTFORML 「……嗯……已经……不能喝……唔」
+	;TranslatedMark 「……ううー……もう……飲めにゃ……ひ」
+	PRINTFORMDL %ANAME(レミリア)%灭亡了
+	;TranslatedMark %ANAME(レミリア)%は潰れてしまった
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+;快感のあまり気絶
+IF TCVAR:レミリア:52 || BASE:レミリア:気力 <= 300
+	PRINTFORML 「……嗯❤嗯……」
+	;TranslatedMark 「……ふあ❤　う……」
+	PRINTFORMDL %ANAME(レミリア)%手脚不时抽搐着，恍惚地笑着
+	;TranslatedMark %ANAME(レミリア)%はくったりした手足を時々ぴくつかせて、恍惚と笑んでいる
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+;疲労による行動不能
+IF TCVAR:レミリア:51
+	PRINTFORML 「嗯……嗯……」
+	;TranslatedMark 「う……んん……」
+	PRINTFORMDL %ANAME(レミリア)%疲倦地睡着了
+	;TranslatedMark %ANAME(レミリア)%は疲れ果てた顔で眠っている
+	WAIT
+	RESETCOLOR
+	RETURN 0
+ENDIF
+
+;不機嫌（帰りまで他人に怒っていることはおそらく滅多にない）
+SELECTCASE レミリア機嫌
+	CASE "恨", "怒", "憤"
+		IF PALAM:レミリア:怒主 <= PALAM:レミリア:怒外
+			PRINTFORML 「%CALLNAME_K10(レミリア_対象)%也打算回去了呢」
+			;TranslatedMark 「%CALLNAME_K10(レミリア_対象)%も帰っちゃうのね」
+		ELSE
+			PRINTFORML 「我不会给你喝血的，快点回去吧」
+			;TranslatedMark 「血は飲まないであげるから、さっさとお帰り」
+		ENDIF
+		WAIT
+		RESETCOLOR
+		RETURN 0
+	CASE "鬱", "悲", "憂"
+		IF PALAM:レミリア:哀主 <= PALAM:レミリア:哀外
+			PRINTFORML 「不能拒绝哦。%CALLNAME_K10(レミリア_対象)%抱怨的话也没用」
+			;TranslatedMark 「下がっていいわよ。%CALLNAME_K10(レミリア_対象)%に文句を言っても仕方ないし」
+		ELSE
+			PRINTFORML 「无聊的话就回去吧？」
+			;TranslatedMark 「つまらないなら帰って？」
+		ENDIF
+		WAIT
+		RESETCOLOR
+		RETURN 0
+	CASE  "狂", "恐", "怯"
+		IF PALAM:レミリア:怖主 <= PALAM:レミリア:怖外
+			PRINTFORML 「你打算让我一个人呆着吗？不，没什么可怕的」
+			;TranslatedMark 「私ひとり置いてくつもり？　べ、別に怖いわけじゃないわよ」
+		ELSE
+			PRINTFORML 「…………」
+		ENDIF
+		WAIT
+		RESETCOLOR
+		RETURN 0
+ENDSELECT
+
+;既成事実獲得後に一度だけ表示
+;Ｈした
+IF CFLAG:レミリア:200 < 4 && TALENT:合意
+	CFLAG:レミリア:200 = 4
+	PRINTFORML 「嗯……嗯。就是这种感觉吧」
+	;TranslatedMark 「うー……ん。こういう感じ、なのね」
+	WAIT
+	RESETCOLOR
+	RETURN 0
+
+;陥落済み
+ELSEIF CFLAG:200 < 3 && TALENT:恋人
+	CFLAG:レミリア:200 = 3
+	PRINTFORML 「已经是我的东西了」
+	;TranslatedMark 「もう、私のものよ」
+	WAIT
+	RESETCOLOR
+	RETURN 0
+
+;キスした
+ELSEIF CFLAG:レミリア:200 < 2 && CFLAG:250 == 1
+	CFLAG:レミリア:200 = 2
+	PRINTFORML 「准备好了吧，成为我的东西」
+	;TranslatedMark 「私のものにする準備はできたわ」
+	WAIT
+	RESETCOLOR
+	RETURN 0
+
+ENDIF
+
+;押し倒しや誘いでＨが発生した
+IF FLAG:ウフフフラグ
+	IF CFLAG:レミリア:好感度 >= 800
+		PRINTDATAL
+			DATAFORM 「晚安。%CALLNAME_K10(レミリア_対象)%」
+			;TranslatedMark 「おやすみなさい。%CALLNAME_K10(レミリア_対象)%」
+		ENDDATA
+	ELSE
+		PRINTDATAL
+			DATAFORM 「天上只有月亮和星星了呢。已经睡了吗？」
+			;TranslatedMark 「空にはまだ月と星だけよ。もう寝るの？」
+			DATAFORM 「不试着做些别的吗？」
+			;TranslatedMark 「道を外れてみない？」
+			DATAFORM 「住下来吧」
+			;TranslatedMark 「泊まっていきなさいよ」
+		ENDDATA
+	ENDIF
+
+;Ｈ発生しなかった
+ELSE
+	IF CFLAG:レミリア:好感度 >= 500
+		PRINTDATAL
+			DATAFORM 「已经打算回去了吗？」
+			;TranslatedMark 「もう帰ってしまうの？」
+			DATAFORM 「回去了吗？好无聊啊」
+			;TranslatedMark 「帰るの？　つまんないわ」
+		ENDDATA
+	ELSE
+		PRINTDATAL
+			DATAFORM 「是的。住下来吧」
+			;TranslatedMark 「ええ。下がりなさい」
+			DATAFORM 「好啊。下次再来吧」
+			;TranslatedMark 「いいわ。また来なさい」
+			DATAFORM 「这是为了消遣一下」
+			;TranslatedMark 「退屈しのぎになったわ」
+		ENDDATA
+	ENDIF
+
+	WAIT
+	RESETCOLOR
+	RETURN 0
+
+ENDIF
+
+;─────────────────────────────────────── 
+;●終了
+;─────────────────────────────────────── 
+RESETCOLOR
+RETURN 0
+

@@ -1,0 +1,219 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_TERRITORY_CEMETERY_RATE()
+RETURN 50
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_TERRITORY_CEMETERY_DECISION()
+#DIM 墓地
+墓地 = GET_CITYNUMBER("墓地")
+
+SIF 墓地 == -1
+	RETURN 0
+SIF CITY_OWNER:墓地 != CFLAG:MASTER:所属
+	RETURN 0
+SIF DVAR:墓地の怪_発生フラグ == 1
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_TERRITORY_CEMETERY_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_TERRITORY_CEMETERY
+#DIM 青娥
+#DIM 墓地
+#DIM 対象
+
+墓地 = GET_CITYNUMBER("墓地")
+
+青娥 = NAME_TO_CHARA("青娥")
+
+LOCAL:0 = 0
+
+PRINTFORML 最近听到了墓地有妖怪出没的传言
+PRINTFORML 说到墓地的妖怪，大概能想到几个人……
+PRINTFORMW 不过这回好像和她们没有关系
+PRINTFORML 怎么办？
+CALL ASK_MULTI_JUDGE("前去调查", 1,"放置", 1,"向青娥询问", CFLAG:青娥:所属 == CFLAG:MASTER:所属 && CFLAG:青娥:捕虜先 == 0)
+IF RESULT == 1
+	PRINTFORML 反正又只是夸张的怪谈吧
+	PRINTFORMW %ANAME(MASTER)%不慌不忙地回到了工作中
+	RETURN
+ELSEIF RESULT == 0
+	PRINTFORML 有种不仅仅是个怪谈而已的感觉
+	PRINTFORMW %ANAME(MASTER)%决定前去调查
+ELSEIF RESULT == 2
+	PRINTFORML 要说墓地的话，好像青娥比较了解
+	PRINTFORML 听到%ANAME(MASTER)%的话之后，她很快就出来迎接了
+	PRINTFORML 脸上挂着一如既往的美丽……但又有些可疑的笑容
+	PRINTFORMW 告诉她关于墓地的传闻，她听了一段之后扑哧笑了出来
+	PRINTFORML %ANAME(MASTER)%生起气来，但她却道歉说这件事与她无关
+	PRINTFORML 然后递来了不知什么的符纸
+	PRINTFORMW 说道一定会派上用场的……看一眼就感觉到散发着奇怪的气场
+	PRINTFORML 怎么办？
+	CALL ASK_YN("收下" ,"拒绝")
+	IF RESULT == 0
+		PRINTFORML 但这里还是决定听从她的建议吧
+		PRINTFORMW %ANAME(MASTER)%接过符纸，开始向墓地出发
+		LOCAL:0 = 1
+	ELSEIF RESULT == 1
+		PRINTFORML 明显很可疑…
+		PRINTFORMW %ANAME(MASTER)%拒绝了，决定独自前往墓地
+	ENDIF
+ENDIF
+PRINTFORML 
+PRINTFORML 墓地一眼看上去似乎没有什么异常，但还是决定进行巡视
+PRINTFORML 稍微转了一会儿，从黑暗中听到了奇怪的声音
+PRINTFORMW 一边警戒着，从黑暗中传出了咔哒咔哒的声音，飞出来了几具骷髅！
+IF LOCAL:0 == 1
+	PRINTFORMW %ANAME(MASTER)%准备好剑和符纸迎击！
+ELSE
+	PRINTFORMW %ANAME(MASTER)%拔出了剑迎击！
+ENDIF
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+IF ABL:MASTER:武闘 / 10 + RAND:10 + (LOCAL:0 * 5) >= 10
+	PRINTFORML %ANAME(MASTER)%感受到了骷髅背后的另一种气息，于是进行了攻击！
+	PRINTFORML 然后传来了 呀-！的悲鸣声，有谁扑通一声倒在了地上
+	PRINTFORMW 同时骷髅也停止了行动
+	IF LOCAL:0 == 1
+		PRINTFORMW 青娥那里得到的符纸也起到了作用，以后再说谢谢吧
+	ENDIF
+	PRINTFORML 看来是这个死灵术师操纵的样子
+	PRINTFORMW 住在这里的她好像就凭这样赶走了入侵者
+	IF HAS_PENIS(MASTER)
+		PRINTFORMW …仔细一看倒在地上的她，还有些可爱
+		PRINTFORML 怎么办？
+		CALL ASK_YN("抓捕" ,"侵犯")
+		IF RESULT == 0
+			PRINTFORMW 这次决定平常地进行逮捕
+		ELSEIF RESULT == 1
+			PRINTFORML 现在周围谁都不在
+			PRINTFORMW %ANAME(MASTER)%抱起她，搬到了附近的空房子里
+			PRINTFORML 
+			PRINTFORMW 空房子里正好有一张不错的床，%ANAME(MASTER)%把她推倒在那里
+			PRINTFORML 轻轻按住她无力的抵抗，剥去衣服暴露出了她丰盈的肉体
+			PRINTFORML 红着脸害羞地嘟囔着的少女的神态十分可爱，令%ANAME(MASTER)%不由自主地勃起了
+			PRINTFORML 一边压着颤抖的她，一边用手指在雪白的肌肤上抚摸着，少女口中漏出了「咿呀」的可爱的喘息声
+			PRINTFORMW 仔细爱抚着拼命闭上双眼的少女身体上敏感的地方，少女浑身一下下的抽动着
+			PRINTFORML 舌尖一碰到她的脖子，颤抖的喉咙中传出甜蜜的喘息声，轻轻咬着她的耳垂，她就紧紧地夹住了大腿
+			PRINTFORML %ANAME(MASTER)%强行将手指伸进那里，在裂缝的入口摩擦着，少女流着眼泪微微摇头
+			PRINTFORML 凝视着她充满泪水的双眼，她不安地游动着视线，脸颊红到了耳根
+			PRINTFORMW 看起来很怕生的样子，似乎还从来没有过这样的经验
+			PRINTFORML 由于这种反应而变得愈发坚挺，终于无法忍耐的%ANAME(MASTER)%怀抱着打开了她的双脚
+			PRINTFORML 看着因想象到之后的事情而紧张地钉在原地的少女的脸，慢慢将肉棒推了进去
+			PRINTFORML 「啊…！呃！唔……！」
+			PRINTFORMW 在全新的并且过于紧致的穴里按压着…慢慢地沉下腰来，少女的呻吟声也紧紧追随着动作
+			PRINTFORML 「嗯…！啊！哈啊…啊！好、好痛…唔！」
+			PRINTFORML 没有理会紧紧咬着手指的少女，%ANAME(MASTER)%不就那样咕啾咕啾的扭动着腰，将肉棒送入深处
+			PRINTFORML 尽管勉强插了进去，但到根部为止果然还是不行。但%ANAME(MASTER)%依旧忍不住开始了活塞运动
+			PRINTFORMW 少女因过度的疼痛而拼命抓着床单发出悲鸣，全身呼的伸直，开始不住颤抖着
+			PRINTFORML 一边责弄着乳头和阴核，一边慢慢加速腰部的动作，雌穴终于渐渐张开，蜜液夹杂着鲜血溢了出来
+			PRINTFORML 「呼呜…！唔…！呜呜…啊！咿！」
+			PRINTFORMW 少女依旧由于痛苦而扭曲着脸呻吟着，但其中却微微夹杂着一丝甜蜜的喘息
+			PRINTFORML 为了放出无法忍受束缚的第一发而深深沉下腰抱住了她，听到射精预告的少女一瞬间发出了悲鸣
+			PRINTFORML 但是%ANAME(MASTER)%没有理会她的话，尽情朝着她的最深处释放了精华
+			PRINTFORML 她猛地仰起身子，反作用使得整个阴道痉挛地刺激着肉棒，挤出了尿道中残存的最后一滴精液
+			PRINTFORMW 对与那种意料之外的舒适感，%ANAME(MASTER)%也不由得低吟一声，继续射出了被榨取的精液
+			PRINTFORML 「呜！呜！呜～～～～！…哈啊！哈啊！哈啊…嗯……」
+			PRINTFORML 结束射精的%ANAME(MASTER)%拔出肉棒，少女在一阵痉挛之后无力地倒在了床上
+			PRINTFORMW 和刚才完全不同的是，张开的蜜穴中不停溢出着大量的精液和鲜血，多么官能的画面
+			PRINTFORMW …对少女的身体十分钟意的%ANAME(MASTER)%，直到她反省为止彻夜品味着她的肉体。
+			CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "死霊術師の唇", "", "死霊術師の膣", "強姦")
+			PRINTFORML 
+			PRINTFORMW 当太阳升起的时候，因為你的技術她完全成為了順服于你的雌犬
+			PRINTFORMW 现在自己開発着自己的身体、像狗一樣不断蹭着期望获得奨励
+			PRINTFORMW 你告诉她，要将她带走，她像只小狗一样，开心的点起头来
+			CALL CREATE_RANDOM_CHARA(0,0,1)
+					SIF RESULT == -1
+						RETURN 1
+					対象 = RESULT
+					ABL:対象:武闘 = 40 + RAND:30
+					ABL:対象:防衛 = 30 + RAND:20
+					ABL:対象:知略 = 30 + RAND:20
+					ABL:対象:政治 = 10 + RAND:10
+					ABL:対象:歌唱 = 15 + RAND:20
+					ABL:対象:料理 = 15 + RAND:20
+					CALL LEARN_SKILL_GENERAL_BY_NAME(対象, "偷袭＋＋")
+					TALENT:対象:合意 = 1
+					CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属, 1)
+					CFLAG:対象:好感度 = 1200
+					CFLAG:対象:依存度 = 1000
+					CFLAG:対象:従属度 = 3000
+					CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+					CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+					CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+					CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+					CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+					CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴")
+					CALL COLOR_PRINT(@"%ANAME(対象)%加入我軍了", カラー_注意)
+		ENDIF
+	ELSE
+		PRINTFORMW %ANAME(MASTER)%抓住了她
+	ENDIF
+	PRINTFORML 之后，在墓地就没有听说妖怪的目击情报了
+	CITY_GUARD:墓地 += 25
+	CALL COLOR_PRINTW("解决事件提高了领地的安全，墓地的防御值上升了", カラー_注意)
+ELSE
+	PRINTFORMW 输了……
+	IF IS_MALE(MASTER)
+		PRINTFORML 对暗夜中浮现出的惊悚地笑着的骷髅感到恐惧的%ANAME(MASTER)%尖叫着逃走了
+	ELSE
+		PRINTFORML %ANAME(MASTER)%倒下后，骷髅背后出现了一个形迹可疑的男人
+		PRINTFORML 看来是这个死灵术士操纵着骷髅
+		PRINTFORMW %ANAME(MASTER)%被骷髅抱着送到了某个地方…
+		PRINTFORML 
+		PRINTFORML 被带到他的据点的%ANAME(MASTER)%被以当成实验台的名义侵犯了
+		PRINTFORML 被贴上使役僵尸的符札的%ANAME(MASTER)%无法抵抗，只好跨上他唯命是从地扭动着腰肢
+		PRINTFORML 不仅是遵守命令，同时还贴上了感官敏锐化的符札，%ANAME(MASTER)%的每次动起腰都会发出没出息的声音
+		PRINTFORMW %ANAME(MASTER)%直接感受着肉棒在身体中抽插的感觉，身体十分苦闷
+		PRINTFORML 他躺在床上，看着那个样子满足地笑了起来，持续扭动着刺激起乳头和阴核。
+		PRINTFORML 只需轻轻触碰就会受到像神经本身的爱抚般的冲击，身体伴随着娇声一起痉挛着
+		PRINTFORMW 肉体已经处于快乐的饱和状态，对不断给予的刺激只有无端的反应才能使他高兴
+		PRINTFORML 尽管如此，%ANAME(MASTER)%还是想尽办法保持理性，流着眼泪低头瞪向他
+		PRINTFORML 但他偶尔的突刺却一瞬间吹飞了虚幻的理性之墙，使得她潮吹着达到了绝顶
+		PRINTFORML 知道达到一次绝顶，%ANAME(MASTER)%的理性就会从根源开始融化，抵抗心也会随之消失
+		PRINTFORMW 他比起一口气完成支配，更加享受着一点一点地调教着身体和心灵
+		PRINTFORML …无数次绝顶早已数不清的时候，%ANAME(MASTER)%依旧在疯狂的摆动着腰肢
+		PRINTFORML 带着充满幸福的恍惚表情的%ANAME(MASTER)%，脚边落着刚才还贴着的命令符札
+		PRINTFORML %ANAME(MASTER)%的身心已经完全属于了男人，正在用自己的意志摆动着腰不停地寻找快乐
+		PRINTFORMW 咻噜噜噜！每当主人的精液一下子被释放出来的时候思考都会碎裂，达到无上的幸福。
+		PRINTFORML %ANAME(MASTER)%的子宫完全降了下来，像吸吮他的肉棒一样贪婪地一滴不剩地把精液喝光
+		PRINTFORML 每当他的手指与舌头划过肌肤的时候，全身都会通过一阵强烈麻痹感，%ANAME(MASTER)%在绝顶的同时又重复着更加的绝顶
+		PRINTFORML 他似乎完全满足了，为了试验%ANAME(MASTER)%的忠诚心和性的感觉而又指示了各种各样的PLAY
+		PRINTFORMW 对于%ANAME(MASTER)%来说，被他夸奖和疼爱比什么都幸福，所以毫不犹豫地遵守着命令
+		PRINTFORMW …他的实验一直持续到黎明，%ANAME(MASTER)%的身体被按照他的喜好而肆意责弄着
+		CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, 膣内射精, Ａ処女喪失, 腸内射精, 口内射精", GET_SPERM_ID("流浪妖怪"), @"流浪妖怪的\@RAND:2 ? 肉棒 # 唇\@", "流浪妖怪", "", "強姦")
+		CALL FUCK(MASTER, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, 膣内射精, Ａ処女喪失, 腸内射精, 口内射精", GET_SPERM_ID("流浪妖怪"), @"流浪妖怪的\@RAND:2 ? 肉棒 # 唇\@", "流浪妖怪", "", "強姦")
+		PRINTFORML 
+		PRINTFORMW 第二天早上，破破烂烂的%ANAME(MASTER)%被放置在了墓地的角落里
+	ENDIF
+	IF CITY_GUARD:墓地 > 25
+		CITY_GUARD:墓地 -= 25
+	ELSE
+		CITY_GUARD:墓地 -= CITY_GUARD:墓地
+	ENDIF
+	CALL COLOR_PRINTW("事件は解決できず領民の不安が高まった結果、墓地の防衛値が減少した…", カラー_注意)
+ENDIF
+DVAR:墓地の怪_発生フラグ = 1
+
+RETURN 1

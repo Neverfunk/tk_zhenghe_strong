@@ -1,0 +1,138 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_ZOOPHILIA_RATE()
+RETURN 1000
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_ZOOPHILIA_DECISION()
+RETURN 1
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_ZOOPHILIA_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_ZOOPHILIA_SETTARGET()
+FOR LOCAL, 0, CHARANUM
+	;捕虜でなく、死んでおらず、雌犬所持者の女で、1/3の確率
+	IF !CFLAG:LOCAL:捕虜先 && CFLAG:LOCAL:特殊状態 != 特殊状態_死亡 && GETBIT(TALENT:LOCAL:淫乱系, 素質_淫乱_雌犬) && IS_FEMALE(LOCAL) && !RAND:3 && IS_APPEAR(LOCAL)
+		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+		DAILY_TARGET_NUM ++
+	ENDIF
+NEXT
+SIF DAILY_TARGET_NUM < 1
+	RETURN 0
+RETURN 1
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_ZOOPHILIA()
+#DIM 対象
+#DIM ID
+#DIMS 竿役
+
+FOR LOCAL, 0, DAILY_TARGET_NUM
+	対象 = DAILY_TARGET:LOCAL
+	PRINTFORMW 觉醒了兽奸性癖的%ANAME(対象)%的身体、每晚每晚都渴求着……
+	SELECTCASE RAND:8
+		CASE 0
+			PRINTFORML %ANAME(対象)%溜到了野狗聚集的场所
+			PRINTFORML %ANAME(対象)%慢慢地脱掉衣服、在他们面前趴了下来
+			PRINTFORML 面对突然出现的上等雌性、野狗们马上就开心的接受了邀请
+			PRINTFORML ……但是、身为一个便利的肉穴
+			PRINTFORML %ANAME(対象)%被狗们簇拥着，一次又一次地被野狗在体内播种
+			PRINTFORML 她一脸欢喜的表情，简直就是一条母狗一样……
+			ID = GET_SPERM_ID("犬")
+			竿役 = 犬
+		CASE 1
+			PRINTFORML %ANAME(対象)%偷偷潜入了猪圈里
+			PRINTFORML 昏暗的夜色中、%ANAME(対象)%光着身子、混迹在一群种猪之间
+			PRINTFORML 面对着突然出现的%ANAME(対象)%、它们察觉到了她渴望被配种的愿望
+			PRINTFORML 种猪们挤成一堆、争相把散发着兽臭的肉棒插进湿润的小穴
+			PRINTFORML %ANAME(対象)%的子宫里、不知多少次被射入了公猪的精液……
+			PRINTFORML 在乱交结束之后、肚子像怀孕了一样鼓了起来
+			ID = GET_SPERM_ID("豚")
+			竿役 = 豚
+		CASE 2
+			PRINTFORML %ANAME(対象)%好象申请了一份兼职
+			PRINTFORML 当着一个看热闹的主人的面、被他养的狗操了……
+			PRINTFORML 公狗好像很中意%ANAME(対象)%的样子、激烈地扭动着腰部
+			PRINTFORML 另一方面%ANAME(対象)%、好像是沉醉于公狗的血统证明的样子、激烈的回应着
+			PRINTFORML “两条狗”的交配场面让好色的主人非常满足。感觉花的钱货有所值……
+			IF CFLAG:対象:所属 == CFLAG:MASTER:所属
+				CALL COLOR_PRINTL("資金多少有所増加了", カラー_注意)
+				MONEY += RAND(300, 1000)
+			ENDIF
+			ID = GET_SPERM_ID("犬")
+			竿役 = 犬
+		CASE 3
+			PRINTFORML %ANAME(対象)%在入夜后的街道上徘徊着
+			PRINTFORML 她潜入住宅区的一家房子的院子里
+			PRINTFORML 在那里脱下衣服，就开始诱惑起住户饲养的狗
+			PRINTFORML 好像对突如其来出现的“母狗”非常中意、公狗激烈地抽插着……
+			PRINTFORML 担心被人发现的恐惧、与公狗给与的快感、让%ANAME(対象)%高潮了好几次
+			ID = GET_SPERM_ID("犬")
+			竿役 = 犬
+		CASE 4
+			PRINTFORML %ANAME(対象)%前往了入夜后的森林
+			PRINTFORML 如预想一样的、遇到了野外出没的妖兽
+			PRINTFORML 如果是平时的话是可以轻易解决的对象、但是%ANAME(対象)%故意没有抵抗、
+			PRINTFORML 被仆倒在地、体内被插入了野兽强有力的肉棒
+			PRINTFORML %ANAME(対象)%绝顶了好几次
+			PRINTFORML 乱交结束之后、雌穴还不定的冒出白浊液……
+			ID = GET_SPERM_ID("不明")
+			竿役 = 妖獣
+		CASE 5
+			PRINTFORML %ANAME(対象)%与自己养的宠物狗关系非常好的样子
+			PRINTFORML 在白天就是很正常的主人与宠物的关系、
+			PRINTFORML 然而到了夜里……这种关系就逆转了过来
+			PRINTFORML %ANAME(対象)%用顺从的姿态、向"主人大人"献上自己的雌穴
+			PRINTFORML 狗也一副赞赏着顺从的“雌犬”的样子、
+			PRINTFORML 人狗交配了一次又一次、一直干到了天蒙蒙亮……
+			ID = GET_SPERM_ID("犬")
+			竿役 = 犬
+		CASE 6
+			PRINTFORML %ANAME(対象)%偷偷潜入到了马厩里
+			PRINTFORML 她用嘴巴侍奉着种马粗大的肉棒
+			PRINTFORML 如同成年男子手腕一样粗大的坚挺肉棒散发着雄性的臭味、%ANAME(対象)%惊喜地睁大了眼睛
+			PRINTFORML %ANAME(対象)%四脚着地地爬到墙角、把肉棒引导到自己的小穴边、马兴奋地开始摇起腰来
+			PRINTFORML 每次抽送的时候肚子都会膨胀出肉棒的形状。子宮传来快被顶坏的快感、%ANAME(対象)%疯狂的甩着头发高潮了……
+			PRINTFORML 不久之后种马射了出来、注入的精液让她的肚子像怀孕一样膨胀起来……
+			ID = GET_SPERM_ID("馬")
+			竿役 = 馬
+		CASE 7
+			PRINTFORML %ANAME(対象)%悄悄潜入了兽栏里
+			PRINTFORML 兽栏里、有给种猪练习交配用的、被称为「擬雌台」的设备
+			PRINTFORML %ANAME(対象)%此时就像变成了一个擬雌台一样……
+			PRINTFORML 把母猪释放的荷尔蒙涂进了肉穴里、%ANAME(対象)%被兴奋的种猪
+			PRINTFORML 在体内不停地注入浓厚的精液、甚至到了承受不住的地步……
+			PRINTFORML 乱交结束之后、她的腹部就像妊娠了一样高高鼓起
+			ID = GET_SPERM_ID("豚")
+			竿役 = 豚
+	ENDSELECT
+	CALL FUCK_BEAST(対象, ID, @"%竿役%的\@ RAND:2 ? 肉棒 # 嘴唇\@", @"%竿役%")
+
+	PRINTW
+NEXT
+RETURN 1
+
+@EVENT_DAILY_ZOOPHILIA_ALLOW_WHEN_WANDERING
+RETURN 1
+

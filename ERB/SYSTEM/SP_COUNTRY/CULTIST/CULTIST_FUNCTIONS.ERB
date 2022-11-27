@@ -1,0 +1,317 @@
+﻿;--------------------------------------
+;ターンエンド時の外来兵の処理
+;--------------------------------------
+@TURNEND_CULTIST
+#DIM 狂信者
+
+狂信者 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_狂信者)
+
+;8ターンに1回、儀式
+CALL CULTIST_RITUAL(DAY % 8 == 0)
+
+;--------------------------------------
+;滅亡時の処理
+;--------------------------------------
+@CULTIST_DESTROY_MSG
+CALL SINGLE_DRAWLINE
+SETCOLOR カラー_注意
+PRINTFORML
+PRINTFORML
+PRINTFORML
+PRINTFORMW  随着最后一个教堂大门的倒塌，士兵们冲进教堂之类，斩杀着一切所能看到的邪教徒
+PRINTFORMW	「终究…还是没能守卫住自己的神明与信仰啊…」
+PRINTFORMW	教祖与其他幸存教徒逃到最后的地下室，哪怕锁上门，被破门活捉也不过是时间问题
+PRINTFORMW	「教徒们，平静一下，我知道现在情况危急，知道你们很害怕」
+PRINTFORMW	「那些亵渎神明的家伙，他们不仅想把我们从肉体上消灭，更想再精神上摧残我们，摧毁我们的信仰，毁灭我们的神明」
+PRINTFORMW	「我绝对不会允许这种事情出现，他们可以毁灭我们的肉体，不会毁灭我们的信仰，来吧！教徒们！展现你们的忠诚之时到了！」
+PRINTFORMW  说罢，教祖召唤出了触手，蠕动的触手喷溢出带腐蚀性的脓液
+PRINTFORMW  「我们会将自己的身心，永远奉献给我们伟大的神明大人，那些亵神者们什么也不会得到！」
+PRINTFORMW  随着触手的炸裂，教祖的生命就此终结
+PRINTFORML   周围的教徒却丝毫没有畏惧，眼中充满了渴望又疯狂的眼神
+PRINTFORMW   …
+PRINTFORML   …
+PRINTFORML   …
+PRINTFORMW  士兵们冲进了地下室，然后便留下了能震撼一生的心理阴影…
+PRINTFORMW  至少邪教彻底被毁灭了，幻想乡从疯狂的邪神信仰中走了出来
+RESETCOLOR
+
+;-------------------------------------------------
+;DESC  :狂信者所属時に閨・捕虜調教前にアイテムを追加する処理
+;-------------------------------------------------
+@START_TRAIN_COMMON_CULTIST()
+ITEM:A_振動棒 = 1
+ITEM:A_肛用振動棒 = 1
+ITEM:A_縄 = 1
+ITEM:A_眼罩 = 1
+ITEM:A_搾乳機 = 1
+ITEM:A_媚薬 = 99
+ITEM:A_排卵誘発剤 = 99
+ITEM:A_桃源香 = 99
+ITEM:A_玩具注射器 = 1
+ITEM:A_避孕套 = 99
+
+;--------------------------------------
+;外来勢力の初期化処理
+;--------------------------------------
+@CULTIST_INIT(ARG:0)
+#DIM LCOUNT
+VARSET LOCAL
+
+SIF GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_狂信者) != -1
+	RETURN 0
+
+SIF SP_COUNTRY_RANK:特殊勢力_狂信者 == 0
+	RETURN 0
+
+SIF GET_NEW_COUNTRY() == -1
+	RETURN 0
+
+CALL CREATE_SP_COUNTRY(特殊勢力_狂信者)
+LOCAL = RESULT
+CALL INIT_SP_COUNTRY(LOCAL)
+
+RETURN LOCAL
+
+;-----------------------------------
+;外来勢力に捕らえられたときのイベント
+;-----------------------------------
+@MASTER_CAPTURED_CULTIST(ARG:0)
+PRINTFORMW 被捉住的%ANAME(MASTER)%被狂信者们包围了
+;TranslatedMark 捕らえられた%ANAME(MASTER)%は狂信者たちに取り囲まれた
+IF GETBIT(TALENT:MASTER:特殊勢力陥落系, 特殊勢力_狂信者)
+	PRINTFORML 你不是我们的伙伴吗，为什么要加入异端者呢？
+	;TranslatedMark 君は我々の仲間ではないか、どうして異端者どもに加わっていたんだ
+	PRINTFORMW 那么，再一次为神服侍
+	;TranslatedMark さあ、また神に仕えようではないか
+	PRINTFORMW 狂信徒们理所当然地劝说着、%ANAME(MASTER)%虽然想加入朋友们、但是……
+	;TranslatedMark 狂信者たちは当然のように、%ANAME(MASTER)%を仲間に加えようとしてくるが……
+	CALL ASK_YN("接受", "拒絶")
+	IF RESULT == 0
+		PRINTFORMW 当然，谁也不可能违背神的意愿
+		;TranslatedMark もちろん、神に逆らおうなどと考えるはずもない
+		PRINTFORMW %ANAME(MASTER)%的身体发疼、主动同意加入了他们
+		;TranslatedMark %ANAME(MASTER)%の身体は疼き、自ら彼らに加わることに同意した
+		PRINTFORMW 穿着他们准备的法衣，非常高兴%ANAME(MASTER)%将自己包裹起来
+		;TranslatedMark 彼らの用意した法衣を身にまとうと、深い悦びが%ANAME(MASTER)%を包む
+		PRINTFORMW 戴上了蒙面的面具，以免吸入世俗肮脏世界的空气、%ANAME(MASTER)%再次成为他们的一员......
+		;TranslatedMark 俗世の穢れた空気を吸わぬよう誂えられた覆面をかぶり、%ANAME(MASTER)%は再び彼らの一員となった……
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%再次加入了狂信徒们
+		;TranslatedMark %ANAME(MASTER)%は再び、狂信者たちに加わりました
+		RESETCOLOR
+	ELSE
+		PRINTFORMW 不要强加思想。%ANAME(MASTER)%的主张是这个
+		;TranslatedMark 思想を押し付けるな。%ANAME(MASTER)%は主張した
+		PRINTFORMW 狂信徒们似乎无法理解那个态度
+		;TranslatedMark 狂信者たちにはその態度が理解できないようだった
+		PRINTFORMW 似乎被异端们给毒害了，需要我们教导什么是正确的教义
+		;TranslatedMark 異端者に紛れて毒されたか、我々の正しい教義を教え込んでやらねばならない
+		PRINTFORMW 这些狂信徒们联合起来、%ANAME(MASTER)%被抓住、戴上了枷锁、关入了大牢……
+		;TranslatedMark わきたつ狂信者たちは、%ANAME(MASTER)%を取り押さえ、枷で縛り、牢獄へと放り込んだ……
+	ENDIF
+ELSE
+	PRINTFORML 异端者本来就应该被投入到监狱，我们会让你从脚尖到头顶都印上我们的教义
+	;TranslatedMark 異端者は本来、牢に放り込み、我々の教義を爪先から頭のてっぺんまで刷り込むことになっている
+	PRINTFORMW 但是你呢喃着好像有什么不得了的东西
+	;TranslatedMark だがお前は見どころがありそうだと呟いた
+	PRINTFORMW 据说如果说主动接受教义，就会被宽恕身为异端者的罪，免除入狱,不过……
+	;TranslatedMark 自ら教義を受け入れるというのなら、異端者であった罪を許し、牢獄行きは免除するとのことだが……
+	PRINTFORMW 要接受吗？
+	;TranslatedMark 受け入れますか？
+	CALL ASK_YN("接受", "拒絶")
+	IF RESULT == 0
+		PRINTFORMW 与其被投狱，不如主动接受教义好了。%ANAME(MASTER)%自觉地点点头、狂信徒们也满意地点头了
+		;TranslatedMark 投獄されるよりはマシだろう。%ANAME(MASTER)%が頷くと、狂信者たちは満足げに頷いた
+		PRINTFORMW 将身体裹上法衣、%ANAME(MASTER)%顺从地服从了
+		;TranslatedMark では法衣を身にまとえといわれ、%ANAME(MASTER)%はおとなしく従う
+		PRINTFORMW 戴上了蒙面的面具，以免吸入世俗肮脏世界的空气、%ANAME(MASTER)%再次成为他们的一员......
+		;TranslatedMark 俗世の穢れた空気を吸わぬよう誂えられた覆面をかぶり、%ANAME(MASTER)%は彼らの一員となった……
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(MASTER)%再次加入了狂信徒们
+		;TranslatedMark %ANAME(MASTER)%は再び、狂信者たちに加わりました
+		RESETCOLOR
+	ELSE
+		PRINTFORMW 我不会帮助你们的。%ANAME(MASTER)%毅然地说出
+		;TranslatedMark お前達になど手を貸すか。%ANAME(MASTER)%は毅然として言い放つ
+		PRINTFORMW 你就去监狱里打扫吧、他们这样说着%ANAME(MASTER)%入狱了……
+		;TranslatedMark その業を牢獄で清めるがよいと、彼らはそのまま%ANAME(MASTER)%を投獄した……
+	ENDIF
+ENDIF
+IF RESULT == 0
+	SETBIT TALENT:MASTER:特殊勢力陥落系, 特殊勢力_狂信者
+	CFLAG:MASTER:所属 = ARG:0
+	CALL PLAYER_FALLEN_TO_SP_COUNTRY(ARG:0)
+	CALL CULTIST_FALLEN_LEAVE_MARK(MASTER)
+	RETURN 0
+ELSE
+	CALL CAPTURE(MASTER, ARG:0)
+	RETURN 2
+ENDIF
+
+;--------------------------------------
+;エンディング
+;--------------------------------------
+@CULTIST_ENDING
+PRINTFORML 邪教徒们成功的散播了自己的信仰
+;TranslatedMark 狂信者たちは布教に成功した
+PRINTFORMW 无论如何，他们把思想渗透到了幻想乡的每一个角落里
+;TranslatedMark 方法はどうあれ、彼らはその思想を幻想郷の隅々にまで浸透させたのだ
+PRINTFORML 今天也举行了他们的仪式
+;TranslatedMark 今日も彼らの儀式は行われている
+PRINTFORML 到处都是正在交合的男人和女人，被召唤出来的“非人”的怪物，以及作为祭品的少女被种下了神圣的种子
+;TranslatedMark あちこちで男と女が交わり、人ならざるものが呼び出されては、贄の少女に神聖な種を植え付けていく
+PRINTFORML 这才是他们所期望的乐园……
+;TranslatedMark これこそが、彼らの望んでいた楽園だった……
+IF CFLAG:MASTER:所属 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_狂信者) && IS_FEMALE(MASTER)
+	PRINTFORMW 
+	PRINTFORMW 在信徒里面、%ANAME(MASTER)%的身影位列其中
+	;TranslatedMark 信者たちの中に、%ANAME(MASTER)%の姿もあった
+	PRINTFORMW 作为模范的优秀信徒而驰名，现在、甚至已经努力成为高层干部
+	;TranslatedMark 模範的な信者ということで名を馳せ、今や幹部にまで上り詰めている
+	PRINTFORMW ......现在获得了作为女性信徒的最高荣誉，与神交合的荣誉
+	;TranslatedMark ……そして、女信者として最高の名誉、神との交わりの栄誉を賜るに至った
+	PRINTFORMW 喝下了特殊的排卵诱发药剂%ANAME(MASTER)%因为即将怀上神之子的喜悦而感到下腹部传来淫痛
+	;TranslatedMark 特殊な排卵誘発剤を飲んだ%ANAME(MASTER)%は、神の子を宿す悦びに下腹を疼かせている
+	PRINTFORML 从仪式上被召唤出来的的巨大的肉块——他们的“神”、%ANAME(MASTER)%被肉块彻底包覆了、感觉到雌穴被插入了奇怪的东西
+	;TranslatedMark 儀式より呼び出された巨大な肉塊――彼らの「神」が、%ANAME(MASTER)%に覆い被さり、肉穴にグロテスクなモノをねじ込む
+	PRINTFORMW %ANAME(MASTER)%发出了不得了的娇喘、肉穴重复地接受着射出的精液
+	;TranslatedMark %ANAME(MASTER)%は、たまらないといった声をあげ、何度も放たれる精液を肉穴で受け止めていく
+	PRINTFORMW 信徒们在神圣的“仪式”前恭恭敬敬地跪倒，祝贺着神之子的诞生!……
+	;TranslatedMark 信者たちは神聖なる「儀式」を前に恭しくひれ伏し、神の子の誕生を寿いでいる……
+	CALL FUCK_SP(MASTER, "触手, 欲望, 奉仕, 性技, 性交, 精愛, Ｖ, Ａ, Ｖ性交, Ａ性交, 口淫", "処女喪失, 膣内射精, Ａ処女喪失, 腸内射精, 接吻喪失", GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_狂信者), GET_SPERM_ID("触手"), "触手", "触手", "触手", "強姦")
+ENDIF
+PRINTFORML 
+PRINTFORMW 没有任何人会不幸。因为在幻想乡，没有人能够违背他们的教诲……
+;TranslatedMark 誰も不幸などではない。もはや幻想郷に、彼らの教えに背く者などいないのだから……
+
+@SELECT_CHARA_RANDOM_LOGIC_CULTIST_RITUAL(対象)
+#DIM 対象
+#DIM 狂信者
+
+狂信者 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_狂信者))
+
+SIF IS_SP_CHARA(対象)
+	RETURN 0
+SIF !IS_FEMALE(対象)
+	RETURN 0
+SIF 対象 == GET_COUNTRY_BOSS(CFLAG:対象:所属)
+	RETURN 0
+SIF CFLAG:対象:所属 != 狂信者
+	RETURN 0
+SIF CFLAG:対象:捕虜先
+	RETURN 0
+SIF TALENT:対象:幼兒
+	RETURN 0
+RETURN 1
+
+
+;--------------------------------------
+;定期イベント
+;--------------------------------------
+@CULTIST_RITUAL(条件)
+#DIM 狂信者
+#DIM 条件
+#DIM 対象, 3
+#DIM 対象数
+#DIM メッセージ
+
+VARSET 対象, -1
+狂信者 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_狂信者))
+
+;狂信者勢力が存在し、条件を満たしている
+SIF 狂信者 == -1 || !条件
+	RETURN -1
+
+CALL SELECT_CHARA_RANDOM_MULTI(VARSIZE("対象"), "CULTIST_RITUAL")
+
+SIF SELECTED_CHARA_NUM <= 0
+	RETURN -1
+
+対象数 = 0
+FOR LOCAL, 0, MIN(SELECTED_CHARA_NUM, VARSIZE("対象"))
+	対象:LOCAL = SELECTED_CHARA:LOCAL
+	対象数 ++
+NEXT
+
+LOCALS = 
+
+FOR LOCAL, 0, 対象数
+	SIF LOCAL > 0
+		LOCALS = %LOCALS%、
+	LOCALS = %LOCALS%%ANAME(対象:LOCAL)%
+NEXT
+
+SIF 対象数 > 1
+	LOCALS = %LOCALS%
+
+CALL SINGLE_DRAWLINE
+SETCOLOR カラー_ピンク
+PRINTFORML 在狂信徒们的本部中，举行着诡异的聚会
+;TranslatedMark 狂信者たちの本部で、怪しげな集会が行われている
+PRINTFORMW 在昏暗的房间里有焚烧着篝火和异香，许多男女混乱地交合在一起
+;TranslatedMark 薄暗い部屋にかがり火と香が焚かれ、多数の男女が交わっている
+PRINTFORML 将精液注射到子宫里面、是他们神圣的仪式……
+;TranslatedMark 精を子宮に注ぎ子をなす、彼らの神聖な儀式だ……
+PRINTFORMW ……在那里面、能看到%LOCALS:0%的身姿
+;TranslatedMark ……その中に、%LOCALS:0%の姿もあった
+PRINTFORML 在她们的脸上浮现出幸福的喜悦，不断接受下一个男人的肉棒，接受男人的精液……
+;TranslatedMark 至福の表情を浮かべながら、次から次に男根を受け入れ、精を受け止めている……
+PRINTFORML 嘴、膣道、双手、乳房、尻穴、身体的所有地方让每一根肉棒都快乐起来
+;TranslatedMark 口や膣、両手に乳房、尻穴と、身体のありとあらゆるところで肉棒を悦ばせていく
+PRINTFORMW 这一切、才是他们教导的实践
+;TranslatedMark それこそが、彼らの教えの実践なのだ
+PRINTFORML ……很快%ANAME(対象)%登上了仪式的座台
+;TranslatedMark ……やがて%ANAME(対象)%が、儀式の台座に進み出る
+PRINTFORML 那个身体从脚尖到头顶，都被白浑弄脏了，粘稠的精液从两个洞里往下滴落着
+;TranslatedMark その身体は爪先から頭頂まで余さず白濁に汚され、両穴からも子種がどろどろと零れ落ちている
+PRINTFORMW 藉此将俗世的丑恶污秽仔细彻底地「净化」了
+;TranslatedMark 俗世の穢れを念入りに「清めた」のだ
+PRINTFORML %ANAME(対象)%躺在台座上被刻画出来的魔法阵中央。
+;TranslatedMark %ANAME(対象)%が台座に描かれた魔法陣の中央で寝そべる
+PRINTFORMW 于是在周围以教祖为首的男人们，开始专心致志地吟唱起了可疑的咒语
+;TranslatedMark すると教祖をはじめとした周囲の男たちは、怪しげな呪文を一心不乱に唱え始める
+PRINTFORML ……很快，它出现了
+;TranslatedMark ……ほどなくして、それは現れた
+PRINTFORMW 他们称之为「神」的、奇形怪状的肉块
+;TranslatedMark 彼らが「神」と呼ぶ、グロテスクな肉塊だ
+PRINTFORML 被作为贡品的%ANAME(対象)%被抓住了、触手塞满了每一个洞
+;TranslatedMark それは供物としてささげられた%ANAME(対象)%を捕らえ、あらゆる穴に触手をねじ込んでいく
+PRINTFORML %ANAME(対象)%不但不害怕，反而爆发出愉悦的欣喜，沉溺在性交带来的快乐中。
+;TranslatedMark %ANAME(対象)%は恐怖するどころか、むしろ歓喜を爆発させ、性交の快楽に溺れていく
+PRINTFORMW 已经得到了生育神之子的至高荣誉，所以这还有什么可害怕的?
+;TranslatedMark 神の子種を受け子を孕む栄誉を得たのだから、何を恐れることがあろう
+PRINTFORML 随着仪式迫近高潮，周围的交合变得愈发激烈起来
+;TranslatedMark 儀式がクライマックスに近づくにつれ、周囲の交わりもより激しくなっていく
+SIF 対象:1 >= 0
+	PRINTFORML %ANAME(対象:1)%的膣道里被顶入了两根缠绕在一起的肉棒，尻穴被扩张着贯穿了，重复地迎来绝顶
+	;TranslatedMark %ANAME(対象:1)%は膣穴に二本の肉棒をねじ込まれ、尻穴を張型で穿たれ、幾度となく絶頂する
+SIF 対象:2 >= 0
+	PRINTFORML %ANAME(対象:2)%被翻过来摆成一种所谓的堆积姿势，好几个人的精液被依次注入到身体里
+	;TranslatedMark %ANAME(対象:2)%はいわゆるまんぐり返しの姿勢で、幾人もの精を次から次に注ぎ込まれていく
+PRINTFORMW 无论是谁，都发出了喜悦的娇声，更加体现出教义的珍贵……
+;TranslatedMark 誰もかれもが歓喜の声をあげ、何よりも尊い教義を体現していく……
+PRINTFORML 触手颤抖着、%ANAME(対象)%被注入了種子
+;TranslatedMark そのうちに触手が震え、%ANAME(対象)%に子種を注ぎ込んだ
+PRINTFORML 这是与人类无法相比的巨量射精、%ANAME(対象)%的膣穴中倒流出了大量的精液
+;TranslatedMark 人間とは比較にならない大量の射精に、%ANAME(対象)%の穴から白濁が逆流する
+PRINTFORMW 接受了超过允许界限的快乐、%ANAME(対象)%在与神交合的喜悦中迎接了顶点
+;TranslatedMark 許容限界を超えた快楽を受け、%ANAME(対象)%は神との交わる喜びの頂点に達していた
+PRINTFORML 同时，周围的交合也即将迎来结束
+;TranslatedMark 同時に、周囲の交わりも終わりを迎える
+PRINTFORML 女性绝顶的娇声在房间中回荡着……
+;TranslatedMark 女の嬌声が室内に響き渡る……
+PRINTFORML ……很快满足的「神」就回归了异界、%ANAME(対象)%被解放出来了
+;TranslatedMark ……やがて満足した「神」は異界へと還り、%ANAME(対象)%は解放される
+PRINTFORML 教祖向%ANAME(対象)%快步跑来、迅速地将扩张的阳具塞入了膣道、并在外面套上了坚固的贞操带
+;TranslatedMark 教祖は%ANAME(対象)%に駆け寄ると、その秘部に張型をうずめ、さらに頑丈な貞操帯を装着した
+PRINTFORML 为了防止神珍贵的精液滴落流出、为膣道盖上盖子是很有必要的事情
+;TranslatedMark 神の貴重な子種が万が一にも零れぬよう、蓋をしようというのだ
+PRINTFORMW 因为腹内养育着神之子的喜悦、%ANAME(対象)%高兴地流下了泪水
+;TranslatedMark この腹で神の子を育てられる悦びに、%ANAME(対象)%は涙を流して喜んでいた……
+RESETCOLOR
+
+CALL FUCK_SP(対象, "触手, 欲望, 奉仕, 性技, 性交, 精愛, Ｖ, Ａ, Ｖ性交, Ａ性交, 口淫", "処女喪失, 膣内射精, Ａ処女喪失, 腸内射精, 接吻喪失", 狂信者, GET_SPERM_ID("触手"), "触手", "触手", "触手", "強姦")
+
+FOR LOCAL, 0, SELECTED_CHARA_NUM
+	CALL FUCK_SP(SELECTED_CHARA:LOCAL, "欲望, 性技, 奉仕, 性交, 精愛, Ｃ, Ｂ, Ｖ, Ａ, Ｍ, 接吻, 口淫, 輪姦, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 接吻喪失", 狂信者, GET_SPERM_ID("狂信者"), @"狂信者的\@ RAND:2 ? 唇 # 肉棒 \@", "狂信者", "", "輪姦")
+NEXT

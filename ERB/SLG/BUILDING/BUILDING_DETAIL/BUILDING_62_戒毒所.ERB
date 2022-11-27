@@ -1,0 +1,73 @@
+@BUILDING_GET_NAME_戒毒所()
+    #FUNCTIONS
+    RETURNF "戒毒所"
+
+@BUILDING_GET_EXP_戒毒所()
+    #FUNCTIONS
+    RETURNF "回合末所有角色药物依存减弱。"
+
+@BUILDING_SET_INFO_ID_62()
+    BUILDING_TYPE:建造物_戒毒所 = 建造物_类型_色情类
+    BUILDING_LEVEL:建造物_戒毒所 = 建造物_等级_一级建筑
+    BUILDING_LIMIT_NUM:建造物_戒毒所 = 建造物_数量限制_1
+    BUILDING_LIMIT_UNI:建造物_戒毒所 = 0
+    BUILDING_COUNTRY_ID:建造物_戒毒所:特殊勢力_普通势力 = 1
+    BUILDING_COUNTRY_ID:建造物_戒毒所:特殊勢力_野盗 = 1
+    BUILDING_COUNTRY_ID:建造物_戒毒所:特殊勢力_ホフゴブリン = 1
+    BUILDING_COUNTRY_ID:建造物_戒毒所:特殊勢力_外来人 = 1
+    BUILDING_COUNTRY_ID:建造物_戒毒所:特殊勢力_触手 = 1
+    BUILDING_COUNTRY_ID:建造物_戒毒所:特殊勢力_自警団 = 1
+    BUILDING_COUNTRY_ID:建造物_戒毒所:特殊勢力_サキュバス = 1
+    BUILDING_COUNTRY_ID:建造物_戒毒所:特殊勢力_狂信者 = 1
+    BUILDING_HAVE_SKILL:建造物_戒毒所 = 1
+    BUILDING_TOHO_REQ_ID:建造物_戒毒所:0 = 0
+
+@CHECK_BUILDING_FUNCTION_戒毒所(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    RESULT:1 = TMP_BUILDING_EXIST_FLAG:COUNTRY_ID:建造物_戒毒所
+    IF RESULT:1 > 0
+        RESULT:0 = 1
+    ENDIF
+    RETURNF RESULT:0
+
+@BUILDING_TEXT_戒毒所(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    SIF !CHECK_BUILDING_TEXT_OUTPUT(COUNTRY_ID)
+        RETURNF 0
+    BUILDING_TEXT = PRINT_BUILDING_TEXT_TITLE_F()
+    PRINTFORM 因为《戒毒所》的存在，
+    PRINTFORML %ANAME(GET_COUNTRY_BOSS(COUNTRY_ID))%势力的角色药物依存下降了！
+    RETURNF 1
+
+@BUILDING_SKILL_戒毒所(COUNTRY_ID)
+    #DIM COUNTRY_ID
+    PRINTFORML 发动后使一个我方角色失去所有药物依存度
+    PRINTFORML 冷却时间3回合
+    PRINTFORML 是否发动
+    CALL ASK_YN()
+    IF !RESULT
+        PRINTFORML 发动了《戒毒所》的技能
+        CALL BUILDING_SKILL_戒毒所_FUNCTION()
+        IF RESULT
+            BUILDING_SKILL_COLDTIME:COUNTRY_ID:建造物_戒毒所 = 3
+            PRINTFORMW 完毕
+        ENDIF
+    ENDIF
+
+
+@BUILDING_SKILL_戒毒所_FUNCTION()
+    CALL SELECT_CHARA_LIST_ONLY_LOGIC_SEX("DOCTOR_DRUG", "DEFAULT", "DOCTOR_DRUG")
+    IF RESULT == -1
+        RETURN 0
+    ENDIF
+    LOCAL = RESULT
+    IF GETBIT(TALENT:(LOCAL):淫乱系, 素質_淫乱_薬物中毒)
+        PRINTFORMW %ANAME(LOCAL)%失去了<薬物中毒>
+    ELSE
+        PRINTFORMW %ANAME(LOCAL)%斬断了対薬物的依賴心
+    ENDIF
+    CLEARBIT TALENT:(LOCAL):淫乱系, 素質_淫乱_薬物中毒
+    CFLAG:(LOCAL):薬物依存 = 0
+    RETURN 1

@@ -1,0 +1,184 @@
+﻿;-------------------------------------------------
+;ターン終了時の略奪処理
+;-------------------------------------------------
+@QuriltaiGOBLIN_Predatoriness_TURNEND
+#DIM 略奪対象勢力
+#DIM 略奪対象都市
+#DIM 略奪兵数
+#DIM 略奪国庫
+#DIM 略奪経済力
+#DIM 自勢力
+#DIM 略奪率
+#DIM 自勢力国庫
+#DIM 支持率
+#DIM 集権性
+#DIM 上昇支持率
+#DIM 上昇集権性
+
+SIF !Destination_Predatoriness_GOBLIN:0
+	RETURN 0
+
+CALL SINGLE_DRAWLINE("-", カラー_選択不可)
+RESETCOLOR
+PRINTFORMW 执行掠夺
+PRINTFORML 
+
+略奪対象勢力 = Destination_Predatoriness_GOBLIN:0
+略奪対象都市 = Destination_Predatoriness_GOBLIN:1
+略奪兵数 = SOLDIER_Predatoriness_GOBLIN
+自勢力 = CFLAG:MASTER:所属
+略奪経済力 = CITY_ECONOMY:略奪対象都市 * 30 / 100
+IF 略奪対象勢力 > 0
+	略奪国庫 = MONEY:略奪対象勢力 * CITY_ECONOMY:略奪対象都市 / GET_SUM_ECONOMY(略奪対象勢力)
+ELSE
+	略奪国庫 = CITY_ECONOMY:略奪対象都市 * 30 / (100 * 10)
+ENDIF
+
+;計算用のダミー部隊を作成
+UNIT_POSITION:自勢力:100 = 略奪対象都市
+UNIT_SOLDIER:自勢力:100 = 略奪兵数
+COUNTRY_SOLDIER:自勢力 += 略奪兵数
+UNIT_TARGET:自勢力:100 = 0
+UNIT_COMMANDER:自勢力:100 = 0
+
+;部隊能力を表示
+CALL COLOR_PRINTL("----------彼此的力量----------", カラー_選択不可)
+
+PRINTL 掠夺部队 兵:{略奪兵数}
+CALL PRINT_CITY_INFO(略奪対象都市, 0)
+PRINTL
+
+;■戦闘の計算
+CALL BATTLE_CALC(自勢力, 100, 略奪対象都市, -1)
+
+SIF GROUPMATCH(0, BATTLE_SOL:0, BATTLE_SOL:1)
+	GOTO BATTLE_CANCEL
+
+;■ダメージの適用
+CALL COLOR_PRINTL("---------补正后的力量---------", カラー_選択不可)
+CALL PRINT_UNIT_INFO_COMBAT(自勢力, 100, 0, 0, 0)
+PRINTL
+CALL PRINT_CITY_INFO_COMBAT(略奪対象都市, 1, 0)
+PRINTL
+CALL COLOR_PRINTL("------------激战！------------", カラー_選択不可)
+
+CALL DECREASE_SOLDIER(自勢力, 100, BATTLE_DMG:0, 1)
+CALL DECREASE_SOLDIER(略奪対象都市, -1,    BATTLE_DMG:1, 1)
+
+$BATTLE_CANCEL
+CALL COLOR_PRINTL("----------战斗后处理----------", カラー_選択不可)
+
+CITY_IS_ATTACKED:略奪対象都市 = 1
+
+IF CITY_SOLDIER:略奪対象都市 <= 0
+	CALL COLOR_PRINTL(@"%GET_CITYNAME(略奪対象都市)%的守备部队被歼灭了！", カラー_注意)
+	;経済力減少
+	CITY_ECONOMY:略奪対象都市 -= 略奪経済力
+	SIF 略奪対象勢力 > 0
+		MONEY:略奪対象勢力 -= 略奪国庫
+	
+	;自勢力国庫の上昇と支持率・集権性上昇
+	自勢力国庫 = MONEY:自勢力
+	MONEY:自勢力 += 略奪国庫
+	IF GET_COUNTRY_BOSS(CFLAG:MASTER:所属) == MASTER
+		PRINTFORML 支持率与集权性上升了
+		支持率 = CFLAG:MASTER:1709
+		上昇支持率 = ((10 * MONEY:自勢力) / 自勢力国庫) - 10
+		SIF 上昇支持率 <= 0
+			上昇支持率 = 1
+		CFLAG:MASTER:1709 += 上昇支持率
+		集権性 = Centralization_power_GOBLIN
+		上昇集権性 = ((10 * MONEY:自勢力) / 自勢力国庫) - 10
+		SIF 上昇集権性 <= 0
+			上昇集権性 = 1
+		Centralization_power_GOBLIN += 上昇集権性
+		SETCOLOR カラー_注意
+		PRINTFORML 支持率：[ {支持率} ] → [ {CFLAG:MASTER:1709} ]
+		PRINTFORML 
+		PRINTFORMW 集权性：[ {集権性} ] → [ {Centralization_power_GOBLIN} ]
+		PRINTFORML 
+		RESETCOLOR
+	ELSE
+		PRINTFORML 支持率上升了
+		支持率 = CFLAG:MASTER:1709
+		上昇支持率 = ((10 * MONEY:自勢力) / 自勢力国庫) - 10
+		SIF 上昇支持率 <= 0
+			上昇支持率 = 1
+		CFLAG:MASTER:1709 += 上昇支持率
+		SETCOLOR カラー_注意
+		PRINTFORMW 支持率：[ {支持率} ] → [ {CFLAG:MASTER:1709} ]
+		PRINTFORML 
+		RESETCOLOR
+	ENDIF
+	
+	;部隊壊滅時の士官の捕獲
+	CALL UNIT_BREAK(0, 自勢力, 100, 略奪対象都市, -1)
+	
+	CALL DIPLOMACY_WORSEN_RELATION(略奪対象勢力, 50)
+	
+ELSEIF UNIT_SOLDIER:自勢力:100 > CITY_SOLDIER:略奪対象都市 && UNIT_SOLDIER:自勢力:100 > 0
+	CALL COLOR_PRINTL(@"%GET_CITYNAME(略奪対象都市)%守備部隊の隙をついて略奪しました！", カラー_注意)
+	略奪率 = 100 - ((CITY_SOLDIER:略奪対象都市 * 100) / UNIT_SOLDIER:自勢力:100)
+	
+	略奪経済力 = (略奪経済力 * 略奪率) / 100
+	略奪国庫 = (略奪国庫 * 略奪率) / 100
+	
+	;経済力減少
+	CITY_ECONOMY:略奪対象都市 -= 略奪経済力
+	SIF 略奪対象勢力 > 0
+		MONEY:略奪対象勢力 -= 略奪国庫
+	
+	;自勢力国庫の上昇と支持率・集権性上昇
+	自勢力国庫 = MONEY:自勢力
+	MONEY:自勢力 += 略奪国庫
+	IF GET_COUNTRY_BOSS(CFLAG:MASTER:所属) == MASTER
+		PRINTFORML 支持率与集权性上升了
+		支持率 = CFLAG:MASTER:1709
+		上昇支持率 = ((10 * MONEY:自勢力) / 自勢力国庫) - 10
+		SIF 上昇支持率 <= 0
+			上昇支持率 = 1
+		CFLAG:MASTER:1709 += 上昇支持率
+		集権性 = Centralization_power_GOBLIN
+		上昇集権性 = ((10 * MONEY:自勢力) / 自勢力国庫) - 10
+		SIF 上昇集権性 <= 0
+			上昇集権性 = 1
+		Centralization_power_GOBLIN += 上昇集権性
+		SETCOLOR カラー_注意
+		PRINTFORML 支持率：[ {支持率} ] → [ {CFLAG:MASTER:1709} ]
+		PRINTFORML 
+		PRINTFORMW 集权性：[ {集権性} ] → [ {Centralization_power_GOBLIN} ]
+		PRINTFORML 
+		RESETCOLOR
+	ELSE
+		PRINTFORML 支持率上升了
+		支持率 = CFLAG:MASTER:1709
+		上昇支持率 = ((10 * MONEY:自勢力) / 自勢力国庫) - 10
+		SIF 上昇支持率 <= 0
+			上昇支持率 = 1
+		CFLAG:MASTER:1709 += 上昇支持率
+		SETCOLOR カラー_注意
+		PRINTFORMW 支持率：[ {支持率} ] → [ {CFLAG:MASTER:1709} ]
+		PRINTFORML 
+		RESETCOLOR
+	ENDIF
+	
+	CALL DIPLOMACY_WORSEN_RELATION(略奪対象勢力, 50)
+	
+ENDIF
+
+;計算用のダミー部隊を解散
+SIF UNIT_SOLDIER:自勢力:100 <= 0
+	UNIT_SOLDIER:自勢力:100 = 0
+
+COUNTRY_SOLDIER:自勢力 -= UNIT_SOLDIER:自勢力:100
+SOLDIER_Predatoriness_GOBLIN = UNIT_SOLDIER:自勢力:100
+Destination_Predatoriness_GOBLIN:0 = 0
+Destination_Predatoriness_GOBLIN:1 = 0
+
+UNIT_POSITION:自勢力:100 = 0
+UNIT_SOLDIER:自勢力:100 = 0
+UNIT_TARGET:自勢力:100 = 0
+UNIT_COMMANDER:自勢力:100 = 0
+
+WAIT
+

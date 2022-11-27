@@ -1,0 +1,172 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K82_REBORN_UNDEAD_RATE(対象)
+#DIM 対象
+RETURN 1000 - MIN(KDVAR:対象:芳香_一度死んだなら * 50 + 500, 999)
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K82_REBORN_UNDEAD_DECISION(対象)
+#DIM 対象
+#DIM 青娥
+
+青娥 = NAME_TO_CHARA("青娥")
+
+;これで対象が死んでないとダメってことになる筈(処刑拡張パッチ)対象が記念品になっていると不可
+SIF CFLAG:対象:特殊状態 != 特殊状態_死亡 || CFLAG:対象:1704 != 0
+	RETURN 0
+
+;左は対象をモノにしているかどうか
+;右は青娥が捕まっていたりどこにも所属していたりしないかどうか
+;つまり、青娥が拘束されているか、どの勢力にも所属していないのに加え、自分が対象をモノにしてない場合はこのイベントが起きないって意味になる筈
+SIF !IS_FALLEN(対象) && (CFLAG:青娥:捕虜先 || !IS_COUNTRY(CFLAG:青娥:所属))
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K82_REBORN_UNDEAD_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K82_REBORN_UNDEAD(対象)
+#DIM 対象
+#DIM 青娥
+
+青娥 = NAME_TO_CHARA("青娥")
+
+
+;毎回あんな長文垂れ流されたって困る　何度も発生させる（ry
+IF KDVAR:対象:芳香_一度死んだなら
+	IF !(IS_SLAVE(対象) || IS_LOVER(対象) || IS_SLAVED_BY(対象))
+		CALL COLOR_PRINTW(@"再次醒来的%ANAME(対象)%，回到了%ANAME(青娥)%的身边", カラー_警告)
+		CALL CHANGE_COUNTRY(対象, CFLAG:青娥:所属)
+	ELSE
+		CALL COLOR_PRINTW(@"再次醒来的%ANAME(対象)%，回到了%ANAME(MASTER)%的身边", カラー_警告)
+		CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属)
+	ENDIF
+ELSE
+	PRINTFORML 无缘冢。一片无名尸体随处可见的乱世，一片行走时很难不踩到石头的、目前人口过剩的土地
+	;TranslatedMark 無縁塚。身元の分からない死体が量産される乱世、石を踏まないことが困難になりつつある目下過剰人口状態の土地
+	PRINTFORMW 在那里，一个圆滚滚的灵魂缓缓浮现，随即被吸入了地面
+	;TranslatedMark そこで、ぽわりぽわりと人魂が浮かび上がって地面に吸い込まれていった
+	PRINTFORML 起初好像什么也没有发生。但过了一会儿，大地忽然稍稍隆起，一根手指从地下伸出
+	;TranslatedMark 何も起こらずにしばらく後、大地が僅かに盛りあがって指先が突き出た
+	PRINTFORML 如同挣扎一般，从手到手臂，渐渐从地下爬了出来。到了肩膀露出来的瞬间，人影一下子飞了出来
+	;TranslatedMark もがくように手、腕と這い出ていき、肩が露出すると一息に人影が飛び出す
+	PRINTFORML 那是一种与此场合相称的姿态，但却不相应地像活物一样运动着
+	;TranslatedMark それは場に見合った姿をしていて、しかし不相応にも生きたように動く
+	PRINTFORMW 她的名字是%ANAME(対象)%。很早以前就死掉了，而在不久之前应该又被杀掉一次的人物
+	;TranslatedMark 名は%ANAME(対象)%。とっくの昔に死んでいて、少し前にもう一度殺された筈の人物である
+	PRINTFORML 「啊——……这里、是……哪里！」
+	;TranslatedMark 「あー……ここ、は……何処だ！」
+	PRINTFORML 「……哦哦，是被打败了吧……？」
+	;TranslatedMark 「……おお、やられたんだっけ……？」
+	PRINTFORML 「嗯，是啊，确实是这样，没错」
+	;TranslatedMark 「うん、そうだな、確かにそうだった、その通りだ」
+	PRINTFORMW 至今为止都是一个人，%ANAME(対象)%终于注意到了
+	;TranslatedMark そこまで一人ごちて、%ANAME(対象)%は気付いた
+	PRINTFORML ——腐臭已经渗透到身体里了，泥土和血液污染了皮肤，衣服就和破布没有区别
+	;TranslatedMark ――腐臭が体に染みついている、それに土やら血やらで肌は汚れて服は襤褸と変わりない
+	PRINTFORMW ——回头向下看，刚才爬出来的洞里，大量蛆虫在胡乱填埋的的悲惨尸体上蠕动着
+	;TranslatedMark ――振り向いて見下ろした、先刻這い出た穴では乱雑に埋め立てられた惨死体を蛆が這い回っている
+	PRINTFORML 自己的身上似乎也有蛆虫，%ANAME(対象)%飞上高空，随后重重落地，发出巨大的响声
+	;TranslatedMark 自分の体にも蛆がひっついている気がして、%ANAME(対象)%は高く飛び上がり、体に響くように着地した
+	PRINTFORMW 预感似乎没有出错，几只虫子伴随着泥土从%ANAME(対象)%的身体上掉落下来，逃到不知哪里去了
+	;TranslatedMark 予感は間違っていなかったようで、%ANAME(対象)%の体からは土と一緒に何匹かの虫が落ちて、何処ぞへと逃げ出した
+	PRINTFORML 「姆，果然还是不能死啊。最糟糕了」
+	;TranslatedMark 「むぅ、やっぱり死ぬのはいかんな。最悪だ」
+	PRINTFORMW 「想早点回去，在水边稍微洗个澡什么的——……也想换衣服啊」
+	;TranslatedMark 「早く帰って、水の一つでも浴びたいところだなー……着替えもしたいし」
+	PRINTFORMW 「……回去，去哪里？」
+	;TranslatedMark 「……帰るって、何処に？」
+	PRINTFORMW 「啊嘞？啊——，那个……」
+	;TranslatedMark 「あれ？　あー、えーっと……」
+	IF !(IS_SLAVE(対象) || IS_LOVER(対象)) || IS_SLAVED_BY(対象) || MASTER == NAME_TO_CHARA("青娥")
+		PRINTFORMW 「……%ANAME(青娥)%」
+		PRINTFORML 「对了，我应该在的地方，无论现在还是过去，都应该是%ANAME(青娥)%的身边吧？」
+		;TranslatedMark 「そうだ、私の居るべき場所なんて今も昔も%ANAME(青娥)%の元一つだろう？」
+		PRINTFORML 「我在烦恼些什么……赶紧回去吧！」
+		;TranslatedMark 「何悩んでたんだ私……さっさと帰ろう！」
+		CALL COLOR_PRINTW(@"%NAME_FORMAL(対象)%醒来后，回到了%ANAME(青娥)%的身边", カラー_警告)
+		CALL CHANGE_COUNTRY(対象, CFLAG:青娥:所属)
+	ELSE
+		PRINTFORMW 「……%ANAME(MASTER)%？」
+		PRINTFORML 「哦哦，没错没错！一定是%ANAME(MASTER)%的身边啊！」
+		;TranslatedMark 「おお、そうだそうだった！　%ANAME(MASTER)%のところしかないな！」
+		PRINTFORML 「……？好像、忘记了谁、不是、吗？」
+		;TranslatedMark 「……？　誰か、忘れてる、よう、な？」
+		PRINTFORML 「不管了！快点回去吧，回到那个人的身边去！」
+		;TranslatedMark 「まあいい！　いざ行かん、我が君の元へ！」
+		CALL COLOR_PRINTW(@"%NAME_FORMAL(対象)%醒来后，回到了%ANAME(MASTER)%的身边", カラー_警告)
+		PRINTFORMW
+		CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属)
+		PRINTFORML 「%ANAME(MASTER)%，好久不见！」
+		;TranslatedMark 「%ANAME(MASTER)%、久しいな！」
+		PRINTFORMW 正当%ANAME(MASTER)%散步的时候，本应已死亡的%ANAME(対象)%出现了
+		;TranslatedMark %ANAME(MASTER)%が散歩をしていると、死亡した筈の%ANAME(対象)%が現われた
+		PRINTFORML 为什么%ANAME(対象)%会在这里……复活了吗？靠自己的力量苏醒了？这样问到
+		;TranslatedMark なぜ%ANAME(対象)%がここに……生き返ったのか？　自力で蘇生を？　と問うと
+		PRINTFORML 「死掉的话就折了不死之名！」
+		;TranslatedMark 「死んで死んだら不死の名折れだ！」
+		PRINTFORMW 回答了个不像回答的回答
+		;TranslatedMark 答えになっていない返事を返された
+		PRINTFORML 「嘛，那种事怎样都无所谓。我想要洗澡，还有好吃的东西！衣服也拜托了！」
+		;TranslatedMark 「まあ、そんなことはどうでもいい。湯浴みの用意と、それと何か食べ物が欲しい！　服も頼む！」
+		PRINTFORML 终于意识到%ANAME(対象)%的惨状的%ANAME(MASTER)%，为她安排了希望的任何东西
+		;TranslatedMark そう言われてようやく%ANAME(対象)%の惨状に気付いた%ANAME(MASTER)%は、彼女が望む諸々を与えるよう手配した
+		IF CFLAG:青娥:所属 == CFLAG:MASTER:所属 && !(IS_LOVER(青娥) || IS_SLAVE(青娥))
+			PRINTFORMW
+			PRINTFORML 「完全被抢走了啊」
+			;TranslatedMark 「すっかり寝取られちゃいましたわ」
+			IF CFLAG:青娥:面識
+				PRINTFORMW 送走了前去洗除污垢的%ANAME(対象)%，%ANAME(青娥)%不知何时站在了身后
+				;TranslatedMark とりあえず汚れを落としに行くと言った%ANAME(対象)%を見送ると、%ANAME(青娥)%が後ろに立っていた
+			ELSE
+				PRINTFORML 送走了前去洗除污垢的%ANAME(対象)%，一个青色装束的女性不知何时站在了后面
+				;TranslatedMark とりあえず汚れを落としに行くと言った%ANAME(対象)%を見送ると、青ずくめの女性が後ろに立っていた
+				PRINTFORM 「啊，我是道仙的
+				;TranslatedMark 「あ、私は道仙の
+				CALL COLOR_PRINT(@"%NAME_FORMAL(青娥)%", カラー_注意)
+				PRINTFORML 。人们都称我为"青娥娘娘"」
+				;TranslatedMark と申します。人は青娥娘々と呼びますが」
+				CFLAG:青娥:面識 = 1
+				PRINTFORMW 「对你自称%ANAME(対象)%的主人不知是否合适。看那个样子，也许加一个“前”字会比较好？」
+				;TranslatedMark 「貴方には%ANAME(対象)%のご主人様と言った方がいいかしら。あの様子だともう"元"かもしれないけど？」
+			ENDIF
+			PRINTFORML 「那个女孩最先想到的不是我，稍微有些嫉妒了」
+			;TranslatedMark 「あの娘が一番に思い出すのが私じゃないだなんて、嫉妬しちゃいそう」
+			PRINTFORMW 确实，自己的部下被夺走时也没什么好心情……
+			;TranslatedMark 確かに、自分の部下を奪われていい気はしないだろうが……
+			PRINTFORML 「——嘛，我倒不想像小姑那样多嘴多舌」
+			;TranslatedMark 「――まあ、小姑みたいにとやかく口を出す気はありませんけど」
+			PRINTFORML 「不过，最后终将会回到我的手中。不管你做些什么，呢」
+			;TranslatedMark 「結局、最後には私の手に戻ってきますから。貴方が何をしたって、ね」
+			PRINTFORML 「是的，所以请随意，不要在意我说的话。尽情地和那孩子培育爱吧」
+			;TranslatedMark 「ええ、ですからどうぞ、私のことはお気になさらず。存分に愛を育んでくださいまし」
+			PRINTFORMW 最后浮现出清秀的笑容，像是想说的话都说完了一样，%ANAME(青娥)%优雅地点头离去了……
+			;TranslatedMark 最後に清楚な笑みを浮かべると、言いたいことは言い終わったとばかりに、%ANAME(青娥)%は優雅に会釈をして立ち去った……
+		ENDIF
+	ENDIF
+ENDIF
+
+KDVAR:対象:芳香_一度死んだなら += 1
+
+RETURN 1
+
+

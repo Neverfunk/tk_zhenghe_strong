@@ -1,0 +1,43 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_SOUP_RUN_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_SOUP_RUN_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_SOUP_RUN(対象)
+#DIM 対象
+
+PRINTFORML 在貧民窟、遇到了賑濟現場
+PRINTFORML 
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "料理"))
+CALL ASK_YN("帮忙", "放棄")
+
+IF RESULT == 1
+	PRINTFORMW 対奉仕活動沒有興趣
+	PRINTFORML 不管它
+	RETURN 1
+ENDIF
+
+IF LIMIT(ABL:対象:料理, 50, 80) >= RAND:100
+	PRINTFORMW 熟練地幫忙了
+	PRINTFORML 被排隊的流浪漢們道謝了
+	CALL PRINT_ADD_EXP(対象, "料理経験値", RAND:10 + 5)
+ELSE
+	PRINTFORMW 最終也只是幫了點小忙
+	PRINTFORML 被排隊的流浪漢們道謝了
+	CALL PRINT_ADD_EXP(対象, "料理経験値", RAND:5 + 1)
+ENDIF    
+
+RETURN 1

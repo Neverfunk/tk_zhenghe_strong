@@ -1,0 +1,108 @@
+;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_1_TROOP_1_EXIST
+RETURN 1
+
+@SKILL_1_TROOP_1_NAME
+RESULTS = 大结界「博丽弹幕结界」
+
+;レベルは1-5まで
+@SKILL_1_TROOP_1_LEVEL
+RETURN 3
+
+;対象選択
+@SKILL_1_TROOP_1_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 1
+
+;発動判定
+@SKILL_1_TROOP_1_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
+	SIF HAS_TAG(BATTLE_COMMANDER:対象側:LOCAL, タグ_妖怪)
+		RETURN 1
+NEXT
+RETURN 0
+
+;発動テ接吻トをオーバライドしたいときに。
+;「誰それのスキル発動！　○○した！」の「○○した！」の部分を実装したい場合は、
+;これじゃなくてINVOKEで書けばいいです。
+;@SKILL_1_TROOP_1_INVOKE_TEXT(発動者, スキル, ジャンル)
+;#DIM 発動者
+;#DIM スキル
+;#DIMS ジャンル
+
+;効果をここに記述
+@SKILL_1_TROOP_1_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+PRINTFORML 敵方部隊的被害軽減無効化！
+BATTLE_RATE_GRD:対象側 = 0
+BATTLE_RATE_GRD_B:対象側 = 0
+
+PRINTFORML  （BGM：《少女绮想曲》）
+PRINTFORML  【在幻想乡，有一件众人都心照不宣的事】
+PRINTFORML  【无论是多强的大妖怪，都不想在结界中和博丽的巫女作对……】
+PRINTFORML  【因为只要在博丽大结界的范围之内，博丽的巫女就是近乎无敌的存在】
+PRINTFORML  【据说这是幻想乡建立之初，博丽的巫女和妖怪贤者们的约定——】
+PRINTFORML  【当博丽的巫女退治作乱的大妖怪时，整个博丽大结界，都是她的弹幕！】
+
+PRINTFORML  “你们这帮家伙……都给我去医院里好好反省吧！”
+PRINTFORML  “大结界「博丽弹幕结界」！！”
+
+PRINTFORML 结界的效果使敵方所有妖怪防衛下降！
+PRINTFORML 海量的弹幕对敌部队造成了大量伤害！
+CALL DECREASE_SOLDIER(対象勢力, 対象部隊, RAND(10000, 100000), 1)
+
+@SKILL_1_TROOP_1_EXPLANATION
+RESULTS = 无效化部队伤害减免；对敌部队造成大量伤害。
+
+@SKILL_1_TROOP_1_CANT_TELL
+
+
+
+
+
+
+
+@SKILL_1_TROOP_1_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 150

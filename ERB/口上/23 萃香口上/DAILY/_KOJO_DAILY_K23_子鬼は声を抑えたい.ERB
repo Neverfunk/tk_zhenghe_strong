@@ -1,0 +1,478 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K23_SILENT_SEX_RATE(対象)
+#DIM 対象
+RETURN (KDVAR:対象:萃香_声を抑えて > 0 ? 200 # 50)
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K23_SILENT_SEX_DECISION(対象)
+#DIM 対象
+
+;終わってたら発生しない
+SIF KDVAR:対象:萃香_声を抑えて == -1
+	RETURN 0
+
+;好感度5000以下だと駄目
+SIF CFLAG:対象:好感度 <= 5000
+	RETURN 0
+
+;合意が無いと駄目
+SIF !TALENT:対象:合意
+	RETURN 0
+
+;対象が女でないとだめ
+SIF !IS_FEMALE(対象)
+	RETURN 0
+
+;主人公と同一勢力で捕虜でなく、主人公がペニス持ち
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0) && HAS_PENIS(MASTER)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K23_SILENT_SEX_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K23_SILENT_SEX(対象)
+#DIM 対象
+
+
+SELECTCASE KDVAR:対象:萃香_声を抑えて
+	CASE 0
+		PRINTFORMW 深夜，%ANAME(対象)%来到了%ANAME(MASTER)%的房间
+		;TranslatedMark 深夜、%ANAME(対象)%が%ANAME(MASTER)%の部屋を訪ねてきた
+		PRINTFORML 「啊，那个…可以吗？有件事想和你商量……」
+		;TranslatedMark 「あ、あのさ…ちょっといいかな？　折り入って相談があるんだけど……」
+		PRINTFORMW 不是平时活泼的样子。她的脸很红。和平常喝醉后的红脸明显不同
+		;TranslatedMark 普段の快活とした様子ではない。そして顔が赤い。普段の酒酔いによる赤ら顔とは明らかに違うものだった
+		PRINTFORML 到底怎么了，我问了一下
+		;TranslatedMark 一体どうしたのか、話を聞いてみると
+		PRINTFORMW 「嗯…那个……那个，我……和%ANAME(MASTER)%做爱的时候，声音大吗？」
+		;TranslatedMark 「えーと…、その……、あのさ、私って……%ANAME(MASTER)%とまぐわってる時、声大きいかな？」
+		PRINTFORMW ……得到了一个意料之外的消息
+		;TranslatedMark ……ちょっと予想外な相談が返ってきた
+		PRINTFORML 「大...真的很大吗！？刚刚被别的孩子说了…和%ANAME(MASTER)%在一起的时候，我的声音…好像周围都能听到…」
+		;TranslatedMark 「い、いやね！？　他の子に言われたんだけど…%ANAME(MASTER)%とシてる時、私の声…、周りに聞こえてるみたいで…」
+		PRINTFORMW 「其他的孩子是这样说的…。我的喘息声，真的有那么大吗…？」
+		;TranslatedMark 「他の子はそんなでも無いみたいなんだけど…。私の喘ぎ声、そんなに大きいかなって…ね」
+		PRINTFORML %ANAME(対象)%红着脸向%ANAME(MASTER)%倾诉了烦恼
+		;TranslatedMark %ANAME(対象)%は顔を赤くしながら%ANAME(MASTER)%に悩みを打ち明けた
+		PRINTFORMW 那么，怎么回答呢……
+		;TranslatedMark さて、どう答えよう……
+		PRINTFORML
+		CALL ASK_YN("……可能确实很大", "不必在意")
+		PRINTFORML
+		IF RESULT == 1
+			PRINTFORMW 没什么。传达了没有必要在意
+			;TranslatedMark 別にそんなことは無い。気にする必要はないと伝えた
+			PRINTFORML 「真的吗？不压抑也可以吗？」
+			;TranslatedMark 「ほ、ほんとに？　抑えたりしなくていい？」
+			PRINTFORMW 不如说%ANAME(対象)%的魅力在于能随心所欲地发出声音
+			;TranslatedMark むしろ%ANAME(対象)%は思うまま声を上げている方が魅力的だ、と伝えた
+			PRINTFORML 「诶！？%ANAME(MASTER)%就会说一些让我开心的话～♪」
+			;TranslatedMark 「も、もう！　%ANAME(MASTER)%ったら調子いい事言っちゃって～♪」
+			PRINTFORMW %ANAME(対象)%一边轻轻地敲着%ANAME(MASTER)%的腰，一边嘟起小嘴
+			;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の腰をバンバン叩きながらも、口元を緩ませている
+			PRINTFORML 「因为说了那样的话……、身体有些难受…♥」
+			;TranslatedMark 「そんなこと言うから……、ガラにも無く身体が疼いてきちゃったじゃないか…♥」
+			PRINTFORMW %ANAME(対象)%痛苦地扭动着身体摩擦着%ANAME(MASTER)%
+			;TranslatedMark %ANAME(対象)%は切なげに身体をくねらせながら%ANAME(MASTER)%に擦りよる
+			PRINTFORMW 为了回应她的期待，%ANAME(MASTER)%抱着%ANAME(対象)%，为了听到可爱的喘息声，两人开始了性交……
+			;TranslatedMark 彼女が求める期待に応えて%ANAME(対象)%を抱き寄せ、可愛い喘ぎ声を聞くための交わりを始めた……
+			CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", ANAME(MASTER))
+			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣")
+			CFLAG:対象:好感度 += 800
+			CFLAG:対象:従属度 += 500
+			CFLAG:対象:依存度 += 300
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了800", カラー_シアン)
+			CALL COLOR_PRINTL(@"%ANAME(対象)%の従属度が500上がった", カラー_シアン)
+			CALL COLOR_PRINTL(@"%ANAME(対象)%の依存度が300上がった", カラー_シアン)
+			KDVAR:対象:萃香_声を抑えて = -1
+		ELSE
+			PRINTFORMW 确实有点…告诉她声音也许真的很大
+			;TranslatedMark 確かにちょっと…大きいかも、と伝えた
+			PRINTFORML 「果然是这样啊……。啊啊啊！好害羞！至今为止做爱的声音周围都能听到！」
+			;TranslatedMark 「や、やっぱり、そうなんだ……。ああっもう！　恥ずかしいっ！　今まで周りに聞こえていたなんて！」
+			PRINTFORMW %ANAME(対象)%红着耳朵把脸藏起来。虽然平时很豪爽单纯，但这种地方果然也会害羞
+			;TranslatedMark %ANAME(対象)%は耳まで真っ赤にして顔を隠す。普段は豪快単純だが、こういう所はやっぱり恥ずかしいようだ
+			PRINTFORML %ANAME(MASTER)%提出了一个提案，对于因自己的娇喘声被周围人听到而感到羞耻的%ANAME(対象)%
+			;TranslatedMark 自分の嬌声が周囲に丸聞こえだったという羞恥に悶える%ANAME(対象)%に、%ANAME(MASTER)%はとある提案をした
+			PRINTFORMW 那么现在开始练习抑制声音吧
+			;TranslatedMark だったらこれから声を抑えるように練習をしよう、と
+			PRINTFORML 「诶？压低声音的练习？为什么要这么做啊？」
+			;TranslatedMark 「へ？　声を抑える練習？　どういうこと？」
+			PRINTFORMW 目的是，H的时候不大声喘气
+			;TranslatedMark 要はエッチの時に大声で喘がなければいいだけだ
+			PRINTFORMW 因此我告诉她，忍住不要发出大的声音，一点一点地习惯快感吧
+			;TranslatedMark だからしばらく、声を出さないよう意識しながら少しずつ快感に慣らしていこう、と伝えた
+			PRINTFORML 「…是吗，一点点习惯的话，也许就不会发出丢脸的声音了…」
+			;TranslatedMark 「…そうか、少しずつ慣らしていけば恥ずかしい声を聞かれることも無くなるかも…」
+			PRINTFORMW 「嗯，我试试看」
+			;TranslatedMark 「うん、ちょっとやってみるよ」
+			PRINTFORML %ANAME(対象)%接受了那个提案。为了更早的适应。%ANAME(MASTER)%立刻抱住了%ANAME(対象)%的身体
+			;TranslatedMark %ANAME(対象)%はその提案に乗った。善は急げだ。%ANAME(MASTER)%はさっそく%ANAME(対象)%の身体を抱き寄せた
+			PRINTFORMW 并不是急切的想要发生性关系，而是告诉她今天就只试试轻飘飘的爱抚
+			;TranslatedMark いきなり性交はせず、今日は軽い愛撫だけで試してみよう、と告げる
+			PRINTFORMW 「嗯，嗯…那个，为了尽量不发出声音，我会努力的……所以请温柔点……」
+			;TranslatedMark 「う、うん…あの、声出さないよう、一応は頑張るから……優しくしてね……」
+			PRINTFORML 对于和平时状况不同的性行为，%ANAME(対象)%以温顺的姿态将自己委托给了%ANAME(MASTER)%…
+			;TranslatedMark 普段と勝手が違う行為に、%ANAME(対象)%はしおらしい態度で%ANAME(MASTER)%に身をゆだねた…
+			PRINTFORML
+			PRINTFORMW ･･･
+			PRINTFORML 「嗯…诶（捂住）！　…♥…嗯…嗯…嗯…！　…♥」
+			;TranslatedMark 「ふ…っ！　…♥…ん、…んん…っ…！　…♥」
+			PRINTFORMW %ANAME(対象)%为了尽量不发出声音，小手捂着紧闭着的嘴忍耐着快感
+			;TranslatedMark %ANAME(対象)%はなるべく声を上げないように、きつく口をつぐみ快感に耐えている
+			PRINTFORMW 但是这种做法，却感觉比平时更敏感了
+			;TranslatedMark その反応から、普段よりも敏感になっているように感じた
+			PRINTFORML 一般情况下，当你心里有着越不想发生的事情，一般却都会发生。这种状况套用在性行为之中也是可以解释的
+			;TranslatedMark 一般的に、ある事をしてはいけない、と意識すると逆にそれらに対して過敏に反応してしまうようになるという
+			PRINTFORMW 现在的%ANAME(対象)%就是这样的状态
+			;TranslatedMark 今の%ANAME(対象)%もそれと同じだった
+			PRINTFORML 越是想不要发出声音，快感就越是强烈
+			;TranslatedMark 声を上げないように、快感を感じないように意識すればするほど
+			PRINTFORMW %ANAME(対象)%的身体比平时更敏感，更加清楚地感受到了%ANAME(MASTER)%爱抚的触感
+			;TranslatedMark %ANAME(対象)%の肉体はいつもより敏感に、%ANAME(MASTER)%の愛撫の手触りを感じ取ってしまっていた
+			PRINTFORML 「嗯，嗯♥…呼啊…！　…啊（捂住）♥…嗯♥……嗯！」
+			;TranslatedMark 「んんっ♥…ふあっ…！　…あっ♥…んっ♥……っ！」
+			PRINTFORMW %ANAME(MASTER)%尽情地爱抚着压抑着可爱喘息声音的%ANAME(対象)%，为了帮助她习惯快感…
+			;TranslatedMark %ANAME(MASTER)%は、声を抑えて可愛く喘ぐ%ANAME(対象)%を存分に撫で上げ、快感に慣らしていった…
+			PRINTFORML ……
+			PRINTFORMW 抚摸行为结束后，%ANAME(対象)%明明没有做多么剧烈的性活动，却露出一副融化了的恍惚表情
+			;TranslatedMark 行為が終わったあと、%ANAME(対象)%はまぐわったわけでもないのに恍惚の表情で蕩けていた
+			PRINTFORMW 「%ANAME(MASTER)%……那个，这个…来做吧…♥」
+			;TranslatedMark 「%ANAME(MASTER)%……また、これに…付き合ってね…♥」
+			CALL FUCK(MASTER, "奉仕, 性技", "接吻喪失")
+			CALL FUCK(対象, "Ｂ, Ｃ, 欲望")
+			CFLAG:対象:好感度 += 200
+			CFLAG:対象:従属度 += 200
+			CFLAG:対象:依存度 += 100
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了200", カラー_シアン)
+			CALL COLOR_PRINTL(@"%ANAME(対象)%の従属度が200上がった", カラー_シアン)
+			CALL COLOR_PRINTL(@"%ANAME(対象)%の依存度が100上がった", カラー_シアン)
+			KDVAR:対象:萃香_声を抑えて = 1
+		ENDIF
+		PRINTFORML
+	;乳首責め
+	CASE 1
+		PRINTFORMW 深夜，%ANAME(対象)%又来到了%ANAME(MASTER)%的房间
+		;TranslatedMark 深夜、%ANAME(対象)%がまた%ANAME(MASTER)%の部屋を訪ねてきた
+		PRINTFORMW 「啊，那个…。又…我想和你练习压声……」
+		;TranslatedMark 「あ、あのさ…。また…、例の練習に付き合って欲しいんだけど……」
+		PRINTFORML 看来是借着练习压低声音的练习来做爱
+		;TranslatedMark どうやらまた、セックス時に声を抑える練習をしたいようだ
+		PRINTFORMW 以温顺的态度仰望%ANAME(MASTER)%的%ANAME(対象)%看起来像一个与年龄相称的少女
+		;TranslatedMark しおらしい態度で%ANAME(MASTER)%を見上げる%ANAME(対象)%は歳相応の少女に見える
+		PRINTFORML %ANAME(MASTER)%为了与上次一样，温柔地抱住了%ANAME(対象)%
+		;TranslatedMark %ANAME(MASTER)%は前回の続きをするため、%ANAME(対象)%を優しく抱き寄せた
+		PRINTFORMW 「啊，那个……为了不发出声音，我会继续努力的……请温柔点……」
+		;TranslatedMark 「あ、あの……声出さないよう、頑張るから……優しくしてね……」
+		PRINTFORML 
+		PRINTFORMW ･･･
+		PRINTFORMW 「嗯…嘿！　…♥…嗯…嗯…嗯…啊…啊！…♥」
+		;TranslatedMark 「ん…っ！　…♥…んん、…ふ…っ…あ…っ！…♥」
+		PRINTFORMW %ANAME(対象)%尽量不发出声音，一边紧闭着嘴一边忍耐着快感
+		;TranslatedMark %ANAME(対象)%はなるべく声を上げないように、きつく口をつぐみながら快感に耐えている
+		PRINTFORML 上次只是对身体全体的爱抚结束了，但是这次进行着以胸为重点的爱抚
+		;TranslatedMark 前回は身体全体への愛撫だけで終わったが、今回は胸を中心にした責めを行っている
+		PRINTFORMW %ANAME(MASTER)%用手掌慢慢涵盖抚摸着%ANAME(対象)%小小的的胸部
+		;TranslatedMark %ANAME(MASTER)%は、小ぶりな%ANAME(対象)%の胸を掌全体でゆっくり撫でつけるように愛撫する
+		PRINTFORML %ANAME(対象)%为了不发出声音，闭紧嘴巴苦苦忍耐着比平时更加敏感地身体
+		;TranslatedMark %ANAME(対象)%が声を上げないように意識するほどに、身体はいつもより敏感に愛撫の手触りを感じ取ってしまっていた
+		PRINTFORMW 不久，%ANAME(MASTER)%像是用指尖描绘似的又以小颗乳头为重点的样子，但是怀中的%ANAME(対象)%却轻声说着绝对不要碰乳头之类的话
+		;TranslatedMark やがて、小粒な乳首を中心に指先でなぞる様に、しかし決して乳首には触れないよう責める
+		PRINTFORML 「…嗯♥…啊…嗯…！　…呜（捂住）♥…嗯♥…嘿！」
+		;TranslatedMark 「…んっ♥…あ…っ…！　…ふっ♥…っ♥…っ！」
+		PRINTFORMW %ANAME(対象)%发出因为忍耐而痛苦的喘息。不敢被触碰乳头的焦急心态却带来了更加敏感的身体
+		;TranslatedMark %ANAME(対象)%は切なげな吐息を漏らす。あえて乳首を触らない焦らすような愛撫が、確実に快感を与えている
+		PRINTFORML 「嗯…嗯…%ANAME(MASTER)%……嗯~」
+		;TranslatedMark 「ん…っ…%ANAME(MASTER)%……っ」
+		PRINTFORMW %ANAME(対象)%用湿润的眼睛恳求着。但是她的身体却一直在%ANAME(MASTER)%的掌控之中
+		;TranslatedMark 潤んだ瞳で%ANAME(対象)%はその先を懇願する。今までずっとおあずけ状態だったのだ
+		PRINTFORMW 两颗乳头已经鼓起来了，尖尖的勃起着，仿佛期待着谁能碰上似的漂亮的淡红色乳头
+		;TranslatedMark その乳先はすでにぷっくりと膨れ、綺麗な薄紅色の乳首が触られることを待ち望むように尖り勃っている
+		PRINTFORML %ANAME(MASTER)%的两只手终于捏住了勃起的乳头。为了更加激烈，四只手指轻轻地扭转拧动
+		;TranslatedMark %ANAME(MASTER)%はついにその乳首を責める。激しくないよう、クニクニと優しくねじり転がすように摘む
+		PRINTFORMW 「嗯！嗯哼…！嗯啊♥♥」
+		;TranslatedMark 「んっ！　んふぅうぅんっ…！　っ♥♥」
+		PRINTFORMW 虽然并没有很用力地扭动，但一直被焦虑所笼罩的%ANAME(対象)%乳头，比平时更加敏感了
+		;TranslatedMark けして強く摘んではいないが、今まで焦らしに焦らされた%ANAME(対象)%の乳首は、いつも以上に過敏になっていた
+		PRINTFORML 每次被温柔地扭动，都会伴随甜蜜而异常激烈的快感从乳尖慢慢扩散到全身，身体也会随之颤抖
+		;TranslatedMark 優しくねじられる度、甘く痺れるような快感が乳先からじんわりと全身に広がり、身体を震わせる
+		PRINTFORMW 看到%ANAME(対象)%这番淫靡的模样，%ANAME(MASTER)%的嗜虐感涌上心头，稍微增强了扭动%ANAME(対象)%乳头的力量
+		;TranslatedMark その淫靡な様に、%ANAME(MASTER)%は嗜虐的な感情が鎌首をもたげ、%ANAME(対象)%の乳首を摘む力を少し強くする
+		PRINTFORMW 「呜啊！　…嗯，嗯♥……呼…♥%ANAME(MASTER)%…好啊……再用力一点…♥」
+		;TranslatedMark 「はっ！　…んんんっ♥……ふっ…♥　%ANAME(MASTER)%…いいよ……もっとして…♥」
+		PRINTFORML %ANAME(対象)%最终还是沉浸于被触碰乳头的快感中，要求进一步的爱抚
+		;TranslatedMark %ANAME(対象)%は、ついに触れられた乳首への快感に蕩けきり、さらなる責めを求めてきた
+		PRINTFORMW 为了回应这个要求，%ANAME(MASTER)%一口把%ANAME(対象)%其中一个乳头含在嘴里舔弄滚转着
+		;TranslatedMark その期待に応えるため、%ANAME(MASTER)%は%ANAME(対象)%の乳首を口に含めて舐め転がす
+		PRINTFORML %ANAME(対象)%的乳头在被%ANAME(MASTER)%的舌头接触后变得更加坚硬挺拔，乳轮也会变得宽大柔软
+		;TranslatedMark %ANAME(対象)%の乳首は%ANAME(MASTER)%の舌が触れるとさらに硬さを増し、乳輪も柔らかく盛り上がる
+		PRINTFORMW 就像刺痛的感觉一样，%ANAME(MASTER)%咬着可爱的勃起乳头，用舌头尽情地舔着它的乳轮，然后用牙齿狠狠地摩擦它的前端
+		;TranslatedMark コリコリした感触を味わうように、可愛らしく勃起した乳首を甘噛みしその先っぽを舌で存分に舐め転がし責め立てる
+		PRINTFORML 「嗯啊！哦~♥…那是…♥好啊…嗯♥」
+		;TranslatedMark 「んひぃっ！　はっ♥…それっ…♥いいよぉ…っ♥」
+		PRINTFORMW %ANAME(MASTER)%尽力爱抚压抑着可爱喘息声音的%ANAME(対象)%的胸，帮助她习惯快感…
+		;TranslatedMark %ANAME(MASTER)%は、声を抑えて可愛く喘ぐ%ANAME(対象)%の胸を存分に責め、快感に慣らしていった…
+		PRINTFORML
+		PRINTFORMW ･･･
+		PRINTFORMW 性行为结束后，%ANAME(対象)%自己揉搓着被充分爱抚的乳头，露出了恍惚的表情……
+		;TranslatedMark 行為が終わったあと、%ANAME(対象)%は責められた乳首を自らこね回しながら恍惚の表情で蕩けていた……
+		PRINTFORMW 「%ANAME(MASTER)%……那个，这个…来做吧…♥」
+		;TranslatedMark 「%ANAME(MASTER)%……また、これに…付き合ってね…♥」
+		PRINTFORML
+		CALL COLOR_PRINTW(@"%ANAME(対象)%の胸が敏感になりました", カラー_注意)
+		TALENT:対象:Ｂ敏感 = 1
+		CALL FUCK(MASTER, "奉仕, 性技", "接吻喪失")
+		CALL FUCK(MASTER, "奉仕, 性技", "接吻喪失")
+		CALL FUCK(対象, "Ｂ, 欲望")
+		CALL FUCK(対象, "Ｂ, 欲望")
+		CFLAG:対象:好感度 += 400
+		CFLAG:対象:従属度 += 400
+		CFLAG:対象:依存度 += 200
+		CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了400", カラー_シアン)
+		CALL COLOR_PRINTL(@"%ANAME(対象)%の従属度が400上がった", カラー_シアン)
+		CALL COLOR_PRINTL(@"%ANAME(対象)%の依存度が200上がった", カラー_シアン)
+		KDVAR:対象:萃香_声を抑えて ++
+		PRINTFORML
+	;クリ責め
+	CASE 2
+		PRINTFORMW 深夜，%ANAME(対象)%又来到了%ANAME(MASTER)%的房间
+		;TranslatedMark 深夜、%ANAME(対象)%がまた%ANAME(MASTER)%の部屋を訪ねてきた
+		PRINTFORMW 「啊，那个…。又…我想和你练习压声……」
+		;TranslatedMark 「あ、あのさ…。また…、例の練習に付き合って欲しいんだけど……」
+		PRINTFORML 看来是借着练习压低声音的练习来做爱
+		;TranslatedMark どうやらまた、セックス時に声を抑える練習をしたいようだ
+		PRINTFORMW 以温顺的态度仰望%ANAME(MASTER)%的%ANAME(対象)%看起来像一个与年龄相称的少女
+		;TranslatedMark しおらしい態度で%ANAME(MASTER)%を見上げる%ANAME(対象)%は歳相応の少女に見える
+		PRINTFORML %ANAME(MASTER)%为了与上次一样，温柔地抱住了%ANAME(対象)%
+		;TranslatedMark %ANAME(MASTER)%は前回の続きをするため、%ANAME(対象)%を優しく抱き寄せた
+		PRINTFORMW 「啊，那个……为了不发出声音，我会更加努力的……请温柔点……♥」
+		;TranslatedMark 「あ、あの……声出さないよう、頑張るから……優しくしてね……♥」
+		PRINTFORML 
+		PRINTFORMW ･･･
+		PRINTFORML %ANAME(MASTER)%把脸埋在%ANAME(対象)%的胯股之间，用舌头慢慢地舔着秘部
+		;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%の股間に顔を埋め、秘部を舌でゆっくり舐め上げている
+		PRINTFORMW 「嗯~♥…！　…♥…呼！　…嗯♥…嗯，嗯♥…嗯…！！　…呼！　…嗯~♥♥」
+		;TranslatedMark 「んん～っ♥…！　…♥…ふーっ！　…っ♥…んんっ♥…っ…！！　…ふっ！　…んん～♥♥」
+		PRINTFORMW %ANAME(対象)%用两只手捂住自己的嘴巴，拼命忍住快感尽量忍住不发出声音
+		;TranslatedMark %ANAME(対象)%は自らの両手で口を塞ぎながら必死に快感に耐え、できるだけ声を上げないようにしている
+		PRINTFORML 但是，由于本来就很敏感的阴蒂被这样激烈的舔弄已经不能够制约住喉间的呻吟
+		;TranslatedMark しかし、ただでさえ敏感なクリトリスが声を上げてはならない制約により、
+		PRINTFORMW 更加激烈暖麻的快感席卷全身
+		;TranslatedMark いっそう過敏に快感を感じ取ってしまう
+		PRINTFORML 如果不是双手用力捂住嘴的话，就会发出很大的娇喘吧
+		;TranslatedMark 両手で強く口を塞いでいないと、大きな嬌声が響き渡ってしまうことだろう
+		PRINTFORMW 「嗯…～！啊~　♥♥嗯，嗯♥…嘿！！嗯♥♥」
+		;TranslatedMark 「ンくっ…～っ！　♥♥んふぅぅっ♥…っ！！　っ♥♥」
+		PRINTFORML %ANAME(MASTER)%慢慢地、温柔地、仔细地舔着%ANAME(対象)%小穴周围的褶皱
+		;TranslatedMark %ANAME(MASTER)%はゆっくり優しく、%ANAME(対象)%のラビアのヒダを丁寧に舐めている
+		PRINTFORMW %ANAME(対象)%的裂痕是美丽的粉红色，每次舌头碰到阴道口都会像寻求%ANAME(MASTER)%一样激烈的抽动
+		;TranslatedMark %ANAME(対象)%の陰裂は綺麗なピンク色で、舌が触れるたび膣口が%ANAME(MASTER)%を求めるようにひくつく
+		PRINTFORML 然后就在眼前像鲍鱼那样慢慢的膨胀张开
+		;TranslatedMark そして目の前でクリトリスが自己主張するように膨れ上がる
+		PRINTFORMW 我也只是想让他帮我练习压低声音而已…
+		;TranslatedMark こっちも責めて欲しい　と言わんばかりに…
+		PRINTFORMW %ANAME(MASTER)%温柔地唑吻着阴核，开始舔弄自己的"弱点"
+		;TranslatedMark %ANAME(MASTER)%は優しくキスをするように陰核に口付けて、『弱点』への責めを始める
+		PRINTFORML 「嗯！！♥♥♥嗯~♥♥嘘！！♥♥」
+		;TranslatedMark 「んんっ！！♥♥♥　ンん～～ッ♥♥ッッ！！♥♥」
+		PRINTFORMW 每当%ANAME(MASTER)%的嘴唇、舌头、牙齿爱抚小豆豆的时候，%ANAME(対象)%的身体就像被一束电流穿过般的麻木快感
+		;TranslatedMark %ANAME(MASTER)%の唇が、舌が、歯が豆を責めるたび、%ANAME(対象)%の身体に電流のような快感が走る
+		PRINTFORMW 在电流一般的快感返回大脑之后，%ANAME(対象)%用力扭转上半部分身体，苦闷不已
+		;TranslatedMark 脳まで響く快感の落雷に、%ANAME(対象)%は大きく身を捩じらせてよがり悶える
+		PRINTFORML 在%ANAME(対象)%的胯股之间埋着脸的%ANAME(MASTER)%死死的按住%ANAME(対象)%乱蹬的双腿，也些担心会不会被鬼的刚力反弹
+		;TranslatedMark %ANAME(対象)%の股間に顔を埋めている%ANAME(MASTER)%は、鬼の剛力で潰されやしないかとヒヤヒヤしたが、
+		PRINTFORMW 为了不让%ANAME(対象)%这样做，让她努力保持理性的最后一条线，不让快感压垮她
+		;TranslatedMark %ANAME(対象)%はそれだけはしないように、理性の最後の一線を持って太ももで押し潰さないよう努めた
+		PRINTFORMW %ANAME(MASTER)%决定更加温柔地舔弄她
+		;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%を落ち着かせようと、もっと優しく責めることにした
+		PRINTFORML 「呼！　…♥♥嗯…♥♥～～～！！　…嗯…♥♥」
+		;TranslatedMark 「ふっ！　…♥♥んんッ…♥♥～～っっ！！　…くぅ～…♥♥」
+		PRINTFORMW 但是，这种行为完全被身体的临界快感灼烧的%ANAME(対象)%所焦心烦恼
+		;TranslatedMark しかしその心遣いも、完全に身体が火照りきった%ANAME(対象)%には焦らされるようにしか感じなかった
+		PRINTFORMW 每次%ANAME(対象)%的快感快要迸发的时候，她满是蜜水的阴道孔里便会蠢蠢欲动
+		;TranslatedMark %ANAME(対象)%が快感でよがる度、秘裂からは蜜が溢れ膣穴がいやらしく蠢く
+		PRINTFORML %ANAME(MASTER)%看到她过于焦躁淫乱的样子，一时冲动真想马上把自己膨胀的肉棒满满的刺进去
+		;TranslatedMark そのあまりに淫らな様子に%ANAME(MASTER)%は、今すぐ己の膨張しきった肉棒を突き込んでやりたい衝動に駆られるが、
+		PRINTFORMW 看到%ANAME(対象)%拼命忍耐着呼吸困难和快感，连眼泪都渗出来的样子，我就冷静了下来
+		;TranslatedMark 息苦しさと快感を、涙さえ滲ませて必死に耐えている%ANAME(対象)%の姿を見て思いとどまる
+		PRINTFORML 再慢一点，再温柔一点，分阶段进行吧
+		;TranslatedMark もっとゆっくり、もっと優しく、段階をおいて進めよう
+		PRINTFORMW %ANAME(MASTER)%不断舔弄爱抚着拼命抑制声音的%ANAME(対象)%的小穴，帮助她习惯快感…
+		;TranslatedMark %ANAME(MASTER)%は、必死に声を抑えてよがる%ANAME(対象)%のクリトリスを責め、快感に慣らしていった…
+		PRINTFORML
+		PRINTFORMW ･･･
+		PRINTFORML 「呜哇♥♥哎呀♥♥啊…嗯♥♥」
+		;TranslatedMark 「はーっ♥♥　はーっ♥♥　はあ…っ♥♥」
+		PRINTFORMW 性行为结束后，%ANAME(対象)%流着泪和涎水，一脸迷乱的表情……
+		;TranslatedMark 行為が終わったあと、%ANAME(対象)%は涙と涎でぐちゃぐちゃになった顔で恍惚の表情を浮かべていた……
+		PRINTFORMW 「%ANAME(MASTER)%……又……继续做吧…♥」
+		;TranslatedMark 「%ANAME(MASTER)%……また……付き合ってね…♥」
+		PRINTFORMW 和%ANAME(対象)%确定了下一个练习的约定
+		;TranslatedMark %ANAME(対象)%は蕩けきった顔と声で、次の練習の約束を交わした
+		FOR LOCAL, 0, 3
+			CALL FUCK(MASTER, "奉仕, 性技", "接吻喪失")
+			CALL FUCK(対象, "Ｃ, 欲望")
+		NEXT
+		CFLAG:対象:好感度 += 700
+		CFLAG:対象:従属度 += 700
+		CFLAG:対象:依存度 += 700
+		CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了700", カラー_シアン)
+		CALL COLOR_PRINTL(@"%ANAME(対象)%の従属度が700上がった", カラー_シアン)
+		CALL COLOR_PRINTL(@"%ANAME(対象)%の依存度が700上がった", カラー_シアン)
+		KDVAR:対象:萃香_声を抑えて ++
+		PRINTFORML
+	;ラスト
+	CASE 3
+		PRINTFORMW 深夜，%ANAME(対象)%又来到了%ANAME(MASTER)%的房间
+		;TranslatedMark 深夜、%ANAME(対象)%がまた%ANAME(MASTER)%の部屋を訪ねてきた
+		PRINTFORMW 「啊，那个…。又…我想和你练习压声……」
+		;TranslatedMark 「あ、あのさ…。また…、例の練習に付き合って欲しいんだけど……」
+		PRINTFORML 看来是借着练习压低声音的练习来做爱
+		;TranslatedMark どうやらまた、セックス時に声を抑える練習をしたいようだ
+		PRINTFORMW 以温顺的态度仰望%ANAME(MASTER)%的%ANAME(対象)%看起来像一个与年龄相称的少女
+		;TranslatedMark しおらしい態度で%ANAME(MASTER)%を見上げる%ANAME(対象)%は歳相応の少女に見える
+		PRINTFORML %ANAME(MASTER)%为了与上次一样，温柔地抱住了%ANAME(対象)%
+		;TranslatedMark %ANAME(MASTER)%は前回の続きをするため、%ANAME(対象)%を優しく抱き寄せた
+		PRINTFORMW 「啊，那个……为了不发出声音，我会更加努力的……请温柔点……♥」
+		;TranslatedMark 「あ、あの……声出さないよう、頑張るから……優しくしてね……♥」
+		PRINTFORML 
+		PRINTFORMW ･･･
+		PRINTFORML 例如，%ANAME(対象)%用自己的双手捂着嘴拼命忍耐着快感
+		;TranslatedMark 例によって%ANAME(対象)%は、自らの両手で口を塞ぎながら必死に快感に耐えている
+		PRINTFORMW 「嗯♥嗯！！　♥♥…嗯…嗯~♥…～♥嘘！！♥」
+		;TranslatedMark 「ん♥んっ！！　♥♥…くぅ…っ～ッ♥…～ッ♥ッ！！♥」
+		PRINTFORML %ANAME(MASTER)%在正式演出前，用手指将%ANAME(対象)%的秘裂塞进去，使之习惯了刺激
+		;TranslatedMark %ANAME(MASTER)%は本番の前に、%ANAME(対象)%の秘裂に指を出し入れして刺激に慣れさせている
+		PRINTFORMW %ANAME(対象)%的小阴道孔，像不想放开%ANAME(MASTER)%的手指一样吸来吸去
+		;TranslatedMark %ANAME(対象)%の小さな膣穴は、%ANAME(MASTER)%の指を放したくないかのようにきゅぅきゅぅと吸い付いてくる
+		PRINTFORML 一边将缠绕在手指上的媚肉划开，一边描上阴道壁的一点
+		;TranslatedMark 指に絡みつく媚肉を宥めるようにかき分けながら、膣壁の一点をなぞり上げる
+		PRINTFORMW 「嗯！♥嗯！♥嗯~！♥！♥」
+		;TranslatedMark 「んひィッ！♥んんッ！♥　っぅうぅ～～っ！♥！♥」
+		PRINTFORML 这是%ANAME(対象)%特别敏感的弱点。%ANAME(対象)%被这样爱抚的身体大幅跳跃
+		;TranslatedMark %ANAME(対象)%が特別感じる弱い箇所だ。そこを責められ、%ANAME(対象)%の身体が大きく跳ねる
+		PRINTFORMW 然后便是最强烈的绝顶，淫乱的蜜水伴随着热潮噗哧地喷了出来
+		;TranslatedMark そして強い絶頂を示すように、愛蜜と熱い潮がぷしっ、と噴き出した
+		PRINTFORML %ANAME(MASTER)%暂时停止行动确认%ANAME(対象)%的状态
+		;TranslatedMark %ANAME(MASTER)%は一旦そこで、行為を止めて%ANAME(対象)%の状態を確認する
+		PRINTFORMW 「哈…啊…哈……嗯…啊…」
+		;TranslatedMark 「はぁーっ…はっ…はぁーっ……っ…ぁ…」
+		PRINTFORML 为了不因为强烈的快感而发出声音，%ANAME(対象)%用双手拼命堵住了嘴
+		;TranslatedMark 強い快感にも声を出さぬよう、両手で口を必死に塞いでいたのだ
+		PRINTFORML 也许是因为抵抗快感而引发了呼吸困难，她的眼睛都被泪水湿润了
+		;TranslatedMark 快感に抗う息苦しさからか、彼女の瞳は涙で潤んでいた
+		PRINTFORMW 看到这个样子，%ANAME(MASTER)%心想。今天本来打算做性交的，但是还是放弃比较好吧…
+		;TranslatedMark その姿を見て%ANAME(MASTER)%は思う。今日は性交までやるつもりだったが、止めた方がいいだろうか…
+		PRINTFORML %ANAME(対象)%轻轻抚摸着犹豫的%ANAME(MASTER)%的脸
+		;TranslatedMark 逡巡している%ANAME(MASTER)%の顔を、%ANAME(対象)%はそっと撫でる
+		PRINTFORMW 「你在担心我吗？　…谢谢你的温柔」
+		;TranslatedMark 「私のこと、心配してくれてるのかい？　…ありがとうね」
+		PRINTFORMW 「但是没关系，鬼的身体很结实。…虽然可能撑不到最后，但我一定会尽力撑住的」
+		;TranslatedMark 「でも大丈夫だよ、鬼の身体は頑丈だから。…最後までは無理かもしれないけど、出来るとこまでやってみるよ」
+		PRINTFORML 那泪水，不仅只是忍耐痛苦，更多的是%ANAME(MASTER)%给人的快感与感动混合在一起的东西
+		;TranslatedMark その涙は、苦しさだけではなく%ANAME(MASTER)%が与える快感への悦びも混ざり合った物だったようだ
+		PRINTFORMW 下定决心的%ANAME(MASTER)%将阴茎贴在%ANAME(対象)%的秘裂上对准穴口，慢慢地插了进去
+		;TranslatedMark 意を決した%ANAME(MASTER)%は%ANAME(対象)%の秘裂にペニスをあてがい、ゆっくりと挿し入れる
+		PRINTFORMW 「啊！♥　…哈哈♥…嗯……、呼♥」
+		;TranslatedMark 「あッ！♥　…はっ♥…んん……、ふぅっ♥」
+		PRINTFORML 也许是因为至今为止的"练习"一直被%ANAME(MASTER)%掌控着的缘故
+		;TranslatedMark 今までの「練習」でおあずけされ続けてきたからだろうか、
+		PRINTFORMW %ANAME(対象)%的肉壶，把插进来的肉棒紧紧地吸在了以前没有侵犯过的深度上，然后好像嘴巴狼吞虎咽一样紧夹不放
+		;TranslatedMark %ANAME(対象)%の肉壷は、入ってきたペニスをかつてないほどきゅうきゅうと締め付けてむしゃぶりつく
+		PRINTFORML 阴道壁上的褶皱、肉粒像是手里拿着棒棒糖的小孩一松手便会掉落地上一样紧紧地缠绕着%ANAME(MASTER)%的肉棒
+		;TranslatedMark 膣壁のヒダが、肉粒が、%ANAME(MASTER)%の一物を愛するかの如く絡み付いて蠢いている
+		PRINTFORMW 「啊，哈…嗯♥…%ANAME(MASTER)%…好舒服啊…哈！♥再用力一点♥♥」
+		;TranslatedMark 「あっ、はぁ…っ♥…%ANAME(MASTER)%…いいよ…っ！♥　もっとぉっ♥♥」
+		PRINTFORML 那娇喘的叹息声已经压不住了，终于像是水坝决裂般从口中发出了极度欢愉与喜悦的声音
+		;TranslatedMark その喘ぎ声はもはや殺しきれず、ついには決壊するように口から悦びの声がまろび出た
+		PRINTFORMW 但是，除了二人又有谁会听到呢
+		;TranslatedMark だが、誰が止められるというのだろう
+		PRINTFORML 她一直忍耐着。然后，对超越极限般的快乐尽情地呐喊
+		;TranslatedMark 彼女はずっと我慢していた。そして、その我慢を超えるほどの快楽に思う存分声を上げる
+		PRINTFORMW 那个身姿，是比到现在为止的哪个身姿都淫荡美丽，让人心情舒畅
+		;TranslatedMark その姿は、今までのどの姿よりも淫らで美しく、気持ち良さそうなモノだった
+		PRINTFORMW 「啊！♥啊！♥啊啊！！♥我喜欢那里♥插到更深处♥啊啊啊！！♥♥」
+		;TranslatedMark 「あっ！♥　あっ！♥　あぁっ！！♥　そこっ好きぃ♥　もっと奥まで♥　ふぁあっ！！♥♥」
+		PRINTFORML …%ANAME(対象)%不停地大声喘息，没有一丝想要压抑的心思
+		;TranslatedMark …すでに%ANAME(対象)%は大声で喘ぎまくり、声を抑えるという意識は消え去っていた
+		PRINTFORML 但是，我觉得她怎么做都可以了
+		;TranslatedMark でも、それでいいと思った
+		PRINTFORMW 回想起来，对方是因和自己的性行为而发出无尽快感的喜悦声音，这本就是一件令人自豪的事。
+		;TranslatedMark 思えば相手が自分との行為で大いに感じ、声を上げて悦んでくれることがどれほど嬉しいことか
+		PRINTFORML 自己以前错了
+		;TranslatedMark 自分が間違っていた
+		PRINTFORMW 用和自己的性行为，抑制传达喜悦的%ANAME(対象)%的声音，是很不自然的事情
+		;TranslatedMark 自分との行為で、あらん限りに悦びを伝えてくれる%ANAME(対象)%の声を抑えようなど、無粋な事だった
+		PRINTFORMW 她比起至今为止的"练习"的时候，像野兽一样大声叫喊的现在确实有着更加幸福的表情…
+		;TranslatedMark 彼女は今までの「練習」の時より、獣のように声を上げている今の方が確実に幸せな顔をしているのだから…
+		PRINTFORMW 「啊！♥啊！♥再加把劲！♥%ANAME(MASTER)%♥的肉棒喜欢！♥最喜欢了！！♥♥」
+		;TranslatedMark 「あっ！♥ああっ！♥　もっとぉっ！♥　%ANAME(MASTER)%っ♥好きっ！♥大好きぃッ！！♥♥」
+		PRINTFORML 听到这句话，%ANAME(MASTER)%也再次向%ANAME(対象)%呼喊着充满爱意的话语，紧紧抓住她的腰，疯狂地反复抽插
+		;TranslatedMark その声を聞いて、%ANAME(MASTER)%もまた%ANAME(対象)%に愛を叫びながら彼女の腰をガッシリと掴み、狂ったように抽挿を繰り返す
+		PRINTFORML 不管周围听得到听不到，已经无所谓了
+		;TranslatedMark 周りに聞こえようが知られようが、もうどうでもよかった
+		PRINTFORMW 现在只是一味地，互相提高声音，贪图肉体间的快感，只想着做爱…
+		;TranslatedMark 今はただひたすらに、互いに声を上げて肉体を貪り合い、愛し合うことしか頭に無かった…
+		PRINTFORML 
+		PRINTFORMW ･･････
+		PRINTFORML 两个人的相爱在接近黎明的时候终于结束了…
+		;TranslatedMark 二人の愛し合いは明け方近くでようやく終わった…
+		PRINTFORMW 经过反复忍耐后的开放，给了两个人前所未有的快乐
+		;TranslatedMark 我慢に我慢を重ねた末の開放は、今までは比較にならない領域の快楽を二人に与えた
+		PRINTFORML 「……结果，到底是原貌呢，还是没能做到控制声音……做了没用的事啊」
+		;TranslatedMark 「……結局、元通りというか、元の木阿弥というか……無駄なことしちゃってたのかねぇ」
+		PRINTFORMW %ANAME(対象)%被抱在%ANAME(MASTER)%的怀里，一脸轻松地说
+		;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に抱きつきながら、緩んだ顔で言った
+		PRINTFORML %ANAME(MASTER)%回应她："我不这么认为。"
+		;TranslatedMark そうは思わない、と%ANAME(MASTER)%は彼女に応える
+		PRINTFORMW 至少正是因为有了那个挑战，才有了"让%ANAME(対象)%发出更有魅力的声音"的答案
+		;TranslatedMark 少なくともあの挑戦があったからこそ、%ANAME(対象)%は声を上げた方が魅力的だ、という答えを出せたのだから
+		PRINTFORML 「…♥真是的。这个东西不要大声地说出来啊♥」
+		;TranslatedMark 「…♥　まったく。物は言いようだね、このぉっ♥」
+		PRINTFORMW 直到被睡魔袭击为止，两人一直在床上亲热……
+		;TranslatedMark 睡魔に襲われるまで、二人はベッドの上でひたすらイチャついた……
+		FOR LOCAL, 0, 5
+			CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", ANAME(MASTER))
+			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣")
+		NEXT
+		PRINTFORML 
+		PRINTFORMW ･･･
+		PRINTFORML 第二天，周围的人还是听得清清楚楚的，"如果不想抑制声音的话就用这个吧！"然后把隔音材料递给了我…
+		;TranslatedMark 翌日、やはり丸聞こえだった周囲から「声を抑える気が無いならこれを使ってくれ！」と防音材を渡された…
+		PRINTFORMW 之后，%ANAME(MASTER)%把%ANAME(対象)%叫出来，一起对房间进行隔音处理
+		;TranslatedMark その後、%ANAME(MASTER)%は%ANAME(対象)%を呼び出し、部屋への防音処理を一緒に施すことにした
+		PRINTFORML 「嘿嘿。虽然有点麻烦，但是这样就可以毫无顾虑地发出声音了呢♪」
+		;TranslatedMark 「ふふんっ。ちょいと手間だが、これで心置きなく声を出せるってモンだねぇ♪」
+		PRINTFORMW 两个人兴致勃勃地进行着工作。虽然很辛苦，但今后也不会再抱怨了吧
+		;TranslatedMark 二人で和気藹々と作業を進めた。中々大変だったが、これで今度から苦情も無くなるだろう
+		PRINTFORML
+		CALL COLOR_PRINTW(@"%ANAME(対象)%のヴァギナが敏感になりました", カラー_注意)
+		TALENT:対象:Ｖ敏感 = 1
+		CFLAG:対象:好感度 += 1000
+		CFLAG:対象:従属度 += 1000
+		CFLAG:対象:依存度 += 1000
+		CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了1000", カラー_シアン)
+		CALL COLOR_PRINTL(@"%ANAME(対象)%の従属度が1000上がった", カラー_シアン)
+		CALL COLOR_PRINTL(@"%ANAME(対象)%の依存度が1000上がった", カラー_シアン)
+		KDVAR:対象:萃香_声を抑えて = -1
+ENDSELECT
+
+RETURN 1

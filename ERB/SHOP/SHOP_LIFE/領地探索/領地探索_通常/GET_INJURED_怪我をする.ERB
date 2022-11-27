@@ -1,0 +1,50 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_GET_INJURED_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_GET_INJURED_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_GET_INJURED(対象)
+#DIM 対象
+PRINTFORML 痛痛痛！
+PRINTFORML %ANAME(対象)%在散步的时候受伤了
+PRINTL
+CALL ASK_MULTI("忍耐撐着", "看医生", "自我治疗")
+
+IF RESULT == 0
+	PRINTFORML 這種程度只要忍著就行……
+	PRINTFORMW 
+	$MYSELF
+	IF RAND:3
+		PRINTFORML ……情況悪化了
+		CALL ADD_COOLTIME(対象, 3)
+	ELSE
+		PRINTFORML ……痊愈了！
+		MAXBASE:対象:体力 += 100
+		CALL ICPRINT(@"体力最大値提高了<100>、変成了<{MAXBASE:対象:体力}>", "L", カラー_注意)
+	ENDIF
+ELSEIF RESULT == 1
+	PRINTFORML 還是讓医生看看比較好……
+	PRINTFORMW 
+	PRINTFORML 多虧了医生、痊愈了！
+	LOCAL = MIN(MONEY, 2000)
+	MONEY -= LOCAL
+	CALL ICPRINT(@"支付了<{LOCAL}>金", "L", カラー_注意)
+ELSE
+	PRINTFORMW 這樣的傷口応該可以自己治疗吧
+	GOTO MYSELF
+ENDIF
+
+RETURN 1

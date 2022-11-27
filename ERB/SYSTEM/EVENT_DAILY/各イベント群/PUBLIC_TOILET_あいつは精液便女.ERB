@@ -1,0 +1,156 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_PUBLIC_TOILET_RATE()
+RETURN 1000
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_PUBLIC_TOILET_DECISION()
+RETURN 1
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_PUBLIC_TOILET_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_PUBLIC_TOILET_SETTARGET()
+FOR LOCAL, 0, CHARANUM
+	;捕虜でなく、死んでおらず、便所所持者の女で、1/3の確率
+	IF !CFLAG:LOCAL:捕虜先 && CFLAG:LOCAL:特殊状態 != 特殊状態_死亡 && GETBIT(TALENT:LOCAL:淫乱系, 素質_淫乱_精液便女) && IS_FEMALE(LOCAL) && !RAND:3 && IS_APPEAR(LOCAL)
+		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+		DAILY_TARGET_NUM ++
+	ENDIF
+NEXT
+SIF DAILY_TARGET_NUM < 1
+	RETURN 0
+RETURN 1
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_PUBLIC_TOILET()
+#DIM 対象
+#DIM ID
+#DIMS 竿役
+
+FOR LOCAL, 0, DAILY_TARGET_NUM
+	対象 = DAILY_TARGET:LOCAL
+	PRINTFORMW %ANAME(対象)%成為了精液便所的身體、每晚每晚都會感到飢渴難耐……
+	SELECTCASE RAND:12
+		CASE 0
+			PRINTFORML %ANAME(対象)%去做娼婦的工作了
+			PRINTFORML 被侵犯了無數次而變得熟練的技巧令客人非常滿足
+			PRINTFORML %ANAME(対象)%被無數客人買下、嘴巴、小穴、菊穴都被染上了白色
+			PRINTFORML 但即使如此、客人和娼婦、沒有暴力和不講理的"正當"関係、令%ANAME(対象)%得不到滿足
+			PRINTFORML 即使身體內外都被染成白色、還是沒有滿足%ANAME(対象)%的肉慾
+			IF CFLAG:対象:所属 == CFLAG:MASTER:所属
+				CALL COLOR_PRINTL("資金多少有所增加了", カラー_注意)
+				MONEY += RAND(3000, 10000)
+			ENDIF
+			竿役 = 娼館的客人
+		CASE 1
+			PRINTFORML %ANAME(対象)%去做士兵們的慰安婦了
+			PRINTFORML 最初士兵們雖然感到驚訝、但當%ANAME(対象)%自行跪下用嘴吸允自己的肉棒時、眼神變了
+			PRINTFORML 爭先恐後地聚集在%ANAME(対象)%身邊、將%ANAME(対象)%所有穴都塞滿了
+			PRINTFORML 長時間缺乏女人的他們粗暴地使著腰、%ANAME(対象)%高潮了好幾次……
+			PRINTFORML 之後、%ANAME(対象)%成為所有士兵們的性伴侶了
+			竿役 = 兵士
+		CASE 2
+			PRINTFORML %ANAME(対象)%去做公衆便所的便器了
+			PRINTFORML 無數的男人一個一個拜訪、用%ANAME(対象)%處理性慾了
+			PRINTFORML 被連名字也不知道的男人使用後捨棄掉的快感、%ANAME(対象)%感到興奮得受不了
+			PRINTFORML 天亮時、大腿被畫上了十幾個「正」字
+			PRINTFORML 作為使用費的零錢和紙幣被強行塞入了肉穴之中
+			IF CFLAG:対象:所属 == CFLAG:MASTER:所属
+				CALL COLOR_PRINTL("資金多少有所增加了", カラー_注意)
+				MONEY += RAND(500, 1000)
+			ENDIF
+			竿役 = 偶遇的男人
+		CASE 3
+			PRINTFORML %ANAME(対象)%作為壁尻被人使用了
+			PRINTFORML 連臉都沒見過的男人，隨意使用着同樣看不見臉的%ANAME(対象)%
+			PRINTFORML 被當成飛機杯...都不如地對待，%ANAME(対象)%感到興奮得受不了
+			PRINTFORML 天亮時，幾十人分量的精液從小穴和菊穴流出、灑落在地上
+			PRINTFORML 牆壁的另一邊、%ANAME(対象)%露出淫蕩的啊嘿顏……
+			竿役 = 偶遇的男人
+		CASE 4
+			PRINTFORML %ANAME(対象)%參加亂交派對了
+			PRINTFORML 會場上無數男女交合著
+			PRINTFORML %ANAME(対象)%的肉體、對男人們十分有魅力
+			PRINTFORML %ANAME(対象)%與不認識的陌生男人們、度過了熱情的時間
+			PRINTFORML 但是、這種過於「正派」的場合、令少女想作為便器被使用的慾望得不到滿足……
+			竿役 = 乱交パーティーの参加者
+		CASE 5
+			PRINTFORML %ANAME(対象)%被路過的男人搭訕了
+			PRINTFORML 走到旅館、進入房間、%ANAME(対象)%就開始跪下吞吐著男人的肉棒
+			PRINTFORML 巧妙的口技、令男人一瞬間在口內射出大量白濁的精液
+			PRINTFORML 興奮了的男人、就這樣將%ANAME(対象)%推倒在床上、用肉棒將已經完全濕潤的陰部貫穿……
+			PRINTFORML 兩人就這樣直到天亮為止、做了幾十次……
+			PRINTFORML 隨便沐浴後、兩人交換聯絡方式、並分別了
+			竿役 = 偶遇的男人
+		CASE 6
+			PRINTFORML %ANAME(対象)%在貧民街上徘徊
+			PRINTFORML 像%ANAME(対象)%這樣的女人一個人在貧民街上徘徊的話、理所當然地被惡人纏上了
+			PRINTFORML %ANAME(対象)%被人威脅然後被帶到廢墟、之後被盡情地侵犯了……
+			PRINTFORML 無論嘴巴、小穴、菊穴都被一個個粗暴的肉棒抽插的快感、這正是少女所追求的快樂...
+			PRINTFORML 不久後滿足了的男人們、將所有穴都溢出精液的%ANAME(対象)%置之不理、就這樣離開了
+			竿役 = 地痞
+		CASE 7
+			PRINTFORML %ANAME(対象)%被行為不良的男人們跟蹤了
+			PRINTFORML 男人們讓%ANAME(対象)%喝下了奇怪的藥後開始侵犯
+			PRINTFORML 因為藥的效果然意識朦朧的%ANAME(対象)%、自行跪下吸允肉棒、張開大腿、乞求著快楽
+			PRINTFORML 但是、即使沒有藥物的效果、少女還是一樣會做相同的事吧……
+			PRINTFORML 男人們對著狼狽不堪的%ANAME(対象)%射精後、將全身沾滿精液的少女棄置於路邊並離開了
+			竿役 = 地痞
+		CASE 8
+			PRINTFORML %ANAME(対象)%被數名男人求愛後，被帶到旅館
+			PRINTFORML 進入房間並鎖上門後，衣服被粗暴地扒下
+			PRINTFORML 然後就這樣，不容分說地被侵犯了幾次……
+			竿役 = 偶遇的男人
+		CASE 9
+			PRINTFORML %ANAME(対象)%被流浪漢搭訕了
+			PRINTFORML 吸吮完充滿污垢的肉棒後他非常鍾意，推倒了%ANAME(対象)%
+			PRINTFORML 然後就這樣， 骯髒的肉棒開始在已經濕透了的陰部抽插
+			PRINTFORML %ANAME(対象)%和流浪漢交合了幾次，相互接吻，子宮接受了精液……
+			PRINTFORML 屈服於與流浪漢性愛之下的%ANAME(対象)%，被單方面做出今後繼續見面的約定
+			竿役 = 流浪漢
+		CASE 10
+			PRINTFORML %ANAME(対象)%被路過的男人搭訕了
+			PRINTFORML 被男人帶到小路，然後被用後立體位的姿勢盡情侵犯了
+			PRINTFORML 男人奪去了%ANAME(対象)%的內褲，命令%ANAME(対象)%就這樣回去
+			PRINTFORML %ANAME(対象)%感受到被內射在到膣內的精液慢慢流到大腿，就這樣返回據點
+			竿役 = 偶遇的男人
+		CASE 11
+			PRINTFORML %ANAME(対象)%全裸走向流浪漢聚居之處
+			PRINTFORML 流浪漢興奮地將%ANAME(対象)%圍着、推倒、並侵犯了
+			PRINTFORML 在墮落的地方如此墮落地做愛，%ANAME(対象)%感到興奮得超乎想像
+			PRINTFORML 少女積極地吸吮肉棒、搖動著腰、膣內承受了被數次、數十次射精
+			PRINTFORML 不久天亮後，全身沾染上白色微黃精液的%ANAME(対象)%獨自躺在河邊……
+			竿役 = 流浪漢
+	ENDSELECT
+	CALL FUCK_GANGBANG(対象, GET_SPERM_ID("不明"), @"%竿役%的\@ RAND:2 ? 肉棒 # 嘴唇\@", @"%竿役%")
+
+	PRINTFORMW
+NEXT
+
+RETURN 1
+
+@EVENT_DAILY_PUBLIC_TOILET_ALLOW_WHEN_WANDERING
+RETURN 1
+

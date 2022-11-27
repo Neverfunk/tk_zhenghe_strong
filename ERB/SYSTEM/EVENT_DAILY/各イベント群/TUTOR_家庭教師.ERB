@@ -1,0 +1,764 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_TUTOR_RATE()
+RETURN (DVAR:家庭教師_お気に入りID > 0 ? 250 # 20)
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_TUTOR_DECISION()
+#DIM 対象
+SIF DVAR:家庭教師_発生フラグ == -1
+	RETURN 0
+
+IF DVAR:家庭教師_授業実施回数 > 0
+	対象 = ID_TO_CHARA(DVAR:家庭教師_お気に入りID)
+	IF 対象 == -1
+		DVAR:家庭教師_逢瀬フラグ = 0
+		DVAR:家庭教師_お気に入りID = 0
+		RETURN 0
+	ELSEIF CFLAG:対象:捕虜先 || CFLAG:対象:所属 != CFLAG:MASTER:所属
+		RETURN 0
+	ENDIF
+ENDIF
+RETURN 15 <= DAY
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_TUTOR_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_TUTOR()
+#DIM 対象
+
+IF DVAR:家庭教師_逢瀬フラグ == 1
+	対象 = ID_TO_CHARA(DVAR:家庭教師_お気に入りID)
+	PRINTFORMW 与貴族的女兒幽会了…
+	PRINTFORML 
+	SELECTCASE RAND:10
+		CASE 0
+			PRINTFORML 頭髮已経散乱的少女跨坐在%ANAME(対象)%上面，激烈地揺動着腰
+			PRINTFORML 毎当腰上下揺動都会讓肉棒挖着全部的膣肉，給予少女極強的快楽
+			PRINTFORML 慢慢地少女変得気息荒乱，膣壁不断收縮，離高潮愈来愈近
+			PRINTFORML 不久少女大大地弓起背高潮同時，膣肉一辺痙攣一辺緊緊地纏繞肉棒
+			PRINTFORMW %ANAME(対象)%同樣到達了極限，腰用力向上突刺将肉棒刺到少女深処射精了
+		CASE 1
+			PRINTFORML %ANAME(対象)%讓少女四肢着地並從背後激烈地用腰拍打着少女，響起拍！拍！声
+			PRINTFORML %ANAME(対象)%毎次突進少女都会身体震顫発出可愛的呻吟，膣壁緊緊地纏繞肉棒
+			PRINTFORML 少女発出平時想像不到的妖媚的声音，令%ANAME(対象)%陶酔地揺動着腰
+			PRINTFORML 因快楽而全身無力的少女倒在床上，発出甜美的声音
+			PRINTFORMW %ANAME(対象)%圧在少女身上膣内射精的同時，少女発出格外大的嬌声一同高潮了
+		CASE 2
+			PRINTFORML 経過数次交合後，%ANAME(対象)%与少女一起倒在床上相擁
+			PRINTFORML 二人気息荒乱，互相依偎対方身体沈溺在高潮的余韻之中
+			PRINTFORML 二人橫躺在床上説着寢辺話度過了甜蜜的時間
+			IF IS_MALE(対象)
+				PRINTFORML 不久後少女一言不発地仰望着%ANAME(対象)%，手指在%ANAME(対象)%的胸膛上打転
+			ELSE
+				PRINTFORML 不久後少女一言不発地仰望着%ANAME(対象)%，用手掌轻轻抚摸着她的脸颊。
+			ENDIF
+			PRINTFORMW 作為回応%ANAME(対象)%与少女温柔地接吻，再次交合了
+		CASE 3
+			PRINTFORML %ANAME(対象)%以正常位圧着少女慢慢地揺動着腰
+			PRINTFORML 少女抓着床単妖豔地扭動身体沈溺在快楽之中
+			PRINTFORML 少女淫靡的表情令%ANAME(対象)%的剛直変得更堅硬， 更激烈地刺激着少女的膣内
+			PRINTFORML 少女発出下流的呻吟声，身体震顫着
+			PRINTFORMW %ANAME(対象)%一辺観察着少女的反応一辺慢慢做愛取楽
+		CASE 4
+			PRINTFORML 少女熱情地用口吸吮奉仕着%ANAME(対象)%的肉棒
+			PRINTFORML 少女的臉毎次前後移動都会発出淫蕩的水声， 意料之外的舒服令%ANAME(対象)%発出呻吟
+			PRINTFORML 喜歡這個反応的少女更激烈地用指和舌全部熱情地全力進攻着肉棒
+			PRINTFORML 不久後到達忍耐極限在口内射精後，少女像被餵食的初生鳥兒一樣将全部精液喝乾浄
+			PRINTFORMW 為了奨勵少女熱情的奉仕将少女推倒侵犯時，少女表情恍惚身体震顫享受着快感
+		CASE 5
+			PRINTFORML 少女背向%ANAME(対象)%跨坐在肉棒上，%ANAME(対象)%從背後抱着少女揉着少女的胸部令少女漏出悶熱的吐息
+			PRINTFORML %ANAME(対象)%责弄着少女的乳首並用舌頭滑過後脖令少女全身不断震顫着
+			PRINTFORML 少女一辺接受着%ANAME(対象)%的愛撫，一辺扭動着腰刺激肉棒給予快感
+			PRINTFORML 不久後少女帯着恍惚的表情用甜美的声音呼喚着你的名字，小穴緊緊地收緊
+			PRINTFORMW %ANAME(対象)%也無法忍耐，緊抱着少女在小穴深処釋放精液
+		CASE 6
+			PRINTFORML %ANAME(対象)%圧在四肢着地的少女身上激烈地揺動着腰
+			PRINTFORML 少女下流地吐着舌頭並無法忍耐地発出歡喜的叫声
+			PRINTFORML 肉棒用力擦着膣壁帯来強烈的快楽，腰停不下来
+			PRINTFORML 二人身体相互緊貼着舌頭相互纏繞，沈酔於野獣般的交尾帯来的心神飄蕩的感覚
+			PRINTFORMW 最後直到双方疲倦為止不断揺動着腰，無数次在少女的裏面釋放出精液
+		CASE 7
+			PRINTFORML %ANAME(対象)%以対面座位的姿勢与少女交合，与少女接吻
+			PRINTFORML 少女幸福地用手撫摸着%ANAME(対象)%的頭，帯着幸福的笑容望住%ANAME(対象)%，不時揺動着腰
+			PRINTFORML %ANAME(対象)%因少女的表情和下半身給予的刺激而無法忍耐，二人舌頭相互纏繞腰進行着圓周運動
+			PRINTFORML 少女嬌喘変得小而急，身体震顫着， 撒嬌地依偎着%ANAME(対象)%
+			PRINTFORMW  一辺用力抱着少女一辺揺動着腰，充分地享受着令人神魂顛倒的激烈性愛
+		CASE 8
+			PRINTFORML %ANAME(対象)%圧在高潮了無数次的少女身上用腰激烈地拍打着少女
+			PRINTFORML 少女嘴上雖然説「要死了」向你求饒，小穴卻緊緊地纏着肉棒不讓其離開
+			PRINTFORML 圧倒的快楽蓋過理性，無視少女的哀求継續陶酔地揺動着腰
+			PRINTFORML 不久後到達極限将肉棒深深地插入痙攣着的少女的深処，将欲望傾倒而尽
+			PRINTFORMW 事後，露出恍惚表情的少女一辺低声説「好厲害」一擁抱着你
+		CASE 9
+			PRINTFORML 少女跨坐在%ANAME(対象)%上面下面深深地呑入肉棒不断移動着腰
+			PRINTFORML 毎当揺動着腰少女都会從口中漏出甜蜜的吐息，小穴緊緊地纏繞刺激着肉棒
+			PRINTFORML 少女観察着%ANAME(対象)%的樣子在不同的角度動腰，給予強烈的刺激
+			PRINTFORML 少女小幅度扭腰，膣肉磨擦着亀頭，%ANAME(対象)%発出意料之外的声音
+			PRINTFORMW 少女見到後開心地笑着，更強烈地動腰，最後在少女的裏面射精了無数次
+	ENDSELECT
+	RETURN 1
+ENDIF
+
+;初回
+IF DVAR:家庭教師_発生フラグ == 0
+	DVAR:家庭教師_お気に入りID = 0
+	PRINTFORML 工作時被告知有来客
+	PRINTFORML 查了一下名字後、似乎是領地内某位貴族的使者
+	PRINTFORML 聽到是貴族時%ANAME(MASTER)%嘆一口気、看来又是麻煩事
+	PRINTFORML 但是対方的影響力相当大、不能胡乱地強行趕走
+	PRINTFORMW %ANAME(MASTER)%不情願地与使者会面了
+	PRINTFORML 
+	PRINTFORML 「初次見面、%ANAME(MASTER)%大人。今日天気真是不錯…。」
+	PRINTFORML 男使者誇張地行禮、慢慢地致意
+	PRINTFORMW %ANAME(MASTER)%做出同樣的問候後、進行了一会無聊的雜談
+	PRINTFORML 「…那麼、今天我要傳達的、是来自我的主人的請求…。」
+	PRINTFORMW 終於来了嗎、%ANAME(MASTER)%小心警戒着男人的発言
+	PRINTFORML 「其実今次我是来請求、為我主人的女兒提供一位家庭教師。」
+	PRINTFORML 『家庭教師？』
+	PRINTFORMW 意料之外的発言、讓%ANAME(MASTER)%不自覚地発出愚蠢的声音
+	PRINTFORML 「感到驚訝也是很正常的。但是、這是因為有各式各樣的緣故。」
+	PRINTFORMW 男人板着臉継續説着
+	PRINTFORML 主人有一個最重要最疼愛的独生女、一直以深藏在大門後足不出戶的閨秀的方式養育
+	PRINTFORML 但是最近、她開始好奇外面的世界因此請求主人讓其外出了
+	PRINTFORML 就算想像実現她的願望、但她実在不擅長応付外面跟上来的悪劣蟲子
+	PRINTFORMW 看来経過苦思之後、決定要拜託能夠信頼的人
+	PRINTFORML 「主人有聽聞過閣下各位的評價、対此亦沒有問題。」
+	PRINTFORML 「為了主人和大小姐務必拜託你了。」
+	PRINTFORML 男人深深地低下頭
+	PRINTFORML 原来如此、知道他想説什麼了
+	PRINTFORMW 或許可以利用這次機会強化一下与貴族間的人際関係吧
+	DVAR:家庭教師_発生フラグ = 1
+;2回目以降、娘のお気に入りがいない場合
+ELSEIF DVAR:家庭教師_お気に入りID == 0
+	PRINTFORMW 之前的貴族使者又来拜訪了
+	PRINTFORMW 又来拜託関於家庭教師方面的事
+;2回目以降、娘のお気に入りがいる場合
+ELSE
+	対象 = ID_TO_CHARA(DVAR:家庭教師_お気に入りID)
+	PRINTFORMW 之前的貴族使者又来拜訪了
+	PRINTFORMW 又来拜託関於家庭教師方面的事
+	PRINTFORMW 少女因為很鍾意%ANAME(対象)%所以指名要%ANAME(対象)%了
+	LOCALS = 他
+	SIF IS_FEMALE(対象)
+		LOCALS = 她
+	IF CFLAG:対象:捕虜先 && DVAR:家庭教師_授業実施回数 >= 4
+		PRINTFORML 但是%LOCALS%処於被俘虜的状態、無法派遣
+		PRINTFORML 這樣説道後男使者非常慌張、並説因為大小姐説過不是%LOCALS%的話会討厭
+		PRINTFORMW 今次他会去説服大小姐、但希望能尽早讓%LOCALS%回来
+		RETURN 1
+	ELSEIF CFLAG:対象:捕虜先
+		PRINTFORML 但是%LOCALS%処於被俘虜的状態、無法派遣
+		PRINTFORML 這樣説道後男使者很慌張
+		PRINTFORMW 相信大小姐能夠理解的，希望你能派遣其他人，使者低頭説道
+		DVAR:家庭教師_お気に入りID = 0
+	ENDIF
+ENDIF
+
+PRINTFORMW 怎麼辦……
+CALL ASK_YN("接受", "拒絶")
+IF RESULT == 1
+	PRINTFORML 果然不能参与貴族女兒的胡鬧
+	PRINTFORMW 禮貌地拒絶了
+	DVAR:家庭教師_お気に入りID = 0
+	SIF DVAR:家庭教師_授業実施回数 >= 4
+		DVAR:家庭教師_発生フラグ = -1
+	RETURN 1
+ELSE
+	IF DVAR:家庭教師_お気に入りID == 0
+		PRINTFORML 這種程度的事又不麻煩、又可以賣個人情
+		PRINTFORML 而且也対那個不識外面世事的大小姐很感興趣、決定接受了
+		PRINTFORML 「非常感謝你。我知道閣下一定会答応的。」
+		PRINTFORML 男使者再次誇張地低下頭
+		PRINTFORMW 那麼、要派遣誰呢？
+		CALL SINGLE_DRAWLINE
+		CALL SELECT_CHARA_LIST_SLG()
+		IF RESULT < 0
+			PRINTFORML 雖然接受了但不幸地現在全部人也很忙碌
+			PRINTFORMW 男使者致謝後、離開了
+			RETURN 1
+		ENDIF
+		対象 = RESULT
+		IF 対象 == MASTER
+			PRINTFORMW %ANAME(対象)%決定親自去
+		ELSE
+			PRINTFORMW 把任务交給了%ANAME(対象)%
+		ENDIF
+	ELSE
+		PRINTFORML 正好可以解悶、開心地接受了
+		IF 対象 == MASTER
+			PRINTFORMW %ANAME(対象)%想起少女之前的笑容後、就開始想今次她会聊什麼話題呢
+		ELSE
+			PRINTFORML 按照指名、交給%ANAME(対象)%了
+			PRINTFORMW 雖然知道他很忙有点抱歉、但他毫不猶豫地接受了
+		ENDIF
+	ENDIF
+ENDIF
+
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+;お気に入りではない場合
+IF DVAR:家庭教師_お気に入りID == 0
+	PRINTFORML 「請過来這辺。」
+	PRINTFORML 被招待到住宅後，経過無数道門，終於被帯到其中一道門前
+	PRINTFORMW 在門後的応該就是委託人的大小姐了
+	PRINTFORML 僕人開始敲門
+	PRINTFORML 「請進。」
+	PRINTFORMW 門後傳来了凛然的声音
+	PRINTFORML 僕人将門打開後、%ANAME(対象)%有点緊張地踏入房間
+	PRINTFORMW 「初次見面、歡迎你来臨。很高興認識你。」
+	PRINTFORML 房間深処有一名少女在等待着、少女有禮地微笑着向%ANAME(対象)%行禮
+	PRINTFORML 她的舉止比%ANAME(対象)%預想中更文雅
+	PRINTFORML 又長又充満光澤的黑髮、周囲脱離現実般的気氛、完完全全是一個公主
+	PRINTFORMW 突然明白到之前来拜訪的使者為何如此強調貴族非常痛愛自己女兒的理由了
+	PRINTFORML 「今天閣下能夠順応我的胡鬧来到這裏、真是非常感謝你。」
+	PRINTFORML 「閣下能夠来訪我真的很開心。因為実在沒什麼機会和外人説話、呼呼。」
+	PRINTFORML 原本聽説很任性放肆、原本以為是一個軽浮的野丫頭結果意外地似乎是一個有禮可靠的孩子
+	PRINTFORMW 這辺才是請多多指教了 這樣回敬後、開始介紹自己
+	PRINTFORML 「%ANAME(対象)%大人対吧…。」
+	PRINTFORML 少女頭微微前傾目不転睛地盯着%ANAME(対象)%的臉
+	PRINTFORML 到底怎麼了、是有什麼疏忽了嗎？%ANAME(対象)%回盯着少女
+	PRINTFORMW 「不、那個…。」
+	PRINTFORML 少女害羞得扭扭擰擰
+	PRINTFORML 「那個…如果可以的話、我可以称呼你做“老師”嗎？」
+	PRINTFORML 少女仰望着%ANAME(対象)%胆怯問道
+	PRINTFORMW 了解到那個非常“任性”的意思後放鬆起来了
+	PRINTFORML 這個称呼感覚不錯啊、%ANAME(対象)%跟少女説這個称呼沒有所謂後少女的表情明亮起来
+	PRINTFORML 「是、謝謝你、老師。哼哼。」
+	PRINTFORMW 這種事值得那麼開心嗎、少女看起来像小孩一樣天真無邪
+	PRINTFORML 「那麼老師？今日要教什麼。」
+	PRINTFORML 対呀、第一次的授課
+	PRINTFORMW 首先談一下少女有興趣的話題吧
+	CALL TUTOR_COURSE(対象)
+	PRINTFORML
+	PRINTFORMW 差不多是時候了、今日的授課就到此為止吧
+	IF DVAR:家庭教師_お気に入りID == GET_ID(対象)
+		PRINTFORML 「真是非常有趣的話題。非常感謝你、老師。」
+		PRINTFORML 少女送%ANAME(対象)%到住宅門前
+		PRINTFORML 「能夠与外界交流真是非常新鮮令人激動呀。如果你下次能再来的話、我会很開心。」
+		PRINTFORMW 「当然、如果老師你願意的話…。」
+		PRINTFORML 少女扭扭擰擰地望着%ANAME(対象)%
+		PRINTFORML 要是時間許可的話以後会再来、少女聽到後温柔地微笑
+		PRINTFORML 「我会等你的。那麼、老師、以後再見面吧。」
+		PRINTFORMW 少女文雅地揮手送給後回到住宅深処
+	ELSE
+		PRINTFORML 「非常有趣的授課。十分感謝你、老師。」
+		PRINTFORMW 授課後、少女送別後返回到住宅内
+	ENDIF
+	MONEY += 2000
+	PRINTFORMW 收到了報酬2000金
+	RETURN 1
+;お気に入りの場合、イベントが進行していく
+ELSE
+	SELECTCASE DVAR:家庭教師_授業実施回数 
+		;2回目、ちょっと親しくなる
+		CASE 0
+			PRINTFORML 「很久不見了、老師。」
+			PRINTFORML 少女見到%ANAME(対象)%後高興得踏 踏 踏地快歩走過来
+			PRINTFORMW 這身姿像小孩子一樣可愛、同時總感覚到有種温文爾雅的気質
+			PRINTFORML 「久等了。請再像上次一樣説些有趣的話題吧。」
+			PRINTFORMW 在少女軽軽一笑時%ANAME(対象)%察覚到少女身上有花的香気
+			PRINTFORML 「？　我的臉上有什麼嗎？」
+			PRINTFORMW 一瞬間不小心看入迷了、%ANAME(対象)%告訴対方一時間看入迷而已什麼事也沒有
+			PRINTFORML 「哼哼、老師真是個奇怪的人呢。」
+			PRINTFORML 「那麼、今日也拜託你了。」
+			PRINTFORMW 与少女一起走向事先準備好的房間
+			CALL TUTOR_COURSE(対象)
+			PRINTFORML 
+			PRINTFORMW 差不多是時候了、今日的授課就到此為止吧
+			PRINTFORML 「老師、今日也在忙碌之中抽時間過来真是非常感謝你。」
+			PRINTFORML 与少女一辺走向住宅大門一辺対話
+			PRINTFORMW 雖然如果説自己一点都不忙的話是騙人的、但是這種程度的空閑還是有的請別在意 %ANAME(対象)%這樣説道
+			PRINTFORML 「是這樣嗎？…其実我、以前就覚得老師説的話真是很有趣。」
+			PRINTFORML 「当我向父親大人説想再聽老師説話時父親大人就罵我任性了…我就在想如果令老師你困擾的話怎麼辦才好呢。」
+			PRINTFORML 少女双手手掌貼住通紅的臉、就像害怕被懲罰一樣從手指間偸偸看看着你
+			PRINTFORMW 如同悪作劇暴露了的小孩子一樣的舉止非常可愛、這樣一想就忍不住笑了出来
+			PRINTFORML 「啊、剛剛笑了吧？真是的、我明明是認真的。」
+			PRINTFORML 向生気起来的少女道歉後、告訴了少女這種程度的話無論什麼時候叫我来都沒有問題
+			PRINTFORMW 「真的嗎？這樣的話我、非常開心。」
+			PRINTFORML 少女聽到%ANAME(対象)%的話語後温柔地開心微笑
+			PRINTFORML 「約定好了哦？来、勾手指尾。」
+			PRINTFORMW 与少女勾手指尾做好約定後在少女的送別之下離開了住宅
+			MONEY += 3000
+			PRINTFORMW 收到了報酬3000金
+			DVAR:家庭教師_授業実施回数 ++
+		;3回目、お茶を飲む
+		CASE 1
+			PRINTFORML 「你好、老師。今天的天気不錯呢。」
+			PRINTFORMW 与在住宅中休息優雅的少女見面了
+			PRINTFORML 「在這種大情天之下尽情地在外面玩、一定会很開心吧。」
+			PRINTFORML 少女罕見地露出憂鬱的表情向着虚空的方向嘆息
+			PRINTFORMW 看来她真的幾乎不会外出
+			PRINTFORML 「但也不可以讓覚得我任性的父親大人困擾呢。」
+			PRINTFORML 但很快就変回平時的温柔表情、転身面向這辺
+			PRINTFORMW 「那麼老師、今日要説什麼話題呢？」
+			CALL TUTOR_COURSE(対象)
+			PRINTFORML 
+			PRINTFORMW 差不多是時候了、今日的授課就到此為止吧
+			PRINTFORML 「已経要回去了嗎？」
+			PRINTFORML 正当%ANAME(対象)%從座位中站起来時、少女看起来感到很可惜地尋問
+			PRINTFORMW 正当你在想『哎、難道忘記了做什麼了嗎』的時候、少女開口慢慢説道
+			PRINTFORML 「…如果可以的話、要一起来喝一杯茶嗎？」
+			PRINTFORML 少女用有点不安的語調挽留着%ANAME(対象)%、看来是還想多聊一陣
+			PRINTFORML 但是作為只是一個被雇傭的家庭教師卻那麼親密真的好嗎？
+			PRINTFORMW 吩咐附近的僕人準備茶和茶点後、僕人若無其事地準備好兩人分的茶
+			PRINTFORML 「…還是説、有工作要忙嗎？」
+			PRINTFORML 少女用微微湿潤的瞳孔看着這辺
+			PRINTFORML …這種眼神真是犯規、剛剛所想的問題完全無法説出来
+			PRINTFORMW 既然被人這樣邀請也無法拒絶了吧、%ANAME(対象)%再度坐在椅子上
+			PRINTFORML 「嘿嘿、非常感謝你、老師。你很温柔呢。」
+			PRINTFORMW 少女双手合十開心地笑着
+			PRINTFORML 「其実我是想讓老師品嚐一下這個美味的茶。」
+			PRINTFORML 「這個是来自外面世界的、我想一定合你口味哦。」
+			PRINTFORML 「然後這裏的点心也不錯、請用。」
+			PRINTFORMW 少女平時像大小姐般的気氛開始薄弱起来、就像年紀相同的少女一般彼女歡鬧，兩人開心地一起享用茶和茶点了
+			MONEY += 4000
+			PRINTFORMW 收到了報酬4000金
+			DVAR:家庭教師_授業実施回数 ++
+		;4回目、更に親しくなる
+		CASE 2
+			PRINTFORML 「你好、老師。」
+			PRINTFORMW 進入住宅後就見到少女在門口等着你
+			PRINTFORML 「嘿嘿、聽到老師会来後我就在這辺等了。」
+			PRINTFORMW 在房間等不就好了嗎？不過見到少女開心的笑容後並沒有那麼不識趣地問這種問題
+			PRINTFORML 「来、老師。再讓我聽聽有趣的話題吧。」
+			PRINTFORML …總覚得距離好像太近了、大概是錯覚吧
+			PRINTFORMW 少女一辺挨近%ANAME(対象)%毫無保留地説話、並走入住宅
+			CALL TUTOR_COURSE(対象)
+			PRINTFORML 
+			PRINTFORMW 鐺   鐺   時鐘鐘声響起
+			PRINTFORML 「啊啦、已経是這種時間了嗎」
+			PRINTFORMW 看来是太陶酔於話題之中了、已経到了回去的時侯
+			PRINTFORML 「和老師一起時、時間就過得很快…。我想、再聊多一会」
+			PRINTFORML 少女難過地看着時鐘的指針説道
+			PRINTFORML 「雖然從来沒有経歷過恋愛…但在以前愛情故事中的少女們、都是抱着這種心情嗎？」
+			PRINTFORMW 這樣自言自語後、少女因為自己所説的話而変得満臉通紅，大嚇一驚
+			PRINTFORML 「不、不！我的意思並不是説対老師抱着這種感情哦！」
+			PRINTFORML 「沒錯！只是舉例而已！就像文学中詩詞的表現！」
+			PRINTFORMW 少女慌張的姿態看起来很可愛、稍微悪作劇一下吧
+			PRINTFORML 用正経的樣子望着少女，用稍微有点戲劇的語調這麼説着
+			PRINTFORML 『真是可惜。如果你真的這麼想我就非常幸福了。』
+			PRINTFORMW …説出了令人作嘔的台詞
+			PRINTFORML 「欸、啊、欸欸、老…老師…？」
+			PRINTFORMW 但這種台詞卻出現了意料之外的效果、少女変得満臉通紅愕在原地
+			PRINTFORML 見到預想外的率直反応後無法維持着表情、忍不住笑了起来
+			PRINTFORML 少女注意到這是開玩笑後、臉紅着生気起来
+			PRINTFORML 「真、真是的！老師你、請別這樣調戲我！………啊。真的……。」
+			PRINTFORMW 少女双手扶着臉看起来很害羞地望着你
+			MONEY += 4000
+			PRINTFORMW 收到了報酬4000金
+			DVAR:家庭教師_授業実施回数 ++
+		;5回目、キスをする
+		CASE 3
+			PRINTFORML 「老師、你有恋人嗎？」
+			PRINTFORML 在授課開始時， 突然被問到這種問題
+			PRINTFORMW  如同突襲般意料之外的問題令你転移視線，説不出話来
+			PRINTFORML 「啊，不好意思，突然這樣問你， 真是失禮了。」
+			PRINTFORML 看到%ANAME(対象)%的反応後少女慌忙地撤回問題， 有点不好意思
+			PRINTFORMW 『 発生什麼事了嗎？』 装作冷静地反問了少女
+			PRINTFORML 「不，只是...。那個，如果老師你有恋人的話， 我這樣令你犧牲時間来陪我会不会不太好呢。」
+			PRINTFORML 少女低頭有点支支吾吾地答道
+			PRINTFORML 「来， 那麼今日也請多多指教了，老師。」
+			PRINTFORMW 話題被打断後少女好像感到不識趣般望着你
+			CALL TUTOR_COURSE(対象)
+			PRINTFORML 
+			PRINTFORML 差不多是時候了、今天的授課就到此為止吧
+			PRINTFORMW %ANAME(対象)%從座位中起来、向少女告別後打算離開房間
+			PRINTFORML 「老師。」
+			PRINTFORML 準備離開時背後的少女突然叫停了你
+			PRINTFORMW 比平時更強烈的語気令你回頭看発生什麼後、少女好像想説什麼一樣扭扭擰擰
+			PRINTFORML 「那個…那個…。」
+			PRINTFORML 少女与平時不一樣変得口窒窒、因為場面尷尬而揺頭
+			PRINTFORMW 少女走近並望着這辺、等待下一句話語
+			PRINTFORML 不久後見到少女露出下定決心的表情並開口
+			PRINTFORML 「老、老師…。那個、我…由以前開始…一想到老師時、胸口就撲通撲通地跳停不下来…。」
+			PRINTFORMW 少女用微微震顫的声線継續説話
+			PRINTFORML 「最近我、一直都…満腦子都想着老師、什麼的…。」
+			PRINTFORML 「我、我…胸口好痛苦…。這、這種事令老師你很困擾吧…。」
+			PRINTFORML 「我知道、我很任性…。但是、我想不到該怎麼辦…。」
+			PRINTFORMW 少女的臉漸漸被染上朱紅、用湿潤的眼神目不転睛地看着你
+			PRINTFORML 「我、我、我…。我不知道、該怎麼辦才好…。老師……。」
+			PRINTFORML 少女絞尽喉嚨発出声音表達自己的想法、並緊緊地抱着%ANAME(対象)%看向這辺
+			PRINTFORMW 軽軽地回抱時、那個身体微微地震抖着
+			PRINTFORMW …怎麼辦？
+			CALL ASK_YN("接吻", "什麼都不做")
+			IF RESULT == 1
+				PRINTFORML 無論怎麼説和少女始終也是老師和学生的関係
+				PRINTFORML 做這種事実在太不老実了 %ANAME(対象)%阻止了少女
+				PRINTFORML 「老師…。」
+				PRINTFORMW 依依不捨地撫摸着少女的頭
+				PRINTFORML 「嗯…抱歉。我、又任性了…。」
+				PRINTFORML 「下次、請再来拜訪呀？我会等你的。」
+				PRINTFORMW %ANAME(対象)%做了下次会再来的約定後、背後承受着少女的視線離開了住宅
+			ELSE
+				PRINTFORML 被対方迫近到這樣不可能什麼都不做
+				PRINTFORMW %ANAME(対象)%抱着少女後、用手抬起対方下巴
+				PRINTFORML 「啊…。」
+				PRINTFORML 靠近少女的臉時、少女柔軟的嘴唇吐出了温熱的気息
+				PRINTFORMW 満面通紅的少女慢慢地合上了双眼
+				PRINTFORMW %ANAME(対象)%抱着少女的同時、嘴唇相疊
+				PRINTFORML 「嗯…！」
+				PRINTFORML 嘴唇球軟的触感以及少女的顫動傳達到這辺
+				PRINTFORMW 双手緊緊地抱着少女、而少女也緊緊地抱着%ANAME(対象)%
+				PRINTFORMW ………
+				PRINTFORML 到底嘴唇相疊多久了呢、幾秒還是幾分鐘呢
+				PRINTFORML 互相好好地感受対方後慢慢地分開了嘴唇、少女発出了依依不捨的声音
+				PRINTFORMW 少女用手摸着嘴唇露出陶酔的表情望着%ANAME(対象)%
+				PRINTFORML 「老師…。」
+				PRINTFORML 這個妖媚的舉止令你忍着想一口気推到少女的衝動、温柔地撫摸少女的頭
+				PRINTFORMW 少女幸福地笑着、撒嬌地依偎着%ANAME(対象)%
+				PRINTFORMW 就這樣和少女度過了一段甜蜜的時間
+				DVAR:家庭教師_授業実施回数 ++
+			ENDIF
+			MONEY += 4000
+			PRINTFORMW 收到了報酬4000金
+		;6回目、こっそりデートする
+		CASE 4
+			PRINTFORML 「老師。我想去住宅外面。」
+			PRINTFORMW 授課開始時、少女突然這樣説
+			PRINTFORML %ANAME(対象)%坐在少女旁辺聽她説着
+			PRINTFORML 「我直到現在為止都在這個住宅被充分地養育長大。」
+			PRINTFORML 「只要向父親大人拜託的話、無論什麼事都可以做到。我能夠過得如此奢侈、無論如何感謝父親大人也不夠。」
+			PRINTFORMW %ANAME(対象)%看着少女認真的眼神聆聽着
+			PRINTFORML 「但是我無論如何拜託父親大人、也不被容許外出。總是説『対我来説還太早、很危険』…。」
+			PRINTFORML 以前見過他不少次，作為人父痛愛過頭了吧
+			PRINTFORMW 「但是一直以来都讓我在這個住宅中閉門不出、我実在忍耐不了。」
+			PRINTFORML 「聽了老師的話後、我更想用自己的眼…和耳、体験外面的世界。」
+			PRINTFORML 少女看着%ANAME(対象)%認真地説道
+			PRINTFORML 「今日很幸運、父親大人外出了。」
+			PRINTFORMW 「我知道這是我的任性。但是、無論如何…和老師的話…。」
+			PRINTFORML 為難了、這件事被揭穿的話一定会被少女的父親厳厲地斥責吧、恐怕不可能再見到少女
+			PRINTFORML 但是令少女対外面的世界産生憧憬的正是我自己
+			PRINTFORML 而且看見這個如同籠中鳥的少女就讓人感到傷感
+			PRINTFORML 而且帯少女離開途中沒有被発現的話、応該来得及在父親帰来前回来的吧…？
+			PRINTFORMW 再次看了一眼少女、雖然多少帯着不安的神情但眼神是認真的
+			PRINTFORMW 怎么办？
+			CALL ASK_YN("偸偸地帯出去", "像平時一樣授課")
+			IF RESULT == 1
+				PRINTFORML 果然不能這樣做、%ANAME(対象)%揺頭了
+				PRINTFORML 「老師…。」
+				PRINTFORMW 少女雖然用強烈的視線看過来、但沒有継續説下去
+				PRINTFORML 是知道現在的任性和之前不一樣吧
+				PRINTFORML 安慰並撫摸抬頭露出悲傷表情的少女的頭後、少女軽軽地点頭了
+				PRINTFORML 至少今日要説点比平時更有趣的話題
+				PRINTFORMW %ANAME(対象)%開始授課了
+			ELSE
+				PRINTFORML %ANAME(対象)%嘆一口気点頭了
+				PRINTFORML 「老師…！」
+				PRINTFORMW 少女的表情一瞬間明朗起来
+				PRINTFORML 少女這個令人感到有点害羞的笑容、令人不知不覚的聽從她的任性
+				PRINTFORMW 在内心都自嘲自己一直都沒有責備這個笨蛋父親
+				PRINTFORML 「那麼、快点出発吧。啊哈、真是令人期待。」
+				PRINTFORML 剛才的気氛完全消失無蹤、少女高高興興地開始打扮
+				PRINTFORML 周囲的僕人們什麼都沒有説若無其事地為大小姐外出作準備
+				PRINTFORMW 之前要喝茶時他們也是什麼都沒説吧？不、雖然這種時候要是能什麼都不説就非常感激…
+				PRINTFORML 「老師、久等了。那麼出発吧。」
+				PRINTFORML 結束打扮後少女向你説道
+				PRINTFORMW 身上穿着外出用的衣服、就像初次遠足的小孩子一樣笑着
+				PRINTFORML 「呵呵、其実就算比起外出、和老師一起出去令我更期待。」
+				PRINTFORML 少女有点臉紅像正在做悪作劇般這樣告訴你
+				PRINTFORMW 其実我自己都有点期待，%ANAME(対象)%這樣説道時、少女有点害羞地看着你
+				PRINTFORML 「嘛、老師真是的。但就算你這樣戲弄我我也不会動揺、呵呵。」
+				PRINTFORML 「那麼、能請你做我的護花使者対吧？」
+				PRINTFORML 這是当然的，因為這個少女万一受了一点傷自己可是百口莫辯呢
+				PRINTFORMW %ANAME(対象)%一辺這樣想着、一辺牽着少女的手去秘密約会了
+				PRINTFORML ・
+				PRINTFORML ・
+				PRINTFORMW ・
+				PRINTFORML 兩人去了各式各樣的地方、度過了愉快的約会
+				PRINTFORMW 所有的一切対少女来説都非常新鮮吧、少女身上的一舉一動都能感受到她幸福的心情
+				PRINTFORMW 在父親回来之前梅道住宅並在少女的請求後和少女軽軽吻別了
+				DVAR:家庭教師_授業実施回数 ++
+			ENDIF
+			MONEY += 4000
+			PRINTFORMW 收到了報酬4000金
+		;7回目、抱く
+		CASE 5
+			PRINTFORML 「啊…你好、老師。」
+			PRINTFORML 進入房間後少女転頭看着這辺
+			PRINTFORMW 總覚得少女看上去有点沒精打采的樣子、是身体不舒服嗎
+			PRINTFORML 「不、我並不是生病…只是有点、那個…。」
+			PRINTFORML 「還是算了、什麼事都沒有。」
+			PRINTFORMW 雖然有点在意但少女自己都説什麼都沒有的話、還是別再問下去吧
+			PRINTFORMW 「来、老師。今天要談什麼話題呢？」
+			PRINTFORMW %ANAME(対象)%坐在少女旁辺後、少女牽着%ANAME(対象)%的手並看着%ANAME(対象)%
+			CALL TUTOR_COURSE(対象)
+			PRINTFORML 
+			PRINTFORML 「那個、老師…。」
+			PRINTFORML 授課結束後少女開口了
+			PRINTFORMW %ANAME(対象)%隠隠約約感覚到她好像想説什麼、目不転睛地看着少女並等待下一句話
+			PRINTFORML 「那個…我…喜歡、老師…。」
+			PRINTFORMW 我早知道、雖然想這麼説但還是忍住了
+			PRINTFORML 「毎次一想起老師、胸口的跳動就停不下来…晩上也睡不着…。」
+			PRINTFORMW 少女眼神微微湿潤気息荒乱緊緊地抱着%ANAME(対象)%
+			PRINTFORML 「請不要覚得我任性…老師…。」
+			PRINTFORML 「但是、已経、我…我……。」
+			PRINTFORMW 少女用難受的表情看着%ANAME(対象)%
+			IF IS_MALE(対象)
+				PRINTFORML 再讓少女継續説下去就不是男人了
+			ELSE
+				PRINTFORML 不能再讓少女継續説下去了
+			ENDIF
+			PRINTFORMW 無論是接受還是拒絶都応該好好清楚地説出来
+			PRINTFORMW 怎么办？
+			CALL ASK_YN("抱到懷裏", "什麼都不做")
+			IF RESULT == 1
+				PRINTFORML 果然這樣的関係不可以再継續下去
+				PRINTFORMW %ANAME(対象)%将少女推開、断然拒絶了
+				PRINTFORML 「老師…。」
+				PRINTFORML 少女的表情像是快要放声大哭
+				PRINTFORMW 看見這個表情後心中過意不去的%ANAME(対象)%、背向少女依依不捨的視線如逃跑一樣跑出住宅
+				PRINTFORML …変成這樣的話、応該不能再見那個少女了吧
+				IF IS_MALE(対象)
+					PRINTFORML 不如説放任少女到這種地歩自己都是隨便的男人嗎
+				ELSE
+					PRINTFORML 不如説放任少女到這種地歩的自己是任性的人嗎
+				ENDIF
+				PRINTFORMW %ANAME(対象)%就這樣自我責備着沈重地回去
+				PRINTFORML ・
+				PRINTFORML ・
+				PRINTFORMW ・
+				PRINTFORML 在此之後%ANAME(対象)%沒有再見到少女
+				PRINTFORML 偶然会在意想不到的時候想起少女
+				PRINTFORML 在腦袋中的残余印象並不是少女的笑容
+				PRINTFORMW 而是少女最後的泣顔………
+				DVAR:家庭教師_発生フラグ = -1
+			ELSE
+				PRINTFORML %ANAME(対象)%一言不発将少女抱到懷裏
+				PRINTFORMW 「啊…。」
+				PRINTFORML 被抱着的少女在%ANAME(対象)%胸口前軽軽地吐息
+				PRINTFORMW 当抱着這個柔軟的身体時少女的心跳傳過来了
+				PRINTFORML 緊抱着一陣間後、与少女分開並相互注視着
+				PRINTFORML 「老師…。」
+				PRINTFORMW 双眼湿潤的少女微笑地看着%ANAME(対象)%
+				PRINTFORMW %ANAME(対象)%温柔地抱起少女、走向寝室
+				PRINTFORML 
+				PRINTFORML 与少女一起坐在床上、緊緊相擁同時接吻
+				PRINTFORML 重複多次接吻後、少女的気息逐漸慌乱
+				PRINTFORML 「走到這歩真是抱歉。啊…真是非常、羞恥。」
+				PRINTFORMW 少女満臉通紅、身体很害羞般震顫
+				PRINTFORML %ANAME(対象)%温柔地撫摸少女的頭、讓她冷静下来的同時将她脱得一絲不掛
+				PRINTFORML 很快少女的肢体毫無遮掩地在你面前、就像雪一樣光滑的白晢肌膚以及長得均整的美麗身体進入你的目光
+				PRINTFORML 「不要、別這樣看着我…老師。」
+				PRINTFORMW 在害羞得用手遮住臉的少女耳辺説『你真美』時、這次少女已経害羞得満臉通紅了
+				PRINTFORML %ANAME(対象)%也貼了自己的衣服並将少女抱到懷裏、慢慢地伸出手指
+				PRINTFORML 為了讓因緊張而僵硬下来的少女放鬆、尽量温柔地撫摸少女的身体
+				PRINTFORML 「嗯…啊、啊啊…嗯…呼嗯…。」
+				PRINTFORMW 慢慢地少女的身体開始放鬆、並禁不住開始喘着大気
+				PRINTFORML 讓少女張開双腿並用手指軽軽劃過私処時、身体像嚇一跳般弾起来
+				PRINTFORML 有着美麗的粉紅色的私処雖然仍然緊閉着、但慢慢地滲出少量愛液了
+				PRINTFORML %ANAME(対象)%温柔地讓少女躺下来、将勃起到極限的肉棒放到少女的裂縫上
+				PRINTFORML 「啊…。」
+				PRINTFORMW 気息慌乱的少女目不転睛地看着%ANAME(対象)%的肉棒
+				PRINTFORML 就這樣圧在少女上面温柔地撫摸少女的臉頬、少女帯着湿潤的眼神軽軽地点頭
+				PRINTFORML 将肉棒対準緊閉着的裂縫、慢慢地沈下腰
+				PRINTFORML 「啊嗯！唔～！咕…嗯唔！」
+				PRINTFORMW  在感受到刺破処女膜的触感同時，身体震顫着的少女発出呻吟声
+				PRINTFORML 肉棒插入到一半時暫時停止動腰，竊視着少女的樣子
+				PRINTFORML 少女雖然気息慌乱流着眼泪但仍然対%ANAME(対象)%微微一笑
+				PRINTFORML 如同擔心她一樣軽軽親吻少女後， 為了拡張緊湊的陰道再度沈下腰
+				PRINTFORMW 「唔、嗯！啊啊 啊…嗯、老、、老師…！」
+				PRINTFORML 整根肉棒插進去後， 緊抱並親吻流着眼泪震顫着的少女
+				PRINTFORML 「嗯…啊…好、厲害的…圧迫感、…老師…。」
+				PRINTFORML 「嗯、我沒事、的。欸嘿嘿…老師、全部、進来了…。」
+				PRINTFORMW 撫摸看起来很痛苦的少女的頭安慰她，少女撲簌落泪並開心地笑着
+				PRINTFORML 用手支撐着上半身的姿勢，慢慢地用肉棒進出緊湊的陰道
+				PRINTFORML 少女雖然痛苦呻吟，但双手双脚用力抱緊着%ANAME(対象)%
+				PRINTFORML 慢慢地扭腰時少女似乎習慣了， 開始大口大口嬌喘吐出甘甜的気息
+				PRINTFORML 「啊、啊！啊啊！啊啊！老師、老師…！」
+				PRINTFORMW 少女流着眼泪用苦悶的眼神看着%ANAME(対象)%，身体震顫着的同時如同撒嬌般這樣叫着
+				PRINTFORML 肉棒在緊繃的陰道緊纏下%ANAME(対象)%同樣都接近極限
+				PRINTFORML 将躺在床上的少女抱到懷裏，舌頭相互纏繞的同時慢慢加快扭腰
+				PRINTFORMW 一沈下腰少女発出混雜着呻吟声的嬌喘，痙攣的同時全身緊緊抱着%ANAME(対象)%
+				PRINTFORML 不久後到達了極限的%ANAME(対象)%将肉棒插入少女最深処， 身体震抖着釋放大量的精液
+				PRINTFORML 「唔！啊 啊啊啊、啊啊…！」
+				PRINTFORML 少女一辺承受膣内射精 感受着由下腹傳来的熱，一辺緊抱着%ANAME(対象)%
+				PRINTFORMW 同時射精中的肉棒被收縮着的陰道刺激，%ANAME(対象)% 因意料之外的快感漏出了呻吟声
+				PRINTFORML 不久後射精結束，%ANAME(対象)%呼出一大口気将肉棒抜出
+				PRINTFORML  作為純潔證明的血以及大量黏糊糊的精液從少女的私処流出
+				PRINTFORMW 已経沒有力気的少女橫躺在床上気喘呼呼的同時， 甜蜜地看着從自己私処溢出的体液
+				PRINTFORML 
+				PRINTFORML 再被黄昏的太陽照耀着的庭院上，%ANAME(対象)% 和少女並肩而行，走向通往大門的路
+				PRINTFORML  不知怎麼總感覚非常地羞恥， 甚至不敢与少女対視一言不発地走着
+				PRINTFORMW 而少女也和這辺一樣， 除了不時偸看%ANAME(対象)%一眼， 沒有多説什麼
+				PRINTFORML 好不容易走到大門時%ANAME(対象)%停下脚歩， 吸了一口気後望向少女的臉龐
+				PRINTFORML 微微臉紅的少女亦都目不転睛地看着%ANAME(対象)%的双眼
+				PRINTFORMW 少女好像想説点什麼地張開小嘴， 又好像很害羞地合上小嘴低頭
+				PRINTFORML 這樣的少女令人忍不住感到可愛，%ANAME(対象)%走近少女， 温柔抱到懷裏並接吻
+				PRINTFORMW 熱情的親吻結束後嘴唇分開，少女恍惚地看着%ANAME(対象)%
+				PRINTFORML 「老師…請下次、 能早一点過来嗎？約定…好了。」
+				PRINTFORML 一辺摸着少女的頭一辺告訴她一定会来後， 少女満面笑容了
+				PRINTFORMW %ANAME(対象)%一辺回憶着少女的体温和気味，一辺離開住宅
+				DVAR:家庭教師_授業実施回数 ++
+			ENDIF
+			MONEY += 4000
+			PRINTFORMW 收到了報酬4000金
+		;8回目、調教
+		CASE 6
+			PRINTFORML 「你好、老師。」
+			PRINTFORMW 進入住宅後， 少女像平時一樣用愉快的笑容歡迎你
+			PRINTFORML 看到少女的臉後就想起上一次的事，不知不覚間害羞避開了視線
+			PRINTFORML 偸看少女時、 少女都一樣満臉通紅害羞得扭扭擰擰
+			PRINTFORMW 羞恥感令二人沈默一言不発
+			PRINTFORML %ANAME(対象)% 為了改変気氛故意假咳一声
+			PRINTFORMW 少女看見後偸偸竊笑、%ANAME(対象)% 看見後都不知不覚跟着一起笑
+			CALL TUTOR_COURSE(対象)
+			PRINTFORML 
+			PRINTFORML 授課結束時、少女一言不発地拉一拉%ANAME(対象)%的上衣
+			PRINTFORML 少女微微水潤的眼睛仰視着這辺
+			PRINTFORMW %ANAME(対象)%軽軽地撫摸少女的頭，一起走進寢室
+			PRINTFORML 
+			PRINTFORML 「啊、老師…嗯…。」
+			PRINTFORMW 温柔地愛撫少女一絲不掛的全身，少女身体震顫発出苦悶的呻吟声
+			PRINTFORML 「老師、啊…已、已経…嗯嗯！老師…。」
+			PRINTFORML 少女雖然多少有点害羞， 但比起上一次更加積極地向%ANAME(対象)%索求着
+			PRINTFORMW 接吻後温柔地插入，艶麗的身体弓起来漏出甘甜的吐息
+			PRINTFORML 「哈啊、啊…嗯…老師満満的…。」
+			PRINTFORML 「完全、不痛…嗯、是…謝謝你…啾。」
+			PRINTFORMW 因擔心少女兒緩慢地動腰，少女発出妖艶的声音刺激着%ANAME(対象)%的色欲
+			PRINTFORML 「啊！啊！啊啊 啊、啊嗯！好激烈、啊！哈啊！」
+			PRINTFORML 「啊、老師！老師！啊 啊 啊啊！有甚麼、要来了！啊！啊啊啊啊啊啊啊！」
+			PRINTFORMW 進一歩沈下腰激烈地欺負陰道深処，少女発出大大的嬌声後仰着高潮了
+			PRINTFORML 初次高潮的衝撃令少女的身体哆嗦震顫着，在%ANAME(対象)%面前露出放蕩的表情
+			PRINTFORMW 這個可愛的表情令%ANAME(対象)%無法再忍耐， 無数無数次陶酔地在少女的身体裏注入精液
+			PRINTFORML 
+			PRINTFORMW 做了無数次後， 与少女做下次再来的約定後離開了
+			DVAR:家庭教師_授業実施回数 ++
+			MONEY += 4000
+			PRINTFORMW 收到了報酬4000金
+		;9回目、更に調教
+		CASE 7
+			PRINTFORMW 「 哎呀哎呀！%ANAME(対象)%君、 今日也辛苦你了！」
+			PRINTFORML 在住宅遇上住宅的屋主了
+			PRINTFORMW 被搭話後嚇了一跳但仍然保持冷静打招呼
+			PRINTFORML 「啊沒甚麼、這是你来了後女兒比以前更加開朗了、我很感謝你呀、哈哈哈哈！」
+			PRINTFORMW 看来他非常信任我 、有点難過
+			PRINTFORML 「対了、 今日預定会出遠門。可以的話請你陪我的女兒久一点吧？」
+			PRINTFORML 聽了詳細情況後好像直到明天早上都不会回来
+			PRINTFORMW %ANAME(対象)%表示了解後男人放心地離開了
+			PRINTFORML 
+			PRINTFORML 「啊、老師…啊啊！啊！啊啊！」
+			PRINTFORML 讓少女四肢着床，從後面捉住腰粗暴地用肉棒抽插，少女発出妩媚的叫聱
+			PRINTFORML 毎当肉棒插到最深処時，少女身体都会震顫着緊纏着肉棒
+			PRINTFORML 忍耐不住射出第一発後少女露出恍惚的表情身体後仰着高潮了
+			PRINTFORMW 呼了一口気将肉棒抜出後少女靠近你並将你推倒
+			PRINTFORML 「老師…今次、由我来…做…嗯、嗯嗯…。」
+			PRINTFORML 少女坐在%ANAME(対象)%身上， 気色荒乱地将裂縫貼近肉棒，慢慢沈下腰
+			PRINTFORML 肉棒被呑噬的同時少女大口嬌喘，身体晃動着
+			PRINTFORML 少女深深地用下面呑下肉棒同時対%ANAME(対象)%説着愛的話語並陶酔地揺動着腰
+			PRINTFORMW %ANAME(対象)%一辺欣賞少女揺動着的美麗身体一辺品味着肉棒感受到的快楽
+			PRINTFORML 「啊 啊啊、嗯！老師的鷄鷄、啊！…変大了、嗯呼…。」
+			PRINTFORML 少女撫摸下腹部用恍惚的表情看着%ANAME(対象)%
+			PRINTFORMW 為了回応少女的心情用肉棒向上突刺，少女発出妩媚的叫聱震顫着身体
+			PRINTFORML 
+			PRINTFORMW 結果那日在少女的請求下一整晩都在做愛
+			DVAR:家庭教師_授業実施回数 ++
+			MONEY += 4000
+			PRINTFORMW 收到了報酬4000金
+		;10回目、愛人にする
+		CASE 8
+			PRINTFORML 「老師…老師…啊 啊啊、啊！嗯嗯！」
+			PRINTFORML 向倒在床上的少女激烈地揺動着腰
+			PRINTFORML 毎次衝刺少女身体都会震顫着，同時陰道蠕動給予肉棒更強烈的刺激
+			PRINTFORMW 肉棒被完全緊纏的快楽令%ANAME(対象)%忍耐不住快要射精了
+			PRINTFORML 「噫噫、老師…！要去、要去了！啊、啊啊！老師…！」
+			PRINTFORML 少女流泪接受着快感同時張開双手索求着%ANAME(対象)%
+			PRINTFORML 已経到達忍耐極限的你倒進少女懷裏激烈地纏繞着舌頭
+			PRINTFORML 「嗯！嗯嗯、啾、啊、啊啊！嗯！啊啊！老師、啾啾噗…啊啊！」
+			PRINTFORMW 如同融為一体的熱情性愛令身心変得溶化同時迎来高潮
+			PRINTFORML 
+			PRINTFORML 「哈啊…哈啊…老師、今日都、好厲害呀…。」
+			PRINTFORML 做了無数次後，二人在床上依偎在一起
+			PRINTFORMW 少女抱着%ANAME(対象)%的手臂幸福地微笑
+			PRINTFORML 靠近這個可愛的表情温柔地接吻
+			PRINTFORMW 「嗯、嗯嗯、啾…哈啊…最喜歡、老師…。」
+			PRINTFORML 嘴唇分開，少女用手抱着%ANAME(対象)%的頭並目不転睛地看着
+			PRINTFORML 「老師…？」
+			PRINTFORMW 「我、真的，最喜歡老師了。真的…。老師如果可以的話、今後都、一直…」
+			PRINTFORMW 聽到這，%ANAME(対象)%用手指碰少女的嘴不讓她説下去
+			PRINTFORMW %ANAME(対象)%緊抱着少女並臉対臉，打算説話
+			PRINTFORMW 少女在一瞬間露出驚訝的表情，軽軽点頭等待着
+			PRINTFORML 
+			PRINTFORML 『我愛你。以後都想一直跟你在一起。』
+			PRINTFORMW 
+			PRINTFORMW 看着少女的双瞳堅定地説道
+			PRINTFORML 少女聽到後喜極而泣，軽軽点頭
+			PRINTFORMW 「是。老師…以後都請、多多指教了…。」
+			PRINTFORMW 将撒嬌般靠近過来的少女緊緊抱着，熱情地接吻
+			DVAR:家庭教師_逢瀬フラグ = 1
+			MONEY += 4000
+			PRINTFORMW 收到了報酬4000金
+			PRINTFORMW 貴族的女兒成為了%ANAME(対象)%的愛人
+	ENDSELECT
+ENDIF
+
+RETURN 1
+
+;---------------------------------------------------------------------------------
+;授業内容
+;---------------------------------------------------------------------------------
+@TUTOR_COURSE(ARG:0)
+
+PRINTFORMW 要談些什麼？
+CALL ASK_MULTI("戦争話題", "数学話題", "政治話題")
+IF RESULT == 0
+	PRINTFORMW 談論了関于戦争的話題
+	PRINTFORMW ………
+	IF ABL:(ARG:0):武闘 * (RAND:5 + 1) >= 20 * (RAND:5 + 1)
+		PRINTFORMW 「很有趣的話題、老師。」
+		PRINTFORMW 看来她很喜歡這個話題
+		CALL PRINT_ADD_EXP(ARG:0, "武闘経験値", RAND:7 + 1, 1)
+		SIF DVAR:家庭教師_お気に入りID == 0 && HAS_PENIS(ARG:0)
+			DVAR:家庭教師_お気に入りID = GET_ID(ARG:0)
+	ELSE
+		PRINTFORMW 「嗯ー、有点艱深啊。」
+		PRINTFORMW 看来下次還是用其他話題比較好
+	ENDIF
+ELSEIF RESULT == 1
+	PRINTFORMW 談論了関于数学的話題
+	PRINTFORMW ………
+	IF ABL:(ARG:0):知略 * (RAND:5 + 1) >= 20 * (RAND:5 + 1)
+		PRINTFORMW 「很有趣的話題、老師。」
+		PRINTFORMW 看来她很喜歡這個話題
+		CALL PRINT_ADD_EXP(ARG:0, "知略経験値", RAND:7 + 1, 1)
+		SIF DVAR:家庭教師_お気に入りID == 0 && HAS_PENIS(ARG:0)
+			DVAR:家庭教師_お気に入りID = GET_ID(ARG:0)
+	ELSE
+		PRINTFORMW 「嗯ー、有点艱深啊。」
+		PRINTFORMW 看来下次還是用其他話題比較好
+	ENDIF
+ELSE
+	PRINTFORMW 談論了関于政治的話題
+	PRINTFORMW ………
+	IF ABL:(ARG:0):政治 * (RAND:5 + 1) >= 20 * (RAND:5 + 1)
+		PRINTFORMW 「很有趣的話題、老師。」
+		PRINTFORMW 看来她很喜歡這個話題
+		CALL PRINT_ADD_EXP(ARG:0, "政治経験値", RAND:7 + 1, 1)
+		SIF DVAR:家庭教師_お気に入りID == 0 && HAS_PENIS(ARG:0)
+			DVAR:家庭教師_お気に入りID = GET_ID(ARG:0)
+	ELSE
+		PRINTFORMW 「嗯ー、有点艱深啊。」
+		PRINTFORMW 看来下次還是用其他話題比較好
+	ENDIF
+ENDIF
+CALL TRAIN_AUTO_ABLUP(ARG:0)
+RETURN 1

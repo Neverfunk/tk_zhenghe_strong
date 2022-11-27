@@ -1,0 +1,1056 @@
+﻿;-------------------------------------------------
+;共通部分
+;-------------------------------------------------
+;=================================================
+;●口上の存在判定
+;=================================================
+@KOJO_EXIST_K148
+
+;=================================================
+;●開始時
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_TRAIN_START_K148
+
+;=================================================
+;●終了時
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_TRAIN_END_K148
+
+;=================================================
+;●コマンド実行時(このキャラがプレイヤー側のとき)
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_TARGET_K148
+
+;=================================================
+;●コマンド実行時(このキャラがプレイヤー側のとき)
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_PLAYER_K148
+
+;=================================================
+;●コマンド実行前(ターゲット・プレイヤー問わず)
+;※地の文が表示される前に実行される。戻り値に1を設定する(RETURN 1)と地の文がカットされる
+;  必要に応じてKOJO_COM_TARGETの代わりに使う
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_BEFORE_K148
+RETURN 0
+
+;=================================================
+;●コマンド実行後(パラメータの変動処理が終わってから呼び出される)
+;※状況にかかわらず常に実行される。取り扱い注意※
+;=================================================
+@KOJO_COM_AFTER_K148
+;[虚ろ]状態の場合、口が塞がっている場合は口上を表示しない
+IF TALENT:空虚 || IS_EQUIP_CONTINUE(TARGET, "口装着")
+	RETURN 0
+ENDIF
+;-------------------------------------------------
+;初絶頂は使い回せそうなのでここに作成
+;-------------------------------------------------
+;-------------------------------------------------
+;初めてＣ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｃ絶頂 > 0
+PRINTFORML 
+	IF CFLAG:220 == 0
+		CFLAG:220 = 1
+			PRINTFORML 「啊啊啊啊♥ 啊……啊………这、这样…………」
+			;TranslatedMark 「ふぁぁっ♥ あ……ぁ………こ、こんな…………」
+			PRINTFORML 隐岐奈因为第一次被人弄到高潮而感到羞耻，浑身发抖。
+			;TranslatedMark 隠岐奈は初めてイかされた羞恥に身もだえしている。
+	;2回目以降
+	ELSE
+		IF GETBIT(TALENT:淫乱系, 素質_淫乱_淫核)
+			SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「啊啊啊啊啊啊啊♥ 再多摸一下♥♥」
+				;TranslatedMark 「あぁあああっ♥ もっとぉ、もっとさわってぇぇっ♥♥」
+				PRINTFORML 隐岐奈因阴蒂感觉到的快乐而疯狂。
+				;TranslatedMark 隠岐奈はクリトリスで感じる快楽に悶え狂っている。
+			CASE 1
+				PRINTFORML 「呼，好舒服啊♥♥ 好舒服♥♥♥」
+				;TranslatedMark 「ひうぅっ、きもちいっ♥♥ さきっぽ きもちぃぃっ♥♥♥」
+				PRINTFORML 在阴蒂带来的快乐中隐岐奈完全被俘虏了。
+				;TranslatedMark クリトリスでの快楽に隠岐奈はすっかり虜になっている。
+			CASE 2
+				PRINTFORML 「不行啊♥♥ 要是被那样碰触的话♥♥♥♥」
+				;TranslatedMark 「だめぇっ♥♥ そんな触られたらぁぁっ♥♥♥♥」
+				PRINTFORML 隐岐奈的躯体猛地跳了起来，身体颤抖起来，。
+				;TranslatedMark 隠岐奈はビクンと大きく体を跳ねさせ、カクカクと腰を浮かせた。
+			ENDSELECT
+		;捕虜調教時
+		ELSEIF FLAG:12 == 2
+			IF TALENT:恋慕 || TALENT:服従
+				SELECTCASE RAND:3
+				CASE 0
+					PRINTFORML 「啊啊啊啊……！！哈……哈……！ 」
+					;TranslatedMark 「あああぁっ……！！はぁっ……はぁっ……！ 」
+					PRINTFORML 隐岐奈的腰很僵硬……。
+					;TranslatedMark 隠岐奈は腰をカクカクさせている……。
+				CASE 1
+					PRINTFORML 「啊啊…被玩弄了……」
+					;TranslatedMark 「あうぅ…イカされちゃった……」
+					PRINTFORML 隐岐奈无法忍受绝顶，战战兢兢地颤抖着…。
+					;TranslatedMark 隠岐奈は絶頂に耐えきれず、ビクビクと震えている…。
+				CASE 2
+					PRINTFORML 「嗯♥ 啊，啊啊……看、看啊……」
+					;TranslatedMark 「っっっ♥ はあっ、はぁぁ……み、見るなぁ……」
+					PRINTFORML 隐岐奈想要用手遮住因绝顶上而放松的脸。
+					;TranslatedMark 隠岐奈は絶頂で緩んだ顔を手で隠そうとしている。
+				ENDSELECT
+			ELSE
+				SELECTCASE RAND:2
+				CASE 0
+					PRINTFORML 「啊！哈……哈……！」
+					;TranslatedMark 「あっ！ はぁっ……はぁっ……！」
+					PRINTFORML 隐岐奈无法忍受绝顶，战战兢兢地颤抖着…。
+					;TranslatedMark 隠岐奈は絶頂に耐えきれず、ビクビクと震えている…。
+				CASE 1
+					PRINTFORML 「嗯♥ 啊，看啊…」
+					;TranslatedMark 「っ♥ くっ、見るなぁ…」
+					PRINTFORML 隐岐奈想要用手遮住因绝顶上而放松的脸。
+					;TranslatedMark 隠岐奈は絶頂で緩んだ顔を手で隠そうとしている。
+				ENDSELECT
+			ENDIF
+		ELSE
+			SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「啊啊啊啊……！！哈……哈……！」
+				;TranslatedMark 「あああぁっ……！！はぁっ……はぁっ……！」
+				PRINTFORML 隐岐奈的腰很僵硬……。
+				;TranslatedMark 隠岐奈は腰をカクカクさせている……。
+			CASE 1
+				PRINTFORML 「但是，但是，不要再摸了………」
+				;TranslatedMark 「も、もう、お前が触りすぎるから………」
+				PRINTFORML 隐岐奈无法忍受绝顶，战战兢兢地颤抖着…。
+				;TranslatedMark 隠岐奈は絶頂に耐えきれず、ビクビクと震えている…。
+			CASE 2
+				PRINTFORML 「嗯♥ 啊，啊啊………因为害羞，所以不要看……」
+				;TranslatedMark 「っっっ♥ はあっ、はぁぁ………は、恥ずかしいから、見るなぁ……」
+				PRINTFORML 隐岐奈想要用手遮住因绝顶上而放松的脸。
+				;TranslatedMark 隠岐奈は絶頂で緩んだ顔を手で隠そうとしている。
+			ENDSELECT
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;初めてＶ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｖ絶頂 > 0
+PRINTFORML 
+	IF CFLAG:221 == 0
+		CFLAG:221 = 1
+			PRINTFORML 「啊，呐，有什么要来了吗！？啊啊啊啊…♥♥」
+			;TranslatedMark 「やっ、な、何かくるぅっ！？ひぁぁっっ…♥♥」
+			PRINTFORML 隐岐奈因第一次绝顶而睁大了眼睛。
+			;TranslatedMark 隠岐奈は初めてのナカでの絶頂に大きく目を見開いている。
+	;2回目以降
+	ELSE
+		;捕虜調教時
+		IF FLAG:12 == 2
+			IF TALENT:恋慕 || TALENT:服従
+				SELECTCASE RAND:2
+				CASE 0
+					PRINTFORML 「————嗯」
+					;TranslatedMark 「――――っっ」
+					PRINTFORML 隐岐奈紧紧闭上眼睛，品味着绝顶的快乐。
+					;TranslatedMark 隠岐奈は目をぎゅっとつむって絶頂の快楽を噛み締めている。
+				CASE 1
+					PRINTFORML 「哇，连我自己都没做过……嗯……」
+					;TranslatedMark 「わ、我ながらはしたない……うぅ……」
+					PRINTFORML 隐岐奈一边呼出粗气，一边沉浸在绝顶的余韵中……
+					;TranslatedMark 隠岐奈は荒い息を吐きながら、絶頂の余韻に浸っている……
+				ENDSELECT
+			ELSE
+				SELECTCASE RAND:2
+				CASE 0
+					PRINTFORML 「这、腰、咯吱咯吱地……哎呀……」
+					;TranslatedMark 「こ、腰が、がくがくして……やだぁ……」
+				CASE 1
+					PRINTFORML 「不、不想说……」
+					;TranslatedMark 「い、いってなんかないぃ……」
+					PRINTFORML 隐岐奈处在屈辱和快乐的夹缝中，脸因苦闷而通红。
+					;TranslatedMark 隠岐奈は屈辱と快楽の板挟みになり、顔を真っ赤にして悶えている。
+				ENDSELECT
+			ENDIF
+		ELSEIF GETBIT(TALENT:淫乱系, 素質_淫乱_淫壷)
+			IF RAND:3 == 0
+				PRINTFORML 「啊，哈♥♥ 嗯，嗯♥♥♥」
+				;TranslatedMark 「あっ、はぁッ♥♥ イっくぅぅッ♥♥♥」
+				;セックス時
+				IF SELECTCOM == 30 || SELECTCOM == 31 || SELECTCOM == 32 || SELECTCOM == 33 || SELECTCOM == 34 || SELECTCOM == 35 || SELECTCOM == 36 || SELECTCOM == 37 || SELECTCOM == 38 || SELECTCOM == 39 || SELECTCOM == 55 || SELECTCOM == 57
+					PRINTFORML 绝顶的同时，隐岐奈的阴道为了追求%ANAME(MASTER)%的精液而紧紧地束缚着…。
+					;TranslatedMark 絶頂と同時に、隠岐奈の膣が%ANAME(MASTER)%の精を求めて強く締めつけてきた…。
+				ELSE
+					PRINTFORML 隐岐奈尖叫着绝顶了，露出了已经一塌糊涂的脸…。
+					;TranslatedMark 隠岐奈は叫び声をあげて絶頂し、だらしないイキ顔を晒している…。
+				ENDIF
+			ELSEIF RAND:2 == 0
+				;セックス時
+				IF SELECTCOM == 30 || SELECTCOM == 31 || SELECTCOM == 32 || SELECTCOM == 33 || SELECTCOM == 34 || SELECTCOM == 35 || SELECTCOM == 36 || SELECTCOM == 37 || SELECTCOM == 38 || SELECTCOM == 39 || SELECTCOM == 55 || SELECTCOM == 57
+					IF NOWEX:MASTER:射精 > 0
+						PRINTFORML 「呜、哈、是啊♥」
+						;TranslatedMark 「くっ、はぁっ、はあっ♥」
+						PRINTFORML 「不许在我之前先去……嗯♥」
+						;TranslatedMark 「私より先にイくのは許さんぞ……っ♥」
+					ELSE
+						PRINTFORML 「哈哈……嘛，还可以做呢…？fufu♥」
+						;TranslatedMark 「はぁぁ……ま、まだまだやれるぞ…？ふふふっ♥」
+						PRINTFORML 隐岐奈笑着，又开始动起腰来…。
+						;TranslatedMark 隠岐奈はにやにやと笑いながら、再び腰を動かし始めた…。
+					ENDIF
+				ELSE
+					;指
+					IF SELECTCOM == 3
+						PRINTFORML 「啊啊啊啊啊♥ 只靠手指什么的……嗯♥♥♥」
+						;TranslatedMark 「あぁぁっ♥ ゆ、指だけでなんてぇぇ……っ♥♥♥」
+						PRINTFORML 隐岐奈面露屈辱和欲望交织在一起的表情。
+						;TranslatedMark 隠岐奈は屈辱と欲情をないまぜにした表情を浮かべている。
+					;道具
+					ELSEIF SELECTCOM == 22 || SELECTCOM == 61
+						PRINTFORML 「啊，啊啊啊♥ 像玩具一样，不行，不行…嘘♥」
+						;TranslatedMark 「あ、あああっ♥ 玩具ごときでっ、だめぇっ、イっくぅ…ッ♥」
+						PRINTFORML 绝顶后，隐岐奈用屈辱的目光盯着玩弄自己的道具…。
+						;TranslatedMark 絶頂後、隠岐奈は焦点の合わない目で自身を辱める道具を見つめていた…。
+					ENDIF
+				ENDIF
+			ELSE 
+				IF RAND:3 == 0
+					PRINTFORML 「啊啊啊啊啊♥ 哈哈哈♥ 」
+					;TranslatedMark 「うあああぁッ♥ はぁっはぁっ♥ 」
+					PRINTFORML 「嗯，嗯……好舒服啊…♥♥♥」
+					;TranslatedMark 「っ、ふぅぅ……気持ちいいぃ…♥♥♥」
+					PRINTFORML 隐岐奈因为太过快乐而无意识地抽动着腰……。
+					;TranslatedMark 隠岐奈はあまりの快楽で無意識に腰をカクカクさせている……。
+				ELSEIF RAND:2 == 0
+					PRINTFORML 「不行啊，啊，太不好意思了♥ 啊，变奇怪了♥♥♥」
+					;TranslatedMark 「だめぇっ、おっ、おかしくなるぅッ♥ へ、変になっちゃうぅぅッ♥♥♥」
+					PRINTFORML 隐岐奈发出喊声，脸上浮现出不像秘神的狂乱表情。
+					;TranslatedMark 隠岐奈は叫び声をあげて絶頂し、秘神らしからぬだらしない表情を浮かべている。
+				ELSE 
+					PRINTFORML 「呃，啊~♥ 哈哈…啊，啊啊………嗯♥♥」
+					;TranslatedMark 「ひっ、あぁぁ～～ッ♥ はあッ…あ、はああぁ………っ♥♥」
+					PRINTFORML 「啊啊啊……♥ 不行，不行……太舒服了……♥」
+					;TranslatedMark 「ああぁ……♥ だ、だめだ……きもちよすぎるぅ……♥」
+				ENDIF
+			ENDIF
+		ELSE
+			IF RAND:3 == 0
+				PRINTFORML 「啊啊♥ 嗯，去了，嗯……嘘♥♥」
+				;TranslatedMark 「ああっ♥ い、いくっ、うぅぅ……ッ♥♥」
+				;セックス時
+				IF SELECTCOM == 30 || SELECTCOM == 31 || SELECTCOM == 32 || SELECTCOM == 33 || SELECTCOM == 34 || SELECTCOM == 35 || SELECTCOM == 36 || SELECTCOM == 37 || SELECTCOM == 38 || SELECTCOM == 39 || SELECTCOM == 55 || SELECTCOM == 57
+					PRINTFORML 在绝顶的同时，隐岐奈的阴道紧紧地勒紧了…。
+					;TranslatedMark 絶頂と同時に、隠岐奈の膣がきゅんきゅんと締め付けてきた…。
+				ELSE
+					PRINTFORML 隐岐奈快乐之余流下了口水，战战兢兢地颤抖着身体。
+					;TranslatedMark 隠岐奈は快楽のあまり涎を零しながら、ビクビクと体を震わせている。
+				ENDIF
+			ELSEIF RAND:2 == 0
+				;セックス時
+				IF SELECTCOM == 30 || SELECTCOM == 31 || SELECTCOM == 32 || SELECTCOM == 33 || SELECTCOM == 34 || SELECTCOM == 35 || SELECTCOM == 36 || SELECTCOM == 37 || SELECTCOM == 38 || SELECTCOM == 39 || SELECTCOM == 55 || SELECTCOM == 57
+					;マスターが射精
+					IF NOWEX:MASTER:射精 > 0
+						PRINTFORML 「哈…哈……喂，你也快点去吧…啊！」
+						;TranslatedMark 「はぁ…はぁ……お、お前もさっさとイけ…っ！」
+						PRINTFORML 隐岐奈露出后悔的表情，为了让%ANAME(MASTER)%舒服而开始摇起腰来…。
+						;TranslatedMark 隠岐奈は悔しそうな顔で、%ANAME(MASTER)%をイかせようと腰を振り始めた…。
+					ELSE
+						PRINTFORML 「哈…哈…不能只有我出丑……嗯」
+						;TranslatedMark 「はぁ…はぁ…私だけがこんな醜態を晒すわけには……っ」
+						PRINTFORML 隐岐奈强迫着自己因快乐而颤抖的身体，为了让%ANAME(MASTER)%舒服而开始挥腰…。
+						;TranslatedMark 隠岐奈は快楽で震える体に鞭打ち、%ANAME(MASTER)%をイかせようと腰を振り始めた…。
+					ENDIF
+				ELSE
+					;指
+					IF SELECTCOM == 3
+						PRINTFORML 「啊啊啊啊啊♥ 这、这样的……只用手指……嗯♥」
+						;TranslatedMark 「あぁぁっ♥ こ、こんな……指だけでぇ……っ♥」
+						PRINTFORML 隐岐奈因为被手指责弄的屈辱而颤抖。
+						;TranslatedMark 隠岐奈は指でイかされた屈辱に震えている。
+					;道具
+					ELSEIF SELECTCOM == 22 || SELECTCOM == 61 || SELECTCOM == 65
+						PRINTFORML 「嗯啊！♥♥ 啊，是啊………呃，道具什么的……屈辱啊……」
+						;TranslatedMark 「んあぁッ！♥♥ はあっ、はあっ………くっ、道具なんかで……屈辱だ……」
+						PRINTFORML 隐岐奈非常厌恶地盯着性玩具……
+						;TranslatedMark 隠岐奈は忌々しそうに性玩具を見つめている……
+					ENDIF
+				ENDIF
+			ELSE 
+				IF RAND:3 == 0
+					PRINTFORML 「————嗯」
+					;TranslatedMark 「――――っっ」
+					PRINTFORML 隐岐奈紧紧闭上眼睛，品味着绝顶的快乐。
+					;TranslatedMark 隠岐奈は目をぎゅっとつむって絶頂の快楽を噛み締めている。
+				ELSEIF RAND:2 == 0
+					PRINTFORML 「哈…哈哈……嗯♥」
+					;TranslatedMark 「はぁ…はぁぁ……っ♥」
+					PRINTFORML 「哇，连我自己都没做过……嗯……」
+					;TranslatedMark 「わ、我ながらはしたない……うぅ……」
+					PRINTFORML 隐岐奈一边呼出粗气，一边沉浸在绝顶的余韵中……
+					;TranslatedMark 隠岐奈は荒い息を吐きながら、絶頂の余韻に浸っている……
+				ELSE 
+					PRINTFORML 「啊，啊啊……嗯♥」
+					;TranslatedMark 「やっ、ああぁ……っ♥」
+					PRINTFORML 「这、腰、咯吱咯吱地……嗯……」
+					;TranslatedMark 「こ、腰が、がくがくして……うぅ……」
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+
+;-------------------------------------------------
+;初めてＡ絶頂
+;-------------------------------------------------
+IF NOWEX:Ａ絶頂 > 0
+	PRINTFORML 
+	;初回
+	IF CFLAG:222 == 0
+		CFLAG:222 = 1
+			PRINTFORML 「呐，总觉得，屁股好舒服啊……嗯♥」
+			;TranslatedMark 「な、なんか、おしりがあついぃぃ……っ♥」
+			;Aセックス時
+			IF SELECTCOM == 40 || SELECTCOM == 41 || SELECTCOM == 42 || SELECTCOM == 43 || SELECTCOM == 44 || SELECTCOM == 45 || SELECTCOM == 46 || SELECTCOM == 47 || SELECTCOM == 48 || SELECTCOM == 49 || SELECTCOM == 56 || SELECTCOM == 58
+				PRINTFORML 被侵犯尻穴的隐岐奈终于第一次经历了肛门绝顶。
+				;TranslatedMark 尻穴を犯されていた隠岐奈はついに初めてのアナル絶頂を経験した。
+			ELSE
+				PRINTFORML 被玩弄尻穴的隐岐奈和小穴一起到达了绝顶
+				;TranslatedMark 尻穴を弄られていた隠岐奈はびくんと体を跳ねさせて絶頂した
+			ENDIF
+		PRINTFORML 「哈…哈哈……这个，这种感觉，难道……」
+		;TranslatedMark 「はぁ…はぁぁ……こ、この感覚って、もしかして……」
+		PRINTFORML 「啊………这个、这样的、嗯……嗯」
+		;TranslatedMark 「あ………こ、こんな、うぅぅ……っ」
+		PRINTFORML 隐岐奈因为尻穴绝顶，似乎感觉非常羞耻……
+		;TranslatedMark 隠岐奈は後ろの穴で果ててしまったことに、ひどく羞恥心を覚えているようだ……
+	;2回目以降
+	ELSE
+		;捕虜調教時
+		IF FLAG:12 == 2
+			IF TALENT:恋慕 || TALENT:服従
+				PRINTFORML 「嗯~嗯~！」
+				;TranslatedMark 「んうぅぅ～～っっ！」
+				PRINTFORML 隐岐奈紧紧闭上眼睛，想要抵抗尻穴的绝顶感。
+				;TranslatedMark 隠岐奈は目をぎゅっと瞑って、尻穴での絶頂感に抗おうとしている。
+			ELSE
+				PRINTFORML 「啊啊…屁股什么的……」
+				;TranslatedMark 「あうぅ…お尻でなんて……」
+				PRINTFORML 隐岐奈可能是感到了屈辱吧，脸通红地颤抖着…。
+				;TranslatedMark 隠岐奈は屈辱を感じているのか、顔を真っ赤にして震えている…。
+			ENDIF
+		ELSEIF GETBIT(TALENT:淫乱系, 素質_淫乱_尻穴狂い)
+			IF RAND:3 == 0
+				PRINTFORML 「哦，屁股的感觉，啊♥ ～～～～♥♥♥」
+				;TranslatedMark 「お、おしり気持ちいっ、ああっ♥ ～～～ッッ♥♥♥」
+				PRINTFORML 隐岐奈在尻穴的快乐中达到了绝顶。
+				;TranslatedMark 隠岐奈は尻穴への快楽で絶頂に達してしまった。
+			ELSEIF RAND:2 == 0
+					;Aセックス時
+					IF SELECTCOM == 40 || SELECTCOM == 41 || SELECTCOM == 42 || SELECTCOM == 43 || SELECTCOM == 44 || SELECTCOM == 45 || SELECTCOM == 46 || SELECTCOM == 47 || SELECTCOM == 48 || SELECTCOM == 49 || SELECTCOM == 56 || SELECTCOM == 58
+						PRINTFORML %ANAME(MASTER)%轻轻打了打隐岐奈的屁股，她的肛门就紧紧地绷紧了。
+						;TranslatedMark %ANAME(MASTER)%が隠岐奈の尻を叩くと、彼女の肛門がギュッとより強く締まった。
+					ELSE
+						PRINTFORML %ANAME(MASTER)%就这样揉了隐岐奈的屁股，她害羞地颤抖着。
+						;TranslatedMark %ANAME(MASTER)%がそのまま隠岐奈の尻を揉みしだくと、彼女は恥ずかしそうにビクビク震えた。
+					ENDIF
+			ELSE
+				PRINTFORML 「啊啊啊，好啊♥ 屁股好粘……嗯♥♥♥」
+				;TranslatedMark 「あっあぁあっ、いいッ♥ おしりきもちいいぃ……っっ♥♥♥」
+				PRINTFORML 隐岐奈浑身发抖，流着口水露出了阿黑颜。
+				;TranslatedMark 隠岐奈は体を震わせ、涎を零してだらしないイキ顔を見せている。
+			ENDIF
+		ELSE
+			IF RAND:3 == 0
+				PRINTFORML 「～～～～！！」
+				;TranslatedMark 「～～～～っっっ！！」
+				PRINTFORML 隐岐奈紧紧闭上眼睛，想要抵抗尻穴的绝顶感。
+				;TranslatedMark 隠岐奈は目をぎゅっと瞑って、尻穴での絶頂感に抗おうとしている。
+			ELSEIF RAND:2 == 0
+				PRINTFORML 「啊啊啊，啊……竟然用屁股……」
+				;TranslatedMark 「ふぁぁっ、う、ああっ……お、お尻で、なんて……」
+				PRINTFORML 隐岐奈可能是感到了屈辱吧，脸通红地颤抖着…。
+				;TranslatedMark 隠岐奈は屈辱を感じているのか、顔を真っ赤にして震えている…。
+			ELSE 
+				PRINTFORML 「啊…啊…、屁股…我去了……嗯…」
+				;TranslatedMark 「あ…あぁ…、おしりで…イっちゃった……うぅぅぅ…」
+				PRINTFORML 隐岐奈即使到了这个时期，似乎还是对用屁股绝顶而产生了抵触…。
+				;TranslatedMark 隠岐奈はこの期に及んでも、尻で感じることに抵抗があるようだ…。
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;初めてＢ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｂ絶頂 > 0
+PRINTFORML 
+	IF CFLAG:223 == 0
+		CFLAG:223 = 1
+			PRINTFORML 「啊啊啊啊♥♥」
+			;TranslatedMark 「ひぁぁあっ♥♥」
+			PRINTFORML 「啊，啊啊……嗯，胸部竟然能这么舒服……」
+			;TranslatedMark 「はあっ、はぁぁ……む、胸でこんな気持ち良くなれるなんて……」
+			PRINTFORML 隐岐奈在乳房第一次达到绝顶时表现出轻微的动摇。
+			;TranslatedMark 隠岐奈は乳房での初めての絶頂に軽い動揺を見せている。
+	;2回目以降
+	ELSE
+		;捕虜調教時
+		IF FLAG:12 == 2
+			IF TALENT:恋慕 || TALENT:服従
+				SELECTCASE RAND:2
+				CASE 0
+					PRINTFORML 「嗯，乳头也痛了……」
+					;TranslatedMark 「む、胸でもイってしまった……」
+					PRINTFORML 隐岐奈对自己的痴态感到十分沮丧。
+					;TranslatedMark 隠岐奈は自身の痴態にすっかり気落ちしている。
+				CASE 1
+					PRINTFORML 「啊，啊♥」
+					;TranslatedMark 「あっ、はああっ♥」
+					PRINTFORML 绝顶的隐岐奈两乳颤抖着。
+					;TranslatedMark 絶頂した隠岐奈はふるふると両乳を震わせている。
+				ENDSELECT
+			ELSE
+				SELECTCASE RAND:2
+				CASE 0
+					PRINTFORML 「嗯……这样的事，我怎么会承认……！」
+					;TranslatedMark 「っっ……こんなこと、認めるものか……！」
+					PRINTFORML 隐岐奈虽然在绝顶放松了面部，但马上咬紧牙关掩饰住自己。
+					;TranslatedMark 隠岐奈は絶頂で顔を緩めたものの、すぐに歯を食いしばり自身を取り繕った。
+				CASE 1
+					PRINTFORML 「这样，真没出息……」
+					;TranslatedMark 「こんな、はしたない……」
+					PRINTFORML 隐岐奈一边呼出魅惑的气息，一边忍耐着绝顶的余韵。
+					;TranslatedMark 隠岐奈は荒い息を吐きながら、絶頂の余韻を振り払った。
+				ENDSELECT
+			ENDIF
+		ELSEIF GETBIT(TALENT:淫乱系, 素質_淫乱_淫乳)
+			SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「啊啊啊……嗯♥ 呃，好，好舒服……♥♥♥」
+				;TranslatedMark 「ふああぁ……っ♥ くぅっ、き、きもちぃぃ……♥♥♥」
+				PRINTFORML 隐岐奈露出了平时绝对看不到的表情，颤抖着…。
+				;TranslatedMark 隠岐奈は普段は絶対に見せないような表情で震えている…。
+			CASE 1
+				PRINTFORML 「～～～～♥♥♥ 啊是啊……哈哈……♥」
+				;TranslatedMark 「～～～ッ♥♥♥ はあっはあっ……はぁぁ……♥」
+				PRINTFORML 「啊啊，我的胸口在抽动了…fufu♥」
+				;TranslatedMark 「ああ、胸でイっちゃった…ふふふっ♥」
+			CASE 2
+				PRINTFORML 「啊，啊啊啊♥♥ 是啊，嗯，嗯…嗯♥」
+				;TranslatedMark 「あ、あああっ♥♥ ひゃだっ、っ、くぅぅ…っっ♥」
+				PRINTFORML 隐岐奈似乎很讨厌乳头的突然直立，两乳都在颤抖。
+				;TranslatedMark 乳首をピンと立たせ、隠岐奈は厭らしく両乳を震わせている。
+			ENDSELECT
+		ELSE
+			SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「啊，啊♥ 啊，嗯，嗯…哇，我做了这么恶心的事……」
+				;TranslatedMark 「はあっ、あぁっ♥ はあっ、ん、うぅ…わ、私、こんないやらしいことをして……」
+				PRINTFORML 也许是因为因胸部绝顶而带来的极致的羞耻感，隐岐奈的脸涨得通红，低着眼睛。
+				;TranslatedMark 胸で絶頂してしまった羞恥のせいか、隠岐奈は顔を真っ赤にし目を伏せている。
+			CASE 1
+				PRINTFORML 「啊，啊♥」
+				;TranslatedMark 「あっ、はああっ♥」
+				PRINTFORML 绝顶的隐岐奈两乳颤抖着。
+				;TranslatedMark 絶頂した隠岐奈はふるふると両乳を震わせている。
+			CASE 2
+				PRINTFORML 「啊啊啊啊♥ 啊，这样，好害羞……嗯♥」
+				;TranslatedMark 「あぁぁッ♥ やっ、こんな、恥ずかしいぃ……っ♥」
+				PRINTFORML 隐岐奈的乳头直立着绝顶了。
+				;TranslatedMark 隠岐奈は乳首をピンと立たせて絶頂している。
+			ENDSELECT
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;初めてＭ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｍ絶頂 > 0
+PRINTFORML 
+	IF CFLAG:224 == 0
+		CFLAG:224 = 1
+			PRINTFORML 「嗯！？嗯，嗯……♥」
+			;TranslatedMark 「んんんっ！？んっ、うぅぅんっ……♥」
+			PRINTFORML 隐岐奈用嘴唇第一次达到了高潮，眼瞳都翻白了。
+			;TranslatedMark 隠岐奈は口唇での初めての絶頂に目を白黒させている。
+	;2回目以降
+	ELSE
+		;捕虜調教時
+		IF FLAG:12 == 2
+			IF TALENT:恋慕 || TALENT:服従
+				PRINTFORML 「嗯，嗯♥ 哈……哈……♥」
+				;TranslatedMark 「んくっ♥ はぁ……はぁ……♥」
+				PRINTFORML 隐岐奈捂着嘴，抽动着身体。
+				;TranslatedMark 隠岐奈は口元を押さえ、ぴくぴくと体を跳ねさせている。
+			ELSE
+				PRINTFORML 「嗯…嘿！！」
+				;TranslatedMark 「んうぅぅ…っ！！」
+				PRINTFORML 隐岐奈捂着嘴，拼命地忍耐着什么。
+				;TranslatedMark 隠岐奈は口元を押さえ、必死に何かを堪えるようにしている。
+			ENDIF
+		ELSE
+			SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「嗯，嗯♥♥ 哈、哈…嗯♥♥♥」
+				;TranslatedMark 「ひっ、ぐうぅぅっっっ♥♥ はっ、はぁぁ…っ♥♥♥」
+				PRINTFORML 从绝顶的隐岐奈口中滴落下口水，吐着粗气浑身颤抖…。
+				;TranslatedMark 絶頂した隠岐奈は口から垂れる涎をそのままに、荒い息を吐いて身を震わせている…。
+			CASE 1
+				PRINTFORML 「嗯…嗯，嗯♥♥ ……嗯，哈，嗯♥♥」
+				;TranslatedMark 「っ…んうっ♥♥ ……んはっ、はぁっ、うぅぅっ♥♥」
+				PRINTFORML 隐岐奈一边用通红的脸呼出粗气，一边擦拭着从口中洒出来的唾液。
+				;TranslatedMark 真っ赤な顔で荒い息を吐きながら、隠岐奈は口から零れた唾液を拭き取った。
+			CASE 2
+				PRINTFORML 「嗯，嗯♥ 哈、哈、哈…♥」
+				;TranslatedMark 「んくっ、んぅぅうっっ♥ はぁっ、はぁ、はあぁっ…♥」
+				PRINTFORML 隐岐奈似乎是因为口腔的刺激而达到了高潮。
+				;TranslatedMark 隠岐奈は口からの刺激で達してしまったようだ。
+			ENDSELECT
+		ENDIF
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;初めて射精
+;-------------------------------------------------
+IF NOWEX:射精 > 0
+PRINTFORML 
+	IF CFLAG:225 == 0
+		CFLAG:225 = 1
+			PRINTFORML 「啊，啊啊啊……♥」
+			;TranslatedMark 「あ、あぁぁぁっ……♥」
+			PRINTFORML 射完精后，隐岐奈看着自己阴茎上射出的精液，满脸通红。
+			;TranslatedMark 精通した隠岐奈は、真っ赤な顔で自身のペニスから吹き出たザーメンを見つめている。
+	;2回目以降
+	ELSE
+		;捕虜調教時
+		IF FLAG:12 == 2
+			IF TALENT:恋慕 || TALENT:服従
+				PRINTFORML 「啊，啊…出来了……♥」
+				;TranslatedMark 「あ、あぁ…出ちゃった……♥」
+				PRINTFORML 隐岐奈因射精的快感而放松下来。
+				;TranslatedMark 隠岐奈は射精の快感に顔を緩ませている。
+			ELSE
+				PRINTFORML 「唔…！」
+				;TranslatedMark 「うっ…！」
+				PRINTFORML 隐岐奈小声地呻吟的同时，精子从阴茎里嗖嗖地射了出来。
+				;TranslatedMark 隠岐奈が小さく呻くと同時に、そのペニスからびゅくっと精子が放たれた。
+			ENDIF
+		ELSEIF GETBIT(TALENT:淫乱系, 素質_淫乱_射精狂い)
+			SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「啊…嗯～～～♥♥」
+				;TranslatedMark 「はあっ…ッくぅぅ～～～っっ♥♥」
+				PRINTFORML 把精液充分地射出来后，隐岐奈露出了恍惚的笑容。
+				;TranslatedMark たっぷりと精液をぶちまけると、隠岐奈は恍惚とした笑みを浮かべた。
+				PRINTFORML 「啊，还没出来呢…fufu♥」
+				;TranslatedMark 「ああ、まだ出し足りないな…ふふふっ♥」
+			CASE 1
+				PRINTFORML 「呼……嗯，还要出来哦，呵呵…嗯♥」
+				;TranslatedMark 「ふうっ……ん、まだ出るぞ、ふふ…っ♥」
+				PRINTFORML 隐岐奈微微一笑，扭动着腰，尽力把精液挤出最后一滴…。
+				;TranslatedMark ニヤリと笑うと隠岐奈は腰を揺すり、最後の一滴まで精液を絞り出した…。
+			CASE 2
+				PRINTFORML 「哈…哈……♥ 还没射出来呢♥」
+				;TranslatedMark 「はぁ…はぁ……♥ まだ出したりないな♥」
+				PRINTFORML 隐岐奈抚摸着没有变小的自己的阴茎。
+				;TranslatedMark 隠岐奈は萎える様子のない自身のペニスを撫でている。
+			ENDSELECT
+		ELSE
+			SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「嗯，啊啊啊♥ 嗯…嗯♥♥」
+				;TranslatedMark 「んうっ、ああぁっ♥ イっくぅぅ…っ♥♥」
+				PRINTFORML 隐岐奈的身体剧烈的颤抖了一下，精子从她阴茎上嗖嗖地射了出来。
+				;TranslatedMark 隠岐奈が一際大きく体を跳ねさせると、彼女のペニスからびゅるっと精子が放たれた。
+			CASE 1
+				PRINTFORML 「有，有♥ 出来……嗯♥♥」
+				;TranslatedMark 「はあっ、はあっ♥ 出る……っ♥♥」
+				PRINTFORML 隐岐奈情不自禁地抬起腰，按照本能射精。
+				;TranslatedMark 隠岐奈は思わず腰を浮かせ、本能のままに射精した。
+			CASE 2
+				PRINTFORML 「也，我要射出来了……啊啊啊啊啊啊啊♥♥」
+				;TranslatedMark 「も、もう出るぞっ……あああぁぁっ♥♥」
+				PRINTFORML 随着身体的颤抖，隐岐奈就这样毫不犹豫地射了出来。
+				;TranslatedMark ビクッと身を震わせると、隠岐奈はそのまま遠慮なく吐精した。
+			ENDSELECT
+		ENDIF
+	ENDIF
+ENDIF
+;=================================================
+;●単体エンディング関係
+;=================================================
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;★ここから先にはエンディングが記述されています★
+;ネタバレを避けたい方は閲覧しないようにご注意下さい。
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+@KOJO_SINGLE_ENDING_K148
+;単体エンディング
+;全都市を統一したとき、好感度5000以上かつ全キャラ中最も好感度が高いと表示される
+IF TALENT:正妻
+	PRINTFORML
+	PRINTFORMW ————后户之国
+	;TranslatedMark ――――後戸の国
+	PRINTFORML 
+	PRINTFORML 「终于，啊…」
+	;TranslatedMark 「やっと、か…」
+	PRINTFORML 「到这里为止，真的很久……」
+	;TranslatedMark 「ここに至るまで、本当に長かった……」
+	PRINTFORML 隐岐奈坐在椅子上，一边眺望着从后门看到的幻想乡一边嘟囔着。
+	;TranslatedMark 隠岐奈は椅子に腰かけ、後戸から見える幻想郷を眺めながら呟いた。
+	PRINTFORMW 伫立在那旁边的%ANAME(MASTER)%歪着头，她突然笑了起来。
+	;TranslatedMark その隣に佇む%ANAME(MASTER)%が首を傾げると、彼女はふっと笑いかける。
+	PRINTFORML 
+	PRINTFORML 「我知道你想说什么」
+	;TranslatedMark 「お前の言いたいことは分かるぞ」
+	PRINTFORML 「对于身为秘神的我来说，这种程度的时间流逝应该也会觉得很短」
+	;TranslatedMark 「秘神である私には、この程度の時の流れすらも短く感じるはずだ、と」
+	PRINTFORMW 「但是，这次的战争是不同的。因为发生了太多的事情……」
+	;TranslatedMark 「だがな、今回の戦争に限っては違うのだ。あまりにも、色々なことがあったから……」
+	PRINTFORML 「……确实是一场很严重的战争。许多不幸散布在幻想乡，至今还留有其祸。但是……」
+	;TranslatedMark 「……たしかにひどい戦争だったよ。多くの不幸が幻想郷にまき散らされ、今もその禍は残っている。だが……」
+	PRINTFORML 「我和你相遇，交换契约……然后，获得了许多幸福」
+	;TranslatedMark 「私はお前と出会い、契りを交わし……そして、幾多もの幸福を得られた」
+	PRINTFORMW 「和你一起度过的时间，比我之前生活的那么久的年月还要充实」
+	;TranslatedMark 「お前と一緒に過ごした時間は、それまで私が生きてきた年月以上に充実していたんだ」
+	PRINTFORML  
+	PRINTFORML 隐岐奈平静地微笑着向%ANAME(MASTER)%招手。
+	;TranslatedMark 隠岐奈は穏やかに微笑んで%ANAME(MASTER)%に手招きした。
+	PRINTFORMW 如果%ANAME(MASTER)%弯下腰，脸靠近的话，那脸颊上就会被温柔地亲下去。
+	;TranslatedMark %ANAME(MASTER)%が屈んで顔を近づければ、その頬に優しく接吻が落とされる。
+	PRINTFORML 「……呵呵呵」
+	;TranslatedMark 「……ふふっ」
+	PRINTFORML 「因为我是神…太过偏袒你一个人，其实是不好的」
+	;TranslatedMark 「私は神様だから…貴方ひとりに肩入れしすぎるのは、本当は良くないんだけれどね」
+	PRINTFORML 「但是……在身为秘神之前，如果被说成是一个少女的话……」
+	;TranslatedMark 「でも……秘神である以前にひとりの少女だ、なんて言われてしまったら、な……」
+	PRINTFORML 虽然很安静，但她用充满喜悦的声音嘟囔着，隐岐奈牵起了%ANAME(MASTER)%的手。
+	;TranslatedMark 静かながらも喜びに満ちた声で呟き、隠岐奈は%ANAME(MASTER)%の手を取る。
+	PRINTFORMW 像是缠绕着手指一样牵着手，她再次闭上了眼睛。
+	;TranslatedMark 指を絡ませるようにして手を繋ぐと、彼女は再び目を閉じた。
+	PRINTFORML 
+	PRINTFORML 再次的接吻，不再是将彼此的嘴唇重叠在一起的东西，而是让温暖、柔软的感觉充满了内心……。
+	;TranslatedMark 再びの接吻は互いの唇を重ね合わせるもので、温かく、柔らかな感触が心を満たす……。
+	PRINTFORMW 交换感情的手势，哪怕只有几秒钟，也足以证实彼此的心意。
+	;TranslatedMark 交わされた親愛の所作は、ほんの数秒でもお互いの心を確かめ合うには十分だった。
+	PRINTFORML 
+	PRINTFORML 「―――――」
+	PRINTFORMW 悄悄地松开嘴唇，隐岐奈喃喃细语着，只让%ANAME(MASTER)%听见。
+	;TranslatedMark そっと唇を離し、%ANAME(MASTER)%だけに聞こえるように隠岐奈が囁いた。
+	PRINTFORML 
+	PRINTFORML ………………………
+	PRINTFORMW ……………
+	PRINTFORML 
+	PRINTFORMW 谁也不知道咱真正的面目。
+	;TranslatedMark 誰も本当の正体を知らない。
+	PRINTFORMW 不可直视，不可言说，不可知晓，究极的秘神·摩多罗神。
+	;TranslatedMark その正体を見てはいけない、聞いてはいけない、語ってはいけない、究極の秘神・摩多羅神。
+	PRINTFORMW 但是，据说有一天，身边出现了一个与其亲近的人。
+	;TranslatedMark しかし、ある時からその傍らに寄り添う者が現れたという。
+	PRINTFORMW 和秘神一样，虽然没有弄清楚它的真面目……
+	;TranslatedMark 秘神同様、その正体が明らかになることはなかったが……
+	PRINTFORMW 只知，他的存在，也已经超越了悠久的时间，而陪伴在秘神身旁
+	;TranslatedMark 確かに彼の者は存在し、悠久の時を超えて両者は共にあったという。
+	PRINTFORML 
+ELSEIF TALENT:恋慕
+	PRINTFORML
+	PRINTFORMW ————后户之国
+	;TranslatedMark ――――後戸の国
+	PRINTFORML 
+	PRINTFORML 隐岐奈坐在椅子上托着腮，通过后门凝视着幻想乡。
+	;TranslatedMark 隠岐奈は椅子に腰かけ頬杖をつき、後戸を通して幻想郷を見つめる。
+	PRINTFORML 看了一眼后，她把脸转向站在一旁的%ANAME(MASTER)%，恶作剧般地笑了。
+	;TranslatedMark 一通り眺め終えると、傍らに佇む%ANAME(MASTER)%に顔を向け、彼女はくすっと悪戯っぽく笑った。
+	PRINTFORML 「不经意间，就把幻想乡统一了呢」
+	;TranslatedMark 「ついうっかり、戯れに幻想郷を統一してしまったわねぇ」
+	PRINTFORMW 「呵呵……真是的，你真是个不会让人厌倦的家伙」
+	;TranslatedMark 「ふふふ……まったく、お前は本当に飽きさせない奴だよ」
+	PRINTFORML 「但是……当然，明面上的统治是由你进行的吧？」
+	;TranslatedMark 「ところで……当然ながら、表に立っての統治はお前が行うのだろう？」
+	PRINTFORMW 隐岐奈含笑地问%ANAME(MASTER)%。
+	;TranslatedMark にやにやしながら、隠岐奈は%ANAME(MASTER)%に問いかけた。
+	PRINTFORML 
+	PRINTFORMW ……但是，虽说居住在土地狭小的地方的人很少，但这里是幻想乡。
+	;TranslatedMark ……しかし、いくら土地も狭く住む者も少ないとはいえ、ここは幻想郷。
+	PRINTFORMW 多样性丰富、罕见的存在横行于世的最后乐园。
+	;TranslatedMark 多様性豊かで、類い稀なる存在が跋扈する最後の楽園。
+	PRINTFORMW 要统治这个地方，保证长久的和平，凭着半吊子的打算和能力是不可能的吧……。
+	;TranslatedMark この地を統治し、長き平和を約束するには、生半可な心持ちと能力では不可能だろう……。
+	PRINTFORML 
+	PRINTFORMW 看到了陷入沉思的%ANAME(MASTER)%，隐岐奈歪着头说“哎呀”。
+	;TranslatedMark 考え込む%ANAME(MASTER)%を見て、隠岐奈はおやおや、と首を傾げた。
+	PRINTFORML 「%ANAME(MASTER)%，明明已经君临人类之上了，事到如今也没有丝毫动摇过吧？」
+	;TranslatedMark 「%ANAME(MASTER)%、よもや人の上に君臨するのに、今さら及び腰になってないだろうな？」
+	PRINTFORMW 像开玩笑似的，隐岐奈笑着，温柔地对%ANAME(MASTER)%说"没关系的"。
+	;TranslatedMark からかうように隠岐奈は笑うと、大丈夫だ、と%ANAME(MASTER)%に優しく声をかけた。
+	PRINTFORML 「确实，在战争时期活跃的人一旦进入和平的世界就会暴露出无能的一面也并不少见」
+	;TranslatedMark 「たしかに、戦時中では多いに活躍した者が、平和な世になった途端に無能を晒すことも珍しくはない」
+	PRINTFORMW 「但是你不同……这是我的保证」
+	;TranslatedMark 「だがお前は違う……私が保証しよう」
+	PRINTFORML 
+	PRINTFORML 隐岐奈紧紧握着%ANAME(MASTER)%的手，仿佛想让孩子安心一般。
+	;TranslatedMark まるで子供を安心させるように、隠岐奈はぎゅっと%ANAME(MASTER)%の手を握る。
+	PRINTFORMW 纤细、洁白、柔弱的手指，却也具备了其他人所没有的温柔。
+	;TranslatedMark 細く、白く、か弱さをも感じさせる手指だが、その温もりは他にはない優しさも備えていた。
+	PRINTFORMW 「如果需要的话，我自己也愿意直接帮忙的」
+	;TranslatedMark 「必要ならば、私自身が直接手を貸すこともやぶさかではない」
+	PRINTFORMW 「所以，%ANAME(MASTER)%……今后也请让我开心吧」
+	;TranslatedMark 「だから、%ANAME(MASTER)%……これからも私を楽しませておくれ」
+	PRINTFORML 
+ELSEIF TALENT:服従
+	PRINTFORML
+	PRINTFORMW ————后户之国
+	;TranslatedMark ――――後戸の国
+	PRINTFORML 
+	PRINTFORMW 黑暗的后门之国漂浮着无数的门。
+	;TranslatedMark 暗い後戸の国に浮かぶ無数の扉。
+	PRINTFORMW 那些所展示的，是幻想乡彼方的景色。
+	;TranslatedMark それらが見せるのは、幻想郷の彼方此方の景色。
+	PRINTFORML 
+	PRINTFORML 为了人间之里的复兴，大家都超越了种族而相互合作着…。
+	;TranslatedMark 人里ではその復興のために、皆が種族を超えて協力し合っている…。
+	PRINTFORML 妇女和女孩为坐在路边的战争孤儿和无处可去的伤兵提供食物....。
+	;TranslatedMark 道端に座りこむ戦災孤児や、行く当てのない傷痍軍人に向け、婦女子が炊き出しを行っている…。
+	PRINTFORML 在远离村庄的地方，在被烧毁的森林土壤里，可能有幸运地躲过了大火的幼树，正向天空伸展着枝叶......
+	;TranslatedMark 里から離れ、焼けた森の土壌には、運よく火を逃れたのであろう若木が枝葉を空へと伸ばしている…。
+	PRINTFORML 妖精们就好像已经忘记了战争一样天真无邪地在河边玩耍…。
+	;TranslatedMark そして妖精たちは、もうすでに戦争を忘れたかのように無邪気に川遊びをしている…。
+	PRINTFORML 仔细看那条河的话，也有肥鱼不在乎水流而在水中游动…。
+	;TranslatedMark その川をよく見れば、肥えた魚が流れを物ともせずに泳ぎ回っている…。
+	PRINTFORML 
+	PRINTFORML 虽然由于之前的战祸而荒废了艺术，但这是一幅绝不会让观众感到厌倦的景象。
+	;TranslatedMark 先の戦禍によって荒廃はすれども、決して見る者を飽きさせない光景だった。
+	PRINTFORML 
+	PRINTFORML 「怎么样，%ANAME(MASTER)%…你喜欢吗？」
+	;TranslatedMark 「どうだ、%ANAME(MASTER)%…気に入ったか？」
+	PRINTFORML 「虽然荒芜了，但幻想乡还是很美的吧？」
+	;TranslatedMark 「荒れ果ててはしまったが、やはり幻想郷は美しいだろう？」
+	PRINTFORMW 隐岐奈站在坐在椅子上的%ANAME(MASTER)%旁边，和%ANAME(MASTER)%一起凝视着一样的情景。
+	;TranslatedMark 隠岐奈は椅子に腰掛けた%ANAME(MASTER)%の傍らに立ち、%ANAME(MASTER)%と同じ情景を見つめている。
+	PRINTFORML 
+	PRINTFORMW 「以前，我们贤者创造了这个乐园的时候，那是不属于任何人的东西…」
+	;TranslatedMark 「かつて、この楽園を我々賢者が作り上げた時、それは誰のものでもなかったが…」
+	PRINTFORMW 「现在已经…映在这里的全部都是你的，%ANAME(MASTER)%」
+	;TranslatedMark 「今はもう…ここに映る全てがお前の物だ、%ANAME(MASTER)%」
+	PRINTFORMW 「但是，如果这片土地上有你不喜欢的东西的话…」
+	;TranslatedMark 「だが、もしもこの地に、お前の気に食わないものがあるというのならば…」
+	PRINTFORMW 「那个时候，我会按照你的愿望改变的」
+	;TranslatedMark 「その時は、私がお前の望み通りに変えてやる」
+	PRINTFORMW 「星星的循环、四个季节、住在这里的人们、制作幻想乡的系统…」
+	;TranslatedMark 「星の巡りも、四つの季節も、この地に住まう者たちも、幻想郷を作るシステムも…」
+	PRINTFORML 「所有的一切」
+	;TranslatedMark 「何もかも、全てを」
+	PRINTFORMW 这样说着，隐岐奈对%ANAME(MASTER)%露出了充满慈爱的笑容。
+	;TranslatedMark そう言って、隠岐奈は%ANAME(MASTER)%に慈愛に満ちた笑みを見せる。
+	PRINTFORML 
+	PRINTFORMW 「满足和实现你所有的愿望......，就是我的宿命，我的快乐。」
+	;TranslatedMark 「貴方が望む全てに応え、叶えること……それこそが我が天命、我が喜び」
+	PRINTFORMW 「不管以后会发生什么事，我都会只为你效力」
+	;TranslatedMark 「これから先にどんなことがあろうとも、私は貴方の為にのみ力を尽くそう」
+	PRINTFORMW 「不久，秘神、摩多罗神这一侧面也会消失，成为只属于你的神，但这已经是我的愿望了」
+	;TranslatedMark 「やがては秘神、摩多羅神という側面も消え、貴方だけの神に成り果てるだろうが、もはやそれこそが私の希望」
+	PRINTFORMW 「所以……让我永远和你在一起，%ANAME(MASTER)%」
+	;TranslatedMark 「だから……永遠に、貴方と共にいさせてくれ、%ANAME(MASTER)%」
+	PRINTFORML 
+ELSE
+	PRINTFORML
+	PRINTFORMW ————%ANAME(MASTER)%之家
+	;TranslatedMark ――――%ANAME(MASTER)%の家
+	PRINTFORML 
+	PRINTFORMW 「幻想乡终于平静下来了啊」
+	;TranslatedMark 「ようやく幻想郷も落ち着いたな」
+	PRINTFORML 「话虽如此，但我从来没有想过，我会是那个做出这个举动的人......」
+	;TranslatedMark 「それにしても、この私が表立って動くことになろうとは……」
+	PRINTFORMW 隐岐奈抱怨着实在是太累了，叹了口气。
+	;TranslatedMark 隠岐奈は実に疲れたと愚痴り、大きな溜息を吐いた。
+	PRINTFORML 
+	PRINTFORML 「不管怎么说，%ANAME(MASTER)%给我了一个好工作。作为幻想乡的贤者是要来道谢的」
+	;TranslatedMark 「ともあれ、%ANAME(MASTER)%、良い働きであった。幻想郷の賢者として礼を言うぞ」
+	PRINTFORMW 「有什么想要的东西吗？给你奖赏吧。喂，说说看啊」
+	;TranslatedMark 「何か望む物はあるか？褒美をくれてやろう。そら、言ってみろ」
+	PRINTFORML %ANAME(MASTER)%摇了摇头，隐岐奈皱起了眉头。
+	;TranslatedMark %ANAME(MASTER)%が首を振ると、隠岐奈は眉を軽く寄せる。
+	PRINTFORMW 「没有吗？无聊的家伙……」
+	;TranslatedMark 「ないのか？つまらん奴め……」
+	PRINTFORML 
+	PRINTFORMW 「那样的话……就给你每周都准备茶和点心来招待我的权利吧」
+	;TranslatedMark 「それならば……そうだなぁ、毎週、茶と菓子を用意して私を接待する権利をやろう」
+	PRINTFORML 「我也很高兴能吃到点心，你也很高兴能看见我……这是双赢嘛」
+	;TranslatedMark 「私もお菓子を食べられて嬉しい、お前も私に会えて嬉しい……うぃんうぃんというわけだな」
+	PRINTFORMW 隐岐奈呵呵笑着说着下一个星期三会来，然后轻轻挥手从后户之国离开了。
+	;TranslatedMark 隠岐奈はにやりと笑い、次は水曜日に来る、と軽く手を振って後戸の国へと去っていった。
+	PRINTFORML 
+	PRINTFORMW ……今后，%ANAME(MASTER)%和秘神的缘分还会继续下去。
+	;TranslatedMark ……これからも、%ANAME(MASTER)%と秘神の縁は続きそうだ。
+ENDIF
+;RETURNの値を0→1に変えると、デフォルトの単体エンディングメッセージがスキップされる
+RETURN 1
+
+@KOJO_DEAD_ENDING_K148
+;斬首エンディング
+;自勢力が滅亡したときの選択肢で「……斬れ」を選択して主人公が死亡した場合に、好感度5000以上かつ全キャラ中最も好感度が高いと表示される
+IF TALENT:正妻
+	PRINTFORML
+	PRINTFORMW ————后户之国
+	;TranslatedMark ――――後戸の国
+	PRINTFORML 
+	PRINTFORML 「生命真是……出奇的枯燥。」
+	;TranslatedMark 「命というものは……存外、呆気ないものだ」
+	PRINTFORML 「那所谓的价值也只不过是我们各自所认同的谎言而已」
+	;TranslatedMark 「その価値も、我々各々が見出すだけのものにすぎない」
+	PRINTFORML 「但是，%ANAME(MASTER)%……你的生，你的死，至少会让我一个人产生巨大的变化」
+	;TranslatedMark 「だが、%ANAME(MASTER)%……お前の生、お前の死は、少なくとも私一人を大きく変えたぞ」
+	PRINTFORMW 隐岐奈独自坐在椅子上，悲伤地抚摸着小小的陶器。
+	;TranslatedMark 隠岐奈は独り椅子に腰かけ、悲しげに小さな陶器を撫でる。
+	PRINTFORMW 那里面收藏着%ANAME(MASTER)%的遗骨。
+	;TranslatedMark その中には%ANAME(MASTER)%の遺骨が納められていた。
+	PRINTFORML 
+	PRINTFORMW 「这里是后户之国…与现世不同的隐世……」
+	;TranslatedMark 「ここは後戸の国…現世とは違う、隠世(かくりよ)……」
+	PRINTFORMW 「为了想和你永远在一起，我把你带到了这里…」
+	;TranslatedMark 「お前と共に居たいがために、お前をここに連れてきたものの…」
+	PRINTFORMW 「难道你不想在故乡的土地下入眠吗？」
+	;TranslatedMark 「よもや、お前は故郷の土の下で眠りにつきたいと思ってはおるまいな？」
+	PRINTFORML 
+	PRINTFORML ………。
+	PRINTFORMW ………………。
+	PRINTFORMW 逝者永远无法给出答复了。
+	;TranslatedMark 死人に口なし。
+	PRINTFORMW 但是，隐岐奈好像在等%ANAME(MASTER)%的回复似的沉默着。
+	;TranslatedMark しかし、隠岐奈は%ANAME(MASTER)%の返事を待つかのように黙りこくっている。
+	PRINTFORML ………………。
+	PRINTFORMW ……………………………。
+	PRINTFORML 
+	PRINTFORMW 「呼呼……如果什么都不说的话，就按我喜欢的做吧」
+	;TranslatedMark 「ふふふっ……何も言わぬというのならば、私の好きなようにさせてもらおうか」
+	PRINTFORML 「但是，先说一件事。我意外地很薄情呢」
+	;TranslatedMark 「だが、一つ言っておく。私は案外薄情でね」
+	PRINTFORMW 「也许在不到一年的时间里，我就会忘记你的？」
+	;TranslatedMark 「もしかしたら、一年も経たないうちに、お前のことなど忘れてしまうかもしれないぞ？」
+	PRINTFORML 
+	PRINTFORMW 「………如果那样也可以的话」
+	;TranslatedMark 「………それでも良いのならば」
+	PRINTFORMW 「在我忘记你之前…因为想在你身边……」
+	;TranslatedMark 「私は、貴方のことを忘れるまで…傍にいたいから……」
+	PRINTFORMW 「请原谅我的任性，%ANAME(MASTER)%………」
+	;TranslatedMark 「私の我儘を許してくれ、%ANAME(MASTER)%………」
+	PRINTFORML 
+	PRINTFORMW 有人说，你对一个人的遗忘先从声音开始。
+	;TranslatedMark 誰かとの記憶は、まずは声から忘れていくという。
+	PRINTFORMW 接下来是脸，再接着是回忆，随着时间的流逝变得模糊……。
+	;TranslatedMark 次に顔が、その次に思い出が、時間とともに曖昧になって……。
+	PRINTFORML 如果，有一天，看到这个骨灰罐，看到%ANAME(MASTER)%的名字，什么感伤都没有了的话。
+	;TranslatedMark もし、この骨壺を見ても、%ANAME(MASTER)%の名前を見ても、何の感傷も湧かなくなったら。
+	PRINTFORMW 那个时候，我就会带你回到镌刻在陶器上的故乡，让你在下面沉睡。
+	;TranslatedMark その時は、この陶器に刻まれた彼のふるさとに連れて行って、その下で眠らせてあげよう。
+	PRINTFORMW 然后我忘记了一切……像以前那样，像未来这样，作为任性的神继续存在。
+	;TranslatedMark そして私は全てを忘れ……かつてのように、今のように、勝手気ままな神としてあり続けるのだ。
+	PRINTFORML 
+	PRINTFORMW 眼泪早已干枯。
+	;TranslatedMark とうに涙は枯れている。
+	PRINTFORMW 剩下的只是等待时间的流逝。
+	;TranslatedMark 後は時が過ぎるのを待つだけだ。
+	PRINTFORML 
+ELSEIF TALENT:恋慕
+	PRINTFORML
+	PRINTFORMW ————后户之国
+	;TranslatedMark ――――後戸の国
+	PRINTFORML 
+	PRINTFORMW 自从失去%ANAME(MASTER)%之后，隐岐奈大人就一直消沉着。
+	;TranslatedMark %ANAME(MASTER)%さんを失ってからというものの、隠岐奈様はずっと意気消沈したままだ。
+	PRINTFORML 
+	PRINTFORML 整天坐在椅子上发呆，即使搭话也只会含糊地回答。
+	;TranslatedMark 一日中、椅子に坐ってぼうっとしていて、話しかけても曖昧な返事しか仰らない。
+	PRINTFORML 就算是为了振奋她的精神而跳舞，也没有什么效果。
+	;TranslatedMark 元気づけようと踊っても、どういうわけか何も効果がないみたい。
+	PRINTFORMW 从未吃过一顿，也没有想过什么自己要做的事情。
+	;TranslatedMark お食事も全然取られないし、ご自分から何かされるということもほとんどない。
+	PRINTFORMW 偶尔会拿出%ANAME(MASTER)%的骨灰罐，将脸贴上去摩挲着…。
+	;TranslatedMark たまに%ANAME(MASTER)%さんの骨壺を持ち出して、沈んだ顔で撫でたりしているけれど…。
+	PRINTFORML 
+	PRINTFORML 顺便一提，我是侍奉摩多罗神的二童子之一。
+	;TranslatedMark ちなみに自分は摩多羅神に仕える二童子の一人。
+	PRINTFORMW 丁礼田还是尔子田都是些琐碎的问题，第几代什么的都无所谓。
+	;TranslatedMark 丁礼田か爾子田かというのは些細な問題だし、何代目かなんてのもどうでもいいこと。
+	PRINTFORMW 总之，如果隐岐奈大人一直是这样的情况的话，我也会很困扰的。
+	;TranslatedMark ともかく、隠岐奈様がこんな具合だと、こちらとしても困ってしまう。
+	PRINTFORML 虽然我们的工作是保持幻想乡的平衡，但是由于隐岐奈大人一直是那种状态，所以完全没有得到指示。
+	;TranslatedMark 幻想郷のバランスを保つことが我々の仕事だけれども、隠岐奈様はあんな状態なので指示は皆無。
+	PRINTFORML 也就是说，该做什么，只能凭着二童子自己的打算而已。
+	;TranslatedMark つまり、二童子だけであれこれ考えてするしかないのだ。
+	PRINTFORMW 我不知道这样好不好。因为隐岐奈大人什么都不说。
+	;TranslatedMark これで良いのか、うまくできているかも分からない。隠岐奈様は何も仰らないから。
+	PRINTFORML 
+	PRINTFORMW 今天隐岐奈大人也坐在椅子上，眺望着远方。
+	;TranslatedMark 今日も隠岐奈様は椅子に腰かけ、どこか遠くを眺めていらっしゃる。
+	PRINTFORMW ……但是，仔细一看，膝盖上有白色的陶瓷器…抱着骨灰罐，对它说了些什么。
+	;TranslatedMark ……でも、よく見てみたらお膝に白い陶磁器…骨壺を乗せていて、それに対して何か語り掛けておられた。
+	PRINTFORMW 说实话，虽然有点担心，但是因为很久没有看到隐岐奈大人的微笑了，所以就悄悄地放下了心来。
+	;TranslatedMark 正直、ちょっと心配になったけれども、久々に隠岐奈様が微笑まれていたのでそっとしておいた。
+	PRINTFORMW 不知道有一天，她会不会对我们露出这样的笑容... ...
+	;TranslatedMark いつか我々にも、ああして笑顔を見せてくれる日が来るのだろうか…。
+	PRINTFORML 
+ELSEIF TALENT:服従
+	PRINTFORML
+	PRINTFORMW ————后户之国
+	;TranslatedMark ――――後戸の国
+	PRINTFORML 
+	PRINTFORMW 「不是。哪里都不像」
+	;TranslatedMark 「違う。何処も似てはいない」
+	PRINTFORMW 「不是。不是那样」
+	;TranslatedMark 「違う。そうではない」
+	PRINTFORMW 「不同」
+	;TranslatedMark 「違う」
+	PRINTFORMW 「不对！不对！不对！！！」
+	;TranslatedMark 「違う！違う！違うッ！！！」
+	PRINTFORML 隐岐奈的怒吼在后户之国响起。
+	;TranslatedMark 後戸の国に隠岐奈の怒号が響く。
+	PRINTFORMW 看着一边颤抖一边反复谢罪的妖精，隐岐奈愤怒地咬起了牙。
+	;TranslatedMark 震えながら謝罪を繰り返す妖精を後目に、隠岐奈は腹立たしげに歯噛みする。
+	PRINTFORML 「你也只是个没用的家伙而已，丢了吧」
+	;TranslatedMark 「お前もお役御免だ、失せよ」
+	PRINTFORMW 隐岐奈刚这么一说，后门就打开了，可怜的那个妖精被放逐到了某个地方。
+	;TranslatedMark 隠岐奈がそう言うや否や後戸が開き、哀れにもその妖精は何処かへと追放された。
+	PRINTFORML 
+	PRINTFORMW  然后打开了各处的门，隐岐奈用布满了血丝的眼睛仔细地注视着来来往往的人们。
+	;TranslatedMark そしてあちこちの扉を開いて、隠岐奈は血走った目で行き交う人々を矯めつ眇めつ眺める。
+	PRINTFORML 「……再找一找的话」
+	;TranslatedMark 「……また探さねば」
+	PRINTFORML 「我必须找到...... %ANAME(MASTER)%在.........。」
+	;TranslatedMark 「%ANAME(MASTER)%を……探さねば………」
+	PRINTFORMW 她用颤抖的声音这样嘟囔着，为了一味地寻找"%ANAME(MASTER)%"而变得兴奋起来。
+	;TranslatedMark 震える声でそう呟き、彼女はひたすらに"%ANAME(MASTER)%"を見つけ出そうと躍起になる。
+	PRINTFORML 「……………嘿！」
+	;TranslatedMark 「……………っ！」
+	PRINTFORML 「为什么不在！？%ANAME(MASTER)%！%ANAME(MASTER)%！！」
+	;TranslatedMark 「何故いない！？ %ANAME(MASTER)%！%ANAME(MASTER)%っ！！」
+	PRINTFORMW 这也是理所当然的，隐岐奈所寻找的，是早已成为故人的%ANAME(MASTER)%本人。
+	;TranslatedMark それもそのはず、隠岐奈が探しているのは、とうに故人となった%ANAME(MASTER)%本人だ。
+	PRINTFORMW 隐岐奈应该理解%ANAME(MASTER)%已经逝去了。
+	;TranslatedMark %ANAME(MASTER)%が土に還ったことを隠岐奈は理解しているはずだった。
+	PRINTFORMW 但是，失去%ANAME(MASTER)%的愤怒和憎恨，以及自己的失败，使她的眼睛蒙上了阴影
+	;TranslatedMark しかし、%ANAME(MASTER)%を失った怒りと憎悪、自身への負い目が、彼女の目を曇らせたのだ
+	PRINTFORML 
+	PRINTFORML 有时是%ANAME(MASTER)%有着同样发色的人。有时会是%ANAME(MASTER)%拥有同样瞳孔的人。
+	;TranslatedMark 時には%ANAME(MASTER)%と同じ髪色の者を。時には%ANAME(MASTER)%と同じ瞳の者を。
+	PRINTFORML 有时是%ANAME(MASTER)%有着同样性别的人。有时会是%ANAME(MASTER)%同种族的人。
+	;TranslatedMark 時には%ANAME(MASTER)%と同じ性別の者を。時には%ANAME(MASTER)%と同じ種族の者を。
+	PRINTFORMW 隐岐奈抓走了觉得"很像"的人并洗脑，让他模仿%ANAME(MASTER)%。
+	;TranslatedMark 隠岐奈が"似ている"と思った者を攫ってきては洗脳し、%ANAME(MASTER)%の真似事をさせる。
+	PRINTFORMW 当然这些人，也无法让她满足，一转眼他们就被解职了…。
+	;TranslatedMark もちろん結局満足することもなく、あっという間に彼らは任を解かれるのだが…。
+	PRINTFORMW 隐岐奈放弃了作为秘神以及幻想乡的贤者的使命，不断重复着这样的事情。
+	;TranslatedMark 秘神としての、そして幻想郷の賢者としての使命を放り、隠岐奈はそのようなことを繰り返し続けた。
+	PRINTFORML 
+	PRINTFORMW 最终陷入绝望的她，想要从零开始改造幻想乡也只是时间的问题吧…。
+	;TranslatedMark やがて絶望した彼女が、幻想郷を一から作り替えようとするのも時間の問題だろう…。
+	PRINTFORML 
+ELSE
+	PRINTFORML
+	PRINTFORMW ―――墓地
+	;TranslatedMark ――――墓所
+	PRINTFORML 
+	PRINTFORML 「%ANAME(MASTER)%，我来给你扫墓了」
+	;TranslatedMark 「%ANAME(MASTER)%、墓参りに来てやったぞ」
+	PRINTFORML 轻轻降落在%ANAME(MASTER)%墓前的隐岐奈，平静地供奉着佛花。
+	;TranslatedMark %ANAME(MASTER)%の墓前にふわりと降り立った隠岐奈は、穏やかな様子で仏花を供える。
+	PRINTFORMW 她还把酒也带进去后，倒在杯子里，将一方供奉在坟墓里，自己也坐在那里开始喝起来。
+	;TranslatedMark さらに酒も持ち込むと、猪口に注いで一方を墓にお供えし、自身もその場に腰かけて飲み始めた。
+	PRINTFORML 
+	PRINTFORML 「……这酒很好喝吧，%ANAME(MASTER)%。因为今天我特地带来了珍贵之物呢」
+	;TranslatedMark 「……美味い酒だろう、%ANAME(MASTER)%。今日のはお高いのを持ってきてやったからな」
+	PRINTFORML 「但我没想到你会死。......，我没想到会这样。」
+	;TranslatedMark 「しかし、まさかお前が死ぬとはねぇ……これは流石に予想外だったよ」
+	PRINTFORMW 隐岐奈故意地耸起肩膀笑了，然后嘴里含着酒，小声地吐了一口气。
+	;TranslatedMark 隠岐奈はわざとらしく肩をすくめて笑ってから、ちび、と酒を口に含み、小さく息を吐く。
+	PRINTFORML 「但是放心吧，正如你所看到的，我已经把你的骸骨收拾好了」
+	;TranslatedMark 「だが安心しろ、見ての通り、お前の骨はちゃんと拾ってやったからな」
+	PRINTFORMW 「那个墓也很漂亮吧？多亏了我，哼哼」
+	;TranslatedMark 「その墓だって立派なものだろう？私のおかげだぞ、ふふふっ」
+	PRINTFORML 
+	PRINTFORML 「老实说…我很喜欢你」
+	;TranslatedMark 「正直言ってね…私はお前のことをとても気に入っていたんだよ」
+	PRINTFORMW 「至少，失去你让我很心痛……」
+	;TranslatedMark 「少なくとも、お前を失って心を痛めるくらいには……」
+	PRINTFORML 「………我很遗憾」
+	;TranslatedMark 「………後悔だってしている」
+	PRINTFORMW 「如果我来保护你的话………如果我能多一点宠爱的话或者……」
+	;TranslatedMark 「私が守ってやっていれば………寵愛してやっていればあるいは、と……」
+	PRINTFORML 「不，果然还是太自负了吧？呵呵」
+	;TranslatedMark 「いや、流石にそれは自惚れがすぎるかな？ふふふっ」
+	PRINTFORMW 隐岐奈浮现出自嘲的笑容，立刻站了起来。
+	;TranslatedMark 隠岐奈は自嘲の笑みを浮かべると、すっくと立ちあがった。
+	PRINTFORMW 「那么，差不多该回去了吧」
+	;TranslatedMark 「さて、そろそろ帰るとするかな」
+	PRINTFORML 
+	PRINTFORMW 「最后……%ANAME(MASTER)%，留下的酒就留给我吧」
+	;TranslatedMark 「っと、最後に……%ANAME(MASTER)%、残すのなら貰うぞ」
+	PRINTFORML 这样说着，隐岐奈拿起供奉的酒，一口气喝干了。
+	;TranslatedMark そう言うと、供えていた酒を手にとり、隠岐奈は一気に飲み干した。
+	PRINTFORMW 「呼哈哈……呵呵，就这样放任不管的话，那些没礼貌的家伙会偷走的」
+	;TranslatedMark 「ぷは……ふふっ、そのまま放置していると、不躾な輩が盗むやもしれんからな」
+	PRINTFORMW 「我之后再给你拿来，你别那么生气了」
+	;TranslatedMark 「また持って来てやるから、そう機嫌を悪くするんじゃない」
+	PRINTFORML 「……再见」
+	;TranslatedMark 「……ではな」
+	PRINTFORMW 突然一笑，隐岐奈就用后门离开了现场。
+	;TranslatedMark ふっと微笑むと、隠岐奈は後戸を使ってその場を後にした。
+	PRINTFORML 
+ENDIF
+
+;RETURNの値を0→1に変えると、デフォルトの単体エンディングメッセージがスキップされる
+RETURN 1

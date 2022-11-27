@@ -1,0 +1,1041 @@
+;--------------------------------------------------------
+;そのキャラのデートイベント本体を呼び出すハブとなる関数
+;--------------------------------------------------------
+@DATE_EVENT_K23(場所)
+#DIM 場所
+#DIM 湖
+#DIM 山
+#DIM 森
+#DIM 人里
+#DIM 花畑
+#DIM 自宅
+#DIM 萃香
+#DIM 勇儀
+萃香 = NAME_TO_CHARA("萃香")
+勇儀 = NAME_TO_CHARA("勇儀")
+
+;面識がないとデートイベントは発生しない
+SIF CFLAG:萃香:面識 == 0
+	RETURN 0
+;服従ルートだと発生しない
+SIF TALENT:萃香:服従
+	RETURN 0
+;好感度が500以上で無いと発生しない
+SIF CFLAG:萃香:好感度 <= 500
+	RETURN 0
+
+;--------------------------
+;デートに誘ったときの反応	
+;--------------------------
+
+;好感度10000以上
+IF CFLAG:萃香:好感度 >= 10000
+	;自軍に勇儀がいたら1/3の確率で表示される
+	IF CFLAG:勇儀:所属 == CFLAG:MASTER:所属 &&  !(MASTER == NAME_TO_CHARA("勇儀")) && !RAND:3
+		PRINTFORML 
+		CALL SINGLE_DRAWLINE
+		PRINTFORML 
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「喂，%ANAME(萃香)%。现在去喝酒吧…嗯，啊，好像已经有约了呢」
+				;TranslatedMark 「おーい、%ANAME(萃香)%。今から飲みに…って、ありゃ、もう先約がいるみたいだね」
+				PRINTFORMW 在前往约会地点的途中，%ANAME(勇儀)%向%ANAME(萃香)%搭话
+				;TranslatedMark デートの待ち合わせ場所に向かう途中、%ANAME(勇儀)%が%ANAME(萃香)%に声を掛ける
+				PRINTFORML 「啊，%ANAME(勇儀)%。嗯，不好意思啊。今天要和%ANAME(MASTER)%见面了♪」
+				;TranslatedMark 「ああ、%ANAME(勇儀)%。ふふーん、悪いね。今日は%ANAME(MASTER)%と逢引さ♪」
+				PRINTFORMW 大概是因为很期待和%ANAME(MASTER)%的约会吧，%ANAME(萃香)%心情非常好
+				;TranslatedMark %ANAME(MASTER)%とのデートが楽しみなのか、%ANAME(萃香)%はとても上機嫌だ
+				PRINTFORML 「戚，你摆出那么开心的表情。啊啊，%ANAME(萃香)%已经离我而去了」
+				;TranslatedMark 「ちぇっ、そんな浮かれた顔しちゃってさ。あーあ、%ANAME(萃香)%が遠くに行っちゃったなー」
+				PRINTFORMW 「什、什么意思啊…。我知道了，下次会和你一起的」
+				;TranslatedMark 「な、何だよソレ…。分かったよ、今度付き合うからさ」
+				PRINTFORML 「哈哈，偶尔也会闹别扭啊。那这次可要准备好下次喝酒的时候给我讲的纪念品哦」
+				;TranslatedMark 「あははは、たまには拗ねてみるもんだね。それじゃあ今度飲む時に土産話を頼むよ」
+				PRINTFORMW %ANAME(勇儀)%和%ANAME(萃香)%约定好后就一起离开……
+				;TranslatedMark %ANAME(勇儀)%は%ANAME(萃香)%との呑み約束と取り付けて去っていった……
+			CASE 1
+				PRINTFORML 「啊，%ANAME(萃香)%。现在要和%ANAME(MASTER)%见面吗？」
+				;TranslatedMark 「あ、%ANAME(萃香)%。今から%ANAME(MASTER)%と逢引かい？」
+				PRINTFORMW 在前往约会地点的途中，%ANAME(萃香)%被%ANAME(勇儀)%搭话
+				;TranslatedMark デートの待ち合わせ場所に向かう途中、%ANAME(萃香)%は%ANAME(勇儀)%に声を掛けられた
+				PRINTFORML 「哦，%ANAME(勇儀)%。…那种事情，难道看得出来吗？」
+				;TranslatedMark 「おお、%ANAME(勇儀)%。…そういうの、傍から見て分かるもんなの？」
+				PRINTFORML 「那是因为我们认识很久了。你的心思明显得我都快看出来了」
+				;TranslatedMark 「そりゃまあ、付き合い長いからね。見りゃ分かるくらい浮かれてるよ、あんた」
+				PRINTFORMW %ANAME(萃香)%对约会过于期待，脸上一直带着笑容这件事完全没有自觉
+				;TranslatedMark %ANAME(萃香)%はデートが楽しみすぎて、頬が緩みっぱなしだったことにまったく自覚が無かったようだ
+				PRINTFORML 「啊哈哈！%ANAME(萃香)%也有那样的表情呢。总觉得会嫉妒的」
+				;TranslatedMark 「あっはは！　%ANAME(萃香)%もそういう顔するんだねぇ。何だか妬けちゃうよ」
+				PRINTFORMW 「喂，你在说什么啊，真是的…」
+				;TranslatedMark 「な、何言ってんだいまったく…」
+				PRINTFORML 「那么，就到此为止吧。请尽情享受吧」
+				;TranslatedMark 「さて、これ以上引き止めちゃあ野暮だね。それじゃ、楽しんできなよ」
+				PRINTFORMW %ANAME(勇儀)%好像很开心的样子目送着%ANAME(萃香)%……
+				;TranslatedMark %ANAME(勇儀)%は何やら嬉しそうな様子で%ANAME(萃香)%を見送った……
+			CASE 2
+				PRINTFORML 「哦，是%ANAME(萃香)%嘛。有空的话一起去喝一杯吧？」
+				;TranslatedMark 「おー、%ANAME(萃香)%じゃん。暇なら一緒に飲みに行かないかい？」
+				PRINTFORMW 约会的时候，%ANAME(萃香)%被%ANAME(勇儀)%搭话了
+				;TranslatedMark デートで待ち合わせている途中、%ANAME(萃香)%は%ANAME(勇儀)%に声を掛けられた
+				PRINTFORML 「啊，不好意思啊%ANAME(勇儀)%。今天和%ANAME(MASTER)%有重要的约定呢♪」
+				;TranslatedMark 「あー、悪いね%ANAME(勇儀)%。今日は%ANAME(MASTER)%との大事な約束があってねー♪」
+				PRINTFORMW 大概是因为很期待和%ANAME(MASTER)%的约会吧，%ANAME(萃香)%心情非常好
+				;TranslatedMark %ANAME(MASTER)%とのデートが楽しみなのか、%ANAME(萃香)%はとても上機嫌だ
+				PRINTFORML 「太遗憾了。…但是山上四天王之一的%ANAME(萃香)%会露出这样的表情，看来是发现了一个非常好的人呢」
+				;TranslatedMark 「ありゃ残念。…しかし山の四天王ともあろう%ANAME(萃香)%がそういう顔するとは、よっぽど良い人見つけたんだねぇ」
+				PRINTFORML 「…诶，我有那种表情吗？」
+				;TranslatedMark 「…え、私そんな顔してる？」
+				PRINTFORMW 「哈哈，那张脸看起来已经很幸福了。那我就趁着还没被马踢出去吧」
+				;TranslatedMark 「あははは、そりゃもう幸せそうな顔してるよ。それじゃ、馬に蹴られないうちに私は退散しようかね」
+				PRINTFORML 「事情的经过下次一起喝酒的时候告诉我吧。现在就尽情享受吧」
+				;TranslatedMark 「事の次第は今度一緒に飲む時に聞かせてよね。それじゃ、楽しんできなよ」
+				PRINTFORMW 然后和%ANAME(萃香)%定下约定，%ANAME(勇儀)%离开了……
+				;TranslatedMark そして%ANAME(萃香)%と呑みの約束を取り付けて、%ANAME(勇儀)%は去っていった……
+		ENDSELECT
+		PRINTFORML 
+		CALL SINGLE_DRAWLINE
+		PRINTFORMW 
+	ENDIF
+	SELECTCASE RAND:4
+		CASE 0
+			PRINTFORML 「喂，好慢啊！真是的。不要让我等太久啊」
+			;TranslatedMark 「おーい、遅いぞーっ！　まったく。あんまり待たせないで欲しいねぇ」
+			PRINTFORMW 本打算比约定时间早30分钟来的，%ANAME(萃香)%是从什么时候开始等待的呢…
+			;TranslatedMark 待ち合わせ時間より30分は早く来たつもりだったが、%ANAME(萃香)%はいつから待っていたのだろうか…
+			PRINTFORML 「嗯，是从什么时候开始呢……从早上开始…？」
+			;TranslatedMark 「え、いつからってそりゃあ、……朝から…？」
+			PRINTFORML 你这么期待约会吗...
+			;TranslatedMark そんなにデートが待ち遠しかったのか……
+			PRINTFORMW %ANAME(MASTER)%摸摸了一下%ANAME(萃香)%的头，她立刻露出了笑容原谅了%ANAME(MASTER)%
+			;TranslatedMark %ANAME(MASTER)%が、ごめん　と%ANAME(萃香)%の頭を一撫ですると、彼女はたちまち笑顔になって許してくれた
+		CASE 1
+			PRINTFORML 「哦！来了呢来了呢♪一直在等着哦♥」
+			;TranslatedMark 「おーっ！　来たねぇ来たねぇ♪　待ってたよーっ♥」
+			PRINTFORMW 「……情绪高涨吗？那是因为和你的约会嘛。肯定是很期待的吧♪」
+			;TranslatedMark 「……何かテンションが高いって？　そりゃあアンタとのデートだもん。楽しみに決まってるじゃん♪」
+			PRINTFORMW %ANAME(萃香)%似乎一直在期待着和%ANAME(MASTER)%的约会
+			;TranslatedMark %ANAME(萃香)%は%ANAME(MASTER)%とのデートを心待ちにしていたようだ
+		CASE 2
+			PRINTFORML 「啊，你来了，我等你很久了♥」
+			;TranslatedMark 「あ、来てくれたね、待ってたよ、ア・ナ・タ♥」
+			PRINTFORML %ANAME(萃香)%一遇到%ANAME(MASTER)%，就扑在手臂上露出了微笑
+			;TranslatedMark %ANAME(萃香)%は%ANAME(MASTER)%と出会うや否や、腕に組み付いてニンマリ笑顔になった
+			PRINTFORMW 「嗯哼♪今天会带我去什么样的地方呢。好期待啊♥」
+			;TranslatedMark 「んふふー♪　今日はどんな所へ連れてってくれるのかなぁ。楽しみだなー♥」
+		CASE 3
+			PRINTFORML 「嗯啊啊…。早上好，%ANAME(MASTER)%…呼啊…嗯」
+			;TranslatedMark 「んあぁ…。おはよう%ANAME(MASTER)%…ふわぁ…っ」
+			PRINTFORMW 出现在约会地点的%ANAME(萃香)%似乎很困
+			;TranslatedMark 待ち合わせ場所に現れた%ANAME(萃香)%は何やら眠そうだ
+			PRINTFORML 「哎呀，很期待今天的约会…太兴奋了以至于睡不着……」
+			;TranslatedMark 「いやぁ、今日のデートが楽しみで…ワクワクしすぎて寝付けなかったんだよ……」
+			PRINTFORMW …那么困的话，约会还是下次的机会吧？
+			;TranslatedMark …そんなに眠いなら、デートはまたの機会にしようか？
+			PRINTFORML 「不要！那是不可能的哟%ANAME(MASTER)%！你不知道我我有多么期待这一天啊！」
+			;TranslatedMark 「いやいやいやっ！　そりゃないよ%ANAME(MASTER)%ーっ！　私がどれだけこの日を楽しみにしていたことかっ！」
+			PRINTFORMW %ANAME(萃香)%的睡意，好像被%ANAME(MASTER)%的一句话吹散了
+			;TranslatedMark %ANAME(萃香)%の眠気は、%ANAME(MASTER)%の一言で吹き飛んでくれたようだ
+	ENDSELECT
+
+;好感度1500以上
+ELSEIF CFLAG:萃香:好感度 >= 1500
+	;自軍に勇儀がいたら1/3の確率で表示される
+	IF CFLAG:勇儀:所属 == CFLAG:MASTER:所属 &&  !(MASTER == NAME_TO_CHARA("勇儀")) && !RAND:3
+		PRINTFORML 
+		CALL SINGLE_DRAWLINE
+		PRINTFORML 
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「喂，%ANAME(萃香)%。正好，现在去喝一杯吧？」
+				;TranslatedMark 「おーい、%ANAME(萃香)%。丁度良かった、今から飲みに行かないかい？」
+				PRINTFORMW 在前往约会地点的途中，%ANAME(勇儀)%向%ANAME(萃香)%搭话
+				;TranslatedMark デートの待ち合わせ場所に向かう途中、%ANAME(勇儀)%が%ANAME(萃香)%に声を掛ける
+				PRINTFORML 「啊，%ANAME(勇儀)%啊。嗯，很遗憾，今天有点事情…」
+				;TranslatedMark 「ああ、%ANAME(勇儀)%か。うーん、残念だけど今日はちょっと用事があってね…」
+				PRINTFORMW 「啊？拒绝和我喝酒，到底有什么事……啊，原来如此啊…」
+				;TranslatedMark 「あー？　私との飲みを断るなんて一体どういう用事が……、ああ、なるほどね…」
+				PRINTFORML 在和%ANAME(MASTER)%约会时，看到了稍微打扮一下的%ANAME(萃香)%的样子，%ANAME(勇儀)%大概察觉到了
+				;TranslatedMark %ANAME(MASTER)%とのデート用に、少しおめかししていた%ANAME(萃香)%の姿を見て、%ANAME(勇儀)%は概ね察した
+				PRINTFORMW 「什、什么啊……」
+				;TranslatedMark 「な、何だよぉ……」
+				PRINTFORML 「啊哈哈，没什么。那么，那我就邀请别人吧。那下次喝酒的时候就拜托你给我讲讲这次的事情吧」
+				;TranslatedMark 「あっははは、何でもないさ。さーて、じゃあ私は他を誘ってみるか。今度飲む時に土産話を頼むよ」
+				PRINTFORMW %ANAME(勇儀)%好像很开心的样子目送着%ANAME(萃香)%……
+				;TranslatedMark %ANAME(勇儀)%は何やら嬉しそうな様子で%ANAME(萃香)%を見送った……
+			CASE 1
+				PRINTFORML 「…哦，是%ANAME(萃香)%嘛。那样的打扮要去哪里？」
+				;TranslatedMark 「…お、%ANAME(萃香)%じゃん。そんなめかしこんで何処へ行くんだ？」
+				PRINTFORMW 在前往约会地点的途中，%ANAME(萃香)%被%ANAME(勇儀)%搭话
+				;TranslatedMark デートの待ち合わせ場所に向かう途中、%ANAME(萃香)%は%ANAME(勇儀)%に声を掛けられた
+				PRINTFORML 「哦，%ANAME(勇儀)%啊。…没什么，和平时一样吧」
+				;TranslatedMark 「おお、%ANAME(勇儀)%か。…べ、別にいつもと変わらないだろ」
+				PRINTFORMW 「你在说什么？ 你以为我们的关系是看不懂你脸色的程度吗？」
+				;TranslatedMark 「なーに言ってんだい。お前さんが色気づいてるって分からない程度の付き合いだと思ってたのかい？」
+				PRINTFORML 「不，不，不是那样的…」
+				;TranslatedMark 「い、いや、そういうわけじゃ…」
+				PRINTFORMW 「……啊哈哈！开玩笑啦，开玩笑啦。是和%ANAME(MASTER)%吧？最近好像很火热的样子」
+				;TranslatedMark 「……あっはは！　冗談さ、冗談。%ANAME(MASTER)%との逢引だろ？　最近お熱らしいじゃないか」
+				PRINTFORML 「…吼，明白了还开玩笑，真是个好胆量啊。果然是%ANAME(勇儀)%啊」
+				;TranslatedMark 「…ほーお、分かっててからかうとは良い度胸だねぇ。流石は%ANAME(勇儀)%だよ」
+				PRINTFORMW 「哎呀，好恐怖。那么，趁着还没打扰到鬼的时候，我就赶紧逃走吧」
+				;TranslatedMark 「おっと怖い怖い。それじゃあ、お邪魔にならないうちに鬼は退散といこうかね」
+				PRINTFORML %ANAME(勇儀)%带着滑稽的表情耸起肩膀，放开了%ANAME(萃香)%
+				;TranslatedMark %ANAME(勇儀)%はおどけた様子で肩をすくめ、%ANAME(萃香)%を開放した
+				PRINTFORMW 「……请享受吧，%ANAME(萃香)%」
+				;TranslatedMark 「……楽しんできなよ、%ANAME(萃香)%」
+				PRINTFORMW 然后目送着%ANAME(萃香)%，%ANAME(勇儀)%温柔地嘟囔着……
+				;TranslatedMark そして%ANAME(萃香)%を見送りながら、%ANAME(勇儀)%は優しげに呟いた……
+			CASE 2
+				PRINTFORML 「哦，是%ANAME(萃香)%嘛。有空的话一起去喝一杯吧？」
+				;TranslatedMark 「おー、%ANAME(萃香)%じゃん。暇なら一緒に飲みに行かないかい？」
+				PRINTFORMW 约会的时候，%ANAME(萃香)%被%ANAME(勇儀)%搭话了
+				;TranslatedMark デートで待ち合わせている途中、%ANAME(萃香)%は%ANAME(勇儀)%に声を掛けられた
+				PRINTFORML 「啊，不好意思啊%ANAME(勇儀)%。今天和%ANAME(MASTER)%有约哦」
+				;TranslatedMark 「あー、悪いね%ANAME(勇儀)%。今日は%ANAME(MASTER)%との先約があるんだよ」
+				PRINTFORMW 「太遗憾了。那就邀请别人吧。…但是%ANAME(萃香)%和%ANAME(MASTER)%的约会啊，感觉兴趣涌上来了」
+				;TranslatedMark 「ありゃ残念。それじゃ他を誘ってみるか。…しかし%ANAME(萃香)%が%ANAME(MASTER)%と逢引とは、興味が湧くねぇ」
+				PRINTFORML 「我姑且以防万一说一下…如果偷窥的话，会发生"很过分"的事情哦？」
+				;TranslatedMark 「一応釘を刺しとくけど…、出歯亀したら、『酷い』ぞ？」
+				PRINTFORML %ANAME(萃香)%用如果对方不是%ANAME(勇儀)%的话脊背大概会发凉的语气叮嘱对方
+				;TranslatedMark 相手が%ANAME(勇儀)%でなければ背筋が凍りつくような声色で%ANAME(萃香)%が念を押す
+				PRINTFORMW 「哈哈，虽然很在意，但是我没有兴趣做到那种程度」
+				;TranslatedMark 「ははは、気にはなるが流石にそこまでする趣味は無いね」
+				PRINTFORML 「事情的经过下次一起喝的时候让我听听吧。那现在就尽情享受吧」
+				;TranslatedMark 「事の次第は今度一緒に飲む時に聞かせてもらうとしようか。それじゃ、楽しんできなよ」
+				PRINTFORMW 然后和%ANAME(萃香)%定下约定，%ANAME(勇儀)%离开了……
+				;TranslatedMark そして%ANAME(萃香)%と呑みの約束を取り付けて、%ANAME(勇儀)%は去っていった……
+		ENDSELECT
+		PRINTFORML 
+		CALL SINGLE_DRAWLINE
+		PRINTFORMW 
+	ENDIF
+	SELECTCASE RAND:4
+		CASE 0
+			PRINTFORML 「好慢啊，不要让我等太久啊」
+			;TranslatedMark 「遅いぞーっ、あんまり待たせないで欲しいねぇ」
+			PRINTFORMW 本打算比约定时间早20分钟来的，%ANAME(萃香)%是从什么时候开始等待的呢…
+			;TranslatedMark 待ち合わせ時間より20分は早く来たつもりだったが、%ANAME(萃香)%はいつから待っていたのだろうか…
+		CASE 1
+			PRINTFORML 「哦！来了呢来了呢♪一直在等着哦？」
+			;TranslatedMark 「おーっ！　来たね来たねぇ♪　待ってたんだよ？」
+			PRINTFORML 「……有那么情绪高涨吗？那，那是因为和你那个…那个」
+			;TranslatedMark 「……何かテンションが高いって？　そ、そりゃお前さんアレだよ…アレ」
+			PRINTFORMW %ANAME(萃香)%的脸比平时红，不知为何总是慌慌张张的
+			;TranslatedMark %ANAME(萃香)%は普段より顔を赤くして何やらアタフタしている
+		CASE 2
+			PRINTFORML 「让你久等了♪今天要去哪里？不过我的话只要在一起就足够了」
+			;TranslatedMark 「お待たせーっ♪　今日は何処に行くんだい？　まあ一緒にいるだけでも充分だけどさ」
+			PRINTFORMW %ANAME(萃香)%这样说着，抱住了%ANAME(MASTER)%的手臂
+			;TranslatedMark %ANAME(萃香)%はそう言うと、%ANAME(MASTER)%の腕に抱きついた
+		CASE 3
+			PRINTFORML 「期待着今天和%ANAME(MASTER)%的约会哦♪」
+			;TranslatedMark 「今日の%ANAME(MASTER)%とのデート、楽しみにしてたよ♪」
+			PRINTFORMW 「那么，今天也过得开心一点吧？」
+			;TranslatedMark 「さあさあ、今日も楽しい一日にしておくれよ？」
+	ENDSELECT
+
+;好感度500以上
+ELSE
+	PRINTDATAL
+		DATAFORM 「你真有胆量想和鬼玩啊♪」
+		;TranslatedMark 「鬼と遊びたいなんて度胸あるねぇ、アンタ♪」
+		DATAFORM 「和这么小的孩子约会真是奇怪啊。…难道你有那个意思吗？」
+		;TranslatedMark 「こんなちんちくりんとデートなんて変わってるねぇ。…もしかしてそっちの気がお有り？」
+		DATAFORM 「好啊，去哪里喝酒？」
+		;TranslatedMark 「いいねぇ、何処に飲みに行くんだい？」
+	ENDDATA
+	PRINTFORMW 被%ANAME(MASTER)%邀请去玩，%ANAME(萃香)%一副没得到满足的样子
+	;TranslatedMark %ANAME(MASTER)%に遊びに誘われ、%ANAME(萃香)%は満更でもない様子だ
+ENDIF
+PRINTFORML …
+PRINTFORML ……
+PRINTFORML ………
+PRINTFORML
+
+;--------------------------
+;デートイベント本体へ
+;--------------------------
+SELECTCASE 場所
+	CASE 1
+		;湖に行く
+		CALL DATE_EVENT_K23_mizuumi(湖)
+	CASE 2
+		;山に行く
+		CALL DATE_EVENT_K23_yama(山)
+	CASE 3
+		;森に行く
+		CALL DATE_EVENT_K23_mori(森)
+	CASE 4
+		;人里に行く
+		CALL DATE_EVENT_K23_hitozato(人里)
+	CASE 5
+		;花畑に行く
+		CALL DATE_EVENT_K23_hanabatake(花畑)
+	CASE 6
+		;自宅に誘う
+		CALL DATE_EVENT_K23_zitaku(自宅)
+ENDSELECT
+
+;--------------------------
+;デート終了時の反応	
+;--------------------------
+PRINTFORML
+PRINTFORML …
+PRINTFORML ……
+PRINTFORML ………
+
+;好感度10000以上
+IF CFLAG:萃香:好感度 >= 10000
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORML 约会回来的时候，%ANAME(萃香)%稍微扯了一下%ANAME(MASTER)%的下摆
+			;TranslatedMark デートの帰り際、%ANAME(萃香)%が　ちょんっ　と%ANAME(MASTER)%の裾を摘んできた
+			PRINTFORMW 当%ANAME(MASTER)%回头的时候，%ANAME(萃香)%害羞地…脸上显得有点寂寞，把葫芦递给了他
+			;TranslatedMark %ANAME(MASTER)%が振り向くと%ANAME(萃香)%は、はにかむような…少し寂しそうな顔で瓢箪を差し出した
+			PRINTFORML 「约会的最后，要不要喝一点？可以再在一起一会吗？」
+			;TranslatedMark 「デートの〆にさ、ちょっと飲んでいかない？　もう少し一緒にいても良いでしょ？」
+			PRINTFORMW 察觉到%ANAME(萃香)%想要多待在一起一会的气氛，%ANAME(MASTER)%决定和她一起喝到满意为止
+			;TranslatedMark %ANAME(萃香)%の少しでも一緒にいたいという空気を察し、%ANAME(MASTER)%は彼女の気が済むまで一緒に飲むことにした
+		CASE 1
+			PRINTFORML 「啊，对了。%ANAME(MASTER)%，过来一下♪」
+			;TranslatedMark 「あっ、そうだ。%ANAME(MASTER)%、ちょっとこっち来て♪」
+			PRINTFORMW 就这样走到她身边，%ANAME(萃香)%向%ANAME(MASTER)%的脸颊赠送了离别的吻
+			;TranslatedMark 言われるまま彼女の元にいくと、%ANAME(萃香)%は%ANAME(MASTER)%の頬にお別れの口付けを贈った
+			PRINTFORML 「嗯…。嘿嘿♪约会的谢礼♪再见，%ANAME(MASTER)%。下次也请和我一起度过愉快的一天♥」
+			;TranslatedMark 「ちゅっ…。へへ♪　デートのお礼♪　それじゃあね、%ANAME(MASTER)%。また今度も楽しい一日にしておくれ♥」
+			PRINTFORMW 两个人勾着手指约定下次约会
+			;TranslatedMark 二人で指きりして、次のデートを約束した
+		CASE 2
+			PRINTFORML 「…啊？骗人，已经这个时间了！？」
+			;TranslatedMark 「…え？　ウソ、もうこんな時間！？」
+			PRINTFORML 「哈…和%ANAME(MASTER)%约会的时间真是转瞬即逝啊」
+			;TranslatedMark 「はー…、%ANAME(MASTER)%とのデートは時間があっという間だね」
+			PRINTFORMW 「……这样的时间，要是能一直持续下去就好了」
+			;TranslatedMark 「……こういう時間が、いつまでも続けばいいのになぁ」
+			PRINTFORML %ANAME(萃香)%带着有些寂寞的表情和%ANAME(MASTER)%分开了
+			;TranslatedMark %ANAME(萃香)%は、少し寂しそうな顔をして%ANAME(MASTER)%と別れた
+	ENDSELECT
+
+;好感度1500以上
+ELSEIF CFLAG:萃香:好感度 >= 1500
+	PRINTDATAL
+		DATAFORM 「今天真开心啊。有空的话再邀请我吧？我很期待哦♪」
+		;TranslatedMark 「今日は楽しかったなー。暇が出来たらまた誘っておくれよ？　楽しみにしてるからさ♪」
+		DATAFORM 「%ANAME(MASTER)%也很会玩呢。我也很期待下一次哦♪……下次约会、是会有的吧？」
+		;TranslatedMark 「%ANAME(MASTER)%も中々遊び上手だねぇ。次も楽しみにしてるよ♪　……次、あるんでしょ？」
+		DATAFORM 「哎呀，时间到了。快乐的时光真是转瞬即逝啊。…再见，%ANAME(MASTER)%♥」
+		;TranslatedMark 「ありゃー、もう時間かー。楽しい時間はあっという間だね。…それじゃあね、%ANAME(MASTER)%♥」
+	ENDDATA
+	PRINTFORMW %ANAME(萃香)%结束了和%ANAME(MASTER)%愉快的约会，高高兴兴地回去了
+	;TranslatedMark %ANAME(萃香)%は%ANAME(MASTER)%との楽しいデートを終え、上機嫌で帰っていった
+
+;好感度500以上
+ELSE
+	PRINTDATAL
+		DATAFORM 「我玩得很开心。你挺能干的呢」
+		;TranslatedMark 「けっこう楽しかったよ。お前さんも中々やるねぇ」
+		DATAFORM 「今天不错哦。下次再约我吧？」
+		;TranslatedMark 「今日は中々だったよ。また誘っておくれな？」
+	ENDDATA
+	PRINTFORMW 和%ANAME(MASTER)%约会的时候，%ANAME(萃香)%好像也很享受
+	;TranslatedMark %ANAME(MASTER)%とのデートで、%ANAME(萃香)%はそれなりに楽しんでくれたようだ
+ENDIF
+
+;------------------------------------
+;湖
+;-----------------------------------
+@DATE_EVENT_K23_mizuumi(湖)
+#DIM 湖
+#DIM 萃香
+萃香 = NAME_TO_CHARA("萃香")
+
+;好感度10000以上
+IF CFLAG:萃香:好感度 >= 10000
+	SELECTCASE RAND:2
+		CASE 0
+			PRINTFORML 「钓鱼真好啊。一边喝酒聊天一边悠闲地度过」
+			;TranslatedMark 「釣りっていいよねー。飲んだりおしゃべりしながらのんびり出来るし」
+			PRINTFORML 「和喜欢的人在一起的话就更好了♥」
+			;TranslatedMark 「好きな人と一緒なら尚のこといいねぇ♥」
+			PRINTFORMW 两个人肩靠在一起，边喝边聊边享受钓鱼的乐趣
+			;TranslatedMark 二人で肩を寄せ合い、飲み語らいながら釣りを楽しんだ
+			CALL PRINT_ADD_EXP(萃香, "肝臓経験値", RAND(10, 30), 1)
+			CALL PRINT_ADD_EXP(MASTER, "肝臓経験値", RAND(5, 15), 1)
+			CALL TRAIN_AUTO_ABLUP(萃香)
+			CALL TRAIN_AUTO_ABLUP(MASTER)
+		CASE 1
+			PRINTFORML 「今天很热，适合游泳呢♪」
+			;TranslatedMark 「今日は暑いから泳ぐのにちょうどいいねー♪」
+			PRINTFORMW %ANAME(萃香)%挑逗%ANAME(MASTER)%似的穿着布料面积很少的过激泳衣
+			;TranslatedMark %ANAME(萃香)%はやたら布面積が少ない過激な水着で挑発するように%ANAME(MASTER)%に見せ付ける
+			PRINTFORML 「…呵呵♪是不是盯着看太多了？真是个色狼啊…♥」
+			;TranslatedMark 「…ふふっ♪　じろじろ見すぎじゃないの？　助平なんだからぁ…♥」
+			PRINTFORML 「如果那么在意的话…可以再靠近一点看哦♥呼呼」
+			;TranslatedMark 「そんなに気になるなら…もっと近くで見てもいいよ♥　くすっ」
+			PRINTFORMW 两个人在湖里扑腾扑腾地游泳
+			;TranslatedMark 湖で二人、ぱちゃぱちゃと水泳を楽しんだ
+	ENDSELECT
+
+;好感度1500以上
+ELSEIF CFLAG:萃香:好感度 >= 1500
+	SELECTCASE RAND:2
+		CASE 0
+			PRINTFORML 「喝的时候顺便去钓鱼吧。%ANAME(MASTER)%也一起来怎么样？有酒哦♪」
+			;TranslatedMark 「飲みがてら釣りでもしようかね。%ANAME(MASTER)%もどう？　お酒はあるよー♪」
+			PRINTFORMW 两个人一边喝酒一边享受钓鱼的乐趣
+			;TranslatedMark 二人で飲みながら釣りを楽しんだ
+		CASE 1
+			PRINTFORML 「今天很热，适合游泳。……呼呼♪你在目不转睛地看什么？这个色狼…♥」
+			;TranslatedMark 「今日は暑いから泳ぐのにちょうどいいねー。……くすっ♪　何をじろじろ見てるんだい？　この助平…♥」
+			PRINTFORMW 两个人在湖里扑腾扑腾地玩水
+			;TranslatedMark 湖で二人、ぱちゃぱちゃと水遊びを楽しんだ
+	ENDSELECT
+
+;好感度500以上
+ELSE
+	SELECTCASE RAND:2
+		CASE 0
+			PRINTFORML 「我们去钓鱼吧。%ANAME(MASTER)%也一起怎么样？」
+			;TranslatedMark 「釣りでもしようかね。%ANAME(MASTER)%もどうだい？」
+			PRINTFORMW 两个人很享受钓鱼的乐趣
+			;TranslatedMark 二人で釣りを楽しんだ
+		CASE 1
+			PRINTFORML 「对喝酒喝得发烫的身体来说，这种冷劲真让人舒服啊」
+			;TranslatedMark 「酒で火照った体には、この冷たさが心地いいねぇ」
+			PRINTFORMW 两个人在水边噼里啪啦地玩水
+			;TranslatedMark 水辺で二人、ぱちゃぱちゃと水遊びを楽しんだ
+	ENDSELECT
+ENDIF
+
+;------------------------------------
+;山
+;-----------------------------------
+@DATE_EVENT_K23_yama(山)
+#DIM 山
+#DIM 萃香
+萃香 = NAME_TO_CHARA("萃香")
+
+;好感度5000以上かつ三分の一の確率で奥義習得イベント発生。遠慮するとイベント終了
+IF CFLAG:萃香:好感度 >= 5000 && (KDVAR:萃香:萃香_山で特訓 > 0 ? 1 # !RAND:3) && !(KDVAR:萃香:萃香_山で特訓 == -1)
+	SELECTCASE KDVAR:萃香:萃香_山で特訓
+		CASE 0
+			PRINTFORML 「嗯～……哈、哈。果然山很好啊，我会想起以前开心的时候…」
+			;TranslatedMark 「んん～～……っ、はぁ。やっぱり山は良いねぇ、楽しかった頃を思い出すよ…」
+			PRINTFORML 「啊，不是现在不开心哦？只是怀念着过去而已」
+			;TranslatedMark 「あ、別に今が楽しくないわけじゃないよ？　ただ昔を懐かしんでるだけさ」
+			PRINTFORMW %ANAME(萃香)%在山顶上舒舒服服地伸展着，和%ANAME(MASTER)%说话
+			;TranslatedMark %ANAME(萃香)%は山頂で気持ち良さそうに伸びをしながら%ANAME(MASTER)%と語らっている
+			PRINTFORML 「不仅仅是天狗和河童，还有各种各样的妖怪。每天都在胡闹…」
+			;TranslatedMark 「天狗や河童だけじゃなくて色んな妖怪共がいてね。毎日ワチャワチャ暴れたもんさ…」
+			PRINTFORMW 「不知从什么时候开始，勇仪他们就被称为山的四天王了……」
+			;TranslatedMark 「いつからか、勇儀たちとで山の四天王とか言われちゃったりさー……」
+			PRINTFORML 「嗯，想起来的话总觉得想活动一下身体」
+			;TranslatedMark 「うーん、思い出してたら何だか体を動かしたくなってきたよ」
+			PRINTFORML 「对了！%ANAME(MASTER)%，要不要在训练的同时和我切磋一下？」
+			;TranslatedMark 「そうだ！　%ANAME(MASTER)%、いっちょ私と訓練がてら闘り合ってみないかい？」
+			PRINTFORM 「这里很地方很宽阔，稍微闹一下也没关系吧。
+			;TranslatedMark 「ここなら広いし、多少暴れても大丈夫でしょ。
+			CALL COLOR_PRINT("能领悟到什么", カラー_注意)
+			PRINTFORMW 也说不定？」
+			;TranslatedMark かも知れないよ？」
+			PRINTFORML %ANAME(萃香)%向%ANAME(MASTER)%提出了比赛的提案
+			;TranslatedMark %ANAME(萃香)%は%ANAME(MASTER)%に試合の提案をしてきた
+			PRINTFORMW 那么，怎么办呢……
+			;TranslatedMark さて、どうしようか……
+			PRINTFORML 
+			CALL ASK_YN("请您手下留情", "这个容我谢绝")
+			IF RESULT == 1
+				PRINTFORML 虽然说是在训练，但从旁人的角度看，她一副想要大闹一场的样子
+				;TranslatedMark 訓練がてら、と言っているが当の本人は傍から見て分かるほど暴れたそうにウズウズしている
+				PRINTFORMW 和这种状态的%ANAME(萃香)%战斗的话，也许不是简单地结束的…
+				;TranslatedMark そんな状態の%ANAME(萃香)%と戦ったらタダではすまないかもしれない…
+				PRINTFORML %ANAME(MASTER)%郑重地拒绝了她的建议
+				;TranslatedMark %ANAME(MASTER)%は彼女の提案を丁重にお断りした
+				PRINTFORM 「太遗憾了。」
+				;TranslatedMark 「ありゃ残念。」
+				IF ABL:萃香:武闘 > ABL:MASTER:武闘
+					PRINTFORMW 明明是我想给你练习一下的」
+					;TranslatedMark 私が稽古つけてあげたかったのにさ」
+				ELSE
+					PRINTFORMW 明明想和%ANAME(MASTER)%认真地战斗一下的」
+					;TranslatedMark %ANAME(MASTER)%と本気で闘り合ってみたかったのになー」
+				ENDIF
+				PRINTFORMW 两人在山顶上继续约会，一边平息%ANAME(萃香)%的不满
+				;TranslatedMark ブーたれる%ANAME(萃香)%を宥めつつ、二人は山頂でのデートを続けた
+				KDVAR:萃香:萃香_山で特訓 = -1
+			ELSE
+				PRINTFORMW 能和身为大妖怪的她比试能够是了解自己实力的好机会。我也传达了我正想要切磋一下的想法
+				;TranslatedMark 大妖怪たる彼女が胸を貸してくれるのは自分の実力を知る良い機会だ。こちらとしても望むところだと伝えた
+				PRINTFORML 「啊哈哈♪真不错呢不愧是%ANAME(MASTER)%♪那么，一起战斗吧！」
+				;TranslatedMark 「あはっ♪　いいねぇ流石%ANAME(MASTER)%♪　それじゃあ、いっちょ闘ろうかっ！」
+				PRINTFORMW %ANAME(萃香)%的表情闪闪发光，看着答应战斗的%ANAME(MASTER)%
+				;TranslatedMark %ANAME(萃香)%はパァっと表情を輝かせ、提案に乗った%ANAME(MASTER)%を見据える
+				PRINTFORML 「那么让宴会开始吧。我上了哦，%ANAME(MASTER)%！」
+				;TranslatedMark 「それじゃあ宴を始めよう。行くよ、%ANAME(MASTER)%っ！」
+				PRINTFORMW 
+				PRINTFORMW …
+				PRINTFORMW ……
+				PRINTFORML 
+				IF ABL:萃香:武闘 > ABL:MASTER:武闘
+					PRINTFORML 「嗯，很清爽♪%ANAME(MASTER)%也很厉害呢」
+					;TranslatedMark 「ふー、すっきりした♪　%ANAME(MASTER)%も中々やるねぇ」
+					PRINTFORMW 总算平安结束了和%ANAME(萃香)%的战斗。不管怎么说，似乎对我有所保留实力的样子
+					;TranslatedMark 何とか五体無事で%ANAME(萃香)%との戦いを終えることが出来た。何だかんだある程度加減してくれていたようだ
+				ELSE
+					PRINTFORML 「哎呀，输了输了♪真是了不起呢%ANAME(MASTER)%♪」
+					;TranslatedMark 「いやー、負けた負けた♪　大したもんだねぇ%ANAME(MASTER)%は♪」
+					PRINTFORMW 不在乎地以大字躺下的%ANAME(萃香)%。从那个样子来看，好像还没有完全展现出自己的力量
+					;TranslatedMark あっけらかんと大の字で寝転がる%ANAME(萃香)%。その様子から、まだまだ力の底を見せていないようだ
+				ENDIF
+				PRINTFORML 「但是%ANAME(MASTER)%的天赋很好呢。不，真的。」
+				;TranslatedMark 「しかし%ANAME(MASTER)%は筋が良いね。いや、本当に。」
+				PRINTFORM 「……这种感觉的话、
+				;TranslatedMark 「……この感じなら、
+				CALL COLOR_PRINT("『嘿！』", カラー_注意)
+				PRINTFORMW 也许也能掌握」
+				;TranslatedMark も覚えられるかもね」
+				PRINTFORML …『嘿！』到底是什么呢
+				;TranslatedMark …『アレ』とは一体何だろうか
+				PRINTFORMW 「嗯？哈哈♪那个下次带我来这里的时候就告诉你哦」
+				;TranslatedMark 「んー？　はは♪　それはまた、ここに連れて来てくれた時に教えてあげるよ」
+				PRINTFORML 「那么，差不多该回去了吧。彼此都弄脏了，回去的时候顺便去一下澡堂吧？」
+				;TranslatedMark 「それじゃあ、そろそろ帰ろうか。お互い汚れちゃったから帰りに銭湯にでも寄るかい？」
+				PRINTFORMW 据说下次在山上约会的话会告诉你接下来的事情…今天就到此为止
+				;TranslatedMark 次にまた、山でデートすれば続きを教えてくれるとのことだが…今日の所はこれでお開きのようだ
+				CALL PRINT_ADD_EXP(萃香, "武闘経験値", RAND(2, 6), 1)
+				CALL PRINT_ADD_EXP(萃香, "防衛経験値", RAND(2, 6), 1)
+				CALL PRINT_ADD_EXP(MASTER, "武闘経験値", RAND(4, 8), 1)
+				CALL PRINT_ADD_EXP(MASTER, "防衛経験値", RAND(4, 8), 1)
+				CALL TRAIN_AUTO_ABLUP(萃香)
+				CALL TRAIN_AUTO_ABLUP(MASTER)
+				KDVAR:萃香:萃香_山で特訓 = 1
+			ENDIF
+
+		CASE IS >= 1
+			IF KDVAR:萃香:萃香_山で特訓 == 1
+				PRINTFORML 「那么，今天也来了呢，这个时间♪」
+				;TranslatedMark 「さーて、今日もやってきたねー、この時間が♪」
+				PRINTFORMW %ANAME(MASTER)%在山顶再次进行了和%ANAME(萃香)%的战斗训练…
+				;TranslatedMark %ANAME(MASTER)%は山頂にて、再び%ANAME(萃香)%との戦闘訓練(开始)運びとなったが…
+				PRINTFORML 「…嗯？之前说的"那个"是指什么？」
+				;TranslatedMark 「…ん？　前に言ってた『アレ』って何のことかって？」
+				PRINTFORM 「呵呵，听了别吓一跳。竟然！我想把我的
+				;TranslatedMark 「ふふーん、聞いて驚きな。なんと！　私の
+				CALL COLOR_PRINT("四天王奥義", カラー_注意)
+				PRINTFORMW 传授给你！」
+				;TranslatedMark を伝授してあげようと思ってね！」
+				PRINTFORMW 竟然！%ANAME(萃香)%似乎直接教给我山上四天王的奥义
+				;TranslatedMark なんと！　%ANAME(萃香)%が山の四天王としての奥義を直々に教えてくれるらしい
+				PRINTFORML 「啊，话虽如此，能不能学会就看%ANAME(MASTER)%的本事了…」
+				;TranslatedMark 「あー、まあとは言え、%ANAME(MASTER)%が習得できるかどうかは%ANAME(MASTER)%の力次第だけど…」
+				PRINTFORM 「最低限度、
+				;TranslatedMark 「最低限、
+				CALL COLOR_PRINT("和我同等的武斗", カラー_注意)
+				PRINTFORMW 是必要的吧」
+				;TranslatedMark が必要だね」
+				PRINTFORM 「这可不是那种廉价的技能、
+				;TranslatedMark 「それに安売りするような技でもないから、
+				CALL COLOR_PRINT("学习的机会只有一次", カラー_注意)
+				PRINTFORMW 哟」
+				;TranslatedMark だよ」
+			ELSE
+				PRINTFORMW 在山顶，再次开始和%ANAME(萃香)%的秘密特训…
+				;TranslatedMark 山頂にて、再び%ANAME(萃香)%との秘密特訓が始まる…
+				PRINTFORML 「那么，今天怎么办？挑战一下奥义学习吗？」
+				;TranslatedMark 「さて、今日はどうする？　奥義習得に挑戦してみるかい？」
+			ENDIF
+			IF ABL:MASTER:武闘 >= ABL:萃香:武闘
+				PRINTFORML 「如果是现在的%ANAME(MASTER)%的话，我想大概可以将其变为自己的东西吧」
+				;TranslatedMark 「今の%ANAME(MASTER)%なら、多分自分の物にできると思うよ」
+			ELSE
+				PRINTFORML 「现在的%ANAME(MASTER)%可能有点困难…」
+				;TranslatedMark 「今の%ANAME(MASTER)%にはちょっと荷が重いかもね…」
+			ENDIF
+			PRINTFORMW 「如果是这样的话，今天就只进行战斗训练也可以，怎么样？」
+			;TranslatedMark 「何なら、今日の所は戦闘訓練だけにしとく、ってのでもいいけど、どうする？」
+			PRINTFORMW 那么……
+			;TranslatedMark さて……
+			PRINTFORML 
+			CALL ASK_YN("奥義習得挑戦", "希望你陪我锻炼")
+			IF RESULT == 1
+				PRINTFORML 「嗯…那种克己心，真是太棒了！好吧，我来当你的对手！」
+				;TranslatedMark 「ふむ…その克己心、実に見事！　よーし、私が相手してやるぞー！」
+				PRINTFORMW %ANAME(萃香)%一下子提起了精神，注视着提出训练的%ANAME(MASTER)%
+				;TranslatedMark %ANAME(萃香)%はパァっと表情を輝かせ、訓練を申し出た%ANAME(MASTER)%を見据える
+				PRINTFORML 「那么让宴会开始吧。我上了哦，%ANAME(MASTER)%！」
+				;TranslatedMark 「それじゃあ宴を始めようか。行くよ、%ANAME(MASTER)%っ！」
+				PRINTFORMW 
+				PRINTFORMW …
+				PRINTFORMW ……
+				PRINTFORML 
+				IF ABL:萃香:武闘 > ABL:MASTER:武闘
+					PRINTFORML 「呼，今天也很开心哦♪%ANAME(MASTER)%也很厉害呢」
+					;TranslatedMark 「ふー、今日も楽しかったよ♪　%ANAME(MASTER)%も中々やるねぇ」
+					PRINTFORMW 总算平安结束了和%ANAME(萃香)%的战斗。不管怎么说，似乎对我有所保留实力的样子
+					;TranslatedMark 何とか五体無事で%ANAME(萃香)%との戦いを終えることが出来た。何だかんだある程度加減してくれていたようだ
+				ELSE
+					PRINTFORML 「哎呀，输了！真了不起啊！%ANAME(MASTER)%」
+					;TranslatedMark 「いやー、負けちゃったー♪　大したもんだねぇ%ANAME(MASTER)%」
+					PRINTFORMW 不在乎地以大字躺下的%ANAME(萃香)%。那种表情总觉得很高兴
+					;TranslatedMark あっけらかんと大の字で寝転がる%ANAME(萃香)%。その表情はどこか嬉しそうだ
+				ENDIF
+				PRINTFORML 「那么差不多该回去了吧。彼此都弄脏了，回去的时候顺便去一下澡堂吧？」
+				;TranslatedMark 「それじゃあそろそろ帰ろうか。お互い汚れちゃったから帰りに銭湯にでも寄るかい？」
+				PRINTFORMW 今天的幽会到现在为止，两人离开了山顶…
+				;TranslatedMark 今日の逢引はこれまでにして、二人は山頂を後にした…
+				CALL PRINT_ADD_EXP(MASTER, "武闘経験値", RAND(3, 6), 1)
+				CALL TRAIN_AUTO_ABLUP(MASTER)
+				KDVAR:萃香:萃香_山で特訓 ++
+			ELSE
+				PRINTFORML 「…那个气势很好。那就把我的奥义赐予%ANAME(MASTER)%吧！」
+				;TranslatedMark 「…その意気やよし。それじゃあ、%ANAME(MASTER)%に私の奥義を授けよう！」
+				PRINTFORMW 「我只打一次。集中精神偷学这个招数吧！」
+				;TranslatedMark 「一度しか打たないよ。集中して技を盗んでみよ！」
+				PRINTFORMW %ANAME(萃香)%的妖气高涨，让人预感到毁灭性的力量…！
+				;TranslatedMark %ANAME(萃香)%の妖気が高まり、破滅的な力を予感させる…！
+				PRINTFORML 
+				PRINTFORML 「看招！四天王奥义，三步必杀！！」
+				;TranslatedMark 「いざ！　四天王奥義ッ、三歩壊廃！！」
+				PRINTFORMW 
+				PRINTFORMW …
+				PRINTFORMW ……
+				IF ABL:MASTER:武闘 >= ABL:萃香:武闘
+					PRINTFORML 「…真不错啊%ANAME(MASTER)%。好像把我的奥秘变成了自己的东西了」
+					;TranslatedMark 「…見事だよ%ANAME(MASTER)%。私の奥義を自分の物にできたみたいだね」
+					PRINTFORMW 对感觉到生命危险的破灭%ANAME(萃香)%的奥义，%ANAME(MASTER)%全力避开，触及到了它的真髓
+					;TranslatedMark 命の危険を感じた破滅的な%ANAME(萃香)%の奥義を、%ANAME(MASTER)%は全力でかわし、その真髄に触れた
+					PRINTFORML 「即使不能实现巨大化，也能切实感受到这个技能的要点」
+					;TranslatedMark 「巨大化は出来なくても、その技の要点はちゃんと感じ取れたみたいだね」
+					PRINTFORMW 「…虽然很佩服，但也有点后悔啊。…%ANAME(MASTER)%，今天和我一起去喝酒吧？约好了哦」
+					;TranslatedMark 「…感心する反面、ちょっと悔しくもあるなー。…%ANAME(MASTER)%、今日は飲みに付き合っておくれよ、約束だぞ？」
+					PRINTFORML
+					CALL ICPRINT(@"<%ANAME(MASTER)%は%ANAME(萃香)%の奥義を習得した>", "W", カラー_注意)
+					CALL SKILL_LEARN_BY_NAME(MASTER, スキル_ジャンル_PERSONAL, NO:萃香, "三步坏废")
+					SIF RESULT
+						CALL COLOR_PRINTW(@"%ANAME(MASTER)%习得技能＜三步坏废＞", カラー_注意)
+					CALL ICPRINT(@"<%ANAME(萃香)%解锁了四天王的奥义>", "W", カラー_注意)
+					CALL SKILL_LEARN_BY_NAME(萃香, スキル_ジャンル_PERSONAL, NO:萃香, "三步坏废")
+					SIF RESULT
+						CALL COLOR_PRINTW(@"%ANAME(萃香)%习得技能＜三步坏废＞", カラー_注意)
+				ELSE
+					PRINTFORML 「嗯，果然对%ANAME(MASTER)%还太早了啊…」
+					;TranslatedMark 「うーん、やっぱり%ANAME(MASTER)%には早かったみたいだねぇ…」
+					PRINTFORMW 所放出的破灭性的%ANAME(萃香)%的技能，是%ANAME(MASTER)%所不能掌握
+					;TranslatedMark 放たれた破滅的な%ANAME(萃香)%の技は、%ANAME(MASTER)%の手に余る物だった
+					PRINTFORML 「即便如此，也没有受伤，依旧四肢健全的果然不愧是%ANAME(MASTER)%啊。真了不起」
+					;TranslatedMark 「それでも、怪我も無しに五体満足なあたりは流石%ANAME(MASTER)%だね。大したもんだよ」
+					PRINTFORML %ANAME(萃香)%向倒下的%ANAME(MASTER)%伸出手来
+					;TranslatedMark 倒れ付した%ANAME(MASTER)%に、%ANAME(萃香)%は手を差し伸べて助け上げる
+					CALL ICPRINT(@"<%ANAME(萃香)%解锁了四天王的奥义>", "W", カラー_注意)
+					CALL SKILL_LEARN_BY_NAME(萃香, スキル_ジャンル_PERSONAL, NO:萃香, "三步坏废")
+					SIF RESULT
+						CALL COLOR_PRINTW(@"%ANAME(萃香)%习得技能＜三步坏废＞", カラー_注意)
+					CALL COLOR_PRINTW(@"%ANAME(MASTER)%没能习得%ANAME(萃香)%的奥义……", カラー_注意)
+					CALL PRINT_ADD_EXP(MASTER, "武闘経験値", RAND(5, 10), 1)
+					CALL TRAIN_AUTO_ABLUP(MASTER)
+				ENDIF
+				PRINTFORML 「那么，差不多该回去了吧。互相弄脏了，回去的时候去泡温泉怎么样？呵呵呵♥」
+				;TranslatedMark 「それじゃあ、もうそろそろ帰ろうか。お互い汚れちゃったから帰りに温泉でも寄ってくかい？　ふふっ♥」
+				PRINTFORMW 结束了山顶的秘密特训，两人离开了山…
+				;TranslatedMark 山頂での秘密特訓を終え、二人は山を後にした…
+				KDVAR:萃香:萃香_山で特訓 = -1
+			ENDIF
+	ENDSELECT
+ELSE
+	;好感度10000以上
+	IF CFLAG:萃香:好感度 >= 10000
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「…在山顶上喝果然很棒啊…」
+				;TranslatedMark 「…山の天辺で飲むのはやっぱり良いねぇ…」
+				PRINTFORML 「如果在我身边是%ANAME(MASTER)%的话就更不用说了♥　…呼呼♪」
+				;TranslatedMark 「隣にいるのが%ANAME(MASTER)%なら尚更だね♥　…ふふー♪」
+				PRINTFORMW 在山顶上两个人紧紧地靠在一起，享受着喝酒的乐趣
+				;TranslatedMark 山頂で二人、ピタリと身を寄せ合ってサシ飲みを楽しんだ
+				CALL PRINT_ADD_EXP(萃香, "肝臓経験値", RAND(20, 40), 1)
+				CALL PRINT_ADD_EXP(MASTER, "肝臓経験値", RAND(10, 20), 1)
+				CALL TRAIN_AUTO_ABLUP(萃香)
+				CALL TRAIN_AUTO_ABLUP(MASTER)
+			CASE 1
+				PRINTFORML 「嗯哼哼…%ANAME(MASTER)%♥」
+				;TranslatedMark 「んふふ…%ANAME(MASTER)%ー♥」
+				PRINTFORMW 被%ANAME(MASTER)%缠住了。如果被天狗看到这样的话该怎么办呢…
+				;TranslatedMark は%ANAME(MASTER)%にベッタリと引っ付いている。こんなところを天狗とかに見られたらどうするのだろうか…
+				PRINTFORML 「嗯？那种东西给他看不就行了吗♥」
+				;TranslatedMark 「んー？　そんなの見せ付けてやればいいじゃない♥」
+				PRINTFORML 「而且如果被说些奇怪的话…那就只能做掉了。由我来动手呢」
+				;TranslatedMark 「それに変なこと言いふらそうとしたら、…そりゃもうアレするよ。私がさ」
+				PRINTFORMW 两个人一边调情一边享受郊游的乐趣
+				;TranslatedMark 二人でイチャつきながらハイキングを楽しんだ
+			CASE 2
+				PRINTFORML 「无论什么时候看，从山顶看到的景色都很好。如果%ANAME(MASTER)%在一起的话就更…对吧♥」
+				;TranslatedMark 「いつ見ても山のてっぺんからの景色って良いなー。%ANAME(MASTER)%が一緒なら尚のこと…ね♥」
+				PRINTFORMW 在山顶上两个人依偎着交谈
+				;TranslatedMark 山頂で二人、寄り添いながら語りあった
+		ENDSELECT
+
+	;好感度1500以上
+	ELSEIF CFLAG:萃香:好感度 >= 1500
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「在山顶请人斟酒也别有风味呢♪」
+				;TranslatedMark 「山頂でお酌してもらうってのも乙だねぇ♪」
+				PRINTFORMW 两个人在山上享受了互相斟酒
+				;TranslatedMark 山で二人、サシ飲みを楽しんだ
+				CALL PRINT_ADD_EXP(萃香, "肝臓経験値", RAND(10, 30), 1)
+				CALL PRINT_ADD_EXP(MASTER, "肝臓経験値", RAND(5, 15), 1)
+				CALL TRAIN_AUTO_ABLUP(萃香)
+				CALL TRAIN_AUTO_ABLUP(MASTER)
+			CASE 1
+				PRINTFORML 「如果遇到天狗什么的话，可以说出我的名字哦。我想大概会老实一些」
+				;TranslatedMark 「天狗とかにちょっかい出されたら私の名前を出していいよ。大抵大人しくなると思うから」
+				PRINTFORMW 两个人在山上享受了郊游的乐趣
+				;TranslatedMark 二人で山のハイキングを楽しんだ
+			CASE 2
+				PRINTFORML 「果然从山顶看到的景色真是太好了。无论是现在还是以前都不会改变」
+				;TranslatedMark 「やっぱり山のてっぺんからの景色って良いもんだねぇ。今も昔も変わらないよ」
+				PRINTFORMW 在山顶上两个人愉快地交谈着
+				;TranslatedMark 山頂で二人、楽しく語りあった
+		ENDSELECT
+
+	;好感度500以上
+	ELSE
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORMW 「反正要喝酒就去到山顶喝吧。如果这样决定的话就出发吧，%ANAME(MASTER)%」
+				;TranslatedMark 「どうせなら山頂で飲もうかね。そうと決まれば行くよ、%ANAME(MASTER)%」
+				CALL PRINT_ADD_EXP(萃香, "肝臓経験値", RAND(10, 20), 1)
+				CALL PRINT_ADD_EXP(MASTER, "肝臓経験値", RAND(5, 10), 1)
+				CALL TRAIN_AUTO_ABLUP(萃香)
+				CALL TRAIN_AUTO_ABLUP(MASTER)
+			CASE 1
+				PRINTFORML 「如果被天狗什么的找麻烦了的话请叫我哦。因为我在这还算有点面子」
+				;TranslatedMark 「天狗とかにちょっかい出されたら私を呼びなよ。顔が利くからさ」
+				PRINTFORMW 两个人在山上享受了郊游的乐趣
+				;TranslatedMark 二人で山のハイキングを楽しんだ
+			CASE 2
+				PRINTFORML 「从山顶看到的景色不觉得很好吗？」
+				;TranslatedMark 「山のてっぺんからの景色って良いと思わないかい？」
+				PRINTFORMW 在山顶上两个人愉快地交谈着
+				;TranslatedMark 山頂で二人、楽しく語りあった
+		ENDSELECT
+	ENDIF
+ENDIF
+;------------------------------------
+;森
+;-----------------------------------
+@DATE_EVENT_K23_mori(森)
+#DIM 森
+#DIM 萃香
+萃香 = NAME_TO_CHARA("萃香")
+
+;好感度10000以上
+IF CFLAG:萃香:好感度 >= 10000
+	SELECTCASE RAND:2
+		CASE 0
+			PRINTFORML 「对喝酒喝得的发热身体来说，森林里的凉爽让人感觉很舒服呢。这可能是森林说要多喝点啊♪」
+			;TranslatedMark 「酒で火照った体には森の涼しさが心地良いねぇ。こりゃあ森が、もっと飲めと言ってるようなもんだね♪」
+			PRINTFORMW 坐在森林里的树桩上，两个人一起享受着喝山酒的乐趣
+			;TranslatedMark 森の中の切り株に座りながら、二人でサシ飲みを楽しんだ
+			CALL PRINT_ADD_EXP(萃香, "肝臓経験値", RAND(20, 40), 1)
+			CALL PRINT_ADD_EXP(MASTER, "肝臓経験値", RAND(10, 20), 1)
+			CALL TRAIN_AUTO_ABLUP(萃香)
+			CALL TRAIN_AUTO_ABLUP(MASTER)
+		CASE 1
+			PRINTFORML 「这是能吃的蘑菇啊。烤一下会变成很好的下酒菜呢，给我点吧」
+			;TranslatedMark 「こりゃ食べれるキノコだね。炙るといいツマミになるよ、ちょっと貰っていこう」
+			PRINTFORML 「之后一起吃吧♪…害怕会中毒吗？没关系，那个时候我会把让毒散出去的♪」
+			;TranslatedMark 「後で一緒に食べようねー♪　…当たったら怖い？　なーに、その時は私が毒を散らしてやるから大丈夫っ♪」
+			PRINTFORMW 两个人在森林里一边调情一边散步
+			;TranslatedMark 二人で森の中を、イチャイチャしながら散策した
+	ENDSELECT
+
+;好感度1500以上
+ELSEIF CFLAG:萃香:好感度 >= 1500
+	SELECTCASE RAND:2
+		CASE 0
+			PRINTFORML 「外面虽然很热，但是在森林里很凉快呢。很凉爽很舒服呢」
+			;TranslatedMark 「外は暑いけど森の中だと涼しいねー。ひんやりしてて気持ち良いもんだねぇ」
+			PRINTFORMW 两个人在森林里开心地散步
+			;TranslatedMark 森林で二人、楽しく散歩した
+		CASE 1
+			PRINTFORML 「哦，发现了奇怪的蘑菇。嗯，这可不能成为下酒菜啊」
+			;TranslatedMark 「お、変なキノコ発見。うーん、こりゃ酒の肴にはなりそうにないねぇ」
+			PRINTFORMW 两个人在森林里散步度过
+			;TranslatedMark 二人で森の中を散策して過ごした
+	ENDSELECT
+
+;好感度500以上
+ELSE
+	SELECTCASE RAND:2
+		CASE 0
+			PRINTFORMW 「有奇怪的家伙出来的话就告诉我吧？不管谁来都不会输，没关系」
+			;TranslatedMark 「変な奴が出てきたら私に言いなよ？　誰が来ても負けないから大丈夫」
+		CASE 1
+			PRINTFORMW 「一边沐浴森林一边喝的酒很好呢～♪」
+			;TranslatedMark 「森林浴しながら飲む酒は上手いね～♪」
+	ENDSELECT
+ENDIF
+
+;------------------------------------
+;人里
+;-----------------------------------
+@DATE_EVENT_K23_hitozato(人里)
+#DIM 人里
+#DIM 萃香
+萃香 = NAME_TO_CHARA("萃香")
+
+;好感度10000以上
+IF CFLAG:萃香:好感度 >= 10000
+	SELECTCASE RAND:2
+		CASE 0
+			PRINTFORML 「啊，%ANAME(MASTER)%。在这里稍微休息一下吧♪」
+			;TranslatedMark 「あ、%ANAME(MASTER)%。ここでちょっと休憩していこうよ♪」
+			PRINTFORMW 约会的时候，两个人决定在茶馆休息
+			;TranslatedMark デートの最中、二人は茶屋にて休憩することにした
+			PRINTFORML 「这里也可以上二楼。宗教战争的时候和勇仪来过」
+			;TranslatedMark 「ここ二階にも上がれるんだー。宗教戦争の時に勇儀と来たことがあってね」
+			PRINTFORMW %ANAME(MASTER)%被看起来很开心的%ANAME(萃香)%牵着手拉上了二楼
+			;TranslatedMark 嬉しそうな%ANAME(萃香)%に手を引かれ、%ANAME(MASTER)%たちは二階へと上がっていった
+			PRINTFORML 「景色很好吧。酒的味道也很不错哦这里♪」
+			;TranslatedMark 「けっこう良い眺めでしょ。お酒の味も中々だったよここは♪」
+			PRINTFORMW 就这样没有被任何人打扰度过了一段时间，一边喝酒一边调情
+			;TranslatedMark そしてしばらくの間、誰にも邪魔されず酒盛りしながらイチャついた
+			CALL PRINT_ADD_EXP(萃香, "肝臓経験値", RAND(20, 40), 1)
+			CALL PRINT_ADD_EXP(MASTER, "肝臓経験値", RAND(10, 20), 1)
+			CALL TRAIN_AUTO_ABLUP(萃香)
+			CALL TRAIN_AUTO_ABLUP(MASTER)
+		CASE 1
+			PRINTFORML 「呼—，走来走去肚子饿了呢。不去吃点什么吗？」
+			;TranslatedMark 「ふいーっ、歩き回ってお腹空いたね。何か食べて行かないかい？」
+			PRINTFORMW 接受提议，顺便去了热闹气氛的餐厅
+			;TranslatedMark 提案を受け、賑やかな雰囲気の食事処に立ち寄った
+			PRINTDATAL
+				DATAFORM 「哦，这个很好吃呢。来，%ANAME(MASTER)%，啊♪」
+				;TranslatedMark 「お、コレいける。はい、%ANAME(MASTER)%、あーん♪」
+				DATAFORM 「啊，你的那个看起来也很不错…。喂，要不要交换一下？」
+				;TranslatedMark 「あ、ソレも美味しそうー…。ねえ、コレと交換しない？」
+				DATAFORM 「呵呵♪来，啊♪」
+				;TranslatedMark 「ふふ♪　はい、あーん♪」
+				DATAFORM 「哦，%ANAME(MASTER)%，这个很好吃哦。尝尝看？」
+				;TranslatedMark 「おっ、%ANAME(MASTER)%、コレ美味しいよ。食べてみる？」
+			ENDDATA
+			PRINTFORMW 在热闹的食堂，一边调情一边享受午餐
+			;TranslatedMark 賑やか食堂で、イチャイチャしながら昼食を楽しんだ
+	ENDSELECT
+
+;好感度1500以上
+ELSEIF CFLAG:萃香:好感度 >= 1500
+	SELECTCASE RAND:2
+		CASE 0
+			PRINTFORML 「在这样的地方邀请鬼来幽会，真是豪气啊%ANAME(MASTER)%♪」
+			;TranslatedMark 「こーんな所に鬼を逢引に誘うなんて、豪気だねー%ANAME(MASTER)%は♪」
+			PRINTFORMW %ANAME(萃香)%在茶馆里，和%ANAME(MASTER)%愉快地聊天
+			;TranslatedMark %ANAME(萃香)%は茶屋にて、%ANAME(MASTER)%と楽しそうにおしゃべりしている
+		CASE 1
+			PRINTFORML 「…虽然感觉已经事到如今了。%ANAME(MASTER)%不会讨厌和身为鬼的我在一起吗？」
+			;TranslatedMark 「…今更だけどさ。%ANAME(MASTER)%って、鬼の私と一緒にいて嫌じゃないの？」
+			PRINTFORML 突然%ANAME(萃香)%问道。%ANAME(MASTER)%回应说，我从来没有想过这种事
+			;TranslatedMark 不意に%ANAME(萃香)%が問う。%ANAME(MASTER)%は、そんなことは思ったことも無い　と応えた
+			PRINTFORMW 「嗯…。果然%ANAME(MASTER)%很奇怪呢。嘛，所以和你在一起很开心♪」
+			;TranslatedMark 「ふーん…。やっぱり%ANAME(MASTER)%は変わってるねぇ。ま、だから付き合ってて楽しいんだけどさ♪」
+	ENDSELECT
+
+;好感度500以上
+ELSE
+	SELECTCASE RAND:2
+		CASE 0
+			PRINTFORML 「在这之前如果没有发生异变的话，是不能来到这样的地方的…但是如果是现在的世态的话，就算有鬼也不会不自然吧」
+			;TranslatedMark 「今までは異変でもなきゃこういう所来れなかったんだけど…今の世情なら鬼がいても不自然じゃないよね」
+		CASE 1
+			PRINTFORML 「哦，有酒店。放了什么东西卖呢，去凉快一下吧」
+			;TranslatedMark 「ほう、酒屋があるね。どんなもんが置いてあるか、冷やかしに行こうか」
+	ENDSELECT
+	PRINTFORMW %ANAME(萃香)%一边和%ANAME(MASTER)%说话一边在街上散步
+	;TranslatedMark %ANAME(萃香)%は%ANAME(MASTER)%と語らいながら町を散策している
+ENDIF
+
+;------------------------------------
+;花畑
+;-----------------------------------
+@DATE_EVENT_K23_hanabatake(花畑)
+#DIM 花畑
+#DIM 萃香
+萃香 = NAME_TO_CHARA("萃香")
+
+;好感度10000以上
+IF CFLAG:萃香:好感度 >= 10000
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORML 「微风送来了花香…。太阳也暖洋洋地温暖着身体，这只能躺下来了♪」
+			;TranslatedMark 「そよ風が花の良い匂いを運んでくるねぇ…。お日様もぽかぽか体を打ってくるし、こりゃ横になるしかないね♪」
+			PRINTFORML 「哟…。嘿嘿，%ANAME(MASTER)%也一起躺下吧？」
+			;TranslatedMark 「よっ、と…。へへ、%ANAME(MASTER)%も一緒に横になろ？」
+			PRINTFORMW 在她的邀请下，%ANAME(MASTER)%也躺在%ANAME(萃香)%的旁边亲了她
+			;TranslatedMark 彼女のお誘いを受け、%ANAME(MASTER)%も%ANAME(萃香)%の隣に寝転んでイチャイチャした
+		CASE 1
+			PRINTFORML 「周围的景色都很华丽的话，酒的味道也会更进一步哦♪这样的赏花也很好呢，%ANAME(MASTER)%在的话就更是这样了♥」
+			;TranslatedMark 「周りが華やかだとお酒も進むねぇ♪　こういう花見もいいもんだね、%ANAME(MASTER)%もいることだしさ♥」
+			PRINTFORMW 两个人不顾在盛开的花上飞来飞去的妖精们，享受着野餐
+			;TranslatedMark 咲き誇る花の上で飛び回る妖精たちを尻目に、二人はピクニックを楽しんだ
+			CALL PRINT_ADD_EXP(萃香, "肝臓経験値", RAND(10, 30), 1)
+			CALL PRINT_ADD_EXP(MASTER, "肝臓経験値", RAND(5, 15), 1)
+			CALL TRAIN_AUTO_ABLUP(萃香)
+			CALL TRAIN_AUTO_ABLUP(MASTER)
+		CASE 2
+			PRINTFORML 「嗯，好风啊……呀！」
+			;TranslatedMark 「んんー、いい風だねぇ……きゃっ！」
+			PRINTFORML 狂风吹起，%ANAME(萃香)%的裙子在%ANAME(MASTER)%面前轻轻地飘了起来
+			;TranslatedMark 強い風が吹き、%ANAME(MASTER)%の目の前で%ANAME(萃香)%のスカートがふわりとめくれ上がった
+			PRINTDATAW
+				DATAFORM 看起来很性感的决胜内衣
+				;TranslatedMark 見るからにセクシーな勝負下着だった
+				DATAFORM 带着一点的丝带的可爱的纯白短裤
+				;TranslatedMark ワンポイントのリボンが可愛らしい純白のショーツだった
+				DATAFORM 老虎花纹的鬼内裤
+				;TranslatedMark 虎柄の鬼パンツだった
+				DATAFORM 有点透的色情内衣
+				;TranslatedMark スケスケのエロ下着だった
+			ENDDATA
+			PRINTFORML 「……眼睛都看直了哦？　…这个色狼♥」
+			;TranslatedMark 「……目が釘付けだったよ？　…この助平♥」
+			PRINTFORMW %ANAME(萃香)%带着平时看不到的妖艳微笑转向%ANAME(MASTER)%
+			;TranslatedMark %ANAME(萃香)%は普段は見せない妖艶な微笑みを%ANAME(MASTER)%に向けた
+	ENDSELECT
+
+;好感度1500以上
+ELSEIF CFLAG:萃香:好感度 >= 1500
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORML 「微风送来了花香…。太阳也暖洋洋地温暖着身体，这只能躺下来了♪」
+			;TranslatedMark 「そよ風が花の良い匂いを運んでくるねぇ…。お日様もぽかぽか体を打ってくるし、こりゃ横になるしかないね♪」
+			PRINTFORML 「哟…。嗯，%ANAME(MASTER)%也躺下怎么样？」
+			;TranslatedMark 「よっ、と…。んふふ、%ANAME(MASTER)%もどうだい？」
+			PRINTFORMW 在她的邀请下，%ANAME(MASTER)%也躺在了%ANAME(萃香)%的旁边
+			;TranslatedMark 彼女のお誘いを受け、%ANAME(MASTER)%も%ANAME(萃香)%の隣に寝そべった
+		CASE 1
+			PRINTFORML 「我还以为花田不是什么好地方呢……在这种温暖的氛围下喝的酒也不错啊」
+			;TranslatedMark 「花畑ってガラじゃないと思ってたけど…、こういうあったかい雰囲気で飲む酒もいいもんだねぇ」
+			PRINTFORMW 两个人不顾在盛开的花上飞来飞去的妖精们，享受着野餐
+			;TranslatedMark 咲き誇る花の上で飛び回る妖精たちを尻目に、二人はピクニックを楽しんだ
+		CASE 2
+			PRINTFORML 「嗯，好风啊……啊」
+			;TranslatedMark 「んんー、いい風だねぇ……あっ」
+			PRINTFORML 风有点大，%ANAME(萃香)%的裙子在%ANAME(MASTER)%面前轻轻地吹了起来
+			;TranslatedMark ちょっと強い風が吹き、%ANAME(MASTER)%の前で%ANAME(萃香)%のスカートがふわりとめくれ上がった
+			PRINTDATAW
+				DATAFORM 和往常一样是白色的衬裤
+				;TranslatedMark いつも通りの白いドロワーズだった
+				DATAFORM 纯白的短裤
+				;TranslatedMark 純白のショーツだった
+				DATAFORM 老虎花纹的鬼内裤
+				;TranslatedMark 虎柄の鬼パンツだった
+			ENDDATA
+			PRINTFORML 「啊，啊哈哈…给你看了有点丢脸的事情呢…」
+			;TranslatedMark 「あ、あはは…ちょっと見苦しい物見せちゃったね…」
+			PRINTFORMW 就算是是%ANAME(萃香)%这样的事情也很害羞，脸上比平时红，努力装出平静的笑容掩饰着
+			;TranslatedMark 流石の%ANAME(萃香)%も恥ずかしかったのか、顔をいつもより赤らめながら愛想笑いでごまかしている
+	ENDSELECT
+
+;好感度500以上
+ELSE
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORMW 「对我来说，花也是下酒菜呢。让我品尝各式色彩的好菜」
+			;TranslatedMark 「私にとっては、花も酒の肴だねぇ。彩りを味わわせてくれる良い肴さ」
+		CASE 1
+			PRINTFORML 「我个人觉得，我和这样的花田完全不适合，你觉得呢？」
+			;TranslatedMark 「我ながらさ、私ってこういうお花畑とまったく似合ってないと思うんだけど、どう思う？」
+			PRINTFORMW 不必那样自嘲……
+			;TranslatedMark そんな自虐しなくても……
+		CASE 2
+			PRINTFORML 「嗯，好风啊……啊」
+			;TranslatedMark 「んんー、いい風だねぇ……あっ」
+			PRINTFORMW 有点强的风吹过，在%ANAME(MASTER)%面前%ANAME(萃香)%的裙子翻到了危险的地方
+			;TranslatedMark ちょっと強目の風が吹き、%ANAME(MASTER)%の前で%ANAME(萃香)%のスカートがきわどい所までめくれ上がった
+			PRINTFORML 「……老实回答。…看见了吗？」
+			;TranslatedMark 「……正直に答えな。…見た？」
+			PRINTFORML 只看到大腿！
+			;TranslatedMark 太股までしか見えてません！
+			PRINTFORMW 「…嗯，老实就好。真是一阵色情的风啊。」
+			;TranslatedMark 「…ふむ、素直でよろしい。まったくスケベな風だよ、もう」
+	ENDSELECT
+ENDIF
+
+;------------------------------------
+;自宅
+;-----------------------------------
+@DATE_EVENT_K23_zitaku(自宅)
+#DIM 自宅
+#DIM 萃香
+萃香 = NAME_TO_CHARA("萃香")
+
+;好感度10000以上
+IF CFLAG:萃香:好感度 >= 10000
+	SELECTCASE RAND:2
+		CASE 0
+			PRINTFORML 「哈♥嗯♥啾、阿♥」
+			;TranslatedMark 「はぁっ♥　んっ♥　ちゅ、ぁんっ♥」
+			PRINTFORMW 在%ANAME(MASTER)%的房间里，两人一心地互相寻求对方的嘴唇
+			;TranslatedMark %ANAME(MASTER)%の部屋にて、二人は一心不乱にお互いの唇を求め合っている
+			PRINTFORML 「啊，呜……。嗯哼哼…♥今天一整天都做些羞羞的事情吧…♪」
+			;TranslatedMark 「あむっ、ちゅぅ……。んふふ…♥　今日は一日中、破廉恥なことして過ごそうか…♪」
+			PRINTFORMW 这一天，两个人在一起亲热中度过了…
+			;TranslatedMark この日は結局、二人で乳繰り合いながら過ごした…
+			CALL FUCK_MAKELOVE(萃香, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", ANAME(MASTER))
+			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(萃香)%の膣", "和姦")
+			CFLAG:萃香:好感度 += 1000
+			CALL COLOR_PRINTL(@"%ANAME(萃香)%的好感度上升了1000", 0x00FFFF)
+		CASE 1
+			PRINTFORML 「呼呼，%ANAME(MASTER)%的床，软软的很舒服呢♪」
+			;TranslatedMark 「ふいーっ、%ANAME(MASTER)%のベッド、ふかふかで気持ちいいねー♪」
+			PRINTFORMW %ANAME(萃香)%趴在床上放松
+			;TranslatedMark %ANAME(萃香)%がベッドの上でうつ伏せで寛いでいる
+			PRINTFORML 不经意间被踢到的裙子里，晃眼的大腿露出来了
+			;TranslatedMark 無造作に肌蹴られたスカートから、眩しい太ももが露わになる
+			PRINTFORML 「…虽然感觉到了视线，但是…只是看看就行了吗♥」
+			;TranslatedMark 「…なーんか視線を感じるけど、…見てるだけで良いのかい♥」
+			PRINTFORMW 然后%ANAME(萃香)%用诱惑的表情提起裙子的下摆，连内衣一并都给人看
+			;TranslatedMark そして誘うような表情で%ANAME(萃香)%はスカートの裾を持ち上げ、下着まで見せ付ける
+			PRINTFORML 被那种淫乱的挑衅所击中的%ANAME(MASTER)%，喘着粗气地扑了上去
+			;TranslatedMark その淫らな挑発に当てられた%ANAME(MASTER)%は、息を荒げて彼女に覆いかぶさった
+			PRINTFORML 「呵呵…必须要那样。那么，两个人一起开始开心的事吧♥」
+			;TranslatedMark 「ふふ…そうこなくっちゃね。それじゃあ、二人だけでキモチいいこと、始めようか♥」
+			PRINTFORMW 结果那天一整天都是两个人做爱度过的…
+			;TranslatedMark 結局その日は一日中、二人でセックスして過ごした…
+			CALL FUCK_MAKELOVE(萃香, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", ANAME(MASTER))
+			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(萃香)%の膣", "和姦")
+			CFLAG:萃香:好感度 += 1000
+			CALL COLOR_PRINTL(@"%ANAME(萃香)%的好感度上升了1000", 0x00FFFF)
+	ENDSELECT
+
+;好感度1500以上
+ELSEIF CFLAG:萃香:好感度 >= 1500
+	SELECTCASE RAND:2
+		CASE 0
+			PRINTFORML 「用储备的东西给你做点心吧？」
+			;TranslatedMark 「有るもんで適当にオツマミ作ってあげようか？」
+		CASE 1
+			PRINTFORML 「作为招待别人来玩来说是个不错的房间啊。看起来很放松，我很喜欢♪」
+			;TranslatedMark 「人を招くだけあって割りといい部屋だね。くつろげそうだし気に入ったよ♪」
+	ENDSELECT
+	PRINTFORMW 两个人在家悠闲地度过了
+	;TranslatedMark 自宅で二人、のんびりまったりして過ごした
+
+;好感度500以上
+ELSEIF CFLAG:萃香:好感度 >= 500
+	SELECTCASE RAND:2
+		CASE 0
+			PRINTFORML 「不管到哪里，只要有这家伙在就会很高兴」
+			;TranslatedMark 「何処に来ようが、コイツがあればご機嫌だね」
+			PRINTFORMW 一边摇着心爱的葫芦，%ANAME(萃香)%很高兴的样子
+			;TranslatedMark 愛用の瓢箪をあおりながら%ANAME(萃香)%は上機嫌だ
+		CASE 1
+			PRINTFORML 「正因为要是招待别人所以收拾了一下吗。有点意外呢」
+			;TranslatedMark 「人を招くだけあって割りと片付けられるね。ちょっと意外だったよ」
+			PRINTFORMW 是想象着怎样的房间呢…
+			;TranslatedMark どんな部屋を想像していたのだろうか…
+	ENDSELECT
+
+ENDIF
+

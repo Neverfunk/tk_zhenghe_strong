@@ -1,0 +1,72 @@
+﻿;-------------------------------------------------
+;指挥中心名称
+;-------------------------------------------------
+@SHOP_SLG_NAME36
+	RESULTS:0 '= "指挥中心"
+
+;-------------------------------------------------
+;指挥中心の選択可否
+;-------------------------------------------------
+@SHOP_SLG_CHECK36
+	SIF FLAG:クリアフラグ
+		RETURN 0
+	SIF FLAG:観戦モード
+		RETURN 0
+	SIF !IS_COUNTRY(CFLAG:MASTER:所属)
+		RETURN 0
+	RETURN 1
+
+;-------------------------------------------------
+;指挥中心の右カラムオン判定
+;-------------------------------------------------
+;@SHOP_SLG_EVENTBUY_COLUMN_RIGHT_ON_CHECK36
+
+;-------------------------------------------------
+;指挥中心の左カラムメニューの入力処理
+;-------------------------------------------------
+@SHOP_SLG_EVENTBUY36
+	CALL SHOW_COMMAND_CENTRE
+	RETURN 1
+
+;-------------------------------------------------
+;指挥中心の表示処理本体
+;-------------------------------------------------
+@SHOW_COMMAND_CENTRE
+	#DIM FIRST_LINE
+	FIRST_LINE = LINECOUNT
+	WHILE 1
+		ALIGNMENT CENTER
+		CALL SINGLE_DRAWLINE
+
+		PRINTFORML
+		PRINTFORML 欢迎来到指挥中心！尊敬的%ANAME(MASTER)%
+		PRINTFORML
+		CALL SINGLE_DRAWLINE
+
+		PRINTBUTTON "[建筑管理]",1
+		PRINTL
+		PRINTL
+		IF DAY >= SLG_PP:0
+			PRINTBUTTON "[外交管理]",2
+			PRINTL
+			PRINTL
+		ENDIF
+		PRINTBUTTON "[建筑技能]",3
+		PRINTL
+		PRINTL
+		PRINTBUTTON "[返回]",0
+		PRINTL
+		ALIGNMENT LEFT
+		INPUT
+		SIF RESULT == 0
+			RETURN
+		SIF RESULT == 1
+			CALL BUILDING_BATCH_PROCESSING
+		IF DAY >= SLG_PP:0
+			SIF RESULT == 2
+				CALL DIPLOMACY_BATCH_PROCESSING
+		ENDIF
+		SIF RESULT == 3
+			CALL BUILDING_SKILL
+		CLEARLINE (LINECOUNT - FIRST_LINE)
+	WEND

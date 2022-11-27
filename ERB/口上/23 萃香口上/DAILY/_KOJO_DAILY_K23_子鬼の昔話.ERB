@@ -1,0 +1,330 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K23_OLDTALE_RATE(対象)
+#DIM 対象
+RETURN 100 + (KDVAR:対象:萃香_昔話 > 0) * 50
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K23_OLDTALE_DECISION(対象)
+#DIM 対象
+
+;プレイヤーキャラが紫か勇儀か華扇なら発生しない
+SIF GROUPMATCH(MASTER, NAME_TO_CHARA("紫"), NAME_TO_CHARA("勇儀"), NAME_TO_CHARA("華扇"))
+	RETURN 0
+
+;終わってたら発生しない
+SIF KDVAR:対象:萃香_昔話 == -1
+	RETURN 0
+
+;恋慕系で、合意がなければだめ
+SIF !(IS_LOVER(対象) && TALENT:対象:合意)
+	RETURN 0
+
+;ARG:0が口上デイリーイベントを実施できるかの簡易チェック関数
+;ARG:1 0 MASTERと別勢力である 1 MASTERと同一勢力である　-1 どちらでもよい
+;ARG:2 0 捕虜でない 1 捕虜である -1 どちらでもよい
+;ARG:3 0 面識がない 1 面識がある -1 どちらでもよい
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K23_OLDTALE_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K23_OLDTALE(対象)
+#DIM 対象
+
+
+SELECTCASE KDVAR:対象:萃香_昔話
+	CASE 0
+		PRINTFORMW 「吔、%ANAME(MASTER)%」
+		PRINTFORML 晚上、在外面無所事事時見到%ANAME(対象)%在喝月見酒
+		PRINTFORMW 「看見明月後、總有點想起以前的往事了」
+		PRINTFORMW 「往事很適合拿來做下酒菜。因為月色從古至今都一成不變呢」
+		PRINTFORML %ANAME(対象)%與看上去完全不一樣，是活了很久的大妖怪
+		PRINTFORMW 当然，过去也发生过很多事吧。……有点兴趣啊
+		PRINTFORML 「…如果可以的话，想听听我的往事吗?我请你喝一杯よ」
+		PRINTFORMW 怎麼辦……
+		PRINTFORML 
+		CALL ASK_YN("是怎樣的故事呢、有點興趣", "今日就算了")
+		IF RESULT == 1
+			PRINTFORML 「是吗?那太遗憾了。嗯，如果你喜欢的话，下次再说吧」
+			PRINTFORMW %ANAME(MASTER)%向%ANAME(対象)%揮手道別
+		ELSE
+			PRINTFORMW 「呵呵、那麼、就陪陪我這個酒鬼聊天吧」
+			PRINTFORML 
+			PRINTFORMW %ANAME(対象)%說起了自己各式各樣的過去
+			PRINTFORML 毫無保留地分享在過去與人類交流、以及恩仇…
+			PRINTFORMW 從一言一語之中、隱約能感受到對人類的好意
+			PRINTFORML ・
+			PRINTFORML ・
+			PRINTFORMW 「呼…、今日就到這裏吧。謝謝你能陪我啊」
+			PRINTFORML 真是豐富精彩的過去。下次有機會真想聽聽後續
+			PRINTFORMW 「是、是吗?嘿嘿，有点害羞啊」
+			PRINTFORML 「但是呢、沒醉意的話總覺得沒什麼興致…對了」
+			PRINTFORML
+			CALL ICPRINT("「下次給我<三瓶清酒>我再和你說更多的往事吧」", "W", カラー_注意)
+			PRINTFORML
+			PRINTFORML 下次準備好酒的話會再聊更多
+			PRINTFORMW 「我會在這裏喝酒、有空的話再來吧」
+			PRINTFORML
+			CALL ICPRINT(@"<%ANAME(対象)%好像是想起了过去的往事>", "W", カラー_注意)
+			CALL PRINT_ADD_EXP(対象, "武闘経験値", 10, 1)
+			CALL PRINT_ADD_EXP(対象, "防衛経験値", 10, 1)
+			CALL PRINT_ADD_EXP(対象, "知略経験値", 5, 1)
+			CALL PRINT_ADD_EXP(対象, "肝臓経験値", RAND(50, 100), 1)
+			CALL PRINT_ADD_EXP(MASTER, "肝臓経験値", RAND(50, 100), 1)
+			CALL TRAIN_AUTO_ABLUP(対象)
+			CALL TRAIN_AUTO_ABLUP(MASTER)
+			PRINTFORML
+			CFLAG:対象:好感度 += 200
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了200", カラー_シアン)
+			KDVAR:対象:萃香_昔話 = 1
+		ENDIF
+	;KDVAR:対象:萃香_昔話 = が1でイベント発生
+	CASE 1
+		PRINTFORML 「喲、%ANAME(MASTER)%」
+		PRINTFORMW 晚上、在外面散步時見到%ANAME(対象)%在喝月見酒
+		PRINTFORML 「想再聽我講故嗎？」
+		CALL ICPRINT("「給我<三瓶清酒>我就和你說更多的往事吧」", "W", カラー_注意)
+		PRINTFORMW 怎麼辦……
+		PRINTFORML 
+		CALL ASK_MULTI_JUDGE("我想聽",  ITEM:清酒 >= 3, "今日就算了", 1)
+		IF RESULT == 1
+			PRINTFORML 「是吗?那太遗憾了。嗯，如果你喜欢的话，下次再说吧」
+			PRINTFORMW %ANAME(MASTER)%向%ANAME(対象)%揮手道別
+		ELSE
+			PRINTFORMW 「呵呵、幹得漂亮%ANAME(MASTER)%。那麼、今日也陪陪我這個酒鬼聊天吧」
+			PRINTFORML 
+			PRINTFORMW %ANAME(対象)%說起了自己各式各樣的過去
+			PRINTFORML 說起了一個認識到不少的鬼和人類、戰鬥、然後化敵為友的故事…
+			PRINTFORMW 從一言一語之中、隱約能感受到作為鬼的驕傲
+			PRINTFORML ・
+			PRINTFORML ・
+			PRINTFORMW 「呼…、今日就到這裏吧。謝謝你能陪我啊」
+			PRINTFORML 「有聽眾的話、總會不自覺越說越多了。不會無聊嗎？」
+			PRINTFORML 真是豐富精彩的過去。真想再聽聽後續
+			PRINTFORMW 「是、是吗?嘿嘿，有点害羞啊」
+			PRINTFORML 「但是呢、沒醉意的話總覺得沒什麼興致…對了」
+			PRINTFORML
+			CALL ICPRINT("「下次準備<三瓶麦酒>給我的話我再和你說更多往事吧」", "W", カラー_注意)
+			PRINTFORML
+			PRINTFORML 下次準備好酒的話會再聊更多
+			PRINTFORMW 「我會在這裏喝酒、有空的話再來吧」
+			PRINTFORML
+			CALL ICPRINT(@"<%ANAME(対象)%好像是想起了过去的往事>", "W", カラー_注意)
+			CALL PRINT_ADD_EXP(対象, "武闘経験値", 15, 1)
+			CALL PRINT_ADD_EXP(対象, "防衛経験値", 15, 1)
+			CALL PRINT_ADD_EXP(対象, "知略経験値", 5, 1)
+			CALL PRINT_ADD_EXP(対象, "肝臓経験値", RAND(20, 50), 1)
+			CALL PRINT_ADD_EXP(MASTER, "肝臓経験値", RAND(20, 50), 1)
+			CALL TRAIN_AUTO_ABLUP(対象)
+			CALL TRAIN_AUTO_ABLUP(MASTER)
+			ITEM:清酒 -= 3
+			CALL COLOR_PRINTW("喝乾了三瓶清酒", カラー_注意)
+			CFLAG:対象:好感度 += 200
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了200", カラー_シアン)
+			KDVAR:対象:萃香_昔話 = 2
+		ENDIF
+	;KDVAR:対象:萃香_昔話 = が2でイベント発生
+	CASE 2
+		PRINTFORML 「喂、%ANAME(MASTER)%」
+		PRINTFORMW 晚上、在外面散步時見到%ANAME(対象)%在喝月見酒。旁邊空著一人的座位…
+		PRINTFORML 「想再聽我講故嗎？」
+		CALL ICPRINT("「給我<三瓶麦酒>我就和你說更多的往事吧」", "W", カラー_注意)
+		PRINTFORMW 怎麼辦……
+		PRINTFORML 
+		CALL ASK_MULTI_JUDGE("我想聽",  ITEM:麦酒 >= 3, "今日就算了", 1)
+		IF RESULT == 1
+			PRINTFORML 「是吗?那太遗憾了。嗯，如果你喜欢的话，下次再说吧」
+			PRINTFORMW %ANAME(MASTER)%向%ANAME(対象)%揮手道別
+		ELSE
+			PRINTFORMW 「呵呵、幹得漂亮%ANAME(MASTER)%。那麼、今日也陪陪我這個酒鬼聊天吧」
+			PRINTFORML 
+			PRINTFORMW %ANAME(対象)%說起了自己各式各樣的過去
+			PRINTFORML 說起了導致與人類關係變化的起端、人和鬼之間友情走到終焉…
+			PRINTFORMW 從一言一語之中、能隱約感受到悔恨、以及寂寞
+			PRINTFORML ・
+			PRINTFORML ・
+			PRINTFORMW 「呼…、今日就到此為止吧。總覺得好像說了什麼多餘的話了呢」
+			PRINTFORML 真是豐富精彩的過去。下次有機會真想聽聽後續
+			PRINTFORMW 「是、是吗?嘿嘿，有点害羞啊」
+			PRINTFORML 「但是呢、沒醉意的話總覺得沒什麼興致…對了」
+			PRINTFORML
+			CALL ICPRINT("「下次給我<三瓶日本酒>我再和你說更多的往事吧」", "W", カラー_注意)
+			PRINTFORML
+			PRINTFORML 下次準備好酒的話會再聊更多
+			PRINTFORMW 「我會在這裏喝酒、有空的話再來吧」
+			PRINTFORML
+			CALL ICPRINT(@"<%ANAME(対象)%好像是想起了过去的往事>", "W", カラー_注意)
+			CALL SKILL_LEARN_BY_NAME(対象, スキル_ジャンル_PERSONAL, NO:対象, "天手力男之投")
+			SIF RESULT
+				CALL COLOR_PRINTW(@"%ANAME(対象)%習得技能＜天手力男之投＞", カラー_注意)
+			CALL PRINT_ADD_EXP(対象, "武闘経験値", 15, 1)
+			CALL PRINT_ADD_EXP(対象, "防衛経験値", 15, 1)
+			CALL PRINT_ADD_EXP(対象, "知略経験値", 5, 1)
+			CALL PRINT_ADD_EXP(対象, "肝臓経験値", RAND(20, 50), 1)
+			CALL PRINT_ADD_EXP(MASTER, "肝臓経験値", RAND(20, 50), 1)
+			CALL TRAIN_AUTO_ABLUP(対象)
+			CALL TRAIN_AUTO_ABLUP(MASTER)
+			ITEM:麦酒 -= 3
+			CALL COLOR_PRINTW("喝乾了三瓶麦酒", カラー_注意)
+			CFLAG:対象:好感度 += 200
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了200", カラー_シアン)
+			KDVAR:対象:萃香_昔話 = 3
+		ENDIF
+	;KDVAR:対象:萃香_昔話 = が3でイベント発生
+	CASE 3
+		PRINTFORML 「啊啊、%ANAME(MASTER)%」
+		PRINTFORMW 晚上、在外面散步時見到%ANAME(対象)%在喝月見酒。旁邊空著一人的座位…
+		PRINTFORML 「想再聽我講故嗎？」
+		CALL ICPRINT("「給我<三瓶日本酒>我就和你說更多的往事吧」", "W", カラー_注意)
+		PRINTFORMW 怎麼辦……
+		PRINTFORML 
+		CALL ASK_MULTI_JUDGE("我想聽",  ITEM:日本酒 >= 3, "今日就算了", 1)
+		IF RESULT == 1
+			PRINTFORML 「是吗?那太遗憾了。嗯，如果你喜欢的话，下次再说吧」
+			PRINTFORMW %ANAME(MASTER)%向%ANAME(対象)%揮手道別
+		ELSE
+			PRINTFORMW 「哟！　一直在等着你♪　怎么样%ANAME(MASTER)%、那麼、今日也陪陪我這個酒鬼聊天吧」
+			PRINTFORML 
+			PRINTFORMW %ANAME(対象)%說起了自己各式各樣的過去
+			PRINTFORML 與人類關係破裂後、仍然無法離開人類
+			PRINTFORMW 為了取回以前的友情而奮鬥、喪命…或是、極少數同胞受到接受的故事…
+			PRINTFORMW 从她的言谈中，流露出悲哀和对坚持自己想法的同胞的羡慕
+			PRINTFORML ・
+			PRINTFORML ・
+			PRINTFORMW 「呼…、今日就到此為止吧。總覺得話題太黑暗真是抱歉呢」
+			PRINTFORML ……令人深思的内容。还想听下文呢
+			PRINTFORMW 「是吗?哈哈，你也太爱管闲事了」
+			PRINTFORML 「但是呢、沒醉意的話總覺得沒什麼興致…對了」
+			PRINTFORML
+			CALL ICPRINT("「下次給我<三瓶蒸留酒>我再和你說更多的往事吧」", "W", カラー_注意)
+			PRINTFORML
+			PRINTFORML 下次準備好酒的話會再聊更多
+			PRINTFORMW 「謝謝你一直陪我聊天。下次的故事、就是最後了。好好期待吧♪」
+			PRINTFORML
+			CALL ICPRINT(@"<%ANAME(対象)%好像是想起了过去的往事>", "W", カラー_注意)
+			CALL SKILL_LEARN_BY_NAME(対象, スキル_ジャンル_PERSONAL, NO:対象, "遗失的高贵之力")
+			SIF RESULT
+				CALL COLOR_PRINTW(@"%ANAME(対象)%習得技能＜遗失的高贵之力＞", カラー_注意)
+			CALL PRINT_ADD_EXP(対象, "武闘経験値", 20, 1)
+			CALL PRINT_ADD_EXP(対象, "防衛経験値", 20, 1)
+			CALL PRINT_ADD_EXP(対象, "知略経験値", 10, 1)
+			CALL PRINT_ADD_EXP(対象, "肝臓経験値", RAND(50, 100), 1)
+			CALL PRINT_ADD_EXP(MASTER, "肝臓経験値", RAND(50, 100), 1)
+			CALL TRAIN_AUTO_ABLUP(対象)
+			CALL TRAIN_AUTO_ABLUP(MASTER)
+			ITEM:日本酒 -= 3
+			CALL COLOR_PRINTW("喝乾了三瓶日本酒", カラー_注意)
+			CFLAG:対象:好感度 += 200
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了200", カラー_シアン)
+			KDVAR:対象:萃香_昔話 = 4
+		ENDIF
+	;KDVAR:対象:萃香_昔話 = が4でイベント発生
+	CASE 4
+		PRINTFORML 「啊、%ANAME(MASTER)%」
+		PRINTFORMW 晚上、在外面散步時見到%ANAME(対象)%在喝月見酒。旁邊空著一人的座位…
+		PRINTFORML 「又來聽我說故事了嗎？」
+		PRINTFORMW 「今回就是最後了。要聽嗎？」
+		CALL ICPRINT("「給我<三瓶蒸留酒>我就和你說更多的往事吧」", "W", カラー_注意)
+		PRINTFORMW 怎麼辦……
+		PRINTFORML 
+		CALL ASK_MULTI_JUDGE("我想聽",  ITEM:蒸留酒 >= 3, "今日就算了", 1)
+		IF RESULT == 1
+			PRINTFORML 「是吗?那太遗憾了。嗯，如果你喜欢的话，下次再说吧」
+			PRINTFORMW %ANAME(MASTER)%向%ANAME(対象)%揮手道別
+		ELSE
+			PRINTFORMW 「哦哦～♪　居然真的好好准备了%ANAME(MASTER)%！　那么，请倾听我最后的故事吧。」
+			PRINTFORML 
+			PRINTFORMW %ANAME(対象)%說起了自己各式各樣的過去
+			PRINTFORML 和人類關係斷絕、鬼們開始獨自生活、日子總還算過得去
+			PRINTFORMW 即使如此還是無法斷絕和人類的友情、來到幻想郷、然後和不少人相遇…
+			PRINTFORML 知心好友的紫們、像蕾米莉亞這樣的西洋之鬼、不良天人、霊夢和魔理沙們這樣不可思議的人類…
+			PRINTFORMW 不在意自己喝醉没有，%ANAME(対象)%津津有味地说着到今天为止在幻想乡遇到的人们的事
+			PRINTFORMW 從一言一語之中、能隱約感受到快樂，以及對大家的感謝之情
+			PRINTFORML ・
+			PRINTFORML ・
+			PRINTFORMW ・
+			PRINTFORMW 「呼……這樣我的故事就結束了。能聽到最後真是謝謝你」
+			PRINTFORML 「%ANAME(MASTER)%が那麼認真地聆聽、我也不知不覺越說越多了」
+			PRINTFORMW 真是津津有味的故事。但是、為什麼會特地和我說那麼多？
+			PRINTFORMW 「为什么呢…难道是想让你知道吗?我的事，我的同胞们的事，鬼和人的事……」
+			PRINTFORML
+			PRINTFORML 「說到這裏、有件事想問%ANAME(MASTER)%你」
+			PRINTFORMW
+			PRINTFORMW ……%ANAME(対象)%坦誠地望向%ANAME(MASTER)%
+			PRINTFORML 「以前呢、我很憤慨人類用詭計暗算鬼」
+			PRINTFORMW 「卑鄙小人!你这帮软弱的家伙连正面面对都不敢面对了吧!是啊……」
+			PRINTFORML 「但是、換個角度想…真正不敢面對的、其實是開始輸給人類的我們鬼才對…」
+			PRINTFORMW 「如果鬼真的很厉害的话…即使是面对卑鄙的手段，也能面对面取得胜利吧……」
+			PRINTFORML 「…就开始这样思考了」
+			PRINTFORML 「說起來、我們鬼和人類的關係、本身是不是搞錯了什麼呢……」
+			PRINTFORMW 「不过勇仪她们也说我，『小脑袋也想太多了』这样的话呢」
+			PRINTFORML 「哈哈，或许就是这个原因吧。我的角已经扭曲得很厉害了」
+			PRINTFORML ……这个少女是不是一直在思考已经过去的鬼与人的关系，一直没有放弃，一直背负着?
+			PRINTFORMW 「所以才会这么想。不像过去那样逃避，应该以直面人类特有的强大，认真接受那样的强大为目标吗?」
+			PRINTFORMW 「还是应该在这个幻想乡里，找到与至今为止不同的、与人类的新的羁绊和生活方式呢?」
+			PRINTFORML 「对吧，%ANAME(MASTER)%。……我到底应该怎么办？」
+			PRINTFORML 我的意見是……
+			PRINTFORMW 
+			CALL ASK_YN("從現在起創造未來吧", "去追求過去的理想吧")
+			IF RESULT == 1
+				PRINTFORML 「……是吗?你是这么说的啊，%ANAME(MASTER)%。」
+				PRINTFORMW 「…嗯！總有種解脫感了！果然想這種亂七八糟的不適合我！」
+				PRINTFORML 「好！那么从现在开始要向前大步的走了！不过在这之中我也要把%ANAME(MASTER)%给掳走。做好心理准备吧♪」
+				PRINTFORML ……好像恢复了精神，像一个鬼一样发出了宣告……
+				PRINTFORMW %ANAME(MASTER)%被%ANAME(対象)%灌酒、然後被漂亮地解決了
+				CALL SKILL_LEARN_BY_NAME(対象, スキル_ジャンル_PERSONAL, NO:対象, "大江山悉皆杀")
+				SIF RESULT
+					CALL COLOR_PRINTW(@"%ANAME(対象)%が習得技能＜大江山悉皆杀＞", カラー_注意)
+				CALL PRINT_ADD_EXP(対象, "武闘経験値", 100, 1)
+				CALL PRINT_ADD_EXP(対象, "防衛経験値", 90, 1)
+				CALL PRINT_ADD_EXP(対象, "知略経験値", 10, 1)
+				CALL PRINT_ADD_EXP(対象, "肝臓経験値", RAND(60, 120), 1)
+				CALL PRINT_ADD_EXP(MASTER, "肝臓経験値", RAND(60, 120), 1)
+				CALL TRAIN_AUTO_ABLUP(対象)
+				CALL TRAIN_AUTO_ABLUP(MASTER)
+			ELSE
+				PRINTFORML 「……是吗?你是这么说的啊，%ANAME(MASTER)%」
+				PRINTFORMW 「嗯！總有種解脫感了！果然煩惱有的沒的還是交給你比較適合」
+				PRINTFORML 「总之，今后也请多多关照，%ANAME(MASTER)%」
+				PRINTFORML 「我很期待和你的羁绊会变成什么样♪」
+				PRINTFORMW 在%ANAME(MASTER)%的支持下，%ANAME(対象)%定创造今后的未来。
+				CALL SKILL_LEARN_BY_NAME(対象, スキル_ジャンル_TROOP, NO:対象, "百万鬼夜行")
+				SIF RESULT
+					CALL COLOR_PRINTW(@"%ANAME(対象)%がスキル＜百万鬼夜行＞を習得しました", カラー_注意)
+				CALL PRINT_ADD_EXP(対象, "武闘経験値", 70, 1)
+				CALL PRINT_ADD_EXP(対象, "防衛経験値", 70, 1)
+				CALL PRINT_ADD_EXP(対象, "知略経験値", 60, 1)
+				CALL PRINT_ADD_EXP(対象, "肝臓経験値", RAND(60, 120), 1)
+				CALL PRINT_ADD_EXP(MASTER, "肝臓経験値", RAND(60, 120), 1)
+				CALL TRAIN_AUTO_ABLUP(対象)
+				CALL TRAIN_AUTO_ABLUP(MASTER)
+			ENDIF
+			PRINTFORML 
+			KDVAR:対象:萃香_昔話 = -1
+			ITEM:蒸留酒 -= 3
+			CALL COLOR_PRINTW("喝乾了三瓶蒸留酒", カラー_注意)
+			CFLAG:対象:好感度 += 500
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了500", カラー_シアン)
+		ENDIF
+ENDSELECT
+
+RETURN 1

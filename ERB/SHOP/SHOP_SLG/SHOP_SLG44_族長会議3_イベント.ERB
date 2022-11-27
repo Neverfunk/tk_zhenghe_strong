@@ -1,0 +1,552 @@
+﻿;-------------------------------------------------
+;「族長会議」ターン終了時イベント
+;-------------------------------------------------
+@QuriltaiGOBLIN_EVENT_TURNEND
+#DIM 自勢力
+#DIM 君主
+#DIM 支持率トップ
+
+自勢力 = CFLAG:MASTER:所属
+君主 = GET_COUNTRY_BOSS(自勢力)
+
+支持率トップ = GET_QuriltaiGOBLIN_HIGHEST_Approval()
+
+;選挙
+IF DAY % 3 == 0 && CHANGE_Government_GOBLIN:1 != 1
+	IF CHANGE_Government_GOBLIN:1 == 2
+		CALL SINGLE_DRAWLINE
+		SETCOLOR カラー_注意
+		PRINTFORML ★评议会选举
+		RESETCOLOR
+		CALL SINGLE_DRAWLINE 
+		IF 支持率トップ == 君主
+			PRINTFORML 评议会的议长的选举开始了
+			SETCOLOR カラー_注意
+			PRINTFORMW %ANAME(君主)%将获得连任 任期为3回合
+			RESETCOLOR
+			PRINTFORML 
+		ELSE
+			PRINTFORML 评议会的议长的选举开始了
+			SETCOLOR カラー_注意
+			PRINTFORMW %ANAME(支持率トップ)%成功当选 任期为3回合
+			RESETCOLOR
+			PRINTFORML 
+			COUNTRY_BOSS:自勢力 = GET_ID(支持率トップ)
+			君主 = GET_COUNTRY_BOSS(自勢力)
+		ENDIF
+	ELSE
+		CALL SINGLE_DRAWLINE
+		SETCOLOR カラー_注意
+		PRINTFORML ★族长选举
+		RESETCOLOR
+		CALL SINGLE_DRAWLINE 
+		IF 支持率トップ == 君主
+			PRINTFORML 哥布林族长的选举会议开始了
+			SETCOLOR カラー_注意
+			PRINTFORMW %ANAME(君主)%将获得连任 任期为3回合
+			RESETCOLOR
+			PRINTFORML 
+		ELSE
+			PRINTFORML 哥布林族长的选举会议开始了
+			SETCOLOR カラー_注意
+			PRINTFORMW %ANAME(支持率トップ)%成功当选 任期为3回合
+			RESETCOLOR
+			PRINTFORML 
+			COUNTRY_BOSS:自勢力 = GET_ID(支持率トップ)
+			君主 = GET_COUNTRY_BOSS(自勢力)
+		ENDIF
+	ENDIF
+ENDIF
+
+IF Centralization_power_GOBLIN >= 200 && GET_QuriltaiGOBLIN_Approval_rate(君主) >= 100
+	CALL SINGLE_DRAWLINE
+	SETCOLOR カラー_注意
+	PRINTFORML 提出了新的法案
+	RESETCOLOR
+	CALL SINGLE_DRAWLINE
+	CALL QuriltaiGOBLIN_EVENT_TURNEND_BILL_0
+ELSEIF 君主 == MASTER
+	CALL SINGLE_DRAWLINE
+	SETCOLOR カラー_注意
+	PRINTFORML 提出了新的法案
+	RESETCOLOR
+	CALL SINGLE_DRAWLINE
+	IF CHANGE_Government_GOBLIN:1 == 2
+		SELECTCASE RAND:6
+			CASE 0
+				CALL QuriltaiGOBLIN_EVENT_TURNEND_BILL_1
+			CASE 1
+				CALL QuriltaiGOBLIN_EVENT_TURNEND_BILL_2
+			CASE 2
+				CALL QuriltaiGOBLIN_EVENT_TURNEND_BILL_3
+			CASE 3
+				CALL QuriltaiGOBLIN_EVENT_TURNEND_BILL_4
+			CASE 4
+				CALL QuriltaiGOBLIN_EVENT_TURNEND_BILL_901
+			CASE 5
+				IF !STATUE_GOBLIN_COUNCIL:2
+					CALL QuriltaiGOBLIN_EVENT_TURNEND_BILL_902
+				ELSE
+					CALL QuriltaiGOBLIN_EVENT_TURNEND_BILL_901
+				ENDIF
+		ENDSELECT
+	ELSEIF Centralization_power_GOBLIN <= 0 && GET_QuriltaiGOBLIN_Approval_rate(MASTER) >= 200
+		CALL QuriltaiGOBLIN_EVENT_TURNEND_BILL_900
+	ELSE
+		SELECTCASE RAND:4
+			CASE 0
+				CALL QuriltaiGOBLIN_EVENT_TURNEND_BILL_1
+			CASE 1
+				CALL QuriltaiGOBLIN_EVENT_TURNEND_BILL_2
+			CASE 2
+				CALL QuriltaiGOBLIN_EVENT_TURNEND_BILL_3
+			CASE 3
+				CALL QuriltaiGOBLIN_EVENT_TURNEND_BILL_4
+		ENDSELECT
+	ENDIF
+ENDIF
+
+IF STATUE_GOBLIN_COUNCIL:2 == 1
+	FOR LOCAL, 0, MAX_COUNTRY
+		IF COUNTRY_Protectorate:LOCAL >= 3 && COUNTRY_Protectorate_REFERENCE:LOCAL:2 == CFLAG:MASTER:所属
+			PRINTFORML %ANAME(GET_COUNTRY_BOSS(LOCAL))%势力
+			CALL DIPLOMACY_IMPROVE_RELATION(LOCAL, 50)
+			PRINTFORML 
+		ENDIF
+	NEXT
+ENDIF
+
+PRINTFORML 你的支持率　　[ {GET_QuriltaiGOBLIN_Approval_rate(MASTER)} ] 
+PRINTFORMW 集权性　　　　[ {Centralization_power_GOBLIN} ]
+
+;-------------------------------------------------
+;「ターン終了時イベント」法案0「ゴブリンロード誕生」
+;-------------------------------------------------
+@QuriltaiGOBLIN_EVENT_TURNEND_BILL_0
+
+PRINTFORML ■法案「哥布林之王的诞生」
+PRINTFORML 　时机已至
+PRINTFORML 　我们哥布林的首领「%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%」将会支配幻想乡的一切
+PRINTFORML 　我们一直遭到幻想乡那帮家伙的无理对待
+PRINTFORML 　复仇之时到了！
+CALL SINGLE_DRAWLINE
+PRINTBUTTON " 0[同意(君主将成为哥布林之王！不会再进行选举了)]", 0
+PRINTL 
+PRINTBUTTON " 1[拒绝（集权性-10）]", 1
+PRINTL 
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 0
+	CHANGE_Government_GOBLIN:1 = 1
+	COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 50000
+	PRINTFORML %ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%成为了哥布林之王！
+	CALL SKILL_LEARN_BY_NAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属), スキル_ジャンル_TROOP, 10101, "王者的威光")
+	SIF RESULT
+		CALL COLOR_PRINTW(@"%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%习得了技能＜王者的威光＞", カラー_注意)
+	PRINTFORML 获得了兵力50000！
+ELSEIF RESULT == 1
+	Centralization_power_GOBLIN -= 10
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+
+;-------------------------------------------------
+;「ターン終了時イベント」法案1「物資の調達」
+;-------------------------------------------------
+@QuriltaiGOBLIN_EVENT_TURNEND_BILL_1
+#DIM 都市
+
+CALL DAILY_EVENT_RAND_CITYSELECT(0)
+都市 = RESULT
+
+PRINTFORML ■法案「物资的筹措」
+PRINTFORML 　我们需要物资
+PRINTFORML 　应当调拨国库来采购物资
+SIF 都市 > 0
+	PRINTFORML 　从%CITY_NAME:都市%中征用物资也是一种手段……
+CALL SINGLE_DRAWLINE
+IF MONEY:(CFLAG:MASTER:所属) >= 1000
+	PRINTBUTTON " 0[使用国库来进行采购(国库-1000)]", 0
+	PRINTL 
+ENDIF
+IF 都市 > 0 && CHANGE_Government_GOBLIN:1 != 2
+	PRINTBUTTON " 1[从都市中征用物资（都市的经济力-・集权性+10）]", 1
+	PRINTL 
+ENDIF
+IF CHANGE_Government_GOBLIN:1 == 2
+	PRINTBUTTON " 2[与民众协力渡过难关（支持率+5）]", 2
+	PRINTL 
+ELSEIF GET_QuriltaiGOBLIN_Approval_rate(MASTER) >= 100
+	PRINTBUTTON " 2[和都市里的居民谈谈（集権性-10）]", 2
+	PRINTL 
+ENDIF
+PRINTBUTTON " 3[巧妇难为无米之炊（支持率-10）]", 3
+PRINTL 
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 3
+	CFLAG:MASTER:1709 = MAX(1, CFLAG:MASTER:1709 - 10)
+ELSEIF RESULT == 0 && MONEY:(CFLAG:MASTER:所属) >= 1000
+	MONEY:(CFLAG:MASTER:所属) -= 1000
+ELSEIF RESULT == 1 && 都市 > 0 && CHANGE_Government_GOBLIN:1 != 2
+	CITY_ECONOMY:都市 = CITY_ECONOMY:都市 * 8 / 10
+	CITY_ECONOMY_LIMIT:都市 = MAX(CITY_ECONOMY:都市, CITY_ECONOMY_LIMIT:都市 * 8 / 10)
+	Centralization_power_GOBLIN += 10
+ELSEIF RESULT == 2 && CHANGE_Government_GOBLIN:1 == 2
+	CFLAG:MASTER:1709 += 5
+ELSEIF RESULT == 2 && GET_QuriltaiGOBLIN_Approval_rate(MASTER) >= 100
+	Centralization_power_GOBLIN -= 10
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+
+;-------------------------------------------------
+;「ターン終了時イベント」法案2「防壁の強化」
+;-------------------------------------------------
+@QuriltaiGOBLIN_EVENT_TURNEND_BILL_2
+#DIM 都市
+
+CALL DAILY_EVENT_RAND_CITYSELECT(0)
+都市 = RESULT
+
+PRINTFORML ■法案「防御的强化」
+PRINTFORML 　有人提出要加强%CITY_NAME:都市%的防御
+PRINTFORML 　应该采取某一种手段来应对
+CALL SINGLE_DRAWLINE
+IF MONEY:(CFLAG:MASTER:所属) >= 1000
+	PRINTBUTTON " 0[动用国库进行整备(都市的防御+・国库-1000)]", 0
+	PRINTL 
+ENDIF
+IF 都市 > 0 && CHANGE_Government_GOBLIN:1 != 2
+	PRINTBUTTON " 1[强制住民进行劳动（都市的防御+・都市的经济力-・集权性+10）]", 1
+	PRINTL 
+ENDIF
+IF CHANGE_Government_GOBLIN:1 == 2 && MONEY:(CFLAG:MASTER:所属) >= 500
+	PRINTBUTTON " 2[和民众一起整备（都市的防御+・国库-500・支持率+10）]", 2
+	PRINTL 
+ELSEIF MONEY:(CFLAG:MASTER:所属) >= 800
+	PRINTBUTTON " 2[倾听民众的声音应该会很有效（都市的防御+・国库-800・集权性-10）]", 2
+	PRINTL 
+ENDIF
+PRINTBUTTON " 3[没有那个必要（支持率-10）]", 3
+PRINTL 
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 3
+	CFLAG:MASTER:1709 = MAX(1, CFLAG:MASTER:1709 - 10)
+ELSEIF RESULT == 0 && MONEY:(CFLAG:MASTER:所属) >= 1000
+	MONEY:(CFLAG:MASTER:所属) -= 1000
+	CITY_GUARD:都市 += 15
+ELSEIF RESULT == 1 && 都市 > 0 && CHANGE_Government_GOBLIN:1 != 2
+	CITY_ECONOMY:都市 = CITY_ECONOMY:都市 * 8 / 10
+	CITY_ECONOMY_LIMIT:都市 = MAX(CITY_ECONOMY:都市, CITY_ECONOMY_LIMIT:都市 * 8 / 10)
+	Centralization_power_GOBLIN += 10
+	CITY_GUARD:都市 += 15
+ELSEIF RESULT == 2 && CHANGE_Government_GOBLIN:1 == 2 && MONEY:(CFLAG:MASTER:所属) >= 500
+	CFLAG:MASTER:1709 += 10
+	MONEY:(CFLAG:MASTER:所属) -= 500
+	CITY_GUARD:都市 += 25
+ELSEIF RESULT == 2 && MONEY:(CFLAG:MASTER:所属) >= 800
+	Centralization_power_GOBLIN -= 10
+	MONEY:(CFLAG:MASTER:所属) -= 800
+	CITY_GUARD:都市 += 15
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+
+;-------------------------------------------------
+;「ターン終了時イベント」法案3「都市への援助」
+;-------------------------------------------------
+@QuriltaiGOBLIN_EVENT_TURNEND_BILL_3
+#DIM 都市
+
+CALL DAILY_EVENT_RAND_CITYSELECT(0)
+都市 = RESULT
+
+PRINTFORML ■法案「对都市的援助」
+PRINTFORML 　难道不应该给%CITY_NAME:都市%提供国库援助吗？
+PRINTFORML 　应该采取某一种手段来应对
+CALL SINGLE_DRAWLINE
+IF MONEY:(CFLAG:MASTER:所属) >= 500
+	PRINTBUTTON " 0[用国库来援助吧(国库-500・支持率+10)]", 0
+	PRINTL 
+ENDIF
+IF 都市 > 0 && CHANGE_Government_GOBLIN:1 != 2
+	PRINTBUTTON " 1[倒不如榨干他们（都市的经济力-・集权性+10・国库+200）]", 1
+	PRINTL 
+ENDIF
+IF CHANGE_Government_GOBLIN:1 == 2 && MONEY:(CFLAG:MASTER:所属) >= 1000
+	PRINTBUTTON " 2[援助自治组织（国库-1000・都市的经济力+・支持率+20）]", 2
+	PRINTL 
+ELSEIF MONEY:(CFLAG:MASTER:所属) >= 1000 && CHANGE_Government_GOBLIN:1 != 1
+	PRINTBUTTON " 2[援助自治组织（国库-1000・都市的经济力+・支持率+10・集权性-20）]", 2
+	PRINTL 
+ENDIF
+PRINTBUTTON " 3[没有那个必要（无变化）]", 3
+PRINTL 
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 3
+	
+ELSEIF RESULT == 0 && MONEY:(CFLAG:MASTER:所属) >= 500
+	MONEY:(CFLAG:MASTER:所属) -= 500
+	CFLAG:MASTER:1709 += 10
+ELSEIF RESULT == 1 && 都市 > 0 && CHANGE_Government_GOBLIN:1 != 2
+	CITY_ECONOMY:都市 = CITY_ECONOMY:都市 * 8 / 10
+	CITY_ECONOMY_LIMIT:都市 = MAX(CITY_ECONOMY:都市, CITY_ECONOMY_LIMIT:都市 * 8 / 10)
+	Centralization_power_GOBLIN += 10
+	MONEY:(CFLAG:MASTER:所属) += 200
+ELSEIF RESULT == 2 && CHANGE_Government_GOBLIN:1 == 2 && MONEY:(CFLAG:MASTER:所属) >= 1000
+	CFLAG:MASTER:1709 += 20
+	MONEY:(CFLAG:MASTER:所属) -= 1000
+	CITY_ECONOMY:都市 += 10
+	CITY_ECONOMY_LIMIT:都市 = MAX(CITY_ECONOMY_LIMIT:都市, CITY_ECONOMY:都市)
+ELSEIF RESULT == 2 && MONEY:(CFLAG:MASTER:所属) >= 1000 && CHANGE_Government_GOBLIN:1 != 1
+	CFLAG:MASTER:1709 += 10
+	Centralization_power_GOBLIN -= 20
+	MONEY:(CFLAG:MASTER:所属) -= 1000
+	CITY_ECONOMY:都市 += 10
+	CITY_ECONOMY_LIMIT:都市 = MAX(CITY_ECONOMY_LIMIT:都市, CITY_ECONOMY:都市)
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+
+;-------------------------------------------------
+;「ターン終了時イベント」法案4「兵力の増強」
+;-------------------------------------------------
+@QuriltaiGOBLIN_EVENT_TURNEND_BILL_4
+#DIM 都市
+
+CALL DAILY_EVENT_RAND_CITYSELECT(0)
+都市 = RESULT
+
+PRINTFORML ■法案「兵力的增强」
+PRINTFORML 　有人提出要在%CITY_NAME:都市%周边增加兵力
+PRINTFORML 　应该采取某一种手段来征兵
+CALL SINGLE_DRAWLINE
+IF MONEY:(CFLAG:MASTER:所属) >= 1000
+	PRINTBUTTON " 0[使用国库进行募集(国库-1000・兵力+1000)]", 0
+	PRINTL 
+ENDIF
+IF 都市 > 0 && CHANGE_Government_GOBLIN:1 != 2
+	PRINTBUTTON " 1[从居民中征兵（都市的经济力-・集权性+10・兵力+1000）]", 1
+	PRINTL 
+ENDIF
+IF CHANGE_Government_GOBLIN:1 == 2 && MONEY:(CFLAG:MASTER:所属) >= 1000
+	PRINTBUTTON " 2[援助自治警察（国库-1000・都市的防御+・支持率+20）]", 2
+	PRINTL 
+ELSEIF MONEY:(CFLAG:MASTER:所属) >= 1000 && CHANGE_Government_GOBLIN:1 != 1
+	PRINTBUTTON " 2[投资居民的自卫组织（国库-1000・都市的防御+・支持率+10・集权性-20）]", 2
+	PRINTL 
+ENDIF
+IF CHANGE_Government_GOBLIN:1 == 1 && !STATUE_GOBLIN_COUNCIL:1
+	PRINTBUTTON " 3[使用肉便器来招募（毎回合兵力+）]", 3
+	PRINTL 
+ENDIF
+PRINTBUTTON " 4[没有那个必要（支持率-10）]", 4
+PRINTL 
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 4
+	CFLAG:MASTER:1709 = MAX(1, CFLAG:MASTER:1709 - 10)
+ELSEIF RESULT == 0 && MONEY:(CFLAG:MASTER:所属) >= 1000
+	MONEY:(CFLAG:MASTER:所属) -= 1000
+	COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 1000
+ELSEIF RESULT == 1 && 都市 > 0 && CHANGE_Government_GOBLIN:1 != 2
+	CITY_ECONOMY:都市 = CITY_ECONOMY:都市 * 8 / 10
+	CITY_ECONOMY_LIMIT:都市 = MAX(CITY_ECONOMY:都市, CITY_ECONOMY_LIMIT:都市 * 8 / 10)
+	Centralization_power_GOBLIN += 10
+	COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 1000
+ELSEIF RESULT == 2 && CHANGE_Government_GOBLIN:1 == 2 && MONEY:(CFLAG:MASTER:所属) >= 1000
+	CFLAG:MASTER:1709 += 20
+	MONEY:(CFLAG:MASTER:所属) -= 1000
+	CITY_GUARD:都市 += 25
+ELSEIF RESULT == 2 && MONEY:(CFLAG:MASTER:所属) >= 1000 && CHANGE_Government_GOBLIN:1 != 1
+	CFLAG:MASTER:1709 += 10
+	Centralization_power_GOBLIN -= 20
+	MONEY:(CFLAG:MASTER:所属) -= 1000
+	CITY_GUARD:都市 += 15
+ELSEIF RESULT == 3 && CHANGE_Government_GOBLIN:1 == 1 && !STATUE_GOBLIN_COUNCIL:1
+	STATUE_GOBLIN_COUNCIL:1 = 1
+	SETCOLOR カラー_注意
+	PRINTFORML 使用特殊陷落的士官每回合获得兵力
+	RESETCOLOR
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+
+;-------------------------------------------------
+;「ターン終了時イベント」法案900「黒旗を掲げよ」
+;-------------------------------------------------
+@QuriltaiGOBLIN_EVENT_TURNEND_BILL_900
+
+PRINTFORML ■法案「升起黑旗」
+PRINTFORML 　我们忍受了无数无理的压迫
+PRINTFORML 　现在不正是向幻想乡的支配者站起来说不的时候吗？
+PRINTFORML 　当然「弱者支配一切」也是没有意义的，
+PRINTFORML 　没有谁应该压迫其他人！
+CALL SINGLE_DRAWLINE
+PRINTBUTTON " 0[同意(注意:不再是特殊势力・不能进行掠夺)]", 0
+PRINTL 
+PRINTBUTTON " 1[拒绝（集权性+10）]", 1
+PRINTL 
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 0
+	COUNTRY_EVENT_ID:(CFLAG:MASTER:所属) = 0
+	FOR LOCAL, 0, CHARANUM
+		IF TALENT:LOCAL:特殊勢力素質 && CFLAG:LOCAL:所属 == CFLAG:MASTER:所属
+			TALENT:LOCAL:特殊勢力素質 = 0
+			CFLAG:LOCAL:1713 = 1
+			CALL SKILL_LEARN_BY_NAME(LOCAL, スキル_ジャンル_TROOP, 10102, "在黑旗的指引下前进！")
+			SIF RESULT
+				CALL COLOR_PRINTW(@"%ANAME(LOCAL)%习得了技能＜在黑旗的指引下前进！＞", カラー_注意)
+		ENDIF
+		IF !IS_TOHO_CHARA(LOCAL) && CFLAG:LOCAL:所属 == CFLAG:MASTER:所属
+			CALL SKILL_LEARN_BY_NAME(LOCAL, スキル_ジャンル_TROOP, 10102, "在黑旗的指引下前进！")
+			SIF RESULT
+				CALL COLOR_PRINTW(@"%ANAME(LOCAL)%习得了技能＜在黑旗的指引下前进！＞", カラー_注意)
+		ENDIF
+	NEXT
+	SETCOLOR カラー_警告
+	PRINTFORML 哥布林不再是一个特殊势力
+	PRINTFORML 停止了掠夺
+	RESETCOLOR
+	CHANGE_Government_GOBLIN:1 = 2
+	
+	FOR LOCAL, 0, MAX_COUNTRY
+		IF COUNTRY_Protectorate:LOCAL >= 3 && COUNTRY_Protectorate_REFERENCE:LOCAL:2 == CFLAG:MASTER:所属
+			SPECIALIZATION_Protectorate:LOCAL = 3
+			PRINTFORML %ANAME(GET_COUNTRY_BOSS(LOCAL))%承认了自治权
+		ENDIF
+	NEXT
+	
+ELSEIF RESULT == 1
+	Centralization_power_GOBLIN += 10
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+
+;-------------------------------------------------
+;「ターン終了時イベント」法案901「特殊調教の停止/再開」
+;-------------------------------------------------
+@QuriltaiGOBLIN_EVENT_TURNEND_BILL_901
+
+IF STATUE_GOBLIN_COUNCIL:0 == 1
+	PRINTFORML ■法案「重启特殊调教」
+	PRINTFORML 　士兵们因为对性的饥渴而日渐不满
+	PRINTFORML 　呼吁恢复性奴隶制度的呼声日渐高涨……
+	CALL SINGLE_DRAWLINE
+	IF MONEY:(CFLAG:MASTER:所属) >= 2000
+		PRINTBUTTON " 0[建立慰安所(国库-2000)]", 0
+		PRINTL 
+	ENDIF
+	PRINTBUTTON " 1[再忍耐一下(支持率-30)]", 1
+	PRINTL 
+	PRINTL 
+	PRINTBUTTON " 2[性奴隶制度复活(支持率-20)]", 2
+	PRINTL 
+
+	$INPUT_LOOP1
+	INPUT
+	
+	IF RESULT == 1
+		CFLAG:MASTER:1709 = MAX(1, CFLAG:MASTER:1709 - 30)
+	ELSEIF RESULT == 2
+		CFLAG:MASTER:1709 = MAX(1, CFLAG:MASTER:1709 - 20)
+		STATUE_GOBLIN_COUNCIL:0 = 0
+		SETCOLOR カラー_警告
+		PRINTFORML 性奴隶制度复活了
+		PRINTFORML 特殊调教再次成为可能
+		RESETCOLOR
+	ELSEIF RESULT == 0 && MONEY:(CFLAG:MASTER:所属) >= 2000
+		MONEY:(CFLAG:MASTER:所属) -= 2000
+	ELSE
+		CLEARLINE 1
+		GOTO INPUT_LOOP1
+	ENDIF
+ELSE
+	PRINTFORML ■法案「停止特殊调教」
+	PRINTFORML 　性奴隶不正是被压迫的极致吗？
+	PRINTFORML 　不良的风俗应该被摈弃
+	CALL SINGLE_DRAWLINE
+	PRINTBUTTON " 1[废除性奴隶制度(支持率+20)]", 1
+	PRINTL 
+	PRINTBUTTON " 2[性奴隶是不可或缺的(支持率-20)]", 2
+	PRINTL 
+
+	$INPUT_LOOP2
+	INPUT
+	
+	IF RESULT == 1
+		CFLAG:MASTER:1709 += 20
+		STATUE_GOBLIN_COUNCIL:0 = 1
+		FOR LOCAL, 0, CHARANUM
+			CALL CHANGE_GOBLIN_subject(LOCAL)
+			SIF CFLAG:LOCAL:1710 >= 1
+				CFLAG:LOCAL:1710 = 1
+		NEXT
+		SETCOLOR カラー_警告
+		PRINTFORML 废除了性奴隶制度
+		PRINTFORML 不能再进行特殊调教了
+		RESETCOLOR
+	ELSEIF RESULT == 2
+		CFLAG:MASTER:1709 = MAX(1, CFLAG:MASTER:1709 - 20)
+	ELSE
+		CLEARLINE 1
+		GOTO INPUT_LOOP2
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;「ターン終了時イベント」法案902「適正手続の保障」
+;-------------------------------------------------
+@QuriltaiGOBLIN_EVENT_TURNEND_BILL_902
+
+PRINTFORML ■法案「法律的正当程序」
+PRINTFORML 　没有事先明确的规则，人民就没有自由。
+PRINTFORML 　制定什么样的规则应该由人民自己决定
+PRINTFORML 　当然，如果没有预先制定刑罚的程序，这个理念就会成为一纸空文。
+PRINTFORML 　恣意的监禁不是已经不被允许了吗？
+CALL SINGLE_DRAWLINE
+PRINTBUTTON " 0[同意(注意:不能再使用投狱了・从属国每回合评价增加+)]", 0
+PRINTL 
+PRINTBUTTON " 1[拒绝（支持率-50）]", 1
+PRINTL 
+
+$INPUT_LOOP
+INPUT
+	
+IF RESULT == 0
+	CFLAG:MASTER:1709 += 10
+	STATUE_GOBLIN_COUNCIL:2 = 1
+	SETCOLOR カラー_警告
+	PRINTFORML 制定了惩罚的程序
+	PRINTFORML 「投狱」已经无法使用了
+	RESETCOLOR
+ELSEIF RESULT == 1
+	CFLAG:MASTER:1709 = MAX(1, CFLAG:MASTER:1709 - 50)
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+
+

@@ -1,0 +1,140 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_LENDER_RATE()
+RETURN 20
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_LENDER_DECISION()
+SIF DVAR:金貸し_発生フラグ == -1
+	RETURN 0
+
+SIF DAY < 15
+	RETURN 0
+
+;返済期限がある（借りている）または現在額がある（返済中）ならスキップ
+SIF !(DVAR:金貸し_返済期限 == 0 && DVAR:金貸し_残り融資額 == 0) 
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_LENDER_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+
+@EVENT_DAILY_LENDER()
+#DIM LCOUNT, 3
+#DIM 融資額
+#DIM 返済額
+#DIM 返済期限
+#DIM 担保
+VARSET 融資額
+VARSET 返済額
+VARSET 返済期限
+
+;借りていないパターン
+IF DVAR:金貸し_返済期限 == 0 && DVAR:金貸し_残り融資額 == 0 && DVAR:金貸し_融資総額 == 0
+	;融資額と返済期限の計算
+	;融資額は現在資金の10% + 俸給 * 期限日分
+	;返済額はその2割増し
+	返済期限 = RAND(5, 10)
+	融資額 = MONEY / 10 + GET_SUM_ECONOMY(CFLAG:MASTER:所属) * (ABL:MASTER:武闘 + ABL:MASTER:防衛 + ABL:MASTER:知略 + ABL:MASTER:政治 + 100) / 40000 * (返済期限)
+	返済額 = 融資額 * 12 / 10
+	PRINTFORMW %ANAME(MASTER)%在工作的时候，侍从告知客人来了
+	PRINTFORMW 听说是什么来了个「体态优美的中年人」
+	PRINTFORMW 虽然很纳闷有什么事，但%ANAME(MASTER)%还是决定见面了
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW 「初次见面。是%ANAME(MASTER)%大人吧。很荣幸能见到你。」
+	PRINTFORMW 揉着手出现的，果然是一个非常丰满，很有人情味的中年男子
+	PRINTFORMW 可以看出，无论是穿着打扮，可以是身份地位相当高。样子也不错。
+	PRINTFORMW 「我是提供贷款的贷款人。如果%ANAME(MASTER)%大人需要我的帮助的话在下了意识以援手」
+	PRINTFORMW 也就是说，这是申请资金援助吧。虽说如此，但毕竟是放款。当然，会变成融资的形式吧……
+	PRINTFORM 「是啊，钱
+	CALL COLOR_PRINT(@"{融資額}", カラー_注意)
+	PRINTFORM 的贷款，还款额为
+	CALL COLOR_PRINT(@"{返済額}", カラー_注意)
+	PRINTFORM 、还款时间为
+	CALL COLOR_PRINT(@"{返済期限}期", カラー_注意)
+	PRINTFORMW 怎么样？」
+	PRINTFORMW 「%ANAME(MASTER)%大人，您需要什么吗？」
+	PRINTFORMW 确实如此。士兵训练、外交、任何事情都需要钱。
+	PRINTFORMW 虽然不太想借钱，但为了活下去，必须不择手段
+	PRINTFORMW 那么，怎么办呢……
+	CALL SINGLE_DRAWLINE
+	PRINTFORML 现在的存款:{MONEY}
+	CALL ASK_MULTI(@"金{融資額}借", "算了吧", "斩了")
+	IF RESULT == 1
+		PRINTFORMW 「嗯。如果你说不需要的话，那也没办法。」
+		PRINTFORMW 「那么我就到这里。我改天再来拜访。」
+		PRINTFORMW 男子匆匆离去……
+		RETURN 1
+	ELSEIF RESULT == 0
+		PRINTFORMW 「契约成立」
+		PRINTFORM 「还款额是
+		CALL COLOR_PRINT(@"{返済額}", カラー_注意)
+		PRINTFORM 偿还期限为
+		CALL COLOR_PRINT(@"{返済期限}期", カラー_注意)
+		PRINTFORMW 所以呢。请不要记错了。」
+		PRINTFORMW 在填写了各种文件后，男子离开了……
+		PRINTFORM 金
+		CALL COLOR_PRINT(@"{融資額}", カラー_注意)
+		PRINTFORMW 得到了……。
+		MONEY += 融資額
+		DVAR:金貸し_返済期限 = 返済期限
+		DVAR:金貸し_残り融資額 = 返済額
+		DVAR:金貸し_融資総額 = 返済額
+		RETURN 1
+	ELSEIF RESULT == 2
+		融資額 = RAND(100000, 300000)
+		PRINTFORMW 「哎呀哎呀！你干什么！受伤的话就麻烦了吧」
+		PRINTFORMW 虽然%ANAME(MASTER)%想要极力斩杀眼前这个男人，但男人却用难以预料的敏捷来躲开了
+		PRINTFORM 「您这样的行为真是难以置信。作为对我的赔偿，该赔我
+		CALL COLOR_PRINT(@"{融資額}", カラー_注意)
+		PRINTFORMW 作为补偿费吧？
+		VARSET DAILY_TARGET
+		VARSET DAILY_TARGET_NUM
+		CALL EVENT_DAILY_DERIVATION_LENDER_REPAYMENT_SETTARGET()
+		IF DAILY_TARGET_NUM > 0
+			担保 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+			;(従属国パッチ)担保が辺境伯だったときは無担保
+			IF CFLAG:担保:1702 != 1
+				担保 = -1
+			ENDIF
+		ELSE
+			担保 = -1
+		ENDIF
+		DVAR:金貸し_発生フラグ = 1
+		IF MONEY >= 融資額
+			PRINTFORM 那男的是认真的，钱
+			CALL COLOR_PRINT(@"{融資額}", カラー_注意)
+			PRINTFORMW 被拿走了……
+			MONEY -= 融資額
+			RETURN 1
+		ELSEIF 担保 != -1
+			PRINTFORMW 「……什么？钱不够？」
+			PRINTFORMW 「那就让%ANAME(担保)%作为您的抵押在我们店里工作来抵债吧」
+			PRINTFORMW 「啊，好好工作的话会还给你的……」
+			PRINTFORMW 男子这样说着，就把%ANAME(担保)%带走了……
+			DVAR:金貸し_返済期限 = -1
+			DVAR:金貸し_カタID = GET_ID(担保)
+			DVAR:金貸し_融資総額 = 融資額
+			DVAR:金貸し_残り融資額 = 融資額
+			CALL CHANGE_COUNTRY(担保, 0)
+			CFLAG:担保:特殊状態 = 0
+			RETURN 1
+		ELSE
+			PRINTFORMW 「……什么？钱不够？」
+			PRINTFORMW 「没办法，这次就不追究了」
+			PRINTFORMW 「但是，下不为例！」
+			PRINTFORMW 男子生气地离开了……
+			RETURN 1
+		ENDIF
+	ENDIF
+ENDIF

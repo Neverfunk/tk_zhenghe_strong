@@ -1,0 +1,177 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K31_ONAHOLE_RATE(対象)
+#DIM 対象
+RETURN 75
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K31_ONAHOLE_DECISION(対象)
+#DIM 対象
+
+;マスターにペニスがないと出ない
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+
+SIF IS_LOVER(対象)
+	RETURN 0
+
+;対象が君主ならだめ
+SIF GET_COUNTRY_BOSS(CFLAG:対象:所属) == 対象
+	RETURN 0
+
+;刺客にてレイプしていること
+SIF KDVAR:対象:妹紅_刺客 != 2
+	RETURN 0
+
+;終わらせたら出ない
+SIF KDVAR:対象:妹紅_穴 == -1
+	RETURN 0
+
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 0, 0)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K31_ONAHOLE_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K31_ONAHOLE(対象)
+#DIM 対象
+
+
+PRINTFORMW %ANAME(対象)%又来拜訪了
+
+
+IF KDVAR:対象:妹紅_穴 == 0
+	PRINTFORMW 「……今天不是来找輝夜、而是有事找%ANAME(MASTER)%的」
+	PRINTFORML ……看来是因為記恨着被侵犯的事、%ANAME(対象)%転移目標了
+	PRINTFORMW 真是麻煩……
+	CALL ASK_YN("做她的対手", "回去")
+
+	IF RESULT == 0
+		PRINTFORM 就算要交手這辺也完全沒準備好、
+	ELSE
+		PRINTFORM 正当打算讓她回去時、
+	ENDIF
+
+	PRINTFORMW %ANAME(対象)%将自已的衣服敞開、令自己的肌膚暴露在%ANAME(MASTER)%眼前
+	PRINTFORMW 「……嗚」
+	PRINTFORMW %ANAME(対象)%扭過臉去、表情浮現出期待的神色、臉頰通紅
+	PRINTFORMW 雖然知道她期待着什麼、但還是要問一下
+	PRINTFORMW 「……那個……我想、要你再做之前……的事情」
+	PRINTFORML 之前的事情、是指什麼呢
+	PRINTFORMW 如果想一決勝負的話無論多少次都可以……
+	PRINTFORMW 「嗚……之、之前、你将我、侵、侵犯的事情、我想要再做一次……唔」
+	PRINTFORMW 大概是無法忘記之前被給予的快感吧
+	PRINTFORMW 低頭呑呑吐吐的%ANAME(対象)%的股間、流出了淫蕩的蜜汁
+ELSE
+	PRINTFORMW 「那個……又要、拜託你了」
+	PRINTFORMW 「請好好、調教我的身体吧……」
+ENDIF
+
+PRINTFORML 那麼、要怎麼辦……
+PRINTL
+CALL ASK_MULTI("侵犯", "提供給士兵", "提供給狗", "讓她賣春", "回去")
+
+SELECTCASE RESULT
+	CASE 4
+		PRINTFORML 現在沒有這種興趣
+		PRINTFORMW 讓%ANAME(対象)%回去了……
+	CASE 1
+		PRINTFORMW 既然是這樣、就讓她来慰安士兵吧
+		PRINTFORMW 将%ANAME(対象)%提供給有性需求的士兵……
+		PRINTFORML
+		CALL FUCK_GANGBANG(対象, GET_SPERM_ID("兵士"), @"兵士の\@ RAND:2 ? 肉棒 # 唇\@", "兵士")
+		PRINTFORML
+		PRINTFORMW 「哈伊、啊哈、吚……♥」
+		PRINTFORMW 最後奄奄一息、双腿大開股間流出白濁液体的%ANAME(対象)%、被%ANAME(MASTER)%丟出據点外了……
+	CASE 2
+		PRINTFORMW 既然是這樣、就讓她表演一下吧
+		PRINTFORMW 讓%ANAME(対象)%与狗交合了……
+		PRINTFORML
+		CALL FUCK_BEAST(対象, GET_SPERM_ID("犬"), "犬的肉棒", "犬")
+		PRINTFORML
+		PRINTFORMW 「嗚、嗚、啊噢噢……♥」
+		PRINTFORMW 身心都変成母狗的%ANAME(対象)%、与公狗分開後、被%ANAME(MASTER)%丟出據点外了……
+	CASE 3
+		PRINTFORMW 既然是這樣、就讓她去賺取金錢吧
+		PRINTFORMW 讓%ANAME(対象)%「工作」了……
+		PRINTFORML
+		CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, Ｖ, Ｍ, 口淫, 売春, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精", GET_SPERM_ID("娼館的客人"), @"客のペニス", @"客", "", "和姦")
+		PRINTFORML
+		PRINTFORMW 回来了的%ANAME(対象)%、聽取了客人的用後感
+		PRINTFORMW 之後、回收了金錢後、将%ANAME(対象)%丟出據点外了……
+		CALL COLOR_PRINTW("金1000を得た", カラー_注意)
+		MONEY += 1000
+	CASE 0
+		PRINTFORMW 既然是這樣、那就尽情做愛做的事情吧
+		PRINTFORMW 推倒了%ANAME(対象)%、再次使用這副肉体……
+		PRINTFORML
+		CALL FUCK_RAPE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的肉棒", @"%ANAME(MASTER)%")
+		CALL FUCK(MASTER, "Ｃ, 性交, 射精, 奉仕", "接吻喪失, 童貞喪失", 0, @"%ANAME(対象)%的\@ RAND:2 ? 秘貝 # 嘴唇\@", "", @"%ANAME(対象)%的膣穴")
+		PRINTFORML 
+		PRINTFORMW 「嗚、嗯、啾嗯、唔、唔……♥」
+		PRINTFORMW 享受完一会後的%ANAME(MASTER)%、命令%ANAME(対象)%用口将肉棒上的体液掃除干浄
+		PRINTFORMW 現在完全成為了%ANAME(MASTER)%的女人的%ANAME(対象)%、従順地奉仕着肉棒
+		PRINTFORMW 現在要下什麼命令好呢……
+		CALL ASK_YN("做我的奴隷", "下次再来")
+		SELECTCASE RESULT
+			CASE 1
+				PRINTFORMW 「呼……我知道了、這是当然的……♥」
+				PRINTFORMW 下次再過来讓我侵犯吧
+				PRINTFORMW 用着厳厲的語気命令、%ANAME(対象)%聽到後用沾満精液的臉点頭……
+				CFLAG:対象:従属度 += 300
+				CFLAG:対象:依存度 += 100
+			CASE 0
+				PRINTFORMW 「是、我発誓……我是%ANAME(MASTER)%大人的奴隸」
+				PRINTFORMW 「所以、請対我做満満舒服的事情、主人大人…呣」
+				PRINTFORMW 遞出肉棒、讓%ANAME(対象)%親吻作為誓約之吻、%ANAME(対象)%用沾満精液的臉用陶醉的神情将肉棒含着
+				PRINTFORMW 対調教成果感到満意的%ANAME(MASTER)%、開始使用%ANAME(対象)%的小穴作為奨勵……
+				CALL COLOR_PRINTW(@"讓%ANAME(対象)%服従了", カラー_注意)
+				CALL COLOR_PRINTW(@"%ANAME(対象)%成為了奴隸", カラー_注意)
+				IF RAND:3
+					CALL SET_PIERCE_RANKED(対象, 0, ピアス_ラビア, ピアス_ペニス, ピアス_クリトリス, ピアス_乳首, ピアス_へそ, ピアス_耳, ピアス_舌, ピアス_鼻)
+					SIF RESULT != -1
+						CALL COLOR_PRINTW(@"%ANAME(対象)%的%GET_PIERCE_NAME(RESULT)%、被安上了象征着服從的環……", カラー_ピンク)
+				ELSE
+					CALL COLOR_PRINTW(@"作為服從的證明、%ANAME(対象)%的陰毛被修整成了心型……", カラー_ピンク)
+					TALENT:対象:陰毛目標値 = 陰毛_ハート型
+					TALENT:対象:陰毛現在値 = 陰毛_ハート型
+				ENDIF
+				CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属, 1)
+				TALENT:対象:服従 = 1
+				TALENT:対象:烙印 = 1
+				TALENT:対象:合意 = 1
+				TALENT:対象:チョロイン = 1
+				TALENT:対象:自尊心高 = 0
+				TALENT:対象:自尊心低 = 1
+				TALENT:対象:孤高 = 0
+				TALENT:対象:Ｓ気質 = 0
+				TALENT:対象:Ｍ気質 = 1
+				CFLAG:対象:従属度 = MAX(CFLAG:対象:従属度, 1500)
+				CFLAG:対象:依存度 = MAX(CFLAG:対象:依存度, 500)
+				SETBIT TALENT:対象:淫乱系, 素質_淫乱_マゾ
+				KDVAR:対象:妹紅_穴 = -1
+				RETURN
+		ENDSELECT
+ENDSELECT
+
+KDVAR:対象:妹紅_穴 = 1
+
+
+RETURN 1

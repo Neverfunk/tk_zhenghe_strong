@@ -1,0 +1,147 @@
+﻿@KOJO_DAILY_K48_NOTHAVEHOUSE()
+#FUNCTION
+
+IF GET_CITYNUMBER("阿求屋敷") != -1 && CITY_OWNER: ( GET_CITYNUMBER("阿求屋敷") ) == CFLAG:MASTER:所属
+	RETURNF 0
+ELSEIF GET_CITYNUMBER("人間之里的田地") != -1 && CITY_OWNER: ( GET_CITYNUMBER("人間之里的田地") ) == CFLAG:MASTER:所属
+	RETURNF 0
+ENDIF
+RETURNF 1
+
+
+;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+
+@KOJO_DAILY_K48_EPIPHYLLUM_RATE(対象)
+#DIM 対象
+#DIM 计数
+IF KDVAR:対象:阿求_昙花 != 0
+	RETURN 0
+ELSEIF CFLAG:対象:好感度 > 750
+	RETURN 50
+ELSE
+	RETURN 0
+ENDIF
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K48_EPIPHYLLUM_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラから隨機に一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K48_EPIPHYLLUM(対象)
+#DIM 対象
+
+PRINTFORML 难得能抛下那些堆积如山的案卷放松一会…干脆去吃点甜品吧。
+PRINTFORML 在茶屋的转角前，一身和服打扮、头戴花饰的紫发少女正在抱着一卷卷轴
+PRINTFORMW
+PRINTFORML 「啊…%ANAME(MASTER)%，这个时间段居然能在这遇到你，该不会在偷懒吧？」
+PRINTFORML 阿求带着一丝狡黠的笑容看着%ANAME(MASTER)%。
+PRINTFORMW
+PRINTFORML "放过我吧，我好不容易才拿到些许假期的。倒是你，今天怎么不在家写书了？"
+PRINTFORMW
+PRINTFORML 「偶尔还是需要出来透透气的，我可不是辉夜小姐那样能安居在家的人。」
+PRINTFORML 「而且素材也讲究累积和更新迭代，因此出外取材可是非常重要的。」
+PRINTFORML 阿求举起食指就开始说教起来，没有深闺大小姐那种神秘气息，现在的阿求更像一个潜心创作的小说家。
+PRINTFORMW
+PRINTFORML 「说起来，%ANAME(MASTER)%现在很有空吧？要和我一起去取材吗？」
+PRINTFORML 阿求眼神中带着些许期待，询问着%ANAME(MASTER)%是否一起前往。
+PRINTFORMW 天色那么晚了，面对阿求的邀请，……
+
+CALL ASK_YN("接受", "拒绝")
+PRINTFORML
+IF RESULT == 1
+	PRINTFORML "还是下次吧，吃完饭就要回去了，工作还有很多积压呢。"
+	PRINTFORML 「这样啊…是我冒昧了。那不打扰你了，我先走一步。」
+	PRINTFORML 阿求眼中闪过一丝失望，面带微笑向%ANAME(MASTER)%别过后便匆匆离开了。
+	PRINTFORML 不知道为何，眼前少女单薄的背影，看起来是那么得落寞……
+	PRINTFORMW 下次有机会的话，抽时间陪陪她吧。
+	CFLAG:対象:好感度 -= 100
+	RETURN 1
+ELSE
+    PRINTFORML 难得是阿求邀请我，%ANAME(MASTER)%也不好意思再推脱。
+	PRINTFORMW
+	PRINTFORML "天色这么晚，怎么能让女孩子独自外出呢？"
+	PRINTFORMW
+    PRINTFORML 「嘻嘻，%ANAME(MASTER)%还真是个大好人呢，事不宜迟，我们立刻出发吧。」
+    PRINTFORML 阿求的笑容在夜色下的灯映照下，显得尤其温暖。%ANAME(MASTER)%竟看得有点出神。
+	PRINTFORMW
+    PRINTFORML 回过神的%ANAME(MASTER)%随着阿求走出了据点，来到了不远处一座小树林中，避开了人群的喧闹繁华，
+	PRINTFORML 这片临近小树林显得如此的静谧，弥漫着露水的空气中。
+	PRINTFORML 踩着厚厚的枝叶，两人终于来到了此行的终点。
+	PRINTFORMW
+    PRINTFORML 那是一朵洁白无暇、不染泥尘的小花。在树枝洒落的斑驳月光下，静静地盛开着。
+    PRINTFORMW 「还好有向幽香姐姐请教过，没有错过这孩子的花期…」
+    PRINTFORML 一路快步地赶来，阿求已经显得有些气喘吁吁。但脸上的喜悦之情并没有因为身体的不适的有所减退。
+	PRINTFORML 她靠着一棵树根坐下，展开空白的卷轴，沾上随身携带的少量墨汁，拿起笔席地而坐撰写起来。
+	PRINTFORMW
+    PRINTFORML "那个…阿求小姐？这朵花究竟是？"
+	PRINTFORMW
+    PRINTFORML 「看来也有%ANAME(MASTER)%不知道的事情啊？这种话叫作昙花哦。」
+    PRINTFORML 「昙花的生长很不容易呢，温度、湿度还有光照，只要稍有差池便无法盛开。」
+	PRINTFORMW
+	PRINTFORML 正当%ANAME(MASTER)%欣赏着昙花盛开的美丽时，阿求的解说的话语声却越来越低。
+	PRINTFORML 「我去咨询了幽香姐姐才能把握这次开花的机会。昙花的花期只有一到两个小时，之后就会枯萎了…」
+    PRINTFORML 回头看时，阿求脸上早已没有了平常的笑容，默默的看着眼前的花朵，手中的笔也停顿下来。
+	PRINTFORMW
+    PRINTFORML 那是一种说不出，道不明的复杂表情，寂寞、不甘、留恋，混合其中。
+	PRINTFORML 在这一瞬间，我仿佛感觉，面前的紫发少女，和这朵昙花，竟是如此的相似。
+	PRINTFORMW
+    PRINTFORML 「%ANAME(MASTER)%…能…回答我一个问题吗？」
+	PRINTFORMW
+    PRINTFORML "当然可以，是什么问题？"
+	PRINTFORMW
+    PRINTFORML 「人的生命，说长不长，说短不短，能存百年之间，也或数十载即逝。和这昙花…又有什么分别呢？」
+    PRINTFORML 「如果是%ANAME(MASTER)%的话，你会希望长久保留着昙花的姿态，一成不变……」
+	PRINTFORML 「还是让她在最美的那刻盛放完，枯萎而去呢？」
+    PRINTFORMW 比起答案，%ANAME(MASTER)%更多的是在思考、为什么阿求会问这种问题呢？
+	CALL ASK_MULTI("在最美那刻盛放殆尽", "长久留存在我的身边")
+	SELECTCASE RESULT
+	CASE 0
+		PRINTFORML "既然上天给了她最美丽的花期，在刹那间绽放，然后就此消散。我觉得这也是一种美。"
+		PRINTFORMW
+		PRINTFORML 「是吗…不求恒久而存，只求刹那辉煌，这是%ANAME(MASTER)%的选择啊…」
+		PRINTFORML 阿求听到了回答后，脸上的表情有些释然，手中的笔也再次动了起来
+		PRINTFORML 在奋笔疾书的时刻，我们两个一时间保持了沉默。
+		PRINTFORMW
+		PRINTFORML 「%ANAME(MASTER)%的想法，我记下了」
+		PRINTFORML 看不透低头书写的阿求的表情，%ANAME(MASTER)%也不明白自己的回答对她有什么意义
+		PRINTFORML 「以及，谢谢你…能回答我这个问题」
+		PRINTFORMW 两人就在这宁静的夜晚中，看着昙花盛开，渡过了悄然流逝的时间。
+	CASE 1
+		PRINTFORML "刹那的美丽是自然是最辉煌的，但是…"
+		PRINTFORML "比起这最美丽的刹那，我希望她能陪伴我，一起渡过更长的时间…"
+		PRINTFORML "不因为她的洁白，辉煌而美丽，只因为她就在我的身旁，长伴己身。"
+		PRINTFORMW
+		PRINTFORML 一番高谈阔论后，%ANAME(MASTER)%不由自主的感到一点不可思议。
+		PRINTFORML 明明是对花的评论，却仿佛融入了一些不一样的情绪。
+		PRINTFORMW
+		PRINTFORML 「是吗…比起那刹那的光辉，%ANAME(MASTER)%更希望的是长相厮守吗…」
+		PRINTFORML 阿求听到回答后，脸上的表情依旧复杂，却仿佛多了一些看不真切的情愫。
+		PRINTFORML 她脸庞上那转瞬而逝的悲伤…只是错觉吗？
+		PRINTFORMW
+		PRINTFORML 「%ANAME(MASTER)%的想法，我记下了」
+		PRINTFORML 看不透低头书写的阿求的表情，%ANAME(MASTER)%也不明白自己的回答对她有什么意义
+		PRINTFORML 「以及，谢谢你…能回答我这个问题」
+		PRINTFORMW 两人就在这宁静的夜晚中，看着昙花盛开，渡过了悄然流逝的时间。
+	ENDSELECT
+	CFLAG:対象:好感度 += 200
+	KDVAR:対象:阿求_上次好感 = CFLAG:対象:好感度
+	KDVAR:対象:阿求_昙花 = 1
+ENDIF
+RETURN 1
+
+
+
+@KOJO_DAILY_K48_EPIPHYLLUM_ALLOW_WHEN_WANDERING()
+RETURN 1

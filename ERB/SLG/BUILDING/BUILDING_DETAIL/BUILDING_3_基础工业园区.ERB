@@ -1,0 +1,48 @@
+@BUILDING_GET_NAME_基础工业园区()
+    #FUNCTIONS
+    RETURNF "基础工业园区"
+
+@BUILDING_GET_EXP_基础工业园区()
+    #FUNCTIONS
+    RETURNF "都市的收入增加，并提高都市经济上限。"
+
+@BUILDING_SET_INFO_ID_3()
+    BUILDING_TYPE:建造物_基础工业园区 = 建造物_类型_经济类
+    BUILDING_LEVEL:建造物_基础工业园区 = 建造物_等级_一级建筑
+    BUILDING_LIMIT_NUM:建造物_基础工业园区 = 建造物_数量限制_无
+    BUILDING_LIMIT_UNI:建造物_基础工业园区 = 0
+    BUILDING_COUNTRY_ID:建造物_基础工业园区:特殊勢力_普通势力 = 1
+    BUILDING_HAVE_SKILL:建造物_基础工业园区 = 0
+    BUILDING_TOHO_REQ_ID:建造物_基础工业园区:0 = 0
+
+@CHECK_BUILDING_FUNCTION_基础工业园区(CITY_ID)
+    #FUNCTION
+    #DIM CITY_ID
+    #DIM TAX
+    #DIM ECONOMY_Limit
+    #DIM CNT
+    CNT = 0
+    TAX = 200
+    ECONOMY_Limit = 10
+    CNT = GET_CITY_BUILDING_NUM(CITY_ID,建造物_基础工业园区)
+    TAX*=CNT
+    ECONOMY_Limit*=CNT
+    IF TMP_BUILDING_EXIST_FLAG:(CITY_OWNER:(CITY_ID)):建造物_高新工业园区 == 1
+        TAX *= 2
+        ECONOMY_Limit *= 2
+    ENDIF
+    RESULT:0 = CNT
+    RESULT:1 = TAX
+    RESULT:2 = ECONOMY_Limit
+    RETURNF RESULT:0
+
+@BUILDING_TEXT_基础工业园区(CITY_ID,ECONOMY_Limit)
+    #FUNCTION
+    #DIM CITY_ID
+    #DIM ECONOMY_Limit
+    SIF !CHECK_BUILDING_TEXT_OUTPUT(CITY_OWNER:CITY_ID)
+        RETURNF 0
+    BUILDING_TEXT = PRINT_BUILDING_TEXT_TITLE_F()
+    PRINTFORML 因为基础工业园的存在，%CITY_NAME:CITY_ID%获得了{ECONOMY_Limit}的经济上限
+    RETURNF 1
+

@@ -1,0 +1,48 @@
+@BUILDING_GET_NAME_独占奴隶市场()
+    #FUNCTIONS
+    RETURNF "独占奴隶市场"
+
+@BUILDING_GET_EXP_独占奴隶市场()
+    #FUNCTIONS
+    RETURNF "回合末国库收入增加。玩家购买奴隶消耗大幅增加，被用于购买奴隶的金钱将转移至本势力中。"
+
+@BUILDING_SET_INFO_ID_80()
+    BUILDING_TYPE:建造物_独占奴隶市场 = 建造物_类型_特殊类
+    BUILDING_LEVEL:建造物_独占奴隶市场 = 建造物_等级_三级建筑
+    BUILDING_LIMIT_NUM:建造物_独占奴隶市场 = 建造物_数量限制_1
+    BUILDING_LIMIT_UNI:建造物_独占奴隶市场 = 0
+    BUILDING_COUNTRY_ID:建造物_独占奴隶市场:特殊勢力_野盗 = 1
+    BUILDING_HAVE_SKILL:建造物_独占奴隶市场 = 1
+    BUILDING_TOHO_REQ_ID:建造物_独占奴隶市场:0 = 0
+
+@CHECK_BUILDING_FUNCTION_独占奴隶市场(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    SIF !CHECK_BUILDING_SP_COUNTRY_LIMIT_USING(COUNTRY_ID,建造物_独占奴隶市场)
+        RETURNF RESULT:0
+    RESULT:1 = TMP_BUILDING_EXIST_FLAG:COUNTRY_ID:建造物_独占奴隶市场
+    IF RESULT:1 > 0
+        RESULT:0 = 1
+    ENDIF
+    RETURNF RESULT:0
+
+@BUILDING_TEXT_独占奴隶市场_1(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    SIF !CHECK_BUILDING_TEXT_OUTPUT(COUNTRY_ID)
+        RETURNF 0
+    BUILDING_TEXT = PRINT_BUILDING_TEXT_TITLE_F()
+    PRINTFORM 因为《独占奴隶市场》的存在，
+    PRINTFORML %ANAME(GET_COUNTRY_BOSS(COUNTRY_ID))%获得了购买奴隶消耗的资金！
+    RETURNF 1
+
+@BUILDING_TEXT_独占奴隶市场_2(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    SIF !CHECK_BUILDING_TEXT_OUTPUT(COUNTRY_ID)
+        RETURNF 0
+    BUILDING_TEXT = PRINT_BUILDING_TEXT_TITLE_F()
+    PRINTFORM 因为《独占奴隶市场》的存在，
+    PRINTFORML 垄断了奴隶交易的土匪获得了大量的资金
+    PRINTFORML %ANAME(GET_COUNTRY_BOSS(COUNTRY_ID))%的国库资金增加了！
+    RETURNF 1

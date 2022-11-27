@@ -1,0 +1,143 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K87_MASOCHIST_RATE(対象)
+#DIM 対象
+RETURN 1000
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K87_MASOCHIST_DECISION(対象)
+#DIM 対象
+
+SIF !IS_SLAVE(対象)
+	RETURN 0
+
+SIF ABL:MASTER:性技 < 3
+	RETURN 0
+
+SIF KDVAR:対象:マミゾウ_マゾの二ッ岩
+	RETURN 0
+
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K87_MASOCHIST_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K87_MASOCHIST(対象)
+#DIM 対象
+#DIM 選択肢
+
+KDVAR:対象:マミゾウ_マゾの二ッ岩 = 1
+
+PRINTFORMW 「……你来干什么」
+;TranslatedMark 「……なんじゃ、お主」
+PRINTFORML 为了「使用」%ANAME(対象)%而去她房间拜访的时候，她的脸上露出不高兴的表情
+;TranslatedMark %ANAME(対象)%を「使って」やろうと部屋を訪ねると、嬉しくなさそうな表情をされた
+PRINTFORML 虽然让%ANAME(対象)%发誓了要效忠，但是现在看来她本人还没有这种自觉
+;TranslatedMark %ANAME(対象)%には忠誠を誓わせたはずだが、どうもそのことへの自覚が足りていないようだ
+PRINTFORMW 要不然现在就让她明白一下自己的立场吧……
+;TranslatedMark ここは一つ、自分の立場を思い知らせてやろうか……
+PRINTFORML 
+CALL ASK_YN("調教", "这次就算了")
+
+IF RESULT == 1
+	PRINTFORML 嘛，谁都会有心情不好的时候吧
+	;TranslatedMark まあ、誰しも虫の居所が悪いことはあるだろう
+	PRINTFORML 决定这次就算了……
+	;TranslatedMark 放っておくことにした……
+	RETURN 1
+ENDIF
+
+PRINTFORMW 「你、你要干什么」
+;TranslatedMark 「な、なんじゃお主」
+PRINTFORML 一边推着%ANAME(対象)%，一边将其强行拉入房间
+;TranslatedMark %ANAME(対象)%を押すようにしながら、部屋に強引に上がり込む
+PRINTFORMW 就这样推倒%ANAME(対象)%，揉搓着她的屁股
+;TranslatedMark そのまま%ANAME(対象)%を押し倒し、尻を揉みしだく
+PRINTFORMW 「你这家伙…还不快住手，一大早就开始……」
+;TranslatedMark 「こ、この、やめんか、昼間っから……」
+PRINTFORML 虽然嘴上很傲慢，但是语调和平时相比没有气势，抵抗也很弱
+;TranslatedMark 生意気な口を叩いているが、口調はいつもと比べ勢いがなく、抵抗も弱々しい
+PRINTFORMW 身体似乎已经清楚的理解了不能违抗%ANAME(MASTER)%
+;TranslatedMark %ANAME(MASTER)%に逆らってはならないと、身体は理解しているようだ
+PRINTFORML %ANAME(MASTER)%用严厉的语气命令%ANAME(対象)%当场脱下衣服
+;TranslatedMark %ANAME(MASTER)%は厳しい口調で、その場で服を脱ぐよう%ANAME(対象)%に命ずる
+PRINTFORMW %ANAME(対象)%瞪着这边，老实地顺从了命令
+;TranslatedMark %ANAME(対象)%はこちらを睨んできたが、大人しく従った
+PRINTFORML 充分地视奸了露出%STR_BODY("胸：感触", 対象)%、%STR_BODY("陰唇", 対象)%的%ANAME(対象)%的身姿
+;TranslatedMark %STR_BODY("胸：感触", 対象)%、%STR_BODY("陰唇", 対象)%を晒す%ANAME(対象)%の姿を、たっぷりと視姦する
+PRINTFORMW 接着，像是命令她来侍奉一样抖了抖下巴
+;TranslatedMark 続いて、奉仕するように顎をしゃくって命じた
+PRINTFORMW 「……嗯，库，嗯，啾噜」
+;TranslatedMark 「……んく、ぐぷッ、ぢゅる」
+PRINTFORMW %ANAME(対象)%虽然什么都不说，但也不会违抗命令，老实地含入肉棒
+;TranslatedMark %ANAME(対象)%は何も言わないが、命令に逆らうことはなく、大人しくペニスに口づける
+PRINTFORMW 调教出来的技术没有一丝下降，足以满足%ANAME(MASTER)%
+;TranslatedMark 仕込んでやった技術に衰えはなく、%ANAME(MASTER)%を満足させるに足るものだった
+PRINTFORML 顺便为了调戏她，%ANAME(MASTER)%原本想命令她把双腿张开来自慰，但又作罢了
+;TranslatedMark 戯れついでに、両脚を大きく広げて自慰するように命じようとした%ANAME(MASTER)%だったが、とりやめた
+PRINTFORMW 因为就算不特意命令，%ANAME(対象)%也会擅自开始自慰
+;TranslatedMark わざわざ命じずとも、%ANAME(対象)%が勝手に始めていたからだ
+PRINTFORML 虽然想嘲笑她淫乱的本性，但%ANAME(MASTER)%并没有对这视而不见
+;TranslatedMark 淫乱な本性を嘲笑う%ANAME(MASTER)%だが、見過ごすつもりはなかった
+PRINTFORML 没有主人的许可擅自采取行动，这是不可原谅的
+;TranslatedMark 主人の許可もなく勝手に行動するなど、しつけがなっていない
+PRINTFORMW 为了让她明白自己的立场，对%STR_BODY("尻：感触", 対象)%以巴掌拍了下去
+;TranslatedMark 自分の分際を思い知らせてやろうと、%STR_BODY("尻：感触", 対象)%に平手をたたき込む
+PRINTFORMW 「咕！？嗯！」
+;TranslatedMark 「ンッ！？　んぐぅッ！」
+PRINTFORML 虽然发出痛苦的声音，%ANAME(対象)%却没有停止口淫
+;TranslatedMark 痛みに声をあげながらも、%ANAME(対象)%は口淫をやめようとはしなかった
+PRINTFORML 不仅如此，她似乎更加热心地为肉棒服务
+;TranslatedMark それどころか、肉棒への奉仕を、より熱心なものにしているようだった
+PRINTFORML 这是%ANAME(対象)%内心深处所具有的，受虐狂的本性吧
+;TranslatedMark %ANAME(対象)%の奥底に備わる、マゾの本性によるものだろう
+PRINTFORML 作为对她热心服务的奖赏，%ANAME(MASTER)%在射精前拔出肉棒，在她的脸上撒上满满的白浊液
+;TranslatedMark 熱心な奉仕への褒美として、%ANAME(MASTER)%は射精直前に肉棒を引き抜き、その顔面にたっぷりと白濁をぶちまけてやる
+PRINTFORMW 眼镜上沾满了精子的%ANAME(対象)%，带着恍惚的表情，用手指沾着粘糊糊的白浊舔着……
+;TranslatedMark 眼鏡もろとも顔を精子まみれにされた%ANAME(対象)%は、恍惚とした表情で、へばりつく白濁を指ですくっては舐め取っている……
+PRINTFORML 命令她趴在地上，她大概是察觉到了要做什么了吧，%ANAME(対象)%按照命令的那样摆出了姿势，把%STR_BODY("膣：欲情", 対象)%掰开给他看
+;TranslatedMark 四つん這いになるように命じると、何をされるか察したのだろう、%ANAME(対象)%は言われたとおりの姿勢をとり、%STR_BODY("膣：欲情", 対象)%を割り開いてみせた
+PRINTFORMW 看来，她已经想起来自己的身份了
+;TranslatedMark どうやら、己の分際をすっかり思い出したようだ
+PRINTFORMW 想着一开始这样做就好了，%ANAME(対象)%再也不想反抗了，这一整天时间里都被这样彻底地教育着……
+;TranslatedMark 最初からそうしていればいいのだと、%ANAME(対象)%が二度と逆らう気にもなれないほど、一日かけて徹底的に躾けてやった……
+
+PRINTFORML 
+CALL COLOR_PRINTW(@"%ANAME(対象)%的被虐心觉醒了", カラー_注意)
+
+FOR LOCAL, 0, 3
+	CALL FUCK(MASTER, "性技, 性交, Ｃ, 射精", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴", "調教")
+	CALL FUCK(対象,   "Ｃ, Ｂ, Ｖ, Ｍ, 欲望, 性交, 奉仕, 精愛, 口淫, 接吻, Ｖ性交, 苦痛快楽, 緊縛", "処女喪失, 接吻喪失, 膣内射精", GET_ID(MASTER), @"%ANAME(MASTER)%的肉棒", ANAME(MASTER), "", "調教")
+NEXT
+
+CFLAG:対象:従属度 += 1500
+CFLAG:対象:依存度 += 1000
+
+TALENT:対象:チョロイン = 1
+TALENT:対象:Ｍ気質 = 1
+SETBIT TALENT:対象:淫乱系, 素質_淫乱_マゾ
+
+RETURN 1
+

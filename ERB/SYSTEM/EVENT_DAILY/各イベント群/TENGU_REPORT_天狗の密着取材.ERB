@@ -1,0 +1,600 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_TENGU_REPORT_RATE()
+RETURN (DVAR:天狗取材_発生フラグ > 0 ? 250 # 50)
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_TENGU_REPORT_DECISION()
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+SIF DVAR:天狗取材_発生フラグ < 0
+	RETURN 0
+SIF (ABL:MASTER:武闘 + ABL:MASTER:防衛 + ABL:MASTER:知略 + ABL:MASTER:政治) < 250
+	RETURN 0
+RETURN DAY >= 15
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_TENGU_REPORT_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_TENGU_REPORT()
+#DIM 対象
+
+;繰り返しイベント
+IF DVAR:天狗取材_発生フラグ == 2
+	PRINTFORML 「打扰了！今天也来采访了！」
+	PRINTFORMW 今日天狗少女也来采访了……
+	
+	PRINTFORML 
+	PRINTFORML ……
+	SELECTCASE RAND:15
+		CASE 0
+			PRINTFORML 「啊！♥ 嗯♥ 再用力一点♥ 再往里一点♥」
+			PRINTFORML 采访草草了事，%ANAME(MASTER)%和少女在房间里激烈地做着正戏
+			PRINTFORML 「嗯啊♥ 可以哦，今晚请一整晚都侵犯我吧♥」
+			PRINTFORML 当然不会有拒绝的理由，%ANAME(MASTER)%深深地把肉棒顶起来回应
+			PRINTFORMW 在妹汁与肉体发出声音的淫壶里，%ANAME(MASTER)%射出了慢慢的精液……
+		CASE 1
+			PRINTFORML 少女跪在%ANAME(MASTER)%脚下，用嘴唇和舌头热心地为肉棒服务
+			PRINTFORML 「嗯……哈！♥ 依旧没变呢，又硬又热……♥ 好舒服啊♥」
+			PRINTFORML 作为代替回答，%ANAME(MASTER)%紧紧抓住了少女的头，深喉着进行活塞运动
+			PRINTFORML 「嗯，嗯♥ 哦，哦♥ 哦~♥ 哦~♥ 唔～～～～♥♥♥」
+			PRINTFORMW 喉咙里噗啾地注入了炽热精液，让少女品尝了个够……
+		CASE 2
+			PRINTFORML 「嗯♥ 主，主人大人♥ 主人大人啊♥ 真的对不起啦♥」
+			PRINTFORML 今天本应该采访作为女仆工作是什么样的，不知为何却变成了这样的游戏
+			PRINTFORML 「嗯啊♥ 主人请中出我♥ 惩罚无能的淫乱女仆♥
+			PRINTFORML 　主人大人的特浓精液♥ 请主人大人射在御用精液容纳女仆的身体里吧♥♥♥」
+			PRINTFORMW %ANAME(MASTER)%在可爱的女仆天狗体内充分射精，之后一整晚都持续责备……
+		CASE 3
+			PRINTFORML 在己方势力内的温泉旅馆里，为了进行采访工作而进行留宿
+			PRINTFORML 「真是的啦♥ 吃完饭马上就做爱什么的，稍微享受一下景色吧……♥」
+			PRINTFORML 两人泡在家庭浴池里，悠闲地享受了温泉
+			PRINTFORML 「话说回来，这个温泉好像被称为"子宝之汤"……♥(ところでこの温泉って子宝の湯って言われてるらしいですよ
+			PRINTFORMW 　啊！♥ 等下♥ 太突然了，太急了啦♥ 哈啊，真的想让我怀孕吗♥♥♥」
+		CASE 4
+			PRINTFORML 被河童拜托对新发明进行审查与实验，所以决定帮助进行测试了
+			PRINTFORML 「咿呃~♥ 等下♥ 不，不要♥ 饶了我吧♥ 呀啊，已经要不行了啦♥
+			PRINTFORML 　哦，啊♥ 菊穴那里，要不行了♥ 会被玩坏的啊♥」
+			PRINTFORML 在四肢着地跪趴着的少女的菊穴里，河童制造的极粗振动棒在蠢蠢欲动着
+			PRINTFORMW %ANAME(MASTER)%一边观察其情况，一边研究购买的事情……
+		CASE 5
+			PRINTFORML 「啊啊啊啊啊♥♥♥ 啊，啊♥ 唔呃~♥ 嗯，唔啊♥
+			PRINTFORML 　咿呃♥♥♥ 啊啊啊♥♥♥ 唔呃♥ 哈啊，咿啊啊~！♥♥♥」
+			PRINTFORML 拜托进行测试永远亭的新媚药，但效果似乎太强了
+			PRINTFORML 这认为的%ANAME(MASTER)%勃起也没有平息，无论中出多少次都完全没有退缩的迹象
+			PRINTFORMW 结果在效果消失的时候，少女的肚子就像怀孕了一样膨胀起来……
+		CASE 6
+			PRINTFORML 「哈……哈啊，咕♥」
+			PRINTFORML 在被%ANAME(MASTER)%深深地贯穿着下体的时候，少女用自拍装置拍摄了自己的身姿
+			PRINTFORML 「嗯，明明是自己熟悉的工具……这样拍出来什么也看不见啊
+			PRINTFORML 　诶？下一个是拍中出的地方吗？那个有点，啊♥ 啊！♥ 啊~♥」
+			PRINTFORMW 之后，%ANAME(MASTER)%接替了拍摄工作，尽情地拍摄了少女的痴态……
+		CASE 7
+			PRINTFORML 「真、真是的！真拿你没办法……♥」
+			PRINTFORML 今天去做美食评测，途中%ANAME(MASTER)%不经意间把少女带到了巷子里，让她进行口交
+			PRINTFORML 「啊，啊♥ 啾唔♥ 唔，呼唔，唔，啾，咕唔♥
+　			PRINTFORML 　当然可以了♥ 把精液射出来吧♥ 尽情地，射在嘴里♥♥♥」
+　			;TranslatedMark いいれふよぉ♥　らひてくらひゃい♥　おいしいせーえき、たっぷりのまへてぇ♥♥♥」
+			PRINTFORMW 之后也口交了好几次，因为口内残留着精液的味道，所以评测出来的结果非常一般……
+		CASE 8
+			PRINTFORML 「啊呃♥ 啊，嗯♥ 啊！♥ 啊！♥ 啊，嗯♥ 啊啊啊啊♥」
+			PRINTFORML %ANAME(MASTER)%把少女压在身下着，深深地戳入密壶中感受肉穴的紧致
+			PRINTFORML 少女高兴得半睁泪眼颤抖着身体，被%ANAME(MASTER)%给予的爱欲所迷倒
+			PRINTFORML 「喜欢，太喜欢了♥ 这样做，戳得好深♥ %ANAME(MASTER)%再用力操我吧♥♥♥」
+			PRINTFORMW %ANAME(MASTER)%用力抱住可爱地呻吟的少女并与之接吻，一边长长地注入了精力……
+		CASE 9
+			PRINTFORML 「啊！♥ 咿呃♥ 戳，戳进来了呢♥ 好充实啊♥」
+			PRINTFORML 少女跨坐%ANAME(MASTER)%的身上，自己摇着腰，沉溺在不断冲击宫口的喜悦中
+			PRINTFORML 完全被%ANAME(MASTER)%调教过后的阴道肉壁，像是有自主意识的生物一样，用力地紧紧包裹吸附肉棒
+			PRINTFORML 「啊哈哈♥ 好舒服啊♥ 当然，可以了♥ 一起，变得，更加舒服吧♥ 咿啊♥」
+			PRINTFORMW 对越来越热情弯起腰的少女，%ANAME(MASTER)%无法忍受地射精了，少女也发出娇声而绝顶……
+		CASE 10
+			PRINTFORML 「啾♥ 呼唔，要是被谁发现了该怎么办啊♥」
+			PRINTFORML 在自己势力内巡视的%ANAME(MASTER)%，途中突然来了感觉，把更好在阳台上休息的少女给袭击了……
+			PRINTFORML 「咿啊啊♥ 拜，拜托了♥ 不要让别人看见啊♥ 要是被看到了，会因为害羞而死的吧♥
+			PRINTFORML 　暴露了的话♥ 啊啊啊啊♥ 如果被发现了的话，我会被印上报纸的……♥♥♥」
+			PRINTFORMW 在异常状况下兴奋不已的肉穴里，%ANAME(MASTER)%将精液注入到满足为止……
+		CASE 11
+			PRINTFORML 今天和少女一起去了势力内举行的祭典
+			PRINTFORML 虽然对少女穿浴衣的样子有些难以兴奋，但还是忍到了采访结束，之后稍微休息了一下，从那里的茂密处可以听到男女的喘息声……
+			PRINTFORML 「大，大家看起来都很高兴的样子……♥ 而且，这，这也是采访的一环，是吧……我们也，一起做吧？」(「い、いやぁ皆さんお盛んなことで……♥　で、その、そう、取材の一環として、ですね……、私達も、しますか？」)
+			PRINTFORML %ANAME(MASTER)%对着只穿着浴衣裆部裸露的害羞少女袭击了
+			PRINTFORMW 然后做一些愉快的事情♥把发出悲鸣的少女推倒，为让少女的娇喘声也不输给周围的情侣们大力干了起来……
+		CASE 12
+			PRINTFORML 在采访中，%ANAME(MASTER)%和少女因为天上突然下起了雨，没办法只好跑进了附近的旅馆
+			PRINTFORML 「但是，这个怎么看都……是情侣住的旅馆吧……♥」
+			PRINTFORML 确实如此。难得进去一次的就话应该好好享受。这样想着的%ANAME(MASTER)%把%ANAME(対象)%推倒了
+			PRINTFORML 「啊，好厉害♥ 我知道了！是不是，啊哈，从一开始就想我带进来……♥
+			PRINTFORMW 　啊！♥ 对不起，我不会再顶嘴了♥ 那里，那里♥ 不行啊！♥ 啊，啊♥ 啊！♥ 啊啊——♥♥♥」
+		CASE 13
+			PRINTFORML %ANAME(MASTER)%和少女掌握了某个旅馆正在进行秘密交易的情报，开始进行潜入搜查
+			PRINTFORML 但是那里是情侣御用的秘密旅馆……不得已，%ANAME(MASTER)%和少女作为恋人们潜入了旅馆
+			PRINTFORML 「是、是的♥ 这是为了搜查没办法的事♥ 像恋人一样做爱♥ 只是演戏而已♥
+			PRINTFORML 　啊！♥ 啊！♥ 太棒了♥ 请再疼爱我一点♥ %ANAME(MASTER)%的精液♥ 请多射一点进来♥」
+			PRINTFORMW 之后，因为沉迷于恋人游戏而一不小心错过了交易现场，但总算抓住了犯人们……
+		CASE 14
+			PRINTFORML 打算放一天假的%ANAME(MASTER)%，决定抛开工作和采访，和%ANAME(対象)%专门干一整天
+			PRINTFORML 「啊！♥ 这、这样可以的吗♥ 要专心工作♥ 不可以这样的啊♥」
+			PRINTFORML %ANAME(MASTER)%说着这并没有关系，并表示只想好好享用这诱人的娇躯
+			PRINTFORML 「……唔♥♥♥ 太，太狡猾了♥ 居然这样说♥ 我已经♥ 忍不了了♥ 要不行了！♥
+			PRINTFORMW 　嗯，嗯♥ 嗯，嗯♥ 请多来一点♥ %ANAME(MASTER)%的精液♥ 请尽情射进来……嗯♥♥♥」
+	ENDSELECT 
+	PRINTFORMW
+	RETURN 1
+ENDIF
+
+;回数進行イベント
+IF DVAR:天狗取材_発生フラグ == 0
+	PRINTFORML 有一天，有一个%ANAME(MASTER)%没听说过的背负鸟翼的天狗少女前来拜访了
+	PRINTFORMW 虽然脸上还留有稚气，但却给人活泼的印象，与其说是漂亮，不如说是可爱
+	PRINTFORML 「你好，咱们是初次见面吧？
+	PRINTFORML 　今天是为了采访最近名列前茅的%ANAME(MASTER)%而来的！」
+	PRINTFORML 听她说后，她想和%ANAME(MASTER)%一起看看日常活动是什么样的
+	PRINTFORMW 另外，希望今后也能继续进行一段时间的采访
+	PRINTFORML 「其实，我是射命丸文桑和姬海棠果桑的后辈，而且我最近没写出什么好的报道……
+	PRINTFORML 　但是想借此机会来尝试一下，把著名%ANAME(MASTER)%的事迹整理成报纸的话，我想应该会吸引足够的关注量的！
+	PRINTFORML 　所以一定同意我的请求！请让我采访您吧！」
+	PRINTFORMW 少女一副非常有干劲的样子喋喋不休地讲了起来
+	PRINTFORML 虽然承认这种热情，但%ANAME(MASTER)%也并不算闲……
+ELSEIF DVAR:天狗取材_発生フラグ == 1
+	PRINTFORMW 背负鸟翼的天狗少女又来拜访了
+	PRINTFORML 「您好，我是来采访的！
+	PRINTFORML 　今天您有空吧？」
+ENDIF
+PRINTFORML 怎么办？
+
+CALL SINGLE_DRAWLINE
+CALL ASK_YN("接受", "拒绝")
+
+IF RESULT == 1
+	IF DVAR:天狗取材_発生フラグ == 0
+		PRINTFORML 「诶，这样啊……」
+		PRINTFORML 眼看着天狗少女无力地垂下了肩膀，但是马上又重振了精神，
+		PRINTFORML 「不，我不会因为这样就放弃的！过几天我再来采访您！」
+		PRINTFORMW 留下这样的话，飞快地飞走了……
+		DVAR:天狗取材_発生フラグ = -1
+	ELSEIF DVAR:天狗取材_発生フラグ == 1
+		PRINTFORML 「啊，今天不方便吗……嗯，下次请让我采访吧！」
+		PRINTFORMW 天狗少女不甘示弱地回去了……
+	ENDIF
+	RETURN 1
+ENDIF
+
+DVAR:天狗取材_発生フラグ = 1
+
+PRINTFORML 「太好了！那么今天一天，让我进行贴身采访吧！」
+PRINTFORMW 一副喜形于色的样子，少女向%ANAME(MASTER)%扑来
+PRINTFORML 
+PRINTFORML ……
+
+SELECTCASE RAND:7
+	CASE 0
+		PRINTFORML %ANAME(MASTER)%今天将在前线指挥作战
+		PRINTFORML 「哇，好激烈的战斗啊！啊，拍照拍照……」
+		PRINTFORMW 不愧是天狗，一边轻快地避开了飞向%ANAME(MASTER)%的箭，一边一个劲地拍照
+	CASE 1
+		PRINTFORML %ANAME(MASTER)%去看了自己势力下的城镇的情况
+		PRINTFORML 「呼呼，真是个充满活力的好城市啊……啊，可以去团子店吗？」
+		PRINTFORMW 与其说是采访，倒不如说是几乎像是边走边吃的感觉，%ANAME(MASTER)%被少女折腾了一天……
+	CASE 2
+		PRINTFORML 今天的%ANAME(MASTER)%要出席讨论政策的会议
+		PRINTFORML 「我想采访一下会议的情况，可以放我进去吗？啊，果然不行吗？呜……」
+		PRINTFORMW 少女噘着嘴抱怨，但还是不能进去……
+	CASE 3
+		PRINTFORML %ANAME(MASTER)%今天一直在自己的房间里整理文件工作
+		PRINTFORML 「嗯，这样的话没空采访您了呢……啊，要给您倒杯茶吗？」
+		PRINTFORMW 正好空闲的少女，亲手给%ANAME(MASTER)%沏茶了
+	CASE 4
+		PRINTFORML 为了维持自势力的治安，%ANAME(MASTER)%和安保部队一起在街上巡逻
+		PRINTFORML 「嗯，看起来很和平的城市……哎，那个男人总觉得很可疑啊！」
+		PRINTFORMW 多亏了她的协助，%ANAME(MASTER)%成功抓住了小偷！
+	CASE 5
+		PRINTFORML 因为今天休息，%ANAME(MASTER)%决定整天在房间里好好休息
+		PRINTFORML 「呐~，既然今天不想做采访的话，那我也刚好有时间空余下来了，请多关照哦~」
+		;(そうされると私が暇なんですよぅ、取材じゃなくていいから構ってくださいよ)
+		PRINTFORMW 本来应该好好休息的，但是回过神来发现已经和少女玩在一起了……
+	CASE 6
+		PRINTFORML 今天的%ANAME(MASTER)%为了确认自己势力内的自然景观情况，决定去登山
+		PRINTFORML 「呀，景色真好啊！来，一起拍照吧！」
+		PRINTFORMW 一番努力之后，在山顶和少女一起拍了纪念照片
+ENDSELECT 
+
+PRINTFORML 
+PRINTFORML ……
+PRINTFORML 「感谢您今天的采访！」
+PRINTFORML 少女满脸欣喜地微笑着，对能接受采访而进行道谢
+PRINTFORML 那么……
+
+CALL SINGLE_DRAWLINE
+CALL ASK_YN("邀请晚上的贴身采访", "就那样目送")
+
+IF RESULT == 1
+	IF DVAR:天狗取材_夜の取材回数 == 0
+		PRINTFORML %ANAME(MASTER)%犒劳了少女，目送她回家了
+		PRINTFORML 「是的！那么下次也请多多关照了！」
+		PRINTFORMW 精神饱满地回答后，少女飞快地飞走了
+		DVAR:天狗取材_発生フラグ = -1
+	ELSEIF DVAR:天狗取材_夜の取材回数 <= 1
+		PRINTFORML 「那么，要不要今晚进行一次夜间贴身采访呢？(今回は夜の密着取材はしなくていいんですか？)」
+		PRINTFORML 少女恶作剧似的以调戏的样子这样说着，不过可以看出来已经面红耳赤了……
+		PRINTFORMW 大概是注意到了%ANAME(MASTER)%的视线吧，她虽然有点慌张，但还是说会再来，然后就飞走了
+	ELSEIF DVAR:天狗取材_夜の取材回数 <= 3
+		PRINTFORML 「诶……啊，好的，那我回去了！」
+		PRINTFORML 少女有些困惑，但马上开始进行掩饰
+		PRINTFORML 「不，我并不是想在晚上来采访您啦……不过如果您想的话？(いえ、夜の取材活動をしたいわけではないです……ないですよ？)」
+		PRINTFORMW 然后像逃跑一样飞走了……
+	ELSE
+		PRINTFORML 「诶！这样啊……」
+		PRINTFORML 呜啊，少女一副很明显的失望的样子，双肩都下榻了
+		PRINTFORML 「……果然还是不行吗？」
+		PRINTFORMW 可爱的眼神一瞬间动摇了%ANAME(MASTER)%的意志，不过还是说是因为有工作，拒绝了请求……
+	ENDIF
+	RETURN 1
+ENDIF
+
+DVAR:天狗取材_夜の取材回数 += 1
+
+IF DVAR:天狗取材_夜の取材回数 == 1
+	PRINTFORML 「诶……那是，那个……」
+	PRINTFORML %ANAME(MASTER)%看着少女尝试着解释的时候，身体害羞地扭捏起来
+	PRINTFORML 那可爱的样子让%ANAME(MASTER)%看着，不由得在心中挣扎了一会
+	PRINTFORML 「如果今后也能好好约定采访的话……」
+	PRINTFORMW 说了这样的话
+	PRINTFORML %ANAME(MASTER)%被那可爱的样子击溃，很快就答应了
+	PRINTFORML 「嗯……我明白了，这估计也是采访的一环吧！
+	PRINTFORML 　那么，我已经做好觉悟了，尽快开始吧！」
+	PRINTFORMW 大概是一旦决定了就会坚定地做下去的类型吧，她红着脸牵着%ANAME(MASTER)%的手……
+	PRINTFORML 
+	PRINTFORML ……
+	PRINTFORML %ANAME(MASTER)%把天狗少女牵引到自己的床上，并排坐着，互相慢慢地爱抚着
+	PRINTFORML 「嗯……♥ 嗯♥」
+	PRINTFORML 白天精神饱满的样子不知跑到哪里去了，现在完全变得些许弱势了起来，
+	PRINTFORMW 被%ANAME(MASTER)%的手指每次接触皮肤时，身体都会有反应地动起来
+	PRINTFORML 看到那个样子，%ANAME(MASTER)%说难道是....少女微微点了点头
+	PRINTFORML 「那个……那个，因为我是第一次……所以不好意思……」
+	PRINTFORML 少女一边染着脸颊一边说着……最开始很有气势的样子完全变得娇弱了
+	PRINTFORML 果然，对没有经验的少女强行要求性行为也会让人觉得不好意思
+	PRINTFORML 事到如今，还是算了吧……
+	PRINTFORML 「不，既然说要做，就要做！作为新闻工作者不能食言……！
+	PRINTFORMW 　但是，如果您能温柔一点的话……我会很感谢您的哦」
+	IF TALENT:MASTER:童貞 == 1
+		PRINTFORML %ANAME(MASTER)%说，其实自己也是第一次，所以不用在意
+		PRINTFORML 「诶……尽管如此还是突然邀请了我吗？」
+		PRINTFORML 少女惊讶地睁大了眼睛，但很快就相好了
+		PRINTFORML 「但是，您确定要把第一次献给我吗？
+		PRINTFORML 　好开心呢，非常感谢您……♥」
+		PRINTFORML 少女腼腆地说着，%ANAME(MASTER)%感觉到了不得了的东西，紧紧地抱住了她
+	ELSE
+		PRINTFORML %ANAME(MASTER)%抱着她，说绝对会温柔的，所以请放心
+		PRINTFORML 「是……请多关照♥」
+		PRINTFORML 少女害羞地将脸埋在了%ANAME(MASTER)%的怀里
+	ENDIF
+	PRINTFORMW %ANAME(MASTER)%和少女接吻后，温柔地推倒在床上……
+	PRINTFORML 
+	PRINTFORML 「嗯，嗯……啊！♥ 呀啊♥」
+	PRINTFORML 一边接吻一边爱抚秘所，从里面慢慢地流出了爱液
+	PRINTFORML %ANAME(MASTER)%看到少女张开了双腿，让自己的身体压在了中间
+	PRINTFORML 「啊……♥」
+	PRINTFORML 少女用充满期待和不安的眼神看着勃起的肉棒
+	PRINTFORMW 随后对着%ANAME(MASTER)%点了点头，尚未知晓男子气息的处女蜜裂被肉棒压了下去，随后肉棒进一步慢慢往里挺着……
+	PRINTFORML 「啊，嗯，嗯……唔！」
+	PRINTFORML 少女痛苦地皱起眉头，从接合处流出了表示纯洁的处女之血……
+	PRINTFORML %ANAME(MASTER)%为了不让少女过于痛苦，慢慢地把肉棒根部也给顶了进去
+	PRINTFORML 「啊啊！♥ 里面，好深……♥」
+	PRINTFORMW 嘴上的动作也慢慢地交融在一起，%ANAME(MASTER)%像是慢慢地习惯了似的，腰前后摇摆着
+	PRINTFORML 
+	PRINTFORML 过了一会儿，少女的喉咙开始发出娇弱的喘气声
+	PRINTFORML 「啊啊！♥ 嗯，嗯♥ 啊，啊，啊♥ 第一次、做爱、是这样的啊♥ 好舒服♥」
+	PRINTFORML 也许是本来就容易感觉到的体质吧，疼痛完全消失了的样子，发出甜美的声音来享受快乐……
+	PRINTFORMW %ANAME(MASTER)%已经可以了，抱着少女的腰，开始了更快速的运动
+	PRINTFORML 「啊~♥ 这个，不行啊♥ 咿啊！♥ 好快♥ 好厉害♥
+	PRINTFORML 　明明是还是第一次♥ 第一次♥ 咿啊♥ 明明还是第一次啊♥」
+	PRINTFORML 残留着稚气的脸庞完全变得软弱起来，少女挺着腰索求着快感
+	PRINTFORMW 意识到射精临近的%ANAME(MASTER)%也紧紧抓住少女的腰开始了最后的冲刺
+	PRINTFORML 「不，不♥ 已经不行了♥ 唔呃♥ 哈，哈啊！♥ 唔啊啊————♥♥♥」
+	PRINTFORML 少女全身颤抖，用力挺起身体，激烈地绝顶了
+	PRINTFORML 配合因绝顶而紧紧勒紧肉棒的阴道，%ANAME(MASTER)%也迎来了极限
+	PRINTFORMW 尽情地刺进肉棒，在少女的深处，射出上沸腾的白浊液……
+	PRINTFORML 
+	PRINTFORML ……
+	PRINTFORML 「那个……辛苦了♥ ……您的技术太厉害了♥」
+	PRINTFORML 事情办完后，少女红着脸说着
+	PRINTFORML 「那么，差不多该回去了！下次再见！」
+	PRINTFORML 刚一低头，少女不经意间用敏捷的动作亲吻了%ANAME(MASTER)%的脸颊
+	PRINTFORML 「下次再见了哦！」
+	PRINTFORMW 留下这样的话，少女这次真的回去了……
+
+ELSEIF DVAR:天狗取材_夜の取材回数 == 2
+	PRINTFORML 「哎呀……英雄，您那么喜欢做色情的事情吗？」
+	PRINTFORML 少女一边嬉笑着一边开玩笑，但似乎还没有完全满足……
+	PRINTFORML 「嗯，没关系，和采访対象建立信赖关系也是很重要的哦！
+	PRINTFORMW 　……不过应该不是枕営業之类的吧？」
+	PRINTFORML 
+	PRINTFORML ……
+	PRINTFORML 「啊，嗯♥ 好♥ 好厉害啊♥ 明明还只是第二次，就已经这样了♥」
+	PRINTFORML %ANAME(MASTER)%从后面侵犯了趴在地上的少女
+	PRINTFORML 少女的阴道内壁湿滑紧闭，裹着%ANAME(MASTER)%的肉棒不断进行挤压
+	PRINTFORML 稍微往里顶一下的时候少女的下腹都会微微鼓起来，淫靡的肉壶也会用力裹紧住%ANAME(MASTER)%的肉棒……
+	PRINTFORMW 扑通一声把腰部冲向屁股，臀肉也在颤抖着，更加煽动了情欲
+	PRINTFORML 感觉到强烈的射精感的%ANAME(MASTER)%紧紧压住少女，宣言要射在里面……
+	PRINTFORML 「好，好的♥ 请射出来♥ 在我的身体里♥」
+	PRINTFORML 紧贴着腰，%ANAME(MASTER)%一滴也不剩地注入了大量的精液
+	PRINTFORML 与射精同时到达高潮的雌穴咕嘟咕嘟地脉从肉棒里榨取精液般蠕动着……
+	PRINTFORML 「啊……啊……啊呃♥ 子宫那里♥ 好像很喜欢喝精液呐♥」
+	PRINTFORMW 少女恍惚地细细品味了充满子宫的白浊液的热度……
+
+ELSEIF DVAR:天狗取材_夜の取材回数 == 3
+	PRINTFORML 「唔嗯♥ 『因为采访出汗了所以想借您的浴室洗澡』，我想表达的是这个意思哦(「あんっ♥　『取材で汗かいただろうからお風呂を貸す』って言うから何かと思えば、)
+	PRINTFORML 　不是这个意思啊♥ 咿啊♥」
+	PRINTFORML %ANAME(MASTER)%侵犯着只披了一条浴巾在地上跪趴着的少女
+	PRINTFORMW 也许是因为在澡堂里太暖和了，少女的身体比平时更热，感觉像融化了一样，小穴紧紧包裹着肉棒
+	PRINTFORML 在那热情的诱惑下，%ANAME(MASTER)%射出了第一发精液
+	PRINTFORML 「啊……♥ 出来了呢……♥」
+	PRINTFORML 少女接受了射精，放声娇喘，不知是不是因为自己还不满足，总觉得有些不满地用力裹紧了一下%ANAME(MASTER)%的肉棒
+	PRINTFORMW 当然，%ANAME(MASTER)%也不打算就这样结束……立刻恢复了活塞运动
+	PRINTFORML 「哈啊？等一下♥ 咿啊♥ 连续抽插♥ 这样会受不了的啊♥
+	PRINTFORML 　精液又射出来了♥ 射得太多了啦♥全都，把子宫撑住了♥ 好厉害♥」
+	PRINTFORML 喉咙不由得吐露出娇声，少女一边喘息，把双脚用力伸直，无法忍耐地享受着欢愉
+	PRINTFORMW %ANAME(MASTER)%和少女同时达到了高潮，她一脸幸福的样子喘着气……
+
+ELSEIF DVAR:天狗取材_夜の取材回数 == 4
+	PRINTFORML 「这，这样的话，会被发现的啦……♥」
+	PRINTFORML %ANAME(MASTER)%无法忍受采访归来后激起的性欲，将少女带到草丛里推倒
+	PRINTFORML 这里离天狗住的妖怪山很近，如果被她的伙伴发现的话会引起大骚动吧……
+	PRINTFORMW 但是现在的情况反而更让少女兴奋了，阴道肉壁比平时更紧地系着肉棒
+	PRINTFORML 因为突然听到了啪嗒啪嗒的振翅声，少女慌忙用双手捂住了嘴
+	PRINTFORML 但是%ANAME(MASTER)%却毫不在意地挺动着腰，用力指责了阴道深处的弱点……
+	PRINTFORML 「……♥ ……呼唔♥ 唔……♥ 唔呃……♥ …………♥♥♥」
+	PRINTFORMW 少女拼命抑制住喘息声，从口边呼噜呼噜呼噜地喘着粗气，但马上就到了极限
+	PRINTFORML 「～～～～～～～～～～～～～～♥♥♥♥♥」
+	PRINTFORML 虽然勉强抑制住了声音，但是全身剧烈痉挛，剧烈潮吹着高潮了，强烈的刺激使得少女失去了意识
+	PRINTFORML %ANAME(MASTER)%之后环视了周围……刚才的羽音好像只是乌鸦
+	PRINTFORMW %ANAME(MASTER)%整理好少女的衣服后背在后背，踏上了归途
+
+ELSEIF DVAR:天狗取材_夜の取材回数 == 5
+	PRINTFORML 今天被邀请去少女家
+	PRINTFORML 招待着亲手做的菜非常好吃，一点不剩地吃了干净
+	PRINTFORML 喝了茶喝了一杯的%ANAME(MASTER)%环视了一下房间
+	PRINTFORML 天狗难道都有当记者的兴趣吗，杂乱的房间里放着照相机相关的器材和印刷报纸的工具……
+	PRINTFORMW 突然，%ANAME(MASTER)%注意到放在床旁边的相框，站起来拿起它
+	PRINTFORML 「……！ 啊，不要拿起来，不要看呀！」
+	PRINTFORML 少女慌慌张张地想把照片抢走，但是好像有点迟了
+	PRINTFORML 照片里放的是一张拍了%ANAME(MASTER)%侧脸的照片……
+	PRINTFORMW %ANAME(MASTER)%向低着头满脸通红的少女询问了为什么要偷拍自己的照片
+	PRINTFORML 「那个……这个，这个是因为……在不能与%ANAME(MASTER)%相见的时候，就用照片代替了……
+	PRINTFORML 　是的……是用来安慰自己用的，就是这样！」
+	PRINTFORML 少女半途放弃了辩解，自暴自弃地告白了……因为太过害羞，耳朵被染成了红色，颤抖着肩膀喘粗气
+	PRINTFORMW 看到那过于可爱的样子，%ANAME(MASTER)%感觉到下半身一下子聚集了血，不容分说就把少女推倒了……
+	PRINTFORML 
+	PRINTFORML ……
+	PRINTFORML 「啊啊，真是的，真是太不好意思了……！」
+	PRINTFORML 充分做爱后，少女把脸埋在床单上，依旧在害羞着
+	PRINTFORML %ANAME(MASTER)%抚摸着少女的头给予谅解，并表示“既然那么想的话以后就多多见面好了”
+	PRINTFORML 「是，是那样的问题吗？啊，不管了♥」
+	PRINTFORML 结果直到天亮，%ANAME(MASTER)%和少女都在相互所求……
+	PRINTFORMW 「真是的……♥ 都做成这样了，恐怕已经睡不着了……♥」
+
+ELSEIF DVAR:天狗取材_夜の取材回数 == 6
+	PRINTFORML 今天晚上，%ANAME(MASTER)%决定让她按照自己的喜好去做
+	PRINTFORML 「呵呵呵……如果是这样的话，我就把%ANAME(MASTER)%的弱点给抓出来吧！请做好觉悟哦！」
+	PRINTFORMW 豪言壮语的少女跨坐在%ANAME(MASTER)%的身上，像狗一样流着口水，一边挥着腰贪图着快乐……
+	PRINTFORML 「但是♥ 但是这也是没办法的事啊♥ 自从做了第一次之后♥好几次想再来几次♥然后，
+	PRINTFORML 　一直都想着让肉棒戳进来♥ 毕竟太舒服了嘛♥
+	PRINTFORML 　我的小穴♥ 已经变成%ANAME(MASTER)%肉棒的形状了♥」
+	PRINTFORMW 一个劲地从接合处流出爱液，少女被挖到阴道深处的感觉迷住了……
+	PRINTFORML 「嘿嘿♥ 最重要的是♥ 您的肉棒♥ 真的好棒♥ 好棒啊♥」
+	PRINTFORML 少女完全变成淫乱的雌性好像是自己的错……应该好好负责起来了
+	PRINTFORML 「精液♥ 请给我精液吧♥ 已经不行了，把我的身体，调教成为%ANAME(MASTER)%的东西吧♥♥♥」(「セキニン♥　セキニンとってくださいっ♥　どうせならっ、完全にぃぃ、%ANAME(MASTER)%のモノにしてぇぇ♥♥♥」)
+	PRINTFORML %ANAME(MASTER)%抓住少女纤细的腰肢，毫不留情地从下面向上推
+	PRINTFORML 每一次用力向上顶起少女幼小的子宫口的时候，少女就披散着头发甜美地娇喘起来，用力地勒紧了阴道肉壁
+	PRINTFORMW 在想把肉棒戳进子宫口中的状态下射出了巨量的精液，少女失去了娇喘了声音，睁大着眼睛……
+	PRINTFORMW 「啊……♥ 喜欢……♥ 我喜欢你，真的……」
+	PRINTFORMW 可爱的少女沉浸在绝顶的余韵中，像做梦一样嘟囔着，抚摸着温热的下腹……
+
+ELSEIF DVAR:天狗取材_夜の取材回数 == 7
+	PRINTFORML 「啊，已经这个时间了……」
+	PRINTFORML 女孩看着手表说如此说道，和%ANAME(MASTER)%在房间里休息了一会
+	PRINTFORML 今天好像比平时要长……日期差不多要变了
+	PRINTFORML 「虽然有点舍不得，但差不多该回去了」
+	PRINTFORML 挽留准备回去的少女，%ANAME(MASTER)%说已经晚了，就住在这里吧
+	PRINTFORMW 少女考虑了一下之后，不知为何脸变得通红，开始扭捏起来
+	PRINTFORML 「不！并不是讨厌住宿啦！
+	PRINTFORML 　只是……所谓的过夜……估计是被%ANAME(MASTER)%疼爱一夜呢……♥
+	PRINTFORMW 　整晚被弄得乱七八糟……明天可能没有力气了……♥」
+	PRINTFORML 炽热的肉枪已经迫不及待地想顶开肉盾了，%ANAME(MASTER)%把眼前可爱的天狗推倒了
+	PRINTFORMW 「咿啊♥ 有，有点可怕呐……但是，还请多关照哦？」
+	PRINTFORML 
+	PRINTFORML ……
+	PRINTFORML 「啊！♥ 啊！♥ 啊！♥ 啊！♥ 啊啊——♥♥♥ 啊啊啊啊啊♥♥♥」
+	PRINTFORMW 「呼、呼唔一♥ 太深了♥ 不行，不能进那种地方♥ 不行啊♥」
+	PRINTFORML 「啊，哈啊♥ 唔啊，啊♥ 啊呃，哈啊♥ 啊，啊啊♥让， 让我稍微休息一下♥」
+	PRINTFORMW 「不、不能再射进去了……♥ 肚子变得，好涨♥ 所以，已经，不行了，啊唔」
+	PRINTFORML 「咿啊啊♥ 啊啊♥ 要，要死了♥ 要被肉棒操死了♥」
+	PRINTFORML 「啊哈……♥ 已经，坚持不住了……♥ 这种样子啊……♥ 真、真的不行了……♥」
+	PRINTFORMW 那天晚上，%ANAME(MASTER)%房间的娇声一整晚都没有中断……
+
+ELSEIF DVAR:天狗取材_夜の取材回数 == 8
+	PRINTFORML 「啊……」
+	PRINTFORML 像往常一样邀约，少女不知为何突然露出悲伤的表情……
+	PRINTFORMW %ANAME(MASTER)%询问了怎么回事
+	PRINTFORML 「那个……我想今天应该是结束采访的日子了
+	PRINTFORML 　已经采访够了……之前就决定了，但是一直说不出来」
+	PRINTFORML %ANAME(MASTER)%想起来是这样的……少女只是来进行采访所以陪几天而已，差点就忘记了，
+	PRINTFORML 她原本是为了写出好的新闻来采访自己的
+	PRINTFORMW 采访结束后关系就会中断了，从某种意义上说这是理所当然的结束方式
+	PRINTFORML 「总之，请先让我再次道谢
+	PRINTFORML 　至今为止，谢谢你的帮助！我一定会写出好的报纸给你看的！
+	PRINTFORML 　所以，那个，那个……」
+	PRINTFORML 对于无法接下一句话的少女，%ANAME(MASTER)%决定——
+
+	CALL SINGLE_DRAWLINE
+	CALL ASK_MULTI("再来采访就行了", "要来我这里帮忙吗", "告别")
+
+	IF RESULT == 0
+		DVAR:天狗取材_発生フラグ = 2
+		PRINTFORML %ANAME(MASTER)%决定，让少女想什么时候来采访就什么时候来就好了
+		PRINTFORML 如果想要写新的报道的话也欢迎过来取材，当然不过来也可以
+		PRINTFORMW 少女听到%ANAME(MASTER)%が的提议之后，瞬间愣住了，然后像花朵一样绽放了笑容
+		PRINTFORML 「是，那样的话请一定要拜托了！请让我再次取材吧」
+		PRINTFORML 然后，接着，脸由不得红了起来，
+		PRINTFORML 「当，当然……晚上也可以进行贴身采访，对吧？」
+		PRINTFORMW 那是当然的，%ANAME(MASTER)%点了点头
+	ELSEIF RESULT == 1
+		DVAR:天狗取材_発生フラグ = -1
+		PRINTFORML 发布报道后，%ANAME(MASTER)%邀请少女在自己的身边作为士官一起战斗
+		PRINTFORML 将提取素材的活动放在战场上，可以说当成战友来提供素材
+		PRINTFORML 在%ANAME(MASTER)%的邀请下，少女瞬间愣住了，
+		PRINTFORML 「作为军官，是吗……也就是说，作为%ANAME(MASTER)%的部下，一直在一起？」
+		PRINTFORML %ANAME(MASTER)%点点头，表示确实是这样的
+		PRINTFORMW 少女像是斟酌了一下似的歪着头，不久便莞尔一笑
+		PRINTFORML 「我明白了，请允许我听候您的差遣！
+		PRINTFORML 　那么，请再次多多关照吧？」
+		PRINTFORMW %ANAME(MASTER)%和脸颊稍微染红的少女紧紧地握手
+	ELSEIF RESULT == 2
+		DVAR:天狗取材_発生フラグ = -2
+		PRINTFORML %ANAME(MASTER)%表示，好聚好散吧
+		PRINTFORML 「是……但是，我一定会再写出好的报道给你看的！」
+		PRINTFORMW 少女虽然看起来很寂寞，但似乎再次燃起了对编辑报道的热情
+		PRINTFORML 「但是，这样就结束了，果然很寂寞呢！
+		PRINTFORML 　所以报纸出来后，在什么地方遇见的话……那时请谈谈感想
+		PRINTFORML 　慢慢地，一个小时也好，一个晚上也好……无论多长时间都好」
+		PRINTFORML %ANAME(MASTER)%对寻求再会约定的少女点头回应
+		PRINTFORMW 并让少女重振精神，让少女要更加努力，好好加油，「是！」少女像往常一样精神饱满地回答了
+	ENDIF
+
+	PRINTFORML 
+	PRINTFORML 「嘛，既然这样，可能以后的命运也都被现在决定了吧(まぁそんな風に、今後の身の振り方が決まったところで)……
+	PRINTFORML 　总之……这次的采访是最后一次了……对吧？
+	PRINTFORML 　晚上也可以再继续取材……吗？」
+	PRINTFORMW %ANAME(MASTER)%紧紧地抱住了感觉像被甩了一样小声说话的少女……
+	PRINTFORML 
+	PRINTFORML ……
+	PRINTFORML 那天晚上，%ANAME(MASTER)%和少女以迄今为止最激烈的程度相爱着……
+	PRINTFORML 「啊啊——♥ 啊啊——♥ 太激烈了♥ 太用力了啊♥」
+	PRINTFORML 敏感的密壶被肉棒用力地进行抠挖和摩擦，少女几乎发出悲鸣般的娇声
+	PRINTFORML 砰的一声肉体相互碰撞的声音在房间里回响，连接处的爱液纷纷飞散
+	PRINTFORML 少女的肉穴完全被调教成%ANAME(MASTER)%的形状了，更加恳切地寻求肉棒，不断用力往里吸
+	PRINTFORMW 为了回应，把肉棒顶得更深，戳入了比之前更深一层的地方……
+	PRINTFORML 「哦，咿啊啊！♥ 子宫♥ 子宫那里，被肉棒戳进来了……♥
+	PRINTFORML 　小宝宝♥ 小宝宝的房间被戳了♥ 被当作了%ANAME(MASTER)%肉棒的肉穴了……♥♥♥」
+	PRINTFORML 少女为连子宫都被%ANAME(MASTER)%所喜爱的喜悦而发抖，像是失禁一样地潮吹着
+	PRINTFORMW %ANAME(MASTER)%沉醉于施虐性的快乐中，毫不留情地蹂躏并开发了子宫内部……
+	PRINTFORML 「不，不要♥ 嗯——♥ 那、那里♥ 哈啊♥ 本来就敏感啊♥
+	PRINTFORML 　精液，全都射出来吧，让子宫填得满满的♥♥♥」
+	PRINTFORML %ANAME(MASTER)%将铃口压在子宫深处，不客气地吐出了忍耐后浓缩的精液
+	PRINTFORML 拼命忍耐着让柔软的块状物体压上射精管的快感，
+	PRINTFORMW 大把抓着丰满的屁股肉进行了射精……
+	PRINTFORML 「哦，哦♥ 妙蛙♥ 妙蛙♥ 来、来了……♥ 连输卵管都被侵犯了……♥」
+	PRINTFORML 少女几乎完全翻了白眼，一脸完全发情了的表情接受着精液的侵蚀……
+	PRINTFORMW 一分钟以上的射精结束后拔出肉棒，少女发出了「呜呜」的呻吟声
+	PRINTFORML 
+	PRINTFORML 「唔呃呃！」
+	PRINTFORML %ANAME(MASTER)%抓住少女的头，将完全看不出退缩迹象的肉棒塞进了小嘴
+	PRINTFORML 喉咙深处都被肉棒填满了，呼吸变得难受起来，但是少女却睁大了眼睛，眼睛里浮现出♥……
+	PRINTFORML 啾、啾唔、少女用深喉代替了回答，使得%ANAME(MASTER)%再次射精，
+	PRINTFORML 然后中途拔出，把剩下的精液射在少女小巧娇嫩的脸上
+	PRINTFORML 少女用恍惚的表情接受了精液……
+	PRINTFORMW 尽管如此还是感觉不够过瘾，于是把少女给按在地上压着，全身都盖在了上面
+	PRINTFORML 「啊哈哈……♥ 当然可以了，请尽情操我♥
+	PRINTFORML 　我的这里，从一开始就一直是%ANAME(MASTER)%的东西♥ 啊，哈啊♥ 唔，咿呃♥ 唔啊啊♥」
+	PRINTFORML 没等说完就把肉棒用力戳进%ANAME(MASTER)%专用的淫穴里，毫不留情地责怪着少女
+	PRINTFORML 子宫内被充满爱欲的炽热精液填充后，又继续往里注射了新鲜的精液
+	PRINTFORMW 今夜要彻底侵犯这名少女，让少女被刻下永不遗忘的快乐……
+	PRINTFORML 
+	PRINTFORML ……
+	PRINTFORML 「啊……♥ 哈……♥」
+	PRINTFORML 直到天亮，%ANAME(MASTER)%都在和少女尽情地相爱着
+	PRINTFORML 少女还没有从绝顶的余韵中恢复，全身被染上白浊液，仰着身体不停颤抖，
+	PRINTFORMW 时而剧烈地挺起腰抖动起来，从被连手指都能从密缝随便勾起一抹精液，完全注入了粘稠精液的小穴里溢出来留有余温的精液……
+	PRINTFORML 对少女的身姿感到满足的%ANAME(MASTER)%，忽然想起了什么，去寻找少女的随身包
+	PRINTFORML 寻找的是少女经常使用的照相机
+	PRINTFORMW %ANAME(MASTER)%确认了还剩胶卷，然后对着少女笑着说
+	PRINTFORMW 「呼……茄～～茄子～♥♥♥」
+	PRINTFORML 咔嚓一张
+	PRINTFORML 把少女那双手二指竖起，双手摊开在被精液沾满的身体旁边，带着恍惚的表情微笑的可爱模样拍了下来
+	PRINTFORMW 期待照片洗出来后会是什么样(写真の出来上がりを楽しみに思いながら)，还在兴头上难以抑制的%ANAME(MASTER)%又一次侵犯了少女……
+	PRINTFORMW 「诶嘿(Pyi e e e/ぴぃぇぇぇ)……♥♥♥」
+
+	;最終結果
+	IF DVAR:天狗取材_発生フラグ == 2
+		PRINTFORML 
+		PRINTFORML 之后，写着%ANAME(MASTER)%的报纸在幻想乡中流通
+		PRINTFORMW 看到了报道中%ANAME(MASTER)%的活跃情况，其他势力对%ANAME(MASTER)%所属势力的关心也高涨了……
+		FOR LOCAL, 1, MAX_COUNTRY
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 100, -50)
+		NEXT
+		CALL COLOR_PRINT("自勢力的評价上升了", カラー_注意)
+	ELSEIF DVAR:天狗取材_発生フラグ == -1
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORML 之后，写着%ANAME(MASTER)%的报纸在幻想乡中流通
+		PRINTFORMW 看到了报道中%ANAME(MASTER)%的活跃情况，其他势力对%ANAME(MASTER)%所属势力的关心也高涨了……
+		FOR LOCAL, 1, MAX_COUNTRY
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 100, -50)
+		NEXT
+		CALL COLOR_PRINT("自勢力的評价上升了", カラー_注意)
+		PRINTFORML 
+		CALL CREATE_RANDOM_CHARA(0,0,1)
+		対象 = RESULT
+		ABL:対象:武闘 = 55 + RAND:10
+		ABL:対象:防衛 = 25 + RAND:10
+		ABL:対象:知略 = 55 + RAND:10
+		ABL:対象:政治 = 15 + RAND:10
+		ABL:対象:歌唱 = 15 + RAND:10
+		ABL:対象:料理 = 45 + RAND:10
+		CALL TAG_INIT(対象,41)
+		CALL LEARN_SKILL_GENERAL_BY_NAME(対象, "实干家")
+		CALL LEARN_SKILL_GENERAL_BY_NAME(対象, "穷追猛打＋")
+		CALL VIRGINIZE_LOST(対象, 初体験_処女)
+		CALL VIRGINIZE_LOST(対象, 初体験_キス)
+		SEXUAL_EXPERIENCE:(対象):初体験_処女 = %ANAME(MASTER)%
+		SEXUAL_LAST_EXPERIENCE:(対象):初体験_処女 = %ANAME(MASTER)%
+		SEXUAL_EXPERIENCE:(対象):初体験_キス = %ANAME(MASTER)%
+		SEXUAL_LAST_EXPERIENCE:(対象):初体験_キス = %ANAME(MASTER)%
+		TALENT:対象:反抗的 = 0
+		TALENT:対象:傲嬌 = 0
+		TALENT:対象:難以越過的底線 = 0
+		TALENT:対象:接受快感 = 1
+		TALENT:対象:否定快感 = 0
+		TALENT:対象:合意 = 1
+		TALENT:対象:恋慕 = 1
+		CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属, 1)
+		CFLAG:対象:好感度 = 1500
+		CFLAG:対象:依存度 = 1200
+		CFLAG:対象:従属度 = 1200
+		CALL COLOR_PRINTW(@"天狗の%ANAME(対象)%加入了我军", カラー_注意)
+		CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", @"%ANAME(MASTER)%")
+		CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失, 接吻喪失", 0, @"%ANAME(対象)%的嘴唇", "", @"%ANAME(対象)%的膣穴")
+		DVAR:天狗取材_キャラID= GET_ID(対象)
+	ELSEIF DVAR:天狗取材_発生フラグ == -2
+		PRINTFORML 
+		PRINTFORML 之后，写着%ANAME(MASTER)%的报纸在幻想乡中流通
+		PRINTFORML 对%ANAME(MASTER)%相关详细内容的文章获得了很高的评价
+		PRINTFORML 特别是被称赞能传达出作者的热情，少女的名声似乎更响亮了
+		PRINTFORMW %ANAME(MASTER)%期待着能传达感情的那一天(%ANAME(MASTER)%は感想を伝えられる日を心待ちにしている)……
+		FOR LOCAL, 1, MAX_COUNTRY
+			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 200, -100)
+		NEXT
+		CALL COLOR_PRINT("自勢力的評价极大的上升了", カラー_注意)
+	ENDIF
+ENDIF
+
+PRINTFORMW
+
+RETURN 1

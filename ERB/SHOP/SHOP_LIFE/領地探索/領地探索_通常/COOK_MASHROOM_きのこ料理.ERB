@@ -1,0 +1,51 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_COOK_MASHROOM_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_COOK_MASHROOM_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_COOK_MASHROOM(対象)
+#DIM 対象
+
+PRINTFORML 在森林中找到了不可思议形状的蘑菇
+PRINTFORML 看上去有種可以吃的感覺……
+PRINTL
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "料理"))
+CALL ASK_YN("试着料理一下", "放棄")
+
+IF RESULT == 1
+	PRINTFORML 外行人不應該輕舉妄動
+	PRINTFORMW %ANAME(対象)%返回了拠点
+	RETURN 1
+ENDIF
+
+PRINTFORML 食欲戦勝了対危險的思考
+PRINTFORMW %ANAME(対象)%把蘑菇帯回去烹飪了
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+IF LIMIT(ABL:対象:料理 * 2, 50, 100) < RAND:100
+	PRINTFORML 好吃！
+	PRINTFORML 極上的味道讓臉頰不由得舒緩了下來
+	CALL PRINT_ADD_EXP(対象, "料理経験値", RAND:8 + 1, 1)
+	RETURN 1
+ENDIF
+
+PRINTFORML 糟了！
+PRINTFORML 不只是因為有毒還是因為調理失敗了、吃壞了肚子
+PRINTFORMW 這肯定是教訓…冒著冷汗按住肚子的%ANAME(対象)%強烈的這麼想著
+CALL ADD_COOLTIME(対象, 2)
+
+RETURN 1

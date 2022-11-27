@@ -1,0 +1,81 @@
+@BUILDING_GET_NAME_长程火炮阵地()
+    #FUNCTIONS
+    RETURNF "长程火炮阵地"
+
+@BUILDING_GET_EXP_长程火炮阵地()
+    #FUNCTIONS
+    RETURNF "所在城市可以对我方任意城市发动援护射击。"
+
+@BUILDING_SET_INFO_ID_35()
+    BUILDING_TYPE:建造物_长程火炮阵地 = 建造物_类型_防御类
+    BUILDING_LEVEL:建造物_长程火炮阵地 = 建造物_等级_三级建筑
+    BUILDING_LIMIT_NUM:建造物_长程火炮阵地 = 建造物_数量限制_1
+    BUILDING_LIMIT_UNI:建造物_长程火炮阵地 = 0
+    BUILDING_COUNTRY_ID:建造物_长程火炮阵地:特殊勢力_普通势力 = 1
+    BUILDING_HAVE_SKILL:建造物_长程火炮阵地 = 1
+    BUILDING_TOHO_REQ_ID:建造物_长程火炮阵地:0 = 0
+
+@CHECK_BUILDING_FUNCTION_长程火炮阵地(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    #DIM CITY_ID
+    #DIM SLOT_PTR
+    RESULT:1 = TMP_BUILDING_EXIST_FLAG:COUNTRY_ID:建造物_长程火炮阵地
+    IF RESULT:1 > 0
+        RESULT:1 = 0
+        FOR CITY_ID , 1 , MAX_CITY
+            IF CITY_OWNER:(CITY_ID) == COUNTRY_ID
+                FOR SLOT_PTR, 0,MAX_BUILDING_SLOT_NUM
+                    IF CITY_BUILDING:CITY_ID:SLOT_PTR == 建造物_长程火炮阵地
+                       RESULT:1 = CITY_ID
+                            BREAK
+                    ENDIF
+                NEXT
+            ENDIF
+            SIF RESULT:1 != 0
+                BREAK
+        NEXT
+        RESULT:0 = 1
+    ENDIF
+    RETURNF RESULT:0
+
+@BUILDING_TEXT_长程火炮阵地(COUNTRY_ID,CITY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    #DIM CITY_ID
+    SIF !CHECK_BUILDING_TEXT_OUTPUT(COUNTRY_ID)
+        RETURNF 0
+    BUILDING_TEXT = PRINT_BUILDING_TEXT_TITLE_F()
+    PRINTFORML 因为《长程火炮阵地》的存在，%ANAME(GET_COUNTRY_BOSS(COUNTRY_ID))%远在视界外的火炮群向%CITY_NAME:CITY_ID%城的敌人发射了死亡的弹雨！
+    RETURNF 1
+
+@BUILDING_TEXT_长程火炮阵地_SKILL(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    #DIM CITY_ID
+    SIF !CHECK_BUILDING_TEXT_OUTPUT(COUNTRY_ID)
+        RETURNF 0
+    BUILDING_TEXT = PRINT_BUILDING_TEXT_TITLE_F()
+    PRINTFORML 因为《长程火炮阵地》的存在，%ANAME(GET_COUNTRY_BOSS(COUNTRY_ID))%远在视界外的火炮群向敌人发起了一轮炮击
+    RETURNF 1
+
+@BUILDING_SKILL_长程火炮阵地(COUNTRY_ID)
+    #DIM COUNTRY_ID
+    PRINTFORML 发动后我方部队本回合作战时立即对敌方造成伤害
+    PRINTFORML 冷却时间3回合
+    PRINTFORML 是否发动
+    CALL ASK_YN()
+    IF !RESULT
+        PRINTFORML 发动了《长程火炮阵地》的技能
+        CALL BUILDING_SKILL_长程火炮阵地_FUNCTION(COUNTRY_ID)
+        BUILDING_SKILL_COLDTIME:COUNTRY_ID:建造物_长程火炮阵地 = 3
+    ENDIF
+    PRINTFORMW 完毕
+
+@BUILDING_SKILL_长程火炮阵地_FUNCTION(COUNTRY_ID)
+    #DIM COUNTRY_ID
+    #DIM CITY_ID
+    SIF !IS_COUNTRY(COUNTRY_ID)
+        RETURN
+    BUILDING_SKILL_BUFF:COUNTRY_ID:建造物_长程火炮阵地 = 1
+    BUILDING_SKILL_BUFF_REMAIN:COUNTRY_ID:建造物_长程火炮阵地 = 1

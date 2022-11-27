@@ -1,0 +1,528 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K83_NIGHT_OF_THE_HERMIT_RATE(対象)
+#DIM 対象
+RETURN 50
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K83_NIGHT_OF_THE_HERMIT_DECISION(対象)
+#DIM 対象
+
+;合意がないとだめ
+SIF !TALENT:対象:合意
+	RETURN 0
+	
+;対象が女でないとだめ
+SIF !IS_FEMALE(対象)
+	RETURN 0
+	
+;主人公と同一勢力で捕虜でなく、主人公がペニス持ちで、好感度1500以上
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0) && HAS_PENIS(MASTER) && CFLAG:対象:好感度 >= 1500
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K83_NIGHT_OF_THE_HERMIT_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K83_NIGHT_OF_THE_HERMIT(対象)
+#DIM 対象
+#DIM OPTION
+
+PRINTFORML ･･･
+SELECTCASE RAND:3
+	;添い寝ルート
+	CASE 0
+		PRINTFORMW 某个夜晚
+		;TranslatedMark とある日の夜
+		PRINTFORML 正想着差不多该睡了的时候，%ANAME(対象)%带着枕头来到了%ANAME(MASTER)%的房间
+		;TranslatedMark そろそろ眠ろうかと思っていたところに、%ANAME(対象)%が枕持参で%ANAME(MASTER)%の部屋を訪ねてきた
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「%ANAME(MASTER)%，还醒着吗？」
+				;TranslatedMark 「%ANAME(MASTER)%、まだ起きてますか？」
+				PRINTFORML 「啊，那个…虽然听起来好像很幼稚，怎么说呢……」
+				;TranslatedMark 「あ、あの…子供っぽいこと言うようで何なんですけど……」
+				PRINTFORMW 「今晚莫名地想念人的肌肤……陪睡什么的…可以帮我做吗？」
+				;TranslatedMark 「今夜は妙に人肌が恋しくて……添い寝とか…してくれませんか？」
+			CASE 1
+				PRINTFORML 「一个人睡不寂寞吗？」
+				;TranslatedMark 「一人寝は寂しくないですか？」
+				PRINTFORMW 「…如果可以的话，把我当成抱枕怎么样呢♪」
+				;TranslatedMark 「…良かったら、私を抱き枕にしてみては如何でしょう♪」
+			CASE 2
+				PRINTFORML 「总觉得有点想念人的肌肤了……可以的话能把你当成抱枕吗？」
+				;TranslatedMark 「何だか人肌恋しくなりまして……良かったら抱き枕になってくれませんか？」
+				PRINTFORMW 「作为补偿，你可以枕着我的胸部…♥」
+				;TranslatedMark 「その代わり、そちらは私のお胸を枕にしても構いませんから…♥」
+		ENDSELECT
+		PRINTFORMW 好像很思念人的%ANAME(対象)%，想和%ANAME(MASTER)%一起睡
+		;TranslatedMark どうやら人恋しくなった%ANAME(対象)%は、%ANAME(MASTER)%と一緒に寝たいようだ
+		PRINTFORMW 那么，该怎么办呢……
+		;TranslatedMark さて、どうしよう……
+		PRINTFORML
+		CALL ASK_YN("一起睡吧", "拒绝")
+		IF RESULT == 1
+			PRINTFORML
+			PRINTFORMW …反而会闷闷地睡不着，所以拒绝了
+			;TranslatedMark …逆に悶々として眠れなくなりそうだから断った
+			PRINTFORML 「真，真是太杀生了……哟哟哟，太过分了……」
+			;TranslatedMark 「そ、そんな殺生な……ヨヨヨ、あんまりですわー……」
+			PRINTFORMW %ANAME(対象)%一副演戏的样子咬着手帕回去了……
+			;TranslatedMark %ANAME(対象)%は芝居がかった様子でハンカチを噛みながら帰っていった……
+			PRINTFORML 那么差不多该睡觉了吧…
+			;TranslatedMark それではそろそろ眠るとしよう…
+			PRINTFORML ･･･
+			PRINTFORMW ･･････
+			PRINTFORML 深夜，突然因为一种奇怪的违和感而醒了。总觉得被子里有一种温暖而柔软的感觉…
+			;TranslatedMark 深夜、ふとした違和感で目が覚めた。何やら布団の中に温かくて柔らかい感触が…
+			PRINTFORMW 这样想着的时候，往旁边一看，不知什么时候%ANAME(対象)%抱着%ANAME(MASTER)%睡着了
+			;TranslatedMark 何かと思って横を見ると、いつの間にか%ANAME(対象)%が%ANAME(MASTER)%に抱きつきながら眠っていた
+			PRINTFORMW ……这么说来，%ANAME(対象)%是可以使用穿墙术的。如果认真的话，锁上房间也是没有意义的
+			;TranslatedMark ……そういえば%ANAME(対象)%は壁抜けの術が使えるのだ。その気になれば部屋の施錠など無意味だった
+			PRINTFORML 但是，抱着%ANAME(MASTER)%，一脸幸福地睡着的她，完全没有感觉到什么邪的样子。
+			;TranslatedMark しかし、%ANAME(MASTER)%に抱きついて幸せそうな顔で眠る彼女からは、邪な考えはまるで無いように感じた
+			PRINTFORMW 真的，只是想一起睡吧
+			;TranslatedMark 本当に、ただ一緒に眠りたかっただけなのだろう
+			PRINTFORML %ANAME(MASTER)%也抱着她再次入眠
+			;TranslatedMark %ANAME(MASTER)%もまた、彼女を抱き枕にして再び眠ることにした
+			PRINTFORMW 「嗯…嗯………%ANAME(MASTER)%………♥」
+			;TranslatedMark 「ん…んん………%ANAME(MASTER)%………♥」
+			PRINTFORML 一边用撒娇的声音说着梦话，一边紧紧抱住%ANAME(対象)%
+			;TranslatedMark 甘えた声で寝言を漏らしながら、%ANAME(対象)%もぎゅっと抱きついてくる
+			PRINTFORMW 结果两个人互相将彼此当做抱枕，甜甜蜜蜜地睡着了……
+			;TranslatedMark 結局二人とも、互いを抱き枕にして仲良く眠りについた……
+			CFLAG:対象:好感度 += 300
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了300", 0x00FFFF)
+		ELSE
+			PRINTFORML
+			PRINTFORMW …让像她这样的美人陪我睡觉的机会白白浪费掉，也是一种损失吧
+			;TranslatedMark …彼女のような美人が添い寝してくれる機会を棒に振る、というのも損だろう
+			PRINTFORML 「呵呵，谢谢。那么，打扰了♪」
+			;TranslatedMark 「ふふ、ありがとうございます。それじゃあ、お邪魔しますね♪」
+			PRINTFORML 换上睡衣，两个人钻进冰冷的被窝里
+			;TranslatedMark 寝巻きに着替えて、冷えた布団の中に二人で潜り込む
+			PRINTFORMW 「啊…%ANAME(MASTER)%的身体，很温暖…♥我的身体怎么样呢？」
+			;TranslatedMark 「あぁ…%ANAME(MASTER)%の身体、とても温かいです…♥　私の身体はどうですか？」
+			PRINTFORML 从上等布质的睡衣中，可以感受到她的体温、香气和柔软
+			;TranslatedMark 上等な布質の寝巻きから、彼女の体温といい香り、そして柔らかさが伝わる
+			PRINTFORMW 想要更多地品味那份柔软，%ANAME(MASTER)%自然地抱紧了%ANAME(対象)%
+			;TranslatedMark その柔らかさをもっと味わいたくて、%ANAME(MASTER)%はおのずと%ANAME(対象)%を抱きしめる
+			PRINTFORMW 「啊…可以哦。今天两个人都成为彼此的抱枕吧…♥」
+			;TranslatedMark 「あん…、いいですよ。今日は二人とも、お互いのための抱き枕になっちゃいましょう…♥」
+			PRINTFORML %ANAME(対象)%一边这样说着，一边用自己的胸口抱住%ANAME(MASTER)%的脸
+			;TranslatedMark %ANAME(対象)%はそう言いながら、%ANAME(MASTER)%の顔を自らの胸で抱き包む
+			PRINTFORMW 「我的胸枕怎么样？这可是不论男女都会喜欢的枕头」
+			;TranslatedMark 「私のお胸枕、どうですか？　男女を問わず喜ばれている枕なんですが」
+			PRINTFORML %ANAME(対象)%抚摸着%ANAME(MASTER)%的头轻声细语
+			;TranslatedMark %ANAME(MASTER)%の頭を撫でながら%ANAME(対象)%が囁く
+			PRINTFORMW 柔软、芳香、温暖，确实是最好的枕头。下半身也不由得变的精神起来…
+			;TranslatedMark 柔らかさも、香りも、温もりも、たしかに極上の枕だった。思わず下半身も元気になるほどの…
+			PRINTFORML 「哎呀哎呀，有热热的东西碰到大腿了呢♥该怎么办呢」
+			;TranslatedMark 「あらあら、熱い物が太ももに当たっていますね♥　どうしましょうか」
+			PRINTFORMW 「只是这样睡觉就够了吗？还是说……我可以为你帮做更多的事情吗…？」
+			;TranslatedMark 「このまま眠っちゃいますか？　それとも……もっと先のことまで、シてあげましょうか…？」
+			PRINTFORML 一边用大腿摩擦着勃起的肉棒一边诱惑着。
+			;TranslatedMark 勃起した肉棒に太ももを擦り付けながら誘惑する
+			PRINTFORMW …能够拒绝这个诱惑的人不多吧。而且，%ANAME(MASTER)%也在寻求着相同的目的
+			;TranslatedMark …この誘惑を撥ね退けられる者はそう多くないだろう。そして%ANAME(MASTER)%もまた、この先を求めた
+			PRINTFORML 「呵呵呵…这么可爱的表情说的话…我也非常想为您服务」
+			;TranslatedMark 「うふふ…そんな可愛いお顔で言われたら…、とっても、サービスしてあげたくなります」
+			PRINTFORMW %ANAME(対象)%取出了%ANAME(MASTER)%硬邦邦的阴茎，用淫荡的表情纠缠着%ANAME(MASTER)%
+			;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%のガチガチになったペニスを取り出し、淫蕩な表情で%ANAME(MASTER)%に絡み付いてきた
+			PRINTFORMW 「为了睡一个好觉，我会榨你很多的♥」
+			;TranslatedMark 「ぐっすり眠れるように、たくさん搾ってあげますわ♥」
+			PRINTFORML
+			PRINTFORMW ……
+			SELECTCASE RAND:4
+				CASE 0
+					PRINTFORMW %ANAME(MASTER)%覆盖到%ANAME(対象)%的身体上，用正常位连接着彼此
+					;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%に覆いかぶさるように、正常位で繋がり合っている
+					PRINTFORML 乍一看应该是%ANAME(MASTER)%在推倒的姿势，但实际上，主导权完全掌握在%ANAME(対象)%的手中
+					;TranslatedMark 一見%ANAME(MASTER)%が押し倒しているはずの体勢だが、その実、主導権は%ANAME(対象)%が握っていた
+					PRINTFORMW %ANAME(対象)%在%ANAME(MASTER)%的腰部性感地缠上双腿，巧妙地摇晃腰部，玩弄着阴道内的阴茎
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の腰に艶かしく脚を絡め、巧みに腰を揺すって膣内のペニスを弄ぶ
+					PRINTFORMW 「呵呵，感觉如何？请尽情享受仙人的房中术♥」
+					;TranslatedMark 「ふふっ、キモチいいですか？　仙人の房中術、堪能してくださいね♥」
+					PRINTFORML %ANAME(対象)%用自己丰满柔软的乳房抱住%ANAME(MASTER)%的脸
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の顔を、自らの豊満で柔らかな乳房で顔を抱き包む
+					PRINTFORMW 上面是乳肉，下面是阴道肉，甜美的快乐支配着%ANAME(MASTER)%…
+					;TranslatedMark 上を乳肉、下を膣肉で包まれ、甘い快楽が%ANAME(MASTER)%を支配していく…
+					PRINTFORML 「啊，你被我迷住了，表情真好啊♥想中出的话随时都可以哦♪」
+					;TranslatedMark 「ああ、私に蕩けて、とてもいいお顔ですわ♥　いつでも中に出してかまいませんからね♪」
+					PRINTFORML %ANAME(対象)%甜美的低语侵犯着%ANAME(MASTER)%的耳朵，被她吃下的阴茎不停颤抖。
+					;TranslatedMark %ANAME(対象)%の甘い囁きが%ANAME(MASTER)%の耳を犯し、彼女に食べられているペニスを震わせる
+					PRINTFORMW 最后终于在她的体内射精了。感受到生命在阴道内奔跑的热度，她幸福地抚摸着%ANAME(MASTER)%的头……
+					;TranslatedMark そしてついに彼女の中に精を漏らす。膣内に走る命の熱を感じ、彼女は幸せそうに%ANAME(MASTER)%の頭を撫でた……
+				CASE 1
+					PRINTFORMW %ANAME(対象)%跨在%ANAME(MASTER)%身上，用粘糊糊的吻堵住了%ANAME(MASTER)%的嘴，摇动起了腰
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の上に跨り、ねっとりとしたキスで%ANAME(MASTER)%の口を塞ぎながら腰を振っている
+					PRINTFORML 啪啪啪，肉与肉互相碰撞的性交特有的声音煽动着两人的情欲
+					;TranslatedMark ぱちゅっぱちゅっ、と肉がぶつかり合う性交特有の音が二人の情欲を煽っていく
+					PRINTFORMW 「啊，嗯，怎么样？%ANAME(MASTER)%♥我的里面，感觉好吗？嗯♥」
+					;TranslatedMark 「あっ、んっ、どうですか？　%ANAME(MASTER)%♥　私の中っ、キモチいいですか？　あんっ♥」
+					PRINTFORML %ANAME(対象)%巧妙地扭腰，给予%ANAME(MASTER)%极大的快感，责弄着肉棒
+					;TranslatedMark %ANAME(対象)%は腰を巧みにくねらせ、%ANAME(MASTER)%に極上の快感を与えて肉棒を責め立てる
+					PRINTFORMW 「啊，请射到我的里面♥请将%ANAME(MASTER)%的爱注入进来♥」
+					;TranslatedMark 「ああ、注いでくださいっ私の中にっ♥　%ANAME(MASTER)%の愛を注いでくださいましっ♥」
+					PRINTFORMW %ANAME(MASTER)%屈服于她的动作，一边喊着%ANAME(対象)%的名字一边狠狠地顶着子宫口，射精……
+					;TranslatedMark %ANAME(MASTER)%は彼女の腰使いに屈服して、%ANAME(対象)%の名を叫びながら子宮口まで思い切り突き上げて射精した……
+				CASE 2
+					PRINTFORMW %ANAME(MASTER)%以面对面坐位的姿势和%ANAME(対象)%紧密相连
+					;TranslatedMark %ANAME(MASTER)%は対面座位の姿勢で%ANAME(対象)%と深く繋がりあっている
+					PRINTFORMW 沉迷于她的魔性的动腰，紧紧抱住柔软的身体，贪图着快乐的%ANAME(MASTER)%
+					;TranslatedMark 彼女の魔性の腰使いに夢中になり、ぎゅっと柔らかな肢体に抱きつきながら快楽を貪る%ANAME(MASTER)%
+					PRINTFORML 在那柔软的肉壶里恍惚的时候，%ANAME(対象)%的声音突然在耳边响起
+					;TranslatedMark その柔らかさと肉壷に恍惚としていると、ふいに%ANAME(対象)%が耳元で
+					CALL COLOR_PRINTL("「　感　觉　好　吗　？　」", カラー_ピンク)
+					PRINTFORMW 伴随着甜蜜的呼吸低语着
+					;TranslatedMark と甘い吐息交じりで囁いてきた
+					PRINTFORMW 脑海中回荡着的娇艳声音，在%ANAME(MASTER)%的全身中弥漫着甜美的麻痹感，阴茎轻轻地跳动着
+					;TranslatedMark 頭の中に響くような艶声が、%ANAME(MASTER)%の全身にゾクゾクと甘い痺れを走らせ、ペニスがびくびくと跳ねる
+					PRINTFORML 「呵呵…♥喜欢在耳边低语吗？　…那么，我再给你一点…♥」
+					;TranslatedMark 「ふふ…♥　耳元で囁かれるの、お好きなんですか？　…じゃあ、もっとシテあげます…♥」
+					PRINTFORMW %ANAME(対象)%的嘴唇在快要触碰到%ANAME(MASTER)%耳朵的距离，一边私语着甜言蜜语一边扭动着腰
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の耳に唇が触れそうな距離で、甘い言葉を囁きながら腰をくねらせる
+					PRINTFORMW 被%ANAME(対象)%给予的甜蜜快乐所支配的%ANAME(MASTER)%，恍惚地盛大地射精……
+					;TranslatedMark %ANAME(対象)%が与える甘い快楽に支配された%ANAME(MASTER)%は、恍惚としたまま盛大に射精した……
+				CASE 3
+					PRINTFORMW 「嗯…嗯…嗯♥…呜哇…。呵呵，感觉很好呢♥」
+					;TranslatedMark 「んちゅ…はむ…っ♥…れろぉ…。うふふ、キモチよさそうですね♥」
+					PRINTFORML %ANAME(対象)%钻进%ANAME(MASTER)%的大腿间，仔细地吮吸着心爱的肉棒
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の股間に潜り込み、愛しい肉棒を丹念にしゃぶっている
+					PRINTFORMW 用舌尖舔舐着他的头部和铃口，连里筋和玉袋都很仔细地责弄着
+					;TranslatedMark カリ首や鈴口を舌先で舐めなぞり、裏筋、玉袋まで入念に責める
+					PRINTFORML 其卓越的性技足以让%ANAME(MASTER)%的腰都断掉。因为过度的快感而想要退缩
+					;TranslatedMark その卓越した性技は%ANAME(MASTER)%を腰砕けにするには十分だった。あまりの快感に腰を引こうとするも
+					PRINTFORML 「啊，还不行哦♥嗯……还请您继续享受我的嘴♥」
+					;TranslatedMark 「あぁん、だめですよ♥　んちゅっ……私のお口、まだまだ堪能してくださいまし♥」
+					PRINTFORMW 这样说着，%ANAME(対象)%紧紧地抱着%ANAME(MASTER)%的腰，更加深地吮吸着阴茎
+					;TranslatedMark そう言うと%ANAME(対象)%は%ANAME(MASTER)%の腰をがっしりと抱え、ペニスをよりいっそう深く強くしゃぶり咥える
+					PRINTFORMW 通过%ANAME(対象)%的技巧，%ANAME(MASTER)%的肉棒轻而易举地缴械投降了，大量射精到她嘴里
+					;TranslatedMark %ANAME(対象)%のテクニックにより、%ANAME(MASTER)%の肉棒はたやすく根を上げ、彼女の口内に大量射精した
+					PRINTFORML 「嗯！　……嗯…嗯…♥……请看，%ANAME(MASTER)%的有这么多…啊~♥」
+					;TranslatedMark 「んんぅっ！　……ん…ちゅぅ…♥……見てください、%ANAME(MASTER)%のがこんなにいっぱい…あ～ん♥」
+					PRINTFORMW %ANAME(対象)%在%ANAME(MASTER)%的面前，张开嘴露出了精液
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の目の前で、口内に出された精液を見せ付ける
+					PRINTFORML 然后和唾液合在一起，咕嘟咕嘟地品尝，然后以煽情的表情，咕嘟一声咽下去
+					;TranslatedMark そして唾液と合わせてくちゅくちゅと味わい、扇情的な表情でごくん、と喉を鳴らして飲み込んだ
+					PRINTFORMW 面对着这种过于淫靡的景象，刚射精的肉棒立刻恢复了硬度
+					;TranslatedMark そのあまりに淫靡な光景に、射精したばかりの肉棒は即座に硬さを取り戻す
+					PRINTFORMW 「呵呵呵…这次请把%ANAME(MASTER)%的种子给我吧♥」
+					;TranslatedMark 「うふふ…今度は私のココに、%ANAME(MASTER)%の子種をくださいませ♥」
+			ENDSELECT 
+			PRINTFORML
+			PRINTFORMW ……
+			PRINTFORMW 直到最后一滴都被%ANAME(対象)%榨干了，做爱才告一段落，两人赤裸着抱在一起躺下了
+			;TranslatedMark 最後の一滴まで%ANAME(対象)%に搾り取られてようやくセックスが終わると、二人は裸で抱き合ったまま横になった
+			PRINTFORML 因为%ANAME(対象)%的性技而恍惚的%ANAME(MASTER)%，就那样撒娇般地抱住她闭上眼睛
+			;TranslatedMark %ANAME(対象)%の性技に恍惚とした%ANAME(MASTER)%は、そのまま甘えるように彼女に抱きついて目を閉じる
+			PRINTFORMW 「嗯……晚安，%ANAME(MASTER)%……♥」
+			;TranslatedMark 「ん……お休みなさい、%ANAME(MASTER)%……♥」
+			PRINTFORMW 一边用骄傲的胸围抱着%ANAME(MASTER)%的脸，%ANAME(対象)%也睡着了……
+			;TranslatedMark %ANAME(MASTER)%の顔を自慢のバストで抱き包みながら、%ANAME(対象)%もまた眠りについた……
+			CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的唇", ANAME(MASTER))
+			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣")
+			CFLAG:対象:好感度 += 700
+			CFLAG:対象:支配度 += 300
+			ABL:対象:主導度Ｕ += 500
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了500", 0x00FFFF)
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的支配度上升了300", 0x00FFFF)
+			PRINTFORML 
+		ENDIF
+	;晩酌ルート
+	CASE 1
+		PRINTFORMW 某个夜晚
+		;TranslatedMark とある日の夜
+		PRINTFORML 正想着差不多该睡觉了，%ANAME(対象)%带着酒来到%ANAME(MASTER)%的房间
+		;TranslatedMark そろそろ眠ろうかと思っていたところに、%ANAME(対象)%がお酒持参で%ANAME(MASTER)%の部屋を訪ねてきた
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「%ANAME(MASTER)%，还醒着吗？」
+				;TranslatedMark 「%ANAME(MASTER)%、まだ起きてます？」
+				PRINTFORMW 「今天莫名其妙的睡不着……。如果可以的话，可以陪我喝一杯吗？」
+				;TranslatedMark 「今日は妙に寝付けなくて……。良ければ、少し晩酌に付き合ってくれませんか？」
+			CASE 1
+				PRINTFORMW 「找到了一点好的东西，可以的话一起怎么样？」
+				;TranslatedMark 「良いものを見つけまして、宜しければご一緒にどうですか？」
+			CASE 2
+				PRINTFORMW 「要不要一起喝一杯？找到了好酒♪」
+				;TranslatedMark 「ちょっと一緒に飲みませんこと？　いいお酒を見つけましたの♪」
+		ENDSELECT
+		PRINTFORMW %ANAME(対象)%把带来的酒给%ANAME(MASTER)%看，提议晚上一起喝酒
+		;TranslatedMark %ANAME(対象)%は持ってきた酒を%ANAME(MASTER)%に見せ、晩酌に付き合ってくれないかと提案してきた
+		PRINTFORMW 那么，怎么办呢……
+		;TranslatedMark さて、どうしよう……
+		PRINTFORML
+		CALL ASK_YN("晚上一起喝吧", "拒绝")
+		IF RESULT == 1
+			PRINTFORML
+			PRINTFORML 「诶，不跟我交往吗？啊，好寂寞啊～、好寂寞啊……」
+			;TranslatedMark 「えー、付き合ってくれないんですの？　はあ、寂しいわ～、ヨヨヨ……」
+			PRINTFORMW  %ANAME(対象)%一副演戏的夸张表情，捂着眼睛回去了……
+			;TranslatedMark %ANAME(対象)%は芝居がかった様子で目元を押さえながら帰っていった……
+		ELSE
+			PRINTFORML
+			PRINTFORMW 睡前过去喝一杯也不错吧。%ANAME(MASTER)%邀请%ANAME(対象)%进入房间。
+			;TranslatedMark 寝る前に駆けつけ一杯というのもいいだろう。%ANAME(MASTER)%は%ANAME(対象)%を部屋に招きいれた
+			PRINTFORML 「呵呵，那我就打扰了♪」
+			;TranslatedMark 「うふふ、それじゃあお邪魔しますわ♪」
+			PRINTFORMW …
+			PRINTFORMW %ANAME(対象)%带来的酒真的很好喝，和能说会道的她一起晚酌，气氛非常热烈
+			;TranslatedMark %ANAME(対象)%が持参した酒は本当に美味しく、話し上手な彼女との晩酌は大いに盛り上升了
+			PRINTFORMW 一边聊天一边喝着酒，醉意升起的时候心情也渐渐变好了
+			;TranslatedMark おしゃべりしながらチビチビ飲んでいると、酔いも回って良い気分になってきた
+			PRINTFORMW 看起来今天会睡的很好
+			;TranslatedMark これはとても良く眠れそうだ
+			PRINTFORMW 「呵呵……和%ANAME(MASTER)%在一起的话，稍微喝多了♪有点热了呢」
+			;TranslatedMark 「ふう……%ANAME(MASTER)%と一緒だと、ちょっと飲み過ぎてしまいます♪　少し火照ってきましたわ」
+			PRINTFORML %ANAME(対象)%啪嗒啪嗒地用手扇风，向微微渗出汗水的胸口送去风
+			;TranslatedMark %ANAME(対象)%はぱたぱたと手で扇ぎ、少し汗が滲む胸元に風を送る
+			PRINTFORMW 酒的缘故将她如玉般白皙的肌肤微微染红，显得十分娇艳……
+			;TranslatedMark 酒の火照りが、彼女の玉のように白い肌をほんのりと朱に染め、とても艶っぽく見せる……
+			CALL ASK_YN("袭击", "就这样睡吧")
+			IF RESULT == 1
+				PRINTFORML
+				PRINTFORML ……不，破坏这种愉快的气氛是很不明智的
+				;TranslatedMark ……いや、この楽しい空気を壊すのは無粋だ
+				PRINTFORMW %ANAME(MASTER)%就这样带着微醉的心情睡着了
+				;TranslatedMark %ANAME(MASTER)%はこのままほろ酔い気分で眠ることにした
+				PRINTFORMW 「呵呵，我也喝醉了，到此结束吧。那么我……」
+				;TranslatedMark 「ふふ、私も酔いが回ってきたところですし、これでお開きですね。それでは私は……」
+				PRINTFORMW 一边这样说着，%ANAME(対象)%理所当然地钻进了%ANAME(MASTER)%的被子里，躺在了%ANAME(MASTER)%的身边
+				;TranslatedMark そう言いながら%ANAME(対象)%は、当然の如く%ANAME(MASTER)%の布団に入りこみ、すぐ隣に陣取った
+				PRINTFORML 「就这样一起睡可以吗？回房间就麻烦了♥」
+				;TranslatedMark 「このまま一緒に寝てもいいですか？　部屋に戻るのが面倒になっちゃいまして♥」
+				PRINTFORMW %ANAME(対象)%用爽朗的笑容这样说。嗯，既然喝了这么好喝的酒，就这么办吧
+				;TranslatedMark 朗らかな笑顔で%ANAME(対象)%が言う。まあ、美味しいお酒を頂いたのだからこれくらい良いだろう
+				PRINTFORMW %ANAME(MASTER)%接受了%ANAME(対象)%的提议，像陪睡一样躺下了
+				;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%の提案を受け入れ、添い寝するように横になった
+				PRINTFORMW 「呵呵，谢谢♥那么晚安，%ANAME(MASTER)%………」
+				;TranslatedMark 「うふふ、ありがとうございます♥　それじゃあお休みなさい、%ANAME(MASTER)%………」
+				PRINTFORMW 因为醉意而进入深度睡眠，两个人都带着幸福的表情睡着了……
+				;TranslatedMark 酔いによって深い眠りに誘われ、二人とも幸せそうな表情で眠りについた……
+				CFLAG:対象:好感度 += 500
+				CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了500", 0x00FFFF)
+				CALL PRINT_ADD_EXP(対象, "肝臓経験値", RAND(5, 10), 1)
+				CALL PRINT_ADD_EXP(MASTER, "肝臓経験値", RAND(5, 10), 1)
+				CALL TRAIN_AUTO_ABLUP(対象)
+				CALL TRAIN_AUTO_ABLUP(MASTER)
+				PRINTFORML
+				RETURN
+			ENDIF
+			PRINTFORML
+			PRINTFORMW ……这个仙人太好色了！兴奋的%ANAME(MASTER)%抱住%ANAME(対象)%，抚摸着她的身体
+			;TranslatedMark ……この仙人、スケベすぎる！　興奮した%ANAME(MASTER)%は%ANAME(対象)%を抱き寄せ、その身体をまさぐる
+			PRINTFORMW 「啊？呀！」
+			;TranslatedMark 「え？　きゃっ！」
+			PRINTFORML %ANAME(対象)%发出惊讶的声音，不知是因为喝醉了，还是只是假装抵抗？
+			;TranslatedMark %ANAME(対象)%は驚いた声を上げるも、酔いが回っているからか、はたまた抵抗しているフリだけなのか
+			PRINTFORMW 试图推开的手上却完全没有感觉到用力，很容易就被%ANAME(MASTER)%推倒了
+			;TranslatedMark 押しのけようとする腕に力はまるで入っておらず、たやすく%ANAME(MASTER)%に押し倒された
+			PRINTFORML 「…已经忍耐不住了吗？真没办法啊…♥」
+			;TranslatedMark 「…もう、我慢できないんですか？　しょうがないですね…♥」
+			PRINTFORMW %ANAME(対象)%在%ANAME(MASTER)%的控制下，把身体交了出来
+			;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%のなすがまま、身体を預けている
+			PRINTFORMW 「至少今天，请温柔一点…♥」
+			;TranslatedMark 「せめて今日は、優しくしてくださいまし…♥」
+			PRINTFORMW %ANAME(対象)%对已经勃起的%ANAME(MASTER)%的阴茎投去了贪婪的目光
+			;TranslatedMark %ANAME(対象)%は、すでに勃起している%ANAME(MASTER)%のペニスに、物欲しそうな視線を向ける
+			PRINTFORMW 顺势，%ANAME(MASTER)%拥抱着%ANAME(対象)%……
+			;TranslatedMark 勢いに任せて、%ANAME(MASTER)%は%ANAME(対象)%を抱いた……
+			PRINTFORML
+			PRINTFORMW ……
+			SELECTCASE RAND:5
+				CASE 0
+					PRINTFORMW 「啊，啊♥好厉害啊♥」
+					;TranslatedMark 「あっ、ああっ♥　すごいぃっ♥」
+					PRINTFORML %ANAME(対象)%像狗一样趴着，被%ANAME(MASTER)%从背后顶着
+					;TranslatedMark %ANAME(対象)%は犬のような恰好になって%ANAME(MASTER)%に背後から突かれている
+					PRINTFORMW 每当%ANAME(MASTER)%的阴茎抽插撞击到肉壶顶部的时候，%ANAME(対象)%都会发出嘶嘶的声音，颤栗地痉挛着。
+					;TranslatedMark %ANAME(MASTER)%のペニスが出入りする度に肉壷の天井をこすられ、%ANAME(対象)%はあられもない声を出してビクビクと痙攣する
+					PRINTFORML 当%ANAME(MASTER)%激烈地撞击到子宫时，%ANAME(対象)%的腰就像快要折断一般弹起
+					;TranslatedMark %ANAME(MASTER)%が激しく子宮まで届くような一突きを見舞うと、%ANAME(対象)%は目の前が弾けたように大きく背を反らしてアクメする
+					PRINTFORML 「啊哈哈♥♥嘘♥嘻哈♥嘘♥啊啊啊啊♥♥」
+					;TranslatedMark 「あひッ♥♥　ッ♥ひあッ♥ッ♥ああッッ♥♥」
+					PRINTFORMW 那个时候缠在肉棒上的膣肉的缩紧让%ANAME(MASTER)%非常高兴，于是更加激烈地沉溺在与她的性爱中
+					;TranslatedMark その際の肉棒に絡みつく膣肉の締まりは%ANAME(MASTER)%を大いに喜ばせ、いっそう激しく彼女とのセックスに溺れた
+				CASE 1
+					PRINTFORMW 「啊，嗯♥好激烈啊♥那里不行♥」
+					;TranslatedMark 「あっ、あんっ♥　激しっ、ああっ♥　そこっだめぇっ♥」
+					PRINTFORML %ANAME(MASTER)%从背后抓住%ANAME(対象)%的腰激烈地侵犯着
+					;TranslatedMark %ANAME(MASTER)%は背後から%ANAME(対象)%の腰を掴んで激しく犯している
+					PRINTFORML %ANAME(対象)%一面因为膣肉被激烈地摩擦着而喘着粗气，一面拼命忍耐着快要令人崩溃掉的快感。
+					;TranslatedMark %ANAME(対象)%はゴリゴリと膣肉を抉られだらしなく喘ぎながらも、崩れ落ちそうになるのを必死で堪えている
+					PRINTFORMW 「要……要去了♥去♥…嗯，嗯♥啊啊啊啊♥」
+					;TranslatedMark 「イッ、イクッ♥　イッ♥…っクぅううぅぅ♥っっ♥」
+					PRINTFORML 但是，由于%ANAME(MASTER)%激烈的活塞冲击，导致%ANAME(対象)%剧烈的高潮，失去力量倒在了床上
+					;TranslatedMark しかし%ANAME(MASTER)%の激しいピストンによってすぐに力が入らなくなり、絶頂と共にベッドに倒れ込んでしまう
+					PRINTFORMW 面对着%ANAME(対象)%那突出的桃臀，%ANAME(MASTER)%继续压在上面激烈的进攻，享受了一夜的配种交配
+					;TranslatedMark 桃尻を突き出す形で倒れた%ANAME(対象)%に対し、%ANAME(MASTER)%は覆いかぶさってさらに攻めたて、一晩中種付け交尾を楽しんだ
+				CASE 2
+					PRINTFORMW 「啊啊啊！请再往里面一点♥」
+					;TranslatedMark 「あっあぁっ！　もっと、突いてくださいましっ♥」
+					PRINTFORML %ANAME(対象)%紧贴着激烈摇着腰的%ANAME(MASTER)%，娇声娇气地叫着
+					;TranslatedMark %ANAME(対象)%は激しく腰を振る%ANAME(MASTER)%にしがみ付きながら嬌声を上げている
+					PRINTFORML 每次被撞击的时候都会发出艳丽的声音，缩紧阴道，一边接受%ANAME(MASTER)%的射精一边仰着背达到高潮
+					;TranslatedMark 突かれる度に艶声を上げて膣を締めつけ、%ANAME(MASTER)%の射精を受けながら背を反らして絶頂する
+					PRINTFORMW 「啊，里面热热的♥　…请再给我一点…♥」
+					;TranslatedMark 「ああ、中に熱いの♥　…もっともっとくださいまし…♥」
+					PRINTFORML %ANAME(対象)%将手放在射精结束后的%ANAME(MASTER)%的脖子上，一边摇晃着腰一边请求进一步的抽插
+					;TranslatedMark %ANAME(対象)%は射精を終えた%ANAME(MASTER)%の首に手を回し、腰を揺すりながら更なる抽挿をおねだりする
+					PRINTFORMW %ANAME(MASTER)%为了回应这讨厌鬼的请求，与%ANAME(対象)%彻夜交欢着
+					;TranslatedMark %ANAME(MASTER)%はそのいやらしいおねだりに応えて、%ANAME(対象)%と夜通し交わり続けた
+				CASE 3
+					PRINTFORMW 「啊啊，嗯！%ANAME(MASTER)%、%ANAME(MASTER)%…♥♥啊，啊！」
+					;TranslatedMark 「あっあっ、あんっ！　%ANAME(MASTER)%、%ANAME(MASTER)%…♥♥　あっ、ぁんっ！」
+					PRINTFORML %ANAME(対象)%用双手和手脚粘在%ANAME(MASTER)%身上，全身纠缠在一起，粘糊糊地接吻着
+					;TranslatedMark %ANAME(対象)%は両手足で%ANAME(MASTER)%にしがみ付いて全身を絡ませながら、ねっとりとキスハメされている
+					PRINTFORML 感觉到被%ANAME(MASTER)%尽情地爱着，%ANAME(対象)%的女人本能苏醒了，小腹开始疼痛起来
+					;TranslatedMark %ANAME(MASTER)%に存分に愛されているのを感じ、%ANAME(対象)%の女の本能が疼き下腹部が疼きだす
+					PRINTFORMW 「嗯，啊，好的♥可以吗♥放进来♥请放到里面去♥」
+					;TranslatedMark 「んっ、ああっ、いいっ♥　いいのぉ♥　中にっ♥中に出してくださいましっ♥」
+					PRINTFORML %ANAME(対象)%察觉到自己的子宫想要%ANAME(MASTER)%的种子，就更加用力地抱住他，将腰压在%ANAME(MASTER)%身上
+					;TranslatedMark %ANAME(対象)%は、自身の子宮が%ANAME(MASTER)%の種を欲しているのを察して、より強くしがみ付いて腰を押し付ける
+					PRINTFORMW 不久之后，等待已久的子种被注入，%ANAME(対象)%在娇声中承载着受精的喜悦达到了高潮
+					;TranslatedMark やがて待ちに待った子種を注がれて、%ANAME(対象)%は受精の悦びを嬌声に乗せて絶頂した
+				CASE 4
+					PRINTFORMW 「嗯，啊！%ANAME(MASTER)%…更多，更多♥」
+					;TranslatedMark 「んんっ、あっ！　%ANAME(MASTER)%…もっと、もっとぉ♥」
+					PRINTFORML %ANAME(対象)%被%ANAME(MASTER)%抓着腰激烈地侵犯着
+					;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に腰を掴まれて激しく犯されている
+					PRINTFORML 每当被突刺的时候，快乐和幸福感就从下腹部往上涌，%ANAME(対象)%的身体一边颤抖着一边接受着快乐
+					;TranslatedMark 一突きされる毎に下腹部からこみ上げてくる快楽と幸福感に、%ANAME(対象)%は身体をビクビク跳ねさせながら悦ぶ
+					PRINTFORMW 「小鸡鸡，摩擦着…♥嗯，嗯♥哈哈♥哈哈♥啊啊啊♥」
+					;TranslatedMark 「おチンポぉ、ズポズポして…♥　あんっ、んん♥　はっ♥はっ♥あぁん♥」
+					PRINTFORML 当%ANAME(MASTER)%把脸凑近时，%ANAME(対象)%就会摆出荡妇的表情，吊着舌头与%ANAME(MASTER)%的舌头纠缠在一起。
+					;TranslatedMark %ANAME(MASTER)%が顔を近づけると、%ANAME(対象)%は蕩けた表情でだらしなく舌を垂らし、%ANAME(MASTER)%と舌を絡ませる
+					PRINTFORMW %ANAME(対象)%的脑子里已经只能思考做爱的事了，在那之后也沉溺在和%ANAME(MASTER)%的情事中
+					;TranslatedMark もはやセックスの事しか考えられなくなった%ANAME(対象)%は、その後も%ANAME(MASTER)%との情事に溺れた
+			ENDSELECT 
+			PRINTFORML
+			PRINTFORMW ……
+			PRINTFORMW 在%ANAME(対象)%的阴道的深处射完最后一发后，%ANAME(MASTER)%扑向她倒下了
+			;TranslatedMark 最後の一発を%ANAME(対象)%の膣奥に出し終えると、%ANAME(MASTER)%は彼女に覆いかぶさるように倒れこんだ
+			PRINTFORML …趁着醉意，胡乱地交欢了
+			;TranslatedMark …酔った勢いに任せてやたら激しく交わってしまった
+			PRINTFORML 带着慰问的心情，温柔地抚摸着%ANAME(対象)%的头，她脸上露出喜悦的表情看着%ANAME(MASTER)%
+			;TranslatedMark 労わりの気持ちを込めて%ANAME(対象)%の頭を優しく撫でると、彼女は嬉しそうな顔で%ANAME(MASTER)%を見つめてくる
+			PRINTFORMW 「偶尔这么激烈也不错啊…♥」
+			;TranslatedMark 「たまにはこういう激しいのも良いものですね…♥」
+			PRINTFORML %ANAME(対象)%也爱抚着%ANAME(MASTER)%的脸，留下一个晚安的吻
+			;TranslatedMark %ANAME(対象)%も%ANAME(MASTER)%の顔を愛おしそうに撫で、お休みのキスをする
+			PRINTFORMW 「啾啾……晚安，%ANAME(MASTER)%……♥」
+			;TranslatedMark 「ちゅ……お休みなさい、%ANAME(MASTER)%……♥」
+			PRINTFORMW 两个人就这样，互相拥抱着睡着了……
+			;TranslatedMark 二人とも、そのまま抱き合うように眠った……
+			CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的唇", ANAME(MASTER))
+			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣")
+			CALL PRINT_ADD_EXP(対象, "肝臓経験値", RAND(10, 20), 1)
+			CALL PRINT_ADD_EXP(MASTER, "肝臓経験値", RAND(10, 20), 1)
+			CALL TRAIN_AUTO_ABLUP(対象)
+			CALL TRAIN_AUTO_ABLUP(MASTER)
+			CFLAG:対象:好感度 += 700
+			CFLAG:対象:依存度 += 500
+			ABL:対象:主導度Ｕ -= 300
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了700", 0x00FFFF)
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的依存度上升了500", 0x00FFFF)
+			PRINTFORML
+		ENDIF
+	;談笑ルート
+	CASE 2
+		PRINTFORMW 某个夜晚
+		;TranslatedMark とある日の夜
+		PRINTFORMW 不知为何闲来无事，正在看文件的时候，%ANAME(対象)%来到了%ANAME(MASTER)%的房间…
+		;TranslatedMark 何となく手持ち無沙汰で、書類でも眺めていると%ANAME(対象)%が%ANAME(MASTER)%の部屋を訪ねてきた…
+		
+		;这里进行一下改变。因为我理解的这里的谈话应该是能接上的。
+		OPTION = RAND:4
+		SELECTCASE OPTION
+			CASE 0
+				PRINTFORML 「%ANAME(MASTER)%，你在做文件工作吗？」
+				;TranslatedMark 「%ANAME(MASTER)%、書類仕事しているんですか？」
+				PRINTFORMW 「如果可以的话我也来帮忙。一边聊天，一边慢慢做吧」
+				;TranslatedMark 「良ければ私もお手伝いしますわ。お喋りでもしながら、ゆっくりやりましょう」
+			CASE 1
+				PRINTFORMW 「如果您有空的话，能和您说几句话吗？和你聊天真的很开心♪」
+				;TranslatedMark 「お暇なようでしたら、少しお話しませんか？　貴方とのお喋りは楽しいもので♪」
+			CASE 2
+				PRINTFORMW 「一想到%ANAME(MASTER)%的事就睡不着了…不聊一会儿吗？」
+				;TranslatedMark 「%ANAME(MASTER)%のことを考えていたら眠れなくなってしまいまして…ちょっとお喋りしません？」
+			CASE 3
+				PRINTFORMW 「前面说过的那个头上顶着红色脸盆的男人的故事。能让我继续听下去吗？」
+				;TranslatedMark 「前に言ってた、赤い洗面器を頭にのせた男の話。続きを聞かせてもらえませんこと？」
+		ENDSELECT
+		PRINTFORMW 看上去%ANAME(対象)%也闲着无事，想和%ANAME(MASTER)%聊一会儿
+		;TranslatedMark どうやら%ANAME(対象)%も暇を持て余しているようで、%ANAME(MASTER)%と少しおしゃべりしたいようだ
+		PRINTFORMW …反正晚上我也很闲。和她这样的美人谈笑也不错
+		;TranslatedMark …どうせこっちも暇な夜だ。彼女のような美人と談笑するというのも悪くない
+		PRINTFORML %ANAME(MASTER)%爽快地将%ANAME(対象)%迎入房间
+		;TranslatedMark %ANAME(MASTER)%は快く%ANAME(対象)%を部屋に迎え入れた
+		PRINTFORMW 「呵呵，谢谢。那么，打扰了」
+		;TranslatedMark 「ふふ、ありがとうございます。それでは、お邪魔しますね」
+		PRINTFORML 
+		PRINTFORMW ･･･
+		SELECTCASE OPTION
+			CASE 0
+				PRINTFORML 「对工作充满热情固然好，但适当放松也很重要哦？」
+				;TranslatedMark 「お仕事に熱心なのもいいですけど、適度に力を抜くのも大切ですよ？」
+				PRINTFORMW 「慢条斯理地做是长寿的秘诀♪」
+				;TranslatedMark 「のらりくらりとやるのが長生きのコツですわ♪」
+			CASE 1
+				PRINTFORMW 「因为%ANAME(MASTER)%会认真听我说话，不知不觉间就会聊得很起劲♪」
+				;TranslatedMark 「%ANAME(MASTER)%って私のお話に聞き入ってくれるから、ついつい会話が弾んじゃいます♪」
+			CASE 2
+				PRINTFORML 「最近，明明是一边想着%ANAME(MASTER)%一边睡觉的，却没有出现在梦里…」
+				;TranslatedMark 「最近、%ANAME(MASTER)%のことを考えながら眠っているのに、夢には現れてくれないんです…」
+				PRINTFORMW 「%ANAME(MASTER)%就是帅哥。什么嘛♪」
+				;TranslatedMark 「%ANAME(MASTER)%ったら、イケズですわ。なーんて♪」
+			CASE 3
+				PRINTFORMW 「没错，那个男人头上顶着红色脸盆的理由是……啊，肚子饿了吗？要我做点什么吗？」
+				;TranslatedMark 「そう、例の男が赤い洗面器を頭にのせていた理由とは……、あ、お腹が空きましたか？　何か作りましょうか」
+				PRINTFORML
+				PRINTFORML 译者注，这里是古畑任三郎里的一个笑话。笑话大致如下。
+				PRINTFORML “几天前我在街上走著，看见一个男人朝著我走了过来，头上顶著一个红色的脸盆...... ”
+				PRINTFORML “后来呢？后来呢？发生什麽事了？” 
+				PRINTFORML “剩下的部分我不记得了，我只记得这是个很好笑的笑话。我只能停住，让他一个人走过去，所以我没法知道这个笑话的下半个部分。 
+				PRINTFORML （直译：我总不能因为要记住这下半个部分的笑话，就跟著他一直走下去吧？）” 
+				PRINTFORML 
+				PRINTFORML 这个笑话的意思是不是讽刺古畑这样一直对下半部分追根究底的人就好像是一直跟著头上顶红脸盆的男人走相同路线的傻瓜, 
+				PRINTFORML 另外还有两个解释。（和日语相关）
+				PRINTFORML 1. 赤い洗面器が落ちない→オチない→オチがない
+				PRINTFORML オチ在日语的意思就是故事的结局，换言之这就是个没有结局的故事，或者说没有结局就是这个故事的结局。
+				PRINTFORML 2. 赤い洗面器(あかいせんめんき)→あかせん→明かさない
+				PRINTFORML 这又是一个文字游戏，红脸盆略称之后就可译成不说破。也就是说结局就是不说破，而这就是结局。
+		ENDSELECT
+		PRINTFORML 
+		PRINTFORML 
+		PRINTFORMW 和%ANAME(対象)%愉快地聊天了…
+		;TranslatedMark %ANAME(対象)%と楽しくおしゃべりした…
+		PRINTFORMW 「时间也差不多了。那么我就失陪了」
+		;TranslatedMark 「もういい時間ですね。それでは私はこの辺で失礼しますわ」
+		PRINTFORML 「那么，%ANAME(MASTER)%。晚安……啾♥」
+		;TranslatedMark 「それじゃあ、%ANAME(MASTER)%。お休みなさい……ちゅっ♥」
+		PRINTFORMW %ANAME(対象)%在%ANAME(MASTER)%的脸颊上进行了晚安吻之后回去了……
+		;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の頬にお休みのキスをして帰って行った……
+		PRINTFORML
+		CFLAG:対象:好感度 += 400
+		CFLAG:対象:従属度 += 500
+		CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了400", 0x00FFFF)
+		CALL COLOR_PRINTL(@"%ANAME(対象)%的従属度上升了500", 0x00FFFF)
+ENDSELECT
+
+RETURN 1

@@ -1,0 +1,57 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_GET_A_RING_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_GET_A_RING_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_GET_A_RING(対象)
+#DIM 対象
+#DIM 仲間
+PRINTFORML 探索時、発現地面有個閃着光的東西
+PRINTFORML 從土裡揀起了一枚閃着光的戒指
+PRINTFORML 是誰掉落在這裡的吧
+PRINTL
+CALL ASK_MULTI_JUDGE("尋找失主", 1,"送給同伴", 対象 == MASTER, "私藏", 1, "丟掉", 1)
+SELECTCASE RESULT 
+	CASE 0
+		PRINTFORML 去尋找戒指的失主
+		PRINTFORML 找到了失主
+		PRINTFORML ……平安的把戒指送回了失主手上
+		PRINTFORMW %ANAME(対象)%心滿意足的回到了拠点
+	CASE 1
+		PRINTFORMW 要当禮物送給誰？
+		CALL SELECT_CHARA_LIST_SLG()
+		仲間 = RESULT
+		IF 仲間 == -1 || 仲間 == 対象
+			PRINTFORMW 哎、果然還是賣掉好了
+			CALL ICPRINT("戒指賣了<2000>金", "L", カラー_注意)
+			MONEY += 2000
+		ELSE
+			CFLAG:仲間:好感度 += 150
+			PRINTFORMW %ANAME(仲間)%收到戒指後感到十分高興
+			CALL ICPRINT("好感度提高了<150>", "L", カラー_注意)
+		ENDIF
+	CASE 2
+		PRINTFORML 揀到了好東西
+		PRINTFORMW 賣給商店賺点零花錢
+		CALL ICPRINT("戒指賣了<2000>金", "L", カラー_注意)
+		MONEY += 2000
+	CASE 3
+		PRINTFORML 仔細一看是鑲着玻璃的便宜貨
+		PRINTFORMW %ANAME(対象)%把戒指丟掉后返回了宮殿
+ENDSELECT
+
+RETURN 1
+

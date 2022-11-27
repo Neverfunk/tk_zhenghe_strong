@@ -1,0 +1,61 @@
+﻿;--------------------------------------
+;蜂起イベントが発生するかの判定
+;--------------------------------------
+@TENTACLE_RISE_RATE()
+;既に出現しているか、触手なし設定なら発動しない
+SIF SP_COUNTRY_APPEARED:特殊勢力_触手 || !SP_COUNTRY_RANK:(特殊勢力_触手)
+	RETURN 0
+
+;いっぱいなら駄目
+SIF GET_NEW_COUNTRY() == -1
+	RETURN 0
+
+SIF !CHECK_SP_COUNTRY_RISE(特殊勢力_触手)
+	RETURN 0
+RETURN 1
+
+
+;--------------------------------------
+;蜂起イベント用メッセージ関数
+;出現できたら1、できなければ0をかえす
+;--------------------------------------
+@TENTACLE_RISE(都市 = 0)
+#DIM 触手
+#DIM 都市
+;触手勢力を作成
+CALL TENTACLE_INIT()
+触手 = RESULT
+;作れなかったら戻す
+SIF 触手 == 0
+	RETURN 0
+
+CALL SP_COUNTRY_RISE(触手, 都市)
+
+SIF !RESULT
+	RETURN 0
+
+SP_COUNTRY_APPEARED:特殊勢力_触手 = 1
+RETURN 触手
+
+;---------------------
+;蜂起イベント用メッセージ関数
+;---------------------
+@TENTACLE_RISE_MSG(勢力, 対象)
+#DIM 勢力
+#DIM 対象
+CALL SINGLE_DRAWLINE
+SETCOLOR カラー_警告
+PRINTFORMW  或许，是战争中有人暗地进行了不人道的生物实验
+PRINTFORMW  或许，是战争中有人动用了生化武器
+PRINTFORMW  又或许，这是上天的惩罚，来自对幻想乡那些无情的统治者不满而降下的天谴
+PRINTFORMW	從地底湧現出了無數的触手！
+PRINTFORMW	所有见到触手的人都会成为它们的苗床！
+;TranslatedMark 突如として、地の底から無数の触手が湧きだしてきました！
+PRINTFORMW %CITY_NAME:(対象)%\@ GET_OWN_CITY(勢力) > 1 ? 等地 # \@被其占領了
+;TranslatedMark %CITY_NAME:(対象)%\@ GET_OWN_CITY(勢力) > 1 ? など # \@が占領されたようです
+PRINTFORMW 触手可以劫持幻想郷的人類和妖怪、作為棋子、加強触手的勢力
+;TranslatedMark 触手は幻想郷の人妖を乗っ取り、手駒とすることで、その勢力を強めています
+PRINTFORMW 這樣下去就危険了、如果成为了苗床，就彻底成为了繁殖触手的生育机器
+PRINTFORMW  幻想乡各地势力集结起来，对抗这传说是天谴而诞生的触手大军
+;TranslatedMark このままでは危険だと、幻想郷の各勢力は撃退に乗り出したようです……
+RESETCOLOR

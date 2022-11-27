@@ -1,0 +1,1337 @@
+﻿;CHECK_KOJO_DAILY_HAPPENの変更にともない一時停止中
+;------------------------------------
+;そのキャラのデートイベント本体を呼び出すハブとなる関数
+;------------------------------------
+@DATE_EVENT_K134(場所)
+#DIM 場所
+#DIM 湖
+#DIM 人里
+#DIM 森
+#DIM 花畑
+#DIM 自宅
+#DIM 発生フラグ
+発生フラグ = 0
+
+;場所はSHOP_DATEを参考にしてね
+SELECTCASE 場所
+    CASE 1
+		;湖口上
+        CALL DATE_EVENT_K134_mizuumi(湖)
+    CASE 2
+		;森口上
+        CALL DATE_EVENT_K134_mori(森)
+    CASE 3
+		;人里口上
+        CALL DATE_EVENT_K134_hitozato(人里)
+    CASE 3
+		;洋服店に行こう
+		;CALL DATE_EVENT_K134_youhuku(人里)
+    CASE 4
+		;花畑口上
+        CALL DATE_EVENT_K134_hanabatake(花畑)
+    CASE 5
+		;自宅口上
+        CALL DATE_EVENT_K134_zitaku(自宅)
+    CASEELSE
+ENDSELECT
+
+;------------------------------------
+;湖口上(イベントというよりセリフ集→間違った使い方かも)
+;-----------------------------------
+@DATE_EVENT_K134_mizuumi(湖)
+#DIM ドレミ
+#DIM 湖
+#DIM キャラ名
+
+ドレミ = NAME_TO_CHARA("ドレミー")
+
+;ドレミーと所属が同じ、ドレミーが捕虜でなく、面識がある、今のところ100%発動
+SIF !CHECK_KOJO_DAILY_HAPPEN(ドレミ, 1, 0, 1)
+    RETURN 0
+
+
+	;通常は4パターン、恋慕7パターン、正妻9パターン
+SELECTCASE  IFRAND("0TO3", 1, "4TO7", TALENT:ドレミ:恋慕, "8TO9", TALENT:ドレミ:正妻)
+		;通常反応
+    CASE 0
+        PRINTFORML 「是！」
+        ;TranslatedMark 「はいっ！」
+        PRINTFORML 「嗯，怎么也做不好呢…」
+        ;TranslatedMark 「んっー、なかなか上手くいきませんね…」
+        PRINTFORML 「%ANAME(MASTER)%也要试试吗？打水漂」
+        ;TranslatedMark 「%ANAME(MASTER)%もやってみます？　水切り」
+    CASE 1
+        PRINTFORML 「这里又安静又凉爽，看来很适合读书」
+        ;TranslatedMark 「ここは静かで涼しくて、読書が捗りそうですね」
+        PRINTFORML 「……你想要的表情是什么」
+        ;TranslatedMark 「……なんですかその構って欲しそうな顔は」
+    CASE 2
+        PRINTFORML 「真是个清澈美丽的湖啊。　……游泳吗？」
+        ;TranslatedMark 「澄んでて綺麗な湖ですね。　……%ANAME(MASTER)%、泳ぐの？」
+        PRINTFORML 「我没带游泳衣」
+        ;TranslatedMark 「私は良いわ、水着持って来てないから」
+    CASE 3
+        PRINTFORML 「在湖边散散步吧」
+        ;TranslatedMark 「湖の周りを少し散歩しましょ」
+		;こっから恋慕反応追加
+    CASE 4
+        PRINTFORML 「即使那样，也没有妖精和河童啊」
+        ;TranslatedMark 「それにしても妖精や河童もいないわね」
+        PRINTFORML 「这是说只有我们两个人吧」
+        ;TranslatedMark 「これって二人っきりということですよね」
+        PRINTFORML 「嗯…」
+        ;TranslatedMark 「ふーん…」
+    CASE 5
+        PRINTFORML 「听说这附近一到晚上水面就会出现美丽的月亮」
+        ;TranslatedMark 「この付近は夜になると水面に綺麗な月が現れるそうよ」
+        PRINTFORML 「也许晚上再来看看也不错呢」
+        ;TranslatedMark 「また夜に来てみても良いかもしれないわね」
+        PRINTFORML 「如果是%ANAME(MASTER)%的话，安静的赏月酒也不错呢」
+        ;TranslatedMark 「%ANAME(MASTER)%となら静かな月見酒も良いわね」
+    CASE 6
+        PRINTFORML 「那么差不多该吃午饭了吧？」
+        ;TranslatedMark 「さてそろそろお昼にしませんか？」
+        PRINTFORML 「嗯，今天做了便当来的」
+        ;TranslatedMark 「えぇ、今日はお弁当を作って来たのですよ」
+        PRINTFORML 「请吃吧♪」
+        ;TranslatedMark 「どうぞ召し上がれ♪」
+    CASE 7
+        PRINTFORML 「真是个清澈美丽的湖啊，要不要稍微游一下呢」
+        ;TranslatedMark 「澄んでて綺麗な湖ですね、少し泳ごうかしら」
+        PRINTFORML 「呵呵，好好准备了泳衣和替换的内衣哦」
+        ;TranslatedMark 「ふふっ、ちゃんと水着と替えの下着は用意して来てますよ」
+        PRINTFORML 「小精%ANAME(MASTER)%，一起游泳吧♪」
+        ;TranslatedMark 「ささ%ANAME(MASTER)%、一緒に泳ぎましょ♪」
+		;ここから正妻反応追加
+    CASE 8
+        PRINTFORML 「亲爱的~差不多该吃午饭了吧？」
+        ;TranslatedMark 「あなた～、そろそろお昼にしませんか？」
+        PRINTFORML 「嗯，今天做了便当来的」
+        ;TranslatedMark 「えぇ、今日はお弁当を作って来たのですよ」
+        PRINTFORML 「请吃吧♪」
+        ;TranslatedMark 「どうぞ召し上がれ♪」
+    CASE 9
+        PRINTFORML 「…………呵呵呵」
+        ;TranslatedMark 「…………ふふっ」
+        PRINTFORML 「只是依偎着走着却笑了」
+        ;TranslatedMark 「寄り添って歩いてるだけなのに笑っちゃった」
+        PRINTFORML 「喜欢啊，%ANAME(MASTER)%」
+        ;TranslatedMark 「好きよ、%ANAME(MASTER)%」
+ENDSELECT
+IF RAND:3 == 0
+    PRINTFORMW 配合着随声附和，%ANAME(ドレミ)%的尾巴微微摇晃……
+    ;TranslatedMark 相槌に合わせて%ANAME(ドレミ)%の尻尾がピコピコと揺れた……
+ELSEIF RAND:2 == 0
+    PRINTFORMW %ANAME(ドレミ)%享受着清澈的湖水的美丽和宁静……
+    ;TranslatedMark %ANAME(ドレミ)%は澄んだ湖の美しさと静けさを楽しんでる……
+ELSE
+    PRINTFORMW 在%ANAME(ドレミ)%的话语中，包含着仿佛带着让%ANAME(MASTER)%着迷的声音
+    ;TranslatedMark %ANAME(ドレミ)%の言葉は、%ANAME(MASTER)%をどこか誂うような声色を含んでいる……
+ENDIF
+
+;------------------------------------
+;森口上
+;一度きりのイベントを入れたかったけど綺麗な方法もといコードが思いつかなかったので超強引に入れた
+;-----------------------------------
+@DATE_EVENT_K134_mori(森)
+#DIM ドレミ
+#DIM 森
+#DIM キャラ名
+
+ドレミ = NAME_TO_CHARA("ドレミー")
+
+;ドレミーと所属が同じ、ドレミーが捕虜でなく、面識がある、今のところ100%発動
+SIF !CHECK_KOJO_DAILY_HAPPEN(ドレミ, 1, 0, 1)
+    RETURN 0
+
+SELECTCASE KDVAR:ドレミ:ドレミー_森口上
+    CASE 0
+	;通常は4パターン、恋慕7パターン、正妻9パターン
+        SELECTCASE  IFRAND("0TO3", 1, "4TO7", TALENT:ドレミ:恋慕, "8TO9", TALENT:ドレミ:正妻)
+			;通常反応
+            CASE 0
+                PRINTFORML 「账簿工作？」
+                ;TranslatedMark 「帳簿の仕事？」
+                PRINTFORML 「%ANAME(MASTER)%，现在正在约会哦，工作的话是不行的」
+                ;TranslatedMark 「%ANAME(MASTER)%、今はデート中なのですよ仕事の話は厳禁です」
+                PRINTFORML 「你看，前面的山丘上好像有可以俯瞰城镇的景点哦」
+                ;TranslatedMark 「ほらほらっ、この先の丘に城下町を見下ろせるスポットがあるらしいですよっ」
+            CASE 1
+                PRINTFORML 「这里又安静又凉爽，看来很适合读书」
+                ;TranslatedMark 「ここは静かで涼しくて、読書が捗りそうですね」
+                PRINTFORML 「……你想要的表情是什么」
+                ;TranslatedMark 「……なんですかその構って欲しそうな顔は」
+            CASE 2
+                PRINTFORML 「哎呀哎呀，%ANAME(MASTER)%看起来很累的样子…」
+                ;TranslatedMark 「おやおや、%ANAME(MASTER)%ったらお疲れの様子で…」
+                PRINTFORML 「那么在对面的树荫下睡觉怎么样？」
+                ;TranslatedMark 「では向こうの木陰でお眠りになっては如何でしょうか？」
+                PRINTFORML 「保证有最好的睡眠和梦哦~」
+                ;TranslatedMark 「最高の眠りと夢を保証しますよ～」
+            CASE 3
+                PRINTFORML 「哈~空气清新，心情很好呢」
+                ;TranslatedMark 「はぁ～空気が澄んでいて気持ちが良いですねぇ」
+                PRINTFORML 「偶尔森林浴也不错啊…」
+                ;TranslatedMark 「たまには森林浴も悪くありませんね…」
+                PRINTFORML 「哎呀…哎呀哎呀，刚才打了哈欠啊…」
+                ;TranslatedMark 「おや…おやおや、今あくびしましたね…」
+                PRINTFORML 「好啊，先在哪里睡午觉吧？」
+                ;TranslatedMark 「良いですよぉ、一旦どこかでお昼寝しましょうか？」
+			;こっから恋慕反応追加
+            CASE 4
+                PRINTFORML 「天气有点热了呢…」
+                ;TranslatedMark 「ちょっと暑くなってきましたね…」
+                PRINTFORML 「在树荫下休息吧」
+                ;TranslatedMark 「少し木陰で休みましょうか」
+                PRINTFORML 「%ANAME(MASTER)%也…怎么样？」
+                ;TranslatedMark 「%ANAME(MASTER)%も…どう？」
+            CASE 5
+                PRINTFORML 「走得有点累了呢…」
+                ;TranslatedMark 「少し歩き疲れましたね…」
+                PRINTFORML 「要不要在那个山中小屋休息一下？」
+                ;TranslatedMark 「あの山小屋で休憩していきませんか？」
+                PRINTFORML 「（呋呋，那个山中小屋已经调查过是情侣用的…！)」
+                ;TranslatedMark 「(ふふっ、あの山小屋はカップル御用達なのはリサーチ済みですよ…！)」
+            CASE 6
+                PRINTFORML 「那么差不多该吃午饭了吧？」
+                ;TranslatedMark 「さてそろそろお昼にしませんか？」
+                PRINTFORML 「嗯，今天做了便当来的」
+                ;TranslatedMark 「えぇ、今日はお弁当を作って来たのですよ」
+                PRINTFORML 「请吃吧♪」
+                ;TranslatedMark 「どうぞ召し上がれ♪」
+            CASE 7
+                PRINTFORML 「即使那样，也没有妖精和河童啊」
+                ;TranslatedMark 「それにしても妖精や河童もいないわね」
+                PRINTFORML 「这是说只有我们两个人吧」
+                ;TranslatedMark 「これって二人っきりということですよね」
+                PRINTFORML 「呋呋，做什么都可以~♪」
+                ;TranslatedMark 「ふふっ、いえなんでも～♪」
+			;ここから正妻反応追加
+            CASE 8
+                PRINTFORML 「亲爱的~差不多该吃午饭了吧？」
+                ;TranslatedMark 「あなた～、そろそろお昼にしませんか？」
+                PRINTFORML 「嗯，今天做了便当来的」
+                ;TranslatedMark 「えぇ、今日はお弁当を作って来たのですよ」
+                PRINTFORML 「请吃吧♪」
+                ;TranslatedMark 「どうぞ召し上がれ♪」
+            CASE 9
+                PRINTFORML 「…………呵呵呵」
+                ;TranslatedMark 「…………ふふっ」
+                PRINTFORML 「只是依偎着走着却笑了」
+                ;TranslatedMark 「寄り添って歩いてるだけなのに笑っちゃった」
+                PRINTFORML 「喜欢啊，%ANAME(MASTER)%」
+                ;TranslatedMark 「好きよ、%ANAME(MASTER)%」
+        ENDSELECT
+	;動作反応
+        IF RAND:3 == 0
+            PRINTFORMW 配合着随声附和，%ANAME(ドレミ)%的尾巴微微摇晃……
+            ;TranslatedMark 相槌に合わせて%ANAME(ドレミ)%の尻尾がピコピコと揺れた……
+        ELSEIF RAND:2 == 0
+            PRINTFORMW 满身是汗的%ANAME(ドレミ)%的肌肤吸着衣服，整个身体的线条都变得清晰可见……
+            ;TranslatedMark 汗まみれになった%ANAME(ドレミ)%の肌が服に吸い付いて体のラインが丸見えになっている……
+        ELSE
+            PRINTFORMW 在%ANAME(ドレミ)%的话语中，包含着仿佛带着让%ANAME(MASTER)%着迷的声音
+            ;TranslatedMark %ANAME(ドレミ)%の言葉は、%ANAME(MASTER)%をどこか誂うような声色を含んでいる……
+        ENDIF
+	;イベント判定
+        IF RAND:1 == 0
+            KDVAR:ドレミ:ドレミー_森口上 = 1
+        ELSE
+        ENDIF
+	;イベント『狩りの帰り』口上
+    CASE 1
+        PRINTFORML ------------------------------------------------------------------------------------------------------------
+        CALL COLOR_PRINTL(@"-デートイベント 『狩りの帰り』発生-", カラー_注意)
+        PRINTFORML ------------------------------------------------------------------------------------------------------------
+        PRINTFORMW 「……嗯，过于专注于狩猎而迷路了呢」
+        ;TranslatedMark 「……うーん、狩りに没頭し過ぎて迷ってしまいましたね」
+        PRINTFORML 两人这天在森林里打猎，但由于过度埋首来到了森林深处……
+        ;TranslatedMark 二人はこの日森で狩りをしていたが、没頭するあまり森の奥まで来てしまった……
+        PRINTFORMW 「啊，对面能看到火光啊……去吧」
+        ;TranslatedMark 「おや、向こうに火の光らしいものが見えますね……行きましょう」
+        PRINTFORML 在%ANAME(ドレミ)%的提议下，%ANAME(MASTER)%他们策马奔驰
+        ;TranslatedMark %ANAME(ドレミ)%の提案で%ANAME(MASTER)%達は馬を走らせた
+        PRINTFORML 
+        PRINTFORMW 「哎呀哎呀，这是……？」
+        ;TranslatedMark 「おやおや、これは……？」
+        PRINTFORML 两个人穿过森林，那里整齐地排列着士兵使用的大型帐篷
+        ;TranslatedMark 二人が森を抜けるとそこは兵士が使う大型のテントが規則正しくズラリと並んでいた
+        PRINTFORML 在帐篷旁边煮饭盒的士兵们注意到了%ANAME(MASTER)%们
+        ;TranslatedMark テントの傍で飯盒を炊いている兵士達が%ANAME(MASTER)%達に気付く
+        PRINTFORMW "什么呀，来了很多穿着很漂亮的人啊？"
+        ;TranslatedMark 『なんだなんだ、随分と身なりのえー方らが来たんで？』
+        PRINTFORML "莫非，有人来巡视吗？"
+        ;TranslatedMark 『もしかしてぇ、えれぇー人が見回りに来たんとちゃいますん？』
+        PRINTFORML "那可不得了啊，要小心迎接啊！"
+        ;TranslatedMark 『そりゃ大変だぁ、丁重に迎えねぇとなぁ！』
+        PRINTFORMW 驻扎在那里的士兵们自然聚集在一起，像是在%ANAME(MASTER)%经过的地方迎接一样列队
+        ;TranslatedMark 駐屯していた兵士達は自ずと集まり、%ANAME(MASTER)%が通る傍に出迎えるように整列した
+        PRINTFORML 
+        PRINTFORMW 「……%ANAME(MASTER)%，难道说这些士兵们」
+        ;TranslatedMark 「……ねぇ%ANAME(MASTER)%、もしかしてこの兵士達って」
+        PRINTFORML 在马上感觉到违和感的%ANAME(ドレミ)%耳语，另一方面%ANAME(MASTER)%似乎察觉到了这种违和感的真面目
+        ;TranslatedMark 馬上で違和感を覚えた%ANAME(ドレミ)%が耳打ちをする、一方%ANAME(MASTER)%はその違和感の正体に気付いた様子である
+        PRINTFORMW "嗯，为什么这里会有地位高的人呢？"
+        ;TranslatedMark 『んでー、何でお偉いさん方がここにいるだぁ？』
+        PRINTFORML "我不知道那件事啊"
+        ;TranslatedMark 『んな事わかんねぇんよー』
+        PRINTFORML 『……嗯？等一下吧？那顶帽子…我在哪里见过……"
+        ;TranslatedMark 『……んん？ ちょっと待てよ？ あの帽子…どっかで見た事があるだで……』
+        PRINTFORMW "啊……啊啊啊啊啊，那顶帽子啊！"
+        ;TranslatedMark 『あっ……ああああああ、あの帽子ってぇええ！』
+        PRINTFORML "怎么了？"
+        ;TranslatedMark 『どうしたで？』
+        PRINTFORML 士兵们开始一点一点地叫嚣，终于出现了大声喊叫的士兵
+        ;TranslatedMark 兵士達が少しずつどよめき始める中、遂に大声で叫ぶ兵士が現れた
+        PRINTFORMW 《那家伙是%ANAME(ドレミ)%！是敌人鬼谋的%ANAME(ドレミ)%！？"
+        ;TranslatedMark 『アイツ、%ANAME(ドレミ)%だぁ！ 鬼謀の%ANAME(ドレミ)%だぁー！？』
+        PRINTFORMW 「……啊，就是这样啊」
+        ;TranslatedMark 「……あぁ、そういう事ね」
+        PRINTFORML 在士兵们发现%ANAME(MASTER)%们的真面目的瞬间，%ANAME(ドレミ)%也察觉到了士兵们带来不安的真面目
+        ;TranslatedMark 兵士達が%ANAME(MASTER)%達の正体に気付いた瞬間、%ANAME(ドレミ)%も違和感の正体に気付く
+        PRINTFORMW 与此同时，%ANAME(MASTER)%和%ANAME(ドレミ)%用力拉着马的缰绳跑了起来
+        ;TranslatedMark それと同時に%ANAME(MASTER)%と%ANAME(ドレミ)%は馬の手綱を強く引き駆けだした
+        PRINTFORML
+        PRINTFORMW 「哎呀哎呀，没想到会混入敌人的驻扎地呢」
+        ;TranslatedMark 「いやはや、まさか敵の駐屯地に紛れ込んでしまうとは予想外でしたねぇ」
+        PRINTFORML 在士兵们组成的队伍之间逃跑的2人，已经发现后面追赶着手持武器的士兵们冲了上来
+        ;TranslatedMark 兵士達の作った列の間を走る2人、既に後ろからは武器を手にした兵士達が追いかけて来ている
+        PRINTFORMW 都是你太有名了，败露了啊
+        ;TranslatedMark お前が有名過ぎてバレてしまったな
+        PRINTFORMW 「哈哈，有名的是你吧？」
+        ;TranslatedMark 「ははぁん、有名にしたのは貴方でしょう？」
+        PRINTFORML 逃走的两个人一边悠闲地对话一边跑，不久就会看到比较大的帐篷
+        ;TranslatedMark 逃げる二人は余裕そうに会話しつつ走っていると、やがて比較的大きなテントが見えてくる
+        PRINTFORMW 「怎么样？如果箭还剩下的话就瞄准大人物吧？」
+        ;TranslatedMark 「どうでしょう？ まだ矢が残っているなら大物を狙ってみては？」
+        PRINTFORMW ……我们的军师的兴趣是瞄准大鱼吗？
+        ;TranslatedMark ……うちの軍師は大魚を狙うのが趣味だったかな？
+        PRINTFORMW 「不不不，狩猎是兴趣的范畴吧？」
+        ;TranslatedMark 「いえいえ、狩りは趣味の範疇でしょう？」
+        PRINTFORMW 原来如此
+        ;TranslatedMark なるほど
+        PRINTFORML 
+        PRINTFORMW 跑马上摆着弓箭的%ANAME(MASTER)%，后面有士兵们追过来
+        ;TranslatedMark 走る馬上で弓矢を構える%ANAME(MASTER)%、後ろには兵士達が追いかけて来ている
+        PRINTFORMW 「那么……差不多了吧」
+        ;TranslatedMark 「さて……そろそろですかね」
+        PRINTFORML 从大型帐篷里出来一个和士兵不同装备精良的彪形大汉
+        ;TranslatedMark 大型テントから兵士と違って立派な装備を持った大男が出てくる
+        PRINTFORMW "难道敌国的两个重臣就对这件事抱着脖子来了吗！！"
+        ;TranslatedMark 『まさか敵国の重臣二人がのこのこと首を持ってきたかーッ！！！！』
+        PRINTFORML 『……嗯！？"
+        ;TranslatedMark 『……ン！？』
+        PRINTFORML 大汉一叫，大汉的右臂就中箭后被射死了
+        ;TranslatedMark 大男が叫ぶと同時に大男の右腕は矢で射ぬかれていた
+        PRINTFORMW "啊！？"
+        ;TranslatedMark 『あぁあ！？』
+        PRINTFORML 察觉到大个子被射中后不久，以左臂、左腿、右腿的顺序箭射中
+        ;TranslatedMark 大男が射抜かれた事に気付く間もなく左腕、左腿、右腿の順で矢が刺さる
+        PRINTFORMW 「请进」
+        ;TranslatedMark 「はいどうぞ」
+        PRINTFORML %ANAME(ドレミ)%一边跑马，一边把用来处理猎物的小刀交给%ANAME(MASTER)%
+        ;TranslatedMark 馬を走らせながら%ANAME(ドレミ)%は獲物を捌く為の小刀を%ANAME(MASTER)%に渡す
+        PRINTFORMW %ANAME(MASTER)%稍微加快了马步，逼近无法动弹的大个子
+        ;TranslatedMark %ANAME(MASTER)%は少し馬のペースを速め、身動きが取れなくなった大男に迫る
+        PRINTFORML 然后%ANAME(MASTER)%抓住大个子的头发，就这样一边拖着大个子一边把头放下来
+        ;TranslatedMark そして%ANAME(MASTER)%は大男の髪を掴み、そのまま大男を引きずりながらも首を落とす
+        PRINTFORMW 「那么就这样奔跑逃走吧」
+        ;TranslatedMark 「さてこのまま駆けて逃げましょうか」
+        PRINTFORML 就这样，%ANAME(ドレミ)%和%ANAME(MASTER)%就这样从驻扎地脱逃回去了
+        ;TranslatedMark こうして%ANAME(ドレミ)%と%ANAME(MASTER)%はそのまま駐屯地を抜けだし帰って行った
+        PRINTFORMW ・
+        PRINTFORMW ・
+        PRINTFORMW ・
+        PRINTFORML 
+        PRINTFORMW 「迷路的%ANAME(MASTER)%，狩猎敌人…很好的句子呢，很适合哦」
+        ;TranslatedMark 「迷子の%ANAME(MASTER)%、敵を狩る…良いフレーズですねぇ、ピッタリですよ」
+        PRINTFORML 日后，在天狗的报纸上，%ANAME(MASTER)%成为了话题，但两人却被命名为迷路的孩子
+        ;TranslatedMark 後日、天狗の新聞で%ANAME(MASTER)%が話題になっていたが二つ名に迷子と付けられてしまった
+        PRINTFORMW 「鬼谋的%ANAME(ドレミ)%和迷路的%ANAME(MASTER)%」
+        ;TranslatedMark 「良いじゃないですか、鬼謀の%ANAME(ドレミ)%と迷子の%ANAME(MASTER)%」
+        PRINTFORML 不知是不是相当开心，%ANAME(ドレミ)%经常开玩笑地使用这两个名字……
+        ;TranslatedMark 余程楽しかったのか%ANAME(ドレミ)%はその二つ名をしばしば冗談で使うようになった……
+        CALL COLOR_PRINTW(@"%ANAME(MASTER)%は疾風怒涛の行軍術を身に着けた！", カラー_注意)
+        CALL COLOR_PRINTW(@"%ANAME(MASTER)%は＜疾風迅雷＞を得ました", カラー_注意)
+        CALL SKILL_LEARN_BY_NAME(MASTER, スキル_ジャンル_PERSONAL, 0, "疾風迅雷")
+        CFLAG:ドレミ:好感度 += 100
+        KDVAR:ドレミ:ドレミー_森口上 = 2
+    CASE 2
+	;通常は4パターン、恋慕7パターン、正妻9パターン
+        SELECTCASE  IFRAND("0TO3", 1, "4TO7", TALENT:ドレミ:恋慕, "8TO9", TALENT:ドレミ:正妻)
+			;通常反応
+            CASE 0
+                PRINTFORML 「账簿工作？」
+                ;TranslatedMark 「帳簿の仕事？」
+                PRINTFORML 「%ANAME(MASTER)%，现在正在约会哦，工作的话是不行的」
+                ;TranslatedMark 「%ANAME(MASTER)%、今はデート中なのですよ仕事の話は厳禁です」
+                PRINTFORML 「你看，前面的山丘上好像有可以俯瞰城镇的景点哦」
+                ;TranslatedMark 「ほらほらっ、この先の丘に城下町を見下ろせるスポットがあるらしいですよっ」
+            CASE 1
+                PRINTFORML 「这里又安静又凉爽，看来很适合读书」
+                ;TranslatedMark 「ここは静かで涼しくて、読書が捗りそうですね」
+                PRINTFORML 「……你想要的表情是什么」
+                ;TranslatedMark 「……なんですかその構って欲しそうな顔は」
+            CASE 2
+                PRINTFORML 「哎呀哎呀，%ANAME(MASTER)%看起来很累的样子…」
+                ;TranslatedMark 「おやおや、%ANAME(MASTER)%ったらお疲れの様子で…」
+                PRINTFORML 「那么在对面的树荫下睡觉怎么样？」
+                ;TranslatedMark 「では向こうの木陰でお眠りになっては如何でしょうか？」
+                PRINTFORML 「保证有最好的睡眠和梦哦~」
+                ;TranslatedMark 「最高の眠りと夢を保証しますよ～」
+            CASE 3
+                PRINTFORML 「哈~空气清新，心情很好呢」
+                ;TranslatedMark 「はぁ～空気が澄んでいて気持ちが良いですねぇ」
+                PRINTFORML 「偶尔森林浴也不错啊…」
+                ;TranslatedMark 「たまには森林浴も悪くありませんね…」
+                PRINTFORML 「哎呀…哎呀哎呀，刚才打了哈欠啊…」
+                ;TranslatedMark 「おや…おやおや、今あくびしましたね…」
+                PRINTFORML 「好啊，先在哪里睡午觉吧？」
+                ;TranslatedMark 「良いですよぉ、一旦どこかでお昼寝しましょうか？」
+			;こっから恋慕反応追加
+            CASE 4
+                PRINTFORML 「天气有点热了呢…」
+                ;TranslatedMark 「ちょっと暑くなってきましたね…」
+                PRINTFORML 「在树荫下休息吧」
+                ;TranslatedMark 「少し木陰で休みましょうか」
+                PRINTFORML 「%ANAME(MASTER)%也…怎么样？」
+                ;TranslatedMark 「%ANAME(MASTER)%も…どう？」
+            CASE 5
+                PRINTFORML 「走得有点累了呢…」
+                ;TranslatedMark 「少し歩き疲れましたね…」
+                PRINTFORML 「要不要在那个山中小屋休息一下？」
+                ;TranslatedMark 「あの山小屋で休憩していきませんか？」
+                PRINTFORML 「（呋呋，那个山中小屋已经调查过是情侣用的…！)」
+                ;TranslatedMark 「(ふふっ、あの山小屋はカップル御用達なのはリサーチ済みですよ…！)」
+            CASE 6
+                PRINTFORML 「那么差不多该吃午饭了吧？」
+                ;TranslatedMark 「さてそろそろお昼にしませんか？」
+                PRINTFORML 「嗯，今天做了便当来的」
+                ;TranslatedMark 「えぇ、今日はお弁当を作って来たのですよ」
+                PRINTFORML 「请吃吧♪」
+                ;TranslatedMark 「どうぞ召し上がれ♪」
+            CASE 7
+                PRINTFORML 「即使那样，也没有妖精和河童啊」
+                ;TranslatedMark 「それにしても妖精や河童もいないわね」
+                PRINTFORML 「这是说只有我们两个人吧」
+                ;TranslatedMark 「これって二人っきりということですよね」
+                PRINTFORML 「呋呋，做什么都可以~♪」
+                ;TranslatedMark 「ふふっ、いえなんでも～♪」
+			;ここから正妻反応追加
+            CASE 8
+                PRINTFORML 「亲爱的~差不多该吃午饭了吧？」
+                ;TranslatedMark 「あなた～、そろそろお昼にしませんか？」
+                PRINTFORML 「嗯，今天做了便当来的」
+                ;TranslatedMark 「えぇ、今日はお弁当を作って来たのですよ」
+                PRINTFORML 「请吃吧♪」
+                ;TranslatedMark 「どうぞ召し上がれ♪」
+            CASE 9
+                PRINTFORML 「…………呵呵呵」
+                ;TranslatedMark 「…………ふふっ」
+                PRINTFORML 「只是依偎着走着却笑了」
+                ;TranslatedMark 「寄り添って歩いてるだけなのに笑っちゃった」
+                PRINTFORML 「喜欢啊，%ANAME(MASTER)%」
+                ;TranslatedMark 「好きよ、%ANAME(MASTER)%」
+        ENDSELECT
+		;反応
+        IF RAND:3 == 0
+            PRINTFORMW 配合着随声附和，%ANAME(ドレミ)%的尾巴微微摇晃……
+            ;TranslatedMark 相槌に合わせて%ANAME(ドレミ)%の尻尾がピコピコと揺れた……
+        ELSEIF RAND:2 == 0
+            PRINTFORMW 满身是汗的%ANAME(ドレミ)%的肌肤吸着衣服，整个身体的线条都变得清晰可见……
+            ;TranslatedMark 汗まみれになった%ANAME(ドレミ)%の肌が服に吸い付いて体のラインが丸見えになっている……
+        ELSE
+            PRINTFORMW  在%ANAME(ドレミ)%的话语中，包含着仿佛带着让%ANAME(MASTER)%着迷的声音
+            ;TranslatedMark %ANAME(ドレミ)%の言葉は、%ANAME(MASTER)%をどこか誂うような声色を含んでいる……
+        ENDIF
+ENDSELECT
+
+;------------------------------------
+;人里口上(イベントというよりセリフ集→間違った使い方かも)
+;森口上同様に一度きりのイベントを入れたかったけど綺麗な方法もといコードが思いつかなかったので超強引に入れた
+;-----------------------------------
+@DATE_EVENT_K134_hitozato(人里)
+#DIM ドレミ
+#DIM 人里
+#DIM キャラ名
+
+ドレミ = NAME_TO_CHARA("ドレミー")
+
+;ドレミーと所属が同じ、ドレミーが捕虜でなく、面識がある、今のところ100%発動
+SIF !CHECK_KOJO_DAILY_HAPPEN(ドレミ, 1, 0, 1)
+    RETURN 0
+
+SELECTCASE KDVAR:ドレミ:ドレミー_人里口上
+    CASE 0
+	;0-14は全共通、15以降は恋慕
+        SELECTCASE  IFRAND("0TO14", 1, "15TO25", TALENT:ドレミ:恋慕)
+            CASE 0
+                PRINTFORML 「那家店排了很长的队呢」
+                ;TranslatedMark 「あのお店、凄い行列が出来てますね」
+                PRINTFORML 「嗯……%SPLIT_RAND("くれーぷ/まかろん/ぱんけーき/かすてーら/しゅーくりぃむ/まどれーぬ/ちーずたると", 1)%？是西洋点心吗」
+                ;TranslatedMark 「んっーと……%SPLIT_RAND("くれーぷ/まかろん/ぱんけーき/かすてーら/しゅーくりぃむ/まどれーぬ/ちーずたると", 1)%？って洋菓子かしら」
+                PRINTFORMW 「看吧，%ANAME(MASTER)%，我们也一起去吧♪」
+                ;TranslatedMark 「ほらほら%ANAME(MASTER)%、私達も並びに行きましょ♪」
+            CASE 1
+                PRINTFORML 「怎么样？这件衣服不可爱吗？」
+                ;TranslatedMark 「どうです？　このお洋服可愛くないですか？」
+                PRINTFORML 「哎呀~这边也不错呢…」
+                ;TranslatedMark 「あらら～こっちも良いわねぇ…」
+                PRINTFORML 「会不会有人买给我呢?」
+                ;TranslatedMark 「誰か買ってくれたりしれないかしら？」
+            CASE 2
+                PRINTFORML 「哎呀哎呀，喷泉那边好像有人在演奏呢」
+                ;TranslatedMark 「おやおや、噴水の方で誰かが演奏しているようですね」
+                PRINTFORML 「那里经常有人演奏呢」
+                ;TranslatedMark 「よくあそこは誰かが演奏してるのよねぇ」
+                PRINTFORML 「…喂，我们去看看吧」
+                ;TranslatedMark 「…ねぇねぇ、ちょっと見に行きましょうよ」
+            CASE 3
+                PRINTFORML 「账簿工作？」
+                ;TranslatedMark 「帳簿の仕事？」
+                PRINTFORML 「%ANAME(MASTER)%，现在正在约会哦工作的话是严禁的哦」
+                ;TranslatedMark 「%ANAME(MASTER)%、今はデート中なのですよ仕事の話は厳禁ですよ」
+                PRINTFORML 「看，下次去那边的书店吧」
+                ;TranslatedMark 「ほらほらっ、次はあそこの本屋さんにでも行きましょう」
+            CASE 4
+                PRINTFORML 「走得有点累了呢…」
+                ;TranslatedMark 「少し歩き疲れましたね…」
+                PRINTFORML 「要不要在那家茶馆休息一下？」
+                ;TranslatedMark 「あの茶屋で休憩していきませんか？」
+            CASE 5
+                PRINTFORML 「%ANAME(MASTER)%，要不要去那家杂货店看看？」
+                ;TranslatedMark 「%ANAME(MASTER)%、あの雑貨屋見ていきませんか？」
+                PRINTFORML 「好像是只卖外面世界的东西的店的连锁店，所以很在意」
+                ;TranslatedMark 「外の世界の物だけを売っているお店の出張店らしくて気になってたの」
+                PRINTFORML 「…我告诉你，没有卖可疑的东西哦」
+                ;TranslatedMark 「…言っておきますがいかがわしい道具は置いてませんからね」
+            CASE 6
+                PRINTFORML 「哎呀…那是市场啊」
+                ;TranslatedMark 「おや…あれは市場ですね」
+                PRINTFORML 「新鲜蔬菜、水果、肉和鱼排列在一起…哎呀，意外地便宜」
+                ;TranslatedMark 「新鮮な野菜、果物、肉や魚が並んで…おや意外と安い」
+                PRINTFORML 「虽然有点小气，但买水果吃也不错啊」
+                ;TranslatedMark 「はしたないけど果物の買い食いなんてのも悪くないわねぇ」
+            CASE 7
+                PRINTFORML 「诶，诶…是啊…」
+                ;TranslatedMark 「え、えぇ…そうねぇ…」
+                PRINTFORML （哎呀，完全没听啊…怎么办呢）
+                ;TranslatedMark （あらやだ、完全に聞いて無かったわ…どうしようかしら）
+                PRINTFORML 「是、是啊…村庄的特产是芝麻蜜团子吗？」
+                ;TranslatedMark 「そ、そうねぇ…人里の名物はごま蜜団子かしら？」
+            CASE 8
+                PRINTFORML 「……请稍微考虑一下」
+                ;TranslatedMark 「……少し考え事をしていましてね」
+                PRINTFORML 「在其他人看来我们是什么关系呢…」
+                ;TranslatedMark 「他の方から見て私たちはどういう関係に見えるのかと…」
+                PRINTFORML 「不，太无聊了，我不想再想了」
+                ;TranslatedMark 「いえ、くだらなくて考えるのを止めてしまいましたよ」
+            CASE 9
+                PRINTFORML 「啊，对面有不熟悉的摊子呢…」
+                ;TranslatedMark 「あら、向こうに見慣れない屋台がありますね…」
+                PRINTFORML 「看来盛况空前啊…嗯嗯」
+                ;TranslatedMark 「随分と盛況のようですねぇ…ふむふむ」
+                PRINTFORML 「去头饰店看看吧♪」
+                ;TranslatedMark 「髪飾りのお店ですって、見ていきましょ♪」
+            CASE 10
+                PRINTFORML 「今天天气晴朗真是太好了~」
+                ;TranslatedMark 「今日は晴れてよかった～」
+                PRINTFORML 「诶？下雨也可以吗？」
+                ;TranslatedMark 「えっ？　雨でも良かった？」
+                PRINTFORML 「哈哈…因为可以打相合伞呢」
+                ;TranslatedMark 「ははぁん…相合傘が出来るからね」
+            CASE 11
+                PRINTFORML 「喂，要不要去看那个花店？相当在意的」
+                ;TranslatedMark 「ねぇねぇ、あの花屋見ていかない？　結構気になってたの」
+                PRINTFORML 「据说那风见幽香也会偶尔来访」
+                ;TranslatedMark 「なんでもあの風見幽香もたまに訪れるそうよ」
+                PRINTFORML 「呋呋，还是说%ANAME(MASTER)%觉得花店很无聊呢？」
+                ;TranslatedMark 「ふふっ、それとも%ANAME(MASTER)%に花屋は退屈かしら？」
+            CASE 12
+                PRINTFORML 「请看啊那个荞麦面店，人可真多啊」
+                ;TranslatedMark 「おやおや見てくださいよあの蕎麦屋、すごく人が並んでるわ」
+                PRINTFORML 「看来…好像那对年轻夫妇经营着」
+                ;TranslatedMark 「見たところ…あの若夫婦が営んでいるようで」
+                PRINTFORML 「呋呋，我也有点憧憬啊」
+                ;TranslatedMark 「ふふっ、私もあぁいうのに少し憧れますねぇ」
+            CASE 13
+                PRINTFORML 「请看%ANAME(MASTER)%，那家店看起来很有趣不是吗？」
+                ;TranslatedMark 「見てください%ANAME(MASTER)%、あのお店面白そうじゃない？」
+                PRINTFORML 「诶？雾雨店？道具店？　…那个姑娘有这么大的店吗？」
+                ;TranslatedMark 「えっ？　霧雨店？　道具店？　…あの娘ってこんな大きなお店を持ってたの？」
+                PRINTFORML 「啊，是父母的啊。果然有点太年起了呢」
+                ;TranslatedMark 「あっ、親御さんね。　流石にちょっと早とちりしちゃったわね」
+            CASE 14
+                PRINTFORML 「哎呀哎呀，有很多开放式的居酒屋呢」
+                ;TranslatedMark 「おやおや随分とオープンな居酒屋がありますね」
+                PRINTFORML 「从中午开始喝吗？」
+                ;TranslatedMark 「あらら%ANAME(MASTER)%、お昼から飲まれますか？」
+                PRINTFORML 「嗯，没关系，我来陪你吧」
+                ;TranslatedMark 「えぇ構いませんよ、お相手しますね」
+		;こっから恋慕反応
+            CASE 15
+                PRINTFORML 「呐 %ANAME(MASTER)%」
+                ;TranslatedMark 「ねぇー%ANAME(MASTER)%」
+                PRINTFORML 「呋呋，只是叫了一下而已哦」
+                ;TranslatedMark 「ふふっ、呼んでみただけですよー」
+                PRINTFORML 「（像这样炫耀情侣的样子很好呢）」
+                ;TranslatedMark 「(こうやってバカップルっぷりを見せびらかすは良いですねぇ)」
+            CASE 16
+                PRINTFORML 「其实这附近我经常来哦」
+                ;TranslatedMark 「実はこの付近は結構来てたりするのですよ」
+                PRINTFORML 「那是因为有很多好吃又甜的店呢」
+                ;TranslatedMark 「そりゃあもう美味しい甘味のお店が沢山あってですね」
+                PRINTFORML 「今天带您去最喜欢的店吧…呋呋呋」
+                ;TranslatedMark 「今日は一番お気に入りのお店に案内してさしあげますよ…ふふっ」
+            CASE 17
+                PRINTFORML 「嗯，也许是心理作用吧，视线都集中在我们身上了。」
+                ;TranslatedMark 「んっー心なしか視線が私たちに集まってますねぇ」
+                PRINTFORML 「嗯，没关系的，尾巴已经藏起来了」
+                ;TranslatedMark 「えぇ大丈夫ですよ、ちゃーんと尻尾は隠していますので」
+                PRINTFORML 「让我再给你看看吧♪看吧」
+                ;TranslatedMark 「それよりもっと見せつけてあげましょ♪　ほらほらー」
+            CASE 18
+                PRINTFORML 「走得有点累了呢…」
+                ;TranslatedMark 「少し歩き疲れましたね…」
+                PRINTFORML 「要不要在那家茶馆休息一下？」
+                ;TranslatedMark 「あの茶屋で休憩していきませんか？」
+                PRINTFORML 「（呋呋，那家茶馆已经调查过是情侣专用的了…！)」
+                ;TranslatedMark 「(ふふっ、あの茶屋はカップル御用達なのはリサーチ済みですよ…！)」
+            CASE 19
+                PRINTFORML 「呐……%ANAME(MASTER)%？」
+                ;TranslatedMark 「ねぇ……%ANAME(MASTER)%？」
+                PRINTFORML 「啊……没什么……」
+                ;TranslatedMark 「あっ……べ、別に……」
+                PRINTFORML 「只是……偶尔也会想……」
+                ;TranslatedMark 「ただ……たまには、思ったから……」
+                PRINTFORML 「喂？%ANAME(MASTER)%喜欢我吗？」
+                ;TranslatedMark 「ねぇ？ %ANAME(MASTER)%は私のこと、好き？」
+                PRINTFORML 「…呣呜，喜欢呐…诶…」
+                ;TranslatedMark 「…ふーん、好きなんだ…へぇ…」
+            CASE 20
+                PRINTFORML 「诶，诶…是啊…」
+                ;TranslatedMark 「え、えぇ…そうねぇ…」
+                PRINTFORML （哎呀，完全没听啊…怎么办呢）
+                ;TranslatedMark （あらやだ、完全に聞いて無かったわ…どうしようかしら）
+                PRINTFORML 「是、是啊…村庄的特产是芝麻蜜团子吗？」
+                ;TranslatedMark 「そ、そうねぇ…人里の名物はごま蜜団子かしら？」
+            CASE 21
+                PRINTFORML 「……请稍微考虑一下」
+                ;TranslatedMark 「……少し考え事をしていましてね」
+                PRINTFORML 「在其他人看来我们是什么关系呢…」
+                ;TranslatedMark 「他の方から見て私たちはどういう関係に見えるのかと…」
+                PRINTFORML 「不，太无聊了，我不想再想了」
+                ;TranslatedMark 「いえ、くだらなくて考えるのを止めてしまいましたよ」
+            CASE 22
+                PRINTFORML 「啊，对面有不熟悉的摊子呢…」
+                ;TranslatedMark 「あら、向こうに見慣れない屋台がありますね…」
+                PRINTFORML 「看来盛况空前啊…嗯嗯」
+                ;TranslatedMark 「随分と盛況のようですねぇ…ふむふむ」
+                PRINTFORML 「去头饰店看看吧♪」
+                ;TranslatedMark 「髪飾りのお店ですって、見ていきましょ♪」
+            CASE 25
+                PRINTFORML 「今天天气晴朗真是太好了~」
+                ;TranslatedMark 「今日は晴れてよかった～」
+                PRINTFORML 「诶？下雨也可以吗？」
+                ;TranslatedMark 「えっ？　雨でも良かった？」
+                PRINTFORML 「哈哈…因为可以打相合伞呢」
+                ;TranslatedMark 「ははぁん…相合傘が出来るからね」
+        ENDSELECT
+		;人竿とデート会話の描写、0-2は全共通、3以降は恋慕
+        SELECTCASE  IFRAND("0TO2", 1, "3TO5", TALENT:ドレミ:恋慕)
+            CASE 0
+                PRINTFORMW 配合着随声附和，%ANAME(ドレミ)%的尾巴微微摇晃……
+                ;TranslatedMark 相槌に合わせて%ANAME(ドレミ)%の尻尾がピコピコと揺れた……
+            CASE 1
+                PRINTFORMW %ANAME(ドレミ)%和%ANAME(MASTER)%手牵手走在路上……
+                ;TranslatedMark %ANAME(ドレミ)%と%ANAME(MASTER)%は手を繋いで歩いている……
+            CASE 2
+                PRINTFORMW 在%ANAME(ドレミ)%的话语中，包含着仿佛带着让%ANAME(MASTER)%着迷的声音
+                ;TranslatedMark %ANAME(ドレミ)%の言葉は、%ANAME(MASTER)%をどこか誂うような声色を含んでいる……
+            CASE 3
+                PRINTFORMW %ANAME(ドレミ)%和%ANAME(MASTER)%紧贴着肩膀走着……
+                ;TranslatedMark %ANAME(ドレミ)%と%ANAME(MASTER)%は肩が触れるくらい密着して歩いている……
+            CASE 4
+                PRINTFORMW %ANAME(ドレミ)%手搭在%ANAME(MASTER)%的肩上走着……
+                ;TranslatedMark %ANAME(ドレミ)%は%ANAME(MASTER)%の肩に手を乗せて歩いている……
+            CASE 5
+                PRINTFORMW %ANAME(ドレミ)%抱着%ANAME(MASTER)%的手臂走着……
+                ;TranslatedMark %ANAME(ドレミ)%は%ANAME(MASTER)%の腕に抱き着いて歩いている……
+        ENDSELECT
+	;イベント判定
+        IF RAND:15 == 0
+            KDVAR:ドレミ:ドレミー_人里口上 = 1
+        ELSE
+        ENDIF
+	;イベント『洋服店に行こう』口上
+    CASE 1
+        PRINTFORML ------------------------------------------------------------------------------------------------------------
+        CALL COLOR_PRINTL(@"-デートイベント 『洋服店に行こう』発生-", カラー_注意)
+        PRINTFORML ------------------------------------------------------------------------------------------------------------
+        PRINTFORML 「呃，那家店确实是…」
+        ;TranslatedMark 「おやっ、あのお店は確か…」
+        PRINTFORMW %ANAME(ドレミ)%发现的好像是评价很高的西服店
+        ;TranslatedMark %ANAME(ドレミ)%が見つけたのは評判の洋服店らしい
+        PRINTFORMW 「喂，%ANAME(MASTER)%，要不要稍微靠近一点？」
+        ;TranslatedMark 「ねぇねぇ%ANAME(MASTER)%、ちょっと寄ってかない？」
+        CALL ASK_YN("走近", "不走近")
+        IF RESULT == 1
+            PRINTFORML 「是吗……」
+            ;TranslatedMark 「そうですか……」
+            PRINTFORMW 「那么下次有机会…」
+            ;TranslatedMark 「ではまた別の機会に…」
+            PRINTFORMW %ANAME(MASTER)%他们通过了服装店……
+            ;TranslatedMark %ANAME(MASTER)%達は洋服店のスルーした……
+            KDVAR:ドレミ:ドレミー_人里口上 = 0
+        ELSE
+            PRINTFORML 「呵呵，那我们走吧」
+            ;TranslatedMark 「ふふっ、それでは行きましょうか」
+            PRINTFORMW 带着%ANAME(ドレミ)%去了服装店……
+            ;TranslatedMark %ANAME(ドレミ)%を連れて洋服店を向かった……
+            PRINTFORMW ・
+            PRINTFORMW ・
+            PRINTFORMW ・
+            PRINTFORML 到了服装店的正门，一个身穿漂亮制服、挺直腰板的门卫打开门迎接了我
+            ;TranslatedMark 洋服店の正面玄関に着くと、立派な制服に身を包み、背筋をピンと伸ばしたドアマンがドアを開けて出迎えて来た
+            PRINTFORMW %ANAME(MASTER)%们惊讶于门曼的存在而进了店…
+            ;TranslatedMark %ANAME(MASTER)%達はドアマンの存在に驚きつつ入店した…
+            PRINTFORML 复古风的内饰、女人味、时尚的单品、吊灯、低速爵士乐
+            ;TranslatedMark ヴィンテージ風の内装、フェミニン、ドレッシーなアイテム、シャンデリア、ローテンポなジャズ
+            PRINTFORMW 厚重的桌子、枝形吊灯、复古风格的架子、花型的布制壁纸
+            ;TranslatedMark 重厚なテーブル、シャンデリア、レトロ調なラック、花柄のファブリックを使った壁紙
+            PRINTFORML 「这又……看起来很贵的店呢」
+            ;TranslatedMark 「これはまた……高そうなお店ですねぇ」
+            PRINTFORML 在宽敞舒适的空间里眺望陈列着的衣服的%ANAME(ドレミ)%
+            ;TranslatedMark ゆったりとしたスペースで陳列された服を眺める%ANAME(ドレミ)%
+            PRINTFORMW 为了不被任何人察觉，%ANAME(MASTER)%再次确认了钱包里的东西
+            ;TranslatedMark %ANAME(MASTER)%は誰にも悟られないように財布の中身を再確認した
+            PRINTFORML 「呐，%ANAME(MASTER)%」
+            ;TranslatedMark 「ねぇねぇ%ANAME(MASTER)%っ」
+            PRINTFORMW 以发现了什么的样子呼唤%ANAME(MASTER)%的%ANAME(ドレミ)%
+            ;TranslatedMark 何かを見つけた様子で%ANAME(MASTER)%を呼ぶ%ANAME(ドレミ)%
+            PRINTFORML 
+            PRINTFORML 朝着%ANAME(ドレミ)%的方向走去，那里设置了整体搭配的人体模型
+            ;TranslatedMark %ANAME(ドレミ)%の元へ向かうと、そこにはトータルコーディネートのマネキンが設置されている
+            PRINTFORMW 人体模型上有以黑色为基调的迷你裙和高级饰品，价格标签的每一张都是不可思议的金额…
+            ;TranslatedMark マネキンは黒を基調にしたミニドレスと高級アクセサリーを纏っており、値札の一枚一枚が途方のない額だ…
+            PRINTFORML 「不是很漂亮的裙子吗？一次就可以了，所以穿了看……」
+            ;TranslatedMark 「素敵なドレスじゃない？　一度で良いから着てみたいわね……」
+            PRINTFORML 「穿着这个和%ANAME(MASTER)%跳舞。　……呵呵，那可真棒啊」
+            ;TranslatedMark 「これを着て%ANAME(MASTER)%と踊るの。　……ふふっ、素敵ね」
+            PRINTFORMW 一方面，%ANAME(MASTER)%再次确认了钱包里的东西…
+            ;TranslatedMark 目を輝かせマネキンを眺める%ANAME(ドレミ)%、一方で%ANAME(MASTER)%は再度財布の中身を確認した…
+            PRINTFORML "如果可以的话要试穿吗？"
+            ;TranslatedMark 『良ければご試着なされますか？』
+            PRINTFORML 穿着西装的店员来访%ANAME(ドレミ)%
+            ;TranslatedMark スーツ姿の店員が%ANAME(ドレミ)%に訪ねてくる
+            PRINTFORML 「那么……」
+            ;TranslatedMark 「それじゃあ……」
+            PRINTFORMW 好像要试穿一下……
+            ;TranslatedMark どうやら試着するようだ……
+            PRINTFORML 
+            PRINTFORML 在店内设置的试衣间前等了几分钟，终于换好衣服了
+            ;TranslatedMark 店内奥に併設されている試着室の前で待つ事数分、ようやく着替え終わったらしい
+            PRINTFORML 「……怎么样？」
+            ;TranslatedMark 「……ど、どう？」
+            PRINTFORMW 拉开窗帘，%ANAME(ドレミ)%换上了迷你裙……
+            ;TranslatedMark カーテンを開かれると、そこにはミニドレスに着替えた%ANAME(ドレミ)%が立っていた……
+            PRINTFORML 好漂亮啊…一边传达着，一边目不转睛地凝视着%ANAME(ドレミ)%的身姿
+            ;TranslatedMark 綺麗だよ…と伝えつつ、%ANAME(ドレミ)%の姿をじろじろと凝視してしまう
+            PRINTFORML 紧身衣加上腰围收紧，强调了%ANAME(ドレミ)%的胸口
+            ;TranslatedMark コルセットでウェストが引き締まっている分、%ANAME(ドレミ)%の胸元が強調されている
+            PRINTFORML 裙子部分的长度也很短，是相当煽情的设计……
+            ;TranslatedMark スカート部分の丈も短く、随分と扇情的なデザインだ……
+            PRINTFORMW 也许是因为这个原因，旁边的女店员对衣服和场景的说明完全听不到
+            ;TranslatedMark そのせいか隣で女性店員が、服やシチュエーションの説明をしているのがまるで耳に入らない
+            PRINTFORML 
+            PRINTFORML 「……嗯♪」
+            ;TranslatedMark 「……えいっ♪」
+            PRINTFORML %ANAME(ドレミ)%突然，不知从哪里拿出了梦魂向店员投掷了梦魂
+            ;TranslatedMark %ANAME(ドレミ)%は突如、どこからともなく夢魂を取り出し店員に夢魂をぶつけた
+            PRINTFORMW 于是店员坐在旁边的椅子上睡着了
+            ;TranslatedMark すると店員は、傍にある椅子に座り寝込んでしまった
+            PRINTFORML 「请放心。她只是做了一点梦而已」
+            ;TranslatedMark 「ご安心ください。　彼女には少しだけ夢を見て貰っただけですよ」
+            PRINTFORMW 是方便的能力……于是，%ANAME(ドレミ)%靠近了%ANAME(MASTER)%……
+            ;TranslatedMark 便利な能力だ……と感心していると、%ANAME(ドレミ)%が%ANAME(MASTER)%の傍へと寄って来た……
+            PRINTFORML 「摸一下……」
+            ;TranslatedMark 「ねぇ触って……」
+            PRINTFORML 被%ANAME(ドレミ)%抓住手，然后被引导到礼服上
+            ;TranslatedMark %ANAME(ドレミ)%に手を掴まれ、そのままドレスに誘導される
+            PRINTFORMW %ANAME(MASTER)%透过丝绸质地，享受柔软的%ANAME(ドレミ)%丰满的臀部和隆起的乳房触感
+            ;TranslatedMark %ANAME(MASTER)%はシルクの生地越しに、柔らかい%ANAME(ドレミ)%のふくよかな臀部や盛り上がった乳房の感触を楽しむ
+            PRINTFORML 「但是……只有这个不够吧？」
+            ;TranslatedMark 「でも……これだけじゃ足りないでしょう？」
+            PRINTFORML %ANAME(ドレミ)%一步一步走到试衣间的深处，一只手灵巧地将裙子的下摆拉到身边
+            ;TranslatedMark %ANAME(ドレミ)%は一歩試着室の奥へステップし、片手で器用にスカートの裾を手繰り寄せていく
+            PRINTFORMW 渐渐失去裙子防御的内衣，稍稍暴露了其高雅的设计……
+            ;TranslatedMark スカートの防御を失いつつある下着は、その上品なデザインを僅かに晒している……
+            PRINTFORML 
+            PRINTFORML 
+            SETCOLOR カラー_ピンク
+            PRINTFORML 「嗯哼……♥嗯……嗯……♥」
+            ;TranslatedMark 「んふっ……♥　んむぅ……んーっ……♥」
+            PRINTFORML 一边拥抱一边夺走嘴唇的话，%ANAME(ドレミ)%也会回应般的吸着舌头，用前端互相撞击
+            ;TranslatedMark 抱き締めながら唇を奪ってやると、%ANAME(ドレミ)%も応えるように舌を吸ったり、先端で突き合ってくる
+            PRINTFORML 试衣间里，混杂着唾液的粘糊糊的声音和含混不清的声音回响着
+            ;TranslatedMark 試着室に、唾液の混ざり合うねっとりとした音とくぐもった声とが響く
+            PRINTFORML 两手绕到%ANAME(ドレミ)%身后，掀开裙子，仿佛享受丰满的臀部触感一般，揉搓着
+            ;TranslatedMark 両手を%ANAME(ドレミ)%の後ろへ回しスカートをめくり上げ、ふくよかな臀部を感触を楽しむように揉みしだく
+            PRINTFORML 「嗯……♥」
+            ;TranslatedMark 「んっ……♥」
+            PRINTFORMW 一边扭动着腰，一边不想离开这里继续接吻的%ANAME(ドレミ)%
+            ;TranslatedMark びくっと腰をくねらせながらも、こちらを離そうとせずキスを続ける%ANAME(ドレミ)%
+            PRINTFORML 
+            PRINTFORML
+            PRINTFORML 一旦放开舌头，互相凝视
+            ;TranslatedMark 一旦舌を離し、お互いに見つめ合う
+            PRINTFORML %ANAME(ドレミ)%的脸涨红了，哈啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊
+            ;TranslatedMark %ANAME(ドレミ)%は顔を紅潮させ、はぁはぁと荒くも甘い吐息を当ててくる
+            PRINTFORML 「……更多」
+            ;TranslatedMark 「……もっとっ」
+            PRINTFORML 为了互相寻求，嘴唇再次浓厚重叠，光靠嘴唇和舌头是不够的，甚至连唾液也要互相交换
+            ;TranslatedMark お互いが求めあうように再び唇を濃厚に重ねる、唇や舌だけでは足らず唾液まで交換し合う
+            PRINTFORML 交错的嘴唇中淫靡的水声响彻房间，不停地亲吻
+            ;TranslatedMark 交わう唇からは淫靡な水音が部屋を鳴り響かせ、何度も飽きずにキスを繰り返す
+            PRINTFORMW 好不容易再次放开嘴的时候，不知什么时候被推倒的%ANAME(ドレミ)%带着红潮的表情看着%ANAME(MASTER)%……
+            ;TranslatedMark ようやく再度口を離した時には、いつの間にか押し倒されていた%ANAME(ドレミ)%は紅潮した表情で%ANAME(MASTER)%を見つめていた……
+            PRINTFORML
+            PRINTFORML
+            PRINTFORML 被推倒的%ANAME(ドレミ)%一边用一只手摩擦%ANAME(MASTER)%的胯股之间的膨胀，一边慢慢地提高裙子露出内衣
+            ;TranslatedMark 押し倒された%ANAME(ドレミ)%は片手で%ANAME(MASTER)%の股間の膨らみを摩りつつ、おもむろにスカートをたくし上げて下着を露わにする
+            PRINTFORML 内衣已经被水气沾湿，用手指挪动打开秘所的话就会发出黏糊糊的声音，爱液就会滴下来
+            ;TranslatedMark 下着は既に水気で濡れ切り、指でずらし秘所を広げるとネチャネチャと音を立てて愛液が零れ落ちる
+            PRINTFORML 「来……来，来♥%ANAME(MASTER)%……要是能插入可就太好了♥」
+            ;TranslatedMark 「き……来て♥　%ANAME(MASTER)%っ……ナマで良いから♥」
+            PRINTFORML 从被%ANAME(ドレミ)%覆盖的状态刺入阴茎的同时，%ANAME(ドレミ)%用脚缠住紧紧抓住腰
+            ;TranslatedMark %ANAME(ドレミ)%に覆いかぶさる状態からペニスを突き入れると同時に、%ANAME(ドレミ)%は足を絡めてガッチリ腰を捕まえる
+            PRINTFORML 从一开始就没有余裕了吗？%ANAME(ドレミ)%发出外面也很可能听到的娇声，来回地叫
+            ;TranslatedMark 最初から余裕がないのか、%ANAME(ドレミ)%は外にも聞こえかねない程の嬌声を上げてよがり回る
+            PRINTFORML 「呜♥咕♥哈啊啊啊啊♥」
+            ;TranslatedMark 「んぅっ♥　くっ♥　ぁはぁあんっ♥」
+            PRINTFORML 在备置的镜子里，映照出一边喘着气一边左右摇晃着脖子，一边露出恍惚表情的%ANAME(MASTER)%，她的身姿非常刺激着彼此的兴奋，%ANAME(MASTER)%加快了活塞的步伐
+            ;TranslatedMark 備え付けの鏡には、喘ぎながら首を左右に揺りつつも恍惚の表情を浮かべる%ANAME(MASTER)%が映る、その姿は酷く互いの興奮を煽り、%ANAME(MASTER)%はピストンのペースを早めた
+            PRINTFORMW 每次打到的时候，连接部的爱液都会舞散，还没打好就把阴道内来往的阴茎系紧……
+            ;TranslatedMark 打ち付ける度に結合部からは愛液が舞い散り、まだかまだかと膣内は行き来するペニスを締め上げていく……
+            PRINTFORML 
+            PRINTFORML
+            PRINTFORML 把%ANAME(ドレミ)%的一只手拉到跟前，再坐下
+            ;TranslatedMark %ANAME(ドレミ)%の片腕を引き寄せて、更に腰を打ち付ける
+            PRINTFORML 「嗯啊！？这个姿势，到里面去……啊啊♥」
+            ;TranslatedMark 「んぁあっ！？ この姿勢、奥まで……ぁうっ♥」
+            PRINTFORML 「厉害♥送到了，在里面……♥」
+            ;TranslatedMark 「すごいっ♥　届いてる、奥にぃっ……♥」
+            PRINTFORML %ANAME(ドレミ)%沉浸在为了播种而一直摆动着腰的%ANAME(MASTER)%肉棒中，沉浸在作为雌性的幸福感中……
+            ;TranslatedMark 種付けする為に腰を振り続ける%ANAME(MASTER)%に、%ANAME(ドレミ)%は雌としての幸福感に浸っていた……
+            PRINTFORML 就在这时，从试衣间的窗帘上传来敲门声
+            ;TranslatedMark その途端、ドンドンと試着室のカーテン越しからノックの音と声が聞こえる
+            PRINTFORML "客人，有什么事吗？"
+            ;TranslatedMark 『お客様、どうかなされましたか？』
+            PRINTFORMW 好像和睡着的店员不一样，对%ANAME(ドレミ)%的娇声做出了反应
+            ;TranslatedMark どうやら寝かした店員とは別で、%ANAME(ドレミ)%の嬌声に反応したようだ
+            PRINTFORML 
+            PRINTFORML
+            PRINTFORML 「嗯，嗯♥穿上礼服♥为了脱掉而苦战♥嘿♥」
+            ;TranslatedMark 「んんっ♥　ドレスをっ♥　脱ぐのに苦戦しちゃ♥　ってぇ♥」
+            PRINTFORML 从窗帘的缝隙中露出脸的%ANAME(ドレミ)%，后面是%ANAME(MASTER)%的阴茎在%ANAME(ドレミ)%的阴道内激烈地往返着
+            ;TranslatedMark カーテンの隙間から顔を出す%ANAME(ドレミ)%、その後ろでは%ANAME(MASTER)%のペニスが%ANAME(ドレミ)%の膣内を激しく往復している
+            PRINTFORML 店员对于红潮的表情和隐约听到的水声感到困惑…
+            ;TranslatedMark 嬌声を抑えながら話すも、紅潮した表情と微かに聞こえる水音に店員は困惑している…
+            PRINTFORML "诶……啊……"
+            ;TranslatedMark 『えっ……あっ……』
+            PRINTFORML %ANAME(MASTER)%一边动着腰，一边用温柔的手抚摸着尾巴
+            ;TranslatedMark %ANAME(MASTER)%は腰を動かしながら尻尾を優しい手つきで撫でてやる
+            PRINTFORML 「啊啊！」
+            ;TranslatedMark 「あぁっ！」
+            PRINTFORML 好像是突然被抚摸吓了一跳，阴道紧紧地勒住了阴茎
+            ;TranslatedMark 突然撫でられて驚いたらしい、膣内がペニスをぎゅうぎゅうと締め付けてくる
+            PRINTFORMW "没关系吗客人！？"
+            ;TranslatedMark 『だ、大丈夫ですかお客様！？』
+            PRINTFORML 
+            PRINTFORML
+            PRINTFORML %ANAME(MASTER)%无视着急的店员，用空着的双臂开始揉%ANAME(ドレミ)%的胸部
+            ;TranslatedMark 焦る店員をよそに後ろから%ANAME(MASTER)%は、空いた両腕で%ANAME(ドレミ)%の胸を揉み始める
+            PRINTFORML 「嗯啊啊♥等、啊……没关系♥没关系的♥到那边去！」
+            ;TranslatedMark 「んぁあっ♥　ちょ、あぁ……だいじょうぶ♥　だいじょうぶだから♥　あっちにいってぇ！」
+            PRINTFORML 在快乐坠落而思考完全转不过来之前，像是要挣脱般发出声音的%ANAME(ドレミ)%
+            ;TranslatedMark 快楽に墜ちて思考がまったく回らなくなる前に、振り絞るように声を上げる%ANAME(ドレミ)%
+            PRINTFORML "那么，失礼了！"
+            ;TranslatedMark 『し、失礼しましたー！』
+            PRINTFORML %ANAME(ドレミ)%确认了逃走的店员后，从窗帘里缩了回去…
+            ;TranslatedMark %ANAME(ドレミ)%は逃げるように去っていく店員を確認すると、カーテンから顔を引っ込めた…
+            PRINTFORML 「嗯♥嗯，嗯♥如果……暴露了……哇♥一定……啊啊啊♥」
+            ;TranslatedMark 「んっ♥　くぅんっ♥　ば……ばれちゃった……わねっ♥　きっと……あぁっ♥」
+            PRINTFORMW 一边喘息一边%ANAME(ドレミ)%向着%ANAME(MASTER)%微笑
+            ;TranslatedMark 喘ぎながらも%ANAME(ドレミ)%は%ANAME(MASTER)%の方を向いて微笑んだ
+            PRINTFORML 
+            PRINTFORML 
+            PRINTFORML 「啊啊啊♥所以……嗯♥再加一点♥给我♥」
+            ;TranslatedMark 「あぁっ♥　だから……んっ♥　もっとぉ♥　ちょうだい♥」
+            PRINTFORML 在%ANAME(ドレミ)%的要求下，%ANAME(MASTER)%的兴奋达到了最大限度，开始以倒退的姿势开始发情的%ANAME(ドレミ)%乱糟糟地犯下
+            ;TranslatedMark %ANAME(ドレミ)%のおねだりに、%ANAME(MASTER)%の興奮は最大限にまで達し、バックの体勢で発情する%ANAME(ドレミ)%を滅茶苦茶に犯し始める
+            PRINTFORML 在房间里回响的声音和%ANAME(ドレミ)%的喘息声。%ANAME(MASTER)%也在兴奋的同时，强烈地撞击湿阴道
+            ;TranslatedMark パンパンと部屋に響く音と%ANAME(ドレミ)%の喘ぎ声。　%ANAME(MASTER)%も興奮を高められながら濡れる膣に強く腰を打ち付ける
+            PRINTFORML 「啊啊啊♥啊♥好棒，%ANAME(MASTER)%……♥」
+            ;TranslatedMark 「ぁあんっ♥　あっ♥　いい、%ANAME(MASTER)%……♥」
+            PRINTFORML 「在阴道内♥你的♥在暴走着……嗯啊啊♥」
+            ;TranslatedMark 「膣内で♥　貴方のが♥　暴れて……んぁあっ♥」
+            PRINTFORML 即将绝顶的%ANAME(MASTER)%从后面拉着%ANAME(ドレミ)%的手臂，比刚才更加激烈地继续打肉棒
+            ;TranslatedMark 絶頂寸前の%ANAME(MASTER)%は後ろから%ANAME(ドレミ)%の腕を引っ張り、先ほどよりも激しく肉棒を打ち込み続ける
+            PRINTFORML 在龟头撬开子宫口的触感中感受到了最高潮的兴奋，同时也为快乐堕落为淫荡的雌性化的%ANAME(ドレミ)%做了配种
+            ;TranslatedMark 亀頭で子宮口をこじ開けていく感触に最高潮の興奮を感じながら、快楽に堕ち淫らな雌と化した%ANAME(ドレミ)%に種付けを果たした
+            PRINTFORML 「进入子宫……你的粘稠精液…♥……满满的…射精吧♥」
+            ;TranslatedMark 「子宮にっ……貴方のドロドロ精液…♥……いっぱい…射精してっ♥」
+            PRINTFORML 插根膨胀的肉棒。绝顶收缩的阴道壁。被吐出的精子们向唯一的逃避场所——子宫袭来雪崩
+            ;TranslatedMark 根本まで挿入され膨張した肉棒。　絶頂で収縮する膣壁。　吐き出された精子たちは唯一の逃げ場である子宮へと雪崩を打って入り込む
+            PRINTFORMW %ANAME(ドレミ)%感受到了子宫被填满的感觉，感受到了作为女人最棒的快感和幸福…
+            ;TranslatedMark %ANAME(ドレミ)%は子宮が満たされていく感覚を覚え、女として最高の快感と幸福を味わった…
+            CALL FUCK(ドレミ, "Ｃ, Ｖ, Ｂ, 欲望, 奉仕, 性交, 性技, 精愛, 苦痛快楽, 被虐, 口淫, Ｖ性交", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_ID(MASTER), @"%ANAME(MASTER)%の\@ RAND:2 ? 肉棒 # 唇\@", ANAME(MASTER), "", "調教")
+            PRINTFORML
+            PRINTFORML
+            PRINTFORML 中出后也激烈地运动是原因，精液的一部分从结合部粘稠地弄脏了溢出%ANAME(ドレミ)%的礼服
+            ;TranslatedMark 中出し後も激しく動いたのが原因で、精液の一部が結合部からドロドロと溢れ%ANAME(ドレミ)%のドレスを汚した
+            PRINTFORML 望着零落的白色浑浊液的%ANAME(ドレミ)%似乎有点欠缺似的凝视着%ANAME(MASTER)%
+            ;TranslatedMark 零れる白濁液を眺めていた%ANAME(ドレミ)%は物足りなさそうに%ANAME(MASTER)%を見つめた
+            PRINTFORML 像是在强求似的，勒紧阴道内抓住肉棒，用眼神向%ANAME(MASTER)%传达继续进行的意志
+            ;TranslatedMark 強請るように膣内をきつく締めて肉棒を捕らえ、上目遣いで続行の意志を%ANAME(MASTER)%に伝える
+            PRINTFORML 被这样撒娇也没办法，%ANAME(MASTER)%又开始摇起腰来了
+            ;TranslatedMark こうまで甘えられては仕方がないと、%ANAME(MASTER)%は再び腰を振り始めた
+            PRINTFORMW 在%ANAME(ドレミ)%满足之前，试衣间一直在娇声尖叫…
+            ;TranslatedMark %ANAME(ドレミ)%が満足するまで、試着室からは嬌声が漏れ続けていた…
+            RESETCOLOR
+            PRINTFORMW ・
+            PRINTFORMW ・
+            PRINTFORMW ・
+            PRINTFORML 之后，%ANAME(ドレミ)%想最大限度地活用了自己的能力，让店员们“同意”自己随意地穿着礼服做爱…决定了
+            ;TranslatedMark その後、%ANAME(ドレミ)%は自身の能力を最大限に活用し、店員達がドレスを勝手に着てセックスした…事にした
+            PRINTFORML 「啊…已经不能去那家店了呢……」
+            ;TranslatedMark 「あぁ…もうあの店には行けませんね……」
+            PRINTFORML 腰酸了走路的%ANAME(ドレミ)%和%ANAME(MASTER)%
+            ;TranslatedMark 腰が砕けつつ歩く%ANAME(ドレミ)%と%ANAME(MASTER)%
+            PRINTFORML 「累了…在那个甜食店休息吧」
+            ;TranslatedMark 「疲れました…あの甘味処で休憩しましょう」
+            PRINTFORML 「但是……还想再去看看呢」
+            ;TranslatedMark 「でも……また行ってみたいですねぇ」
+            PRINTFORMW 提案的%ANAME(ドレミ)%，%ANAME(MASTER)%应允并共同迈向甜味处……
+            ;TranslatedMark 提案する%ANAME(ドレミ)%、%ANAME(MASTER)%は承諾し共に甘味処へと足取りを進めた……
+        ENDIF
+    CASE 3
+		;0-14は全共通、15以降は恋慕
+        SELECTCASE  IFRAND("0TO14", 1, "15TO25", TALENT:ドレミ:恋慕)
+            CASE 0
+                PRINTFORML 「那家店排了很长的队呢」
+                ;TranslatedMark 「あのお店、凄い行列が出来てますね」
+                PRINTFORML 「嗯……%SPLIT_RAND("くれーぷ/まかろん/ぱんけーき/かすてーら/しゅーくりぃむ/まどれーぬ/ちーずたると", 1)%？是西洋点心吗」
+                ;TranslatedMark 「んっーと……%SPLIT_RAND("くれーぷ/まかろん/ぱんけーき/かすてーら/しゅーくりぃむ/まどれーぬ/ちーずたると", 1)%？って洋菓子かしら」
+                PRINTFORMW 「看吧，%ANAME(MASTER)%，我们也一起去吧♪」
+                ;TranslatedMark 「ほらほら%ANAME(MASTER)%、私達も並びに行きましょ♪」
+            CASE 1
+                PRINTFORML 「怎么样？这件衣服不可爱吗？」
+                ;TranslatedMark 「どうです？　このお洋服可愛くないですか？」
+                PRINTFORML 「哎呀~这边也不错呢…」
+                ;TranslatedMark 「あらら～こっちも良いわねぇ…」
+                PRINTFORML 「会不会有人买给我呢?」
+                ;TranslatedMark 「誰か買ってくれたりしれないかしら？」
+            CASE 2
+                PRINTFORML 「哎呀哎呀，喷泉那边好像有人在演奏呢」
+                ;TranslatedMark 「おやおや、噴水の方で誰かが演奏しているようですね」
+                PRINTFORML 「那里经常有人演奏呢」
+                ;TranslatedMark 「よくあそこは誰かが演奏してるのよねぇ」
+                PRINTFORML 「…喂，我们去看看吧」
+                ;TranslatedMark 「…ねぇねぇ、ちょっと見に行きましょうよ」
+            CASE 3
+                PRINTFORML 「账簿工作？」
+                ;TranslatedMark 「帳簿の仕事？」
+                PRINTFORML 「%ANAME(MASTER)%，现在正在约会哦工作的话是严禁的哦」
+                ;TranslatedMark 「%ANAME(MASTER)%、今はデート中なのですよ仕事の話は厳禁ですよ」
+                PRINTFORML 「看，下次去那边的书店吧」
+                ;TranslatedMark 「ほらほらっ、次はあそこの本屋さんにでも行きましょう」
+            CASE 4
+                PRINTFORML 「走得有点累了呢…」
+                ;TranslatedMark 「少し歩き疲れましたね…」
+                PRINTFORML 「要不要在那家茶馆休息一下？」
+                ;TranslatedMark 「あの茶屋で休憩していきませんか？」
+            CASE 5
+                PRINTFORML 「%ANAME(MASTER)%，要不要去那家杂货店看看？」
+                ;TranslatedMark 「%ANAME(MASTER)%、あの雑貨屋見ていきませんか？」
+                PRINTFORML 「好像是只卖外面世界的东西的店的连锁店，所以很在意」
+                ;TranslatedMark 「外の世界の物だけを売っているお店の出張店らしくて気になってたの」
+                PRINTFORML 「…我告诉你，没有卖可疑的东西哦」
+                ;TranslatedMark 「…言っておきますがいかがわしい道具は置いてませんからね」
+            CASE 6
+                PRINTFORML 「哎呀…那是市场啊」
+                ;TranslatedMark 「おや…あれは市場ですね」
+                PRINTFORML 「新鲜蔬菜、水果、肉和鱼排列在一起…哎呀，意外地便宜」
+                ;TranslatedMark 「新鮮な野菜、果物、肉や魚が並んで…おや意外と安い」
+                PRINTFORML 「虽然有点小气，但买水果吃也不错啊」
+                ;TranslatedMark 「はしたないけど果物の買い食いなんてのも悪くないわねぇ」
+            CASE 7
+                PRINTFORML 「诶，诶…是啊…」
+                ;TranslatedMark 「え、えぇ…そうねぇ…」
+                PRINTFORML （哎呀，完全没听啊…怎么办呢）
+                ;TranslatedMark （あらやだ、完全に聞いて無かったわ…どうしようかしら）
+                PRINTFORML 「是、是啊…村庄的特产是芝麻蜜团子吗？」
+                ;TranslatedMark 「そ、そうねぇ…人里の名物はごま蜜団子かしら？」
+            CASE 8
+                PRINTFORML 「……请稍微考虑一下」
+                ;TranslatedMark 「……少し考え事をしていましてね」
+                PRINTFORML 「在其他人看来我们是什么关系呢…」
+                ;TranslatedMark 「他の方から見て私たちはどういう関係に見えるのかと…」
+                PRINTFORML 「不，太无聊了，我不想再想了」
+                ;TranslatedMark 「いえ、くだらなくて考えるのを止めてしまいましたよ」
+            CASE 9
+                PRINTFORML 「啊，对面有不熟悉的摊子呢…」
+                ;TranslatedMark 「あら、向こうに見慣れない屋台がありますね…」
+                PRINTFORML 「看来盛况空前啊…嗯嗯」
+                ;TranslatedMark 「随分と盛況のようですねぇ…ふむふむ」
+                PRINTFORML 「去头饰店看看吧♪」
+                ;TranslatedMark 「髪飾りのお店ですって、見ていきましょ♪」
+            CASE 10
+                PRINTFORML 「今天天气晴朗真是太好了~」
+                ;TranslatedMark 「今日は晴れてよかった～」
+                PRINTFORML 「诶？下雨也可以吗？」
+                ;TranslatedMark 「えっ？　雨でも良かった？」
+                PRINTFORML 「哈哈…因为可以打相合伞呢」
+                ;TranslatedMark 「ははぁん…相合傘が出来るからね」
+            CASE 11
+                PRINTFORML 「喂，要不要去看那个花店？相当在意的」
+                ;TranslatedMark 「ねぇねぇ、あの花屋見ていかない？　結構気になってたの」
+                PRINTFORML 「据说那风见幽香也会偶尔来访」
+                ;TranslatedMark 「なんでもあの風見幽香もたまに訪れるそうよ」
+                PRINTFORML 「呋呋，还是说%ANAME(MASTER)%觉得花店很无聊呢？」
+                ;TranslatedMark 「ふふっ、それとも%ANAME(MASTER)%に花屋は退屈かしら？」
+            CASE 12
+                PRINTFORML 「请看啊那个荞麦面店，人可真多啊」
+                ;TranslatedMark 「おやおや見てくださいよあの蕎麦屋、すごく人が並んでるわ」
+                PRINTFORML 「看来…好像那对年轻夫妇经营着」
+                ;TranslatedMark 「見たところ…あの若夫婦が営んでいるようで」
+                PRINTFORML 「呋呋，我也有点憧憬啊」
+                ;TranslatedMark 「ふふっ、私もあぁいうのに少し憧れますねぇ」
+            CASE 13
+                PRINTFORML 「请看%ANAME(MASTER)%，那家店看起来很有趣不是吗？」
+                ;TranslatedMark 「見てください%ANAME(MASTER)%、あのお店面白そうじゃない？」
+                PRINTFORML 「诶？雾雨店？道具店？　…那个姑娘有这么大的店吗？」
+                ;TranslatedMark 「えっ？　霧雨店？　道具店？　…あの娘ってこんな大きなお店を持ってたの？」
+                PRINTFORML 「啊，是父母的啊。果然有点太年起了呢」
+                ;TranslatedMark 「あっ、親御さんね。　流石にちょっと早とちりしちゃったわね」
+            CASE 14
+                PRINTFORML 「哎呀哎呀，有很多开放式的居酒屋呢」
+                ;TranslatedMark 「おやおや随分とオープンな居酒屋がありますね」
+                PRINTFORML 「从中午开始喝吗？」
+                ;TranslatedMark 「あらら%ANAME(MASTER)%、お昼から飲まれますか？」
+                PRINTFORML 「嗯，没关系，我来陪你吧」
+                ;TranslatedMark 「えぇ構いませんよ、お相手しますね」
+		;こっから恋慕反応
+            CASE 15
+                PRINTFORML 「呐 %ANAME(MASTER)%」
+                ;TranslatedMark 「ねぇー%ANAME(MASTER)%」
+                PRINTFORML 「呋呋，只是叫了一下而已哦」
+                ;TranslatedMark 「ふふっ、呼んでみただけですよー」
+                PRINTFORML 「（像这样炫耀情侣的样子很好呢）」
+                ;TranslatedMark 「(こうやってバカップルっぷりを見せびらかすは良いですねぇ)」
+            CASE 16
+                PRINTFORML 「其实这附近我经常来哦」
+                ;TranslatedMark 「実はこの付近は結構来てたりするのですよ」
+                PRINTFORML 「那是因为有很多好吃又甜的店呢」
+                ;TranslatedMark 「そりゃあもう美味しい甘味のお店が沢山あってですね」
+                PRINTFORML 「今天带您去最喜欢的店吧…呋呋呋」
+                ;TranslatedMark 「今日は一番お気に入りのお店に案内してさしあげますよ…ふふっ」
+            CASE 17
+                PRINTFORML 「嗯，也许是心理作用吧，视线都集中在我们身上了。」
+                ;TranslatedMark 「んっー心なしか視線が私たちに集まってますねぇ」
+                PRINTFORML 「嗯，没关系的，尾巴已经藏起来了」
+                ;TranslatedMark 「えぇ大丈夫ですよ、ちゃーんと尻尾は隠していますので」
+                PRINTFORML 「让我再给你看看吧♪看吧」
+                ;TranslatedMark 「それよりもっと見せつけてあげましょ♪　ほらほらー」
+            CASE 18
+                PRINTFORML 「走得有点累了呢…」
+                ;TranslatedMark 「少し歩き疲れましたね…」
+                PRINTFORML 「要不要在那家茶馆休息一下？」
+                ;TranslatedMark 「あの茶屋で休憩していきませんか？」
+                PRINTFORML 「（呋呋，那家茶馆已经调查过是情侣专用的了…！)」
+                ;TranslatedMark 「(ふふっ、あの茶屋はカップル御用達なのはリサーチ済みですよ…！)」
+            CASE 19
+                PRINTFORML 「呐……%ANAME(MASTER)%？」
+                ;TranslatedMark 「ねぇ……%ANAME(MASTER)%？」
+                PRINTFORML 「啊……没什么……」
+                ;TranslatedMark 「あっ……べ、別に……」
+                PRINTFORML 「只是……偶尔也会想……」
+                ;TranslatedMark 「ただ……たまには、思ったから……」
+                PRINTFORML 「喂？%ANAME(MASTER)%喜欢我吗？」
+                ;TranslatedMark 「ねぇ？ %ANAME(MASTER)%は私のこと、好き？」
+                PRINTFORML 「…呣呜，喜欢呐…诶…」
+                ;TranslatedMark 「…ふーん、好きなんだ…へぇ…」
+            CASE 20
+                PRINTFORML 「诶，诶…是啊…」
+                ;TranslatedMark 「え、えぇ…そうねぇ…」
+                PRINTFORML （哎呀，完全没听啊…怎么办呢）
+                ;TranslatedMark （あらやだ、完全に聞いて無かったわ…どうしようかしら）
+                PRINTFORML 「是、是啊…村庄的特产是芝麻蜜团子吗？」
+                ;TranslatedMark 「そ、そうねぇ…人里の名物はごま蜜団子かしら？」
+            CASE 21
+                PRINTFORML 「……请稍微考虑一下」
+                ;TranslatedMark 「……少し考え事をしていましてね」
+                PRINTFORML 「在其他人看来我们是什么关系呢…」
+                ;TranslatedMark 「他の方から見て私たちはどういう関係に見えるのかと…」
+                PRINTFORML 「不，太无聊了，我不想再想了」
+                ;TranslatedMark 「いえ、くだらなくて考えるのを止めてしまいましたよ」
+            CASE 22
+                PRINTFORML 「啊，对面有不熟悉的摊子呢…」
+                ;TranslatedMark 「あら、向こうに見慣れない屋台がありますね…」
+                PRINTFORML 「看来盛况空前啊…嗯嗯」
+                ;TranslatedMark 「随分と盛況のようですねぇ…ふむふむ」
+                PRINTFORML 「去头饰店看看吧♪」
+                ;TranslatedMark 「髪飾りのお店ですって、見ていきましょ♪」
+            CASE 25
+                PRINTFORML 「今天天气晴朗真是太好了~」
+                ;TranslatedMark 「今日は晴れてよかった～」
+                PRINTFORML 「诶？下雨也可以吗？」
+                ;TranslatedMark 「えっ？　雨でも良かった？」
+                PRINTFORML 「哈哈…因为可以打相合伞呢」
+                ;TranslatedMark 「ははぁん…相合傘が出来るからね」
+        ENDSELECT
+		;人竿とデート会話の描写、0-2は全共通、3以降は恋慕
+        SELECTCASE  IFRAND("0TO2", 1, "3TO5", TALENT:ドレミ:恋慕)
+            CASE 0
+                PRINTFORMW 配合着随声附和，%ANAME(ドレミ)%的尾巴微微摇晃……
+                ;TranslatedMark 相槌に合わせて%ANAME(ドレミ)%の尻尾がピコピコと揺れた……
+            CASE 1
+                PRINTFORMW %ANAME(ドレミ)%和%ANAME(MASTER)%手牵手走在路上……
+                ;TranslatedMark %ANAME(ドレミ)%と%ANAME(MASTER)%は手を繋いで歩いている……
+            CASE 2
+                PRINTFORMW 在%ANAME(ドレミ)%的话语中，包含着仿佛带着让%ANAME(MASTER)%着迷的声音                ;TranslatedMark %ANAME(ドレミ)%の言葉は、%ANAME(MASTER)%をどこか誂うような声色を含んでいる……
+            CASE 3
+                PRINTFORMW %ANAME(ドレミ)%和%ANAME(MASTER)%紧贴着肩膀走着……
+                ;TranslatedMark %ANAME(ドレミ)%と%ANAME(MASTER)%は肩が触れるくらい密着して歩いている……
+            CASE 4
+                PRINTFORMW %ANAME(ドレミ)%手搭在%ANAME(MASTER)%的肩上走着……
+                ;TranslatedMark %ANAME(ドレミ)%は%ANAME(MASTER)%の肩に手を乗せて歩いている……
+            CASE 5
+                PRINTFORMW %ANAME(ドレミ)%抱着%ANAME(MASTER)%的手臂走着……
+                ;TranslatedMark %ANAME(ドレミ)%は%ANAME(MASTER)%の腕に抱き着いて歩いている……
+        ENDSELECT
+ENDSELECT
+;------------------------------------
+;花畑口上(イベントというよりセリフ集→間違った使い方かも)
+;-----------------------------------
+@DATE_EVENT_K134_hanabatake(花畑)
+#DIM ドレミ
+#DIM 花畑
+#DIM キャラ名
+
+ドレミ = NAME_TO_CHARA("ドレミー")
+
+;ドレミーと所属が同じ、ドレミーが捕虜でなく、面識がある、今のところ100%発動
+SIF !CHECK_KOJO_DAILY_HAPPEN(ドレミ, 1, 0, 1)
+    RETURN 0
+
+	;0-8は全共通、9以降は恋慕
+SELECTCASE  IFRAND("0TO7", 1, "8TO13", TALENT:ドレミ:恋慕)
+	;通常反応
+    CASE 0
+        PRINTFORML 「账簿工作？」
+        ;TranslatedMark 「帳簿の仕事？」
+        PRINTFORML 「%ANAME(MASTER)%，现在正在约会哦工作的话是严禁的」
+        ;TranslatedMark 「%ANAME(MASTER)%、今はデート中なのですよ仕事の話は厳禁ですっ」
+        PRINTFORML 「你看，这里开着珍贵的花哦」
+        ;TranslatedMark 「ほらほらっ、こっちに珍しい花が咲いてますよーっ」
+    CASE 1
+        PRINTFORML 「走得有点累了呢…」
+        ;TranslatedMark 「少し歩き疲れましたね…」
+        PRINTFORML 「要不要在那家茶馆休息一下？」
+        ;TranslatedMark 「あの茶屋で休憩していきませんか？」
+    CASE 2
+        PRINTFORML 「那么差不多该吃午饭了吧？」
+        ;TranslatedMark 「さてそろそろお昼にしませんか？」
+        PRINTFORML 「嗯，今天做了便当来的」
+        ;TranslatedMark 「えぇ、今日はお弁当を作って来たのですよ」
+    CASE 3
+        PRINTFORML 「哎呀哎呀，%ANAME(MASTER)%看起来很累的样子…」
+        ;TranslatedMark 「おやおや、%ANAME(MASTER)%ったらお疲れの様子で…」
+        PRINTFORML 「那么在对面的草坪上睡觉怎么样？」
+        ;TranslatedMark 「では向こうの芝生でお眠りになっては如何でしょうか？」
+        PRINTFORML 「保证有最好的睡眠和梦哦~」
+        ;TranslatedMark 「最高の眠りと夢を保証しますよ～」
+    CASE 4
+        PRINTFORML 「哎呀…这是鹭草吧」
+        ;TranslatedMark 「おや…これは鷺草ですね」
+        PRINTFORML 「它的由来是纯白、细碎的花姿看起来像白鹭在飞」
+        ;TranslatedMark 「純白で細かな切れ込みの入った花姿が、まるで白鷺（シラサギ）が飛んでいるかのようにみえるのが由来ですね」
+        PRINTFORML 「花语是…即使在梦中也会想念你」
+        ;TranslatedMark 「花言葉は…『夢でもあなたを想う』ね」
+    CASE 5
+        PRINTFORML 「哎呀哎呀…有玫瑰的庭园呢」
+        ;TranslatedMark 「おやおや…薔薇の庭園がありますね」
+        PRINTFORML 「这么说来，青蔷薇有『美梦成真』这样的花语呢」
+        ;TranslatedMark 「そういえば青薔薇には『夢かなう』という花言葉がありましたね」
+        PRINTFORML 「嘛，虽然和我管理的"梦"不同…」
+        ;TranslatedMark 「まぁ私の管理する"夢"とは違ってはいますが…」
+    CASE 6
+        PRINTFORML 「哎呀…这是霞草吧」
+        ;TranslatedMark 「おや…これは霞草ですね」
+        PRINTFORML 「据说霞草有『梦境』这样的花语哦」
+        ;TranslatedMark 「霞草には『夢心地』という花言葉があるそうですよ」
+        PRINTFORML 「呋呋，这个安静的美丽很好呢…」
+        ;TranslatedMark 「ふふっ、この静かな綺麗さが良いですよね…」
+    CASE 7
+        PRINTFORML 「哎呀…这是黑种草吧」
+        ;TranslatedMark 「おや…これはニゲラですね」
+        PRINTFORML 「据说黑种草有『在梦里相会吧』这样的花语」
+        ;TranslatedMark 「ニゲラには『夢で逢いましょう』という花言葉があるそうですよ」
+        PRINTFORML 「呋呋，如果是我的话不管多少都能在梦里见到呢」
+        ;TranslatedMark 「ふふっ、私なら幾らでも夢の中で会えますね」
+    CASE 8
+        PRINTFORML 「呐 %ANAME(MASTER)%」
+        ;TranslatedMark 「ねぇー%ANAME(MASTER)%」
+        PRINTFORML 「呋呋，只是叫了一下而已哦」
+        ;TranslatedMark 「ふふっ、呼んでみただけですよー」
+        PRINTFORML 「（像这样炫耀情侣的样子很好呢）」
+        ;TranslatedMark 「(こうやってバカップルっぷりを見せびらかすは良いですねぇ)」
+	;こっから恋慕反応追加
+    CASE 9
+        PRINTFORML 「走得有点累了呢…」
+        ;TranslatedMark 「少し歩き疲れましたね…」
+        PRINTFORML 「要不要在那家茶馆休息一下？」
+        ;TranslatedMark 「あの茶屋で休憩していきませんか？」
+        PRINTFORML 「（呋呋，那家茶馆已经调查过是情侣专用的了…！)」
+        ;TranslatedMark 「(ふふっ、あの茶屋はカップル御用達なのはリサーチ済みですよ…！)」
+    CASE 10
+        PRINTFORML 「呐……%ANAME(MASTER)%？」
+        ;TranslatedMark 「ねぇ……%ANAME(MASTER)%？」
+        PRINTFORML 「啊……没什么……」
+        ;TranslatedMark 「あっ……べ、別に……」
+        PRINTFORML 「只是……偶尔也会想……」
+        ;TranslatedMark 「ただ……たまには、思ったから……」
+        PRINTFORML 「喂？%ANAME(MASTER)%喜欢我吗？」
+        ;TranslatedMark 「ねぇ？ %ANAME(MASTER)%は私のこと、好き？」
+        PRINTFORML 「…呣呜，喜欢呐…诶…」
+        ;TranslatedMark 「…ふーん、好きなんだ…へぇ…」
+    CASE 11
+        PRINTFORML 「那么差不多该吃午饭了吧？」
+        ;TranslatedMark 「さてそろそろお昼にしませんか？」
+        PRINTFORML 「嗯，今天做了便当来的」
+        ;TranslatedMark 「えぇ、今日はお弁当を作って来たのですよ」
+        PRINTFORML 「请吃吧♪」
+        ;TranslatedMark 「どうぞ召し上がれ♪」
+    CASE 12
+        PRINTFORML 「哎呀哎呀，%ANAME(MASTER)%看起来很累的样子…」
+        ;TranslatedMark 「おやおや、%ANAME(MASTER)%ったらお疲れの様子で…」
+        PRINTFORML 「那么在对面的草坪上睡觉怎么样？」
+        ;TranslatedMark 「では向こうの芝生でお眠りになっては如何でしょうか？」
+        PRINTFORML 「保证有最好的睡眠和梦哦~」
+        ;TranslatedMark 「最高の眠りと夢を保証しますよ～」
+    CASE 13
+        PRINTFORML 「哎呀…这是翠菊吧」
+        ;TranslatedMark 「おや…これはアスターですね」
+        PRINTFORML 「据说桃色的翠菊有"甜美的梦"这样的花语哦」
+        ;TranslatedMark 「桃色のアスターには『甘い夢』という花言葉があるそうですよ」
+        PRINTFORML 「呋呋，简直就像现在的我们……呋呋呋」
+        ;TranslatedMark 「ふふっ、まるで今の私達の……ふふっ」
+ENDSELECT
+IF RAND:3 == 0
+    PRINTFORMW 配合着随声附和，%ANAME(ドレミ)%的尾巴微微摇晃……
+    ;TranslatedMark 相槌に合わせて%ANAME(ドレミ)%の尻尾がピコピコと揺れた……
+ELSEIF RAND:2 == 0
+    PRINTFORMW %ANAME(ドレミ)%享受着花的美丽和香味……
+    ;TranslatedMark %ANAME(ドレミ)%は花の美しさと香りを楽しんでいる……
+ELSE
+    PRINTFORMW 在%ANAME(ドレミ)%的话语中，包含着仿佛带着让%ANAME(MASTER)%着迷的声音
+    ;TranslatedMark %ANAME(ドレミ)%の言葉は、%ANAME(MASTER)%をどこか誂うような声色を含んでいる……
+ENDIF
+
+;------------------------------------
+;自宅口上(イベントというよりセリフ集→間違った使い方かも)
+;-----------------------------------
+@DATE_EVENT_K134_zitaku(自宅)
+#DIM ドレミ
+#DIM 自宅
+#DIM キャラ名
+
+ドレミ = NAME_TO_CHARA("ドレミー")
+
+;ドレミーと所属が同じ、ドレミーが捕虜でなく、面識がある、今のところ100%発動
+SIF !CHECK_KOJO_DAILY_HAPPEN(ドレミ, 1, 0, 1)
+    RETURN 0
+
+	;通常は4パターン、恋慕7パターン、正妻9パターン
+SELECTCASE  IFRAND("0TO3", 1, "4TO7", TALENT:ドレミ:恋慕, "8TO9", TALENT:ドレミ:正妻)
+		;通常反応
+    CASE 0
+        PRINTFORML 「嗯，%ANAME(MASTER)%的房间意外的朴素呢」
+        ;TranslatedMark 「ふーん、%ANAME(MASTER)%の部屋って意外と質素なのね」
+        PRINTFORML 「但是连寝具都很朴素，我不关心」
+        ;TranslatedMark 「でも寝具まで質素なのは関心しませんよ」
+        PRINTFORML 「为了做个好梦，寝具也要讲究哦」
+        ;TranslatedMark 「良い夢を見る為にも寝具はこだわりましょうよ」
+    CASE 1
+        PRINTFORML 「哎呀，这个包是什么？」
+        ;TranslatedMark 「おや、この包みは何ですか？」
+        PRINTFORML 「是邻国使者带来的点心吗」
+        ;TranslatedMark 「隣国の使者が持って来たお菓子ですか」
+        PRINTFORML 「毒见好像也结束了，一起吃吧」
+        ;TranslatedMark 「毒見も済んでるようですし一緒に食べましょ」
+    CASE 2
+        PRINTFORML 「今天在%ANAME(MASTER)%的房间里好好休息吧」
+        ;TranslatedMark 「今日は%ANAME(MASTER)%の部屋でゆっくりさせて貰おうかしら」
+        PRINTFORML 「呵呵，我来陪你说话吧」
+        ;TranslatedMark 「ふふっ、話相手くらいにならなってあげるわよ」
+    CASE 3
+        PRINTFORML 「外面下雨了吗……」
+        ;TranslatedMark 「外は雨ですか……」
+        PRINTFORML 「这样的日子在家约会也不错呢」
+        ;TranslatedMark 「こういう日は自宅デートも悪くないですね」
+		;こっから恋慕反応追加
+    CASE 4
+        PRINTFORML 「嗯，%ANAME(MASTER)%的房间不是有点太乱了吗？」
+        ;TranslatedMark 「うーん、%ANAME(MASTER)%の部屋ちょっと散らかり過ぎじゃない？」
+        PRINTFORML 「没办法啊，我也会帮忙的，收拾一下吧」
+        ;TranslatedMark 「仕方ないですねぇ、私も手伝いますから片付けましょ」
+    CASE 5
+        PRINTFORML 「今天为了%ANAME(MASTER)%我做了特制的枕头！」
+        ;TranslatedMark 「今日は%ANAME(MASTER)%の為に私が特製の枕を作って来ました！」
+        PRINTFORML 「来吧！请马上睡觉看看！一定能做个好梦哦！」
+        ;TranslatedMark 「さぁさぁ！　早速寝て見てください！　きっと良い夢が見れますよ！」
+    CASE 6
+        PRINTFORML 「%ANAME(MASTER)%的房间相当远离其他人呢」
+        ;TranslatedMark 「%ANAME(MASTER)%の部屋って随分と他の方々から離れてるわよね」
+        PRINTFORML 「而且监视的宪兵也很少」
+        ;TranslatedMark 「それに見張りの憲兵も少ない」
+        PRINTFORML 「也就是说稍微出点声也没关系吧……♥」
+        ;TranslatedMark 「つまり少しくらい声を出しても大丈夫って事よね……♥」
+    CASE 7
+        PRINTFORML 「那我借点淋浴吧」
+        ;TranslatedMark 「それじゃあ少しシャワー借りるわね」
+        PRINTFORML 「……淋浴的时候我的衣服和内衣没有了我该怎么办，所以以后请好好还给我」
+        ;TranslatedMark 「……シャワー中に私の服や下着をどうしようが私は構いませんが後でちゃんと返してくださいね」
+		;ここから正妻反応追加
+    CASE 8
+        PRINTFORML 「呀呀，好大的哈欠，你好像有点困啊」
+        ;TranslatedMark 「おやおや大きな欠伸、あなたったら少し眠そうね」
+        PRINTFORML 「那先睡在床上吧」
+        ;TranslatedMark 「じゃあ一旦ベッドで眠りましょうか」
+        PRINTFORML 「呵呵，当然我陪你睡吧」
+        ;TranslatedMark 「ふふっ、もちろん私が添い寝して差し上げますよ」
+    CASE 9
+        PRINTFORML 「…君，昨天和别的女性睡了吗？」
+        ;TranslatedMark 「…くんくん、昨日他の女性と寝てたりしてましたか？」
+        PRINTFORMW 「哈哈，这个反应有点奇怪呢…」
+        ;TranslatedMark 「ははぁん、その反応は少し怪しいですねぇ…」
+        PRINTFORMW 「算了吧…是是，刚睡醒吧?」
+        ;TranslatedMark 「まぁ良いでしょう…はい、寝起きなのでしょう？」
+        PRINTFORMW %ANAME(ドレミ)%往茶杯里倒水
+        ;TranslatedMark %ANAME(ドレミ)%は湯呑に湯を注いでいる
+        PRINTFORMW 「看，这是白开水，刚起床时这对健康很有好处」
+        ;TranslatedMark 「ほら白湯ですよ、寝起きにはこれが健康に良いらしいですよ」
+ENDSELECT
+IF RAND:3 == 0
+    PRINTFORMW 配合着随声附和，%ANAME(ドレミ)%的尾巴微微摇晃……
+    ;TranslatedMark 相槌に合わせて%ANAME(ドレミ)%の尻尾がピコピコと揺れた……
+ELSEIF RAND:2 == 0
+    PRINTFORMW %ANAME(ドレミ)%边看书边编织语言…………
+    ;TranslatedMark %ANAME(ドレミ)%は本を読みながら言葉を紡いだ…………
+ELSE
+    PRINTFORMW 在%ANAME(ドレミ)%的话语中，包含着仿佛带着让%ANAME(MASTER)%着迷的声音
+    ;TranslatedMark %ANAME(ドレミ)%の言葉は、%ANAME(MASTER)%をどこか誂うような声色を含んでいる……
+ENDIF
+
+

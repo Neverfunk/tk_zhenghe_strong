@@ -1,0 +1,251 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K9_ASK_MASTER_NAME_RATE(対象)
+#DIM 対象
+RETURN 1000
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K9_ASK_MASTER_NAME_DECISION(対象)
+#DIM 対象
+
+;対象口上デイリー入力系使用の設定が「使用」でなければ戻る
+SIF 咲夜_口上デイリー入力系使用 != 2
+	RETURN 0
+
+SIF !TALENT:対象:恋人 && !TALENT:対象:烙印
+	RETURN 0
+
+;一回きり
+SIF KDVAR:対象:咲夜_親しい呼びかた
+	RETURN 0
+
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K9_ASK_MASTER_NAME_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K9_ASK_MASTER_NAME(対象)
+#DIM 対象
+#DIM 咲夜_対象
+#DIMS NOW_CALLNAME_MASTER_K9
+#DIMS NOW_CALLNAME_MASTER_RUBY_K9
+
+;リセット
+咲夜_対象 = MASTER
+
+
+SETCOLOR 咲夜_口上カラー
+
+IF CHECK_K9("敬語")
+	PRINTFORML 「%CALLNAME_K9(咲夜_対象)%」
+	PRINTFORMDW 在巡视据点的时候，%ANAME(対象)%快步走了过来
+	;TranslatedMark 拠点の見回りをしていると、%ANAME(対象)%が早足で近寄ってきた
+	PRINTL
+	PRINTFORML 「那个，我有个请求。……这是我无法辩解的请求」
+	;TranslatedMark 「その、お願いがあるんです。……分を弁えないお願いなのですが」
+	PRINTFORML 「平常把%CALLNAME_K9(咲夜_対象)%叫做%CALLNAME_K9(咲夜_対象)%」
+	;TranslatedMark 「普段、%CALLNAME_K9(咲夜_対象)%のことを%CALLNAME_K9(咲夜_対象)%と呼ばせて頂いてますが」
+	PRINTFORML 「如果可以的话，我想试着更亲切地称呼他们」
+	;TranslatedMark 「できたら、もっと親しみをこめて呼んでみたいと思うことがあるんです」
+	PRINTFORMDW %ANAME(対象)%平静地游动着眼睛，脸颊也被染红了
+	;TranslatedMark %ANAME(対象)%は落ち着きなく目を泳がせて頬を染めている
+	PRINTL
+	PRINTL
+	PRINTFORML 「我不想用不喜欢%CALLNAME_K9(咲夜_対象)%的称呼」
+	;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%のお気に召さない呼び方はしたくありません」
+	PRINTFORML 「如果有喜欢的叫法，可以告诉我吗？」
+	;TranslatedMark 「お好みの呼び方がありましたら、教えて頂けないでしょうか？」
+ELSE
+	PRINTFORML 「%CALLNAME_K9(咲夜_対象)%」
+	PRINTFORMDW 在巡视据点的时候，%ANAME(対象)%快步走了过来
+	;TranslatedMark 拠点の見回りをしていると、%ANAME(対象)%が早足で近寄ってきた
+	PRINTL
+	PRINTFORML 「那个，我有个请求」
+	;TranslatedMark 「その、お願いがあって」
+	PRINTFORML 「一直以来我不是都把%CALLNAME_K9(咲夜_対象)%叫做%CALLNAME_K9(咲夜_対象)%吗？」
+	;TranslatedMark 「いつもは私、%CALLNAME_K9(咲夜_対象)%のことを%CALLNAME_K9(咲夜_対象)%って呼んでるじゃない？」
+	PRINTFORML 「想再稍微亲切一点地称呼你呢」
+	;TranslatedMark 「もうちょっと親しみをこめて呼んでみたいのよね」
+	PRINTFORMDW %ANAME(対象)%染红了脸颊微笑着
+	;TranslatedMark %ANAME(対象)%は頬を染めて微笑んでいる
+	PRINTL
+	PRINTFORML 「但是，我不想随便决定%CALLNAME_K9(咲夜_対象)%不喜欢的叫法……」
+	;TranslatedMark 「でも、%CALLNAME_K9(咲夜_対象)%の気に入らない呼び方を勝手に決めたくはないから……」
+	PRINTFORML 「如果有喜欢的叫法，能告诉我吗？」
+	;TranslatedMark 「好きな呼び方があったら、教えてくれないかしら？」
+ENDIF
+
+;CALLNAME_K9で現在呼称判定とフリガナの再取得が行われているのでここでリセット
+NOW_CALLNAME_MASTER_K9 '= CALLNAME_K9(咲夜_対象)
+NOW_CALLNAME_MASTER_RUBY_K9 '= 咲夜_主人公への呼称フリガナ
+
+LOCAL:0 = LINECOUNT
+$SHOW_LOOP
+
+RESETCOLOR
+CALL SINGLE_DRAWLINE
+
+SETCOLOR カラー_選択不可
+PRINTFORM 输入或决定想要告知的名称
+;TranslatedMark 教えたい名称を入力・または決定
+PRINTL
+PRINTFORM 从现在的%ANAME(対象)%到%ANAME(咲夜_対象)%的称呼：
+;TranslatedMark 現在の%ANAME(対象)%から%ANAME(咲夜_対象)%への呼称         :
+RESETCOLOR
+
+PRINTFORM %NOW_CALLNAME_MASTER_K9, 20, LEFT%
+PRINTBUTTON "  [输入名称]", "输入名称"
+;TranslatedMark "  [入力]", "入力"
+PRINTL
+
+SETCOLOR カラー_選択不可
+PRINTFORM 从现在的%ANAME(対象)%到%ANAME(咲夜_対象)%的称呼注音：
+;TranslatedMark 現在の%ANAME(対象)%から%ANAME(咲夜_対象)%への呼称フリガナ :
+RESETCOLOR
+
+PRINTFORM %NOW_CALLNAME_MASTER_RUBY_K9, 20, LEFT%
+PRINTBUTTON "  [输入注音]", "输入注音"
+PRINTBUTTON "  [決定]", "決定"
+
+PRINTL
+CALL SINGLE_DRAWLINE
+
+;入力・初期値は"決定"
+INPUTS 決定
+
+IF RESULTS == "決定"
+	咲夜_主人公への呼称 '= NOW_CALLNAME_MASTER_K9
+	咲夜_主人公への呼称フリガナ '= NOW_CALLNAME_MASTER_RUBY_K9
+	CLEARLINE LINECOUNT - LOCAL:0
+	PRINTL
+
+ELSEIF RESULTS == "输入名称"
+	CLEARLINE 1
+	SETCOLOR カラー_選択不可
+	PRINTFORML 正在输入称呼
+	;TranslatedMark 呼称入力中
+	RESETCOLOR
+	IF RESULTS != NOW_CALLNAME_MASTER_K9
+		INPUTS %NOW_CALLNAME_MASTER_K9%
+		LOCALS:0 '= RESULTS
+		;半角を1字と数えてLOCALS:0の0字目から20字目までを切り出す
+		SUBSTRING LOCALS:0, 0, 20
+		NOW_CALLNAME_MASTER_K9 '= LOCALS:0
+	ENDIF
+	CLEARLINE LINECOUNT - LOCAL:0
+	GOTO SHOW_LOOP
+
+ELSEIF RESULTS == "输入注音"
+	CLEARLINE 1
+	SETCOLOR カラー_選択不可
+	PRINTFORML 名称注音输入中
+	;TranslatedMark 呼称フリガナ入力中
+	RESETCOLOR
+	IF RESULTS != NOW_CALLNAME_MASTER_RUBY_K9
+		INPUTS %NOW_CALLNAME_MASTER_RUBY_K9%
+		LOCALS:0 '= RESULTS
+		;半角を1字と数えてLOCALS:0の0字目から20字目までを切り出す
+		SUBSTRING LOCALS:0, 0, 20
+		NOW_CALLNAME_MASTER_RUBY_K9 '= LOCALS:0
+	ENDIF
+	CLEARLINE LINECOUNT - LOCAL:0
+	GOTO SHOW_LOOP
+
+ELSE
+	CLEARLINE LINECOUNT - LOCAL:0
+	GOTO SHOW_LOOP
+ENDIF
+
+;※ここでフラグを立てないと下記テキスト内で変更後の呼称に対応できない
+KDVAR:対象:咲夜_親しい呼びかた = 1
+
+SETCOLOR カラー_選択不可
+PRINTFORML ➡%CALLNAME_K9(咲夜_対象)%）
+;TranslatedMark ➡%CALLNAME_K9(咲夜_対象)%（%咲夜_主人公への呼称フリガナ%）
+PRINTL
+
+SETCOLOR 咲夜_口上カラー
+
+IF 咲夜_主人公への呼称 == "" && 咲夜_主人公への呼称フリガナ == ""
+	PRINTFORMDW %ANAME(咲夜_対象)%向%ANAME(対象)%传达了希望她一如既往地称呼她为"%CALLNAME_K9(咲夜_対象)%（%咲夜_主人公への呼称フリガナ%）"
+	;TranslatedMark %ANAME(咲夜_対象)%は%ANAME(対象)%にこれまで通り『%CALLNAME_K9(咲夜_対象)%（%咲夜_主人公への呼称フリガナ%）』と呼んで欲しいと伝えた
+	PRINTL
+	IF CHECK_K9("敬語")
+		PRINTFORML 「好的。……虽然有点遗憾」
+		;TranslatedMark 「かしこまりました。……ちょっと残念ですけれど」
+		PRINTFORMW 「如果你喜欢现在的叫法的话，就不会勉强改变了吧」
+		;TranslatedMark 「今の呼び方を気に入ってくださっているなら、無理に変えることはありませんよね」
+		PRINTL
+		PRINTFORML 「谢谢您的聆听」
+		;TranslatedMark 「聞いてくださってありがとうございます」
+		PRINTFORML 「今后也请多多关照。%CALLNAME_K9(咲夜_対象)%❤」
+		;TranslatedMark 「どうぞ、これからもよろしくお願いします。%CALLNAME_K9(咲夜_対象)%❤」
+		PRINTFORMDL 被%ANAME(対象)%恭敬地鞠躬而分手
+		;TranslatedMark %ANAME(対象)%から丁寧におじぎをされて別れた
+	ELSE
+		PRINTFORML 「是的……虽然有点遗憾」
+		;TranslatedMark 「そう……ちょっと残念だけど」
+		PRINTFORMW 「如果你喜欢"%CALLNAME_K9(咲夜_対象)%"这个称呼的话，就不会勉强改变了吧」
+		;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%って呼び方を気に入ってくれてるなら、無理に変えることもないわよね」
+		PRINTL
+		PRINTFORML 「谢谢你听我说。今后也请多多关照啊，%CALLNAME_K9(咲夜_対象)%❤」
+		;TranslatedMark 「聞いてくれてありがとう。これからもよろしくお願いするわね、%CALLNAME_K9(咲夜_対象)%❤」
+		PRINTFORMDL 被%ANAME(対象)%亲吻脸颊而分手
+		;TranslatedMark %ANAME(対象)%から頬にキスをされて別れた
+	ENDIF
+ELSE
+	PRINTFORMDW %ANAME(咲夜_対象)%向%ANAME(対象)%传达了希望你称呼她为"%CALLNAME_K9(咲夜_対象)%（%咲夜_主人公への呼称フリガナ%）"的愿望
+	;TranslatedMark %ANAME(咲夜_対象)%は%ANAME(対象)%に『%CALLNAME_K9(咲夜_対象)%（%咲夜_主人公への呼称フリガナ%）』と呼んで欲しいと伝えた
+	PRINTL
+	IF CHECK_K9("敬語")
+		PRINTFORML 「是%CALLNAME_K9(咲夜_対象)%吧。%CALLNAME_K9(咲夜_対象)%、%CALLNAME_K9(咲夜_対象)%……」
+		;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%ですね。%CALLNAME_K9(咲夜_対象)%、%CALLNAME_K9(咲夜_対象)%……」
+		PRINTFORMDW %ANAME(対象)%带着幸福的笑容在玩着%ANAME(咲夜_対象)%教给她的名字
+		;TranslatedMark %ANAME(対象)%は幸福に満ちた笑顔で%ANAME(咲夜_対象)%が教えた呼び名を口遊んでいる
+		PRINTL
+		PRINTFORML 「谢谢您的考虑。站着说了对不起」
+		;TranslatedMark 「考えてくださってありがとうございます。立ち話をしてしまってすみません」
+		PRINTFORML 「今后也请多多关照。%CALLNAME_K9(咲夜_対象)%❤」
+		;TranslatedMark 「これからもよろしくお願いします。%CALLNAME_K9(咲夜_対象)%❤」
+		PRINTFORMDL 被%ANAME(対象)%恭敬地鞠躬而分手
+		;TranslatedMark %ANAME(対象)%から丁寧におじぎをされて別れた
+
+	ELSE
+		PRINTFORML 「%CALLNAME_K9(咲夜_対象)%也不错呢。%CALLNAME_K9(咲夜_対象)%、%CALLNAME_K9(咲夜_対象)%……」
+		;TranslatedMark 「%CALLNAME_K9(咲夜_対象)%でいいのね。%CALLNAME_K9(咲夜_対象)%、%CALLNAME_K9(咲夜_対象)%……」
+		PRINTFORMDW %ANAME(対象)%带着幸福的笑容在玩着%ANAME(咲夜_対象)%教给她的名字
+		;TranslatedMark %ANAME(対象)%は幸福に満ちた笑顔で%ANAME(咲夜_対象)%が教えた呼び名を口遊んでいる
+		PRINTL
+		PRINTFORML 「你能考虑到我很高兴」
+		;TranslatedMark 「考えてくれて嬉しいわ」
+		PRINTFORML 「今后也请多多关照啊，%CALLNAME_K9(咲夜_対象)%❤」
+		;TranslatedMark 「これからもよろしくお願いするわね、%CALLNAME_K9(咲夜_対象)%❤」
+		PRINTFORMDL 被%ANAME(対象)%亲吻脸颊而分手
+		;TranslatedMark %ANAME(対象)%から頬にキスをされて別れた
+	ENDIF
+ENDIF
+WAIT
+RESETCOLOR
+CFLAG:対象:好感度 = CFLAG:対象:好感度 + 100
+CFLAG:対象:依存度 = CFLAG:対象:依存度 + 100
+CFLAG:対象:従属度 = CFLAG:対象:従属度 + 100
+
+RETURN 1
+

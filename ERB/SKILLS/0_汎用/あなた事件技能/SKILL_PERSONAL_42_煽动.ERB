@@ -1,0 +1,291 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_0_PERSONAL_42_EXIST
+RETURN 1
+
+
+@SKILL_0_PERSONAL_42_CANT_LEARN_FROM_SHOP
+@SKILL_0_PERSONAL_42_CANT_TELL
+
+@SKILL_0_PERSONAL_42_NAME
+RESULTS = 煽动
+
+;レベルは1-5まで
+@SKILL_0_PERSONAL_42_LEVEL
+RETURN 5
+
+;対象選択
+@SKILL_0_PERSONAL_42_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+SIF BATTLE_COMMANDER_NUM:対象側 == 0
+	RETURN 0
+RETURN 1
+
+;発動判定
+@SKILL_0_PERSONAL_42_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 势力判定
+#DIM 人员判定
+#DIM 君主
+対象側 = !発動側
+SIF BATTLE_COMMANDER_NUM:対象側 == 0
+	RETURN 0
+IF 対象部隊 >= 0
+    SIF !IS_COUNTRY(対象勢力)
+        RETURN
+ELSE
+    SIF !IS_COUNTRY(CITY_OWNER:対象勢力)
+        RETURN
+ENDIF
+
+IF 対象部隊 >= 0
+	君主 = GET_COUNTRY_BOSS(対象勢力)
+ELSE
+	君主 = GET_COUNTRY_BOSS(CITY_OWNER:対象勢力)
+ENDIF
+人员判定 = 0
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
+    SIF CFLAG:(BATTLE_COMMANDER:対象側:LOCAL):好感度 >= 1500 && BATTLE_COMMANDER:対象側:LOCAL != 君主 && IS_FEMALE(BATTLE_COMMANDER:対象側:LOCAL)
+        人员判定 ++
+NEXT
+IF 対象部隊 >= 0
+    势力判定 = IS_COUNTRY(対象勢力)
+ELSE
+    势力判定 = IS_COUNTRY(CITY_OWNER:対象勢力)
+ENDIF
+
+RETURN 発動者 == MASTER && IS_MALE(MASTER) && 势力判定 && (人员判定 == BATTLE_COMMANDER_NUM:対象側) && BATTLE_COMMANDER_NUM:対象側
+
+;発動テキストをオーバライドしたいときに。
+;「誰それのスキル発動！　○○した！」の「○○した！」の部分を実装したい場合は、
+;これじゃなくてINVOKEで書けばいいです。
+;@SKILL_0_PERSONAL_0_INVOKE_TEXT(発動者, スキル, ジャンル)
+;#DIM 発動者
+;#DIM スキル
+;#DIMS ジャンル
+
+;効果をここに記述
+@SKILL_0_PERSONAL_42_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 我方君主
+#DIM 对方君主
+#DIM 枚举人物, 2
+#DIM 恋慕因数, 3
+#DIM 我方好感, 3
+#DIM 君主好感, 3
+#DIM 忠诚, 3
+#DIM 选择, 3
+#DIM 兵数
+対象側 = !発動側
+VARSET 选择
+IF 発動部隊 >= 0
+    我方君主 = GET_COUNTRY_BOSS(発動勢力)
+ELSE
+    我方君主 = GET_COUNTRY_BOSS(CITY_OWNER:発動勢力)
+ENDIF
+
+IF 対象部隊 >= 0
+    对方君主 = GET_COUNTRY_BOSS(対象勢力)
+ELSE
+    对方君主 = GET_COUNTRY_BOSS(CITY_OWNER:対象勢力)
+ENDIF
+
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
+    枚举人物 = BATTLE_COMMANDER:対象側:LOCAL
+    恋慕因数:LOCAL = (TALENT:枚举人物:恋慕 || TALENT:枚举人物:親愛) + TALENT:枚举人物:恋人 + (TALENT:枚举人物:正妻 || TALENT:枚举人物:妾)
+    我方好感:LOCAL = (REL_LIKE:枚举人物:MASTER - REL_HATE:枚举人物:MASTER) * 100 / 1500
+    君主好感:LOCAL = (REL_LIKE:枚举人物:我方君主 - REL_HATE:枚举人物:我方君主) * 100 / 1500
+    忠诚:LOCAL = SETTOKU_REL_EFFECT(枚举人物, 对方君主)
+NEXT
+PRINTFORMW 「大家都在啊～」
+PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:(RAND:(BATTLE_COMMANDER_NUM:対象側)))%『没想到能在这场合见到你啊』
+IF 我方君主 == MASTER
+    PRINTFORMW 「我现在创了业，就靠这个过活了」
+ELSE
+    PRINTFORMW 「不才，现在在%ANAME(我方君主)%手下打工」
+ENDIF
+PRINTFORMW 「但可怜从此之后我们一直不能相会——」
+PRINTFORMW 「既然现在在这里相遇了，不如来投奔我吧」
+IF 我方君主 == MASTER
+    PRINTFORMW 「我一定会带领大家走向繁荣的」
+ELSE
+    PRINTFORMW 「%ANAME(我方君主)%一定不会亏待大家的」
+ENDIF
+CALL SINGLE_DRAWLINE
+FOR LOCAL, BATTLE_COMMANDER_NUM:対象側 - 1, -1, -1
+    枚举人物 = BATTLE_COMMANDER:対象側:LOCAL
+    IF 我方好感:LOCAL < 0
+        PRINTFORMW %ANAME(枚举人物)%『呸！』
+        PRINTFORMW %ANAME(枚举人物)%『我倒不觉得你有哪怕一点想念我的心思！』
+        PRINTFORMW %ANAME(枚举人物)%『大家不要听这负心汉的话！』
+        IF LOCAL > 0
+            枚举人物:1 = BATTLE_COMMANDER:対象側:(RAND(LOCAL))
+            PRINTFORM %ANAME(枚举人物:1)%
+            PRINTDATAW
+                DATAFORM 『没想到你居然是这种人！』
+                DATAFORM 『原来你这么能恶心你的朋友吗！』
+                DATAFORM 『亏我那么看好你，你竟然……！』
+            ENDDATA
+            CFLAG:(枚举人物:1):好感度 -= 500
+            CALL COLOR_PRINTW(@"%ANAME(枚举人物:1)%的好感度下降了500……", カラー_注意)
+        ENDIF
+        RETURN
+    ELSEIF 君主好感:LOCAL < 0
+        PRINTFORMW %ANAME(枚举人物)%『住口！』
+        PRINTFORMW %ANAME(枚举人物)%『我与%ANAME(我方君主)%老贼势不两立！』
+        PRINTFORMW %ANAME(枚举人物)%『你怎能令我们向%PRONOUN(我方君主)%俯首称臣！？』
+        PRINTFORMW %ANAME(枚举人物)%『我绝不答应！』
+        选择:LOCAL = -1
+    ELSEIF MIN(我方好感:LOCAL, 君主好感:LOCAL) > 忠诚:LOCAL
+        PRINTFORM %ANAME(枚举人物)%
+        IF 忠诚:LOCAL < 0
+            PRINTDATAW
+                DATAFORM 『早看%ANAME(对方君主)%不顺眼了……！』
+                DATAFORM 『还是%ANAME(我方君主)%前途光明一些……』
+                DATAFORM 『今天总算找到理由了……』
+            ENDDATA
+            选择:LOCAL = 2
+        ELSE
+            PRINTDATAW
+                DATAFORM 『\@(TALENT:枚举人物:正妻 || TALENT:枚举人物:妾) ? 夫君 # %ANAME(MASTER)%\@大人的话，妾身岂敢不从？』
+                DATAFORM 『\@(TALENT:枚举人物:正妻 || TALENT:枚举人物:妾) ? 夫君 # %ANAME(MASTER)%\@都这么说了……』
+                DATAFORM 『只要能和\@(TALENT:枚举人物:正妻 || TALENT:枚举人物:妾) ? 夫君 # %ANAME(MASTER)%\@在一起的话……』
+            ENDDATA
+            选择:LOCAL = 1
+        ENDIF
+    ELSE
+        PRINTFORMW %ANAME(枚举人物)%『此言差矣！』
+        PRINTFORMW %ANAME(枚举人物)%『要不还是\@(TALENT:枚举人物:正妻 || TALENT:枚举人物:妾) ? 夫君 # %ANAME(MASTER)%\@来%ANAME(对方君主)%麾下吧』
+        SIF (REL_LIKE:对方君主:MASTER - REL_HATE:对方君主:MASTER) >= 1000 && CFLAG:对方君主:好感度 >= 1500
+            PRINTFORMW %ANAME(枚举人物)%『我们的%ANAME(对方君主)%殿下也很中意你呢』
+    ENDIF
+NEXT
+CALL SINGLE_DRAWLINE("=")
+兵数 = MIN(GET_SOLDIER(対象勢力, 対象部隊) * MAX(BATTLE_知略:対象側:0, BATTLE_知略:対象側:1, BATTLE_知略:対象側:2, 1) / 100, GET_SOLDIER(対象勢力, 対象部隊))
+IF MATCH(选择, -1) == BATTLE_COMMANDER_NUM:対象側
+    PRINTFORML %ANAME(BATTLE_COMMANDER:対象側:(RAND:(BATTLE_COMMANDER_NUM:対象側)))%『%ANAME(我方君主)%是我们共同的仇人』
+    PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:(RAND:(BATTLE_COMMANDER_NUM:対象側)))%『还请%ANAME(MASTER)%大人有朝一日弃暗投明』
+    PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:(RAND:(BATTLE_COMMANDER_NUM:対象側)))%『得罪了！』
+    CALL COLOR_PRINTW(@"她们不为所动……", カラー_注意)
+ELSEIF MATCH(选择, 2) == BATTLE_COMMANDER_NUM:対象側
+    PRINTFORML %ANAME(BATTLE_COMMANDER:対象側:(RAND:(BATTLE_COMMANDER_NUM:対象側)))%『%ANAME(对方君主)%望之不似人君，一点身为君主的自觉都没有』
+    PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:(RAND:(BATTLE_COMMANDER_NUM:対象側)))%『今天幸有%ANAME(MASTER)%大人救我等于水火之中』
+    PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:(RAND:(BATTLE_COMMANDER_NUM:対象側)))%『从现在开始我们就是你的人了♥』
+    CALL COLOR_PRINTW(@"%ANAME(BATTLE_COMMANDER:対象側:0)%全军倒向了%ANAME(我方君主)%！", カラー_注意)
+    FOR LOCAL, BATTLE_COMMANDER_NUM:対象側 - 1, -1, -1
+        SIF !BATTLE_SUMMONED_CHARA:対象側:LOCAL
+            CALL CHANGE_COUNTRY(BATTLE_COMMANDER:対象側:LOCAL, CFLAG:MASTER:所属, 1)
+        CALL BATTLE_COMMANDER_WITHDRAWAL(対象側, LOCAL)
+    NEXT
+    CALL DECREASE_SOLDIER(対象勢力, 対象部隊, 兵数, 1)
+    CALL INCREASE_SOLDIER(発動勢力, 発動部隊, 兵数, 1)
+ELSEIF MATCH(选择, 1) + MATCH(选择, 2) == BATTLE_COMMANDER_NUM:対象側
+    PRINTFORML %ANAME(BATTLE_COMMANDER:対象側:(RAND:(BATTLE_COMMANDER_NUM:対象側)))%『有%ANAME(MASTER)%做担保的话，我们以后就高枕无忧了』
+    PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:(RAND:(BATTLE_COMMANDER_NUM:対象側)))%『只要能和%ANAME(MASTER)%在一起的话，怎么样都可以♥』
+    PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:(RAND:(BATTLE_COMMANDER_NUM:対象側)))%『我们现在就来与你相伴～♥』
+    CALL COLOR_PRINTW(@"%ANAME(BATTLE_COMMANDER:対象側:0)%全军倒向了%ANAME(我方君主)%！", カラー_注意)
+    FOR LOCAL, BATTLE_COMMANDER_NUM:対象側 - 1, -1, -1
+        SIF !BATTLE_SUMMONED_CHARA:対象側:LOCAL
+            CALL CHANGE_COUNTRY(BATTLE_COMMANDER:対象側:LOCAL, CFLAG:MASTER:所属, 1)
+        CALL BATTLE_COMMANDER_WITHDRAWAL(対象側, LOCAL)
+    NEXT
+    CALL DECREASE_SOLDIER(対象勢力, 対象部隊, 兵数, 1)
+    CALL INCREASE_SOLDIER(発動勢力, 発動部隊, 兵数, 1)
+ELSEIF MATCH(选择, 0) == BATTLE_COMMANDER_NUM:対象側
+    PRINTFORML %ANAME(BATTLE_COMMANDER:対象側:(RAND:(BATTLE_COMMANDER_NUM:対象側)))%『还请%ANAME(MASTER)%好好思考一下要不要投奔%ANAME(对方君主)%吧』
+    PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:(RAND:(BATTLE_COMMANDER_NUM:対象側)))%『我们不愿伤害%ANAME(MASTER)%大人，但——』
+    PRINTFORMW %ANAME(BATTLE_COMMANDER:対象側:(RAND:(BATTLE_COMMANDER_NUM:対象側)))%『后会有期！』
+    CALL COLOR_PRINTW(@"%ANAME(BATTLE_COMMANDER:対象側:0)%们擅自脱离了战斗！", カラー_注意)
+    FOR LOCAL, BATTLE_COMMANDER_NUM:対象側 - 1, -1, -1
+        CALL BATTLE_COMMANDER_WITHDRAWAL(対象側, LOCAL)
+    NEXT
+ELSE
+    FOR LOCAL, BATTLE_COMMANDER_NUM:対象側 - 1, -1, -1
+        枚举人物 = BATTLE_COMMANDER:対象側:LOCAL
+        IF BATTLE_SUMMONED_CHARA:対象側:LOCAL
+            IF 选择:LOCAL > 0
+                CFLAG:(枚举人物:1):好感度 += 100
+                PRINTFORML %ANAME(枚举人物)%『%ANAME(MASTER)%，对不起……』
+            ENDIF
+            PRINTFORMW %ANAME(枚举人物)%『我……我要走了……！』
+            CALL COLOR_PRINTW(@"%ANAME(枚举人物)%擅自脱离了战场！", カラー_注意)
+            CALL BATTLE_COMMANDER_WITHDRAWAL(対象側, LOCAL)
+            CONTINUE
+        ENDIF
+        SELECTCASE 选择:LOCAL
+            CASE -1
+                PRINTFORMW %ANAME(枚举人物)%『我可不会向%ANAME(我方君主)%屈膝！』
+            CASE 1,2
+                IF LOCAL > 0
+                    枚举人物:1 = BATTLE_COMMANDER:対象側:(RAND(LOCAL))
+                    PRINTFORM %ANAME(枚举人物:1)%
+                    PRINTDATAW
+                        DATAFORM 『喂！』
+                        DATAFORM 『慢着！』
+                        DATAFORM 『等等！』
+                    ENDDATA
+                ENDIF
+                PRINTFORMW %ANAME(枚举人物)%『我愿与\@(TALENT:枚举人物:正妻 || TALENT:枚举人物:妾) ? 夫君 # %ANAME(MASTER)%\@同行～♥』
+                CALL COLOR_PRINTW(@"%ANAME(枚举人物)%倒向了%ANAME(我方君主)%！", カラー_注意)
+                CALL CHANGE_COUNTRY(枚举人物, CFLAG:MASTER:所属, 1)
+                CALL BATTLE_COMMANDER_WITHDRAWAL(対象側, LOCAL)
+            CASEELSE
+                IF MIN(我方好感:LOCAL, 君主好感:LOCAL) > 忠诚:LOCAL - 10 * 恋慕因数:LOCAL
+                    PRINTFORMW %ANAME(枚举人物)%『念在我们的交情，我可以放你一马……』
+                    PRINTFORMW %ANAME(枚举人物)%『回去考虑一下要不要加入%ANAME(对方君主)%吧』
+                    CALL COLOR_PRINTW(@"%ANAME(枚举人物)%擅自脱离了战场！", カラー_注意)
+                    CALL BATTLE_COMMANDER_WITHDRAWAL(対象側, LOCAL)
+                ELSE
+                    PRINTFORMW %ANAME(枚举人物)%『%ANAME(对方君主)%对我有恩，我可不能背叛%PRONOUN(对方君主)%』
+                    PRINTFORMW %ANAME(枚举人物)%『还请回去考虑一下要不要辅佐%ANAME(对方君主)%吧』
+                ENDIF
+        ENDSELECT
+    NEXT
+ENDIF
+CALL SINGLE_DRAWLINE
+
+
+@SKILL_0_PERSONAL_42_EXPLANATION
+RESULTS = 当对方所有人都是高好感度女性时触发，试图煽动队伍全体倒戈
+
+@SKILL_0_PERSONAL_42_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 500

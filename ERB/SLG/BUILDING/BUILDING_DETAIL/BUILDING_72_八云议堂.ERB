@@ -1,0 +1,255 @@
+@BUILDING_GET_NAME_八云议堂()
+    #FUNCTIONS
+    RETURNF "八云议堂"
+
+@BUILDING_GET_EXP_八云议堂()
+    #FUNCTIONS
+    RETURNF "停战/联盟的上限增加"
+
+@BUILDING_SET_INFO_ID_72()
+    BUILDING_TYPE:建造物_八云议堂 = 建造物_类型_幻想类
+    BUILDING_LEVEL:建造物_八云议堂 = 建造物_等级_二级建筑
+    BUILDING_LIMIT_NUM:建造物_八云议堂 = 建造物_数量限制_1
+    BUILDING_LIMIT_UNI:建造物_八云议堂 = 0
+    BUILDING_COUNTRY_ID:建造物_八云议堂:特殊勢力_普通势力 = 1
+    BUILDING_COUNTRY_ID:建造物_八云议堂:特殊勢力_野盗 = 1
+    BUILDING_COUNTRY_ID:建造物_八云议堂:特殊勢力_ホフゴブリン = 1
+    BUILDING_COUNTRY_ID:建造物_八云议堂:特殊勢力_外来人 = 1
+    BUILDING_COUNTRY_ID:建造物_八云议堂:特殊勢力_触手 = 1
+    BUILDING_COUNTRY_ID:建造物_八云议堂:特殊勢力_自警団 = 1
+    BUILDING_COUNTRY_ID:建造物_八云议堂:特殊勢力_サキュバス = 1
+    BUILDING_COUNTRY_ID:建造物_八云议堂:特殊勢力_狂信者 = 1
+    BUILDING_HAVE_SKILL:建造物_八云议堂 = 1
+    BUILDING_TOHO_REQ_ID:建造物_八云议堂:0 = 22
+
+@CHECK_BUILDING_FUNCTION_八云议堂(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    SIF !CHECK_BUILDING_CHARA_LIMIT_USING(COUNTRY_ID,建造物_八云议堂)
+        RETURNF RESULT:0
+    RESULT:1 = TMP_BUILDING_EXIST_FLAG:COUNTRY_ID:建造物_八云议堂
+    IF RESULT:1 > 0
+        RESULT:0 = 1
+    ENDIF
+    RETURNF RESULT:0
+
+@BUILDING_SKILL_八云议堂(COUNTRY_ID)
+    #DIM COUNTRY_ID
+    PRINTFORML 发动后将可以提议讨伐一个势力
+    PRINTFORML 冷却时间5回合
+    PRINTFORML 是否发动
+    CALL ASK_YN()
+    IF !RESULT
+        CALL SINGLE_DRAWLINE
+        PRINTFORML 发动了《八云议堂》的技能
+        CALL BUILDING_SKILL_八云议堂_FUNCTION(COUNTRY_ID)
+        IF RESULT
+            BUILDING_SKILL_COLDTIME:COUNTRY_ID:建造物_八云议堂 = 5
+            PRINTFORMW 完毕
+        ENDIF
+    ENDIF
+
+@BUILDING_SKILL_八云议堂_FUNCTION(COUNTRY_ID)
+    #DIM TARGET_COUNTRY_ID
+    #DIM COUNTRY_ID
+    #DIM LIST_COUNTRY, MAX_COUNTRY
+    #DIM LIST_ECONOMY, MAX_COUNTRY
+    #DIM LIST_STARS, MAX_COUNTRY
+    #DIM LIST_MAX
+    #DIM SELECTED
+    #DIM FIRST_LINE
+    VARSET SELECTED
+
+    LIST_MAX = 0
+    REDRAW 0
+
+    ;必要な高速化用マップの作成
+    CALL TMP_CREATE_RELATION_MAP
+    CALL TMP_CREATE_COUNTRY_BOSS_MAP
+    CALL TMP_CREATE_UNION_TARGET_MAP
+    CALL TMP_PREPARE_CHARA_STARS
+    CALL TMP_PREPARE_COUNTRY_STARS
+    ;勢力を経済規模順に並び替えてリストに記録
+    FOR LOCAL:0, 1, MAX_COUNTRY
+        ;勢力の存在判定 ただし都市のないときの野盗は除外する
+        IF IS_COUNTRY(LOCAL:0)
+            LOCAL:5 = GET_SUM_ECONOMY(LOCAL:0)
+            LIST_COUNTRY:(LIST_MAX) = LOCAL:0
+            LIST_ECONOMY:(LIST_MAX) = LOCAL:5
+            FOR LOCAL:1, 0, LIST_MAX
+                IF LOCAL:5 > LIST_ECONOMY:(LOCAL:1)
+                    FOR LOCAL:2, 0, LIST_MAX - LOCAL:1
+                        SWAP LIST_COUNTRY:(LIST_MAX - LOCAL:2 - 1), LIST_COUNTRY:(LIST_MAX - LOCAL:2)
+                        SWAP LIST_ECONOMY:(LIST_MAX - LOCAL:2 - 1), LIST_ECONOMY:(LIST_MAX - LOCAL:2)
+                    NEXT
+                    BREAK
+                ENDIF
+            NEXT
+            LIST_MAX ++
+        ENDIF
+    NEXT
+
+    FOR LOCAL:0, 0, LIST_MAX
+        LOCAL:2 = 0
+        LOCAL:5 = LIST_COUNTRY:(LOCAL:0)
+        FOR LOCAL:1, 0, CHARANUM
+            SIF CFLAG:(LOCAL:1):所属 == LOCAL:5 && TMP_CHARA_STARS:(LOCAL:1) >= 7
+                LOCAL:2 ++
+        NEXT
+        LIST_STARS:(LOCAL:0) = LOCAL:2
+    NEXT
+
+    ;表示部分開始
+    FIRST_LINE = LINECOUNT
+
+    $SHOW_LOOP
+
+    CALL SINGLE_DRAWLINE
+
+    PRINTFORM %"君主",MAX_CHARANAME_LENGTH / 2 + 2,LEFT%
+    PRINTFORM %"経済", 6,RIGHT%
+    PRINTFORM %"国庫", 6,RIGHT%
+    PRINTFORM %"兵力", 7, RIGHT%
+    PRINTFORM %"傾向", 6, RIGHT%
+    PRINTFORM %"都市", 6, RIGHT%
+    PRINTFORM %"士官", 6, RIGHT%
+    PRINTFORM %"★７↑", 8, RIGHT%
+    PRINTFORM %"関係", 8, RIGHT%
+    PRINTFORML %"評価", 13, RIGHT%
+
+    FOR LOCAL:0, 0, LIST_MAX
+        LOCAL:5 = LIST_COUNTRY:(LOCAL:0)
+
+        IF COUNTRY_ID == LOCAL:5
+            CONTINUE
+        ENDIF
+        PRINT
+
+        SETCOLOR COUNTRY_COLOR:(LOCAL:5)　
+
+        PRINTBUTTON @"[%SNAME(TMP_COUNTRY_BOSS_NUMBER:(LOCAL:5)), MAX_CHARANAME_LENGTH / 2, LEFT%]", LOCAL:5
+        RESETCOLOR
+
+        PRINTFORM {LIST_ECONOMY:(LOCAL:0) / 100, 6, RIGHT}
+        PRINTFORM {MONEY:(LOCAL:5), 6, RIGHT}
+        PRINTFORM {GET_SUM_SOLDIER(LOCAL:5), 7, RIGHT}
+        PRINTFORM %TOSTR_AI_TYPE(COUNTRY_AI_TYPE:(LOCAL:5)), 6, RIGHT%
+        PRINTFORM {GET_OWN_CITY(LOCAL:5), 6, RIGHT}
+        PRINTFORM {GET_COMMANDER_NUM(LOCAL:5), 6, RIGHT}
+        PRINTFORM {LIST_STARS:(LOCAL:0), 8, RIGHT}
+        IF LOCAL:5 != CFLAG:MASTER:所属
+            CALL TMP_SETCOLOR_COUNTRY_RELATION(CFLAG:MASTER:所属, LOCAL:5)
+            PRINTFORM %TMP_TOSTR_COUNTRY_RELATION(CFLAG:MASTER:所属, LOCAL:5, 1), 8, RIGHT%
+        ELSE
+            PRINTFORM %TOSTR_REPEAT(" ", 8)%
+        ENDIF
+        PRINT
+        CALL TMP_PRINT_COUNTRY_STARS(LOCAL:5)
+        PRINTL
+        RESETCOLOR
+    NEXT
+    CALL SINGLE_DRAWLINE
+    PRINTBUTTON " 0[    取消]", -1
+	INPUT
+    TARGET_COUNTRY_ID = RESULT
+	SIF TARGET_COUNTRY_ID == -1
+		RETURN 0
+    IF IS_COUNTRY(TARGET_COUNTRY_ID) && COUNTRY_ID != TARGET_COUNTRY_ID
+        PRINTFORMW {TARGET_COUNTRY_ID}
+        CALL SLG_DIPLOMACY_CREATE_UNION_八云议堂(COUNTRY_ID, TARGET_COUNTRY_ID)
+        IF RESULT == 1
+            CALL CHANGE_RELATION_C_TO_C(TARGET_COUNTRY_ID, COUNTRY_ID, -500, 500)
+            PRINTFORML %ANAME(GET_COUNTRY_BOSS(TARGET_COUNTRY_ID))%因此对%ANAME(GET_COUNTRY_BOSS(COUNTRY_ID))%的评价大幅下降了
+        ENDIF
+        RETURN 1
+    ELSE
+        RESTART
+    ENDIF
+
+@SLG_DIPLOMACY_CREATE_UNION_八云议堂(勢力, 相手勢力)
+    #DIM 勢力
+    #DIM 相手勢力
+    #DIM 参加勢力数
+    #DIM 勢力君主
+    #DIM 相手勢力君主
+    #DIM 参加フラグ, MAX_COUNTRY
+    #DIM CONST 理由_嫌い = 1
+    #DIM CONST 理由_経済 = 2
+    #DIM CONST 理由_武力 = 3
+    #DIM CONST 理由_領土 = 4
+    #DIM 連合番号
+    VARSET 参加フラグ
+    VARSET 参加勢力数
+    VARSET 連合番号
+
+    CALL CLEAR_AI_DIPLOMACY_PLAN(勢力, 相手勢力)
+    勢力君主 = GET_COUNTRY_BOSS(勢力)
+    相手勢力君主 = GET_COUNTRY_BOSS(相手勢力)
+    参加フラグ:勢力 = 1
+    参加勢力数 ++
+    CALL COLOR_PRINTL("!!!連合発議!!!", カラー_注意)
+    CALL COLOR_PRINTL(@"%ANAME(勢力君主)%提議連合起来討伐%ANAME(相手勢力君主)%！", 勢力 == CFLAG:MASTER:所属 ? カラー_警告 # カラー_注意)
+
+    FOR LOCAL, 0, MAX_COUNTRY
+        SIF !IS_COUNTRY(LOCAL) || TMP_COUNTRY_RELATION:LOCAL:相手勢力 != 0 || GROUPMATCH(LOCAL, 勢力, 相手勢力)
+            CONTINUE
+        ;主人公所属勢力の場合は特殊処理
+        IF LOCAL == CFLAG:MASTER:所属 && !CONFIG:302
+            PRINTFORML 要参加這個連盟麼？
+            CALL ASK_YN()
+            IF RESULT == 0
+                PRINTFORML 表明自己要参加
+                参加フラグ:LOCAL = 1
+            ELSE
+                PRINTFORML 表明自己不参加
+            ENDIF
+        ELSE
+            参加フラグ:LOCAL = SLG_AI_DIPLOMACY_DOES_PARTICIPATE_UNION(LOCAL, 相手勢力, 勢力, 参加勢力数)
+            SIF !参加フラグ:LOCAL
+                CONTINUE
+            PRINTFORM %ANAME(GET_COUNTRY_BOSS(LOCAL))%因
+            SELECTCASE 参加フラグ:LOCAL
+                CASE 理由_嫌い
+                    PRINTFORM 勢力之間的厭悪
+                CASE 理由_経済
+                    PRINTFORM 勢力之間的経済差
+                CASE 理由_武力
+                    PRINTFORM 勢力之間的兵力差
+                CASE 理由_領土
+                    PRINTFORM 対擴張的勢力的警戒心
+            ENDSELECT
+            PRINTFORML 、表示了参加的願望
+            参加勢力数 ++
+        ENDIF
+    NEXT
+
+    IF 参加勢力数 == 1
+        PRINTFORML ……結果、沒有一個其他勢力参加了
+        PRINTFORML 連合被取消了
+        RETURN 0
+    ENDIF
+
+    参加勢力数 = 0
+
+    FOR LOCAL, 0, MAX_COUNTRY
+        SIF !IS_COUNTRY(LOCAL) || !参加フラグ:LOCAL
+            CONTINUE
+        TREATY_U_COUNTRY:連合番号:参加勢力数 = LOCAL
+        TMP_COUNTRY_UNION_TARGET:LOCAL = 相手勢力
+        参加勢力数 ++
+        CALL CLEAR_AI_DIPLOMACY_PLAN(LOCAL, 相手勢力)
+        FOR LOCAL:1, LOCAL + 1, MAX_COUNTRY
+            SIF !IS_COUNTRY(LOCAL:1) || !参加フラグ:(LOCAL:1)
+                CONTINUE
+            TMP_COUNTRY_RELATION:LOCAL:(LOCAL:1) = 2
+            TMP_COUNTRY_RELATION:(LOCAL:1):LOCAL = 2
+        NEXT
+    NEXT
+
+    TREATY_U_TERM:連合番号 = LIMIT((REL_HATE:勢力君主:相手勢力君主 - REL_LIKE:勢力君主:相手勢力君主) / 100, 5, 8)
+    TREATY_U_TARGET:連合番号 = 相手勢力
+
+    CALL ICPRINT(@"連盟的持續時間為<{TREATY_U_TERM:連合番号}>回合", "L", カラー_注意)
+
+    FORCEWAIT
+    RETURN 1

@@ -1,0 +1,45 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_PICK_A_FLOWER_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_PICK_A_FLOWER_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_PICK_A_FLOWER(対象)
+#DIM 対象
+PRINTFORML 在路邊綻放著漂亮的花
+PRINTFORML 那引人注目的景象相当難得、所以忍不住想摘一朵
+
+PRINTL
+CALL ASK_MULTI("紅色的花朵", "藍色的花朵", "黄色的花朵")
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORML 摘了一朵紅色的花、聞一聞它的香味
+		PRINTFORMW ……突然感覚身体有種微微発熱的異状
+		CALL PRINT_ADD_EXP(対象, "性技経験値", RAND:8 + 1, 1)
+	CASE 1
+		PRINTFORML 摘了一朵藍色的花、聞一聞它的香味
+		PRINTFORMW ……突然感覚到被一股強烈的睡意侵襲、沒有抵抗的当場倒在地上了
+		PRINTFORML …醒過来的時候已経是傍晚了
+		PRINTFORML 一辺摸着昏沈的頭一辺檢查身体、沒有発現什麼異状
+		PRINTFORMW 但是錢包卻遺失了
+		LOCAL = MIN(MONEY, 3000)
+		MONEY -= LOCAL
+		CALL ICPRINT(@"失去了{LOCAL}金", "L", カラー_注意)
+	CASE 2
+		PRINTFORML 摘了一朵黄色的花、聞一聞它的香味
+		PRINTFORMW ……腦袋変得很清醒、感覚非常舒服
+		CALL PRINT_ADD_EXP(対象, "知略経験値", RAND:8 + 1, 1)
+ENDSELECT
+RETURN 1

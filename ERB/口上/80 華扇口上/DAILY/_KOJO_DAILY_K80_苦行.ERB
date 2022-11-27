@@ -1,0 +1,107 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K80_PENANCE_RATE(対象)
+#DIM 対象
+RETURN 50
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K80_PENANCE_DECISION(対象)
+#DIM 対象
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K80_PENANCE_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K80_PENANCE(対象)
+#DIM 対象
+
+SELECTCASE IFRAND("0, 1, 2, 3", 1, "4", ABL:対象:欲望 > 3 && HAS_PENIS(MASTER))
+	CASE 0
+		PRINTFORMW 今日果然很寒冷、外面還下着雪……
+		PRINTFORMW 正當打算休休閒閒地呆在據點時、見到%ANAME(対象)%在被爐裏輕鬆地休息
+		PRINTFORMW 「啊啊、%ANAME(MASTER)%。正好、過來這邊」
+		PRINTFORMW 「我現在、正在進行一種叫暑苦行的修行。透過忍耐炎熱、來磨練自己」
+		PRINTFORMW 「每日都是修行、仙道的日子就是那麼艱辛……亦因為這樣我無法離開這裏、所以請幫我拿橘子過來」
+		PRINTFORMW 「喂快點快點！　進行暑苦行的話不能沒有橘子的！」
+		PRINTFORMW ……就這樣被%ANAME(対象)%當成跑腿使喚了……
+		CALL PRINT_ADD_EXP(対象, "武闘経験値", 3, 1)
+		CALL TRAIN_AUTO_ABLUP(対象)
+
+	CASE 1
+		PRINTFORMW 今日好熱。能看見陽氣升騰……
+		PRINTFORMW 正當打算休休閒閒地呆在據點時、看見%ANAME(対象)%用水桶向自己潑水
+		PRINTFORMW 「啊啊、%ANAME(MASTER)%。正好、過來這邊」
+		PRINTFORMW 「我現在、正在進行一種叫寒苦行的修行。透過忍耐嚴寒、來磨練自己」
+		PRINTFORMW 「每日都是修行、仙道的日子就是那麼艱辛……另外、午餐吃素面就好」
+		PRINTFORMW 「別忘記素面要有生姜和大蔥！　一定不要忘記呀！」
+		PRINTFORMW ……就這樣被%ANAME(対象)%當成跑腿使喚了……
+		CALL PRINT_ADD_EXP(対象, "知略経験値", 3, 1)
+		CALL TRAIN_AUTO_ABLUP(対象)
+	CASE 2
+		PRINTFORMW 「%ANAME(MASTER)%、一起來苦行吧」
+		PRINTFORMW 偶然遇到%ANAME(対象)%時、她就這麼說了……
+		PRINTFORM 「人里開了新的甜品店了。聽說尤其是
+		SELECTCASE RAND:6
+			CASE 0
+				PRINT 團子
+			CASE 1
+				PRINT 餡蜜
+			CASE 2
+				PRINT 蕨餅
+			CASE 3
+				PRINT 雪糕
+			CASE 4
+				PRINT 蛋糕
+			CASE 5
+				PRINT 芭菲
+		ENDSELECT
+		PRINTFORMW 非常有人氣啊」
+		PRINTFORMW 「盡情吃喜歡的食物、再回頭審視自己的食慾、這就是食苦行」
+		PRINTFORMW 「所以就出発吧！　因為那家店很有人氣所以應該大排長龍了！　快！」
+		CALL PRINT_ADD_EXP(対象, "料理経験値", 3, 1)
+		CALL TRAIN_AUTO_ABLUP(対象)
+	CASE 3
+		PRINTFORMW %ANAME(対象)%正在睡午覺……
+		PRINTFORMW 那麼空閒的話就過來鍛鍊吧、%PRONOUN(対象)%聽到後就非常憤慨了
+		PRINTFORMW 「你說我空閒！？　怎麼看我都正在修練好嗎！」
+		PRINTFORMW 「聽好了、這是寝苦行、先滿足自己的懶惰之心、然後再回頭審視自己懶惰的苦行！」
+		PRINTFORMW 「因此、我現在非常忙哦……說起來能不能幫我隨便準備什麼食物嗎。我肚子餓了」
+		PRINTFORMW 被%ANAME(対象)%當成跑腿使喚了……
+		CALL PRINT_ADD_EXP(対象, "政治経験値", 3, 1)
+		CALL TRAIN_AUTO_ABLUP(対象)
+	CASE 4
+		PRINTFORMW 深夜、%ANAME(対象)%來訪你的房間了
+		PRINTFORMW 「%ANAME(MASTER)%、到修行的時間了……來吧」
+		PRINTFORMW 語畢、%PRONOUN(対象)%將身體貼近%ANAME(MASTER)%、敞開自己的衣服……
+		PRINTFORMW 「這是房中術、透過吸取他人精氣來活化自己精氣的秘術、是修行。沒錯、這是修行」
+		PRINTFORMW 「所以、一定要、認真地做、……來吧……♥」
+		PRINTFORMW 帶着迷蕩的表情、%pronoun(対象)%捉着%ANAME(MASTER)%的手、放到自己的陰部
+		PRINTFORMW 一整晚、與%ANAME(対象)%交合了……
+		CALL FUCK(対象, "Ｃ, Ｂ, Ｖ, Ｍ, 欲望, 奉仕, 性技, 性交, 精愛. Ｖ性交", "処女喪失, 接吻喪失, 膣内射精", GET_ID(MASTER), @"%ANAME(MASTER)%的肉棒", ANAME(MASTER), "", "和姦")
+		CALL FUCK(MASTER, "Ｃ, 欲望, 性技, 性交, 射精, Ｖ挿入", "童貞喪失", GET_SPERM_ID("不明"), "", "", @"%ANAME(対象)%的膣穴", "和姦")
+ENDSELECT
+
+
+
+RETURN 1
+

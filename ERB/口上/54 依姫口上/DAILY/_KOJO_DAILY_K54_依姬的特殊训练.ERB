@@ -1,0 +1,416 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K54_TESHUXUNLIAN_RATE(対象)
+#DIM 対象
+RETURN 1000
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K54_TESHUXUNLIAN_DECISION(対象)
+#DIM 対象
+
+SIF GROUPMATCH(MASTER, NAME_TO_CHARA("豊姫"), NAME_TO_CHARA("サグメ"), NAME_TO_CHARA("永琳"), NAME_TO_CHARA("輝夜"))
+	RETURN 0
+
+
+SIF !KDVAR:対象:依姫_月面式訓練 == 1
+    RETURN 0
+
+SIF KDVAR:対象:依姫_依姬的特殊训练 
+	RETURN 0
+
+
+
+;主人公はペニスがあること
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+	
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K54_TESHUXUNLIAN_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K54_TESHUXUNLIAN(対象)
+#DIM 対象
+#DIM 判定値
+
+
+IF CFLAG:対象:200 == 0
+
+	PRINTFORMW 你好，我是这个口上的作者，欢迎你游玩我写的依姬系列剧情口上。因为是第一次写，有很多不好的地方，请多包涵。
+	PRINTFORMW 在进入这个口上事件之前有个问题想问你
+	PRINTFORMW 因为原作者似乎是把所有年长者都设定为非处女，所以
+	PRINTFORMW 你想要一个什么样的依姬？
+	CALL ASK_MULTI("少女依姬" ,"人妻依姬" ,"选项的说明")
+	IF RESULT == 0
+		PRINTFORML 好的，那么依姬变为了结婚前的样子。
+		PRINTFORML  
+		PRINTFORMW 
+		TALENT:対象:処女 = 1
+		TALENT:対象:無接吻経験 = 1
+		EXP:54:絶頂経験 -= 50
+		EXP:54:接吻経験 -= 3
+		EXP:54:口淫経験 -= 1
+		EXP:54:膣内射精経験 -= 1
+		EXP:54:Ｖ性交経験 -= 3
+
+
+		CFLAG:対象:200 += 1
+	ENDIF
+ENDIF
+
+IF RESULT == 1
+	PRINTFORMW 
+	CFLAG:対象:200 += 1
+ENDIF
+
+
+IF RESULT == 2
+	PRINTFORML 简单来说，2个选项除了因为素质不同而产生的口上描述不同外，结局和结局后所产生的影响导致后续剧情都会大不一样。
+	PRINTFORMW 并且在中途不能进行线路的更换。
+	PRINTFORMW 这是根据素质决定影响，并由作者构想延伸出的人际关系等剧情。
+	PRINTFORMW 声明：该选项会影响到多角色后续的攻略，如果想自由攻略的玩家注意。
+	PRINTFORMW 总而言之，选项1偏向纯爱，选项2偏向恶堕（并非无法纯爱）。
+	PRINTFORMW 最后感谢游玩本口上，祝各位玩得开心，谢谢。
+	PRINTFORMW 那么，选择是？
+	CALL ASK_YN("少女依姬", "人妻依姬")
+
+	IF RESULT == 0
+		PRINTFORML 好的，那么依姬变为了结婚前的样子。
+		PRINTFORML  
+		PRINTFORMW 
+		TALENT:対象:処女 = 1
+		TALENT:対象:無接吻経験 = 1
+		EXP:54:絶頂経験 -= 50
+		EXP:54:接吻経験 -= 3
+		EXP:54:口淫経験 -= 1
+		EXP:54:膣内射精経験 -= 1
+		EXP:54:Ｖ性交経験 -= 3
+
+
+		CFLAG:対象:200 += 1
+	ENDIF
+ENDIF
+
+	IF RESULT == 1
+	PRINTFORML 好的，那么依姬就是原本的模样。
+	PRINTFORML  
+	PRINTFORMW 
+	CFLAG:対象:200 += 1
+	CFLAG:対象:202 = 1
+ENDIF
+
+
+判定値 = CFLAG:対象:201
+
+;判定失敗
+IF CFLAG:対象:201 == 0
+
+PRINTFORMW 「%ANAME(MASTER)%。你最近不是经常跟我训练嘛。」
+PRINTFORML 突然造访我房间的%ANAME(対象)%，对我说出了这样的话。
+PRINTFORMW 「也时候进行下一阶段的训练了。只要%ANAME(MASTER)%同意的话，我可以来帮你训练哦？」
+PRINTFORML 虽然跟之前一样很像是随意提到的，但是绝对不是临时起意的吧。连要到用的衣服在内都已经完全准备好了。
+PRINTFORML %PRONOUN(対象)%作为指导月面部队的总教官，虽然训练的效果一定会很好，但是肯定会非常辛苦的吧？
+PRINTFORML 那麼、要怎麼辦呢……
+PRINTFORML 
+CALL ASK_YN("请求训练", "直接对打")
+
+IF RESULT == 1
+IF CFLAG:対象:201 == 0
+	PRINTFORMW 「嗯……是这样吗，那就没办法了……」
+PRINTFORMW 「哦？很有胆量嘛？」
+PRINTFORML 依姬似乎有点惊讶，又挑了挑眉
+PRINTFORMW 「非常好，既然已经决定了的话，那么就现在，立刻，马上开始吧！」
+PRINTFORMW 被%ANAME(対象)%拉到训练场去了……
+PRINTFORMW 「呼....呼.....很不错啊」
+PRINTFORMW 我呆坐在地上，喘着粗气，暗红色的血液从大腿内侧流到了训练场冰冷的地上。
+PRINTFORMW 「嗯？你受伤了？我这边有永琳师匠的特效药，让我看看」
+PRINTFORMW %ANAME(対象)%不由分说的把裤子撕开，一道大约10厘米的刀伤映入眼帘……
+PRINTFORMW 我被%ANAME(対象)%的动作惊呆了，享受着%ANAME(対象)%玉手在我大腿内侧的摩擦，看着她给我上药时靠近的脸庞……不自觉的……起立了
+PRINTFORMW 「好了，这样就行了。」
+PRINTFORMW 「嗯？你怎么了？」
+PRINTFORMW %ANAME(対象)%看了看我呆呆的样子，挥了挥手
+PRINTFORMW 「这点小伤就被疼傻啦？看来你还需要更多的训……练……」
+PRINTFORMW %ANAME(対象)%忽然注意到了我下体正隔着内裤对着她敬礼，一下子羞红了脸庞
+PRINTFORMW 「你！下流！果然师匠说的没错！地上之人，满脑子都是污秽！」
+PRINTFORMW 这么说着，%ANAME(対象)%下意识的将那瓶药，扔到了我的腿上。
+PRINTFORML 刚刚包扎好的伤口瞬间又流出了血，我捂着伤口，呼呼的吸着气。
+PRINTFORML 一边头上的冷汗伴随着下体的疼痛顺着我的下巴朝地上滴落。
+PRINTFORMW 「……」
+PRINTFORMW %ANAME(対象)%沉默着看了我痛苦的样子，羞愤的离开了。
+PRINTFORMW  我坐在地上慢慢的喘着粗气，拿着%ANAME(対象)%扔在我身上的药，一点一点的在伤口上揉搓着。
+PRINTFORMW ……
+PRINTFORMW …………
+PRINTFORMW ……………………
+PRINTFORMW  经过一番简单的处理，伤口已经不在流血了，回想起%ANAME(対象)%的手的温度，我刚才还疼痛不已的小兄弟又有起立的姿势，一瞬间伤口仿佛又隐隐作痛起来
+PRINTFORML  我正准备起身，发现%ANAME(対象)%把盔甲脱下，带着一套干净的裤子又折返回回来
+PRINTFORMW 「……………………」
+PRINTFORML 「还疼么……」
+PRINTFORMW  %ANAME(対象)%冷着脸僵硬的说道
+PRINTFORMW 还不是因为你
+PRINTFORMW 我虽然这么想着，嘴上却咬着牙说没事。
+PRINTFORMW  %ANAME(対象)%看了看我苍白的脸，又看了看我粗糙包扎的伤口
+PRINTFORMW  %ANAME(対象)%仿佛在思索着什么，平时英气的脸庞染上了一层粉色。
+PRINTFORML                                                                  
+PRINTFORML  那个……裤子，是给我的？
+PRINTFORMW  我像是想找些话题，略显尴尬的问道
+PRINTFORML   
+PRINTFORMW 「不然你想穿着开裆裤回去吗？地上人果真污秽不堪。」
+PRINTFORMW 「包扎伤口也不会，坐着别动！」
+PRINTFORML  %ANAME(対象)%听了我的话，像是缓过了神，又像是遮掩什么冷着脸说道。
+PRINTFORMW  %ANAME(対象)%又把我刚包扎好伤口的绷带重新拆开，换上了新的绷带。
+PRINTFORMW  我本想反驳她几句，但是在%ANAME(対象)%手的触感和伤口的疼痛下，我只是张了张嘴，又把话咽了回去。愣愣的看着她。
+PRINTFORMW  「行了。」
+PRINTFORMW  %ANAME(対象)%仔细检查了我的伤口，发现没有什么大问题，准备起身离开时
+PRINTFORMW  我的小兄弟却又在%ANAME(対象)%玉手的触感下挺立了起来。
+PRINTFORMW 「你！居然还敢！污秽不堪！」                                                                       
+PRINTFORML  %ANAME(対象)%瞧见那支棱的小帐篷，本来粉色的脸庞闪过一丝羞愤，伸手朝我打了过来。
+PRINTFORML  我实在惧怕她对我小兄弟造成二次伤害，在她要打中的瞬间，本能的抓住了她的手。
+PRINTFORML  %ANAME(対象)%她看我抓住她的手，便想努力挣脱。
+PRINTFORMW  我和%ANAME(対象)%发力的同时，刚刚包扎好的伤口又渗出丝丝了血迹。
+PRINTFORML   
+PRINTFORML  我因伤口疼痛厉声道
+PRINTFORMW  你还想做什么？！是想就这么杀了我？第一次你就把我砸的说不出话，现在你还想继续？
+PRINTFORML    
+PRINTFORMW  %ANAME(対象)%听到我的话，面色一冷，正准备训斥我。
+PRINTFORML   
+PRINTFORML  但是，不知我从哪里来的勇气，我用更大的声音掩盖住了她想说什么
+PRINTFORML 「你自己看看它都被砸成什么样了？」
+PRINTFORMW  我一边向%ANAME(対象)%发泄着不满，一边鬼使神差的拉起%ANAME(対象)%的手往我的小兄弟那里放。
+PRINTFORML  %ANAME(対象)%吓了一跳，想要挣脱我的手，但被我死死抓住。
+PRINTFORMW  %ANAME(対象)%下意思的往我依旧支棱的帐篷那边看了一眼，啐了一口。
+PRINTFORML  呵~堂堂月之都的公主敢做不敢当？
+PRINTFORML  不知怎么的我像着了魔一般略带嘲讽的说。
+PRINTFORMW   
+PRINTFORMW 「……」
+PRINTFORMW  %ANAME(対象)%听了这句话狠狠的瞪了我一眼，沉默了半晌，便任由我把她的手放在我的了帐篷上。
+PRINTFORMW  我打算？
+PRINTFORML 
+CALL ASK_YN("用依姬的手抚摸", "道歉")
+
+IF RESULT == 0
+IF CFLAG:対象:201 == 0
+
+
+PRINTFORML 我用着依姬的手，默不作声的在内裤上抚摸着
+PRINTFORMW 「……」
+PRINTFORMW 「…………」
+PRINTFORMW 「……………………」
+PRINTFORML 随着一阵快感袭来精液射到了内裤上，连带着，也有一些沾到了依姬的手上，做完这一切的依姬，默不作声的站了起来，只是愣愣的看着自己的手。
+PRINTFORML 我看了看依姬，正准备站起来继续。依姬那冰冷仇视的眼光，却突然盯了过来，气氛突然凝重了起来，所幸，她只是站起来甩了甩手，默不作声的又离开了……
+CALL TRAIN_AUTO_ABLUP(MASTER)
+CALL ADD_COOLTIME(MASTER, 3, 1)
+
+	KDVAR:対象:依姫_依姬的特殊训练 = 2
+	RETURN 1
+    CFLAG:対象:好感度 -= 1500
+
+ENDIF
+ENDIF
+ENDIF
+ENDIF
+ENDIF
+
+IF RESULT == 1
+IF CFLAG:対象:201 == 0
+
+PRINTFORML  我对着%ANAME(対象)%道歉，紧张的松开抓着%ANAME(対象)%的手说不出一句完整的话。因为动作太大甚至扯到了伤口，身子一瞬间蜷缩起来。
+PRINTFORML  %ANAME(対象)%看着我什么话也没说，双方就这么沉默了下去。
+PRINTFORMW  我正尽可能的不去注意伤口传来的阵阵刺痛感的时候，突然一阵又酥又麻的感觉，从下体直窜大脑，只见%ANAME(対象)%正搁着内裤，用手笨拙的爱抚我的阴茎。
+PRINTFORMW  我抬头看了看她的脸，发现她偏过头去，也不说话，只是隔着内裤抓着我的阴茎上下抚摸蠕动着。
+PRINTFORMW  我的阴茎随着%ANAME(対象)%手一颤一颤，仿佛要挣脱束缚它的内裤，快感一阵阵涌来，不多时，我的下体一阵抽搐，射在了内裤上，也因此，沾了不少到%ANAME(対象)%的手上。
+PRINTFORML  
+PRINTFORML  依姬…………
+PRINTFORMW  我伸出手喊出她的名字，但是，%ANAME(対象)%便头也不回的走了。
+PRINTFORMW  我意犹未尽的把手放下，脱下了内裤，换上了依姬带来的新裤子，思索着刚刚是不是看见了依姬羞红的面庞。（错觉吧）
+
+
+	CFLAG:対象:201 += 5
+	KDVAR:対象:依姫_依姬的特殊训练 = 0
+	RETURN 0
+	ENDIF
+	ENDIF
+	
+	
+
+IF CFLAG:対象:201 == 0
+
+PRINTFORMW 「是吗？我就知道你一定会这么说的。」
+PRINTFORMW 「非常好，既然已经决定了的话，那么就现在开始下一阶段的训练吧！」
+PRINTFORMW  被%ANAME(対象)%拉到训练场去了……
+PRINTFORMW  果不其然，训练真的太可怕了……
+CALL PRINT_ADD_EXP(MASTER, EXPNAME:GET_EXP(GETNUM(ABL, "武闘")), RAND(10, 15), 1)
+CALL PRINT_ADD_EXP(MASTER, EXPNAME:GET_EXP(GETNUM(ABL, "防衛")), RAND(10, 15), 1)
+CALL TRAIN_AUTO_ABLUP(MASTER)
+CALL ADD_COOLTIME(MASTER, 3, 1)
+WAIT
+KDVAR:対象:依姫_依姬的特殊训练 = 0
+
+RETURN 0
+ENDIF
+
+
+	IF CFLAG:対象:201 == 5
+PRINTFORMW  因为上次的事情，早晨我又偶然走到了训练场。却并没有见到%ANAME(対象)%的身影，呆呆的站了一会，回想着上次如梦一般的场景，我叹了口气，转身准备离开，却迎面撞上了来训练的%ANAME(対象)%和铃仙二号。
+PRINTFORML 「呀！」
+PRINTFORMW  铃仙2号正低着头碎碎念，怦的一下撞在了停下脚步的%ANAME(対象)%身上，发出了可爱的叫声。
+PRINTFORML 「……」
+PRINTFORML  %ANAME(対象)%面如寒霜的看着我，我本来想打招呼的手，一瞬间就被那目光给吓住了，只好尴尬的摸了摸鼻子。
+PRINTFORMW  铃仙2号见%ANAME(対象)%停下脚步，便从%ANAME(対象)%身后伸出头来疑惑的望着我
+PRINTFORMW 「%ANAME(MASTER)%大人，你好呀！你也是来训练的嘛？%ANAME(対象)%大人训练好严格的呀！」
+PRINTFORMW  像是找到了可以吐苦水的人，铃仙2号惨兮兮的向我说道。
+PRINTFORMW  我只能尴尬的笑着点头，说我已经训练完毕，这就准备回去了。
+PRINTFORMW 「骗子……走了，铃仙！」
+PRINTFORML  铃仙2号听了我的话，跳着到我身前，还没来得及说什么，便被%ANAME(対象)%抓着衣服后领从我面前拖走了。铃仙2号一脸麻木的表情看着我，顺带挥了挥手表示再见。
+PRINTFORMW  我只能尴尬笑着，并没有听清%ANAME(対象)%前面小声说的话，只能挥手告别。
+PRINTFORMW  我回到了卧室，想着%ANAME(対象)%那无视我的态度，昨日%ANAME(対象)%做的种种，与今日的表现夹杂在一起，我的思绪不由得混乱起来。
+PRINTFORMW 「%ANAME(MASTER)%大人，在么？」
+PRINTFORMW  就在我胡思乱想，不知道过了多久的时候，听见有人在喊我的名字。
+PRINTFORMW  原来是铃仙2号，她看见我，那眼神里发出异样的光亮，仿佛看到了希望一般。
+PRINTFORMW  我对铃仙2号的到来表示惊讶，再一看时间竟然已经中午了。我一边抚摸着她的耳朵，一边询问着来意。
+PRINTFORMW 「那个!%ANAME(対象)%大人要你下午去训练哦~嘻嘻~」铃仙2号顺势用耳朵在我手上蹭了蹭，仿佛很享受的样子
+PRINTFORMW  大概是因为找到了替罪羊？铃仙2号看起来心情很好。
+PRINTFORMW 「说起来，今天的%ANAME(対象)%大人的训练比平时要松的多诶，我偶尔都能偷偷懒。」
+PRINTFORMW 「就算是被%ANAME(対象)%大人发现后，以为会被训斥的很惨。结果嘛，%ANAME(対象)%大人举起手正要发火，却又愣愣的看了几秒，便放下手说下不为例。」
+PRINTFORMW 「你说奇怪不奇怪？不过今天也算是逃过一劫啦~」
+PRINTFORMW  铃仙2号带着侥幸的笑容，拍了拍我的肩膀。
+PRINTFORMW  我听见铃仙2号的描述，自然知道是因为什么，想着%ANAME(対象)%下午要我去训练，不由得打了个寒颤。
+PRINTFORMW 「嘛，你也不用在意，多做几次训练就好了。加油哦~」
+PRINTFORMW  铃仙2号以过来人的身份，拍了拍我，便一蹦一跳的走了。
+PRINTFORMW  我苦笑一声，心里不知是因为%ANAME(対象)%要见我的喜悦多一些，还是害怕她会因为之前那件事跟我算账的忧虑多一些。
+PRINTFORMW  那么，去还是不去？
+
+CALL ASK_YN("去", "不去")
+
+IF RESULT == 1
+PRINTFORMW  那之后%ANAME(対象)%再也没有提起过这件事。
+
+
+KDVAR:対象:依姫_依姬的特殊训练 = 2
+	RETURN 1
+    CFLAG:対象:好感度 -= 1500
+ENDIF
+ENDIF
+	
+	
+ IF CFLAG:対象:201 == 5
+ IF RESULT == 0
+PRINTFORML  下午，我还是怀着纠结的心情来到了训练场，所幸，并没有发现%ANAME(対象)%的身影。我不由得长舒一口气。
+PRINTFORMW  我百无聊赖的向四周寻找着%ANAME(対象)%，发现根本没有她来过的样子，我只好随便找了个地方等着。
+PRINTFORMW  ……
+PRINTFORMW  …………
+PRINTFORMW  ………………
+PRINTFORMW  时间一点一滴的流逝，就当我准备放弃的时候，%ANAME(対象)%突然从我身后出现。
+PRINTFORMW 「……」
+PRINTFORMW  %ANAME(対象)%沉默的看着我，目光中有我看不懂的复杂。
+PRINTFORMW  我尴尬的打了声招呼，说着肯定是有什么急事耽误了吧？但并没有得到她的回应。
+PRINTFORML  她沉默着看了我半晌，用着比平时更加清冷的声音道
+PRINTFORMW 「并没有什么急事……」
+PRINTFORML  
+PRINTFORML  是吗？啊……哈哈……
+PRINTFORMW  我略带颤抖的说道。听了她的话，我默默的摸了摸鼻子，脸上挂起一丝尴尬的笑容，下一刻又变为苦涩。
+PRINTFORMW  那意思是单纯的放了我这么久的鸽子吗？我心里除了感到难过以外，却又或多或少有了那么一丝怨恨。
+PRINTFORMW  「现在，抓紧时间训练吧，你平时就很懈怠。」
+PRINTFORMW  %ANAME(対象)%冷漠的说完，便开始做起了准备动作。
+PRINTFORMW  我看了看时间，这不是马上要吃饭的时间了么。我向%ANAME(対象)%提出要不下次在训练吧，结果被%ANAME(対象)%无视了，我只好跟着她做起了训练。
+PRINTFORMW  ……
+PRINTFORMW  …………
+PRINTFORMW  ………………
+PRINTFORMW  训练完毕，我满身大汗的趟在地上喘着粗气，肚子隐约传来咕咕的响声。
+PRINTFORMW  「哼……」
+PRINTFORMW  %ANAME(対象)%发出一声轻哼，冷漠的眼神在我身上扫过，当扫到我的下半身的时候，楞了一下，脸上闪过一抹红色。
+PRINTFORMW  「污秽！」
+PRINTFORMW  %ANAME(対象)%小声的啐了一口。
+PRINTFORMW  躺在地下的我听到她的话，一阵迷茫委屈之后，随之而来的是愤怒，起身想向她讨个说法。
+PRINTFORMW  %ANAME(対象)%只是冷冷的看了我一眼，并没有回应我，从我身边擦身而过。彻底的把我无视掉了。
+PRINTFORMW  我回想起%ANAME(対象)%开始故意放我鸽子的样子、让我饿着肚子训练完身体难受的感觉，以及最后那句脱口而出的“污秽”。一股无明业火涌上心头。
+PRINTFORMW  啪！
+PRINTFORMW  我狠狠的抓住她的手，把%ANAME(対象)%一下拽了回来。
+PRINTFORMW  %ANAME(対象)%只是冷冷的看着我，在我看来那目光充满了轻蔑。
+PRINTFORMW  「放开我！离我远点！」
+PRINTFORMW  %ANAME(対象)%这句话终于点燃了我内心的恶魔，我疲惫的身体仿佛忘记了刚刚训练时痛苦的感觉，强行拉着%ANAME(対象)%到了训练场一个阴暗的角落。
+PRINTFORMW  途中%ANAME(対象)%试图想逃脱我的掌控，但是令人疑惑的是我并没有感觉到从%ANAME(対象)%传来的力量，像往常的话，我早就被她甩出去了才是。
+PRINTFORMW  怒火冲昏了我的头脑，我强行让她坐在地上，随后把裤子脱下，漏出了被训练时汗水打湿的内裤。
+PRINTFORMW  我拿着%ANAME(対象)%的手放在了我的内裤上，狠厉的向她下达了爱抚阴茎的话语。
+PRINTFORMW  %ANAME(対象)%狠狠的看了我一眼，把手闪电似的收了回来，羞红的脸上，充满了愤怒。
+PRINTFORML  
+PRINTFORML  怎么？还害羞了？装什么纯洁！就像你之前做的哪样！这是你对我羞辱的报复。
+PRINTFORMW  我一边说着，一边强行把%ANAME(対象)%的手又放在了我的内裤上。
+PRINTFORMW  「……」
+PRINTFORMW  %ANAME(対象)%沉默了一会，看了我一眼，又看了看正放在内裤上的手，默默的把头转过去，慢慢的隔着内裤爱抚着我的阴茎。
+PRINTFORML  
+PRINTFORML  这就对了，哼哼~                 
+PRINTFORMW  我看%ANAME(対象)%开始主动爱抚我的阴茎，便伸出手捏着她的下巴，强行把%ANAME(対象)%的头拽了过来，看到了她羞红的脸庞。
+PRINTFORMW  %ANAME(対象)%复杂的看了我一眼，挣脱了我的手，开始专注的抚摸着我的阴茎。
+PRINTFORMW  随着%ANAME(対象)%玉手的上下爱抚，我的阴茎像逐渐变得粗壮起来，一跳一跳的仿佛要蹦出内裤。
+PRINTFORMW  「唔……」
+PRINTFORMW  %ANAME(対象)%看着支棱起来的内裤，发出一声轻呼。
+PRINTFORMW  我看着差不多了，便把内裤一把拉下，漏出了挺立粗壮的阴茎。
+PRINTFORMW  「噫！」
+PRINTFORMW  %ANAME(対象)%像是吓了一跳，正爱抚阴茎的双手，闪电般的收回。
+PRINTFORML  
+PRINTFORML  怎么了？堂堂月之都总教官，害怕了？                 
+PRINTFORMW  我戏谑的伸手，摸了摸%ANAME(対象)%的脸，同时下身挺立着的阴茎似乎耀武耀威的跳了跳。
+PRINTFORML  
+PRINTFORMW  「别碰我！」
+PRINTFORMW  %ANAME(対象)%啪的一声，打掉了我抚摸她细腻脸蛋的手。瞪了我一眼，又默默地盯着我的阴茎看。
+PRINTFORMW  我哼了一声，又把阴茎往前挪了挪，被汗水和前列腺液混着的味道逐渐弥漫开来。
+PRINTFORMW  %ANAME(対象)%用手慢慢的一点一点开始触碰我的阴茎，慢慢的开始用手上下套弄着。
+PRINTFORMW  我看着这一幕，不由得心底闪过一丝快意，默默地享受着%ANAME(対象)%玉手的揉弄。
+PRINTFORMW  享受了一会儿，我觉得不过瘾，便命令%ANAME(対象)%用双手猛的加快了套弄的节奏。
+PRINTFORMW  静谧的夜晚，训练场边上一个不起眼的角落了，一男一女喘着粗气，做着下流的动作。
+PRINTFORMW  随着节奏加快，%ANAME(対象)%像是感受到了什么，手上下套弄的频率也越来越快。眼睛一眨不眨的盯着我的阴茎。
+PRINTFORMW  下身享受着%ANAME(対象)%的快速套弄，我像是不断的追求刺激，阴茎不断的向前伸，几乎已经感受到了%ANAME(対象)%皮肤的温度和她喘息的热度。
+PRINTFORMW  一阵巨大的快感袭来，我抓住%ANAME(対象)%的肩膀，腥臭的精液一股脑的射到了%ANAME(対象)%白皙的脸上。
+PRINTFORMW  呼……呼……我喘着粗气看着被我颜射的%ANAME(対象)%，心里像是给高洁的莲花染上了别样的颜色一般舒爽。
+PRINTFORMW  %ANAME(対象)%似乎还没从被我颜射的事实中反应过来，随着喘息上下起伏的胸部，精液从额头划到鼻子，从鼻子划到嘴角。构成了一副邪魅娟丽的画卷。
+PRINTFORMW  半晌，一道咕咕的响声，把我从手交的余韵中拉回了现实。我以为是我没吃饭肚子发出的响声，结果看见坐在地上的依姬用袖子擦拭脸上精液的脸庞闪过一丝害羞的神色。
+PRINTFORMW  我顿时意识到%ANAME(対象)%我们俩都没有吃饭的事实，我收拾好现场，穿上内裤。主动拿出了随身携带的手帕，给%ANAME(対象)%擦拭着脸上的精液。
+PRINTFORMW  %ANAME(対象)%察觉到我的动作后，反抗似的扭动，但被我强行按住，一点点把精液擦拭干净。
+PRINTFORMW  擦拭完以后，我发现%ANAME(対象)%正用一种复杂的眼光看着我。我捏了捏她的脸蛋，%ANAME(対象)%作势欲打，但是被我一把抓住手，顺势拉了起来。
+PRINTFORML  别动，我们去吃饭吧，我肚子饿了。
+PRINTFORMW 「放开！我不去！」
+PRINTFORMW  %ANAME(対象)%听到我“邀请”她的话语，疯狂的想要挣脱。
+PRINTFORML  别闹了，走吧。
+PRINTFORMW  说完，我的手牢牢的抓住她的玉手，一拽，便把她揽到身前，牵着手强行要把她牵着走。
+PRINTFORMW  %ANAME(対象)%反抗了几下，发现自己并没有余力挣脱，狠狠的瞪着我。
+PRINTFORMW  我并没有甩头看她，只是默默的拉着她的手往前走去。
+PRINTFORMW  ……
+PRINTFORMW  …………
+PRINTFORMW  ………………
+PRINTFORMW  我们随便找了家小饭馆，默默得吃完饭，我便送%ANAME(対象)%回去了。
+PRINTFORMW  分别的时候，我感受到身后有一股寒意，狠狠侵蚀着我的后背。顿时心脏狂跳不止，回去后才长吁一口气。
+PRINTFORMW  感受到身体的疲惫，来不及细想今天发生的种种，沉沉的睡去了。
+
+
+CFLAG:対象:201 += 5
+KDVAR:対象:依姫_依姬的特殊训练 = 1
+	RETURN 1
+    ENDIF
+    ENDIF
+
+
+;---------------------
+;当前依姬堕落进度为10
+;一次剧情进展+5
+;---------------------
+
+
+

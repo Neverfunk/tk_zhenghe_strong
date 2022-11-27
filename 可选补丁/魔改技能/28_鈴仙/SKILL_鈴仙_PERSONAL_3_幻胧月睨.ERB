@@ -1,0 +1,109 @@
+;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_28_PERSONAL_3_EXIST
+RETURN 1
+
+@SKILL_28_PERSONAL_3_NAME
+RESULTS = 〖幻胧月睨〗(Lunatic Red Eyes)
+
+;レベルは1-5まで
+@SKILL_28_PERSONAL_3_LEVEL
+RETURN 3
+
+;対象選択
+@SKILL_28_PERSONAL_3_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+SIF BATTLE_COMMANDER_NUM:対象側 == 0
+	RETURN 0
+COMBAT_SKILL_TARGET = RAND:(BATTLE_COMMANDER_NUM:対象側)
+RETURN 1
+
+;発動判定
+@SKILL_28_PERSONAL_3_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1
+
+;発動テキストをオーバライドしたいときに。
+;「誰それのスキル発動！　○○した！」の「○○した！」の部分を実装したい場合は、
+;これじゃなくてINVOKEで書けばいいです。
+;@SKILL_28_PERSONAL_3_INVOKE_TEXT(発動者, スキル, ジャンル)
+;#DIM 発動者
+;#DIM スキル
+;#DIMS ジャンル
+
+;効果をここに記述
+@SKILL_28_PERSONAL_3_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 奪う兵数
+#DIM 君主
+対象側 = !発動側
+PRINTFORML  “利用这肮脏的战场上，所能利用的一切……”
+PRINTFORML  铃仙的双眼，发出诡异的赤红光芒。
+
+IF 対象部隊 >= 0
+	君主 = GET_COUNTRY_BOSS(対象勢力)
+ELSE
+	君主 = GET_COUNTRY_BOSS(CITY_OWNER:対象勢力)
+ENDIF
+
+奪う兵数 = MIN(GET_SOLDIER(対象勢力, 対象部隊) * RAND(1, 10) / 100, 50000)
+PRINTFORML \@ 君主 >= 0 ? %ANAME(君主)% # 敵人 \@軍隊的士兵、看到了%ANAME(発動者)%的眼睛后陷入狂乱、接連反叛了！
+CALL DECREASE_SOLDIER(対象勢力, 対象部隊, 奪う兵数, 1)
+CALL INCREASE_SOLDIER(発動勢力, 発動部隊, 奪う兵数, 1)
+
+PRINTFORML  “为了我能活下去…”
+PRINTFORML  铃仙平静的凝视着敌军，伸手比出枪形。
+PRINTFORML  “请你们去死吧。”
+
+PRINTFORML  一股极度扭曲的波长瞬间传遍了敌方部队……
+PRINTFORML  许多敌军被这股波长扫到的瞬间就七窍流血了。
+
+CALL DECREASE_SOLDIER(対象勢力, 対象部隊, RAND(100, 20000), 1)
+
+PRINTFORML  “砰。”
+
+@SKILL_28_PERSONAL_3_EXPLANATION
+RESULTS = 夺走敌方兵力；对敌部队造成伤害。
+
+@SKILL_28_PERSONAL_3_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 520

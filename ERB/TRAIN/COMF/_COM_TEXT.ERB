@@ -1,0 +1,608 @@
+﻿;地の文に関する処理
+
+;---------------------------------------------------------
+;コマンド実行前に表示される地の文の呼び出し
+;主に行動内容や状況等を記述する
+;---------------------------------------------------------
+@COM_TEXT_BEFORE
+;地の文が非表示なら戻る
+;SIF FLAG:0 == 0
+;	RETURN
+
+;口上表示
+CALL KOJO_COM_BEFORE
+
+;口上側の戻り値が1なら地の文はカットされる
+IF !RESULT
+	TRYCALLFORM COM_TEXT_BEFORE{SELECTCOM}
+ENDIF
+
+;---------------------------------------------------------
+;コマンド実行直後に表示される地の文の呼び出し
+;主に行動の結果を記述する
+;射精や絶頂に関連したメッセージもここで表示
+;何かメッセージを表示したら1を返す
+;---------------------------------------------------------
+@COM_TEXT_AFTER
+;地の文が非表示なら戻る
+;SIF FLAG:0 == 0
+;	RETURN
+
+RESULT = 0
+TRYCALLFORM COM_TEXT_AFTER{SELECTCOM}
+IF RESULT
+	;コマンド専用の地の文が定義されていれば戻る
+	RETURN 0
+ENDIF
+
+LOCAL:10 = 0
+
+;今ターンに絶頂したキャラの人数を数え、名前と最低強度を記録
+LOCAL:5 = 0
+LOCAL:6 = 0
+LOCAL:7 = 999
+LOCALS:1 = 
+LOCALS:2 = 
+FOR LOCAL:0, 0, CHARANUM
+	IF IS_PARTICIPATE_TRAIN(LOCAL:0) && !IS_ANIMAL(LOCAL:0)
+		;今回のＣＶＡＢＭの絶頂回数(NOWEX)の合計を取得
+		LOCAL:2 = SUM_NOWEX(LOCAL:0, 0, 0)
+
+		IF LOCAL:2 > 0
+			IF LOCAL:2 < LOCAL:7
+				LOCAL:7 = LOCAL:2
+			ENDIF
+
+			IF LOCAL:0 == MASTER
+				LOCAL:6 = 1
+			ELSE
+				IF LOCAL:5 == 1
+					LOCALS:2 = 和%ANAME(LOCAL:0)%
+				ELSE
+					LOCALS:1 = %ANAME(LOCAL:0)%
+				ENDIF
+				LOCAL:5 ++
+			ENDIF
+		ENDIF
+	ENDIF
+NEXT
+
+;一人以上絶頂した場合
+IF LOCAL:5 >= 1
+	IF LOCAL:5 >= 3
+		LOCALS:1 = %LOCALS:1%們
+	ELSE
+		LOCALS:1 = %LOCALS:1%%LOCALS:2%
+	ENDIF
+	;主人公が同時に絶頂した場合
+	IF LOCAL:6
+		LOCALS:0 = %ANAME(MASTER)%和
+		LOCALS:3 = 同時
+	ELSE
+		LOCALS:0 = 
+		LOCALS:3 = 
+	ENDIF
+
+	IF LOCAL:7 >= 8
+		LOCAL:10 = 1
+		PRINTFORML %LOCALS:0%%LOCALS:1%因為感受到了強烈的高潮数次後弓着背、身体就像是岸上的魚一樣跳動着…
+	ELSEIF LOCAL:7 >= 3
+		LOCAL:10 = 1
+		PRINTFORML %LOCALS:0%%LOCALS:1%%LOCALS:3%激烈的高潮了、流出了口水身体一陣痙攣…
+	ELSEIF LOCAL:7 >= 1
+		LOCAL:10 = 1
+		PRINTFORML %LOCALS:0%%LOCALS:1%%LOCALS:3%迎来了高潮身体一陣顫抖…
+	ENDIF
+
+;主人公だけが絶頂した場合
+ELSEIF LOCAL:6
+	;今回のＣＶＡＢＭの絶頂回数(NOWEX)の合計を取得
+	LOCAL:2 = SUM_NOWEX(MASTER, 0, 0)
+
+	IF LOCAL:2 >= 8
+		LOCAL:10 = 1
+		PRINTFORML %ANAME(MASTER)%因為感受到了強烈的高潮数次後弓着背、身体就像是岸上的魚一樣跳動着…
+	ELSEIF LOCAL:2 >= 3
+		LOCAL:10 = 1
+		PRINTFORML %ANAME(MASTER)%は激烈的高潮了、流出了口水身体一陣痙攣…
+	ELSEIF LOCAL:2 >= 1
+		LOCAL:10 = 1
+		PRINTFORML %ANAME(MASTER)%は迎来了高潮身体一陣顫抖…
+	ENDIF
+ENDIF
+
+FOR LOCAL:0, 0, CHARANUM
+	;番号LOCAL:0のキャラが射精した場合
+	IF IS_PARTICIPATE_TRAIN(LOCAL:0) && NOWEX:(LOCAL:0):射精 > 0
+
+		LOCAL:10 = 1
+
+		;コンドーム装着中
+		IF IS_EQUIP_PLAYER(LOCAL:0, 75)
+			SIF SOURCE:(LOCAL:0):快Ｐ == 0 && NOWEX:(LOCAL:0):Ｖ絶頂 + NOWEX:(LOCAL:0):Ａ絶頂 > 0
+				PRINTFORM 阴茎还没被碰到就已经射精了
+			PRINTFORML %ANAME(LOCAL:0)%以一种将避孕套冲破的气势射精了……
+			GOTO CUM_SKIP
+		ENDIF
+
+		IF STACK_SPERM_CHARA_NUM:(LOCAL:0):0 <= 0
+			SIF SOURCE:(LOCAL:0):快Ｐ == 0 && NOWEX:(LOCAL:0):Ｖ絶頂 + NOWEX:(LOCAL:0):Ａ絶頂 > 0
+				PRINTFORM 阴茎还没被碰到就已经射精了
+			;捕虜調教 or 捕虜逆調教
+			IF GROUPMATCH(FLAG:調教モード, 2, 4, 6, 7)
+				PRINTFORML %ANAME(LOCAL:0)%的精液弄脏了地板…
+			ELSE
+				PRINTFORML %ANAME(LOCAL:0)%的精液弄脏了%GET_GROUND_NAME(TFLAG:54)%…
+			ENDIF
+			GOTO CUM_SKIP
+		ENDIF
+
+		FOR LOCAL:5, 0, CUM_SLOT_NUM
+			;射精対象の人数を数え、必要な文字列を作成
+			LOCAL:2 = 0
+			LOCAL:3 = 2
+			LOCAL:4 = -1
+			;shitty animal logic. have to run through and count animals first to get apostrophe right.
+			FOR LOCAL:1, 0, STACK_SPERM_CHARA_NUM:(LOCAL:0):0
+				SIF STACK_SPERM_TO_MAP:(LOCAL:0):(LOCAL:1) != LOCAL:5
+					CONTINUE
+				LOCAL:4 = STACK_SPERM_CHARA_MAP:(LOCAL:0):(LOCAL:1)
+				SIF LOCAL:4 >= 0
+					LOCAL:2 ++
+				;対象の精愛Lvを判定(主人公が含まれているor逆調教なら-1に固定)
+				;★was: IF TCVAR:(LOCAL:0):(LOCAL:1) == MASTER || FLAG:調教モード == 4
+				;enabling MASTER's reaction to cum (LOCAL:3 text) depending on config
+				IF (!CONFIG:441 ? LOCAL:4 == MASTER # MASTER) || FLAG:調教モード == 4 || IS_ANIMAL(LOCAL:4)
+					LOCAL:3 = -1
+				ELSEIF LOCAL:3 >= 1 && ABL:(LOCAL:4):精愛 < 2
+					LOCAL:3 = 0
+				ELSEIF LOCAL:3 >= 2 && ABL:(LOCAL:4):精愛 < 5
+					LOCAL:3 = 1
+				ENDIF
+			NEXT
+			;射精対象が未設定
+			IF LOCAL:2 <= 0
+				CONTINUE
+			ELSE
+				SIF SOURCE:(LOCAL:0):快Ｐ == 0 && NOWEX:(LOCAL:0):Ｖ絶頂 + NOWEX:(LOCAL:0):Ａ絶頂 > 0
+					PRINTFORM 阴茎还没被碰到就已经射精了
+				;射精対象が４人以上
+				IF LOCAL:2 >= 2
+					LOCALS:1 = %ANAME(STACK_SPERM_CHARA_MAP:(LOCAL:0):0)%們
+				;射精対象が３人以下
+				ELSE
+					LOCALS:1 = %ANAME(STACK_SPERM_CHARA_MAP:(LOCAL:0):0)%
+				ENDIF
+				PRINTFORM %ANAME(LOCAL:0)%的精液向%LOCALS:1%
+
+				SELECTCASE LOCAL:5
+					CASE 1
+					PRINTL 的膣内射了進去…
+					;射精したキャラが獣変化中
+						IF (TALENT:(LOCAL):動物耳 || TALENT:(LOCAL):尾巴) && !IS_ANIMAL(LOCAL)
+							IF LOCAL:0 == MASTER
+								PRINTFORML 野獣本能帯来的膣内射精的喜悦、讓%ANAME(LOCAL:0)%的頭皮因為快感而発麻…
+						;好感度または従属度が1500以上
+							ELSEIF CFLAG:(LOCAL:0):好感度 >= 1500 || CFLAG:(LOCAL:0):従属度 >= 1500 || CFLAG:(LOCAL:4):支配度 >= 1500
+								PRINTFORML %ANAME(LOCAL:0)%受到野獣本能的支配、因為膣内射精的喜悦表情慢慢地舒緩了下来…
+							ELSE
+								PRINTFORML %ANAME(LOCAL:0)%無法抵抗野獣本能、因為膣内射精的喜悦身体止不住的顫抖…
+							ENDIF
+						ENDIF
+					;射精されたキャラが獣変化中
+						IF LOCAL:4 >= 0 && (TALENT:(LOCAL:4):動物耳 || TALENT:(LOCAL:4):尾巴)
+							IF LOCAL:4 == MASTER
+								PRINTFORML 野獣本能帯来的膣内射精的喜悦、讓%ANAME(LOCAL:4)%的頭皮因為快感而発麻…
+						;好感度または従属度が1500以上
+							ELSEIF CFLAG:(LOCAL:4):好感度 >= 1500 || CFLAG:(LOCAL:4):従属度 >= 1500 || CFLAG:(LOCAL:4):支配度 >= 1500
+								PRINTFORML %ANAME(LOCAL:4)%受到野獣本能的支配、因為膣内射精的喜悦表情慢慢地舒緩了下来…
+							ELSE
+								PRINTFORML %ANAME(LOCAL:4)%無法抵抗野獣本能、因為膣内射精的喜悦身体止不住的顫抖…
+							ENDIF
+						ENDIF
+					;射精されたキャラが妊娠中
+						IF LOCAL:4 >= 0 && TALENT:(LOCAL:4):妊娠
+							PRINTFORML %ANAME(LOCAL:0)%的精液、填滿了已経懷孕的%ANAME(LOCAL:4)%的膣内…
+						ENDIF
+						IF LOCAL:4 >= 0 && (HAS_SAME_FATHER(LOCAL:0, LOCAL:4) || HAS_SAME_MOTHER(LOCAL:0, LOCAL:4))
+							PRINTFORML 有著血縁関係的%ANAME(LOCAL:0)%的精液、填滿了%ANAME(LOCAL:4)%的膣内……
+						ELSEIF LOCAL:4 >= 0 && IS_FATHER(LOCAL:4, LOCAL:0)
+							PRINTFORML 身為父親的%ANAME(LOCAL:0)%的精液、填滿了%ANAME(LOCAL:4)%的膣内……
+						ELSEIF LOCAL:4 >= 0 && IS_MOTHER(LOCAL:0, LOCAL:4)
+							PRINTFORML 身為人子的%ANAME(LOCAL:0)%的精液、填滿了%ANAME(LOCAL:4)%的膣内……
+						ENDIF
+
+						IF LOCAL:4 >= 0 && GETBIT(TALENT:(LOCAL:4):淫乱系, 素質_淫乱_浮気癖)
+							IF LOCAL:0 == MASTER
+								PRINTFORML 出軌上癮的%ANAME(LOCAL:4)%、現在即使被%ANAME(LOCAL:0)%膣内射精也興奮不起来了……
+							ELSE
+								PRINTFORML 出軌上癮的%ANAME(LOCAL:4)%、因為%ANAME(LOCAL:0)%的膣内射精而更加興奮了……
+							ENDIF
+						ENDIF
+
+					;捕虜調教のメインターゲット
+						IF FLAG:調教モード == 2 && FINDELEMENT(PRISONER_TARGET, LOCAL:4) != -1 && !((TCVAR:(LOCAL:4):52) || (TCVAR:(LOCAL:4):53 == 1))
+							IF IS_ANIMAL(LOCAL:0)
+								IF GETBIT(TALENT:(LOCAL:4):淫乱系, 素質_淫乱_雌犬)
+									SELECTCASE TALENT:(LOCAL:0):動物
+										CASE 動物_犬
+											PRINTFORML 完全中意于和野獣交尾的%ANAME(LOCAL:4)%在狗的精子射入的時候扭着腰晃動着屁股、糾纏着想再来一次
+										CASE 動物_豚
+											PRINTFORML 完全中意于和家畜交尾的%ANAME(LOCAL:4)%在豬的精子射入的時候扭着腰晃動着屁股、糾纏着想再来一次
+										CASE 動物_馬
+											PRINTFORML 完全中意于和種馬交尾的%ANAME(LOCAL:4)%在馬的精子射入的時候扭着腰晃動着屁股、糾纏着想再来一次
+									ENDSELECT
+								ELSE
+									SELECTCASE TALENT:(LOCAL:0):動物
+										CASE 動物_犬
+											PRINTFORML 感覚到狗那兇暴的肉棒在子宮内注入繁殖力旺盛的精子的熱度、讓%ANAME(LOCAL:4)%発出了野獣一般的悲鳴
+										CASE 動物_豚
+											PRINTFORML 感覚到豬那螺旋状的肉棒在子宮内注入家畜的精子的熱度、讓%ANAME(LOCAL:4)%発出了野獣一般的悲鳴
+										CASE 動物_馬
+											PRINTFORML 馬那巨大的肉棒圧迫着子宮直接注入了精子、讓%ANAME(LOCAL:4)%発出了野獣一般的悲鳴
+									ENDSELECT
+								ENDIF
+							ELSE
+								IF RAND:3 == 0
+									IF TALENT:(LOCAL:4):隷属 && (LOCAL:0 == MASTER)
+										PRINTFORML 作為奴隸被調教的非常完美的%ANAME(LOCAL:4)%在接受了%ANAME(LOCAL:0)%的腔内射精之後、説着感謝賞賜的話
+									ELSEIF TALENT:(LOCAL:4):服従 && (LOCAL:0 == MASTER)
+										PRINTFORML 被調教成奴隸的%ANAME(LOCAL:4)%在%ANAME(LOCAL:0)%腔内射精後顫抖着呻吟着、忘記了応該要説的感謝賞賜的話
+									ELSEIF TALENT:(LOCAL:4):正妻 && (LOCAL:0 == MASTER)
+										PRINTFORML 明明是%ANAME(LOCAL:0)%的伴侶卻被当做俘虜侵犯和腔内射精的事讓%ANAME(LOCAL:4)%完全無法接受
+									ELSEIF TALENT:(LOCAL:4):親愛 && (LOCAL:0 == MASTER)
+										PRINTFORML 被深愛着的%ANAME(LOCAL:0)%当做俘虜侵犯和腔内射精的事讓%ANAME(LOCAL:4)%流出了泪水
+									ELSEIF TALENT:(LOCAL:4):恋慕 && (LOCAL:0 == MASTER)
+										PRINTFORML 被愛慕着的%ANAME(LOCAL:0)%当做俘虜侵犯和腔内射精的事讓%ANAME(LOCAL:4)%流出了泪水
+									ELSEIF TALENT:(LOCAL:4):親友 && (LOCAL:0 == MASTER)
+										PRINTFORML 被当做親友的%ANAME(LOCAL:0)%所逮捕、侵犯和腔内射精的事讓%ANAME(LOCAL:4)%至今還無法接受
+									ELSEIF TALENT:(LOCAL:4):恋人 && (LOCAL:0 == MASTER)
+										PRINTFORML 被已経互訴衷腸的%ANAME(LOCAL:0)%当做俘虜侵犯和腔内射精的事讓%ANAME(LOCAL:4)%無法忍受
+									ELSEIF TALENT:(LOCAL:4):合意 && (LOCAL:0 == MASTER)
+										PRINTFORML 被以前許可了触碰自己身体的%ANAME(LOCAL:0)%当做俘虜侵犯和腔内射精的事讓%ANAME(LOCAL:4)%後悔過去做出的選択
+									ELSEIF TALENT:(LOCAL:4):小孩人質
+										PRINTFORML 孩子被当做人質的%ANAME(LOCAL:4)%完全沒有拒絶被腔内射精的余地
+									ELSEIF TALENT:(LOCAL:4):妊娠
+										PRINTFORML 身為俘虜的%ANAME(LOCAL:4)%即使懷着孕但還是被毫不留情的腔内射精了、孕育着孩子的子宮内被射進了大量精子
+									ELSEIF TALENT:(LOCAL:4):無接吻経験
+										PRINTFORML 身為俘虜的%ANAME(LOCAL:4)%接受不了還沒有接吻経験就被強行腔内射精的現実
+									ELSEIF TALENT:(LOCAL:4):討厭男人 && ((TALENT:(LOCAL:0):性別 == 0) || (TALENT:(LOCAL:0):性別 >= 3))
+										PRINTFORML %ANAME(LOCAL:4)%頑強的抵抗着男人的侵犯、但是身為俘虜無法阻止直接被腔内射精了
+									ELSEIF TALENT:(LOCAL:4):人気
+										PRINTFORML 外面的人気在牢獄中毫無用処、被腔内射精後子宮傳来的熱度讓%ANAME(LOCAL:4)%領悟到了這一点
+									ELSEIF FIND_PASSIVE_SKILL(LOCAL:4, "实干家")
+										PRINTFORML 這個世界存在着不管怎麼努力無法改変的事、被腔内射精後子宮傳来的熱度讓%ANAME(LOCAL:4)%領悟到了這一点
+									ENDIF
+								ELSEIF RAND:2 == 0
+									IF !IS_FALLEN(LOCAL:4) || (IS_LOVER(LOCAL:4) && !(LOCAL:0 == MASTER))
+										PRINTFORML 雖然%ANAME(LOCAL:4)%拼命的拒絶着、但是身為俘虜沒有討價還價的權利直接被腔内射精了
+									ENDIF
+								ELSE
+									IF GETBIT(TALENT:(LOCAL:4):淫乱系, 素質_淫乱_淫乱)
+										PRINTFORML 儘管%ANAME(LOCAL:4)%身為俘虜、但是非常淫乱的沈醉在了被腔内射精的快感之中
+									ELSEIF TALENT:(LOCAL:4):接受快感
+										PRINTFORML 子宮被精子充満的快感讓%ANAME(LOCAL:4)%毫不顧忌的高声呻吟着
+									ELSEIF TALENT:(LOCAL:4):否定快感
+										PRINTFORML 子宮被精子蹂躙的感覚讓否定快感的%ANAME(LOCAL:4)%圧抑着呻吟声
+									ELSEIF TALENT:(LOCAL:4):自尊心高
+										IF LOCAL:4 >= 0 && IS_OVULATION(LOCAL:4)
+											PRINTFORML 自尊心很強的%ANAME(LOCAL:4)%因為自己処在危險日中非常坦率的請求着不要射在裡面、但是身為俘虜沒有討價還價的權利
+										ELSE
+											PRINTFORML 即使被囚禁也不讓自己暴露出醜態、被腔内射精的%ANAME(LOCAL:4)%努力保持着平静
+										ENDIF
+									ENDIF
+								ENDIF
+							ENDIF
+						ENDIF
+						SIF LOCAL:4 >= 0 && GETBIT(TALENT:(LOCAL:0):淫乱系, 素質_淫乱_濃厚精液)
+							PRINTFORML %ANAME(LOCAL:0)%的特濃且大量的精液、讓%ANAME(LOCAL:4)%翻起了白眼…
+						SIF LOCAL:4 >= 0 && GETBIT(TALENT:(LOCAL:4):淫乱系, 素質_淫乱_孕みたがり)
+							PRINTFORML %ANAME(LOCAL:4)%沈醉在会懷上孩子的快感之中…
+						SIF LOCAL:4 >= 0 && GETBIT(TALENT:(LOCAL:4):淫乱系, 素質_淫乱_生ハメ依存)
+							PRINTFORML %ANAME(LOCAL:4)%品味着被中出的快感并沈醉其中…
+						SIF LOCAL:4 >= 0 && GETBIT(TALENT:(LOCAL:4):淫乱系, 素質_淫乱_良質母胎)
+							PRINTFORML 成為了苗床的%ANAME(LOCAL:4)%的子宮、因為被膣内射精而強烈地蠢動着…
+						SIF LOCAL:4 >= 0 && TCVAR:(LOCAL:4):60
+							PRINTFORML 在媚薬的效果下、%ANAME(LOCAL:4)%因為被膣内射精的快感在高声呻吟的同時還不停扭動着腰部…
+						SIF LOCAL:4 >= 0 && TCVAR:(LOCAL:4):67
+							PRINTFORML 因為麻薬陷入了幻覚的%ANAME(LOCAL:4)%、因為被膣内射精的快感在高声呻吟的同時還不停扭動着腰部…
+						SIF LOCAL:4 >= 0 && CFLAG:(LOCAL:4):排卵誘発剤
+							PRINTFORML 因為薬物的效果更容易懷孕的%ANAME(LOCAL:4)%的子宮内、大量的精子聚集在卵子周囲…
+						SIF LOCAL:4 >= 0 && TFLAG:69
+							PRINTFORML 在瀰漫着的桃源香中、被膣内射精的快感傳遍了籠罩在薄霧下的%ANAME(LOCAL:4)%的頭腦和身体…
+						SIF LOCAL:4 >= 0 && IS_OVULATION(LOCAL:4)
+							PRINTFORML 処於危險日的%ANAME(LOCAL:4)%的子宮、被注入了無数精子…
+					CASE 2
+						PRINTL 的腸内射了進去…
+						IF LOCAL:3 == 2
+							PRINTFORML %LOCALS:1%的肛内、就像是貪求着更多精液的射入一般下流的反復收縮着
+						ENDIF
+						IF GETBIT(TALENT:(LOCAL:4):淫乱系, 素質_淫乱_尻穴狂い)
+							PRINTFORML 完全性器化的淫肛被肉棒蹂躙射入精子的感触、讓%LOCALS:1%因為強烈的背德感而非常満足…
+						ENDIF
+						IF GETBIT(TALENT:(LOCAL:4):淫乱系, 素質_淫乱_生ハメ依存)
+							PRINTFORML %ANAME(LOCAL:4)%、品味着無套直接被腸内射精的快感并沈醉其中…
+						ENDIF
+						IF LOCAL:4 >= 0 && TCVAR:(LOCAL:4):60
+							PRINTFORML 在媚薬的效果下、%ANAME(LOCAL:4)%因為被肛内射精的快感在高声呻吟的同時還不停扭動着腰部…
+						ENDIF
+						IF LOCAL:4 >= 0 && TCVAR:(LOCAL:4):67
+							PRINTFORML 因為麻薬陷入了幻覚的%ANAME(LOCAL:4)%、因為被肛内射精的快感在高声呻吟的同時還不停扭動着腰部…
+						ENDIF
+						IF LOCAL:4 >= 0 && CFLAG:(LOCAL:4):排卵誘発剤
+							PRINTFORML 因為薬物的效果更容易懷孕的%ANAME(LOCAL:4)%的子宮、感受到被肛内射精的快感也開始蠢動起来…
+						ENDIF
+						IF LOCAL:4 >= 0 && TFLAG:69
+							PRINTFORML 在瀰漫着的桃源香中、被肛内射精的快感傳遍了籠罩在薄霧下的%ANAME(LOCAL:4)%的頭腦和身体…
+						ENDIF
+					CASE 3
+						PRINTL 的手中迸発…
+						IF LOCAL:3 == 2
+							PRINTFORML %LOCALS:1%帯着出神的表情舔取着手中的精液…
+						ENDIF
+					CASE 4
+						PRINTL 的口中迸発…
+						IF TALENT:(LOCAL:4):自尊心高
+							IF TALENT:(LOCAL:4):恋慕 && (LOCAL:0 == MASTER)
+								PRINTFORML %LOCALS:1%出神地含着肉棒、用充満着自信的双眼凝視着
+							ELSEIF TALENT:(LOCAL:4):服従 && (LOCAL:0 == MASTER)
+								PRINTFORML %LOCALS:1%緊盯着讓自己屈服的肉棒、絶対不会讓肉棒離開自己灼熱的視線
+							ELSE
+								PRINTFORML %LOCALS:1%一辺含着肉棒一辺向上緊盯着
+							ENDIF
+						ENDIF
+						IF LOCAL:3 == 2
+							IF LOCAL:2 >= 2
+								PRINTFORML %LOCALS:1%爭着把射出来的精液舔干浄了…
+							ELSE
+								PRINTFORML %LOCALS:1%把射出来的精液一滴不剩的吸在口中、直接呑了下去…
+							ENDIF
+						ELSEIF LOCAL:3 == 1
+							IF LOCAL:2 >= 2
+								PRINTFORML %LOCALS:1%一起把射出来的精液舔干浄了…
+							ELSE
+								PRINTFORML %LOCALS:1%把射出来的精液呑了下去…
+							ENDIF
+						ELSEIF LOCAL:3 == 0 && LOCAL:2 == 1
+							PRINTFORML %LOCALS:1%沒能把精液呑下去、吐了出去…
+						ENDIF
+					CASE 5
+						PRINTL 的胸部塗抹了白濁…
+						IF LOCAL:3 == 2
+							PRINTFORML %ANAME(LOCAL:4)%用手指刮取了掛在胸部的精液、当做美味舔舐着…
+						ENDIF
+					CASE 6
+						PRINTL 的脚進行了玷汚…
+						IF LOCAL:3 == 2
+							PRINTFORML %ANAME(LOCAL:4)%愉快的蹭着掛在脚上的精液…
+						ENDIF
+					CASE 7
+						PRINTL 的尾巴進行了玷汚…
+					CASE 8
+						PRINTL 的臉上落了下去…
+						IF TALENT:(LOCAL:4):自尊心高
+							IF CFLAG:(LOCAL:4):2 >= 1500 || CFLAG:(LOCAL:4):4 >= 1500
+								PRINTFORML %LOCALS:1%被顔射的屈辱感、已経完全変成了満足感
+							ELSE
+								PRINTFORML %LOCALS:1%的臉上被掛上精液後、目光変得有些尖鋭了
+							ENDIF
+						ELSEIF TALENT:(LOCAL:4):自尊心低
+							PRINTFORML %LOCALS:1%閉着眼睛、承受着精液洗臉
+						ENDIF
+						IF LOCAL:3 == 2
+							PRINTFORML %LOCALS:1%用手指刮取了粘在臉上的精液、当做美味舔舐着…
+						ENDIF
+					CASE 9
+						PRINTL 的頭髮黏了上去…
+					CASE 10
+						PRINTL 的腋下塗抹了白濁…
+					CASE 11
+						IF TALENT:(LOCAL:4):美臀
+							PRINTL 的美麗的蜜桃臀塗抹了白濁…
+						ELSEIF GET_HIPSIZE(LOCAL:4) >= 1
+							PRINTL 的漂亮豊満的臀部塗抹了白濁…
+						ELSE
+							PRINTL 的臀部塗抹了白濁…
+						ENDIF
+						IF LOCAL:3 == 2
+							PRINTFORML %LOCALS:1%在精液掛在臀部的時候、兩辦臀肉不停的微顫着…
+						ENDIF
+					CASE 12
+						PRINTL 拿着的飛機杯中射了進去…
+					CASE 13
+						PRINTL 操縱的触手飛機杯中射了出来…
+					CASE 14
+						PRINTL 的膀胱中射了进去…
+					CASEELSE
+						PRINTL 飛射了過去…
+				ENDSELECT
+			ENDIF
+		NEXT
+		$CUM_SKIP
+
+		IF TCVAR:(LOCAL:0):51
+			IF TCVAR:(LOCAL:0):52
+				PRINTFORML %ANAME(LOCAL:0)%超過極限的射精後、失去了意識小声呻吟着
+			ELSE
+				IF LOCAL:0 == MASTER
+					PRINTFORML %ANAME(LOCAL:0)%超過極限的射精後忍不住発出了呻吟
+				ELSE
+					PRINTFORML %ANAME(LOCAL:0)%超過極限的射精後痛苦的呻吟着
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+
+	;番号LOCAL:0のキャラが噴乳した場合
+	IF IS_PARTICIPATE_TRAIN(LOCAL:0) && NOWEX:(LOCAL:0):噴乳 > 0
+		;触手搾乳中
+		IF (SELECTCOM == 207 && IS_MTAR(LOCAL:0)) || IS_EQUIP_TARGET(LOCAL:0, 207)
+			IF NOWEX:(LOCAL:0):噴乳 >= 2
+				PRINTFORML %ANAME(LOCAL:0)%的母乳、在吸附在乳頭上的触手中大量噴出…
+			ELSE
+				PRINTFORML %ANAME(LOCAL:0)%的母乳、在吸附在乳頭上的触手中噴了出来…
+			ENDIF
+		ELSE
+			IF NOWEX:(LOCAL:0):噴乳 >= 2
+				PRINTFORML %ANAME(LOCAL:0)%的乳頭射出了大量的母乳…
+			ELSE
+				PRINTFORML %ANAME(LOCAL:0)%的乳頭射出了母乳…
+			ENDIF
+		ENDIF
+	ENDIF
+
+	;番号LOCAL:0のキャラが潮吹きした場合
+	IF IS_PARTICIPATE_TRAIN(LOCAL:0) && NOWEX:(LOCAL:0):潮吹 > 0
+		;顔面騎乗中ならターゲットを取得
+		IF GROUPMATCH(SELECTCOM, 101, 102, 105) && IS_MPLY(LOCAL:0)
+			LOCAL:7 = MTAR:0
+		ELSE
+			LOCAL:7 = SEARCH_EQUIP(101, LOCAL:0, -1)
+			IF LOCAL:7 < 0
+				LOCAL:7 = SEARCH_EQUIP(102, LOCAL:0, -1)
+				IF LOCAL:7 < 0
+					LOCAL:7 = SEARCH_EQUIP(105, LOCAL:0, -1)
+				ENDIF
+			ENDIF
+			IF LOCAL:7 >= 0
+				LOCAL:7 = MEQUIP_TARGET:(LOCAL:5):0
+			ENDIF
+		ENDIF
+
+		LOCAL:5 = HAS_PENIS(LOCAL:0) && NOWEX:(LOCAL:0):Ｃ絶頂 >= 1
+		LOCAL:6 = HAS_VAGINA(LOCAL:0)
+		IF LOCAL:5
+			PRINTFORML %ANAME(LOCAL:0)%潮吹後肉棒和身体止不住的顫抖…
+		ELSE
+			IF LOCAL:7 >= 0
+				PRINTFORML %ANAME(LOCAL:0)%的小穴内噴出了大量的愛液、射到了%ANAME(LOCAL:7)%的臉上…
+			ELSE
+				PRINTFORML %ANAME(LOCAL:0)%的小穴一陣收縮、潮吹了…
+			ENDIF
+		ENDIF
+	ENDIF
+
+	;番号LOCAL:0のキャラがおもらしした場合
+	IF IS_PARTICIPATE_TRAIN(LOCAL:0) && TCVAR:(LOCAL:0):0
+		IF HAS_PENIS(LOCAL:0)
+			LOCALS:0 = %BAR_NAME(LOCAL:0)%
+		ELSEIF HAS_VAGINA(LOCAL:0)
+			LOCALS:0 = %STR_BODY("膣", LOCAL:0)%
+		ELSE
+			LOCALS:0 = 股間
+		ENDIF
+;2015 08 21 ここのLOCAL:7は（上の表記を参照する限りでは)
+		LOCAL:7 = -1
+		IF !HAS_PENIS(LOCAL:0)
+			;顔面騎乗中ならターゲットを取得
+			IF GROUPMATCH(SELECTCOM, 101, 102, 105) && IS_MPLY(LOCAL:0)
+				LOCAL:7 = MTAR:0
+			ELSE
+				LOCAL:7 = SEARCH_EQUIP(101, LOCAL:0, -1)
+				IF LOCAL:7 < 0
+					LOCAL:7 = SEARCH_EQUIP(102, LOCAL:0, -1)
+					IF LOCAL:7 < 0
+						LOCAL:7 = SEARCH_EQUIP(105, LOCAL:0, -1)
+					ENDIF
+				ENDIF
+				IF LOCAL:7 >= 0
+					LOCAL:7 = MEQUIP_TARGET:(LOCAL:5):0
+				ENDIF
+			ENDIF
+		ENDIF
+
+		SELECTCASE TCVAR:(LOCAL:0):0
+			;尿意がある状態で絶頂強度の合計が4以上
+			CASE 1
+				;大量
+				IF TCVAR:(LOCAL:0):1 >= 2
+					IF NOWEX:(LOCAL:0):射精 >= 1
+						PRINTFORML 結束射精的%ANAME(LOCAL:0)%的%LOCALS:0%溢出了大量的尿液…
+					ELSEIF LOCAL:7 >= 0
+						PRINTFORML 顫抖着高潮的%ANAME(LOCAL:0)%在%ANAME(LOCAL:7)%的臉上漏出了大量的尿液…
+					ELSE
+						PRINTFORML 顫抖着高潮的%ANAME(LOCAL:0)%的%LOCALS:0%溢出了大量的尿液…
+					ENDIF
+				;通常
+				ELSE
+					IF NOWEX:(LOCAL:0):射精 >= 1
+						PRINTFORML 結束射精的%ANAME(LOCAL:0)%的%LOCALS:0%漏出了尿液…
+					ELSEIF LOCAL:7 >= 0
+						PRINTFORML 顫抖着高潮的%ANAME(LOCAL:0)%在%ANAME(LOCAL:7)%的臉上漏出了尿液…
+					ELSE
+						PRINTFORML 顫抖着高潮的%ANAME(LOCAL:0)%的%LOCALS:0%漏出了尿液…
+					ENDIF
+				ENDIF
+
+			;尿意が高い状態で絶頂
+			CASE 2
+				IF NOWEX:(LOCAL:0):射精 >= 1
+					PRINTFORML 結束射精的%ANAME(LOCAL:0)%的%LOCALS:0%溢出了大量的尿液…
+				ELSEIF LOCAL:7 >= 0
+					PRINTFORML 迎来高潮的%ANAME(LOCAL:0)%在%ANAME(LOCAL:7)%的臉上漏出了大量的尿液…
+				ELSE
+					PRINTFORML %ANAME(LOCAL:0)%高潮的同時從%LOCALS:0%漏出了大量的尿液…
+				ENDIF
+
+			;尿意の限界
+			CASE 3
+				IF LOCAL:7 >= 0
+					PRINTFORML %ANAME(LOCAL:0)%無法忍住尿意、在%ANAME(LOCAL:7)%的臉上漏出了大量的尿液…
+				ELSE
+					PRINTFORML 無法忍耐住尿意的%ANAME(LOCAL:0)%的%LOCALS:0%漏出了大量的尿液…
+				ENDIF
+
+			;恐怖による失禁
+			CASE 4
+				PRINTL 
+				PRINTFORM %ANAME(LOCAL:0), 8%:
+				SETCOLOR カラー_注意
+				IF TCVAR:(LOCAL:0):1 >= 2
+					PRINTL 大量失禁
+				ELSE
+					PRINTL 失禁
+				ENDIF
+				RESETCOLOR
+				PRINTL 
+				;大量
+				IF TCVAR:(LOCAL:0):1 >= 2
+					PRINTFORML 在恐懼中顫抖的%ANAME(LOCAL:0)%的%LOCALS:0%漏出了大量的尿液…
+				;通常
+				ELSE
+					PRINTFORML 在恐懼中顫抖的%ANAME(LOCAL:0)%的%LOCALS:0%漏出了尿液…
+				ENDIF
+		ENDSELECT
+	ENDIF
+NEXT
+
+FOR LOCAL:0, 0, CHARANUM
+	;尿意が高い場合
+	IF IS_PARTICIPATE_TRAIN(LOCAL:0) && TCVAR:(LOCAL:0):54 >= 3000
+		PRINTFORML %ANAME(LOCAL:0)%因為尿意有些難為情的夾緊了双腿…
+	ENDIF
+NEXT
+
+FOR LOCAL:0, 0, CHARANUM
+	SIF IS_PARTICIPATE_TRAIN(LOCAL:0) && TCVAR:(LOCAL:0):催眠中 > 0
+		PRINTFORML 催被催眠的%ANAME(LOCAL:0)%双眼変得十分空虚…
+NEXT
+
+RETURN LOCAL:10
+
+;---------------------------------------------------------
+;コマンド実行直前に表示される地の文の呼び出し
+;主にキャラの反応などを記述する
+;---------------------------------------------------------
+@COM_TEXT_LAST
+;地の文が非表示なら戻る
+;SIF FLAG:0 == 0
+;	RETURN 0
+
+TRYCCALLFORM COM_TEXT_LAST{SELECTCOM}
+	PRINTL 
+CATCH
+	;コマンド個別の反応が定義されていなければTEQUIPの地の文を呼び出す
+	;CALL COM_TEXT_LAST_EQUIP
+ENDCATCH
+
+

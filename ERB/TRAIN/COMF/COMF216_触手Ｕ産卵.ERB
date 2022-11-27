@@ -1,0 +1,881 @@
+﻿;触手産卵
+
+;-------------------------------------------------
+;コマンド名称
+;-------------------------------------------------
+@COM_NAME216
+LOCALS:0 = 触手Ｕ産卵
+
+RESULTS:0 = %LOCALS:0%(主動)
+RESULTS:1 = %LOCALS:0%(被役)
+RESULTS:2 = %LOCALS:0%(使役)
+RESULTS:3 = %LOCALS:0%(被動)
+RESULTS:4 = %LOCALS:0%(使役)
+RESULTS:5 = %LOCALS:0%(展示)
+
+;-------------------------------------------------
+;選択可否判定
+;-------------------------------------------------
+@COM_ABLE216
+;共通部分
+CALL COM_ABLE_COMMON(216)
+SIF RESULT == 0
+	RETURN 0
+;プレイヤーは最大で1人まで
+SIF MPLY_NUM <= 0 || MPLY_NUM > 1
+	RETURN 0
+;ターゲットは1人以上
+SIF MTAR_NUM <= 0
+	RETURN 0
+;プレイヤーが行動不能なら不可
+SIF !IS_PLAYABLE(MPLY:0) && !FLAG:RECHECKING
+	RETURN 0
+;プレイヤーが触手召喚中でないなら不可
+SIF !IS_EQUIP_PLAYER(MPLY:0, 200)
+	RETURN 0
+;全てのターゲットについて判定
+FOR LOCAL:0, 0, MTAR_NUM
+	;ターゲットのＵが塞がっているなら不可(プレイヤーからターゲットへの触手挿入中は可)
+	SIF IS_U_HOLD(MTAR:(LOCAL:0)) && SEARCH_EQUIP(215, MPLY:0, MTAR:(LOCAL:0)) == -1
+		RETURN 0
+	;既に触手妊娠中なら不可
+	SIF TALENT:(MTAR:(LOCAL:0)):Ｕ触手妊娠 && !FLAG:RECHECKING
+		RETURN 0
+NEXT
+RETURN 1
+
+;-------------------------------------------------
+;メイン処理
+;-------------------------------------------------
+@COM216
+;実行判定
+CALL COM_ORDER_COMMON
+SIF RESULT == 0
+	RETURN 0
+
+;●プレイヤーについて処理
+EXP:(MPLY:0):性技経験値 += 1
+EXP:(MPLY:0):妖術経験値 += 1
+EXP:(MPLY:0):触手経験値 += 1
+
+SOURCE:(MPLY:0):嗜虐 = 100
+SOURCE:(MPLY:0):逸脱 = 150
+SOURCE:(MPLY:0):触手 = 200
+SOURCE:(MPLY:0):性行動 = 180
+
+;主導権に応じた優越・屈従のソース追加
+CALL ADD_SOURCE_INITIATIVE_U(MPLY:0, 170, 30)
+
+;●全てのターゲットについて処理
+FOR LOCAL:0, 0, MTAR_NUM
+	LOCAL:2 = MTAR:(LOCAL:0)
+
+	EXP:(LOCAL:2):触手経験値 += 2
+
+	SOURCE:(LOCAL:2):快Ｕ = SENSE_HOUSHI(MPLY:0, LOCAL:2, 500 + ABL:(MPLY:0):妖術 * 6) + (GETBIT(TALENT:(LOCAL:2):淫乱系, 素質_淫乱_苗床) * 1000)
+	SOURCE:(LOCAL:2):逸脱 = 1500 - (GETBIT(TALENT:(LOCAL:2):淫乱系, 素質_淫乱_苗床) * 500)
+	SOURCE:(LOCAL:2):触手 = 1500 + (GETBIT(TALENT:(LOCAL:2):淫乱系, 素質_淫乱_苗床) * 1500)
+	SOURCE:(LOCAL:2):性行動 = 450 + (GETBIT(TALENT:(LOCAL:2):淫乱系, 素質_淫乱_苗床) * 450)
+
+	;主導権に応じた優越・屈従のソース追加
+	CALL ADD_SOURCE_INITIATIVE_U(LOCAL:2, 60, 120)
+
+	;基本処理
+	CALL COM_COMMON216(LOCAL:2)
+
+	TALENT:(LOCAL:2):Ｕ触手妊娠 = 1
+
+	;触手Ｖ産卵したキャラのIDを記録
+	CFLAG:(LOCAL:2):触手Ｕ産卵実行者 = GET_ID(MPLY:0)
+
+NEXT
+
+;主導度変化基準値
+TFLAG:49 = 2
+
+;倒錯度変化基準値
+TFLAG:50 = 10
+
+;レズ・ＢＬ経験基準値
+TFLAG:51 = 1
+
+RETURN 1
+
+;--------------------------------------------------------
+;ターゲットに対する諸々の処理
+;--------------------------------------------------------
+@COM_COMMON216(ARG:0)
+SELECTCASE ABL:(ARG:0):Ｕ感
+	CASE 0
+		SOURCE:(ARG:0):苦痛 += 800
+	CASE 1
+		SOURCE:(ARG:0):苦痛 += 500
+	CASE 2
+		SOURCE:(ARG:0):苦痛 += 300
+ENDSELECT
+
+IF PALAM:(ARG:0):潤滑 < PALAMLV:1
+	TIMES SOURCE:(ARG:0):快Ｕ, 0.05
+	SOURCE:(ARG:0):苦痛 = SOURCE:(ARG:0):苦痛 * 4 + 1000
+ELSEIF PALAM:(ARG:0):潤滑 < PALAMLV:3
+	TIMES SOURCE:(ARG:0):快Ｕ, 0.20
+	SOURCE:(ARG:0):苦痛 = SOURCE:(ARG:0):苦痛 * 2 + 300
+ELSEIF PALAM:(ARG:0):潤滑 < PALAMLV:5
+	TIMES SOURCE:(ARG:0):快Ｕ, 0.60
+	TIMES SOURCE:(ARG:0):苦痛, 1.00
+ELSEIF PALAM:(ARG:0):潤滑 < PALAMLV:7
+	TIMES SOURCE:(ARG:0):快Ｕ, 0.85
+	TIMES SOURCE:(ARG:0):苦痛, 0.70
+ELSE
+	TIMES SOURCE:(ARG:0):快Ｕ, 1.00
+	TIMES SOURCE:(ARG:0):苦痛, 0.50
+ENDIF
+
+IF TALENT:(ARG:0):体格 == 体格_小柄
+	TIMES SOURCE:(ARG:0):苦痛, 1.50
+ENDIF
+
+IF ARG:0 != MASTER
+	IF !(TALENT:(ARG:0):恋慕 || TALENT:(ARG:0):親友)
+		IF TALENT:(ARG:0):貞操観念
+			IF TALENT:(ARG:0):処女
+				SOURCE:(ARG:0):反感 = 5000
+			ELSE
+				SOURCE:(ARG:0):反感 = 1000
+			ENDIF
+		ELSEIF TALENT:(ARG:0):不在乎貞操
+			IF TALENT:(ARG:0):処女
+				SOURCE:(ARG:0):反感 = 300
+			ENDIF
+		ELSE
+			IF TALENT:(ARG:0):処女
+				SOURCE:(ARG:0):反感 = 2500
+			ENDIF
+		ENDIF
+		IF TALENT:(ARG:0):恋人
+			TIMES SOURCE:(ARG:0):反感, 0.10
+		ENDIF
+	ENDIF
+
+	;好感度・従属度・支配度の影響
+	LOCAL:0 = MAX(CFLAG:(ARG:0):2, CFLAG:(ARG:0):4, CFLAG:(ARG:0):5)
+	IF LOCAL:0 < 100
+		TIMES SOURCE:(ARG:0):反感, 1.00
+	ELSEIF LOCAL:0 < 300
+		TIMES SOURCE:(ARG:0):反感, 0.90
+	ELSEIF LOCAL:0 < 500
+		TIMES SOURCE:(ARG:0):反感, 0.80
+	ELSEIF LOCAL:0 < 800
+		TIMES SOURCE:(ARG:0):反感, 0.40
+	ELSEIF LOCAL:0 < 1500
+		TIMES SOURCE:(ARG:0):反感, 0.15
+	ELSE
+		SOURCE:(ARG:0):反感 = SOURCE:(ARG:0):反感 / ((LOCAL:0 - 1500) / 50 + 10)
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;固有の実行判定
+;-------------------------------------------------
+@COM_ORDER_PLAYER216(ARG:0)
+;実行値の設定
+TCVAR:(ARG:0):25 = 160
+
+;共通部分
+CALL COM_ORDER(ARG:0)
+
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲望Lv{ABL:(ARG:0):欲望}", ABL:(ARG:0):欲望 * 2)
+CALL COM_ORDER_ELEMENT(ARG:0, @"侍奉Lv{ABL:(ARG:0):奉仕}", ABL:(ARG:0):奉仕 * 3)
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲望Lv{ABL:(ARG:0):触手}", ABL:(ARG:0):触手 * 6)
+
+LOCAL:0 = GET_PALAMLV(PALAM:(ARG:0):欲情)
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲情Lv{LOCAL:0}", MIN(LOCAL:0 * 1, 10))
+
+IF TALENT:(ARG:0):害羞
+	CALL COM_ORDER_ELEMENT(ARG:0, "害羞", -2)
+ENDIF
+IF TALENT:(ARG:0):好奇心
+	CALL COM_ORDER_ELEMENT(ARG:0, "好奇心", 2)
+ENDIF
+IF TALENT:(ARG:0):保守的
+	CALL COM_ORDER_ELEMENT(ARG:0, "保守的", -7)
+ENDIF
+IF TALENT:(ARG:0):献身的
+	CALL COM_ORDER_ELEMENT(ARG:0, "献身的", 4)
+ENDIF
+IF TALENT:(ARG:0):否定快感
+	CALL COM_ORDER_ELEMENT(ARG:0, "否定快感", -2)
+ENDIF
+
+IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_サド) || GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_マゾ) || ABL:(ARG:0):倒錯度 >= 800
+	CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 32)
+ELSEIF ABL:(ARG:0):倒錯度 >= 500
+	CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 24)
+ELSEIF ABL:(ARG:0):倒錯度 >= 300
+	CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 16)
+ELSEIF ABL:(ARG:0):倒錯度 >= 100
+	CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 8)
+ELSE
+	CALL COM_ORDER_ELEMENT(ARG:0, "倒錯度", 0)
+ENDIF
+
+IF !TALENT:(ARG:0):合意 && !TALENT:(ARG:0):親友
+	CALL COM_ORDER_ELEMENT(ARG:0, "合意無", -10)
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;地の文(前文)
+;-------------------------------------------------
+@COM_TEXT_BEFORE216
+LOCAL:1 = 1
+FOR LOCAL:0, 0, MTAR_NUM
+	IF SEARCH_EQUIP(215, MPLY:0, MTAR:(LOCAL:0)) == -1
+		LOCAL:1 = 0
+	ENDIF
+NEXT
+
+;全員が既に触手挿入中なら分岐
+IF LOCAL:1
+	;継続中の地の文をカット
+	FOR LOCAL:0, 0, MTAR_NUM
+		LOCAL:2 = SEARCH_EQUIP(201, MPLY:0, MTAR:(LOCAL:0))
+		IF LOCAL:2 >= 0
+			MEQUIP_CUT:(LOCAL:2) = 1
+		ENDIF
+	NEXT
+
+	IF MTAR_NUM >= 3
+		LOCALS:1 = %ANAME(MTAR:0)%们
+;%ANAME(MTAR:0)%たち
+		LOCALS:2 = 一齐
+;一斉に
+	ELSEIF MTAR_NUM == 2
+		LOCALS:1 = %ANAME(MTAR:0)%和%ANAME(MTAR:1)%
+;%ANAME(MTAR:0)%と%ANAME(MTAR:1)%
+		LOCALS:2 = 
+	ELSE
+		LOCALS:1 = %ANAME(MTAR:0)%
+		LOCALS:2 = 
+	ENDIF
+
+	SELECTCASE GET_COM_INITIATIVE()
+		;プレイヤーに主導権
+		CASE 0
+			PRINTFORML 在%LOCALS:1%中插入的触手震动了一下后，在%LOCALS:1%的膀胱内吐出了鸡蛋
+			;TranslatedMark %LOCALS:1%の中に挿入された触手が一際大きく震えると、%LOCALS:1%の膀胱内に卵を吐き出した
+			;耐性付いてないと嫌がる
+			IF (TCVAR:(MTAR:0):52) || (TCVAR:(MTAR:0):53 == 1)
+				IF GETBIT(TALENT:(MTAR:0):淫乱系, 素質_淫乱_苗床)
+					PRINTFORM 触手是无意识%LOCALS:1%开发出来的
+					;TranslatedMark 触手は意識のない%LOCALS:1%の開発されきった
+				ELSE
+					PRINTFORM 触手是没有意识的%LOCALS:1%
+					;TranslatedMark 触手は意識のない%LOCALS:1%の
+				ENDIF
+			ELSEIF TCVAR:(MTAR:0):51
+				IF GETBIT(TALENT:(MTAR:0):淫乱系, 素質_淫乱_苗床)
+					PRINTFORM 触手疲劳，委身于身体的%LOCALS:1%开发完成了
+					;TranslatedMark 触手は疲れて身を任せている%LOCALS:1%の開発されきった
+				ELSEIF ABL:(MTAR:0):触手 >= 3
+					PRINTFORM 触手累得筋疲力尽
+					;TranslatedMark 触手は疲れてぐったりとした%LOCALS:1%の
+				ELSE
+					PRINTFORM 触手无法动弹\@ RAND:2 ? 含泪抗议 # 拼命摇头抵抗 \@的%LOCALS:1%
+					;TranslatedMark 触手は身動きのとれぬまま\@ RAND:2 ? 涙目で抗議 # 必死に首を振って抵抗 \@する%LOCALS:1%の
+				ENDIF
+			ELSE
+				IF GETBIT(TALENT:(MTAR:0):淫乱系, 素質_淫乱_苗床)
+					PRINTFORM 触手是%LOCALS:1%开发出来的
+					;TranslatedMark 触手は%LOCALS:1%の開発されきった
+				ELSEIF ABL:(MTAR:0):触手 >= 3
+					PRINTFORM 触手是%LOCALS:1%的
+					;TranslatedMark 触手は%LOCALS:1%の
+				ELSE
+					PRINTFORM 触手是\@ RAND:2 ? 用眼泪抵抗 # 拼命抵抗 \@的%LOCALS:1%
+					;TranslatedMark 触手は\@ RAND:2 ? 涙目で抵抗 # 必死に抵抗 \@する%LOCALS:1%の
+				ENDIF
+			ENDIF
+			;卵の形状分岐
+			SELECTCASE RAND:13
+				CASE 0
+					PRINTW 在膀胱上不断地产卵…
+					;TranslatedMark 膀胱に次々と卵を産みつけていった…
+				CASE 1
+					PRINTW 在膀胱上掉了几个大鸡蛋…
+					;TranslatedMark 膀胱に大きな卵を数個産み落とした…
+				CASE 2
+					PRINTW 在膀胱上生下了粘结膜张开的鸡蛋…
+					;TranslatedMark 膀胱に粘着質の膜が張った卵を産み落とした…
+				CASE 3
+					PRINTW 在膀胱产卵了…
+					;TranslatedMark 膀胱に産卵を行った…
+				CASE 4
+					PRINTW 在膀胱上产下触手的种子…
+					;TranslatedMark 膀胱に触手の種子を産み付けた…
+				CASE 5
+					PRINTW 在膀胱上产下了小的卵核…
+					;TranslatedMark 膀胱に小さな卵核を産み落とした…
+				CASE 6
+					PRINTW 将触手的种子一个一个地塞进了膀胱…
+					;TranslatedMark 膀胱に触手の種子を一つ一つ押し込んでいった…
+				CASE 7
+					PRINTW 与粘附在膀胱上的液体一起流入鸡蛋…
+					;TranslatedMark 膀胱に粘りつく液体と共に卵を流し込んだ…
+				CASE 8
+					PRINTW 在膀胱里（上）注入了乒乓球左右的鸡蛋…
+					;TranslatedMark 膀胱にピンポン玉ぐらいの卵を流し込んだ…
+				CASE 9
+					PRINTW 在膀胱里注入了心跳的鸡蛋…
+					;TranslatedMark 膀胱に鼓動する卵を流し込んだ…
+				CASE 10
+					PRINTW 将生殖液和鸡蛋流入膀胱…
+					;TranslatedMark 膀胱へ生殖液と卵を流し込んだ…
+				CASE 11
+					PRINTW 将白浊的液体和鸡蛋塞进膀胱…
+					;TranslatedMark 膀胱へ白濁した液体と卵を押し込んだ…
+				CASE 12
+					PRINTW 将成为蛋的源头的妖力流到了膀胱上…
+					;TranslatedMark 卵の元となる妖力を膀胱へ零れ落ちるほど流し込んだ…
+			ENDSELECT
+		;ターゲットに主導権
+		CASE 1
+			PRINTFORML %LOCALS:1%命令%ANAME(MPLY:0)%让自己的尿道里插入的触手产卵
+			;TranslatedMark %LOCALS:1%は%ANAME(MPLY:0)%に対して、自身の尿道に挿入された触手に産卵させるように命令した
+			;耐性付いてないと嫌がる
+			IF GETBIT(TALENT:(MTAR:0):淫乱系, 素質_淫乱_苗床)
+				PRINTFORM %ANAME(MPLY:0)%是由%LOCALS:1%开发的触手
+				;TranslatedMark %ANAME(MPLY:0)%は触手を%LOCALS:1%の開発された
+			ELSEIF ABL:(MTAR:0):触手 >= 3
+				PRINTFORM %ANAME(MPLY:0)%操纵着触手
+				;TranslatedMark %ANAME(MPLY:0)%は触手を操って、%LOCALS:1%の
+			ELSE
+				PRINTFORM %ANAME(MPLY:0)%操纵着触手，讨厌%LOCALS:1%的
+				;TranslatedMark %ANAME(MPLY:0)%は触手を操って、嫌がる%LOCALS:1%の
+			ENDIF
+			;卵の形状分岐
+			SELECTCASE RAND:13
+				CASE 0
+					PRINTW 在膀胱上不断地产卵…
+					;TranslatedMark 膀胱に次々と卵を産みつけていった…
+				CASE 1
+					PRINTW 在膀胱上掉了几个大鸡蛋…
+					;TranslatedMark 膀胱に大きな卵を数個産み落とした…
+				CASE 2
+					PRINTW 在膀胱上生下了粘结膜张开的鸡蛋…
+					;TranslatedMark 膀胱に粘着質の膜が張った卵を産み落とした…
+				CASE 3
+					PRINTW 在膀胱产卵了…
+					;TranslatedMark 膀胱に産卵を行った…
+				CASE 4
+					PRINTW 在膀胱上产下触手的种子…
+					;TranslatedMark 膀胱に触手の種子を産み付けた…
+				CASE 5
+					PRINTW 在膀胱上产下了小的卵核…
+					;TranslatedMark 膀胱に小さな卵核を産み落とした…
+				CASE 6
+					PRINTW 将触手的种子一个一个地塞进了膀胱…
+					;TranslatedMark 膀胱に触手の種子を一つ一つ押し込んでいった…
+				CASE 7
+					PRINTW 与粘附在膀胱上的液体一起流入鸡蛋…
+					;TranslatedMark 膀胱に粘りつく液体と共に卵を流し込んだ…
+				CASE 8
+					PRINTW 在膀胱里（上）注入了乒乓球左右的鸡蛋…
+					;TranslatedMark 膀胱にピンポン玉ぐらいの卵を流し込んだ…
+				CASE 9
+					PRINTW 在膀胱里注入了心跳的鸡蛋…
+					;TranslatedMark 膀胱に鼓動する卵を流し込んだ…
+				CASE 10
+					PRINTW 将生殖液和鸡蛋流入膀胱…
+					;TranslatedMark 膀胱へ生殖液と卵を流し込んだ…
+				CASE 11
+					PRINTW 把白浊的液体和鸡蛋塞进了膀胱…
+					;TranslatedMark 白濁した液体と卵を膀胱へ押し込んだ…
+				CASE 12
+					PRINTW 将成为蛋的源头的妖力流到了膀胱上…
+					;TranslatedMark 卵の元となる妖力を膀胱へ零れ落ちるほど流し込んだ…
+			ENDSELECT
+		;第三者に主導権
+		CASEELSE
+			PRINTFORML %ANAME(TFLAG:45)%命令%ANAME(MPLY:0)%在%LOCALS:1%的膀胱上产卵
+			;TranslatedMark %ANAME(TFLAG:45)%は%ANAME(MPLY:0)%に対し、%LOCALS:1%の膀胱に触手の卵を産み付けるように命令した
+			;耐性付いてないと嫌がる
+			IF (TCVAR:(MTAR:0):52) || (TCVAR:(MTAR:0):53 == 1)
+				IF GETBIT(TALENT:(MTAR:0):淫乱系, 素質_淫乱_苗床)
+					PRINTFORM %ANAME(MPLY:0)%操纵触手，开发出了没有意识的%LOCALS:1%
+					;TranslatedMark %ANAME(MPLY:0)%は触手を操って、意識のない%LOCALS:1%の開発されきった
+				ELSE
+					PRINTFORM %ANAME(MPLY:0)%操纵着触手，没有意识的%LOCALS:1%
+					;TranslatedMark %ANAME(MPLY:0)%は触手を操って、意識のない%LOCALS:1%の
+				ENDIF
+			ELSEIF TCVAR:(MTAR:0):51
+				IF GETBIT(TALENT:(MTAR:0):淫乱系, 素質_淫乱_苗床)
+					PRINTFORM %ANAME(MPLY:0)%操纵着触手，疲劳地委身于%LOCALS:1%的开发完成了
+					;TranslatedMark %ANAME(MPLY:0)%は触手を操って、疲れて身を任せている%LOCALS:1%の開発されきった
+				ELSEIF ABL:(MTAR:0):触手 >= 3
+					PRINTFORM %ANAME(MPLY:0)%操纵着触手，累得动弹不得
+					;TranslatedMark %ANAME(MPLY:0)%は触手を操って、疲れて身動きのとれぬ%LOCALS:1%の
+				ELSE
+					PRINTFORM %ANAME(MPLY:0)%操纵着触手，身体动弹不得\@ RAND:2 ? 含泪抗议 # 拼命摇头抵抗 \@的%LOCALS:1%
+					;TranslatedMark %ANAME(MPLY:0)%は触手を操って、身動きのとれぬまま\@ RAND:2 ? 涙目で抗議 # 必死に首を振って抵抗 \@する%LOCALS:1%の
+				ENDIF
+			ELSE
+				IF GETBIT(TALENT:(MTAR:0):淫乱系, 素質_淫乱_苗床)
+					PRINTFORM %ANAME(MPLY:0)%是由%LOCALS:1%开发的触手
+					;TranslatedMark %ANAME(MPLY:0)%は触手を%LOCALS:1%の開発された
+				ELSEIF ABL:(MTAR:0):触手 >= 3
+					PRINTFORM %ANAME(MPLY:0)%操纵着触手
+					;TranslatedMark %ANAME(MPLY:0)%は触手を操って、%LOCALS:1%の
+				ELSE
+					PRINTFORM %ANAME(MPLY:0)%操纵着触手\@ RAND:2 ? 用眼泪抵抗 # 拼命抵抗 \@的%LOCALS:1%
+					;TranslatedMark %ANAME(MPLY:0)%は触手を操って、\@ RAND:2 ? 涙目で抵抗 # 必死に抵抗 \@する%LOCALS:1%の
+				ENDIF
+			ENDIF
+			;卵の形状分岐
+			SELECTCASE RAND:13
+				CASE 0
+					PRINTW 在膀胱上不断地产卵…
+					;TranslatedMark 膀胱に次々と卵を産みつけていった…
+				CASE 1
+					PRINTW 在膀胱上掉了几个大鸡蛋…
+					;TranslatedMark 膀胱に大きな卵を数個産み落とした…
+				CASE 2
+					PRINTW 在膀胱上生下了粘结膜张开的鸡蛋…
+					;TranslatedMark 膀胱に粘着質の膜が張った卵を産み落とした…
+				CASE 3
+					PRINTW 在膀胱产卵了…
+					;TranslatedMark 膀胱に産卵を行った…
+				CASE 4
+					PRINTW 在膀胱上产下触手的种子…
+					;TranslatedMark 膀胱に触手の種子を産み付けた…
+				CASE 5
+					PRINTW 在膀胱上产下了小的卵核…
+					;TranslatedMark 膀胱に小さな卵核を産み落とした…
+				CASE 6
+					PRINTW 将触手的种子一个一个地塞进了膀胱…
+					;TranslatedMark 膀胱に触手の種子を一つ一つ押し込んでいった…
+				CASE 7
+					PRINTW 与粘附在膀胱上的液体一起流入鸡蛋…
+					;TranslatedMark 膀胱に粘りつく液体と共に卵を流し込んだ…
+				CASE 8
+					PRINTW 在膀胱里（上）注入了乒乓球左右的鸡蛋…
+					;TranslatedMark 膀胱にピンポン玉ぐらいの卵を流し込んだ…
+				CASE 9
+					PRINTW 在膀胱里注入了心跳的鸡蛋…
+					;TranslatedMark 膀胱に鼓動する卵を流し込んだ…
+				CASE 10
+					PRINTW 将生殖液和鸡蛋流入膀胱…
+					;TranslatedMark 膀胱へ生殖液と卵を流し込んだ…
+				CASE 11
+					PRINTW 把白浊的液体和鸡蛋塞进了膀胱…
+					;TranslatedMark 白濁した液体と卵を膀胱へ押し込んだ…
+				CASE 12
+					PRINTW 将成为蛋的源头的妖力流到了膀胱上…
+					;TranslatedMark 卵の元となる妖力を膀胱へ零れ落ちるほど流し込んだ…
+			ENDSELECT
+	ENDSELECT
+ELSE
+	IF MTAR_NUM >= 3
+		LOCALS:0 = 尿道
+		LOCALS:1 = %ANAME(MTAR:0)%们
+;%ANAME(MTAR:0)%たち
+		LOCALS:2 = 一齐
+;一斉に
+		LOCALS:3 = 全员的
+;全員の
+	ELSEIF MTAR_NUM == 2
+		LOCALS:0 = 尿道
+		LOCALS:1 = %ANAME(MTAR:0)%和%ANAME(MTAR:1)%
+;%ANAME(MTAR:0)%と%ANAME(MTAR:1)%
+		LOCALS:2 = 
+		LOCALS:3 = 二人的
+;二人の
+	ELSE
+
+		IF TALENT:(MTAR:0):体格 == 体格_小柄
+			LOCALS:0 = 尿道
+		ELSE
+			LOCALS:0 = 尿道
+		ENDIF
+
+		LOCALS:1 = %ANAME(MTAR:0)%
+		LOCALS:2 = 
+		LOCALS:3 = 自己的
+;自身の
+	ENDIF
+
+	SELECTCASE GET_COM_INITIATIVE()
+		;プレイヤーに主導権
+		CASE 0
+			;先に差し込んでない時は適当に犯す
+			SELECTCASE RAND:13
+				CASE 0
+					PRINTFORML 操纵%ANAME(MPLY:0)%的触手，%LOCALS:2%插入%LOCALS:1%的%LOCALS:0%
+					;TranslatedMark %ANAME(MPLY:0)%の触手を操って、%LOCALS:1%の%LOCALS:0%に%LOCALS:2%挿入した
+				CASE 1
+					PRINTFORML 用%ANAME(MPLY:0)%的触手\@ RAND:2 ? 倒吊 # 悬吊 \@在%LOCALS:0%上插入触手%LOCALS:2%
+					;TranslatedMark %ANAME(MPLY:0)%の触手で%LOCALS:1%を\@ RAND:2 ? 逆さ吊り # 宙吊り \@にし、%LOCALS:0%に触手を%LOCALS:2%挿入させた
+				CASE 2
+					PRINTFORML %ANAME(MPLY:0)%用触手将%LOCALS:1%的身体固定在空中，将触手插入%LOCALS:0%中
+					;TranslatedMark %ANAME(MPLY:0)%は触手で%LOCALS:1%の体を宙に固定し、%LOCALS:0%に触手を%LOCALS:2%挿入した
+				CASE 3
+					PRINTFORML %ANAME(MPLY:0)%用触手将%LOCALS:1%仰向上，将生殖用触手%LOCALS:2%插入%LOCALS:0%中
+					;TranslatedMark %ANAME(MPLY:0)%は触手で%LOCALS:1%を仰向けにすると、生殖用の触手を%LOCALS:0%に%LOCALS:2%挿入させた
+				CASE 4
+					PRINTFORML 用%ANAME(MPLY:0)%的触手打开%LOCALS:1%的大腿，像是往上推一样将触手%LOCALS:2%插入%LOCALS:0%
+					;TranslatedMark %ANAME(MPLY:0)%の触手で%LOCALS:1%の股を開かせると、突き上げるように%LOCALS:0%に触手を%LOCALS:2%挿入させた
+				CASE 5
+					PRINTFORML %ANAME(MPLY:0)%用触手将%LOCALS:1%逼入墙壁，将触手插入%LOCALS:0%
+					;TranslatedMark %ANAME(MPLY:0)%は触手で%LOCALS:1%を壁に追い詰め、%LOCALS:0%に触手を%LOCALS:2%挿入した
+				CASE 6
+					PRINTFORML %ANAME(MPLY:0)%用触手多次抚摸%LOCALS:1%的胯股之间，就那样流畅地使触手%LOCALS:2%插入%LOCALS:0%
+					;TranslatedMark %ANAME(MPLY:0)%は触手で%LOCALS:1%の股間を何度も撫上げると、そのままするりと%LOCALS:0%に触手を%LOCALS:2%挿入させた
+				CASE 7
+					PRINTFORML %ANAME(MPLY:0)%将触手擦到%LOCALS:1%的大腿上，粘糊糊地将触手插入%LOCALS:0%中
+					;TranslatedMark %ANAME(MPLY:0)%は触手を%LOCALS:1%の股に擦りつけ、ねっとりと%LOCALS:0%に触手を%LOCALS:2%挿入させた
+				CASE 8
+					PRINTFORML %ANAME(MPLY:0)%用触手将%LOCALS:1%按倒在%LOCALS:0%上\@ RAND:2 ? 强加于人 # 温柔 \@插入触手%LOCALS:2%
+					;TranslatedMark %ANAME(MPLY:0)%は触手で%LOCALS:1%を組み伏せると、%LOCALS:0%に\@ RAND:2 ? 無理やり # 優しく \@触手を%LOCALS:2%挿入させた
+				CASE 9
+					PRINTFORML %ANAME(MPLY:0)%用触手夺走%LOCALS:1%的自由，强行将产卵管插入%LOCALS:0%中
+					;TranslatedMark %ANAME(MPLY:0)%は触手で%LOCALS:1%の自由を奪うと、強引に産卵管を%LOCALS:0%に%LOCALS:2%挿入させた
+				CASE 10
+					PRINTFORML %ANAME(MPLY:0)%用触手抱起%LOCALS:1%，将产卵管插入%LOCALS:0%中
+					;TranslatedMark %ANAME(MPLY:0)%は触手で%LOCALS:1%を抱き上げると、産卵管を%LOCALS:0%に%LOCALS:2%挿入した
+				CASE 11
+					PRINTFORML %ANAME(MPLY:0)%用触手固定%LOCALS:1%的四肢，将粗的触手插入%LOCALS:0%中
+					;TranslatedMark %ANAME(MPLY:0)%は触手で%LOCALS:1%の四肢を固定すると、太い触手を%LOCALS:0%に%LOCALS:2%挿入した
+				CASE 12
+					PRINTFORML %ANAME(MPLY:0)%用触手反复责弄%LOCALS:1%的%LOCALS:0%后，将前端%LOCALS:2%插入
+					;TranslatedMark %ANAME(MPLY:0)%は触手で%LOCALS:1%の%LOCALS:0%を何度も弄んだあと、先端を%LOCALS:2%挿入した
+			ENDSELECT
+			;耐性付いてないと嫌がる
+			IF (TCVAR:(MTAR:0):52) || (TCVAR:(MTAR:0):53 == 1)
+				IF GETBIT(TALENT:(MTAR:0):淫乱系, 素質_淫乱_苗床)
+					PRINTFORM 而且触手还开发出了无意识的%LOCALS:1%
+					;TranslatedMark さらに触手は意識のない%LOCALS:1%の開発されきった
+				ELSE
+					PRINTFORM 而且触手是没有意识到的%LOCALS:1%的
+					;TranslatedMark さらに触手は意識のない%LOCALS:1%の
+				ENDIF
+			ELSEIF TCVAR:(MTAR:0):51
+				IF GETBIT(TALENT:(MTAR:0):淫乱系, 素質_淫乱_苗床)
+					PRINTFORM 触手疲劳，委身于身体的%LOCALS:1%开发完成了
+					;TranslatedMark 触手は疲れて身を任せている%LOCALS:1%の開発されきった
+				ELSEIF ABL:(MTAR:0):触手 >= 3
+					PRINTFORM 触手累得筋疲力尽
+					;TranslatedMark 触手は疲れてぐったりとした%LOCALS:1%の
+				ELSE
+					PRINTFORM 触手无法动弹\@ RAND:2 ? 含泪抗议 # 拼命摇头抵抗 \@的%LOCALS:1%
+					;TranslatedMark 触手は身動きのとれぬまま\@ RAND:2 ? 涙目で抗議 # 必死に首を振って抵抗 \@する%LOCALS:1%の
+				ENDIF
+			ELSE
+				IF GETBIT(TALENT:(MTAR:0):淫乱系, 素質_淫乱_苗床)
+					PRINTFORM 而且触手是很老实的%LOCALS:1%的
+					;TranslatedMark さらに触手は大人しくしている%LOCALS:1%の
+				ELSEIF ABL:(MTAR:0):触手 >= 3
+					PRINTFORM 触手是%LOCALS:1%的
+					;TranslatedMark さらに触手は%LOCALS:1%の
+				ELSE
+					PRINTFORM 触手是\@ RAND:2 ? 用眼泪抵抗 # 拼命抵抗 \@按了%LOCALS:1%的话，强行
+					;TranslatedMark 触手は\@ RAND:2 ? 涙目で抵抗 # 必死に抵抗 \@する%LOCALS:1%を押さえつけると、無理やり
+				ENDIF
+			ENDIF
+			;卵の形状分岐
+			SELECTCASE RAND:13
+				CASE 0
+					PRINTW 在膀胱上不断地产卵…
+					;TranslatedMark 膀胱に次々と卵を産みつけていった…
+				CASE 1
+					PRINTW 在某国产下了几个大鸡蛋…
+					;TranslatedMark 某国に大きな卵を数個産み落とした…
+				CASE 2
+					PRINTW 在膀胱上生下了粘结膜张开的鸡蛋…
+					;TranslatedMark 膀胱に粘着質の膜が張った卵を産み落とした…
+				CASE 3
+					PRINTW 在膀胱产卵了…
+					;TranslatedMark 膀胱に産卵を行った…
+				CASE 4
+					PRINTW 在膀胱上产下触手的种子…
+					;TranslatedMark 膀胱に触手の種子を産み付けた…
+				CASE 5
+					PRINTW 在膀胱上产下了小的卵核…
+					;TranslatedMark 膀胱に小さな卵核を産み落とした…
+				CASE 6
+					PRINTW 将触手的种子一个一个地塞进了膀胱…
+					;TranslatedMark 膀胱に触手の種子を一つ一つ押し込んでいった…
+				CASE 7
+					PRINTW 与粘附在膀胱上的液体一起流入鸡蛋…
+					;TranslatedMark 膀胱に粘りつく液体と共に卵を流し込んだ…
+				CASE 8
+					PRINTW 在膀胱里（上）注入了乒乓球左右的鸡蛋…
+					;TranslatedMark 膀胱にピンポン玉ぐらいの卵を流し込んだ…
+				CASE 9
+					PRINTW 在膀胱里注入了心跳的鸡蛋…
+					;TranslatedMark 膀胱に鼓動する卵を流し込んだ…
+				CASE 10
+					PRINTW 将生殖液和鸡蛋流入膀胱…
+					;TranslatedMark 膀胱へ生殖液と卵を流し込んだ…
+				CASE 11
+					PRINTW 把白浊的液体和鸡蛋塞进了膀胱…
+					;TranslatedMark 白濁した液体と卵を膀胱へ押し込んだ…
+				CASE 12
+					PRINTW 将成为蛋的源头的妖力流到了膀胱上…
+					;TranslatedMark 卵の元となる妖力を膀胱へ零れ落ちるほど流し込んだ…
+			ENDSELECT
+		;ターゲットに主導権
+		CASE 1
+			PRINTFORML %LOCALS:1%命令%ANAME(MPLY:0)%在自己的尿道上产卵
+			;TranslatedMark %LOCALS:1%は%ANAME(MPLY:0)%に対して、自身の尿道に触手の卵を産み付けるように命令した
+			;耐性付いてないと嫌がる
+			IF ABL:(MTAR:0):触手 >= 3
+				PRINTFORM %ANAME(MPLY:0)%将触手插入%LOCALS:1%的阴道，%LOCALS:1%的膀胱
+				;TranslatedMark %ANAME(MPLY:0)%は触手を%LOCALS:1%的小穴%LOCALS:2%挿入すると、%LOCALS:1%の膀胱
+			ELSE
+				PRINTFORM %ANAME(MPLY:0)%把触手插入%LOCALS:1%的阴道，讨厌%LOCALS:1%的膀胱
+				;TranslatedMark %ANAME(MPLY:0)%は触手を%LOCALS:1%的小穴%LOCALS:2%挿入すると、嫌がる%LOCALS:1%の膀胱
+			ENDIF
+			;卵の形状分岐
+			SELECTCASE RAND:13
+				CASE 0
+					PRINTW 不断地产卵…
+					;TranslatedMark に次々と卵を産みつけていった…
+				CASE 1
+					PRINTW 产下了几个大鸡蛋…
+					;TranslatedMark に大きな卵を数個産み落とした…
+				CASE 2
+					PRINTW 产下黏着性膜的鸡蛋…
+					;TranslatedMark に粘着質の膜が張った卵を産み落とした…
+				CASE 3
+					PRINTW 进行了产卵…
+					;TranslatedMark に産卵を行った…
+				CASE 4
+					PRINTW 产下触手的种子…
+					;TranslatedMark に触手の種子を産み付けた…
+				CASE 5
+					PRINTW 产下了小小的卵核…
+					;TranslatedMark に小さな卵核を産み落とした…
+				CASE 6
+					PRINTW 把触手的种子一个一个地塞进去…
+					;TranslatedMark に触手の種子を一つ一つ押し込んでいった…
+				CASE 7
+					PRINTW 和粘糊糊的液体一起灌入鸡蛋…
+					;TranslatedMark に粘りつく液体と共に卵を流し込んだ…
+				CASE 8
+					PRINTW 往里倒了乒乓球之类的鸡蛋…
+					;TranslatedMark にピンポン玉ぐらいの卵を流し込んだ…
+				CASE 9
+					PRINTW 注入了心跳的鸡蛋…
+					;TranslatedMark に鼓動する卵を流し込んだ…
+				CASE 10
+					PRINTW 将生殖液和鸡蛋注入…
+					;TranslatedMark へ生殖液と卵を流し込んだ…
+				CASE 11
+					PRINTW 往里塞入白色浑浊的液体和鸡蛋…
+					;TranslatedMark へ白濁した液体と卵を押し込んだ…
+				CASE 12
+					PRINTW 将成为蛋之源的妖力流了下来…
+					;TranslatedMark へ卵の元となる妖力を零れ落ちるほど流し込んだ…
+			ENDSELECT
+		;第三者に主導権
+		CASEELSE
+			PRINTFORML %ANAME(TFLAG:45)%命令%ANAME(MPLY:0)%在%LOCALS:1%的尿道上产卵
+			;TranslatedMark %ANAME(TFLAG:45)%は%ANAME(MPLY:0)%に対し、%LOCALS:1%の尿道に触手の卵を産み付けるように命令した
+			;耐性付いてないと嫌がる
+			IF (TCVAR:(MTAR:0):52) || (TCVAR:(MTAR:0):53 == 1)
+				IF GETBIT(TALENT:(MTAR:0):淫乱系, 素質_淫乱_苗床)
+					PRINTFORM %ANAME(MPLY:0)%没有触手意识地将%LOCALS:2%插入%LOCALS:1%的尿道中，%LOCALS:1%开发的膀胱
+					;TranslatedMark %ANAME(MPLY:0)%は触手を意識のない%LOCALS:1%の尿道に%LOCALS:2%挿入すると、%LOCALS:1%の開発された膀胱
+				ELSE
+					PRINTFORM %ANAME(MPLY:0)%没有触手意识的插入%LOCALS:1%的尿道，%LOCALS:1%的膀胱
+					;TranslatedMark %ANAME(MPLY:0)%は触手を意識のない%LOCALS:1%の尿道に%LOCALS:2%挿入すると、%LOCALS:1%の膀胱
+				ENDIF
+			ELSEIF TCVAR:(MTAR:0):51
+				IF GETBIT(TALENT:(MTAR:0):淫乱系, 素質_淫乱_苗床)
+					PRINTFORM %ANAME(MPLY:0)%把身体交给触手疲劳的%LOCALS:1%开发的尿道里插入%LOCALS:2%，%LOCALS:1%的膀胱
+					;TranslatedMark %ANAME(MPLY:0)%は触手を疲れて身を任せている%LOCALS:1%の開発されきった尿道に%LOCALS:2%挿入すると、%LOCALS:1%の膀胱
+				ELSEIF ABL:(MTAR:0):触手 >= 3
+					PRINTFORM %ANAME(MPLY:0)%将%LOCALS:2%插入%LOCALS:1%的尿道中，由于触手疲劳而无法动弹，%LOCALS:1%的膀胱
+					;TranslatedMark %ANAME(MPLY:0)%は触手を疲れて身動きのとれぬ%LOCALS:1%の尿道に%LOCALS:2%挿入すると、%LOCALS:1%の膀胱
+				ELSE
+					PRINTFORM %ANAME(MPLY:0)%的触手无法动弹\@ RAND:2 ? 含泪抗议 # 拼命摇头抵抗 \@在%LOCALS:1%的尿道中插入%LOCALS:2%，%LOCALS:1%的膀胱
+					;TranslatedMark %ANAME(MPLY:0)%は触手を身動きのとれぬまま\@ RAND:2 ? 涙目で抗議 # 必死に首を振って抵抗 \@する%LOCALS:1%の尿道に%LOCALS:2%挿入すると、%LOCALS:1%の膀胱
+				ENDIF
+			ELSE
+				IF GETBIT(TALENT:(MTAR:0):淫乱系, 素質_淫乱_苗床)
+					PRINTFORM %ANAME(MPLY:0)%是%LOCALS:1%开发的触手膀胱
+					;TranslatedMark %ANAME(MPLY:0)%は触手を%LOCALS:1%の開発された膀胱
+				ELSEIF ABL:(MTAR:0):触手 >= 3
+					PRINTFORM %ANAME(MPLY:0)%将触手插入%LOCALS:1%的尿道，%LOCALS:1%的膀胱
+					;TranslatedMark %ANAME(MPLY:0)%は触手を%LOCALS:1%の尿道に%LOCALS:2%挿入すると、%LOCALS:1%の膀胱
+				ELSE
+					PRINTFORM %ANAME(MPLY:0)%将触手插入%LOCALS:1%的尿道中\@ RAND:2 ? 用眼泪抵抗 # 拼命抵抗 \@膀胱，膀胱
+					;TranslatedMark %ANAME(MPLY:0)%は触手を%LOCALS:1%の尿道に%LOCALS:2%挿入すると、\@ RAND:2 ? 涙目で抵抗 # 必死に抵抗 \@する%LOCALS:1%の膀胱
+				ENDIF
+			ENDIF
+			;卵の形状分岐
+			SELECTCASE RAND:13
+				CASE 0
+					PRINTW 不断地产卵…
+					;TranslatedMark に次々と卵を産みつけていった…
+				CASE 1
+					PRINTW 产下了几个大鸡蛋…
+					;TranslatedMark に大きな卵を数個産み落とした…
+				CASE 2
+					PRINTW 产下黏着性膜的鸡蛋…
+					;TranslatedMark に粘着質の膜が張った卵を産み落とした…
+				CASE 3
+					PRINTW 进行了产卵…
+					;TranslatedMark に産卵を行った…
+				CASE 4
+					PRINTW 产下触手的种子…
+					;TranslatedMark に触手の種子を産み付けた…
+				CASE 5
+					PRINTW 产下了小小的卵核…
+					;TranslatedMark に小さな卵核を産み落とした…
+				CASE 6
+					PRINTW 把触手的种子一个一个地塞进去…
+					;TranslatedMark に触手の種子を一つ一つ押し込んでいった…
+				CASE 7
+					PRINTW 和粘糊糊的液体一起灌入鸡蛋…
+					;TranslatedMark に粘りつく液体と共に卵を流し込んだ…
+				CASE 8
+					PRINTW 往里倒了乒乓球之类的鸡蛋…
+					;TranslatedMark にピンポン玉ぐらいの卵を流し込んだ…
+				CASE 9
+					PRINTW 注入了心跳的鸡蛋…
+					;TranslatedMark に鼓動する卵を流し込んだ…
+				CASE 10
+					PRINTW 将生殖液和鸡蛋注入…
+					;TranslatedMark へ生殖液と卵を流し込んだ…
+				CASE 11
+					PRINTW 往里塞入白色浑浊的液体和鸡蛋…
+					;TranslatedMark へ白濁した液体と卵を押し込んだ…
+				CASE 12
+					PRINTW 将成为蛋之源的妖力流了下来…
+					;TranslatedMark へ卵の元となる妖力を零れ落ちるほど流し込んだ…
+			ENDSELECT
+	ENDSELECT
+ENDIF
+
+SETCOLOR カラー_注意
+FOR LOCAL:0, 0, MTAR_NUM
+	PRINTFORML %ANAME(MTAR:(LOCAL:0))%把触手的孩子寄宿在了膀胱上
+	;TranslatedMark %ANAME(MTAR:(LOCAL:0))%は触手の子を膀胱に宿しました
+NEXT
+RESETCOLOR
+
+;--------------------------------------------------------
+;地の文(パラメータ・刻印変動後)
+;--------------------------------------------------------
+@COM_TEXT_LAST216
+FOR LOCAL:0, 0, MTAR_NUM
+	LOCAL:1 = MTAR:(LOCAL:0)
+
+	IF (LOCAL:1 != MASTER || CONFIG:441) && !IS_ANIMAL(LOCAL:1)
+		IF (TCVAR:(MTAR:0):52) || (TCVAR:(MTAR:0):53 == 1)
+			IF GETBIT(TALENT:(LOCAL:1):淫乱系, 素質_淫乱_苗床)
+				PRINTFORMW 尽管%ANAME(LOCAL:1)%没有意识到，但她仍带着一副恍惚的表情接受了触手的产卵
+				;TranslatedMark %ANAME(LOCAL:1)%は意識が無いにも拘らず、熱っぽい吐息を漏らして恍惚とした表情で触手の産卵を受け入れている
+			ELSEIF ABL:(LOCAL:1):触手 >= 3
+				PRINTFORMW 渐渐习惯了孕育异形孩子的%ANAME(LOCAL:1)%，在没有意识的情况下颤抖不已
+				;TranslatedMark 徐々に異形の子供を孕むことに慣れてきた%ANAME(LOCAL:1)%は、意識のないままゾクゾクと体を震わせている
+			ELSE
+				PRINTFORMW 没有意识的%ANAME(LOCAL:1)%的身体，在膀胱上生下的异形的孩子蠢动的触觉中发抖
+				;TranslatedMark 意識のないままの%ANAME(LOCAL:1)%の身体は、膀胱に産み付けられた異形の子の蠢く感触に身震いしている
+			ENDIF
+		ELSE
+			IF GETBIT(TALENT:(LOCAL:1):淫乱系, 素質_淫乱_苗床)
+				PRINTFORMW %ANAME(LOCAL:1)%一脸陶醉的表情，接受了触手的产卵
+				;TranslatedMark %ANAME(LOCAL:1)%はすっかり陶酔しきった表情で、触手の産卵を受け入れている
+			ELSEIF ABL:(LOCAL:1):触手 >= 3
+				PRINTFORMW %ANAME(LOCAL:1)%因被异形所孕育的倒错感而颤抖不已
+				;TranslatedMark %ANAME(LOCAL:1)%は異形に孕まされる倒錯感に、ゾクゾクと体を震わせている
+			ELSE
+				PRINTFORMW %ANAME(LOCAL:1)%因被生下异形之子的恐怖和震惊而脸色苍白
+				;TranslatedMark %ANAME(LOCAL:1)%は異形の子を産み付けられた恐怖とショックで青ざめている
+			ENDIF
+		ENDIF
+	ENDIF
+NEXT
+
+
+
+IF (LOCAL:1 != MASTER || CONFIG:441) && !IS_ANIMAL(LOCAL:1)
+	PRINTFORM 从尿道上拔出沾满粘液的触手
+	;TranslatedMark 尿道から粘液にまみれた触手を引き抜くと%ANAME(LOCAL:1)%
+
+	LOCALS:3 = %TOSTR_EMOTION(LOCAL:1)%
+
+	SELECTCASE RAND:7
+		CASE 0
+			IF GROUPMATCH(LOCALS:3, "幸", "悦", "良", "平", "普")
+				PRINTW 呼哧呼哧地重复着呼吸…
+				;TranslatedMark はフーフーと呼吸を繰り返している…
+			ELSEIF GROUPMATCH(LOCALS:3, "恨", "怒", "憤", "狂", "鬱", "恐", "怯")
+				PRINTW 反复着粗暴的呼吸…
+				;TranslatedMark は荒い呼吸を繰り返している…
+			ELSEIF GROUPMATCH(LOCALS:3, "壊", "虚", "悲", "憂")
+				PRINTW 呆呆地持续看着虚空…
+				;TranslatedMark は呆然と虚空を見続けている…
+			ELSE
+				PRINTW 反复着粗暴的呼吸…
+				;TranslatedMark は荒い呼吸を繰り返している…
+			ENDIF
+		CASE 1
+			PRINTW 在触手之间形成了半透明的线桥…
+			;TranslatedMark と触手の間には半透明な糸の橋が出来上がった…
+		CASE 2
+			PRINTW 的肚子大大的膨胀了…
+			;TranslatedMark のお腹は大きく膨れ上がっていた…
+		CASE 3
+			PRINTW 从尿道中滴落出微粒和水滴…
+			;TranslatedMark の尿道からはごぽりと雫が漏れ落ちた…
+		CASE 4
+			PRINTW 的尿道发出了滑溜和猥亵的水声…
+			;TranslatedMark の尿道からはずるりと卑猥な水音が響いた…
+		CASE 5
+			PRINTW 扑通一声倒在了地上…
+			;TranslatedMark はくたりと地面に倒れ付した…
+		CASE 6
+			IF ABL:(LOCAL:1):触手 >= 3
+				IF GROUPMATCH(LOCALS:3, "幸", "悦", "良", "平", "普")
+					PRINTW 用温柔的表情抚摸着自己的肚子…
+					;TranslatedMark は柔らかい表情で自分のお腹を撫でている…
+				ELSEIF GROUPMATCH(LOCALS:3, "恨", "怒", "憤", "狂")
+					PRINTW 默默地抚摸着自己的肚子…
+					;TranslatedMark は黙って自分のお腹を撫でている…
+				ELSEIF GROUPMATCH(LOCALS:3, "鬱", "悲", "憂", "恐", "怯")
+					PRINTW 用复杂的表情抚摸着自己的肚子…
+					;TranslatedMark は複雑な表情で自分のお腹を撫でている…
+				ELSEIF GROUPMATCH(LOCALS:3, "壊", "虚")
+					PRINTW 他目瞪口呆地摩挲着自己的肚子…
+					;TranslatedMark は呆然として自分のお腹を摩っている…
+				ELSE
+					PRINTW 他目瞪口呆地摩挲着自己的肚子…
+					;TranslatedMark は呆然として自分のお腹を摩っている…
+				ENDIF
+			ELSE
+				PRINTW 呆呆地摩挲着自己的肚子…
+				;TranslatedMark は呆然と自分のお腹を摩っている…
+			ENDIF
+	ENDSELECT
+ENDIF
+
+;-------------------------------------------------
+
+;コマンド区分
+;-------------------------------------------------
+
+@COM_AVAILABLE_WHEN216
+RETURN コマンド_ウフフ
+
+;--------------------
+;性嗜好用関数
+;--------------------
+@COM_PREFERENCE_PLAYER_216()
+RETURN POWER(2, 性的嗜好_触手で犯したい) + POWER(2, 性的嗜好_虐げたい)
+
+@COM_PREFERENCE_TARGET_216()
+RETURN POWER(2, 性的嗜好_触手で犯されたい) + POWER(2, 性的嗜好_虐げられたい) + POWER(2, 性的嗜好_妊娠したい)
+

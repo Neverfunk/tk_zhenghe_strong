@@ -1,0 +1,101 @@
+;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K4_SHOP_RATE(対象)
+#DIM 対象
+RETURN 30
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K4_SHOP_DECISION(対象)
+#DIM 対象
+
+;主人公はペニスがあること
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K4_SHOP_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+
+;---------------------
+@KOJO_DAILY_K4_SHOP(対象)
+#DIM 対象
+	PRINTFORMW 准备出门散步的%ANAME(MASTER)%看见了正准备出门的大妖精
+	PRINTFORMW 提着小巧的购物篮，是要去买东西吗？
+	PRINTFORMW 「%ANAME(MASTER)%晚上好！是要出门嘛？」
+	PRINTFORMW 大妖精摇着篮子靠了过来
+	PRINTFORMW 绿色的眼睛闪着光，是想要陪她去吧
+	PRINTFORMW 「如果多买一些%ANAME(MASTER)%爱吃的菜会提不动吧，真是纠结呢」
+	PRINTFORMW 大妖精假装看向一边自言自语
+	PRINTFORMW 本来是想要自己一个人去清闲一下的
+	PRINTFORMW 怎么办？
+	CALL ASK_YN("陪大妖精也是休息", "果然还是想一个人出去")
+	IF RESULT == 1
+		PRINTFORML 随便找了个借口推辞了
+		PRINTFORMW 「%ANAME(MASTER)%真是大忙人呢，自己去也好啦」
+		PRINTFORML 大妖精的背影似乎没那么精神
+		PRINTFORML 管他呢，自己的独处空间才更重要
+	ELSEIF RESULT == 0
+		PRINTFORMW 总之这种小事还是陪一下大妖精的好
+		PRINTFORMW 「好！今天的购物小组满员啦！出发！」
+		PRINTFORMW 从大妖精那边接过了篮子，小小的妖精奔着跳着走在了前面
+		PRINTFORMW 「调料都快见底了，蔬菜也得买一些，米...米应该还多吧？」
+		PRINTFORMW 「反正有%ANAME(MASTER)%帮着拿，也买一些吧」
+		PRINTFORMW 来到市场的大妖精似乎显得很激动，絮絮叨叨聊了一路
+		PRINTFORMW 「唉...」
+		PRINTFORMW 大妖精突然停住了
+		PRINTFORML 卖甜饼的小摊传来香甜的气息
+		PRINTFORMW 小家伙犹豫着，迈不开腿了
+		PRINTFORML 是因为用的采购的钱不好意思买吗？
+		PRINTFORMW 果然还是小孩子呢
+		PRINTFORMW 
+		CALL ASK_YN("一人买一份吧", "只给自己买一份")
+		IF RESULT == 0
+			PRINTFORMW 越过大妖精上前买了两份甜饼
+			PRINTFORMW 「唉？%ANAME(MASTER)%想要吃甜饼吗？回去自己做也行啦」
+			PRINTFORMW 给大妖精递过去一份
+			PRINTFORMW 「现在吃甜饼一会要吃不动晚饭」
+			PRINTFORMW 嘴上这样说着，大妖精还是接过了甜饼
+			PRINTFORMW 张开小口轻轻咬下一块来
+			PRINTFORMW 看着大妖精露出幸福的笑容
+			PRINTFORML 妖精们真是好对付呢
+			CFLAG:対象:好感度 += 500
+		ELSEIF RESULT == 1
+			PRINTFORML 只买了一份甜饼
+			PRINTFORML 偶尔也想吃一些路边的小东西
+			PRINTFORML 「好吃吗？」
+			PRINTFORML 大妖精靠过来拽住%ANAME(MASTER)%的衣角
+			PRINTFORML 蜂蜜的甜和谷物的香结合在一起，配上切碎的薄荷叶，口感超赞
+			PRINTFORML 「吃了甜饼的话就不需要吃晚饭了吧」
+			PRINTFORML 大妖精拽住衣角的力度越来越大了
+			CALL ASK_YN("那你帮我吃吧", "反正我胃口大") 
+			IF RESULT == 0
+				PRINTFORML 打算不惹大妖精玩了，把甜饼递了过去
+				PRINTFORML 「我这是为了你能好好吃晚饭」
+				PRINTFORML 大妖精长大小小的嘴巴，恶狠狠地咬下了一大口
+				PRINTFORML 脸颊被甜饼涨的圆滚，嘴角还残留着淡黄的蜂蜜
+				PRINTFORML 看着大妖精大仇得报的狼狈样子忍不住笑了出来
+				CFLAG:対象:好感度 += 500
+			ELSEIF RESULT == 1
+				PRINTFORML 大妖精猛地丢开了衣角
+				PRINTFORML 快步走到前面的摊位去挑土豆了
+				PRINTFORML 之后提了很多东西回去
+				PRINTFORML 累的腰酸背痛
+				CFLAG:対象:好感度 += 100
+			ENDIF
+		ENDIF
+	ENDIF
+
+RETURN 1

@@ -1,0 +1,631 @@
+﻿
+@EVENT_DAILY_SMUGGLER_RATE()
+RETURN 80
+
+
+@EVENT_DAILY_SMUGGLER_DECISION()
+;斬ってたらダメ
+SIF DVAR:薬売り_発生フラグ == -1
+	RETURN 0
+;調教中のキャラがいるならダメ
+SIF ID_TO_CHARA(DVAR:薬売り_調教対象ID) != -1
+	RETURN 0
+RETURN 1
+
+@EVENT_DAILY_SMUGGLER_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;密売人イベント
+@EVENT_DAILY_SMUGGLER()
+#DIM 料金
+#DIM 対象
+#DIM 能力計
+#DIM 失敗率
+#DIM 成功率
+#DIM 高能力フラグ
+#DIM 結果フラグ
+#DIM 対象能力
+#DIM 変化量
+VARSET 高能力フラグ
+
+料金 = RAND(10000, 30000)
+IF GETBIT(TALENT:MASTER:日常系, 素質_デイリー_薬売りの性奴隷)
+	PRINTFORMW 「喂、性奴隶，你的主人来了哦」
+	PRINTFORMW %ANAME(MASTER)%的“主人”来卖药了
+	PRINTFORM 「价钱可是
+	CALL COLOR_PRINT(@"{料金}", カラー_注意)
+	PRINTFORMW 金哦，喂，快点付钱滚蛋，你这头母猪」
+	PRINTFORMW 那么，怎么办呢……
+ELSEIF DVAR:薬売り_陥落報告済み
+	PRINTFORMW 「哎呀呀%ANAME(MASTER)%先生，我来啦！」
+	PRINTFORMW 「哎呀，为了能够再让我得到一个女人，买我一个药吧？」
+	PRINTFORM 「价格是
+	CALL COLOR_PRINT(@"{料金}", カラー_注意)
+	PRINTFORMW 「金哦！哎呀，快点买吧」
+	PRINTFORMW 那个男人又带着药来向我贩卖了……
+ELSEIF DVAR:薬売り_発生フラグ == 0
+	PRINTFORML %ANAME(MASTER)%正在工作的時候、侍從通知有客來訪
+	PRINTFORML 据说什么领地里来了个「可疑的男人」。
+	PRINTFORMW 「可疑」这件事到底有多可疑呢，%ANAME(MASTER)%决定会见一下他
+	PRINTFORML 
+	PRINTFORML 
+	PRINTFORML 
+	PRINTFORMW 「哎呀，这是！%ANAME(MASTER)%是吧？今天你可是走运了……」
+	PRINTFORMW 一边搓手一边出现的，的确是个形迹可疑、矮小瘦削的男人。
+	PRINTFORML 「対不起，我迟到了，我在路上一边赶着路一边卖着药。其实，今天我想给你看看我珍藏的药」
+	PRINTFORM 「价格是
+	CALL COLOR_PRINT(@"{料金}", カラー_注意)
+	PRINTFORMW 金，嘛嘛。怎么样？」
+	PRINTFORML 别说热情的交流了，简直就是个闷葫芦。不能给别人看的药也值得怀疑。
+	PRINTFORMW 很明显是值得怀疑的，怎么办才好呢……
+ELSEIF DVAR:薬売り_発生フラグ == 1 || DVAR:薬売り_発生フラグ == 2
+	PRINTFORMW 「哎呀哎呀%ANAME(MASTER)%先生！我来了！」
+	PRINTFORMW 「这可是十补十全的的绝佳的药啊！」
+	PRINTFORM 「价格是
+	CALL COLOR_PRINT(@"{料金}", カラー_注意)
+	PRINTFORMW 金，嘛嘛，怎么样！？」
+	PRINTFORMW 那个男人又带着药来向我贩卖了……
+ENDIF
+CALL SINGLE_DRAWLINE
+PRINTFORML 現在の金:{MONEY}
+CALL ASK_MULTI_JUDGE("买来看看", MONEY >= 料金, "什么也不做", 1, "太烦了所以决定斩掉他", 1)
+IF RESULT == 1
+	$DENIED
+	PRINTFORMW 当然，不可能买。反正肯定是欺诈
+	PRINTFORMW 「啊，这样啊。那么，再在这里打扰的话也没有用处。再见了，再见。哦！」
+	PRINTFORMW 男子早早的离去了，%ANAME(MASTER)%撒了一把盐
+	RETURN 1
+ELSEIF RESULT == 2
+	PRINTFORMW 「哎呀！」
+	PRINTFORMW 「加油啊！」
+	PRINTFORMW ……不由得用力砍了。好象还有气，怎么办呢？
+	CALL ASK_MULTI_JUDGE("枭首示众", 1, "当成奴隶", 1, "当触手的点心", ITEM:触手部屋 && ID_TO_CHARA(FLAG:触手部屋管理者) != -1)
+	SELECTCASE RESULT
+		CASE 0
+			PRINTFORMW 这样的男人没有活着的理由吧。
+			PRINTFORMW %ANAME(MASTER)%是恶德商人的末路，该男子在被曝光后就被炒鱿鱼了
+			PRINTFORMW 来自其他势力的评价上升了一点
+			FOR LOCAL, 1, MAX_COUNTRY
+				CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 20)
+			NEXT
+		CASE 1
+			PRINTFORMW %ANAME(MASTER)%命令男子当做性处理奴隶
+			PRINTFORMW 令人吃惊的是士兵们博得好评，{料金 / 20}的兵力聚集起来
+			COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 料金 / 20
+
+		CASE 2
+			PRINTFORMW %ANAME(MASTER)%把男人扔进触手室
+			PRINTFORMW 可爱的触手们不会拉肚子吧？有点担心杞人忧天。
+			CALL PRINT_ADD_EXP(ID_TO_CHARA(FLAG:触手部屋管理者), "妖術経験値", 料金 / 1000)
+			CALL TRAIN_AUTO_ABLUP(ID_TO_CHARA(FLAG:触手部屋管理者))
+	ENDSELECT
+	DVAR:薬売り_発生フラグ = -1
+	RETURN 1
+ELSE
+	PRINTFORMW 「哎呀~~真不愧是我！好有眼光！太棒了！终于！幻想乡一一！」
+	PRINTFORMW 一个胡言乱语的男人……
+ENDIF
+CALL SINGLE_DRAWLINE
+PRINTFORMW 「那么，要给谁服用呢？」
+PRINTFORMW 那么，让谁喝呢……
+CALL SINGLE_DRAWLINE
+
+CALL SELECT_CHARA_LIST_SLG
+
+IF RESULT == -1
+	GOTO DENIED
+ENDIF
+
+対象 = RESULT
+
+
+IF MONEY >= 料金 * 2
+	料金 *= 2
+	PRINTFORM 「哎呀，不好意思，这药现在涨价了。现在是这个价钱」
+	CALL COLOR_PRINT(@"{料金}", カラー_注意)
+	PRINTFORMW 「真是贵重的东西」
+	PRINTFORMW 「嘿嘿，就是这样，这笔钱我就收下了。」
+	PRINTFORM 一点多余的时间都不肯浪费，真是个贪财的男人啊。
+	CALL COLOR_PRINT(@"{料金}", カラー_注意)
+	PRINTFORMW 付给男人了……
+ENDIF
+
+
+MONEY -= 料金
+
+
+;効果選択
+;------------成功率・変化量算出----------------
+能力計 = ABL:対象:武闘 + ABL:対象:知略 + ABL:対象:政治 + ABL:対象:防衛
+;失敗率は3能力の1/10
+失敗率 = 能力計 / 15
+;能力計に応じ、失敗率に補正
+SELECTCASE 能力計
+	CASE IS < 200
+		失敗率 -= 10
+	CASE IS > 250
+		失敗率 += 5
+ENDSELECT
+;80以上ある能力を保存
+IF ABL:(対象):武闘 >= 80
+	SETBIT 高能力フラグ, 0
+	失敗率 += 5
+ENDIF
+IF ABL:対象:防衛 >= 80
+	SETBIT 高能力フラグ , 1
+	失敗率 += 5
+ENDIF
+IF ABL:(対象):知略 >= 80
+	SETBIT 高能力フラグ, 2
+	失敗率 += 5
+ENDIF
+IF ABL:(対象):政治 >= 80
+	SETBIT 高能力フラグ, 3
+	失敗率 += 5
+ENDIF
+;失敗
+IF RAND:100 < 失敗率
+	;対象能力を決定する
+	;80以上のものがあればそれらの中から選択する
+	FOR LOCAL:0, 0, 4
+		;80より小さければ上の処理でビットが立っていないので、GETBITの返値が0
+		;RANDが(100 * 0, 100 * 0 + 100)となるので、RAND(0, 100)になる。80より大きければ左右で100 * 1となり、RAND(100, 200)になる
+		;結果、80以上が確実に選出される
+		LOCAL:(LOCAL + 1) = RAND(GETBIT(高能力フラグ, LOCAL:0) * 100, GETBIT(高能力フラグ, LOCAL:0) * 100 + 100)
+	NEXT
+	対象能力 = FINDELEMENT(LOCAL, MAXARRAY(LOCAL, 1, 5), 1, 5) + 49
+	;変化量は5 ~ 10
+	変化量 = RAND(5, 11)
+	結果フラグ = 0
+;成功
+ELSE
+	;対象能力を決定する
+	;80以上のものがあればそれは回避しようとする
+	FOR LOCAL:0, 0, 3
+		;失敗パターンとは逆。80以上だとRAND(-100, 0)で、80より小さければRAND(0, 100)
+		;結果、80以上は回避される（全部80以上ならともかく）
+		LOCAL:(LOCAL + 1) = RAND(GETBIT(高能力フラグ, LOCAL:0) * -100, GETBIT(高能力フラグ, LOCAL:0) * -100 + 100)
+	NEXT
+	対象能力 = FINDELEMENT(LOCAL, MAXARRAY(LOCAL, 1, 5), 1, 5) + 49
+	;変化量は10~15
+	;能力計が250以上あると5～10になる
+	変化量 = RAND(10, 16)
+	SIF 能力計 >= 250
+		変化量 -= 5
+	結果フラグ = 1
+ENDIF
+
+;成功パターン
+IF 結果フラグ
+	ABL:対象:対象能力 = MAX(ABL:対象:対象能力 + 変化量, 1)
+	PRINTFORMW ……果然，因为药的原因，%ANAME(対象)%的能力上升了！
+	CALL COLORPRINT (@"%ANAME(対象)%的%ABLNAME:(対象能力)%发生了变化", カラー_シアン)
+	CALL COLORPRINT (@"{変化量}", カラー_注意)
+	CALL COLORPRINT ("上升了！", カラー_シアン, "W")
+
+	PRINTFORML 「……咦，为什么，这么轻易的就成功了……」
+	PRINTFORML 「啊！不，没什么。那么那么！我已经很累了~~」
+	PRINTFORMW 男子慌慌张张地走了……
+	DVAR:薬売り_発生フラグ = 1
+;失敗パターン
+ELSE
+	ABL:対象:対象能力 = MAX(ABL:対象:対象能力 - 変化量, 1)
+	PRINTFORMW ……果然，因为药的原因，%ANAME(対象)%的能力下降了！
+	CALL COLORPRINT (@"%ANAME(対象)%的%ABLNAME:(対象能力)%发生了变化", カラー_警告)
+	CALL COLORPRINT (@"{変化量}", カラー_注意)
+	CALL COLORPRINT ("下降了！", カラー_警告, "W")
+
+	PRINTFORML 「哎呀哎呀？这样是不行的呢」
+	PRINTFORMW 「嘛，我告诉过您这种药，后果是要自己负责的吧。」
+	DVAR:薬売り_発生フラグ = 2
+	;対象が女で、40%の確率でエロに発展
+	;そうでないならただのメッセージ
+	IF !(RAND:100 < 40 && IS_FEMALE(対象))
+		PRINTFORMW 「那么！就是这样！」
+		PRINTFORMW %ANAME(MASTER)%没有来得及抗议，药商就慌慌张张的逃走了……
+		RETURN 1
+	ELSE
+		PRINTFORML
+		PRINTFORML
+		PRINTFORMW 「……那么，差不多该开始了吧？嘿嘿？」
+		PRINTFORMW %ANAME(対象)%的脸变得很红。看来是由于药物的效果而发情的……
+		PRINTFORML 「哎呀哎呀？怎么了吗？情况不妙啊」。
+		PRINTFORMW 「如果愿意的话，我可以帮忙‘处理’的。」
+		PRINTFORML 药商毫无廉耻的，向%ANAME(対象)%的腰伸出了手
+		PRINTFORML 连屁股都被用讨厌的手抚摸过了
+		PRINTFORML 很明显，一开始就是以「这样的事」为目的，但身体已经不听使唤了
+		PRINTFORMW 那么，该怎么办呢……
+		CALL SINGLE_DRAWLINE
+		;意思の力で……はダミー
+		$ZENGI_LOOP
+		CALL ASK_MULTI("口交", "手交", "随你喜欢的疼爱我吧", "休想侵犯我")
+
+		SELECTCASE RESULT
+			CASE 0
+				PRINTFORML 无法抑制情欲的%ANAME(対象)%跪在了男人的身边
+				PRINTFORMW 脱下他的裤子，肉棒像是跳舞一样，一下子就蹦出来了
+				PRINTFORML 「嘿嘿，来吧，这家伙怎么样啊？」
+				PRINTFORML 怎么办呢？只有清楚地向他说明，他才会放过我。
+				PRINTFORMW 于是他马上用已经勃起的肉棒在%ANAME(対象)%的脸颊上用力的压着
+				PRINTFORML 虽然%ANAME(対象)%很讨厌这样肮脏的东西……但是脸上传来的雄性的气息以及滚烫的触感，却让人难以拒绝。
+				PRINTFORMW 张开了嘴巴，把他那已经勃起的像一根石棍一样的肉棒含在了嘴里
+				CALL KISS_COMMON(対象, @"药商的肉棒", "被药商尽情的强奸")
+				PRINTFORML 「哇，対了対了，就是这样。母猪就应该像母猪一样喊着肉棒就行了。」
+				PRINTFORML 「怎么样？我的肉棒好吃么？嗯？」
+				PRINTFORML 感受着嘴的肉棒传来的的热度，使得%ANAME(対象)%性欲高涨。
+				PRINTFORML 明明正在吃着男人肮脏的肉棒，但是却感觉美味得不得了
+				PRINTFORMW 从龟头上渗出的苦味、在舌头上迅速得到扩散开来，让她更加疯狂。
+				PRINTFORML 「哦！？真是淫乱啊，含着肉棒居然这么兴奋！」
+				PRINTFORML 应为实在太过于性奋了，手伸向了自己的\@ HAS_PENIS(対象) ? 肉棒 # 秘裂 \@
+				PRINTFORML 然后用自己的手开始责弄那里
+				PRINTFORML 嘴里，肺里都充满了雄性的气味，甚至都要染进大脑里去了,依旧被命令着侍奉
+				PRINTFORMW %ANAME(対象)%不断地把头前后摆动着，用嘴唇咕嘟咕嘟地吮吸着肉棒，一边进行着这件事一边沉迷于自慰中……
+				PRINTFORML 「啊——，肉棒感觉到了，真是淫乱的人啊」
+				PRINTFORML 「如果你那么想要肉棒的话，那我就让你尝尝，噢啦哦啦哦啦！」(你他吗是jojo么)
+				PRINTFORML 男子抓住%ANAME(対象)%的头，让它前后的动着。就像在使用飞机杯一般，不仅仅是%ANAME(対象)%的口腔，甚至连喉咙也使用。
+				PRINTFORML 虽然喉壁被龟头狠狠地一下下的顶撞着，但她还是非常兴奋。
+				PRINTFORMW 依旧在\@ HAS_PENIS(対象) ? 肉棒や # 陰核や \@上责弄着的手，是最好的证据……
+				PRINTFORML 「嘿嘿，你的嘴被当成便所使用了，你知道吗？啊？」
+				PRINTFORML 用粗暴的语调询问着的他，完全轻视着%ANAME(対象)%。尽管如此，%ANAME(対象)%还是兴致高涨。
+				PRINTFORMW 被作为性处理工具使用，变的更加的性奋了
+				PRINTFORMW 肉棒粗暴的在哪尺寸不相称的小嘴里抽插着，咕嘟咕嘟粗俗的水音在房间中回响着。
+				PRINTFORML 「啊～糟糕，射精，就要射精了，全部喝光吧，知道吐出来会怎么样吧，啊？」
+				PRINTFORML 抛弃可疑的假面，男人进行恐吓。但是，他甚至没有必要特意做那样的发言。
+				PRINTFORMW 用嘴侍奉着眼前的这个凶恶的肉棒这件事是不可能停止的，越是这么想，%ANAME(対象)%就越是屈服于他的肉棒
+				PRINTFORML 「我射精了哦，你这母猪，呜呜，呜呜！」
+				PRINTFORML 在男人的声音刚落下之后，滚烫的精液就从肉棒的尿道中咕噜咕噜地释放出来。
+				PRINTFORML 他的精液吧她的牙龈、口壁、舌头、牙缝、喉咙、食道都染成了乳白色。
+				PRINTFORMW 她一边感到无数的精子在口腔跳舞，一边像是吃年糕一样发出下流的声音将会浓稠的精子喝了下去。
+				PRINTFORMW 另一方面，因为滚烫的精液刺激到了胃，于是她也达到了绝顶。
+				PRINTFORM 背部微微弯曲，
+				IF HAS_PENIS(対象)
+					PRINTFORML 肉棒咕噜咕噜地撒满精液弄脏地板。
+					PRINTFORMW 她的手狠狠地将阴道弄得一塌糊涂，手上的动作让她更加剧烈的高潮了。
+				ELSE
+					PRINTFORML 阴道里噗嗤噗嗤的喷射出浓厚的淫液
+					PRINTFORMW 这是她屈服于药商这一雄性，比任何语言都易懂的证据……
+				ENDIF
+				PRINTFORML 「哈哈，你真是个不错的便器啊。嗓子如果再紧一点的话就是100分了」
+				PRINTFORML 狠狠地射精了的药商从%ANAME(対象)%的嘴唇拔出肉棒。之所以发出「嘿嘿」的声音，是因为她一直吸着肉棒直到最后的最后
+				PRINTFORMW 嘴唇与龟头之间，唾液与精液混杂在一起牵成了线……
+				IF HAS_PENIS(対象)
+					PRINTFORML 「喂，别发呆了。地板还没有打扫干净吧？」
+					PRINTFORML 地板上从%ANAME(対象)%身体上滴落下来的白灼和淫水混合了一大滩
+					PRINTFORMW 被男人命令着，%ANAME(対象)%自己爬在地上用舌头将地面上浓稠的混合物，小心翼翼地舔噬干净了……
+				ENDIF
+
+				CALL FUCK(対象, "欲望, 奉仕, 性技, 精愛, 射精, Ｃ, \@ !VIRGIN ? Ｖ, # \@ 口淫", "接吻喪失, 口内射精, CFLAG減少", 0, "药商的肉棒", "", "", "被药商尽情的强奸")
+			CASE 1
+				PRINTFORML 无法抑制情欲的%ANAME(対象)%跪在了男人的身边
+				PRINTFORMW 脱下他的裤子，肉棒像是跳舞一样，一下子就蹦出来了
+				PRINTFORML 「嘿嘿，来吧，这家伙怎么样啊？」
+				PRINTFORML 怎么办呢？只有清楚地向他说明，他才放过我。
+				PRINTFORMW 之后他马上用已经勃起的肉棒在%ANAME(対象)%的脸颊上用力的压着
+				PRINTFORML 这么脏的东西……然而，被流入鼻腔的雄性气味所刺激，实在是无可奈何。
+				PRINTFORMW 虽然知道闻得越多越不妙，但还是经受不了雄性的气息的诱惑。
+				PRINTFORML 「啊？啊？什么啊，想要含进嘴里吗？。嘿，母猪还装个什么样子」
+				PRINTFORML 虽然理性说不能这么做，但是%ANAME(対象)%还是不顾廉耻，不顾尊严的享受着从肉棒上面散发出来的雄性气息
+				PRINTFORMW 尽管如此，从身体传来的疼痛，只靠侍奉眼前的雄性的肉棒是不够的，这样欲望不能消除
+				PRINTFORML %ANAME(対象)%小心翼翼的用颤抖着的手指摸向他的肉棒
+				PRINTFORML 「混蛋，你在干什么呢，快点给我摸上来。」
+				PRINTFORMW 在催促下，她的手开始套弄肉棒。
+				PRINTFORMW 明明知道不能做这种不检点的事。但是手却像磁铁粘在像钢铁一样坚硬的肉棒上。
+				PRINTFORML 「喂，做的不错啊，你已经习惯抚摸肉棒了吧，是谁教你的，啊？」
+				PRINTFORML 男人一边挺起腰，一边吧肉棒交给%ANAME(対象)%
+				PRINTFORMW 从那个尖端慢慢渗出的东西似乎在宣示着自己的存在一样，%ANAME(対象)%的理性进一步溶化了
+				PRINTFORML 「哦！？呵呵！？什么啊喂，淫乱的家伙，已经想要被这家伙插进去了么～？」
+				PRINTFORML 应为实在太过于性奋了，手伸向了自己的\@ HAS_PENIS(対象) ? 肉棒 # 秘裂 \@
+				PRINTFORML 然后用自己的手开始责弄那里
+				PRINTFORML 想要被这样的肉棒插进身体里么？仅仅这样的一句话，脑海中就开始浮现出这样的妄想。
+				PRINTFORMW 那该有多舒服呢——和现在摆弄着胯下的手指相比，根本是天壤之别啊。
+				PRINTFORML 「真色情啊，真让人受不了。喂，喘息再淫乱一点吧，母猪就该有母猪的样子」
+				PRINTFORML 男人一边毫不客气地责弄乳房，一边这么说着。完全不在乎她的想法，但%ANAME(対象)%却没有任何反抗
+				PRINTFORML 岂止如此，还按照他所说的那样，一边发出粗俗的声音和水声，一边责弄着自己的阴道。
+				PRINTFORML 男人的肉棒更硬，更热。是因为自己的痴态而兴奋--%ANAME(対象)%的心中浮现的是喜悦
+				PRINTFORMW 是药的效果，还是本性，总之她现在已经成为了为了雄性而存在的雌性了。
+				PRINTFORML 「喂，差不多该射精了，把脸转过来这边，我要射在你的脸上了。」
+				PRINTFORML 早就抛弃殷勤的假面，男人高声的下着命令。但是，完全没有必要特意下那样的命令。
+				PRINTFORMW %ANAME(対象)%是为雄性效劳的母猪，按照她说的姿势，用迎接的姿态等待着男人的精液
+				PRINTFORML 「我要射精了哦，你这母猪，哦，哦！」
+				PRINTFORML 男人的话音刚落下，肉棒就咕噜咕噜的从尿道中射出了大量浓稠的精液
+				PRINTFORML 精液吧她的脸上弄得乱七八糟，张开的嘴里，比起的眼睛上，以及漂亮的脸上都覆盖着浓稠的精液
+				PRINTFORMW 被精液射在脸上就像是引火索一样，她感受着脸上的灼热感瞬间达到了绝顶
+				PRINTFORM 背部微微弯曲，
+				IF HAS_PENIS(対象)
+					PRINTFORML 肉棒咕噜咕噜地撒满精液弄脏地板。但是，无论是气势、数量还是浓度，都比不上他的。
+					PRINTFORML 她不仅仅作为雌性屈服于他的肉棒，在雄性方面也同样敌不过他
+					PRINTFORMW 她的手狠狠地将阴道弄得一塌糊涂，手上的动作让她更加剧烈的高潮了。
+				ELSE
+					PRINTFORML 阴道里噗嗤噗嗤的喷射出浓厚的淫液
+					PRINTFORMW 这是她屈服于药商这一雄性，比任何语言都易懂的证据……
+				ENDIF
+				PRINTFORML 「嘿嘿嘿，这个妆不错嘛，嘿嘿。」
+				PRINTFORML 在肉棒噗嗤噗嗤的喷射了一会精子之后，她的上脸好像是在用精液做面膜似的。
+				PRINTFORMW %ANAME(対象)%现在的样子就算是熟人看见了，也不会认出是她吧
+				PRINTFORML 「但是还不够呢，我会帮你画上更多的妆，哈哈！」
+				PRINTFORMW 男子哈哈地笑着，将自己的双手放在%ANAME(対象)%的脸上
+				PRINTFORML 然后开始将刚刚射出来的新鲜精液涂抹到%ANAME(対象)%的脸上的各个地方
+				PRINTFORML 就像是要渗透进每一个细胞里一样
+				PRINTFORML 据说「女人的脸就是生命」——如果这样说的话，现在她就如同被雄性的欲望玷污了生命一般。
+				PRINTFORML 尽管如此%ANAME(対象)%也没有任何抵抗，只是被动的将雄性的精液涂抹到脸上。
+				PRINTFORMW 在不断颤抖的心中萌生出了被虐的萌芽……
+				PRINTFORML 「嘿嘿，完成了，这样就变成适合母猪的妆了」
+				PRINTFORMW 不久，男子放开了手。虽然感到脸部很不舒服，但%ANAME(対象)%対妆容做出了「十分感谢」的言辞……
+				IF HAS_PENIS(対象)
+					PRINTFORML 「喂，别发呆了。地板还没有打扫干净吧？」
+					PRINTFORML 地板上从%ANAME(対象)%身体上滴落下来的白灼和淫水混合了一大滩
+					PRINTFORMW 被男人命令着，%ANAME(対象)%自己爬在地上用舌头将地面上浓稠的混合物，小心翼翼地舔噬干净了……
+				ENDIF
+				CALL FUCK(対象, "欲望, 奉仕, 性技, 精愛, 射精, Ｃ, \@ !VIRGIN ? Ｖ # \@ ", "CFLAG減少")
+			CASE 2
+				PRINTFORML 无法忍受情欲的%ANAME(対象)%向药商请求安慰。
+				PRINTFORML 「呵呵，你希望被今天刚刚遇到的连名字都不知道的男人责弄你的身体吗？」
+				PRINTFORML 「你知道自己在说什么么？哎呀哎呀，竟然还有这么不得了的婊子！」
+				PRINTFORML 正如男人所说的那样。自己所做的事，是完全违背了常理和伦理的。
+				PRINTFORMW 但是，即使理解了这一点，%ANAME(対象)%还是在身体的欲求下选择了屈服
+				PRINTFORML 「如果想要这么玩的话，就赶紧自己脱衣服吧，母猪。」
+				PRINTFORML 被催促着。他的目光看向了在衣物覆盖下的我的肉体，眼神中充满了欲望。
+				PRINTFORML 一般情况下理所当然地会感到厌恶、愤怒，而%ANAME(対象)%却感到兴奋
+				PRINTFORMW 终于，%ANAME(対象)%一边害羞着，一边脱去了一件件衣服，露出了完美的胴体
+				PRINTFORML 「嘻嘻哈！身材很不错嘛？哼，这么色情的身材，不就是为了成为谁的便器而出生的吗？」
+				PRINTFORML 「喂，母猪，我要开始责弄你了，自己把腿张开！」
+				PRINTFORML 男人完全得意忘形。尽管如此，%ANAME(対象)%还是顺从着他
+				PRINTFORMW 能安慰%ANAME(対象)%的因发情而带来的疼痛的，只有这个男人
+				PRINTFORML 「嘿，你的阴道已经湿透了吧，已经想要肉棒想要的吧唧吧唧湿透了吧？真是淫乱的变态啊「
+				PRINTFORMW 旁若无人的用手指撑开了阴道，感受着阴道内灌进了凉凉的空气的%ANAME(対象)%发出了甜美的声音
+				PRINTFORML 「哇，马上就流出了淫水啊。嘿嘿，真是个淫荡的女人，你难道打算用别人的手指高潮么？」
+				PRINTFORML 轻轻地被挖秘密的裂缝。快感让的%ANAME(対象)%得腰微微颤抖,不过，这样还远远不能使她满足
+				PRINTFORMW 不知什么时候，她紧紧地握住他的胳膊，要求进一步的行为。
+				IF VIRGIN(対象)
+					PRINTFORML 「哈哈哈，明明还是处女，却不知廉耻的流出了淫水，明明不知道肉棒的味道，还是因此而发情了。你是天生就这么淫乱的吧？「
+					PRINTFORML 「等着哦。马上，我就会把你变成真正的女人」
+					PRINTFORMW 我马上要强奸你了。即使対被说除了与那差不多的宣言，%ANAME(対象)%也只感觉到了甜美的滋味
+					PRINTFORML 「但是……处女自己用肉棒把自己破处是最棒的，所以现在你就自己动手吧」
+					PRINTFORMW 在%ANAME(対象)%的阴道里浅浅的挖弄着处女摸的手指被抽出来了
+					PRINTFORML 「哈哈哈哈，别那么遗憾啊，我来弄你的这边。」
+					PRINTFORML 男人的手，伸向后面。掰开他的屁股肉，插进肛门里，开始专注的责弄她的肛门。
+					PRINTFORMW 在那种地方……%ANAME(対象)%打算阻止他,不过，男人的速度更快。他很直接的，把手指插进了肛门里责弄着
+					PRINTFORML 「喂喂，接下来你就是我肉便器了。你觉得怎么样啊？不好好地说出来的话，是没办法成为一个出色的肉便器的吧」
+					PRINTFORML 「不用担心，多亏了你的淫水，手指都湿透了，哈哈，这是最好的润滑剂啊。」
+					PRINTFORML 正如他所说，淫水代替了润滑油沾满了手指，手指毫无抵抗地插进了肛门里
+					PRINTFORMW 他的手指一动，从身体里传来的快感使得脊椎都好像要融化了一般。腰都没有了力气
+					PRINTFORML 「喂，你在干什么？马上就要被夺走处女了，在那之前做好万全的准备不是应该做的么？」
+					PRINTFORML 「真是个没有自尊的女人啊，被责弄着这个洞都能感觉到快感么」
+					PRINTFORMW 就像训斥一般，手指在肠壁上咯吱咯吱地挠着。由于那个快感，像是被鞭子抽到的马匹一样，%ANAME(対象)%伸出了手指放到到自己的耻部上。
+					IF HAS_PENIS(対象)
+						PRINTFORML 握住女人不会有的东西，开始侍奉着
+						PRINTFORML 从菊花里传来的快感，全身都产生了剧烈的反应
+						PRINTFORMW 为了能更多的体会这种让脑髓都为之麻木的快感，%ANAME(対象)%的腰开始扭动了。
+						PRINTFORML 「嘿，你这个女人真是淫乱啊，看见了肉棒就这么高兴。」
+						PRINTFORML 「而且之前明明没有被责弄过肛门，菊花却还是能够产生快感。」
+						PRINTFORML 「这已经没有作为女人的意义了吧？哎，变成男的怎么样啊，听到了吗？」
+						PRINTFORML 即使作为女人的自己被否定了，%ANAME(対象)%也还是没有停止自慰　
+						PRINTFORMW 一边提高呻吟的声音，一边专心致志地继续侍奉肉棒
+						PRINTFORML 「啊——从刚才开始就一直在流出肠液，真是一只下贱的母狗啊」
+						PRINTFORMW 被轻轻地拍打着屁股。这样的疼痛感，让%ANAME(対象)%一边发出甜美的声音一边向上仰起来了
+						PRINTFORML 「哦？嘿嘿，哈哈哈，你瞧，既然这么舒服的话就给快点我高潮吧！」
+						PRINTFORML 対%ANAME(対象)%的反应感到满意的男人，陆续向肛门里插进了第二根，第三根手指
+						PRINTFORML 并且，用插进肛门的手指，激烈地开始搅拌直肠。
+						PRINTFORMW 那里肠液不停的分泌着，手指抽送时发出咕嘟咕嘟的声音。
+						PRINTFORML 被肛门中的快感刺激到的%ANAME(対象)%更激烈的撸动着肉棒
+						PRINTFORML 像这种情况，她已经很长时间没有感受过了
+						PRINTFORMW 声音逐渐升高，腰和膝盖不停地痉挛。
+						PRINTFORML 「喂，差不多该高潮了吧，嗯？说说看，如果不说出来的话就不让你高潮哦？」
+						PRINTFORML 被这么要求了的%ANAME(対象)%用自己所知道的最下流的词汇，传达了自己即将迎接绝顶的事
+						PRINTFORMW 脑子里已经完全没有了害羞的想法。现在已经变得不在乎其他的事只想追求快感了。 
+						PRINTFORML 「啊，这样啊，既然你这么想要的话就给你吧，高潮吧！」
+						PRINTFORML 男人在这短暂的爱抚中看穿了%ANAME(対象)%的弱点，用指腹狠狠地挖弄着
+						PRINTFORMW 就像是点燃了导火索一般，%ANAME(対象)%完全不在乎羞耻和尊严的迎来了剧烈的高潮
+						PRINTFORML 背部弯曲着，像是被吸走了身体里全部的空气似的痉挛着。
+						PRINTFORMW 在充满了淫水与爱液的阴道里从肉棒中咕噜咕噜的射出了浓稠的精液
+						PRINTFORML 「啊啊啊！这家伙一定会成为最棒的肉便器的！」
+						PRINTFORML 「被不认识的男人责弄着阴道和肛门，没有抵抗的达到了高潮。真的不是脑袋有问题吗？」
+						PRINTFORMW 虽然笑得咯吱咯吱，可男子仍旧持续着対%ANAME(対象)%肛门的责弄
+						PRINTFORMW 最后，直到他射不出来了为之，她都持续的品味着绝顶的快乐
+					ELSE
+						PRINTFORML 把手指放在女人的弱点上开始不断挖弄着。
+						PRINTFORMW 令人麻木的快感像是电流一样，一直传到大脑顶端。
+						PRINTFORML 「嘿，在高潮之前还要加把劲啊。」
+						PRINTFORML 「在我责弄之前就把阴蒂就已经勃起了啊。」
+						PRINTFORML 「肯定平时自己就一直在责弄吧？啊？说说看，啊？」
+						PRINTFORML 虽然被说着屈辱的言语，单%ANAME(対象)%依旧没有停止自慰
+						PRINTFORMW 一边发出呻吟声，一边专心致志地责弄着阴蒂。
+						PRINTFORML 「啊——啊，阴道里已经全是淫水了，真是一只淫乱的母狗啊」
+						PRINTFORMW 被轻轻地拍打屁股。这样尖锐的疼痛感，让%ANAME(対象)%一边发出甜美的声音一边将背部反弓起来了
+						PRINTFORML 「哦？这样的反应很棒啊，嘿嘿，既然那么喜欢的话就尽情的给我高潮吧！」
+						PRINTFORML 対%ANAME(対象)%的反应感到满意的男人，陆续向肛门里插进了第二根，第三根手指
+						PRINTFORML 并且，用插进肛门的手指，激烈地开始搅拌直肠。
+						PRINTFORMW 那里分泌着大量的肠液，每次提取手指的时候都会发出咕嘟咕嘟的声音。
+						PRINTFORML 被肛门中的快感刺激到的%ANAME(対象)%更激烈责弄着阴蒂和自己的身体
+						PRINTFORML 像这种情况，她已经很长时间没有感受过了
+						PRINTFORMW 声音逐渐变大，腰和膝盖在抽动着，痉挛着。
+						PRINTFORML 「喂，差不多该高潮了吧，诶？说说看，如果不说的话就不让你高潮哦？」
+						PRINTFORML 在男人这样的要求下，%ANAME(対象)%用着自己所知道的最下流的词汇，传达了自己马上就要迎来绝顶这件事
+						PRINTFORMW 脑子里已经完全没有害羞之类的概念了。现在的脑子里完全不知道其他的事只想追求快感
+						PRINTFORML 「啊，这样啊，既然你这么想要的话就给你吧，高潮吧！」
+						PRINTFORMW 男人在这短暂的爱抚中看穿了%ANAME(対象)%的弱点，用指腹狠狠地挖弄着
+						PRINTFORML 就像是点燃了导火索一般，%ANAME(対象)%完全不在乎羞耻和尊严的高潮了
+						PRINTFORMW 背部弯曲着，像是被吸走了身体里全部的空气似的痉挛着。。女性得到阴道里喷出了大量浓稠的淫水。
+						PRINTFORML 「啊啊啊！这家伙一定会成为最棒的肉便器的！」
+						PRINTFORML 「被不认识的男人责弄着阴道和肛门，没有抵抗的达到了高潮。真的不是脑袋有问题吗？」
+						PRINTFORMW 虽然笑得咯吱咯吱，可男子仍旧持续着対%ANAME(対象)%肛门的责弄
+						PRINTFORMW 最后，直到他射不出来了为之，她都持续的品味着绝顶的快乐……
+					ENDIF
+					IF HAS_PENIS(対象)
+						PRINTFORML 「喂，别发呆了。地板还没有打扫干净吧？」
+						PRINTFORML 地板上从%ANAME(対象)%身体上滴落下来的白灼和淫水混合了一大滩
+						PRINTFORMW 被男人命令着，%ANAME(対象)%自己爬在地上用舌头将地面上浓稠的混合物，小心翼翼地舔噬干净了……
+					ENDIF
+					CALL FUCK(対象, "欲望, 性技, 精愛, 自慰, 射精, Ａ, Ｃ", "CFLAG減少")
+				ELSE
+					PRINTFORML 「嘿嘿，接二连三的滴出淫水，就这么想要肉棒么，其实你本来就是个淫乱的女人吧。」
+					PRINTFORML 「等一下哦？我马上把肉棒插进你的阴道里，把它变成我的专用便所」
+					PRINTFORMW 我马上就要强奸你了。即使被说了跟这样差不多的话，%ANAME(対象)%不在乎的其他的事只是在享受着身体上的快感
+					PRINTFORML 「但是，那是之后的事。嘛，现在要做的事，就是好好的把你的阴道调教好，让它成为我肉棒的专用便器「
+					PRINTFORMW 男人的手指，像是在探索阴道内一样开始蠢蠢欲动。将%ANAME(対象)%的性器官改造成适合肉棒插入的便器——
+					PRINTFORML 想这样的话，只用自己的手指就能让女性沉醉在快感之中吧
+					PRINTFORML 明明已经知道了这一点，但%ANAME(対象)%却一点反抗的想法都没有
+					PRINTFORMW 対于现在的%ANAME(対象)%来说，他给予的快乐，就好像対鱼来说的水一样
+					PRINTFORML 「喂，像是你这么淫乱的人，光是这样还不够吧？」
+					PRINTFORML 「话说回来，我的手的数量是有限的，不够的地方自己来试试怎么样？」
+					PRINTFORML 用着像是提议一样的语气实际上却是命令。指尖轻轻地挖弄着%ANAME(対象)%的弱点。
+					PRINTFORMW 想要我更多责弄「想要的地方」就服从于我吧。就是这样。如果%ANAME(対象)%不服从与我的话是不会让你去的
+					IF HAS_PENIS(対象)
+						PRINTFORMW 握住女人不会有的东西，开始侍奉着
+						PRINTFORML 插进了女性阴道里的手指在里面不停的挖弄着，快感传遍了全身使得身体不断地颤抖着。
+						PRINTFORMW 为了能更多的体会这种让脑髓都为之麻木的快感，%ANAME(対象)%的腰开始扭动了。
+						PRINTFORML 「嘿，你这个女人真是淫乱啊，看见了肉棒就这么高兴。」
+						PRINTFORML 「真是个淫乱的家伙啊，就算引导被责弄的沾满了淫水，也还是没有停下対肉棒的侍奉」
+						PRINTFORML 「啊？如果肉棒那么舒服的话，干脆变成男生怎么样，啊啊？」
+						PRINTFORML 即使作为女人的自己被否定了，%ANAME(対象)%也还是没有停止自慰
+						PRINTFORMW 一边提高呻吟的声音，一边专心致志地继续侍奉肉棒
+						PRINTFORML 「啊—啊—淫水一直待往下滴，真是淫乱的母狗啊」
+						PRINTFORMW 被轻轻地拍打屁股。这样尖锐的疼痛感，让%ANAME(対象)%一边发出甜美的声音一边将背部反弓起来了
+						PRINTFORML 「哦？这样的反应很棒啊，嘿嘿，既然那么喜欢这样的话，就尽情的给我高潮吧！」
+						PRINTFORML 完全揭露了本性的男人在阴道里插进了第二根，第三根手指。
+						PRINTFORML 并且，用已经插进肛门里了的手指不停的在里面搅动着，剧烈的刺激着隔壁发情了的阴道
+						PRINTFORMW 阴道与肛门内被不停的责弄着的快感，使得阴道里分泌了大量的爱液，每次拔出手指的时候都会咕嘟咕嘟地带出满是泡沫的爱液。
+						PRINTFORML 被肛门中的快感刺激到的%ANAME(対象)%更激烈的撸动着肉棒
+						PRINTFORML 像这种情况，她已经很长时间没有感受过了
+						PRINTFORMW 声音逐渐升高，腰和膝盖不停地痉挛。
+						PRINTFORML 「喂，差不多该高潮了吧，诶？说说看，如果不说的话就不让你高潮哦？」
+						PRINTFORML 在男人这样的要求下，%ANAME(対象)%用着自己所知道的最下流的词汇，传达了自己马上就要迎来绝顶这件事
+						PRINTFORMW 脑子里已经完全没有害羞之类的概念了。现在的脑子里完全不知道其他的事只想追求快感
+						PRINTFORML 「啊，这样啊，既然你这么想要的话就给你吧，高潮吧！」
+						PRINTFORML 男人在这短暂的爱抚中看穿了%ANAME(対象)%的弱点，用指腹狠狠地挖弄着
+						PRINTFORML 就像是点燃了导火索一般，%ANAME(対象)%完全不在乎羞耻和尊严的迎来了剧烈的高潮
+						PRINTFORML 背部反弓起来，全身像抽筋似的痉挛着。
+						PRINTFORMW 在充满了淫水与爱液的阴道里从肉棒中咕噜咕噜的射出了浓稠的精液
+						PRINTFORML 「啊啊啊！这家伙一定会成为最棒的肉便器的！」
+						PRINTFORML 「被不认识的男人责弄着阴道和肛门，没有抵抗的达到了高潮。真的不是脑袋有问题吗？」
+						PRINTFORML 虽然咯吱咯吱地笑着，但男人没有停下正在责弄着%ANAME(対象)%的身体里的手指
+						PRINTFORMW 结果，直到他厌倦为止，她一直品尝着无上的快乐
+						PRINTFORML  「喂，别发呆了。地板还没有打扫干净吧？」
+						PRINTFORML 地板上从%ANAME(対象)%身体上滴落下来的白灼和淫水混合了一大滩
+						PRINTFORMW 被男人命令着，%ANAME(対象)%自己爬在地上用舌头将地面上浓稠的混合物，小心翼翼地舔噬干净了……
+					ELSE
+						PRINTFORML 把手指放在女人的弱点上开始不断挖弄着。
+						PRINTFORML 令人麻木的快感像是电流一样，一直传到大脑顶端。
+						PRINTFORML 「嘿，在高潮之前还要加把劲啊。」
+						PRINTFORML 「在我责弄之前就把阴蒂就已经勃起了啊。」
+						PRINTFORML 「肯定平时自己就一直在责弄吧？啊？说说看，啊？」
+						PRINTFORML 虽然被说着屈辱的言语，单%ANAME(対象)%依旧没有停止自慰
+						PRINTFORML 一边发出呻吟声，一边专心致志地责弄着阴蒂。
+						PRINTFORML 「啊——啊，阴道里已经全是淫水了，真是一只淫乱的母狗啊」
+						PRINTFORML 被轻轻地拍打屁股。这样尖锐的疼痛感，让%ANAME(対象)%一边发出甜美的声音一边将背部反弓起来了
+						PRINTFORML 「哦？这样的反应很棒啊，嘿嘿，既然那么喜欢的话就尽情的给我高潮吧！」
+						PRINTFORML 対%ANAME(対象)%的反应感到满意的男人，陆续向肛门里插进了第二根，第三根手指
+						PRINTFORML 并且，用已经插进肛门里了的手指不停的在里面搅动着，剧烈的刺激着隔壁发情了的阴道
+						PRINTFORML 阴道与肛门内被不停的责弄着的快感，使得阴道里分泌了大量的爱液，每次拔出手指的时候都会咕嘟咕嘟地带出满是泡沫的爱液。
+						PRINTFORML 被肛门中的快感刺激到的%ANAME(対象)%更激烈责弄着阴蒂和自己的身体
+						PRINTFORML 像这种情况，她已经很长时间没有感受过了
+						PRINTFORML 声音逐渐变大，腰和膝盖在抽动着，痉挛着。
+						PRINTFORML 「喂，差不多该高潮了吧，诶？说说看，如果不说的话就不让你高潮哦？」
+						PRINTFORML 在男人这样的要求下，%ANAME(対象)%用着自己所知道的最下流的词汇，传达了自己马上就要迎来绝顶这件事
+						PRINTFORML 脑子里已经完全没有害羞之类的概念了。现在的脑子里完全不知道其他的事只想追求快感
+						PRINTFORML 「啊，这样啊，既然你这么想要的话就给你吧，高潮吧！」
+						PRINTFORML 男人在这短暂的爱抚中看穿了%ANAME(対象)%的弱点，用指腹狠狠地挖弄着
+						PRINTFORML 就像是点燃了导火索一般，%ANAME(対象)%完全不在乎羞耻和尊严的高潮了
+						PRINTFORML 背部弯曲着，像是被吸走了身体里全部的空气似的痉挛着。。女性得到阴道里喷出了大量浓稠的淫水。
+						PRINTFORML 「啊啊啊！这家伙一定会成为最棒的肉便器的！」
+						PRINTFORML 「被不认识的男人责弄着阴道和肛门，没有抵抗的达到了高潮。真的不是脑袋有问题吗？」
+						PRINTFORML 虽然咯吱咯吱地笑着，但男人没有停下正在责弄着%ANAME(対象)%的身体里的手指
+						PRINTFORML 最后，直到他射不出来了为之，她都持续的品味着绝顶的快乐……
+					ENDIF
+					;経験値追加
+					CALL FUCK(対象, "欲望, 性技, 精愛, 自慰, 射精, Ｖ, Ｃ", "CFLAG減少")
+					EXP:対象:絶頂経験 += 5
+				ENDIF
+			CASE 3
+				PRINTFORMW 「休想侵犯我！」
+				PRINTFORMW 虽然%ANAME(対象)%全身燥热，难以自已地想要责弄自己的下体，但脑海里的最后一丝理性让%ANAME(対象)%咬牙喊出了这句话
+				PRINTFORMW 靠着这一股气势，%ANAME(対象)%奋力抽出了武器
+				PRINTFORMW .
+				PRINTFORMW .
+				PRINTFORMW .
+				PRINTFORMW ……不由得用力砍了。好象还有气，怎么办呢？
+				CALL ASK_MULTI_JUDGE("枭首示众", 1, "当成奴隶", 1, "当触手的点心", ITEM:触手部屋 && ID_TO_CHARA(FLAG:触手部屋管理者) != -1)
+				SELECTCASE RESULT
+					CASE 0
+						PRINTFORMW 这样的男人没有活着的理由吧。
+						PRINTFORMW %ANAME(対象)%是恶德商人的末路，该男子在被曝光后就被炒鱿鱼了
+						PRINTFORMW 来自其他势力的评价上升了一点
+						FOR LOCAL, 1, MAX_COUNTRY
+							CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 20)
+						NEXT
+					CASE 1
+						PRINTFORMW %ANAME(対象)%命令男子当做性处理奴隶
+						PRINTFORMW 令人吃惊的是士兵们博得好评，{料金 / 20}的兵力聚集起来
+						COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 料金 / 20
+
+					CASE 2
+						PRINTFORMW %ANAME(対象)%把男人扔进触手室
+						PRINTFORMW 可爱的触手们不会拉肚子吧？有点担心杞人忧天。
+						CALL PRINT_ADD_EXP(ID_TO_CHARA(FLAG:触手部屋管理者), "妖術経験値", 料金 / 1000)
+						CALL TRAIN_AUTO_ABLUP(ID_TO_CHARA(FLAG:触手部屋管理者))
+					ENDSELECT
+					PRINTFORML ……不过之后，%ANAME(対象)%压抑不住自身的欲望，躲在房间里不断抚摸自己
+					CALL FUCK(対象, "欲望, Ｃ, Ｂ, Ｖ")
+					EXP:対象:絶頂経験 += LOCAL:1 * (60 + RAND:81) / 100
+					DVAR:薬売り_発生フラグ = -1
+					DVAR:薬売り_調教対象ID = 0
+					DVAR:薬売り_調教進行度 = 0
+					RETURN 1
+		ENDSELECT
+		;能力上昇メッセ
+		CALL TRAIN_AUTO_ABLUP(対象, 0)
+		PRINTFORML 
+		PRINTFORML ……之后，男人推倒了%ANAME(対象)%，让她四肢着地的压着她
+		PRINTFORMW 还在往下滴着淫水的阴道和正在不停的蠕动着的肛门，都暴露在他的视线之下
+		PRINTFORML 「喂，是让我来选择插进那一边呢，还是你自己来选择？」
+		PRINTFORMW 「如果直接说出来的话，我可是会把你侵犯到死的哦，嘿嘿！」
+		PRINTFORML 龟头在两个洞上不停地交替摩擦着
+		PRINTFORML 虽说现在就要被侵犯了，而且还被逼着要自己选择被侵犯哪一个洞，但%ANAME(対象)%完全没有觉得讨厌
+		PRINTFORMW 不仅如此，她的胸口还因为兴奋而剧烈的起伏着，却迟迟无法选择到底要被侵犯那一个洞……甚至想都没有去想
+		PRINTFORMW 那么，插进那一个洞好呢……
+		CALL ASK_MULTI("阴道","肛门","两边都被侵犯")
+		LOCAL = RESULT
+
+		SELECTCASE LOCAL
+			CASE 0
+				PRINTFORMW 想要侵犯阴道……听着这样的要求男人咧开嘴下流的笑着。
+				PRINTFORML 「嘿嘿，是么，想要被侵犯这里啊？」
+				SIF VIRGIN(対象)
+					PRINTFORMW 「那么希望被弄破处女摸啊，真是淫乱的女人呢」
+				PRINTFORMW 「马上，我就要把肉棒插进我专用的肉便器阴道里了」
+				PRINTFORMW 被又硬又烫的肉棒顶着，一想到马上就要被它插进身体里，这样的想象就快要达到高潮了
+			CASE 1
+				PRINTFORMW 希望被插进肛门里……她亲自掰开了屁股，这样索求到，男子发出了下流的笑声。
+				PRINTFORML 「嘿嘿嘿，是吗，你这个变态的女人想要被疼爱这边啊。」
+				SIF VIRGIN(対象)
+					PRINTFORMW 「明明是处女，却想要被责弄肛门，真是下流啊，是不是啊？」
+				PRINTFORMW 「真是太棒了，有这么棒的肉便器我已经不想再侵犯其她的女人了」
+				PRINTFORMW 被又硬又烫的肉棒顶着，一想到马上就要被它插进身体里，这样的想象就快要达到高潮了
+			CASE 2
+				PRINTFORMW 两边都想要……自己扭着腰求着他侵犯自己，那男子大声的笑了出来。
+				PRINTFORML 「哎哟哟!居然两边都想要被侵犯啊!真是想不到啊，你这个母猪!」
+				SIF VIRGIN(対象)
+					PRINTFORMW 「有那样母猪的本性、却至今还是个处女、多么可怜的家伙啊! ?」
+				PRINTFORMW 「啊，是吗?那样的话，我就把你两边的洞都侵犯的合不拢把，不要乱动!」
+				PRINTFORMW 被又硬又烫的肉棒顶着，一想到马上就要被它插进身体里，这样的想象就快要达到高潮了
+		ENDSELECT
+		PRINTFORML 「……怎么了，你想要我把肉棒插进去么？」
+		PRINTFORMW 「哈哈哈！这世上可没有那么便宜的事~~~！」
+		PRINTFORML 男子哈哈地笑着，把腰收了回去
+		PRINTFORML 肉棒从它本应该插进去的地方离开了
+		PRINTFORMW 男人到底在说什么，%ANAME(対象)%理解不了了
+		PRINTFORML 「哈！没错就是这样，这个表情最棒了！「
+		PRINTFORMW 「只是一只想要被人侵犯的母猪而已，居然真的以为我会把肉棒插进去，这个样子真是太棒了！？」
+		PRINTFORML 自己被骗了——这个男人根本不打算凌辱自己。至此，%ANAME(対象)%才弄明白了这件事
+		PRINTFORMW 所以她低声下气的向男子索求着肉棒，但是男子并没有答应，身体上的因为欲望而产生的疼痛让%ANAME(対象)%快要疯掉了
+		PRINTFORML 「啊，讨厌。谁会吧肉棒插进你这样白痴的女人的身体里呢？」
+		PRINTFORMW 「一个人悲惨地\@ HAS_PENIS(対象) ? 处理着肉棒 # 抠弄着小穴 \@」
+					;TranslatedMark「一人惨めに\@ HAS_PENIS(対象) ? チンポ扱いてるこったな # マンコ弄くり回してるこったな \@」
+		PRINTFORML 「但是……如果你无论如何都想被侵犯的话。」
+		PRINTFORMW 「下次一个人来我的店里来吧……嘿嘿，我会的好好疼爱你的」
+		PRINTFORML 男人留下了这样的一句话后就离开了
+		PRINTFORMW %ANAME(対象)%只好抱着疼痛不已的身体，一个人寂寞的流着眼泪凄惨地想象着\@ HAS_PENIS(対象) ? 肉棒を扱き # 被肉棒插进身体里的时候的感觉自慰 \@
+		DVAR:薬売り_調教対象ID = GET_ID(対象)
+	ENDIF
+ENDIF
+RETURN 1

@@ -1,0 +1,167 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K31_DIE_KAGUYA_RATE(対象)
+#DIM 対象
+RETURN 30
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K31_DIE_KAGUYA_DECISION(対象)
+#DIM 対象
+#DIM 輝夜
+#DIM 判定値
+輝夜 = NAME_TO_CHARA("輝夜")
+
+
+;いちどきり
+SIF	KDVAR:対象:妹紅_刺客
+RETURN 0
+
+;対象が君主ならだめ
+SIF GET_COUNTRY_BOSS(CFLAG:対象:所属) == 対象
+	RETURN 0
+
+;駄目キャラリスト
+SIF GROUPMATCH(MASTER, NAME_TO_CHARA("てゐ"), NAME_TO_CHARA("鈴仙"), NAME_TO_CHARA("輝夜"), NAME_TO_CHARA("永琳"), NAME_TO_CHARA("慧音"))
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 0, 0) && CHECK_KOJO_DAILY_HAPPEN(輝夜, 1, 0)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K31_DIE_KAGUYA_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K31_DIE_KAGUYA(対象)
+#DIM 対象
+#DIM 輝夜
+#DIM 判定値
+輝夜 = NAME_TO_CHARA("輝夜")
+
+PRINTFORMW 「%ANAME(輝夜)%！　我来殺你了！」
+PRINTFORML 在據点工作的時候、突然聽到非常嘈吵的怒声
+PRINTFORML 再跑去查看発生什麼事的時候、看見一個全身纏着火焰的少女襲撃過来
+PRINTFORML 正当在疑惑衛兵都去哪……的時候、看見衛兵倒在%PRONOUN(対象)%周囲的地上
+PRINTFORML 看見那華麗的戦闘姿態後、就知道她是具有相当実力的人
+PRINTFORMW 「那辺的傢伙！　%ANAME(輝夜)%在哪裏、将她隠藏起来的話我絶対不会原諒你哦！」
+PRINTFORMW 「告訴她%ANAME(対象)%来了！　這樣她就会過来這辺了！」
+PRINTFORML 看来少女的目標是%ANAME(輝夜)%。少女説要殺死%ANAME(輝夜)%、大概是刺客之類的吧
+PRINTFORML 但作為蓬莱人的%ANAME(輝夜)%怎麼可能会這樣被軽易殺死呢
+PRINTFORML 要怎麼辦……
+PRINTFORML 
+CALL ASK_YN("迎撃", "讓少女通過")
+
+IF RESULT == 1
+	PRINTFORMW 「誒……讓我通過嗎……雖然很謝謝你、誒誒……？」
+	PRINTFORMW 「就這樣讓我通過不会令你困擾嗎……？　算了、這樣就可以了」
+	PRINTFORMW 後来你得知、%ANAME(対象)%和%ANAME(輝夜)%一決勝負、結果最後双方都死了
+	PRINTFORMW 看来%ANAME(対象)%也是蓬莱人呢……
+	CALL ADD_COOLTIME(対象, 3)
+	CALL ADD_COOLTIME(輝夜, 3)
+	KDVAR:対象:妹紅_刺客 = 1
+	RETURN 1
+ENDIF
+
+
+PRINTFORML 就算是這樣都不能讓她就這樣通過
+PRINTFORMW 迎撃了……
+PRINTFORMW 「呼？　不錯的胆量呢」
+PRINTFORMW 「那麼……就讓你這傢伙也一樣困在永遠的苦輪中吧！」
+PRINTFORMW 
+PRINTFORMW 
+PRINTFORMW 
+;勇儀式
+判定値 = (ABL:MASTER:武闘 + 10 - ABL:対象:武闘) * 5
+
+
+
+IF RAND:100 > 判定値
+	PRINTFORMW 「嘛、就這樣吧」
+	PRINTFORMW ……%ANAME(対象)%很強
+	PRINTFORML 即使受到攻撃很快就回復了
+	PRINTFORMW %PRONOUN(対象)%也是蓬莱人……
+	PRINTFORMW 「那麼、之後到%ANAME(輝夜)%了……雖然想這樣説、但有点累了」
+	PRINTFORMW 「今日就這樣吧、再見」
+	PRINTFORMW 在大鬧一場後、%ANAME(対象)%離開了……
+	CALL ADD_COOLTIME(MASTER, 3)
+	KDVAR:対象:妹紅_刺客 = 1
+	RETURN 1
+ENDIF
+
+PRINTFORMW 「嗚……可悪……！」
+PRINTFORML 總算……勉強地勝利了
+PRINTFORML 看来%PRONOUN(対象)%也是蓬莱人、被攻撃受傷後很快就会回復
+PRINTFORML 但、体力卻是有限的。在戦闘中、靠着耐力将少女打倒了
+PRINTFORMW 換句話説、是這辺的勝利了……
+PRINTFORMW 「呼……雖然無可奈何、輸了就是輸了」
+PRINTFORMW 「知道了、今次是我輸了、隨便你吧」
+PRINTFORMW %ANAME(対象)%沒有逃跑、就這樣趴在地上。是很干脆的類型呢
+PRINTFORML 那麼、要怎麼辦……
+PRINTL
+CALL ASK_MULTI_JUDGE("讓其做部下", 1, "投獄", 1, "処刑蓬莱人根本毫無意義吧", 0, "奪去金錢", 1, "讓她找輝夜", 1, "侵犯", HAS_PENIS(MASTER))
+
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORMW 「哈？　部下？　我？」
+		PRINTFORMW 「別開玩笑了、這樣我不就成了%ANAME(輝夜)%的同伴嗎」
+		PRINTFORMW 的確看少女的眼睛就知道、她不想成為任何人的同伴
+		PRINTFORMW 在輝夜身辺不就最容易殺死輝夜嗎？　……用這樣的理由説服少女了
+		PRINTFORMW 「原来如此……的確有道理」
+		PRINTFORMW 「了解了。%ANAME(MASTER)%吧？　我就做你的部下吧」
+		CALL COLOR_PRINTW(@"%ANAME(対象)%成為了部下", カラー_注意)
+		CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属, 1)
+		CFLAG:対象:好感度 += 500
+		KDVAR:対象:妹紅_刺客 = 1
+	CASE 1
+		PRINTFORMW 「嘛、這樣嗎、如果只是這樣的話」
+		PRINTFORMW 「隨便你吧」
+		PRINTFORMW %ANAME(対象)%被士兵帯走了……
+		CALL COLOR_PRINTW(@"俘虜了%ANAME(対象)%", カラー_注意)
+		CALL CAPTURE(対象, CFLAG:MASTER:所属)
+		KDVAR:対象:妹紅_刺客 = 1
+	CASE 3
+		PRINTFORMW 「啊、等下、錢的話請放過我……」
+		PRINTFORMW 「不行？　怎麼会這樣……」
+		CALL COLOR_PRINTW(@"得到了30000金", カラー_注意)
+		MONEY += 30000
+		KDVAR:対象:妹紅_刺客 = 1
+	CASE 4
+		PRINTFORMW 「……哈？　誒？　為什麼現在才？」
+		PRINTFORMW 「那麼剛才完全沒有必要戦闘吧……誒誒……甚麼啊……」
+		PRINTFORMW 「不、今天就算了、已経沒有体力了、這樣就無法和輝夜互相廝殺了」
+		PRINTFORMW 「再見」
+		PRINTFORMW %ANAME(対象)%離開了……
+		KDVAR:対象:妹紅_刺客 = 1
+	CASE 5
+		PRINTFORMW 「誒、啊、等、不、不要……！」
+		PRINTFORMW 從破損的衣服中能夠看見白皙的肌膚
+		PRINTFORMW 圧在%ANAME(対象)%身上、尽情品味這個纖瘦的身体……
+		PRINTFORML
+		CALL FUCK_RAPE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的肉棒", @"%ANAME(MASTER)%")
+		CALL FUCK(MASTER, "Ｃ, 性交, 射精, 奉仕", "接吻喪失, 童貞喪失", 0, @"%ANAME(対象)%的\@ RAND:2 ? 秘貝 # 嘴唇\@", "", @"%ANAME(対象)%的膣穴")
+		PRINTFORML 
+		PRINTFORMW 「啊、啊、啊……♥」
+		PRINTFORMW 一開始嫌悪的%ANAME(対象)%、在%ANAME(MASTER)%感到満足的時候、発出了妖媚的喘息声
+		PRINTFORMW 沈溺在快楽余韻的%ANAME(対象)%、被丟出據点了……
+		KDVAR:対象:妹紅_刺客 = 2
+ENDSELECT
+
+
+RETURN 1
+

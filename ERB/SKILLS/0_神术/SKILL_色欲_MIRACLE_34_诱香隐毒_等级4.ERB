@@ -1,0 +1,276 @@
+﻿;==========================================================
+;本文本整理了一个神术技能的编写可能会用到的函数和解决方案||
+;==========================================================
+
+
+;返回本技能是否存在
+@SKILL_0_MIRACLE_34_EXIST
+RETURN 1
+
+;返回本技能的技能名称,用于显示
+@SKILL_0_MIRACLE_34_NAME
+RESULTS = 诱香隐毒
+
+;返回技能等级,决定本技能学习门槛
+@SKILL_0_MIRACLE_34_LEVEL
+RETURN 4
+
+;返回本技能属于哪一信仰
+;0或本函数不存在=通用
+;1=暴虐 2=诡术 3=腐朽 4=色欲
+@SKILL_0_MIRACLE_34_FROMWHO
+RETURN 4
+
+;返回本技能的说明文本，用于玩家理解技能效果
+;按照发动条件-发动效果来编写,尽量精简
+@SKILL_0_MIRACLE_34_EXPLANATION
+RESULTS = [增幅]战斗时发动，使敌方部队攻击防御下降 [完美]额外降低攻防
+
+;返回技能的发动率,神术默认100%
+@SKILL_0_MIRACLE_34_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1000
+
+;用于AI势力角色学习神术，将复杂情况量化为优先度，优先度高的技能将被优先学习。
+;不允许AI角色学的技能直接返回0或不添加本函数
+;基础技能的升级版技能也同上
+;也用于遗忘技能时的选择量化标准
+;已经列出了一些常见影响因子,可以根据技能效果自行选择
+;如果有其他判断情况，请自行决定优先度的增减，对于某些AI极难发动的技能原则上应当考虑在AI需要遗忘技能时大幅度下调本技能优先度
+@SKILL_0_MIRACLE_34_SELFLEARN(对象)
+#DIM 对象
+#DIM 优先度
+#DIM 技能ID = 34  ;本技能ID
+#DIM 上任
+优先度 = 0
+;信仰等级要求
+CALLFORM SKILL_0_MIRACLE_{技能ID}_LEVEL
+SIF ABL:对象:信仰 < FAITH_LEVEL:RESULT
+	RETURN 0
+;神术等级加成,一般认为越高越强
+优先度 += RESULT * 20
+;已有技能联动，技能ID就是神术的编号从1开始
+;角色属性
+SIF ABL:对象:武闘 >= 70
+	优先度 += 20
+SIF ABL:对象:防衛 >= 70
+	优先度 += 20
+;角色是否主君
+;领土数量
+;被俘虏时
+SIF CFLAG:对象:捕虜先
+	优先度 -= 50
+;部队/都市就任情况
+上任 = 0
+IF CFLAG:对象:所属 != 0
+	FOR LOCAL:0, 0, MAX_CITY
+		IF CITY_COMMANDER:(LOCAL:0) != 0
+			FOR LOCAL:1, 0, MAX_CITY_COMMANDER
+				IF GET_CITY_COMMANDER(LOCAL:0, LOCAL:1) == 对象
+					;对象 = 都市LOCAL:0的第LOCAL:1守将
+					优先度 -= 30 ;守将不推荐降低防卫	
+					上任 = 1
+				ENDIF
+			NEXT
+		ENDIF
+	NEXT
+	FOR LOCAL:0, 0, MAX_COUNTRY
+		IF IS_COUNTRY(LOCAL:0)
+			FOR LOCAL:1, 0, 10
+				IF UNIT_COMMANDER:(LOCAL:0):(LOCAL:1) != 0
+					FOR LOCAL:2, 0, MAX_UNIT_COMMANDER
+						IF GET_UNIT_COMMANDER(LOCAL:0, LOCAL:1, LOCAL:2) == 对象
+							;对象 = 势力LOCAL:0的部队LOCAL:1的第LOCAL:2将领
+							优先度 += 30
+							上任 = 1
+						ENDIF
+					NEXT
+				ENDIF
+			NEXT
+		ENDIF
+	NEXT
+ENDIF
+SIF 上任 == 0
+	优先度 -= 300
+;势力方针/倾向
+IF CFLAG:对象:所属 == CFLAG:MASTER:所属 ;此分支暂时无用
+	SELECTCASE COUNTRY_POLICY:(CFLAG:对象:所属)
+		CASE 政策_経済
+			优先度 += 0
+		CASE 政策_徴兵
+			优先度 += 20
+		CASE 政策_防衛
+			优先度 -= 20
+		CASEELSE ;政策未定
+	ENDSELECT
+ELSE
+	SELECTCASE COUNTRY_AI_TYPE:(CFLAG:对象:所属)
+		CASE AI_通常
+			优先度 += 0
+		CASE AI_好戦
+			优先度 += 20
+		CASE AI_防衛
+			优先度 -= 20
+		CASE AI_外交
+			优先度 -= 20
+		CASE AI_内政
+			优先度 -= 10
+		CASE AI_蛮行
+			优先度 += 30
+		CASE AI_ホフゴブリン
+	ENDSELECT
+ENDIF
+;角色成长型
+SELECTCASE TALENT:对象:300 
+	CASE 0 ;万能 武防知政
+		优先度 += 20
+	CASE 1 ;知将 武防知
+		优先度 += 20
+	CASE 2 ;学士 政治 知略
+		优先度 -= 20
+	CASE 3 ;两道 武防政
+		优先度 += 20
+	CASE 4 ; 武官 武防
+		优先度 += 30
+	CASE 5 ;军师 知略
+		优先度 -= 10
+	CASE 6 ;文官 政治
+		优先度 -= 50
+	CASE 7 ;芸能 歌唱
+		优先度 -= 50
+	CASE 8 ;料理
+		优先度 -= 50
+	CASE 9 ;天才
+		优先度 += 10
+ENDSELECT
+RETURN MAX(优先度,0)
+
+;対象選択
+@SKILL_0_MIRACLE_34_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+;我方部隊対象
+RETURN 1
+
+;战场技能発動判定，此函数编写与原版技能相同
+;由于示例技能并非战场上直接发动,所以直接返回0
+@SKILL_0_MIRACLE_34_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM FIRST_LINE
+対象側 = !発動側
+
+SIF CFLAG:発動者:1 != CFLAG:MASTER:1
+	RETURN 1
+
+CALL SKILL_0_MIRACLE_34_NAME
+PRINTL
+FIRST_LINE = LINECOUNT 
+PRINTFORML %ANAME(発動者)%持有技能「%RESULTS%」,是否发动?
+PRINTBUTTON " 0[是]", 0
+PRINTL  
+PRINTBUTTON " 1[否]", 1
+PRINTL 
+INPUT
+CLEARLINE LINECOUNT - FIRST_LINE
+SIF RESULT == 0
+	RETURN 1
+RETURN 0
+
+;技能发动的效果代码，只用于在战斗阶段发动的神术使用
+;如果是发动时机特殊的神术，此处函数体保留返回0(,在实际发动函数中书写代码
+@SKILL_0_MIRACLE_34_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 信仰消耗
+#DIM FIRST_LINE
+対象側 = !発動側
+IF CFLAG:発動者:1 != CFLAG:MASTER:1
+	;AI使用
+	PRINTFORML %ANAME(発動者)%利用信仰之力,制造了大量的奇异香气!敌人吸入后纷纷感到腹部绞痛,疲于战斗了!
+	PRINTFORML 敌方部队的攻击防御下降了
+	BATTLE_ATK:対象側 = BATTLE_ATK:対象側 * (100 - 3) / 100 ;下降5%-10%
+	BATTLE_DEF:対象側 = BATTLE_DEF:対象側 * (100 - 3) / 100 ;下降5%-10%
+	RETURN 0
+ENDIF
+FIRST_LINE = LINECOUNT
+PRINTFORML --请选择你要消耗的信仰--
+PRINTL
+PRINTBUTTON "0[     0]",0
+PRINTL
+PRINTBUTTON "1[     1]",1
+PRINTL
+PRINTBUTTON "2[     2]",2
+PRINTL
+PRINTBUTTON "3[     3]",3
+PRINTL
+PRINTBUTTON "4[     4]",4
+PRINTL
+PRINTBUTTON "5[     5]",5
+PRINTL
+PRINTBUTTON "99[ 取  消 ]",99
+PRINTL
+$INPUT_LOOP1
+INPUT
+信仰消耗=RESULT
+IF 信仰消耗 == 99
+	CLEARLINE LINECOUNT - FIRST_LINE
+	RETURN 0
+ELSEIF 信仰消耗<0 || 信仰消耗 >5
+	CLEARLINE 1
+	GOTO INPUT_LOOP1
+ELSE
+	SIF ABL:発動者:信仰 < 信仰消耗
+		信仰消耗 = ABL:発動者:信仰
+	ABL:発動者:信仰 -= 信仰消耗
+	CLEARLINE LINECOUNT - FIRST_LINE
+	SIF 信仰消耗 == 5
+		PRINT [完美]
+	IF 信仰消耗
+		PRINTFORML %ANAME(発動者)%利用信仰之力,制造了大量的奇异香气!敌人吸入后纷纷感到腹部绞痛,疲于战斗了!
+		PRINTFORML 敌方部队的攻击防御下降了
+	ELSE
+		PRINTFORML %ANAME(発動者)%制造了一些奇异香气!敌人吸入后纷纷感到腹部绞痛,疲于战斗了!
+		PRINTFORML 敌方部队的攻击防御下降了
+	ENDIF
+	
+	SIF 信仰消耗 == 5 ;满额消耗额外增益
+		信仰消耗++
+	BATTLE_ATK:対象側 = BATTLE_ATK:対象側 * (100 - 3 - 信仰消耗 + 1 ) / 100 ;下降2%-7%
+	BATTLE_DEF:対象側 = BATTLE_DEF:対象側 * (100 - 3 - 信仰消耗 + 1 ) / 100 ;下降2%-7%
+ENDIF
+RETURN 0

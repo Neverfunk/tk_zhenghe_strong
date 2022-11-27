@@ -1,0 +1,103 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_ENCOUNT_ROBBERY_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_ENCOUNT_ROBBERY_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_ENCOUNT_ROBBERY(対象)
+#DIM 対象
+
+PRINTFORML 探索的時候、遭遇了強盜
+PRINTFORML 男人抓住女村民做人質想要逃跑
+PRINTL
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "知略"))
+
+CALL ASK_MULTI("説服他", "用自己代替人質", "交給士兵処理", "放過人質的話就用身體獎勵他")
+
+SELECTCASE RESULT
+	CASE 0
+		IF LIMIT(ABL:対象:知略, 30, 100) > RAND:100
+			PRINTFORML 成功説服了！
+			PRINTFORML 男人放了人質、老實地被捆了起來
+			CALL PRINT_ADD_EXP(対象, "知略経験値", RAND:10 + 5)
+		ELSE
+			PRINTFORML 説服失敗了……
+			PRINTFORML 男人帯著人質逃走了
+		ENDIF
+	CASE 1
+		PRINTFORML 提出用自己代替人質……
+		IF IS_MALE(対象)
+			PRINTFORML ……但是、因為女性更適合當作人質而被拒絕了
+			PRINTFORML 男人帯著人質逃走了
+		ELSE
+			PRINTFORML 男人用品定的眼光打量著%ANAME(対象)%、答應了
+			PRINTFORML
+			IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+				PRINTFORML 人质交接的一刹那，原本看起来弱不禁风的女村民忽然用体术把男人按在了地上！
+				PRINTFORML 面对目瞪口呆的%ANAME(対象)%，对方微笑着解释说自己其实是下班的警察
+				PRINTFORMW 注意到%ANAME(対象)%好像在惊讶中扭伤了脚，对方不好意思地做出了赔罪的请求
+				PRINTFORML
+				PRINTFORML 空荡的警察局中，渐渐回响起了咕湫咕湫的水声
+				PRINTFORML 女警跪在%ANAME(対象)%身前，轻轻脱下她的鞋袜，在脚踝受伤的部位温柔地舔舐了起来
+				PRINTFORML 脚踝的肿胀在她的呵护下渐渐缓解，但对方却看不出要停下来的意思，舌尖沿着%ANAME(対象)%光滑的腿部一路向上进攻
+				PRINTFORML 一路达到了%ANAME(対象)%的股间，薄薄的内裤早已被粘稠的液体浸透，她用嘴把它拨到一边，直接品尝起%ANAME(対象)%湿润的秘缝
+				PRINTFORMW 无法压抑触电般的快感，%ANAME(対象)%的身体浑身颤抖，不一会儿就在女警小姐的奉仕中达到了高潮……
+				PRINTFORMW 被关在隔壁牢房里的男人，聆听着%ANAME(対象)%细微的娇喘，不争气地脱下裤子打起了飞机……
+				CALL FUCK(対象, "欲望, 性技, Ｃ, 百合")
+				PRINTFORML
+				PRINTFORMW %ANAME(対象)%告别女警小姐，穿着湿漉漉的内裤走上归途
+			ELSE
+				PRINTFORML 男人帯着%ANAME(対象)%逃向了村子後面的山裡
+				PRINTFORML 為了讓%ANAME(対象)%無法反撃、用縄子捆住了両手
+				PRINTFORMW 抱起掙扎的%ANAME(対象)%、他把%PRONOUN(対象)%帯進了深山里的洞窟內
+				PRINTFORML
+				PRINTFORML 在深山里的洞窟之中、%ANAME(対象)%被圧在地面上
+				PRINTFORML 因為早晚會被抓住而自暴自棄的男人、已經在小穴内射了好幾発
+				PRINTFORML %ANAME(対象)%已經因為被多次給予的快楽而屈服了、坦率地接受了快感呑下了他的種子
+				PRINTFORMW 男人每次晃動腰的時候精液都會從%STR_BODY("膣：処女確認：感度", 対象)%里溢出、讓%ANAME(対象)%反復喘息痙攣
+				CALL FUCK(対象, "欲望, 欲望, 性交, 性交, Ｖ, Ｖ性交", "処女喪失, 膣内射精", GET_SPERM_ID("流氓"), @"流氓的\@RAND:2 ? 肉棒 # 嘴唇\@", "流氓", "", "身代わりになっての強姦")
+				PRINTFORML
+				PRINTFORMW 之後趕到的士兵把男人逮捕了、救出了全身粘糊糊的%ANAME(対象)%
+			ENDIF
+
+		ENDIF
+	CASE 2
+		PRINTFORML 還是不要貿然插手比較好
+		PRINTFORML 決定交給士兵処理
+	CASE 3
+		PRINTFORML 提出放過人質的話就用身體獎勵他……
+		IF IS_MALE(対象)
+			PRINTFORML ……但是、因為是男性而被拒絕了
+			PRINTFORML 男人帯著人質逃走了
+		ELSE
+			PRINTFORML 男人用驚訝的眼光打量著%ANAME(対象)%、答應了
+			PRINTFORML
+			PRINTFORML %ANAME(対象)%讓男人揉捏著自己的%STR_BODY("胸：愛撫", 対象)%、一起來到了村中的旅館
+			PRINTFORML 剛進門%ANAME(対象)%就把手伸進了男人的褲子、撫摸著已經挺立的肉棒
+			PRINTFORML 男人迫不及待的脫下衣服、%ANAME(対象)%讓男人轉過身、一邊擼動著肉棒一邊用舌頭進攻著男人的菊穴
+			PRINTFORMW 最高的奉仕讓男人舒爽的渾身顫抖
+			PRINTFORML
+			PRINTFORML 在旅館的房間之中、%ANAME(対象)%把男人圧在床上
+			PRINTFORML 因為%ANAME(対象)%魅惑的身體、男人已經在小穴内射了好幾発
+			PRINTFORML 男人已經因為多次射精的快楽而屈服了、坦率地接受了快感繼續奉仕著%ANAME(対象)%
+			PRINTFORMW 男人每次晃動腰的時候精液都會從%STR_BODY("膣：処女確認：感度", 対象)%里溢出、讓%ANAME(対象)%發出愉悅而甜美的喘息
+			CALL FUCK(対象, "欲望, 欲望, 性交, 性交, Ｖ, Ｖ性交", "処女喪失, 膣内射精", GET_SPERM_ID("流氓"), @"流氓的\@RAND:2 ? 菊穴 # 嘴唇\@", "流氓", "", "用身體獎勵了流氓")
+			PRINTFORML
+			PRINTFORMW 在男人保證再也不犯罪后、%ANAME(対象)%親吻了他的肉棒就離開了
+		ENDIF
+
+ENDSELECT
+
+RETURN 1

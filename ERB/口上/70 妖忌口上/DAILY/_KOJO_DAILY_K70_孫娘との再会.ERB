@@ -1,0 +1,269 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K70_NTR_HIS_GRAND_DAUGHTER_RATE(対象)
+#DIM 対象
+RETURN 1000
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K70_NTR_HIS_GRAND_DAUGHTER_DECISION(対象)
+#DIM 対象
+#DIM 妖夢
+#DIM 避妊
+妖夢 = NAME_TO_CHARA("妖夢")
+
+SIF IS_FALLEN(対象)
+	RETURN 0
+
+SIF !IS_SLAVE(妖夢)
+	RETURN 0
+
+SIF TALENT:妖夢:処女 || TALENT:妖夢:無接吻経験
+	RETURN 0
+
+SIF ABL:妖夢:欲望 < ランク閾値:ランク_その他:ランク_C
+	RETURN 0
+
+SIF !HAS_PENIS(対象) || !HAS_PENIS(MASTER)
+	RETURN 0
+
+SIF CFLAG:対象:捕虜先 != CFLAG:MASTER:所属
+	RETURN 0
+
+SIF KDVAR:対象:妖忌_孫娘との再会
+	RETURN 0
+
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, -1, 1) && CHECK_KOJO_DAILY_HAPPEN(妖夢, 1, 0)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K70_NTR_HIS_GRAND_DAUGHTER_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K70_NTR_HIS_GRAND_DAUGHTER(対象)
+#DIM 対象
+#DIM 妖夢
+#DIM 避妊
+妖夢 = NAME_TO_CHARA("妖夢")
+
+
+KDVAR:対象:妖忌_主との再会 = 1
+KDVAR:対象:妖忌_孫娘との再会 = 1
+
+PRINTFORMW %ANAME(MASTER)%访问了狱中的の%ANAME(対象)%……
+PRINTFORMW 「你是来笑话老夫的吗？」
+PRINTFORMW 「呼嗯，正好。接下来就看你怎么吠了，年轻人。」
+PRINTFORMW 「事先告诉你，老夫不会向你这种家伙摇尾乞怜……什」
+PRINTFORML 虽然%ANAME(対象)%开头语气强硬，但才说了一半就无法再说下去
+PRINTFORMW 是因为注意到了%ANAME(MASTER)%身后的少女……%ANAME(妖夢)%吧
+PRINTFORMW 「%ANAME(妖夢)%！？　究竟……！？」
+PRINTFORMW 「爷爷，可不能违抗这位大人。」
+PRINTFORMW 「一切都已无法挽回了。」
+PRINTFORMW 「到底在说什么…… 那是敌人！ 斩了他！ %ANAME(妖夢)%！」
+PRINTFORMW 看起来这个老人好像还不太能理解发生了什么
+PRINTFORMW %ANAME(MASTER)%只是给了%ANAME(妖夢)%一个眼神，她立刻顺从地掀起裙子
+PRINTFORMW 什么都没有穿完全裸露的秘部，已经粘糊糊的湿透了……
+PRINTFORMW 「不能……违抗这位大人，嗯～哈～♥，不然的话，啊～♥」
+PRINTFORMW 「心里被教了，被灌输了各种各样下流的事情～♥，我已经是没有%ANAME(MASTER)%♥就活不下去了……啊～♥」
+PRINTFORML %ANAME(MASTER)%的手指缓缓爬上在诉说着的%ANAME(妖夢)%的秘部，咕啾咕啾地责弄了起来
+PRINTFORMW 只是这样，%PRONOUN(妖夢)%的双膝就震得嘎吱嘎吱响，从秘裂中滴下了爱液
+PRINTFORMW 「%ANAME(妖夢)%ッ！？　貴様ッ……你做了什么！」
+PRINTFORML 没什么。只是稍微教育了一下，仅此而已。
+PRINTFORMW 与原本认真的个性完全相反，只要印入快乐就马上能显露出淫乱的本性……
+PRINTFORMW 「貴様，你这……给我过来！　我要杀了你！」
+PRINTFORMW 双手穿过牢笼猛的向这边抓来，是想掐死我吗？明明上了年纪却是精神矍铄啊。
+PRINTFORML 话虽如此，但毕竟是上了年纪，头脑还是很顽固。看来是有必要稍微指点一下这个老家伙了啊……
+PRINTFORML
+CALL ASK_MULTI(@"让%ANAME(妖夢)%引诱%ANAME(対象)%", @"在他面前侵犯%ANAME(妖夢)%", "什么都不做回去")
+
+SELECTCASE RESULT
+	CASE 2
+		PRINTFORMW 嘛，今天只是来让你见见%ANAME(妖夢)%的
+		PRINTFORMW 就这样回去了……
+	CASE 0
+		PRINTFORMW 好不容易能再见面，就让他“开心”一下吧
+		PRINTFORMW %ANAME(MASTER)%打开牢狱的门，将%ANAME(妖夢)%放了进去
+		PRINTFORMW 「啊啊～爷爷～♥」
+		PRINTFORMW 「从教我练剑那时候开始，就很仰慕爷爷……一直想这样做……♥」
+		PRINTFORMW 「%ANAME(妖夢)%……那是，不对的……不对的！　快住手！」
+		PRINTFORML %ANAME(妖夢)%进入了牢狱，一点点褪去衣服，暴露出柔软的胴体
+		PRINTFORMW 接着上前拨开了%ANAME(対象)%衣服的下摆，将暴露出的宝物用嘴含住，卖力地奉仕了起来
+		PRINTFORMW 这是%ANAME(MASTER)%亲自训练出的动作
+		PRINTFORML 虽然%ANAME(対象)%想扭转身体逃走，但双手被枷锁锁住的状态下是不可能从%ANAME(妖夢)%口中逃脱的
+		PRINTFORMW 仅仅被%ANAME(妖夢)%用%ANAME(MASTER)%训练的技术舔舐了几下，那东西就勃起了……
+		CALL ASK_YN("让直接做", "把避孕套扔进去")
+		避妊 = RESULT
+		IF 避妊 == 0
+			PRINTFORML 机会难得，送%ANAME(対象)%礼物吧
+			PRINTFORMW 让自己精心培育的孙女生下自己的孩子。这是最好的礼物吧。
+			PRINTFORMW 「啊哈～♥这么说来，爷爷不也已经变硬了吗？」
+			PRINTFORMW 「我会用%ANAME(MASTER)%桑教给我的所有方法，让爷爷舒舒服服的在我里面全部射出来的……♥」
+		ELSE
+			PRINTFORML ……但是，我并不打算让%ANAME(妖夢)%怀上那家伙的孩子
+			PRINTFORMW %ANAME(妖夢)%的子宫留着有别的用处
+			PRINTFORMW 从牢笼外面喊了一声，把避孕套扔给了%ANAME(妖夢)%
+			PRINTFORMW %ANAME(妖夢)%似乎很快就理解了其中的意图，在%ANAME(対象)%的肉棒上套上了那个
+			PRINTFORMW 「对不起，爷爷，我就连肚子的里面也全部都是属于那位大人的东西……」
+			PRINTFORMW 「但是，我会好好地给爷爷做的，让这两颗球球里的精华一滴不剩地射出来的……♥」
+		ENDIF
+		PRINTFORMW 「%ANAME(妖夢)%，为什么……老夫，这种事……」
+		PRINTFORMW 「爷爷？为什么看起来很悲伤呢？明明这么舒服……你看……啊哈～♥，呐～♥，好舒服啊～♥」
+		PRINTFORML 跨坐在变得十分软弱的%ANAME(対象)%之上，%ANAME(妖夢)%沉下了腰
+		PRINTFORML 噗啾一声，%PRONOUN(対象)%的肉棒就被自己最疼爱的孙女的膣道整个吞下了。
+		PRINTFORMW %ANAME(妖夢)%发出了难以忍受的甜美声音，立即开始激烈地上下摆动着腰……
+		PRINTFORMW 「啊哈～♥，好硬，好厉害，爷爷的欧金金，虽然是上了年纪却还是这么硬，好棒～♥」
+		PRINTFORMW 「啊呜……！唔哇，啊，啊啊啊……！」
+		PRINTFORML %ANAME(妖夢)%用%ANAME(MASTER)%训练出的腰技，不断给%ANAME(対象)%带去刺激
+		PRINTFORML 那里已经久疏问候的老人，怎么能忍受得住那种技巧呢？
+		PRINTFORML 只能发出微弱呻吟声，摇着头否定现状
+		PRINTFORMW 当然，已经发情的%ANAME(妖夢)%也不会因为那样的恳求而停下腰上的动作……
+		PRINTFORMW 「啊哈～，啊，啊～♥　……啊咧」
+		PRINTFORML 突然，%ANAME(妖夢)%停止了动作，露出惊讶的表情
+		PRINTFORMW 相反，%ANAME(対象)%的身体一抖一抖痉挛着。会阴处收缩着，射精了。
+		PRINTFORMW 「爷爷？已经射精了吗？快并不是什么坏事，请不要在意」
+		PRINTFORMW 「%ANAME(妖夢)%……呜呜……对不起……す对不起……」
+		PRINTFORML %ANAME(対象)%无力的重复着謝罪的话
+		PRINTFORMW 只是，对于失去伦理观的现在的%ANAME(妖夢)%而言，无法正确理解这句话……
+		IF 避妊
+			PRINTFORMW 「只是在我里面射出来了而已，不用介意也没关系哟？而且也戴了避孕套。」
+			PRINTFORMW 「只要有了这个就不怀孕了，自从爷爷离开之后，%ANAME(妖夢)%也一直有在好好学习的。」
+		ELSE
+			PRINTFORMW 「没关系这并不是什么需要在意的事情哟，反正迟早是会射在里面的啦」
+			PRINTFORMW 「而且，快就是说，仅仅这样就已经把爷爷服侍得很舒服了……我很高兴」
+		ENDIF
+		PRINTFORMW 「比起这种事，让我们继续吧，呐～♥」
+		PRINTFORMW 「继续……？ 不，啊啊啊！？%ANAME(妖夢)%，还不住手……」
+		PRINTFORMW 「没关系的哟♥，我还很精神呢，就让我们再多做一些吧♥。」
+		PRINTFORML 已经从头到脚被调教成淫乱女的%ANAME(妖夢)%，仅仅一两次的射精是不可能满足的
+		PRINTFORML 因此%ANAME(妖夢)%并没有从%PRONOUN(対象)%的肉棒上下来，而是保持着射精时的姿势又开始动起了腰
+		PRINTFORML 与之相对，%ANAME(対象)%则是全身不住地震颤，被快乐责弄于股掌之间
+		PRINTFORMW ……真是看到了不错的东西
+		PRINTFORMW %ANAME(MASTER)%就这样眺望着热烈的交尾……
+		PRINTFORML
+		PRINTFORML
+		FOR LOCAL, 0, 5
+			CALL FUCK(対象, "Ｃ, 射精, 性交, 苦痛快楽, Ｖ挿入, 接吻", "童貞喪失, 接吻喪失", 0, @"%ANAME(妖夢)%の唇", "", @"%ANAME(妖夢)%の膣", "調教")
+			CALL FUCK(妖夢, "Ｃ, Ｂ, Ｖ, 性交, 奉仕, 性技, 精愛, Ｖ性交, 接吻, 口淫", @"\@ 避妊 == 0 ? 膣内射精, # \@ 接吻喪失, 処女喪失", 避妊 == 0 ? GET_ID(対象) # 0, @"%ANAME(対象)%の肉棒", ANAME(対象), "", "調教")
+		NEXT
+		PRINTFORML
+		PRINTFORML 
+		PRINTFORMW 过了一会，%ANAME(対象)%才终于被松开
+		PRINTFORMW 到体力的极限为止一直被榨取着，已经完全枯萎了
+		PRINTFORMW 「……发誓忠诚。我发誓……无论如何只有%ANAME(妖夢)%……还请……」
+		PRINTFORMW 看到他无力地嘟囔着，就把%ANAME(対象)%从监狱里放出来了
+		PRINTFORMW 不过，%ANAME(妖夢)%还是随我喜欢来使用（笑）
+		CALL COLOR_PRINTW(@"%ANAME(対象)%発誓效忠了", カラー_注意)
+		CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属, 1)
+		TALENT:対象:服従 = 1
+		TALENT:対象:チョロイン = 1
+		TALENT:対象:胆怯 = 1
+		TALENT:対象:堅強 = 0
+		CFLAG:対象:従属度 += 1500
+		CFLAG:対象:依存度 += 300
+	CASE 1
+		PRINTFORMW 真是令人感动的重逢，给他看看孙女现在在做什么工作也不错。
+		PRINTFORMW 这样想着的%ANAME(MASTER)%简短的向%ANAME(妖夢)%搭话
+		PRINTFORMW 「是……♥」
+		PRINTFORMW %ANAME(妖夢)%似乎察觉到了主人的意图，马上脱下衣服扔在地上
+		PRINTFORMW 像是从下方捧起剔透的乳房一样轻轻地爱抚着，仅仅是这样%ANAME(妖夢)%就吐出了甜蜜的气息……
+		PRINTFORMW 「貴様！　你在做甚么！　你这……！」
+		PRINTFORML 无视了%ANAME(対象)%的叫唤，双眼饥渴地紧盯着%ANAME(妖夢)%的薄唇
+		PRINTFORMW 「那么，我就失礼了……嗯芙，嗯呒，啾噜，啾……♥」
+		PRINTFORML %ANAME(妖夢)%的薄唇贴了上来，一边进行着浓厚的接吻，一边用熟练的手法将%ANAME(MASTER)%的宝物掏了出来
+		PRINTFORMW 洁白的手指缠绕着，缓缓抚摸着，使手中的肉棒逐渐坚挺……
+		PRINTFORMW 「啊……拜托了，%ANAME(MASTER)%大人，请赐予我恩惠……♥」
+		PRINTFORML 已经无法忍受下体传来的欲火，既然%ANAME(妖夢)%这样恳求了，就允许吧
+		PRINTFORMW %ANAME(妖夢)%一边感谢着%ANAME(MASTER)%的慈悲，一边跪在%ANAME(MASTER)%的脚边，对已经变硬的那个时而舔舐，时而吮吸
+		PRINTFORMW 「嗯啾～啾噜～嗯呼～嗯唔～嗯～啾噗～♥」
+		PRINTFORMW 这是%ANAME(MASTER)%に教导的，%ANAME(MASTER)%喜欢的技术
+		PRINTFORMW 一边用大量的唾液缠在肉棒上，一边狼吞虎咽用喉咙吞吐肉棒的样子，无法想象她前不久还是个“剑士”
+		PRINTFORMW 「%ANAME(妖夢)%……快停下！　振作起来，魂魄的末裔哟……！」
+		PRINTFORML %ANAME(対象)%像要把牢笼破坏一般紧紧抓住铁格子，拼命朝这边喊叫着
+		PRINTFORMW %ANAME(妖夢)%用无聊的眼神瞥了%PRONOUN(対象)%一眼后，从喉咙深处缓缓吐出肉棒
+		PRINTFORMW 「振作起来？  爷爷，你在说什么呀？」
+		PRINTFORMW 「魂魄的教诲的确很重要。 但是，奉仕主人大人这件事……是世界上最重要的，我想没有能够比这更优先的事情了」
+		PRINTFORML 说了挺有意思的话啊
+		PRINTFORML 虽然很中意那个回答，但是未经许可就擅自说话还中断用嘴奉仕这个事实是不能接受的
+		PRINTFORMW 看来有必要惩罚一下了啊  %ANAME(MASTER)%一把将%ANAME(妖夢)%推倒在地……
+		PRINTFORMW 「啊哈～♥　对，对不起，%ANAME(MASTER)%大人，是我错了」
+		PRINTFORMW 「请给我这个不争气的奴隶，赐下惩罚……♥」
+		PRINTFORMW 从后面将自己的宝物抵在了膣口
+		PRINTFORMW 如果用上面的嘴不能好好服务的话，那就只能让我使用下面了
+		PRINTFORMW 察觉到%ANAME(MASTER)%の的意图，%ANAME(妖夢)%主动撅起可爱的臀部，自己掰开秘裂引诱着主人的性交
+		PRINTFORMW 既然做到那个地步，就给你吧……
+		PRINTFORMW 「啊……哇、啊哇啊啊啊啊啊啊啊——！」
+		PRINTFORML %ANAME(MASTER)%使劲全力把腰往前狠狠一顶，将自己凶狠的刚直整根插到了%ANAME(妖夢)%膣内的最深处
+		PRINTFORMW 仅仅是那样%ANAME(妖夢)%就好像已经绝顶了，背部后仰，从秘部喷出了爱液
+		PRINTFORMW 「啊啊，十分抱……剑～♥　啊哈～！」
+		PRINTFORML 真是个品质恶劣的奴隶啊。作为惩罚，我一边用手掌打着她的翘臀、一边开始了抽送
+		PRINTFORMW 啪！啊嗯～　啪！啊嗯～　令人愉悦的声音传到牢笼那一边，%ANAME(対象)%只能像要咬碎一般紧咬嘴唇，眼睁睁地看着孙女被蹂躏
+		PRINTFORMW 「啊哈嗯～♥　好棒～♥　欧金金～♥　欧金金插得我好舒服啊～主人大人嗯～♥」
+		PRINTFORML 不知道是知道还是不知道祖父的心情，%ANAME(妖夢)%淫乱地笑着，不断说出与奴隷相符的话语
+		PRINTFORMW 像是配合%ANAME(MASTER)%的动作扭动着腰的样子，才配得上这条淫乱的母狗啊
+		PRINTFORMW 「啊哈啊～♥　请射精吧～在我的，在%ANAME(妖夢)%的里面播下主人大人的种子呀嗯～♥」
+		PRINTFORML 终于，%ANAME(MASTER)%接近极限，开始不断加速撞击着最深处，作为被良好调教过的奴隷%ANAME(妖夢)%马上就明白了，恳求在膣内射精
+		PRINTFORMW 既然说到这个份上就给你吧，%ANAME(MASTER)%这样说着，用力挺腰压住%ANAME(妖夢)%的翘臀，龟头紧紧贴在子宫口上射精了
+		PRINTFORMW 「啊哈啊啊啊啊啊啊啊ーッ♥」
+		PRINTFORML 滚烫的精液直接射进子宫的感觉让%ANAME(妖夢)%格外大声地浪叫着绝顶了
+		PRINTFORML 她的声音在石造的牢狱里回响
+		PRINTFORMW 膣壁の紧缩得相当厉害，就好像要把%ANAME(MASTER)%的精液全部榨出来一样蠕动着
+		PRINTFORML ……使用起来挺不错的
+		PRINTFORMW 但是，这还不是结束
+		PRINTFORML 这并不是为了让%ANAME(MASTER)%满足而做的
+		PRINTFORML 说到底只是为了把%ANAME(妖夢)%轻薄的姿态展现给%ANAME(対象)%看的行为罢了
+		PRINTFORMW 那么，不是要再多让他看看吗？
+		PRINTFORMW 手掌对着还沉浸在膣内射精所带来快感的余韵中的%ANAME(妖夢)%的臀部拍打了几下，好让她回过神来
+		PRINTFORMW 然后，对才刚刚绝顶过的%PRONOUN(妖夢)%，没有多余的喘息机会，再度开始了抽送
+		PRINTFORMW 「嘿咿～！？　哈咿～噢，咿～♥　啊嘿～，咿～～♥」
+		PRINTFORML 才刚刚去过的敏感的膣内被再度蹂躙，%ANAME(妖夢)%忍不住发出了与刚刚完全不同的下流嘶哑的浪叫
+		PRINTFORMW 就应该这样，%ANAME(MASTER)%这么说着，用腰激烈地拍打着%ANAME(妖夢)%的臀部
+		PRINTFORMW 之后，知道%ANAME(妖夢)%失去意识为止，用她狠狠干了个爽……
+		PRINTFORML
+		PRINTFORML
+		FOR LOCAL, 0, 5
+			CALL FUCK(MASTER, "Ｃ, 射精, 性交, 苦痛快楽, Ｖ挿入, 接吻", "童貞喪失, 接吻喪失", 0, @"%ANAME(妖夢)%の唇", "", @"%ANAME(妖夢)%の膣", "調教")
+			CALL FUCK(妖夢, "Ｃ, Ｂ, Ｖ, Ｍ, 被虐, 苦痛快楽, 性交, 奉仕, 性技, 精愛, Ｖ性交, 接吻, 口淫", @"\@ 避妊 == 0 ? 膣内射精, # \@ 接吻喪失, 処女喪失", GET_ID(MASTER), @"%ANAME(MASTER)%的肉棒", ANAME(MASTER), "", "調教")
+		NEXT
+		PRINTFORML
+		PRINTFORML 
+		PRINTFORMW 「啊嘿，诶嘿嘿……♥」
+		PRINTFORML 在%ANAME(MASTER)%暂时满足的时候，%ANAME(妖夢)%浑身颤抖着失去了意识
+		PRINTFORML 露出看起来很幸福的阿嘿颜，瘫倒在石造的地板上
+		PRINTFORMW %ANAME(MASTER)%的子种汁发出噗嘟噗嘟的声音从秘裂里喷洒了出来……
+		PRINTFORML 期间，%ANAME(対象)%一句话也没有说
+		PRINTFORMW 对那样的他，说到「看到了不错的东西吧（笑）？」
+		PRINTFORMW 「……杀了你」
+		PRINTFORMW 「貴様！ 给我记住！ 无论你逃到哪里，哪怕追到地狱的尽头，都要让你化为我刀上铁锈，连你那个灵魂都会被斩断！！」
+		PRINTFORML 用一副不像老人的气势、%ANAME(対象)%疯狂地喊叫着
+		PRINTFORML 看起来不是很中意给他看的东西啊
+		PRINTFORMW %ANAME(MASTER)%一边呀累呀累地耸着肩膀，一边支起%ANAME(妖夢)%离开了牢狱……
+		CALL COLOR_PRINTW(@"引起了%ANAME(対象)%的反感", カラー_注意)
+		CFLAG:対象:好感度 -= 1500
+		CFLAG:対象:従属度 -= 1500
+		CFLAG:対象:依存度 -= 1500
+		TALENT:対象:反抗的 = 1
+		TALENT:対象:圧抑 = 1
+		TALENT:対象:自尊心高 = 1
+ENDSELECT
+
+
+RETURN 1
+
+
+

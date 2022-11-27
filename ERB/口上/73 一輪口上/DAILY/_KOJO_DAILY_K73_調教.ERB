@@ -1,0 +1,408 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K73_TRAIN_RATE(対象)
+#DIM 対象
+RETURN 1000
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K73_TRAIN_DECISION(対象)
+#DIM 対象
+
+SIF !IS_SLAVE(対象)
+	RETURN 0
+
+SIF CFLAG:対象:従属度 >= 5000
+	RETURN 0
+
+SIF !ITEM:肛用振動棒 && !ITEM:振動棒　&& !ITEM:縄
+	RETURN 0
+
+SIF ABL:MASTER:性技 < 3
+	RETURN 0
+
+SIF KDVAR:対象:一輪_調教
+	RETURN 0
+
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K73_TRAIN_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K73_TRAIN(対象)
+#DIM 対象
+#DIM 選択肢
+
+KDVAR:対象:一輪_調教 = 1
+
+PRINTFORMW 「啊……」
+;TranslatedMark 「あっ……」
+PRINTFORML 在据点巡视的时候，和%ANAME(対象)%擦肩而过
+;TranslatedMark 拠点で見回りをしている最中、%ANAME(対象)%とすれ違った
+PRINTFORMW 但是，%PRONOUN(対象)%却低着眼睛就这样过去了
+;TranslatedMark だが、%PRONOUN(対象)%は目を伏せてそのまま通り過ぎようとした
+PRINTFORMW 应该让%ANAME(対象)%发誓忠诚的，但是%PRONOUN(対象)%最近好像忘记了那件事
+;TranslatedMark %ANAME(対象)%には忠誠を誓わせたはずだが、%PRONOUN(対象)%は最近どうもそのことを忘れかけているらしい
+PRINTFORML 这里要不要重新让他认清自己的立场呢……?
+;TranslatedMark ここらで一つ、自らの立場を教え直してやるべきだろうか……？
+PRINTFORML
+
+CALL ASK_YN("调教", "下次可以吗")
+
+IF RESULT == 1
+	PRINTFORMW 即使不是现在也可以吧。很忙
+	;TranslatedMark なにも今でなくとも良いだろう。忙しいのだ
+	PRINTFORMW 决定放任不管……
+	;TranslatedMark 放っておくことにした……
+	RETURN 1
+ENDIF
+
+PRINTFORMW 「呃、等...等一下」
+;TranslatedMark 「ッ、ち、ちょっと」
+PRINTFORML 擦身而过的时候，给他揉%PRONOUN(対象)%的屁股
+;TranslatedMark すれ違いざまに、%PRONOUN(対象)%の尻を揉んでやる
+PRINTFORMW 脸上浮现出抗议的表情，抓着面向自己的%ANAME(対象)%的手，带进了自己的房间
+;TranslatedMark 抗議するような表情を浮かべこちらを向いた%ANAME(対象)%の手を引っつかみ、自室へと連れ込んだ
+PRINTFORMW 「什、什么啊……是我做了什么坏事吗？」
+;TranslatedMark 「な、何よ……私が何か悪いことしたっていうの？」
+PRINTFORML %ANAME(対象)%虽然说话傲慢，但他的眼神和语调都在颤抖
+;TranslatedMark 生意気な口をきく%ANAME(対象)%だが、その目も口調も震えている
+PRINTFORMW 不能违抗%ANAME(MASTER)%，这具身体应该还记得吧
+;TranslatedMark %ANAME(MASTER)%に逆らってはならないということは、その身体がしっかり覚えているのだろう
+PRINTFORML 那么，首先……
+;TranslatedMark さて、まずは……
+PRINTL
+CALL ASK_MULTI("爱抚", "把内衣给我", "侍奉")
+
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORMW 「啊，等等，算了……」
+		;TranslatedMark 「あっ、ちょ、やめッ……」
+		PRINTFORMW 为了不让它逃走，我把她逼到了墙上，卷起僧衣，把手伸进内衣里
+		;TranslatedMark 逃げられないよう壁に追いやると、僧衣をまくり上げ、下着の内へと手を差し込む
+		PRINTFORMW 「啊，不行，不行，啊，啊……」
+		;TranslatedMark 「あ、やだ、だめ、アッ、あぁぁッ……」
+		PRINTFORML 被%ANAME(MASTER)%教育了的肉体，只是抚摸裂缝简单地濡湿了
+		;TranslatedMark %ANAME(MASTER)%に躾けられた肉体は、裂け目を撫でてやるだけで簡単に濡れそぼつ
+		PRINTFORMW 稍微解开了点衣服，把手指插进内侧，稍微触摸了下弱点，%ANAME(対象)%就已经颤抖地瘫倒在地上
+		;TranslatedMark 軽く解れたところで内側に指を差し込み、弱いところを責めてやると、%ANAME(対象)%はもう腰砕けになっている
+		PRINTFORMW 「呃，呃……嗯……嗯~♥」
+		;TranslatedMark 「ッ、くぅ、ッ……く……ゥ～ッ♥」
+		PRINTFORML 为了不发出声音，%PRONOUN(対象)%紧紧咬着衣服的下摆，只是在徒劳的努力着
+		;TranslatedMark 声をあげまいと、%PRONOUN(対象)%は服の裾を噛んでいるが、無駄な努力というものだった
+		PRINTFORMW 身为尼姑却作为女人而生的这个肉体的弱点在哪里等，我可是都知道的一清二楚
+		;TranslatedMark 尼僧でありながらオンナとして出来上がったこの肉体の弱点がどこにあるかなど、お見通しなのだから
+		PRINTFORMW 「啊、哈、啊、那里、那里不行、我的那里不要♥ 啊、啊、啊……♥」
+		;TranslatedMark 「アッ、はぁッ、あ、そこッ、そこだめ、私そこぉっ♥　あ、ひぁ、ッあぁッ……♥」
+		PRINTFORML 同时欺负入口处的小豆豆和里面嫩肉的话，%ANAME(対象)%就好像受不了一样，膝盖和腰都被夹住了，开始浮现出雌性的表情
+		;TranslatedMark 入り口近くの浅いところをクリトリスと同時に苛めてやると、%ANAME(対象)%はたまらないというように膝も腰もかくつかせ、牝の表情を浮かべ始める
+		PRINTFORMW 作为给人一种略显温顺的奖励，让他去做吧……
+		;TranslatedMark いくらか従順さを見せたご褒美に、イかせてやるとしよう……
+		PRINTFORMW 「啊~啊~♥」
+		;TranslatedMark 「ッあぁッ、～～～ッ♥」
+		PRINTFORML 突然间，发出了与至今为止温柔的爱抚不同的强烈刺激、突然的快乐让%PRONOUN(対象)%声音也发不出就翻着眼白绝顶了
+		;TranslatedMark ぐりっと、今までの優しい愛撫とは違い強く刺激してやると、不意の快楽に%PRONOUN(対象)%は声もなく絶頂した
+		PRINTFORMW 弓形弯曲的脊背和从秘部喷出的淫荡的潮水，诉说着%ANAME(対象)%记忆中的快乐
+		;TranslatedMark 弓なりに反った背と、秘部から噴き出した淫らな潮が、%ANAME(対象)%の覚えた快楽を物語っている
+		PRINTFORMW 在绝顶的余韵中脱出力量，抱住了在那个场合崩溃的%ANAME(対象)%的腰……
+		;TranslatedMark 絶頂の余韻で脱力し、その場にくずおれかけた%ANAME(対象)%の腰を抱き留めた……
+		CALL FUCK(対象, "Ｃ, Ｖ, 欲望")
+	CASE 1
+		PRINTFORMW 「是……？说什么傻话……」
+		;TranslatedMark 「は……？　何馬鹿なこと言って……」
+		PRINTFORMW 把内衣递给我
+		;TranslatedMark 下着を、よこせ
+		PRINTFORMW 「呼，别开玩笑了，谁会这样……」
+		;TranslatedMark 「ふ、ふざけないで、誰がそんな……」
+		PRINTFORMW 把内衣递给我
+		;TranslatedMark 下着を、よこせ
+		PRINTFORMW 「……嘘」
+		;TranslatedMark 「……ッ」
+		PRINTFORML 不许顶嘴。到底哪一方是上级，有必要让他知道
+		;TranslatedMark 口答えは許さない。どちらが上の立場なのか、思い知らせてやる必要がある
+		PRINTFORMW 用强硬的语气反复的话，%ANAME(対象)%小声嘟囔
+		;TranslatedMark 強い口調で繰り返すと、%ANAME(対象)%は小さく呟く
+		PRINTFORMW 「我知道了……交给你就行了吧」
+		;TranslatedMark 「分かったわよ……渡せばいいんでしょう」
+		PRINTFORMW 虽然回答很傲慢，但在这个阶段应该是这样的吧
+		;TranslatedMark ずいぶんと小生意気な返事だが、この段階ではこんなものだろう
+		PRINTFORML 将手伸进法衣内的%PRONOUN(対象)%的身姿，充分地视淫
+		;TranslatedMark 法衣の内に手を差し込む%PRONOUN(対象)%の姿を、たっぷりと視姦してやる
+		PRINTFORMW 「看……这样可以吗？」
+		;TranslatedMark 「ほら……これでいいんでしょう？」
+		PRINTFORMW 「下次打算让你做什么呢……」
+		;TranslatedMark 「次は何をさせるつもりよ……」
+		PRINTFORMW 她穿的是尼姑不适合的，也就是所谓的"大人"式的内衣
+		;TranslatedMark 彼女が身に着けていたのは、尼僧には不釣り合いな、いわゆる「オトナ」らしい下着だった
+		PRINTFORMW 还是暖和的，她的体温还残留着
+		;TranslatedMark まだ暖かいのは、彼女の体温が残っているのだ
+		PRINTFORMW 接下来要做什么呢？%PRONOUN(対象)%的表情中，浮现出颠倒的颜色……
+		;TranslatedMark 次はなにをするのかと問う%PRONOUN(対象)%の表情には、倒錯の色が浮かんでいる……
+		CALL FUCK(対象, "露出, 欲望")
+	CASE 2
+		PRINTFORMW 「等一下……我是认真的，这样大白天的……」
+		;TranslatedMark 「ちょ……、本気なの、こんな昼間っから……」
+		PRINTFORML 让它露出一个东西，命令它吃下去，%ANAME(対象)%发出了慌张的声音
+		;TranslatedMark 一物を露出させ、しゃぶれと命じると、%ANAME(対象)%は慌てたような声をあげた
+		PRINTFORML 但是，在白天和调教%ANAME(対象)%之间，到底有什么关系呢
+		;TranslatedMark だが、昼間であることと%ANAME(対象)%を調教することに、一体何の関わりがあるというのだろう
+		PRINTFORMW 还是说，你想违背自己？
+		;TranslatedMark それとも、自分に逆らうつもりか？
+		PRINTFORMW 问了一下，%ANAME(対象)%好像很害怕似的低着头
+		;TranslatedMark 問うと、%ANAME(対象)%は畏れるように顔を伏せた
+		PRINTFORMW 「我知道了，我知道了……」
+		;TranslatedMark 「分かった、分かったわよ……」
+		PRINTFORMW %ANAME(対象)%跪在%ANAME(MASTER)%的面前
+		;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の元に跪く
+		PRINTFORMW 看着坚硬膨胀的指向天空的东西，隐约可以看出她作为女人的本性
+		;TranslatedMark 硬く膨らみ天を指すモノを眺める目には、微かながらオンナとしての本性がうかがえる
+		PRINTFORMW 「呼……嗯哼……嗯，嗯」
+		;TranslatedMark 「ッくぷ……んふ……んぅ」
+		PRINTFORML 她的嘴内很烫，唾液黏糊糊的
+		;TranslatedMark 彼女の口内は熱く、唾液でぬめっている
+		PRINTFORML 舌头黏糊糊地缠绕在肉棒上，好像在渴求精液
+		;TranslatedMark 舌はねっとりと肉棒に絡みつき、精液をねだっているようだ
+		PRINTFORMW 如果没有瞄准的话，雌性的本能会让它这样做吧……
+		;TranslatedMark 狙っているのでないとしたら、牝の本能がそうさせているのだろう……
+		PRINTFORMW 「嗯……嗯，嗯，嗯」
+		;TranslatedMark 「ぢゅるッ……ぐぷ、んく、ん」
+		PRINTFORMW 「咕嘟……小、小、小、小」
+		;TranslatedMark 「ぐぷっ……ぢゅぶ、ぐぶ、ッんむ」
+		PRINTFORML 即使没有特别的命令，%ANAME(対象)%也深深地叼进了%ANAME(MASTER)%的东西
+		;TranslatedMark 特に命じずとも、%ANAME(対象)%は深々と%ANAME(MASTER)%のモノを咥え込んでいる
+		PRINTFORMW 无论采取多么傲慢的态度，教育的成果还是会出现的……
+		;TranslatedMark いくら生意気な態度をとっていようが、躾の成果というのは現れるものだ……
+		PRINTFORMW 「呼呼……啊，啊……」
+		;TranslatedMark 「ぐぷッ……ぷはッ、あっ、あぁ……」
+		PRINTFORML 献身的态度需要奖励
+		;TranslatedMark 献身的な態度には褒美が必要だろう
+		PRINTFORML 从%ANAME(対象)%的嘴唇上拔出东西，向你的脸上撒上白浊的礼物
+		;TranslatedMark %ANAME(対象)%の唇からモノを引き抜き、その顔に白いプレゼントをぶちまけてやる
+		PRINTFORMW 她像是在等待着似的伸出了脸，闭上眼睛张开嘴接受了
+		;TranslatedMark 彼女は待ち受けるように顔を差し出し、瞳を閉じ口を開けてそれを受け止めていった
+		PRINTFORML ……当然，这样沾满精液的脸是不能在外面走的吧
+		;TranslatedMark ……もちろん、こんな精液まみれの顔では外を歩けないだろう
+		PRINTFORMW 至少要把附着在脸上的精液涂满，让它不容易暴露
+		;TranslatedMark せめてバレにくいようにしてやろうと、ベトベトと付着する精液を、たっぷりと顔に塗り込んでやる
+		PRINTFORMW 在这期间，%PRONOUN(対象)%一直保持着成熟的样子，让身体颤抖不已……
+		;TranslatedMark その間、%PRONOUN(対象)%は大人しくされるがままになっており、ゾクゾクとカラダを震わせるばかりだった……
+		CALL FUCK(対象, "Ｍ, 欲望, 奉仕, 性技, 精愛, 口淫", "接吻喪失", GET_SPERM_ID("不明"), @"%ANAME(MASTER)%的阴茎", "", "", "調教")
+ENDSELECT
+PRINTL
+PRINTFORMW %ANAME(対象)%虽然有点顺从的表情，但是教育必须贯彻到底
+;TranslatedMark %ANAME(対象)%は幾分従順な表情を浮かべてはいるが、躾というものは徹底して行われなくてはならない
+PRINTFORML 那么，接下来该怎么做呢……？
+;TranslatedMark さて、次はどうしてやろうか……？
+PRINTL
+
+CALL ASK_MULTI_JUDGE("用绳子绑着度过", ITEM:縄, "插入振动棒度过", ITEM:振動棒, "插入肛用振动棒度过", ITEM:肛用振動棒)
+
+選択肢 = RESULT
+SELECTCASE 選択肢
+	CASE 0
+		PRINTFORMW 「是的……我明白了」
+		;TranslatedMark 「はい……わかり、ました」
+		PRINTFORMW 用绳子绑上吧……
+		;TranslatedMark 縄で縛ってやることとしよう……
+		PRINTFORMW 脱下衣服，这样命令后，%ANAME(対象)%踌躇着点点头
+		;TranslatedMark 服を脱げ、そう命じると、%ANAME(対象)%は躊躇いつつも頷いた
+		PRINTFORMW 「呃，呃，啊……kitsu……」
+		;TranslatedMark 「ッ、く、あ……キツっ……」
+		PRINTFORMW 不是为了快乐，而是为了教养。紧紧绑住
+		;TranslatedMark 快楽のためでなく、躾のためだ。強めに縛っておく
+		PRINTFORMW 虽然%ANAME(対象)%的脸扭曲了，但更重要的是，由于深入肌肤和秘部而产生的快乐，使她的表情荡漾开来
+		;TranslatedMark %ANAME(対象)%は顔を歪めるが、それ以上に肌や秘部への食い込みによる快楽が、その表情を蕩かせている
+		PRINTFORMW ——就这样穿着法衣，今天一天就这样度过吧
+		;TranslatedMark ――そのまま法衣を着て、今日は一日そのままで過ごせ
+	CASE 1
+		PRINTFORMW 「是的……我明白了」
+		;TranslatedMark 「はい……わかり、ました」
+		PRINTFORML 因为给了我很棒的玩具，所以今天一天都能带着它度过……
+		;TranslatedMark 素敵なおもちゃをくれてやるから、今日は一日それを着けて過ごせ……
+		PRINTFORMW 命令后，%ANAME(対象)%一边踌躇一边点了点头
+		;TranslatedMark 命じると、%ANAME(対象)%は躊躇いながらも頷いた
+		PRINTFORMW 「呃……」
+		;TranslatedMark 「ッ……」
+		PRINTFORMW 把手放在墙上，让屁股向后仰
+		;TranslatedMark 壁に手をつかせ、尻をむけさせる
+		PRINTFORMW 卷起法衣出现的秘部，对期待一下子收缩，流着口水
+		;TranslatedMark 法衣をまくって現れた秘部は、期待にひくひくと収縮し、涎を垂れ流している
+		PRINTFORML ——你的下半身完全不像尼姑吧？
+		;TranslatedMark ――とても尼僧とは思えない下半身だな？
+		PRINTFORML 我开玩笑地说，%ANAME(対象)%不情愿地摇头
+		;TranslatedMark からかうように言ってやると、%ANAME(対象)%はいやいやをするように首を振る
+		PRINTFORMW 但是，他的腰却像期待一样弯曲着……
+		;TranslatedMark だが、その腰は期待するようにくねっている……
+		PRINTFORMW 「啊……啊，啊，啊，进来，啊啊……」
+		;TranslatedMark 「ァ……はっ、あ、あぁッ、入って、あぁぁッ……」
+		PRINTFORMW 就这样一头一头地扭转振动
+		;TranslatedMark そのままずぶずぶと、バイブをねじ込んでやる
+		PRINTFORMW 发出嘶哑的声音，轻轻地拍打着膝盖，%ANAME(対象)%就这样一直被使唤着
+		;TranslatedMark 蕩けた声をあげ、膝を軽くカクつかせながら、%ANAME(対象)%はされるがままになっている
+		PRINTFORMW ——好不容易来一次，绝对不要掉下去哦
+		;TranslatedMark ――せっかくくれてやったんだから、絶対に落とすんじゃないぞ
+	CASE 2
+		PRINTFORMW 「是的……我明白了」
+		;TranslatedMark 「はい……わかり、ました」
+		PRINTFORML 因为给了我很棒的玩具，所以今天一天都能带着它度过……
+		;TranslatedMark 素敵なおもちゃをくれてやるから、今日は一日それを着けて過ごせ……
+		PRINTFORMW 命令后，%ANAME(対象)%一边踌躇一边点了点头
+		;TranslatedMark 命じると、%ANAME(対象)%は躊躇いながらも頷いた
+		PRINTFORMW 「呃……」
+		;TranslatedMark 「ッ……」
+		PRINTFORMW 把手放在墙上，让屁股向后仰
+		;TranslatedMark 壁に手をつかせ、尻をむけさせる
+		PRINTFORMW 卷起法衣出现的屁股孔，简直就像性器一样在期待中抽搐着收缩着
+		;TranslatedMark 法衣をまくって現れた尻穴は、まるで性器のように期待にひくひくと収縮している
+		PRINTFORML ——这种地方还不错，真是个大变态啊？
+		;TranslatedMark ――こんなところがいいだなんて、大した変態だな？
+		PRINTFORML 我开玩笑地说，%ANAME(対象)%不情愿地摇头
+		;TranslatedMark からかうように言ってやると、%ANAME(対象)%はいやいやをするように首を振る
+		PRINTFORMW 但是，他的腰却像期待一样弯曲着……
+		;TranslatedMark だが、その腰は期待するようにくねっている……
+		PRINTFORMW 「啊……啊，啊，啊，进来，啊啊……」
+		;TranslatedMark 「ァ……はっ、あ、あぁッ、入って、あぁぁッ……」
+		PRINTFORMW 就这样扭进腰窝里
+		;TranslatedMark そのままずぶずぶと、背徳の穴にバイブをねじ込んでやる
+		PRINTFORMW 发出嘶哑的声音，轻轻地拍打着膝盖，%ANAME(対象)%就这样一直被使唤着
+		;TranslatedMark 蕩けた声をあげ、膝を軽くカクつかせながら、%ANAME(対象)%はされるがままになっている
+		PRINTFORMW ——好不容易来一次，绝对不要掉下去哦
+		;TranslatedMark ――せっかくくれてやったんだから、絶対に落とすんじゃないぞ
+ENDSELECT
+
+PRINTFORMW 「是的……我明白了……♥」
+;TranslatedMark 「はい……わかりました……♥」
+PRINTFORMW 强烈命令后，%ANAME(対象)%用兴奋的声音回答
+;TranslatedMark 強く命じると、%ANAME(対象)%は熱に浮かされたような声で返事をした
+PRINTFORMW 说起来，他原本就是每天修行的人。从本质上喜欢这种苦行的调教吧
+;TranslatedMark そもそも、日々修行を積んでいる身だ。こういう苦行のような要素のある調教を本質的に好むのだろう
+PRINTFORMW %ANAME(対象)%就这样，迈着蹒跚的步伐离开了房间……
+;TranslatedMark %ANAME(対象)%はそのまま、ふらふらとした足取りで部屋を後にした……
+
+TALENT:対象:難以越過的底線 = 0
+
+FOR LOCAL, 0, 3
+	PRINTL ・
+NEXT
+
+FOR LOCAL, 0, 5
+	SELECTCASE 選択肢
+		CASE 0
+			CALL FUCK(対象, "Ｃ, 欲望, 緊縛, 苦痛快楽, 被虐")
+		CASE 1
+			CALL FUCK(対象, "Ｖ, 欲望", "処女喪失", GET_SPERM_ID("不明"), "", "振動棒", "", "調教")
+		CASE 2
+			CALL FUCK(対象, "Ａ, 欲望", "Ａ処女喪失", GET_SPERM_ID("不明"), "", "肛用振動棒", "", "調教")
+	ENDSELECT
+NEXT
+
+FOR LOCAL, 0, 3
+	PRINTL ・
+NEXT
+
+PRINTFORML 到了晚上，又把%ANAME(対象)%叫到了自己的房间
+;TranslatedMark 夜になって、再び%ANAME(対象)%を自室に呼び寄せた
+PRINTFORML %PRONOUN(対象)%的脸颊像感冒了一样红潮，呼吸也很激烈。被同伴们担心了吧
+;TranslatedMark %PRONOUN(対象)%の頬は風邪でもひいたように紅潮し、息も荒い。仲間には心配されたことだろう
+PRINTFORMW 当然不是感冒……
+;TranslatedMark もちろん、風邪などではないわけだが……
+PRINTFORMW 「……♥」
+PRINTFORMW 首先脱下衣服。命令后，%ANAME(対象)%什么也没说就服从了。连说什么的力气都没有吧
+;TranslatedMark まずは服を脱げ。命じると、%ANAME(対象)%は何も言わずに従った。何か言う気力もないのだろう
+SELECTCASE 選択肢
+	CASE 0
+		PRINTFORML 裸露的皮肤上，绳子紧紧地扎着，痛得要命
+		;TranslatedMark 露わになった肌には、縄がぴっちりと、痛々しいほどに食い込んでいる
+		PRINTFORML 然后她的秘密破裂，在那快乐中不断地溢出蜜
+		;TranslatedMark そして彼女の秘裂は、その快楽にとろとろと止めどなく蜜を溢れさせていた
+		PRINTFORMW 胯股绳附近等，由于水分的原因，颜色也发生了变化……
+		;TranslatedMark 股縄のあたりなど、その水分のせいでじっとりと色が変わっているほどだ……
+		PRINTFORMW 解开绳结后，皮肤上还留有绳子扎进去后的红色痕迹
+		;TranslatedMark 結び目を解いてやると、その肌には縄の食い込んだあとが赤く残っていた
+		PRINTFORMW 丰满的肉体和白色肌肤的对比真的很美，很淫荡……
+		;TranslatedMark 豊満な肉体、白い肌とのコントラストがなんとも美しく、淫らだ……
+	CASE 1
+		PRINTFORML 那个秘密裂紧紧地叼进振动，被给予的快乐不断地使蜜溢出
+		;TranslatedMark その秘裂はバイブをしっかりと咥え込み、与えられる快楽に止めどなく蜜を溢れさせていた
+		PRINTFORML 从大腿到脚踝，还残留着晶莹剔透的蜜痕
+		;TranslatedMark 太腿からくるぶしにかけて、てらてらとした蜜の跡が残っているほどだ
+		PRINTFORMW 雌性的香味十分浓厚。即使是在白天和%PRONOUN(対象)%相遇的人也会注意到的吧
+		;TranslatedMark 濃厚な牝の香りがする。これは日中%PRONOUN(対象)%に出会った者も気づいたことだろう
+		PRINTFORMW 拔出来的时候，肉穴好像很舍不得和它分手似的，吸到了最后……
+		;TranslatedMark 引き抜いてやると、肉穴はそれとの別れを惜しむように最後まで吸い付いてきた……
+	CASE 2
+		PRINTFORML 被埋入丰满屁股肉之间的肛门振动，似乎一整天都在对%ANAME(対象)%的肛门进行充分的训练
+		;TranslatedMark 豊満な尻肉の間に埋め込まれたアナルバイブは、%ANAME(対象)%の肛門を一日中たっぷりと躾けていたらしい
+		PRINTFORML 作为证据，%ANAME(対象)%的下半身是看不到的
+		;TranslatedMark その証拠に、%ANAME(対象)%の下半身は見ていられないほどにぐしょぐしょだ
+		PRINTFORMW 有着特有的浓厚的女人味。即使是在白天和%PRONOUN(対象)%相遇的人也一定注意到了吧
+		;TranslatedMark 特有の、濃厚なオンナの香りがする。日中%PRONOUN(対象)%に出会った者もきっと気づいたことだろう
+		PRINTFORMW 拔出来的时候，菊穴好像很舍不得和她分手似的，发出了咻咻的声音……
+		;TranslatedMark 引き抜いてやると、菊穴はそれとの別れを惜しむように、ぢゅぽんと音を立てた……
+ENDSELECT
+PRINTFORMW 「{RAND(10, 15)}次左右开始……我不记得了，心情很好……记忆模糊，又是怎么来到这里的呢……不知道」
+;TranslatedMark 「{RAND(10, 15)}回くらいから……覚えてません、気持ちよくて……記憶が曖昧で、ここにどうやってきたのかも……わかりません」
+PRINTFORMW 问了他几次，%ANAME(対象)%一脸迷糊的回答
+;TranslatedMark 何回イッたか尋ねると、惚けたような顔で%ANAME(対象)%は答える
+PRINTFORMW 站着也好不容易吧——或者说，如果不是像%PRONOUN(対象)%那样积累了精神修行的话，早就崩溃了吧
+;TranslatedMark 立っているのもやっとなのだろう――というか、%PRONOUN(対象)%のような精神修行を積んだものでなければ、とっくにくずおれていただろう
+PRINTFORMW 或者，是想起了在%ANAME(MASTER)%面前不允许疏忽大意的事情……
+;TranslatedMark あるいは、%ANAME(MASTER)%の前での粗相は許されないということを思い出したのか……
+PRINTFORML 不管怎么说，教育已经到了最后的阶段。还有……
+;TranslatedMark なんにせよ、躾は最後の段階まで来ている。後は……
+PRINTFORML
+CALL ASK_MULTI("只是好好调教一下而已")
+PRINTL
+PRINTFORMW 「是的……请随意使用%ANAME(対象)%的身体……♥」
+;TranslatedMark 「はい……どうぞ、%ANAME(対象)%のカラダを、お好きにお使い下さい……♥」
+PRINTFORMW 大概是想起了自己的立场吧。告诉他要疼爱他，%ANAME(対象)%用特殊的语言接受了%ANAME(MASTER)%
+;TranslatedMark 自分の立場を思い出したのだろう。可愛がってやると伝えると、%ANAME(対象)%は殊勝な言葉で%ANAME(MASTER)%を受け入れた
+PRINTFORMW 为了回应他的顺从……
+;TranslatedMark その従順さに答えてやるとしよう……
+
+CALL COLOR_PRINTW(@"%ANAME(対象)%诚恳地发誓服从", カラー_注意)
+
+;全員の調教参加フラグをクリア
+CVARSET CFLAG, 6, 0
+
+CFLAG:対象:従属度 += 1500
+CFLAG:対象:依存度 += 1000
+TALENT:対象:チョロイン = 1
+TALENT:対象:堅強 = 0
+TALENT:対象:保守的 = 0
+TALENT:対象:難以越過的底線 = 0
+CFLAG:対象:調教参加フラグ = 1
+CFLAG:対象:調教中帰らない = 1
+CFLAG:対象:強制友好化 = 1
+BASE:対象:体力 = MAXBASE:対象:体力
+BASE:対象:気力 = MAXBASE:対象:気力
+
+;強制逆調教フラグをオン
+FLAG:ターンエンド調教 = 1
+;それ以降のデイリーイベント発生を潰す
+DAILY_CANCEL = 1
+
+
+RETURN 1
+

@@ -1,0 +1,51 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_BEAT_A_YOUKAI_EXISTS()
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_BEAT_A_YOUKAI_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_BEAT_A_YOUKAI(対象)
+#DIM 対象
+PRINTFORML 聽說這一帯有妖怪在作孽
+PRINTFORML 被拜託想想辦法
+PRINTL
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "武闘"))
+CALL ASK_YN("试着去讨伐", "放棄")
+
+IF RESULT == 1
+	PRINTFORML 太危険了、還是別干比較好
+	PRINTFORMW 決定放棄
+	RETURN 1
+ENDIF
+
+PRINTFORML 不能忽視領民受到的危害
+PRINTFORMW %ANAME(対象)%進入了妖怪的巣穴
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+
+IF LIMIT(ABL:対象:武闘, 50, 100) > RAND:100
+	PRINTFORML 成功了！
+	PRINTFORML %ANAME(対象)%非常顺利的討伐了妖怪
+	CALL ICPRINT("收到了報酬<3000>金", "L", カラー_注意)
+	CALL PRINT_ADD_EXP(対象, "武闘経験値", RAND:8 + 1, 1)
+	MONEY += 3000
+	RETURN 1
+ENDIF
+
+PRINTFORML 失败了！
+PRINTFORML 妖怪比想像以上的還要強、反被撃敗%ANAME(対象)%拼命地逃回去了
+CALL ADD_COOLTIME(対象, 2)
+
+RETURN 1

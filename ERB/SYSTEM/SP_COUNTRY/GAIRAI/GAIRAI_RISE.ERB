@@ -1,0 +1,77 @@
+﻿
+;--------------------------------------
+;蜂起イベントが発生するかの判定
+;--------------------------------------
+@GAIRAI_RISE_RATE()
+;既に出現しているか、外来人なし設定なら発動しない
+SIF SP_COUNTRY_APPEARED:特殊勢力_外来人 || !SP_COUNTRY_RANK:(特殊勢力_外来人)
+	RETURN 0
+
+;いっぱいなら駄目
+SIF GET_NEW_COUNTRY() == -1
+	RETURN 0
+
+SIF !CHECK_SP_COUNTRY_RISE(特殊勢力_外来人)
+	RETURN 0
+RETURN 1
+
+
+;--------------------------------------
+;外来勢力出現イベント
+;出現できたら1、できなければ0をかえす
+;--------------------------------------
+@GAIRAI_RISE(都市 = 0)
+#DIM 外来人
+#DIM 都市
+
+;外来勢力を作成
+CALL GAIRAI_INIT()
+外来人 = RESULT
+;作れなかったら戻す
+SIF 外来人 == -1
+	RETURN 0
+
+CALL SP_COUNTRY_RISE(外来人, 都市)
+
+SIF !RESULT
+	RETURN 0
+
+SP_COUNTRY_APPEARED:特殊勢力_外来人 = 1
+RETURN 外来人
+
+;--------------------------------------
+;蜂起イベント用都市選択処理
+;--------------------------------------
+@GAIRAI_RISE_SELECT_CITY()
+#DIM 結界
+#DIM 所有者
+;博麗大結界の所有者が3都市以上所持していればそこから
+結界 = GET_CITYNUMBER("博麗大結界")
+IF 結界 >= 0 && (!IS_COUNTRY(CITY_OWNER:結界) || GET_OWN_CITY(CITY_OWNER:結界) >= 3)
+	LOCAL = 結界
+;そうでなければランダム
+ELSE
+	CALL SP_COUNTRY_RISE_SELECT_CITY()
+	LOCAL = RESULT
+ENDIF
+
+RETURN LOCAL
+
+
+;---------------------
+;蜂起イベント用メッセージ関数
+;---------------------
+@GAIRAI_RISE_MSG(勢力, 対象)
+#DIM 勢力
+#DIM 対象
+CALL SINGLE_DRAWLINE
+SETCOLOR カラー_警告
+PRINTFORMW  幻想乡大战争逐渐走向高潮，曾经用于隔绝外界的大结界却在众人眼中销声匿迹
+PRINTFORMW  直到这一天，电闪雷鸣，风雨交加，幻想乡的大结界崩然倒塌
+PRINTFORML  来自另一个世界的外乡人们，用着如同神迹一般的未来武器
+PRINTFORMW  以闪电战的方式，瞬间把大结界的守卫屠杀殆尽
+PRINTFORMW  「用着如此原始的武器，为了这区区不超几百平方公里的土地而斗争」
+PRINTFORMW  「呵呵呵呵，真是可笑，现在，是时候来让这些原始生物感受一下什么叫做科技！」
+PRINTFORMW  外乡人的军团在研究所长的指挥下出动了
+PRINTFORMW  使用着甚至超越月之都科技的武器的他们所向披靡，幻想乡能抵挡住这样可怕的外乡帝国的军队吗
+RESETCOLOR

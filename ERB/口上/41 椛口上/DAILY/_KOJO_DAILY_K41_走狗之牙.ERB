@@ -1,0 +1,109 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K41_KIBA_RATE(対象)
+#DIM 対象
+RETURN 500
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K41_KIBA_DECISION(対象)
+#DIM 対象
+;玩家为君主
+SIF !(GET_COUNTRY_BOSS(CFLAG:MASTER:所属) == 0)
+	RETURN 0
+
+;玩家不是文果荷取
+SIF GROUPMATCH(MASTER, NAME_TO_CHARA("文"), NAME_TO_CHARA("はたて"), NAME_TO_CHARA("にとり"))
+	RETURN 0
+
+;依存度1500以上
+SIF CFLAG:対象:依存度 < 1500
+	RETURN 0
+
+SIF Item:日本酒 < 3
+	RETURN 0
+
+SIF KDVAR:対象:椛_走狗之牙 == -1
+	RETURN 0
+
+;ARG:0が口上デイリーイベントを実施できるかの簡易チェック関数
+;ARG:1 0 MASTERと別勢力である 1 MASTERと同一勢力である　-1 どちらでもよい
+;ARG:2 0 捕虜でない 1 捕虜である -1 どちらでもよい
+;ARG:3 0 面識がない 1 面識がある -1 どちらでもよい
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K41_KIBA_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+@KOJO_DAILY_K41_KIBA(対象)
+#DIM 対象
+
+	PRINTFORMW 業已子時, 萬籟俱寂, 耳不聞嘈雜, 心卻覺煩躁, 因戰事而輾轉不能眠的%ANAME(MASTER)%打算出門散散心.
+	PRINTFORMW 熏風習習, 流光熠熠, 行至營地崗哨時, 看到了正在站崗的%ANAME(対象)%, 便向她打了招呼.
+	PRINTFORMW 「今夜空中沒有雲朵遮蔽, 月光明亮視野很好. 但即便如此, 隨意跟夜哨打招呼可是很危險的, 對吧, %ANAME(MASTER)%.」
+	PRINTFORMW 說完, %ANAME(対象)%旋即轉過身來, 與話語不同, 臉上掛著發自內心的微笑, 看來不僅沒有生氣, 還很高興被%ANAME(MASTER)%搭話.
+	PRINTFORMW 「多虧是有山中的千裏眼之稱的我, 不然就會讓你答口令咯」
+	PRINTFORMW 月光洋洋灑灑, 落在了她的身上, 與在戰場上威風凜凜的%ANAME(対象)%不同, 今夜, 月下的%ANAME(対象)%又多了一份俏皮可愛.
+	PRINTFORMW 「嗯? 你說今天沒有我的值班安排? 哈哈, 習慣罷了」
+	PRINTFORMW 「在這次異變之前我就是哨戒天狗, 一段時間不做這份工作就會不自在, 我讓原班人員去值流動哨了.」
+	PRINTFORMW 「倒是你, 這麽晚在外邊亂晃, 是要做什麽?」
+	PRINTFORMW 「心煩睡不著所以出來散步嗎. 作為君主, 肩上的重擔可不輕啊.」
+	CALL ASK_MULTI_JUDGE("今晚的夜哨也很輕松, 不如我們坐下來喝點酒, 聊聊天吧", 1, "椛小姐辛苦了, 請繼續作為警衛保護我們吧", 1)
+	SELECTCASE RESULT
+		CASE 0
+		PRINTFORMW 「什...什麽? 這可是瀆職啊. 就算這裏是最內側的崗哨也不能放松警惕.」
+		PRINTFORMW 「...出事你兜著? 那既然是君主的承諾和邀請, 我就恭敬不如從命了.」
+		ITEM:日本酒 -= 3
+		CALL COLOR_PRINTW("喝光了3瓶日本酒", カラー_注意)
+		PRINTFORMW ...
+		PRINTFORMW ..
+		PRINTFORMW .
+		PRINTFORMW 酒過三巡, 氣氛已經高漲起來, %ANAME(対象)%也漸臻佳境, 便從傾聽者轉為傾訴者, 向%ANAME(MASTER)%打開了心扉.
+		PRINTFORMW 「%ANAME(MASTER)%啊, 可不只有你在煩惱, 接下來也聽聽我的故事吧」
+		PRINTFORMW 「我的姓是犬走, %ANAME(MASTER)%知道這個姓氏的含義嗎」
+		PRINTFORMW 「直接理解就是走狗的意思呢. 但我也是白狼天狗, 是尊貴的白狼, 無論在什麽地方, 狼都是野性的象征」
+		PRINTFORMW 「堅韌不屈, 沈默不語, 卻意誌堅定, 毫不憐憫, 只會對眼前的敵人, 眼前的獵物利齒相向.」
+		PRINTFORMW 「%ANAME(MASTER)%或許不知道, 犬走家族, 在白狼天狗中是名門世家之一.」
+		PRINTFORMW 「但是犬走, 很合適的姓, 我不過是一只飼養出來的狼, 和家犬有什麽區別呢.」
+		PRINTFORMW 「我們白狼天狗, 一直在給鴉天狗大人當看門狗, 族內長老們也安於現狀, 甘於平庸」
+		PRINTFORMW 「這樣的我們, 是否還殘留著獸族的血液呢, 我們還配叫"狼"嗎」
+		PRINTFORMW 畢竟妖怪之山已經形成社會, 投身於社會中就要遵循社會的規則吧, 被磨平棱角也是無可奈何.
+		PRINTFORMW %ANAME(対象)%擺弄了一下她的項鏈, 一串穿有八顆尖銳利齒的項鏈, 說道
+		PRINTFORMW 「這個小護符, 是我親手制作的, 穿著的牙齒, 來自一位狼群首領, 那是只高貴的白狼, 在狼群中, 仿佛鶴立雞群一般」
+		PRINTFORMW 「堅韌不屈, 沈默不語, 卻意誌堅定, 毫不憐憫, 只會對眼前的敵人, 眼前的獵物利齒相向」
+		PRINTFORMW 「因為擁有千裏眼, 我一直在註視著它, 我向往它的野性, 白狼天狗曾經也一定有過如此兇悍的一面吧. 」
+		PRINTFORMW 「因為是巡哨天狗, 我能感受到它也一直在"註視"著我, 它在問我們白狼天狗為什麽丟掉了野性, 為什麽變得汙濁不堪.」
+		PRINTFORMW 「我向往它, 玩起了扮演狼的"遊戲", 在山林中進行狩獵, 日復一日, 獵殺了不少動物. 」
+		PRINTFORMW 「那一天, 狩獵的是一只很難對付的大野豬, 我追的太深太久, 直到亥時才將其斬殺. 」
+		PRINTFORMW 「此時我已進入狼群的領地, 回過神來已被群狼包圍, 它們徑直撲向我, 讓我受了點傷. 」
+		PRINTFORMW 「我不想濫殺無辜, 但它們聽不懂我的話, 為求自保, 我擊殺了一只狼作為震懾」
+		PRINTFORMW %ANAME(対象)%的聲音有些許顫抖, 但她很快就平靜了下來, 繼續追溯著回憶.
+		PRINTFORMW 「這時, 那只白狼, 那位狼群的首領, 我一直向往的野性, 仰天怒吼, 憤怒的出現在我面前. 」
+		PRINTFORMW 「不知何時開始, 我竟然再也, 無法成為那只狼一樣的存在了」
+		PRINTFORMW %ANAME(対象)%捏了捏護符上的尖牙
+		PRINTFORMW 「生而為狼, 活如走狗, 拔下鋒利的牙齒, 將其制成項圈, 套上枷鎖與平庸為伍. 」
+		PRINTFORMW 「這個小護符, 和我很配吧」
+		PRINTFORMW ...
+		PRINTFORMW ..
+		PRINTFORMW .
+		PRINTFORMW %ANAME(対象)%的武鬥和防衛上升了
+		CALL PRINT_ADD_EXP(対象, "武闘経験値", 60, 1)
+		CALL PRINT_ADD_EXP(対象, "防衛経験値", 60, 1)
+
+	CASE 1
+		PRINTFORMW 「保護大家, 是我作為哨戒天狗, 也是作為%ANAME(対象)%最重要的責任, 請你放心, 我會保護好大家的.」
+		PRINTFORMW %ANAME(対象)%的武鬥和防衛上升了
+		CALL PRINT_ADD_EXP(対象, "武闘経験値", 16, 1)
+		CALL PRINT_ADD_EXP(対象, "防衛経験値", 16, 1)
+	ENDSELECT
+KDVAR:対象:椛_走狗之牙 = -1
+RETURN 1

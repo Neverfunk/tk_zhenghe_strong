@@ -1,0 +1,158 @@
+﻿;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_HUNTER_S_LIST_DUMMY_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("HUNTER_S_DAY")
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_HUNTER_S_LIST_DUMMY_DECISION()
+FOR LOCAL, 0, CHARANUM
+    SIF !GETBIT(TALENT:LOCAL:日常系, 素質_デイリー_专属奴隶)
+        CONTINUE
+    IF CFLAG:LOCAL:所属 != CFLAG:MASTER:所属 || CFLAG:LOCAL:特殊状態
+        PRINTFORML %ANAME(LOCAL)%远离%ANAME(MASTER)%之后，似乎已经忘记了她的身份……
+	    CALL COLOR_PRINTW(@"%ANAME(LOCAL)%不再是%ANAME(MASTER)%的专属奴隶了……", カラー_注意)
+        CLEARBIT TALENT:LOCAL:日常系, 素質_デイリー_专属奴隶
+        CONTINUE
+    ELSEIF (!IS_SLAVE(LOCAL) && !IS_LOVER(LOCAL)) || !IS_FEMALE(LOCAL)
+        PRINTFORML 随着%ANAME(LOCAL)%迎来了新的生活，%PRONOUN(LOCAL)%似乎已经忘记了从前与%ANAME(MASTER)%的关系……
+	    CALL COLOR_PRINTW(@"%ANAME(LOCAL)%不再是%ANAME(MASTER)%的专属奴隶了……", カラー_注意)
+        CLEARBIT TALENT:LOCAL:日常系, 素質_デイリー_专属奴隶
+        CONTINUE
+    ENDIF
+NEXT
+RETURN 0
+
+;---------------------
+;本体 ここにはこないが安全のため
+;---------------------
+@EVENT_DAILY_DERIVATION_HUNTER_S_LIST_DUMMY()
+
+RETURN 1
+
+;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_HUNTER_S_LAIR_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("HUNTER_S_DAY")
+
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_DERIVATION_HUNTER_S_LAIR_DECISION()
+SIF DAY < 5
+    RETURN 0
+SIF !HAS_PENIS(MASTER)
+    RETURN 0
+;技能只能习得一系，除非全部遗忘
+SIF CHECK_SKILL_DUPLICATE(MASTER, スキル_ジャンル_PERSONAL, 0, 41) || CHECK_SKILL_DUPLICATE(MASTER, スキル_ジャンル_PERSONAL, 0, 42)
+    RETURN 0
+RETURN RAND:100 < ABL:MASTER:欲望 * 5
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_DERIVATION_HUNTER_S_LAIR_SETTARGET()
+FOR LOCAL, 0, CHARANUM
+    SIF !GETBIT(TALENT:LOCAL:日常系, 素質_デイリー_专属奴隶)
+        CONTINUE
+    SIF CFLAG:LOCAL:所属 != CFLAG:MASTER:所属 || CFLAG:LOCAL:特殊状態 || (!IS_SLAVE(LOCAL) && !IS_LOVER(LOCAL)) || !IS_FEMALE(LOCAL)
+        CONTINUE
+    IF !COOLTIME:LOCAL:0
+        DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+        DAILY_TARGET_NUM ++
+    ENDIF
+NEXT
+RETURN DAILY_TARGET_NUM
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_HUNTER_S_LAIR()
+#DIM 对象
+对象 = DAILY_TARGET:(RAND(DAILY_TARGET_NUM))
+
+PRINTFORMW 今天的%ANAME(对象)%像往常一样穿着%ANAME(MASTER)%指定的服装
+PRINTDATAW
+    DATAFORM ——全身上下只穿着一件透明连衣裙，重要的地方一览无余
+    DATAFORM ——在禁止穿内衣的情况下让胸部和私处裸露出来的下流女仆装
+    DATAFORM ——在乳头和私处周围都开了洞的泳装
+    DATAFORM ——勉强能遮住三点的裸体围裙
+    DATAFORM ——实际上没有衣服，但是用可食用颜料在身上画上了衣服的样子
+    DATAFORM ——全身上下只穿着一件风衣，但是因为衣服内置的骨架导致前面几乎完全裸露
+    DATAFORM ——只有在腰部穿着一件连私处都挡不住的前开叉裙
+    DATAFORM ——只有一个挂着写有自己名字的小牌子的项圈
+    DATAFORM ——私处部分能像胸部部分那样简单掀开的特制兔女郎服
+    DATAFORM ——全身上下只穿着一件接近透明的丝绸衬衫
+    DATAFORM ——用几张小符纸编成的色情巫女服
+    DATAFORM ——全身上下只穿着一件披风
+    DATAFORM ——只有一个领口和领带
+    DATAFORM ——在特制眼镜下才能看见的%SPLIT_RAND("西装/女仆服/和服/兔女郎服/泳装/水手服/常服/裸体围裙/连衣裙")%
+    DATAFORM ——用礼品系带勉强遮住三点的捆绑包装
+    DATAFORM ——接近透明的丝绸肚兜
+    ; DATAFORM ——
+ENDDATA
+IF DAILY_TARGET_NUM > 10
+    PRINTFORML %ANAME(MASTER)%的府邸已经变成了酒池肉林的存在
+    PRINTFORMW 每当%ANAME(MASTER)%回来的时候，都会强奸看到的几乎每一个少女
+ELSEIF DAILY_TARGET_NUM > 3
+    PRINTFORML 最近%ANAME(MASTER)%府邸里甚至能看到之前的同事
+    PRINTFORMW 她们显然也变成了只懂和%ANAME(MASTER)%交欢的性奴
+ELSE
+    PRINTFORML 不仅是%ANAME(对象)%，连%ANAME(MASTER)%府邸里的女仆都得这么穿
+    PRINTFORMW 想到这一点，%ANAME(对象)%的羞耻感减轻了一些
+ENDIF
+PRINTFORMW 不知道%ANAME(MASTER)%今天叫她过来是有什么事呢……？
+PRINTFORMW
+SELECTCASE RAND:5
+    CASE 0
+        PRINTFORMW %ANAME(MASTER)%让%ANAME(对象)%暂时负责他的起居……
+        PRINTFORMW 首先是惯例的骑乘位起床闹钟，之后不论是做饭、吃饭、办公还是洗澡都要保持连接在一起
+        PRINTFORMW 一天下来，%ANAME(对象)%便已堕落为%ANAME(MASTER)%的飞机杯，除了高潮和被内射外几乎做不成任何事
+        PRINTFORMW 就这样，直到其他少女抱怨为止，%ANAME(MASTER)%和%ANAME(对象)%单独享受了好几天这样的日子……
+    CASE 1
+        PRINTFORMW %ANAME(MASTER)%说要「补偿第一次」什么的，给了%ANAME(对象)%一个药丸让她吃下去
+        PRINTFORMW 打开摄像机，让%ANAME(对象)%对着镜头诉说着爱的话语
+        PRINTFORMW 两个人在镜头前深吻，互相挑逗，之后%ANAME(MASTER)%便让%ANAME(对象)%面向镜头，自己沉下腰来
+        PRINTFORMW 插入瞬间带来的疼痛和结合部处流下的血液让%ANAME(对象)%想起了什么，但随即便因为熟悉的阴茎触及子宫口而在镜头面前绝顶了……
+        PRINTFORMW 之后又换成了各种各样的体位，但都会向摄像机方向尽情展示%ANAME(对象)%的肉体，以及被抽插的淫水四溅的蜜穴
+        PRINTFORMW 直到摄像机显示电量不足的时候，二人才停止了拍摄
+        PRINTFORMW 事后，%ANAME(MASTER)%和%ANAME(对象)%一起观看了刚刚拍下来的「%ANAME(对象)%的初体验」
+        PRINTFORMW 被片中的自己煽动的二人，又忍不住做了好几次……
+    CASE 2
+        PRINTFORMW 正当%ANAME(对象)%疑惑的时候，突然一对手伸了过来捂住了%ANAME(对象)%的嘴巴，把她拽入了花园之中……
+        PRINTFORMW 直到小穴被似曾相识的东西充满之后，%ANAME(对象)%才认出了正在强奸自己的%ANAME(MASTER)%
+        PRINTFORMW 身为%ANAME(MASTER)%专属的性奴隶，%ANAME(对象)%的小穴早已变成了%ANAME(MASTER)%的形状
+        PRINTFORMW %ANAME(对象)%不但没有反抗，甚至连子宫口都为了榨取精液而主动吸吮着%ANAME(MASTER)%的龟头……
+    CASE 3
+        PRINTFORMW %ANAME(MASTER)%一见到%ANAME(对象)%，就立刻把她推倒侵犯
+        PRINTFORMW 但是突然一个女仆跑过来，说有要紧公务要%ANAME(MASTER)%去处理
+        PRINTFORMW 到了办公室，%ANAME(对象)%和传话的女仆都被%ANAME(MASTER)%拉过来负责性处理
+        PRINTFORMW 结果回去的时候两个人的下体都止不住地往外溢出精液……
+    CASE 4
+        PRINTFORMW %ANAME(MASTER)%把%ANAME(对象)%叫到了府邸里一处极为隐蔽的书房
+        PRINTFORMW 一边让%ANAME(对象)%用对面座位侍奉一边让她汇报府邸外的情报
+        PRINTFORMW %ANAME(对象)%强忍着快感，尽量用平静的语气向%ANAME(MASTER)%传递着情报
+        PRINTFORMW %ANAME(MASTER)%对%ANAME(对象)%的表现非常满意，作为奖励便让她在被中出的一瞬间剧烈高潮……
+ENDSELECT
+CALL FUCK(对象, "Ｃ, Ｖ, Ｂ, 欲望, 精愛, 奉仕, 奉仕, 性交, 接吻, 口淫, Ｖ性交", "膣内射精, 接吻喪失, 処女喪失, 口内射精",　GET_ID(MASTER), @"%ANAME(MASTER)%的阴茎", ANAME(MASTER), "", "調教")
+CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(对象)%的小穴", "調教")
+CFLAG:对象:従属度 += 200
+CFLAG:对象:依存度 += 40
+
+IF DAILY_TARGET_NUM > 3 && !CHECK_SKILL_DUPLICATE(MASTER, スキル_ジャンル_PERSONAL, 0, 43)
+    PRINTFORMW 至今为止征服了不知多少少女的%ANAME(MASTER)%好像顿悟了什么……
+    PRINTFORMW 在这个女将如云的世界里，他将让所有女人都能体会到那份快乐——
+    PRINTFORMW 然后被快乐征服，成为自己的女人……！
+    CALL SKILL_LEARN(MASTER, スキル_ジャンル_PERSONAL, 0, 43)
+    CALL COLOR_PRINTW(@"%ANAME(MASTER)%领悟了在战场上公开强奸女性的技能！", カラー_注意)
+ENDIF
+RETURN 1

@@ -1,0 +1,286 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_TENTACLE_BREEDING_RATE()
+RETURN 25
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_TENTACLE_BREEDING_DECISION()
+#DIM 触手
+
+触手 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_触手))
+SIF 触手 == -1
+	RETURN 0
+SIF CFLAG:MASTER:所属 != 触手
+	RETURN 0
+SIF CFLAG:MASTER:捕虜先 != 0
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_TENTACLE_BREEDING_SETTARGET()
+
+FOR LOCAL, 0, CHARANUM
+	;男かつ触手かつ自国所属かつ捕虜でなくかつ動物でない
+	IF IS_MALE(LOCAL) && TALENT:LOCAL:特殊勢力素質 == 特殊勢力_触手 && CFLAG:LOCAL:所属 == CFLAG:MASTER:所属 && !CFLAG:LOCAL:捕虜先 && !IS_ANIMAL(LOCAL)
+		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+		DAILY_TARGET_NUM ++
+	ENDIF
+NEXT
+
+SIF DAILY_TARGET_NUM < 1
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_TENTACLE_BREEDING_GENRE()
+RETURN デイリー_ジャンル_特殊勢力
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_TENTACLE_BREEDING
+#DIM 対象触手
+#DIM 対象
+
+対象触手 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+
+PRINTFORMW %ANAME(対象触手)%进入了繁殖期、变得异常兴奋
+$SELECT_LOOP
+PRINTFORML 怎麼辦？
+CALL ASK_MULTI("献出村女" ,"使用俘虏繁殖" ,"使用苗床繁殖", "放置不管！")
+IF RESULT == 3
+	PRINTFORMW 没必要再繁殖了
+	PRINTFORMW 放置不理
+	RETURN 0
+ELSEIF RESULT == 0
+	PRINTFORMW 决定从属民中献出一个村女
+	PRINTFORMW …找来了一个非常健康的女孩
+	SELECTCASE RAND:5
+		CASE 0
+			PRINTFORMW 胆怯的女生被扔进繁殖屋里、无数触手朝她袭来……
+		CASE 1
+			PRINTFORMW %ANAME(対象触手)%们兴奋地一拥而上抓住了想逃跑的村娘、拽进了触手屋内……
+		CASE 2
+			PRINTFORMW 被雌性气味吸引而变得兴奋的%ANAME(対象触手)%把被麻醉的村娘拉进了触手物内……
+		CASE 3
+			PRINTFORMW 村娘被推进繁殖小屋内、里面马上传出悲鸣声、紧接着又什么动静都没有了……
+		CASE 4
+			PRINTFORMW 被献祭的少女一开始还在哭喊着、但过了一会却从小屋里传来了娇滴滴的笑声……
+	ENDSELECT
+	PRINTFORML 
+	PRINTFORML 不久之后，少女被放了出来
+	PRINTFORMW 身体和心都完全崩溃了，重生为了触手的苗床
+	PRINTFORML 
+	FOR LOCAL, 1, MAX_COUNTRY
+		CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -30, 30)
+	NEXT
+	CALL COLOR_PRINT("对领民的这种行为引起了其它国家的不满", カラー_注意)
+	PRINTFORMW 
+ELSEIF RESULT == 1
+	PRINTFORML 刚刚好可以把俘虏派过去
+	CALL SINGLE_DRAWLINE
+	CALL SELECT_CHARA_LIST_ONLY_LOGIC_SEX("TENTACLE_BREEDING_CAPTIVE", "NONE")
+	IF RESULT == -1
+		PRINTFORMW 她们是重要的谈判资本、还是算了吧
+		PRINTFORML 
+		GOTO SELECT_LOOP
+	ELSE
+		対象 = RESULT
+		PRINTFORMW 就决定是%ANAME(対象)%了
+		PRINTFORML 拼命地抵抗着的%ANAME(対象)%被扔进了特制的触手繁殖屋内
+		PRINTFORMW 兴奋的%ANAME(対象触手)%一起朝她袭来
+		CALL TENTACLE_BREEDING_RAPE(対象)
+		PRINTFORML 
+		IF CFLAG:対象:所属 != 0
+			FOR LOCAL, 1, MAX_COUNTRY
+				SIF CFLAG:対象:所属 == LOCAL
+					CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -300, 300)
+			NEXT
+			CALL COLOR_PRINT(@"%ANAME(対象)%受到的对待惹怒了她的国家", カラー_注意)
+			PRINTFORMW 
+		ELSE
+			FOR LOCAL, 1, MAX_COUNTRY
+				CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -30, 30)
+			NEXT
+			CALL COLOR_PRINT("如此对待俘虏的方式让其他国家感到不满", カラー_注意)
+			PRINTFORMW 
+		ENDIF
+	ENDIF
+ELSEIF RESULT == 2
+	PRINTFORML 刚好有成为了触手苗床的女人
+	PRINTFORMW 她们会很高兴地为触手献身
+	PRINTFORML 选择谁呢？
+	CALL SELECT_CHARA_LIST_ONLY_LOGIC_SEX("TENTACLE_BREEDING_SEEDBED", "TENTACLE_BREEDING_SEEDBED")
+	対象 = RESULT
+	IF RESULT < 0
+		PRINTFORMW 果然使用重要的战力太可惜了，还是派别的女人吧
+		PRINTFORML 
+		GOTO SELECT_LOOP
+	ELSEIF RESULT == MASTER
+		PRINTFORMW %ANAME(対象)%决定自己成为触手的苗床
+	ELSE
+		PRINTFORMW 就决定是%ANAME(対象)%了
+	ENDIF
+	PRINTFORML %ANAME(対象)%胸口因为即将发生的事情而剧烈跳动着、朝着触手屋走去
+	PRINTFORMW %ANAME(対象)%刚刚进入触手屋内就被狂暴的触手们袭击了
+	CALL TENTACLE_BREEDING_RAPE(対象)
+	CALL ADD_COOLTIME(対象, 1)
+ENDIF
+
+IF RAND:6 == 0
+	PRINTFORMW %ANAME(対象触手)%与少女之间的相性非常完美
+	PRINTFORMW %ANAME(対象触手)%的能力大幅强化了
+	CALL PRINT_ADD_EXP(対象触手, "武闘経験値", 10 + RAND:15, 1)
+	CALL PRINT_ADD_EXP(対象触手, "防衛経験値", 10 + RAND:15, 1)
+	CALL PRINT_ADD_EXP(対象触手, "知略経験値", 10 + RAND:15, 1)
+	CALL TRAIN_AUTO_ABLUP(対象触手)
+ELSE
+	PRINTFORMW %ANAME(対象触手)%似乎是大量的繁殖而更加强大起来
+	CALL PRINT_ADD_EXP(対象触手, "武闘経験値", 5 + RAND:10, 1)
+	CALL PRINT_ADD_EXP(対象触手, "防衛経験値", 5 + RAND:10, 1)
+	CALL PRINT_ADD_EXP(対象触手, "知略経験値", 5 + RAND:10, 1)
+	CALL TRAIN_AUTO_ABLUP(対象触手)
+ENDIF
+
+RETURN 1
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_TENTACLE_BREEDING_CAPTIVE(対象)
+#DIM 対象
+RETURN !IS_MALE(対象) && CFLAG:対象:捕虜先 == CFLAG:MASTER:所属
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_TENTACLE_BREEDING_SEEDBED(対象)
+#DIM 対象
+RETURN CFLAG:対象:行動不能状態 != 行動不能_子供 && CFLAG:対象:所属 == CFLAG:MASTER:所属 && !IS_ANIMAL(対象) && !IS_MALE(対象)
+
+@SELECT_CHARA_LIST_SELECT_LOGIC_TENTACLE_BREEDING_SEEDBED(対象)
+#DIM 対象
+RETURN CFLAG:対象:捕虜先 == 0
+
+@TENTACLE_BREEDING_RAPE(ARG:0)
+
+PRINTFORML 
+PRINTFORMW 繁殖小屋里传来了%ANAME(ARG:0)%微弱的呻吟声……
+PRINTFORML 
+SELECTCASE RAND:21
+	CASE 0
+		PRINTFORML %ANAME(ARG:0)%体内被无数触手蹂躏着、发出近视悲鸣的喘息
+		PRINTFORML 触手毫不在意%ANAME(ARG:0)%的悲鸣继续蠕动着钻入雌穴
+		PRINTFORML 小穴里咕噜咕噜地飞溅着爱液、四肢哆哆嗦嗦地痉挛着
+		PRINTFORMW 被在体内释放出大量精液、%ANAME(ARG:0)%的意识随着强烈的绝顶而飞散了
+	CASE 1
+		PRINTFORML %ANAME(ARG:0)%被从尻穴插入、嘴巴钻出的触手悬吊在半空中
+		PRINTFORML 像是被触手穿成肉串的%ANAME(ARG:0)%翻着白眼全身痉挛
+		PRINTFORML 痛苦和更多的快乐席卷全身、%ANAME(ARG:0)%忍耐不住着绝顶潮吹了
+		PRINTFORMW %ANAME(ARG:0)%体内被触手们射满了种子、快乐的昏了过去
+	CASE 2
+		PRINTFORML 被触手捆绑着的%ANAME(ARG:0)%体味着猛烈的突刺、疯狂的扭动着腰身
+		PRINTFORML 巨大的触手直接插入最深处、强烈的冲击快要把子宫顶飞了
+		PRINTFORML 每一次突刺都让%ANAME(ARG:0)%的身体达到绝顶、雌性的本能追求着触手带来的欢愉
+		PRINTFORMW 触手们的欲望像汹涌的大海一样无法平息、接连几天一直侵犯着%ANAME(ARG:0)%
+	CASE 3
+		PRINTFORML %ANAME(ARG:0)%被悬吊成大字型、因为长着吸盘的触手的侵犯而痉挛着
+		PRINTFORML 吸盘吸着腔肉的暴力抽插带来的快感、让她快要发疯了
+		PRINTFORML 突然间♥子宫口也被吸住了、发出充满情欲的尖叫、身体剧烈的反躬着
+		PRINTFORMW 在没有尝过的未知的快感中%ANAME(ARG:0)%着迷的扭动着腰身
+	CASE 4
+		PRINTFORML %ANAME(ARG:0)%被倒吊着毫不留情的抽插凌辱着
+		PRINTFORML 咕湫咕湫！触手捅进%ANAME(ARG:0)%的雌孔里反复进行抽插和射精
+		PRINTFORML 无可争辩的压倒性的快感下，%ANAME(ARG:0)%只能苦闷的“嘻嘻”笑着来忍受
+		PRINTFORMW %ANAME(ARG:0)%一直被他们发泄着无止境的性欲、绝顶昏倒然后又被刺激着醒过来
+	CASE 5
+		PRINTFORML 小穴、尻穴和口穴被触手插入、%ANAME(ARG:0)%大脑一片空白、苦闷的忍受着
+		PRINTFORML 腔道、肛门和嘴巴里、手上足上和胸部、一切都被触手所侵犯，不断地被玷污
+		PRINTFORML %ANAME(ARG:0)%忘记了人类的身份、像个肉便器一般最求着快乐
+		PRINTFORMW 由于过度的刺激，%ANAME(ARG:0)%在被放出来后也在想着与触手交配的情景。
+	CASE 6
+		PRINTFORML 手脚都被触手吞没的%ANAME(ARG:0)%在触手的凌辱之下昂起头尖叫着
+		PRINTFORML 毫不在意的触手们像是要毁掉少女神圣的部位一般、狠狠的侵犯着
+		PRINTFORML 在快乐之浪中吹出泡沫的%ANAME(ARG:0)%什么也不顾了，一心一意顺从着肉欲享受着触手的抽插
+		PRINTFORMW 被释放之后%ANAME(ARG:0)%的阴道内被蹂躏的肿得通红
+	CASE 7
+		PRINTFORML %ANAME(ARG:0)%被两根触手同时刺入、身体苦闷的发出野兽般的呻吟
+		PRINTFORML 两穴被交替抽插赋种、变成狂乱无神的人偶一般
+		PRINTFORML 它们已经射精了几十发，还不够满足，朝着更深的部位钻去
+		PRINTFORMW 在无底的性欲中，%ANAME(ARG:0)%被彻底凌辱到接近非人的程度
+	CASE 8
+		PRINTFORML 肚子因为被大量射入精液而鼓起的%ANAME(ARG:0)%像脱水的鱼一样弹跳着
+		PRINTFORML 压迫感和灼热使视野歪斜，颤抖的喉咙里传出呻吟和喘息的声音
+		PRINTFORML 触手的卵碎裂开、%ANAME(ARG:0)%的圣域中传来了有东西在扎根的感觉
+		PRINTFORMW 被满意了的触手抚摸着肚子、%ANAME(ARG:0)%一边痉挛着一边发出空虚无神的笑声
+	CASE 9
+		PRINTFORML %ANAME(ARG:0)%的雌穴里插入了好几根粗大的触手、粗暴的扭动着
+		PRINTFORML 每当触手在体内咕噜着蠕动时，下腹部就被顶的会鼓起、%ANAME(ARG:0)%一边颤抖着一边发出呻吟
+		PRINTFORML 尽管是如此的凄惨、但是强烈的快感还是引来了高潮、%ANAME(ARG:0)%毫无疑问的绝顶了
+		PRINTFORMW 腔内的触手一起射精、%ANAME(ARG:0)%大声淫叫着身体用力的反向躬去。
+	CASE 10
+		PRINTFORML 一根跳动着的触手被留在%ANAME(ARG:0)%体内深处
+		PRINTFORML 触手一到达子宫口就打开顶端，伸出几根细小的触手钻入其中
+		PRINTFORML 被触手舔舐着子宫壁、%ANAME(ARG:0)%发出了无药可救的堕落声音
+		PRINTFORMW 超出常识的感觉让%ANAME(ARG:0)%无法忍耐、无数次因为非人的快感而绝顶了
+	CASE 11
+		PRINTFORML 被触手包裹着的%ANAME(ARG:0)%一般被侵犯一边露出了崩坏的笑容
+		PRINTFORML 触手体液里的成分超出极限地刺激着%ANAME(ARG:0)%、让她脑子里只能想到快感
+		PRINTFORML 积极地侍奉着身体周围的触手，一边被赋予了白浊的种子，一边发出喜悦的叫声
+		PRINTFORMW 被放开后的%ANAME(ARG:0)%一边工口的笑着、一边不停的自慰
+	CASE 12
+		PRINTFORML 极度兴奋的触手们像海啸一样扑向%ANAME(ARG:0)%、钻入她的小穴
+		PRINTFORML 由于过于粗暴，%ANAME(ARG:0)%发出了尖叫，但是却无法逃脱，被触手的波浪吞噬了
+		PRINTFORML 肚里里暴走的触手和滚烫的精液、让%ANAME(ARG:0)%的理性咯吱咯吱地碎裂了
+		PRINTFORMW %ANAME(ARG:0)%在接下来的数日里，成为了他们发泄性欲的肉袋，只能无助的呻吟着
+	CASE 13
+		PRINTFORML 丸吞了%ANAME(ARG:0)%的巨大触手里面传来闷闷的呻吟声
+		PRINTFORML %ANAME(ARG:0)%在其中、全身都被触手抽插着、翻着白眼痉挛了
+		PRINTFORML 触手们不时颤抖着射出滚烫的精液、%ANAME(ARG:0)%的身体随着大幅度的震颤着
+		PRINTFORMW %ANAME(ARG:0)%怀着身心都与触手同化的错觉沉入了无尽的快乐之中
+	CASE 14
+		PRINTFORML 触手蠕动的声音与粘膜摩擦的声音、和女人的呻吟声混响在一起
+		PRINTFORML 被咕噜咕噜地缠绕着、不停侵犯内射而反复绝顶的%ANAME(ARG:0)%低着头露出失神的表情
+		PRINTFORML 触手出入的秘处肿得通红，大量白浊液流淌着
+		PRINTFORMW 繁殖期的触手的性欲非常强烈，%ANAME(ARG:0)%被释放是在数日后的事情了
+	CASE 15
+		PRINTFORML %ANAME(ARG:0)%翻着白眼、以野兽般的姿势呻吟着
+		PRINTFORML %ANAME(ARG:0)%被两根粗的触手刺穿同时蹂躏着腔肉、理性被击溃了、疯狂的甩着头
+		PRINTFORML 通常不可能被接触到的地方传来刺痛、但是远远超越痛苦的快感袭击了%ANAME(ARG:0)%
+		PRINTFORMW 他们震颤着喷出精液、%ANAME(ARG:0)%全身都涂满了白浊高潮了
+	CASE 16
+		PRINTFORML 屋子中央被吊在半空的%ANAME(ARG:0)%被大量触手侵犯着
+		PRINTFORML 由于不间断的攻势，%ANAME(ARG:0)%持续地绝顶，理性被破坏了。
+		PRINTFORML 全身变得黏糊糊的，呛人的雄性气味再度提高了%ANAME(ARG:0)%的官能
+		PRINTFORMW 被从好像是无尽的快感中解放的%ANAME(ARG:0)%继续工口的痴笑着
+	CASE 17
+		PRINTFORML %ANAME(ARG:0)%被扭合成人型的触手以背后为侵犯着、疯狂的扭动着腰身
+		PRINTFORML 性欲旺盛的触手咚呲咚呲的顶着！%ANAME(ARG:0)%在脑袋都被震晕的强大冲击下、意识都飞散了
+		PRINTFORML 由于那激烈的性爱，子宫早已陷落，为了求子种而大咧咧敞开着
+		PRINTFORMW %ANAME(ARG:0)%身心都成了触手的新娘，一心一意地养育着孩子
+	CASE 18
+		PRINTFORML 翻着白眼的%ANAME(ARG:0)%被插入两穴的触手顶在半空
+		PRINTFORML 全身的体重都压在深入的触手上、%ANAME(ARG:0)%一边抓住触手一边喘着粗气
+		PRINTFORML 触手不时震动的时候、内脏都被挖出来般的感觉让她不停地潮吹着到达了绝顶
+		PRINTFORMW 他们很喜欢%ANAME(ARG:0)%的身体一样、在满足之前一直像对待玩具一样责弄着她
+	CASE 19
+		PRINTFORML %ANAME(ARG:0)%四肢被吞没、因为全身传来的被触手插入的疼痛而呻吟着
+		PRINTFORML 两穴、嘴巴自不用说，连乳头、耳朵、肚脐都被触手钻入，一边搅动一边刺激着
+		PRINTFORML 非人的刺激让%ANAME(ARG:0)%无法忍耐、从很久之前开始就一直绝顶着
+		PRINTFORMW %ANAME(ARG:0)%只能在快感中继续享受着触手们“爱”的插入了
+	CASE 20
+		PRINTFORML %ANAME(ARG:0)%的肚子膨胀到了极限、透过透明的肚皮可以清楚的看到子宫里蠕动着的新生触手
+		PRINTFORML 子宫的极限扩张与即将产下怪物的背德感、让%ANAME(ARG:0)%淫荡的呻吟着、双手不断责弄着自己的蜜穴
+		PRINTFORML 随着%ANAME(ARG:0)%绝顶的痉挛、子宫口主动的打开、无数触手蠕动着涌出产道
+		PRINTFORMW 蜜穴里接二连三地钻出触手的异样感、让%ANAME(ARG:0)%更加激烈的潮吹着绝顶了
+ENDSELECT
+CALL FUCK(ARG:0, "欲望, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 奉仕, 精愛, 口淫, 性交, 触手, 触手, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("触手"), "触手", "触手", "", "調教")
+CALL FUCK(ARG:0, "欲望, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 奉仕, 精愛, 口淫, 性交, 触手, 触手, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("触手"), "触手", "触手", "", "調教")
+PRINTFORML 
+
+RETURN 1

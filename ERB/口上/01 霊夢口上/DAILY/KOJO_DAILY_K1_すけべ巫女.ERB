@@ -1,0 +1,126 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K1_NAUGHTY_MAIDEN_RATE(対象)
+#DIM 対象
+RETURN 30
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K1_NAUGHTY_MAIDEN_DECISION(対象)
+#DIM 対象
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0) && HAS_PENIS(MASTER) && IS_FALLEN(対象)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K1_NAUGHTY_MAIDEN_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K1_NAUGHTY_MAIDEN(対象)
+#DIM 対象
+
+IF IS_SLAVE(対象)
+	LOCALS:0 = 主人
+ELSEIF MASTER == NAME_TO_CHARA("霖之助")
+	LOCALS:0 = %ANAME(MASTER)%桑
+ELSE
+	LOCALS:0 = %ANAME(MASTER)%
+ENDIF
+
+
+PRINTFORML 深夜。在走廊巡視的時候、看到%ANAME(対象)%在房間内向自己招手
+PRINTFORML 究竟是想要干什麼……
+PRINTFORML
+CALL ASK_YN("逐漸靠近", "置之不理")
+IF RESULT == 1
+	PRINTFORMW 不打算在意、現在很忙……
+	PRINTFORMW 雖然有些対不起%ANAME(対象)%、但還是無視了継續前進
+	RETURN 1
+ELSE
+	IF KDVAR:対象:霊夢_すけべ巫女 == 0
+		PRINTFORMW 「%LOCALS:0%。実際上、有点事想要拜託你」
+		PRINTFORMW 那個%ANAME(対象)%、居然這麼温和的説出了「拜託了」這種話。到底是発生了什麼
+		PRINTFORML 説起来、%ANAME(対象)%看上去有点不舒服的樣子。満臉通紅、呼吸繚乱
+		PRINTFORMW 問道是不是感冒了、在被子里好好睡着比較好、但是%ANAME(対象)%搖了搖頭
+		;かつて調教されたパターン
+		IF IS_FALLEN_TO_SP_COUNTRY(対象) && !IS_SP_COUNTRY(CFLAG:対象:所属)
+			PRINTFORMW 「雖然想着無論如何也要忍耐……但是、実在是沒有辦法了」
+			PRINTFORMW 「一到晚上、就会想起"那些人"的事、然後、身体就開始発熱」
+			PRINTFORML "那些人"。是曾経俘虜了%ANAME(対象)%、進行了凌辱的傢伙吧
+			PRINTFORMW 一想到那些傢伙、気就不打一処来……
+			PRINTFORMW 「雖然我知道這是不対的、但是怎麼也沒有辦法」
+			PRINTFORMW 「好想要、好難受、自慰再多次、也還是得不到満足」
+			PRINTFORMW 「対我来説、除了%LOCALS:0%、就沒有可以信賴的人了」
+			PRINTFORMW 「所以、吶？　拜託了、無論如何、請蹂躙我吧……」
+		;単純にすけべ
+		ELSEIF ABL:対象:欲望 >= 5
+			PRINTFORMW 「是誰的原因、才会讓我変成這樣的啊」
+			PRINTFORMW 「我的身体、漸漸地変了……只要軽軽触碰、就会変得奇怪了」
+			PRINTFORMW 「無法圧抑住、想要更加舒服的想法、明明已経自慰了、但是完全沒有満足」
+			PRINTFORMW 「腦子裡面、已経乱七八糟了、……我這個樣子、%LOCALS:0%、会負起責任的吧……！」
+		;神降ろしの影響
+		ELSE
+			PRINTFORMW 「在白天、進行了久違的神降。修行的時候紫一直嘮叨」
+			PRINTFORML 「但是、巫女進行神降、会受到降臨的神的影響。具体有什麼影響、根據神的性質各有不同」
+			PRINTFORMW 「話説回来、有多産的神大人吧？　也就是説、很好色的。好像已経受到了、這次的影響……那個」
+			PRINTFORMW 受到了好色的神的影響……呼吸慌乱的%ANAME(対象)%有些語無倫次、但總算是明白了言下之意
+			PRINTFORMW 説到底、就是受到神降的影響、発情了……於是就変成了這樣
+			PRINTFORMW 「明明從中午開始、就一個人在自慰了、但是怎麼也無法満足、不断地変得更想要、身体越来越奇怪了」
+			PRINTFORMW 「不能去拜託其他人、但如果是%LOCALS:0%的話、説不定可以、所以説……拜託了」
+		ENDIF
+		PRINTFORMW 這麼説来抱過来的%ANAME(対象)%的身体一直在発熱、完全做好了迎接男人進入的準備
+		PRINTFORML ……夜已経很深了、很快就到明天了。直接去睡覚的話肯定不太好……
+	ELSEIF KDVAR:対象:霊夢_すけべ巫女 == 1
+		PRINTFORML 走進房間。%ANAME(対象)%的臉熱的通紅。呼吸也很乱
+		PRINTFORMW 就像以前那樣、各種各樣的圧抑不住了吧……
+		PRINTFORMW 「対不起……雖然我明白、但是已経忍不住了」
+		PRINTFORML 「強行忍耐什麼的、是辦不到的。……対吧？」
+	ELSE
+		PRINTFORML 走進房間。%ANAME(対象)%的臉熱的通紅。呼吸也很乱
+		PRINTFORMW 就像以前那樣、各種各樣的圧抑不住了吧……
+		PRINTFORMW 「這次、実在是不行了……」
+		PRINTFORMW %ANAME(対象)%只説了這一句、就直接抱了上来
+		PRINTFORML 看来已経相当糟糕了……
+	ENDIF
+	PRINTFORML
+	CALL ASK_YN("緊緊抱住", "因為很忙……")
+	IF RESULT == 1
+		PRINTFORMW 「%LOCALS:0%太可悪了……！」
+		PRINTFORMW 在背後傳来的怨言声中、離開了房間……
+		CFLAG:対象:好感度 = MAX(CFLAG:対象:好感度 - 500, 0)
+		CFLAG:対象:従属度 = MAX(CFLAG:対象:従属度 - 500, 0)
+		KDVAR:対象:霊夢_すけべ巫女 = 2
+	ELSE
+		PRINTFORMW 送到嘴辺的怎麼能不吃。抱住了%ANAME(対象)%的身体、温柔的推倒了……
+		CFLAG:対象:好感度 += 300
+		;全員の調教参加フラグをクリア
+		CVARSET CFLAG, 6, 0
+		CFLAG:対象:調教参加フラグ = 1
+		CFLAG:対象:調教中帰らない = 1
+		CFLAG:対象:強制友好化 = 1
+		BASE:対象:体力 = MAXBASE:対象:体力
+		BASE:対象:気力 = MAXBASE:対象:気力
+		;強制逆調教フラグをオン
+		FLAG:ターンエンド調教 = 1
+		;それ以降のデイリーイベント発生を潰す
+		DAILY_CANCEL = 1
+		;フラグ
+		KDVAR:対象:霊夢_すけべ巫女 = 1
+	ENDIF
+ENDIF
+
+
+RETURN 1

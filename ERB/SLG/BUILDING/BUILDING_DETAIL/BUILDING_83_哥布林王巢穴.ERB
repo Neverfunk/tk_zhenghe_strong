@@ -1,0 +1,43 @@
+@BUILDING_GET_NAME_哥布林王巢穴()
+    #FUNCTIONS
+    RETURNF "哥布林王巢穴"
+
+@BUILDING_GET_EXP_哥布林王巢穴()
+    #FUNCTIONS
+    RETURNF "《集群巢穴》和《陷阱巢穴》的效果翻倍。"
+
+@BUILDING_SET_INFO_ID_83()
+    BUILDING_TYPE:建造物_哥布林王巢穴 = 建造物_类型_特殊类
+    BUILDING_LEVEL:建造物_哥布林王巢穴 = 建造物_等级_三级建筑
+    BUILDING_LIMIT_NUM:建造物_哥布林王巢穴 = 建造物_数量限制_1
+    BUILDING_LIMIT_UNI:建造物_哥布林王巢穴 = 0
+    BUILDING_COUNTRY_ID:建造物_哥布林王巢穴:特殊勢力_ホフゴブリン = 1
+    BUILDING_HAVE_SKILL:建造物_哥布林王巢穴 = 1
+    BUILDING_TOHO_REQ_ID:建造物_哥布林王巢穴:0 = 0
+
+@CHECK_BUILDING_FUNCTION_哥布林王巢穴(COUNTRY_ID)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    SIF !CHECK_BUILDING_SP_COUNTRY_LIMIT_USING(COUNTRY_ID,建造物_哥布林王巢穴)
+        RETURNF RESULT:0
+    RESULT:1 = TMP_BUILDING_EXIST_FLAG:COUNTRY_ID:建造物_哥布林王巢穴
+    IF RESULT:1 > 0
+        RESULT:0 = 1
+    ENDIF
+    RETURNF RESULT:0
+
+@BUILDING_TEXT_哥布林王巢穴(COUNTRY_ID,STATUS)
+    #FUNCTION
+    #DIM COUNTRY_ID
+    #DIM STATUS
+    SIF !CHECK_BUILDING_TEXT_OUTPUT(COUNTRY_ID)
+        RETURNF 0
+    BUILDING_TEXT = PRINT_BUILDING_TEXT_TITLE_F()
+    PRINTFORM 因为《哥布林王巢穴》的存在，
+    PRINTFORML 不似其他愚蠢的绿皮生物，有着巨人体型的哥布林王精妙地发布各种命令
+    IF STATUS
+        PRINTFORML 《集群巢穴》的效果翻倍！
+    ELSE
+        PRINTFORML 《陷阱巢穴》的效果翻倍！
+    ENDIF
+    RETURNF 1

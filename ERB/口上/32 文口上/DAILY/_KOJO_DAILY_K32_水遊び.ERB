@@ -1,0 +1,76 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K32_MIZUASOBI_RATE(対象)
+#DIM 対象
+RETURN 35
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K32_MIZUASOBI_DECISION(対象)
+#DIM 対象
+
+;好感度が必要
+SIF CFLAG:対象:好感度 >= 500
+	RETURN 0
+
+;一回きり
+SIF KDVAR:対象:文_水遊び
+	RETURN 0
+
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象,  1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K32_MIZUASOBI_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+
+;----------------------------------
+;水遊び
+;----------------------------------
+@KOJO_DAILY_K32_MIZUASOBI(対象)
+#DIM 対象
+
+
+PRINTFORMW 「哈～、好熱……那個、%ANAME(MASTER)%、已経要回去了嗎？」
+PRINTFORMW 「現在天空飛的時候感覚不錯、但像這樣走路的話、真的好熱好討厭啊……」
+PRINTFORML 在這個悶熱的天気中、%ANAME(MASTER)%和%ANAME(対象)%一起在領地巡邏
+PRINTFORML %ANAME(対象)%汗流浹背。看起来真的很熱呢
+PRINTFORMW %ANAME(対象)%撥着自己的衣領、讓人不知該往哪看……
+PRINTFORML 「嗯……啊、等等、%ANAME(MASTER)%、看看這辺啊、有条不錯的河」
+PRINTFORMW 「這種炎熱的天気、然後加上涼快的河流！　要做的事只有一件対吧？」
+PRINTFORMW 「来吧、来吧、一起来吧、這種程度玩楽的話不算偸懶！　吶？」
+PRINTFORML 正如%ANAME(対象)%所説、眼前的確有一条非常適合洗澡和玩水的小河
+PRINTFORML 
+PRINTFORML 那麼、該怎麼做呢……
+PRINTFORML
+CALL ASK_YN("一起嬉水", "不行")
+IF RESULT == 0
+	PRINTFORML 「真不概是%ANAME(MASTER)%！　我就知道你会這樣説！」
+	PRINTFORML 「決定好了的話就事不延遲吧！」
+	PRINTFORML 与%ANAME(対象)%手牽手、一起享受玩水的楽趣……
+	PRINTFORMW
+	PRINTFORMW
+	PRINTFORMW
+	PRINTFORML 回到據点後%ANAME(MASTER)%感到全身発冷
+	PRINTFORML 看来感冒了……
+	CALL ADD_COOLTIME(MASTER, 3)
+	KDVAR:対象:文_水遊び = 1
+ELSE
+	PRINTFORMW 「誒誒ー？　只是稍微一下而己、吶？」
+	PRINTFORMW 「……不行？　哈、沒辦法了……」
+	PRINTFORML 工作時不能偸懶
+	PRINTFORMW 拒絶邀請、並継續巡邏了……
+	KDVAR:対象:文_水遊び = 2
+ENDIF
+
+RETURN 1

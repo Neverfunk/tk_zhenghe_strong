@@ -1,0 +1,238 @@
+﻿
+;---------------------
+;対応するデイリーのDISABLEを返す。設定しない場合、イベントは発生しない。
+;---------------------
+@EVENT_DAILY_DERIVATION_SMUGGLER_TRAIN_DISABLE()
+RETURN DAILY_GET_DISABLE_CONFIG("SMUGGLER")
+
+
+
+;---------------------
+;発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;対応するデイリーのDISABLEチェックを規約として必須とする
+;---------------------
+@EVENT_DAILY_DERIVATION_SMUGGLER_TRAIN_DECISION()
+RETURN DVAR:薬売り_発生フラグ != -1
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_DERIVATION_SMUGGLER_TRAIN_SETTARGET()
+FOR LOCAL, 0, CHARANUM
+	SIF !GETBIT(TALENT:LOCAL:日常系, 素質_デイリー_薬売りの性奴隷)
+		CONTINUE
+	SIF !IS_FEMALE(LOCAL)
+		CONTINUE
+	SIF CFLAG:LOCAL:特殊状態 != 0
+		CONTINUE
+	SIF CFLAG:LOCAL:捕虜先
+		CONTINUE
+	SIF RAND:3
+		CONTINUE
+	DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+	DAILY_TARGET_NUM ++
+NEXT
+
+SIF DAILY_TARGET_NUM < 1
+	RETURN 0
+
+RETURN 1
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_DERIVATION_SMUGGLER_TRAIN(対象)
+#DIM 対象
+#DIM LCOUNT
+
+FOR LOCAL, 0, DAILY_TARGET_NUM
+	対象 = DAILY_TARGET:LOCAL
+
+	PRINTFORML %ANAME(対象)%到药店去拜访了……
+
+	
+	SELECTCASE RAND:16
+		CASE 0
+			PRINTDATAL
+				DATA “啊~好啊，你的口活还是一如既往的好啊~”
+				DATA “喂，再大点声，你这个奴隶还不够下流啊。”
+				DATA “喂喂，含到更深的地方去啊，你这家伙根本不会啊。”
+				DATA “噢，那里，対了。好的，再投入点热情，不要放松下来”
+				DATA “対了対了，菊花里也要舔到，呜，呜~呜……”
+			ENDDATA
+			PRINTFORML 药商让%ANAME(対象)%给他口交
+			PRINTFORML %ANAME(対象)%似乎很高兴能为其服务，热情的用嘴含着他的肉棒
+			PRINTFORML 特意没有洗掉的带着羞耻污垢的肉棒，被用舌尖细心地打扫着。
+			PRINTFORML ……可是男人好像还是不满意她做的事
+			PRINTFORML 抓住%ANAME(対象)%的头发，开始强制口交
+			PRINTFORML 虽然喉咙的粘膜被肉棒给刮得支离破碎，但%ANAME(対象)%却浮现出幸福的表情……
+		CASE 1
+			PRINTDATAL
+				DATA “你随便搞什么啊喂，屁股再用力的动起来！”
+				DATA “嘿嘿，不用自己动会自动的摆动腰，真是方便的便器啊。”
+				DATA “喂，屁股再动的激烈一点的，要在里面射精了。”
+				DATA “啊—真棒啊，你可真是最好的便器啊”
+			ENDDATA
+			PRINTFORML 药商“使用”着%ANAME(対象)%的阴道
+			PRINTFORML 每当男人抽送的时候%ANAME(対象)%就会发出淫乱的娇喘声和乱摆着头发，疯狂地扭动着腰
+			PRINTFORML %ANAME(対象)%自己也积极地扭动腰，贪图性交的快乐
+			PRINTFORML 从结合的地方溢出的白色淫液，表示她已经接受了好几发阴道内射精了。
+			PRINTFORML 但是男人丝毫没有疲倦的，又射出了一次浓稠的精液
+			PRINTFORML 被在阴道内注入一股股滚烫的精液，%ANAME(対象)%发出无法抑制的声音绝顶了……
+		CASE 2
+			PRINTDATAL
+				DATA “你随便搞什么啊喂，屁股再用力的动起来！”
+				DATA “嘿嘿，不用自己动会自动的摆动腰，真是方便的便器啊。”
+				DATA “喂，屁股再动的激烈一点的，要在里面射精了。”
+				DATA “啊—真棒啊，你可真是最好的便器啊”
+			ENDDATA
+			PRINTFORML 药商“使用”着%ANAME(対象)%的肛门
+			PRINTFORML 每当男人抽送的时候%ANAME(対象)%就会发出淫乱的娇喘声和乱摆着头发，疯狂地扭动着腰
+			PRINTFORML %ANAME(対象)%自己也积极地扭动腰，贪图性交的快乐
+			PRINTFORML 从结合的地方溢出的白色淫液，表示她已经接受了好几发肛门内射精了。
+			PRINTFORML 但是男人丝毫没有疲倦的，又射出了一次浓稠的精液
+			PRINTFORML 被在直肠内注入一股股滚烫的精液，%ANAME(対象)%发出无法抑制的声音绝顶了……
+		CASE 3
+			PRINTDATAL
+				DATA “喂，谁允许你休息了，手别停下来啊。”
+				DATA “看，只剩下5分钟了，目标的高潮还有50次啊，你知道吗？”
+				DATA “更下流地责弄阴道，因为是奴隶，所以不要觉得羞耻。”
+				DATA “嘿嘿，这真是最棒的表演啊。”
+			ENDDATA
+			PRINTFORML 药店让%ANAME(対象)%使用振动棒进行两穴自慰
+			PRINTFORML 虽然%ANAME(対象)%已经多次达到了顶峰，但他还是没有让她停止这种行为
+			PRINTFORML %ANAME(対象)%不愧是%ANAME(対象)%，完全没有停顿的按照男人的要求持续着手上的动作
+			PRINTFORML %ANAME(対象)%一边摆着下流的姿势，一边持续的插着自己的阴道和肛门
+			PRINTFORML 在脚下面，雌性的体液已经形成了一个小水潭……
+		CASE 4
+			PRINTDATAL
+				DATA “哇，哇，每次插进阴道都会喷出这么多的淫水。”
+				DATA “啊~，新的药品就有那么棒么？”
+				DATA “哈哈哈！被侵犯的同时又哭又笑的家伙！”
+				DATA “哇，完全沉迷进去了啊，嘿嘿嘿黑”
+			ENDDATA
+			PRINTFORML 药商把%ANAME(対象)%当做药物实验台实验新的药物。
+			PRINTFORML 他猛烈地侵犯了%ANAME(対象)%的阴道
+			PRINTFORML 不知道是药的效果还是本人的淫乱，%ANAME(対象)%的阴道不停的喷出淫乱的淫液。
+			PRINTFORML 不久后男人在阴道内射出了黏糊糊精液，%ANAME(対象)%发出象野兽一样的声音绝顶了
+			PRINTFORML 性交结束后，%ANAME(対象)%继续用手指在自己的阴道里挖弄……
+		CASE 5
+			PRINTDATAL
+				DATA “哈哈哈哈，这个药可是好东西啊~”
+				DATA “这个药，现在竟然只用10000日元就能买到！”
+				DATA “怎么样？我们的药还不错吧”
+			ENDDATA
+			PRINTFORML 作为药商营业活动的助手，%ANAME(対象)%被要求参加了
+			PRINTFORML 在裙子中，两穴被插进非常大的振动棒
+			PRINTFORML 从洞里不停的往下滴的白色液体，证明了在离开店门前曾多次“被使用”。
+			PRINTFORML 完全不在乎男人的说明，%ANAME(対象)%因为快要绝顶了所以正在拼命的忍耐
+			PRINTFORML 不久，男子结束了商谈，回到店里，%ANAME(対象)%全然不在乎其他的事，向他索求着奖赏……
+		CASE 6
+			PRINTDATAL
+				DATA “唔，唔，唔。”
+				DATA “的确是壮阳药，这个女奴隶也很棒!”
+				DATA “噢……被榨出精液了啊。”
+				DATA “这个药啊……嘿嘿，好像又回到年轻的时候了。”
+			ENDDATA
+			PRINTFORML 作为药商营业活动的助手，%ANAME(対象)%被要求参加了
+			PRINTFORML 他研发了新的精力剂作为试用品，%ANAME(対象)%被当作观察试用效果的实验台
+			PRINTFORML 因药效而精力超群的陌生男子，能把%ANAME(対象)%的所有的洞都给填满
+			PRINTFORML %ANAME(対象)%也积极地扭动腰部，反复地让男性到达绝顶
+			PRINTFORML 实验结束的时候，阴道里不知名的男子的精液不住地往外流……
+		CASE 7
+			PRINTDATAL
+				DATA “你是新人？而且很厉害……呜呜！”
+				DATA “呵呵，这女人怎么回事啊，真是最棒了啊，哦，哦”
+				DATA “你真棒，尤其是动腰的时候……哇！”
+				DATA “啊啊啊，你真棒啊，我很喜欢你。”
+			ENDDATA
+			PRINTFORML %ANAME(対象)%在妓院里工作着
+			PRINTFORML 药商所教授的技术，似乎使客人非常满意
+			PRINTFORML “辛苦了。”
+			PRINTFORML “那么，赚了多少啊?……怎么回事，就这么点儿啊。”
+			PRINTFORML 工作结束后，就在%ANAME(対象)%一边从阴道里流出精液一边在床上筋疲力尽地躺着的时候，药商过来了
+			PRINTFORM 男人拿走了大部分的钱，只留下了很少的一部分，作为%ANAME(対象)%的打工费
+			CALL COLOR_PRINT("1", カラー_注意)
+			PRINTFORML 得到了……
+			MONEY += 1
+		CASE 8
+			PRINTFORML %ANAME(対象)%在公共厕所作为肉便器工作着
+			PRINTFORML 从单间被打开了的孔，不知道的男人们伸出肉棒来。单间里的%ANAME(対象)%显得十分的开心
+			PRINTFORML 从满是污垢的肉棒，到很粗地健壮的肉棒，各种各样的肉棒%ANAME(対象)%都积极地含着
+			PRINTFORML 已经让几十根肉棒射精了的%ANAME(対象)%的上半身，由于粘稠的精液而变得泥泞不堪
+			PRINTFORML 不久后男人们终于忍耐不住了，撬开单间的门，拉出%ANAME(対象)%，开始侵犯她所有的洞……
+			PRINTFORML 收取道德金钱全部被药商拿走了……
+		CASE 9
+			PRINTFORML %ANAME(対象)%在公共厕所作为肉便器工作着
+			PRINTFORML 作为壁尻被设置了的%ANAME(対象)%的两穴，被不知名的几个男人们随意地使用
+			PRINTFORML 被各种各样的肉棒插入，被内射，%ANAME(対象)%的经验人数不断地增加
+			PRINTFORML 已经被几十人“使用”了的%ANAME(対象)%的下半身满是粘稠的精液，浑浊不堪，在屁股上被写着正字
+			PRINTFORML 不久后%ANAME(対象)%被解放了的时候，两穴一起无法合拢的精液接连不断地洒落
+			PRINTFORML 売上金は薬商が全て回収していったようだ……
+		CASE 10
+			PRINTDATAL
+				DATA “哎呀!能抱到这样的好女人，已经几十年没有过了!”
+				DATA “啊~真是谢谢呢，老公我很喜欢这样的女人！”
+				DATA “嘿嘿嘿，没洗的肉棒好吃吗？你这个淫乱的女人！”
+				DATA “如果叫我老公的话，我就会尽情的侵犯你哦”
+			ENDDATA
+			PRINTFORML 在药商恶劣的玩笑中，%ANAME(対象)%被借给被流浪汉们了
+			PRINTFORML 缺乏女人的他们、看见了%ANAME(対象)%没有理由不兴奋
+			PRINTFORML 他们一个接一个地聚集起来，%ANAME(対象)%身上所有的洞都被射满了精子
+			PRINTFORML 被药商预先打了药物的%ANAME(対象)%，刚一被肉棒插入就连续不止的高潮了
+			PRINTFORML 虽然是凄惨的陵辱剧，但女性的娇喘声却一直回响着。
+			PRINTFORML 结果，在她放走的时候，她的身体上已经没有不被乳白的精液污染的地方了……
+		CASE 11
+			PRINTFORML 在药商恶劣的玩笑中，%ANAME(対象)%穿着十分暴露的衣服走在贫民窟中
+			PRINTFORML 贫民窟地痞们，不会不注意迷路的好女人。
+			PRINTFORML %ANAME(対象)%一转眼就被一群人堵在了小巷子里走投无路
+			PRINTFORML 所有的洞都被肮脏的肉棒插入了
+			PRINTFORML 明明被侵犯了，%ANAME(対象)%却一次次地激烈的绝顶……
+			PRINTFORML 结果，在她放走的时候，她的身体上已经没有不被乳白的精液污染的地方了……
+		CASE 12
+			PRINTDATAL
+				DATA “别胡闹了!你怎么负责任?啊!”
+				DATA “这样的话，你已经没有资格再当我的奴隶了!”
+				DATA “给我去死吧，用死来补偿，去死吧！”
+				DATA “这样的失败！难道不该用生命来抵偿吗！？啊！？”
+			ENDDATA
+			PRINTFORML 犯了难以想象的错误的%ANAME(対象)%，作为惩罚被药商侵犯
+			PRINTFORML 脖子被紧紧地掐住，%ANAME(対象)%无法呼吸
+			PRINTFORML 与此同时，肉棒被插进了阴道里，痛苦和快乐两者都被%ANAME(対象)%品味着
+			PRINTFORML 不久，男子射精后，%ANAME(対象)%因过于激烈的快乐而全身痉挛不断绝顶着
+			PRINTFORML 然后就这样，因为缺氧而昏倒了……
+		CASE 13
+			PRINTFORML “哦，来了啊，自己把阴道口张开吧！”
+			PRINTFORML 一到药店%ANAME(対象)%就被推倒了
+			PRINTFORML 被摆成匍匐的姿势，肉棒被强行插进了还没有湿润的阴道里。
+			PRINTFORML 强烈的快乐与疼痛一起袭击了过来，仅仅如此%ANAME(対象)%就已经绝顶了
+			PRINTFORML 就这样，男人用粗暴的动作来提高自己的快感
+			PRINTFORML 然后，随意地将被射进了精子的%ANAME(対象)%扔在地板上置之不理，返回工作……
+		CASE 14
+			PRINTFORML “喂——，是在偷懒吗?”
+			PRINTFORML “如果是肉棒的话怎么都行吗？你啊~？”
+			PRINTFORML 在药商恶劣的玩笑中，%ANAME(対象)%与野狗性交
+			PRINTFORML 野性的本能与露出的做爱，%ANAME(対象)%的眼睛里都已经看不见黑色了，反复的绝顶着
+			PRINTFORML 男子看到后哈哈大笑着，把脚放到%ANAME(対象)%的头上，用力踩着
+			PRINTFORML 不久后野狗射精了，被在阴道内注入了灼热粘稠的精液，%ANAME(対象)%又绝顶了
+			PRINTFORML 结果，直到狗满足为止，%ANAME(対象)%都一直品味着兽交的快感……
+		CASE 15
+			PRINTFORML “你以为只要道歉就可以了吗？啊？”
+			PRINTFORML 工作上遇到了重大失败的%ANAME(対象)%被药商要求着全裸的跪在他面前
+			PRINTFORML “这怎么回事啊，白痴！为什么弄丢了那么重要的东西！”
+			PRINTFORML 激动的男人，反复的踩踏着%ANAME(対象)%
+			PRINTFORML 然后，以就那样的姿势，好多次陵辱了%ANAME(対象)%的两穴
+			PRINTFORML “接受这个教训下次不要再犯了，不然下次就杀了你。”
+			PRINTFORML 最后，在保持着土下座的，两个洞里不停地流出精液的%ANAME(対象)%的身上撒尿后，男子离开了那个地方……
+	ENDSELECT
+	CALL FUCK_GANGBANG(対象, GET_SPERM_ID("薬商"), @"薬商的\@ RAND:2 ? 肉棒 # 唇\@", @"薬商")
+
+	PRINTFORMW 
+NEXT

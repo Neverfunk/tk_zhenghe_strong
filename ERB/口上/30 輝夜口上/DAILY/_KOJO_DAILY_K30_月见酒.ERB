@@ -1,0 +1,161 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K30_Moonshine_Wine_RATE(対象)
+#DIM 対象
+RETURN 50
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K30_Moonshine_Wine_DECISION(対象)
+#DIM 対象
+
+;散歩できるのは一回きり
+SIF KDVAR:対象:輝夜_月见酒
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, -1, 0, -1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K30_Moonshine_Wine_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K30_Moonshine_Wine(対象)
+#DIM 対象
+PRINTFORMW 又是一年的中秋时节啊
+PRINTFORMW 不过，在战争时期的幻想乡，真的会有人过这样的节日吗？%ANAME(MASTER)%这么想着，放下了手中的工作
+PRINTFORMW 总之，在这样一个阖家团圆的日子里，出去散散步倒也无妨
+PRINTFORML 怎么办呢
+CALL SINGLE_DRAWLINE
+PRINTFORML
+CALL ASK_YN("出去散步", "算了吧")
+IF RESULT == 1
+	PRINTFORML 不，还是回去工作吧
+	RETURN 1
+ELSE
+	PRINTFORML 偶尔这样休息一下也不错吧
+	PRINTFORMW %ANAME(MASTER)%悄悄地走出了宫殿
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW 今夜的月亮似乎有些奇特呢
+	PRINTFORMW %ANAME(MASTER)%在竹林里静静的散着步，什么也没有说，什么也没有想
+	PRINTFORMW 就在不经意间，来到了竹林中隐藏的空地上
+	IF CFLAG:対象:面識 == 1
+		PRINTFORMW 是辉夜啊，%ANAME(MASTER)%看到了那月光下端坐的身影
+	ELSE
+		PRINTFORMW 在皎洁的月光下，端坐着一位少女
+		PRINTFORMW 原本就有着高贵的容貌，在月光的照耀下，就像是月神一般
+		PRINTFORMW 「妾身是蓬莱山辉夜」
+	ENDIF
+	PRINTFORMW 「%ANAME(MASTER)%大人，既然受到命运的指引来到这里，那就一起坐下吧」
+	PRINTFORMW 少女的声音透露出一丝不容拒绝的高贵
+	PRINTFORMW 不知不觉间就坐下了
+	PRINTFORMW 「这是月圆之夜，虽然妾身并不喜欢月都的那几位，但是每当这个时候，总会想起一些往事呢」
+	PRINTFORMW 「那么，%ANAME(MASTER)%大人，难得一见，要来玩些什么吗？」
+	PRINTFORML
+	CALL ASK_MULTI("来玩会花札吧", "静静的品酒也挺好呢", "要来唱歌吗？", "我想听你讲点故事呢")
+	IF RESULT == 0
+		PRINTFORMW 「天正扎吗？也行，不过，两个人玩的话，只能是こいこい了吧」
+		PRINTFORMW 她温和的笑着
+		PRINTFORML 「妾身是芒に月（月）呢」
+		PRINTFORMW %ANAME(MASTER)%翻开了自己的手牌，是菊に杯（酒）
+		PRINTFORMW 「啊？看来第一场，%ANAME(MASTER)%大人是子家呢，不过，月见酒吗？」
+		PRINTFORMW 她这么喃喃自语道
+		PRINTFORML 「こいこい，あがり，花见で一杯，月见で一杯，猪鹿蝶」
+		PRINTFORMW 看起来，两人都玩的很开心呢
+		PRINTFORMW 「虽然是这样的世界，但是这种日子如果能一直持续下去，倒也不错呢」
+		PRINTFORML 在月亮消失之前，她也失去了踪影，一切就像是梦中一般
+	ELSEIF RESULT == 1
+		;虽然完全没有俳句的天赋，也不懂音律，但是实在找不到描写月见酒的，只能用松尾芭蕉的月，加上自己配的酒了
+		PRINTFORMW 「是啊，就这么静静的品酒也不错呢」
+		PRINTFORMW 她又一次抬头看起了那神圣而不可侵犯的月亮
+		PRINTFORMW 月光下的那张脸照得很美
+		PRINTFORML 「那么，%ANAME(MASTER)%大人，和妾身，共饮一杯月见酒吧」
+		PRINTFORMW 「名月や（中秋月）」
+		PRINTFORMW 「池をめぐりて（绕池赏）」
+		PRINTFORMW 「夜もすがら（不觉天已亮）」
+		PRINTFORMW 「月见で一杯（月见酒）」
+		PRINTFORMW 「寝る時（不入眠）」
+		PRINTFORMW 「もなき月見哉（赏月一整夜）」
+		PRINTFORML 在月亮消失之前，她也失去了踪影，一切就像是梦中一般
+	ELSEIF RESULT == 2
+		;嘛，在这里安利一下av24250724的月见酒版本，真的很好听
+		PRINTFORMW 「唱歌嘛？倒也不是不行」
+		PRINTFORMW 她似乎愣了一下，但很快又回到了那温和的笑容
+		PRINTFORMW 「既然如此，那就来一首那个世界的曲子吧」
+		PRINTFORML 她这么笑着，在闪耀的月光下，流露出淡淡的神秘感
+		PRINTFORMW 「小春日和的寒蝉啊」
+		PRINTFORMW 「不再喧嚣」
+		PRINTFORMW 「许下过冬的愿望」
+		PRINTFORMW 「落在地上」
+		PRINTFORMW 「渐凉的夕阳」
+		PRINTFORMW 「告别了窗」
+		PRINTFORMW 「隔绝微光 梦见了」
+		PRINTFORML 「那是夜颜花」
+		PRINTFORMW 
+		PRINTFORML 「夜颜花 你是真是假」
+		PRINTFORMW 
+		PRINTFORML 「夜冷如水 云绘月光」
+		PRINTFORMW 「洒落满床」
+		PRINTFORMW 「依稀流过的星芒」
+		PRINTFORMW 「随泪淡忘」
+		PRINTFORMW 「酒盏盛韶光」
+		PRINTFORMW 「倒映出红色的墙」
+		PRINTFORMW 「夜颜花今宵仍开放」
+		PRINTFORML 「我有许多的话 许多的话 听吗」
+		PRINTFORMW 「午夜钟声已然敲响」
+		PRINTFORMW 「水面回荡」
+		PRINTFORMW 「氤氲桃源的幻象」
+		PRINTFORMW 「摄取过量」
+		PRINTFORMW 「指尖残暗香」
+		PRINTFORMW 「抹去了地上的霜」
+		PRINTFORML 「我举杯　酌尽了月光」
+		PRINTFORMW 「让我再醉一回　再醉一回」
+		PRINTFORML 「好吗」
+		PRINTFORML 曲终之时，人已经消失不见了，只留下淡淡的清香与似乎还在的歌声
+	ELSEIF RESULT == 3
+		;在咱的二设里，辉夜其实是放弃了一切的月夜见，这里的交流也是因此而起
+		PRINTFORMW 「想听妾身的故事吗？」
+		PRINTFORMW 她叹了一口气
+		PRINTFORMW 「既然是月夜，那就讲讲那些月亮上的事吧」
+		PRINTFORMW 「永琳吗？她一直是那么认真的模样呢，无论是妾身对姐姐的背叛，还是放弃自身的身份，她都是那样，默默地跟在妾身后面」
+		PRINTFORMW 「月夜见，神久夜，辉夜，又有什么区别呢？」
+		PRINTFORMW 「月都啊，原本就是祂庇护一切的地方，但是，祂也有抛弃一切的时候啊，不再作为高天原守护自己臣民最久的神明」
+		PRINTFORMW 「绵月两人一定还在怨恨着妾身吧，怨恨着夺走了一切的妾身，也怨恨着抛弃了一切的祂」
+		PRINTFORMW 「嫦娥吗？亦或是姮娥呢？所谓的蓬莱药，真的有那么容易偷走嘛，不过是神明的权柄罢了。放弃了神明的身份，而作为世界的罪人」
+		PRINTFORMW 「既是意外，也是必然啊」
+		PRINTFORMW 「月都所谓的贤者制度，大概是真的错了吧，没有了妾身，没有了永琳，所谓的三贤者系统，也不过是仅存的贤者的军事化管理罢了」
+		PRINTFORMW 「在永生中，唯一的背叛者，其实是咱啊」
+		PRINTFORMW 她似乎说了很多，又似乎什么也没有说
+		PRINTFORMW 在月光消失之前，她也消失在了竹林中
+	ENDIF
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW 回过神来，就已经回到了宫殿前
+	PRINTFORMW 抬头时，月亮已经完全落下了
+	PRINTFORMW 月，自古以来就是幻象的代言啊
+	PRINTFORMW 这一切，真的是真实的吗？
+	CFLAG:対象:好感度 = MAX(CFLAG:対象:好感度, 300)
+	CFLAG:対象:面識 = 1
+	KDVAR:対象:輝夜_月见酒 = 1
+ENDIF
+
+
+RETURN 1
+

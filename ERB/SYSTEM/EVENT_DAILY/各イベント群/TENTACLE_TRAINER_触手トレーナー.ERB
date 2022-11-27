@@ -1,0 +1,397 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@EVENT_DAILY_TENTACLE_TRAINER_RATE()
+RETURN 25
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@EVENT_DAILY_TENTACLE_TRAINER_DECISION()
+SIF DVAR:触手トレーナー_発生フラグ == -1
+	RETURN 0
+SIF !ITEM:触手部屋
+	RETURN 0
+
+RETURN DAY >= 15
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@EVENT_DAILY_TENTACLE_TRAINER_GENRE()
+RETURN デイリー_ジャンル_トレーナー
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@EVENT_DAILY_TENTACLE_TRAINER()
+#DIM 対象
+
+;5回以上利用すると苗床を付けられるようになる
+IF DVAR:触手トレーナー_発生フラグ == 5
+	PRINTFORMW 那个妖术师又来了
+	PRINTFORML 「好久不见...我又来求你们提供实验材料和资金啦…」
+	PRINTFORML 「并且，作为一直靠您接济着的谢礼.我们还准备了新的“培训”…」
+	PRINTFORMW 所谓新的训练，好像是将对方变成触手的【苗床】的样子
+	PRINTFORML 价格是70000，价格有点高，但是从以往的实际成绩来看，效果似乎是值得信赖的
+	PRINTFORML 当然，只有那些已经习惯了触手的人才能做到
+	PRINTFORMW 然后，今后也需要他们此行的进行继续训练
+	PRINTFORMW 那么，怎么办呢……
+;1回目
+ELSEIF DVAR:触手トレーナー_発生フラグ == 0
+	PRINTFORML 正在工作中、被通报了有访客到来
+	PRINTFORML 好象是个非常诡异的气氛的人
+	PRINTFORMW 决定去见见他有多诡异
+	PRINTFORML 
+	PRINTFORMW 「%ANAME(MASTER)%大人，初次见面，贵安。很荣幸见到你」
+	PRINTFORML 戴着兜帽遮着脸的男人恭恭敬敬地低头致意
+	PRINTFORMW 确实、是个很可疑的人
+	PRINTFORML 「我呢、是以妖术为业…%ANAME(MASTER)%大人的话，应该能看得出来吧？」
+	PRINTFORMW 听了对方的话，那种诡异的气息也就说得通了
+	PRINTFORML 「我正在做各种研究，以达到妖术的极限。但是却为难于筹集“实验材料”和“资金”…」
+	PRINTFORML 「那么同是妖术使的%ANAME(MASTER)%大人、能资助下我的研究吗…我想到这里就来拜访您了」
+	PRINTFORMW 「当然啦、不是白白被你帮助。我擅长把妖术知识传授给别人，又能提高妖术知识的能力。」
+	PRINTFORML 男人的话简单来说、就是只要给他钱、就能提升别人的妖术能力
+	PRINTFORMW 当然也因此需要做出什么样的行为、%ANAME(MASTER)%一清二楚、所谓实验素材就是这么一回事。
+	PRINTFORML 费用是一次50000，贵是贵，但是如果有效果的话是否很划算呢？
+	PRINTFORMW 虽然很诡异，但男人并非在胡说八道这一点、一听就明白了
+	PRINTFORMW 那么，怎么办呢？……
+;2回目以降
+ELSE
+	PRINTFORMW 那个妖术师又来了
+	PRINTFORMW 「好久不见...我又来求你们提供实验材料和资金啦…」
+	PRINTFORMW 那么，怎么办呢？……
+ENDIF
+
+CALL SINGLE_DRAWLINE
+IF DVAR:触手トレーナー_発生フラグ >= 5
+	PRINTFORML 現在的資金:{MONEY} 妖術知識費用:50000 苗床費用:70000
+ELSE
+	PRINTFORML 現在的資金:{MONEY} 妖術知識費用:50000
+ENDIF
+CALL ASK_MULTI_JUDGE("提供材料和资金", MONEY >= 50000, "算了吧", 1, "斩了", 1)
+IF RESULT == 2
+	PRINTFORMW 邪恶的触手！做好觉悟吧！
+	PRINTFORMW 「哇ー！」
+	PRINTFORMW 邪恶消失了！
+	DVAR:触手トレーナー_発生フラグ = -1
+	RETURN 1
+ELSEIF RESULT == 1
+		PRINTFORML 抱歉现在不需要它了
+	PRINTFORML 「是这样吗，那么我改日再来吧」
+	PRINTFORMW 妖术师一声不响就走了
+	DVAR:触手トレーナー_発生フラグ += 1
+	RETURN 1
+ELSE
+	PRINTFORMW 「我明白了…那么，要提供哪位呢…」
+	;TranslatedMark 「わかりました…では、どなたを提供していただけるのか、選んでください…」
+	CALL SINGLE_DRAWLINE
+	CALL SELECT_CHARA_LIST_ONLY_LOGIC_SEX("TENTACLE_TRAINER", "TENTACLE_TRAINER")
+	対象 = RESULT
+	IF 対象 == -1
+		PRINTFORML 还是算了吧
+		PRINTFORML 「是这样吗，那么我改日再来吧」
+	PRINTFORMW 妖术师一声不响就走了
+		RETURN 1
+	ELSE
+		IF 対象 == MASTER
+			PRINTFORML 「选你自己？…好吧…」
+		ELSE
+			PRINTFORML 「%ANAME(対象)%大人吗、好的我知道了…」
+		ENDIF
+		IF DVAR:触手トレーナー_発生フラグ >= 5 && ABL:対象:触手 >= 4 && GETBIT(TALENT:対象:淫乱系, 素質_淫乱_苗床) == 0 && MONEY >= 70000
+			PRINTFORMW 「常规的调教和苗床改造.您要选哪个？」
+			CALL ASK_YN("常规的调教", "苗床改造")
+			IF RESULT == 1
+				PRINTFORMW 「好的、这边请…」
+				IF ABL:対象:触手 <= 4 && 対象 != PLAYER
+					PRINTFORMW 妖术师从长袍下伸出无数触手捆住一脸嫌弃的る%ANAME(対象)%、拖走了
+				ELSE
+					PRINTFORMW %ANAME(対象)%战战兢兢地被妖术师带走了
+				ENDIF
+				PRINTFORML ・
+				PRINTFORML ・
+				PRINTFORML ・
+				SELECTCASE RAND:5
+					CASE 0
+						PRINTFORMW %ANAME(対象)%肚子像足月的孕妇一样膨胀起来，表面时不时会像有什么东西在蠕动一样地颤抖着
+						PRINTFORMW %ANAME(対象)%子宫里被接种的触手幼体、吸收着%ANAME(対象)%的魔力、急速成长着，等待着分娩的时刻
+						PRINTFORMW 不久之后%ANAME(対象)%的下腹部传来强烈的震动，感到子宫咕咚咕咚地跳动起来。
+						PRINTFORMW 终于到分娩的时候了、%ANAME(対象)%主动撑开自己的秘穴、帮助触手们的出生
+						PRINTFORMW 分娩过程中、触手在产道里咕噜咕噜地爬着、%ANAME(対象)%不知道绝顶了多少次
+						PRINTFORMW 不久，触手接二连三地从%ANAME(対象)%雌穴里飞出、%ANAME(対象)%带着幸福的表情到了高潮
+					CASE 1
+						PRINTFORMW 被无数的触手们埋没、子宮不停被撞击着的%ANAME(対象)%发出喜悦的叫喊
+						PRINTFORMW %ANAME(対象)%下腹部浮现出心形的徽章、%ANAME(対象)%的子宫因为渴求生育而刺痛着
+						PRINTFORMW 这个徽章在%ANAME(対象)%达到绝顶时会发出奇怪的光芒、%ANAME(対象)%的大脑完全被快感占据
+						PRINTFORMW %ANAME(対象)%现在只想着侍奉触手、怀上触手的种子这些事情了、积极地索求着触手的精液
+						PRINTFORMW 能成为触手的苗床是多么的幸福啊，早点知道就好了
+						PRINTFORMW 一边模模糊糊地想着这种事情，一边接受全身触手的种子、%ANAME(対象)%兴奋的绝顶了
+					CASE 2
+						PRINTFORMW 在昏暗的房间里，巨大的球根状触手静静的坐落在那里
+						PRINTFORMW %ANAME(対象)%被那个巨大的触手吞噬，全身的孔穴都被触手填了了侵犯着
+						PRINTFORMW 连动都动不了，只能一心一意地享受着被赋予的快感、%ANAME(対象)%持续不断的绝顶着
+						PRINTFORMW 子宫和嘴巴里再次被咕噜噜噜的注入白浊、又一次绝顶了的%ANAME(対象)%好像非常美味的把嘴巴里的精液全部吞了下去
+						PRINTFORMW 在%ANAME(対象)%的头脑中已经没有了厌恶感、而是由衷的喜爱着带来快感的触手们
+						PRINTFORMW 整夜都在被触手疼爱着%ANAME(対象)%、热切的盼望着生下触手们的后代
+					CASE 3
+						PRINTFORMW %ANAME(対象)%一边埋在触手组成的墙壁中，一边被海绵状的触手遮住双眼
+						PRINTFORMW 那个触手咯吱作响的发出催眠光线，重新改写着她的意识
+						PRINTFORMW 过了一会儿%ANAME(対象)%无力地留着口水垂下头、好像发情的狗一样地喘息起来
+						PRINTFORMW 一只触手蹭到%ANAME(対象)%的胯股之间，一次又一次地摩擦着渗出爱液的裂缝
+						;TranslatedMark そんな%ANAME(対象)%の股間に一本の触手が擦り寄り、二度三度と愛液を垂れ流している割れ目を擦りあげる
+						PRINTFORMW %ANAME(対象)%完全忘记了廉耻、拼命扭动着腰迎合着插入的触手、索求着白浊的精液
+						PRINTFORMW 对这种态度十分满意的触手们、开始像奖赏一般激烈的侵犯%ANAME(対象)%、赋予%ANAME(対象)%极上的快感
+					CASE 4
+						PRINTFORMW %ANAME(対象)%一边叼着触手、一边啊嘿啊嘿的垂着舌头扭动着自己的腰
+						PRINTFORMW 从刚才开始，像注射器一样的触手、就在%ANAME(対象)%的体内注入了奇怪的液体
+						PRINTFORMW 这种液体和自己的血肉混合在一起，%ANAME(対象)%感觉自己的身体正在一点点地从内部被重新塑造出来
+						PRINTFORMW 一会之后、%ANAME(対象)%的意识已经由触手重新改写了，没有了厌恶的神色
+						PRINTFORMW %ANAME(対象)%由于身体改造的副作用，沉浸在麻药般的快感中，进一步加快了腰部的动作
+						PRINTFORMW 朝着达到了绝顶后仍在索求着精液的%ANAME(対象)%、触手们持续注入着白浊和媚药
+				ENDSELECT
+				PRINTFORML ・
+				PRINTFORML ・
+				PRINTFORML ・
+				CALL COLOR_PRINT(@"%ANAME(対象)%变成了【苗床】", カラー_注意)
+				PRINTFORMW 
+				CALL FUCK(対象, "欲望, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 奉仕, 精愛, 口淫, 性交, 触手, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精, CFLAG減少", GET_SPERM_ID("触手"), "触手", "触手", "", "調教")
+				EXP:対象:触手出産経験 += 6 + RAND:10
+				SETBIT TALENT:対象:淫乱系, 素質_淫乱_苗床
+				MONEY -= 70000
+				DVAR:触手トレーナー_発生フラグ += 1
+				PRINTFORML 「感谢您的合作.那么我先告辞了…」
+				PRINTFORMW 感谢您的合作.那么我先告辞了
+				RETURN 1
+			ELSE
+				PRINTFORMW 「好的、这边请…」
+			ENDIF
+		ELSE
+			PRINTFORMW 「好的、这边请…」
+		ENDIF
+		IF TALENT:対象:妖術知識 == 0
+			IF ABL:対象:触手 <= 4 && 対象 != PLAYER
+				PRINTFORMW 妖术师从长袍下伸出无数触手捆住一脸嫌弃的%ANAME(対象)%、拖走了
+			ELSEIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_苗床) == 1
+				PRINTFORMW 沉醉于触手的魅力的%ANAME(対象)%羞红了脸、满怀期待的看着妖术师的动作
+			ELSE
+				PRINTFORMW %ANAME(対象)%战战兢兢地被妖术师带走了
+			ENDIF
+			PRINTFORML ・
+			PRINTFORML ・
+			PRINTFORML ・
+			PRINTFORMW 昏暗的房间中、%ANAME(対象)%被无数的触手侵犯着
+			PRINTFORML 在手脚都被捆绑住的状态下、被无数的触手、一个接一个地持续蹂躏着全身的孔穴
+			PRINTFORMW 身体内涂满了触手的粘液、全身都被触手们当做玩具责弄着
+			PRINTFORML 无法喘息的感觉与怪物带来的快感、让%ANAME(対象)%在充满了背德感的同时疯狂的享受着
+			PRINTFORMW 腔内的触手再次射出精液、%ANAME(対象)%满脸通红的绝顶了
+			PRINTFORML 触手拔出后%ANAME(対象)%精疲力尽地躺倒地上、无数触手马上肆无忌惮的蜂拥到她的身上
+			PRINTFORMW 狂欢持续了整整一夜、%ANAME(対象)%的全身渗透进了触手的魔力和快感
+			PRINTFORML ・
+			PRINTFORML ・
+			PRINTFORML ・
+			TALENT:対象:妖術知識 = 1
+			ABL:対象:妖術 += 10
+			CALL COLOR_PRINT(@"%ANAME(対象)%は妖術知識を身につけた", カラー_注意)
+			PRINTFORMW 
+			CALL FUCK(対象, "欲望, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 奉仕, 精愛, 口淫, 性交, 触手, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精, CFLAG減少", GET_SPERM_ID("触手"), "触手", "触手", "", "調教")
+			EXP:対象:触手出産経験 += 6 + RAND:10
+			MONEY -= 50000
+			DVAR:触手トレーナー_発生フラグ += 1
+		ELSE
+			IF ABL:対象:触手 <= 4 && 対象 != PLAYER
+				PRINTFORMW 妖术师从长袍下伸出无数触手捆住一脸嫌弃的る%ANAME(対象)%、拖走了
+			ELSEIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_苗床) == 1
+				PRINTFORMW 沉醉于触手的魅力的%ANAME(対象)%羞红了脸、满怀期待的看着妖术师的动作
+			ELSE
+				PRINTFORMW %ANAME(対象)%战战兢兢地被妖术师带走了
+			ENDIF
+			PRINTFORML ・
+			PRINTFORML ・
+			PRINTFORML ・
+			SELECTCASE RAND:25
+				CASE 0
+					PRINTFORMW 昏暗的房间中、%ANAME(対象)%被触手侵犯着
+					PRINTFORMW 在全身都被触手束缚着的状态下，被插入雌穴无情的凌辱着
+					PRINTFORMW 非人的快乐与厌恶感、让%ANAME(対象)%一边感受着背德感一边疯狂的享受着
+					PRINTFORMW 又一次被内射后、%ANAME(対象)%尖叫着浑身颤抖的绝顶了
+					PRINTFORMW 触手拔出后%ANAME(対象)%精疲力尽地躺倒地上、更多的触手马上聚集过来
+				CASE 1
+					PRINTFORMW 昏暗的房间中、隐隐传来%ANAME(対象)%的呻吟声
+					PRINTFORMW %ANAME(対象)%的股间被人类手臂般粗大的触手深深插入、雌穴几乎要裂开了
+					PRINTFORMW 触手每次进出时%ANAME(対象)%的小腹上就被顶出触手的形状、%ANAME(対象)%的悲鸣声与喘息声混杂在一起
+					PRINTFORMW 触手继续无情的侵入%ANAME(対象)%的子宫内、%ANAME(対象)%由于太过猛烈的刺激，全身痉挛得惨叫着
+					PRINTFORMW 触手毫不在意%ANAME(対象)%的惨叫、为了让这个雌性怀孕而大量注入了精液
+				CASE 2
+					PRINTFORMW 被触手淹没的房间中、%ANAME(対象)%被吊在半空侵犯着
+					PRINTFORMW 插入体内的一群触手、像在比赛一般蹂躏着%ANAME(対象)%的肉穴
+					PRINTFORMW 触手毫不在意%ANAME(対象)%的惨叫、无情的在腔道内抽插、に%ANAME(対象)%数次被干的翻起白眼娇喘着
+					PRINTFORMW 腔内的触手一起膨胀起来、在%ANAME(対象)%体内吐出大量的精液、%ANAME(対象)%无法呼吸地绝顶了
+					PRINTFORMW 满足的触手们拔出的瞬间、%ANAME(対象)%的雌穴里痉挛着喷射出大量的白浊
+				CASE 3
+					PRINTFORMW 被触手淹没的房间中、悲鸣声和娇喘声混杂在一起
+					PRINTFORMW %ANAME(対象)%的雌穴和尻穴同时被触手侵犯着
+					PRINTFORMW 两根触手交替着在%ANAME(対象)%刺激着的腔肉和直肠、%ANAME(対象)%像坏掉的人偶一样哈呲哈呲的喘着气
+					PRINTFORMW 侵入的两根触手同时在%ANAME(対象)%的体内达到了极限、深深的释放出精液
+					PRINTFORMW 被注入的惊人热度、野兽和雄性味道带来的快感、让%ANAME(対象)%的头都要被快感冲爆了、激烈地达到了绝顶
+				CASE 4
+					PRINTFORMW 回响着猥琐的水声的房间里、%ANAME(対象)%被侵犯着
+					PRINTFORMW 捆绑中的%ANAME(対象)%的尻穴被触手深深地刺入、%ANAME(対象)%身体震颤着忍受着它的热度
+					PRINTFORMW 触手不断刺激着%ANAME(対象)%的尻穴、一次一次的插入更深的位置、%ANAME(対象)%的下腹部膨胀出了扭动着的触手的形状
+					PRINTFORMW 拼命忍耐着的%ANAME(対象)%突然感到胃部传来一阵违和感、下一个瞬间、%ANAME(対象)%的嘴巴里伸出了一根扭动着的触手
+					PRINTFORMW 被触手贯通的%ANAME(対象)%、眼睛失神的转着、 丧失了自我地享受着非人的快感
+				CASE 5
+					PRINTFORMW 被触手捆成大字狠狠侵犯、%ANAME(対象)%拼命忍耐着
+					PRINTFORMW 朦朧之中乳头出传来违和感、%ANAME(対象)%的乳首顶端被两根金属针一般细的触手顶住了
+					PRINTFORMW 不会吧、在%ANAME(対象)%这样想着的时候、两根触手滋遛滋遛地、向%ANAME(対象)%的乳首里钻了进去
+					PRINTFORMW 毫不理会惨叫着的%ANAME(対象)%、触手们毫无顾虑地挤开乳房里的肉，钻进更深处
+					PRINTFORMW %ANAME(対象)%渐渐开始从这种插入的异物中感受到快感、在乳房内被射精的同时大幅反弓着腰绝顶了
+				CASE 6
+					PRINTFORMW 在昏暗的房间中央、%ANAME(対象)%躺在地上大口喘息着
+					PRINTFORMW %ANAME(対象)%的股间贴着一团咕嘟作响的肉块，覆盖着雌穴和尻穴
+					PRINTFORMW 用触手做成貞操帯毫不停歇地持续侵犯着两穴、%ANAME(対象)%几度失去意识、又几度因为绝顶的快感清醒过来
+					PRINTFORMW 为了逃脱不断的快感拼命地想要揭开触手，反而激发起了触手更猛烈的攻击
+					PRINTFORMW 天亮后触手贞操带像破布一样滚落、%ANAME(対象)%的两穴里、大量的触手种子喷涌而出
+				CASE 7
+					PRINTFORMW 在触手涌动的房间中央、%ANAME(対象)%垂直舌头淫荡地喘息着
+					PRINTFORMW %ANAME(対象)%的腿间耸立着巨大的肉棒般的触手、正被其他的触手吞噬着
+					PRINTFORMW 触手根部寄生在%ANAME(対象)%体内、不仅无法取出来、还会像真正的肉棒一般给%ANAME(対象)%带来快感
+					PRINTFORMW 无法继续忍耐未知快感的%ANAME(対象)%、羞红了脸在触手群中一边射精一边绝顶了
+					PRINTFORMW 但是触手的攻势并没有结束、在%ANAME(対象)%精液耗尽前一次又一次地榨取着
+				CASE 8
+					PRINTFORMW 在昏暗的房间里、下体传来猥琐水声的%ANAME(対象)%娇声淫叫着
+					PRINTFORMW 被坐落在房间中央的巨大触手吞没了下半身、%ANAME(対象)%身体颤抖着吐着粗气
+					PRINTFORMW 巨大触手里的无数小触手抓住了%ANAME(対象)%的双腿、同时一群触手开始侵犯起她的雌穴
+					PRINTFORMW 下半身被袭击的暴力快感让%ANAME(対象)%无法逃避的绝顶了、触手们毫不关心地一个接一个地喷涂着精液
+					PRINTFORMW %ANAME(対象)%被放开后腰腿酸软地无法站立、雌穴里不停的涌出触手的精液
+				CASE 9
+					PRINTFORMW %ANAME(対象)%仿佛被触手抱着，发出空虚的喘息声
+					PRINTFORMW 两只耳朵中被细小的触手插入、%ANAME(対象)%被触手呼噜呼噜的搅动着脑袋改造了精神
+					PRINTFORMW %ANAME(対象)%一边垂着口水，一边露出空虚的表情，时不时地对刺激做出反应，身体反复颤抖着
+					PRINTFORMW 不久后一根触手伸到%ANAME(対象)%的秘裂旁、%ANAME(対象)%用手指撑开秘裂迎接着
+					PRINTFORMW 大脑和子宫被强行插入的非人快感、让%ANAME(対象)%口吐白沫地潮吹着高潮了
+				CASE 10
+					PRINTFORMW 大量触手淹没的房间中、%ANAME(対象)%被触手捆住侵犯着
+					PRINTFORMW 侵犯继续着、已经无力叫喊的%ANAME(対象)%的肚脐被一根细细的触手插入了
+					PRINTFORMW %ANAME(対象)%被不可能出现的景象吓得脸都抽筋了，下一瞬间，从下腹部感觉到有力的搏动
+					PRINTFORMW 插入肚脐里的触手发出诡异的光、%ANAME(対象)%的魔力被吸走了
+					PRINTFORMW 在副作用下直接让子宫产生了异常的快感、%ANAME(対象)%狂乱的达到了高潮
+				CASE 11
+					PRINTFORMW 在昏暗的房间里、%ANAME(対象)%被触手侵犯着
+					PRINTFORMW 四肢被拉伸成大字型的%ANAME(対象)%、小穴被一根搏动着的触手激烈的侵犯着
+					PRINTFORMW 每一次插入都产生足够破坏般的冲击、%ANAME(対象)%眼睛不停地眨着、咬住下唇拼命地忍耐着
+					PRINTFORMW 不久后在触手喷吐出大量精液的同时、身体哆哆嗦嗦地颤抖着、发出淫荡的娇喘高潮了
+					PRINTFORMW 经历了一次绝顶后的%ANAME(対象)%、放弃了抵抗、发狂一般的沉迷于触手不断带来的快感之中
+				CASE 12
+					PRINTFORMW 无数的触手包围着的%ANAME(対象)%、被它们侵犯着
+					PRINTFORMW 尖端像注射器一样的触手靠近了全身被捆住的%ANAME(対象)%、噗的一声刺入她的脊背
+					PRINTFORMW 猝不及防的%ANAME(対象)%发出声惊叫、紧接着就感到体内被注入了奇怪的炙热液体
+					PRINTFORMW 全身变得滚烫、通体上下都敏感到了被触手轻轻抚摸就会绝顶的地步
+					PRINTFORMW 被注入了触手特征的浓缩媚药的%ANAME(対象)%、中毒一般地沉浸在快感的冲击力、不停淫荡的喘息着
+				CASE 13
+					PRINTFORMW 被触手包围着、%ANAME(対象)%躺倒在地上呻吟着
+					PRINTFORMW %ANAME(対象)%的肚子像怀孕了一般膨胀着、里面不是咕噜咕噜地蠕动着什么
+					PRINTFORMW 子宫里侵入的大量触手从里面侵犯着%ANAME(対象)%
+					PRINTFORMW 触手释放出的体液中含有媚药的成分、子宫炙热的发痛、在触手的一再蠕动下%ANAME(対象)%流着口水绝顶了
+					PRINTFORMW 在那之后触手们继续改造着%ANAME(対象)%的子宫、触手离开后子宫得到刺痛还是无法停止
+				CASE 14
+					PRINTFORMW 在充满恶臭的房间里、%ANAME(対象)%被触手侵犯着
+					PRINTFORMW 尖端膨大的触手在%ANAME(対象)%的雌穴里进出着、咯吱咯吱地刺激着腔肉
+					PRINTFORMW 就这样子、%ANAME(対象)%不知几次绝顶后、依然拼命地抵抗着、想要把触手拔出来
+					PRINTFORMW 突然，触手的尖端像钻头一样旋转起来、在%ANAME(対象)%的膣内狂暴的搅动着
+					PRINTFORMW %ANAME(対象)%在剧烈的冲击下两眼一黑绝顶了、忘记了抵抗狂乱地享受着
+				CASE 15
+					PRINTFORMW 在充满恶臭的房间里、传出了啪滋啪滋的下流声响
+					PRINTFORMW 在大群蠕动着的触手中央、%ANAME(対象)%正在被侵犯着
+					PRINTFORMW 全身的洞里都插满了触手、两手两脚都被触手操作着、哆哆嗦嗦地责弄着自己的身体、好像是活祭品一样
+					PRINTFORMW 触手们同时膨胀起来、朝着%ANAME(対象)%喷吐出白浊液、惊人的热度和数量的精液快要把她淹死了
+					PRINTFORMW 但只有一次射精他们不满意、无数触手再度聚集到%ANAME(対象)%的身边、为了让这个极品的雌性受孕而整夜侵犯着她
+				CASE 16
+					PRINTFORMW 触手蠕动的房间中央、%ANAME(対象)%以四肢着地的状态趴在地上喘息着
+					PRINTFORMW 肚子像个足月的孕妇一样肿胀起来，可以看到里面不时有东西跳动着
+					PRINTFORMW %ANAME(対象)%体内寄生的触手开始狂暴的增殖起来
+					PRINTFORMW 毫无办法的%ANAME(対象)%只能拼命忍耐着、子宮口被从里面顶开了、一边生出触手一边绝顶了
+					PRINTFORMW 疯狂的快感让%ANAME(対象)%每次生出触手时都尖叫着绝顶、但出产过程终于结束后、她精疲力尽地昏死过去
+				CASE 17
+					PRINTFORMW 充斥着刺鼻恶臭的小屋里、%ANAME(対象)%被触手侵犯着
+					PRINTFORMW %ANAME(対象)%的蜜穴被触手深深地插入、%ANAME(対象)%配合着触手搏动的节奏呻吟着
+					PRINTFORMW 触手表面的细小凸起咯吱咯吱的刺激着%ANAME(対象)%的腔穴、%ANAME(対象)%身体剧烈颤抖着绝顶了
+					PRINTFORMW 被触手掌握了弱点的%ANAME(対象)%、一边愉悦地喃喃自语着、沉溺于与异形的交合
+					PRINTFORMW 不久、当他们在%ANAME(対象)%的体内喷射出种子时、%ANAME(対象)%大幅度的反着背深深的高潮了
+				CASE 18
+					PRINTFORMW 被触手淹没的小屋里、%ANAME(対象)%开心的抱着触手被侵犯着
+					PRINTFORMW 正在抽插着%ANAME(対象)%的尖端像胡须一样分裂的触手、抵在子宫口插入了%ANAME(対象)%的子宮内部
+					PRINTFORMW 不知为何%ANAME(対象)%对触手的触碰变得极为敏感、子宫内被抚摸着，发出了混杂着快感的悲鸣
+					PRINTFORMW 极细触手的尖端侵入了%ANAME(対象)%的输卵管伸出、用顶端刺激着她的卵巢、%ANAME(対象)%一边排出卵子一边娇声呻吟着
+					PRINTFORMW 被極細触手侵犯着卵巢的%ANAME(対象)%、体验到这种奇妙的感觉、%ANAME(対象)%因为非人的快乐而绝顶了
+				CASE 19
+					PRINTFORMW 无数触手蠕动着的房间里、传出快乐的娇喘声
+					PRINTFORMW 房间中央、神情恍惚的%ANAME(対象)%与触手交配着
+					PRINTFORMW %ANAME(対象)%的耳朵被极细的触手插入、脑袋被咕噜咕噜的乱搅着的%ANAME(対象)%身体震颤不已
+					PRINTFORMW 脑部被责弄到催眠状态的%ANAME(対象)%、把触手们当成了可以和自己配种的可爱雄性
+					PRINTFORMW 触手们在%ANAME(対象)%的体内深处射出精液、接受着白浊的%ANAME(対象)%眼睛里都冒出桃心了
+				CASE 20
+					PRINTFORMW 躺在触手做的床上、%ANAME(対象)%的娇喘声和尖叫声交织在一起
+					PRINTFORMW %ANAME(対象)%的肚子膨大到极限、从秘裂里又涌出了更多的触手
+					PRINTFORMW 无数触手的出产、让%ANAME(対象)%的脑袋都要被快感冲击疯了
+					PRINTFORMW 触手在出生的过程中粗暴的蹂躏着%ANAME(対象)%的产道、腔肉出传来的刺激、让%ANAME(対象)%获得了更强的快感
+					PRINTFORMW 不久后就被刚刚生出的孩子灌入了精液、%ANAME(対象)%在强烈背德感的催动下夸张的绝顶了
+				CASE 21
+					PRINTFORMW 躺在触手做的床上、%ANAME(対象)%大口喘着气
+					PRINTFORMW %ANAME(対象)%她的胸部以难以想象的程度膨胀起来、乳首处悬挂着溢出的乳汁
+					PRINTFORMW %ANAME(対象)%的乳房表面不停咕噜咕噜的蠕动着、不要啊！%ANAME(対象)%呻吟着扭动着身体
+					PRINTFORMW 尽管%ANAME(対象)%流着眼泪请求着饶恕、潜入乳房里的触手们却更加肆无忌惮的、激烈地侵犯着她
+					PRINTFORMW 不久后%ANAME(対象)%一边从乳头里产出大量触手、一边疯狂的绝顶了
+				CASE 22
+					PRINTFORMW 传来娇喘声的小屋里、无数的触手聚集在%ANAME(対象)%的秘所处
+					PRINTFORMW 毫不鼓励%ANAME(対象)%已经绝顶了的事情、触手们把她当着育儿袋一样不停着侵犯向更深处
+					PRINTFORMW 到达最深处的触手们，用力刺激子宫口，尝试着侵入、每次都会让%ANAME(対象)%的身体弹跳起来
+					PRINTFORMW 然后触手们撬开%ANAME(対象)%的子宮口挤了进去、潜入内部，开始产出像乒乓球一样的卵
+					PRINTFORMW %ANAME(対象)%的身体因为子宫内被异型产卵而震颤不已，就这样子绝顶了
+				CASE 23
+					PRINTFORMW 昏暗的小屋里、%ANAME(対象)%被触手侵犯着
+					PRINTFORMW %ANAME(対象)%的体内、长着章鱼般吸盘的触手从根部把自己切断、深深的钻了进去
+					PRINTFORMW 触手用吸盘吮吸着%ANAME(対象)%的腔肉、腔肉不停的被咬一般的%ANAME(対象)%疯狂的扭动着
+					PRINTFORMW 在最敏感的地方不断被给予甜美的刺激、%ANAME(対象)%的身体像发疯一般的乱扭
+					PRINTFORMW 离开小屋后、那个触手暂时还留在%ANAME(対象)%的体内、继续刺激着%ANAME(対象)%
+				CASE 24
+					PRINTFORMW 传出咕噜咕噜怪响的小屋里、%ANAME(対象)%骑跨在巨大的触手上
+					PRINTFORMW 这个触手的表面长出好多条男根一般的小触手、侵犯着骑在上面的%ANAME(対象)%
+					PRINTFORMW 仿佛是跨坐在人类男子身上被侵犯着一般的错觉、%ANAME(対象)%因为触手给与的刺激而喘息着
+					PRINTFORMW 不久随着%ANAME(対象)%的绝顶、触手们液一起吐出精液、绝大的触手菇滋菇滋的蠕动着、把下一条男根插入%ANAME(対象)%体内
+					PRINTFORMW 直到“他”生长出的大量肉棒都得到满足后、%ANAME(対象)%才被触手放了下来
+			ENDSELECT
+			PRINTFORML ・
+			PRINTFORML ・
+			PRINTFORML ・
+			CALL COLOR_PRINT(@"%ANAME(対象)%的妖術能力上升了", カラー_注意)
+			PRINTFORMW 
+			CALL FUCK(対象, "欲望, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 奉仕, 精愛, 口淫, 性交, 触手, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精, CFLAG減少", GET_SPERM_ID("触手"), "触手", "触手", "", "調教")
+			EXP:対象:触手出産経験 += 6 + RAND:10
+			CALL TRAIN_AUTO_ABLUP(対象)
+			CALL KISS_COMMON(対象, "触手", "調教")
+			CALL VIRGIN_COMMON(対象, "触手", "調教")
+			CALL VIRGIN_COMMON_A(対象, "触手", "調教")
+			MONEY -= 50000
+			DVAR:触手トレーナー_発生フラグ += 1
+		ENDIF
+		PRINTFORML 「感谢您的协助…那么，我现在就离开…」
+		PRINTFORMW 妖术师悄无声息地走了
+	ENDIF
+ENDIF
+RETURN 1
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_TENTACLE_TRAINER(対象)
+#DIM 対象
+RETURN CFLAG:対象:行動不能状態 != 行動不能_子供 && CFLAG:対象:所属 == CFLAG:MASTER:所属 && !IS_ANIMAL(対象) && !IS_MALE(対象)
+
+@SELECT_CHARA_LIST_SELECT_LOGIC_TENTACLE_TRAINER(対象)
+#DIM 対象
+RETURN CFLAG:対象:捕虜先 == 0

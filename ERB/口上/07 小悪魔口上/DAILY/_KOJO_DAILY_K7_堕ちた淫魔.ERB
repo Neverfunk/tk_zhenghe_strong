@@ -1,0 +1,89 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K7_HOBGOBLIN_GANGBANG_RATE(対象)
+#DIM 対象
+RETURN 300
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K7_HOBGOBLIN_GANGBANG_DECISION(対象)
+#DIM 対象
+#DIM ゴブリン
+ゴブリン = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン)
+
+SIF ゴブリン == -1 || CFLAG:対象:捕虜先 != ゴブリン || CFLAG:対象:所属 == ゴブリン
+	RETURN 0
+
+SIF KDVAR:対象:小悪魔_堕ちた淫魔
+	RETURN 0
+
+SIF GETBIT(TALENT:対象:特殊勢力陥落系, 特殊勢力_ホフゴブリン)
+	RETURN 0
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, -1, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K7_HOBGOBLIN_GANGBANG_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K7_HOBGOBLIN_GANGBANG(対象)
+#DIM 対象
+#DIM ゴブリン
+
+ゴブリン = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン)
+
+
+PRINTFORMW 「啊哈♥嗯，啊，嘿！」
+PRINTFORMW 「嗯，啊哈，哦哦，嗯哼！？哼，缩るッ，哼哼哼♥」
+PRINTFORML 在昏暗的牢狱中%ANAME(対象)%被哥布林们侵犯着
+PRINTFORML %PRONOUN(対象)%睁着眼睛感受着贯穿身体的快感，将被射到嘴里喝掉。
+PRINTFORMW 已经被释放了好几发种子的两穴，每次被贯穿时都咕嘟咕嘟地吐出白浊……
+PRINTFORML 「咕噜，唔，咕噜，咕噜噜♥」
+PRINTFORML 被要求不停的扭动着腰，舌头舔涮着口中的肉棒
+PRINTFORMW 拥有淫魔之血的%PRONOUN(対象)%的性爱技术，似乎让哥布林们非常的满意
+PRINTFORMW 「哼哼，哼，———哇，哈，啊哈，啊啊……♥」
+PRINTFORML 服务中的肉棒发射出来，在阴道，菊穴，口内注入白浊的精液。
+PRINTFORMW 被雄性欲望污染着体内，%ANAME(対象)%恍惚着
+PRINTFORMW 「啊哈、哈、哈……♥」
+PRINTFORML 被哥布林囚禁，被不分昼夜的调教，%ANAME(対象)%并没有表现出悲观的情绪
+PRINTFORML 作为拥有淫魔血统的人，本身无法抵抗这种事。
+PRINTFORML 作为娱乐的活动，也不算坏事。
+PRINTFORMW 只不过误算了哥布林的数量和欲望而已。
+PRINTFORML 凌辱接连不断，持续了数天。
+PRINTFORML 其间%ANAME(対象)%彻底地被白浊所淹没，绝顶更是数都数不清。
+PRINTFORMW 结果%PRONOUN(対象)%变成了没有哥布林的肉棒就活不下去的样子
+PRINTFORMW 「啊哈哈，快点给我肉棒，下一个给我吧……啊啊啊啊啊♥」
+PRINTFORML 不能做这样的事，必须逃脱
+PRINTFORML 虽然%PRONOUN(対象)%头脑中理解这个道理
+PRINTFORML 但是，%PRONOUN(対象)%的身体已经成为哥布林肉棒的俘虏
+PRINTFORMW 这样也不坏吧？
+PRINTFORMW 这样想着，享受着新插进去肉棒的%PRONOUN(対象)%，成为了哥布林优秀的肉便器
+PRINTFORML 
+CALL COLOR_PRINTL(@"%ANAME(対象)%成為了哥布林的肉便器", カラー_注意)
+TRYCALLFORM %SP_COUNTRY_NAME_ENG:特殊勢力_ホフゴブリン%_FALLEN_LEAVE_MARK(対象)
+PRINTFORML 
+
+FOR LOCAL, 0, 3
+	CALL FUCK_GANGBANG_SP(対象, GET_SPERM_ID("哥布林"), "哥布林の肉棒", "哥布林", ゴブリン)
+NEXT
+
+KDVAR:対象:小悪魔_堕ちた淫魔 = 1
+SETBIT TALENT:対象:特殊勢力陥落系, 特殊勢力_ホフゴブリン
+CALL CHANGE_COUNTRY(対象, ゴブリン, 1)
+
+RETURN 1

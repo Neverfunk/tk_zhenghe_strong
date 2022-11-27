@@ -1,0 +1,223 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K64_OYATU_THIEF_RATE(対象)
+#DIM 対象
+RETURN 60
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K64_OYATU_THIEF_DECISION(対象)
+#DIM 対象
+
+;対象が君主ではない
+SIF GET_COUNTRY_BOSS(CFLAG:対象:所属) == 対象
+	RETURN 0
+
+;おわってたら出ない
+SIF KDVAR:対象:こいし_おやつ泥棒 == -1
+	RETURN 0
+
+
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 0, 0, -1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K64_OYATU_THIEF_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K64_OYATU_THIEF(対象)
+#DIM 対象
+#DIM 判定値
+#DIM 快楽堕ちした
+
+
+判定値 = MIN(ABL:MASTER:知略 + KDVAR:対象:こいし_おやつ泥棒 * 20, 40)
+
+
+;判定失敗
+IF KDVAR:対象:こいし_おやつ泥棒 == 0 || (RAND:100 >= 判定値 && KDVAR:対象:こいし_おやつ泥棒 != 5)
+	CALL COLOR_PRINTW(@"咦！！！！！！！！？", カラー_警告)
+	PRINTFORML 原本心情愉快地打算吃甜点但発現甜点不見了！
+	PRINTFORMW 明明原本就放在橱柜裏的！
+	PRINTFORML %ANAME(MASTER)%慌張地詢問部下和同僚、但沒有人承認是自己吃掉的
+	PRINTFORML 甜点又沒有脚不会自己離開、一定是被誰吃掉了
+	PRINTFORMW 不可原諒、甜点小偸……！
+	CALL ADD_COOLTIME(MASTER, 1)
+	KDVAR:対象:こいし_おやつ泥棒 ++
+	RETURN 1
+ENDIF
+
+
+;判定をクリアしたらとっ捕まえる。
+PRINTFORML 夜裏的宮廷非常安静。在這之中、有個可疑的身影
+PRINTFORMW 将櫥櫃打開……取出了%ANAME(MASTER)%的甜点！
+PRINTFORMW ――捉到了！
+PRINTFORMW 「好ー痛！　放開我ー！」
+PRINTFORM %ANAME(MASTER)%飛奔出去、将身影圧在地上。身影的真正身份是――
+CALL COLOR_PRINT(@"%NAME_FORMAL(対象)%", カラー_注意)
+PRINTFORMW ！
+PRINTFORML 原来如此、少女有着操控無意識的能力、能夠軽易潜入宮廷並偸吃甜点
+PRINTFORMW 在理解的同時、%ANAME(MASTER)%亦感到不寒而慄
+PRINTFORMW 有了她的能力、暗殺重要人員就像扭断嬰兒的手臂一樣簡単吧？
+PRINTFORMW 「吶ー、放開我的話ー。我会為我偸吃甜点的事道歉的ー」
+PRINTFORML %ANAME(対象)%慌張地掙扎着。如果只是偸吃甜点的話可以笑着原諒她……但這樣真的好嗎
+PRINTFORML 如果少女用她的能力、加害%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%勢力的話呢……？
+PRINTFORML
+CALL ASK_MULTI_JUDGE("原諒", 1, "呼叫衛兵", 1, "請她吃甜点", 1, "請她吃「甜点」", HAS_PENIS(MASTER))
+IF RESULT == 0
+	PRINTFORMW 不不。那麼天真無邪的孩子、根本不需要擔心
+	PRINTFORMW 這樣思考着的%ANAME(MASTER)%、放開了%ANAME(対象)%
+	PRINTFORMW 「謝謝！　我会還你人情的！」
+	PRINTFORMW %ANAME(対象)%急忙地点頭感謝你、然後就這樣消失了。是利用了無意識的能力吧……
+	PRINTFORML
+	IF GET_COUNTRY_BOSS(CFLAG:対象:所属) != -1
+		PRINTFORML
+		PRINTFORMW 之後、從%ANAME(GET_COUNTRY_BOSS(CFLAG:対象:所属))%那辺、收到一些作為賠禮的名牌糕点
+		PRINTFORMW 很一般的味道……
+		CALL CHANGE_RELATION_C_TO_C(CFLAG:対象:所属, CFLAG:MASTER:所属, 200, -200)
+	ELSE
+		PRINTFORMW 之後、在%ANAME(MASTER)%的枕辺、有人放了一点糖果
+		PRINTFORMW 是草莓味的……
+	ENDIF
+	CFLAG:対象:好感度 += 200
+ELSEIF RESULT == 1
+	PRINTFORMW 如果這孩子、対我們有悪意的話。会非常危險……
+	PRINTFORMW 這樣思考着的%ANAME(MASTER)%、呼叫了衛兵、将%ANAME(対象)%投入大牢……
+	CALL CAPTURE(対象, CFLAG:MASTER:所属)
+	CFLAG:対象:好感度 -= 300
+	CALL CHANGE_RELATION_O_TO_O(対象, MASTER, -300, 300)
+ELSEIF RESULT == 2
+	PRINTFORML 這孩子大概很餓吧
+	PRINTFORMW 從櫥櫃裏取出甜甜圈、分一半給她……
+	PRINTFORMW 「這是給我的嗎？」
+	PRINTFORMW 「哇ー、謝謝你！」
+	PRINTFORMW 在吃完甜甜圈後、%ANAME(対象)%不知不覚間消失離開了……
+	IF GET_COUNTRY_BOSS(CFLAG:対象:所属) != -1
+		PRINTFORML
+		PRINTFORMW 之後、從%ANAME(GET_COUNTRY_BOSS(CFLAG:対象:所属))%那辺、收到一些作為賠禮的名牌糕点
+		PRINTFORMW 很一般的味道……
+		CALL CHANGE_RELATION_C_TO_C(CFLAG:対象:所属, CFLAG:MASTER:所属, 100, -100)
+	ELSE
+		PRINTFORMW 之後、在%ANAME(MASTER)%的枕辺、有人放了一点糖果
+		PRINTFORMW 是草莓味的……
+	ENDIF
+	CFLAG:対象:好感度 += 250
+ELSEIF RESULT == 3
+	PRINTFORMW 那麼想吃甜点的話就請她吃吧
+	PRINTFORMW 這樣思考着的%ANAME(MASTER)%、決定讓%ANAME(対象)%下面的口吃甜点……
+	IF ABL:対象:性知識 == 0
+		;無知ックス(データ操作前提)
+		PRINTFORMW 「将那個棒插入股間的穴的話会很好吃？我知道了、試試看吧…」
+		IF ABL:MASTER:性技 >= RAND:3
+			;無知なので中出し性行為に溺れるハードルが低い
+			PRINTFORML …
+			PRINTFORML ……
+			PRINTFORMW ………
+			PRINTFORMW 在夜晚鴉雀無声的宮廷中傳来了床吱吱嘎嘎作響的声音以及%ANAME(対象)%的嬌喘声
+			CALL KOJO_DAILY_K64_FUCK(対象)
+			PRINTFORMW 「啊！啊！跟%ANAME(MASTER)%説的一樣、雖然味道不怎麼樣但感覚很舒服…%UNICODE(0x2661)%」
+			PRINTFORMW %ANAME(MASTER)%在最後加速抽插、在%ANAME(対象)%陰道内吐出作為甜点的白濁液体…
+			CALL COLOR_PRINTW(@"%ANAME(MASTER)%的性技令%ANAME(対象)%感到満足", カラー_注意)
+			PRINTFORMW 「那個呢、能讓%ANAME(対象)%吃更多甜点嗎…？」
+			PRINTFORMW %ANAME(対象)%和%ANAME(MASTER)%住在一起了………
+			CALL COLOR_PRINTW(@"%ANAME(対象)%成為了同伴", カラー_注意)
+			CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属, 1)
+			CFLAG:対象:好感度 += 1000
+			CALL CHANGE_RELATION_O_TO_O(対象, MASTER, 1000, -600)
+			快楽堕ちした = 1
+		ELSE
+			;お仕置きが痛くて泣いちゃうルート
+			PRINTFORML …
+			PRINTFORML ……
+			PRINTFORMW ………
+			PRINTFORMW 在夜晚鴉雀無声的宮廷中傳来了床吱吱嘎嘎作響的声音以及%ANAME(対象)%的悲鳴
+			CALL KOJO_DAILY_K64_FUCK(対象)
+			PRINTFORMW 「好痛！唔唔…不要啊…為什麼要做這種事…」
+			PRINTFORMW %ANAME(MASTER)%在最後加速抽插、在%ANAME(対象)%陰道内吐出作為懲罰的白濁液体…
+			CALL COLOR_PRINTW(@"%ANAME(MASTER)%的粗暴行為讓%ANAME(対象)%感到悲痛", カラー_注意)
+			PRINTFORMW 「甜点我会還給你的…別再做那麼痛的事了…」
+			PRINTFORMW %ANAME(MASTER)%将哭着乞求原諒的%ANAME(対象)%投入大牢………
+			CALL CAPTURE(対象, CFLAG:MASTER:所属)
+			;無知なので投獄されたのと同じくらいの印象
+			CFLAG:対象:好感度 -= 300
+			CALL CHANGE_RELATION_O_TO_O(対象, MASTER, -300, 300)
+			快楽堕ちした = 0
+		ENDIF
+	ELSE
+		;通常ルート（性知識2だとセックスは知ってるので）
+		PRINTFORMW 「不要！！　姉快来救我啊！」
+		IF ABL:MASTER:性技 >= RAND:5
+			;セックスや避妊の必要性は知ってるけど快楽には勝てなかったよ…ルート
+			PRINTFORML …
+			PRINTFORML ……
+			PRINTFORMW ………
+			PRINTFORMW 在夜晚鴉雀無声的宮廷中傳来了床吱吱嘎嘎作響的声音以及%ANAME(対象)%的嬌喘声
+			CALL KOJO_DAILY_K64_FUCK(対象)
+			PRINTFORMW 「啊！啊啊！唔唔…明明不想要、卻感覚很舒服…%UNICODE(0x2661)%」
+			PRINTFORMW %ANAME(MASTER)%在最後加速抽插、在%ANAME(対象)%陰道内吐出作為甜点的白濁液体…
+			CALL COLOR_PRINTW(@"%ANAME(MASTER)%的性技令%ANAME(対象)%感到満足", カラー_注意)
+			PRINTFORMW 「吶、能讓我吃更多%ANAME(対象)%的甜点嗎…？」
+			PRINTFORMW %ANAME(対象)%和%ANAME(MASTER)%住在一起了………
+			CALL COLOR_PRINTW(@"%ANAME(対象)%成為了同伴", カラー_注意)
+			CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属, 1)
+			CFLAG:対象:好感度 += 1000
+			CALL CHANGE_RELATION_O_TO_O(対象, MASTER, 1000, -600)
+			快楽堕ちした = 1
+		ELSE
+			;そりゃおやつの代償に中出しされたら怒るよねルート
+			PRINTFORML …
+			PRINTFORML ……
+			PRINTFORMW ………
+			PRINTFORMW 在夜晚鴉雀無声的宮廷中傳来了床吱吱嘎嘎作響的声音以及%ANAME(対象)%的悲鳴
+			CALL KOJO_DAILY_K64_FUCK(対象)
+			PRINTFORMW 「好痛！我明明只是吃掉甜点而已為什麼対我這樣」
+			PRINTFORMW %ANAME(MASTER)%在最後加速抽插、在%ANAME(対象)%陰道内吐出作為懲罰的白濁液体…
+			CALL COLOR_PRINTW(@"%ANAME(MASTER)%的粗暴行為讓%ANAME(対象)%感到悲痛", カラー_注意)
+			PRINTFORMW 「已経不想再做這種事了…救救我姐姐…」
+			PRINTFORMW %ANAME(MASTER)%将哭着乞求原諒的%ANAME(対象)%投入大牢………
+			CALL CAPTURE(対象, CFLAG:MASTER:所属)
+			CFLAG:対象:好感度 -= 500
+			CALL CHANGE_RELATION_O_TO_O(対象, MASTER, -500, 500)
+			快楽堕ちした = 0
+		ENDIF
+	ENDIF
+	IF 快楽堕ちした && !TALENT:対象:合意
+		CALL COLOR_PRINTW(@"取得了%ANAME(対象)%的合意", カラー_ピンク)
+		CFLAG:対象:面識 = 1
+		TALENT:対象:合意 = 1
+		TALENT:対象:チョロイン = 1
+	ELSEIF !CFLAG:対象:面識
+		CALL COLOR_PRINTW(@"結識了%ANAME(対象)%", カラー_注意)
+		CFLAG:対象:面識 = 1
+	ENDIF
+ENDIF
+KDVAR:対象:こいし_おやつ泥棒 = -1
+RETURN 1
+
+
+;----------------------------------
+;セックス
+;----------------------------------
+@KOJO_DAILY_K64_FUCK(対象)
+#DIM 対象
+CALL FUCK(MASTER, "Ｃ, 欲望, 性交, 射精, Ｖ挿入", "童貞喪失, 接吻喪失", 0, @"%ANAME(対象)%的嘴唇", "", @"%ANAME(対象)%的膣穴", "強姦")
+CALL FUCK(対象, "欲望, Ｃ, Ｂ, Ｖ, 奉仕, 性交, 性技, 精愛, 口淫, Ｖ性交", "膣内射精, 処女喪失, 接吻喪失, 口内射精", GET_ID(MASTER), @"%ANAME(MASTER)%的\@ RAND:2 ? 嘴唇 # 肉棒 \@", ANAME(MASTER), "", "強姦")
+
+;性知識なしルート用
+SIF ABL:対象:性知識 < 2
+	ABL:対象:性知識 = 2

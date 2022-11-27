@@ -1,0 +1,232 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_LOVER_OF_RATE()
+RETURN 100
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_LOVER_OF_DECISION()
+SIF DAY < 5
+	RETURN 0
+SIF DVAR:恋人酱的后宫
+	RETURN 0
+;MASTERがペニスを持っている
+SIF !(IS_MALE(MASTER) && HAS_PENIS(MASTER))
+	RETURN 0
+;至少陷落30人
+SIF FLAG:陥落人数 < 30
+	RETURN 0
+;MASTER必须仕官/为君主
+SIF !IS_COUNTRY(CFLAG:MASTER:所属)
+	RETURN 0
+;技能只能习得一次，只能习得一系，除非全部遗忘
+SIF CHECK_SKILL_DUPLICATE(MASTER, スキル_ジャンル_PERSONAL, 0, 41) || CHECK_SKILL_DUPLICATE(MASTER, スキル_ジャンル_PERSONAL, 0, 42) || CHECK_SKILL_DUPLICATE(MASTER, スキル_ジャンル_PERSONAL, 0, 43) || CHECK_SKILL_DUPLICATE(MASTER, スキル_ジャンル_PERSONAL, 0, 44)
+	RETURN 0
+RETURN 1
+
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_LOVER_OF_SETTARGET()
+
+FOR LOCAL, 1, CHARANUM
+	SIF !IS_FEMALE(LOCAL)
+		CONTINUE
+	;自国所属かつ捕虜でない
+	IF CFLAG:LOCAL:所属 == CFLAG:MASTER:所属 && !TALENT:LOCAL:妊娠 && !CFLAG:LOCAL:捕虜先 && CFLAG:LOCAL:面識 && IS_LOVER(LOCAL)
+		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
+		DAILY_TARGET_NUM ++
+	ENDIF
+NEXT
+;同仕官中至少有10人恋慕
+SIF DAILY_TARGET_NUM < 10
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_LOVER_OF_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_LOVER_OF
+#DIM 头子
+#DIM 妻子 = 0
+#DIM 随机人物
+#DIM 特殊人物, 3
+头子 = DAILY_TARGET:0
+VARSET 特殊人物
+SIF FINDELEMENT(DAILY_TARGET, NAME_TO_CHARA("咲夜"))
+	特殊人物:0 = NAME_TO_CHARA("咲夜")
+IF FINDELEMENT(DAILY_TARGET, NAME_TO_CHARA("鈴仙"))
+	特殊人物:1 = NAME_TO_CHARA("鈴仙")
+ELSEIF FINDELEMENT(DAILY_TARGET, NAME_TO_CHARA("永琳"))
+	特殊人物:1 = NAME_TO_CHARA("永琳")
+ENDIF
+IF FINDELEMENT(DAILY_TARGET, NAME_TO_CHARA("早苗")) && (!FINDELEMENT(DAILY_TARGET, NAME_TO_CHARA("レミリア")) || RAND:2)
+	特殊人物:2 = NAME_TO_CHARA("早苗")
+ELSEIF FINDELEMENT(DAILY_TARGET, NAME_TO_CHARA("レミリア"))
+	特殊人物:2 = NAME_TO_CHARA("レミリア")
+ENDIF
+FOR LOCAL, 0, DAILY_TARGET_NUM
+	SIF CFLAG:(DAILY_TARGET:LOCAL):好感度 > CFLAG:头子:好感度
+		头子 = DAILY_TARGET:LOCAL
+	SIF TALENT:(DAILY_TARGET:LOCAL):正妻
+		妻子 = DAILY_TARGET:LOCAL
+NEXT
+
+PRINTFORMW 深夜，%ANAME(MASTER)%的房门传来了敲门声
+PRINTFORMW %ANAME(MASTER)%一打开门，门外的少女们便挤在门前，争着抢着要进去
+PRINTFORMW %ANAME(头子)%「我可是最受\@(TALENT:头子:正妻 || TALENT:头子:妾) ? 夫君 # %ANAME(MASTER)%\@大人宠爱的，让我先进……！」
+IF 妻子
+	IF 妻子 == 头子
+		PRINTFORMW %ANAME(头子)%「再说了，我可是夫君大人明媒正娶的正妻，不比你们有资格先进去吗……」
+	ELSE
+		PRINTFORML %ANAME(妻子)%「夫君大人也是你们能随意碰的！？」
+		PRINTFORMW %ANAME(妻子)%「我才是最适合侍寝的人！」
+	ENDIF
+ENDIF
+REPEAT RAND(5, 11)
+	随机人物 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+	PRINTFORM %ANAME(随机人物)%
+	PRINTDATAW
+		DATAFORM 「\@(TALENT:随机人物:正妻 || TALENT:随机人物:妾) ? 夫君 # %ANAME(MASTER)%\@大人不是几天前才临幸过你吗……」
+		DATAFORM 「人家只是怕孤独……想要和\@(TALENT:随机人物:正妻 || TALENT:随机人物:妾) ? 夫君 # %ANAME(MASTER)%\@酱一起睡……」
+		DATAFORM 「\@(TALENT:随机人物:正妻 || TALENT:随机人物:妾) ? 夫君 # %ANAME(MASTER)%\@一定不会拒绝我来侍寝吧……？」
+		DATAFORM 「\@(TALENT:随机人物:正妻 || TALENT:随机人物:妾) ? 夫君 # %ANAME(MASTER)%\@的意思是……？」
+		DATAFORM 「\@(TALENT:随机人物:正妻 || TALENT:随机人物:妾) ? 夫君 # %ANAME(MASTER)%\@大人……让我进来嘛……」
+	ENDDATA
+REND
+PRINTFORML 「磨磨唧唧的，先到先得！」
+PRINTFORMW 一个少女挤过人群，径直向%ANAME(MASTER)%冲去
+PRINTFORMW 后面的人看到后，也争先恐后的冲向房门
+PRINTFORML 『停……！』
+PRINTFORMW %ANAME(MASTER)%见状，连忙制止了冲动的少女们
+PRINTFORMW 『起码让我做一下决定吧？』
+PRINTFORMW 「诶……大家都想要啊……」
+PRINTFORMW 『这……没时间啊……』
+IF 特殊人物:0
+	PRINTFORML %ANAME(特殊人物:0)%「\@(TALENT:(特殊人物:0):正妻 || TALENT:(特殊人物:0):妾) ? 夫君 # %ANAME(MASTER)%\@大人无需顾虑这些」
+	PRINTFORMW 旁边的%ANAME(特殊人物:0)%拿出了怀表，微笑着对%ANAME(MASTER)%说
+ELSE
+	随机人物 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+	PRINTFORML %ANAME(随机人物)%「\@(TALENT:随机人物:正妻 || TALENT:随机人物:妾) ? 夫君 # %ANAME(MASTER)%\@大人你看，这是什么～」
+	PRINTFORMW 旁边的%ANAME(随机人物)%转身，捧着一大堆不可思议的怀表
+ENDIF
+PRINTFORMW 『有时间我也没宠爱大家的精力啊……』
+IF 特殊人物:1
+	PRINTFORML %ANAME(特殊人物:1)%「\@(TALENT:(特殊人物:1):正妻 || TALENT:(特殊人物:1):妾) ? 夫君 # %ANAME(MASTER)%\@看我拿了什么～」
+	PRINTFORMW %ANAME(特殊人物:1)%站出来，从怀里掏出来一瓶谜之药水
+ELSE
+	随机人物 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+	PRINTFORML %ANAME(随机人物)%「这种事我们早料到了」
+	PRINTFORMW 人群突然散开，只见%ANAME(随机人物)%推着一箱装满了谜之药水的箱子缓慢走了过来
+ENDIF
+PRINTFORMW 『这……药水会有副作用的……』
+IF 特殊人物:2
+	IF 特殊人物:2 == NAME_TO_CHARA("早苗")
+		PRINTFORML %ANAME(特殊人物:2)%「%ANAME(特殊人物:2)%有没有副作用就能让\@(TALENT:(特殊人物:2):正妻 || TALENT:(特殊人物:2):妾) ? 夫君 # %ANAME(MASTER)%\@变强的方法哦～」
+	ELSEIF 特殊人物:2 == NAME_TO_CHARA("レミリア")
+		PRINTFORML %ANAME(特殊人物:2)%「\@(TALENT:(特殊人物:2):正妻 || TALENT:(特殊人物:2):妾) ? 夫君 # 你\@可没有这样的命运哦～」
+	ENDIF
+	PRINTFORMW %ANAME(特殊人物:2)%突然冒出来，依偎在%ANAME(MASTER)%身旁
+ELSE
+	随机人物 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
+	PRINTFORML %ANAME(随机人物)%「那就让这些来代替\@(TALENT:随机人物:正妻 || TALENT:随机人物:妾) ? 夫君 # %ANAME(MASTER)%\@大人承受副作用吧」
+	PRINTFORMW %ANAME(随机人物)%从一个袋子里掏出了几个替身人偶展示给%ANAME(MASTER)%看
+ENDIF
+PRINTFORMW 看来什么借口都阻止不了她们了……
+PRINTFORMW 『这样吧……看在我的份上，你们商量一下顺序，然后排队，好吗？』
+PRINTFORMW 但话音刚落少女们又为了顺序吵起来了……
+IF ABL:MASTER:主導度Ｕ <= -300
+	PRINTFORMW 『大家其实只要一个一个进来就行了……不用抢的……』
+ELSEIF ABL:MASTER:主導度Ｕ >= 300
+	PRINTFORMW 『都不要吵了！』
+	PRINTFORMW 『我来决定大家的顺序！』
+ELSE
+	PRINTFORMW 『不如大家用石头剪刀布定个顺序？』
+ENDIF
+CALL FISHER_YATES_SHAFFLE(DAILY_TARGET_NUM)
+PRINTFORMW 总算让这群人乖乖排队了……
+PRINTFORM 为了不让大家失望，今晚一定要
+SETCOLOR カラー_ピンク
+IF ABL:MASTER:主導度Ｕ >= 300
+	PRINTFORMW 让她们变成听话的好妻子～
+ELSE
+	PRINTFORMW 好好疼爱大家～
+ENDIF
+RESETCOLOR
+CALL SINGLE_DRAWLINE("♥", カラー_ピンク)
+PRINTFORMW ……
+FOR LOCAL, 0, DAILY_TARGET_NUM
+	随机人物 = DAILY_TARGET:(SHAFFLE_ARRAY:LOCAL)
+	PRINTFORM %ANAME(随机人物)%
+	IF VIRGIN(随机人物)
+		PRINTDATAW
+			DATAFORM 「请\@(TALENT:随机人物:正妻 || TALENT:随机人物:妾) ? 夫君 # %ANAME(MASTER)%桑\@动作轻一点……」
+			DATAFORM 「我……还是第一次……」
+			DATAFORM 「请\@(TALENT:随机人物:正妻 || TALENT:随机人物:妾) ? 夫君 # %ANAME(MASTER)%桑\@成为我的第一次吧……」
+			DATAFORM 「\@(TALENT:随机人物:正妻 || TALENT:随机人物:妾) ? 夫君 # %ANAME(MASTER)%\@的……终于……♥」
+			DATAFORM 「能成为\@(TALENT:随机人物:正妻 || TALENT:随机人物:妾) ? 夫君的妻子 # %ANAME(MASTER)%的爱人\@……我最幸福了……♥」
+		ENDDATA
+	ELSEIF GETBIT(TALENT:随机人物:淫乱系, 素質_淫乱_孕みたがり) || RAND:5
+		PRINTDATAW
+			DATAFORM 「让我怀上\@(TALENT:随机人物:正妻 || TALENT:随机人物:妾) ? 夫君 # %ANAME(MASTER)%\@大人的孩子吧……」
+			DATAFORM 「就这样……♥在里面出来吧……♥」
+			DATAFORM 「啊♥肚子好热♥」
+			DATAFORM 「\@(TALENT:随机人物:正妻 || TALENT:随机人物:妾) ? 夫君 # %ANAME(MASTER)%\@……还要更多……♥」
+			DATAFORM 「肚子满满的……♥」
+		ENDDATA
+	ELSE
+		PRINTDATAW
+			DATAFORM 「\@(TALENT:随机人物:正妻 || TALENT:随机人物:妾) ? 夫君 # %ANAME(MASTER)%\@的……顶到最深处了……♥」
+			DATAFORM 「要去了……♥咿啊啊啊啊……♥」
+			DATAFORM 「啊……♥那里……♥好舒服……♥」
+			DATAFORM 「\@(TALENT:随机人物:正妻 || TALENT:随机人物:妾) ? 夫君 # %ANAME(MASTER)%\@的……进来了……♥」
+			DATAFORM 「不要停……♥腰停不下来♥」
+		ENDDATA
+	ENDIF
+	CALL FUCK_MAKELOVE(随机人物, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+	CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(随机人物)%的膣穴")
+	IF !TALENT:随机人物:合意
+		CALL COLOR_PRINTW(@"获得了%ANAME(随机人物)%的合意♥", カラー_ピンク)
+		TALENT:随机人物:合意 = 1
+		TALENT:随机人物:チョロイン = 1
+	ENDIF
+NEXT
+CALL SINGLE_DRAWLINE("♥", カラー_ピンク)
+
+PRINTFORMW 终于让这群欲求不满的发情娘们满足了……
+PRINTFORMW 实在累的不行的%ANAME(MASTER)%直接趴在床上睡着了……
+
+PRINTFORMW 醒来的时候，旁边的%ANAME(头子)%\@妻子 && 妻子 != 头子 ? 和%ANAME(妻子)% # \@还在抱着自己
+PRINTFORMW %ANAME(头子)%「听说\@(TALENT:头子:正妻 || TALENT:头子:妾) ? 夫君 # %ANAME(MASTER)%\@大人在外面也很受欢迎呢～」
+PRINTFORMW \@妻子 && RAND:2 ? %ANAME(妻子)% # %ANAME(头子)%\@「好花心～♥」
+PRINTFORMW 『你听我说，主要是……』
+PRINTFORMW \@妻子 && RAND:2 ? %ANAME(妻子)% # %ANAME(头子)%\@「也没怪罪你啊」
+PRINTFORMW \@妻子 && RAND:2 ? %ANAME(妻子)% # %ANAME(头子)%\@「最近你不是说人手不足吗？」
+PRINTFORMW \@妻子 && RAND:2 ? %ANAME(妻子)% # %ANAME(头子)%\@「不如把他们劝诱进来？」
+PRINTFORMW 『这……你不担心我被她们抢走？』
+PRINTFORMW \@妻子 && RAND:2 ? %ANAME(妻子)% # %ANAME(头子)%\@「到时候就轮到\@妻子 && 妻子 != 头子 ? 我们 # 我\@来宣誓地位了嘛～」
+PRINTFORMW \@妻子 && RAND:2 ? %ANAME(妻子)% # %ANAME(头子)%\@「比起\@妻子 && 妻子 != 头子 ? 我们 # 我\@的嫉妒心，还是你的事业更重要一些，对吗？」
+PRINTFORMW 看到\@妻子 && 妻子 != 头子 ? 她们 # 她\@居然如此深明大义，我感动地和\@妻子 && 妻子 != 头子 ? 她们 # 她\@再做了好几次……
+REPEAT 5
+	IF 妻子 && 妻子 != 头子
+		CALL FUCK_MAKELOVE(妻子, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+		CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(妻子)%的膣穴")
+	ENDIF
+	CALL FUCK_MAKELOVE(头子, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+	CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(头子)%的膣穴")
+REND
+CALL SKILL_LEARN(MASTER, スキル_ジャンル_PERSONAL, 0, 41)
+CALL COLOR_PRINTW(@"%ANAME(MASTER)%领悟了让自己的爱慕者倒戈的技能！", カラー_注意)
+DVAR:恋人酱的后宫 = 1
+RETURN 1

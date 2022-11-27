@@ -1,0 +1,7893 @@
+﻿;-------------------------------------------------
+;「会いに行く」「閨に呼ぶ」「子育て」「捕虜会話」の口上
+;-------------------------------------------------
+
+;=================================================
+;●「会いに行く」の開始時のセリフ
+;=================================================
+@KOJO_TRAIN_START_A1_K1204
+;[虚ろ]状態なら口上を表示しない
+IF TALENT:空虚 || CFLAG:400 == 1
+	RETURN
+ENDIF
+;━━━━━━━━━━━━━━━━━━━━
+
+;━━━━━━━━━━━━━━━━━━━━
+IF CFLAG:400 == 0
+	PRINTFORML 请选择口上
+	;TranslatedMark 口上を選択してください
+	PRINTL [0]不使用口上
+	;TranslatedMark [0] 口上を使用しない
+	PRINTL [1]武官口上
+	;TranslatedMark [1] 武官口上
+
+	$INPUT_LOOP
+	INPUT
+
+	IF RESULT == 0
+		PRINTFORMW 不使用口上
+		;TranslatedMark 口上を使用しません
+		CFLAG:400 = 1
+		RETURN
+	ELSEIF RESULT == 1
+		PRINTFORMW 使用武官口上
+		;TranslatedMark 武官口上を使用します
+		CFLAG:400 = 2
+		PRINTFORML 口上是否会改变素质？
+		;TranslatedMark 口上に合わせて素質を変更しますか？
+		PRINTFORML （注意素质会被改变）
+		;TranslatedMark （注意　かなり素質が変質します）
+		PRINTL [0]不更改
+		;TranslatedMark [0] 変更しない
+		PRINTL [1]变更
+		;TranslatedMark [1] 変更する
+		$INPUT_LOOP2
+		INPUT
+		IF RESULT == 0
+			PRINTFORMW 素质就这样开始。
+			;TranslatedMark 素質はそのままで開始します。
+			RETURN
+		ELSEIF RESULT == 1
+			PRINTFORMW 改变素质。
+			;TranslatedMark 素質を変更します。
+			TALENT:怕痛 = 0
+			TALENT:自尊心低 = 0
+			TALENT:胆怯 = 0
+			TALENT:圧抑 = 0
+
+			TALENT:解放 = 1
+			TALENT:不怕痛 = 1
+			TALENT:自尊心高 = 1
+		ELSE
+			GOTO INPUT_LOOP2
+		ENDIF
+	ELSE
+		GOTO INPUT_LOOP
+	ENDIF
+ENDIF
+
+;
+;
+;
+;━━━━━━━━━━━━━━━━━━━━
+;━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+;-------------------------------------------------
+;初回
+;-------------------------------------------------
+IF CFLAG:200 == 0
+	CFLAG:200 = 1
+	;初対面の場合
+	IF !CFLAG:17
+		CALL SINGLE_DRAWLINE
+		PRINTFORMW 
+		PRINTFORMW 「要我做什么吗？」
+		;TranslatedMark 「俺に何かようか？」
+		PRINTFORMW 第一印象的感觉是粗鲁。
+		;TranslatedMark 第一声からしてぶっきらぼうである。
+		PRINTFORMW 作为武官倒是不错，但作为女人来说却让人觉得有些遗憾。
+		;TranslatedMark 武官としてはいいのだろうが、女としては残念な部類である。
+		PRINTFORMW 「交流吗？嗯……嘛……和同辈加深关系也是一种乐趣吗」
+		;TranslatedMark 「交流か、ふむ、まあ同輩と仲を深めるのも一興か」
+	;既に会ったことがある場合
+	ELSE
+		PRINTFORMW 「你有什么事？」
+		;TranslatedMark 「お前か、何の用だ？」
+	ENDIF
+
+;-------------------------------------------------
+;開始時(1回のみ)
+;-------------------------------------------------
+;既成事実Lv3(初めてセックスをした次の回)
+ELSEIF CFLAG:200 < 5 && TALENT:合意
+	CFLAG:200 = 5
+	PRINTFORMW 「没想到会变成你……」
+	;TranslatedMark 「まさか、お前としてしまうとはな……」
+	PRINTFORMW 「听好了！出了什么事的话，你就要负责任」
+	;TranslatedMark 「いいか！　何かあったら、責任だけは取れよ」
+;既成事実Lv2(恋人になった次の回)
+ELSEIF CFLAG:200 < 4 && TALENT:恋人 
+	CFLAG:200 = 4
+	PRINTFORMW 「你来得真好，那么，和恋人们做什么呢？」
+	;TranslatedMark 「よく来たな、で、恋人同士とはどんなことをするんだ？」
+;既成事実Lv1(初めてキスをした次の回)
+ELSEIF CFLAG:200 < 3 && CFLAG:250 == 1
+	CFLAG:200 = 3
+	PRINTFORMW 「什……什么事。动摇？淅淅沥沥！」
+	;TranslatedMark 「な、なんだ、なんの用だ。動揺？　しとらん！」
+;既成事実Lv0で恋慕
+ELSEIF CFLAG:200 < 2 && !TALENT:恋人 && TALENT:恋慕 && !TALENT:合意 && CFLAG:250 < 1
+	CFLAG:200 = 2
+	PRINTFORMW 「啊……你讨厌我的措辞吗？」
+	;TranslatedMark 「あー……俺の言葉遣いは、その、嫌いか？」
+	PRINTFORMW %ANAME(MASTER)%回答说这样就可以了，%ANAME(TARGET)%露出了松了一口气的样子。
+	;TranslatedMark そのままでいい、と%ANAME(MASTER)%が返答すると、%ANAME(TARGET)%はそうか、とほっとした様子を見せた。
+
+;-------------------------------------------------
+;開始時(2回目以降)
+;-------------------------------------------------
+;既成事実Lv3かつ恋慕
+ELSEIF TALENT:合意 && TALENT:恋慕
+	SELECTCASE RAND:4
+		CASE 0
+			PRINTFORMW 「哟，你来了吗」
+			;TranslatedMark 「よお、来てくれたのか」
+			PRINTFORMW 「今天……做什么都可以吗？只要陪在你身边就好。」
+			;TranslatedMark 「今日は……なんでもいいか。お前がいればいい」
+			PRINTFORMW 这样说着，%ANAME(TARGET)%开心地笑了。
+			;TranslatedMark そう言って%ANAME(TARGET)%は楽しそうに笑った。
+		CASE 1
+			PRINTFORMW 「……怎么也不行啊」
+			;TranslatedMark 「……どうにもいかんな」
+			PRINTFORMW 「嗯，不管怎么说，你来了，这样我就轻松了」
+			;TranslatedMark 「うん、どうにもお前が来ると、こう、気が緩むな」
+			PRINTFORMW 「不是，不是说不要来，请不要误会」
+			;TranslatedMark 「いや、来るなと言ってるんじゃない、勘違いしないでくれ」
+		CASE 2
+			PRINTFORMW 「哦，你来了吗？不好意思，请稍等」
+			;TranslatedMark 「おっ、来たか、悪いが少し待ってくれ」
+			PRINTFORMW 她很会保养剑。如果你碍事的话，有可能会她把剑架在脖子上
+			;TranslatedMark 彼女は手際よく剣の手入れをしている。邪魔をすれば首が飛びかねない
+			PRINTFORMW 「好，就是这样吗？」
+			;TranslatedMark 「よし、こんなものか」
+			PRINTFORMW 「让他等了一会儿。那么，现在该怎么办？」
+			;TranslatedMark 「っと、待たせた。では、今日はどうする」
+		CASE 3
+			PRINTFORMW 「呦，今天不去其他人那里吗？」
+			;TranslatedMark 「おっ、今日は他の奴らの所にはいかないのか」
+			PRINTFORMW 「是吗？是吗！那太好了！」
+			;TranslatedMark 「そうか、そうか、そいつはいい」
+			PRINTFORMW 她一边说着，一边牵着你的手跑了出去。
+			;TranslatedMark 言いながら、彼女はあなたの手を取り、走り出す。
+			PRINTFORMW 「好，走吧%ANAME(MASTER)%！」
+			;TranslatedMark 「よし、行くぞ%ANAME(MASTER)%！」
+	ENDSELECT
+;既成事実Lv3(セックス済み)
+ELSEIF TALENT:合意
+	PRINTFORMW 「今天要做些什么？我会陪你做你想做的事。」
+	;TranslatedMark 「今日はどうする？　お前のやりたいことに付き合うぞ」
+;既成事実Lv2(恋人)
+ELSEIF TALENT:恋人 
+	PRINTFORMW 「去吃饭吗？还是训练？」
+	;TranslatedMark 「飯に行くか？　それとも訓練か？」
+	PRINTFORMW 在%ANAME(TARGET)%的选择项中内政关系似乎全部被舍弃了。
+	;TranslatedMark %ANAME(TARGET)%の選択肢には内政関係は全て捨てられているようだ。
+;既成事実Lv1(キス済み)
+ELSEIF CFLAG:250 == 1
+	PRINTFORMW 「今天要做些什么？」
+	;TranslatedMark 「今日は、どうするんだ？」
+;既成事実Lv0で恋慕
+ELSEIF !TALENT:恋人 && TALENT:恋慕 && !TALENT:合意 && CFLAG:250 < 1
+	PRINTFORMW 「你也许意外的是个迟钝系的家伙……」
+	;TranslatedMark 「お前は、意外と鈍感な奴なのかもしれんな……」
+	PRINTFORMW 「不，没什么，我只是在自言自语。」
+	;TranslatedMark 「いや、なんでもない、こちらの話だ」
+;既成事実Lv0
+ELSEIF CFLAG:250 < 1
+	PRINTFORMW 「又是切磋吗？」
+	;TranslatedMark 「また交流か？」
+	PRINTFORMW 「比起那个不活动下身体吗？光会说可不行」
+	;TranslatedMark 「それよりも身体を動かさないか？　話してばかりは性に合わん」
+ENDIF
+
+;=================================================
+;●「会いに行く」の終了時のセリフ
+;=================================================
+@KOJO_TRAIN_END_A1_K1204
+;[虚ろ]状態なら口上を表示しない
+IF TALENT:空虚 || CFLAG:400 == 1
+	RETURN
+ENDIF
+
+;-------------------------------------------------
+;行動不能の場合
+;-------------------------------------------------
+;酒酔いによる行動不能
+IF TCVAR:53 == 1
+	PRINTFORMW 「没想到会会在酒桌上尝到败北的滋味」
+	;TranslatedMark 「酔いに負けるとは～」
+;快感のあまり気絶 or 気力300以下
+ELSEIF TCVAR:52 || BASE:気力 <= 300
+	;PRINTFORMW 
+;疲労による行動不能
+ELSEIF TCVAR:51
+	;PRINTFORMW 
+ENDIF
+
+;-------------------------------------------------
+;終了時(1回のみ)
+;-------------------------------------------------
+;既成事実Lv3(初めてセックスをした)
+IF CFLAG:201 < 5 && TALENT:合意
+	CFLAG:201 = 5
+	;行動不能ならフラグだけ立てて表示はしない
+	IF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
+		PRINTFORMW 「真是没想到会这么累」
+		;TranslatedMark 「こんなに疲れるものとはな」
+		PRINTFORMW %ANAME(TARGET)%把身体交给了奇妙的疲劳感，靠在了%ANAME(MASTER)%的身上。
+		;TranslatedMark %ANAME(TARGET)%は奇妙な疲労感に身を任せ、%ANAME(MASTER)%に寄りかかった。
+		PRINTFORMW 那个汗流浃背的身体，从平时的样子看不出一点女人的样子。
+		;TranslatedMark その汗ばんだ体は普段の姿からは想像できないほど女らしい。
+	ENDIF
+;既成事実Lv2(恋人になった)
+ELSEIF CFLAG:201 < 4 && TALENT:恋人 
+	CFLAG:201 = 4
+	;行動不能ならフラグだけ立てて表示はしない
+	IF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
+		PRINTFORMW 「没想到会有人喜欢我……」
+		;TranslatedMark 「俺に恋人ができるとはな……」
+		PRINTFORMW 「但是，恋人之间到底该做什么呢？」
+		;TranslatedMark 「だが、恋人同士はいったい何をする関係なんだ？」
+		PRINTFORMW 「算了，我会和你一起烦恼到底要做什么」
+		;TranslatedMark 「まあいい、何をするかはお前と一緒に悩んでいこう」
+	ENDIF
+;既成事実Lv1(初めてキスをした)
+ELSEIF CFLAG:201 < 3 && CFLAG:250 == 1
+	CFLAG:201 = 3
+	;行動不能ならフラグだけ立てて表示はしない
+	IF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
+		PRINTFORMW 「嘴唇什么的，没什么特别的……」
+		;TranslatedMark 「唇ぐらい、別に、別になんてことは……」
+		PRINTFORMW 「怎么可能没有呢！笨蛋！色魔！」
+		;TranslatedMark 「ないわけないだろう！　馬鹿！　色魔！」
+		PRINTFORMW %ANAME(TARGET)%和平时不同，骂得很孩子气。接吻时相当有进攻欲。
+		;TranslatedMark %ANAME(TARGET)%は普段とは違い、ひどく子供っぽい罵倒をした。よほどキスが衝撃だったらしい。
+	ENDIF
+
+;-------------------------------------------------
+;終了時(2回目以降)
+;-------------------------------------------------
+;行動不能なら非表示
+ELSEIF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
+	;既成事実Lv3かつ恋慕
+	IF TALENT:合意 && TALENT:恋慕
+		PRINTFORMW 「如果能永远在一起的话……」
+		;TranslatedMark 「いつまでも一緒にいられればな……」
+		PRINTFORMW 「总有一天，我会出人头地，我想保护你」
+		;TranslatedMark 「いずれ、出世してお前を囲いたいものだ」
+		PRINTFORMW 从表情上看不出她是认真的还是在开玩笑。对于%ANAME(TARGET)%的独占欲，%ANAME(MASTER)%感到了小小的寒意。
+		;TranslatedMark 冗談とも本気とも言えない表情である。%ANAME(TARGET)%の独占欲に%ANAME(MASTER)%は小さな悪寒を感じた。
+	;既成事実Lv3(セックス済み)
+	ELSEIF TALENT:合意
+		PRINTFORMW 「已经这么晚了啊……虽然很不想分开，但回去时请小心」
+		;TranslatedMark 「時間か……名残おしいが、気をつけて帰れよ」
+		PRINTFORMW 虽然说出话很粗鲁。但是%ANAME(TARGET)%完全是一副舍不得分离的小女人样。
+		;TranslatedMark ぶっきらぼうな言葉だ。だが%ANAME(TARGET)%の表情は、完全に別れを惜しむ女の顔である。
+	;既成事実Lv2(恋人)
+	ELSEIF TALENT:恋人 
+		PRINTFORMW 「时间过得真快啊。再见」
+		;TranslatedMark 「時間が経つのが早いな。じゃあな」
+		PRINTFORMW 这样说着，%ANAME(TARGET)%吻上了%ANAME(MASTER)%的嘴唇。
+		;TranslatedMark そう言って、%ANAME(TARGET)%は%ANAME(MASTER)%の唇を奪った。
+		PRINTFORMW %ANAME(TARGET)%看到了%ANAME(MASTER)%一脸震惊的样子禁不住笑着。
+		;TranslatedMark 驚く%ANAME(MASTER)%の姿を見て%ANAME(TARGET)%はニヤニヤ笑っている。
+	;既成事実Lv1(キス済み)
+	ELSEIF CFLAG:250 == 1 
+		PRINTFORMW 「看来和你很合得来啊。再见了」
+		;TranslatedMark 「お前とはウマが合うようだな。また来てくれよ」
+	;既成事実Lv0で恋慕
+	ELSEIF !TALENT:恋人 && TALENT:恋慕 && !TALENT:合意 && CFLAG:250 < 1
+		PRINTFORMW 「已经这个时间了吗……啊，今天晚上……不，没什么」
+		;TranslatedMark 「もうこんな時間か……なあ、今日は泊……いや、なんでもない」
+	;既成事実Lv0
+	ELSEIF CFLAG:250 < 1
+		PRINTFORMW 「时间差不多了。回家路上小心」
+		;TranslatedMark 「そろそろ時間だな。気をつけて帰れよ」
+	ENDIF
+ENDIF
+
+;=================================================
+;●「閨に呼ぶ」の開始時のセリフ ※単独で呼ばれた場合のみ呼ばれる
+;=================================================
+@KOJO_TRAIN_START_A2_K1204
+;[虚ろ]状態なら口上を表示しない
+IF TALENT:空虚 || CFLAG:400 == 1
+	RETURN
+ENDIF
+
+;=================================================
+;●「閨に呼ぶ」の終了時のセリフ ※単独で呼ばれた場合のみ呼ばれる
+;=================================================
+@KOJO_TRAIN_END_A2_K1204
+;[虚ろ]状態なら口上を表示しない
+IF TALENT:空虚 || CFLAG:400 == 1
+	RETURN
+ENDIF
+
+;酒酔いによる行動不能
+IF TCVAR:53 == 1
+	;PRINTFORMW 
+;快感のあまり気絶 or 気力300以下
+ELSEIF TCVAR:52 || BASE:気力 <= 300
+	;PRINTFORMW 
+;疲労による行動不能
+ELSEIF TCVAR:51
+	;PRINTFORMW 
+ELSE
+	;PRINTFORMW 
+ENDIF
+
+;=================================================
+;●コマンド実行前(このキャラがターゲット側のとき)
+;※地の文が表示される前に実行される。戻り値に1を設定する(RETURN 1)と地の文がカットされる
+;  必要に応じてKOJO_COM_TARGETの代わりに使う
+;=================================================
+@KOJO_COM_BEFORE_TARGET_A_K1204
+;[虚ろ]状態の場合、口が塞がっている場合は口上を表示しない
+IF TALENT:空虚 || IS_EQUIP_CONTINUE(TARGET, "口装着") || CFLAG:400 == 1
+	RETURN 0
+ENDIF
+
+RETURN 0
+
+;=================================================
+;●コマンド実行前(このキャラがプレイヤー側のとき)
+;※地の文が表示される前に実行される。戻り値に1を設定する(RETURN 1)と地の文がカットされる
+;  必要に応じてKOJO_COM_PLAYERの代わりに使う
+;=================================================
+@KOJO_COM_BEFORE_PLAYER_A_K1204
+;[虚ろ]状態の場合、口が塞がっている場合は口上を表示しない
+IF TALENT:空虚 || IS_EQUIP_CONTINUE(TARGET, "口装着") || CFLAG:400 == 1
+	RETURN 0
+ENDIF
+
+RETURN 0
+
+;=================================================
+;●コマンド実行時(このキャラがプレイヤーでもターゲットでも呼び出される)
+;  プレイヤー・ターゲットの区別がないコマンドはここに口上を記述する
+;=================================================
+@KOJO_COM_A_K1204
+;[虚ろ]状態の場合、口が塞がっている場合は口上を表示しない
+IF TALENT:空虚 || IS_EQUIP_CONTINUE(TARGET, "口装着") || CFLAG:400 == 1
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;キス
+;-------------------------------------------------
+IF SELECTCOM == 20
+	CFLAG:250 = 1;初めてキスをしたフラグ
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;ファーストキス
+		IF TALENT:無接吻経験
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;キス経験済み
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;ファーストキス
+		IF TALENT:無接吻経験
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;キス経験済み
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;貝合わせ
+;-------------------------------------------------
+IF SELECTCOM == 21
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｃ感Lv3以上
+				IF ABL:Ｃ感 >= 3
+					;PRINTFORMW 
+				;Ｃ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｃ感Lv3以上
+				IF ABL:Ｃ感 >= 3
+					;PRINTFORMW 
+				;Ｃ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｃ感Lv3以上
+				IF ABL:Ｃ感 >= 3
+					;PRINTFORMW 
+				;Ｃ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｃ感Lv3以上
+				IF ABL:Ｃ感 >= 3
+					;PRINTFORMW 
+				;Ｃ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;双頭バイブ
+;-------------------------------------------------
+IF SELECTCOM == 22
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;処女
+			IF TALENT:処女
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;非処女
+			ELSE
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;処女
+			IF TALENT:処女
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;非処女
+			ELSE
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;=================================================
+;●コマンド実行時(このキャラがターゲット側のとき)
+;=================================================
+@KOJO_COM_TARGET_A_K1204
+;[虚ろ]状態の場合、口が塞がっている場合は口上を表示しない
+IF TALENT:空虚 || IS_EQUIP_CONTINUE(TARGET, "口装着") || CFLAG:400 == 1
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;愛撫(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 0
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;胸愛撫(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 1
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｂ感Lv3以上
+				IF ABL:Ｂ感 >= 3
+					;PRINTFORMW 
+				;Ｂ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｂ感Lv3以上
+				IF ABL:Ｂ感 >= 3
+					;PRINTFORMW 
+				;Ｂ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｂ感Lv3以上
+				IF ABL:Ｂ感 >= 3
+					;PRINTFORMW 
+				;Ｂ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｂ感Lv3以上
+				IF ABL:Ｂ感 >= 3
+					;PRINTFORMW 
+				;Ｂ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;クンニ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 2
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｃ感Lv3以上
+				IF ABL:Ｃ感 >= 3
+					;PRINTFORMW 
+				;Ｃ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｃ感Lv3以上
+				IF ABL:Ｃ感 >= 3
+					;PRINTFORMW 
+				;Ｃ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｃ感Lv3以上
+				IF ABL:Ｃ感 >= 3
+					;PRINTFORMW 
+				;Ｃ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｃ感Lv3以上
+				IF ABL:Ｃ感 >= 3
+					;PRINTFORMW 
+				;Ｃ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;指挿入れ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 3
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;アナル愛撫(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 4
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;手コキ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 10
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;フェラチオ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 11
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;パイズリ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 12
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;素股(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 13
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;足コキ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 14
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;尻コキ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 15
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;正常位(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 30
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;処女
+			IF TALENT:処女
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;非処女
+			ELSE
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;処女
+			IF TALENT:処女
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;非処女
+			ELSE
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;後背位(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 31
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;処女
+			IF TALENT:処女
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;非処女
+			ELSE
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;処女
+			IF TALENT:処女
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;非処女
+			ELSE
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;対面座位(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 32
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;処女
+			IF TALENT:処女
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;非処女
+			ELSE
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;処女
+			IF TALENT:処女
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;非処女
+			ELSE
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;背面座位(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 33
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;処女
+			IF TALENT:処女
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;非処女
+			ELSE
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;処女
+			IF TALENT:処女
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;非処女
+			ELSE
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;騎乗位(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 34
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;処女
+			IF TALENT:処女
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;非処女
+			ELSE
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;処女
+			IF TALENT:処女
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;非処女
+			ELSE
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;背面騎乗位(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 35
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;処女
+			IF TALENT:処女
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;非処女
+			ELSE
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;処女
+			IF TALENT:処女
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;非処女
+			ELSE
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ正常位(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 40
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ後背位(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 41
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ対面座位(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 42
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ背面座位(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 43
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ騎乗位(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 44
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ背面騎乗位(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 45
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;ローター(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 60
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｃ感Lv3以上
+				IF ABL:Ｃ感 >= 3
+					;PRINTFORMW 
+				;Ｃ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｃ感Lv3以上
+				IF ABL:Ｃ感 >= 3
+					;PRINTFORMW 
+				;Ｃ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｃ感Lv3以上
+				IF ABL:Ｃ感 >= 3
+					;PRINTFORMW 
+				;Ｃ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｃ感Lv3以上
+				IF ABL:Ｃ感 >= 3
+					;PRINTFORMW 
+				;Ｃ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;バイブ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 61
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｖ感Lv3以上
+				IF ABL:Ｖ感 >= 3
+					;PRINTFORMW 
+				;Ｖ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;アナルバイブ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 62
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;クリキャップ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 63
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｃ感Lv3以上
+				IF ABL:Ｃ感 >= 3
+					;PRINTFORMW 
+				;Ｃ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｃ感Lv3以上
+				IF ABL:Ｃ感 >= 3
+					;PRINTFORMW 
+				;Ｃ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｃ感Lv3以上
+				IF ABL:Ｃ感 >= 3
+					;PRINTFORMW 
+				;Ｃ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｃ感Lv3以上
+				IF ABL:Ｃ感 >= 3
+					;PRINTFORMW 
+				;Ｃ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;ニプルキャップ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 64
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｂ感Lv3以上
+				IF ABL:Ｂ感 >= 3
+					;PRINTFORMW 
+				;Ｂ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｂ感Lv3以上
+				IF ABL:Ｂ感 >= 3
+					;PRINTFORMW 
+				;Ｂ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｂ感Lv3以上
+				IF ABL:Ｂ感 >= 3
+					;PRINTFORMW 
+				;Ｂ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｂ感Lv3以上
+				IF ABL:Ｂ感 >= 3
+					;PRINTFORMW 
+				;Ｂ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;ローション(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 70
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;媚薬(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 71
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;スパンキング(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 81
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;鞭(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 82
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;針(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 83
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;縄(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 85
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				IF GETBIT(TALENT:淫乱系, 素質_淫乱_マゾ)
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;フィストファック(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 87
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｖ感Lv5以上
+				IF ABL:Ｖ感 >= 5
+					;PRINTFORMW 
+				;Ｖ感Lv5未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｖ感Lv5以上
+				IF ABL:Ｖ感 >= 5
+					;PRINTFORMW 
+				;Ｖ感Lv5未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｖ感Lv5以上
+				IF ABL:Ｖ感 >= 5
+					;PRINTFORMW 
+				;Ｖ感Lv5未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｖ感Lv5以上
+				IF ABL:Ｖ感 >= 5
+					;PRINTFORMW 
+				;Ｖ感Lv5未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;アナルフィスト(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 88
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ａ感Lv5以上
+				IF ABL:Ａ感 >= 5
+					;PRINTFORMW 
+				;Ａ感Lv5未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ａ感Lv5以上
+				IF ABL:Ａ感 >= 5
+					;PRINTFORMW 
+				;Ａ感Lv5未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ａ感Lv5以上
+				IF ABL:Ａ感 >= 5
+					;PRINTFORMW 
+				;Ａ感Lv5未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ａ感Lv5以上
+				IF ABL:Ａ感 >= 5
+					;PRINTFORMW 
+				;Ａ感Lv5未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;自慰(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 100
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;顔面騎乗(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 101
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;プレイヤーが男性
+				IF TALENT:(MPLY:0):性別 == 0
+					;PRINTFORMW 
+				;プレイヤーが女性orふたなり
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;プレイヤーが男性
+				IF TALENT:(MPLY:0):性別 == 0
+					;PRINTFORMW 
+				;プレイヤーが女性orふたなり
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;プレイヤーが男性
+				IF TALENT:(MPLY:0):性別 == 0
+					;PRINTFORMW 
+				;プレイヤーが女性orふたなり
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;プレイヤーが男性
+				IF TALENT:(MPLY:0):性別 == 0
+					;PRINTFORMW 
+				;プレイヤーが女性orふたなり
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;プレイヤーが男性
+				IF TALENT:(MPLY:0):性別 == 0
+					;PRINTFORMW 
+				;プレイヤーが女性orふたなり
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;プレイヤーが男性
+				IF TALENT:(MPLY:0):性別 == 0
+					;PRINTFORMW 
+				;プレイヤーが女性orふたなり
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;プレイヤーが男性
+				IF TALENT:(MPLY:0):性別 == 0
+					;PRINTFORMW 
+				;プレイヤーが女性orふたなり
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;プレイヤーが男性
+				IF TALENT:(MPLY:0):性別 == 0
+					;PRINTFORMW 
+				;プレイヤーが女性orふたなり
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ顔面騎乗(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 102
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;電気按摩(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 103
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;足を舐める(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 104
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ｗ顔面騎乗(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 105
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手挿入(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 201
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;触手Lv3以上
+				IF ABL:触手 >= 3
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;触手Lv3以上
+				IF ABL:触手 >= 3
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;触手Lv3以上
+				IF ABL:触手 >= 3
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;触手Lv3以上
+				IF ABL:触手 >= 3
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手Ａ挿入(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 202
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;触手Lv3以上
+				IF ABL:触手 >= 3
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;触手Lv3以上
+				IF ABL:触手 >= 3
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;触手Lv3以上
+				IF ABL:触手 >= 3
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;触手Lv3以上
+				IF ABL:触手 >= 3
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手クリ責め(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 203
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;触手Lv3以上
+				IF ABL:触手 >= 3
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;触手Lv3以上
+				IF ABL:触手 >= 3
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;触手Lv3以上
+				IF ABL:触手 >= 3
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;触手Lv3以上
+				IF ABL:触手 >= 3
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手胸愛撫(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 204
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;触手Lv3以上
+				IF ABL:触手 >= 3
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;触手Lv3以上
+				IF ABL:触手 >= 3
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;触手Lv3以上
+				IF ABL:触手 >= 3
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;触手Lv3以上
+				IF ABL:触手 >= 3
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手オナホ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 205
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;触手Lv3以上
+				IF ABL:触手 >= 3
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;触手Lv3以上
+				IF ABL:触手 >= 3
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;触手Lv3以上
+				IF ABL:触手 >= 3
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;触手Lv3以上
+				IF ABL:触手 >= 3
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手コキ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 206
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;触手Lv3以上
+				IF ABL:触手 >= 3
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;触手Lv3以上
+				IF ABL:触手 >= 3
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;触手Lv3以上
+				IF ABL:触手 >= 3
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;触手Lv3以上
+				IF ABL:触手 >= 3
+					;PRINTFORMW 
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;会話
+;-------------------------------------------------
+IF SELECTCOM == 300
+	;初めて(主導権を考慮しない)
+	IF IS_COM_FIRST(1)
+		PRINTFORMW 「我不擅长表达啊」
+		;TranslatedMark 「話すのは苦手なんだがな」
+	;二回目以降
+	ELSE
+		;恋慕 or 服従 or 親友
+		IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+			SELECTCASE RAND:5
+				CASE 0
+					PRINTFORMW 「北方的马好像质量很好啊」
+					;TranslatedMark 「北方の馬は質がいいらしいな」
+					PRINTFORMW %ANAME(TARGET)%说，想骑着这种马指挥一次出军。
+					;TranslatedMark そんな馬に乗って一軍を指揮してみたい、と%ANAME(TARGET)%は夢を語っている。
+				CASE 1
+					PRINTFORMW 「你不觉得冲锋才是战场的精髓吗？」
+					;TranslatedMark 「突撃こそ戦場の華、そうは思わないか？」
+				CASE 2
+					PRINTFORMW 「总有一天，我也想和你远足啊」
+					;TranslatedMark 「いつか、お前と遠乗りでもやりたいものだな」
+				CASE 3
+					PRINTFORMW 「如果是勇武方面的话，我想我不会输给任何人」
+					;TranslatedMark 「武勇なら誰にも負けん、つもりだったんだがな」
+					PRINTFORMW 举出其他国家优秀武将的名字，%ANAME(TARGET)%叹息道。
+					;TranslatedMark 他国の優秀な武将達の名前を挙げ、%ANAME(TARGET)%はため息をついている。
+				CASE 4
+					PRINTFORMW 「什么话题都可以。总之请让我听听你的声音」
+					;TranslatedMark 「話題はなんでもいい。とにかく声を聞かせてくれ」
+					PRINTFORMW %ANAME(TARGET)%这样说着，继续附和着%ANAME(MASTER)%的话。
+					;TranslatedMark %ANAME(TARGET)%はそう言って%ANAME(MASTER)%の話に相槌を打ち続けている。
+			ENDSELECT
+		;それ以外
+		ELSE
+			SELECTCASE RAND:4
+				CASE 0
+					PRINTFORMW 「北方的马好像质量很好啊」
+					;TranslatedMark 「北方の馬は質がいいらしいな」
+					PRINTFORMW %ANAME(TARGET)%说，想骑着这种马指挥一次出军。
+					;TranslatedMark そんな馬に乗って一軍を指揮してみたい、と%ANAME(TARGET)%は夢を語っている。
+				CASE 1
+					PRINTFORMW 「你不觉得冲锋才是战场的精髓吗？」
+					;TranslatedMark 「突撃こそ戦場の華、そうは思わないか？」
+				CASE 2
+					PRINTFORMW 「治安维持的话，如果有用的话什么都要做」
+					;TranslatedMark 「治安維持であれ、役に立つならなんでもやらなければな」
+				CASE 3
+					PRINTFORMW 「如果是勇武方面的话，我想我不会输给任何人」
+					;TranslatedMark 「武勇なら誰にも負けん、つもりだったんだがな」
+					PRINTFORMW 举出其他国家优秀武将的名字，%ANAME(TARGET)%叹息道。
+					;TranslatedMark 他国の優秀な武将達の名前を挙げ、%ANAME(TARGET)%はため息をついている。
+			ENDSELECT
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;武術訓練
+;-------------------------------------------------
+IF SELECTCOM == 301
+	;初めて(主導権を考慮しない)
+	IF IS_COM_FIRST(1)
+		PRINTFORMW 「哈哈，要做吗！」
+		;TranslatedMark 「ははは、やるか！」
+		PRINTFORMW %ANAME(TARGET)%一脸非常高兴的样子拿着武器。
+		;TranslatedMark %ANAME(TARGET)%は実に楽しそうな様子で武器を構えた。
+	;二回目以降
+	ELSE
+		;恋慕 or 服従 or 親友
+		IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+			;PRINTFORMW 
+					;それ以外
+		ELSE
+			SELECTCASE RAND:4
+				CASE 0
+					PRINTFORMW 「怎么了！只有这点程度吗？」
+					;TranslatedMark 「どうした！　その程度か？」
+					PRINTFORMW 以实战的气势挥舞着武器。
+					;TranslatedMark 実戦さながらの勢いで武器が振るわれている。
+					PRINTFORMW 在%ANAME(TARGET)%字典里似乎没有"手下留情"这个词。
+					;TranslatedMark %ANAME(TARGET)%に手加減という言葉は存在しないようだ。
+				CASE 1
+					PRINTFORMW 「动作很好！来拿下一分看看！」
+					;TranslatedMark 「いい動きだ！　次は一本取ってみろ！」
+				CASE 2
+					PRINTFORMW 「啊！是因为孩子的关系嘛！」
+					;TranslatedMark 「はっ！　子供の間合いだな！」
+				CASE 3
+					PRINTFORMW 「哇哈哈哈！要逃跑吗！」
+					;TranslatedMark 「わははははは！　逃げるか！」
+					PRINTFORMW %ANAME(TARGET)%追赶着想要重整架势的%ANAME(MASTER)%。
+					;TranslatedMark 間合いを取ろうとする%ANAME(MASTER)%を%ANAME(TARGET)%が追いかける。
+					PRINTFORMW 那姿态宛如猫科动物执着地追逐猎物的样子。
+					;TranslatedMark その姿はさながら猫が獲物を執拗に追いかける時のようである。
+			ENDSELECT
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;兵法学習
+;-------------------------------------------------
+IF SELECTCOM == 303
+	;初めて(主導権を考慮しない)
+	IF IS_COM_FIRST(1)
+		PRINTFORMW 「练习吗……我不需要」
+		;TranslatedMark 「座学か……俺には必要ないな」
+	;二回目以降
+	ELSE
+		;恋慕 or 服従 or 親友
+		IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+			SELECTCASE RAND:4
+				CASE 0
+					PRINTFORMW 「原来如此，突击一边倒是不行的……」
+					;TranslatedMark 「なるほど、突撃一辺倒ではいかんわけか……」
+				CASE 1
+					PRINTFORMW 「也就是说弱兵也能起到意想不到的作用吗，原来如此」
+					;TranslatedMark 「弱兵も使いようというわけか、なるほど分からん」
+				CASE 2
+					PRINTFORMW 「是吗，制造容易突击的状况，原来如此」
+					;TranslatedMark 「そうか、突撃しやすい状況を作るのか、なるほど」
+				CASE 3
+					PRINTFORMW 「燃烧这些军粮然后的发动总攻，真是让人心潮澎湃」
+					;TranslatedMark 「この兵糧を燃やしてからの突撃は心躍るな」
+			ENDSELECT
+		;それ以外
+		ELSE
+			SELECTCASE RAND:4
+				CASE 0
+					PRINTFORMW 「断绝敌人的粮草？那就没意思了」
+					;TranslatedMark 「敵の兵糧を叩く？　それではつまらんだろうに」
+				CASE 1
+					PRINTFORMW 「将敌人分割并逐个击破？作为一个军人难道不应该正面作战吗？」
+					;TranslatedMark 「敵を分断して叩く？　武人としては真正面で戦ってこそではないのか？」
+				CASE 2
+					PRINTFORMW 「伏兵？踩过去就好了」
+					;TranslatedMark 「伏兵？　踏み潰せばよかろう」
+				CASE 3
+					PRINTFORMW 「暗杀？不是一对一吗？」
+					;TranslatedMark 「暗殺？　一騎打ちではいかんのか？」
+			ENDSELECT
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;政務
+;-------------------------------------------------
+IF SELECTCOM == 304
+	;初めて(主導権を考慮しない)
+	IF IS_COM_FIRST(1)
+		PRINTFORMW 「有我能做的事吗？」
+		;TranslatedMark 「俺に出来ることがあるのか？」
+	;二回目以降
+	ELSE
+		;恋慕 or 服従 or 親友
+		IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+			SELECTCASE RAND:4
+				CASE 0
+					PRINTFORMW 「这里可能也是一种战场……」
+					;TranslatedMark 「ここも一種の戦場なのかもしれんな……」
+					PRINTFORMW %ANAME(TARGET)%一边读着各方战报，一边叹气。
+					;TranslatedMark %ANAME(TARGET)%は数多くの資料を読みながら、ため息を吐いた。
+				CASE 1
+					PRINTFORMW 「没有印章？没办法，那就用血书吧」
+					;TranslatedMark 「判子がない？　仕方ない、血判で」
+					PRINTFORMW %ANAME(MASTER)%慌忙阻止了想要割破手指的%ANAME(TARGET)%。
+					;TranslatedMark 指を切ろうとする%ANAME(TARGET)%を%ANAME(MASTER)%はあわてて止めた。
+				CASE 2
+					PRINTFORMW 「常备兵的军资和粮草好像消耗很大啊」
+					;TranslatedMark 「常備兵っていうのはかなり金を食うらしいな」
+					PRINTFORMW %ANAME(TARGET)%读了兵站相关的军报很佩服。
+					;TranslatedMark %ANAME(TARGET)%は兵站関連の資料を読んで感心している。
+				CASE 3
+					PRINTFORMW 「军粮真少啊。多买点比较好哦」
+					;TranslatedMark 「兵糧が随分少ないな。多い目に買ったほうがいいぞ」
+					PRINTFORMW 武官的意见大多时间都很有参考价值。
+					;TranslatedMark 武官ならではの意見は時に参考になるものである。
+			ENDSELECT
+		;それ以外
+		ELSE
+			SELECTCASE RAND:4
+				CASE 0
+					PRINTFORMW 「要我去资料室做什么工作？」
+					;TranslatedMark 「資料室に行けと言われたのだが、何の仕事をするんだ？」
+					PRINTFORMW 闲职。
+					;TranslatedMark 閑職である。
+				CASE 1
+					PRINTFORMW 「没有印章？没办法，那就用血书吧」
+					;TranslatedMark 「判子がない？　仕方ない、血判で」
+					PRINTFORMW %ANAME(MASTER)%慌忙阻止了想要割破手指的%ANAME(TARGET)%。
+					;TranslatedMark 指を切ろうとする%ANAME(TARGET)%を%ANAME(MASTER)%はあわてて止めた。
+				CASE 2
+					PRINTFORMW 「常备兵的军资和粮草好像消耗很大啊」
+					;TranslatedMark 「常備兵っていうのはかなり金を食うらしいな」
+					PRINTFORMW %ANAME(TARGET)%读了兵站相关的军报很佩服。
+					;TranslatedMark %ANAME(TARGET)%は兵站関連の資料を読んで感心している。
+				CASE 3
+					PRINTFORMW 「军粮真少啊。多买点比较好哦」
+					;TranslatedMark 「兵糧が随分少ないな。多い目に買ったほうがいいぞ」
+					PRINTFORMW 武官的意见大多时间都很有参考价值。
+					;TranslatedMark 武官ならではの意見は時に参考になるものである。
+			ENDSELECT
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;警邏
+;-------------------------------------------------
+IF SELECTCOM == 305
+	;初めて(主導権を考慮しない)
+	IF IS_COM_FIRST(1)
+		PRINTFORMW 「去维持治安吧！快去！」
+		;TranslatedMark 「治安維持に行くぞ！　着いてこい！」
+	;二回目以降
+	ELSE
+		;恋慕 or 服従 or 親友
+		IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+			PRINTFORMW 「快去吧！别磨磨蹭蹭的，浪费时间」
+			;TranslatedMark 「さあ行くぞ！　ぐずぐずするな、時間がもったいない」
+			PRINTFORMW %ANAME(TARGET)%像去散步之前的狗一样不稳重。
+			;TranslatedMark %ANAME(TARGET)%は、散歩に行く前の犬のように落ち着きがない。
+		;それ以外
+		ELSE
+			PRINTFORMW 「认为只有我的人会被打到军门，如果这样的话……」
+			;TranslatedMark 「我こそはと思う者は軍門を叩かれよ、さすれば……」
+			PRINTFORMW %ANAME(TARGET)%一边为自己的军队宣传，一边前进着。
+			;TranslatedMark %ANAME(TARGET)%は自軍の宣伝をしながら道を歩いている。
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;歌唱訓練
+;-------------------------------------------------
+IF SELECTCOM == 306
+	;初めて(主導権を考慮しない)
+	IF IS_COM_FIRST(1)
+		PRINTFORMW 「对自己有自信的话就大声的说出来」
+		;TranslatedMark 「大声なら自信はあるんだがな」
+	;二回目以降
+	ELSE
+		;恋慕 or 服従 or 親友
+		IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 「持续发出声音真的很难……」
+			;TranslatedMark 「声を出し続けるというのはなんとも難しいものだ……」
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;料理
+;-------------------------------------------------
+IF SELECTCOM == 307
+	;初めて(主導権を考慮しない)
+	IF IS_COM_FIRST(1)
+		PRINTFORMW 「如果是普通食物的话倒是会做……但是不好吃哦」
+		;TranslatedMark 「常備食なら作れるが……不味いぞ」
+		PRINTFORMW 不应该期待。
+		;TranslatedMark 期待はするべきではないようだ。
+	;二回目以降
+	ELSE
+		;恋慕 or 服従 or 親友
+		IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+			;PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 「在外面做比较轻松啊」
+			;TranslatedMark 「外で作る方が気楽なんだがな」
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;酒を飲む
+;-------------------------------------------------
+IF SELECTCOM == 310
+	;初めて(主導権を考慮しない)
+	IF IS_COM_FIRST(1)
+		PRINTFORMW 「不好，居然是酒！」
+		;TranslatedMark 「酒か！　いただこう」
+	;二回目以降
+	ELSE
+		;恋慕 or 服従 or 親友
+		IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+			PRINTFORMW 「啊，这就喝醉了。不行啊，把身体借靠一下」
+			;TranslatedMark 「ああ、酔った。いかんな、ちょっと身体を貸せ」
+			PRINTFORMW 这样说着，%ANAME(TARGET)%就被%ANAME(MASTER)%迷住了。
+			;TranslatedMark そう言って%ANAME(TARGET)%は%ANAME(MASTER)%にしなだれかかった。
+			PRINTFORMW 身体接触时可以感到对方炙热呼吸，与醉酒时有着不同的感觉。
+			;TranslatedMark 身体に当たる熱い息遣いは、酔いとはまた別のものを感じる。
+		;それ以外
+		ELSE
+			PRINTFORMW 「哈哈哈！%ANAME(MASTER)%！在吗！」
+			;TranslatedMark 「ははははははは！　%ANAME(MASTER)%！　おるか！」
+			PRINTFORMW 因为%ANAME(MASTER)%的关系，%ANAME(TARGET)%的情绪高涨到了可怕的程度。
+			;TranslatedMark %ANAME(TARGET)%は恐ろしい程上機嫌に%ANAME(MASTER)%に絡んでいる。
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;スキンシップ(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 320
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				PRINTFORMW 「情侣之间好像会做这种事啊」
+				;TranslatedMark 「恋人同士はこういうことをやるらしいな」
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				PRINTFORMW 「光是这样牵着手就已经很开心了呢」
+				;TranslatedMark 「こうやって指を絡ませるだけでも、楽しいものだな」
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				PRINTFORMW 「可以进行亲密的身体接触，因为是恋人嘛」
+				;TranslatedMark 「体ぐらいいつでも触れ、恋人なのだからな」
+			ELSE
+				PRINTFORMW 「你有什么打算」
+				;TranslatedMark 「何のつもりだ」
+				PRINTFORMW %ANAME(TARGET)%的眼神中没有笑意。因为我的突然接触好像有些不自在。
+				;TranslatedMark %ANAME(TARGET)%の目は笑っていない。急に身体に触られたことが気に障ったようだ。
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				PRINTFORMW 「来，摸摸看。哪里都可以，胸部怎么样？」
+				;TranslatedMark 「さあ、触れ。どこでもいいぞ、胸とかどうだ？」
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				PRINTFORMW 「嘛，被要求也不错啊」
+				;TranslatedMark 「まあ、求められるのも悪くはないな」
+			;それ以外
+			ELSE
+				PRINTFORMW 「有点太安逸了吧」
+				;TranslatedMark 「少し、気安すぎないか」
+				PRINTFORMW %ANAME(TARGET)%被触碰的时候不太自在的样子。
+				;TranslatedMark %ANAME(TARGET)%は触られるのが苦手な様子である。
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;頭を撫でる(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 321
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				PRINTFORMW 「不要想起小时候被摸头的样子」
+				;TranslatedMark 「頭を撫でられるのは幼い頃を思い出すな」
+			ELSE
+				PRINTFORMW 「嗯，我不讨厌这样的」
+				;TranslatedMark 「まあ、こういうのは嫌いじゃないな」
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				PRINTFORMW 「可以摸一摸耳朵吗？」
+				;TranslatedMark 「耳も触ってくれないか？」
+				PRINTFORMW 每次抚摸头的时候，%ANAME(TARGET)%的表情都会变得妩媚，注视着%ANAME(MASTER)%的视线也会变得火热。
+				;TranslatedMark 頭を撫でる度に%ANAME(TARGET)%の表情は色めき、%ANAME(MASTER)%を見つめる視線は強い熱を帯びていく。
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				PRINTFORMW 「爸爸经常这样抚摸我」
+				;TranslatedMark 「よく父にはこうやって撫でてもらったよ」
+				PRINTFORMW 「非常怀念……」
+				;TranslatedMark 「とても懐かしい……」
+			;それ以外
+			ELSE
+				PRINTFORMW 「好像被当做孩子一样啊」
+				;TranslatedMark 「子供扱いされているみたいだな」
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;髪を梳く(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 322
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				PRINTFORMW 「摸我的头发什么的也会开心吗？」
+				;TranslatedMark 「俺の髪なんぞ触っても楽しいのか？」
+				PRINTFORMW 「不太明白啊」
+				;TranslatedMark 「よく分からんな」
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				PRINTFORMW 「能帮我梳头发吗」
+				;TranslatedMark 「髪を梳いてくれるのか」
+				PRINTFORMW 「对不起，拜托了」
+				;TranslatedMark 「すまんな、頼む」
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				PRINTFORMW 「嗯，不用，太客气了」
+				;TranslatedMark 「む、あんまり丁寧にやらなくてもいいぞ」
+				PRINTFORMW 「让我自己保养的话我就没有自信了」
+				;TranslatedMark 「自分で手入れする時に自信がなくなりそうだからな」
+			;それ以外
+			ELSE
+				PRINTFORMW 「嘛，想摸的话就随你的便」
+				;TranslatedMark 「まあ、触りたいなら好きにしろ」
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;櫛で梳かす(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 323
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				PRINTFORMW 「喂，能帮我梳头发吗」
+				;TranslatedMark 「お、髪を梳かしてくれるのか」
+				PRINTFORMW 「这方面我不擅长……」
+				;TranslatedMark 「どうにも自分でやるのは苦手でな……」
+			ELSE
+				PRINTFORMW 「谁在摸我的头发……啊，是你的话就没问题了」
+				;TranslatedMark 「髪を触らせるのは……まあ、お前ならいいか」
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				PRINTFORMW 「多么舒服啊……因为是你嘛。」
+				;TranslatedMark 「なんとも心地いいものだな……お前だからか」
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				PRINTFORMW 「嗯，不用，太客气了」
+				;TranslatedMark 「む、あんまり丁寧にやらなくてもいいぞ」
+				PRINTFORMW 「让我自己保养的话我就没有自信了」
+				;TranslatedMark 「自分で手入れする時に自信がなくなりそうだからな」
+			;それ以外
+			ELSE
+				PRINTFORMW 「剩下的便交给我吧」
+				;TranslatedMark 「好きにしてくれ、任せる」
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;お腹の音を聴く
+;-------------------------------------------------
+IF SELECTCOM == 326
+	;父親が主人公で確定している場合
+	IF CFLAG:23 == GET_ID(MASTER)
+		;妊娠８期以降(ぼてっ)
+		IF CFLAG:18 >= 8
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;妊娠６期以降(ぽっこり)
+		ELSEIF CFLAG:18 >= 6
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;妊娠５期以前
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;父親不明、もしくは他の士官の子
+	ELSE
+		;妊娠８期以降(ぼてっ)
+		IF CFLAG:18 >= 8
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;妊娠６期以降(ぽっこり)
+		ELSEIF CFLAG:18 >= 6
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;妊娠５期以前
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;バードキス(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 340
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			CFLAG:250 = 1;初めてキスをしたフラグ
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			CFLAG:250 = 1;初めてキスをしたフラグ
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;ソフトキス(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 341
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			CFLAG:250 = 1;初めてキスをしたフラグ
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			CFLAG:250 = 1;初めてキスをしたフラグ
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;ディープキス(ターゲット)
+;-------------------------------------------------
+IF SELECTCOM == 342
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			CFLAG:250 = 1;初めてキスをしたフラグ
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			CFLAG:250 = 1;初めてキスをしたフラグ
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;水浴び
+;-------------------------------------------------
+IF SELECTCOM == 354
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;泳ぐ
+;-------------------------------------------------
+IF SELECTCOM == 355
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;=================================================
+;●コマンド実行時(このキャラがプレイヤー側のとき)
+;=================================================
+@KOJO_COM_PLAYER_A_K1204
+;[虚ろ]状態の場合、口が塞がっている場合は口上を表示しない
+IF TALENT:空虚 || IS_EQUIP_CONTINUE(TARGET, "口装着")
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;愛撫(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 0
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;胸愛撫(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 1
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;クンニ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 2
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;指挿入れ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 3
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;アナル愛撫(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 4
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;手コキ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 10
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;フェラチオ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 11
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;パイズリ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 12
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;素股(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 13
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;足コキ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 14
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;尻コキ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 15
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;正常位(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 30
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;主人公が処女
+			IF TALENT:MASTER:処女
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;主人公が非処女
+			ELSE
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;主人公が処女
+			IF TALENT:MASTER:処女
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;主人公が非処女
+			ELSE
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;後背位(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 31
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;主人公が処女
+			IF TALENT:MASTER:処女
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;主人公が非処女
+			ELSE
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;主人公が処女
+			IF TALENT:MASTER:処女
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;主人公が非処女
+			ELSE
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;対面座位(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 32
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;主人公が処女
+			IF TALENT:MASTER:処女
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;主人公が非処女
+			ELSE
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;主人公が処女
+			IF TALENT:MASTER:処女
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;主人公が非処女
+			ELSE
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;背面座位(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 33
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;主人公が処女
+			IF TALENT:MASTER:処女
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;主人公が非処女
+			ELSE
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;主人公が処女
+			IF TALENT:MASTER:処女
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;主人公が非処女
+			ELSE
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;騎乗位(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 34
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;主人公が処女
+			IF TALENT:MASTER:処女
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;主人公が非処女
+			ELSE
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;主人公が処女
+			IF TALENT:MASTER:処女
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;主人公が非処女
+			ELSE
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;背面騎乗位(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 35
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;主人公が処女
+			IF TALENT:MASTER:処女
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;主人公が非処女
+			ELSE
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;主人公が処女
+			IF TALENT:MASTER:処女
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;主人公が非処女
+			ELSE
+				;恋慕 or 服従
+				IF TALENT:恋慕 || TALENT:服従
+					;PRINTFORMW 
+				;それ以外
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ正常位(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 40
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ後背位(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 41
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ対面座位(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 42
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ背面座位(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 43
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ騎乗位(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 44
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ背面騎乗位(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 45
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;ローター(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 60
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;バイブ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 61
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;アナルバイブ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 62
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;クリキャップ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 63
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;ニプルキャップ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 64
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;ローション(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 70
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;媚薬(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 71
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;スパンキング(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 81
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;鞭(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 82
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;針(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 83
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;縄(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 85
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;フィストファック(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 87
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;アナルフィスト(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 88
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;自慰(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 100
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;自慰Lv2以上
+				IF ABL:自慰 >= 2
+					;PRINTFORMW 
+				;自慰Lv2未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;自慰Lv2以上
+				IF ABL:自慰 >= 2
+					;PRINTFORMW 
+				;自慰Lv2未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;自慰Lv2以上
+				IF ABL:自慰 >= 2
+					;PRINTFORMW 
+				;自慰Lv2未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;自慰Lv2以上
+				IF ABL:自慰 >= 2
+					;PRINTFORMW 
+				;自慰Lv2未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;顔面騎乗(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 101
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｃ感Lv3以上
+				IF ABL:Ｃ感 >= 3
+					;PRINTFORMW 
+				;Ｃ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｃ感Lv3以上
+				IF ABL:Ｃ感 >= 3
+					;PRINTFORMW 
+				;Ｃ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ｃ感Lv3以上
+				IF ABL:Ｃ感 >= 3
+					;PRINTFORMW 
+				;Ｃ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ｃ感Lv3以上
+				IF ABL:Ｃ感 >= 3
+					;PRINTFORMW 
+				;Ｃ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;Ａ顔面騎乗(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 102
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			;それ以外
+			ELSE
+				;Ａ感Lv3以上
+				IF ABL:Ａ感 >= 3
+					;PRINTFORMW 
+				;Ａ感Lv3未満
+				ELSE
+					;PRINTFORMW 
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;電気按摩(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 103
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;足を舐める(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 104
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手挿入(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 201
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手Ａ挿入(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 202
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手クリ責め(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 203
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手胸愛撫(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 204
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手オナホ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 205
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;触手コキ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 206
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;スキンシップ(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 320
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;頭を撫でる(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 321
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;髪を梳く(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 322
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;櫛で梳かす(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 323
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;バードキス(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 340
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			CFLAG:250 = 1;初めてキスをしたフラグ
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			CFLAG:250 = 1;初めてキスをしたフラグ
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;ソフトキス(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 341
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			CFLAG:250 = 1;初めてキスをしたフラグ
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			CFLAG:250 = 1;初めてキスをしたフラグ
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;ディープキス(プレイヤー)
+;-------------------------------------------------
+IF SELECTCOM == 342
+	;このキャラが主導権を持っている
+	IF IS_INITIATIVE(TARGET)
+		;初めて
+		IF IS_COM_FIRST()
+			CFLAG:250 = 1;初めてキスをしたフラグ
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	;このキャラが主導権を持っていない
+	ELSE
+		;初めて
+		IF IS_COM_FIRST()
+			CFLAG:250 = 1;初めてキスをしたフラグ
+			;既成事実Lv2以上
+			IF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;二回目以降
+		ELSE
+			;恋慕 or 服従 or 親友
+			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+				;PRINTFORMW 
+			;既成事実Lv2以上
+			ELSEIF TALENT:恋人 || TALENT:合意
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;=================================================
+;●コマンド実行後(パラメータの変動処理が終わってから呼び出される)
+;=================================================
+@KOJO_COM_AFTER_A_K1204
+;[虚ろ]状態の場合、口が塞がっている場合は口上を表示しない
+IF TALENT:空虚 || IS_EQUIP_CONTINUE(TARGET, "口装着")
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;処女喪失
+;-------------------------------------------------
+;主人公とのセックスによる処女喪失
+IF TCVAR:13 == 1
+	;恋慕 or 服従
+	IF TALENT:恋慕 || TALENT:服従
+		;PRINTFORMW 
+	;それ以外
+	ELSE
+		;PRINTFORMW 
+	ENDIF
+;主人公にセックス以外で処女を奪われる
+ELSEIF TCVAR:13 == 2
+	;恋慕 or 服従
+	IF TALENT:恋慕 || TALENT:服従
+		;PRINTFORMW 
+	;それ以外
+	ELSE
+		;PRINTFORMW 
+	ENDIF
+;それ以外の時に処女喪失
+ELSE
+	;恋慕 or 服従
+	IF TALENT:恋慕 || TALENT:服従
+		;PRINTFORMW 
+	;それ以外
+	ELSE
+		;PRINTFORMW 
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;主人公を射精させた
+;-------------------------------------------------
+IF NOWEX:MASTER:射精 > 0
+	SELECTCASE GET_STACK_SPERM_TO(MASTER, TARGET)
+		;膣に射精
+		CASE 1
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;アナルに射精
+		CASE 2
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;手に射精
+		CASE 3
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;口に射精
+		CASE 4
+			;恋慕 or 服従 かつ精愛Lv2以上
+			IF (TALENT:恋慕 || TALENT:服従) && ABL:精愛 >= 2
+				;PRINTFORMW 
+			;恋慕 or 服従
+			ELSEIF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;胸に射精
+		CASE 5
+			;恋慕 or 服従
+			IF TALENT:恋慕 || TALENT:服従
+				;PRINTFORMW 
+			;それ以外
+			ELSE
+				;PRINTFORMW 
+			ENDIF
+		;足に射精
+		CASE 6
+		;尻尾に射精
+		CASE 7
+		;顔に射精
+		CASE 8
+		;髪に射精
+		CASE 9
+		;腋に射精
+		CASE 10
+		;その他の場所に射精
+		CASEELSE
+	ENDSELECT
+
+;-------------------------------------------------
+;主人公を射精させずに絶頂させた
+;-------------------------------------------------
+ELSEIF NOWEX:MASTER:Ｃ絶頂 + NOWEX:MASTER:Ｖ絶頂 + NOWEX:MASTER:Ａ絶頂 + NOWEX:MASTER:Ｂ絶頂 + NOWEX:MASTER:Ｍ絶頂 > 0
+	;恋慕 or 服従
+	IF TALENT:恋慕 || TALENT:服従
+		;PRINTFORMW 
+	;それ以外
+	ELSE
+		;PRINTFORMW 
+	ENDIF
+ENDIF

@@ -1,0 +1,280 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_BESTIALITY_RATE()
+RETURN 30
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_BESTIALITY_DECISION()
+
+SIF DVAR:動物遣い_発生フラグ == 3
+	RETURN 0
+
+LOCAL:1 = 0
+
+;捕虜か仲間に女がいるか判定、いない場合はキャンセル
+FOR LOCAL, 0, CHARANUM
+	IF (CFLAG:LOCAL:捕虜先 == CFLAG:MASTER:所属 && IS_FEMALE(LOCAL)) || (CFLAG:LOCAL:所属 == CFLAG:MASTER:所属 && IS_FEMALE(LOCAL))
+		LOCAL:1 ++
+	ENDIF
+NEXT
+
+SIF LOCAL:1 == 0
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;特定の条件を満たすキャラをランダムに選択する場合に利用
+;他の関数は必須だが、これだけはなくてもよい　というかパフォーマンスへ影響するので不要なら作ってはならない
+;対象が存在せずデイリーを開始できない場合は0を返すことでデイリーの発生をキャンセルする
+;---------------------
+@EVENT_DAILY_BESTIALITY_SETTARGET()
+#DIM 対象
+
+CALL SELECT_CHARA_RANDOM("DAILY_BEASTALITY", "DAILY_BEASTALITY")
+
+SIF RESULT == -1
+	RETURN 0
+
+DAILY_TARGET:0 = RESULT
+
+RETURN 1
+
+@SELECT_CHARA_RANDOM_LOGIC_DAILY_BEASTALITY(対象)
+#DIM 対象
+;女、かつ「所属がMASTERと同一で、捕虜でない」か「」
+RETURN IS_FEMALE(対象) && ((CFLAG:対象:所属 == CFLAG:MASTER:所属 && !CFLAG:対象:捕虜先) || (CFLAG:対象:捕虜先 == CFLAG:MASTER:所属))
+
+@SELECT_CHARA_RANDOM_BIAS_DAILY_BEASTALITY(対象)
+#DIM 対象
+;好感度をベースに決定
+RETURN CFLAG:対象:好感度 + IS_LOVER(対象) * 1000
+
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_BESTIALITY_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_BESTIALITY
+#DIM 対象
+
+IF DVAR:動物遣い_発生フラグ == 0
+	PRINTFORMW 有一个自称调教师的男人来了
+	PRINTFORML 他以用獣奸调教淫女作为职业
+	PRINTFORML 被告知这里有很适合用来调教的女性就一路过来了
+	PRINTFORMW 男人坏坏的笑着，说如果想要用动物调教女性的话就需要支付酬劳
+	DVAR:動物遣い_発生フラグ = 1
+ELSEIF DVAR:動物遣い_発生フラグ > 0
+	PRINTFORMW 调教师又来了
+	IF DVAR:動物遣い_発生フラグ == 2
+		PRINTFORML %ANAME(MASTER)%想起上次这个男人的做法不禁怒目而视
+		PRINTFORMW 但他只是坏坏的笑着，询问是否还需要调教
+	ELSEIF DVAR:動物遣い_発生フラグ == 1
+		PRINTFORMW 他笑着说着道歉的话、询问是否还需要调教
+	ENDIF
+ENDIF
+PRINTFORML 怎麼辦？
+CALL ASK_MULTI("同意" ,"赶走" ,"斬向他")
+IF RESULT == 1
+	PRINTFORML 那样的事是不可能的
+	PRINTFORMW %ANAME(MASTER)%把男人赶走了
+	DVAR:動物遣い_発生フラグ = 1
+	RETURN
+ELSEIF RESULT == 2
+	PRINTFORML %ANAME(MASTER)%斬向了男人！
+	PRINTFORMW 男人华丽的躲开了斩来的剑，說道既然這樣那就要決出個勝負了
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW ・
+	IF ABL:MASTER:武闘 * (RAND:8 + 1) >= 50 * (RAND:9 + 1)
+		PRINTFORMW 勝利了！
+		PRINTFORMW 男人趴在地上
+		PRINTFORML 怎麼辦？
+		CALL ASK_YN("直接斩首", "流放到国外")
+		IF RESULT == 0
+			PRINTFORMW 第二天，他的头颅被放在城头示众
+			PRINTFORMW %ANAME(MASTER)%的行为得到了其他国家的很高评价
+			FOR LOCAL, 1, MAX_COUNTRY
+				CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 20)
+			NEXT
+		ELSEIF RESUlT == 1
+			PRINTFORMW 国外流放
+			PRINTFORMW 再也不会见面了吧…
+		ENDIF
+		DVAR:動物遣い_発生フラグ = 3
+		RETURN 1
+	ELSE
+		対象 = DAILY_TARGET:0
+		PRINTFORMW 输了…
+		PRINTFORMW 男人说是作為勝利的補償，把%ANAME(対象)%帯走了
+		DVAR:動物遣い_発生フラグ = 2
+	ENDIF
+ELSEIF RESULT == 0
+	PRINTFORMW 决定交易
+	PRINTFORML 同伴和俘虏，提供哪一个？？
+	CALL ASK_YN("同伴", "俘虏")
+	IF RESULT == 0
+		PRINTFORML 要用谁来？
+		CALL SELECT_CHARA_LIST_ONLY_LOGIC_SEX("BEASTALITY_A", "BEASTALITY", "BEASTALITY")
+		対象 = RESULT
+		IF RESULT < 0
+			PRINTFORMW 还是算了
+			DVAR:動物遣い_発生フラグ = 1
+			RETURN
+		ELSEIF RESULT == MASTER
+			PRINTFORMW %ANAME(対象)%咽了咽口水，报出了自己的姓名
+		ELSE
+			PRINTFORMW %ANAME(対象)%指定
+			IF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_雌犬)
+				PRINTFORMW %ANAME(対象)%被指名后，一边咬牙一边点头
+			ELSEIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫乱)
+				PRINTFORMW %ANAME(対象)%被提名的话虽然很惊讶，但在那眼眸中却看到了期待的颜色
+			ELSEIF IS_SLAVE(対象)
+				PRINTFORMW %ANAME(対象)%听到被%ANAME(MASTER)%提名的时候快要哭了，但同时也点了点头
+			ELSE
+				PRINTFORML %ANAME(対象)%一被提名，就激烈地抵抗了
+				PRINTFORMW 可是，男人强行拉着她去了
+				CFLAG:対象:好感度 -= 1000
+			ENDIF
+		ENDIF
+	ELSEIF RESULT == 1
+		PRINTFORML 要用谁来？
+		CALL SELECT_CHARA_LIST_ONLY_LOGIC_SEX("BEASTALITY_B", "NONE", "BEASTALITY")
+		対象 = RESULT
+		IF RESULT < 0
+			PRINTFORMW 还是算了
+			DVAR:動物遣い_発生フラグ = 1
+			RETURN
+		ELSE
+			PRINTFORML %ANAME(対象)%一被提名，就激烈地抵抗了
+			PRINTFORMW 可是，男人强行拉着她去了
+			CFLAG:対象:好感度 -= 1000
+		ENDIF
+	ENDIF
+ENDIF
+PRINTFORML 
+PRINTFORM %ANAME(対象)%
+SELECTCASE RAND:3
+	CASE 0
+		PRINTFORMW 被猪侵犯著……
+		SELECTCASE RAND:5
+			CASE 0
+				PRINTFORML 双目通红的猪趴在%ANAME(対象)%身上、一边嘶叫一边挺动着腰
+				PRINTFORML %ANAME(対象)%的子宫包裹着粗大的肉棒，因为冲击翻白眼痉挛着
+				PRINTFORML 只要猪一摇动身体，肉棒就会把子宫顶起来，然后发出野兽一样的喘息
+				PRINTFORML %ANAME(対象)%不断抵抗著和人外的性交、但还是被授种了好几次
+			CASE 1
+				PRINTFORML 一匹猪一边嘶叫着一边在%ANAME(対象)%的小穴中射精了
+				PRINTFORML 浓厚精液充满着子宫的每一个角落，被侵犯的感觉让%ANAME(対象)%双眼翻白快要疯了
+				PRINTFORML 猪一边晃动着腰一边射精、剧烈的冲击让%ANAME(対象)%本来就快疯狂的身体瞬间绝顶了好几次
+				PRINTFORML 不久之后当猪因为满足而解放出来的时候，、%ANAME(対象)%的下腹部忽然膨胀了起来
+			CASE 2
+				PRINTFORML 肥硕的猪在%ANAME(対象)%已经被蹂躏不堪的子宫里猛烈的射入了精液
+				PRINTFORML 被射入了太多的精液、滚烫的精液不禁让%ANAME(対象)%呼哧呼哧的娇喘着
+				PRINTFORML 猪的射精持续了很长时间、%ANAME(対象)%被滚烫的精液冲击的好几次都绝顶了，一脸舒服的表情
+				PRINTFORML 终于射精结束的时候头脑当中好像陷入了精液浸泡过了一样的感觉
+			CASE 3
+				PRINTFORML 性欲旺盛的猪们一个接一个地伸进了%ANAME(対象)%的淫穴
+				PRINTFORML 被当做牲畜授种的%ANAME(対象)%流着泪发出悲鸣，被猪们毫不留情地继续交尾
+				PRINTFORML %ANAME(対象)%的肚子已经膨胀起来，从秘所漏出了大量的精液
+				PRINTFORML 猪们的宴会彻夜持续、%ANAME(対象)%完全染上了他们的味道
+			CASE 4
+				PRINTFORML 抬着头的%ANAME(対象)%被一只巨大的猪从背后压住激烈的摇晃着
+				PRINTFORML 因为根本无法抵挡连子宫都能刺入的肉棒%ANAME(対象)%只能激动地流着泪娇喘着
+				PRINTFORML 不久，猪的嘶鸣声和粘糊糊的精液在子宫中爆发、%ANAME(対象)%流着眼泪高潮了
+				PRINTFORML 结束了射精的猪，为了确保%ANAME(対象)%能够怀孕，用滑板状的粘液盖上了秘所
+		ENDSELECT
+		CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｍ, 獣姦, 獣姦, Ｖ性交, Ｖ拡張", "処女喪失, 膣内射精, CFLAG減少", GET_SPERM_ID("豚"), @"豚の\@RAND:2 ? 肉棒 # 唇\@", @"豚", "", "調教")
+	CASE 1
+		PRINTFORML 被马侵犯著……
+		SELECTCASE RAND:5
+			CASE 0
+				PRINTFORML 被用巨大的肉棒压迫阴道膣肉的%ANAME(対象)%大腿抽搐着颤抖
+				PRINTFORML 每一次噗嗤的挺动！噗嗤！在子宫快被破坏的冲击下%ANAME(対象)%翻白眼喘息着
+				PRINTFORML %ANAME(対象)%反复挑选之后选了她喜欢的种马，她的意识随着每次灼热的冲击中飞逝
+				PRINTFORML 解放出来的时候是腰腿站不直了，肉穴也被扩大了
+			CASE 1
+				PRINTFORML 被安装到拘留台的%ANAME(対象)%、被粗暴地缠上肉棒一边痉挛一边呻吟
+				PRINTFORML 毫不客气充满野性的活塞式的冲击让%ANAME(対象)%疯狂地随着冲击晃动
+				PRINTFORML 不经意间，随着一声嘶鸣，肉棒忽然膨胀，强烈的热度和大量的精液都喷射了出来
+				PRINTFORML 子宫里面被一吐为快的强烈的热量冲击着的%ANAME(対象)%意识飞腾起来身体不停的绝顶
+			CASE 2
+				PRINTFORML %ANAME(対象)%被装在木马里只露出屁股和头，从后面被插入了马的肉棒
+				PRINTFORML 用人的手臂那样的肉棒，向着子宫冲刺着，每一次冲刺，眼睛里面都会冒出出❤
+				PRINTFORML %ANAME(対象)%正在被作为雌兽而进行着野性的交尾的感觉
+				PRINTFORML 直到它满足为止不断地被侵犯，直到子宫的各个角落都被填满了马的精液
+			CASE 3
+				PRINTFORML 久违的交尾让兴奋的马骑在了%ANAME(対象)%的腰上激烈晃动着
+				PRINTFORML 巨大的肉棒蹂躏在体内被冲击着的%ANAME(対象)%流着眼泪呻吟一边也拼命求饶着
+				PRINTFORML 但是，不可能传到马的耳朵，而是用肉欲来代替回答
+				PRINTFORML 一段小时之后%ANAME(対象)%作为雌兽被教育了，浑身无力的躺着
+			CASE 4
+				PRINTFORML 床上仰着被M字固定着的%ANAME(対象)%面前一只巨大的马。
+				PRINTFORML 胯股之间肉棒咕嘟咕嘟跳动着、想象无法避免马上就要被侵犯了的事
+				PRINTFORML 被调教师催促的马跨越%ANAME(対象)%的身体，慢慢地放松了下来！把肉棒插入了
+				PRINTFORML 大脑被快感融化了、身体沉迷于灼热的交尾%ANAME(対象)%被教育了一晚
+		ENDSELECT
+		CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｍ, 獣姦, 獣姦, Ｖ性交, Ｖ拡張", "処女喪失, 膣内射精, CFLAG減少", GET_SPERM_ID("馬"), @"馬の\@RAND:2 ? 肉棒 # 唇\@", @"馬", "", "調教")
+	CASE 2
+		PRINTFORML 被狗侵犯著……
+		SELECTCASE RAND:5
+			CASE 0
+				PRINTFORML 双眼通红体型巨大的狗在呼哧呼哧呼吸的同时，跨越在了%ANAME(対象)%的身上激烈的晃动着
+				PRINTFORML 被锁链拘束的%ANAME(対象)%狗一样的姿势四肢手脚趴在地上边呻吟边颤抖着
+				PRINTFORML 被调教的狗准确地挖出了女人的弱点、%ANAME(対象)%因为屈辱和快乐而脸通红
+				PRINTFORML 不久之后，狗大声地吠叫着射精了%ANAME(対象)%说着不可以，但身体却绝顶了
+			CASE 1
+				PRINTFORML 一只狗肉棒插在她的淫穴射精了%ANAME(対象)%发出呼呼的喘息
+				PRINTFORML 长时间的射精已经持续了几分钟，被内射的子宫因为强烈的热度已经绝顶很多次了
+				PRINTFORML 终于，射精结束被拔掉了肉棒，从秘所开始大量地溢出了精液
+				PRINTFORML 被说明他的精液是特制的，即使是人类也能孕育、%ANAME(対象)%一边感到害怕一边因为高潮抽搐着
+			CASE 2
+				PRINTFORML 被口枷绳子固定而被侵犯的%ANAME(対象)%因为悲痛的呻吟
+				PRINTFORML 被畜生的肉棒插入被蹂躏的事实，让%ANAME(対象)%浑身都在发烫
+				PRINTFORML 但是随着充满野性的突刺，每一次雌兽的身体都在被狠狠教育，子宫因为想要被插入而隐隐作痛
+				PRINTFORML 它很喜欢%ANAME(対象)%彻夜交尾，好几次都把它的精液深深地射入了深处
+			CASE 3
+				PRINTFORML 在狗群中浑身精液的被侵犯着，因为不停的绝顶抑制不住的说着淫乱的话
+				PRINTFORML 通宵被它们轮奸了%ANAME(対象)%完全成为了母狗，接受了肉棒的插入
+				PRINTFORML 与强壮的雄性交尾，被注入雄性精华，发挥着雌性本能不停摇动着腰肢绝顶并被授种
+				PRINTFORML 已经被调教成不知道什么样的%ANAME(対象)%之后又被疯狂的侵犯了
+			CASE 4
+				PRINTFORML 被加上一项圈%ANAME(対象)%被大量的雄犬聚集而悲鸣
+				PRINTFORML 他们替换着伸出插入肉棒，就毫不留情地把肉棒塞进了小穴里授种
+				PRINTFORML 一样健壮的肉棒，野兽特有的激烈的做爱让%ANAME(対象)%的身体一刻不停的绝顶着
+				PRINTFORML 注意到的话%ANAME(対象)%气喘吁吁的一边发出娇叫一边晃动着屁股，露出了淫乱的笑容
+		ENDSELECT
+		CALL FUCK(対象, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｍ, 獣姦, 獣姦, Ｖ性交, Ｖ拡張", "処女喪失, 膣内射精, CFLAG減少", GET_SPERM_ID("犬"), @"犬の\@RAND:2 ? 肉棒 # 唇\@", @"犬", "", "調教")
+ENDSELECT
+PRINTFORML 
+PRINTFORMW 做完调教的男人满足地回去了
+PRINTFORMW 作为谢礼得到了5000
+MONEY += 5000
+
+RETURN 1
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_BEASTALITY_A(対象)
+#DIM 対象
+RETURN CFLAG:対象:行動不能状態 != 行動不能_子供 && CFLAG:対象:所属 == CFLAG:MASTER:所属 && !IS_ANIMAL(対象) && !IS_MALE(対象)
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_BEASTALITY_B(対象)
+#DIM 対象
+RETURN CFLAG:対象:行動不能状態 != 行動不能_子供 && CFLAG:対象:所属 != CFLAG:MASTER:所属 && !IS_ANIMAL(対象) && !IS_MALE(対象) && CFLAG:対象:捕虜先 == CFLAG:MASTER:所属
+
+@SELECT_CHARA_LIST_SELECT_LOGIC_BEASTALITY(対象)
+#DIM 対象
+RETURN CFLAG:対象:捕虜先 == 0
+
+@SELECT_CHARA_LIST_COLOR_LOGIC_BEASTALITY(対象)
+#DIM 対象
+SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫乱) || GETBIT(TALENT:対象:淫乱系, 素質_淫乱_雌犬)
+	RETURN カラー_ピンク
+RETURN GETDEFCOLOR()

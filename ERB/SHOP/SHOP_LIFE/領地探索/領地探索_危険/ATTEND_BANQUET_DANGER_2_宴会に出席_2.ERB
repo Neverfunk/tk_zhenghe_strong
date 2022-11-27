@@ -1,0 +1,79 @@
+﻿;-------------------
+;存在判定
+;なにもさせないこと
+;-------------------
+@TERRITORY_EVENT_ATTEND_BANQUET_DANGER_2_EXISTS()
+#DIM 対象
+RETURN 1
+
+;-------------------
+;発生判定
+;-------------------
+@TERRITORY_EVENT_ATTEND_BANQUET_DANGER_2_DECISION(対象)
+#DIM 対象
+RETURN 1
+
+;-------------------
+;本体
+;-------------------
+@TERRITORY_EVENT_ATTEND_BANQUET_DANGER_2(対象)
+#DIM 対象
+PRINTFORML 探索的時候、聽見了歡声笑語
+PRINTFORML 走向声音傳来的方向、発現那裡正在舉辦宴会
+PRINTFORML 参加者向这边招着手，总感觉气氛有些怪怪的……
+PRINTL
+CALL PRINT_ABILITY(対象, GETNUM(ABL, "肝臓"))
+CALL ASK_YN("参加" ,"離開這裡")
+
+IF RESULT == 1
+	PRINTFORML 没有那種心情
+	PRINTFORML %ANAME(対象)%離開了那個地方
+	RETURN 1
+ENDIF
+
+PRINTFORML 因為很難得所以決定参加
+PRINTFORMW 他歡迎著%ANAME(対象)%、立刻就勸起酒來
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+PRINTFORML 酒裡面好像混了什麼東西
+PRINTFORML %ANAME(対象)%喝的酩酊大醉
+
+IF IS_MALE(対象)
+	PRINTFORML 清醒過来的時候宴会已経結束了、錢包不見了
+	PRINTFORML 看來是被偷走了……
+	LOCAL = MIN(MONEY, 5000)
+	CALL ICPRINT("失去了<{LOCAL}>金", "L", カラー_注意)
+	MONEY -= LOCAL
+	RETURN 1
+ENDIF
+
+IF (CONFIG:202 == 1 && TALENT:対象:0 == 1)
+	PRINTFORML 醉得连话都说不清楚的%ANAME(対象)%，被跑来跑去端酒的侍女小姐注意到了
+	PRINTFORMW 把手里的酒托付给了别人，她把神志不清的%ANAME(対象)%带到了别人注意不到的地方
+	PRINTFORML
+	PRINTFORML %ANAME(対象)%由于酒精的影响而浑身发热，不由自主地敞开了上身的衣服想要透气
+	PRINTFORML %ANAME(対象)%%STR_BODY("胸", 対象)%暴露在空气中，不自觉地吸引着侍女小姐的视线
+	PRINTFORML 确认%ANAME(対象)%的确完全喝醉以后，侍女一边咽着口水，一边把手摸上了%ANAME(対象)%的乳房
+	PRINTFORML 已经完全丧失判断力的%ANAME(対象)%不仅没有抵抗，反而像迎合着她的动作一样不停扭动起了身体
+	PRINTFORMW 在侍女的刺激之下，%ANAME(対象)%的乳头渐渐勃起。浑身都燃起情欲的%ANAME(対象)%，悄悄把手伸向了下体……
+	CALL FUCK(対象, "欲望, Ｂ, Ｃ, 自慰, 百合")
+	PRINTFORML
+	PRINTFORML 慢慢清醒过来的%ANAME(対象)%，向一直照顾自己的侍女小姐表示了感谢
+	PRINTFORMW 但不知为什么，走在回家路上的时候，%ANAME(対象)%总觉得自己的内裤好像黏糊糊的
+ELSE
+	PRINTFORMW 宴會的参加者立刻露出了本性、把朦朧状態的%ANAME(対象)%拖到了陰暗的角落
+	PRINTFORML 
+	PRINTFORML 酩酊大醉的%ANAME(対象)%按照男人的説法奉仕着他們
+	PRINTFORML %ANAME(対象)%跨坐在躺着的男人的身上把肉棒含入小穴搖動着腰、帯着沈醉的表情吐出熱情的呼吸
+	PRINTFORML %ANAME(対象)%的腦海已經被下腹処傳来的熱度和快感填満、対他們唯命是從
+	PRINTFORMW 之後満足的男人説着給你奨勵射出了大量的精液、讓%ANAME(対象)%高声淫叫着高潮了
+	CALL FUCK(対象, "欲望, 性交, 奉仕, 奉仕, Ｖ, Ｂ, Ｃ, Ｖ性交, 輪姦", "接吻喪失, 処女喪失, 膣内射精", GET_SPERM_ID("流氓"), @"流氓的\@RAND:2 ? 肉棒 # 嘴唇\@", "流氓", "", "前後不覚に陥った末の輪姦")
+	PRINTFORML 
+	PRINTFORML 清醒過来的時候宴会已経結束了
+	PRINTFORMW %ANAME(対象)%は頭を抱え、本人も気づかぬうちに太腿に漏れ出た精液を垂らしながらへ戻った
+ENDIF
+
+CALL ADD_COOLTIME(対象, 1)
+
+RETURN 1

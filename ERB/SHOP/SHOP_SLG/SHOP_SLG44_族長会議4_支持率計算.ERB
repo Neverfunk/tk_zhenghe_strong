@@ -1,0 +1,60 @@
+﻿;-------------------------------------------------
+;最も支持率が高い士官を返す
+;-------------------------------------------------
+@GET_QuriltaiGOBLIN_HIGHEST_Approval
+#FUNCTION
+#DIM 自勢力
+#DIM プレイヤー加算
+#DIM 支持率暫定トップ
+#DIM 支持率トップ
+自勢力 = CFLAG:MASTER:所属
+
+支持率暫定トップ = -1
+支持率トップ = -1
+FOR LOCAL, 0, CHARANUM
+	IF CFLAG:LOCAL:所属 == 自勢力 && CFLAG:LOCAL:捕虜先 != 自勢力
+		IF 支持率暫定トップ < 0
+			支持率暫定トップ = LOCAL
+		ELSEIF GET_QuriltaiGOBLIN_Approval_rate(LOCAL) > GET_QuriltaiGOBLIN_Approval_rate(支持率暫定トップ)
+			支持率暫定トップ = LOCAL
+		ENDIF
+	ENDIF
+NEXT
+支持率トップ = 支持率暫定トップ
+
+RETURNF 支持率トップ
+
+;-------------------------------------------------
+;最終支持率を返す
+;-------------------------------------------------
+@GET_QuriltaiGOBLIN_Approval_rate(対象)
+#FUNCTION
+#DIM 対象
+#DIM 自勢力
+#DIM プレイヤー加算
+#DIM プレイヤー最終支持率
+#DIM 応援対象
+#DIM 要請対象
+自勢力 = CFLAG:MASTER:所属
+
+プレイヤー加算 = 0
+FOR 要請対象, 0, CHARANUM
+	SIF CFLAG:要請対象:所属 == CFLAG:MASTER:所属 && CFLAG:要請対象:捕虜先 != CFLAG:要請対象:所属 && 要請対象 != MASTER && CFLAG:要請対象:1711 && CFLAG:要請対象:1712 == MASTER
+		プレイヤー加算 += CFLAG:要請対象:1709
+NEXT
+
+SIF 対象 == MASTER
+	RETURNF CFLAG:MASTER:1709 + プレイヤー加算
+
+プレイヤー最終支持率 = CFLAG:MASTER:1709 + プレイヤー加算
+
+IF CFLAG:対象:所属 == 自勢力 && CFLAG:対象:捕虜先 != 自勢力
+	IF CFLAG:MASTER:1711 && CFLAG:MASTER:1712 == 対象
+		RETURNF CFLAG:対象:1709 + プレイヤー最終支持率
+	ELSE
+		RETURNF CFLAG:対象:1709
+	ENDIF
+ENDIF
+
+RETURNF 0
+

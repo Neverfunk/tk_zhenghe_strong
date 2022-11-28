@@ -104,6 +104,13 @@ RETURN 1
 #DIM 信仰消耗
 #DIM FIRST_LINE
 対象側 = !発動側
+IF CFLAG:発動者:1 != CFLAG:MASTER:1
+	;AI使用
+	PRINTFORML %ANAME(発動者)%展露出倾国倾城的魅力,看得士兵们如痴如醉,一些敌军丢下武器拒绝参战了!
+	人数 = MIN(GET_SOLDIER(対象勢力, 対象部隊) * 3 / 100, 3000)
+	CALL DECREASE_SOLDIER(対象勢力, 対象部隊, 人数, 1)
+	RETURN 0
+ENDIF
 FIRST_LINE = LINECOUNT
 PRINTFORML --请选择要消耗的信仰--
 PRINTL
@@ -123,6 +130,7 @@ $INPUT_LOOP1
 INPUT
 信仰消耗=RESULT
 IF 信仰消耗 != 0  && 信仰消耗 != 1 && 信仰消耗 != 2 && 信仰消耗 != 3 && 信仰消耗 != 4 && 信仰消耗 != 6
+;IF !GROUPMATCH(,0,1,2,3,4,6)
 	CLEARLINE 1
 	GOTO INPUT_LOOP1
 ELSEIF ABL:発動者:信仰 < 信仰消耗

@@ -123,6 +123,7 @@ ENDIF
 #DIM 评感度, 4
 #DIM 方差
 #DIM 符号
+#DIM 随机看板娘
 
 #DIM 経験値総量
 #DIM 獲得経験値, 6
@@ -418,14 +419,27 @@ IF 轮空少女
     PRINTFORMW 于是没能参加比赛的%ANAME(轮空少女:0)%\@轮空少女:1 ? 和%ANAME(轮空少女:1)% # \@就只能在中央的裁判台上被%ANAME(MASTER)%不停的侵犯……
 ENDIF
 CALL SINGLE_DRAWLINE("+") 
-PRINTFORMW 比赛开始！
+IF 轮空少女
+    随机看板娘 = 轮空少女:1 ? 轮空少女:(RAND:2) # 轮空少女
+    CALL COLOR_PRINT(@"%ANAME(随机看板娘)%", TALENT:随机看板娘:髪色)
+ELSE
+    PRINTPLAIN 女仆
+ENDIF
+PRINTFORM 「比赛开始！」
+FORCEWAIT
 FOR LOCAL, 0, 队伍数
     A队:LOCAL = LOCAL
 NEXT
 A队数 = 队伍数
 WHILE 1
     CALL SINGLE_DRAWLINE
-    PRINTFORM 第{轮数}轮淘汰，开始！
+    IF 轮空少女
+        随机看板娘 = 轮空少女:1 ? 轮空少女:(RAND:2) # 轮空少女
+        CALL COLOR_PRINT(@"%ANAME(随机看板娘)%", TALENT:随机看板娘:髪色)
+    ELSE
+        PRINTPLAIN 女仆
+    ENDIF
+    PRINTFORM 「第{轮数}轮淘汰，开始！」
     FORCEWAIT
     ;第一轮：A队淘汰赛，淘汰人员进入B队
     IF A队数 > 0
@@ -462,13 +476,19 @@ WHILE 1
             FORCEWAIT
             SELECTCASE RESULT
                 CASE 0
-                    PRINTFORMW 同归于尽……
+                    IF 轮空少女
+                        随机看板娘 = 轮空少女:1 ? 轮空少女:(RAND:2) # 轮空少女
+                        CALL COLOR_PRINT(@"%ANAME(随机看板娘)%", TALENT:随机看板娘:髪色)
+                    ELSE
+                        PRINTPLAIN 女仆
+                    ENDIF
+                    PRINTFORMW 「同归于尽……」
                     PRINTFORMW 那么……只能用那招了……
                     PRINTFORMW ……
                     目标 = (RAND:(感度:0 + 感度:1) >= 感度:0)
                     PRINTFORMW %ANAME(队伍:(对战队伍:目标):0)%被突然出现的%ANAME(MASTER)%强奸了！
-                    CALL FUCK(队伍:(对战队伍:目标):0, "Ｃ, Ｖ, Ｂ, 欲望, 精愛, 奉仕, 奉仕, 性交, 接吻, 口淫, Ｖ性交", "膣内射精, 接吻喪失, 処女喪失, 口内射精",　GET_ID(MASTER), @"%ANAME(MASTER)%的阴茎", ANAME(MASTER), "", "強姦")
-                    CALL FUCK(MASTER, "欲望, 性技, 性交, 加虐, Ｃ, 射精, 露出, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(队伍:(对战队伍:目标):0)%的小穴", "強姦")
+                    CALL FUCK(队伍:(对战队伍:目标):0, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 欲望, 精愛, 奉仕, 露出, 性交, 接吻, 口淫, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精",　GET_ID(MASTER), @"%ANAME(MASTER)%的\@RAND:2 ? 肉棒 # 嘴唇\@", ANAME(MASTER), "", "強姦")
+                    CALL FUCK(MASTER, "欲望, 性技, 性交, 加虐, Ｃ, 射精, 露出, 接吻, Ｖ挿入, Ａ挿入", "接吻喪失, 童貞喪失", 0, @"%ANAME(队伍:(对战队伍:目标):0)%的嘴唇", "", @"%ANAME(队伍:(对战队伍:目标):0)%的小穴", "強姦")
                     PRINTFORML 看来%ANAME(队伍:(对战队伍:目标):0)%在色气这方面赢了呢
                     PRINTFORMW 那赢家就是……%ANAME(队伍:(对战队伍:(目标)):0)%队！
                     DEBUGPRINTFORML 将{A队:(2 * 对战轮次 + (!目标))}队(编号：{(2 * 对战轮次 + (!目标))})转移至B队
@@ -477,7 +497,13 @@ WHILE 1
                     A队:(2 * 对战轮次 + (!目标)) = __INT_MAX__
                     A队数 --
                 CASEELSE
-                    PRINTFORML 胜负已定！
+                    IF 轮空少女
+                        随机看板娘 = 轮空少女:1 ? 轮空少女:(RAND:2) # 轮空少女
+                        CALL COLOR_PRINT(@"%ANAME(随机看板娘)%", TALENT:随机看板娘:髪色)
+                    ELSE
+                        PRINTPLAIN 女仆
+                    ENDIF
+                    PRINTFORML 「胜负已定！」
                     PRINTFORMW 是\@RESULT == 1 ? %ANAME(队伍:(对战队伍:0):0)% # %ANAME(队伍:(对战队伍:1):0)%\@队的胜利！
                     IF RESULT == 1
                         DEBUGPRINTFORML 将{A队:(2 * 对战轮次 + 1)}队(编号：{(2 * 对战轮次 + 1)})转移至B队
@@ -495,7 +521,7 @@ WHILE 1
         ARRAYSORT A队
     ENDIF
     CALL SINGLE_DRAWLINE("-=")
-    ;第二轮：B队淘汰赛，淘汰人员被淘汰，ID记录到排名数组便于排名
+    ;第二轮：B队淘汰赛，淘汰人员被淘汰，ID记录到排名数组便于排名(倒序)
     IF B队数 >= 2
         IF B队数 > 2
             CALL FISHER_YATES_SHAFFLE(B队数)
@@ -527,13 +553,19 @@ WHILE 1
             FORCEWAIT
             SELECTCASE RESULT
                 CASE 0
-                    PRINTFORMW 同归于尽……
+                    IF 轮空少女
+                        随机看板娘 = 轮空少女:1 ? 轮空少女:(RAND:2) # 轮空少女
+                        CALL COLOR_PRINT(@"%ANAME(随机看板娘)%", TALENT:随机看板娘:髪色)
+                    ELSE
+                        PRINTPLAIN 女仆
+                    ENDIF
+                    PRINTFORML 「同归于尽……」
                     PRINTFORMW 那么……只能用那招了……
                     PRINTFORMW ……
                     目标 = (RAND:(感度:0 + 感度:1) >= 感度:0)
                     PRINTFORMW %ANAME(队伍:(对战队伍:目标):0)%被突然出现的%ANAME(MASTER)%强奸了！
-                    CALL FUCK(队伍:(对战队伍:目标):0, "Ｃ, Ｖ, Ｂ, 欲望, 精愛, 奉仕, 奉仕, 性交, 接吻, 口淫, Ｖ性交", "膣内射精, 接吻喪失, 処女喪失, 口内射精",　GET_ID(MASTER), @"%ANAME(MASTER)%的阴茎", ANAME(MASTER), "", "強姦")
-                    CALL FUCK(MASTER, "欲望, 性技, 性交, 加虐, Ｃ, 射精, 露出, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(队伍:(对战队伍:目标):0)%的小穴", "強姦")
+                    CALL FUCK(队伍:(对战队伍:目标):0, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 欲望, 精愛, 奉仕, 露出, 性交, 接吻, 口淫, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精",　GET_ID(MASTER), @"%ANAME(MASTER)%的\@RAND:2 ? 肉棒 # 嘴唇\@", ANAME(MASTER), "", "強姦")
+                    CALL FUCK(MASTER, "欲望, 性技, 性交, 加虐, Ｃ, 射精, 露出, 接吻, Ｖ挿入, Ａ挿入", "接吻喪失, 童貞喪失", 0, @"%ANAME(队伍:(对战队伍:目标):0)%的嘴唇", "", @"%ANAME(队伍:(对战队伍:目标):0)%的小穴", "強姦")
                     PRINTFORML 看来%ANAME(队伍:(对战队伍:目标):0)%在色气这方面赢了呢
                     PRINTFORMW 那赢家就是……%ANAME(队伍:(对战队伍:(目标)):0)%队！
                     DEBUGPRINTFORML 将{B队:(2 * 对战轮次 + (!目标))}队(编号：{(2 * 对战轮次 + (!目标))})淘汰
@@ -541,7 +573,13 @@ WHILE 1
                     B队:(2 * 对战轮次 + (!目标)) = __INT_MAX__
                     B队数 --
                 CASEELSE
-                    PRINTFORML 胜负已定！
+                    IF 轮空少女
+                        随机看板娘 = 轮空少女:1 ? 轮空少女:(RAND:2) # 轮空少女
+                        CALL COLOR_PRINT(@"%ANAME(随机看板娘)%", TALENT:随机看板娘:髪色)
+                    ELSE
+                        PRINTPLAIN 女仆
+                    ENDIF
+                    PRINTFORML 「胜负已定！」
                     PRINTFORMW 是\@RESULT == 1 ? %ANAME(队伍:(对战队伍:0):0)% # %ANAME(队伍:(对战队伍:1):0)%\@队的胜利！
                     IF RESULT == 1
                         DEBUGPRINTFORML 将{B队:(2 * 对战轮次 + 1)}队(编号：{(2 * 对战轮次 + 1)})淘汰
@@ -586,10 +624,16 @@ WHILE 1
     轮数 ++
 WEND
 
-PRINTFORMW 最终，%ANAME(队伍:(排名:(排名次序 - 1)):0)%队站到了最后！
+PRINTFORM 最终，%ANAME(队伍:(排名:(排名次序 - 1)):0)%队站到了最后！
 FORCEWAIT
 
-PRINTFORML 要显示排名吗？
+IF 轮空少女
+    随机看板娘 = 轮空少女:1 ? 轮空少女:(RAND:2) # 轮空少女
+    CALL COLOR_PRINT(@"%ANAME(随机看板娘)%", TALENT:随机看板娘:髪色)
+ELSE
+    PRINTPLAIN 女仆
+ENDIF
+PRINTFORML 「要显示排名吗？」
 CALL ASK_YN
 IF !RESULT
     FOR LOCAL, 排名次序 - 1, -1, -1
@@ -602,23 +646,23 @@ IF !RESULT
                 @"%ANAME(队伍:(排名:LOCAL):0)%队",TALENT:(队伍:(排名:LOCAL):0):髪色)
         }
     NEXT
+    FORCEWAIT
 ENDIF
-
 IF 轮空少女:0
     PRINTFORMW 随着比赛结束，%ANAME(轮空少女:0)%\@轮空少女:1 ? 和%ANAME(轮空少女:1)% # \@挺着充满精液的肚子回到了队伍……
     REPEAT 轮数
         IF 轮空少女:1
-            CALL FUCK(轮空少女:1, "Ｃ, Ｖ, Ｂ, 欲望, 精愛, 奉仕, 奉仕, 性交, 接吻, 口淫, Ｖ性交", "膣内射精, 接吻喪失, 処女喪失, 口内射精",　GET_ID(MASTER), @"%ANAME(MASTER)%的阴茎", ANAME(MASTER), "", "調教")
-            CALL FUCK(MASTER, "欲望, 性技, 性交, 加虐, Ｃ, 射精, 露出, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(轮空少女:1)%的小穴", "調教")
+            CALL FUCK(轮空少女:1, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 欲望, 精愛, 奉仕, 露出, 性交, 接吻, 口淫, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精",　GET_ID(MASTER), @"%ANAME(MASTER)%的\@RAND:2 ? 肉棒 # 嘴唇\@", ANAME(MASTER), "", "調教")
+            CALL FUCK(MASTER, "欲望, 性技, 性交, 加虐, Ｃ, 射精, 露出, 接吻, Ｖ挿入, Ａ挿入", "接吻喪失, 童貞喪失", 0, @"%ANAME(轮空少女:1)%的嘴唇", "", @"%ANAME(轮空少女:1)%的小穴", "調教")
         ENDIF
-        CALL FUCK(轮空少女:0, "Ｃ, Ｖ, Ｂ, 欲望, 精愛, 奉仕, 奉仕, 性交, 接吻, 口淫, Ｖ性交", "膣内射精, 接吻喪失, 処女喪失, 口内射精",　GET_ID(MASTER), @"%ANAME(MASTER)%的阴茎", ANAME(MASTER), "", "調教")
-        CALL FUCK(MASTER, "欲望, 性技, 性交, 加虐, Ｃ, 射精, 露出, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(轮空少女:0)%的小穴", "調教")
+        CALL FUCK(轮空少女:0, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 欲望, 精愛, 奉仕, 露出, 性交, 接吻, 口淫, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精",　GET_ID(MASTER), @"%ANAME(MASTER)%的\@RAND:2 ? 肉棒 # 嘴唇\@", ANAME(MASTER), "", "調教")
+        CALL FUCK(MASTER, "欲望, 性技, 性交, 加虐, Ｃ, 射精, 露出, 接吻, Ｖ挿入, Ａ挿入", "接吻喪失, 童貞喪失", 0, @"%ANAME(轮空少女:0)%的嘴唇", "", @"%ANAME(轮空少女:0)%的小穴", "調教")
     REND
 ENDIF
-PRINTFORMW 作为赢家，今夜就让%ANAME(队伍:(排名:(排名次序 - 1)):0)%、%ANAME(队伍:(排名:(排名次序 - 1)):1)%和%ANAME(队伍:(排名:(排名次序 - 1)):2)%负责侍寝♥
+PRINTFORMW 作为第一名的奖励，今夜就让%ANAME(队伍:(排名:(排名次序 - 1)):0)%、%ANAME(队伍:(排名:(排名次序 - 1)):1)%和%ANAME(队伍:(排名:(排名次序 - 1)):2)%负责侍寝♥
 FOR LOCAL, 0, 3
-    CALL FUCK_MAKELOVE(队伍:(排名:(排名次序 - 1)):LOCAL, GET_ID(MASTER), @"%ANAME(MASTER)%的肉棒", @"%ANAME(MASTER)%")
-    CALL FUCK(MASTER, "欲望, 性技, 性交, Ｃ, 射精, 露出, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(队伍:(排名:(排名次序 - 1)):LOCAL)%的小穴", "和姦")
+    CALL FUCK_MAKELOVE(队伍:(排名:(排名次序 - 1)):LOCAL, GET_ID(MASTER), @"%ANAME(MASTER)%的\@RAND:2 ? 肉棒 # 嘴唇\@", @"%ANAME(MASTER)%")
+    CALL FUCK(MASTER, "欲望, 性技, 性交, Ｃ, 射精, 接吻, Ｖ挿入, Ａ挿入", "接吻喪失, 童貞喪失", 0, @"%ANAME(队伍:(排名:(排名次序 - 1)):LOCAL)%的嘴唇", "", @"%ANAME(队伍:(排名:(排名次序 - 1)):LOCAL)%的小穴", "和姦")
     経験値総量 = MIN(ARENA_GET_POWER(队伍:(排名:(排名次序 - 1)):LOCAL) / 3, ARENA_GET_POWER(MASTER)) * MAX(MIN(ABL:(队伍:(排名:(排名次序 - 1)):LOCAL):性技, ABL:MASTER:性技), 1) * 轮数
     FOR LOCAL:1, 0, 経験値総量
         獲得経験値:(IFRAND("0TO2", 1, "3TO5", RAND:100 < 50)) ++
@@ -688,10 +732,10 @@ WHILE 1
     CLEARLINE LINECOUNT - FIRSTLINE
 
     ;显示Trimp™同款UI
-    PRINTFORML %@"%ANAME(左队:0)%队 ({生命值:0}\/{最大生命值:0})", 50, LEFT%  |  %@"%ANAME(右队:0)%队 ({生命值:1}\/{最大生命值:1})", 50, LEFT%
-    PRINTFORML %@"{攻击力:0 * 8 / 10}-{攻击力:0 * 12 / 10}攻击力", 50, LEFT%  |  %@"{攻击力:1 * 8 / 10}-{攻击力:1 * 12 / 10}攻击力", 50, LEFT%
+    PRINTFORML %@"%ANAME(左队:0)%队 ({生命值:0}\/{最大生命值:0})", 50, LEFT%%TOSTR_SPACE(2)%|%TOSTR_SPACE(2)%%@"%ANAME(右队:0)%队 ({生命值:1}\/{最大生命值:1})", 50, LEFT%
+    PRINTFORML %@"{攻击力:0 * 8 / 10}-{攻击力:0 * 12 / 10}攻击力", 50, LEFT%%TOSTR_SPACE(2)%|%TOSTR_SPACE(2)%%@"{攻击力:1 * 8 / 10}-{攻击力:1 * 12 / 10}攻击力", 50, LEFT%
     CALL EVENT_TRIMPBAR(生命值:0, 最大生命值:0, 50)
-    PRINTFORM   |  
+    PRINTFORM %TOSTR_SPACE(2)%|%TOSTR_SPACE(2)%
     CALL EVENT_TRIMPBAR(生命值:1, 最大生命值:1, 50)
     PRINTL
     CALL SINGLE_DRAWLINE("=") 
@@ -815,8 +859,8 @@ SELECTCASE RAND:5
         PRINTFORMW 待到%ANAME(ARG:0)%爬完一圈后，%ANAME(MASTER)%便拉上%ANAME(ARG:1)%和%ANAME(ARG:2)%，如法炮制地让她们边被侵犯边爬了一圈……
 ENDSELECT
 FOR LOCAL, 0, 3
-    CALL FUCK(ARG:LOCAL, "Ｃ, Ｖ, Ｂ, 欲望, 精愛, 奉仕, 奉仕, 性交, 接吻, 口淫, Ｖ性交", "膣内射精, 接吻喪失, 処女喪失, 口内射精",　GET_ID(MASTER), @"%ANAME(MASTER)%的阴茎", ANAME(MASTER), "", "強姦")
-    CALL FUCK(MASTER, "欲望, 性技, 性交, 加虐, Ｃ, 射精, 露出, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(ARG:LOCAL)%的小穴", "強姦")
+    CALL FUCK(ARG:LOCAL, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 欲望, 精愛, 奉仕, 露出, 性交, 接吻, 口淫, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精",　GET_ID(MASTER), @"%ANAME(MASTER)%的\@RAND:2 ? 肉棒 # 嘴唇\@", ANAME(MASTER), "", "強姦")
+    CALL FUCK(MASTER, "欲望, 性技, 性交, 加虐, Ｃ, 射精, 露出, 接吻, Ｖ挿入, Ａ挿入", "童貞喪失", 0, @"%ANAME(ARG:LOCAL)%的嘴唇", "", @"%ANAME(ARG:LOCAL)%的小穴", "強姦")
     経験値総量 = MIN(ARENA_GET_POWER(ARG:LOCAL) / 3, ARENA_GET_POWER(MASTER)) * MAX(MIN(ABL:(ARG:LOCAL):性技, ABL:MASTER:性技), 1)
     FOR LOCAL:1, 0, 経験値総量
         獲得経験値:(IFRAND("0TO2", 1, "3TO5", RAND:100 < 50)) ++

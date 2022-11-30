@@ -80,9 +80,17 @@ FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
 			技能ID:技能总数 = SKILL_ID_SLOT:角色:スキル_ジャンル_PERSONAL:(LOCAL:1)
 			技能NO:技能总数 = SKILL_NO_SLOT:角色:スキル_ジャンル_PERSONAL:(LOCAL:1)
 			技能总数 ++
-			TRYCCALLFORM SKILL_{技能NO:技能总数}_%SKILL_GENRE_ENG:スキル_ジャンル_PERSONAL%_{技能ID:技能总数}_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
-				SIF !RESULT
+			TRYCCALLFORM SKILL_{技能NO:(技能总数-1)}_%SKILL_GENRE_ENG:スキル_ジャンル_PERSONAL%_{技能ID:(技能总数-1)}_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+				IF !RESULT
 					技能总数--
+				ELSE
+					TRYCCALLFORM SKILL_{技能NO:(技能总数-1)}_%SKILL_GENRE_ENG:スキル_ジャンル_PERSONAL%_{技能ID:(技能总数-1)}_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+						IF !RESULT
+							技能总数--
+						ENDIF
+					CATCH
+					ENDCATCH
+				ENDIF
 			CATCH
 				技能总数--
 			ENDCATCH
@@ -92,20 +100,37 @@ FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
 			技能ID:技能总数 = SKILL_ID_SLOT:角色:スキル_ジャンル_TROOP:(LOCAL:1)
 			技能NO:技能总数 = SKILL_NO_SLOT:角色:スキル_ジャンル_TROOP:(LOCAL:1)
 			技能总数 ++
-			TRYCCALLFORM SKILL_{技能NO:技能总数}_%SKILL_GENRE_ENG:スキル_ジャンル_TROOP%_{技能ID:技能总数}_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
-				SIF !RESULT
+			TRYCCALLFORM SKILL_{技能NO:(技能总数-1)}_%SKILL_GENRE_ENG:スキル_ジャンル_TROOP%_{技能ID:(技能总数-1)}_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+				IF !RESULT
 					技能总数--
+				ELSE
+					TRYCCALLFORM SKILL_{技能NO:(技能总数-1)}_%SKILL_GENRE_ENG:スキル_ジャンル_TROOP%_{技能ID:(技能总数-1)}_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+						IF !RESULT
+							技能总数--
+						ENDIF
+					CATCH
+					ENDCATCH
+				ENDIF
 			CATCH
 				技能总数--
 			ENDCATCH
 		ENDIF
+		;#; PRINTFORML 技能总数 = {技能总数}
 	NEXT
+	[IF_DEBUG]
+		FOR LOCAL:11,0,技能总数
+			CALLFORM SKILL_{技能NO:(LOCAL:11)}_%SKILL_GENRE_ENG:(技能类型:(LOCAL:11))%_{技能ID:(LOCAL:11)}_NAME
+			PRINTFORML {技能NO:(LOCAL:11)} %SKILL_GENRE_ENG:(技能类型:(LOCAL:11))% {技能ID:(LOCAL:11)}技能「%RESULTS%」！
+		NEXT
+		FORCEWAIT
+	[ENDIF]
 	IF 技能总数 <= 0
 		PRINTFORML ..%ANAME(角色)%没有可以被复刻的技能
 	ELSE
 		随机数 = RAND:技能总数
 		CALLFORM SKILL_{技能NO:随机数}_%SKILL_GENRE_ENG:(技能类型:随机数)%_{技能ID:随机数}_NAME
 		PRINTFORML ..%ANAME(発動者)%复刻了%ANAME(角色)%的技能「%RESULTS%」！
+		CALLFORM SKILL_{技能NO:随机数}_%SKILL_GENRE_ENG:(技能类型:随机数)%_{技能ID:随机数}_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
 		CALLFORM SKILL_{技能NO:随机数}_%SKILL_GENRE_ENG:(技能类型:随机数)%_{技能ID:随机数}_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
 	ENDIF
 NEXT
@@ -126,4 +151,4 @@ RESULTS = 对敌方全员分别发动，从其所持个人和部队技能中随�
 #DIM 対象側
 #DIM 対象勢力
 #DIM 対象部隊
-RETURN 300
+RETURN 1000

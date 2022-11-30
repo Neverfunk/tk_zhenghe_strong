@@ -17,11 +17,11 @@ RETURN 1000
 ;プレイヤーキャラが紫か勇儀か華扇なら発生しない
 SIF GROUPMATCH(MASTER, NAME_TO_CHARA("紫"), NAME_TO_CHARA("勇儀"), NAME_TO_CHARA("華扇"))
 	RETURN 0
-	
+
 ;主人公と同一勢力で捕虜でない
 SIF !(CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0))
 	RETURN 0
-	
+
 ;12ターンに一回発動する
 RETURN (DAY % 12 == 0)
 ;---------------------
@@ -94,7 +94,8 @@ SELECTCASE RESULT
 	CASE 0
 		PRINTFORMW 不过，虽然不想被这么驱赶出去，但既然这是只有鬼才能完成的任务，当然要好好地完成啦
 		;TranslatedMark まあ、当の本人が投げられたがっているし、ここはちゃんと鬼の役目を真っ当させてあげよう
-		CALL COLOR_PRINTW("鬼はー外！　福はー内！", カラー_警告)
+		CALL COLOR_PRINTW("鬼在外！福在内！", カラー_警告)
+		;TranslatedMark "鬼はー外！　福はー内！", カラー_警告
 		PRINTFORMW 「哇！好了，我要逃走了，哈哈！」
 		;TranslatedMark 「うひゃー！　いててっ、退散だー、あはははっ！」
 		PRINTFORML %ANAME(対象)%笑着离开了
@@ -103,7 +104,8 @@ SELECTCASE RESULT
 		;TranslatedMark %ANAME(MASTER)%がちゃんと豆を投げてくれたのが嬉しかったようだ
 		PRINTFORML …第二天，%ANAME(対象)%送酒来作为配合她节分活动的谢礼
 		;TranslatedMark …翌日、%ANAME(対象)%が節分のお礼にお酒を持ってきてくれた
-		CALL COLOR_PRINTW("日本酒をもらった", カラー_注意)
+		CALL COLOR_PRINTW("得到了一瓶日本酒", カラー_注意)
+		;TranslatedMark "日本酒をもらった", カラー_注意
 		PRINTFORML
 		ITEM:日本酒 += 1
 		CFLAG:対象:好感度 += 100
@@ -120,15 +122,18 @@ SELECTCASE RESULT
 		;TranslatedMark 「はははっ！　面白い、そう来なくっちゃね！　なら私も本気で行こう！」
 		PRINTFORMW %ANAME(対象)%巨大化袭来！
 		;TranslatedMark %ANAME(対象)%は巨大化して襲い掛かって来た！
-		CALL COLOR_PRINTW("今、空前絶後の節分が始まる……", カラー_注意)
+		CALL COLOR_PRINTW("那么，空前绝后的节分即将开始……", カラー_注意)
+		;TranslatedMark "今、空前絶後の節分が始まる……", カラー_注意
 		PRINTFORML
-		CALL COLOR_PRINTL(@"レイドバトル発生！ 巨大%ANAME(対象)%を倒せ！！", カラー_警告)
+		CALL COLOR_PRINTL(@"极巨团体战开始！ 打倒巨大的%ANAME(対象)%を！！", カラー_警告)
+		;TranslatedMark @"レイドバトル発生！ 巨大%ANAME(対象)%を倒せ！！", カラー_警告
 		PRINTFORMW
 		;4回、正しい選択肢を選ぶ
 		FOR LOCAL, 0, 4
 			;答えを出しておく
 			答え = RAND:4
-			CALL COLOR_PRINTL(@"　%答え文字列:答え%　に避けて豆を投げろ！", カラー_注意)
+			CALL COLOR_PRINTL(@"　向%答え文字列:答え%方向避开并投出豆子！", カラー_注意)
+			;TranslatedMark @"　%答え文字列:答え%　に避けて豆を投げろ！", カラー_注意
 			FOR LOCAL:1, 0, VARSIZE("答え文字列")
 				PRINTFORML [{LOCAL:1}] %答え文字列:(LOCAL:1)%
 			NEXT
@@ -145,18 +150,20 @@ SELECTCASE RESULT
 		IF LOCAL != 4
 			PRINTFORML %ANAME(MASTER)%想避开巨大化的%ANAME(対象)%的攻击！
 			;TranslatedMark %ANAME(MASTER)%は巨大化した%ANAME(対象)%の攻撃を避けようとした！
-			PRINTFORML 
-			PRINTFORMW 
+			PRINTFORML
+			PRINTFORMW
 			PRINTFORMW 但是，攻击招式完美地在%ANAME(MASTER)%所在的人群中爆炸，大豆攻击部队瓦解了……
 			;TranslatedMark が、攻撃はものの見事に%ANAME(MASTER)%に炸裂し、大豆攻撃部隊は瓦解した……
 			PRINTFORML
-			CALL COLOR_PRINTW(@"%ANAME(MASTER)%たちは%ANAME(対象)%に敗北した。福は逃げていった……", カラー_警告)
+			CALL COLOR_PRINTW(@"%ANAME(MASTER)%一行人败给了%ANAME(対象)%。福逃走了……", カラー_警告)
+			;TranslatedMark @"%ANAME(MASTER)%たちは%ANAME(対象)%に敗北した。福は逃げていった……", カラー_警告
 			PRINTFORML
 			PRINTFORMW 「哈哈哈！虽然撒的不错，但是想要惩办我还差一点呢」
 			;TranslatedMark 「ふはははー！　中々だったけど、鬼退治にはちょいと足りなかったねえ」
 			PRINTFORMW 「那么，我就适当取走一些福气吧」
 			;TranslatedMark 「そいじゃあ、適当に福っぽいものをもらっていくよー」
-			CALL COLOR_PRINTW(@"金{カツアゲ料}を奪われました", カラー_注意)
+			CALL COLOR_PRINTW(@"金{カツアゲ料}被夺走了", カラー_注意)
+			;TranslatedMark @"金{カツアゲ料}を奪われました", カラー_注意
 			MONEY -= カツアゲ料
 			CFLAG:対象:好感度 += 150
 			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了150", 0x00FFFF)
@@ -192,7 +199,8 @@ SELECTCASE RESULT
 			;TranslatedMark 残された場所にはお酒が残されていた
 			PRINTFORMW %ANAME(MASTER)%决定把剩下的福气传递给每一个人……
 			;TranslatedMark %ANAME(MASTER)%たちは残された福を、各々の懐に収める事にした……
-			CALL COLOR_PRINTW("蒸留酒を3つ手に入れた", カラー_注意)
+			CALL COLOR_PRINTW("得到了3个蒸馏酒", カラー_注意)
+			;TranslatedMark "蒸留酒を3つ手に入れた", カラー_注意
 			ITEM:蒸留酒 += 3
 			CFLAG:対象:好感度 += 200
 			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了200", 0x00FFFF)

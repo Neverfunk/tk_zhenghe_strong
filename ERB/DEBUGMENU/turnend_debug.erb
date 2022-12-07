@@ -1,24 +1,42 @@
 @TURN_END_DEBUG
     TRYCALL DEBUG1()
-
+    TRYCALL DEBUG2()
 @DEBUG1
     FOR LOCAL,0,CHARANUM
-        IF !INRANGE(CFLAG:LOCAL:所属,0,MAX_COUNTRY)
+        IF !INRANGE(CFLAG:LOCAL:所属,0,MAX_COUNTRY-1)
             SETCOLOR カラー_警告
             PRINTFORML 角色%ANAME(LOCAL)%,id:{LOCAL}的“CFLAG:所属”值:{CFLAG:LOCAL:所属} 错误的超出了范围
-            PRINTFORML 现在我们将其设置为了0，继续游戏将不会出错
-            PRINTFORMW 如果你收到此消息，希望你能向制作者反馈这一消息并提供最近的存档，以便我们寻找此bug的来源
+            PRINTFORML 现在我们将其设置为了0(无所属)，继续游戏将不会出错
+            PRINTFORML 如果你收到此消息，希望你能向制作者反馈这一消息并提供最近的存档，以便我们寻找此bug的来源
             RESETCOLOR
             FORCEWAIT
             CFLAG:LOCAL:所属 = 0
         ENDIF
-        IF !INRANGE(CFLAG:LOCAL:捕虜先,0,MAX_COUNTRY)
+        IF !INRANGE(CFLAG:LOCAL:捕虜先,0,MAX_COUNTRY-1)
             SETCOLOR カラー_警告
             PRINTFORML 角色%ANAME(LOCAL)%,id:{LOCAL}的“CFLAG:捕虜先”值:{CFLAG:LOCAL:捕虜先} 错误的超出了范围
-            PRINTFORML 现在我们将其设置为了0，继续游戏将不会出错
-            PRINTFORMW 如果你收到此消息，希望你能向制作者反馈这一消息并提供最近的存档，以便我们寻找此bug的来源
+            PRINTFORML 现在我们将其设置为了0(无所属)，继续游戏将不会出错
+            PRINTFORML 如果你收到此消息，希望你能向制作者反馈这一消息并提供最近的存档，以便我们寻找此bug的来源
             RESETCOLOR
             FORCEWAIT
             CFLAG:LOCAL:捕虜先 = 0
+        ENDIF
+    NEXT
+@DEBUG2
+    FOR LOCAL,0,MAX_COUNTRY
+        SIF !IS_COUNTRY(LOCAL)
+            CONTINUE
+        IF IS_TREATY_UNI:(LOCAL) == 1
+	        IF !INRANGE(COUNTRY_Union_REFERENCE:(LOCAL):0,1,MAX_COUNTRY-1)
+                SETCOLOR カラー_警告
+                PRINTFORML 国家：%ANAME(GET_COUNTRY_BOSS(LOCAL))%，id：{LOCAL}
+                PRINTFORML 的COUNTRY_Union_REFERENCE（联邦ID）不在正确的范围内
+                PRINTFORML 继续游戏将不会出错
+                PRINTFORML 如果你收到此消息，希望你能向制作者反馈这一消息并提供最近的存档，以便我们寻找此bug的来源
+                PRINTFORML 这个错误不会自动修正，如果您不想看见此提示，
+                PRINTFORML 请将ERB/DEBUGMENU/turnend_debug.erb 中的函数@DEBUG2 删除
+                RESETCOLOR
+                FORCEWAIT
+            ENDIF
         ENDIF
     NEXT

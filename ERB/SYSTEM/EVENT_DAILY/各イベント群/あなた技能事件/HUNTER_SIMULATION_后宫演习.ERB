@@ -116,6 +116,7 @@ ENDIF
 #DIM 目标
 #DIM 敏捷判定
 #DIM 对战轮次
+#DIM 结果
 ;以下为评价系统用(0-2=能力值,3=平均值)
 #DIM 评武力, 4
 #DIM 评防御, 4
@@ -473,8 +474,9 @@ WHILE 1
                 感度:1 += (ABL:(队伍:(对战队伍:1):LOCAL):Ｃ感 + ABL:(队伍:(对战队伍:1):LOCAL):Ｖ感 + ABL:(队伍:(对战队伍:1):LOCAL):Ａ感 + ABL:(队伍:(对战队伍:1):LOCAL):Ｂ感 + ABL:(队伍:(对战队伍:1):LOCAL):Ｍ感) / 5
             NEXT
             CALL EVENT_HUNTER_BATTLE(队伍:(对战队伍:0):0,队伍:(对战队伍:0):1,队伍:(对战队伍:0):2,队伍:(对战队伍:1):0,队伍:(对战队伍:1):1,队伍:(对战队伍:1):2)
+            结果 = RESULT
             FORCEWAIT
-            SELECTCASE RESULT
+            SELECTCASE 结果
                 CASE 0
                     IF 轮空少女
                         随机看板娘 = 轮空少女:1 ? 轮空少女:(RAND:2) # 轮空少女
@@ -504,8 +506,8 @@ WHILE 1
                         PRINTPLAIN 女仆
                     ENDIF
                     PRINTFORML 「胜负已定！」
-                    PRINTFORMW 是\@RESULT == 1 ? %ANAME(队伍:(对战队伍:0):0)% # %ANAME(队伍:(对战队伍:1):0)%\@队的胜利！
-                    IF RESULT == 1
+                    PRINTFORMW 是\@结果 == 1 ? %ANAME(队伍:(对战队伍:0):0)% # %ANAME(队伍:(对战队伍:1):0)%\@队的胜利！
+                    IF 结果 == 1
                         DEBUGPRINTFORML 将{A队:(2 * 对战轮次 + 1)}队(编号：{(2 * 对战轮次 + 1)})转移至B队
                         B队:B队数 = A队:(2 * 对战轮次 + 1)
                         A队:(2 * 对战轮次 + 1) = __INT_MAX__
@@ -551,7 +553,8 @@ WHILE 1
             NEXT
             CALL EVENT_HUNTER_BATTLE(队伍:(对战队伍:0):0,队伍:(对战队伍:0):1,队伍:(对战队伍:0):2,队伍:(对战队伍:1):0,队伍:(对战队伍:1):1,队伍:(对战队伍:1):2)
             FORCEWAIT
-            SELECTCASE RESULT
+            结果 = RESULT
+            SELECTCASE 结果
                 CASE 0
                     IF 轮空少女
                         随机看板娘 = 轮空少女:1 ? 轮空少女:(RAND:2) # 轮空少女
@@ -580,8 +583,8 @@ WHILE 1
                         PRINTPLAIN 女仆
                     ENDIF
                     PRINTFORML 「胜负已定！」
-                    PRINTFORMW 是\@RESULT == 1 ? %ANAME(队伍:(对战队伍:0):0)% # %ANAME(队伍:(对战队伍:1):0)%\@队的胜利！
-                    IF RESULT == 1
+                    PRINTFORMW 是\@结果 == 1 ? %ANAME(队伍:(对战队伍:0):0)% # %ANAME(队伍:(对战队伍:1):0)%\@队的胜利！
+                    IF 结果 == 1
                         DEBUGPRINTFORML 将{B队:(2 * 对战轮次 + 1)}队(编号：{(2 * 对战轮次 + 1)})淘汰
                         排名:排名次序 = B队:(2 * 对战轮次 + 1)
                         B队:(2 * 对战轮次 + 1) = __INT_MAX__

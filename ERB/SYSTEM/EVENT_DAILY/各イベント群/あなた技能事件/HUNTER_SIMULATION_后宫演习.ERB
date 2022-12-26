@@ -116,6 +116,7 @@ ENDIF
 #DIM 目标
 #DIM 敏捷判定
 #DIM 对战轮次
+#DIM 结果
 ;以下为评价系统用(0-2=能力值,3=平均值)
 #DIM 评武力, 4
 #DIM 评防御, 4
@@ -473,8 +474,9 @@ WHILE 1
                 感度:1 += (ABL:(队伍:(对战队伍:1):LOCAL):Ｃ感 + ABL:(队伍:(对战队伍:1):LOCAL):Ｖ感 + ABL:(队伍:(对战队伍:1):LOCAL):Ａ感 + ABL:(队伍:(对战队伍:1):LOCAL):Ｂ感 + ABL:(队伍:(对战队伍:1):LOCAL):Ｍ感) / 5
             NEXT
             CALL EVENT_HUNTER_BATTLE(队伍:(对战队伍:0):0,队伍:(对战队伍:0):1,队伍:(对战队伍:0):2,队伍:(对战队伍:1):0,队伍:(对战队伍:1):1,队伍:(对战队伍:1):2)
+            结果 = RESULT
             FORCEWAIT
-            SELECTCASE RESULT
+            SELECTCASE 结果
                 CASE 0
                     IF 轮空少女
                         随机看板娘 = 轮空少女:1 ? 轮空少女:(RAND:2) # 轮空少女
@@ -504,8 +506,8 @@ WHILE 1
                         PRINTPLAIN 女仆
                     ENDIF
                     PRINTFORML 「胜负已定！」
-                    PRINTFORMW 是\@RESULT == 1 ? %ANAME(队伍:(对战队伍:0):0)% # %ANAME(队伍:(对战队伍:1):0)%\@队的胜利！
-                    IF RESULT == 1
+                    PRINTFORMW 是\@结果 == 1 ? %ANAME(队伍:(对战队伍:0):0)% # %ANAME(队伍:(对战队伍:1):0)%\@队的胜利！
+                    IF 结果 == 1
                         DEBUGPRINTFORML 将{A队:(2 * 对战轮次 + 1)}队(编号：{(2 * 对战轮次 + 1)})转移至B队
                         B队:B队数 = A队:(2 * 对战轮次 + 1)
                         A队:(2 * 对战轮次 + 1) = __INT_MAX__
@@ -551,7 +553,8 @@ WHILE 1
             NEXT
             CALL EVENT_HUNTER_BATTLE(队伍:(对战队伍:0):0,队伍:(对战队伍:0):1,队伍:(对战队伍:0):2,队伍:(对战队伍:1):0,队伍:(对战队伍:1):1,队伍:(对战队伍:1):2)
             FORCEWAIT
-            SELECTCASE RESULT
+            结果 = RESULT
+            SELECTCASE 结果
                 CASE 0
                     IF 轮空少女
                         随机看板娘 = 轮空少女:1 ? 轮空少女:(RAND:2) # 轮空少女
@@ -580,8 +583,8 @@ WHILE 1
                         PRINTPLAIN 女仆
                     ENDIF
                     PRINTFORML 「胜负已定！」
-                    PRINTFORMW 是\@RESULT == 1 ? %ANAME(队伍:(对战队伍:0):0)% # %ANAME(队伍:(对战队伍:1):0)%\@队的胜利！
-                    IF RESULT == 1
+                    PRINTFORMW 是\@结果 == 1 ? %ANAME(队伍:(对战队伍:0):0)% # %ANAME(队伍:(对战队伍:1):0)%\@队的胜利！
+                    IF 结果 == 1
                         DEBUGPRINTFORML 将{B队:(2 * 对战轮次 + 1)}队(编号：{(2 * 对战轮次 + 1)})淘汰
                         排名:排名次序 = B队:(2 * 对战轮次 + 1)
                         B队:(2 * 对战轮次 + 1) = __INT_MAX__
@@ -595,14 +598,14 @@ WHILE 1
             IF DVAR:自动战败惩罚 >= 0
                 IF DVAR:自动战败惩罚 == 1
                     PRINTFORMW 当然，作为败犬的%ANAME(队伍:(排名:排名次序):0)%队肯定是要遭受惩罚的～
-                    CALL EVENT_HUNTER_DEFEATRAPE(队伍:(排名:排名次序):0, 队伍:(排名:排名次序):1, 队伍:(排名:排名次序):2)
+                    CALL EVENT_HUNTER_DEFEATRAPE(队伍:(排名:排名次序):0, 队伍:(排名:排名次序):1, 队伍:(排名:排名次序):2, 队伍数 - 排名次序)
                 ELSE
                     PRINTFORML 那么，该如何处置败犬呢～
                     CALL ASK_YN("当然要用肉棒给她们开个反省会啦","就放过她们吧")
                     IF !RESULT
                         PRINTFORMW 这样啊～
                         PRINTFORMW 那就让主人好好教训她们吧♥
-                        CALL EVENT_HUNTER_DEFEATRAPE(队伍:(排名:排名次序):0, 队伍:(排名:排名次序):1, 队伍:(排名:排名次序):2)
+                        CALL EVENT_HUNTER_DEFEATRAPE(队伍:(排名:排名次序):0, 队伍:(排名:排名次序):1, 队伍:(排名:排名次序):2, 队伍数 - 排名次序)
                     ELSE
                         PRINTFORMW 好的～
                         PRINTFORML 听到赦免的%ANAME(队伍:(排名:排名次序):0)%们连忙感谢
@@ -649,7 +652,7 @@ IF !RESULT
     FORCEWAIT
 ENDIF
 IF 轮空少女:0
-    PRINTFORMW 随着比赛结束，%ANAME(轮空少女:0)%\@轮空少女:1 ? 和%ANAME(轮空少女:1)% # \@挺着充满精液的肚子回到了队伍……
+    PRINTFORMW 比赛结束，%ANAME(轮空少女:0)%\@轮空少女:1 ? 和%ANAME(轮空少女:1)% # \@挺着充满精液的肚子回到了队伍……
     REPEAT 轮数
         IF 轮空少女:1
             CALL FUCK(轮空少女:1, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 欲望, 精愛, 奉仕, 露出, 性交, 接吻, 口淫, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精",　GET_ID(MASTER), @"%ANAME(MASTER)%的\@RAND:2 ? 肉棒 # 嘴唇\@", ANAME(MASTER), "", "調教")
@@ -663,7 +666,8 @@ PRINTFORMW 作为第一名的奖励，今夜就让%ANAME(队伍:(排名:(排名�
 FOR LOCAL, 0, 3
     CALL FUCK_MAKELOVE(队伍:(排名:(排名次序 - 1)):LOCAL, GET_ID(MASTER), @"%ANAME(MASTER)%的\@RAND:2 ? 肉棒 # 嘴唇\@", @"%ANAME(MASTER)%")
     CALL FUCK(MASTER, "欲望, 性技, 性交, Ｃ, 射精, 接吻, Ｖ挿入, Ａ挿入", "接吻喪失, 童貞喪失", 0, @"%ANAME(队伍:(排名:(排名次序 - 1)):LOCAL)%的嘴唇", "", @"%ANAME(队伍:(排名:(排名次序 - 1)):LOCAL)%的小穴", "和姦")
-    経験値総量 = MIN(ARENA_GET_POWER(队伍:(排名:(排名次序 - 1)):LOCAL) / 3, ARENA_GET_POWER(MASTER)) * MAX(MIN(ABL:(队伍:(排名:(排名次序 - 1)):LOCAL):性技, ABL:MASTER:性技), 1) * 轮数
+    ;経験値総量 = MIN(ARENA_GET_POWER(队伍:(排名:(排名次序 - 1)):LOCAL), ARENA_GET_POWER(MASTER) / 3) / 10 * MAX(MIN(ABL:(队伍:(排名:(排名次序 - 1)):LOCAL):性技, ABL:MASTER:性技 * 2 / 3), 1) * (轮数 - 2)
+    経験値総量 = MIN(ARENA_GET_POWER(队伍:(排名:(排名次序 - 1)):LOCAL), ARENA_GET_POWER(MASTER) / 3) * MAX(MIN(ABL:(队伍:(排名:(排名次序 - 1)):LOCAL):性技, ABL:MASTER:性技 * 2 / 3), 3) * (轮数 - 2) / 10 / 3
     FOR LOCAL:1, 0, 経験値総量
         獲得経験値:(IFRAND("0TO2", 1, "3TO5", RAND:100 < 50)) ++
     NEXT
@@ -827,9 +831,10 @@ CALL PRINT_COLORBAR(ARG, ARG:1, ARG:2, ARGS, ARGS:1, COLOR, 0xFFFFFF)
 ;ARG = 变量 ARG:1 = 变量最大值 ARG:2 = 条长度
 ;ARGS + ARG:3 = 内填色/图案 ARGS:1 + ARG:4 = 外填色/图案
 
-@EVENT_HUNTER_DEFEATRAPE(ARG:0, ARG:1, ARG:2)
+@EVENT_HUNTER_DEFEATRAPE(ARG:0, ARG:1, ARG:2, 排名)
 #DIM 経験値総量
 #DIM 獲得経験値, 6
+#DIM 排名
 VARSET 獲得経験値
 SELECTCASE RAND:5
     CASE 0
@@ -861,7 +866,8 @@ ENDSELECT
 FOR LOCAL, 0, 3
     CALL FUCK(ARG:LOCAL, "Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 欲望, 精愛, 奉仕, 露出, 性交, 接吻, 口淫, Ｖ性交, Ａ性交", "接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精",　GET_ID(MASTER), @"%ANAME(MASTER)%的\@RAND:2 ? 肉棒 # 嘴唇\@", ANAME(MASTER), "", "強姦")
     CALL FUCK(MASTER, "欲望, 性技, 性交, 加虐, Ｃ, 射精, 露出, 接吻, Ｖ挿入, Ａ挿入", "接吻喪失, 童貞喪失", 0, @"%ANAME(ARG:LOCAL)%的嘴唇", "", @"%ANAME(ARG:LOCAL)%的小穴", "強姦")
-    経験値総量 = MIN(ARENA_GET_POWER(ARG:LOCAL) / 3, ARENA_GET_POWER(MASTER)) * MAX(MIN(ABL:(ARG:LOCAL):性技, ABL:MASTER:性技), 1)
+    ;経験値総量 = MIN(ARENA_GET_POWER(ARG:LOCAL), ARENA_GET_POWER(MASTER) / 3) / 10 * MAX(MIN(ABL:(ARG:LOCAL):性技, ABL:MASTER:性技 * 2 / 3), 3) / 3 / 排名
+    経験値総量 = MIN(ARENA_GET_POWER(ARG:LOCAL), ARENA_GET_POWER(MASTER) / 3) * MAX(MIN(ABL:(ARG:LOCAL):性技, ABL:MASTER:性技 * 2 / 3), 3) / 10 / 3 / 排名
     FOR LOCAL:1, 0, 経験値総量
         獲得経験値:(IFRAND("0TO2", 1, "3TO5", RAND:100 < 50)) ++
     NEXT

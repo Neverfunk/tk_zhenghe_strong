@@ -95,19 +95,19 @@ UNIT_FBATTLE:(ARG:2):(ARG:3) = 1
 攻撃側壊滅 = 0
 
 
-;制造死亡事件跳转	
+;制造死亡事件跳转
 CALL SHOP_LIFE_USERSHOP68_MAKE_DEATH(ARG:0,ARG:1,(原兵力2- MAX(UNIT_SOLDIER:(ARG:2):(ARG:3),0)))
 CALL SHOP_LIFE_USERSHOP68_MAKE_DEATH(ARG:2,ARG:3,(原兵力1- MAX(UNIT_SOLDIER:(ARG:0):(ARG:1),0)))
 ;----------记录杀敌数----------
 TRYCCALL SHOP_LIFE_MIRACLE ;判断是否有祷告插件
 	FOR LOCAL ,0,MAX_UNIT_COMMANDER,1
 		对象 = GET_UNIT_COMMANDER(ARG:0,ARG:1,LOCAL)
-		SIF 对象 == -1 
+		SIF 对象 == -1
 			CONTINUE
 		CFLAG:对象:杀敌数+=(原兵力2- MAX(UNIT_SOLDIER:(ARG:2):(ARG:3),0))
-		
+
 		对象 = GET_UNIT_COMMANDER(ARG:2,ARG:3,LOCAL)
-		SIF 对象 == -1 
+		SIF 对象 == -1
 			CONTINUE
 		CFLAG:对象:杀敌数+=(原兵力1-MAX(UNIT_SOLDIER:(ARG:0):(ARG:1),0))
 	NEXT
@@ -131,12 +131,12 @@ IF UNIT_SOLDIER:(ARG:0):(ARG:1) <= 0
 	ELSE
 		PRINTFORML %BATTLE_NAME:0%軍敗逃了
 	ENDIF
-	
-	;侵攻胜利事件跳转	
+
+	;侵攻胜利事件跳转
 	TRYCALL SHOP_LIFE_USERSHOP68_AWIN(ARG:2,ARG:3,ARG:0, ARG:1)
-	;侵攻失败事件跳转	
+	;侵攻失败事件跳转
 	TRYCALL SHOP_LIFE_USERSHOP68_ALOSE(ARG:0,ARG:1)
-	
+
 	IF ARG:2 != CFLAG:MASTER:所属
 		CALL CHANGE_RELATION_C_TO_C(ARG:0, ARG:2, (-10 * AI_RELATION:(LOCAL:1):(LOCAL:2) / 100), (50 * 100 / AI_RELATION:(LOCAL:1):(LOCAL:2)))
 	ELSE
@@ -145,7 +145,7 @@ IF UNIT_SOLDIER:(ARG:0):(ARG:1) <= 0
 
 	SIF IS_COUNTRY(ARG:0) && FINDELEMENT(TREATY_U_TARGET, ARG:0) != -1
 		CALL SLG_COMBAT_BEAT_TREATY_TARGET(ARG:2, ARG:0)
-		
+
 	;将の捕獲
 	CALL UNIT_BREAK(1, ARG:2, ARG:3, ARG:0, ARG:1)
 	;壊滅した部隊の後始末
@@ -165,12 +165,12 @@ IF UNIT_SOLDIER:(ARG:2):(ARG:3) <= 0
 	ELSE
 		PRINTFORML %BATTLE_NAME:1%軍敗逃了
 	ENDIF
-	
-	;侵攻胜利事件跳转	
+
+	;侵攻胜利事件跳转
 	CALL SHOP_LIFE_USERSHOP68_AWIN(ARG:0,ARG:1,ARG:2,ARG:3)
-	;侵攻失败事件跳转	
+	;侵攻失败事件跳转
 	TRYCALL SHOP_LIFE_USERSHOP68_ALOSE(ARG:2,ARG:3)
-	
+
 	IF ARG:0 != CFLAG:MASTER:所属
 		CALL CHANGE_RELATION_C_TO_C(ARG:2, ARG:0, (-10 * AI_RELATION:(LOCAL:2):(LOCAL:1) / 100), (50 * 100 / AI_RELATION:(LOCAL:2):(LOCAL:1)))
 	ELSE
@@ -296,19 +296,19 @@ CALL DECREASE_SOLDIER(ARG:2, -1,    BATTLE_DMG:1, 1)
 $BATTLE_CANCEL
 CALL COLOR_PRINTL("----------戦闘後処理----------", カラー_選択不可)
 
-;制造死亡事件跳转	
+;制造死亡事件跳转
 CALL SHOP_LIFE_USERSHOP68_MAKE_DEATH(ARG:0,ARG:1,(原兵力2- MAX(CITY_SOLDIER:(ARG:2),0)))
 CALL SHOP_LIFE_USERSHOP68_MAKE_DEATH(0,0,(原兵力1- MAX(UNIT_SOLDIER:(ARG:0):(ARG:1),0)),ARG:2)
 ;----------记录杀敌数----------
 TRYCCALL SHOP_LIFE_MIRACLE ;判断是否有祷告插件
 	FOR LOCAL ,0,MAX_UNIT_COMMANDER,1
 		对象 = GET_UNIT_COMMANDER(ARG:0,ARG:1,LOCAL)
-		SIF 对象 == -1 
+		SIF 对象 == -1
 			CONTINUE
 		CFLAG:对象:杀敌数+=(原兵力2- MAX(CITY_SOLDIER:(ARG:2),0))
-		
+
 		对象 = GET_CITY_COMMANDER(ARG:2,LOCAL)
-		SIF 对象 < 0  
+		SIF 对象 < 0
 			CONTINUE
 		CFLAG:对象:杀敌数+=(原兵力1- MAX(UNIT_SOLDIER:(ARG:0):(ARG:1),0))
 	NEXT
@@ -330,7 +330,7 @@ IF CITY_SOLDIER:(ARG:2) <= 0
 	都市奪取 = 1
 	CITY_TIRED_COUNT:(ARG:2) = 0
 	CITY_IS_ATTACKED:(ARG:2) = 0
-	
+
 	;都市占領による略奪
 	;LOCAL 10:その都市に備蓄されていた財産
 	;無所属の都市は経済規模の30%を備蓄しているとみなす
@@ -350,16 +350,16 @@ IF CITY_SOLDIER:(ARG:2) <= 0
 	ELSE
 		PRINTFORML %BATTLE_NAME:0%軍占領了%GET_CITYNAME(ARG:2)%
 	ENDIF
-	
-	;占领胜利事件跳转	
+
+	;占领胜利事件跳转
 	CALL SHOP_LIFE_USERSHOP68_OCCUPYWIN(ARG:0,ARG:1,ARG:2)
-	;防守失败事件跳转	
+	;防守失败事件跳转
 	TRYCALL SHOP_LIFE_USERSHOP68_DLOSE(ARG:2)
-	
+
 	SIF IS_COUNTRY(CITY_OWNER:(ARG:2)) && FINDELEMENT(TREATY_U_TARGET, CITY_OWNER:(ARG:2)) != -1
 		CALL SLG_COMBAT_BEAT_TREATY_TARGET(ARG:0, CITY_OWNER:(ARG:2))
 
-	
+
 	;部隊壊滅時の士官の捕獲
 	CALL UNIT_BREAK(0, ARG:0, ARG:1, ARG:2, -1)
 
@@ -432,10 +432,10 @@ IF CITY_SOLDIER:(ARG:2) <= 0
 			ENDIF
 			SIF !IS_SP_COUNTRY(LOCAL:6)
 				DIPLOMACY_HATE:(ARG:0) += 3
-				
-			;灭国事件跳转	
+
+			;灭国事件跳转
 			TRYCALL SHOP_LIFE_USERSHOP68_RUINWIN(ARG:0,ARG:1)
-			
+
 			;敗将の処理
 			CALL LOSERS_ACTION(LOCAL:6, ARG:0)
 
@@ -466,10 +466,10 @@ IF UNIT_SOLDIER:(ARG:0):(ARG:1) <= 0
 	;このパターンのみ、倒した側がIS_COUNTRYであるかのチェックも行う(都市側が無所属である可能性もあるので)
 	SIF IS_COUNTRY(ARG:0) && IS_COUNTRY(CITY_OWNER:(ARG:2)) && FINDELEMENT(TREATY_U_TARGET, ARG:0) != -1
 		CALL SLG_COMBAT_BEAT_TREATY_TARGET(CITY_OWNER:(ARG:2), ARG:0)
-	
-	;防卫事件跳转	
+
+	;防卫事件跳转
 	TRYCALLFORM SHOP_LIFE_USERSHOP68_DEFENSEWIN(ARG:2,ARG:1, ARG:2)
-	;侵攻失败事件跳转	
+	;侵攻失败事件跳转
 	TRYCALL SHOP_LIFE_USERSHOP68_ALOSE(ARG:0,ARG:1)
 
 	;都市所有勢力が居た場合のみ
@@ -1324,11 +1324,11 @@ ENDSELECT
 SIF ホフゴブリン == 0
 	ホフゴブリン = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン)
 IF IS_COUNTRY(ホフゴブリン)
-	IF 勝利勢力 == ホフゴブリン
+	IF (勝利部隊 >= 0 && 勝利勢力 == ホフゴブリン) || (勝利部隊 < 0 && CITY_OWNER:勝利勢力 == ホフゴブリン)
 		ホフゴブリン勝利 = 1
 		SIF 敗北部隊 == -1
 			CFLAG:(GET_COUNTRY_BOSS(ホフゴブリン)):1709 += 10
-	ELSEIF 敗北勢力 == ホフゴブリン
+	ELSEIF (敗北部隊 >= 0 && 敗北勢力 == ホフゴブリン) || (敗北部隊 < 0 && CITY_OWNER:敗北勢力 == ホフゴブリン)
 		ホフゴブリン敗北 = 1
 		SIF 敗北部隊 == -1
 			CFLAG:(GET_COUNTRY_BOSS(ホフゴブリン)):1709 = MAX(1, CFLAG:(GET_COUNTRY_BOSS(ホフゴブリン)):1709 - 10)
@@ -1341,21 +1341,21 @@ COUNTRY_W = (勝利部隊 >= 0 ? 勝利勢力 # CITY_OWNER:(勝利勢力))
 COUNTRY_L = (敗北部隊 >= 0 ? 敗北勢力 # CITY_OWNER:(敗北勢力))
 
 ;召喚キャラは関わらない
-;(ホフゴブリン拡張パッチ)ホフゴブリン勢力君主・士官の支持率上昇																							 
+;(ホフゴブリン拡張パッチ)ホフゴブリン勢力君主・士官の支持率上昇
 FOR LOCAL, 0, BATTLE_COMMANDER_NUM:勝利側
 	SIF BATTLE_SUMMONED_CHARA:勝利側:LOCAL
 		BATTLE_COMMANDER:勝利側:LOCAL = -1
 	SIF ホフゴブリン勝利 == 1 && BATTLE_COMMANDER:勝利側:LOCAL > -1
-		CFLAG:(BATTLE_COMMANDER:勝利側:LOCAL):1709 += 10																	   
+		CFLAG:(BATTLE_COMMANDER:勝利側:LOCAL):1709 += 10
 NEXT
 
 ;召喚キャラは関わらない
-;(ホフゴブリン拡張パッチ)ホフゴブリン勢力君主・士官の支持率減少																							 
+;(ホフゴブリン拡張パッチ)ホフゴブリン勢力君主・士官の支持率減少
 FOR LOCAL, 0, BATTLE_COMMANDER_NUM:敗北側
 	SIF BATTLE_SUMMONED_CHARA:敗北側:LOCAL
 		BATTLE_COMMANDER:敗北側:LOCAL = -1
 	SIF ホフゴブリン敗北 == 1 && BATTLE_COMMANDER:敗北側:LOCAL > -1
-	CFLAG:(BATTLE_COMMANDER:敗北側:LOCAL):1709 = MAX(1, CFLAG:(BATTLE_COMMANDER:敗北側:LOCAL):1709 - 10)																	   																						
+	CFLAG:(BATTLE_COMMANDER:敗北側:LOCAL):1709 = MAX(1, CFLAG:(BATTLE_COMMANDER:敗北側:LOCAL):1709 - 10)
 NEXT
 
 CALL UNIT_BREAK_DIE(勝利側, 勝利勢力, 勝利部隊, 敗北勢力, 敗北部隊, COUNTRY_W, COUNTRY_L)
@@ -1432,7 +1432,7 @@ FOR LOCAL:0, BATTLE_COMMANDER_NUM:敗北側 - 1, -1, -1
 			SETCOLOR カラー_警告
 			PRINTFORML %ANAME(LOCAL:4)%好像戦死沙場了
 			RESETCOLOR
-		ENDIF	
+		ENDIF
 	ENDIF
 	;击杀事件
 	TRYCALLFORM SHOP_LIFE_USERSHOP68_KILL(勝利勢力, 勝利部隊,LOCAL:4)

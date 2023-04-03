@@ -1,0 +1,196 @@
+;EVENT_ENG = COSER
+;---------------------
+;基本发生概率(1000分率100为10%)
+;再加上configue项目的发生频率，所以概率还会有所变化
+;---------------------
+@EVENT_DAILY_COSER_RATE()
+	CALL MRU_get_phase_rate("MRU_1_2",MRU_1_2_PHASE)
+	IF RESULT != -1
+		RETURN RESULT
+	ELSE
+		RETURN 200
+	ENDIF
+
+
+;---------------------
+;发生判定
+;1可以发生，0不能发生
+;---------------------
+@EVENT_DAILY_COSER_DECISION()
+	SIF !MRU_1_奴隶贩子集团事件链启用
+		RETURN 0
+    SIF !IS_MALE(MASTER)
+    RETURN 0
+    SIF !IS_COUNTRY(CFLAG:MASTER:所属) || IS_SP_COUNTRY(CFLAG:MASTER:所属)
+    RETURN 0
+	SIF MRU_1_SUBEVENT_STATUS:1 != 0
+		RETURN 0
+	CALL MRU_event_check("MRU_1_2",MRU_1_2_PHASE)
+	SIF RESULT == -1
+		RETURN 0
+	RETURN 1
+
+;---------------------
+;事件类型
+;用于在设置中进行配置
+;---------------------
+@EVENT_DAILY_COSER_GENRE()
+	RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;名称
+;返回空或不存在时使用注册名称
+;---------------------
+@EVENT_DAILY_COSER_NAME()
+	CALL MRU_get_phase_name("MRU_1_2",MRU_1_2_PHASE)
+	SIF RESULTS != ""
+		RETURN
+	RESULTS '= "COSER"
+
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_COSER()
+	IF MRU_1_2_PHASE == ""
+        CALL MRU_event_set_next_phase("MRU_1_2",MRU_1_2_PHASE,"初见")
+	ENDIF
+	CALL MRU_event_procedure("MRU_1_2",MRU_1_2_PHASE)
+	RETURN 1
+
+@MRU_1_2__rate
+    RETURN 50
+
+@MRU_1_2_初见_name
+    RESULTS '= "意外收获"
+
+@MRU_1_2_初见_check
+    SIF !MRU_exist_unfallen_female_boss()
+        RETURN -1
+    RETURN 1
+@MRU_1_2_初见_text
+    #DIM coser_chara
+    coser_chara = MRU_get_random_unfallen_female_boss()
+    HTML_PRINT get_text_html(@"听说下面的人解救出了一批被奴隶贩子抓走的人")
+    HTML_PRINT get_text_html(@"有空的话去看看吧，说不定能找到什么线索")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"%ANAME(MASTER)%这样想着的时候，一个守卫突然前来报告")
+    HTML_PRINT get_text_html(@"据说是在被解放的奴隶中有身为君主的%ANAME(coser_chara)%")
+    HTML_PRINT get_text_html(@"大吃一惊的%ANAME(MASTER)%赶忙前去查看")
+    CALL EXPEND_LATER()
+    HTML_PRINT get_text_html(@"%ANAME(MASTER)%被带着来到了关押室，一进去就听到了一阵浪叫")
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「啊啊啊啊啊——怎么没有男人！雄性！MAN！来条狗也好啊！」",coser_chara)
+    HTML_PRINT get_text_html_c(@"「这个地方是没有男人吗？怎么每个人都是短根啊？」",coser_chara)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「招守卫的第一原则不应该是雄根的大小吗？」",coser_chara)
+    HTML_PRINT get_text_html_c(@"「没鸡巴的雄性想必都是废物啊！怎么可以要呢！」",coser_chara)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「啊啊啊啊啊被关起来的囚犯这么想都应该被轮奸到晕过去吧！」",coser_chara)
+    HTML_PRINT get_text_html_c(@"「现在这个样子完！全！满！足！不！了！啊！」",coser_chara)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"看起来有些问题")
+    CALL html_wait
+    IF CFLAG:coser_chara:面識
+        HTML_PRINT get_text_html(@"%ANAME(MASTER)%早已见过%ANAME(coser_chara)%")
+        HTML_PRINT get_text_html(@"这样的荡妇绝对不可能是%PRONOUN(coser_chara)%")
+        CALL html_wait
+    ELSE
+        HTML_PRINT get_text_html(@"虽然没见过%ANAME(coser_chara)%")
+        HTML_PRINT get_text_html(@"但这样的荡妇这么想都没可能是%PRONOUN(coser_chara)%吧")
+        CALL html_wait
+
+    ENDIF
+    HTML_PRINT get_text_html_c(@"「喂喂！那边的家伙！」",coser_chara)
+    HTML_PRINT get_text_html(@"虽然在监墙内，『%ANAME(coser_chara)%』却毫不畏惧地指着%ANAME(MASTER)%的鼻子说道")
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「把那玩意儿给我看一下！我要受不了了！」",coser_chara)
+    HTML_PRINT get_text_html_c(@"「一圈守卫的鸡巴都小的可怜！」",coser_chara)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「再不来个人干我我真的要受不了了！」",coser_chara)
+    HTML_PRINT get_text_html_c(@"「啊❤！啊❤！啊❤！快点啊❤！这里想要男人的大肉棒啊❤！」",coser_chara)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"『%ANAME(coser_chara)%』一边说着，一边撩起了囚服")
+    HTML_PRINT get_text_html(@"毫不在意地向众人展示着早已湿透地私处")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"%ANAME(MASTER)%感到身边传来了一圈的口水声")
+    HTML_PRINT get_text_html(@"虽然有些下流，但是看到『%ANAME(coser_chara)%』以这种方式求爱还是让%ANAME(MASTER)%勃起了")
+    HTML_PRINT get_text_html(@"不过以防万一，还是先确认一下%PRONOUN(coser_chara)%的身份吧")
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「啊？你问我是说？」",coser_chara)
+    HTML_PRINT get_text_html_c(@"「果然都是一群书呆子啊！！！」",coser_chara)
+    HTML_PRINT get_text_html_c(@"「东方PROJECT没有听说过吗？同人界三大奇迹没有听说过吗？」",coser_chara)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「而我，正是在COS的%ANAME(coser_chara)%啊！」",coser_chara)
+    HTML_PRINT get_text_html_c(@"「连这都没有听说过，你们还真是失败呢！」",coser_chara)
+    HTML_PRINT get_text_html_c(@"「连TOUHOU都不知道呢！怪不得都是一群短小的废物……诶诶诶！」",coser_chara)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「我说啊，这位的肉棒不是很大吗！！！」",coser_chara)
+    HTML_PRINT get_text_html(@"『%ANAME(coser_chara)%』像是发现宝物一般死死盯着%ANAME(MASTER)%勃起的下体")
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「是从来都没见过的巨大❤！」",coser_chara)
+    HTML_PRINT get_text_html_c(@"「求，求你了！快来干我吧❤！已经完全忍耐不住了！」",coser_chara)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"『%ANAME(coser_chara)%』夸张地抬起右脚，将性器抵在了栏杆的缝隙外")
+    HTML_PRINT get_text_html(@"怎么办？")
+    CALL get_text_html_b(@"干死她","","")
+	CALL get_text_html_b(@"我对这种玩意儿没有兴趣","","")
+	CALL get_html_button_input
+    IF RESULT == 0
+        HTML_PRINT get_text_html(@"都发出请求了，%ANAME(MASTER)%没有拒绝的理由")
+        HTML_PRINT get_text_html(@"就这样在众目睽睽之下用肉棒从后面撞击着主动抬着腿的『%ANAME(coser_chara)%』")
+        CALL html_wait
+        HTML_PRINT get_text_html_c(@"「呜♡！好♥！再❤！更❤！啊啊啊❤！」",coser_chara)
+        HTML_PRINT get_text_html(@"一被%ANAME(MASTER)%的巨物后入的『%ANAME(coser_chara)%』就完全没法正常的说话了")
+        HTML_PRINT get_text_html(@"口齿不清地吐出着淫荡地话语")
+        CALL html_wait
+        HTML_PRINT get_text_html(@"虽然看起来是个经验丰富的家伙，下面倒是紧致地要死")
+        HTML_PRINT get_text_html_c(@"「要❤！要不行了！❤啊！要被大鸡巴干到高潮了！」",coser_chara)
+        HTML_PRINT get_text_html(@"不仅如此，%PRONOUN(coser_chara)%的腔内似乎是因为要去了而进一步地缩紧着")
+        CALL html_wait
+        HTML_PRINT get_text_html(@"无法忍耐的%ANAME(MASTER)%抵着『%ANAME(coser_chara)%』的最深处注入了自己的精液")
+        HTML_PRINT get_text_html(@"『%ANAME(coser_chara)%』感受着子宫被配种的感觉高潮了……")
+        CALL EXPEND_LATER()
+        HTML_PRINT get_text_html(@"像是炫耀一般，%ANAME(MASTER)%当着一众『短根』的面收起了自己的那玩意儿")
+        HTML_PRINT get_text_html(@"至于还趴在地上痉挛着喘息着的『%ANAME(coser_chara)%』就先关着吧")
+        HTML_PRINT get_text_html_n(@"听闻了这件事，世人人对%ANAME(coser_chara)%的认可下降了")
+        FOR LOCAL,1,CHARANUM
+            CALL CHANGE_RELATION_O_TO_O(LOCAL,coser_chara,-500,0)
+        NEXT
+        HTML_PRINT get_text_html_n(@"真正的%ANAME(coser_chara)%在知道这件事后对%ANAME(MASTER)%充满了怨念")
+        CALL CHANGE_RELATION_O_TO_O(coser_chara,MASTER,-500,1000)
+    ELSE
+        HTML_PRINT get_text_html(@"和这种家伙做爱说不定会染上性病啊")
+        HTML_PRINT get_text_html(@"摆摆手叫手下把她处理了")
+        CALL html_wait
+        CALL EXPEND_LATER()
+        HTML_PRINT get_text_html(@"好像忘记问%PRONOUN(coser_chara)%关于奴隶集团的事情了……")
+        HTML_PRINT get_text_html(@"算了，这种家伙应该也记不住什么东西吧")
+        HTML_PRINT get_text_html_n(@"似乎是因为没让属下丢太多脸，MS在国内的评价上升了")
+        CALL MRU_1_SUBEVENT_STATUS(2,-1)
+        CALL CHANGE_RELATION_C_TO_O(CFLAG:MASTER:所属,MASTER,50,-50)
+        CALL html_wait
+    ENDIF
+@MRU_exist_unfallen_female_boss
+    #FUNCTION
+    FOR LOCAL,0,MAX_COUNTRY
+        IF IS_COUNTRY(LOCAL) && LOCAL != CFLAG:MASTER:所属
+            LOCAL:1 = GET_COUNTRY_BOSS(LOCAL)
+            SIF IS_FEMALE(LOCAL:1) && !IS_FALLEN(LOCAL:1)
+                RETURNF 1
+        ENDIF
+    NEXT
+    RETURNF 0
+@MRU_get_random_unfallen_female_boss
+    #FUNCTION
+    #DIM 候补,MAX_COUNTRY
+    #DIM DYNAMIC 候补数
+    FOR LOCAL,0,MAX_COUNTRY
+        IF IS_COUNTRY(LOCAL) && LOCAL != CFLAG:MASTER:所属
+            LOCAL:1 = GET_COUNTRY_BOSS(LOCAL)
+            SIF IS_FEMALE(LOCAL:1) && !IS_FALLEN(LOCAL:1)
+                候补:(候补数++) = LOCAL:1
+        ENDIF
+    NEXT
+    RETURNF 候补:(RAND:候补数)

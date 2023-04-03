@@ -1,0 +1,156 @@
+﻿;EVENT_ENG = NO_FUTURE_FOR_TRAITOR
+;---------------------
+;基本发生概率(1000分率100为10%)
+;再加上configue项目的发生频率，所以概率还会有所变化
+;---------------------
+@EVENT_DAILY_NO_FUTURE_FOR_TRAITOR_RATE()
+    CALL MRU_EVENT_3_RECODE_CHARA_DATA
+    ;#; RETURN 1000
+    RETURN 100
+
+@MRU_EVENT_3_RECODE_CHARA_DATA
+    FOR LOCAL,1,CHARANUM
+        IF IS_TOHO_CHARA(LOCAL)
+            MRU_3_记录恋慕:LOCAL = MRU_3_记录恋慕:LOCAL || TALENT:LOCAL:恋慕
+            MRU_3_记录服从:LOCAL = MRU_3_记录服从:LOCAL || TALENT:LOCAL:服従
+        ENDIF
+    NEXT
+;---------------------
+;发生判定
+;1可以发生，0不能发生
+;---------------------
+@EVENT_DAILY_NO_FUTURE_FOR_TRAITOR_DECISION()
+    SIF !IS_MALE(MASTER)
+        RETURN 0
+    SIF !IS_COUNTRY(CFLAG:MASTER:所属)
+        RETURN 0
+    SIF !TALENT:MASTER:君主的器量
+        RETURN 0
+    RETURN 1
+
+;---------------------
+;事件类型
+;用于在设置中进行配置
+;---------------------
+@EVENT_DAILY_NO_FUTURE_FOR_TRAITOR_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;目标选择
+;不存在该函数或返回1时事件可以触发
+;存在该函数且返回0事件不能触发
+;---------------------
+@EVENT_DAILY_NO_FUTURE_FOR_TRAITOR_SETTARGET()
+    #DIM 候补,MAX_CHARA_NUM
+    #DIM DYNAMIC 候补数
+    FOR LOCAL, 1, CHARANUM
+        SIF !IS_TOHO_CHARA(LOCAL)
+            CONTINUE
+        IF (MRU_3_记录恋慕:LOCAL && !TALENT:LOCAL:恋慕)||(MRU_3_记录服从:LOCAL && !TALENT:LOCAL:服従)
+            SIF !IS_FEMALE(LOCAL)
+                CONTINUE
+            SIF GET_COUNTRY_BOSS(CFLAG:LOCAL:所属) == LOCAL
+                CONTINUE
+            SIF (CFLAG:LOCAL:所属 == CFLAG:MASTER:所属 && CFLAG:LOCAL:捕虜先 == 0) || CFLAG:LOCAL:捕虜先 == CFLAG:MASTER:所属
+                候补:(候补数++) = LOCAL
+        ENDIF
+    NEXT
+    SIF 候补数 <= 0
+        RETURN 0
+    DAILY_TARGET = 候补:(RAND(候补数))
+    DAILY_TARGET_NUM = 1
+    RETURN 1
+
+;---------------------
+;名称
+;返回空或不存在时使用注册名称
+;---------------------
+@EVENT_DAILY_NO_FUTURE_FOR_TRAITOR_NAME()
+    RESULTS = 叛徒没有明天
+
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_NO_FUTURE_FOR_TRAITOR()
+    #DIM CHARA_ID
+    CHARA_ID = DAILY_TARGET
+    IF MRU_3_记录恋慕:CHARA_ID && !TALENT:CHARA_ID:恋慕
+        HTML_PRINT get_text_html(@"曾经和%ANAME(MASTER)%许下了山盟海誓的%ANAME(CHARA_ID)%居然背叛了！")
+    ELSE
+        HTML_PRINT get_text_html(@"曾经发誓永远向%ANAME(MASTER)%效忠的%ANAME(CHARA_ID)%居然背叛了！")
+    ENDIF
+    CALL html_wait
+    HTML_PRINT get_text_html(@"拜倒在了不知道从哪里冒出来的人的控制下")
+    HTML_PRINT get_text_html(@"明明曾经是一副高傲的模样，现在却低贱到成为快乐的奴隶")
+    HTML_PRINT get_text_html(@"一想到这点，%ANAME(MASTER)%就感到怒不可遏")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"但是……真的完全是%ANAME(CHARA_ID)%的责任吗？")
+    HTML_PRINT get_text_html(@"生气也好，悲哀也罢，%ANAME(MASTER)%最终得作出抉择")
+    CALL get_text_html_b(@"让%ANAME(CHARA_ID)%付出代价","","")
+	CALL get_text_html_b(@"算了吧","","")
+	CALL get_html_button_input
+    IF RESULT == 1
+        HTML_PRINT get_text_html(@"是不愿意让%PRONOUN(CHARA_ID)%的人生变得更惨了，还是乐于看着%ANAME(CHARA_ID)%在快乐中沉沦？")
+        HTML_PRINT get_text_html(@"没人知道了，总之%ANAME(MASTER)%选择放手不管")
+        CALL html_wait
+    ELSE
+        HTML_PRINT get_text_html(@"背叛是绝对不能容忍的，必须告诉所有人背叛自己的代价！")
+        HTML_PRINT get_text_html(@"这样想着的%ANAME(MASTER)%，一步步走向了%ANAME(CHARA_ID)%的\@CFLAG:LOCAL:捕虜先 > 0 ? 房间 # 牢房\@")
+        HTML_PRINT get_text_html(@"看见%ANAME(MASTER)%突然进来的%ANAME(CHARA_ID)%吓了一跳")
+        CALL html_wait
+        HTML_PRINT get_text_html(@"长时间被各种各样的人调教过的身心早已经软弱无力")
+        HTML_PRINT get_text_html(@"%ANAME(CHARA_ID)%完全没能反应过来就被%ANAME(MASTER)%按着头抵在了墙上……")
+        HTML_PRINT get_text_html(@"虽然如此，%ANAME(CHARA_ID)%那早已被开发过的身体却不自觉的躁动了起来")
+        CALL html_wait
+        HTML_PRINT get_text_html(@"这个婊子！")
+        HTML_PRINT get_text_html(@"%PRONOUN(CHARA_ID)%的样子更激起了%ANAME(MASTER)%的暴虐心")
+        CALL html_wait
+        HTML_PRINT get_text_html(@"去他妈的！")
+        HTML_PRINT get_text_html(@"今晚一定要让臣服于%ANAME(MASTER)%刻印在%ANAME(CHARA_ID)%的本能上！")
+        CALL html_wait
+        CALL MRU_3_SEX(CHARA_ID)
+        CALL html_wait
+        TALENT:CHARA_ID:自尊心高 = 0
+        TALENT:CHARA_ID:堅強 = 0
+        TALENT:CHARA_ID:傲慢 = 0
+        TALENT:CHARA_ID:自尊心低 = 1
+        TALENT:CHARA_ID:反抗的 = 1
+        TALENT:CHARA_ID:胆怯 = 1
+        TALENT:CHARA_ID:怕痛 = 1
+        CFLAG:CHARA_ID:好感度 = 0
+        CFLAG:CHARA_ID:従属度 = 10000
+        CFLAG:CHARA_ID:依存度 = 300
+		TALENT:CHARA_ID:淫乱系 = 0
+		TALENT:CHARA_ID:特殊勢力素質 = 0
+		TALENT:CHARA_ID:特殊勢力陥落系 = 0
+		TALENT:CHARA_ID:日常系 = 0
+        HTML_PRINT get_text_html(@"彻夜的调教后，%ANAME(CHARA_ID)%心中对%ANAME(MASTER)%的畏惧已经深入骨髓")
+        HTML_PRINT get_text_html(@"跪在%ANAME(MASTER)%的脚边，一边强忍着抽泣一边恳求%ANAME(MASTER)%的原谅")
+        CALL html_wait
+        HTML_PRINT get_text_html(@"但是还不够，%ANAME(CHARA_ID)%还是会为了自己而哭泣")
+        CALL html_wait
+        HTML_PRINT get_text_html(@"必须要让%PRONOUN(CHARA_ID)%的心中只剩下%ANAME(MASTER)%一人")
+        HTML_PRINT get_text_html(@"其余的一切都应该被摒弃")
+        CALL html_wait
+        IF CFLAG:CHARA_ID:捕虜先 == 0
+            CFLAG:CHARA_ID:捕虜先 = CFLAG:MASTER:所属
+            HTML_PRINT get_text_html_n(@"仍然余怒未消的%ANAME(MASTER)%把%ANAME(CHARA_ID)%丢进了大牢")
+        ENDIF
+        HTML_PRINT get_text_html_n(@"听闻了这件事的大家，对%ANAME(MASTER)%感到了畏怖！")
+        FOR LOCAL,1,CHARANUM
+            SIF CFLAG:LOCAL:所属 != CFLAG:MASTER:所属
+                CONTINUE
+            CFLAG:LOCAL:好感度 -= 200
+            CFLAG:LOCAL:従属度 += 200
+        NEXT
+        MRU_3_记录恋慕:CHARA_ID = 0
+        MRU_3_记录服从:CHARA_ID = 1
+    ENDIF
+    RETURN 1
+
+@MRU_3_SEX(CHARA_ID)
+    #DIM CHARA_ID
+    PRINTFORML 涩涩
+    CALL FUCK(MASTER, "欲望, 性技, 性交, 加虐, Ｃ, 射精, 露出, 接吻, Ｖ挿入, Ａ挿入", "童貞喪失", 0, "", "", @"%ANAME(CHARA_ID)%的小穴", "对背叛者的惩罚")
+    CALL FUCK(CHARA_ID, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｖ拡張, 露出, 被虐, 苦痛快楽, 緊縛,口淫,Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精", GET_ID(MASTER), @"%ANAME(MASTER)%的肉棒", ANAME(MASTER), "", "作为背叛者的惩罚")

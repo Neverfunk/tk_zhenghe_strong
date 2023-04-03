@@ -1,0 +1,598 @@
+﻿;ENG = LITTLE_ARTIST
+;---------------------
+;基本发生概率(1000分率100为10%)
+;再加上configue项目的发生频率，所以概率还会有所变化
+;---------------------
+@EVENT_DAILY_LITTLE_ARTIST_RATE()
+	CALL MRU_get_phase_rate("MRU_1_1",MRU_1_1_PHASE)
+	IF RESULT != -1
+		RETURN RESULT
+	ELSE
+		RETURN 200
+	ENDIF
+
+
+
+;---------------------
+;发生判定
+;1可以发生，0不能发生
+;---------------------
+@EVENT_DAILY_LITTLE_ARTIST_DECISION()
+	SIF !MRU_1_奴隶贩子集团事件链启用
+		RETURN 0
+    SIF !IS_MALE(MASTER)
+        RETURN 0
+    SIF !IS_COUNTRY(CFLAG:MASTER:所属) || IS_SP_COUNTRY(CFLAG:MASTER:所属)
+        RETURN 0
+	SIF MRU_1_SUBEVENT_STATUS:0 != 0
+		RETURN 0
+	CALL MRU_event_check("MRU_1_1",MRU_1_1_PHASE)
+	SIF RESULT == -1
+		RETURN 0
+	RETURN 1
+;---------------------
+;事件类型
+;用于在设置中进行配置
+;---------------------
+@EVENT_DAILY_LITTLE_ARTIST_GENRE()
+	RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;名称
+;返回空或不存在时使用注册名称
+;---------------------
+@EVENT_DAILY_LITTLE_ARTIST_NAME()
+	CALL MRU_get_phase_name("MRU_1_1",MRU_1_1_PHASE)
+	SIF RESULTS != ""
+		RETURN
+	RESULTS '= "小画师"
+
+;CALL MRU_event_set_next_phase("MRU_1_1",MRU_1_1_PHASE,"")
+;CALL MRU_1_SUBEVENT_STATUS:0 = 1(1)
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_LITTLE_ARTIST()
+	IF MRU_1_1_PHASE == ""
+		CALL MRU_event_set_next_phase("MRU_1_1",MRU_1_1_PHASE,"初见")
+	ENDIF
+	CALL MRU_event_procedure("MRU_1_1",MRU_1_1_PHASE)
+	RETURN 1
+
+@MRU_1_1__rate
+	RETURN 50
+;0：初见
+@MRU_1_1_初见_text
+	HTML_PRINT get_text_html(@"%ANAME(MASTER)%按照情报来到了地方")
+	HTML_PRINT get_text_html(@"正迷茫于不知道该从何处下手时，突然被人拉住了衣角")
+	HTML_PRINT get_text_html_c(@"「先生……可以请您买一副画吗？」",CHARA_NPC)
+	HTML_PRINT get_text_html(@"%ANAME(MASTER)%仔细看去，发现是个尚且年轻的『画师』")
+	CALL html_wait
+	HTML_PRINT get_text_html(@"身上穿着的是一件非常破旧的连衣裙")
+	HTML_PRINT get_text_html(@"看得出来尺码已经非常小了，勉强才能遮住大腿根")
+	HTML_PRINT get_text_html(@"大大小小地破洞把她那许久没清洗过的灰色肌肤透露了出来")
+	HTML_PRINT get_text_html(@"唯一能确定她在干什么的大概只有她手上的画盘和身旁的画布了吧")
+	CALL html_wait
+	HTML_PRINT get_text_html(@"看见%ANAME(MASTER)%没有回答，女孩有些害怕地退了回去")
+	HTML_PRINT get_text_html(@"正当%ANAME(MASTER)%在思索应该怎么办时，被另一个满脸坏笑地人搭上了话")
+	CALL html_wait
+	HTML_PRINT get_text_html_c(@"「看起来先生很喜欢这个东西呢？」",CHARA_NPC)
+	HTML_PRINT get_text_html_c(@"「只要5000金，我们会安排好房间。一小时，让她单独给您画一幅画，怎么样？」",CHARA_NPC)
+	CALL html_wait
+	HTML_PRINT get_text_html(@"非常快速地就进入了要价的环节")
+	HTML_PRINT get_text_html(@"那么已经没有任何疑问了")
+	HTML_PRINT get_text_html(@"这里就是%ANAME(MASTER)%苦苦寻找的地方")
+	CALL html_wait
+	HTML_PRINT get_text_html(@"没有时间呼叫增援了，现在就要做出决定")
+	CALL get_text_html_b("攻击","","武斗判定")
+	CALL get_text_html_b("同意","1_0_0","买下女孩")
+	CALL get_text_html_b("拒绝","","不能做这种事情")
+	CALL get_html_button_input
+	IF RESULT == 0
+		HTML_PRINT get_text_html(@"到底是在什么地方潜伏了那么多人？")
+		HTML_PRINT get_text_html(@"掏出武器的一瞬间，%ANAME(MASTER)%就被无数人包围了")
+		SIF MRU_1_RANDOM_CHECK_BOUNS > 0
+			HTML_PRINT get_text_html(@"即使有同伴帮忙，这场战斗看起来也是凶多吉少")
+		CALL html_wait
+		CALL MRU_check(MASTER,"ack",3)
+		IF RESULT
+			HTML_PRINT get_text_html(@"勉强击溃了这帮人，不过也到此为止了")
+			HTML_PRINT get_text_html(@"一小帮人贩子趁乱带着奴隶们逃走了")
+			HTML_PRINT get_text_html_w(@"看起来在这里是不能再搜索到任何情报了")
+			MRU_1_SUBEVENT_STATUS:0 = -1
+			CALL html_wait
+		ELSE
+			HTML_PRINT get_text_html(@"被狠狠地击败了，浑身是伤的%ANAME(MASTER)%被人在晚上丢回了据点")
+			HTML_PRINT get_text_html(@"大概是确认了%ANAME(MASTER)%的身份，不想把事情闹大的奴隶贩子没有下死手")
+			HTML_PRINT get_text_html(@"不过正是因为这样，他们必然会提高警惕")
+			HTML_PRINT get_text_html_w(@"看起来在这里是不能再搜索到任何情报了")
+			HTML_PRINT get_text_html_n(@"%ANAME(MASTER)%需要休息三个回合")
+			MRU_1_SUBEVENT_STATUS:0 = -1
+			CALL ADD_COOLTIME(MASTER,3,0)
+			CALL html_wait
+		ENDIF
+	ELSEIF RESULT == 1
+		MONEY -= 5000
+		IF MONEY > 10000
+			HTML_PRINT get_text_html(@"就在%ANAME(MASTER)%掏钱时，男子看着%ANAME(MASTER)%手中大把的钱突然说道")
+			HTML_PRINT get_text_html_c(@"「价格变了，现在要10000金。」",CHARA_NPC)
+			HTML_PRINT get_text_html(@"非常干脆利落地涨价")
+			HTML_PRINT get_text_html(@"大概是认为%ANAME(MASTER)%被欲望冲昏了头脑吧")
+			HTML_PRINT get_text_html(@"男人的眼里闪烁着得意的鄙夷抢过了钱")
+			CALL html_wait
+			MONEY -= 5000
+		ENDIF
+		CALL MRU_1_1_初见_text_agree
+	ELSE
+		HTML_PRINT get_text_html(@"%ANAME(MASTER)%拒绝了男人")
+		HTML_PRINT get_text_html_c(@"「啧……2000，这是底线了。」",CHARA_NPC)
+		HTML_PRINT get_text_html(@"看得出来，男人也苦于『商品』无法售出")
+		CALL html_wait
+		CALL get_text_html_b("同意","1_0_1","买下女孩")
+		CALL get_text_html_b("拒绝","","不能做这种事情")
+		CALL get_html_button_input
+		IF RESULT == 0
+			MONEY -= 2000
+			CALL MRU_1_1_初见_text_agree
+		ELSE
+			HTML_PRINT get_text_html_c(@"「那就滚吧，穷鬼。」",CHARA_NPC)
+			HTML_PRINT get_text_html(@"一瞬间就对%ANAME(MASTER)%失去了兴趣的男人转头躲回了阴影中")
+			HTML_PRINT get_text_html_c(@"「也是啊，会对画画感兴趣也只能是这种货色了。」",CHARA_NPC)
+			HTML_PRINT get_text_html_c(@"「期待你这样能给我赚钱真是愚蠢。回去以后……」",CHARA_NPC)
+			HTML_PRINT get_text_html(@"%ANAME(MASTER)%只能眼巴巴地看着男人把画师拖走了")
+			HTML_PRINT get_text_html_w(@"看起来在这里是不能再搜索到任何情报了")
+			MRU_1_SUBEVENT_STATUS:0 = -1
+			CALL html_wait
+
+		ENDIF
+	ENDIF
+;0_agree：同意买
+@MRU_1_1_初见_text_agree
+	HTML_PRINT get_text_html(@"收了钱的男人贱笑着把%ANAME(MASTER)%和画师带进了小旅馆")
+	HTML_PRINT get_text_html_c(@"「虽然说是一个小时呢……先生请便吧，晚上之前送回来就好。」",CHARA_NPC)
+	HTML_PRINT get_text_html_c(@"「如果想买下来的话价格也好说，不过可千万别偷偷带人跑走呢。」",CHARA_NPC)
+	HTML_PRINT get_text_html_c(@"「这里可是有人看着的，当然了，您的隐私我们可是会好好保护的。」",CHARA_NPC)
+	HTML_PRINT get_text_html(@"说着，男子带上了门离开了")
+	CALL html_wait
+	HTML_PRINT get_text_html(@"画师有些紧张地看着%ANAME(MASTER)%")
+	HTML_PRINT get_text_html(@"是第一次做这种事情吗？")
+	HTML_PRINT get_text_html(@"%ANAME(MASTER)%也不知道这算是幸运还是不幸")
+	HTML_PRINT get_text_html(@"该怎么办呢？")
+	CALL get_text_html_b("享用商品","","")
+	CALL get_text_html_b("好好对待","","")
+	CALL get_html_button_input
+	IF RESULT == 0
+		HTML_PRINT get_text_html(@"自己花大价钱买来的东西还是要享用一下的")
+		HTML_PRINT get_text_html(@"（就当是为了赢取奴隶贩子的信任）")
+		HTML_PRINT get_text_html(@"这样欺骗着自己，%ANAME(MASTER)%把自己和画师的衣服褪去了")
+		HTML_PRINT get_text_html(@"然后把不断流泪的女孩压倒在了床上，好好地享用了她的第一次")
+		CALL FUCK(MASTER, "性技, 性交,欲望, Ｃ, 射精", "童貞喪失, Ｖ挿入", 0, "画师的唇", "", "画师的膣", "买春")
+		CALL EXPEND_LATER()
+		HTML_PRINT get_text_html(@"她那娇小的肉体极大地满足了%ANAME(MASTER)%")
+		HTML_PRINT get_text_html(@"很难想象这样的打扮下居然会有这样的极品，真是幸运啊")
+		HTML_PRINT get_text_html(@"咳嗽着地少女在初夜后艰难地睡去了")
+		HTML_PRINT get_text_html(@"该思考一下接下来应该怎么办了")
+		CALL get_text_html_b("强行带走","","武斗判定")
+		CALL get_text_html_b("把女孩送回去","","不引起冲突")
+		CALL get_html_button_input
+		IF RESULT == 0
+			HTML_PRINT get_text_html(@"完全没有被防备！")
+			HTML_PRINT get_text_html(@"看起来监视的人在%ANAME(MASTER)%展现兽欲时就离开了")
+			HTML_PRINT get_text_html(@"%ANAME(MASTER)%把女孩带回了据点，随意放在了空房间中")
+			CALL MRU_event_set_next_phase("MRU_1_1",MRU_1_1_PHASE,"雷普结局")
+			CALL html_wait
+		ELSE
+			HTML_PRINT get_text_html(@"正常地把女孩带回给了奴隶贩子")
+			HTML_PRINT get_text_html_c(@"「嘿嘿嘿……怎么样？」",CHARA_NPC)
+			HTML_PRINT get_text_html(@"男人淫笑着问着%ANAME(MASTER)%")
+			CALL html_wait
+			HTML_PRINT get_text_html_c(@"「这孩子其实天生就是变态，经常晚上偷偷自己躲在被窝里自慰呢。」",CHARA_NPC)
+			HTML_PRINT get_text_html_c(@"「白天还像模像样地整点画画，一到晚上就是一纯粹的贱货。」",CHARA_NPC)
+			HTML_PRINT get_text_html_c(@"「要不是这里有规定，我都自己想干了。不过能被您享用到我也很开心。」",CHARA_NPC)
+			HTML_PRINT get_text_html_c(@"「如果先生想把这奴隶买下来，只需要10000金，怎么样？」",CHARA_NPC)
+			CALL get_text_html_b("买下","1_0_2","")
+			CALL get_text_html_b("不买","","")
+			CALL get_html_button_input
+			IF RESULT == 0
+				HTML_PRINT get_text_html(@"收下了钱的男人干脆地给画师套上项圈交给了%ANAME(MASTER)%")
+				HTML_PRINT get_text_html(@"似乎在推销完了商品后就不愿意浪费口舌了，快速地消失在了阴影中")
+				HTML_PRINT get_text_html(@"%ANAME(MASTER)%把女孩带回了据点，随意放在了空房间中")
+				CALL MRU_event_set_next_phase("MRU_1_1",MRU_1_1_PHASE,"雷普结局")
+				CALL html_wait
+			ELSE
+				HTML_PRINT get_text_html_c(@"「真是遗憾……如果是因为经济上的问题请随时再来。」",CHARA_NPC)
+				HTML_PRINT get_text_html(@"男人撇着嘴把女孩带了回去")
+				CALL MRU_event_set_next_phase("MRU_1_1",MRU_1_1_PHASE,"失踪结局")
+			ENDIF
+		ENDIF
+	ELSE
+		HTML_PRINT get_text_html(@"看着女孩那害怕地样子，%ANAME(MASTER)%的心都要碎了")
+		HTML_PRINT get_text_html(@"先让女孩去浴室洗个澡，自己则到街上去买了干净的衣服和食物")
+		HTML_PRINT get_text_html(@"让画师换上合身的衣服后，把食物推到了她的面前")
+		HTML_PRINT get_text_html(@"女孩再三确认是给她吃的以后，开始狼吞虎咽起来")
+		HTML_PRINT get_text_html(@"%ANAME(MASTER)%看着眼前的景象，沉思着接下来该怎么办")
+		CALL EXPEND_LATER()
+		HTML_PRINT get_text_html(@"毫无疑问的是，这间房子肯定被人贩子监听着")
+		HTML_PRINT get_text_html(@"直接问女孩相关的问题就是打草惊蛇")
+		HTML_PRINT get_text_html(@"要想办法把这孩子带回据点再询问吧")
+		HTML_PRINT get_text_html(@"不过她真的能知道什么有用的情报吗？")
+		CALL html_wait
+		HTML_PRINT get_text_html_c(@"「先生……请让我给您画一幅画吧……」",CHARA_NPC)
+		HTML_PRINT get_text_html(@"突然被喊住了，回过神来的%ANAME(MASTER)%发现画师已经吃完了")
+		HTML_PRINT get_text_html_c(@"「作……作为报答？」",CHARA_NPC)
+		HTML_PRINT get_text_html(@"%ANAME(MASTER)%点了点头")
+		HTML_PRINT get_text_html(@"画师看起来开心地动起了画笔")
+		HTML_PRINT get_text_html(@"%ANAME(MASTER)%只能『木讷』地做着模板")
+		HTML_PRINT get_text_html(@"心里盘算着接下来该怎么办")
+		CALL EXPEND_LATER()
+		HTML_PRINT get_text_html(@"画师的画技看起来……不好评价")
+		HTML_PRINT get_text_html(@"只是门外汉的%ANAME(MASTER)%也能察觉出其中几乎没有任何技巧可言")
+		HTML_PRINT get_text_html(@"但令人惊奇的是，%ANAME(MASTER)%可以明确知道画中的人就是自己")
+		HTML_PRINT get_text_html(@"看得出来这孩子很擅长抓住画面的重点");←就黄油而言就是MASTER的大XX吧，我可以画画你的奖杯吗
+		HTML_PRINT get_text_html(@"或许能让她把见过的奴隶贩子都画下来？")
+		CALL html_wait
+		HTML_PRINT get_text_html(@"已经没时间思考了，门被敲响了")
+		CALL get_text_html_b("强行把画师带走","","武斗判定")
+		CALL get_text_html_b("正常离开","","不引起冲突")
+		CALL get_html_button_input
+		IF RESULT == 0
+			HTML_PRINT get_text_html(@"强行带着女孩突围")
+			HTML_PRINT get_text_html(@"大概是没想到刚刚还正常无比的客人突然暴起")
+			HTML_PRINT get_text_html(@"奴隶贩子们看起来没什么准备")
+			CALL html_wait
+			CALL MRU_check(MASTER,"ack",1)
+			IF RESULT
+				HTML_PRINT get_text_html(@"成功了，%ANAME(MASTER)%带着画师逃了出来，返回了据点")
+				HTML_PRINT get_text_html(@"今晚先把画师安置好，具体怎么办之后再说吧")
+				HTML_PRINT get_text_html(@"离开时，还恍惚于突然被救出的女孩向%ANAME(MASTER)%表达了感谢")
+				HTML_PRINT get_text_html(@"%ANAME(MASTER)%把女孩送自己的画像存了起来")
+				CALL MRU_event_set_next_phase("MRU_1_1",MRU_1_1_PHASE,"不信任结局")
+				CALL html_wait
+			ELSE
+				HTML_PRINT get_text_html(@"即便如此，%ANAME(MASTER)%还是失败了")
+				HTML_PRINT get_text_html(@"虽然自己成功逃了出来")
+				HTML_PRINT get_text_html(@"但是身旁的画师却不知何时被人刺穿了胸口")
+				HTML_PRINT get_text_html(@"%ANAME(MASTER)%只能草草把她安葬在荒郊野岭")
+				HTML_PRINT get_text_html_w(@"看来这里没法再继续调查下去了")
+				MRU_1_SUBEVENT_STATUS:0 = -1
+				CALL html_wait
+			ENDIF
+		ELSE
+			HTML_PRINT get_text_html(@"%ANAME(MASTER)%作出正常的样子打开了门")
+			HTML_PRINT get_text_html(@"那个奴隶贩子出现在了门口")
+			HTML_PRINT get_text_html(@"他简单打量了一下女孩的样子，然后挥手让人把她带走了")
+			HTML_PRINT get_text_html(@"正当%ANAME(MASTER)%也准备离开时，被那男人拦住了")
+			CALL html_wait
+			HTML_PRINT get_text_html_c(@"「先生很喜欢这孩子吧？」",CHARA_NPC)
+			HTML_PRINT get_text_html_c(@"「她不知道从哪里学来了画画，所以我们才让她出来试试看。」",CHARA_NPC)
+			HTML_PRINT get_text_html_c(@"「她是个很乖的孩子，我们照顾起来也非常省心。」",CHARA_NPC)
+			HTML_PRINT get_text_html_c(@"「如果您想带回去收养的话，只需要100 000金。」",CHARA_NPC)
+			HTML_PRINT get_text_html_c(@"「确实不是一笔小数目，您可以随时再来。」",CHARA_NPC)
+			HTML_PRINT get_text_html_c(@"「但是您也知道，毕竟在我们这里她只是商品。」",CHARA_NPC)
+			HTML_PRINT get_text_html_c(@"「作为还保有纯洁的奴隶，随时就会被别人买走，可别怪我没提醒你。」",CHARA_NPC)
+			HTML_PRINT get_text_html(@"男人抛出了令人愤慨的话")
+			CALL html_wait
+			HTML_PRINT get_text_html(@"%ANAME(MASTER)%试探着问道能否今天就买下")
+			HTML_PRINT get_text_html_c(@"「我们也得检查检查……真想买的话还请下次再来。」",CHARA_NPC)
+			HTML_PRINT get_text_html(@"看来还是被奴隶贩子怀疑了，毕竟%ANAME(MASTER)%的所作所为太正常了")
+			HTML_PRINT get_text_html(@"今天就先回据点")
+			HTML_PRINT get_text_html(@"%ANAME(MASTER)%把女孩送自己的画像存了起来")
+			CALL MRU_event_set_next_phase("MRU_1_1",MRU_1_1_PHASE,"二次前往")
+			CALL html_wait
+		ENDIF
+	ENDIF
+;1：二次前往
+@MRU_1_1_二次前往_name
+	RESULTS '= "救出画师行动"
+@MRU_1_1_二次前往_text
+	HTML_PRINT get_text_html(@"已经过了一段时间了")
+	HTML_PRINT get_text_html(@"该去解决那个奴隶画师的事情了")
+	CALL get_text_html_b("出发","","")
+	CALL get_text_html_b("再等等吧","","")
+	CALL get_html_button_input
+	IF RESULT == 0
+		IF MONEY < 1e5
+			HTML_PRINT get_text_html(@"似乎还没有攒够约定的钱")
+		ELSE
+			HTML_PRINT get_text_html(@"虽然攒够了约定的钱")
+		ENDIF
+		HTML_PRINT get_text_html(@"不过对于这种家伙也没有和和气气的必要吧")
+		HTML_PRINT get_text_html_n(@"%ANAME(MASTER)%做好了武力对抗的准备")
+		CALL html_wait
+		HTML_PRINT get_text_html(@"%ANAME(MASTER)%回到到了那里")
+		HTML_PRINT get_text_html(@"再次看见了那个画师和她身边的奴隶贩子")
+		HTML_PRINT get_text_html(@"他们就待在原来的地方，看来还是没人愿意买女孩的画")
+		HTML_PRINT get_text_html(@"女孩倒是没有被粗暴对待，穿着的还是上次%ANAME(MASTER)%赠予的衣物")
+		HTML_PRINT get_text_html(@"也许唯一能让奴隶贩子保持耐心的就是%ANAME(MASTER)%这个可能的『客户』了")
+		CALL html_wait
+		HTML_PRINT get_text_html(@"正在观察情况时，突然有一个女人把%ANAME(MASTER)%拉进了小巷")
+		HTML_PRINT get_text_html(@"%ANAME(MASTER)%紧张地要掏出武器，那人却双手张开安抚着%ANAME(MASTER)%")
+		HTML_PRINT get_text_html_c(@"「你也在关注那孩子呢，上次送她衣服的就是你吧？」",CHARA_NPC)
+		HTML_PRINT get_text_html_c(@"「别紧张，我也是个搞画画的人，眼力可是很好的。」",CHARA_NPC)
+		HTML_PRINT get_text_html_c(@"「请原谅我直接一点，我希望你把那孩子救出来，然后送给我当学生。」",CHARA_NPC)
+		CALL html_wait
+		HTML_PRINT get_text_html(@"不知道该说什么的%ANAME(MASTER)%下意识地表达了对那孩子画技的担忧")
+		HTML_PRINT get_text_html_c(@"「虽然表面上很难看出来，但是那孩子在画画上确实很有天赋。」",CHARA_NPC)
+		HTML_PRINT get_text_html_c(@"「在没人系统地教过的情况下，却能特别敏锐地察觉到画像的重点。」",CHARA_NPC)
+		CALL html_wait
+		HTML_PRINT get_text_html_c(@"「我相信你救她也不是为了什么一己私欲。」",CHARA_NPC)
+		HTML_PRINT get_text_html_c(@"「如果你能救她出来，我打算把她带回外界学习。毕竟现在幻想乡真是一片泥潭。」",CHARA_NPC)
+		HTML_PRINT get_text_html_c(@"「我本来想靠自己的，但是那群混蛋要价太狠了！光是要让她画一幅画就要花50金！」",CHARA_NPC)
+		HTML_PRINT get_text_html_c(@"「你怎么看？不过也不着急，等你救她出来再说吧。」",CHARA_NPC)
+		HTML_PRINT get_text_html(@"自称也是『画家』的女人说完后快速地离开了")
+		CALL html_wait
+		HTML_PRINT get_text_html(@"先把注意力移到女孩上吧，那么要动手还是花钱买呢")
+		CALL get_text_html_b("动手","","武斗判定")
+		CALL get_text_html_b("交易","1_0_3","花钱买下女孩")
+		CALL get_html_button_input
+		IF RESULT == 0
+			HTML_PRINT get_text_html(@"对付这帮家伙没什么可谈的")
+			HTML_PRINT get_text_html(@"做好了充足准备的%ANAME(MASTER)%冲了上去")
+			CALL MRU_check(MASTER,"ack",2,30)
+			IF RESULT
+				HTML_PRINT get_text_html(@"成功了！")
+				CALL html_wait
+				HTML_PRINT get_text_html(@"突然的袭击让奴隶贩子们措手不及")
+				HTML_PRINT get_text_html(@"%ANAME(MASTER)%趁机把画师带了出来")
+				CALL EXPEND_LATER()
+				HTML_PRINT get_text_html(@"今晚先把画师安置好，具体怎么办之后再说吧")
+				HTML_PRINT get_text_html(@"还有那个奇怪的画家，要不要相信她呢？")
+				HTML_PRINT get_text_html(@"离开时，还恍惚于突然获得自由的女孩向%ANAME(MASTER)%表达了感谢")
+				CALL MRU_event_set_next_phase("MRU_1_1",MRU_1_1_PHASE,"抉择")
+				CALL html_wait
+			ELSE
+				HTML_PRINT get_text_html(@"居然失败了……")
+				CALL html_wait
+				HTML_PRINT get_text_html(@"虽然没有人员上的损伤")
+				HTML_PRINT get_text_html(@"但察觉到%ANAME(MASTER)%的目标是画师后")
+				HTML_PRINT get_text_html(@"奴隶贩子们决绝地刺死了女孩后逃走了")
+				HTML_PRINT get_text_html(@"%ANAME(MASTER)%只能在某处埋葬了女孩然后离开")
+				HTML_PRINT get_text_html_w(@"这条线索看来是断了")
+				MRU_1_SUBEVENT_STATUS:0 = -1
+				CALL html_wait
+			ENDIF
+		ELSE
+			HTML_PRINT get_text_html(@"决定用更安全的方法把女孩带出来")
+			HTML_PRINT get_text_html(@"%ANAME(MASTER)%独自靠近了奴隶贩子")
+			CALL html_wait
+			HTML_PRINT get_text_html(@"一看见来者是%ANAME(MASTER)%，那个男人马上露出了笑容")
+			HTML_PRINT get_text_html_c(@"「怎么样，打算把她买下来了吗？」",CHARA_NPC)
+			HTML_PRINT get_text_html_c(@"「这孩子可是一直在盼望着呢。」",CHARA_NPC)
+			CALL html_wait
+			HTML_PRINT get_text_html(@"%ANAME(MASTER)%低头看去，女孩在画板上所描绘的居然是自己")
+			HTML_PRINT get_text_html(@"和女人所说的一样，虽然画技很一般，但却能一眼看出画的就是自己")
+			HTML_PRINT get_text_html(@"看见%ANAME(MASTER)%在看自己的画，画师害羞地把头低了下去")
+			CALL html_wait
+			HTML_PRINT get_text_html(@"%ANAME(MASTER)%把钱交给了奴隶贩子")
+			HTML_PRINT get_text_html(@"他一副甩掉了包袱的样子匆忙把女孩脖颈的项圈解开了")
+			HTML_PRINT get_text_html(@"然后迅速地从旁边黑暗的小巷中消失了")
+			CALL html_wait
+			HTML_PRINT get_text_html(@"%ANAME(MASTER)%让隐藏在身边的属下去追踪那个人贩子")
+			HTML_PRINT get_text_html(@"自己则带着画师回到了据点")
+			CALL EXPEND_LATER()
+			HTML_PRINT get_text_html(@"今晚先把画师安置好，具体怎么办之后再说吧")
+			HTML_PRINT get_text_html(@"还有那个奇怪的女人，要不要相信她呢？")
+			HTML_PRINT get_text_html(@"离开时，还恍惚于突然获得自由的女孩向%ANAME(MASTER)%表达了感谢")
+			CALL MRU_event_set_next_phase("MRU_1_1",MRU_1_1_PHASE,"抉择")
+			CALL html_wait
+		ENDIF
+	ELSE
+		HTML_PRINT get_text_html(@"那就再等等吧")
+		HTML_PRINT get_text_html(@"不过还是得早点去呢……%ANAME(MASTER)%回想起上次那个男人说的话")
+		MRU_1_1_拖延次数++
+		CALL html_wait
+	ENDIF
+@MRU_1_1_二次前往_end
+	IF MRU_1_1_拖延次数 > 3
+		CALL MRU_event_set_next_phase("MRU_1_1",MRU_1_1_PHASE,"失踪结局")
+	ENDIF
+;2-抉择是否送女孩出去
+@MRU_1_1_抉择_text
+	HTML_PRINT get_text_html(@"就在%ANAME(MASTER)%救出画师后不久，那个女人就找上了门")
+	HTML_PRINT get_text_html_c(@"「我看见你带着那孩子走了呢。」",CHARA_NPC)
+	HTML_PRINT get_text_html_c(@"「怎么样，要接受我的提议吗？」",CHARA_NPC)
+	HTML_PRINT get_text_html_c(@"「我会把这孩子带出去学习画画，至于出师之后怎么办由她自己定。」",CHARA_NPC)
+	HTML_PRINT get_text_html(@"昨天已经让属下查明了，这个女人确实是在放浪中的个画家")
+	HTML_PRINT get_text_html(@"那么要不要相信她呢")
+	CALL get_text_html_b("相信她","","")
+	CALL get_text_html_b("不相信她","","")
+	CALL get_html_button_input
+	IF RESULT == 0
+		HTML_PRINT get_text_html(@"姑且还是相信她")
+		HTML_PRINT get_text_html(@"而且自己也没什么空照顾那个孩子")
+		CALL html_wait
+		HTML_PRINT get_text_html(@"不过还是要先试着解决自己的问题")
+		HTML_PRINT get_text_html(@"把画师叫到了房间来，请她试着画出她所见过的奴隶贩子都是什么样子的")
+		HTML_PRINT get_text_html(@"她有些惶恐地动起了画笔……")
+		CALL EXPEND_LATER()
+		HTML_PRINT get_text_html(@"很遗憾，女孩的画技还是太差了")
+		HTML_PRINT get_text_html(@"画出来的人像哪怕作为寻人的比对都很困难")
+		HTML_PRINT get_text_html_c(@"「非……非常抱歉！我我我……」",CHARA_NPC)
+		HTML_PRINT get_text_html(@"女孩一次又一次地向%ANAME(MASTER)%道歉着")
+		CALL html_wait
+		HTML_PRINT get_text_html_c(@"「原来你的目的是这个呀……」",CHARA_NPC)
+		HTML_PRINT get_text_html(@"女人恍然地说到")
+		CALL html_wait
+		HTML_PRINT get_text_html_c(@"「我倒是可以帮你呢……你看这里……」",CHARA_NPC)
+		HTML_PRINT get_text_html(@"说着，女人直接坐在了画师身边开始指导")
+		HTML_PRINT get_text_html(@"一开始女孩还有点害怕，但是慢慢地也投入到了温柔地教学中")
+		CALL EXPEND_LATER()
+		HTML_PRINT get_text_html_c(@"「所以说，如果你想学好怎么画画的话，可以跟着我学习。」",CHARA_NPC)
+		HTML_PRINT get_text_html_c(@"「我很乐意去教聪明的孩子。」",CHARA_NPC)
+		HTML_PRINT get_text_html_c(@"「还有就是，你也很想帮助救你出来的人吧，不好好练习可是没什么可能的。」",CHARA_NPC)
+		HTML_PRINT get_text_html_c(@"「怎么样？」",CHARA_NPC)
+		CALL html_wait
+		HTML_PRINT get_text_html(@"长时间的教导结束后，女人向画师伸出了双手")
+		HTML_PRINT get_text_html(@"女孩有些担忧地望着%ANAME(MASTER)%")
+		CALL html_wait
+		HTML_PRINT get_text_html(@"%ANAME(MASTER)%向女孩表示可以信任她")
+		HTML_PRINT get_text_html(@"女孩犹豫了片刻，最终还是点了点头")
+		CALL html_wait
+		HTML_PRINT get_text_html_c(@"「嗯……那我们就赶紧出发吧。」",CHARA_NPC)
+		HTML_PRINT get_text_html_c(@"「有目标的人生总是很短暂的……有缘再见了。」",CHARA_NPC)
+		HTML_PRINT get_text_html(@"女人雷厉风行地带着画师离开了")
+		HTML_PRINT get_text_html(@"离别时，女孩一直回头望着%ANAME(MASTER)%")
+		HTML_PRINT get_text_html_n(@"这里关于奴隶集团的调查暂时搁置了")
+		CALL MRU_event_set_next_phase("MRU_1_1",MRU_1_1_PHASE,"等待")
+		CALL html_wait
+	ELSE
+		HTML_PRINT get_text_html(@"不想相信这个人，何况%ANAME(MASTER)%还指望能靠女孩查到什么线索呢")
+		HTML_PRINT get_text_html_c(@"「哎……也是呢。」",CHARA_NPC)
+		HTML_PRINT get_text_html(@"女人离开了")
+		CALL EXPEND_LATER()
+		HTML_PRINT get_text_html(@"%ANAME(MASTER)%来到了画师的房间，拜托她试着画出她所见过的奴隶贩子都是什么样子的")
+		HTML_PRINT get_text_html(@"她有些惶恐地动起了画笔……")
+		CALL EXPEND_LATER()
+		HTML_PRINT get_text_html(@"很遗憾，女孩的画技还是太差了")
+		HTML_PRINT get_text_html(@"画出来的人像哪怕作为寻人的比对都很困难")
+		HTML_PRINT get_text_html_c(@"「非……非常抱歉！我我我……」",CHARA_NPC)
+		HTML_PRINT get_text_html(@"女孩一次又一次地向%ANAME(MASTER)%道歉着")
+		HTML_PRINT get_text_html(@"%ANAME(MASTER)%压住内心的失望，摆着手表示没关系")
+		CALL EXPEND_LATER()
+		HTML_PRINT get_text_html(@"半夜，%ANAME(MASTER)%突然被据点的医生叫醒了")
+		HTML_PRINT get_text_html(@"当他们赶到画师的床前时，她刚好呼出最后一口气")
+		HTML_PRINT get_text_html(@"没闭上的眼睛似乎依然在向%ANAME(MASTER)%表达歉意")
+		HTML_PRINT get_text_html(@"让医生稍微检查一下尸体后在据点郊外埋葬了画师")
+		CALL EXPEND_LATER()
+		HTML_PRINT get_text_html(@"简单的葬礼后，被检查的医生叫住了")
+		HTML_PRINT get_text_html_c(@"「这孩子得了『月曜症』呢，太可怜了……」",CHARA_NPC)
+		HTML_PRINT get_text_html_c(@"「有一点你可能感兴趣。」",CHARA_NPC)
+		CALL html_wait
+		HTML_PRINT get_text_html_c(@"「『月曜症』会导致全身剧痛。」",CHARA_NPC)
+		HTML_PRINT get_text_html_c(@"「这么小的孩子不太可能靠意志忍受这种痛苦。」",CHARA_NPC)
+		HTML_PRINT get_text_html_c(@"「所以我怀疑那群混蛋喂了她麻药来缓解病痛。」",CHARA_NPC)
+		HTML_PRINT get_text_html(@"这也许也是线索，把麻药买卖和奴隶买卖合并起来查的话或许能发现什么？")
+		CALL html_wait
+		HTML_PRINT get_text_html_c(@"「不要太自责，这种病几乎无法医治，我们就算发现了也只能帮她缓解痛苦……」",CHARA_NPC)
+		HTML_PRINT get_text_html(@"谈话结束后，%ANAME(MASTER)%让属下根据新的线索进行交叉验证，果然确定了几个当地人贩子的首领")
+		HTML_PRINT get_text_html_w(@"对奴隶集团的调查取得了进展！")
+		MRU_1_SUBEVENT_STATUS:0 = 1
+		CALL html_wait
+	ENDIF
+;外出时不触发
+@MRU_1_1_等待_check
+	;#; PRINTFORML {MRU_1_1_离开时间}
+	MRU_1_1_离开时间 ++
+	IF MRU_1_1_离开时间 > 10 + RAND:5
+		CALL MRU_event_set_next_phase("MRU_1_1",MRU_1_1_PHASE,"归来")
+	ENDIF
+	[IF_DEBUG]
+		CALL MRU_event_set_next_phase("MRU_1_1",MRU_1_1_PHASE,"归来")
+	[ENDIF]
+	RETURN -1
+@MRU_1_1_等待_text
+
+;正常对待后续
+@MRU_1_1_不信任结局_text
+	HTML_PRINT get_text_html(@"%ANAME(MASTER)%来到了画师的房间，拜托她试着画出她所见过的奴隶贩子都是什么样子的")
+	HTML_PRINT get_text_html(@"她有些惶恐地动起了画笔……")
+	CALL EXPEND_LATER()
+	HTML_PRINT get_text_html(@"很遗憾，女孩的画技还是太差了")
+	HTML_PRINT get_text_html(@"画出来的人像哪怕作为寻人的比对都很困难")
+	HTML_PRINT get_text_html_c(@"「非……非常抱歉！我我我……」",CHARA_NPC)
+	HTML_PRINT get_text_html(@"女孩一次又一次地向%ANAME(MASTER)%道歉着")
+	HTML_PRINT get_text_html(@"%ANAME(MASTER)%压住内心的失望，摆着手表示没关系")
+	CALL EXPEND_LATER()
+	HTML_PRINT get_text_html(@"半夜，%ANAME(MASTER)%突然被据点的医生叫醒了")
+	HTML_PRINT get_text_html(@"当他们赶到画师的床前时，她刚好呼出最后一口气")
+	HTML_PRINT get_text_html(@"没闭上的眼睛似乎依然在向%ANAME(MASTER)%表达歉意")
+	HTML_PRINT get_text_html(@"让医生稍微检查一下尸体后在据点郊外埋葬了画师")
+	CALL EXPEND_LATER()
+	HTML_PRINT get_text_html(@"简单的葬礼后，被检查的医生叫住了")
+	HTML_PRINT get_text_html_c(@"「这孩子得了『月曜症』呢，太可怜了……」",CHARA_NPC)
+	HTML_PRINT get_text_html_c(@"「有一点你可能感兴趣。」",CHARA_NPC)
+	HTML_PRINT get_text_html_c(@"「『月曜症』会导致全身剧痛。」",CHARA_NPC)
+	HTML_PRINT get_text_html_c(@"「这么小的孩子不太可能靠意志忍受这种痛苦。」",CHARA_NPC)
+	HTML_PRINT get_text_html_c(@"「所以我怀疑那群混蛋喂了她麻药来缓解病痛。」",CHARA_NPC)
+	HTML_PRINT get_text_html(@"这也许也是线索，把麻药买卖和奴隶买卖合并起来查的话或许能发现什么？")
+	CALL html_wait
+	HTML_PRINT get_text_html_c(@"「不要太自责，这种病几乎无法医治，我们就算发现了也只能帮她缓解痛苦……」",CHARA_NPC)
+	HTML_PRINT get_text_html(@"谈话结束后，%ANAME(MASTER)%让属下根据新的线索进行交叉验证，果然确定了几个当地人贩子的首领")
+	HTML_PRINT get_text_html_n(@"对奴隶集团的调查取得了进展！")
+	CALL html_wait
+
+;雷普后续
+@MRU_1_1_雷普结局_text
+	HTML_PRINT get_text_html(@"终于从繁忙的公务中脱身的%ANAME(MASTER)%打算把画师叫到自己的房间进行询问")
+	HTML_PRINT get_text_html(@"听到手下讲女孩已经很多天没有见到女孩后，%ANAME(MASTER)%不禁心里一凉")
+	CALL html_wait
+	HTML_PRINT get_text_html(@"匆忙前往画师的房间，不出%ANAME(MASTER)%意外的是她已经死了")
+	HTML_PRINT get_text_html(@"枕头上到处都是血，她本人则趴着倒在地上，不知道她死前到底是什么样的情况")
+	HTML_PRINT get_text_html(@"不想再看下去的%ANAME(MASTER)%让下手把女孩的尸体处理了")
+	HTML_PRINT get_text_html_w(@"这条线索看起来是断了")
+	CALL html_wait
+
+;过多拒绝后续/雷普后未带回
+@MRU_1_1_失踪结局_text
+	HTML_PRINT get_text_html(@"%ANAME(MASTER)%再次来到了那里")
+	HTML_PRINT get_text_html(@"但并没有看见那个画师，掌管着她的奴隶贩子也不见了")
+	HTML_PRINT get_text_html(@"到底发生了什么……")
+	CALL html_wait
+	HTML_PRINT get_text_html(@"%ANAME(MASTER)%再三搜寻，但没有任何发现")
+	HTML_PRINT get_text_html(@"再次陷入了无头苍蝇的状态")
+	HTML_PRINT get_text_html_w(@"看来这条路是走不通了")
+	CALL html_wait
+
+;归来后续
+@MRU_1_1_归来_name
+	RESULTS '= "小画师的归来"
+@MRU_1_1_归来_text
+	HTML_PRINT get_text_html(@"接到了属下的报告，说是有两个人想要见%ANAME(MASTER)%")
+	CALL EXPEND_LATER()
+	HTML_PRINT get_text_html(@"%ANAME(MASTER)%来到会客室时，那两人已经在里面了")
+	HTML_PRINT get_text_html(@"正在急切地望着门口的正是那个画师")
+	CALL html_wait
+	HTML_PRINT get_text_html(@"不过已经过去了很久，她已经长大了很多")
+	HTML_PRINT get_text_html(@"不过更能感受到的是她内心的成熟")
+	HTML_PRINT get_text_html(@"看起来这些年被历练了很多呢……")
+	CALL html_wait
+	HTML_PRINT get_text_html(@"%ANAME(MASTER)%让属下先带着女孩找一个住处")
+	HTML_PRINT get_text_html(@"那个带着她在外界学习的女人则留下来和%ANAME(MASTER)%谈了起来")
+	CALL html_wait
+	HTML_PRINT get_text_html_c(@"「刚把她带出去她就生了重病呢，吓了我一跳。」",CHARA_NPC)
+	HTML_PRINT get_text_html_c(@"「幸好最后还是治好了，接着就是带着她到处学习了。」",CHARA_NPC)
+	HTML_PRINT get_text_html_c(@"「她自己底子好，加上很有学习的意愿，我教起来真的非常开心。」",CHARA_NPC)
+	CALL html_wait
+	HTML_PRINT get_text_html_c(@"「然后一晃就这么久过去了……」",CHARA_NPC)
+	HTML_PRINT get_text_html_c(@"「虽然很想她一直留在我身边，但是我还是尊重她的决定。」",CHARA_NPC)
+	HTML_PRINT get_text_html(@"%ANAME(MASTER)%表达了希望她也留下来的意思")
+	CALL html_wait
+	HTML_PRINT get_text_html_c(@"「多谢了……但是你们这里真是一团糟呢……」",CHARA_NPC)
+	HTML_PRINT get_text_html_c(@"「……虽然我相信你会这么做，但请你一定要好好对我的爱徒。」",CHARA_NPC)
+	HTML_PRINT get_text_html_c(@"「她……怎么说呢，算是个蛮标准的艺术家。」",CHARA_NPC)
+	CALL html_wait
+	HTML_PRINT get_text_html_c(@"「这么说确实有点以偏概全，毕竟我自认为还算是正常人。」",CHARA_NPC)
+	HTML_PRINT get_text_html_c(@"「趁她还没回来我就先走了，我认为人生不应该浪费在离别上。」",CHARA_NPC)
+	HTML_PRINT get_text_html(@"女人说着就准备离开了")
+	CALL html_wait
+	HTML_PRINT get_text_html(@"不幸的是在走廊上就碰见了回来的画师")
+	HTML_PRINT get_text_html(@"三个人在『离别』上浪费了许多时间")
+	CALL EXPEND_LATER()
+	HTML_PRINT get_text_html(@"不知不觉已经是夜里了")
+	HTML_PRINT get_text_html(@"为女孩准备的简单会餐结束后，%ANAME(MASTER)%把女孩送回了房间")
+	HTML_PRINT get_text_html(@"在房间门口时，女孩拉住了%ANAME(MASTER)%")
+	CALL html_wait
+	HTML_PRINT get_text_html_c(@"「%ANAME(MASTER)%大人，请……进来一下。」",CHARA_NPC)
+	HTML_PRINT get_text_html(@"被女孩带进房间后")
+	HTML_PRINT get_text_html(@"她从行李中小心地拿出了一沓仔细包装的画")
+	CALL html_wait
+	HTML_PRINT get_text_html_c(@"「这，这是您上次希望我画出来的人呢……」",CHARA_NPC)
+	HTML_PRINT get_text_html_c(@"「我一直在练习，就是希望能帮到您……」",CHARA_NPC)
+	HTML_PRINT get_text_html(@"上面的画仅仅是浅看了一下就让%ANAME(MASTER)%大吃一惊")
+	CALL html_wait
+	HTML_PRINT get_text_html(@"似乎都是奴隶集团里的人贩子的画像")
+	HTML_PRINT get_text_html(@"%ANAME(MASTER)%翻查着，果然看见了那个曾经拴着女孩的奴隶贩子")
+	CALL html_wait
+	HTML_PRINT get_text_html(@"真是面目可憎的样子啊，但看起来很真实")
+	HTML_PRINT get_text_html(@"这份资料应该可以帮忙指认奴隶贩子们吧")
+	CALL html_wait
+	HTML_PRINT get_text_html(@"%ANAME(MASTER)%按捺住心中的喜悦，郑重地向画师表示了感谢")
+	HTML_PRINT get_text_html(@"看到自己可以帮助到%ANAME(MASTER)%，女孩的脸上也满是笑意")
+	CALL html_wait
+	HTML_PRINT get_text_html(@"让属下根据这份画像去搜集情报")
+	CALL html_wait
+	HTML_PRINT get_text_html_n(@"果然确定到了很多奴隶贩子的身份！")
+	HTML_PRINT get_text_html_n(@"这里的情报搜集工作顺利地完成了！")
+	MRU_1_SUBEVENT_STATUS:0 = 1
+	CALL MRU_event_set_next_phase("MRU_1_1_LATER",MRU_1_1_LATER_PHASE,"请求")
+	CALL html_wait

@@ -1,0 +1,188 @@
+﻿;EVENT_ENG = SLAVE_TRADERS
+;---------------------
+;基本发生概率(1000分率100为10%)
+;再加上configue项目的发生频率，所以概率还会有所变化
+;---------------------
+@EVENT_DAILY_SLAVE_TRADERS_RATE()
+    RETURN 400 + DAY * 5
+
+
+;---------------------
+;发生判定
+;1可以发生，0不能发生
+;---------------------
+@EVENT_DAILY_SLAVE_TRADERS_DECISION()
+    SIF MRU_1_0_PHASE != 0
+        RETURN 0
+    SIF !IS_MALE(MASTER)
+        RETURN 0
+    SIF !IS_COUNTRY(CFLAG:MASTER:所属) || IS_SP_COUNTRY(CFLAG:MASTER:所属)
+        RETURN 0
+    RETURN 1
+
+;---------------------
+;事件类型
+;用于在设置中进行配置
+;---------------------
+@EVENT_DAILY_SLAVE_TRADERS_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_SLAVE_TRADERS()
+    IF MRU_1_0_CHOICE_PEACE
+        MRU_1_0_CHOICE_PEACE = 0
+		HTML_PRINT get_text_html(@"不知为何，一本小说般的传记在幻想乡流传")
+		HTML_PRINT get_text_html(@"详细描述了『某位英雄』是如何打击一个外来的人贩子集团")
+		CALL html_wait
+		HTML_PRINT get_text_html(@"虽然%ANAME(MASTER)%一再表示那不是自己，但依然被人们善意地曲解成了谦虚")
+		HTML_PRINT get_text_html_n(@"被强加了人们的感谢与钱财")
+        MONEY += 1000000
+        FOR LOCAL, 1, MAX_COUNTRY
+			SIF !IS_COUNTRY(LOCAL)
+				CONTINUE
+            CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 1000, 1000)
+        NEXT
+        CALL EXPEND_LATER()
+    ENDIF
+	HTML_PRINT get_text_html(@"%ANAME(MASTER)%接到了属下的报告，一个来自外界的奴隶贩子集团趁乱进入了幻想乡")
+	HTML_PRINT get_text_html(@"据逃难来的外界人说，这个组织没有任何底线可言")
+	HTML_PRINT get_text_html(@"无论是老幼还是男女都在被他们当做商品贩卖")
+	HTML_PRINT get_text_html(@"不仅如此，他们也很擅长为某些有特殊癖好的人提供对应的服务")
+	CALL html_wait
+	HTML_PRINT get_text_html(@"放任他们行动的话会有很多无辜的人被害")
+	HTML_PRINT get_text_html(@"那么，%ANAME(MASTER)%决定")
+	CALL get_text_html_b("我义不容辞","","")
+	CALL get_text_html_b("我可没空","","")
+	CALL get_html_button_input
+    IF RESULT == 1
+        HTML_PRINT get_text_html(@"还有更重要的事情要做")
+		CALL html_wait_end
+        MRU_1_0_PHASE = -1
+		MRU_1_奴隶贩子集团事件链启用 = 0
+        RETURN 1
+    ENDIF
+    MRU_1_0_PHASE = 1
+	MRU_1_奴隶贩子集团事件链启用 = 1
+	HTML_PRINT get_text_html(@"不能坐视不管")
+	HTML_PRINT get_text_html(@"%ANAME(MASTER)%选择亲自处理这件事")
+	CALL html_wait
+	HTML_PRINT get_text_html(@"但是这个组织隐藏地非常好，国内的情报系统几乎无法探查到任何情报")
+	HTML_PRINT get_text_html(@"幸好，有一份可靠的情报显示，他们发展了大量的奴隶买卖下线")
+	CALL html_wait
+	HTML_PRINT get_text_html(@"那么唯一的突破口看来就是这里了，%ANAME(MASTER)%让属下去查明哪里有奴隶贩卖的消息")
+	CALL EXPEND_LATER()
+	; HTML_PRINT get_text_html(@"在以下地点有疑似奴隶买卖的交易发生")
+	; CALL EXPEND_MRU_1_SET_TARGET_MAP
+    ; CALL EXPEND_MRU_1_SHOW_TARGET_MAP
+	; HTML_PRINT get_text_html(@"不过大部分地方不在领土范围内呢，只有控制了这些区域才能开展调查吧？")
+	CALL html_wait
+    MRU_1_0_REMIND_COUNT_DOWN = 5
+    RETURN 1
+
+@EXPEND_MRU_1_SET_TARGET_MAP
+    #DIM TARTGET_LIST,MAX_CITY
+    #DIM SUBEVENT_LIST,MRU_1_SUBEVENT_NUM
+    #DIM DYNAMIC TARTGET_LIST_NUM
+    #DIM CITY_ID
+    ;将1MASTER的城市加入列表
+    FOR CITY_ID,1,MAX_CITY
+        SIF CITY_TYPE:CITY_ID != 0
+            CONTINUE
+        IF CITY_OWNER:CITY_ID == CFLAG:MASTER:所属
+            TARTGET_LIST:TARTGET_LIST_NUM = CITY_ID
+            TARTGET_LIST_NUM++
+        ENDIF
+    NEXT
+    MRU_1_TARGET_CITY:0 = TARTGET_LIST:(RAND:TARTGET_LIST_NUM)
+
+    ;将4非MASTER擁有的城市加入列表
+    TARTGET_LIST_NUM = 0
+    FOR CITY_ID,1,MAX_CITY
+        SIF CITY_TYPE:CITY_ID != 0
+            CONTINUE
+        IF CITY_OWNER:CITY_ID != CFLAG:MASTER:所属
+            TARTGET_LIST:TARTGET_LIST_NUM = CITY_ID
+            TARTGET_LIST_NUM++
+        ENDIF
+    NEXT
+    FOR LOCAL:0 , 0 , (MRU_1_SUBEVENT_ENABLE_NUM-1)
+        LOCAL:1 = RAND(LOCAL:0 , TARTGET_LIST_NUM)
+        SWAP TARTGET_LIST:(LOCAL:0), TARTGET_LIST:(LOCAL:1)
+    NEXT
+    FOR LOCAL:0 , 0 , (MRU_1_SUBEVENT_ENABLE_NUM-1)
+        MRU_1_TARGET_CITY:(LOCAL:0 + 1) = TARTGET_LIST:(LOCAL:0)
+    NEXT
+
+    ;设置ENABLE_NUM个本周目預定要发生的子事件
+    FOR LOCAL:0 , 0 , MRU_1_SUBEVENT_NUM
+        SUBEVENT_LIST:(LOCAL:0) = (LOCAL:0) + 1
+    NEXT
+    FOR LOCAL:0 , 0 , MRU_1_SUBEVENT_ENABLE_NUM
+        LOCAL:1 = RAND(LOCAL:0 , MRU_1_SUBEVENT_NUM)
+        SWAP SUBEVENT_LIST:(LOCAL:0), SUBEVENT_LIST:(LOCAL:1)
+    NEXT
+
+    FOR LOCAL:0 , 0 , MRU_1_SUBEVENT_ENABLE_NUM
+        MRU_1_SUBEVENT_ID:(LOCAL:0) = SUBEVENT_LIST:(LOCAL:0)
+    NEXT
+
+;顯示子事件完成狀態
+@EXPEND_MRU_1_SHOW_TARGET_MAP
+    #DIMS HTML
+    HTML =
+    LOCAL:1 = 0
+    HTML += @"%get_text_html("已完成",FONT_I,"green")%"
+    HTML += "<br>"
+    FOR LOCAL,0,MRU_1_SUBEVENT_ENABLE_NUM
+        IF MRU_1_SUBEVENT_STATUS == 1
+            HTML += @"%get_text_html(@"{LOCAL + 1}. %CITY_NAME:(MRU_1_TARGET_CITY:LOCAL)%",FONT_S)%"
+            HTML += "<br>"
+            LOCAL:1 = 1
+        ENDIF
+    NEXT
+    IF LOCAL:1
+        HTML += "<br>"
+        HTML += "<br>"
+    ELSE
+        HTML += @"%get_text_html("無",FONT_I,"gray")%"
+        HTML += "<br>"
+    ENDIF
+    HTML += @"%get_text_html("失敗",FONT_I,"red")%"
+    HTML += "<br>"
+    LOCAL:1 = 0
+    FOR LOCAL,0,MRU_1_SUBEVENT_ENABLE_NUM
+        IF MRU_1_SUBEVENT_STATUS == -1
+            HTML += @"%get_text_html(@"{LOCAL + 1}. %CITY_NAME:(MRU_1_TARGET_CITY:LOCAL)%",FONT_S)%"
+            HTML += "<br>"
+            LOCAL:1 = 1
+        ENDIF
+    NEXT
+    IF LOCAL:1
+        HTML += "<br>"
+        HTML += "<br>"
+    ELSE
+        HTML += @"%get_text_html("無",FONT_I,"gray")%"
+        HTML += "<br>"
+    ENDIF
+    LOCAL:1 = 0
+    HTML += @"%get_text_html("進行中",FONT_I,"yellow")%"
+    HTML += "<br>"
+    FOR LOCAL,0,MRU_1_SUBEVENT_ENABLE_NUM
+        IF MRU_1_SUBEVENT_STATUS == 0
+            HTML += @"%get_text_html(@"{LOCAL + 1}. %CITY_NAME:(MRU_1_TARGET_CITY:LOCAL)%")%"
+            HTML += "<br>"
+            LOCAL:1 = 1
+        ENDIF
+    NEXT
+    IF LOCAL:1
+        HTML += "<br>"
+        HTML += "<br>"
+    ELSE
+        HTML += @"%get_text_html("無",FONT_I,"gray")%"
+        HTML += "<br>"
+    ENDIF
+    HTML '= @"<p align='left'>%HTML%</p>"
+    HTML_PRINT HTML

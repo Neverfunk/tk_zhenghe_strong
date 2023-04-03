@@ -1,0 +1,91 @@
+﻿;ENG_NAME = Artificial Vagina
+;ARTIFICIAL_PORTAL_VAGINA
+
+;---------------------
+;基本发生概率(1000分率100为10%)
+;再加上configue项目的发生频率，所以概率还会有所变化
+;---------------------
+@EVENT_DAILY_ARTIFICIAL_PORTAL_VAGINA_RATE()
+	CALL MRU_get_phase_rate("MRU_6",MRU_6_PHASE)
+	IF RESULT != -1
+		RETURN RESULT
+	ELSE
+		RETURN 200
+	ENDIF
+
+
+;---------------------
+;发生判定
+;1可以发生，0不能发生
+;---------------------
+@EVENT_DAILY_ARTIFICIAL_PORTAL_VAGINA_DECISION()
+    SIF !IS_MALE(MASTER)
+        RETURN 0
+    SIF !IS_COUNTRY(CFLAG:MASTER:所属) || IS_SP_COUNTRY(CFLAG:MASTER:所属)
+    RETURN 0
+	SIF MRU_1_SUBEVENT_STATUS:1 != 0
+		RETURN 0
+	CALL MRU_event_check("MRU_6",MRU_6_PHASE)
+	SIF RESULT == -1
+		RETURN 0
+	RETURN 1
+
+;---------------------
+;事件类型
+;用于在设置中进行配置
+;---------------------
+@EVENT_DAILY_ARTIFICIAL_PORTAL_VAGINA_GENRE()
+    RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;名称
+;返回空或不存在时使用注册名称
+;---------------------
+@EVENT_DAILY_ARTIFICIAL_PORTAL_VAGINA_NAME()
+	CALL MRU_get_phase_name("MRU_6",MRU_6_PHASE)
+	SIF RESULTS != ""
+		RETURN
+    RESULTS = 传送套
+
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_ARTIFICIAL_PORTAL_VAGINA()
+	IF MRU_6_PHASE == ""
+		CALL MRU_event_set_next_phase("MRU_6",MRU_6_PHASE,"初见")
+	ENDIF
+	CALL MRU_event_procedure("MRU_6",MRU_6_PHASE)
+	RETURN 1
+
+@MRU_6__rate
+    RETURN 50
+
+@MRU_6__check
+    #DIM DYNAMIC 国家总数
+    #DIM DYNAMIC 低风评国家数
+    FOR LOCAL,1,MAX_COUNTRY
+        SIF !IS_COUNTRY()
+            CONTINUE
+        SIF LOCAL == CFLAG:MASTER:所属
+            CONTINUE
+        国家总数++
+		LOCAL:1 = GET_COUNTRY_BOSS(LOCAL)
+        SIF REL_LIKE:(LOCAL:1 ):(MASTER) + 300 < REL_HATE:(LOCAL:1):(MASTER) || REL_HATE:(LOCAL:1):(MASTER) > 300
+            低风评国家数++
+    NEXT
+    IF 低风评国家数 > 国家总数 / 2 && 国家总数 > 2
+        RETURN 1
+    ELSE
+        RETURN 0
+    ENDIF
+
+@MRU_6_初见_name
+    RESULTS = 这是什么？
+
+@MRU_6_初见_text
+    #DIM TARGET_ID
+    CALL MRU_6_GET_TARGET
+
+@MRU_6_GET_TARGET

@@ -1,0 +1,552 @@
+﻿@EXPEND_LATER
+    PRINTFORML ………………
+    PRINTFORML …………
+    PRINTFORMW ……
+
+@EXPEND_NOTICE(ARGS)
+    CALL COLOR_PRINTW(@"%ARGS%", カラー_注意)
+
+@EXPEND_WARN(ARGS)
+    CALL COLOR_PRINTW(@"%ARGS%", カラー_警告)
+
+;----------------------------------------------------------------
+; 生成文本 / 按钮 HTML
+;by lackbfun
+;----------------------------------------------------------------
+@get_text_html(text, style=0, color="", tooltip="", button="", bcolor="", font="")
+#FUNCTIONS
+    #DIMS text
+    #DIM style
+    #DIMS color
+    #DIMS tooltip
+    #DIMS button
+    #DIMS bcolor
+    #DIMS font
+    #DIMS html
+	html '= "<nobr>"
+    SIF GETBIT(style, 0)
+        text '= @"<b>%text%</b>"
+    SIF GETBIT(style, 1)
+        text '= @"<i>%text%</i>"
+    SIF GETBIT(style, 2)
+        text '= @"<s>%text%</s>"
+    SIF GETBIT(style, 3)
+        text '= @"<u>%text%</u>"
+    SIF STRFINDU(color, "#") != 0 && COLOR_FROMNAME(color) == -1
+        color '= @"#%TOSTR(GETCOLOR(), "X6")%"
+    SIF STRFINDU(bcolor, "#") != 0 && COLOR_FROMNAME(bcolor) == -1
+        bcolor '= @"#%TOSTR(GETFOCUSCOLOR(), "X6")%"
+    SIF !CHKFONT(font)
+        font '= "ＭＳ ゴシック"
+    SIF button == "" && tooltip == ""
+        RETURNF @"<font face='' color='%color%' bcolor='%bcolor%'>%text%</font>"
+    html += button == "" ? "<nonbutton" # @"<button value='%button%'"
+	IF tooltip != ""
+    	html += @" title='%tooltip%'>"
+	ELSE
+		html += @" >"
+	ENDIF
+    html += @"<font face='%font%' color='%color%' bcolor='%bcolor%'>%text%</font>"
+    html += button == "" ? "</nonbutton>" # "</button>"
+	html += "</nobr>"
+	RETURNF html
+
+;因为排版问题，在html打印后的wait额外进行空行
+;字体问题，已经解决
+@html_wait
+	PRINTL
+	WAIT
+
+@html_wait_end
+	PRINTL
+	WAIT
+
+;生成提醒html文本
+@get_text_html_n(text, style=-1)
+#FUNCTIONS
+	#DIMS text
+	#DIM style
+	IF style == -1
+		style = 0
+		SETBIT style,1
+	ENDIF
+	RETURNF @"%get_text_html(text, style, "yellow")%"
+
+;生成警告html文本
+@get_text_html_w(text, style=-1)
+#FUNCTIONS
+	#DIMS text
+	#DIM style
+	IF style == -1
+		style = 0
+		SETBIT style,1
+	ENDIF
+	RETURNF @"%get_text_html(text, style, "red")%"
+
+;生成对话html文本
+@get_text_html_c(text, chara_id = 0, style=0)
+#FUNCTIONS
+	#DIMS text
+	#DIM style
+	#DIM chara_id
+	#DIMS DYNAMIC chara_color
+	#DIMS DYNAMIC chara_name
+	IF chara_id < 0
+		chara_color '= "white"
+		chara_name '= ""
+	ELSE
+		chara_color '= get_chara_color_html(chara_id)
+		chara_name = %ANAME(chara_id)%
+	ENDIF
+	RETURNF @"%get_text_html(text, style, chara_color, chara_name)%"
+
+;生成html按钮
+@get_text_html_b(text, judge_name="", tooltip="")
+    #DIMS text
+    #DIMS judge_name
+    #DIMS tooltip
+	IF judge_name == "" || judge_name == "1"
+		judge_name = TRUE
+	ENDIF
+	IF judge_name == "0"
+		judge_name = FALSE
+	ENDIF
+	TRYCCALLFORM MRU_JUDGE_%judge_name%
+		CALL generate_button(text,MRU_JUDGE_STATUS,MRU_JUDGE_CONDITION_NUM,tooltip)
+	CATCH
+		;#; THROW MRU_JUDGE_%judge_name%不存在
+	ENDCATCH
+	RETURN
+@generate_button(text,status,reason_num,tooltip)
+	#DIMS text
+	#DIM status
+	#DIM reason_num
+    #DIMS tooltip
+	LOCALS =
+	MRU_JUDGE_BUTTON_STATUS:MRU_JUDGE_BUTTON_NUM = status
+	FOR LOCAL,0,reason_num
+		SIF LOCAL >= 20
+			BREAK
+		LOCALS += @"%MRU_JUDGE_CONDITION_REASON:LOCAL%"
+		IF MRU_JUDGE_CONDITION_STATUS:LOCAL
+			LOCALS += @"	√\n"
+		ELSE
+			LOCALS += @"	X\n"
+		ENDIF
+	NEXT
+	SIF LOCALS != ""
+		tooltip = %LOCALS%\n%tooltip%
+	IF status
+		HTML_PRINT get_text_html(@"{MRU_JUDGE_BUTTON_NUM}[%text%]",,, tooltip, @"{MRU_JUDGE_BUTTON_NUM}")
+	ELSE
+		HTML_PRINT get_text_html(@"{MRU_JUDGE_BUTTON_NUM}[%text%]",,"#606060", tooltip)
+	ENDIF
+	MRU_JUDGE_BUTTON_NUM++
+
+;获取html按钮的输入
+@get_html_button_input
+	PRINTL
+	INPUT
+	IF INRANGE(RESULT,0,MRU_JUDGE_BUTTON_NUM-1) && MRU_JUDGE_BUTTON_STATUS:RESULT
+		LOCAL = RESULT
+	ELSE
+		LOCAL = MRU_JUDGE_BUTTON_NUM-1
+	ENDIF
+	MRU_JUDGE_BUTTON_NUM = 0
+	RETURN LOCAL
+
+;根据角色16进制数字发色生成对应角色的html格式发色字符串
+@get_chara_color_html(chara_id)
+#FUNCTIONS
+	#DIM chara_id
+	#DIM DYNAMIC chara_color
+	chara_color = TALENT:chara_id:髪色
+
+	;非法发色自动转白
+	SIF chara_color < 0 || chara_color > 0xFFFFFF
+		RETURNF "white"
+	;过暗发色提高亮度
+	IF get_v_from_rgb(chara_color) < 140
+		chara_color = add_rgb_v(chara_color)
+	ENDIF
+	RETURNF color_num_to_html(chara_color)
+
+
+;16进制颜色转html字符串颜色
+@color_num_to_html(color)
+#FUNCTIONS
+	#DIM color
+	#DIMS DYNAMIC color_html
+	VARSET LOCAL
+	LOCAL:1 = 0
+	WHILE LOCAL:1 ++ < 6
+		LOCAL = color % 16
+		SELECTCASE LOCAL
+			CASE 0 TO 9
+				color_html '= @"{LOCAL}%color_html%"
+			CASE 10
+				color_html '= @"A%color_html%"
+			CASE 11
+				color_html '= @"B%color_html%"
+			CASE 12
+				color_html '= @"C%color_html%"
+			CASE 13
+				color_html '= @"D%color_html%"
+			CASE 14
+				color_html '= @"E%color_html%"
+			CASE 15
+				color_html '= @"F%color_html%"
+		ENDSELECT
+		color /= 16
+	WEND
+	RETURNF @"#%color_html%"
+
+
+;获取RGB的VALUE
+@get_v_from_rgb(COLOR)
+#FUNCTION
+	#DIM COLOR
+	#DIM DYNAMIC RED
+	#DIM DYNAMIC GREEN
+	#DIM DYNAMIC BLUE
+	#DIM DYNAMIC VALUE
+	RED = COLOR >> 16 & 0xFF
+	GREEN = COLOR >> 8 & 0xFF
+	BLUE = COLOR & 0xFF
+	VALUE = MAX(RED,GREEN,BLUE)
+	RETURNF VALUE
+
+
+;提高RGB的VALUE
+@add_rgb_v(COLOR)
+#FUNCTION
+	#DIM COLOR
+	#DIM DYNAMIC RED
+	#DIM DYNAMIC GREEN
+	#DIM DYNAMIC BLUE
+	#DIM DYNAMIC VALUE
+	RED = COLOR >> 16 & 0xFF
+	GREEN = COLOR >> 8 & 0xFF
+	BLUE = COLOR & 0xFF
+	VALUE = get_v_from_rgb(COLOR)
+	WHILE VALUE < 140
+		SIF RED == VALUE
+			RED += 8
+		SIF GREEN == VALUE
+			GREEN += 8
+		SIF BLUE == VALUE
+			BLUE += 8
+		COLOR = (RED << 16) + (GREEN << 8) + BLUE
+		VALUE = get_v_from_rgb(COLOR)
+	WEND
+	RETURNF color
+
+
+;获取RGB的HSV
+@rgb_to_csv(color)
+	#DIM color
+	#DIM DYNAMIC RED
+	#DIM DYNAMIC GREEN
+	#DIM DYNAMIC BLUE
+	#DIM DYNAMIC HUE
+	#DIM DYNAMIC SATURATION
+	#DIM DYNAMIC VALUE
+	#DIM DYNAMIC MAX_RGB
+	#DIM DYNAMIC MIN_RGB
+	RED = COLOR >> 16 & 0xFF
+	GREEN = COLOR >> 8 & 0xFF
+	BLUE = COLOR & 0xFF
+	MAX_RGB = MAX(RED,GREEN,BLUE)
+	MIN_RGB = MIN(RED,GREEN,BLUE)
+	VALUE = MAX(RED,GREEN,BLUE)
+	IF MAX_RGB > 0
+		SATURATION = (MAX_RGB-MIN_RGB)/MAX_RGB
+	ELSE
+		SATURATION = 0
+	ENDIF
+	IF MAX_RGB-MIN_RGB != 0
+		SIF RED == MAX_RGB
+			HUE =(GREEN-BLUE)/(MAX_RGB-MIN_RGB) * 60
+		SIF GREEN == MAX_RGB
+			HUE = 120 + (BLUE-RED)/(MAX_RGB-MIN_RGB)* 60
+		SIF BLUE == MAX_RGB
+			HUE = 240 + (RED-GREEN)/(MAX_RGB-MIN_RGB)* 60
+	ELSE
+		HUE = 0
+	ENDIF
+	SIF (HUE < 0)
+		HUE = HUE + 360
+	RESULT:0 = HUE
+	RESULT:1 = SATURATION
+	RESULT:2 = VALUE
+
+;进攻判定时角色提供的数值
+@check_ack_chara(chara_id)
+	#DIM chara_id
+	#DIM DYNAMIC check_value
+	check_value = MIN(90,ABL:CHARA_ID:武闘) + MIN((ABL:CHARA_ID:防衛 / 2),45)
+	SIF ABL:chara_id:知略 > 70
+		TIMES check_value,1.1
+	RETURN check_value
+;进攻判定时需要的数值
+@check_ack_target(check_level)
+	#DIM check_level
+	SELECTCASE check_level
+		CASE 0
+			RETURN 0
+		CASE 1
+			RETURN 50 + RAND:10
+		CASE 2
+			RETURN 80 + RAND:20
+		CASE 3
+			RETURN 120 + RAND:30
+		CASE 4
+			RETURN 9999999
+	ENDSELECT
+;防守判定时角色提供	的数值
+@check_def_chara(chara_id)
+	#DIM chara_id
+	#DIM DYNAMIC check_value
+		check_value = MIN(90,ABL:CHARA_ID:防衛) + MIN((ABL:CHARA_ID:武闘 / 2),45)
+	SIF ABL:chara_id:知略 > 70
+		TIMES check_value,1.1
+	RETURN check_value
+
+;防御判定时需要的数值
+@check_def_target(check_level)
+	#DIM check_level
+	SELECTCASE check_level
+		CASE 0
+			RETURN 0
+		CASE 1
+			RETURN 50 + RAND:10
+		CASE 2
+			RETURN 80 + RAND:20
+		CASE 3
+			RETURN 120 + RAND:30
+		CASE 4
+			RETURN 9999999
+	ENDSELECT
+
+;智略判定时角色提供的数值
+@check_int_chara(chara_id)
+	#DIM chara_id
+	#DIM DYNAMIC check_value
+		check_value = MIN(90,ABL:CHARA_ID:知略) + MIN((ABL:CHARA_ID:政治 / 2),45)
+	SIF ABL:chara_id:知略 > 70
+		TIMES check_value,1.1
+	RETURN check_value
+
+;智判定时需要的数值
+@check_int_target(check_level)
+	#DIM check_level
+	SELECTCASE check_level
+		CASE 0
+			RETURN 0
+		CASE 1
+			RETURN 50 + RAND:10
+		CASE 2
+			RETURN 80 + RAND:20
+		CASE 3
+			RETURN 120 + RAND:30
+		CASE 4
+			RETURN 9999999
+	ENDSELECT
+
+;政治判定时角色提供	的数值
+@check_pol_chara(chara_id)
+	#DIM chara_id
+	#DIM DYNAMIC check_value
+		check_value = MIN(90,ABL:CHARA_ID:防衛) + MIN((ABL:CHARA_ID:武闘 / 2),45)
+	SIF ABL:chara_id:知略 > 70
+		TIMES check_value,1.1
+	RETURN check_value
+
+;政治判定时需要的数值
+@check_pol_target(check_level)
+	#DIM check_level
+	SELECTCASE check_level
+		CASE 0
+			RETURN 0
+		CASE 1
+			RETURN 50 + RAND:10
+		CASE 2
+			RETURN 80 + RAND:20
+		CASE 3
+			RETURN 120 + RAND:30
+		CASE 4
+			RETURN 9999999
+	ENDSELECT
+
+
+;生活判定时角色提供的数值
+@check_life_chara(chara_id)
+	#DIM chara_id
+	#DIM DYNAMIC check_value
+		check_value = MIN(90,ABL:CHARA_ID:歌唱) + MIN(ABL:CHARA_ID:料理,90)
+	RETURN check_value
+
+;生活判定时需要的数值
+@check_life_target(check_level)
+	#DIM check_level
+	SELECTCASE check_level
+		CASE 0
+			RETURN 0
+		CASE 1
+			RETURN 50 + RAND:10
+		CASE 2
+			RETURN 80 + RAND:10
+		CASE 3
+			RETURN 110 + RAND:10
+		CASE 4
+			RETURN 9999999
+	ENDSELECT
+;色色判定时角色提供的数值
+@check_sex_chara(chara_id)
+	#DIM chara_id
+	#DIM DYNAMIC check_value
+
+;check_level 0 always, 1 easy, 2 normal, 3 hard, 4 impossible
+;tmp_cor 临时加成
+@MRU_check(chara_id = 0,check_type,check_level = 2,tmp_cor = 0)
+	#DIM chara_id
+	#DIMS check_type
+	#DIM check_level
+	#DIM tmp_cor
+	#DIM DYNAMIC check_value_success
+	#DIM DYNAMIC check_value_fail
+	SIF !INRANGE(check_level,0,4)
+		check_level = 2
+	TRYCCALLFORM check_%check_type%_chara(chara_id)
+	CATCH
+		check_type '= "ack"
+	ENDCATCH
+	IF chara_id >=0
+		TRYCALLFORM check_%check_type%_chara(chara_id)
+		check_value_success += RESULT
+	ELSE
+		check_value_success += 60
+	ENDIF
+	IF MRU_1_RANDOM_CHECK_BOUNS > 0
+		HTML_PRINT get_text_html_n(@"在同伴的帮助下，判定的成功概率提高了")
+		check_value_success += MRU_1_RANDOM_CHECK_BOUNS
+		MRU_1_RANDOM_CHECK_BOUNS = 0
+	ENDIF
+	check_value_success += tmp_cor
+	TRYCALLFORM check_%check_type%_target(check_level)
+	check_value_fail += RESULT
+	;#; PRINTFORML {check_value_success}-{check_value_fail}
+	RETURN check_value_success > check_value_fail
+
+;将子事件ID与启用的子事件List进行匹配，返回event_id 在List中的位置
+;未找到则返回-1，表示不启用
+@MRU_1_get_subevent_id(event_id)
+	#DIM event_id
+	FOR LOCAL,0,MRU_1_SUBEVENT_ENABLE_NUM
+		SIF MRU_1_SUBEVENT_ID:LOCAL == event_id
+			RETURN LOCAL
+	NEXT
+	RETURN -1
+
+;返回子事件所在城市
+@MRU_1_get_subevent_city(event_id)
+	#DIM event_id
+	#DIM subevent_list_id
+	#DIM city_id
+	CALL MRU_1_get_subevent_id(event_id)
+	SIF RESULT == -1
+		RETURN
+	subevent_list_id = RESULT
+	city_id = MRU_1_TARGET_CITY:subevent_list_id
+	RETURN city_id
+
+
+;返回是否拥有子事件状态
+@MRU_1_check_event_status(event_id)
+	#DIM event_id
+	#DIM subevent_list_id
+	CALL MRU_1_get_subevent_id(event_id)
+	SIF RESULT == -1
+		RETURN
+	subevent_list_id = RESULT
+	RETURN MRU_1_SUBEVENT_STATUS:subevent_list_id
+;设置子事件状态，默认成功
+@MRU_1_set_event_status(event_id,status = -1)
+	#DIM event_id
+	#DIM subevent_list_id
+	#DIM status
+	CALL MRU_1_get_subevent_id(event_id)
+	SIF RESULT == -1
+		RETURN
+	subevent_list_id = RESULT
+	MRU_1_SUBEVENT_STATUS:subevent_list_id = status
+
+;返回事件阶段概率
+;不存在则返回-1
+@MRU_get_phase_rate(event_name,event_phase)
+	#DIMS event_name
+	#DIMS event_phase
+	#DIMS target_func
+	target_func '= @"%event_name%_%event_phase%"
+	TRYCCALLFORM %target_func%_rate
+		RETURN RESULT
+	CATCH
+		RETURN -1
+	ENDCATCH
+
+;返回事件阶段名称
+@MRU_get_phase_name(event_name,event_phase)
+	#DIMS event_name
+	#DIMS event_phase
+	#DIMS target_func
+	target_func '= @"%event_name%_%event_phase%"
+	RESULTS '= ""
+	TRYCALLFORM %target_func%_name
+
+;日常事件判断触发时调用
+;返回该事件阶段是否触发
+;不存在函数则不改变判断
+@MRU_event_check(event_name,event_phase)
+	#DIMS event_name
+	#DIMS event_phase
+	#DIMS target_func
+	target_func '= @"%event_name%_%event_phase%"
+	;#; PRINTFORMW %target_func%
+	TRYCCALLFORM %target_func%_check
+		RETURN RESULT
+	CATCH
+		RETURN 1
+	ENDCATCH
+
+;日常事件设置下一阶段，并触发下一阶段预设事件
+@MRU_event_set_next_phase(event_name,event_phase,next_phase)
+	#DIMS event_name
+	#DIMS REF event_phase
+	#DIMS next_phase
+	#DIMS target_func
+	event_phase '= @"%next_phase%"
+	target_func '= @"%event_name%_%event_phase%"
+	TRYCALLFORM %target_func%_after_set
+;事件阶段流程
+;尝试访问开始事件
+;访问本体（必须存在）
+;访问结束事件
+;尝试修改事件阶段
+;如果修改则尝试访问阶段切换事件
+@MRU_event_procedure(event_name,event_phase)
+	#DIMS event_name
+	#DIMS event_phase
+	#DIMS target_func
+	target_func '= @"%event_name%_%event_phase%"
+	TRYCALLFORM %target_func%_start
+
+	TRYCCALLFORM %target_func%_text
+	CATCH
+		;#; THROW %target_func%_text不存在
+	ENDCATCH
+
+	TRYCALLFORM %target_func%_end
+
+
+
+

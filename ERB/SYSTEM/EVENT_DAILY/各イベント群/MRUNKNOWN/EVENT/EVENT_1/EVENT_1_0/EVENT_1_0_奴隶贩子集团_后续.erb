@@ -1,0 +1,221 @@
+﻿;EVENT_ENG = SLAVE_TRADERS_AFTER
+;---------------------
+;返回对应事件的DISABLE。在不设定的情况下，不会发生
+;---------------------
+@EVENT_DAILY_DERIVATION_SLAVE_TRADERS_AFTER_DISABLE()
+
+    RETURN DAILY_GET_DISABLE_CONFIG("SLAVE_TRADERS")
+
+
+;---------------------
+;发生判定
+;〇期以后会发生，如果在DAILY使用的变量是-1的话就不会发生。
+;---------------------
+@EVENT_DAILY_DERIVATION_SLAVE_TRADERS_AFTER_DECISION()
+    SIF !GROUPMATCH(MRU_1_0_PHASE,1,2)
+        RETURN 0
+    CALL  EXPEND_MRU_1_CHECK_FINISH()
+    IF MRU_1_0_PHASE == 1
+		CALL MRU_1_0_DERIVATION_1_get_help_check
+        RETURN RESULT
+    ENDIF
+    IF MRU_1_0_PHASE == 2 && MRU_1_0_REWARD_COUNT_DOWN > 0
+        MRU_1_0_REWARD_COUNT_DOWN --
+        RETURN 0
+    ENDIF
+    SIF !IS_MALE(MASTER)
+        RETURN 0
+    SIF !IS_COUNTRY(CFLAG:MASTER:所属) || IS_SP_COUNTRY(CFLAG:MASTER:所属)
+        RETURN 0
+    RETURN 1
+
+@EXPEND_MRU_1_CHECK_FINISH
+    IF FINDELEMENT(MRU_1_SUBEVENT_STATUS,0) == -1
+        MRU_1_0_PHASE = 2
+        MRU_1_0_REWARD_COUNT_DOWN = 0
+    ENDIF
+;---------------------
+;根据活动的进行程度想变更活动名称的情况下使用
+;如果不需要改变，则不需要这个函数
+;---------------------
+@EVENT_DAILY_DERIVATION_SLAVE_TRADERS_AFTER_NAME()
+IF MRU_1_0_PHASE == 1
+	RESULTS '= "奴隶集团调查中"
+ELSEIF MRU_1_0_PHASE == 2
+	RESULTS '= "回报"
+ENDIF
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_SLAVE_TRADERS_AFTER()
+    IF MRU_1_0_PHASE == 1
+        CALL MRU_1_0_DERIVATION_1
+    ELSEIF MRU_1_0_PHASE == 2
+		IF MRU_1_0_CHOICE == 0
+        	CALL MRU_1_0_DERIVATION_2_FINSIH
+		ELSE
+			CALL MRU_1_0_DERIVATION_2_REWARD
+		ENDIF
+    ENDIF
+    RETURN 1
+@MRU_1_0_DERIVATION_1_get_help_check
+	#DIM LAST_HELP_DAY
+    IF RAND:100 < 40 + (DAY - LAST_HELP_DAY) * 10 + MRU_DEBUG_COR
+		CALL SELECT_CHARA_RANDOM("MRU_1_0_SELECT_LOGIC")
+		LOCAL = RESULT
+		IF LOCAL > 0
+			RETURN 1
+		ENDIF
+    ENDIF
+	RETURN 0
+@MRU_1_0_DERIVATION_1
+	CALL SELECT_CHARA_RANDOM("MRU_1_0_SELECT_LOGIC")
+	LOCAL = RESULT
+	IF LOCAL > 0
+		CALL MRU_1_0_DERIVATION_1_GET_HELP(LOCAL)
+	ENDIF
+	; CALL MRU_1_0_DERIVATION_1_REMIND
+@MRU_1_0_DERIVATION_1_GET_HELP(CHARA_ID)
+	#DIM CHARA_ID
+	HTML_PRINT get_text_html(@"听说了%ANAME(MASTER)%正在对奴隶集团进行调查，%ANAME(CHARA_ID)%决定来帮忙")
+	IF ABL:CHARA_ID:武闘 > 70
+		HTML_PRINT get_text_html_c(@"「%ANAME(MASTER)%在调查奴隶集团的事情吧？请让我也来帮忙！」",CHARA_ID)
+		HTML_PRINT get_text_html(@"被%ANAME(CHARA_ID)%要求参与下次调查")
+		MRU_1_RANDOM_CHECK_BOUNS = ABL:CHARA_ID:武闘
+	ELSEIF ABL:CHARA_ID:知略 > 70
+		HTML_PRINT get_text_html_c(@"「%ANAME(MASTER)%在调查奴隶集团的事情吧？请收下这些微薄。」",CHARA_ID)
+		LOCAL = ABL:CHARA_ID:知略*100 + RAND:5000
+		HTML_PRINT get_text_html_n(@"被%ANAME(CHARA_ID)%赠予了金钱{LOCAL}")
+		MONEY += LOCAL
+	ELSEIF ABL:CHARA_ID:政治 > 70
+		HTML_PRINT get_text_html_c(@"%ANAME(MASTER)%在调查奴隶集团的事情吧？我会帮你做宣传的。",CHARA_ID)
+		HTML_PRINT get_text_html_n(@"%ANAME(CHARA_ID)%在势力间宣传了%ANAME(MASTER)%的事迹")
+		FOR LOCAL, 0, MAX_COUNTRY
+			SIF IS_COUNTRY(LOCAL)
+				CALL CHANGE_RELATION_C_TO_O(LOCAL, MASTER, ABL:CHARA_ID:政治 * 2, ABL:CHARA_ID:政治)
+		NEXT
+	ELSE
+		HTML_PRINT get_text_html_c(@"「%ANAME(MASTER)%在调查奴隶集团的事情吧？」",CHARA_ID)
+		HTML_PRINT get_text_html_c(@"「没什么我可以帮上忙的吗……」",CHARA_ID)
+		HTML_PRINT get_text_html_c(@"「但是，我还是会尽力帮你的！」",CHARA_ID)
+		HTML_PRINT get_text_html_n(@"%ANAME(CHARA_ID)%在本势力中热心地宣传了%ANAME(MASTER)%的事迹")
+		FOR LOCAL, 0, CHARANUM
+			SIF CFLAG:LOCAL:所属 == CFLAG:MASTER:所属  || CFLAG:LOCAL:捕虜先 == CFLAG:MASTER:所属
+				CALL CHANGE_RELATION_O_TO_O(LOCAL, MASTER, (ABL:CHARA_ID:歌唱 + ABL:CHARA_ID:料理) * 2, ABL:CHARA_ID:歌唱 + ABL:CHARA_ID:料理)
+		NEXT
+	ENDIF
+	HTML_PRINT get_text_html_n(@"和%ANAME(CHARA_ID)%的关系变好了")
+	CFLAG:CHARA_ID:好感度 += 200
+	CALL EXPEND_LATER()
+
+@MRU_1_0_DERIVATION_1_REMIND
+	HTML_PRINT get_text_html(@"下属再次递上了关于人贩集团的情报:")
+	CALL EXPEND_MRU_1_SHOW_TARGET_MAP
+	CALL html_wait
+	HTML_PRINT get_text_html(@"要不要让属下多提醒自己呢？")
+	CALL get_text_html_b("每期提醒","","")
+	CALL get_text_html_b("隔一段时间吧","","")
+	CALL get_text_html_b("不需要再提醒了","","")
+	CALL get_html_button_input
+	IF RESULT == 0
+		MRU_1_0_REMIND_COUNT_DOWN = 0
+	ELSEIF RESULT == 1
+		MRU_1_0_REMIND_COUNT_DOWN = 3 + RAND:3
+	ELSEIF RESULT == 2
+		MRU_1_0_REMIND_COUNT_DOWN = 99999
+	ELSE
+		MRU_1_0_REMIND_COUNT_DOWN = 3 + RAND:3
+	ENDIF
+
+@MRU_1_0_DERIVATION_2_FINSIH
+	LOCAL:1 = 0
+	FOR LOCAL,0,MRU_1_SUBEVENT_ENABLE_NUM
+		SIF MRU_1_SUBEVENT_STATUS:LOCAL == 1
+			LOCAL:1 ++
+	NEXT
+	IF LOCAL:1 < MRU_1_SUBEVENT_NUM / 2
+		HTML_PRINT get_text_html(@"实在是遗憾，错过的线索太多了")
+		HTML_PRINT get_text_html(@"%ANAME(MASTER)%只能敲掉几个外围的小鬼，但看起来那个集团依然会正常运作下去")
+		CALL html_wait
+		HTML_PRINT get_text_html(@"「在乱世中想要救下更多的人还是有难度的」")
+		HTML_PRINT get_text_html(@"被属下这样安慰了")
+		CALL html_wait
+		MRU_1_0_REWARD_COUNT_DOWN = 999999
+		RETURN
+	ELSEIF LOCAL:1 < MRU_1_SUBEVENT_NUM
+		HTML_PRINT get_text_html(@"已经尽力了，但%ANAME(MASTER)%依然错过了少量的线索")
+		HTML_PRINT get_text_html(@"%ANAME(MASTER)%成功消灭了这个集团的架构，但集团的核心人物依然逍遥快活")
+		CALL html_wait
+		HTML_PRINT get_text_html(@"「在乱世中想要救下所有人还是有难度的」")
+		HTML_PRINT get_text_html(@"被属下这样安慰了")
+		CALL html_wait
+		MRU_1_0_REWARD_COUNT_DOWN = 999999
+		RETURN
+	ELSE
+		HTML_PRINT get_text_html(@"这一天终于来了，%ANAME(MASTER)%掌握了足够的情报")
+		HTML_PRINT get_text_html(@"令人震惊的是，这个组织早已经渗透到了势力内的很多地方")
+		HTML_PRINT get_text_html(@"连%ANAME(MASTER)%的几个下属也收受了他们的贿赂，给%ANAME(MASTER)%提供了假的情报")
+		CALL html_wait
+		HTML_PRINT get_text_html(@"不管怎么样，最终这个组织被%ANAME(MASTER)%从根上挖掉了")
+		HTML_PRINT get_text_html(@"所有和他们有过关系的人都被打入了大牢")
+		CALL EXPEND_LATER()
+		HTML_PRINT get_text_html(@"事情终于结束了，正在把各种资料归档的%ANAME(MASTER)%舒了一口气")
+		HTML_PRINT get_text_html(@"也许该考虑一下回报的事情了")
+		CALL get_text_html_b("金钱","","每隔一段时间获得金钱奖励")
+		CALL get_text_html_b("声望","","每隔一段时间获得声望")
+		CALL get_text_html_b("内心的平静","","————————")
+		CALL get_html_button_input
+		IF RESULT == 0
+			HTML_PRINT get_text_html(@"%ANAME(MASTER)%打算缴获的赃款中抽取了一部分作为自己的个人资金")
+			HTML_PRINT get_text_html_n(@"获得了资金100000")
+			HTML_PRINT get_text_html(@"虽然还有很多余量，但为了避免怀疑，还是隔一段时间再操作一次比较好")
+			MONEY+=50000
+			MRU_1_0_REWARD_COUNT_DOWN += 1 + RAND:3
+			MRU_1_0_CHOICE_PEACE = 0
+			MRU_1_0_CHOICE = 1
+			CALL html_wait
+		ELSEIF RESULT == 1
+			HTML_PRINT get_text_html(@"%ANAME(MASTER)%让人把自己的事迹进行宣传")
+			HTML_PRINT get_text_html(@"相信很快就会有效果了吧")
+			HTML_PRINT get_text_html_n(@"%ANAME(MASTER)%的声望提高了")
+			HTML_PRINT get_text_html(@"不过还是不要过度宣传吧，得稍稍等一等")
+			FOR LOCAL, 0, MAX_COUNTRY
+				SIF IS_COUNTRY(LOCAL)
+					CALL CHANGE_RELATION_C_TO_O(LOCAL, MASTER, 750, 750)
+			NEXT
+			MRU_1_0_REWARD_COUNT_DOWN += 1 + RAND:3
+			MRU_1_0_CHOICE_PEACE = 0
+			MRU_1_0_CHOICE = 2
+			CALL html_wait
+		ELSEIF RESULT == 2
+			HTML_PRINT get_text_html(@"什么都不需要")
+			HTML_PRINT get_text_html(@"能救下那么多人对%ANAME(MASTER)%来说已经是莫大的幸福了")
+			HTML_PRINT get_text_html(@"把最后一份档案封号存储后，%ANAME(MASTER)%离开了档案室")
+			MRU_1_0_REWARD_COUNT_DOWN = 999999
+			MRU_1_0_CHOICE_PEACE = 1
+			MRU_1_0_CHOICE = 3
+			CALL html_wait
+		ENDIF
+	ENDIF
+@MRU_1_0_DERIVATION_2_REWARD
+	IF MRU_1_0_CHOICE == 1
+		HTML_PRINT get_text_html(@"再次从缴获的赃款中抽取了一部分作为自己的个人资金")
+		HTML_PRINT get_text_html(@"获得了资金50000")
+		MONEY+=50000
+		MRU_1_0_REWARD_COUNT_DOWN += 1 + RAND:3
+	ELSEIF MRU_1_0_CHOICE == 2
+		HTML_PRINT get_text_html(@"%ANAME(MASTER)%让人把自己的事迹进行宣传")
+		HTML_PRINT get_text_html(@"相信很快就会有效果了吧")
+		HTML_PRINT get_text_html_n(@"%ANAME(MASTER)%的声望提高了")
+		FOR LOCAL, 0, MAX_COUNTRY
+			SIF IS_COUNTRY(LOCAL) && !IS_SP_COUNTRY(LOCAL)
+				CALL CHANGE_RELATION_C_TO_O(LOCAL, MASTER, 750, 750)
+		NEXT
+		MRU_1_0_REWARD_COUNT_DOWN += 1 + RAND:3
+	ELSE
+	ENDIF
+	CALL html_wait
+@SELECT_CHARA_RANDOM_LOGIC_MRU_1_0_SELECT_LOGIC(CHARA_ID)
+	#DIM CHARA_ID
+	RETURN CFLAG:CHARA_ID:所属 == CFLAG:MASTER:所属 && CFLAG:CHARA_ID:好感度 > 0&&!CFLAG:(CHARA_ID):捕虜先 && !CFLAG:(CHARA_ID):特殊状態 && !TALENT:CHARA_ID:特殊勢力陥落系

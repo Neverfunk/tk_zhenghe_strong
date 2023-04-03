@@ -1,0 +1,222 @@
+﻿;ENG_NAME = DAUGHTERS_WEDDING
+;---------------------
+;基本发生概率(1000分率100为10%)
+;再加上configue项目的发生频率，所以概率还会有所变化
+;---------------------
+@EVENT_DAILY_DAUGHTERS_WEDDING_RATE()
+	RETURN 1000
+
+
+;---------------------
+;发生判定
+;1可以发生，0不能发生
+;---------------------
+@EVENT_DAILY_DAUGHTERS_WEDDING_DECISION()
+	SIF MRU_8_事件禁用
+		RETURN 0
+	SIF !IS_MALE(MASTER)
+        RETURN 0
+	SIF IS_COUNTRY(CFLAG:MASTER:所属) && IS_SP_COUNTRY(CFLAG:MASTER:所属)
+        RETURN 0
+	RETURN 1
+
+;---------------------
+;事件类型
+;用于在设置中进行配置
+;---------------------
+@EVENT_DAILY_DAUGHTERS_WEDDING_GENRE()
+	RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;目标选择
+;不存在该函数或返回1时事件可以触发
+;存在该函数且返回0事件不能触发
+;---------------------
+@EVENT_DAILY_DAUGHTERS_WEDDING_SETTARGET()
+    #DIM 候补,MAX_CHARA_NUM
+    #DIM DYNAMIC 候补数
+	#DIM 父亲id
+	#DIM 母亲id
+
+	FOR LOCAL, 0, CHARANUM
+		父亲id = ID_TO_CHARA(CFLAG:LOCAL:父親)
+		母亲id = ID_TO_CHARA(CFLAG:LOCAL:母親)
+{
+		IF 父亲id == MASTER && IS_TOHO_CHARA(母亲id) &&
+				母亲id != MASTER && !IS_TOHO_CHARA(LOCAL) &&
+				CFLAG:LOCAL:所属 == CFLAG:MASTER:所属
+}
+			候补:(候补数++) = LOCAL
+		ENDIF
+
+	NEXT
+	SIF 候补数 <= 0
+        RETURN 0
+    DAILY_TARGET = 候补:(RAND(候补数))
+    DAILY_TARGET_NUM = 1
+    RETURN 1
+
+;---------------------
+;名称
+;返回空或不存在时使用注册名称
+;---------------------
+@EVENT_DAILY_DAUGHTERS_WEDDING_NAME()
+	RESULTS = 出嫁
+
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DAUGHTERS_WEDDING()
+	#DIM 男方类型
+	#DIM 彩礼金额
+	#DIM 婚礼评价
+	#DIM 女儿id
+	#DIM 母亲id
+	女儿id = DAILY_TARGET
+	母亲id = ID_TO_CHARA(CFLAG:女儿id:母親)
+	HTML_PRINT get_text_html(@"%ANAME(MASTER)%和%ANAME(母亲id)%的女儿%ANAME(女儿id)%到了出嫁的年龄了")
+	CALL html_wait
+	HTML_PRINT get_text_html(@"大概是因为母亲和父亲的基因都很好吧")
+	HTML_PRINT get_text_html(@"%ANAME(女儿id)%已经是一副亭亭玉立的模样了")
+	HTML_PRINT get_text_html(@"任谁都会被情不自禁吸引住")
+	CALL EXPEND_LATER()
+	HTML_PRINT get_text_html(@"突然间，有人前来求亲了！")
+	男方类型 = RAND:3 - 1
+	IF 男方类型 == -1
+		HTML_PRINT get_text_html(@"似乎是当地名声不太好的年迈富人，不过很有钱")
+		彩礼金额 = 100000
+	ELSEIF 男方类型 == 0
+		HTML_PRINT get_text_html(@"似乎是平常的贵族子弟，倒是和%ANAME(MASTER)%家门当户对")
+		彩礼金额 = 30000
+	ELSEIF 男方类型 == 1
+		HTML_PRINT get_text_html(@"似乎只是一个普通的年轻人人，不过很有上进心，风评也非常好")
+		彩礼金额 = 1000
+	ENDIF
+	婚礼评价 = 男方类型
+	CALL html_wait
+	HTML_PRINT get_text_html_n(@"男方提出了{彩礼金额}金作为彩礼")
+	HTML_PRINT get_text_html(@"那么，要怎么办呢")
+	CALL get_text_html_b("同意","","出嫁的女儿将永久离开！")
+	CALL get_text_html_b("拒绝","","")
+	CALL get_text_html_b("要求更多彩礼","","出嫁的女儿将永久离开！")
+	CALL get_text_html_b("问问女儿的意愿","","出嫁的女儿将永久离开！")
+	CALL get_text_html_b("谁再和我提嫁女儿我和谁急","","")
+	CALL get_html_button_input
+	IF RESULT == 0
+		HTML_PRINT get_text_html(@"女儿总得嫁出去啊")
+		HTML_PRINT get_text_html(@"让男方准备了盛大的婚礼")
+		CALL EXPEND_LATER()
+		CALL MRU_8_WEDDING(婚礼评价,彩礼金额)
+	ELSEIF RESULT == 1
+		HTML_PRINT get_text_html(@"自己的小棉袄怎么能轻易交给这种人！")
+		HTML_PRINT get_text_html(@"让属下把求亲的人打发了")
+		CALL html_wait
+	ELSEIF RESULT == 2
+		HTML_PRINT get_text_html(@"比起亲情果然是钱更重要啊")
+		HTML_PRINT get_text_html(@"成功求到了更多的彩礼")
+		彩礼金额 *= 2
+		婚礼评价 -= 1
+		HTML_PRINT get_text_html_n(@"现在的彩礼是{彩礼金额}金")
+		CALL EXPEND_LATER()
+		CALL MRU_8_WEDDING(婚礼评价,彩礼金额)
+	ELSEIF RESULT == 3
+		HTML_PRINT get_text_html(@"还是得尊重女儿的意愿")
+		HTML_PRINT get_text_html(@"问问女儿怎么想的吧")
+		CALL EXPEND_LATER()
+		IF IS_LOVER(女儿id)
+			HTML_PRINT get_text_html(@"早已经无可救药爱上父亲的%ANAME(女儿id)%不想离开")
+			HTML_PRINT get_text_html(@"但是在心底里知道这种感情是不会有结果的，最终还是选择了认命")
+			HTML_PRINT get_text_html_c(@"「但是……如果是父亲希望的话……我也接受……」",女儿id)
+			婚礼评价 += 1
+		ELSEIF IS_SLAVE(女儿id)
+			HTML_PRINT get_text_html(@"早已经完全隶属于%ANAME(MASTER)%的%ANAME(女儿id)%为能帮到父亲感到幸福")
+			HTML_PRINT get_text_html_c(@"「居然能这样帮到父亲……请让我做更多吧！」",女儿id)
+			HTML_PRINT get_text_html_n(@"%ANAME(女儿id)%似乎是靠自己的努力换到了更多的利益")
+			婚礼评价 += 1
+			彩礼金额 *= 2
+		ELSEIF 男方类型 >=0
+			LOCAL = 男方类型 - RAND:2
+			IF LOCAL > 0
+				HTML_PRINT get_text_html_c(@"「啊！其实……我喜欢他很久了！真的可以吗！谢谢你，父亲！」",女儿id)
+				HTML_PRINT get_text_html(@"开心的女儿拉住了%ANAME(MASTER)%的手")
+				婚礼评价 += 2
+			ELSEIF LOCAL == 0
+				HTML_PRINT get_text_html_c(@"「和那种人吗……虽然不算讨厌……但我也不知道呢……让父亲决定吧」",女儿id)
+				HTML_PRINT get_text_html(@"有些迷茫的女儿把人生的未来交给了父亲抉择")
+				婚礼评价 += 1
+			ELSE
+				HTML_PRINT get_text_html_c(@"「我不喜欢他！求……求您了，不要把我嫁给她！」",女儿id)
+				HTML_PRINT get_text_html(@"女儿哭泣着请求父亲不要作出这种决定")
+				婚礼评价 -= 1
+			ENDIF
+		ELSE
+			HTML_PRINT get_text_html_c(@"「我不喜欢他！求……求您了，不要把我嫁给她！」",女儿id)
+			HTML_PRINT get_text_html(@"女儿哭泣着请求父亲不要作出这种决定")
+			CALL html_wait
+			HTML_PRINT get_text_html(@"有些变态的富商知道了这件事后")
+			HTML_PRINT get_text_html(@"似乎是因为更喜欢『强迫』")
+			HTML_PRINT get_text_html(@"对%ANAME(MASTER)%提出了三倍的彩礼")
+			婚礼评价 -= 3
+			彩礼金额 *= 3
+			CALL EXPEND_LATER()
+		ENDIF
+		HTML_PRINT get_text_html_n(@"现在的彩礼是{彩礼金额}金")
+		CALL get_text_html_b("同意","","出嫁的女儿将永久离开！")
+		CALL get_text_html_b("拒绝","","")
+		CALL get_html_button_input
+		IF RESULT == 0
+			HTML_PRINT get_text_html(@"女儿总得嫁出去啊")
+			HTML_PRINT get_text_html(@"让男方准备了盛大的婚礼")
+			CALL EXPEND_LATER()
+			CALL MRU_8_WEDDING(婚礼评价,彩礼金额)
+		ELSE
+			HTML_PRINT get_text_html(@"自己的小棉袄怎么能轻易交给这种人！")
+			HTML_PRINT get_text_html(@"让属下把求亲的人打发了")
+			CALL html_wait
+		ENDIF
+
+	ELSE
+		HTML_PRINT get_text_html(@"自己的小棉袄怎么能轻易交出去！")
+		HTML_PRINT get_text_html(@"让属下不要再让这种事情打扰自己了")
+		MRU_8_事件禁用 = 1
+		CALL html_wait
+	ENDIF
+	RETURN 1
+@MRU_8_WEDDING(婚礼评价,彩礼金额)
+	#DIM 彩礼金额
+	#DIM 婚礼评价
+	#DIM 女儿id
+	#DIM 母亲id
+	女儿id = DAILY_TARGET
+	母亲id = CFLAG:女儿id:母親
+	HTML_PRINT get_text_html(@"在%ANAME(MASTER)%所在的领地上举行了盛大的婚礼")
+	HTML_PRINT get_text_html(@"流着泪的%ANAME(母亲id)%把女儿的手交给了对方……")
+	HTML_PRINT get_text_html(@"%ANAME(MASTER)%则偷偷逼对方立下了永远对女儿%ANAME(女儿id)%好的誓言")
+	IF 婚礼评价 > 0
+		HTML_PRINT get_text_html_n(@"似乎是因为婚礼的缘故，%ANAME(MASTER)%的风评上升了")
+		CALL MRU_8_CHANGE_REL(婚礼评价)
+		LOCAL = RAND(250,750) * RAND(3,7)
+		HTML_PRINT get_text_html_n(@"额外收获了礼金{LOCAL}")
+	ELSEIF 婚礼评价 == 0
+		HTML_PRINT get_text_html(@"一场平平无奇的婚礼")
+		LOCAL = RAND(250,750) * RAND(1,5)
+		HTML_PRINT get_text_html_n(@"额外收获了礼金{LOCAL}")
+	ELSE
+		HTML_PRINT get_text_html_w(@"似乎是因为婚礼的缘故，%ANAME(MASTER)%的风评下降了")
+		CALL MRU_8_CHANGE_REL(婚礼评价)
+		LOCAL = RAND(500,1000) * RAND(1,3)
+		HTML_PRINT get_text_html_n(@"额外收获了礼金{LOCAL}")
+	ENDIF
+	MONEY+=彩礼金额+LOCAL
+	CALL DELETE_CHARA(女儿id)
+
+@MRU_8_CHANGE_REL(婚礼评价)
+	#DIM 婚礼评价
+	FOR LOCAL,1,CHARANUM
+		SIF CFLAG:LOCAL:捕虜先 > 0
+			CONTINUE
+		IF CFLAG:LOCAL:所属 == CFLAG:MASTER:所属 || !RAND:3
+			CALL CHANGE_RELATION_O_TO_O(LOCAL, MASTER, RAND(50,150) * 婚礼评价, -1 * RAND(75,200) * 婚礼评价)
+		ENDIF
+	NEXT

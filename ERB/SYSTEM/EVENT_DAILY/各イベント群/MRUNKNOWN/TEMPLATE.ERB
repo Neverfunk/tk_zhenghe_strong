@@ -1,0 +1,103 @@
+﻿[SKIPSTART]
+;---------------------
+;基本发生概率(1000分率100为10%)
+;再加上configue项目的发生频率，所以概率还会有所变化
+;---------------------
+@EVENT_DAILY_EVENTENG_RATE()
+
+RETURN 0
+
+
+;---------------------
+;发生判定
+;1可以发生，0不能发生
+;---------------------
+@EVENT_DAILY_EVENTENG_DECISION()
+
+RETURN 1
+
+;---------------------
+;事件类型
+;用于在设置中进行配置
+;---------------------
+@EVENT_DAILY_EVENTENG_GENRE()
+
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;目标选择
+;不存在该函数或返回1时事件可以触发
+;存在该函数且返回0事件不能触发
+;---------------------
+@EVENT_DAILY_EVENTENG_SETTARGET()
+
+FOR LOCAL, 0, CHARANUM
+
+NEXT
+RETURN 1
+
+;---------------------
+;名称
+;返回空或不存在时使用注册名称
+;---------------------
+@EVENT_DAILY_EVENTENG_NAME()
+
+RESULTS = ""
+
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_EVENTENG()
+
+
+RETURN 1
+
+;---------------------
+;如果主人公在野，只有存在该函数且返回1时事件可以发生
+;---------------------
+@EVENT_DAILY_INVITATION_FROM_COUNTRY_ALLOW_WHEN_WANDERING()
+RETURN 1
+[SKIPEND]
+
+[SKIPSTART]
+;---------------------
+;返回对应事件的DISABLE。在不设定的情况下，不会发生
+;---------------------
+@EVENT_DAILY_DERIVATION_EVENTENG_DISABLE()
+
+RETURN DAILY_GET_DISABLE_CONFIG("EVENTENG")
+
+
+;---------------------
+;发生判定
+;〇期以后会发生，如果在DAILY使用的变量是-1的话就不会发生。
+;---------------------
+@EVENT_DAILY_DERIVATION_EVENTENG_DECISION()
+RETURN 1
+
+;---------------------
+;随机选择满足特定条件的角色时使用
+;其他函数是必需的，但是这个是可以没有的，因为影响性能所以不需要的话就不要做
+;在对象不存在且不能开始每日的情况下，通过返回0来取消每日的发生。
+;---------------------
+@EVENT_DAILY_DERIVATION_EVENTENG_SETTARGET()
+FOR LOCAL, 0, CHARANUM
+；这里写条件，找到符合条件的角色之后赋给对象，如果没有记得返回0
+NEXT
+RETURN 1
+
+;---------------------
+;根据活动的进行程度想变更活动名称的情况下使用
+;如果不需要改变，则不需要这个函数
+;---------------------
+@EVENT_DAILY_DERIVATION_EVENTENG_NAME()
+RESULTS = ""
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_DERIVATION_EVENTENG()
+RETURN 1
+
+[SKIPEND]

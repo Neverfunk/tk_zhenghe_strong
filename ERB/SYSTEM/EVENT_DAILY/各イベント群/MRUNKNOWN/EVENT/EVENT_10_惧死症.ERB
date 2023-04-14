@@ -5,25 +5,33 @@
 ;基本的な発生確率(1000分率 100で10%)
 ;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
 ;---------------------
-@KOJO_DAILY_K25_NECROPHOBIA_RATE(対象)
+@KOJO_DAILY_K20_NECROPHOBIA_RATE(対象)
     #DIM 対象
-    RETURN 50
+	CALL MRU_get_phase_rate("MRU_10",MRU_10_PHASE)
+	IF RESULT != -1
+		RETURN RESULT
+	ELSE
+		RETURN 50
+	ENDIF
 
 ;---------------------
 ;確率以外の発生判定
 ;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
 ;---------------------
-@KOJO_DAILY_K25_NECROPHOBIA_DECISION(対象)
+@KOJO_DAILY_K20_NECROPHOBIA_DECISION(対象)
     #DIM 対象
-    SIF MRU_9_已经发生
+    SIF !IS_MALE(MASTER)
         RETURN 0
-    RETURN CHECK_KOJO_DAILY_HAPPEN(対象,0,0,0)
+	CALL MRU_event_check("MRU_10",MRU_10_PHASE)
+	SIF RESULT == -1
+		RETURN 0
+	RETURN CHECK_KOJO_DAILY_HAPPEN(対象,0,0,-1)
 
 ;---------------------
 ;ジャンル
 ;コンフィグ設定で使用
 ;---------------------
-@KOJO_DAILY_K25_NECROPHOBIA_GENRE(対象)
+@KOJO_DAILY_K20_NECROPHOBIA_GENRE(対象)
     #DIM 対象
     RETURN デイリー_ジャンル_その他
 
@@ -31,9 +39,12 @@
 ;---------------------
 ;KOJO_NAME
 ;---------------------
-@KOJO_DAILY_K25_NECROPHOBIA_NAME(対象)
+@KOJO_DAILY_K20_NECROPHOBIA_NAME(対象)
     #DIM 対象
-    RESULTS '= "已经只能听见歌声了"
+	CALL MRU_get_phase_name("MRU_10",MRU_10_PHASE)
+	SIF RESULTS != ""
+		RETURN
+    RESULTS = NECROPHOBIA
 
 ;---------------------
 ;本体
@@ -41,215 +52,436 @@
 ;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
 ;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
 ;---------------------
-@KOJO_DAILY_K25_NECROPHOBIA(対象)
+@KOJO_DAILY_K20_NECROPHOBIA(対象)
     #DIM 対象
-    CLEARLINE LINECOUNT
-    HTML_PRINT get_text_html(@"晚上，%ANAME(MASTER)%一个人走在回家的路上",,MRU_9_COLOR_明)
-    CALL EXPEND_LATER()
-    HTML_PRINT get_text_html(@"为了快点回去，%ANAME(MASTER)%选择了一条森林中的小道",,MRU_9_COLOR_暗_1)
-    CALL html_wait
-    HTML_PRINT get_text_html(@"真是不错的地方啊，不知道为什么没什么人走呢",,MRU_9_COLOR_暗_1)
-    CALL html_wait
-    HTML_PRINT get_text_html(@"就是有恼人的麻雀一直在叫啊，好烦！",,MRU_9_COLOR_暗_1)
-    CALL html_wait
-    HTML_PRINT get_text_html(@"真是不吉利啊",,MRU_9_COLOR_暗_2)
-    CALL html_wait
-    HTML_PRINT get_text_html(@"………………",,MRU_9_COLOR_暗_3)
-    CALL html_wait
-    HTML_PRINT get_text_html(@"说起来，之前这里有这么暗吗？",,MRU_9_COLOR_暗_4)
-    CALL html_wait
-    HTML_PRINT get_text_html(@"「啊！是落单的人类呢！」",,MRU_9_COLOR_暗_3)
-    CALL html_wait
-    HTML_PRINT get_text_html(@"「居然敢一个人走夜路啊！」",,MRU_9_COLOR_暗_4)
-    CALL html_wait
-    HTML_PRINT get_text_html(@"「平时有没有注意保护视力呢？」",,MRU_9_COLOR_暗_3)
-    CALL html_wait
-    HTML_PRINT get_text_html(@"「如果什么都看不见记得要多吃水产哦！」",,MRU_9_COLOR_暗_4)
-    CALL html_wait
-    HTML_PRINT get_text_html(@"什么都看不见了！这下糟了！",,MRU_9_COLOR_暗_3)
-    CALL html_wait
-    HTML_PRINT get_text_html(@"弹幕从看不见的地方袭来！",,MRU_9_COLOR_暗_4)
-    CALL html_wait
-    HTML_PRINT get_text_html(@"如果不赶紧躲开的话……",,MRU_9_COLOR_暗_3)
-    CALL html_wait
-    FOR LOCAL,0,3
-        LOCAL:1 = LINECOUNT
-        HTML_PRINT get_text_html(@"BGM ~ もう歌しか聞こえない！",,MRU_9_COLOR_明)
-        CALL MRU_9_NORMAL
-        IF !RESULT
-            CALL MRU_9_FAIL1
-            RETURN 1
-        ENDIF
-        CLEARLINE LINECOUNT - LOCAL:1
-    NEXT
-    HTML_PRINT get_text_html(@"………………",,MRU_9_COLOR_暗_3)
-    CALL html_wait
-    HTML_PRINT get_text_html(@"这算是，躲，躲过去了？",,MRU_9_COLOR_暗_3)
-    CALL html_wait
-    HTML_PRINT get_text_html(@"「哎呀呀，又是个厉害的人类啊！」",,MRU_9_COLOR_暗_3)
-    CALL html_wait
-    HTML_PRINT get_text_html(@"「我明明只是普通妖怪啊，怎么总是碰上这么厉害的人」",,MRU_9_COLOR_暗_3)
-    CALL html_wait
-    HTML_PRINT get_text_html(@"「但是还没结束呢！」",,MRU_9_COLOR_暗_3)
-    CALL html_wait
-    HTML_PRINT get_text_html(@"「刚刚的充其量只能算热场曲哦！」",,MRU_9_COLOR_暗_3)
-    CALL html_wait
-    HTML_PRINT get_text_html(@"「那么，迷失于真正的黑暗之中吧！」",,MRU_9_COLOR_暗_4)
-    CALL html_wait
-    HTML_PRINT get_text_html(@"「ブラインドナイトバード」！",,MRU_9_COLOR_暗_4)
-    CALL html_wait
-    HTML_PRINT get_text_html(@"LAST WORD了啊，用尽一切手段躲过去吧！",,MRU_9_COLOR_暗_3)
-    CALL html_wait
-    HTML_PRINT get_text_html(@"BGM ~ もう歌しか聞こえない！",,MRU_9_COLOR_明)
-    CALL MRU_9_LASTWORD
-    IF !RESULT
-        CALL MRU_9_FAIL2
+    ;#; CALL MRU_10_死_text
+    IF MRU_10_PHASE == ""
+		CALL MRU_event_set_next_phase("MRU_10",MRU_10_PHASE,"初见")
+	ENDIF
+	CALL MRU_event_procedure("MRU_10",MRU_10_PHASE)
+	RETURN 1
+
+@MRU_10__rate
+    RETURN 1000
+
+@MRU_10__name
+    RESULTS '= "天衣无缝的亡灵"
+
+@MRU_10__check
+    #DIM 妖梦id
+    #DIM 紫id
+    妖梦id = NAME_TO_CHARA("妖夢")
+    紫id = NAME_TO_CHARA("紫")
+    IF CFLAG:妖梦id:好感度 < -10
+        MRU_10_TARGET = 妖梦id
         RETURN 1
+    ELSEIF CFLAG:紫id:好感度 < -10
+        MRU_10_TARGET = 紫id
+        RETURN 1
+    ELSE
+        RETURN -1
     ENDIF
-    CALL MRU_9_SUCCESS
-    RETURN 1
 
-@MRU_9_NORMAL
-    #DIM RIGHT_DIR
-    #DIMS text
-    RIGHT_DIR = RAND:4
-    FOR LOCAL,0,4
-        IF RIGHT_DIR != LOCAL
-            text '= "肯定不是往这里躲啊"
-        ELSE
-            text '= "这里可以扭！"
-        ENDIF
-        HTML_PRINT get_text_html(@"{LOCAL}[%text%]",,MRU_9_COLOR_无,,@"{LOCAL}")
-    NEXT
-    TINPUT 5000,-1,0,""
-    SIF RESULT != RIGHT_DIR
-        RETURN 0
-    RETURN 1
-
-@MRU_9_LASTWORD
-    #DIM RIGHT_DIR
-    #DIMS text
-    #DIMS dir = "左", "右", "上", "下"
-    RIGHT_DIR = RAND:4
-    HTML_PRINT get_text_html(@"冷静下来，看起来只要向%dir:RIGHT_DIR%躲避就行了",,MRU_9_COLOR_无)
-    FOR LOCAL,0,4
-        text '= @"向%dir:LOCAL%躲避！"
-        HTML_PRINT get_text_html(@"{LOCAL}[%text%]",,MRU_9_COLOR_无,,@"{LOCAL}")
-    NEXT
-    TINPUT 10000,-1,0,""
-    SIF RESULT != RIGHT_DIR
-        RETURN 0
-    RETURN 1
-
-@MRU_9_FAIL1
-    #DIM 米斯蒂亜ID
-    米斯蒂亜ID = NAME_TO_CHARA("ミスティア")
-    CLEARLINE 1
-    HTML_PRINT get_text_html(@"BIU！！！")
-    HTML_PRINT get_text_html(@"满 身 疮 痍")
+@MRU_10_终止_check
+    RETURN -1
+@MRU_10_终止_text
+    RETURN 0
+@MRU_10_初见_text
+    #DIM 幽幽子id
+    幽幽子id = NAME_TO_CHARA("幽幽子")
+    HTML_PRINT get_text_html_c(@"「阿拉，是没见过的男人呢。」",幽幽子id)
     CALL html_wait
-    CALL ADD_COOLTIME(MASTER,3)
-    HTML_PRINT get_text_html_c(@"「终于遇见普通的人类了啊……终于能打过别人了！」",米斯蒂亜ID)
+    HTML_PRINT get_text_html(@"就在%ANAME(MASTER)%独自在热闹的酒馆喝酒的时候")
+    HTML_PRINT get_text_html(@"一个粉头发的女人慢慢凑到了身边")
     CALL html_wait
-    HTML_PRINT get_text_html_c(@"「今天晚上会把你的故事唱给别人听的♫♫♫！」",米斯蒂亜ID)
+    HTML_PRINT get_text_html(@"唔，一瞬间白花花的肉体就填满了余光")
+    HTML_PRINT get_text_html(@"不仅身材很好，而且衣着也很大胆")
     CALL html_wait
-    HTML_PRINT get_text_html_c(@"「别太气馁了，下次请不要一个人走夜路哦！」",米斯蒂亜ID)
+    HTML_PRINT get_text_html(@"从完全没能裹住胸口和胯处的蓝色和服中露出的春光一下子就让%ANAME(MASTER)%硬了起来了")
+    HTML_PRINT get_text_html(@"女人敏锐地察觉到了这一点，带着媚态笑了起来")
     CALL html_wait
-    HTML_PRINT get_text_html_c(@"「还有有机会的话请去找夜雀开的八目鳗店里吃八目鳗哦！」",米斯蒂亜ID)
+    HTML_PRINT get_text_html_c(@"「初次见面就无礼的勃起了，果真像传闻中说的那样是个坏孩子呢。」",幽幽子id)
     CALL html_wait
-    MRU_9_已经发生 = 1
-
-
-@MRU_9_FAIL2
-    #DIM 米斯蒂亜ID
-    米斯蒂亜ID = NAME_TO_CHARA("ミスティア")
-    CLEARLINE 1
-    HTML_PRINT get_text_html(@"BIU！！！")
+    HTML_PRINT get_text_html_c(@"「既然已经把持不住了，那就由我来赔罪吧。」",幽幽子id)
     CALL html_wait
-    HTML_PRINT get_text_html_c(@"「虽然没那么厉害，但还是很厉害的人啊……」",米斯蒂亜ID)
+    HTML_PRINT get_text_html_c(@"「名字什么的不重要吧？」",幽幽子id)
     CALL html_wait
-    HTML_PRINT get_text_html_c(@"「那个……我叫米斯蒂娅！」",米斯蒂亜ID)
+    HTML_PRINT get_text_html_c(@"「那么……」",幽幽子id)
     CALL html_wait
-    HTML_PRINT get_text_html_c(@"「有机会的话来我的店里吃八目鳗哦！」",米斯蒂亜ID)
+    HTML_PRINT get_text_html(@"女人对着%ANAME(MASTER)%解开了和服的束缚，露出了完全没有其他保护的身体")
     CALL html_wait
-    MRU_9_已经发生 = 1
-    CFLAG:米斯蒂亜ID:好感度+=100
-    CFLAG:米斯蒂亜ID:面識 = 1
-
-@MRU_9_SUCCESS
-    #DIM 米斯蒂亜ID
-    米斯蒂亜ID = NAME_TO_CHARA("ミスティア")
-    CLEARLINE 1
-    HTML_PRINT get_text_html(@"HITTTTTTTT！！！")
-    CALL html_wait
-    HTML_PRINT get_text_html_c(@"「哇……又被打倒了！！明明又只是人类……」",米斯蒂亜ID)
-    CALL html_wait
-    HTML_PRINT get_text_html_c(@"「总，总之！\@IS_MALE(MASTER) ? 先生 # 大姐\@您视力很好啊！」",米斯蒂亜ID)
-    CALL html_wait
-    HTML_PRINT get_text_html_c(@"「……这么晚了我就先告辞了晚上还要开店还要准备食材……呜啊！」",米斯蒂亜ID)
-    CALL html_wait
-    HTML_PRINT get_text_html(@"想逃？")
-    CALL html_wait
-    HTML_PRINT get_text_html(@"%ANAME(MASTER)%一把抓住了想要从树丛中飞走的夜雀")
-    CALL html_wait
-    HTML_PRINT get_text_html_c(@"「那个……我是米斯蒂娅……请手下留情……」",米斯蒂亜ID)
-    CALL html_wait
-    HTML_PRINT get_text_html_c(@"「不如你晚上来我这里吃烤八目鳗吧，我请你！」",米斯蒂亜ID)
-    CALL html_wait
-    CALL get_text_html_b(@"坏孩子就得抓回去教训","9_1","")
-	CALL get_text_html_b(@"不如你来我们这里做饭吧","9_1","")
-    CALL get_text_html_b(@"晚上去吃八目鳗吧？","","")
+    CALL get_text_html_b(@"控制不住了","","")
+	CALL get_text_html_b(@"感觉怪怪的","","")
 	CALL get_html_button_input
     IF RESULT == 0
-        HTML_PRINT get_text_html_c(@"「呜啊对不起我下次不敢了放过我吧！」",米斯蒂亜ID)
+        HTML_PRINT get_text_html(@"不知怎么就被带到了酒馆的房间中")
+        HTML_PRINT get_text_html(@"初次见面的女人非常干脆地骑到了%ANAME(MASTER)%的身上")
         CALL html_wait
-        HTML_PRINT get_text_html(@"太晚了呢，夜晚可不适合后悔啊")
-        CALL html_wait
-        HTML_PRINT get_text_html_n(@"把%ANAME(米斯蒂亜ID)%关入了大牢")
-        CALL CAPTURE(米斯蒂亜ID,CFLAG:MASTER:所属)
-        CFLAG:米斯蒂亜ID:従属度+=300
-    ELSEIF RESULT == 1
-        HTML_PRINT get_text_html_c(@"「……来您这里吗？」",米斯蒂亜ID)
-        CALL html_wait
-        HTML_PRINT get_text_html_c(@"「只是……我除了做饭和唱歌其他什么也不会呢……」",米斯蒂亜ID)
-        CALL html_wait
-        HTML_PRINT get_text_html(@"明明刚刚还把我打个半死！！！")
-        CALL html_wait
-        HTML_PRINT get_text_html_c(@"「那……既然您愿意，就请多指教了！」",米斯蒂亜ID)
-        CALL html_wait
-        HTML_PRINT get_text_html_c(@"「还有刚刚真的很抱歉！」",米斯蒂亜ID)
-        CALL html_wait
-        HTML_PRINT get_text_html_n(@"劝诱%ANAME(米斯蒂亜ID)%加入了我国")
-        CALL CHANGE_COUNTRY(米斯蒂亜ID,CFLAG:MASTER:所属)
-        CFLAG:米斯蒂亜ID:好感度+=300
-        CALL html_wait
-    ELSE
-        HTML_PRINT get_text_html(@"去%ANAME(米斯蒂亜ID)%的小店吃了免费的八目鳗")
-        CALL html_wait
-        HTML_PRINT get_text_html_c(@"「请，这是今天最新鲜的八目鳗，还有雀酒！」",米斯蒂亜ID)
+        HTML_PRINT get_text_html(@"直直地把%ANAME(MASTER)%膨胀到极点的雄根吞进了身体里")
+        HTML_PRINT get_text_html(@"然后如同舞蹈一般疯狂摇摆着")
         CALL html_wait
         CALL EXPEND_LATER()
-        HTML_PRINT get_text_html(@"好吃！",,MRU_9_COLOR_超量)
+        HTML_PRINT get_text_html(@"之后的事情%ANAME(MASTER)%几乎没有了印象")
+        HTML_PRINT get_text_html(@"只记得在恍惚之中射了出来")
         CALL html_wait
-        HTML_PRINT get_text_html(@"眼前的夜雀妖怪虽然打起人来毫不犹豫，但是做饭却意外地有水平",,MRU_9_COLOR_超量)
+        HTML_PRINT get_text_html_c(@"「哈……怪不得♡」",幽幽子id)
         CALL html_wait
-        HTML_PRINT get_text_html(@"「毕竟是我家的招牌菜哦！」",,MRU_9_COLOR_超量)
+        HTML_PRINT get_text_html_c(@"「你还……蛮厉害的……嗯！」",幽幽子id)
         CALL html_wait
-        HTML_PRINT get_text_html(@"「一开始做八目鳗只是为了别的事情。」",,MRU_9_COLOR_超量)
+        CALL MRU_10_FUCK
+        HTML_PRINT get_text_html(@"似乎也是高潮了的女人保持着被内射的姿态把脸贴近了%ANAME(MASTER)%")
+        IF CFLAG:幽幽子id:面識 == 0
+            HTML_PRINT get_text_html_c(@"「我是%NAME_FORMAL(幽幽子id)%……请多关照」",幽幽子id)
+            CFLAG:幽幽子id:面識 = 1
+        ELSE
+            HTML_PRINT get_text_html_c(@"「我是%ANAME(幽幽子id)%哦……还假装忘记了吗？真可爱♡」",幽幽子id)
+        ENDIF
         CALL html_wait
-        HTML_PRINT get_text_html(@"「但是做到现在只是单纯的想看见大家都来开心地吃饭。」",,MRU_9_COLOR_超量)
+        HTML_PRINT get_text_html_c(@"「下次……还要一起和我快乐呢。」",幽幽子id)
         CALL html_wait
-        HTML_PRINT get_text_html(@"「以，以后都免费来吃吗？既然是被打败了……呜……」",,MRU_9_COLOR_超量)
+        HTML_PRINT get_text_html(@"撑不住了，本想就这样吻上去的%ANAME(MASTER)%在恍惚中睡了过去")
+        HTML_PRINT get_text_html(@"……")
+        HTML_PRINT get_text_html(@"失去意识前，总觉得自己心跳好快啊")
+        HTML_PRINT get_text_html(@"不会是爱上了%ANAME(幽幽子id)%吧？")
         CALL html_wait
-        HTML_PRINT get_text_html(@"「这个月又要没钱花了……」",,MRU_9_COLOR_超量)
+        CALL MRU_event_set_next_phase("MRU_10",MRU_10_PHASE,"沉沦")
+    ELSE
+        HTML_PRINT get_text_html(@"还是算了吧，这样随便倒贴的人总觉有问题")
+        HTML_PRINT get_text_html(@"看见%ANAME(MASTER)%是这种态度，女人脸上的笑容凝固了")
         CALL html_wait
-        HTML_PRINT get_text_html(@"以后多来这里吃吃夜宵吧？",,MRU_9_COLOR_超量)
+        HTML_PRINT get_text_html_c(@"「……」",幽幽子id)
         CALL html_wait
-        HTML_PRINT get_text_html(@"………………",,MRU_9_COLOR_超量)
+        HTML_PRINT get_text_html_c(@"「怪不得……」",幽幽子id)
         CALL html_wait
-        HTML_PRINT get_text_html(@"说起来，这八目鳗的明目效果是不是太好了一点",,MRU_9_COLOR_超量)
-        CFLAG:米斯蒂亜ID:好感度+=500
-        CFLAG:米斯蒂亜ID:従属度+=500
+        IF CFLAG:幽幽子id:面識 == 0
+            HTML_PRINT get_text_html_c(@"「我的名字是%NAME_FORMAL(幽幽子id)%」",幽幽子id)
+            CALL html_wait
+            HTML_PRINT get_text_html_c(@"「好好记住吧！」",幽幽子id)
+            CALL html_wait
+            CFLAG:幽幽子id:面識 = 1
+        ELSE
+            HTML_PRINT get_text_html_c(@"「还假装忘记我是谁了吗？真是恶心的人啊！」",幽幽子id)
+            CALL html_wait
+        ENDIF
+        CFLAG:幽幽子id:好感度 = -500
+        CFLAG:幽幽子id:依存度 = -500
+        CFLAG:幽幽子id:従属度 = -500
+        HTML_PRINT get_text_html(@"%ANAME(幽幽子id)%抛下最后一句话就消失了")
+        HTML_PRINT get_text_html(@"果然来者不善啊，也不知道自己怎么得罪她了")
+        CALL html_wait
+        CALL MRU_event_set_next_phase("MRU_10",MRU_10_PHASE,"终止")
+    ENDIF
+
+@MRU_10_FUCK
+    #DIM 幽幽子id
+    幽幽子id = NAME_TO_CHARA("幽幽子")
+    {
+    CALL FUCK(MASTER,
+        "欲望, 性技, 性交, Ｃ, 射精, 露出, Ｖ挿入",
+        "童貞喪失",
+        0,
+        "",
+        "",
+        @"%ANAME(幽幽子id)%",
+        "突如其来的做爱邀请")
+    }
+    {
+    CALL FUCK(幽幽子id,
+        "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ｂ, Ｖ拡張, 露出,Ｖ性交",
+        "処女喪失",
+        0,
+        "",
+        ANAME(MASTER),
+        "",
+        "突如其来的做爱邀请")
+    }
+@MRU_10_沉沦_rate
+    RETURN 100 + MRU_10_沉沦次数 * 200
+
+@MRU_10_沉沦_name
+    RESULTS '= "天衣无缝的亡灵"
+
+@MRU_10_沉沦_check
+
+@MRU_10_沉沦_text
+    #DIM 幽幽子id
+    幽幽子id = NAME_TO_CHARA("幽幽子")
+    HTML_PRINT get_text_html(@"%ANAME(幽幽子id)%又找上门了")
+    HTML_PRINT get_text_html_c(@"「呐，要来做吗？。」",幽幽子id)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「%ANAME(MASTER)%实在是太特别了。」",幽幽子id)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「上次知道了是什么样的以后，就再也忘记不了了。」",幽幽子id)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"%ANAME(幽幽子id)%再次拉开了衣服，向%ANAME(MASTER)%展示着已经发情的身体")
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「所以呢，请不要拒绝哦。」",幽幽子id)
+    CALL html_wait
+    CALL get_text_html_b(@"同意","","")
+	CALL get_text_html_b(@"拒绝","","")
+	CALL get_html_button_input
+    IF RESULT == 0
+        HTML_PRINT get_text_html(@"那蚀骨的快乐%ANAME(MASTER)%也无法忘记啊！")
+        HTML_PRINT get_text_html(@"完全没有犹豫地就答应了")
+    ELSE
+        HTML_PRINT get_text_html(@"虽然很想这么拒绝她")
+        HTML_PRINT get_text_html(@"但是……身体已经诚实地对另一个美丽的身体作出了反应")
+        MRU_10_拒绝次数++
+    ENDIF
+    CALL EXPEND_LATER()
+    HTML_PRINT get_text_html_c(@"「嗯♡……哈♡……啊♡」",幽幽子id)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「好……厉害！%ANAME(MASTER)%……」",幽幽子id)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"和以前一样，%ANAME(幽幽子id)%在%ANAME(MASTER)%身上进行着淫靡的舞蹈")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"往常都能在性爱中掌握主导权的%ANAME(MASTER)%在%ANAME(幽幽子id)%面前完全失去了抵抗力")
+    HTML_PRINT get_text_html(@"任凭着%ANAME(幽幽子id)%一次又一次地撞击把自己的意识带走……")
+    CALL EXPEND_LATER()
+    HTML_PRINT get_text_html(@"每次察觉到%ANAME(MASTER)%已经到极限的%ANAME(幽幽子id)%都会用力夹紧自己的腔穴")
+    HTML_PRINT get_text_html(@"射……射了！")
+    CALL EXPEND_LATER()
+    HTML_PRINT get_text_html(@"哈……哈……")
+    HTML_PRINT get_text_html(@"到底射了多少呢？")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"恍惚中%ANAME(MASTER)%看到自己的子种早就溢满了两人的结合处")
+    HTML_PRINT get_text_html(@"但是%ANAME(幽幽子id)%似乎没有停下来的意思")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"挑逗似的故意把嘴唇靠近%ANAME(MASTER)%")
+    HTML_PRINT get_text_html(@"在%ANAME(MASTER)%勉强像吻上去的时候又调皮地离开了")
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「再努力一点的话，就奖励给你吧♡?」",幽幽子id)
+    CALL EXPEND_LATER()
+    HTML_PRINT get_text_html(@"一直到失去意识前，%ANAME(MASTER)%都没能得到那个吻")
+    CALL html_wait
+    REPEAT RAND(3,5)
+        CALL MRU_10_FUCK
+    REND
+    CALL EXPEND_LATER()
+    HTML_PRINT get_text_html(@"心脏……跳得好快啊……真想……吻%PRONOUN(幽幽子id)%啊")
+    CALL html_wait
+    MRU_10_沉沦次数 ++
+
+@MRU_10_沉沦_end
+    IF MRU_10_沉沦次数 >= RAND(3,6)
+        CALL MRU_event_set_next_phase("MRU_10",MRU_10_PHASE,"死")
+    ENDIF
+
+
+@MRU_10_死_rate
+    RETURN 1000
+
+@MRU_10_死_name
+    RESULTS '= "惧死症"
+
+@MRU_10_死_check
+    #DIM 幽幽子id
+    幽幽子id = NAME_TO_CHARA("幽幽子")
+    SIF IS_SLAVE(幽幽子id)
+        RETURN -1
+    RETURN 1
+
+@MRU_10_死_text
+    #DIM 幽幽子id
+    #DIM 妖梦id
+    #DIM 紫id
+    #DIM DYNAMIC 选择放弃
+    幽幽子id = NAME_TO_CHARA("幽幽子")
+    妖梦id = NAME_TO_CHARA("妖夢")
+    紫id = NAME_TO_CHARA("紫")
+    HTML_PRINT get_text_html(@"%ANAME(MASTER)%最近完全没法认真工作，一闭上眼睛就是%ANAME(幽幽子id)%那张愉悦的脸")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"（下次一定要拒绝她，一定！）")
+    CALL EXPEND_LATER()
+    HTML_PRINT get_text_html(@"虽然没有任何约定，%ANAME(幽幽子id)%又来了")
+    HTML_PRINT get_text_html(@"完全没说任何话，两人就这样来到了床上")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"衣服也完全不需要麻烦，两人早就默契地穿着适合随时做爱的衣服")
+    HTML_PRINT get_text_html(@"%ANAME(幽幽子id)%先是随手解下了自己的衣服，然后温柔地把%ANAME(MASTER)%推倒在床上")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"（心脏……跳得好快啊）")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"%ANAME(MASTER)%那曾经不可一世的雄根在连日的摧残后已经摇摇欲坠了")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"但是看见%ANAME(幽幽子id)%那诱人的躯体，还勉强支撑了起来")
+    HTML_PRINT get_text_html_c(@"「真……可爱啊……即便这样了还不肯放弃呢♡」",幽幽子id)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"（心脏……怎么那么沉重）")
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「那么♡我开动了♡」",幽幽子id)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"（不……不行……好累啊）")
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「啊啦，还会往上顶呢真可爱。」",幽幽子id)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「或者说……可怜呢。」",幽幽子id)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"（救命啊……不要再动了！）")
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「即便是性命攸关，还是不愿意放弃快乐吗？」",幽幽子id)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"（唔！）")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"心脏如同铁锤一般一下又一下撞击在胸口上")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"为什么……完全反抗不了啊")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"再这样下去的话……会……！")
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「今天完全不行啊……这样就没了……真是的。」",幽幽子id)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"虽然根本没有高潮，%ANAME(幽幽子id)%还是带着往常的媚笑趴在了%ANAME(MASTER)%的身边")
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「呐，来聊会天吧？」",幽幽子id)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"看着眼前正在喘着粗气的%ANAME(MASTER)%")
+    HTML_PRINT get_text_html(@"%ANAME(幽幽子id)%再次把脸凑到了%ANAME(MASTER)%的耳边")
+    CALL html_wait
+    IF MRU_10_TARGET == 妖梦id
+        HTML_PRINT get_text_html_c(@"「你应该还记得%ANAME(MRU_10_TARGET)%吧？」",幽幽子id)
+        CALL html_wait
+        HTML_PRINT get_text_html(@"（咚……咚……咚……）")
+        CALL html_wait
+        HTML_PRINT get_text_html_c(@"「我的一个很重要的人把我托付给她，或者说把她托付给我了。」",幽幽子id)
+        CALL html_wait
+        HTML_PRINT get_text_html_c(@"「那孩子是个一根筋的傻瓜呢，总是我说什么就相信什么。」",幽幽子id)
+        CALL html_wait
+        HTML_PRINT get_text_html_c(@"「经常以为我的玩笑是认真的，然后自己尽全力去实现我那奇怪的要求。」",幽幽子id)
+        CALL html_wait
+        HTML_PRINT get_text_html_c(@"「但是呢……只有我可以这么做哦？」",幽幽子id)
+        CALL html_wait
+        HTML_PRINT get_text_html_c(@"「像你这样的人，怎么敢碰她！！！」",幽幽子id)
+        CALL html_wait
+    ELSE
+        HTML_PRINT get_text_html_c(@"「你应该还记得%ANAME(MRU_10_TARGET)%吧？」",幽幽子id)
+        CALL html_wait
+        HTML_PRINT get_text_html(@"（咚……咚……咚……）")
+        CALL html_wait
+        HTML_PRINT get_text_html_c(@"「我和她认识很久了哦……」",幽幽子id)
+        CALL html_wait
+        HTML_PRINT get_text_html_c(@"「久到你的祖辈都还没出生吧？」",幽幽子id)
+        CALL html_wait
+        HTML_PRINT get_text_html_c(@"「像你这样的人，眼里大概是只有欲望吧？」",幽幽子id)
+        CALL html_wait
+        HTML_PRINT get_text_html_c(@"「友情这种东西，你真的能理解吗？」",幽幽子id)
+        CALL html_wait
+        HTML_PRINT get_text_html_c(@"「既然理解不了，就不要随意的去破坏！」",幽幽子id)
         CALL html_wait
     ENDIF
-    CFLAG:米斯蒂亜ID:面識 = 1
+    HTML_PRINT get_text_html(@"掺杂着愤怒和鄙夷的媚笑凝固了")
+    HTML_PRINT get_text_html_c(@"「该让你付出代价了！」",幽幽子id)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"（咚……咚……咚……）")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"%ANAME(幽幽子id)%再次骑在了%ANAME(MASTER)%的身上")
+    HTML_PRINT get_text_html(@"看着那玩意已经是一副完全萎靡的样子")
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「真是没用啊……让我来帮你最后一次把？」",幽幽子id)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"（咚……咚……咚……）")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"%ANAME(幽幽子id)%用手开始慢慢爱抚着%ANAME(MASTER)%的雄根")
+    HTML_PRINT get_text_html(@"是用了什么能力吗，已经在崩溃边缘的%ANAME(MASTER)%再次勃起了")
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「……心脏很疼吧？」",幽幽子id)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「心脏不舒服的时候，要避免剧烈运动哦？」",幽幽子id)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「不然的话……会死的吧？」",幽幽子id)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"%ANAME(幽幽子id)%一边说着，一边跨坐上了最后的雄根上")
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「阿啦，不好意思。」",幽幽子id)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「忘记了你是个脑子里面除了欲望什么都不想的人呢。」",幽幽子id)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"把%ANAME(MASTER)%的双手死死压住，%ANAME(幽幽子id)%开始了最后的舞蹈")
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「那就让我来成全你吧？」",幽幽子id)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"（咚……咚……咚……）")
+    HTML_PRINT get_text_html(@"（咚……咚……咚……）")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"（心脏……要爆炸了）")
+    HTML_PRINT get_text_html(@"（再不反抗的话，真的要死了！）")
+    CALL html_wait
+    FOR LOCAL,0,4
+        CALL get_text_html_b(@"挣扎","","")
+        CALL get_text_html_b(@"主动攻击","","")
+        CALL get_text_html_b(@"求饶","","")
+        CALL get_text_html_b(@"放弃","","")
+        TINPUT 5000,-1,1,""
+        IF RESULT == 0
+            HTML_PRINT get_text_html(@"%ANAME(MASTER)%挣扎着想要爬起来……")
+            HTML_PRINT get_text_html(@"%ANAME(幽幽子id)%把全身的重量都压了下去")
+            CALL html_wait
+        ELSEIF RESULT == 1
+            HTML_PRINT get_text_html(@"%ANAME(MASTER)%用尽最后的力气想要反攻")
+            HTML_PRINT get_text_html(@"%ANAME(幽幽子id)%用腰死死卡住了%ANAME(MASTER)%的雄根，继续掌握着主导权")
+            CALL html_wait
+        ELSEIF RESULT == 2
+            HTML_PRINT get_text_html_c(@"「既然希望别人能饶恕你。」",幽幽子id)
+            CALL html_wait
+            HTML_PRINT get_text_html_c(@"「就要先学会饶恕别人哦？」",幽幽子id)
+            CALL html_wait
+            HTML_PRINT get_text_html(@"%ANAME(幽幽子id)%看起来不为所动")
+            CALL html_wait
+        ELSE
+            选择放弃 = 1
+        ENDIF
+        HTML_PRINT get_text_html(@"（咚……咚……咚……）")
+        CALL html_wait
+        HTML_PRINT get_text_html(@"%ANAME(幽幽子id)%继续着那绝望的死亡之舞")
+        CALL html_wait
+        CALL MRU_10_LASTWORD(LOCAL)
+    NEXT
+    HTML_PRINT get_text_html(@"%ANAME(幽幽子id)%加快了扭动的速度")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"曾经是象征着新生命诞生的行为现在却只会带来死亡")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"（要……射了……）")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"（要……死了……）")
+    CALL html_wait
+    IF 选择放弃 || MRU_10_拒绝次数 < MRU_10_沉沦次数
+        HTML_PRINT get_text_html(@"坚持不住了，%ANAME(MASTER)%就这样射了……")
+        HTML_PRINT get_text_html(@"无力再支撑下去的心脏停止了工作")
+        CALL html_wait
+        FLAG:強制エンドフラグ = 1
+        BEGIN SYSTEM_TITLE
+    ELSE
+    ENDIF
+@MRU_10_LASTWORD(PTR)
+    #DIM PTR
+    #DIMS LASTWORD = "",""
+    #DIM 幽幽子id
+    幽幽子id = NAME_TO_CHARA("幽幽子")
+    SIF !INRANGE(PTR,0,3)
+        PTR = 3
+    SELECTCASE PTR
+        CASE 0
+            HTML_PRINT get_text_html_c(@"「%ANAME(MRU_10_TARGET)%是我最在乎的人！而你却这样伤害了她！」",幽幽子id)
+            HTML_PRINT get_text_html_c(@"「你伤害了我最在乎的人，所以我就要让你去死。」",幽幽子id)
+            CALL html_wait
+        CASE 1
+            HTML_PRINT get_text_html_c(@"「不是作为君主死去，不是作为英雄死去。」",幽幽子id)
+            CALL html_wait
+            HTML_PRINT get_text_html_c(@"「不能像任何一个普通人一样死去。」",幽幽子id)
+            CALL html_wait
+            HTML_PRINT get_text_html_c(@"「只能用我的方法，让你诱骗成最无助的亡灵。」",幽幽子id)
+            CALL html_wait
+        CASE 2
+            HTML_PRINT get_text_html_c(@"「只有这样，你才不能进入伪善的轮回。」",幽幽子id)
+            CALL html_wait
+            HTML_PRINT get_text_html_c(@"「只能在我的怀抱里被折磨到……宁愿去死。」",幽幽子id)
+            CALL html_wait
+            HTML_PRINT get_text_html_c(@"「明天早上，世上所有人都会看见我们的%ANAME(MASTER)%大人死在一副丑陋的躯壳上……」",幽幽子id)
+            CALL html_wait
+        CASEELSE
+            HTML_PRINT get_text_html_c(@"「而你的灵魂……就让我作成永远的亡灵吧！」",幽幽子id)
+            CALL html_wait
+            HTML_PRINT get_text_html_c(@"「那么……就永远程眠在此吧！」",幽幽子id)
+            CALL html_wait
+    ENDSELECT
+
+

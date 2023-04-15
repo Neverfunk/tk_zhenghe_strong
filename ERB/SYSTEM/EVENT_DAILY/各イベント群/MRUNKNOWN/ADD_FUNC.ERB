@@ -548,6 +548,16 @@
 
 	TRYCALLFORM %target_func%_end
 
-
-
-
+@SELECT_CHARA_RANDOM_MRU_BASE(対象)
+	#FUNCTION
+	#DIM 対象
+	;MASTERならダメ
+	SIF 対象 == MASTER
+		RETURNF 0
+	;死んでたら駄目
+	SIF CFLAG:対象:特殊状態 == 特殊状態_死亡
+		RETURNF 0
+	;未登場もだめ
+	SIF CFLAG:対象:所属 == 0 && CFLAG:対象:特殊状態 == 0 && !CFLAG:対象:捕虜先
+		RETURNF 0
+	RETURNF 1

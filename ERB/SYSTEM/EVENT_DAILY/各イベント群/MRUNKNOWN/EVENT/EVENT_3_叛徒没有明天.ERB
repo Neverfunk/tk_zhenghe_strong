@@ -41,26 +41,23 @@ RETURN デイリー_ジャンル_エロ
 ;存在该函数且返回0事件不能触发
 ;---------------------
 @EVENT_DAILY_NO_FUTURE_FOR_TRAITOR_SETTARGET()
-    #DIM 候补,MAX_CHARA_NUM
-    #DIM DYNAMIC 候补数
-    FOR LOCAL, 1, CHARANUM
-        SIF !IS_TOHO_CHARA(LOCAL)
-            CONTINUE
-        IF (MRU_3_记录恋慕:LOCAL && !TALENT:LOCAL:恋慕)||(MRU_3_记录服从:LOCAL && !TALENT:LOCAL:服従)
-            SIF !IS_FEMALE(LOCAL)
-                CONTINUE
-            SIF GET_COUNTRY_BOSS(CFLAG:LOCAL:所属) == LOCAL
-                CONTINUE
-            SIF (CFLAG:LOCAL:所属 == CFLAG:MASTER:所属 && CFLAG:LOCAL:捕虜先 == 0) || CFLAG:LOCAL:捕虜先 == CFLAG:MASTER:所属
-                候补:(候补数++) = LOCAL
-        ENDIF
-    NEXT
-    SIF 候补数 <= 0
-        RETURN 0
-    DAILY_TARGET = 候补:(RAND(候补数))
-    DAILY_TARGET_NUM = 1
-    RETURN 1
+	CALL SELECT_CHARA_RANDOM( "MRU_3", "MRU_3")
 
+@SELECT_CHARA_RANDOM_LOGIC_MRU_3(対象)
+	#DIM 対象
+	SIF !IS_TOHO_CHARA(対象)
+        RETURN 0
+	SIF !IS_FEMALE(対象)
+        RETURN 0
+	SIF (MRU_3_记录恋慕:対象 == TALENT:対象:恋慕)&&(MRU_3_记录服从:対象 == TALENT:対象:服従)
+		RETURN 0
+	SIF GET_COUNTRY_BOSS(CFLAG:対象:所属) == 対象
+        RETURN 0
+	SIF CFLAG:対象:所属 != CFLAG:MASTER:所属 && CFLAG:対象:捕虜先 != CFLAG:MASTER:所属
+		RETURN 0
+    RETURN SELECT_CHARA_RANDOM_MRU_BASE(対象)
+@SELECT_CHARA_RANDOM_BIAS_MRU_3(対象)
+	#DIM
 ;---------------------
 ;名称
 ;返回空或不存在时使用注册名称
@@ -96,7 +93,7 @@ RETURN デイリー_ジャンル_エロ
         CALL html_wait
     ELSE
         HTML_PRINT get_text_html(@"背叛是绝对不能容忍的，必须告诉所有人背叛自己的代价！")
-        HTML_PRINT get_text_html(@"这样想着的%ANAME(MASTER)%，一步步走向了%ANAME(CHARA_ID)%的\@CFLAG:LOCAL:捕虜先 > 0 ? 房间 # 牢房\@")
+        HTML_PRINT get_text_html(@"这样想着的%ANAME(MASTER)%，一步步走向了%ANAME(CHARA_ID)%的\@CFLAG:CHARA_ID:捕虜先 > 0 ? 房间 # 牢房\@")
         HTML_PRINT get_text_html(@"看见%ANAME(MASTER)%突然进来的%ANAME(CHARA_ID)%吓了一跳")
         CALL html_wait
         HTML_PRINT get_text_html(@"长时间被各种各样的人调教过的身心早已经软弱无力")

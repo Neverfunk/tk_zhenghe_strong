@@ -25,6 +25,8 @@
 	CALL MRU_event_check("MRU_10",MRU_10_PHASE)
 	SIF RESULT == -1
 		RETURN 0
+	SIF IS_FALLEN(対象)
+		RETURN 0
 	RETURN CHECK_KOJO_DAILY_HAPPEN(対象,0,0,-1)
 
 ;---------------------
@@ -54,7 +56,6 @@
 ;---------------------
 @KOJO_DAILY_K20_NECROPHOBIA(対象)
     #DIM 対象
-    ;#; CALL MRU_10_死_text
     IF MRU_10_PHASE == ""
 		CALL MRU_event_set_next_phase("MRU_10",MRU_10_PHASE,"初见")
 	ENDIF
@@ -304,7 +305,9 @@
     HTML_PRINT get_text_html(@"%ANAME(MASTER)%那曾经不可一世的雄根在连日的摧残后已经摇摇欲坠了")
     CALL html_wait
     HTML_PRINT get_text_html(@"但是看见%ANAME(幽幽子id)%那诱人的躯体，还勉强支撑了起来")
-    HTML_PRINT get_text_html_c(@"「真……可爱啊……即便这样了还不肯放弃呢♡」",幽幽子id)
+	HTML_PRINT get_text_html_c(@"「看来就是今天了啊」",幽幽子id)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「真可爱啊……即便这样了还不肯放弃呢♡」",幽幽子id)
     CALL html_wait
     HTML_PRINT get_text_html(@"（心脏……怎么那么沉重）")
     CALL html_wait
@@ -410,7 +413,7 @@
         CALL get_text_html_b(@"主动攻击","","")
         CALL get_text_html_b(@"求饶","","")
         CALL get_text_html_b(@"放弃","","")
-        TINPUT 5000,-1,1,""
+        CALL get_html_button_input
         IF RESULT == 0
             HTML_PRINT get_text_html(@"%ANAME(MASTER)%挣扎着想要爬起来……")
             HTML_PRINT get_text_html(@"%ANAME(幽幽子id)%把全身的重量都压了下去")
@@ -446,10 +449,26 @@
     IF 选择放弃 || MRU_10_拒绝次数 < MRU_10_沉沦次数
         HTML_PRINT get_text_html(@"坚持不住了，%ANAME(MASTER)%就这样射了……")
         HTML_PRINT get_text_html(@"无力再支撑下去的心脏停止了工作")
-        CALL html_wait
+		CALL EXPEND_LATER()
+
         FLAG:強制エンドフラグ = 1
-        BEGIN SYSTEM_TITLE
+		DAILY_CANCEL = 1
+        BEGIN EVENT
     ELSE
+		HTML_PRINT get_text_html(@"哈……哈……哈……")
+		HTML_PRINT get_text_html(@"还……活着吗？")
+		CALL html_wait
+		HTML_PRINT get_text_html(@"最后的高潮让心脏停止了几秒")
+		HTML_PRINT get_text_html(@"但身体里最后的求生欲还是让%ANAME(MASTER)%活了回来")
+		CALL html_wait
+		HTML_PRINT get_text_html_c(@"「……」",幽幽子id)
+		CALL html_wait
+		HTML_PRINT get_text_html(@"最终还是没能实现目的的%ANAME(幽幽子id)%用怨恨的眼神盯着%ANAME(MASTER)%")
+		CALL html_wait
+		HTML_PRINT get_text_html(@"不行了……支撑不住了……")
+		HTML_PRINT get_text_html(@"%ANAME(MASTER)%就这样昏死了过去")
+		CALL EXPEND_LATER()
+		CALL ADD_COOLTIME(MASTER,5)
     ENDIF
 @MRU_10_LASTWORD(PTR)
     #DIM PTR
@@ -478,9 +497,9 @@
             HTML_PRINT get_text_html_c(@"「明天早上，世上所有人都会看见我们的%ANAME(MASTER)%大人死在一副丑陋的躯壳上……」",幽幽子id)
             CALL html_wait
         CASEELSE
-            HTML_PRINT get_text_html_c(@"「而你的灵魂……就让我作成永远的亡灵吧！」",幽幽子id)
+            HTML_PRINT get_text_html_c(@"「而你的灵魂……就让我作成最弱的亡灵吧！」",幽幽子id)
             CALL html_wait
-            HTML_PRINT get_text_html_c(@"「那么……就永远程眠在此吧！」",幽幽子id)
+            HTML_PRINT get_text_html_c(@"「那么……就请永远沉眠在此吧！」",幽幽子id)
             CALL html_wait
     ENDSELECT
 

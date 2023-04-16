@@ -69,6 +69,10 @@
     SIF !MRU_exist_unfallen_female_boss()
         RETURN -1
     RETURN 1
+
+@MRU_1_2_终止_check
+	RETURN -1
+
 @MRU_1_2_初见_text
     #DIM coser_chara
     coser_chara = MRU_get_random_unfallen_female_boss()
@@ -168,7 +172,8 @@
         HTML_PRINT get_text_html(@"好像忘记问%PRONOUN(coser_chara)%关于奴隶集团的事情了……")
         HTML_PRINT get_text_html(@"算了，这种家伙应该也记不住什么东西吧")
         HTML_PRINT get_text_html_n(@"似乎是因为没让属下丢太多脸，MS在国内的评价上升了")
-        CALL MRU_1_SUBEVENT_STATUS(2,-1)
+		CALL MRU_event_set_next_phase("MRU_1_2",MRU_1_2_PHASE,"终止")
+        MRU_1_SUBEVENT_STATUS:1 = -1
         CALL CHANGE_RELATION_C_TO_O(CFLAG:MASTER:所属,MASTER,50,-50)
         CALL html_wait
     ENDIF

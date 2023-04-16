@@ -5,7 +5,6 @@
 ;---------------------
 @EVENT_DAILY_NO_FUTURE_FOR_TRAITOR_RATE()
     CALL MRU_EVENT_3_RECODE_CHARA_DATA
-    ;#; RETURN 1000
     RETURN 100
 
 @MRU_EVENT_3_RECODE_CHARA_DATA
@@ -53,17 +52,21 @@ RETURN デイリー_ジャンル_エロ
 		RETURN 0
 	SIF GET_COUNTRY_BOSS(CFLAG:対象:所属) == 対象
         RETURN 0
+	SIF CFLAG:対象:所属 == CFLAG:MASTER:所属 && CFLAG:対象:捕虜先 != CFLAG:MASTER:所属 && CFLAG:対象:捕虜先 != 0
+		RETURN 0
 	SIF CFLAG:対象:所属 != CFLAG:MASTER:所属 && CFLAG:対象:捕虜先 != CFLAG:MASTER:所属
 		RETURN 0
     RETURN SELECT_CHARA_RANDOM_MRU_BASE(対象)
+
 @SELECT_CHARA_RANDOM_BIAS_MRU_3(対象)
-	#DIM
+	#DIM 対象
+	RETURN ABL:対象:野心
 ;---------------------
 ;名称
 ;返回空或不存在时使用注册名称
 ;---------------------
 @EVENT_DAILY_NO_FUTURE_FOR_TRAITOR_NAME()
-    RESULTS = 叛徒没有明天
+    RESULTS '= @"叛徒没有明天"
 
 
 ;---------------------

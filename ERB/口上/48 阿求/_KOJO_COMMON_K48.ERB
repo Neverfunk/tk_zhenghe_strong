@@ -3,6 +3,298 @@
 ;-------------------------------------------------
 
 ;=================================================
-;●口上の存在判定
+;●口上的存在判定
 ;=================================================
 @KOJO_EXIST_K48
+
+;=================================================
+;●开始时
+;※任何状况都会执行。谨慎操作※
+;=================================================
+@KOJO_TRAIN_START_K48
+
+;=================================================
+;●结束时
+;※任何状况都会执行。谨慎操作※
+;=================================================
+@KOJO_TRAIN_END_K48
+
+;=================================================
+;执行命令时(该角色为玩家)
+;※任何状况都会执行。谨慎操作※
+;=================================================
+@KOJO_COM_TARGET_K48
+
+;=================================================
+;执行命令时(该角色为玩家)
+;※任何状况都会执行。谨慎操作※
+;=================================================
+@KOJO_COM_PLAYER_K48
+
+;=================================================
+;●命令执行前(无论是Target还是Player)
+;※地文显示前执行。返回值为1(RETURN 1)时地文将被截断
+;  如果需要，可以用KOJO_COM_TARGET代替
+;※任何状况都会执行。谨慎操作※
+;=================================================
+@KOJO_COM_BEFORE_K48
+
+;第一次接吻FLAG(如果没有接吻经验，将CFLAG:255设为1)
+SIF TALENT:無接吻経験
+	CFLAG:255 = 1
+;处女FLAG(如果是处女，CFLAG:260为1)
+SIF TALENT:処女
+	CFLAG:260 = 1
+;主人公是童贞FLAG(如果主人公是童贞，将CFLAG:261设为1)
+SIF TALENT:MASTER:童貞
+	CFLAG:261 = 1
+
+RETURN 0
+
+;=================================================
+;●命令执行后(参数的变动处理结束后被调用)
+;※任何状况都会执行。谨慎操作※
+;=================================================
+@KOJO_COM_AFTER_K48
+;[空虚]状态下，嘴巴被堵住的情况下不表示口上
+IF TALENT:空虚 || IS_EQUIP_CONTINUE(TARGET, "口装着")
+	RETURN 0
+ENDIF
+
+;第一次接吻FLAG(命令结束时没有接吻经验的话CFLAG:255设置为0)
+SIF !TALENT:無接吻経験
+	CFLAG:255 = 0
+;处女FLAG(命令结束的时候不是处女的话CFLAG:260设置为0)
+SIF !TALENT:処女
+	CFLAG:260 = 0
+;主人公童贞FLAG(命令结束时主人公不是童贞的话CFLAG:261设为0)
+SIF !TALENT:MASTER:童貞
+	CFLAG:261 = 0
+
+PRINTL
+;-------------------------------------------------
+;每次调教的初次绝顶在此创建
+;-------------------------------------------------
+;-------------------------------------------------
+;第一次Ｃ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｃ絶頂 > 0
+	IF CFLAG:220 == 0
+		CFLAG:220 = 1
+		;PRINTFORMW
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;第一次Ｖ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｖ絶頂 > 0
+	IF CFLAG:221 == 0
+		CFLAG:221 = 1
+		;PRINTFORMW
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;第一次Ａ絶頂
+;-------------------------------------------------
+IF NOWEX:Ａ絶頂 > 0
+	IF CFLAG:222 == 0
+		CFLAG:222 = 1
+		;PRINTFORMW
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;第一次Ｂ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｂ絶頂 > 0
+	IF CFLAG:223 == 0
+		CFLAG:223 = 1
+		;PRINTFORMW
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;第一次Ｍ絶頂
+;-------------------------------------------------
+IF NOWEX:Ｍ絶頂 > 0
+	IF CFLAG:224 == 0
+		CFLAG:224 = 1
+		;PRINTFORMW
+	ENDIF
+ENDIF
+
+;=================================================
+;●单人结局
+;=================================================
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;★从这里开始记述结局★
+;想要避免剧透的人请注意不要阅览
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+@KOJO_SINGLE_ENDING_K48
+;単体结局
+;统一全都市的场合，好感度达到5000以上，并且在所有角色中好感度最高
+    PRINTFORML
+    PRINTFORML
+    PRINTFORML
+    PRINTFORML
+    PRINTFORML
+    PRINTFORML
+    PRINTFORML
+    PRINTFORML
+    PRINTFORML
+    PRINTFORML
+    PRINTFORML
+    PRINTFORML
+    PRINTFORML
+    PRINTFORML
+    PRINTFORML
+    PRINTFORML
+IF TALENT:TARGET:恋人 && ABL:TARGET:知略 > 80 && ABL:TARGET:政治 > 80 && !TALENT:TARGET:崩壊 && !TALENT:TARGET:空虚 && GET_COUNTRY_BOSS(CFLAG:MASTER:所属) == MASTER
+    CALL K48_END_1
+ENDIF
+
+;当RETURN的值由0变为1时，跳过默认的单体结尾消息
+RETURN 1
+
+@K48_END_1
+    PRINTFORML 幻想乡终于被%ANAME(MASTER)%统一了
+    PRINTFORML 整个幻想乡开着盛大的宴会
+    WAIT
+    PRINTFORML 人人无不庆祝幻想乡多年来的统一与歌颂%ANAME(MASTER)%的功绩
+    CALL K48_AKYUU_SAY(@"「太好了呢，您现在可是创造了幻想乡有史以来的第一段完全地大一统的历史呢！」")
+    PRINTFORML %ANAME(TARGET)%走过来，小小的身躯撑在了%ANAME(MASTER)%的身上
+    CALL K48_AKYUU_SAY(@"「这可是能记录在『幻想乡缘起』里的哦！」")
+    CALL K48_AKYUU_SAY(@"「那么，我能否以第九代御阿礼之子的名义优先向您进行采访呢？」")
+    PRINTFORML %ANAME(TARGET)%更加靠近了%ANAME(MASTER)%，暧昧地抱着%ANAME(MASTER)%的腰部
+    CALL K48_AKYUU_SAY(@"「因为接下来的话都会记录在求闻口授里。」")
+    CALL K48_AKYUU_SAY(@"「所以接下来请把握分寸哦。」")
+    PRINTFORML 说完%ANAME(TARGET)%开始蹲下来
+    CALL K48_USELESS_INPUT
+    CALL K48_HUGE_WAIT()
+    PRINTFORML 突然，自己撑着伞，来到了城堡外，还有穿着有关祭祀事情的衣服的人站在旁边
+    PRINTFORML 天似乎下起了雨，滴答滴答地落在自己的伞上
+    WAIT
+    CALL K48_NPC_SAY(@"「恭祝御阿礼大人一路顺风！」")
+    PRINTFORML 听到了这样的声音
+    CALL K48_NPC_SAY(@"「恭祝御阿礼大人一路顺风！」")
+    PRINTFORML 自己的身边都是这样的声音
+    CALL K48_NPC_SAY(@"「恭祝御阿礼大人一路顺风！」")
+    PRINTFORML 脑子里充满了这令人恐惧的声音
+    PRINTFORML %ANAME(MASTER)%不自觉地向前跑去，似乎明白了发生什么不敢面对的事情
+    WAIT
+    PRINTFORML 但是%ANAME(MASTER)%依旧跑了过去，丝毫没有在意周围的人
+    PRINTFORML 周围站着许多的人，围在一个躺在地上的少女身旁
+    WAIT
+    PRINTFORML 那个少女就那么安静地躺着，而远处的死神带着个灵魂飘然离开
+    PRINTFORML 那位少女的面容突然清晰，那位少女的名字浮现在%ANAME(MASTER)%的脑海
+    WAIT
+    PRINTFORML ————%NAME_FORMAL(TARGET)%
+    CALL K48_USELESS_INPUT
+    CALL K48_HUGE_WAIT()
+    PRINTFORML 突然从床上惊醒，阿，原来只是个梦阿，%ANAME(MASTER)%舒了一口气
+    PRINTFORML 躺在双人床上的%ANAME(MASTER)%看向旁边空空如也的空位，又叹了一口气
+    WAIT
+    CALL K48_NPC_SAY(@"「果然还是...做噩梦了吗...」")
+    PRINTFORML 起床下身，把放着一个合照的相框按倒，数着墙上的日历
+    PRINTFORML 上面的年份赫然地告示了%ANAME(TARGET)%已死多年的事实
+    CALL K48_NPC_SAY(@"「果然我，还是不能就这么放下的啊...」")
+    PRINTFORML 作为一个领导人，%ANAME(MASTER)%自然是不能向众人过多地展现自己悲伤的一面
+    PRINTFORML 时间也作为最好的忘情水，让人忘却丧妻之痛
+    WAIT
+    PRINTFORML 但，时间有时候并不能抚平一切，再坚强的领导人也会有伤心的一面
+    PRINTFORML 就在这不知不觉间，本来是深夜出门散心的%ANAME(MASTER)%不自觉来到了%NAME_FORMAL(TARGET)%的墓前
+    WAIT
+    CALL K48_NPC_SAY(@"「这么久了，还是放不下你啊..」")
+    CALL K48_NPC_SAY(@"「你在是非曲直厅过的还好吗？那儿的阎魔有故意责难你吗？」")
+    CALL K48_NPC_SAY(@"「你不用担心呢，你的下一任转生的御阿礼很优秀呢」")
+    CALL K48_NPC_SAY(@"「幻想乡的历史还在被好好地记录着，今日的幻想乡依旧安稳和谐」")
+    CALL K48_NPC_SAY(@"「我回去啦，好好地睡吧，一切都令人放心」")
+    CALL K48_NPC_SAY(@"「再见，我的爱人，稗田阿求」")
+@KOJO_DEAD_ENDING_K48
+;斩首结局
+;在自势力灭亡时的选项中选择「……斩」，在主人公死亡的情况下，好感度在5000以上，并且在所有角色中好感度最高
+
+
+
+;当RETURN的值由0变为1时，跳过默认的单体结尾消息
+RETURN 1
+
+
+
+@K48_AKYUU_SAY(SENTENCE)
+    #DIMS SENTENCE
+    SETCOLOR 0x8904B1
+    PRINTFORML %SENTENCE%
+    RESETCOLOR
+    WAIT
+    RETURN
+
+@K48_NPC_SAY(SENTENCE)
+    #DIMS SENTENCE
+    SETCOLOR 0xFFFFFF
+    PRINTFORML %SENTENCE%
+    RESETCOLOR
+    WAIT
+    RETURN
+
+@K48_HUGE_WAIT
+    PRINTFORML ………………
+    PRINTFORML …………
+    PRINTFORML ……
+    WAIT
+
+@K48_USELESS_INPUT
+    LOCAL:1 = RAND(2,4)
+    FOR LOCAL,0,LOCAL:1
+        PRINTBUTTON "[无意义按钮]",1
+        INPUT
+        CLEARLINE 2
+    NEXT

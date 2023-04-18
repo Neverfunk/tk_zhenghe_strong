@@ -1,0 +1,340 @@
+﻿;ENG_NAME = SPELLCARD_PRACTICE
+;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K1_SPELLCARD_PRACTICE_RATE(対象)
+    #DIM 対象
+	CALL MRU_get_phase_rate("MRU_12",MRU_12_PHASE)
+	IF RESULT != -1
+		RETURN RESULT
+	ELSE
+		RETURN 50
+	ENDIF
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K1_SPELLCARD_PRACTICE_DECISION(対象)
+    #DIM 対象
+    SIF !IS_MALE(MASTER)
+        RETURN 0
+    SIF MONEY < 2000
+        RETURN 0
+    SIF !MRU_CHECK_CHARA_BASE(対象)
+        RETURN 0
+    CALL MRU_event_check("MRU_12",MRU_12_PHASE)
+	SIF RESULT == -1
+		RETURN 0
+    RETURN CHECK_KOJO_DAILY_HAPPEN(対象,1,0,1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K1_SPELLCARD_PRACTICE_GENRE(対象)
+    #DIM 対象
+    RETURN デイリー_ジャンル_その他
+
+
+;---------------------
+;KOJO_NAME
+;---------------------
+@KOJO_DAILY_K1_SPELLCARD_PRACTICE_NAME(対象)
+    #DIM 対象
+    CALL MRU_get_phase_name("MRU_12",MRU_12_PHASE)
+	SIF RESULTS != ""
+		RETURN
+    RESULTS '= "符卡练习"
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K1_SPELLCARD_PRACTICE(対象)
+    #DIM 対象
+    IF MRU_12_PHASE == ""
+		CALL MRU_event_set_next_phase("MRU_12",MRU_12_PHASE,"初见")
+	ENDIF
+	CALL MRU_event_procedure("MRU_12",MRU_12_PHASE)
+	RETURN 1
+
+@MRU_12__check
+    #DIM 灵梦id
+    灵梦id = NAME_TO_CHARA("霊夢")
+    SIF ABL:灵梦id:武闘 + 20 < ABL:MASTER:武闘
+        RETURN -1
+    RETURN 1
+
+@MRU_12__rate
+    RETURN 100
+
+@MRU_12_初见_rate
+    RETURN 200
+
+@MRU_12_初见_text
+    #DIM 灵梦id
+    灵梦id = NAME_TO_CHARA("霊夢")
+    HTML_PRINT get_text_html(@"路过了神社的时候，遇见了正坐在台阶上休息的%ANAME(灵梦id)%")
+    HTML_PRINT get_text_html_c(@"「早上好，%ANAME(MASTER)%。」",灵梦id)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"简单的回礼后，%ANAME(MASTER)%正准备离开")
+    HTML_PRINT get_text_html_c(@"「请等一下……」",灵梦id)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"被%ANAME(灵梦id)%叫住了")
+    HTML_PRINT get_text_html_c(@"「现在的幻想乡不太太平啊。」",灵梦id)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「%ANAME(MASTER)%想不想学一些防身用的符卡技巧呢？」",灵梦id)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「作为博丽的巫女，我可以教你很多符卡技巧。」",灵梦id)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「当然啦，希望你会自愿地表示一下感谢。」",灵梦id)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"%ANAME(灵梦id)%指了指身后的赛钱箱")
+    HTML_PRINT get_text_html(@"（本质上还是买卖啊）")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"感谢的话……大概要2000金左右才能表示自己的诚意吧？")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"要交2000金让%ANAME(灵梦id)%教自己符卡技巧吗？")
+    CALL get_text_html_b(@"好啊","12_1","")
+    CALL get_text_html_b(@"算了","","")
+    CALL get_html_button_input
+    IF RESULT == 0
+        HTML_PRINT get_text_html_n(@"向赛钱箱里塞入了2000金")
+        MONEY-=2000
+        HTML_PRINT get_text_html(@"被很开心的%ANAME(灵梦id)%拉着到了神社的后院进行练习")
+        CALL EXPEND_LATER()
+        CALL MRU_12_符卡练习
+        CALL EXPEND_LATER()
+        HTML_PRINT get_text_html(@"不知不觉间已经到正午了")
+        HTML_PRINT get_text_html_c(@"「哈……那么今天就到这里吧。」",灵梦id)
+        CALL html_wait
+        HTML_PRINT get_text_html_c(@"「如果还要再学的话就请明天再来吧？」",灵梦id)
+        CALL html_wait
+        HTML_PRINT get_text_html_c(@"「当然要满怀诚意的过来哦。」",灵梦id)
+        CALL html_wait
+        HTML_PRINT get_text_html(@"%ANAME(灵梦id)%一边说着，一边撑起一个大大的懒腰")
+        HTML_PRINT get_text_html_c(@"「嗯……啊……」",灵梦id)
+        CALL html_wait
+        HTML_PRINT get_text_html(@"不知道是因为衣服太小了还是动作太大了")
+        HTML_PRINT get_text_html(@"%ANAME(灵梦id)%的衣服被带着抬高了上去")
+        CALL html_wait
+        HTML_PRINT get_text_html(@"本来就若隐若现的小腹完全露了出来")
+        CALL html_wait
+        HTML_PRINT get_text_html(@"形状姣好的腋窝也完全地显现了在%ANAME(MASTER)%眼前")
+        CALL html_wait
+        HTML_PRINT get_text_html(@"还有……胸部……虽然暂时只能看见下半")
+        CALL html_wait
+        HTML_PRINT get_text_html(@"要继续盯着吗？")
+        CALL get_text_html_b(@"盯————","","")
+        CALL get_text_html_b(@"算了","","")
+        CALL get_html_button_input
+        IF RESULT == 0
+            HTML_PRINT get_text_html(@"继续把视线沿着衣服内侧向上爬")
+            CALL html_wait
+            HTML_PRINT get_text_html(@"已经能完全看见整个乳房了")
+            CALL html_wait
+            HTML_PRINT get_text_html(@"虽然有万恶的裹胸布的束缚")
+            CALL html_wait
+            HTML_PRINT get_text_html(@"但从白布边缘自然挤出的白皙反而更能展现那玉乳的年轻")
+            CALL html_wait
+            HTML_PRINT get_text_html(@"真是美丽……啊！")
+            CALL html_wait
+            HTML_PRINT get_text_html_c(@"「啪！」",灵梦id)
+            CALL html_wait
+            HTML_PRINT get_text_html_c(@"「变态！」",灵梦id)
+            CALL html_wait
+            HTML_PRINT get_text_html(@"发现被偷窥后的%ANAME(灵梦id)%狠狠地用御币砸了%ANAME(MASTER)%的头")
+            CALL html_wait
+        ELSE
+            HTML_PRINT get_text_html(@"再看下去有点不礼貌了")
+            CALL html_wait
+            HTML_PRINT get_text_html(@"%ANAME(MASTER)%强迫着自己把视线移开了")
+            CALL html_wait
+            HTML_PRINT get_text_html_c(@"「变态！」",灵梦id)
+            CALL html_wait
+            HTML_PRINT get_text_html(@"被%ANAME(灵梦id)%用御币砸了头")
+            HTML_PRINT get_text_html_c(@"「你以为我没看见吗？」",灵梦id)
+            CALL html_wait
+        ENDIF
+        CALL MRU_event_set_next_phase("MRU_12",MRU_12_PHASE,"日常练习")
+    ELSE
+        HTML_PRINT get_text_html(@"还是算了吧")
+        HTML_PRINT get_text_html_c(@"「唔……那就算了……」",灵梦id)
+        CALL html_wait
+        HTML_PRINT get_text_html(@"%ANAME(灵梦id)%失望地坐了回去")
+        HTML_PRINT get_text_html_c(@"「自己一个人出门的时候千万小心哦。」",灵梦id)
+        CALL html_wait
+    ENDIF
+
+@MRU_12_日常练习_rate
+    RETURN 100
+
+@MRU_12_日常练习_text
+    #DIM 灵梦id
+    灵梦id = NAME_TO_CHARA("霊夢")
+    HTML_PRINT get_text_html(@"似乎又攒齐了足够的『诚意』")
+    HTML_PRINT get_text_html(@"要再次去找%ANAME(灵梦id)%练习吗？")
+    CALL get_text_html_b(@"是的","12_1","")
+    CALL get_text_html_b(@"算了","","")
+    CALL get_html_button_input
+    IF RESULT == 1
+        HTML_PRINT get_text_html(@"今天就先作罢")
+        HTML_PRINT get_text_html(@"先不去找%ANAME(灵梦id)%，希望%PRONOUN(灵梦id)%不要太失望")
+        CALL html_wait
+        RETURN 1
+    ENDIF
+    HTML_PRINT get_text_html_c(@"「啊，%ANAME(MASTER)%你来啦，今天要来继续学习吗？」",灵梦id)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"%ANAME(灵梦id)%非常开心地看着%ANAME(MASTER)%把钱放入了赛钱箱")
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「那么就开始吧！」",灵梦id)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"真是充满干劲的%ANAME(灵梦id)%啊")
+    CALL html_wait
+    CALL EXPEND_LATER()
+    CALL MRU_12_符卡练习
+    CALL EXPEND_LATER()
+    HTML_PRINT get_text_html_c(@"「哈……那么今天就到这里。」",灵梦id)
+    HTML_PRINT get_text_html_c(@"「要常来哦？」",灵梦id)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"老样子，%ANAME(灵梦id)%在劳累的教学后伸着懒腰")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"要偷偷看吗？")
+    CALL get_text_html_b(@"要","","")
+    CALL get_text_html_b(@"算了","","")
+    CALL get_html_button_input
+    IF RESULT == 0
+        HTML_PRINT get_text_html(@"再次用眼睛享受了%ANAME(灵梦id)%美丽的胸口和身体")
+        CALL html_wait
+        IF TALENT:灵梦id:恋慕
+            HTML_PRINT get_text_html(@"似乎是用余光察觉到了%ANAME(MASTER)%那直勾勾的眼神")
+            HTML_PRINT get_text_html(@"不过%ANAME(灵梦id)%并没有把手放下来，而是继续着懒腰")
+            CALL html_wait
+            HTML_PRINT get_text_html(@"那对被束缚的玉乳已经完全暴露出来了")
+            HTML_PRINT get_text_html(@"仿佛在确认%ANAME(MASTER)%还在不在看一着自己")
+            CALL html_wait
+            HTML_PRINT get_text_html(@"%ANAME(灵梦id)%悄悄地转过头来看着%ANAME(MASTER)%")
+            HTML_PRINT get_text_html(@"两人的视线就这样撞上了，%ANAME(灵梦id)%一下子就羞红了脸")
+            CALL html_wait
+            CALL get_text_html_b(@"揉！","","")
+            CALL get_text_html_b(@"算了","","")
+            CALL get_html_button_input
+            IF RESULT == 0
+                HTML_PRINT get_text_html(@"看着%ANAME(灵梦id)%那娇羞的样子")
+                HTML_PRINT get_text_html(@"控制不住的%ANAME(MASTER)%快步上去，用手直接把住了%ANAME(灵梦id)%的胸部")
+                CALL html_wait
+                HTML_PRINT get_text_html_c(@"「呀！你，你……怎么这样……」",灵梦id)
+                CALL html_wait
+                HTML_PRINT get_text_html_c(@"「咳……一直缠着什么的……不利于发育呢。」",MASTER)
+                CALL html_wait
+                HTML_PRINT get_text_html_c(@"「需要好好放松一下才能健康生长。」",MASTER)
+                CALL html_wait
+                HTML_PRINT get_text_html(@"下意识地说出了冠冕堂皇的但完全不合理的理由")
+                HTML_PRINT get_text_html(@"不过%ANAME(MASTER)%完全没打算停下手上的动作")
+                CALL html_wait
+                HTML_PRINT get_text_html_c(@"「呜……真是的……」",灵梦id)
+                CALL html_wait
+                HTML_PRINT get_text_html(@"虽然脸已经完全涨红了，但%ANAME(灵梦id)%似乎完全没有打算抵抗")
+                HTML_PRINT get_text_html(@"%ANAME(MASTER)%解开了束缚着的裹胸布")
+                CALL html_wait
+                HTML_PRINT get_text_html(@"一瞬间充满青春气息的嫩肉就弹了出来")
+                HTML_PRINT get_text_html(@"不仅大小是最合适的只手难盈")
+                CALL html_wait
+                HTML_PRINT get_text_html(@"而且还能反抗着巨大的重力，完全不会那样坠下去")
+                HTML_PRINT get_text_html(@"粉嫩的乳头已经勃起了，看起来%ANAME(灵梦id)%被%ANAME(MASTER)%看得很有感觉")
+                CALL html_wait
+                HTML_PRINT get_text_html_c(@"「已经……可以了吧？」",灵梦id)
+                CALL html_wait
+                HTML_PRINT get_text_html(@"还不够啊，%ANAME(MASTER)%发自内心地想着开始揉搓起来")
+                CALL html_wait
+                HTML_PRINT get_text_html_c(@"「看起来很疲惫……需要认真按摩一下……」",MASTER)
+                CALL html_wait
+                HTML_PRINT get_text_html_c(@"「……♡」",灵梦id)
+                CALL html_wait
+                HTML_PRINT get_text_html(@"两个人其实都心知肚明这个理由不过是个借口")
+                HTML_PRINT get_text_html(@"不过%ANAME(灵梦id)%还是主动把衣服提了起来，方便%ANAME(MASTER)%随意地揉搓着")
+                CALL html_wait
+                HTML_PRINT get_text_html_c(@"「哈……♡……嗯♡……那里♡」",灵梦id)
+                CALL html_wait
+                HTML_PRINT get_text_html(@"在%ANAME(MASTER)%的蹂躏下，%ANAME(灵梦id)%开始发出微微的娇声")
+                HTML_PRINT get_text_html(@"慢慢的，%ANAME(MASTER)%开始探寻起%ANAME(灵梦id)%敏感的地方")
+                CALL html_wait
+                HTML_PRINT get_text_html(@"只要捏着乳尖，%ANAME(灵梦id)%就会开始微微发抖")
+                HTML_PRINT get_text_html(@"而滑弄腋下与胸部连接的嫩肉则会让%PRONOUN(灵梦id)%身体愈发瘫软")
+                CALL html_wait
+                HTML_PRINT get_text_html_c(@"「%ANAME(MASTER)%♡……不行了♡……哈♡……嗯♡」",灵梦id)
+                CALL html_wait
+                HTML_PRINT get_text_html(@"快要高潮了的%ANAME(灵梦id)%紧紧抱住了%ANAME(MASTER)%")
+                HTML_PRINT get_text_html(@"%ANAME(MASTER)%顺势微微用力拧着乳头")
+                CALL html_wait
+                HTML_PRINT get_text_html_c(@"「要♡……哈♥……要去了啊❤！！！」",灵梦id)
+                CALL html_wait
+                HTML_PRINT get_text_html(@"被最后一击送上云天的%ANAME(灵梦id)%毫不顾忌地娇喘着")
+                HTML_PRINT get_text_html(@"全身肌肉痉挛着瘫倒在%ANAME(MASTER)%怀中，享受着乳房高潮的余韵")
+                CALL html_wait
+                HTML_PRINT get_text_html_c(@"「哈……啊……真是的♡%ANAME(MASTER)%」",灵梦id)
+                CALL html_wait
+                HTML_PRINT get_text_html(@"%ANAME(灵梦id)%用迷离的微笑着看着%ANAME(MASTER)%")
+                HTML_PRINT get_text_html_c(@"「太舒服了……一下子都失去意识了……」",灵梦id)
+                CALL html_wait
+                HTML_PRINT get_text_html_c(@"「有机会的话……再帮我按摩一下吧……」",灵梦id)
+                CALL html_wait
+                HTML_PRINT get_text_html(@"感觉和%ANAME(灵梦id)%更加的亲近了！")
+            ELSE
+                HTML_PRINT get_text_html_c(@"「总是那么好色啊……」",灵梦id)
+                CALL html_wait
+                HTML_PRINT get_text_html(@"被%ANAME(灵梦id)%轻轻用御币敲了头")
+                CALL html_wait
+                HTML_PRINT get_text_html_c(@"「走啦，吃饭去了。」",灵梦id)
+                CALL html_wait
+                HTML_PRINT get_text_html(@"被%ANAME(灵梦id)%带着一起在神社吃了午饭")
+                CALL html_wait
+            ENDIF
+        ELSE
+            HTML_PRINT get_text_html_c(@"「变态！怎么老是这样」",灵梦id)
+            CALL html_wait
+            HTML_PRINT get_text_html(@"理所当然地被发现的%ANAME(灵梦id)%用御币敲着脑袋骂了")
+            CALL html_wait
+        ENDIF
+    ELSE
+        IF TALENT:灵梦id:恋慕
+            HTML_PRINT get_text_html_c(@"「嗯……今天这么乖吗……」",灵梦id)
+            CALL html_wait
+            HTML_PRINT get_text_html_c(@"「走啦，吃饭去了。」",灵梦id)
+            CALL html_wait
+            HTML_PRINT get_text_html(@"被%ANAME(灵梦id)%带着一起在神社吃了午饭")
+            CALL html_wait
+        ELSE
+            HTML_PRINT get_text_html_c(@"「下次再来哦？」",灵梦id)
+            CALL html_wait
+        ENDIF
+    ENDIF
+@MRU_12_符卡练习
+    #DIM 灵梦id
+    灵梦id = NAME_TO_CHARA("霊夢")
+    HTML_PRINT get_text_html(@"在%ANAME(灵梦id)%的带领下，%ANAME(MASTER)%练习了一上午的符卡技巧")
+    HTML_PRINT get_text_html(@"完全没有手下留情，%ANAME(灵梦id)%几乎是毫无保留地攻击着%ANAME(MASTER)%")
+    SELECTCASE RAND:4
+        CASE 0
+            HTML_PRINT get_text_html_n(@"总觉得自己更擅长躲避了！")
+            CALL PRINT_ADD_EXP(MASTER, "防衛経験値", RAND(5, 10), 1)
+            CALL html_wait
+        CASE 1
+            HTML_PRINT get_text_html_n(@"总觉得自己更擅长攻击了！")
+            CALL html_wait
+            CALL PRINT_ADD_EXP(MASTER, "武闘経験値", RAND(5, 10), 1)
+        CASE 2
+            HTML_PRINT get_text_html_n(@"总觉得自己的战斗思路更清晰了！")
+            CALL PRINT_ADD_EXP(MASTER, "知略経験値", RAND(5, 10), 1)
+            CALL html_wait
+        CASE 3
+            HTML_PRINT get_text_html_n(@"总觉得……和%ANAME(灵梦id)%更亲近了！")
+            CFLAG:灵梦id:好感度+=100
+            CALL html_wait
+            HTML_PRINT get_text_html_c(@"「不要老是盯着我！专心练习！」",灵梦id)
+    ENDSELECT
+    CFLAG:灵梦id:好感度+=100
+    CALL TRAIN_AUTO_ABLUP(MASTER)

@@ -111,6 +111,7 @@
 	IF judge_name == "0"
 		judge_name = FALSE
 	ENDIF
+	CALL MRU_JUDGE_RESET
 	TRYCCALLFORM MRU_JUDGE_%judge_name%
 		CALL generate_button(text,MRU_JUDGE_STATUS,MRU_JUDGE_CONDITION_NUM,tooltip)
 	CATCH
@@ -230,7 +231,7 @@
 	GREEN = COLOR >> 8 & 0xFF
 	BLUE = COLOR & 0xFF
 	VALUE = get_v_from_rgb(COLOR)
-	WHILE VALUE < 140
+	WHILE VALUE < 160
 		SIF RED == VALUE
 			RED += 8
 		SIF GREEN == VALUE
@@ -548,19 +549,27 @@
 
 	TRYCALLFORM %target_func%_end
 
-@MRU_CHECK_CHARA_BASE(対象)
+@MRU_CHECK_CHARA_BASE(CHARA_ID)
 	#FUNCTION
-	#DIM 対象
+	#DIM CHARA_ID
 	;MASTERならダメ
-	SIF 対象 == MASTER
+	SIF CHARA_ID == MASTER
 		RETURNF 0
 	;死んでたら駄目
-	SIF CFLAG:対象:特殊状態 == 特殊状態_死亡
+	SIF CFLAG:CHARA_ID:特殊状態 == 特殊状態_死亡
 		RETURNF 0
 	;未登場もだめ
-	SIF CFLAG:対象:所属 == 0 && CFLAG:対象:特殊状態 == 0 && !CFLAG:対象:捕虜先
+	SIF CFLAG:CHARA_ID:所属 == 0 && CFLAG:CHARA_ID:特殊状態 == 0 && !CFLAG:CHARA_ID:捕虜先
 		RETURNF 0
 
-	SIF TALENT:対象:崩壊 || TALENT:対象:空虚
+	SIF TALENT:CHARA_ID:崩壊 || TALENT:CHARA_ID:空虚
 		RETURNF 0
 	RETURNF 1
+
+@MRU_IS_WIFE(CHARA_ID,妾许可 = 0)
+	#FUNCTION
+	#DIM CHARA_ID
+	#DIM 妾许可
+	SIF TALENT:CHARA_ID:正妻 || (TALENT:CHARA_ID:妾 && 妾许可)
+		RETURNF 1
+	RETURNF 0

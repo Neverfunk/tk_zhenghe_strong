@@ -1,4 +1,13 @@
-﻿;---------------------
+﻿@EVENT_DAILY_GAIRAI_PHEROMONE_TAG()
+	LOCAL = 0
+	SETBIT LOCAL,EVENT_TAG_不可规避
+	SETBIT LOCAL,EVENT_TAG_男性主角无关
+	SETBIT LOCAL,EVENT_TAG_特殊势力
+	SETBIT LOCAL,EVENT_TAG_恶堕
+	SETBIT LOCAL,EVENT_TAG_强奸
+	SETBIT LOCAL,EVENT_TAG_被捕获
+	RETURN LOCAL
+;---------------------
 ;基本的な発生確率(1000分率 100で10%)
 ;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
 ;---------------------
@@ -62,7 +71,7 @@ IF 対象 != -1
 		DVAR:フェロモン中毒_対象ID = 0
 		RETURN 0
 	ENDIF
-	
+
 	;(従属国パッチ)念のため辺境伯になっているなら解除
 	IF CFLAG:対象:1702 == 1
 		DVAR:フェロモン中毒_対象ID = 0
@@ -102,7 +111,7 @@ ELSE
 		;所属が外来人でなく、捕虜でなく、女。
 		;MASTERでなく、君主でなく、動物でなく、特殊キャラでなく、特殊勢力キャラでなく、死んでおらず、未登場でもない(従属国パッチ)辺境伯はだめ、外来人が加入している連邦構成国所属はダメ
 		{
-			IF CFLAG:(LOCAL):所属 != 外来人 && !CFLAG:(LOCAL):捕虜先 && IS_FEMALE(LOCAL) 
+			IF CFLAG:(LOCAL):所属 != 外来人 && !CFLAG:(LOCAL):捕虜先 && IS_FEMALE(LOCAL)
 				&& LOCAL != MASTER && LOCAL != GET_COUNTRY_BOSS(CFLAG:LOCAL:所属) && !IS_ANIMAL(LOCAL) && !IS_SP_CHARA(LOCAL) && !TALENT:LOCAL:特殊勢力素質
 				&& CFLAG:LOCAL:特殊状態 != 特殊状態_死亡 && !ALLSAMES(CFLAG:LOCAL:特殊状態, CFLAG:LOCAL:所属, 0) && CFLAG:LOCAL:1702 != 1 && 連邦構成国:(CFLAG:LOCAL:所属) != 1
 		}
@@ -158,7 +167,7 @@ ELSE
 	PRINTFORMW 外来人看到%ANAME(対象)%的样子确信了实验的确是成功了、他们满意的笑着并继续将她带入到阴暗的角落中去
 	;TranslatedMark 外来人は%ANAME(対象)%の様子に実験の成功を確信して満足そうに笑うと、物陰へと連れ込んだ
 ENDIF
-PRINTFORML 
+PRINTFORML
 SELECTCASE RAND:20
 	CASE 0
 		PRINTFORML %ANAME(対象)%以四肢伏地的姿态被外来人侵犯着
@@ -344,7 +353,7 @@ ENDSELECT
 
 CALL FUCK_SP(対象, "欲望, 精愛, 奉仕, 性交, 性技, Ｖ, Ｂ, Ｃ, Ｍ, Ｖ性交", "膣内射精, 処女喪失, 接吻喪失", 勢力番号, GET_SPERM_ID("外来人"), @"外来人的\@ RAND:2 ? 唇 # 肉棒 \@", "外来人", "", "強姦")
 
-PRINTFORML 
+PRINTFORML
 
 IF GETBIT(TALENT:対象:特殊勢力陥落系, 特殊勢力_外来人)
 	PRINTFORML %ANAME(対象)%想起了曾经铭刻在身上的实验动物性
@@ -354,7 +363,7 @@ IF GETBIT(TALENT:対象:特殊勢力陥落系, 特殊勢力_外来人)
 	PRINTFORMW 那个表情既不是屈辱，也不是羞耻，充满了喜悦和期待。
 	;TranslatedMark その表情は屈辱でも羞恥でもなく、悦びと期待に満ちていた
 	CALL COLOR_PRINT(@"%ANAME(対象)%は再び外来人の実験動物に成り下がった…", カラー_ピンク)
-	PRINTFORMW 
+	PRINTFORMW
 	CALL CHANGE_COUNTRY(対象, 外来人, 1)
 	DVAR:フェロモン中毒_対象ID = 0
 	DVAR:フェロモン中毒_発生回数 = 0
@@ -383,7 +392,7 @@ ELSE
 	;TranslatedMark 彼は新しいペットの尻を撫でまわしながら拠点へと連れ帰った
 	SETBIT TALENT:対象:特殊勢力陥落系, 特殊勢力_外来人
 	CALL COLOR_PRINT(@"%ANAME(対象)%は外来人の実験動物に成り下がった…", カラー_ピンク)
-	PRINTFORMW 
+	PRINTFORMW
 	CALL GAIRAI_FALLEN_LEAVE_MARK(対象)
 	CALL CHANGE_COUNTRY(対象, 外来人, 1)
 	DVAR:フェロモン中毒_対象ID = 0

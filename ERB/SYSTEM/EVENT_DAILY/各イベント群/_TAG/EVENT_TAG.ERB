@@ -180,20 +180,35 @@
         CALL BAN_EVENT_DAILY_BY_TAG(EVENT_TAG_兽奸,EVENT_TAG_不可规避)
         REUSELASTLINE 关闭了不可规避的兽奸事件
     ELSE
-        REUSELASTLINE 不关闭被捕获事件
+        REUSELASTLINE 不关闭兽奸事件
     ENDIF
     WAIT
 @SET_EVENT_DAILY_BY_TAG_BY_USER
+    #DIM EVENT_STATUS,EVENT_TAG_TYPE_NUM
+    #DIM DYNAMIC LAST_CHANGE_TAG
+    VARSET EVENT_STATUS,1
     LOCAL:1 = LINECOUNT
     WHILE 1
         CLEARLINE LINECOUNT - LOCAL:1
         FOR LOCAL,1,EVENT_TAG_TYPE_NUM+1
-            PRINTBUTTON @"[{LOCAL}]关闭%EVENT_TAG_NAME:(LOCAL-1)%的事件\n",LOCAL
-            PRINTL
+            PRINTFORM 当前 %EVENT_TAG_NAME:(LOCAL-1)% 事件状态:
+            PRINTFORM %TOSTR_SPACE(20 - STRLENS(EVENT_TAG_NAME:(LOCAL-1)))%
+            IF EVENT_STATUS:(LOCAL-1)
+                CALL COLOR_PRINT("开启 ",カラー_緑)
+                PRINTBUTTON @"[{LOCAL}]关闭\n",LOCAL
+                PRINTL
+            ELSE
+                CALL COLOR_PRINT("关闭 ",カラー_警告)
+                PRINTBUTTON @"[{LOCAL}]开启\n",LOCAL
+                PRINTL
+            ENDIF
+
         NEXT
         PRINTBUTTON @"[{EVENT_TAG_TYPE_NUM+1}]重置事件状态为全部启用",EVENT_TAG_TYPE_NUM+1
         PRINTL
-        PRINTBUTTON @"[{EVENT_TAG_TYPE_NUM+2}]结束",EVENT_TAG_TYPE_NUM+2
+        PRINTBUTTON @"[{EVENT_TAG_TYPE_NUM+2}]将包含以上任一TAG的事件变为关闭",EVENT_TAG_TYPE_NUM+2
+        PRINTL
+        PRINTBUTTON @"[{EVENT_TAG_TYPE_NUM+3}]结束",EVENT_TAG_TYPE_NUM+3
         PRINTL
         INPUT
         IF RESULT == EVENT_TAG_TYPE_NUM+1
@@ -201,15 +216,31 @@
                 DAILY_DISABLE:LOCAL = 0
             NEXT
             REUSELASTLINE 所有事件已经启用
+            VARSET EVENT_STATUS,1
         ELSEIF RESULT == EVENT_TAG_TYPE_NUM+2
+            FOR LOCAL,1,EVENT_TAG_TYPE_NUM+1
+                CALL BAN_EVENT_DAILY_BY_TAG(LOCAL)
+            NEXT
+            REUSELASTLINE 所有包含上述TAG的事件已经禁用
+            VARSET EVENT_STATUS,0
+        ELSEIF RESULT == EVENT_TAG_TYPE_NUM+3
             BREAK
         ELSEIF INRANGE(RESULT,1,EVENT_TAG_TYPE_NUM)
             LOCAL = RESULT
+            FOR LOCAL,0,DAILY_EVENT_NUM:デイリー_通常
+                DAILY_DISABLE:LOCAL = 0
+            NEXT
+            EVENT_STATUS:(LOCAL-1) = 1 - EVENT_STATUS:(LOCAL-1)
             CALL BAN_EVENT_DAILY_BY_TAG(LOCAL)
-            REUSELASTLINE 所有%EVENT_TAG_NAME:(LOCAL-1)%事件已经关闭
+            IF EVENT_STATUS:(LOCAL-1) == 0
+                REUSELASTLINE 所有%EVENT_TAG_NAME:(LOCAL-1)%事件已经关闭
+            ELSE
+                REUSELASTLINE 所有%EVENT_TAG_NAME:(LOCAL-1)%事件已经开启
+            ENDIF
         ENDIF
         WAIT
     WEND
+
 
 @BAN_EVENT_DAILY_BY_TAG(ARG:0 = 0,ARG:1 = 0,ARG:2 = 0,ARG:3 = 0,ARG:4 = 0,ARG:5 = 0,ARG:6 = 0,ARG:7 = 0,ARG:8 = 0)
     #DIM EVENT_DAILY_TAG_BIT

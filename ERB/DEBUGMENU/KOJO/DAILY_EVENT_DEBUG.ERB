@@ -7,6 +7,8 @@
     PRINTL
     PRINTBUTTON " 1[检测角色日常口上]", 1
     PRINTL
+    PRINTBUTTON " 1[展示日常口上TAG]", 2
+    PRINTL
     CALL SINGLE_DRAWLINE
     PRINTBUTTON " 99[取消]", 99
     PRINTL
@@ -24,11 +26,17 @@
         CALL DAILY_EVENT_DEBUG
         FORCEWAIT
         GOTO KOJO_LOOP
-     ELSEIF RESULT == 1
+    ELSEIF RESULT == 1
         REDRAW 1
         CALL KOJO_DAILY_EVENT_DEBUG_CHARA_SELECT
         FORCEWAIT
         GOTO KOJO_LOOP
+    ELSEIF RESULT == 2
+        REDRAW 1
+        CALL SHOW_EVENT_DAILY_TAG
+        FORCEWAIT
+        GOTO KOJO_LOOP
+
     ELSE
         REDRAW 1
         GOTO INPUT_LOOP
@@ -36,13 +44,15 @@
 
 @DAILY_EVENT_DEBUG
     #DIMS KOJO_NAME
+    #DIMS LAST_IMPUT
     PRINTFORML 请输入要检测口上的英文名称
-    RESULTS = ""
+    PRINTBUTTON @"[上次输入：%LAST_IMPUT%]",LAST_IMPUT
     INPUTS
     IF RESULTS == ""
         PRINTFORML 空输入
     ELSE
         KOJO_NAME = %RESULTS%
+        LAST_IMPUT = %RESULTS%
         CALL DAILY_EVENT_DEBUG_DETAIL(KOJO_NAME)
     ENDIF
 
@@ -162,6 +172,7 @@
         CALL COLOR_PRINTL("警告，可能导致相关数据出现问题，请存档后再继续！",カラー_警告)
         CALL ASK_YN()
         IF RESULT == 0
+            CALL DAILY_START(KOJO_NAME)
             CALLFORM EVENT_DAILY_%NAME_ENG%()
             IF RESULT == 1
                 PRINTFORML 日常口上正常结束
@@ -260,6 +271,7 @@
         CALL COLOR_PRINTL("警告，可能导致相关数据出现问题，请存档后再继续！",カラー_警告)
         CALL ASK_YN()
         IF RESULT == 0
+            CALL DAILY_START_DERIVATION(KOJO_NAME)
             CALLFORM EVENT_DAILY_DERIVATION_%NAME_ENG%()
             SIF DAILY_CANCEL
 			    PRINTFORML 后续其他日常口上无法继续触发
@@ -421,8 +433,10 @@
         CALL COLOR_PRINTL("警告，可能导致相关数据出现问题，请存档后再继续！",カラー_警告)
         CALL ASK_YN()
         IF RESULT == 0
+            CALL KOJO_DAILY_START(KOJO_NAME,CHARA_ID)
             CALLFORM KOJO_DAILY_K{CHARA_NO}_%NAME_ENG%(CHARA_ID)
             IF RESULT == 1
+
                 PRINTFORML 角色日常口上正常结束
             ELSE
                 PRINTFORML 角色日常口上不正常结束
@@ -521,6 +535,7 @@
         CALL COLOR_PRINTL("警告，可能导致相关数据出现问题，请存档后再继续！",カラー_警告)
         CALL ASK_YN()
         IF RESULT == 0
+            CALL KOJO_DAILY_START_DERIVATION(KOJO_NAME,CHARA_ID)
             CALLFORM KOJO_DAILY_K{CHARA_NO}_DERIVATION_%NAME_ENG%(CHARA_ID)
             SIF DAILY_CANCEL
 			    PRINTFORML 后续其他日常口上无法继续触发
@@ -529,3 +544,4 @@
 	CATCH
         ;DEBUGPRINTFORML KOJO_DAILY_K{CHARA_NO}_DERIVATION_%NAME_ENG%_DECISIONみつからず
 	ENDCATCH
+

@@ -1,0 +1,197 @@
+﻿;ENG_NAME = THE_END_OF_CYCLE
+;---------------------
+;基本发生概率(1000分率100为10%)
+;再加上configue项目的发生频率，所以概率还会有所变化
+;---------------------
+@EVENT_DAILY_THE_END_OF_CYCLE_RATE()
+	CALL MRU_get_phase_rate("MRU_15",MRU_15_PHASE)
+	IF RESULT != -1
+		RETURN RESULT
+	ELSE
+        ;#; RETURN 1000
+		RETURN !RAND:10
+	ENDIF
+
+
+;---------------------
+;发生判定
+;1可以发生，0不能发生
+;---------------------
+@EVENT_DAILY_THE_END_OF_CYCLE_DECISION()
+    SIF !IS_MALE(MASTER)
+        RETURN 0
+    SIF !IS_COUNTRY(CFLAG:MASTER:所属) || IS_SP_COUNTRY(CFLAG:MASTER:所属)
+    RETURN 0
+	CALL MRU_event_check("MRU_15",MRU_15_PHASE)
+	SIF RESULT == -1
+		RETURN 0
+	RETURN 1
+
+;---------------------
+;事件类型
+;用于在设置中进行配置
+;---------------------
+@EVENT_DAILY_THE_END_OF_CYCLE_GENRE()
+    RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;名称
+;返回空或不存在时使用注册名称
+;---------------------
+@EVENT_DAILY_THE_END_OF_CYCLE_NAME()
+	CALL MRU_get_phase_name("MRU_15",MRU_15_PHASE)
+	SIF RESULTS != ""
+		RETURN
+    RESULTS '= @"轮回之终末"
+
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_THE_END_OF_CYCLE()
+	IF MRU_15_PHASE == ""
+		CALL MRU_event_set_next_phase("MRU_15",MRU_15_PHASE,"初见")
+	ENDIF
+	CALL MRU_event_procedure("MRU_15",MRU_15_PHASE)
+	RETURN 1
+
+@MRU_15_终止_check
+    RETURN -1
+
+@MRU_15__rate
+    RETURN 50
+
+@MRU_15__name
+    RESULTS '= "梦中的妖术"
+; @MRU_15__check
+;     SIF ABL:MASTER:妖術 <= 0
+;         RETURN -1
+;     RETURN 1
+
+@MRU_15_初见_text
+    LOCAL = LINECOUNT
+    HTML_PRINT get_text_html(@"自从%ANAME(MASTER)%获得妖术以后，无论是在战场上还是在床上都威猛了许多")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"这是是多么便利的能力啊！")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"只要有了妖术，就能杀死敌人")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"就能征服女人，就能获得想要的一切")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"只要有了……只要啊")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"……")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"只要有了螯匁惘……就有了迪ｮ霄ｫ逧�ｧ画ぁ")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"就能刺开蟶ｷ蟷�，就能遇见豁ｻ莠｡")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"这里荳榊ｱ樔ｺ�你，这里蜿ｪ譛芽劒莨ｪ蜥梧裏譛�")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"蜍ｿ蜚､蜈ｶ蜷搾ｼ悟筈蛻吝叉遏･")
+    CALL html_wait
+    CLEARLINE LINECOUNT - LOCAL + 6
+    CALL SINGLE_DRAWLINE
+    CALL COLOR_PRINTL(@"-日常事件『轮回之终末』発生-", カラー_注意)
+    FORCEWAIT
+    CALL SINGLE_DRAWLINE
+    PRINTFORMW ・
+    PRINTFORMW ・
+    PRINTFORMW ・
+    CALL MRU_15_AA_1
+    HTML_PRINT get_text_html("「CIALLO～（∠・Ω&lt; ）⌒☆！」",,"#FF80BF")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"「吾达希『圆神』跌斯」",,"#FF80BF")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"「%ANAME(MASTER)%在这片大地上的努力吾可是一直看在眼里的哟？」",,"#FF80BF")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"「作为圆环之理的最高存在，吾特在此给你一点小小的奖励！」",,"#FF80BF")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"「只要你和吾签约，吾就可以给你以下的特♡别♡效♡果♡」",,"#FF80BF")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"不知道从何处飘来了一份契约")
+    HTML_PRINT get_text_html(@"上面写着")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"『吾』可以给你梦寐以求的『财富，爱人，地位，未来』")
+    CALL html_wait
+    HTML_PRINT get_text_html_n(@"立即变为国家领袖")
+    CALL html_wait
+    HTML_PRINT get_text_html_n(@"每期金产出翻倍")
+    CALL html_wait
+    HTML_PRINT get_text_html_n(@"每期地方经济+200")
+    CALL html_wait
+    HTML_PRINT get_text_html_n(@"每期获得20\%兵力上限的士兵")
+    CALL html_wait
+    HTML_PRINT get_text_html_n(@"每期所有所属角色获得好感度，从属度，依存度")
+    CALL html_wait
+    HTML_PRINT get_text_html_n(@"每期所有角色风评上升")
+    CALL html_wait
+    HTML_PRINT get_text_html_n(@"每期科技速度+1")
+    CALL html_wait
+    HTML_PRINT get_text_html_n(@"每期全属性经验提升")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"代价不过是『雍｢蟇鯉ｼ檎鯵莠ｺ�悟慍菴搾ｼ梧悴譚･�御ｸ蛻�ｼ�』而已")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"只需要签上自己的蜷榊ｭ�")
+    CALL html_wait
+    CALL get_text_html_b(@"我超，○！","","你说得对",2)
+    CALL get_text_html_b(@"我要画个圈！","","别这么做")
+	CALL get_text_html_b(@"感觉怪怪的","","哪来的柚子厨装古神啊？")
+	CALL get_html_button_input
+    IF RESULT == 0
+        HTML_PRINT get_text_html(@"我超，○！")
+        FOR LOCAL,0,1000
+            LOCAL --
+            REPEAT 10
+                CALL MRU_15_AA_1
+            REND
+            REPEAT 10
+                CALL MRU_15_AA_1(1)
+            REND
+        NEXT
+    ELSEIF RESULT == 1
+        HTML_PRINT get_text_html(@"我们ｻｬ遏･驕捺�莉ｬ扈亥ｰ�ｻ伜�莉｣莉ｷ")
+        CALL html_wait
+        HTML_PRINT get_text_html(@"我们ｻｬ隶､荳ｺ霑吩ｸｪ莉｣莉ｷ譏ｯ謌台ｻｬ閭ｽ謇ｿ蜿礼噪")
+        CALL html_wait
+        HTML_PRINT get_text_html(@"我们��莉ｬ閭ｽ謇ｾ蛻ｰ莉荵域婿豕穂ｻ･霄ｲ驕ｿ莉｣莉ｷ縲�")
+        CALL html_wait
+        HTML_PRINT get_text_html(@"我们ｻｬ莉倅ｸ崎ｵｷ�梧�莉ｬ荵溯ｺｲ荳崎ｿ��")
+        CALL html_wait
+        HTML_PRINT get_text_html(@"消失了！")
+        CALL html_wait
+    ELSE
+        HTML_PRINT get_text_html(@"「逵溯↑譏主賦」",,"#FF80BF")
+        CALL html_wait
+    ENDIF
+    CLEARLINE LINECOUNT - LOCAL + 6
+    CALL MRU_15_AA_1(1)
+    FORCEWAIT
+@MRU_15_AA_1(font_flag = 0)
+    #DIM font_flag
+    IF CHKFONT("Saitamaar")
+        LOCALS:0 = %GETFONT()%
+        SIF !font_flag
+            SETFONT "Saitamaar"
+        PRINTL 'Ｌ、　　,／: : :,/:イ′ /: :／／: /'　/　 /: : : : : : : : : :'Ｌ、: : : : : : : :､: : : :ヽ,　　　　 　 /
+        PRINTL │‐'"´￣｀ﾌ"/',ィ ,/／,／: : /　,.ｲ　,/: /: : : : : : : |: : ヽ: : : : : : : : ﾄ、: : :IＬ,　　　　 ,/
+        PRINTL 　Ｌ、　　 ／:/'/'/　'´／: : : /　 /:,| /: :│: : : : : : : |!: : : :L、: : : : : : Ｌ|L､: : : 'Ｌ／　　 〈、
+        PRINTL 　 `I､　/: /:,/:/　 ／: :,/:,/　 /: :,|'′: :|: : : : : : :,I:,|'Ｌ、: : ::|: : : : : : :| |:'L､: :│　　 　 ヽ,
+        PRINTL 　　 Ｌ,/: :/ｲ: / ／: : :/:,/ｲ":/: : ′: :,/|: : : : : : ::|:,|! ヽ: : :::|、: : : : :,|, |: |、│　　　 　 L
+        PRINTL 　　 /: /'/:,/／: : :/'／: /:::|!: : : : :／│: : : : :.:::Ｌ:| | 　 ＼_::|: : : : : :ﾄ､ L、|: ﾄ,_ 　 　 　 |
+        PRINTL 　　/:ｲ /: /′: :,/: : : : :|://: _:,:-Ｉ'─‐|: : : :.::::::|:/ | ￣｀｀ ヾ｢`ヽ: :,|: L、|: L:|,　｀＼,_　_,｣
+        PRINTL 　 I|'/　|: : : : : /: : : : :イ' ,|‐'´／　＿│: .::::::::I|/ │ =ﾃ云ﾐ:I|: : : :I|: : `I|: :`|　　　 ｀`'-、
+        PRINTL 　,|' |　|: : : .::ｲ′: ／:/　:|::／,イ乏ミ' |::::::::::/ﾘ′L 　 う伐ﾊ`ヾ、:IＬ|: : : |!: : |、　　　　　＼
+        PRINTL 　|! |_,｣: :.／/: :,: : :,:Λ:　|/ ∥,う代ﾊ, Ｌ:::::://′/　　 |:Ｌ:::::}:J　|ﾘ:/IﾄＬ、: :|: : :|ﾄ,　　　 ヽ,／
+        PRINTL 　Ｌ／ |‐'′,Ｌ／: : :.:||ｲ'Ｌ、!　I|!　|::Ｌ::::}:J　Ｌ:/' ′　 　 　 込:Ｔり　|:/ ,||'I|: : :│::|::ト、　／′
+        PRINTL く´ 　 !　 ,ｲ‐': : .::::I|Ｌ,ヽ Ｌ,　 ﾞ!　 辷Ｔり　 ′　　　　　 　 . , 、,､|'　H|´Ｌ、: ,Ｌ|: |:::'｢ヽ'′
+        PRINTL 　｀＼, ,ｨI'´＿.:::／:||`'ｰ､Ｌ、 ､, 、, . .　　 　 　 ′　 　 　 　 ﾞ `　ﾉ:Ｌ':::R|、ﾄ-|L:::ヽ,
+        PRINTL 　　 ,.Lｲ"￣　￣｀`'┴-､:/ヽ,　　　　　　　　＿＿　 　 　 　 _,／:ｲ‐'′|/　|' ｀＼Ｌ、
+        PRINTL 　,イ'´|　　　 　 　 　 　 ｀`ヽ:`I-､.,_　　　　 ` - '′ 　 _,..,イ‐'"´′　 /′　 _,.-‐':Ｌ、
+        PRINTL /'/: ::::Ｌ,_　 ＿＿_,..,,,＿_ _,,　く´┼‐'`'I:Ｒ､...,＿＿_,...イ'(,`ヾ　　　 　 　 _,..-‐'´:|:::::::::＼
+        PRINTL ,/: :::Ｌ'"´￣: : : :_:.: -‐'"´　　　| く　　 Ｌ:＼.,＿　 _,..ｲ′`ヽ　　-　‐＝"‐──┴┐::: :ヽ、
+        SETFONT LOCALS:0
+    ELSE
+        PRINTL
+    ENDIF

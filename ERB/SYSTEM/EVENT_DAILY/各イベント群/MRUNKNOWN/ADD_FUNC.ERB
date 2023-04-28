@@ -84,14 +84,22 @@
 	RETURNF @"%get_text_html(text, style, "red")%"
 
 ;生成对话html文本
-@get_text_html_c(text, chara_id = 0, style=0)
+@get_text_html_c(text, chara_id = 0, color = -1,style=0)
 #FUNCTIONS
 	#DIMS text
 	#DIM style
 	#DIM chara_id
+	#DIM color
 	#DIMS DYNAMIC chara_color
 	#DIMS DYNAMIC chara_name
-	IF chara_id < 0
+	IF color >= 0x000000 && color <= 0xFFFFFF
+		chara_color = color_num_to_html(color)
+		IF INRANGE(chara_id,0,CHARANUM -1)
+			chara_name = %ANAME(chara_id)%
+		ELSE
+			chara_name '= ""
+		ENDIF
+	ELSEIF !INRANGE(chara_id,0,CHARANUM -1)
 		chara_color '= "white"
 		chara_name '= ""
 	ELSE
@@ -101,10 +109,12 @@
 	RETURNF @"%get_text_html(text, style, chara_color, chara_name)%"
 
 ;生成html按钮
-@get_text_html_b(text, judge_name="", tooltip="")
+;hide_flag 0 正常，1无效时隐藏，2强制隐藏
+@get_text_html_b(text, judge_name="", tooltip="",hide_flag = 0)
     #DIMS text
     #DIMS judge_name
     #DIMS tooltip
+	#DIM hide_flag
 	IF judge_name == "" || judge_name == "1"
 		judge_name = TRUE
 	ENDIF
@@ -113,18 +123,20 @@
 	ENDIF
 	CALL MRU_JUDGE_RESET
 	TRYCCALLFORM MRU_JUDGE_%judge_name%
-		CALL generate_button(text,MRU_JUDGE_STATUS,MRU_JUDGE_CONDITION_NUM,tooltip)
+		CALL generate_button(text,MRU_JUDGE_STATUS,MRU_JUDGE_CONDITION_NUM,tooltip,hide_flag)
 	CATCH
 		;#; THROW MRU_JUDGE_%judge_name%不存在
 	ENDCATCH
 	RETURN
-@generate_button(text,status,reason_num,tooltip)
+@generate_button(text,status,reason_num,tooltip,hide_flag = 0)
 	#DIMS text
 	#DIM status
 	#DIM reason_num
     #DIMS tooltip
+	#DIM hide_flag
 	LOCALS =
 	MRU_JUDGE_BUTTON_STATUS:MRU_JUDGE_BUTTON_NUM = status
+
 	FOR LOCAL,0,reason_num
 		SIF LOCAL >= 20
 			BREAK
@@ -137,13 +149,12 @@
 	NEXT
 	SIF LOCALS != ""
 		tooltip = %LOCALS%\n%tooltip%
-	IF status
+	IF status && hide_flag !=2
 		HTML_PRINT get_text_html(@"{MRU_JUDGE_BUTTON_NUM}[%text%]",,, tooltip, @"{MRU_JUDGE_BUTTON_NUM}")
-	ELSE
+	ELSEIF hide_flag != 1 && hide_flag !=2
 		HTML_PRINT get_text_html(@"{MRU_JUDGE_BUTTON_NUM}[%text%]",,"#606060", tooltip)
 	ENDIF
 	MRU_JUDGE_BUTTON_NUM++
-
 ;获取html按钮的输入
 @get_html_button_input
 	PRINTL

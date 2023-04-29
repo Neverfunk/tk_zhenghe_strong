@@ -21,7 +21,7 @@
 		RETURN 0
     SIF !IS_MALE(MASTER)
     RETURN 0
-    SIF !IS_COUNTRY(CFLAG:MASTER:所属) || IS_SP_COUNTRY(CFLAG:MASTER:所属)
+    SIF !IS_COUNTRY(CFLAG:MASTER:所属)
     RETURN 0
 	SIF MRU_1_SUBEVENT_STATUS:1 != 0
 		RETURN 0
@@ -160,10 +160,11 @@
         HTML_PRINT get_text_html(@"至于还趴在地上痉挛着喘息着的『%ANAME(coser_chara)%』就先关着吧")
         HTML_PRINT get_text_html_n(@"听闻了这件事，世人人对%ANAME(coser_chara)%的认可下降了")
         FOR LOCAL,1,CHARANUM
-            CALL CHANGE_RELATION_O_TO_O(LOCAL,coser_chara,-500,0)
+            CALL CHANGE_RELATION_O_TO_O(LOCAL,coser_chara,-1000,0)
         NEXT
         HTML_PRINT get_text_html_n(@"真正的%ANAME(coser_chara)%在知道这件事后对%ANAME(MASTER)%充满了怨念")
-        CALL CHANGE_RELATION_O_TO_O(coser_chara,MASTER,-500,500)
+        CALL MRU_event_set_next_phase("MRU_1_2",MRU_1_2_PHASE,"二次")
+        CALL CHANGE_RELATION_O_TO_O(coser_chara,MASTER,-300,300)
     ELSE
         HTML_PRINT get_text_html(@"和这种家伙做爱说不定会染上性病啊")
         HTML_PRINT get_text_html(@"摆摆手叫手下把她处理了")
@@ -177,6 +178,434 @@
         CALL CHANGE_RELATION_C_TO_O(CFLAG:MASTER:所属,MASTER,50,-50)
         CALL html_wait
     ENDIF
+
+
+@MRU_1_2_二次_rate
+    RETURN 200
+
+@MRU_1_2_二次_name
+    RESULTS '= @"粉丝行为谢绝上升到角色"
+
+@MRU_1_2_二次_check
+    SIF !MRU_exist_unfallen_female_boss()
+        RETURN -1
+    RETURN 1
+
+@MRU_1_2_二次_text
+    HTML_PRINT get_text_html(@"又想起了那个假扮成哪个东方少女的人")
+    HTML_PRINT get_text_html(@"再去看看吧")
+    CALL EXPEND_LATER()
+    HTML_PRINT get_text_html_c(@"「呜啊你终于又来了！」",CHARA_NPC)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「求！求你了！已经忍不住了！我现在要大鸡巴！」",CHARA_NPC)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"女人黏在监狱的栏杆上，像上次一样向%ANAME(MASTER)%发出着请求")
+    HTML_PRINT get_text_html(@"糜烂的气息早已经充斥在监仓中")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"%ANAME(MASTER)%并没有去和一个性瘾患者腻味在一起的欲望")
+    CALL html_wait
+    CALL get_text_html_b(@"但是即便是这样的人，也会是会有作用的","","")
+	CALL get_text_html_b(@"死人就不会有欲望了","","")
+	CALL get_html_button_input
+    IF RESULT == 0
+        HTML_PRINT get_text_html(@"说起来……上次她是不是假装自己是谁来着")
+        HTML_PRINT get_text_html(@"谁来着……")
+        CALL html_wait
+        HTML_PRINT get_text_html(@"上次射得太舒服了完全忘记了")
+        HTML_PRINT get_text_html(@"不过也没关系，这次再让她扮一次就行了")
+        CALL html_wait
+        HTML_PRINT get_text_html(@"选择有头有脸的人物来让女人扮演会好点吧？")
+
+        CALL SELECT_CHARA_LIST("MRU_1_2_GET_UNFALLEN_FEMALE_BOSS", "MRU_1_2_GET_UNFALLEN_FEMALE_BOSS", "DEFAULT")
+        MRU_1_2_装扮君主 = RESULT
+        CALL EXPEND_LATER
+        IF RESULT == -1
+            HTML_PRINT get_text_html(@"转念一想还是算了")
+            CALL EXPEND_LATER()
+            CALL MRU_1_2_二次_终止
+            RETURN
+        ENDIF
+        HTML_PRINT get_text_html_c(@"「要我扮成%ANAME(MRU_1_2_装扮君主)%？」",CHARA_NPC)
+        CALL html_wait
+        HTML_PRINT get_text_html_c(@"「那种角色有什么意思！！！死宅真恶心啊！！！」",CHARA_NPC)
+        CALL html_wait
+        HTML_PRINT get_text_html_c(@"「明明前面就有一个现实存在的女人却要变成不存在的角色什么的不是本末倒置吗难道不是只要爽了就可以了吗？」",CHARA_NPC)
+        CALL html_wait
+        HTML_PRINT get_text_html_c(@"「所以说……等一下别走啊我穿就是了！」",CHARA_NPC)
+        CALL html_wait
+        HTML_PRINT get_text_html(@"%ANAME(MASTER)%无语地看着女人迫不及待地穿上了%ANAME(MRU_1_2_装扮君主)%的衣服")
+        CALL html_wait
+        HTML_PRINT get_text_html_c(@"「咳咳……我是%NAME_FORMAL(MRU_1_2_装扮君主)%，请多指教！」",MRU_1_2_装扮君主)
+        CALL html_wait
+        HTML_PRINT get_text_html(@"不得不说，这个女人真的很有天赋")
+        HTML_PRINT get_text_html(@"即使只是穿上了衣服和假发，就已经和真正的%ANAME(MRU_1_2_装扮君主)%真假难分了")
+        CALL html_wait
+        HTML_PRINT get_text_html(@"当然了，某种意义上也归功于拖了衣服的幻想乡少女们都差不多呢")
+        HTML_PRINT get_text_html(@"%ANAME(MASTER)%上次克制不住自己也是情有可原的！")
+        CALL html_wait
+        HTML_PRINT get_text_html_c(@"「寒暄完了就应该来做爱了吧！！！」",MRU_1_2_装扮君主)
+        CALL html_wait
+        HTML_PRINT get_text_html_c(@"「求你了快点干死我吧！！！」",MRU_1_2_装扮君主)
+        CALL html_wait
+        HTML_PRINT get_text_html(@"真是执着的人，%ANAME(MASTER)%不禁有点敬佩她了")
+        HTML_PRINT get_text_html(@"当然了，身下的伙伴也因为『%ANAME(MRU_1_2_装扮君主)%』的这幅模样按捺不住了！")
+        CALL html_wait
+        HTML_PRINT get_text_html(@"在此之前……自己眼前可是有个正在发情的『%ANAME(MRU_1_2_装扮君主)%』啊")
+        CALL html_wait
+        HTML_PRINT get_text_html(@"要做点什么吗？")
+        CALL get_text_html_b(@"把摄像机拿出来 ","1_2_1","")
+        CALL get_text_html_b(@"已经到极限了","","")
+        CALL get_html_button_input
+        IF RESULT == 0
+            HTML_PRINT get_text_html_c(@"「诶呀呀还要拍下来吗？」",MRU_1_2_装扮君主)
+            CALL html_wait
+            HTML_PRINT get_text_html_c(@"「记得把脸遮住！」",MRU_1_2_装扮君主)
+            CALL html_wait
+            HTML_PRINT get_text_html(@"你还知道羞耻啊？")
+            HTML_PRINT get_text_html(@"完全忽视了这个请求，在摄像头前把『%ANAME(MRU_1_2_装扮君主)%』压倒了")
+            CALL EXPEND_LATER()
+            HTML_PRINT get_text_html(@"把『%ANAME(MRU_1_2_装扮君主)%』干到完全昏迷后，%ANAME(MASTER)%拿着充满了情色的录像带离开了牢房")
+            HTML_PRINT get_text_html(@"这种东西在手上……大有可为啊")
+            CALL html_wait
+            CALL MRU_1_2_勒索
+        ELSE
+            HTML_PRINT get_text_html(@"就这样把『%ANAME(MRU_1_2_装扮君主)%』给上了")
+            CALL html_wait
+            CALL EXPEND_LATER()
+            HTML_PRINT get_text_html(@"事后，把被干到昏迷的女人丢在了原处")
+            CALL html_wait
+            HTML_PRINT get_text_html(@"%ANAME(MASTER)%离开了牢房")
+            CALL html_wait
+            HTML_PRINT get_text_html(@"看起来这位还是有点用处的……先留着吧")
+            CALL html_wait
+        ENDIF
+    ELSE
+        CALL MRU_1_2_二次_终止
+    ENDIF
+@MRU_1_2_二次_终止
+    HTML_PRINT get_text_html(@"让监狱省出了一个空位")
+    CALL html_wait
+    CALL MRU_event_set_next_phase("MRU_1_2",MRU_1_2_PHASE,"终止")
+@MRU_1_2_勒索
+    HTML_PRINT get_text_html(@"要用『%ANAME(MRU_1_2_装扮君主)%』的性爱录像做什么呢？")
+    CALL get_text_html_b(@"勒索%ANAME(MRU_1_2_装扮君主)%","","")
+    CALL get_text_html_b(@"勒索%ANAME(MRU_1_2_装扮君主)%的手下","1_2_2","")
+    CALL get_text_html_b(@"公之于众","","")
+    CALL get_text_html_b(@"罢了","","")
+    CALL get_html_button_input
+    LOCAL = RESULT
+    IF INRANGE(LOCAL,0,2)
+        MRU_1_2_勒索次数++
+        CALL MRU_1_2_SP_END
+        SIF RESULT
+            RETURN
+    ENDIF
+    IF LOCAL == 0
+        CALL MRU_1_2_勒索君主
+    ELSEIF LOCAL == 1
+        CALL MRU_1_2_勒索手下
+    ELSEIF LOCAL == 2
+        CALL MRU_1_2_公之于众
+    ELSE
+        CALL MRU_1_2_这次算了
+    ENDIF
+
+@MRU_1_2_勒索君主
+    #DIM 勒索类型
+    HTML_PRINT get_text_html(@"偷偷把录像的拷贝发给%ANAME(MRU_1_2_装扮君主)%吧")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"不需要任何威胁的话语，这录像带本身就是威胁")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"当然不会忘记在信尾附上自己小小的请求")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"要提出什么要求呢？")
+    CALL get_text_html_b(@"和本国停战","1_2_3","")
+    CALL get_text_html_b(@"转让经济","","")
+    CALL get_text_html_b(@"转让士兵","","")
+    CALL get_html_button_input
+    勒索类型 = RESULT
+    CALL EXPEND_LATER
+    IF MRU_1_2_勒索_判定() > 0
+        CALL MRU_1_2_勒索君主_成功
+        SELECTCASE 勒索类型
+            CASE 0
+                LOCAL = RAND(3,5)
+                CALL INIT_CEASEFIRE(CFLAG:MASTER:所属, CFLAG:MRU_1_2_装扮君主:所属, LOCAL)
+                HTML_PRINT get_text_html_n(@"和%ANAME(MRU_1_2_装扮君主)%達成了{LOCAL}期間内的停戦協議")
+                CALL html_wait
+            CASE 1
+                LOCAL = RAND(1,4) * 25
+                CALL SHIFT_ECONOMY(CFLAG:MRU_1_2_装扮君主:所属, CFLAG:MASTER:所属, LOCAL*100)
+                HTML_PRINT get_text_html_n(@"%ANAME(MRU_1_2_装扮君主)%「提供」了{LOCAL}経済力…")
+                CALL html_wait
+            CASE 2
+                LOCAL = RAND(10,30) * 10
+                CALL SHIFT_SOLDIER(CFLAG:MRU_1_2_装扮君主:所属, CFLAG:MASTER:所属, LOCAL)
+                HTML_PRINT get_text_html_n(@"%ANAME(CFLAG:MRU_1_2_装扮君主:所属)%「提供」了{LOCAL}士兵…")
+                CALL html_wait
+        ENDSELECT
+    ELSE
+        CALL MRU_1_2_勒索君主_失败
+    ENDIF
+
+@MRU_1_2_勒索君主_成功
+    HTML_PRINT get_text_html_c(@"「什——么——？」",MRU_1_2_装扮君主)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"%ANAME(MRU_1_2_装扮君主)%颤抖着看着录像带中的自己在%ANAME(MASTER)%身下浪叫着承欢")
+    HTML_PRINT get_text_html_c(@"「%ANAME(MASTER)%家伙……居然搞这么下流的手段……不可饶恕！」",MRU_1_2_装扮君主)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「可恶可恶可恶啊！」",MRU_1_2_装扮君主)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「%ANAME(MASTER)%给我等着！」",MRU_1_2_装扮君主)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"在屈辱中，%ANAME(MRU_1_2_装扮君主)%答应了%ANAME(MASTER)%的请求")
+    CALL CHANGE_RELATION_O_TO_O(MRU_1_2_装扮君主, MASTER, -500, 500)
+
+@MRU_1_2_勒索君主_失败
+    HTML_PRINT get_text_html(@"完全不够啊")
+    HTML_PRINT get_text_html_c(@"「啊？」",MRU_1_2_装扮君主)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「这谁啊……你随便找个愿意挨草的穿上我的衣服就能假装是我了吗？」",MRU_1_2_装扮君主)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「滚啊……垃圾！」",MRU_1_2_装扮君主)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"%ANAME(MRU_1_2_装扮君主)%完全不觉得录像带上的是自己，勒索失败了")
+    CALL html_wait
+    HTML_PRINT get_text_html_w(@"徒增了%ANAME(MRU_1_2_装扮君主)%的恨")
+    CALL html_wait
+    CALL CHANGE_RELATION_O_TO_O(MRU_1_2_装扮君主, MASTER, -500, 500)
+
+@MRU_1_2_勒索手下
+    #DIM 手下
+    #DIM 记者
+    HTML_PRINT get_text_html(@"%ANAME(MRU_1_2_装扮君主)%本人是个硬茬……但她的手下不是呢！")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"要选择%ANAME(MRU_1_2_装扮君主)%的哪个手下呢？")
+    CALL SELECT_CHARA_LIST("MRU_1_2_GET_LOYAL_UNDER", "MRU_1_2_GET_LOYAL_UNDER", "DEFAULT")
+    手下 = RESULT
+    IF 手下 < 0
+    ENDIF
+    CALL MRU_1_2_GET_REPOTER(手下)
+    记者 = RESULT
+    HTML_PRINT get_text_html(@"偷偷把录像的拷贝发给%ANAME(MRU_1_2_装扮君主)%忠诚的%ANAME(手下)%吧")
+    CALL EXPEND_LATER
+    HTML_PRINT get_text_html(@"如果不答应的话……明天就会把这份东西交给%ANAME(记者)%哦？")
+    HTML_PRINT get_text_html(@"除非呢……用自己来代替%ANAME(MRU_1_2_装扮君主)%吧？")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"在信中留下了这样语句")
+    CALL EXPEND_LATER
+    IF MRU_1_2_勒索_判定() - ABL:手下:性知識
+        CALL MRU_1_2_勒索手下_成功(手下)
+    ELSE
+        CALL MRU_1_2_勒索手下_失败(手下)
+    ENDIF
+
+@MRU_1_2_勒索手下_成功(手下)
+    #DIM 手下
+    HTML_PRINT get_text_html_c(@"「什——么——？」",手下)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"%ANAME(手下)%颤抖着看着录像带中的自己的%ANAME(MRU_1_2_装扮君主)%大人在%ANAME(MASTER)%身下浪叫着承欢")
+    HTML_PRINT get_text_html_c(@"「这不可能……的啊……%ANAME(MRU_1_2_装扮君主)%大人……」",手下)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「你他妈的……不可以这样啊……不可以啊！」",手下)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「可恶可恶可恶啊！」",手下)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「%ANAME(MRU_1_2_装扮君主)%大人……一定要击败%ANAME(MASTER)%啊！」",手下)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"在屈辱中，%ANAME(手下)%答应了%ANAME(MASTER)%的请求")
+    HTML_PRINT get_text_html_n(@"可以在调教中调教%ANAME(手下)%了！")
+	CFLAG:手下:外交調教中 = 1
+    CALL CHANGE_RELATION_O_TO_O(手下, MASTER, -100, 100)
+    CFLAG:手下:好感度 = MAX(CFLAG:手下:好感度 - 500,-1000)
+    CFLAG:手下:従属度 = MAX(CFLAG:手下:従属度 + 500,-1000)
+
+@MRU_1_2_勒索手下_失败(手下)
+    #DIM 手下
+    HTML_PRINT get_text_html_c(@"「啊？」",手下)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「这谁啊……你随便找个愿意挨草的穿上%ANAME(MRU_1_2_装扮君主)%大人的衣服就能假装是%ANAME(MRU_1_2_装扮君主)%大人了吗？」",手下)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「滚啊……垃圾！」",手下)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"%ANAME(手下)%完全不觉得录像带上的是自己的%ANAME(MRU_1_2_装扮君主)%大人，勒索失败了")
+    HTML_PRINT get_text_html_w(@"徒增了%ANAME(手下)%的恨，顺便被报告了这件事，%ANAME(MRU_1_2_装扮君主)%的恨意也增加了")
+    CALL CHANGE_RELATION_O_TO_O(手下, MASTER, -300, 300)
+    CALL CHANGE_RELATION_O_TO_O(MRU_1_2_装扮君主, MASTER, -300, 300)
+    CFLAG:手下:好感度 = -1000
+    CFLAG:手下:従属度 = -1000
+
+@MRU_1_2_公之于众
+    #DIM 记者
+    CALL MRU_1_2_GET_REPOTER
+    记者 = RESULT
+    HTML_PRINT get_text_html(@"把录像带交给了%ANAME(记者)%")
+    CALL EXPEND_LATER
+    IF MRU_1_2_勒索_判定()+3
+        CALL MRU_1_2_公之于众_成功(记者)
+    ELSE
+        CALL MRU_1_2_公之于众_失败(记者)
+    ENDIF
+
+@MRU_1_2_公之于众_成功(记者)
+    #DIM 记者
+    HTML_PRINT get_text_html_c(@"「噢噢噢噢噢噢噢噢哦哦！」",记者)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「我的天哪，这里的……是%ANAME(MRU_1_2_装扮君主)%吗！！！」",记者)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「这淫荡的声音！这欲求的表情！这销魂的动作！太棒了！」",记者)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「这就是……我要的大新闻啊！」",记者)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「明天早上，所有人都会看见%ANAME(MRU_1_2_装扮君主)%的肮脏的阴暗面的！」",记者)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「谢谢你%ANAME(MASTER)%！」",记者)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"话还没说完的%ANAME(记者)%已经消失了，这就是记者的速度吗？")
+    HTML_PRINT get_text_html_c(@"「号外号外！身为一国之君的%ANAME(MRU_1_2_装扮君主)%居然做出来这种事情！」",记者)
+    CALL html_wait
+    HTML_PRINT get_text_html_n(@"仿佛就在一瞬间，%ANAME(MRU_1_2_装扮君主)%的丑态传遍了整个幻想乡……")
+    FOR LOCAL,1,CHARANUM
+        CALL CHANGE_RELATION_O_TO_O(LOCAL,MRU_1_2_装扮君主,-1000,0)
+    NEXT
+
+@MRU_1_2_公之于众_失败(记者)
+    #DIM 记者
+    HTML_PRINT get_text_html_c(@"「啊？」",记者)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「这谁啊……你随便找个愿意挨草的穿上%ANAME(MRU_1_2_装扮君主)%的衣服就能假装是%ANAME(MRU_1_2_装扮君主)%了吗？」",记者)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「这种东西上了新闻，将来要是出了事情，我可是要负责任的啊，明白了吗？」",记者)
+    CALL html_wait
+    HTML_PRINT get_text_html_c(@"「滚啊……垃圾！」",记者)
+    CALL html_wait
+    HTML_PRINT get_text_html(@"%ANAME(记者)%完全不觉得录像带上的是%ANAME(MRU_1_2_装扮君主)%")
+    HTML_PRINT get_text_html_c(@"「拿出这种东西，你不觉得恶心吗？」",记者)
+    CALL html_wait
+    HTML_PRINT get_text_html_w(@"被%ANAME(记者)%讨厌了")
+    CALL html_wait
+    CALL CHANGE_RELATION_O_TO_O(记者, MASTER, -300, 300)
+    CFLAG:记者:好感度 = -1000
+    CFLAG:记者:従属度 = -1000
+
+@MRU_1_2_这次算了
+    HTML_PRINT get_text_html(@"还是算了")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"这次就先放过%ANAME(MRU_1_2_装扮君主)%")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"下次再来好好考虑该怎么玩吧？")
+    CALL html_wait
+@MRU_1_2_SP_END()
+    #DIM 文
+    #DIM 果
+    文 = NAME_TO_CHARA("文")
+    果 = NAME_TO_CHARA("はたて")
+    SIF !GROUPMATCH(MRU_1_2_装扮君主,果,文)
+        RETURN 0
+    FOR LOCAL,1,CHARANUM
+        CALL SELECT_CHARA_LIST_SHOW_LOGIC_MRU_1_2_GET_LOYAL_UNDER(LOCAL)
+        IF RESULT && GROUPMATCH(LOCAL,果,文)
+            HTML_PRINT get_text_html(@"在把信寄出去的那一刻，%ANAME(MASTER)%突然想起了什么")
+            CALL html_wait
+            HTML_PRINT get_text_html(@"不过太晚了，现在已经没有弥补的可能了")
+            CALL html_wait
+            HTML_PRINT get_text_html(@"兄啊你用金金想一想")
+            CALL html_wait
+            HTML_PRINT get_text_html(@"同时威胁了文文和果果谁帮你传假新闻啊")
+            CALL html_wait
+            HTML_PRINT get_text_html(@"不出所料，收到信的%ANAME(文)%和%ANAME(果)%一起把持住了舆论，反将了%ANAME(MASTER)%一军")
+            CALL html_wait
+            HTML_PRINT get_text_html(@"%ANAME(MASTER)%那野兽般的吼叫传遍了整个幻想乡")
+            CALL html_wait
+            HTML_PRINT get_text_html_w(@"风评理所当然的变差了")
+            CALL html_wait
+            RETURN 1
+            CALL CHANGE_RELATION_O_TO_O(果, MASTER, -500, 500)
+            CALL CHANGE_RELATION_O_TO_O(文, MASTER, -500, 500)
+            FOR LOCAL, 1, CHARANUM
+                CALL CHANGE_RELATION_O_TO_O(LOCAL, MASTER, -100, 100)
+            NEXT
+        ENDIF
+    NEXT
+    RETURN 0
+
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_MRU_1_2_GET_UNFALLEN_FEMALE_BOSS(対象)
+    #DIM 対象
+    CALL SELECT_CHARA_LIST_SHOW_LOGIC_DEFAULT
+    SIF !RESULT
+        RETURN 0
+    {
+    RETURN 対象 ==  GET_COUNTRY_BOSS(CFLAG:対象:所属) && 対象 != MASTER &&
+        CFLAG:対象:所属 != CFLAG:MASTER:所属 && !IS_FALLEN(対象) &&
+        IS_FEMALE(対象) && !IS_SP_COUNTRY(CFLAG:対象:所属)
+    }
+@SELECT_CHARA_LIST_SELECT_LOGIC_MRU_1_2_GET_UNFALLEN_FEMALE_BOSS(対象)
+    #DIM 対象
+    RETURN CFLAG:対象:捕虜先 == 0
+
+@SELECT_CHARA_LIST_SHOW_LOGIC_MRU_1_2_GET_LOYAL_UNDER(対象)
+    #DIM 対象
+
+    SIF CFLAG:対象:捕虜先 != 0 && CFLAG:対象:捕虜先 != CFLAG:MASTER:所属
+        RETURN 0
+    SIF CFLAG:対象:所属 != CFLAG:MRU_1_2_装扮君主:所属
+        RETURN 0
+    SIF SETTOKU_REL_EFFECT(対象,MRU_1_2_装扮君主) < 50
+        RETURN 0
+    RETURN 対象 != MASTER && CFLAG:対象:所属 != CFLAG:MASTER:所属 && !IS_FALLEN(対象) && IS_FEMALE(対象) && MRU_1_2_装扮君主 != 対象
+@SELECT_CHARA_LIST_SELECT_LOGIC_MRU_1_2_GET_LOYAL_UNDER(対象)
+    #DIM 対象
+    RETURN CFLAG:対象:捕虜先 == 0
+
+@MRU_1_2_HAS_LOYAL_UNDER
+    SIF MRU_1_2_装扮君主 <= 0 || MRU_1_2_装扮君主 >= CHARANUM
+        RETURN 0
+    FOR LOCAL,1,CHARANUM
+        CALL SELECT_CHARA_LIST_SHOW_LOGIC_MRU_1_2_GET_LOYAL_UNDER(LOCAL)
+        SIF RESULT
+            RETURN 1
+    NEXT
+    RETURN 0
+
+@MRU_1_2_GET_REPOTER(手下 = 0)
+    #DIM 手下
+    #DIM 文
+    #DIM 果
+    文 = NAME_TO_CHARA("文")
+    果 = NAME_TO_CHARA("はたて")
+    IF GROUPMATCH(果,手下,MRU_1_2_装扮君主)
+        RETURN 文
+    ENDIF
+    IF GROUPMATCH(文,手下,MRU_1_2_装扮君主)
+        RETURN 果
+    ENDIF
+    RETURN 文
+@MRU_1_2_勒索_判定
+    #FUNCTION
+    #DIM POINT
+    POINT += TALENT:MRU_1_2_装扮君主:淫乱系 > 0
+    POINT += TALENT:MRU_1_2_装扮君主:人気
+    POINT += TALENT:MRU_1_2_装扮君主:接受快感
+    POINT += TALENT:MRU_1_2_装扮君主:不在乎貞操
+    POINT += TALENT:MRU_1_2_装扮君主:自尊心低
+    POINT += TALENT:MRU_1_2_装扮君主:不知羞恥
+    POINT += ABL:MRU_1_2_装扮君主:欲望 > 3
+    POINT += ABL:MRU_1_2_装扮君主:野心 > 80
+    POINT += MIN(MRU_1_2_勒索次数,3)
+    POINT += ABL:MASTER:性技
+    POINT += (ABL:MASTER:知略 > 70)? 3 # 0
+
+    POINT -= TALENT:MRU_1_2_装扮君主:討厭男人
+    POINT -= TALENT:MRU_1_2_装扮君主:否定快感
+    POINT -= TALENT:MRU_1_2_装扮君主:孤高
+    POINT -= TALENT:MRU_1_2_装扮君主:貞操観念
+    POINT -= TALENT:MRU_1_2_装扮君主:自尊心高
+    POINT -= (TALENT:MRU_1_2_装扮君主:処女 == 0) ? 5 # 0
+
+    POINT += RAND:10 - 5
+    RETURNF POINT
+
 @MRU_exist_unfallen_female_boss
     #FUNCTION
     FOR LOCAL,0,MAX_COUNTRY

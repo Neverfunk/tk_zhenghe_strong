@@ -1,0 +1,436 @@
+﻿;ENG = SECTURE_ROOM
+;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K48_SECTURE_ROOM_RATE(対象)
+#DIM 対象
+RETURN 1000
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K48_SECTURE_ROOM_DECISION(対象)
+	#DIM 対象
+
+	SIF CFLAG:対象:好感度 < 5000 || !TALENT:対象:恋人
+		RETURN 0
+
+	SIF ABL:対象:知略 < 75 || ABL:対象:政治 < 75
+		RETURN 0
+	SIF TALENT:対象:空虚 || TALENT:対象:崩壊
+		RETURN 0
+	SIF EVENT_2_已经发生
+		RETURN 0
+	RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K48_SECTURE_ROOM_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K48_SECTURE_ROOM(対象)
+	#DIM 対象
+	EVENT_2_已经发生 = 1
+    PRINTFORML 最近政务颇多，%ANAME(MASTER)%每天忙着政务
+    PRINTFORML 而一天%ANAME(対象)%突然来找到自己
+    WAIT
+    CALL K48_AKYUU_SAY(@"「明天我受邀请去一个村庄开展个关于幻想乡的历史与未来走向的讲座」")
+    CALL K48_AKYUU_SAY(@"「那么，能送我去一趟么」")
+    CALL K48_AKYUU_SAY(@"「我也会顺势为%ANAME(MASTER)%你打宣传哦」")
+    PRINTFORML %ANAME(対象)%这样鼓动地说着，那么应该怎么办呢
+    CALL ASK_MULTI("亲自去送","派人接送","自己去吧")
+    IF RESULT == 0
+        CALL EVENT_2_1(対象)
+    ELSEIF RESULT == 1
+        CALL EVENT_2_2(対象)
+    ELSE
+        CALL EVENT_2_3(対象)
+    ENDIF
+
+@EVENT_2_1(対象)
+	#DIM 対象
+	CALL K48_AKYUU_SAY(@"「果然%ANAME(MASTER)%还是好啊」")
+	PRINTFORML %ANAME(対象)%向着%ANAME(MASTER)%身上蹭了上去
+	PRINTFORML 唉，没办法，现在幻想乡也乱，虽然路途不远，但是总怕出什么乱子
+	CALL K48_AKYUU_SAY(@"「放心吧，上午出发后演讲完就没事了」")
+	CALL K48_AKYUU_SAY(@"「中午吃完饭剩下的时间我们就一起自由地在一起啦」")
+	PRINTFORML %ANAME(対象)%收回了一些调皮，声音也变得温柔起来
+	CALL K48_AKYUU_SAY(@"「好了，也别每天愁眉苦脸地忙这这些事情了」")
+	CALL K48_AKYUU_SAY(@"「这些事情是处理不完的，不要太累到自己了」")
+	CALL K48_AKYUU_SAY(@"「早点睡吧，明天的事我已经打理好了，不用准备什么，就当约会好了」")
+	CALL K48_HUGE_WAIT()
+	PRINTFORML 第二天早上，%ANAME(MASTER)%吩咐好事情后，早早地与%ANAME(対象)%一起，二人独自前往那个村庄
+	WAIT
+	PRINTFORML 一路上没有什么意外，讲座上%ANAME(対象)%的表现也非常好，整个村庄的人都认为%ANAME(MASTER)%将会是拯救幻想乡的英雄
+	PRINTFORML 中午，找了一家饭馆，包了二楼的隔间，%ANAME(対象)%负责点菜，要了一盘炒肉和一盘青菜
+	WAIT
+	CALL K48_AKYUU_SAY(@"「啊~累死了，讲了一上午」")
+	CALL K48_AKYUU_SAY(@"「嗯，没事，我不要紧的，就是有点站久了」")
+	CALL K48_AKYUU_SAY(@"「毕竟有%ANAME(MASTER)%陪我一起，我还很有精力呢」")
+	PRINTFORML 在等饭菜的时候，%ANAME(MASTER)%与%ANAME(対象)%在说说笑笑着消磨时光
+	PRINTFORML 这时一个服务员端一碗热汤走了过来
+	WAIT
+	CALL K48_NPC_SAY(@"「上汤啦」")
+	PRINTFORML 服务员这么说着并靠近了过来
+	PRINTFORML 咦？可是明明没有点汤啊
+	WAIT
+	PRINTFORML 问向服务员这汤是怎么回事时，他却愣在原地，结结巴巴地说不清话
+	WAIT
+	PRINTFORML 突然服务员把热汤向%ANAME(対象)%与%ANAME(MASTER)%砸去，而早知不对劲，玩家也把%ANAME(対象)%推开，自己也顺势躲开，只溅到了肩膀
+	PRINTFORML 看况不在预料中发展，服务员拔出小刀冲向了%ANAME(MASTER)%，只可惜实力也就普通服务员的水平，被三拳两脚就解决掉了
+	WAIT
+	CALL K48_NPC_SAY(@"「B哥！B哥！救我口牙！」")
+	PRINTFORML 服务员喊着帮手求救命，而门口伸进了无数的触手，触手先捆住了服务员，于是他带着恐惧与惊讶的表情，在%ANAME(MASTER)%面前被抽成了人干
+	PRINTFORML 一个比服务员明显更有气场的男人走了进来，手里拿着把长木棍，身后则是无尽的触手
+	WAIT
+	CALL K48_NPC_SAY(@"「不用太惊讶，整个餐馆都是为你们而准备的」")
+	CALL K48_NPC_SAY(@"「我为了即使获得这个餐馆，还不小心餐馆老板起了冲突，不过我的触手们已经让他们一家物尽其用了」")
+	CALL K48_NPC_SAY(@"「刚才我手下的行为实在是献丑，一点灵活变通都没有，让您与您的爱人受到如此惊吓」")
+	CALL K48_NPC_SAY(@"「那么，不用在意我的身份与动机....我要上了！」")
+	PRINTFORML 男人向着%ANAME(MASTER)%冲去，周围触手也一并涌来，那么该如何接敌
+    CALL ASK_MULTI("短兵相接","弹幕压制")
+	LOCAL = 1
+	IF RESULT == 0
+		; 武功70——80防御70——80智力70——80
+		{
+		SIF !(K48_GET_INTERVAL_PROBABILITY(ABL:MASTER:武闘,70,80) && K48_GET_INTERVAL_PROBABILITY(ABL:MASTER:防衛,70,80) &&
+			K48_GET_INTERVAL_PROBABILITY(ABL:MASTER:知略,70,80))
+		}
+			LOCAL = 0
+	ELSE
+		; 防御70——80智力70——80，妖术60——70
+		{
+		SIF !(K48_GET_INTERVAL_PROBABILITY(ABL:MASTER:防衛,70,80) && K48_GET_INTERVAL_PROBABILITY(ABL:MASTER:知略,70,80) &&
+			K48_GET_INTERVAL_PROBABILITY(ABL:MASTER:妖術,60,70))
+		}
+			LOCAL = 0
+	ENDIF
+	IF LOCAL == 0
+		CALL K48_NPC_SAY(@"「切，就只有这点本事么」")
+		PRINTFORML %ANAME(MASTER)%被触手掀翻在地，只能无力地看着男人向%ANAME(対象)%靠近
+		WAIT
+		CALL K48_HUGE_WAIT()
+		CALL EVENT_2_1_1(対象)
+		RETURN
+	ENDIF
+	CALL K48_NPC_SAY(@"「啧...还挺有些实力的嘛」")
+	CALL K48_NPC_SAY(@"「但，不用以为我就这么点实力啊！」")
+	PRINTFORML 受了伤的男人用触手紧绕在受伤的地方作为绷带，再次指挥着触手涌了上来
+	WAIT
+	CALL K48_AKYUU_SAY(@"「啊！不要过来，救命」")
+	PRINTFORML 男人似乎是看到了%ANAME(対象)%并没有那么擅长战斗，触手对她开始格外照顾
+	WAIT
+	PRINTFORML 在这么耗下去%ANAME(対象)%绝对会先抵抗不能，那么再要如何接敌
+	PRINTFORML 1短兵相接  2弹幕压制
+	CALL ASK_MULTI("短兵相接","弹幕压制")
+	LOCAL = 1
+	IF RESULT == 0
+		; 武功70——80防御70——80智力70——80
+		{
+		SIF !(K48_GET_INTERVAL_PROBABILITY(ABL:MASTER:武闘,70,80) && K48_GET_INTERVAL_PROBABILITY(ABL:MASTER:防衛,70,80) &&
+			K48_GET_INTERVAL_PROBABILITY(ABL:MASTER:知略,70,80))
+		}
+			LOCAL = 0
+	ELSE
+		; 防御70——80智力70——80，妖术60——70
+		{
+		SIF !(K48_GET_INTERVAL_PROBABILITY(ABL:MASTER:防衛,70,80) && K48_GET_INTERVAL_PROBABILITY(ABL:MASTER:知略,70,80) &&
+			K48_GET_INTERVAL_PROBABILITY(ABL:MASTER:妖術,60,70))
+		}
+			LOCAL = 0
+	ENDIF
+	IF LOCAL == 0
+		CALL K48_NPC_SAY(@"「呼~还是我技高一筹啊，呵呵呵...」")
+		PRINTFORML %ANAME(MASTER)%被男人一棍子打翻后立马被触手捆住，只能无力地看着男人向%ANAME(対象)%靠近
+		WAIT
+		CALL K48_HUGE_WAIT()
+		CALL EVENT_2_1_1(対象)
+		RETURN
+	ENDIF
+	PRINTFORML %ANAME(MASTER)%打断了男人手持的木棍，震退了缠身的触手
+	PRINTFORML 男人确实是没有意料到，丢掉了手里的断了节的棍子，没有了闲谈，朝着%ANAME(対象)%冲去
+	WAIT
+	PRINTFORML 君子做不成，那就做欺负女人的小人好了，触手则伺机而动，相当多的触手随时准备向%ANAME(MASTER)%发动攻击
+	PRINTFORML 看来是打算以%ANAME(対象)%为突破口，令%ANAME(MASTER)%严重分心在一网打尽的战术呵
+	WAIT
+	PRINTFORML 没时间多想了，如何对敌
+	CALL ASK_MULTI("短兵相接","弹幕压制")
+	LOCAL = 1
+	IF RESULT == 0
+		; 武功70——80防御70——80智力70——80
+		{
+		SIF !(K48_GET_INTERVAL_PROBABILITY(ABL:MASTER:武闘,70,80) && K48_GET_INTERVAL_PROBABILITY(ABL:MASTER:防衛,70,80) &&
+			K48_GET_INTERVAL_PROBABILITY(ABL:MASTER:知略,70,80))
+		}
+			LOCAL = 0
+	ELSE
+		; 防御70——80智力70——80，妖术60——70
+		{
+		SIF !(K48_GET_INTERVAL_PROBABILITY(ABL:MASTER:防衛,70,80) && K48_GET_INTERVAL_PROBABILITY(ABL:MASTER:知略,70,80) &&
+			K48_GET_INTERVAL_PROBABILITY(ABL:MASTER:妖術,60,70))
+		}
+			LOCAL = 0
+	ENDIF
+	IF LOCAL == 0
+		CALL K48_NPC_SAY(@"「...」")
+		CALL K48_NPC_SAY(@"「果然她才是你的弱点啊...」")
+		PRINTFORML 或许是为了保护%ANAME(対象)%，%ANAME(MASTER)%被暗处的触手绊倒，随后立马遭受了触手与男人趁势的围殴，终于是抵挡不住
+		WAIT
+		PRINTFORML 被触手捆了起来后，只能无力地看着男人向%ANAME(対象)%靠近
+		WAIT
+		CALL K48_HUGE_WAIT()
+		CALL EVENT_2_1_1(対象)
+		RETURN
+	ENDIF
+	CALL EVENT_2_1_2
+
+@EVENT_2_1_1(対象)
+	#DIM 対象
+	PRINTFORML 男人走在了%ANAME(対象)%跟前，触手已经把%ANAME(対象)%以极其暴露的姿势吊了起来
+	PRINTFORML 稍立了一会儿，随着身上触手的枯萎，男人身上的伤便好了大半
+	WAIT
+	CALL K48_NPC_SAY(@"「撒，那么轮到我们了」")
+	PRINTFORML 男人捏着%ANAME(対象)%的脸嚣张地说着
+	CALL K48_NPC_SAY(@"「多么可爱的女孩，我已经迫不及待地养一条新的母狗了」")
+	CALL K48_AKYUU_SAY(@"「我呸，我绝对不会屈服你这种变态！」")
+	PRINTFORML 男人并没有多说，被捆成一团%ANAME(MASTER)%则被抬了起来，触手捂实了嘴巴，开始抽取%ANAME(MASTER)%的生命力了
+	PRINTFORML 光是表情就能体会到%ANAME(MASTER)%的痛苦，%ANAME(対象)%知道这是胁迫，但是立马就变了语气，乞求能放%ANAME(MASTER)%一命
+	WAIT
+	CALL K48_NPC_SAY(@"「可以啊，那得看你伺候我得伺候的怎么样了」")
+	CALL K48_NPC_SAY(@"「先从最先的礼仪讲起吧，从现在起，你就是我的妻子，你必须得我丈夫或者夫君」")
+	PRINTFORML 这是明显当着%ANAME(MASTER)%的面故意羞辱，但是%ANAME(対象)%还是屈从了
+	CALL K48_NPC_SAY(@"「那么作为夫妻，接下来就该相爱了啊」")
+	PRINTFORML 接下来的事情却一点也不礼仪起来，男人撕碎了%ANAME(対象)%的衣物，用自己的粗壮的阴茎直接猛插%ANAME(対象)%的小穴
+	CALL K48_AKYUU_SAY(@"「啊！好疼，不...不要」")
+	PRINTFORML %ANAME(対象)%带着哭泣悲鸣着，男人却未说话但是回应的只有%ANAME(MASTER)%更加痛苦的哀嚎
+	CALL K48_AKYUU_SAY(@"「对..对不起，夫君，是夫君实在是太强壮，太厉害了...哈♥..哈♥..」")
+	PRINTFORML 身上的触手渐渐松开，小小的%ANAME(対象)%慢慢被抱在男人的怀里，脚不着地的她只能更加紧密地抱住男人，小穴被不断抽插，四溅的淫水引得触手也悄悄来偷食
+	CALL K48_AKYUU_SAY(@"「哈♥...哈♥..夫君的大鸡巴好爽♥...好舒服♥...」")
+	PRINTFORML 为了完成最后的冲刺，男人把%ANAME(対象)%顶在了墙上
+	CALL K48_AKYUU_SAY(@"「呃~~♥啊~~♥呃啊，好爽~~♥好舒服~~♥」")
+	CALL K48_AKYUU_SAY(@"「夫君..夫君好棒♥..诶诶，这是要射..啊啊啊啊~~♥♥」")
+	PRINTFORML 大量的精液直接射入%ANAME(対象)%的子宫
+	CALL K48_AKYUU_SAY(@"「啊啊啊啊♥♥~~~夫~夫~...唔揪」")
+	PRINTFORML 在射精之后，男人直接吻住了%ANAME(対象)%还在娇喘的小嘴
+	PRINTFORML %ANAME(対象)%没多反抗，任凭男人的舌头就那样在%ANAME(対象)%的牙齿和嘴唇的背面咕噜咕噜地舔着……
+	WAIT
+	PRINTFORML 男人还特意换了个位置，来到了被捆住的%ANAME(MASTER)%面前，要让%ANAME(MASTER)%更清楚地看着自己与%ANAME(対象)%缠绵的过程
+	PRINTFORML 长吻过后慢慢伸开了嘴，%ANAME(対象)%很配合男人地伸出舌头，与男人的舌头又一次缠在了一起，互相交换着双方的唾液
+	WAIT
+	PRINTFORML 而%ANAME(MASTER)%唯一能做的就是看着，清晰地看着%ANAME(対象)%与男人嘴巴间唾液连成的丝，还有%ANAME(対象)%那忧伤的并不快乐的表情
+	PRINTFORML 而男人似乎还不满意
+	WAIT
+	CALL K48_NPC_SAY(@"「怎么，这就累了吗？」")
+	PRINTFORML %ANAME(対象)%跪在地上，还在一遍遍的说着对不起
+	CALL K48_NPC_SAY(@"「呵，看在你刚才的努力上，在给你一个机会吧」")
+	PRINTFORML 触手涌向了%ANAME(対象)%，重新以极其暴露与诱惑的姿态，带到了墙前
+	CALL K48_NPC_SAY(@"「夫妻游戏已经结束了」")
+	PRINTFORML 男人站在了%ANAME(対象)%的身后
+	CALL K48_NPC_SAY(@"「从现在起，你就是触手的苗床，触手就是你的主人！」")
+	PRINTFORML 墙仿佛听到什么指令一般，化成了一滩稀泥，而街道上的行人，看到这副场景，全部涌了过来
+	CALL K48_NPC_SAY(@"「我..我是触手的奴隶，我是触手的苗床，我是触手的母狗！」")
+	CALL K48_NPC_SAY(@"「请..请触手大人赏赐我吧！」")
+	PRINTFORML 说罢触手从%ANAME(対象)%的小穴，后庭，口部三管齐下
+	PRINTFORML %ANAME(対象)%想说什么，然而，%ANAME(対象)%越是想说，触手就越激烈
+	WAIT
+	CALL K48_NPC_SAY(@"「怎么？累了没声了？看来是要点药啊」")
+	PRINTFORML 男人掏出了烈性药直接注入%ANAME(対象)%体内，让%ANAME(対象)%更加兴奋
+	PRINTFORML 当着全村人的面，%ANAME(対象)%与触手们一直激战到天黑，直到被自己势力的人派人解救为止
+	WAIT
+	CALL K48_HUGE_WAIT()
+	PRINTFORML 那个男人已经跑了，但是事情却闹遍了整个幻想乡
+	PRINTFORML 而%ANAME(対象)%，在经历了这些后，更是受到严重打击，受到药物与触手过于暴力的影响，已经神志不清了
+	WAIT
+	CALL EVENT_2_AKYUUS_GET_DOWN(対象)
+	CALL ADD_COOLTIME(MASTER,5)
+	CFLAG:対象:依存度 += 100
+	FOR LOCAL, 1, MAX_COUNTRY
+		CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -700, 0)
+	NEXT
+@EVENT_2_1_2(対象)
+	#DIM 対象
+	PRINTFORML 又要保护%ANAME(対象)%，又要与触手怪人作战，难度确实有些大
+	PRINTFORML 好在，对于%ANAME(MASTER)%来说，这也不是不可能的事情
+	WAIT
+	CALL K48_NPC_SAY(@"「扑噶」")
+	PRINTFORML 男人发着惨叫，倒在了地上
+	CALL K48_AKYUU_SAY(@"「没..没事了吗..」")
+	PRINTFORML %ANAME(対象)%从残破的触手里钻出头来探望
+	PRINTFORML 此时的触手已经没了动静，%ANAME(MASTER)%轻松地把还缠在%ANAME(対象)%身上的触手尽数扯下
+	WAIT
+	PRINTFORML 那么，是时候处理眼前的这个男人了
+	WAIT
+	CALL K48_NPC_SAY(@"「咳咳，可以啊，是有些板眼」")
+	CALL K48_NPC_SAY(@"「那么，再见，我们还有机会再见的」")
+	PRINTFORML 这个男人自言自语，毫不在意提出的问题，说罢，身体便化作了碎片消散，连一滴血都没有剩下，只留下一地触手残骸
+	PRINTFORML 而很快，整幢楼也似乎解放了似的，周围的村民也进来看热闹
+	WAIT
+	PRINTFORML 而就这样，%ANAME(MASTER)%们被当作了抗击触手的英雄，村庄的记者把此事再幻想乡大肆宣扬，所有的势力都给出了高度的评价
+	WAIT
+	CALL K48_HUGE_WAIT()
+	CALL K48_AKYUU_SAY(@"「初稿写好了，觉得怎么样」")
+	PRINTFORML %ANAME(対象)%合上了记事的本子，坐在了%ANAME(MASTER)%的床上
+	CALL K48_AKYUU_SAY(@"「诶，这也是很值得写入求闻的内容啊」")
+	CALL K48_AKYUU_SAY(@"「算了。今天白天的事情实在是太刺激太累了，先休息下算了」")
+	PRINTFORML %ANAME(対象)%把本子摊在一边，躺在了%ANAME(MASTER)%的床上
+	CALL K48_AKYUU_SAY(@"「另外，白天的事情，谢谢你保护我...」")
+	PRINTFORML ...夜深了，虽然值得疑问的事情还有很多
+	PRINTFORML 不过最值得注重的，是当下的美好，不是么
+	WAIT
+	CALL ADD_COOLTIME(対象,1)
+	CALL ADD_COOLTIME(MASTER,1)
+	CFLAG:対象:依存度 += 100
+	CFLAG:対象:好感度 += 1000
+	FOR LOCAL, 1, MAX_COUNTRY
+		CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, 1000, 0)
+	NEXT
+@EVENT_2_2(対象)
+	#DIM 対象
+	#DIM 保镖
+	PRINTFORML 选择派人护送
+	WAIT
+	PRINTFORML 那么要派遣谁去护送%ANAME(対象)%呢？
+	CALL SELECT_CHARA_LIST_ONLY_LOGIC_SLG("SECTRUE_ROOM", "SECTRUE_ROOM")
+	保镖 = RESULT
+	PRINTFORML 选择让%ANAME(保镖)%去保护%ANAME(対象)%
+	WAIT
+	CALL K48_HUGE_WAIT()
+	IF MIN(ABL:保镖:防衛,ABL:保镖:知略,ABL:保镖:妖術) >= 90
+		CALL EVENT_2_2_1(対象,保镖)
+	ELSE
+		CALL EVENT_2_2_2(対象,保镖)
+	ENDIF
+
+@EVENT_2_2_1(対象,保镖)
+	#DIM 対象
+	#DIM 保镖
+	PRINTFORML 从讲座开始那天起，过了一整天都没有%ANAME(対象)%的消息
+	WAIT
+	PRINTFORML 实在不放心派人去接应一下
+	WAIT
+	PRINTFORML 却发现了伤痕累累的%ANAME(保镖)%与%ANAME(対象)%
+	WAIT
+	PRINTFORML %ANAME(保镖)%看到了%ANAME(MASTER)%们后，安心地倒下了
+	WAIT
+	PRINTFORML %ANAME(対象)%解释着遭遇着袭击，不过一切都不重要了，大家都安在就好
+	WAIT
+	PRINTFORML 不过袭击者已经再也不见踪迹了
+	WAIT
+	CALL ADD_COOLTIME(対象,3)
+	CALL ADD_COOLTIME(保镖,3)
+
+@EVENT_2_2_2(対象,保镖)
+	#DIM 対象
+	#DIM 保镖
+	PRINTFORML 结果意外真发生了
+    PRINTFORML 过了几天，都没有%ANAME(対象)%的消息
+    WAIT
+    PRINTFORML 就算是开玩笑，也不至于这个地步吧
+    WAIT
+    CALL ASK_MULTI("赶紧带人出去找","联系那个村庄，然后再赶快过去找")
+	PRINTFORML 虽然只找到了被打的快半死的%ANAME(保镖)%
+	PRINTFORML 看着濒死的%ANAME(保镖)%，%ANAME(MASTER)%也只能先送回去养伤
+	WAIT
+	PRINTFORML 为了找到%ANAME(対象)%
+	PRINTFORML 最后花了相当久的时间与力气
+	WAIT
+	PRINTFORML %ANAME(MASTER)%带着人费了相当的力气，终于在隔壁国家的地下赌场意外找到
+	PRINTFORML 不过似乎已经有点为时已晚，%ANAME(対象)%已经神志不清，即使在赌场，也只是作为吸引客人的免费肉便器罢了
+	WAIT
+	PRINTFORML 而那天究竟发生了什么，也只有天知道了
+	WAIT
+	CALL EVENT_2_AKYUUS_GET_DOWN(対象)
+
+@EVENT_2_3(対象)
+	#DIM 対象
+    CALL K48_AKYUU_SAY(@"「?」")
+    CALL K48_AKYUU_SAY(@"「什么呀，这么无情的吗？」")
+    CALL K48_AKYUU_SAY(@"「哼，讨厌你啦，我讲完不回来啦！」")
+    PRINTFORML %ANAME(対象)%说着赌气的话后跑开了
+    PRINTFORML 但毕竟国事为重，不能沉迷这点儿女情长
+    WAIT
+    PRINTFORML 再说也就一个讲座，能有什么危险
+    PRINTFORML 让%ANAME(対象)%随便带点保安就行了
+    WAIT
+    CALL K48_HUGE_WAIT()
+    PRINTFORML 结果意外真发生了
+    PRINTFORML 过了几天，都没有%ANAME(対象)%的消息
+    WAIT
+    PRINTFORML 就算是开玩笑，也不至于这个地步吧
+    WAIT
+    CALL ASK_MULTI("赶紧带人出去找","联系那个村庄，然后再赶快过去找")
+    PRINTFORML 虽然都是一无所获
+    WAIT
+    PRINTFORML 不过功夫也不负有心人
+    PRINTFORML 花了相当久的时间与力气
+    WAIT
+    PRINTFORML 最后%ANAME(MASTER)%带着人费了相当的力气，终于在隔壁国家的地下赌场意外找到
+    PRINTFORML 不过似乎已经有点为时已晚，%ANAME(対象)%已经神志不清，即使在赌场，也只是作为吸引客人的免费肉便器罢了
+    WAIT
+    PRINTFORML 而那天究竟发生了什么，也只有天知道了
+    WAIT
+	CALL EVENT_2_AKYUUS_GET_DOWN(対象)
+
+@EVENT_2_AKYUUS_GET_DOWN(阿求)
+    #DIM 阿求
+	CFLAG:阿求:好感度 = 250
+	ABL:阿求:知略 = 1
+	ABL:阿求:政治 = 1
+	EXP:阿求:知略経験値 = 0
+	EXP:阿求:政治経験値 = 0
+	TALENT:阿求:空虚 = 1
+	TALENT:阿求:崩壊 = 1
+	SETBIT TALENT:阿求:淫乱系,素質_淫乱_苗床
+	SETBIT TALENT:阿求:淫乱系,素質_淫乱_薬物中毒
+	FOR LOCAL:0,0,SKILL_GENRE_NUM
+		FOR LOCAL:1,0,MAX_SKILL_SLOT
+			SKILL_NO_SLOT:阿求:(LOCAL:0):(LOCAL:1) = -1
+			SKILL_ID_SLOT:阿求:(LOCAL:0):(LOCAL:1) = -1
+		NEXT
+	NEXT
+	CALL ADD_COOLTIME(阿求,3)
+	CALL K48_FUCK(阿求)
+@SELECT_CHARA_LIST_SHOW_LOGIC_SECTRUE_ROOM(対象)
+#DIM 対象
+CALL SELECT_CHARA_LIST_SHOW_LOGIC_DEFAULT(対象)
+RETURN RESULT && CFLAG:対象:所属 == CFLAG:MASTER:所属 && !IS_ANIMAL(対象) && CFLAG:対象:行動不能状態 != 行動不能_子供 && 対象 != MASTER
+
+@SELECT_CHARA_LIST_SELECT_LOGIC_SECTRUE_ROOM(対象)
+#DIM 対象
+RETURN CFLAG:対象:捕虜先 == 0
+
+
+@K48_GET_INTERVAL_PROBABILITY(VAL,LOW_LIMIT,UP_LIMIT)
+	#FUNCTION
+	#DIM VAL
+	#DIM LOW_LIMIT
+	#DIM UP_LIMIT
+	SIF VAL <= LOW_LIMIT
+		RETURNF 0
+	SIF VAL >= UP_LIMIT
+		RETURNF 1
+	RETURNF (VAL - LOW_LIMIT) > RAND(UP_LIMIT - LOW_LIMIT)
+
+@K48_FUCK(阿求)
+    #DIM 阿求
+{
+	CALL FUCK(阿求, "欲望, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 奉仕, 精愛, 口淫, 性交, 触手, Ｖ性交, Ａ性交",
+	"接吻喪失, 処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精", GET_SPERM_ID("触手"), "触手", "触手", "", "調教")
+}
+	EXP:阿求:触手出産経験 += 6 + RAND:10
+{
+	CALL FUCK(阿求, "欲望, 性技, 性交, 情愛, Ｃ, Ｖ, Ａ, 接吻, 緊縛, 被虐, Ｖ性交, Ａ性交",
+	"処女喪失, 膣内射精, Ａ処女喪失, 腸内射精", GET_SPERM_ID("偶遇的男人"), @"偶遇的男人的\@RAND:2 ? 肉棒 # 唇\@", @"偶遇的男人", "", "強姦")
+}

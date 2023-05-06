@@ -1,0 +1,64 @@
+﻿;ENG_NAME = LONELY_NIGHT
+;---------------------
+;基本发生概率(1000分率100为10%)
+;再加上configue项目的发生频率，所以概率还会有所变化
+;---------------------
+@EVENT_DAILY_LONELY_NIGHT_RATE()
+	CALL MRU_get_phase_rate("MRU_7",MRU_7_PHASE)
+	IF RESULT != -1
+		RETURN RESULT
+	ELSE
+		RETURN 200
+	ENDIF
+
+
+;---------------------
+;发生判定
+;1可以发生，0不能发生
+;---------------------
+@EVENT_DAILY_LONELY_NIGHT_DECISION()
+    SIF !IS_MALE(MASTER)
+        RETURN 0
+    SIF !IS_COUNTRY(CFLAG:MASTER:所属) || IS_SP_COUNTRY(CFLAG:MASTER:所属)
+    RETURN 0
+	CALL MRU_event_check("MRU_7",MRU_7_PHASE)
+	SIF RESULT == -1
+		RETURN 0
+	RETURN 1
+
+;---------------------
+;事件类型
+;用于在设置中进行配置
+;---------------------
+@EVENT_DAILY_LONELY_NIGHT_GENRE()
+    RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;名称
+;返回空或不存在时使用注册名称
+;---------------------
+@EVENT_DAILY_LONELY_NIGHT_NAME()
+	CALL MRU_get_phase_name("MRU_7",MRU_7_PHASE)
+	SIF RESULTS != ""
+		RETURN
+    RESULTS '= @"长夜漫漫"
+
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_LONELY_NIGHT()
+	IF MRU_7_PHASE == ""
+		CALL MRU_event_set_next_phase("MRU_7",MRU_7_PHASE,"初见")
+	ENDIF
+	CALL MRU_event_procedure("MRU_7",MRU_7_PHASE)
+	RETURN 1
+
+
+@MRU_7__rate
+@MRU_7__name
+@MRU_7__check
+@MRU_7__after_set
+@MRU_7__start
+@MRU_7__text

@@ -814,7 +814,6 @@ $INPUT_LOOP2
 INPUT
 
 ;
-;#; PRINTFORMW 選択MASTERID = {選択MASTERID}
 SELECTCASE RESULT
 	;このキャラを主人公にする
 	CASE 0
@@ -824,14 +823,11 @@ SELECTCASE RESULT
 		;二週目以降なら、MASTERと「あなた」を入れ替えて元に戻す
 		;MASTERが「あなた」以外だと、並びがぐちゃぐちゃになってしまうので（IDの仕組みがあるし問題ないと思うけど）
 		IF 旧MASTERID > 0
-		;#; PRINTFORMW NAME_TO_CHARA("あなた") = {NAME_TO_CHARA("あなた")}
 			CALL SWAP_CHARA(MASTER, NAME_TO_CHARA("あなた"))
-		;#; PRINTFORMW NAME_TO_CHARA("あなた") = {NAME_TO_CHARA("あなた")}
 			CALL NEWGAME_SWAP_RELATIONS(ID_TO_CHARA(旧MASTERID))
 		ENDIF
 		;MASTERと選択したMASTERを入れ替える
 		CALL SWAP_CHARA(MASTER, ID_TO_CHARA(選択MASTERID))
-
 		;主人公の所属を選択した勢力にする
 		;既存勢力以外のスタートを選んでいる場合はとりあえず0にしておく
 		CALL CHANGE_COUNTRY(MASTER, MAX(FLAG:OP選択勢力, 0), 1)
@@ -863,9 +859,9 @@ SELECTCASE RESULT
 				FLAG:陥落ボーナス受領数 = 0
 
 			;元主人公がカスタムキャラだった場合、ここで削除（ここ以降に削除するとこはない）
-			SIF ID_TO_CHARA(旧MASTERID) != -1 && TALENT:(ID_TO_CHARA(旧MASTERID)):カスタムキャラ
+			;元主人公是新主人公时也不删除
+			SIF ID_TO_CHARA(旧MASTERID) != -1 && ID_TO_CHARA(旧MASTERID) != 0 && TALENT:(ID_TO_CHARA(旧MASTERID)):カスタムキャラ
 				CALL DELETE_CHARA(ID_TO_CHARA(旧MASTERID))
-
 		ENDIF
 
 		RETURN 1

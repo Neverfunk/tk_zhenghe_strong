@@ -1,0 +1,820 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_SUCCUBUS_RATE()
+RETURN (DVAR:夢魔の夢_発生フラグ || DVAR:夢魔の夢その後_発生フラグ || DVAR:夢魔との逢瀬フラグ > 0 ? 200 # 70) 
+
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_SUCCUBUS_DECISION()
+
+SIF DVAR:夢魔の夢_発生フラグ == -1
+	RETURN 0
+	
+SIF DAY < 10
+	RETURN 0
+	
+SIF !IS_MALE(MASTER)
+	RETURN 0
+	
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_SUCCUBUS_GENRE()
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体　ハブとして扱う
+;---------------------
+@EVENT_DAILY_SUCCUBUS()
+#DIM 対象
+
+TRYCALLFORM EVENT_DAILY_SUCCUBUS_%TOSTR(DVAR:夢魔の夢_発生フラグ)%
+SIF RESULT
+	DVAR:夢魔の夢_発生フラグ ++
+RETURN 1
+
+;---------------------
+;初回
+;---------------------
+@EVENT_DAILY_SUCCUBUS_0()
+#DIM 対象
+PRINTFORML 工作结束的深夜
+;TranslatedMark 仕事終わりの深夜
+PRINTFORML %ANAME(MASTER)%在卧室前发现了奇怪的东西
+;TranslatedMark 寝室の前で%ANAME(MASTER)%は妙なものを見つけた
+PRINTFORMW 是女式内裤。而且很艳丽啊…
+;TranslatedMark 女物のパンツだ。しかもずいぶんと艶やかな…
+PRINTFORML ……不知为什么，光是看着就不断地涌出情欲
+;TranslatedMark …なぜか、見ているだけでどんどんと、情欲が沸き立ってくる
+PRINTFORMW 怎么办呢……
+;TranslatedMark どうしようか……
+PRINTFORML
+CALL ASK_MULTI("得到，放着不管")
+;TranslatedMark "貰う", "放っておく"
+SELECTCASE RESULT
+	CASE 0
+		PRINTFORML 为了用自慰来发泄，%ANAME(MASTER)%捡起内裤进了卧室
+		;TranslatedMark ムラムラした%ANAME(MASTER)%は、オナニーで発散するため、パンツを拾い寝室に入った
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW 无论射精多少次，都丝毫不退缩。不仅如此，情欲更加高涨了
+		;TranslatedMark 何度射精しても、一向に萎えない。それどころか、さらに情欲は高まっていった
+		PRINTFORML 只是触摸一下，就会变得粘糊糊的
+		;TranslatedMark ただ触っているだけで、ムラムラとしてくる
+		PRINTFORML 一旦吸入香味，马上就能勃起
+		;TranslatedMark ひとたび香りを吸い込めば、すぐさま勃起できる
+		PRINTFORML 在这种异样的情况下
+		;TranslatedMark この異様な状況に没頭する中
+		PRINTFORMW 不知什么时候%ANAME(MASTER)%开始想和这条裤子的主人见面
+		;TranslatedMark いつしか%ANAME(MASTER)%は、このパンツの持ち主と会いたいとまで思い始めた
+		PRINTFORML 手淫一直持续到失去意识……
+		;TranslatedMark オナニーは気を失うまで続いた……
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW 醒来后，内裤消失了……
+		;TranslatedMark 目が覚めたら、パンツは消えていた……
+		CALL FUCK(MASTER, "欲望")
+	CASE 1
+		PRINTFORML ……有什么不好的预感
+		;TranslatedMark ……何か嫌な予感がする
+		PRINTFORMW %ANAME(MASTER)%不捡就不管了
+		;TranslatedMark %ANAME(MASTER)%は拾わずに放っておいた
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW 第二天早上，内裤消失了……
+		;TranslatedMark 翌朝には、パンツは消えていた……
+		DVAR:夢魔の夢_発生フラグ = -1
+		RETURN 0
+ENDSELECT
+RETURN 1
+
+;---------------------
+;2回目
+;---------------------
+@EVENT_DAILY_SUCCUBUS_1()
+PRINTFORML 工作结束的深夜
+;TranslatedMark 仕事終わりの深夜
+PRINTFORMW %ANAME(MASTER)%在卧室前又发现了内裤
+;TranslatedMark %ANAME(MASTER)%は寝室の前で、またパンツを見つけた
+PRINTFORML 好像和之前发现的一样
+;TranslatedMark 前に見つけたものと同じ物のようだ
+PRINTFORML ……果然只是看着，情欲就会沸腾起来
+;TranslatedMark …やはり見ているだけでどんどんと、情欲が沸き立ってくる
+PRINTFORMW 怎么办呢……
+;TranslatedMark どうしようか……
+PRINTFORML
+CALL ASK_YN("捡起来，不管")
+;TranslatedMark "拾う", "放っておく"
+IF RESULT == 1
+	PRINTFORML 我想起了上次发生的事情。显然情况不妙
+	;TranslatedMark 前回の出来事を思い出す。明らかに異常な状況だった
+	PRINTFORML 虽然有点可惜，但在没有习惯之前停止吧
+	;TranslatedMark 少しもったいないが、癖にならないうちに止めよう
+	PRINTFORMW %ANAME(MASTER)%不捡就不管了
+	;TranslatedMark %ANAME(MASTER)%は拾わずに放っておいた
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW 第二天早上，内裤消失了……
+	;TranslatedMark 翌朝には、パンツは消えていた……
+	DVAR:夢魔の夢_発生フラグ = -1
+	RETURN 0
+ENDIF
+
+PRINTFORML 象上次一样地muramura了的%ANAME(MASTER)%，拾起裤衩进入了房间
+;TranslatedMark 前回のようにムラムラした%ANAME(MASTER)%は、パンツを拾って部屋に入った
+PRINTFORMW 但是到了床上，突然强烈的睡意袭来
+;TranslatedMark しかしベッドまで来ると、ふいに強烈な眠気が襲ってきた
+PRINTFORMW 握着内裤倒在床上，%ANAME(MASTER)%失去了意识……
+;TranslatedMark パンツを握ったままベッドに倒れ、%ANAME(MASTER)%は意識を失った……
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW ・
+CALL COLOR_PRINTW(@"啊♪心情怎么样？"，颜色_粉红)
+;TranslatedMark @"「はぁい♪　気分はいかが？」", カラー_ピンク
+PRINTFORML 谜之声使%ANAME(MASTER)%恢复了意识
+;TranslatedMark 謎の声によって%ANAME(MASTER)%は意識を取り戻した
+PRINTFORML ……虽然恢复了意识，但是身体完全不动
+;TranslatedMark …意識は取り戻したものの、体がまるで動かない
+PRINTFORMW 简直象被束缚住似的
+;TranslatedMark まるで金縛りにでもあっているようだ
+PRINTFORML 周围的情况也很奇怪。除了床以外，被桃色的雾包围着
+;TranslatedMark 周囲の様子もおかしい。ベッド以外、桃色の霧で包まれている
+PRINTFORML 然后一个从未见过的女人跨过自己
+;TranslatedMark そして見たことも無い女が自分に跨っていた
+CALL COLOR_PRINTW(@"呵呵，身体不动吧？因为这里是梦中"，颜色_粉红) 
+;TranslatedMark @"「ふふ　体、動かないでしょ？　ココは夢の中だからよ」", カラー_ピンク
+PRINTFORML 女人在耳边喃喃自语
+;TranslatedMark 女は耳元で吐息をかけるように囁いた
+PRINTFORML 在梦中？仔细一看，女人有翅膀和尾巴。不会吧……
+;TranslatedMark 夢の中？　よく見たら女には翼と尻尾がついている。まさか……
+CALL COLOR_PRINTW("对了，我是萨居巴斯，梦魔。请多关照♥」，颜色_粉色)
+;TranslatedMark @"「そう　私はサキュバス、夢魔よ。よろしくね♥」", カラー_ピンク
+PRINTFORML 萨居巴斯…确实是栖息在梦的世界里，吸收男人精气的存在…
+;TranslatedMark サキュバス…たしか夢の世界に棲む、男の精気を吸い取る存在…
+PRINTFORML 但是，幻想乡有着特殊的大结界，应该不能简单地侵入，为什么会在这里？
+;TranslatedMark だが、幻想郷には特殊な大結界が張られており、簡単には侵入できないはずなのに、何故ここに？
+CALL COLOR_PRINTL(@"对了对了，因为结界，我一个人来不了这里"，彩色_粉红) 
+;TranslatedMark @"「そうそう、結界のせいで私一人じゃ、こっちに来れないのよねぇ」", カラー_ピンク
+CALL COLOR_PRINTW("至少要让别人觉得‘想见我’啊♥」，颜色_粉色) 
+;TranslatedMark @"「せめて、誰かが“私に会いたい”って思ってもらわないとね♥」", カラー_ピンク
+PRINTFORML ……不会吧！
+;TranslatedMark ……まさか！
+CALL COLOR_PRINTL("是的，你用来自慰的那条内裤，是我的"，彩色_粉红) 
+;TranslatedMark @"「そう、貴方が自慰に使ってくれたあのパンツ、私の物なの」", カラー_ピンク
+CALL COLOR_PRINTW(""送你一件内衣也很辛苦吧？但是……真是有意义啊♥」，颜色_粉色) 
+;TranslatedMark @"「下着一枚そっちに送るのも大変なのよ？　で・も・　その甲斐はあったわぁ♥」", カラー_ピンク
+PRINTFORML 这样说着，Sacubasu跨在还不能动的%ANAME(MASTER)%的脸上，隔着内裤摩擦着秘部
+;TranslatedMark そう言うと、サキュバスは未だ動けぬ%ANAME(MASTER)%の顔面に跨り、パンツ越しに秘部を擦り付けてきた
+CALL COLOR_PRINTW("Sacubas的信息素，对男人来说是受不了的香味吧？随便尝尝吧♥」，颜色_粉色) 
+;TranslatedMark @"「サキュバスのフェロモンって、男にはたまらない香りでしょう？　好きなだけ味わってぇ♥」", カラー_ピンク
+PRINTFORML 萨奎巴斯摆出了锡克斯纳恩的姿势，取出了%ANAME(MASTER)%生气的阴茎
+;TranslatedMark サキュバスはシックスナインの体勢になり、%ANAME(MASTER)%のいきり立ったペニスを取り出した
+CALL COLOR_PRINTW("今天我会用嘴给你的♥豆沙馅儿♥ "，颜色_粉色)
+;TranslatedMark @"「今日はお口でシテあげるわね♥　あん♥ もう我慢できないわぁ　い　た　だ　き　ま　ー　す　♪」", カラー_ピンク
+PRINTFORML ・
+PRINTFORMW ・
+PRINTFORML %ANAME(MASTER)%的阴茎被沙皇用嘴吸着
+;TranslatedMark %ANAME(MASTER)%のペニスはサキュバスに口でしゃぶり上げられている
+PRINTFORML 在Sacubas绝妙的舌技面前，%ANAME(MASTER)%已经放出了数不清的精灵
+;TranslatedMark サキュバスの絶妙な舌技の前に、%ANAME(MASTER)%はすでに数え切れぬほど精を放っている
+PRINTFORML 可是，梦的世界好象没有「子弹断」，%ANAME(MASTER)%不断地被榨取精
+;TranslatedMark しかし、夢の世界に「弾切れ」は無いようで、%ANAME(MASTER)%は絶え間なく精を搾り取られていく
+CALL COLOR_PRINTW(@""啊哈♥%ANAME(MASTER)%的作品♥ "，颜色_粉色) 
+;TranslatedMark @"「あはぁ♥　%ANAME(MASTER)%のおひんひんおいひぃ♥ ん、ちゅぷ、ちゅっじゅるるるっ」", カラー_ピンク
+PRINTFORML 在被挤得精疲力竭的抽吸前，她以经久不衰的气势将精疲力竭地释放到嘴里
+;TranslatedMark 搾り上げるような吸引の前に、未だ衰えぬ勢いで精を彼女の口内に解き放った
+CALL COLOR_PRINTW(@"嗯！…嗯……嗯……嗯，感觉很舒服吗？今天就给你这么多♪"，颜色_粉红)
+;TranslatedMark @"「んぶぅ！　…ちゅぷ……ちゅっ、ぷはっ　気持ち良かった？　今日はこれくらいにしてあげる♪」", カラー_ピンク
+PRINTFORML 萨奎巴斯抚摸了%ANAME(MASTER)%的头之后，温柔地吻了她
+;TranslatedMark サキュバスは%ANAME(MASTER)%の頭を撫でた後、優しくキスをした
+CALL COLOR_PRINTL("差不多该早上了……反正起来了，%ANAME(MASTER)%也会忘记这件事的吧"，彩色_粉红) 
+;TranslatedMark @"「もうそろそろ朝……どうせ起きたら、%ANAME(MASTER)%はこのことは忘れちゃうでしょうけど」", カラー_ピンク
+CALL COLOR_PRINTL(@"又捡了我的内裤，叫我哦♪我等你"，彩色_粉红) 
+;TranslatedMark @"「また、私のパンツ拾って、私を呼んでね♪　待ってるわ」", カラー_ピンク
+CALL COLOR_PRINTW("然后，请再多加努力♥」，颜色_粉色) 
+;TranslatedMark @"「そしてまた、いっぱい精気を頂戴♥」", カラー_ピンク
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW 第二天，%ANAME(MASTER)%奇妙地迎来了慵懒的觉醒
+;TranslatedMark 翌日、%ANAME(MASTER)%は妙に気だるい目覚めを迎えた
+PRINTFORML 好像做了个很舒服的梦…但是，想不起来了
+;TranslatedMark 何か、すごく気持ち良い夢を見ていたような…しかし、よく思い出せなかった
+PRINTFORMW 醒来后，内裤消失了……
+;TranslatedMark 目が覚めたら、パンツは消えていた……
+CALL FUCK(MASTER, "欲望")
+RETURN 1
+
+;---------------------
+;3回目
+;---------------------
+@EVENT_DAILY_SUCCUBUS_2()
+PRINTFORML 工作结束的深夜
+;TranslatedMark 仕事終わりの深夜
+PRINTFORMW %ANAME(MASTER)%在卧室前又发现了内裤
+;TranslatedMark %ANAME(MASTER)%は寝室の前で、またもパンツを見つけた
+PRINTFORML 好像和之前发现的一样
+;TranslatedMark 前に見つけたものと同じ物のようだ
+PRINTFORML ……光是看着就情欲澎湃
+;TranslatedMark …見ているだけで情欲が沸き立ってくる
+PRINTFORML 与此同时，也期待着能和"谁"见面…
+;TranslatedMark それと同時に、“誰か”と会えるような期待も…
+PRINTFORMW 怎么办呢……
+;TranslatedMark どうしようか……
+PRINTFORML
+CALL ASK_YN("捡起来，不管")
+;TranslatedMark "拾う", "放っておく"
+IF RESULT == 1
+	PRINTFORML 脑海的一角浮现出"某人"的身影
+	;TranslatedMark 頭の片隅に“誰か”の姿が浮かぶ
+	PRINTFORML 与此同时，肉棒也在期待着什么而爬起来
+	;TranslatedMark それと同時に、肉棒が何かを期待して起き上がってしまう
+	PRINTFORMW …不行！这样下去会被这种情况冲走的
+	;TranslatedMark …駄目だ！　このままではこの状況に流されてしまう
+	PRINTFORML 虽然依依不舍，但趁还没习惯之前停止吧
+	;TranslatedMark 名残惜しいが、癖にならないうちに止めよう
+	PRINTFORML %ANAME(MASTER)%不捡就不管了
+	;TranslatedMark %ANAME(MASTER)%は拾わずに放っておいた
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW 第二天早上，内裤消失了……
+	;TranslatedMark 翌朝には、パンツは消えていた……
+	DVAR:夢魔の夢_発生フラグ = -1
+	RETURN 0
+ENDIF
+
+PRINTFORML %ANAME(MASTER)%捡起内裤走进房间
+;TranslatedMark %ANAME(MASTER)%は、パンツを拾って部屋に入った
+PRINTFORML 然后来到床上，突然强烈的睡意袭来
+;TranslatedMark そしてベッドまで来ると、ふいに強烈な眠気が襲ってきた
+PRINTFORMW 握着内裤倒在床上，%ANAME(MASTER)%失去了意识……
+;TranslatedMark パンツを握ったままベッドに倒れ、%ANAME(MASTER)%は意識を失った……
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORML ・
+CALL COLOR_PRINTW(@"呵呵♪又见面了呢"，颜色_粉红) 
+;TranslatedMark @"「ふふ♪　また会えたわね」", カラー_ピンク
+PRINTFORML %ANAME(MASTER)%恢复了意识，把视线转向了声音的主人之前的sakibus
+;TranslatedMark %ANAME(MASTER)%は意識を取り戻し、声の主に視線を向けた　前のサキュバスだ
+PRINTFORML 虽然身体的动作也非常迟钝，但是比以前能动了…
+;TranslatedMark 体の動きもひどく鈍いが、前よりかは動けるようになっている…
+CALL COLOR_PRINTW(你还记得我吗？好开心啊♥」，颜色_粉色) 
+;TranslatedMark @"「私のこと、覚えてるの？　嬉しいわぁ♥」", カラー_ピンク
+CALL COLOR_PRINTL("多亏了%ANAME(MASTER)%给我的精气，我的力量一点点增强了"，彩色_粉红) 
+;TranslatedMark @"「%ANAME(MASTER)%にもらった精気のおかげで、少しずつ私の力が強まってるみたいね」", カラー_ピンク
+CALL COLOR_PRINTL("如果再给我点精气的话，也许也能打扰到那边的世界…♥」，颜色_粉色) 
+;TranslatedMark @"「もっと精気をくれたら、そっちの世界にもお邪魔できるかも…♥」", カラー_ピンク
+PRINTFORMW 萨奎巴斯伴随着热吐的气息低声细语，亲吻着耳朵离开了
+;TranslatedMark サキュバスは熱い吐息を伴って囁き、耳にキスをして離れた
+CALL COLOR_PRINTW("今天，我会用乳房给你的♥"，颜色_粉色)
+;TranslatedMark @" 「今日は、おっぱいでシテあげるわね♥　いっぱい精を頂戴ね♪」", カラー_ピンク
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW %ANAME(MASTER)%被Sacubas用胸处理阴茎
+;TranslatedMark %ANAME(MASTER)%はサキュバスに胸でペニスを扱われている
+PRINTFORML 被吸吮般柔滑的乳房包裹着，%ANAME(MASTER)%苦于腰酸背痛般的快感
+;TranslatedMark 吸い付くようなもっちりとした乳房に包まれ、%ANAME(MASTER)%は腰が抜けるような快感に悶えている
+CALL COLOR_PRINTW(@"哼哼…，我的胸部舒服吗？什么时候都可以射精♪"，彩色_粉红) 
+;TranslatedMark @"「うふふ…、私のおっぱい気持ちいい？　いつでも射精していいからね♪」", カラー_ピンク
+PRINTFORML 被阴茎的铃口接吻，%ANAME(MASTER)%不忍耐放出了精
+;TranslatedMark ペニスの鈴口にキスをされ、%ANAME(MASTER)%は堪らず精を放った
+CALL COLOR_PRINTL(@"啊哈♪心情好吗？我也用你的嘴"，颜色_粉红) 
+;TranslatedMark @"「あはっ♪　気持ちよかった？　お口も使ってあげるわ」", カラー_ピンク
+CALL COLOR_PRINTL(@""还得好好享受哦♥」，颜色_粉色) 
+;TranslatedMark @"「まだまだ、たっぷり楽しんでね♥」", カラー_ピンク
+PRINTFORMW ……%ANAME(MASTER)%在那之后也被充分榨取了精华……
+;TranslatedMark ……%ANAME(MASTER)%はその後もたっぷり精を搾り取られた……
+PRINTFORML 
+PRINTFORML 
+CALL COLOR_PRINTW(@"今天也谢谢款待♪能吸很多精真是帮了大忙啊♪"，颜色_粉红) 
+;TranslatedMark @"「今日もごちそうさま♪　いっぱい精を吸えて助かるわぁ♪」", カラー_ピンク
+PRINTFORML Sacubasu和快乐朦胧的%ANAME(MASTER)%相依为命
+;TranslatedMark サキュバスは、快楽で朦朧としている%ANAME(MASTER)%に添い寝をするように寄り添っている
+CALL COLOR_PRINTL("差不多该早上了……醒来后，%ANAME(MASTER)%还记得我吗……"，彩色_粉红) 
+;TranslatedMark @"「もうそろそろ朝ね……目覚めた後、%ANAME(MASTER)%は私のことを覚えているかしら…」", カラー_ピンク
+CALL COLOR_PRINTL(@"如果没忘记的话，再捡我的内裤叫我哦♪等着你"，彩色_粉红) 
+;TranslatedMark @"「忘れていなかったら、また私のパンツを拾って私を呼んでね♪　待ってるわ」", カラー_ピンク
+CALL COLOR_PRINTW("然后再给我更多的精气吧♥」，颜色_粉色)
+;TranslatedMark @"「そしてもっともっと精気を頂戴ね♥」", カラー_ピンク
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW 第二天，%ANAME(MASTER)%迎来了慵懒的觉醒
+;TranslatedMark 翌日、%ANAME(MASTER)%は気だるい目覚めを迎えた
+PRINTFORMW 我记得做了非常舒服的梦。而且，那个萨奇巴士的事也……
+;TranslatedMark すごく気持ち良い夢を見ていたことは覚えている。そして、あのサキュバスのことも……
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW 醒来后，内裤消失了……
+;TranslatedMark 目が覚めたら、パンツは消えていた……
+CALL FUCK(MASTER, "欲望")
+RETURN 1
+
+
+;---------------------
+;4回目
+;---------------------
+@EVENT_DAILY_SUCCUBUS_3()
+
+PRINTFORML 工作结束的深夜
+;TranslatedMark 仕事終わりの深夜
+PRINTFORML %ANAME(MASTER)%在卧室前又发现了内裤
+;TranslatedMark %ANAME(MASTER)%は寝室の前で、またもパンツを見つけた
+PRINTFORMW ……肯定是那个萨居巴斯的东西
+;TranslatedMark …間違いない　あのサキュバスのものだ
+PRINTFORML ……光是看着就情欲澎湃
+;TranslatedMark …見ているだけで情欲が沸き立ってくる
+PRINTFORML 与此同时，也有能见到她的期待感…
+;TranslatedMark それと同時に、彼女に逢えるという期待感も…
+PRINTFORMW 怎么办呢……
+;TranslatedMark どうしようか……
+PRINTFORML 
+CALL ASK_YN("捡起来，不管")
+;TranslatedMark "拾う", "放っておく"
+IF RESULT == 1
+	PRINTFORML 把这个捡起来就能见到她
+	;TranslatedMark これを拾えば彼女に逢える
+	PRINTFORML %ANAME(MASTER)%总算摆脱了影响自己内心的诱惑
+	;TranslatedMark 自身の心に響く誘惑を、%ANAME(MASTER)%はなんとか振り払った
+	PRINTFORML Sacubas是吸着精气成为自身力量的存在
+	;TranslatedMark サキュバスは精気を吸って自身の力にする存在だ
+	PRINTFORMW 就这样对她献出全部精力显然是不好的
+	;TranslatedMark このまま彼女に精を捧げるのは明らかにまずい
+	PRINTFORML 在没有完全沉浸在梦中的情事中的时候，必须切断这种奇妙的关系…
+	;TranslatedMark 夢の中での情事に嵌りきってしまわぬ内に、この妙な関係を断ち切らねば…
+	PRINTFORMW %ANAME(MASTER)%不捡就不管了
+	;TranslatedMark %ANAME(MASTER)%は拾わずに放っておいた
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW 第二天早上，内裤消失了……
+	;TranslatedMark 翌朝には、パンツは消えていた……
+	RETURN 0
+ENDIF
+
+PRINTFORML %ANAME(MASTER)%捡起内裤走进房间
+;TranslatedMark %ANAME(MASTER)%は、パンツを拾って部屋に入った
+PRINTFORML 满怀期待地躺在床上，强烈的睡意袭来
+;TranslatedMark 期待に股間を膨らませベッドに寝転ぶと、強烈な眠気が襲ってきた
+PRINTFORMW 握着内裤，%ANAME(MASTER)%失去了意识……
+;TranslatedMark パンツを握ったまま、%ANAME(MASTER)%は意識を失った……
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORML ・
+CALL COLOR_PRINTW("呵呵♪又见面了呢♥」，颜色_粉色)
+;TranslatedMark @"「ふふ♪　また、会えたわね♥」", カラー_ピンク
+PRINTFORML %ANAME(MASTER)%恢复了意识，把视线转向了声音的主人，果然是她
+;TranslatedMark %ANAME(MASTER)%は意識を取り戻し、声の主に視線を向けた　やはり彼女だ
+PRINTFORML 虽然身体的动作也有点迟钝，但是比以前能动了…
+;TranslatedMark 体の動きもやや鈍いが、前より動けるようになってきた…
+CALL COLOR_PRINTW(你还记得我吗？很高兴♥」，颜色_粉色)
+;TranslatedMark @"「私のこと、覚えててくれたの？　嬉しい♥」", カラー_ピンク
+CALL COLOR_PRINTL("多亏了从%ANAME(MASTER)%中吸取的精气，我的力量增强了，是这个原因吗？"粉红)
+;TranslatedMark @"「%ANAME(MASTER)%から吸った精気のおかげで、私の力が強まってるから、そのせいかしら？」", カラー_ピンク
+CALL COLOR_PRINTL("……没有什么大力气的我，竟然能变成这样……真是太感谢了"，彩色_粉红)
+;TranslatedMark @"「…たいした力も無かった私が、これほどになれるなんて…感謝してるわ」", カラー_ピンク
+CALL COLOR_PRINTW(""再给我一点精气的话，好像也能去那边的世界呢…♥」，颜色_粉色)
+;TranslatedMark @"「もうちょっと精気をくれたら、そっちの世界にも行けそうね…♥」", カラー_ピンク
+PRINTFORML Sacubasu伴随热的呼吸甜蜜地低声私语，和善地接吻了%ANAME(MASTER)%
+;TranslatedMark サキュバスは熱い吐息を伴って甘く囁き、%ANAME(MASTER)%に優しくキスをした
+PRINTFORMW 然后，把%ANAME(MASTER)%推倒，取出了生气的阴茎
+;TranslatedMark そして、%ANAME(MASTER)%を押し倒し、いきり立つペニスを取り出した
+CALL COLOR_PRINTW(@"啊，已经是冰冰了，那么今天…"，颜色_粉红)
+;TranslatedMark @"「あはっ　もうビンビンね　それじゃあ今日は…」", カラー_ピンク
+PRINTFORML 萨居巴斯握着阴茎，将其尖端引导到淫蜜滴下的女阴处
+;TranslatedMark サキュバスはペニスを握り、その先端を淫蜜滴る女陰へと誘導した
+CALL COLOR_PRINTL(""特别……我会给你的♥」，颜色_粉色)
+;TranslatedMark @"「特別にィ…コ・コ・で　シテあげるわね♥」", カラー_ピンク
+PRINTFORML Sacubasu一口气坐下，深深地衔入%ANAME(MASTER)%的阴茎，激烈地摇着腰
+;TranslatedMark サキュバスは一気に腰を落とし、%ANAME(MASTER)%のペニスを深々と咥えこみ、激しく腰を振る
+PRINTFORML 那个蜜罐正是为了绞尽脑汁，把极品的快乐给予整根竿
+;TranslatedMark その蜜壺は正に精を絞る取る為のような、極上の快楽を竿全体に与えてくる
+PRINTFORMW 对于这样的快乐，男人是无法抗拒的……%ANAME(MASTER)%忍不住放出了大量的精灵
+;TranslatedMark こんな快楽に、男が抗えるはずが無く…、%ANAME(MASTER)%は堪らず大量の精を放った
+CALL COLOR_PRINTL(@""啊♥心情好吗？但是还差得远呢"，颜色_粉色)
+;TranslatedMark @"「あぁん♥　気持ちよかった？　でもまだまだよ」", カラー_ピンク
+CALL COLOR_PRINTW("射精到发疯♥只要喜欢就好了♥」，颜色_粉色)
+;TranslatedMark @"「気が狂うほど射精して♥　好きなだけヨガリまくってぇ♥」", カラー_ピンク
+PRINTFORML ・
+PRINTFORML ・
+CALL COLOR_PRINTW(@""啊♥更多的♥再戳一下♥」，颜色_粉色)
+;TranslatedMark @"「あぁんっ♥　もっとぉ♥もっと突いてぇ♥」", カラー_ピンク
+PRINTFORMW %ANAME(MASTER)%被Sacubasu，以骑乘位激烈地侵犯着
+;TranslatedMark %ANAME(MASTER)%はサキュバスに、騎乗位で激しく犯されている
+PRINTFORML 虽然身体在梦中也能动弹，但还是没能推开她
+;TranslatedMark 夢の中でも動かせるようになってきた体だが、それでも彼女を押しのけることはできなかった
+PRINTFORML 不仅如此，为了不让她的腰离开而压抑着，为了更加快乐而自己摇着腰
+;TranslatedMark それどころか彼女の腰を離すまいと押さえ込み、更なる快楽をむさぼろうと自ら腰を振っている
+CALL COLOR_PRINTW(@""嗯♥你看，拿出来！我想要%ANAME(MASTER)%的精液♥」，颜色_粉色)
+;TranslatedMark @"「ぁんっ♥　ほらっ、出して出してっ♪　%ANAME(MASTER)%の精液が欲しいのぉ♥」", カラー_ピンク
+PRINTFORML 艳丽的声音，煽情的动作，官能的表情，全部刺激%ANAME(MASTER)%，引导到顶峰
+;TranslatedMark 艶っぽい声、扇情的な動き、官能的な表情、その全てが%ANAME(MASTER)%を刺激し、絶頂へ導いてくる
+CALL COLOR_PRINTW(@""啊，啊♥早，早♥用%ANAME(MASTER)%的精液，填满我的阴道♥」，颜色_粉色)
+;TranslatedMark @"「ぁっ、ぁんっ♥　早くっ♥　%ANAME(MASTER)%の精液でぇっ、私の膣をいっぱいにしてぇ♥」", カラー_ピンク
+PRINTFORML 萨居巴斯配合着%ANAME(MASTER)%和摇腰的节奏，像剥削灵魂一样，肉壁包裹着竿子
+;TranslatedMark サキュバスは%ANAME(MASTER)%と腰を振るリズムを合わせ、魂ごと搾り取るように肉壁が竿を包みこむ
+PRINTFORML 心灵荡漾的魔之蜜罐，将%ANAME(MASTER)%引导至不知第几百次的绝顶
+;TranslatedMark 心を蕩かす魔の蜜壺に、%ANAME(MASTER)%は何百回目とも分からぬ絶頂へと導かれた
+CALL COLOR_PRINTW(@""啊♥黄色♥黄色♥♥%ANAME(MASTER)%，我也要做了♥♥」，颜色_粉色)
+;TranslatedMark @"「あっ♥イく♥イくっ♥♥　%ANAME(MASTER)%、私もイっちゃううう♥♥」", カラー_ピンク
+PRINTFORMW 用极好的阴道阴茎被勒紧，%ANAME(MASTER)%超过界限，在她中释放了今天最好的精灵
+;TranslatedMark 極上の膣でペニスを締め上げられ、%ANAME(MASTER)%は限界を超え、彼女の中に今日一番の精を解き放った
+PRINTFORMW 与此同时，萨居巴斯大大地翘起了背，发出了特别大的娇声
+;TranslatedMark それと同時に、サキュバスが大きく背を反らし、一際大きな嬌声をあげ絶頂した
+CALL COLOR_PRINTW(@""啊…最高♥」，颜色_粉色)
+;TranslatedMark @"「はぁ…最高♥」", カラー_ピンク
+PRINTFORML 她紧抱着%ANAME(MASTER)%，享受着绝顶的余韵
+;TranslatedMark 彼女は%ANAME(MASTER)%に抱きつくようにもたれかかり、絶頂の余韻を楽しんでいる
+PRINTFORMW ……这么说来，也许是第一次看到她登顶的地方
+;TranslatedMark ……そういえば、彼女が絶頂するところを初めて見たかもしれない
+CALL COLOR_PRINTW(@"今天也谢谢款待♪果然精，从这里吸是最好的♪"，颜色_粉红)
+;TranslatedMark @"「今日もごちそうさま♪　やっぱり精は、ココから吸うのが一番だわ♪」", カラー_ピンク
+PRINTFORML Sacubasu就像陪着睡一样，温柔地贴近%ANAME(MASTER)%
+;TranslatedMark サキュバスは添い寝をするように、%ANAME(MASTER)%に優しく寄り添っている
+CALL COLOR_PRINTL("……我比较喜欢%ANAME(MASTER)%的时间……但是很遗憾"，彩色_粉红)
+;TranslatedMark @"「…%ANAME(MASTER)%とこうしている時間が、割と気に入っているんだけど…でも残念」", カラー_ピンク
+CALL COLOR_PRINTW("快到早上了…依依不舍…醒来后，不要忘记我……"，彩色_粉红)
+;TranslatedMark @"「もうそろそろ朝だわ…名残惜しい…目覚めた後、私のことを忘れないで……」", カラー_ピンク
+PRINTFORML 说完之后，她脸红了一下，移开了视线
+;TranslatedMark そう言った後、彼女は少し顔を赤くして視線をそらした
+CALL COLOR_PRINTL(@"如果能记住的话，心情会更好，我会给你的♪"，颜色_粉红)
+;TranslatedMark @"「覚えておいてくれたら、もっと気持ち良いこと、シテあげるから♪」", カラー_ピンク
+CALL COLOR_PRINTW(所以，请多给我一些%ANAME(MASTER)%的精气吧♥」，颜色_粉色)
+;TranslatedMark @"「だからもっと、%ANAME(MASTER)%の精気を頂戴ね♥」", カラー_ピンク
+PRINTFORML 萨居巴斯亲吻%ANAME(MASTER)%后分手了…
+;TranslatedMark サキュバスは%ANAME(MASTER)%に口づけをして別れた…
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW 中午时分，%ANAME(MASTER)%醒了
+;TranslatedMark 昼ごろ、%ANAME(MASTER)%は目を覚ました
+PRINTFORMW %ANAME(MASTER)%想起了刚才还在做的梦。而且，她也……
+;TranslatedMark %ANAME(MASTER)%はさっきまで見ていた夢を思い出した。そして、彼女のことも……
+PRINTFORML 
+PRINTFORML 
+PRINTFORMW 醒来后，内裤消失了……
+;TranslatedMark 目が覚めたら、パンツは消えていた……
+CALL FUCK(MASTER, "欲望")
+RETURN 1
+
+;---------------------
+;最後
+;---------------------
+@EVENT_DAILY_SUCCUBUS_4()
+#DIM 対象
+PRINTFORML 工作结束的深夜
+;TranslatedMark 仕事終わりの深夜
+PRINTFORML %ANAME(MASTER)%在卧室前又发现了内裤
+;TranslatedMark %ANAME(MASTER)%は寝室の前で、またもパンツを見つけた
+PRINTFORMW 肯定是她的
+;TranslatedMark 間違いない　彼女のものだ
+PRINTFORML 只是看了就会想起梦中的快乐，胯座因期待而疼痛…
+;TranslatedMark 見ただけで夢の中での快楽を思い出し、期待に股座が疼きだす…
+PRINTFORML ……话虽如此，她还是很可爱。是能吸收人精气变强的魔物
+;TranslatedMark …とはいえ彼女はサキュバス。人の精気を吸い取り強くなる魔物だ
+PRINTFORML 这样下去她的力量会越来越大。到底这样的关系还能继续下去吗…
+;TranslatedMark このままでは彼女の力は増す一方だ。果たしてこれ以上こんな関係を続けて良いものか…
+PRINTFORML 但是，期待着她在梦中给予的快乐也是事实……
+;TranslatedMark しかし、彼女が夢の中で与えてくれる快楽を期待してしまっているのも事実……
+PRINTFORMW 怎么办呢……
+;TranslatedMark どうしようか……
+PRINTFORML
+CALL ASK_YN("捡起来，不管")
+;TranslatedMark "拾う", "放っておく"
+IF RESULT == 1
+	PRINTFORML 如果捡到这个就能见到她，想捡到这个见到她…
+	;TranslatedMark これを拾えば彼女に逢える　これを拾って彼女に逢いたい…
+	PRINTFORML 至今为止给予Sacubasu的快乐，侵蚀了%ANAME(MASTER)%稚嫩的理性
+	;TranslatedMark 今までサキュバスに与えられた快楽が、%ANAME(MASTER)%のなけなしの理性を蝕む
+	PRINTFORML 只是内裤进入视觉，胯间就会膨胀成内裤
+	;TranslatedMark パンツが視覚に入るだけで、股間はパンパンに膨らんでしまう
+	PRINTFORML 这太糟糕了……越来越依赖和她的行为
+	;TranslatedMark これはまずい…彼女との行為に依存しかけている
+	PRINTFORMW 她已经得到了相当大的力量。再给她献殷勤是很不好的
+	;TranslatedMark すでに彼女はかなりの力を手にしている。これ以上彼女に精を捧げるのは非常にまずい
+	PRINTFORML 在完全不可能抵抗萨居巴斯的情况下，切断这个相遇吧
+	;TranslatedMark サキュバスに抗うことが、完全に不可能になってしまわない内に、この逢瀬を断ち切ろう
+	PRINTFORML %ANAME(MASTER)%挣脱诱惑，为了不看内裤，进了房间
+	;TranslatedMark %ANAME(MASTER)%は誘惑を振り切り、パンツを見ないよう、部屋に入った
+	PRINTFORMW ……但是这样下去睡不着
+	;TranslatedMark …しかしこのままでは眠れない
+	PRINTFORML 期待着能见到萨奇巴士的肉棒咯吱咯吱地站起来，好像无法平息
+	;TranslatedMark サキュバスに逢うことを期待してしまった肉棒はガチガチにいきり立ち、鎮まりそうに無い
+	PRINTFORML %ANAME(MASTER)%为了镇定肉棒，努力进行自慰行为
+	;TranslatedMark %ANAME(MASTER)%は肉棒を鎮めるため、自慰行為に勤しんだ
+	PRINTFORMW 但是，记住了萨居巴斯给予的快感的肉棒，完全没有平息…
+	;TranslatedMark しかし、サキュバスが与える快感を覚えてしまった肉棒は、まったく鎮まらなかった…
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW 第二天早上，内裤消失了……
+	;TranslatedMark 翌朝には、パンツは消えていた……
+	CALL FUCK(MASTER, "欲望")
+	RETURN 0
+ENDIF
+
+PRINTFORML ……
+PRINTFORMW 犹豫的结果，%ANAME(MASTER)%捡起内裤进入了房间
+;TranslatedMark 逡巡の末、%ANAME(MASTER)%は、パンツを拾って部屋に入った
+PRINTFORML 在梦中给予她的许多快感，%ANAME(MASTER)%的心和身体都在追求"下一个"
+;TranslatedMark 夢の中で彼女に与えられてきた快感の数々に、%ANAME(MASTER)%の心と体はすっかり“次”を求めてしまった
+PRINTFORMW 抱着期待的心情在胯间用力，躺在床上闭上了眼睛。很快愉快的睡意袭来
+;TranslatedMark 期待に股間をいきり立たせ、ベッドに寝転び目を閉じた。すぐに心地よい眠気が襲ってきた
+PRINTFORMW 握着内裤，%ANAME(MASTER)%失去了意识……
+;TranslatedMark パンツを握ったまま、%ANAME(MASTER)%は意識を失った……
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORML ・
+CALL COLOR_PRINTW(@""呵呵♥晚上好，%ANAME(MASTER)%♥」，颜色_粉色)
+;TranslatedMark @"「ふふ♥　こんばんわ、%ANAME(MASTER)%♥」", カラー_ピンク
+PRINTFORML 还是她。%ANAME(MASTER)%在梦中醒来，面对着声音的主人萨奎巴斯
+;TranslatedMark やはり彼女だ。%ANAME(MASTER)%は夢の中で目を覚まし、声の主であるサキュバスに向き合った
+PRINTFORMW 和以前的梦想不同，身体变得正常了
+;TranslatedMark いままでの夢と違い、体が普通に動くようになっている
+CALL COLOR_PRINTW(""又来见我了，好开心啊♥」，颜色_粉色)
+;TranslatedMark @"「また、会いに来てくれたのね　嬉しい♥」", カラー_ピンク
+PRINTFORML 和以前的样子稍有不同，Sacubas一直在向%ANAME(MASTER)%撒娇
+;TranslatedMark いままでの様子と少し違い、サキュバスは%ANAME(MASTER)%に甘えるようにしなだれかかってきた
+CALL COLOR_PRINTL("多亏了%ANAME(MASTER)%的精灵，我变得很强了♪所以，作为感谢…♥」，颜色_粉色)
+;TranslatedMark @"「%ANAME(MASTER)%の精のおかげで、私、結構強くなれたわ♪　だから、そのお礼として…♥」", カラー_ピンク
+PRINTFORML 萨居巴斯在%ANAME(MASTER)%面前张开双腿，露出了已经被淫蜜淋湿的秘处
+;TranslatedMark サキュバスは%ANAME(MASTER)%の前で股を開き、すでに淫蜜に濡れている秘所をさらけ出した
+CALL COLOR_PRINTW("今天可以随意使用我的身体哦♥漫画和乳房…全部都是%ANAME(MASTER)%的东西…♥」，颜色_粉色)
+;TranslatedMark @"「今日は私の体を好きに使ってくれて良いのよ♥　おまんこもおっぱいも…全て%ANAME(MASTER)%のモノ…♥」", カラー_ピンク
+PRINTFORML Sacubasu艳丽地移动肢体，用蛊惑性的瞳孔诱惑%ANAME(MASTER)%
+;TranslatedMark サキュバスは肢体を艶かしく動かし、蠱惑的な瞳で%ANAME(MASTER)%を誘惑する
+PRINTFORML 这次身体活动就是这样吗。她好像想让%ANAME(MASTER)%去犯
+;TranslatedMark 今回、体が動くのはそういうことか。彼女は%ANAME(MASTER)%に犯してもらいたいようだ
+PRINTFORMW 令人心旷神怡的魔性诱惑。不可能与之抗衡，%ANAME(MASTER)%完全在意了
+;TranslatedMark 心を蕩かすような魔性の誘惑。　それに抗えるはずも無く、%ANAME(MASTER)%はすっかりその気になった
+PRINTFORML %ANAME(MASTER)%推倒了Sacubas，用已经很生气的阴茎贯穿了热带龙猫的裂缝
+;TranslatedMark %ANAME(MASTER)%はサキュバスを押し倒し、すでにいきり立ったペニスでトロトロの割れ目を貫いた
+CALL COLOR_PRINTW(@""嗯！好啊♥很多，很多…侵犯我吧♥♥」，颜色_粉色)
+;TranslatedMark @"「ぁんっ！　いいわよ♥　いっぱい、いっぱい…私を犯してぇ♥♥」", カラー_ピンク
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORML ・
+PRINTFORMW %ANAME(MASTER)%每天都在和Sacubas的热恋中度过
+;TranslatedMark %ANAME(MASTER)%はサキュバスとの熱い交わりに明け暮れている
+PRINTFORML 与至今为止的激烈的榨精相比，这次也有可以按照自己的步调行动的情况，被嘲笑的数量很少
+;TranslatedMark 今までの激しい搾精に比べ、今回は自分のペースで動けるということもあり、イカされた数は少なめだ
+CALL COLOR_PRINTW(@""啊♥嗯♥%ANAME(MASTER)%♥更加，更加♥再深一点♥冲到里面去♥」，颜色_粉色)
+;TranslatedMark @"「あぁっ♥ぁんっ♥　%ANAME(MASTER)%♥もっとっ♥　もっと奥までっ♥奥まで突いてっ♥」", カラー_ピンク
+PRINTFORML 可是，简直象恋人们一样的做爱，带来了伴随了到现在没有的幸福感的快感
+;TranslatedMark しかし、まるで恋人同士のようなセックスは、今までに無い多幸感を伴った快感をもたらした
+PRINTFORML 被幸福感包围的顶峰…，那带来了比至今为止的梦中给予的任何快感都更深的陶醉
+;TranslatedMark 多幸感に包まれた絶頂…、それは今までの夢で与えられたどの快感よりも深い陶酔をもたらした
+PRINTFORML %ANAME(MASTER)%和Sacubas，正常位相连激烈地挥舞着腰
+;TranslatedMark %ANAME(MASTER)%とサキュバスは、正常位で繋がり激しく腰を振ってる
+CALL COLOR_PRINTW(@""啊♥嗯♥接吻……更多……嗯，嗯，嗯，接受♥」，颜色_粉色)
+;TranslatedMark @"「あぁっ♥んっ♥　キス…もっと…んっちゅっ、むちゅっ、ぅん、じゅる♥」", カラー_ピンク
+PRINTFORML Sacubasu把手臂缠在%ANAME(MASTER)%的脖子上，为了不让对方一刻都不放开，嘴上互相贪婪着
+;TranslatedMark サキュバスは%ANAME(MASTER)%の首に腕を絡め、互いに片時も放すまいと、口内を貪り合っている
+PRINTFORML 另一方面，%ANAME(MASTER)%的手，享受着Sacubasu的心的不得了的柔软
+;TranslatedMark その一方、%ANAME(MASTER)%の手は、サキュバスの胸のたまらない柔らかさを堪能している
+CALL COLOR_PRINTW("好啊♥再加点小鸡鸡♥♥」，颜色_粉色)
+;TranslatedMark @"「いいっ♥　もっとチンポグリグリしてぇっ♥♥」", カラー_ピンク
+PRINTFORML 用极上的阴道肉勒紧阴茎揉搓，给予%ANAME(MASTER)%幸福的快感
+;TranslatedMark 極上の膣肉でペニスを締め付けては揉みしだき、%ANAME(MASTER)%に幸せな快感を与えてくる
+PRINTFORML 不服输的%ANAME(MASTER)%深深地刺入肉棒，刺激子宫口
+;TranslatedMark 負けじと%ANAME(MASTER)%は肉棒を深く突き入れ、子宮口を刺激する
+PRINTFORML 每当铃口和子宫口在深活塞上接吻时，萨奎巴斯就会发出很大的娇声来吹潮水
+;TranslatedMark 深いピストンで鈴口と子宮口がキスをする度、サキュバスは大きく嬌声を上げて潮を吹いた
+CALL COLOR_PRINTW(@""啊♥喂，我的漫画心情好吗？受不了，不得了？好像又要出来了？"，颜色_粉色) 
+;TranslatedMark @"「ぁっ♥　ねえ、私のおまんこ気持ちイイ？　たまらない？　またびゅうびゅう出ちゃいそう？」", カラー_ピンク
+PRINTFORML %ANAME(MASTER)%用更激烈的活塞回答。界限很近
+;TranslatedMark %ANAME(MASTER)%はよりいっそう激しいピストンで答える。限界は近い
+CALL COLOR_PRINTW(@""啊♥黄色♥黄色♥♥%ANAME(MASTER)%♥我也很帅♥♥」，颜色_粉色)
+;TranslatedMark @"「あっ♥イく♥イくっ♥♥　%ANAME(MASTER)%♥っ私もイっちゃうっ♥♥」", カラー_ピンク
+PRINTFORML 领悟到射精的气息，把伸直的腿紧紧地缠在%ANAME(MASTER)%的腰上，让彼此的身体紧贴在一起
+;TranslatedMark 射精の気配を悟り、スラリと伸びた脚を%ANAME(MASTER)%の腰に強く絡め、互いの体を密着させた
+CALL COLOR_PRINTL(@""啊♥啊啊啊♥%ANAME(MASTER)%♥把它放到子宫里♥♥一起吧♥和我一起♥♥♥」，颜色_粉色)
+;TranslatedMark @"「あっ♥あぁっ♥%ANAME(MASTER)%♥子宮に出してっ♥♥一緒にっ♥私と一緒にイッてぇっ♥♥♥」", カラー_ピンク
+PRINTFORMW %ANAME(MASTER)%回应了她的恳求，紧紧拥抱，两人一起迎来了顶峰
+;TranslatedMark %ANAME(MASTER)%は彼女の懇願に応え、強く抱き合い、二人そろって絶頂を迎えた
+CALL COLOR_PRINTW(@""啊♥啊啊啊啊啊啊啊啊啊啊啊♥♥♥♥♥♥♥♥♥♥♥♥♥」，颜色_粉色)
+;TranslatedMark @"「あっ♥あぁっふああぁああぁぁぁああっっっ♥♥♥♥♥♥♥♥♥♥♥♥♥」", カラー_ピンク
+PRINTFORML 在绝顶的同时，萨居巴斯的子宫口吸着龟头，用子宫一口一口地吸出难以置信量的精液
+;TranslatedMark 絶頂とともにサキュバスの子宮口が亀頭に吸い付き、信じられない量の精液を、ぢゅう、ぢゅうと子宮で吸い上げていく
+PRINTFORML 再滴一滴也不剩地吸着子宫口，把媚肉缠在阴茎上，从根部紧紧地拧了起来
+;TranslatedMark さらに一滴も残すまいと子宮口を吸い付けたまま、ペニスに媚肉を絡みつかせ、根元からきゅうきゅう絞り上げていった
+CALL COLOR_PRINTW(@""啊…啊……♥我的子宫…♥满是%ANAME(MASTER)%♥♥」，颜色_粉色)
+;TranslatedMark @"「あっ…はぁぁ……♥　私の子宮ぅ…♥　%ANAME(MASTER)%のでいっぱいぃ♥♥」", カラー_ピンク
+PRINTFORML 萨居巴斯似乎对与%ANAME(MASTER)%的性爱很满意，露出了荡漾的表情
+;TranslatedMark サキュバスは%ANAME(MASTER)%とのセックスに満足したようで、蕩けた表情を向けてくる
+PRINTFORML 但是，只有阴茎还叼着不放…
+;TranslatedMark しかし、ペニスだけはまだ咥え込んだまま放してくれなかった…
+PRINTFORMW 对于只有淫魔对手才能体会到的强烈结合的快感，%ANAME(MASTER)%暂时疯狂了瑜伽
+;TranslatedMark 淫魔相手にしか味わえない強烈な結合の快感に、%ANAME(MASTER)%はしばらくヨガリ狂った
+PRINTFORML ・
+PRINTFORML ・
+CALL COLOR_PRINTW("其实呢，今天有想问%ANAME(MASTER)%的事情"，彩色_粉红)
+;TranslatedMark @"「実はね、今日は%ANAME(MASTER)%に聞きたいことがあるの」", カラー_ピンク
+PRINTFORML 事后，在床上互相拥抱，她开口了
+;TranslatedMark 事後、ベッドで抱き合いながら、彼女が口を開いた
+CALL COLOR_PRINTW(@"我啊，多亏了%ANAME(MASTER)%给我的精气，才变强的吧？"粉红)
+;TranslatedMark @"「私ね、%ANAME(MASTER)%に貰った精気のおかげで、強くなれたって言ったわよね？」", カラー_ピンク
+CALL COLOR_PRINTL("所以呢，努力的话就能去那边的世界了♥""，颜色_粉色)
+;TranslatedMark @"「それでね、頑張ればそっちの世界にいけるようになったの♥　『受肉化』っていうんだけどね…」", カラー_ピンク
+PRINTFORML 原来如此。她说，通过"受肉化"可以得到在这个世界上活动的身体
+;TranslatedMark …なるほど。彼女いわく、『受肉化』することでこちらの世界で動ける身体を手に入れられるらしい
+PRINTFORML 但是也有风险。这是为了极大地消耗至今为止积蓄的魔力，所以不可避免地会减弱。
+;TranslatedMark しかしリスクもある。今まで貯めた魔力を大きく消耗するため、弱体化は免れないとのことだ。
+PRINTFORMW 在梦的世界里，即使是无敌的梦魔，如果带着实体来到这边的世界，那就另当别论了。
+;TranslatedMark 夢の世界では無敵の夢魔でも、実体を持ってこちら側の世界に来るとなると、話は別だ。
+PRINTFORMW 幻想乡有以消灭妖怪为生的人，也有无赖。有可能会遭殃。
+;TranslatedMark 幻想郷には妖怪退治を生業にする者や、ならず者も居る。ひどい目に会う可能性はある。
+PRINTFORML 为什么说那样的话？
+;TranslatedMark なぜそんな話を？
+CALL COLOR_PRINTW(@"嗯…好不容易变强了，又变弱了，我很生气"，颜色_粉红)
+;TranslatedMark @"「ん…せっかく強くなれたのに、また弱くなるのは癪だけど」", カラー_ピンク
+CALL COLOR_PRINTL("我觉得能在%ANAME(MASTER)%和梦中以外的地方见面真好啊♥」，颜色_粉色)
+;TranslatedMark @"「%ANAME(MASTER)%と夢の中以外でも会えるようになるのは良いなーって思ってね♥」", カラー_ピンク
+PRINTFORMW 她淡淡地染了脸颊，拿着%ANAME(MASTER)%的手臂缠在自己的身体上
+;TranslatedMark 彼女はうっすら頬を染め、%ANAME(MASTER)%の腕を取り自分の身体に絡めてきた
+CALL COLOR_PRINTL(@""在我和现实的世界里…♥从早到晚做爱…♥」，颜色_粉色)
+;TranslatedMark @"「私と現実の世界でぇ…♥　朝から晩までずぅっとセックス…♥」", カラー_ピンク
+CALL COLOR_PRINTL(被%ANAME(MASTER)%的种子塞满子宫…♥你不觉得这样也很好吗？"，颜色_粉色)
+;TranslatedMark @"「%ANAME(MASTER)%の子種で子宮いっぱいにされちゃうの…♥　そういうのも良いと思わない？」", カラー_ピンク
+PRINTFORML 炽热的吐气和艳丽的声音，从耳朵渗透到大脑。听起来像是有魅力的提案…
+;TranslatedMark 熱い吐息と艶かしい声が、耳から脳に染み渡る。魅力的な提案に聞こえてくる…
+CALL COLOR_PRINTW("或者，就这样也没关系吧？只要能在梦中得到充分的爱就好了♥」，颜色_粉色)
+;TranslatedMark @"「もしくは、別にこのままでもいいわよ？　夢の中でたっぷり愛してもらえれば良いし♥」", カラー_ピンク
+CALL COLOR_PRINTL("而且好不容易变强了。在梦中的话可能会做得更厉害♥」，颜色_粉色)
+;TranslatedMark @"「それにせっかく強くなったんだもの。夢の中でならもっとスゴイこと、できちゃうかも♥」", カラー_ピンク
+CALL COLOR_PRINTL(@"%ANAME(MASTER)%哪个好？"粉红)
+;TranslatedMark @"「%ANAME(MASTER)%はどっちがイイ？」", カラー_ピンク
+PRINTFORMW ……好像是让我选择受肉化还是保持原样
+;TranslatedMark ……どうやら受肉化するか、そのままかを選ばせてくれるようだ
+PRINTFORML ……
+PRINTFORMW 那么，怎么办呢？
+;TranslatedMark さて、どうしようか？
+CALL ASK_MULTI_JUDGE("邀请到幻想乡"，CAN_ADD_RANDOM_CHARA（），"想在梦中见面"，1，"能不能安静一点？", 1)
+;TranslatedMark "幻想郷に誘う", CAN_ADD_RANDOM_CHARA(), "夢の中で逢いたい", 1, "そっとしておいてくれない？", 1
+
+;そっとしておいてくれない？
+IF RESULT == 2
+	CALL COLOR_PRINTW(@"讨厌"，颜色_粉红) 
+	;TranslatedMark @"「それはイヤ」", カラー_ピンク
+	PRINTFORMW 立即回答
+	;TranslatedMark 即答された
+	CALL COLOR_PRINTW(@"什么？你对我的技巧不满意吗？"，彩色_粉红)
+	;TranslatedMark @"「なに？　私のテクに不満があるの？」", カラー_ピンク
+	PRINTFORML 虽然不是那样，但是被榨的话会很累。再稍微调整一下…
+	;TranslatedMark そ、そういうわけではないが、搾精されるととても疲れる。もう少し加減を…
+	PRINTFORMW 她把语无伦次的%ANAME(MASTER)%推倒在床上
+	;TranslatedMark しどろもどろになる%ANAME(MASTER)%を、彼女はベッドに押し倒した
+	CALL COLOR_PRINTW("这个有点需要教育啊！"♥」，颜色_粉色)
+	;TranslatedMark @"「これはちょっと教育が必要ね♪　あんっ♥」", カラー_ピンク
+	PRINTFORMW 她骑着%ANAME(MASTER)%的阴茎叼了进去
+	;TranslatedMark 彼女は%ANAME(MASTER)%のペニスを騎乗位で咥え込んだ
+	CALL COLOR_PRINTW("心情好是好事，刻在灵魂上吧♥」，颜色_粉色)
+	;TranslatedMark @"「気持ちイイことは良いことだって、魂に刻んでア・ゲ・ル♥」", カラー_ピンク
+	PRINTFORMW ……被萨居巴斯打乱了瑜伽
+	;TranslatedMark ……サキュバスにヨガリ狂わされた
+	PRINTFORMW 虽然被她榨干了很多，但分手的时候却很高兴
+	;TranslatedMark 彼女にたっぷり搾り取られたが、別れ際には機嫌を直していた
+	PRINTFORML ・
+	PRINTFORMW ・
+	PRINTFORML 傍晚时分，%ANAME(MASTER)%醒了
+	;TranslatedMark 夕方ごろ、%ANAME(MASTER)%は目を覚ました
+	PRINTFORMW 到现在为止奉献了很多的精气的结果，她已经得到了用%ANAME(MASTER)%不能匹敌的，梦的支配力
+	;TranslatedMark これまで多くの精気を捧げてしまった結果、彼女はもはや%ANAME(MASTER)%では太刀打ちできぬほどの、夢の支配力を手にしていた
+	PRINTFORML 因为现在对与%ANAME(MASTER)%的相遇好象发烧一样，对幻想乡没有受害
+	;TranslatedMark 今のところは%ANAME(MASTER)%との逢瀬にお熱のようなので、幻想郷には被害は無いが
+	PRINTFORML 要是得罪了她，不知道会发生什么事
+	;TranslatedMark 彼女の機嫌を損ねては、どんなことが起こるか分からない
+	PRINTFORMW 暂时老实一点，好像只能和她交往了…
+	;TranslatedMark しばらくは大人しく、彼女に付き合うしかないようだ…
+	DVAR:夢魔の夢その後_発生フラグ = 1
+	
+;夢の中で逢いたい
+ELSEIF RESULT == 1
+	PRINTFORML 告诉她，今后也想享受在梦中的相遇
+	;TranslatedMark 彼女に、これからも夢の中での逢瀬を楽しみたいと告げた
+	CALL COLOR_PRINTW("啊哈♪好啊，今后也请多多关照♥」，颜色_粉色)
+	;TranslatedMark @"「あはっ♪　いいわよ、これからもよろしくね♥」", カラー_ピンク
+	PRINTFORML 她紧紧地抱住%ANAME(MASTER)%，热情地、深深地亲吻了对方
+	;TranslatedMark 彼女は%ANAME(MASTER)%にぎゅっと抱きつき、熱く、深いキスを交わした
+	PRINTFORML %ANAME(MASTER)%再次燃起了情欲，推着生气勃勃的肉棒，要求重新开始自己的行为
+	;TranslatedMark %ANAME(MASTER)%は再び情欲が沸き立ち、いきり立つ肉棒を押し当て、行為の再開をねだった
+	CALL COLOR_PRINTW(@""啊哈♪好啊♥那么，这次我来给你上♥♥」，颜色_粉色)
+	;TranslatedMark @"「あはっ♪　いいわよ♥　さぁ、今度は私が上になってあげる♥♥」", カラー_ピンク
+	PRINTFORML 两人再次开始了热情的性爱
+	;TranslatedMark 二人は再び、情熱的なセックスを開始した
+	CALL COLOR_PRINTW(我是%ANAME(MASTER)%专用的梦魔♥只有%ANAME(MASTER)%的身体，今后也会让你心情舒畅♥」，颜色_粉色)
+	;TranslatedMark @"「私は%ANAME(MASTER)%専用の夢魔♥　%ANAME(MASTER)%だけの身体で、これからもいっぱい気持ちよくしてあげる♥」", カラー_ピンク
+	CALL COLOR_PRINTL(所以今后也…为了我而努力吧♥♥」，颜色_粉色)
+	;TranslatedMark @"「だからこれからも…私のために精を捧げてね♥♥」", カラー_ピンク
+	PRINTFORMW ……在时间到来之前，一直相爱着
+	;TranslatedMark ……時間が来るまで、ひたすら愛し合った
+	CALL FUCK(MASTER, "欲望")
+	DVAR:夢魔の夢その後_発生フラグ = 1
+	
+;幻想郷に誘う
+ELSE
+	PRINTFORML 幻想乡又增加了一个有魅力的女人
+	;TranslatedMark 幻想郷にまた一人、魅力的な女が増える
+	PRINTFORML 有什么好犹豫的呢。%ANAME(MASTER)%接受了这个富有魅力的提案，邀请她去幻想乡
+	;TranslatedMark 何を迷うことがあろう。%ANAME(MASTER)%は、この魅力的な提案を受け入れ、彼女を幻想郷に誘った
+	PRINTFORMW 并且，也考虑在这边的生活的事，如果好我军不来吗？加上
+	;TranslatedMark そして、こっちでの生活のことも考え、もし良ければ我が軍に来ないか？　とも付け加えた
+	CALL COLOR_PRINTL("…啊哈♪好开心啊，今后也请多多关照♥」，颜色_粉色)
+	;TranslatedMark @"「…あはっ♪　嬉しいっ　これからもよろしくね♥」", カラー_ピンク
+	PRINTFORMW 她跳入%ANAME(MASTER)%的胸口，用力揉着头撒娇
+	;TranslatedMark 彼女は%ANAME(MASTER)%の胸元に飛び込み、頭をぐりぐりとこすり付けて甘えてきた
+	CALL COLOR_PRINTL(@"…说不定"，颜色_粉红)
+	;TranslatedMark @"「…もしかしたらね」", カラー_ピンク
+	PRINTFORML 把头压在%ANAME(MASTER)%的胸前说话。那个声色有点弱
+	;TranslatedMark %ANAME(MASTER)%の胸に頭を押し付けたまま話す。その声色はどこか弱弱しい
+	CALL COLOR_PRINTL(@"如果受肉化变弱的话，可能就不能像以前那样心情舒畅地提高了…"，颜色_粉红)
+	;TranslatedMark @"「受肉化して弱くなったら、今までみたいに気持ちよくして上げられなくなるかもしれない…」", カラー_ピンク
+	CALL COLOR_PRINTL("但是我会努力的……加油，还会让你心情舒畅的"，颜色_粉红)
+	;TranslatedMark @"「でも頑張るから…頑張って、また…いっぱい気持ちよくしてあげるから」", カラー_ピンク
+	CALL COLOR_PRINTW(""又和我……相爱吧♥」，颜色_粉色)
+	;TranslatedMark @"「また私と…愛し合ってね♥」", カラー_ピンク
+	PRINTFORML 她抬起头，凝视着%ANAME(MASTER)%，露出了笑容
+	;TranslatedMark 彼女は顔を上げ、%ANAME(MASTER)%を見つめると笑顔を見せた
+	PRINTFORML 那个表情不是淫荡的淫魔，而是一个恋爱的少女
+	;TranslatedMark その表情は淫蕩な淫魔のそれではなく、一人の恋する少女のようだった
+	PRINTFORML %ANAME(MASTER)%忐忑不安地抚摸着她的头，回答说今后也请多多关照
+	;TranslatedMark %ANAME(MASTER)%はドキッとしながらも、彼女の頭を撫で、これからもよろしくと答えた
+	PRINTFORMW 两人互相凝视，然后自然地接吻
+	;TranslatedMark 二人は見つめ合い、そして自然にキスを交わした
+	CALL COLOR_PRINTL(@"嗯……嗯……嗯……是的，那以后的身体姿势就决定了……"，颜色_粉红)
+	;TranslatedMark @"「んん……ぷぁ…　はい、じゃあこれからの身の振り方が決まったわけだから…」", カラー_ピンク
+	CALL COLOR_PRINTW("在时间到来之前，我们相爱吧♥」，颜色_粉色)
+	;TranslatedMark @"「時間が来るまで、愛し合いしましょう♥」", カラー_ピンク
+	PRINTFORML 两个人又开始交往了
+	;TranslatedMark 二人は再び交わり始めた
+	PRINTFORMW ……在时间到来之前，一直相爱着
+	;TranslatedMark ……時間が来るまで、ひたすら愛し合った
+	CALL CREATE_RANDOM_CHARA(0,0,1,1)
+	対象 = RESULT
+	ABL:対象:武闘 = 25 + RAND:10
+	ABL:対象:防衛 = 55 + RAND:10
+	ABL:対象:知略 = 25 + RAND:10
+	ABL:対象:政治 = 5  + RAND:5
+	ABL:対象:歌唱 = 25 + RAND:20
+	ABL:対象:料理 = 40 + RAND:20
+	ABL:対象:Ａ感 = 1
+	ABL:対象:Ｂ感 = 3
+	ABL:対象:Ｃ感 = 2
+	ABL:対象:Ｖ感 = 3
+	ABL:対象:Ｍ感 = 2
+	ABL:対象:欲望 = 5
+	ABL:対象:性技 = 5
+	ABL:対象:性知識 = 5
+	ABL:対象:奉仕 = 4
+	ABL:対象:性交 = 3
+	ABL:対象:精愛 = 4
+	ABL:対象:露出 = 1
+	TALENT:対象:快感に素直 = 1
+	TALENT:対象:快感の否定 = 0
+	TALENT:対象:小悪魔 = 1
+	TALENT:対象:貞操無頓着 = 1
+	TALENT:対象:貞操観念 = 0
+	TALENT:対象:魅惑 = 1
+	TALENT:対象:解放 = 1
+	TALENT:対象:抑圧 = 0
+	TALENT:対象:好奇心 = 1
+	TALENT:対象:しっぽ = 1
+	TALENT:対象:Ｖ敏感 = 1
+	TALENT:対象:Ｖ鈍感 = 0
+	TALENT:対象:絶倫 = 1
+	TALENT:対象:合意 = 1
+	TALENT:対象:体型 = -1
+	TALENT:対象:体型 = RAND:2
+	TALENT:対象:体格 = RAND:3 - 1
+	TALENT:対象:バストサイズ = 1
+	CALL TAG_INIT(対象,111)
+	TALENT:対象:陰毛目標値 = 陰毛_ハート型
+	TALENT:対象:陰毛現在値 = 陰毛_ハート型
+	TALENT:対象:腋毛目標値 = 腋毛_つるつる
+	TALENT:対象:腋毛現在値 = 腋毛_つるつる
+	CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属, 1)
+	CALL LEARN_SKILL_GENERAL_BY_NAME(対象, "淫らな誘惑")
+	CFLAG:対象:好感度 = 1000
+	CFLAG:対象:依存度 = 1000
+	CFLAG:対象:従属度 = 500
+	CFLAG:対象:支配度 = 1200
+	CFLAG:対象:面識 = 1
+	TALENT:(対象):処女 = 1
+	TALENT:(対象):キス未経験 = 1
+	TALENT:(対象):アナル処女 = 1
+	TALENT:対象:Ｖ締まり = GET_DEFAULT_TIGHTNESS("名器")
+	TALENT:対象:Ａ締まり = GET_DEFAULT_TIGHTNESS("名器")
+	CALL COLOR_PRINTW(@"%ANAME(対象)%加入我军"，彩色_注意事项)
+	;TranslatedMark @"%ANAME(対象)%が我が軍に入りました", カラー_注意
+	CALL FUCK(MASTER, "欲望")
+	DVAR:夢魔との逢瀬フラグ = 1
+	DVAR:夢魔ID = GET_ID(対象)
+	PRINTFORMW
+ENDIF
+DVAR:夢魔の夢_発生フラグ = -1
+RETURN 0

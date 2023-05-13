@@ -1,0 +1,363 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_SUCCUBUS_DEEPCOVEROPERATION_RATE()
+RETURN 35
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_SUCCUBUS_DEEPCOVEROPERATION_DECISION()
+#DIM サキュバス
+サキュバス = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_サキュバス))
+SIF サキュバス == -1
+	RETURN 0
+SIF CFLAG:MASTER:所属 == サキュバス
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_SUCCUBUS_DEEPCOVEROPERATION_GENRE()
+RETURN デイリー_ジャンル_特殊勢力
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_SUCCUBUS_DEEPCOVEROPERATION
+#DIM 対象
+#DIM サキュバス
+#DIM 兵数
+
+サキュバス = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_サキュバス)
+
+PRINTFORML 在萨居巴斯的领地内，得到了最近将举行大规模仪式的情报
+;TranslatedMark サキュバスの領内で、近々大規模な儀式が行われるという情報を入手した
+PRINTFORMW 为了证明这一点，被淫气猜中的男女陆续聚集在一起
+;TranslatedMark それを裏付けるように、淫気に当てられた男女が続々集まっているという
+PRINTFORML 可能有必要潜入调查，以避免引人注目
+;TranslatedMark 何が行われようとしているのか、目立たないよう潜入して調査する必要があるかもしれない
+PRINTFORML 如果放任不管的话，萨居巴斯们的势力会更加强化吧
+;TranslatedMark このまま見過ごせばサキュバスたちの勢力がより強化されるだろう
+PRINTFORMW 但是，如果是潜入调查的话，可能会遇到危险…
+;TranslatedMark しかし、潜入調査となると危ない目に会うかもしれない…
+PRINTFORML 怎么办？
+;TranslatedMark どうしよう？
+CALL ASK_MULTI(@"调查"，"放置不管"")
+;TranslatedMark @"調査する" ,"放置する"
+IF RESULT == 1
+	PRINTFORML ……单独潜入调查的话危险还是很大的。这次就放弃吧
+	;TranslatedMark …単独で潜入調査となるとやはり危険が大きい。今回は諦めよう
+	PRINTFORMW 把萨奎巴斯他们的仪式搁置了
+	;TranslatedMark サキュバスたちの儀式を放置した
+	$HOUTI_LOOP
+	兵数 = 700 + (RAND:5 + DAY / 5) * 400
+	COUNTRY_SOLDIER:サキュバス += 兵数
+	CALL COLOR_PRINTW(@"萨居巴斯等人聚集在一起，兵数好像增加了{兵数}人"，彩色_注意事项)
+	;TranslatedMark @"サキュバス達のところに人が集まり、兵数が{兵数}人増えたようだ", カラー_注意
+ELSEIF RESULT == 0
+	PRINTFORML 还是不能置之不理
+	;TranslatedMark やはり放置はできない
+	PRINTFORMW 我决定潜入调查
+	;TranslatedMark 潜入調査する事にした
+	PRINTFORML 选谁呢？
+	;TranslatedMark 誰を選ぼうか？
+	CALL SELECT_CHARA_LIST_SLG()
+	対象 = RESULT
+	IF RESULT < 0
+		PRINTFORMW 还是算了
+		;TranslatedMark やはりやめておいた
+		GOTO HOUTI_LOOP
+	ELSEIF 対象 == MASTER
+		PRINTFORMW %ANAME(対象)%决定亲自调查
+		;TranslatedMark %ANAME(対象)%自ら調査する事にした
+	ELSE
+		PRINTFORMW 决定交给%ANAME(対象)%
+		;TranslatedMark %ANAME(対象)%に任せる事にした
+	ENDIF
+	PRINTFORML ・
+	PRINTFORML ・
+	PRINTFORMW 满月之夜
+	;TranslatedMark 満月の夜
+	PRINTFORML 潜入领内进行调查，发现领内到处都是男女混杂的异样景象
+	;TranslatedMark 領内に潜入し調査を進めると、領内の至る所で多くの男女がまぐわりあう異様な光景が広がっていた
+	PRINTFORMW 那是为了从很多人那里收集精气的萨居巴斯们的萨巴托！
+	;TranslatedMark それは多くの人間から精気を集めるための、サキュバスたちのサバトだった！
+	PRINTFORML 被肉欲的那样贪图快乐的淫秽的仪式的情况夺走了眼的%ANAME(対象)%
+	;TranslatedMark 肉欲のままに快楽をむさぼる淫猥な儀式の様子に目を奪われた%ANAME(対象)%は
+	PRINTFORML 注意到包围着自己的存在已经晚了！
+	;TranslatedMark 自分を取り囲みつつある存在に気付くのが遅れてしまった！
+	PRINTFORMW 注意到周围漂浮着的妖气的时候，已经被萨奇巴士们包围了
+	;TranslatedMark 周りに漂う妖しい気配に気付いた時には、すでにサキュバスたちに取り囲まれていた
+	PRINTFORMW 她们为了让%ANAME(対象)%也参加宴会而驱邪诱惑！
+	;TranslatedMark 彼女たちは%ANAME(対象)%も宴に参加させるべく淫気を飛ばして誘惑してきた！
+	PRINTFORML 
+	IF (MAXBASE:対象:精神力 / 100) * (RAND:5 + 1) >= (12 + DAY / 8) * (RAND:12 + 1) && !GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫乱) && !GETBIT(TALENT:対象:淫乱系, 素質_淫乱_精液便女)
+		PRINTFORMW 可是%ANAME(対象)%总算忍耐了！
+		;TranslatedMark しかし%ANAME(対象)%は何とか堪えてみせた！
+		PRINTFORML %ANAME(対象)%挣脱Sacubasu们的诱惑打破包围
+		;TranslatedMark %ANAME(対象)%はサキュバスたちの誘惑を振り切って包囲を破り
+		PRINTFORMW 一边妨碍仪式一边逃跑成功了！
+		;TranslatedMark 儀式の妨害をしながら逃走に成功した！
+		FOR LOCAL, 1, MAX_COUNTRY
+			IF IS_COUNTRY(LOCAL) && LOCAL != サキュバス
+				CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:対象:所属, 200, -150)
+			ELSE
+				CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:対象:所属, -250, 300)
+			ENDIF
+		NEXT
+		CALL COLOR_PRINTL("%ANAME(対象)%的活跃在其他国家广为人知，评价上升了"，彩色_注意事项)
+		;TranslatedMark @"%ANAME(対象)%の活躍は他国に知れ渡り評価が上がった", カラー_注意
+		CALL COLOR_PRINTW("但是，萨居巴斯们发出了强烈的不满声"，颜色_注意)
+		;TranslatedMark "しかしサキュバス達からは強い不満の声が上がった", カラー_注意
+	ELSE
+		PRINTFORMW 受到Sacubasu们的淫荡的诱惑，%ANAME(対象)%一瞬间停止了动作
+		;TranslatedMark サキュバスたちの淫らな誘惑を受けて、%ANAME(対象)%は一瞬動きが止まってしまう
+		PRINTFORML 那个间隙被sakibasu们聚集，被拘束了！
+		;TranslatedMark その隙を突かれてサキュバスたちに群がられ、拘束されてしまった！
+		PRINTFORMW 虽然反抗，但是她们柔软的肢体，魔性的爱抚，甜的香味和接吻的雨夺走理性，从身体无力…
+		;TranslatedMark 抵抗するものの、彼女たちの柔らかな肢体が、魔性の愛撫が、甘い香りとキスの雨が理性を奪い、身体から力が抜けていく…
+		PRINTFORML 被给予的快感心快要荡漾了的地方，看sakibasu的妖艳地发光的瞳孔被挂上了夺人魂魄的术！
+		;TranslatedMark 与えられる快感に心が蕩けかけたところで、サキュバスの妖しく光る瞳を見てしまい魅了の術を掛けられてしまった！
+		PRINTFORML %ANAME(対象)%的脑子里已经被肉欲支配，只能考虑性爱了
+		;TranslatedMark %ANAME(対象)%はもはや頭の中が肉欲で支配され、セックスのことしか考えられなくなってしまう
+		PRINTFORM 沙皇们妖艳地笑着，在%ANAME(対象)%的耳边
+		;TranslatedMark サキュバスたちは妖艶に笑い、%ANAME(対象)%の耳元で
+		CALL COLOR_PRINT ("　一起享受吧"，颜色_粉色)
+		;TranslatedMark "　一緒に楽しみましょう　", カラー_ピンク
+		PRINTFORMW 低语
+		;TranslatedMark と囁いた
+		PRINTFORML 
+		IF IS_MALE(対象)
+			PRINTFORMW %ANAME(対象)%完全忘记了任务的事，本能地追求女人…
+			;TranslatedMark %ANAME(対象)%はすっかり任務の事も忘れ、本能のままに女を求めた…
+			PRINTFORML 
+			SELECTCASE RAND:5
+				CASE 0
+					PRINTFORMW %ANAME(対象)%被无数的守护者包围着被侵犯
+					;TranslatedMark %ANAME(対象)%は無数のサキュバスに囲まれ犯されている
+					PRINTFORML 她们像聚集在糖里的蚂蚁一样推倒%ANAME(対象)%，摩擦着柔软的女子身体
+					;TranslatedMark 彼女たちは砂糖に群がる蟻のように%ANAME(対象)%を押し倒し、柔らかな女体を擦り合わせて来る
+					PRINTFORML 一个人跨过%ANAME(対象)%，深深地叼着阴茎激烈地挥着腰
+					;TranslatedMark 一人が%ANAME(対象)%に跨り深々とペニスを咥えこんで激しく腰を振る
+					PRINTFORML 那个蜜罐就像是为了榨取精液一样，用极上的触感缠绕在整个竿上
+					;TranslatedMark その蜜壺は正に精液を絞る取る為のような、ゾリゾリとした極上の感触で竿全体に絡みつく
+					PRINTFORMW 这样的快乐是不可能忍耐的，%ANAME(対象)%忍不住释放了精灵
+					;TranslatedMark こんな快楽を我慢など出来るはずも無く、%ANAME(対象)%はたまらず精を解き放った
+					PRINTFORML 陶醉在射精于淫魔阴道内的禁忌快感中，又有一个萨奎巴斯跨到了%ANAME(対象)%的脸上
+					;TranslatedMark 淫魔の膣内に射精する禁忌の快感に酔いしれていると、また一人のサキュバスが%ANAME(対象)%の顔に跨ってきた
+					PRINTFORMW 被渗透到脑深处的甜雌的味道所刺激，沉迷于她的媚肉和爱蜜而狼吞虎咽
+					;TranslatedMark 脳の奥底まで染み渡る様な甘い雌の匂いに刺激され、彼女の媚肉と愛蜜に夢中でむしゃぶりつく
+					PRINTFORML 由于Sacubasu们的淫气的影响，无论怎么射精，肉棒都不会收起来，反而会硬翘起来，性欲也会越来越高
+					;TranslatedMark サキュバスたちの淫気の影響で、いくら射精しても肉棒は収まるどころか硬く反り立ち、性欲はますます増していく
+					PRINTFORML 射精十次后又被下一辆萨奎巴斯叼进去。这个被反复，阴茎连干的时间都没有
+					;TranslatedMark 十回射精してはまた次のサキュバスに咥え込まれる。これが繰り返えされ、ペニスは乾く暇もない
+					PRINTFORMW %ANAME(対象)%在天亮之前一直保持着肉欲，一味地为她们奉献了力量……
+					;TranslatedMark %ANAME(対象)%は夜が明けるまで肉欲のまま、ひたすらに彼女たちに精を捧げてしまう事になった……
+					CALL FUCK(対象, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失", 0, "サキュバスの唇", "", "サキュバスの膣", "強姦")
+					CALL FUCK(対象, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失", 0, "サキュバスの唇", "", "サキュバスの膣", "強姦")
+				CASE 1
+					PRINTFORMW 从萨居巴斯领内传来了莫名其妙的娇声
+					;TranslatedMark サキュバス領内からあられもない嬌声が響いている
+					PRINTFORML 无论是老年人还是年轻人、人类还是妖怪，无数赤裸裸的男女都会在那里眼花缭乱
+					;TranslatedMark 老いも若きも人間も妖怪も関係なく、無数の裸の男女がそこかしこでまぐわりあう
+					PRINTFORML 正是适合称为淫魔宴的违背道德的景象在蔓延
+					;TranslatedMark まさに淫魔の宴と呼ぶにふさわしい背徳的な光景が広がっている
+					PRINTFORMW 其中也有被捉住的%ANAME(対象)%的身姿，现在也埋头于与复数的sakibasu激烈的做爱
+					;TranslatedMark その中には捕らえられた%ANAME(対象)%の姿もあり、今も複数のサキュバスと激しいセックスに没頭していた
+					PRINTFORML 她们抑制住%ANAME(対象)%，一边缠着舌头一边巧妙地使腰上下起伏
+					;TranslatedMark 彼女たちは%ANAME(対象)%を抑え込み、舌を絡ませながら巧みに腰を上下させる
+					PRINTFORML 萨居巴斯的雌穴是天然的肉，给一种不寻常的快感
+					;TranslatedMark サキュバスの雌穴は天然の肉オナホであり一物に尋常ならざる快感を与えて来る
+					PRINTFORMW 被肉欲支配的%ANAME(対象)%，不可能抵抗这种快乐
+					;TranslatedMark 肉欲に支配された%ANAME(対象)%が、この快楽に抗うことなど不可能であった
+					PRINTFORML %ANAME(対象)%非但没有忍耐，反而自己向她们的阴道多次放精
+					;TranslatedMark %ANAME(対象)%は我慢どころか、自ら進んで彼女たちの膣へ何度も精を放つが、
+					PRINTFORML 也许是受sacubasu们的淫气的影响吧，无论怎么射精，肉棒都不会收起来，反而会硬翘起来，性欲也会越来越高
+					;TranslatedMark サキュバスたちの淫気の影響か、いくら射精しても肉棒は収まるどころか硬く反り立ち、性欲はますます増していく
+					PRINTFORMW %ANAME(対象)%在天亮之前一直保持着肉欲，一味地为她们奉献了力量……
+					;TranslatedMark %ANAME(対象)%は夜が明けるまで肉欲のまま、ひたすらに彼女たちに精を捧げてしまう事になった……
+					CALL FUCK(対象, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失", 0, "サキュバスの唇", "", "サキュバスの膣", "乱交")
+					CALL FUCK(対象, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失", 0, "サキュバスの唇", "", "サキュバスの膣", "乱交")
+				CASE 2
+					PRINTFORMW 被sakibusu们带了的%ANAME(対象)%在领内交替做着女人的对手
+					;TranslatedMark サキュバスたちに連れられた%ANAME(対象)%は領内で代わる代わる女の相手をしている
+					PRINTFORML 无论是人类还是萨居巴斯都积极地与%ANAME(対象)%交往，用全身的精心服务给予快感
+					;TranslatedMark 人間もサキュバスも積極的に%ANAME(対象)%と交わり、全身を使った丹念な奉仕で快感を与えてくる
+					PRINTFORMW 被淫魔训练了的村姑娘们的性技能和肉欲可怕，一转眼被肉欲的旋涡吞噬了
+					;TranslatedMark 淫魔に仕込まれた村娘たちの性技と肉欲は凄まじく、あっという間に肉欲の渦に飲み込まれてしまう
+					PRINTFORML 一个人匍匐着伸出屁股，用力抓住他的腰，一心一意地刺进肉棒
+					;TranslatedMark 一人が四つん這いとなって尻を突き出すと、その腰を強く掴み一心不乱に肉棒を突き挿れる
+					PRINTFORML 从后面使劲推的时候，她们的爱抚一刻也停不下来
+					;TranslatedMark 後ろから突きまくっている間も、彼女たちの愛撫は一時も止まらない
+					PRINTFORMW 到了极限露出阴道，她们发出欢喜的声音，露出了可爱喘息的雌性的一面
+					;TranslatedMark 限界が来て膣出しすると、彼女たちは歓喜の声を上げて可愛らしく喘ぐ雌の一面を見せた
+					PRINTFORML 那个淫荡的雌的表情使%ANAME(対象)%的本能高涨，更加专心于性交…
+					;TranslatedMark その淫らな雌の表情が%ANAME(対象)%の本能を昂ぶらせ、よりいっそう性交に没頭していく…
+					PRINTFORML 由于Sacubasu们的淫气的影响，无论怎么射精，肉棒都不会收起来，反而会硬翘起来，性欲也会越来越高
+					;TranslatedMark サキュバスたちの淫気の影響で、いくら射精しても肉棒は収まるどころか硬く反り立ち、性欲はますます増していく
+					PRINTFORMW %ANAME(対象)%在天亮之前一直保持着肉欲，一味地为她们奉献了力量……
+					;TranslatedMark %ANAME(対象)%は夜が明けるまで肉欲のまま、ひたすらに彼女たちに精を捧げてしまう事になった……
+					CALL FUCK(対象, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失", 0, "村娘の唇", "", "村娘の膣", "乱交")
+					CALL FUCK(対象, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失", 0, "サキュバスの唇", "", "サキュバスの膣", "乱交")
+				CASE 3
+					PRINTFORMW 被Sacubasu们迷住了的%ANAME(対象)%，与她们的做爱入迷着
+					;TranslatedMark サキュバスたちに魅了された%ANAME(対象)%は、彼女たちとのセックスに夢中になっている
+					PRINTFORML 醉倒在她们的肢体中尽情地放精，有一只身体特别好的萨奎巴斯
+					;TranslatedMark 彼女たちの肢体に酔いしれ存分に精を放つ中、一際具合がいいサキュバスがいた
+					PRINTFORML 她，是最初对%ANAME(対象)%挂上了夺人魂魄的策略的sakibasu
+					;TranslatedMark 彼女は、最初に%ANAME(対象)%に魅了の術を掛けたサキュバスだった
+					PRINTFORML 其他的沙丁鱼们也是很棒的肉壶，但是她的东西比那个更高级
+					;TranslatedMark 他のサキュバスたちも素晴らしい肉壷だったが、彼女の物はそれ以上の極上品だった
+					PRINTFORMW 看来%ANAME(対象)%和她的身体很投缘，被给予的快感非同寻常
+					;TranslatedMark どうやら%ANAME(対象)%と彼女の身体の相性はバツグンらしく、与えられる快感が尋常ではない
+					PRINTFORML 这一点她也一样，吸食男人精的淫魔所不应有的混乱，埋头于与%ANAME(対象)%的行为
+					;TranslatedMark それは彼女も同じようで、男の精を吸う淫魔にあるまじき乱れぶりで%ANAME(対象)%との行為に没頭していく
+					PRINTFORML 她像独占%ANAME(対象)%之精一样，用力地用脚夹住腰不放开
+					;TranslatedMark 彼女は%ANAME(対象)%の精を独り占めするように、腰を強く脚で挟み込んで離さない
+					PRINTFORMW %ANAME(対象)%为了回应，一次又一次地深入她的深处，释放出精灵
+					;TranslatedMark %ANAME(対象)%はそれに応えるように、何度も何度も彼女の奥深くまで突き込み精を放つ
+					PRINTFORML 在深深相爱的行为中，甚至能听到不知从哪一方爱着的话
+					;TranslatedMark 深く愛し合うような行為に、どちらからか　愛している　という言葉まで聞こえてくる
+					PRINTFORML 也许是这句话让两人燃起了熊熊大火，无论怎么射精，肉棒都收不住，性欲也会越来越大
+					;TranslatedMark その言葉が二人を燃え上がらせたのか、いくら射精しても肉棒は収まらず、性欲はますます増していく
+					PRINTFORML 彼此呼喊着爱的话语，两人更加激烈地相爱了
+					;TranslatedMark お互いに愛の言葉を叫びながら、二人はよりいっそう激しく愛し合った
+					PRINTFORMW %ANAME(対象)%在天亮之前一直保持着肉欲，一味地为她奉献了力量……
+					;TranslatedMark %ANAME(対象)%は夜が明けるまで肉欲のまま、ひたすらに彼女に精を捧げてしまう事になった……
+					CALL FUCK(対象, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失", 0, "サキュバスの唇", "", "サキュバスの膣", "乱交")
+					CALL FUCK(対象, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失", 0, "サキュバスの唇", "", "サキュバスの膣", "和姦")
+				CASE 4
+					PRINTFORMW %ANAME(対象)%在那个场合与无数的Sacubasu们激烈地交换着
+					;TranslatedMark %ANAME(対象)%はその場で無数のサキュバスたちと激しく交わっている
+					PRINTFORML 她们以同样诱惑男人的淫荡的表情聚集在%ANAME(対象)%寻求性爱
+					;TranslatedMark 彼女たちは一様に男を誘う淫蕩な表情で%ANAME(対象)%に群がりセックスを求めて来る
+					PRINTFORML 像是在卖弄媚眼似的向后仰着屁股的Sacubas们的雌穴讨厌地抽搐着，像是在盼望肉棒一样充满了爱液
+					;TranslatedMark 媚びを売る様に尻を向けるサキュバスたちの雌穴はいやらしくひくつき、肉棒を待ち望む様に愛液を溢れさせている
+					PRINTFORMW 那过于淫乱的身姿和呛人的雌的气味，%ANAME(対象)%像野兽一样袭击了她们
+					;TranslatedMark そのあまりに淫らな姿とむせ返る様な雌の匂いに、%ANAME(対象)%は獣の様に彼女達に襲い掛かった
+					PRINTFORML 也许是受可怕的淫气的影响吧，不管抱多少人，射精多少次，肉棒都不会收起来，反而会变硬，翘起性欲也会越来越大
+					;TranslatedMark 凄まじい淫気の影響か、何人抱いても、何回射精しても、肉棒は収まるどころか硬く反り立ち性欲はますます増していく
+					PRINTFORML 在魔性的交集中，向她们献精的行为意味着什么，从%ANAME(対象)%的头脑中完全消失了
+					;TranslatedMark 魔性の交わりの中、彼女たちに精を捧げる行為が何を意味するのか、%ANAME(対象)%の頭からは完全に消えていた
+					PRINTFORML 不仅如此，他还保持着雄性的本能，自己向萨居巴斯们的阴道不断地释放出自己的精力
+					;TranslatedMark それどころか雄の本能のままに、自ら進んでサキュバスたちの膣へどんどん精を放っていく
+					PRINTFORMW %ANAME(対象)%在天亮之前一直保持着肉欲，一味地为她们奉献了力量……
+					;TranslatedMark %ANAME(対象)%は夜が明けるまで肉欲のまま、ひたすらに彼女たちに精を捧げてしまう事になった……
+					CALL FUCK(対象, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失", 0, "サキュバスの唇", "", "サキュバスの膣", "乱交")
+					CALL FUCK(対象, "性技, 性交, Ｃ, 射精", "童貞喪失, キス喪失", 0, "サキュバスの唇", "", "サキュバスの膣", "乱交")
+			ENDSELECT
+		ELSE
+			PRINTFORMW %ANAME(対象)%完全忘记了任务的事，本能地沉溺于肉欲…
+			;TranslatedMark %ANAME(対象)%はすっかり任務の事も忘れ、本能のままに肉欲に溺れた…
+			PRINTFORML 
+			SELECTCASE RAND:5
+				CASE 0
+					PRINTFORMW %ANAME(対象)%被无数的水獭包围着
+					;TranslatedMark %ANAME(対象)%は無数のサキュバスに囲まれている
+					PRINTFORML 她们的胯间长着漂亮的男人根，散发着雄性的味道勃起
+					;TranslatedMark 彼女達の股間には立派な男根が生えており、雄の匂いを漂わせてバッキバキに勃起している
+					PRINTFORML 从现在开始只要考虑被无数的阴茎侵犯就觉得子宫疼痛%ANAME(対象)%在眼睛里♥浮现出
+					;TranslatedMark 今からこの無数のペニスに犯されつくす事を考えるだけで子宮が疼き%ANAME(対象)%は瞳に♥を浮かべた
+					PRINTFORML 立刻第一个人的sakubasu推倒的话，%ANAME(対象)%提高喜悦的声音自己张开了胯
+					;TranslatedMark 早速一人目のサキュバスが押し倒してくると、%ANAME(対象)%は悦びの声を上げて自ら股を開いた
+					PRINTFORMW %ANAME(対象)%在黎明之前被无数的阴茎侵犯，被污染到子宫膨胀为止…
+					;TranslatedMark %ANAME(対象)%は夜明けまでに延々と無数のペニスに犯され汚され子宮が膨れるまで種付けされた…
+					CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, Ｖ性交, Ａ性交, キス, 口淫", "キス喪失, 処女喪失, 膣内射精, 口内射精, Ａ処女喪失, 腸内射精", GET_SPERM_ID("サキュバス"), @"サキュバスの\@RAND:2 ? ペニス # 唇\@", @"サキュバス", "", "乱交")
+					CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, Ｖ性交, Ａ性交, キス, 口淫", "キス喪失, 処女喪失, 膣内射精, 口内射精, Ａ処女喪失, 腸内射精", GET_SPERM_ID("サキュバス"), @"サキュバスの\@RAND:2 ? ペニス # 唇\@", @"サキュバス", "", "乱交")
+				CASE 1
+					PRINTFORMW %ANAME(対象)%被很多男人粗暴地侵犯
+					;TranslatedMark %ANAME(対象)%は多数の男たちに乱暴に犯されている
+					PRINTFORML 被萨巴托的淫气猜中了的男人们象盛了的猴子一样地拧入在%ANAME(対象)%里（上）聚集立了的东西
+					;TranslatedMark サバトの淫気に当てられた男達は盛った猿の様に%ANAME(対象)%に群がりいきり立った一物をねじ込んできた
+					PRINTFORML 他们把%ANAME(対象)%当成一个肉洞，粗暴地打在腰上，蹂躏全身，反复射精
+					;TranslatedMark 彼らは%ANAME(対象)%をただの肉穴として扱い、乱暴に腰を打ち付け全身を蹂躙しては射精を繰り返す
+					PRINTFORML %ANAME(対象)%是%ANAME(対象)%，对男人们只是作为雌性的要求感到无比的喜悦，疯狂
+					;TranslatedMark %ANAME(対象)%は%ANAME(対象)%で男達にただ雌として求められる事にこの上ない悦びを感じてヨガリ狂った
+					PRINTFORMW 当大家都清醒地解放的时候，%ANAME(対象)%全身都被弄得乱七八糟…
+					;TranslatedMark 皆が正気に戻り解放された頃には%ANAME(対象)%は全身がドロドロにされてしまっていた…
+					CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, Ｖ性交, Ａ性交, キス, 口淫", "キス喪失, 処女喪失, 膣内射精, 口内射精, Ａ処女喪失, 腸内射精", GET_SPERM_ID("行きずりの男"), @"領民の\@RAND:2 ? ペニス # 唇\@", @"領民", "", "乱交")
+					CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, Ｖ性交, Ａ性交, キス, 口淫", "キス喪失, 処女喪失, 膣内射精, 口内射精, Ａ処女喪失, 腸内射精", GET_SPERM_ID("行きずりの男"), @"領民の\@RAND:2 ? ペニス # 唇\@", @"領民", "", "乱交")
+				CASE 2
+					PRINTFORMW %ANAME(対象)%被Sacubasu带来的巨大的鬼侵犯
+					;TranslatedMark %ANAME(対象)%はサキュバスの連れてきた巨大な鬼に犯されている
+					PRINTFORML 凶恶的阴茎因淫气而更加膨胀，仅仅一戳就破坏了%ANAME(対象)%的理性
+					;TranslatedMark 凶悪なペニスは淫気によって更に膨張し、ただの一突きで%ANAME(対象)%の理性を破壊した
+					PRINTFORML 他疯狂地摇着腰，%ANAME(対象)%配合着它，下腹部突然膨胀，痉挛起来
+					;TranslatedMark 彼は狂ったように腰を振り、それに合わせて%ANAME(対象)%は下腹部をボゴォと膨らませて痙攣する
+					PRINTFORML 但是%ANAME(対象)%不但没有感到痛苦，反而感到了疯狂的快感
+					;TranslatedMark しかし%ANAME(対象)%は苦痛を感じるどころか気が狂う程の快感を感じてあられもなくヨガリ狂う
+					PRINTFORMW 被sakibasu先生给予了的最高的做爱%ANAME(対象)%到丢失气为止享受了…
+					;TranslatedMark サキュバス様から与えられた最高のセックスに%ANAME(対象)%は気を失うまで楽しんだ…
+					CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, Ｖ性交, Ｖ拡張, キス, 口淫", "キス喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("鬼"), @"鬼の\@RAND:2 ? ペニス # 唇\@", "鬼", "", "乱交")
+					CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, Ｖ性交, Ｖ拡張, キス, 口淫", "キス喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("鬼"), @"鬼の\@RAND:2 ? ペニス # 唇\@", "鬼", "", "乱交")
+				CASE 3
+					PRINTFORMW %ANAME(対象)%是作为公共肉便器设置的
+					;TranslatedMark %ANAME(対象)%は公共肉便器として設置されている
+					PRINTFORML 由于sakibasu的淫气%ANAME(対象)%被发疯的程度的快感袭击了的那样的iki一个劲地
+					;TranslatedMark サキュバスの淫気によって%ANAME(対象)%は気が狂う程の快感に襲われだらしなくイキまくっている
+					PRINTFORML 被不认识的男人不负责任地犯下的事实让%ANAME(対象)%兴奋得脊梁发抖
+					;TranslatedMark 顔も知らない男に無責任に犯され種付けされている事実に%ANAME(対象)%は興奮して背筋を震わせる
+					PRINTFORML 然后又跳了！被气势很好地射精，%ANAME(対象)%大大地仰起绝顶了
+					;TranslatedMark そしてまたびゅるるる！と勢いよく射精されながら、%ANAME(対象)%は大きく仰け反り絶頂した
+					PRINTFORMW 解放时的%ANAME(対象)%正是作为身心都很好的肉便器而露出了脸…
+					;TranslatedMark 解放された時の%ANAME(対象)%はまさに身も心も立派な肉便器としてアヘ顔を晒していた…
+					CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, Ｖ性交, キス, 口淫", "キス喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("行きずりの男"), @"領民の\@RAND:2 ? ペニス # 唇\@", "領民", "", "乱交")
+					CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, Ｖ性交, キス, 口淫", "キス喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("行きずりの男"), @"領民の\@RAND:2 ? ペニス # 唇\@", "領民", "", "乱交")
+				CASE 4
+					PRINTFORMW %ANAME(対象)%一边和马交配一边发出野兽般的呐喊
+					;TranslatedMark %ANAME(対象)%は馬と交尾しながら獣のような雄叫びを上げている
+					PRINTFORML 马也受了淫气而兴奋不已，疯狂地嘶叫着坐在%ANAME(対象)%上
+					;TranslatedMark 馬もまた淫気を受け興奮しきっており、狂ったように嘶きながら%ANAME(対象)%に腰を打ち付ける
+					PRINTFORML 接受了用长的阴茎子宫破裂的程度的活塞，%ANAME(対象)%激烈地一边吹潮一边痉挛
+					;TranslatedMark 長大なペニスで子宮が破ける程のピストンを受け、%ANAME(対象)%は激しく潮を吹きながら痙攣する
+					PRINTFORML 被畜生侵犯的背德感让%ANAME(対象)%兴奋得翻白眼，反复多次登顶
+					;TranslatedMark 畜生に犯されるという背徳感は%ANAME(対象)%を興奮させ白目を剥きながら何度も絶頂を繰り返した
+					PRINTFORMW "被他"看中的%ANAME(対象)%把特浓的斯佩尔玛注入了极限…
+					;TranslatedMark "彼"に気に入られた%ANAME(対象)%は特濃のスペルマを限界まで注がれた…
+					CALL FUCK(対象, "欲望, 性技, 性交, 精愛, Ｖ, Ｖ, Ｖ性交, 獣姦", "処女喪失, 膣内射精", GET_SPERM_ID("馬"), @"馬の\@RAND:2 ? ペニス # 唇\@", "馬", "", "和姦")
+					CALL FUCK(対象, "欲望, 性技, 性交, 精愛, Ｖ, Ｖ, Ｖ性交, 獣姦", "処女喪失, 膣内射精", GET_SPERM_ID("馬"), @"馬の\@RAND:2 ? ペニス # 唇\@", "馬", "", "和姦")
+			ENDSELECT
+		ENDIF
+		PRINTFORML 
+		PRINTFORML 天亮了，淫荡的萨巴托结束了
+		;TranslatedMark 夜が明けて、淫らなサバトが終わった
+		PRINTFORML 得到了%ANAME(対象)%的优质精气的Sacubasu们满足了吗，解放了%ANAME(対象)%
+		;TranslatedMark %ANAME(対象)%の良質な精気を得たサキュバスたちは満足したのか、%ANAME(対象)%を解放した
+		PRINTFORML 因为太过快乐而意识模糊的%ANAME(対象)%中，萨居巴斯们妖艳地低声私语
+		;TranslatedMark あまりの快楽に意識朦朧となっている%ANAME(対象)%にサキュバスたちが妖しく囁く
+		PRINTFORML 
+		CALL COLOR_PRINTW ("　またいつでもいらっしゃい。　今度もたくさんイイコトしましょう♥", カラー_ピンク)
+		PRINTFORML ・
+		PRINTFORML ・
+		PRINTFORMW ・
+		PRINTFORML 当我注意到的时候，我回到了宫殿
+		;TranslatedMark 気づけば宮殿まで帰ってきていた
+		PRINTFORML %ANAME(対象)%现在潜入时的记忆好像很模糊…
+		;TranslatedMark %ANAME(対象)%はいまいち潜入していた時の記憶があいまいなようだ…
+		PRINTFORMW 结果，萨奎巴斯他们的仪式细节并不清楚。也许还需要调查……
+		;TranslatedMark 結局、サキュバスたちの儀式の詳細は分からなかった。また調査する必要があるかもしれない……
+		CALL CHANGE_RELATION_C_TO_C(サキュバス, CFLAG:対象:所属, 150, -200)
+		CALL COLOR_PRINTW("……不知为什么萨居巴斯势力的评价上升了"，颜色_注意)
+		;TranslatedMark "…なぜかサキュバス勢力の評価が上がったようだ", カラー_注意
+		兵数 = (800 + (RAND:7 + DAY / 5) * 500) * 2
+		COUNTRY_SOLDIER:サキュバス += 兵数
+		CALL COLOR_PRINTW(@"萨居巴斯等人聚集在一起，兵数好像增加了{兵数}人"，彩色_注意事项)
+		;TranslatedMark @"サキュバス達のところに人が集まり、兵数が{兵数}人増えた様だ", カラー_注意
+		FOR LOCAL, 0, CHARANUM
+			IF LOCAL != MASTER && CFLAG:(LOCAL):所属 == サキュバス && !CFLAG:(LOCAL):捕虜先 
+				ABL:LOCAL:武闘 += RAND:2
+				ABL:LOCAL:防衛 += RAND:2
+				ABL:LOCAL:知略 += RAND:2
+				ABL:LOCAL:政治 += RAND:2
+			ENDIF
+		NEXT
+	CALL COLOR_PRINTW(@"用青花鱼收集的精气强化了沙丁鱼们"，颜色_注意事项)	
+	;TranslatedMark @"サバトで集めた精気はサキュバス達を強化した", カラー_注意
+	ENDIF
+ENDIF
+
+
+RETURN 1

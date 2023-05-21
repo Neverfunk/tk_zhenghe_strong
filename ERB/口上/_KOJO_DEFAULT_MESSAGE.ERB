@@ -812,7 +812,7 @@ ELSEIF ARG == 44
 				PRINTL 在两个洞里产下了胳膊那么粗的触手…
 				;TranslatedMark 両穴で腕ほどの太さの触手を産み落としている…
 			ENDSELECT
-			LOCALS:0 = 膣和尻穴
+			LOCALS:0 = 膣とアナル
 		ELSE
 			;膣に産みつけられている
 			SELECTCASE RAND:14
@@ -1041,7 +1041,7 @@ ELSEIF ARG == 50
 			;TranslatedMark 忠誠を誓った証として、%ANAME(MASTER)%は%ANAME(TARGET)%の体に消えない烙印を焼き入れた
 	;それ以外
 	ELSE
-		PRINTFORMW %ANAME(MASTER)%让%ANAME(TARGET)%正对着，说出了宣誓效忠%ANAME(MASTER)%的誓言
+		PRINTFORMW %ANAME(MASTER)%对着%ANAME(TARGET)%，说出了宣誓效忠%ANAME(MASTER)%的誓言
 		;TranslatedMark %ANAME(MASTER)%は%ANAME(TARGET)%に対し、%ANAME(MASTER)%に服従し忠誠を誓うように言った
 		IF TALENT:服従
 			PRINTFORMW ……%ANAME(TARGET)%带着空虚的表情，嬉笑着向%ANAME(MASTER)%发出了恭顺的誓言
@@ -1074,7 +1074,7 @@ ELSEIF ARG == 51
 		;TranslatedMark まだ調教が足りないようだ…
 	;それ以外
 	ELSE
-		PRINTFORMW %ANAME(MASTER)%让%ANAME(TARGET)%正对着，说出了宣誓效忠%ANAME(MASTER)%的誓言
+		PRINTFORMW %ANAME(MASTER)%对着%ANAME(TARGET)%，说出了宣誓效忠%ANAME(MASTER)%的誓言
 		;TranslatedMark %ANAME(MASTER)%は%ANAME(TARGET)%に対し、%ANAME(MASTER)%に服従し忠誠を誓うように言った
 		IF TALENT:服従
 			PRINTFORMW ……%ANAME(TARGET)%想了一会，悲伤地摇了摇头
@@ -1537,6 +1537,10 @@ ELSEIF ARG == 241
 ELSEIF ARG == 343
 	;※触手部屋の管理者(=触手処刑の実行者)のキャラ番号はFLAG:触手部屋管理者に格納
 	
+	;(触手勢力拡張パッチ)触手処刑非表示フラグONの時はスキップ
+	SIF 触手処刑非表示フラグ == 1
+		RETURN
+	
 	妊婦フラグ = 0
 	IF TALENT:妊娠
 		妊婦フラグ = 1
@@ -1661,6 +1665,24 @@ ELSEIF ARG == 343
 				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
 			ENDIF
 			CALL GET_GOODS_EXECUTED(TARGET, 6, 1, 妊婦フラグ)
+			
+			;(従属国パッチ)ミッション達成
+			IF ACHIEVEMENT_MISSION:12 == 1
+				ACHIEVEMENT_MISSION:12 = 2
+				SETCOLOR カラー_注意
+				PRINTL 任务完成!
+				RESETCOLOR
+				WAIT
+			ENDIF
+			
+			IF ACHIEVEMENT_MISSION:18 == 1
+				ACHIEVEMENT_MISSION:18 = 2
+				SETCOLOR カラー_注意
+				PRINTL 任务完成!
+				RESETCOLOR
+				WAIT
+			ENDIF
+			
 		ELSE
 			IF HAS_PENIS(TARGET)
 				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
@@ -1674,6 +1696,16 @@ ELSEIF ARG == 343
 				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
 			ENDIF
 			CALL GET_GOODS_EXECUTED(TARGET, 6, 0, 妊婦フラグ)
+			
+			;(従属国パッチ)ミッション達成
+			IF ACHIEVEMENT_MISSION:12 == 1
+				ACHIEVEMENT_MISSION:12 = 2
+				SETCOLOR カラー_注意
+				PRINTL 任务完成!
+				RESETCOLOR
+				WAIT
+			ENDIF
+			
 		ENDIF
 
 	ELSEIF RESULT == 1
@@ -1750,6 +1782,24 @@ ELSEIF ARG == 343
 				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
 			ENDIF
 			CALL GET_GOODS_EXECUTED(TARGET, 6, 1, 妊婦フラグ)
+			
+			;(従属国パッチ)ミッション達成
+			IF ACHIEVEMENT_MISSION:12 == 1
+				ACHIEVEMENT_MISSION:12 = 2
+				SETCOLOR カラー_注意
+				PRINTL 任务完成!
+				RESETCOLOR
+				WAIT
+			ENDIF
+			
+			IF ACHIEVEMENT_MISSION:18 == 1
+				ACHIEVEMENT_MISSION:18 = 2
+				SETCOLOR カラー_注意
+				PRINTL 任务完成!
+				RESETCOLOR
+				WAIT
+			ENDIF
+			
 		ELSE
 			IF HAS_PENIS(TARGET)
 				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
@@ -1763,6 +1813,16 @@ ELSEIF ARG == 343
 				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
 			ENDIF
 			CALL GET_GOODS_EXECUTED(TARGET, 6, 0, 妊婦フラグ)
+			
+			;(従属国パッチ)ミッション達成
+			IF ACHIEVEMENT_MISSION:12 == 1
+				ACHIEVEMENT_MISSION:12 = 2
+				SETCOLOR カラー_注意
+				PRINTL 任务完成!
+				RESETCOLOR
+				WAIT
+			ENDIF
+			
 		ENDIF
 
 	ELSEIF RESULT == 2
@@ -1783,7 +1843,7 @@ ELSEIF ARG == 343
 		PRINTFORMW 必须亲自去咨询一下。
 		;TranslatedMark 親身になってカウンセリングを行ってやらなければならない。
 
-		IF HAS_VAGINA(TARGET)
+		IF HAS_VAGINA(TARGET) && CFLAG:TARGET:行動不能状態 != 行動不能_子供
 			PRINTFORMW 幸运的是%ANAME(TARGET)%是女性，可以为了触手而使用自己的身体
 			;TranslatedMark 幸いにも%ANAME(TARGET)%は女性だったので、触手の為に自分の身体を使うことにした
 			IF TALENT:妊娠
@@ -1833,10 +1893,45 @@ ELSEIF ARG == 343
 		;TranslatedMark それが自分の名前すらも忘れた%ANAME(TARGET)%の新しい生活となった……
 		
 		PRINTL 
+		IF HAS_VAGINA(TARGET) && CFLAG:TARGET:行動不能状態 != 行動不能_子供
+			IF TALENT:妊娠
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, Ｃ, Ａ, Ｂ, Ｍ, Ａ, 苦痛快楽, 被虐, 輪姦, 口淫, 触手, Ａ性交", "Ａ処女喪失, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手カウンセリング")
+			ELSE
+				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ｖ, 苦痛快楽, 被虐, 輪姦, 口淫, 触手, Ｖ性交", "処女喪失, 膣内射精, 接吻喪失, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手カウンセリング")
+			ENDIF
+		ENDIF
 		IF CFLAG:TARGET:行動不能状態 == 行動不能_子供
 			CALL GET_GOODS_EXECUTED(TARGET, 5, 1, 妊婦フラグ)
+			
+			;(従属国パッチ)ミッション達成
+			IF ACHIEVEMENT_MISSION:12 == 1
+				ACHIEVEMENT_MISSION:12 = 2
+				SETCOLOR カラー_注意
+				PRINTL 任务完成!
+				RESETCOLOR
+				WAIT
+			ENDIF
+			
+			IF ACHIEVEMENT_MISSION:18 == 1
+				ACHIEVEMENT_MISSION:18 = 2
+				SETCOLOR カラー_注意
+				PRINTL 任务完成!
+				RESETCOLOR
+				WAIT
+			ENDIF
+			
 		ELSE
 			CALL GET_GOODS_EXECUTED(TARGET, 5, 0, 妊婦フラグ)
+			
+			;(従属国パッチ)ミッション達成
+			IF ACHIEVEMENT_MISSION:12 == 1
+				ACHIEVEMENT_MISSION:12 = 2
+				SETCOLOR カラー_注意
+				PRINTL 任务完成!
+				RESETCOLOR
+				WAIT
+			ENDIF
+			
 		ENDIF
 
 	ELSEIF RESULT == 3
@@ -1921,6 +2016,24 @@ ELSEIF ARG == 343
 				CALL FUCK(TARGET, "欲望, 精愛, 性交, Ｖ拡張, Ａ拡張, 苦痛快楽, 被虐, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
 			ENDIF
 			CALL GET_GOODS_EXECUTED(TARGET, 6, 1, 妊婦フラグ)
+			
+			;(従属国パッチ)ミッション達成
+			IF ACHIEVEMENT_MISSION:12 == 1
+				ACHIEVEMENT_MISSION:12 = 2
+				SETCOLOR カラー_注意
+				PRINTL 任务完成!
+				RESETCOLOR
+				WAIT
+			ENDIF
+			
+			IF ACHIEVEMENT_MISSION:18 == 1
+				ACHIEVEMENT_MISSION:18 = 2
+				SETCOLOR カラー_注意
+				PRINTL 任务完成!
+				RESETCOLOR
+				WAIT
+			ENDIF
+			
 		ELSE
 			IF HAS_PENIS(TARGET)
 				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "触手飞机杯", "触手処刑")
@@ -1934,6 +2047,16 @@ ELSEIF ARG == 343
 				CALL FUCK(TARGET, "欲望, 性技, 精愛, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
 			ENDIF
 			CALL GET_GOODS_EXECUTED(TARGET, 6, 0, 妊婦フラグ)
+			
+			;(従属国パッチ)ミッション達成
+			IF ACHIEVEMENT_MISSION:12 == 1
+				ACHIEVEMENT_MISSION:12 = 2
+				SETCOLOR カラー_注意
+				PRINTL 任务完成!
+				RESETCOLOR
+				WAIT
+			ENDIF
+			
 		ENDIF
 		
 	ELSEIF RESULT == 4

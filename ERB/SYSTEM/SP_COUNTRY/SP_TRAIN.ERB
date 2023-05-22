@@ -17,6 +17,13 @@ IF CFLAG:MASTER:所属 == CHANGE_Government_GOBLIN:0 && CHANGE_Government_GOBLIN
 	RETURN
 ENDIF
 
+;(触手勢力拡張パッチ)自勢力が触手であって、かつ特殊勢力であることをやめた場合、ターン終了時の処理を利用して処理を終了
+IF CFLAG:MASTER:所属 == CHANGE_Government_TENTACLE:0 && CHANGE_Government_TENTACLE:1 == 2 && 勢力 == CFLAG:MASTER:所属 && IS_COUNTRY(勢力)
+	CALL Breeding_AREA_TENTACLE_01_TURNEND
+	CALL Breeding_AREA_TENTACLE_10_absorbent_TURNEND
+	RETURN
+ENDIF
+
 勢力定数 = SP_COUNTRY_TO_CONST(勢力)
 
 SIF !勢力定数
@@ -47,8 +54,18 @@ IF CFLAG:MASTER:所属 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフ�
 	CALL QuriltaiGOBLIN_EVENT_TURNEND
 	RETURN
 ENDIF
+;(触手勢力拡張パッチ)自勢力が触手であるとき、ターン終了時の処理を利用して処理を終了
+IF CFLAG:MASTER:所属 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_触手) && 勢力 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_触手)
+	CALL Breeding_AREA_TENTACLE_01_TURNEND
+	CALL Breeding_AREA_TENTACLE_10_absorbent_TURNEND
+	RETURN
+ENDIF
 ;(ホフゴブリン拡張パッチ)念のためホフゴブリンが特殊勢力であることをやめた場合処理を終了
 SIF 勢力 == CHANGE_Government_GOBLIN:0 && CHANGE_Government_GOBLIN:1 == 2
+	RETURN 0
+
+;(触手拡張パッチ)念のため触手が特殊勢力であることをやめた場合処理を終了
+SIF 勢力 == CHANGE_Government_TENTACLE:0 && CHANGE_Government_TENTACLE:1 == 2
 	RETURN 0
 
 FOR 対象, 0, CHARANUM
@@ -110,7 +127,7 @@ IF CFLAG:MASTER:所属 != GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフ�
 	ENDIF
 	PRINTFORML ホフゴブリンの集権性[ {Centralization_power_GOBLIN} ]
 	PRINTL
-	
+
 	IF Centralization_power_GOBLIN <= 0
 		SETCOLOR カラー_警告
 		PRINTFORML 哥布林宣布他们将会为所有人与妖的自由而战
@@ -119,12 +136,12 @@ IF CFLAG:MASTER:所属 != GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフ�
 		PRINTFORMW 哥布林不再是一个特殊势力
 		PRINTL
 		RESETCOLOR
-		
+
 		COUNTRY_EVENT_ID:勢力 = 0
 		FOR LOCAL, 0, CHARANUM
 			IF TALENT:LOCAL:特殊勢力素質 && CFLAG:LOCAL:所属 == 勢力
 				TALENT:LOCAL:特殊勢力素質 = 0
-				CFLAG:LOCAL:1713 = 1
+				非特殊ホフゴブリン:LOCAL:0 = 1
 				CALL SKILL_LEARN_BY_NAME(LOCAL, スキル_ジャンル_TROOP, 10102, "在黑旗的指引下前进！")
 				SIF RESULT
 					CALL COLOR_PRINTW(@"%ANAME(LOCAL)%习得了技能＜在黑旗的指引下前进！＞", カラー_注意)
@@ -135,13 +152,13 @@ IF CFLAG:MASTER:所属 != GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフ�
 					CALL COLOR_PRINTW(@"%ANAME(LOCAL)%习得了技能＜在黑旗的指引下前进！＞", カラー_注意)
 			ENDIF
 		NEXT
-	
+
 		FOR LOCAL, 0, MAX_COUNTRY
 			IF COUNTRY_Protectorate:LOCAL >= 3 && COUNTRY_Protectorate_REFERENCE:LOCAL:2 == 勢力
 				SPECIALIZATION_Protectorate:LOCAL = 3
 			ENDIF
 		NEXT
-		
+
 		CHANGE_Government_GOBLIN:1 = 2
 	ELSEIF Centralization_power_GOBLIN >= 200
 		SETCOLOR カラー_警告
@@ -152,8 +169,9 @@ IF CFLAG:MASTER:所属 != GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフ�
 		SIF RESULT
 			CALL COLOR_PRINTW(@"%ANAME(GET_COUNTRY_BOSS(勢力))%习得了技能＜王者的威光＞", カラー_注意)
 		COUNTRY_SOLDIER:勢力 += 50000
+		ゴブリン支持率:(GET_COUNTRY_BOSS(勢力)):0 = MAX(150, ゴブリン支持率:(GET_COUNTRY_BOSS(勢力)):0)
 		PRINTL
-		
+
 		CHANGE_Government_GOBLIN:1 = 1
 	ENDIF
 ENDIF
@@ -165,7 +183,7 @@ IF CFLAG:MASTER:所属 != GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフ�
 		IF CFLAG:LOCAL:所属 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン) && LOCAL != MASTER
 			IF 支持率トップ < 0
 				支持率トップ = LOCAL
-			ELSEIF CFLAG:LOCAL:1709 > CFLAG:支持率トップ:1709
+			ELSEIF ゴブリン支持率:LOCAL:0 > ゴブリン支持率:支持率トップ:0
 				支持率トップ = LOCAL
 			ENDIF
 		ENDIF

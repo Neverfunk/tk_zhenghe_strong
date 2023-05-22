@@ -44,6 +44,7 @@ RETURN 1
 #DIM ステージ
 #DIM 表示中研究番号
 #DIM FIRST_LINE
+#DIM 表示中継続方針
 
 FIRST_LINE = LINECOUNT
 
@@ -73,11 +74,127 @@ ENDIF
 CALL SINGLE_DRAWLINE
 CALL SHOW_TECHNOLOGY_TREE(勢力)
 CALL SINGLE_DRAWLINE
+PRINTL 继续方针
+
+IF CONTINUOUS_FOCUS:(CFLAG:MASTER:所属) != 1
+	SETCOLOR カラー_白
+ELSE
+	SETCOLOR カラー_選択中
+ENDIF
+PRINTBUTTON "[经济支援]", 5001
+RESETCOLOR
+PRINT
+
+IF CONTINUOUS_FOCUS:(CFLAG:MASTER:所属) != 2
+	SETCOLOR カラー_白
+ELSE
+	SETCOLOR カラー_選択中
+ENDIF
+PRINTBUTTON "[防御布告]", 5002
+RESETCOLOR
+PRINT
+
+IF CONTINUOUS_FOCUS:(CFLAG:MASTER:所属) != 3
+	SETCOLOR カラー_白
+ELSE
+	SETCOLOR カラー_選択中
+ENDIF
+PRINTBUTTON "[国际协调]", 5003
+RESETCOLOR
+PRINT
+
+IF COUNTRY_Protectorate:(CFLAG:MASTER:所属) != 1
+	SETCOLOR カラー_選択不可
+ELSEIF CONTINUOUS_FOCUS:(CFLAG:MASTER:所属) != 4
+	SETCOLOR カラー_白
+ELSE
+	SETCOLOR カラー_選択中
+ENDIF
+PRINTBUTTON "[安抚从属国]", 5004
+RESETCOLOR
+PRINT
+
+IF COUNTRY_Protectorate:(CFLAG:MASTER:所属) <= 1
+	SETCOLOR カラー_選択不可
+ELSEIF CONTINUOUS_FOCUS:(CFLAG:MASTER:所属) != 5
+	SETCOLOR カラー_白
+ELSE
+	SETCOLOR カラー_選択中
+ENDIF
+PRINTBUTTON "[自治权向上]", 5005
+RESETCOLOR
+PRINTL
+
+CALL SINGLE_DRAWLINE
 
 ジャンル = 表示中研究番号 / 100
 ステージ = 表示中研究番号 % 100
 
-IF !IS_TECHNOLOGY_EXISTS(ジャンル, ステージ)
+IF 表示中継続方針 == 5001
+	PRINTFORML 继续方针：经济支援
+	PRINTFORML 效果：经济发展提升1.1倍
+	PRINTFORML
+	IF 勢力 == CFLAG:MASTER:所属 && CONTINUOUS_FOCUS:(CFLAG:MASTER:所属) != 1
+		PRINTBUTTON "[继续选择]", 1002
+		PRINTL
+	ELSEIF 勢力 == CFLAG:MASTER:所属
+		PRINTL [选择中]
+	ELSE
+		PRINTL
+	ENDIF
+ELSEIF 表示中継続方針 == 5002
+	PRINTFORML 继续方针：防御布告
+	PRINTFORML 效果：防御倍率+0.05
+	PRINTFORML
+	IF 勢力 == CFLAG:MASTER:所属 && CONTINUOUS_FOCUS:(CFLAG:MASTER:所属) != 2
+		PRINTBUTTON "[继续选择]", 1002
+		PRINTL
+	ELSEIF 勢力 == CFLAG:MASTER:所属
+		PRINTL [选择中]
+	ELSE
+		PRINTL
+	ENDIF
+ELSEIF 表示中継続方針 == 5003
+	PRINTFORML 继续方针：国际协调
+	PRINTFORML 效果：每回合与全部势力的关系+20
+	PRINTFORML
+	IF 勢力 == CFLAG:MASTER:所属 && CONTINUOUS_FOCUS:(CFLAG:MASTER:所属) != 3
+		PRINTBUTTON "[继续选择]", 1002
+		PRINTL
+	ELSEIF 勢力 == CFLAG:MASTER:所属
+		PRINTL [选择中]
+	ELSE
+		PRINTL
+	ENDIF
+ELSEIF 表示中継続方針 == 5004
+	PRINTFORML 继续方针：安抚从属国
+	PRINTFORML 效果：每回合所有从属国的关系+40
+	PRINTFORML
+	IF COUNTRY_Protectorate:(CFLAG:MASTER:所属) != 1
+		PRINTL
+	ELSEIF 勢力 == CFLAG:MASTER:所属 && CONTINUOUS_FOCUS:(CFLAG:MASTER:所属) != 4
+		PRINTBUTTON "[继续选择]", 1002
+		PRINTL
+	ELSEIF 勢力 == CFLAG:MASTER:所属
+		PRINTL [选择中]
+	ELSE
+		PRINTL
+	ENDIF
+ELSEIF 表示中継続方針 == 5005
+	PRINTFORML 继续方针：自治权向上
+	PRINTFORML 效果：每回合与宗主国关系+40
+	PRINTFORML
+	IF COUNTRY_Protectorate:(CFLAG:MASTER:所属) <= 1
+		PRINTL
+	ELSEIF 勢力 == CFLAG:MASTER:所属 && CONTINUOUS_FOCUS:(CFLAG:MASTER:所属) != 5
+		PRINTBUTTON "[继续选择]", 1002
+		PRINTL
+	ELSEIF 勢力 == CFLAG:MASTER:所属
+		PRINTL [选择中]
+	ELSE
+		PRINTL
+	ENDIF
+ELSEIF !IS_TECHNOLOGY_EXISTS(ジャンル, ステージ)
 	PRINTL
 	PRINTL
 	PRINTL
@@ -110,11 +227,58 @@ ELSEIF RESULT == 1001 && 勢力 == CFLAG:MASTER:所属 && IS_TECHNOLOGY_RESEARCH
 	PRINTFORML 开始研究吗？（当前研究的进度将被重置）
 	CALL ASK_YN()
 	IF RESULT == 0 && TECHNOLOGY_RESEARCH_TARGET:勢力 != 表示中研究番号
+		CONTINUOUS_FOCUS:(CFLAG:MASTER:所属) = 0
 		TECHNOLOGY_RESEARCH_TARGET:勢力 = 表示中研究番号
 		TECHNOLOGY_RESEARCH_PROGRESS:勢力 = 0
 		PRINTFORMW 研究开始了
 	ENDIF
+ELSEIF RESULT == 1002 && 表示中継続方針 >= 5001 && 表示中継続方針 <= 5003
+	PRINTFORML 继续方针：效果已经生效
+	;TranslatedMark 継続方針：採用中効果発揮
+	PRINTL
+	PRINTFORML 是否采用继续方针？（目前正在进行的研究的进度将被重置）
+	;TranslatedMark 継続方針を採用しますか？（現在研究中の進捗状況はリセットされます）
+	CALL ASK_YN()
+	IF RESULT == 0 && CONTINUOUS_FOCUS:(CFLAG:MASTER:所属) != 表示中継続方針 - 5000
+		CONTINUOUS_FOCUS:(CFLAG:MASTER:所属) = 表示中継続方針 - 5000
+		TECHNOLOGY_RESEARCH_TARGET:勢力 = -1
+		TECHNOLOGY_RESEARCH_PROGRESS:勢力 = 0
+		PRINTFORMW 采用了继续方针
+		;TranslatedMark 継続方針を採用しました
+	ENDIF
+ELSEIF RESULT == 1002 && 表示中継続方針 == 5004 && COUNTRY_Protectorate:(CFLAG:MASTER:所属) == 1
+	PRINTFORML 继续方针：效果已经生效
+	;TranslatedMark 継続方針：採用中効果発揮
+	PRINTL
+	PRINTFORML 是否采用继续方针？（目前正在进行的研究的进度将被重置）
+	;TranslatedMark 継続方針を採用しますか？（現在研究中の進捗状況はリセットされます）
+	CALL ASK_YN()
+	IF RESULT == 0 && CONTINUOUS_FOCUS:(CFLAG:MASTER:所属) != 4
+		CONTINUOUS_FOCUS:(CFLAG:MASTER:所属) = 4
+		TECHNOLOGY_RESEARCH_TARGET:勢力 = -1
+		TECHNOLOGY_RESEARCH_PROGRESS:勢力 = 0
+		PRINTFORMW 采用了继续方针
+		;TranslatedMark 継続方針を採用しました
+	ENDIF
+ELSEIF RESULT == 1002 && 表示中継続方針 == 5005 && COUNTRY_Protectorate:(CFLAG:MASTER:所属) >= 2
+	PRINTFORML 继续方针：效果已经生效
+	;TranslatedMark 継続方針：採用中効果発揮
+	PRINTL
+	PRINTFORML 是否采用继续方针？（目前正在进行的研究的进度将被重置）
+	;TranslatedMark 継続方針を採用しますか？（現在研究中の進捗状況はリセットされます）
+	CALL ASK_YN()
+	IF RESULT == 0 && CONTINUOUS_FOCUS:(CFLAG:MASTER:所属) != 5
+		CONTINUOUS_FOCUS:(CFLAG:MASTER:所属) = 5
+		TECHNOLOGY_RESEARCH_TARGET:勢力 = -1
+		TECHNOLOGY_RESEARCH_PROGRESS:勢力 = 0
+		PRINTFORMW 采用了继续方针
+		;TranslatedMark 継続方針を採用しました
+	ENDIF
+ELSEIF RESULT >= 5001 && RESULT <= 5005
+	表示中継続方針 = RESULT
+	表示中研究番号 = 0
 ELSE
+	表示中継続方針 = 0
 	ジャンル = RESULT / 100
 	ステージ = RESULT % 100
 	SIF IS_TECHNOLOGY_EXISTS(ジャンル, ステージ)

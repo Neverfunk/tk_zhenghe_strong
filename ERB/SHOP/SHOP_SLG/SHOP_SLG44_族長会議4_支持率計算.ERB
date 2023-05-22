@@ -39,20 +39,20 @@ RETURNF 支持率トップ
 
 プレイヤー加算 = 0
 FOR 要請対象, 0, CHARANUM
-	SIF CFLAG:要請対象:所属 == CFLAG:MASTER:所属 && CFLAG:要請対象:捕虜先 != CFLAG:要請対象:所属 && 要請対象 != MASTER && CFLAG:要請対象:1711 && CFLAG:要請対象:1712 == MASTER
-		プレイヤー加算 += CFLAG:要請対象:1709
+	SIF CFLAG:要請対象:所属 == CFLAG:MASTER:所属 && CFLAG:要請対象:捕虜先 != CFLAG:要請対象:所属 && 要請対象 != MASTER && 他の士官を応援:要請対象:0 && 他の士官応援対象:要請対象:0 == MASTER
+		プレイヤー加算 += ゴブリン支持率:要請対象:0
 NEXT
 
 SIF 対象 == MASTER
-	RETURNF CFLAG:MASTER:1709 + プレイヤー加算
+	RETURNF ゴブリン支持率:MASTER:0 + プレイヤー加算
 
-プレイヤー最終支持率 = CFLAG:MASTER:1709 + プレイヤー加算
+プレイヤー最終支持率 = ゴブリン支持率:MASTER:0 + プレイヤー加算
 
 IF CFLAG:対象:所属 == 自勢力 && CFLAG:対象:捕虜先 != 自勢力
-	IF CFLAG:MASTER:1711 && CFLAG:MASTER:1712 == 対象
-		RETURNF CFLAG:対象:1709 + プレイヤー最終支持率
+	IF 他の士官を応援:MASTER:0 && 他の士官応援対象:MASTER:0 == 対象
+		RETURNF ゴブリン支持率:対象:0 + プレイヤー最終支持率
 	ELSE
-		RETURNF CFLAG:対象:1709
+		RETURNF ゴブリン支持率:対象:0
 	ENDIF
 ENDIF
 

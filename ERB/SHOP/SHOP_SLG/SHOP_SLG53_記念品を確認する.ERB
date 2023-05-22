@@ -33,6 +33,7 @@ RETURN 1
 #DIM 選択可能フラグ, 999
 #DIM 選択対象種類, 999
 #DIM 子供フラグ, 999
+#DIM 表示記念品
 
 FIRST_LINE = LINECOUNT
 
@@ -41,38 +42,51 @@ PRINTL ★纪念品的确认
 PRINTL 　可以确认到目前为止得到的「记念品」
 CALL SINGLE_DRAWLINE
 
-FOR 加工元識別ナンバー, 0, 999
-	FOR 種類, 0, 10
-		IF TYPE_GOODS_EXECUTED:加工元識別ナンバー:種類:0 > 0 && 種類 != 7
-			PRINTBUTTON @"{加工元識別ナンバー}[%NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類%]", 加工元識別ナンバー
-			選択可能フラグ:加工元識別ナンバー = 1
-			選択対象種類:加工元識別ナンバー = 種類
-			子供フラグ:加工元識別ナンバー = 0
-			PRINTL
-		ELSEIF TYPE_GOODS_EXECUTED:加工元識別ナンバー:種類:1 > 0 && 種類 != 7
-			PRINTBUTTON @"{加工元識別ナンバー}[%NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類%]", 加工元識別ナンバー
-			選択可能フラグ:加工元識別ナンバー = 1
-			選択対象種類:加工元識別ナンバー = 種類
-			子供フラグ:加工元識別ナンバー = 1
-			PRINTL
+IF 表示記念品 == 0
+	FOR 加工元識別ナンバー, 0, 999
+		FOR 種類, 0, 10
+			IF TYPE_GOODS_EXECUTED:加工元識別ナンバー:種類:0 > 0 && 種類 != 7
+				PRINTBUTTON @"{加工元識別ナンバー}[%NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類%]", 加工元識別ナンバー
+				選択可能フラグ:加工元識別ナンバー = 1
+				選択対象種類:加工元識別ナンバー = 種類
+				子供フラグ:加工元識別ナンバー = 0
+				PRINTL
+			ELSEIF TYPE_GOODS_EXECUTED:加工元識別ナンバー:種類:1 > 0 && 種類 != 7
+				PRINTBUTTON @"{加工元識別ナンバー}[%NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:種類%]", 加工元識別ナンバー
+				選択可能フラグ:加工元識別ナンバー = 1
+				選択対象種類:加工元識別ナンバー = 種類
+				子供フラグ:加工元識別ナンバー = 1
+				PRINTL
+			ENDIF
+		NEXT
+	NEXT
+ELSE
+	FOR 加工元識別ナンバー, 0, 999
+		IF TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:0 > 0 || TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:1 > 0
+			PRINTFORML [%NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:7%]
 		ENDIF
 	NEXT
-NEXT
+ENDIF
 
-FOR 加工元識別ナンバー, 0, 999
-	IF TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:0 > 0 || TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:1 > 0
-		PRINTFORML [%NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:7%]
-	ENDIF
-NEXT
 PRINTL
 CALL SINGLE_DRAWLINE
 PRINTBUTTON "9999[取消]", 9999
+PRINT 　
+IF 表示記念品 == 1
+	PRINTBUTTON "9998[記念品]", 9998
+ELSE
+	PRINTBUTTON "9998[生命之素]", 9998
+ENDIF
 
 INPUT
 
 IF RESULT == 9999
 	RETURN
-ELSEIF 選択可能フラグ:RESULT == 1
+ELSEIF RESULT == 9998 && 表示記念品 == 0
+	表示記念品 = 1
+ELSEIF RESULT == 9998 && 表示記念品 == 1
+	表示記念品 = 0
+ELSEIF 選択可能フラグ:RESULT == 1 && 表示記念品 == 0
 	CALL CHECK_MY_GOODS_EXECUTED_INFORMATION(RESULT, 選択対象種類:RESULT, 子供フラグ:RESULT)
 ENDIF
 
@@ -216,7 +230,7 @@ IF 選択 == 1 && 選択可能フラグ == 1
 		IS_GOODS_EXECUTED:加工元識別ナンバー = 0
 		NAME_BEFORE_GOODS_EXECUTED:加工元識別ナンバー = 0
 		TYPE_GOODS_EXECUTED:加工元識別ナンバー:種類:子供フラグ = 0
-		CFLAG:加工元士官:1704 = 0
+		記念品である:加工元士官:0 = 0
 
 		HAVE_GOODS_EXECUTED:種類 -= 1
 

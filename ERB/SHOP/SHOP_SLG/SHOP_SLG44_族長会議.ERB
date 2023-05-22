@@ -60,15 +60,15 @@ SIF 残り任期 == 3
 
 プレイヤー加算 = 0
 FOR 要請対象, 0, CHARANUM
-	SIF CFLAG:要請対象:所属 == CFLAG:MASTER:所属 && CFLAG:要請対象:捕虜先 != CFLAG:要請対象:所属 && 要請対象 != MASTER && CFLAG:要請対象:1711 && CFLAG:要請対象:1712 == MASTER
-		プレイヤー加算 += CFLAG:要請対象:1709
+	SIF CFLAG:要請対象:所属 == CFLAG:MASTER:所属 && CFLAG:要請対象:捕虜先 != CFLAG:要請対象:所属 && 要請対象 != MASTER && 他の士官を応援:要請対象:0 && 他の士官応援対象:要請対象:0 == MASTER
+		プレイヤー加算 += ゴブリン支持率:要請対象:0
 NEXT
 
-最終支持率:MASTER = CFLAG:MASTER:1709 + プレイヤー加算
+最終支持率:MASTER = ゴブリン支持率:MASTER:0 + プレイヤー加算
 FOR LOCAL, 0, CHARANUM
 	IF CFLAG:LOCAL:所属 == CFLAG:MASTER:所属 && CFLAG:LOCAL:捕虜先 != CFLAG:LOCAL:所属 && LOCAL != MASTER
-		最終支持率:LOCAL = CFLAG:LOCAL:1709
-		SIF CFLAG:MASTER:1711 && CFLAG:MASTER:1712 == LOCAL
+		最終支持率:LOCAL = ゴブリン支持率:LOCAL:0
+		SIF 他の士官を応援:MASTER:0 && 他の士官応援対象:MASTER:0 == LOCAL
 			最終支持率:LOCAL += 最終支持率:MASTER
 	ELSEIF LOCAL != MASTER
 		最終支持率:LOCAL = 0
@@ -117,9 +117,9 @@ IF CHANGE_Government_GOBLIN:1 == 2
 ELSE
 	PRINTL 族长
 ENDIF
-PRINTFORM [ %ANAME(君主)% ] 支持率[ {CFLAG:君主:1709} ] 
-SIF  CFLAG:MASTER:1711 && CFLAG:MASTER:1712 == 君主
-	PRINTFORM ＋ 加算[ {CFLAG:MASTER:1709 + プレイヤー加算} ] 
+PRINTFORM [ %ANAME(君主)% ] 支持率[ {ゴブリン支持率:君主:0} ]
+SIF  他の士官を応援:MASTER:0 && 他の士官応援対象:MASTER:0 == 君主
+	PRINTFORM ＋ 加算[ {ゴブリン支持率:MASTER:0 + プレイヤー加算} ]
 IF CHANGE_Government_GOBLIN:1 == 1
 	PRINTFORM 任期[ 终身 ]
 ELSE
@@ -134,45 +134,45 @@ ELSE
 	PRINTFORML 集权性[ {Centralization_power_GOBLIN} ]
 ENDIF
 
-PRINTFORM 支持率最高[ %ANAME(支持率トップ)% ] 支持率[ {CFLAG:支持率トップ:1709} ] 
-IF CFLAG:MASTER:1711 && CFLAG:MASTER:1712 == 支持率トップ
-	PRINTFORML ＋ 加算[ {最終支持率:MASTER} ] 
+PRINTFORM 支持率トップ[ %ANAME(支持率トップ)% ] 支持率[ {ゴブリン支持率:支持率トップ:0} ]
+IF 他の士官を応援:MASTER:0 && 他の士官応援対象:MASTER:0 == 支持率トップ
+	PRINTFORML ＋ 加算[ {最終支持率:MASTER} ]
 ELSE
-	PRINTL 
+	PRINTL
 ENDIF
 
 SIF 君主 != MASTER
-	PRINTFORM 你的支持率[ {CFLAG:MASTER:1709} ] ＋ 加算[ {プレイヤー加算} ] 
+	PRINTFORM 你的支持率[ {ゴブリン支持率:MASTER:0} ] ＋ 加算[ {プレイヤー加算} ]
 
-IF CFLAG:MASTER:1711
-	PRINTFORML 支持[ %ANAME(CFLAG:MASTER:1712)% ]中
+IF 他の士官を応援:MASTER:0
+	PRINTFORML 支持[ %ANAME(他の士官応援対象:MASTER:0)% ]中
 ELSE
-	PRINTFORML 
+	PRINTFORML
 ENDIF
 
-PRINTL 
+PRINTL
 IF !STATUE_GOBLIN_COUNCIL:0
 	PRINTBUTTON "[1] 公众便器的管理", 1
-	PRINTL 
+	PRINTL
 ENDIF
 PRINTBUTTON "[2] 支持其他士官", 2
-PRINTL 
+PRINTL
 PRINTBUTTON "[3] 请求其他士官支持", 3
-PRINTL 
+PRINTL
 PRINTBUTTON "[4] 绑架其他势力的俘虏", 4
-PRINTL 
+PRINTL
 IF CHANGE_Government_GOBLIN:1 == 2 && MONEY:(CFLAG:MASTER:所属) >= 5000 && 部隊編成可能フラグ == 1 && DAY >= SLG_PP:1
 	PRINTBUTTON "[6] 煽动起义(国庫10000消費)", 6
-	PRINTL 
+	PRINTL
 ELSEIF CHANGE_Government_GOBLIN:1 != 2
 	PRINTBUTTON "[5] 出去掠夺", 5
-	PRINTL 
+	PRINTL
 ENDIF
 
 
 CALL SINGLE_DRAWLINE
 PRINTBUTTON "1000[取消]", 1000
-PRINTL 
+PRINTL
 
 REDRAW 0
 
@@ -182,7 +182,7 @@ INPUT
 IF RESULT == 1000
 	REDRAW 1
 	RETURN
-	
+
 ELSEIF RESULT == 1 && !STATUE_GOBLIN_COUNCIL:0
 	CALL QuriltaiGOBLIN_MANAGE_PublicLavatory
 ELSEIF RESULT == 2
@@ -210,7 +210,12 @@ RESTART
 #DIM 性奴隷
 #DIMS 名前
 #DIM FIRST_LINE
+#DIM 残り陥落ターン
+#DIM 情報表示キャラ
 FIRST_LINE = LINECOUNT
+
+;SHOW_INFOの初期画面を基本情報にする
+FLAG:能力表示モード = 0
 
 CALL SINGLE_DRAWLINE
 PRINTL 公众便器的管理
@@ -218,7 +223,8 @@ CALL SINGLE_DRAWLINE
 
 FOR 性奴隷, 0, CHARANUM
 	CALL CHANGE_GOBLIN_subject(性奴隷)
-	IF CFLAG:性奴隷:1710 >= 1
+	IF ホフゴブリンに監禁:性奴隷:0 >= 1
+		残り陥落ターン = TRAIN_FALLEN_TERM:3 - (CFLAG:性奴隷:所属 == CFLAG:MASTER:所属)
 		IF STRLENS(ANAME(性奴隷)) >= MAX_CHARANAME_LENGTH
 			名前 = %SNAME(性奴隷)%
 		ELSE
@@ -226,29 +232,42 @@ FOR 性奴隷, 0, CHARANUM
 		ENDIF
 		CALL PRINTBUTTON_CENTER(@"[%名前, MAX_CHARANAME_LENGTH, LEFT%]", 性奴隷, 0)
 		CALL PRINT_SEX(性奴隷, 1, 0, 2)
-		PRINT  
-		SELECTCASE CFLAG:性奴隷:1710
+		PRINT
+		PRINTBUTTON "[能力]", 性奴隷 + 2000
+		PRINT
+		SELECTCASE ホフゴブリンに監禁:性奴隷:0
 			CASE 1
 				PRINTFORM [ 待　　机 ]
 			CASE 2
 				PRINT [
 				SETCOLOR カラー_緑
-				PRINTFORM  公众便器 
+				PRINTFORM  公众便器
 				RESETCOLOR
 				PRINT ]
 		ENDSELECT
-		PRINTL 
+		IF GETBIT(TALENT:性奴隷:特殊勢力陥落系, 特殊勢力_ホフゴブリン)
+			SETCOLOR カラー_選択中
+			PRINTFORML 　已陷落
+		ELSEIF SP_TRAIN_COUNT:性奴隷:特殊勢力_ホフゴブリン >= 残り陥落ターン - 1
+			PRINTFORML 　马上陷落
+		ELSEIF SP_TRAIN_COUNT:性奴隷:特殊勢力_ホフゴブリン >= 残り陥落ターン - 2
+			SETCOLOR カラー_選択不可
+			PRINTFORML 　即将陷落
+		ELSE
+			PRINTL
+		ENDIF
 	ENDIF
+	RESETCOLOR
 NEXT
 PRINTL
 
 CALL SINGLE_DRAWLINE
 PRINTBUTTON "[ 600][统一　运用终止]", 600
-PRINTL 
+PRINTL
 PRINTBUTTON "[ 700][统一　运用开始]", 700
-PRINTL 
+PRINTL
 PRINTBUTTON "[1000][　　　取消]", 1000
-PRINTL 
+PRINTL
 
 REDRAW 0
 
@@ -260,20 +279,29 @@ IF RESULT == 1000
 	RETURN
 ELSEIF RESULT == 600
 	FOR 性奴隷, 0, CHARANUM
-		IF CFLAG:性奴隷:1710 == 2
-			CFLAG:性奴隷:1710 = 1
+		IF ホフゴブリンに監禁:性奴隷:0 == 2
+			ホフゴブリンに監禁:性奴隷:0 = 1
 		ENDIF
 	NEXT
 ELSEIF RESULT == 700
 	FOR 性奴隷, 0, CHARANUM
-		IF CFLAG:性奴隷:1710 == 1
-			CFLAG:性奴隷:1710 = 2
+		IF ホフゴブリンに監禁:性奴隷:0 == 1
+			ホフゴブリンに監禁:性奴隷:0 = 2
 		ENDIF
 	NEXT
-ELSEIF CFLAG:RESULT:1710 == 1
-	CFLAG:RESULT:1710 = 2
-ELSEIF CFLAG:RESULT:1710 == 2
-	CFLAG:RESULT:1710 = 1
+ELSEIF RESULT >= 2000
+	情報表示キャラ = RESULT - 2000
+	;対象キャラの情報を表示
+	CALL SINGLE_DRAWLINE
+	CALL SHOW_INFO(情報表示キャラ)
+	CALL SINGLE_DRAWLINE
+	WAIT
+	CLEARLINE LINECOUNT - FIRST_LINE
+	RESTART
+ELSEIF ホフゴブリンに監禁:RESULT:0 == 1
+	ホフゴブリンに監禁:RESULT:0 = 2
+ELSEIF ホフゴブリンに監禁:RESULT:0 == 2
+	ホフゴブリンに監禁:RESULT:0 = 1
 ELSE
 	CLEARLINE 1
 	GOTO INPUT_LOOP
@@ -295,19 +323,19 @@ FIRST_LINE = LINECOUNT
 
 支持率加算 = 0
 FOR 要請対象, 0, CHARANUM
-	SIF CFLAG:要請対象:所属 == CFLAG:MASTER:所属 && CFLAG:要請対象:捕虜先 != CFLAG:要請対象:所属 && 要請対象 != MASTER && CFLAG:要請対象:1711 && CFLAG:要請対象:1712 == MASTER
-		支持率加算 += CFLAG:要請対象:1709
+	SIF CFLAG:要請対象:所属 == CFLAG:MASTER:所属 && CFLAG:要請対象:捕虜先 != CFLAG:要請対象:所属 && 要請対象 != MASTER && 他の士官を応援:要請対象:0 && 他の士官応援対象:要請対象:0 == MASTER
+		支持率加算 += ゴブリン支持率:要請対象:0
 NEXT
 
 CALL SINGLE_DRAWLINE
 PRINTL 支持其他士官
 PRINT 现在的支持对象
-IF !CFLAG:MASTER:1711
+IF !他の士官を応援:MASTER:0
 	PRINTL [ 无 ]
 ELSE
-	PRINTFORML [ %ANAME(CFLAG:MASTER:1712)% ] 支持率[ {CFLAG:(CFLAG:MASTER:1712):1709} ] ＋加算 [ {CFLAG:MASTER:1709} ] ＋ 加算[ {支持率加算} ]
+	PRINTFORML [ %ANAME(他の士官応援対象:MASTER:0)% ] 支持率[ {ゴブリン支持率:(他の士官応援対象:MASTER:0):0} ] ＋加算 [ {ゴブリン支持率:MASTER:0} ] ＋ 加算[ {支持率加算} ]
 ENDIF
-PRINTFORML 你的支持率[ {CFLAG:MASTER:1709} ] ＋ 加算[ {支持率加算} ]
+PRINTFORML 你的支持率[ {ゴブリン支持率:MASTER:0} ] ＋ 加算[ {支持率加算} ]
 CALL SINGLE_DRAWLINE
 
 FOR 応援対象, 0, CHARANUM
@@ -317,24 +345,24 @@ FOR 応援対象, 0, CHARANUM
 		ELSE
 			名前 = %ANAME(応援対象)%
 		ENDIF
-		IF CFLAG:MASTER:1711 && 応援対象 == CFLAG:MASTER:1712
+		IF 他の士官を応援:MASTER:0 && 応援対象 == 他の士官応援対象:MASTER:0
 			CALL PRINTBUTTON_CENTER(@"[%名前, MAX_CHARANAME_LENGTH, LEFT%]", 応援対象, 0, 0)
 		ELSE
 			CALL PRINTBUTTON_CENTER(@"[%名前, MAX_CHARANAME_LENGTH, LEFT%]", 応援対象, 0)
 		ENDIF
-		PRINTFORM  支持率[ {CFLAG:応援対象:1709} ] 
-		PRINTL 
-	ELSEIF 応援対象 == CFLAG:MASTER:1712
-		CFLAG:MASTER:1711 = 0
-		CFLAG:MASTER:1712 = 0
+		PRINTFORM  支持率[ {ゴブリン支持率:応援対象:0} ]
+		PRINTL
+	ELSEIF 応援対象 == 他の士官応援対象:MASTER:0
+		他の士官を応援:MASTER:0 = 0
+		他の士官応援対象:MASTER:0 = 0
 	ENDIF
 NEXT
 
 CALL SINGLE_DRAWLINE
 PRINTBUTTON "[ 900][支持终止]", 900
-PRINTL 
+PRINTL
 PRINTBUTTON "[1000][　　取消]", 1000
-PRINTL 
+PRINTL
 
 REDRAW 0
 
@@ -345,11 +373,11 @@ IF RESULT == 1000
 	REDRAW 1
 	RETURN
 ELSEIF RESULT == 900
-	CFLAG:MASTER:1711 = 0
-	CFLAG:MASTER:1712 = 0
+	他の士官を応援:MASTER:0 = 0
+	他の士官応援対象:MASTER:0 = 0
 ELSEIF CFLAG:RESULT:所属 == CFLAG:MASTER:所属 && CFLAG:RESULT:捕虜先 != CFLAG:RESULT:所属
-	CFLAG:MASTER:1711 = 1
-	CFLAG:MASTER:1712 = RESULT
+	他の士官を応援:MASTER:0 = 1
+	他の士官応援対象:MASTER:0 = RESULT
 ELSE
 	CLEARLINE 1
 	GOTO INPUT_LOOP
@@ -370,13 +398,13 @@ FIRST_LINE = LINECOUNT
 
 支持率加算 = 0
 FOR 要請対象, 0, CHARANUM
-	SIF CFLAG:要請対象:所属 == CFLAG:MASTER:所属 && CFLAG:要請対象:捕虜先 != CFLAG:要請対象:所属 && 要請対象 != MASTER && CFLAG:要請対象:1711 && CFLAG:要請対象:1712 == MASTER
-		支持率加算 += CFLAG:要請対象:1709
+	SIF CFLAG:要請対象:所属 == CFLAG:MASTER:所属 && CFLAG:要請対象:捕虜先 != CFLAG:要請対象:所属 && 要請対象 != MASTER && 他の士官を応援:要請対象:0 && 他の士官応援対象:要請対象:0 == MASTER
+		支持率加算 += ゴブリン支持率:要請対象:0
 NEXT
 
 CALL SINGLE_DRAWLINE
 PRINTL 请求其他士官支持
-PRINTFORML 你的支持率[ {CFLAG:MASTER:1709} ] ＋ 加算[ {支持率加算} ]
+PRINTFORML 你的支持率[ {ゴブリン支持率:MASTER:0} ] ＋ 加算[ {支持率加算} ]
 CALL SINGLE_DRAWLINE
 
 FOR 要請対象, 0, CHARANUM
@@ -387,24 +415,24 @@ FOR 要請対象, 0, CHARANUM
 			名前 = %ANAME(要請対象)%
 		ENDIF
 		CALL PRINTBUTTON_CENTER(@"[%名前, MAX_CHARANAME_LENGTH, LEFT%]", 要請対象, 0)
-		IF CFLAG:要請対象:1711 && MASTER == CFLAG:要請対象:1712
+		IF 他の士官を応援:要請対象:0 && MASTER == 他の士官応援対象:要請対象:0
 			PRINTL [ 支持中 ]
 		ELSE
-			PRINTL 
+			PRINTL
 		ENDIF
-	ELSEIF MASTER == CFLAG:要請対象:1712
-		CFLAG:要請対象:1711 = 0
-		CFLAG:要請対象:1712 = 0
+	ELSEIF MASTER == 他の士官応援対象:要請対象:0
+		他の士官を応援:要請対象:0 = 0
+		他の士官応援対象:要請対象:0 = 0
 	ENDIF
 NEXT
 
 CALL SINGLE_DRAWLINE
 PRINTBUTTON "[ 800][统一终止]", 800
-PRINTL 
+PRINTL
 PRINTBUTTON "[ 900][统一支持]", 900
-PRINTL 
+PRINTL
 PRINTBUTTON "[1000][　　取消]", 1000
-PRINTL 
+PRINTL
 
 REDRAW 0
 
@@ -416,25 +444,25 @@ IF RESULT == 1000
 	RETURN
 ELSEIF RESULT == 800
 	FOR 要請対象, 0, CHARANUM
-		IF CFLAG:要請対象:所属 == CFLAG:MASTER:所属 && CFLAG:要請対象:捕虜先 != CFLAG:要請対象:所属 && 要請対象 != MASTER && CFLAG:要請対象:1711 && CFLAG:要請対象:1712 == MASTER
-			CFLAG:要請対象:1711 = 0
-			CFLAG:要請対象:1712 = 0
+		IF CFLAG:要請対象:所属 == CFLAG:MASTER:所属 && CFLAG:要請対象:捕虜先 != CFLAG:要請対象:所属 && 要請対象 != MASTER && 他の士官を応援:要請対象:0 && 他の士官応援対象:要請対象:0 == MASTER
+			他の士官を応援:要請対象:0 = 0
+			他の士官応援対象:要請対象:0 = 0
 		ENDIF
 	NEXT
 ELSEIF RESULT == 900
 	FOR 要請対象, 0, CHARANUM
 		IF CFLAG:要請対象:所属 == CFLAG:MASTER:所属 && CFLAG:要請対象:捕虜先 != CFLAG:要請対象:所属 && 要請対象 != MASTER && (IS_FALLEN(要請対象) || TALENT:要請対象:親友)
-			CFLAG:要請対象:1711 = 1
-			CFLAG:要請対象:1712 = MASTER
+			他の士官を応援:要請対象:0 = 1
+			他の士官応援対象:要請対象:0 = MASTER
 		ENDIF
 	NEXT
 ELSEIF CFLAG:RESULT:所属 == CFLAG:MASTER:所属 && CFLAG:RESULT:捕虜先 != CFLAG:RESULT:所属 && RESULT != MASTER && (IS_FALLEN(RESULT) || TALENT:RESULT:親友)
-	IF MASTER == CFLAG:RESULT:1712 && CFLAG:RESULT:1711 == 1
-		CFLAG:RESULT:1711 = 0
-		CFLAG:RESULT:1712 = 0
+	IF MASTER == 他の士官応援対象:RESULT:0 && 他の士官を応援:RESULT:0 == 1
+		他の士官を応援:RESULT:0 = 0
+		他の士官応援対象:RESULT:0 = 0
 	ELSE
-		CFLAG:RESULT:1711 = 1
-		CFLAG:RESULT:1712 = MASTER
+		他の士官を応援:RESULT:0 = 1
+		他の士官応援対象:RESULT:0 = MASTER
 	ENDIF
 ELSE
 	CLEARLINE 1
@@ -470,19 +498,19 @@ IF !略奪対象勢力 || !IS_COUNTRY(略奪対象勢力)
 ELSE
 	PRINTFORML [ %ANAME(略奪対象勢力名)% ]势力 [ %CITY_NAME:略奪対象都市% ]
 ENDIF
-PRINTL 
+PRINTL
 
 CALL SINGLE_DRAWLINE
 PRINTBUTTON "[1][掠夺兵数的设定]", 1
-PRINTL 
+PRINTL
 PRINTBUTTON "[2][　掠夺兵的解散]", 2
-PRINTL 
+PRINTL
 IF SOLDIER_Predatoriness_GOBLIN > 0
 	PRINTBUTTON "[3][　掠夺的目的地]", 3
-	PRINTL 
+	PRINTL
 ENDIF
 PRINTBUTTON "[10][　　　　　取消]", 10
-PRINTL 
+PRINTL
 
 REDRAW 0
 
@@ -525,7 +553,7 @@ PRINTL 请输入掠夺兵数(输入0时不会改变)
 PRINTFORML 现在的所持金[ {MONEY} ] 最大兵数[ {最大略奪兵数} ]
 CALL SINGLE_DRAWLINE
 PRINTBUTTON "[     0]", 0
-PRINTL 
+PRINTL
 
 $INPUT_LOOP
 INPUT
@@ -561,7 +589,7 @@ CALL RESET_CITY_COLOR
 CALL SINGLE_DRAWLINE
 
 PRINTBUTTON " 0[取消]", 0
-PRINTL 
+PRINTL
 
 REDRAW 0
 
@@ -601,7 +629,7 @@ IF 都市 >= 0
 	ENDIF
 	Destination_Predatoriness_GOBLIN:0 = CITY_OWNER:都市
 	Destination_Predatoriness_GOBLIN:1 = 都市
-	
+
 	RETURN 1
 ENDIF
 CLEARLINE 1
@@ -664,13 +692,13 @@ CALL SINGLE_DRAWLINE
 PRINTFORML 确定要绑架这个角色吗？
 
 PRINTBUTTON " 0[　　　　　　　　　否]", 0
-PRINTL 
+PRINTL
 PRINTBUTTON " 1[　　　　　小心地绑架]", 1
-PRINTL 
+PRINTL
 IF CHANGE_Government_GOBLIN:1 != 2 && IS_FEMALE(対象) && CFLAG:対象:所属 != CFLAG:MASTER:所属
-	PRINTL 
+	PRINTL
 	PRINTBUTTON " 2[粗暴地绑架（※凌辱）]", 2
-	PRINTL 
+	PRINTL
 ENDIF
 
 $INPUT_LOOP
@@ -690,11 +718,11 @@ ELSEIF RESULT == 1
 	CALL CAPTURE(対象, CFLAG:MASTER:所属)
 	MONEY -= 10000
 	PRINTFORML 支持率上升了
-	支持率 = CFLAG:MASTER:1709
-	CFLAG:MASTER:1709 += 1
+	支持率 = ゴブリン支持率:MASTER:0
+	ゴブリン支持率:MASTER:0 += 1
 	SETCOLOR カラー_注意
-	PRINTFORMW 支持率：[ {支持率} ] → [ {CFLAG:MASTER:1709} ]
-	PRINTFORML 
+	PRINTFORMW 支持率：[ {支持率} ] → [ {ゴブリン支持率:MASTER:0} ]
+	PRINTFORML
 	RESETCOLOR
 	CLEARLINE LINECOUNT - FIRST_LINE
 	RESTART
@@ -704,7 +732,7 @@ ELSEIF RESULT == 2 && CHANGE_Government_GOBLIN:1 != 2 && IS_FEMALE(対象) && CF
 	CALL QuriltaiGOBLIN_Abduction_MSG(対象)
 	PRINTFORML 与%ANAME(GET_COUNTRY_BOSS(対象勢力))%势力之间的关系恶化了
 	CALL DIPLOMACY_WORSEN_RELATION(対象勢力, 50)
-	PRINTFORML 
+	PRINTFORML
 	IF IS_COUNTRY(所属勢力)
 		PRINTFORML 与%ANAME(GET_COUNTRY_BOSS(所属勢力))%势力之间的关系恶化了
 		CALL DIPLOMACY_WORSEN_RELATION(所属勢力, 100)
@@ -712,24 +740,24 @@ ELSEIF RESULT == 2 && CHANGE_Government_GOBLIN:1 != 2 && IS_FEMALE(対象) && CF
 	CALL CAPTURE(対象, CFLAG:MASTER:所属)
 	MONEY -= 10000
 	IF GET_COUNTRY_BOSS(CFLAG:MASTER:所属) == MASTER
-		PRINTFORML 支持率与集权性上升了
-		支持率 = CFLAG:MASTER:1709
-		CFLAG:MASTER:1709 += 2
+		PRINTFORML 支持率と集権性が上昇しました
+		支持率 = ゴブリン支持率:MASTER:0
+		ゴブリン支持率:MASTER:0 += 2
 		集権性 = Centralization_power_GOBLIN
 		Centralization_power_GOBLIN += 5
 		SETCOLOR カラー_注意
-		PRINTFORML 支持率：[ {支持率} ] → [ {CFLAG:MASTER:1709} ]
-		PRINTFORML 
+		PRINTFORML 支持率：[ {支持率} ] → [ {ゴブリン支持率:MASTER:0} ]
+		PRINTFORML
 		PRINTFORMW 集权性：[ {集権性} ] → [ {Centralization_power_GOBLIN} ]
-		PRINTFORML 
+		PRINTFORML
 		RESETCOLOR
 	ELSE
-		PRINTFORML 支持率上升了
-		支持率 = CFLAG:MASTER:1709
-		CFLAG:MASTER:1709 += 2
+		PRINTFORML 支持率が上昇しました
+		支持率 = ゴブリン支持率:MASTER:0
+		ゴブリン支持率:MASTER:0 += 2
 		SETCOLOR カラー_注意
-		PRINTFORMW 支持率：[ {支持率} ] → [ {CFLAG:MASTER:1709} ]
-		PRINTFORML 
+		PRINTFORMW 支持率：[ {支持率} ] → [ {ゴブリン支持率:MASTER:0} ]
+		PRINTFORML
 		RESETCOLOR
 	ENDIF
 	CLEARLINE LINECOUNT - FIRST_LINE
@@ -738,7 +766,7 @@ ELSE
 	CLEARLINE 1
 	GOTO INPUT_LOOP
 ENDIF
-	
+
 @SELECT_CHARA_LIST_SHOW_LOGIC_ABLE_Abduction_CHARA(対象)
 #DIM 対象
 RETURN 対象 != MASTER && CFLAG:対象:捕虜先 && CFLAG:対象:捕虜先 != CFLAG:MASTER:所属 && !IS_SP_CHARA(対象)
@@ -756,7 +784,7 @@ SETCOLOR カラー_注意
 PRINTFORML 内部にいたホフゴブリンと協力して%ANAME(GET_COUNTRY_BOSS(LOCAL:1))%勢力に囚われていた%ANAME(対象)%を拉致した！
 RESETCOLOR
 PRINTFORMW ホフゴブリンは暴れる%ANAME(対象)%に猿轡を噛ませると、その身体を抱え上げて外へと連れ出した……
-PRINTFORML 
+PRINTFORML
 ;(画像パッチ)
 ;CALL 画像表示(対象, 2, 5)
 PRINTFORML 被带到阴暗处的%ANAME(対象)%被哥布林他们侵犯了
@@ -940,10 +968,10 @@ SELECTCASE RAND:25
 ENDSELECT
 CALL FUCK_SP(対象, "欲望, 精愛, 奉仕, 性交, Ａ, Ｖ, 輪姦, Ｖ性交, Ａ性交", "膣内射精, 処女喪失, Ａ処女喪失", 勢力番号, GET_SPERM_ID("哥布林"), @"哥布林的\@ RAND:2 ? 唇 # 阴茎 \@", "哥布林", "", "輪姦")
 CALL FUCK_SP(対象, "欲望, 精愛, 奉仕, 性交, Ａ, Ｖ, 輪姦, Ｖ性交, Ａ性交", "膣内射精, 処女喪失, Ａ処女喪失", 勢力番号, GET_SPERM_ID("哥布林"), @"哥布林的\@ RAND:2 ? 唇 # 阴茎 \@", "哥布林", "", "輪姦")
-PRINTFORML 
+PRINTFORML
 PRINTFORMW %ANAME(対象)%被肆意侵犯后，哥布林们把她塞进破口袋给带回了自己的国家……
 ;TranslatedMark %ANAME(対象)%を好き放題に犯した後、ホフゴブリン達は彼女をボロ袋に詰め込んで自国へ持ち帰ってきた……
-PRINTFORML 
+PRINTFORML
 
 ;-------------------------------------------------
 ;「評議会」蜂起を扇動する
@@ -967,7 +995,7 @@ CALL RESET_CITY_COLOR
 CALL SINGLE_DRAWLINE
 
 PRINTBUTTON " 0[取消]", 0
-PRINTL 
+PRINTL
 
 REDRAW 0
 
@@ -1005,7 +1033,7 @@ IF 都市 >= 0
 		CLEARLINE LINECOUNT - FIRST_LINE
 		GOTO SHOW_LOOP
 	ENDIF
-	
+
 	PRINTFORML %CITY_NAME:都市%中赞同我们的民众起义了！
 	MONEY:(CFLAG:MASTER:所属) -= 10000
 	UNIT_POSITION:(CFLAG:MASTER:所属):部隊編成ナンバー = 都市

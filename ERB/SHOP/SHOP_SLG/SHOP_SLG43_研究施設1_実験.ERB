@@ -6,6 +6,8 @@
 #DIM 実験対象
 #DIM 士官フラグ
 #DIM 対象性別
+#DIM 身体改造結果
+身体改造結果 = 0
 
 外来人勢力 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_外来人)
 
@@ -16,7 +18,7 @@ PRINTFORML
 
 FOR 実験対象, 0, CHARANUM
 	CALL CHANGE_GAIRAI_subject(実験対象)
-	SIF !CFLAG:実験対象:1705
+	SIF !外来人に監禁:実験対象:0
 		CONTINUE
 	IF GETBIT(TALENT:実験対象:特殊勢力陥落系, 特殊勢力_外来人) || SP_TRAIN_COUNT:実験対象:特殊勢力_外来人 >= (TRAIN_FALLEN_TERM:2 - (CFLAG:実験対象:所属 == 外来人勢力))
 		士官フラグ = 1
@@ -24,7 +26,7 @@ FOR 実験対象, 0, CHARANUM
 		士官フラグ = 0
 	ENDIF
 
-	SELECTCASE CFLAG:実験対象:1707
+	SELECTCASE 実験内容:実験対象:0
 		CASE 0
 			PRINTFORML %ANAME(実験対象)%通过休养，精神恢复了
 			SP_TRAIN_COUNT:実験対象:特殊勢力_外来人 = MAX(0, SP_TRAIN_COUNT:実験対象:特殊勢力_外来人 - 1)
@@ -347,6 +349,21 @@ FOR 実験対象, 0, CHARANUM
 			RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属) += MAX(0, 1 - RAND:3)
 			COOLTIME:実験対象:0 = MAX(COOLTIME:実験対象:0 - 1 , 0)
 		CASE 10
+			IF TALENT:実験対象:Ｃ鈍感 == 1
+				身体改造結果 = 1
+				TALENT:実験対象:Ｃ鈍感 = 0
+			ELSEIF GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_淫核) && GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_自慰狂い)
+				身体改造結果 = 0
+			ELSEIF GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_淫核)
+				身体改造結果 = 2
+				SETBIT TALENT:実験対象:淫乱系, 素質_淫乱_自慰狂い
+			ELSEIF TALENT:実験対象:Ｃ敏感 == 1
+				身体改造結果 = 3
+				SETBIT TALENT:実験対象:淫乱系, 素質_淫乱_淫核
+			ELSE
+				身体改造結果 = 4
+				TALENT:実験対象:Ｃ敏感 = 1
+			ENDIF
 			SELECTCASE RAND:4
 				CASE 0
 					CALL LaboGAIRAI_TRYexperiment_MSG(実験対象, 601,士官フラグ)
@@ -358,31 +375,26 @@ FOR 実験対象, 0, CHARANUM
 					CALL LaboGAIRAI_TRYexperiment_MSG(実験対象, 604,士官フラグ)
 			ENDSELECT
 			SP_TRAIN_COUNT:実験対象:特殊勢力_外来人 ++
-			SP_TRAIN_COUNT:実験対象:特殊勢力_外来人 ++
 			RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属) += MAX(0, 1 - RAND:3)
-			CFLAG:実験対象:1707 = 0
-			IF TALENT:実験対象:Ｃ鈍感 == 1
-				SETCOLOR カラー_ピンク
-				PRINTFORMW %ANAME(実験対象)%的阴蒂感度上升了
-				RESETCOLOR
-				TALENT:実験対象:Ｃ鈍感 = 0
-			ELSEIF GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_淫核)
-				SETCOLOR カラー_ピンク
-				PRINTFORMW %ANAME(実験対象)%成为了<自慰狂>
-				RESETCOLOR
-				SETBIT TALENT:実験対象:淫乱系, 素質_淫乱_自慰狂い
-			ELSEIF TALENT:実験対象:Ｃ敏感 == 1
-				SETCOLOR カラー_ピンク
-				PRINTFORMW %ANAME(実験対象)%获得了<淫核>
-				RESETCOLOR
-				SETBIT TALENT:実験対象:淫乱系, 素質_淫乱_淫核
-			ELSE
-				SETCOLOR カラー_ピンク
-				PRINTFORMW %ANAME(実験対象)%的阴蒂感度进一步上升了
-				RESETCOLOR
-				TALENT:実験対象:Ｃ敏感 = 1
-			ENDIF
-			CALL ADD_COOLTIME(実験対象, 2)
+			SELECTCASE 身体改造結果
+				CASE 1
+					SETCOLOR カラー_ピンク
+					PRINTFORMW %ANAME(実験対象)%的阴蒂感度上升了
+					RESETCOLOR
+				CASE 2
+					SETCOLOR カラー_ピンク
+					PRINTFORMW %ANAME(実験対象)%成为了<自慰狂>
+					RESETCOLOR
+				CASE 3
+					SETCOLOR カラー_ピンク
+					PRINTFORMW %ANAME(実験対象)%获得了<淫核>
+					RESETCOLOR
+				CASE 4
+					SETCOLOR カラー_ピンク
+					PRINTFORMW %ANAME(実験対象)%的阴蒂感度进一步上升了
+					RESETCOLOR
+			ENDSELECT
+			COOLTIME:実験対象:0 = MAX(COOLTIME:実験対象:0 - 1 , 0)
 		CASE 11
 			IF !HAS_PENIS(実験対象)
 				SELECTCASE RAND:2
@@ -392,59 +404,97 @@ FOR 実験対象, 0, CHARANUM
 						CALL LaboGAIRAI_TRYexperiment_MSG(実験対象, 612,士官フラグ)
 				ENDSELECT
 			ELSE
+				IF TALENT:実験対象:Ｃ鈍感 == 1
+					身体改造結果 = 1
+					TALENT:実験対象:Ｃ鈍感 = 0
+				ELSEIF GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_射精狂い) && GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_濃厚精液)
+					身体改造結果 = 0
+				ELSEIF GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_射精狂い)
+					身体改造結果 = 2
+					SETBIT TALENT:実験対象:淫乱系, 素質_淫乱_濃厚精液
+				ELSEIF TALENT:実験対象:Ｃ敏感 == 1
+					身体改造結果 = 3
+					SETBIT TALENT:実験対象:淫乱系, 素質_淫乱_射精狂い
+				ELSE
+					身体改造結果 = 4
+					TALENT:実験対象:Ｃ敏感 = 1
+				ENDIF
 				SELECTCASE RAND:2
 					CASE 0
 						CALL LaboGAIRAI_TRYexperiment_MSG(実験対象, 711,士官フラグ)
 					CASE 1
 						CALL LaboGAIRAI_TRYexperiment_MSG(実験対象, 712,士官フラグ)
 				ENDSELECT
-				IF TALENT:実験対象:Ｃ鈍感 == 1
-					SETCOLOR カラー_ピンク
-					PRINTFORMW %ANAME(実験対象)%的阴茎感度上升了
-					RESETCOLOR
-					TALENT:実験対象:Ｃ鈍感 = 0
-				ELSEIF GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_射精狂い)
-					SETCOLOR カラー_ピンク
-					PRINTFORMW %ANAME(実験対象)%获得了<濃厚精液>
-					RESETCOLOR
-					SETBIT TALENT:実験対象:淫乱系, 素質_淫乱_濃厚精液
-				ELSEIF TALENT:実験対象:Ｃ敏感 == 1
-					SETCOLOR カラー_ピンク
-					PRINTFORMW %ANAME(実験対象)%成为了<射精狂>
-					RESETCOLOR
-					SETBIT TALENT:実験対象:淫乱系, 素質_淫乱_射精狂い
-				ELSE
-					SETCOLOR カラー_ピンク
-					PRINTFORMW %ANAME(実験対象)%的阴茎感度进一步上升了
-					RESETCOLOR
-					TALENT:実験対象:Ｃ敏感 = 1
-				ENDIF
+				SELECTCASE 身体改造結果
+					CASE 1
+						SETCOLOR カラー_ピンク
+						PRINTFORMW %ANAME(実験対象)%的阴茎感度上升了
+						RESETCOLOR
+					CASE 2
+						SETCOLOR カラー_ピンク
+						PRINTFORMW %ANAME(実験対象)%获得了<濃厚精液>
+						RESETCOLOR
+					CASE 3
+						SETCOLOR カラー_ピンク
+						PRINTFORMW %ANAME(実験対象)%成为了<射精狂>
+						RESETCOLOR
+					CASE 4
+						SETCOLOR カラー_ピンク
+						PRINTFORMW %ANAME(実験対象)%的阴茎感度进一步上升了
+						RESETCOLOR
+				ENDSELECT
 			ENDIF
 			SP_TRAIN_COUNT:実験対象:特殊勢力_外来人 ++
-			SP_TRAIN_COUNT:実験対象:特殊勢力_外来人 ++
 			RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属) += MAX(0, 1 - RAND:3)
-			CFLAG:実験対象:1707 = 0
-			CALL ADD_COOLTIME(実験対象, 2)
+			COOLTIME:実験対象:0 = MAX(COOLTIME:実験対象:0 - 1 , 0)
 		CASE 12
 			IF IS_MALE(実験対象)
-				CALL LaboGAIRAI_TRYexperiment_MSG(実験対象, 622,士官フラグ)
 				IF TALENT:実験対象:Ｂ鈍感 == 1
-					SETCOLOR カラー_ピンク
-					PRINTFORMW %ANAME(実験対象)%的胸部感度上升了
-					RESETCOLOR
+					身体改造結果 = 1
 					TALENT:実験対象:Ｂ鈍感 = 0
+				ELSEIF GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_淫乳)
+					身体改造結果 = 0
 				ELSEIF TALENT:実験対象:Ｂ敏感 == 1
-					SETCOLOR カラー_ピンク
-					PRINTFORMW %ANAME(実験対象)%获得了<淫乳>
-					RESETCOLOR
+					身体改造結果 = 2
 					SETBIT TALENT:実験対象:淫乱系, 素質_淫乱_淫乳
 				ELSE
-					SETCOLOR カラー_ピンク
-					PRINTFORMW %ANAME(実験対象)%的胸部感度进一步上升了
-					RESETCOLOR
+					身体改造結果 = 3
 					TALENT:実験対象:Ｂ敏感 = 1
 				ENDIF
+				CALL LaboGAIRAI_TRYexperiment_MSG(実験対象, 622,士官フラグ)
+				SELECTCASE 身体改造結果
+					CASE 1
+						SETCOLOR カラー_ピンク
+						PRINTFORMW %ANAME(実験対象)%的胸部感度上升了
+						RESETCOLOR
+					CASE 2
+						SETCOLOR カラー_ピンク
+						PRINTFORMW %ANAME(実験対象)%获得了<淫乳>
+						RESETCOLOR
+					CASE 3
+						SETCOLOR カラー_ピンク
+						PRINTFORMW %ANAME(実験対象)%的胸部感度进一步上升了
+						RESETCOLOR
+				ENDSELECT
 			ELSE
+				IF !TALENT:(実験対象):母乳体質
+					TALENT:(実験対象):母乳体質 = 1
+					身体改造結果 = 1
+				ELSEIF TALENT:実験対象:Ｂ鈍感 == 1
+					身体改造結果 = 2
+					TALENT:実験対象:Ｂ鈍感 = 0
+				ELSEIF GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_雌牛)
+					身体改造結果 = 0
+				ELSEIF GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_淫乳)
+					身体改造結果 = 5
+					SETBIT TALENT:実験対象:淫乱系, 素質_淫乱_雌牛
+				ELSEIF TALENT:実験対象:Ｂ敏感 == 1
+					身体改造結果 = 3
+					SETBIT TALENT:実験対象:淫乱系, 素質_淫乱_淫乳
+				ELSE
+					身体改造結果 = 4
+					TALENT:実験対象:Ｂ敏感 = 1
+				ENDIF
 				SELECTCASE RAND:3
 					CASE 0
 						CALL LaboGAIRAI_TRYexperiment_MSG(実験対象, 621,士官フラグ)
@@ -453,33 +503,47 @@ FOR 実験対象, 0, CHARANUM
 					CASE 2
 						CALL LaboGAIRAI_TRYexperiment_MSG(実験対象, 623,士官フラグ)
 				ENDSELECT
-				IF !TALENT:(実験対象):母乳体質
-					TALENT:(実験対象):母乳体質 = 1
-					CALL COLOR_PRINT(@"%ANAME(実験対象)%获得了母乳体质", カラー_ピンク)
-					PRINTFORMW
-				ELSEIF TALENT:実験対象:Ｂ鈍感 == 1
-					SETCOLOR カラー_ピンク
-					PRINTFORMW %ANAME(実験対象)%的胸部感度上升了
-					RESETCOLOR
-					TALENT:実験対象:Ｂ鈍感 = 0
-				ELSEIF TALENT:実験対象:Ｂ敏感 == 1
-					SETCOLOR カラー_ピンク
-					PRINTFORMW %ANAME(実験対象)%获得了<淫乳>
-					RESETCOLOR
-					SETBIT TALENT:実験対象:淫乱系, 素質_淫乱_淫乳
-				ELSE
-					SETCOLOR カラー_ピンク
-					PRINTFORMW %ANAME(実験対象)%的胸部感度进一步上升了
-					RESETCOLOR
-					TALENT:実験対象:Ｂ敏感 = 1
-				ENDIF
+				SELECTCASE 身体改造結果
+					CASE 1
+						CALL COLOR_PRINT(@"%ANAME(実験対象)%获得了母乳体质", カラー_ピンク)
+						PRINTFORMW
+					CASE 2
+						SETCOLOR カラー_ピンク
+						PRINTFORMW %ANAME(実験対象)%的胸部感度上升了
+						RESETCOLOR
+					CASE 3
+						SETCOLOR カラー_ピンク
+						PRINTFORMW %ANAME(実験対象)%获得了<淫乳>
+						RESETCOLOR
+					CASE 4
+						SETCOLOR カラー_ピンク
+						PRINTFORMW %ANAME(実験対象)%的胸部感度进一步上升了
+						RESETCOLOR
+					CASE 5
+						SETCOLOR カラー_ピンク
+						PRINTFORMW %ANAME(実験対象)%获得了<雌牛>
+						RESETCOLOR
+				ENDSELECT
 			ENDIF
 			SP_TRAIN_COUNT:実験対象:特殊勢力_外来人 ++
-			SP_TRAIN_COUNT:実験対象:特殊勢力_外来人 ++
 			RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属) += MAX(0, 1 - RAND:3)
-			CFLAG:実験対象:1707 = 0
-			CALL ADD_COOLTIME(実験対象, 2)
+			COOLTIME:実験対象:0 = MAX(COOLTIME:実験対象:0 - 1 , 0)
 		CASE 13
+			IF TALENT:実験対象:Ｖ鈍感 == 1
+				身体改造結果 = 1
+				TALENT:実験対象:Ｖ鈍感 = 0
+			ELSEIF GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_淫壷) && GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_良質母胎)
+				身体改造結果 = 0
+			ELSEIF GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_淫壷)
+				身体改造結果 = 2
+				SETBIT TALENT:実験対象:淫乱系, 素質_淫乱_良質母胎
+			ELSEIF TALENT:実験対象:Ｖ敏感 == 1
+				身体改造結果 = 3
+				SETBIT TALENT:実験対象:淫乱系, 素質_淫乱_淫壷
+			ELSE
+				身体改造結果 = 4
+				TALENT:実験対象:Ｖ敏感 = 1
+			ENDIF
 			SELECTCASE RAND:2
 				CASE 0
 					CALL LaboGAIRAI_TRYexperiment_MSG(実験対象, 631,士官フラグ)
@@ -487,87 +551,118 @@ FOR 実験対象, 0, CHARANUM
 					CALL LaboGAIRAI_TRYexperiment_MSG(実験対象, 632,士官フラグ)
 			ENDSELECT
 			SP_TRAIN_COUNT:実験対象:特殊勢力_外来人 ++
-			SP_TRAIN_COUNT:実験対象:特殊勢力_外来人 ++
 			RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属) += MAX(0, 1 - RAND:3)
-			CFLAG:実験対象:1707 = 0
-			IF TALENT:実験対象:Ｖ鈍感 == 1
-				SETCOLOR カラー_ピンク
-				PRINTFORMW %ANAME(実験対象)%的阴道感度上升了
-				RESETCOLOR
-				TALENT:実験対象:Ｖ鈍感 = 0
-			ELSEIF GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_淫壷)
-				SETCOLOR カラー_ピンク
-				PRINTFORMW %ANAME(実験対象)%成为了<良質母胎>
-				RESETCOLOR
-				SETBIT TALENT:実験対象:淫乱系, 素質_淫乱_良質母胎
-			ELSEIF TALENT:実験対象:Ｖ敏感 == 1
-				SETCOLOR カラー_ピンク
-				PRINTFORMW %ANAME(実験対象)%获得了<淫壷>
-				RESETCOLOR
-				SETBIT TALENT:実験対象:淫乱系, 素質_淫乱_淫壷
-			ELSE
-				SETCOLOR カラー_ピンク
-				PRINTFORMW %ANAME(実験対象)%的阴道感度进一步上升了
-				RESETCOLOR
-				TALENT:実験対象:Ｖ敏感 = 1
-			ENDIF
-			CALL ADD_COOLTIME(実験対象, 2)
+			SELECTCASE 身体改造結果
+				CASE 1
+					SETCOLOR カラー_ピンク
+					PRINTFORMW %ANAME(実験対象)%的阴道感度上升了
+					RESETCOLOR
+				CASE 2
+					SETCOLOR カラー_ピンク
+					PRINTFORMW %ANAME(実験対象)%成为了<良質母胎>
+					RESETCOLOR
+				CASE 3
+					SETCOLOR カラー_ピンク
+					PRINTFORMW %ANAME(実験対象)%获得了<淫壷>
+					RESETCOLOR
+				CASE 4
+					SETCOLOR カラー_ピンク
+					PRINTFORMW %ANAME(実験対象)%的阴道感度进一步上升了
+					RESETCOLOR
+			ENDSELECT
+			COOLTIME:実験対象:0 = MAX(COOLTIME:実験対象:0 - 1 , 0)
 		CASE 14
-			CALL LaboGAIRAI_TRYexperiment_MSG(実験対象, 641,士官フラグ)
-			SP_TRAIN_COUNT:実験対象:特殊勢力_外来人 ++
-			SP_TRAIN_COUNT:実験対象:特殊勢力_外来人 ++
-			RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属) += MAX(0, 1 - RAND:3)
-			CFLAG:実験対象:1707 = 0
 			IF TALENT:実験対象:Ａ鈍感 == 1
-				SETCOLOR カラー_ピンク
-				PRINTFORMW %ANAME(実験対象)%的肛门感度上升了
-				RESETCOLOR
+				身体改造結果 = 1
 				TALENT:実験対象:Ａ鈍感 = 0
+			ELSEIF GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_尻穴狂い)
+				身体改造結果 = 0
 			ELSEIF TALENT:実験対象:Ａ敏感 == 1
-				SETCOLOR カラー_ピンク
-				PRINTFORMW %ANAME(実験対象)%成为了<尻穴狂い>
-				RESETCOLOR
+				身体改造結果 = 2
 				SETBIT TALENT:実験対象:淫乱系, 素質_淫乱_尻穴狂い
 			ELSE
-				SETCOLOR カラー_ピンク
-				PRINTFORMW %ANAME(実験対象)%的肛门感度进一步上升了
-				RESETCOLOR
+				身体改造結果 = 3
 				TALENT:実験対象:Ａ敏感 = 1
 			ENDIF
-			CALL ADD_COOLTIME(実験対象, 2)
+			CALL LaboGAIRAI_TRYexperiment_MSG(実験対象, 641,士官フラグ)
+			SP_TRAIN_COUNT:実験対象:特殊勢力_外来人 ++
+			RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属) += MAX(0, 1 - RAND:3)
+			SELECTCASE 身体改造結果
+				CASE 1
+					SETCOLOR カラー_ピンク
+					PRINTFORMW %ANAME(実験対象)%的肛门感度上升了
+					RESETCOLOR
+				CASE 2
+					SETCOLOR カラー_ピンク
+					PRINTFORMW %ANAME(実験対象)%成为了<尻穴狂い>
+					RESETCOLOR
+				CASE 3
+					SETCOLOR カラー_ピンク
+					PRINTFORMW %ANAME(実験対象)%的肛门感度进一步上升了
+					RESETCOLOR
+			ENDSELECT
+			COOLTIME:実験対象:0 = MAX(COOLTIME:実験対象:0 - 1 , 0)
 		CASE 15
+			IF TALENT:実験対象:Ｕ鈍感 == 1
+				身体改造結果 = 1
+				TALENT:実験対象:Ｕ鈍感 = 0
+			ELSEIF TALENT:実験対象:漏尿癖 == 1 && GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_尿道狂い)
+				身体改造結果 = 0
+			ELSEIF TALENT:実験対象:漏尿癖 == 1
+				身体改造結果 = 2
+				SETBIT TALENT:実験対象:淫乱系, 素質_淫乱_尿道狂い
+			ELSEIF TALENT:実験対象:Ｕ敏感 == 1
+				身体改造結果 = 3
+				TALENT:実験対象:漏尿癖 = 1
+			ELSE
+				身体改造結果 = 4
+				TALENT:実験対象:Ｕ敏感 = 1
+			ENDIF
 			IF IS_MALE(実験対象)
 				CALL LaboGAIRAI_TRYexperiment_MSG(実験対象, 751,士官フラグ)
 			ELSE
 				CALL LaboGAIRAI_TRYexperiment_MSG(実験対象, 651,士官フラグ)
 			ENDIF
 			SP_TRAIN_COUNT:実験対象:特殊勢力_外来人 ++
-			SP_TRAIN_COUNT:実験対象:特殊勢力_外来人 ++
 			RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属) += MAX(0, 1 - RAND:3)
-			CFLAG:実験対象:1707 = 0
-			IF TALENT:実験対象:Ｕ鈍感 == 1
-				SETCOLOR カラー_ピンク
-				PRINTFORMW %ANAME(実験対象)%的尿道感度上升了
-				RESETCOLOR
-				TALENT:実験対象:Ｕ鈍感 = 0
-			ELSEIF TALENT:実験対象:漏尿癖 == 1
-				SETCOLOR カラー_ピンク
-				PRINTFORMW %ANAME(実験対象)%成为了<尿道狂>
-				RESETCOLOR
-				SETBIT TALENT:実験対象:淫乱系, 素質_淫乱_尿道狂い
-			ELSEIF TALENT:実験対象:Ｕ敏感 == 1
-				SETCOLOR カラー_ピンク
-				PRINTFORMW %ANAME(実験対象)%获得了<漏尿癖>
-				RESETCOLOR
-				TALENT:実験対象:漏尿癖 = 1
-			ELSE
-				SETCOLOR カラー_ピンク
-				PRINTFORMW %ANAME(実験対象)%的尿道感度进一步上升了
-				RESETCOLOR
-				TALENT:実験対象:Ｕ敏感 = 1
-			ENDIF
-			CALL ADD_COOLTIME(実験対象, 2)
+			SELECTCASE 身体改造結果
+				CASE 1
+					SETCOLOR カラー_ピンク
+					PRINTFORMW %ANAME(実験対象)%的尿道感度上升了
+					RESETCOLOR
+				CASE 2
+					SETCOLOR カラー_ピンク
+					PRINTFORMW %ANAME(実験対象)%成为了<尿道狂>
+					RESETCOLOR
+				CASE 3
+					SETCOLOR カラー_ピンク
+					PRINTFORMW %ANAME(実験対象)%获得了<漏尿癖>
+					RESETCOLOR
+				CASE 4
+					SETCOLOR カラー_ピンク
+					PRINTFORMW %ANAME(実験対象)%的尿道感度进一步上升了
+					RESETCOLOR
+			ENDSELECT
+			COOLTIME:実験対象:0 = MAX(COOLTIME:実験対象:0 - 1 , 0)
 	ENDSELECT
+
+	;ミッション達成
+	IF ACHIEVEMENT_MISSION:51 == 1
+		ACHIEVEMENT_MISSION:51 = 2
+		SETCOLOR カラー_注意
+		PRINTL 任务完成!
+		RESETCOLOR
+		WAIT
+	ENDIF
+
+	;ミッション達成
+	IF ACHIEVEMENT_MISSION:52 == 1 && GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_淫核) && GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_自慰狂い) && GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_射精狂い) && GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_濃厚精液) && GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_淫乳) && GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_雌牛) && GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_淫壷) && GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_良質母胎) && GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_尻穴狂い) && GETBIT(TALENT:実験対象:淫乱系, 素質_淫乱_尿道狂い)
+		ACHIEVEMENT_MISSION:52 = 2
+		SETCOLOR カラー_注意
+		PRINTL ミッション達成!
+		RESETCOLOR
+		WAIT
+	ENDIF
 
 	IF IS_BETRAY_TO_SP_COUNTRY(実験対象, 外来人勢力)
 		PRINTFORML
@@ -609,7 +704,7 @@ FOR 実験対象, 0, CHARANUM
 		ENDIF
 	ENDIF
 	PRINTL
-	SIF CFLAG:実験対象:1707 > 0 && CFLAG:実験対象:1707 <= 15
+	SIF 実験内容:実験対象:0 > 0 && 実験内容:実験対象:0 <= 15
 		WAIT
 NEXT
 
@@ -1747,30 +1842,30 @@ ENDSELECT
 ;-------------------------------------------------
 @LaboGAIRAI_TRYexperiment_MAINexamination(実験対象)
 #DIM 実験対象
-#DIM 被対象者
+#DIM 被実験対象
 
-被対象者 = CFLAG:実験対象:1708
+被実験対象 = 被対象者:実験対象:0
 
-IF CFLAG:被対象者:1705 == 0
-	PRINTFORML 因为没有%ANAME(被対象者)%，所以和%ANAME(実験対象)%的交配实验中止了
-	;TranslatedMark %ANAME(被対象者)%がいないため、%ANAME(実験対象)%との交配実験は中止されました
+IF 外来人に監禁:被実験対象:0 == 0
+	PRINTFORML 因为没有%ANAME(被実験対象)%，所以和%ANAME(実験対象)%的交配实验中止了
+	;TranslatedMark %ANAME(被実験対象)%がいないため、%ANAME(実験対象)%との交配実験は中止されました
 	RETURN
 ENDIF
 
-PRINTFORML 外来人为了生产更优秀的生命体，决定将%ANAME(実験対象)%和%ANAME(被対象者)%进行交配
-;TranslatedMark 外来人たちはより優秀な生命体を生産するため、%ANAME(実験対象)%と%ANAME(被対象者)%を交配することにした
-PRINTFORML %ANAME(被対象者)%双手双脚被固定在实验台上，而%ANAME(実験対象)%以压在上面的姿势结合在了一起
-;TranslatedMark %ANAME(被対象者)%が四つん這いに固定され、%ANAME(実験対象)%はその上にのしかかる体勢で接合された
-PRINTFORML 被药物提升到极限的%ANAME(被対象者)%的肉壶，为了榨取精液而勒紧了%ANAME(実験対象)%的肉棒
-;TranslatedMark 薬品によって極限まで昂った%ANAME(被対象者)%の肉壺は、精液を搾り取ろうと%ANAME(実験対象)%の肉棒を締め付けている
-PRINTFORML 研究人员用粗壮的器具刺激了%ANAME(実験対象)%的前列腺，%ANAME(実験対象)%边呻吟边在%ANAME(被対象者)%中释放出了精液
-;TranslatedMark さらに研究員が太い器具で%ANAME(実験対象)%の前立腺を刺激すると、%ANAME(実験対象)%はうめき声をあげながら%ANAME(被対象者)%の中に精を放った
+PRINTFORML 外来人为了生产更优秀的生命体，决定将%ANAME(実験対象)%和%ANAME(被実験対象)%进行交配
+;TranslatedMark 外来人たちはより優秀な生命体を生産するため、%ANAME(実験対象)%と%ANAME(被実験対象)%を交配することにした
+PRINTFORML %ANAME(被実験対象)%双手双脚被固定在实验台上，而%ANAME(実験対象)%以压在上面的姿势结合在了一起
+;TranslatedMark %ANAME(被実験対象)%が四つん這いに固定され、%ANAME(実験対象)%はその上にのしかかる体勢で接合された
+PRINTFORML 被药物提升到极限的%ANAME(被実験対象)%的肉壶，为了榨取精液而勒紧了%ANAME(実験対象)%的肉棒
+;TranslatedMark 薬品によって極限まで昂った%ANAME(被実験対象)%の肉壺は、精液を搾り取ろうと%ANAME(実験対象)%の肉棒を締め付けている
+PRINTFORML 研究人员用粗壮的器具刺激了%ANAME(実験対象)%的前列腺，%ANAME(実験対象)%边呻吟边在%ANAME(被実験対象)%中释放出了精液
+;TranslatedMark さらに研究員が太い器具で%ANAME(実験対象)%の前立腺を刺激すると、%ANAME(実験対象)%はうめき声をあげながら%ANAME(被実験対象)%の中に精を放った
 
-CALL FUCK(実験対象, "欲望, 射精, 射精, Ｃ, Ｃ, Ａ, 性交, Ｖ挿入, Ａ挿入", "童貞喪失, Ａ処女喪失", 0, "", "搾精用器具", @"%ANAME(被対象者)%的阴道", "人体実験")
-CALL FUCK(被対象者, "欲望, 奉仕, 精愛, 性交, Ｃ, Ｖ, Ｖ, Ａ, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 腸内射精, 膣内射精", GET_ID(実験対象), "", ANAME(実験対象), "", "人体実験")
+CALL FUCK(実験対象, "欲望, 射精, 射精, Ｃ, Ｃ, Ａ, 性交, Ｖ挿入, Ａ挿入", "童貞喪失, Ａ処女喪失", 0, "", "搾精用器具", @"%ANAME(被実験対象)%的阴道", "人体実験")
+CALL FUCK(被実験対象, "欲望, 奉仕, 精愛, 性交, Ｃ, Ｖ, Ｖ, Ａ, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 腸内射精, 膣内射精", GET_ID(実験対象), "", ANAME(実験対象), "", "人体実験")
 
 SP_TRAIN_COUNT:実験対象:特殊勢力_外来人 ++
-SP_TRAIN_COUNT:被対象者:特殊勢力_外来人 ++
+SP_TRAIN_COUNT:被実験対象:特殊勢力_外来人 ++
 RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属) ++
 COOLTIME:実験対象:0 = MAX(COOLTIME:実験対象:0 - 1 , 0)
-COOLTIME:被対象者:0 = MAX(COOLTIME:被対象者:0 - 1 , 0)
+COOLTIME:被実験対象:0 = MAX(COOLTIME:被実験対象:0 - 1 , 0)

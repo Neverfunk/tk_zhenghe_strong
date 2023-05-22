@@ -3,8 +3,8 @@
 #DIM 計画
 
 ;暫定対処
-;プレイヤーは自分で外交できるので。
-SIF 勢力 == CFLAG:MASTER:所属 && CONFIG:302
+;プレイヤーは自分で外交できるので。【CONFIG:302】为【0】时是玩家操控SLG
+SIF 勢力 == CFLAG:MASTER:所属 && !CONFIG:302
 	RETURN
 
 
@@ -683,11 +683,11 @@ TRYCALL SHOP_LIFE_USERSHOP68_REQUEST(勢力,相手勢力,内容,効果量)
 SIF DAY < SLG_PP:1
 	RETURNF 0
 
-;AI是边疆伯、殖民地、傀儡国时不能提议联合
+;(従属国パッチ)AIが辺境伯か植民地,傀儡国であるときは連合を発議できない
 SIF COUNTRY_Protectorate:勢力 >= 2
 	RETURNF 0
 
-;同时成立的联盟只有一个
+;同時に成立する連合は一つ
 SIF MATCH(TREATY_U_TARGET, 0) != MAX_TREATY_U
 	RETURNF 0
 
@@ -744,7 +744,7 @@ RETURNF 0
 SIF IS_SP_COUNTRY(勢力)
 	RETURNF 0
 
-;（从属国补丁）AI是边疆伯或殖民地、傀儡国时不能参加联合
+;(従属国パッチ)AIが辺境伯か植民地,傀儡国であるときは連合に参加できない
 SIF COUNTRY_Protectorate:勢力 >= 2
 	RETURNF 0
 
@@ -757,7 +757,7 @@ SIF TMP_COUNTRY_RELATION:勢力:相手勢力 != 0
 SIF 相手勢力 == CFLAG:MASTER:所属
 	嫌悪感 = 嫌悪感 * GET_DIFFICULTY_CORRECTION() / 100
 
-;因为讨厌宣言势力，所以不太想参加。再太讨厌的话绝对不参加
+;宣言勢力が嫌いだとあまり参加したがらない。またあまりにも嫌いだと絶対に参加しない
 SELECTCASE 宣言勢力への嫌悪感
 	CASE IS < 300
 		参加難易度 = 1
@@ -771,7 +771,7 @@ SELECTCASE 宣言勢力への嫌悪感
 		RETURNF 0
 ENDSELECT
 
-;由于对宣言势力的厌恶而设定的参加难易度，由于对讨伐对象的厌恶感而减轻（？）被，被
+;宣言勢力への嫌悪から設定された参加難易度は、討伐対象への嫌悪感で軽減（？）される
 SELECTCASE 嫌悪感
 	CASE IS > 1200
 		RETURNF 理由_嫌い

@@ -1,1 +1,327 @@
+﻿
 ; ;-------------------------------------------------
+; ;建造物の開発(従属国パッチ)スパコン・清掃局・公衆便所・培養槽
+; ;-------------------------------------------------
+; @DEVELOP_SLOT(CITY_ID)
+; #DIM CITY_ID
+; #DIM FIRST_LINE
+; #DIM 勢力
+; #DIM ジャンル
+; 勢力 = CFLAG:MASTER:所属
+; IF MONEY:勢力 < 3000
+;     PRINTFORMW 国库里没有足够的钱进行建造%CITY_NAME:CITY_ID%(需要国庫3,000)
+;     RETURN 0
+; ENDIF
+
+; FIRST_LINE = LINECOUNT
+
+; CALL SINGLE_DRAWLINE
+
+; PRINTFORML %CITY_NAME:CITY_ID%请选择要建设的设施（需要国庫3,000）。
+; PRINTFORML 国庫:%NUM_FORMAT(MONEY:勢力), 10% 現在的施設:%GET_DEVELOPMENT_NAME(CITY_DEVELOPMENT:CITY_ID)%
+; DRAWLINE
+; FOR LOCAL, 建造物_兵舎, 建造物_培養槽 + 1
+;     SIF !CAN_BUILD_DEVELOPMENT(LOCAL, 勢力)
+;         CONTINUE
+;     PRINTBUTTON @"%"[" + GET_DEVELOPMENT_NAME(LOCAL) + "]", 11, LEFT%", LOCAL
+;     PRINTFORML : %GET_DEVELOPMENT_EXPLANATION(LOCAL)%
+; NEXT
+; PRINTBUTTON "[取消]" , 0
+; PRINTL
+; $DEV_LOOP
+; INPUT
+; SELECTCASE RESULT
+;     CASE 建造物_兵舎 TO 建造物_培養槽
+;         IF CAN_BUILD_DEVELOPMENT(LOCAL, 勢力)
+;             SIF CITY_DEVELOPMENT:CITY_ID
+;                 PRINTFORM 拆除了%GET_DEVELOPMENT_NAME(CITY_DEVELOPMENT:CITY_ID)%
+;             PRINTFORMW 建造了%GET_DEVELOPMENT_NAME(RESULT)%
+;             CITY_DEVELOPMENT:CITY_ID = RESULT
+;             MONEY:(CFLAG:MASTER:所属) -= 3000
+;             CLEARLINE FIRST_LINE - LINECOUNT
+;             RETURN
+;         ENDIF
+;     CASE 0
+;         CLEARLINE FIRST_LINE - LINECOUNT
+;         RETURN
+;     CASEELSE
+;         CLEARLINE 1
+;         GOTO DEV_LOOP
+; ENDSELECT
+
+; CLEARLINE 1
+; GOTO DEV_LOOP
+
+; ;-------------------------------------------------
+; ;ある勢力が特定の建造物を建築可能かどうか
+; ;技術研究で建てるやつの判定用(従属国パッチ)スパコン・清掃局・公衆便所・培養槽
+; ;-------------------------------------------------
+; @CAN_BUILD_DEVELOPMENT(DEVELOPMENT_ID, COUNTRY)
+; #FUNCTION
+; #DIM DEVELOPMENT_ID
+; #DIM COUNTRY
+; #DIM 連邦ナンバー
+; #DIM 連邦構成国, MAX_COUNTRY
+; VARSET 連邦構成国
+
+; SELECTCASE DEVELOPMENT_ID
+;     CASE 建造物_本拠地
+;         RETURNF TECHNOLOGY_STATUS:COUNTRY:TECHNOLOGY_BATTLE_PASSIVE >= 5 && GET_DEVELOPMENT_COUNT(DEVELOPMENT_ID, COUNTRY) < 1
+;     CASE 建造物_忍びの里
+;         RETURNF TECHNOLOGY_STATUS:COUNTRY:TECHNOLOGY_DIPLOMACY >= 5 && GET_DEVELOPMENT_COUNT(DEVELOPMENT_ID, COUNTRY) < 1
+;     CASE 建造物_集積所
+;         RETURNF TECHNOLOGY_STATUS:COUNTRY:TECHNOLOGY_CONSCRIPTION >= 5 && GET_DEVELOPMENT_COUNT(DEVELOPMENT_ID, COUNTRY) < 1
+;     CASE 建造物_税務署
+;         RETURNF TECHNOLOGY_STATUS:COUNTRY:TECHNOLOGY_TAX >= 5 && GET_DEVELOPMENT_COUNT(DEVELOPMENT_ID, COUNTRY) < 1
+;     CASE 建造物_大宴会場
+;         RETURNF TECHNOLOGY_STATUS:COUNTRY:TECHNOLOGY_EMPLOYMENT >= 5 && GET_DEVELOPMENT_COUNT(DEVELOPMENT_ID, COUNTRY) < 1
+; 	CASE 建造物_スパコン
+; 		RETURNF IS_RESEARCH_AGREEMENT_WITH_SP:COUNTRY == 1 || COUNTRY == (GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_外来人))
+; 	CASE 建造物_清掃局
+; 		FOR LOCAL:0, 0, MAX_COUNTRY
+; 			FOR LOCAL:1, 0, MAX_COUNTRY
+; 				IF TREATY_UNI_COUNTRY:(LOCAL:0):(LOCAL:1):0 == COUNTRY || TREATY_UNI_COUNTRY:(LOCAL:0):(LOCAL:1):1 == COUNTRY
+; 					連邦ナンバー = LOCAL:0
+; 					BREAK
+; 				ENDIF
+; 			NEXT
+; 		NEXT
+; 		IF IS_SP_COUNTRY_IN_UNION:連邦ナンバー:2 == 1 || COUNTRY == (GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン))
+; 			RETURNF GET_DEVELOPMENT_COUNT(DEVELOPMENT_ID, COUNTRY) < 1
+; 		ELSE
+; 			RETURNF 0
+; 		ENDIF
+; 	CASE 建造物_公衆便所
+; 		FOR LOCAL:0, 0, MAX_COUNTRY
+; 			FOR LOCAL:1, 0, MAX_COUNTRY
+; 				IF TREATY_UNI_COUNTRY:(LOCAL:0):(LOCAL:1):0 == COUNTRY || TREATY_UNI_COUNTRY:(LOCAL:0):(LOCAL:1):1 == COUNTRY
+; 					連邦ナンバー = LOCAL:0
+; 					BREAK
+; 				ENDIF
+; 			NEXT
+; 		NEXT
+; 		IF IS_SP_COUNTRY_IN_UNION:連邦ナンバー:6 == 1 || COUNTRY == (GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_サキュバス))
+; 			RETURNF GET_DEVELOPMENT_COUNT(DEVELOPMENT_ID, COUNTRY) < 1
+; 		ELSE
+; 			RETURNF 0
+; 		ENDIF
+; 	CASE 建造物_培養槽
+; 		FOR LOCAL:0, 0, MAX_COUNTRY
+; 			FOR LOCAL:1, 0, MAX_COUNTRY
+; 				IF TREATY_UNI_COUNTRY:(LOCAL:0):(LOCAL:1):0 == COUNTRY || TREATY_UNI_COUNTRY:(LOCAL:0):(LOCAL:1):1 == COUNTRY
+; 					連邦ナンバー = LOCAL:0
+; 					BREAK
+; 				ENDIF
+; 			NEXT
+; 		NEXT
+; 		IF IS_SP_COUNTRY_IN_UNION:連邦ナンバー:4 == 1 || COUNTRY == (GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_触手))
+; 			RETURNF 1
+; 		ELSE
+; 			RETURNF 0
+; 		ENDIF
+; ENDSELECT
+; RETURNF 1
+
+; ;-------------------------------------------------
+; ;建造物の建築物名返却
+; ;-------------------------------------------------
+; @GET_DEVELOPMENT_NAME(DEVELOPMENT_ID)
+; #FUNCTIONS
+; #DIM DEVELOPMENT_ID
+; SELECTCASE DEVELOPMENT_ID
+;     CASE 建造物_兵舎
+;         RETURNF "兵舎"
+;     CASE 建造物_独占市場
+;         RETURNF "独占市場"
+;     CASE 建造物_弓櫓
+;         RETURNF "弓櫓"
+;     CASE 建造物_武芸塾
+;         RETURNF "武芸塾"
+;     CASE 建造物_戦略塾
+;         RETURNF "戦略塾"
+;     CASE 建造物_知略塾
+;         RETURNF "知略塾"
+;     CASE 建造物_湯治場
+;         RETURNF "湯治場"
+;     CASE 建造物_研究所
+;         RETURNF "研究所"
+;     CASE 建造物_本拠地
+;         RETURNF "大本营"
+;     CASE 建造物_忍びの里
+;         RETURNF "忍者之里"
+;     CASE 建造物_集積所
+;         RETURNF "大型仓库"
+;     CASE 建造物_税務署
+;         RETURNF "税務署"
+;     CASE 建造物_大宴会場
+;         RETURNF "大宴会場"
+;     CASE 建造物_醸造所
+;         RETURNF "醸造所"
+;     CASE 建造物_スパコン
+;         RETURNF "超级计算机"
+;     CASE 建造物_清掃局
+;         RETURNF "清掃局"
+;     CASE 建造物_公衆便所
+;         RETURNF "公衆便所"
+;     CASE 建造物_培養槽
+;         RETURNF "培養槽"
+;     CASEELSE
+;         RETURNF "---"
+; ENDSELECT
+
+; ;-------------------------------------------------
+; ;建造物の説明返却
+; ;-------------------------------------------------
+; @GET_DEVELOPMENT_EXPLANATION(DEVELOPMENT_ID)
+; #FUNCTIONS
+; #DIM DEVELOPMENT_ID
+; SELECTCASE DEVELOPMENT_ID
+;     CASE 建造物_兵舎
+;         RETURNF "每回合的征兵数量和征兵的极限增加"
+;     CASE 建造物_独占市場
+;         RETURNF "都市的収入増加"
+;     CASE 建造物_弓櫓
+;         RETURNF "都市的援護射撃強化"
+;     CASE 建造物_武芸塾
+;         RETURNF "毎回合守将的武闘経験値增加"
+;     CASE 建造物_戦略塾
+;         RETURNF "毎回合守将的防衛経験値增加"
+;     CASE 建造物_知略塾
+;         RETURNF "毎回合守将的知略経験値增加"
+;     CASE 建造物_湯治場
+;         RETURNF "毎回合士官与捕虜的印象改善"
+;     CASE 建造物_本拠地
+;         RETURNF "全都市的防衛倍率増加%。不重複计算"
+;     CASE 建造物_研究所
+;         RETURNF "技術研究的时间减少1期。不重複计算"
+;     CASE 建造物_忍びの里
+;         RETURNF "将其他势力已经掌握的技术研究缩短1期。不重複计算"
+;     CASE 建造物_集積所
+;         RETURNF "征兵的极限大幅增加。不重複计算"
+;     CASE 建造物_税務署
+;         RETURNF "毎回合収入大幅増加。不重複计算"
+;     CASE 建造物_大宴会場
+;         RETURNF "毎回合士官与捕虜的印象大幅改善。不重複计算"
+;     CASE 建造物_醸造所
+;         RETURNF "每回合出产酒系道具中的一个。全部99個的时候無効"
+;     CASE 建造物_スパコン
+;         RETURNF "加速自己国家的研究1期。可重复"
+;     CASE 建造物_清掃局
+;         RETURNF "每回合部队疲劳度的恢复量增加。不重複计算"
+;     CASE 建造物_公衆便所
+;         RETURNF "肉便器的出产数增加。不重複计算"
+;     CASE 建造物_培養槽
+;         RETURNF "每回合额外生产200人的士兵。可重复"
+;     CASEELSE
+;         RETURNF "---"
+; ENDSELECT
+
+
+; ;-------------------------------------------------
+; ;建造物の建築物数返却
+; ;-------------------------------------------------
+; @GET_DEVELOPMENT_COUNT(DEVELOPMENT_ID, COUNTRY)
+; #FUNCTION
+; #DIM DEVELOPMENT_ID
+; #DIM COUNTRY
+; #DIM DEVELOPMENT_COUNT
+
+; DEVELOPMENT_COUNT = 0
+; FOR LOCAL, 0, MAX_CITY
+;     SIF CITY_OWNER:(LOCAL) == COUNTRY && CITY_DEVELOPMENT:LOCAL == DEVELOPMENT_ID
+;         DEVELOPMENT_COUNT ++
+; NEXT
+; RETURNF DEVELOPMENT_COUNT
+
+; ;-------------------------------------------------
+; ;塾のある都市の守将に経験値を割り振る
+; ;-------------------------------------------------
+; @CRAM_SCHOOL
+; #DIM 建造物
+; #DIM 守将
+; #DIM 成長箇所
+; #DIM 効果量
+
+; FOR LOCAL, 0, MAX_CITY
+;     建造物 = CITY_DEVELOPMENT:LOCAL
+;     成長箇所 = 0
+;     SELECTCASE 建造物
+;         CASE 建造物_武芸塾
+;             成長箇所 = GETNUM(ABL, "武闘")
+;         CASE 建造物_戦略塾
+;             成長箇所 = GETNUM(ABL, "防衛")
+;         CASE 建造物_知略塾
+;             成長箇所 = GETNUM(ABL, "知略")
+;     ENDSELECT
+;     SIF !成長箇所
+;         CONTINUE
+;     FOR LOCAL:1, 0, GET_CITY_COMMANDER_NUM(LOCAL)
+;         守将 = GET_CITY_COMMANDER(LOCAL, LOCAL:1)
+;         SELECTCASE ABL:守将:成長箇所
+;             CASE IS < ランク閾値:ランク_ＳＬＧ:ランク_D
+;                 効果量 = MAX(ABLUP_NEED_EXP_SLG(ABL:守将:成長箇所) * 3 / 100, 1)
+;             CASE IS < ランク閾値:ランク_ＳＬＧ:ランク_B
+;                 効果量 = MAX(ABLUP_NEED_EXP_SLG(ABL:守将:成長箇所) / 100, 1)
+;             CASE IS < ランク閾値:ランク_ＳＬＧ:ランク_A
+;                 効果量 = MAX(ABLUP_NEED_EXP_SLG(ABL:守将:成長箇所) / 2 / 100, 1)
+;             CASE IS < ランク閾値:ランク_ＳＬＧ:ランク_S
+;                 効果量 = MAX(ABLUP_NEED_EXP_SLG(ABL:守将:成長箇所) / 3 / 100, 1)
+;             CASEELSE
+;                 効果量 = MAX(ABLUP_NEED_EXP_SLG(ABL:守将:成長箇所) / 10 / 100, 1)
+;         ENDSELECT
+;         EXP:守将:GET_EXP(成長箇所) += 効果量
+;         SIF CFLAG:守将:所属 == CFLAG:MASTER:所属
+;             PRINTFORML %ANAME(守将)%去塾里学习了
+;         CALL TRAIN_AUTO_ABLUP(守将, CFLAG:守将:所属 != CFLAG:MASTER:所属)
+;     NEXT
+; NEXT
+
+; ;-------------------------------------------------
+; ;醸造所の効果
+; ;-------------------------------------------------
+; @BREWERY
+; #DIM 産出
+; #DIM 産出個数, 8
+; {
+;     #DIM CONST 産出対象 =
+;         GETNUM(ITEM, "濁酒"), GETNUM(ITEM, "清酒"), GETNUM(ITEM, "葡萄酒"), GETNUM(ITEM, "麦酒"),
+;         GETNUM(ITEM, "醸造酒"), GETNUM(ITEM, "果実酒"), GETNUM(ITEM, "日本酒"), GETNUM(ITEM, "蒸留酒")
+; }
+
+; VARSET 産出個数
+; FOR LOCAL, 0, MAX_CITY
+;     ;無所属のとき、無所属都市に残った醸造所の恩恵を受けるのを防止
+;     SIF !IS_COUNTRY(CITY_OWNER:LOCAL)
+;         CONTINUE
+;     SIF CITY_OWNER:LOCAL != CFLAG:MASTER:所属
+;         CONTINUE
+;     SIF CITY_DEVELOPMENT:LOCAL != 建造物_醸造所
+;         CONTINUE
+;     SELECTCASE RAND:100
+;         CASE 0 TO 19
+;             産出個数:0 ++
+;         CASE 20 TO 39
+;             産出個数:1 ++
+;         CASE 49 TO 59
+;             産出個数:2 ++
+;         CASE 60 TO 79
+;             産出個数:3 ++
+;         CASE 80 TO 84
+;             産出個数:4 ++
+;         CASE 85 TO 89
+;             産出個数:5 ++
+;         CASE 90 TO 94
+;             産出個数:6 ++
+;         CASE 95 TO 99
+;             産出個数:7 ++
+;     ENDSELECT
+; NEXT
+
+; FOR LOCAL, 0, VARSIZE("産出個数")
+;     SIF 産出個数:LOCAL + ITEM:(産出対象:LOCAL) >= 99
+;         産出個数:LOCAL = 99 - ITEM:(産出対象:LOCAL)
+;     SIF 産出個数:LOCAL <= 0
+;         CONTINUE
+;     ITEM:(産出対象:LOCAL) = 産出個数:LOCAL
+;     PRINTFORML 醸造所，酿造了%ITEMNAME:(産出対象:LOCAL)%{産出個数:LOCAL}個
+; NEXT

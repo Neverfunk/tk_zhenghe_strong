@@ -126,6 +126,9 @@ ENDIF
 ;恋慕・服従・淫乱
 ;-------------------------------------------------
 @TALENT_CHECK_FALLEN(ARG:0)
+#DIM 触手
+;(触手拡張パッチ)プレイヤー勢力が触手であるときハートのかけら入手処理
+触手 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_触手)
 
 LOCAL:1 = 0
 
@@ -137,6 +140,11 @@ IF !IS_SLAVE(ARG:0) && !IS_LOVER(ARG:0) && !IS_SLAVED_BY(ARG:0) && !TALENT:(ARG:
 	PRINTFORMW %ANAME(ARG:0)%獲得了<親友>
 	RESETCOLOR
 	TALENT:(ARG:0):親友 = 1
+	;(触手拡張パッチ)プレイヤー勢力が触手であるときハートのかけら入手
+	IF (CFLAG:MASTER:所属 == 触手 || (CFLAG:MASTER:所属 == CHANGE_Government_TENTACLE:0 && IS_COUNTRY(CHANGE_Government_TENTACLE:0))) && TENTACLE_SYMPATHY_POINT:2 != ARG:0
+		TENTACLE_SYMPATHY_POINT:0 ++
+		TENTACLE_SYMPATHY_POINT:2 = ARG:0
+	ENDIF
 ENDIF
 
 SIF CFLAG:(ARG:0):陥落するな
@@ -158,6 +166,13 @@ IF !IS_SLAVE(ARG:0) && !IS_SLAVED_BY(ARG:0)
 		;堕とした人数＋１
 		FLAG:陥落人数 += !(CFLAG:(ARG:0):陥落済み)
 		CFLAG:(ARG:0):陥落済み = 1
+
+		;(触手拡張パッチ)プレイヤー勢力が触手であるときハートのかけら入手
+		IF (CFLAG:MASTER:所属 == 触手 || (CFLAG:MASTER:所属 == CHANGE_Government_TENTACLE:0 && IS_COUNTRY(CHANGE_Government_TENTACLE:0))) && TENTACLE_SYMPATHY_POINT:2 != ARG:0
+			TENTACLE_SYMPATHY_POINT:0 ++
+			TENTACLE_SYMPATHY_POINT:2 = ARG:0
+		ENDIF
+
 		LOCAL:1 = 1
 	ENDIF
 
@@ -168,6 +183,21 @@ IF !IS_SLAVE(ARG:0) && !IS_SLAVED_BY(ARG:0)
 		PRINTFORMW %ANAME(ARG:0)%獲得了<親愛>
 		RESETCOLOR
 		TALENT:(ARG:0):親愛 = 1
+
+		;(触手拡張パッチ)プレイヤー勢力が触手であるとき親愛+1
+		IF CFLAG:MASTER:所属 == 触手 || (CFLAG:MASTER:所属 == CHANGE_Government_TENTACLE:0 && IS_COUNTRY(CHANGE_Government_TENTACLE:0))
+			TENTACLE_SYMPATHY_POINT:1 ++
+		ENDIF
+
+		;ミッション達成
+		IF ACHIEVEMENT_MISSION:61 == 1 && TENTACLE_SYMPATHY_POINT:1 >= 10
+			ACHIEVEMENT_MISSION:61 = 2
+			SETCOLOR カラー_注意
+			PRINTL 任务完成!
+			RESETCOLOR
+			WAIT
+		ENDIF
+
 		LOCAL:1 = 2
 	ENDIF
 ENDIF

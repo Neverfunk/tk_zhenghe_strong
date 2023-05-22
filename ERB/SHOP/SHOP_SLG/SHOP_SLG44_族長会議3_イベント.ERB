@@ -18,19 +18,19 @@ IF DAY % 3 == 0 && CHANGE_Government_GOBLIN:1 != 1
 		SETCOLOR カラー_注意
 		PRINTFORML ★评议会选举
 		RESETCOLOR
-		CALL SINGLE_DRAWLINE 
+		CALL SINGLE_DRAWLINE
 		IF 支持率トップ == 君主
 			PRINTFORML 评议会的议长的选举开始了
 			SETCOLOR カラー_注意
 			PRINTFORMW %ANAME(君主)%将获得连任 任期为3回合
 			RESETCOLOR
-			PRINTFORML 
+			PRINTFORML
 		ELSE
 			PRINTFORML 评议会的议长的选举开始了
 			SETCOLOR カラー_注意
 			PRINTFORMW %ANAME(支持率トップ)%成功当选 任期为3回合
 			RESETCOLOR
-			PRINTFORML 
+			PRINTFORML
 			COUNTRY_BOSS:自勢力 = GET_ID(支持率トップ)
 			君主 = GET_COUNTRY_BOSS(自勢力)
 		ENDIF
@@ -39,26 +39,36 @@ IF DAY % 3 == 0 && CHANGE_Government_GOBLIN:1 != 1
 		SETCOLOR カラー_注意
 		PRINTFORML ★族长选举
 		RESETCOLOR
-		CALL SINGLE_DRAWLINE 
+		CALL SINGLE_DRAWLINE
 		IF 支持率トップ == 君主
 			PRINTFORML 哥布林族长的选举会议开始了
 			SETCOLOR カラー_注意
 			PRINTFORMW %ANAME(君主)%将获得连任 任期为3回合
 			RESETCOLOR
-			PRINTFORML 
+			PRINTFORML
 		ELSE
 			PRINTFORML 哥布林族长的选举会议开始了
 			SETCOLOR カラー_注意
 			PRINTFORMW %ANAME(支持率トップ)%成功当选 任期为3回合
 			RESETCOLOR
-			PRINTFORML 
+			PRINTFORML
 			COUNTRY_BOSS:自勢力 = GET_ID(支持率トップ)
 			君主 = GET_COUNTRY_BOSS(自勢力)
 		ENDIF
 	ENDIF
+
+	;ミッション達成
+	IF ACHIEVEMENT_MISSION:56 == 1 && 支持率トップ == MASTER
+		ACHIEVEMENT_MISSION:56 = 2
+		SETCOLOR カラー_注意
+		PRINTL 任务完成!
+		RESETCOLOR
+		WAIT
+	ENDIF
+
 ENDIF
 
-IF Centralization_power_GOBLIN >= 200 && GET_QuriltaiGOBLIN_Approval_rate(君主) >= 100
+IF Centralization_power_GOBLIN >= 200 && GET_QuriltaiGOBLIN_Approval_rate(君主) >= 100 && CHANGE_Government_GOBLIN:1 == 0
 	CALL SINGLE_DRAWLINE
 	SETCOLOR カラー_注意
 	PRINTFORML 提出了新的法案
@@ -111,13 +121,23 @@ IF STATUE_GOBLIN_COUNCIL:2 == 1
 		IF COUNTRY_Protectorate:LOCAL >= 3 && COUNTRY_Protectorate_REFERENCE:LOCAL:2 == CFLAG:MASTER:所属
 			PRINTFORML %ANAME(GET_COUNTRY_BOSS(LOCAL))%势力
 			CALL DIPLOMACY_IMPROVE_RELATION(LOCAL, 50)
-			PRINTFORML 
+			PRINTFORML
 		ENDIF
 	NEXT
 ENDIF
 
-PRINTFORML 你的支持率　　[ {GET_QuriltaiGOBLIN_Approval_rate(MASTER)} ] 
+PRINTFORML 你的支持率　　[ {GET_QuriltaiGOBLIN_Approval_rate(MASTER)} ]
 PRINTFORMW 集权性　　　　[ {Centralization_power_GOBLIN} ]
+
+;ミッション達成
+IF ACHIEVEMENT_MISSION:60 == 1 && Centralization_power_GOBLIN <= -100
+	ACHIEVEMENT_MISSION:60 = 2
+	SETCOLOR カラー_注意
+	PRINTL 任务完成!
+	RESETCOLOR
+	WAIT
+ENDIF
+
 
 ;-------------------------------------------------
 ;「ターン終了時イベント」法案0「ゴブリンロード誕生」
@@ -131,9 +151,9 @@ PRINTFORML 　我们一直遭到幻想乡那帮家伙的无理对待
 PRINTFORML 　复仇之时到了！
 CALL SINGLE_DRAWLINE
 PRINTBUTTON " 0[同意(君主将成为哥布林之王！不会再进行选举了)]", 0
-PRINTL 
+PRINTL
 PRINTBUTTON " 1[拒绝（集权性-10）]", 1
-PRINTL 
+PRINTL
 
 $INPUT_LOOP
 INPUT
@@ -170,27 +190,27 @@ SIF 都市 > 0
 CALL SINGLE_DRAWLINE
 IF MONEY:(CFLAG:MASTER:所属) >= 1000
 	PRINTBUTTON " 0[使用国库来进行采购(国库-1000)]", 0
-	PRINTL 
+	PRINTL
 ENDIF
 IF 都市 > 0 && CHANGE_Government_GOBLIN:1 != 2
 	PRINTBUTTON " 1[从都市中征用物资（都市的经济力-・集权性+10）]", 1
-	PRINTL 
+	PRINTL
 ENDIF
 IF CHANGE_Government_GOBLIN:1 == 2
 	PRINTBUTTON " 2[与民众协力渡过难关（支持率+5）]", 2
-	PRINTL 
+	PRINTL
 ELSEIF GET_QuriltaiGOBLIN_Approval_rate(MASTER) >= 100
 	PRINTBUTTON " 2[和都市里的居民谈谈（集権性-10）]", 2
-	PRINTL 
+	PRINTL
 ENDIF
 PRINTBUTTON " 3[巧妇难为无米之炊（支持率-10）]", 3
-PRINTL 
+PRINTL
 
 $INPUT_LOOP
 INPUT
 
 IF RESULT == 3
-	CFLAG:MASTER:1709 = MAX(1, CFLAG:MASTER:1709 - 10)
+	ゴブリン支持率:MASTER:0 = MAX(1, ゴブリン支持率:MASTER:0 - 10)
 ELSEIF RESULT == 0 && MONEY:(CFLAG:MASTER:所属) >= 1000
 	MONEY:(CFLAG:MASTER:所属) -= 1000
 ELSEIF RESULT == 1 && 都市 > 0 && CHANGE_Government_GOBLIN:1 != 2
@@ -198,7 +218,7 @@ ELSEIF RESULT == 1 && 都市 > 0 && CHANGE_Government_GOBLIN:1 != 2
 	CITY_ECONOMY_LIMIT:都市 = MAX(CITY_ECONOMY:都市, CITY_ECONOMY_LIMIT:都市 * 8 / 10)
 	Centralization_power_GOBLIN += 10
 ELSEIF RESULT == 2 && CHANGE_Government_GOBLIN:1 == 2
-	CFLAG:MASTER:1709 += 5
+	ゴブリン支持率:MASTER:0 += 5
 ELSEIF RESULT == 2 && GET_QuriltaiGOBLIN_Approval_rate(MASTER) >= 100
 	Centralization_power_GOBLIN -= 10
 ELSE
@@ -221,27 +241,27 @@ PRINTFORML 　应该采取某一种手段来应对
 CALL SINGLE_DRAWLINE
 IF MONEY:(CFLAG:MASTER:所属) >= 1000
 	PRINTBUTTON " 0[动用国库进行整备(都市的防御+・国库-1000)]", 0
-	PRINTL 
+	PRINTL
 ENDIF
 IF 都市 > 0 && CHANGE_Government_GOBLIN:1 != 2
 	PRINTBUTTON " 1[强制住民进行劳动（都市的防御+・都市的经济力-・集权性+10）]", 1
-	PRINTL 
+	PRINTL
 ENDIF
 IF CHANGE_Government_GOBLIN:1 == 2 && MONEY:(CFLAG:MASTER:所属) >= 500
 	PRINTBUTTON " 2[和民众一起整备（都市的防御+・国库-500・支持率+10）]", 2
-	PRINTL 
+	PRINTL
 ELSEIF MONEY:(CFLAG:MASTER:所属) >= 800
 	PRINTBUTTON " 2[倾听民众的声音应该会很有效（都市的防御+・国库-800・集权性-10）]", 2
-	PRINTL 
+	PRINTL
 ENDIF
 PRINTBUTTON " 3[没有那个必要（支持率-10）]", 3
-PRINTL 
+PRINTL
 
 $INPUT_LOOP
 INPUT
 
 IF RESULT == 3
-	CFLAG:MASTER:1709 = MAX(1, CFLAG:MASTER:1709 - 10)
+	ゴブリン支持率:MASTER:0 = MAX(1, ゴブリン支持率:MASTER:0 - 10)
 ELSEIF RESULT == 0 && MONEY:(CFLAG:MASTER:所属) >= 1000
 	MONEY:(CFLAG:MASTER:所属) -= 1000
 	CITY_GUARD:都市 += 15
@@ -251,7 +271,7 @@ ELSEIF RESULT == 1 && 都市 > 0 && CHANGE_Government_GOBLIN:1 != 2
 	Centralization_power_GOBLIN += 10
 	CITY_GUARD:都市 += 15
 ELSEIF RESULT == 2 && CHANGE_Government_GOBLIN:1 == 2 && MONEY:(CFLAG:MASTER:所属) >= 500
-	CFLAG:MASTER:1709 += 10
+	ゴブリン支持率:MASTER:0 += 10
 	MONEY:(CFLAG:MASTER:所属) -= 500
 	CITY_GUARD:都市 += 25
 ELSEIF RESULT == 2 && MONEY:(CFLAG:MASTER:所属) >= 800
@@ -278,42 +298,42 @@ PRINTFORML 　应该采取某一种手段来应对
 CALL SINGLE_DRAWLINE
 IF MONEY:(CFLAG:MASTER:所属) >= 500
 	PRINTBUTTON " 0[用国库来援助吧(国库-500・支持率+10)]", 0
-	PRINTL 
+	PRINTL
 ENDIF
 IF 都市 > 0 && CHANGE_Government_GOBLIN:1 != 2
 	PRINTBUTTON " 1[倒不如榨干他们（都市的经济力-・集权性+10・国库+200）]", 1
-	PRINTL 
+	PRINTL
 ENDIF
 IF CHANGE_Government_GOBLIN:1 == 2 && MONEY:(CFLAG:MASTER:所属) >= 1000
 	PRINTBUTTON " 2[援助自治组织（国库-1000・都市的经济力+・支持率+20）]", 2
-	PRINTL 
+	PRINTL
 ELSEIF MONEY:(CFLAG:MASTER:所属) >= 1000 && CHANGE_Government_GOBLIN:1 != 1
 	PRINTBUTTON " 2[援助自治组织（国库-1000・都市的经济力+・支持率+10・集权性-20）]", 2
-	PRINTL 
+	PRINTL
 ENDIF
 PRINTBUTTON " 3[没有那个必要（无变化）]", 3
-PRINTL 
+PRINTL
 
 $INPUT_LOOP
 INPUT
 
 IF RESULT == 3
-	
+
 ELSEIF RESULT == 0 && MONEY:(CFLAG:MASTER:所属) >= 500
 	MONEY:(CFLAG:MASTER:所属) -= 500
-	CFLAG:MASTER:1709 += 10
+	ゴブリン支持率:MASTER:0 += 10
 ELSEIF RESULT == 1 && 都市 > 0 && CHANGE_Government_GOBLIN:1 != 2
 	CITY_ECONOMY:都市 = CITY_ECONOMY:都市 * 8 / 10
 	CITY_ECONOMY_LIMIT:都市 = MAX(CITY_ECONOMY:都市, CITY_ECONOMY_LIMIT:都市 * 8 / 10)
 	Centralization_power_GOBLIN += 10
 	MONEY:(CFLAG:MASTER:所属) += 200
 ELSEIF RESULT == 2 && CHANGE_Government_GOBLIN:1 == 2 && MONEY:(CFLAG:MASTER:所属) >= 1000
-	CFLAG:MASTER:1709 += 20
+	ゴブリン支持率:MASTER:0 += 20
 	MONEY:(CFLAG:MASTER:所属) -= 1000
 	CITY_ECONOMY:都市 += 10
 	CITY_ECONOMY_LIMIT:都市 = MAX(CITY_ECONOMY_LIMIT:都市, CITY_ECONOMY:都市)
 ELSEIF RESULT == 2 && MONEY:(CFLAG:MASTER:所属) >= 1000 && CHANGE_Government_GOBLIN:1 != 1
-	CFLAG:MASTER:1709 += 10
+	ゴブリン支持率:MASTER:0 += 10
 	Centralization_power_GOBLIN -= 20
 	MONEY:(CFLAG:MASTER:所属) -= 1000
 	CITY_ECONOMY:都市 += 10
@@ -338,31 +358,31 @@ PRINTFORML 　应该采取某一种手段来征兵
 CALL SINGLE_DRAWLINE
 IF MONEY:(CFLAG:MASTER:所属) >= 1000
 	PRINTBUTTON " 0[使用国库进行募集(国库-1000・兵力+1000)]", 0
-	PRINTL 
+	PRINTL
 ENDIF
 IF 都市 > 0 && CHANGE_Government_GOBLIN:1 != 2
 	PRINTBUTTON " 1[从居民中征兵（都市的经济力-・集权性+10・兵力+1000）]", 1
-	PRINTL 
+	PRINTL
 ENDIF
 IF CHANGE_Government_GOBLIN:1 == 2 && MONEY:(CFLAG:MASTER:所属) >= 1000
 	PRINTBUTTON " 2[援助自治警察（国库-1000・都市的防御+・支持率+20）]", 2
-	PRINTL 
+	PRINTL
 ELSEIF MONEY:(CFLAG:MASTER:所属) >= 1000 && CHANGE_Government_GOBLIN:1 != 1
 	PRINTBUTTON " 2[投资居民的自卫组织（国库-1000・都市的防御+・支持率+10・集权性-20）]", 2
-	PRINTL 
+	PRINTL
 ENDIF
 IF CHANGE_Government_GOBLIN:1 == 1 && !STATUE_GOBLIN_COUNCIL:1
 	PRINTBUTTON " 3[使用肉便器来招募（毎回合兵力+）]", 3
-	PRINTL 
+	PRINTL
 ENDIF
 PRINTBUTTON " 4[没有那个必要（支持率-10）]", 4
-PRINTL 
+PRINTL
 
 $INPUT_LOOP
 INPUT
 
 IF RESULT == 4
-	CFLAG:MASTER:1709 = MAX(1, CFLAG:MASTER:1709 - 10)
+	ゴブリン支持率:MASTER:0 = MAX(1, ゴブリン支持率:MASTER:0 - 10)
 ELSEIF RESULT == 0 && MONEY:(CFLAG:MASTER:所属) >= 1000
 	MONEY:(CFLAG:MASTER:所属) -= 1000
 	COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 1000
@@ -372,11 +392,11 @@ ELSEIF RESULT == 1 && 都市 > 0 && CHANGE_Government_GOBLIN:1 != 2
 	Centralization_power_GOBLIN += 10
 	COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += 1000
 ELSEIF RESULT == 2 && CHANGE_Government_GOBLIN:1 == 2 && MONEY:(CFLAG:MASTER:所属) >= 1000
-	CFLAG:MASTER:1709 += 20
+	ゴブリン支持率:MASTER:0 += 20
 	MONEY:(CFLAG:MASTER:所属) -= 1000
 	CITY_GUARD:都市 += 25
 ELSEIF RESULT == 2 && MONEY:(CFLAG:MASTER:所属) >= 1000 && CHANGE_Government_GOBLIN:1 != 1
-	CFLAG:MASTER:1709 += 10
+	ゴブリン支持率:MASTER:0 += 10
 	Centralization_power_GOBLIN -= 20
 	MONEY:(CFLAG:MASTER:所属) -= 1000
 	CITY_GUARD:都市 += 15
@@ -402,9 +422,9 @@ PRINTFORML 　当然「弱者支配一切」也是没有意义的，
 PRINTFORML 　没有谁应该压迫其他人！
 CALL SINGLE_DRAWLINE
 PRINTBUTTON " 0[同意(注意:不再是特殊势力・不能进行掠夺)]", 0
-PRINTL 
+PRINTL
 PRINTBUTTON " 1[拒绝（集权性+10）]", 1
-PRINTL 
+PRINTL
 
 $INPUT_LOOP
 INPUT
@@ -414,7 +434,7 @@ IF RESULT == 0
 	FOR LOCAL, 0, CHARANUM
 		IF TALENT:LOCAL:特殊勢力素質 && CFLAG:LOCAL:所属 == CFLAG:MASTER:所属
 			TALENT:LOCAL:特殊勢力素質 = 0
-			CFLAG:LOCAL:1713 = 1
+			非特殊ホフゴブリン:LOCAL:0 = 1
 			CALL SKILL_LEARN_BY_NAME(LOCAL, スキル_ジャンル_TROOP, 10102, "在黑旗的指引下前进！")
 			SIF RESULT
 				CALL COLOR_PRINTW(@"%ANAME(LOCAL)%习得了技能＜在黑旗的指引下前进！＞", カラー_注意)
@@ -430,14 +450,14 @@ IF RESULT == 0
 	PRINTFORML 停止了掠夺
 	RESETCOLOR
 	CHANGE_Government_GOBLIN:1 = 2
-	
+
 	FOR LOCAL, 0, MAX_COUNTRY
 		IF COUNTRY_Protectorate:LOCAL >= 3 && COUNTRY_Protectorate_REFERENCE:LOCAL:2 == CFLAG:MASTER:所属
 			SPECIALIZATION_Protectorate:LOCAL = 3
 			PRINTFORML %ANAME(GET_COUNTRY_BOSS(LOCAL))%承认了自治权
 		ENDIF
 	NEXT
-	
+
 ELSEIF RESULT == 1
 	Centralization_power_GOBLIN += 10
 ELSE
@@ -457,21 +477,21 @@ IF STATUE_GOBLIN_COUNCIL:0 == 1
 	CALL SINGLE_DRAWLINE
 	IF MONEY:(CFLAG:MASTER:所属) >= 2000
 		PRINTBUTTON " 0[建立慰安所(国库-2000)]", 0
-		PRINTL 
+		PRINTL
 	ENDIF
 	PRINTBUTTON " 1[再忍耐一下(支持率-30)]", 1
-	PRINTL 
-	PRINTL 
+	PRINTL
+	PRINTL
 	PRINTBUTTON " 2[性奴隶制度复活(支持率-20)]", 2
-	PRINTL 
+	PRINTL
 
 	$INPUT_LOOP1
 	INPUT
-	
+
 	IF RESULT == 1
-		CFLAG:MASTER:1709 = MAX(1, CFLAG:MASTER:1709 - 30)
+		ゴブリン支持率:MASTER:0 = MAX(1, ゴブリン支持率:MASTER:0 - 30)
 	ELSEIF RESULT == 2
-		CFLAG:MASTER:1709 = MAX(1, CFLAG:MASTER:1709 - 20)
+		ゴブリン支持率:MASTER:0 = MAX(1, ゴブリン支持率:MASTER:0 - 20)
 		STATUE_GOBLIN_COUNCIL:0 = 0
 		SETCOLOR カラー_警告
 		PRINTFORML 性奴隶制度复活了
@@ -489,27 +509,27 @@ ELSE
 	PRINTFORML 　不良的风俗应该被摈弃
 	CALL SINGLE_DRAWLINE
 	PRINTBUTTON " 1[废除性奴隶制度(支持率+20)]", 1
-	PRINTL 
+	PRINTL
 	PRINTBUTTON " 2[性奴隶是不可或缺的(支持率-20)]", 2
-	PRINTL 
+	PRINTL
 
 	$INPUT_LOOP2
 	INPUT
-	
+
 	IF RESULT == 1
-		CFLAG:MASTER:1709 += 20
+		ゴブリン支持率:MASTER:0 += 20
 		STATUE_GOBLIN_COUNCIL:0 = 1
 		FOR LOCAL, 0, CHARANUM
 			CALL CHANGE_GOBLIN_subject(LOCAL)
-			SIF CFLAG:LOCAL:1710 >= 1
-				CFLAG:LOCAL:1710 = 1
+			SIF ホフゴブリンに監禁:LOCAL:0 >= 1
+				ホフゴブリンに監禁:LOCAL:0 = 1
 		NEXT
 		SETCOLOR カラー_警告
 		PRINTFORML 废除了性奴隶制度
 		PRINTFORML 不能再进行特殊调教了
 		RESETCOLOR
 	ELSEIF RESULT == 2
-		CFLAG:MASTER:1709 = MAX(1, CFLAG:MASTER:1709 - 20)
+		ゴブリン支持率:MASTER:0 = MAX(1, ゴブリン支持率:MASTER:0 - 20)
 	ELSE
 		CLEARLINE 1
 		GOTO INPUT_LOOP2
@@ -528,22 +548,22 @@ PRINTFORML 　当然，如果没有预先制定刑罚的程序，这个理念就
 PRINTFORML 　恣意的监禁不是已经不被允许了吗？
 CALL SINGLE_DRAWLINE
 PRINTBUTTON " 0[同意(注意:不能再使用投狱了・从属国每回合评价增加+)]", 0
-PRINTL 
+PRINTL
 PRINTBUTTON " 1[拒绝（支持率-50）]", 1
-PRINTL 
+PRINTL
 
 $INPUT_LOOP
 INPUT
-	
+
 IF RESULT == 0
-	CFLAG:MASTER:1709 += 10
+	ゴブリン支持率:MASTER:0 += 10
 	STATUE_GOBLIN_COUNCIL:2 = 1
 	SETCOLOR カラー_警告
 	PRINTFORML 制定了惩罚的程序
 	PRINTFORML 「投狱」已经无法使用了
 	RESETCOLOR
 ELSEIF RESULT == 1
-	CFLAG:MASTER:1709 = MAX(1, CFLAG:MASTER:1709 - 50)
+	ゴブリン支持率:MASTER:0 = MAX(1, ゴブリン支持率:MASTER:0 - 50)
 ELSE
 	CLEARLINE 1
 	GOTO INPUT_LOOP

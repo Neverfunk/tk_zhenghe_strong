@@ -23,7 +23,7 @@ RETURNF 1
 
 ;-------------------------------------------------
 ;渡されたIDのキャラの特殊勢力素質に対応する特殊精液を返す
-;-------------------------------------------------	
+;-------------------------------------------------
 @SP_CHARA_TO_SPERM_ID(ID)
 #FUNCTION
 #DIM ID
@@ -32,7 +32,7 @@ RETURNF GET_SPERM_ID(SP_COUNTRY_NAME:(TALENT:ID_TO_CHARA(ID):特殊勢力素質)
 
 ;-------------------------------------------------
 ;渡された勢力番号が特殊勢力であるかを判断する
-;-------------------------------------------------	
+;-------------------------------------------------
 @IS_SP_COUNTRY(勢力)
 #FUNCTION
 #DIM 勢力
@@ -42,7 +42,7 @@ RETURNF (FINDELEMENT(SP_COUNTRY_ID, COUNTRY_EVENT_ID:勢力) != -1 ? 1 # 0)
 
 ;-------------------------------------------------
 ;対象が渡された勢力に調教されうるかを判断する
-;-------------------------------------------------	
+;-------------------------------------------------
 @IS_TRAIN_BY_SP_COUNTRY(対象, 勢力番号)
 #FUNCTION
 #DIM 対象
@@ -82,7 +82,8 @@ SIF	!SP_COUNTRY_IS_TRAINED(対象)
 ;対象勢力に所属して、しかも堕ちているキャラは2/3でカット（いちいち出るとうっとうしいので）
 ;(外来人拡張パッチ)但し自勢力が外来人勢力である、または外来人と研究協定を締結しているときは、カットしない
 ;(ホフゴブリン拡張パッチ)自勢力がホフゴブリン勢力であるときは、カットしない
-SIF CFLAG:対象:所属 == 勢力番号 && GETBIT(TALENT:対象:特殊勢力陥落系, SP_COUNTRY_TO_CONST(勢力番号)) && (RAND:3 && CFLAG:MASTER:所属 != GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_外来人) && !IS_RESEARCH_AGREEMENT_WITH_SP:(CFLAG:MASTER:所属) && CFLAG:MASTER:所属 != GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン) && !(CFLAG:MASTER:所属 == CHANGE_Government_GOBLIN:0 && IS_COUNTRY(CHANGE_Government_GOBLIN:0)))
+;(触手拡張パッチ)自勢力が触手勢力であるときは、カットしない
+SIF CFLAG:対象:所属 == 勢力番号 && GETBIT(TALENT:対象:特殊勢力陥落系, SP_COUNTRY_TO_CONST(勢力番号)) && (RAND:3 && CFLAG:MASTER:所属 != GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_外来人) && !IS_RESEARCH_AGREEMENT_WITH_SP:(CFLAG:MASTER:所属) && CFLAG:MASTER:所属 != GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン) && !(CFLAG:MASTER:所属 == CHANGE_Government_GOBLIN:0 && IS_COUNTRY(CHANGE_Government_GOBLIN:0)) && CFLAG:MASTER:所属 != GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_触手) && !(CFLAG:MASTER:所属 == CHANGE_Government_TENTACLE:0 && IS_COUNTRY(CHANGE_Government_TENTACLE:0)))
 	RETURNF 0
 ;(外来人拡張パッチ)特殊勢力に所属する堕ちていない、かつ、監禁されていないキャラはスキップ
 SIF !GETBIT(TALENT:対象:特殊勢力陥落系, SP_COUNTRY_TO_CONST(勢力番号)) && CFLAG:対象:所属 == 勢力番号 && (CFLAG:対象:捕虜先 != 勢力番号 || CFLAG:対象:軟禁中 == 1)
@@ -92,7 +93,7 @@ RETURNF 1
 
 ;-------------------------------------------------
 ;対象が渡された勢力に寝返るかどうか判断する
-;-------------------------------------------------	
+;-------------------------------------------------
 @IS_BETRAY_TO_SP_COUNTRY(対象, 勢力番号)
 #FUNCTION
 #DIM 対象
@@ -112,7 +113,7 @@ RETURNF 1
 
 ;-------------------------------------------------
 ;渡されたキャラが特殊勢力の陥落系素質を持っているかを判断する
-;-------------------------------------------------	
+;-------------------------------------------------
 @IS_FALLEN_TO_SP_COUNTRY(対象)
 #FUNCTION
 #DIM 対象
@@ -120,7 +121,7 @@ RETURNF (TALENT:対象:特殊勢力陥落系 != 0)
 
 ;-------------------------------------------------
 ;主人公が特殊勢力に陥落した場合の処理
-;-------------------------------------------------	
+;-------------------------------------------------
 @PLAYER_FALLEN_TO_SP_COUNTRY(勢力)
 #DIM 勢力
 FOR LOCAL, 1, CHARANUM
@@ -135,7 +136,7 @@ NEXT
 
 ;-------------------------------------------------
 ;渡されたキャラが特殊勢力のキャラであるかどうかを判断する
-;-------------------------------------------------	
+;-------------------------------------------------
 @IS_SP_COUNTRY_CHARA(対象)
 #FUNCTION
 #DIM 対象

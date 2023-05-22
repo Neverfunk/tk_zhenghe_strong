@@ -1,0 +1,4462 @@
+﻿;-------------------------------------------------
+;シナリオ33
+;
+;-------------------------------------------------
+@SCENARIO_NAME_33
+RESULTS = 幻想少女のななつ星紀行～Romantic Railway～
+RETURN
+
+@SCENARIO_MAPSELECT_33
+
+MAPID '= "KYUSHU"
+
+
+
+@SCENARIO_INTRO_33
+PRINTFORML
+
+PRINTFORMW 突如、外の世界は九州に現れた幻想少女たち。
+PRINTFORMW どうやら好き放題に縄張り争いを始めるみたいだ…
+PRINTFORML
+PRINTFORML このシナリオでは九州の鉄道路線が舞台になります。
+PRINTFORML 路線を全て訪れると、路線ごとにボーナスがもらえます。
+PRINTFORML 九州縦断を達成するもよし、今は亡き廃線を乗り通すも良し。
+PRINTFORML 自由気ままに九州各地を旅行しよう！
+
+
+;ランダムキャラは選択に委ねる
+FLAG:OPランダムキャラ使用 = 0
+
+
+@SCENARIO_PLACEMENT_33
+
+;勢力設定
+COUNTRY_BOSS:0 = 0
+COUNTRY_COLOR:0 = GETDEFCOLOR()
+
+PRINTFORML
+PRINTFORML このシナリオでは登場キャラクターを制限することができます。
+PRINTFORML 制限した場合、妖精大戦争に登場するキャラクター+αのみ登場します。
+CALL SINGLE_DRAWLINE
+PRINTBUTTON "[1] 妖精大戦争+α",1
+PRINT
+PRINTBUTTON "[0] 全員登場させる",0
+PRINTFORML
+$INPUT_LOOP
+INPUT
+IF RESULT > 1 || RESULT < 0
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+
+IF RESULT
+	SCVAR:500 = 1
+ELSE
+	SCVAR:500 = 0
+	GOTO JUMP_SCENARIO_1
+ENDIF
+
+;;--------サニーミルク;--------
+COUNTRY_BOSS:1 = GET_ID(NAME_TO_CHARA("サニーミルク"))
+COUNTRY_COLOR:1 = 0xFA5882
+CITY_OWNER:GET_CITYNUMBER("日向市") = 1
+CITY_OWNER:GET_CITYNUMBER("杉安") = 1
+;
+CFLAG:(NAME_TO_CHARA("サニーミルク")):1 = 1
+
+;;--------ルナチャイルド;--------
+COUNTRY_BOSS:2 = GET_ID(NAME_TO_CHARA("ルナチャイルド"))
+COUNTRY_COLOR:2 = 0xFFF999
+CITY_OWNER:GET_CITYNUMBER("八代") = 2
+CITY_OWNER:GET_CITYNUMBER("人吉") = 2
+;
+CFLAG:(NAME_TO_CHARA("ルナチャイルド")):1 = 2
+
+;;--------スターサファイア;--------
+COUNTRY_BOSS:3 = GET_ID(NAME_TO_CHARA("スターサファイア"))
+COUNTRY_COLOR:3 = 0x778CFF
+CITY_OWNER:GET_CITYNUMBER("豊後森") = 3
+CITY_OWNER:GET_CITYNUMBER("日田") = 3
+;
+CFLAG:(NAME_TO_CHARA("スターサファイア")):1 = 3
+
+;;--------リリーホワイト;--------
+COUNTRY_BOSS:4 = GET_ID(NAME_TO_CHARA("リリーホワイト"))
+COUNTRY_COLOR:4 = 0xF5A9F2
+CITY_OWNER:GET_CITYNUMBER("大牟田") = 4
+CITY_OWNER:GET_CITYNUMBER("瀬高") = 4
+;
+CFLAG:(NAME_TO_CHARA("リリーホワイト")):1 = 4
+
+;;--------リリーブラック;--------
+COUNTRY_BOSS:5 = GET_ID(NAME_TO_CHARA("リリーブラック"))
+COUNTRY_COLOR:5 = 0x757575
+CITY_OWNER:GET_CITYNUMBER("飯塚") = 5
+CITY_OWNER:GET_CITYNUMBER("下山田") = 5
+;
+CFLAG:(NAME_TO_CHARA("リリーブラック")):1 = 5
+
+;;--------チルノ;--------
+COUNTRY_BOSS:6 = GET_ID(NAME_TO_CHARA("チルノ"))
+COUNTRY_COLOR:6 = 0x00FFF7
+CITY_OWNER:GET_CITYNUMBER("伊万里") = 6
+CITY_OWNER:GET_CITYNUMBER("有田") = 6
+;
+CFLAG:(NAME_TO_CHARA("チルノ")):1 = 6
+
+;;--------大妖精;--------
+COUNTRY_BOSS:7 = GET_ID(NAME_TO_CHARA("大妖精"))
+COUNTRY_COLOR:7 = 0x79FF4B
+CITY_OWNER:GET_CITYNUMBER("加津佐") = 7
+CITY_OWNER:GET_CITYNUMBER("島原") = 7
+;
+CFLAG:(NAME_TO_CHARA("大妖精")):1 = 7
+
+;;--------エタニティラルバ;--------
+COUNTRY_BOSS:8 = GET_ID(NAME_TO_CHARA("エタニティラルバ"))
+COUNTRY_COLOR:8 = 0x007042
+CITY_OWNER:GET_CITYNUMBER("志布志") = 8
+CITY_OWNER:GET_CITYNUMBER("油津") = 8
+;
+CFLAG:(NAME_TO_CHARA("エタニティラルバ")):1 = 8
+
+;;--------クラウンピース;--------
+COUNTRY_BOSS:9 = GET_ID(NAME_TO_CHARA("クラウンピース"))
+COUNTRY_COLOR:9 = 0xc1ab05
+CITY_OWNER:GET_CITYNUMBER("枕崎") = 9
+CITY_OWNER:GET_CITYNUMBER("山川") = 9
+CITY_OWNER:GET_CITYNUMBER("加世田") = 9
+;
+CFLAG:(NAME_TO_CHARA("クラウンピース")):1 = 9
+
+
+;指定されなかったキャラは放浪 「あなた」は除外（MASTER入れ替えたときに放浪するのを防ぐ）。
+FOR LOCAL:0, 1, CHARANUM
+	SIF CFLAG:(LOCAL:0):1 == 0  && CSTR:(LOCAL:0):99 != "あなた"
+		CFLAG:(LOCAL:0):特殊状態 = 0
+NEXT
+
+;妖精の戦争レベルに似合いそうな東方キャラを放浪状態に。妖精のごっこ遊びに付き合ってもらうイメージ
+;秋姉妹はステータスはともかく、イメージ的に神様が参加していいものか……
+;マップ広くなったんで追加しました。。。
+CFLAG:(NAME_TO_CHARA("ルーミア")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("リグル")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("ミスティア")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("小悪魔")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("レティ")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("橙")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("メディスン")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("リリカ")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("メルラン")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("ルナサ")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("静葉")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("穣子")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("雛")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("阿求")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("小鈴")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("キスメ")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("ヤマメ")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("朱鷺子")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("小傘")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("響子")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("芳香")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("わかさぎ姫")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("赤蛮奇")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("影狼")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("弁弁")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("八橋")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("菫子")):特殊状態 = 特殊状態_放浪
+
+;こっから追加分
+CFLAG:(NAME_TO_CHARA("ルイズ")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("サラ")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("ユキ")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("マイ")):特殊状態 = 特殊状態_放浪
+
+;+α
+CFLAG:(NAME_TO_CHARA("美宵")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("フランドール")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("こいし")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("典")):特殊状態 = 特殊状態_放浪
+CFLAG:(NAME_TO_CHARA("ぬえ")):特殊状態 = 特殊状態_放浪
+
+
+;兵力の初期配置
+CALL INIT_ARMY
+
+;■関係設定
+CALL SHARED_SETTING_RELATION
+;三月精、大チル、リリー2人はそれぞれ仲良し
+CALL INIT_RELATION("サニーミルク", "ルナチャイルド", 500, 0)
+CALL INIT_RELATION("サニーミルク", "スターサファイア", 500, 0)
+CALL INIT_RELATION("ルナチャイルド", "サニーミルク", 500, 0)
+CALL INIT_RELATION("ルナチャイルド", "スターサファイア", 500, 0)
+CALL INIT_RELATION("スターサファイア", "サニーミルク", 500, 0)
+CALL INIT_RELATION("スターサファイア", "ルナチャイルド", 500, 0)
+CALL INIT_RELATION("リリーブラック", "リリーホワイト", 1000, 0)
+CALL INIT_RELATION("リリーホワイト", "リリーブラック", 1000, 0)
+CALL INIT_RELATION("チルノ", "大妖精", 500, 0)
+CALL INIT_RELATION("大妖精", "チルノ", 1000, 0)
+
+;無所属都市の兵数は経済の2%
+FOR LOCAL:0, 0, MAX_CITY
+	SIF CITY_OWNER:(LOCAL:0) == 0
+		CITY_SOLDIER:(LOCAL:0) = CITY_ECONOMY:(LOCAL:0) * 20 / 1000
+NEXT
+
+GOTO JUMP_SCENARIO_0
+
+$JUMP_SCENARIO_1
+
+;;------------博麗神社組----------
+COUNTRY_BOSS:1 = GET_ID(NAME_TO_CHARA("霊夢"))
+COUNTRY_COLOR:1 = 0x007042
+COUNTRY_AI_TYPE:1 = AI_好戦
+
+CITY_OWNER:GET_CITYNUMBER("鹿児島中央") = 1
+CITY_OWNER:GET_CITYNUMBER("鹿児島") = 1
+
+;博麗神社関係者+α
+CFLAG:(NAME_TO_CHARA("霊夢")):1 = 1
+CFLAG:(NAME_TO_CHARA("魅魔")):1 = 1
+CFLAG:(NAME_TO_CHARA("萃香")):1 = 1
+CFLAG:(NAME_TO_CHARA("玄爺")):1 = 1
+CFLAG:(NAME_TO_CHARA("華扇")):1 = 1
+CFLAG:(NAME_TO_CHARA("あうん")):1 = 1
+CFLAG:(NAME_TO_CHARA("カナ")):1 = 1
+CFLAG:(NAME_TO_CHARA("魅須丸")):1 = 1
+
+;マヨイガからの助っ人
+CFLAG:(NAME_TO_CHARA("紫")):1 = 1
+CFLAG:(NAME_TO_CHARA("藍")):1 = 1
+CFLAG:(NAME_TO_CHARA("橙")):1 = 1
+
+
+;;------------紅魔館組----------
+COUNTRY_BOSS:2 = GET_ID(NAME_TO_CHARA("レミリア"))
+COUNTRY_COLOR:2 = 0xB40404
+COUNTRY_AI_TYPE:2 = AI_好戦
+
+CITY_OWNER:GET_CITYNUMBER("長崎") = 2
+CITY_OWNER:GET_CITYNUMBER("長与") = 2
+
+;紅魔館組
+CFLAG:(NAME_TO_CHARA("レミリア")):1 = 2
+CFLAG:(NAME_TO_CHARA("フランドール")):1 = 2
+CFLAG:(NAME_TO_CHARA("咲夜")):1 = 2
+CFLAG:(NAME_TO_CHARA("美鈴")):1 = 2
+CFLAG:(NAME_TO_CHARA("パチュリー")):1 = 2
+CFLAG:(NAME_TO_CHARA("小悪魔")):1 = 2
+
+;地獄組
+CFLAG:(NAME_TO_CHARA("さとり")):1 = 2
+CFLAG:(NAME_TO_CHARA("こいし")):1 = 2
+CFLAG:(NAME_TO_CHARA("燐")):1 = 2
+CFLAG:(NAME_TO_CHARA("空")):1 = 2
+
+
+;;------------月関係者----------
+COUNTRY_BOSS:3 = GET_ID(NAME_TO_CHARA("永琳"))
+COUNTRY_COLOR:3 = 0x778CFF
+COUNTRY_AI_TYPE:3 = AI_外交
+
+CITY_OWNER:GET_CITYNUMBER("大分") = 3
+CITY_OWNER:GET_CITYNUMBER("別府") = 3
+
+;月面組
+CFLAG:(NAME_TO_CHARA("豊姫")):1 = 3
+CFLAG:(NAME_TO_CHARA("依姫")):1 = 3
+CFLAG:(NAME_TO_CHARA("レイセン")):1 = 3
+CFLAG:(NAME_TO_CHARA("月の門番")):1 = 3
+CFLAG:(NAME_TO_CHARA("サグメ")):1 = 3
+CFLAG:(NAME_TO_CHARA("ドレミー")):1 = 3
+CFLAG:(NAME_TO_CHARA("清蘭")):1 = 3
+CFLAG:(NAME_TO_CHARA("鈴瑚")):1 = 3
+
+;永夜抄組
+CFLAG:(NAME_TO_CHARA("輝夜")):1 = 3
+CFLAG:(NAME_TO_CHARA("永琳")):1 = 3
+CFLAG:(NAME_TO_CHARA("てゐ")):1 = 3
+CFLAG:(NAME_TO_CHARA("鈴仙")):1 = 3
+
+
+;;------------命蓮寺組----------
+COUNTRY_BOSS:4 = GET_ID(NAME_TO_CHARA("白蓮"))
+COUNTRY_COLOR:4 = 0xbf783a
+COUNTRY_AI_TYPE:4 = AI_外交
+
+CITY_OWNER:GET_CITYNUMBER("熊本") = 4
+CITY_OWNER:GET_CITYNUMBER("宇土") = 4
+;命蓮寺組
+CFLAG:(NAME_TO_CHARA("白蓮")):1 = 4
+CFLAG:(NAME_TO_CHARA("水蜜")):1 = 4
+CFLAG:(NAME_TO_CHARA("一輪")):1 = 4
+CFLAG:(NAME_TO_CHARA("雲山")):1 = 4
+CFLAG:(NAME_TO_CHARA("ナズーリン")):1 = 4
+CFLAG:(NAME_TO_CHARA("星")):1 = 4
+CFLAG:(NAME_TO_CHARA("命蓮")):1 = 4
+CFLAG:(NAME_TO_CHARA("マミゾウ")):1 = 4
+CFLAG:(NAME_TO_CHARA("小傘")):1 = 4
+CFLAG:(NAME_TO_CHARA("ぬえ")):1 = 4
+
+;女苑
+CFLAG:(NAME_TO_CHARA("女苑")):1 = 4
+
+
+;;------------天狗関係者----------
+COUNTRY_BOSS:5 = GET_ID(NAME_TO_CHARA("龍"))
+COUNTRY_COLOR:5 = 0Xfff1cf
+COUNTRY_AI_TYPE:5 = AI_外交
+
+CITY_OWNER:GET_CITYNUMBER("南宮崎") = 5
+CITY_OWNER:GET_CITYNUMBER("宮崎") = 5
+
+;天狗関係者
+CFLAG:(NAME_TO_CHARA("椛")):1 = 5
+CFLAG:(NAME_TO_CHARA("文")):1 = 5
+CFLAG:(NAME_TO_CHARA("はたて")):1 = 5
+CFLAG:(NAME_TO_CHARA("龍")):1 = 5
+CFLAG:(NAME_TO_CHARA("典")):1 = 5
+CFLAG:(NAME_TO_CHARA("百々世")):1 = 5
+
+;妖怪の山
+CFLAG:(NAME_TO_CHARA("にとり")):1 = 5
+CFLAG:(NAME_TO_CHARA("雛")):1 = 5
+CFLAG:(NAME_TO_CHARA("ネムノ")):1 = 5
+CFLAG:(NAME_TO_CHARA("ミケ")):1 = 5
+CFLAG:(NAME_TO_CHARA("たかね")):1 = 5
+CFLAG:(NAME_TO_CHARA("山如")):1 = 5
+
+
+;;------------魔法の森の皆さん----------
+COUNTRY_BOSS:6 = GET_ID(NAME_TO_CHARA("魔理沙"))
+COUNTRY_COLOR:6 = 0xc1ab05
+COUNTRY_AI_TYPE:6 = AI_内政
+
+CITY_OWNER:GET_CITYNUMBER("佐賀") = 6
+CITY_OWNER:GET_CITYNUMBER("筑後大川") = 6
+
+;魔法の森
+CFLAG:(NAME_TO_CHARA("魔理沙")):1 = 6
+CFLAG:(NAME_TO_CHARA("エレン")):1 = 6
+CFLAG:(NAME_TO_CHARA("成美")):1 = 6
+
+;ブクレシュティの人形師
+CFLAG:(NAME_TO_CHARA("アリス")):1 = 6
+CFLAG:(NAME_TO_CHARA("上海人形")):1 = 6
+CFLAG:(NAME_TO_CHARA("蓬莱人形")):1 = 6
+CFLAG:(NAME_TO_CHARA("大江戸人形")):1 = 6
+CFLAG:(NAME_TO_CHARA("ゴリアテ人形")):1 = 6
+
+;魔界一家
+CFLAG:(NAME_TO_CHARA("神綺")):1 = 6
+CFLAG:(NAME_TO_CHARA("夢子")):1 = 6
+CFLAG:(NAME_TO_CHARA("マイ")):1 = 6
+CFLAG:(NAME_TO_CHARA("ユキ")):1 = 6
+CFLAG:(NAME_TO_CHARA("サラ")):1 = 6
+CFLAG:(NAME_TO_CHARA("ルイズ")):1 = 6
+
+
+;;------------妖精の仲間たち----------
+COUNTRY_BOSS:7 = GET_ID(NAME_TO_CHARA("チルノ"))
+COUNTRY_COLOR:7 = 0xa1d8e2
+COUNTRY_AI_TYPE:7 = AI_防衛
+
+CITY_OWNER:GET_CITYNUMBER("博多") = 7
+CITY_OWNER:GET_CITYNUMBER("小倉") = 7
+CITY_OWNER:GET_CITYNUMBER("福岡空港") = 7
+
+;⑨
+CFLAG:(NAME_TO_CHARA("大妖精")):1 = 7
+CFLAG:(NAME_TO_CHARA("チルノ")):1 = 7
+CFLAG:(NAME_TO_CHARA("レティ")):1 = 7
+
+;三妖精+
+CFLAG:(NAME_TO_CHARA("サニーミルク")):1 = 7
+CFLAG:(NAME_TO_CHARA("スターサファイア")):1 = 7
+CFLAG:(NAME_TO_CHARA("ルナチャイルド")):1 = 7
+CFLAG:(NAME_TO_CHARA("エタニティラルバ")):1 = 7
+CFLAG:(NAME_TO_CHARA("クラウンピース")):1 = 7
+
+;リリー
+CFLAG:(NAME_TO_CHARA("リリーホワイト")):1 = 7
+CFLAG:(NAME_TO_CHARA("リリーブラック")):1 = 7
+
+
+;指定されなかったキャラは放浪 「あなた」は除外（MASTER入れ替えたときに放浪するのを防ぐ）。
+FOR LOCAL:0, 1, CHARANUM
+	SIF CFLAG:(LOCAL:0):1 == 0  && CSTR:(LOCAL:0):99 != "あなた"
+		CFLAG:(LOCAL:0):特殊状態 = 1
+NEXT
+
+;兵力の初期配置
+CALL INIT_ARMY
+
+COUNTRY_SOLDIER:6 += 20000
+MONEY:5 += 10000
+MONEY:6 += 10000
+MONEY:7 -= 20000
+
+;■関係設定
+CALL SHARED_SETTING_RELATION
+
+;無所属都市の兵数は経済の10%
+FOR LOCAL:0, 0, MAX_CITY
+	SIF CITY_OWNER:(LOCAL:0) == 0
+		CITY_SOLDIER:(LOCAL:0) = CITY_ECONOMY:(LOCAL:0) * 100 / 1000
+NEXT
+
+$JUMP_SCENARIO_0
+
+
+;-------------------------------------------------
+;定例イベント
+;ターンエンド時に呼び出される
+;一度都市を領有すると都市訪問フラグがオンになる
+;SCVAR:(都市)　都市訪問フラグ
+;SCVAR:(路線)　0=未訪問 1=訪問 2=踏破
+;-------------------------------------------------
+@SCENARIO_EVENT_33
+#DIM 都市
+#DIM 自国
+
+SIF !CFLAG:MASTER:所属
+	RETURN
+
+自国 = CFLAG:MASTER:所属
+
+FOR 都市, 1, GET_CITY_NUM() + 1
+	SIF CITY_OWNER:都市 == 自国
+		SCVAR:都市 = 1
+NEXT
+
+;--------------------九州新幹線--------------------
+
+IF SCVAR:都市名_鹿児島中央 == 1 && SCVAR:都市名_川内 == 1 && SCVAR:都市名_出水 == 1 && SCVAR:都市名_新水俣 == 1 && SCVAR:都市名_新八代 == 1 && SCVAR:都市名_熊本 == 1 && SCVAR:都市名_新玉名 == 1 && SCVAR:都市名_新大牟田 == 1 && SCVAR:都市名_筑後船小屋 == 1 && SCVAR:都市名_久留米 == 1 && SCVAR:都市名_新鳥栖 == 1 && SCVAR:都市名_博多 == 1 && SCVAR:路線_九州新幹線 != 2
+	SCVAR:路線_九州新幹線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 九州新幹線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+60000
+	MONEY:自国 += 60000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_鹿児島中央 == 1 || SCVAR:都市名_川内 == 1 || SCVAR:都市名_出水 == 1 || SCVAR:都市名_新水俣 == 1 || SCVAR:都市名_新八代 == 1 || SCVAR:都市名_熊本 == 1 || SCVAR:都市名_新玉名 == 1 || SCVAR:都市名_新大牟田 == 1 || SCVAR:都市名_筑後船小屋 == 1 || SCVAR:都市名_久留米 == 1 || SCVAR:都市名_新鳥栖 == 1 || SCVAR:都市名_博多 == 1
+	IF SCVAR:路線_九州新幹線 == 0
+		SCVAR:路線_九州新幹線 = 1
+		PRINTFORML 九州新幹線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------西九州新幹線--------------------
+
+IF SCVAR:都市名_長崎 == 1 && SCVAR:都市名_諫早 == 1 && SCVAR:都市名_新大村 == 1 && SCVAR:都市名_嬉野温泉 == 1 && SCVAR:都市名_武雄温泉 == 1 && SCVAR:路線_西九州新幹線 != 2
+	SCVAR:路線_西九州新幹線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 西九州新幹線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+25000
+	MONEY:自国 += 25000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_長崎 == 1 || SCVAR:都市名_諫早 == 1 || SCVAR:都市名_新大村 == 1 || SCVAR:都市名_嬉野温泉 == 1 || SCVAR:都市名_武雄温泉 == 1
+	IF SCVAR:路線_西九州新幹線 == 0
+		SCVAR:路線_西九州新幹線 = 1
+		PRINTFORML 西九州新幹線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------博多南線--------------------
+
+IF SCVAR:都市名_博多 == 1 && SCVAR:都市名_博多南 == 1 && SCVAR:路線_博多南線 != 2
+	SCVAR:路線_博多南線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 博多南線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+10000
+	MONEY:自国 += 10000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_博多 == 1 || SCVAR:都市名_博多南 == 1
+	IF SCVAR:路線_博多南線 == 0
+		SCVAR:路線_博多南線 = 1
+		PRINTFORML 博多南線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------鹿児島本線--------------------
+
+IF SCVAR:都市名_門司港 == 1 && SCVAR:都市名_小倉 == 1 && SCVAR:都市名_西小倉 == 1 && SCVAR:都市名_黒崎 == 1 && SCVAR:都市名_折尾 == 1 && SCVAR:都市名_遠賀川 == 1 && SCVAR:都市名_香椎 == 1 && SCVAR:都市名_吉塚 == 1 && SCVAR:都市名_博多 == 1 && SCVAR:都市名_原田 == 1 && SCVAR:都市名_基山 == 1 && SCVAR:都市名_鳥栖 == 1 && SCVAR:都市名_久留米 == 1 && SCVAR:都市名_羽犬塚 == 1 && SCVAR:都市名_筑後船小屋 == 1 && SCVAR:都市名_瀬高 == 1 && SCVAR:都市名_大牟田 == 1 && SCVAR:都市名_荒尾 == 1 && SCVAR:都市名_玉名 == 1 && SCVAR:都市名_熊本 == 1 && SCVAR:都市名_宇土 == 1 && SCVAR:都市名_新八代 == 1 && SCVAR:都市名_八代 == 1 && SCVAR:都市名_水俣 == 1 && SCVAR:都市名_出水 == 1 && SCVAR:都市名_阿久根 == 1 && SCVAR:都市名_川内 == 1 && SCVAR:都市名_伊集院 == 1 && SCVAR:都市名_鹿児島中央 == 1 && SCVAR:都市名_鹿児島 == 1 && SCVAR:路線_鹿児島本線 != 2
+	SCVAR:路線_鹿児島本線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 鹿児島本線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+150000
+	MONEY:自国 += 150000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_門司港 == 1 || SCVAR:都市名_小倉 == 1 || SCVAR:都市名_西小倉 == 1 || SCVAR:都市名_黒崎 == 1 || SCVAR:都市名_折尾 == 1 || SCVAR:都市名_遠賀川 == 1 || SCVAR:都市名_香椎 == 1 || SCVAR:都市名_吉塚 == 1 || SCVAR:都市名_博多 == 1 || SCVAR:都市名_原田 == 1 || SCVAR:都市名_基山 == 1 || SCVAR:都市名_鳥栖 == 1 || SCVAR:都市名_久留米 == 1 || SCVAR:都市名_羽犬塚 == 1 || SCVAR:都市名_筑後船小屋 == 1 || SCVAR:都市名_瀬高 == 1 || SCVAR:都市名_大牟田 == 1 || SCVAR:都市名_荒尾 == 1 || SCVAR:都市名_玉名 == 1 || SCVAR:都市名_熊本 == 1 || SCVAR:都市名_宇土 == 1 || SCVAR:都市名_新八代 == 1 || SCVAR:都市名_八代 == 1 || SCVAR:都市名_水俣 == 1 || SCVAR:都市名_出水 == 1 || SCVAR:都市名_阿久根 == 1 || SCVAR:都市名_川内 == 1 || SCVAR:都市名_伊集院 == 1 || SCVAR:都市名_鹿児島中央 == 1 || SCVAR:都市名_鹿児島 == 1
+	IF SCVAR:路線_鹿児島本線 == 0
+		SCVAR:路線_鹿児島本線 = 1
+		PRINTFORML 鹿児島本線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------長崎本線--------------------
+
+IF SCVAR:都市名_長崎 == 1 && SCVAR:都市名_諫早 == 1 && SCVAR:都市名_肥前浜 == 1 && SCVAR:都市名_肥前鹿島 == 1 && SCVAR:都市名_江北（旧肥前山口） == 1 && SCVAR:都市名_久保田 == 1 && SCVAR:都市名_佐賀 == 1 && SCVAR:都市名_新鳥栖 == 1 && SCVAR:都市名_鳥栖 == 1 && SCVAR:路線_長崎本線 != 2
+	SCVAR:路線_長崎本線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 長崎本線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+45000
+	MONEY:自国 += 45000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_長崎 == 1 || SCVAR:都市名_諫早 == 1 || SCVAR:都市名_肥前浜 == 1 || SCVAR:都市名_肥前鹿島 == 1 || SCVAR:都市名_江北（旧肥前山口） == 1 || SCVAR:都市名_久保田 == 1 || SCVAR:都市名_佐賀 == 1 || SCVAR:都市名_新鳥栖 == 1 || SCVAR:都市名_鳥栖 == 1
+	IF SCVAR:路線_長崎本線 == 0
+		SCVAR:路線_長崎本線 = 1
+		PRINTFORML 長崎本線踏破チャレンジスタート（注：長与支線を含みません）
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------筑豊本線--------------------
+
+IF SCVAR:都市名_若松 == 1 && SCVAR:都市名_折尾 == 1 && SCVAR:都市名_中間 == 1 && SCVAR:都市名_直方 == 1 && SCVAR:都市名_勝野 == 1 && SCVAR:都市名_新飯塚 == 1 && SCVAR:都市名_飯塚 == 1 && SCVAR:都市名_桂川 == 1 && SCVAR:都市名_原田 == 1 && SCVAR:路線_筑豊本線 != 2
+	SCVAR:路線_筑豊本線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 筑豊本線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+45000
+	MONEY:自国 += 45000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_若松 == 1 || SCVAR:都市名_折尾 == 1 || SCVAR:都市名_中間 == 1 || SCVAR:都市名_直方 == 1 || SCVAR:都市名_勝野 == 1 || SCVAR:都市名_新飯塚 == 1 || SCVAR:都市名_飯塚 == 1 || SCVAR:都市名_桂川 == 1 || SCVAR:都市名_原田 == 1
+	IF SCVAR:路線_筑豊本線 == 0
+		SCVAR:路線_筑豊本線 = 1
+		PRINTFORML 筑豊本線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------日豊本線--------------------
+
+IF SCVAR:都市名_小倉 == 1 && SCVAR:都市名_西小倉 == 1 && SCVAR:都市名_城野 == 1 && SCVAR:都市名_行橋 == 1 && SCVAR:都市名_中津 == 1 && SCVAR:都市名_宇佐 == 1 && SCVAR:都市名_杵築 == 1 && SCVAR:都市名_別府 == 1 && SCVAR:都市名_大分 == 1 && SCVAR:都市名_佐伯 == 1 && SCVAR:都市名_延岡 == 1 && SCVAR:都市名_日向市 == 1 && SCVAR:都市名_佐土原 == 1 && SCVAR:都市名_宮崎 == 1 && SCVAR:都市名_南宮崎 == 1 && SCVAR:都市名_都城 == 1 && SCVAR:都市名_西都城 == 1 && SCVAR:都市名_国分 == 1 && SCVAR:都市名_隼人 == 1 && SCVAR:都市名_鹿児島 == 1 && SCVAR:路線_日豊本線 != 2
+	SCVAR:路線_日豊本線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 日豊本線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+100000
+	MONEY:自国 += 100000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_小倉 == 1 || SCVAR:都市名_西小倉 == 1 || SCVAR:都市名_城野 == 1 || SCVAR:都市名_行橋 == 1 || SCVAR:都市名_中津 == 1 || SCVAR:都市名_宇佐 == 1 || SCVAR:都市名_杵築 == 1 || SCVAR:都市名_別府 == 1 || SCVAR:都市名_大分 == 1 || SCVAR:都市名_佐伯 == 1 || SCVAR:都市名_延岡 == 1 || SCVAR:都市名_日向市 == 1 || SCVAR:都市名_佐土原 == 1 || SCVAR:都市名_宮崎 == 1 || SCVAR:都市名_南宮崎 == 1 || SCVAR:都市名_都城 == 1 || SCVAR:都市名_西都城 == 1 || SCVAR:都市名_国分 == 1 || SCVAR:都市名_隼人 == 1 || SCVAR:都市名_鹿児島 == 1
+	IF SCVAR:路線_日豊本線 == 0
+		SCVAR:路線_日豊本線 = 1
+		PRINTFORML 日豊本線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------筑肥線--------------------
+
+IF SCVAR:都市名_博多 == 1 && SCVAR:都市名_西新 == 1 && SCVAR:都市名_姪浜 == 1 && SCVAR:都市名_筑前前原 == 1 && SCVAR:都市名_唐津 == 1 && SCVAR:都市名_山本 == 1 && SCVAR:都市名_伊万里 == 1 && SCVAR:路線_筑肥線 != 2
+	SCVAR:路線_筑肥線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 筑肥線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+35000
+	MONEY:自国 += 35000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_博多 == 1 || SCVAR:都市名_西新 == 1 || SCVAR:都市名_姪浜 == 1 || SCVAR:都市名_筑前前原 == 1 || SCVAR:都市名_唐津 == 1 || SCVAR:都市名_山本 == 1 || SCVAR:都市名_伊万里 == 1
+	IF SCVAR:路線_筑肥線 == 0
+		SCVAR:路線_筑肥線 = 1
+		PRINTFORML 筑肥線踏破チャレンジスタート（注：廃線区間を含みます）
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------長崎本線長与支線--------------------
+
+IF SCVAR:都市名_諫早 == 1 && SCVAR:都市名_長与 == 1 && SCVAR:都市名_長崎 == 1 && SCVAR:路線_長崎本線長与支線 != 2
+	SCVAR:路線_長崎本線長与支線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 長崎本線長与支線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+15000
+	MONEY:自国 += 25000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_諫早 == 1 || SCVAR:都市名_長与 == 1 || SCVAR:都市名_長崎 == 1
+	IF SCVAR:路線_長崎本線長与支線 == 0
+		SCVAR:路線_長崎本線長与支線 = 1
+		PRINTFORML 長崎本線長与支線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------佐世保線--------------------
+
+IF SCVAR:都市名_江北（旧肥前山口） == 1 && SCVAR:都市名_武雄温泉 == 1 && SCVAR:都市名_有田 == 1 && SCVAR:都市名_早岐 == 1 && SCVAR:都市名_佐世保 == 1 && SCVAR:路線_佐世保線 != 2
+	SCVAR:路線_佐世保線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 佐世保線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+25000
+	MONEY:自国 += 25000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_江北（旧肥前山口） == 1 || SCVAR:都市名_武雄温泉 == 1 || SCVAR:都市名_有田 == 1 || SCVAR:都市名_早岐 == 1 || SCVAR:都市名_佐世保 == 1
+	IF SCVAR:路線_佐世保線 == 0
+		SCVAR:路線_佐世保線 = 1
+		PRINTFORML 佐世保線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------大村線--------------------
+
+IF SCVAR:都市名_諫早 == 1 && SCVAR:都市名_大村 == 1 && SCVAR:都市名_新大村 == 1 && SCVAR:都市名_ハウステンボス == 1 && SCVAR:都市名_早岐 == 1 && SCVAR:路線_大村線 != 2
+	SCVAR:路線_大村線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 大村線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+25000
+	MONEY:自国 += 25000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_諫早 == 1 || SCVAR:都市名_大村 == 1 || SCVAR:都市名_新大村 == 1 || SCVAR:都市名_ハウステンボス == 1 || SCVAR:都市名_早岐 == 1
+	IF SCVAR:路線_大村線 == 0
+		SCVAR:路線_大村線 = 1
+		PRINTFORML 大村線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------日田彦山線--------------------
+
+IF SCVAR:都市名_城野 == 1 && SCVAR:都市名_香春 == 1 && SCVAR:都市名_田川伊田 == 1 && SCVAR:都市名_田川後藤寺 == 1 && SCVAR:都市名_豊前川崎 == 1 && SCVAR:都市名_添田 == 1 && SCVAR:都市名_夜明 == 1 && SCVAR:路線_日田彦山線 != 2
+	SCVAR:路線_日田彦山線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 日田彦山線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+30000
+	MONEY:自国 += 30000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_城野 == 1 || SCVAR:都市名_香春 == 1 || SCVAR:都市名_田川伊田 == 1 || SCVAR:都市名_田川後藤寺 == 1 || SCVAR:都市名_豊前川崎 == 1 || SCVAR:都市名_添田 == 1 || SCVAR:都市名_夜明 == 1
+	IF SCVAR:路線_日田彦山線 == 0
+		SCVAR:路線_日田彦山線 = 1
+		PRINTFORML 日田彦山線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------後藤寺線--------------------
+
+IF SCVAR:都市名_新飯塚 == 1 && SCVAR:都市名_田川後藤寺 == 1 && SCVAR:路線_後藤寺線 != 2
+	SCVAR:路線_後藤寺線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 後藤寺線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+10000
+	MONEY:自国 += 10000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_新飯塚 == 1 || SCVAR:都市名_田川後藤寺 == 1
+	IF SCVAR:路線_後藤寺線 == 0
+		SCVAR:路線_後藤寺線 = 1
+		PRINTFORML 後藤寺線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------篠栗線--------------------
+
+IF SCVAR:都市名_桂川 == 1 && SCVAR:都市名_篠栗 == 1 && SCVAR:都市名_長者原 == 1 && SCVAR:都市名_吉塚 == 1 && SCVAR:路線_篠栗線 != 2
+	SCVAR:路線_篠栗線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 篠栗線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+20000
+	MONEY:自国 += 20000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_桂川 == 1 || SCVAR:都市名_篠栗 == 1 || SCVAR:都市名_長者原 == 1 || SCVAR:都市名_吉塚 == 1
+	IF SCVAR:路線_篠栗線 == 0
+		SCVAR:路線_篠栗線 = 1
+		PRINTFORML 篠栗線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------唐津線--------------------
+
+IF SCVAR:都市名_西唐津 == 1 && SCVAR:都市名_唐津 == 1 && SCVAR:都市名_山本 == 1 && SCVAR:都市名_久保田 == 1 && SCVAR:路線_唐津線 != 2
+	SCVAR:路線_唐津線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 唐津線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+20000
+	MONEY:自国 += 20000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_西唐津 == 1 || SCVAR:都市名_唐津 == 1 || SCVAR:都市名_山本 == 1 || SCVAR:都市名_久保田 == 1
+	IF SCVAR:路線_唐津線 == 0
+		SCVAR:路線_唐津線 = 1
+		PRINTFORML 唐津線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------指宿枕崎線--------------------
+
+IF SCVAR:都市名_鹿児島中央 == 1 && SCVAR:都市名_谷山 == 1 && SCVAR:都市名_指宿 == 1 && SCVAR:都市名_山川 == 1 && SCVAR:都市名_枕崎 == 1 && SCVAR:路線_指宿枕崎線 != 2
+	SCVAR:路線_指宿枕崎線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 指宿枕崎線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+25000
+	MONEY:自国 += 25000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_鹿児島中央 == 1 || SCVAR:都市名_谷山 == 1 || SCVAR:都市名_指宿 == 1 || SCVAR:都市名_山川 == 1 || SCVAR:都市名_枕崎 == 1
+	IF SCVAR:路線_指宿枕崎線 == 0
+		SCVAR:路線_指宿枕崎線 = 1
+		PRINTFORML 指宿枕崎線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------肥薩線--------------------
+
+IF SCVAR:都市名_八代 == 1 && SCVAR:都市名_人吉 == 1 && SCVAR:都市名_吉松 == 1 && SCVAR:都市名_栗野 == 1 && SCVAR:都市名_隼人 == 1 && SCVAR:路線_肥薩線 != 2
+	SCVAR:路線_肥薩線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 肥薩線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+25000
+	MONEY:自国 += 25000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_八代 == 1 || SCVAR:都市名_人吉 == 1 || SCVAR:都市名_吉松 == 1 || SCVAR:都市名_栗野 == 1 || SCVAR:都市名_隼人 == 1
+	IF SCVAR:路線_肥薩線 == 0
+		SCVAR:路線_肥薩線 = 1
+		PRINTFORML 肥薩線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------吉都線--------------------
+
+IF SCVAR:都市名_吉松 == 1 && SCVAR:都市名_えびの == 1 && SCVAR:都市名_都城 == 1 && SCVAR:路線_吉都線 != 2
+	SCVAR:路線_吉都線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 吉都線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+15000
+	MONEY:自国 += 15000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_吉松 == 1 || SCVAR:都市名_えびの == 1 || SCVAR:都市名_都城 == 1
+	IF SCVAR:路線_吉都線 == 0
+		SCVAR:路線_吉都線 = 1
+		PRINTFORML 吉都線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------三角線--------------------
+
+IF SCVAR:都市名_宇土 == 1 && SCVAR:都市名_三角 == 1 && SCVAR:路線_三角線 != 2
+	SCVAR:路線_三角線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 三角線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+10000
+	MONEY:自国 += 10000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_宇土 == 1 || SCVAR:都市名_三角 == 1
+	IF SCVAR:路線_三角線 == 0
+		SCVAR:路線_三角線 = 1
+		PRINTFORML 三角線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------豊肥本線--------------------
+
+IF SCVAR:都市名_熊本 == 1 && SCVAR:都市名_肥後大津 == 1 && SCVAR:都市名_立野 == 1 && SCVAR:都市名_宮地 == 1 && SCVAR:都市名_豊後竹田 == 1 && SCVAR:都市名_大分 == 1 && SCVAR:路線_豊肥本線 != 2
+	SCVAR:路線_豊肥本線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 豊肥本線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+30000
+	MONEY:自国 += 30000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_熊本 == 1 || SCVAR:都市名_肥後大津 == 1 || SCVAR:都市名_立野 == 1 || SCVAR:都市名_宮地 == 1 || SCVAR:都市名_豊後竹田 == 1 || SCVAR:都市名_大分 == 1
+	IF SCVAR:路線_豊肥本線 == 0
+		SCVAR:路線_豊肥本線 = 1
+		PRINTFORML 豊肥本線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------久大本線--------------------
+
+IF SCVAR:都市名_久留米 == 1 && SCVAR:都市名_うきは == 1 && SCVAR:都市名_夜明 == 1 && SCVAR:都市名_日田 == 1 && SCVAR:都市名_由布院 == 1 && SCVAR:都市名_大分 == 1 && SCVAR:路線_久大本線 != 2
+	SCVAR:路線_久大本線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 久大本線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+30000
+	MONEY:自国 += 30000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_久留米 == 1 || SCVAR:都市名_うきは == 1 || SCVAR:都市名_夜明 == 1 || SCVAR:都市名_日田 == 1 || SCVAR:都市名_由布院 == 1 || SCVAR:都市名_大分 == 1
+	IF SCVAR:路線_久大本線 == 0
+		SCVAR:路線_久大本線 = 1
+		PRINTFORML 久大本線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------香椎線--------------------
+
+IF SCVAR:都市名_西戸崎 == 1 && SCVAR:都市名_香椎 == 1 && SCVAR:都市名_長者原 == 1 && SCVAR:都市名_宇美 == 1 && SCVAR:路線_香椎線 != 2
+	SCVAR:路線_香椎線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 香椎線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+20000
+	MONEY:自国 += 20000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_西戸崎 == 1 || SCVAR:都市名_香椎 == 1 || SCVAR:都市名_長者原 == 1 || SCVAR:都市名_宇美 == 1
+	IF SCVAR:路線_香椎線 == 0
+		SCVAR:路線_香椎線 = 1
+		PRINTFORML 香椎線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------臼ノ浦線--------------------
+
+IF SCVAR:都市名_佐々 == 1 && SCVAR:都市名_臼ノ浦 == 1 && SCVAR:路線_臼ノ浦線 != 2
+	SCVAR:路線_臼ノ浦線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 臼ノ浦線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+10000
+	MONEY:自国 += 10000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_佐々 == 1 || SCVAR:都市名_臼ノ浦 == 1
+	IF SCVAR:路線_臼ノ浦線 == 0
+		SCVAR:路線_臼ノ浦線 = 1
+		PRINTFORML 臼ノ浦線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------世知原線--------------------
+
+IF SCVAR:都市名_吉井 == 1 && SCVAR:都市名_世知原 == 1 && SCVAR:路線_世知原線 != 2
+	SCVAR:路線_世知原線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 世知原線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+10000
+	MONEY:自国 += 10000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_吉井 == 1 || SCVAR:都市名_世知原 == 1
+	IF SCVAR:路線_世知原線 == 0
+		SCVAR:路線_世知原線 = 1
+		PRINTFORML 世知原線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------唐津線岸嶽支線--------------------
+
+IF SCVAR:都市名_山本 == 1 && SCVAR:都市名_岸嶽 == 1 && SCVAR:路線_唐津線岸嶽支線 != 2
+	SCVAR:路線_唐津線岸嶽支線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 唐津線岸嶽支線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+10000
+	MONEY:自国 += 10000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_山本 == 1 || SCVAR:都市名_岸嶽 == 1
+	IF SCVAR:路線_唐津線岸嶽支線 == 0
+		SCVAR:路線_唐津線岸嶽支線 = 1
+		PRINTFORML 唐津線岸嶽支線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------佐賀線--------------------
+
+IF SCVAR:都市名_佐賀 == 1 && SCVAR:都市名_筑後大川 == 1 && SCVAR:都市名_瀬高 == 1 && SCVAR:路線_佐賀線 != 2
+	SCVAR:路線_佐賀線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 佐賀線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+15000
+	MONEY:自国 += 15000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_佐賀 == 1 || SCVAR:都市名_筑後大川 == 1 || SCVAR:都市名_瀬高 == 1
+	IF SCVAR:路線_佐賀線 == 0
+		SCVAR:路線_佐賀線 = 1
+		PRINTFORML 佐賀線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------山野線--------------------
+
+IF SCVAR:都市名_水俣 == 1 && SCVAR:都市名_山野 == 1 && SCVAR:都市名_薩摩大口 == 1 && SCVAR:都市名_栗野 == 1 && SCVAR:路線_山野線 != 2
+	SCVAR:路線_山野線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 山野線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+20000
+	MONEY:自国 += 20000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_水俣 == 1 || SCVAR:都市名_山野 == 1 || SCVAR:都市名_薩摩大口 == 1 || SCVAR:都市名_栗野 == 1
+	IF SCVAR:路線_山野線 == 0
+		SCVAR:路線_山野線 = 1
+		PRINTFORML 山野線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------大隅線--------------------
+
+IF SCVAR:都市名_志布志 == 1 && SCVAR:都市名_鹿屋 == 1 && SCVAR:都市名_海潟温泉 == 1 && SCVAR:都市名_国分 == 1 && SCVAR:路線_大隅線 != 2
+	SCVAR:路線_大隅線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 大隅線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+20000
+	MONEY:自国 += 20000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_志布志 == 1 || SCVAR:都市名_鹿屋 == 1 || SCVAR:都市名_海潟温泉 == 1 || SCVAR:都市名_国分 == 1
+	IF SCVAR:路線_大隅線 == 0
+		SCVAR:路線_大隅線 = 1
+		PRINTFORML 大隅線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------志布志線--------------------
+
+IF SCVAR:都市名_志布志 == 1 && SCVAR:都市名_岩川 == 1 && SCVAR:都市名_西都城 == 1 && SCVAR:路線_志布志線 != 2
+	SCVAR:路線_志布志線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 志布志線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+15000
+	MONEY:自国 += 15000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_志布志 == 1 || SCVAR:都市名_岩川 == 1 || SCVAR:都市名_西都城 == 1
+	IF SCVAR:路線_志布志線 == 0
+		SCVAR:路線_志布志線 = 1
+		PRINTFORML 志布志線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------妻線--------------------
+
+IF SCVAR:都市名_佐土原 == 1 && SCVAR:都市名_杉安 == 1 && SCVAR:路線_妻線 != 2
+	SCVAR:路線_妻線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 妻線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+10000
+	MONEY:自国 += 10000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_佐土原 == 1 || SCVAR:都市名_杉安 == 1
+	IF SCVAR:路線_妻線 == 0
+		SCVAR:路線_妻線 = 1
+		PRINTFORML 妻線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------細島線--------------------
+
+IF SCVAR:都市名_日向市 == 1 && SCVAR:都市名_細島 == 1 && SCVAR:路線_細島線 != 2
+	SCVAR:路線_細島線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 細島線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+10000
+	MONEY:自国 += 10000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_日向市 == 1 || SCVAR:都市名_細島 == 1
+	IF SCVAR:路線_細島線 == 0
+		SCVAR:路線_細島線 = 1
+		PRINTFORML 細島線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------矢部線--------------------
+
+IF SCVAR:都市名_羽犬塚 == 1 && SCVAR:都市名_黒木 == 1 && SCVAR:路線_矢部線 != 2
+	SCVAR:路線_矢部線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 矢部線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+10000
+	MONEY:自国 += 10000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_羽犬塚 == 1 || SCVAR:都市名_黒木 == 1
+	IF SCVAR:路線_矢部線 == 0
+		SCVAR:路線_矢部線 = 1
+		PRINTFORML 矢部線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------宮原線--------------------
+
+IF SCVAR:都市名_豊後森 == 1 && SCVAR:都市名_肥後小国 == 1 && SCVAR:路線_宮原線 != 2
+	SCVAR:路線_宮原線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 宮原線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+10000
+	MONEY:自国 += 10000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_豊後森 == 1 || SCVAR:都市名_肥後小国 == 1
+	IF SCVAR:路線_宮原線 == 0
+		SCVAR:路線_宮原線 = 1
+		PRINTFORML 宮原線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------勝田線--------------------
+
+IF SCVAR:都市名_吉塚 == 1 && SCVAR:都市名_宇美 == 1 && SCVAR:都市名_筑前勝田 == 1 && SCVAR:路線_勝田線 != 2
+	SCVAR:路線_勝田線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 勝田線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+15000
+	MONEY:自国 += 15000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_吉塚 == 1 || SCVAR:都市名_宇美 == 1 || SCVAR:都市名_筑前勝田 == 1
+	IF SCVAR:路線_勝田線 == 0
+		SCVAR:路線_勝田線 = 1
+		PRINTFORML 勝田線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------室木線--------------------
+
+IF SCVAR:都市名_遠賀川 == 1 && SCVAR:都市名_室木 == 1 && SCVAR:路線_室木線 != 2
+	SCVAR:路線_室木線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 室木線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+10000
+	MONEY:自国 += 10000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_遠賀川 == 1 || SCVAR:都市名_室木 == 1
+	IF SCVAR:路線_室木線 == 0
+		SCVAR:路線_室木線 = 1
+		PRINTFORML 室木線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------宮田線--------------------
+
+IF SCVAR:都市名_勝野 == 1 && SCVAR:都市名_筑前宮田 == 1 && SCVAR:路線_宮田線 != 2
+	SCVAR:路線_宮田線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 宮田線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+10000
+	MONEY:自国 += 10000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_勝野 == 1 || SCVAR:都市名_筑前宮田 == 1
+	IF SCVAR:路線_宮田線 == 0
+		SCVAR:路線_宮田線 = 1
+		PRINTFORML 宮田線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------香月線--------------------
+
+IF SCVAR:都市名_中間 == 1 && SCVAR:都市名_香月 == 1 && SCVAR:路線_香月線 != 2
+	SCVAR:路線_香月線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 香月線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+10000
+	MONEY:自国 += 10000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_中間 == 1 || SCVAR:都市名_香月 == 1
+	IF SCVAR:路線_香月線 == 0
+		SCVAR:路線_香月線 = 1
+		PRINTFORML 香月線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------添田線--------------------
+
+IF SCVAR:都市名_香春 == 1 && SCVAR:都市名_大任 == 1 && SCVAR:都市名_添田 == 1 && SCVAR:路線_添田線 != 2
+	SCVAR:路線_添田線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 添田線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+15000
+	MONEY:自国 += 15000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_香春 == 1 || SCVAR:都市名_大任 == 1 || SCVAR:都市名_添田 == 1
+	IF SCVAR:路線_添田線 == 0
+		SCVAR:路線_添田線 = 1
+		PRINTFORML 添田線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------福岡市地下鉄空港線--------------------
+
+IF SCVAR:都市名_姪浜 == 1 && SCVAR:都市名_天神 == 1 && SCVAR:都市名_博多 == 1 && SCVAR:都市名_福岡空港 == 1 && SCVAR:路線_福岡市地下鉄空港線 != 2
+	SCVAR:路線_福岡市地下鉄空港線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 福岡市地下鉄空港線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+20000
+	MONEY:自国 += 20000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_姪浜 == 1 || SCVAR:都市名_天神 == 1 || SCVAR:都市名_博多 == 1 || SCVAR:都市名_福岡空港 == 1
+	IF SCVAR:路線_福岡市地下鉄空港線 == 0
+		SCVAR:路線_福岡市地下鉄空港線 = 1
+		PRINTFORML 福岡市地下鉄空港線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------平成筑豊鉄道田川線--------------------
+
+IF SCVAR:都市名_行橋 == 1 && SCVAR:都市名_油須原 == 1 && SCVAR:都市名_田川伊田 == 1 && SCVAR:路線_平成筑豊鉄道田川線 != 2
+	SCVAR:路線_平成筑豊鉄道田川線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 平成筑豊鉄道田川線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+15000
+	MONEY:自国 += 15000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_行橋 == 1 || SCVAR:都市名_油須原 == 1 || SCVAR:都市名_田川伊田 == 1
+	IF SCVAR:路線_平成筑豊鉄道田川線 == 0
+		SCVAR:路線_平成筑豊鉄道田川線 = 1
+		PRINTFORML 平成筑豊鉄道田川線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------平成筑豊鉄道伊田線--------------------
+
+IF SCVAR:都市名_直方 == 1 && SCVAR:都市名_金田 == 1 && SCVAR:都市名_田川伊田 == 1 && SCVAR:路線_平成筑豊鉄道伊田線 != 2
+	SCVAR:路線_平成筑豊鉄道伊田線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 平成筑豊鉄道伊田線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+15000
+	MONEY:自国 += 15000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_直方 == 1 || SCVAR:都市名_金田 == 1 || SCVAR:都市名_田川伊田 == 1
+	IF SCVAR:路線_平成筑豊鉄道伊田線 == 0
+		SCVAR:路線_平成筑豊鉄道伊田線 = 1
+		PRINTFORML 平成筑豊鉄道伊田線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------平成筑豊鉄道糸田線--------------------
+
+IF SCVAR:都市名_田川後藤寺 == 1 && SCVAR:都市名_金田 == 1 && SCVAR:路線_平成筑豊鉄道糸田線 != 2
+	SCVAR:路線_平成筑豊鉄道糸田線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 平成筑豊鉄道糸田線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+10000
+	MONEY:自国 += 10000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_田川後藤寺 == 1 || SCVAR:都市名_金田 == 1
+	IF SCVAR:路線_平成筑豊鉄道糸田線 == 0
+		SCVAR:路線_平成筑豊鉄道糸田線 = 1
+		PRINTFORML 平成筑豊鉄道糸田線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------松浦鉄道西九州線--------------------
+
+IF SCVAR:都市名_有田 == 1 && SCVAR:都市名_伊万里 == 1 && SCVAR:都市名_松浦 == 1 && SCVAR:都市名_吉井 == 1 && SCVAR:都市名_たびら平戸口 == 1 && SCVAR:都市名_佐々 == 1 && SCVAR:都市名_佐世保 == 1 && SCVAR:路線_松浦鉄道西九州線 != 2
+	SCVAR:路線_松浦鉄道西九州線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 松浦鉄道西九州線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+35000
+	MONEY:自国 += 35000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_有田 == 1 || SCVAR:都市名_伊万里 == 1 || SCVAR:都市名_松浦 == 1 || SCVAR:都市名_吉井 == 1 || SCVAR:都市名_たびら平戸口 == 1 || SCVAR:都市名_佐々 == 1 || SCVAR:都市名_佐世保 == 1
+	IF SCVAR:路線_松浦鉄道西九州線 == 0
+		SCVAR:路線_松浦鉄道西九州線 = 1
+		PRINTFORML 松浦鉄道西九州線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------島原鉄道線--------------------
+
+IF SCVAR:都市名_諫早 == 1 && SCVAR:都市名_島原 == 1 && SCVAR:都市名_加津佐 == 1 && SCVAR:路線_島原鉄道線 != 2
+	SCVAR:路線_島原鉄道線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 島原鉄道線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+15000
+	MONEY:自国 += 15000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_諫早 == 1 || SCVAR:都市名_島原 == 1 || SCVAR:都市名_加津佐 == 1
+	IF SCVAR:路線_島原鉄道線 == 0
+		SCVAR:路線_島原鉄道線 = 1
+		PRINTFORML 島原鉄道線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------くま川鉄道湯前線--------------------
+
+IF SCVAR:都市名_人吉 == 1 && SCVAR:都市名_湯前 == 1 && SCVAR:路線_くま川鉄道湯前線 != 2
+	SCVAR:路線_くま川鉄道湯前線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML くま川鉄道湯前線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+10000
+	MONEY:自国 += 10000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_人吉 == 1 || SCVAR:都市名_湯前 == 1
+	IF SCVAR:路線_くま川鉄道湯前線 == 0
+		SCVAR:路線_くま川鉄道湯前線 = 1
+		PRINTFORML くま川鉄道湯前線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------南阿蘇鉄道高森線--------------------
+
+IF SCVAR:都市名_立野 == 1 && SCVAR:都市名_高森 == 1 && SCVAR:路線_南阿蘇鉄道高森線 != 2
+	SCVAR:路線_南阿蘇鉄道高森線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 南阿蘇鉄道高森線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+10000
+	MONEY:自国 += 10000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_立野 == 1 || SCVAR:都市名_高森 == 1
+	IF SCVAR:路線_南阿蘇鉄道高森線 == 0
+		SCVAR:路線_南阿蘇鉄道高森線 = 1
+		PRINTFORML 南阿蘇鉄道高森線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------甘木鉄道甘木線--------------------
+
+IF SCVAR:都市名_基山 == 1 && SCVAR:都市名_甘木 == 1 && SCVAR:路線_甘木鉄道甘木線 != 2
+	SCVAR:路線_甘木鉄道甘木線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 甘木鉄道甘木線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+10000
+	MONEY:自国 += 10000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_基山 == 1 || SCVAR:都市名_甘木 == 1
+	IF SCVAR:路線_甘木鉄道甘木線 == 0
+		SCVAR:路線_甘木鉄道甘木線 = 1
+		PRINTFORML 甘木鉄道甘木線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------南薩鉄道枕崎線--------------------
+
+IF SCVAR:都市名_伊集院 == 1 && SCVAR:都市名_加世田 == 1 && SCVAR:都市名_枕崎 == 1 && SCVAR:路線_南薩鉄道枕崎線 != 2
+	SCVAR:路線_南薩鉄道枕崎線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 南薩鉄道枕崎線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+15000
+	MONEY:自国 += 15000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_伊集院 == 1 || SCVAR:都市名_加世田 == 1 || SCVAR:都市名_枕崎 == 1
+	IF SCVAR:路線_南薩鉄道枕崎線 == 0
+		SCVAR:路線_南薩鉄道枕崎線 = 1
+		PRINTFORML 南薩鉄道枕崎線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------南薩鉄道万世線--------------------
+
+IF SCVAR:都市名_薩摩万世 == 1 && SCVAR:都市名_加世田 == 1 && SCVAR:路線_南薩鉄道万世線 != 2
+	SCVAR:路線_南薩鉄道万世線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 南薩鉄道万世線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+10000
+	MONEY:自国 += 10000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_薩摩万世 == 1 || SCVAR:都市名_加世田 == 1
+	IF SCVAR:路線_南薩鉄道万世線 == 0
+		SCVAR:路線_南薩鉄道万世線 = 1
+		PRINTFORML 南薩鉄道万世線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------南薩鉄道知覧線--------------------
+
+IF SCVAR:都市名_知覧 == 1 && SCVAR:都市名_加世田 == 1 && SCVAR:路線_南薩鉄道知覧線 != 2
+	SCVAR:路線_南薩鉄道知覧線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 南薩鉄道知覧線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+10000
+	MONEY:自国 += 10000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_知覧 == 1 || SCVAR:都市名_加世田 == 1
+	IF SCVAR:路線_南薩鉄道知覧線 == 0
+		SCVAR:路線_南薩鉄道知覧線 = 1
+		PRINTFORML 南薩鉄道知覧線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------高千穂鉄道高千穂線--------------------
+
+IF SCVAR:都市名_延岡 == 1 && SCVAR:都市名_高千穂 == 1 && SCVAR:路線_高千穂鉄道高千穂線 != 2
+	SCVAR:路線_高千穂鉄道高千穂線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 高千穂鉄道高千穂線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+10000
+	MONEY:自国 += 10000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_延岡 == 1 || SCVAR:都市名_高千穂 == 1
+	IF SCVAR:路線_高千穂鉄道高千穂線 == 0
+		SCVAR:路線_高千穂鉄道高千穂線 = 1
+		PRINTFORML 高千穂鉄道高千穂線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------肥薩おれんじ鉄道線--------------------
+
+IF SCVAR:都市名_八代 == 1 && SCVAR:都市名_新水俣 == 1 && SCVAR:都市名_水俣 == 1 && SCVAR:都市名_出水 == 1 && SCVAR:都市名_阿久根 == 1 && SCVAR:都市名_川内 == 1 && SCVAR:路線_肥薩おれんじ鉄道線 != 2
+	SCVAR:路線_肥薩おれんじ鉄道線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 肥薩おれんじ鉄道線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+30000
+	MONEY:自国 += 30000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_八代 == 1 || SCVAR:都市名_新水俣 == 1 || SCVAR:都市名_水俣 == 1 || SCVAR:都市名_出水 == 1 || SCVAR:都市名_阿久根 == 1 || SCVAR:都市名_川内 == 1
+	IF SCVAR:路線_肥薩おれんじ鉄道線 == 0
+		SCVAR:路線_肥薩おれんじ鉄道線 = 1
+		PRINTFORML 肥薩おれんじ鉄道線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------宮崎空港線--------------------
+
+IF SCVAR:都市名_田吉 == 1 && SCVAR:都市名_宮崎空港 == 1 && SCVAR:路線_宮崎空港線 != 2
+	SCVAR:路線_宮崎空港線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 宮崎空港線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+10000
+	MONEY:自国 += 10000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_田吉 == 1 || SCVAR:都市名_宮崎空港 == 1
+	IF SCVAR:路線_宮崎空港線 == 0
+		SCVAR:路線_宮崎空港線 = 1
+		PRINTFORML 宮崎空港線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------日南線--------------------
+
+IF SCVAR:都市名_志布志 == 1 && SCVAR:都市名_油津 == 1 && SCVAR:都市名_田吉 == 1 && SCVAR:都市名_南宮崎 == 1 && SCVAR:路線_日南線 != 2
+	SCVAR:路線_日南線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 日南線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+20000
+	MONEY:自国 += 20000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_志布志 == 1 || SCVAR:都市名_油津 == 1 || SCVAR:都市名_田吉 == 1 || SCVAR:都市名_南宮崎 == 1
+	IF SCVAR:路線_日南線 == 0
+		SCVAR:路線_日南線 = 1
+		PRINTFORML 日南線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------えびの高原線--------------------
+
+IF SCVAR:都市名_八代 == 1 && SCVAR:都市名_人吉 == 1 && SCVAR:都市名_吉松 == 1 && SCVAR:都市名_えびの == 1 && SCVAR:都市名_都城 == 1 && SCVAR:路線_えびの高原線 != 2
+	SCVAR:路線_えびの高原線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML えびの高原線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+25000
+	MONEY:自国 += 25000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_八代 == 1 || SCVAR:都市名_人吉 == 1 || SCVAR:都市名_吉松 == 1 || SCVAR:都市名_えびの == 1 || SCVAR:都市名_都城 == 1
+	IF SCVAR:路線_えびの高原線 == 0
+		SCVAR:路線_えびの高原線 = 1
+		PRINTFORML えびの高原線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------福北ゆたか線--------------------
+
+IF SCVAR:都市名_黒崎 == 1 && SCVAR:都市名_折尾 == 1 && SCVAR:都市名_中間 == 1 && SCVAR:都市名_直方 == 1 && SCVAR:都市名_新飯塚 == 1 && SCVAR:都市名_飯塚 == 1 && SCVAR:都市名_桂川 == 1 && SCVAR:都市名_篠栗 == 1 && SCVAR:都市名_長者原 == 1 && SCVAR:都市名_吉塚 == 1 && SCVAR:都市名_博多 == 1 && SCVAR:路線_福北ゆたか線 != 2
+	SCVAR:路線_福北ゆたか線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 福北ゆたか線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+55000
+	MONEY:自国 += 55000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_黒崎 == 1 || SCVAR:都市名_折尾 == 1 || SCVAR:都市名_中間 == 1 || SCVAR:都市名_直方 == 1 || SCVAR:都市名_新飯塚 == 1 || SCVAR:都市名_飯塚 == 1 || SCVAR:都市名_桂川 == 1 || SCVAR:都市名_篠栗 == 1 || SCVAR:都市名_長者原 == 1 || SCVAR:都市名_吉塚 == 1 || SCVAR:都市名_博多 == 1
+	IF SCVAR:路線_福北ゆたか線 == 0
+		SCVAR:路線_福北ゆたか線 = 1
+		PRINTFORML 福北ゆたか線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------原田線--------------------
+
+IF SCVAR:都市名_原田 == 1 && SCVAR:都市名_桂川 == 1 && SCVAR:路線_原田線 != 2
+	SCVAR:路線_原田線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 原田線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+10000
+	MONEY:自国 += 10000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_原田 == 1 || SCVAR:都市名_桂川 == 1
+	IF SCVAR:路線_原田線 == 0
+		SCVAR:路線_原田線 = 1
+		PRINTFORML 原田線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------若松線--------------------
+
+IF SCVAR:都市名_若松 == 1 && SCVAR:都市名_折尾 == 1 && SCVAR:路線_若松線 != 2
+	SCVAR:路線_若松線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 若松線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+10000
+	MONEY:自国 += 10000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_若松 == 1 || SCVAR:都市名_折尾 == 1
+	IF SCVAR:路線_若松線 == 0
+		SCVAR:路線_若松線 = 1
+		PRINTFORML 若松線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------日肥線--------------------
+
+IF SCVAR:都市名_佐土原 == 1 && SCVAR:都市名_杉安 == 1 && SCVAR:都市名_村所 == 1 && SCVAR:都市名_湯前 == 1 && SCVAR:都市名_人吉 == 1 && SCVAR:路線_日肥線 != 2
+	SCVAR:路線_日肥線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 日肥線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+25000
+	MONEY:自国 += 25000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_佐土原 == 1 && SCVAR:都市名_杉安 == 1 && SCVAR:都市名_村所 == 1 || SCVAR:都市名_湯前 == 1 || SCVAR:都市名_人吉 == 1
+	IF SCVAR:路線_日肥線 == 0
+		SCVAR:路線_日肥線 = 1
+		PRINTFORML 日肥線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------高千穂線--------------------
+
+IF SCVAR:都市名_延岡 == 1 && SCVAR:都市名_高千穂 == 1 && SCVAR:都市名_日向泊 == 1 && SCVAR:都市名_高森 == 1 && SCVAR:都市名_立野 == 1 && SCVAR:路線_高千穂線 != 2
+	SCVAR:路線_高千穂線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 高千穂線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+25000
+	MONEY:自国 += 25000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_延岡 == 1 && SCVAR:都市名_高千穂 == 1 && SCVAR:都市名_日向泊 == 1 || SCVAR:都市名_高森 == 1 || SCVAR:都市名_立野 == 1
+	IF SCVAR:路線_高千穂線 == 0
+		SCVAR:路線_高千穂線 = 1
+		PRINTFORML 高千穂線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------古江線--------------------
+
+IF SCVAR:都市名_志布志 == 1 && SCVAR:都市名_鹿屋 == 1 && SCVAR:都市名_海潟温泉 == 1 && SCVAR:路線_古江線 != 2
+	SCVAR:路線_古江線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 古江線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+15000
+	MONEY:自国 += 15000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_志布志 == 1 || SCVAR:都市名_鹿屋 == 1 || SCVAR:都市名_海潟温泉 == 1
+	IF SCVAR:路線_古江線 == 0
+		SCVAR:路線_古江線 = 1
+		PRINTFORML 古江線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------上山田線--------------------
+
+IF SCVAR:都市名_飯塚 == 1 && SCVAR:都市名_下山田 == 1 && SCVAR:都市名_豊前川崎 == 1 && SCVAR:路線_上山田線 != 2
+	SCVAR:路線_上山田線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 上山田線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+15000
+	MONEY:自国 += 15000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_飯塚 == 1 || SCVAR:都市名_下山田 == 1 || SCVAR:都市名_豊前川崎 == 1
+	IF SCVAR:路線_上山田線 == 0
+		SCVAR:路線_上山田線 = 1
+		PRINTFORML 上山田線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------油須原線--------------------
+
+IF SCVAR:都市名_下山田 == 1 && SCVAR:都市名_豊前川崎 == 1 && SCVAR:都市名_大任 == 1 && SCVAR:都市名_油須原 == 1 && SCVAR:路線_油須原線 != 2
+	SCVAR:路線_油須原線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 油須原線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+15000
+	MONEY:自国 += 15000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_下山田 == 1 || SCVAR:都市名_豊前川崎 == 1 || SCVAR:都市名_大任 == 1 || SCVAR:都市名_油須原 == 1
+	IF SCVAR:路線_油須原線 == 0
+		SCVAR:路線_油須原線 = 1
+		PRINTFORML 油須原線踏破チャレンジスタート（漆生～下山田は踏破しなくても良い）
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------日田彦山線BRT--------------------
+
+IF SCVAR:都市名_添田 == 1 && SCVAR:都市名_夜明 == 1 && SCVAR:路線_日田彦山線 != 2
+	SCVAR:路線_日田彦山線BRT = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 日田彦山線BRTを踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+10000
+	MONEY:自国 += 30000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_添田 == 1 || SCVAR:都市名_夜明 == 1
+	IF SCVAR:路線_日田彦山線BRT == 0
+		SCVAR:路線_日田彦山線BRT = 1
+		PRINTFORML 日田彦山線BRT踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------九州肥筑鉄道線--------------------
+
+IF SCVAR:都市名_瀬高 == 1 && SCVAR:都市名_南関 == 1 && SCVAR:路線_九州肥筑鉄道線 != 2
+	SCVAR:路線_九州肥筑鉄道線 = 2
+	SETCOLOR カラー_注意
+	PRINTFORML 九州肥筑鉄道線を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+10000
+	MONEY:自国 += 30000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_瀬高 == 1 || SCVAR:都市名_南関 == 1
+	IF SCVAR:路線_九州肥筑鉄道線 == 0
+		SCVAR:路線_九州肥筑鉄道線 = 1
+		PRINTFORML 九州肥筑鉄道線踏破チャレンジスタート
+		PRINTFORML 進捗は「ミッション」から確認してください
+		PRINTFORMW
+	ENDIF
+ENDIF
+;--------------------隈府線（仮称）--------------------
+
+IF SCVAR:都市名_佐賀 == 1 && SCVAR:都市名_筑後大川 == 1 && SCVAR:都市名_瀬高 == 1 && SCVAR:都市名_南関 == 1 && SCVAR:都市名_山鹿 == 1 && SCVAR:都市名_菊池 == 1 && SCVAR:都市名_肥後大津 == 1 && SCVAR:都市名_中津江 == 1 && SCVAR:都市名_肥後小国 == 1 && SCVAR:都市名_豊後森 == 1 && SCVAR:路線_隈府線（仮称） != 2
+	SCVAR:路線_隈府線（仮称） = 2
+	SETCOLOR カラー_注意
+	PRINTFORML (隠し路線)改正鉄道敷設法別表第113号を踏破しました！
+	RESETCOLOR
+	PRINTFORML 賞金：国庫+50000
+	PRINTFORML
+	PRINTFORML 佐賀━瀬高━菊池┳肥後小国━豊後森
+	PRINTFORML 　　　　　　　　┗肥後大津
+	MONEY:自国 += 50000
+	PRINTFORMW
+ELSEIF SCVAR:都市名_佐賀 == 1 || SCVAR:都市名_筑後大川 == 1 || SCVAR:都市名_瀬高 == 1 || SCVAR:都市名_南関 == 1 || SCVAR:都市名_山鹿 == 1 || SCVAR:都市名_菊池 == 1 || SCVAR:都市名_肥後大津 == 1 || SCVAR:都市名_中津江 == 1 || SCVAR:都市名_肥後小国 == 1 || SCVAR:都市名_豊後森 == 1
+	IF SCVAR:路線_隈府線（仮称） == 0
+		SCVAR:路線_隈府線（仮称） = 1
+		PRINTFORMW
+	ENDIF
+ENDIF
+
+@BUTTON_NATIONAL_MISSION_SCENARIO_33
+#DIM 表示路線
+
+LOCALS:1 = 九州新幹線
+LOCALS:2 = 西九州新幹線
+LOCALS:3 = 山陽新幹線
+LOCALS:4 = 博多南線
+LOCALS:5 = 鹿児島本線
+LOCALS:6 = 長崎本線
+LOCALS:7 = 筑豊本線
+LOCALS:8 = 日豊本線
+LOCALS:9 = 筑肥線
+LOCALS:10 = 長崎本線長与支線
+LOCALS:11 = 佐世保線
+LOCALS:12 = 大村線
+LOCALS:13 = 日田彦山線
+LOCALS:14 = 後藤寺線
+LOCALS:15 = 篠栗線
+LOCALS:16 = 唐津線
+LOCALS:17 = 指宿枕崎線
+LOCALS:18 = 肥薩線
+LOCALS:19 = 吉都線
+LOCALS:20 = 三角線
+LOCALS:21 = 豊肥本線
+LOCALS:22 = 久大本線
+LOCALS:23 = 香椎線
+LOCALS:24 = 臼ノ浦線
+LOCALS:25 = 世知原線
+LOCALS:26 = 唐津線岸嶽支線
+LOCALS:27 = 佐賀線
+LOCALS:28 = 山野線
+LOCALS:29 = 大隅線
+LOCALS:30 = 志布志線
+LOCALS:31 = 妻線
+LOCALS:32 = 細島線
+LOCALS:33 = 矢部線
+LOCALS:34 = 宮原線
+LOCALS:35 = 勝田線
+LOCALS:36 = 室木線
+LOCALS:37 = 宮田線
+LOCALS:38 = 香月線
+LOCALS:39 = 添田線
+LOCALS:40 = 福岡市地下鉄空港線
+LOCALS:41 = 平成筑豊鉄道田川線
+LOCALS:42 = 平成筑豊鉄道伊田線
+LOCALS:43 = 平成筑豊鉄道糸田線
+LOCALS:44 = 松浦鉄道西九州線
+LOCALS:45 = 島原鉄道線
+LOCALS:46 = くま川鉄道湯前線
+LOCALS:47 = 南阿蘇鉄道高森線
+LOCALS:48 = 甘木鉄道甘木線
+LOCALS:49 = 南薩鉄道枕崎線
+LOCALS:50 = 南薩鉄道万世線
+LOCALS:51 = 南薩鉄道知覧線
+LOCALS:52 = 高千穂鉄道高千穂線
+LOCALS:53 = 肥薩おれんじ鉄道線
+LOCALS:54 = 宮崎空港線
+LOCALS:55 = 日南線
+LOCALS:56 = えびの高原線
+LOCALS:57 = 福北ゆたか線
+LOCALS:58 = 原田線
+LOCALS:59 = 若松線
+LOCALS:60 = 日肥線
+LOCALS:61 = 高千穂線
+LOCALS:62 = 古江線
+LOCALS:63 = 上山田線
+LOCALS:64 = 油須原線
+LOCALS:65 = 日田彦山線BRT
+LOCALS:66 = 九州肥筑鉄道線
+LOCALS:67 = 隈府線（仮称）
+
+
+FOR 表示路線, 0, ((路線_隈府線（仮称） - 路線_九州新幹線 + 1)/3)+1
+	SELECTCASE SCVAR:(201+(表示路線*3))
+		CASE 1
+			PRINTBUTTON @"{1+(表示路線*3), 2}[%LOCALS:(1+(表示路線*3))%]", 2001+(表示路線*3)
+			PRINT 　
+		CASE 2
+			SETCOLOR カラー_選択中
+			PRINTBUTTON @"{1+(表示路線*3), 2}[%LOCALS:(1+(表示路線*3))%]", 2001+(表示路線*3)
+			RESETCOLOR
+			PRINT 　
+	ENDSELECT
+	SELECTCASE SCVAR:(202+(表示路線*3))
+		CASE 1
+			PRINTBUTTON @"{2+(表示路線*3), 2}[%LOCALS:(2+(表示路線*3))%]", 2002+(表示路線*3)
+			PRINT 　
+		CASE 2
+			SETCOLOR カラー_選択中
+			PRINTBUTTON @"{2+(表示路線*3), 2}[%LOCALS:(2+(表示路線*3))%]", 2002+(表示路線*3)
+			RESETCOLOR
+			PRINT 　
+	ENDSELECT
+	SELECTCASE SCVAR:(203+(表示路線*3))
+		CASE 1
+			PRINTBUTTON @"{3+(表示路線*3), 2}[%LOCALS:(3+(表示路線*3))%]", 2003+(表示路線*3)
+			PRINT 　
+		CASE 2
+			SETCOLOR カラー_選択中
+			PRINTBUTTON @"{3+(表示路線*3), 2}[%LOCALS:(3+(表示路線*3))%]", 2003+(表示路線*3)
+			RESETCOLOR
+	ENDSELECT
+	PRINTL
+NEXT
+
+@SHOW_NATIONAL_MISSION_SCENARIO_33(結果)
+#DIM 結果
+結果 += 200
+
+SELECTCASE 結果
+	CASE 路線_九州新幹線
+		SELECTCASE SCVAR:都市名_博多
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 博多
+				RESETCOLOR
+			CASEELSE
+				PRINT 博多
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_新鳥栖
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 新鳥栖
+				RESETCOLOR
+			CASEELSE
+				PRINT 新鳥栖
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_久留米
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 久留米
+				RESETCOLOR
+			CASEELSE
+				PRINT 久留米
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_筑後船小屋
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 筑後船小屋
+				RESETCOLOR
+			CASEELSE
+				PRINT 筑後船小屋
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_新大牟田
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 新大牟田
+				RESETCOLOR
+			CASEELSE
+				PRINT 新大牟田
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_新玉名
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 新玉名
+				RESETCOLOR
+			CASEELSE
+				PRINT 新玉名
+		ENDSELECT
+		PRINTL 　→　
+		PRINTL
+		SELECTCASE SCVAR:都市名_熊本
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 熊本
+				RESETCOLOR
+			CASEELSE
+				PRINT 熊本
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_新八代
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 新八代
+				RESETCOLOR
+			CASEELSE
+				PRINT 新八代
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_新水俣
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 新水俣
+				RESETCOLOR
+			CASEELSE
+				PRINT 新水俣
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_出水
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 出水
+				RESETCOLOR
+			CASEELSE
+				PRINT 出水
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_川内
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 川内
+				RESETCOLOR
+			CASEELSE
+				PRINT 川内
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_鹿児島中央
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 鹿児島中央
+				RESETCOLOR
+			CASEELSE
+				PRINT 鹿児島中央
+		ENDSELECT
+		WAIT
+	CASE 路線_西九州新幹線
+		SELECTCASE SCVAR:都市名_武雄温泉
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 武雄温泉
+				RESETCOLOR
+			CASEELSE
+				PRINT 武雄温泉
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_嬉野温泉
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 嬉野温泉
+				RESETCOLOR
+			CASEELSE
+				PRINT 嬉野温泉
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_新大村
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 新大村
+				RESETCOLOR
+			CASEELSE
+				PRINT 新大村
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_諫早
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 諫早
+				RESETCOLOR
+			CASEELSE
+				PRINT 諫早
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_長崎
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 長崎
+				RESETCOLOR
+			CASEELSE
+				PRINT 長崎
+		ENDSELECT
+		WAIT
+	CASE 路線_山陽新幹線
+		PRINT 未実装
+		WAIT
+	CASE 路線_博多南線
+		SELECTCASE SCVAR:都市名_博多
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 博多
+				RESETCOLOR
+			CASEELSE
+				PRINT 博多
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_博多南
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 博多南
+				RESETCOLOR
+			CASEELSE
+				PRINT 博多南
+		ENDSELECT
+		WAIT
+	CASE 路線_鹿児島本線
+		SELECTCASE SCVAR:都市名_門司港
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 門司港
+				RESETCOLOR
+			CASEELSE
+				PRINT 門司港
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_小倉
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 小倉
+				RESETCOLOR
+			CASEELSE
+				PRINT 小倉
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_西小倉
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 西小倉
+				RESETCOLOR
+			CASEELSE
+				PRINT 西小倉
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_黒崎
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 黒崎
+				RESETCOLOR
+			CASEELSE
+				PRINT 黒崎
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_折尾
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 折尾
+				RESETCOLOR
+			CASEELSE
+				PRINT 折尾
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_遠賀川
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 遠賀川
+				RESETCOLOR
+			CASEELSE
+				PRINT 遠賀川
+		ENDSELECT
+		PRINTL 　→　
+		PRINTL
+		SELECTCASE SCVAR:都市名_香椎
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 香椎
+				RESETCOLOR
+			CASEELSE
+				PRINT 香椎
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_吉塚
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 吉塚
+				RESETCOLOR
+			CASEELSE
+				PRINT 吉塚
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_博多
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 博多
+				RESETCOLOR
+			CASEELSE
+				PRINT 博多
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_原田
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 原田
+				RESETCOLOR
+			CASEELSE
+				PRINT 原田
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_基山
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 基山
+				RESETCOLOR
+			CASEELSE
+				PRINT 基山
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_鳥栖
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 鳥栖
+				RESETCOLOR
+			CASEELSE
+				PRINT 鳥栖
+		ENDSELECT
+		PRINTL 　→　
+		PRINTL
+		SELECTCASE SCVAR:都市名_久留米
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 久留米
+				RESETCOLOR
+			CASEELSE
+				PRINT 久留米
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_羽犬塚
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 羽犬塚
+				RESETCOLOR
+			CASEELSE
+				PRINT 羽犬塚
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_筑後船小屋
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 筑後船小屋
+				RESETCOLOR
+			CASEELSE
+				PRINT 筑後船小屋
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_瀬高
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 瀬高
+				RESETCOLOR
+			CASEELSE
+				PRINT 瀬高
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_大牟田
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 大牟田
+				RESETCOLOR
+			CASEELSE
+				PRINT 大牟田
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_荒尾
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 荒尾
+				RESETCOLOR
+			CASEELSE
+				PRINT 荒尾
+		ENDSELECT
+		PRINTL 　→　
+		PRINTL
+		SELECTCASE SCVAR:都市名_玉名
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 玉名
+				RESETCOLOR
+			CASEELSE
+				PRINT 玉名
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_熊本
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 熊本
+				RESETCOLOR
+			CASEELSE
+				PRINT 熊本
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_宇土
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 宇土
+				RESETCOLOR
+			CASEELSE
+				PRINT 宇土
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_新八代
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 新八代
+				RESETCOLOR
+			CASEELSE
+				PRINT 新八代
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_八代
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 八代
+				RESETCOLOR
+			CASEELSE
+				PRINT 八代
+		ENDSELECT
+		PRINT 　→
+		SETCOLOR カラー_選択不可
+		PRINT 初野信号場（現：新水俣）
+		RESETCOLOR
+		PRINT →　
+		SELECTCASE SCVAR:都市名_水俣
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 水俣
+				RESETCOLOR
+			CASEELSE
+				PRINT 水俣
+		ENDSELECT
+		PRINTL 　→　
+		PRINTL
+		SELECTCASE SCVAR:都市名_出水
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 出水
+				RESETCOLOR
+			CASEELSE
+				PRINT 出水
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_阿久根
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 阿久根
+				RESETCOLOR
+			CASEELSE
+				PRINT 阿久根
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_川内
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 川内
+				RESETCOLOR
+			CASEELSE
+				PRINT 川内
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_伊集院
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 伊集院
+				RESETCOLOR
+			CASEELSE
+				PRINT 伊集院
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_鹿児島中央
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 鹿児島中央
+				RESETCOLOR
+			CASEELSE
+				PRINT 鹿児島中央
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_鹿児島
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 鹿児島
+				RESETCOLOR
+			CASEELSE
+				PRINT 鹿児島
+		ENDSELECT
+		WAIT
+	CASE 路線_長崎本線
+		SELECTCASE SCVAR:都市名_鳥栖
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 鳥栖
+				RESETCOLOR
+			CASEELSE
+				PRINT 鳥栖
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_新鳥栖
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 新鳥栖
+				RESETCOLOR
+			CASEELSE
+				PRINT 新鳥栖
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_佐賀
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 佐賀
+				RESETCOLOR
+			CASEELSE
+				PRINT 佐賀
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_久保田
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 久保田
+				RESETCOLOR
+			CASEELSE
+				PRINT 久保田
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_江北（旧肥前山口）
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 江北（旧肥前山口）
+				RESETCOLOR
+			CASEELSE
+				PRINT 江北（旧肥前山口）
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_肥前鹿島
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 肥前鹿島
+				RESETCOLOR
+			CASEELSE
+				PRINT 肥前鹿島
+		ENDSELECT
+		PRINTL 　→　
+		PRINTL
+		SELECTCASE SCVAR:都市名_肥前浜
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 肥前浜
+				RESETCOLOR
+			CASEELSE
+				PRINT 肥前浜
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_諫早
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 諫早
+				RESETCOLOR
+			CASEELSE
+				PRINT 諫早
+		ENDSELECT
+		PRINT 　→
+		SETCOLOR カラー_選択不可
+		PRINT （新線経由）
+		RESETCOLOR
+		PRINT →　
+		SELECTCASE SCVAR:都市名_長崎
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 長崎
+				RESETCOLOR
+			CASEELSE
+				PRINT 長崎
+		ENDSELECT
+		WAIT
+	CASE 路線_筑豊本線
+		SELECTCASE SCVAR:都市名_若松
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 若松
+				RESETCOLOR
+			CASEELSE
+				PRINT 若松
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_折尾
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 折尾
+				RESETCOLOR
+			CASEELSE
+				PRINT 折尾
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_中間
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 中間
+				RESETCOLOR
+			CASEELSE
+				PRINT 中間
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_直方
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 直方
+				RESETCOLOR
+			CASEELSE
+				PRINT 直方
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_勝野
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 勝野
+				RESETCOLOR
+			CASEELSE
+				PRINT 勝野
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_新飯塚
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 新飯塚
+				RESETCOLOR
+			CASEELSE
+				PRINT 新飯塚
+		ENDSELECT
+		PRINTL 　→　
+		PRINTL
+		SELECTCASE SCVAR:都市名_飯塚
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 飯塚
+				RESETCOLOR
+			CASEELSE
+				PRINT 飯塚
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_桂川
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 桂川
+				RESETCOLOR
+			CASEELSE
+				PRINT 桂川
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_原田
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 原田
+				RESETCOLOR
+			CASEELSE
+				PRINT 原田
+		ENDSELECT
+		WAIT
+	CASE 路線_日豊本線
+		SELECTCASE SCVAR:都市名_小倉
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 小倉
+				RESETCOLOR
+			CASEELSE
+				PRINT 小倉
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_西小倉
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 西小倉
+				RESETCOLOR
+			CASEELSE
+				PRINT 西小倉
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_城野
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 城野
+				RESETCOLOR
+			CASEELSE
+				PRINT 城野
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_行橋
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 行橋
+				RESETCOLOR
+			CASEELSE
+				PRINT 行橋
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_中津
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 中津
+				RESETCOLOR
+			CASEELSE
+				PRINT 中津
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_宇佐
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 宇佐
+				RESETCOLOR
+			CASEELSE
+				PRINT 宇佐
+		ENDSELECT
+		PRINTL 　→　
+		PRINTL
+		SELECTCASE SCVAR:都市名_杵築
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 杵築
+				RESETCOLOR
+			CASEELSE
+				PRINT 杵築
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_別府
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 別府
+				RESETCOLOR
+			CASEELSE
+				PRINT 別府
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_大分
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 大分
+				RESETCOLOR
+			CASEELSE
+				PRINT 大分
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_佐伯
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 佐伯
+				RESETCOLOR
+			CASEELSE
+				PRINT 佐伯
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_延岡
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 延岡
+				RESETCOLOR
+			CASEELSE
+				PRINT 延岡
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_日向市
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 日向市
+				RESETCOLOR
+			CASEELSE
+				PRINT 日向市
+		ENDSELECT
+		PRINTL 　→　
+		PRINTL
+		SELECTCASE SCVAR:都市名_佐土原
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 佐土原
+				RESETCOLOR
+			CASEELSE
+				PRINT 佐土原
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_宮崎
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 宮崎
+				RESETCOLOR
+			CASEELSE
+				PRINT 宮崎
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_南宮崎
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 南宮崎
+				RESETCOLOR
+			CASEELSE
+				PRINT 南宮崎
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_都城
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 都城
+				RESETCOLOR
+			CASEELSE
+				PRINT 都城
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_西都城
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 西都城
+				RESETCOLOR
+			CASEELSE
+				PRINT 西都城
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_国分
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 国分
+				RESETCOLOR
+			CASEELSE
+				PRINT 国分
+		ENDSELECT
+		PRINTL 　→　
+		PRINTL
+		SELECTCASE SCVAR:都市名_隼人
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 隼人
+				RESETCOLOR
+			CASEELSE
+				PRINT 隼人
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_鹿児島
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 鹿児島
+				RESETCOLOR
+			CASEELSE
+				PRINT 鹿児島
+		ENDSELECT
+		WAIT
+	CASE 路線_筑肥線
+		SELECTCASE SCVAR:都市名_博多
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 博多
+				RESETCOLOR
+			CASEELSE
+				PRINT 博多
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_西新
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 西新
+				RESETCOLOR
+			CASEELSE
+				PRINT 西新
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_姪浜
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 姪浜
+				RESETCOLOR
+			CASEELSE
+				PRINT 姪浜
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_筑前前原
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 筑前前原
+				RESETCOLOR
+			CASEELSE
+				PRINT 筑前前原
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_唐津
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 唐津
+				RESETCOLOR
+			CASEELSE
+				PRINT 唐津
+		ENDSELECT
+		PRINT 　→　
+		SETCOLOR カラー_選択不可
+		PRINT （旧線経由）
+		RESETCOLOR
+		PRINTL 　→　
+		PRINTL
+		SELECTCASE SCVAR:都市名_山本
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 山本
+				RESETCOLOR
+			CASEELSE
+				PRINT 山本
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_伊万里
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 伊万里
+				RESETCOLOR
+			CASEELSE
+				PRINT 伊万里
+		ENDSELECT
+		WAIT
+	CASE 路線_長崎本線長与支線
+		SELECTCASE SCVAR:都市名_諫早
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 諫早
+				RESETCOLOR
+			CASEELSE
+				PRINT 諫早
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_長与
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 長与
+				RESETCOLOR
+			CASEELSE
+				PRINT 長与
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_長崎
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 長崎
+				RESETCOLOR
+			CASEELSE
+				PRINT 長崎
+		ENDSELECT
+		WAIT
+	CASE 路線_佐世保線
+		SELECTCASE SCVAR:都市名_江北（旧肥前山口）
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 江北（旧肥前山口）
+				RESETCOLOR
+			CASEELSE
+				PRINT 江北（旧肥前山口）
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_武雄温泉
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 武雄温泉
+				RESETCOLOR
+			CASEELSE
+				PRINT 武雄温泉
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_有田
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 有田
+				RESETCOLOR
+			CASEELSE
+				PRINT 有田
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_早岐
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 早岐
+				RESETCOLOR
+			CASEELSE
+				PRINT 早岐
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_佐世保
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 佐世保
+				RESETCOLOR
+			CASEELSE
+				PRINT 佐世保
+		ENDSELECT
+		WAIT
+	CASE 路線_大村線
+		SELECTCASE SCVAR:都市名_早岐
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 早岐
+				RESETCOLOR
+			CASEELSE
+				PRINT 早岐
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_ハウステンボス
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT ハウステンボス
+				RESETCOLOR
+			CASEELSE
+				PRINT ハウステンボス
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_新大村
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 新大村
+				RESETCOLOR
+			CASEELSE
+				PRINT 新大村
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_大村
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 大村
+				RESETCOLOR
+			CASEELSE
+				PRINT 大村
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_諫早
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 諫早
+				RESETCOLOR
+			CASEELSE
+				PRINT 諫早
+		ENDSELECT
+		WAIT
+	CASE 路線_日田彦山線
+		SELECTCASE SCVAR:都市名_城野
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 城野
+				RESETCOLOR
+			CASEELSE
+				PRINT 城野
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_香春
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 香春
+				RESETCOLOR
+			CASEELSE
+				PRINT 香春
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_田川伊田
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 田川伊田
+				RESETCOLOR
+			CASEELSE
+				PRINT 田川伊田
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_田川後藤寺
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 田川後藤寺
+				RESETCOLOR
+			CASEELSE
+				PRINT 田川後藤寺
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_豊前川崎
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 豊前川崎
+				RESETCOLOR
+			CASEELSE
+				PRINT 豊前川崎
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_添田
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 添田
+				RESETCOLOR
+			CASEELSE
+				PRINT 添田
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_夜明
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 夜明
+				RESETCOLOR
+			CASEELSE
+				PRINT 夜明
+		ENDSELECT
+		WAIT
+	CASE 路線_後藤寺線
+		SELECTCASE SCVAR:都市名_新飯塚
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 新飯塚
+				RESETCOLOR
+			CASEELSE
+				PRINT 新飯塚
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_田川後藤寺
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 田川後藤寺
+				RESETCOLOR
+			CASEELSE
+				PRINT 田川後藤寺
+		ENDSELECT
+		WAIT
+	CASE 路線_篠栗線
+		SELECTCASE SCVAR:都市名_桂川
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 桂川
+				RESETCOLOR
+			CASEELSE
+				PRINT 桂川
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_篠栗
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 篠栗
+				RESETCOLOR
+			CASEELSE
+				PRINT 篠栗
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_長者原
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 長者原
+				RESETCOLOR
+			CASEELSE
+				PRINT 長者原
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_吉塚
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 吉塚
+				RESETCOLOR
+			CASEELSE
+				PRINT 吉塚
+		ENDSELECT
+		WAIT
+	CASE 路線_唐津線
+		SELECTCASE SCVAR:都市名_久保田
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 久保田
+				RESETCOLOR
+			CASEELSE
+				PRINT 久保田
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_山本
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 山本
+				RESETCOLOR
+			CASEELSE
+				PRINT 山本
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_唐津
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 唐津
+				RESETCOLOR
+			CASEELSE
+				PRINT 唐津
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_西唐津
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 西唐津
+				RESETCOLOR
+			CASEELSE
+				PRINT 西唐津
+		ENDSELECT
+		WAIT
+	CASE 路線_指宿枕崎線
+		SELECTCASE SCVAR:都市名_鹿児島中央
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 鹿児島中央
+				RESETCOLOR
+			CASEELSE
+				PRINT 鹿児島中央
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_谷山
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 谷山
+				RESETCOLOR
+			CASEELSE
+				PRINT 谷山
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_指宿
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 指宿
+				RESETCOLOR
+			CASEELSE
+				PRINT 指宿
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_山川
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 山川
+				RESETCOLOR
+			CASEELSE
+				PRINT 山川
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_枕崎
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 枕崎
+				RESETCOLOR
+			CASEELSE
+				PRINT 枕崎
+		ENDSELECT
+		WAIT
+	CASE 路線_肥薩線
+		SELECTCASE SCVAR:都市名_八代
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 八代
+				RESETCOLOR
+			CASEELSE
+				PRINT 八代
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_人吉
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 人吉
+				RESETCOLOR
+			CASEELSE
+				PRINT 人吉
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_吉松
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 吉松
+				RESETCOLOR
+			CASEELSE
+				PRINT 吉松
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_栗野
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 栗野
+				RESETCOLOR
+			CASEELSE
+				PRINT 栗野
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_隼人
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 隼人
+				RESETCOLOR
+			CASEELSE
+				PRINT 隼人
+		ENDSELECT
+		WAIT
+	CASE 路線_吉都線
+		SELECTCASE SCVAR:都市名_吉松
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 吉松
+				RESETCOLOR
+			CASEELSE
+				PRINT 吉松
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_えびの
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT えびの
+				RESETCOLOR
+			CASEELSE
+				PRINT えびの
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_都城
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 都城
+				RESETCOLOR
+			CASEELSE
+				PRINT 都城
+		ENDSELECT
+		WAIT
+	CASE 路線_三角線
+		SELECTCASE SCVAR:都市名_宇土
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 宇土
+				RESETCOLOR
+			CASEELSE
+				PRINT 宇土
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_三角
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 三角
+				RESETCOLOR
+			CASEELSE
+				PRINT 三角
+		ENDSELECT
+		WAIT
+	CASE 路線_豊肥本線
+		SELECTCASE SCVAR:都市名_大分
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 大分
+				RESETCOLOR
+			CASEELSE
+				PRINT 大分
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_豊後竹田
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 豊後竹田
+				RESETCOLOR
+			CASEELSE
+				PRINT 豊後竹田
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_宮地
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 宮地
+				RESETCOLOR
+			CASEELSE
+				PRINT 宮地
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_立野
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 立野
+				RESETCOLOR
+			CASEELSE
+				PRINT 立野
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_肥後大津
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 肥後大津
+				RESETCOLOR
+			CASEELSE
+				PRINT 肥後大津
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_熊本
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 熊本
+				RESETCOLOR
+			CASEELSE
+				PRINT 熊本
+		ENDSELECT
+		WAIT
+	CASE 路線_久大本線
+		SELECTCASE SCVAR:都市名_久留米
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 久留米
+				RESETCOLOR
+			CASEELSE
+				PRINT 久留米
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_うきは
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT うきは
+				RESETCOLOR
+			CASEELSE
+				PRINT うきは
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_夜明
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 夜明
+				RESETCOLOR
+			CASEELSE
+				PRINT 夜明
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_日田
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 日田
+				RESETCOLOR
+			CASEELSE
+				PRINT 日田
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_豊後森
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 豊後森
+				RESETCOLOR
+			CASEELSE
+				PRINT 豊後森
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_由布院
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 由布院
+				RESETCOLOR
+			CASEELSE
+				PRINT 由布院
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_大分
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 大分
+				RESETCOLOR
+			CASEELSE
+				PRINT 大分
+		ENDSELECT
+		WAIT
+	CASE 路線_香椎線
+		SELECTCASE SCVAR:都市名_西戸崎
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 西戸崎
+				RESETCOLOR
+			CASEELSE
+				PRINT 西戸崎
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_香椎
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 香椎
+				RESETCOLOR
+			CASEELSE
+				PRINT 香椎
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_長者原
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 長者原
+				RESETCOLOR
+			CASEELSE
+				PRINT 長者原
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_宇美
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 宇美
+				RESETCOLOR
+			CASEELSE
+				PRINT 宇美
+		ENDSELECT
+		WAIT
+	CASE 路線_臼ノ浦線
+		SELECTCASE SCVAR:都市名_佐々
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 佐々
+				RESETCOLOR
+			CASEELSE
+				PRINT 佐々
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_臼ノ浦
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 臼ノ浦
+				RESETCOLOR
+			CASEELSE
+				PRINT 臼ノ浦
+		ENDSELECT
+		WAIT
+	CASE 路線_世知原線
+		SELECTCASE SCVAR:都市名_吉井
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 吉井
+				RESETCOLOR
+			CASEELSE
+				PRINT 吉井
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_世知原
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 世知原
+				RESETCOLOR
+			CASEELSE
+				PRINT 世知原
+		ENDSELECT
+		WAIT
+	CASE 路線_唐津線岸嶽支線
+		SELECTCASE SCVAR:都市名_山本
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 山本
+				RESETCOLOR
+			CASEELSE
+				PRINT 山本
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_岸嶽
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 岸嶽
+				RESETCOLOR
+			CASEELSE
+				PRINT 岸嶽
+		ENDSELECT
+		WAIT
+	CASE 路線_佐賀線
+		SELECTCASE SCVAR:都市名_佐賀
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 佐賀
+				RESETCOLOR
+			CASEELSE
+				PRINT 佐賀
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_筑後大川
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 筑後大川
+				RESETCOLOR
+			CASEELSE
+				PRINT 筑後大川
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_瀬高
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 瀬高
+				RESETCOLOR
+			CASEELSE
+				PRINT 瀬高
+		ENDSELECT
+		WAIT
+	CASE 路線_山野線
+		SELECTCASE SCVAR:都市名_水俣
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 水俣
+				RESETCOLOR
+			CASEELSE
+				PRINT 水俣
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_山野
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 山野
+				RESETCOLOR
+			CASEELSE
+				PRINT 山野
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_薩摩大口
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 薩摩大口
+				RESETCOLOR
+			CASEELSE
+				PRINT 薩摩大口
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_栗野
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 栗野
+				RESETCOLOR
+			CASEELSE
+				PRINT 栗野
+		ENDSELECT
+		WAIT
+	CASE 路線_大隅線
+		SELECTCASE SCVAR:都市名_志布志
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 志布志
+				RESETCOLOR
+			CASEELSE
+				PRINT 志布志
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_鹿屋
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 鹿屋
+				RESETCOLOR
+			CASEELSE
+				PRINT 鹿屋
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_海潟温泉
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 海潟温泉
+				RESETCOLOR
+			CASEELSE
+				PRINT 海潟温泉
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_国分
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 国分
+				RESETCOLOR
+			CASEELSE
+				PRINT 国分
+		ENDSELECT
+		WAIT
+	CASE 路線_志布志線
+		SELECTCASE SCVAR:都市名_西都城
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 西都城
+				RESETCOLOR
+			CASEELSE
+				PRINT 西都城
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_岩川
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 岩川
+				RESETCOLOR
+			CASEELSE
+				PRINT 岩川
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_志布志
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 志布志
+				RESETCOLOR
+			CASEELSE
+				PRINT 志布志
+		ENDSELECT
+		WAIT
+	CASE 路線_妻線
+		SELECTCASE SCVAR:都市名_佐土原
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 佐土原
+				RESETCOLOR
+			CASEELSE
+				PRINT 佐土原
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_杉安
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 杉安
+				RESETCOLOR
+			CASEELSE
+				PRINT 杉安
+		ENDSELECT
+		WAIT
+	CASE 路線_細島線
+		SELECTCASE SCVAR:都市名_日向市
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 日向市
+				RESETCOLOR
+			CASEELSE
+				PRINT 日向市
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_細島
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 細島
+				RESETCOLOR
+			CASEELSE
+				PRINT 細島
+		ENDSELECT
+		WAIT
+	CASE 路線_矢部線
+		SELECTCASE SCVAR:都市名_羽犬塚
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 羽犬塚
+				RESETCOLOR
+			CASEELSE
+				PRINT 羽犬塚
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_黒木
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 黒木
+				RESETCOLOR
+			CASEELSE
+				PRINT 黒木
+		ENDSELECT
+		WAIT
+	CASE 路線_宮原線
+		SELECTCASE SCVAR:都市名_豊後森
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 豊後森
+				RESETCOLOR
+			CASEELSE
+				PRINT 豊後森
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_肥後小国
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 肥後小国
+				RESETCOLOR
+			CASEELSE
+				PRINT 肥後小国
+		ENDSELECT
+		WAIT
+	CASE 路線_勝田線
+		SELECTCASE SCVAR:都市名_吉塚
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 吉塚
+				RESETCOLOR
+			CASEELSE
+				PRINT 吉塚
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_宇美
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 宇美
+				RESETCOLOR
+			CASEELSE
+				PRINT 宇美
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_筑前勝田
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 筑前勝田
+				RESETCOLOR
+			CASEELSE
+				PRINT 筑前勝田
+		ENDSELECT
+		WAIT
+	CASE 路線_室木線
+		SELECTCASE SCVAR:都市名_遠賀川
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 遠賀川
+				RESETCOLOR
+			CASEELSE
+				PRINT 遠賀川
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_室木
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 室木
+				RESETCOLOR
+			CASEELSE
+				PRINT 室木
+		ENDSELECT
+		WAIT
+	CASE 路線_宮田線
+		SELECTCASE SCVAR:都市名_勝野
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 勝野
+				RESETCOLOR
+			CASEELSE
+				PRINT 勝野
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_筑前宮田
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 筑前宮田
+				RESETCOLOR
+			CASEELSE
+				PRINT 筑前宮田
+		ENDSELECT
+		WAIT
+	CASE 路線_香月線
+		SELECTCASE SCVAR:都市名_中間
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 中間
+				RESETCOLOR
+			CASEELSE
+				PRINT 中間
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_香月
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 香月
+				RESETCOLOR
+			CASEELSE
+				PRINT 香月
+		ENDSELECT
+		WAIT
+	CASE 路線_添田線
+		SELECTCASE SCVAR:都市名_香春
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 香春
+				RESETCOLOR
+			CASEELSE
+				PRINT 香春
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_大任
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 大任
+				RESETCOLOR
+			CASEELSE
+				PRINT 大任
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_添田
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 添田
+				RESETCOLOR
+			CASEELSE
+				PRINT 添田
+		ENDSELECT
+		WAIT
+
+	CASE 路線_福岡市地下鉄空港線
+		SELECTCASE SCVAR:都市名_姪浜
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 姪浜
+				RESETCOLOR
+			CASEELSE
+				PRINT 姪浜
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_天神
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 天神
+				RESETCOLOR
+			CASEELSE
+				PRINT 天神
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_博多
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 博多
+				RESETCOLOR
+			CASEELSE
+				PRINT 博多
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_福岡空港
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 福岡空港
+				RESETCOLOR
+			CASEELSE
+				PRINT 福岡空港
+		ENDSELECT
+		WAIT
+	CASE 路線_平成筑豊鉄道田川線
+		SELECTCASE SCVAR:都市名_行橋
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 行橋
+				RESETCOLOR
+			CASEELSE
+				PRINT 行橋
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_油須原
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 油須原
+				RESETCOLOR
+			CASEELSE
+				PRINT 油須原
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_田川伊田
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 田川伊田
+				RESETCOLOR
+			CASEELSE
+				PRINT 田川伊田
+		ENDSELECT
+		WAIT
+	CASE 路線_平成筑豊鉄道伊田線
+		SELECTCASE SCVAR:都市名_直方
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 直方
+				RESETCOLOR
+			CASEELSE
+				PRINT 直方
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_金田
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 金田
+				RESETCOLOR
+			CASEELSE
+				PRINT 金田
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_田川伊田
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 田川伊田
+				RESETCOLOR
+			CASEELSE
+				PRINT 田川伊田
+		ENDSELECT
+		WAIT
+	CASE 路線_平成筑豊鉄道糸田線
+		SELECTCASE SCVAR:都市名_金田
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 金田
+				RESETCOLOR
+			CASEELSE
+				PRINT 金田
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_田川後藤寺
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 田川後藤寺
+				RESETCOLOR
+			CASEELSE
+				PRINT 田川後藤寺
+		ENDSELECT
+		WAIT
+	CASE 路線_松浦鉄道西九州線
+		SELECTCASE SCVAR:都市名_有田
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 有田
+				RESETCOLOR
+			CASEELSE
+				PRINT 有田
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_伊万里
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 伊万里
+				RESETCOLOR
+			CASEELSE
+				PRINT 伊万里
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_松浦
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 松浦
+				RESETCOLOR
+			CASEELSE
+				PRINT 松浦
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_吉井
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 吉井
+				RESETCOLOR
+			CASEELSE
+				PRINT 吉井
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_たびら平戸口
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT たびら平戸口
+				RESETCOLOR
+			CASEELSE
+				PRINT たびら平戸口
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_佐々
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 佐々
+				RESETCOLOR
+			CASEELSE
+				PRINT 佐々
+		ENDSELECT
+		SELECTCASE SCVAR:都市名_佐世保
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 佐世保
+				RESETCOLOR
+			CASEELSE
+				PRINT 佐世保
+		ENDSELECT
+		WAIT
+	CASE 路線_島原鉄道線
+		SELECTCASE SCVAR:都市名_諫早
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 諫早
+				RESETCOLOR
+			CASEELSE
+				PRINT 諫早
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_島原
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 島原
+				RESETCOLOR
+			CASEELSE
+				PRINT 島原
+		ENDSELECT
+		SELECTCASE SCVAR:都市名_加津佐
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 加津佐
+				RESETCOLOR
+			CASEELSE
+				PRINT 加津佐
+		ENDSELECT
+		WAIT
+	CASE 路線_くま川鉄道湯前線
+		SELECTCASE SCVAR:都市名_人吉
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 人吉
+				RESETCOLOR
+			CASEELSE
+				PRINT 人吉
+		ENDSELECT
+		SELECTCASE SCVAR:都市名_湯前
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 湯前
+				RESETCOLOR
+			CASEELSE
+				PRINT 湯前
+		ENDSELECT
+		WAIT
+	CASE 路線_南阿蘇鉄道高森線
+		SELECTCASE SCVAR:都市名_立野
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 立野
+				RESETCOLOR
+			CASEELSE
+				PRINT 立野
+		ENDSELECT
+		SELECTCASE SCVAR:都市名_高森
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 高森
+				RESETCOLOR
+			CASEELSE
+				PRINT 高森
+		ENDSELECT
+		WAIT
+	CASE 路線_甘木鉄道甘木線
+		SELECTCASE SCVAR:都市名_基山
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 基山
+				RESETCOLOR
+			CASEELSE
+				PRINT 基山
+		ENDSELECT
+		SELECTCASE SCVAR:都市名_甘木
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 甘木
+				RESETCOLOR
+			CASEELSE
+				PRINT 甘木
+		ENDSELECT
+		WAIT
+	CASE 路線_南薩鉄道枕崎線
+		SELECTCASE SCVAR:都市名_伊集院
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 伊集院
+				RESETCOLOR
+			CASEELSE
+				PRINT 伊集院
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_加世田
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 加世田
+				RESETCOLOR
+			CASEELSE
+				PRINT 加世田
+		ENDSELECT
+		SELECTCASE SCVAR:都市名_枕崎
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 枕崎
+				RESETCOLOR
+			CASEELSE
+				PRINT 枕崎
+		ENDSELECT
+		WAIT
+	CASE 路線_南薩鉄道万世線
+		SELECTCASE SCVAR:都市名_加世田
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 加世田
+				RESETCOLOR
+			CASEELSE
+				PRINT 加世田
+		ENDSELECT
+		SELECTCASE SCVAR:都市名_薩摩万世
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 薩摩万世
+				RESETCOLOR
+			CASEELSE
+				PRINT 薩摩万世
+		ENDSELECT
+		WAIT
+	CASE 路線_南薩鉄道知覧線
+		SELECTCASE SCVAR:都市名_加世田
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 加世田
+				RESETCOLOR
+			CASEELSE
+				PRINT 加世田
+		ENDSELECT
+		SELECTCASE SCVAR:都市名_知覧
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 知覧
+				RESETCOLOR
+			CASEELSE
+				PRINT 知覧
+		ENDSELECT
+		WAIT
+	CASE 路線_高千穂鉄道高千穂線
+		SELECTCASE SCVAR:都市名_延岡
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 延岡
+				RESETCOLOR
+			CASEELSE
+				PRINT 延岡
+		ENDSELECT
+		SELECTCASE SCVAR:都市名_高千穂
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 高千穂
+				RESETCOLOR
+			CASEELSE
+				PRINT 高千穂
+		ENDSELECT
+		WAIT
+
+	CASE 路線_肥薩おれんじ鉄道線
+		SELECTCASE SCVAR:都市名_八代
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 八代
+				RESETCOLOR
+			CASEELSE
+				PRINT 八代
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_新水俣
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 新水俣
+				RESETCOLOR
+			CASEELSE
+				PRINT 新水俣
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_水俣
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 水俣
+				RESETCOLOR
+			CASEELSE
+				PRINT 水俣
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_出水
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 出水
+				RESETCOLOR
+			CASEELSE
+				PRINT 出水
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_阿久根
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 阿久根
+				RESETCOLOR
+			CASEELSE
+				PRINT 阿久根
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_川内
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 川内
+				RESETCOLOR
+			CASEELSE
+				PRINT 川内
+		ENDSELECT
+		WAIT
+	CASE 路線_宮崎空港線
+		SELECTCASE SCVAR:都市名_田吉
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 田吉
+				RESETCOLOR
+			CASEELSE
+				PRINT 田吉
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_宮崎空港
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 宮崎空港
+				RESETCOLOR
+			CASEELSE
+				PRINT 宮崎空港
+		ENDSELECT
+		WAIT
+	CASE 路線_日南線
+		SELECTCASE SCVAR:都市名_南宮崎
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 南宮崎
+				RESETCOLOR
+			CASEELSE
+				PRINT 南宮崎
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_田吉
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 田吉
+				RESETCOLOR
+			CASEELSE
+				PRINT 田吉
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_油津
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 油津
+				RESETCOLOR
+			CASEELSE
+				PRINT 油津
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_志布志
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 志布志
+				RESETCOLOR
+			CASEELSE
+				PRINT 志布志
+		ENDSELECT
+		WAIT
+
+	CASE 路線_えびの高原線
+		SELECTCASE SCVAR:都市名_八代
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 八代
+				RESETCOLOR
+			CASEELSE
+				PRINT 八代
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_人吉
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 人吉
+				RESETCOLOR
+			CASEELSE
+				PRINT 人吉
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_吉松
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 吉松
+				RESETCOLOR
+			CASEELSE
+				PRINT 吉松
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_えびの
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT えびの
+				RESETCOLOR
+			CASEELSE
+				PRINT えびの
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_都城
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 都城
+				RESETCOLOR
+			CASEELSE
+				PRINT 都城
+		ENDSELECT
+		WAIT
+	CASE 路線_福北ゆたか線
+		SELECTCASE SCVAR:都市名_黒崎
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 黒崎
+				RESETCOLOR
+			CASEELSE
+				PRINT 黒崎
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_折尾
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 折尾
+				RESETCOLOR
+			CASEELSE
+				PRINT 折尾
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_中間
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 中間
+				RESETCOLOR
+			CASEELSE
+				PRINT 中間
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_直方
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 直方
+				RESETCOLOR
+			CASEELSE
+				PRINT 直方
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_勝野
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 勝野
+				RESETCOLOR
+			CASEELSE
+				PRINT 勝野
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_新飯塚
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 新飯塚
+				RESETCOLOR
+			CASEELSE
+				PRINT 新飯塚
+		ENDSELECT
+		PRINTL 　→　
+		PRINTL
+		SELECTCASE SCVAR:都市名_飯塚
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 飯塚
+				RESETCOLOR
+			CASEELSE
+				PRINT 飯塚
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_桂川
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 桂川
+				RESETCOLOR
+			CASEELSE
+				PRINT 桂川
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_篠栗
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 篠栗
+				RESETCOLOR
+			CASEELSE
+				PRINT 篠栗
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_長者原
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 長者原
+				RESETCOLOR
+			CASEELSE
+				PRINT 長者原
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_吉塚
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 吉塚
+				RESETCOLOR
+			CASEELSE
+				PRINT 吉塚
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_博多
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 博多
+				RESETCOLOR
+			CASEELSE
+				PRINT 博多
+		ENDSELECT
+		WAIT
+	CASE 路線_原田線
+		SELECTCASE SCVAR:都市名_桂川
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 桂川
+				RESETCOLOR
+			CASEELSE
+				PRINT 桂川
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_原田
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 原田
+				RESETCOLOR
+			CASEELSE
+				PRINT 原田
+		ENDSELECT
+		WAIT
+	CASE 路線_若松線
+		SELECTCASE SCVAR:都市名_若松
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 若松
+				RESETCOLOR
+			CASEELSE
+				PRINT 若松
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_折尾
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 折尾
+				RESETCOLOR
+			CASEELSE
+				PRINT 折尾
+		ENDSELECT
+		WAIT
+
+	CASE 路線_日肥線
+		SELECTCASE SCVAR:都市名_人吉
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 人吉
+				RESETCOLOR
+			CASEELSE
+				PRINT 人吉
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_湯前
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 湯前
+				RESETCOLOR
+			CASEELSE
+				PRINT 湯前
+		ENDSELECT
+		PRINT 　→
+		SETCOLOR カラー_選択不可
+		PRINT （未成線）
+		RESETCOLOR
+		PRINT →　
+		SELECTCASE SCVAR:都市名_村所
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 村所
+				RESETCOLOR
+			CASEELSE
+				PRINT 村所
+		ENDSELECT
+		PRINT 　→
+		SETCOLOR カラー_選択不可
+		PRINT （未成線）
+		RESETCOLOR
+		PRINT →　
+		SELECTCASE SCVAR:都市名_杉安
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 杉安
+				RESETCOLOR
+			CASEELSE
+				PRINT 杉安
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_佐土原
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 佐土原
+				RESETCOLOR
+			CASEELSE
+				PRINT 佐土原
+		ENDSELECT
+		WAIT
+	CASE 路線_高千穂線
+		SELECTCASE SCVAR:都市名_立野
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 立野
+				RESETCOLOR
+			CASEELSE
+				PRINT 立野
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_高森
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 高森
+				RESETCOLOR
+			CASEELSE
+				PRINT 高森
+		ENDSELECT
+		PRINT 　→
+		SETCOLOR カラー_選択不可
+		PRINT （未成線）
+		RESETCOLOR
+		PRINT →　
+		SELECTCASE SCVAR:都市名_日向泊
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 日向泊
+				RESETCOLOR
+			CASEELSE
+				PRINT 日向泊
+		ENDSELECT
+		PRINT 　→
+		SETCOLOR カラー_選択不可
+		PRINT （未成線）
+		RESETCOLOR
+		PRINT →　
+		SELECTCASE SCVAR:都市名_高千穂
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 高千穂
+				RESETCOLOR
+			CASEELSE
+				PRINT 高千穂
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_延岡
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 延岡
+				RESETCOLOR
+			CASEELSE
+				PRINT 延岡
+		ENDSELECT
+		WAIT
+	CASE 路線_古江線
+		SELECTCASE SCVAR:都市名_志布志
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 志布志
+				RESETCOLOR
+			CASEELSE
+				PRINT 志布志
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_鹿屋
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 鹿屋
+				RESETCOLOR
+			CASEELSE
+				PRINT 鹿屋
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_海潟温泉
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 海潟温泉
+				RESETCOLOR
+			CASEELSE
+				PRINT 海潟温泉
+		ENDSELECT
+		PRINT 　→　
+		SETCOLOR カラー_選択不可
+		PRINT 以降1972年開通
+		RESETCOLOR
+		WAIT
+	CASE 路線_上山田線
+		SELECTCASE SCVAR:都市名_飯塚
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 飯塚
+				RESETCOLOR
+			CASEELSE
+				PRINT 飯塚
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_下山田
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 下山田
+				RESETCOLOR
+			CASEELSE
+				PRINT 下山田
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_豊前川崎
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 豊前川崎
+				RESETCOLOR
+			CASEELSE
+				PRINT 豊前川崎
+		ENDSELECT
+		WAIT
+	CASE 路線_油須原線
+		SETCOLOR カラー_選択不可
+		PRINT 漆生（未実装）　→　
+		RESETCOLOR
+		SELECTCASE SCVAR:都市名_下山田
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 下山田
+				RESETCOLOR
+			CASEELSE
+				PRINT 下山田
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_豊前川崎
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 豊前川崎
+				RESETCOLOR
+			CASEELSE
+				PRINT 豊前川崎
+		ENDSELECT
+		PRINT 　→
+		SETCOLOR カラー_選択不可
+		PRINT （未成線）
+		RESETCOLOR
+		PRINT →　
+		SELECTCASE SCVAR:都市名_大任
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 大任
+				RESETCOLOR
+			CASEELSE
+				PRINT 大任
+		ENDSELECT
+		PRINT 　→
+		SETCOLOR カラー_選択不可
+		PRINT （未成線）
+		RESETCOLOR
+		PRINT →　
+		SELECTCASE SCVAR:都市名_油須原
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 油須原
+				RESETCOLOR
+			CASEELSE
+				PRINT 油須原
+		ENDSELECT
+		WAIT
+	CASE 路線_日田彦山線BRT
+		SELECTCASE SCVAR:都市名_添田
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 添田
+				RESETCOLOR
+			CASEELSE
+				PRINT 添田
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_夜明
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 夜明
+				RESETCOLOR
+			CASEELSE
+				PRINT 夜明
+		ENDSELECT
+		WAIT
+	CASE 路線_九州肥筑鉄道線
+		SELECTCASE SCVAR:都市名_瀬高
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 矢部川（現：瀬高）
+				RESETCOLOR
+			CASEELSE
+				PRINT 矢部川（現：瀬高）
+		ENDSELECT
+		PRINT 　→　
+		SELECTCASE SCVAR:都市名_夜明
+			CASE 1
+				SETCOLOR カラー_緑
+				PRINT 南関
+				RESETCOLOR
+			CASEELSE
+				PRINT 南関
+		ENDSELECT
+		WAIT
+ENDSELECT
+

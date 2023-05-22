@@ -41,11 +41,11 @@ SIF IS_SP_CHARA(MTAR:0)
 ;慰安モブも不可
 SIF TALENT:(MTAR:0):慰安婦
 	RETURN 0
-;相手が君主なら不可(従属国パッチ)コメントアウト,相手が君主であるときは辺境伯任命となる
-;FOR LOCAL:0, 0, MAX_COUNTRY
-;	SIF COUNTRY_BOSS:(LOCAL:0) == GET_ID(MTAR:0)
-;		RETURN 0
-;NEXT
+;相手が君主なら不可(従属国パッチ)相手が従属被従属関係の存在しない勢力の君主であるときは辺境伯任命となる
+FOR LOCAL:0, 0, MAX_COUNTRY
+	SIF (COUNTRY_BOSS:(LOCAL:0) == GET_ID(MTAR:0)) && (COUNTRY_Protectorate:(CFLAG:(MTAR:0):所属) >= 1)
+		RETURN 0
+NEXT
 RETURN 1
 
 ;-------------------------------------------------
@@ -181,18 +181,33 @@ PRINTFORMW  = {TCVAR:(MTAR:0):24} %TOSTR_COMPARE(TCVAR:(MTAR:0):24, TCVAR:(MTAR:
 FOR LOCAL:1, 0, MAX_COUNTRY
 	IF COUNTRY_BOSS:(LOCAL:1) == GET_ID(MTAR:0)
 		CALL CHECK_COUNTRY_RELATION(CFLAG:MASTER:所属, CFLAG:(MTAR:0):所属)
-		;同盟国・植民地・傀儡国ではないときはじく
-		IF RESULT != 3 && RESULT < 8
-			PRINTFORMW 只有同盟国・殖民地・傀儡国的君主才能被任命为边境伯
-			;TranslatedMark 辺境伯に任命できるのは,同盟国・植民地・傀儡国の君主のみです
+		;同盟国ではないときはじく
+		IF RESULT != 3
+			PRINTFORMW 只有同盟国的君主才能被任命为边境伯
+			;TranslatedMark 辺境伯に任命できるのは,同盟国の君主のみです
 			RETURN 1
 		ENDIF
 		IF TCVAR:(MTAR:0):24 >= TCVAR:(MTAR:0):25 && (TALENT:(MTAR:0):親愛 || TALENT:(MTAR:0):隷属 || ((TALENT:(MTAR:0):恋慕 || TALENT:(MTAR:0):親友) && CFLAG:(MTAR:0):2 >= 5000))
 			PRINTFORMW %ANAME(MTAR:0)%势力成为了我国的边境伯
 			;TranslatedMark %ANAME(MTAR:0)%勢力は我が国の辺境伯になりました
+
+			;ミッション達成
+			IF ACHIEVEMENT_MISSION:3 == 1
+				ACHIEVEMENT_MISSION:3 = 2
+				SETCOLOR カラー_注意
+				PRINTL 任务完成!
+				RESETCOLOR
+				WAIT
+			ENDIF
+
 			CALL CHANGE_COUNTRY(MTAR:0, CFLAG:MASTER:所属, 1)
+			CALL CHECK_Markgraf_start
 			RETURN 1
 		ELSE
+			SIF !(TALENT:(MTAR:0):親愛 || TALENT:(MTAR:0):隷属)
+				PRINTFORML ×親愛或者隷属
+			SIF !((TALENT:(MTAR:0):恋慕 || TALENT:(MTAR:0):親友) && CFLAG:(MTAR:0):2 >= 5000)
+				PRINTFORML ×恋慕或者親友的其中一个好感度5000以上
 			;捕虜会話の場合
 			IF FLAG:調教モード == 6
 				;口上表示
@@ -212,7 +227,7 @@ IF TCVAR:(MTAR:0):24 >= TCVAR:(MTAR:0):25
 	IF FLAG:調教モード == 6
 		;口上表示
 		CALL KOJO_EVENT(MTAR:0, 54)
-		PRINTL 
+		PRINTL
 
 		PRINTFORML %ANAME(MASTER)%帯著%ANAME(MTAR:0)%離開了監獄
 		;TranslatedMark %ANAME(MASTER)%は%ANAME(MTAR:0)%の手引で牢屋を抜け出しました
@@ -226,7 +241,7 @@ IF TCVAR:(MTAR:0):24 >= TCVAR:(MTAR:0):25
 	ELSE
 		;口上表示
 		CALL KOJO_EVENT(MTAR:0, 52)
-		PRINTL 
+		PRINTL
 
 		;自国の捕虜ないし放浪中の場合
 		IF CFLAG:(MTAR:0):捕虜先 == CFLAG:MASTER:所属 || CFLAG:(MTAR:0):特殊状態 == 特殊状態_放浪
@@ -234,7 +249,7 @@ IF TCVAR:(MTAR:0):24 >= TCVAR:(MTAR:0):25
 			;TranslatedMark %ANAME(MTAR:0)%が我が国の士官になりました
 			CALL CHANGE_COUNTRY(MTAR:0, CFLAG:MASTER:所属, 1)
 		ELSE
-			
+
 			CALL CHECK_COUNTRY_RELATION(CFLAG:MASTER:所属, CFLAG:(MTAR:0):所属)
 
 			;永久同盟中の国家に所属している場合(従属国パッチ)従属国に所属する者対しても同様の処理

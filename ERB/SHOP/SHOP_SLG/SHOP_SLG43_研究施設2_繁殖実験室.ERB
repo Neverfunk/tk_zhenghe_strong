@@ -47,6 +47,8 @@ RESTART
 #DIMS 名前
 #DIM 取り出し元
 #DIM 加工元識別ナンバー
+#DIM 一括取出可能フラグ
+#DIM 一括対象, 999
 #DIM FIRST_LINE
 FIRST_LINE = LINECOUNT
 
@@ -56,19 +58,25 @@ PRINTL 　（妊娠状态会被接触）
 CALL SINGLE_DRAWLINE
 
 FOR 実験対象, 0, CHARANUM
-	IF CFLAG:実験対象:1705 == 1 && CFLAG:実験対象:妊娠期間 >= 1
+	IF 外来人に監禁:実験対象:0 == 1 && CFLAG:実験対象:妊娠期間 >= 1
 		IF STRLENS(ANAME(実験対象)) >= MAX_CHARANAME_LENGTH
 			名前 = %SNAME(実験対象)%
 		ELSE
 			名前 = %ANAME(実験対象)%
 		ENDIF
 		CALL PRINTBUTTON_CENTER(@"[%名前, MAX_CHARANAME_LENGTH, LEFT%]", 実験対象, 0)
+		一括対象:実験対象 = 1
+		一括取出可能フラグ = 1
 		PRINTL
 	ENDIF
 NEXT
 PRINTL
 
 CALL SINGLE_DRAWLINE
+IF 一括取出可能フラグ == 1
+	PRINTBUTTON "1001[全部取出]", 1001
+	PRINTL
+ENDIF
 PRINTBUTTON "1000[取消]", 1000
 PRINTL
 
@@ -81,7 +89,46 @@ IF RESULT == 1000
 	REDRAW 1
 	RETURN
 
-ELSEIF CFLAG:RESULT:1705 == 1 && CFLAG:RESULT:妊娠期間 >= 1
+ELSEIF RESULT == 1001 && 一括取出可能フラグ == 1
+	PRINTFORML 要从实验对象中取出全部生命之素吗？
+
+	;はい／いいえ入力処理
+	CALL ASK_YN()
+	IF RESULT == 0
+		FOR LOCAL:0, 0, CHARANUM
+			IF 一括対象:(LOCAL:0) == 1
+				;空いている加工元識別ナンバーを検索・割り当て
+				FOR LOCAL:1, 0, 999
+					IF IS_GOODS_EXECUTED:(LOCAL:1) == 0
+						加工元識別ナンバー = LOCAL:1
+						BREAK
+					ENDIF
+				NEXT
+
+				IS_GOODS_EXECUTED:加工元識別ナンバー = 1
+				NAME_BEFORE_GOODS_EXECUTED:加工元識別ナンバー = LOCAL:0
+
+				NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:7 = 从「%ANAME(LOCAL:0)%」身上提取的生命之素
+				TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:0 = 1
+				HAVE_GOODS_EXECUTED:7 += 1
+				NAME_FATHER_FETUS:加工元識別ナンバー = CFLAG:(LOCAL:0):子の父親
+
+				CFLAG:(LOCAL:0):行動不能状態 = 0
+				CFLAG:(LOCAL:0):妊娠期間 = 0
+				CFLAG:(LOCAL:0):子の父親 = 0
+				TALENT:(LOCAL:0):妊娠 = 0
+				CALL MOTHER_SHRINK_BUSTSIZE((LOCAL:0))
+				CALL MOTHER_STOP_MILKING((LOCAL:0))
+
+				PRINTFORML 从%ANAME(LOCAL:0)%处获得了★記念品[生命之素]
+				一括対象:(LOCAL:0) = 0
+
+			ENDIF
+		NEXT
+		WAIT
+	ENDIF
+
+ELSEIF 外来人に監禁:RESULT:0 == 1 && CFLAG:RESULT:妊娠期間 >= 1
 	取り出し元 = RESULT
 	PRINTFORML 要从%ANAME(取り出し元)%身上提取生命之素吗？
 
@@ -144,7 +191,9 @@ FOR 加工元識別ナンバー, 0, 999
 
 		父親ID = NAME_FATHER_FETUS:加工元識別ナンバー
 		FATHER = ID_TO_CHARA(父親ID)
-		IF FATHER == -1
+		IF NAME_FATHER_FETUS:加工元識別ナンバー == GET_SPERM_ID("触手")
+			父親名 = 触手
+		ELSEIF FATHER == -1
 			父親名 = 不明
 		ELSE
 			父親名 = %ANAME(FATHER)%
@@ -202,6 +251,7 @@ RESTART
 #DIM 新生児
 #DIM 外来人勢力
 #DIM 識別ナンバーカウント
+#DIM 変更可能, 5
 
 SIF !HAVE_GOODS_EXECUTED:7
 	RETURN
@@ -260,13 +310,16 @@ FOR 加工元識別ナンバー, 0, 999
 		CALL ASK_YN("培养", "不培养")
 		IF RESULT == 1
 			CALL DELETE_CHARA(新生児)
-			PRINTFORMW 被其他研究员抱走了
+			PRINTFORML 通过地下渠道卖掉了
+			PRINTFORMW 获得了国库资金500
+			MONEY:(CFLAG:MASTER:所属) += 500
 			NAME_BEFORE_GOODS_EXECUTED:加工元識別ナンバー = 0
 			NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:7 = ""
 			TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:0 = 0
 			TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:1 = 0
 			HAVE_GOODS_EXECUTED:7 = MAX(HAVE_GOODS_EXECUTED:7 - 1, 0)
 			NAME_FATHER_FETUS:加工元識別ナンバー = 0
+			Incubate_FETUS:加工元識別ナンバー = 0
 
 			識別ナンバーカウント = 0
 			FOR 種類, 1, 7
@@ -289,7 +342,7 @@ FOR 加工元識別ナンバー, 0, 999
 		IF RESULT == 0
 			;CFLAG:新生児:捕虜先 = CFLAG:MASTER:所属
 			CALL CAPTURE(新生児,CFLAG:MASTER:所属)
-			CFLAG:新生児:1703 = 1
+			子供捕虜:新生児:0 = 1
 			PRINTFORMW 被关进了监狱
 		ENDIF
 		PRINTFORML 要自己取名麼？
@@ -312,6 +365,66 @@ FOR 加工元識別ナンバー, 0, 999
 		TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:1 = 0
 		HAVE_GOODS_EXECUTED:7 = MAX(HAVE_GOODS_EXECUTED:7 - 1, 0)
 		NAME_FATHER_FETUS:加工元識別ナンバー = 0
+		Incubate_FETUS:加工元識別ナンバー = 0
+
+		;(従属国パッチ)「研究・教育機関」が利用可能であるとき教育方法を選べる
+		IF IS_TREATY_UNI:(CFLAG:MASTER:所属)
+			PRINTFORML 教育機関将实行怎样的教育？
+			PRINTFORML (之后可以在「外交部」中进行变更)
+			PRINTBUTTON "[1] 在学校中教育", 1
+			PRINTL
+			IF ID_TO_CHARA(FLAG:触手部屋管理者) != -1
+				変更可能:2 = 1
+				PRINTBUTTON "[2] 泡在触手群中锻炼妖术", 2
+			ENDIF
+			PRINTL
+			IF CFLAG:新生児:捕虜先 > 0 || 奴隷士官フラグ:新生児:0 == 1 || 子供捕虜:新生児:0 == 1
+				変更可能:3 = 1
+				PRINTBUTTON "[3] 「教育」(調教)", 3
+				PRINTL
+				変更可能:4 = 1
+				PRINTBUTTON "[4] 洗脑", 4
+			ENDIF
+			PRINTL
+
+			$INPUT_LOOP_SCHOOL
+			INPUT
+
+			SIF RESULT > 4 || (RESULT == 2 && 変更可能:2 != 1) || (RESULT == 3 && 変更可能:3 != 1) || (RESULT == 4 && 変更可能:4 != 1)
+				GOTO INPUT_LOOP_SCHOOL
+
+			SELECTCASE RESULT
+				CASE 1
+					教育内容:新生児:0 = RESULT
+					PRINTFORML [%ANAME(新生児)%]在学校中进行教育
+					PRINTFORMW 战略回合结束时增加各种经验值
+					PRINTFORML
+				CASE 2
+					教育内容:新生児:0 = RESULT
+					PRINTFORML [%ANAME(新生児)%]被泡在触手群中锻炼妖术
+					PRINTFORMW 战略回合结束时增加妖术经验值
+					PRINTFORML
+				CASE 3
+					教育内容:新生児:0 = RESULT
+					PRINTFORML [%ANAME(新生児)%]进行名为「教育」的调教
+					PRINTFORMW 战略回合结束时增加各种经验值
+					PRINTFORML
+				CASE 4
+					教育内容:新生児:0 = RESULT
+					PRINTFORML [%ANAME(新生児)%]接受洗脑
+					PRINTFORMW 战略回合结束时增从属度・依存度
+					PRINTFORML
+			ENDSELECT
+		ENDIF
+
+		;ミッション達成
+		IF ACHIEVEMENT_MISSION:53 == 1
+			ACHIEVEMENT_MISSION:53 = 2
+			SETCOLOR カラー_注意
+			PRINTL 任务完成!
+			RESETCOLOR
+			WAIT
+		ENDIF
 
 		識別ナンバーカウント = 0
 		FOR 種類, 1, 7

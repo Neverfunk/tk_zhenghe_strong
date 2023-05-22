@@ -2,8 +2,11 @@
 ;ターンエンド時の触手の処理
 ;--------------------------------------
 @TURNEND_TENTACLE
-;2ターンに1度、無理矢理妊娠
-CALL TENTACLE_FORCE_PREGNATE(DAY % 2 == 0)
+#DIM 触手
+触手 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_触手)
+;2ターンに1度、無理矢理妊娠(触手拡張パッチ)プレイヤー勢力であるときはスキップ
+SIF CFLAG:MASTER:所属 != 触手
+	CALL TENTACLE_FORCE_PREGNATE(DAY % 2 == 0)
 
 ;--------------------------------------
 ;滅亡時の処理
@@ -18,6 +21,8 @@ PRINTFORMW 在各勢力的努力下、成功殲滅了触手
 PRINTFORMW  随着最后一点残余被清除，幻想乡众人打破的天谴的神话
 PRINTFORMW  现在仅仅需要处理的就是那些被寄生的苗床了
 PRINTFORMW 但是在幻想乡一统之前，幻想乡永远不会就此平静……
+;(触手拡張パッチ)リセット
+CHANGE_Government_TENTACLE:0 = 0
 PRINTFORML
 PRINTFORML
 PRINTFORML
@@ -42,6 +47,9 @@ SIF GET_NEW_COUNTRY() == -1
 CALL CREATE_SP_COUNTRY(特殊勢力_触手)
 LOCAL = RESULT
 CALL INIT_SP_COUNTRY(LOCAL)
+
+;(触手勢力拡張パッチ)触手勢力を記録
+CHANGE_Government_TENTACLE:0 = LOCAL
 
 RETURN LOCAL
 
@@ -81,7 +89,7 @@ CALL SINGLE_DRAWLINE
 SETCOLOR カラー_ピンク
 PRINTFORML 触手利用%ANAME(対象)%開始了繁殖……
 ;TranslatedMark 触手は%ANAME(対象)%を繁殖のため利用したようだ……
-PRINTFORML 
+PRINTFORML
 IF GETBIT(TALENT:対象:特殊勢力陥落系, 特殊勢力_触手)
 	PRINTFORMW 被他們寄生、順從的成為了苗床的%ANAME(対象)%、高興的為他們提供自己的身体
 	;TranslatedMark 彼らに寄生され、従順な苗床と化していた%ANAME(対象)%は、嬉々として彼らに身体を提供した
@@ -228,9 +236,9 @@ PRINTFORMW 环顾左右，没有看不到触手的地方
 ;TranslatedMark 左を見ても右を見ても、触手が目に入らないところはない
 PRINTFORMW 少女们被怪异的肉块所侵犯，成为他们繁殖的道具……
 ;TranslatedMark 少女らはグロテスクな肉塊にありとあらゆる穴を犯され、彼らの繁殖のための道具にされている……
-PRINTFORML 
+PRINTFORML
 IF CFLAG:MASTER:所属 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_触手) && IS_FEMALE(MASTER)
-	PRINTFORMW 
+	PRINTFORMW
 	PRINTFORML ……其中也有%ANAME(MASTER)%的身影
 	;TranslatedMark ……その中に、%ANAME(MASTER)%の姿もあった
 	PRINTFORMW 和其他少女一样，被触手侵蚀到脑髓的%ANAME(MASTER)%，将自己的胎盘交给了触手
@@ -243,6 +251,6 @@ IF CFLAG:MASTER:所属 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_触手)
 	;TranslatedMark そうして死ぬまで、彼らのための苗床として飼われ続けるのだ……
 	CALL FUCK_SP(MASTER, "欲望, 性交, 射精, 精愛, Ｃ, Ｖ, Ｂ, Ａ, Ｍ, 触手, Ｖ性交, Ａ性交", "処女喪失, 童貞喪失, 接吻喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精", GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_触手), GET_SPERM_ID("触手"), "触手", "触手", "触手", "強姦")
 ENDIF
-PRINTFORML 
+PRINTFORML
 PRINTFORMW 在成为巨大繁殖场的幻想乡中，苗床们的娇声响彻……
 ;TranslatedMark 巨大な繁殖場となった幻想郷に、苗床達の嬌声が響き渡る……

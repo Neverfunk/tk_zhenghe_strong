@@ -50,7 +50,7 @@ NEXT
 $SHOW_LOOP
 
 PRINTFORML 以调查特殊势力得到的知识为基础，研究特殊技术
-PRINTFORML 
+PRINTFORML
 PRINTFORML 现在的研究点数[ {RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属)} ]
 ;必要な研究ポイントは、自勢力が「外来人」であるとき50、そうでないとき100
 IF CFLAG:MASTER:所属 == 外来人
@@ -65,9 +65,13 @@ CALL SINGLE_DRAWLINE
 研究可能フラグ:3 = 0
 研究可能フラグ:4 = 0
 
-PRINTL 
+PRINTBUTTON "[与外部世界通信]", 51
+PRINTL
+PRINTBUTTON "[进行妖力研究]", 52
+PRINTL
+PRINTL
 PRINTBUTTON "[精子发电站]", 1
-PRINTL 
+PRINTL
 PRINTBUTTON "[触手・信标]", 2
 PRINTL
 PRINTBUTTON "[触手・戴森炮]", 3
@@ -107,7 +111,7 @@ IF 選択対象 == 1
 		PRINTL 研究点数不足
 	ELSE
 		PRINTBUTTON "[研究]", 101
-		PRINTL 
+		PRINTL
 	ENDIF
 ELSEIF 選択対象 == 2
 	PRINTL 「触手・信标」
@@ -124,7 +128,7 @@ ELSEIF 選択対象 == 2
 		PRINTL 研究点数不足
 	ELSE
 		PRINTBUTTON "[研究]", 102
-		PRINTL 
+		PRINTL
 	ENDIF
 ELSEIF 選択対象 == 3
 	PRINTL 「触手・戴森炮」
@@ -140,7 +144,7 @@ ELSEIF 選択対象 == 3
 		PRINTL 研究点数不足
 	ELSE
 		PRINTBUTTON "[研究]", 103
-		PRINTL 
+		PRINTL
 	ENDIF
 ELSEIF 選択対象 == 4
 	PRINTL 「类星触陨」
@@ -156,7 +160,6 @@ ELSEIF 選択対象 == 4
 	RESETCOLOR
 	PRINTL 原型：群星(Stellaris)的著名mod更多巨构(Gigastructural Engineering & More)中的巨构：类星天陨
 	PRINTL 　　　在银心中制造的一种巨型武器，可以直接湮灭恒星系。一旦建造完成全银河会自行结盟为“泛银河防御同盟”
-	RESETCOLOR
 	IF RESEARCH_UNIVERSITY_CAN_KNOWLEDGE_SP:(CFLAG:MASTER:所属):7 > 0
 		PRINTL 研究完成
 	ELSEIF 研究可能フラグ:3 <= 0
@@ -165,7 +168,7 @@ ELSEIF 選択対象 == 4
 		PRINTL 研究点数不足
 	ELSE
 		PRINTBUTTON "[研究]", 104
-		PRINTL 
+		PRINTL
 	ENDIF
 ELSEIF 選択対象 == 5
 	PRINTL 「矩阵奸脑」
@@ -177,7 +180,6 @@ ELSEIF 選択対象 == 5
 	PRINTL 幻想乡不会给践踏生命尊严的你好脸色吧…
 	RESETCOLOR
 	PRINTL 原型：群星(Stellaris)的著名mod更多巨构(Gigastructural Engineering & More)中的巨构：恒星套娃脑
-	RESETCOLOR
 	IF RESEARCH_UNIVERSITY_CAN_KNOWLEDGE_SP:(CFLAG:MASTER:所属):8 > 0
 		PRINTL 研究完成
 	ELSEIF 研究可能フラグ:4 <= 0
@@ -186,14 +188,50 @@ ELSEIF 選択対象 == 5
 		PRINTL 研究点数不足
 	ELSE
 		PRINTBUTTON "[研究]", 105
-		PRINTL 
+		PRINTL
+	ENDIF
+ELSEIF 選択対象 == 51
+	PRINTL 「与外部世界通信」
+	PRINTL 说明：利用已经变得顺从的博丽大结界的管理者，或许可以通过削弱博丽大结界的效果
+	PRINTL 　　　来获取外部世界的信息，从而增加我们的国力
+	PRINTL 效果：不尝试一下怎么知道会有什么效果呢
+	SETCOLOR カラー_警告
+	PRINTL 危险的尝试…
+	RESETCOLOR
+	IF SP_COUNTRY_APPEARED:特殊勢力_外来人 >= 1
+		PRINTL 外来人已经成功涌入了
+	ELSEIF !(TALENT:(NAME_TO_CHARA("霊夢")):隷属 >= 1 && TALENT:(NAME_TO_CHARA("紫")):隷属 >= 1 && TALENT:(NAME_TO_CHARA("藍")):隷属 >= 1)
+		PRINTL 前提条件：「霊夢」「紫」「藍」的隷属
+	ELSEIF RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属) < 50
+		PRINTL 研究点数不足
+	ELSE
+		PRINTBUTTON "[研究]", 151
+		PRINTL
+	ENDIF
+ELSEIF 選択対象 == 52
+	PRINTL 「进行妖力研究」
+	PRINTL 说明：「妖術」的本质究竟是什么？
+	PRINTL 　　　或许应该准备「实验体」来尝试进行一下实验
+	PRINTL 效果：不尝试一下怎么知道会有什么效果呢
+	SETCOLOR カラー_警告
+	PRINTL 危险的尝试…
+	RESETCOLOR
+	IF SP_COUNTRY_APPEARED:特殊勢力_触手 >= 1
+		PRINTL 触手已经出现了
+	ELSEIF !(HAVE_GOODS_EXECUTED:6 >= 5 && ABL:MASTER:妖術 >= 60)
+		PRINTL 前提条件：玩家的妖術技能大于60且拥有纪念品「触手地狱」5个以上
+	ELSEIF RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属) < 50
+		PRINTL 研究点数不足
+	ELSE
+		PRINTBUTTON "[研究]", 152
+		PRINTL
 	ENDIF
 ENDIF
 CALL SINGLE_DRAWLINE
 
 PRINTL
 PRINTBUTTON "99[取消]", 99
-PRINTL 
+PRINTL
 
 $INPUT_LOOP
 INPUT
@@ -213,6 +251,10 @@ ELSEIF RESULT == 1 || RESULT == 2 || RESULT == 3 || RESULT == 4 || RESULT == 5
 		選択対象 = 4
 	ELSEIF RESULT == 5
 		選択対象 = 5
+	ELSEIF RESULT == 51
+		選択対象 = 51
+	ELSEIF RESULT == 52
+		選択対象 = 52
 	ENDIF
 	CLEARLINE LINECOUNT - FIRST_LINE
 	GOTO SHOW_LOOP
@@ -235,7 +277,7 @@ ELSEIF RESULT == 102 && 選択対象 == 2 && 研究可能フラグ:2 == 1
 	RESEARCH_UNIVERSITY_CAN_KNOWLEDGE_SP:(CFLAG:MASTER:所属):5 = 1
 	PRINTL 「触手・信标」研究完成、可以在特殊区划中进行建造
 	PRINTW 可以利用「触手地狱」来使士官堕落了
-	PRINTL 
+	PRINTL
 	PRINTFORML 触手・信标成功引导触手们跟随你了
 	;触手勢力が現存していないときは傀儡国にできない
 	IF IS_COUNTRY(外交対象)
@@ -250,12 +292,12 @@ ELSEIF RESULT == 102 && 選択対象 == 2 && 研究可能フラグ:2 == 1
 					TREATY_P_COUNTRY:(LOCAL:0):0:0 = 外交対象
 					TREATY_P_COUNTRY:(LOCAL:0):1:1 = (CFLAG:MASTER:所属)
 					IS_TREATY_P:(LOCAL:0) = 1
-					
+
 					;従属国簡易変数参考
 					COUNTRY_Protectorate_REFERENCE:外交対象:0 = 4
 					COUNTRY_Protectorate_REFERENCE:外交対象:1 = LOCAL:0
 					COUNTRY_Protectorate_REFERENCE:外交対象:2 = (CFLAG:MASTER:所属)
-					
+
 					; 関係マップの更新
 					TMP_COUNTRY_RELATION:外交対象:(CFLAG:MASTER:所属) = 6
 					TMP_COUNTRY_RELATION:(CFLAG:MASTER:所属):外交対象 = 9
@@ -273,9 +315,9 @@ ELSEIF RESULT == 102 && 選択対象 == 2 && 研究可能フラグ:2 == 1
 			CALL INIT_Pupet(外交対象, (CFLAG:MASTER:所属))
 		ENDIF
 		IS_SP_COUNTRY_IN_UNION:連邦ナンバー:4 = 1
-		PRINTL 
+		PRINTL
 		PRINTFORMW 对于这一事态，各势力都加强了警戒
-		
+
 		FOR LOCAL, 1, MAX_COUNTRY
 			SIF !IS_COUNTRY(LOCAL) || LOCAL == CFLAG:MASTER:所属 || 連邦構成国:(LOCAL) == 1
 				CONTINUE
@@ -303,16 +345,16 @@ ELSEIF RESULT == 104 && 選択対象 == 4 && 研究可能フラグ:3 == 1
 	IF IS_COUNTRY(外交対象)
 		PRINTFORMW 成功整合了触手势力。
 		CALL INIT_Protectorate_Integrate(外交対象, (CFLAG:MASTER:所属))
-		PRINTL 
+		PRINTL
 		PRINTFORMW 对于这种异常事态，各势力都感到了强烈的危机感
-		
+
 		FOR LOCAL, 1, MAX_COUNTRY
 			SIF !IS_COUNTRY(LOCAL) || LOCAL == CFLAG:MASTER:所属 || 連邦構成国:(LOCAL) == 1
 				CONTINUE
 			CALL CHANGE_RELATION_C_TO_C(LOCAL, CFLAG:MASTER:所属, -300, 450)
 		NEXT
 	ENDIF
-	
+
 	PRINTL 将这些触手聚集到一起，「类星触陨」开始进行启动前的准备
 	PRINTW 接下来只要准备「幼小的纪念品」和「生命之素」，使用「触手能量」进行填充！
 ELSEIF RESULT == 105 && 選択対象 == 5 && 研究可能フラグ:4 == 1
@@ -324,6 +366,24 @@ ELSEIF RESULT == 105 && 選択対象 == 5 && 研究可能フラグ:4 == 1
 	RESEARCH_UNIVERSITY_CAN_KNOWLEDGE_SP:(CFLAG:MASTER:所属):8 = 1
 	PRINTL 「矩阵奸脑」研究完成，作为基础可以在特殊区划中进行建造了。
 	PRINTW 接下来只要准备「幼小的纪念品」和「生命之素」，将「高濃度精力」注入进去！
+ELSEIF RESULT == 151 && 選択対象 == 51 && TALENT:(NAME_TO_CHARA("霊夢")):隷属 >= 1 && TALENT:(NAME_TO_CHARA("紫")):隷属 >= 1 && TALENT:(NAME_TO_CHARA("藍")):隷属 >= 1 && SP_COUNTRY_APPEARED:特殊勢力_外来人 == 0
+	PRINTL 博丽的巫女已经准备好了，命令紫和她的式神开始削弱博丽大结界的效力…
+	PRINTFORMW ……………………
+	PRINTFORMW ……
+	SIF SP_COUNTRY_RANK:特殊勢力_外来人 <= 0
+		SP_COUNTRY_RANK:特殊勢力_外来人 = 3
+	CALL GAIRAI_RISE
+	SIF RESULT == 0
+		PRINTW 但是什么也没有发生
+ELSEIF RESULT == 152 && 選択対象 == 52 && HAVE_GOODS_EXECUTED:6 >= 5 && ABL:MASTER:妖術 >= 60 && SP_COUNTRY_APPEARED:特殊勢力_触手 == 0
+	PRINTL 将「实验体」集中在一个地方，一点一点地注入妖力…
+	PRINTFORMW ……………………
+	PRINTFORMW ……
+	SIF SP_COUNTRY_RANK:特殊勢力_触手 <= 0
+		SP_COUNTRY_RANK:特殊勢力_触手 = 3
+	CALL TENTACLE_RISE
+	SIF RESULT == 0
+		PRINTW 但是什么也没有发生
 ELSE
 	CLEARLINE 1
 	GOTO INPUT_LOOP

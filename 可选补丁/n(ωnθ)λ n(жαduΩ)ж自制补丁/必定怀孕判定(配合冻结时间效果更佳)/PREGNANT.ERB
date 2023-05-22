@@ -41,7 +41,7 @@ ENDIF
 
 ;膣内射精量が0以下なら妊娠判定に入らない
 SIF LOCAL:2 <= 0
-	RETURN 
+	RETURN
 
 ;中出し量が1以上の場合
 
@@ -544,7 +544,7 @@ IF IS_PREGNANT_MSG(MOTHER)
 		FLAG:能力表示モード = 0
 		CALL SHOW_INFO_WITH_UI(CHILD, 0, 0)
 		CALL SINGLE_DRAWLINE
-		
+
 		;(従属国パッチ)捕虜が産んだ子供の処理
 		IF CFLAG:MASTER:所属 == CFLAG:MOTHER:捕虜先
 			PRINTFORML 这孩子是俘虏生的孩子
@@ -556,7 +556,7 @@ IF IS_PREGNANT_MSG(MOTHER)
 			IF RESULT == 0
 				; CFLAG:CHILD:捕虜先 = CFLAG:MASTER:所属
 				CALL CAPTURE(CHILD,CFLAG:MASTER:所属)
-				CFLAG:CHILD:1703 = 1
+				子供捕虜:CHILD:0 = 1
 				PRINTFORMW 被关进了监狱
 				;TranslatedMark 投獄しました
 				PRINTFORML 要自己取名麼？
@@ -577,7 +577,7 @@ IF IS_PREGNANT_MSG(MOTHER)
 				ENDIF
 			ENDIF
 		ENDIF
-		
+
 		PRINTFORMW 這個孩子、要当做本国将来的士官而進行教育麼？
 		;TranslatedMark この子を将来、自国の仕官となるように教育しますか？
 		CALL ASK_MULTI("是", "是（今後自動当做士官）", "不要", "不要（今後自動無視）")
@@ -806,8 +806,8 @@ IF TALENT:(ARG:0):幼兒 && CFLAG:(ARG:0):子の成長度 >= 15 && IS_CHILD(ARG:
 	ENDIF
 
 	;(従属国パッチ)そのキャラの教育内容フラグ・捕虜経験子供フラグをリセット
-	CFLAG:(ARG:0):1701 = 0
-	CFLAG:(ARG:0):1703 = 0
+	教育内容:(ARG:0):0 = 0
+	子供捕虜:(ARG:0):0 = 0
 
 	TALENT:(ARG:0):幼稚 = TALENT:(ARG:0):成長後幼稚
 	TALENT:(ARG:0):幼兒 = 0
@@ -907,7 +907,7 @@ FOR LOCAL:0, 0, CHARANUM
 			PRINTFORMW 苗床化的%ANAME(LOCAL:0)%、因為生下触手的孩子感到了無上的喜悦……
 			;TranslatedMark 苗床と化した%ANAME(LOCAL:0)%は、触手の子を産み出せることにこの上ない悦びを覚えているようだ……
 		RESETCOLOR
-		PRINTL 
+		PRINTL
 
 		;口上の表示
 		CALL KOJO_EVENT(LOCAL:0, 44)
@@ -935,12 +935,12 @@ FOR LOCAL:0, 0, CHARANUM
 			CALL FUCK(LOCAL, "Ｕ, 触手")
 		ENDIF
 
-		PRINTL 
+		PRINTL
 		PRINTFORML <%ANAME(LOCAL:0)%>
 		CALL PRINT_ADD_EXP(LOCAL:0, "出産経験", 1)
 		CALL PRINT_ADD_EXP(LOCAL:0, "触手出産経験", LOCAL:12 + LOCAL:22)
 		CALL TRAIN_AUTO_ABLUP(LOCAL:0)
-		PRINTL 
+		PRINTL
 
 		;妊娠履歴の記録
 		CALL REFRESH_PREGNANT_RECORD(LOCAL:0, GET_SPERM_ID("触手"), LOCAL:12 + LOCAL:22)
@@ -978,7 +978,7 @@ FOR LOCAL:0, 0, CHARANUM
 			SETCOLOR カラー_注意
 			PRINTFORMW 触手同化了%ANAME(LOCAL:0)%的子宮内懷着的孩子、更加堅韌的成長了(妖術ボーナス+{CFLAG:(LOCAL:0):妊娠期間 * 2})
 			;TranslatedMark 触手は%ANAME(LOCAL:0)%の胎内に宿っていた子供と同化し、より強靭に育ちました(妖術ボーナス+{CFLAG:(LOCAL:0):妊娠期間 * 2})
-			PRINTL 
+			PRINTL
 			RESETCOLOR
 
 			;妊娠関係のフラグをクリア
@@ -1017,14 +1017,14 @@ FOR LOCAL:0, 0, CHARANUM
 			PRINTFORML <%ANAME(LOCAL:6)%>
 			CALL PRINT_ADD_EXP(LOCAL:6, "妖術経験値", LOCAL:9)
 			CALL TRAIN_AUTO_ABLUP(LOCAL:6)
-			PRINTL 
+			PRINTL
 		ENDIF
 
 		IF LOCAL:7 >= 0
 			PRINTFORML <%ANAME(LOCAL:7)%>
 			CALL PRINT_ADD_EXP(LOCAL:7, "妖術経験値", LOCAL:10)
 			CALL TRAIN_AUTO_ABLUP(LOCAL:7)
-			PRINTL 
+			PRINTL
 		ENDIF
 
 
@@ -1193,7 +1193,7 @@ ENDIF
 IF CSTR:(ARG:0):0 != ""
 	PRINTBUTTON "[消去]", 112
 ENDIF
-PRINTL 
+PRINTL
 PRINTFORM   名:%CSTR:(ARG:0):1, 10, LEFT%%CSTR:(ARG:0):6, 10, LEFT%
 PRINTBUTTON "[輸入]", 120
 ;TranslatedMark "[入力]", 120
@@ -1206,7 +1206,7 @@ PRINTBUTTON "[隨機(日本名)]", 124
 IF CSTR:(ARG:0):1 != ""
 	PRINTBUTTON "[消去]", 122
 ENDIF
-PRINTL 
+PRINTL
 PRINTFORM   字:%CSTR:(ARG:0):2, 10, LEFT%%CSTR:(ARG:0):7, 10, LEFT%
 PRINTBUTTON "[輸入]", 130
 ;TranslatedMark "[入力]", 130
@@ -1215,15 +1215,15 @@ PRINTBUTTON "[隨機]", 131
 IF CSTR:(ARG:0):2 != ""
 	PRINTBUTTON "[消去]", 132
 ENDIF
-PRINTL 
+PRINTL
 PRINTFORM 愛称:%CSTR:(ARG:0):98, 10, LEFT%
 PRINTBUTTON "[輸入]", 140
 ;TranslatedMark "[入力]", 140
 IF CSTR:(ARG:0):98 != ""
 	PRINTBUTTON "[消去]", 141
 ENDIF
-PRINTL 
-PRINTL 
+PRINTL
+PRINTL
 PRINTL ※必須要取名
 ;TranslatedMark ※名は必須です
 IF CSTR:(ARG:0):1 == ""
@@ -1248,7 +1248,7 @@ IF LOCAL:1
 	;TranslatedMark ◆同姓同名のキャラが存在します◆
 	RESETCOLOR
 ENDIF
-PRINTL 
+PRINTL
 
 REDRAW 0
 
@@ -1274,8 +1274,8 @@ ELSEIF RESULT == 111 && LOCAL:6 >= 0 && CSTR:(LOCAL:6):0 != ""
 	GOTO SHOW_LOOP
 
 ELSEIF RESULT == 112
-	CSTR:(ARG:0):0 = 
-	CSTR:(ARG:0):5 = 
+	CSTR:(ARG:0):0 =
+	CSTR:(ARG:0):5 =
 	CLEARLINE LINECOUNT - FIRST_LINE
 	TALENT:(ARG:0):姓名逆転 = 0
 	GOTO SHOW_LOOP
@@ -1286,8 +1286,8 @@ ELSEIF RESULT == 120
 	$INPUTS_LOOP3
 	INPUTS
 	IF RESULTS == ""
-		CSTR:(ARG:0):1 = 
-		CSTR:(ARG:0):6 = 
+		CSTR:(ARG:0):1 =
+		CSTR:(ARG:0):6 =
 	ELSE
 		CSTR:(ARG:0):1 = %RESULTS%
 		PRINTL (可选)请用片假名输入读音
@@ -1295,7 +1295,7 @@ ELSEIF RESULT == 120
 		$INPUTS_LOOP3_1
 		INPUTS
 		IF CSTR:(ARG:0):1 == RESULTS
-			CSTR:(ARG:0):6 = 
+			CSTR:(ARG:0):6 =
 		ELSE
 			CSTR:(ARG:0):6 = %RESULTS%
 		ENDIF
@@ -1311,8 +1311,8 @@ ELSEIF RESULT == 121
 	GOTO SHOW_LOOP
 
 ELSEIF RESULT == 122
-	CSTR:(ARG:0):1 = 
-	CSTR:(ARG:0):6 = 
+	CSTR:(ARG:0):1 =
+	CSTR:(ARG:0):6 =
 	CLEARLINE LINECOUNT - FIRST_LINE
 	GOTO SHOW_LOOP
 
@@ -1346,8 +1346,8 @@ ELSEIF RESULT == 130
 	$INPUTS_LOOP4
 	INPUTS
 	IF RESULTS == ""
-		CSTR:(ARG:0):2 = 
-		CSTR:(ARG:0):7 = 
+		CSTR:(ARG:0):2 =
+		CSTR:(ARG:0):7 =
 	ELSE
 		CSTR:(ARG:0):2 = %RESULTS%
 		PRINTL (可选)请用片假名输入读音
@@ -1355,7 +1355,7 @@ ELSEIF RESULT == 130
 		$INPUTS_LOOP4_1
 		INPUTS
 		IF CSTR:(ARG:0):2 == RESULTS
-			CSTR:(ARG:0):7 = 
+			CSTR:(ARG:0):7 =
 		ELSE
 			CSTR:(ARG:0):7 = %RESULTS%
 		ENDIF
@@ -1371,8 +1371,8 @@ ELSEIF RESULT == 131
 	GOTO SHOW_LOOP
 
 ELSEIF RESULT == 132
-	CSTR:(ARG:0):2 = 
-	CSTR:(ARG:0):7 = 
+	CSTR:(ARG:0):2 =
+	CSTR:(ARG:0):7 =
 	CLEARLINE LINECOUNT - FIRST_LINE
 	GOTO SHOW_LOOP
 ELSEIF RESULT == 140
@@ -1382,7 +1382,7 @@ ELSEIF RESULT == 140
 	CSTR:(ARG:0):98 = %RESULTS%
 	GOTO SHOW_LOOP
 ELSEIF RESULT == 141
-	CSTR:(ARG:0):98 = 
+	CSTR:(ARG:0):98 =
 	GOTO SHOW_LOOP
 ELSEIF RESULT != 999 || (CALLNAME:(ARG:0) == "" && CSTR:(ARG:0):1 == "")
 	CLEARLINE 1

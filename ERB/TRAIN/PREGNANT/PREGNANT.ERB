@@ -56,7 +56,7 @@ IF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_孕みたがり)
 		LOCAL:5 /= 5
 	ENDIF
 ;獣変化中は確率上昇
-ELSEIF TALENT:(ARG:0):動物耳 || TALENT:(ARG:0):しっぽ
+ELSEIF TALENT:(ARG:0):動物耳 || TALENT:(ARG:0):尾巴
 	;排卵誘発剤使用中は確率上昇
 	IF CFLAG:(ARG:0):排卵誘発剤
 		LOCAL:5 /= 20
@@ -78,7 +78,11 @@ SIF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_良質母胎)
 
 ;★デバッグ用(100%妊娠)
 ;LOCAL:5 = 1
-
+IF CONFIG:557
+	CALL PRINT_IMAGE_ANIMATION("implant",0,7,3,1)
+	CALL PRINT_IMAGE_ANIMATION("implant",0,3,1,0)
+	CALL PRINT_IMAGE("implant2")
+ENDIF
 IF RAND:(LOCAL:5) < SQRT(LOCAL:2 * 100 + 300)
 	;誰の子供かを判定
 	LOCAL:3 = RAND:(LOCAL:2)
@@ -93,6 +97,11 @@ IF RAND:(LOCAL:5) < SQRT(LOCAL:2 * 100 + 300)
 			CALL RECORD_FATHER_FROM_CREAMPIE_HISTORY(ARG:0)
 			;妊娠発覚
 			CALL DETECT_PREGNANCY(ARG:0)
+			IF CONFIG:557
+				CALL PRINT_IMAGE_ANIMATION("implant",0,12,5,0)
+				CALL PRINT_IMAGE("implant11")
+			ENDIF
+
 			BREAK
 		ENDIF
 	NEXT
@@ -202,19 +211,26 @@ CALL CLEAR_CREAMPIE_HISTORY(ARG:0)
 
 IF IS_PREGNANT_MSG(ARG:0)
 	IF ARG:0 == MASTER
-		PRINTFORML %ANAME(ARG:0)%は体の変調を感じた…
+		PRINTFORML %ANAME(ARG:0)%感覚身体有些異常…
+		;TranslatedMark %ANAME(ARG:0)%は体の変調を感じた…
 	ELSE
-		PRINTFORML %ANAME(ARG:0)%の様子がおかしい…
+		PRINTFORML %ANAME(ARG:0)%的様子有些奇怪…
+		;TranslatedMark %ANAME(ARG:0)%の様子がおかしい…
 	ENDIF
-	PRINTFORM どうやら%ANAME(ARG:0)%は
+	PRINTFORM 好像%ANAME(ARG:0)%怀上了
+	;TranslatedMark どうやら%ANAME(ARG:0)%は
 	IF GET_SPERM_NAME(CFLAG:(ARG:0):子の父親) != "不明"
-		CALL COLOR_PRINT(GET_SPERM_NAME(CFLAG:(ARG:0):子の父親), カラー_注意, "の")
+		CALL COLOR_PRINT(GET_SPERM_NAME(CFLAG:(ARG:0):子の父親), カラー_注意, "的")
+		;TranslatedMark GET_SPERM_NAME(CFLAG:(ARG:0):子の父親), カラー_注意, "の"
 	ELSE
-		CALL COLOR_PRINT("名も知れぬ誰か", カラー_注意, "の")
+		CALL COLOR_PRINT("不知道名字的某人", カラー_注意, "的")
+		;TranslatedMark "名も知れぬ誰か", カラー_注意, "の"
 	ENDIF
-	PRINTFORML 子供を身篭った様だ
+	PRINTFORML 的孩子的樣子
+	;TranslatedMark 子供を身篭った様だ
 	SETCOLOR カラー_注意
-	PRINTFORMW %ANAME(ARG:0)%は[妊娠]しました
+	PRINTFORMW %ANAME(ARG:0)%[妊娠]了
+	;TranslatedMark %ANAME(ARG:0)%は[妊娠]しました
 	RESETCOLOR
 ENDIF
 
@@ -222,7 +238,8 @@ ENDIF
 IF !TALENT:(ARG:0):母乳体質
 	IF IS_PREGNANT_MSG(ARG:0)
 		SETCOLOR カラー_注意
-		PRINTFORMW %ANAME(ARG:0)%の胸から母乳が出るようになりました
+		PRINTFORMW %ANAME(ARG:0)%的胸部開始流出了母乳
+		;TranslatedMark %ANAME(ARG:0)%の胸から母乳が出るようになりました
 		RESETCOLOR
 	ENDIF
 	TALENT:(ARG:0):母乳体質 = 1
@@ -236,7 +253,8 @@ IF IS_FEMALE(ARG:0) && GET_BUSTSIZE(ARG:0) != 2 && CFLAG:(ARG:0):妊娠時バス
 	CFLAG:(ARG:0):妊娠時バストサイズ増加 = 1
 	IF IS_PREGNANT_MSG(ARG:0) && BUSTSIZE < 2
 		SETCOLOR カラー_注意
-		PRINTFORMW 妊娠により%ANAME(ARG:0)%の胸のサイズが一段階大きくなりました
+		PRINTFORMW 妊娠状態的%ANAME(ARG:0)%的胸部変大了一個尺寸
+		;TranslatedMark 妊娠により%ANAME(ARG:0)%の胸のサイズが一段階大きくなりました
 		RESETCOLOR
 	ENDIF
 	SIF BUSTSIZE != 2
@@ -274,7 +292,7 @@ ENDIF
 EXP:(ARG:0):妊娠経験 ++
 
 SIF ID_TO_CHARA(CFLAG:(ARG:0):子の父親) != -1
-	EXP:(ID_TO_CHARA(CFLAG:(ARG:0):子の父親) ):孕ませ経験 ++
+	EXP:(ID_TO_CHARA(CFLAG:(ARG:0):子の父親) ):授孕経験 ++
 
 SIF IS_PREGNANT_MSG(ARG:0)
 	CALL SINGLE_EMPTY_LINE()
@@ -317,10 +335,13 @@ ENDIF
 
 IF IS_CONFISCATE_CHILD(ARG:0)
 	SETCOLOR カラー_注意
-	PRINTFORMW そろそろ%ANAME(ARG:0)%の子供が産まれそうです
+	PRINTFORMW %ANAME(ARG:0)%的孩子快要出生了
+	;TranslatedMark そろそろ%ANAME(ARG:0)%の子供が産まれそうです
 	RESETCOLOR
-	PRINTFORMW %ANAME(ARG:0)%は無事に出産を終えました
-	PRINTFORMW 生まれた子供は没収されてしまったようだ……
+	PRINTFORMW %ANAME(ARG:0)%平安的結束了分娩
+	;TranslatedMark %ANAME(ARG:0)%は無事に出産を終えました
+	PRINTFORMW 剛生出来的孩子直接被沒收了……
+	;TranslatedMark 生まれた子供は没収されてしまったようだ……
 	仕官させないフラグ = 1
 ELSE
 	;普通の時の処理は長いから切りだし
@@ -368,7 +389,7 @@ ENDIF
 
 ;∨締まりがゆるくなる
 ;拡張経験付かないのかって？　ホルモンやら何やらの効果でおにくの柔軟性上がってただけだからノーカンノーカン
-LOCAL = MAX(TALENT:(ARG:0):Ｖ締まり / 5, 1)
+LOCAL = MAX(TALENT:(ARG:0):Ｖ緊緻度 / 5, 1)
 CALL TIGHTNESS_DECREASE_V(ARG:0, (RAND:LOCAL + RAND:LOCAL + RAND:LOCAL) / 3)
 
 EXP:(ARG:0):出産経験 += 1
@@ -382,9 +403,11 @@ SIF !仕官させないフラグ
 IF ABL:(ARG:0):性知識 == 0
 	ABL:(ARG:0):性知識 = 1
 	IF IS_PREGNANT_MSG(ARG:0)
-		PRINTFORML %ANAME(ARG:0)%は出産を通して最低限の性知識を身につけたようです
+		PRINTFORML %ANAME(ARG:0)%通過分娩獲得了最低限度的性知識
+		;TranslatedMark %ANAME(ARG:0)%は出産を通して最低限の性知識を身につけたようです
 		SETCOLOR カラー_オレンジ
-		PRINTFORML %ANAME(ARG:0)%の性知識が上昇しました(Lv{ABL:(ARG:0):性知識})
+		PRINTFORML %ANAME(ARG:0)%的性知識提高了(Lv{ABL:(ARG:0):性知識})
+		;TranslatedMark %ANAME(ARG:0)%の性知識が上昇しました(Lv{ABL:(ARG:0):性知識})
 		RESETCOLOR
 	ENDIF
 ENDIF
@@ -414,8 +437,10 @@ CALL CLEAR_CREAMPIE_HISTORY(ARG:0)
 IF IS_FOSTER_CHILD(MOTHER)
 	IF IS_PREGNANT_MSG(MOTHER)
 		SETCOLOR カラー_注意
-		PRINTFORMW %ANAME(MOTHER)%が産気づいたようです
-		PRINTFORMW 生まれた子供を、%ANAME(MOTHER)%は里子に出しました……
+		PRINTFORMW %ANAME(MOTHER)%就快要分娩了
+		;TranslatedMark %ANAME(MOTHER)%が産気づいたようです
+		PRINTFORMW 生下来的孩子、被%ANAME(MOTHER)%寄養在了外面……
+		;TranslatedMark 生まれた子供を、%ANAME(MOTHER)%は里子に出しました……
 		CALL SINGLE_EMPTY_LINE()
 		RESETCOLOR
 		RETURN -1
@@ -431,8 +456,10 @@ CHILD = RESULT
 IF RESULT == -1
 	IF IS_PREGNANT_MSG(MOTHER)
 		SETCOLOR カラー_注意
-		PRINTFORMW %ANAME(MOTHER)%が産気づいたようです
-		PRINTFORMW 生まれた子供を、%ANAME(MOTHER)%は里子に出しました……
+		PRINTFORMW %ANAME(MOTHER)%就快要分娩了
+		;TranslatedMark %ANAME(MOTHER)%が産気づいたようです
+		PRINTFORMW 生下来的孩子、被%ANAME(MOTHER)%寄養在了外面……
+		;TranslatedMark 生まれた子供を、%ANAME(MOTHER)%は里子に出しました……
 		RESETCOLOR
 		CALL SINGLE_EMPTY_LINE()
 		RETURN -1
@@ -456,18 +483,21 @@ IF IS_PREGNANT_MSG(MOTHER)
 
 	IF MOTHER == MASTER
 		SETCOLOR カラー_注意
-		PRINTFORMW そろそろ子供が産まれそうです
+		PRINTFORMW 孩子就快要出生了
+		;TranslatedMark そろそろ子供が産まれそうです
 		RESETCOLOR
 
 		;父親が同一勢力にいれば出産に立ち会う際の口上を表示
 		IF FATHER >= 0 && CFLAG:FATHER:捕虜先 == 0 && CFLAG:FATHER:所属 >= 1 && CFLAG:FATHER:特殊状態 == 0 && ((CFLAG:MASTER:捕虜先 == 0 && CFLAG:FATHER:所属 == CFLAG:MASTER:所属) || (CFLAG:MASTER:捕虜先 >= 1 && CFLAG:MASTER:捕虜先 == CFLAG:FATHER:所属))
 			CALL KOJO_EVENT(FATHER, 43)
 		ELSE
-			PRINTFORMW %ANAME(MOTHER)%は無事に出産を終えました
+			PRINTFORMW %ANAME(MOTHER)%平安的結束了分娩
+			;TranslatedMark %ANAME(MOTHER)%は無事に出産を終えました
 		ENDIF
 	ELSE
 		SETCOLOR カラー_注意
-		PRINTFORMW %ANAME(MOTHER)%が産気づいたようです
+		PRINTFORMW %ANAME(MOTHER)%就快要分娩了
+		;TranslatedMark %ANAME(MOTHER)%が産気づいたようです
 		RESETCOLOR
 
 		;口上の表示
@@ -477,9 +507,11 @@ IF IS_PREGNANT_MSG(MOTHER)
 	CALL VIRGIN_COMMON(MOTHER, "出産")
 
 	IF IS_MALE(CHILD)
-		PRINTFORMW 元気な男の子です
+		PRINTFORMW 是個健康的男孩子
+		;TranslatedMark 元気な男の子です
 	ELSE
-		PRINTFORMW 元気な女の子です
+		PRINTFORMW 是個健康的女孩子
+		;TranslatedMark 元気な女の子です
 	ENDIF
 	IF !FLAG:観戦モード && (CFLAG:MASTER:所属 == CFLAG:MOTHER:所属 || CFLAG:MASTER:所属 == CFLAG:MOTHER:捕虜先)
 		IF CONFIG:16 == 1
@@ -494,15 +526,22 @@ IF IS_PREGNANT_MSG(MOTHER)
 
 		;(従属国パッチ)捕虜が産んだ子供の処理
 		IF CFLAG:MASTER:所属 == CFLAG:MOTHER:捕虜先
-			PRINTFORML この子は捕虜が産んだ子供です
-			PRINTFORMW 親と同様に投獄しますか？
-			CALL ASK_YN("投獄する", "投獄しない")
+			PRINTFORML 这孩子是俘虏生的孩子
+			;TranslatedMark この子は捕虜が産んだ子供です
+			PRINTFORMW 和他的亲人一样投入狱中吗？
+			;TranslatedMark 親と同様に投獄しますか？
+			CALL ASK_YN("投狱", "不投狱")
+			;TranslatedMark "投獄する", "投獄しない"
 			IF RESULT == 0
-				CFLAG:CHILD:捕虜先 = CFLAG:MASTER:所属
+				; CFLAG:CHILD:捕虜先 = CFLAG:MASTER:所属
+				CALL CAPTURE(CHILD,CFLAG:MASTER:所属)
 				子供捕虜:CHILD:0 = 1
-				PRINTFORMW 投獄しました
-				PRINTFORML 自分で名前を付けますか？
-				CALL ASK_YN("手動で命名", "ランダムに命名")
+				PRINTFORMW 被关进了监狱
+				;TranslatedMark 投獄しました
+				PRINTFORML 要自己取名麼？
+				;TranslatedMark 自分で名前を付けますか？
+				CALL ASK_YN("手動命名", "隨機命名")
+				;TranslatedMark "手動で命名", "ランダムに命名"
 				IF RESULT == 0
 					;手動での命名処理
 					CALL INPUT_CHILD_NAME(CHILD)
@@ -511,7 +550,8 @@ IF IS_PREGNANT_MSG(MOTHER)
 				ELSE
 					;ランダムに命名
 					CALL RANDOM_CHILD_NAMING(CHILD)
-					PRINTFORMW この子の名は「%CSTR:(CHILD):1%」\@ CSTR:(CHILD):2 != "" ? 、字は「%CSTR:(CHILD):2%」 # \@に決まったようです
+					PRINTFORMW 這個孩子的姓名就決定是「%CSTR:(CHILD):1%」\@ CSTR:(CHILD):2 != "" ? 、字「%CSTR:(CHILD):2%」 # \@了
+					;TranslatedMark この子の名は「%CSTR:(CHILD):1%」\@ CSTR:(CHILD):2 != "" ? 、字は「%CSTR:(CHILD):2%」 # \@に決まったようです
 					CALL SINGLE_EMPTY_LINE()
 					CALL SET_BIRTH_CHILD_SCHOOL(CHILD)
 					RETURN CHILD
@@ -519,13 +559,16 @@ IF IS_PREGNANT_MSG(MOTHER)
 			ENDIF
 		ENDIF
 
-		PRINTFORMW この子を将来、自国の仕官となるように教育しますか？
-		CALL ASK_MULTI("する", "する（今後自動的に士官にする）", "しない", "しない（今後自動的に無視する）")
+		PRINTFORMW 這個孩子、要当做本国将来的士官而進行教育麼？
+		;TranslatedMark この子を将来、自国の仕官となるように教育しますか？
+		CALL ASK_MULTI("是", "是（今後自動当做士官）", "不要", "不要（今後自動無視）")
+		;TranslatedMark "する", "する（今後自動的に士官にする）", "しない", "しない（今後自動的に無視する）"
 		IF GROUPMATCH(RESULT, 2, 3)
 			SIF RESULT == 3
 				CONFIG:16 = 2
 			$AUTO_CANCEL
-			PRINTFORMW 教育するのはやめておきます
+			PRINTFORMW 不需要進行教育
+			;TranslatedMark 教育するのはやめておきます
 			CALL DELETE_CHARA(CHILD)
 			;仕官させないフラグ
 			RETURN -1
@@ -533,8 +576,10 @@ IF IS_PREGNANT_MSG(MOTHER)
 			SIF RESULT == 1
 				CONFIG:16 = 1
 			$AUTO_RECRUIT
-			PRINTFORML 自分で名前を付けますか？
-			CALL ASK_YN("手動で命名", "ランダムに命名")
+			PRINTFORML 要自己取名麼？
+			;TranslatedMark 自分で名前を付けますか？
+			CALL ASK_YN("手動命名", "隨機命名")
+			;TranslatedMark "手動で命名", "ランダムに命名"
 			IF RESULT == 0
 				;手動での命名処理
 				CALL INPUT_CHILD_NAME(CHILD)
@@ -545,7 +590,8 @@ IF IS_PREGNANT_MSG(MOTHER)
 	ENDIF
 	;ランダムに命名
 	CALL RANDOM_CHILD_NAMING(CHILD)
-	PRINTFORMW この子の名は「%CSTR:(CHILD):1%」\@ CSTR:(CHILD):2 != "" ? 、字は「%CSTR:(CHILD):2%」 # \@に決まったようです
+	PRINTFORMW 這個孩子的姓名就決定是「%CSTR:(CHILD):1%」\@ CSTR:(CHILD):2 != "" ? 、字「%CSTR:(CHILD):2%」 # \@了
+	;TranslatedMark この子の名は「%CSTR:(CHILD):1%」\@ CSTR:(CHILD):2 != "" ? 、字は「%CSTR:(CHILD):2%」 # \@に決まったようです
 	CALL SINGLE_EMPTY_LINE()
 	CALL SET_BIRTH_CHILD_SCHOOL(CHILD)
 ;メッセージ表示を行わない場合、ランダムに名前を設定
@@ -565,21 +611,21 @@ RETURN CHILD
 
 ;(従属国パッチ)「研究・教育機関」が利用可能であるとき教育方法を選べる
 IF IS_TREATY_UNI:(CFLAG:MASTER:所属) && CFLAG:(ARG:0):所属 == CFLAG:MASTER:所属
-	PRINTFORML 教育機関ではどのような教育を行いますか？
-	PRINTFORML (後から「外務省」で変更可能です)
-	PRINTBUTTON "[1] 学校で教育する", 1
+	PRINTFORML 教育機関将实行怎样的教育？
+	PRINTFORML (之后可以在「外交部」中进行变更)
+	PRINTBUTTON "[1] 在学校中教育", 1
 	PRINTL
 	IF ID_TO_CHARA(FLAG:触手部屋管理者) != -1
 		変更可能:2 = 1
-		PRINTBUTTON "[2] 触手に漬けて妖術を鍛える", 2
+		PRINTBUTTON "[2] 泡在触手群中锻炼妖术", 2
 	ENDIF
 	PRINTL
 	IF CFLAG:(ARG:0):捕虜先 > 0 || 奴隷士官フラグ:(ARG:0):0 == 1 || 子供捕虜:(ARG:0):0 == 1
 		変更可能:3 = 1
-		PRINTBUTTON "[3] 「教育」する(調教する)", 3
+		PRINTBUTTON "[3] 「教育」(調教)", 3
 		PRINTL
 		変更可能:4 = 1
-		PRINTBUTTON "[4] 洗脳する", 4
+		PRINTBUTTON "[4] 洗脑", 4
 	ENDIF
 	PRINTL
 
@@ -592,23 +638,23 @@ IF IS_TREATY_UNI:(CFLAG:MASTER:所属) && CFLAG:(ARG:0):所属 == CFLAG:MASTER:�
 	SELECTCASE RESULT
 		CASE 1
 			教育内容:(ARG:0):0 = RESULT
-			PRINTFORML [%ANAME(ARG:0)%]を学校で教育します
-			PRINTFORMW 戦略フェイズ終了時に各種経験値が入ります
+			PRINTFORML [%ANAME(ARG:0)%]在学校中进行教育
+			PRINTFORMW 战略回合结束时增加各种经验值
 			PRINTFORML
 		CASE 2
 			教育内容:(ARG:0):0 = RESULT
-			PRINTFORML [%ANAME(ARG:0)%]を触手に漬けて妖術を鍛えます
-			PRINTFORMW 戦略フェイズ終了時に妖術経験値が入ります
+			PRINTFORML [%ANAME(ARG:0)%]被泡在触手群中锻炼妖术
+			PRINTFORMW 战略回合结束时增加妖术经验值
 			PRINTFORML
 		CASE 3
 			教育内容:(ARG:0):0 = RESULT
-			PRINTFORML [%ANAME(ARG:0)%]を「教育」と称して調教します
-			PRINTFORMW 戦略フェイズ終了時に各種経験値が入ります
+			PRINTFORML [%ANAME(ARG:0)%]进行名为「教育」的调教
+			PRINTFORMW 战略回合结束时增加各种经验值
 			PRINTFORML
 		CASE 4
 			教育内容:(ARG:0):0 = RESULT
-			PRINTFORML [%ANAME(ARG:0)%]を洗脳します
-			PRINTFORMW 戦略フェイズ終了時に従属度・依存度が加算されます
+			PRINTFORML [%ANAME(ARG:0)%]接受洗脑
+			PRINTFORMW 战略回合结束时增从属度・依存度
 			PRINTFORML
 	ENDSELECT
 ENDIF
@@ -730,8 +776,10 @@ IF CFLAG:(ARG:0):行動不能状態 == 行動不能_子供 && CFLAG:(ARG:0):特�
 		;主人公勢力の士官ならメッセージを表示
 		IF CFLAG:(ARG:0):所属 == CFLAG:MASTER:所属
 			SETCOLOR カラー_注意
-			PRINTFORML まだ幼いながらも%ANAME(ARG:0)%は一人で行動できる程度にまで成長しました
-			PRINTFORMW %ANAME(ARG:0)%が我が国の士官(？)として加わりました
+			PRINTFORML 雖然還很幼小進過成長的%ANAME(ARG:0)%已経可以一個人行動了
+			;TranslatedMark まだ幼いながらも%ANAME(ARG:0)%は一人で行動できる程度にまで成長しました
+			PRINTFORMW %ANAME(ARG:0)%加入了我国的士官(？)之中
+			;TranslatedMark %ANAME(ARG:0)%が我が国の士官(？)として加わりました
 			CALL SINGLE_EMPTY_LINE
 			RESETCOLOR
 		ENDIF
@@ -747,15 +795,17 @@ IF CFLAG:(ARG:0):行動不能状態 == 行動不能_子供 && CFLAG:(ARG:0):特�
 ENDIF
 
 ;[幼児]があり成長度が15以上の子供を成長させる(従属国パッチ)死んでいたら判定しない
-IF TALENT:(ARG:0):幼児 && CFLAG:(ARG:0):子の成長度 >= 15 && IS_CHILD(ARG:0) && CFLAG:(ARG:0):特殊状態 != 特殊状態_死亡
+IF TALENT:(ARG:0):幼兒 && CFLAG:(ARG:0):子の成長度 >= 15 && IS_CHILD(ARG:0)&& CFLAG:(ARG:0):特殊状態 != 特殊状態_死亡
 	IF IS_PREGNANT_MSG(ARG:0)
 		SETCOLOR カラー_注意
-		PRINTFORML 幼かった%ANAME(ARG:0)%は今や立派に成長しました
-		PRINTFORMW %ANAME(ARG:0)%は[幼児]を失い、一部の素質が変化しました
+		PRINTFORML 年幼的%ANAME(ARG:0)%出色的成長了
+		;TranslatedMark 幼かった%ANAME(ARG:0)%は今や立派に成長しました
+		PRINTFORMW %ANAME(ARG:0)%失去了[幼兒]、一部分素質発生了変化
+		;TranslatedMark %ANAME(ARG:0)%は[幼児]を失い、一部の素質が変化しました
 		CALL SINGLE_EMPTY_LINE
 		RESETCOLOR
 	ENDIF
-	CALL SET_BUSTSIZE(ARG:0, TALENT:(ARG:0):成長後バスト)
+	CALL SET_BUSTSIZE(ARG:0, TALENT:(ARG:0):成長後胸部)
 	CALL SET_HIPSIZE(ARG:0, TALENT:(ARG:0):成長後ヒップ)
 
 	IF LINEAGE_TO_FIXED(ARG:0) < 0 && ID_TO_CHARA(CFLAG:(ARG:0):父親) < 0 && ID_TO_CHARA(CFLAG:(ARG:0):母親) < 0
@@ -801,7 +851,7 @@ IF TALENT:(ARG:0):幼児 && CFLAG:(ARG:0):子の成長度 >= 15 && IS_CHILD(ARG:
 	子供捕虜:(ARG:0):0 = 0
 
 	TALENT:(ARG:0):幼稚 = TALENT:(ARG:0):成長後幼稚
-	TALENT:(ARG:0):幼児 = 0
+	TALENT:(ARG:0):幼兒 = 0
 	CALL SET_BODYSIZE(ARG:0)
 	;ランダムキャラの設定を流用して陰毛を設定
 	;あくまで暫定的な措置・完全ランダムで遺伝はしない
@@ -892,9 +942,11 @@ CALL TURNEND_PREGNANT_CHECK_SYOKUSYU
 FOR LOCAL:0, 0, CHARANUM
 	IF CFLAG:(LOCAL:0):触手産卵実行者 || CFLAG:(LOCAL:0):触手Ａ産卵実行者 || CFLAG:(LOCAL:0):触手Ｕ産卵実行者
 		SETCOLOR カラー_注意
-		PRINTFORMW %ANAME(LOCAL:0)%に産み付けられた触手の子供は、瞬く間に大きく育ち%ANAME(LOCAL:0)%のお腹から這い出そうとしています
+		PRINTFORMW %ANAME(LOCAL:0)%分娩出的触手的孩子、瞬間就長大了然後從%ANAME(LOCAL:0)%的腹中爬了出来
+		;TranslatedMark %ANAME(LOCAL:0)%に産み付けられた触手の子供は、瞬く間に大きく育ち%ANAME(LOCAL:0)%のお腹から這い出そうとしています
 		SIF GETBIT(TALENT:(LOCAL:0):淫乱系, 素質_淫乱_苗床)
-			PRINTFORMW 苗床と化した%ANAME(LOCAL:0)%は、触手の子を産み出せることにこの上ない悦びを覚えているようだ……
+			PRINTFORMW 苗床化的%ANAME(LOCAL:0)%、因為生下触手的孩子感到了無上的喜悦……
+			;TranslatedMark 苗床と化した%ANAME(LOCAL:0)%は、触手の子を産み出せることにこの上ない悦びを覚えているようだ……
 		RESETCOLOR
 		PRINTL
 
@@ -965,7 +1017,8 @@ FOR LOCAL:0, 0, CHARANUM
 
 		IF TALENT:(LOCAL:0):妊娠 && CFLAG:(LOCAL:0):触手産卵実行者
 			SETCOLOR カラー_注意
-			PRINTFORMW 触手は%ANAME(LOCAL:0)%の胎内に宿っていた子供と同化し、より強靭に育ちました(妖術ボーナス+{CFLAG:(LOCAL:0):妊娠期間 * 2})
+			PRINTFORMW 触手同化了%ANAME(LOCAL:0)%的子宮内懷着的孩子、更加堅韌的成長了(妖術ボーナス+{CFLAG:(LOCAL:0):妊娠期間 * 2})
+			;TranslatedMark 触手は%ANAME(LOCAL:0)%の胎内に宿っていた子供と同化し、より強靭に育ちました(妖術ボーナス+{CFLAG:(LOCAL:0):妊娠期間 * 2})
 			PRINTL
 			RESETCOLOR
 
@@ -979,7 +1032,8 @@ FOR LOCAL:0, 0, CHARANUM
 			;中出し履歴をクリア
 			CALL CLEAR_CREAMPIE_HISTORY(LOCAL:0)
 			IF CFLAG:(LOCAL:0):育児期間 == 0
-				PRINTFORMW 触手による堕胎のショックで体の反応が収まっていく
+				PRINTFORMW 被触手堕胎的衝撃讓身体的妊娠反応平息了
+				;TranslatedMark 触手による堕胎のショックで体の反応が収まっていく
 				CALL MOTHER_SHRINK_BUSTSIZE(LOCAL:0)
 				CALL MOTHER_STOP_MILKING(LOCAL:0)
 			ENDIF
@@ -1052,13 +1106,15 @@ IF LOCAL:5 >= 0
 		;例外状況として、子育て中に臨月になる場合がある　それ用の分岐
 		IF ARG:1 && IS_PREGNANT_MSG(ARG:0)
 			SETCOLOR カラー_注意
-			PRINTFORMW %ANAME(ARG:0)%は膨らんだ腹を抱えながら前の子供の育児を終えました
+			PRINTFORMW %ANAME(ARG:0)%抱着膨脹的腹部結束了対之前的孩子的育兒
+			;TranslatedMark %ANAME(ARG:0)%は膨らんだ腹を抱えながら前の子供の育児を終えました
 			RESETCOLOR
 		ENDIF
 	ELSE
 		IF ARG:1 && IS_PREGNANT_MSG(ARG:0)
 			SETCOLOR カラー_注意
-			PRINTFORMW %ANAME(ARG:0)%は育児を終えて復帰しました
+			PRINTFORMW %ANAME(ARG:0)%結束了育兒復帰了隊伍
+			;TranslatedMark %ANAME(ARG:0)%は育児を終えて復帰しました
 			RESETCOLOR
 		ENDIF
 		;育児状態を解除
@@ -1066,11 +1122,12 @@ IF LOCAL:5 >= 0
 	ENDIF
 	CFLAG:(ARG:0):育児対象 = 0
 	;子育てが終わると【子供人質】が解除
-	IF TALENT:(ARG:0):子供人質 > 0
+	IF TALENT:(ARG:0):小孩人質 > 0
 		SETCOLOR カラー_注意
-		PRINTFORMW %ANAME(ARG:0)%は人質であった我が子の逞しく成長した姿に安堵し、%ANAME(MASTER)%に対する恐怖心を克服しました。
+		PRINTFORMW 被当做人質的自己的孩子那健康成長的姿態讓%ANAME(ARG:0)%放下心来、克服了対%ANAME(MASTER)%的恐懼心
+		;TranslatedMark %ANAME(ARG:0)%は人質であった我が子の逞しく成長した姿に安堵し、%ANAME(MASTER)%に対する恐怖心を克服しました。
 		RESETCOLOR
-		TALENT:(ARG:0):子供人質 = 0
+		TALENT:(ARG:0):小孩人質 = 0
 	ENDIF
 	;育児期間のリセット
 	CFLAG:(ARG:0):育児期間 = 0
@@ -1087,7 +1144,8 @@ LOCAL:5 = ID_TO_CHARA(CFLAG:(ARG:0):育児対象)
 IF !TALENT:(ARG:0):妊娠 && LOCAL:5 < 0 && CFLAG:(ARG:0):妊娠時バストサイズ増加
 	IF ARG:1 && IS_PREGNANT_MSG(ARG:0)
 		SETCOLOR カラー_注意
-		PRINTFORMW 出産により大きくなっていた%ANAME(ARG:0)%の胸は元に戻りました
+		PRINTFORMW %ANAME(ARG:0)%由於生産而変大的胸部恢復了原状
+		;TranslatedMark 出産により大きくなっていた%ANAME(ARG:0)%の胸は元に戻りました
 		RESETCOLOR
 	ENDIF
 	SIF INRANGE(GET_BUSTSIZE(ARG:0), -1, 2)
@@ -1108,14 +1166,16 @@ IF CFLAG:(ARG:0):一時的母乳体質 && !TALENT:(ARG:0):妊娠 && LOCAL:5 < 0
 	IF ( GET_BUSTSIZE(ARG:0) < 0 && ABL:(ARG:0):噴乳 >= ランク閾値:ランク_その他:ランク_A ) || ( GET_BUSTSIZE(ARG:0) == 0 && ABL:(ARG:0):噴乳 >= ランク閾値:ランク_その他:ランク_B ) || ( GET_BUSTSIZE(ARG:0) > 0 && ABL:(ARG:0):噴乳 >= ランク閾値:ランク_その他:ランク_C )
 		IF ARG:1 && IS_PREGNANT_MSG(ARG:0)
 			SETCOLOR カラー_注意
-			PRINTFORMW %ANAME(ARG:0)%は度重なる噴乳により、子育てが終わったにも係わらず母乳が止まらなくなりました
+			PRINTFORMW %ANAME(ARG:0)%反復的噴乳行為、導致結束育兒之後母乳也無法停止分泌
+			;TranslatedMark %ANAME(ARG:0)%は度重なる噴乳により、子育てが終わったにも係わらず母乳が止まらなくなりました
 			RESETCOLOR
 			CALL KOJO_EVENT(ARG:0, 99)
 		ENDIF
 	ELSE
 		IF ARG:1 && IS_PREGNANT_MSG(ARG:0)
 			SETCOLOR カラー_注意
-			PRINTFORMW %ANAME(ARG:0)%の母乳は止まりました
+			PRINTFORMW %ANAME(ARG:0)%的母乳停止分泌了
+			;TranslatedMark %ANAME(ARG:0)%の母乳は止まりました
 			RESETCOLOR
 		ENDIF
 		TALENT:(ARG:0):母乳体質 = 0
@@ -1151,7 +1211,8 @@ FIRST_LINE = LINECOUNT
 $SHOW_LOOP
 
 CALL SINGLE_DRAWLINE
-PRINTFORML ★★★この子にどんな名前を付けますか？★★★
+PRINTFORML ★★★打算給這個孩子取什麼名字呢？★★★
+;TranslatedMark ★★★この子にどんな名前を付けますか？★★★
 CALL SINGLE_DRAWLINE
 
 ;命名
@@ -1175,29 +1236,37 @@ IF CSTR:(ARG:0):0 != ""
 ENDIF
 PRINTL
 PRINTFORM   名:%CSTR:(ARG:0):1, 10, LEFT%%CSTR:(ARG:0):6, 10, LEFT%
-PRINTBUTTON "[入力]", 120
-PRINTBUTTON "[ランダム(漢字)]", 121
-PRINTBUTTON "[ランダム(カナ)]", 123
-PRINTBUTTON "[ランダム(日本名)]", 124
+PRINTBUTTON "[輸入]", 120
+;TranslatedMark "[入力]", 120
+PRINTBUTTON "[隨機(漢字)]", 121
+;TranslatedMark "[ランダム(漢字)]", 121
+PRINTBUTTON "[隨機(片假名)]", 123
+;TranslatedMark "[ランダム(カナ)]", 123
+PRINTBUTTON "[隨機(日本名)]", 124
+;TranslatedMark "[ランダム(日本名)]", 124
 IF CSTR:(ARG:0):1 != ""
 	PRINTBUTTON "[消去]", 122
 ENDIF
 PRINTL
 PRINTFORM   字:%CSTR:(ARG:0):2, 10, LEFT%%CSTR:(ARG:0):7, 10, LEFT%
-PRINTBUTTON "[入力]", 130
-PRINTBUTTON "[ランダム]", 131
+PRINTBUTTON "[輸入]", 130
+;TranslatedMark "[入力]", 130
+PRINTBUTTON "[隨機]", 131
+;TranslatedMark "[ランダム]", 131
 IF CSTR:(ARG:0):2 != ""
 	PRINTBUTTON "[消去]", 132
 ENDIF
 PRINTL
 PRINTFORM 愛称:%CSTR:(ARG:0):98, 10, LEFT%
-PRINTBUTTON "[入力]", 140
+PRINTBUTTON "[輸入]", 140
+;TranslatedMark "[入力]", 140
 IF CSTR:(ARG:0):98 != ""
 	PRINTBUTTON "[消去]", 141
 ENDIF
 PRINTL
 PRINTL
-PRINTL ※名は必須です
+PRINTL ※必須要取名
+;TranslatedMark ※名は必須です
 IF CSTR:(ARG:0):1 == ""
 	SETCOLOR カラー_選択不可
 	PRINTPLAIN [決定]
@@ -1216,7 +1285,8 @@ FOR LOCAL:0, 0, CHARANUM
 NEXT
 IF LOCAL:1
 	SETCOLOR 0xc41818
-	PRINT   ◆同姓同名のキャラが存在します◆
+	PRINT   ◆存在同姓同名的角色◆
+	;TranslatedMark ◆同姓同名のキャラが存在します◆
 	RESETCOLOR
 ENDIF
 PRINTL
@@ -1252,7 +1322,8 @@ ELSEIF RESULT == 112
 	GOTO SHOW_LOOP
 
 ELSEIF RESULT == 120
-	PRINTL 設定する名を入力して下さい
+	PRINTL 請輸入設定的名
+	;TranslatedMark 設定する名を入力して下さい
 	$INPUTS_LOOP3
 	INPUTS
 	IF RESULTS == ""
@@ -1260,7 +1331,8 @@ ELSEIF RESULT == 120
 		CSTR:(ARG:0):6 =
 	ELSE
 		CSTR:(ARG:0):1 = %RESULTS%
-		PRINTL (必要な場合は)読みをカタカナで入力して下さい
+		PRINTL (可选)请用片假名输入读音
+		;TranslatedMark (必要な場合は)読みをカタカナで入力して下さい
 		$INPUTS_LOOP3_1
 		INPUTS
 		IF CSTR:(ARG:0):1 == RESULTS
@@ -1310,7 +1382,8 @@ ELSEIF RESULT == 124
 	GOTO SHOW_LOOP
 
 ELSEIF RESULT == 130
-	PRINTL 設定する字を入力して下さい
+	PRINTL 請輸入設定的字
+	;TranslatedMark 設定する字を入力して下さい
 	$INPUTS_LOOP4
 	INPUTS
 	IF RESULTS == ""
@@ -1318,7 +1391,8 @@ ELSEIF RESULT == 130
 		CSTR:(ARG:0):7 =
 	ELSE
 		CSTR:(ARG:0):2 = %RESULTS%
-		PRINTL (必要な場合は)読みをカタカナで入力して下さい
+		PRINTL (可选)请用片假名输入读音
+		;TranslatedMark (必要な場合は)読みをカタカナで入力して下さい
 		$INPUTS_LOOP4_1
 		INPUTS
 		IF CSTR:(ARG:0):2 == RESULTS
@@ -1343,7 +1417,8 @@ ELSEIF RESULT == 132
 	CLEARLINE LINECOUNT - FIRST_LINE
 	GOTO SHOW_LOOP
 ELSEIF RESULT == 140
-	PRINTL 設定する愛称を入力して下さい
+	PRINTL 請輸入設定的愛称
+	;TranslatedMark 設定する愛称を入力して下さい
 	INPUTS
 	CSTR:(ARG:0):98 = %RESULTS%
 	GOTO SHOW_LOOP
@@ -1357,16 +1432,21 @@ ENDIF
 
 REDRAW 1
 
-PRINTL 名前はどういう形式にしますか？
-PRINTL [0] 名のみ（和名風・洋風）
-PRINTL [1] 姓名合わせて（中華風）
+PRINTL 名字是什麼形式的？
+;TranslatedMark 名前はどういう形式にしますか？
+PRINTL [0] 只有名（和名風・洋風）
+;TranslatedMark [0] 名のみ（和名風・洋風）
+PRINTL [1] 姓名結合（中華風）
+;TranslatedMark [1] 姓名合わせて（中華風）
 $INPUT_LOOP2
 INPUT
 IF RESULT == 0
-	PRINTFORMW 名のみで設定しました
+	PRINTFORMW 設定為了只有名
+	;TranslatedMark 名のみで設定しました
 	NAME:(ARG:0) = %CSTR:(ARG:0):1%
 ELSEIF RESULT == 1
-	PRINTFORMW 姓名合わせてで設定しました
+	PRINTFORMW 設定為了姓名結合
+	;TranslatedMark 姓名合わせてで設定しました
 	;姓名を合わせて名前を設定
 	NAME:(ARG:0) = %CSTR:(ARG:0):0%%CSTR:(ARG:0):1%
 ELSE
@@ -1402,8 +1482,8 @@ ELSEIF LOCAL:6 >= 0 && CSTR:(LOCAL:6):0 != ""
 ENDIF
 
 ;姓がなく親が動物キャラならカタカナ名
-LOCAL:10 = (LOCAL:5 >= 0 && (TALENT:(LOCAL:5):動物耳 || TALENT:(LOCAL:5):しっぽ))
-LOCAL:11 = (LOCAL:6 >= 0 && (TALENT:(LOCAL:6):動物耳 || TALENT:(LOCAL:6):しっぽ))
+LOCAL:10 = (LOCAL:5 >= 0 && (TALENT:(LOCAL:5):動物耳 || TALENT:(LOCAL:5):尾巴))
+LOCAL:11 = (LOCAL:6 >= 0 && (TALENT:(LOCAL:6):動物耳 || TALENT:(LOCAL:6):尾巴))
 IF (LOCAL:10 || LOCAL:11) && CSTR:0 == ""
 	;↓これだとFAMILYNAMEまで設定されるっぽいか
 	;カナ名の決定
@@ -1473,7 +1553,8 @@ MPLY:0 = ARG:0
 MTAR:0 = ARG:1
 
 SIF IS_COUNTRY(CFLAG:(ARG:0):所属) && CFLAG:(ARG:0):所属 == CFLAG:MASTER:所属
-	PRINTFORML %ANAME(ARG:0)%は%ANAME(ARG:1)%を教育している……
+	PRINTFORML %ANAME(ARG:0)%正在教育%ANAME(ARG:1)%……
+	;TranslatedMark %ANAME(ARG:0)%は%ANAME(ARG:1)%を教育している……
 
 FOR LOCAL, 0, 5
 	SELECTCASE RAND:6

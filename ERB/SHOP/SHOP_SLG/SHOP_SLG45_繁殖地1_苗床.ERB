@@ -1,0 +1,141 @@
+﻿;-------------------------------------------------
+;ターン終了時の苗床処理
+;-------------------------------------------------
+@Breeding_AREA_TENTACLE_01_TURNEND
+#DIM 苗床
+#DIMS 名前
+#DIM 士官フラグ
+
+CALL SINGLE_DRAWLINE("-", カラー_選択不可)
+RESETCOLOR
+PRINTFORMW 触手们正在使用苗床
+PRINTFORML
+
+
+FOR 苗床, 0, CHARANUM
+	CALL CHANGE_TENTACLE_subject(苗床)
+	SIF !触手勢力に監禁:苗床:0
+		CONTINUE
+	IF GETBIT(TALENT:苗床:特殊勢力陥落系, 特殊勢力_触手) || SP_TRAIN_COUNT:苗床:特殊勢力_触手 >= (TRAIN_FALLEN_TERM:2 - (CFLAG:苗床:所属 == CFLAG:MASTER:所属))
+		士官フラグ = 1
+	ELSE
+		士官フラグ = 0
+	ENDIF
+
+	IF 触手勢力に監禁:苗床:0 == 1
+		PRINTFORML %ANAME(苗床)%通过修养，恢复了精神
+		SP_TRAIN_COUNT:苗床:特殊勢力_触手 = MAX(0, SP_TRAIN_COUNT:苗床:特殊勢力_触手 - 1)
+		COOLTIME:苗床:0 = MAX(COOLTIME:苗床:0 - 1 , 0)
+	ELSEIF 触手勢力に監禁:苗床:0 == 2
+		CALL TENTACLE_TRAIN_MSG(苗床, 士官フラグ)
+		SP_TRAIN_COUNT:苗床:特殊勢力_触手 ++
+		COOLTIME:苗床:0 = MAX(COOLTIME:苗床:0 - 1 , 0)
+		CALL Breeding_AREA_TENTACLE_01_TURNEND_PREGNANT(苗床, CFLAG:MASTER:所属)
+		TENTACLE_MENACE_POINT ++
+		SIF TENTACLE_MENACE_LV >= 2
+			TENTACLE_MENACE_POINT ++
+		WAIT
+	ENDIF
+
+	;ミッション達成
+	IF ACHIEVEMENT_MISSION:57 == 1
+		ACHIEVEMENT_MISSION:57 = 2
+		SETCOLOR カラー_注意
+		PRINTL 任务完成!
+		RESETCOLOR
+		WAIT
+	ENDIF
+
+	IF IS_BETRAY_TO_SP_COUNTRY(苗床, CFLAG:MASTER:所属)
+		PRINTFORML
+		SETCOLOR カラー_警告
+		CALL TENTACLE_FALLEN_MSG(苗床)
+		RESETCOLOR
+		SETBIT TALENT:苗床:特殊勢力陥落系, 特殊勢力_触手
+		SIF SP_TRAIN_IS_DECREASE_CFLAG(苗床, CFLAG:MASTER:所属)
+			CALL LOSE_RELATION_TALENT(苗床)
+		CALL TENTACLE_FALLEN_LEAVE_MARK(苗床)
+		CALL CLOTH_RESET(苗床)
+		CALL SET_CLOTH_BY_NAME(苗床, 衣装部位_首, "奴隷項圈")
+		PRINTFORML 要将%ANAME(苗床)%从监狱中放出来作为士官吗？
+
+		;はい／いいえ入力処理
+		CALL ASK_YN()
+		IF RESULT == 0
+			CALL CHANGE_COUNTRY(苗床, CFLAG:MASTER:所属, 1)
+		ELSE
+			CALL CHANGE_COUNTRY(苗床, CFLAG:MASTER:所属)
+		ENDIF
+
+		IF 苗床 != MASTER && CFLAG:苗床:所属 == CFLAG:MASTER:所属
+			CFLAG:苗床:好感度 = MAX(CFLAG:苗床:好感度, 500)
+			CFLAG:苗床:従属度 = MAX(CFLAG:苗床:従属度, 1000)
+			CFLAG:苗床:依存度 = MAX(CFLAG:苗床:依存度, 500)
+			CFLAG:苗床:支配度 = MAX(CFLAG:苗床:支配度, 0)
+			TALENT:苗床:合意 = 1
+		ENDIF
+		TENTACLE_MENACE_POINT += 5
+	ENDIF
+	PRINTL
+NEXT
+
+;-------------------------------------------------
+;戦略フェイズ終了時の「苗床」兵数増加処理
+;-------------------------------------------------
+@Breeding_AREA_TENTACLE_01_TURNEND_PREGNANT(ARG:0, 設置勢力)
+#DIM 設置勢力
+#DIM 出産能力
+#DIM 増加量
+#DIM 出産数
+
+出産能力 = Abl:(ARG:0):出産
+増加量 = 1 + 出産能力
+増加量 = SQRT(増加量) * 10
+増加量 = (増加量 * (10 + CHECK_BUILDING_FUNCTION_SELECT(-1,設置勢力,建造物_培養槽))) / 10
+
+SIF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_良質母胎)
+	増加量 = 増加量 * 2
+
+SIF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_苗床)
+	TIMES 増加量, 1.5
+
+SIF TENTACLE_MENACE_LV >= 2
+	TIMES 増加量, 1.2
+
+出産数 = 増加量
+
+COUNTRY_SOLDIER:(設置勢力) += 増加量
+EXP:(ARG:0):妊娠経験 += 増加量
+EXP:(ARG:0):出産経験値 += SQRT(増加量)
+EXP:(ARG:0):出産経験 += 増加量
+CALL TIGHTNESS_DECREASE_V((ARG:0), 増加量)
+EXP:(ARG:0):Ｖ拡張経験 += 増加量
+
+増加量 = RAND(増加量, 増加量 * 6)
+
+EXP:(ARG:0):Ｖ感経験値 += ABL:(ARG:0):Ｖ感 * 5 * 増加量 + RAND:2 * 増加量
+EXP:(ARG:0):性交経験値 += ABL:(ARG:0):性交 * 2 * 増加量
+EXP:(ARG:0):精愛経験値 += ABL:(ARG:0):精愛 * 5 * 増加量
+EXP:(ARG:0):触手経験値 += ABL:(ARG:0):触手 * 3 * 増加量
+EXP:(ARG:0):輪姦経験 += 増加量
+EXP:(ARG:0):Ｖ性交経験 += 増加量
+SEXUAL_PREFERENCE_EXP:(ARG:0):性的嗜好_性交されたい += 増加量
+SEXUAL_PREFERENCE_EXP:(ARG:0):性的嗜好_触手で犯されたい += 増加量
+EXP:(ARG:0):絶頂経験 += ABL:(ARG:0):Ｖ感 * 増加量 * (60 + RAND:81) / 100
+CALL VIRGIN_COMMON(ARG:0, "触手", "輪姦")
+EXP:(ARG:0):膣内射精経験 += 増加量
+
+FOR LOCAL:1, 0, MIN(増加量, 100)
+	CALL RECORD_CREAMPIE(ARG:0, GET_SPERM_ID("触手"), CUM_AMOUNT_CORRECTION(GET_SPERM_ID("触手"), ARG:0, 射精部位_膣内, 3), 射精部位_膣内)
+NEXT
+
+CALL TRAIN_AUTO_ABLUP(ARG:0, 0)
+CALL CHECK_SEXUAL_PREFERENCE(ARG:0)
+CALL TALENT_CHECK(ARG:0)
+
+SETCOLOR カラー_注意
+PRINTFORML %ANAME(ARG:0)%生产了触手兵[{出産数}人]
+RESETCOLOR
+
+
+

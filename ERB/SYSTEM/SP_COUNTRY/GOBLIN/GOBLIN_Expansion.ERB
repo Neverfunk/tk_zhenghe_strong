@@ -1,24 +1,24 @@
 ﻿;-------------------------------------------------
-;渡されたキャラが性奴隷にされているCFLAG:1710を1にする
-;渡されたキャラが性奴隷にされていないときCFLAG:1710を0にする
-;-------------------------------------------------	
+;渡されたキャラが性奴隷にされている「ホフゴブリンに監禁」を1にする
+;渡されたキャラが性奴隷にされていないとき「ホフゴブリンに監禁」を0にする
+;-------------------------------------------------
 @CHANGE_GOBLIN_subject(性奴隷)
 #DIM 性奴隷
 #DIM ホフゴブリン
 
 ホフゴブリン = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン)
 
-;ホフゴブリンに調教されうる状態、又は、ホフゴブリン勢力が特殊勢力をやめたとき、CFLAG:1710を1にする。そうでないときCFLAG:1710を0にする
+;ホフゴブリンに調教されうる状態、又は、ホフゴブリン勢力が特殊勢力をやめたとき、「ホフゴブリンに監禁」を1にする。そうでないとき「ホフゴブリンに監禁」を0にする
 IF IS_TRAIN_BY_SP_COUNTRY(性奴隷, ホフゴブリン) == 1 || (CHANGE_Government_GOBLIN:1 == 2 && CHANGE_Government_GOBLIN:0 > 0 && CFLAG:性奴隷:捕虜先 == CHANGE_Government_GOBLIN:0 && !CFLAG:性奴隷:軟禁中 && CFLAG:性奴隷:行動不能状態 != 行動不能_子供)
-	SIF CFLAG:性奴隷:1710 == 0
-		CFLAG:性奴隷:1710 = 1
+	SIF ホフゴブリンに監禁:性奴隷:0 == 0
+		ホフゴブリンに監禁:性奴隷:0 = 1
 ELSE
-	CFLAG:性奴隷:1710 = 0
+	ホフゴブリンに監禁:性奴隷:0 = 0
 ENDIF
 
 ;-------------------------------------------------
 ;支持率を設定する
-;-------------------------------------------------	
+;-------------------------------------------------
 @SET_GOBLIN_Approval_rate
 #DIM ホフゴブリン
 #DIM 美鈴
@@ -42,24 +42,24 @@ IF !CHANGE_Government_GOBLIN:0
 ENDIF
 
 FOR LOCAL, 0, CHARANUM
-	IF CFLAG:LOCAL:1709 <= 0 && CFLAG:LOCAL:所属 == CHANGE_Government_GOBLIN:0
+	IF ゴブリン支持率:LOCAL:0 <= 0 && CFLAG:LOCAL:所属 == CHANGE_Government_GOBLIN:0
 		IF GET_COUNTRY_BOSS(CHANGE_Government_GOBLIN:0) == LOCAL
-			CFLAG:LOCAL:1709 = 70
+			ゴブリン支持率:LOCAL:0 = 70
 		ELSEIF IS_SP_CHARA(LOCAL)
-			CFLAG:LOCAL:1709 = 50
+			ゴブリン支持率:LOCAL:0 = 50
 		ELSEIF !IS_TOHO_CHARA(LOCAL)
-			CFLAG:LOCAL:1709 = 30
+			ゴブリン支持率:LOCAL:0 = 30
 		ELSEIF LOCAL == レミリア
-			CFLAG:LOCAL:1709 = 60
+			ゴブリン支持率:LOCAL:0 = 60
 		ELSEIF LOCAL == 咲夜
-			CFLAG:LOCAL:1709 = 50
+			ゴブリン支持率:LOCAL:0 = 50
 		ELSEIF LOCAL == 美鈴 &&  LOCAL == 小悪魔 &&  LOCAL == パチュリー &&  LOCAL == フランドール
-			CFLAG:LOCAL:1709 = 40
+			ゴブリン支持率:LOCAL:0 = 40
 		ELSE
-			CFLAG:LOCAL:1709 = 1
+			ゴブリン支持率:LOCAL:0 = 1
 		ENDIF
-	ELSEIF CFLAG:LOCAL:1709 <= 0
-		CFLAG:LOCAL:1709 = 0
+	ELSEIF ゴブリン支持率:LOCAL:0 <= 0
+		ゴブリン支持率:LOCAL:0 = 0
 	ENDIF
 NEXT
 

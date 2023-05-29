@@ -1,0 +1,75 @@
+@KOJO_35_IMAGE
+	SIF !GET_K36_IMAGE_STATUS()
+		RETURN 0
+	IF 小町_face_change_flag || 四季_face_show_flag
+		CBGCLEAR
+		;CLIENTWIDTH()-SPRITEWIDTH(LOCALS)
+		LOCALS = %GetImage_k35_face(小町_衣服_id,小町_感情_id)%
+		CBGSETSPRITE LOCALS,0,0,-1
+
+		LOCALS = %GetImage_k35_blush(GETBIT(小町_SP_bit,1))%
+		CBGSETSPRITE LOCALS,0,0,-2
+
+		LOCALS = %GetImage_k35_puff(GETBIT(小町_SP_bit,2))%
+		CBGSETSPRITE LOCALS,0,0,-3
+		小町_face_show_flag = 1
+		四季_face_show_flag = 0
+	ENDIF
+	小町_face_change_flag = 0
+	RETURN 1
+
+
+@GetImage_k35_face(cloth_id,mood_id)
+	#FUNCTIONS
+	#DIM cloth_id
+	#DIM mood_id
+	#DIMS IMAGE_NAME
+	IMAGE_NAME '= "onozuka_"
+	SELECTCASE cloth_id
+		CASE 小町_衣服_普通
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"normal_"
+		CASE 小町_衣服_裸
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"nude_"
+		CASEELSE
+			THROW 小町口上报错：图象衣服参数{cloth_id}错误！
+	ENDSELECT
+
+	SELECTCASE mood_id
+		CASE 小町_感情_普通
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"none"
+		CASE 小町_感情_开心
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"happy"
+		CASE 小町_感情_生气
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"angry"
+		CASE 小町_感情_睡着
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"sleep"
+		CASE 小町_感情_欲求
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"lust"
+		CASEELSE
+			THROW 小町口上报错：图象感情参数{mood_id}错误！
+	ENDSELECT
+	IF SPRITECREATED(IMAGE_NAME)
+		RETURNF IMAGE_NAME
+	ENDIF
+
+@GetImage_k35_blush(blush_flag)
+	#FUNCTIONS
+	#DIM blush_flag
+	#DIMS IMAGE_NAME
+	IF blush_flag
+		IMAGE_NAME = onozuka_blush
+	ELSE
+		IMAGE_NAME = ダミー
+	ENDIF
+	RETURNF IMAGE_NAME
+
+@GetImage_k35_puff(puff_flag)
+	#FUNCTIONS
+	#DIM puff_flag
+	#DIMS IMAGE_NAME
+	IF puff_flag
+		IMAGE_NAME = onozuka_puff
+	ELSE
+		IMAGE_NAME = ダミー
+	ENDIF
+	RETURNF IMAGE_NAME

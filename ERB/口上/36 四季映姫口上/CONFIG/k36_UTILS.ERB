@@ -1,0 +1,429 @@
+@K36_一段时间后_IMAGE
+    CALL K36_NORMAL_SENTENCE_IMAGE("……")
+    CALL K36_NORMAL_SENTENCE_IMAGE("……")
+    CALL K36_NORMAL_SENTENCE_IMAGE("……",1)
+
+@EMPTYLINES_FOR_FACE
+    SIF !GET_K36_IMAGE_STATUS()
+		RETURN
+
+    REPEAT 10
+        PRINTL
+    REND
+
+@K36_SHIKIEIKI_SAY(SENTENCE,WAIT_FLAG = 0)
+    #DIMS SENTENCE
+    #DIMS HTMLS
+    #DIM WAIT_FLAG
+    SETCOLOR 四季_语句颜色
+    PRINTFORML %SENTENCE%
+    RESETCOLOR
+    IF WAIT_FLAG
+        WAIT
+    ENDIF
+
+@K36_SHIKIEIKI_SAY_IMAGE(SENTENCE)
+    #DIMS SENTENCE
+    #DIMS HTMLS
+    HTMLS '= @"<nobr><nonbutton pos='{GET_K36_IMAGE_STATUS() ? 1200 # 0}'>"
+    HTMLS += @"<font color='%四季_语句颜色_html%'>%SENTENCE%</font>"
+    HTMLS += "</nonbutton></nobr>"
+    HTML_PRINT HTMLS
+    CALL KOJO_36_IMAGE
+    WAIT
+
+@K36_NORMAL_PRINTDATA_IMAGE(SENTENCE = "",PRINT_FLAG = 0,WAIT_FLAG = 0)
+    #DIMS SENTENCE
+    #DIMS SENTENCE_LIST,100
+    #DIM SENTENCE_NUM = 0
+    #DIM WAIT_FLAG
+    #DIM PRINT_FLAG
+    IF SENTENCE != ""
+        SENTENCE_LIST:SENTENCE_NUM '= SENTENCE
+        SENTENCE_NUM++
+    ENDIF
+    IF PRINT_FLAG && SENTENCE_NUM > 0
+        CALL K36_NORMAL_SENTENCE_IMAGE(SENTENCE_LIST:(RAND:SENTENCE_NUM))
+        SENTENCE_NUM = 0
+    ENDIF
+    IF WAIT_FLAG
+        WAIT
+    ENDIF
+@K36_NORMAL_SENTENCE_IMAGE(SENTENCE,WAIT_FLAG = 0)
+    #DIMS SENTENCE
+    #DIMS HTMLS
+    #DIM WAIT_FLAG
+    HTMLS '= @"<nobr><nonbutton pos='{GET_K36_IMAGE_STATUS() ? 1200 # 0}'>"
+    HTMLS += @"%SENTENCE%"
+    HTMLS += "</nonbutton></nobr>"
+    HTML_PRINT HTMLS
+    IF WAIT_FLAG
+        WAIT
+    ENDIF
+
+@K36_NORMAL_SENTENCE_IMAGE_COLOR(SENTENCE,WAIT_FLAG = 0,HTML_COLOR = "")
+    #DIMS SENTENCE
+    #DIMS HTMLS
+    #DIMS HTML_COLOR
+    #DIM WAIT_FLAG
+    SIF HTML_COLOR == ""
+        HTML_COLOR = "#FFFFFF"
+    HTMLS '= @"<nobr><nonbutton pos='{GET_K36_IMAGE_STATUS() ? 1200 # 0}'><font face='' color='%HTML_COLOR%'>"
+    HTMLS += @"%SENTENCE%"
+    HTMLS += "</font></nonbutton></nobr>"
+    HTML_PRINT HTMLS
+    IF WAIT_FLAG
+        WAIT
+    ENDIF
+
+@K36_NORMAL_SENTENCE_IMAGE_NOTICE(SENTENCE,WAIT_FLAG = 0)
+    #DIMS SENTENCE
+    #DIM WAIT_FLAG
+    CALL K36_NORMAL_SENTENCE_IMAGE_COLOR(SENTENCE,WAIT_FLAG,"#FFFF00")
+
+@K36_NORMAL_SENTENCE_IMAGE_WARN(SENTENCE,WAIT_FLAG = 0)
+    #DIMS SENTENCE
+    #DIM WAIT_FLAG
+    CALL K36_NORMAL_SENTENCE_IMAGE_COLOR(SENTENCE,WAIT_FLAG,"#FF0000")
+
+@K36_NORMAL_SENTENCE_IMAGE_BUTTON(BUTTON_NAME,BUTTON_VALUE,WAIT_FLAG = 0)
+    #DIMS BUTTON_NAME
+    #DIMS HTMLS
+    #DIM WAIT_FLAG
+    #DIM BUTTON_VALUE
+    HTMLS '= @"<nobr><button value='{BUTTON_VALUE}' pos='{GET_K36_IMAGE_STATUS() ? 1200 # 0}'>"
+    HTMLS += @"[{BUTTON_VALUE}]%BUTTON_NAME%"
+    HTMLS += "</button></nobr>"
+    HTML_PRINT HTMLS
+    IF WAIT_FLAG
+        WAIT
+    ENDIF
+
+@SET_SHIKIEIKI_FACE(cloth_id = -1,mood_id = -1,SP:0 = -1,SP:1 = -1,SP:2 = -1,SP:3 = -1,SP:4 = -1,SP:5 = -1)
+    #DIM cloth_id
+    #DIM mood_id
+    #DIM SP,6
+    SIF !GET_K36_IMAGE_STATUS()
+        RETURN
+    IF cloth_id >= 0; && 四季_衣服_id != cloth_id
+        四季_衣服_id = cloth_id
+        四季_face_change_flag = 1
+    ENDIF
+
+    IF mood_id >= 0 ;&& 四季_感情_id != mood_id
+        四季_感情_id = mood_id
+        四季_face_change_flag = 1
+    ENDIF
+    FOR LOCAL,0,6
+        IF (SP:LOCAL) >= 0 ;&& 四季_额外_bit != SP
+            IF SP:LOCAL == 四季_额外_清空
+                四季_额外_bit = 0
+            ENDIF
+            SETBIT 四季_额外_bit,(SP:LOCAL)
+            四季_face_change_flag = 1
+        ENDIF
+    NEXT
+
+@RESET_SHIKIEIKI_FACE
+    四季_衣服_id = 0
+    四季_感情_id = 0
+    四季_额外_bit = 0
+    
+@K36_SET_ID
+    IF 四季_ID <= 0 || 四季_ID > MAX_CHARA_NUM || ANAME(四季_ID) != "四季映姫"
+        四季_ID = NAME_TO_CHARA("四季映姫")
+    ENDIF
+    IF 小町_ID <=0 || 小町_ID > MAX_CHARA_NUM ||ANAME(小町_ID) != "小町"
+        小町_ID = NAME_TO_CHARA("小町")
+    ENDIF
+    
+@K36_RESET_VAR
+    SIF K36_当前周目 == FLAG:周回数
+        RETURN
+    K36_当前周目 = FLAG:周回数
+    K36_上次色色日期 = 0
+    K36_上次事件日期 = 0
+    K36_CALL_MASTER_COUSTOM = 0
+    K36_CALL_MASTER = ""
+
+    K36_阴影之下_子进度 = 0
+    K36_阴影之下_上次访问日期 = 0
+
+@K36_FUCK(REPEAT_TIME = 1,FUCK_TARGET = -1,TYPE = "")
+    #DIMS TYPE
+    #DIM REPEAT_TIME
+    #DIM FUCK_TARGET
+    SIF REPEAT_TIME <= 0
+        RETURN
+
+    CBGCLEAR
+    SIF FUCK_TARGET < 0
+        FUCK_TARGET = 四季_ID
+    REPEAT REPEAT_TIME
+        IF TYPE == ""
+			CALL FUCK(MASTER, "Ｃ, 射精,性技, 性交, 欲望, 接吻,Ｖ挿入", "接吻喪失, 童貞喪失", 0, @"%ANAME(FUCK_TARGET)%的嘴唇", "", @"%ANAME(FUCK_TARGET)%的膣穴", "和姦")
+			CALL FUCK(FUCK_TARGET, "Ｖ, Ｃ, Ｂ, Ｍ, 奉仕, 性交, 欲望, 性技, 精愛, Ｖ性交, 接吻, 口淫", "接吻喪失, 膣内射精, 処女喪失", GET_ID(MASTER), @"%ANAME(MASTER)%", @"%ANAME(MASTER)%的肉棒", "", "和姦")
+            SIF FUCK_TARGET == 四季_ID
+                K36_上次色色日期 = DAY
+        ELSEIF TYPE == "口"
+            CALL FUCK(MASTER, "Ｃ, 射精, 欲望", "童貞喪失,口内射精", 0, @"", "", @"%ANAME(FUCK_TARGET)%的口穴", "口交")
+			CALL FUCK(FUCK_TARGET, "Ｖ, Ｃ, Ｂ, Ｍ, 奉仕, 欲望, 精愛, 口淫", "接吻喪失, 口内射精", GET_ID(MASTER), @"%ANAME(MASTER)%的肉棒", "", "", "口交")
+        ENDIF
+    REND
+
+;2同一势力且未被捕获且陷落
+;1同一势力且未被捕获无陷落
+;0不同势力或者被捕获
+@GET_ONOZUKA_STATUS
+    #FUNCTION
+    小町_ID = NAME_TO_CHARA("小町")
+    IF CFLAG:MASTER:所属 == CFLAG:小町_ID:所属 && CFLAG:小町_ID:捕虜先 == 0
+        IF IS_FALLEN(小町_ID)
+            RETURNF 2
+        ELSE
+            RETURNF 1
+        ENDIF
+    ELSE
+        RETURNF 0
+    ENDIF
+
+@GET_K36_IMAGE_STATUS()
+    #FUNCTION
+    IF !CONFIG:555 || K36_DAILY_KOJO_日常事件不启用图片
+        RETURNF 0
+    ELSE
+        RETURNF 1
+    ENDIF
+
+[SKIPSTART]
+@K36_PENIS
+    #FUNCTIONS
+    #DIMS 候补
+    #DIM DYNAMIC 候补数
+    IF CFLAG:四季_ID:好感度 < 0
+        候补:(候补数++) = 罪恶之物
+        候补:(候补数++) = 肮脏之物
+        候补:(候补数++) = 不洁之物
+        RETURNF 候补:(RAND:候补数)
+    ENDIF
+    候补:(候补数++) = 那个
+    候补:(候补数++) = 那根
+    候补:(候补数++) = 那里
+    IF ABL:四季_ID:欲望 >= 5 && IS_FALLEN(四季_ID)
+        候补:(候补数++) = 巨棒
+        候补:(候补数++) = 大棒
+        候补:(候补数++) = 肉棒
+        候补:(候补数++) = 粗棒
+        候补:(候补数++) = 欧金金
+    ENDIF
+    RETURNF 候补:(RAND:候补数)
+
+CALL BAR_NAME
+@K36_PENIS_D
+    #FUNCTIONS
+    #DIMS 候补
+    #DIM DYNAMIC 候补数
+    候补:(候补数++) = 巨棒
+    候补:(候补数++) = 巨擘
+    候补:(候补数++) = 巨根
+    候补:(候补数++) = 大棒
+    候补:(候补数++) = 大根
+    候补:(候补数++) = 粗硬
+    候补:(候补数++) = 刚直
+    候补:(候补数++) = 肉欲
+    候补:(候补数++) = 原欲
+    候补:(候补数++) = 肉棒
+    候补:(候补数++) = 男根
+    候补:(候补数++) = 阳刚
+    RETURNF 候补:(RAND:候补数)
+
+@K36_PENIS_ADJ
+    #FUNCTIONS
+    #DIMS 候补
+    #DIM DYNAMIC 候补数
+    RETURNF 候补:(RAND:候补数)
+
+@K36_VAGINA
+    #FUNCTIONS
+    #DIMS 候补
+    #DIM DYNAMIC 候补数
+    候补:(候补数++) = 那里
+    候补:(候补数++) = 下面
+    候补:(候补数++) = 里面
+    IF ABL:四季_ID:Ｖ感 > 3
+        候补:(候补数++) = 小穴
+    ENDIF
+    IF ABL:四季_ID:欲望 >= 5 && IS_FALLEN(四季_ID)
+        候补:(候补数++) = 淫穴
+        候补:(候补数++) = 肉穴
+        候补:(候补数++) = 淫壶
+        候补:(候补数++) = 荡穴
+    ENDIF
+    RETURNF 候补:(RAND:候补数)
+
+@K36_VAGINA_D
+    #FUNCTIONS
+    #DIMS 候补
+    #DIM DYNAMIC 候补数
+    候补:(候补数++) = 肉穴
+    候补:(候补数++) = 腔道
+    候补:(候补数++) = 女阴
+    候补:(候补数++) = 阴道
+    候补:(候补数++) = 小穴
+    候补:(候补数++) = 下面
+    候补:(候补数++) = 花径
+    候补:(候补数++) = 秘所
+    候补:(候补数++) = 蜜穴
+    候补:(候补数++) = 雌穴
+    RETURNF 候补:(RAND:候补数)
+
+@K36_VAGINA_ADJ
+    #FUNCTIONS
+    #DIMS 候补
+    #DIM DYNAMIC 候补数
+    RETURNF @"%候补:(RAND:候补数)%%K36_VAGINA_D()%"
+
+@K36_BREAST
+    #FUNCTIONS
+    #DIMS 候补
+    #DIM DYNAMIC 候补数
+    候补:(候补数++) = 胸
+    候补:(候补数++) = 胸部
+    候补:(候补数++) = 前面
+    候补:(候补数++) = 那里
+    IF ABL:四季_ID:Ｂ感 > 3
+        候补:(候补数++) = 乳房
+        候补:(候补数++) = 乳头
+    ENDIF
+    IF ABL:四季_ID:欲望 >= 5 && IS_FALLEN(四季_ID)
+        候补:(候补数++) = 淫乳
+        候补:(候补数++) = 浪乳
+        候补:(候补数++) = 坏乳
+        候补:(候补数++) = 奶子
+    ENDIF
+    RETURNF 候补:(RAND:候补数)
+
+@K36_BREAST_D
+    #FUNCTIONS
+    #DIMS 候补
+    #DIM DYNAMIC 候补数
+    候补:(候补数++) = 奶子
+    候补:(候补数++) = 乳房
+    候补:(候补数++) = 胸部
+    候补:(候补数++) = 淫乳
+    候补:(候补数++) = 浪乳
+    RETURNF 候补:(RAND:候补数)
+
+@K36_BREAST_ADJ
+    #FUNCTIONS
+    #DIMS 候补
+    #DIM DYNAMIC 候补数
+    候补:(候补数++) = 小小的
+    候补:(候补数++) = 圆润的
+    候补:(候补数++) = 白嫩的
+    候补:(候补数++) = 诱人的
+    候补:(候补数++) = 幼嫩的
+    候补:(候补数++) = 淫荡的
+    候补:(候补数++) = 柔软的
+    IF ABL:四季_ID:Ｂ感 > 3
+        候补:(候补数++) = 被彻底开发的
+        候补:(候补数++) = 感度惊人的
+        候补:(候补数++) = 被调教的
+        候补:(候补数++) = 无法忍耐快感的
+    ENDIF
+    IF CUM_CUR_AMOUNT:四季_ID:射精部位_胸
+        候补:(候补数++) = 沾满精液的
+        候补:(候补数++) = 被玷污的
+        候补:(候补数++) = 被白灼覆盖的
+        候补:(候补数++) = 被精液弄脏的
+    ENDIF
+    IF PALAM:四季_ID:潤滑 > PALAMLV:5;3000
+        候补:(候补数++) = 已经勃起的
+        候补:(候补数++) = 已经发情的
+        候补:(候补数++) = 正在渴求的
+    ENDIF
+    IF TALENT:四季_ID:母乳体質
+        候补:(候补数++) = 冒出母乳的
+        候补:(候补数++) = 渴望哺乳的
+        候补:(候补数++) = 充满母性的
+    ENDIF
+    IF IS_INSERT_SINGLE(四季_ID,"Ｖ")
+        候补:(候补数++) = 晃动着的
+        候补:(候补数++) = 弹跳着的
+        候补:(候补数++) = 有节奏的
+    ENDIF
+    RETURNF @"%候补:(RAND:候补数)%%K36_BREAST_D()%"
+
+@K36_MOUTH
+    #FUNCTIONS
+    #DIMS 候补
+    #DIM DYNAMIC 候补数
+    候补:(候补数++) = 嘴巴
+    候补:(候补数++) = 嘴
+    RETURNF 候补:(RAND:候补数)
+
+@K36_MOUTH_D
+    #FUNCTIONS
+    #DIMS 候补
+    #DIM DYNAMIC 候补数
+    候补:(候补数++) = 小嘴
+    候补:(候补数++) = 樱嘴
+    候补:(候补数++) = 粉嘴
+    RETURNF 候补:(RAND:候补数)
+
+@@K36_MOUTH_ADJ
+    #FUNCTIONS
+    #DIMS 候补
+    #DIM DYNAMIC 候补数
+    RETURNF 候补:(RAND:候补数)
+
+@K36_ASS
+    #FUNCTIONS
+    #DIMS 候补
+    #DIM DYNAMIC 候补数
+    候补:(候补数++) = 那里
+    IF ABL:四季_ID:Ａ感>3
+        候补:(候补数++) = 屁股
+        候补:(候补数++) = 后面
+    ENDIF
+    IF ABL:四季_ID:欲望>=5 && IS_FALLEN(四季_ID)
+        候补:(候补数++) = 屁穴
+        候补:(候补数++) = 尻穴
+        候补:(候补数++) = 屁眼
+        候补:(候补数++) = 肛穴
+        候补:(候补数++) = 淫尻
+        候补:(候补数++) = 浪尻
+    ENDIF
+    RETURNF 候补:(RAND:候补数)
+
+@K36_ASS_D
+    #FUNCTIONS
+    #DIMS 候补
+    #DIM DYNAMIC 候补数
+    候补:(候补数++) = 不洁穴
+    候补:(候补数++) = 屁穴
+    候补:(候补数++) = 屁股
+    候补:(候补数++) = 肛肠
+    候补:(候补数++) = 淫尻
+    候补:(候补数++) = 淫尾
+    候补:(候补数++) = 浪尻
+    RETURNF 候补:(RAND:候补数)
+
+@K36_CLITORIS
+    #FUNCTIONS
+    #DIMS 候补
+    #DIM DYNAMIC 候补数
+    RETURNF 候补:(RAND:候补数)
+
+@K36_CLITORIS_D
+    #FUNCTIONS
+    #DIMS 候补
+    #DIM DYNAMIC 候补数
+    RETURNF 候补:(RAND:候补数)
+
+@K36_CLITORIS_ADJ
+    #FUNCTIONS
+    #DIMS 候补
+    #DIM DYNAMIC 候补数
+    RETURNF 候补:(RAND:候补数)
+[SKIPEND]

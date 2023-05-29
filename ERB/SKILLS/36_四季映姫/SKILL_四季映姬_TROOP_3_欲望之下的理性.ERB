@@ -1,0 +1,100 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_36_TROOP_3_EXIST
+RETURN 1
+
+@SKILL_36_TROOP_3_NAME
+RESULTS = 欲望之下的理性
+
+;レベルは1-5まで
+@SKILL_36_TROOP_3_LEVEL
+RETURN 5
+
+;対象選択
+@SKILL_36_TROOP_3_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+;部隊対象
+RETURN 1
+
+;発動判定
+@SKILL_36_TROOP_3_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+SIF 対象部隊 < 0 || !IS_COUNTRY(対象勢力) || IS_SP_COUNTRY(対象勢力)
+    RETURN 0
+RETURN 1
+
+;効果をここに記述
+@SKILL_36_TROOP_3_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+IF BATTLE_政治:発動側:発動番号 > RAND:100
+    LOCAL = RAND:5000 + 1000
+    CALL DECREASE_SOLDIER(対象勢力,対象部隊,LOCAL)
+ENDIF
+IF BATTLE_政治:発動側:発動番号 > RAND:110
+    LOCAL = RAND:5000 + 1000
+    CALL INCREASE_SOLDIER(対象勢力,対象部隊,LOCAL)
+ENDIF
+IF BATTLE_政治:発動側:発動番号 > RAND:120
+    LOCAL = RAND:3000 + 1000
+    CALL DECREASE_SOLDIER(対象勢力,対象部隊,LOCAL)
+    CALL INCREASE_SOLDIER(対象勢力,対象部隊,LOCAL)
+ENDIF
+
+@SKILL_36_TROOP_3_EXPLANATION
+RESULTS = 根据发动者政治，削减敌军数量/增加我军数量/劝诱敌军加入我方
+
+;以下の三つ、スキル習得で購入させないための処理
+@SKILL_36_TROOP_3_NO_LEARN_INIT
+@SKILL_36_TROOP_3_CANT_LEARN_FROM_SHOP
+@SKILL_36_TROOP_3_CANT_TELL
+
+; 発動率が変動する場合に必要な処理
+; @SKILL_36_TROOP_3_IS_RATE_VARIABLE
+; RETURN 1
+
+@SKILL_36_TROOP_3_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+    #DIM 発動者
+    #DIM 発動番号
+    #DIM スキル
+    #DIMS ジャンル
+    #DIM 発動側
+    #DIM 発動勢力
+    #DIM 発動部隊
+    #DIM 対象側
+    #DIM 対象勢力
+    #DIM 対象部隊
+    [IF_DEBUG]
+        RETURN 1000
+    [ENDIF]
+    RETURN 200

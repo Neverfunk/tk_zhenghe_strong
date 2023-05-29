@@ -1,0 +1,123 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_36_TROOP_2_EXIST
+RETURN 1
+
+@SKILL_36_TROOP_2_NAME
+RESULTS = 克己之罪
+
+;レベルは1-5まで
+@SKILL_36_TROOP_2_LEVEL
+RETURN 5
+
+;対象選択
+@SKILL_36_TROOP_2_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+    #DIM 発動者
+    #DIM 発動番号
+    #DIM スキル
+    #DIMS ジャンル
+    #DIM 発動側
+    #DIM 発動勢力
+    #DIM 発動部隊
+    #DIM 対象側
+    #DIM 対象勢力
+    #DIM 対象部隊
+    対象側 = !発動側
+    ;部隊対象
+    RETURN 1
+
+;発動判定
+@SKILL_36_TROOP_2_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+    #DIM 発動者
+    #DIM 発動番号
+    #DIM スキル
+    #DIMS ジャンル
+    #DIM 発動側
+    #DIM 発動勢力
+    #DIM 発動部隊
+    #DIM 対象側
+    #DIM 対象勢力
+    #DIM 対象部隊
+    対象側 = !発動側
+    SIF 発動部隊 < 0
+        RETURN 0
+    RETURN 1
+
+;効果をここに記述
+@SKILL_36_TROOP_2_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+    #DIM 発動者
+    #DIM 発動番号
+    #DIM スキル
+    #DIMS ジャンル
+    #DIM 発動側
+    #DIM 発動勢力
+    #DIM 発動部隊
+    #DIM 対象側
+    #DIM 対象勢力
+    #DIM 対象部隊
+    対象側 = !発動側
+    IF CFLAG:発動者:所属 == CFLAG:MASTER:所属 && CONFIG:300 != 2
+        NOSKIP
+        {
+            CALL ASK_MULTI_JUDGE("减少我方部队疲劳值并削弱攻击",UNIT_TIRED_COUNT:発動勢力:発動部隊 > 10,
+                                 "提升我方部队攻击但增加疲劳值",UNIT_TIRED_COUNT:発動勢力:発動部隊 < 30
+                                 )
+        }
+        ENDNOSKIP
+        IF RESULT
+            GOTO 提升我方部队攻击但增加疲劳值
+        ELSE
+            GOTO 减少我方部队疲劳值并削弱攻击
+        ENDIF
+    ELSE
+        IF UNIT_TIRED_COUNT:発動勢力:発動部隊 < 10
+            GOTO 提升我方部队攻击但增加疲劳值
+        ELSEIF UNIT_TIRED_COUNT:発動勢力:発動部隊 >= 20
+            GOTO 减少我方部队疲劳值并削弱攻击
+        ELSE
+            IF RAND:2
+                GOTO 提升我方部队攻击但增加疲劳值
+            ELSE
+                GOTO 减少我方部队疲劳值并削弱攻击
+            ENDIF
+        ENDIF
+    ENDIF
+
+    $提升我方部队攻击但增加疲劳值
+    UNIT_TIRED_COUNT:発動勢力:発動部隊 = MIN(UNIT_TIRED_COUNT:発動勢力:発動部隊+5,100)
+    TIMES BATTLE_ATK:発動側, 1.50
+    RETURN 1
+
+    $减少我方部队疲劳值并削弱攻击
+    UNIT_TIRED_COUNT:発動勢力:発動部隊 = MAX(UNIT_TIRED_COUNT:発動勢力:発動部隊-10,100)
+    TIMES BATTLE_ATK:発動側, 0.90
+    RETURN 1
+
+@SKILL_36_TROOP_2_EXPLANATION
+    RESULTS = 减少我方部队疲劳值并削弱攻击/提升我方部队攻击但增加疲劳值
+
+;以下の三つ、スキル習得で購入させないための処理
+@SKILL_36_TROOP_2_NO_LEARN_INIT
+@SKILL_36_TROOP_2_CANT_LEARN_FROM_SHOP
+@SKILL_36_TROOP_2_CANT_TELL
+
+; 発動率が変動する場合に必要な処理
+; @SKILL_36_TROOP_2_IS_RATE_VARIABLE
+; RETURN 1
+
+@SKILL_36_TROOP_2_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+    #DIM 発動者
+    #DIM 発動番号
+    #DIM スキル
+    #DIMS ジャンル
+    #DIM 発動側
+    #DIM 発動勢力
+    #DIM 発動部隊
+    #DIM 対象側
+    #DIM 対象勢力
+    #DIM 対象部隊
+    [IF_DEBUG]
+        RETURN 1000
+    [ENDIF]
+    RETURN 200

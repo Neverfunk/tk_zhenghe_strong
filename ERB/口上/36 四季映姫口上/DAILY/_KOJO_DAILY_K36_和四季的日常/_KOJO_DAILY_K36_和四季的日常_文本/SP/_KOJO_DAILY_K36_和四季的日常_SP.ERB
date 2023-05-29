@@ -1,0 +1,22 @@
+@K36_SP_MAIN
+    #DIM ID
+    FOR ID,0,20
+        SIF GETBIT(K36_和四季的日常_SP事件_bit,ID)
+            CONTINUE
+        TRYCCALLFORM K36_SP_ENEVT_{ID}_EXIST
+            RESULT = 0
+
+            TRYCALLFORM K36_SP_ENEVT_{ID}_STATUS
+            SIF !RESULT
+                CONTINUE
+            ; TRYCALLFORM K36_SP_ENEVT_{ID}_NAME
+            TRYCALLFORM K36_SP_ENEVT_{ID}
+            IF RESULT
+                SETBIT K36_和四季的日常_SP事件_bit,ID
+                RETURN 1
+            ENDIF
+        CATCH
+        ENDCATCH
+
+    NEXT
+    RETURN 0

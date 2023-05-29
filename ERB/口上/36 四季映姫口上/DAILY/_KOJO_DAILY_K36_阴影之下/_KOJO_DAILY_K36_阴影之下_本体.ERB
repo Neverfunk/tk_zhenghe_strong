@@ -1,0 +1,147 @@
+;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K36_TO_FUTURE_RATE(対象)
+#DIM 対象
+RETURN GET_DIFFICULTY_CORRECTION()*3 + MAX(0,DAY-3)*250
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+;---------------------
+; 第一次事件需要在三期内触发，不然就判断不触发了
+; 除此以外
+; 小町在同势力中且没有陷落或者恋慕系陷落
+; 四季没有陷落或者是恋慕系陷落
+; 两人没被捕获
+; 玩家是君主开的话会有些怪异（倒不如说玩家一开始就能当君主本身就很怪异（笑））
+;---------------------
+@KOJO_DAILY_K36_TO_FUTURE_DECISION(対象)
+    #DIM 対象
+    CALL K36_SET_ID
+    CALL K36_RESET_VAR
+    SIF TALENT:四季_ID:恋慕 || TALENT:四季_ID:服従
+        RETURN 0
+    SIF TALENT:小町_ID:恋慕 || TALENT:小町_ID:服従
+        RETURN 0
+    IF KDVAR:四季_ID:四季映姫_阴影之下_进度 == 0
+        IF DAY > 3
+            KDVAR:四季_ID:四季映姫_阴影之下_进度 = -1
+            RETURN 0
+        ENDIF
+    ELSEIF KDVAR:四季_ID:四季映姫_阴影之下_进度 == 1
+        IF K36_阴影之下_子进度 == 0
+        ELSEIF K36_阴影之下_子进度 == 1
+        ELSEIF K36_阴影之下_子进度 == 2
+        ENDIF
+    ELSEIF KDVAR:四季_ID:四季映姫_阴影之下_进度 == 2
+        IF K36_阴影之下_子进度 == 0
+        ELSEIF K36_阴影之下_子进度 == 1
+        ELSEIF K36_阴影之下_子进度 == 2
+        ENDIF
+    ELSEIF KDVAR:四季_ID:四季映姫_阴影之下_进度 == 3
+    ELSE
+        RETURN 0
+    ENDIF
+
+    RETURN CHECK_KOJO_DAILY_HAPPEN(四季_ID, 1, 0, -1) && CHECK_KOJO_DAILY_HAPPEN(小町_ID, 1, 0, -1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K36_TO_FUTURE_GENRE(対象)
+    #DIM 対象
+    RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K36_TO_FUTURE(対象)
+    #DIM 対象
+    CALL K36_RESET_VAR
+    CALL K36_SET_ID
+    CALL RESET_SHIKIEIKI_FACE
+    CALL RESET_ONOZUKA_FACE
+    CALL EMPTYLINES_FOR_FACE
+    [IF_DEBUG]
+        ; CALL 四季映姫_阴影之下_初见
+        ; CALL 四季映姫_阴影之下_初见_1
+        ; CALL 四季映姫_阴影之下_初见_2
+        ; CALL 四季映姫_阴影之下_工作_1
+        ; CALL 四季映姫_阴影之下_工作_2
+        ; CALL 四季映姫_阴影之下_工作_3
+        ; CALL 四季映姫_阴影之下_共眠_1
+        ; CALL 四季映姫_阴影之下_共眠_2
+        ; CALL 四季映姫_阴影之下_共眠_3
+        ; CALL 四季映姫_阴影之下_初夜
+        ; CALL 四季映姫_阴影之下_初夜_1
+        ; CALL 四季映姫_阴影之下_初夜_2
+        ; CALL 四季映姫_阴影之下_初夜_3
+        ; CALL 四季映姫_阴影之下_初夜_4
+        ; CALL 四季映姫_阴影之下_初夜_5
+        ; GOTO KOJO_36_END
+    [ENDIF]
+    IF KDVAR:四季_ID:四季映姫_阴影之下_进度 == 0
+        CALL 四季映姫_阴影之下_初见
+        GOTO KOJO_36_END
+    ELSEIF KDVAR:四季_ID:四季映姫_阴影之下_进度 == 1
+        IF K36_阴影之下_子进度 == 0
+            CALL 四季映姫_阴影之下_工作_1
+        ELSEIF K36_阴影之下_子进度 == 1
+            CALL 四季映姫_阴影之下_工作_2
+        ELSEIF K36_阴影之下_子进度 == 2
+            CALL 四季映姫_阴影之下_工作_3
+        ENDIF
+        GOTO KOJO_36_END
+    ELSEIF KDVAR:四季_ID:四季映姫_阴影之下_进度 == 2
+        IF K36_阴影之下_子进度 == 0
+            CALL 四季映姫_阴影之下_共眠_1
+        ELSEIF K36_阴影之下_子进度 == 1
+            CALL 四季映姫_阴影之下_共眠_2
+        ELSEIF K36_阴影之下_子进度 == 2
+            CALL 四季映姫_阴影之下_共眠_3
+        ENDIF
+        GOTO KOJO_36_END
+    ELSEIF KDVAR:四季_ID:四季映姫_阴影之下_进度 == 3
+        CALL 四季映姫_阴影之下_初夜
+        GOTO KOJO_36_END
+    ENDIF
+
+RETURN 0
+$KOJO_36_END
+CALL KOJO_DAILY_K36_TO_FUTURE_CHANGE_FLAG
+CBGCLEAR
+RETURN 1
+
+@KOJO_DAILY_K36_TO_FUTURE_CHANGE_FLAG
+    IF KDVAR:四季_ID:四季映姫_阴影之下_进度 == 0
+        KDVAR:四季_ID:四季映姫_阴影之下_进度 = 1
+        K36_阴影之下_子进度 = 0
+    ELSEIF KDVAR:四季_ID:四季映姫_阴影之下_进度 == 1
+        IF K36_阴影之下_子进度 == 0
+            K36_阴影之下_子进度 = 1
+        ELSEIF K36_阴影之下_子进度 == 1
+            K36_阴影之下_子进度 = 2
+        ELSEIF K36_阴影之下_子进度 == 2
+            K36_阴影之下_子进度 = 0
+            KDVAR:四季_ID:四季映姫_阴影之下_进度 = 2
+        ENDIF
+    ELSEIF KDVAR:四季_ID:四季映姫_阴影之下_进度 == 2
+        IF K36_阴影之下_子进度 == 0
+            K36_阴影之下_子进度 = 1
+        ELSEIF K36_阴影之下_子进度 == 1
+            K36_阴影之下_子进度 = 2
+        ELSEIF K36_阴影之下_子进度 == 2
+            KDVAR:四季_ID:四季映姫_阴影之下_进度 = 3
+            K36_阴影之下_子进度 = 0
+        ENDIF
+    ELSEIF KDVAR:四季_ID:四季映姫_阴影之下_进度 == 3
+        KDVAR:四季_ID:四季映姫_阴影之下_进度 = 4
+    ENDIF

@@ -5,6 +5,15 @@
 ;現在の国家関係マップを作成する関数
 ;-------------------------------------------------
 @TMP_CREATE_RELATION_MAP
+#DIM 甲国現在条約
+#DIM 甲国条約期間
+#DIM 乙国現在条約
+#DIM 乙国条約期間
+
+甲国現在条約 = 0
+甲国条約期間 = 0
+乙国現在条約 = 0
+乙国条約期間 = 0
 VARSET TMP_COUNTRY_RELATION, 0
 VARSET COUNTRY_TREATY_NO
 FOR LOCAL:0, 1, MAX_COUNTRY
@@ -13,22 +22,32 @@ FOR LOCAL:0, 1, MAX_COUNTRY
 		;(従属国パッチ)下記改変に合わせてこちらも改変
 		;FOR LOCAL:1, LOCAL:0 + 1, MAX_COUNTRY
 		FOR LOCAL:1, 0, MAX_COUNTRY
-			IF IS_COUNTRY(LOCAL:1)
+			IF IS_COUNTRY(LOCAL:1) && LOCAL:0 < LOCAL:1
 			;(従属国パッチ)従属国と宗主国はRESULT:0の値が一致しないため分離
 				CALL CHECK_COUNTRY_RELATION(LOCAL:0, LOCAL:1)
-				TMP_COUNTRY_RELATION:(LOCAL:0):(LOCAL:1) = RESULT:0
-				TMP_COUNTRY_RELATION_TERM:(LOCAL:0):(LOCAL:1) = RESULT:1
+				甲国現在条約 = RESULT:0
+				甲国条約期間 = RESULT:1
+				TMP_COUNTRY_RELATION:(LOCAL:0):(LOCAL:1) = 甲国現在条約
+				TMP_COUNTRY_RELATION_TERM:(LOCAL:0):(LOCAL:1) = 甲国条約期間
 				CALL CHECK_COUNTRY_RELATION(LOCAL:1, LOCAL:0)
-				TMP_COUNTRY_RELATION:(LOCAL:1):(LOCAL:0) = RESULT:0
-				TMP_COUNTRY_RELATION_TERM:(LOCAL:1):(LOCAL:0) = RESULT:1
-				SELECTCASE RESULT:0
-					CASE 1
-						COUNTRY_TREATY_NO:(LOCAL:0):1 ++
-						COUNTRY_TREATY_NO:(LOCAL:1):1 ++
-					CASE 3, 4
-						COUNTRY_TREATY_NO:(LOCAL:0):0 ++
-						COUNTRY_TREATY_NO:(LOCAL:1):0 ++
-				ENDSELECT
+				乙国現在条約 = RESULT:0
+				乙国条約期間 = RESULT:1
+				TMP_COUNTRY_RELATION:(LOCAL:1):(LOCAL:0) = 乙国現在条約
+				TMP_COUNTRY_RELATION_TERM:(LOCAL:1):(LOCAL:0) = 乙国条約期間
+				IF COUNTRY_Protectorate:(LOCAL:0) <= 1 && COUNTRY_Protectorate:(LOCAL:1) <= 1
+					SELECTCASE 甲国現在条約
+						CASE 1
+							COUNTRY_TREATY_NO:(LOCAL:0):1 ++
+						CASE 3, 4
+							COUNTRY_TREATY_NO:(LOCAL:0):0 ++
+					ENDSELECT
+					SELECTCASE 乙国現在条約
+						CASE 1
+							COUNTRY_TREATY_NO:(LOCAL:1):1 ++
+						CASE 3, 4
+							COUNTRY_TREATY_NO:(LOCAL:1):0 ++
+					ENDSELECT
+				ENDIF
 			ENDIF
 		NEXT
 	ENDIF

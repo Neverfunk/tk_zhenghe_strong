@@ -4,7 +4,7 @@
 ;-------------------------------------------------
 @INIT_Markgraf(ARG:0, ARG:1)
 IF !IS_COUNTRY(ARG:0) || !IS_COUNTRY(ARG:1)
-	THROW 请为0号参数:{ARG:0}和1号:{ARG:1}参数分别指定正确的势力号
+	THROW 请为0号参数和1号参数分别指定正确的势力号
 ENDIF
 
 FOR LOCAL:0, 0, MAX_TREATY_M
@@ -16,7 +16,7 @@ FOR LOCAL:0, 0, MAX_TREATY_M
 		TREATY_M_COUNTRY:(LOCAL:0):0:0 = ARG:0
 		TREATY_M_COUNTRY:(LOCAL:0):1:1 = ARG:1
 		IS_TREATY_M:(LOCAL:0) = 1
-		CFLAG:(GET_COUNTRY_BOSS(ARG:0)):1702 = 1
+		辺境伯である:(GET_COUNTRY_BOSS(ARG:0)):0 = 1
 
 		COUNTRY_Protectorate_REFERENCE:(ARG:0):0 = 2
 		COUNTRY_Protectorate_REFERENCE:(ARG:0):1 = LOCAL:0
@@ -35,8 +35,8 @@ FOR LOCAL:0, 0, MAX_TREATY_M
 
 		;対象従属国士官の特殊なフラグを消去
 		FOR LOCAL:1, 0, CHARANUM
-			IF CFLAG:(LOCAL:1):所属 == ARG:0 && CFLAG:(LOCAL:1):1700 == 1
-				CFLAG:(LOCAL:1):1700 = 0
+			IF CFLAG:(LOCAL:1):所属 == ARG:0 && 奴隷士官フラグ:(LOCAL:1):0 == 1
+				奴隷士官フラグ:(LOCAL:1):0 = 0
 			ENDIF
 		NEXT
 
@@ -323,20 +323,20 @@ WAIT
 PRINTL
 PRINTFORMW %ANAME(従属国君主)%军的士兵加入了我们的军队
 
-;まずCFLAG:1700が立っている士官から処理
+;まず奴隷士官フラグが立っている士官から処理
 ;傀儡士官を自動で登用
 IF CONFIG:303 == 0
 	;傀儡士官の組み込み
 	PRINTL
 	FOR LOCAL:0, 0, CHARANUM
-		IF CFLAG:(LOCAL:0):所属 == ARG:0 && CFLAG:(LOCAL:0):1700 == 1
+		IF CFLAG:(LOCAL:0):所属 == ARG:0 && 奴隷士官フラグ:(LOCAL:0):0 == 1
 			IF !CFLAG:(LOCAL:0):捕虜先 || CFLAG:(LOCAL:0):捕虜先 == ARG:1
 				CALL CHANGE_COUNTRY(LOCAL:0, ARG:1, 1)
-				CFLAG:(LOCAL:0):1700 = 0
+				奴隷士官フラグ:(LOCAL:0):0 = 0
 				PRINTFORML 登用了%ANAME(LOCAL:0)%
 			ELSE
 				CALL CHANGE_COUNTRY(LOCAL:0, ARG:1)
-				CFLAG:(LOCAL:0):1700 = 0
+				奴隷士官フラグ:(LOCAL:0):0 = 0
 				SETCOLOR カラー_シアン
 				PRINTFORML %ANAME(LOCAL:0)%被%ANAME(GET_COUNTRY_BOSS(CFLAG:(LOCAL:0):捕虜先))%囚禁了
 				RESETCOLOR
@@ -350,15 +350,15 @@ ELSEIF CONFIG:303 == 1
 	;傀儡士官の組み込み
 	PRINTL
 	FOR LOCAL:0, 0, CHARANUM
-		IF CFLAG:(LOCAL:0):所属 == ARG:0 && CFLAG:(LOCAL:0):1700 == 1
+		IF CFLAG:(LOCAL:0):所属 == ARG:0 && 奴隷士官フラグ:(LOCAL:0):0 == 1
 			IF !CFLAG:(LOCAL:0):捕虜先 || CFLAG:(LOCAL:0):捕虜先 == ARG:1
 				CALL CHANGE_COUNTRY(LOCAL:0, 0, 1)
 				CALL CAPTURE(LOCAL:0, ARG:1)
-				CFLAG:(LOCAL:0):1700 = 0
+				奴隷士官フラグ:(LOCAL:0):0 = 0
 				PRINTFORML %ANAME(LOCAL:0)%被投入了监狱
 			ELSE
 				CALL CHANGE_COUNTRY(LOCAL:0, ARG:1)
-				CFLAG:(LOCAL:0):1700 = 0
+				奴隷士官フラグ:(LOCAL:0):0 = 0
 				SETCOLOR カラー_シアン
 				PRINTFORML %ANAME(LOCAL:0)%被%ANAME(GET_COUNTRY_BOSS(CFLAG:(LOCAL:0):捕虜先))%囚禁了
 				RESETCOLOR
@@ -370,16 +370,16 @@ ELSEIF CONFIG:303 == 1
 ;手動で選択
 ELSE
 	FOR LOCAL:0, 0, CHARANUM
-		IF CFLAG:(LOCAL:0):所属 == ARG:0 && CFLAG:(LOCAL:0):1700 == 1
+		IF CFLAG:(LOCAL:0):所属 == ARG:0 && 奴隷士官フラグ:(LOCAL:0):0 == 1
 			CALL INIT_Protectorate_Integrate_SET_TREATMENT(ARG:0, ARG:1)
 			BREAK
 		ENDIF
 	NEXT
 ENDIF
-IF CFLAG:従属国君主:1700 == 1
+IF 奴隷士官フラグ:従属国君主:0 == 1
 	CALL CHANGE_COUNTRY(従属国君主, 0, 1)
 	CALL CAPTURE(従属国君主, ARG:1)
-	CFLAG:従属国君主:1700 = 0
+	奴隷士官フラグ:従属国君主:0 = 0
 	PRINTFORML %ANAME(従属国君主)%被投入了监狱
 ENDIF
 
@@ -429,7 +429,7 @@ IF CMATCH(CFLAG:捕虜先, ARG:0)
 		IF CFLAG:(LOCAL:0):捕虜先 == ARG:0
 			;第三勢力の士官なら、投獄
 			CALL CAPTURE(LOCAL:0, ARG:1)
-			CFLAG:(LOCAL:0):1700 = 0
+			奴隷士官フラグ:(LOCAL:0):0 = 0
 			PRINTFORML %ANAME(LOCAL:0)%被投入了监狱
 		ENDIF
 	NEXT
@@ -448,7 +448,7 @@ CALL CHECK_NON_Protectorate(ARG:1)
 RETURN 1
 
 ;-------------------------------------------------
-;統合された勢力のCFLAG:1700が立っている士官の処遇を個別に設定 ARG:0=統合された勢力 ARG:1=統合した勢力
+;統合された勢力の奴隷士官フラグが立っている士官の処遇を個別に設定 ARG:0=統合された勢力 ARG:1=統合した勢力
 ;-------------------------------------------------
 @INIT_Protectorate_Integrate_SET_TREATMENT(ARG:0, ARG:1)
 ;キャラの扱い設定用変数
@@ -474,7 +474,7 @@ CALL SELECT_CHARA_LIST_MULTI_ONLY_LOGIC_SLG(-1, "Integrate_SET_TREATMENT", "Inte
 FOR LOCAL, 0, SELECTED_CHARA_NUM
 	LOCAL:1 = SELECTED_CHARA:(LOCAL)
 	CALL CHANGE_COUNTRY(LOCAL:1, ARG:1)
-	CFLAG:(LOCAL:0):1700 = 0
+	奴隷士官フラグ:(LOCAL:0):0 = 0
 	PRINTFORML %ANAME(LOCAL:1)%被登用了
 NEXT
 
@@ -487,13 +487,13 @@ CALL SELECT_CHARA_LIST_MULTI_ONLY_LOGIC_SLG(-1, "Integrate_SET_TREATMENT", "Inte
 FOR LOCAL, 0, SELECTED_CHARA_NUM
 	LOCAL:1 = SELECTED_CHARA:(LOCAL)
 	CALL CAPTURE(LOCAL:1, ARG:1)
-	CFLAG:(LOCAL:0):1700 = 0
+	奴隷士官フラグ:(LOCAL:0):0 = 0
 	PRINTFORML %ANAME(LOCAL:1)%被投入了监狱
 NEXT
 
 @SELECT_CHARA_LIST_SHOW_LOGIC_Integrate_SET_TREATMENT(対象)
 #DIM 対象
-RETURN CFLAG:対象:所属 == Integrate_Protectorate && !IS_SP_CHARA(対象) && CFLAG:(LOCAL:0):1700 == 1
+RETURN CFLAG:対象:所属 == Integrate_Protectorate && !IS_SP_CHARA(対象) && 奴隷士官フラグ:(LOCAL:0):0 == 1
 
 @SELECT_CHARA_LIST_SELECT_LOGIC_Integrate_SET_TREATMENT(対象)
 #DIM 対象
@@ -592,7 +592,7 @@ SELECTCASE COUNTRY_Protectorate:(ARG:0)
 				TMP_COUNTRY_RELATION_TERM:(ARG:0):(ARG:1) = 0
 				TMP_COUNTRY_RELATION_TERM:(ARG:1):(ARG:0) = 0
 
-				CFLAG:従属国君主:1700 = 0
+				奴隷士官フラグ:従属国君主:0 = 0
 
 				PRINTFORML %ANAME(従属国君主)%势力从%ANAME(宗主国君主)%势力独立了
 				;TranslatedMark %ANAME(従属国君主)%勢力と%ANAME(宗主国君主)%勢力から独立しました

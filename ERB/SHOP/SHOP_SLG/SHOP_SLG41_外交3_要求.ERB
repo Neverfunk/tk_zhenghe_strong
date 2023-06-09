@@ -12,12 +12,12 @@ LOCAL:4 = GET_COUNTRY_BOSS(CFLAG:MASTER:所属)
 LOCAL:5 = GET_COUNTRY_BOSS(ARG:0)
 
 ;(従属国パッチ)相手勢力が傀儡国であるにもかかわらず相手勢力の君主に奴隷士官フラグが付与されていないとき奴隷士官フラグを付与
-IF CFLAG:(LOCAL:5):1700 != 1 && COUNTRY_Protectorate:(CFLAG:MASTER:所属) == 1 && COUNTRY_Protectorate:(ARG:0) == 4 && COUNTRY_Protectorate_REFERENCE:(ARG:0):2 == CFLAG:MASTER:所属
-	CFLAG:(LOCAL:5):1700 = 1
+IF 奴隷士官フラグ:(LOCAL:5):0 != 1 && COUNTRY_Protectorate:(CFLAG:MASTER:所属) == 1 && COUNTRY_Protectorate:(ARG:0) == 4 && COUNTRY_Protectorate_REFERENCE:(ARG:0):2 == CFLAG:MASTER:所属
+	奴隷士官フラグ:(LOCAL:5):0 = 1
 ENDIF
 
 ;(従属国パッチ)相手勢力の君主に奴隷士官フラグが付与されているとき(=相手勢力が傀儡国)要求は必ず通る
-IF CFLAG:(LOCAL:5):1700 == 1
+IF 奴隷士官フラグ:(LOCAL:5):0 == 1
 	PRINTFORMW 傀儡政権である%ANAME(LOCAL:5)%は%ANAME(MASTER)%の要求に逆らえない！
 	;関係悪化
 	CALL CHANGE_RELATION_C_TO_C(ARG:0, CFLAG:MASTER:所属, -70, 100)
@@ -181,7 +181,7 @@ ELSE
 		;TranslatedMark %ANAME(MASTER)%は%ANAME(LOCAL:5)%の体を焦らすような手付きで愛撫しながら、
 		PRINTFORMW 在%ANAME(LOCAL:5)%的耳辺低声説道答応要求的話就会給你豊富的奨勵
 		;TranslatedMark 要求を飲んだらご褒美にたっぷり虐めてやると%ANAME(LOCAL:5)%の耳元で囁いた
-		PRINTL 
+		PRINTL
 
 		;●実行値の計算
 		CVARSET TCVAR, 24, -10000
@@ -285,7 +285,7 @@ ELSE
 		;TranslatedMark %ANAME(MASTER)%は%ANAME(LOCAL:5)%の眼前に錠剤をちらつかせながら、
 		PRINTFORMW 在%ANAME(LOCAL:5)%的耳辺低声説道答応要求的話這個就是你的東西了
 		;TranslatedMark 要求を飲んだらとびきりキくやつをくれてやると%ANAME(LOCAL:5)%の耳元で囁いた
-		PRINTL 
+		PRINTL
 		IF CFLAG:(LOCAL:5):薬物依存 >= REL_HATE:(LOCAL:5):(MASTER)
 			PRINTFORMW ………………
 			PRINTFORML 薬物是最重要的、%ANAME(LOCAL:5)%同意了服從的要求
@@ -325,7 +325,7 @@ RETURN -1
 LOCAL:4 = GET_COUNTRY_BOSS(CFLAG:MASTER:所属)
 LOCAL:5 = GET_COUNTRY_BOSS(ARG:0)
 
-PRINTL 
+PRINTL
 PRINTFORMW ………………
 PRINTFORMW %ANAME(LOCAL:5)%用帯着期待的双眼凝視着%ANAME(MASTER)%…
 ;TranslatedMark %ANAME(LOCAL:5)%は期待するような瞳で%ANAME(MASTER)%を見つめている…
@@ -371,7 +371,7 @@ LOCAL:2 = 0
 FOR LOCAL:0, 0, 20
 	IF LOCALS:(LOCAL:0) != ""
 		PRINTBUTTON @"{LOCAL:2, 3}[%LOCALS:(LOCAL:0)%]", LOCAL:2
-		PRINTL 
+		PRINTL
 		TRAIN_LIST:(LOCAL:2) = LOCAL:0
 		LOCAL:2 ++
 	ENDIF
@@ -420,8 +420,8 @@ SELECTCASE TRAIN_LIST:RESULT
 			;TranslatedMark 幸せそうなアヘ顔を晒しながら快感の余韻にビクビクと震える%ANAME(LOCAL:5)%をその場に残し、
 			PRINTFORMW %ANAME(MASTER)%離開了這裡…
 			;TranslatedMark %ANAME(MASTER)%はその場を後にした…
-			CALL FUCK(MASTER, "Ｃ, 欲望, 性交, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(LOCAL:5)%の膣", "外交要求のご褒美での調教")
-			CALL FUCK(LOCAL:5, "欲望, 奉仕, 性交, 精愛, Ｖ, Ｖ性交", "処女喪失, 膣内射精", GET_ID(MASTER), "", ANAME(MASTER), "", "外交要求のご褒美での調教")
+			CALL FUCK(MASTER, "Ｃ, 欲望, 性交, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(LOCAL:5)%の膣", "作为外交要求的奖励调教")
+			CALL FUCK(LOCAL:5, "欲望, 奉仕, 性交, 精愛, Ｖ, Ｖ性交", "処女喪失, 膣内射精", GET_ID(MASTER), "", ANAME(MASTER), "", "作为外交要求的奖励调教")
 			CFLAG:(LOCAL:5):4 += 300
 			CFLAG:(LOCAL:5):3 += 300
 			WAIT
@@ -445,8 +445,8 @@ SELECTCASE TRAIN_LIST:RESULT
 			;TranslatedMark やがて、真っ赤になった尻を情けなくビクンビクンと跳ね上げる%ANAME(LOCAL:5)%をその場に残し、
 			PRINTFORMW %ANAME(MASTER)%離開了這裡…
 			;TranslatedMark %ANAME(MASTER)%はその場を後にした…
-			CALL FUCK(MASTER, "Ｃ, 欲望, 性交, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(LOCAL:5)%の膣", "外交要求のご褒美での調教")
-			CALL FUCK(LOCAL:5, "欲望, 奉仕, 性交, 精愛, Ｖ, 苦痛快楽, 被虐, Ｖ挿入", "処女喪失, 膣内射精", GET_ID(MASTER), "", ANAME(MASTER), "", "外交要求のご褒美での調教")
+			CALL FUCK(MASTER, "Ｃ, 欲望, 性交, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(LOCAL:5)%の膣", "作为外交要求的奖励调教")
+			CALL FUCK(LOCAL:5, "欲望, 奉仕, 性交, 精愛, Ｖ, 苦痛快楽, 被虐, Ｖ挿入", "処女喪失, 膣内射精", GET_ID(MASTER), "", ANAME(MASTER), "", "作为外交要求的奖励调教")
 			CFLAG:(LOCAL:5):4 += 500
 			CFLAG:(LOCAL:5):3 += 100
 		ENDIF
@@ -533,8 +533,8 @@ SELECTCASE TRAIN_LIST:RESULT
 			PRINTFORMW %ANAME(MASTER)%離開了這裡…
 			;TranslatedMark %ANAME(MASTER)%はその場を後にした…
 		ENDIF
-		CALL FUCK(MASTER, "Ｃ, 欲望, 性交, 射精, Ａ挿入", "童貞喪失", 0, "", "", @"%ANAME(LOCAL:5)%のアナル", "外交要求のご褒美での調教")
-		CALL FUCK(LOCAL:5, "欲望, 奉仕, 性交, 精愛, Ａ, 射精, Ａ性交", "Ａ処女喪失, 腸内射精", 0, "", ANAME(MASTER), "", "外交要求のご褒美での調教")
+		CALL FUCK(MASTER, "Ｃ, 欲望, 性交, 射精, Ａ挿入", "童貞喪失", 0, "", "", @"%ANAME(LOCAL:5)%の肛门", "作为外交要求的奖励调教")
+		CALL FUCK(LOCAL:5, "欲望, 奉仕, 性交, 精愛, Ａ, 射精, Ａ性交", "Ａ処女喪失, 腸内射精", 0, "", ANAME(MASTER), "", "作为外交要求的奖励调教")
 		CFLAG:(LOCAL:5):4 += 400
 		CFLAG:(LOCAL:5):3 += 200
 		WAIT
@@ -570,7 +570,7 @@ SELECTCASE TRAIN_LIST:RESULT
 		PRINTFORMW %ANAME(MASTER)%離開了這裡…
 		;TranslatedMark %ANAME(MASTER)%はその場を後にした…
 		CALL FUCK(MASTER, "Ｃ, 欲望, 射精")
-		CALL FUCK(LOCAL:5, "欲望, 奉仕, 性技, 精愛, 口淫", "接吻喪失, 口内射精", 0, @"%ANAME(MASTER)%的肉棒", "", "", "外交要求のご褒美での調教")
+		CALL FUCK(LOCAL:5, "欲望, 奉仕, 性技, 精愛, 口淫", "接吻喪失, 口内射精", 0, @"%ANAME(MASTER)%的肉棒", "", "", "作为外交要求的奖励调教")
 		CFLAG:(LOCAL:5):4 += 300
 		CFLAG:(LOCAL:5):3 += 300
 		WAIT
@@ -663,7 +663,7 @@ SELECTCASE TRAIN_LIST:RESULT
 			PRINTFORMW %ANAME(MASTER)%離開了這裡…
 			;TranslatedMark %ANAME(MASTER)%はその場を後にした…
 		ENDIF
-		CALL FUCK(LOCAL:5, "欲望, Ｖ, Ｃ, Ａ, 緊縛, 苦痛快楽, 被虐", "処女喪失, Ａ処女喪失", 0, "", "振動棒", "", "外交要求のご褒美での調教")
+		CALL FUCK(LOCAL:5, "欲望, Ｖ, Ｃ, Ａ, 緊縛, 苦痛快楽, 被虐", "処女喪失, Ａ処女喪失", 0, "", "振動棒", "", "作为外交要求的奖励调教")
 		CFLAG:(LOCAL:5):4 += 300
 		CFLAG:(LOCAL:5):3 += 300
 		WAIT
@@ -756,7 +756,7 @@ SELECTCASE TRAIN_LIST:RESULT
 				;TranslatedMark 放たれる白濁を、%ANAME(LOCAL:5)%は音を立てて飲み下していく
 				PRINTFORMW %ANAME(MASTER)%説出了可以使用%ANAME(LOCAL:5)%的膣穴后、士兵一辺感謝着一辺開始猛然地侵犯着她……
 				;TranslatedMark %ANAME(MASTER)%が%ANAME(LOCAL:5)%の膣穴を使う許可を出すと、兵士は感謝しながら彼女を猛然と犯し始めた……
-				CALL FUCK(LOCAL:5, "欲望, 精愛, 奉仕, 性交, 性技, 露出, 露出, 口淫, Ｖ感", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("士兵"), "士兵的肉棒", "士兵", "", "外交要求のご褒美での調教")
+				CALL FUCK(LOCAL:5, "欲望, 精愛, 奉仕, 性交, 性技, 露出, 露出, 口淫, Ｖ感", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("士兵"), "士兵的肉棒", "士兵", "", "作为外交要求的奖励调教")
 			CASE 3
 				PRINTFORML %ANAME(LOCAL:5)%被%ANAME(MASTER)%、帯到了陰暗的走廊的陰影処
 				;TranslatedMark 人目につかない廊下の陰に、%ANAME(MASTER)%は%ANAME(LOCAL:5)%を連れ込んだ
@@ -770,7 +770,7 @@ SELECTCASE TRAIN_LIST:RESULT
 				;TranslatedMark 誰かに見られていることも忘れ、%ANAME(LOCAL:5)%はたまらないという声をあげ、腰を振りたくってヨガり狂っている
 				PRINTFORML 不久%ANAME(MASTER)%在腔穴的深処射精了、宮廷中迴響起了%ANAME(LOCAL:5)%高潮時的嬌喘声……
 				;TranslatedMark やがて%ANAME(MASTER)%が膣穴深くで射精すると、%ANAME(LOCAL:5)%は宮廷中に響くほどの声で絶頂した……
-				CALL FUCK(LOCAL:5, "欲望, 精愛, 奉仕, 性交, 性技, 露出, 露出, Ｖ感, Ｖ性交", "処女喪失, 膣内射精", GET_ID(MASTER), "", ANAME(MASTER), "", "外交要求のご褒美での調教")
+				CALL FUCK(LOCAL:5, "欲望, 精愛, 奉仕, 性交, 性技, 露出, 露出, Ｖ感, Ｖ性交", "処女喪失, 膣内射精", GET_ID(MASTER), "", ANAME(MASTER), "", "作为外交要求的奖励调教")
 		ENDSELECT
 		PRINTFORMW ………………
 		PRINTFORML 之後、回到了房間的%ANAME(MASTER)%、不断地調教着因為露出的快感而変得興奮的%ANAME(LOCAL:5)%
@@ -952,7 +952,7 @@ LOCAL:4 = GET_COUNTRY_BOSS(CFLAG:MASTER:所属)
 LOCAL:5 = GET_COUNTRY_BOSS(ARG:0)
 
 CFLAG:(LOCAL:5):薬物依存 += RAND(20, 50)
-PRINTL 
+PRINTL
 PRINTFORMW ………………
 PRINTFORMW %ANAME(LOCAL:5)%用帯着期待的双眼凝視着%ANAME(MASTER)%…
 ;TranslatedMark %ANAME(LOCAL:5)%は期待するような瞳で%ANAME(MASTER)%を見つめている…
@@ -999,7 +999,7 @@ LOCAL:5 = GET_COUNTRY_BOSS(ARG:0)
 SIF !IS_FEMALE(LOCAL:5) || !HAS_PENIS(MASTER)
 	RETURN 0
 
-PRINTL 
+PRINTL
 PRINTFORMW ………………
 PRINTFORMW %ANAME(LOCAL:5)%的眼睛变得空虚了……
 ;TranslatedMark %ANAME(LOCAL:5)%は虚ろな瞳でうなだれている……

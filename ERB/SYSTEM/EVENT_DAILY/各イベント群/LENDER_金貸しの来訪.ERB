@@ -1,4 +1,11 @@
-﻿;---------------------
+﻿@EVENT_DAILY_LENDER_TAG()
+	LOCAL = 0
+	SETBIT LOCAL,EVENT_TAG_男性主角无关
+	SETBIT LOCAL,EVENT_TAG_NTR
+	SETBIT LOCAL,EVENT_TAG_恶堕
+	SETBIT LOCAL,EVENT_TAG_强奸
+	RETURN LOCAL
+;---------------------
 ;発生確率(1000分率 100で10%)
 ;---------------------
 @EVENT_DAILY_LENDER_RATE()
@@ -15,7 +22,7 @@ SIF DAY < 15
 	RETURN 0
 
 ;返済期限がある（借りている）または現在額がある（返済中）ならスキップ
-SIF !(DVAR:金貸し_返済期限 == 0 && DVAR:金貸し_残り融資額 == 0) 
+SIF !(DVAR:金貸し_返済期限 == 0 && DVAR:金貸し_残り融資額 == 0)
 	RETURN 0
 
 RETURN 1
@@ -104,7 +111,7 @@ IF DVAR:金貸し_返済期限 == 0 && DVAR:金貸し_残り融資額 == 0 && DV
 		IF DAILY_TARGET_NUM > 0
 			担保 = DAILY_TARGET:(RAND:DAILY_TARGET_NUM)
 			;(従属国パッチ)担保が辺境伯だったときは無担保
-			IF CFLAG:担保:1702 != 1
+			IF 辺境伯である:担保:0 != 1
 				担保 = -1
 			ENDIF
 		ELSE

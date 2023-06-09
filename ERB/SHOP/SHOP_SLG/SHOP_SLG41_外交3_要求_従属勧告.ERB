@@ -32,19 +32,28 @@ IF DIPLOMACY_REQUEST_CHECK(CFLAG:MASTER:所属, ARG:0, 300)
 	PRINTFORMW 成为了我国的傀儡国
 	;TranslatedMark 我が国の傀儡国となります
 	RESETCOLOR
-	
+
 	;跳转信仰事件
 	TRYCALL SHOP_LIFE_USERSHOP68_PUPPET(ARG:0)
-	
+
+	;ミッション達成
+	IF ACHIEVEMENT_MISSION:2 == 1
+		ACHIEVEMENT_MISSION:2 = 2
+		SETCOLOR カラー_注意
+		PRINTL 任务完成!
+		RESETCOLOR
+		WAIT
+	ENDIF
+
 	;(従属国パッチ)対象勢力が従属国を所有している場合、自勢力の植民地に変更
 	IF COUNTRY_Protectorate:(ARG:0) == 1
 		CALL INIT_Protectorate_Asset_Purchase(ARG:0, CFLAG:MASTER:所属)
 	ENDIF
-	
+
 	CALL INIT_Pupet(ARG:0, CFLAG:MASTER:所属)
 	CALL INIT_Protectorate_TREATY(ARG:0, CFLAG:MASTER:所属)
-	CFLAG:(LOCAL:5):1700 = 1
-	
+	奴隷士官フラグ:(LOCAL:5):0 = 1
+
 	;外交補正の加算処理
 	DIPLOMACY_HATE:(CFLAG:MASTER:所属) += 3
 ELSE

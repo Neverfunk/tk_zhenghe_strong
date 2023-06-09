@@ -21,7 +21,7 @@ ENDSELECT
 RETURNF -1
 
 ;---------------------------------
-;查找是否具有指定名称的被动技能
+;指定した名前のパッシブスキルがあるかを探す
 ;---------------------------------
 @FIND_PASSIVE_SKILL(発動者, スキル名)
 #FUNCTION
@@ -42,9 +42,7 @@ FOR LOCAL, 0, MAX_SKILL_SLOT
 		RETURNF 1
 NEXT
 RETURNF 0
-;---------------------------------
-;查找是否具有指定名称的技能
-;---------------------------------
+
 @FIND_GENERAL_SKILL(発動者, スキル名)
 #DIM 発動者
 #DIMS スキル名
@@ -77,7 +75,7 @@ NEXT
 RETURN 0
 
 ;---------------------------------
-;SP, BASE, CAPTURE, ESCAPE技能发动用
+;SP, BASE, CAPTURE, ESCAPEスキル発動用
 ;---------------------------------
 @SKILL_COMBAT_INVOKE(発動者, 発動番号, ジャンル, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
 #DIM 発動者
@@ -140,6 +138,14 @@ SIF TECHNOLOGY_STATUS:(CFLAG:発動者:所属):TECHNOLOGY_BATTLE_SKILL >= 1
 SIF TECHNOLOGY_STATUS:(CFLAG:発動者:所属):TECHNOLOGY_BATTLE_SKILL >= 7
 	RESULT += 100
 
+;(触手勢力拡張パッチ)発動者が触手勢力であるとき共感レベルによりスキル発動率上昇
+IF CFLAG:発動者:所属 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_触手) || (CFLAG:発動者:所属 == CHANGE_Government_TENTACLE:0 && CHANGE_Government_TENTACLE:1 == 2 && IS_COUNTRY(CHANGE_Government_TENTACLE:0))
+	SIF TENTACLE_SYMPATHY_LV >= 1
+		RESULT += 100
+	SIF TENTACLE_SYMPATHY_LV >= 5
+		RESULT += 100
+ENDIF
+
 IF RAND:1000 >= RESULT * BATTLE_SKILL_RATE:発動側:発動番号 / 100
 	RESETCOLOR
 	RETURN 0
@@ -200,7 +206,7 @@ SIF BATTLE_COMMANDER_NUM:発動側 == 0
 
 SIF BATTLE_SKILL_SEALED:発動側:発動番号 || BATTLE_SUMMONED_CHARA:発動側:発動番号
 	RETURN 0
-	
+
 発動者 = BATTLE_COMMANDER:(発動側):0
 発動番号 = 0
 ;弾幕強化
@@ -212,6 +218,18 @@ SIF TECHNOLOGY_STATUS:(CFLAG:発動者:所属):TECHNOLOGY_BATTLE_SKILL >= 5
 	CALL SKILL_COMBAT_TRY_INVOKE(発動者, 発動番号, スキル_ジャンル_TROOP, 0, 36, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
 SIF TECHNOLOGY_STATUS:(CFLAG:発動者:所属):TECHNOLOGY_BATTLE_SKILL >= 6
 	CALL SKILL_COMBAT_TRY_INVOKE(発動者, 発動番号, スキル_ジャンル_TROOP, 0, 37, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+
+;(触手勢力拡張パッチ)発動者が触手勢力であるとき共感レベルにより能力上昇
+IF CFLAG:発動者:所属 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_触手) || (CFLAG:発動者:所属 == CHANGE_Government_TENTACLE:0 && CHANGE_Government_TENTACLE:1 == 2 && IS_COUNTRY(CHANGE_Government_TENTACLE:0))
+	SELECTCASE TENTACLE_SYMPATHY_LV
+		CASE 2
+			CALL SKILL_COMBAT_TRY_INVOKE(発動者, 発動番号, スキル_ジャンル_TROOP, 10202, 1, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+		CASE 3,4
+			CALL SKILL_COMBAT_TRY_INVOKE(発動者, 発動番号, スキル_ジャンル_TROOP, 10202, 2, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+		CASE IS >= 5
+			CALL SKILL_COMBAT_TRY_INVOKE(発動者, 発動番号, スキル_ジャンル_TROOP, 10202, 3, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+	ENDSELECT
+ENDIF
 
 ;---------------------------------
 ;スキル発動時のデフォルト地の文
@@ -603,7 +621,7 @@ RETURN 1
 
 
 ;---------------------------------------
-;检查是否已经记住指定的技能
+;指定したスキルをもう覚えているかを調べる
 ;---------------------------------------
 @CHECK_SKILL_DUPLICATE(対象, ジャンル, スキルNO, スキルID)
 #FUNCTION

@@ -34,10 +34,15 @@ RETURN 1
 ;-------------------------------------------------
 @LaboGAIRAI
 #DIM 実験対象
-#DIM 被対象者
+#DIM 被実験対象
 #DIMS 名前
 #DIM FIRST_LINE
+#DIM 残り陥落ターン
+#DIM 情報表示キャラ
 FIRST_LINE = LINECOUNT
+
+;SHOW_INFOの初期画面を基本情報にする
+FLAG:能力表示モード = 0
 
 LOCALS:0 = 无
 LOCALS:1 = 委托进行
@@ -63,44 +68,59 @@ CALL SINGLE_DRAWLINE
 
 FOR 実験対象, 0, CHARANUM
 	CALL CHANGE_GAIRAI_subject(実験対象)
-	IF CFLAG:実験対象:1705 == 1
+	IF 外来人に監禁:実験対象:0 == 1
+		残り陥落ターン = TRAIN_FALLEN_TERM:3 - (CFLAG:実験対象:所属 == CFLAG:MASTER:所属)
 		IF STRLENS(ANAME(実験対象)) >= MAX_CHARANAME_LENGTH
 			名前 = %SNAME(実験対象)%
 		ELSE
 			名前 = %ANAME(実験対象)%
 		ENDIF
-		IF CFLAG:実験対象:1707 == 16
+		IF 実験内容:実験対象:0 == 16
 			CALL PRINTBUTTON_CENTER(@"[%名前, MAX_CHARANAME_LENGTH, LEFT%]", 実験対象, 0, 0)
 		ELSE
 			CALL PRINTBUTTON_CENTER(@"[%名前, MAX_CHARANAME_LENGTH, LEFT%]", 実験対象, 0)
 		ENDIF
 		CALL PRINT_SEX(実験対象, 1, 0, 2)
-		PRINT  
-		SELECTCASE CFLAG:実験対象:1707
+		PRINT
+		PRINTBUTTON "[能力]", 実験対象 + 2000
+		PRINT
+		IF GETBIT(TALENT:実験対象:特殊勢力陥落系, 特殊勢力_外来人)
+			SETCOLOR カラー_選択中
+			PRINTFORM  已陷落　　　　
+		ELSEIF SP_TRAIN_COUNT:実験対象:特殊勢力_外来人 >= 残り陥落ターン - 1
+			PRINTFORM  马上陷落　
+		ELSEIF SP_TRAIN_COUNT:実験対象:特殊勢力_外来人 >= 残り陥落ターン - 2
+			SETCOLOR カラー_選択不可
+			PRINTFORM  即将陷落　
+		ELSE
+			PRINTFORM  　　　　　　　
+		ENDIF
+		RESETCOLOR
+		SELECTCASE 実験内容:実験対象:0
 			CASE 0 TO 7, 9 TO 15
-				PRINTFORM [ %LOCALS:(CFLAG:実験対象:1707)% ]
+				PRINTFORM [ %LOCALS:(実験内容:実験対象:0)% ]
 			CASE 8
-				被対象者 = CFLAG:実験対象:1708
-				PRINTFORM [ 和%ANAME(被対象者)%的交配 ]
+				被実験対象 = 被対象者:実験対象:0
+				PRINTFORM [ 和%ANAME(被実験対象)%的交配 ]
 			CASE 16
 				PRINTFORM [ 交配实验中 ]
 		ENDSELECT
-		PRINTL 
+		PRINTL
 	ENDIF
 NEXT
 PRINTL
 
 CALL SINGLE_DRAWLINE
 PRINTBUTTON "[ 200][全部　实验终止]", 200
-PRINTL 
+PRINTL
 PRINTBUTTON "[ 300][全部　委托进行]", 300
-PRINTL 
+PRINTL
 PRINTBUTTON "[ 400][全部　快乐实验]", 400
-PRINTL 
+PRINTL
 PRINTBUTTON "[ 500][繁殖实验室]", 500
-PRINTL 
+PRINTL
 PRINTBUTTON "[1000][　　　取消]", 1000
-PRINTL 
+PRINTL
 
 REDRAW 0
 
@@ -114,28 +134,37 @@ ELSEIF RESULT == 500
 	CALL LaboGAIRAI_breedingROOM
 ELSEIF RESULT == 200
 	FOR 実験対象, 0, CHARANUM
-		IF CFLAG:実験対象:1705 == 1
-			CFLAG:実験対象:1707 = 0
-			CFLAG:実験対象:1708 = 0
+		IF 外来人に監禁:実験対象:0 == 1
+			実験内容:実験対象:0 = 0
+			被対象者:実験対象:0 = 0
 		ENDIF
 	NEXT
 ELSEIF RESULT == 300
 	FOR 実験対象, 0, CHARANUM
-		IF CFLAG:実験対象:1705 == 1
-			CFLAG:実験対象:1707 = 1
-			CFLAG:実験対象:1708 = 0
+		IF 外来人に監禁:実験対象:0 == 1
+			実験内容:実験対象:0 = 1
+			被対象者:実験対象:0 = 0
 		ENDIF
 	NEXT
 ELSEIF RESULT == 400
 	FOR 実験対象, 0, CHARANUM
-		IF CFLAG:実験対象:1705 == 1
-			CFLAG:実験対象:1707 = 2
-			CFLAG:実験対象:1708 = 0
+		IF 外来人に監禁:実験対象:0 == 1
+			実験内容:実験対象:0 = 2
+			被対象者:実験対象:0 = 0
 		ENDIF
 	NEXT
-ELSEIF CFLAG:RESULT:1705 == 1 && CFLAG:RESULT:1707 != 16
+ELSEIF RESULT >= 2000
+	情報表示キャラ = RESULT - 2000
+	;対象キャラの情報を表示
+	CALL SINGLE_DRAWLINE
+	CALL SHOW_INFO(情報表示キャラ)
+	CALL SINGLE_DRAWLINE
+	WAIT
+	CLEARLINE LINECOUNT - FIRST_LINE
+	RESTART
+ELSEIF 外来人に監禁:RESULT:0 == 1 && 実験内容:RESULT:0 != 16
 	CALL LaboGAIRAI_experiment(RESULT)
-	
+
 ELSE
 	CLEARLINE 1
 	GOTO INPUT_LOOP
@@ -189,8 +218,8 @@ LOCALS:65 = 尿道的改造
 CALL SINGLE_DRAWLINE
 CALL SHOW_HEADER(実験対象)
 
-PRINTFORML 现在的实验内容[ %LOCALS:(CFLAG:実験対象:1707)% ]  冷却时间[ {COOLTIME:実験対象:0} ]回合
-PRINTL 
+PRINTFORML 现在的实验内容[ %LOCALS:(実験内容:実験対象:0)% ]  冷却时间[ {COOLTIME:実験対象:0} ]回合
+PRINTL
 
 FOR LOCAL:0, 0, 4
 	PRINTBUTTON @"{LOCAL:0, 2}[%LOCALS:(LOCAL:0), 14%]", LOCAL:0
@@ -317,7 +346,7 @@ NEXT
 
 CALL SINGLE_DRAWLINE
 PRINTBUTTON "1000[取消]", 1000
-PRINTL 
+PRINTL
 
 REDRAW 0
 
@@ -327,51 +356,51 @@ INPUT
 IF RESULT == 1000
 	REDRAW 1
 	RETURN
-	
+
 ELSEIF RESULT >= 0 && RESULT <= 15 && 選択不能フラグ:RESULT == 0
 	SELECTCASE RESULT
 		CASE 0
-			CFLAG:実験対象:1707 = 0
+			実験内容:実験対象:0 = 0
 		CASE 1
-			CFLAG:実験対象:1707 = 1
+			実験内容:実験対象:0 = 1
 		CASE 2
-			CFLAG:実験対象:1707 = 2
+			実験内容:実験対象:0 = 2
 		CASE 3
-			CFLAG:実験対象:1707 = 3
+			実験内容:実験対象:0 = 3
 		CASE 4
-			CFLAG:実験対象:1707 = 4
+			実験内容:実験対象:0 = 4
 		CASE 5
-			CFLAG:実験対象:1707 = 5
+			実験内容:実験対象:0 = 5
 		CASE 6
-			CFLAG:実験対象:1707 = 6
+			実験内容:実験対象:0 = 6
 		CASE 7
-			CFLAG:実験対象:1707 = 7
+			実験内容:実験対象:0 = 7
 		CASE 8
 			CALL LaboGAIRAI_experiment_crossingTEST(実験対象)
 		CASE 9
-			CFLAG:実験対象:1707 = 9
+			実験内容:実験対象:0 = 9
 		CASE 10
-			CFLAG:実験対象:1707 = 10
+			実験内容:実験対象:0 = 10
 		CASE 11
-			CFLAG:実験対象:1707 = 11
+			実験内容:実験対象:0 = 11
 		CASE 12
-			CFLAG:実験対象:1707 = 12
+			実験内容:実験対象:0 = 12
 		CASE 13
-			CFLAG:実験対象:1707 = 13
+			実験内容:実験対象:0 = 13
 		CASE 14
-			CFLAG:実験対象:1707 = 14
+			実験内容:実験対象:0 = 14
 		CASE 15
-			CFLAG:実験対象:1707 = 15
+			実験内容:実験対象:0 = 15
 	ENDSELECT
 ELSE
 	CLEARLINE 1
 	GOTO INPUT_LOOP
 ENDIF
 
-;「本試験」から変更する場合被対象者をリセット
-IF CFLAG:実験対象:1708 > 0 && CFLAG:実験対象:1707 != 8
-	CFLAG:(CFLAG:実験対象:1708):1707 = 0
-	CFLAG:実験対象:1708 = 0
+;「本試験」から変更する場合被実験対象をリセット
+IF 被対象者:実験対象:0 > 0 && 実験内容:実験対象:0 != 8
+	実験内容:(被対象者:実験対象:0):0 = 0
+	被対象者:実験対象:0 = 0
 ENDIF
 
 ;-------------------------------------------------
@@ -379,7 +408,7 @@ ENDIF
 ;-------------------------------------------------
 @LaboGAIRAI_experiment_crossingTEST(実験対象)
 #DIM 実験対象
-#DIM 被対象者
+#DIM 被実験対象
 #DIM FIRST_LINE
 FIRST_LINE = LINECOUNT
 
@@ -396,9 +425,9 @@ CALL SELECT_CHARA_LIST_ONLY_LOGIC_SLG("crossingTEST", "NONE")
 SIF RESULT == -1
 	RETURN 0
 
-被対象者 = RESULT
+被実験対象 = RESULT
 
-PRINTFORML 要选择%ANAME(被対象者)%做为母胎吗？
+PRINTFORML 要选择%ANAME(被実験対象)%做为母胎吗？
 
 ;はい／いいえ入力処理
 CALL ASK_YN()
@@ -407,15 +436,15 @@ IF RESULT == 1
 	GOTO CHARA_LIST_LOOP
 ENDIF
 
-CFLAG:実験対象:1707 = 8
-CFLAG:被対象者:1707 = 16
-CFLAG:実験対象:1708 = 被対象者
+実験内容:実験対象:0 = 8
+実験内容:被実験対象:0 = 16
+被対象者:実験対象:0 = 被実験対象
 
 RETURN 1
 
 @SELECT_CHARA_LIST_SHOW_LOGIC_crossingTEST(対象)
 #DIM 対象
-RETURN CFLAG:対象:1705 == 1 && HAS_VAGINA(対象) && 対象 != experiment_crossing_oneself
+RETURN 外来人に監禁:対象:0 == 1 && HAS_VAGINA(対象) && 対象 != experiment_crossing_oneself
 
 ;-------------------------------------------------
 ;「研究施設」バストサイズを変更(事業凍結)
@@ -429,18 +458,18 @@ RETURN CFLAG:対象:1705 == 1 && HAS_VAGINA(対象) && 対象 != experiment_cros
 ;現在バスト文字 = TOSTR_BUSTSIZE(現在バスト)
 
 ;PRINTFORML %ANAME(実験対象)%のバストサイズを変更します 現在[ %現在バスト文字% ]
-;PRINTL 
+;PRINTL
 ;PRINTBUTTON "[-2  絶壁  ]", -2
-;PRINTL 
+;PRINTL
 ;PRINTBUTTON "[-1  貧乳  ]", -1
-;PRINTL 
+;PRINTL
 ;PRINTBUTTON "[ 0  並乳  ]", 0
-;PRINTL 
+;PRINTL
 ;PRINTBUTTON "[ 1  巨乳  ]", 1
-;PRINTL 
+;PRINTL
 ;PRINTBUTTON "[ 2  爆乳  ]", 2
-;PRINTL 
-;PRINTL 
+;PRINTL
+;PRINTL
 ;PRINTBUTTON "[99 やめる ]", 99
 
 ;REDRAW 0
@@ -451,7 +480,7 @@ RETURN CFLAG:対象:1705 == 1 && HAS_VAGINA(対象) && 対象 != experiment_cros
 ;IF RESULT == 99
 ;	REDRAW 1
 ;	RETURN
-;	
+;
 ;ELSEIF RESULT == 現在バスト
 ;	PRINTL バストサイズを変更しません
 ;	REDRAW 1

@@ -78,11 +78,11 @@ SIF GETBIT(TALENT:(ARG:0):淫乱系, 素質_淫乱_良質母胎)
 
 ;★デバッグ用(100%妊娠)
 ;LOCAL:5 = 1
-
-CALL PRINT_IMAGE_ANIMATION("implant",0,7,3,1)
-CALL PRINT_IMAGE_ANIMATION("implant",0,3,1,0)
-CALL PRINT_IMAGE("implant2")
-
+IF CONFIG:557
+	CALL PRINT_IMAGE_ANIMATION("implant",0,7,3,1)
+	CALL PRINT_IMAGE_ANIMATION("implant",0,3,1,0)
+	CALL PRINT_IMAGE("implant2")
+ENDIF
 IF RAND:(LOCAL:5) < SQRT(LOCAL:2 * 100 + 300)
 	;誰の子供かを判定
 	LOCAL:3 = RAND:(LOCAL:2)
@@ -97,9 +97,10 @@ IF RAND:(LOCAL:5) < SQRT(LOCAL:2 * 100 + 300)
 			CALL RECORD_FATHER_FROM_CREAMPIE_HISTORY(ARG:0)
 			;妊娠発覚
 			CALL DETECT_PREGNANCY(ARG:0)
-			CALL PRINT_IMAGE_ANIMATION("implant",0,12,5,0)
-			CALL PRINT_IMAGE("implant11")
-
+			IF CONFIG:557
+				CALL PRINT_IMAGE_ANIMATION("implant",0,12,5,0)
+				CALL PRINT_IMAGE("implant11")
+			ENDIF
 
 			BREAK
 		ENDIF
@@ -150,6 +151,8 @@ NEXT
 ;---------------------------------------------------------
 @TURNEND_PREGNANT_CHECK_MOTHER(ARG:0)
 
+CALL UPDATE_CREAMPIE_HISTORY(ARG:0)
+
 ;出産後
 IF CFLAG:(ARG:0):育児期間 >= 1
 	;出産後期間を進める
@@ -171,7 +174,6 @@ ENDIF
 
 ;妊娠していない
 IF TALENT:(ARG:0):妊娠 == 0
-	CALL UPDATE_CREAMPIE_HISTORY(ARG:0)
 	CALL CHECK_PREGNANT(ARG:0)
 ;妊娠中
 ELSE
@@ -430,6 +432,7 @@ CALL CLEAR_CREAMPIE_HISTORY(ARG:0)
 #DIM MOTHER
 #DIM CHILD
 #DIM FATHER
+#DIM 変更可能, 5
 ;里子フラグが立っていたら、里子に出したことにする
 IF IS_FOSTER_CHILD(MOTHER)
 	IF IS_PREGNANT_MSG(MOTHER)
@@ -532,7 +535,7 @@ IF IS_PREGNANT_MSG(MOTHER)
 			IF RESULT == 0
 				; CFLAG:CHILD:捕虜先 = CFLAG:MASTER:所属
 				CALL CAPTURE(CHILD,CFLAG:MASTER:所属)
-				CFLAG:CHILD:1703 = 1
+				子供捕虜:CHILD:0 = 1
 				PRINTFORMW 被关进了监狱
 				;TranslatedMark 投獄しました
 				PRINTFORML 要自己取名麼？
@@ -542,6 +545,7 @@ IF IS_PREGNANT_MSG(MOTHER)
 				IF RESULT == 0
 					;手動での命名処理
 					CALL INPUT_CHILD_NAME(CHILD)
+					CALL SET_BIRTH_CHILD_SCHOOL(CHILD)
 					RETURN CHILD
 				ELSE
 					;ランダムに命名
@@ -549,6 +553,7 @@ IF IS_PREGNANT_MSG(MOTHER)
 					PRINTFORMW 這個孩子的姓名就決定是「%CSTR:(CHILD):1%」\@ CSTR:(CHILD):2 != "" ? 、字「%CSTR:(CHILD):2%」 # \@了
 					;TranslatedMark この子の名は「%CSTR:(CHILD):1%」\@ CSTR:(CHILD):2 != "" ? 、字は「%CSTR:(CHILD):2%」 # \@に決まったようです
 					CALL SINGLE_EMPTY_LINE()
+					CALL SET_BIRTH_CHILD_SCHOOL(CHILD)
 					RETURN CHILD
 				ENDIF
 			ENDIF
@@ -578,6 +583,7 @@ IF IS_PREGNANT_MSG(MOTHER)
 			IF RESULT == 0
 				;手動での命名処理
 				CALL INPUT_CHILD_NAME(CHILD)
+				CALL SET_BIRTH_CHILD_SCHOOL(CHILD)
 				RETURN CHILD
 			ENDIF
 		ENDIF
@@ -587,12 +593,71 @@ IF IS_PREGNANT_MSG(MOTHER)
 	PRINTFORMW 這個孩子的姓名就決定是「%CSTR:(CHILD):1%」\@ CSTR:(CHILD):2 != "" ? 、字「%CSTR:(CHILD):2%」 # \@了
 	;TranslatedMark この子の名は「%CSTR:(CHILD):1%」\@ CSTR:(CHILD):2 != "" ? 、字は「%CSTR:(CHILD):2%」 # \@に決まったようです
 	CALL SINGLE_EMPTY_LINE()
+	CALL SET_BIRTH_CHILD_SCHOOL(CHILD)
 ;メッセージ表示を行わない場合、ランダムに名前を設定
 ELSE
 	;ランダムに命名
 	CALL RANDOM_CHILD_NAMING(CHILD)
 ENDIF
+
 RETURN CHILD
+
+
+;---------------------------------------------------------
+;(従属国パッチ)ARG:0の教育機関での教育方法を設定
+;---------------------------------------------------------
+@SET_BIRTH_CHILD_SCHOOL(ARG:0)
+#DIM 変更可能, 5
+
+;(従属国パッチ)「研究・教育機関」が利用可能であるとき教育方法を選べる
+IF IS_TREATY_UNI:(CFLAG:MASTER:所属) && CFLAG:(ARG:0):所属 == CFLAG:MASTER:所属
+	PRINTFORML 教育機関将实行怎样的教育？
+	PRINTFORML (之后可以在「外交部」中进行变更)
+	PRINTBUTTON "[1] 在学校中教育", 1
+	PRINTL
+	IF ID_TO_CHARA(FLAG:触手部屋管理者) != -1
+		変更可能:2 = 1
+		PRINTBUTTON "[2] 泡在触手群中锻炼妖术", 2
+	ENDIF
+	PRINTL
+	IF CFLAG:(ARG:0):捕虜先 > 0 || 奴隷士官フラグ:(ARG:0):0 == 1 || 子供捕虜:(ARG:0):0 == 1
+		変更可能:3 = 1
+		PRINTBUTTON "[3] 「教育」(調教)", 3
+		PRINTL
+		変更可能:4 = 1
+		PRINTBUTTON "[4] 洗脑", 4
+	ENDIF
+	PRINTL
+
+	$INPUT_LOOP_SCHOOL
+	INPUT
+
+	SIF RESULT > 4 || (RESULT == 2 && 変更可能:2 != 1) || (RESULT == 3 && 変更可能:3 != 1) || (RESULT == 4 && 変更可能:4 != 1)
+		GOTO INPUT_LOOP_SCHOOL
+
+	SELECTCASE RESULT
+		CASE 1
+			教育内容:(ARG:0):0 = RESULT
+			PRINTFORML [%ANAME(ARG:0)%]在学校中进行教育
+			PRINTFORMW 战略回合结束时增加各种经验值
+			PRINTFORML
+		CASE 2
+			教育内容:(ARG:0):0 = RESULT
+			PRINTFORML [%ANAME(ARG:0)%]被泡在触手群中锻炼妖术
+			PRINTFORMW 战略回合结束时增加妖术经验值
+			PRINTFORML
+		CASE 3
+			教育内容:(ARG:0):0 = RESULT
+			PRINTFORML [%ANAME(ARG:0)%]进行名为「教育」的调教
+			PRINTFORMW 战略回合结束时增加各种经验值
+			PRINTFORML
+		CASE 4
+			教育内容:(ARG:0):0 = RESULT
+			PRINTFORML [%ANAME(ARG:0)%]接受洗脑
+			PRINTFORMW 战略回合结束时增从属度・依存度
+			PRINTFORML
+	ENDSELECT
+ENDIF
 
 
 ;---------------------------------------------------------
@@ -782,8 +847,8 @@ IF TALENT:(ARG:0):幼兒 && CFLAG:(ARG:0):子の成長度 >= 15 && IS_CHILD(ARG:
 	ENDIF
 
 	;(従属国パッチ)そのキャラの教育内容フラグ・捕虜経験子供フラグをリセット
-	CFLAG:(ARG:0):1701 = 0
-	CFLAG:(ARG:0):1703 = 0
+	教育内容:(ARG:0):0 = 0
+	子供捕虜:(ARG:0):0 = 0
 
 	TALENT:(ARG:0):幼稚 = TALENT:(ARG:0):成長後幼稚
 	TALENT:(ARG:0):幼兒 = 0

@@ -10,8 +10,9 @@
 @MRU_EVENT_3_RECODE_CHARA_DATA
     FOR LOCAL,1,CHARANUM
         IF IS_TOHO_CHARA(LOCAL)
-            MRU_3_记录恋慕:LOCAL = MRU_3_记录恋慕:LOCAL || TALENT:LOCAL:恋慕
-            MRU_3_记录服从:LOCAL = MRU_3_记录服从:LOCAL || TALENT:LOCAL:服従
+            LOCAL:1 = GET_ID(LOCAL)
+            MRU_3_记录恋慕:(LOCAL:1) = MRU_3_记录恋慕:(LOCAL:1) || TALENT:(LOCAL:1):恋慕
+            MRU_3_记录服从:(LOCAL:1) = MRU_3_记录服从:(LOCAL:1) || TALENT:(LOCAL:1):服従
         ENDIF
     NEXT
 ;---------------------
@@ -41,14 +42,20 @@ RETURN デイリー_ジャンル_エロ
 ;---------------------
 @EVENT_DAILY_NO_FUTURE_FOR_TRAITOR_SETTARGET()
 	CALL SELECT_CHARA_RANDOM( "MRU_3", "MRU_3")
+    DAILY_TARGET = RESULT
+    RETURN DAILY_TARGET > 0
 
 @SELECT_CHARA_RANDOM_LOGIC_MRU_3(対象)
 	#DIM 対象
+    #DIM CHARA_ID
 	SIF !IS_TOHO_CHARA(対象)
         RETURN 0
 	SIF !IS_FEMALE(対象)
         RETURN 0
-	SIF (MRU_3_记录恋慕:対象 == TALENT:対象:恋慕)&&(MRU_3_记录服从:対象 == TALENT:対象:服従)
+    CHARA_ID = ID_TO_CHARA(対象)
+    SIF TALENT:CHARA_ID:恋慕 || TALENT:CHARA_ID:服従
+        RETURN 0
+	SIF (MRU_3_记录恋慕:CHARA_ID == TALENT:CHARA_ID:恋慕)&&(MRU_3_记录服从:CHARA_ID == TALENT:CHARA_ID:服従)
 		RETURN 0
 	SIF GET_COUNTRY_BOSS(CFLAG:対象:所属) == 対象
         RETURN 0
@@ -73,84 +80,120 @@ RETURN デイリー_ジャンル_エロ
 ;本体
 ;---------------------
 @EVENT_DAILY_NO_FUTURE_FOR_TRAITOR()
+    #DIM CHARA
     #DIM CHARA_ID
-    CHARA_ID = DAILY_TARGET
+    CHARA = DAILY_TARGET
+    CHARA_ID = ID_TO_CHARA(CHARA)
     IF MRU_3_记录恋慕:CHARA_ID && !TALENT:CHARA_ID:恋慕
-        HTML_PRINT get_text_html(@"曾经和%ANAME(MASTER)%许下了山盟海誓的%ANAME(CHARA_ID)%居然背叛了！")
+        HTML_PRINT get_text_html(@"曾经和%ANAME(MASTER)%许下了山盟海誓的%ANAME(CHARA)%居然背叛了！")
     ELSE
-        HTML_PRINT get_text_html(@"曾经发誓永远向%ANAME(MASTER)%效忠的%ANAME(CHARA_ID)%居然背叛了！")
+        HTML_PRINT get_text_html(@"曾经发誓永远向%ANAME(MASTER)%效忠的%ANAME(CHARA)%居然背叛了！")
     ENDIF
     CALL html_wait
     HTML_PRINT get_text_html(@"拜倒在了不知道从哪里冒出来的人的控制下")
     HTML_PRINT get_text_html(@"明明曾经是一副高傲的模样，现在却低贱到成为快乐的奴隶")
     HTML_PRINT get_text_html(@"一想到这点，%ANAME(MASTER)%就感到怒不可遏")
     CALL html_wait
-    HTML_PRINT get_text_html(@"但是……真的完全是%ANAME(CHARA_ID)%的责任吗？")
+    HTML_PRINT get_text_html(@"但是……真的完全是%ANAME(CHARA)%的责任吗？")
     HTML_PRINT get_text_html(@"生气也好，悲哀也罢，%ANAME(MASTER)%最终得作出抉择")
-    CALL get_text_html_b(@"让%ANAME(CHARA_ID)%付出代价","","")
+    CALL get_text_html_b(@"让%ANAME(CHARA)%付出代价","","")
+    CALL get_text_html_b(@"让%ANAME(CHARA)%回来","3_1","",MRU_BUTTON_FORCE_HIDE)
 	CALL get_text_html_b(@"算了吧","","")
 	CALL get_html_button_input
-    IF RESULT == 1
-        HTML_PRINT get_text_html(@"是不愿意让%PRONOUN(CHARA_ID)%的人生变得更惨了，还是乐于看着%ANAME(CHARA_ID)%在快乐中沉沦？")
+    IF RESULT == 2
+        HTML_PRINT get_text_html(@"是不愿意让%PRONOUN(CHARA)%的人生变得更惨了，还是乐于看着%ANAME(CHARA)%在快乐中沉沦？")
         HTML_PRINT get_text_html(@"没人知道了，总之%ANAME(MASTER)%选择放手不管")
         CALL html_wait
+    ELSEIF RESULT == 1
+        CALL MRU_3_BACK(CHARA)
     ELSE
-        HTML_PRINT get_text_html(@"背叛是绝对不能容忍的，必须告诉所有人背叛自己的代价！")
-        HTML_PRINT get_text_html(@"这样想着的%ANAME(MASTER)%，一步步走向了%ANAME(CHARA_ID)%的\@CFLAG:CHARA_ID:捕虜先 > 0 ? 房间 # 牢房\@")
-        HTML_PRINT get_text_html(@"看见%ANAME(MASTER)%突然进来的%ANAME(CHARA_ID)%吓了一跳")
-        CALL html_wait
-        HTML_PRINT get_text_html(@"长时间被各种各样的人调教过的身心早已经软弱无力")
-        HTML_PRINT get_text_html(@"%ANAME(CHARA_ID)%完全没能反应过来就被%ANAME(MASTER)%按着头抵在了墙上……")
-        HTML_PRINT get_text_html(@"虽然如此，%ANAME(CHARA_ID)%那早已被开发过的身体却不自觉的躁动了起来")
-        CALL html_wait
-        HTML_PRINT get_text_html(@"这个婊子！")
-        HTML_PRINT get_text_html(@"%PRONOUN(CHARA_ID)%的样子更激起了%ANAME(MASTER)%的暴虐心")
-        CALL html_wait
-        HTML_PRINT get_text_html(@"去他妈的！")
-        HTML_PRINT get_text_html(@"今晚一定要让臣服于%ANAME(MASTER)%刻印在%ANAME(CHARA_ID)%的本能上！")
-        CALL html_wait
-        CALL MRU_3_SEX(CHARA_ID)
-        CALL html_wait
-        TALENT:CHARA_ID:自尊心高 = 0
-        TALENT:CHARA_ID:堅強 = 0
-        TALENT:CHARA_ID:傲慢 = 0
-        TALENT:CHARA_ID:自尊心低 = 1
-        TALENT:CHARA_ID:反抗的 = 1
-        TALENT:CHARA_ID:胆怯 = 1
-        TALENT:CHARA_ID:怕痛 = 1
-        CFLAG:CHARA_ID:好感度 = 0
-        CFLAG:CHARA_ID:従属度 = 10000
-        CFLAG:CHARA_ID:依存度 = 300
-		TALENT:CHARA_ID:淫乱系 = 0
-		TALENT:CHARA_ID:特殊勢力素質 = 0
-		TALENT:CHARA_ID:特殊勢力陥落系 = 0
-		TALENT:CHARA_ID:日常系 = 0
-        HTML_PRINT get_text_html(@"彻夜的调教后，%ANAME(CHARA_ID)%心中对%ANAME(MASTER)%的畏惧已经深入骨髓")
-        HTML_PRINT get_text_html(@"跪在%ANAME(MASTER)%的脚边，一边强忍着抽泣一边恳求%ANAME(MASTER)%的原谅")
-        CALL html_wait
-        HTML_PRINT get_text_html(@"但是还不够，%ANAME(CHARA_ID)%还是会为了自己而哭泣")
-        CALL html_wait
-        HTML_PRINT get_text_html(@"必须要让%PRONOUN(CHARA_ID)%的心中只剩下%ANAME(MASTER)%一人")
-        HTML_PRINT get_text_html(@"其余的一切都应该被摒弃")
-        CALL html_wait
-        IF CFLAG:CHARA_ID:捕虜先 == 0
-            CFLAG:CHARA_ID:捕虜先 = CFLAG:MASTER:所属
-            HTML_PRINT get_text_html_n(@"仍然余怒未消的%ANAME(MASTER)%把%ANAME(CHARA_ID)%丢进了大牢")
-        ENDIF
-        HTML_PRINT get_text_html_n(@"听闻了这件事的大家，对%ANAME(MASTER)%感到了畏怖！")
-        FOR LOCAL,1,CHARANUM
-            SIF CFLAG:LOCAL:所属 != CFLAG:MASTER:所属
-                CONTINUE
-            CFLAG:LOCAL:好感度 -= 200
-            CFLAG:LOCAL:従属度 += 200
-        NEXT
-        MRU_3_记录恋慕:CHARA_ID = 0
-        MRU_3_记录服从:CHARA_ID = 1
+        CALL MRU_3_PUNISHIMENT(CHARA)
     ENDIF
     RETURN 1
 
-@MRU_3_SEX(CHARA_ID)
+@MRU_3_PUNISHIMENT(CHARA)
+    #DIM CHARA
     #DIM CHARA_ID
-    PRINTFORML 涩涩
-    CALL FUCK(MASTER, "欲望, 性技, 性交, 加虐, Ｃ, 射精, 露出, 接吻, Ｖ挿入, Ａ挿入", "童貞喪失", 0, "", "", @"%ANAME(CHARA_ID)%的小穴", "对背叛者的惩罚")
-    CALL FUCK(CHARA_ID, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｖ拡張, 露出, 被虐, 苦痛快楽, 緊縛,口淫,Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精", GET_ID(MASTER), @"%ANAME(MASTER)%的肉棒", ANAME(MASTER), "", "作为背叛者的惩罚")
+    CHARA_ID = ID_TO_CHARA(CHARA)
+    HTML_PRINT get_text_html(@"背叛是绝对不能容忍的，必须告诉所有人背叛自己的代价！")
+    HTML_PRINT get_text_html(@"这样想着的%ANAME(MASTER)%，一步步走向了%ANAME(CHARA)%的\@CFLAG:CHARA:捕虜先 > 0 ? 房间 # 牢房\@")
+    HTML_PRINT get_text_html(@"看见%ANAME(MASTER)%突然闯进来的%ANAME(CHARA)%吓了一跳")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"长时间被各种各样的人调教过的身心早已经软弱无力")
+    HTML_PRINT get_text_html(@"%ANAME(CHARA)%完全没能反应过来就被%ANAME(MASTER)%按着头抵在了墙上……")
+    HTML_PRINT get_text_html(@"虽然如此，%ANAME(CHARA)%那早已被开发过的身体却不自觉的躁动了起来")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"这个婊子！")
+    HTML_PRINT get_text_html(@"%PRONOUN(CHARA)%的样子更激起了%ANAME(MASTER)%的暴虐心")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"去他妈的！")
+    HTML_PRINT get_text_html(@"今晚一定要让臣服于%ANAME(MASTER)%刻印在%ANAME(CHARA)%的本能上！")
+    CALL html_wait
+    CALL MRU_3_PUNISHIMENT_SEX(CHARA)
+    TALENT:CHARA:自尊心高 = 0
+    TALENT:CHARA:堅強 = 0
+    TALENT:CHARA:傲慢 = 0
+    TALENT:CHARA:自尊心低 = 1
+    TALENT:CHARA:反抗的 = 0
+    TALENT:CHARA:胆怯 = 1
+    TALENT:CHARA:怕痛 = 1
+    CFLAG:CHARA:好感度 = 0
+    CFLAG:CHARA:従属度 = 10000
+    CFLAG:CHARA:依存度 = 500
+	TALENT:CHARA:淫乱系 = 0
+	TALENT:CHARA:特殊勢力素質 = 0
+	TALENT:CHARA:特殊勢力陥落系 = 0
+	TALENT:CHARA:日常系 = 0
+    HTML_PRINT get_text_html(@"彻夜的调教后，%ANAME(CHARA)%心中对%ANAME(MASTER)%的畏惧已经深入骨髓")
+    HTML_PRINT get_text_html(@"跪在%ANAME(MASTER)%的脚边，一边强忍着抽泣一边恳求%ANAME(MASTER)%的原谅")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"但是还不够，%ANAME(CHARA)%还是会为了自己而哭泣")
+    CALL html_wait
+    HTML_PRINT get_text_html(@"必须要让%PRONOUN(CHARA)%的心中只剩下%ANAME(MASTER)%一人")
+    HTML_PRINT get_text_html(@"其余的一切都应该被摒弃")
+    CALL html_wait
+    IF CFLAG:CHARA:捕虜先 == 0
+        CFLAG:CHARA:捕虜先 = CFLAG:MASTER:所属
+        HTML_PRINT get_text_html_n(@"仍然余怒未消的%ANAME(MASTER)%把%ANAME(CHARA)%丢进了大牢")
+    ENDIF
+    HTML_PRINT get_text_html_n(@"听闻了这件事的大家，对%ANAME(MASTER)%感到了畏怖！")
+    FOR LOCAL,1,CHARANUM
+        SIF CFLAG:LOCAL:所属 != CFLAG:MASTER:所属
+            CONTINUE
+        CFLAG:LOCAL:好感度 -= 200
+        CFLAG:LOCAL:従属度 += 200
+    NEXT
+    MRU_3_记录恋慕:CHARA_ID = 0
+    MRU_3_记录服从:CHARA_ID = 1
+
+@MRU_3_PUNISHIMENT_SEX(CHARA)
+    #DIM CHARA
+    SELECTCASE RAND:2
+        CASE 0
+            HTML_PRINT get_text_html(@"%ANAME(CHARA)%被%ANAME(MASTER)%按在墙上不断地抽插着")
+            HTML_PRINT get_text_html(@"%ANAME(MASTER)%的手死死压在%ANAME(CHARA)%的脑袋上，即便如此，%ANAME(CHARA)%仍然快乐地喘息着")
+            CALL html_wait
+            HTML_PRINT get_text_html(@"看着%PRONOUN(CHARA)%这幅毫不抵抗的样子，更加愤怒的%ANAME(MASTER)%抓起%ANAME(CHARA)%的头不断向墙上撞去")
+            HTML_PRINT get_text_html(@"头部的剧痛覆盖了快感，惊恐的%ANAME(CHARA)%颤抖着求饶起来，更加努力地扭动起腰来取悦%ANAME(MASTER)%")
+            CALL html_wait
+            HTML_PRINT get_text_html(@"但%ANAME(MASTER)%完全不打算就此罢休，就像是把%ANAME(CHARA)%的头当作石头一样继续使用着")
+            HTML_PRINT get_text_html(@"当%ANAME(CHARA)%失去意识时，%PRONOUN(CHARA)%已经头破血流了")
+            CALL EXPEND_LATER()
+        CASE 1
+            HTML_PRINT get_text_html(@"%ANAME(MASTER)%给%ANAME(CHARA)%喂下了精力超群丸，再把%PRONOUN(CHARA)%绑在了床上")
+            HTML_PRINT get_text_html(@"随后用各式各样震动着的棍棒塞满了%ANAME(CHARA)%身上的每一个洞口")
+            CALL html_wait
+            HTML_PRINT get_text_html(@"起初还高兴地淫叫着的%ANAME(CHARA)%在数百次高潮后只能无力地喘息")
+            HTML_PRINT get_text_html(@"瞪大眼睛祈求地看着%ANAME(MASTER)%，像是想要求饶一样，但是贯穿喉咙地巨棒阻止了声音的发出")
+            CALL html_wait
+            HTML_PRINT get_text_html(@"像你这样的垃圾说的话我可是听不懂的，等你什么时候学会说人话了再说吧")
+            HTML_PRINT get_text_html(@"这样宣判以后，%ANAME(MASTER)%离开了")
+            CALL html_wait
+            HTML_PRINT get_text_html(@"早上再来验收成果吧")
+            CALL EXPEND_LATER()
+    ENDSELECT
+    CALL FUCK(MASTER, "欲望, 性技, 性交, 加虐, Ｃ, 射精, 露出, 接吻, Ｖ挿入, Ａ挿入", "童貞喪失", 0, "", "", @"%ANAME(CHARA)%的小穴", "对背叛者的惩罚")
+    CALL FUCK(CHARA, "欲望, 奉仕, 精愛, 性技, 性交, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, Ｖ拡張, 露出, 被虐, 苦痛快楽, 緊縛,口淫,Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 腸内射精, 口内射精", GET_ID(MASTER), @"%ANAME(MASTER)%的肉棒", ANAME(MASTER), "", "作为背叛者的惩罚")
+
+@MRU_3_BACK(CHARA)
+    #DIM CHARA

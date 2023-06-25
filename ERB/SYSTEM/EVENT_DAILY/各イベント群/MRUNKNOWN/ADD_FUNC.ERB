@@ -128,6 +128,7 @@
 		;#; THROW MRU_JUDGE_%judge_name%不存在
 	ENDCATCH
 	RETURN
+
 @generate_button(text,status,reason_num,tooltip,hide_flag = 0)
 	#DIMS text
 	#DIM status
@@ -149,15 +150,16 @@
 	NEXT
 	SIF LOCALS != ""
 		tooltip = %LOCALS%\n%tooltip%
-	IF status && hide_flag !=2
-		HTML_PRINT get_text_html(@"{MRU_JUDGE_BUTTON_NUM}[%text%]",,, tooltip, @"{MRU_JUDGE_BUTTON_NUM}")
-	ELSEIF hide_flag != 1 && hide_flag !=2
-		HTML_PRINT get_text_html(@"{MRU_JUDGE_BUTTON_NUM}[%text%]",,"#606060", tooltip)
+	IF hide_flag != MRU_BUTTON_FORCE_HIDE
+		IF status
+			HTML_PRINT get_text_html(@"{MRU_JUDGE_BUTTON_NUM}[%text%]",,, tooltip, @"{MRU_JUDGE_BUTTON_NUM}")
+		ELSEIF hide_flag != MRU_BUTTON_HIDE_WHILE_CANT_USE
+			HTML_PRINT get_text_html(@"{MRU_JUDGE_BUTTON_NUM}[%text%]",,"#606060", tooltip)
+		ENDIF
 	ENDIF
 	MRU_JUDGE_BUTTON_NUM++
 ;获取html按钮的输入
 @get_html_button_input
-	PRINTL
 	INPUT
 	IF INRANGE(RESULT,0,MRU_JUDGE_BUTTON_NUM-1) && MRU_JUDGE_BUTTON_STATUS:RESULT
 		LOCAL = RESULT
@@ -232,7 +234,7 @@
 
 ;提高RGB的VALUE
 @add_rgb_v(COLOR)
-#FUNCTION
+	#FUNCTION
 	#DIM COLOR
 	#DIM DYNAMIC RED
 	#DIM DYNAMIC GREEN
@@ -252,7 +254,7 @@
 		COLOR = (RED << 16) + (GREEN << 8) + BLUE
 		VALUE = get_v_from_rgb(COLOR)
 	WEND
-	RETURNF color
+	RETURNF COLOR
 
 
 ;获取RGB的HSV

@@ -1,0 +1,240 @@
+﻿;-------------------------------------------------
+;調教中の情報表示
+;-------------------------------------------------
+@SHOW_STATUS_show_picture
+#DIMS 画像名, 9999
+#DIM 捕虜, VARSIZE("PRISONER_TARGET")
+#DIM 慰安者, 8
+#DIM カウンタ
+#DIM 行数
+#DIM 描画開始行数
+#DIM 画像縦幅
+#DIM 画像横幅
+#DIMS  表示HTML
+#DIM 画像表示フラグ
+#DIM 画像表示可能, 9999
+#DIM くすぐり画像表示
+
+VARSET 捕虜, 0
+カウンタ = 0
+画像表示フラグ = 0
+描画開始行数 = LINECOUNT
+
+画像縦幅 = (180 * 100) / GETCONFIG("フォントサイズ")
+画像横幅 = (180 * 100) / GETCONFIG("フォントサイズ")
+
+表示HTML =
+表示HTML += "<p align='left'>"
+
+LOCAL:1 = 0
+FOR LOCAL:0, 0, CHARANUM
+	画像表示可能:(LOCAL:0) = 0
+	IF CFLAG:(LOCAL:0):調教参加フラグ || (FLAG:調教モード != 調教_慰安 && LOCAL:0 == MASTER)
+		;捕虜調教のメインターゲットは後回し
+		IF FLAG:調教モード == 調教_捕虜調教 && FINDELEMENT(PRISONER_TARGET, LOCAL:0) != -1
+			捕虜:カウンタ = LOCAL:1
+			カウンタ ++
+		;慰安系の調教で慰安参加者でない（ヤる側でない）キャラは後回し
+		ELSEIF FLAG:調教モード == 調教_慰安 && !CFLAG:(LOCAL):慰安参加者
+			慰安者:カウンタ = LOCAL:1
+			カウンタ ++
+		ELSE
+			画像名:(LOCAL:0) =
+			SELECTCASE FLAG:調教モード
+				CASE 調教_会う, 調教_子育て
+					画像名:(LOCAL:0) += "服"
+				CASEELSE
+					画像名:(LOCAL:0) += "裸"
+			ENDSELECT
+			くすぐり画像表示 = 0
+			IF TCVAR:(LOCAL:0):51 || TCVAR:(LOCAL:0):52 || TOSTR_EMOTION(LOCAL:0) == "壊" || TOSTR_EMOTION(LOCAL:0) == "虚"
+				画像名:(LOCAL:0) =
+				画像名:(LOCAL:0) += "特殊_疲労_"
+			ELSEIF くすぐり悶笑フラグ:(LOCAL:0):0
+				画像名:(LOCAL:0) =
+				画像名:(LOCAL:0) += "特殊_悶笑_"
+				くすぐり画像表示 = 1
+			ELSE
+				SELECTCASE TOSTR_EMOTION(LOCAL:0)
+					CASE "壊", "虚"
+						画像名:(LOCAL:0) =
+						画像名:(LOCAL:0) += "特殊_疲労_"
+					CASE "良", "悦", "幸"
+						画像名:(LOCAL:0) += "_笑顔_"
+					CASE "憤", "怒", "恨"
+						画像名:(LOCAL:0) += "_怒り_"
+					CASE "憂", "悲", "鬱"
+						画像名:(LOCAL:0) += "_泣き_"
+					CASE "怯", "恐", "狂"
+						画像名:(LOCAL:0) += "_怯え_"
+					CASEELSE
+						IF FLAG:調教モード == 調教_捕虜調教 && !TALENT:(LOCAL:0):恋慕 && !TALENT:(LOCAL:0):親友 && !TALENT:(LOCAL:0):親愛 && !TALENT:(LOCAL:0):恋人
+							IF TALENT:(LOCAL:0):反抗的 || TALENT:(LOCAL:0):堅強 || TALENT:(LOCAL:0):自尊心高 || TALENT:(LOCAL:0):傲慢 || TALENT:(LOCAL:0):傲嬌 || TALENT:(LOCAL:0):難以越過的底線
+								画像名:(LOCAL:0) += "_怒り_"
+							ELSE
+								画像名:(LOCAL:0) += "_怯え_"
+							ENDIF
+						ELSE
+							画像名:(LOCAL:0) += "_通常_"
+						ENDIF
+				ENDSELECT
+			ENDIF
+			画像名:(LOCAL:0) += @"%ANAME(LOCAL:0)%"
+			DEBUGPRINTFORML %画像名:(LOCAL:0)%
+
+			IF !SPRITECREATED(画像名:(LOCAL:0))
+				画像名:(LOCAL:0) =
+				CONTINUE
+			ENDIF
+			表示HTML += @"<img src='%画像名:(LOCAL:0)%' height='{画像縦幅}' width='{画像横幅}'>"
+
+			画像表示フラグ = 1
+		ENDIF
+		SIF !IS_EQUIP_TARGET(LOCAL:0, 180) && くすぐり画像表示 == 1
+			くすぐり悶笑フラグ:(LOCAL:0):0 = 0
+		LOCAL:1 ++
+	ENDIF
+NEXT
+
+カウンタ = 0
+IF FLAG:調教モード == 調教_捕虜調教
+	;捕虜調教のメインターゲットについて処理
+	FOR LOCAL:0, 0, CHARANUM
+		画像表示可能:(LOCAL:0) = 0
+		IF FINDELEMENT(PRISONER_TARGET, LOCAL:0) != -1
+			画像名:(LOCAL:0) =
+			SELECTCASE FLAG:調教モード
+				CASE 調教_会う, 調教_子育て
+					画像名:(LOCAL:0) += "服"
+				CASEELSE
+					画像名:(LOCAL:0) += "裸"
+			ENDSELECT
+			くすぐり画像表示 = 0
+			IF TCVAR:(LOCAL:0):51 || TCVAR:(LOCAL:0):52 || TOSTR_EMOTION(LOCAL:0) == "壊" || TOSTR_EMOTION(LOCAL:0) == "虚"
+				画像名:(LOCAL:0) =
+				画像名:(LOCAL:0) += "特殊_疲労_"
+			ELSEIF くすぐり悶笑フラグ:(LOCAL:0):0
+				画像名:(LOCAL:0) =
+				画像名:(LOCAL:0) += "特殊_悶笑_"
+				くすぐり画像表示 = 1
+			ELSE
+				SELECTCASE TOSTR_EMOTION(LOCAL:0)
+					CASE "壊", "虚"
+						画像名:(LOCAL:0) =
+						画像名:(LOCAL:0) += "特殊_疲労_"
+					CASE "良", "悦", "幸"
+						画像名:(LOCAL:0) += "_笑顔_"
+					CASE "憤", "怒", "恨"
+						画像名:(LOCAL:0) += "_怒り_"
+					CASE "憂", "悲", "鬱"
+						画像名:(LOCAL:0) += "_泣き_"
+					CASE "怯", "恐", "狂"
+						画像名:(LOCAL:0) += "_怯え_"
+					CASEELSE
+						IF FLAG:調教モード == 調教_捕虜調教 && !TALENT:(LOCAL:0):恋慕 && !TALENT:(LOCAL:0):親友 && !TALENT:(LOCAL:0):親愛 && !TALENT:(LOCAL:0):恋人
+							IF TALENT:(LOCAL:0):反抗的 || TALENT:(LOCAL:0):堅強 || TALENT:(LOCAL:0):自尊心高 || TALENT:(LOCAL:0):傲慢 || TALENT:(LOCAL:0):傲嬌 || TALENT:(LOCAL:0):難以越過的底線
+								画像名:(LOCAL:0) += "_怒り_"
+							ELSE
+								画像名:(LOCAL:0) += "_怯え_"
+							ENDIF
+						ELSE
+							画像名:(LOCAL:0) += "_通常_"
+						ENDIF
+				ENDSELECT
+			ENDIF
+			画像名:(LOCAL:0) += @"%ANAME(LOCAL:0)%"
+			DEBUGPRINTFORML %画像名:(LOCAL:0)%
+
+			IF !SPRITECREATED(画像名:(LOCAL:0))
+				画像名:(LOCAL:0) =
+				CONTINUE
+			ENDIF
+			表示HTML += @"<img src='%画像名:(LOCAL:0)%' height='{画像縦幅}' width='{画像横幅}'>"
+
+			画像表示フラグ = 1
+
+			SIF !IS_EQUIP_TARGET(LOCAL:0, 180) && くすぐり画像表示 == 1
+				くすぐり悶笑フラグ:(LOCAL:0):0 = 0
+			カウンタ ++
+		ENDIF
+	NEXT
+ELSEIF FLAG:調教モード == 調教_慰安
+	;民の慰安のメインターゲットの処理
+	FOR LOCAL:0, 0, CHARANUM
+		画像表示可能:(LOCAL:0) = 0
+		IF CFLAG:LOCAL:調教参加フラグ && !CFLAG:(LOCAL):慰安参加者
+			画像名:(LOCAL:0) =
+			SELECTCASE FLAG:調教モード
+				CASE 調教_会う, 調教_子育て
+					画像名:(LOCAL:0) += "服"
+				CASEELSE
+					画像名:(LOCAL:0) += "裸"
+			ENDSELECT
+			くすぐり画像表示 = 0
+			IF TCVAR:(LOCAL:0):51 || TCVAR:(LOCAL:0):52 || TOSTR_EMOTION(LOCAL:0) == "壊" || TOSTR_EMOTION(LOCAL:0) == "虚"
+				画像名:(LOCAL:0) =
+				画像名:(LOCAL:0) += "特殊_疲労_"
+			ELSEIF くすぐり悶笑フラグ:(LOCAL:0):0
+				画像名:(LOCAL:0) =
+				画像名:(LOCAL:0) += "特殊_悶笑_"
+				くすぐり画像表示 = 1
+			ELSE
+				SELECTCASE TOSTR_EMOTION(LOCAL:0)
+					CASE "壊", "虚"
+						画像名:(LOCAL:0) =
+						画像名:(LOCAL:0) += "特殊_疲労_"
+					CASE "良", "悦", "幸"
+						画像名:(LOCAL:0) += "_笑顔_"
+					CASE "憤", "怒", "恨"
+						画像名:(LOCAL:0) += "_怒り_"
+					CASE "憂", "悲", "鬱"
+						画像名:(LOCAL:0) += "_泣き_"
+					CASE "怯", "恐", "狂"
+						画像名:(LOCAL:0) += "_怯え_"
+					CASEELSE
+						IF FLAG:調教モード == 調教_捕虜調教 && !TALENT:(LOCAL:0):恋慕 && !TALENT:(LOCAL:0):親友 && !TALENT:(LOCAL:0):親愛 && !TALENT:(LOCAL:0):恋人
+							IF TALENT:(LOCAL:0):反抗的 || TALENT:(LOCAL:0):堅強 || TALENT:(LOCAL:0):自尊心高 || TALENT:(LOCAL:0):傲慢 || TALENT:(LOCAL:0):傲嬌 || TALENT:(LOCAL:0):難以越過的底線
+								画像名:(LOCAL:0) += "_怒り_"
+							ELSE
+								画像名:(LOCAL:0) += "_怯え_"
+							ENDIF
+						ELSE
+							画像名:(LOCAL:0) += "_通常_"
+						ENDIF
+				ENDSELECT
+			ENDIF
+			画像名:(LOCAL:0) += @"%ANAME(LOCAL:0)%"
+			DEBUGPRINTFORML %画像名:(LOCAL:0)%
+
+			IF !SPRITECREATED(画像名:(LOCAL:0))
+				画像名:(LOCAL:0) =
+				CONTINUE
+			ENDIF
+			表示HTML += @"<img src='%画像名:(LOCAL:0)%' height='{画像縦幅}' width='{画像横幅}'>"
+
+			画像表示フラグ = 1
+
+			SIF !IS_EQUIP_TARGET(LOCAL:0, 180) && くすぐり画像表示 == 1
+				くすぐり悶笑フラグ:(LOCAL:0):0 = 0
+			カウンタ ++
+		ENDIF
+	NEXT
+ENDIF
+
+SIF 画像表示フラグ == 0
+	RETURN
+
+DEBUGPRINTFORML %表示HTML%
+HTML_PRINT 表示HTML
+
+;端数切り上げ。演算内容は 縦幅 / GETCONFIG("一行の高さ")
+行数 = (180 + GETCONFIG("一行の高さ") - 1) / GETCONFIG("一行の高さ")
+
+FOR LOCAL, 0, 行数 - (LINECOUNT - 描画開始行数)
+	PRINTFORML
+NEXT
+
+
+描画開始行数 = 0
+
+

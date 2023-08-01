@@ -1,0 +1,456 @@
+﻿;くすぐり
+
+;-------------------------------------------------
+;コマンド名称
+;-------------------------------------------------
+@COM_NAME180
+IF MTAR_NUM >= 2
+	LOCALS:0 = 同时挠痒痒
+	;TranslatedMark 同時くすぐり
+ELSEIF MPLY_NUM >= 2
+	LOCALS:0 = 一起挠痒痒
+	;TranslatedMark 集団くすぐり
+ELSE
+	LOCALS:0 = 挠痒痒
+	;TranslatedMark くすぐり
+ENDIF
+RESULTS:0 = %LOCALS:0%(主動)
+RESULTS:1 = %LOCALS:0%(被役)
+RESULTS:2 = %LOCALS:0%(使役)
+RESULTS:3 = %LOCALS:0%(被動)
+RESULTS:4 = %LOCALS:0%(使役)
+RESULTS:5 = %LOCALS:0%(展示)
+
+;-------------------------------------------------
+;選択可否判定
+;-------------------------------------------------
+@COM_ABLE180
+CALL COM_ABLE_COMMON(180)
+SIF RESULT == 0
+	RETURN 0
+;1+
+SIF MPLY_NUM <= 0
+	RETURN 0
+;ターゲットはプレイヤーの倍まで
+SIF MTAR_NUM <= 0 || MTAR_NUM > MPLY_NUM * 2
+	RETURN 0
+
+FOR LOCAL:0, 0, MPLY_NUM
+	FOR LOCAL:1, 0, MTAR_NUM
+		SIF !CAN_REACH_BODY(MPLY:(LOCAL:0),MTAR:(LOCAL:1))
+			RETURN 0
+	NEXT
+NEXT
+RETURN 1
+
+;-------------------------------------------------
+;メイン処理
+;-------------------------------------------------
+@COM180
+#DIM 拘束フラグ
+#DIM 目隠しフラグ
+拘束フラグ = 0
+目隠しフラグ = 0
+
+;実行判定
+CALL COM_ORDER_COMMON
+SIF RESULT == 0
+	RETURN 0
+
+;●全プレイヤーについて処理
+FOR LOCAL:0, 0, MPLY_NUM
+	LOCAL:2 = MPLY:(LOCAL:0)
+
+	DOWNBASE:(LOCAL:2):体力 += 100
+
+	EXP:(LOCAL:2):性技経験値 += MAX(MTAR_NUM / 2 + 1, 1)
+
+	SOURCE:(LOCAL:2):奉仕 = SERVE_HOUSHI(LOCAL:2, 70)
+	SOURCE:(LOCAL:2):接触 = 100
+	SOURCE:(LOCAL:2):性行動 = 50
+
+	IF MPLY_NUM >= 2
+		SOURCE:(LOCAL:2):嗜虐 = 60 + (20 * (MPLY_NUM - 1))
+		SOURCE:(LOCAL:2):逸脱 = 20 + (10 * (MPLY_NUM - 1))
+		EXP:(LOCAL:2):嗜虐経験値 += 1
+	ENDIF
+
+	;主人公がターゲットなら愛情のソース追加
+	IF IS_MTAR(MASTER) && MPLY_NUM == 1
+		CALL ADD_SOURCE_AIZYOU(LOCAL:2, 50)
+	ENDIF
+
+	;主導権に応じた優越・屈従のソース追加
+	CALL ADD_SOURCE_INITIATIVE_U(LOCAL:2, 100, 20)
+
+	;奉仕経験値を得られるコマンドのフラグ
+	TCVAR:(LOCAL:2):4 = 1
+
+NEXT
+
+;●全ターゲットについて処理
+FOR LOCAL:0, 0, MTAR_NUM
+	LOCAL:2 = MTAR:(LOCAL:0)
+
+	DOWNBASE:(LOCAL:2):体力 += 60 + (20 * (MPLY_NUM - 1))
+
+	SOURCE:(LOCAL:2):露出 = 100
+	SOURCE:(LOCAL:2):接触 = 100
+	SOURCE:(LOCAL:2):性行動 = 180
+
+	IF MPLY_NUM >= 2 || IS_EQUIP_TARGET(LOCAL:2, 180)
+		SOURCE:(LOCAL:2):苦痛 = 100 + (40 * (MPLY_NUM - 1))
+		SOURCE:(LOCAL:2):逸脱 = 20 + (10 * (MPLY_NUM - 1))
+		EXP:(LOCAL:2):被虐経験値 += 1
+	ENDIF
+
+	拘束フラグ = 0
+	SIF IS_EQUIP_TARGET(LOCAL:2, 85, 208)
+		拘束フラグ = 1
+
+	IF 拘束フラグ
+		SOURCE:(LOCAL:2):苦痛 += 50
+		SOURCE:(LOCAL:2):逸脱 += 10
+	ENDIF
+
+	目隠しフラグ = 0
+	SIF IS_EQUIP_TARGET(LOCAL:2, 84)
+		目隠しフラグ = 1
+
+	IF 目隠しフラグ
+		SOURCE:(LOCAL:2):接触 += 20
+		SOURCE:(LOCAL:2):性行動 += 30
+		SOURCE:(LOCAL:2):苦痛 += 50
+		SOURCE:(LOCAL:2):逸脱 += 10
+	ENDIF
+
+	;主人公がプレイヤーなら愛情のソース追加
+	IF IS_MPLY(MASTER) && MPLY_NUM == 1
+		CALL ADD_SOURCE_AIZYOU(LOCAL:2, 100)
+	ENDIF
+
+	;主導権に応じた優越・屈従のソース追加
+	CALL ADD_SOURCE_INITIATIVE_U(LOCAL:2, 60, 0)
+
+	CALL SET_AMOUNT_TICKLE180(LOCAL:2)
+	;全ターゲットに尿残量がたまっていく
+	IF くすぐり悶笑フラグ:(LOCAL:2):0
+		SOURCE:(LOCAL:2):露出 += 300
+		TCVAR:(LOCAL:2):54 += 150
+	ELSE
+		TCVAR:(LOCAL:2):54 += 20
+	ENDIF
+
+NEXT
+
+;主導度変化基準値
+TFLAG:49 = 2
+
+;倒錯度変化基準値
+IF MPLY_NUM >= 2
+	TFLAG:50 = 1
+ELSE
+	TFLAG:50 = -1
+ENDIF
+
+;レズ・ＢＬ経験基準値
+TFLAG:51 = 5
+
+RETURN 1
+
+;-------------------------------------------------
+;継続コマンドかどうかを設定
+;-------------------------------------------------
+@COM_IS_EQUIP180
+RETURN 1
+
+;-------------------------------------------------
+;継続状態の処理
+;-------------------------------------------------
+@COM_EQUIP180(ARG:0)
+#DIM 拘束フラグ
+#DIM 目隠しフラグ
+拘束フラグ = 0
+目隠しフラグ = 0
+
+;●全プレイヤーについて判定
+FOR LOCAL:0, 0, MEQUIP_PLAYER_NUM:(ARG:0)
+	LOCAL:2 = MEQUIP_PLAYER:(ARG:0):(LOCAL:0)
+
+	DOWNBASE:(LOCAL:2):体力 += 20
+
+	EXP:(LOCAL:2):性技経験値 += MAX(MEQUIP_TARGET_NUM:(ARG:0) / 2 + 1, 1)
+
+
+	SOURCE:(LOCAL:2):嗜虐 = 50 + (10 * (MPLY_NUM - 1))
+	SOURCE:(LOCAL:2):逸脱 = 30 + (5 * (MPLY_NUM - 1))
+	SOURCE:(LOCAL:2):奉仕 += SERVE_HOUSHI(LOCAL:2, 30)
+	SOURCE:(LOCAL:2):接触 += 30
+	SOURCE:(LOCAL:2):性行動 += 20
+	EXP:(LOCAL:2):嗜虐経験値 += 1
+
+	;奉仕経験値を得られるコマンドのフラグ
+	TCVAR:(LOCAL:2):4 = 1
+
+	;倒錯度変化基準値
+	TCVAR:(LOCAL:2):50 += 1
+NEXT
+
+;●全ターゲットについて判定
+FOR LOCAL:0, 0, MEQUIP_TARGET_NUM:(ARG:0)
+	LOCAL:2 = MEQUIP_TARGET:(ARG:0):(LOCAL:0)
+
+	DOWNBASE:(LOCAL:2):体力 += 10
+
+	SOURCE:(LOCAL:2):露出 += 50
+	SOURCE:(LOCAL:2):接触 += 30
+	SOURCE:(LOCAL:2):性行動 += 60
+
+	SOURCE:(LOCAL:2):苦痛 += 50 + (20 * (MPLY_NUM - 1))
+	SOURCE:(LOCAL:2):逸脱 += 70 + (10 * (MPLY_NUM - 1))
+	EXP:(LOCAL:2):被虐経験値 += 1
+
+	拘束フラグ = 0
+	SIF IS_EQUIP_TARGET(LOCAL:2, 85, 208)
+		拘束フラグ = 1
+
+	IF 拘束フラグ
+		SOURCE:(LOCAL:2):接触 += 20
+		SOURCE:(LOCAL:2):性行動 += 30
+		SOURCE:(LOCAL:2):苦痛 += 50
+		SOURCE:(LOCAL:2):逸脱 += 10
+	ENDIF
+
+	目隠しフラグ = 0
+	SIF IS_EQUIP_TARGET(LOCAL:2, 84)
+		目隠しフラグ = 1
+
+	IF 目隠しフラグ
+		SOURCE:(LOCAL:2):接触 += 20
+		SOURCE:(LOCAL:2):性行動 += 30
+		SOURCE:(LOCAL:2):苦痛 += 50
+		SOURCE:(LOCAL:2):逸脱 += 10
+	ENDIF
+
+	CALL SET_AMOUNT_TICKLE180(LOCAL:2)
+	;全ターゲットに尿残量がたまっていく
+	IF くすぐり悶笑フラグ:(LOCAL:2):0
+		SOURCE:(LOCAL:2):露出 += 300
+		TCVAR:(LOCAL:2):54 += 150
+	ELSE
+		TCVAR:(LOCAL:2):54 += 20
+	ENDIF
+
+
+
+	;倒錯度変化基準値
+	TCVAR:(LOCAL:2):50 += 2
+NEXT
+
+;-------------------------------------------------
+;継続中の表示
+;-------------------------------------------------
+@EQUIP_MESSAGE180(ARG:0)
+LOCAL:2 = 0
+RESULTS = %EQUIP_PLAYER_ANAME(ARG:0)%正在给%EQUIP_TARGET_ANAME(ARG:0)%挠痒痒中
+;TranslatedMark %EQUIP_PLAYER_ANAME(ARG:0)%が%EQUIP_TARGET_ANAME(ARG:0)%にくすぐり中
+
+;-------------------------------------------------
+;継続中の地の文(前文)
+;-------------------------------------------------
+@COM_TEXT_BEFORE_EQUIP180(ARG:0)
+
+PRINTFORML  %EQUIP_PLAYER_ANAME(ARG:0)%正在挠%EQUIP_TARGET_ANAME(ARG:0)%的痒痒...
+;TranslatedMark %EQUIP_PLAYER_ANAME(ARG:0)%が%EQUIP_TARGET_ANAME(ARG:0)%の身体をくすぐっている…
+
+;-------------------------------------------------
+;継続を解除したときの地の文
+;-------------------------------------------------
+@COM_TEXT_RELEASE_EQUIP180(ARG:0)
+くすぐり悶笑フラグ:(MEQUIP_TARGET:(ARG:0):0):0 = 0
+
+;-------------------------------------------------
+;固有の実行判定
+;-------------------------------------------------
+@COM_ORDER_PLAYER180(ARG:0)
+;実行値の設定
+TCVAR:(ARG:0):25 = 60
+
+;共通部分
+CALL COM_ORDER(ARG:0)
+
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲望Lv{ABL:(ARG:0):欲望}", ABL:(ARG:0):欲望 * 1)
+CALL COM_ORDER_ELEMENT(ARG:0, @"奉仕Lv{ABL:(ARG:0):奉仕}", ABL:(ARG:0):奉仕 * 4)
+
+LOCAL:0 = GET_PALAMLV(PALAM:(ARG:0):欲情)
+CALL COM_ORDER_ELEMENT(ARG:0, @"欲情Lv{LOCAL:0}", MIN(LOCAL:0 * 2, 20))
+
+IF TCVAR:(ARG:0):60
+	CALL COM_ORDER_ELEMENT(ARG:0, "媚薬", 6)
+ENDIF
+
+IF TALENT:(ARG:0):害羞
+	CALL COM_ORDER_ELEMENT(ARG:0, "害羞", -1)
+ENDIF
+IF TALENT:(ARG:0):献身的
+	CALL COM_ORDER_ELEMENT(ARG:0, "献身的", 6)
+ENDIF
+IF TALENT:(ARG:0):否定快感
+	CALL COM_ORDER_ELEMENT(ARG:0, "否定快感", -1)
+ENDIF
+
+;合意
+IF !TALENT:(ARG:0):合意 && !TALENT:(ARG:0):親友
+	CALL COM_ORDER_ELEMENT(ARG:0, "合意无", -10)
+ENDIF
+;性知識なし
+IF ABL:(ARG:0):性知識 == 0
+	CALL COM_ORDER_ELEMENT(ARG:0, "性知識无", 10)
+ENDIF
+;幼稚
+IF TALENT:(ARG:0):幼稚
+	CALL COM_ORDER_ELEMENT(ARG:0, "幼稚", 5)
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;地の文(前文)
+;-------------------------------------------------
+@COM_TEXT_BEFORE180
+
+;ターゲットが2人
+IF MTAR_NUM == 2
+	LOCALS:1 = %ANAME(MTAR:0)%和%ANAME(MTAR:1)%
+	;TranslatedMark %ANAME(MTAR:0)%と%ANAME(MTAR:1)%
+;ターゲットが1人
+ELSE
+	LOCALS:1 = %ANAME(MTAR:0)%
+ENDIF
+
+;プレイヤーが複数
+IF MPLY_NUM >= 3
+	LOCALS:2 = %ANAME(MPLY:0)%们
+	;TranslatedMark %ANAME(MPLY:0)%達
+;プレイヤーが2人
+ELSEIF MPLY_NUM == 2
+	LOCALS:2 = %ANAME(MPLY:0)%和%ANAME(MPLY:1)%
+	;TranslatedMark %ANAME(MPLY:0)%と%ANAME(MPLY:1)%
+;プレイヤーが1人
+ELSE
+	LOCALS:2 = %ANAME(MPLY:0)%
+ENDIF
+
+SELECTCASE GET_COM_INITIATIVE()
+	;プレイヤーに主導権
+	CASE 0
+		PRINTFORMW  %LOCALS:2%对%LOCALS:0%%LOCALS:1%用指尖轻轻滑过腋下和肚子挠痒痒…
+		;TranslatedMark %LOCALS:2%は%LOCALS:0%%LOCALS:1%の腋やお腹に指を這わせくすぐっ%TARGET_STR("た", "てきた")%…
+	;ターゲットに主導権
+	CASE 1
+		PRINTFORMW  %LOCALS:2%听从了%LOCALS:1%的要求,%LOCALS:0%挠着%LOCALS:1%的腋下和肚子...
+		;TranslatedMark %LOCALS:2%は%LOCALS:1%に言われるまま、%LOCALS:0%%LOCALS:1%の腋やお腹をくすぐった…
+	;第三者に主導権
+	CASEELSE
+		PRINTFORML  %ANAME(TFLAG:45)%命令%LOCALS:2%去挠%LOCALS:1%的痒。
+		;TranslatedMark %ANAME(TFLAG:45)%は%LOCALS:2%に%LOCALS:1%の体をくすぐるように命令した
+		PRINTFORMW  %LOCALS:2%抓住了%LOCALS:0%%LOCALS:1%的腋下和肚子,轻轻地挠痒痒......
+		;TranslatedMark %LOCALS:2%は%LOCALS:0%%LOCALS:1%の腋やお腹に指を這わせくすぐった…
+ENDSELECT
+
+;--------------------------------------------------------
+;地の文(パラメータ・刻印変動後)
+;--------------------------------------------------------
+@COM_TEXT_LAST180
+FOR LOCAL:0, 0, MTAR_NUM
+	LOCAL:1 = MTAR:(LOCAL:0)
+
+	IF ((LOCAL:1 != MASTER || CONFIG:441) && !IS_ANIMAL(LOCAL:1)) && !IS_ANIMAL(LOCAL:1)
+
+		IF TCVAR:(LOCAL:1):52
+			;気絶中
+			PRINTFORML  %ANAME(LOCAL:1)%失去知觉,浑身颤抖不停。
+			;TranslatedMark %ANAME(LOCAL:1)%は意識を失ったままビクビクと体を震わせている
+		ELSEIF くすぐり悶笑フラグ:(LOCAL:1):0
+			PRINTFORML  %ANAME(LOCAL:1)%受不了痒,笑着在地上打滚。
+			;TranslatedMark %ANAME(LOCAL:1)%はくすぐったさに悶えて笑い転げている
+		ELSE
+			IF TALENT:(LOCAL:1):反抗的 && !TALENT:(LOCAL:1):合意
+				PRINTFORML  %ANAME(LOCAL:1)%从不会笑,总是忍受着别人调皮捣蛋的骚扰。
+				;TranslatedMark %ANAME(LOCAL:1)%は決して笑うまいとくすぐったさに耐えている
+			ELSE
+				PRINTFORML  %ANAME(LOCAL:1)%正忍受着被挠痒痒的感觉。
+				;TranslatedMark %ANAME(LOCAL:1)%はくすぐったさに耐えている
+			ENDIF
+
+		ENDIF
+
+	ENDIF
+NEXT
+
+;-------------------------------------------------
+
+;コマンド区分
+;-------------------------------------------------
+
+@COM_AVAILABLE_WHEN180
+RETURN コマンド_ウフフ
+
+;--------------------
+;性嗜好用関数
+;--------------------
+@COM_PREFERENCE_PLAYER_180()
+RETURN POWER(2, 性的嗜好_愛撫したい)
+
+@COM_PREFERENCE_TARGET_180()
+RETURN POWER(2, 性的嗜好_愛撫されたい)
+
+;-------------------------------------------------
+;くすぐり合計ターン数を設定
+;-------------------------------------------------
+@SET_AMOUNT_TICKLE180(ARG:0)
+#DIM くすぐり耐性
+くすぐり耐性 = 0
+
+くすぐり合計ターン数:(ARG:0):0 ++
+
+SIF TALENT:(ARG:0):反抗的
+	くすぐり耐性 ++
+SIF TALENT:(ARG:0):堅強
+	くすぐり耐性 += 2
+SIF TALENT:(ARG:0):自尊心高
+	くすぐり耐性 ++
+SIF TALENT:(ARG:0):自制心
+	くすぐり耐性 += 2
+SIF TALENT:(ARG:0):冷漠
+	くすぐり耐性 ++
+SIF TALENT:(ARG:0):感情缺乏
+	くすぐり耐性 ++
+SIF TALENT:(ARG:0):孤高
+	くすぐり耐性 ++
+SIF TALENT:(ARG:0):害羞
+	くすぐり耐性 ++
+SIF TALENT:(ARG:0):否定快感
+	くすぐり耐性 += 2
+
+SIF TALENT:(ARG:0):不知羞恥
+	くすぐり耐性 --
+SIF TALENT:(ARG:0):漏尿癖
+	くすぐり耐性 --
+SIF TALENT:(ARG:0):倒錯的
+	くすぐり耐性 --
+SIF TALENT:(ARG:0):幼兒
+	くすぐり耐性 -= 2
+SIF TALENT:(ARG:0):幼稚
+	くすぐり耐性 --
+SIF TALENT:(ARG:0):恋慕
+	くすぐり耐性 --
+SIF TALENT:(ARG:0):親愛
+	くすぐり耐性 --
+SIF TALENT:(ARG:0):服従
+	くすぐり耐性 --
+SIF TALENT:(ARG:0):隷属
+	くすぐり耐性 --
+
+SIF くすぐり合計ターン数:(ARG:0):0 >= くすぐり耐性
+	くすぐり悶笑フラグ:(ARG:0):0 = 1
+

@@ -63,46 +63,94 @@ RETURN デイリー_ジャンル_その他
 
 
 IF KDVAR:対象:サニー_いたずらに命をかけて == 0 || 判定値 < RAND:100
-	CALL COLOR_PRINTW(@"什麼情況？？？？", カラー_警告)
+	CALL COLOR_PRINTW("什麼情況？？？？", カラー_警告)
+	;TranslatedMark あれっ？？？？
 	PRINTFORML 明明走在熟悉的道路上、卻不知不覚間就失去方向了
+	;TranslatedMark いつもの道を歩いていたはずなのに、気がついたら全く知らないところに出ていた
 	PRINTFORML 当注意到了的時候、已経找不到回去的路了
+	;TranslatedMark ついでにいうと、振り返った道にも見覚えがない
 	PRINTFORMW 換句話説、迷路了……
+	;TranslatedMark なんと、迷子になってしまったようだ……
 	PRINTFORMW 結果、返回據点時已経是黄昏了
+	;TranslatedMark 結局、拠点に戻るころには日がとっぷり暮れてしまった
+	;(画像パッチ)
+	CALL 画像表示(対象, 1, 2)
 	PRINTFORMW 「Yeah、大成功！」
+	;TranslatedMark 「いぇーい、大成功！」
+	;(画像パッチ)
+	CALL 画像表示(スター, 1, 2)
 	PRINTFORMW 「真的沒有発現我們呢ー」
+	;TranslatedMark 「まさか気づかないなんてねー」
+	;(画像パッチ)
+	CALL 画像表示(ルナ, 1, 2)
 	PRINTFORMW 「想要発現我們才沒有那麼容易」
+	;TranslatedMark 「まぁ私たちに気づけるほうが珍しいんだけどね」
 	CALL ADD_COOLTIME(MASTER, 1)
 KDVAR:対象:サニー_いたずらに命をかけて　++
 	RETURN 1
 ENDIF
 
 PRINTFORML 明明走在熟悉的道路上、卻不知不覚間就失去方向了……
+;TranslatedMark いつもの道を歩いていたはずなのに、気がついたら全く知らないところに出ていた……
 PRINTFORML 但是%ANAME(MASTER)%知道這是妖精的悪作劇！
+;TranslatedMark それは妖精のしわざだと、%ANAME(MASTER)%は見破った！
 PRINTFORMW 捕捉到三隻妖精！
+;TranslatedMark いたずらをしていた妖精三匹を捕らえた！
+;(画像パッチ)
+CALL 画像表示(対象, 1, 4)
 PRINTFORMW 「哇啊被発現了！　等等%ANAME(ルナ)%、有好好消除我們的気息嗎！？」
+;TranslatedMark 「あわわわバレちゃった！　ちょっと%ANAME(ルナ)%、ちゃんと気配消したの！？」
+;(画像パッチ)
+CALL 画像表示(ルナ, 1, 3)
 PRINTFORMW 「%ANAME(対象)%才是！　　有好好控制光線隠藏我們的身影嗎！？」
+;TranslatedMark 「%ANAME(対象)%こそ！　　ちゃんと光曲げてたんでしょうね！？」
+;(画像パッチ)
+CALL 画像表示(スター, 1, 2)
 PRINTFORMW 「……」
 PRINTFORMW 「%ANAME(スター)%！　快幇我們逃跑呀！」
+;TranslatedMark 「%ANAME(スター)%！　何逃げようとしてんのよ！」
 PRINTFORML ……根據她們的対話、她們貌似有控制光以及声音相関的能力
+;TranslatedMark ……会話からするに、どうやらそれぞれ光と音と気配に関連した能力をもつらしい
 PRINTFORMW 雖然以妖精的頭腦頂多只会拿来用作悪作劇、但如果被聰明的人利用的話、多多少少会用来做不好的事情
+;TranslatedMark 妖精だからいたずらくらいにしか使えないが、もう少し知恵のある輩であれば、いくらでも悪用できるだろう
 PRINTFORMW 危険だ。要怎麼辦……
+;TranslatedMark 危険だ。どうしたものか……
 PRINTFORML
 CALL ASK_YN("嘛、快走吧", "打入大牢")
+;TranslatedMark "まあ、逃がしてやろう", "牢に放り込んでおく"
 
 IF RESULT == 0
+	;(画像パッチ)
+	CALL 画像表示(対象, 1, 2)
+	;(画像パッチ)
+	CALL 画像表示(ルナ, 1, 2)
+	;(画像パッチ)
+	CALL 画像表示(スター, 1, 2)
 	PRINTFORMW 「誒、可以嗎？　太好了！」
+	;TranslatedMark 「えっ、いいの？　やった！」
 	PRINTFORMW 「謝謝你！　這個恩情……我們不会忘記的！」
+	;TranslatedMark 「ありがと！　この恩は……まぁ忘れるかもしんないけど！」
 	PRINTFORMW 三隻妖精向遠処飛去……
+	;TranslatedMark 三匹はそろってどこかへ飛んでいった……
 	CFLAG:対象:好感度 += 100
 	CFLAG:スター:好感度 += 100
 	CFLAG:ルナ:好感度 += 100
 	IF IS_COUNTRY(CFLAG:対象:所属)
 		CALL COLOR_PRINTW(@"与三隻妖精的所属勢力、%ANAME(GET_COUNTRY_BOSS(CFLAG:対象:所属))%之間的関係改善了", カラー_注意)
+		;TranslatedMark 三匹が所属する、%ANAME(GET_COUNTRY_BOSS(CFLAG:対象:所属))%との関係が改善されました
 		CALL CHANGE_RELATION_C_TO_C(CFLAG:対象:所属, CFLAG:MASTER:所属, 300, -300)
 	ENDIF
 ELSE
+	;(画像パッチ)
+	CALL 画像表示(対象, 1, 5)
+	;(画像パッチ)
+	CALL 画像表示(ルナ, 1, 4)
+	;(画像パッチ)
+	CALL 画像表示(スター, 1, 4)
 	PRINTFORMW 「誒、放、放過我們吧！　不要ー！」
+	;TranslatedMark 「えっ、ろ、牢屋は勘弁！　やだー！」
 	PRINTFORMW 将三隻妖精打入大牢了……
+	;TranslatedMark 三匹まとめて牢屋に放り込んでおいた……
 	CALL CAPTURE(対象, CFLAG:MASTER:所属)
 	CALL CAPTURE(スター, CFLAG:MASTER:所属)
 	CALL CAPTURE(ルナ, CFLAG:MASTER:所属)

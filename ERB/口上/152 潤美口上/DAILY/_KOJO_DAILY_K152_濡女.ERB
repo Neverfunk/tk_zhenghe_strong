@@ -1,0 +1,215 @@
+﻿;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K152_LADY_BY_WATER_RATE(対象)
+#DIM 対象
+RETURN 100
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K152_LADY_BY_WATER_DECISION(対象)
+#DIM 対象
+
+;終わってたら発生しない
+SIF KDVAR:対象:潤美_濡女 == -1
+	RETURN 0
+
+;好感度1500以下だと駄目
+SIF CFLAG:対象:好感度 <= 1500
+	RETURN 0
+
+;対象が女でないとだめ
+SIF !IS_FEMALE(対象)
+	RETURN 0
+
+;主人公と同一勢力で捕虜でなく、主人公がペニス持ち
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0) && HAS_PENIS(MASTER)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K152_LADY_BY_WATER_GENRE(対象)
+#DIM 対象
+RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K152_LADY_BY_WATER(対象)
+#DIM 対象
+
+PRINTL
+PRINTFORML  一天,%ANAME(MASTER)%沿着河边散步,突然看见%ANAME(対象)%一只手按着胸口,站在河面上。
+;TranslatedMark ある日、%ANAME(MASTER)%が川沿いを散歩していると、片手で胸元を押さえながら川面に佇む%ANAME(対象)%の姿が目に入った
+PRINTFORMW  当走近想要看看发生了什么的时候...
+;TranslatedMark 何があったのかと近づくと…
+PRINTFORML 「嗨%ANAME(MASTER)%。正好遇到你了。其实我刚在游泳,结果上衣不小心破了洞,被水流冲走了......」
+;TranslatedMark 「やあ%ANAME(MASTER)%。ちょうど良かった。実はちょいと泳いでたら上の服が破れて流されちゃってねぇ…」
+PRINTFORMW 「岸边放着的那件工作服,如果你能帮我拿过来就非常感谢了,可以帮这个忙吗?」
+;TranslatedMark 「そこの岸に置いてる半纏を持ってきてくれたら助かるんだが…、頼めるかい？」
+PRINTL
+PRINTFORML  她确实现在正处于上半身赤裸的状态。用一只手无法完全掩盖住那对巨大的乳房,一边用手抚摸按压,一边招手示意。
+;TranslatedMark 確かに彼女は今、上半身裸の状態だった。両手でも隠しきれない大きな乳房を片手でむにゅ、と押さえながら手招きしている
+PRINTFORMW  但是看起来她并不慌张,也不羞涩。反而更像是在试图引诱%ANAME(MASTER)%......
+;TranslatedMark だがその割には慌ててるようにも恥ずかしがってるようにも見えない。むしろ%ANAME(MASTER)%を誘いこもうとしているような…
+PRINTFORMW  她被淫靡的气氛环绕,微笑着走过来。这样一来,%ANAME(MASTER)%感觉到了一种异样的氛围。
+;TranslatedMark そんな淫靡な空気を纏ってこちらに微笑みかけてくる。その様に、%ANAME(MASTER)%は何か異様な雰囲気を感じた
+PRINTFORML  就这样直接靠近她,像她说的那样,可以吗......
+;TranslatedMark このまま彼女の言うとおり、近づいていいものか……
+PRINTW
+
+CALL ASK_YN("靠近","不敢靠近怀疑地走近")
+;TranslatedMark "近寄る", "怪しんで近づかない"
+;近寄る
+IF RESULT == 0
+	PRINTFORML  %ANAME(対象)%每次招手时,被一只手抓住的爆乳就摇晃来晃去。
+	;TranslatedMark %ANAME(対象)%が手招きするたび、片手で押さえられてる爆乳がゆさゆさと揺れる
+	PRINTFORMW  那景象对%ANAME(MASTER)%来说具有足以超越她警惕心的吸引力。
+	;TranslatedMark その光景は、%ANAME(MASTER)%の警戒心を超える吸引力となるには十分だった
+	PRINTFORMW  若是能近距离观察就好了......怀着这样邪恶的想法,%ANAME(MASTER)%慢慢地向%ANAME(対象)%靠近......
+	;TranslatedMark あわよくば間近で…。そんな邪な考えを浮かべつつ、%ANAME(MASTER)%は%ANAME(対象)%に近づいていく…
+	PRINTL
+	PRINTFORML 「哈哈...对不起呢%ANAME(MASTER)%。来吧,再过来一点...抓到你了♥」
+	;TranslatedMark 「ふふ…すまないねぇ%ANAME(MASTER)%。さあ、もっとこっちへ、………………捕まえた♥」
+	PRINTFORMW  %ANAME(MASTER)%一靠近,%ANAME(対象)%就把她推倒在地。
+	;TranslatedMark %ANAME(MASTER)%が近づいた途端、%ANAME(対象)%は%ANAME(MASTER)%を押し倒した
+	PRINTFORML  浅滩的关系,不会有溺水的危险,但还是全身都湿透了。
+	;TranslatedMark 浅瀬だったため溺れる心配は無いが、それでも全身が濡れてしまった
+	PRINTFORMW  但是,这些都被眼前的景象所淹没了。%ANAME(対象)%那对像一个大瓜一般大小的乳房,就在%ANAME(MASTER)%的面前鼓胀着。
+	;TranslatedMark しかしそんなことがどうでもよくなる光景が広がる。%ANAME(対象)%の、大きめなメロンほどもある乳房が今%ANAME(MASTER)%の眼前に実っている
+	PRINTL
+	PRINTFORML 「哈哈,你太天真了%ANAME(MASTER)%。牛鬼也被称为『濡女』,是一种会将人拖入水边的妖怪啊......」
+	;TranslatedMark 「ふふふ、無用心だぞ%ANAME(MASTER)%。牛鬼は『濡女（ぬれおんな）』とも呼ばれることもある、水辺に引きずり込む妖怪なんだからなぁ…」
+	PRINTFORMW 「或者......你是不是这么想要近距离看我的胸部?就像这样......嘻嘻♥」
+	;TranslatedMark 「それとも………そんなに私のおっぱいを近くで見たかったのかな？　こんな風に…、くすっ♥」
+	PRINTFORMW  %ANAME(対象)%妖艳地笑着,身体扭动着。与此同时,她那对巨大的乳房就在眼前摇晃,摇晃,摆动,摇荡。
+	;TranslatedMark %ANAME(対象)%は妖しく笑いながら身体をくねらせる。それに合わせて大質量の乳房が目の前でゆさ、ゆさ、たゆん、たぷん、と揺れる
+	PRINTFORML  虽然该巨乳的尺寸和它的名字相符,但仅仅看它就能感觉到它那张力十足而又美丽的形状,会令任何男人为之倾倒,感受到它的柔软。
+	;TranslatedMark 爆乳の名がふさわしいサイズでありながら見るからに張りのある美しい形は、見るだけでどんな男をも魅了する柔らかさを感じさせる
+	PRINTFORMW  那对小丘峰上鼓鼓的樱桃样可爱的乳头,让人立刻想狠狠地吸吮品尝。
+	;TranslatedMark その双丘にぷっくりと存在を主張するさくらんぼのような乳首は、%ANAME(MASTER)%をすぐさまむしゃぶりつきたい衝動に駆らせた
+	PRINTL
+	PRINTFORML 「呵呵,你那么专注地盯着看...看不出在反省吗?这样的%ANAME(MASTER)%...真是可爱呢♥」
+	;TranslatedMark 「くすくす、そんなに熱心に見つめて…反省の色が見えないな？　そんな%ANAME(MASTER)%には…オシオキだ♥」
+	PRINTFORMW %ANAME(対象)%说着,就像要用她的大乳房把%ANAME(MASTER)%的脸压扁似的,压了过去。
+	;TranslatedMark そう言うと%ANAME(対象)%は、むぎゅうぅぅぅ……、と%ANAME(MASTER)%の顔をその爆乳で押しつぶすようにのしかかってきた
+	PRINTFORML  %ANAME(MASTER)%的脸颊被柔软温暖的丰满乳房包围着,就像在棉花糖里。乳沟间飘散的甜美费洛蒙瞬间让大脑融化。
+	;TranslatedMark %ANAME(MASTER)%の顔面が、おもちのように柔らかく温かいおっぱいに包まれる。谷間に香る甘いフェロモンがたちまち脳を蕩けさせる
+	PRINTFORMW  满身湿透的衣服带来的寒冷和不适感让%ANAME(MASTER)%麻痹了知觉,她无意识地把手臂环抱住了面前女子温暖柔软的身体,获得了惬意和安心。
+	;TranslatedMark 濡れた服の冷たさ、不快さを忘れさせる温もりと心地よさに%ANAME(MASTER)%は恍惚となり、無意識のうちに彼女の肉体に腕を絡めて抱きついてしまった
+	PRINTL
+	PRINTFORML 「哎呀呀...这样的话可不够甜蜜呢?那这样吧...再做一些更甜蜜的事情好不好...♥」
+	;TranslatedMark 「あらあら…これじゃあオシオキにならないなぁ？　それじゃあ…もうちょっとオシオキらしいことをするか…♥」
+	PRINTFORMW  %ANAME(MASTER)%一说这话,她脸前的乳房就变得越来越大。她使用自己「可以改变身边物品重量的能力」,增加了自己乳房的重量。
+	;TranslatedMark その言葉の直後、%ANAME(MASTER)%の顔面を包む乳圧がどんどん増す。彼女の『身近な物の重さを変える程度の能力』で乳房の重さを増しているのだ
+	PRINTFORML  每当我想要摆脱窒息,移动脸部时感受到的乳房重量增加的阻力,反而使它们更紧地吸附在肌肤上,强调了它们的柔软质感,带来令人愉悦的压迫感。
+	;TranslatedMark 窒息を逃れようと顔を動かすたびに感じる重みを増した乳肉の抵抗が、むしろより一層肌に吸い付いて柔らかさを強調させる心地よい圧迫感となる
+	PRINTFORMW  并且逼仄感让盘绕在山谷中的%ANAME(対象)%的费洛蒙变得更加甜蜜,成为刺激%ANAME(MASTER)%逐渐兴奋的调味品。
+	;TranslatedMark そして息苦しさが、谷間にこもる%ANAME(対象)%のフェロモンをより甘く感じさせるスパイスとなって、%ANAME(MASTER)%をどんどん興奮させる
+	PRINTL
+	PRINTFORML 「呵呵呵,被压在胸部的感觉怎么样?好了,这边的你应该在反省吧,♥」
+	;TranslatedMark 「ふふふ、おっぱいに押しつぶされる気持ちはどうだい？　さて、コッチの方は反省しているかな、と…♥」
+	PRINTFORMW  %ANAME(対象)%把大腿插入%ANAME(MASTER)%的两腿之间,用柔软潮湿的大腿紧紧压迫着湿润的股间。
+	;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の脚の間に太ももを差し込み、柔らかくむちむちの太ももで濡れた股間をぐにゅぅ…と圧迫する
+	PRINTFORML  然后我用力按压她的大腿...或者为了得到更多刺激而勃起。
+	;TranslatedMark すると彼女の太ももを押し返す…あるいはもっと刺激を求めるようにペニスが隆起する
+	PRINTFORMW 「嗯,看起来这里也没有反省的意思呢。...看来只能直接不给他吃了♥」
+	;TranslatedMark 「うーむ、コッチも反省の色が見られないなぁ。…これはもう直接、食べてあげないといけないなぁ♥」
+	PRINTFORML  %ANAME(対象)%把%ANAME(MASTER)%的衣服脱下,露出了她挺立的下身。%ANAME(対象)%也脱下自己的衣服,对准已经流出爱液的女阴。
+	;TranslatedMark そう言うと%ANAME(対象)%は%ANAME(MASTER)%の服を脱がして股間の剛直を露出させる。自分も下の服を脱ぎ、すでに愛液溢れる女陰へあてがう
+	PRINTFORMW 「好像%ANAME(MASTER)%太喜欢胸部了,以至于没法专心做正事。没办法,我就在这里帮你挤一挤喽,嗯......唔♥」
+	;TranslatedMark 「どうやら%ANAME(MASTER)%はおっぱいが好きすぎてオシオキにならないみたいだな。仕方ないからコッチで絞り取ってあげるよ、ほぉ…、らっ♥」
+	PRINTFORMW  然后一下子坐下去,整根吞入%ANAME(MASTER)%的阴茎。那火热湿润的肉壁让冰冷的湿透的衣服也感受不到寒意。
+	;TranslatedMark そして一気に腰を落として%ANAME(MASTER)%のペニスを奥まで飲み込む。その肉壷は濡れた服の冷たさを吹き飛ばすほど熱く蠢いていた
+	PRINTL
+	PRINTFORML 「噢,虽然正在被袭击,但是它那么硬,又这么大,真的是个坏坏又可爱的家伙啊!」
+	;TranslatedMark 「ふっ、…はあぁっ♥　襲われてるってのにっ、こんなに硬くっ、大っきくてさっ、ホント、悪くて…素敵なヤツだよアンタは、はあんっ♥」
+	PRINTFORMW  %ANAME(対象)%压在%ANAME(MASTER)%的脸上,用她的乳房死死地压住%ANAME(MASTER)%的脸。同时,%ANAME(対象)%熟练地摆动着腰部,贪婪地含着肉棒。
+	;TranslatedMark %ANAME(対象)%はのしかかっておっぱいで%ANAME(MASTER)%の顔を押しつぶしたまま、器用に腰を振って肉棒を貪っている
+	PRINTFORML  %ANAME(MASTER)%也抵挡不住这种快感,她紧紧抓住臀部,拼命摆动腰部。
+	;TranslatedMark %ANAME(MASTER)%もまたこの快感に抗えず、彼女のお尻を掴んで必死に腰を打ち付ける
+	PRINTFORMW  在河边湿漉漉地厮磨,比平时更能强烈感受到两人之间的热情,皮肤的摩擦,粘膜的摩擦,将彼此推向更激烈的高潮......
+	;TranslatedMark 水辺で濡れながらのまぐわいが、いつも以上の両者の熱を強く感じさせ、肌の擦れ合い、粘膜の擦り合いをより激しくエスカレートさせる…
+	PRINTL
+	PRINTFORML 「哇,已经快要高潮了吗?没关系,都射出来吧,我会全数接受的。」
+	;TranslatedMark 「あっ、はぁっ♥　もうイキそうっ？　いいよっ、出してっ♥　ありったけ私がっ、受け止めてあげるからさあっ♥」
+	PRINTFORMW  %ANAME(MASTER)%几乎要被不断增长重量的乳房囚禁着窒息,但她获得的快感也在不断增强,终于迎来了极乐的时刻。
+	;TranslatedMark %ANAME(MASTER)%は重さを増す乳房の牢獄に窒息しかけながらも、受ける快感はさらに強さを増していき、ついに絶頂の時を迎える
+	PRINTFORML  两人紧紧拥抱在一起,忍耐着那强烈的快感,同时达到了高潮。
+	;TranslatedMark その快感に耐えるように、お互いを強く抱きしめながら両者同時に絶頂した
+	PRINTFORMW 「啊,哈啊~ 嗯嗯...哈啊~...射了这么多出来...原来感觉这么舒服吗,呵呵~」
+	;TranslatedMark 「あっ、はぁあっ♥　んんん…っはあぁ♥　…こんなにいっぱい出して…そんなにキモチよかったのかい、ふふ♥」
+	PRINTL
+	PRINTFORML  %ANAME(対象)%一边紧紧地抱住%ANAME(MASTER)%的头,隔着乳房用力地抱紧,一边全身与她紧密相贴,让%ANAME(MASTER)%在她胸前达到高潮。
+	;TranslatedMark %ANAME(対象)%は自らの胸の中で絶頂した%ANAME(MASTER)%の頭を乳房越しにぎゅぅっ、と抱きしめながら全身で密着する
+	PRINTFORMW  阴道内即使射精结束,肉褶也会像安慰阴茎一样紧紧包裹住它,子宮口吸附着龟头不肯离开。
+	;TranslatedMark 膣内でも射精が終わったペニスを労わるように肉ヒダがまとわりつき、子宮口が亀頭に吸い付いて離れない
+	PRINTFORMW  两人的性器和乳房紧密地贴在一起,%ANAME(対象)%在高潮的余韻中浑身颤抖,喘息着...
+	;TranslatedMark 性器も乳房も隙間無く密着したまま、%ANAME(対象)%はしばらく絶頂の余韻に全身を震わせてながら甘い吐息を漏らしていた…、
+	PRINTFORMW 「噗嗤...我真想和你这样一直待在一起,但如果继续站在这里,可能会感冒的。...那么,我们去我房间继续刚才的亲热可以吗♥」
+	;TranslatedMark 「うふふ。…ずっとこうしていたいところだけど、このままじゃ風邪引いちゃうね。…それじゃあオシオキの続きは、私の部屋でヤろうか♥」
+	PRINTL
+	PRINTFORML  %ANAME(対象)%说着,就抱起因窒息和高潮而迷乱的%ANAME(MASTER)%,像抓住猎物一样将她携带回自己的房间。
+	;TranslatedMark そう言うと%ANAME(対象)%は窒息と絶頂で朦朧としている%ANAME(MASTER)%を攫うように担ぎ上げ、自室へお持ち帰りした
+	PRINTFORMW  然后,整个晚上,%ANAME(MASTER)%通过和她所谓的「欧尚」的性爱,将她的恐怖和舒适感深深刻印在了他的肉棒上......
+	;TranslatedMark そして一晩中、%ANAME(MASTER)%はオシオキと称したセックスによって彼女の恐ろしさとキモチよさを肉棒にたっぷり刻まれた………
+
+	CALL FUCK(対象, "Ｖ, 奉仕, 性交, 欲望, 性技, Ｖ性交", "膣内射精, 処女喪失", GET_ID(MASTER), "", ANAME(MASTER), "", "強姦")
+	;TranslatedMark 対象, "Ｖ, 奉仕, 性交, 欲望, 性技, Ｖ性交", "膣内射精, 処女喪失", GET_ID(MASTER), "", ANAME(MASTER), "", "強姦"
+	CALL FUCK(対象, "Ｖ, 奉仕, 性交, 欲望, 性技, Ｖ性交", "膣内射精, 処女喪失", GET_ID(MASTER), "", ANAME(MASTER), "", "和姦")
+	;TranslatedMark 対象, "Ｖ, 奉仕, 性交, 欲望, 性技, Ｖ性交", "膣内射精, 処女喪失", GET_ID(MASTER), "", ANAME(MASTER), "", "和姦"
+	CALL FUCK(MASTER, "Ｃ, 射精, 欲望, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣", "和姦")
+	;TranslatedMark MASTER, "Ｃ, 射精, 欲望, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣", "和姦"
+	CALL FUCK(MASTER, "Ｃ, 射精, 欲望, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣", "和姦")
+	;TranslatedMark MASTER, "Ｃ, 射精, 欲望, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣", "和姦"
+	ABL:対象:主導度Ｕ += 500
+	CFLAG:対象:好感度 += 500
+	CFLAG:対象:支配度 += 5000
+	CALL COLOR_PRINTL(@" %ANAME(対象)%的好感度提高了500", カラー_シアン)
+	;TranslatedMark %ANAME(対象)%の好感度が500上がった
+	CALL COLOR_PRINTL(@" %ANAME(対象)%的支配度提高了5000", カラー_シアン)
+	;TranslatedMark %ANAME(対象)%の支配度が5000上がった
+
+;怪しんで近づかない
+ELSE
+	PRINTFORML  她不是湖畔诱惑男子的牛鬼而是传说中的妖怪。不该轻易接近她。
+	;TranslatedMark …いや、彼女は水辺に誘い込む伝承の多い牛鬼だ。迂闊に近づくべきではないだろう
+	PRINTFORMW  %ANAME(MASTER)%保持警惕,不敢靠近......
+	;TranslatedMark %ANAME(MASTER)%が警戒して近づかないでいると…
+	PRINTFORML 「哈哈哈!真是谨慎啊%ANAME(MASTER)%。那就是正确的。」
+	;TranslatedMark 「……あっはははっ！　なかなか用心深いじゃないか%ANAME(MASTER)%。それで正解だよ」
+	PRINTFORMW  刚才那种怪异的气氛被%ANAME(対象)%的笑声给吹散了。
+	;TranslatedMark さっきまでの妖しい雰囲気を吹き飛ばすように、%ANAME(対象)%は笑った
+	PRINTFORMW 「哦,牛鬼也被称为『濡女』这种妖怪啊。如果鲁莽地靠近的话,本想吓唬吓唬你的。」
+	;TranslatedMark 「牛鬼は『濡女』とも呼ばれることがある妖怪だからね。迂闊に近づいてきたら、ちょっと脅かしてやるつもりだったさ」
+	PRINTFORML  %ANAME(対象)%一边说着,一边开始穿上衣服。看起来她不是被冲掉了衣服,而是本来就隐藏着衣服。
+	;TranslatedMark そう言いながら%ANAME(対象)%はトップスを着始める。どうやら流されたのではなく隠し持っていただけのようだ
+	PRINTL
+	PRINTFORMW 「以后也要保持这样的状态,不要受到奇怪的引诱哦,不然的话......」
+	;TranslatedMark 「今後もその調子で、変な誘いに乗るんじゃないよ？　さもないと………」
+	PRINTFORML  当%ANAME(対象)%从山川里回来时,与%ANAME(MASTER)%擦肩而过,刚才还露出妖艳的表情,在她耳边低语。
+	;TranslatedMark 川から上がって帰る際、%ANAME(対象)%は%ANAME(MASTER)%とすれ違い様、さっきまでの妖艶な顔で耳元に囁く
+	PRINTFORMW 「...可能会被色色的妖怪欺负呢 ♥ ......嘿嘿嘿♪」
+	;TranslatedMark 「…スケベな妖怪に、タベラレちゃうかもよ♥　……ふふふっ♪」
+	PRINTFORML  她没有回头看一眼,%ANAME(対象)%就那样离开了。
+	;TranslatedMark そのまま振り返ることなく、%ANAME(対象)%は帰っていった
+	PRINTFORMW  剩下的%ANAME(MASTER)%,暂时被(要是那时我靠近了她,事情会变成什么样呢)这样的妄想困扰着......
+	;TranslatedMark 残された%ANAME(MASTER)%はしばしの間、（あの時近づいていたら、どうなっていただろう）という妄想に捕らわれた……
+	CFLAG:対象:好感度 += 800
+	CALL COLOR_PRINTL(@" %ANAME(対象)%对我的好感度提高了800点。", カラー_シアン)
+	;TranslatedMark %ANAME(対象)%の好感度が800上がった
+ENDIF
+PRINTW
+KDVAR:対象:潤美_濡女 = -1
+
+
+RETURN 1

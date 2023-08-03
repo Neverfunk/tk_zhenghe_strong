@@ -16,6 +16,9 @@
 #DIM 画像縦幅
 #DIM 画像横幅
 
+SIF !CONFIG:555
+	RETURN
+
 画像名 =
 
 SELECTCASE 服装
@@ -79,9 +82,12 @@ ENDIF
 
 DEBUGPRINTFORML %画像名%
 
-SIF !SPRITECREATED(画像名)
-	RETURN 0
-
+IF !SPRITECREATED(画像名)
+	CALL 画像表示_normal_photo(ARG:0, 服装, 表情)
+	SIF !RESULT
+		RETURN 0
+	画像名 = %RESULTS%
+ENDIF
 描画開始行数 = LINECOUNT
 
 画像縦幅 = (180 * 100) / GETCONFIG("フォントサイズ")

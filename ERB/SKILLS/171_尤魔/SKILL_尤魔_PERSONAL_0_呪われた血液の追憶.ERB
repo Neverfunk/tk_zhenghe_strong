@@ -1,0 +1,91 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_171_PERSONAL_0_EXIST
+RETURN 1
+
+@SKILL_171_PERSONAL_0_NAME
+RESULTS = 被诅咒之血的追忆
+;TranslatedMark 呪われた血液の追憶
+
+;レベルは1-5まで
+@SKILL_171_PERSONAL_0_LEVEL
+RETURN 4
+
+;対象選択
+@SKILL_171_PERSONAL_0_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 能力, 3
+VARSET 能力
+
+RETURN 1
+
+;発動判定
+@SKILL_171_PERSONAL_0_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1
+
+;効果をここに記述
+@SKILL_171_PERSONAL_0_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+PRINTFORML 沐浴在诅咒之血中，除了自己意外的全员武闘下降了！
+;TranslatedMark 呪われた血液を浴びた全員の武闘が低下した！
+
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
+	SIF LOCAL == 発動番号
+		CONTINUE
+	TIMES BATTLE_武闘パワー:発動側:LOCAL, 0.9
+	TIMES BATTLE_武闘パワー:対象側:LOCAL, 0.9
+NEXT
+
+RETURN 1
+
+;
+@SKILL_171_PERSONAL_0_EXPLANATION
+RESULTS = 使自身意外的所有人武斗下降10％。
+;TranslatedMark 自身以外の全員の武闘を10％低下させる。
+
+@SKILL_171_PERSONAL_1_CANT_TELL
+
+
+@SKILL_171_PERSONAL_0_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 100

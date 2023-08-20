@@ -13,19 +13,28 @@ ENDIF
 CALL SINGLE_DRAWLINE
 IF RESEARCHER_UNION == 0
 	PRINTFORML 现在的负责人[无]
+	;TranslatedMark 現在の担当者[なし]
 ELSE
 	PRINTFORML 现在的负责人[%ANAME(RESEARCHER_UNION)%]
+	;TranslatedMark 現在の担当者[%ANAME(RESEARCHER_UNION)%]
 ENDIF
 研究ポイント = RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属)
 PRINTFORML 现在的研究点数[ {研究ポイント} ]
+;TranslatedMark 現在の研究ポイント[ {研究ポイント} ]
 CALL SINGLE_DRAWLINE
 
 LOCALS:0 = 变更负责人
+;TranslatedMark 担当者を変更する
 LOCALS:1 = 共享研究进度
+;TranslatedMark 研究を共有する
 LOCALS:2 = 煽动叛乱
+;TranslatedMark 反乱を工作する
 LOCALS:3 = 调查特殊势力
+;TranslatedMark 特殊勢力を調査する
 LOCALS:4 = 调查特殊技术
+;TranslatedMark 特殊技術を調査する
 LOCALS:5 = 教育子女
+;TranslatedMark 子供を教育する
 
 ;従属国・永久同盟国がいないと「研究を共有する」は選択不可
 IF !IS_TREATY_UNI:(CFLAG:MASTER:所属)
@@ -60,6 +69,7 @@ PRINTL
 
 PRINTL
 PRINTBUTTON "99[取消]", 99
+;TranslatedMark 99[戻る]
 PRINTL
 
 REDRAW 0
@@ -104,24 +114,29 @@ RESTART
 #DIM 担当者候補
 
 PRINTFORML 要让谁来当负责人？(不能选择「操作角色」)
+;TranslatedMark 誰を担当者にしますか？(「操作キャラクター」は選択できません)
 PRINTFORML 负责人的能力值会影响每回合的研究点收入
+;TranslatedMark 担当者の能力値によって月ごとの研究ポイント収入が上下します
 CALL SINGLE_DRAWLINE
 CALL SELECT_CHARA_LIST_ONLY_LOGIC_SLG("university_RESEARCHER", "university_RESEARCHER")
 担当者候補 = RESULT
 IF RESULT == -1
 	PRINTFORMW 返回
+	;TranslatedMark 戻ります
 	REDRAW 1
 	RETURN 0
 ENDIF
 
 RESEARCHER_UNION = 担当者候補
 PRINTFORMW %ANAME(担当者候補)%成为了负责人
+;TranslatedMark %ANAME(担当者候補)%を担当者にしました
 
 ;ミッション達成
 IF ACHIEVEMENT_MISSION:8 == 1
 	ACHIEVEMENT_MISSION:8 = 2
 	SETCOLOR カラー_注意
 	PRINTL 任务完成!
+	;TranslatedMark ミッション達成!
 	RESETCOLOR
 	WAIT
 ENDIF
@@ -146,17 +161,24 @@ RETURN IS_FREE(対象) && CFLAG:対象:捕虜先 == 0
 VARSET 連邦構成国
 
 PRINTFORML 宗主国・従属国・永久同盟国共享研究结果
+;TranslatedMark 研究成果を宗主国・従属国・永久同盟国で共有することで
 PRINTFORML 战略回合结束时，这些势力的研究进度会增加2回合
+;TranslatedMark 戦略ターン終了時にこれら全ての勢力の研究進捗を追加で2ターン進めます
 PRINTFORML 研究加速可重复，超额部分将会保存到下一回合。
+;TranslatedMark 研究ブーストは重複し、超過分は次期に持ち越されます。
 PRINTFORML
 PRINTFORML 现在的研究点数[ {RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属)} ]
+;TranslatedMark 現在の研究ポイント[ {RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属)} ]
 PRINTFORML 需要15点研究点
+;TranslatedMark 研究ポイントが15必要です
 
 IF RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属) < 15
 	PRINTFORMW 研究点不足
+	;TranslatedMark 不足しています
 	RETURN
 ELSE
 	PRINTFORML 要支付研究点吗？
+	;TranslatedMark 支払いますか？
 	;はい／いいえ入力処理
 	CALL ASK_YN()
 	IF RESULT == 1
@@ -166,6 +188,7 @@ ELSE
 	RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属) -= 15
 	RESEARCH_UNIVERSITY_BOOST:(CFLAG:MASTER:所属) += 2
 	PRINTFORML %ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%势力的研究正在加速 現在累計增加[ {RESEARCH_UNIVERSITY_BOOST:(CFLAG:MASTER:所属)} ]
+	;TranslatedMark %ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%勢力の研究は加速しています 現在累計[ {RESEARCH_UNIVERSITY_BOOST:(CFLAG:MASTER:所属)} ]ターン加算
 
 	FOR LOCAL:0, 0, MAX_COUNTRY
 		FOR LOCAL:1, 0, MAX_COUNTRY
@@ -189,6 +212,7 @@ ELSE
 			共有対象 = LOCAL:0
 			RESEARCH_UNIVERSITY_BOOST:共有対象 += 2
 			PRINTFORML %ANAME(GET_COUNTRY_BOSS(共有対象))%势力的研究正在加速 現在累計增加[ {RESEARCH_UNIVERSITY_BOOST:共有対象} ]ターン加算
+			;TranslatedMark %ANAME(GET_COUNTRY_BOSS(共有対象))%勢力の研究は加速しています 現在累計[ {RESEARCH_UNIVERSITY_BOOST:共有対象} ]ターン加算
 		ENDIF
 	NEXT
 
@@ -197,6 +221,7 @@ ELSE
 		ACHIEVEMENT_MISSION:9 = 2
 		SETCOLOR カラー_注意
 		PRINTL 任务完成!
+		;TranslatedMark ミッション達成!
 		RESETCOLOR
 		WAIT
 	ENDIF
@@ -216,17 +241,24 @@ RETURN
 #DIM 独立成功判定
 
 PRINTFORML 在没有签订任何条约的敌国支持不稳分子发生叛乱
+;TranslatedMark 何らの条約を結んでいない敵国で不穏分子を支援して反乱を発生させ
 PRINTFORML 独立的叛乱势力将成为我国的殖民地
+;TranslatedMark 独立した反乱勢力を自国の植民地とします
 PRINTFORML
 PRINTFORML 现在的研究点数[ {RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属)} ]
+;TranslatedMark 現在の研究ポイント[ {RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属)} ]
 PRINTFORML 现在的国库资金[ {MONEY:(CFLAG:MASTER:所属)} ]
+;TranslatedMark 現在の国庫資金　　[ {MONEY:(CFLAG:MASTER:所属)} ]
 PRINTFORML 需要50点研究点数与10000国库资金
+;TranslatedMark 研究ポイントが50と国庫資金10000必要です
 
 IF RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属) < 50 || MONEY:(CFLAG:MASTER:所属) < 10000
-	PRINTFORMW 资源不足
+	PRINTFORMW 研究点不足
+	;TranslatedMark 不足しています
 	RETURN
 ELSE
-	PRINTFORML 要支付吗？
+	PRINTFORML 要支付研究点吗？
+	;TranslatedMark 支払いますか？
 	;はい／いいえ入力処理
 	CALL ASK_YN()
 	IF RESULT == 1
@@ -235,6 +267,7 @@ ELSE
 ENDIF
 
 PRINTFORML 选择作为叛乱目标的国家
+;TranslatedMark 反乱の工作対象となる国を選択してください
 
 ;必要な高速化用マップの作成
 CALL TMP_CREATE_RELATION_MAP
@@ -254,6 +287,7 @@ NEXT
 
 CALL SINGLE_DRAWLINE
 PRINTBUTTON " 0[    取消]", 0
+;TranslatedMark 0[    戻る]
 PRINTL
 
 REDRAW 0
@@ -264,6 +298,7 @@ INPUT
 IF RESULT == 0
 	REDRAW 1
 	PRINTFORMW 取消了，研究点不会被消耗。
+	;TranslatedMark 戻ります。研究ポイントは消費されません。
 	RETURN 0
 ELSEIF IS_COUNTRY(RESULT)
 	REDRAW 1
@@ -281,15 +316,19 @@ CALL SELECT_CHARA_RANDOM("university_INDEPENDENCE_support", "SLG_RANDOM_INDEPEND
 
 IF 支援対象 == -1
 	PRINTFORMW %ANAME(対象勢力名)%势力没有发现不稳分子。研究点不会被消耗。
+	;TranslatedMark %ANAME(対象勢力名)%勢力に不穏分子が見つかりませんでした。研究ポイントは消費されません。
 	RETURN 0
 ENDIF
 
 PRINTFORML %ANAME(支援対象)%似乎企图从%ANAME(対象勢力名)%势力中独立出来
+;TranslatedMark %ANAME(支援対象)%は%ANAME(対象勢力名)%勢力からの独立を企んでいるようです
 PRINTFORML 是否要支援?
+;TranslatedMark 支援しますか?
 ;はい／いいえ入力処理
 CALL ASK_YN()
 IF RESULT == 1
 	PRINTFORMW 取消了，研究点不会被消耗。
+	;TranslatedMark 戻ります。研究ポイントは消費されません。
 	RETURN
 ENDIF
 
@@ -298,16 +337,19 @@ CALL NPC_INDEPENDENCE(支援対象)
 独立成功判定 = RESULT
 IF 独立成功判定 == -1
 	PRINTFORMW 没有发生叛乱。研究点不会被消耗。
+	;TranslatedMark 反乱は発生しませんでした。研究ポイントは消費されません。
 	RETURN
 ENDIF
 
 PRINTFORML 叛乱成功，%ANAME(GET_COUNTRY_BOSS(CFLAG:支援対象:所属))%势力独立了
+;TranslatedMark 反乱は成功し、%ANAME(GET_COUNTRY_BOSS(CFLAG:支援対象:所属))%勢力は独立しました
 CALL DIPLOMACY_IMPROVE_RELATION(CFLAG:支援対象:所属, 500)
 RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属) -= 50
 MONEY:(CFLAG:MASTER:所属) -= 10000
 
 PRINTFORML
 PRINTFORMW 我国与%ANAME(対象勢力名)%势力之间的关系大幅度恶化
+;TranslatedMark 我が国と%ANAME(対象勢力名)%勢力との関係が大きく悪化しました
 CALL CHANGE_RELATION_C_TO_C(対象勢力, CFLAG:MASTER:所属, -200, 600)
 
 ;ミッション達成
@@ -315,6 +357,7 @@ IF ACHIEVEMENT_MISSION:10 == 1
 	ACHIEVEMENT_MISSION:10 = 2
 	SETCOLOR カラー_注意
 	PRINTL 任务完成!
+	;TranslatedMark ミッション達成!
 	RESETCOLOR
 	WAIT
 ENDIF
@@ -342,16 +385,22 @@ RETURN CAN_RANDOM_INDEPENDENCE(対象) && CFLAG:対象:所属 == INDEPENDENCE_un
 触手 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_触手)
 
 PRINTFORML 调查对所有势力构成威胁的特殊势力
+;TranslatedMark 各勢力の脅威となっている特殊勢力を調査し
 PRINTFORML 建立外交关系的基础，准备接收特殊的技术
+;TranslatedMark 外交関係の基盤を整えたり、特殊な技術を受け入れる準備をしたりします
 PRINTFORML
 PRINTFORML 现在的研究点数[ {RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属)} ]
+;TranslatedMark 現在の研究ポイント[ {RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属)} ]
 PRINTFORML 需要50点研究点
+;TranslatedMark 研究ポイントが50必要です
 
 IF RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属) < 50
 	PRINTFORMW 研究点不足
+	;TranslatedMark 不足しています
 	RETURN
 ELSE
-	PRINTFORML 是否支付？
+	PRINTFORML 要支付研究点吗？
+	;TranslatedMark 支払いますか？
 	;はい／いいえ入力処理
 	CALL ASK_YN()
 	IF RESULT == 1
@@ -360,6 +409,7 @@ ELSE
 ENDIF
 
 PRINTFORML 请选择要调查的外来势力
+;TranslatedMark 調査したい特殊勢力を選択してください
 ;対象はホフゴブリン・外来人・触手・サキュバス
 
 ;特殊勢力は原則特殊勢力を調査できない。但し触手以外は触手を調査できる。
@@ -369,24 +419,28 @@ FOR LOCAL:0, 0, MAX_COUNTRY
 		IF LOCAL:0 == サキュバス && RESEARCH_UNIVERSITY_CAN_COMMUNICATE_SP:(CFLAG:MASTER:所属):6 != 1 && !IS_SP_COUNTRY(CFLAG:MASTER:所属)
 			SETCOLOR COUNTRY_COLOR:(LOCAL:0)
 			PRINTBUTTON " [　　　　　调查魅魔势力]", LOCAL:0
+			;TranslatedMark [　サキュバスを調査する]
 			RESETCOLOR
 			選択可能フラグ:(LOCAL:0) = 1
 			PRINTL
 		ELSEIF LOCAL:0 == ホフゴブリン && RESEARCH_UNIVERSITY_CAN_COMMUNICATE_SP:(CFLAG:MASTER:所属):2 != 1 && !IS_SP_COUNTRY(CFLAG:MASTER:所属)
 			SETCOLOR COUNTRY_COLOR:(LOCAL:0)
 			PRINTBUTTON " [　　　　调查哥布林势力]", LOCAL:0
+			;TranslatedMark [ホフゴブリンを調査する]
 			RESETCOLOR
 			選択可能フラグ:(LOCAL:0) = 1
 			PRINTL
 		ELSEIF LOCAL:0 == 外来人 && RESEARCH_UNIVERSITY_CAN_COMMUNICATE_SP:(CFLAG:MASTER:所属):3 != 1 && !IS_SP_COUNTRY(CFLAG:MASTER:所属)
 			SETCOLOR COUNTRY_COLOR:(LOCAL:0)
 			PRINTBUTTON " [　　　　调查外来人势力]", LOCAL:0
+			;TranslatedMark [　　　外来人を調査する]
 			RESETCOLOR
 			選択可能フラグ:(LOCAL:0) = 1
 			PRINTL
 		ELSEIF LOCAL:0 == 触手 && RESEARCH_UNIVERSITY_CAN_COMMUNICATE_SP:(CFLAG:MASTER:所属):4 != 1 && CFLAG:MASTER:所属 != 触手
 			SETCOLOR COUNTRY_COLOR:(LOCAL:0)
 			PRINTBUTTON " [　　　　　调查触手势力]", LOCAL:0
+			;TranslatedMark [　　　　触手を調査する]
 			RESETCOLOR
 			選択可能フラグ:(LOCAL:0) = 1
 			PRINTL
@@ -394,6 +448,7 @@ FOR LOCAL:0, 0, MAX_COUNTRY
 	ENDIF
 NEXT
 PRINTBUTTON " 0[　　　　　　　　　取消]", 0
+;TranslatedMark 0[　　　　　　　　　戻る]
 
 $INPUT_LOOP1
 INPUT
@@ -410,13 +465,16 @@ IF 調査対象 == サキュバス
 	RESEARCH_UNIVERSITY_CAN_COMMUNICATE_SP:(CFLAG:MASTER:所属):6 = 1
 	RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属) -= 50
 	PRINTFORML 对魅魔们的行为形态・心理・行为伦理・思想等进行详细的了解
+	;TranslatedMark サキュバス達の行動形態・心理・行動倫理などに詳しくなりました
 	PRINTFORMW 可以在「外交部」菜单中的「与特殊勢力的外交」中进行秘密外交了
+	;TranslatedMark 「外務省」タブの「特殊勢力と外交」から秘密外交を行えるようになりました
 
 	;ミッション達成
 	IF ACHIEVEMENT_MISSION:11 == 1
 		ACHIEVEMENT_MISSION:11 = 2
 		SETCOLOR カラー_注意
 		PRINTL 任务完成!
+		;TranslatedMark ミッション達成!
 		RESETCOLOR
 		WAIT
 	ENDIF
@@ -425,13 +483,16 @@ ELSEIF 調査対象 == ホフゴブリン
 	RESEARCH_UNIVERSITY_CAN_COMMUNICATE_SP:(CFLAG:MASTER:所属):2 = 1
 	RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属) -= 50
 	PRINTFORML 对哥布林们的行为形态・心理・行为伦理・思想等进行详细的了解
+	;TranslatedMark ホフゴブリン達の行動形態・心理・行動倫理・思想などに詳しくなりました
 	PRINTFORMW 可以在「外交部」菜单中的「与特殊勢力的外交」中进行秘密外交了
+	;TranslatedMark 「外務省」タブの「特殊勢力と外交」から秘密外交を行えるようになりました
 
 	;ミッション達成
 	IF ACHIEVEMENT_MISSION:11 == 1
 		ACHIEVEMENT_MISSION:11 = 2
 		SETCOLOR カラー_注意
 		PRINTL 任务完成!
+		;TranslatedMark ミッション達成!
 		RESETCOLOR
 		WAIT
 	ENDIF
@@ -440,13 +501,16 @@ ELSEIF 調査対象 == 外来人
 	RESEARCH_UNIVERSITY_CAN_COMMUNICATE_SP:(CFLAG:MASTER:所属):3 = 1
 	RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属) -= 50
 	PRINTFORML 对外来人们的行为形态・心理・行为伦理・思想等进行详细的了解
+	;TranslatedMark 外来人達の行動形態・心理・行動倫理・思想などに詳しくなりました
 	PRINTFORMW 可以在「外交部」菜单中的「与特殊勢力的外交」中进行秘密外交了
+	;TranslatedMark 「外務省」タブの「特殊勢力と外交」から秘密外交を行えるようになりました
 
 	;ミッション達成
 	IF ACHIEVEMENT_MISSION:11 == 1
 		ACHIEVEMENT_MISSION:11 = 2
 		SETCOLOR カラー_注意
 		PRINTL 任务完成!
+		;TranslatedMark ミッション達成!
 		RESETCOLOR
 		WAIT
 	ENDIF
@@ -455,13 +519,16 @@ ELSEIF 調査対象 == 触手
 	RESEARCH_UNIVERSITY_CAN_COMMUNICATE_SP:(CFLAG:MASTER:所属):4 = 1
 	RESEARCH_UNIVERSITY_POINT:(CFLAG:MASTER:所属) -= 50
 	PRINTFORML 对触手进行更深层次的了解
+	;TranslatedMark 触手について、より深い洞察を得ました
 	PRINTFORMW 「研究・教育機関」界面中使用更多关于触手的知识
+	;TranslatedMark 「研究・教育機関」タブで触手に関する知識を活かせるようになりました
 
 	;ミッション達成
 	IF ACHIEVEMENT_MISSION:11 == 1
 		ACHIEVEMENT_MISSION:11 = 2
 		SETCOLOR カラー_注意
 		PRINTL 任务完成!
+		;TranslatedMark ミッション達成!
 		RESETCOLOR
 		WAIT
 	ENDIF

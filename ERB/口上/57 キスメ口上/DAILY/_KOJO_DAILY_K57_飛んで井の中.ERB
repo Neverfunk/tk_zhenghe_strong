@@ -42,45 +42,75 @@ KDVAR:対象:キスメ_飛んで井の中 = 1
 
 PRINTFORML 深夜……
 PRINTFORMW 在領地內巡邏時、突然有個吊桶掉了下來！
+;TranslatedMark 領内を見回り中、突如としてつるべが降ってきた！
 
 判定値 = (ABL:MASTER:防衛 + 10 - ABL:対象:武闘) * 5
 
 IF RAND:100 > 判定値
 	PRINTFORMW %ANAME(MASTER)%未能避開、頭部被吊桶直接擊中！
+	;TranslatedMark %ANAME(MASTER)%は避けそこね、頭部につるべが直撃した！
 	PRINTFORMW 然後就這樣暈倒、恢復意識時就已經是早上了……
+	;TranslatedMark そのまま気を失ってしまい、気づいたら朝になっていた……
 	CALL ADD_COOLTIME(MASTER, 2)
 	RETURN 1
 ENDIF
 
 PRINTFORMW ……但、華麗地避開了！
-PRINTFORMW 「ちッ……」
+;TranslatedMark ……が、華麗に回避した！
+;(画像パッチ)
+CALL 画像表示(対象, 1, 3)
+PRINTFORMW 「哇……」
+;TranslatedMark 「ちッ……」
 PRINTFORML 襲撃者是個與吊桶一體化的少女
+;TranslatedMark 襲撃者はつるべと一体化した少女だった
 PRINTFORMW 尋問名字時、自稱自己叫%NAME_FORMAL(対象)%
+;TranslatedMark 名を尋ねると、%NAME_FORMAL(対象)%と名乗った
 PRINTFORML 雖然看起來沒有失去幹勁、但好像沒有打算襲擊過來的樣子
+;TranslatedMark すわやる気かと身構えたが、襲ってくる様子はない
 PRINTFORMW 「……隨便你吧？」
+;TranslatedMark 「……好きにすれば？」
 PRINTFORMW 看來她在剛才的突襲被避開了的一刻就判斷自己贏不了的樣子
+;TranslatedMark どうもさっきの不意打ちを避けられた時点で勝ちはないと判断したらしい
 PRINTFORML 看來已經放棄了……
+;TranslatedMark 勝手に諦めムードを漂わせているが……
 
 PRINTL
 CALL ASK_MULTI_JUDGE("讓其做部下", GET_COUNTRY_BOSS(CFLAG:対象:所属) != 対象, "投獄", GET_COUNTRY_BOSS(CFLAG:対象:所属) != 対象, "処刑", GET_COUNTRY_BOSS(CFLAG:対象:所属) != 対象,  "奪去金錢", 1, "侵犯", HAS_PENIS(MASTER))
+;TranslatedMark "部下にする", GET_COUNTRY_BOSS(CFLAG:対象:所属) != 対象, "投獄する", GET_COUNTRY_BOSS(CFLAG:対象:所属) != 対象, "処刑", GET_COUNTRY_BOSS(CFLAG:対象:所属) != 対象,  "有り金を奪う", 1, "犯す", HAS_PENIS(MASTER)
 
 SELECTCASE RESULT
 	CASE 0
+		;(画像パッチ)
+		CALL 画像表示(対象, 1, 1)
 		PRINTFORMW 「……哈？　部下？　我？」
+		;TranslatedMark 「……は？　部下？　私を？」
 		PRINTFORMW 「……嘛、反正我沒有所謂」
+		;TranslatedMark 「……まあ、別にいいけど」
 		CALL COLOR_PRINTW(@"%ANAME(対象)%成為了部下", カラー_注意)
+		;TranslatedMark %ANAME(対象)%が部下になりました
 		CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属, 1)
 		CFLAG:対象:好感度 += 500
 	CASE 1
+		;(画像パッチ)
+		CALL 画像表示(対象, 1, 3)
 		PRINTFORMW 「……隨便你吧？」
+		;TranslatedMark 「……好きにすれば？」
 		PRINTFORMW 呼叫了支援、將%ANAME(対象)%帶走了……
+		;TranslatedMark 応援を呼び、%ANAME(対象)%を連行させた……
 		CALL COLOR_PRINTW(@"俘虜了%ANAME(対象)%", カラー_注意)
+		;TranslatedMark %ANAME(対象)%を捕虜にしました
 		CALL CAPTURE(対象, CFLAG:MASTER:所属)
 	CASE 2
+		;(画像パッチ)
+		CALL 画像表示(対象, 1, 4)
 		PRINTFORMW 「……嗚！」
+		;TranslatedMark 「……っ！」
 		PRINTFORMW 「……隨便你吧？」
+		;TranslatedMark 「……好きにすれば？」
 		PRINTFORMW 呼叫了支援、將%ANAME(対象)%帶走了……
+		;TranslatedMark 応援を呼び、%ANAME(対象)%を連行させた……
 		CALL COLOR_PRINTW(@"把%ANAME(対象)%処刑了", カラー_注意)
+		;TranslatedMark %ANAME(対象)%を処刑しました
 		PRINTL
 		CALL EXECUTION(対象)
 		PRINTL
@@ -88,19 +118,34 @@ SELECTCASE RESULT
 		CFLAG:対象:所属 = 0
 		CFLAG:対象:特殊状態 = 特殊状態_死亡
 	CASE 3
+		;(画像パッチ)
+		CALL 画像表示(対象, 1, 1)
 		PRINTFORMW 「錢……」
+		;TranslatedMark 「金……」
 		PRINTFORMW 「這種程度的話就沒辦法了」
-		CALL COLOR_PRINTW(@"獲得了10000金", カラー_注意)
+		;TranslatedMark 「これだけしかないけど」
+		CALL COLOR_PRINTW("獲得了10000金", カラー_注意)
+		;TranslatedMark 金10000を得ました
 		MONEY += 10000
 		PRINTFORMW %ANAME(対象)%離開了……
+		;TranslatedMark %ANAME(対象)%は立ち去っていった……
 	CASE 4
+		;(画像パッチ)
+		CALL 画像表示(対象, 2, 4)
 		PRINTFORMW 「誒……等等、不、不要……！」
+		;TranslatedMark 「えッ……ちょっ、や、やだ……！」
 		PRINTFORMW 強行將%ANAME(対象)%從吊桶中拉了出來、扒光她身上的衣服……
+		;TranslatedMark 暴れる%ANAME(対象)%をつるべから引きずり出し、その服を剥ぎ取っていった……
 		PRINTFORML
 		CALL FUCK_RAPE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的肉棒", @"%ANAME(MASTER)%")
+		;TranslatedMark 対象, GET_ID(MASTER), @"%ANAME(MASTER)%のペニス", @"%ANAME(MASTER)%"
 		PRINTFORML 
+		;(画像パッチ)
+		CALL 画像表示(対象, 3, 4)
 		PRINTFORMW 「呼啊……啊咕、哈唔……♥」
+		;TranslatedMark 「ふあ……あくぅっ、はぅう……♥」
 		PRINTFORMW 將失神痙攣着的%ANAME(対象)%棄於地上不顧、並返回據點了……
+		;TranslatedMark 気を失い痙攣するばかりになった%ANAME(対象)%を放置して、拠点へ戻った……
 		KDVAR:対象:キスメ_飛んで井の中 = 2
 ENDSELECT
 

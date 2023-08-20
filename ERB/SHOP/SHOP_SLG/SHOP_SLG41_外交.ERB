@@ -37,11 +37,13 @@ RETURN 1
 FIRST_LINE = LINECOUNT
 IF DAY < SLG_PP:0
 	PRINTFORMW 到第{SLG_PP:0}期為止不能進行外交
+	;TranslatedMark {SLG_PP:0}期までは外交を行うことができません
 	RETURN
 ENDIF
 
 IF COUNTRY_NOTDIPLOMACY_TERM:(CFLAG:MASTER:所属)
 	PRINTFORMW 現在我方勢力不能和其他勢力進行外交（還剩{COUNTRY_NOTDIPLOMACY_TERM:(CFLAG:MASTER:所属),2}ターン）
+	;TranslatedMark 現在わが勢力と外交を行おうとする勢力がありません（残{COUNTRY_NOTDIPLOMACY_TERM:(CFLAG:MASTER:所属),2}ターン）
 	RETURN
 ENDIF
 
@@ -55,6 +57,7 @@ CALL TMP_CREATE_SUM_SOLDIER_MAP
 
 CALL SINGLE_DRAWLINE
 PRINTL 請選択需要進行外交的勢力
+;TranslatedMark 外交を行う勢力を選択して下さい
 PRINTFORML 現在の外交警戒値:{DIPLOMACY_HATE:(CFLAG:MASTER:所属)}
 CALL SINGLE_DRAWLINE
 PRINTFORM %"君主",10,LEFT%
@@ -65,7 +68,9 @@ PRINTFORM %"印象",6, RIGHT%
 PRINTFORM %"友好", 7, RIGHT%
 PRINTFORM %"敵対", 7, RIGHT%
 PRINTFORM %"俘虜", 26, RIGHT%
+;TranslatedMark %"囚えている", 26, RIGHT%
 PRINTFORML %"被俘的角色", 26, RIGHT%
+;TranslatedMark %"囚われている", 26, RIGHT%
 
 ;他勢力一覧の表示
 FOR LOCAL:0, 1, MAX_COUNTRY
@@ -144,6 +149,7 @@ CALL SINGLE_DRAWLINE
 PRINTBUTTON "98[自動送金設定]",98
 PRINTL
 PRINTBUTTON "99[取消]", 99
+;TranslatedMark 99[戻る]
 PRINTL
 
 REDRAW 0
@@ -229,11 +235,13 @@ LOCAL:8 = MAX(LOCAL:6, LOCAL:7) * 10 / MAX(MIN(LOCAL:6, LOCAL:7), 1)
 
 CALL SINGLE_DRAWLINE
 PRINTFORM 現在的関係:
+;TranslatedMark 現在の関係:
 CALL TMP_SETCOLOR_COUNTRY_RELATION(CFLAG:MASTER:所属, ARG:0)
 PRINTFORML %TMP_TOSTR_COUNTRY_RELATION(CFLAG:MASTER:所属, ARG:0, 1)%
 RESETCOLOR
 
 PRINTFORM 現在的印象:
+;TranslatedMark 現在の印象:
 CALL TMP_PRINT_COUNTRY_RELATION2(LOCAL:5, LOCAL:4)
 PRINTL
 
@@ -242,7 +250,9 @@ LOCAL:12 = MAX(GET_DIGIT(LOCAL:6 / 100), GET_DIGIT(LOCAL:7 / 100))
 
 CALL SINGLE_DRAWLINE
 PRINTFORML %ANAME(LOCAL:4), LOCAL:11%的経済力:{LOCAL:6 / 100, LOCAL:12}
+;TranslatedMark %ANAME(LOCAL:4), LOCAL:11%の経済力:{LOCAL:6 / 100, LOCAL:12}
 PRINTFORML %ANAME(LOCAL:5), LOCAL:11%的経済力:{LOCAL:7 / 100, LOCAL:12}
+;TranslatedMark %ANAME(LOCAL:5), LOCAL:11%の経済力:{LOCAL:7 / 100, LOCAL:12}
 PRINTFORM %ANAME(LOCAL:4)% %TOSTR_COMPARE(LOCAL:6, LOCAL:7)% %ANAME(LOCAL:5)%  %DECIMAL_STRING(LOCAL:8, 1)%倍
 
 IF LOCAL:8 < 15
@@ -258,6 +268,7 @@ ELSEIF LOCAL:6 > LOCAL:7
 	ELSE
 		SETCOLOR 0x4040FF
 		PRINTL 稍微有利
+		;TranslatedMark やや有利
 	ENDIF
 ELSE
 	IF LOCAL:8 >= 60
@@ -269,6 +280,7 @@ ELSE
 	ELSE
 		SETCOLOR 0xFF4080
 		PRINTL 稍微不利
+		;TranslatedMark やや不利
 	ENDIF
 ENDIF
 
@@ -298,6 +310,7 @@ ELSEIF LOCAL:13 > LOCAL:14
 	ELSE
 		SETCOLOR 0x4040FF
 		PRINTL 稍微有利
+		;TranslatedMark やや有利
 	ENDIF
 ELSE
 	IF LOCAL:15 >= 60
@@ -309,6 +322,7 @@ ELSE
 	ELSE
 		SETCOLOR 0xFF4080
 		PRINTL 稍微不利
+		;TranslatedMark やや不利
 	ENDIF
 ENDIF
 
@@ -339,6 +353,7 @@ ELSEIF LOCAL:17 > LOCAL:18
 	ELSE
 		SETCOLOR 0x4040FF
 		PRINTL 稍微有利
+		;TranslatedMark やや有利
 	ENDIF
 ELSE
 	IF LOCAL:19 >= 60
@@ -350,6 +365,7 @@ ELSE
 	ELSE
 		SETCOLOR 0xFF4080
 		PRINTL 稍微不利
+		;TranslatedMark やや不利
 	ENDIF
 ENDIF
 
@@ -364,26 +380,46 @@ PRINTFORML 同盟:{COUNTRY_TREATY_NO:(CFLAG:MASTER:所属):0, 2}/{同盟可能�
 CALL SINGLE_DRAWLINE
 
 LOCALS:0 = 提出停戦
+;TranslatedMark 停戦を申し込む
 LOCALS:1 = 提出同盟
+;TranslatedMark 同盟を申し込む
 LOCALS:2 = 提出永久同盟
+;TranslatedMark 永久同盟を申し込む
 LOCALS:3 = 提出外交合併
+;TranslatedMark 外交併合を申し込む
 LOCALS:4 = 破棄同盟(停戦)協定
+;TranslatedMark 同盟(停戦)破棄
 LOCALS:5 = 流傳醜聞
+;TranslatedMark 醜聞を流す
 LOCALS:6 = 内部工作
 LOCALS:7 = 寻求保护
+;TranslatedMark 保護を求める
 LOCALS:10 = 会談
+;TranslatedMark 会談する
 LOCALS:11 = 転讓士兵
+;TranslatedMark 兵を譲り渡す
 LOCALS:12 = 転讓経済力
+;TranslatedMark 経済力を譲り渡す
 LOCALS:13 = 士官移籍
+;TranslatedMark 士官を移籍させる
 LOCALS:14 = 割譲領土
+;TranslatedMark 領土を割譲する
 LOCALS:20 = 進行勸降
+;TranslatedMark 降伏勧告を行う
 LOCALS:21 = 要求提供士兵
+;TranslatedMark 兵を要求する
 LOCALS:22 = 要求提供経済力
+;TranslatedMark 経済力を要求する
 LOCALS:23 = 要求提供人質
+;TranslatedMark 人質を要求する
 LOCALS:24 = 要求釋放人質
+;TranslatedMark 人質解放を要求する
 LOCALS:25 = 調教
+;TranslatedMark 調教する
 LOCALS:26 = 調教部下
+;TranslatedMark 部下を調教する
 LOCALS:27 = 进行従属勧告
+;TranslatedMark 従属勧告を行う
 LOCALS:30 = 捕虜返還交渉
 ;(従属国パッチ)従属勧告を追加
 ;(従属国パッチ)保護を求めるを追加
@@ -505,6 +541,7 @@ IF DONE_DIPLOMACY_REQUEST:(ARG:0)
 ENDIF
 
 PRINT ◇締結関係◇
+;TranslatedMark ◇関係を結ぶ◇
 LOCAL:1 = 0
 FOR LOCAL:0, 0, 10
 	IF LOCALS:(LOCAL:0) != ""
@@ -527,6 +564,7 @@ PRINTL
 PRINTL
 
 PRINT ◇加深友好◇
+;TranslatedMark ◇友好を深める◇
 LOCAL:1 = 0
 FOR LOCAL:0, 10, 20
 	IF LOCALS:(LOCAL:0) != ""
@@ -548,6 +586,7 @@ PRINTL
 PRINTL
 
 PRINT ◇提出要求◇
+;TranslatedMark ◇要求を行う◇
 LOCAL:1 = 0
 FOR LOCAL:0, 20, 30
 	IF LOCALS:(LOCAL:0) != ""
@@ -569,6 +608,7 @@ PRINTL
 PRINTL
 
 PRINT ◇進行交渉◇
+;TranslatedMark ◇交渉する◇
 LOCAL:1 = 0
 FOR LOCAL:0, 30, 40
 	IF LOCALS:(LOCAL:0) != ""
@@ -590,6 +630,7 @@ PRINTL
 CALL SINGLE_DRAWLINE
 PRINT
 PRINTBUTTON "99[              取消]", 99
+;TranslatedMark 99[              戻る]
 PRINTL
 
 REDRAW 0
@@ -715,7 +756,9 @@ ELSEIF RESULT >= 0 && RESULT < 40 && !LOCAL:(RESULT + 100)
 	IF 選択項目 == "要求" && RESULT == 1 && DIPLOMACY_REQUEST_SUCCESS_COUNT % 3 == 0 && DIPLOMACY_REQUEST_SUCCESS_COUNT
 		SETCOLOR カラー_警告
 		PRINTFORMW 多次向其他勢力提出要求、各国開始警戒起%ANAME(LOCAL:4)%的動作！
+		;TranslatedMark 度重なる他勢力への要求により、%ANAME(LOCAL:4)%を警戒する動きが各国で出ているようです！
 		PRINTFORMW %ANAME(LOCAL:4)%和其他国家的関係悪化了
+		;TranslatedMark %ANAME(LOCAL:4)%と他国との関係が悪化しました
 		FOR LOCAL:0, 0, MAX_COUNTRY
 
 			SIF IS_COUNTRY(LOCAL:0) && LOCAL:0 != CFLAG:MASTER:所属

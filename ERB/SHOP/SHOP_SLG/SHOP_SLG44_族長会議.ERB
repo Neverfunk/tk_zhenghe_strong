@@ -6,8 +6,10 @@
 @SHOP_SLG_NAME44
 IF CHANGE_Government_GOBLIN:1 == 2
 	RESULTS:0 '= "评议会"
+	;TranslatedMark 評議会
 ELSE
 	RESULTS:0 '= "族长会议"
+	;TranslatedMark 族長会議
 ENDIF
 
 ;-------------------------------------------------
@@ -105,33 +107,44 @@ FIRST_LINE = LINECOUNT
 CALL SINGLE_DRAWLINE
 IF CHANGE_Government_GOBLIN:1 == 2
 	PRINTL ★评议会
+	;TranslatedMark ★評議会
 ELSE
 	PRINTL ★族长会议
+	;TranslatedMark ★族長会議
 ENDIF
 PRINTL 　管理内政
+;TranslatedMark 内政を管理します
 CALL SINGLE_DRAWLINE
 
 PRINT 现在的
+;TranslatedMark 現在の
 IF CHANGE_Government_GOBLIN:1 == 2
 	PRINT 议长
+	;TranslatedMark 議長
 ELSE
 	PRINTL 族长
+	;TranslatedMark 族長
 ENDIF
 PRINTFORM [ %ANAME(君主)% ] 支持率[ {ゴブリン支持率:君主:0} ]
 SIF  他の士官を応援:MASTER:0 && 他の士官応援対象:MASTER:0 == 君主
 	PRINTFORM ＋ 加算[ {ゴブリン支持率:MASTER:0 + プレイヤー加算} ]
 IF CHANGE_Government_GOBLIN:1 == 1
 	PRINTFORM 任期[ 终身 ]
+	;TranslatedMark 任期[ 終身 ]
 ELSE
 	PRINTFORM 任期还有[ {残り任期} ]个回合
+	;TranslatedMark 任期あと[ {残り任期} ]ターン
 ENDIF
 
 IF CHANGE_Government_GOBLIN:1 == 2
 	PRINTFORML 集权性[ 分权体制 ]
+	;TranslatedMark 集権性[ 分権体制 ]
 ELSEIF CHANGE_Government_GOBLIN:1 == 1
 	PRINTFORML 集权性[ 中央集权 ]
+	;TranslatedMark 集権性[ 中央集権 ]
 ELSE
 	PRINTFORML 集权性[ {Centralization_power_GOBLIN} ]
+	;TranslatedMark 集権性[ {Centralization_power_GOBLIN} ]
 ENDIF
 
 PRINTFORM 支持率トップ[ %ANAME(支持率トップ)% ] 支持率[ {ゴブリン支持率:支持率トップ:0} ]
@@ -143,9 +156,11 @@ ENDIF
 
 SIF 君主 != MASTER
 	PRINTFORM 你的支持率[ {ゴブリン支持率:MASTER:0} ] ＋ 加算[ {プレイヤー加算} ]
+	;TranslatedMark あなたの支持率[ {ゴブリン支持率:MASTER:0} ] ＋ 加算[ {プレイヤー加算} ]
 
 IF 他の士官を応援:MASTER:0
 	PRINTFORML 支持[ %ANAME(他の士官応援対象:MASTER:0)% ]中
+	;TranslatedMark [ %ANAME(他の士官応援対象:MASTER:0)% ]を応援している
 ELSE
 	PRINTFORML
 ENDIF
@@ -153,25 +168,32 @@ ENDIF
 PRINTL
 IF !STATUE_GOBLIN_COUNCIL:0
 	PRINTBUTTON "[1] 公众便器的管理", 1
+	;TranslatedMark [1] 公衆便器を管理する
 	PRINTL
 ENDIF
 PRINTBUTTON "[2] 支持其他士官", 2
+;TranslatedMark [2] 他の士官を応援する
 PRINTL
 PRINTBUTTON "[3] 请求其他士官支持", 3
+;TranslatedMark [3] 他の士官に応援してもらう
 PRINTL
 PRINTBUTTON "[4] 绑架其他势力的俘虏", 4
+;TranslatedMark [4] 他勢力の捕虜を拉致する
 PRINTL
 IF CHANGE_Government_GOBLIN:1 == 2 && MONEY:(CFLAG:MASTER:所属) >= 5000 && 部隊編成可能フラグ == 1 && DAY >= SLG_PP:1
 	PRINTBUTTON "[6] 煽动起义(国庫10000消費)", 6
+	;TranslatedMark [6] 蜂起を扇動する(国庫10000消費)
 	PRINTL
 ELSEIF CHANGE_Government_GOBLIN:1 != 2
 	PRINTBUTTON "[5] 出去掠夺", 5
+	;TranslatedMark [5] 略奪に出かける
 	PRINTL
 ENDIF
 
 
 CALL SINGLE_DRAWLINE
 PRINTBUTTON "1000[取消]", 1000
+;TranslatedMark 1000[戻る]
 PRINTL
 
 REDRAW 0
@@ -219,6 +241,7 @@ FLAG:能力表示モード = 0
 
 CALL SINGLE_DRAWLINE
 PRINTL 公众便器的管理
+;TranslatedMark 公衆便器を管理します
 CALL SINGLE_DRAWLINE
 
 FOR 性奴隷, 0, CHARANUM
@@ -238,21 +261,26 @@ FOR 性奴隷, 0, CHARANUM
 		SELECTCASE ホフゴブリンに監禁:性奴隷:0
 			CASE 1
 				PRINTFORM [ 待　　机 ]
+				;TranslatedMark [ 待　　機 ]
 			CASE 2
 				PRINT [
 				SETCOLOR カラー_緑
 				PRINTFORM  公众便器
+				;TranslatedMark 公衆便器
 				RESETCOLOR
 				PRINT ]
 		ENDSELECT
 		IF GETBIT(TALENT:性奴隷:特殊勢力陥落系, 特殊勢力_ホフゴブリン)
 			SETCOLOR カラー_選択中
 			PRINTFORML 　已陷落
+			;TranslatedMark 陥落済
 		ELSEIF SP_TRAIN_COUNT:性奴隷:特殊勢力_ホフゴブリン >= 残り陥落ターン - 1
 			PRINTFORML 　马上陷落
+			;TranslatedMark まもなく陥落
 		ELSEIF SP_TRAIN_COUNT:性奴隷:特殊勢力_ホフゴブリン >= 残り陥落ターン - 2
 			SETCOLOR カラー_選択不可
 			PRINTFORML 　即将陷落
+			;TranslatedMark もうすぐ陥落
 		ELSE
 			PRINTL
 		ENDIF
@@ -263,10 +291,13 @@ PRINTL
 
 CALL SINGLE_DRAWLINE
 PRINTBUTTON "[ 600][统一　运用终止]", 600
+;TranslatedMark [ 600][一括　運用中止]
 PRINTL
 PRINTBUTTON "[ 700][统一　运用开始]", 700
+;TranslatedMark [ 700][一括　運用開始]
 PRINTL
 PRINTBUTTON "[1000][　　　取消]", 1000
+;TranslatedMark [1000][　　　戻る]
 PRINTL
 
 REDRAW 0
@@ -329,13 +360,17 @@ NEXT
 
 CALL SINGLE_DRAWLINE
 PRINTL 支持其他士官
+;TranslatedMark 他の士官を応援します
 PRINT 现在的支持对象
+;TranslatedMark 現在の応援対象
 IF !他の士官を応援:MASTER:0
 	PRINTL [ 无 ]
+	;TranslatedMark [ なし ]
 ELSE
 	PRINTFORML [ %ANAME(他の士官応援対象:MASTER:0)% ] 支持率[ {ゴブリン支持率:(他の士官応援対象:MASTER:0):0} ] ＋加算 [ {ゴブリン支持率:MASTER:0} ] ＋ 加算[ {支持率加算} ]
 ENDIF
 PRINTFORML 你的支持率[ {ゴブリン支持率:MASTER:0} ] ＋ 加算[ {支持率加算} ]
+;TranslatedMark あなたの支持率[ {ゴブリン支持率:MASTER:0} ] ＋ 加算[ {支持率加算} ]
 CALL SINGLE_DRAWLINE
 
 FOR 応援対象, 0, CHARANUM
@@ -360,8 +395,10 @@ NEXT
 
 CALL SINGLE_DRAWLINE
 PRINTBUTTON "[ 900][支持终止]", 900
+;TranslatedMark [ 900][応援中止]
 PRINTL
 PRINTBUTTON "[1000][　　取消]", 1000
+;TranslatedMark [1000][　　戻る]
 PRINTL
 
 REDRAW 0
@@ -404,7 +441,9 @@ NEXT
 
 CALL SINGLE_DRAWLINE
 PRINTL 请求其他士官支持
+;TranslatedMark 他の士官に応援してもらいます
 PRINTFORML 你的支持率[ {ゴブリン支持率:MASTER:0} ] ＋ 加算[ {支持率加算} ]
+;TranslatedMark あなたの支持率[ {ゴブリン支持率:MASTER:0} ] ＋ 加算[ {支持率加算} ]
 CALL SINGLE_DRAWLINE
 
 FOR 要請対象, 0, CHARANUM
@@ -417,6 +456,7 @@ FOR 要請対象, 0, CHARANUM
 		CALL PRINTBUTTON_CENTER(@"[%名前, MAX_CHARANAME_LENGTH, LEFT%]", 要請対象, 0)
 		IF 他の士官を応援:要請対象:0 && MASTER == 他の士官応援対象:要請対象:0
 			PRINTL [ 支持中 ]
+			;TranslatedMark [ 応援中 ]
 		ELSE
 			PRINTL
 		ENDIF
@@ -428,10 +468,13 @@ NEXT
 
 CALL SINGLE_DRAWLINE
 PRINTBUTTON "[ 800][统一终止]", 800
+;TranslatedMark [ 800][一括中止]
 PRINTL
 PRINTBUTTON "[ 900][统一支持]", 900
+;TranslatedMark [ 900][一括応援]
 PRINTL
 PRINTBUTTON "[1000][　　取消]", 1000
+;TranslatedMark [1000][　　戻る]
 PRINTL
 
 REDRAW 0
@@ -489,27 +532,36 @@ FIRST_LINE:0 = LINECOUNT
 
 CALL SINGLE_DRAWLINE
 PRINTL 出去掠夺
+;TranslatedMark 略奪に出かけます
 CALL SINGLE_DRAWLINE
 
 PRINTFORML 掠夺兵数[ {SOLDIER_Predatoriness_GOBLIN} ]
+;TranslatedMark 略奪兵数[ {SOLDIER_Predatoriness_GOBLIN} ]
 PRINT 目的地
+;TranslatedMark 行先
 IF !略奪対象勢力 || !IS_COUNTRY(略奪対象勢力)
 	PRINTFORML [ 无 ]
+	;TranslatedMark [ なし ]
 ELSE
 	PRINTFORML [ %ANAME(略奪対象勢力名)% ]势力 [ %CITY_NAME:略奪対象都市% ]
+	;TranslatedMark [ %ANAME(略奪対象勢力名)% ]勢力 [ %CITY_NAME:略奪対象都市% ]
 ENDIF
 PRINTL
 
 CALL SINGLE_DRAWLINE
 PRINTBUTTON "[1][掠夺兵数的设定]", 1
+;TranslatedMark [1][略奪兵数の設定]
 PRINTL
 PRINTBUTTON "[2][　掠夺兵的解散]", 2
+;TranslatedMark [2][　略奪兵の解散]
 PRINTL
 IF SOLDIER_Predatoriness_GOBLIN > 0
 	PRINTBUTTON "[3][　掠夺的目的地]", 3
+	;TranslatedMark [3][　　略奪の行先]
 	PRINTL
 ENDIF
 PRINTBUTTON "[10][　　　　　取消]", 10
+;TranslatedMark [10][　　　　　戻る]
 PRINTL
 
 REDRAW 0
@@ -549,8 +601,11 @@ RESTART
 
 CALL SINGLE_DRAWLINE
 PRINTL 以所持金作为基准来编成掠夺兵(比例 所持金:掠夺兵数 = 100:1)
+;TranslatedMark 所持金を元手に略奪兵を編成します(レート 所持金:略奪兵数 = 100:1)
 PRINTL 请输入掠夺兵数(输入0时不会改变)
+;TranslatedMark 略奪兵数を入力してください(0を入力すると変更されません)
 PRINTFORML 现在的所持金[ {MONEY} ] 最大兵数[ {最大略奪兵数} ]
+;TranslatedMark 現在の所持金[ {MONEY} ] 最大兵数[ {最大略奪兵数} ]
 CALL SINGLE_DRAWLINE
 PRINTBUTTON "[     0]", 0
 PRINTL
@@ -578,6 +633,7 @@ ENDIF
 #DIM FIRST_LINE
 
 PRINTFORML 请选择要掠夺的城市(不能选择自己势力的城市)
+;TranslatedMark 略奪したい都市を選択してください(自勢力の都市は不可)
 CALL SINGLE_DRAWLINE
 
 FIRST_LINE = LINECOUNT
@@ -589,6 +645,7 @@ CALL RESET_CITY_COLOR
 CALL SINGLE_DRAWLINE
 
 PRINTBUTTON " 0[取消]", 0
+;TranslatedMark 0[戻る]
 PRINTL
 
 REDRAW 0
@@ -609,6 +666,7 @@ ENDIF
 
 IF 都市所持勢力 == CFLAG:MASTER:所属
 	PRINTFORMW 不能选择自己势力的城市
+	;TranslatedMark 自勢力の都市は選択できません
 	CLEARLINE 1
 	GOTO INPUT_LOOP
 ENDIF
@@ -620,6 +678,7 @@ IF 都市 >= 0
 	CALL SHOW_CITY_INFO(都市)
 	CALL SINGLE_DRAWLINE
 	PRINTFORML 确定要掠夺这个城市吗？
+	;TranslatedMark この都市を略奪しますか？
 
 	;はい／いいえ入力処理
 	CALL ASK_YN()
@@ -659,11 +718,13 @@ NEXT
 
 IF 拉致可能 <= 0
 	PRINTFORMW 没有可以绑架的士官
+	;TranslatedMark 拉致可能な士官がいません
 	RETURN 0
 ENDIF
 
 IF MONEY < 10000
 	PRINTFORMW 资金不足(需要所持金10000)
+	;TranslatedMark 資金が足りません(所持金10000必要)
 	RETURN 0
 ENDIF
 
@@ -673,7 +734,9 @@ $CHARA_LIST_LOOP
 
 CALL SINGLE_DRAWLINE
 PRINTFORML 可以绑架其他国家的战俘（消费个人资金10000）
+;TranslatedMark 他国の捕虜拉致できます（個人資金10000消費）
 PRINTFORML 请选择你想要绑架的军官
+;TranslatedMark 拉致したい士官を選択して下さい
 CALL SINGLE_DRAWLINE
 
 CALL SELECT_CHARA_LIST_ONLY_LOGIC_SLG("ABLE_Abduction_CHARA", "NONE")
@@ -690,14 +753,18 @@ CALL SINGLE_DRAWLINE
 CALL SHOW_INFO(対象)
 CALL SINGLE_DRAWLINE
 PRINTFORML 确定要绑架这个角色吗？
+;TranslatedMark このキャラを拉致しますか？
 
 PRINTBUTTON " 0[　　　　　　　　　否]", 0
+;TranslatedMark 0[　　　　　　　　　いいえ]
 PRINTL
 PRINTBUTTON " 1[　　　　　小心地绑架]", 1
+;TranslatedMark 1[　　　　　丁重に拉致する]
 PRINTL
 IF CHANGE_Government_GOBLIN:1 != 2 && IS_FEMALE(対象) && CFLAG:対象:所属 != CFLAG:MASTER:所属
 	PRINTL
 	PRINTBUTTON " 2[粗暴地绑架（※凌辱）]", 2
+	;TranslatedMark 2[手荒に拉致する（※凌辱）]
 	PRINTL
 ENDIF
 
@@ -712,12 +779,15 @@ ELSEIF RESULT == 1
 	所属勢力 = CFLAG:対象:所属
 	SETCOLOR カラー_注意
 	PRINTFORML 与势力内部的哥布林合作绑架了%ANAME(GET_COUNTRY_BOSS(対象勢力))%势力所囚禁的%ANAME(対象)%！
+	;TranslatedMark 内部にいたホフゴブリンと協力して%ANAME(GET_COUNTRY_BOSS(対象勢力))%勢力に囚われていた%ANAME(対象)%を拉致した！
 	RESETCOLOR
 	PRINTFORML 与%ANAME(GET_COUNTRY_BOSS(対象勢力))%势力之间的关系恶化了
+	;TranslatedMark %ANAME(GET_COUNTRY_BOSS(対象勢力))%勢力との関係が悪化しました
 	CALL DIPLOMACY_WORSEN_RELATION(対象勢力, 50)
 	CALL CAPTURE(対象, CFLAG:MASTER:所属)
 	MONEY -= 10000
 	PRINTFORML 支持率上升了
+	;TranslatedMark 支持率が上昇しました
 	支持率 = ゴブリン支持率:MASTER:0
 	ゴブリン支持率:MASTER:0 += 1
 	SETCOLOR カラー_注意
@@ -731,10 +801,12 @@ ELSEIF RESULT == 2 && CHANGE_Government_GOBLIN:1 != 2 && IS_FEMALE(対象) && CF
 	所属勢力 = CFLAG:対象:所属
 	CALL QuriltaiGOBLIN_Abduction_MSG(対象)
 	PRINTFORML 与%ANAME(GET_COUNTRY_BOSS(対象勢力))%势力之间的关系恶化了
+	;TranslatedMark %ANAME(GET_COUNTRY_BOSS(対象勢力))%勢力との関係が悪化しました
 	CALL DIPLOMACY_WORSEN_RELATION(対象勢力, 50)
 	PRINTFORML
 	IF IS_COUNTRY(所属勢力)
 		PRINTFORML 与%ANAME(GET_COUNTRY_BOSS(所属勢力))%势力之间的关系恶化了
+		;TranslatedMark %ANAME(GET_COUNTRY_BOSS(所属勢力))%勢力との関係が悪化しました
 		CALL DIPLOMACY_WORSEN_RELATION(所属勢力, 100)
 	ENDIF
 	CALL CAPTURE(対象, CFLAG:MASTER:所属)
@@ -750,6 +822,7 @@ ELSEIF RESULT == 2 && CHANGE_Government_GOBLIN:1 != 2 && IS_FEMALE(対象) && CF
 		PRINTFORML 支持率：[ {支持率} ] → [ {ゴブリン支持率:MASTER:0} ]
 		PRINTFORML
 		PRINTFORMW 集权性：[ {集権性} ] → [ {Centralization_power_GOBLIN} ]
+		;TranslatedMark 集権性：[ {集権性} ] → [ {Centralization_power_GOBLIN} ]
 		PRINTFORML
 		RESETCOLOR
 	ELSE
@@ -786,11 +859,11 @@ SETCOLOR カラー_注意
 PRINTFORML 内部和我们合作的哥布林协助我们绑架了被%ANAME(GET_COUNTRY_BOSS(LOCAL:1))%势力囚禁的%ANAME(対象)%!
 ;TranslatedMark 内部にいたホフゴブリンと協力して%ANAME(GET_COUNTRY_BOSS(LOCAL:1))%勢力に囚われていた%ANAME(対象)%を拉致した！
 RESETCOLOR
-PRINTFORMW 霍夫哥布林把口枷塞进%ANAME(対象)%大喊大叫的嘴里,然后抱起%ANAME(対象)%的身体把%PRONOUN(対象)%带出去....
+PRINTFORMW 霍夫哥布林把口枷塞进%ANAME(対象)%大喊大叫的嘴里,然后抱起%ANAME(対象)%的身体把%PRONOUN(対象)%带出去……
 ;TranslatedMark ホフゴブリンは暴れる%ANAME(対象)%に猿轡を噛ませると、その身体を抱え上げて外へと連れ出した……
 PRINTFORML
 ;(画像パッチ)
-;CALL 画像表示(対象, 2, 5)
+CALL 画像表示(対象, 2, 5)
 PRINTFORML 被带到阴暗处的%ANAME(対象)%被哥布林他们侵犯了
 ;TranslatedMark 物陰に連れ込まれた%ANAME(対象)%はホフゴブリン達に犯された
 SELECTCASE RAND:25
@@ -971,7 +1044,9 @@ SELECTCASE RAND:25
 		;TranslatedMark 小一時間もそうして躾けられ続けた結果、すっかり%ANAME(対象)%は彼らの虜にされてしまった
 ENDSELECT
 CALL FUCK_SP(対象, "欲望, 精愛, 奉仕, 性交, Ａ, Ｖ, 輪姦, Ｖ性交, Ａ性交", "膣内射精, 処女喪失, Ａ処女喪失", 勢力番号, GET_SPERM_ID("哥布林"), @"哥布林的\@ RAND:2 ? 唇 # 阴茎 \@", "哥布林", "", "輪姦")
+;TranslatedMark 対象, "欲望, 精愛, 奉仕, 性交, Ａ, Ｖ, 輪姦, Ｖ性交, Ａ性交", "膣内射精, 処女喪失, Ａ処女喪失", 勢力番号, GET_SPERM_ID("ホフゴブリン"), @"ホフゴブリンの\@ RAND:2 ? 唇 # ペニス \@", "ホフゴブリン", "", "輪姦"
 CALL FUCK_SP(対象, "欲望, 精愛, 奉仕, 性交, Ａ, Ｖ, 輪姦, Ｖ性交, Ａ性交", "膣内射精, 処女喪失, Ａ処女喪失", 勢力番号, GET_SPERM_ID("哥布林"), @"哥布林的\@ RAND:2 ? 唇 # 阴茎 \@", "哥布林", "", "輪姦")
+;TranslatedMark 対象, "欲望, 精愛, 奉仕, 性交, Ａ, Ｖ, 輪姦, Ｖ性交, Ａ性交", "膣内射精, 処女喪失, Ａ処女喪失", 勢力番号, GET_SPERM_ID("ホフゴブリン"), @"ホフゴブリンの\@ RAND:2 ? 唇 # ペニス \@", "ホフゴブリン", "", "輪姦"
 PRINTFORML
 PRINTFORMW %ANAME(対象)%被肆意侵犯后，哥布林们把她塞进破口袋给带回了自己的国家……
 ;TranslatedMark %ANAME(対象)%を好き放題に犯した後、ホフゴブリン達は彼女をボロ袋に詰め込んで自国へ持ち帰ってきた……
@@ -988,6 +1063,7 @@ PRINTFORML
 #DIM FIRST_LINE
 
 PRINTFORML 请选择你想要煽动起义的城市(只能选择敌对势力)
+;TranslatedMark 蜂起を扇動したい都市を選択してください(敵対勢力のみ可能)
 CALL SINGLE_DRAWLINE
 
 FIRST_LINE = LINECOUNT
@@ -999,6 +1075,7 @@ CALL RESET_CITY_COLOR
 CALL SINGLE_DRAWLINE
 
 PRINTBUTTON " 0[取消]", 0
+;TranslatedMark 0[戻る]
 PRINTL
 
 REDRAW 0
@@ -1019,6 +1096,7 @@ ENDIF
 
 IF TMP_COUNTRY_RELATION:(CFLAG:MASTER:所属):都市所持勢力 >= 1
 	PRINTFORMW 你不能选择非敌对势力的城市
+	;TranslatedMark 敵対していない勢力の都市は選択できません
 	CLEARLINE 1
 	GOTO INPUT_LOOP
 ENDIF
@@ -1030,6 +1108,7 @@ IF 都市 >= 0
 	CALL SHOW_CITY_INFO(都市)
 	CALL SINGLE_DRAWLINE
 	PRINTFORML 确定要在这个城市煽动起义吗？
+	;TranslatedMark この都市で蜂起を扇動しますか？
 
 	;はい／いいえ入力処理
 	CALL ASK_YN()
@@ -1039,6 +1118,7 @@ IF 都市 >= 0
 	ENDIF
 
 	PRINTFORML %CITY_NAME:都市%中赞同我们的民众起义了！
+	;TranslatedMark %CITY_NAME:都市%で我々に賛同する民衆が蜂起した！
 	MONEY:(CFLAG:MASTER:所属) -= 10000
 	UNIT_POSITION:(CFLAG:MASTER:所属):部隊編成ナンバー = 都市
 	蜂起兵数 = CITY_ECONOMY:都市 / 10

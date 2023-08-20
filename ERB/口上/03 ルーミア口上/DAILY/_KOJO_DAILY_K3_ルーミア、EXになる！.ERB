@@ -17,7 +17,11 @@ RETURN 50
 SIF !TALENT:対象:合意
 	RETURN 0
 
-;主人公と同一勢力で捕虜でなく、主人公が肉棒持ちで、好感度1500以上
+;対象が女でないとだめ
+SIF !IS_FEMALE(対象)
+	RETURN 0
+
+;主人公と同一勢力で捕虜でなく、主人公がペニス持ちで、好感度1500以上
 RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0) && HAS_PENIS(MASTER) && CFLAG:対象:好感度 >= 1500
 
 ;---------------------
@@ -31,7 +35,7 @@ RETURN デイリー_ジャンル_エロ
 ;---------------------
 ;本体
 ;イベントが発生した場合は1、発生しなかった場合は0を返す
-;発生しなかったというのは例えば、特定条件を満たすキャラから隨機に一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
 ;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
 ;---------------------
 @KOJO_DAILY_K3_EX_RUMIA(対象)
@@ -42,76 +46,134 @@ RETURN デイリー_ジャンル_エロ
 ;一回目
 IF KDVAR:対象:ルーミア_EXルーミア == 0
 	PRINTFORML 「喂、%ANAME(MASTER)%。一起来玩吗？」
+	;TranslatedMark 「ねえねえ、%ANAME(MASTER)%。遊んでっていい？」
 	PRINTFORMW 在休息日，%ANAME(対象)%来到了%ANAME(MASTER)%的房间
+	;TranslatedMark 休日に、%ANAME(対象)%が%ANAME(MASTER)%の部屋を訪ねてきた
 	PRINTFORML 没有什么要拒绝的理由，就邀请到了房间里
+	;TranslatedMark 特に断る理由もないので部屋に上げた
+	;(画像パッチ)
+	CALL 画像表示(対象, 1, 2)
 	PRINTFORMW 「哇，谢谢你♪」
+	;TranslatedMark 「わーい、ありがとね♪」
 	PRINTFORML 就这样，两个人一边躺着吃点心一边看漫画，悠闲地度过了
+	;TranslatedMark 寝転がっておやつを食べたり漫画を読んだり、二人でまったり過ごしていと、
 	PRINTFORMW 突然发现%ANAME(対象)%头上带的发带，稍微有点脏了
+	;TranslatedMark ふと%ANAME(対象)%の頭にあるリボンに目がつく。よく見ると、ちょっと汚れている
 	PRINTFORMW 平时就在意皮肤粗糙、头发脏污等问题的%ANAME(対象)%
+	;TranslatedMark 普段から肌荒れや髪の毛の痛みなどを気にしている%ANAME(対象)%だ
 	PRINTFORMW 把显眼的丝带上的污垢原封不动地放在那里，总觉得有些违和
+	;TranslatedMark そんな彼女が目立つリボンの汚れをそのままにしていることに、なんとなく違和感を覚える
 	PRINTFORML 「嗯？啊，这个？虽然知道，但是自己是不会碰的」
+	;TranslatedMark 「んー？　ああ、これ？　分かってるけど自分じゃあ触れないのよねー」
 	PRINTFORMW %ANAME(対象)%说，这不是单纯的丝带，而是封印了某些东西的符纸
+	;TranslatedMark %ANAME(対象)%いわく、これはただのリボンではなく何かしらを封印しているお札なのだという
 	PRINTFORMW 由于封印时下的术，她不会接触到这个符纸，平时也不会意识到…
+	;TranslatedMark 封印の際の術により、彼女はこのお札に触れず、意識してもすぐに忘れてしまうようにされているのだと…
 	PRINTFORML 「我也是最近照镜子一看，觉得脏了呢」
+	;TranslatedMark 「私もねー、鏡で見ると最近汚れてきたなーって思ってたところなのよ」
 	PRINTFORMW 「如果是我以外的人的话，好像能摸到，%ANAME(MASTER)%试一试？」
+	;TranslatedMark 「私以外なら触れるみたいだから、%ANAME(MASTER)%が取ってみる？」
 	PRINTFORMW 「顺便帮我洗一下就好了。啊，或许会升级呢！？」
+	;TranslatedMark 「ついでに洗ってくれると嬉しいなー。あ、もしかしてパワーアップとかしちゃうかも！？」
 	PRINTFORML 如果是很轻的封印的话…
+	;TranslatedMark 自分の封印云々の話なのにずいぶん軽い扱いだ…
 	PRINTFORMW 嘛，符纸只要再穿上就可以了，但是被封印的东西不知道是什么，可以取下来吗？…
+	;TranslatedMark まあ、お札はまた着ければいいだけのようだが、封印されたモノが何なのか分からないのに取っていいものか…
 	PRINTFORMW 那么，怎么办呢……
+	;TranslatedMark さて、どうしよう……
 	CALL ASK_YN("拿下来", "就那样放着")
+	;TranslatedMark "お札を取ってみる", "そのままにしておく"
 	IF RESULT == 1
 		PRINTFORMW 被封印了，也有相应的理由吧
+		;TranslatedMark 封印されているということは、それなりの理由があるのだろう
 		PRINTFORMW 用不着和神作对
+		;TranslatedMark 触らぬ神に祟りなしだ
 		PRINTFORMW %ANAME(MASTER)%将符纸保持原样，继续与%ANAME(対象)%玩闹起来……
+		;TranslatedMark %ANAME(MASTER)%はお札をそのままにして、%ANAME(対象)%とじゃれあった……
 		CFLAG:対象:好感度 += 200
+		CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了200", カラー_シアン)
+		;TranslatedMark %ANAME(対象)%の好感度が200上がった
 		RETURN 1
 	ELSE
 		PRINTFORML 嗯，以如此引人注目的形式放置不管，也许并不是那么严重的事情
+		;TranslatedMark まあ、こんな目立つ形で放って置かれているということは、それほど深刻な物ではないのかもしれない
 		PRINTFORMW 稍微有点好奇心，就试着取了符纸
+		;TranslatedMark ちょっとした好奇心も手伝って、お札を取ってみる事にした
 		PRINTFORML 「嗯，可能有点害怕了。感觉有什么危险的话请马上放回去」
+		;TranslatedMark 「んー、ちょっとドキドキしてきたかも。何か危ない感じになったらすぐ戻してね」
 		PRINTFORMW %ANAME(対象)%也有点紧张的样子。总之，试着温柔地取下符纸
-		PRINTFORML …认真观察手上的符纸。远远的看到白色线条的部分全部用白字写着咒语一样的东西…
+		;TranslatedMark %ANAME(対象)%もちょっと緊張の面持ちだ。とりあえず、優しくお札を取ってみる
+		PRINTFORML …认真观察手上的符纸。
+		;TranslatedMark …手にとってまじまじと観察する
+		PRINTFORML 远远的看到白色线条的部分全部用白字写着咒语一样的东西…
+		;TranslatedMark 遠目には白いラインに見えた部分は全て白字で、呪文のような物がびっしりと書かれていた…
 		PRINTFORMW 「……嗯？这个……嗯」
+		;TranslatedMark 「……ん？　これ……っ」
 		PRINTFORML %ANAME(対象)%注意到身体的异常。好像感觉到了力量的高涨
+		;TranslatedMark %ANAME(対象)%が体の異変に気づく。何やらパワーの高まりを感じるようだ
 		PRINTFORMW 「这、这是…嘿！黑暗力量高涨……溢出来了…嘿！」
+		;TranslatedMark 「こ、これは…っ！　闇の力が高まる……、溢れるぅ…っ！」
 		PRINTFORML 「这就是我真正的力量吗！！」
-		CALL COLOR_PRINTW(@"%ANAME(対象)%が、释放出被封印的真正力量！", カラー_注意)
+		;TranslatedMark 「これが私の、真の力なのかーっ！！」
+		;(画像パッチ)
+		CALL 画像表示(対象, 4, 1)
+		CALL COLOR_PRINTW(@"%ANAME(対象)%、释放出被封印的真正力量！", カラー_注意)
+		;TranslatedMark %ANAME(対象)%が、封印されていた真の力を解き放った！
 		CALL COLOR_PRINTL(@"%ANAME(対象)%的武闘上升了1！", カラー_注意)
+		;TranslatedMark %ANAME(対象)%の武闘が1上がった！
 		ABL:対象:武闘 += 1
 		CALL COLOR_PRINTL(@"%ANAME(対象)%的防衛上升了1！", カラー_注意)
+		;TranslatedMark %ANAME(対象)%の防衛が1上がった！
 		ABL:対象:防衛 += 1
 		CALL COLOR_PRINTW(@"%ANAME(対象)%的知略上升了1！", カラー_注意)
+		;TranslatedMark %ANAME(対象)%の知略が1上がった！
 		ABL:対象:知略 += 1
 		PRINTFORML
 		PRINTFORML
 		PRINTFORMW ・・・
 		PRINTFORMW 虽然感觉不到自己变得有多强大……
+		;TranslatedMark あんまり強くなっているようには感じないが……
 		PRINTFORMW 「…嗯，是这样的吧」
+		;TranslatedMark 「…うん、まあ、こんなもんだよね」
 		IF CFLAG:霊夢:所属 == CFLAG:MASTER:所属 &&  !(MASTER == NAME_TO_CHARA("霊夢"))
 			PRINTFORML
 			CALL SINGLE_DRAWLINE
 			PRINTFORML
 			PRINTFORML 　　被封印也就是这种程度
+			;TranslatedMark 封印されるって事は、つまりその程度ってことよ
 			PRINTFORML
 			CALL SINGLE_DRAWLINE
 			PRINTFORML
 			PRINTFORML 不知从哪里传来了博丽巫女的话语…
+			;TranslatedMark どこからともなく、博麗の巫女のありがたい言葉が聞こえてきたような気がした…
 			PRINTFORMW
 		ENDIF
 		PRINTFORMW 「啊，简单的power up『ＥＸ%ANAME(対象)%！』我还以为能到这种程度呢」
+		;TranslatedMark 「あーあ、お手軽パワーアップで『ＥＸ%ANAME(対象)%だー！』ってやれるかと思ったのになー」
 		PRINTFORML
-		CALL COLOR_PRINTL(@"扑通——扑通", カラー_警告)
-		;TranslatedMark @"ドクンッ", カラー_警告
+		CALL COLOR_PRINTL("扑通——扑通", カラー_警告)
+		;TranslatedMark ドクンッ
 		PRINTFORMW
+		;(画像パッチ)
+		CALL 画像表示(対象, 4, 2)
 		PRINTFORMW 「啊，那个…总觉得…有点……」
+		;TranslatedMark 「あ、あれっ？　…なんか…気分が……」
 		PRINTFORML %ANAME(対象)%突然跪了下来。果然发生了什么不好的事情吗！？
+		;TranslatedMark %ANAME(対象)%が急に膝をつく。やはり何か良くないことが起こったのだろうか！？
 		PRINTFORMW 急忙打算给%ANAME(対象)%安装符纸的时候，反过来被她控制住了，就那样被推倒了
+		;TranslatedMark 急ぎ%ANAME(対象)%にお札を取り付けようとしたところを、逆に彼女に抑えられ、そのまま押し倒されてしまった
 		PRINTFORML 然后，在发出抵抗声之前，被%ANAME(対象)%的嘴唇堵住了嘴
+		;TranslatedMark %ANAME(MASTER)%が驚きと抵抗の声を上げる前に、%ANAME(対象)%の唇によって口を塞がれてしまう
 		PRINTFORMW 「嗯…嘘♥嗯…继续…嗯…♥♥」
+		;TranslatedMark 「あんん…ッ♥　ん…ちゅぶッ…んん…♥♥」
 		PRINTFORML %ANAME(MASTER)%在%ANAME(対象)%掌控下、由于无法呼吸的激烈接吻而陷入缺氧状态，意识朦胧
+		;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%の呼吸も許さぬ激しい接吻に酸欠状態となり、意識朦朧としてしまう
 		PRINTFORMW 确认了%ANAME(MASTER)%的抵抗力减弱了的%ANAME(対象)%，跨坐在%ANAME(MASTER)%身上，把衣服扔到了一边
+		;TranslatedMark %ANAME(MASTER)%の抵抗が弱まったのを確認した%ANAME(対象)%は、%ANAME(MASTER)%の体に跨り自らの服を脱ぎ捨てる
 		PRINTFORML 那个姿态并不是平时那个天真无邪的少女，而是一个劲地闪烁着妖艳的淫光的妖怪
+		;TranslatedMark その姿は普段の無邪気な少女ではなく、ひたすら淫らで妖しい光を目に灯した、妖艶な妖怪だった
 		PRINTFORMW 完全被情欲支配了的%ANAME(対象)%，一个劲的渴求着%ANAME(MASTER)%的精液……
+		;TranslatedMark 完全に情欲に支配された様子の%ANAME(対象)%が、%ANAME(MASTER)%の精を求めて覆いかぶさってきた……
 
 		CVARSET CFLAG, 6, 0
 		KDVAR:対象:ルーミア_EXルーミアとセックス中 = 1
@@ -129,45 +191,83 @@ IF KDVAR:対象:ルーミア_EXルーミア == 0
 ;２回目以降
 ELSE
 	PRINTFORML 「喂、%ANAME(MASTER)%。可以再来玩吗？」
+	;TranslatedMark 「ねえねえ、%ANAME(MASTER)%。また遊んでっていい？」
 	PRINTFORMW 休息日、%ANAME(対象)%又来%ANAME(MASTER)%的屋子里玩了
+	;TranslatedMark 休日に、%ANAME(対象)%がまた%ANAME(MASTER)%の部屋に遊びに来た
 	PRINTFORML 好像不记得上次在这里干过什么
+	;TranslatedMark どうやら、前回ここで起こった事は覚えていないようだ
+	;(画像パッチ)
+	CALL 画像表示(対象, 1, 2)
 	PRINTFORMW 「嘿嘿，不用顾虑，滚来滚去吧♪」
+	;TranslatedMark 「えへへー、気兼ねなくゴロゴロするぞー♪」
 	PRINTFORML 躺着吃吃点心、看看漫画，两个人悠闲地度过一段时光
+	;TranslatedMark 寝転がっておやつを食べたり漫画を読んだり、二人でまったり過ごしていと、
 	PRINTFORMW 突然又一次注意到了%ANAME(対象)%头上的发带
+	;TranslatedMark またも%ANAME(対象)%の頭にあるリボンに目が行く
 	PRINTFORMW 上一次，她因为取了这个东西而变得混乱不堪的样子不禁浮现在我的脑海里
+	;TranslatedMark 前回、これを取って豹変し、乱れに乱れた彼女の姿が否応無しに頭に浮かぶ
 	PRINTFORMW 「嗯？怎么了？　%ANAME(MASTER)%。啊，这个？」
+	;TranslatedMark 「んー？　どうしたの？　%ANAME(MASTER)%。ああ、これ？」
 	PRINTFORML 「我知道脏了…这个，自己是不会碰的」
+	;TranslatedMark 「汚れてきてるのは知ってるんだけど…これ、自分じゃあ触れないのよねー」
 	PRINTFORMW 「如果是我以外的人的话，好像能摸到，%ANAME(MASTER)%试着拿下来看看？」
+	;TranslatedMark 「私以外なら触れるみたいだから、%ANAME(MASTER)%が取ってみる？」
 	PRINTFORMW 「顺便帮我洗一下就好了。啊，或许会升级也说不定！？」
+	;TranslatedMark 「ついでに洗ってくれると嬉しいなー。あ、もしかしてパワーアップとかしちゃうかも！？」
 	PRINTFORML 因为没有记忆，所以%ANAME(対象)%又一次天真无邪的这么说着
+	;TranslatedMark 記憶が無いゆえに、無邪気に提案する%ANAME(対象)%
 	PRINTFORML 但是%ANAME(MASTER)%还记得上次那么激烈的交合…
+	;TranslatedMark だが%ANAME(MASTER)%は、それが淫らで激しい交わりになることを知っている…
 	PRINTFORML 怎么办呢……
+	;TranslatedMark どうしよう……
 	CALL ASK_YN("拿下来", "还是算了")
+	;TranslatedMark "お札を取る", "そのままにしておく"
 	IF RESULT == 1
 		PRINTFORMW ……把失忆时发生的事情当作好事，去寻求交合，怎么看也不应该吧
+		;TranslatedMark ……記憶が無いことをいい事に、再び体を重ねるというのも不義理だろう
 		PRINTFORMW 而且……继续做那样的事情的话，可能会完全沉溺于她的身体呢…
+		;TranslatedMark それに……あんなことを続けると、彼女に溺れてしまうかもしれない…
 		PRINTFORMW %ANAME(MASTER)%将符纸保持原样，继续与%ANAME(対象)%玩闹起来……
+		;TranslatedMark %ANAME(MASTER)%はお札をそのままにして、%ANAME(対象)%とじゃれあった……
 		CFLAG:対象:好感度 += 200
+		CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了200", カラー_シアン)
+		;TranslatedMark %ANAME(対象)%の好感度が200上がった
 		RETURN 1
 	ELSE
 		PRINTFORML 想起上次在这里发生的事情
+		;TranslatedMark 前回、ここで起こった出来事を思い出す
 		PRINTFORMW %ANAME(MASTER)%的身体、因为情欲而不自觉的疼了起来
+		;TranslatedMark そして%ANAME(MASTER)%の身体の芯が、情欲によって甘く疼きだす
 		PRINTFORML %ANAME(MASTER)%将%ANAME(対象)%的符紙拿了下来
+		;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%のお札を取り外した
+		;(画像パッチ)
+		CALL 画像表示(対象, 4, 1)
 		PRINTFORMW 「好！这样就是EX的我…」
+		;TranslatedMark 「よーし！　これでＥＸな私に…」
 		PRINTFORML
-		CALL COLOR_PRINTL(@"扑通——扑通", カラー_警告)
-		;TranslatedMark @"ドクンッ", カラー_警告
+		CALL COLOR_PRINTL("扑通——扑通", カラー_警告)
+		;TranslatedMark ドクンッ
 		PRINTFORMW
+		;(画像パッチ)
+		CALL 画像表示(対象, 4, 2)
 		PRINTFORMW 「啊，那个…总觉得…嗯……」
+		;TranslatedMark 「あ、あれっ？　…なんか…気分が……」
 		PRINTFORML %ANAME(対象)%突然跪了下来。就这么期待着接下来会发生的事情，靠近了她
+		;TranslatedMark %ANAME(対象)%が急に膝をつく。そして%ANAME(MASTER)%は、これから起こる事を期待し彼女に近づく
 		PRINTFORMW %ANAME(対象)%完全没有辜负期待，将%ANAME(MASTER)%推倒在了床上
+		;TranslatedMark %ANAME(対象)%はその期待を裏切らず、%ANAME(MASTER)%をベッドへ押し倒す
 		PRINTFORML 然后迫不及待的，用嘴激烈地吮吸着%ANAME(MASTER)%的嘴唇
 		;TranslatedMark そして待ちきれないという風情で、%ANAME(MASTER)%の口を唇によって激しく貪る
 		PRINTFORMW 「嗯…嘘♥嗯…继续…嗯…♥♥」
+		;TranslatedMark 「あんん…ッ♥　ん…ちゅぶッ…んん…♥♥」
 		PRINTFORML %ANAME(MASTER)%在%ANAME(対象)%掌控下、由于无法呼吸的激烈接吻而陷入缺氧状态，意识朦胧
+		;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%の、呼吸も許さぬ激しい接吻に酸欠状態となり、意識朦朧としてしまう
 		PRINTFORMW 确认了%ANAME(MASTER)%的抵抗力减弱了的%ANAME(対象)%，跨坐在%ANAME(MASTER)%的身上，把衣服扔到了一边
+		;TranslatedMark %ANAME(MASTER)%の抵抗が弱まったのを確認した%ANAME(対象)%は、%ANAME(MASTER)%の体に跨り自らの服を脱ぎ捨てる
 		PRINTFORML 那个姿态并不是平时天真无邪的少女，而是一个劲地闪烁着妖艳的淫光的妖怪
+		;TranslatedMark その姿は普段の無邪気な彼女ではなく、ひたすら淫らで妖しい光を目に灯した、妖艶な妖怪だった
 		PRINTFORMW 欲望再次解封了的%ANAME(対象)%，一个劲的渴求着%ANAME(MASTER)%的精液……
+		;TranslatedMark 再び欲望の封印を解かれた%ANAME(対象)%が、%ANAME(MASTER)%の精を求めて覆いかぶさってきた……
 
 		CVARSET CFLAG, 6, 0
 		KDVAR:対象:ルーミア_EXルーミア ++

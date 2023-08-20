@@ -568,6 +568,38 @@ ENDIF
 CALL SHOW_TAG(ARG:0)
 PRINTL
 
+;(画像パッチ)画像を表示
+IF IS_TOHO_CHARA(ARG:0)
+	IF CFLAG:(ARG:0):12 == 2 && 記念品である:(ARG:0):0
+		FOR LOCAL, 0, 999
+			IF NAME_BEFORE_GOODS_EXECUTED:LOCAL == ARG:0
+				IF TYPE_GOODS_EXECUTED:LOCAL:8:0 == 1 || TYPE_GOODS_EXECUTED:LOCAL:8:1 == 1
+					CALL 画像表示(ARG:0, 1, 6)
+				ELSE
+					CALL 画像表示(ARG:0, 2, 5)
+				ENDIF
+				BREAK
+			ENDIF
+		NEXT
+	ELSEIF CFLAG:(ARG:0):12 == 2
+		CALL 画像表示(ARG:0, 1, 6)
+	ELSEIF 記念品である:(ARG:0):0
+		CALL 画像表示(ARG:0, 2, 5)
+	ELSEIF TALENT:(ARG:0):特殊勢力陥落系
+		CALL 画像表示(ARG:0, 3, 1)
+	ELSEIF 外来人に監禁:(ARG:0):0 || ホフゴブリンに監禁:(ARG:0):0 || 触手勢力に監禁:(ARG:0):0
+		CALL 画像表示(ARG:0, 2, 4)
+	ELSEIF (CFLAG:(ARG:0):捕虜先 == CFLAG:MASTER:所属 && CFLAG:(ARG:0):軟禁中 != 1) && ABL:(ARG:0):武闘 >= 70
+		CALL 画像表示(ARG:0, 1, 3)
+	ELSEIF CFLAG:(ARG:0):捕虜先 == CFLAG:MASTER:所属 && CFLAG:(ARG:0):軟禁中 != 1
+		CALL 画像表示(ARG:0, 1, 4)
+	ELSEIF TALENT:(ARG:0):150 || TALENT:(ARG:0):151 || TALENT:(ARG:0):152 || TALENT:(ARG:0):153
+		CALL 画像表示(ARG:0, 1, 2)
+	ELSE
+		CALL 画像表示(ARG:0, 1, 1)
+	ENDIF
+ENDIF
+
 CALL SINGLE_DRAWLINE
 
 ;-------------------------------------------------

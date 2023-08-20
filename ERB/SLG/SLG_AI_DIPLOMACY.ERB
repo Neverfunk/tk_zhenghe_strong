@@ -285,19 +285,19 @@ ENDIF
 効果量 = 効果量 * (政治パワー + 料理パワー + 100) / 100
 
 持ち出し額 = MONEY:勢力 * AI_DIPLOMACY_PROPERTY:(COUNTRY_AI_TYPE:勢力):AI_外交_会談支払額 / 100
+IF 持ち出し額 > 0
+	;跳转信仰事件
+	TRYCALL SHOP_LIFE_USERSHOP68_CONFERENCE(勢力,相手勢力,持ち出し額)
 
-;跳转信仰事件
-TRYCALL SHOP_LIFE_USERSHOP68_CONFERENCE(勢力,相手勢力,持ち出し額)
+	;金銭授受
+	MONEY:勢力 -= 持ち出し額
+	MONEY:相手勢力 += 持ち出し額
 
-;金銭授受
-MONEY:勢力 -= 持ち出し額
-MONEY:相手勢力 += 持ち出し額
-
-;DEBUGPRINTFORML 会談の政治料理パワー補正後効果量{効果量}
+	;DEBUGPRINTFORML 会談の政治料理パワー補正後効果量{効果量}
 
 CALL CHANGE_RELATION_C_TO_C(勢力, 相手勢力, 効果量, 効果量 * -1)
 CALL CHANGE_RELATION_C_TO_C(相手勢力, 勢力, 効果量, 効果量 * -1)
-
+ENDIF
 ; IF （B不是玩家势力 || 玩家正在委托） && 想停战
 IF (相手勢力 != CFLAG:MASTER:所属 || CONFIG:302) && REL_LIKE:相手勢力:勢力 - REL_HATE:相手勢力:勢力 > 600 && !RAND:4 && GET_COUNTRY_NUM() > 3
 	CALL CHANGE_AI_DIPLOMACY_PLAN(勢力, 相手勢力, AI_外交計画_停戦)

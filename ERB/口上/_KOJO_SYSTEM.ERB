@@ -91,8 +91,8 @@ RETURN 0
 IF ARG:0 >= 200
 	RETURN 1
 ENDIF
-
-IF CFLAG:(ARG:0):2999 == 0 
+LOCAL = NO_TO_CHARA(ARG:0)
+IF CFLAG:(LOCAL):2999 == 0
 	RETURN 1
 ELSE
 	RETURN 0
@@ -399,7 +399,7 @@ IF IS_MPLY(MASTER)
 					TRYCALLFORM KOJO_COM_TARGET_%KOJO_STATE()%_K{LOCAL:5}_{CFLAG:(LOCAL:5):2999}
 					LOCAL:1 |= RESULT
 				ENDIF
-			ENDIF	
+			ENDIF
 		ENDIF
 	NEXT
 ;主人公がターゲットの場合
@@ -920,7 +920,7 @@ RETURNF 1
 ;デートイベント用の関数。ARG:0はキャラ番号で、ARG:1は行き先。
 ;呼び出されたDATE_EVENT_K内で、自作したイベント本体の関数を呼び出してください
 ;行き先を参照する場合はDATE_EVENT_Kに渡ってるARG:1を利用すると良いでしょう。
-;-------------------------------------------------	
+;-------------------------------------------------
 @KOJO_DATE_EVENT(ARG:0, ARG:1)
 LOCAL:5 = KOJO_NO(ARG:0)
 CALL IS_KOJO(LOCAL:5)
@@ -929,16 +929,16 @@ IF RESULT
 	IF RESULT
 		TRYCCALLFORM DATE_EVENT_K{LOCAL:5}(ARG:1)
 			RETURN RESULT
-		CATCH 
+		CATCH
 			RETURN 0
 		ENDCATCH
 	ELSE
 		TRYCCALLFORM DATE_EVENT_K{LOCAL:5}_{CFLAG:(LOCAL:5):2999}(ARG:1)
 			RETURN RESULT
-		CATCH 
+		CATCH
 			RETURN 0
 		ENDCATCH
-	ENDIF		
+	ENDIF
 ELSE
 	RETURN 0
 ENDIF

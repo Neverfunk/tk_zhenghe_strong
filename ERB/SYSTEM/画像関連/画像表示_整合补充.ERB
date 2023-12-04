@@ -1,0 +1,115 @@
+@画像表示_normal_photo(ARG, 服装, 表情)
+    #DIMS 画像名				;リソース名
+    #DIM 服装
+    #DIM 表情
+    #DIM Chara
+    Chara = ARG
+    SIF !INRANGE(ARG,0,MAX_CHARA_NUM)
+        RETURN 0
+
+    ;别不服气，东方的爷就是爷
+    IF IS_TOHO_CHARA(Chara) && (Chara != MASTER && NO:MASTER == 0)
+        CALL 画像表示_normal_photo_toho(Chara, 服装, 表情)
+    ELSE
+        ; CALL 画像表示_normal_photo_other(Chara,表情)
+    ENDIF
+    SIF RESULT
+        RETURN 1
+    RETURN 0
+@画像表示_normal_photo_toho(ARG, 服装, 表情)
+    #DIMS 画像名				;リソース名
+    #DIM 服装
+    #DIM 表情
+    #DIM CHARA_NO
+    CHARA_NO = NO:ARG
+
+    画像名 '= @"Face"
+    画像名 = %画像名%_{CHARA_NO}
+
+    SELECTCASE 表情
+        CASE 2 ;happy
+            画像名 = %画像名%_happy
+        CASE 3 ;angry
+            画像名 = %画像名%_angry
+        CASE 4,5,6,7 ;lust
+            画像名 = %画像名%_lust
+        CASEELSE ;normal
+    ENDSELECT
+
+    SELECTCASE 服装
+        CASE 2;nude
+        画像名 = %画像名%_nude
+        CASEELSE
+    ENDSELECT
+
+    IF SPRITECREATED(画像名)
+        IF CheckBust(ARG)
+            LOCALS = %画像名%_huge
+            SIF SPRITECREATED(LOCALS)
+                画像名 = LOCALS
+        ENDIF
+        RESULTS = %画像名%
+    ELSE
+        画像名 = Face_{CHARA_NO}
+        SIF !SPRITECREATED(画像名)
+        RETURN 0
+    ENDIF
+    RESULTS = %画像名%
+    RETURN 1
+
+@画像表示_normal_photo_other(ARG,表情)
+    #DIM iID
+    #DIM Chara
+    #DIM mood
+    #DIM 表情
+    #DIMS ChkSprite
+    #DIMS iName
+    iID = ARG
+    IF iID < 0
+        RESULTS = No_Image
+        RETURN 1
+    ENDIF
+    SELECTCASE 表情
+        CASE 2 ;happy
+            mood = 1
+        CASE 3 ;angry
+            mood = 2
+        CASE 4,5,6,7 ;lust
+            mood = 0
+        CASEELSE ;normal
+            mood = 0
+    ENDSELECT
+    Chara = iID
+    iID = NO:iID
+    ;JVN: Child portrait
+    IF CUSTOM_PORTRAITS:Chara:CP_Child != 0 && TALENT:Chara:131
+        iName = c{CUSTOM_PORTRAITS:Chara:CP_Child}
+    ;JVN: Male portrait
+    ELSEIF CUSTOM_PORTRAITS:Chara:CP_Male != 0 && IS_MALE(Chara)
+        iName = c{CUSTOM_PORTRAITS:Chara:CP_Male}
+    ;JVN: Female portrait
+    ELSEIF CUSTOM_PORTRAITS:Chara:CP_Female != 0 && IS_FEMALE(Chara)
+        iName = c{CUSTOM_PORTRAITS:Chara:CP_Female}
+    ;If everything else fail, use custom generated portrait
+    ELSEIF TALENT:Chara:性別 != 0
+        iName = %GetGenImage(Chara,mood)%
+    ENDIF
+
+    ChkSprite = %iName%
+    PRINTFORM %ChkSprite%
+    IF !SPRITECREATED(ChkSprite)
+        ; Add male or female image here if available
+        IF (iID) == MASTER && IS_MALE(Chara)
+            RESULTS = Image_Player
+        ELSEIF IS_MALE(Chara)
+            RESULTS = Image_Male
+        ELSEIF IS_FEMALE(Chara)
+            RESULTS = Image_Female
+        ELSE
+            RESULTS = No_Image
+        ENDIF
+    ELSE
+        RESULTS = %ChkSprite%
+    ENDIF
+
+    RETURN 1

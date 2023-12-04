@@ -29,7 +29,7 @@ FOR 苗床, 0, CHARANUM
 		ENDIF
 		CALL PRINTBUTTON_CENTER(@"[%名前, MAX_CHARANAME_LENGTH, LEFT%]", 苗床, 0)
 		CALL PRINT_SEX(苗床, 1, 0, 2)
-		PRINT  
+		PRINT
 		PRINTBUTTON "[能力]", 苗床 + 2000
 		PRINTL
 		吸収可能苗床 ++
@@ -40,10 +40,10 @@ PRINTL
 CALL SINGLE_DRAWLINE
 IF 吸収可能苗床 >= 2
 	PRINTBUTTON "[ 900][统一吸收]", 900
-	PRINTL 
+	PRINTL
 ENDIF
 PRINTBUTTON "[1000][　　取消]", 1000
-PRINTL 
+PRINTL
 
 REDRAW 0
 
@@ -64,7 +64,7 @@ ELSEIF RESULT >= 2000
 	RESTART
 ELSEIF RESULT == 900 && 吸収可能苗床 >= 2
 	PRINTFORML 是否要吸收所有苗床？(注意：所有苗床都会死亡！！)
-	
+
 	;はい／いいえ入力処理
 	CALL ASK_YN()
 	IF RESULT == 0
@@ -74,13 +74,13 @@ ELSEIF RESULT == 900 && 吸収可能苗床 >= 2
 				CALL CHANGE_COUNTRY(吸収対象, 0, 1, 1)
 				吸収中苗床:吸収対象:0 = 1
 				触手処刑非表示フラグ = 1
-				
+
 				;(画像パッチ)
-				;CALL 画像表示(吸収対象, 2, 4)
+				CALL 画像表示(吸収対象, 2, 4)
 				CALL KOJO_EVENT(吸収対象, 343)
-				
+
 				PRINTFORMW %ANAME(吸収対象)%被吞入了蠢动着的肉块之中……
-				
+
 				IF CFLAG:吸収対象:妊娠期間 >= 1
 					;空いている加工元識別ナンバーを検索・割り当て
 					FOR LOCAL:0, 0, 999
@@ -89,25 +89,25 @@ ELSEIF RESULT == 900 && 吸収可能苗床 >= 2
 							BREAK
 						ENDIF
 					NEXT
-					
+
 					IS_GOODS_EXECUTED:加工元識別ナンバー = 1
 					NAME_BEFORE_GOODS_EXECUTED:加工元識別ナンバー = 吸収対象
-					
+
 					NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:7 = 从「%ANAME(吸収対象)%」身上提取的生命之素
 					TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:0 = 1
 					HAVE_GOODS_EXECUTED:7 += 1
 					NAME_FATHER_FETUS:加工元識別ナンバー = CFLAG:吸収対象:子の父親
-					
+
 					CFLAG:吸収対象:行動不能状態 = 0
 					CFLAG:吸収対象:妊娠期間 = 0
 					CFLAG:吸収対象:子の父親 = 0
 					TALENT:吸収対象:妊娠 = 0
 					CALL MOTHER_SHRINK_BUSTSIZE(吸収対象)
 					CALL MOTHER_STOP_MILKING(吸収対象)
-					
+
 					PRINTFORMW %ANAME(吸収対象)%的胎内提取出了★記念品[生命之素]
 				ENDIF
-				PRINTFORML 
+				PRINTFORML
 			ENDIF
 		NEXT
 		;ミッション達成
@@ -118,13 +118,13 @@ ELSEIF RESULT == 900 && 吸収可能苗床 >= 2
 			RESETCOLOR
 			WAIT
 		ENDIF
-	
+
 	ENDIF
-	
+
 ELSEIF 触手勢力に監禁:RESULT:0 >= 1 && (GETBIT(TALENT:RESULT:特殊勢力陥落系, 特殊勢力_触手) || HAS_TAG(RESULT, タグ_触手))
 	吸収対象 = RESULT
 	PRINTFORML 要吸收%ANAME(吸収対象)%吗？(注意：该士官将会死亡！！)
-	
+
 	;はい／いいえ入力処理
 	CALL ASK_YN()
 	IF RESULT == 0
@@ -132,13 +132,13 @@ ELSEIF 触手勢力に監禁:RESULT:0 >= 1 && (GETBIT(TALENT:RESULT:特殊勢力
 		CALL CHANGE_COUNTRY(吸収対象, 0, 1, 1)
 		吸収中苗床:吸収対象:0 = 1
 		触手処刑非表示フラグ = 1
-		
+
 		;(画像パッチ)
-		; CALL 画像表示(吸収対象, 2, 4)
+		CALL 画像表示(吸収対象, 2, 4)
 		CALL KOJO_EVENT(吸収対象, 343)
-		
+
 		PRINTFORMW 剥成全裸的%ANAME(吸収対象)%被吞入了蠢动的肉块之中……
-		
+
 		IF CFLAG:吸収対象:妊娠期間 >= 1
 			;空いている加工元識別ナンバーを検索・割り当て
 			FOR LOCAL:0, 0, 999
@@ -147,26 +147,26 @@ ELSEIF 触手勢力に監禁:RESULT:0 >= 1 && (GETBIT(TALENT:RESULT:特殊勢力
 					BREAK
 				ENDIF
 			NEXT
-			
+
 			IS_GOODS_EXECUTED:加工元識別ナンバー = 1
 			NAME_BEFORE_GOODS_EXECUTED:加工元識別ナンバー = 吸収対象
-			
+
 			NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:7 = 从「%ANAME(吸収対象)%」身上提取的生命之素
 			TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:0 = 1
 			HAVE_GOODS_EXECUTED:7 += 1
 			NAME_FATHER_FETUS:加工元識別ナンバー = CFLAG:吸収対象:子の父親
-			
+
 			CFLAG:吸収対象:行動不能状態 = 0
 			CFLAG:吸収対象:妊娠期間 = 0
 			CFLAG:吸収対象:子の父親 = 0
 			TALENT:吸収対象:妊娠 = 0
 			CALL MOTHER_SHRINK_BUSTSIZE(吸収対象)
 			CALL MOTHER_STOP_MILKING(吸収対象)
-			
+
 			PRINTFORMW %ANAME(吸収対象)%的胎内提取出了★記念品[生命之素]
-			
+
 		ENDIF
-		PRINTFORML 
+		PRINTFORML
 		;ミッション達成
 		IF ACHIEVEMENT_MISSION:62 == 1
 			ACHIEVEMENT_MISSION:62 = 2
@@ -176,7 +176,7 @@ ELSEIF 触手勢力に監禁:RESULT:0 >= 1 && (GETBIT(TALENT:RESULT:特殊勢力
 			WAIT
 		ENDIF
 	ENDIF
-	
+
 ELSE
 	CLEARLINE 1
 	GOTO INPUT_LOOP
@@ -212,9 +212,9 @@ FOR 苗床, 0, CHARANUM
 	ENDIF
 	SIF 吸収中苗床:苗床:0 != 1
 		CONTINUE
-	
+
 	;(画像パッチ)
-	; CALL 画像表示(苗床, 3, 4)
+	CALL 画像表示(苗床, 3, 4)
 	PRINTFORML %ANAME(苗床)%被困在肉块之中……
 	PRINTFORML 触手在%ANAME(苗床)%的每一个洞中出入，不停榨取着力量
 	IF HAS_PENIS(苗床)
@@ -227,19 +227,19 @@ FOR 苗床, 0, CHARANUM
 	能力変動量:2 = MIN(10, ABL:苗床:知略)
 	能力変動量:3 = MIN(10, ABL:苗床:政治)
 	能力変動量:4 = MIN(10, ABL:苗床:妖術)
-	
+
 	苗床元能力量:0 = ABL:苗床:武闘
 	苗床元能力量:1 = ABL:苗床:防衛
 	苗床元能力量:2 = ABL:苗床:知略
 	苗床元能力量:3 = ABL:苗床:政治
 	苗床元能力量:4 = ABL:苗床:妖術
-	
+
 	ABL:苗床:武闘 -= 能力変動量:0
 	ABL:苗床:防衛 -= 能力変動量:1
 	ABL:苗床:知略 -= 能力変動量:2
 	ABL:苗床:政治 -= 能力変動量:3
 	ABL:苗床:妖術 -= 能力変動量:4
-	
+
 	IF HAS_TAG(苗床, タグ_触手)
 		能力変動量:0 = MAX(1, (能力変動量:0)/2)
 		能力変動量:1 = MAX(1, (能力変動量:1)/2)
@@ -252,36 +252,36 @@ FOR 苗床, 0, CHARANUM
 		能力変動量:2 = MAX(0, (能力変動量:2)/4)
 		能力変動量:3 = MAX(0, (能力変動量:3)/4)
 		能力変動量:4 = MAX(0, (能力変動量:4)/4)
-	
+
 	ENDIF
-	
+
 	プレイヤー能力変動量:0 += 能力変動量:0
 	プレイヤー能力変動量:1 += 能力変動量:1
 	プレイヤー能力変動量:2 += 能力変動量:2
 	プレイヤー能力変動量:3 += 能力変動量:3
 	プレイヤー能力変動量:4 += 能力変動量:4
-	
+
 	能力変動量:0 = 0
 	能力変動量:1 = 0
 	能力変動量:2 = 0
 	能力変動量:3 = 0
 	能力変動量:4 = 0
-	
+
 	PRINTFORML %ANAME(苗床)%
 	PRINTFORML 武闘：{苗床元能力量:0}→{ABL:苗床:武闘}
 	PRINTFORML 防衛：{苗床元能力量:1}→{ABL:苗床:防衛}
 	PRINTFORML 知略：{苗床元能力量:2}→{ABL:苗床:知略}
 	PRINTFORML 政治：{苗床元能力量:3}→{ABL:苗床:政治}
 	PRINTFORML 妖術：{苗床元能力量:4}→{ABL:苗床:妖術}
-	PRINTFORML 
-	
+	PRINTFORML
+
 	IF ABL:苗床:武闘 <= 0 && ABL:苗床:防衛 <= 0 && ABL:苗床:知略 <= 0 && ABL:苗床:政治 <= 0 && ABL:苗床:妖術 <= 0
 		SETCOLOR カラー_警告
 		PRINTFORMW 被完全吸干%ANAME(苗床)%的，已经完全被触手吃干抹净了……
 		RESETCOLOR
 		吸収中苗床:苗床:0 = 2
 	ENDIF
-	PRINTFORML 
+	PRINTFORML
 	吸収フラグ = 1
 NEXT
 
@@ -291,19 +291,19 @@ IF 吸収フラグ
 	プレイヤー元能力量:2 = ABL:MASTER:知略
 	プレイヤー元能力量:3 = ABL:MASTER:政治
 	プレイヤー元能力量:4 = ABL:MASTER:妖術
-	
+
 	ABL:MASTER:武闘 += プレイヤー能力変動量:0
 	ABL:MASTER:防衛 += プレイヤー能力変動量:1
 	ABL:MASTER:知略 += プレイヤー能力変動量:2
 	ABL:MASTER:政治 += プレイヤー能力変動量:3
 	ABL:MASTER:妖術 += プレイヤー能力変動量:4
-	
+
 	プレイヤー能力変動量:0 = 0
 	プレイヤー能力変動量:1 = 0
 	プレイヤー能力変動量:2 = 0
 	プレイヤー能力変動量:3 = 0
 	プレイヤー能力変動量:4 = 0
-	
+
 	SETCOLOR カラー_注意
 	PRINTFORML %ANAME(MASTER)%吸收到了力量！
 	RESETCOLOR
@@ -312,7 +312,7 @@ IF 吸収フラグ
 	PRINTFORML 知略：{プレイヤー元能力量:2}→{ABL:MASTER:知略}
 	PRINTFORML 政治：{プレイヤー元能力量:3}→{ABL:MASTER:政治}
 	PRINTFORML 妖術：{プレイヤー元能力量:4}→{ABL:MASTER:妖術}
-	PRINTFORML 
+	PRINTFORML
 	WAIT
 ENDIF
 ;-------------------------------------------------
@@ -345,7 +345,7 @@ ELSE
 		ENDIF
 		SIF 吸収中苗床:苗床:0 != 2
 			CONTINUE
-		
+
 		IF STRLENS(ANAME(苗床)) >= MAX_CHARANAME_LENGTH
 			名前 = %SNAME(苗床)%
 		ELSE
@@ -353,16 +353,16 @@ ELSE
 		ENDIF
 		CALL PRINTBUTTON_CENTER(@"[%名前, MAX_CHARANAME_LENGTH, LEFT%]", 苗床, 0)
 		CALL PRINT_SEX(苗床, 1, 0, 2)
-		PRINT  
+		PRINT
 		PRINTBUTTON "[能力]", 苗床 + 2000
 		PRINTL
-		
+
 	NEXT
 ENDIF
 
 CALL SINGLE_DRAWLINE
 PRINTBUTTON "[1000][　　取消]", 1000
-PRINTL 
+PRINTL
 
 REDRAW 0
 
@@ -381,21 +381,21 @@ ELSEIF RESULT >= 2000
 	WAIT
 	CLEARLINE LINECOUNT - FIRST_LINE
 	RESTART
-	
+
 ELSEIF 吸収中苗床:RESULT:0 == 2
 	再誕対象 = RESULT
 	PRINTFORML 要让%ANAME(再誕対象)%生产吗？(触手能量（现在［ {RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:3} ］）需要消耗15点)
-	
+
 	;はい／いいえ入力処理
 	CALL ASK_YN()
 	IF RESULT == 0
-		
+
 		RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:3 -= 15
-		
+
 		;固定の素質を付与
 		TALENT:再誕対象:幼兒 = 1
 		TALENT:再誕対象:体格 = 体格_子供
-		
+
 		;性経験等をリセット
 		CALL VIRGINIZE(再誕対象, 初体験_処女)
 		CALL VIRGINIZE(再誕対象, 初体験_アナル処女)
@@ -407,9 +407,9 @@ ELSEIF 吸収中苗床:RESULT:0 == 2
 		TALENT:再誕対象:腋毛現在値 = 腋毛_つるつる
 		CALL CLEAR_PIERCE_HOLE_SEX_CHANGE(再誕対象)
 		FOR LOCAL, 0, VARSIZE("TATTOO")
-			TATTOO:再誕対象:RESULT = 
+			TATTOO:再誕対象:RESULT =
 		NEXT
-		
+
 		;成長後の[幼稚]を退避し、固定で幼稚を付与
 		IF TALENT:再誕対象:幼稚
 			TALENT:再誕対象:成長後幼稚 = 1
@@ -417,29 +417,29 @@ ELSEIF 吸収中苗床:RESULT:0 == 2
 			TALENT:再誕対象:成長後幼稚 = 0
 		ENDIF
 		TALENT:再誕対象:幼稚 = 1
-		
+
 		;バストサイズを設定
 		TALENT:再誕対象:成長後胸部 = GET_BUSTSIZE(再誕対象)
 		CALL SET_BUSTSIZE(再誕対象, -2)
-		
+
 		TALENT:再誕対象:成長後ヒップ = GET_HIPSIZE(再誕対象)
 		CALL SET_HIPSIZE(再誕対象, 0)
-		
+
 		TALENT:再誕対象:Ｖ緊緻度 = GET_DEFAULT_TIGHTNESS("緊閉")
 		TALENT:再誕対象:Ａ緊緻度 = GET_DEFAULT_TIGHTNESS("緊閉")
-		
+
 		;触手タグがないとき触手タグを付与
 		SIF !HAS_TAG(再誕対象, タグ_触手)
 			CALL ADD_TAG(再誕対象, タグ_触手)
-		
+
 		;妖術知識を付与
 		TALENT:再誕対象:妖術知識 = 1
 		ABL:再誕対象:妖術 = RAND:30 + 30
-		
+
 		;被育児状態に設定
 		CFLAG:再誕対象:行動不能状態 = 行動不能_子供
 		CFLAG:再誕対象:子の成長度 = 0
-		
+
 		;好感度・陥落素質等リセット
 		CFLAG:再誕対象:好感度 = 0
 		CFLAG:再誕対象:従属度 = 0
@@ -455,7 +455,7 @@ ELSEIF 吸収中苗床:RESULT:0 == 2
 		TALENT:再誕対象:所有者 = 0
 		TALENT:再誕対象:合意 = 0
 		TALENT:再誕対象:特殊勢力陥落系 = 0
-		
+
 		SETCOLOR カラー_注意
 		PRINTFORMW %ANAME(再誕対象)%以一个完美的孩子的身体重生
 		CALL CHANGE_COUNTRY(再誕対象, CFLAG:MASTER:所属, 0, 0)
@@ -466,11 +466,11 @@ ELSEIF 吸収中苗床:RESULT:0 == 2
 		CALL SHOW_INFO(再誕対象)
 		CALL SINGLE_DRAWLINE
 		WAIT
-		PRINTFORML 
-		
+		PRINTFORML
+
 		;教育機関での教育方法を設定
 		CALL SET_BIRTH_CHILD_SCHOOL(再誕対象)
-		
+
 		;ミッション達成
 		IF ACHIEVEMENT_MISSION:63 == 1
 			ACHIEVEMENT_MISSION:63 = 2
@@ -479,7 +479,7 @@ ELSEIF 吸収中苗床:RESULT:0 == 2
 			RESETCOLOR
 			WAIT
 		ENDIF
-		
+
 	ENDIF
 ELSE
 	CLEARLINE 1

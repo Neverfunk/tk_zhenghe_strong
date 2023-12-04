@@ -1,11 +1,11 @@
-﻿;============================================================================== 
+﻿;==============================================================================
 ;■シナリオ21
 ;　傾城乱遊の記憶
 ;　eraTohloveKHのシナリオ3を他人が移植
-;============================================================================== 
-;============================================================================== 
+;==============================================================================
+;==============================================================================
 ;◆初期設定
-;============================================================================== 
+;==============================================================================
 @SCENARIO_NAME_21
 RESULTS = 傾城乱遊の記憶
 RETURN
@@ -13,6 +13,7 @@ RETURN
 @SCENARIO_INTRO_21
 PRINTFORML
 PRINTFORMW 幻想郷分裂了！
+;TranslatedMark 幻想郷は分裂した！
 PRINTFORMW 各個勢力懷抱着不同的想法、開始爭闘！
 ;TranslatedMark 各々が様々な思惑を絡め、争いあう！
 PRINTFORMW 争执的原因是……玩家自身！？
@@ -35,13 +36,17 @@ FLAG:OPランダムキャラ使用 = 0
 @SCENARIO_MAPSELECT_21
 PRINTFORML
 PRINTFORML 要使用哪一張地図遊戲？
-CALL ASK_MULTI("默認", "日本", "歐洲")
+;TranslatedMark どのマップでプレイしますか？
+CALL ASK_MULTI("默認", "幻想郷","日本", "歐洲")
+;TranslatedMark "デフォルト","幻想郷", "日本", "ヨーロッパ"
 SELECTCASE RESULT
 	CASE 0
 		MAPID '= "DEFAULT"
 	CASE 1
-		MAPID '= "JAPAN"
+		MAPID '= "GENSOU"
 	CASE 2
+		MAPID '= "JAPAN"
+	CASE 3
 		MAPID '= "EU"
 ENDSELECT
 
@@ -85,10 +90,10 @@ CALL SHARED_SETTING_RELATION
 CALL SCENARIO_21_SELECT_RBOSS(7, 12)
 
 
-;============================================================================== 
+;==============================================================================
 ;◆定例イベント
 ;　ターンエンド時に呼び出される
-;============================================================================== 
+;==============================================================================
 @SCENARIO_EVENT_21
 #DIM 対象士官番号
 #DIM 闇堕ち君主番号
@@ -105,7 +110,7 @@ ENDIF
 ;	CALL SCENARIO_21_SELECT_RBOSS(7, 12)
 ;ENDIF
 
-;───────────────────────────────────── 
+;─────────────────────────────────────
 ;◇傾城(SCVAR:2 SCVAR:3 SCVAR:4 使用)
 ;●概要
 ;○使用しているシナリオ用変数
@@ -137,9 +142,9 @@ ENDIF
 ;　　　　　　　▼「他勢力へ誘う」……対象を生き返して他軍の支配国数を表示したリンクを出し、選択した先に対象と主人公が二人で仕官。
 ;　　　　　　　▼「ここに残る」……対象を生き返して対象を地方派遣した君主への敵対度が最も高い君主のいる軍へ士官。
 ;　　　　　　　主人公は無所属なら自分を監禁した君主に士官して捕虜状態を解除。無所属でなければ現状維持。
-;───────────────────────────────────── 
+;─────────────────────────────────────
 ;●イベント１～２のリセット
-;───────────────────────────────────── 
+;─────────────────────────────────────
 ;警告・逃避行独立まではリセット可
 ;３・４・５・６は後に引けない状況なのでリセットしない
 IF DAY % 1 == 0 && SCVAR:2 >= 1 && SCVAR:2 < 3
@@ -170,24 +175,24 @@ IF DAY % 1 == 0 && SCVAR:2 >= 1 && SCVAR:2 < 3
 	ENDIF
 ENDIF
 
-;───────────────────────────────────── 
+;─────────────────────────────────────
 ;●傾城進行度４監禁または日常からの救出
-;───────────────────────────────────── 
+;─────────────────────────────────────
 ;発生条件：
 ;イベント進行度が３以上
 ;特に何事もなければ地方派遣が起きてから２期続き、３期目に終了する
 IF DAY % 1 == 0 && SCVAR:2 >= 3
 	対象士官番号 = ID_TO_CHARA(SCVAR:3)
 	闇堕ち君主番号 = ID_TO_CHARA(SCVAR:4)
-	;---------------------------------------------------------------------- 
+	;----------------------------------------------------------------------
 	;○途中・主人公が斬首された
-	;---------------------------------------------------------------------- 
+	;----------------------------------------------------------------------
 	IF FLAG:強制エンドフラグ
 		;主人公処刑時の口上を出すために生き返す
 		CALL CHANGE_COUNTRY(対象士官番号, 0, 1, 0)
-	;---------------------------------------------------------------------- 
+	;----------------------------------------------------------------------
 	;○途中・主人公が独立した
-	;---------------------------------------------------------------------- 
+	;----------------------------------------------------------------------
 	ELSEIF CFLAG:MASTER:所属 && GET_COUNTRY_BOSS(CFLAG:MASTER:所属) == MASTER
 		;対象が未登場状態から通常状態になる
 		;主人公の勢力に対象が士官
@@ -200,14 +205,14 @@ IF DAY % 1 == 0 && SCVAR:2 >= 3
 		CALL SCENARIO_21_COLOR_LINE
 		PRINTFORMW %ANAME(MASTER)%小跑过去迎接%ANAME(対象士官番号)%
 		;TranslatedMark %ANAME(MASTER)%は小走りになって%ANAME(対象士官番号)%を出迎えた
-		PRINTFORML 
+		PRINTFORML
 		PRINTFORMW %ANAME(対象士官番号)%似乎是被%ANAME(闇堕ち君主番号)%的士兵追赶而到来的
 		;TranslatedMark %ANAME(対象士官番号)%は%ANAME(闇堕ち君主番号)%の兵に追われて身を潜めていたらしい
 		PRINTFORMW 他这么说着，因为听说了%ANAME(MASTER)%的独立，连夜赶过来仕官
 		;TranslatedMark %ANAME(MASTER)%の独立を知って居ても立っても居られず、士官しに来たことを話した
-		PRINTFORML 
+		PRINTFORML
 		IF TALENT:対象士官番号:自制心 || TALENT:対象士官番号:難以越過的底線
-			PRINTFORMW %ANAME(対象士官番号)%默默地抱住%ANAME(MASTER)%，直到他冷静下来为止一直在抚摸着他的后背…
+			PRINTFORMW %ANAME(対象士官番号)%默默地抱住%ANAME(MASTER)%，直到冷静下来为止一直在抚摸着后背…
 			;TranslatedMark %ANAME(対象士官番号)%は黙って%ANAME(MASTER)%を抱き締めて落ち着くまで背中を撫で続けた…
 		ELSEIF TALENT:対象士官番号:老実 || TALENT:対象士官番号:悲観的
 			PRINTFORMW %ANAME(対象士官番号)%抱住%ANAME(MASTER)%，感动的流下了眼泪…
@@ -221,9 +226,9 @@ IF DAY % 1 == 0 && SCVAR:2 >= 3
 		ENDIF
 		WAIT
 		CALL SCENARIO_21_RESET_SCVARS
-	;---------------------------------------------------------------------- 
+	;----------------------------------------------------------------------
 	;○途中・主人公は無所属でなく、士官先が闇堕ち君主でない
-	;---------------------------------------------------------------------- 
+	;----------------------------------------------------------------------
 	ELSEIF CFLAG:MASTER:所属 && GET_COUNTRY_BOSS(CFLAG:MASTER:所属) != 闇堕ち君主番号
 		;対象が未登場状態から通常状態になる
 		;主人公の勢力に対象が士官
@@ -236,17 +241,17 @@ IF DAY % 1 == 0 && SCVAR:2 >= 3
 		CALL SCENARIO_21_COLOR_LINE
 		PRINTFORMW %ANAME(MASTER)%小跑过去迎接%ANAME(対象士官番号)%
 		;TranslatedMark %ANAME(MASTER)%は小走りになって%ANAME(対象士官番号)%を出迎えた
-		PRINTL 
+		PRINTL
 		PRINTFORML %ANAME(対象士官番号)%似乎是被%ANAME(闇堕ち君主番号)%的士兵追赶而到来的
 		;TranslatedMark %ANAME(対象士官番号)%は%ANAME(闇堕ち君主番号)%の兵に追われて身を潜めていたらしい
 		PRINTFORMW 因为%ANAME(闇堕ち君主番号)%不在了，变成了自由之身，她这么诉说着来见%ANAME(MASTER)%之前的事
 		;TranslatedMark %ANAME(闇堕ち君主番号)%が居なくなって自由の身になり、%ANAME(MASTER)%に会いに来たことを話した
-		PRINTL 
+		PRINTL
 		PRINTFORML 和%ANAME(闇堕ち君主番号)%关系很好的%ANAME(MASTER)%的心情和立场都很复杂
 		;TranslatedMark %ANAME(闇堕ち君主番号)%とも親しい間柄だった%ANAME(MASTER)%は気持ちも立場も複雑だが
 		PRINTFORMW 现在只为能和%ANAME(対象士官番号)%再会而感到深深的高兴
 		;TranslatedMark 今はただ%ANAME(対象士官番号)%と再会できたことを深く喜んだ
-		PRINTL 
+		PRINTL
 		IF TALENT:対象士官番号:自制心 || TALENT:対象士官番号:難以越過的底線
 			PRINTFORMW %ANAME(対象士官番号)%默默地抱住%ANAME(MASTER)%，直到冷静下来为止一直在抚摸着后背…
 			;TranslatedMark %ANAME(対象士官番号)%は黙って%ANAME(MASTER)%を抱き締めて落ち着くまで背中を撫で続けた…
@@ -261,9 +266,9 @@ IF DAY % 1 == 0 && SCVAR:2 >= 3
 			;TranslatedMark 二人は互いの再会を喜んで、二度と離れまいと誓い合った…
 		ENDIF
 		CALL SCENARIO_21_RESET_SCVARS
-	;---------------------------------------------------------------------- 
+	;----------------------------------------------------------------------
 	;○途中・主人公は無所属で、捕虜ではない（監禁中でないが無所属＝自国が滅ぼされた等）
-	;---------------------------------------------------------------------- 
+	;----------------------------------------------------------------------
 	ELSEIF CFLAG:MASTER:捕虜先 == 0 && CFLAG:MASTER:所属 == 0 && GET_NEW_COUNTRY() > 0
 		;空いている勢力の番号を取得
 		LOCAL:4 = GET_NEW_COUNTRY()
@@ -305,7 +310,7 @@ IF DAY % 1 == 0 && SCVAR:2 >= 3
 		CALL SCENARIO_21_COLOR_LINE
 		PRINTFORMW %ANAME(対象士官番号)%一直这么漫无目的流浪，直到来到%ANAME(MASTER)%身边
 		;TranslatedMark あてもなく放浪する%ANAME(MASTER)%の元へ%ANAME(対象士官番号)%が尋ねて来た
-		PRINTL 
+		PRINTL
 		PRINTFORML 看到令人怀念的脸，%ANAME(MASTER)%发出了声音
 		;TranslatedMark 懐かしい顔を見て%ANAME(MASTER)%が声を上げると
 		IF TALENT:対象士官番号:自制心 || TALENT:対象士官番号:難以越過的底線
@@ -321,7 +326,7 @@ IF DAY % 1 == 0 && SCVAR:2 >= 3
 			PRINTFORMW 为了再也不分离而紧紧地抱住了%ANAME(MASTER)%
 			;TranslatedMark %ANAME(対象士官番号)%は二度と離れまいと固く%ANAME(MASTER)%を抱き締めた
 		ENDIF
-		PRINTL 
+		PRINTL
 		PRINTFORML %ANAME(対象士官番号)%果然还是被%ANAME(闇堕ち君主番号)%的士兵追赶，遭遇了危险
 		;TranslatedMark %ANAME(対象士官番号)%はやはり%ANAME(闇堕ち君主番号)%の兵に追われ危険な目に遭ったらしい
 		PRINTFORMW %ANAME(MASTER)%反复点了点头，说是要打算起义、来接我…
@@ -335,16 +340,16 @@ IF DAY % 1 == 0 && SCVAR:2 >= 3
 		;TranslatedMark %ANAME(MASTER)%が%ANAME(対象士官番号)%の元へ駆けつけた
 		WAIT
 		CALL SCENARIO_21_RESET_SCVARS
-	;---------------------------------------------------------------------- 
+	;----------------------------------------------------------------------
 	;○３期クリアして４期目
-	;---------------------------------------------------------------------- 
+	;----------------------------------------------------------------------
 	ELSEIF SCVAR:2 >= 6
 		;主人公が捕虜でない
 		IF CFLAG:MASTER:捕虜先 == 0
 			CALL SCENARIO_21_COLOR_LINE
 			PRINTFORMW %ANAME(MASTER)%打算到营地外面做一些杂务
 			;TranslatedMark %ANAME(MASTER)%は雑用の為に陣外に出た
-			PRINTL 
+			PRINTL
 			PRINTFORMW 突然，有人叫我停下脚步，回头一看，那里有令人怀念的%ANAME(対象士官番号)%的身影
 			;TranslatedMark 誰かに声をかけられて足を止め、振り返るとそこには懐かしい%ANAME(対象士官番号)%の姿があった
 			IF TALENT:対象士官番号:自制心 || TALENT:対象士官番号:難以越過的底線
@@ -371,7 +376,7 @@ IF DAY % 1 == 0 && SCVAR:2 >= 3
 			;TranslatedMark 感動の声を上げそうになった%ANAME(MASTER)%の口を押さえて静かにと耳打ちし、縄を解いて外に連れ出す
 			PRINTFORMW 到达安全的地方后，%ANAME(対象士官番号)%反复为自己的迟到而道歉，担心着憔悴的%ANAME(MASTER)%
 			;TranslatedMark 安全な場所まで離れると、%ANAME(対象士官番号)%は迎えが遅くなったことを繰り返し詫び、やつれた%ANAME(MASTER)%を心配した
-			PRINTL 
+			PRINTL
 			IF TALENT:対象士官番号:自制心 || TALENT:対象士官番号:難以越過的底線
 				PRINTFORML 默默地抱着%ANAME(MASTER)%，抚摸着背部，直到冷静下来
 				;TranslatedMark 黙って%ANAME(MASTER)%を抱き締めて落ち着くまで背中を撫でる
@@ -390,7 +395,7 @@ IF DAY % 1 == 0 && SCVAR:2 >= 3
 		;TranslatedMark %ANAME(対象士官番号)%はやはり%ANAME(闇堕ち君主番号)%の兵に追われ危険な目に遭ったらしい
 		PRINTFORML 来迎接%ANAME(MASTER)%，邀请他下次一定要一起起义…
 		;TranslatedMark %ANAME(MASTER)%を迎えに来た、今度こそ一緒に独立しようと誘っている…
-		PRINTL 
+		PRINTL
 		CALL ASK_MULTI_JUDGE(@"%ANAME(対象士官番号)%と二人で独立する", GET_NEW_COUNTRY() > 0, "他勢力へ誘う", GET_COUNTRY_NUM() > 1, @"%ANAME(闇堕ち君主番号)%の勢力に残る", 1)
 		;▼0_独立する
 		IF RESULT == 0
@@ -518,14 +523,14 @@ IF DAY % 1 == 0 && SCVAR:2 >= 3
 			;TranslatedMark %ANAME(対象士官番号)%は絶句し、臣下の命を狙うほど乱心した君主になぜ付き従うのかと問う
 			PRINTFORMW %ANAME(MASTER)%说，正因为情况如此奇怪，才不能放任现在的%ANAME(闇堕ち君主番号)%不管
 			;TranslatedMark それほど様子がおかしいからこそ今の%ANAME(闇堕ち君主番号)%を放ってはおけない、と%ANAME(MASTER)%は話す
-			PRINTL 
+			PRINTL
 			PRINTFORML %ANAME(対象士官番号)%沉默了一会儿，然后用颤抖的声音嘀咕道："你选择了独自面对？"
 			;TranslatedMark %ANAME(対象士官番号)%はしばらく黙り込み、やがて震える声で孤独を選ぶのかと呟いた
 			PRINTFORML 不要再和除%ANAME(闇堕ち君主番号)%以外的任何人亲近了
 			;TranslatedMark 二度と%ANAME(闇堕ち君主番号)%以外の誰とも親しくなってはいけない
 			PRINTFORMW 下一个对手甚至可能会要了你的命，那样的话，%ANAME(MASTER)%会受伤的
 			;TranslatedMark 次の相手は命まで奪われるかもしれない、そうなれば誰より傷つくのは%ANAME(MASTER)%だと続ける
-			PRINTL 
+			PRINTL
 			PRINTFORML 看到%ANAME(MASTER)%点点头，%ANAME(対象士官番号)%露出了死心的表情离开了
 			;TranslatedMark %ANAME(MASTER)%が頷くのを見届けると、%ANAME(対象士官番号)%は諦観の表情を浮かべ立ち去った
 			PRINTFORMW %ANAME(MASTER)%目送着%ANAME(対象士官番号)%的背影，转身回到%ANAME(闇堕ち君主番号)%的阵地里…
@@ -595,9 +600,9 @@ IF DAY % 1 == 0 && SCVAR:2 >= 3
 			;TranslatedMark 全ては己の選んだ道だ。覚悟を決めるのが遅過ぎたことを後悔はしても、繰り返しはすまい…
 			CALL SCENARIO_21_RESET_SCVARS
 		ENDIF
-	;---------------------------------------------------------------------- 
+	;----------------------------------------------------------------------
 	;○２期クリアして３期目
-	;---------------------------------------------------------------------- 
+	;----------------------------------------------------------------------
 	ELSEIF SCVAR:2 >= 5
 		;イベント進行度を6にする
 		SCVAR:2 = 6
@@ -630,9 +635,9 @@ IF DAY % 1 == 0 && SCVAR:2 >= 3
 			;TranslatedMark %ANAME(闇堕ち君主番号)%から牢獄の警戒を強めるよう命じられたようだ
 			RESETCOLOR
 		ENDIF
-	;---------------------------------------------------------------------- 
+	;----------------------------------------------------------------------
 	;○それ以外で捕虜
-	;---------------------------------------------------------------------- 
+	;----------------------------------------------------------------------
 	ELSEIF CFLAG:MASTER:捕虜先
 		;説得してからの期間をリセット
 		FLAG:勧誘経過期間 = 0
@@ -642,18 +647,18 @@ IF DAY % 1 == 0 && SCVAR:2 >= 3
 		FLAG:逆調教メイン調教者 = GET_ID(闇堕ち君主番号)
 		;イベントの進行フラグをカウンタに使う
 		SCVAR:2 = SCVAR:2 + 1
-	;---------------------------------------------------------------------- 
+	;----------------------------------------------------------------------
 	;○それ以外
-	;---------------------------------------------------------------------- 
+	;----------------------------------------------------------------------
 	ELSE
 		;イベントの進行フラグをカウンタに使う
 		SCVAR:2 = SCVAR:2 + 1
 	ENDIF
 ENDIF
 
-;───────────────────────────────────── 
+;─────────────────────────────────────
 ;●傾城進行度３地方派遣
-;───────────────────────────────────── 
+;─────────────────────────────────────
 ;発生条件：
 ;イベント進行度２（逃避行独立が１回以上起きている）
 ;主人公が捕虜でない
@@ -698,7 +703,7 @@ IF DAY % 3 == 0 && SCVAR:2 == 2 && CFLAG:MASTER:所属 && CFLAG:MASTER:捕虜先
 			IF TALENT:闇堕ち君主番号:自制心 || TALENT:闇堕ち君主番号:難以越過的底線
 				PRINTFORMW 从其他士官了解到了%ANAME(対象士官番号)%的放浪后，%ANAME(MASTER)%追问了有关%ANAME(闇堕ち君主番号)%的事
 				;TranslatedMark 他の士官から%ANAME(対象士官番号)%の放浪について教わった%ANAME(MASTER)%は、%ANAME(闇堕ち君主番号)%を問い詰めた
-				PRINTL 
+				PRINTL
 				PRINTFORML 虽然有着平时的人品做担保，但%ANAME(闇堕ち君主番号)%似乎并没有确认事情真相的打算
 				;TranslatedMark 平素より動じない人柄とはいえ、%ANAME(闇堕ち君主番号)%は事情を確かめる心算もないようだ
 				PRINTFORMW 该多听听%ANAME(対象士官番号)%的话吗，或者说，这也是受诅咒的影响吗
@@ -706,7 +711,7 @@ IF DAY % 3 == 0 && SCVAR:2 == 2 && CFLAG:MASTER:所属 && CFLAG:MASTER:捕虜先
 			ELSEIF TALENT:闇堕ち君主番号:老実 || TALENT:闇堕ち君主番号:悲観的
 				PRINTFORMW %ANAME(闇堕ち君主番号)%很客气地告诉了%ANAME(MASTER)%关于%ANAME(対象士官番号)%的放浪有关的事
 				;TranslatedMark %ANAME(闇堕ち君主番号)%は遠慮がちに%ANAME(対象士官番号)%の放浪について%ANAME(MASTER)%へ伝えた
-				PRINTL 
+				PRINTL
 				PRINTFORML 虽然突然失去了伙伴，但是%ANAME(闇堕ち君主番号)%比起悲伤更在意的是%ANAME(MASTER)%的态度
 				;TranslatedMark 突然仲間を失ったのに、%ANAME(闇堕ち君主番号)%は哀しむより%ANAME(MASTER)%の態度を気にしているようだ
 				PRINTFORMW 该多听听%ANAME(対象士官番号)%的话吗，或者说，这也是受诅咒的影响吗
@@ -714,7 +719,7 @@ IF DAY % 3 == 0 && SCVAR:2 == 2 && CFLAG:MASTER:所属 && CFLAG:MASTER:捕虜先
 			ELSEIF TALENT:闇堕ち君主番号:自尊心高 || TALENT:闇堕ち君主番号:堅強 || TALENT:闇堕ち君主番号:楽観的
 				PRINTFORMW %ANAME(闇堕ち君主番号)%把%ANAME(対象士官番号)%的放浪的事告诉了%ANAME(MASTER)%
 				;TranslatedMark %ANAME(闇堕ち君主番号)%は%ANAME(対象士官番号)%の放浪を%ANAME(MASTER)%に告げた
-				PRINTL 
+				PRINTL
 				PRINTFORML 虽然被军官拒之门外，%ANAME(闇堕ち君主番号)%却奇怪的满足了
 				;TranslatedMark 士官に背を向けられてしまったというのに%ANAME(闇堕ち君主番号)%は妙に満足気だ
 				PRINTFORMW 该多听听%ANAME(対象士官番号)%的话吗，或者说，这也是受诅咒的影响吗
@@ -722,7 +727,7 @@ IF DAY % 3 == 0 && SCVAR:2 == 2 && CFLAG:MASTER:所属 && CFLAG:MASTER:捕虜先
 			ELSE
 				PRINTFORMW %ANAME(闇堕ち君主番号)%把%ANAME(対象士官番号)%的放浪的事告诉了%ANAME(MASTER)%
 				;TranslatedMark %ANAME(闇堕ち君主番号)%は%ANAME(対象士官番号)%の放浪を%ANAME(MASTER)%に告げた
-				PRINTL 
+				PRINTL
 				PRINTFORML 尽管突然失去了可靠的士官，%ANAME(闇堕ち君主番号)%却丝毫没有动摇的迹象
 				;TranslatedMark 急な放浪で頼れる士官を失ったにも拘わらず、%ANAME(闇堕ち君主番号)%はまるで動揺の色を見せない
 				PRINTFORMW 该多听听%ANAME(対象士官番号)%的话吗，或者说，这也是受诅咒的影响吗
@@ -730,8 +735,9 @@ IF DAY % 3 == 0 && SCVAR:2 == 2 && CFLAG:MASTER:所属 && CFLAG:MASTER:捕虜先
 			ENDIF
 			PRINTFORML %ANAME(闇堕ち君主番号)%向混乱的%ANAME(MASTER)%询问了不追回%ANAME(対象士官番号)%是否合适…
 			;TranslatedMark 混乱する%ANAME(MASTER)%に、%ANAME(闇堕ち君主番号)%は%ANAME(対象士官番号)%の後を追わなくて良いのか尋ねてきた…
-			PRINTL 
+			PRINTL
 			CALL ASK_YN("马上追回", "沉默")
+			;TranslatedMark "後を追う", "黙り込む"
 			;○0_後を追う
 			IF RESULT == 0
 				PRINTFORML %ANAME(MASTER)%想马上追上她
@@ -789,9 +795,9 @@ IF DAY % 3 == 0 && SCVAR:2 == 2 && CFLAG:MASTER:所属 && CFLAG:MASTER:捕虜先
 	ENDIF
 ENDIF
 
-;───────────────────────────────────── 
+;─────────────────────────────────────
 ;●傾城進行度２逃避行独立
-;───────────────────────────────────── 
+;─────────────────────────────────────
 ;発生条件：
 ;イベント進行度１または２（闇堕ち君主の警告後、繰り返す）
 ;主人公が捕虜でない
@@ -812,7 +818,7 @@ IF DAY % 3 == 0 && (SCVAR:2 == 1 || SCVAR:2 == 2) && CFLAG:MASTER:所属 && CFLA
 		CALL SCENARIO_21_COLOR_LINE
 		PRINTFORML %ANAME(MASTER)%被召唤到%ANAME(対象士官番号)%的私人房间
 		;TranslatedMark %ANAME(MASTER)%は%ANAME(対象士官番号)%の私室に呼び出された
-		PRINTFORML 
+		PRINTFORML
 		;初回
 		IF SCVAR:2 == 1
 			PRINTFORML 好像听%ANAME(闇堕ち君主番号)%说了关于%ANAME(MASTER)%和%ANAME(対象士官番号)%的关系
@@ -866,8 +872,9 @@ IF DAY % 3 == 0 && (SCVAR:2 == 1 || SCVAR:2 == 2) && CFLAG:MASTER:所属 && CFLA
 				;TranslatedMark ついて来て欲しいと改めて言っている…
 			ENDIF
 		ENDIF
-		PRINTFORML 
+		PRINTFORML
 		CALL ASK_YN("追寻", "留下")
+		;TranslatedMark "ついていく", "引き留める"
 		;○0_ついていく
 		IF RESULT == 0
 			PRINTFORMW %ANAME(対象士官番号)%紧紧抱住了%ANAME(MASTER)%
@@ -931,9 +938,9 @@ IF DAY % 3 == 0 && (SCVAR:2 == 1 || SCVAR:2 == 2) && CFLAG:MASTER:所属 && CFLA
 	ENDIF
 ENDIF
 
-;───────────────────────────────────── 
+;─────────────────────────────────────
 ;●傾城進行度１君主の闇堕ち警告
-;───────────────────────────────────── 
+;─────────────────────────────────────
 ;発生条件：
 ;イベント進行度が０
 ;主人公がどこかの勢力にいる
@@ -975,7 +982,7 @@ IF DAY % 3 == 0 && SCVAR:2 == 0 && CFLAG:MASTER:所属 && GET_COUNTRY_BOSS(CFLAG
 				CALL SCENARIO_21_COLOR_LINE
 				PRINTFORML %ANAME(LOCAL:1)%带着酒来到了%ANAME(MASTER)%的房间
 				;TranslatedMark %ANAME(MASTER)%の部屋に%ANAME(LOCAL:1)%が酒を持って訪れた
-				PRINTFORML 
+				PRINTFORML
 				;闇堕ちしそうな君主の正妻
 				IF TALENT:(LOCAL:1):正妻
 					IF TALENT:(LOCAL:1):自制心 || TALENT:(LOCAL:1):難以越過的底線
@@ -1064,7 +1071,7 @@ IF DAY % 3 == 0 && SCVAR:2 == 0 && CFLAG:MASTER:所属 && GET_COUNTRY_BOSS(CFLAG
 				PRINTFORML %ANAME(LOCAL:1)%から%ANAME(LOCAL:0)%への友好度 : {LOCAL:3}
 				PRINTFORML %ANAME(LOCAL:1)%から%ANAME(LOCAL:0)%への敵対度 : {LOCAL:4}
 				RESETCOLOR
-				PRINTFORML 
+				PRINTFORML
 				CALL ASK_MULTI(@"%ANAME(LOCAL:1)%が大切", "仲間の大切さは比較できない", @"%ANAME(LOCAL:0)%が大切")
 				;○0_闇堕ち君主が大切
 				IF RESULT == 0
@@ -1126,9 +1133,9 @@ IF DAY % 3 == 0 && SCVAR:2 == 0 && CFLAG:MASTER:所属 && GET_COUNTRY_BOSS(CFLAG
 	ENDIF
 ENDIF
 
-;───────────────────────────────────── 
+;─────────────────────────────────────
 ;●傾城進行度０傾城
-;───────────────────────────────────── 
+;─────────────────────────────────────
 ;発生条件：
 ;主人公がどこかの勢力にいる
 ;主人公が君主でない
@@ -1256,9 +1263,9 @@ IF DAY % 1 == 0 && CFLAG:MASTER:所属 && GET_COUNTRY_BOSS(CFLAG:MASTER:所属) 
 	NEXT
 ENDIF
 
-;───────────────────────────────────── 
+;─────────────────────────────────────
 ;◇花一匁（人質を要求される）
-;───────────────────────────────────── 
+;─────────────────────────────────────
 ;発生条件：
 ;主人公が捕虜でない
 ;主人公が行動不能（妊娠・怪我・育児）でない
@@ -1286,29 +1293,32 @@ IF DAY % 9 == 0 && CFLAG:MASTER:所属 && CFLAG:MASTER:捕虜先 == 0 && CFLAG:M
 	;最大勢力の君主が主人公勢力の君主でなく、連合参加中でない、同盟でない、主人公に陥落素質を持っていたらたまに人質要求してくる
 	IF GET_COUNTRY_BOSS(LOCAL:15) != GET_COUNTRY_BOSS(CFLAG:MASTER:所属) && GET_UNION_TARGET(CFLAG:MASTER:所属) == -1 && CHECK_COUNTRY_RELATION_F(LOCAL:15, CFLAG:MASTER:所属) < 2 && ( TALENT:(LOCAL:1):恋慕 || TALENT:(LOCAL:1):服従 || TALENT:(LOCAL:1):主人 )
 		CALL SCENARIO_21_COLOR_LINE
-		PRINTFORML %ANAME(LOCAL:1)%陣より使者が訪れ、要求を伝える書状を読み上げた
+		PRINTFORML 使者从%ANAME(LOCAL:1)%的阵地前来，宣读了传达要求的书信。
+		;TranslatedMark %ANAME(LOCAL:1)%陣より使者が訪れ、要求を伝える書状を読み上げた
 		PRINTFORML 虽然表达了对我们的敬畏，但归根结底还是要把%ANAME(MASTER)%作为人质送过去
 		;TranslatedMark 畏まった表現をしているが、つまるところ%ANAME(MASTER)%を人質に寄越せという内容のようだ
-		PRINTFORML 
+		PRINTFORML
 		PRINTFORML 有着扑灭飞鸟之势的%ANAME(LOCAL:1)%的势力，事到如今还想要人质什么的
 		;TranslatedMark 飛ぶ鳥を落とす勢いの%ANAME(LOCAL:1)%陣が今更人質を欲しがるなど
 		PRINTFORML 我只能认为这是预料到会被拒绝，而打算用作开战的理由
 		;TranslatedMark 断られることを見越して開戦理由に使う心算としか思えない
 		PRINTFORML 正因为如此，如果答应了要求，就不能期待会有好的待遇了吧
 		;TranslatedMark だからこそ、要求に応じたら応じたで、まともな待遇は期待できないだろう
-		PRINTFORML 
+		PRINTFORML
 		;君主にも陥落があれば反対する
 		IF TALENT:(LOCAL:2):恋慕 || TALENT:(LOCAL:2):服従 || TALENT:(LOCAL:2):主人
 			PRINTFORML %ANAME(MASTER)%正在回应的时候，把%ANAME(LOCAL:2)%赠送的酒瓶打碎了
 			;TranslatedMark %ANAME(MASTER)%が答えあぐねていると、%ANAME(LOCAL:2)%が贈られた酒瓶を叩き割った
-			PRINTFORML 激昂して使者を斬れと命じている
-			PRINTFORML 
+			PRINTFORML 她们兴奋地下令斩杀使者。
+			;TranslatedMark 激昂して使者を斬れと命じている
+			PRINTFORML
 		ENDIF
 		;プレイヤーがどうするか決める
 		CALL ASK_YN("答应要求", "拒绝要求")
-		;……………………………………………………………………………………… 
+		;TranslatedMark "要求を呑む", "要求を断る"
+		;………………………………………………………………………………………
 		;●0_要求を呑む
-		;……………………………………………………………………………………… 
+		;………………………………………………………………………………………
 		IF RESULT == 0
 			PRINTFORML %ANAME(MASTER)%说要去%ANAME(LOCAL:1)%的势力
 			;TranslatedMark %ANAME(MASTER)%は%ANAME(LOCAL:1)%陣に赴くと言った
@@ -1347,15 +1357,15 @@ IF DAY % 9 == 0 && CFLAG:MASTER:所属 && CFLAG:MASTER:捕虜先 == 0 && CFLAG:M
 			CALL CHANGE_RELATION_O_TO_O(LOCAL:1, LOCAL:2, 500, -500)
 			;主人公勢力君主から最大勢力君主への友好度-敵対度+
 			CALL CHANGE_RELATION_O_TO_O(LOCAL:1, LOCAL:2, -500, 500)
-		;……………………………………………………………………………………… 
+		;………………………………………………………………………………………
 		;●1_要求を断る
-		;……………………………………………………………………………………… 
+		;………………………………………………………………………………………
 		ELSE
 			PRINTFORML %ANAME(MASTER)%拒绝了要求
 			;TranslatedMark %ANAME(MASTER)%は要求を跳ねのけた
 			PRINTFORML 我们势力好像导致了%ANAME(LOCAL:1)%的愤怒
 			;TranslatedMark 我が陣営は%ANAME(LOCAL:1)%の怒りを買ったようだ
-			PRINTFORML 
+			PRINTFORML
 			WAIT
 			;最大勢力の君主の感情
 			PALAM:(LOCAL:1):怒外 += 5000
@@ -1366,7 +1376,7 @@ IF DAY % 9 == 0 && CFLAG:MASTER:所属 && CFLAG:MASTER:捕虜先 == 0 && CFLAG:M
 			;主人公勢力君主から最大勢力君主への友好度-敵対度+
 			CALL CHANGE_RELATION_O_TO_O(LOCAL:1, LOCAL:2, -500, 500)
 		ENDIF
-	ENDIF	
+	ENDIF
 ENDIF
 
 @SCENARIO_21_RESET_SCVARS
@@ -1437,11 +1447,11 @@ SETCOLOR カラー_灰色
 DRAWLINE
 SETCOLOR 元の色
 
-;============================================================================== 
+;==============================================================================
 ;◆ランダム君主決定
 ;ARG:0 勢力数最小値
 ;ARG:1 勢力数最大値
-;============================================================================== 
+;==============================================================================
 @SCENARIO_21_SELECT_RBOSS(ARG:0, ARG:1)
 #DIM 今物語の初期勢力数
 #DIM 新君主番号
@@ -1461,9 +1471,9 @@ LOCAL:0 = 1
 WHILE LOCAL:0 <= 今物語の初期勢力数
 	;RANDは0が選ばれるので１足す
 	LOCAL:1 = 1 + RAND:(CHARANUM - 1)
-	;---------------------------------------------------------------------- 
+	;----------------------------------------------------------------------
 	;◇乱数で選ばれたキャラが未所属でない or 死亡している or 主人公 or CSVのあなた
-	;---------------------------------------------------------------------- 
+	;----------------------------------------------------------------------
 	SIF CFLAG:(LOCAL:1):所属 || CFLAG:(LOCAL:1):特殊状態 == 特殊状態_死亡 || LOCAL:1 == MASTER || CSTR:(LOCAL:0):99 == "あなた"
 		CONTINUE
 	;未登場も除外する
@@ -1472,9 +1482,9 @@ WHILE LOCAL:0 <= 今物語の初期勢力数
 	;東方キャラ限定にする（シナリオ選択後に、引き継いだキャラ・カスタムキャラの出現設定になるので。）
 	SIF !IS_TOHO_CHARA(LOCAL:1)
 		CONTINUE
-	;---------------------------------------------------------------------- 
+	;----------------------------------------------------------------------
 	;◇それ以外ならLOCAL:1が君主に当選
-	;---------------------------------------------------------------------- 
+	;----------------------------------------------------------------------
 	新君主番号 = LOCAL:1
 	;空いている勢力の番号を取得
 	新勢力番号 = GET_NEW_COUNTRY()

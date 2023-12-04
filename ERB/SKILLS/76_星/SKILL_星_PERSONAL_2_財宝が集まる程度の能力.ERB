@@ -1,0 +1,93 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_76_PERSONAL_2_EXIST
+RETURN 1
+
+@SKILL_76_PERSONAL_2_NAME
+RESULTS = 收集财宝程度的能力
+;TranslatedMark 財宝が集まる程度の能力
+
+;レベルは1-5まで
+@SKILL_76_PERSONAL_2_LEVEL
+RETURN 5
+
+;対象選択
+@SKILL_76_PERSONAL_2_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1
+
+;発動判定
+@SKILL_76_PERSONAL_2_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1
+
+;発動テキストをオーバライドしたいときに。
+;「誰それのスキル発動！　○○した！」の「○○した！」の部分を実装したい場合は、
+;これじゃなくてINVOKEで書けばいいです。
+;@SKILL_76_PERSONAL_2_INVOKE_TEXT(発動者, スキル, ジャンル)
+;#DIM 発動者
+;#DIM スキル
+;#DIMS ジャンル
+
+;効果をここに記述
+@SKILL_76_PERSONAL_2_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+LOCAL = RAND(100, 5000)
+PRINTFORML %ANAME(発動者)%聚集到了金银财宝！
+;TranslatedMark %ANAME(発動者)%の元に金銀財宝が集まってくる！
+PRINTFORML 国库增加了{LOCAL}资金！
+;TranslatedMark 国庫が{LOCAL}上昇！
+MONEY:(CFLAG:(発動者):所属) += LOCAL
+
+@SKILL_76_PERSONAL_2_EXPLANATION
+RESULTS = 战斗时，国库的资金随机增加100到5000。
+;TranslatedMark 戦闘時、国庫の資金が100から5000増加する。
+
+@SKILL_76_PERSONAL_2_CANT_TELL
+
+
+
+
+@SKILL_76_PERSONAL_2_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 250

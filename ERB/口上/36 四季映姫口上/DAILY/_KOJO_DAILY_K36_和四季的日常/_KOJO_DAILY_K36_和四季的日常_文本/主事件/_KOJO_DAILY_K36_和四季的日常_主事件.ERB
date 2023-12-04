@@ -1,0 +1,62 @@
+@K36_NEVERMIND_MAIN
+    #DIM EVENT_ID
+    CALL K36_NEVERMIND_MAIN_GETEVENTID
+    EVENT_ID = RESULT
+    TRYCCALLFORM K36_NEVERMIND_EVENT_{EVENT_ID}
+        K36_和四季的日常_主事件_上次触发日期:EVENT_ID = DAY
+    CATCH
+        CALL K36_NEVERMIND_EVENT_1
+        K36_和四季的日常_主事件_上次触发日期:1 = DAY
+    ENDCATCH
+@K36_NEVERMIND_MAIN_GETEVENTID
+    ;本来想扩展IFRAND加个权重来随机事件的……摸了
+    #DIM EVENT_ID
+    #DIM DYNAMIC EVENT_ID_LIST,100
+    #DIM DYNAMIC EVENT_ID_RATE,100
+    #DIM DYNAMIC EVENT_ID_NUM
+    #DIM DYNAMIC TOTAL_RATE
+    FOR EVENT_ID,1,120
+        TRYCCALLFORM K36_NEVERMIND_EVENT_{EVENT_ID}_EXIST
+            ;是否能触发
+            CALLFORM K36_NEVERMIND_EVENT_{EVENT_ID}_STATUS
+            SIF !RESULT
+                CONTINUE
+            ;触发几率
+            CALLFORM K36_NEVERMIND_EVENT_{EVENT_ID}_RATE
+            IF RESULT > 0
+                EVENT_ID_LIST:EVENT_ID_NUM = EVENT_ID
+                EVENT_ID_RATE:EVENT_ID_NUM = RESULT
+                TOTAL_RATE += RESULT
+                EVENT_ID_NUM++
+            ENDIF
+        CATCH
+        ENDCATCH
+    NEXT
+    IF TOTAL_RATE > 0
+        LOCAL:1 = RAND:TOTAL_RATE
+        LOCAL = 0
+        EVENT_ID_NUM = 0
+        WHILE 1
+            IF INRANGE(LOCAL:1,LOCAL,LOCAL + EVENT_ID_RATE:EVENT_ID_NUM - 1)
+                RETURN EVENT_ID_LIST:EVENT_ID_NUM
+            ELSE
+                LOCAL += EVENT_ID_RATE:EVENT_ID_NUM
+                EVENT_ID_NUM++
+            ENDIF
+        WEND
+    ENDIF
+    RETURN 0
+
+; @K36_NEVERMIND_EVENT_x
+;     CALL K36_NORMAL_SENTENCE_IMAGE_BUTTON(@"",1)
+;     CALL K36_NORMAL_SENTENCE_IMAGE_BUTTON(@"",0)
+;     INPUT
+;     CLEARLINE 1
+;     IF RESULT != 0
+;     ELSE
+;     ENDIF
+
+;     IF DAY - K36_上次色色日期 <= 3
+;     ELSE
+;     ENDIF
+

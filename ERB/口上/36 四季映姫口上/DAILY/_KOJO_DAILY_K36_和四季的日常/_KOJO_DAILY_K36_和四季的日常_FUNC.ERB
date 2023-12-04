@@ -1,0 +1,157 @@
+;是否有本国势力士官被捕/四季小町被捕/主人公被捕
+;getbit 4 主人公被捕
+;getbit 3 四季被捕
+;getbit 2 小町被捕
+;getbit 1 其他士官被捕
+@K36_CHECK_EMERGENCY_RESCUE
+    #FUNCTION
+    #DIM STATUS
+    STATUS = 0
+    SIF CFLAG:MASTER:捕虜先 > 0 && CFLAG:MASTER:所属 != CFLAG:MASTER:捕虜先
+        SETBIT STATUS,4
+    SIF CFLAG:四季_ID:捕虜先 > 0 && CFLAG:四季_ID:所属 != CFLAG:四季_ID:捕虜先
+        SETBIT STATUS,3
+    SIF CFLAG:小町_ID:捕虜先 > 0 && CFLAG:小町_ID:所属 != CFLAG:小町_ID:捕虜先
+        SETBIT STATUS,2
+    FOR LOCAL,0,CHARANUM
+        IF CFLAG:LOCAL:所属 == CFLAG:LOCAL:所属 && CFLAG:LOCAL:捕虜先 > 0 && CFLAG:LOCAL:所属 != CFLAG:LOCAL:捕虜先
+            SETBIT STATUS,1
+            BREAK
+        ENDIF
+    NEXT
+    RETURNF STATUS
+
+;是否有任何角色被非所在势力捕
+@K36_CHECK_NORMAL_RESCUE
+    #FUNCTION
+    FOR LOCAL,0,CHARANUM
+        IF CFLAG:LOCAL:捕虜先 > 0 && CFLAG:LOCAL:所属 != CFLAG:LOCAL:捕虜先
+            RETURNF 1
+        ENDIF
+    NEXT
+    RETURNF 0
+
+;是否有可以说服的角色
+@K36_CHECK_PERSUADE
+    #FUNCTION
+    FOR LOCAL,0,CHARANUM
+        IF LOCAL != MASTER && CFLAG:(LOCAL):所属 != CFLAG:MASTER:所属 && CFLAG:(LOCAL):捕虜先 == CFLAG:MASTER:所属
+            RETURNF 1
+        ENDIF
+    NEXT
+    RETURNF 0
+
+; 打印被关押在其他国家的我方士官
+; COUNTRY_ID>=63时会报错，那种情况下不能使用SITBIT
+@K36_RESCUE_OUTPUT_PARTNER_LIST
+    #DIM COUNTRY_BIT
+    #DIM FIRST_LINE
+    #DIM CHARA_ID
+    #DIM COUNTRY_ID
+    VARSET COUNTRY_BIT,0
+    $INPUT_LOOP
+    FIRST_LINE = LINECOUNT
+    FOR CHARA_ID,0,CHARANUM
+        IF CFLAG:CHARA_ID:所属 == CFLAG:CHARA_ID:所属 && CFLAG:CHARA_ID:捕虜先 > 0 && CFLAG:CHARA_ID:所属 != CFLAG:CHARA_ID:捕虜先
+            IF !GETBIT(COUNTRY_BIT,CFLAG:CHARA_ID:捕虜先)
+                SETBIT COUNTRY_BIT,CFLAG:CHARA_ID:捕虜先
+            ENDIF
+            CALL K36_NORMAL_SENTENCE_IMAGE_BUTTON(@"%ANAME(CHARA_ID)%",CFLAG:CHARA_ID:捕虜先)
+
+        ENDIF
+    NEXT
+    SIF COUNTRY_BIT == 0
+        RETURN
+    INPUT
+    COUNTRY_ID = RESULT
+    IF !GETBIT(COUNTRY_BIT,COUNTRY_ID)
+        CLEARLINE LINECOUNT - FIRST_LINE
+        REDRAW 2
+        GOTO INPUT_LOOP
+    ELSE
+        CLEARLINE 1
+        RETURN COUNTRY_ID
+    ENDIF
+
+; 营救被关押在指定国家的我方士官
+@K36_RESCUE_PARTNER_IN_COUNTRY(COUNTRY_ID)
+    #DIM COUNTRY_ID
+    SIF !IS_COUNTRY(COUNTRY_ID)
+        RETURN
+    FOR LOCAL,0,CHARANUM
+        IF CFLAG:LOCAL:所属 == CFLAG:LOCAL:所属 && CFLAG:LOCAL:捕虜先 == COUNTRY_ID
+            CFLAG:LOCAL:捕虜先 = 0
+            CFLAG:LOCAL:好感度 += 300
+            CFLAG:LOCAL:依存度 += 50
+            CALL CHANGE_RELATION_O_TO_C(LOCAL,CFLAG:LOCAL:所属, RAND(50, 100) , RAND(50, 100)* -1)
+            CALL K36_NORMAL_SENTENCE_IMAGE_NOTICE(@"%ANAME(LOCAL)%被救出了")
+        ENDIF
+    NEXT
+
+@K36_PERSUADE_OUTPUT_TARGET_LIST()
+    #DIM CHARA_ID
+    #DIM TARGET_CHARA_LIST,MAX_CHARA_NUM
+    #DIM TARGET_CHARA_NUM
+    #DIM FIRST_LINE
+    VARSET TARGET_CHARA_NUM,-1
+    TARGET_CHARA_NUM = 0
+    $INPUT_LOOP
+    FIRST_LINE = LINECOUNT
+    FOR CHARA_ID,0,CHARANUM
+        IF CHARA_ID != MASTER && CFLAG:(CHARA_ID):所属 != CFLAG:MASTER:所属 && CFLAG:(CHARA_ID):捕虜先 == CFLAG:MASTER:所属
+            TARGET_CHARA_LIST:TARGET_CHARA_NUM = CHARA_ID
+            TARGET_CHARA_NUM ++
+            CALL K36_NORMAL_SENTENCE_IMAGE_BUTTON(@"%ANAME(CHARA_ID)%",CHARA_ID)
+        ENDIF
+    NEXT
+    INPUT
+    CHARA_ID = RESULT
+    IF FINDELEMENT(TARGET_CHARA_LIST,CHARA_ID) < 0
+        CLEARLINE LINECOUNT - FIRST_LINE
+        REDRAW 2
+        GOTO INPUT_LOOP
+    ELSE
+        CLEARLINE 1
+        RETURN CHARA_ID
+    ENDIF
+
+@K36_PERSUADE_AUTO_SELECT_TARGET()
+    #DIM CHARA_ID
+    #DIM TARGET_CHARA_LIST,MAX_CHARA_NUM
+    #DIM TARGET_CHARA_NUM
+    TARGET_CHARA_NUM = 0
+    FOR CHARA_ID,0,CHARANUM
+        IF CHARA_ID != MASTER && CFLAG:(CHARA_ID):所属 != CFLAG:MASTER:所属 && CFLAG:(CHARA_ID):捕虜先 == CFLAG:MASTER:所属
+            TARGET_CHARA_LIST:TARGET_CHARA_NUM = CHARA_ID
+            TARGET_CHARA_NUM ++
+        ENDIF
+    NEXT
+    RETURN TARGET_CHARA_LIST:(RAND:TARGET_CHARA_NUM)
+
+@K36_ADD_四季好感度(VALUE = -1)
+    #DIM VALUE
+    IF VALUE < 0
+        IF DAY - K36_上次色色日期 > 6
+            VALUE = 4
+        ELSEIF DAY - K36_上次色色日期 > 3
+            VALUE = 2
+        ELSE
+            VALUE = 1
+        ENDIF
+    ENDIF
+    ;#; PRINTFORMW 四季好感度 :{K36_和四季的日常_四季好感度} -> {K36_和四季的日常_四季好感度+VALUE}
+    K36_和四季的日常_四季好感度 += VALUE
+    
+@K36_ADD_四季敏感度(VALUE = -1)
+    #DIM VALUE
+    IF VALUE < 0
+        IF DAY - K36_上次色色日期 > 6
+            VALUE = (DAY - K36_上次色色日期) + 1
+        ELSEIF DAY - K36_上次色色日期 > 3
+            VALUE = (DAY - K36_上次色色日期) - 1
+        ELSE
+            VALUE = 1
+        ENDIF
+    ENDIF
+    ;#; PRINTFORMW 四季敏感度 :{K36_和四季的日常_四季敏感度} -> {K36_和四季的日常_四季敏感度+VALUE}
+    K36_和四季的日常_四季敏感度 += VALUE

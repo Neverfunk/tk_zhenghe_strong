@@ -1,0 +1,62 @@
+@K36_SP_ENEVT_17_EXIST
+    RETURN 1
+
+@K36_SP_ENEVT_17_STATUS
+    SIF K36_和四季的日常_四季好感度 < 15 || K36_和四季的日常_四季敏感度 < 15
+        RETURN 0
+    RETURN 1
+
+@K36_SP_ENEVT_17_NAME
+    CLEARLINE 1
+    CALL KOJO_DAILY_START("想要的称呼")
+    RETURN 1
+
+@K36_SP_ENEVT_17
+    CALL SET_SHIKIEIKI_FACE(四季_衣服_常服,四季_感情_开心,四季_额外_清空,四季_额外_害羞)
+    CALL K36_SHIKIEIKI_SAY_IMAGE(@"「对，对了！%ANAME(MASTER)%希望我用特别的方式称呼你吗？」")
+    CALL K36_NORMAL_SENTENCE_IMAGE(@"本来是在闲聊中的%ANAME(四季_ID)%突然提出了问题",1)
+    CALL SET_SHIKIEIKI_FACE(四季_衣服_常服,四季_感情_爱意,四季_额外_清空,四季_额外_害羞)
+    CALL K36_SHIKIEIKI_SAY_IMAGE(@"「为什么这么突然？因为想到了！」")
+    CALL SET_SHIKIEIKI_FACE(四季_衣服_常服,四季_感情_开心,四季_额外_清空,四季_额外_害羞)
+    CALL K36_SHIKIEIKI_SAY_IMAGE(@"「平常总是直呼名字呢……我想更加亲昵一点呢！」")
+    CALL K36_NORMAL_SENTENCE_IMAGE(@"%ANAME(四季_ID)%很直接地表达了自己的心意")
+    CALL K36_NORMAL_SENTENCE_IMAGE(@"那么%ANAME(MASTER)%决定？")
+    $INPUT_LOOP
+    LOCAL:1 = LINECOUNT
+    CALL K36_NORMAL_SENTENCE_IMAGE_BUTTON(@"不用呢！",1)
+    CALL K36_NORMAL_SENTENCE_IMAGE_BUTTON(@"%ANAME(MASTER)%桑",2)
+    CALL K36_NORMAL_SENTENCE_IMAGE_BUTTON(@"%ANAME(MASTER)%先生",3)
+    CALL K36_NORMAL_SENTENCE_IMAGE_BUTTON(@"或者直接输入想要的名字！",0)
+    INPUT
+    CLEARLINE 1
+    LOCAL = RESULT
+    LOCALS =
+    IF LOCAL == 1
+        LOCALS '= @"%ANAME(MASTER)%"
+    ELSEIF LOCAL == 2
+        LOCALS '= @"%ANAME(MASTER)%桑"
+    ELSEIF LOCAL == 3
+        LOCALS '= @"%ANAME(MASTER)%先生"
+    ELSE
+        CALL K36_NORMAL_SENTENCE_IMAGE("请输入想要的称呼：")
+        INPUTS
+        LOCALS '= @"%RESULTS%"
+        CLEARLINE 1
+    ENDIF
+    CALL K36_NORMAL_SENTENCE_IMAGE(@"称呼%LOCALS%可以吗？")
+    CALL K36_NORMAL_SENTENCE_IMAGE_BUTTON(@"可以！",1)
+    CALL K36_NORMAL_SENTENCE_IMAGE_BUTTON(@"再想想！",0)
+    INPUT
+    LOCAL = RESULT
+    IF LOCAL
+        K36_CALL_MASTER '= @"%LOCALS%"
+        K36_CALL_MASTER_COUSTOM = 1
+    ELSE
+        CLEARLINE LINECOUNT - LOCAL:1
+        GOTO INPUT_LOOP
+    ENDIF
+    CALL K36_SHIKIEIKI_SAY_IMAGE(@"「诶？叫%K36_CALL_MASTER()%吗？」")
+    CALL K36_SHIKIEIKI_SAY_IMAGE(@"「我明白了！……嘿嘿嘿。」")
+    CALL K36_SHIKIEIKI_SAY_IMAGE(@"「有了一些独占的东西呢！%K36_CALL_MASTER()%……」")
+    CALL K36_NORMAL_SENTENCE_IMAGE(@"%ANAME(四季_ID)%轻轻呼唤着自己的『%K36_CALL_MASTER()%』。",1)
+    RETURN 1

@@ -1,0 +1,45 @@
+
+@K35_ONOZUKA_SAY_IMAGE(SENTENCE)
+    #DIMS SENTENCE
+    #DIMS HTMLS
+    HTMLS '= @"<nobr><nonbutton pos='{CONFIG:555 ? 1200 # 0}'>"
+    HTMLS += @"<font color='%小町_语句颜色_html%'>%SENTENCE%</font>"
+    HTMLS += "</nonbutton></nobr>"
+    HTML_PRINT HTMLS
+    CALL KOJO_35_IMAGE
+    WAIT
+
+
+@SET_ONOZUKA_FACE(cloth_id = -1,mood_id = -1,SP = -1)
+    #DIM cloth_id
+    #DIM mood_id
+    #DIM SP
+    IF cloth_id >= 0; && 小町_衣服_id != cloth_id
+        小町_衣服_id = cloth_id
+        小町_face_change_flag = 1
+    ENDIF
+
+    IF mood_id >= 0 ;&& 小町_感情_id != mood_id
+        小町_感情_id = mood_id
+        小町_face_change_flag = 1
+    ENDIF
+
+    IF SP >= 0 ;&& 小町_SP_bit != SP
+        IF GETBIT(SP,1)
+            SETBIT 小町_SP_bit,1
+        ELSE
+            CLEARBIT 小町_SP_bit,1
+        ENDIF
+
+        IF GETBIT(SP,2)
+            SETBIT 小町_SP_bit,2
+        ELSE
+            CLEARBIT 小町_SP_bit,2
+        ENDIF
+        小町_face_change_flag = 1
+    ENDIF
+
+@RESET_ONOZUKA_FACE
+    小町_衣服_id = 0
+    小町_感情_id = 0
+    小町_SP_bit = 0

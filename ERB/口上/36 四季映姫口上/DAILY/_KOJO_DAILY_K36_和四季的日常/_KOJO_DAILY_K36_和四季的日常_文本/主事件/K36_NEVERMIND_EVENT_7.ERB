@@ -1,0 +1,156 @@
+@K36_NEVERMIND_EVENT_7_EXIST
+    RETURN 1
+
+@K36_NEVERMIND_EVENT_7_RATE
+    RETURN 1 + (DAY - K36_和四季的日常_主事件_上次触发日期:7)*3
+
+@K36_NEVERMIND_EVENT_7_STATUS
+    RETURN 1
+
+@K36_NEVERMIND_EVENT_7
+    CALL SET_SHIKIEIKI_FACE(四季_衣服_衬衫,四季_感情_普通,四季_额外_清空,四季_额外_害羞)
+    CALL K36_SHIKIEIKI_SAY_IMAGE(@"「呐……%K36_CALL_MASTER()%，要一起出去散散步吗？」")
+    CALL K36_NORMAL_SENTENCE_IMAGE(@"休息日的%ANAME(MASTER)%受到了%ANAME(四季_ID)%的邀请")
+    CALL K36_NORMAL_SENTENCE_IMAGE(@"「当然！」",1)
+    CALL SET_SHIKIEIKI_FACE(四季_衣服_衬衫,四季_感情_开心,四季_额外_清空,四季_额外_害羞,四季_额外_期待)
+    CALL KOJO_36_IMAGE
+    CALL K36_NORMAL_SENTENCE_IMAGE(@"欣然答应的%ANAME(MASTER)%和开心的%ANAME(四季_ID)%一起踏上了漫步的路程……")
+    CALL K36_一段时间后_IMAGE
+    CALL K36_NEVERMIND_EVENT_7_CALLEVENT
+
+@K36_NEVERMIND_EVENT_7_CALLEVENT
+    #DIM LAST_EVENT = 0
+    [IF_DEBUG]
+        FOR LOCAL,1,6
+            TRYCALLFORM K36_NEVERMIND_EVENT_7_{LOCAL}
+        NEXT
+        RETURN
+    [ENDIF]
+    LAST_EVENT = IFRAND("1TO4",1,@"D{LAST_EVENT}",1)
+    TRYCCALLFORM K36_NEVERMIND_EVENT_7_{LAST_EVENT}
+    CATCH
+        CALL K36_NEVERMIND_EVENT_7_1
+        [IF_DEBUG]
+            PRINTFORMW EVENT_7 事件ID{LAST_EVENT}错误
+        [ENDIF]
+    ENDCATCH
+
+@K36_NEVERMIND_EVENT_7_1
+    CALL K36_NORMAL_SENTENCE_IMAGE(@"两人漫步在山上，享受着自然的气息")
+    CALL SET_SHIKIEIKI_FACE(四季_衣服_衬衫,四季_感情_开心,四季_额外_清空,四季_额外_害羞)
+    SELECTCASE RAND:3 + 1
+        CASE 1
+            CALL K36_SHIKIEIKI_SAY_IMAGE(@"「诶！……C%ANAME(MASTER)%，这个好看吧」")
+            CALL K36_NORMAL_SENTENCE_IMAGE(@"%ANAME(四季_ID)%从花丛中捻起了一只蝴蝶展示给%ANAME(MASTER)%看")
+        CASE 2
+            CALL K36_NORMAL_SENTENCE_IMAGE(@"%ANAME(MASTER)%给%ANAME(四季_ID)%摘了一朵花")
+            CALL K36_SHIKIEIKI_SAY_IMAGE(@"「谢谢你%K36_CALL_MASTER()%」")
+        CASE 3
+            CALL K36_NORMAL_SENTENCE_IMAGE(@"两人在溪边清洗着留着汗水的脸庞")
+            CALL K36_SHIKIEIKI_SAY_IMAGE(@"「哈！」")
+            CALL K36_NORMAL_SENTENCE_IMAGE(@"突然间，%ANAME(四季_ID)%调皮地把水泼到了%ANAME(MASTER)%的脸上",1)
+    ENDSELECT
+    IF (DAY - K36_上次色色日期 <= 3) || RAND:2
+        CALL K36_一段时间后_IMAGE
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"已经很晚了，两人开心地回到了据点")
+        CALL K36_SHIKIEIKI_SAY_IMAGE(@"「谢谢你，%ANAME(MASTER)%，今天玩的很开心呢！」")
+        CALL K36_ADD_四季好感度
+        RETURN
+    ENDIF
+    CALL K36_一段时间后_IMAGE
+    CALL K36_NORMAL_SENTENCE_IMAGE(@"远处传来了轰鸣声")
+    CALL SET_SHIKIEIKI_FACE(四季_衣服_衬衫,四季_感情_担忧,四季_额外_清空)
+    CALL K36_SHIKIEIKI_SAY_IMAGE(@"「难道说打雷了吗？看来得赶紧回去了」")
+    CALL K36_NORMAL_SENTENCE_IMAGE(@"突然间，%ANAME(MASTER)%闻到了一股奇怪的味道！")
+    CALL K36_NORMAL_SENTENCE_IMAGE(@"「啊！%K36_CALL_映姬()%，你有没有闻到什么味道？」",1)
+    CALL K36_SHIKIEIKI_SAY_IMAGE(@"「诶？没有呢……%K36_CALL_MASTER()%闻到什么了吗？」")
+    CALL K36_NORMAL_SENTENCE_IMAGE(@"「好像是很甜的味道呢……像%K36_CALL_映姬()%一样。」",1)
+    CALL SET_SHIKIEIKI_FACE(四季_衣服_衬衫,四季_感情_开心,四季_额外_清空)
+    CALL K36_SHIKIEIKI_SAY_IMAGE(@"「真——是——的——，又在调戏我！」")
+    CALL K36_NORMAL_SENTENCE_IMAGE(@"%K36_CALL_映姬()%故意拉长了音调，虽然嘴上这么说着还是一副很开心的样子")
+    CALL K36_NORMAL_SENTENCE_IMAGE(@"%ANAME(MASTER)%逐渐感到无法克制自己了")
+    CALL K36_NORMAL_SENTENCE_IMAGE_BUTTON(@"再忍一忍",1)
+    CALL K36_NORMAL_SENTENCE_IMAGE_BUTTON(@"压住%ANAME(四季_ID)%",0)
+    INPUT
+    CLEARLINE 1
+    IF RESULT
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"%ANAME(MASTER)%大口呼吸着，强压下了内心的冲动")
+        CALL SET_SHIKIEIKI_FACE(四季_衣服_衬衫,四季_感情_普通,四季_额外_清空)
+        CALL K36_SHIKIEIKI_SAY_IMAGE(@"「走啦走啦，待会下雨可就麻烦了！」")
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"%ANAME(四季_ID)%拉着%ANAME(MASTER)%回到了据点",1)
+        CALL K36_SHIKIEIKI_SAY_IMAGE(@"「谢谢你，%ANAME(MASTER)%，今天玩的很开心呢！」")
+        CALL K36_ADD_四季好感度
+        RETURN
+    ELSE
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"发泄着突如其来的性欲",1)
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"压住%ANAME(四季_ID)%")
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"%ANAME(四季_ID)%全然没有注意到%ANAME(MASTER)%已经不对劲了")
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"「%ANAME(四季_ID)%……我……」",1)
+        CALL SET_SHIKIEIKI_FACE(四季_衣服_衬衫,四季_感情_担忧,四季_额外_清空)
+        CALL KOJO_36_IMAGE
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"%ANAME(四季_ID)%疑惑地回过头来，看见的却是一张发狂的脸")
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"「我已经……克制不了了……对不起……」",1)
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"说罢，%ANAME(MASTER)%猛的把%ANAME(四季_ID)%压在了山间的土地上")
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"身边的落叶被激地飞扬了起来")
+        CALL SET_SHIKIEIKI_FACE(四季_衣服_衬衫,四季_感情_生气,四季_额外_清空)
+        CALL K36_SHIKIEIKI_SAY_IMAGE(@"「呀！%K36_CALL_MASTER()%！不要这么突然啊！」")
+        CALL SET_SHIKIEIKI_FACE(四季_衣服_衬衫,四季_感情_担忧,四季_额外_清空)
+        CALL K36_SHIKIEIKI_SAY_IMAGE(@"「想做的话，回去做吧？」")
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"已经被肉欲淹没的%ANAME(MASTER)%没能听见%ANAME(四季_ID)%的请求")
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"完全忽略了前戏，就这样粗暴的脱起了%ANAME(四季_ID)%的衣服",1)
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"%ANAME(四季_ID)%有些生气地抵抗着")
+        CALL SET_SHIKIEIKI_FACE(四季_衣服_衬衫,四季_感情_生气,四季_额外_清空)
+        CALL K36_SHIKIEIKI_SAY_IMAGE(@"「这样不讲理是不行的！我真的生气了呢！」")
+        IF ABL:MASTER:武闘 > ABL:四季_ID:武闘
+            CALL K36_NORMAL_SENTENCE_IMAGE(@"但是本就弱于%ANAME(MASTER)%的%ANAME(四季_ID)%完全被压制住了")
+        ELSE
+            CALL K36_NORMAL_SENTENCE_IMAGE(@"虽然%ANAME(MASTER)%弱于%ANAME(四季_ID)%，但是在肉欲的指使下爆发出了前所未有的力量")
+            CALL K36_NORMAL_SENTENCE_IMAGE(@"%ANAME(四季_ID)%也因为不想伤到%ANAME(MASTER)%而没有动粗")
+        ENDIF
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"抵抗只是徒劳，%ANAME(四季_ID)%眼睁睁地看着自己的衣服被撕成了碎片")
+        CALL SET_SHIKIEIKI_FACE(四季_衣服_裸体,四季_感情_接吻,四季_额外_清空)
+        CALL K36_SHIKIEIKI_SAY_IMAGE(@"「你到底怎么了啊……唔！……唔！」")
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"%ANAME(MASTER)%粗暴的堵住了%ANAME(四季_ID)%的嘴")
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"然后更粗暴的分开了%ANAME(四季_ID)%拼命合拢的腿",1)
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"就像使用飞机杯一样，对着完全没有湿润腔道狠狠地刺了进去")
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"自顾自地动了起来，每次撞击都会顶到最深处",1)
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"%ANAME(四季_ID)%逐渐意识到了%ANAME(MASTER)%的不对劲",1)
+        CALL SET_SHIKIEIKI_FACE(四季_衣服_裸体,四季_感情_接吻,四季_额外_清空,四季_额外_吐气)
+        CALL K36_SHIKIEIKI_SAY_IMAGE(@"（是因为刚刚的味道吗……不要再……顶了……）")
+        CALL K36_SHIKIEIKI_SAY_IMAGE(@"（如果是因为别的原因……得让%ANAME(MASTER)%发泄出来才行吧……唔！！！）")
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"不满于身下的雌性的分神，%ANAME(MASTER)%重重地撞击着花心来提醒%ANAME(四季_ID)%")
+        CALL SET_SHIKIEIKI_FACE(四季_衣服_裸体,四季_感情_发情,四季_额外_清空,四季_额外_吐气)
+        CALL K36_SHIKIEIKI_SAY_IMAGE(@"「啊！！！不要！……唔！！！」")
+        CALL K36_SHIKIEIKI_SAY_IMAGE(@"（再这样……要坏了……要坏掉了！）")
+        CALL K36_SHIKIEIKI_SAY_IMAGE(@"（反抗不了的话……不如放弃呢……呀！……嗯……！）")
+        CALL SET_SHIKIEIKI_FACE(四季_衣服_裸体,四季_感情_发情,四季_额外_维持上次,四季_额外_吐气,四季_额外_爱心)
+        CALL K36_SHIKIEIKI_SAY_IMAGE(@"（如果一直发泄不完的话……岂不是要被侵犯到……嗯♥！）")
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"心里选择了放弃抵抗的%ANAME(四季_ID)%开始迎合起%ANAME(MASTER)%")
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"但是已经被压住许久的%ANAME(四季_ID)%完全跟不上%ANAME(MASTER)%的节奏")
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"很快就又在%ANAME(MASTER)%粗暴的进攻下变回了『飞机杯』")
+        CALL K36_SHIKIEIKI_SAY_IMAGE(@"「唔♥……嗯♥……♥」")
+        CALL K36_SHIKIEIKI_SAY_IMAGE(@"（不行了♥……要飞走了♥）")
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"%ANAME(四季_ID)%的意识逐渐消散于狂暴的性爱之中",1)
+        CALL K36_一段时间后_IMAGE
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"迷迷糊糊地%ANAME(MASTER)%醒了过来，已经是黄昏了",1)
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"察觉到身下的气息，匆忙抬起身来")
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"已经被侵犯到坏掉的%ANAME(四季_ID)%在%ANAME(MASTER)%下面无力地喘息着",1)
+        CALL SET_SHIKIEIKI_FACE(四季_衣服_裸体,四季_感情_流泪,四季_额外_清空)
+        CALL K36_SHIKIEIKI_SAY_IMAGE(@"「……哈……」")
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"「%K36_CALL_映姬()%！你没事情吧！」",1)
+        CALL SET_SHIKIEIKI_FACE(四季_衣服_裸体,四季_感情_生气,四季_额外_清空)
+        CALL K36_SHIKIEIKI_SAY_IMAGE(@"「变态！混蛋！唔……怎么可以……这样！」")
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"%ANAME(四季_ID)%辗转着寻找自己的衣服，却发现只剩下了一地的碎片")
+        CALL K36_SHIKIEIKI_SAY_IMAGE(@"「……连衣服也！！！呜……」")
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"勉强想站起来的%ANAME(四季_ID)%因为浑身脱力再次倒了下去")
+        CALL K36_SHIKIEIKI_SAY_IMAGE(@"「嘶……」")
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"%ANAME(MASTER)%赶忙把她抱进怀里，用自己的大衣遮住了%ANAME(四季_ID)%那尚在颤抖的躯体")
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"%ANAME(四季_ID)%靠在%ANAME(MASTER)%的身上，把头埋在%ANAME(MASTER)%的肩上轻轻咬着")
+        CALL SET_SHIKIEIKI_FACE(四季_衣服_裸体,四季_感情_睡着,四季_额外_清空,四季_额外_睡着)
+        CALL K36_SHIKIEIKI_SAY_IMAGE(@"「真是的……哈……ZZZ」")
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"明明是在抱怨的%ANAME(四季_ID)%却又在%ANAME(MASTER)%的怀中睡着了")
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"「真的非常抱歉！！！……我现在带你回去……」",1)
+        CALL K36_NORMAL_SENTENCE_IMAGE(@"%ANAME(MASTER)%就这样用衣服裹着%ANAME(四季_ID)%返回了据点……")
+        CALL K36_ADD_四季敏感度
+        CALL K36_FUCK(10)
+    ENDIF

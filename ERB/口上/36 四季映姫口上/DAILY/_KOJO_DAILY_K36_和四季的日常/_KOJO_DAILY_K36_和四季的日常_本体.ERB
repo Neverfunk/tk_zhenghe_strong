@@ -1,0 +1,90 @@
+;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K36_NEVERMIND_RATE(対象)
+#DIM 対象
+RETURN GET_DIFFICULTY_CORRECTION()*2
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+;---------------------
+;---------------------
+@KOJO_DAILY_K36_NEVERMIND_DECISION(対象)
+    #DIM 対象
+    CALL K36_SET_ID
+    CALL K36_RESET_VAR
+    SIF INRANGE(KDVAR:四季_ID:四季映姫_阴影之下_进度,1,3) || !IS_LOVER(四季_ID)
+        RETURN 0
+    SIF IS_SLAVE(小町_ID) || IS_SLAVED_BY(小町_ID)
+        RETURN 0
+    RETURN CHECK_KOJO_DAILY_HAPPEN(四季_ID, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K36_NEVERMIND_GENRE(対象)
+    #DIM 対象
+    RETURN デイリー_ジャンル_エロ
+
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K36_NEVERMIND(対象)
+    #DIM 対象
+    CALL K36_RESET_VAR
+    CALL K36_SET_ID
+    CALL RESET_SHIKIEIKI_FACE
+    CALL RESET_ONOZUKA_FACE
+    CALL EMPTYLINES_FOR_FACE
+    ;---------口上开始---------
+    [IF_DEBUG]
+        ; CALL K36_RESCUE_SHIKIEIKI
+        ; CALL K36_RESCUE_ONOZUKA
+        ; CALL K36_PERSUADE
+        ; CALL K36_PERSUADE_ENTER
+        ; CALL K36_RESCUE_PARTNER
+        ; CALL K36_NEVERMIND_EVENT_1
+        ; CALL K36_NEVERMIND_EVENT_2
+        ; CALL K36_NEVERMIND_EVENT_3
+        ; CALL K36_NEVERMIND_EVENT_4
+        ; CALL K36_NEVERMIND_EVENT_5
+        ; CALL K36_NEVERMIND_EVENT_6
+        ; CALL K36_NEVERMIND_EVENT_7
+        ; CALL K36_NEVERMIND_EVENT_8
+        ; CALL K36_NEVERMIND_EVENT_101
+        ; CALL K36_NEVERMIND_EVENT_102
+        ; CALL K36_NEVERMIND_EVENT_103
+        ; CALL K36_SP_ENEVT_1
+        ; CALL K36_SP_ENEVT_2
+        ; CALL K36_SP_ENEVT_3
+        ; CALL K36_SP_ENEVT_4
+        ; CALL K36_SP_ENEVT_5
+        ; CALL K36_SP_ENEVT_6
+        ; CALL K36_SP_ENEVT_7
+        ; CALL K36_SP_ENEVT_17
+        ; CALL K36_SP_ENEVT_18
+        ; CALL K36_SP_ENEVT_19
+        GOTO KOJO_36_END
+    [ENDIF]
+    CALL EMPTYLINES_FOR_FACE
+    ;紧急援救（如果是四季/小町被捕则必须进行）
+    CALL K36_EMERGENCY_RESCUE
+    SIF RESULT
+        GOTO KOJO_36_END
+    ;SP事件
+    CALL K36_SP_MAIN
+    SIF RESULT
+        GOTO KOJO_36_END
+    ;事件本体
+    CALL K36_NEVERMIND_MAIN
+    $KOJO_36_END
+    CBGCLEAR
+    RETURN 1

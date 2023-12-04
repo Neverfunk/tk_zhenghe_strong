@@ -1,0 +1,107 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_35_PERSONAL_3_EXIST
+    RETURN 1
+
+@SKILL_35_PERSONAL_3_NAME
+    RESULTS = 想要逃离的说教
+
+;レベルは1-5まで
+@SKILL_35_PERSONAL_3_LEVEL
+    RETURN 5
+
+;対象選択
+@SKILL_35_PERSONAL_3_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+    #DIM 発動者
+    #DIM 発動番号
+    #DIM スキル
+    #DIMS ジャンル
+    #DIM 発動側
+    #DIM 発動勢力
+    #DIM 発動部隊
+    #DIM 対象側
+    #DIM 対象勢力
+    #DIM 対象部隊
+    対象側 = !発動側
+    ;部隊対象
+    RETURN 1
+
+;発動判定
+@SKILL_35_PERSONAL_3_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+    #DIM 発動者
+    #DIM 発動番号
+    #DIM スキル
+    #DIMS ジャンル
+    #DIM 発動側
+    #DIM 発動勢力
+    #DIM 発動部隊
+    #DIM 対象側
+    #DIM 対象勢力
+    #DIM 対象部隊
+    対象側 = !発動側
+    RETURN 1
+
+;効果をここに記述
+@SKILL_35_PERSONAL_3_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+    #DIM 発動者
+    #DIM 発動番号
+    #DIM スキル
+    #DIMS ジャンル
+    #DIM 発動側
+    #DIM 発動勢力
+    #DIM 発動部隊
+    #DIM 対象側
+    #DIM 対象勢力
+    #DIM 対象部隊
+    #DIM 四季映姬在队伍中
+    対象側 = !発動側
+    IF GET_SHIKIEIKI_IN_COMMANDER(発動側)
+        PRINTFORML 在四季映姬的说教下，小町打起了精神
+    ELSE
+        PRINTFORML 回想起了四季映姬的说教（以及不听的后果），小町勉强打起了精神
+    ENDIF
+    BATTLE_SKILL_RATE:発動側:発動番号 += 50
+
+
+
+@SKILL_35_PERSONAL_3_EXPLANATION
+    RESULTS = 提升小町的技能发动率，如果四季映姬也在队伍中则必定触发
+
+;以下の三つ、スキル習得で購入させないための処理
+@SKILL_35_PERSONAL_3_NO_LEARN_INIT
+@SKILL_35_PERSONAL_3_CANT_LEARN_FROM_SHOP
+@SKILL_35_PERSONAL_3_CANT_TELL
+
+; 発動率が変動する場合に必要な処理
+@SKILL_35_PERSONAL_3_IS_RATE_VARIABLE
+    RETURN 1
+
+@SKILL_35_PERSONAL_3_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+    #DIM 発動者
+    #DIM 発動番号
+    #DIM スキル
+    #DIMS ジャンル
+    #DIM 発動側
+    #DIM 発動勢力
+    #DIM 発動部隊
+    #DIM 対象側
+    #DIM 対象勢力
+    #DIM 対象部隊
+    IF GET_SHIKIEIKI_IN_COMMANDER(発動側)
+        RETURN 1000
+    ELSE
+        RETURN 200
+    ENDIF
+
+
+
+@GET_SHIKIEIKI_IN_COMMANDER(発動側)
+    #FUNCTION
+    #DIM 発動側
+    FOR LOCAL,0,BATTLE_COMMANDER_NUM:発動側
+        IF BATTLE_COMMANDER:発動側:LOCAL == NAME_TO_CHARA("四季映姫")
+            RETURNF 1
+        ENDIF
+    NEXT
+    RETURNF 0

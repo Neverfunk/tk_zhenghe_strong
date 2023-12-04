@@ -1,0 +1,139 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_36_PERSONAL_2_EXIST
+    RETURN 1
+
+@SKILL_36_PERSONAL_2_NAME
+    RESULTS = 各司其职
+
+;レベルは1-5まで
+@SKILL_36_PERSONAL_2_LEVEL
+    RETURN 5
+
+;対象選択
+@SKILL_36_PERSONAL_2_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+    #DIM 発動者
+    #DIM 発動番号
+    #DIM スキル
+    #DIMS ジャンル
+    #DIM 発動側
+    #DIM 発動勢力
+    #DIM 発動部隊
+    #DIM 対象側
+    #DIM 対象勢力
+    #DIM 対象部隊
+    対象側 = !発動側
+    ;部隊対象
+    RETURN 1
+
+;発動判定
+@SKILL_36_PERSONAL_2_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+    #DIM 発動者
+    #DIM 発動番号
+    #DIM スキル
+    #DIMS ジャンル
+    #DIM 発動側
+    #DIM 発動勢力
+    #DIM 発動部隊
+    #DIM 対象側
+    #DIM 対象勢力
+    #DIM 対象部隊
+    対象側 = !発動側
+    RETURN 1
+
+;効果をここに記述
+@SKILL_36_PERSONAL_2_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+    #DIM 発動者
+    #DIM 発動番号
+    #DIM スキル
+    #DIMS ジャンル
+    #DIM 発動側
+    #DIM 発動勢力
+    #DIM 発動部隊
+    #DIM 対象側
+    #DIM 対象勢力
+    #DIM 対象部隊
+;------------------------------------------------------------------------------------
+    #DIMS CONST ABL_NAME = "武闘","防衛","知略","政治","妖術","歌唱","料理"
+    #DIM DYNAMIC ABL_POWERED,7
+    #DIM DYNAMIC ABL_POWERED_NUM
+    対象側 = !発動側
+    FOR LOCAL,0,BATTLE_COMMANDER_NUM:発動側
+        IF BATTLE_武闘:発動側:LOCAL >= 70
+            TIMES BATTLE_武闘パワー:発動側:LOCAL,1.05
+            ABL_POWERED_NUM += (ABL_POWERED:0 == 0)
+            ABL_POWERED:0 = 1
+        ENDIF
+        IF BATTLE_防衛:発動側:LOCAL >= 70
+            TIMES BATTLE_防衛パワー:発動側:LOCAL,1.05
+            ABL_POWERED_NUM += (ABL_POWERED:1 == 0)
+            ABL_POWERED:1 = 1
+        ENDIF
+        IF BATTLE_知略:発動側:LOCAL >= 70
+            TIMES BATTLE_知略パワー:発動側:LOCAL,1.05
+            ABL_POWERED_NUM += (ABL_POWERED:2 == 0)
+            ABL_POWERED:2 = 1
+        ENDIF
+        IF BATTLE_政治:発動側:LOCAL >= 70
+            TIMES BATTLE_政治:発動側:LOCAL,1.1
+            ABL_POWERED_NUM += (ABL_POWERED:0 == 0)
+            ABL_POWERED:3 = 1
+        ENDIF
+        IF BATTLE_妖術:発動側:LOCAL >= 70
+            TIMES BATTLE_妖術パワー:発動側:LOCAL,1.05
+            ABL_POWERED_NUM += (ABL_POWERED:4 == 0)
+            ABL_POWERED:4 = 1
+        ENDIF
+        IF BATTLE_歌唱:発動側:LOCAL >= 70
+            TIMES BATTLE_歌唱パワー:発動側:LOCAL,1.05
+            ABL_POWERED_NUM += (ABL_POWERED:5 == 0)
+            ABL_POWERED:5 = 1
+        ENDIF
+        IF BATTLE_料理:発動側:LOCAL >= 70
+            TIMES BATTLE_料理パワー:発動側:LOCAL,1.05
+            ABL_POWERED_NUM += (ABL_POWERED:6 == 0)
+            ABL_POWERED:6 = 1
+        ENDIF
+    NEXT
+    IF ABL_POWERED_NUM == 7 && BATTLE_COMMANDER_NUM:発動側 == 3
+        TIMES BATTLE_ATK:発動側,1.2
+        TIMES BATTLE_DEF:発動側,1.2
+        TIMES BATTLE_INT:発動側,1.2
+        TIMES BATTLE_MAG:発動側,1.2
+    ENDIF
+
+
+
+
+@SKILL_36_PERSONAL_2_EXPLANATION
+    RESULTS = 提升我方将领较强的属性。如果队伍人满且每种属性均得到增强,将会额外提高军队的属性。
+
+;以下の三つ、スキル習得で購入させないための処理
+@SKILL_36_PERSONAL_2_NO_LEARN_INIT
+@SKILL_36_PERSONAL_2_CANT_LEARN_FROM_SHOP
+@SKILL_36_PERSONAL_2_CANT_TELL
+
+; 発動率が変動する場合に必要な処理
+@SKILL_36_PERSONAL_2_IS_RATE_VARIABLE
+    RETURN 1
+
+@SKILL_36_PERSONAL_2_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+    #DIM 発動者
+    #DIM 発動番号
+    #DIM スキル
+    #DIMS ジャンル
+    #DIM 発動側
+    #DIM 発動勢力
+    #DIM 発動部隊
+    #DIM 対象側
+    #DIM 対象勢力
+    #DIM 対象部隊
+    [IF_DEBUG]
+        RETURN 1000
+    [ENDIF]
+    IF BATTLE_COMMANDER_NUM:発動側 == 3
+        RETURN 400
+    ELSE
+        RETURN 150
+    ENDIF

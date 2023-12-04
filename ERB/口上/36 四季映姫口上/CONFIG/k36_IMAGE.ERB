@@ -1,0 +1,130 @@
+@KOJO_36_IMAGE
+	SIF !GET_K36_IMAGE_STATUS()
+		RETURN 0
+	;如果需要更多的角色交互需要把face_show_flag改成函数
+	IF 四季_face_change_flag || 小町_face_show_flag
+		CBGCLEAR
+		;CLIENTWIDTH()-SPRITEWIDTH(LOCALS)
+		CALL PRINT_K36_FACE(四季_衣服_id,四季_感情_id)
+		CALL PRINT_K36_EXTRA(四季_额外_bit)
+		四季_face_show_flag = 1
+		小町_face_show_flag = 0
+	ENDIF
+	四季_face_change_flag = 0
+	RETURN 1
+
+@PRINT_K36_FACE(cloth_id,mood_id)
+	#DIM cloth_id
+	#DIM mood_id
+	LOCALS = %GetImage_k36_face(cloth_id,mood_id)%
+	CBGSETSPRITE LOCALS,0,0,-1
+	RETURN
+
+@PRINT_K36_EXTRA(extra_bit)
+	#DIM extra_bit
+	FOR LOCAL,0,四季_额外_上限,1
+		LOCAL:1 = LOCAL
+		IF GETBIT(extra_bit,LOCAL:1)
+			LOCALS = %GetImage_k36_sp(LOCAL:1)%
+			CBGSETSPRITE LOCALS,0,0,-2*(LOCAL:1)
+		ENDIF
+	NEXT
+	RETURN
+
+@GetImage_k36_face(cloth_id,mood_id)
+	#FUNCTIONS
+	#DIM cloth_id
+	#DIM mood_id
+	#DIMS IMAGE_NAME
+	IMAGE_NAME '= "shikieiki_"
+	SELECTCASE cloth_id
+		CASE 四季_衣服_常服
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"常服_"
+		CASE 四季_衣服_裸体
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"裸体_"
+		CASE 四季_衣服_衬衫
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"衬衫_"
+		CASE 四季_衣服_睡衣
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"睡衣_"
+		CASEELSE
+			THROW 四季口上报错：图象衣服参数cloth_id:{cloth_id}错误！
+	ENDSELECT
+
+	SELECTCASE mood_id
+		CASE 四季_感情_普通
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"普通"
+		CASE 四季_感情_开心
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"开心"
+		CASE 四季_感情_生气
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"生气"
+		CASE 四季_感情_担忧
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"担忧"
+		CASE 四季_感情_震惊
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"震惊"
+		CASE 四季_感情_爱意
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"爱意"
+		CASE 四季_感情_发情
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"发情"
+		CASE 四季_感情_接吻
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"接吻"
+		CASE 四季_感情_哭泣
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"哭泣"
+		CASE 四季_感情_流泪
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"流泪"
+		CASE 四季_感情_睡着
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"睡着"
+		CASE 四季_感情_戏谑
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"戏谑"
+		CASE 四季_感情_期待
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"期待"
+		CASEELSE
+			THROW 四季口上报错：图象感情参数mood_id:{mood_id}错误！
+	ENDSELECT
+	IF SPRITECREATED(IMAGE_NAME)
+		RETURNF IMAGE_NAME
+	ENDIF
+
+
+
+@GetImage_k36_sp(extra_id)
+	#FUNCTIONS
+	#DIM extra_id
+	#DIMS IMAGE_NAME
+	IMAGE_NAME '= "shikieiki_extra_"
+	SELECTCASE extra_id
+		CASE 四季_额外_无表情
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"无表情"
+		CASE 四季_额外_生气
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"生气"
+		CASE 四季_额外_爱心
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"爱心"
+		CASE 四季_额外_睡着
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"睡着"
+		CASE 四季_额外_吐气
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"吐气"
+		CASE 四季_额外_母乳
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"母乳"
+		CASE 四季_额外_汗滴
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"汗滴"
+		CASE 四季_额外_害羞重
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"害羞重"
+		CASE 四季_额外_精液上
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"精液上"
+		CASE 四季_额外_精液下
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"精液下"
+		CASE 四季_额外_精液手
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"精液手"
+		CASE 四季_额外_痛哭
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"痛哭"
+		CASE 四季_额外_期待
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"期待"
+		CASE 四季_额外_害羞
+			IMAGE_NAME '= @"%IMAGE_NAME%" +"害羞"
+		CASE 四季_额外_清空
+			RETURNF ""
+		CASEELSE
+			THROW 四季口上报错：图象额外参数extra_id:{extra_id}错误！
+	ENDSELECT
+	IF SPRITECREATED(IMAGE_NAME)
+		RETURNF IMAGE_NAME
+	ENDIF

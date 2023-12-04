@@ -1,0 +1,110 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_36_PERSONAL_3_EXIST
+    RETURN 1
+
+@SKILL_36_PERSONAL_3_NAME
+    RESULTS = 人欲胜天
+
+;レベルは1-5まで
+@SKILL_36_PERSONAL_3_LEVEL
+    RETURN 5
+
+;対象選択
+@SKILL_36_PERSONAL_3_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+    #DIM 発動者
+    #DIM 発動番号
+    #DIM スキル
+    #DIMS ジャンル
+    #DIM 発動側
+    #DIM 発動勢力
+    #DIM 発動部隊
+    #DIM 対象側
+    #DIM 対象勢力
+    #DIM 対象部隊
+    対象側 = !発動側
+    ;部隊対象
+    RETURN 1
+
+;発動判定
+@SKILL_36_PERSONAL_3_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+    #DIM 発動者
+    #DIM 発動番号
+    #DIM スキル
+    #DIMS ジャンル
+    #DIM 発動側
+    #DIM 発動勢力
+    #DIM 発動部隊
+    #DIM 対象側
+    #DIM 対象勢力
+    #DIM 対象部隊
+    対象側 = !発動側
+    RETURN 1
+
+;効果をここに記述
+@SKILL_36_PERSONAL_3_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+    #DIM 発動者
+    #DIM 発動番号
+    #DIM スキル
+    #DIMS ジャンル
+    #DIM 発動側
+    #DIM 発動勢力
+    #DIM 発動部隊
+    #DIM 対象側
+    #DIM 対象勢力
+    #DIM 対象部隊
+    #DIM CHARA_ID
+    対象側 = !発動側
+    SIF 対象部隊<0
+        対象勢力 = CITY_OWNER:対象勢力
+    FOR LOCAL,0,BATTLE_COMMANDER_NUM:対象側
+        CHARA_ID = BATTLE_COMMANDER:対象側:LOCAL
+        SIF CHARA_ID < 0
+            CONTINUE
+        IF IS_COUNTRY(対象勢力) && IS_SP_COUNTRY(対象勢力)
+            IF (GET_RATE(50+ABL:CHARA_ID:欲望*5) || GET_RATE(10))
+                CALL BATTLE_KNOCKOUT(対象側,LOCAL)
+            ELSE
+            ENDIF
+        ELSE
+            IF (ABL:CHARA_ID:欲望 >= 5 && GET_RATE(50))
+                CALL BATTLE_KNOCKOUT(対象側,LOCAL)
+            ELSE
+            ENDIF
+        ENDIF
+
+    NEXT
+
+
+
+@SKILL_36_PERSONAL_3_EXPLANATION
+    RESULTS = 根据敌方将领欲望将其移出战斗，对特殊势力有额外的加成
+
+;以下の三つ、スキル習得で購入させないための処理
+@SKILL_36_PERSONAL_3_NO_LEARN_INIT
+@SKILL_36_PERSONAL_3_CANT_LEARN_FROM_SHOP
+@SKILL_36_PERSONAL_3_CANT_TELL
+
+; 発動率が変動する場合に必要な処理
+@SKILL_36_PERSONAL_3_IS_RATE_VARIABLE
+    RETURN 1
+
+@SKILL_36_PERSONAL_3_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+    #DIM 発動者
+    #DIM 発動番号
+    #DIM スキル
+    #DIMS ジャンル
+    #DIM 発動側
+    #DIM 発動勢力
+    #DIM 発動部隊
+    #DIM 対象側
+    #DIM 対象勢力
+    #DIM 対象部隊
+    SIF 対象部隊<0
+        対象勢力 = CITY_OWNER:対象勢力
+    IF IS_COUNTRY(対象勢力) && IS_SP_COUNTRY(対象勢力)
+        RETURN 500
+    ELSE
+        RETURN 100
+    ENDIF

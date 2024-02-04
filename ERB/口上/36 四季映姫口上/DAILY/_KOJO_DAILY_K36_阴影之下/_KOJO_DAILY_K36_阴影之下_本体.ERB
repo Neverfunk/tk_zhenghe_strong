@@ -85,60 +85,15 @@ RETURN GET_DIFFICULTY_CORRECTION()*3 + MAX(0,DAY-3)*250
         ; CALL 四季映姫_阴影之下_初夜_5
         ; GOTO KOJO_36_END
     [ENDIF]
-    IF KDVAR:四季_ID:四季映姫_阴影之下_进度 == 0
-        CALL 四季映姫_阴影之下_初见
-        GOTO KOJO_36_END
-    ELSEIF KDVAR:四季_ID:四季映姫_阴影之下_进度 == 1
-        IF K36_阴影之下_子进度 == 0
-            CALL 四季映姫_阴影之下_工作_1
-        ELSEIF K36_阴影之下_子进度 == 1
-            CALL 四季映姫_阴影之下_工作_2
-        ELSEIF K36_阴影之下_子进度 == 2
-            CALL 四季映姫_阴影之下_工作_3
-        ENDIF
-        GOTO KOJO_36_END
-    ELSEIF KDVAR:四季_ID:四季映姫_阴影之下_进度 == 2
-        IF K36_阴影之下_子进度 == 0
-            CALL 四季映姫_阴影之下_共眠_1
-        ELSEIF K36_阴影之下_子进度 == 1
-            CALL 四季映姫_阴影之下_共眠_2
-        ELSEIF K36_阴影之下_子进度 == 2
-            CALL 四季映姫_阴影之下_共眠_3
-        ENDIF
-        GOTO KOJO_36_END
-    ELSEIF KDVAR:四季_ID:四季映姫_阴影之下_进度 == 3
-        CALL 四季映姫_阴影之下_初夜
-        GOTO KOJO_36_END
-    ENDIF
+	IF K36_1_PHASE == ""
+		CALL MRU_event_set_next_phase("K36_1",K36_1_PHASE,"初见")
+	ENDIF
+	CALL MRU_event_procedure("K36_1",K36_1_PHASE)
+    CBGCLEAR
+	RETURN 1
 
-RETURN 0
-$KOJO_36_END
-CALL KOJO_DAILY_K36_TO_FUTURE_CHANGE_FLAG
-CBGCLEAR
-RETURN 1
-
-@KOJO_DAILY_K36_TO_FUTURE_CHANGE_FLAG
-    IF KDVAR:四季_ID:四季映姫_阴影之下_进度 == 0
-        KDVAR:四季_ID:四季映姫_阴影之下_进度 = 1
-        K36_阴影之下_子进度 = 0
-    ELSEIF KDVAR:四季_ID:四季映姫_阴影之下_进度 == 1
-        IF K36_阴影之下_子进度 == 0
-            K36_阴影之下_子进度 = 1
-        ELSEIF K36_阴影之下_子进度 == 1
-            K36_阴影之下_子进度 = 2
-        ELSEIF K36_阴影之下_子进度 == 2
-            K36_阴影之下_子进度 = 0
-            KDVAR:四季_ID:四季映姫_阴影之下_进度 = 2
-        ENDIF
-    ELSEIF KDVAR:四季_ID:四季映姫_阴影之下_进度 == 2
-        IF K36_阴影之下_子进度 == 0
-            K36_阴影之下_子进度 = 1
-        ELSEIF K36_阴影之下_子进度 == 1
-            K36_阴影之下_子进度 = 2
-        ELSEIF K36_阴影之下_子进度 == 2
-            KDVAR:四季_ID:四季映姫_阴影之下_进度 = 3
-            K36_阴影之下_子进度 = 0
-        ENDIF
-    ELSEIF KDVAR:四季_ID:四季映姫_阴影之下_进度 == 3
-        KDVAR:四季_ID:四季映姫_阴影之下_进度 = 4
-    ENDIF
+@K36_1_STOP1_CHECK
+    RETURN 0
+    
+@K36_1_STOP2_CHECK
+    RETURN 0

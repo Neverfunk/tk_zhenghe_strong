@@ -1,4 +1,4 @@
-诅咒子,魔天使,瑞灵
+影华扇,诅咒子,魔天使,瑞灵
 kaoru
 https://www.pixiv.net/users/743845
 http://gensoukyou.1000.tv/

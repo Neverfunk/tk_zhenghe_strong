@@ -1,138 +1,138 @@
-﻿;ENG_NAME = MEET_WHITE_LAP
-;---------------------
-;基本的な発生確率(1000分率 100で10%)
-;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
-;---------------------
-@EVENT_DAILY_MEET_WHITE_LAP_RATE()
-    RETURN 50 + GET_CONCUBINE_NUM()*5
+﻿; ;ENG_NAME = MEET_WHITE_LAP
+; ;---------------------
+; ;基本的な発生確率(1000分率 100で10%)
+; ;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+; ;---------------------
+; @EVENT_DAILY_MEET_WHITE_LAP_RATE()
+;     RETURN 50 + GET_CONCUBINE_NUM()*5
 
-;---------------------
-;確率以外の発生判定
-;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
-;---------------------
-@EVENT_DAILY_MEET_WHITE_LAP_DECISION()
-    SIF DAY < 30
-        RETURN 0
-    SIF !IS_MALE(MASTER)
-        RETURN 0
-    SIF GET_WIFE_ID() <=0
-        RETURN 0
-    RETURN 1
+; ;---------------------
+; ;確率以外の発生判定
+; ;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+; ;---------------------
+; @EVENT_DAILY_MEET_WHITE_LAP_DECISION()
+;     SIF DAY < 30
+;         RETURN 0
+;     SIF !IS_MALE(MASTER)
+;         RETURN 0
+;     SIF GET_WIFE_ID() <=0
+;         RETURN 0
+;     RETURN 1
 
-@GET_CONCUBINE_NUM
-    #FUNCTION
-    #DIM DYNAMIC CONCUBINE_NUM
-    FOR LOCAL,0,CHARANUM
-        SIF TALENT:LOCAL:妾
-            CONCUBINE_NUM++
-    NEXT
-    RETURNF CONCUBINE_NUM
-;---------------------
-;ジャンル
-;コンフィグ設定で使用
-;---------------------
-@EVENT_DAILY_MEET_WHITE_LAP_GENRE()
-    RETURN デイリー_ジャンル_エロ
+; @GET_CONCUBINE_NUM
+;     #FUNCTION
+;     #DIM DYNAMIC CONCUBINE_NUM
+;     FOR LOCAL,0,CHARANUM
+;         SIF TALENT:LOCAL:妾
+;             CONCUBINE_NUM++
+;     NEXT
+;     RETURNF CONCUBINE_NUM
+; ;---------------------
+; ;ジャンル
+; ;コンフィグ設定で使用
+; ;---------------------
+; @EVENT_DAILY_MEET_WHITE_LAP_GENRE()
+;     RETURN デイリー_ジャンル_エロ
 
-;---------------------
-;本体
-;イベントが発生した場合は1、発生しなかった場合は0を返す
-;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
-;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
-;---------------------
-@EVENT_DAILY_MEET_WHITE_LAP()
-    PRINTFORML 这天，%ANAME(MASTER)%梦到了在人里的街道上闲逛
-    PRINTFORMW 这时候，遇到了一位看起来很奇怪的女人
-    PRINTFORML 她的外貌倒是没什么出众之处，甚至可言一句土气
-    PRINTFORMW 引人注目的地方是她披着一身尚且带着血腥气和泥土的狼皮
-    PRINTFORML 穿皮草的人类不奇怪，白狼妖怪也不算奇怪
-    PRINTFORMW 但傻子都能看得清楚，那分明是从一头活着的狼身上生生剥下的完整狼皮
-    PRINTFORML 正当%ANAME(MASTER)%感到恐惧并且准备开始逃的时候
-    PRINTFORMW 那个女人飞速向%ANAME(MASTER)%的面前突进了过来。
-    PRINTFORML 「嘛,不要逃跑，可以吗？咱家名唤拉普，不是什么杰克或者弗莱迪，你没必要逃开哦。」
-    PRINTFORMW 「我只是想知道，你真的有思考过她们的心情吗？」
-    PRINTFORML %ANAME(MASTER)%对她这没头没尾的话感到困惑
-    PRINTFORMW 但因为%ANAME(MASTER)%的困惑，拉普的脸色倒是开始坏起来了。
-    PRINTFORML 「所以你真的不明白我在问什么吗？你这个贪心的家伙。
-    SETCOLOR カラー_警告
-    PRINTFORMW 「我 在 问 的 是 你 想 没 想 过 那 些 被 你 求 婚 的 女 孩 子 的 心 情！」
-    RESETCOLOR
-    CALL ASK_MULTI("大家都是我的翅膀","想过，真的爱过")
-    IF RESULT == 0
-        CALL JUDGE_LOYAL()
-        IF RESULT
-            PRINTFORML 「对着电子数据这样用心，该说是真诚呢还该说是蠢呢？」
-            PRINTFORMW 拉普轻叹一声
-            PRINTFORML 尽管说着责备的话语，拉普周围的杀气却慢慢稀释
-            PRINTFORMW 「也许这也是真爱的一种吧，背叛了她我可不会饶你。」
-            PRINTFORML %ANAME(MASTER)%眼前闪过一阵狂风，拉普已经不知道去哪儿了
-            PRINTFORMW 只留下了一些散发着血腥和魔药气味的金币
-            MONEY+=99999
-        ELSE
-            PRINTFORMW %ANAME(MASTER)%还想继续说些类似「大家都是我的翅膀」的辩解之词
-            PRINTFORML 但拉普想听的不是这些
-            PRINTFORMW 拉普只想听到面前这罪恶深重的男人为他那欺骗了幻想乡的大家的恋爱之心的大罪忏悔
-            PRINTFORML 「所以你的遗言就是这些空话了吗？还真是恶心呢！」
-            PRINTFORMW 「因为在外界没有办法做到被这么多女孩子喜欢所以跑到幻想乡做后宫梦了吗？」
-            PRINTFORML 作为一个给上司当狗的士阶级，拉普并不是什么好人，但也能分得清人渣和恶党
-            PRINTFORML 这个男人恶心的地方在于他甚至不觉得幻想乡是真实的，
-            PRINTFORML 所以他随意摧残任何在他看来是数据的女孩子的时候毫无心理负担
-            PRINTFORMW 如果是在隔壁的话他已经被博丽巫女三牌扔出去了。但这里没有这种规定，所以拉普只能自己动手了
-            PRINTFORML 「可以给我一个赎罪的机会吗？我保证以后不再做这些事......」
-            PRINTFORML %ANAME(MASTER)%卑微乞求着，但拉普知道
-            PRINTFORML 这家伙暗地里一定在找机会以不亚于那位写花边新闻的鸦天狗崽子平日被追杀的速度一样开始跑路
-            PRINTFORMW 与其在这听他说假话，不如好好折磨他，省得博丽巫女跑到自己家里兴师问罪
-            CALL ADD_COOLTIME(MASTER,3)
-            ;FLAG:強制エンドフラグ = 1
-        ENDIF
-    ELSE
-            PRINTFORML 欲盖弥彰，%ANAME(MASTER)%肆意摧残女子身心的恶名在幻想乡无人不知无人不晓
-            PRINTFORMW 连有些有良知的外界人都开始诅咒%ANAME(MASTER)%了
-            PRINTFORML 拉普自然不会被这种苍白的谎言欺骗
-            PRINTFORMW 「四季映姬不审判你，上天也会收你！！」
-            PRINTFORML 那似乎是一句很老的台词
-            PRINTFORMW 梦中的%ANAME(MASTER)%发挥不出能力，迅速被拉普击倒，如同烤鸭一般被挂在处刑架上
-            PRINTFORML 「哼，现在就让你尝尝少女们曾经受过的痛苦吧。」
-            PRINTFORML 白之拉普也许正是少女们怨恨的化身吧
-            PRINTFORMW 曾经被%ANAME(MASTER)%伤害感情过的少女都闪到他眼前
-            PRINTFORML 不知何时拉普手上已经出现了一把斧头砍向%ANAME(MASTER)%，%ANAME(MASTER)%发觉自己的大脑异常的清醒
-            PRINTFORML 斧刃如同暴风般吞噬了%ANAME(MASTER)%
-            PRINTFORMW 「每一斧都是为你量身定制的。」
-            PRINTFORML 刀法精准又狠辣，%ANAME(MASTER)%被砍后还能清晰地感觉到千万倍的少女们的苦痛感情
-            PRINTFORMW %ANAME(MASTER)%就这样被审判至天荒地老
-            CALL ADD_COOLTIME(MASTER,3)
-            ;FLAG:強制エンドフラグ = 1
-    ENDIF
-    RETURN 1
+; ;---------------------
+; ;本体
+; ;イベントが発生した場合は1、発生しなかった場合は0を返す
+; ;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+; ;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+; ;---------------------
+; @EVENT_DAILY_MEET_WHITE_LAP()
+;     PRINTFORML 这天，%ANAME(MASTER)%梦到了在人里的街道上闲逛
+;     PRINTFORMW 这时候，遇到了一位看起来很奇怪的女人
+;     PRINTFORML 她的外貌倒是没什么出众之处，甚至可言一句土气
+;     PRINTFORMW 引人注目的地方是她披着一身尚且带着血腥气和泥土的狼皮
+;     PRINTFORML 穿皮草的人类不奇怪，白狼妖怪也不算奇怪
+;     PRINTFORMW 但傻子都能看得清楚，那分明是从一头活着的狼身上生生剥下的完整狼皮
+;     PRINTFORML 正当%ANAME(MASTER)%感到恐惧并且准备开始逃的时候
+;     PRINTFORMW 那个女人飞速向%ANAME(MASTER)%的面前突进了过来。
+;     PRINTFORML 「嘛,不要逃跑，可以吗？咱家名唤拉普，不是什么杰克或者弗莱迪，你没必要逃开哦。」
+;     PRINTFORMW 「我只是想知道，你真的有思考过她们的心情吗？」
+;     PRINTFORML %ANAME(MASTER)%对她这没头没尾的话感到困惑
+;     PRINTFORMW 但因为%ANAME(MASTER)%的困惑，拉普的脸色倒是开始坏起来了。
+;     PRINTFORML 「所以你真的不明白我在问什么吗？你这个贪心的家伙。
+;     SETCOLOR カラー_警告
+;     PRINTFORMW 「我 在 问 的 是 你 想 没 想 过 那 些 被 你 求 婚 的 女 孩 子 的 心 情！」
+;     RESETCOLOR
+;     CALL ASK_MULTI("大家都是我的翅膀","想过，真的爱过")
+;     IF RESULT == 0
+;         CALL JUDGE_LOYAL()
+;         IF RESULT
+;             PRINTFORML 「对着电子数据这样用心，该说是真诚呢还该说是蠢呢？」
+;             PRINTFORMW 拉普轻叹一声
+;             PRINTFORML 尽管说着责备的话语，拉普周围的杀气却慢慢稀释
+;             PRINTFORMW 「也许这也是真爱的一种吧，背叛了她我可不会饶你。」
+;             PRINTFORML %ANAME(MASTER)%眼前闪过一阵狂风，拉普已经不知道去哪儿了
+;             PRINTFORMW 只留下了一些散发着血腥和魔药气味的金币
+;             MONEY+=99999
+;         ELSE
+;             PRINTFORMW %ANAME(MASTER)%还想继续说些类似「大家都是我的翅膀」的辩解之词
+;             PRINTFORML 但拉普想听的不是这些
+;             PRINTFORMW 拉普只想听到面前这罪恶深重的男人为他那欺骗了幻想乡的大家的恋爱之心的大罪忏悔
+;             PRINTFORML 「所以你的遗言就是这些空话了吗？还真是恶心呢！」
+;             PRINTFORMW 「因为在外界没有办法做到被这么多女孩子喜欢所以跑到幻想乡做后宫梦了吗？」
+;             PRINTFORML 作为一个给上司当狗的士阶级，拉普并不是什么好人，但也能分得清人渣和恶党
+;             PRINTFORML 这个男人恶心的地方在于他甚至不觉得幻想乡是真实的，
+;             PRINTFORML 所以他随意摧残任何在他看来是数据的女孩子的时候毫无心理负担
+;             PRINTFORMW 如果是在隔壁的话他已经被博丽巫女三牌扔出去了。但这里没有这种规定，所以拉普只能自己动手了
+;             PRINTFORML 「可以给我一个赎罪的机会吗？我保证以后不再做这些事......」
+;             PRINTFORML %ANAME(MASTER)%卑微乞求着，但拉普知道
+;             PRINTFORML 这家伙暗地里一定在找机会以不亚于那位写花边新闻的鸦天狗崽子平日被追杀的速度一样开始跑路
+;             PRINTFORMW 与其在这听他说假话，不如好好折磨他，省得博丽巫女跑到自己家里兴师问罪
+;             CALL ADD_COOLTIME(MASTER,3)
+;             ;FLAG:強制エンドフラグ = 1
+;         ENDIF
+;     ELSE
+;             PRINTFORML 欲盖弥彰，%ANAME(MASTER)%肆意摧残女子身心的恶名在幻想乡无人不知无人不晓
+;             PRINTFORMW 连有些有良知的外界人都开始诅咒%ANAME(MASTER)%了
+;             PRINTFORML 拉普自然不会被这种苍白的谎言欺骗
+;             PRINTFORMW 「四季映姬不审判你，上天也会收你！！」
+;             PRINTFORML 那似乎是一句很老的台词
+;             PRINTFORMW 梦中的%ANAME(MASTER)%发挥不出能力，迅速被拉普击倒，如同烤鸭一般被挂在处刑架上
+;             PRINTFORML 「哼，现在就让你尝尝少女们曾经受过的痛苦吧。」
+;             PRINTFORML 白之拉普也许正是少女们怨恨的化身吧
+;             PRINTFORMW 曾经被%ANAME(MASTER)%伤害感情过的少女都闪到他眼前
+;             PRINTFORML 不知何时拉普手上已经出现了一把斧头砍向%ANAME(MASTER)%，%ANAME(MASTER)%发觉自己的大脑异常的清醒
+;             PRINTFORML 斧刃如同暴风般吞噬了%ANAME(MASTER)%
+;             PRINTFORMW 「每一斧都是为你量身定制的。」
+;             PRINTFORML 刀法精准又狠辣，%ANAME(MASTER)%被砍后还能清晰地感觉到千万倍的少女们的苦痛感情
+;             PRINTFORMW %ANAME(MASTER)%就这样被审判至天荒地老
+;             CALL ADD_COOLTIME(MASTER,3)
+;             ;FLAG:強制エンドフラグ = 1
+;     ENDIF
+;     RETURN 1
 
-@JUDGE_LOYAL
-    #DIM DYNAMIC WIFE_ID
-    WIFE_ID = GET_WIFE_ID()
-    SIF WIFE_ID <= 0
-        RETURN 1
-    ;存在妾
-    SIF GET_CONCUBINE_NUM() > 0
-        RETURN 0
-    FOR LOCAL,0,1000
-        SIF TRAINNAME:LOCAL == ""
-            CONTINUE
-        RESULT = 0
-        TRYCALLFORM COM_CATEGORY{LOCAL}
-        ;指令不是加虐系跳过
-        SIF RESULT != 3
-            CONTINUE
-        ;妻子成为过玩家的加虐系指令目标
-        SIF COM_EXP:(WIFE_ID):(LOCAL + 1000) > 0
-            RETURN 0
-    NEXT
-    RETURN 1
+; @JUDGE_LOYAL
+;     #DIM DYNAMIC WIFE_ID
+;     WIFE_ID = GET_WIFE_ID()
+;     SIF WIFE_ID <= 0
+;         RETURN 1
+;     ;存在妾
+;     SIF GET_CONCUBINE_NUM() > 0
+;         RETURN 0
+;     FOR LOCAL,0,1000
+;         SIF TRAINNAME:LOCAL == ""
+;             CONTINUE
+;         RESULT = 0
+;         TRYCALLFORM COM_CATEGORY{LOCAL}
+;         ;指令不是加虐系跳过
+;         SIF RESULT != 3
+;             CONTINUE
+;         ;妻子成为过玩家的加虐系指令目标
+;         SIF COM_EXP:(WIFE_ID):(LOCAL + 1000) > 0
+;             RETURN 0
+;     NEXT
+;     RETURN 1
 
 
-@GET_WIFE_ID
-    #FUNCTION
-    #DIM DYNAMIC CONCUBINE_NUM
-    FOR LOCAL,0,CHARANUM
-        SIF TALENT:LOCAL:正妻
-            RETURNF LOCAL
-    NEXT
-    RETURNF 0
+; @GET_WIFE_ID
+;     #FUNCTION
+;     #DIM DYNAMIC CONCUBINE_NUM
+;     FOR LOCAL,0,CHARANUM
+;         SIF TALENT:LOCAL:正妻
+;             RETURNF LOCAL
+;     NEXT
+;     RETURNF 0

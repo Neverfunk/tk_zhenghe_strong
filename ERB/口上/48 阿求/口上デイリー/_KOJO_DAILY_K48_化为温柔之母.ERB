@@ -1,0 +1,78 @@
+﻿;@HZ=化为温柔之母
+;@ENG=MOTHER_OF_TENTACLE
+;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K48_MOTHER_OF_TENTACLE_RATE(阿求)
+#DIM 阿求
+RETURN 1000
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K48_MOTHER_OF_TENTACLE_DECISION(阿求)
+	#DIM 阿求
+	#DIM 触手
+	触手 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_触手)
+	SIF 触手 == -1
+		RETURN 0
+	SIF CFLAG:阿求:捕虜先 != 触手 && CFLAG:阿求:所属 != 触手
+		RETURN 0
+	SIF ABL:阿求:知略 < 40 || ABL:阿求:政治 < 40
+		RETURN 0
+	SIF K48_LOST_IN_TENTACLE_HAPPEND != 1
+		RETURN 0
+	SIF K48_MOTHER_OF_TENTACLE_HAPPEND
+		RETURN 0
+	RETURN CHECK_KOJO_DAILY_HAPPEN(阿求)
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K48_MOTHER_OF_TENTACLE_GENRE(阿求)
+#DIM 阿求
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K48_MOTHER_OF_TENTACLE(阿求)
+#DIM 阿求
+CALL K48_AKYUU_SAY(@"「嗯……噫……啊……」")
+PRINTFORML %ANAME(阿求)%的下体不断产生渍渍的水声，在%ANAME(阿求)%体内蠕动着的触手让%ANAME(阿求)%体内连连传出快感
+PRINTFORML %ANAME(阿求)%作为苗床的日子里，每天都被不断的注入，产出，那种快感每时每刻都在侵蚀着%ANAME(阿求)%的理智
+CALL K48_AKYUU_SAY(@"「哈……嗯……啊，啊啊♡」")
+PRINTFORML 触手不断的在阴道里摩擦着穴壁，注入白浊，但即使是这样，%ANAME(阿求)%却沉浸在了那种快感中
+PRINTFORML 只要闭上眼睛，就是温柔乡和极乐与幸福的感受，但睁开眼只有异种包裹住自己的身体
+PRINTFORML 渐渐的，似乎也是适应了这种环境
+PRINTFORML %ANAME(阿求)%的内心开始追随快感，这些触手是多么温柔啊，为什么要抵抗了
+CALL K48_AKYUU_SAY(@"「哈……啊……♡」")
+PRINTFORML 在这个想法出现之后，%ANAME(阿求)%的其余想法都被这个念头驱散了
+PRINTFORML 伴随着小触手从穴口蠕动而出，%ANAME(阿求)%的内心已经明白了，这些触手才是自己想要的
+PRINTFORML 有趣的是，这些触手只需要很短的时间便可以产出，作为苗床的躯体也会因此感受到快感
+CALL K48_AKYUU_SAY(@"「都……不重要了♡」")
+PRINTFORML 她紧紧抱住刚出生的小触手，小触手已经饥渴的对着乳头痛饮
+PRINTFORML 明明是刚生产下来的触手却已经如此富有生命力
+PRINTFORML 几日后，那些触手便已经成熟，转而对着%ANAME(阿求)%继续侵犯起来
+CALL K48_AKYUU_SAY(@"「真是的……现在就想要和妈妈生育吗？没问题哦♡」")
+PRINTFORML %ANAME(阿求)%只是用手指掰开穴口，享受着明明是自己所生育下来的，触手的侵犯
+PRINTFORML 面对这样的行为，%ANAME(阿求)%却已经追随快感而毫不犹豫的选择
+PRINTFORML 是母性的驱使吗？是背德感的刺激吗？还是触手体液的作用？
+PRINTFORML 总之，%ANAME(阿求)%在这种生育与交缠之中追随着快感而沦陷
+PRINTFORML 成为了触手忠实的苗床，不断的重复生育与侵犯的循环......
+PRINTFORML 直至彻底沦为触手们中的一员
+CALL K48_HUGE_WAIT()
+ABL:阿求:武闘 = 65
+ABL:阿求:防衛 = 65
+ABL:阿求:妖術 = 80
+RETURN 1
+
+
+@KOJO_DAILY_K48_MOTHER_OF_TENTACLE_ALLOW_WHEN_WANDERING()
+RETURN 0

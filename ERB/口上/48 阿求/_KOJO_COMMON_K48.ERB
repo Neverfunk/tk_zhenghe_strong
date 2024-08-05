@@ -179,6 +179,7 @@ ENDIF
 ;
 ;
 @KOJO_SINGLE_ENDING_K48
+#DIM 阿求
 ;単体结局
 ;统一全都市的场合，好感度达到5000以上，并且在所有角色中好感度最高
     PRINTFORML
@@ -228,15 +229,15 @@ ENDIF
 IF TALENT:TARGET:恋人 && ABL:TARGET:知略 > 80 && ABL:TARGET:政治 > 80 && !TALENT:TARGET:崩壊
     && !TALENT:TARGET:空虚 && GET_COUNTRY_BOSS(CFLAG:MASTER:所属) == MASTER
 }
-    CALL K48_END_1
+    CALL K48_END_1(阿求)
     CALL CHANGE_COUNTRY(TARGET, 0)
     CFLAG:TARGET:特殊状態 = 0
 ELSEIF !(ABL:TARGET:知略 > 75 && ABL:TARGET:政治 > 75 && !TALENT:TARGET:崩壊 && !TALENT:TARGET:空虚)
-    CALL K48_END_2
+    CALL K48_END_2(阿求)
     CALL CHANGE_COUNTRY(TARGET, 0)
     CFLAG:TARGET:特殊状態 = 0
 ELSEIF GET_COUNTRY_BOSS(CFLAG:MASTER:所属) != MASTER
-    CALL K48_END_3
+    CALL K48_END_3(阿求)
     CALL CHANGE_COUNTRY(TARGET, 0)
     CFLAG:TARGET:特殊状態 = 0
 ENDIF
@@ -244,247 +245,203 @@ ENDIF
 ;当RETURN的值由0变为1时，跳过默认的单体结尾消息
 RETURN 1
 
-@K48_END_1
+;@DEBUG_COLLECTION
+@K48_END_1(阿求)
+    #DIM 阿求
     PRINTFORML 幻想乡终于被%ANAME(MASTER)%统一了
     PRINTFORML 整个幻想乡开着盛大的宴会
-    WAIT
     PRINTFORML 人人无不庆祝幻想乡多年来的统一与歌颂%ANAME(MASTER)%的功绩
-    WAIT
-    CALL K48_AKYUU_SAY(@"「太好了呢，您现在可是创造了幻想乡有史以来的第一段完全地大一统的历史呢」")
-    PRINTFORML %ANAME(TARGET)%走过来，小小的身躯撑在了%ANAME(MASTER)%的身上
-    CALL K48_AKYUU_SAY(@"「这可是能记录在《幻想乡缘起》里的哦」")
-    CALL K48_AKYUU_SAY(@"「那么，我能否以第九代御阿礼之子的名义优先向您进行采访呢」")
-    PRINTFORML %ANAME(TARGET)%更加靠近了%ANAME(MASTER)%，暧昧地抱着%ANAME(MASTER)%的腰部
-    WAIT
-    CALL K48_AKYUU_SAY(@"「因为接下来的话都会记录在求闻口授里」")
-    CALL K48_AKYUU_SAY(@"「所以接下来请把握分寸哦」")
-    PRINTFORML 说完%ANAME(TARGET)%开始蹲下来
-    WAIT
-    CALL K48_USELESS_INPUT
-    CALL K48_HUGE_WAIT()
-    PRINTFORML 突然，自己撑着伞，来到了城堡外，还有穿着有关祭祀事情的衣服的人站在旁边
-    PRINTFORML 天似乎下起了雨，滴答滴答地落在自己的伞上
-    WAIT
-    CALL K48_NPC_SAY(@"「恭祝御阿礼大人一路顺风」")
+    PRINTFORML 「太好了呢，您现在可是创造了幻想乡有史以来的第一段完全地大一统的历史呢」
+    PRINTFORML %ANAME(阿求)%走过来，小小的身躯撑在了%ANAME(MASTER)%的身上
+    PRINTFORML 「这可是能记录在《幻想乡缘起》里的哦」
+    PRINTFORML 「那么，我能否以第九代御阿礼之子的名义优先向您进行采访呢」
+    PRINTFORML %ANAME(阿求)%更加靠近了%ANAME(MASTER)%，暧昧地抱着%ANAME(MASTER)%的腰部
+    PRINTFORML 「因为接下来的话都会记录在求闻口授里」
+    PRINTFORML 「所以接下来请把握分寸哦」
+    PRINTFORML 说完%ANAME(阿求)%开始蹲下来
+    PRINTFORML （这里留两个空，什么都没有，但是就是故意让玩家要多点两次才能继续）
+    PRINTFORML 突然，自己撑着伞，来到了城堡外，而眼前的众人穿着的似乎是祭祀所用的服装
+    PRINTFORML 稀疏的雨滴答滴答地打在伞上，愈来愈慢，相识走到了最后一圈发条的钟表声
+    PRINTFORML 「御阿礼大人一路走好」
     PRINTFORML 听到了这样的声音
-    WAIT
-    CALL K48_NPC_SAY(@"「恭祝御阿礼大人一路顺风」")
+    PRINTFORML 「御阿礼大人一路走好」
     PRINTFORML 自己的身边都是这样的声音
-    WAIT
-    CALL K48_NPC_SAY(@"「恭祝御阿礼大人一路顺风」")
+    PRINTFORML 「御阿礼大人一路走好」
     PRINTFORML 脑子里充满了这令人恐惧的声音
-    PRINTFORML %ANAME(MASTER)%不自觉地向前跑去，似乎明白了发生什么不敢面对的事情
-    WAIT
-    PRINTFORML 但是%ANAME(MASTER)%依旧跑了过去，丝毫没有在意周围的人
-    PRINTFORML 周围站着许多的人，围在一个躺在地上的少女身旁
-    WAIT
-    PRINTFORML 那个少女就那么安静地躺着，而远处的死神带着个灵魂飘然离开
+    PRINTFORML 但是%ANAME(MASTER)%依旧跑了过去，丝毫没有在意周围的一切，尽管明白，那件令人恐惧的事情已经发生了
+    PRINTFORML 众人围着的那具躯体显得如此娇小无力
+    PRINTFORML 那个少女就那么安静地躺着，而远处的死神带着个灵魂悄然离开
     PRINTFORML 那位少女的面容突然清晰，那位少女的名字浮现在%ANAME(MASTER)%的脑海
-    WAIT
-    PRINTFORML ————%NAME_FORMAL(TARGET)%
-    CALL K48_USELESS_INPUT
-    CALL K48_HUGE_WAIT()
+    PRINTFORML ————%NAME_FORMAL(阿求)%
+    CALL K48_USELESS_INPUT()
     PRINTFORML 突然从床上惊醒，阿，原来只是个梦阿，%ANAME(MASTER)%舒了一口气
-    WAIT
-    PRINTFORML 躺在双人床上的%ANAME(MASTER)%看向旁边空空如也的空位，又叹了一口气
-    WAIT
-    CALL K48_MASTER_SAY(@"「果然还是...做噩梦了吗...」")
-    PRINTFORML 起床下身，把放着一个合照的相框按倒，数着墙上的日历
-    PRINTFORML 上面的年份赫然地告示了%ANAME(TARGET)%已死多年的事实
-    WAIT
-    CALL K48_MASTER_SAY(@"「果然我，还是不能就这么放下的啊...」")
-    PRINTFORML 作为一个领导人，%ANAME(MASTER)%自然是不能向众人过多地展现自己悲伤的一面
-    PRINTFORML 时间也作为最好的忘情水，让人忘却丧妻之痛
-    WAIT
-    PRINTFORML 但，时间有时候并不能抚平一切，再坚强的领导人也会有伤心的一面
-    PRINTFORML 就在这不知不觉间，本来是深夜出门散心的%ANAME(MASTER)%不自觉来到了%NAME_FORMAL(TARGET)%的墓前
-    WAIT
-    CALL K48_MASTER_SAY(@"「这么久了，还是放不下你啊...」")
-    CALL K48_MASTER_SAY(@"「你在是非曲直厅过的还好吗？那儿的阎魔有故意责难你吗？」")
-    CALL K48_MASTER_SAY(@"「你不用担心呢，你的下一任转生的御阿礼很优秀呢」")
-    CALL K48_MASTER_SAY(@"「幻想乡的历史还在被好好地记录着，今日的幻想乡依旧安稳和谐」")
-    CALL K48_MASTER_SAY(@"「我回去啦，好好地睡吧，一切都令人放心」")
-    CALL K48_MASTER_SAY(@"「再见，我的爱人，%NAME_FORMAL(TARGET)%」")
+    PRINTFORML 躺在双人床上的%ANAME(MASTER)%看向旁边，空空如也，又叹了一口气
+    PRINTFORML 「果然还是...做噩梦了吗...」
+    PRINTFORML 艰难而犹豫地抬起手，把放着一个合照的相框按倒，数着墙上的日历
+    PRINTFORML 上面的年份赫然地告示了%ANAME(阿求)%已死多年的事实
+    PRINTFORML 「果然我，还是不能就这么放下的啊...」
+    PRINTFORML 作为领导人，%ANAME(MASTER)%自然是不能向众人过多地展现自己悲伤的一面
+    PRINTFORML 时间或许是很好的忘情水，可无非是将撕心裂肺变成了持久的钝痛
+    PRINTFORML 无法摆脱，那便把思想暂且交由它控制吧
+    PRINTFORML 在这个深夜，并非是脚踏上的路，而是路指引着脚，%ANAME(MASTER)%兜兜转转最后又回到了%ANAME(阿求)%的墓前
+    PRINTFORML 这是个无风晴朗的夜晚，可星光却并不灿烂
+    PRINTFORML 「这么久了，还是放不下你啊...」
+    PRINTFORML 「你在是非曲直厅过的还好吗？那儿的阎魔有故意责难你吗？」
+    PRINTFORML 「你不用担心呢，你的下一任转生的御阿礼很优秀呢」
+    PRINTFORML 「幻想乡的历史还在被好好地记录着，今日的幻想乡依旧安稳和谐」
+    PRINTFORML 「我回去啦，好好地睡吧，一切都令人放心」
+    PRINTFORML 「再见，我的爱人，%NAME_FORMAL(阿求)%」
+    PRINTFORML 在人间之里的方向，一颗流星坠落，浓厚的黑添了一抹亮色，长长的拖尾像是在留恋夜空，又如同一道伤痕。
 
 
-@K48_END_2
-    CALL K48_MASTER_SAY(@"「还是不行么」")
-    PRINTFORML %ANAME(MASTER)%坐在了床边，看着床边的%ANAME(TARGET)%，病怏怏地躺在床上
-    WAIT
-    CALL K48_MASTER_SAY(@"「还是恶化了么」")
-    PRINTFORML 早已经知道%ANAME(TARGET)%时日不多，只是身体差到了如此地步
-    WAIT
-    CALL K48_MASTER_SAY(@"「果然还是那场事件造成的后遗症么」")
-    PRINTFORML 那场事件给了%ANAME(TARGET)%极大的伤害，不仅精神受损，记忆也受损严重
+
+@K48_END_2(阿求)
+    #DIM 阿求
+    PRINTFORML 「还是不行么」
+    PRINTFORML %ANAME(MASTER)%坐在了床边，%ANAME(阿求)%在一旁病怏怏地躺在床上
+    PRINTFORML 「还是恶化了么」
+    PRINTFORML 早已经知道%ANAME(阿求)%时日不多，但身体本不应差到如此地步，她本该在完成一生最重要的作品也是一生最睿智的时候，灵魂于睡梦中平静地离体
+    PRINTFORML 「果然还是那场事件造成的后遗症么」
+    PRINTFORML 那场事件给了%ANAME(阿求)%极大的伤害，不仅精神受损，记忆也受损严重
     PRINTFORML 而她作为御阿礼之子的契约仍在，导致了她的症状进一步恶化
-    WAIT
     PRINTFORML 真是可笑，作为御阿礼之子，不仅丧失了关于幻想乡历史的记忆，连眼前的事情都记不住了
     PRINTFORML 现在的她，自理都难以做到
-    WAIT
-    CALL K48_MASTER_SAY(@"「来，刚热的粥，喝吧」")
-    PRINTFORML 令人欣慰，%ANAME(TARGET)%忘记了很多，但是对%ANAME(MASTER)%似乎还有印象，而%ANAME(MASTER)%也是唯一能正常接触%ANAME(TARGET)%的人了
-    PRINTFORML 而正在%ANAME(TARGET)%躺在床上依偎着%ANAME(MASTER)%时，突然，%ANAME(TARGET)%非常地害怕地远离了%ANAME(MASTER)%，向着远离门口的墙角爬去
-    WAIT
-    PRINTFORML 如果%ANAME(MASTER)%不拉着的话，%ANAME(TARGET)%定是要摔个狗啃泥
-    WAIT
+    PRINTFORML 「来，刚热的粥，喝吧」
+    PRINTFORML 令人欣慰，%ANAME(阿求)%忘记了很多，但是对%ANAME(MASTER)%似乎还有印象，而玩家也是唯一能正常接触%ANAME(阿求)%的人了
+    PRINTFORML 只是这些少的平静与幸运并不能长久，或许仅来自于一段极为久远而短暂的记忆
+    PRINTFORML 上一刻%ANAME(阿求)%还躺在床上依偎着%ANAME(MASTER)%，下个瞬间%ANAME(阿求)%的眼睛中充满了恐惧，拼着命要逃离%ANAME(MASTER)%，向着 远离门口的墙角爬去
+    PRINTFORML 如果%ANAME(MASTER)%不拉着的话，%ANAME(阿求)%定是要摔个狗啃泥
     CALL K48_DEATH_SAY(@"「怎么，御阿礼之子已经变成这副模样了吗」")
-    PRINTFORML 门口的一副死神打扮的人撑个镰刀靠在门框，对着门内的%ANAME(MASTER)%们说着
-    WAIT
-    CALL K48_DEATH_SAY(@"「不用多说了，我已经从阎魔上司那儿知道你与%ANAME(TARGET)%的状况了」")
+    PRINTFORML 门口的人撑个镰刀靠在门框，一副死神打扮，对着门内的%ANAME(MASTER)%们说着
+    CALL K48_DEATH_SAY(@" 「不用多说了，我已经从阎魔上司那儿知道你与%ANAME(阿求)%的状况了」")
     PRINTFORML 阿，知道了么，那挺好
-    PRINTFORML 现在的%ANAME(TARGET)%除了%ANAME(MASTER)%看谁都是当年的那些混蛋呵，得亏死神也知道了，不然这对死神大人可是大不敬
-    WAIT
-    CALL K48_MASTER_SAY(@"「永远亭那边也说精神状态很差，已经无药可治了，所以恳请死神大人想想办法」")
-    PRINTFORML 死神也无奈地笑了笑，想必她也已经知道因为那个契约，永远亭有那个能力也不会来治疗的
+    PRINTFORML %ANAME(MASTER)%已经客套话都懒得说了，死神也好医者也罢，比起身边人来说，略微有些失礼又算什么呢？
+    PRINTFORML 「永远亭那边也说精神状态很差，已经无药可医，所以恳请死神大人想想办法」
+    PRINTFORML 话语中却听不出多少希望，反倒透着悲愤与无奈
+    PRINTFORML 死神也无奈地笑了笑，她自然知道因为那个契约，永远亭有那个能力也不会来治疗的
     PRINTFORML 不过自己也无能为力，尴尬的死神只好岔开话题
-    WAIT
-    CALL K48_DEATH_SAY(@"「还是先来检查一下%ANAME(TARGET)%的灵魂状态吧，精神会影响离开肉体后的灵魂的」")
-    CALL K48_DEATH_SAY(@"「我本来来的目的就是来检查%ANAME(TARGET)%是否还有能力继续进行御阿礼之子的转生仪式」")
-    PRINTFORML 死神突然闪现到%ANAME(TARGET)%面前，%ANAME(TARGET)%直接昏了过去，随后死神把%ANAME(TARGET)%抱到了床上并进行检查
-    WAIT
+    CALL K48_DEATH_SAY(@"「还是先来检查一下%ANAME(阿求)%的灵魂状态吧，精神会影响离开肉体后的灵魂的」")
+    CALL K48_DEATH_SAY(@"「我本来来的目的就是来检查%ANAME(阿求)%是否还有能力继续进行御阿礼之子的转生仪式」")
+    PRINTFORML 死神突然闪现到%ANAME(阿求)%面前，%ANAME(阿求)%直接昏了过去，随后死神把%ANAME(阿求)%抱回了床上并进行检查
     PRINTFORML ...
     CALL K48_DEATH_SAY(@"「对了，问你一个选择题」")
-    CALL K48_DEATH_SAY(@"「你是希望%ANAME(TARGET)%就拖着个这么残破不堪的身体与灵魂苟活呢，还是早死早超生」")
-    PRINTFORML 死神突然问话，%ANAME(MASTER)%一时不知所措地楞再那
-    WAIT
-    CALL K48_DEATH_SAY(@"「经验证，第九代御阿礼之子%NAME_FORMAL(TARGET)%，其灵魂因为受到严重损害，已无法担任御阿礼转生仪式的职责」")
+    CALL K48_DEATH_SAY(@"「你是希望%ANAME(阿求)%就拖着个这么残破不堪的身体与灵魂苟活呢，还是早死早超生」")
+    PRINTFORML 死神突然问话，%ANAME(MASTER)%一时不知所措地楞在那
+    CALL K48_DEATH_SAY(@"「经验证，第九代御阿礼之子稗田%ANAME(阿求)%，其灵魂因为受到严重损害，已无法担任御阿礼转生仪式的职责」")
     PRINTFORML 死神突然站起来然后发布了最后的宣布
-    WAIT
-    CALL K48_DEATH_SAY(@"「那么%ANAME(MASTER)%，我该说的已经说了，所以刚才的选择题，来选择吧」")
-    CALL K48_DEATH_SAY(@"「正好今天我在，我能让%ANAME(TARGET)%就这么无痛苦的离开」")
-    CALL K48_DEATH_SAY(@"「而御阿礼转生无法继续了，但是%ANAME(TARGET)%自己的契约还在，也就是说，过不了多久我还是要过来一趟的」")
+    CALL K48_DEATH_SAY(@"「那么%ANAME(MASTER)%，我该说的已经说了，而选择在你」")
+    CALL K48_DEATH_SAY(@"「正好今天我在，我能让%ANAME(阿求)%就这么无痛苦的离开」")
+    CALL K48_DEATH_SAY(@"「而御阿礼转生无法继续了，但是%ANAME(阿求)%自己的契约还在，也就是说，过不了多久我还是要过来一趟的」")
     PRINTFORML 那么%ANAME(MASTER)%的选择是
     WAIT
     CALL ASK_MULTI(@"坚持让%ANAME(TARGET)%陪自己到最后一刻",@"让%ANAME(TARGET)%轻松地离开")
     IF RESULT == 0
-        CALL K48_END_2_1
+        CALL K48_END_2_1(阿求)
     ELSE
-        CALL K48_END_2_2
+        CALL K48_END_2_2(阿求)
     ENDIF
 
 
-@K48_END_2_1
+@K48_END_2_1(阿求)
+    #DIM 阿求
     PRINTFORML 在着最后的时光里
-    WAIT
-    CALL K48_MASTER_SAY(@"「这里是神社，来参拜下吧，放心，这个点没人的」")
-    PRINTFORML %ANAME(MASTER)%带着%ANAME(TARGET)%，四处游历幻想乡
-    WAIT
-    CALL K48_MASTER_SAY(@"「这个是神灵庙，气派不，现在这里在白天时候人可多了」")
-    PRINTFORML 也许还包含着期待%ANAME(TARGET)%能在旅行中能恢复的奇迹吧，尽管%ANAME(TARGET)%已经连说话都说不清了
-    WAIT
-    CALL K48_MASTER_SAY(@"「这里是命莲寺，虽然晚上还是会有妖怪来着」")
-    CALL K48_MASTER_SAY(@"「去！野妖怪别来捣乱！诶，诶没事了，妖怪已经被赶走了，没事没事来，别怕，我在呢」")
+    PRINTFORML 「这里是神社，来参拜下吧，放心，这个点没人的」
+    PRINTFORML %ANAME(MASTER)%带着%ANAME(阿求)%，四处游历幻想乡
+    PRINTFORML 「这个是神灵庙，气派不，现在这里在白天时候人可多了」
+    PRINTFORML 也许还包含着期待%ANAME(阿求)%能在旅行中能恢复的奇迹吧，尽管%ANAME(阿求)%已经连说话都说不清了
+    PRINTFORML 「这里是命莲寺，虽然晚上还是会有妖怪来着」
+    PRINTFORML 「去！野妖怪别来捣乱！诶，诶没事了，妖怪已经被赶走了，没事没事来，别怕，我在呢」
     PRINTFORML 虽然路上也会有意外，不过总体还是很不错
-    PRINTFORML %ANAME(TARGET)%不能说话，但是表情能说的出来她很开心
-    WAIT
-    CALL K48_MASTER_SAY(@"「这个照片是我们在妖怪之山照的，当时还被河童下了一跳呢哈哈。还有这个是在天界...」")
+    PRINTFORML %ANAME(阿求)%不能说话，但是表情能说的出来她很开心
+    PRINTFORML 「这个照片是我们在妖怪之山照的，当时还被河童下了一跳呢哈哈。还有这个是在天界...」
     PRINTFORML 而终于最后一站来了————永远亭
-    PRINTFORML 此时地%ANAME(TARGET)%在床上躺着，%ANAME(MASTER)%在一旁讲着一起玩的故事
-    WAIT
+    PRINTFORML 此时地%ANAME(阿求)%在床上躺着，%ANAME(MASTER)%在一旁讲着一起玩的故事
     PRINTFORML 而本应让病人好好休息的医生，大概是因病人无救，不如让家属做最后告别吧
     PRINTFORML 门开了，但是进来的并不是大夫
-    WAIT
-    CALL K48_DEATH_SAY(@"「该走了..」")
+    PRINTFORML 「该走了..」
     PRINTFORML 当初的死神站在床边说
-    WAIT
     CALL K48_DEATH_SAY(@"「她的肉体已经死亡了，灵魂让我带回去吧，否则这种灵魂很快魂飞魄散的」")
     PRINTFORML 啊啊，旅行已经结束了啊，%ANAME(MASTER)%站了起来
-    CALL K48_DEATH_SAY(@"「那么...有劳死神大人了」")
-    PRINTFORML 死神用手盖上了%ANAME(TARGET)%最后临终前猛睁着的双眼
-    WAIT
-    CALL K48_DEATH_SAY(@"「...心放开点吧」")
-    PRINTFORML 说道死神便离开了
-    PRINTFORML 而空空的病房内，%ANAME(MASTER)%独自站到天黑...
-    WAIT
-    PRINTFORML 直到月亮出现...
-    PRINTFORML 直到%ANAME(TARGET)%下葬...
-    WAIT
+    PRINTFORML 「那么...有劳死神大人了」
+    PRINTFORML 死神离开前用手盖上了%ANAME(阿求)%最后临终前猛睁着的双眼，有那么一瞬间究竟是你的幻视，是泪光的衬托，还是真实存在的呢？那双早已浑浊的眸子似乎有那么一丁点灵性在闪烁，映出那个明慧的少女来，可那已经是许久以前的事情了
+    CALL K48_DEATH_SAY(@"「...生者节哀吧」")
+    PRINTFORML 而空空的病房内，%ANAME(MASTER)%独自坐在床畔
+    PRINTFORML 直到月升日落...
+    PRINTFORML 直到%ANAME(阿求)%下葬...
+    PRINTFORML 直到...
     CALL K48_HUGE_WAIT()
 
 
-@K48_END_2_2
-    CALL K48_MASTER_SAY(@"「我明白了...」")
-    CALL K48_MASTER_SAY(@"「那么...有劳死神大人了...」")
+@K48_END_2_2(阿求)
+    #DIM 阿求
+    PRINTFORML 「我明白了...」
+    PRINTFORML 「那么...有劳死神大人了...」
     PRINTFORML 死神拿起了镰刀，手起刀落....
-    WAIT
-    CALL K48_HUGE_WAIT()
-    PRINTFORML 在%NAME_FORMAL(TARGET)%之墓前
+    PRINTFORML ......
+    PRINTFORML ...
+    PRINTFORML ..
+    PRINTFORML 在稗田%ANAME(阿求)%之墓前
     PRINTFORML 一个人站在墓前，久久不愿离去
-    WAIT
-    CALL K48_MASTER_SAY(@"「...」")
-    CALL K48_MASTER_SAY(@"「我..」")
-    CALL K48_MASTER_SAY(@"「...」")
+    PRINTFORML 「...」
+    PRINTFORML 「我..」
+    PRINTFORML 「...」
     PRINTFORML 说出嘴边的话，再次咽了下去
     PRINTFORML 或许是对当初过于擅自的行为有愧疚？又或者是真的没有想好说什么
-    WAIT
     PRINTFORML 只是每年的这天，人们都会看到，有个人在一座墓碑前从白天站到天黑...
-    WAIT
 
 
-@K48_END_3
-    PRINTFORML 幻想乡统一之后，%ANAME(MASTER)%与%ANAME(TARGET)%终于可以每天安心地在一起了
-    PRINTFORML 每天在一起谈论文学，历史，也包括各种笑话
-    WAIT
-    PRINTFORML 每天晚上也会一起散步，有时候也会去其他地方游玩
-    PRINTFORML 路边的大爷大妈看了都羡慕
-    WAIT
+@K48_END_3(阿求)
+    #DIM 阿求
+    PRINTFORML 幻想乡统一之后，%ANAME(MASTER)%与%ANAME(阿求)%终于可以每天安心地在一起了
+    PRINTFORML 文学，历史，也包括各种笑话，哪怕是不合时宜的话题，也能开怀大笑
+    PRINTFORML 每天晚上也会一起散步，从人里的东侧到西侧，从幻想乡的中央到边界
+    PRINTFORML 路人也只有羡慕的份
     PRINTFORML 而这个周末晚上正开着迎接秋季收获的庆典
-    PRINTFORML 自然是少不了%ANAME(MASTER)%与%ANAME(TARGET)%的身影
-    WAIT
-    PRINTFORML %ANAME(MASTER)%与%ANAME(TARGET)%漫步在庆典的街道上，谈论着庆典上的节目与街摊的美食
-    PRINTFORML 当然了，美好的日子总是短暂
-    WAIT
-    CALL K48_AKYUU_SAY(@"「对了，下周末我就要去参加仪式了，明天我回家整理一下我的书集」")
-    PRINTFORML 正在吃着糖葫芦的%ANAME(TARGET)%突然一转话题
-    WAIT
-    CALL K48_AKYUU_SAY(@"「仪式内容你知道的，那天还是别来了哦」")
-    PRINTFORML %ANAME(TARGET)%有些苦涩地笑道
-    PRINTFORML 不过%ANAME(TARGET)%也心知肚明，%ANAME(MASTER)%不会让自己就这么去参加仪式的
-    WAIT
-    PRINTFORML 虽然在最后这一周里%ANAME(TARGET)%还是天天叫%ANAME(MASTER)%下周末不要去参加仪式
-    PRINTFORML 依旧是『好了好了』『不回去的啦』这些敷衍的话，把%ANAME(TARGET)%哄回去睡觉后
-    WAIT
+    PRINTFORML 自然是少不了%ANAME(MASTER)%与%ANAME(阿求)%的身影
+    PRINTFORML %ANAME(MASTER)%与%ANAME(阿求)%漫步在庆典的街道上，谈论着庆典上的节目与街摊的美食
+    PRINTFORML 美好的日子虽多，却一天天在减少
+    PRINTFORML 「对了，下周末我就要去参加转生仪式了，明天我回家整理一下我的书集」
+    PRINTFORML 正在吃着糖葫芦的%ANAME(阿求)%突然一转话题
+    PRINTFORML 「仪式内容你知道的，那天还是别来了哦」
+    PRINTFORML %ANAME(阿求)%有些苦涩地笑道
+    PRINTFORML 不过%ANAME(阿求)%也心知肚明，%ANAME(MASTER)%不会让自己就这么去参加仪式的
+    PRINTFORML 虽然在最后这一周里%ANAME(阿求)%还是天天叫%ANAME(MASTER)%下周末不要去参加仪式
+    PRINTFORML 依旧是"好了好了""不会去的啦"这些敷衍的话，把%ANAME(阿求)%哄回去睡觉后
     PRINTFORML %ANAME(MASTER)%也回到了城堡，看着自己房间的日历
-    PRINTFORML 这这一天的0点钟声敲响，正式意味着%ANAME(TARGET)%的寿命决定在这个周末了
-    WAIT
+    PRINTFORML 这这一天的0点钟声敲响，正式意味着%ANAME(阿求)%的寿命决定在这个周末了
     PRINTFORML 那么是应该
-    WAIT
     CALL ASK_MULTI("睡个好觉，反正还有6天","深夜特训，为周末做准备")
     IF RESULT == 0
-        CALL K48_END_3_1
+        CALL K48_END_3_1(阿求)
     ELSE
-        CALL K48_END_3_2
+        CALL K48_END_3_2(阿求)
     ENDIF
 
 
-@K48_END_3_1
+@K48_END_3_1(阿求)
+    #DIM 阿求
     PRINTFORML 已经第二天了，再不睡对身体不好
-    PRINTFORML 身体是革命的本钱，没了身体怎么能从仪式上把%ANAME(TARGET)%带走
-    WAIT
+    PRINTFORML 身体是革命的本钱，没了身体怎么能从仪式上把%ANAME(阿求)%带走
     PRINTFORML 这么想着的%ANAME(MASTER)%睡着了
-    WAIT
-    CALL K48_HUGE_WAIT()
+    PRINTFORML ZZZ
+    PRINTFORML ZZ
+    PRINTFORML Z
     PRINTFORML 睡了个好觉的%ANAME(MASTER)%在早上8点多的时候起床了
-    PRINTFORML 去吃个早饭，再去看看%ANAME(TARGET)%怎么样了，完美的计划
-    WAIT
+    PRINTFORML 去吃个早饭，再去看看%ANAME(阿求)%怎么样了，完美的计划
     PRINTFORML 然而当%ANAME(MASTER)%来到街上时，只有零零散散的数人
-    PRINTFORML 一个比较熟识%ANAME(TARGET)%的大妈看到急忙过来
-    WAIT
-    CALL K48_NPC_SAY(@"「%ANAME(MASTER)%大人，今天是%ANAME(TARGET)%大人参加御阿礼仪式的日子阿，您不去看看吗」")
+    PRINTFORML 一个比较熟识%ANAME(阿求)%的大妈看到急忙过来
+    CALL K48_NPC_SAY(@"「%ANAME(MASTER)%大人，今天是%ANAME(阿求)%大人参加御阿礼仪式的日子阿，您不去看看吗」")
     PRINTFORML 大妈说了什么，%ANAME(MASTER)%一时有点没回过神
-    PRINTFORML 御阿礼的仪式明明是在周末阿，无论是%ANAME(TARGET)%所说还是日记标注，都是这周末啊
-    WAIT
-    PRINTFORML 不过%ANAME(MASTER)%很快回过了神，日历这种东西，%ANAME(TARGET)%很轻松就能换掉
+    PRINTFORML 御阿礼的仪式明明是在周末阿，无论是%ANAME(阿求)%所说还是日记标注，都是这周末啊
+    PRINTFORML 不过%ANAME(MASTER)%很快回过了神，日历这种东西，%ANAME(阿求)%很轻松就能换掉
     PRINTFORML 而一直再让%ANAME(MASTER)%不要周末去参加仪式，也只是为了让%ANAME(MASTER)%误以为仪式举办在周末
-    WAIT
     PRINTFORML 而仪式真正举办的时间，其实在这周一啊！
     PRINTFORML %ANAME(MASTER)%不顾形象一路狂奔，到达会场时，那些身着祭祀服装的人跪拜在地
-    WAIT
     CALL K48_NPC_SAY(@"「恭祝御阿礼大人一路顺风」")
     CALL K48_NPC_SAY(@"「恭祝御阿礼大人一路顺风」")
     CALL K48_NPC_SAY(@"「恭祝御阿礼大人一路顺风」")
     PRINTFORML 在这阵阵恭祝声中，少女从祭坛倒在地上，死神转头准备离开
-    WAIT
+
     CALL ASK_MULTI("跪在地上痛哭",@"他妈的，把%ANAME(TARGET)%的灵魂还回来！")
     IF RESULT == 0
         CALL K48_END_3_3
@@ -493,7 +450,8 @@ RETURN 1
     ENDIF
 
 
-@K48_END_3_2
+@K48_END_3_2(阿求)
+    #DIM 阿求
     PRINTFORML 果然还是要为仪式做准备啊
     PRINTFORML %ANAME(MASTER)%一直训练到深夜
     WAIT
@@ -533,71 +491,59 @@ RETURN 1
     WAIT
 
 
-@K48_END_3_3
+@K48_END_3_3(阿求)
+    #DIM 阿求
     PRINTFORML 知道自己失败了的%ANAME(MASTER)%，跪在地上失声痛哭
     PRINTFORML 然而周围没人在意，在一声声的恭祝中，连%ANAME(MASTER)%唯一的哭声也被掩盖了
-    WAIT
-    CALL K48_HUGE_WAIT()
-    PRINTFORML 在%NAME_FORMAL(TARGET)%之墓前
+    PRINTFORML ...
+    PRINTFORML ..
+    PRINTFORML 在稗田%ANAME(阿求)%之墓前
     PRINTFORML 一个人站在墓前，久久不愿离去
-    WAIT
-    CALL K48_MASTER_SAY(@"「...」")
-    CALL K48_MASTER_SAY(@"「我..」")
-    CALL K48_MASTER_SAY(@"「...」")
+    PRINTFORML 「...」
+    PRINTFORML 「我..」
+    PRINTFORML 「...」
     PRINTFORML 说出嘴边的话，再次咽了下去
     PRINTFORML 或许是对当初的自己的无能而忏悔？又或者是真的没有想好说什么
-    WAIT
     PRINTFORML 只是每年的这天，人们都会看到，有个人在一座墓碑前从白天站到天黑...
-    WAIT
 
 
-@K48_END_3_4
-    PRINTFORML %ANAME(MASTER)%不能接受%ANAME(TARGET)%就这么在自己面前死去，他妈的！%ANAME(MASTER)%怎能接受%ANAME(TARGET)%在自己面前死去
-    PRINTFORML 愤怒的%ANAME(MASTER)%一个箭步冲上前，右手拔刀剑斩死神，左手随时夺回灵魂
-    WAIT
-    PRINTFORML 而死神漫不经心地用镰刀挡住了%ANAME(MASTER)%的剑，周围的祭祀看了立马起身嘴念符咒
-    PRINTFORML %ANAME(MASTER)%在那一瞬间就失去了全部灵力，身体仿佛灌了铅，倒在了死神面前，却不愿放弃而用剑支撑身体
-    WAIT
-    PRINTFORML 一个个子高大的祭祀上前一把掐住了%ANAME(MASTER)%的脖颈
-    WAIT
-    CALL K48_NPC_SAY(@"「死神大人，此人破坏仪式，该如何处置」")
-    PRINTFORML 死神看向%ANAME(MASTER)%
-    WAIT
-    CALL K48_NPC_SAY(@"「你就是%ANAME(MASTER)%吧，安静点，%NAME_FORMAL(TARGET)%有话对你说」")
-    PRINTFORML %ANAME(MASTER)%眼前突然一黑，失去了知觉
-    CALL K48_HUGE_WAIT()
-    CALL K48_AKYUU_SAY(@"「%ANAME(MASTER)%？听的到吗，是我，%ANAME(TARGET)%」")
-    CALL K48_AKYUU_SAY(@"「对不起，我是骗了你，因为我不想让你看到我的离去而伤心，我不想你为了我而做傻事」")
-    PRINTFORML 虽然%ANAME(MASTER)%的眼前一片漆黑，但是明显感受到了%ANAME(TARGET)%的抽泣声
-    PRINTFORML 对不起,是我的错,是我没有保护好你，如果我能再来早一点...
-    WAIT
-    PRINTFORML 不知道安慰什么，%ANAME(MASTER)%稀里糊涂地说了一大堆的话，反倒是把%ANAME(TARGET)%给逗笑了
-    WAIT
-    CALL K48_AKYUU_SAY(@"「好啦，不要伤心了，你能来我就已经很满足了」")
-    CALL K48_AKYUU_SAY(@"「有时候我也会想，也会恨啊，为什么我先祖的一个契约，我就要承受如此残酷的命运」")
-    CALL K48_AKYUU_SAY(@"「我也想活着啊，我也想像普通家的女孩子一样正常地没有任何义务地开心地活着，和自己爱的人携手白头」")
-    CALL K48_AKYUU_SAY(@"「不过呢，我现在也想开了，正因为御阿礼之子的使命，我才认识了您，不是么」")
-    CALL K48_AKYUU_SAY(@"「既然这就是我的命运的话，那我就欣然接受好了」")
-    CALL K48_AKYUU_SAY(@"「%ANAME(MASTER)%也不要太悲伤呢，以后我还会在转生嘛，不要轻生哦，下一代御阿礼之子怎么样我等着您告诉我呢」")
-    PRINTFORML 本来是%ANAME(MASTER)%来安慰%ANAME(TARGET)%的，却变成了%ANAME(TARGET)%来安慰%ANAME(MASTER)%
-    WAIT
-    CALL K48_AKYUU_SAY(@"「好了，我该走了」")
-    CALL K48_AKYUU_SAY(@"「再见了%ANAME(MASTER)%再见，来笑一下，我要走了的时候，不想看见%ANAME(MASTER)%哭哦」")
-    PRINTFORML %ANAME(MASTER)%还想说些什么，而%ANAME(TARGET)%的声音已经消失了。
-    PRINTFORML 这时候%ANAME(MASTER)%突然醒了过来
-    WAIT
-    PRINTFORML 太阳已经快下山，祭坛上除了自己与少女的尸体以外空无一人
-    WAIT
-    CALL K48_HUGE_WAIT()
-    PRINTFORML 某天，在%NAME_FORMAL(TARGET)%之墓前，有个人站在坟前，久久不愿离去
-    WAIT
-    CALL K48_MASTER_SAY(@"「我又来看你了呢」")
-    CALL K48_MASTER_SAY(@"「你的下一任转生的御阿礼很优秀，不过比起你还是差了远了呢」")
-    CALL K48_MASTER_SAY(@"「幻想乡的历史还在被好好地记录着，今日的幻想乡依旧安稳和谐」")
-    CALL K48_MASTER_SAY(@"「那么，我走了，再见了呢」")
-    CALL K48_MASTER_SAY(@"「这里有你平时爱吃的点心，我就留在这了，不要偷吃太多哦」")
-    PRINTFORML 那个人放下了手里的祭品，转生离去..
-    WAIT
+@K48_END_3_4(阿求)
+    #DIM 阿求
+    PRINTFORML 果然还是要为仪式做准备啊
+    PRINTFORML %ANAME(MASTER)%一直训练到深夜
+    PRINTFORML 第二天的中午，%ANAME(MASTER)%揉了揉朦胧的睡眼起了床，准备去%ANAME(阿求)%家
+    PRINTFORML 而到%ANAME(阿求)%家的时候，却发现到处到处挂这白布白花，里面大桌的人正围一起吃席
+    PRINTFORML 一打听更是不得了，%ANAME(阿求)%不仅完成了仪式，甚至连下葬都下葬完成了
+    PRINTFORML %ANAME(MASTER)%不能接受这个事实，%ANAME(MASTER)%崩溃地跑回了家，无论是%ANAME(阿求)%所说还是日记标注，都不是在今天啊
+    PRINTFORML 不过%ANAME(MASTER)%很快明白了，日历这种东西，%ANAME(阿求)%很轻松就能换掉
+    PRINTFORML 而一直再让%ANAME(MASTER)%不要周末去参加仪式，也只是为了让%ANAME(MASTER)%误以为仪式举办在周末
+    PRINTFORML 在自己床头柜里，也在一个小角落翻出了标注了今天是仪式举办日子的日历
+    PRINTFORML 与此同时，还有一封信
+    CALL K48_AKYUU_SAY(@"「亲爱的%ANAME(MASTER)%」")
+    CALL K48_AKYUU_SAY(@"「如果你找到这封信的话，想必已经发现了真相了吧」")
+    CALL K48_AKYUU_SAY(@"「很抱歉是我欺骗了你」")
+    CALL K48_AKYUU_SAY(@"「因为我不想让你看到我的离去而伤心，我不想你为了我而做傻事」")
+    CALL K48_AKYUU_SAY(@"「这是我的宿命，我不能也不应去逃避，我们也没有办法逃避」")
+    CALL K48_AKYUU_SAY(@"「好啦，看到这里也不用太沉重」")
+    CALL K48_AKYUU_SAY(@"「天涯何处无芳草呢，我只不过是个除了比别人更短命以外毫无特点的女孩子而已啦」")
+    CALL K48_AKYUU_SAY(@"「也不要太为我伤心而自我沉沦啊，我知道了的话会很难受的」")
+    CALL K48_AKYUU_SAY(@"「生命本就是被过度高估的现象，或许下次见面我已化作尘土，再下次这则是墓碑上的苔藓则，连岩石上的纹理和细小的裂缝都看得 清楚」")
+    CALL K48_AKYUU_SAY(@"「而为生命赋予意义的不外乎是我们的思想与记忆，因而，只要你还记得%ANAME(阿求)%曾经存在过，那便已足够」")
+    CALL K48_AKYUU_SAY(@"「信也该结尾了，记得来告知我下一代御阿礼有没有好好记录哦」")
+    CALL K48_AKYUU_SAY(@"「信就写到这里吧，还有还有，如果可以的话，祭奠我的时候准备一些村庄南头糕点铺的糕点」")
+    CALL K48_AKYUU_SAY(@"「那里的糕点好吃，很甜，如果你以后很想我的话，不要喝酒了，来吃点甜点吧」")
+    CALL K48_AKYUU_SAY(@"「爱你的————稗田%ANAME(阿求)%」")
+    PRINTFORML ...
+    PRINTFORML ..
+    PRINTFORML .
+    PRINTFORML 某天，在稗田%ANAME(阿求)%之墓前，有个人站在坟前，久久不愿离去
+    PRINTFORML 「我又来看你了呢」
+    PRINTFORML 「你的下一任转生的御阿礼很优秀，不过比起你还是差了远了呢」
+    PRINTFORML 「幻想乡的历史还在被好好地记录着，今日的幻想乡依旧安稳和谐」
+    PRINTFORML 「那么，我走了，再见了呢」
+    PRINTFORML 「这里有你平时爱吃的点心，我就留在这了，不要偷吃太多哦」
+    PRINTFORML 那个人放下了手里的祭品，转身离去..
+
 
 
 @KOJO_DEAD_ENDING_K48
@@ -657,7 +603,8 @@ RETURN 1
 @K48_USELESS_INPUT
     LOCAL:1 = RAND(2,4)
     FOR LOCAL,0,LOCAL:1
-        PRINTBUTTON "[无意义按钮]",1
+        ;PRINTBUTTON @"[别肘！]",1
+        PRINTBUTTON @"[阿求！]",1
         INPUT
         CLEARLINE 2
     NEXT

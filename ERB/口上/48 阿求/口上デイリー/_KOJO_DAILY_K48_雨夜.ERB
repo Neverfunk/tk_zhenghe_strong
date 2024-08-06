@@ -1,0 +1,144 @@
+﻿;@HZ=雨夜
+;@ENG=RAINY_HEART
+;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K48_RAINY_HEART_RATE(阿求)
+#DIM 阿求
+RETURN 200
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K48_RAINY_HEART_DECISION(阿求)
+	#DIM 阿求
+	SIF CFLAG:阿求:好感度 < 4000
+		RETURN 0
+	RETURN CHECK_KOJO_DAILY_HAPPEN(阿求,1,-1,-1)
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K48_RAINY_HEART_GENRE(阿求)
+#DIM 阿求
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K48_RAINY_HEART(阿求)
+#DIM 阿求
+PRINTFORML 晚上，雨淅沥沥地下着
+PRINTFORML 当天政务已经全部处理完毕了
+PRINTFORML 已经下班的%ANAME(阿求)%独自一人站在屋檐下的走道，默默地看着外面的夜雨
+CALL ASK_MULTI("不作打扰", "上前询问")
+IF RESULT == 0
+	PRINTFORML 不想多打扰%ANAME(阿求)%，%ANAME(MASTER)%只是默默地站在背后
+	PRINTFORML 陪着%ANAME(阿求)%看着这夜雨连绵
+	IF CFLAG:阿求:好感度 < 8000
+		CALL K48_HUGE_WAIT()
+		CALL K48_AKYUU_SAY(@"「雨停了呢」")
+		CALL K48_AKYUU_SAY(@"「啊，%ANAME(MASTER)%大人也在呢」")
+		CALL K48_AKYUU_SAY(@"「请休息吧，明日还需早起」")
+		CALL K48_AKYUU_SAY(@"「晚安」")
+		PRINTFORML 互相简单问候过后，各自回房间休息了
+	ELSE
+		IF DAY > 80
+			PRINTFORML 离%ANAME(阿求)%转世的日子要来了
+			PRINTFORML 能这样陪%ANAME(阿求)%一起看夜雨的机会还有几次呢
+		ENDIF
+		PRINTFORML 不知道%ANAME(阿求)%心里想着什么，但是一定也是思绪万千罢
+		PRINTFORML 感受这下雨的夜晚，听着雨水拍打着屋檐发出噗哒声
+		PRINTFORML 想说些什么，却终究是看了一晚上夜雨，直到雨停为止
+		CALL K48_HUGE_WAIT()
+		CALL K48_AKYUU_SAY(@"「雨停了呢...」")
+		PRINTFORML %ANAME(阿求)%扭过头，看着后面的%ANAME(MASTER)%
+		CALL K48_AKYUU_SAY(@"「啊，是%ANAME(MASTER)%呢」")
+		CALL K48_AKYUU_SAY(@"「...」")
+		PRINTFORML %ANAME(阿求)%似乎想说什么，但是却欲言又止了
+		CALL K48_AKYUU_SAY(@"「天色不早了，明日还要早起，该休息了」")
+		PRINTFORML  .....
+		CALL K48_AKYUU_SAY(@"「晚安，明天见」")
+		PRINTFORML 互相简单地问候过后，各自回房间休息了
+	ENDIF
+ELSE
+	PRINTFORML 好奇地询问%ANAME(阿求)%在看什么
+	IF CFLAG:阿求:好感度 < 4000
+		CALL K48_AKYUU_SAY(@"「啊，没什么，看着发愣而已」")
+		PRINTFORML ......
+		CALL K48_AKYUU_SAY(@"「嗯...时间不早了，是要回去休息了呢」")
+		CALL K48_AKYUU_SAY(@"「晚安，明天见」")
+		PRINTFORML 互相简单地问候过后，各自回房间休息了
+	ELSEIF CFLAG:阿求:好感度 < 8000
+		IF DAY < 80
+			PRINTFORML （好感高于4000低于8000且回合周目＜80时触发）
+			CALL K48_AKYUU_SAY(@"「啊！....」")
+			CALL K48_AKYUU_SAY(@"「...没事」")
+			CALL K48_AKYUU_SAY(@"「就想到了一些琐事而已」")
+			PRINTFORML .......
+			PRINTFORML 窗外雨声滴滴答答，二人没有再过多交谈
+			PRINTFORML ....
+			PRINTFORML 直至雨停为止....
+			CALL K48_AKYUU_SAY(@"「嗯...时间不早了，是要回去休息了呢」")
+			CALL K48_AKYUU_SAY(@"「晚安，明天见」")
+			PRINTFORML 互相简单地问候过后，各自回房间休息了
+		ELSE
+			CALL K48_AKYUU_SAY(@"「啊！....」")
+			CALL K48_AKYUU_SAY(@"「...没事」")
+			CALL K48_AKYUU_SAY(@"「就想到了一些琐事而已」")
+			PRINTFORML .......
+			PRINTFORML 窗外雨声滴滴答答
+			CALL K48_AKYUU_SAY(@"「你说，如果我不在人里生活了，大家会想我吗」")
+			PRINTFORML 离别的日子要到了，%ANAME(MASTER)%听的出%ANAME(阿求)%的意思
+			PRINTFORML .......
+			CALL K48_AKYUU_SAY(@"「...」")
+			PRINTFORML %ANAME(阿求)%想说什么，但是却欲言又止了
+			CALL K48_AKYUU_SAY(@"「...」")
+			CALL K48_AKYUU_SAY(@"「是啊....」")
+			CALL K48_AKYUU_SAY(@"「嗯...时间不早了...呢」")
+			CALL K48_AKYUU_SAY(@"「我也要回去休息了，晚安」")
+			PRINTFORML 互相告别之后，各自回房间休息了
+		ENDIF
+	ELSE
+		CALL K48_AKYUU_SAY(@"「啊！...」")
+		CALL K48_AKYUU_SAY(@"「没事，我只是...」")
+		CALL K48_AKYUU_SAY(@"「...」")
+		CALL K48_AKYUU_SAY(@"「只是想到了一些事情...」")
+		PRINTFORML 说罢，%ANAME(阿求)%脸继续望回窗外的夜雨
+		CALL K48_AKYUU_SAY(@"「你说，如果我不在人里生活了，大家会想我吗」")
+		PRINTFORML 没有直说，但是%ANAME(MASTER)%听的出%ANAME(阿求)%想表达的意思
+		PRINTFORML .......
+		CALL K48_AKYUU_SAY(@"「...」")
+		CALL K48_AKYUU_SAY(@"「我知道，我知道，我放不下大家....」")
+		CALL K48_AKYUU_SAY(@"「但是我...更放不下你啊...」")
+		PRINTFORML %ANAME(阿求)%回过身来，眼里似带有泪
+		CALL K48_AKYUU_SAY(@"「...见丑了呢」")
+		PRINTFORML ......
+		PRINTFORML %ANAME(阿求)%独自一人站在屋檐下的走道，看着外面夜雨
+		CALL K48_AKYUU_SAY(@"「山茶花的叶子，好像被打落不少呢」")
+		PRINTFORML %ANAME(阿求)%指着雨下的山茶花
+		PRINTFORML 檐下的孤影，脸上带着不知是雨还是泪的液滴。
+		PRINTFORML 而雨仍旧默默地下着，最后一朵残存的山茶花，努力地苟延残喘着
+		CALL K48_AKYUU_SAY(@"「有时候我会关注这花，有时候我会在意地上的草」")
+		CALL K48_AKYUU_SAY(@"「虽然各有不同，但是在这雨里，它们都一样脆弱，随时便会从世上消失」")
+		CALL K48_AKYUU_SAY(@"「如此无奈，令人感慨...」")
+		PRINTFORML %ANAME(阿求)%回头对%ANAME(MASTER)%说道
+		PRINTFORML .......
+		PRINTFORML 雨停了
+		CALL K48_AKYUU_SAY(@"「雨停了呢」")
+		CALL K48_AKYUU_SAY(@"「好啦，不要想太多了....就当是，我的自言自语吧」")
+		PRINTFORML %ANAME(阿求)%怕%ANAME(MASTER)%多虑，故作出开朗样子
+		PRINTFORML 再简单的互告晚安后，各自回房间休息了
+	ENDIF
+ENDIF
+RETURN 1
+
+
+@KOJO_DAILY_K48_RAINY_HEART_ALLOW_WHEN_WANDERING()
+RETURN 0

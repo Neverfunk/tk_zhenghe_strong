@@ -1,0 +1,107 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_48_PERSONAL_2_EXIST
+RETURN 1
+
+@SKILL_48_PERSONAL_2_NAME
+RESULTS = 御前试合
+
+;レベルは1-5まで
+@SKILL_48_PERSONAL_2_LEVEL
+RETURN 5
+
+;対象選択
+@SKILL_48_PERSONAL_2_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+;部隊対象
+RETURN 1
+
+;発動判定
+@SKILL_48_PERSONAL_2_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1
+
+;発動テキストをオーバライドしたいときに。
+;「誰それのスキル発動！　○○した！」の「○○した！」の部分を実装したい場合は、
+;これじゃなくてINVOKEで書けばいいです。
+;@SKILL_48_PERSONAL_2_INVOKE_TEXT(発動者, スキル, ジャンル)
+;#DIM 発動者
+;#DIM スキル
+;#DIMS ジャンル
+
+;効果をここに記述
+@SKILL_48_PERSONAL_2_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+;LOCAL:1 最高武斗数值
+;LOCAL:2 最高武斗者
+LOCAL:1 = 0
+LOCAL:2 = 0
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
+    IF LOCAL:1 < ABL:(BATTLE_COMMANDER:対象側:LOCAL):武闘
+        LOCAL:1 = ABL:(BATTLE_COMMANDER:対象側:LOCAL):武闘
+        LOCAL:2 = LOCAL
+    ENDIF
+NEXT
+SIF LOCAL:2 >= 0
+    PRINTFORML %ANAME(BATTLE_COMMANDER:対象側:(LOCAL:2))%前来参加决斗了！
+
+
+IF ABL:(BATTLE_COMMANDER:対象側:(LOCAL:2)):武闘 > ABL:(発動者):武闘
+    PRINTFORML %ANAME(発動者)%战败了，被逐出了战斗！
+    BATTLE_KNOCKOUT(発動側, 発動番号)
+ELSE
+    PRINTFORML %ANAME(BATTLE_COMMANDER:対象側:(LOCAL:2))%战败了，被逐出了战斗！
+    BATTLE_KNOCKOUT(対象側, (LOCAL:2))
+ENDIF
+
+@SKILL_48_PERSONAL_2_EXPLANATION
+RESULTS = 和对方武斗最高一名武将进行武斗对抗，低者战斗不能
+
+
+@SKILL_48_PERSONAL_2_NO_LEARN_INIT
+@SKILL_48_PERSONAL_2_CANT_LEARN_FROM_SHOP
+@SKILL_48_PERSONAL_2_CANT_TELL
+
+@SKILL_48_PERSONAL_2_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 500

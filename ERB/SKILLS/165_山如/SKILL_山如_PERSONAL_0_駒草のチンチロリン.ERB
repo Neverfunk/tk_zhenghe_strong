@@ -1,0 +1,98 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_165_PERSONAL_0_EXIST
+RETURN 1
+
+@SKILL_165_PERSONAL_0_NAME
+RESULTS = 駒草之赌
+;TranslatedMark 駒草のチンチロリン
+
+;レベルは1-5まで
+@SKILL_165_PERSONAL_0_LEVEL
+RETURN 1
+
+;対象選択
+@SKILL_165_PERSONAL_0_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1
+
+;発動判定
+@SKILL_165_PERSONAL_0_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+SIF (対象部隊 >= 0 && !IS_COUNTRY(対象勢力)) || (対象部隊 < 0 && !IS_COUNTRY(CITY_OWNER:対象勢力))
+	RETURN 0
+RETURN 1
+
+;発動テキストをオーバライドしたいときに。
+;「誰それのスキル発動！　○○した！」の「○○した！」の部分を実装したい場合は、
+;これじゃなくてINVOKEで書けばいいです。
+;@SKILL_165_PERSONAL_0_INVOKE_TEXT(発動者, スキル, ジャンル)
+;#DIM 発動者
+;#DIM スキル
+;#DIMS ジャンル
+
+;効果をここに記述
+@SKILL_165_PERSONAL_0_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+LOCAL = RAND(-3000, 3000)
+PRINTFORML %ANAME(発動者)%开始吸烟赌博！
+;TranslatedMark %ANAME(発動者)%は煙草を吹かしギャンブルを始めた！
+PRINTFORML 敌方的国库随机变化！
+;TranslatedMark 敵味方揃って国庫がランダムに変化する！
+MONEY:(CFLAG:(発動者):所属) -= MIN(LOCAL, MONEY:(CFLAG:(発動者):所属))
+IF 対象部隊 >= 0
+	MONEY:対象勢力 -= MIN(LOCAL, MONEY:対象勢力)
+ELSE
+	MONEY:(CITY_OWNER:対象勢力) -= MIN(LOCAL, MONEY:(CITY_OWNER:対象勢力))
+ENDIF
+
+@SKILL_165_PERSONAL_0_EXPLANATION
+RESULTS = 战斗时，我方和敌方的国库随机增减。
+;TranslatedMark 戦闘時、味方と敵の国庫をランダムで増減させる。
+
+@SKILL_165_PERSONAL_0_CANT_TELL
+
+
+@SKILL_165_PERSONAL_0_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 250

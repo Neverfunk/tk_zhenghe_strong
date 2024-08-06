@@ -1,4 +1,7 @@
-﻿;---------------------
+﻿@KOJO_DAILY_K3_STRAY_YOUKAI_TAG	
+    LOCAL = 0
+	RETURN LOCAL
+ ;---------------------
 ;基本的な発生確率(1000分率 100で10%)
 ;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
 ;---------------------
@@ -42,70 +45,116 @@ KDVAR:対象:ルーミア_野良妖怪 = 1
 CFLAG:対象:面識 = 1
 
 PRINTFORMW 「吶 吶、那邊的那位」
+;TranslatedMark 「ねえねえ、そこのあなた」
 PRINTFORML %ANAME(MASTER)%が在街道傳来的時候、突然有個声音在叫他
+;TranslatedMark %ANAME(MASTER)%が街を巡回していると、不意に声をかけられた
 PRINTFORMW 仔細一看、看到一名少女
+;TranslatedMark 見ると、少女がこちらを見つめていた
+;(画像パッチ)
+CALL 画像表示(対象, 1, 1)
 CALL ICPRINT(@"「你好、我是<%NAME_FORMAL(対象)%>、是宵闇的妖怪", "W", カラー_注意)
+;TranslatedMark @"「こんにちは、私は<%NAME_FORMAL(対象)%>、宵闇の妖怪だよ", "W", カラー_注意
 PRINTFORMW 「那麼突然真是抱歉、但我現在肚子很餓」
+;TranslatedMark 「突然で悪いんだけど、今お腹が空いてるの」
 PRINTFORMW 「但我是個妖怪、身上沒有錢啊」
+;TranslatedMark 「でも私妖怪だし、お金とか持ってなくってさ」
 PRINTFORMW 「如果能請我吃飯的話、我會很高興的ー」
+;TranslatedMark 「ご飯おごってくれると、嬉しいんだけどなー」
 PRINTFORML ……沒想到會被流浪妖怪乞食
+;TranslatedMark ……まさか野良妖怪に飯をたかられるとは
 PRINTFORML 那麼、要怎麼辦呢……
+;TranslatedMark さて、どうするか……
 
 CALL ASK_MULTI_JUDGE("幫一下她", MONEY >= 1000, "不行", 1)
+;TranslatedMark "恵んでやる", MONEY >= 1000, "無理", 1
 
 IF RESULT == 1
 	PRINTFORMW 「誒ー、真可惜」
+	;TranslatedMark 「えー、残念」
 	PRINTFORMW 「那麼、唯有去拜託其他人吧ー」
+	;TranslatedMark 「それじゃ、他の誰かに頼むかなー」
 	PRINTFORMW 語畢、%ANAME(対象)%搖擺不定地飛向遠處了……
+	;TranslatedMark 言うだけ言って、%ANAME(対象)%はふらふらと飛んでいった……
 	RETURN 1
 ENDIF
 
 PRINTFORMW 「真的嗎？　謝謝你呀ー」
+;TranslatedMark 「ほんとに？　ありがたいなー」
 PRINTFORMW 「那麼帶我去餐店吧、什麼店鋪也可以哦！」
+;TranslatedMark 「それじゃお店に連れてって、何でもいいよ！」
+;(画像パッチ)
+CALL 画像表示(対象, 1, 2)
 PRINTFORMW 被%ANAME(対象)%拖到店鋪裏了……
+;TranslatedMark %ANAME(対象)%に引っ張られるように店に入った……
 PRINTFORML ・
 PRINTFORML ・
 PRINTFORML ・
 PRINTFORML %ANAME(対象)%輕鬆地吃光了三人分量的食物
-CALL ICPRINT("金<1000>を支払いました", "W", カラー_注意)
+;TranslatedMark %ANAME(対象)%は軽く三人前を平らげてようやく落ち着いたようだ
+CALL ICPRINT("支付了金<1000>", "W", カラー_注意)
+;TranslatedMark 金<1000>を支払いました
 MONEY -= 1000
 PRINTFORMW 妖怪都是這麼厲害的嗎……
+;TranslatedMark 妖怪というのは皆こんなものなのだろうか……
 PRINTFORMW 「呼、吃飽了吃飽了。謝謝款待」
+;TranslatedMark 「ふう、食べた食べた。ごちそうさま」
 PRINTFORMW 「給你點回禮吧ー。你想要甚麼？」
+;TranslatedMark 「何かお礼をしようかなー。何にする？」
 PRINTFORML 該怎麼辦呢……
+;TranslatedMark さて、どうしよう……
 
 CALL ASK_MULTI_JUDGE("想要力量", 1, "教我技能", GET_EMPTY_SKILL_SLOT(MASTER, スキル_ジャンル_TROOP) != -1, "說過沒有錢了吧……", 0, "成為同伴", 1, "不需要", 1)
+;TranslatedMark "力が欲しい", 1, "技を教えて", GET_EMPTY_SKILL_SLOT(MASTER, スキル_ジャンル_TROOP) != -1, "金は無いと言っていたな……", 0, "仲間になって", 1, "いらない", 1
 
 SELECTCASE RESULT
 	CASE 0
 		PRINTFORMW 「這樣就可以了嗎？　真是好辦呀」
+		;TranslatedMark 「そんなんでいいの？　お安い御用だよ」
 		PRINTFORMW 得到了%ANAME(対象)%的訓練……
+		;TranslatedMark %ANAME(対象)%に訓練してもらった……
 		CALL COLOR_PRINTW(@"%ANAME(MASTER)%的武闘上昇了3！！", カラー_注意)
+		;TranslatedMark %ANAME(MASTER)%の武闘が3上昇した！
 		ABL:MASTER:武闘 += 3
 	CASE 1
 		PRINTFORMW 「哼ー嗯？　我沒所謂哦」
+		;TranslatedMark 「ふーん？　別にいいよ」
 		PRINTFORMW 「那麼、我教你我的必殺技吧」
+		;TranslatedMark 「それじゃ、私の必殺技を教えてあげるとしよう」
 		PRINTFORMW 「不要隨便乱用啊」
+		;TranslatedMark 「うまいこと使いこなしなよ」
 		CALL SKILL_LEARN_BY_NAME(MASTER, スキル_ジャンル_TROOP, NO:対象, "月的阴暗面")
 		CALL COLOR_PRINTW(@"%ANAME(MASTER)%習得了技能「月的阴暗面」！", カラー_注意)
+		;TranslatedMark %ANAME(MASTER)%はスキル「ダークサイドオブザムーン」を習得した！
 	CASE 2
 		;死に分岐
 	CASE 3
 		PRINTFORMW 「啊？　你的同伴？」
+		;TranslatedMark 「あん？　あなたの仲間？」
 		PRINTFORMW 「可以哦、你那麼親切就當做回禮吧」
+		;TranslatedMark 「いいよ、親切にしてくれたお礼」
 		PRINTFORMW 「啊 但是、偶然也要請我吃飯哦？」
+		;TranslatedMark 「あっでも、たまにご飯おごってね？」
+		;(画像パッチ)
+		CALL 画像表示(対象, 1, 2)
 		CALL COLOR_PRINTW(@"%ANAME(対象)%成為了同伴", カラー_注意)
+		;TranslatedMark %ANAME(対象)%が仲間になりました
 		CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属, 1)
 		CFLAG:対象:好感度 += 500
 		CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了500", カラー_シアン)
+		;TranslatedMark %ANAME(対象)%の好感度が500上がった
 		RETURN 1
 	CASE 4
 		PRINTFORMW 「誒ー？　真是謙虚ー」
+		;TranslatedMark 「えー？　謙虚だなー」
 		PRINTFORMW 「……真的甚麼也不要嗎？」
+		;TranslatedMark 「……ホントになんにもあげないよ？」
 		PRINTFORMW 「嘛、這樣的話我也沒所謂」
+		;TranslatedMark 「まあ、それならそれで別にいいけど」
 ENDSELECT
 
 PRINTFORMW 「那麼、再見了。謝謝你呢！」
+;TranslatedMark 「じゃ、私はこれで。ありがとね！」
 PRINTFORMW %ANAME(対象)%離開了……
+;TranslatedMark %ANAME(対象)%は去っていった……
 
 RETURN 1

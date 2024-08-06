@@ -1,0 +1,384 @@
+﻿;---------------------
+;発生確率(1000分率 100で10%)
+;---------------------
+@EVENT_DAILY_SUCCUBUS_IN_CAGE_RATE()
+RETURN 100
+
+;---------------------
+;確率以外の発生判定
+;---------------------
+@EVENT_DAILY_SUCCUBUS_IN_CAGE_DECISION()
+#DIM 梦魔
+梦魔 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_サキュバス))
+SIF 梦魔== -1
+	RETURN 0
+SIF CFLAG:MASTER:所属 == 梦魔
+	RETURN 0
+SIF DVAR:檻の中のサキュバス_進行フラグ == -1
+	RETURN 0
+SIF DVAR:檻の中のサキュバス_進行フラグ > 0
+	RETURN 0
+
+RETURN 1
+
+;---------------------
+;ジャンル
+;---------------------
+@EVENT_DAILY_SUCCUBUS_IN_CAGE_GENRE()
+RETURN デイリー_ジャンル_特殊勢力
+
+;---------------------
+;本体
+;---------------------
+@EVENT_DAILY_SUCCUBUS_IN_CAGE
+#DIM 対象
+#DIM 梦魔
+#DIM 兵数
+
+梦魔= GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:(特殊勢力_サキュバス))
+
+
+PRINTFORML 收到通知，有个梦魔单独到%ANAME(MASTER)%的所在地投降了。
+;TranslatedMark %ANAME(MASTER)%の元に、領内にサキュバスが一人で投降して来たという連絡が入った
+PRINTFORML 据说她想流亡，现在在看守所里乖乖待着。
+;TranslatedMark どうやら亡命を希望しているとのことで、今は留置場で大人しくしているそうだ
+PRINTFORMW 然而，在现场看守者的报告说，没有感受到本人的悲壮感，反倒是在用自己的魅力色诱看守人员。
+;TranslatedMark しかし現場からは、本人から悲壮感は感じられず看守に色目を使って誘惑している、と報告が上がった…
+PRINTFORML 那么，应该如何处理呢？
+;TranslatedMark さて、処遇はどうしよう？
+CALL ASK_MULTI("退治决定","选择监视人","交给士兵处理")
+;TranslatedMark @"すぐに退治する" ,"監視員を選ぶ" ,"兵士に任せる"
+
+;すぐに退治する
+IF RESULT == 0
+	PRINTFORML 很可能这是派入我军的进行分裂活动的卧底。在事态进一步恶化前，应该采取行动将其铲除。
+	;TranslatedMark …我が軍を内部から崩すハニートラップとして送り込まれた可能性が高い。大事になる前に退治すべきだろう
+	PRINTFORMW %ANAME(MASTER)%带着一些手下前往抓捕被关押在牢房的梦魔。
+	;TranslatedMark %ANAME(MASTER)%は少数の手勢を連れてサキュバスを捕らえている留置場に向かった
+	PRINTFORML 但牢房已经空了。只有露出恍惚表情的士兵晕倒在哪里。
+	;TranslatedMark ……しかし牢はすでにもぬけの殻。そこには恍惚の表情で気絶している兵士しかいなかった
+	PRINTFORMW 看起来，梦魔似乎立刻就察觉到%ANAME(MASTER)%的行动并逃离了……
+	;TranslatedMark どうやらサキュバスは%ANAME(MASTER)%の動きを察してすぐに逃げ出したようだ………
+	CALL CHANGE_RELATION_C_TO_C(梦魔, CFLAG:MASTER:所属, -50, 50)
+	CALL COLOR_PRINTW("从梦魔势力那里得到的评价下降了",カラー_注意)
+	;TranslatedMark "サキュバス勢力からの評価が下がった", カラー_注意
+	DVAR:檻の中のサキュバス_進行フラグ = -1
+
+;監視員を選ぶ
+ELSEIF RESULT == 1
+	PRINTFORML 即使真的是为了逃亡而来也不能立即接受，毕竟还是有可能是间谍的。
+	;TranslatedMark …本当に亡命だとしてもすぐに受け入れるというわけにもいくまい。スパイの可能性だってある
+	PRINTFORMW 在进行政审的同时，最好让可靠的人监视一段时间。
+	;TranslatedMark 身辺調査を進める間、信頼できる者にしばらく監視してもらった方がいいだろう
+	PRINTFORML 选谁呢？
+	;TranslatedMark 誰を選ぼうか？
+	CALL SELECT_CHARA_LIST_SLG()
+	対象 = RESULT
+	IF RESULT < 0
+		PRINTFORMW 不，我们没有把人才投入到这样的事情上的余地。还是让士兵们努力监视吧。
+		;TranslatedMark いや、こんなことに人材を割く余裕は無い。やはり兵士たちに頑張ってもらおう
+		GOTO HOUTI_LOOP
+	ELSEIF 対象 == MASTER
+		PRINTFORMW %ANAME(対象)%决定暂时亲自监视。
+		;TranslatedMark しばらくの間、%ANAME(対象)%自ら監視する事にした
+	ELSE
+		PRINTFORMW 暂时将事情交由%ANAME(対象)%处理。
+		;TranslatedMark しばらくの間、%ANAME(対象)%に任せる事にした
+	ENDIF
+	PRINTFORML ・
+	;TranslatedMark ・
+	PRINTFORML ・
+	;TranslatedMark ・
+	PRINTFORMW ・
+	;TranslatedMark ・
+	PRINTFORML 监视开始的一段时间内，檻中的梦魔一直非常友善。
+	;TranslatedMark 監視をはじめてしばらくの間、檻の中でもサキュバスは友好的そのものだった
+	PRINTFORMW 然而，尽管进行了政审，却几乎没有获得任何有效的信息，仍不能轻率地做出判断。
+	;TranslatedMark しかし身辺調査ではろくに情報が出てこず、まだ軽率に判断は出来ない
+	PRINTFORML 在这种情况下的某个晚上。梦魔在被关押在的囚笼中开始自慰，看起来像是要引诱%ANAME(対象)%。
+	;TranslatedMark そんな状況下のとある日の夜。寝泊りしている檻の中で、サキュバスは%ANAME(対象)%に見えるように自慰行為を始めた
+	PRINTFORMW 看起来像是因为监禁生活积累了欲求不满,作为梦魔这种种族来说似乎无可奈何。
+	;TranslatedMark なんでも留置場生活で欲求不満が溜まっているようで、サキュバスという種族としては仕方の無いことらしい
+	PRINTL
+	;キャラが男か女ふたなりの場合
+	IF IS_MALE(対象) || (HAS_PENIS(対象) && RAND:2) || (HAS_PENIS(対象) && TALENT:対象:討厭男人)
+		PRINTFORML 一丝不挂的梦魔躺在牢房的长凳上自慰着。
+		;TranslatedMark サキュバスは牢の中のベンチに、一子纏わぬ姿で寝転びながらオナニーに耽っている
+		PRINTFORML 细长的手指揉捏着丰满的胸部，在指缝间看似柔软且有质感的乳肉溢了出来。
+		;TranslatedMark 大きな胸を揉みしだく細く長い指の間から、瑞々しく柔らかそうな乳肉が溢れる
+		PRINTFORMW 然后灵活地扭动着尾巴，插入自己的淫穴之中，使之溢出大量的爱液，滴落在床上。
+		;TranslatedMark そして尻尾を器用に動かして自らの淫裂に挿入させ、床に滴るほど愛液を溢れさせる
+		PRINTL
+		PRINTFORML %ANAME(対象)%尽量不看他淫秽的模样，但还是会忍不住把目光移到那雪白的肉体上。
+		;TranslatedMark %ANAME(対象)%はなるべく見ないようしつつも、その淫らな様についつい目で追ってしまう
+		PRINTFORMW 梦魔媚笑起身站了起来，来到铁栅门前。
+		;TranslatedMark するとサキュバスは妖しく笑って起き上がり、鉄格子の前まで来る
+		PRINTFORM 然后
+		;TranslatedMark そして
+		CALL COLOR_PRINT(@"不用顾虑的。可以再仔细看看？", カラー_ピンク)
+		;TranslatedMark 遠慮しなくていいのよ。もっとよく見て？
+		PRINTFORMW 她这么说着，开始将身体压在铁栅栏上摩擦着。
+		;TranslatedMark と言って鉄柵に身体を擦り付け始める
+		PRINTL
+		PRINTFORML 将铁栅栏当作肉竿，用匀称的肉腿夹住，用已经溢出蜜汁的秘裂上在上面摩擦着。
+		;TranslatedMark 鉄柵を肉竿に見立てるようにむちむちの太ももで挟み、すでに蜜が溢れている秘裂を卑猥に擦り付ける
+		PRINTFORMW 从被压迫的秘部流出粘稠的爱液,咕噜咕噜作响地流过栅栏,落到地板上。
+		;TranslatedMark 押し当てられた秘部からは愛液がとろとろと溢れ、ぐちゅぐちゅと音を立てながら柵を伝って床に流れ落ちる
+		PRINTFORML 仿佛在示意去看那里一样，目光被这样被她所吸引，她用巨乳把牢牢柵栏夹住，同时伸出舌头挑逗着。
+		;TranslatedMark その様に目を奪われていると、コッチも見て　とばかりに柵をずっしりした巨乳で挟みながら舌を這わせる
+		PRINTFORMW 这边也像把铁栅当成肉棒一样,用饱满有弹性的乳肉咿咿呀呀的揉捏着。
+		;TranslatedMark こちらも鉄柵を肉棒に見立てるように、見るからに張りのある瑞々しい乳肉でむにむにと揉み込む
+		PRINTFORML 然后一边盯着%ANAME(対象)%一边用长舌头邪恶地舔弄铁栅,涂满大量唾液。
+		;TranslatedMark そして%ANAME(対象)%を見つめながら鉄柵を長い舌でいやらしく舐め這わせて唾液をたっぷりとまぶす
+		PRINTFORMW 那口水流进了乳房的沟谷中，也发出了淫荡的水声，凸显了这场表演的淫靡。
+		;TranslatedMark その唾液が乳房の谷間に流れ込み、こちらも淫らな水音を立てて行為の卑猥さを際立たせる
+		PRINTFORMW 沿着一根栅栏,梦魔的唾液和爱液混合,变成催人淫欲的淫蜜,在地板上蔓延开来。
+		;TranslatedMark 一本の柵を伝ってサキュバスの唾液と愛液が混ざり合い、淫らな感情に駆り立てる淫蜜となって床に広がっていく
+		PRINTL
+		PRINTFORMW %ANAME(対象)%的眼睛被梦魔女体的美丽和其淫荡的行为所吸引,无法移开。
+		;TranslatedMark %ANAME(対象)%は、サキュバスの女体の美しさとそれがいやらしく乱れる淫靡さに目が釘付けになってしまう
+		PRINTFORML 那被称为淫气的能唤起性欲的荷尔蒙充斥在仅有两人的夜间拘留室里，甘美的低嗔声缭绕着整个房间。
+		;TranslatedMark 二人だけの夜の留置場に、淫気とも呼ばれる肉欲に狂わせるサキュバスのフェロモンと甘い喘ぎ声が満ちていく
+		PRINTFORMW %ANAME(対象)%不知不觉勃起了阴茎，沉迷地凝视着她的痴态……
+		;TranslatedMark %ANAME(対象)%はいつしかペニスを勃起させながら、彼女の痴態から目を離せないでいた……
+	;キャラが女の場合
+	ELSE
+		PRINTFORML 然而最让人惊讶的是，它阴部生长的雄健有力的凶恶阴茎。
+		;TranslatedMark しかし何より驚いたのは、その股間に生えている凶悪なほど雄々しいペニスだ
+		PRINTFORMW 据说梦魔族是一种阴阳混合的存在，他们甚至可以生长出生殖器来和女性发生性关系。
+		;TranslatedMark 何でもサキュバスという種族は陰陽が混じった存在で、女性とも交わるために一物を生やすことも出来るらしい
+		PRINTFORML 梦魔说要迅速解决欲求不满,将这个拿出来愉悦一下就是最快的方法。
+		;TranslatedMark 欲求不満の解消には、コレをしごいて出すのが手っ取り早いのだと言う
+		PRINTFORMW 但这样的解释对%ANAME(対象)%而言并不太重要。她被那个优秀的生殖器深深吸引住了。
+		;TranslatedMark しかし%ANAME(対象)%にはそんな説明もあまり耳に入らない。それほどサキュバスの立派なペニスに目を奪われていた
+		PRINTL
+		PRINTFORML 如果一个普通男人看到了这个，恐怕立刻会失去作为雄性的自信。
+		;TranslatedMark そこらの男が目にしたならば、たちまち雄としての自信を失ってしまうだろう程のモノだった
+		PRINTFORMW 凸凹有致的肉棒和巨大的龟头，整体上凶猛地向上翘了起来，一眼就能明白这是让女性体验快乐并堕落而生的肉棒。
+		;TranslatedMark 凹凸に富んだ竿と大きなカリ首、そして猛々しい反り返りは、女を快楽漬けにして堕とすためのモノ、そんな役割を見ただけで伝えてしまう
+		PRINTFORML 有着如此美丽动人的，可以被称为理性中的女性的梦魔身体，但却和如此畸形的阴茎共存。
+		;TranslatedMark 女体の理想とも言えるほど美しいサキュバスの肢体に、そんなグロテスクなほどのペニスが共存している
+		PRINTFORMW 那本该是充满违和感的造形，在%ANAME(対象)%眼中不知为何显得和谐起来。大概这就是梦魔独特的美丽之处吧。
+		;TranslatedMark そのアンバランスなはずの姿が、%ANAME(対象)%にはなぜか調和しているように見えた。淫魔独特の美しさだと思えた
+		PRINTL
+		PRINTFORML 一丝不挂的梦魔坐在监狱的长椅上，注视着%ANAME(対象)%。
+		;TranslatedMark サキュバスは牢の中のベンチに腰掛け、一子纏わぬ姿で%ANAME(対象)%に視線を送る
+		CALL COLOR_PRINT(@"被看着会更加幸福啊", カラー_ピンク)
+		;TranslatedMark 見られながらのほうが興奮するの
+		PRINTFORMW 她说着，特意上演手淫给%ANAME(対象)%看。
+		;TranslatedMark と言ってわざわざ%ANAME(対象)%に見せつけるようにオナニーに耽っている
+		PRINTFORML 通过细长而又有力地手指揉弄美丽的胸部，从指间渗出了令人愉悦又充满柔软感的肉。
+		;TranslatedMark 大きな胸を揉みしだく細く長い指の間から、瑞々しく柔らかそうな乳肉が溢れている
+		PRINTFORMW 然后每揉捏一次肉棒,龟头都会溢出前列腺液,根部的蜜穴也会滴下爱液。
+		;TranslatedMark そしてペニスをしごくたび、鈴口からカウパー液が溢れ、根元の淫裂からは愛液が滴る
+		PRINTL
+		PRINTFORMW 那些体液混合滴落成淫液，浓厚的梦魔荷尔蒙在夜晚的监狱中蔓延着。
+		;TranslatedMark それらの体液が混ざりあって滴り落ちて淫液となり、夜の留置場に濃厚なサキュバスのフェロモンが満ちていく
+		PRINTFORML 在被她的自慰行为吸引的间隙,%ANAME(対象)%完全被称为能让人陷入情欲的媚香迷住。
+		;TranslatedMark 彼女のオナニーに目を奪われていた間に、%ANAME(対象)%は肉欲に狂わせる淫気とも呼ばれる媚香にすっかり中てられていた
+		PRINTFORMW 不知何时，%ANAME(対象)%的下体已经湿透了，无法将视线从她那淫荡的样子移开……
+		;TranslatedMark %ANAME(対象)%はいつしか股をぐっしょり濡らせながら、彼女の痴態から目を離せないでいた……
+	ENDIF
+	PRINTFORML
+	PRINTFORM 于是梦魔对这样的%ANAME(対象)%说
+	;TranslatedMark するとサキュバスはそんな%ANAME(対象)%に、
+	CALL COLOR_PRINT(@"希望您能帮忙解决一下欲望呢。", カラー_ピンク)
+	;TranslatedMark 貴方にも欲求不満解消の手助けをしてほしいの
+	PRINTFORMW 这么说着
+	;TranslatedMark と言ってきた
+	PRINTFORML 她微微叹着气，媚惑地向%ANAME(対象)%投来诱人的眼神。
+	;TranslatedMark そうして彼女は、甘くねだるように妖艶な吐息を漏らしながら%ANAME(対象)%に蠱惑的な視線を向けてくる
+	PRINTFORMW 在受到那道视线的注视时，%ANAME(対象)%的心脏猛然跳动起来……
+	;TranslatedMark その視線を受け、%ANAME(対象)%の胸がドキリと高鳴る……
+	PRINTL
+	IF (MAXBASE:対象:精神力 / 100) * (RAND:10 + 1) >= (10 + DAY / 8) * (RAND:10 + 1) && !GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫乱) && !GETBIT(TALENT:対象:淫乱系, 素質_淫乱_精液便女)
+		PRINTFORMW 但那淫荡的诱惑，被%ANAME(対象)%勉强忍住了！
+		;TranslatedMark その淫靡な誘惑に%ANAME(対象)%は何とか堪えてみせた！
+		PRINTFORMW %ANAME(対象)%将心中的劣情驱逐出去，坚决的拒绝做出那样的事情，警惕地监视着梦魔。
+		;TranslatedMark %ANAME(対象)%は劣情を振り払い、そんなことはしない　と、より警戒してサキュバスを監視した
+		PRINTFORMW 然而，梦魔并没有忽略那眼神深处闪烁出的对性的期待和好奇心……
+		;TranslatedMark …しかしその目の奥に灯った性への期待と好奇心を、サキュバスは見逃さなかった……
+		CALL FUCK(対象, "欲望")
+		DVAR:檻の中のサキュバス_篭絡ID = GET_ID(対象)
+		DVAR:檻の中のサキュバス_進行フラグ = 1
+	ELSE
+		PRINTFORMW %ANAME(対象)%忍不住受到梦魔淫荡的引诱，所有注意力都被她吸引了过去….
+		;TranslatedMark %ANAME(対象)%はサキュバスの淫らな誘惑を無視できず、彼女に視線を釘付けにされてしまった…
+		PRINTFORM 梦魔看到这幅情景咯咯笑了起来,用一个妩媚的声音对%ANAME(対象)%说:
+		;TranslatedMark その様子にサキュバスはニヤリと笑い、%ANAME(対象)%に媚びるような声で
+		CALL COLOR_PRINT(@"希望你能了解梦魔文化。", カラー_ピンク)
+		;TranslatedMark サキュバスの文化のことを知って欲しいの
+		PRINTFORMW 她身体一扭，低声说道。
+		;TranslatedMark と身体をくねらせて囁いた
+		PRINTFORMW 那甜美的声音萦绕在耳边，令人充满了想要更多地了解她的欲望。
+		;TranslatedMark 彼女の甘い声が耳に残り、頭の中が彼女のことをもっと知りたいという欲望でいっぱいになってしまう
+		PRINTFORM 梦魔从监牢里伸出手。然后一边妖艳地动着手指说道
+		;TranslatedMark サキュバスは檻の中から手を伸ばす。そして指を艶かしく動かしながら
+		CALL COLOR_PRINT(@"和我做一些能让我们更加亲密的事情吧？", カラー_ピンク)
+		;TranslatedMark 私とイイコトして、もっと仲良くなりましょう？
+		PRINTFORMW 一边挥着手
+		;TranslatedMark と手招いている
+		PRINTFORMW %ANAME(対象)%像被热蒸汽漂浮着一样走近笼子前,开始隔着铁栅栏与梦魔亲密起来……
+		;TranslatedMark %ANAME(対象)%は熱に浮かされたように檻の前まで近づき、鉄格子越しのサキュバスとより仲良くなるコトを始めた…
+		PRINTFORML ･･･
+		PRINTFORMW ･･････
+		;キャラが男か女ふたなりの場合
+		IF IS_MALE(対象) || (HAS_PENIS(対象) && RAND:2) || (HAS_PENIS(対象) && TALENT:対象:討厭男人)
+			PRINTFORML 夜晚的拘留所中，听到了饱含甜蜜的婬喘声和在铁栅栏缝隙间碰撞发出的撞击声。
+			;TranslatedMark 夜の留置場に、サキュバスの甘い喘ぎ声と鉄格子の隙間越しにぶつけ合うピストンの音が響いている
+			PRINTFORML %ANAME(対象)%犹如野兽般兴奋，眼中之人不再是应当监视的囚犯，而只是应该被自己侵犯的雌性。
+			;TranslatedMark %ANAME(対象)%は獣のように興奮しており、目の前の相手を、見張るべき女ではなく犯すべき雌としか見ていない
+			PRINTW
+			PRINTFORML 起初%ANAME(対象)%只是打算让梦魔口交，但被梦魔的舌技太过娴熟了
+			;TranslatedMark 最初は%ANAME(対象)%もフェラだけのつもりだったが、サキュバスの余りに巧みな舌使いと
+			PRINTFORMW 喉咙里发出声响，将精液全部喝干，张开嘴巴着看向%ANAME(対象)%。这幅淫秽的模样更加挑起欲望，让肉棒越来越硬。
+			;TranslatedMark 喉を鳴らして精液を飲み干し、空になった口を開けて%ANAME(対象)%を見上げる淫らさが欲望を煽り、肉棒をどんどん硬くさせた
+			PRINTFORML 梦继续隔着铁栅栏服务着仍然坚硬突出的肉棒,用乳夹口交侍奉着。
+			;TranslatedMark サキュバスはさらに、鉄格子越しに突き出された硬いままのペニスをパイズリフェラで奉仕を続けた
+			PRINTFORMW 用长舌头舔舐从乳房间挤出、横跨两侧、在丰满柔软的山峰中卡住的阴茎龟头，并同时摩擦着龟头被肉瓣夹住的部分。
+			;TranslatedMark 大きくもっちりとした双丘で挟み、竿を乳肉で擦り回しながら谷間から飛び出した亀頭を長い舌でねぶる
+			PRINTL
+			PRINTFORML 在梦魔卓越的技巧下,%ANAME(対象)%尽管已经是第二次射精,仍然射出大量精液,足以将她的颜面覆盖。
+			;TranslatedMark 淫魔の卓越したテクに、%ANAME(対象)%は二度目の射精だというのに彼女の顔にかかるほど大量のザーメンを吐き出した
+			PRINTFORMW 梦魔用长舌头慢慢舔去%ANAME(対象)%的精液,那精液溅到了她的脸和胸上,她一面加之妖艳的视线,样子看起来倒像是在享受美味。
+			;TranslatedMark 顔や胸に飛び散った%ANAME(対象)%の精液を、サキュバスは妖艶な視線を向けながら長い舌を使って美味しそうに舐め取っていく
+			PRINTFORML 感受到那视线,肉棒变得更加坚硬。%ANAME(対象)%的头脑已经完全被情欲主宰。
+			;TranslatedMark その視線を受けて、ペニスはますます硬さを増していく。%ANAME(対象)%の頭はすでに肉欲が支配していた
+			PRINTFORMW 看到%ANAME(対象)%这样的姿态，梦魔挂上迷人的笑容，身体转向后方，把丰满的屁股紧贴在铁栅栏上。
+			;TranslatedMark そんな%ANAME(対象)%の様子を見て、サキュバスは蠱惑的な笑みを浮かべて身体を後ろ向きにし、むっちりとしたお尻を鉄格子に押し付ける
+			PRINTFORML 可以从屁股那边看到梦魔裂缝流出的等待接受%ANAME(対象)%之阴茎的淫液，溢满了大腿之间。
+			;TranslatedMark お尻側からも見えるサキュバスの割れ目は、%ANAME(対象)%のペニスを迎えるための淫蜜がすでに溢れ、太ももを伝っていた
+			PRINTFORMW 看到这样的场景，%ANAME(対象)%已经无法控制对梦魔的渴望了……
+			;TranslatedMark そんな光景を見せられては、%ANAME(対象)%のサキュバスを求める欲望にもはや歯止めは効かなかった……
+			PRINTL
+			PRINTFORMW 从那时起，%ANAME(対象)%一直通过铁栅栏抓住梦魔的腰部，保持立身姿势，疯狂地进行冲刺。
+			;TranslatedMark それからずっと、%ANAME(対象)%は鉄格子越しにサキュバスの腰を掴み、立ちバックの体勢で一心不乱にピストンを繰り返していた
+			PRINTFORML %ANAME(対象)%也抚摸起梦魔的身体,她也因被插入感到快乐,淫荡地扭动身体。
+			;TranslatedMark 奥を突かれた快感で淫らに身体をのけぞりくねらせてくるサキュバスの身体にも手を回し、
+			PRINTFORMW 从后面用力揉捏着丰满的乳房，尽情体验着梦魔肉体的柔软度。
+			;TranslatedMark 後ろから大きな乳房をムニムニと揉みしだいて淫魔の肉体の柔らかさを存分に味わっている
+			PRINTL
+			PRINTFORML 梦魔腔内的肉褶像滑溜溜的爬上来一样将刺入进来的肉棒紧缠着
+			;TranslatedMark サキュバスの、溝の深い肉ヒダが侵入してくるペニスをゾリゾリとなぞり上げるように絡みつき、
+			PRINTFORMW 每次拉扯阴茎时，都能让%ANAME(対象)%感受到腰要坏掉的愉悦。
+			;TranslatedMark ペニスを引くたび%ANAME(対象)%に腰が抜けるほどの快感を与えてくる
+			PRINTFORML 那无法忍受的冲动驱使着他插入进去，这一次，梦魔的子宫口紧贴住阳具的顶端，直接吸取着精液。
+			;TranslatedMark それにたまらず突き込むと、今度はサキュバスの子宮口がペニスの鈴口に張り付き、精を直接いただこうと吸い付いてくる
+			PRINTFORMW 想要逃离这种压抑而又充满快感的地狱，必须用肉棒满足梦魔，把她干到阴道收紧松弛为止。
+			;TranslatedMark 押しても引いても押し寄せるこの快楽地獄から逃れるには、膣の締めつけが緩くなるまでサキュバスを満足させるしかない
+			PRINTFORML 但贪欲的梦魔不会满足于一次或两次射精，每次得到精液时，它都会卑劣地扭动着腰部，并乞求下一次。
+			;TranslatedMark しかし貪欲な淫魔は二度、三度どころの射精ではまったく満足せず、精を受けるたびに腰を卑猥にくねらせ次を強請ってくる
+			PRINTFORMW 理性在快乐之流中被彻底粉碎的%ANAME(対象)%，无法抑制内心欲望的涌动，一整夜地奉献精液给梦魔的子宫……
+			;TranslatedMark 快楽の奔流に理性を砕かれた%ANAME(対象)%は欲望のまま、夜通しサキュバスの子宮に精を捧げ続けた……
+			PRINTL
+			PRINTFORML 早上，%ANAME(対象)%虽然意识模糊，但他的阴茎却仍然高昂，仿佛还在期待更多的交合。
+			;TranslatedMark 朝方、%ANAME(対象)%は意識朦朧としながらも、そのペニスだけはもっと交わりたい、と言わんばかりに硬さを保っていた
+			PRINTFORM 梦魔看见这幅光景,满意地微笑着,
+			;TranslatedMark サキュバスはその様を見て満足げに微笑み、
+			CALL COLOR_PRINT(@"下一次再一起来快乐吧♥。", カラー_ピンク)
+			;TranslatedMark 次は檻の中で、一緒に仲良くシましょう♥
+			PRINTFORMW 一边抚摸着脸颊，一边耳语道。
+			;TranslatedMark と頬を撫でながら囁いた
+			PRINTFORMW 与监视対象发生了肉体关系的%ANAME(対象)%，不能反抗那个人的话语，只能点头同意。
+			;TranslatedMark 監視すべき相手と肉体関係を持ってしまった%ANAME(対象)%は、そこの言葉に逆らうことも出来ず頷いた
+			PRINTL
+			PRINTFORML 不能直率地说出%ANAME(対象)%沉迷于她的诱惑，做了一整晚的爱。
+			;TranslatedMark ……%ANAME(対象)%は、見張り相手の誘惑に負けて朝までセックスしていました、などと正直に言う訳にも行かず、
+			PRINTFORMW 结果向上级报告：昨晚一切正常，就离开了。
+			;TranslatedMark 結局報告官には　昨晩は異常なし　とだけ告げて戻った
+			PRINTFORMW 在接下来的监视值班之前，%ANAME(対象)%一边回忆梦魔的肉穴快感，肉棒一边疼痛不已……
+			;TranslatedMark そして次の監視当番までの間、%ANAME(対象)%はサキュバスの肉壷の快感を思い出しては肉棒を疼かせることになる……
+			CALL FUCK(対象, "性技, 性交, Ｃ, 射精", "童貞喪失, 接吻喪失", 0, "梦魔の唇", "", "梦魔の膣", "和姦")
+		;キャラが女の場合
+		ELSE
+			PRINTFORML 在夜间的拘留所里，可以听到%ANAME(対象)%的娇声和彼此柔软的肌肉在铁栅格缝隙之间碰撞的声音。
+			;TranslatedMark 夜の留置場に、%ANAME(対象)%の嬌声と互いの柔肉を鉄格子の隙間越しにぶつけ合う音が響いている
+			PRINTFORMW %ANAME(対象)%的表情已经放松，尽管正在被侵犯，但看上去却是在更积极地摆动着臀部。
+			;TranslatedMark %ANAME(対象)%の表情は蕩けきっており、犯されているはずなのにむしろ積極的に腰を振っているようにさえ見える
+			PRINTL
+			PRINTFORML 最初，%ANAME(対象)%本来只是想浅尝辄止而言。
+			;TranslatedMark 最初は%ANAME(対象)%も、ほんの少しだけのつもりだったが
+			PRINTFORMW 结果梦魔的阳具无法抗拒的形状和熟练的腰部动作，刺激着自己雌性本能的觉醒。
+			;TranslatedMark サキュバスのペニスの余りの逞しさと巧みな腰遣いに、己の雌の本能が目を覚ましてしまった
+			PRINTFORML 隔着铁栅栏像恋人一般温柔地抚慰着融化的%ANAME(対象)%,她裂开的缝隙顺从地迎接进入了梦魔凶残的肉棒。 （已编辑）
+			;TranslatedMark 鉄格子越しに恋人の様に優しく愛撫され、蕩け切った%ANAME(対象)%の割れ目はサキュバスの凶悪なペニスもするりと迎え入れた
+			PRINTFORMW 被无数次插入腔道的最深处,最终被梦魔不断侵犯子宫的肉棒唤醒了快感。
+			;TranslatedMark 何度も奥まで突かれているうちに、サキュバスのペニスで膣穴を犯される快感に目覚めさせられてしまった
+			PRINTL
+			PRINTFORML 最终,%ANAME(対象)%像依赖一般与隔着铁栅栏的梦魔舌头缠绵,在高潮时子宫接受了淫魔的种子。
+			;TranslatedMark やがて%ANAME(対象)%は甘える様に鉄格子の向こうにいるサキュバスと舌を絡めながら、淫魔の種を子宮で受けとめつつ絶頂した
+			PRINTFORML 每次炙热的梦魔精液都在%ANAME(対象)%的阴道内均匀地涂抹着，让身心都疼痛得提高了感度和性欲，下意识地追求更多的快感。
+			;TranslatedMark 熱いサキュバスの精液が%ANAME(対象)%の膣内に塗り込まれる度に心身が疼き、感度と性欲をより高めて更なる快感を求め始める
+			PRINTFORMW 梦魔不止于4、5次射精满足,而是几十发的精液射入%ANAME(対象)%的子宫深处,将被梦魔侵犯的快乐刻印在子宫上。
+			;TranslatedMark サキュバスも４、５回程度の射精では満足せず、%ANAME(対象)%は何十発も淫魔の精を膣奥に放たれ、サキュバスに犯される快楽を子宮に刻み込まれた
+			PRINTFORMW ……最终,天明的时候,%ANAME(対象)%带着融化的表情,用口交清理着浊白且脏污的梦魔肉棒
+			;TranslatedMark ……やがて夜が明ける頃、%ANAME(対象)%は蕩けた表情で白濁で汚れるサキュバスのペニスをフェラで清掃していた
+			PRINTL
+			PRINTFORM 梦魔看见这幅光景,满意地微笑着,
+			;TranslatedMark サキュバスはその様を見て満足げに微笑み、
+			CALL COLOR_PRINT(@"下一次再一起来快乐吧♥。", カラー_ピンク)
+			;TranslatedMark 次は檻の中で、一緒に仲良くシましょう♥
+			PRINTFORMW 一边抚摸着脸颊，一边耳语道。
+			;TranslatedMark と頬を撫でながら囁いた
+			PRINTFORMW 与监视対象发生了肉体关系的%ANAME(対象)%，不能反抗那个人的话语，只能点头同意。
+			;TranslatedMark 監視すべき相手と肉体関係を持ってしまった%ANAME(対象)%は、そこの言葉に逆らうことも出来ず頷いた
+			PRINTL
+			PRINTFORML 不能直率地说出%ANAME(対象)%沉迷于她的诱惑，做了一整晚的爱。
+			;TranslatedMark ……%ANAME(対象)%は、見張り相手の誘惑に負けて朝までセックスしていました、などと正直に言う訳にも行かず、
+			PRINTFORMW 结果向上级报告：昨晚一切正常，就离开了。
+			;TranslatedMark 結局報告官には　昨晩は異常なし　とだけ告げて戻った
+			PRINTFORMW 在接下来的监视值班期间，%ANAME(対象)%一边回想着被那根阴茎侵犯的快感到身体疼痛。
+			;TranslatedMark そして次の監視当番までの間、%ANAME(対象)%はあのペニスに犯される悦びを思い出しては身体を疼かせることになる……
+			CALL FUCK(対象, "欲望, 奉仕, 性技, 性交, 精愛, Ｃ, Ｖ, Ｂ, Ｍ, Ｖ性交, 接吻, 口淫", "接吻喪失, 処女喪失, 膣内射精, 口内射精", GET_SPERM_ID("梦魔"), @"梦魔の\@RAND:2 ? 阴茎 # 唇\@", @"梦魔", "", "和姦")
+		ENDIF
+		PRINTFORML ･･･
+		PRINTFORMW ･･････
+		PRINTFORMW 梦魔赐予的背德快乐深深地刻在%ANAME(対象)%的身体里……
+		;TranslatedMark サキュバスが与えた背徳の快楽は、%ANAME(対象)%の身体に強く刻み込まれた……
+		DVAR:檻の中のサキュバス_篭絡ID = GET_ID(対象)
+		DVAR:檻の中のサキュバス_進行フラグ = 5
+	ENDIF
+
+;兵士に任せる
+ELSE
+	$HOUTI_LOOP
+	PRINTFORML 对士兵使用魅术只是梦魔的特性,并无其他意图。
+	;TranslatedMark …兵士に色目を使うのはサキュバスとしての特性というだけで他意はないのだろう
+	PRINTFORMW %ANAME(MASTER)%决定让现场士兵负责监视，直到确认她真的是来流亡的。
+	;TranslatedMark %ANAME(MASTER)%は亡命の裏付けが取れるまでの間、監視は現場の兵士たちに任せることにした
+	PRINTFORML
+	PRINTFORML ･･･
+	PRINTFORMW ･･････
+	PRINTFORMW 几日后。夜间在监禁场,值班士兵与梦魔不断地交媾着,虽然是这么说，事实上是遭到了侵犯。
+	;TranslatedMark 数日後。夜の留置場で見張りの兵士がサキュバスと交わり、犯されていた
+	PRINTL
+	PRINTFORML 起初温顺友好的梦魔在知道只有这种级别的士兵来监视后，态度发生了改变。
+	;TranslatedMark 最初は従順に、友好的に接していたサキュバスだったが、末端の兵士くらいしか監視に来ないことが分かると
+	PRINTFORMW 她开始露骨地诱惑士兵，到现在为止，已经和几乎与大多数守卫发生过肉体关系。
+	;TranslatedMark 露骨に兵士を誘惑し始め、今では殆どの見張り当番たちと肉体関係を持って篭絡していた
+	PRINTL
+	PRINTFORMW 最初是一名普通的守卫被梦魔的淫气包裹着，像野兽一样沉溺在性爱中。
+	;TranslatedMark 最初はサキュバスの淫気に中てられて獣のように盛っていた見張り番だったが、
+	PRINTFORML 连续2-3次射精而精尽力竭后，梦魔却还没有满足。
+	;TranslatedMark 二度三度も続く射精で体力が尽きてしまった。しかしサキュバスはそれで満足しなかった
+	PRINTFORMW 梦魔将他推倒在地板上,用乘骑位开始侵犯他。与此同时,将尾巴插入他的肛门,摩擦前列腺。
+	;TranslatedMark サキュバスは彼を床に押し倒し、騎乗位で犯し始める。それと同時に、彼の尻穴に尻尾を挿入し前立腺を責める
+	PRINTFORML 然后淫魔用充满口水的深吻一点点地灌满了他的口腔。刚刚还萎靡不振的肉棒一下子重新恢复了硬度。
+	;TranslatedMark そして彼の口内に、ディープキスで淫魔の唾液をたっぷりと流し込む。すると萎えそうだった肉棒は再び硬さを取り戻した
+	PRINTFORMW 士兵们就这样一整夜献出超过极限的精液给魅魔,被侵犯的快乐刻入了骨髓……
+	;TranslatedMark 見張り番はそうやって一晩中サキュバスに限界以上の精を捧げ、淫魔に犯される快楽を骨の髄まで刻み込まれた……
+	PRINTL
+	PRINTFORMW 成为魅魔给予的快乐俘虏的值班士兵,今天也向报告官称“无异常”就回去了……
+	;TranslatedMark サキュバスが与える快楽の虜になった見張り番は、今日も報告官に　異常なし　と告げて帰った…
+	PRINTFORMW 然后梦魔在形式上的牢笼里思考着
+	;TranslatedMark そしてサキュバスは形だけの檻の中で考えた
+	CALL COLOR_PRINT(@"既然来到这里的士兵都已被腐蚀。那么现在该开始行动了。", カラー_注意)
+	;TranslatedMark ここに来た兵士達はみんな篭絡した。そろそろ活動を始めよう
+	PRINTFORML 而且
+	;TranslatedMark と
+	PRINTFORMW 她舔舐着嘴唇，开始以吃掉这个国家的士兵为目标的行动。
+	;TranslatedMark 彼女は舌なめずりをしながら、この国の兵士を食いモノにするための行動を始めようとしていた……
+	DVAR:檻の中のサキュバス_進行フラグ = 2
+ENDIF
+
+RETURN 1

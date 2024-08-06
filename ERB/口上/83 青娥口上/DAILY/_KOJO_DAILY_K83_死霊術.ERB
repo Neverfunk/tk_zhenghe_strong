@@ -1,4 +1,8 @@
-﻿;---------------------
+﻿@KOJO_DAILY_K83_NECRO_TAG	
+    LOCAL = 0
+	SETBIT LOCAL,EVENT_TAG_恶堕
+	RETURN LOCAL
+ ;---------------------
 ;基本的な発生確率(1000分率 100で10%)
 ;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
 ;---------------------
@@ -17,7 +21,7 @@ RETURN 50
 ;死人が1人はいないとダメ(処刑拡張パッチ)対象が記念品になっていると不可
 LOCAL:2 = 0
 FOR LOCAL:0, 0, CHARANUM
-	SIF CFLAG:(LOCAL:0):特殊状態 == 特殊状態_死亡 && CFLAG:(LOCAL:0):1704 == 0
+	SIF CFLAG:(LOCAL:0):特殊状態 == 特殊状態_死亡 && 記念品である:(LOCAL:0):0 == 0
 		;BREAKするとLOCALは1増える
 		GOTO PASSED
 NEXT
@@ -141,7 +145,7 @@ SELECTCASE RESULT
 		PRINTFORMW 「让您久等了，只为%ANAME(MASTER)%而活的忠实仆人完成了」
 		;TranslatedMark 「おまたせしました、%ANAME(MASTER)%のためだけに生きる忠実なしもべができあがりましたわ」
 		CALL COLOR_PRINTW(@"%ANAME(蘇生対象)%复活了", カラー_注意)
-		;TranslatedMark @"%ANAME(蘇生対象)%が蘇りました", カラー_注意
+		;TranslatedMark %ANAME(蘇生対象)%が蘇りました
 	CASE 1
 		PRINTFORMW 「啊，这样没问题吗？」
 		;TranslatedMark 「あら、よろしいんですの？」
@@ -162,4 +166,4 @@ RETURN CFLAG:対象:所属 == CFLAG:MASTER:所属 && CFLAG:対象:行動不能�
 @SELECT_CHARA_LIST_SHOW_LOGIC_KOJO_DAILY_K83_NECRO_OBJ(対象)
 #DIM 対象
 ;(処刑拡張パッチ)対象が記念品になっていると不可
-RETURN CFLAG:対象:特殊状態 == 特殊状態_死亡 && CFLAG:対象:1704 == 0
+RETURN CFLAG:対象:特殊状態 == 特殊状態_死亡 && 記念品である:対象:0 == 0

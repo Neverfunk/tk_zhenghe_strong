@@ -18,6 +18,7 @@
 ;相手の外交計画内ならば、無条件で成立
 IF 相手外交計画 == AI_外交計画_同盟
 	PRINTFORMW %ANAME(MASTER)%请求保护，%ANAME(LOCAL:5)%爽快地答应了…
+	;TranslatedMark %ANAME(MASTER)%が保護を求めると、%ANAME(LOCAL:5)%は快く承諾した…
 	GOTO SUCCESS
 ENDIF
 
@@ -30,14 +31,17 @@ ENDIF
 SELECTCASE 判定値
 	CASE IS >= 50
 		PRINTFORMW %ANAME(君主)%请求保护，%ANAME(相手君主)%爽快地答应了…
+		;TranslatedMark %ANAME(君主)%が保護を求めると、%ANAME(相手君主)%は快く承諾した…
 	CASE 35 TO 49
 		CALL DIPLOMACY_REQUESTED(相手勢力)
 		;要求できるものなし
 		IF RESULT == -1
 			IF INRANGE(判定値, 40, 49)
 				PRINTFORMW %ANAME(君主)%请求保护，%ANAME(相手君主)%虽然苦恼但是还是答应了…
+				;TranslatedMark %ANAME(君主)%が保護を求めると、%ANAME(相手君主)%は悩みつつも承諾した…
 			ELSE
 				PRINTFORMW %ANAME(君主)%请求保护，但是%ANAME(相手君主)%苦恼地拒绝了…
+				;TranslatedMark %ANAME(君主)%が保護を求めると、%ANAME(相手君主)%は悩みつつも断った…
 				RETURN
 			ENDIF
 		ELSEIF RESULT == 0
@@ -45,8 +49,10 @@ SELECTCASE 判定値
 		ENDIF
 	CASEELSE
 		PRINTFORMW %ANAME(君主)%请求保护，%ANAME(相手君主)%拒绝了…
+		;TranslatedMark %ANAME(君主)%は保護を求めたが、%ANAME(相手君主)%は断った…
 		SIF !TMP_COUNTRY_IS_NEIBORING:勢力:相手勢力
 			PRINTFORMW 领地不相邻的情况下，从属比正常情况下更难…
+			;TranslatedMark 領地が隣接していない状態での従属は、通常よりも難しいものとなるようだ…
 		RETURN
 ENDSELECT
 
@@ -57,6 +63,7 @@ CALL INIT_Colony(勢力, 相手勢力)
 PRINTL
 SETCOLOR カラー_注意
 PRINTFORMW 成为了%ANAME(相手君主)%的殖民地
+;TranslatedMark %ANAME(相手君主)%の植民地となりました
 RESETCOLOR
 
 

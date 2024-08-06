@@ -1,4 +1,13 @@
-﻿;---------------------
+﻿@EVENT_DAILY_BANDIT_REQUIRE_RANSOM_TAG()
+	LOCAL = 0
+	SETBIT LOCAL,EVENT_TAG_男性主角无关
+	SETBIT LOCAL,EVENT_TAG_特殊势力
+	SETBIT LOCAL,EVENT_TAG_恶堕
+	SETBIT LOCAL,EVENT_TAG_强奸
+	SETBIT LOCAL,EVENT_TAG_兽奸
+	SETBIT LOCAL,EVENT_TAG_被捕获
+	RETURN LOCAL
+;---------------------
 ;基本的な発生確率(1000分率 100で10%)
 ;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
 ;---------------------
@@ -40,7 +49,7 @@ RETURN デイリー_ジャンル_特殊勢力
 
 FOR LOCAL, 1, CHARANUM
 	;(従属国パッチ)辺境伯はだめ
-	IF CFLAG:LOCAL:所属 == CFLAG:MASTER:所属 && CFLAG:LOCAL:捕虜先 == 野盗 && IS_FEMALE(LOCAL) && RAND:100 < SP_TRAIN_COUNT:LOCAL:特殊勢力_野盗 * 5 && CFLAG:LOCAL:1702 != 1
+	IF CFLAG:LOCAL:所属 == CFLAG:MASTER:所属 && CFLAG:LOCAL:捕虜先 == 野盗 && IS_FEMALE(LOCAL) && RAND:100 < SP_TRAIN_COUNT:LOCAL:特殊勢力_野盗 * 5 && 辺境伯である:LOCAL:0 != 1
 		DAILY_TARGET:DAILY_TARGET_NUM = LOCAL
 		DAILY_TARGET_NUM ++
 	ENDIF
@@ -333,6 +342,7 @@ CALL SINGLE_DRAWLINE
 PRINTFORML 现款:{MONEY}
 ;TranslatedMark 現在の金:{MONEY}
 CALL ASK_MULTI_JUDGE("付", MONEY >= 身代金, "不付", 1, "自己当俘虏来代替", IS_FEMALE(MASTER) && GET_COUNTRY_BOSS(CFLAG:MASTER:所属) != MASTER, "把男人斩了", 1)
+;TranslatedMark "払う", MONEY >= 身代金, "払わない", 1, "代わりに自分が捕虜になる", IS_FEMALE(MASTER) && GET_COUNTRY_BOSS(CFLAG:MASTER:所属) != MASTER, "男を斬り捨てる", 1
 ;払う
 IF RESULT == 0 && MONEY >= 身代金
 	PRINTFORML 「嘿嘿，每次都有啊」
@@ -429,7 +439,7 @@ IF GROUPMATCH(RESULT, 1, 3)
 		PRINTFORMW 土匪向%ANAME(対象)%施加了比平时更凄惨的陵辱……
 		;TranslatedMark 野盗は%ANAME(対象)%へ普段以上に凄惨な陵辱をくわえていく……
 		RESETCOLOR
-		PRINTFORMW 
+		PRINTFORMW
 		SELECTCASE RAND:5
 			CASE 0
 				PRINTFORML 昏暗的房间里，男人们的骂声和女人的尖叫声回响着
@@ -582,7 +592,8 @@ IF GROUPMATCH(RESULT, 1, 3)
 		;TranslatedMark %ANAME(対象)%が解放されましたが、行方知らずになりました
 		RESETCOLOR
 		FOR LOCAL, 0, RAND(5, 8)
-			CALL FUCK_GANGBANG(対象, GET_SPERM_ID("野盗"), @"野盗の\@ RAND:2 ? ペニス # 唇\@", "野盗")
+			CALL FUCK_GANGBANG(対象, GET_SPERM_ID("野盗"), @"野盗の\@ RAND:2 ? 阴茎 # 唇\@", "野盗")
+			;TranslatedMark 対象, GET_SPERM_ID("野盗"), @"野盗の\@ RAND:2 ? ペニス # 唇\@", "野盗"
 		NEXT
 		CALL CHANGE_COUNTRY(対象, 0, 1)
 		SETCOLOR カラー_警告

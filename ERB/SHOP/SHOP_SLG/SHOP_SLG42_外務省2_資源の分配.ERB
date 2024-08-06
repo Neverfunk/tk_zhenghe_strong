@@ -6,7 +6,8 @@
 
 CALL TMP_CREATE_COUNTRY_BOSS_MAP
 
-PRINTL ◇辺境伯◇
+PRINTL ◇边境伯◇
+;TranslatedMark ◇辺境伯◇
 FOR LOCAL:0, 0, MAX_TREATY_M
 	FOR LOCAL:1, 0, MAX_TREATY_COUNTRY
 		IF TREATY_M_COUNTRY:(LOCAL:0):(LOCAL:1):1 == CFLAG:MASTER:所属
@@ -28,6 +29,7 @@ NEXT
 PRINTL
 
 PRINTL ◇殖民地◇
+;TranslatedMark ◇植民地◇
 FOR LOCAL:0, 0, MAX_TREATY_CO
 	FOR LOCAL:1, 0, MAX_TREATY_COUNTRY
 		IF TREATY_CO_COUNTRY:(LOCAL:0):(LOCAL:1):1 == CFLAG:MASTER:所属
@@ -70,7 +72,8 @@ NEXT
 PRINTL
 
 CALL SINGLE_DRAWLINE
-PRINTBUTTON " 0[    取消]", 0
+PRINTBUTTON "0[    取消]", 0
+;TranslatedMark 0[    戻る]
 PRINTL
 
 REDRAW 0
@@ -97,7 +100,8 @@ ENDIF
 
 CALL TMP_CREATE_COUNTRY_BOSS_MAP
 
-PRINTL ◇辺境伯◇
+PRINTL ◇边境伯◇
+;TranslatedMark ◇辺境伯◇
 FOR LOCAL:0, 0, MAX_TREATY_M
 	FOR LOCAL:1, 0, MAX_TREATY_COUNTRY
 		IF TREATY_M_COUNTRY:(LOCAL:0):(LOCAL:1):1 == CFLAG:MASTER:所属
@@ -116,6 +120,7 @@ NEXT
 PRINTL
 
 PRINTL ◇殖民地◇
+;TranslatedMark ◇植民地◇
 FOR LOCAL:0, 0, MAX_TREATY_CO
 	FOR LOCAL:1, 0, MAX_TREATY_COUNTRY
 		IF TREATY_CO_COUNTRY:(LOCAL:0):(LOCAL:1):1 == CFLAG:MASTER:所属
@@ -152,7 +157,8 @@ NEXT
 PRINTL
 
 CALL SINGLE_DRAWLINE
-PRINTBUTTON " 0[    取消]", 0
+PRINTBUTTON "0[    取消]", 0
+;TranslatedMark 0[    戻る]
 PRINTL
 
 REDRAW 0
@@ -212,7 +218,8 @@ NEXT
 PRINTL
 
 CALL SINGLE_DRAWLINE
-PRINTBUTTON " 0[    取消]", 0
+PRINTBUTTON "0[    取消]", 0
+;TranslatedMark 0[    戻る]
 PRINTL
 
 REDRAW 0
@@ -273,7 +280,8 @@ IF COUNTRY_Protectorate:(CFLAG:MASTER:所属) >= 2
 	PRINTL
 ENDIF
 
-PRINTL ◇辺境伯◇
+PRINTL ◇边境伯◇
+;TranslatedMark ◇辺境伯◇
 FOR LOCAL:0, 0, MAX_TREATY_M
 	FOR LOCAL:1, 0, MAX_TREATY_COUNTRY
 		IF TREATY_M_COUNTRY:(LOCAL:0):(LOCAL:1):1 == CFLAG:MASTER:所属
@@ -292,6 +300,7 @@ NEXT
 PRINTL
 
 PRINTL ◇殖民地◇
+;TranslatedMark ◇植民地◇
 FOR LOCAL:0, 0, MAX_TREATY_CO
 	FOR LOCAL:1, 0, MAX_TREATY_COUNTRY
 		IF TREATY_CO_COUNTRY:(LOCAL:0):(LOCAL:1):1 == CFLAG:MASTER:所属
@@ -328,7 +337,99 @@ NEXT
 PRINTL
 
 CALL SINGLE_DRAWLINE
-PRINTBUTTON " 0[    取消]", 0
+PRINTBUTTON "0[    取消]", 0
+;TranslatedMark 0[    戻る]
+PRINTL
+
+REDRAW 0
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 0
+	REDRAW 1
+	RETURN 0
+ELSEIF IS_COUNTRY(RESULT)
+	REDRAW 1
+	RETURN RESULT
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+;------------------------------------------------------------------
+;特殊勢力を含めた従属国を検索・表示する(「捕虜を譲受ける」用)
+;------------------------------------------------------------------
+@Colonial_Office_indicate_6
+#DIM 表示勢力
+#DIM 捕虜所持数, MAX_COUNTRY
+
+CALL TMP_CREATE_COUNTRY_BOSS_MAP
+
+;従属国の捕虜の数をカウント
+FOR LOCAL:0, 0, CHARANUM
+	IF CFLAG:(LOCAL:0):捕虜先
+		捕虜所持数:(CFLAG:(LOCAL:0):捕虜先) ++
+	ENDIF
+NEXT
+
+PRINTL ◇边境伯◇
+;TranslatedMark ◇辺境伯◇
+FOR LOCAL:0, 0, MAX_TREATY_M
+	FOR LOCAL:1, 0, MAX_TREATY_COUNTRY
+		IF TREATY_M_COUNTRY:(LOCAL:0):(LOCAL:1):1 == CFLAG:MASTER:所属
+			FOR LOCAL:2, 0, MAX_TREATY_COUNTRY
+				IF TREATY_M_COUNTRY:(LOCAL:0):(LOCAL:2):0 > 0 && 捕虜所持数:(TREATY_M_COUNTRY:(LOCAL:0):(LOCAL:2):0) > 0
+					表示勢力 = TREATY_M_COUNTRY:(LOCAL:0):(LOCAL:2):0
+					SETCOLOR COUNTRY_COLOR:(表示勢力)
+					PRINTBUTTON @"[%SNAME(TMP_COUNTRY_BOSS_NUMBER:(表示勢力)), MAX_CHARANAME_LENGTH / 2, LEFT%]", 表示勢力
+					RESETCOLOR
+					PRINTL
+				ENDIF
+			NEXT
+		ENDIF
+	NEXT
+NEXT
+PRINTL
+
+PRINTL ◇殖民地◇
+;TranslatedMark ◇植民地◇
+FOR LOCAL:0, 0, MAX_TREATY_CO
+	FOR LOCAL:1, 0, MAX_TREATY_COUNTRY
+		IF TREATY_CO_COUNTRY:(LOCAL:0):(LOCAL:1):1 == CFLAG:MASTER:所属
+			FOR LOCAL:2, 0, MAX_TREATY_COUNTRY
+				IF TREATY_CO_COUNTRY:(LOCAL:0):(LOCAL:2):0 > 0 && 捕虜所持数:(TREATY_CO_COUNTRY:(LOCAL:0):(LOCAL:2):0) > 0
+					表示勢力 = TREATY_CO_COUNTRY:(LOCAL:0):(LOCAL:2):0
+					SETCOLOR COUNTRY_COLOR:(表示勢力)
+					PRINTBUTTON @"[%SNAME(TMP_COUNTRY_BOSS_NUMBER:(表示勢力)), MAX_CHARANAME_LENGTH / 2, LEFT%]", 表示勢力
+					RESETCOLOR
+					PRINTL
+				ENDIF
+			NEXT
+		ENDIF
+	NEXT
+NEXT
+PRINTL
+
+PRINTL ◇傀儡国◇
+FOR LOCAL:0, 0, MAX_TREATY_P
+	FOR LOCAL:1, 0, MAX_TREATY_COUNTRY
+		IF TREATY_P_COUNTRY:(LOCAL:0):(LOCAL:1):1 == CFLAG:MASTER:所属
+			FOR LOCAL:2, 0, MAX_TREATY_COUNTRY
+				IF TREATY_P_COUNTRY:(LOCAL:0):(LOCAL:2):0 > 0 && 捕虜所持数:(TREATY_P_COUNTRY:(LOCAL:0):(LOCAL:2):0) > 0
+					表示勢力 = TREATY_P_COUNTRY:(LOCAL:0):(LOCAL:2):0
+					SETCOLOR COUNTRY_COLOR:(表示勢力)
+					PRINTBUTTON @"[%SNAME(TMP_COUNTRY_BOSS_NUMBER:(表示勢力)), MAX_CHARANAME_LENGTH / 2, LEFT%]", 表示勢力
+					RESETCOLOR
+					PRINTL
+				ENDIF
+			NEXT
+		ENDIF
+	NEXT
+NEXT
+PRINTL
+
+CALL SINGLE_DRAWLINE
+PRINTBUTTON "0[    取消]", 0
+;TranslatedMark 0[    戻る]
 PRINTL
 
 REDRAW 0
@@ -368,11 +469,13 @@ NEXT
 
 IF 自国都市領有数 <= 1
 	PRINTFORMW 没有可以割让的领土
+	;TranslatedMark 割譲できる領土がありません
 	RETURN 0
 ENDIF
 
 PRINTFORML 请选择要交付给的従属国
-CALL Colonial_Office_indicate_2
+;TranslatedMark 対象となる従属国を選択してください
+CALL Colonial_Office_indicate_4
 
 IF RESULT == 0
 	RETURN 0
@@ -382,6 +485,7 @@ ENDIF
 譲受勢力名 = GET_COUNTRY_BOSS(譲受勢力)
 
 PRINTFORML 请选择要割让的领土
+;TranslatedMark 次に,譲渡したい自国領土を選択してください
 CALL SINGLE_DRAWLINE
 
 FIRST_LINE = LINECOUNT
@@ -392,7 +496,8 @@ CALL DRAWMAP
 CALL RESET_CITY_COLOR
 CALL SINGLE_DRAWLINE
 
-PRINTBUTTON " 0[取消]", 0
+PRINTBUTTON "0[取消]", 0
+;TranslatedMark 0[戻る]
 PRINTL
 
 REDRAW 0
@@ -413,6 +518,7 @@ ENDIF
 
 IF 都市所持勢力 != CFLAG:MASTER:所属
 	PRINTFORMW 只能割让自己的城市
+	;TranslatedMark 自国の領土から都市を選んでください
 	CLEARLINE 1
 	GOTO INPUT_LOOP
 ENDIF
@@ -424,6 +530,7 @@ IF 都市 >= 0 && CITY_OWNER:都市 == CFLAG:MASTER:所属
 	CALL SHOW_CITY_INFO(都市)
 	CALL SINGLE_DRAWLINE
 	PRINTFORML 要割让这块领土吗？
+	;TranslatedMark この領土を割譲しますか？
 
 	;はい／いいえ入力処理
 	CALL ASK_YN()
@@ -433,6 +540,7 @@ IF 都市 >= 0 && CITY_OWNER:都市 == CFLAG:MASTER:所属
 	ENDIF
 
 	PRINTFORMW %GET_CITYNAME(都市)%成为了%ANAME(譲受勢力名)%势力的领土
+	;TranslatedMark %GET_CITYNAME(都市)%は%ANAME(譲受勢力名)%勢力の領土になりました
 	CALL SINGLE_MINIMIZE(都市)
 	CITY_OWNER:(都市) = 譲受勢力
 	;互いの国同士の好感度を上昇させ敵対値を低下させる
@@ -453,7 +561,8 @@ GOTO INPUT_LOOP
 #DIM 譲渡勢力
 #DIM 譲渡勢力名
 
-PRINTFORML 请选择成为对象的従属国
+PRINTFORML 请选择要交付给的従属国
+;TranslatedMark 対象となる従属国を選択してください
 CALL Colonial_Office_indicate_2
 
 IF RESULT == 0
@@ -473,10 +582,12 @@ NEXT
 
 IF 相手方都市領有数 <= 1
 	PRINTFORMW 对方没有可以割让的领土
+	;TranslatedMark 対象勢力に割譲できる領土がありません
 	RETURN 0
 ENDIF
 
 PRINTFORML 请选择要接收的领土
+;TranslatedMark 次に,譲受けたい領土を選択してください
 CALL SINGLE_DRAWLINE
 
 FIRST_LINE = LINECOUNT
@@ -487,7 +598,8 @@ CALL DRAWMAP
 CALL RESET_CITY_COLOR
 CALL SINGLE_DRAWLINE
 
-PRINTBUTTON " 0[取消]", 0
+PRINTBUTTON "0[取消]", 0
+;TranslatedMark 0[戻る]
 PRINTL
 
 REDRAW 0
@@ -508,6 +620,7 @@ ENDIF
 
 IF 都市所持勢力 != 譲渡勢力
 	PRINTFORMW 只能选择%ANAME(譲渡勢力名)%的领土
+	;TranslatedMark %ANAME(譲渡勢力名)%の領土から都市を選んでください
 	CLEARLINE 1
 	GOTO INPUT_LOOP
 ENDIF
@@ -519,6 +632,7 @@ IF 都市 >= 0 && CITY_OWNER:都市 == 譲渡勢力
 	CALL SHOW_CITY_INFO(都市)
 	CALL SINGLE_DRAWLINE
 	PRINTFORML 你要接收这块领地吗？
+	;TranslatedMark この領土を譲受けますか？
 
 	;はい／いいえ入力処理
 	CALL ASK_YN()
@@ -528,6 +642,7 @@ IF 都市 >= 0 && CITY_OWNER:都市 == 譲渡勢力
 	ENDIF
 
 	PRINTFORMW %GET_CITYNAME(都市)%成为了自己国家的领地
+	;TranslatedMark %GET_CITYNAME(都市)%は自国の領土になりました
 	CALL SINGLE_MINIMIZE(都市)
 	CITY_OWNER:(都市) = CFLAG:MASTER:所属
 	;互いの国同士の敵対値を上昇させ好感度を低下させる
@@ -548,8 +663,9 @@ GOTO INPUT_LOOP
 
 FIRST_LINE:0 = LINECOUNT
 
-PRINTFORML 请选择成为对象的従属国
-CALL Colonial_Office_indicate_2
+PRINTFORML 请选择要交付给的従属国
+;TranslatedMark 対象となる従属国を選択してください
+CALL Colonial_Office_indicate_4
 
 IF RESULT == 0
 	RETURN 0
@@ -560,17 +676,22 @@ ENDIF
 
 $SEND_MONEY_LOOP
 PRINTFORML 请输入想要转让给%ANAME(譲受勢力名)%勢力的国庫資金的数字(手动输入・输入0以下取消, 最大50000)
+;TranslatedMark %ANAME(譲受勢力名)%勢力に譲渡したい国庫資金の額を入力してください(手入力・ボタンから入力、0以下でキャンセル, 最大50000)
 
 CALL ICPRINT(@"現在的国庫:<{MONEY:(CFLAG:MASTER:所属)}>", "L", カラー_注意)
+;TranslatedMark 現在の国庫:<{MONEY:(CFLAG:MASTER:所属)}>
 FOR LOCAL, 0, VARSIZE("支払額")
 	SIF MONEY:(CFLAG:MASTER:所属) < 支払額:LOCAL
 		BREAK
 	PRINTBUTTON @"[支付{支払額:LOCAL}]", 支払額:LOCAL
+	;TranslatedMark [{支払額:LOCAL}払う]
 	PRINTL
 NEXT
 PRINTFORML
 PRINTBUTTON @"[支付{MONEY:(CFLAG:MASTER:所属)}]", MONEY:(CFLAG:MASTER:所属)
+;TranslatedMark [{MONEY:(CFLAG:MASTER:所属)}払う]
 PRINTFORM [0] 取消
+;TranslatedMark [0] 戻る
 INPUT
 IF RESULT <= 0
 	CLEARLINE LINECOUNT - FIRST_LINE:0
@@ -581,6 +702,7 @@ ELSEIF MONEY:(CFLAG:MASTER:所属) < RESULT || RESULT > 50000
 ENDIF
 
 PRINTFORML 向%ANAME(譲受勢力名)%势力转让了国库资金 {RESULT}
+;TranslatedMark %ANAME(譲受勢力名)%勢力に国庫資金 {RESULT} を譲渡しました
 MONEY:(CFLAG:MASTER:所属) -= RESULT
 MONEY:譲受勢力 += RESULT
 
@@ -613,11 +735,13 @@ RETURN 1
 
 IF 自国残存兵数 < 500
 	PRINTFORMW 至少需要保留500名士兵
+	;TranslatedMark 最低でも500以上の残存兵数が必要です
 	RETURN 0
 ENDIF
 
-PRINTFORML 请选择成为对象的従属国
-CALL Colonial_Office_indicate_2
+PRINTFORML 请选择要交付给的従属国
+;TranslatedMark 対象となる従属国を選択してください
+CALL Colonial_Office_indicate_4
 
 IF RESULT == 0
 	RETURN 0
@@ -629,22 +753,30 @@ ENDIF
 
 SETCOLOR COUNTRY_COLOR:(CFLAG:MASTER:所属)
 PRINTFORML [%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%]
+;TranslatedMark [%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%]
 RESETCOLOR
-PRINTFORML 総兵数:  {GET_SUM_SOLDIER(CFLAG:MASTER:所属)}
-PRINTFORML 防衛兵数:{GET_SUM_ARMY_DF(CFLAG:MASTER:所属)}
-PRINTFORML 残存兵数:{自国残存兵数}
+PRINTFORML 總兵數:  {GET_SUM_SOLDIER(CFLAG:MASTER:所属)}
+;TranslatedMark 総兵数:  {GET_SUM_SOLDIER(CFLAG:MASTER:所属)}
+PRINTFORML 防衛兵數:{GET_SUM_ARMY_DF(CFLAG:MASTER:所属)}
+;TranslatedMark 防衛兵数:{GET_SUM_ARMY_DF(CFLAG:MASTER:所属)}
+PRINTFORML 殘存兵數:{自国残存兵数}
+;TranslatedMark 残存兵数:{自国残存兵数}
 PRINTFORML
 
 SETCOLOR COUNTRY_COLOR:譲受勢力
 PRINTFORML [%ANAME(譲受勢力名)%]
 RESETCOLOR
-PRINTFORML 総兵数:  {GET_SUM_SOLDIER(譲受勢力)}
-PRINTFORML 防衛兵数:{GET_SUM_ARMY_DF(譲受勢力)}
-PRINTFORML 残存兵数:{相手国残存兵数}
+PRINTFORML 總兵數:  {GET_SUM_SOLDIER(譲受勢力)}
+;TranslatedMark 総兵数:  {GET_SUM_SOLDIER(譲受勢力)}
+PRINTFORML 防衛兵數:{GET_SUM_ARMY_DF(譲受勢力)}
+;TranslatedMark 防衛兵数:{GET_SUM_ARMY_DF(譲受勢力)}
+PRINTFORML 殘存兵數:{相手国残存兵数}
+;TranslatedMark 残存兵数:{相手国残存兵数}
 PRINTFORML
 CALL SINGLE_DRAWLINE
 
 PRINTFORML 请输入要转让的兵力数(0以下取消)
+;TranslatedMark 譲渡する兵数を入力して下さい(0以下でキャンセル)
 
 CALL DRAW_SOLDIER_INPUT(自国残存兵数)
 
@@ -658,10 +790,12 @@ IF LOCAL:2 <= 0
 ELSEIF LOCAL:2 > 0 && LOCAL:2 < 500
 	CLEARLINE 1
 	PRINTL 至少需要转让500名士兵
+	;TranslatedMark 最低でも500以上の兵を譲渡する必要があります
 	GOTO INPUT_LOOP
 ELSEIF RESULT > 自国残存兵数
 	CLEARLINE 1
 	PRINTL 兵力不足
+	;TranslatedMark 兵数が不足しています
 	GOTO INPUT_LOOP
 ENDIF
 
@@ -669,6 +803,7 @@ COUNTRY_SOLDIER:(CFLAG:MASTER:所属) -= LOCAL:2
 COUNTRY_SOLDIER:譲受勢力 += LOCAL:2
 
 PRINTFORMW %ANAME(MASTER)%向%ANAME(譲受勢力名)%转让了兵力{LOCAL:2}
+;TranslatedMark %ANAME(MASTER)%は%ANAME(譲受勢力名)%に兵{LOCAL:2}を譲渡しました
 
 ;好感度上昇値・敵対値下降値の計算
 ;同じ兵数でも、自国の規模が小さいほど、また相手勢力の規模が小さいほど効果が高い
@@ -700,7 +835,8 @@ RETURN 1
 
 自国残存兵数 = COUNTRY_SOLDIER:(CFLAG:MASTER:所属)
 
-PRINTFORML 请选择成为对象的従属国
+PRINTFORML 请选择要交付给的従属国
+;TranslatedMark 対象となる従属国を選択してください
 CALL Colonial_Office_indicate_2
 
 IF RESULT == 0
@@ -713,27 +849,36 @@ ENDIF
 
 IF 相手国残存兵数 < 500
 	PRINTFORMW 对方最少需要剩余500人
+	;TranslatedMark 対象に最低でも500以上の残存兵数が必要です
 	RETURN 0
 ENDIF
 
 SETCOLOR COUNTRY_COLOR:(CFLAG:MASTER:所属)
 PRINTFORML [%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%]
+;TranslatedMark [%ANAME(GET_COUNTRY_BOSS(CFLAG:MASTER:所属))%]
 RESETCOLOR
-PRINTFORML 総兵数:  {GET_SUM_SOLDIER(CFLAG:MASTER:所属)}
-PRINTFORML 防衛兵数:{GET_SUM_ARMY_DF(CFLAG:MASTER:所属)}
-PRINTFORML 残存兵数:{自国残存兵数}
+PRINTFORML 總兵數:  {GET_SUM_SOLDIER(CFLAG:MASTER:所属)}
+;TranslatedMark 総兵数:  {GET_SUM_SOLDIER(CFLAG:MASTER:所属)}
+PRINTFORML 防衛兵數:{GET_SUM_ARMY_DF(CFLAG:MASTER:所属)}
+;TranslatedMark 防衛兵数:{GET_SUM_ARMY_DF(CFLAG:MASTER:所属)}
+PRINTFORML 殘存兵數:{自国残存兵数}
+;TranslatedMark 残存兵数:{自国残存兵数}
 PRINTFORML
 
 SETCOLOR COUNTRY_COLOR:譲渡勢力
 PRINTFORML [%ANAME(譲渡勢力名)%]
 RESETCOLOR
-PRINTFORML 総兵数:  {GET_SUM_SOLDIER(譲渡勢力)}
-PRINTFORML 防衛兵数:{GET_SUM_ARMY_DF(譲渡勢力)}
-PRINTFORML 残存兵数:{相手国残存兵数}
+PRINTFORML 總兵數:  {GET_SUM_SOLDIER(譲渡勢力)}
+;TranslatedMark 総兵数:  {GET_SUM_SOLDIER(譲渡勢力)}
+PRINTFORML 防衛兵數:{GET_SUM_ARMY_DF(譲渡勢力)}
+;TranslatedMark 防衛兵数:{GET_SUM_ARMY_DF(譲渡勢力)}
+PRINTFORML 殘存兵數:{相手国残存兵数}
+;TranslatedMark 残存兵数:{相手国残存兵数}
 PRINTFORML
 CALL SINGLE_DRAWLINE
 
 PRINTFORML 请输入要接收的兵力数(0以下取消)
+;TranslatedMark 譲受けたい兵数を入力して下さい(0以下でキャンセル)
 
 CALL DRAW_SOLDIER_INPUT(相手国残存兵数)
 
@@ -746,11 +891,13 @@ IF LOCAL:2 <= 0
 	RETURN 0
 ELSEIF LOCAL:2 > 0 && LOCAL:2 < 500
 	CLEARLINE 1
-	PRINTL 至少需要接收500名士兵
+	PRINTL 至少需要转让500名士兵
+	;TranslatedMark 最低でも500以上の兵を譲渡する必要があります
 	GOTO INPUT_LOOP
 ELSEIF RESULT > 相手国残存兵数
 	CLEARLINE 1
 	PRINTL 兵力不足
+	;TranslatedMark 兵数が不足しています
 	GOTO INPUT_LOOP
 ENDIF
 
@@ -758,11 +905,12 @@ COUNTRY_SOLDIER:譲渡勢力 -= LOCAL:2
 COUNTRY_SOLDIER:(CFLAG:MASTER:所属) += LOCAL:2
 
 PRINTFORMW %ANAME(MASTER)%从%ANAME(譲渡勢力名)%那里接收了兵力{LOCAL:2}
+;TranslatedMark %ANAME(MASTER)%は%ANAME(譲渡勢力名)%から兵{LOCAL:2}を譲受けました
 
 RETURN 1
 
 ;-------------------------------------------------
-;捕虜を譲受ける
+;捕虜を譲受ける 特殊勢力からも可能
 ;-------------------------------------------------
 @Colonial_Office_ACQUISITION_prisoner
 #DIM FIRST_LINE
@@ -773,8 +921,9 @@ RETURN 1
 #DIM 捕虜所持数
 #DIM 対象
 
-PRINTFORML 请选择成为对象的従属国
-CALL Colonial_Office_indicate_2
+PRINTFORML 请选择要交付给的従属国
+;TranslatedMark 対象となる従属国を選択してください
+CALL Colonial_Office_indicate_6
 
 IF RESULT == 0
 	RETURN 0
@@ -796,6 +945,7 @@ NEXT
 
 IF 捕虜所持数 <= 0
 	PRINTFORMW 对象势力没有可选择的俘虏
+	;TranslatedMark 対象勢力は捕虜を持っていません
 	RETURN 0
 ENDIF
 
@@ -805,6 +955,7 @@ $CHARA_LIST_LOOP
 
 CALL SINGLE_DRAWLINE
 PRINTFORML 请选择想要转让的俘虏
+;TranslatedMark 譲受けたい捕虜を選択して下さい
 CALL SINGLE_DRAWLINE
 
 CALL SELECT_CHARA_LIST_ONLY_LOGIC_SLG("ACQUISITION_prisoner", "NONE")
@@ -821,6 +972,7 @@ CALL SINGLE_DRAWLINE
 CALL SHOW_INFO(対象)
 CALL SINGLE_DRAWLINE
 PRINTFORML 要将这名角色作为%ANAME(自国勢力名)%势力的俘虏吗？
+;TranslatedMark このキャラを%ANAME(自国勢力名)%勢力の捕虜としますか？
 
 ;はい／いいえ入力処理
 CALL ASK_YN()
@@ -829,9 +981,10 @@ IF RESULT == 1
 	GOTO CHARA_LIST_LOOP
 ENDIF
 
-; CFLAG:対象:捕虜先 = 自国勢力
-CALL CAPTURE(対象,自国勢力)
+CFLAG:対象:捕虜先 = 自国勢力
+
 PRINTFORML %ANAME(対象)%成为了%ANAME(自国勢力名)%势力的俘虏
+;TranslatedMark %ANAME(対象)%は%ANAME(自国勢力名)%勢力の捕虜になりました
 
 RETURN 1
 

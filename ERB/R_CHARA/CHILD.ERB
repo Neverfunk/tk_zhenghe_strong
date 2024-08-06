@@ -580,6 +580,11 @@ NEXT
 #DIM 母
 父 = ID_TO_CHARA(CFLAG:父親)
 母 = ID_TO_CHARA(CFLAG:母親)
+
+;(触手勢力拡張パッチ)父親が触手であるとき触手タグを付与
+SIF CFLAG:父親 == GET_SPERM_ID("触手")
+	CALL ADD_TAG(TARGET, タグ_触手)
+
 SIF 父 < 0
 	GOTO FATHER_CANCEL
 FOR LOCAL, 0, MAX_TAG
@@ -590,10 +595,22 @@ NEXT
 
 $FATHER_CANCEL
 
-SIF 母 < 0
+IF 母 < 0
+	;(触手勢力拡張パッチ)触手タグがあるとき妖術知識を付与
+	IF HAS_TAG(TARGET, タグ_触手)
+		TALENT:妖術知識 = 1
+		ABL:妖術 = RAND:30 + 10
+	ENDIF
 	RETURN
+ENDIF
 FOR LOCAL, 0, MAX_TAG
 	SIF TAG:母:LOCAL != -1 && RAND:2 && (TAG:母:LOCAL != タグ_蓬莱人)
 		CALL ADD_TAG(TARGET, TAG:母:LOCAL)
 NEXT
+
+;(触手勢力拡張パッチ)触手タグがあるとき妖術知識を付与
+IF HAS_TAG(TARGET, タグ_触手)
+	TALENT:妖術知識 = 1
+	ABL:妖術 = RAND:30 + 10
+ENDIF
 

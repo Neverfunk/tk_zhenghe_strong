@@ -4,17 +4,24 @@
 ;-------------------------------------------------
 @SCENARIO_NAME_31
 RESULTS = 無法無天的罪悪 Redux
+;TranslatedMark 悪の栄えた試し無しRedux
 RETURN
 
 @SCENARIO_INTRO_31
 PRINTFORML
 PRINTFORMW 幻想郷分裂了！
+;TranslatedMark 幻想郷は分裂した！
 PRINTFORMW 在激烈的勢力爭奪中　出現了一位非常暴虐的人
+;TranslatedMark 熾烈なる勢力争いに乗じて　ワルい奴らが現れ暴虐の限りを尽くした
 PRINTFORMW 因為長時間的戦闘変得非常疲憊的幻想鄉的少女們被迫撤退　最终不得已　全面投降了
+;TranslatedMark 長きに渡る戦いにより疲弊した幻想少女たちは撤退を　余儀なくされ　ついに全面降伏してしまった
 PRINTFORMW 现在是时候站起来！团结一致争取独立！
+;TranslatedMark 今こそ立ち上がれ！力を合わせて独立を勝ち取ろう！
 PRINTFORMW 
 PRINTFORMW ◇注意◇
+;TranslatedMark ◇ちゅうい◇
 PRINTFORMW 必然会出現強暴女子的特殊勢力
+;TranslatedMark 女の子に乱暴する特殊勢力が必ず出現します
 PRINTFORMW 
 PRINTL
 
@@ -31,6 +38,7 @@ FLAG:4 = 0
 #DIM 狂信者
 #DIM 連邦ナンバー
 #DIM 友好
+#DIM 瑞霊所属
 ;勢力設定
 COUNTRY_BOSS:0 = 0
 COUNTRY_COLOR:0 = GETDEFCOLOR()
@@ -119,6 +127,7 @@ CFLAG:(NAME_TO_CHARA("大江戸人形")):1 = 3
 CFLAG:(NAME_TO_CHARA("ゴリアテ人形")):1 = 3
 CFLAG:(NAME_TO_CHARA("朱鷺子")):1 = 3
 CFLAG:(NAME_TO_CHARA("成美")):1 = 3
+CFLAG:(NAME_TO_CHARA("慧ノ子")):1 = 3
 
 ;--------ひとざとをまもるよ--------
 COUNTRY_BOSS:4 = GET_ID(NAME_TO_CHARA("星"))
@@ -219,6 +228,9 @@ CFLAG:(NAME_TO_CHARA("矜羯羅")):1 = 7
 CFLAG:(NAME_TO_CHARA("瓔花")):1 = 7
 CFLAG:(NAME_TO_CHARA("潤美")):1 = 7
 CFLAG:(NAME_TO_CHARA("久侘歌")):1 = 7
+
+CFLAG:(NAME_TO_CHARA("残無")):1 = 7
+CFLAG:(NAME_TO_CHARA("日狭美")):1 = 7
 
 ;--------妖怪の山連合--------
 COUNTRY_BOSS:8 = GET_ID(NAME_TO_CHARA("神奈子"))
@@ -349,6 +361,8 @@ CFLAG:(NAME_TO_CHARA("小兎姫")):1 = 15
 
 CFLAG:(NAME_TO_CHARA("里香")):1 = 15
 CFLAG:(NAME_TO_CHARA("明羅")):1 = 15
+CFLAG:(NAME_TO_CHARA("呪子")):1 = 15
+CFLAG:(NAME_TO_CHARA("魔天使")):1 = 15
 ;人里の住人
 CFLAG:(NAME_TO_CHARA("運松")):1 = 15
 CFLAG:(NAME_TO_CHARA("蟒蛇")):1 = 15
@@ -395,20 +409,32 @@ CFLAG:(NAME_TO_CHARA("幻月")):1 = 17
 
 ;--------畜生界暫定同盟--------
 COUNTRY_BOSS:18 = GET_ID(NAME_TO_CHARA("八千慧"))
-COUNTRY_COLOR:18 = 0x9900ff
+COUNTRY_COLOR:18 = 0xffe8a5
 COUNTRY_AI_TYPE:18 = AI_防衛
 
 CITY_OWNER:GET_CITYNUMBER("畜生界") = 18
-CITY_OWNER:GET_CITYNUMBER("霊長園") = 18
-CITY_OWNER:GET_CITYNUMBER("霊長園大墳墓") = 18
+CITY_OWNER:GET_CITYNUMBER("賽之河原") = 18
 
 ;畜生界の皆様
 CFLAG:(NAME_TO_CHARA("八千慧")):1 = 18
+CFLAG:(NAME_TO_CHARA("美天")):1 = 18
 CFLAG:(NAME_TO_CHARA("早鬼")):1 = 18
-CFLAG:(NAME_TO_CHARA("磨弓")):1 = 18
-CFLAG:(NAME_TO_CHARA("袿姫")):1 = 18
 CFLAG:(NAME_TO_CHARA("尤魔")):1 = 18
+CFLAG:(NAME_TO_CHARA("ちやり")):1 = 18
 
+;--------霊長園--------
+COUNTRY_BOSS:19 = GET_ID(NAME_TO_CHARA("袿姫"))
+COUNTRY_COLOR:19 = 0x5dbcf2
+COUNTRY_AI_TYPE:19 = AI_防衛
+
+CITY_OWNER:GET_CITYNUMBER("霊長園") = 19
+CITY_OWNER:GET_CITYNUMBER("霊長園大墳墓") = 19
+
+CFLAG:(NAME_TO_CHARA("磨弓")):1 = 19
+CFLAG:(NAME_TO_CHARA("袿姫")):1 = 19
+
+;瑞霊は野盗・触手・狂信者・自警団のどれかに所属
+瑞霊所属 = RAND:4
 
 CALL BANDIT_INIT()
 LOCAL = RESULT
@@ -419,6 +445,9 @@ CITY_OWNER:GET_CITYNUMBER("魔法之森北部") = LOCAL
 CITY_OWNER:GET_CITYNUMBER("魔法之森西部") = LOCAL
 CITY_OWNER:GET_CITYNUMBER("血池地獄") = LOCAL
 SP_COUNTRY_APPEARED:特殊勢力_野盗 = 1
+
+SIF 瑞霊所属 == 0
+	CFLAG:(NAME_TO_CHARA("端霊")):1 = LOCAL
 
 CALL GAIRAI_INIT()
 LOCAL = RESULT
@@ -450,11 +479,15 @@ CITY_OWNER:GET_CITYNUMBER("魔界大都会") = LOCAL
 CITY_OWNER:GET_CITYNUMBER("是非曲直庁") = LOCAL
 SP_COUNTRY_APPEARED:特殊勢力_触手 = 1
 
+SIF 瑞霊所属 == 1
+	CFLAG:(NAME_TO_CHARA("端霊")):1 = LOCAL
+
 CALL SUCCUBUS_INIT()
 LOCAL = RESULT
 CITY_OWNER:GET_CITYNUMBER("静寂海") = LOCAL
 CITY_OWNER:GET_CITYNUMBER("夢世界") = LOCAL
 CITY_OWNER:GET_CITYNUMBER("表之月面") = LOCAL
+CITY_OWNER:GET_CITYNUMBER("綿月亭") = LOCAL
 SP_COUNTRY_APPEARED:特殊勢力_サキュバス = 1
 
 CALL CULTIST_INIT()
@@ -467,6 +500,9 @@ CITY_OWNER:GET_CITYNUMBER("有頂天") = LOCAL
 CITY_OWNER:GET_CITYNUMBER("桃園") = LOCAL
 SP_COUNTRY_APPEARED:特殊勢力_狂信者 = 1
 
+SIF 瑞霊所属 == 2
+	CFLAG:(NAME_TO_CHARA("端霊")):1 = LOCAL
+
 ;--------自警団--------
 CALL VIGILANTE_INIT()
 LOCAL = RESULT
@@ -478,6 +514,9 @@ CITY_OWNER:GET_CITYNUMBER("妖怪之山的樹海") = LOCAL
 CITY_OWNER:GET_CITYNUMBER("玄武之泽") = LOCAL
 
 SP_COUNTRY_APPEARED:特殊勢力_自警団 = 1
+
+SIF 瑞霊所属 == 3
+	CFLAG:(NAME_TO_CHARA("端霊")):1 = LOCAL
 
 ;指定されなかったキャラは放浪 あと「あなた」も（MASTER入れ替えたときに放浪するのを防ぐ）。
 FOR LOCAL:0, 1, CHARANUM
@@ -558,9 +597,10 @@ CALL INIT_Pupet(17, サキュバス)
 IS_SP_COUNTRY_IN_UNION:連邦ナンバー:6 = 1
 
 ;触手の傀儡
-;傀儡国：神子・八千慧
+;傀儡国：神子・八千慧・袿姫
 CALL INIT_Pupet(9, 触手)
 CALL INIT_Pupet(18, 触手)
+CALL INIT_Pupet(19, 触手)
 連邦ナンバー = COUNTRY_Union_REFERENCE:触手:0
 IS_SP_COUNTRY_IN_UNION:連邦ナンバー:4 = 1
 

@@ -59,8 +59,8 @@ CALL DRAWMAP
 CALL RESET_CITY_COLOR
 CALL SINGLE_DRAWLINE
 
-PRINTBUTTON " 0[取消]", 0
-;TranslatedMark " 0[戻る]", 0
+PRINTBUTTON "0[取消]", 0
+;TranslatedMark 0[戻る]
 PRINTL
 
 REDRAW 0
@@ -135,8 +135,18 @@ CALL CHANGE_COUNTRY_COLOR(新植民地, 1)
 
 PRINTFORML %ANAME(植民地君主予定)%在%GET_RELAYNAME(都市)%进行了殖民
 ;TranslatedMark %ANAME(植民地君主予定)%を%GET_RELAYNAME(都市)%に植民しました
+;ミッション達成
+IF ACHIEVEMENT_MISSION:1 == 1
+	ACHIEVEMENT_MISSION:1 = 2
+	SETCOLOR カラー_注意
+	PRINTL 任务完成!
+	;TranslatedMark ミッション達成!
+	RESETCOLOR
+	WAIT
+ENDIF
+
 CALL INIT_Protectorate_TREATY(新植民地, CFLAG:MASTER:所属)
-CALL TMP_BUILDING_EXIST_MAP
+TRYCALL TMP_BUILDING_EXIST_MAP
 RETURN
 
 @SELECT_CHARA_LIST_SHOW_LOGIC_MAKE_colony(対象)
@@ -197,8 +207,8 @@ CALL DRAWMAP
 CALL RESET_CITY_COLOR
 CALL SINGLE_DRAWLINE
 
-PRINTBUTTON " 0[取消]", 0
-;TranslatedMark " 0[戻る]", 0
+PRINTBUTTON "0[取消]", 0
+;TranslatedMark 0[戻る]
 PRINTL
 
 REDRAW 0
@@ -256,8 +266,7 @@ COUNTRY_BOSS:新傀儡国 = GET_ID(傀儡国君主予定)
 COUNTRY_SOLDIER:新傀儡国 = CITY_ECONOMY:都市 / 20
 CITY_SOLDIER:都市 = 2000
 
-;CFLAG:傀儡国君主予定:捕虜先 = 0
-CALL CAPTURE(傀儡国君主予定,0)
+CFLAG:傀儡国君主予定:捕虜先 = 0
 CALL CHANGE_COUNTRY(傀儡国君主予定, 新傀儡国)
 
 CALL COUNTRY_SET_TECHNOLOGY(新傀儡国)
@@ -265,7 +274,7 @@ CALL COUNTRY_SET_TECHNOLOGY(新傀儡国)
 CALL INIT_Pupet(新傀儡国, CFLAG:MASTER:所属)
 
 ;傀儡国君主に特殊なフラグを付与する
-CFLAG:傀儡国君主予定:1700 = 1
+奴隷士官フラグ:傀儡国君主予定:0 = 1
 
 CALL SINGLE_DRAWLINE
 
@@ -276,6 +285,15 @@ CALL CHANGE_COUNTRY_COLOR(新傀儡国, 1)
 
 PRINTFORML %ANAME(傀儡国君主予定)%在%GET_RELAYNAME(都市)%建立了傀儡政权
 ;TranslatedMark %ANAME(傀儡国君主予定)%に%GET_RELAYNAME(都市)%で傀儡政権を樹立しました
+;ミッション達成
+IF ACHIEVEMENT_MISSION:1 == 1
+	ACHIEVEMENT_MISSION:1 = 2
+	SETCOLOR カラー_注意
+	PRINTL 任务完成!
+	;TranslatedMark ミッション達成!
+	RESETCOLOR
+	WAIT
+ENDIF
 CALL INIT_Protectorate_TREATY(新傀儡国, CFLAG:MASTER:所属)
 
 RETURN

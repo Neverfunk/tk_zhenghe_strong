@@ -1,4 +1,7 @@
-﻿;---------------------
+﻿@KOJO_DAILY_K25_UNAGI_STALL_TAG	
+    LOCAL = 0
+	RETURN LOCAL
+ ;---------------------
 ;基本的な発生確率(1000分率 100で10%)
 ;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
 ;---------------------
@@ -42,50 +45,88 @@ RETURN デイリー_ジャンル_その他
 @KOJO_DAILY_K25_UNAGI_STALL(対象)
 #DIM 対象
 PRINTFORML ……在領地巡邏時、聞到了附近有美食的香氣
+;TranslatedMark ……領地の見回りをしていると、なんだか美味しそうな香りが漂ってきた
 PRINTFORML 看來附近有貨攤正在營業
+;TranslatedMark どうやら屋台の営業をしているようだ
 PRINTFORML 印像中應該沒有発出過任何營業許可才對……
+;TranslatedMark 営業許可を出した覚えはないが……
 PRINTL
 CALL ASK_YN("去看一下", "算了吧")
+;TranslatedMark "見に行く", "まあいいだろう"
 
 IF RESULT == 1
 	PRINTFORML 這種事沒有必要去找人麻煩
+	;TranslatedMark 目くじらをたてるほどのことでもないだろう
 	PRINTFORMW 不去理會了
+	;TranslatedMark 放っておくことにした
 	KDVAR:対象:ミスティア_屋台 = 1
 	RETURN 1
 ENDIF
 
 PRINTFORML 不能忽視未經許可的營業
+;TranslatedMark 無許可営業は見過ごせない
 PRINTFORMW 決定去看看了……
+;TranslatedMark 見に行くことにした……
+;(画像パッチ)
+CALL 画像表示(対象, 4, 1)
 PRINTFORMW 「啊、是客人？　歡迎光臨！」
+;TranslatedMark 「あっ、お客さん？　いらっしゃい！」
 PRINTFORML 穿過布簾、受到一名夜雀少女迎接
+;TranslatedMark 暖簾をくぐると、夜雀の少女が出迎えた
 PRINTFORML 少女自稱自己叫%NAME_FORMAL(対象)%
+;TranslatedMark 少女は%NAME_FORMAL(対象)%と名乗った
 PRINTFORML 看來正在烤八目鰻
+;TranslatedMark どうやら八目鰻を焼いて出しているらしい
 PRINTFORMW %ANAME(MASTER)%亮出自己的身份、並告知在這裏營業必須要有營業許可
+;TranslatedMark %ANAME(MASTER)%は自分の身分を明かし、このあたりでの営業に許可が必要なことを告げた
 PRINTFORML 「誒！　這樣嗎？　抱歉、我不知道有這種事……」
+;TranslatedMark 「えっ！　そうなの？　ごめんなさい、知らなくって……」
 PRINTFORML %ANAME(対象)%微微低頭、露出歉意的表情
+;TranslatedMark %ANAME(対象)%は眉尻をたれ下げ、申し訳なさそうな表情を浮かべている
 PRINTFORML 這個樣子、看上去應該真的不知道
+;TranslatedMark この様子だと、本当に知らなかったのだろう
 PRINTFORMW 看來應該是沒有惡意的、該怎麼辦……
-PRINTFORML 
+;TranslatedMark 悪気はなかったようだが、どうしたものか……
+PRINTFORML
 CALL ASK_MULTI("要一串鰻魚", "回收營業費", "拘捕")
+;TranslatedMark "鰻で手を打つ", "営業代を回収", "捕らえる"
 
 SELECTCASE RESULT
 	CASE 0
 		PRINTFORMW 「……謝謝你、但真的可以嗎？」
+		;TranslatedMark 「……ありがたいけど、いいの？」
 		PRINTFORML 雖然未經許可營業是有問題、但如果不是刻意的話就沒辦法了
+		;TranslatedMark 無許可営業は問題だが、故意でないなら仕方あるまい
 		PRINTFORML 跟%ANAME(対象)%說要一串鰻魚後，%ANAME(対象)%開始面露笑容、烹調好鰻魚並遞過來
+		;TranslatedMark 鰻一匹で手を打つと伝えると、%ANAME(対象)%は笑顔で仕込みを始め、焼き立てを渡してくれた
+		;(画像パッチ)
+		CALL 画像表示(対象, 4, 2)
 		PRINTFORMW 「謝謝你！　請慢用，小心別燙到啊！」
+		;TranslatedMark 「ありがと！　熱いから気を付けて食べてね！」
 		PRINTFORMW 味道相當不錯……
+		;TranslatedMark 鰻はなかなかの味だった……
 		CFLAG:対象:好感度 += 300
 	CASE 1
+		;(画像パッチ)
+		CALL 画像表示(対象, 4, 3)
 		PRINTFORMW 「也對呢……嗯ー、那就沒有辦法了」
+		;TranslatedMark 「だよね……うーん、捕まらないだけましかぁ」
 		PRINTFORMW 儘管不是故意但規則就是規則。所以必須要回收營業費
+		;TranslatedMark 故意でないとはいえ規則は規則だ。営業代は払ってもらわなくてはならない
 		PRINTFORMW 如此轉告後、%ANAME(対象)%乖乖地交出錢了……
+		;TranslatedMark そう伝えると、%ANAME(対象)%は素直に金を差し出した……
 		CALL ICPRINT("得到了<3000>金", "W", カラー_注意)
+		;TranslatedMark 金<3000>を得ました
 		MONEY += 3000
 	CASE 2
+		;(画像パッチ)
+		CALL 画像表示(対象, 4, 4)
 		PRINTFORMW 「誒？　等、等等！」
+		;TranslatedMark 「えっ？　ちょ、ちょっと！」
 		PRINTFORMW 是否有惡意也沒有關係。違法就是違法
+		;TranslatedMark 悪気の有無など関係ない。違反は違反なのだ
 		PRINTFORMW %ANAME(MASTER)%拘捕了%ANAME(対象)%、帶到牢獄之中……
+		;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%を捕らえると、牢獄へと連行した……
 		CALL CAPTURE(対象, CFLAG:MASTER:所属)
 		CFLAG:対象:好感度 -= 500
 		CFLAG:対象:従属度 -= 500

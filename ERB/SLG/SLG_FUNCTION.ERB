@@ -326,7 +326,7 @@ ELSEIF GET_CITY_COMMANDER(ARG:0, 1) == ARG:1
 ENDIF
 RETURN -1
 ;-------------------------------------------------
-;关于ARG:0势力的ARG:1部队，ARG:2返回角色号码的函数
+;ARG:0勢力のARG:1部隊について、ARG:2番目の将のキャラ番号を返す関数
 ;-------------------------------------------------
 @GET_UNIT_COMMANDER(ARG:0, ARG:1, ARG:2)
 #FUNCTION
@@ -336,7 +336,7 @@ SIF !INRANGE_COUNTRY(ARG:0) || !INRANGE_UNIT(ARG:1) || !INRANGE_UNIT_COMMANDER(A
 RETURNF ID_TO_CHARA((UNIT_COMMANDER:(ARG:0):(ARG:1) >> (16 * ARG:2)) & 0xFFFF)
 
 ;-------------------------------------------------
-;ARG:0势力的ARG:1部队将全员的角色号码插入RESULT返回的函数
+;ARG:0勢力のARG:1部隊の将全員のキャラ番号をRESULTにつっこんで返す関数
 ;-------------------------------------------------
 @GET_UNIT_COMMANDER_ALL(ARG:0, ARG:1)
 FOR LOCAL, 0, MAX_UNIT_COMMANDER
@@ -617,7 +617,6 @@ RESETCOLOR
 
 ;-------------------------------------------------
 ;ARG:0勢力のARG:1部隊の星の数を返す関数
-;计算星数
 ;-------------------------------------------------
 @SUM_UNIT_STARS(ARG:0, ARG:1)
 #FUNCTION
@@ -883,8 +882,8 @@ NEXT
 RETURNF 1
 
 ;-------------------------------------------------
-;ARG:0号角色如果在部队中，强制下任的函数
-;下任时返回1
+;ARG:0番のキャラが部隊に入っている場合、強制的に隊から外す関数
+;解除を行った場合1が返る
 ;-------------------------------------------------
 @FORCE_FREE(ARG:0)
 SIF CFLAG:(ARG:0):所属 == 0
@@ -907,7 +906,7 @@ FOR LOCAL:0, 0, MAX_COUNTRY
 	IF IS_COUNTRY(LOCAL:0)
 		FOR LOCAL:1, 0, 10
 			IF UNIT_COMMANDER:(LOCAL:0):(LOCAL:1) != 0
-				FOR LOCAL:2, 0, MAX_UNIT_COMMANDER
+				FOR LOCAL:2, 0, 3
 					IF GET_UNIT_COMMANDER(LOCAL:0, LOCAL:1, LOCAL:2) == ARG:0
 						CALL CLEAR_UNIT_COMMANDER(LOCAL:0, LOCAL:1, LOCAL:2)
 						GOTO SUCCESS
@@ -1055,7 +1054,7 @@ NEXT
 RETURNF RET
 
 ;--------------------------------------------------------
-;ARG:0号城市是否能从ARG:1的国家侵略
+;ARG:0番の都市がARG:1の国から侵略できるかチェック
 ;--------------------------------------------------------
 @IS_INVADABLE(ARG:0, ARG:1)
 #FUNCTION
@@ -1230,7 +1229,7 @@ NEXT
 RETURNF RET
 
 ;-------------------------------------------------
-;仅返回ARG:0号城市是否存在自军部队的函数
+;ARG:0番の都市に自軍の部隊が存在するかどうかだけを単純に返す関数
 ;-------------------------------------------------
 @IS_STAY_MYUNIT(ARG:0)
 #FUNCTION
@@ -2238,7 +2237,7 @@ FOR LOCAL:0, 0, MAX_TREATY_C
 								;	CASE 1
 								;		COUNTRY_TREATY_NO:(LOCAL:4):1 ++
 								;		COUNTRY_TREATY_NO:(ARG:1):1 ++
-								;		CASE 3, 4
+								;	CASE 3, 4
 								;		COUNTRY_TREATY_NO:(LOCAL:4):0 ++
 								;		COUNTRY_TREATY_NO:(ARG:1):0 ++
 								;ENDSELECT
@@ -2960,9 +2959,9 @@ FOR LOCAL, 0, TECHNOLOGY_MAX_GENRE
 NEXT
 
 ;-------------------------------------------------
-;消灭ARG:0号势力的函数
-;调用这个函数的话，对象势力的士官会强制成为无党派，所以需要事先进行士官的分配
-;这个函数不解除该势力所拥有的城市，根据需要另行处理
+;ARG:0番の勢力を滅亡させる関数
+;この関数を呼び出すと、対象勢力の将が強制的に無所属になるため、事前に将の分配を行なっておくこと
+;所属都市の解除は行わないため、必要に応じて別途処理すること
 ;-------------------------------------------------
 @DESTROY_COUNTRY(ARG:0)
 #DIM 宗主国
@@ -2972,7 +2971,7 @@ NEXT
 
 LOCAL:3 = GET_COUNTRY_BOSS(ARG:0)
 
-;被要求调教或在势力灭亡时重置变量
+;調教要求をされていたorしていた勢力滅亡時に変数をリセット
 IF ARG:0 == CFLAG:MASTER:所属 || LOCAL:3 == DIPLOMACY_TRAINING_CHARA
 	DIPLOMACY_TRAINING_CHARA = 0
 	DIPLOMACY_TRAINED_DAY = 0
@@ -2980,7 +2979,7 @@ ENDIF
 
 FOR LOCAL:0, 0, MAX_TREATY_A
 	FOR LOCAL:1, 0, MAX_TREATY_COUNTRY
-		;如果你加入了联盟
+		;同盟に参加していた場合
 		IF TREATY_A_COUNTRY:(LOCAL:0):(LOCAL:1) == ARG:0
 			TREATY_A_COUNTRY:(LOCAL:0):(LOCAL:1) = 0
 			LOCAL:4 = 0
@@ -2988,7 +2987,7 @@ FOR LOCAL:0, 0, MAX_TREATY_A
 				SIF TREATY_A_COUNTRY:(LOCAL:0):(LOCAL:2) > 0
 					LOCAL:4 ++
 			NEXT
-			;如果已经只有一个参加势力的话就解散
+			;既に参加勢力が一つしかないなら解散
 			IF LOCAL:4 <= 1
 				FOR LOCAL:2, 0, MAX_TREATY_COUNTRY
 					TREATY_A_COUNTRY:(LOCAL:0):(LOCAL:2) = 0
@@ -3257,7 +3256,7 @@ NEXT
 LOCAL:2 = CHARANUM
 FOR LOCAL:0, 0, LOCAL:2
 	LOCAL:1 = LOCAL:2 - LOCAL:0 - 1
-	IF CFLAG:(LOCAL:1):所属 == ARG:0 && IS_SP_CHARA(LOCAL:1) && LOCAL:1 != MASTER && CFLAG:(LOCAL:1):1704 == 0
+	IF CFLAG:(LOCAL:1):所属 == ARG:0 && IS_SP_CHARA(LOCAL:1) && LOCAL:1 != MASTER && 記念品である:(LOCAL:1):0 == 0
 		CALL DELETE_CHARA(LOCAL:1)
 	ENDIF
 NEXT
@@ -3269,7 +3268,7 @@ IF IS_SP_COUNTRY(ARG:0)
 		LOCAL:1 = CHARANUM
 		FOR LOCAL:0, 0, LOCAL:1
 			LOCAL:2 = LOCAL:1 - LOCAL:0 - 1
-			IF TALENT:(LOCAL:2):特殊勢力素質 == SP_COUNTRY_TO_CONST(ARG:0) && IS_SP_CHARA(LOCAL:2) && LOCAL:2 != MASTER && CFLAG:(LOCAL:2):1704 == 0
+			IF TALENT:(LOCAL:2):特殊勢力素質 == SP_COUNTRY_TO_CONST(ARG:0) && IS_SP_CHARA(LOCAL:2) && LOCAL:2 != MASTER && 記念品である:(LOCAL:2):0 == 0
 				CALL DELETE_CHARA(LOCAL:2)
 			ENDIF
 		NEXT
@@ -3329,19 +3328,24 @@ RETURNF INRANGE(ARG,0, MAX_COUNTRY-1)
 
 @INRANGE_UNIT(ARG)
 #FUNCTION
-RETURNF INRANGE(ARG,0, MAX_UNIT-1)
+;(ホフゴブリン拡張パッチ)略奪部隊(部隊ナンバー100)に対応
+IF (ARG >= 0 && ARG <= MAX_UNIT-1) || ARG == 100
+	RETURNF 1
+ELSE
+	RETURNF 0
+ENDIF
 
 @INRANGE_UNIT_COMMANDER(ARG)
 #FUNCTION
 RETURNF INRANGE(ARG,0, MAX_UNIT_COMMANDER-1)
 
-;ARGS:0势力接管城市ARGS:1
+;ARGS:0勢力が都市ARGS:1を接収する
 @TAKEOVER_CITY_FROM_NAME(ARGS:0, ARGS:1)
 SIF GET_CITYNUMBER(ARGS:1) == -1
 	THROW @TAKEOVER_CITY_FROM_NAMEに渡された引数%ARGS:1%の都市は存在しません
 CALL TAKEOVER_CITY_FROM_NO(GET_COUNTRY_FROM_BOSS_NAME(ARGS:0), GET_CITYNUMBER(ARGS:1))
 
-;ARG:0势力接管城市ARG:1
+;ARG:0勢力が都市ARG:1を接収する
 @TAKEOVER_CITY_FROM_NO(ARG:0, ARG:1)
 #DIM INVADER,5
 #DIM LCOUNTRY

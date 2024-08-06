@@ -33,12 +33,12 @@ PRINTFORML 发表独立宣言 声明成为[%ANAME(宗主国勢力名)%]势力的
 ;TranslatedMark 独立宣言する 現在[%ANAME(宗主国勢力名)%]勢力の[%従属国種別%]です
 CALL SINGLE_DRAWLINE
 
-PRINTL 
+PRINTL
 PRINTL 宣布独立的话，旧宗主国的评价会严重恶化
 ;TranslatedMark 独立を宣言すると旧宗主国からの評価がかなり悪化します
 PRINTL 另外，与旧宗主国的从属国的永久同盟被废弃
 ;TranslatedMark また旧宗主国の従属国との永久同盟は破棄されます
-PRINTL 
+PRINTL
 PRINTFORML 从%ANAME(宗主国勢力名)%势力独立吗？
 ;TranslatedMark %ANAME(宗主国勢力名)%勢力から独立しますか？
 
@@ -47,12 +47,23 @@ CALL ASK_YN()
 IF RESULT == 1
 	REDRAW 1
 	RETURN
-	
+
 ELSE
 	CALL INIT_Protectorate_RENOUNCE(自国勢力, 宗主国勢力)
 	CALL INIT_Union_RENOUNCE(自国勢力)
+
+	;ミッション達成
+	IF ACHIEVEMENT_MISSION:6 == 1
+		ACHIEVEMENT_MISSION:6 = 2
+		SETCOLOR カラー_注意
+		PRINTL 任务完成!
+		;TranslatedMark ミッション達成!
+		RESETCOLOR
+		WAIT
+	ENDIF
+
 	CALL DIPLOMACY_WORSEN_RELATION(宗主国勢力, 500)
-	
+
 	;宗主国勢力のその他従属国のうち独立宣言勢力との関係がより良好であるときその従属国も独立
 	その他従属国 = 0
 	FOR LOCAL:0, 0, MAX_COUNTRY
@@ -60,6 +71,7 @@ ELSE
 			その他従属国 = LOCAL:0
 			IF REL_HATE:(GET_COUNTRY_BOSS(その他従属国)):宗主国勢力名 > REL_HATE:(GET_COUNTRY_BOSS(その他従属国)):自国勢力名 && REL_LIKE:(GET_COUNTRY_BOSS(その他従属国)):宗主国勢力名 < REL_LIKE:(GET_COUNTRY_BOSS(その他従属国)):自国勢力名 && REL_HATE:(GET_COUNTRY_BOSS(その他従属国)):宗主国勢力名 > 100
 				CALL COLOR_PRINTW(@"%NAME_FORMAL(GET_COUNTRY_BOSS(その他従属国))%也从%NAME_FORMAL(GET_COUNTRY_BOSS(宗主国勢力))%的势力中宣布独立了！", カラー_警告)
+				;TranslatedMark %NAME_FORMAL(GET_COUNTRY_BOSS(その他従属国))%もまた%NAME_FORMAL(GET_COUNTRY_BOSS(宗主国勢力))%の勢力からの独立を宣言しました！
 				CALL INIT_Protectorate_RENOUNCE(その他従属国, 宗主国勢力)
 				CALL INIT_Union_RENOUNCE(その他従属国)
 				CALL CHANGE_RELATION_C_TO_C(その他従属国, 宗主国勢力, -500, 500)
@@ -67,7 +79,7 @@ ELSE
 			ENDIF
 		ENDIF
 	NEXT
-	
+
 	RETURN
 ENDIF
 

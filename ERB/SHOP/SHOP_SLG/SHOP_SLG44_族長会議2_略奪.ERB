@@ -14,6 +14,12 @@
 #DIM 集権性
 #DIM 上昇支持率
 #DIM 上昇集権性
+#DIM 守備隊救援フラグ
+#DIM 救援兵数
+#DIM 救援守将
+
+守備隊救援フラグ = 0
+救援守将 = 0
 
 SIF !Destination_Predatoriness_GOBLIN:0
 	RETURN 0
@@ -21,17 +27,46 @@ SIF !Destination_Predatoriness_GOBLIN:0
 CALL SINGLE_DRAWLINE("-", カラー_選択不可)
 RESETCOLOR
 PRINTFORMW 执行掠夺
-PRINTFORML 
+;TranslatedMark 略奪を実行します
+PRINTFORML
 
-略奪対象勢力 = Destination_Predatoriness_GOBLIN:0
 略奪対象都市 = Destination_Predatoriness_GOBLIN:1
+略奪対象勢力 = CITY_OWNER:略奪対象都市
+Destination_Predatoriness_GOBLIN:0 = 略奪対象勢力
 略奪兵数 = SOLDIER_Predatoriness_GOBLIN
 自勢力 = CFLAG:MASTER:所属
 略奪経済力 = CITY_ECONOMY:略奪対象都市 * 30 / 100
 IF 略奪対象勢力 > 0
-	略奪国庫 = MONEY:略奪対象勢力 * CITY_ECONOMY:略奪対象都市 / GET_SUM_ECONOMY(略奪対象勢力)
+	SIF GET_SUM_ECONOMY(略奪対象勢力) > 0
+		略奪国庫 = MONEY:略奪対象勢力 * CITY_ECONOMY:略奪対象都市 / GET_SUM_ECONOMY(略奪対象勢力)
 ELSE
 	略奪国庫 = CITY_ECONOMY:略奪対象都市 * 30 / (100 * 10)
+ENDIF
+
+IF 略奪対象勢力 == CFLAG:MASTER:所属
+	PRINTFORMW 因为已成为自势力的城市，所以掠夺停止了
+	;TranslatedMark 自勢力の都市となったので略奪を中止します
+	RETURN
+ENDIF
+
+;都市守備隊増加+守将
+IF GET_CITY_COMMANDER(略奪対象都市, 0) < 0 && GET_CITY_COMMANDER(略奪対象都市, 1) < 0 && (COUNTRY_SOLDIER:略奪対象勢力 >= 500 || CITY_SOLDIER:略奪対象都市 >= 500)
+	CALL SELECT_CHARA_RANDOM("GOBLIN_Predatoriness_TURNEND")
+	IF RESULT != -1
+		守備隊救援フラグ = 1
+		救援守将 = RESULT
+		CALL SET_CITY_COMMANDER(略奪対象都市, 0, 救援守将)
+		救援兵数 = MIN(COUNTRY_SOLDIER:略奪対象勢力, 1000 + RAND:4000)
+		IF 救援兵数 > 0
+			CITY_SOLDIER:略奪対象都市 += 救援兵数
+			COUNTRY_SOLDIER:略奪対象勢力 -= 救援兵数
+		ENDIF
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(救援守将)%前来支援%GET_CITYNAME(略奪対象都市)%的防御了！
+		;TranslatedMark %ANAME(救援守将)%が%GET_CITYNAME(略奪対象都市)%の防衛に駆け付けた！
+		PRINTFORML
+		RESETCOLOR
+	ENDIF
 ENDIF
 
 ;計算用のダミー部隊を作成
@@ -41,10 +76,14 @@ COUNTRY_SOLDIER:自勢力 += 略奪兵数
 UNIT_TARGET:自勢力:100 = 0
 UNIT_COMMANDER:自勢力:100 = 0
 
+CALL SET_UNIT_COMMANDER(自勢力, 100, 0, MASTER)
+
 ;部隊能力を表示
 CALL COLOR_PRINTL("----------彼此的力量----------", カラー_選択不可)
+;TranslatedMark ----------互いの力量----------
 
-PRINTL 掠夺部队 兵:{略奪兵数}
+CALL PRINT_UNIT_INFO(自勢力, 100, 0, 0)
+PRINTFORML
 CALL PRINT_CITY_INFO(略奪対象都市, 0)
 PRINTL
 
@@ -56,122 +95,140 @@ SIF GROUPMATCH(0, BATTLE_SOL:0, BATTLE_SOL:1)
 
 ;■ダメージの適用
 CALL COLOR_PRINTL("---------补正后的力量---------", カラー_選択不可)
+;TranslatedMark ---------補正後の力量---------
 CALL PRINT_UNIT_INFO_COMBAT(自勢力, 100, 0, 0, 0)
 PRINTL
 CALL PRINT_CITY_INFO_COMBAT(略奪対象都市, 1, 0)
 PRINTL
 CALL COLOR_PRINTL("------------激战！------------", カラー_選択不可)
+;TranslatedMark ------------激突！------------
 
 CALL DECREASE_SOLDIER(自勢力, 100, BATTLE_DMG:0, 1)
 CALL DECREASE_SOLDIER(略奪対象都市, -1,    BATTLE_DMG:1, 1)
 
 $BATTLE_CANCEL
 CALL COLOR_PRINTL("----------战斗后处理----------", カラー_選択不可)
-
+;TranslatedMark ----------戦闘後処理----------
 CITY_IS_ATTACKED:略奪対象都市 = 1
 
 IF CITY_SOLDIER:略奪対象都市 <= 0
 	CALL COLOR_PRINTL(@"%GET_CITYNAME(略奪対象都市)%的守备部队被歼灭了！", カラー_注意)
+	;TranslatedMark %GET_CITYNAME(略奪対象都市)%の守備部隊を壊滅させました！
 	;経済力減少
 	CITY_ECONOMY:略奪対象都市 -= 略奪経済力
 	SIF 略奪対象勢力 > 0
 		MONEY:略奪対象勢力 -= 略奪国庫
-	
+
 	;自勢力国庫の上昇と支持率・集権性上昇
 	自勢力国庫 = MONEY:自勢力
 	MONEY:自勢力 += 略奪国庫
+	PRINTFORML 掠夺了国库资金 {略奪国庫}
+	;TranslatedMark 国庫資金を {略奪国庫} 略奪しました
 	IF GET_COUNTRY_BOSS(CFLAG:MASTER:所属) == MASTER
 		PRINTFORML 支持率与集权性上升了
-		支持率 = CFLAG:MASTER:1709
-		上昇支持率 = ((10 * MONEY:自勢力) / 自勢力国庫) - 10
+		;TranslatedMark 支持率と集権性が上昇しました
+		支持率 = ゴブリン支持率:MASTER:0
+		上昇支持率 = 略奪国庫 / 100
 		SIF 上昇支持率 <= 0
 			上昇支持率 = 1
-		CFLAG:MASTER:1709 += 上昇支持率
+		ゴブリン支持率:MASTER:0 += 上昇支持率
 		集権性 = Centralization_power_GOBLIN
-		上昇集権性 = ((10 * MONEY:自勢力) / 自勢力国庫) - 10
+		上昇集権性 = 略奪国庫 / 100
 		SIF 上昇集権性 <= 0
 			上昇集権性 = 1
 		Centralization_power_GOBLIN += 上昇集権性
 		SETCOLOR カラー_注意
-		PRINTFORML 支持率：[ {支持率} ] → [ {CFLAG:MASTER:1709} ]
-		PRINTFORML 
+		PRINTFORML 支持率：[ {支持率} ] → [ {ゴブリン支持率:MASTER:0} ]
+		PRINTFORML
 		PRINTFORMW 集权性：[ {集権性} ] → [ {Centralization_power_GOBLIN} ]
-		PRINTFORML 
+		;TranslatedMark 集権性：[ {集権性} ] → [ {Centralization_power_GOBLIN} ]
+		PRINTFORML
 		RESETCOLOR
 	ELSE
 		PRINTFORML 支持率上升了
-		支持率 = CFLAG:MASTER:1709
-		上昇支持率 = ((10 * MONEY:自勢力) / 自勢力国庫) - 10
+		;TranslatedMark 支持率が上昇しました
+		支持率 = ゴブリン支持率:MASTER:0
+		上昇支持率 = 略奪国庫 / 100
 		SIF 上昇支持率 <= 0
 			上昇支持率 = 1
-		CFLAG:MASTER:1709 += 上昇支持率
+		ゴブリン支持率:MASTER:0 += 上昇支持率
 		SETCOLOR カラー_注意
-		PRINTFORMW 支持率：[ {支持率} ] → [ {CFLAG:MASTER:1709} ]
-		PRINTFORML 
+		PRINTFORMW 支持率：[ {支持率} ] → [ {ゴブリン支持率:MASTER:0} ]
+		PRINTFORML
 		RESETCOLOR
 	ENDIF
-	
+
 	;部隊壊滅時の士官の捕獲
 	CALL UNIT_BREAK(0, 自勢力, 100, 略奪対象都市, -1)
-	
+
 	CALL DIPLOMACY_WORSEN_RELATION(略奪対象勢力, 50)
-	
+
 ELSEIF UNIT_SOLDIER:自勢力:100 > CITY_SOLDIER:略奪対象都市 && UNIT_SOLDIER:自勢力:100 > 0
-	CALL COLOR_PRINTL(@"%GET_CITYNAME(略奪対象都市)%守備部隊の隙をついて略奪しました！", カラー_注意)
+	CALL COLOR_PRINTL(@"趁著%GET_CITYNAME(略奪対象都市)%守備空虛完成了掠奪", カラー_注意)
+	;TranslatedMark %GET_CITYNAME(略奪対象都市)%守備部隊の隙をついて略奪しました！
 	略奪率 = 100 - ((CITY_SOLDIER:略奪対象都市 * 100) / UNIT_SOLDIER:自勢力:100)
-	
+
 	略奪経済力 = (略奪経済力 * 略奪率) / 100
 	略奪国庫 = (略奪国庫 * 略奪率) / 100
-	
+
 	;経済力減少
 	CITY_ECONOMY:略奪対象都市 -= 略奪経済力
 	SIF 略奪対象勢力 > 0
 		MONEY:略奪対象勢力 -= 略奪国庫
-	
+
 	;自勢力国庫の上昇と支持率・集権性上昇
 	自勢力国庫 = MONEY:自勢力
 	MONEY:自勢力 += 略奪国庫
+	PRINTFORML 掠夺了国库资金 {略奪国庫}
+	;TranslatedMark 国庫資金を {略奪国庫} 略奪しました
 	IF GET_COUNTRY_BOSS(CFLAG:MASTER:所属) == MASTER
 		PRINTFORML 支持率与集权性上升了
-		支持率 = CFLAG:MASTER:1709
-		上昇支持率 = ((10 * MONEY:自勢力) / 自勢力国庫) - 10
+		;TranslatedMark 支持率と集権性が上昇しました
+		支持率 = ゴブリン支持率:MASTER:0
+		上昇支持率 = 略奪国庫 / 100
 		SIF 上昇支持率 <= 0
 			上昇支持率 = 1
-		CFLAG:MASTER:1709 += 上昇支持率
+		ゴブリン支持率:MASTER:0 += 上昇支持率
 		集権性 = Centralization_power_GOBLIN
-		上昇集権性 = ((10 * MONEY:自勢力) / 自勢力国庫) - 10
+		上昇集権性 = 略奪国庫 / 100
 		SIF 上昇集権性 <= 0
 			上昇集権性 = 1
 		Centralization_power_GOBLIN += 上昇集権性
 		SETCOLOR カラー_注意
-		PRINTFORML 支持率：[ {支持率} ] → [ {CFLAG:MASTER:1709} ]
-		PRINTFORML 
+		PRINTFORML 支持率：[ {支持率} ] → [ {ゴブリン支持率:MASTER:0} ]
+		PRINTFORML
 		PRINTFORMW 集权性：[ {集権性} ] → [ {Centralization_power_GOBLIN} ]
-		PRINTFORML 
+		;TranslatedMark 集権性：[ {集権性} ] → [ {Centralization_power_GOBLIN} ]
+		PRINTFORML
 		RESETCOLOR
 	ELSE
 		PRINTFORML 支持率上升了
-		支持率 = CFLAG:MASTER:1709
-		上昇支持率 = ((10 * MONEY:自勢力) / 自勢力国庫) - 10
+		;TranslatedMark 支持率が上昇しました
+		支持率 = ゴブリン支持率:MASTER:0
+		上昇支持率 = 略奪国庫 / 100
 		SIF 上昇支持率 <= 0
 			上昇支持率 = 1
-		CFLAG:MASTER:1709 += 上昇支持率
+		ゴブリン支持率:MASTER:0 += 上昇支持率
 		SETCOLOR カラー_注意
-		PRINTFORMW 支持率：[ {支持率} ] → [ {CFLAG:MASTER:1709} ]
-		PRINTFORML 
+		PRINTFORMW 支持率：[ {支持率} ] → [ {ゴブリン支持率:MASTER:0} ]
+		PRINTFORML
 		RESETCOLOR
 	ENDIF
-	
+
 	CALL DIPLOMACY_WORSEN_RELATION(略奪対象勢力, 50)
-	
+
 ENDIF
+
+;救援守将解除
+CALL CLEAR_CITY_COMMANDER_FIND(略奪対象都市, 救援守将)
 
 ;計算用のダミー部隊を解散
 SIF UNIT_SOLDIER:自勢力:100 <= 0
 	UNIT_SOLDIER:自勢力:100 = 0
 
 COUNTRY_SOLDIER:自勢力 -= UNIT_SOLDIER:自勢力:100
-SOLDIER_Predatoriness_GOBLIN = UNIT_SOLDIER:自勢力:100
+SIF UNIT_SOLDIER:自勢力:100 < 略奪兵数
+	SOLDIER_Predatoriness_GOBLIN = UNIT_SOLDIER:自勢力:100
 Destination_Predatoriness_GOBLIN:0 = 0
 Destination_Predatoriness_GOBLIN:1 = 0
 
@@ -180,5 +237,27 @@ UNIT_SOLDIER:自勢力:100 = 0
 UNIT_TARGET:自勢力:100 = 0
 UNIT_COMMANDER:自勢力:100 = 0
 
+;ミッション達成
+IF ACHIEVEMENT_MISSION:55 == 1
+	ACHIEVEMENT_MISSION:55 = 2
+	SETCOLOR カラー_注意
+	PRINTL 任务完成!
+	;TranslatedMark ミッション達成!
+	RESETCOLOR
+	WAIT
+ENDIF
+
 WAIT
+
+@SELECT_CHARA_RANDOM_LOGIC_GOBLIN_Predatoriness_TURNEND(対象)
+#DIM 対象
+
+;士官が部隊に所属しているかどうかのマップを作成(高速化用)
+CALL TMP_CREATE_IS_FREE_MAP
+
+IF CFLAG:対象:所属 == Destination_Predatoriness_GOBLIN:0 && !CFLAG:対象:捕虜先 && !IS_ANIMAL(対象) && CFLAG:対象:行動不能状態 != 行動不能_子供 && CFLAG:対象:特殊状態 < 1 && TMP_IS_FREE:対象:0 == 0 && GET_COUNTRY_BOSS(CFLAG:対象:所属) != 対象
+	RETURN 1
+ELSE
+	RETURN 0
+ENDIF
 

@@ -1,4 +1,7 @@
-﻿;---------------------
+﻿@KOJO_DAILY_K2_TRAINING_TAG	
+    LOCAL = 0
+	RETURN LOCAL
+ ;---------------------
 ;基本的な発生確率(1000分率 100で10%)
 ;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
 ;---------------------
@@ -58,35 +61,69 @@ ENDSELECT
 SELECTCASE KDVAR:対象:魔理沙_トレーニング
 	CASE 0
 		PRINTFORMW %ANAME(MASTER)%散步的时候、偶然遇见了在练习魔法的%ANAME(対象)%
+		;TranslatedMark %ANAME(MASTER)%が散歩をしていると、%ANAME(対象)%が魔法をしているところに出くわした
 		PRINTFORMW %ANAME(対象)%看到了这边、中断了訓練走了過来
+		;TranslatedMark %ANAME(対象)%はこちらを見つけると、訓練を中断して近づいてきた
+		;(画像パッチ)
+		CALL 画像表示(対象, 1, 1)
 		PRINTFORMW 「啊ー、正打算進行秘密特訓……」
+		;TranslatedMark 「あー、秘密の特訓のつもりだったんだが……」
 		PRINTFORML 「這樣吧、有假想敵的話、訓練也会更加順利」
+		;TranslatedMark 「まぁいいや、仮想敵がいれば、訓練もはかどるだろ」
 		PRINTFORMW 「你能陪我一起么？」
+		;TranslatedMark 「ちょっと付き合ってくれないか？」
 		PRINTFORMW 用軽松的語気説着、使用的是真正的魔法
+		;TranslatedMark 軽い口調で言うが、使うのは本当の魔法だ
 		PRINTFORML 失敗的話肯定会受傷……
+		;TranslatedMark 失敗すれば当然怪我するだろうが……
 	CASE 1
 		PRINTFORMW 再次、遇見了特訓中的%ANAME(対象)%
+		;TranslatedMark また、%ANAME(対象)%の特訓に出くわした
+		;(画像パッチ)
+		CALL 画像表示(対象, 1, 1)
 		PRINTFORMW 「哦、来的真好」
+		;TranslatedMark 「おっ、ちょうどいいや」
 		PRINTFORMW 「要一起再次特訓么？」
+		;TranslatedMark 「また付き合ってくれないか？」
 		PRINTFORML 失敗的話肯定会受傷、怎麼辦……
+		;TranslatedMark 失敗すれば怪我するだろうが、どうしようか……
 	CASE 2
 		PRINTFORMW 再次、遇見了特訓中的%ANAME(対象)%
+		;TranslatedMark また、%ANAME(対象)%の特訓に出くわした
+		;(画像パッチ)
+		CALL 画像表示(対象, 1, 1)
 		PRINTFORMW 「哦、来的真好」
+		;TranslatedMark 「おっ、ちょうどいいや」
 		PRINTFORMW 「這次会和我一起特訓吧？」
+		;TranslatedMark 「今度は付き合ってくれるよな？」
 		PRINTFORML 失敗的話肯定会受傷、怎麼辦……
+		;TranslatedMark 失敗すれば怪我するだろうが、どうしようか……
 ENDSELECT
 CALL ASK_YN("奉陪", "因為太危險還是算了")
+;TranslatedMark "付き合う", "危ないからやめておく"
 IF RESULT == 1
+	;(画像パッチ)
+	CALL 画像表示(対象, 4, 2)
 	PRINTFORMW 「誒ー？　什麼啊、真是沒勁」
+	;TranslatedMark 「えー？　なんだよ、意気地なしだな」
 	PRINTFORMW 「沒辦法、只好一個人訓練了」
+	;TranslatedMark 「しょうがないな、一人で練習するかぁ」
 	PRINTFORML %ANAME(対象)%回去継续訓練了……
+	;TranslatedMark %ANAME(対象)%は訓練に戻っていった……
 	KDVAR:対象:魔理沙_トレーニング = 2
 ELSE
+	;(画像パッチ)
+	CALL 画像表示(対象, 1, 2)
 	PRINTFORMW 「太好了、已経決定了的話那就趕緊吧」
+	;TranslatedMark 「よっしゃ、そうと決まれば話は早い」
 	PRINTFORMW 「你站在那裡。……対、就是那」
+	;TranslatedMark 「そこに立ってくれ。……そうだ、そこだ」
 	PRINTFORMW 「好、要来了！」
+	;TranslatedMark 「よし、いくぞ！」
 	PRINTFORML %ANAME(対象)%釋放了魔弾！
+	;TranslatedMark %ANAME(対象)%がマジックナパームを放ってきた！
 	CALL COLOR_PRINTL(@"請選択%答え文字列:答え%！", カラー_警告)
+	;TranslatedMark %答え文字列:答え%を選べ！
 	FOR LOCAL, 0, VARSIZE("答え文字列")
 		PRINTFORML [{LOCAL}] %答え文字列:LOCAL%
 	NEXT
@@ -94,21 +131,36 @@ ELSE
 	;失敗したパターン
 	IF RESULT != 答え
 		PRINTFORML %ANAME(MASTER)%試図回避！
+		;TranslatedMark %ANAME(MASTER)%は回避しようと試みた！
 		PRINTFORMW 但是、壯觀的弾幕命中了%ANAME(MASTER)%！
+		;TranslatedMark だが、弾幕はものの見事に%ANAME(MASTER)%に命中した！
+		;(画像パッチ)
+		CALL 画像表示(対象, 4, 1)
 		PRINTFORMW 「喂喂、沒事吧！？」
+		;TranslatedMark 「お、おいおい、大丈夫か！？」
 		PRINTFORMW 「啊ー、真是対不起……嘛、多虧了你讓我更有自信了。謝謝啦」
+		;TranslatedMark 「あー、なんかごめんな……まぁ、おかげで自信がついたよ。ありがとな」
 		PRINTFORMW 被%ANAME(対象)%治疗了……
+		;TranslatedMark %ANAME(対象)%に手当してもらった……
 		CALL COLOR_PRINTW(@"%ANAME(MASTER)%受傷了", カラー_警告)
+		;TranslatedMark %ANAME(MASTER)%は怪我をしてしまいました
 		CALL ADD_COOLTIME(MASTER, 3)
 		CALL PRINT_ADD_EXP(対象, EXPNAME:経験値, RAND:5 + 1, 1)
 		CALL TRAIN_AUTO_ABLUP(対象)
 	;成功
 	ELSE
 		PRINTFORML %ANAME(MASTER)%試図回避！
+		;TranslatedMark %ANAME(MASTER)%は回避しようと試みた！
 		PRINTFORMW 漂亮的回避了、%ANAME(対象)%放出的弾幕！
+		;TranslatedMark %ANAME(対象)%の放った弾幕を、見事回避してみせた！
+		;(画像パッチ)
+		CALL 画像表示(対象, 4, 3)
 		PRINTFORMW 「哎呀……已経很認真了、沒想到還是被回避了」
+		;TranslatedMark 「おっと……わりと本気だったんだけど、避けられるとはな」
 		PRINTFORMW 「看来我還是不行啊。還好有你陪我練習、還是説一下謝謝啦」
+		;TranslatedMark 「私もまだまだだな。付き合ってくれてありがとな、礼を言うぜ」
 		PRINTFORMW %ANAME(対象)%回去継续訓練了……
+		;TranslatedMark %ANAME(対象)%は訓練に戻っていった……
 		CALL PRINT_ADD_EXP(MASTER, EXPNAME:経験値, RAND:5 + 1, 1)
 		CALL TRAIN_AUTO_ABLUP(MASTER)
 	ENDIF

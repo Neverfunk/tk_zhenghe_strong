@@ -1,4 +1,7 @@
-﻿;---------------------
+﻿@KOJO_DAILY_K82_REBORN_UNDEAD_TAG	
+    LOCAL = 0
+	RETURN LOCAL
+ ;---------------------
 ;基本的な発生確率(1000分率 100で10%)
 ;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
 ;---------------------
@@ -18,7 +21,7 @@ RETURN 1000 - MIN(KDVAR:対象:芳香_一度死んだなら * 50 + 500, 999)
 青娥 = NAME_TO_CHARA("青娥")
 
 ;これで対象が死んでないとダメってことになる筈(処刑拡張パッチ)対象が記念品になっていると不可
-SIF CFLAG:対象:特殊状態 != 特殊状態_死亡 || CFLAG:対象:1704 != 0
+SIF CFLAG:対象:特殊状態 != 特殊状態_死亡 || 記念品である:対象:0 != 0
 	RETURN 0
 
 ;左は対象をモノにしているかどうか
@@ -55,9 +58,11 @@ RETURN デイリー_ジャンル_その他
 IF KDVAR:対象:芳香_一度死んだなら
 	IF !(IS_SLAVE(対象) || IS_LOVER(対象) || IS_SLAVED_BY(対象))
 		CALL COLOR_PRINTW(@"再次醒来的%ANAME(対象)%，回到了%ANAME(青娥)%的身边", カラー_警告)
+		;TranslatedMark 再び%ANAME(対象)%が蘇り、%ANAME(青娥)%の元に推参しました
 		CALL CHANGE_COUNTRY(対象, CFLAG:青娥:所属)
 	ELSE
 		CALL COLOR_PRINTW(@"再次醒来的%ANAME(対象)%，回到了%ANAME(MASTER)%的身边", カラー_警告)
+		;TranslatedMark 再び%ANAME(対象)%が蘇り、%ANAME(MASTER)%の元に推参しました
 		CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属)
 	ENDIF
 ELSE
@@ -104,6 +109,7 @@ ELSE
 		PRINTFORML 「我在烦恼些什么……赶紧回去吧！」
 		;TranslatedMark 「何悩んでたんだ私……さっさと帰ろう！」
 		CALL COLOR_PRINTW(@"%NAME_FORMAL(対象)%醒来后，回到了%ANAME(青娥)%的身边", カラー_警告)
+		;TranslatedMark %NAME_FORMAL(対象)%が蘇り、%ANAME(青娥)%の元に推参しました
 		CALL CHANGE_COUNTRY(対象, CFLAG:青娥:所属)
 	ELSE
 		PRINTFORMW 「……%ANAME(MASTER)%？」
@@ -114,6 +120,7 @@ ELSE
 		PRINTFORML 「不管了！快点回去吧，回到那个人的身边去！」
 		;TranslatedMark 「まあいい！　いざ行かん、我が君の元へ！」
 		CALL COLOR_PRINTW(@"%NAME_FORMAL(対象)%醒来后，回到了%ANAME(MASTER)%的身边", カラー_警告)
+		;TranslatedMark %NAME_FORMAL(対象)%が蘇り、%ANAME(MASTER)%の元に推参しました
 		PRINTFORMW
 		CALL CHANGE_COUNTRY(対象, CFLAG:MASTER:所属)
 		PRINTFORML 「%ANAME(MASTER)%，好久不见！」

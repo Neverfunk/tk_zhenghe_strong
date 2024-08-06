@@ -11,7 +11,9 @@
 #DIM 辺境伯判定
 
 PRINTFORML 请选择作为对象的従属国
+;TranslatedMark 対象となる従属国を選択してください
 PRINTFORML 为了统合附属国，好感值必须高于敌对值1000
+;TranslatedMark 従属国を統合するためには好感度が敵対値より1000以上であることが必要です
 CALL Colonial_Office_indicate_1
 
 IF RESULT == 0
@@ -43,12 +45,15 @@ $INPUT_LOOP1
 $INPUT_LOOP2
 
 PRINTFORML %ANAME(対象勢力名)%势力的从属形态要如何变更？
+;TranslatedMark %ANAME(対象勢力名)%勢力の従属形態をどのように変更しますか？
 
 CALL ASK_MULTI_JUDGE("独立", 傀儡国判定, "合并", 辺境伯判定, "取消变更", 1)
+;TranslatedMark "独立させる", 傀儡国判定, "統合する", 辺境伯判定, "変更しない", 1
 IF RESULT == 2
 	RETURN 0
 ELSEIF RESULT == 0
 	PRINTFORML 要让%ANAME(対象勢力名)%势力独立吗？
+	;TranslatedMark %ANAME(対象勢力名)%勢力を独立させますか？
 
 	;はい／いいえ入力処理
 	CALL ASK_YN()
@@ -58,10 +63,12 @@ ELSEIF RESULT == 0
 	ENDIF
 
 	PRINTFORML %ANAME(対象勢力名)%势力从%ANAME(自国勢力名)%势力独立了
+	;TranslatedMark %ANAME(対象勢力名)%勢力は%ANAME(自国勢力名)%勢力から独立しました
 	CALL INIT_Protectorate_Independence(対象勢力, 自国勢力)
 	RETURN 1
 ELSEIF RESULT == 1
 	PRINTFORML 要合并%ANAME(対象勢力名)%势力吗？
+	;TranslatedMark %ANAME(対象勢力名)%勢力を統合しますか？
 
 	;はい／いいえ入力処理
 	CALL ASK_YN()
@@ -71,8 +78,20 @@ ELSEIF RESULT == 1
 	ENDIF
 
 	PRINTFORML %ANAME(対象勢力名)%势力与%ANAME(自国勢力名)%势力合并了
+	;TranslatedMark %ANAME(対象勢力名)%勢力は%ANAME(自国勢力名)%勢力に統合されました
+
+	;ミッション達成
+	IF ACHIEVEMENT_MISSION:5 == 1
+		ACHIEVEMENT_MISSION:5 = 2
+		SETCOLOR カラー_注意
+		PRINTL 任务完成!
+		;TranslatedMark ミッション達成!
+		RESETCOLOR
+		WAIT
+	ENDIF
+
 	CALL INIT_Protectorate_Integrate(対象勢力, 自国勢力)
-	CALL TMP_BUILDING_EXIST_MAP
+	TRYCALL TMP_BUILDING_EXIST_MAP
 	RETURN 1
 ENDIF
 RETURN 0

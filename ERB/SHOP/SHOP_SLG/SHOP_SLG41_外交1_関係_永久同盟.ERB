@@ -13,21 +13,25 @@
 
 IF CHECK_COUNTRY_RELATION_F(勢力, 相手勢力) != 3
 	PRINTFORMW 永久同盟提案、只能在現在同盟中的勢力間提出
+	;TranslatedMark 永久同盟は、現在同盟中の勢力にしか提案することができません
 	RETURN 0
 ENDIF
 
 IF COUNTRY_Protectorate:相手勢力 > 1
 	PRINTFORMW 你不能和你的従属国締結永久同盟
+	;TranslatedMark 従属国と永久同盟を締結することはできません
 	RETURN 0
 ENDIF
 
 IF IS_TREATY_UNI:相手勢力 == 1
 	PRINTFORMW 你不能和已经组成联邦的人结成永久同盟
+	;TranslatedMark 既に連邦を形成している相手と永久同盟を締結することはできません
 	RETURN 0
 ENDIF
 
 IF IS_SP_COUNTRY(相手勢力)
 	PRINTFORMW 不可能和這樣的人結成夥伴
+	;TranslatedMark こんな連中と手を組むわけにはいきません
 	RETURN 0
 ENDIF
 
@@ -35,15 +39,18 @@ ENDIF
 相手君主 = GET_COUNTRY_BOSS(相手勢力)
 
 PRINTFORMW %ANAME(君主)%対%ANAME(相手君主)%提出了無期限同盟的提案
+;TranslatedMark %ANAME(君主)%は%ANAME(相手君主)%に無期限の同盟を提案した
 
 ;好感度1200以上、敵対値0
 IF REL_LIKE:相手君主:君主 >= 1200 && REL_HATE:相手君主:君主 <= 0
 	PRINTFORMW %ANAME(相手君主)%決定和%ANAME(君主)%一起統治天下…
+	;TranslatedMark %ANAME(相手君主)%は%ANAME(君主)%と共に天下を統べる決意を固めたようだ…
 	CALL INIT_ALLIANCE(勢力, 相手勢力, 9999)
 
-	PRINTL 
+	PRINTL
 	SETCOLOR カラー_注意
 	PRINTFORMW 和%ANAME(相手君主)%的無期限同盟成立了
+	;TranslatedMark %ANAME(相手君主)%と無期限の同盟が成立しました
 	RESETCOLOR
 	CALL INIT_Union(相手勢力, CFLAG:MASTER:所属)
 	;跳转信仰事件
@@ -51,6 +58,8 @@ IF REL_LIKE:相手君主:君主 >= 1200 && REL_HATE:相手君主:君主 <= 0
 ;不成立
 ELSE
 	PRINTFORML 但是、%ANAME(相手君主)%拒絶了%ANAME(君主)%的提案
+	;TranslatedMark だが、%ANAME(相手君主)%は%ANAME(君主)%の提案を断った
 	PRINTFORMW 好像是%ANAME(君主)%還沒有被対方信任的樣子…
+	;TranslatedMark まだ%ANAME(君主)%のことをそこまで信用できないようだ…
 ENDIF
 

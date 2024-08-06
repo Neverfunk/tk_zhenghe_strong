@@ -7,9 +7,12 @@
 #DIM FIRST_LINE
 
 選択対象 = 0
-LOCALS:0 = 徴税特化
-LOCALS:1 = 経済支援
-LOCALS:2 = 防衛特化
+LOCALS:0 = 征税特化
+;TranslatedMark 徴税特化
+LOCALS:1 = 经济支援
+;TranslatedMark 経済支援
+LOCALS:2 = 防卫特化
+;TranslatedMark 防衛特化
 
 $SHOW_LOOP
 
@@ -17,11 +20,13 @@ FIRST_LINE = LINECOUNT
 
 CALL SINGLE_DRAWLINE
 PRINTFORML 使从属国的角色更加特化
-PRINTFORML 
+;TranslatedMark 従属国の役割を特化させます
+PRINTFORML
 
 CALL TMP_CREATE_COUNTRY_BOSS_MAP
 
 PRINTL ◇殖民地◇
+;TranslatedMark ◇植民地◇
 FOR LOCAL:0, 0, MAX_TREATY_CO
 	FOR LOCAL:1, 0, MAX_TREATY_COUNTRY
 		IF TREATY_CO_COUNTRY:(LOCAL:0):(LOCAL:1):1 == CFLAG:MASTER:所属
@@ -60,42 +65,48 @@ PRINTL
 CALL SINGLE_DRAWLINE
 IF 選択対象 != 0
 	PRINTFORML %ANAME(GET_COUNTRY_BOSS(選択対象))%
-	PRINTFORML 
+	PRINTFORML
 	IF SPECIALIZATION_Protectorate:選択対象 == 3
-		PRINTFORM [征税] [经济支援] [防卫特化] 
+		PRINTFORM [征税] [经济支援] [防卫特化]
+		;TranslatedMark [徴税] [経済支援] [防衛特化]
 		SETCOLOR カラー_緑
 		PRINTFORML [地方自治]
 		RESETCOLOR
 		CALL SINGLE_DRAWLINE
 		PRINTFORML 都市的防备特化・经济成长
+		;TranslatedMark 都市の防備特化・経済成長がなされます
 		CALL SINGLE_DRAWLINE
 	ELSE
 		FOR LOCAL:1, 0, 3
 			IF SPECIALIZATION_Protectorate:選択対象 == LOCAL:1
 				SETCOLOR カラー_緑
-				PRINTFORM [%LOCALS:(LOCAL:1)%] 
+				PRINTFORM [%LOCALS:(LOCAL:1)%]
 				RESETCOLOR
 			ELSE
 				PRINTBUTTON @"[%LOCALS:(LOCAL:1)%]", LOCAL:1 + 1000
-				PRINT  
+				PRINT
 			ENDIF
 		NEXT
 	ENDIF
-	PRINTL 
+	PRINTL
 	CALL SINGLE_DRAWLINE
 	SELECTCASE SPECIALIZATION_Protectorate:選択対象
 		CASE 0
 			PRINTFORML 从从属国获得的税收增加
+			;TranslatedMark 従属国からの収入がより増加します
 		CASE 1
 			PRINTFORML 经济将会发展更快
+			;TranslatedMark 経済が発展していきます
 		CASE 2
 			PRINTFORML 不组建部队，而是加强都市的防御
+			;TranslatedMark 部隊を作らず都市の防備を固めます
 	ENDSELECT
 	CALL SINGLE_DRAWLINE
 ENDIF
 
 PRINTBUTTON "999[取消]", 999
-PRINTL 
+;TranslatedMark 999[戻る]
+PRINTL
 
 $INPUT_LOOP
 INPUT
@@ -103,12 +114,12 @@ INPUT
 IF RESULT == 999
 	REDRAW 1
 	RETURN
-	
+
 ELSEIF RESULT > 0 && RESULT <= MAX_COUNTRY
 	選択対象 = RESULT
 	CLEARLINE LINECOUNT - FIRST_LINE
 	GOTO SHOW_LOOP
-	
+
 ELSEIF IS_COUNTRY(選択対象) && COUNTRY_Protectorate:選択対象 >= 3 && RESULT >= 1000 && RESULT <= 1002
 	SELECTCASE RESULT
 		CASE 1000
@@ -118,9 +129,20 @@ ELSEIF IS_COUNTRY(選択対象) && COUNTRY_Protectorate:選択対象 >= 3 && RES
 		CASE 1002
 			SPECIALIZATION_Protectorate:選択対象 = 2
 	ENDSELECT
+
+	;ミッション達成
+	IF ACHIEVEMENT_MISSION:4 == 1
+		ACHIEVEMENT_MISSION:4 = 2
+		SETCOLOR カラー_注意
+		PRINTL 任务完成!
+		;TranslatedMark ミッション達成!
+		RESETCOLOR
+		WAIT
+	ENDIF
+
 	CLEARLINE LINECOUNT - FIRST_LINE
 	GOTO SHOW_LOOP
-	
+
 ELSE
 	CLEARLINE 1
 	GOTO INPUT_LOOP

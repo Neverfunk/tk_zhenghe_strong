@@ -1,0 +1,90 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_119_PERSONAL_2_EXIST
+RETURN 1
+
+@SKILL_119_PERSONAL_2_NAME
+RESULTS = 文明魔术
+;TranslatedMark シヴィライゼーションマジック
+
+;レベルは1-5まで
+@SKILL_119_PERSONAL_2_LEVEL
+RETURN 5
+
+;対象選択
+@SKILL_119_PERSONAL_2_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+COMBAT_SKILL_TARGET = 発動番号
+RETURN 1
+
+;発動判定
+@SKILL_119_PERSONAL_2_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN BATTLE_妖術:発動側:発動番号 == 0 
+
+;発動テキストをオーバライドしたいときに。
+;「誰それのスキル発動！　○○した！」の「○○した！」の部分を実装したい場合は、
+;これじゃなくてINVOKEで書けばいいです。
+;@SKILL_119_PERSONAL_2_INVOKE_TEXT(発動者, スキル, ジャンル)
+;#DIM 発動者
+;#DIM スキル
+;#DIMS ジャンル
+
+;効果をここに記述
+@SKILL_119_PERSONAL_2_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+PRINTFORML 魔力解放后的%ANAME(発動者)%获得了暂时的妖术能力
+;TranslatedMark 魔力を解放した%ANAME(発動者)%は一時的に妖術を得る！
+BATTLE_妖術:発動側:COMBAT_SKILL_TARGET = 30
+BATTLE_妖術パワー:発動側:COMBAT_SKILL_TARGET = ABL_POWER(BATTLE_妖術:発動側:COMBAT_SKILL_TARGET, 発動者)
+
+@SKILL_119_PERSONAL_2_EXPLANATION
+RESULTS = 当自身妖力为0时触发。获得暂时的妖术。
+;TranslatedMark 自身の妖術が0のとき発動。一時的に妖術を得る。
+
+@SKILL_119_PERSONAL_2_CANT_TELL
+
+
+@SKILL_119_PERSONAL_2_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 150

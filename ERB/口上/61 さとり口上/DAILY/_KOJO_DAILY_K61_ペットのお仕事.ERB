@@ -1,4 +1,8 @@
-﻿;---------------------
+﻿@KOJO_DAILY_K61_SATARI_PET_WORK_TAG	
+    LOCAL = 0
+	SETBIT LOCAL,EVENT_TAG_不可规避
+	RETURN LOCAL
+ ;---------------------
 ;基本的な発生確率(1000分率 100で10%)
 ;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
 ;---------------------
@@ -17,15 +21,18 @@ RETURN 100 + (KDVAR:対象:さとり_ペットのお仕事 > 0) * 50
 ;主人公がお空、お燐、こいしだと駄目
 SIF GROUPMATCH(MASTER, NAME_TO_CHARA("空"), NAME_TO_CHARA("燐"), NAME_TO_CHARA("こいし"))
 	RETURN 0
-	
+
 ;主人じゃないと駄目
 SIF !TALENT:対象:主人
 	RETURN 0
-	
+
+SIF !HAS_PENIS(MASTER)
+	RETURN 0
+
 ;好感度2000以下だと駄目
 SIF CFLAG:対象:好感度 <= 2000
 	RETURN 0
-	
+
 ;最後まで行ったら発生しない
 SIF KDVAR:対象:さとり_ペットのお仕事 == -1
 	RETURN 0
@@ -156,7 +163,7 @@ SELECTCASE KDVAR:対象:さとり_ペットのお仕事
 		;TranslatedMark %ANAME(MASTER)%は愛するご主人様の可愛らしい頼みを断れず、そのまま一日彼女のなすがままに甘い夜を過ごした…
 		KDVAR:対象:さとり_ペットのお仕事 ++
 	CASE 2
-		PRINTFORML 
+		PRINTFORML
 		PRINTFORMW %ANAME(対象)%以性欲处理为名把%ANAME(MASTER)%叫到自己的卧室……
 		;TranslatedMark %ANAME(対象)%は性欲処理、という名目で%ANAME(MASTER)%を自らの寝室に呼び出した……
 		IF TALENT:対象:母乳体質
@@ -241,7 +248,7 @@ SELECTCASE KDVAR:対象:さとり_ペットのお仕事
 		CALL FUCK(対象, "欲望, 奉仕, 性技, 精愛, 手淫", "接吻喪失", GET_SPERM_ID("不明"), @"%ANAME(MASTER)%的阴茎", "", "", "和姦")
 		CALL FUCK(MASTER, "Ｃ, 奉仕, 精愛, 射精", "接吻喪失", GET_SPERM_ID("不明"), @"%ANAME(対象)%の手")
 		KDVAR:対象:さとり_ペットのお仕事 = -1
-ENDSELECT 
+ENDSELECT
 
 
 RETURN 1

@@ -1,0 +1,110 @@
+﻿;-----------------------------------------------
+;画像表示
+;ARG:0のキャラクターの画像を表示
+;服装:1=服 2=裸 3=特殊 4=自由
+;表情:1=通常 2=笑顔 3=怒り 4=怯え 5=絶頂 6=死亡
+;特殊(表情へ代入すること):1=特殊陥落 2=悶笑
+;-----------------------------------------------
+
+@画像表示(ARG:0, 服装, 表情)
+#DIMS 画像名				;リソース名
+#DIM 服装
+#DIM 表情
+#DIMS  表示HTML
+#DIM 行数
+#DIM 描画開始行数
+#DIM 画像縦幅
+#DIM 画像横幅
+
+SIF !CONFIG:555
+	RETURN
+
+画像名 =
+
+SELECTCASE 服装
+	CASE 1
+		画像名 += "服"
+	CASE 2
+		画像名 += "裸"
+	CASE 3
+		画像名 += "特殊"
+	CASE 4
+		画像名 += "自由"
+ENDSELECT
+
+IF 服装 == 3
+	SELECTCASE 表情
+		CASE 1
+			画像名 += "_特殊陥落_"
+		CASE 2
+			画像名 += "_悶笑_"
+		CASE 3
+			画像名 += "_睡姦_"
+		CASE 4
+			画像名 += "_疲労_"
+	ENDSELECT
+ELSEIF 服装 == 4
+	画像名 += @"_{表情}_"
+ELSE
+	SELECTCASE 表情
+		CASE 1
+			画像名 += "_通常_"
+		CASE 2
+			画像名 += "_笑顔_"
+		CASE 3
+			画像名 += "_怒り_"
+		CASE 4
+			画像名 += "_怯え_"
+		CASE 5
+			画像名 += "_絶頂_"
+		CASE 6
+			画像名 += "_死亡_"
+		CASE 7
+			画像名 += "_泣き_"
+	ENDSELECT
+ENDIF
+
+画像名 += @"%CSTR:(ARG:0):99%"
+
+IF !SPRITECREATED(画像名) && 服装 == 3
+	SELECTCASE 表情
+		CASE 1
+			画像名 = 裸_通常_
+		CASE 2
+			画像名 = 裸_絶頂_
+		CASE 3
+			画像名 = 裸_絶頂_
+		CASE 4
+			画像名 = 裸_怯え_
+	ENDSELECT
+	画像名 += @"%CSTR:(ARG:0):99%"
+ENDIF
+
+DEBUGPRINTFORML %画像名%
+
+IF !SPRITECREATED(画像名)
+	CALL 画像表示_normal_photo(ARG:0, 服装, 表情)
+	SIF !RESULT
+		RETURN 0
+	画像名 = %RESULTS%
+ENDIF
+描画開始行数 = LINECOUNT
+
+画像縦幅 = (180 * 100) / GETCONFIG("フォントサイズ")
+画像横幅 = (180 * 100) / GETCONFIG("フォントサイズ")
+
+表示HTML =
+表示HTML = <p align='left'><img src='%画像名%' height='{画像縦幅}' width='{画像横幅}'>
+DEBUGPRINTFORML %表示HTML%
+
+HTML_PRINT 表示HTML
+
+;端数切り上げ。演算内容は 縦幅 / GETCONFIG("一行の高さ")
+行数 = (180 + GETCONFIG("一行の高さ") - 1) / GETCONFIG("一行の高さ")
+
+FOR LOCAL, 0, 行数 - (LINECOUNT - 描画開始行数)
+	PRINTFORML
+NEXT
+
+描画開始行数 = 0
+RETURN 1

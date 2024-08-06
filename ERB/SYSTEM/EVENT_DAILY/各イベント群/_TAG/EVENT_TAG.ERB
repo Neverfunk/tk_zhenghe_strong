@@ -1,0 +1,354 @@
+﻿@SET_EVENT_DAILY_BY_TAG
+    PRINTFORML 要根据TAG选择关闭部分日常事件吗？
+    SETCOLOR カラー_注意
+    PRINTFORML 请注意TAG仅标识事件中存在的内容，不代表一定会触发
+    PRINTFORML 因此只推荐关闭不可规避的性事件
+    RESETCOLOR
+    CALL ASK_YN()
+    IF RESULT == 1
+    ELSE
+        CALL CREATE_TMP_EVENT_DAILY_TAG_MAP()
+        CALL ASK_MULTI("进行快速的设置","进行详细的设置","完全按个人喜好进行设置")
+        IF RESULT == 0
+            CALL SET_EVENT_DAILY_BY_TAG_FAST()
+        ELSEIF RESULT ==1
+            CALL SET_EVENT_DAILY_BY_TAG_CAREFULLY()
+        ELSE
+            CALL SET_EVENT_DAILY_BY_TAG_BY_USER()
+        ENDIF
+    ENDIF
+    PRINTFORMW 你可以在设置中再次启用这个界面
+    RETURN
+@SET_EVENT_DAILY_BY_TAG_FAST
+    #DIM BAN_TYPE,4
+    VARSET BAN_TYPE,1
+    LOCAL:1 = LINECOUNT
+    WHILE 1
+        CLEARLINE LINECOUNT - LOCAL:1
+        {
+        CALL ASK_MULTI_JUDGE("关闭不可规避的性事件",BAN_TYPE:0,
+        "关闭与男性主角无关的性事件",BAN_TYPE:1,
+        "关闭存在兽奸的事件（即使只有一小部分兽奸的事件也会被关闭）",BAN_TYPE:2,
+        "关闭特殊势力且与男性主角无关的性事件（不会关闭每期结算的特殊势力调教）",BAN_TYPE:3,
+        "重置事件状态为全部启用",1,
+        "完成",1
+        )
+        }
+        IF RESULT == 0
+            CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_不可规避,1)
+            BAN_TYPE:0 = 0
+            REUSELASTLINE 关闭了所有不可规避的事件
+        ELSEIF RESULT == 1
+            CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_男性主角无关,1)
+            BAN_TYPE:1 = 0
+            REUSELASTLINE 关闭了与所有男性主角无关的事件
+        ELSEIF RESULT == 2
+            CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_兽奸,1)
+            BAN_TYPE:2 = 0
+            REUSELASTLINE 关闭了所有存在兽奸的事件
+        ELSEIF RESULT == 3
+            CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_男性主角无关,1)
+            CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_特殊势力)
+            BAN_TYPE:3 = 0
+            REUSELASTLINE 关闭了所有殊势力且性描写与男性主角无关的事件
+        ELSEIF RESULT == 4
+            CALL EVENT_DAILY_DIABLE_RESET()
+            VARSET BAN_TYPE,1
+            BAN_BIT = 0
+            REUSELASTLINE 所有事件已经启用
+        ELSE
+            BREAK
+        ENDIF
+        CALL BAN_EVENT_DAILY_BY_TAG(BAN_BIT)
+        WAIT
+    WEND
+
+@SET_EVENT_DAILY_BY_TAG_CAREFULLY
+    CALL EVENT_DAILY_DIABLE_RESET
+    FOR LOCAL,1,EVENT_TAG_TYPE_NUM+1
+        TRYCALLFORM SET_EVENT_DAILY_BY_TAG_%EVENT_TAG_NAME:(LOCAL-1)%
+    NEXT
+
+@SET_EVENT_DAILY_BY_TAG_NTR
+    PRINTFORML 关于NTR的设定
+    PRINTFORML 具体来说
+    PRINTFORML 这里NTR事件是指玩家亲自将某个角色交出去供其他人『享用』
+    PRINTFORML 那么要怎么设置呢？
+    {
+    CALL ASK_MULTI("关闭全部的NTR事件","关闭不可规避的NTR事件",
+    "关闭与男性主角无关的NTR事件"
+    ,"关闭特殊势力的NTR事件","不关闭NTR事件")
+    }
+    IF RESULT == 0
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_NTR,1)
+        REUSELASTLINE 关闭了全部的NTR事件
+    ELSEIF RESULT == 1
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_NTR,1)
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_不可规避,1)
+        REUSELASTLINE 关闭了不可规避的NTR事件
+    ELSEIF RESULT == 2
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_NTR,1)
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_男性主角无关,1)
+        REUSELASTLINE 关闭了与男性主角无关的NTR事件
+    ELSEIF RESULT == 3
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_NTR,1)
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_特殊势力,1)
+        REUSELASTLINE 关闭了特殊势力的NTR事件
+    ELSE
+        REUSELASTLINE 不关闭NTR事件
+        BAN_BIT = 0
+    ENDIF
+    CALL BAN_EVENT_DAILY_BY_TAG(BAN_BIT)
+    WAIT
+
+@SET_EVENT_DAILY_BY_TAG_恶堕
+    PRINTFORML 关于恶堕的设定
+    PRINTFORML 某个角色拥有堕落素质后发生的事件
+    PRINTFORML 或者会导致某个角色恶堕的事件
+    PRINTFORML 那么要怎么设置呢？
+    {
+    CALL ASK_MULTI("关闭全部的恶堕事件","关闭不可规避的恶堕事件",
+    "关闭与男性主角无关的恶堕事件"
+    ,"关闭特殊势力的恶堕事件","不关闭恶堕事件")
+    }
+    IF RESULT == 0
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_恶堕,1)
+        REUSELASTLINE 关闭了全部的恶堕事件
+    ELSEIF RESULT == 1
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_恶堕,1)
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_不可规避)
+        REUSELASTLINE 关闭了不可规避的恶堕事件
+    ELSEIF RESULT == 2
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_恶堕,1)
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_男性主角无关)
+        REUSELASTLINE 关闭了与男性主角无关的恶堕事件
+    ELSEIF RESULT == 3
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_恶堕,1)
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_特殊势力)
+        REUSELASTLINE 关闭了特殊势力的恶堕事件
+    ELSE
+        REUSELASTLINE 不关闭恶堕事件
+        BAN_BIT = 0
+    ENDIF
+    CALL BAN_EVENT_DAILY_BY_TAG(BAN_BIT)
+    WAIT
+
+@SET_EVENT_DAILY_BY_TAG_强奸
+    PRINTFORML 关于强奸的设定
+    PRINTFORML 女性角色被主角以外的人强奸的事件
+    PRINTFORML 那么要怎么设置呢？
+    {
+    CALL ASK_MULTI("关闭全部的强奸事件","关闭不可规避的强奸事件",
+    "关闭与男性主角无关的强奸事件"
+    ,"关闭特殊势力的强奸事件","不关闭强奸事件")
+    }
+    IF RESULT == 0
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_强奸,1)
+        CALL BAN_EVENT_DAILY_BY_TAG(BAN_BIT)
+    ELSEIF RESULT == 1
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_强奸,1)
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_不可规避)
+        CALL BAN_EVENT_DAILY_BY_TAG(BAN_BIT)
+    ELSEIF RESULT == 2
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_强奸,1)
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_男性主角无关)
+        CALL BAN_EVENT_DAILY_BY_TAG(BAN_BIT)
+    ELSEIF RESULT == 3
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_强奸,1)
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_特殊势力)
+        REUSELASTLINE 关闭了特殊势力的强奸事件
+    ELSE
+        REUSELASTLINE 不关闭强奸事件
+        BAN_BIT = 0
+    ENDIF
+    CALL BAN_EVENT_DAILY_BY_TAG(BAN_BIT)
+    WAIT
+
+@SET_EVENT_DAILY_BY_TAG_被捕获
+    PRINTFORML 关于被捕获的设定
+    PRINTFORML 可能导致角色被捕捉到其他势力或者单纯消失的事件
+    PRINTFORML 那么要怎么设置呢？
+    {
+    CALL ASK_MULTI("关闭全部的被捕获事件","关闭不可规避的被捕获事件",
+    "关闭与男性主角无关的被捕获事件"
+    ,"关闭特殊势力的被捕获事件","不关闭被捕获事件")
+    }
+    IF RESULT == 0
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_被捕获,1)
+        REUSELASTLINE 关闭了全部的被捕获事件
+    ELSEIF RESULT == 1
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_被捕获,1)
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_不可规避)
+        REUSELASTLINE 关闭了不可规避的被捕获事件
+    ELSEIF RESULT == 2
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_被捕获,1)
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_男性主角无关)
+        REUSELASTLINE 关闭了与男性主角无关的被捕获事件
+    ELSEIF RESULT == 3
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_被捕获,1)
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_特殊势力)
+        REUSELASTLINE 关闭了特殊势力的被捕获事件
+    ELSE
+        REUSELASTLINE 不关闭被捕获事件
+        BAN_BIT = 0
+    ENDIF
+    CALL BAN_EVENT_DAILY_BY_TAG(BAN_BIT)
+    WAIT
+
+@SET_EVENT_DAILY_BY_TAG_兽奸
+    PRINTFORML 关于兽奸的设定
+    PRINTFORML 顾名思义……不过请注意哪怕只有一点点相关内容都会被视为兽奸事件
+    PRINTFORML 那么要怎么设置呢？
+    {
+    CALL ASK_MULTI("关闭全部的兽奸事件","关闭不可规避的兽奸事件","不关闭兽奸事件")
+    }
+    IF RESULT == 0
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_兽奸,1)
+        REUSELASTLINE 关闭了全部的兽奸事件
+    ELSEIF RESULT == 1
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_兽奸,1)
+        CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,EVENT_TAG_不可规避)
+        REUSELASTLINE 关闭了不可规避的兽奸事件
+    ELSE
+        REUSELASTLINE 不关闭兽奸事件
+        BAN_BIT =0
+    ENDIF
+    CALL BAN_EVENT_DAILY_BY_TAG(BAN_BIT)
+    WAIT
+
+@SET_EVENT_DAILY_BY_TAG_BY_USER
+    #DIM EVENT_TAG_STATUS,EVENT_TAG_TYPE_NUM
+    #DIM DYNAMIC LAST_CHANGE_TAG
+    VARSET EVENT_TAG_STATUS,1
+    LOCAL:1 = LINECOUNT
+    WHILE 1
+        CLEARLINE LINECOUNT - LOCAL:1
+        FOR LOCAL,0,EVENT_TAG_TYPE_NUM
+            PRINTFORM 当前 %EVENT_TAG_NAME:LOCAL% 事件状态:
+            PRINTFORM %TOSTR_SPACE(20 - STRLENS(EVENT_TAG_NAME:LOCAL))%
+            IF EVENT_TAG_STATUS:LOCAL
+                CALL COLOR_PRINT("开启 ",カラー_緑)
+                PRINTBUTTON @"[{LOCAL}]关闭\n",LOCAL
+                PRINTL
+            ELSE
+                CALL COLOR_PRINT("关闭 ",カラー_警告)
+                PRINTBUTTON @"[{LOCAL}]开启\n",LOCAL
+                PRINTL
+            ENDIF
+
+        NEXT
+        PRINTBUTTON @"[{EVENT_TAG_TYPE_NUM+1}]重置事件状态为全部启用",EVENT_TAG_TYPE_NUM+1
+        PRINTL
+        PRINTBUTTON @"[{EVENT_TAG_TYPE_NUM+2}]将包含以上任一TAG的事件变为关闭",EVENT_TAG_TYPE_NUM+2
+        PRINTL
+        PRINTBUTTON @"[{EVENT_TAG_TYPE_NUM+3}]结束",EVENT_TAG_TYPE_NUM+3
+        PRINTL
+        INPUT
+        IF RESULT == EVENT_TAG_TYPE_NUM+1
+            REUSELASTLINE 所有事件已经启用
+            VARSET EVENT_TAG_STATUS,1
+        ELSEIF RESULT == EVENT_TAG_TYPE_NUM+2
+            REUSELASTLINE 所有包含上述TAG的事件已经禁用
+            VARSET EVENT_TAG_STATUS,0
+        ELSEIF RESULT == EVENT_TAG_TYPE_NUM+3
+            BREAK
+        ELSEIF INRANGE(RESULT,0,EVENT_TAG_TYPE_NUM)
+            LOCAL = RESULT
+            EVENT_TAG_STATUS:LOCAL = 1 - EVENT_TAG_STATUS:LOCAL
+            IF EVENT_TAG_STATUS:LOCAL == 0
+                REUSELASTLINE 所有%EVENT_TAG_NAME:LOCAL%事件已经关闭
+            ELSE
+                REUSELASTLINE 所有%EVENT_TAG_NAME:LOCAL%事件已经开启
+            ENDIF
+        ENDIF
+        CALL EVENT_DAILY_DIABLE_RESET
+        FOR LOCAL,0,EVENT_TAG_TYPE_NUM
+            IF EVENT_TAG_STATUS:LOCAL == 0
+                CALL CREATE_EVENT_DAILY_BAN_TAG(BAN_BIT,LOCAL,1)
+                CALL BAN_EVENT_DAILY_BY_TAG(BAN_BIT)
+            ENDIF
+        NEXT
+        WAIT
+    WEND
+
+@EVENT_DAILY_DIABLE_RESET()
+    FOR LOCAL,0,DAILY_EVENT_NUM:デイリー_通常
+        DAILY_DISABLE:LOCAL = 0
+    NEXT
+    PRINTFORML 要重置角色日常口上状态为全部启用吗？
+    CALL ASK_YN()
+    SIF RESULT == 0
+        CALL SET_ALL_KOJO_DAILY(1)
+
+@BAN_EVENT_DAILY_BY_TAG(BAN_TAG_BIT)
+    #DIM EVENT_DAILY_TAG_BIT
+    #DIM BAN_TAG_BIT
+    SIF BAN_TAG_BIT == 0
+        RETURN
+    FOR LOCAL,0,DAILY_EVENT_NUM:デイリー_通常
+        EVENT_DAILY_TAG_BIT = TMP_EVENT_DAILY_TAG_MAP:LOCAL
+        SIF EVENT_DAILY_TAG_BIT == 0
+            CONTINUE
+        ;事件包含全部要ban的tag
+        SIF (BAN_TAG_BIT & EVENT_DAILY_TAG_BIT) == BAN_TAG_BIT
+            DAILY_DISABLE:LOCAL = 1
+    NEXT
+    CALL BAN_KOJO_EVENT_DAILY_BY_TAG(BAN_TAG_BIT)
+
+@BAN_KOJO_EVENT_DAILY_BY_TAG(BAN_TAG_BIT)
+    #DIM EVENT_DAILY_TAG_BIT
+    #DIM BAN_TAG_BIT
+    #DIMS EVENT_NAME_ENG
+    PRINTFORML 要对角色日常口上进行相同的处理吗？
+    CALL ASK_YN()
+    SIF RESULT == 1
+        RETURN
+    SIF BAN_TAG_BIT == 0
+        RETURN
+    FOR LOCAL, 0, CHARANUM
+        SIF !IS_TOHO_CHARA(LOCAL)
+            CONTINUE
+        FOR LOCAL:1, 0, VARSIZE("KOJO_DAILY_EVENT_NAME_ENG", 2)
+            
+            EVENT_NAME_ENG = %KOJO_DAILY_EVENT_NAME_ENG:(NO:LOCAL):デイリー_通常:(LOCAL:1)%
+            TRYCCALLFORM KOJO_DAILY_K{(NO:LOCAL)}_%EVENT_NAME_ENG%_TAG
+                CALLFORM KOJO_DAILY_K{(NO:LOCAL)}_%EVENT_NAME_ENG%_TAG
+                SIF (BAN_TAG_BIT & RESULT) == BAN_TAG_BIT
+                    CALL KOJO_DAILY_SET_DISABLE(LOCAL, EVENT_NAME_ENG, 1)
+            CATCH
+            ENDCATCH
+        NEXT
+    NEXT
+    
+@CREATE_EVENT_DAILY_BAN_TAG(BAN_TAG_BIT,BAN_TAG,RESET_FLAG = 0)
+    #DIM REF BAN_TAG_BIT
+    #DIM BAN_TAG
+    #DIM RESET_FLAG
+    SIF RESET_FLAG
+        BAN_TAG_BIT = 0
+    SETBIT BAN_TAG_BIT,BAN_TAG
+
+@CREATE_TMP_EVENT_DAILY_TAG_MAP
+    VARSET TMP_EVENT_DAILY_TAG_MAP,0
+    FOR LOCAL, 0, DAILY_EVENT_NUM:デイリー_通常
+        TRYCALLFORM EVENT_DAILY_%DAILY_EVENT_NAME_ENG:デイリー_通常:LOCAL%_TAG
+        TMP_EVENT_DAILY_TAG_MAP:LOCAL = RESULT
+    NEXT
+
+@SHOW_EVENT_DAILY_TAG
+    CALL CREATE_TMP_EVENT_DAILY_TAG_MAP
+    FOR LOCAL,0,DAILY_EVENT_NUM:デイリー_通常
+        PRINTFORML {LOCAL+1} %DAILY_EVENT_NAME_ENG:デイリー_通常:LOCAL%
+        RESULTS =
+        TRYCALLFORM EVENT_DAILY_%DAILY_EVENT_NAME_ENG:デイリー_通常:LOCAL%_NAME()
+        IF RESULTS == ""
+			PRINTFORML %DAILY_EVENT_NAME:デイリー_通常:LOCAL%的TAG如下
+		ELSE
+			PRINTFORML %RESULTS%的TAG如下
+		ENDIF
+        FOR LOCAL:1,1,EVENT_TAG_TYPE_NUM+1
+            SIF GETBIT(TMP_EVENT_DAILY_TAG_MAP:LOCAL,LOCAL:1)
+                PRINTFORML %EVENT_TAG_NAME:(LOCAL:1 - 1)%
+        NEXT
+        PRINTFORML
+    NEXT

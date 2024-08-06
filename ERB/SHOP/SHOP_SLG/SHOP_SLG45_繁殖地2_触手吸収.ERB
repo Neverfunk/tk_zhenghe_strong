@@ -1,0 +1,490 @@
+﻿;-------------------------------------------------
+;「繁殖地」触手吸収
+;-------------------------------------------------
+@Breeding_AREA_TENTACLE_10_absorbent
+#DIM 苗床
+#DIMS 名前
+#DIM 情報表示キャラ
+#DIM 吸収可能苗床
+#DIM 吸収対象
+#DIM 加工元識別ナンバー
+#DIM FIRST_LINE
+FIRST_LINE = LINECOUNT
+吸収可能苗床 = 0
+
+CALL SINGLE_DRAWLINE
+PRINTFORML 可以将苗床化的俘虏变成你的资粮
+PRINTFORML 在每个回合结束时，苗床将会不断减少能力，当所有能力为0时苗床会死亡
+PRINTFORML 苗床减少的能力将会加在你的身上
+
+CALL SINGLE_DRAWLINE
+
+FOR 苗床, 0, CHARANUM
+	CALL CHANGE_TENTACLE_subject(苗床)
+	IF 触手勢力に監禁:苗床:0 >= 1 && (GETBIT(TALENT:苗床:特殊勢力陥落系, 特殊勢力_触手) || HAS_TAG(苗床, タグ_触手))
+		IF STRLENS(ANAME(苗床)) >= MAX_CHARANAME_LENGTH
+			名前 = %SNAME(苗床)%
+		ELSE
+			名前 = %ANAME(苗床)%
+		ENDIF
+		CALL PRINTBUTTON_CENTER(@"[%名前, MAX_CHARANAME_LENGTH, LEFT%]", 苗床, 0)
+		CALL PRINT_SEX(苗床, 1, 0, 2)
+		PRINT
+		PRINTBUTTON "[能力]", 苗床 + 2000
+		PRINTL
+		吸収可能苗床 ++
+	ENDIF
+NEXT
+PRINTL
+
+CALL SINGLE_DRAWLINE
+IF 吸収可能苗床 >= 2
+	PRINTBUTTON "[ 900][统一吸收]", 900
+	PRINTL
+ENDIF
+PRINTBUTTON "[1000][　　取消]", 1000
+PRINTL
+
+REDRAW 0
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 1000
+	REDRAW 1
+	RETURN
+ELSEIF RESULT >= 2000
+	情報表示キャラ = RESULT - 2000
+	;対象キャラの情報を表示
+	CALL SINGLE_DRAWLINE
+	CALL SHOW_INFO(情報表示キャラ)
+	CALL SINGLE_DRAWLINE
+	WAIT
+	CLEARLINE LINECOUNT - FIRST_LINE
+	RESTART
+ELSEIF RESULT == 900 && 吸収可能苗床 >= 2
+	PRINTFORML 是否要吸收所有苗床？(注意：所有苗床都会死亡！！)
+
+	;はい／いいえ入力処理
+	CALL ASK_YN()
+	IF RESULT == 0
+		FOR 吸収対象, 0, CHARANUM
+			IF 触手勢力に監禁:吸収対象:0 >= 1 && (GETBIT(TALENT:吸収対象:特殊勢力陥落系, 特殊勢力_触手) || HAS_TAG(吸収対象, タグ_触手))
+				触手勢力に監禁:吸収対象:0 = 0
+				CALL CHANGE_COUNTRY(吸収対象, 0, 1, 1)
+				吸収中苗床:吸収対象:0 = 1
+				触手処刑非表示フラグ = 1
+
+				;(画像パッチ)
+				CALL 画像表示(吸収対象, 2, 4)
+				CALL KOJO_EVENT(吸収対象, 343)
+
+				PRINTFORMW %ANAME(吸収対象)%被吞入了蠢动着的肉块之中……
+
+				IF CFLAG:吸収対象:妊娠期間 >= 1
+					;空いている加工元識別ナンバーを検索・割り当て
+					FOR LOCAL:0, 0, 999
+						IF IS_GOODS_EXECUTED:(LOCAL:0) == 0
+							加工元識別ナンバー = LOCAL:0
+							BREAK
+						ENDIF
+					NEXT
+
+					IS_GOODS_EXECUTED:加工元識別ナンバー = 1
+					NAME_BEFORE_GOODS_EXECUTED:加工元識別ナンバー = 吸収対象
+
+					NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:7 = 从「%ANAME(吸収対象)%」身上提取的生命之素
+					TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:0 = 1
+					HAVE_GOODS_EXECUTED:7 += 1
+					NAME_FATHER_FETUS:加工元識別ナンバー = CFLAG:吸収対象:子の父親
+
+					CFLAG:吸収対象:行動不能状態 = 0
+					CFLAG:吸収対象:妊娠期間 = 0
+					CFLAG:吸収対象:子の父親 = 0
+					TALENT:吸収対象:妊娠 = 0
+					CALL MOTHER_SHRINK_BUSTSIZE(吸収対象)
+					CALL MOTHER_STOP_MILKING(吸収対象)
+
+					PRINTFORMW %ANAME(吸収対象)%的胎内提取出了★記念品[生命之素]
+				ENDIF
+				PRINTFORML
+			ENDIF
+		NEXT
+		;ミッション達成
+		IF ACHIEVEMENT_MISSION:62 == 1
+			ACHIEVEMENT_MISSION:62 = 2
+			SETCOLOR カラー_注意
+			PRINTL 任务完成!
+			RESETCOLOR
+			WAIT
+		ENDIF
+
+	ENDIF
+
+ELSEIF 触手勢力に監禁:RESULT:0 >= 1 && (GETBIT(TALENT:RESULT:特殊勢力陥落系, 特殊勢力_触手) || HAS_TAG(RESULT, タグ_触手))
+	吸収対象 = RESULT
+	PRINTFORML 要吸收%ANAME(吸収対象)%吗？(注意：该士官将会死亡！！)
+
+	;はい／いいえ入力処理
+	CALL ASK_YN()
+	IF RESULT == 0
+		触手勢力に監禁:吸収対象:0 = 0
+		CALL CHANGE_COUNTRY(吸収対象, 0, 1, 1)
+		吸収中苗床:吸収対象:0 = 1
+		触手処刑非表示フラグ = 1
+
+		;(画像パッチ)
+		CALL 画像表示(吸収対象, 2, 4)
+		CALL KOJO_EVENT(吸収対象, 343)
+
+		PRINTFORMW 剥成全裸的%ANAME(吸収対象)%被吞入了蠢动的肉块之中……
+
+		IF CFLAG:吸収対象:妊娠期間 >= 1
+			;空いている加工元識別ナンバーを検索・割り当て
+			FOR LOCAL:0, 0, 999
+				IF IS_GOODS_EXECUTED:(LOCAL:0) == 0
+					加工元識別ナンバー = LOCAL:0
+					BREAK
+				ENDIF
+			NEXT
+
+			IS_GOODS_EXECUTED:加工元識別ナンバー = 1
+			NAME_BEFORE_GOODS_EXECUTED:加工元識別ナンバー = 吸収対象
+
+			NAME_AFTER_GOODS_EXECUTED:加工元識別ナンバー:7 = 从「%ANAME(吸収対象)%」身上提取的生命之素
+			TYPE_GOODS_EXECUTED:加工元識別ナンバー:7:0 = 1
+			HAVE_GOODS_EXECUTED:7 += 1
+			NAME_FATHER_FETUS:加工元識別ナンバー = CFLAG:吸収対象:子の父親
+
+			CFLAG:吸収対象:行動不能状態 = 0
+			CFLAG:吸収対象:妊娠期間 = 0
+			CFLAG:吸収対象:子の父親 = 0
+			TALENT:吸収対象:妊娠 = 0
+			CALL MOTHER_SHRINK_BUSTSIZE(吸収対象)
+			CALL MOTHER_STOP_MILKING(吸収対象)
+
+			PRINTFORMW %ANAME(吸収対象)%的胎内提取出了★記念品[生命之素]
+
+		ENDIF
+		PRINTFORML
+		;ミッション達成
+		IF ACHIEVEMENT_MISSION:62 == 1
+			ACHIEVEMENT_MISSION:62 = 2
+			SETCOLOR カラー_注意
+			PRINTL 任务完成!
+			RESETCOLOR
+			WAIT
+		ENDIF
+	ENDIF
+
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+
+触手処刑非表示フラグ = 0
+
+CLEARLINE LINECOUNT - FIRST_LINE
+RESTART
+
+;-------------------------------------------------
+;ターン終了時の触手吸収処理
+;-------------------------------------------------
+@Breeding_AREA_TENTACLE_10_absorbent_TURNEND
+#DIM 苗床
+#DIM 能力変動量, 5
+#DIM プレイヤー能力変動量, 5
+#DIM 苗床元能力量, 5
+#DIM プレイヤー元能力量, 5
+#DIM 吸収フラグ
+吸収フラグ = 0
+
+プレイヤー能力変動量:0 = 0
+プレイヤー能力変動量:1 = 0
+プレイヤー能力変動量:2 = 0
+プレイヤー能力変動量:3 = 0
+プレイヤー能力変動量:4 = 0
+
+FOR 苗床, 0, CHARANUM
+	IF CFLAG:苗床:特殊状態 != 特殊状態_死亡
+		吸収中苗床:苗床:0 = 0
+		CONTINUE
+	ENDIF
+	SIF 吸収中苗床:苗床:0 != 1
+		CONTINUE
+
+	;(画像パッチ)
+	CALL 画像表示(苗床, 3, 4)
+	PRINTFORML %ANAME(苗床)%被困在肉块之中……
+	PRINTFORML 触手在%ANAME(苗床)%的每一个洞中出入，不停榨取着力量
+	IF HAS_PENIS(苗床)
+		CALL FUCK(苗床, "欲望, 性技, 精愛, 性交, 射精, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, 童貞喪失, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "オナホ触手", "触手処刑")
+	ELSE
+		CALL FUCK(苗床, "欲望, 性技, 精愛, 性交, Ｃ, Ｖ, Ｂ, Ｍ, Ａ, 苦痛快楽, 緊縛, 被虐, 輪姦, 口淫, 触手, Ｖ性交, Ａ性交", "処女喪失, Ａ処女喪失, 膣内射精, 接吻喪失, 腸内射精, 口内射精, CFLAG減少, 性癖取得", GET_SPERM_ID("触手"), "触手", "触手", "", "触手処刑")
+	ENDIF
+	能力変動量:0 = MIN(10, ABL:苗床:武闘)
+	能力変動量:1 = MIN(10, ABL:苗床:防衛)
+	能力変動量:2 = MIN(10, ABL:苗床:知略)
+	能力変動量:3 = MIN(10, ABL:苗床:政治)
+	能力変動量:4 = MIN(10, ABL:苗床:妖術)
+
+	苗床元能力量:0 = ABL:苗床:武闘
+	苗床元能力量:1 = ABL:苗床:防衛
+	苗床元能力量:2 = ABL:苗床:知略
+	苗床元能力量:3 = ABL:苗床:政治
+	苗床元能力量:4 = ABL:苗床:妖術
+
+	ABL:苗床:武闘 -= 能力変動量:0
+	ABL:苗床:防衛 -= 能力変動量:1
+	ABL:苗床:知略 -= 能力変動量:2
+	ABL:苗床:政治 -= 能力変動量:3
+	ABL:苗床:妖術 -= 能力変動量:4
+
+	IF HAS_TAG(苗床, タグ_触手)
+		能力変動量:0 = MAX(1, (能力変動量:0)/2)
+		能力変動量:1 = MAX(1, (能力変動量:1)/2)
+		能力変動量:2 = MAX(1, (能力変動量:2)/2)
+		能力変動量:3 = MAX(1, (能力変動量:3)/2)
+		能力変動量:4 = MAX(1, (能力変動量:4)/2)
+	ELSE
+		能力変動量:0 = MAX(0, (能力変動量:0)/4)
+		能力変動量:1 = MAX(0, (能力変動量:1)/4)
+		能力変動量:2 = MAX(0, (能力変動量:2)/4)
+		能力変動量:3 = MAX(0, (能力変動量:3)/4)
+		能力変動量:4 = MAX(0, (能力変動量:4)/4)
+
+	ENDIF
+
+	プレイヤー能力変動量:0 += 能力変動量:0
+	プレイヤー能力変動量:1 += 能力変動量:1
+	プレイヤー能力変動量:2 += 能力変動量:2
+	プレイヤー能力変動量:3 += 能力変動量:3
+	プレイヤー能力変動量:4 += 能力変動量:4
+
+	能力変動量:0 = 0
+	能力変動量:1 = 0
+	能力変動量:2 = 0
+	能力変動量:3 = 0
+	能力変動量:4 = 0
+
+	PRINTFORML %ANAME(苗床)%
+	PRINTFORML 武闘：{苗床元能力量:0}→{ABL:苗床:武闘}
+	PRINTFORML 防衛：{苗床元能力量:1}→{ABL:苗床:防衛}
+	PRINTFORML 知略：{苗床元能力量:2}→{ABL:苗床:知略}
+	PRINTFORML 政治：{苗床元能力量:3}→{ABL:苗床:政治}
+	PRINTFORML 妖術：{苗床元能力量:4}→{ABL:苗床:妖術}
+	PRINTFORML
+
+	IF ABL:苗床:武闘 <= 0 && ABL:苗床:防衛 <= 0 && ABL:苗床:知略 <= 0 && ABL:苗床:政治 <= 0 && ABL:苗床:妖術 <= 0
+		SETCOLOR カラー_警告
+		PRINTFORMW 被完全吸干%ANAME(苗床)%的，已经完全被触手吃干抹净了……
+		RESETCOLOR
+		吸収中苗床:苗床:0 = 2
+	ENDIF
+	PRINTFORML
+	吸収フラグ = 1
+NEXT
+
+IF 吸収フラグ
+	プレイヤー元能力量:0 = ABL:MASTER:武闘
+	プレイヤー元能力量:1 = ABL:MASTER:防衛
+	プレイヤー元能力量:2 = ABL:MASTER:知略
+	プレイヤー元能力量:3 = ABL:MASTER:政治
+	プレイヤー元能力量:4 = ABL:MASTER:妖術
+
+	ABL:MASTER:武闘 += プレイヤー能力変動量:0
+	ABL:MASTER:防衛 += プレイヤー能力変動量:1
+	ABL:MASTER:知略 += プレイヤー能力変動量:2
+	ABL:MASTER:政治 += プレイヤー能力変動量:3
+	ABL:MASTER:妖術 += プレイヤー能力変動量:4
+
+	プレイヤー能力変動量:0 = 0
+	プレイヤー能力変動量:1 = 0
+	プレイヤー能力変動量:2 = 0
+	プレイヤー能力変動量:3 = 0
+	プレイヤー能力変動量:4 = 0
+
+	SETCOLOR カラー_注意
+	PRINTFORML %ANAME(MASTER)%吸收到了力量！
+	RESETCOLOR
+	PRINTFORML 武闘：{プレイヤー元能力量:0}→{ABL:MASTER:武闘}
+	PRINTFORML 防衛：{プレイヤー元能力量:1}→{ABL:MASTER:防衛}
+	PRINTFORML 知略：{プレイヤー元能力量:2}→{ABL:MASTER:知略}
+	PRINTFORML 政治：{プレイヤー元能力量:3}→{ABL:MASTER:政治}
+	PRINTFORML 妖術：{プレイヤー元能力量:4}→{ABL:MASTER:妖術}
+	PRINTFORML
+	WAIT
+ENDIF
+;-------------------------------------------------
+;「繁殖地」再誕の子宮
+;-------------------------------------------------
+@Breeding_AREA_TENTACLE_11_womb
+#DIM 苗床
+#DIMS 名前
+#DIM 情報表示キャラ
+#DIM 連邦ナンバー
+#DIM 再誕対象
+#DIM FIRST_LINE
+FIRST_LINE = LINECOUNT
+連邦ナンバー = COUNTRY_Union_REFERENCE:(CFLAG:MASTER:所属):0
+
+CALL SINGLE_DRAWLINE
+PRINTFORML 将触手能量注入被吸收后的苗床中，然后生产
+PRINTFORML 我们可以从孩子开始培养新的士官
+PRINTFORML 触手能量（现在［ {RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:3} ］）需要消耗15点
+
+CALL SINGLE_DRAWLINE
+
+IF RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:3 < 15
+	PRINTFORML 触手能量不够
+ELSE
+	FOR 苗床, 0, CHARANUM
+		IF CFLAG:苗床:特殊状態 != 特殊状態_死亡
+			吸収中苗床:苗床:0 = 0
+			CONTINUE
+		ENDIF
+		SIF 吸収中苗床:苗床:0 != 2
+			CONTINUE
+
+		IF STRLENS(ANAME(苗床)) >= MAX_CHARANAME_LENGTH
+			名前 = %SNAME(苗床)%
+		ELSE
+			名前 = %ANAME(苗床)%
+		ENDIF
+		CALL PRINTBUTTON_CENTER(@"[%名前, MAX_CHARANAME_LENGTH, LEFT%]", 苗床, 0)
+		CALL PRINT_SEX(苗床, 1, 0, 2)
+		PRINT
+		PRINTBUTTON "[能力]", 苗床 + 2000
+		PRINTL
+
+	NEXT
+ENDIF
+
+CALL SINGLE_DRAWLINE
+PRINTBUTTON "[1000][　　取消]", 1000
+PRINTL
+
+REDRAW 0
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 1000
+	REDRAW 1
+	RETURN
+ELSEIF RESULT >= 2000
+	情報表示キャラ = RESULT - 2000
+	;対象キャラの情報を表示
+	CALL SINGLE_DRAWLINE
+	CALL SHOW_INFO(情報表示キャラ)
+	CALL SINGLE_DRAWLINE
+	WAIT
+	CLEARLINE LINECOUNT - FIRST_LINE
+	RESTART
+
+ELSEIF 吸収中苗床:RESULT:0 == 2
+	再誕対象 = RESULT
+	PRINTFORML 要让%ANAME(再誕対象)%生产吗？(触手能量（现在［ {RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:3} ］）需要消耗15点)
+
+	;はい／いいえ入力処理
+	CALL ASK_YN()
+	IF RESULT == 0
+
+		RESEARCH_UNIVERSITY_SP_POINT:連邦ナンバー:3 -= 15
+
+		;固定の素質を付与
+		TALENT:再誕対象:幼兒 = 1
+		TALENT:再誕対象:体格 = 体格_子供
+
+		;性経験等をリセット
+		CALL VIRGINIZE(再誕対象, 初体験_処女)
+		CALL VIRGINIZE(再誕対象, 初体験_アナル処女)
+		CALL VIRGINIZE(再誕対象, 初体験_童貞)
+		CALL VIRGINIZE(再誕対象, 初体験_キス)
+		TALENT:再誕対象:陰毛目標値 = 陰毛_つるつる
+		TALENT:再誕対象:陰毛現在値 = 陰毛_つるつる
+		TALENT:再誕対象:腋毛目標値 = 腋毛_つるつる
+		TALENT:再誕対象:腋毛現在値 = 腋毛_つるつる
+		CALL CLEAR_PIERCE_HOLE_SEX_CHANGE(再誕対象)
+		FOR LOCAL, 0, VARSIZE("TATTOO")
+			TATTOO:再誕対象:RESULT =
+		NEXT
+
+		;成長後の[幼稚]を退避し、固定で幼稚を付与
+		IF TALENT:再誕対象:幼稚
+			TALENT:再誕対象:成長後幼稚 = 1
+		ELSE
+			TALENT:再誕対象:成長後幼稚 = 0
+		ENDIF
+		TALENT:再誕対象:幼稚 = 1
+
+		;バストサイズを設定
+		TALENT:再誕対象:成長後胸部 = GET_BUSTSIZE(再誕対象)
+		CALL SET_BUSTSIZE(再誕対象, -2)
+
+		TALENT:再誕対象:成長後ヒップ = GET_HIPSIZE(再誕対象)
+		CALL SET_HIPSIZE(再誕対象, 0)
+
+		TALENT:再誕対象:Ｖ緊緻度 = GET_DEFAULT_TIGHTNESS("緊閉")
+		TALENT:再誕対象:Ａ緊緻度 = GET_DEFAULT_TIGHTNESS("緊閉")
+
+		;触手タグがないとき触手タグを付与
+		SIF !HAS_TAG(再誕対象, タグ_触手)
+			CALL ADD_TAG(再誕対象, タグ_触手)
+
+		;妖術知識を付与
+		TALENT:再誕対象:妖術知識 = 1
+		ABL:再誕対象:妖術 = RAND:30 + 30
+
+		;被育児状態に設定
+		CFLAG:再誕対象:行動不能状態 = 行動不能_子供
+		CFLAG:再誕対象:子の成長度 = 0
+
+		;好感度・陥落素質等リセット
+		CFLAG:再誕対象:好感度 = 0
+		CFLAG:再誕対象:従属度 = 0
+		CFLAG:再誕対象:依存度 = 0
+		CFLAG:再誕対象:支配度 = 0
+		TALENT:再誕対象:恋慕 = 0
+		TALENT:再誕対象:親愛 = 0
+		TALENT:再誕対象:恋人 = 0
+		TALENT:再誕対象:服従 = 0
+		TALENT:再誕対象:隷属 = 0
+		TALENT:再誕対象:烙印 = 0
+		TALENT:再誕対象:主人 = 0
+		TALENT:再誕対象:所有者 = 0
+		TALENT:再誕対象:合意 = 0
+		TALENT:再誕対象:特殊勢力陥落系 = 0
+
+		SETCOLOR カラー_注意
+		PRINTFORMW %ANAME(再誕対象)%以一个完美的孩子的身体重生
+		CALL CHANGE_COUNTRY(再誕対象, CFLAG:MASTER:所属, 0, 0)
+		RESETCOLOR
+		CFLAG:再誕対象:特殊状態 = 0
+		;対象キャラの情報を表示
+		CALL SINGLE_DRAWLINE
+		CALL SHOW_INFO(再誕対象)
+		CALL SINGLE_DRAWLINE
+		WAIT
+		PRINTFORML
+
+		;教育機関での教育方法を設定
+		CALL SET_BIRTH_CHILD_SCHOOL(再誕対象)
+
+		;ミッション達成
+		IF ACHIEVEMENT_MISSION:63 == 1
+			ACHIEVEMENT_MISSION:63 = 2
+			SETCOLOR カラー_注意
+			PRINTL 任务完成!
+			RESETCOLOR
+			WAIT
+		ENDIF
+
+	ENDIF
+ELSE
+	CLEARLINE 1
+	GOTO INPUT_LOOP
+ENDIF
+
+CLEARLINE LINECOUNT - FIRST_LINE
+RESTART

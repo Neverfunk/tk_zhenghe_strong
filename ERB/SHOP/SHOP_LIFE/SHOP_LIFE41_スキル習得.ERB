@@ -108,7 +108,7 @@ SELECTCASE RESULT
 		CALL SHOP_LIFE_SKILL_CREATE_LIST(対象, 編集モード, ソート順)
 		IF LOCAL == 1 && !編集モード
 			CLEARLINE LINECOUNT - FIRST_LINE
-			GOTO SHOW_LOOP			
+			GOTO SHOW_LOOP
 		ENDIF
 	CASE 4000 TO (4000 + SKILL_GENRE_NUM)
 		ジャンル = RESULT - 4000
@@ -171,7 +171,7 @@ CALL SKILL_LEARN(対象, ジャンル, SHOP_SKILL_NO_LIST:ジャンル:番号, S
 IF RESULT == 0
 	PRINTFORML (這個類型的技能已経学過了)
 	PRINTFORMW (想要学習新的技能、需要先忘記之前的)
-	RETURN 
+	RETURN
 ENDIF
 
 CALLFORM SKILL_{SHOP_SKILL_NO_LIST:ジャンル:番号}_%SKILL_GENRE_ENG:ジャンル%_{SHOP_SKILL_ID_LIST:ジャンル:番号}_NAME
@@ -256,7 +256,7 @@ FOR LOCAL, 0, SKILL_GENRE_NUM
 		SETCOLOR カラー_選択中
 	ENDIF
 	PRINTBUTTON @"[%SKILL_GENRE:LOCAL%]", 4000 + LOCAL
-	PRINT  
+	PRINT
 	RESETCOLOR
 NEXT
 IF ジャンル == LOCAL
@@ -330,7 +330,7 @@ FOR スキル, (SHOP_SKILL_PAGE:ジャンル - 1) * 項目数, MIN(SHOP_SKILL_PA
 
 	CALL COLOR_LINE
 	;習得ボタンは一番左
-	IF ((SKILL_LEARN_PRICE:レベル)/半价消费 > MONEY && !編集モード) || 空きスロット == -1 
+	IF ((SKILL_LEARN_PRICE:レベル)/半价消费 > MONEY && !編集モード) || 空きスロット == -1
 		SETCOLOR カラー_選択不可
 		PRINTPLAIN [習得]
 		RESETCOLOR
@@ -356,7 +356,7 @@ FOR スキル, (SHOP_SKILL_PAGE:ジャンル - 1) * 項目数, MIN(SHOP_SKILL_PA
 	ENDIF
 	;項目描画
 	SIF !編集モード
-		PRINTFORM  価格:%NUM_FORMAT((SKILL_LEARN_PRICE:レベル)/半价消费), 7, RIGHT% 
+		PRINTFORM  価格:%NUM_FORMAT((SKILL_LEARN_PRICE:レベル)/半价消费), 7, RIGHT%
 	CALL SKILL_EXPLANATION(ジャンル, SHOP_SKILL_NO_LIST:ジャンル:スキル, SHOP_SKILL_ID_LIST:ジャンル:スキル, 19)
 	描画行 ++
 NEXT
@@ -431,10 +431,7 @@ CALL SINGLE_DRAWLINE
 描画行 = 0
 FOR ジャンル, 0, SKILL_GENRE_NUM
 	FOR スキル, 0, MAX_SKILL_SLOT
-		IF オフセット < (SHOP_SKILL_PAGE:ジャンル数 - 1) * 項目数
-			オフセット ++
-			CONTINUE
-		ELSEIF オフセット >= MIN(SHOP_SKILL_PAGE:ジャンル数 * 項目数, スキル数)
+		IF オフセット >= MIN(SHOP_SKILL_PAGE:ジャンル数 * 項目数, スキル数)
 			BREAK
 		ENDIF
 		;存在判定
@@ -443,6 +440,10 @@ FOR ジャンル, 0, SKILL_GENRE_NUM
 			CONTINUE
 		ENDCATCH
 
+		IF オフセット < (SHOP_SKILL_PAGE:ジャンル数 - 1) * 項目数
+			オフセット ++
+			CONTINUE
+		ENDIF
 		CALL COLOR_LINE
 
 		;習得ボタンは一番左
@@ -455,7 +456,7 @@ FOR ジャンル, 0, SKILL_GENRE_NUM
 		ENDIF
 		;項目描画
 		SIF !編集モード
-			PRINTFORM  価格:%NUM_FORMAT(SKILL_FORGET_PRICE), 7, RIGHT% 
+			PRINTFORM  価格:%NUM_FORMAT(SKILL_FORGET_PRICE), 7, RIGHT%
 		CALL SKILL_EXPLANATION(ジャンル, SKILL_NO_SLOT:対象:ジャンル:スキル, SKILL_ID_SLOT:対象:ジャンル:スキル, 19)
 		描画行 ++
 		オフセット ++
@@ -496,9 +497,9 @@ VARSET SHOP_SKILL_ID_LIST
 VARSET SHOP_SKILL_LEVEL_LIST
 VARSET SHOP_SKILL_NUM
 ;遍历角色
-FOR キャラ, 0, CHARANUM  
+FOR キャラ, 0, CHARANUM
 	;因为0号表示通用技能，所以跳过，角色本人也跳过
-	
+
 	IF !(NO:キャラ == 0 || キャラ == 対象)
 		SIF (CFLAG:キャラ:所属 != CFLAG:MASTER:所属 || CFLAG:キャラ:特殊状態 == 特殊状態_放浪) && !編集モード
 			CONTINUE
@@ -537,7 +538,7 @@ FOR キャラ, 0, CHARANUM
 								CONTINUE
 						CATCH
 							CALLFORM SKILL_{NO:キャラ}_%SKILL_GENRE_ENG:ジャンル%_{スキルID}_LEVEL
-							;SIF MASTER == 対象 && RESULT > CFLAG:対象:神术等级 
+							;SIF MASTER == 対象 && RESULT > CFLAG:対象:神术等级
 							;	CONTINUE
 							;SIF MASTER != 対象 && FAITH_LEVEL:RESULT > ABL:対象:信仰
 							;	CONTINUE

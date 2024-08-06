@@ -32,10 +32,6 @@ NEXT
 
 ;連邦構成国の全士官・捕虜を検索
 FOR LOCAL:0, 0, CHARANUM
-		IF (!IS_COUNTRY(CFLAG:(LOCAL:0):所属) && CFLAG:(LOCAL:0):所属 !=0) ||(!IS_COUNTRY(CFLAG:(LOCAL:0):捕虜先) && CFLAG:(LOCAL:0):捕虜先 !=0)
-			FORCEWAIT
-			THROW ID:{(LOCAL:0)} 所属：{CFLAG:(LOCAL:0):所属} 捕虜先{CFLAG:(LOCAL:0):捕虜先}
-		ENDIF
 	IF CFLAG:(LOCAL:0):所属 == CFLAG:MASTER:所属 || CFLAG:(LOCAL:0):捕虜先 == CFLAG:MASTER:所属 || 連邦構成国:(CFLAG:(LOCAL:0):所属) == 1 || 連邦構成国:(CFLAG:(LOCAL:0):捕虜先) == 1
 		連邦構成士官:(LOCAL:0) = 1
 	ENDIF
@@ -50,26 +46,29 @@ FOR 教育対象, 0, CHARANUM
 		PRINTL
 		PRINTBUTTON @"{教育対象, 2}[%ANAME(教育対象), 10%]", 教育対象
 
-		IF CFLAG:教育対象:1701 == 0
+		IF 教育内容:教育対象:0 == 0
 			PRINTFORM  現在[　　无　　]
 			;TranslatedMark 現在[　なし　]
-		ELSEIF CFLAG:教育対象:1701 == 1
+		ELSEIF 教育内容:教育対象:0 == 1
 			PRINTFORM  現在[　学校教育]
 			;TranslatedMark 現在[学校教育]
-		ELSEIF CFLAG:教育対象:1701 == 2
+		ELSEIF 教育内容:教育対象:0 == 2
 			PRINTFORM  現在[　触手调教]
 			;TranslatedMark 現在[触手漬け]
-		ELSEIF CFLAG:教育対象:1701 == 3
-			PRINTFORM  現在[　　調教　]
-			;TranslatedMark 現在[　調教　]
+		ELSEIF 教育内容:教育対象:0 == 3
+			PRINTFORM  現在[　「教育」]
+			;TranslatedMark 現在[「教育」]
+		ELSEIF 教育内容:教育対象:0 == 4
+			PRINTFORM  現在[　　洗脑　]
+			;TranslatedMark 現在[洗脳する]
 		ENDIF
 	ENDIF
 NEXT
 PRINTL
 CALL SINGLE_DRAWLINE
 
-PRINTBUTTON " 0[取消]", 0
-;TranslatedMark " 0[戻る]", 0
+PRINTBUTTON "0[取消]", 0
+;TranslatedMark 0[戻る]
 PRINTL
 
 $INPUT_LOOP
@@ -96,45 +95,46 @@ VARSET 変更可能
 
 PRINTFORM 改变[%ANAME(変更対象)%]的教育内容
 ;TranslatedMark [%ANAME(変更対象)%]の教育内容を変更します
-IF CFLAG:変更対象:1701 == 0
+IF 教育内容:変更対象:0 == 0
 	PRINTFORML  現在[　　无　　]
 	;TranslatedMark 現在[　なし　]
-ELSEIF CFLAG:変更対象:1701 == 1
+ELSEIF 教育内容:変更対象:0 == 1
 	PRINTFORML  現在[　学校教育]
 	;TranslatedMark 現在[学校教育]
-ELSEIF CFLAG:変更対象:1701 == 2
+ELSEIF 教育内容:変更対象:0 == 2
 	PRINTFORML  現在[　触手调教]
 	;TranslatedMark 現在[触手漬け]
-ELSEIF CFLAG:変更対象:1701 == 3
-	PRINTFORML  現在[　　調教　]
-ELSEIF CFLAG:変更対象:1701 == 4
-PRINTFORML  現在[　　洗脑　]
-	;TranslatedMark 現在[　調教　]
+ELSEIF 教育内容:変更対象:0 == 3
+	PRINTFORML  現在[　「教育」]
+ELSEIF 教育内容:変更対象:0 == 4
+	PRINTFORML  現在[　　洗脑　]
+	;TranslatedMark 現在[洗脳する]
 ENDIF
 CALL SINGLE_DRAWLINE
 
 PRINTBUTTON "[1] 在学校中教育", 1
-;TranslatedMark "[1] 学校で教育する", 1
+;TranslatedMark [1] 学校で教育する
 PRINTL
 IF ID_TO_CHARA(FLAG:触手部屋管理者) != -1
 	変更可能:2 = 1
 	PRINTBUTTON "[2] 泡在触手群中锻炼妖术", 2
-	;TranslatedMark "[2] 触手に漬けて妖術を鍛える", 2
+	;TranslatedMark [2] 触手に漬けて妖術を鍛える
 ENDIF
 PRINTL
-IF CFLAG:変更対象:捕虜先 > 0 || CFLAG:変更対象:1700 == 1 || CFLAG:変更対象:1703 == 1
+IF CFLAG:変更対象:捕虜先 > 0 || 奴隷士官フラグ:変更対象:0 == 1 || 子供捕虜:変更対象:0 == 1
 	変更可能:3 = 1
 	PRINTBUTTON "[3] 「教育」(調教)", 3
-	;TranslatedMark "[3] 「教育」する(調教する)", 3
+	;TranslatedMark [3] 「教育」する(調教する)
+	PRINTL
 	変更可能:4 = 1
 	PRINTBUTTON "[4] 洗脑", 4
-	;TranslatedMark "[4] 洗脳する", 3
+	;TranslatedMark [4] 洗脳する
 ENDIF
 PRINTL
 CALL SINGLE_DRAWLINE
 
 PRINTBUTTON " 0[取消]", 0
-;TranslatedMark " 0[戻る]", 0
+;TranslatedMark  0[戻る]
 PRINTL
 
 $INPUT_LOOP
@@ -143,11 +143,11 @@ INPUT
 SIF RESULT == 0
 	RETURN
 
-IF RESULT > 3 || (RESULT == 2 && 変更可能:2 != 1) || (RESULT == 3 && 変更可能:3 != 1)
+IF RESULT > 4 || (RESULT == 2 && 変更可能:2 != 1) || (RESULT == 3 && 変更可能:3 != 1) || (RESULT == 4 && 変更可能:4 != 1)
 	GOTO INPUT_LOOP
 ENDIF
 
-CFLAG:変更対象:1701 = RESULT
+教育内容:変更対象:0 = RESULT
 
 IF RESULT == 1
 	PRINTFORML [%ANAME(変更対象)%]在学校中进行教育
@@ -202,12 +202,8 @@ FOR LOCAL:0, 0, MAX_COUNTRY
 NEXT
 
 FOR 教育対象, 0, CHARANUM
-		IF (!IS_COUNTRY(CFLAG:教育対象:所属) && CFLAG:教育対象:所属 !=0) ||(!IS_COUNTRY(CFLAG:教育対象:捕虜先) && CFLAG:教育対象:捕虜先 !=0)
-			FORCEWAIT
-			THROW ID:{教育対象} 所属：{CFLAG:教育対象:所属} 捕虜先{CFLAG:教育対象:捕虜先}
-		ENDIF
-	IF (CFLAG:教育対象:所属 == CFLAG:MASTER:所属 || CFLAG:教育対象:捕虜先 == CFLAG:MASTER:所属 || (IS_COUNTRY(CFLAG:教育対象:所属) && 連邦構成国:(CFLAG:教育対象:所属) == 1) || (IS_COUNTRY(CFLAG:教育対象:捕虜先) && 連邦構成国:(CFLAG:教育対象:捕虜先) == 1)) && CFLAG:教育対象:子の成長度 < 15
-		IF CFLAG:教育対象:1701 == 1
+	IF (CFLAG:教育対象:所属 == CFLAG:MASTER:所属 || CFLAG:教育対象:捕虜先 == CFLAG:MASTER:所属 || 連邦構成国:(CFLAG:教育対象:所属) == 1 || 連邦構成国:(CFLAG:教育対象:捕虜先) == 1) && CFLAG:教育対象:子の成長度 < 15
+		IF 教育内容:教育対象:0 == 1
 			PRINTFORML %ANAME(教育対象)%在学校进行了学习
 			;TranslatedMark %ANAME(教育対象)%は学校で学んできた
 			対象項目 = GETNUM(ABL, "武闘")
@@ -235,17 +231,19 @@ FOR 教育対象, 0, CHARANUM
 			取得経験値 /= 15
 			CALL PRINT_ADD_EXP(教育対象, EXPNAME:GET_EXP(対象項目), 取得経験値, 0)
 			CALL TRAIN_AUTO_ABLUP(教育対象)
-		ELSEIF CFLAG:教育対象:1701 == 2
+		ELSEIF 教育内容:教育対象:0 == 2
 			PRINTFORML %ANAME(教育対象)%被泡在触手中
 			;TranslatedMark %ANAME(教育対象)%は触手に漬けられた
 			IF CFLAG:教育対象:子の成長度 < 6
 				PRINTFORML 蠕动的触手在%ANAME(教育対象)%幼小的身体上爬行着…
 				;TranslatedMark うねる触手が幼い%ANAME(教育対象)%の躰を這いまわる…
 				CALL FUCK(教育対象, "Ｃ, Ｂ, 苦痛快楽, 苦痛快楽, 緊縛, 被虐, 被虐, 触手, 露出")
+				;TranslatedMark 教育対象, "Ｃ, Ｂ, 苦痛快楽, 苦痛快楽, 緊縛, マゾ, マゾ, 触手, 露出"
 			ELSE
 				PRINTFORML 蠕动的触手在%ANAME(教育対象)%还在成长中的身体上爬行着…
 				;TranslatedMark うねる触手が成長途中の%ANAME(教育対象)%の躰を這いまわる…
 				CALL FUCK(教育対象, "欲望, 精愛, 射精, Ｃ, Ｂ, 苦痛快楽, 緊縛, 被虐, 触手, 露出")
+				;TranslatedMark 教育対象, "欲望, 精愛, 射精, Ｃ, Ｂ, 苦痛快楽, 緊縛, マゾ, 触手, 露出"
 			ENDIF
 			IF !TALENT:(教育対象):妖術知識
 				TALENT:(教育対象):妖術知識 = 1
@@ -257,18 +255,20 @@ FOR 教育対象, 0, CHARANUM
 			取得経験値 /= 15
 			CALL PRINT_ADD_EXP(教育対象, EXPNAME:GET_EXP(対象項目), 取得経験値, 0)
 			CALL TRAIN_AUTO_ABLUP(教育対象)
-		ELSEIF CFLAG:教育対象:1701 == 3
+		ELSEIF 教育内容:教育対象:0 == 3
 			PRINTFORML %ANAME(教育対象)%被带去进行了名为「教育」的调教…
 			;TranslatedMark %ANAME(教育対象)%は「教育」と称して調教された…
 			IF CFLAG:教育対象:子の成長度 < 6
 				PRINTFORML 对于年幼的%ANAME(教育対象)%来说，痛苦似乎大于快乐
 				;TranslatedMark まだ幼い%ANAME(教育対象)%にとっては快楽より苦痛が勝っているようだった
 				CALL FUCK(教育対象, "Ｃ, Ｃ, Ｂ, Ｂ, Ｖ, Ｖ, Ａ, Ａ, Ｍ, Ｍ, 苦痛快楽, 苦痛快楽, 被虐, 被虐, 露出")
+				;TranslatedMark 教育対象, "Ｃ, Ｃ, Ｂ, Ｂ, Ｖ, Ｖ, Ａ, Ａ, Ｍ, Ｍ, 苦痛快楽, 苦痛快楽, マゾ, マゾ, 露出"
 			ELSE
 				PRINTFORML 对于还在成长中的%ANAME(教育対象)%来说，似乎渐渐从痛苦中感受到了快乐
 				CALL FUCK(教育対象, "欲望, 精愛, 射精, 射精, Ｃ, Ｃ, Ｂ, Ｂ, Ｖ, Ｖ, Ａ, Ａ, Ｍ, Ｍ, 苦痛快楽, 被虐, 露出")
+				;TranslatedMark 教育対象, "欲望, 精愛, 射精, 射精, Ｃ, Ｃ, Ｂ, Ｂ, Ｖ, Ｖ, Ａ, Ａ, Ｍ, Ｍ, 苦痛快楽, マゾ, 露出"
 			ENDIF
-		ELSEIF CFLAG:教育対象:1701 == 4
+		ELSEIF 教育内容:教育対象:0 == 4
 			PRINTFORML 对%ANAME(教育対象)%进行了洗脑…
 			;TranslatedMark %ANAME(教育対象)%は洗脳されている…
 			CFLAG:教育対象:依存度 += 30

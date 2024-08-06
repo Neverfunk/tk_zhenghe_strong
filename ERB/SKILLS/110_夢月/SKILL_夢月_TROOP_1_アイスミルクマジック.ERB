@@ -1,0 +1,96 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_110_TROOP_1_EXIST
+RETURN 1
+
+@SKILL_110_TROOP_1_NAME
+RESULTS = 冰牛奶魔法
+;TranslatedMark アイスミルクマジック
+
+;レベルは1-5まで
+@SKILL_110_TROOP_1_LEVEL
+RETURN 5
+
+;対象選択
+@SKILL_110_TROOP_1_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1
+
+;発動判定
+@SKILL_110_TROOP_1_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:発動側
+	SIF BATTLE_COMMANDER:発動側:LOCAL == NAME_TO_CHARA("幻月")
+		RETURN 1
+NEXT
+RETURN 0
+
+;発動テキストをオーバライドしたいときに。
+;「誰それのスキル発動！　○○した！」の「○○した！」の部分を実装したい場合は、
+;これじゃなくてINVOKEで書けばいいです。
+;@SKILL_110_TROOP_1_INVOKE_TEXT(発動者, スキル, ジャンル)
+;#DIM 発動者
+;#DIM スキル
+;#DIMS ジャンル
+
+
+;効果をここに記述
+@SKILL_110_TROOP_1_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+PRINTFORML 敌方部队的攻击力与防御力下降
+;TranslatedMark 敵部隊の攻撃力と防御力が低下した！
+TIMES BATTLE_ATK:対象側, 0.95
+TIMES BATTLE_DEF:対象側, 0.95
+
+@SKILL_110_TROOP_1_EXPLANATION
+RESULTS = 队伍中存在幻月时触发。使敌方部队的攻击力与防御力下降。
+;TranslatedMark 部隊に幻月がいる時に発動。敵部隊の攻撃力と防御力を低下させる。
+
+
+
+
+@SKILL_110_TROOP_1_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 1000
+
+
+@SKILL_110_TROOP_1_CANT_TELL

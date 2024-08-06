@@ -1,0 +1,100 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_48_PERSONAL_3_EXIST
+RETURN 1
+
+@SKILL_48_PERSONAL_3_NAME
+RESULTS = 触手之乱
+
+;レベルは1-5まで
+@SKILL_48_PERSONAL_3_LEVEL
+RETURN 5
+
+;対象選択
+@SKILL_48_PERSONAL_3_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+;部隊対象
+RETURN 1
+
+;発動判定
+@SKILL_48_PERSONAL_3_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1
+
+;発動テキストをオーバライドしたいときに。
+;「誰それのスキル発動！　○○した！」の「○○した！」の部分を実装したい場合は、
+;これじゃなくてINVOKEで書けばいいです。
+;@SKILL_48_PERSONAL_3_INVOKE_TEXT(発動者, スキル, ジャンル)
+;#DIM 発動者
+;#DIM スキル
+;#DIMS ジャンル
+
+;効果をここに記述
+@SKILL_48_PERSONAL_3_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+;LOCAL:1 最高武斗数值
+;LOCAL:2 最高武斗者
+LOCAL:1 = 0
+LOCAL:2 = 0
+PRINTFORML %ANAME(発動者)%放出了触手！
+FOR LOCAL, 0, BATTLE_COMMANDER_NUM:対象側
+    IF IS_FEMALE((BATTLE_COMMANDER:対象側:LOCAL))
+        PRINTFORML %ANAME((BATTLE_COMMANDER:対象側:LOCAL))%被触手捆了起来，无法战斗了！
+        CALL BATTLE_KNOCKOUT(対象側, LOCAL)
+        PRINTFORML 被捆起来的%ANAME((BATTLE_COMMANDER:対象側:LOCAL))%吸引了大量敌人！
+        CALL INCREASE_SOLDIER(対象勢力, 対象部隊, 1000, 1)
+    ENDIF
+NEXT
+RETURN 1
+
+@SKILL_48_PERSONAL_3_EXPLANATION
+RESULTS = 令所有敌人女性武将战斗不能，并根据战斗不能的人数获得兵力
+
+
+@SKILL_48_PERSONAL_3_NO_LEARN_INIT
+@SKILL_48_PERSONAL_3_CANT_LEARN_FROM_SHOP
+@SKILL_48_PERSONAL_3_CANT_TELL
+
+@SKILL_48_PERSONAL_3_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 250

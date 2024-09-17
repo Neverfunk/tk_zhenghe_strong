@@ -1,0 +1,105 @@
+﻿;-----------------------------------
+;基本値計算に先んじて処理するもの
+;-----------------------------------
+@SKILL_0_TROOP_38_EXIST
+RETURN 1
+
+@SKILL_0_TROOP_38_NAME
+RESULTS = 焚城
+
+;レベルは1-5まで
+@SKILL_0_TROOP_38_LEVEL
+RETURN 5
+
+;対象選択
+@SKILL_0_TROOP_38_SETTARGET(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+;部隊対象
+RETURN 1
+
+;発動判定
+@SKILL_0_TROOP_38_CAN_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+対象側 = !発動側
+RETURN 1
+
+;発動テキストをオーバライドしたいときに。
+;「誰それのスキル発動！　○○した！」の「○○した！」の部分を実装したい場合は、
+;これじゃなくてINVOKEで書けばいいです。
+;@SKILL_0_TROOP_38_INVOKE_TEXT(発動者, スキル, ジャンル)
+;#DIM 発動者
+;#DIM スキル
+;#DIMS ジャンル
+
+;効果をここに記述
+@SKILL_0_TROOP_38_INVOKE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+#DIM 増員量
+対象側 = !発動側
+; PRINTDATAW
+;     DATAFORM 「我得不到的，你们也别想得到！」
+;     DATAFORM 「这一切都灰飞烟灭吧！哼哼哼哼……」
+;     DATAFORM 「此城，于我已无用！」
+;     DATAFORM 「哈哈哈哈，看你们再往哪里躲！」
+;     DATAFORM 「尽情哀嚎吧，这是你们最后的声音！」
+;     DATAFORM 「城郭燃烧时的惨叫，是如此的动听！」
+;     DATAFORM 「我要这满城的人都来给你陪葬！」
+;     DATAFORM 「一把火烧他个精光吧，诶啊哈哈哈……」
+; ENDDATA
+
+PRINTFORML %ANAME(GET_COUNTRY_BOSS(発動勢力))%点燃了熊熊大火！
+PRINTFORML %ANAME(GET_COUNTRY_BOSS(対象勢力))%的部队被点燃了！
+CALL DECREASE_SOLDIER(対象勢力, 対象部隊, RAND(2000,4000), 1)
+PRINTFORML %ANAME(GET_COUNTRY_BOSS(対象勢力))%部队的疲劳度增加了！
+UNIT_TIRED_COUNT:対象勢力:対象部隊 + 35
+
+
+
+@SKILL_0_TROOP_38_EXPLANATION
+RESULTS = 使我方部队的兵力提升。
+
+
+@SKILL_0_TROOP_38_NO_LEARN_INIT
+@SKILL_0_TROOP_38_CANT_LEARN_FROM_SHOP
+@SKILL_0_TROOP_38_CANT_TELL
+
+@SKILL_0_TROOP_38_RATE(発動者, 発動番号, 発動側, 発動勢力, 発動部隊, 対象勢力, 対象部隊)
+#DIM 発動者
+#DIM 発動番号
+#DIM スキル
+#DIMS ジャンル
+#DIM 発動側
+#DIM 発動勢力
+#DIM 発動部隊
+#DIM 対象側
+#DIM 対象勢力
+#DIM 対象部隊
+RETURN 400

@@ -1,0 +1,313 @@
+﻿;@HZ=御阿礼之终点
+;@ENG=END_OF_AKYUU
+;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K48_END_OF_AKYUU_RATE(阿求)
+#DIM 阿求
+RETURN 1000
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K48_END_OF_AKYUU_DECISION(阿求)
+	#DIM 阿求
+	SIF DAY < 100
+		RETURN 0
+	SIF FLAG:クリアフラグ
+		RETURN 0
+	RETURN CHECK_KOJO_DAILY_HAPPEN(阿求)
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K48_END_OF_AKYUU_GENRE(阿求)
+#DIM 阿求
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K48_END_OF_AKYUU(阿求)
+#DIM 阿求
+[IF_DEBUG]
+	CALL KOJO_DAILY_K48_END_OF_AKYUU_1(阿求)
+	CALL KOJO_DAILY_K48_END_OF_AKYUU_2(阿求)
+	CALL KOJO_DAILY_K48_END_OF_AKYUU_3(阿求)
+	CALL KOJO_DAILY_K48_END_OF_AKYUU_4(阿求)
+	CALL KOJO_DAILY_K48_END_OF_AKYUU_5(阿求)
+	CALL KOJO_DAILY_K48_END_OF_AKYUU_6(阿求)
+	CALL KOJO_DAILY_K48_END_OF_AKYUU_7(阿求)
+	CALL KOJO_DAILY_K48_END_OF_AKYUU_8(阿求)
+	CALL KOJO_DAILY_K48_END_OF_AKYUU_9(阿求)
+	CALL KOJO_DAILY_K48_END_OF_AKYUU_10(阿求)
+	CALL KOJO_DAILY_K48_END_OF_AKYUU_11(阿求)
+	CALL KOJO_DAILY_K48_END_OF_AKYUU_12(阿求)
+	CALL KOJO_DAILY_K48_END_OF_AKYUU_13(阿求)
+	RETURN
+[ENDIF]
+PRINTFORML 这一天还是到来了
+PRINTFORML 已是到了轮回的日子，%ANAME(阿求)%完全做好了准备
+PRINTFORML 可...如今的幻想乡早已经不是那个和平的幻想乡了
+IF GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_外来人) > 0 && CFLAG:阿求:捕虜先 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_外来人)
+	CALL KOJO_DAILY_K48_END_OF_AKYUU_1(阿求)
+ELSEIF GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_自警団) > 0 && CFLAG:阿求:捕虜先 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_自警団)
+	CALL KOJO_DAILY_K48_END_OF_AKYUU_2(阿求)
+ELSEIF GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_狂信者) > 0 && CFLAG:阿求:捕虜先 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_狂信者)
+	CALL KOJO_DAILY_K48_END_OF_AKYUU_3(阿求)
+ELSEIF GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_野盗) > 0 && CFLAG:阿求:捕虜先 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_野盗)
+	CALL KOJO_DAILY_K48_END_OF_AKYUU_4(阿求)
+ELSEIF GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_触手) > 0 && CFLAG:阿求:捕虜先 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_触手)
+	CALL KOJO_DAILY_K48_END_OF_AKYUU_5(阿求)
+ELSEIF GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_サキュバス) > 0 && CFLAG:阿求:捕虜先 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_サキュバス)
+	CALL KOJO_DAILY_K48_END_OF_AKYUU_6(阿求)
+ELSEIF GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン) > 0 && CFLAG:阿求:捕虜先 == GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_ホフゴブリン)
+	CALL KOJO_DAILY_K48_END_OF_AKYUU_13(阿求)
+ELSEIF CFLAG:阿求:好感度 > 7000 && CFLAG:MASTER:所属 > 0 && CFLAG:阿求:所属 == CFLAG:MASTER:所属
+	IF CFLAG:NAME_TO_CHARA("四季映姫"):所属 == CFLAG:MASTER:所属 && CFLAG:NAME_TO_CHARA("小町"):所属 == CFLAG:MASTER:所属
+		CALL KOJO_DAILY_K48_END_OF_AKYUU_7(阿求)
+	ELSE
+		CALL KOJO_DAILY_K48_END_OF_AKYUU_8(阿求)
+	ENDIF
+ELSEIF CFLAG:阿求:好感度 <= 7000 && CFLAG:MASTER:所属 > 0 && CFLAG:阿求:所属 == CFLAG:MASTER:所属
+	CALL KOJO_DAILY_K48_END_OF_AKYUU_11(阿求)
+ELSEIF CFLAG:阿求:好感度 > 5000 && CFLAG:MASTER:所属 > 0 && CFLAG:阿求:所属 != CFLAG:MASTER:所属
+	CALL KOJO_DAILY_K48_END_OF_AKYUU_9(阿求)
+ELSEIF CFLAG:阿求:好感度 <= 5000 && CFLAG:MASTER:所属 > 0 && CFLAG:阿求:所属 != CFLAG:MASTER:所属
+	CALL KOJO_DAILY_K48_END_OF_AKYUU_10(阿求)
+ELSE
+	CALL KOJO_DAILY_K48_END_OF_AKYUU_12(阿求)
+ENDIF
+CALL COLOR_PRINTW(@"晚安，%ANAME(阿求)%", カラー_警告)
+CALL CHANGE_COUNTRY(阿求, 0)
+CFLAG:阿求:特殊状態 = 0
+RETURN 1
+
+@KOJO_DAILY_K48_END_OF_AKYUU_1(阿求)
+#DIM 阿求
+PRINTFORML 已是稗田%ANAME(阿求)%该离去的日子，然而在外乡人的基地里，死神与阎魔不可能引渡的到%ANAME(阿求)%的灵魂
+PRINTFORML 那外乡人呢？他们自是引渡不了，那科技能否延长%ANAME(阿求)%的性命呢
+PRINTFORML 可惜，无论是怎样高端的科技，都无法挽回稗田%ANAME(阿求)%
+PRINTFORML 拥有超乎常理的科技的外乡人救下了%ANAME(阿求)%的肉体
+PRINTFORML 然而%ANAME(阿求)%的灵魂却因契约的原因，终究是魂飞魄散了
+PRINTFORML 「即使是这样也终究只能是作为植物人么...」
+PRINTFORML 「明明高级大脑皮质功能没有失能...」
+PRINTFORML 「果然，幻想乡是有被征服后纳为己有作为实验场的价值啊...」
+PRINTFORML 得出这个结论后，玩腻了的外乡人们把无意识的稗田%ANAME(阿求)%遗体回收了
+PRINTFORML 稗田的传承自此断绝，可在如今的幻想乡谁又会在乎呢
+
+
+@KOJO_DAILY_K48_END_OF_AKYUU_2(阿求)
+#DIM 阿求
+PRINTFORML 已是稗田%ANAME(阿求)%该离去的日子
+PRINTFORML 尽管在自警团里，没人敢引渡稗田%ANAME(阿求)%
+PRINTFORML 不过被当做与妖怪的同伙而饱受折磨的%ANAME(阿求)%终于可以解脱了罢
+PRINTFORML ...
+PRINTFORML 在大街上，%ANAME(阿求)%的尸体被长枪刺穿，晾尸街头
+PRINTFORML 连死了也不放过么，一点也不尊重死者，自警团们羞辱着稗田%ANAME(阿求)%的尸体，继续维持他们的恐怖统治
+PRINTFORML 不过对于这帮自警团的暴徒来说，也是再正常不过了
+PRINTFORML 至于%ANAME(阿求)%死后的灵魂，谁在乎一个孤魂野鬼呢
+PRINTFORML 以那种灵体，估计早魂飞魄散了罢
+PRINTFORML 稗田的传承自此断绝，可在如今的幻想乡谁又会在乎呢
+
+
+@KOJO_DAILY_K48_END_OF_AKYUU_3(阿求)
+#DIM 阿求
+PRINTFORML 一些癫狂的狂信徒们嫉妒着%ANAME(阿求)%，至于稗田%ANAME(阿求)%本人呢
+PRINTFORML 她是否又愿意了？无从知晓，稗田%ANAME(阿求)%早已没有了意识，还活着只不过是为了邪教仪式而被信徒们用魔力吊着最后一口气罢了
+PRINTFORML ...
+PRINTFORML 一系列繁琐的仪式过后，神明降下了祂的部分真身
+PRINTFORML 不可直视的肉状物缠绕在稗田%ANAME(阿求)%的身上，将其吞噬，如同触手般的肢体从%ANAME(阿求)%嘴部插入她的脑内
+PRINTFORML 很快，%ANAME(阿求)%的灵魂被祂剥夺，供祂把玩
+PRINTFORML 肉体也被祂美美享用
+PRINTFORML 信徒们不知道发生了什么，只知道仪式成功了，神明大人很喜欢这次的贡品
+PRINTFORML 确实，所谓的引渡，不过是献给祂的一次贡品罢了
+PRINTFORML 至于稗田%ANAME(阿求)%？祝她好运，希望在她的灵魂早日飘散，早日从祂手中解脱吧
+PRINTFORML 稗田的传承自此断绝，可在如今的幻想乡谁又会在乎呢
+
+
+@KOJO_DAILY_K48_END_OF_AKYUU_4(阿求)
+#DIM 阿求
+PRINTFORML 在淫乱的土匪巢里
+PRINTFORML 稗田%ANAME(阿求)%每天被注射过量药物，进行着癫狂般的性爱
+PRINTFORML 明明距离转世的日子还有些时日
+PRINTFORML 不过稗田%ANAME(阿求)%等不到那个时候了
+PRINTFORML 被活活玩死的%ANAME(阿求)%只不过是众多被土匪活活姦淫至死的女孩子中的一员
+PRINTFORML 「切，这就死了」
+PRINTFORML 「人类果然还是经不起折腾，还是这些母猪妖怪玩的爽，怎么玩都玩不死啊哈哈」
+PRINTFORML 没有人在意稗田%ANAME(阿求)%的死亡，连个草席都没有，就这样直接光着身子被抛尸荒野
+PRINTFORML 身上，嘴里，穴内精液还没有干，陈述着她被土匪姦淫至死的故事
+PRINTFORML 不过谁又会在乎呢，就连稗田%ANAME(阿求)%她自己的灵魂，都已支撑不住，魂飞魄散
+PRINTFORML 土匪们不在乎，被土匪继续姦淫的其他女孩子也不会在乎，他们只沉迷于这淫荡的狂欢性爱
+PRINTFORML 稗田的传承自此断绝，可在如今的幻想乡谁又会在乎呢
+
+
+@KOJO_DAILY_K48_END_OF_AKYUU_5(阿求)
+#DIM 阿求
+PRINTFORML 已是%ANAME(阿求)%该离去的日子
+PRINTFORML 尽管在幻想乡，没有谁敢去引渡触手的苗床
+PRINTFORML 可触手也拦不住生命的流逝
+PRINTFORML 稗田%ANAME(阿求)%终究是死了，没有生命力的肉体，已经无法再作为苗床进行触手生殖
+PRINTFORML 曾经对%ANAME(阿求)%的温柔表象全部撕去，触手们一拥而上，把她的遗体消化殆尽
+PRINTFORML 不过对于%ANAME(阿求)%来讲应该是无所谓的
+PRINTFORML 毕竟，连她的灵魂都要飘散了
+PRINTFORML ....
+PRINTFORML 总之，稗田的传承自此断绝，可在如今的幻想乡谁又会在乎呢
+
+
+@KOJO_DAILY_K48_END_OF_AKYUU_6(阿求)
+#DIM 阿求
+PRINTFORML 已是%ANAME(阿求)%要离去的日子
+PRINTFORML 梦魔们能轻易地将人拉入欲望的深渊
+PRINTFORML 却不能把%ANAME(阿求)%从死亡的地狱里拖出
+PRINTFORML 嘛，不过地狱也没有那个胆量派人把%ANAME(阿求)%引渡罢
+PRINTFORML 死了的尸体，没有玩弄的价值
+PRINTFORML 脆弱的灵魂，经受不起梦魔的折腾
+PRINTFORML 刚刚脱离肉体的%ANAME(阿求)%的魂魄，在梦魔们的肆意玩弄下，很快就魂飞魄散
+PRINTFORML 至于%ANAME(阿求)%的遗体，谁在乎呢
+PRINTFORML 稗田的传承自此断绝，可在如今的幻想乡谁又会在乎呢
+
+
+@KOJO_DAILY_K48_END_OF_AKYUU_7(阿求)
+#DIM 阿求
+PRINTFORML ...,
+CALL K48_NPC_SAY(@"「非常抱歉，我们这边已经停工了」")
+CALL K48_NPC_SAY(@"「非常抱歉，我们这边接受不了她的灵魂，地狱现在也到处燃着战火」")
+CALL K48_NPC_SAY(@"「原本接纳灵魂负责转世的功能早已经停止了」")
+PRINTFORML ...
+CALL K48_NPC_SAY(@"「啊？你问我们要怎么处理？还能怎么处理，只能就这样了」")
+CALL K48_NPC_SAY(@"「现在幻想乡到处是孤魂野鬼，不是么」")
+PRINTFORML ...
+CALL K48_NPC_SAY(@"「对着我发火也没有用啊...我们又何尝不希望能帮助御阿礼之子转世呢」")
+CALL K48_NPC_SAY(@"「唉，剩下最后一些时间里多去陪陪她吧」")
+CALL K48_NPC_SAY(@"「契约依旧生效，就算肉体能保持生命力，其灵魂如果没有及时引渡还是会魂飞魄散的」")
+CALL K48_NPC_SAY(@"「也就是说，她连孤魂野鬼都做不了...」")
+PRINTFORML ...
+PRINTFORML 得到了这样的回复...
+PRINTFORML 已经无法阻止%ANAME(阿求)%的死，%ANAME(阿求)%躺在床上，生命迹象越来越弱
+PRINTFORML ...
+CALL K48_AKYUU_SAY(@"「没事的...」")
+PRINTFORML 微弱的声音传来，%ANAME(阿求)%如今只能以这种方式来表达安慰
+PRINTFORML 不想让%ANAME(MASTER)%太伤心，%ANAME(阿求)%开始讲起了自己先辈的故事
+CALL K48_AKYUU_SAY(@"「呐...你知道吗，我们御阿礼一家的故事...」")
+PRINTFORML %ANAME(阿求)%讲起了自己先辈的恋爱故事，讲到先辈的开心，讲到先辈的不舍，讲到先辈的转世
+CALL K48_AKYUU_SAY(@"「...」")
+CALL K48_AKYUU_SAY(@"「呐...」")
+CALL K48_AKYUU_SAY(@"「等到我...转世后...一定...一定要来...找我呦...」")
+PRINTFORML %ANAME(MASTER)%伤心地答应了，而更令人伤心的是%ANAME(MASTER)%知道这一次分别，将是永别
+CALL K48_AKYUU_SAY(@"「呐...听我说...」")
+PRINTFORML %ANAME(阿求)%最后想说些什么
+CALL K48_AKYUU_SAY(@"「...我...」")
+PRINTFORML 「..爱...」
+CALL K48_AKYUU_SAY(@"「...」")
+PRINTFORML 结束了...%ANAME(MASTER)%看着床上躺着的%ANAME(阿求)%，已经知道...
+PRINTFORML 稗田的传承，已经尽断于此了...
+
+
+@KOJO_DAILY_K48_END_OF_AKYUU_8(阿求)
+#DIM 阿求
+PRINTFORML 这一天还是到来了
+PRINTFORML 已是到了轮回的日子，%ANAME(阿求)%完全做好了准备
+PRINTFORML 可...如今的幻想乡早已经不是那个和平的幻想乡了
+PRINTFORML 本应来接应的死神迟迟不见踪影，可%ANAME(阿求)%生命流失却并不因死神的迟来而延缓
+PRINTFORML 稗田%ANAME(阿求)%...已经要支撑不住了...
+PRINTFORML ...
+CALL K48_AKYUU_SAY(@"「没事的...」")
+PRINTFORML 微弱的声音传来，%ANAME(阿求)%如今只能以这种方式来表达安慰
+PRINTFORML 不想让%ANAME(MASTER)%太伤心，%ANAME(阿求)%开始讲起了自己先辈的故事
+PRINTFORML 「呐...你知道吗，我们御阿礼一家的故事...」
+PRINTFORML %ANAME(阿求)%讲起了自己先辈的恋爱故事，讲到先辈的开心，讲到先辈的不舍，讲到先辈的转世
+CALL K48_AKYUU_SAY(@"「...」")
+CALL K48_AKYUU_SAY(@"「呐...」")
+CALL K48_AKYUU_SAY(@"「等到我...转世后...一定...一定要来...找我呦...」")
+PRINTFORML %ANAME(MASTER)%伤心地答应了，而更令人伤心的是%ANAME(MASTER)%知道这一次分别，将是永别
+CALL K48_AKYUU_SAY(@"「呐...听我说...」")
+PRINTFORML %ANAME(阿求)%最后想说些什么
+CALL K48_AKYUU_SAY(@"「...我...」")
+CALL K48_AKYUU_SAY(@"「..爱...」")
+CALL K48_AKYUU_SAY(@"「...」")
+PRINTFORML 结束了...%ANAME(MASTER)%看着床上已无呼吸的%ANAME(阿求)%，暗自下定决心——无论幻想乡会混乱多久，也要把下一任御阿礼之子保护下来
+PRINTFORML 可%ANAME(MASTER)%还不知道，如此混乱的幻想乡，连地狱都战火连天，%ANAME(阿求)%又该在何处转世呢
+PRINTFORML 稗田的传承，大概就以稗田%ANAME(阿求)%作为句号了。
+
+
+@KOJO_DAILY_K48_END_OF_AKYUU_9(阿求)
+#DIM 阿求
+PRINTFORML 今天是稗田%ANAME(阿求)%该离去的日子
+PRINTFORML 然而自己与%ANAME(阿求)%天各一方，在如今的幻想乡，相见是非常难的事情了
+PRINTFORML 不知道%ANAME(阿求)%怎么样了，%ANAME(MASTER)%这样想着
+IF CFLAG:MASTER:所属 > 0 && CFLAG:阿求:所属 > 0
+	CALL TMP_CREATE_RELATION_MAP()
+	IF TMP_COUNTRY_RELATION:(CFLAG:MASTER:所属):(CFLAG:阿求:所属) >= 2
+		PRINTFORML 向对方势力发出了请求，希望%ANAME(阿求)%最后是安详地离去吧
+	ELSE
+		PRINTFORML 可惜了，身在敌营，不被捉去拷问已是万幸
+		PRINTFORML 希望%ANAME(阿求)%不要死的太痛苦吧，%ANAME(MASTER)%唯一能做的只有这样祈祷着
+	ENDIF
+ELSEIF CFLAG:阿求:所属 == 0
+		PRINTFORML 不知道%ANAME(阿求)%身处何处，希望%ANAME(阿求)%能够安详地离去吧】
+		PRINTFORML %ANAME(MASTER)%已来不及过多伤心，自己必须振作起来继续工作
+		PRINTFORML 不然只会有更多的人，因为战乱而有情人终不成眷属
+ENDIF
+
+
+@KOJO_DAILY_K48_END_OF_AKYUU_10(阿求)
+#DIM 阿求
+PRINTFORML 今天是稗田%ANAME(阿求)%该离去的日子
+PRINTFORML 然而再如今这个混乱的幻想乡，每天都有人因为战乱饥荒而死，多她一个不多，少她一个不少
+PRINTFORML 没有人在乎她，%ANAME(MASTER)%还有其他人得知消息后，仅仅就是感叹回顾战争开始前的美好回忆
+PRINTFORML 连对外的公开悼文以表追忆都没有打算写，回忆完后大家重新自顾自地忙自己事去了
+
+
+@KOJO_DAILY_K48_END_OF_AKYUU_11(阿求)
+#DIM 阿求
+PRINTFORML 这一天还是到来了
+PRINTFORML 可...如今的幻想乡早已经不是那个和平的幻想乡了
+PRINTFORML 稗田%ANAME(阿求)%在幻想乡也是小有名气，%ANAME(MASTER)%自然也是抽出时间参加其葬礼
+PRINTFORML 尽管按照以往惯例前来引渡的死神并没有前来，毕竟如今这个战火纷飞的幻想乡，地狱已经乱了套也说不定
+PRINTFORML 但是尸体还是要处理的，按照习俗进行了一系列的仪式后，让%ANAME(阿求)%入土为安了
+
+
+@KOJO_DAILY_K48_END_OF_AKYUU_12(阿求)
+#DIM 阿求
+PRINTFORML 这一天还是到来了
+PRINTFORML 已是到了轮回的日子，%ANAME(阿求)%完全做好了准备
+PRINTFORML 可...如今的幻想乡早已经不是那个和平的幻想乡了
+IF CFLAG:阿求:好感度 > 7000
+	PRINTFORML 尽管非常在意%ANAME(阿求)%的情况，但是%ANAME(MASTER)%已是自顾不暇
+	PRINTFORML 抱着对%ANAME(阿求)%的担心，%ANAME(MASTER)%继续前进着
+ELSE
+	PRINTFORML 连自己都自顾不暇，谁还管%ANAME(阿求)%怎么样
+	PRINTFORML %ANAME(MASTER)%继续前进着，希望天黑前能找到一个过夜的地方
+ENDIF
+
+@KOJO_DAILY_K48_END_OF_AKYUU_13(阿求)
+#DIM 阿求
+PRINTFORML 已是稗田%ANAME(阿求)%要离去的日子
+PRINTFORML 对于%ANAME(阿求)%来讲终于是解脱了
+PRINTFORML 不过对于她的遗体来讲并没有
+PRINTFORML 噗嗤 噗嗤 噗嗤 噗嗤 噗嗤 噗嗤
+PRINTFORML 噗嗤 噗嗤 噗嗤 噗嗤 噗嗤 噗嗤
+PRINTFORML 噗嗤 噗嗤 噗嗤 噗嗤 噗嗤 噗嗤
+PRINTFORML 噗嗤 噗嗤 噗嗤 噗嗤 噗嗤 噗嗤
+PRINTFORML 噗嗤 噗嗤 噗嗤 噗嗤 噗嗤 噗嗤
+PRINTFORML 噗嗤 噗嗤 噗嗤 噗嗤 噗嗤 噗嗤
+PRINTFORML ...
+PRINTFORML 即使是死了，哥布林也没有放过%ANAME(阿求)%
+PRINTFORML 双目早已失去光泽的%ANAME(阿求)%，用僵硬的小穴接受的哥布林们的猛烈冲击
+PRINTFORML 嘴巴早就无法再咽下精液，无论哥布林怎样的殴打都无济于事
+PRINTFORML 嘛，真是变态，不过以哥布林的智力，恐怕直到尸体彻底腐烂发臭前，都不会意识到稗田%ANAME(阿求)%已经死了吧
+PRINTFORML 又或者只是哥布林有着单纯的姦尸癖
+PRINTFORML 不过稗田%ANAME(阿求)%本人是再没机会考虑了，没有人回来哥布林的据点引渡她
+PRINTFORML 等待她的，除了尸体腐烂后被哥布林抛尸荒野，接着就要迎来自己的魂飞魄散
+PRINTFORML 稗田的传承自此断绝，可在如今的幻想乡谁又会在乎呢
+
+
+@KOJO_DAILY_K48_END_OF_AKYUU_ALLOW_WHEN_WANDERING()
+RETURN 0

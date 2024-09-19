@@ -1,0 +1,189 @@
+﻿;@HZ=沉浸在温柔乡之中
+;@ENG=LOST_IN_TENTACLE
+;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K48_LOST_IN_TENTACLE_RATE(阿求)
+#DIM 阿求
+RETURN 1000
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K48_LOST_IN_TENTACLE_DECISION(阿求)
+	#DIM 阿求
+	#DIM 触手
+	SIF ABL:阿求:知略 < 40 || ABL:阿求:政治 < 40
+		RETURN 0
+	触手 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_触手)
+	SIF 触手 == -1
+		RETURN 0
+	SIF CFLAG:阿求:捕虜先 != 触手
+		RETURN 0
+	SIF GETBIT(TALENT:阿求:特殊勢力陥落系, 特殊勢力_触手)
+		RETURN 0
+	SIF K48_LOST_IN_TENTACLE_HAPPEND
+		RETURN 0
+	SIF !IS_LOVER() && CFLAG:阿求:妊娠期間 != 0
+		RETURN 0
+	RETURN CHECK_KOJO_DAILY_HAPPEN(阿求)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K48_LOST_IN_TENTACLE_GENRE(阿求)
+#DIM 阿求
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K48_LOST_IN_TENTACLE(阿求)
+#DIM 阿求
+PRINTFORML 小瞧了触手的实力，%ANAME(阿求)%被触手们捉进了大牢
+PRINTFORML 在被押送进自己的部屋前，看到沿途其他部屋里被调教的女人的淫乱场景，听到那高潮的尖叫与娇喘
+PRINTFORML 恐惧，害怕从%ANAME(阿求)%心中油然而生
+CALL K48_HUGE_WAIT()
+CALL K48_AKYUU_SAY(@"「呃...不..不要这样」")
+PRINTFORML 来到了自己的部屋，触手们一拥而上，把%ANAME(阿求)%围了起来
+PRINTFORML 但出乎%ANAME(阿求)%的意料的是，她预想的强暴与凌辱并没有出现
+PRINTFORML 取而代之的是，触手们轻柔地缠绕在%ANAME(阿求)%的身躯，生怕%ANAME(阿求)%感到不适，就像做按摩一般，令%ANAME(阿求)%舒适无比，连逃生都不想了
+PRINTFORML 突然，触手开始顺着衣物伸进衣内，与%ANAME(阿求)%的肉体直接接触
+CALL K48_AKYUU_SAY(@"「咿呀！」")
+PRINTFORML 光滑的肌肤与触手相接的一刹那，%ANAME(阿求)%发出惊恐的尖叫
+PRINTFORML 但是传来脑子的感受是——舒适，还是舒适
+PRINTFORML 触手们很快摸至大腿内侧，在其反复摩擦来增强刺激感的同时，又分出触手不断挑逗%ANAME(阿求)%的阴蒂
+PRINTFORML 完了，要被触手侵犯了，尽管现在自己很舒服，但是%ANAME(阿求)%知道在不反抗，就要被温水煮青蛙了
+PRINTFORML 可惜为时已晚，当%ANAME(阿求)%试图挣脱触手束缚时，触手早已经顺着身体到达了她的胳肢窝里
+PRINTFORML 配合触手对下体的挑逗，%ANAME(阿求)%使不上一点劲
+CALL K48_AKYUU_SAY(@"「不，不要，啊啊...请，请停下来....」")
+IF !IS_LOVER() && CFLAG:阿求:妊娠期間 == 0
+	PRINTFORML 随着触手的不断深入，%ANAME(阿求)%的全身都被粘滑的触手抚摸，但那种感觉没有让%ANAME(阿求)%反感，反而是产生了些许快感
+	CALL K48_AKYUU_SAY(@"「嗯……啊……不要……」")
+	PRINTFORML 在不断的挑逗中，%ANAME(阿求)%的快感逐渐涌上头脑，只是轻轻的抚摸，但让%ANAME(阿求)%的脸色变的阵阵潮红，浑身不断的抽动
+	CALL K48_AKYUU_SAY(@"「嗯…这样太…啊……」")
+	PRINTFORML 到了这种地步，触手却没有继续深入，像是在清洁%ANAME(阿求)%的身体，%ANAME(阿求)%开始怀疑这些触手似乎并非传言中的可怕？对其他人的 折磨，但对自己又是这么温柔，也许……这些触手爱着自己？
+	CALL K48_AKYUU_SAY(@"「嗯……嘛……」")
+	IF !TALENT:阿求:貞操観念
+		PRINTFORML %ANAME(阿求)%的挣扎逐渐微弱，但只是因为自己不想再抵抗下去了，在不断的抚摸下，%ANAME(阿求)%的脸色仍旧绯红，但心中已经全然没有抗 拒
+		CALL K48_AKYUU_SAY(@"「啊……不要太在乎……我的想法……来吧」")
+		PRINTFORML 说着，%ANAME(阿求)%不再挣扎，而是张开了全身，让触手更好的爱抚自己...
+	ELSE
+		PRINTFORML 虽然还是遭到了抗拒，但是触手还是没有死心
+		CALL K48_AKYUU_SAY(@"「诶，这是...唔！唔唔唔！」")
+		PRINTFORML 触手们没有执着于%ANAME(阿求)%的下体，反而是钻进了%ANAME(阿求)%的嘴巴
+		CALL K48_AKYUU_SAY(@"「唔唔唔，唔唔，唔唔唔唔！」")
+		PRINTFORML 以稗田%ANAME(阿求)%的嘴为穴，噗嗤噗嗤地射进了%ANAME(阿求)%的嘴里
+		CALL K48_AKYUU_SAY(@"「哈啊...哈啊...」")
+		PRINTFORML 不知道多少轮触手口交过去后，%ANAME(阿求)%无力地摊倒在触手里
+		PRINTFORML 已无力气反抗，身体已彻底交由触手
+		PRINTFORML 但是触手却似乎一定要听到%ANAME(阿求)%同意为止
+	ENDIF
+	CALL K48_HUGE_WAIT()
+	PRINTFORML 尽管触手一直没有进来，但是触手们释放的特殊液体已经彻底搅乱的%ANAME(阿求)%的神经
+	CALL K48_AKYUU_SAY(@"「嗯……啊……不要……」")
+	PRINTFORML 和往常一样，触手们挑逗%ANAME(阿求)%的身体
+	CALL K48_AKYUU_SAY(@"「嗯…这样太…啊……」")
+	PRINTFORML %ANAME(阿求)%开始怀疑这些触手似乎并非传言中的可怕？
+	PRINTFORML 对其他人的折磨，但对自己又是这么温柔
+	PRINTFORML 也许
+	CALL K48_HUGE_WAIT()
+	PRINTFORML 这些触手爱着自己？
+	PRINTFORML 没有错，一定是这样啊，自己被困在这这么久
+	PRINTFORML 是触手们，让稗田%ANAME(阿求)%自己如此地舒服，用粘稠而充满营养的精液养活了自己
+	CALL K48_AKYUU_SAY(@"「嗯……嘛……」")
+	PRINTFORML %ANAME(阿求)%思想逐渐错乱，近乎不能正常思考了
+	PRINTFORML 身体已经开始出卖了%ANAME(阿求)%，随着身体的不断燥热，滚烫的脸色，内心的防线在快感的冲击下不断的被瓦解
+	CALL K48_AKYUU_SAY(@"「嗯……不行……」")
+	PRINTFORML 触手的不断撩拨挑逗让%ANAME(阿求)%扭动的幅度越来越小，因为她感觉到了浑身酥麻的感觉，这是%ANAME(阿求)%从未感受过的，在触手的包裹 之中，%ANAME(阿求)%感受到了无比的温暖
+	CALL K48_AKYUU_SAY(@"「已经……要……啊……」")
+	PRINTFORML 在不断冲刷内心的触手面前，过去的记忆好像不是那么重要了，自己只是想一直被触手以这样的方式娱乐，最终，%ANAME(阿求)%不再扭动，而是紧紧抱住了触手
+ELSEIF IS_LOVER() && CFLAG:阿求:妊娠期間 == 0
+	PRINTFORML 随着触手的不断深入，%ANAME(阿求)%的全身都被粘滑的触手抚摸
+	PRINTFORML 但那种感觉没有让%ANAME(阿求)%反感，反而是产生了些许快感
+	CALL K48_AKYUU_SAY(@"「嗯……啊……不要……」")
+	PRINTFORML 在不断的挑逗中，%ANAME(阿求)%的快感逐渐涌上头脑，只是轻轻的抚摸
+	PRINTFORML 但让%ANAME(阿求)%的脸色变的阵阵潮红，浑身不断的抽动
+	CALL K48_AKYUU_SAY(@"「嗯…这样太…啊……」")
+	PRINTFORML 到了这种地步，触手却没有继续深入
+	PRINTFORML %ANAME(阿求)%开始怀疑这些触手似乎并非传言中的可怕？
+	PRINTFORML 对其他人的折磨，但对自己又是这么温柔
+	PRINTFORML 也许
+	CALL K48_HUGE_WAIT()
+	PRINTFORML 这些触手爱着自己？
+	PRINTFORML 没有错，一定是这样啊，自己被困在这这么久
+	PRINTFORML 而自己心爱的%ANAME(MASTER)%却为什么还没有来救自己呢
+	PRINTFORML 在稗田%ANAME(阿求)%的脑子已无法再冷静思考，触手们长久以来的拘禁已经让%ANAME(阿求)%神志不清
+	CALL K48_AKYUU_SAY(@"「嗯……嘛……」")
+	PRINTFORML %ANAME(阿求)%的挣扎逐渐微弱，但只是因为自己不想再抵抗下去了
+	PRINTFORML 在不断的抚摸下，%ANAME(阿求)%的脸色仍旧绯红，但心中已经全然没有抗拒
+	CALL K48_AKYUU_SAY(@"「啊……不要太在乎……我的想法……来吧」")
+	PRINTFORML 说着，%ANAME(阿求)%不再挣扎，而是张开了全身，让触手更好的爱抚自己PRINTFORML 随着触手的不断深入，%ANAME(阿求)%的全身都被粘滑的触手抚摸
+	PRINTFORML 但那种感觉没有让%ANAME(阿求)%反感，反而是产生了些许快感
+	CALL K48_AKYUU_SAY(@"「嗯……啊……不要……」")
+	PRINTFORML 在不断的挑逗中，%ANAME(阿求)%的快感逐渐涌上头脑，只是轻轻的抚摸
+	PRINTFORML 但让%ANAME(阿求)%的脸色变的阵阵潮红，浑身不断的抽动
+	CALL K48_AKYUU_SAY(@"「嗯…这样太…啊……」")
+	PRINTFORML 到了这种地步，触手却没有继续深入
+	PRINTFORML %ANAME(阿求)%开始怀疑这些触手似乎并非传言中的可怕？
+	PRINTFORML 对其他人的折磨，但对自己又是这么温柔
+	PRINTFORML 也许
+	CALL K48_HUGE_WAIT()
+	PRINTFORML 这些触手爱着自己？
+	PRINTFORML 没有错，一定是这样啊，自己被困在这这么久
+	PRINTFORML 而自己心爱的%ANAME(MASTER)%却为什么还没有来救自己呢
+	PRINTFORML 在稗田%ANAME(阿求)%的脑子已无法再冷静思考，触手们长久以来的拘禁已经让%ANAME(阿求)%神志不清
+	CALL K48_AKYUU_SAY(@"「嗯……嘛……」")
+	PRINTFORML %ANAME(阿求)%的挣扎逐渐微弱，但只是因为自己不想再抵抗下去了
+	PRINTFORML 在不断的抚摸下，%ANAME(阿求)%的脸色仍旧绯红，但心中已经全然没有抗拒
+	CALL K48_AKYUU_SAY(@"「啊……不要太在乎……我的想法……来吧」")
+	PRINTFORML 说着，%ANAME(阿求)%不再挣扎，而是张开了全身，让触手更好的爱抚自己
+ELSE
+	PRINTFORML 随着触手的不断深入，%ANAME(阿求)%的全身都被粘滑的触手抚摸
+	PRINTFORML 但那种感觉没有让%ANAME(阿求)%反感，反而是产生了些许快感
+	CALL K48_AKYUU_SAY(@"「嗯……啊……不要……」")
+	PRINTFORML 在不断的挑逗中，%ANAME(阿求)%的快感逐渐涌上头脑
+	PRINTFORML 只是轻轻的抚摸，但让%ANAME(阿求)%的脸色变的阵阵潮红，浑身不断的抽动
+	CALL K48_AKYUU_SAY(@"「嗯…这样太…啊……」")
+	PRINTFORML %ANAME(阿求)%开始怀疑这些触手似乎并非传言中的可怕？明明自己已经有恋人了啊……
+	PRINTFORML 对其他人的折磨，但对自己又是这么温柔，也许……这些触手爱着自己？
+	CALL K48_AKYUU_SAY(@"「嗯……嘛……」")
+	PRINTFORML %ANAME(阿求)%的挣扎逐渐微弱，但是，她还记得，自己有爱着的人，有腹中的孩子
+	PRINTFORML %ANAME(阿求)%还在不断的抗拒着，但身体已经开始出卖了自己
+	PRINTFORML 随着身体的不断燥热，滚烫的脸色，内心的防线在快感的冲击下不断的被瓦解
+	CALL K48_AKYUU_SAY(@"「嗯……不行……」")
+	PRINTFORML 触手的不断撩拨挑逗让%ANAME(阿求)%扭动的幅度越来越小，也许是因为怀有身孕，%ANAME(阿求)%的体力明显不支
+	CALL K48_AKYUU_SAY(@"「那里……是他……」")
+	PRINTFORML 触手看到无力挣扎的%ANAME(阿求)%，仍然没有继续深入
+	PRINTFORML 而是给%ANAME(阿求)%短暂的歇息，然后往%ANAME(阿求)%的嘴里慢慢滴了一些粘液
+	CALL K48_AKYUU_SAY(@"「嗯……咕噜……」")
+	PRINTFORML %ANAME(阿求)%咽了下去，没有那种腥臭粘滑的感觉
+	PRINTFORML 反而那些粘液非常的甘甜，就像露水一样，好像自己的体力恢复了一些
+	PRINTFORML 但触手为什么要这么做？
+	PRINTFORML 在慢慢的恢复之后，触手开始了新一轮的撩拨挑逗
+	PRINTFORML 但每当%ANAME(阿求)%剧烈挣扎的时候，触手反而会更慢的去拨逗
+	CALL K48_AKYUU_SAY(@"「奇怪……不行……啊」")
+	CALL K48_HUGE_WAIT()
+	PRINTFORML 在不断的过程中，%ANAME(阿求)%终于明白了
+	PRINTFORML 触手是因为要照顾自己，怕自己和腹中的宝宝出问题所以才这样
+	PRINTFORML 那些汁水也是为了更好的养胎，避免自己伤害到自己
+	PRINTFORML 想通这一点的%ANAME(阿求)%明白了，触手一直爱着自己啊
+	PRINTFORML 于是停下了抵抗，只是抚摸着自己的肚子，然后嘴唇贴近触手亲上了一口
+	CALL K48_AKYUU_SAY(@"「嗯……要温柔一些……就像这样……」")
+	CALL K48_HUGE_WAIT()
+ENDIF
+K48_LOST_IN_TENTACLE_HAPPEND=1
+SETBIT TALENT:阿求:特殊勢力陥落系, 特殊勢力_触手
+CALL COLOR_PRINTL(@"%ANAME(阿求)%向触手屈服了", カラー_注意)
+RETURN 1
+
+
+@KOJO_DAILY_K48_LOST_IN_TENTACLE_ALLOW_WHEN_WANDERING()
+RETURN 0

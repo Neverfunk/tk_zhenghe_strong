@@ -4,7 +4,7 @@
 ;作者:eratoho総合スレ302,>>939氏
 ;
 ;別人加筆:eratoho総合スレ303,>>25
-;更新履歴:20230910 条件分岐、誤字脱字の修正etc
+;更新履歴:ver1.3 20231127 文章の加筆修正
 ;-------------------------------------------------
 @SCENARIO_NAME_10
 RESULTS = 淫色帝国的逆袭
@@ -26,26 +26,26 @@ PRINTFORML 如此这般的文字以特大号的字体被摆放在了标题的位
 ;TranslatedMark それはデカデカ載った見出しと共に、
 PRINTFORML 某人眼睛被粗线条涂黑了的刺激照片占据了头版头条，
 ;TranslatedMark 目を線で黒く塗り潰された、とある人物達のキワドイ写真が一面トップを飾っていた！
-PRINTFORML
+PRINTFORML 
 PRINTFORML 根据发色就可以判断一个人的淫乱程度什么的，这种传闻根本毫无根据，
 ;TranslatedMark 髪色によって、その人物の淫乱度合いがわかるという根拠無き風評は、
 PRINTFORML 「特别是粉色头发的人，全都沉迷于淫荡的行径」
-;TranslatedMark 「特に髪が桃色の者は、揃いも揃って淫行に耽る」
+;TranslatedMark “特に髪が桃色の者は、揃いも揃って淫行に耽る”
 PRINTFORML 诸如此类的谣言，被包装的像是事实一样，密密麻麻地写满了整页报纸
 ;TranslatedMark などと言うデマカセが事実のように、つらつら紙面に書かれていたのである
-PRINTFORML
+PRINTFORML 
 PRINTFORML 茨木华扇认为事态如今已经发展到了相当严重的地步
 ;TranslatedMark この事態を特に重くみたのは茨木華扇
 PRINTFORML 上了报纸头条的她表现得相当激动
 ;TranslatedMark 紙面のトップを飾ってしまった彼女は激昂すると、
 PRINTFORML 同为被害者的其他人也聚集在一起商讨起对策！
 ;TranslatedMark 同じく被害に遭った面々も集い策を練り始めるのであった！
-PRINTFORML
+PRINTFORML 
 PRINTFORML 这会对其他的人类与妖怪们产生影响吗？
 ;TranslatedMark それは他の人妖達にも影響が及ぶや否や、
 PRINTFORML 发色相似的人们聚集在一起，在团结下逐渐变得强大。
 ;TranslatedMark 髪色が近しい者同士が集まり、身を固める様になってゆく
-PRINTFORML
+PRINTFORML 
 PRINTFORML 愤怒的拳头砸向了淫乱的绯闻和流窜的谣言！
 ;TranslatedMark 淫乱ピンクと轟く風聞に、怒りの拳が叩きつけられる！
 PRINTFORML 以茨木华扇为首，一群粉色头发的人与妖为了自己的名声而站了出来！
@@ -63,6 +63,7 @@ COUNTRY_COLOR:0 = GETDEFCOLOR()
 ;--------淫ピ;--------
 COUNTRY_BOSS:1                                  = GET_ID(NAME_TO_CHARA("華扇"))
 COUNTRY_COLOR:1                                 = 0xF7819F
+COUNTRY_IS_CLOSED:1 = 1
 CFLAG:NAME_TO_CHARA("美宵"):所属                = GET_COUNTRY_FROM_BOSS_NAME("華扇")
 CFLAG:NAME_TO_CHARA("華扇"):所属                = GET_COUNTRY_FROM_BOSS_NAME("華扇")
 CFLAG:NAME_TO_CHARA("ミスティア"):所属          = GET_COUNTRY_FROM_BOSS_NAME("華扇")
@@ -371,8 +372,6 @@ NEXT
 ;兵力の初期配置
 CALL INIT_ARMY
 
-;下駄
-
 ;無所属都市の兵数は経済の7.5%
 FOR LOCAL:0, 0, MAX_CITY
 	SIF CITY_OWNER:(LOCAL:0) == 0
@@ -385,6 +384,8 @@ CALL SHARED_SETTING_RELATION
 ;SCVAR:0
 PRINTFORML 要显示游戏中播放的事件信息吗？
 ;TranslatedMark プレイ中に流れるイベントメッセージを表示しますか？
+PRINTFORML （如果选择OFF的话，就不会显示事件信息了）
+;TranslatedMark (メッセージＯＦＦの場合はシナリオイベントが抑制されます)
 CALL ASK_YN("要", "不要")
 ;TranslatedMark "はい", "いいえ"
 SIF RESULT == 0
@@ -405,14 +406,14 @@ UNIFY = GET_UNIFY_COUNTRY()
 SIF FLAG:観戦モード
 	RETURN 0
 
-;SCVAR:0
+;SCVAR:0, SCVAR:10~17
 ;イベントメッセージ
 SIF SCVAR:0
 	CALL EventMessage_10
 
 ;SCVAR:20
 ;最終戦争(華扇のみ)
-SIF (UNIFY == GET_COUNTRY_FROM_BOSS_NAME("華扇")) && (SCVAR:10 == 2) && (SCVAR:20 < 2) && (CFLAG:華扇:特殊状態 != 特殊状態_死亡)
+SIF (UNIFY == GET_COUNTRY_FROM_BOSS_NAME("華扇")) && (SCVAR:10 != 1) && (SCVAR:20 < 2) && (CFLAG:華扇:特殊状態 != 特殊状態_死亡)
 	CALL Final_Wars_S10
 
 ;定期イベント
@@ -426,11 +427,13 @@ CALL Event_Daily_S10
 #DIM FIRST_LINE
 #DIM UNIFY
 #DIM 対象
+
 CLEARLINE 10000
 FIRST_LINE = LINECOUNT
 
 ;統一した国家の番号を取得
 UNIFY = GET_UNIFY_COUNTRY()
+SCVAR:18 = SCVAR:10 + SCVAR:11 + SCVAR:12 + SCVAR:13 + SCVAR:14 + SCVAR:15 + SCVAR:16 + SCVAR:17
 
 ;保険
 SIF !SCVAR:0
@@ -441,933 +444,1141 @@ IF SCVAR:0 == 1
 	SELECTCASE DAY
 		CASE 1
 			PRINTFORML 【虚实纷乱的绯闻可有冤枉•其一】
-			;TranslatedMark [０１：虚実入り乱れるその風聞は濡れ衣か]
-			PRINTFORMW
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML 这天，散播在整个幻想乡内流传的谣言，让茨木华扇大为震撼！
+			;TranslatedMark [０１：虚実の入り乱れるその風聞は濡れ衣か]
+			PRINTFORMW 
+			PRINTFORML 某天，散播在整个幻想乡里流传的谣言，使得茨木华扇大为震撼！
 			;TranslatedMark その日、幻想卿を触れ回るデマカセが、茨木華扇を激震させた！
-			PRINTFORMW
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORMW 在那张破皱纸面歪斜的一角
-			;TranslatedMark ぐしゃりと歪んだ紙面の片隅
-			PRINTFORML 她颤抖着的目光紧盯着字里行间，焦灼的视线几乎要把纸面烧穿。
-			;TranslatedMark 震える瞳でみつめる先は、今にも大穴を開けてしまいそうなほどの厳しい視線
-			PRINTFORMW 上面记载着毫无根据的流言蜚语，以及许多偷拍到的淫乱私生活丑态
-			;TranslatedMark そこには謂れ無き風評と、隠し撮りと思われる数多の痴態が写っていた
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML 「——粉色等于淫乱……什么的，谁写的这么无礼又荒谬的报道！？」
-			;TranslatedMark 「――桃色が淫乱、ですって？　誰よこんな非常識で馬鹿げた記事を書いたのはー！？」
-			PRINTFORMW
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML 越是往下读愤怒就越加涌溢
-			;TranslatedMark 読めば読むほど怒りは滲み溢れ、
-			PRINTFORMW 最终她青筋暴起的手掌一把捏碎了手里的报纸，制造出了尖锐的爆鸣声
-			;TranslatedMark とうとうその手で握り潰して叩きつけると、辺りに破裂音を響かせた
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML 怎么会这样！竟然连我也被这么说了！
-			;TranslatedMark なんてことだ。まさか自分がやられるとは！
-			PRINTFORMW 她狠狠地把罪魁祸首摔到地上，身体无力地瘫倒，眼泪哗哗地流淌而下。
-			;TranslatedMark 彼女はその元凶を叩き付けると、腰砕けに崩れ落ち、ヨヨヨと涙を流していた
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML 搞不懂她们到底在想些什么，报纸居然可以毫不在意地做出如此恶劣的事情。
-			;TranslatedMark 何を考えてのことか知らないが、新聞というのはこんな悪質なことを平気でするのかっ
-			PRINTFORMW 更不用说还特意准备了这样的照片，给荒谬的内容增添了说服力！
-			;TranslatedMark ましてやわざわざそれっぽい写真まで用意して、デタラメな内容に説得力を与えている！
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML 「哈......而且，居然就是我饰演了那方面的角色......哈哈......啊哈哈，哈......」
-			;TranslatedMark 「は……しかもその一面の役を飾ったのが私だなんて……はは……あはは、は……」
-			PRINTFORMW
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML 再怎么用黑框消除脸部也没有意义吧
-			;TranslatedMark いくら線で消しているからといって、あれでは意味もないだろう
-			PRINTFORML 脸的轮廓、身体的曲线、平时穿着的衣服。特征这么明显，无论怎么想都只可能是她。
-			;TranslatedMark 顔の輪郭、体の線、普段着。特徴が特徴すぎて、どう考えても彼女以外にありえない
-			PRINTFORMW 就更不用说那条宣传语本身了
-			;TranslatedMark ましてやあのキャッチコピー
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML （这种事情不要啊......）
-			;TranslatedMark （いやだわー……）
-			PRINTFORMW
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML 既然如此，不如现在就去动手（物理）阻止她们吧。
-			;TranslatedMark ならば今から差し止めをしに殴り込もうか
-			PRINTFORML 不……现在谣言已经传播开了。事到如今才这么做已经太晚了。
-			;TranslatedMark いや、既に一度広まってしまった風聞。今更それも遅いだろう
-			PRINTFORML 何况这种程度庸俗无聊的话题，只要等待就会随着时间自然消散轮换，这是显而易见的。
-			;TranslatedMark ましてやこの手の下世話な話題、あれやこれやで延々付いて回るのは目に見える
-			PRINTFORMW 虽然是这么说……被见到的人类和妖怪们们都用好奇的目光看着，我也会受不了。
-			;TranslatedMark だからと言って、会う人妖に好奇の目で見られるのも我慢ならない
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML （这下连正常出门走路都做不到了......）
-			;TranslatedMark （これでは外もマトモに歩けない……）
-			PRINTFORMW
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORMW 这对于她来说，就等于剥夺了她小小的乐趣。
-			;TranslatedMark それは彼女にとって、小さな楽しみを奪われたに等しいこと
-			PRINTFORML
-			PRINTFORML 周末的片刻时光，用于前去尽情品尝只存在在乡间小路的甜美——
-			;TranslatedMark 週末のひと時、里の甘味を思うままに食べ歩く――
-			PRINTFORML 独自一人静静地享用甜点，对于流淌过味蕾的甘甜啧啧称赞，在平静轻松、一团和气的氛围中享受。
-			;TranslatedMark 一人静かに甘味に向き合い舌鼓を打つこともあれば、和気藹々とした空気の中で趣を味わい尽くす
-			PRINTFORML 以甜品作为清凉剂和媒介，熟识店主以及他人，发展成能攀上话的点头之交
-			;TranslatedMark 甘味という清涼剤を通して顔馴染みとなった店主や知り合い、
-			PRINTFORMW 和孩子们的对话，一点一点地扩大了自己这个小小的圈子。
-			;TranslatedMark 子供達との語らいは少しずつ、小さな輪が広がっていたのである
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML （不，本来就没有做任何亏心事，不要介意才是，就应该堂堂正正地——）
-			;TranslatedMark （いいえ。そもそもやましい所なんてないんだから、気にせず堂々――）
-			PRINTFORML 「啊啊……被拍下照片了啊……」
-			;TranslatedMark 「ああ……写真を撮られていたんでしたっけ……」
-			PRINTFORMW
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML 啊啊……现在应该已经在乡里传遍了吧。
-			;TranslatedMark ああ。今頃は里中に広まってしまっただろうか
-			PRINTFORML 大家读了之后会怎么想呢？
-			;TranslatedMark 皆はいったい、これを読んでどう思っただろうか
-			PRINTFORML 稍微思考一下就能明白，即便如此，自己给别人的印象也会变成那样吗？
-			;TranslatedMark 少し考えれば分かるはずだが、それでもやはりイメージは付いて回るだろうか
-			PRINTFORMW 那样的报道，要是连孩子们都看到了的话——
-			;TranslatedMark あんな記事を、それも子供にまで見られていたら――
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML ——「呐呐~姐姐~姐姐很淫乱吗~？」
-			;TranslatedMark 『ねえねえ、おねえちゃん。おねえちゃんっていんらんなの？』
-			PRINTFORML ——「淫乱是什么呐，请告诉我仙人小姐——！」
-			;TranslatedMark 『いんらんってなあに？　おしえてくださいせんにんさまー』
-			PRINTFORMW
+			PRINTFORMW 
+			PRINTFORML 「――—粉红色...就是淫乱？什么鬼啊？！」
+			;TranslatedMark 「――ピンクが、淫乱？　ですって？」
+			PRINTFORMW 
+			PRINTFORMW 她颤抖着的目光紧盯着那张破皱纸面上密密麻麻地写着毫无根据的谣言的一角
+			;TranslatedMark 謂れ無き風評に、ぐしゃりと紙面の片隅が歪んでゆく
+			PRINTFORML 就这般在字里行间反复阅读着，焦灼的视线就仿佛是要把纸面烧穿一般
+			;TranslatedMark 大穴を開けてしまいそうな厳しい視線が、受け入れ難い内容に震えていた
+			PRINTFORML 上面记载着的通篇都是毫无根据的流言蜚语，以及受害者包括自己在内的，大量偷拍到的淫秽照片
+			;TranslatedMark そこにはなんと！　数多の隠し撮りと思われる、自身を含む痴態が写っていた！
+			PRINTFORMW 
+			PRINTFORML 「啊...谁...？谁干的？！这种毫无根据的蠢东西到底是谁写的！？」
+			;TranslatedMark 「だ、誰が……こい、つ、誰、誰ぇ？！　誰なの誰よ？！　こんな馬鹿げた記事を書いたのは誰ですかー！？」
+			PRINTFORMW 
+			PRINTFORML 身为贤者的智慧使她瞬间便分析出了大致的情况———有某个长得与自己很像的神秘人，而这也使得她的面色顿时一片惨白
+			;TranslatedMark そこに収められた自身と似た謎の誰か。そして瞬時に把握してしまった青ざめてしまう様な今の状況
+			PRINTFORML 越是往下读，讶异与愤怒的情绪就越是从心底翻涌而起
+			;TranslatedMark 読めば読むほどに高まるフラストレーションに、滲み迸る怒りで目が据わる
+			PRINTFORMW 
+			PRINTFORML （可...可恶啊...！没想到我竟然会被那帮臭乌鸦这样摆了一道———！）
+			;TranslatedMark （ま、まさかこの私が……鴉如きにすっぱ抜かれることになるなんて――！）
+			PRINTFORMW 
+			PRINTFORML 哈啊———哈啊...哈啊...
+			;TranslatedMark てーー！　てーー……てー……
+			PRINTFORMW 
+			PRINTFORML 默读文字的声音仍在华扇心中空荡荡地回响，在呆滞短暂片刻之后，她便在愤怒的驱使之下将手中的报纸狠狠摔在地上
+			;TranslatedMark 心のなかで響いたエコーも虚しく、その手でそれを握り潰して叩きつけると、
+			PRINTFORMW ...很快，在愤怒过去后，涌上心头的强烈悲伤便使得她的眼泪不住流淌下来
+			;TranslatedMark ……ガックリ。気の抜けた体がヨロヨロ崩れ落ちてゆく
+			PRINTFORMW 
+			PRINTFORML 唐突传来令人窒息的消息使得华扇的脑海当中一片混乱，但此刻事实就摆在她的眼前，再怎样内耗下去都是没有意义的
+			;TranslatedMark 唐突に首を絞められたかのような奇襲、混乱。しかし目の前の現実。不甲斐なさ
+			PRINTFORML 难道自己是忘了什么吗？纵使华扇心中起了怀疑，但在她于自己内心当中反复做着回忆的时候，但却又怎么都想不出来
+			;TranslatedMark 身に覚えの無いできごとに、疑心暗鬼に囚われ始めた自らの心の隙間が、華扇に涙を流させる
+			PRINTFORML 如果只用一句修行不足就可以应付的话，这就不是一件这么简单的故事了
+			;TranslatedMark 修行不足とひと言で片付けられればこんな簡単な話は無いだろう
+			PRINTFORMW 但...但是！他们是怎么得到这些照片的呢？
+			;TranslatedMark しかし、……だがしかし！　そこに付け入るようなこのやり方はなんなのか？
+			PRINTFORML 她们竟然不顾与世无争的当事人的隐私...
+			;TranslatedMark 新聞にプライバシーという言葉は……いや！
+			PRINTFORMW 就这样做出那种讨人厌的事情吗？！
+			;TranslatedMark 平穏なる個人を脅かしてまで行う生業が瓦版というものなのか？！
+			PRINTFORMW 更何况还恶毒地特意准备了这样的照片，给报道上的这些荒谬的内容又增加了这么大的说服力...
+			;TranslatedMark わざわざそれっぽい写真まで用意し、デタラメな内容に説得力を与えるこの悪辣さ！
+			PRINTFORML 
+			PRINTFORML 好可恶！迟早...迟早会双倍返还回去的...！
+			;TranslatedMark 悔しい！　でも……倍返しだ！
+			PRINTFORMW 
+			PRINTFORML 或许就是因为华扇一本正经的性格的原因，她们才会想到制造所谓反差来为自己引来流量，再去这么做的
+			;TranslatedMark そう思えば思うほどに不甲斐無さが先に立つのは、華扇の生真面目な性格故か
+			PRINTFORML 虽说也不是不知道这些所谓媒体的本质，但是...
+			;TranslatedMark いや、そもそも。それら媒体がどういった性質なのかは分かっていたのだが、
+			PRINTFORML 她们是真的不知道这些东西会给当事人带来怎样的困扰吗？只是因为到目前为止都还没有对谁造成实际损失就做出了这种事情，甚至还...
+			;TranslatedMark ただ単に、今まで実害が無かっただけに見ないふりをしていただけなのである
+			PRINTFORMW 
+			PRINTFORML 「哈哈...而且...甚至头版角色还是我...哈哈...啊...啊...」
+			;TranslatedMark 「はっ……とはいえ、その一面の役を飾ったのが私だなんて……はは……あはは、は……」
+			PRINTFORMW 
+			PRINTFORML 华扇不禁怒极反笑
+			;TranslatedMark だが……だが、あれでは……！　あれではあまりにもあんまりすぎる！
+			PRINTFORMW 
+			PRINTFORML 而且用一条黑线去遮住脸的一部分这种事情也是根本就没有意义的吧
+			;TranslatedMark いくら顔の一部を線で消しているからといって、あんな写真で隠せるわけが無いだろう！
+			PRINTFORML 脸的轮廓、身体的曲线、平时穿着的衣服。各种独一无二的特征都这么明显，无论怎么想都只可能是她吧
+			;TranslatedMark 顔の輪郭。体の線。普段着……特徴が特徴すぎて、他にいないどころか分かる人には分かってしまう
+			PRINTFORML 就更不用说那条加上的宣传语本身了
+			;TranslatedMark そして付け加えられたあの“キャッチコピー”
+			PRINTFORMW 
 			PRINTFORML 「…………」
-			PRINTFORMW
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORMW 会变得小孩子被父母们抓住蒙着眼睛说「不能看这种人」吗？
-			;TranslatedMark 親御さんには見ちゃいけませんとか、言われてしまうようになるのだろうか
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML 「……必须把写出这种文章的人逮住，让他立刻把报道修改了」
+			PRINTFORMW 
+			PRINTFORML 前方与以往的善行相反，是一片漆黑的世界。而华扇也在这般强烈愤怒的驱使之下，情不自禁地径直朝前迈出了脚步———
+			;TranslatedMark 真っ暗。お先は真っ暗。善行どころか一気に真逆の夜の世界へまっしぐら
+			PRINTFORMW 
+			PRINTFORML 既然这样的话...是不是就应该现在去狠狠地殴打她，来让她收回这篇污人清白的愚蠢文章？
+			;TranslatedMark ならば今から止めを刺しに……差し止めを求めに殴り込もうか？
+			PRINTFORML 不...现在谣言已经传播开了。事到如今才去这么做，也已经太迟了
+			;TranslatedMark いや、既に一度広まってしまった風聞である。今更それも望みは薄い
+			PRINTFORML 很显然，同样作为受害者的那些人们对于这些喋喋不休的话题都或多或少是感到了愤怒，而且就凭它的无聊程度...大概很快就会消散的吧？
+			;TranslatedMark この手の下世話な話題は、あれやこれやで尾ひれが付くのが目に見える
+			PRINTFORML 虽然话是这么说...但周边总是传来的好奇目光，却也是那么地让人难受...
+			;TranslatedMark きっと間に合わないかもしれない。だからと言って好奇の目に晒されるのはもっと我慢ならない
+			PRINTFORML 甚至连正常出门都做不到了
+			;TranslatedMark これではマトモに外も歩けない
+			PRINTFORMW 不管了！首先这种事情应该很快就会被忘掉的，所以不要担心就这样充满信心地...
+			;TranslatedMark いや！　そもそもやましいことなんてないのだから気にせず堂々――
+			PRINTFORML 
+			PRINTFORML 「啊啊...被拍下照片了啊...」
+			;TranslatedMark 「ああ……写真を撮られていたんでしたっけ……」
+			PRINTFORMW 
+			PRINTFORML 方才赶出脑海的思绪又再度飞了回来
+			;TranslatedMark ぐるぐると回り続けた思考がその一点で立ち返る
+			PRINTFORMW 唉———她长长地叹了口气，但直到最后也还是想不出一个好主意
+			;TranslatedMark はあ。と深く長い溜息をつくが……結局、いい考えなどひとつも浮かんではこないのだ
+			PRINTFORML 
+			PRINTFORML 啊啊...但这种事情又光是想想就够令人生气的了...
+			;TranslatedMark ああ、思い返すだけでも腹立たしい。ああ……情けない
+			PRINTFORMW 等等！华扇突然像是想到了什么
+			;TranslatedMark らしくない。いじけた心がムクリと起きて45度へ折れてゆく
+			PRINTFORML 谣言现在肯定已经传遍了整个村子吧
+			;TranslatedMark 今頃噂も里中に広まってしまっただろう
+			PRINTFORMW 那么读完这篇报道以后...大家都作何感想？
+			;TranslatedMark 皆はいったい、これを読んでどう思っただろう
+			PRINTFORML 
+			PRINTFORML 即使这是只要稍微思考一下就能理解个中荒谬的东西，但那种淫荡的形象却也仍然还是会留在读者的脑海里
+			;TranslatedMark 少し考えれば分かることでも、それでもイメージは付いて回るだろう
+			PRINTFORML 即使那是篇虚假的报道，但要是连孩子们都看到了的话，那也就再也没有什么脸去面对他们了吧？
+			;TranslatedMark あんな嘘っぱちな話であっても、子供にまで読まれていたら合わせる顔がなくなってしまう
+			PRINTFORMW 
+			PRINTFORML 『呐呐~姐姐~姐姐是那种“yin luan”的女孩子吗~？』
+			;TranslatedMark 『ねえねえ、おねえちゃん。おねえちゃんって“いんらん”なの？』
+			PRINTFORML ——「淫乱是什么呐，请告诉我仙人小姐———！」
+			;TranslatedMark 『いんらんってなあに？　おしえてくださいせんにんさまー』
+			PRINTFORMW 
+			PRINTFORML （会变成就连小孩子见了也会被父母们抓住，蒙着眼睛说「不能看这种人」的那种家伙吧...）
+			;TranslatedMark （……親御さんには見ちゃいけません、などと言われてしまうようになるのでしょうね……）
+			PRINTFORMW 
+			PRINTFORMW 干涩的笑声不禁露了出来...啊啊，一想到那番光景，方才停止的眼泪就又不自觉地流出来了
+			;TranslatedMark 乾いた笑いが漏れてしまう。ああ、その光景が目に浮かぶ。ドバドバ溢れる涙は止まらない
+			PRINTFORMW 但既然也想不出什么好主意的话...那就也只能尽力而为了
+			;TranslatedMark だが、良案なんてものが浮かばなかった以上は、できることからやらなくてはならない
+			PRINTFORMW 最终还是做出决定的华扇终于还是摆脱了消极的枷锁，缓缓地站了起来。首先...
+			;TranslatedMark そう結論づけた華扇の重くなった腰がようやくあがる。まずは、そうだ――
+			PRINTFORML 
+			PRINTFORML 「……必须要把写出这种东西的人逮住，让她立刻把报道修改了」
 			;TranslatedMark 「……書いたヤツをひっ捕まえて、早急に訂正記事を書かせましょう」
-			PRINTFORMW
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML ——不要诉诸暴力
-			;TranslatedMark ――暴力に訴えてはイケナイ
-			PRINTFORMW 摇曳升起的杀意，被全力动员的理性牢牢压制住，她踏出了混乱的第一步。
-			;TranslatedMark 揺らめき立ち昇る気迫を、フル動員する理性で抑えこむと、彼女は騒乱への第一歩を踏みしめた
+			PRINTFORMW 
+			PRINTFORML 但是，绝对不会诉诸暴力的
+			;TranslatedMark だが決して暴力に訴えてはいけない
+			PRINTFORML ...但那应该是不可能的吧？
+			;TranslatedMark ……いけないはず。たぶん……いえ、どうだったかしら……？
+			PRINTFORMW 
+			PRINTFORML 华山怀着沉重的心情，就这样出了门去
+			;TranslatedMark こうして歩き出した華扇の背中は煤けていた
+			PRINTFORML 就这样动员自己所剩无几的理性，朝着未来的混乱迈出了步伐
+			;TranslatedMark 既に錯乱している危ない理性を動員しながら、華扇は今後の騒乱への一歩を踏みしめたのだった
+			PRINTFORMW 
 			CLEARLINE LINECOUNT - FIRST_LINE
 		CASE 2
 			PRINTFORML 【虚实纷乱的绯闻可有冤枉•其二】
-			;TranslatedMark [０２：虚実入り乱れるその風聞は濡れ衣か]
-			PRINTFORMW
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
+			;TranslatedMark [０２：虚実の入り乱れるその風聞は濡れ衣か]
+			PRINTFORMW 
 			PRINTFORML 《花果子念报》
-			;TranslatedMark 「案山子念報」
-			PRINTFORMW 这是幻想乡内为数众多的报纸之一，由姬海棠自己供资发行。
+			;TranslatedMark “案山子念報”
+			PRINTFORMW 这是幻想乡内为数众多的报纸之一，由姬海棠自己供资发行
 			;TranslatedMark それは幻想郷における数ある新聞の一つとして、姫海棠はたてにより発行される瓦版
-			PRINTFORML
-			PRINTFORML 其中娱乐的要素相对较少，刊载的文章大体上偏严肃走向。
+			PRINTFORML 
+			PRINTFORML 其中娱乐的要素相对较少，刊载的文章大体上偏严肃走向
 			;TranslatedMark 娯楽的要素は薄めであり、書き綴られる文章は概ね堅い
-			PRINTFORML 收录的报道以谴责实事居多，主要以那些作为教训引发讨论的话题为主。
+			PRINTFORML 而收录的报道也以谴责实事居多，主要也是以那些作为教训引发讨论的话题为主
 			;TranslatedMark 取り上げられる記事は非難が多く、それらを教訓として投げかける様な話題が主である
-			PRINTFORML 因此，作为报纸，它的内容大多真实可靠......但是，
+			PRINTFORML 因此，作为报纸，它的内容大多真实可靠...但是
 			;TranslatedMark 故に、新聞としての中身は以外にも誠実だったりするのである……が、
-			PRINTFORMW 不得不说，娱乐色彩不浓的刊物并不太受欢迎，它的发行量一直不大。
+			PRINTFORMW 不得不说，娱乐色彩不浓的刊物并不太受欢迎，它的发行量一直不大
 			;TranslatedMark 娯楽色の薄い刊行物に人気はあまりなく、部数は伸び悩んでいると言わざるをえないだろう
-			PRINTFORML
-			PRINTFORML 写出那种报道的到底是什么人？
+			PRINTFORML 
+			PRINTFORML 写出那种报道的到底会是什么人？
 			;TranslatedMark その様な新聞を書く人物とは何者だったか――
-			PRINTFORMW
+			PRINTFORMW 
 			CLEARLINE LINECOUNT - FIRST_LINE
+			PRINTFORML 
 			PRINTFORML 找到了建造在巨大树木上的木质结构房屋
 			;TranslatedMark 見えてきてた大木の節目に建てられた木造家屋
-			PRINTFORMW 追随之前指引的乌鸦，跳到大鹫的背上，不出几分钟就找到了万恶的根源。
-			;TranslatedMark 案内させた鴉を追って、大鷲の背中へ飛び乗ると、諸悪の根源は数分と掛からず辿り着いた
+			PRINTFORML 追随之前指引的乌鸦，跳到大鹫的背上，不出几分钟就找到了万恶的根源
+			;TranslatedMark 案内させた鴉を追って、大鷲の背中へ飛び乗ると――諸悪の根源は数分掛からずに辿り着いた
+			PRINTFORMW 
+			PRINTFORML 敲门的时候，心里尚且还想着会得到什么样的辩解
+			;TranslatedMark はたしてどんな言い訳が返ってくるのかと思案しながら扉を叩けば、
+			PRINTFORML 紧接着，透露着慵懒气息的声音就从门里面传了出来
+			;TranslatedMark 気の抜けそうなほどに明るい声が、扉の奥から返ってきたのである
+			PRINTFORMW 
+			PRINTFORML 「啊咧？我记得你是山脚下的...仙人大人吧。来这里有什么事吗？」
+			;TranslatedMark 「は～い。あら、確か麓の……仙人様、だっけ？　こんな所まで何か用？」
+			PRINTFORMW 
+			PRINTFORMW （什...什么？给人带来了这么大的麻烦竟然还这么不自知吗...？原来如此，这样的话就可以动手狠狠地殴打她了吧）
+			;TranslatedMark （何か……何か？　ああ、天然ですか？　そうですか。今すぐ首をキュっと捻ってもいいですよね）
+			PRINTFORML 华扇花费了整整0.3秒才想到了这一点
+			;TranslatedMark そう華扇が思い至るまでの秒数コンマ0.3秒。
+			PRINTFORML 迅速升高的血压冲击着她的太阳穴，激得她浑身都在颤抖着
+			;TranslatedMark 幾らか上がってしまった血圧に、ぴくぴくこめかみが震えてゆく
+			PRINTFORMW 
+			PRINTFORML 「别告诉我你不明白自己都干了些什么———给我纠正这篇文章，就现在！立刻，马上！」
+			;TranslatedMark 「わからないとは言わせません――記事を訂正なさいっ。今、すぐにっ！」
+			PRINTFORML 「啊...？为什么？」
+			;TranslatedMark 「……？　どうして？」
+			PRINTFORML 「你...你还有脸问———？！」
+			;TranslatedMark 「ど――、どっ？！」
+			PRINTFORMW 
+			PRINTFORMW 华扇心头涌起的怒气又再度增加了
+			;TranslatedMark 華扇の怒りのボルテージが上がってゆく
+			PRINTFORML 被告人Ｈ就这样站在华扇的眼前一动不动，浑然不觉眼前的她颤抖的拳头里究竟蕴含了怎样的矛盾与愤怒
+			;TranslatedMark 震える拳に様々な葛藤を抱えているとは知らずに、目の前でキョトンとしている被告人Ｈは、
+			PRINTFORML 甚至还就这般歪着脑袋，仿佛是要把“我不知道”这四个大字写在脸上一般
+			;TranslatedMark まるでわからないと言いたげに、その首が斜めに折れ曲がる
+			PRINTFORMW 
+			PRINTFORML （冷静点，华扇...不要因为这点事情这么生气...）
+			;TranslatedMark （落ち着くのです華扇……。こんなことで、心を乱されてはいけません……）
+			PRINTFORMW 
+			PRINTFORML 就这样从剧烈的情绪波动中抽身而出，强迫着自己冷静下来
+			;TranslatedMark 半ば動揺する心に間を設けて無理矢理落ち着き払うと、
+			PRINTFORML 然而在开口时，从喉咙中挤出来的依旧是难以压抑愤怒而显得颤抖与嘶哑的声音
+			;TranslatedMark 怒りに震える声を喉から絞りだすよう、その理由を説明しようとした。が――
+			PRINTFORMW 
 			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML 敲门的时候,想着会得到什么样的辩解,
-			;TranslatedMark はたして、どんな言い訳が返ってくるのかと思案しながら扉を叩けば、
-			PRINTFORMW 透露着慵懒气息的声音从门里面传了出来。
-			;TranslatedMark 垢抜けるほどに気の抜けた声が、扉の奥から返ってきたのだった
+			PRINTFORML 
+			PRINTFORML 「仙人大人说是自己在修行，结果却是在做那种事情，难道自己也觉得没问题吗？我是无论如何都不能接受的」
+			;TranslatedMark 「修行と偽ってあんなことしちゃうんでしょ？　幾ら何でもいけないと思うわ」
+			PRINTFORML 「反正我是绝对不会这么做的———！！」
+			;TranslatedMark 「するわけないでしょうが――！！」
+			PRINTFORML 「噫？不，不要哇？！暴力反对！暴力反对———！！」
+			;TranslatedMark 「えー？　……違うの、って、わわっ？！　暴力反対！　暴力反対ーー！」
+			PRINTFORMW 
 			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORMW 「啊咧？我记得你是山脚下的……仙人大人吧。来这里有什么事吗？」
-			;TranslatedMark 「あら？　確か麓の……仙人様、だっけ。こんな所まで何か用？」
-			PRINTFORMW 「看来不说清楚你是不会明白的。把报道修改了。」
-			;TranslatedMark 「わからないとは言わせないわ。訂正記事を書きなさい」
-			PRINTFORMW 「……新闻的事情？为什么？」
-			;TranslatedMark 「……新聞のこと？　どうして？」
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORMW 惊讶的表情仿佛在说：『完全不明白』，透露着茫然。头上的羽毛跟着脑袋一起偏向了一侧。
-			;TranslatedMark キョトンとした顔は、まるでわからないとでも言いたげに、はたては首を傾けた
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORMW 「仙人大人顶着修行的名义冒充，结果在做那种事情，难道自己觉得没问题吗？我是无论如何都不能接受的」
-			;TranslatedMark 「修行と偽ってあんなことをしちゃうんでしょ？　幾ら何でもいけないと思うわ」
-			PRINTFORMW 「怎么可能有在发生这种事情啊！」
-			;TranslatedMark 「するわけがないでしょう！」
-			PRINTFORMW 「诶？......不是吗？」
-			;TranslatedMark 「えー？　……違うの？」
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML 虽然那张讶异的面容看起来一脸无趣的表情，声音中也带着些许犹豫，其实心底充满了浓厚的兴趣。
-			;TranslatedMark 怪訝な顔で興味も無さげと言う割に、引き気味に喋るはたての内心はその実興味津々
-			PRINTFORML 与此相对，喘着粗气的华扇颈部以及太阳穴上都暴起了青筋，微微凸起的血管阵阵鼓动。
-			;TranslatedMark それに対して、肩で息をする華扇のこめかみには青筋が立ち、微かに浮いた血管が波打った
-			PRINTFORMW 内心咒骂的恶毒话语虽然没有吐露出来，但散发的喘息却如同烟雾散着热气。
-			;TranslatedMark 内心で毒づく言葉は表に出しはしないが、吐き出される息が煙の様に漏れている
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML 「我不知道你是用什么方式拍到的，但是你偷拍到底是想拿去做些什么！
-			;TranslatedMark 「どうやって撮ったのかは知りませんがっ、隠し撮りまでしてどうゆうつもりですか？！
-			PRINTFORMW 而且仅仅通过那些一部分例子就来判断一个人的全部，这样的报道风格是不公平的！」
+			PRINTFORML 
+			PRINTFORML ———嘣，似乎在华扇的脑袋里，有什么东西断掉了
+			;TranslatedMark ――プッツン。
+			PRINTFORML 既然都已经做出了这种事情，现在竟然还有脸要我保持理智？！
+			;TranslatedMark その様な言い草をされて保てるほど、今の私に図太い理性はありません
+			PRINTFORMW 
+			PRINTFORML 内心被愤怒盈满的华扇恨不得掐住她的脖子，但最后也还是被躲开了
+			;TranslatedMark 内心毒づく華扇が掴もうとした首根っこは寸での所で躱され、
+			PRINTFORMW 紧接着的就是第二拳，第三拳———但最后也都只是徒劳罢了
+			;TranslatedMark 二手、三手と捕まえる為に繰り出される拳は、ギリギリの所で虚しくも空振り空を切る
+			PRINTFORML 起初姬海棠果还以为这些只是华扇为了掩饰自己尴尬才会进行的行为
+			;TranslatedMark はたても初めは、羞恥心からくる照れ隠しみたいなものだろうと暢気にしていたが、
+			PRINTFORML 但感受着愤怒出拳的气势从耳畔擦过，即使是她心中也不免有些发怵
+			;TranslatedMark あまりの剣幕に「いや、まさか……ねえ？」と多少の焦りを覚えずにはいられない
+			PRINTFORMW 
+			PRINTFORML 「我不知道你是用什么方式偷拍到这些照片的，但是你配上这篇文章是想要搞什么鬼？！」
+			;TranslatedMark 「どうやって隠し撮ったのかは知りませんけどっ、どうゆうつもりであの記事を？！
+			PRINTFORMW 　「而且仅仅通过那一部分的例子就判断一个人的全部，这样的报道风格也是不公平的！」
 			;TranslatedMark しかもあの様な一部だけを見て、それが全ての様な書き方をされたらたまったものじゃありません！」
-			PRINTFORMW 「……难道没有吗？」
-			;TranslatedMark 「…………ないの？」
-			PRINTFORML 「没有！何况那张照片本身就是伪造的！
-			;TranslatedMark 「ありません！　そもそもあの写真自体がデタラメじゃない
-			PRINTFORMW 那种下流的事情，一次也没做过！」
-			;TranslatedMark あんなはしたないこと、一度だってしたことがないわよっ！」
-			PRINTFORML
-			PRINTFORMW 「真的吗，真的没有吗？」
-			;TranslatedMark 「ほんとうに、ないの？」
-			PRINTFORMW 「太啰嗦了！」
-			;TranslatedMark 「くどいです！」
-			PRINTFORML
-			PRINTFORMW 「嗯。那......也许以后会有吧。」
-			;TranslatedMark 「ふーん。じゃあ……これからあるのかもね」
-			PRINTFORMW 「怎、怎么可能会有啊！」
-			;TranslatedMark 「あ、あるわけがないでしょう！？」
-			PRINTFORML
-			PRINTFORMW 「不是这个意思。这张照片是『念写』出来的。」
-			;TranslatedMark 「そうじゃなくて。この写真は、「念写」してるの」
-			PRINTFORMW 「哈……哈啊？念写？」
-			;TranslatedMark 「は…………はあ？　念写？」
+			PRINTFORMW 「欸！？只是...只是这样？有什么关系吗？」
+			;TranslatedMark 「えー！？　どうもこうも……そのまま？　違うの？」
+			PRINTFORML 「...你说有什么关系呢？！首先，那张照片就是来路不正的偷拍产物！」
+			;TranslatedMark 「違います！　大体がそもそも、あの写真自体がデタラメじゃない！
+			PRINTFORML 　「其次，我到底是因为什么才会在修行的时候做出这种事？！我甚至根本都不记得有哪一次这么干过了！」
+			;TranslatedMark あんなはしたないことをする修行ってなんですか！　私は一度だってした覚えはありませんよっ！」
+			PRINTFORMW 
+			PRINTFORML 姬海棠就这般用全然可以说是神秘或者可疑来形容的脸色听着，由于她总是很少说话，我又不禁对她的内心想法感起了兴趣
+			;TranslatedMark 神妙とも怪訝とも言える様な顔色で伺いながら、少なげに喋るはたてのその内心は興味津々
+			PRINTFORML 哪怕是在取材的过程里，也同样如此...一时间，华扇的理智甚至短暂的回归了
+			;TranslatedMark 取材といえど、足を使ったわけではないので直接色々聞けるとなれば俄然興味が湧く
+			PRINTFORMW 
+			PRINTFORML 「但我知道！有一种东西叫做房中术，对吧？这是一种色情的东西没错吧！」
+			;TranslatedMark 「でも確かっ、房中術っていうのがあるんでしょ？　えっちぃやつ！」
+			PRINTFORMW 「你...我可以保证我修行的过程里绝对没有什么房不房中术这种东西！而且竟然还能说出以修行为借口行淫的房中术什么的那又是什么鬼啊！你是变态吗！」
+			;TranslatedMark 「わ、私が実践する修行の中に房中術などありませんっ！　大体修行を言い訳に行う房中術ってなんですか！　変態ですか！」
+			PRINTFORML 「欸...？所以你其实是个守身如玉的...呃...但话说回来，万一仙人大人实际上———」
+			;TranslatedMark 「えー？　じゃあ身持ちは堅い方なんだ……。あれ？　でも、じゃあもしかして、仙人様って実は処――」
+			PRINTFORML 「你要是再敢说下去的话———！」
+			;TranslatedMark 「言うに事欠いてそれですかーー！」
+			PRINTFORMW 
+			PRINTFORML 比想象的要更快的露出了失态的神情。而姬海棠在看到这番光景的时候，在惊恐中也不禁发出了短促的悲鸣声
+			;TranslatedMark 失言だった。そう思うよりも早く、華扇の一段上がったギアを前にはたての短い悲鳴が上がる
+			PRINTFORML 然而，这却使得本就气喘吁吁的华扇更加愤怒，心中仿佛是有一团火正在燃烧那般，殴打眼前的人的欲望又再度升腾而起
+			;TranslatedMark それは半ば肩で息をしていた華扇に更なる怒りの念を引き出し、その心を、闘士を燃やせと獣が吼える！
+			PRINTFORMW 
+			PRINTFORML 「你你你...你确定你不知道吗...？」
+			;TranslatedMark 「ほんとうに、心当たりないの？」
+			PRINTFORML 「――—啰嗦！」
+			;TranslatedMark 「――くどい！」
+			PRINTFORMW 
+			PRINTFORML 眼底浮现出个大大的“杀”字，就这样愤怒地轰出一拳，将眼前的姬海棠狠狠打倒
+			;TranslatedMark 瞳に浮かぶ“殺”の一文字が、目の前の怨敵を引きずり下ろせと拳が唸る
+			PRINTFORML 解放力量一拳轰出的茨木华扇猛地呼出的热气逐渐消散，留下一道宛如烟雾般的痕迹
+			;TranslatedMark 一騎当千の拳闘士として生まれ変わった茨木華扇の吐き出す息は、煙の様な軌跡を残して流れてゆく
+			PRINTFORMW 
+			PRINTFORML 「但...但是，你知道吧？我，我不觉得我拍到的是假的照片？！因，因为，你知道“念写”吧？我的照片就是这样得到的而已！」
+			;TranslatedMark 「で、でもね？　嘘は、嘘は撮ってないと思うよっ？！　だ、だって！　“念写”してるんだもの！」
+			PRINTFORML 「那到底又是什么——！！」
+			;TranslatedMark 「それが、一体なんだというのですかーー！！」
+			PRINTFORMW 
+			PRINTFORML 华扇猛地将右臂伸到了她的面前，原先工整的面容也随之抽搐了一下
+			;TranslatedMark 突然伸びた華扇の右ストレートに、ギョッと引き攣るはたての顔色なんておかまいなし
+			PRINTFORML 一如其名的奥义，“难以逃脱的猿之手”———只消将这绷带解开，便可直接将眼前的人抓住并猛地收紧...
+			;TranslatedMark 奥義と言わんが如くの“猿の手”は、シュルりと解けた包帯が、はたてを捕まえ締め上げてゆく
+			PRINTFORMW 
+			PRINTFORML 「虽...虽然会有点失焦什么的！但绝对不可能拍到任何不存在的东西！是绝对不可能有任何错误的！」
+			;TranslatedMark 「少しぴんぼけしてたけど！　でも、無かったことは絶対に写せないの！　間違いなんて有り得ないのー！」
+			PRINTFORMW 
+			PRINTFORML 听到这里，华扇的动作便停了下来
+			;TranslatedMark ピタリと、華扇の動きが止まっていた
+			PRINTFORML 念写...嗯？念写是什么？华扇望了过来，就这么歪过头以向她表达疑惑
+			;TranslatedMark 念写……はて？　念写とは？　と、心の中で今更首を傾げる華扇を注視しながら、
+			PRINTFORMW 当动作终于停止的那时候，姬海棠也不禁是长出了口气
+			;TranslatedMark ようやく止まった動きにはたては盛大に息を吐いた
+			PRINTFORML 
+			PRINTFORML （噫...突然就发生了这种事情...！好可怕好紧张，不会是真的...）
+			;TranslatedMark （い、いきなりなんなのよっ！　こわすぎて超引くんだけど……！）
+			PRINTFORMW 
+			PRINTFORML 不过如果华扇不就这样停下来的话，恐怕都还不够...
+			;TranslatedMark とはいえあのまま華扇が止まらなければ、きっとただではすまないことになっただろう
+			PRINTFORML 抹去冷汗的记者随后便开始奋力挣扎，终于是挣脱了来自华扇的严密束缚
+			;TranslatedMark ゾっとする冷や汗を拭いつつ、もがくはたてがなんとかようやく、きつい拘束から抜け出した
+			PRINTFORMW 
+			PRINTFORML 「啊啊...我经历了好可怕的事情...这就是你想听我说的东西吗？」
+			;TranslatedMark 「あー……酷い目に遭った。それで、少しは話を聞く気になったワケ？」
+			PRINTFORML 「不要说多余的话，只说出要点就可以了」
+			;TranslatedMark 「余計な事は言わず、さっさと要点だけを話しなさい」
+			PRINTFORML 「嗯...」
+			;TranslatedMark 「むぅ……」
+			PRINTFORMW 
+			PRINTFORML 姬海棠所说的“使用念写程度的能力”到底是什么意思？
+			;TranslatedMark はたて曰く“念写をする程度の能力”とは――
+			PRINTFORML 大抵就是指，姬海棠能够通过照相机搜索到的静止图像的信息
+			;TranslatedMark それははたての念が、端末を通して検索される静止画情報のことであるが、
+			PRINTFORML 所有人都会说，拍摄没人知道的事情或别人不知道的未知事件是不可能的
+			;TranslatedMark 誰も知らないことや見ず知らずの未知の事象は写すことができないという
+			PRINTFORML 而即使是那也是存在的东西。显然，只要有人看到、听到或经历过某件事，姬海棠就可以将其拍摄下来
+			;TranslatedMark で、あるからこそ。誰かが見聞き体験したことであれば写すことができる、というものらしい
+			PRINTFORMW 
 			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORMW 『你在说些什么呢』这种想法在华扇脑袋里一闪而过，才想起姬海棠拥有『使用念写程度的能力』
-			;TranslatedMark 何を言ってるんだと思う華扇の頭に、姫海棠はたての「念写をする程度の能力」を思い出す
-			PRINTFORML 所谓念写，就是通过她持有的终端，检索静止画面的情报并将其记录下来，
-			;TranslatedMark はたて曰く念写とは、彼女の持つ端末を通して検索された静止画情報であるが、
-			PRINTFORML 没有人知道的、不知名和未知的事物是无法被念写的。
-			;TranslatedMark 誰も知らない見ず知らずで未知のものは、写すことができないという
-			PRINTFORMW 换言之只要是别人的所见所闻，就能以念想的形式记录下来……好像是这样。
-			;TranslatedMark だからこそ誰かが見聞きしたものであれば、念写として写すことができる……というものらしい
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML 「所以，当我将这篇文章写出来的时候，大家大致上都已经知道了，这是很常见的事情啦。
-			;TranslatedMark 「だから私が記事にする頃には、大体みんなも知ってるってことが多いからさー
-			PRINTFORMW 这样说可能有些不太好，但是...... 也没有必要太在意吧？」
-			;TranslatedMark こう言っちゃアレなんだけど……あんまり気にすること、ないんじゃない？」
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML 就是这么回事啦。诶嘿pero☆
+			PRINTFORML 
+			PRINTFORML 「所以说？虽然仙人大人不记得了———但的确是有见过的人（？）的，所以才会被我拍下来的说」
+			;TranslatedMark 「だからさー？　仙人様にとっては身に覚えの無い話だとは思うんだけど――被害者(？)はいるわけよ」
+			PRINTFORML 「啊...不，但是！？还是不排除有人假扮成我做这种事情的可能性吧？」
+			;TranslatedMark 「あ……いや、ですが！？　誰かが化けて行った可能性もあるでしょう？！」
+			PRINTFORML 「如果这么问的话也不是不能说不存在，但是...你不认为能做到这一点的妖怪数量是实在有限的吗？」
+			;TranslatedMark 「それを言われると無いとはいいきれないけど……それが出来る妖怪なんて、限られてくると思わない？」
+			PRINTFORML （既然也不是偷拍，用念写的能力拍个照也没错吧？）
+			;TranslatedMark （まあ裏は取ってないんだけどー、念写だって間違ってないしー？）
+			PRINTFORMW 
+			PRINTFORML 从远到近的多张胸部特写的现场照片就这么展示在了华扇的眼前
+			;TranslatedMark ちらりとはたての胸元から出てくる複数の現像写真
+			PRINTFORMW 然而那微不可闻的低语声并没有传到仿佛是被时停了般的华扇耳中
+			;TranslatedMark ボソリと聞こえない様に呟くはたての声は、時が止まった華扇の耳には届かない
+			PRINTFORML “受害者”这个词汇，以及那些主角的脸部与自己完全一致的照片，无一不是强烈地冲击着华扇的脑海
+			;TranslatedMark 被害者と言うワードと、完璧瓜二つの顔写真にショックを隠せなかった華扇の頭の中で、
+			PRINTFORMW 各种场景来来去去
+			;TranslatedMark 様々な１シーンが浮かんでは消えてゆく
+			PRINTFORML 只有当华扇被告知这一点时，她才意识到这些都是从别人的角度来拍摄的场面
+			;TranslatedMark そう言われて初めて華扇は、あれは誰かの視点を切り取ったかのような一場面だったと思えてくる
+			PRINTFORML 我想知道它是在什么情况下、如何进行的，给受害者（？）带来了怎样的快乐...或是屈辱
+			;TranslatedMark それがどんな状況で、どんな風に行われ、被害者(？)にどんな悦……屈辱な思いさせたのだろうかと思うと
+			PRINTFORMW 
+			PRINTFORML 「所以说，现在已经太晚了，对吧？呐~」
+			;TranslatedMark 「それでさー、今更なんだけどねー？」
+			PRINTFORML 「啊？」
+			;TranslatedMark 「へ？」
+			PRINTFORMW 
+			PRINTFORML 因逃避现实而显得如同燃尽的灰烬般的华扇发出了像是笨蛋般的声音
+			;TranslatedMark 現実逃避から軽く灰になりかけていた華扇に、間抜けな声があがってしまう
+			PRINTFORML 不祥的预感已然成为了事实，华扇的理智也在提醒着她不要再去问下去了
+			;TranslatedMark 嫌な予感というのはつくづく当たる。やめてくれと心の声が木霊した
+			PRINTFORMW 
+			PRINTFORML 「我的文章写得总是会慢上一步，而且这又不是突发新闻。所以———我想，知道的人都已经知道了，对吧？」
+			;TranslatedMark 「私の記事って一歩遅いっていうかー、速報性が無いんだよねー。だから――知ってる人は元々知ってると思うよ？」
+			PRINTFORML 「所以我想...仙人大人也没有必要太过担心吧？呐☆」
+			;TranslatedMark 「だから仙人様も、あまり気にしないでいいと思うよ？　ね☆」
+			PRINTFORMW 
+			PRINTFORML 就是这么回事啦。诶嘿ぺろ——☆
 			;TranslatedMark ということだから。てへぺろー☆
-			PRINTFORMW 留下了连这种拟声词都听得见的笑容，她缩回了门里。
-			;TranslatedMark そんな擬音すら聞こえてきそうな笑顔を残して、彼女は扉の奥へ引っ込んでしまうのだった
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
+			PRINTFORML 脸上重新带上那标志性的笑容的姬海棠，就这么退回到了门边
+			;TranslatedMark そんなフザケた笑顔を残して、彼女は扉の中へ再度引っ込んでしまうのだった
+			PRINTFORMW 
+			PRINTFORML 「――――あ」
+			PRINTFORMW 
+			PRINTFORML 华扇的心中似乎有什么东西破碎掉了
+			;TranslatedMark 華扇の中で何かが壊れた――
+			PRINTFORML 保护着她内心羞耻感的仅存的厚重理性，就这么像是玻璃墙般迸裂，随后便是破碎开来
+			;TranslatedMark 羞恥心という中身を守っていた分厚い理性が、あと一枚だけ存在していたガラスの壁に罅が入り、割れた
+			PRINTFORMW 
+			PRINTFORML 「哇――哇啊...呃，啊，不要啊...真是丢脸...好羞耻...」
+			;TranslatedMark 「は――はは……え、あ、やだ……はしたない……恥ずかしい……」
+			PRINTFORMW 
+			PRINTFORML 繁杂的思绪宛如漩涡般被卷起，随后混乱也只会越来越大
+			;TranslatedMark 拍車の掛かかった思考の渦に混乱は増すばかり。
+			PRINTFORMW 通红的面上早已烧得发烫，使得她几乎完全抬不起头来
+			;TranslatedMark 顔が熱くてどうしようもなくなったせいで、表を上げてはいられない
+			PRINTFORML 接着也就紧紧地抱着自己的双腿，将脸埋进腿间闭着眼睛坐在了地上，一动也不敢动
+			;TranslatedMark 掻き抱くように体を隠し、堅く目を閉じて座り込んでしまった華扇は、突っ伏したまま動けなかった
+			PRINTFORMW 
 			PRINTFORML 「…………」
-			PRINTFORMW
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORMW 说到被抛弃在那里的华扇――
-			;TranslatedMark そこに取り残されてしまった華扇と言えば――
-			PRINTFORML 尽管不停地敲门和呼喊，无人应答的门扉最终让她失去了力气。
-			;TranslatedMark 再三に渡るノックと呼び出しにも関わらず、居留守を決め込むはたてに気力を失い、
-			PRINTFORMW 只能在太阳西斜的时候返回了。
-			;TranslatedMark 日が傾きかけたところで引き返す他なかったのだった
+			PRINTFORMW 
+			PRINTFORML ...纵使心中有着千言万语
+			;TranslatedMark ……言葉がでない。言いたいことは万とあった筈だった
+			PRINTFORML 但当她看到报道上那张与未经编辑的照片一模一样的脸时，也还是失了声
+			;TranslatedMark だが、加工していない写真に瓜二つの顔を見て、言葉をすべて失った
+			PRINTFORMW 
+			PRINTFORML ———片刻以后
+			;TranslatedMark ――それから暫く経った後
+			PRINTFORMW 意识到为时已晚的华扇，终于还是平静了下来
+			;TranslatedMark なんとか落ち着きを取り戻すことができた頃には、全てが後の祭りであったと華扇は思い知る
+			PRINTFORML 现在也实在不敢再去敲门，只好就这样悄悄地回家了...
+			;TranslatedMark 再度呼び出す気にはもうなれず、ただ静かに家へ引き返す他になかったのであった
+			PRINTFORMW 
 			CLEARLINE LINECOUNT - FIRST_LINE
 		CASE 3
 			PRINTFORML 【虚实纷乱的绯闻可有冤枉•其三】
-			;TranslatedMark [０３：虚実入り乱れるその風聞は濡れ衣か]
-			PRINTFORMW
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
+			;TranslatedMark [０３：虚実の入り乱れるその風聞は濡れ衣か]
+			PRINTFORMW 
 			PRINTFORML 「淫乱粉」
-			;TranslatedMark 「淫乱ピンク」
-			PRINTFORMW
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML 这条口号就像自己长了腿一样，哪怕什么都不做也四处散播着影响。
+			;TranslatedMark “淫乱ピンク”
+			PRINTFORMW 
+			PRINTFORML 这条绰号就像是自己长了腿一样，肆意地散播着影响
 			;TranslatedMark 一人歩きするキャッチコピーは、無作為に影響だけを残して広がった
-			PRINTFORML 一开始受到题字的刺激，用颜色与头条照片上的人物联系了起来。
-			;TranslatedMark 初めは題字に刺激され、トップを飾る写真の人物たちと色で紐付けされる
-			PRINTFORMW 结果就是，粉色头发的人很淫乱的这个认知，被有效地灌输进了大众的潜意识里。
-			;TranslatedMark 終いはピンク髪の人物は淫乱という認識が、サブリミナル効果的に刷り込まれたのだ
+			PRINTFORML 很多人都被大而醒目的标题与底下照片中各种人物的香艳姿态所吸引
+			;TranslatedMark 大きく目を引く題字は注目を浴び、トップを飾る写真の人物たちの艶姿に多くの大衆が刺激され、
+			PRINTFORML 某些发色的人会很淫乱的这个认知，已经被有效且深刻地灌输进了大众的潜意识里
+			;TranslatedMark 紐付けされた髪色と人物達は淫乱という認識が、サブリミナル効果的に刷り込まれていった
+			PRINTFORMW 
 			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML
-			PRINTFORMW 匿名希望、被害者：Ｍ小姐
+			PRINTFORMW 匿名希望，受害人：Ｍ小姐
 			;TranslatedMark 匿名希望、被害者：Ｍさん
-			PRINTFORML
-			PRINTFORML 「——是说工作？嗯……在做餐饮业。住在家里，做着类似女佣的工作」
-			;TranslatedMark 「――お仕事ですか？　えーっと、飲食です。住み込みで女中さん、みたいなことをしています」
-			PRINTFORMW
-			PRINTFORMW 今天为什么来到这里接受采访？
-			;TranslatedMark 今日はどうしてこちらに？
-			PRINTFORML
-			PRINTFORML 「其实，我最近遇到了很麻烦的事情......是的，正如你所猜测的。
-			;TranslatedMark 「実は最近、困ったことになりまして……ええ、お察しの通りです
-			PRINTFORMW   自从那篇文章开始广泛传播之后，针对我的恶作剧......增加了......这样继续下去有点......」
-			;TranslatedMark あの瓦版が広がる様になってから、私に対する悪戯が……増えて……このままだとちょっと……」
-			PRINTFORML
-			PRINTFORMW 啊啊...果然如此。
+			PRINTFORML 
+			PRINTFORML   ———你的工作是什么？
+			;TranslatedMark ―――お仕事ですか？
+			PRINTFORML   「嗯...在做餐饮业。差不多就是类似女佣的工作吧」
+			;TranslatedMark えっと、飲食です。住み込みで女中さん……みたいなことをしています
+			PRINTFORMW 
+			PRINTFORML   「其实，我最近遇到了很麻烦的事情...是的，正如你所猜测的」
+			;TranslatedMark 実は最近、困ったことになりまして……そうなんです！　あの瓦版なんですよー！
+			PRINTFORMW   「自从那篇文章开始广泛传播之后，针对我的恶作剧...就增加了...如果再这样继续下去的话...」
+			;TranslatedMark あれが里に広がった所為で私を覚えて――あ、いえ、酷い悪戯がっ！　増えて……！
+			PRINTFORML 
+			PRINTFORML 啊啊...果然如此
 			;TranslatedMark ああ……やっぱり
+			PRINTFORMW 
 			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML
-			PRINTFORMW 匿名希望、被害者：Ｍ小姐
+			PRINTFORMW 匿名希望，受害人：Ｍ小姐
 			;TranslatedMark 匿名希望、被害者：Ｍさん
-			PRINTFORML
-			PRINTFORML 「这太过分了吧？！这几天一直被各种各样的客人性骚扰！」
-			;TranslatedMark 「――酷いんだよ？！　ここ何日もずーっと色んなお客さんからセクハラばっかり！」
-			PRINTFORMW
-			PRINTFORMW 啊啊...果然如此。
-			;TranslatedMark ああ……やっぱり
-			PRINTFORML
-			PRINTFORML
+			PRINTFORML 
+			PRINTFORML   「―――听我说啦！这太可怕了！每天都有什么的！」
+			;TranslatedMark ―――聞いてよもーっ！　酷いんだよ？！　ここずーっと毎日なんだから！
+			PRINTFORMW 
+			PRINTFORML   「你肯定是刚刚来到这里的吧？！现在我几乎每天都在一直被各种各样的客人性骚扰！所以最近才会休业什么的！」
+			;TranslatedMark ご新規さんなんだけどね？！　来る客皆がセクハラばっかりするから、やんなっちゃう！
+			PRINTFORMW   「那天要不是妹红的话...我差点就被...就被袭击了！哇啊！！」
+			;TranslatedMark この前なんて、も、妹紅さんがいなかったら危うく私っ……お、襲われてたあ！　うぇ～ん！！
+			PRINTFORML 
+			PRINTFORML 啊啊...我的天啊...
+			;TranslatedMark ああ……なんてこと
+			PRINTFORMW 
 			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORMW 匿名希望、被害者：K小姐
+			PRINTFORMW 匿名希望，被害者：Ｋ小姐
 			;TranslatedMark 匿名希望、被害者：Ｋさん
-			PRINTFORML
-			PRINTFORML 「——因为他说可以教我什么是感情，所以我就跟着去了。
-			;TranslatedMark 「――感情を教えてくれるって言うからついていったのだ
-			PRINTFORMW   于是，他说要先从了解自己开始，不知为何，他就到处摸我的身体。」
-			;TranslatedMark そしたら、まずは自分を知ることからだと言って、なぜか体をあちこち触られたのだ」
-			PRINTFORML
-			PRINTFORMW 啊啊......哎呀，那可就出局了！
+			PRINTFORML 
+			PRINTFORML   「———因为他说可以教我什么是感情，所以我就跟着去了」
+			;TranslatedMark ―――感情を教えてくれると言うからついていったのだ。
+			PRINTFORMW 
+			PRINTFORML   「于是，他说要先从了解自己开始，然后就在我的身上到处乱摸」
+			;TranslatedMark そいつはまずは自分を知ることからだと言ってな、体のあちこちを触ってきたのだ
+			PRINTFORMW   「然后就是问我...被摸的地方有什么感觉吗？有没有想要发出什么奇怪的声音...之类的问题，然后...然后他就突然把衣服脱了下来！」
+			;TranslatedMark なんかムズムズして、変な声が出てな？　そしたら奴は、突然すっぽんぽんになってなー
+			PRINTFORML   
+			PRINTFORML 啊啊...哎呀，那可就出局了！
 			;TranslatedMark ああ……やっ、それはアウトです！
-			PRINTFORML
-			PRINTFORML
+			PRINTFORMW 
 			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORMW 匿名希望、被害者：S小姐
+			PRINTFORMW 匿名希望，受害人：Ｓ小姐
 			;TranslatedMark 匿名希望、被害者：Ｓさん
-			PRINTFORML
-			PRINTFORML 「――能听得到。来自其他人的不好的想象，或者说是声音……
-			;TranslatedMark 「――聞こえてしまうんです。相手のよからぬ想像と言いますか、声が……
-			PRINTFORMW   而且全都是以我作为对象的......最近连视线也......Lian（消音）也对我捉弄个不停......」
-			;TranslatedMark それも皆私を対象にしているのか……最近は視線も……こ[ﾋﾟｰ]しも悪戯をやめませんし……」
-			PRINTFORML
-			PRINTFORMW 啊啊......看起来敌人好像有点多呢。可以的话，要不要喝点药？
-			;TranslatedMark ああ……敵が多そうですもんね。よければお薬、飲みますか？
-			PRINTFORML
-			PRINTFORML
+			PRINTFORML 
+			PRINTFORML   「――我能感受得到」
+			;TranslatedMark ―――聞こえてしまうんです
+			PRINTFORMW 
+			PRINTFORML   「他们想象着，把我变成自己身下的玩物的...这种讨厌的声音」
+			;TranslatedMark 慰み者として使われているのか……相手のよからぬ想像の……声が……
+			PRINTFORMW   「以至于这边甚至和他们进行眼神交流什么的都是夸张程度的麻烦...而且，就连Koi[消音]对我进行恶作剧的频率都增加了...」
+			;TranslatedMark その所為で最近は視線を合わせるのも億劫で……こ[ﾋﾟｰ]しも色々と悪戯をやめないし……
+			PRINTFORML 
+			PRINTFORML 啊啊...看起来身边的奇怪家伙好像有点多呢。如果不介意的话，要不要这边为您煎点安神的药？
+			;TranslatedMark ああ……あなた、敵が多そうですよね。よければお薬でも煎じましょうか
+			PRINTFORMW 
 			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORMW 匿名希望、被害者（？）：K女士
-			;TranslatedMark 匿名希望、被害者（？）：Ｋさん
-			PRINTFORML
-			PRINTFORML 「真不愧是本体啊。居然给我准备了如此大的舞台......我可要久违地大闹一场了。呐？」
-			;TranslatedMark 「――流石だな本体。私の晴れ舞台を用意してくれるとは……久々に大暴れしてやろう。な？」
-			PRINTFORMW
-			PRINTFORMW 呐？呐个头啊！不要随便没自觉地从封印里出来！请回到箱子里去！
+			PRINTFORMW 匿名希望，加害人（？）：Ｋ小姐
+			;TranslatedMark 匿名希望、加害者（？）：Ｋさん
+			PRINTFORML 
+			PRINTFORML   「―――真不愧是本体啊」
+			;TranslatedMark ―――流石だな本体
+			PRINTFORMW 
+			PRINTFORML   「居然给我准备了如此大的舞台...我可要久违地大闹一场了。呐？」
+			;TranslatedMark こんな晴れ舞台を用意してくれるとは……久々に大暴れしてやろう。な？
+			PRINTFORMW 
+			PRINTFORML 呐？呐你个大头鬼啊！不要随便就没自觉地从封印里出来！请回到你的箱子里去！
 			;TranslatedMark な？　じゃない！　勝手に封印から出てくるな！　箱の中へ戻りなさい！
+			PRINTFORMW 
 			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML
-			PRINTFORMW 像这样，在茨木华扇的庇护下聚集起来的人数，有6人+分身。
-			;TranslatedMark この様に、茨木華扇の下へと押し掛け集まった人数は、６名＋分身
-			PRINTFORML 看到这些人，更加让我怀疑为什么他们会聚集到我这边来，
-			;TranslatedMark その顔ぶれを見て尚更に、なぜ私のところへ集まったのかと言う疑問を、
-			PRINTFORMW 华扇听不下去了。
-			;TranslatedMark 華扇は聞くことが出来なくなった
-			PRINTFORML
-			PRINTFORML 居酒屋的看板娘、小吃摊的老板娘
-			;TranslatedMark 居酒屋の看板娘に、屋台の女将
-			PRINTFORML 尚且还是个小孩子的妖怪、初次见面不太了解的魔界人
-			;TranslatedMark まだまだ子供で生まれたばかりの妖怪に、初対面でよくわからない魔界人
-			PRINTFORML 另一方面，几位值得依赖的妖怪，都陷入了萎靡不振的状态。
-			;TranslatedMark 一方、頼りがいのある妖怪若干名は、のらりくらりとしていてよくわからない
-			PRINTFORMW 还有一位，已经在散发奇怪的气氛了。
-			;TranslatedMark もう一名は、既にグロッキー気味で参っているのである
-			PRINTFORML
-			PRINTFORML 这样一来，其他成员也会有同样的想法，能依靠的对象只剩下一个。
-			;TranslatedMark そうなれば、他の面子も思うことは同じであり、頼る先は一つに絞られた
-			PRINTFORMW 每个人共有的唯一的主张追求。
-			;TranslatedMark それぞれが求める主張はただ一つ
+			PRINTFORML 
+			PRINTFORMW 像这样，在茨华仙的庇护下所聚集起来的人数，有6人+分身
+			;TranslatedMark この様に――。茨華扇の下へ押し掛け集まった人数は６名＋α
+			PRINTFORML 看到这些人，更加让本台记者怀疑，为什么她们会聚集到她的身边来...
+			;TranslatedMark その顔ぶれを見て、華扇はなぜ私のところへ集まったのかという疑問を抱かずにはいられない
+			PRINTFORMW 不过，如果仔细观察聚集在一起的面孔，华扇也能看出一些东西
+			;TranslatedMark だが、それぞれ集まった顔をよく見れば、華扇もなんとなく察してしまう
+			PRINTFORML 
+			PRINTFORML （虽说如此...但如果对方就避而不出的话，这种行为又会有什么意义呢？总感觉有点不靠谱...）
+			;TranslatedMark （人が伏せっているというのになんなんですかね、この仕打ち……なんて、頼りないのかしら……）
+			PRINTFORMW 
+			PRINTFORML 居酒屋的看板娘，小吃摊的老板娘
+			;TranslatedMark 居酒屋の看板娘に、屋台の女将。
+			PRINTFORMW 还未曾接受过情感教育的，新近诞生的妖怪
+			;TranslatedMark そして最近生まれたばかりの妖怪は、情操教育すら未熟な危うい子供。
+			PRINTFORMW 以及并不算是了解的初次见面的魔界来客
+			;TranslatedMark 更には初対面でよくわからない魔界の訪問者。
+			PRINTFORMW 如果大家齐心协力的话，兴许做点什么也不是不可能的事情。然而此时的她们现在也顶多只是互相吐着苦水罢了
+			;TranslatedMark 集まればなんとかなるかもという、考えているのかいないかの様なで、半分匙を投げている
+			PRINTFORML 
+			PRINTFORML 另一方面，那些本应可靠的妖怪此时却只是懒洋洋地笑看着这一切，她们究竟是有什么意图也没人能搞懂
+			;TranslatedMark 一方、頼りがいのある筈の妖怪若干名は、のらりくらりと微笑むばかりで意図がわからず
+			PRINTFORMW 而还有一位，现在已经在散发着奇怪的气氛了
+			;TranslatedMark 最後のもう一名は、既にグロッキーどころの話ではない
+			PRINTFORML 
 			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
+			PRINTFORML 
 			PRINTFORML 「救    命    啊    ！    （杀    光    光    ！）」
 			;TranslatedMark 『な　ん　と　か　し　て　！　（殺　ら　せ　て　！）』
-			PRINTFORMW
+			PRINTFORMW 
 			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML 以向自己求助为目的而聚集到这里来的这些人，茨木华扇做不到毫无心理负担地就将她们驱逐，
-			;TranslatedMark 助けを請われて、無碍に追い返すことができない茨木華扇は、
-			PRINTFORMW 自己会成为眼下这一事态的代表已经成为了必然，必须为此绞尽脑汁以应对此事态。
-			;TranslatedMark 必然的にこの事態における代表者となり、その為の知恵を絞ることになる
-			PRINTFORML
-			PRINTFORML 相同境遇的人，同样被拍的人，
-			;TranslatedMark 同じ境遇の者同士、同じく撮られた者同士、
-			PRINTFORMW 波及到日常生活的人身危险，各自积累的愤怒和悲伤即将爆发
-			;TranslatedMark 日常生活にまで及んだ身の危険は、それぞれに溜まった怒り悲しみは爆発寸前
-			PRINTFORML
-			PRINTFORML 这种局势，是整个幻想乡在向自己发出着「宣战布告」以示威，
-			;TranslatedMark この事態は、幻想卿におけるデモンストレーション「宣戦布告」によって、
-			PRINTFORMW 将会扩大为袭卷整个幻想乡的波澜
-			;TranslatedMark 全土を巻き込む波乱へ広がってゆく
-			PRINTFORML
-			PRINTFORMW 战争已经，迫在眉睫——
-			;TranslatedMark 戦争は、すぐ傍まで迫っていた――
+			PRINTFORML 
+			PRINTFORML 经过短暂的考虑后，受害者们得出了这一结论
+			;TranslatedMark 要はそうゆうことである
+			PRINTFORML 既然华扇是这篇淫秽报刊首页上的第一位，而即使是上面的第二第三位也只是作为陪衬罢了
+			;TranslatedMark 卑猥な一面トップを飾った華扇は第一号であり、第二、第三号を飾った者達はそのオマケでも、
+			PRINTFORML 但是她们每个人的共同点都是，只通过外表就被下达了此人是否容易相处，值得信赖这种事情的判断
+			;TranslatedMark それぞれがその顔を見て、誰が接しやすく、誰が頼り甲斐のある人物なのかを、
+			PRINTFORML 于是，大家瞬间就明白自己应该怎么做了
+			;TranslatedMark 誰もが瞬時に悟ってしまった結果だったのだ。
+			PRINTFORMW 
+			PRINTFORML 而处于这场事件最中心的华扇也无法再说些什么了———不，如果可以的话
+			;TranslatedMark その中心にいる華扇は、また何も言えなくなってしまう。――いいや、むしろできるならば、
+			PRINTFORML 她希望自己也能做同样的事情，甚至为自己没有人能依靠而感到遗憾
+			;TranslatedMark 自身も同じ様にそうできたらしたいというのに、それができないこの身が恨めしいとすら悔やんでいる。
+			PRINTFORML 而就这样被请求帮助的茨木华扇，纵使再三犹豫，最后也只能做出同意的选择
+			;TranslatedMark だが、助けを請われて追い返すことはできない茨木華扇に、迷いはあれども辞退するという選択肢はない。
+			PRINTFORMW 
+			PRINTFORML 「...明白了。那么作为回报，请帮助我们」
+			;TranslatedMark 「……わかりました。ならばその代わりに、協力してください」
+			PRINTFORMW 
+			PRINTFORML 就在那天，那些被推入同样处境、面临同样处境的人们也都聚集而来
+			;TranslatedMark 同じ日、同じ境遇に突き落とされ、その目に合わされた者同士。
+			PRINTFORML 无端的谣言让他们感到愤怒、悲伤、痛苦、羞愧和沮丧，甚至连日常生活的人身安全都得不到保障
+			;TranslatedMark 謂れ無き風評に怒り、悲しみ、苦しみ、羞恥し、悔しさを味合わされ、日常生活に及んだ身の危険に恐怖した。
+			PRINTFORML 就这般累积起来的负面情绪实在是让每一个人都难以忍受，急需一个宣泄口
+			;TranslatedMark 積もりに積もった感情は、皆一様に耐え切れないのである。
+			PRINTFORMW 
+			PRINTFORML 「让那帮家伙为自己的所作所为付出代价！」
+			;TranslatedMark 「こんな目に合わせた奴らを、一人残らず全て懲らしめてやりましょう」
+			PRINTFORMW 
+			PRINTFORML 策划者们，在此推动下也同样是做出了坚定的决定———
+			;TranslatedMark 首謀者達は、ここに固く決意した――
+			PRINTFORML 宣战，后来被称为示威的行动，就这样发展成一场涉及整个幻想乡的战争
+			;TranslatedMark 後にデモンストレーションという名で行われる宣戦布告は、全土を巻き込む戦争へと発展する
+			PRINTFORMW 
 			CLEARLINE LINECOUNT - FIRST_LINE
 		CASE 4
 			PRINTFORML 【虚实纷乱的绯闻可有冤枉•其四】
-			;TranslatedMark [０４：虚実入り乱れるその風聞は濡れ衣か]
-			PRINTFORMW
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML 某乌天狗的报纸所带来的影响，绝不是可以忽视的程度
+			;TranslatedMark [０４：虚実の入り乱れるその風聞は濡れ衣か]
+			PRINTFORMW 
+			PRINTFORML 某鸦天狗的报纸所带来的影响，已然扩张到绝对无法忽视的程度
 			;TranslatedMark 某烏天狗による瓦版の影響は、決して無視できるものではなくなっていた
-			PRINTFORML 被下流的广告语吸引而且买下来的人络绎不绝，
-			;TranslatedMark 卑猥なキャッチコピーに惹かれて手に取る者は後を絶たず、
-			PRINTFORMW 不知不觉间就到了需要加印的地步，人气直线飙升
-			;TranslatedMark いつの間にか増刷されるほど、人気はうなぎ登りに高まっていた
+			PRINTFORML 被淫秽的流行语和照片所吸引并拿起它们的人数不胜数
+			;TranslatedMark 卑猥なキャッチコピーや写真に惹かれて手に取る者は後を絶たず、
+			PRINTFORML 而飙升的人气也使得每当书一售完的时候，要求再版的人也络绎不绝
+			;TranslatedMark 完売御礼と同時に増刷の要望がなされるほど、人気はうなぎ登りに高まっていた
+			PRINTFORMW 
+			PRINTFORML 不过，光是淫乱粉，也绝对不是这些报刊现在的全部
+			;TranslatedMark しかしその中身は、淫乱ピンクに関わる者が多く占めてはいたものの、
+			PRINTFORML 所有的发色几乎都被打上了刻板印象的标签———
+			;TranslatedMark 決してそれだけが全てではなかったのである――
+			PRINTFORMW 
 			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML 加印的内容中，关于淫乱粉的部分又占了大多数
-			;TranslatedMark その中身は淫乱ピンクで多くが占められてはいたものの、
-			PRINTFORMW 绝不仅仅如此
-			;TranslatedMark 決してそれだけではなかったのである
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML 举个例子——
+			PRINTFORML 
+			PRINTFORML 举个例子———
 			;TranslatedMark 例えば――
-			PRINTFORMW 蓝发的人物，虽然经常保持着冷静的表情，却不时展现出天真幼稚的反应，显得很可爱。
+			PRINTFORMW 　蓝发的人物，虽然经常保持着冷静的表情，却不时展现出天真幼稚的反应，显得很可爱
 			;TranslatedMark 青い髪の人物は、澄ました顔をしている癖に、時々初心な反応を見せる可愛さがある
-			PRINTFORMW 但是非常麻烦。烦人蓝
+			PRINTFORML 但是也因此而变得非常麻烦...所以叫烦人蓝
 			;TranslatedMark だが面倒臭い。青面倒
+			PRINTFORMW 
 			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML 举个例子——
+			PRINTFORML 
+			PRINTFORML 举个例子———
 			;TranslatedMark 例えば――
-			PRINTFORMW 红发的人物，是直性子，总是用着短视的思考模式，但是他们对于情感非常忠诚专一、热情且容易解决。
+			PRINTFORMW 　红发的人物，是直性子，总是用着短视的思考模式，但是他们对于情感非常忠诚专一、热情且好搞定
 			;TranslatedMark 赤い髪の人物は、直情的で短絡的な思考行動であるが、一途で情熱的でチョロ落とし易い
-			PRINTFORMW 太单纯了。单纯红
+			PRINTFORML 显得多少有些太单纯了。所以叫单纯红
 			;TranslatedMark チョロイ。チョロ赤
+			PRINTFORMW 
 			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML 举个例子——
+			PRINTFORML 
+			PRINTFORML 举个例子———
 			;TranslatedMark 例えば――
-			PRINTFORMW 绿色头发的人通常态度友好、举止柔和、待人和善，但实际上内心大多都是腹黑清纯bitch
+			PRINTFORMW 　绿色头发的人通常态度友好、举止柔和、待人和善，但实际上内心大多都是腹黑清纯bitch
 			;TranslatedMark 緑色の髪の人物は、人当たりが良く物腰柔らかい人が多いが、中身は大体腹黒清純ビッチ
-			PRINTFORMW 淫乱绿
-			;TranslatedMark 淫乱緑
+			PRINTFORML 所以叫淫乱绿，绿色Bitch
+			;TranslatedMark 淫乱緑、みどビッチ
+			PRINTFORMW 
 			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML ……像这样的例子不胜枚举
-			;TranslatedMark ……この様に、例を挙げればきりがなく
-			PRINTFORMW 这样充满毫无根据的偏见的丑闻，被越来越多的人所认知
+			PRINTFORML 
+			PRINTFORML ...这样的例子数不胜数
+			;TranslatedMark ……例を挙げればきりがなく
+			PRINTFORML 那些充满毫无根据的偏见的丑闻，在病毒式的传播下被越来越多的人所熟知
 			;TranslatedMark 根拠の無い偏見に満ち溢れた醜聞は、多くの者に認知されるようになったのだった
-			PRINTFORML
-			PRINTFORMW 当然，对这种偏见不能坐视不管的人们，也纷至沓来地前去抗议。
+			PRINTFORMW 
+			PRINTFORML 当然，对这种偏见不能坐视不管的人们，也纷纷地前去抗议
 			;TranslatedMark 当然、この様な偏見を黙って見過ごすことが出来ない者達は、揃って抗議しに赴いた
-			PRINTFORMW 但当到达的时候已经晚了，住所内空无一人，抗议者们除了回去别无他法。
-			;TranslatedMark しかし辿り着いた頃には既に遅く、家人は不在のもぬけの殻であり、引き返す他に無かったのであった
+			PRINTFORML 但当到达的时候也已经晚了
+			;TranslatedMark しかし、辿り着いた頃には既に遅く
+			PRINTFORML 住所内空无一人，抗议者们除了回去也别无他法
+			;TranslatedMark 家人は不在のもぬけの殻であり、引き返す他に無かったのである
+			PRINTFORMW 
 			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORMW 这些人也将经历与华扇她们相似的事情。
-			;TranslatedMark そんな者達にも、華扇達同様の事態が訪れる
+			PRINTFORML 
+			PRINTFORML 与华扇她们相似的受害者就这样越来越多
+			;TranslatedMark そんな者達にも華扇達同様、被害者が増え始めていた
+			PRINTFORMW 
+			PRINTFORML 有些人成功报复并安然逃脱，但另一些人试图反抗则只是徒劳，结果就这样被加害者们肆意地奸淫与玩弄
+			;TranslatedMark ある者は返り討ちにして事なきを得たが、ある者は抵抗も虚しく犯され弄ばれ
+			PRINTFORML 有些人内心对春天的突然到来而感到欣喜若狂，而当他们意识到这一切都只不过是一场骗局时，他们就又变得沮丧起来了
+			;TranslatedMark そしてある者は、突然の春の到来に浮かれていた、が――その実態はただのヤリ目だと分かった途端塞ぎ込み、
+			PRINTFORML 包括精神异常在内的各种问题，正在与日俱增
+			;TranslatedMark 精神に異常をきたしたなどと問題は様々。それは日毎に増えていた
+			PRINTFORMW 
 			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML 有些人会去反击，有些人会遭遇白眼。
-			;TranslatedMark ある者は返り討ちに。ある者は酷い目に遭う
-			PRINTFORML 有些人内心对春天的到来欣喜若狂，但实际上却只是一场骗局。
-			;TranslatedMark ある者は内心、春の到来を喜んだりもしたが、その実態はただのヤリ目だと分かった途端、
-			PRINTFORMW 周围问题的不断增加，很明显，人们的情绪亦越来越不好。
-			;TranslatedMark 周りへ八つ当たり塞ぎこむなど、問題の暇は目に見えて増えていた
+			PRINTFORML 
+			PRINTFORML 而在这些变化发生的同时，随着不同发色的人们的相互交流与接触，新的问题又随之诞生
+			;TranslatedMark それらの変化がある一方、色の違う者同士が顔を合わせる様になると、新たな問題が浮上した
+			PRINTFORML 而在周边舆论的庞大压力下，他们对彼此的敌对之心也难免会产生
+			;TranslatedMark ある種の敵対心が生まれていた
+			PRINTFORMW 
+			PRINTFORML 一旦标签渗透到人们的内心，他们就会情不自禁地想起它们
+			;TranslatedMark 一度浸透してしまったレッテルは、少なからず意識せずにはいられず
+			PRINTFORMW 而这些舆论所引起的意识变化则是———人们总是开始不自觉地开始看不起别人，并由此来得到安慰与优越感，而代价则是被自己所歧视的人群开始疏远
+			;TranslatedMark 醜聞の生み出した意識変化は、慰めや疎外感、優越性など、無意識に相手を見下す様になってゆく
+			PRINTFORML 当这些事情被暴露时，斗殴事件也不乏发生
+			;TranslatedMark 時にそれらが暴露されるとなれば乱闘騒ぎに事欠かず、
+			PRINTFORML 越来越多的人在不必要的战斗中受伤，以坚决去保护一条根本上认真而言毫无意义的底线
+			;TranslatedMark 譲れぬ一線を守るためと、不必要な喧嘩に怪我を負う者が増えていた
+			PRINTFORMW 
 			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML 然后最终，不同发色的人们开始互相贴上标签。
-			;TranslatedMark そしてとうとう、色の違う者同士がレッテルを貼り合う様になると、
-			PRINTFORML 这是用于嘲弄对方的标签
-			;TranslatedMark それは相手を詰る意味を持ってしまうのであり、
-			PRINTFORML 原本小小的分歧，逐渐开始导致的沟通失败。
-			;TranslatedMark 小さな行き違いから生まれたコミュニケーションの失敗は、
-			PRINTFORMW 人们不惜大打出手，一触即发。
-			;TranslatedMark 殴り合いも辞さない一触即発のケンカを生もうとしていた
+			PRINTFORML 
+			PRINTFORML 而在另一方面，也仍有一些人坚持保持中立
+			;TranslatedMark その一方、中立を維持し続けている者達もいた
+			PRINTFORMW 
+			PRINTFORML 其中，大多数是经常与黑发混淆的人
+			;TranslatedMark 中でも、黒髪と混同されがちだった人達が多くを占めていた
+			PRINTFORML 但也只是因为他们并没有成为这场舆论的目标
+			;TranslatedMark だがそれは単に、あの醜聞の的にならなかっただけの話であるのだが、
+			PRINTFORMW 她们在面对这些情况的时候，根本就没有想过要插手这种事情
+			;TranslatedMark 彼女らもこの事態を前に、積極的に関わろうとも思わなかった
+			PRINTFORML 对于他们来说，这也是本着某种危机意识，在不想遭受无故牵扯的情况下所做出的选择
+			;TranslatedMark それは彼女達にとって、余計な火の粉は被りたくないという危機意識からである
+			PRINTFORML 然而接下来，那些嫉妒他们的人就开始用无情的语言嘲笑他们了
+			;TranslatedMark しかしそれを妬んだ人々は、彼女たちを心無い言葉で揶揄するようになってゆく――
+			PRINTFORMW 
+			PRINTFORML 「既不是赤色或是金色, 也无法被称为黑发的不伦不类的家伙们」
+			;TranslatedMark “赤やブロンドにも程遠い。黒にもなれない中途半端なヤツら”
+			PRINTFORMW 
+			PRINTFORML 「他们不会了解我们的感受，我们也同样是拒绝接受你们这些不理解我们的人」
+			;TranslatedMark 「そんな奴らに私達の気持ちはわからない。わからないあなた達は、私達の方からお断りよ」
+			PRINTFORMW 
+			PRINTFORML 半指责性的语言就这样逐渐传播开来，也成为了迫害他们的借口
+			;TranslatedMark 半ば八つ当たりとも言える様な物言いが、徐々に迫害してもよい免罪符として広がった
+			PRINTFORML 这些原本保持中立的人们，也因此而不可避免地开始为了自卫而加强了对周围的防备
+			;TranslatedMark それは中立だった彼女達も必然的に、自衛の為に身を固めるようになってゆく
+			PRINTFORMW 
+			PRINTFORML 情况还在继续恶化着———走到街上便会发现，路人们彼此间的目光到处都是怒视
+			;TranslatedMark 状況は悪化の一途を辿る――睨みあいはそこかしこで始まった
+			PRINTFORMW 
 			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORMW 然而，即便在这种情况下，仍有一些人坚持保持中立。
-			;TranslatedMark だが、この様な状況の一方で、中立を維持し続けている者達がいた
-			PRINTFORML
-			PRINTFORML 只有唯一一种发色没有被报道抹黑。
-			;TranslatedMark それは唯一話題に上ることも無く、
-			PRINTFORMW 对那些常常被误认是黑发的人来说，这在某种程度上也算是一种好事。
-			;TranslatedMark 黒髪と混同されがちだった人達にとっては半ば好都合でもあった
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML 即便如此，也有人开始说这是一种卑鄙，
-			;TranslatedMark だがそれは卑怯だとする人々が現れると、
-			PRINTFORMW 不经意间的揶揄与讽刺向她们袭来
-			;TranslatedMark 彼女たちを心無い言葉で揶揄するようになってゆく
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML 「既不是赤色或是金色, 也无法被称为黑发的不伦不类的家伙们。」被这样说了
-			;TranslatedMark 「赤やブロンドにも程遠く、黒にもなれない中途半端なヤツら」、と
-			PRINTFORMW
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML 周围情况不断恶化
-			;TranslatedMark 周りは悪化の一途を辿ってゆく
-			PRINTFORMW 各个势力开始分裂，对峙起来
-			;TranslatedMark それぞれが勢力として分かれると、そこかしこで睨みあいが始まった
-			PRINTFORML
-			PRINTFORMW 必然地，她们开始为了自卫而加强防备。
-			;TranslatedMark 必然的に、中立だった彼女達も自衛の為に身を固めるようになったのだ
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML 说到导致这些状况的某只天狗——
-			;TranslatedMark さて。これらの状況を生み出してしまったとある天狗は、というと――
-			PRINTFORMW
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML 不熟悉的人气和不断增长的销售量让她目眩神迷，
-			;TranslatedMark 不慣れな人気と伸び続ける販売部数に目が眩み、
-			PRINTFORMW 随着财富的不断累积，她的理智却逐渐消失了，顿时仿佛置身有頂天。
-			;TranslatedMark 更には身軽な懐が分厚くなるにつれて理性を失い、彼女はまさに有頂天になっていた
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML 然而，这种情况也没有持续很长时间，销量的下滑趋势开始线路出来，越发严重。
-			;TranslatedMark しかしそれも長くは続かず、販売部数の落ち込みは目に見えて大きくなると、
-			PRINTFORML 终于意识到周围紧张的空气，她通宵修改新闻稿并道歉，
-			;TranslatedMark ようやく周囲の剣呑な空気を察して、徹夜で訂正記事を刷り上げ謝罪とするも、
-			PRINTFORMW 但是信任的崩溃是无法就这样轻易修复的。
-			;TranslatedMark 一度入った亀裂は、簡単に直るような状況ではもうなくなっていたのである
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML 「姬海棠」就这样留下了如此庞大的影响
-			;TranslatedMark 様々な影響を残してしまった「姫海棠はたて」
-			PRINTFORMW
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML 她在这种不知道会发生什么的情况下感到恐惧，躲藏起来，
-			;TranslatedMark いつどうなるかもわからない状況に慄く彼女は身を隠し、
-			PRINTFORMW 她试图向头发颜色相近的猯藏寻求帮助，但却被毫不留情地拒绝。
-			;TranslatedMark 髪色の近いマミゾウ達に助けを求めて接触するが、ものの見事に一刀両断でされるのであった
-			CLEARLINE LINECOUNT - FIRST_LINE
-			PRINTFORML
-			PRINTFORML 然而，被承诺要上交大部分销售收入的猯藏却表示。
-			;TranslatedMark しかし今回の売上金の大半を上納すると持ち掛けらたマミゾウは、
-			PRINTFORMW 出于担忧之前的情况，不得已，他们决定保护姬海棠的安全。
-			;TranslatedMark 先の状況を案じてやむなく、はたての身柄を保護することに決めたのだった
-			CLEARLINE LINECOUNT - FIRST_LINE
+
 		CASE 5
 			PRINTFORML 【虚实纷乱的绯闻可有冤枉•其五】
-			;TranslatedMark [０５：虚実入り乱れるその風聞は濡れ衣か]
-			PRINTFORMW
-			PRINTFORML 已经玩够了呢。
-			;TranslatedMark ――いやー大分遊ばせて貰ったぞ
-			PRINTFORML 如果四处散布谣言的话，会产生令人匪夷所思的争吵呢。
-			;TranslatedMark そこかしこで噂流して回ってやったら、面白いくらい簡単に喧嘩が始まってやがんの
-			PRINTFORML 多亏了这个，酒变得更加美味了。
-			;TranslatedMark おかげで酒場の酒が旨いったら旨いったらもう
-			PRINTFORMW 但是呢？这样就好吗？
-			;TranslatedMark ……それで？　本当にこれでいいんだな？
-			PRINTFORML
-			PRINTFORML 是呀,虽说没办法,但不能就这样背叛别人呢。
-			;TranslatedMark ええ。仕方がないとはいえ背に腹は代えられません
-			PRINTFORML 多亏了你们,我们不必操心,每个人都忙着自己的事情。
-			;TranslatedMark おかげで我々がどうこうと言うより、自分たちのことで皆も頭がいっぱいでしょう
-			PRINTFORML 只需要用另一则谣言来抵消谣言就可以了呢，很方便的。
-			;TranslatedMark 流言には流言で。別の噂でかき消してしまうのが手っ取り早いというものです
-			PRINTFORMW 然而，由于此次的代价较大，所以不能说是很好的对策......
-			;TranslatedMark ただし今回は代償のほうも大きいので、あまり良い手立てとは言えませんが……
-			PRINTFORML
-			PRINTFORMW 哈？我只是因为可以随意地杀人才协助你的，知道吗？
-			;TranslatedMark あ？　私は殺し合いが出来るというから協力してやったんだぞ？
-			PRINTFORML
-			PRINTFORML 谁说要杀人了?! 最多也就小小地战斗一下,要控制好自己啊。
-			;TranslatedMark 誰がそんなことを言いましたか？！　精々小競り合い程度に加減なさい
-			PRINTFORMW 如果你做不到的话，只能马上把你放回盒子里了。
-			;TranslatedMark でなければ今ここで箱に戻します
-			PRINTFORML
-			PRINTFORML 啊——讨厌讨厌......明明是同一个我,居然变得这样顽固啊。
-			;TranslatedMark あーやだやだ……同じ私のくせに無駄にお固くなりやがって
-			PRINTFORML 这种事情我怎么都无所谓。
-			;TranslatedMark 大体こっちはそんなのどうだっていいんだよ
-			PRINTFORMW 粉色的发色表示淫乱？真不错！马上就可以把你榨干哟。
-			;TranslatedMark 淫乱ピンク？　上等だ！　それなら干乾びるまで生気を吸い取ってやるよ
-			PRINTFORML
-			PRINTFORML 请您停止！
-			;TranslatedMark やめてくださいっ！
-			PRINTFORMW 即使我们本来就一模一样，发生这种事情也会涉及到我的信用和威严！
-			;TranslatedMark ただでさえ同じ顔をしているのに、そんなことになったら私の信用と威厳に関わります！
-			PRINTFORML
-			PRINTFORML 别胡闹了。总之,当我们还是一体的时候——
-			;TranslatedMark かまととぶってんじゃねぇよ。大体私らがひとつだった時は――
-			PRINTFORML
-			PRINTFORMW 啊！啊！听不到呢！听不到！
-			;TranslatedMark あー！　あー！　聞こえなーい！　聞こえなーーーーい！
-			PRINTFORML
-			PRINTFORML 如果那样，就这样来吧。
-			;TranslatedMark ならばこうしよう
-			PRINTFORML 那么就来一场乱七八糟的战斗吧。
-			;TranslatedMark これから始まるのはどう転んだって大喧嘩だ
-			PRINTFORMW 虽然对什么时候结束没有兴趣，但如果到那时你还能保持原来的想法的话，我会承认你的。
-			;TranslatedMark いつ終わるなんてことに興味はないが、その時までに正気を保っていれば認めてやるよ
-			PRINTFORML
-			PRINTFORML 什么？你要承认什么？我可没有兴趣参与这样的事情！
-			;TranslatedMark は？　何を認めるというのですか。そんな話には乗りませんよ？
-			PRINTFORMW 我把你拿出来是作为这场战斗的武器的。看样子我或许应该让你回去?
-			;TranslatedMark 戦力になるので取り繕っておきましたが、さっさと箱に詰め戻してしまおうかしら
-			PRINTFORML
-			PRINTFORMW 听好了,如果你想坚持自己是那个单纯的小女孩的话,就请保持理智到最后呢。
-			;TranslatedMark いいか？　お前が初心な娘だと言い張りたいなら、最後まで正気を保っていろよ？
-			PRINTFORML
-			PRINTFORML ......真烦人!别说这么让人难为情的话!
-			;TranslatedMark ……生娘だ正気だうるさいわよ！　恥ずかしいことばかり聞くんじゃない！
-			PRINTFORMW
+			;TranslatedMark [０５：虚実の入り乱れるその風聞は濡れ衣か]
+			PRINTFORMW 
+			PRINTFORML ———幻想乡里，这些冲突随着时间而不可避免地愈发升级了
+			;TranslatedMark ――幻想郷は、至る所で争いに暇が無くなった
+			PRINTFORML 而在另一方面，几乎可说是这场骚乱的始作俑者的天狗，正在为此而大笑着
+			;TranslatedMark 一方。これらの騒動を生み出してしまったとある天狗は、
+			PRINTFORMW 
+			CLEARLINE LINECOUNT - FIRST_LINE
+			PRINTFORML 
+			PRINTFORML  呜呼...呜呼呼...啊哈哈哈哈哈...！！
+			;TranslatedMark ぐふ……ぐふふっ……ぐふふふふっ……！
+			PRINTFORMW 
+			PRINTFORML 「啊...就是这样！金钱的世界正在向我招手啊！啊哈哈哈哈哈哈！」
+			;TranslatedMark 「金……金よ！　この世は金よぉぉぉ！　あーっさいっこぉ！　あははははは！」
+			PRINTFORMW 
+			CLEARLINE LINECOUNT - FIRST_LINE
+			PRINTFORML 
+			PRINTFORML 带着异常增长的人气而来的巨大曝光———
+			;TranslatedMark 不慣れな人気と共に浴びてしまった大脚光――
+			PRINTFORML 愈来愈厚的钱袋，以及可预见的未来里巨大的销售量已然使她目眩神迷
+			;TranslatedMark 未だに伸び続ける販売部数と、分厚く重くなる懐には目が眩む
+			PRINTFORML 堆积成山的硬币很快就会变成一沓相对体积而言本身显得极小的钞票，而同等的钞票又会很快就再度累积成更大的一座钱山
+			;TranslatedMark 銭の山はたちまち一貫の束となり、いくつもの束が山となる！
+			PRINTFORML 彻底丧失理智的她，仿佛是达到人生的高潮一般喜悦
+			;TranslatedMark 理性を失った彼女は、人生の絶頂を味わっていた！
+			PRINTFORMW 
+			PRINTFORML 然而，没过多久，这个峰值就已经开始出现了下降的趋势
+			;TranslatedMark だがしかし、その絶頂に陰りが見え始めるのも、遠い話ではなかったのである
+			PRINTFORMW 销量的下滑趋势开始显露出来以后，便随着时间而变得越发严重。而再当她回过神时，已经是为时已晚了
+			;TranslatedMark 販売部数の落ち込みは目に見えて大きくなり、つれてようやく理性を取り戻すがもう遅い
+			PRINTFORML 
+			PRINTFORML 终于意识到周围紧张的空气的她，连忙开始通宵修改新闻稿并做出了道歉
+			;TranslatedMark 周囲の剣呑な空気を察して、徹夜で訂正記事を刷り上げて謝罪とするも、
+			PRINTFORML 但是信任的崩溃，可是无法就这样被轻易修复的
+			;TranslatedMark 一度入った亀裂は簡単に収拾がつく状況ではなくなっていた
+			PRINTFORMW 
+			CLEARLINE LINECOUNT - FIRST_LINE
+			PRINTFORML 
+			PRINTFORML 「姬海棠」就这样留下了如此庞大的影响
+			;TranslatedMark 様々な影響を残してしまった“姫海棠はたて”
+			PRINTFORMW 
+			PRINTFORML 人们凝聚杀意的视线近乎无处不在
+			;TranslatedMark 殺気立つ人々の視線。あちこちで始まる睨みあい
+			PRINTFORML 现在的人们也不可能不知道如今这场冲突是因何而起，但如果再将这种目光转向根本的源头的话，又会发生些什么？
+			;TranslatedMark その原因が誰なのかが今更分からぬわけもなく、その根源となる姿を見ればどうなるか
+			PRINTFORMW 
+			PRINTFORML 姬海棠不禁对这种失去控制的可怕情况感到惊慌，并也同样开始通过用布遮住眼睛的方式来盖住自己的脸
+			;TranslatedMark 戦慄する状況に慌てたはたては、目深に布を被ると顔を隠し、
+			PRINTFORML 同时也开始联系发色相似的人以寻求帮助
+			;TranslatedMark 髪色の近い者達に助けを求めて接触する
+			PRINTFORMW 
+			PRINTFORML 「———以往的所作所为什么的真的非常对不起，但是拜托了！请你们帮帮我！」
+			;TranslatedMark 「――ごめんなさいっ、でもお願いしますっ！　助けてください！」
+			PRINTFORMW 
+			PRINTFORML 当时，棕发派系的管理者，是二岩猯藏
+			;TranslatedMark その時。纏め役に落ち着いていたのは、二ツ岩マミゾウ
+			PRINTFORML 温和稳定的性格，裹挟着知性的一双慧眼...周围的人都说，她被选中是很自然的选择
+			;TranslatedMark 穏便且つ、知性に裏付けられた慧眼の持ち主と、選ばれたのは極々自然な流れだと周囲は言う
+			PRINTFORML 然而，在面对姬海棠时，猯藏却叹息地说，她关心他人的天性已经成为了她最大的敌人
+			;TranslatedMark しかしそれはマミゾウ曰く、何だかんだと面倒見の良さが仇になったのだと溜息を吐く
+			PRINTFORMW 
+			PRINTFORML 「这种事情...不...不会吧？这种事情...很麻烦的不是吗？」
+			;TranslatedMark 「いやじゃのぉ。めんどうじゃけぇ、なあ？」
+			PRINTFORMW 
+			PRINTFORML 因为事实如此。我们不希望带来不必要的火花，这是不容忽视的集体利益
+			;TranslatedMark であるからこそ。余計な火種を持ち込みたくないという、集団の利は無視できない
+			PRINTFORML 当然。当她听见猯藏的回答时，她本以为能成功的毫无根据的计划，就这样被瞬间腰斩了
+			;TranslatedMark 当然。根拠なくイケると踏んでいたその目論見は見事、即一刀両断されたのであった
+			PRINTFORMW 
+			CLEARLINE LINECOUNT - FIRST_LINE
+			PRINTFORML 
+			PRINTFORML 「呐...啊，你...你不想要钱吗？」
+			;TranslatedMark 「ねえ……。お、お金……欲しくない？」
+			PRINTFORMW 
+			PRINTFORMW 但即便如此，我们也不能因为你的一句话就简单地退缩
+			;TranslatedMark しかしはたても、そう言われたからと、簡単に引き下がるわけにはいかない
+			PRINTFORML 因为在他们的脑袋里，被拖着走过大街小巷，绑在十字架上拷问、轮奸和凌辱的记忆...
+			;TranslatedMark なぜならはたての頭の中では、市中引き回し、磔拷問、輪姦、陵辱……
+			PRINTFORML 以及未来将成为所有可能的惩罚的宣泄口...
+			;TranslatedMark 考えられうる全ての懲罰という名のはけ口としての未来が過ぎるのだ
+			PRINTFORMW 
+			PRINTFORML 啊啊...少女转瞬即逝的生命里，纯洁的身体和回忆———就这样被污染了什么的，也实在是令人难以忍受，对吧
+			;TranslatedMark ああ、儚きかな。うら若き乙女の体とこの命――、穢されてたまるもんですかーっ！
+			PRINTFORMW 
+			PRINTFORML 如果我能保护自己免受我如此兴奋地收集的钱的影响的话，我相信我还是能有东山再起的机会的！
+			;TranslatedMark 興奮するほど集めてしまったあの金も、この身が守れたならば再起の目はきっとある！
+			PRINTFORML 她的眼睛已经被金钱和自我保护的欲望所蒙蔽，甚至已经失去了冷静的判断力，认为在金钱面前，哪怕是二岩猯藏，也是可以被收买的对象
+			;TranslatedMark 金と保身に曇った眼は、金の前ではマミゾウだろうが買収できると、冷静な判断すら失われていた
+			PRINTFORMW 
+			PRINTFORML （我不知道她是否也是贪婪的人，但至少她一直对我很宽容...）
+			;TranslatedMark （欲に溺れたかは知らんがのぅ、随分舐め腐ってくれおるのぉ……）
+			PRINTFORMW 
+			PRINTFORML 在猯藏那雾蒙蒙的眼镜片上，似乎亮起了一道锐利的光芒
+			;TranslatedMark 曇りきった眼鏡のレンズの奥で、マミゾウは鋭くはたてを切り捨てた
+			PRINTFORML ———但是，如果是赞助人出现，那就又是另一回事了
+			;TranslatedMark ――だが、しかしである。パトロンが現れたと見れば、そりゃまた別の話である
+			PRINTFORMW 
+			PRINTFORML 你的报道之前卖得很好，吸引了很多人，以至于商店不得不等它进货
+			;TranslatedMark アレだけ多くの者に売れに大売れ、商店では入荷待ちを繰り返したのだ
+			PRINTFORML 得到了多少利润，我甚至难以想象
+			;TranslatedMark 儲けがどれだけでたのか、それなりに想像もつく
+			PRINTFORMW 
+			PRINTFORML （...嘛，问题主要也还是出在那些卑鄙的男人身上）
+			;TranslatedMark （……まあ。大体は、すけべぇな男共が問題ではあるがのぉ……）
+			PRINTFORMW 
+			PRINTFORML 无论如何，她一定是攒下了不少钱
+			;TranslatedMark ともすれば、である。相当金を貯め込んでいるに違いない
+			PRINTFORML 有些事情除非真的实际大量尝试过，否则是绝对不可能会知道的...但唯一能够肯定的事情就是———那滋味一定很爽
+			;TranslatedMark 実際にふんだくってみなければわからないところもあるが、旨味はきっとでかいだろう
+			PRINTFORMW 
+			PRINTFORML 可是，即使真的把姬海棠引进来...我们又该如何维护这个群体呢？
+			;TranslatedMark では、実際に引き入れたとして、集団はどう維持するべきか――
+			PRINTFORML 谢罪文章想必现在的话大家都知道，但能接受它的人肯定也不会有多少
+			;TranslatedMark 謝罪記事のことは誰もが知っていることだろうが、今更それで納得できるような奴もそういまい
+			PRINTFORMW 
+			PRINTFORML （...我就把它放在那里）
+			;TranslatedMark （……ぶち込んでおくかのぅ）
+			PRINTFORMW 
+			PRINTFORML 如果脸部特征被人熟知的话，我就不会把它暴露出来...
+			;TranslatedMark 顔が知れている以上表に出すのも躊躇われる
+			PRINTFORML 如果这样的话，也许就有办法坚持下去了
+			;TranslatedMark それこそいざとなれば、突き出すという方法もあるだろう
+			PRINTFORMW 
+			PRINTFORML 看着静止不动的猯藏，姬海棠也不禁同样是屏住呼吸，忍受着这段难耐的时光
+			;TranslatedMark そうしてジッと佇むマミゾウを、はたてはごくりと固唾を飲んで堪え忍ぶ
+			PRINTFORML 猯藏的脸色让人几乎看不清她在想什么，这也让本身就已别无退路的姬海棠感到了强烈的不安
+			;TranslatedMark 何を考えているのかわからないその顔色は、排水の陣を構えるはたてにとっては気が気じゃない
+			PRINTFORMW 
+			PRINTFORML 「...如果你愿意帮我解决各种问题的话，开上这个口子也不是不可以。有钱能使鬼推磨，听说过吧？」
+			;TranslatedMark 「……色々と用立ててくれるというのなら、やぶさかではないのぉ。地獄の沙汰も金次第じゃぞ？」
+			PRINTFORMW 
+			PRINTFORML 随后，姬海棠的表情便突然灿烂起来，露出了充满喜悦的笑容——
+			;TranslatedMark パッと華やぐはたての喜色満面のその笑顔――
+			PRINTFORML 正打着心底的小算盘的商人方才还在意味深长地笑着，随后很快就又因彼此表现出的模样而大笑起来
+			;TranslatedMark ニヤリと意地悪くほくそ笑む商人の、懐から取り出された算盤を弾く音は嬉々としている
+			PRINTFORML 看样子，两个人心意不谋而合的那一瞬间，就连她们自己也觉得实在是太好笑了
+			;TranslatedMark 二人の思惑が一致した瞬間は実に滑稽だったそうだ
+			PRINTFORMW 
+			CFLAG:NAME_TO_CHARA("はたて"):捕虜先 = GET_COUNTRY_FROM_BOSS_NAME("マミゾウ")
+			CLEARLINE LINECOUNT - FIRST_LINE
+		CASE 6
+			PRINTFORML 【虚实纷乱的绯闻可有冤枉•其五】
+			;TranslatedMark [０６：虚実の入り乱れるその風聞は濡れ衣か]
+			PRINTFORMW 
+			PRINTFORML ―—―远道而来的听众们！朋友们！竖起你们的耳朵，仔细给我听好了！
+			;TranslatedMark ――ここに集まりし聴衆よ！　同士よ！　よく聞きなさい！
+			PRINTFORMW 
+			PRINTFORMW 本人在此，再度发出宣言
+			;TranslatedMark 私はここに、改めて宣言する！
+			PRINTFORML 我们的发色，是与生俱来的！它也不可能是附带任何其他意义的！
+			;TranslatedMark 我々のこの髪色は、生まれついてのものである！　卑猥なものではありはしない！
+			PRINTFORMW 
+			PRINTFORML 此时此刻，我们都或多或少因为无知与贪婪，而轻易就受到那些灌输偏见的板块和谣言的影响而犯下了各种错误！
+			;TranslatedMark 全ては偏見を植え付けしあの瓦版、そして風聞に踊らされし無知と欲望故の過ちである！
+			PRINTFORML 不过，直到今天，我们才能够真正意义上的面对这一切！
+			;TranslatedMark しかし、その過ちを赦せるのも今日まで！
+			PRINTFORMW 
+			PRINTFORML 你们，好好给我照照镜子吧！你头发的颜色从哪一点反映了你的个性吗？！
+			;TranslatedMark 汝よ、鏡を見よ！　その髪色は、人格を写したものなのか？！
+			PRINTFORML 只凭头发的颜色就可以决定人格吗！？只凭头发的颜色就可以决定性格吗！？
+			;TranslatedMark 髪色が人格を決定しうるものなのか！？　髪色が性格を決定しうるものなのか！？
+			PRINTFORMW 
+			PRINTFORML 不，绝对不可能！那样的事情根本意义上就是不可能的！
+			;TranslatedMark 否、断じて違う！　その様なことはありえない！
+			PRINTFORML 我们的发色，是与生俱来的，并没有什么卑猥与高贵之分！
+			;TranslatedMark この髪色は、生まれついてのものであり、卑猥なものではありはしない！
+			PRINTFORMW 
+			PRINTFORMW 但是———但是！
+			;TranslatedMark しかし――、だがしかし！
+			PRINTFORML 可悲的是，直到此时此刻，也仍然有着不少的人们，就这样将我们视为他们的性对象！
+			;TranslatedMark 嘆かわしくも、それでも我々を性的なものとして見る輩が占めている！
+			PRINTFORML 被袭击过的受害者随处可见，因此而遭受到不可挽回的伤害的也大有人在！
+			;TranslatedMark 中には襲われた者も、傷を負った者もいるだろう！
+			PRINTFORMW 
+			PRINTFORML 对于这样的事情，我们绝不能保持沉默！
+			;TranslatedMark こんなことを、いつまでも黙っていられるわけが無い！
+			PRINTFORMW 
+			PRINTFORML 我们要让始作俑者双倍！不，是三倍，甚至十倍的付出代价！
+			;TranslatedMark 倍返しです――！　いいえ、三倍返しです！　十倍返しにしてやりましょう！
+			PRINTFORML 让他们认识到发自我们内心的愤怒，并为之而后悔！
+			;TranslatedMark 我々の怒りを、心の底から思い知らせて、後悔させてやりましょう！
+			PRINTFORMW 
+			PRINTFORML 从今以后，我们也将坚决与将偏见强加于我们、羞辱于我们的家伙作斗争！
+			;TranslatedMark 偏見を押し付け辱めるのならば、我々は断固としてこの偏見と戦い抜く！
+			PRINTFORML 这就是我们的宣战布告———！！来自受歧视者的宣战布告———！！！
+			;TranslatedMark これは宣戦布告である――！　宣戦布告である――！
+			PRINTFORMW 
+			PRINTFORML .
+			PRINTFORML .
+			PRINTFORML .
+			PRINTFORMW 
+			CLEARLINE LINECOUNT - FIRST_LINE
+			PRINTFORMW 
+			PRINTFORML 现在，都已经闹够了呢
+			;TranslatedMark いやー、大分遊ばせて貰ったぞ
+			PRINTFORMW 
+			PRINTFORML 现在再就此四处散布谣言的话，就会产生令人匪夷所思的争吵
+			;TranslatedMark そこかしこで噂を流してやったら、面白いくらいすぐに喧嘩が始まりやがんの
+			PRINTFORML 不过也拜其所赐，即使是喝酒时的话题也变得更多了
+			;TranslatedMark おかげで酒場の酒が旨いったら旨いったらもうないね！
+			PRINTFORMW 
+			CLEARLINE LINECOUNT - FIRST_LINE
+			PRINTFORML 
+			PRINTFORML ...非常好。那么，你的工作成果———我想也就没有必要问了
+			;TranslatedMark ……ご苦労様。なら仕事の成果は――聞くまでもなさそうですね
+			PRINTFORMW 
+			PRINTFORML 本来气氛就已经差不多了，但各组似乎都缺乏最后的冲劲
+			;TranslatedMark 元々ほどよく醸成されていた空気でしたが、どの集団も最後の一押しが足りないようでしたからね
+			PRINTFORML 现在，相信很多人肯定都能和这种发色走到一起了
+			;TranslatedMark これできっと、多くの者がその髪色で纏まり合うことになるでしょう
+			PRINTFORMW 
+			PRINTFORML 谣言归谣言———如果进展顺利的话，我们很快就会获得同情，并且甚至有可能连战斗的过程也能省去
+			;TranslatedMark 流言には流言で――うまくいけば共感も得られ、争わずに済む可能性もあるでしょう
+			PRINTFORMW 
+			PRINTFORML 但如果不这样做的话，也没有办法避免
+			;TranslatedMark しかしそうでなかった場合は、避ける手段がありません
+			PRINTFORML 在这种情况下，我们为此不得不付出高昂的代价，也实在是令人遗憾
+			;TranslatedMark その場合は、それなりの代償を払わねばならないのが心残りですが……
+			PRINTFORMW 
+			CLEARLINE LINECOUNT - FIRST_LINE
+			PRINTFORML 
+			PRINTFORML 啊？你这是什么鬼话？
+			;TranslatedMark あ゛――？　何腑抜けたことを言ってやがる
+			PRINTFORML 我只是因为可以随意地杀人才协助你的，知道吗？
+			;TranslatedMark 私は殺し合いが出来ると思ったから協力してやってるんだぞ？
+			PRINTFORMW 
+			CLEARLINE LINECOUNT - FIRST_LINE
+			PRINTFORML 
+			PRINTFORML 谁说要杀人了？！最多也就小小地战斗一下,要好好地控制好自己啊！
+			;TranslatedMark 誰がそんなことを言いましたか？！　小競り合い程度の喧嘩にしてください
+			PRINTFORML 否则，我就只能现在就把你重新封印回箱子里了哦？我是说，我希望你现在就能回去
+			;TranslatedMark でなければ今ここで箱に戻しますよ？　というか今すぐにでも戻って欲しいのですが
+			PRINTFORMW 
+			CLEARLINE LINECOUNT - FIRST_LINE
+			PRINTFORML 
+			PRINTFORML 啊——讨厌讨厌...这样对我也太过苛刻了吧？虽然我也一样
+			;TranslatedMark ……あーやだやだっ！　おんなじ私のくせして上も下も固すぎる
+			PRINTFORMW 
+			PRINTFORML 不过这种事情我怎么样都无所谓哦？
+			;TranslatedMark 大体こっちはそんなのどうだっていいんだぜ？
+			PRINTFORML 粉色的发色表示淫乱？真不错！既然这样，为什么不直接把他们的生命力榨干呢
+			;TranslatedMark 淫乱ピンク？　上等だ！　それなら干乾びるまで生気を吸い取ってやろうじゃねぇか
+			PRINTFORMW 
+			CLEARLINE LINECOUNT - FIRST_LINE
+			PRINTFORML 
+			PRINTFORML 请立刻给我停下来！
+			;TranslatedMark やめてくださいっ！！
+			PRINTFORMW 
+			PRINTFORML 都已经被确定是诬告了，但如果真的发生了这样的事情的话，这个可笑的称号也就真的被坐实了吧！
+			;TranslatedMark ただでさえ濡れ衣なのに、そんなことになったら今度こそ本当に、そうなってしまうじゃないですか！
+			PRINTFORML 现在再回想下人们看我的眼神...！当时的我甚至都不能在公共场合公开行走哎，不知道吗？！
+			;TranslatedMark 今だって周りの視線を思うと……！　堂々表を歩くことも出来ないのですよ？！
+			PRINTFORMW 
+			CLEARLINE LINECOUNT - FIRST_LINE
+			PRINTFORML 
+			PRINTFORML 你在胡说些什么？要知道，当我们曾经还是一个...（贤者时间）
+			;TranslatedMark まったく、何かまととぶってんだよ。大体我らがひとつだった時は――、なあ？（賢者タイム）
+			PRINTFORMW 
+			CLEARLINE LINECOUNT - FIRST_LINE
+			PRINTFORML 
+			PRINTFORML 啊啊啊———！！啊啊！！我听不见！我听不见我听不见———！！
+			;TranslatedMark ああああー！　あー！　あー！！　聞こえませーん！　聞こえませーーーーん！
+			PRINTFORMW 
+			CLEARLINE LINECOUNT - FIRST_LINE
 	ENDSELECT
 
-	;戦況・経過
-	IF IS_COUNTRY(GET_COUNTRY_FROM_BOSS_NAME("華扇")) && (CFLAG:MASTER:所属 == GET_COUNTRY_FROM_BOSS_NAME("華扇"))
-		PRINTFORML .
-		PRINTFORML .
-		PRINTFORML .
-		PRINTFORMW %ANAME(MASTER)%正在观察那些有淫媚可疑之处的女孩们...
-		;TranslatedMark %ANAME(MASTER)%は淫ピ疑惑のある彼女らを観察している……
-		PRINTFORML
-		FOR LOCAL:0, 0, CHARANUM
-			SELECTCASE LOCAL:0
-				CASE NAME_TO_CHARA("華扇")
-					対象 = NAME_TO_CHARA("華扇")
-					SIF SCVAR:10 > 0
-						CONTINUE
-				CASE NAME_TO_CHARA("茨木童子の腕")
-					対象 = NAME_TO_CHARA("茨木童子の腕")
-					SIF SCVAR:11 > 0
-						CONTINUE
-				CASE NAME_TO_CHARA("美宵")
-					対象 = NAME_TO_CHARA("美宵")
-					SIF SCVAR:12 > 0
-						CONTINUE
-				CASE NAME_TO_CHARA("ミスティア")
-					対象 = NAME_TO_CHARA("ミスティア")
-					SIF SCVAR:13 > 0
-						CONTINUE
-				CASE NAME_TO_CHARA("こころ")
-					対象 = NAME_TO_CHARA("こころ")
-					SIF SCVAR:14 > 0
-						CONTINUE
-				CASE NAME_TO_CHARA("幽幽子")
-					対象 = NAME_TO_CHARA("幽幽子")
-					SIF SCVAR:15 > 0
-						CONTINUE
-				CASE NAME_TO_CHARA("サラ")
-					対象 = NAME_TO_CHARA("サラ")
-					SIF SCVAR:16 > 0
-						CONTINUE
-				CASE NAME_TO_CHARA("さとり")
-					対象 = NAME_TO_CHARA("さとり")
-					SIF SCVAR:17 > 0
-						CONTINUE
-				CASEELSE
-					CONTINUE
-			ENDSELECT
-			SIF (CFLAG:対象:所属 == GET_COUNTRY_FROM_BOSS_NAME("華扇"))
-				CALL SCENARIO_EVENT_TALENT_CHECK_10(対象)
-		NEXT
-	ENDIF
-
 	;終局(桃色組の所持タレントや開発具合で分岐）
-	IF (SCVAR:10 == 1) && (UNIFY == GET_COUNTRY_FROM_BOSS_NAME("華扇")) && (CFLAG:MASTER:所属 == GET_COUNTRY_FROM_BOSS_NAME("華扇"))
-		PRINTFORML 【虚实纷乱的绯闻可有冤枉•终局】
-		;TranslatedMark [終：虚実入り乱れるその風聞は濡れ衣か]
-		PRINTFORMW
-		PRINTFORML 「啊啊...果然呢。
-		;TranslatedMark 「あーあー……やっぱりなあ
-		PRINTFORMW 不愧是另一个呢，看起来右手非常想要去哪里呢，这可不是我的错哦？」
-		;TranslatedMark さすがは相棒。どうやら右手が寂しい様に見えのだが、それは私の間違いか？」
-		PRINTFORML
-		PRINTFORML 茨木华扇完成了她今日的任务后，立刻匆匆返回房间开始了自慰。
-		;TranslatedMark 茨木華扇がその役目を終えて、そそくさ部屋へ戻るなり始めたのは自慰だった
-		PRINTFORML 将身体倚在床铺上，把双手伸到胸前和密处，按照已经印刻在心的动作方式开始揉动。
-		;TranslatedMark 寝台に体を預け、胸や秘所に手を滑り込ませると、覚えてしまった動きの通りに手を動かし始める
-		PRINTFORMW 虽然勉强抑制住了漏出来的声音，但满足的喘息声依然微微地传出来了。
-		;TranslatedMark 漏れそうになる声を抑えながらも、細かい息継ぎには悦に浸った声が零れ落ちていた
-		PRINTFORML
-		PRINTFORML 「看来你压抑了很久,连我的声音都听不见了?
-		;TranslatedMark 「こっちの声すら聞こえてないとか、相当溜まってたのか？
-		PRINTFORML 好吧......你之前说了些什么......大概是「秘密」或者类似的词吧?
-		;TranslatedMark まあいいか……あーお前、なんて言ったか……はたて、だったか？
-		PRINTFORMW 怎么办。这次可是你最想要的素材啊，不留下点回忆吗？」
-		;TranslatedMark どうするお前。今度こそお前の一番欲しい素材だと思うが、撮らなくていいのか？」
-		PRINTFORML
-		PRINTFORML 「啊？知错了？那先拍下证据照片保留一下吧。
-		;TranslatedMark 「あ？　懲りた？　じゃあとりあえず証拠写真だけ撮っておけよ
-		PRINTFORMW 至于用途什么的就交给我来考虑吧。」
-		;TranslatedMark 使い道はこっちで考えるからよ」
-		PRINTFORML
-		PRINTFORML 「那是因为我
-		;TranslatedMark 「なんたってこちとら
-		PRINTFORMW 不想要那个能够修善断恶的茨木童子。我只想看她随心所欲的样子。」
-		;TranslatedMark 断善修悪を修める茨木童子なんだからよ。暫く好き勝手にさせて貰うぜ？」
-		PRINTFORML
-		PRINTFORML 在一个哈哈大笑的女人面前，一个眼神茫然的女人绝顶中颤抖着......
-		;TranslatedMark ハハハと笑う女の前で、虚ろな目をした女が高い絶頂に打ち震えていた……
-		PRINTFORMW
+
+	;淫ピでした…
+	IF SCVAR:10 == 1
+		;統一勢力が華扇勢力の場合
+		IF UNIFY == GET_COUNTRY_FROM_BOSS_NAME("華扇")
+			IF CFLAG:MASTER:所属 == GET_COUNTRY_FROM_BOSS_NAME("華扇")
+				PRINTFORML 【虚实纷乱的绯闻可有冤枉•终局】
+				;TranslatedMark [終：虚実入り乱れるその風聞は濡れ衣か]
+				PRINTFORMW 
+				PRINTFORML 茨木华扇完成了她的角色———
+				;TranslatedMark 茨木華扇がその役目を終えて――
+				PRINTFORMW 
+				PRINTFORML 「啊啊———我就知道...」
+				;TranslatedMark 「あーあー……やっぱりなあ……」
+				PRINTFORMW 
+				PRINTFORML 一回到房间后，她就直接扑向了自家的床铺，瘫倒在身下正在冲击下吱吱作响的床上
+				;TranslatedMark 部屋へ戻るや否や、軋む寝台に飛び込むように体を沈み込ませると、
+				PRINTFORMW 随后，很快就将手指搁着衣服开始轻轻揉捏，以此来抚慰自己火热的身体
+				;TranslatedMark その手を服の上から弄る様にして、華扇は火照る体を慰め始めた
+				PRINTFORML 
+				PRINTFORML 「真不敢相信你竟然就连我的声音也听不见了...好吧，看来你已经忍住了」
+				;TranslatedMark 「私の声すら聞こえていないとは。いやあ、相当溜まっていたようだなあ」
+				PRINTFORMW 
+				PRINTFORML 就这样一边把碍事的内衣弄皱，一边把手伸进下身的秘缝间
+				;TranslatedMark 邪魔になりつつある肌着に皺を作りながら、その手を隙間に滑り込ませ、
+				PRINTFORMW 用指腹贴合着敏感处反复地揉捏着，并以此来使自己沉浸在愉悦之中
+				;TranslatedMark 敏感なところを指の腹で捏ね繰り回して悦に浸る
+				PRINTFORMW 虽然勉强抑制住了过程里漏出来的声音，但最后满足的喘息声依然还是从嗓间微微溢出来了
+				;TranslatedMark 漏れそうになる声を抑えながらも、か細い吐息は快楽に熱を帯びている
+				PRINTFORML 
+				PRINTFORML 「好吧...你之前说了些什么...大概是「秘密」或者类似的词吧？」
+				;TranslatedMark 「まあいいか。あーお前、なんて言ったか……はたて、だったか？
+				PRINTFORMW 　「想要怎么做呢。这次可是你最想要的素材啊，不留下点回忆吗？」
+				;TranslatedMark どうするお前？　今度こそお前の一番欲しい素材だと思うが、撮らなくていいのか？」
+				PRINTFORML 「对...对不起...我已经受到惩罚了啊！而且我...我现在也正在受着惩罚啊...！」
+				;TranslatedMark 「ごめん、なさ……ごめ……もぉ懲りたから、あ！　懲りてるからあ……！」
+				PRINTFORMW 
+				PRINTFORML 在检查对方痴态的空余间，另一个华扇则是正在玩弄着被捆绑的女人
+				;TranslatedMark もうひとりの自分の痴態を確認する片手間、もうひとりの華扇は縛ったまま連れてきた女を弄ぶ
+				PRINTFORMW 从背后抓住乳房并反复抓揉使得乳房形变成各种形状的同时，另一只手也同样是滑入她的私密处，以指尖在那肆意地侵犯着
+				;TranslatedMark 背後から鷲掴みにした胸をぐにぐに歪ませながら、もう片方の手を、滑り込ませた秘所を指先が掻き乱す
+				PRINTFORML 
+				PRINTFORML 「啊？知错了？那还是先拍下照片保留一下证据好了」
+				;TranslatedMark 「あ？　懲りた？　なんだつまらん。だが、とりあえず証拠写真だけは撮っておけ？
+				PRINTFORMW 　「至于用途什么的就交给我来考虑吧。好啦，不用担心哦，趁着现在...我先让你去上一发好了」
+				;TranslatedMark 後の使い道は私が考えてやるから心配するな。ほら、折角だからお前も一発イってしまえ」
+				PRINTFORML 「啊，呀，啊啊...啊嗯...哈~啊啊...♥♥！」
+				;TranslatedMark 「え、や、あ゛、あ、あ゛っ、ぁ゛あ、あぁぁあ゛ああ゛あぁ……！」
+				PRINTFORMW 
+				PRINTFORML 姬海棠的内心在她熟练的技巧夏轻易便被攻破开来，就这般被准确地发现了弱点
+				;TranslatedMark 弱い所を的確に探り当てる熟達した手管を前に、はたての頭の奥が弾け飛ぶ
+				PRINTFORMW 压抑不住自己淫靡的声音，羞人地从嘴角淌落的唾液就这般滑进脚底所溢出的一滩淫液里
+				;TranslatedMark 抑え切れない声と共に、口端から垂れる涎が、足の付根から溢れる愛液の水溜りの中へ落ちてゆく
+				PRINTFORMW 就这般不住地颤抖着双腿
+				;TranslatedMark カクカクと小刻みに震える足腰
+				PRINTFORMW 被迫弯腰蹲下，即使是站立也无法做到
+				;TranslatedMark 立っていられない体を、くの字に折れ曲がるのを無理矢理引き起こされ
+				PRINTFORMW 姬海棠的意识就这样被紧贴而上的嘴唇和纠缠的舌头打断了
+				;TranslatedMark 塞がれた唇と絡み取られる舌に、はたての意識はプツリと切れた
+				PRINTFORMW 她感受到，在自己的身体里各种力量都在逐渐流失着———
+				;TranslatedMark 体から、ありとあらゆる力が抜けてゆく――
+				PRINTFORML 
+				PRINTFORML 「至于为什么？那是因为我啊...才不想要那个修善断恶的茨木童子」
+				;TranslatedMark 「なんたってこちとら――“断善修悪”を修める茨木童子様よ。
+				PRINTFORML 　「现在啊...也的确是一个很好的机会，所以我就要让她解放本性玩个开心，至少暂且———表现得随心所欲一点...不好吗？」
+				;TranslatedMark 折角の機会だからな、もう暫く好き勝手面白おかしく遊ばせて貰うぜ……？」
+				PRINTFORMW 
+				PRINTFORML 感受着从倒下的女人体内夺走的精力，她不禁陶醉在体内充满力量的感觉之中
+				;TranslatedMark 倒れた女から奪いとった精力に、漲る感覚を確かめ酔いしれながら、
+				PRINTFORML 渐渐地，无法抑制的笑声愈发增大
+				;TranslatedMark 堪え切れなくなった笑いが少しずつ、高笑いへと変わり始めていた
+				PRINTFORMW 
+				SETCOLOR 0xF7819F
+				PRINTFORML （......淫乱粉什么的...非...非常抱歉......❤）
+				;TranslatedMark （…………淫乱ピンクで……ごめん、なさい…………❤）
+				RESETCOLOR
+				PRINTFORMW 
+				PRINTFORML 在大笑着的女子身边，一个眼神空虚茫然的女人正沉浸在绝顶的快感中，不住地颤抖着...
+				;TranslatedMark 笑う女の傍では、虚ろな目をした同じ顔の女が、絶頂に蕩けて沈んでいた...
+				PRINTFORMW 
+			;勢力に属していない、放浪中など
+			ELSE
+				PRINTFORML 【虚实纷乱的绯闻可有冤枉•终局】
+				;TranslatedMark [終：虚実入り乱れるその風聞は濡れ衣か]
+				PRINTFORMW 
+				PRINTFORML 在这风雨飘摇，令人头晕目眩的数周或数月里
+				;TranslatedMark 嵐の様に目まぐるしい数週間か数ヶ月
+				PRINTFORMW 在这段时间里发生了诸多的暴力事件，甚至那种以血洗血的程度都是被允许的
+				;TranslatedMark その間に起きた出来事は、血で血を洗い流す様な暴力を是とした日々だった
+				PRINTFORML 
+				PRINTFORML 至于这场纷争的起因到底又是什么呢...或许已经没有人记得了
+				;TranslatedMark 争いの原因はなんだったかなど……きっと誰も覚えていないことだろう
+				PRINTFORMW 
+			ENDIF
+
+		;その他勢力が勝利した場合
+		ELSE
+			;PRINTFORML 
+		ENDIF
 	ENDIF
 ENDIF
 
 CALL SINGLE_DRAWLINE
 
 ;-------------------------------------------------
-;タレントチェック
-;シナリオメインキャラのタレント状況を保存してＥＤを変化させます
-;-------------------------------------------------
-@SCENARIO_EVENT_TALENT_CHECK_10(対象)
-#DIM 対象
-
-SELECTCASE RAND:5
-	CASE 0
-		IF ABL:対象:Ｃ感 > 3
-			PRINTFORML %ANAME(対象)%对她的阴蒂感到不自在......
-			;TranslatedMark %ANAME(対象)%はクリトリスに違和感を感じている……
-			PRINTFORML
-			PRINTDATAL
-				DATAFORM 「嗯......稍微有些紧张......」
-				;TranslatedMark 「んっ……ちょっと、びりびり、する……」
-				DATAFORM 「呼......呼......无法集中注意力......」
-				;TranslatedMark 「はあ……はあ……集中、できない……」
-				DATAFORM 「奇怪的...感觉......」
-				;TranslatedMark 「……へんな……感じが、する……」
-			ENDDATA
-			IF ABL:対象:Ｃ感 >= 7
-				PRINTDATAL
-					DATAFORM 「嗯...内裤....摩擦....呃...」
-					;TranslatedMark 「……うぅ……下着が……擦れ、て……」
-					DATAFORM 「嗯，哦......那里会......湿了呢......」
-					;TranslatedMark 「……んうぅ……あそこが……濡れちゃう……」
-					DATAFORM 「呼......呼......动力有点......刺激......」
-					;TranslatedMark 「はあ……はあ……擦れ、て……刺激が……」
-				ENDDATA
-			ENDIF
-			PRINTFORML
-			PRINTFORMW 积聚起来的身体异常感，肯定正在困扰着%ANAME(対象)%......
-			;TranslatedMark 積もり始めた体の違和感は、確実に%ANAME(対象)%を悩ませている……
-		ELSE
-			PRINTDATAL
-				DATAFORM 「什么？不要盯着看。」
-				;TranslatedMark 「何？　じろじろ見ないで」
-				DATAFORM 「......没什么事情啦」
-				;TranslatedMark 「……なんともないわよ」
-				DATAFORM 「......奇怪的东西」
-				;TranslatedMark 「……変なの」
-				DATAFORM 「请不要盯着看。」
-				;TranslatedMark 「じろじろ見ないで下さい」
-			ENDDATA
-			PRINTFORML
-			PRINTFORMW %ANAME(対象)%似乎没什么特别的感觉......
-			;TranslatedMark %ANAME(対象)%は特に何も感じていないようだ……
-		ENDIF
-	CASE 1
-		IF ABL:対象:Ｖ感 > 3
-			PRINTFORML %ANAME(対象)%对隐秘之处感到不安......
-			;TranslatedMark %ANAME(対象)%は秘所に違和感を感じている……
-			PRINTFORML
-			PRINTDATAL
-				DATAFORM 「......呐......手指伸进去了哦......」
-				;TranslatedMark 「……なに……手を伸ばしてるのよ……」
-				DATAFORM 「......没有什么......什么也没有......」
-				;TranslatedMark 「……なんともない……なんとも、ない……」
-				DATAFORM 「......啊......又......湿了......」
-				;TranslatedMark 「……あ……また、濡れちゃう……」
-			ENDDATA
-			IF ABL:対象:Ｖ感 >= 7
-				PRINTDATAL
-					DATAFORM 「呼呼，呼呼......好痒，难受着......」
-					;TranslatedMark 「……はあ、はあ……むずむず、してる……」
-					DATAFORM 「......真是的......随便......」
-					;TranslatedMark 「……奥が……勝手に……」
-					DATAFORM 「不足...」
-					;TranslatedMark 「……足りない……」
-				ENDDATA
-			ENDIF
-			PRINTFORML
-			PRINTFORMW 积聚起来的身体异常感，肯定正在困扰着%ANAME(対象)%......
-			;TranslatedMark 積もり始めた体の違和感は、確実に%ANAME(対象)%を悩ませている……
-		ELSE
-			PRINTDATAL
-				DATAFORM 「什么？不要盯着看。」
-				;TranslatedMark 「何？　じろじろ見ないで」
-				DATAFORM 「......没什么事情啦」
-				;TranslatedMark 「……なんともないわよ」
-				DATAFORM 「......奇怪的东西」
-				;TranslatedMark 「……変なの」
-				DATAFORM 「请不要盯着看。」
-				;TranslatedMark 「じろじろ見ないで下さい」
-			ENDDATA
-			PRINTFORML
-			PRINTFORMW %ANAME(対象)%似乎没什么特别的感觉......
-			;TranslatedMark %ANAME(対象)%は特に何も感じていないようだ……
-		ENDIF
-	CASE 2
-		IF ABL:対象:Ａ感 > 3
-			PRINTFORML %ANAME(対象)%感到屁股有些不舒服...
-			;TranslatedMark %ANAME(対象)%はお尻に違和感を感じている……
-			PRINTFORML
-			PRINTDATAL
-				DATAFORM 「...呜...这样的话...无法正正经经地坐下来...」
-				;TranslatedMark 「……うぅ……これじゃあ……まともに、座れない……」
-				DATAFORM 「......没有什么......什么也没有......」
-				;TranslatedMark 「……なんともない……なんとも、ない……」
-				DATAFORM 「屁股......」
-				;TranslatedMark 「……おしりが……」
-			ENDDATA
-			IF ABL:対象:Ａ感 >= 7
-				PRINTDATAL
-					DATAFORM 「嗯嗯......扑通扑通......想要......」
-					;TranslatedMark 「……うぅ……ずぼずぼ……したい……」
-					DATAFORM 「呼，呼...好疼...」
-					;TranslatedMark 「……はあ、はあ……じんじんしてる……」
-					DATAFORM 「......屁股......」
-					;TranslatedMark 「……おしりがあ……」
-				ENDDATA
-			ENDIF
-			PRINTFORML
-			PRINTFORMW 积聚起来的身体异常感，肯定正在困扰着%ANAME(対象)%......
-			;TranslatedMark 積もり始めた体の違和感は、確実に%ANAME(対象)%を悩ませている……
-		ELSE
-			PRINTDATAL
-				DATAFORM 「什么？不要盯着看。」
-				;TranslatedMark 「何？　じろじろ見ないで」
-				DATAFORM 「......没什么事情啦」
-				;TranslatedMark 「……なんともないわよ」
-				DATAFORM 「......奇怪的东西」
-				;TranslatedMark 「……変なの」
-				DATAFORM 「请不要盯着看。」
-				;TranslatedMark 「じろじろ見ないで下さい」
-			ENDDATA
-			PRINTFORML
-			PRINTFORMW %ANAME(対象)%似乎没什么特别的感觉......
-			;TranslatedMark %ANAME(対象)%は特に何も感じていないようだ……
-		ENDIF
-	CASE 3
-		IF ABL:対象:Ｂ感 > 3
-			PRINTFORML %ANAME(対象)%对自己的胸口感到不舒服......
-			;TranslatedMark %ANAME(対象)%は胸に違和感を感じている……
-			PRINTFORML
-			PRINTDATAL
-				DATAFORM 「......哈啊......哈啊......兴奋起来了......」
-				;TranslatedMark 「……はあ……はあ……勃っちゃってる……」
-				DATAFORM 「滚烫的凉意......」
-				;TranslatedMark 「……じんじんしてる……」
-				DATAFORM 「......胸口有些不舒服......感觉有点奇怪......」
-				;TranslatedMark 「……むねが……なんかへん……」
-			ENDDATA
-			IF ABL:対象:Ｂ感 >= 7
-				PRINTDATAL
-					DATAFORM 「呜呜......内衣......碍事啊......」
-					;TranslatedMark 「……うぅ……下着が……邪魔ぁ……」
-					DATAFORM 「......不能想要碰触啊......明明知道不可以想这样的......」
-					;TranslatedMark 「……さわりたいとか……おもっちゃいけないのに……」
-					DATAFORM 「......为什么会这样......？」
-					;TranslatedMark 「……さきっぽが……なんでぇっ……？」
-				ENDDATA
-			ENDIF
-			PRINTFORML
-			PRINTFORMW 积聚起来的身体异常感，肯定正在困扰着%ANAME(対象)%......
-			;TranslatedMark 積もり始めた体の違和感は、確実に%ANAME(対象)%を悩ませている……
-		ELSE
-			PRINTDATAL
-				DATAFORM 「什么？不要盯着看。」
-				;TranslatedMark 「何？　じろじろ見ないで」
-				DATAFORM 「......没什么事情啦」
-				;TranslatedMark 「……なんともないわよ」
-				DATAFORM 「......奇怪的东西」
-				;TranslatedMark 「……変なの」
-				DATAFORM 「请不要盯着看。」
-				;TranslatedMark 「じろじろ見ないで下さい」
-			ENDDATA
-			PRINTFORML
-			PRINTFORMW %ANAME(対象)%似乎没什么特别的感觉......
-			;TranslatedMark %ANAME(対象)%は特に何も感じていないようだ……
-		ENDIF
-	CASE 4
-		IF ABL:対象:Ｍ感 > 3
-			PRINTFORML %ANAME(対象)%感到嘴唇不舒服。
-			;TranslatedMark %ANAME(対象)%は唇に違和感を感じている……
-			PRINTFORML
-			PRINTDATAL
-				DATAFORM 「......嘴唇好像有点奇怪......」
-				;TranslatedMark 「……くちびるが……なんかへん……」
-				DATAFORM 「......真奇怪......口渴啊......」
-				;TranslatedMark 「……なんだろ……口寂しい……」
-				DATAFORM 「......这个......是那么...误解翻译了吗......」
-				;TranslatedMark 「……こんなに……びんかんだったっけ……」
-			ENDDATA
-			IF ABL:対象:Ｍ感 >= 7
-				PRINTDATAL
-					DATAFORM 「......嗯......好像快不行了......」
-					;TranslatedMark 「……っ……どうにかなりそう……」
-					DATAFORM 「......只是用手碰了一下而已......全身都麻痹了呜呜......」
-					;TranslatedMark 「……指で触れただけなのにっ……しびれてるぅ……」
-					DATAFORM 「......更多的......想要、尽情地、去做、或许......」
-					;TranslatedMark 「……もっと……きす、いっぱいしたい、かも……」
-				ENDDATA
-			ENDIF
-			PRINTFORML
-			PRINTFORMW 积聚起来的身体异常感，肯定正在困扰着%ANAME(対象)%......
-			;TranslatedMark 積もり始めた体の違和感は、確実に%ANAME(対象)%を悩ませている……
-		ELSE
-			PRINTDATAL
-				DATAFORM 「什么？不要盯着看。」
-				;TranslatedMark 「何？　じろじろ見ないで」
-				DATAFORM 「......没什么事情啦」
-				;TranslatedMark 「……なんともないわよ」
-				DATAFORM 「......奇怪的东西」
-				;TranslatedMark 「……変なの」
-				DATAFORM 「请不要盯着看。」
-				;TranslatedMark 「じろじろ見ないで下さい」
-			ENDDATA
-			PRINTFORML
-			PRINTFORMW %ANAME(対象)%似乎没什么特别的感觉......
-			;TranslatedMark %ANAME(対象)%は特に何も感じていないようだ……
-		ENDIF
-ENDSELECT
-PRINTFORML
-
-IF GETBIT(TALENT:NAME_TO_CHARA("華扇"):淫乱系, 素質_淫乱_淫乱) && !SCVAR:10
-	PRINTFORML （......这种事情......不可以接收啊......虽然不想承认......也不想承认......）
-	;TranslatedMark （……こんなこと……認められない……認めたくなど、ないのに……）
-	PRINTFORML
-	PRINTFORMW 华扇似乎要越过最后的底线了。...要越过吗？
-	;TranslatedMark 華扇は最後の一線を越えてしまいそうです。……越えてしまう？
-	CALL ASK_YN("要", "不要")
-	;TranslatedMark "はい", "いいえ"
-	IF RESULT == 0
-		SETCOLOR 0xFFFF00
-		PRINTFORMW 无法抗拒肉欲的茨木华扇屈服了......
-		;TranslatedMark 抗うことの出来なかった肉欲に、茨木華扇は屈してしまった……
-		RESETCOLOR
-		SCVAR:10 = 1
-	ELSE
-		SCVAR:10 = 2
-	ENDIF
-ENDIF
-;その他メンバー用に11～17を確保してます。作るかはわかりません…
-;茨木童子
-;IF GETBIT(TALENT:NAME_TO_CHARA("茨木童子の腕"):淫乱系, 素質_淫乱_淫乱) && SCVAR:11
-;
-;ENDIF
-;-------------------------------------------------
 ;定期イベント
 ;-------------------------------------------------
 @Event_Daily_S10
+#DIM 対象
 #DIM マミゾウ勢力
 #DIM マミゾウ
 #DIM はたて
+
 マミゾウ = NAME_TO_CHARA("マミゾウ")
 はたて   = NAME_TO_CHARA("はたて")
 マミゾウ勢力 = GET_COUNTRY_FROM_BOSS_NAME("マミゾウ")
 
+;淫ピ化チェック
+IF DAY > 7 && !SCVAR:20 && IS_COUNTRY(GET_COUNTRY_FROM_BOSS_NAME("華扇"))
+	PRINTFORML .
+	PRINTFORML .
+	PRINTFORML .
+	IF CFLAG:MASTER:所属 == GET_COUNTRY_FROM_BOSS_NAME("華扇")
+		PRINTFORMW %ANAME(MASTER)%正在观察那些有淫媚可疑之处的女孩们...
+		;TranslatedMark %ANAME(MASTER)%は淫ピ疑惑のある彼女らを観察している……
+	ELSE
+		PRINTFORMW 疑似淫妇的少女的举动逐渐被人所知……
+		;TranslatedMark 淫ピ疑惑のある彼女らの動向が知れ渡る……
+	ENDIF
+	PRINTFORML 
+	FOR LOCAL:0, 0, CHARANUM
+		SELECTCASE LOCAL:0
+			CASE NAME_TO_CHARA("華扇")
+				対象 = NAME_TO_CHARA("華扇")
+				SIF SCVAR:10
+					CONTINUE
+			CASE NAME_TO_CHARA("茨木童子の腕")
+				対象 = NAME_TO_CHARA("茨木童子の腕")
+				SIF SCVAR:11
+					CONTINUE
+			CASE NAME_TO_CHARA("美宵")
+				対象 = NAME_TO_CHARA("美宵")
+				SIF SCVAR:12
+					CONTINUE
+			CASE NAME_TO_CHARA("ミスティア")
+				対象 = NAME_TO_CHARA("ミスティア")
+				SIF SCVAR:13
+					CONTINUE
+			CASE NAME_TO_CHARA("こころ")
+				対象 = NAME_TO_CHARA("こころ")
+				SIF SCVAR:14
+					CONTINUE
+			CASE NAME_TO_CHARA("幽幽子")
+				対象 = NAME_TO_CHARA("幽幽子")
+				SIF SCVAR:15
+					CONTINUE
+			CASE NAME_TO_CHARA("サラ")
+				対象 = NAME_TO_CHARA("サラ")
+				SIF SCVAR:16
+					CONTINUE
+			CASE NAME_TO_CHARA("さとり")
+				対象 = NAME_TO_CHARA("さとり")
+				SIF SCVAR:17
+					CONTINUE
+			CASEELSE
+				CONTINUE
+		ENDSELECT
+		CALL SCENARIO_EVENT_TALENT_CHECK_10(対象)
+	NEXT
+ENDIF
+
 ;マミゾウへの献金(はたて)
 IF INRANGE(DAY, 8, 16) && IS_COUNTRY(マミゾウ勢力) && (CFLAG:はたて:所属 == GET_COUNTRY_FROM_BOSS_NAME("マミゾウ"))
 	IF (DAY % 2 == 0)
-		PRINTFORML 「唔哇！我来付钱......我一定会支付的！这样就可以了吧？！」
-		;TranslatedMark 「うぇーん！　払うよぉ……払いますともおっ！　これでいいでしょう？！」
-		PRINTFORML
-		PRINTFORMW %ANAME(はたて)%向%ANAME(マミゾウ)%势力供款了......
-		;TranslatedMark はたてはマミゾウ勢力に、売り上げの一部を上納しました……
+		CALL SINGLE_DRAWLINE
+		PRINTFORML 
+		PRINTFORML 受到猯藏势力保护的姬海棠，似乎被要求支付了报酬
+		;TranslatedMark マミゾウ勢力に保護されているはたてが、代金の請求を受けているようです
+		PRINTFORMW 
+		SELECTCASE RAND:5
+			CASE 0
+				PRINTFORML 「唔啊啊！我付钱...我付钱！这样就可以了，对吧！」
+				;TranslatedMark 「うぇーん！　払うよぉ……払いますともおっ！　これでいいでしょお！」
+			CASE 1
+				PRINTFORML 「呜咕...别，别再继续了...或者至少让我休息一下吧！我不想再那样光着身子了！」
+				;TranslatedMark 「うぐ……こ、これ以上は勘弁を……か、勘弁してよお！　丸裸はいやあ！」
+			CASE 2
+				PRINTFORML 「哈啊...猯藏，大人...这次...只有这些...的说...」
+				;TranslatedMark 「ハイ……マミゾウ、サマ……コンカイハ、コレダケ、デス……」
+			CASE 3
+				PRINTFORML 「呜...我全身已经脱得干干净净了...羽毛什么的，请不要拔掉啊...」
+				;TranslatedMark 「ううっ……丸裸にされちゃった……お願いだから羽まで毟らないで……」
+			CASE 4
+				PRINTFORML 「呜啊？！有反省了！我真的有在反省了！所以我才会付出这么多，你们说对吧？！」
+				;TranslatedMark 「うぇーん！　反省してるぅ！　反省してるってばあ！　だから色々払ってるでしょぉ？！」
+		ENDSELECT
+		PRINTFORML 
+		SETCOLOR 0xFFFF00
+		PRINTFORMW 姬海棠将一部分的销售额交给了猯藏...！
+		;TranslatedMark はたてはマミゾウに、売り上げの一部を上納しました……！
+		RESETCOLOR
 		LOCAL:1 = GET_OWN_CITY(マミゾウ勢力)
 		FOR LOCAL:0, 0, MAX_CITY
 			SIF CITY_OWNER:(LOCAL:0) == マミゾウ勢力
@@ -1376,7 +1587,6 @@ IF INRANGE(DAY, 8, 16) && IS_COUNTRY(マミゾウ勢力) && (CFLAG:はたて:所
 	ENDIF
 	CALL SINGLE_DRAWLINE
 ENDIF
-
 ;-------------------------------------------------
 ;統一後イベント
 ;茨木童子の出現（SCVAR:20,21,22）
@@ -1402,95 +1612,105 @@ IF !SCVAR:20 && UNIFY
 	PRINTL  .
 	PRINTL  .
 	PRINTFORML [ＥＸ：？？？？？？？？？]
-	PRINTFORMW
-	PRINTFORML 喂，辛苦了。果然是我的搭档。
+	PRINTFORMW  
+	PRINTFORML 哟~辛苦了。不愧是我的搭档
 	;TranslatedMark よう、お疲れさん。さすが我が相棒よ
-	PRINTFORMW 事态的最终结果......这个短暂的目的，让我看见了一切。
+	PRINTFORMW 事情也终于要结束了...这双短暂所拥有的眼睛，让我看见了一切
 	;TranslatedMark 事態の行く末の最後まで……この仮初の目は、全てを見届けさせてもらったぞ
-	PRINTFORML
-	PRINTFORML 干得好啊。天气真好。
+	PRINTFORML 
+	PRINTFORML 不错，干得漂亮
 	;TranslatedMark やるじゃないか。天晴れだ
-	PRINTFORMW 实在是讨厌和困扰的家伙。但这也是他的可爱之处。
+	PRINTFORMW 虽说是个实在讨厌和让人困扰的家伙。但这也的确是她的可爱之处。
 	;TranslatedMark 本当に忌々しくて、困ったヤツだ。だが、そこがまた好いところだ
-	PRINTFORML
-	PRINTFORMW 顺便问问伙伴......你难道没有觉得有点奇怪吗？
+	PRINTFORML 
+	PRINTFORMW 话说...你难道就没有感觉到有点奇怪吗？
 	;TranslatedMark ところで相棒……少しはおかしいと思わなかったのか？
-	PRINTFORML
-	PRINTFORML 啊？现在才说？别这样说。我都吓了一跳。
+	PRINTFORML 
+	PRINTFORML 啊？现在才说是不是有点太晚了？别这样。我都吓了一跳
 	;TranslatedMark あ？　今更？　そう言うな。私だって驚いたのさ
-	PRINTFORMW 为什么又能够自由地四处走动呢？
+	PRINTFORMW 为什么现在又能够自由地四处活动了呢？
 	;TranslatedMark どうしてまた、自由に歩きまわれるんだってな
-	PRINTFORML
-	PRINTFORMW 啊啊，请别生气，别生气。我的可爱的脸因此弄坏了。
+	PRINTFORML 
+	PRINTFORMW 啊啊，别生气别生气。我这张可爱的脸都要因此被弄坏了
 	;TranslatedMark ああ、怒るな怒るな。私の可愛い顔が台無しだ
-	PRINTFORML
+	PRINTFORML 
 	PRINTFORML 然而，难道管理有些松懈是我的错觉吗？
 	;TranslatedMark だが、管理が少々甘くなっていたのは、私の気のせいではあるまい？
-	PRINTFORMW 把困在箱子里的我爱抚如此，你却懒得照料，这是怎么一回事？
+	PRINTFORMW 即使你很喜欢我被锁在箱子里的样子，但如果忽视管理的话，即使是它又有什么意义呢？
 	;TranslatedMark 箱に閉じ込めた私を愛でているというのに、その管理を怠るとは何事だ
-	PRINTFORML
+	PRINTFORML 
 	PRINTFORMW 多亏了你，我能够经历千年来有趣的东西，真是太有意思了！
 	;TranslatedMark お陰で千年振りに、面白いものをたくさん見られて楽しかったぞ！
-	PRINTFORML
+	PRINTFORML 
 	PRINTFORMW 好的。那么，让我们进行答案检查吧。
 	;TranslatedMark さて。それじゃあ、答え合わせをしよう
-	PRINTFORML
-	PRINTFORMW 这次的事件。说那个女人进行了念写的......就是「我」。
-	;TranslatedMark 今回の事件。あの女が念写したというのは……「私」だ
-	PRINTFORML
-	PRINTFORML 等待对方没注意到的好时机，开始行动吧？
+	PRINTFORML 
+	PRINTFORMW 这次的事件最开始，那个女人进行念写的对象...就是「我」
+	;TranslatedMark 今回の事件。あの女が念写したというのは……“私”だ
+	PRINTFORML 
+	PRINTFORML 就是等到你没有注意到的好时机才开始行动的哦？
 	;TranslatedMark 相棒に気付かれない頃合を見計らってな？
 	PRINTFORMW 从箱子里逃出来的时候，这可能是我到处寻求一点活力时的一张照片。
 	;TranslatedMark 箱から抜け出し、少々精気を分けて貰いに回っていた時の一枚だろう
-	PRINTFORML
-	PRINTFORML 啊啊，不要生气喔。
+	PRINTFORML 
+	PRINTFORML 啊啊，请不要生气喔
 	;TranslatedMark ああ、ああ、そう目くじらを立てるなよぉ
-	PRINTFORML 相伴的方式我知道
+	PRINTFORML 我知道该怎么做的
 	;TranslatedMark 相棒のやり方は知っている
-	PRINTFORMW 希望你能感谢我，我刻意控制了迷惑的程度。
+	PRINTFORMW 希望你能心存感激呢。毕竟我还刻意的控制了迷惑的程度呢
 	;TranslatedMark 迷惑を掛けない程度に抑えておいたのだ。そこは感謝して欲しいなあ
-	PRINTFORML
+	PRINTFORML 
 	PRINTFORML 那么
 	;TranslatedMark さて
-	PRINTFORMW
-	PRINTFORML 说到这个原因呢。解决之说，我还远远不够发泄呢？
+	PRINTFORMW 
+	PRINTFORML 这就是为什么说就算是解决了，我还是远远不够发泄呢
 	;TranslatedMark そうゆうわけでなあ。解決と言っても、私はまだまだ暴れ足りなくてな？
-	PRINTFORMW 最后我希望能与你交战一次，你能接受吗？
+	PRINTFORMW 我希望最后还能够与你交战一次，你能接受吗？
 	;TranslatedMark 最後に一戦交えたいと思うわけだが、受けてくれるよな？
-	PRINTFORML
-	PRINTFORML 傻话，要不？非常认真的。
+	PRINTFORML 
+	PRINTFORML 傻话？哪里有，非常认真的
 	;TranslatedMark 馬鹿言うな？　いいや？　大真面目だ
-	PRINTFORMW 为什么呢？这种事情明明已经决定了啊。
+	PRINTFORMW 为什么呢？这种事情明明已经注定了啊
 	;TranslatedMark なぜだと？　そんなもの決まっているではないか
-	PRINTFORML
+	PRINTFORML 
 	PRINTFORML 将分开的两个身体合为一个，这有什么不好呢？
 	;TranslatedMark ふたつに別れた体を、ひとつに戻して何がいけない
-	PRINTFORMW
-	PRINTFORML 我可能喜欢现在的状态，但我仍然感到孤独。
+	PRINTFORMW 
+	PRINTFORML 虽说可能的确有些喜欢现在的状态，但我仍然会为此感到孤独什么的，也是真的
 	;TranslatedMark 私は今が気に入っているのかもしれないが、私はこれでも寂しくてな
-	PRINTFORMW 这部事情的发展虽然出乎意料，但我很高兴。
-	;TranslatedMark この前のアレが予想外とはいえ、嬉しかった
-	PRINTFORML
-	PRINTFORML 但是，这次不行了哦？如果是那个的话，我已经把它藏起来了。
-	;TranslatedMark だが、今度ばかりはそうはいかんぞ？　アレなら私がもう隠した
-	PRINTFORMW 那种东西，再被切断就无法与之抗衡了啊......
+	PRINTFORMW 虽然这些事情的发展的确有些出乎意料，但我还是很高兴哦
+	;TranslatedMark この前のアレは予想外とはいえ、嬉しかったのだ
+	PRINTFORML 
+	PRINTFORML 但是，这次可不行了哦？如果是那个的话，我已经把它藏起来了。
+	;TranslatedMark だが。今度ばかりはそうはいかんぞ？　アレなら私がもう隠した
+	PRINTFORMW 那种东西，要是再被切断的话，就再也没有办法与之抗衡了啊...
 	;TranslatedMark あんなもので、また切り離されたりしては敵わんからなあ……
-	PRINTFORML
-	PRINTFORML 这就是理由。如果胜利后，就算他不愿意也要让他回到原来的样子，好吗？
+	PRINTFORML 
+	PRINTFORML 这就是理由。如果我赢了的话，就算你不愿意也要好好地回到原来的样子，好吗？
 	;TranslatedMark そうゆうわけだ。勝った暁には、嫌がってでも元に戻ってもらうぞ？
-	PRINTFORMW 当然，如果输了，不管在盒子里还是哪里，我都会回去的！
+	PRINTFORMW 当然，如果我输了，不管回到箱子里还是怎么说，我都会好好照办的！
 	;TranslatedMark もちろん負けた場合は、箱の中でもどこでも戻ってやろう！
-	PRINTFORML
+	PRINTFORML 
 	SETCOLOR 0xFFFF00
-	PRINTFORML 来吧，让我们尽情享受吧！我的伙伴啊！我在地狱等着你！
+	PRINTFORML 来吧，就让我们尽情享受吧！我的伙伴啊！我会在地狱等着你的！
 	;TranslatedMark さあ、楽しもう！　我が相棒よ！　私は地獄で待っている！
 	RESETCOLOR
-	PRINTFORMW
+	PRINTFORMW 
+	PRINTL  .
+	PRINTL  .
+	PRINTL  .
+	PRINTFORML 
+	SETCOLOR 0xFFFF00
+	PRINTFORML ...被此时的事态勾起兴趣的伊吹萃香和星熊勇仪加入了茨木童子一方！
+	;TranslatedMark ……この事態を面白がった伊吹萃香と星熊勇儀が茨木童子に加勢した！
+	RESETCOLOR
+	PRINTFORMW 
+
 	CALL SINGLE_DRAWLINE
 
 	SIF 童子勢力 < 1
 		CALL CREATE_COUNTRY_DOUJI
-
+		
 ;童子勢力の出現後
 ELSEIF SCVAR:20 == 1
 	;童子勢力が勝利した場合
@@ -1498,32 +1718,33 @@ ELSEIF SCVAR:20 == 1
 		SCVAR:20 = 2
 		PRINTFORML 终：奸佞邪智的鬼 茨木华扇
 		;TranslatedMark [終：奸佞邪智の鬼　茨木華扇]
-		PRINTFORMW
-		PRINTFORML
+		PRINTFORMW  
+		PRINTFORML  
 		PRINTFORML 这场胜利，是我得来的！
 		;TranslatedMark この勝負、私が頂いたあ！
-		PRINTFORMW 按照约定，让我们变回一体吧，我的本体啊！
+		PRINTFORMW 按照约定，就让我们重新变回一体吧，我的本体啊！
 		;TranslatedMark 盟約に従い、ひとつに戻らせてもらおう我が本体よ！
-		PRINTFORML
-		PRINTFORML 我的伙伴虽然让我很烦恼。
-		;TranslatedMark 我が相棒ながら、手を煩わせる
-		PRINTFORMW 多亏了你，给她灌输了错误的内容！
-		;TranslatedMark おかげで匙加減を間違えてしまったではないか！
-		PRINTFORML
-		PRINTFORML 完全不知道是要昏迷到什么时候呢。我不会只能得到一具尸体吧？
+		PRINTFORML  
+		PRINTFORML 虽然我的搭档的确是经常让我伤透了脑筋
+		;TranslatedMark いやはや我が相棒ながら、中々に手を煩わせる
+		PRINTFORMW 但我的胜利，也得是多亏了你给她灌输错误的信息啊！
+		;TranslatedMark おかげで匙加減をひとつ間違えてしまったではないか！
+		PRINTFORML  
+		PRINTFORML 啊啊...完全不知道要昏迷到什么时候呢。我不会只能得到一具尸体吧？
 		;TranslatedMark 全くいつまで気絶している。勝手に体を頂いてしまうぞ？
-		PRINTFORML 嘛，随便了，不管了。
-		;TranslatedMark まあ、勝手に頂くんだがな
-		PRINTFORMW 你的恨言，我将听到你满意为止——
-		;TranslatedMark 恨み言は、後で気の済むまで聞いてやろう――
-		PRINTFORMW
+		PRINTFORMW ———啊啊，反正最后也还是得自己来，不是吗？
+		;TranslatedMark ――まあ、勝手に頂くんだがな？
+		PRINTFORML 
+		PRINTFORML 但是啊，你的怨言...我还是会好好地听到满意为止的
+		;TranslatedMark 恨み言は、後で気が済むまで聞いてやろう
+		PRINTFORMW 
 		SETCOLOR 0xFFFF00
-		PRINTFORML
-		PRINTFORML 哈哈......哈哈哈......
+		PRINTFORML 
+		PRINTFORML 哈哈...哈哈哈...
 		;TranslatedMark はは……ははは……っ
 		PRINTFORML 啊哈哈哈哈哈！啊哈哈哈哈哈！！
 		;TranslatedMark アーッハッハッハッハッハ！　アーッハッハッハッハッハ！！
-		PRINTFORMW
+		PRINTFORMW 
 		RESETCOLOR
 		CALL SINGLE_DRAWLINE
 
@@ -1541,40 +1762,40 @@ ELSEIF SCVAR:20 == 1
 		PRINTL
 		PRINTFORML 终结：断善修恶的怪腕 茨木童子
 		;TranslatedMark [終：断善修悪の怪腕　茨木童子]
-		PRINTFORMW
-		PRINTFORML
-		PRINTFORML 真是令人惊讶啊。这场败战竟然如此清爽无阴云。
+		PRINTFORMW 
+		PRINTFORML  
+		PRINTFORML 真是令人惊讶啊。我竟然如此清爽的败了...
 		;TranslatedMark なんてことだ。清々しいほど天晴な負け戦じゃないかっ
-		PRINTFORMW 你竟敢摒弃这么多亡灵，再次追杀我？
+		PRINTFORMW 想不到你竟然能够成功击退这么多的亡灵，然后又再次把我逼到了这种境地！
 		;TranslatedMark あれだけの死者をよくぞ退け、再び私を追い詰めるとは！
-		PRINTFORML
-		PRINTFORML 啊，没办法了。这次可说是名副其实的我输了。
+		PRINTFORML 
+		PRINTFORML 啊，没办法了。这次可名副其实的是我输了。
 		;TranslatedMark ああ、仕方ない。今度こそ、名実ともに私の負けだ
-		PRINTFORMW 随便处理你喜欢的事情吧，无论是在盒子里还是在任何地方，我都会回来的！
+		PRINTFORMW 那么就随你喜欢的来吧，无论是在箱子里还是在任何地方，我总有一天会回来的！
 		;TranslatedMark 相棒の好きな様にするが良い。箱の中でもどこでも戻ってやろう！
-		PRINTFORML
-		PRINTFORML 听觉敏锐吗？不管怎样，虽然费了些力气，但还是感到清爽。
+		PRINTFORML 
+		PRINTFORML 听觉变得敏锐了吗？也许是因为使用了力量所以会感到神清气爽吧
 		;TranslatedMark 聞き分けが良いか？　なんだかんだと力を使ってスッキリしたからなあ
-		PRINTFORMW 暂时想让你安静一会
+		PRINTFORMW 不过我暂时还是希望你能安静一会
 		;TranslatedMark 暫く大人しくしといてやろうと思ったのさ
-		PRINTFORML
-		PRINTFORML 还是说，难道你忘了妖魔的盟约吗？
+		PRINTFORML 
+		PRINTFORML 还是说，难道你已经把鬼的盟约给忘记了吗？
 		;TranslatedMark それともまさか、鬼の盟約を忘れたわけではあるまい？
-		PRINTFORMW
-		PRINTFORML 赶快把事情处理了吧，趁我还没有改变主意。
+		PRINTFORMW 
+		PRINTFORML 赶快把你的事情处理了吧，趁我还没有改变主意
 		;TranslatedMark さあ。さっさと私の気が変わらないうちに済ませてくれ
-		PRINTFORMW 不然，你会闹出什么事情来？
-		;TranslatedMark でないと、何をしでかすかわからんぞ？
-		PRINTFORML
-		PRINTFORMW 啊，对了。最后还有一件事。
-		;TranslatedMark ああ、そうだ。最後にひとつ
-		PRINTFORML
-		PRINTFORML 只要你随时愿意，无论什么时候都可以靠近我，好吗？我会一直等着的。
-		;TranslatedMark 気が変わったらいつでもくっつけてくれていいからな？　私はいつでも待っている
-		PRINTFORML 那么再见，我的搭档。
+		PRINTFORMW 不然，谁知道现在的你还能闹出什么事情来？
+		;TranslatedMark でないと、今度こそ何をしでかすかわからんぞ？
+		PRINTFORML 
+		PRINTFORMW 啊，对了。最后还有一件事
+		;TranslatedMark そうだ。最後にひとつ
+		PRINTFORML 
+		PRINTFORML 只要你随时愿意的话，无论什么时候都可以再次靠近我，好吗？我会一直等着你的
+		;TranslatedMark 気が変わったらいつでも使うがいい。私はいつでも待っている
+		PRINTFORML 那么，再见了，我的搭档
 		;TranslatedMark それではまたな、我が相棒よ
-		PRINTFORMW
-		PRINTL
+		PRINTFORMW 
+		PRINTL 
 
 		CALL SINGLE_DRAWLINE
 
@@ -1610,7 +1831,7 @@ ELSEIF SCVAR:20 == 1
 		LOCAL:2 = CHARANUM
 		FOR LOCAL:0, 0, LOCAL:2
 			LOCAL:1 = LOCAL:2 - LOCAL:0 - 1
-			SIF IS_SP_CHARA(LOCAL:1)
+			SIF IS_SP_CHARA(LOCAL:1) && ANAME(LOCAL:1) == "骸"
 				CALL DELETE_CHARA(LOCAL:1)
 		NEXT
 
@@ -1630,7 +1851,7 @@ ENDIF
 童子 = NAME_TO_CHARA("茨木童子の腕")
 
 COUNTRY_BOSS:(新勢力)      = GET_ID(NAME_TO_CHARA("茨木童子の腕"))
-COUNTRY_COLOR:(新勢力)     = 0xF7819F
+COUNTRY_COLOR:(新勢力)     = 0x757575
 COUNTRY_SOLDIER:(新勢力)   = 3000000
 COUNTRY_IS_CLOSED:(新勢力) = 1
 
@@ -1688,13 +1909,314 @@ ENDIF
 ABL:(CHARANUM - 1):主導度Ｕ = 500
 ABL:(CHARANUM - 1):主導度Ｎ = 300
 
-ABL:(CHARANUM - 1):武闘 = 50
-ABL:(CHARANUM - 1):知略 = 10
-ABL:(CHARANUM - 1):政治 = 10
-ABL:(CHARANUM - 1):妖術 = 50
+ABL:(CHARANUM - 1):武闘 = 45 + (RAND:10)
+ABL:(CHARANUM - 1):知略 = 10 + (RAND:10)
+ABL:(CHARANUM - 1):政治 = 10 + (RAND:10)
+ABL:(CHARANUM - 1):妖術 = 45 + (RAND:10)
 ABL:(CHARANUM - 1):歌唱 = 0
 ABL:(CHARANUM - 1):料理 = 0
 
 ;所属を童子勢力にする
 CFLAG:(CHARANUM - 1):所属 = ARG:0
 
+;-------------------------------------------------
+;タレントチェック
+;シナリオメインキャラのタレント状況を保存してＥＤを変化させます
+;-------------------------------------------------
+@SCENARIO_EVENT_TALENT_CHECK_10(対象)
+#DIM 対象
+
+SELECTCASE RAND:5
+	CASE 0
+		IF ABL:対象:Ｃ感 > 3
+			SETCOLOR 0xFFFF00
+			PRINTFORML %ANAME(対象)%对她的阴蒂感到不自在...
+			;TranslatedMark %ANAME(対象)%はクリトリスに違和感を感じている……
+			RESETCOLOR
+			PRINTFORML 
+			PRINTDATAL
+				DATAFORM 「嗯...稍微有些紧张...」
+				;TranslatedMark 「んっ……ちょっと、びりびり、する……」
+				DATAFORM 「呼...呼...无法集中注意力...」
+				;TranslatedMark 「はあ……はあ……集中、できない……」
+				DATAFORM 「奇怪的...感觉...」
+				;TranslatedMark 「……へんな……感じが、する……」
+			ENDDATA
+			IF ABL:対象:Ｃ感 >= 5
+				PRINTDATAL
+					DATAFORM 「嗯...内裤...摩擦...呃...」
+					;TranslatedMark 「……うぅ……下着が……擦れ、て……」
+					DATAFORM 「嗯，哦...那里会...湿了呢...」
+					;TranslatedMark 「……んうぅ……あそこが……濡れちゃう……」
+					DATAFORM 「呼...呼...稍微有点...刺激...」
+					;TranslatedMark 「はあ……はあ……擦れ、て……刺激が……」
+				ENDDATA
+			ENDIF
+			PRINTFORML 
+			SETCOLOR 0xFF0000
+			PRINTFORMW 积聚起来的身体异常感，肯定正在困扰着%ANAME(対象)%...
+			;TranslatedMark 積もり始めた体の違和感は、確実に%ANAME(対象)%を悩ませている……
+			RESETCOLOR
+		ELSE
+			PRINTDATAL
+				DATAFORM 「干嘛？不要盯着我看」
+				;TranslatedMark 「何？　じろじろ見ないで」
+				DATAFORM 「...没什么事情啦」
+				;TranslatedMark 「……なんともないわよ」
+				DATAFORM 「...奇怪的家伙」
+				;TranslatedMark 「……変なの」
+				DATAFORM 「请不要盯着这里看」
+				;TranslatedMark 「じろじろ見ないで下さい」
+			ENDDATA
+			PRINTFORML 
+			PRINTFORMW %ANAME(対象)%似乎并没有什么特别的感觉...
+			;TranslatedMark %ANAME(対象)%は特に何も感じていないようだ……
+		ENDIF
+	CASE 1
+		IF ABL:対象:Ｖ感 > 3
+			SETCOLOR 0xFFFF00
+			PRINTFORML %ANAME(対象)%对隐秘之处感到不安...
+			;TranslatedMark %ANAME(対象)%は秘所に違和感を感じている……
+			RESETCOLOR
+			PRINTFORML 
+			PRINTDATAL
+				DATAFORM 「...呐...手指伸进去了哦...」
+				;TranslatedMark 「……なに……手を伸ばしてるのよ……」
+				DATAFORM 「...没什么...什么也没有...」
+				;TranslatedMark 「……なんともない……なんとも、ない……」
+				DATAFORM 「...啊...又...湿了...」
+				;TranslatedMark 「……あ……また、濡れちゃう……」
+			ENDDATA
+			IF ABL:対象:Ｖ感 >= 5
+				PRINTDATAL
+					DATAFORM 「呼呼，呼呼...好痒，好难受...」
+					;TranslatedMark 「……はあ、はあ……むずむず、してる……」
+					DATAFORM 「...真是的...就这样随便地看过来...」
+					;TranslatedMark 「……奥が……勝手に……」
+					DATAFORM 「不够...」
+					;TranslatedMark 「……足りない……」
+				ENDDATA
+			ENDIF
+			PRINTFORML 
+			SETCOLOR 0xFF0000
+			PRINTFORMW 积聚起来的身体异常感，肯定正在困扰着%ANAME(対象)%...
+			;TranslatedMark 積もり始めた体の違和感は、確実に%ANAME(対象)%を悩ませている……
+			RESETCOLOR
+		ELSE
+			PRINTDATAL
+				DATAFORM 「干嘛？不要盯着我看」
+				;TranslatedMark 「何？　じろじろ見ないで」
+				DATAFORM 「...没什么事情啦」
+				;TranslatedMark 「……なんともないわよ」
+				DATAFORM 「...奇怪的家伙」
+				;TranslatedMark 「……変なの」
+				DATAFORM 「请不要盯着这里看」
+				;TranslatedMark 「じろじろ見ないで下さい」
+			ENDDATA
+			PRINTFORML 
+			PRINTFORMW %ANAME(対象)%似乎并没有什么特别的感觉...
+			;TranslatedMark %ANAME(対象)%は特に何も感じていないようだ……
+		ENDIF
+	CASE 2
+		IF ABL:対象:Ａ感 > 3
+			SETCOLOR 0xFFFF00
+			PRINTFORML %ANAME(対象)%感到屁股有些不舒服...
+			;TranslatedMark %ANAME(対象)%はお尻に違和感を感じている……
+			RESETCOLOR
+			PRINTFORML 
+			PRINTDATAL
+				DATAFORM 「...呜...这样的话...正正经经地坐下来都不可以了...」
+				;TranslatedMark 「……うぅ……これじゃあ……まともに、座れない……」
+				DATAFORM 「...没什么...什么也没有...」
+				;TranslatedMark 「……なんともない……なんとも、ない……」
+				DATAFORM 「屁股...」
+				;TranslatedMark 「……おしりが……」
+			ENDDATA
+			IF ABL:対象:Ａ感 >= 5
+				PRINTDATAL
+					DATAFORM 「嗯嗯...扑通扑通的...好想要...」
+					;TranslatedMark 「……うぅ……ずぼずぼ……したい……」
+					DATAFORM 「呼，呼...那里，一缩一缩的...」
+					;TranslatedMark 「……はあ、はあ……じんじんしてる……」
+					DATAFORM 「...屁股...」
+					;TranslatedMark 「……おしりがあ……」
+				ENDDATA
+			ENDIF
+			PRINTFORML 
+			SETCOLOR 0xFF0000
+			PRINTFORMW 积聚起来的身体异常感，肯定正在困扰着%ANAME(対象)%...
+			;TranslatedMark 積もり始めた体の違和感は、確実に%ANAME(対象)%を悩ませている……
+			RESETCOLOR
+		ELSE
+			PRINTDATAL
+				DATAFORM 「干嘛？不要盯着我看」
+				;TranslatedMark 「何？　じろじろ見ないで」
+				DATAFORM 「...没什么事情啦」
+				;TranslatedMark 「……なんともないわよ」
+				DATAFORM 「...奇怪的家伙」
+				;TranslatedMark 「……変なの」
+				DATAFORM 「请不要盯着这里看」
+				;TranslatedMark 「じろじろ見ないで下さい」
+			ENDDATA
+			PRINTFORML 
+			PRINTFORMW %ANAME(対象)%似乎并没有什么特别的感觉...
+			;TranslatedMark %ANAME(対象)%は特に何も感じていないようだ……
+		ENDIF
+	CASE 3
+		IF ABL:対象:Ｂ感 > 3
+			SETCOLOR 0xFFFF00
+			PRINTFORML %ANAME(対象)%的胸前似乎感到有些不适...
+			;TranslatedMark %ANAME(対象)%は胸に違和感を感じている……
+			RESETCOLOR
+			PRINTFORML 
+			PRINTDATAL
+				DATAFORM 「...哈啊...哈啊...兴奋起来了...」
+				;TranslatedMark 「……はあ……はあ……勃っちゃってる……」
+				DATAFORM 「硬硬的，好难受...」
+				;TranslatedMark 「……じんじんしてる……」
+				DATAFORM 「...胸口有些不舒服...感觉有点奇怪...」
+				;TranslatedMark 「……むねが……なんかへん……」
+			ENDDATA
+			IF ABL:対象:Ｂ感 >= 5
+				PRINTDATAL
+					DATAFORM 「呜呜...内衣...碍事啊...」
+					;TranslatedMark 「……うぅ……下着が……邪魔ぁ……」
+					DATAFORM 「...不能想要碰触啊...明明知道不可以想这样的...」
+					;TranslatedMark 「……さわりたいとか……おもっちゃいけないのに……」
+					DATAFORM 「...为什么会这样...？」
+					;TranslatedMark 「……さきっぽが……なんでぇっ……？」
+				ENDDATA
+			ENDIF
+			PRINTFORML 
+			SETCOLOR 0xFF0000
+			PRINTFORMW 积聚起来的身体异常感，肯定正在困扰着%ANAME(対象)%...
+			;TranslatedMark 積もり始めた体の違和感は、確実に%ANAME(対象)%を悩ませている……
+			RESETCOLOR
+		ELSE
+			PRINTDATAL
+				DATAFORM 「干嘛？不要盯着我看」
+				;TranslatedMark 「何？　じろじろ見ないで」
+				DATAFORM 「...没什么事情啦」
+				;TranslatedMark 「……なんともないわよ」
+				DATAFORM 「...奇怪的家伙」
+				;TranslatedMark 「……変なの」
+				DATAFORM 「请不要盯着这里看」
+				;TranslatedMark 「じろじろ見ないで下さい」
+			ENDDATA
+			PRINTFORML 
+			PRINTFORMW %ANAME(対象)%似乎并没有什么特别的感觉...
+			;TranslatedMark %ANAME(対象)%は特に何も感じていないようだ……
+		ENDIF
+	CASE 4
+		IF ABL:対象:Ｍ感 > 3
+			SETCOLOR 0xFFFF00
+			PRINTFORML 嘴唇处传来的违和感使得%ANAME(対象)%有些不自在...
+			;TranslatedMark %ANAME(対象)%は唇に違和感を感じている……
+			RESETCOLOR
+			PRINTFORML 
+			PRINTDATAL
+				DATAFORM 「...嘴巴，好像有点奇怪...」
+				;TranslatedMark 「……くちびるが……なんかへん……」
+				DATAFORM 「...真奇怪...嘴里像是缺了点什么一样啊...」
+				;TranslatedMark 「……なんだろ……口寂しい……」
+				DATAFORM 「...这里...竟然会这么敏感...」
+				;TranslatedMark 「……こんなに……びんかんだったっけ……」
+			ENDDATA
+			IF ABL:対象:Ｍ感 >= 5
+				PRINTDATAL
+					DATAFORM 「...嗯...好像快不行了...」
+					;TranslatedMark 「……っ……どうにかなりそう……」
+					DATAFORM 「...只是用手指稍微碰了一下而已...全身都脱力了...呜呜...」
+					;TranslatedMark 「……指で触れただけなのにっ……しびれてるぅ……」
+					DATAFORM 「...我想要，更多的触碰什么的...或许...啊啊...」
+					;TranslatedMark 「……もっと……いっぱいしたい、かも……」
+				ENDDATA
+			ENDIF
+			PRINTFORML 
+			SETCOLOR 0xFF0000
+			PRINTFORMW 积聚起来的身体异常感，肯定正在困扰着%ANAME(対象)%...
+			;TranslatedMark 積もり始めた体の違和感は、確実に%ANAME(対象)%を悩ませている……
+			RESETCOLOR
+		ELSE
+			PRINTDATAL
+				DATAFORM 「干嘛？不要盯着我看」
+				;TranslatedMark 「何？　じろじろ見ないで」
+				DATAFORM 「...没什么事情啦」
+				;TranslatedMark 「……なんともないわよ」
+				DATAFORM 「...奇怪的家伙」
+				;TranslatedMark 「……変なの」
+				DATAFORM 「请不要盯着这里看」
+				;TranslatedMark 「じろじろ見ないで下さい」
+			ENDDATA
+			PRINTFORML 
+			PRINTFORMW %ANAME(対象)%似乎并没有什么特别的感觉...
+			;TranslatedMark %ANAME(対象)%は特に何も感じていないようだ……
+		ENDIF
+ENDSELECT
+PRINTFORML 
+
+IF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫乱) && (!SCVAR:11 || !SCVAR:12 || !SCVAR:13 || !SCVAR:14 || !SCVAR:15 || !SCVAR:16 || !SCVAR:17)
+	SELECTCASE 対象
+		CASE NAME_TO_CHARA("茨木童子の腕")
+			SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫乱) && !SCVAR:11
+				SCVAR:11 = 1
+		CASE NAME_TO_CHARA("美宵")
+			SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫乱) && !SCVAR:12
+				SCVAR:12 = 1
+		CASE NAME_TO_CHARA("ミスティア")
+			SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫乱) && !SCVAR:13
+				SCVAR:13 = 1
+		CASE NAME_TO_CHARA("こころ")
+			SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫乱) && !SCVAR:14
+				SCVAR:14 = 1
+		CASE NAME_TO_CHARA("幽幽子")
+			SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫乱) && !SCVAR:15
+				SCVAR:15 = 1
+		CASE NAME_TO_CHARA("サラ")
+			SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫乱) && !SCVAR:16
+				SCVAR:16 = 1
+		CASE NAME_TO_CHARA("さとり")
+			SIF GETBIT(TALENT:対象:淫乱系, 素質_淫乱_淫乱) && !SCVAR:17
+				SCVAR:17 = 1
+	ENDSELECT
+	SETCOLOR 0xFF0000
+	PRINTFORML %ANAME(対象)%似乎已经要越过最后的底线了...要让她就这样堕落下去吗？
+	;TranslatedMark %ANAME(対象)%は最後の一線を越えてしまったようです
+	PRINTFORMW 无法抗拒肉欲的%NAME_FORMAL(対象)%终于彻底屈服了...
+	;TranslatedMark 抗うことの出来なかった肉欲に、%NAME_FORMAL(対象)%は屈してしまいました……
+	RESETCOLOR
+ENDIF
+
+IF GETBIT(TALENT:NAME_TO_CHARA("華扇"):淫乱系, 素質_淫乱_淫乱) && !SCVAR:10
+	IF CFLAG:MASTER:所属 == GET_COUNTRY_FROM_BOSS_NAME("華扇")
+		PRINTFORML 
+		PRINTFORML （...这种事情...不可以接受啊...虽然不想承认...但是...）
+		;TranslatedMark （……こんなこと……認められない……認めたくなど、ないのに……）
+		PRINTFORMW 
+		PRINTFORML 经历过无数快乐的%ANAME(対象)%，即将屈服于发自她内心伸出的肉欲...
+		;TranslatedMark 数多の快楽を与えられた%ANAME(対象)%は、肉欲に負けそうになっています
+		PRINTFORML 再这样下去的话，最后的底线也会被越过的...要怎么做呢？
+		;TranslatedMark このままでは最後の一線を越えてしまうかもしれません……どうしますか？
+		CALL ASK_YN("身为淫乱粉什么的真是对不起❤", "喂，你没开玩笑吧！谁是那什么淫乱粉啊！")
+		;TranslatedMark "淫乱ピンクでごめんなさい……❤", "じょ、冗談じゃない！　誰が淫ピですか！"
+		IF RESULT == 0
+			SETCOLOR 0xFF0000
+			PRINTFORML 无法抗拒肉欲的%NAME_FORMAL(対象)%终于彻底屈服了...
+			;TranslatedMark 抗うことの出来なかった肉欲に、%NAME_FORMAL(対象)%は屈してしまいました……
+			PRINTFORMW 
+			RESETCOLOR
+			SCVAR:10 = 1
+		ELSE
+			SCVAR:10 = 2
+		ENDIF
+	ELSE
+		SETCOLOR 0xFF0000
+		PRINTFORML 茨木华扇越过了她的最后一条底线
+		;TranslatedMark 茨木華扇は最後の一線を越えてしまったようです
+		PRINTFORML 无法抗拒内心深处的淫欲，茨木华扇终究还是屈服了...
+		;TranslatedMark 抗うことの出来なかった肉欲に、茨木華扇は屈してしまいました……
+		PRINTFORMW 
+		RESETCOLOR
+		SCVAR:10 = 1
+	ENDIF
+ENDIF

@@ -54,6 +54,7 @@
     #DIM SET_TIMES
     #DIM AVAIL_COUNTRY_ID,MAX_COUNTRY
     #DIM AVAIL_COUNTRY_NUM
+    #DIM TARGET_COUNTRY
     VARSET AVAIL_COUNTRY_ID
     VARSET AVAIL_COUNTRY_NUM
     FOR LOCAL, 0, MAX_COUNTRY
@@ -72,18 +73,14 @@
         ENDIF
     NEXT
     IF AVAIL_COUNTRY_NUM > 0
+        TARGET_COUNTRY = AVAIL_COUNTRY_ID:(RAND:AVAIL_COUNTRY_NUM)
+        BUILDING_TEXT = BUILDING_TEXT_美梦祭坛(TARGET_COUNTRY)
         FOR LOCAL,0,CHARANUM
             SIF !SELECT_CHARA_RANDOM_CHARA_梦魔(LOCAL)
                 CONTINUE
-            LOCAL:2 = 0
-            FOR LOCAL:1,0,AVAIL_COUNTRY_NUM
-                SIF LOCAL:2
-                    BREAK
-                IF CFLAG:LOCAL:所属 == AVAIL_COUNTRY_ID:(LOCAL:1)
-                    LOCAL:2 = 1
-                    CALL ADD_COOLTIME(LOCAL,3)
-                ENDIF
-            NEXT
+            IF CFLAG:LOCAL:所属 == TARGET_COUNTRY
+                CALL ADD_COOLTIME(LOCAL,3)
+            ENDIF
         NEXT
     ENDIF
 

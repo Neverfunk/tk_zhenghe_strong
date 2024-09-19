@@ -1,0 +1,227 @@
+﻿;@HZ=御阿礼之炎
+;@ENG=BURNED_AKYUU
+;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K48_AKYUU_DAILY_RATE(阿求)
+#DIM 阿求
+RETURN 400
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K48_AKYUU_DAILY_DECISION(阿求)
+	#DIM 阿求
+	SIF CFLAG:阿求:好感度 < 600
+		RETURN 0
+	SIF ABL:阿求:知略 < 75 || ABL:阿求:政治 < 75
+		RETURN 0
+	SIF TALENT:阿求:空虚 || TALENT:阿求:崩壊
+		RETURN 0
+	RETURN CHECK_KOJO_DAILY_HAPPEN(阿求, 1, 0, 1)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K48_AKYUU_DAILY_GENRE(阿求)
+#DIM 阿求
+RETURN デイリー_ジャンル_エロ
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K48_AKYUU_DAILY(阿求)
+	#DIM 阿求
+	[IF_DEBUG]
+		CALL KOJO_DAILY_K48_AKYUU_1(阿求)
+		CALL KOJO_DAILY_K48_AKYUU_2(阿求)
+		CALL KOJO_DAILY_K48_AKYUU_3(阿求)
+	[ENDIF]
+	IF !TALENT:阿求:恋慕
+		CALL KOJO_DAILY_K48_AKYUU_1(阿求)
+	; ELSE CFLAG:阿求:好感度 >= 5000 && CFLAG:阿求:恋慕
+	ELSEIF !TALENT:阿求:親愛
+		CALL KOJO_DAILY_K48_AKYUU_2(阿求)
+	ELSE
+		CALL KOJO_DAILY_K48_AKYUU_3(阿求)
+	ENDIF
+	RETURN 1
+
+@KOJO_DAILY_K48_AKYUU_1(阿求)
+	#DIM 阿求
+	PRINTFORML 今天是天气晴朗的一天
+	PRINTFORML 手下报告，%ANAME(阿求)%前来拜访。
+	PRINTFORML %ANAME(阿求)%么，编篡史书的稗田家主呀，还在为史书取材吗？这次也挺期待我们的话题呢...
+	PRINTFORML 允许%ANAME(阿求)%进来了
+	PRINTFORML 病弱的娇躯依旧，缓慢柔弱的鞠躬比平常礼节更盛，少女的声音轻柔低哑
+	CALL K48_AKYUU_SAY(@"「%ANAME(MASTER)%先生早安，我又来打搅您了呢...」")
+	CALL K48_AKYUU_SAY(@"「之前有采访您有关对幻想乡现在局势与未来发展的情况，我对于您所说的这些部分非常感兴趣」")
+	CALL K48_AKYUU_SAY(@"「可以能再聊一下么...」")
+	CALL ASK_YN("同意","拒绝")
+	IF RESULT == 0
+		PRINTFORML 这也没什么不好的，说不定能提高自己在史记里的形象
+		CALL K48_AKYUU_SAY(@"「好的，谢谢您」")
+		PRINTFORML 谈论了很多有关幻想乡从前的社会环境与和平生活..还谈论了非常多的关于现在各方势力的问题...
+		CALL K48_AKYUU_SAY(@"「非常感谢您能接受采访」")
+		PRINTFORML 天色渐渐暗了，采访也是时候该结束了
+		CALL K48_AKYUU_SAY(@"「天色不早了，我就不多打搅了」")
+		PRINTFORML %ANAME(阿求)%抱着记事的本子离开了，%ANAME(MASTER)%则让人帮忙把%ANAME(阿求)%送回家了
+		CFLAG:阿求:好感度+=100
+	ELSE
+		CALL K48_AKYUU_SAY(@"「这样么..」")
+		PRINTFORML %ANAME(阿求)%似乎有些失落
+		CALL K48_AKYUU_SAY(@"「那么我就不多打搅了，告辞了」")
+		PRINTFORML %ANAME(阿求)%离开了据点，%ANAME(MASTER)%还想让人帮忙送%ANAME(阿求)%回家，不过也被好意拒绝了
+	ENDIF
+@KOJO_DAILY_K48_AKYUU_2(阿求)
+	#DIM 阿求
+	IF ABL:阿求:知略 <= ABL:MASTER:知略
+		PRINTFORML 这是一个悠闲的日子，%ANAME(MASTER)%处理完政务后闲来无事
+		PRINTFORML 来到前院，发现%ANAME(阿求)%全神贯注地写着什么东西，%ANAME(MASTER)%悄悄过去...
+		CALL K48_AKYUU_SAY(@"「唔诶！」")
+		PRINTFORML 没有注意到%ANAME(MASTER)%的%ANAME(阿求)%，一个肘击精准命中%ANAME(MASTER)%的脸
+		PRINTFORML %ANAME(阿求)%吓的在纸上画了大大的一个捺
+		CALL K48_AKYUU_SAY(@"「呀，对不起，我没注意到...」")
+		PRINTFORML ...
+		CALL K48_AKYUU_SAY(@"「诶，你说我写的这个么？啊，一些个人爱好罢了...」")
+		PRINTFORML ...
+		CALL K48_AKYUU_SAY(@"「不要装糊涂啊，你都看到我再写小说了啊」")
+		PRINTFORML ...
+		CALL K48_AKYUU_SAY(@"「嗯...虽然我确实没想好小说名字呢」")
+		PRINTFORML 看着小说的内容，病重的少女躺在床上，旁边的柜台插着一簇水仙花
+		PRINTFORML ...
+		CALL K48_AKYUU_SAY(@"「诶，这个命名？」")
+		CALL K48_AKYUU_SAY(@"「未免太俗了罢」")
+		PRINTFORML %ANAME(阿求)%嘲笑道
+		PRINTFORML ...........
+		PRINTFORML 数天后，在士官休息室的书架上，无意间翻到一本名为《水仙》的小说
+		PRINTFORML 她的末尾依旧是那个少女，依旧有那簇水仙花
+		PRINTFORML 看来%ANAME(阿求)%还是参考了%ANAME(MASTER)%的提议嘛
+	ELSE
+		PRINTFORML 忙碌的一天，%ANAME(MASTER)%正在写着政务报告
+		CALL K48_AKYUU_SAY(@"「嗯？这样写可不行哦」")
+		PRINTFORML %ANAME(MASTER)%被旁边突然响起的少女声吓了一跳
+		CALL K48_AKYUU_SAY(@"「也不至于这么大反应吧」")
+		PRINTFORML %ANAME(阿求)%也被%ANAME(MASTER)%吓到了，%ANAME(MASTER)%差点一个肘击打翻%ANAME(阿求)%
+		CALL K48_AKYUU_SAY(@"「还好我反应快躲开了...你这个报告是要给底下官员看到是要被笑话的」")
+		CALL K48_AKYUU_SAY(@"「太庸俗，太简单啦」")
+		PRINTFORML %ANAME(MASTER)%看着自己的手稿，好像语言是有些乡土气息
+		CALL K48_AKYUU_SAY(@"「来，我来给你改改」")
+		PRINTFORML %ANAME(阿求)%帮玩家修改了下报告，不得不说，这方面还是%ANAME(阿求)%写的来
+		PRINTFORML 不仅语言顺口，修改了诸多语病，而且文字也是平民化，即使是%ANAME(MASTER)%这种老大粗也能轻松理解报告的内容
+		CALL K48_AKYUU_SAY(@"「不用谢我啦，而且如果我连个报告都写不明白的话，怎么能去写求闻史记呢」")
+		PRINTFORML 帮助完%ANAME(MASTER)%后，%ANAME(阿求)%高兴而自豪地离开了
+	ENDIF
+	CFLAG:阿求:好感度 += 500
+
+@KOJO_DAILY_K48_AKYUU_3(阿求)
+	#DIM 阿求
+	PRINTFORML 再处理了日常的事务之后，%ANAME(MASTER)%撑了一个大大地懒腰
+	CALL K48_AKYUU_SAY(@"「怎么样，处理完了吗」")
+	PRINTFORML %ANAME(阿求)%从背后蹭了过来
+	CALL K48_AKYUU_SAY(@"「这么好的天气，要不我们出去走走散散心吧」")
+	CALL ASK_YN("一起出去","我要家里蹲")
+	IF RESULT == 0
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 一起在城堡的后花园内逛了一会儿
+				WAIT
+				PRINTFORML 漫步在有着明媚阳光的花园里，虽然没出远门，但是颇有春游的感觉
+				PRINTFORML %ANAME(阿求)%似乎有点害羞，虽然路上一直紧挨着%ANAME(MASTER)%，但是想牵她的手时，%ANAME(阿求)%却躲开了
+				WAIT
+				CALL K48_AKYUU_SAY(@"「什么啊，不是你要求一起来散步的嘛，你这又是闹哪出啊」")
+				PRINTFORML %ANAME(MASTER)%笑着吐槽%ANAME(阿求)%，在这故意挑逗之后，%ANAME(阿求)%的脸更红了
+				CALL K48_AKYUU_SAY(@"「什？！..什么，我..我只是...」")
+				PRINTFORML %ANAME(阿求)%有点紧张到话说不清了，而%ANAME(MASTER)%趁势摸了摸她的头
+				CALL K48_AKYUU_SAY(@"「哼，讨厌，我走啦」")
+				PRINTFORML %ANAME(阿求)%有点生气地坐在园内亭子的石凳上，然而过了好一会儿，仍未见%ANAME(MASTER)%身影
+				PRINTFORML %ANAME(阿求)%有点害怕了，起身到处搜寻着%ANAME(MASTER)%的身影
+				WAIT
+				PRINTFORML 这时%ANAME(阿求)%突然感觉背后有人拍了她的肩膀，%ANAME(阿求)%急忙转身
+				PRINTFORML 而%ANAME(MASTER)%不知何时已经站在了%ANAME(阿求)%的身后，而桌子上则有一束插在花瓶上的与%ANAME(阿求)%发色相近的花
+				WAIT
+				PRINTFORML 「哈哈哈哈」
+				PRINTFORML 二人都相视一笑
+				WAIT
+			CASE 1
+				PRINTFORML 来到了城下町
+				PRINTFORML 阳光明媚，%ANAME(MASTER)%与%ANAME(阿求)%悠闲地走在街道上..
+				WAIT
+				CALL K48_AKYUU_SAY(@"「呵呵，原来是这样的吗」")
+				PRINTFORML 在一路上有说有笑，%ANAME(MASTER)%谈及到自己手下睁着眼睛睡觉的书记被自己抓的事情后
+				PRINTFORML %ANAME(阿求)%用手微遮自己嘴部呵呵笑，并开玩笑地说不如让她来当
+				WAIT
+				PRINTFORML 这时一阵香气飘过，发现一家新开的西式蛋糕店在做活动
+				CALL K48_AKYUU_SAY(@"「要想进去吃尝尝西洋的糕点么」")
+				CALL K48_AKYUU_SAY(@"「在记录里面这类糕点店并不是哪里都可见哦，怎样，意向如何？」")
+				PRINTFORML 在%ANAME(阿求)%的极力鼓动下，%ANAME(MASTER)%走进了糕点店
+				PRINTFORML 点了几个商家推荐的精品，再等上桌的时候%ANAME(阿求)%还再讲她以前在宴会上有尝过从红魔馆制作的甜品
+				WAIT
+				IF ABL:MASTER:料理 >= 70
+					PRINTFORML 哈，不过如此，这种糕点我%ANAME(MASTER)%也做的出来
+					CALL K48_AKYUU_SAY(@"「哇，真的吗？你居然还会这种？」")
+					PRINTFORML 借用了厨房与原料，一套行云流水的操作下，香喷喷的蛋糕新鲜出炉
+					PRINTFORML 还顺手泡了三杯红茶，请老板也喝了一杯
+					WAIT
+					PRINTFORML 确实是%ANAME(MASTER)%做的更好吃，和%ANAME(阿求)%愉快地吃完蛋糕后，老板也大气地免了单，还想来多请教%ANAME(MASTER)%一番
+					WAIT
+				ELSE
+					PRINTFORML 这家蛋糕店的手艺确实还行
+					CALL K48_AKYUU_SAY(@"「怎么样，我说过这种糕点很好吃吧」")
+					CALL K48_AKYUU_SAY(@"「什么？你以前也吃过这种糕点么」")
+					PRINTFORML ...
+					PRINTFORML 与%ANAME(阿求)%说笑着在糕点店度过了一会愉快的时光
+					WAIT
+				ENDIF
+			CASE 2
+				PRINTFORML 来到了野外的湖边
+				WAIT
+				PRINTFORML 漫步在湖边，感觉无比畅快
+				PRINTFORML 看到%ANAME(阿求)%在湖边小心翼翼地走着时，%ANAME(MASTER)%拉了%ANAME(阿求)%一把
+				WAIT
+				CALL K48_AKYUU_SAY(@"「哎呀哎呀，哇啊！」")
+				PRINTFORML %ANAME(阿求)%却反而更紧张，差点摔了一跤
+				CALL K48_AKYUU_SAY(@"「你怎么回事啊」")
+				PRINTFORML %ANAME(阿求)%有点生气的指责%ANAME(MASTER)%
+				CALL K48_AKYUU_SAY(@"「不能好好地拉着我的手吗」")
+				PRINTFORML 结果%ANAME(MASTER)%说自己只是想扶一把%ANAME(阿求)%而已
+				PRINTFORML 然后双方各执一词，直到%ANAME(阿求)%偷偷捧了一把水撒向%ANAME(MASTER)%，和平彻底被打破了
+				WAIT
+				CALL K48_AKYUU_SAY(@"「哈哈，别小瞧我，我也是很擅长弹幕战斗的呢」")
+				PRINTFORML %ANAME(MASTER)%与%ANAME(阿求)%在湖边以湖水作为弹幕打闹起来
+				CALL K48_HUGE_WAIT()
+				PRINTFORML 在激战一番过后，精疲力竭%ANAME(阿求)%与%ANAME(MASTER)%坐在树下休息
+				WAIT
+				CALL K48_AKYUU_SAY(@"「哎呀，衣服都脏了」")
+				CALL K48_AKYUU_SAY(@"「好久没有出来玩的这么开心了，衣服都没注意，哈哈」")
+				PRINTFORML %ANAME(MASTER)%站起来，虽然身上邋遢但仍学着绅士样想优雅地扶起%ANAME(阿求)%
+				PRINTFORML %ANAME(阿求)%则很配合地站了起来，拉着%ANAME(MASTER)%的手回家了
+				WAIT
+		ENDSELECT
+		CFLAG:阿求:好感度 += 500
+	ELSE
+		CALL K48_AKYUU_SAY(@"「诶，这样吗」")
+		CALL K48_AKYUU_SAY(@"「一直呆在家不动对身体不好的」")
+		PRINTFORML %ANAME(阿求)%叹了一声气
+		CALL K48_AKYUU_SAY(@"「算了，觉得累的话还是在家好好休息」")
+		CALL K48_AKYUU_SAY(@"「我写求闻的时候也有写完一章后号累只想躺在床上的时候呢」")
+		PRINTFORML %ANAME(阿求)%给%ANAME(MASTER)%推荐就几本休闲一些的小说
+		WAIT
+		PRINTFORML 然后帮%ANAME(MASTER)%检查了一下工作后离开了
+		PRINTFORML 看着%ANAME(阿求)%修改的城市的经济报告，果然超额工作对身体不好啊
+		WAIT
+		CFLAG:阿求:好感度 += 100
+		CALL DAILY_EVENT_RAND_CITYSELECT()
+		LOCAL = RESULT
+		IF LOCAL > 0
+			CALL MODIFY_CITY_ECONOMY(LOCAL, 5000)
+			RESETCOLOR
+		ENDIF
+	ENDIF

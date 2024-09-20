@@ -377,11 +377,18 @@ CALL SINGLE_DRAWLINE
 $EVENTMAIN
 PRINTFORMW 本次共有{队伍数}队队伍参赛
 IF 轮空少女
-    IF 轮空少女:1
-        PRINTFORMW
-    ENDIF
+    PRINTFORMW 等等……
+    PRINTFORMW 好像%ANAME(轮空少女:0)%\@轮空少女:1 ? 和%ANAME(轮空少女:1)% # \@没被分到队伍的样子……
+    PRINTFORMW 不过%ANAME(MASTER)%决定把\@轮空少女:1 ? 她们 # 她\@留到自己身边
+    PRINTFORMW 于是没能参加比赛的%ANAME(轮空少女:0)%\@轮空少女:1 ? 和%ANAME(轮空少女:1)% # \@就只能在中央的裁判台上被%ANAME(MASTER)%不停的侵犯……
 ENDIF
-PRINTFORML 需要介绍规则吗？
+IF 轮空少女
+    随机看板娘 = 轮空少女:1 ? 轮空少女:(RAND:2) # 轮空少女
+    CALL COLOR_PRINT(@"%ANAME(随机看板娘)%", TALENT:随机看板娘:髪色)
+ELSE
+    PRINTPLAIN 女仆
+ENDIF
+PRINTFORML 「需要介绍规则吗？」
 CALL ASK_YN
 IF !RESULT
     PRINTFORMW 本次演习采用了“淘汰制”规则
@@ -415,12 +422,6 @@ IF !RESULT
     ENDSELECT
 ELSE
     PRINTFORMW 好的，那么现在……各就各位……！
-ENDIF
-IF 轮空少女
-    PRINTFORMW 等等……
-    PRINTFORMW 好像%ANAME(轮空少女:0)%\@轮空少女:1 ? 和%ANAME(轮空少女:1)% # \@没被分到队伍的样子……
-    PRINTFORMW 不过%ANAME(MASTER)%决定把\@轮空少女:1 ? 她们 # 她\@留到自己身边
-    PRINTFORMW 于是没能参加比赛的%ANAME(轮空少女:0)%\@轮空少女:1 ? 和%ANAME(轮空少女:1)% # \@就只能在中央的裁判台上被%ANAME(MASTER)%不停的侵犯……
 ENDIF
 CALL SINGLE_DRAWLINE("+")
 IF 轮空少女
@@ -736,6 +737,12 @@ DEBUGPRINTFORML {生命值:1}/{攻击力:1}/{总知略:1}/{感度因子:1}
 最大生命值:0 = 生命值:0
 最大生命值:1 = 生命值:1
 WHILE 1
+    IF LINECOUNT != FIRSTLINE
+        WHILE (LINECOUNT - FIRSTLINE < 8)
+            PRINTL
+        WEND
+        PRINTW
+    ENDIF
     CLEARLINE LINECOUNT - FIRSTLINE
 
     ;显示Trimp™同款UI
@@ -748,8 +755,12 @@ WHILE 1
     CALL SINGLE_DRAWLINE("=")
 
     ;有一方生命值归0则结束对战
-    SIF 生命值:0 == 0 || 生命值:1 == 0
+    IF 生命值:0 == 0 || 生命值:1 == 0
+        WHILE (LINECOUNT - FIRSTLINE <= 8)
+            PRINTL
+        WEND
         BREAK
+    ENDIF
     ;决定攻击顺序
     攻方敏捷 = 500 * 感度因子:攻方
     守方敏捷 = 500 * 感度因子:(!攻方)
@@ -783,7 +794,7 @@ WHILE 1
     IF !压制flag
         IF RAND(总知略:攻方 + 总知略:守方) < 总知略:守方 - 总知略:攻方
             CALL COLOR_PRINTL("反制! ",0xFF0000)
-            PRINTFORMW 但是\@守方 == 0 ? %ANAME(左队:0)% # %ANAME(右队:0)%\@化解了\@攻方 == 0 ? %ANAME(左队:0)% # %ANAME(右队:0)%\@队的攻击并夺得了进攻权！
+            PRINTFORML 但是\@守方 == 0 ? %ANAME(左队:0)% # %ANAME(右队:0)%\@化解了\@攻方 == 0 ? %ANAME(左队:0)% # %ANAME(右队:0)%\@队的攻击并夺得了进攻权！
             连击次数 = 0
             攻方 = !攻方
             压制flag = 1
@@ -791,18 +802,18 @@ WHILE 1
         ELSEIF RAND(总知略:攻方 + 总知略:守方) < 总知略:守方 - 总知略:攻方 / 2
             CALL COLOR_PRINTL("反击! ",0xFFA824)
             PRINTFORML \@守方 == 0 ? %ANAME(左队:0)% # %ANAME(右队:0)%\@队受到了{伤害}点伤害！
-            PRINTFORMW 但是\@守方 == 0 ? %ANAME(左队:0)% # %ANAME(右队:0)%\@队也将同等伤害反馈到了\@攻方 == 0 ? %ANAME(左队:0)% # %ANAME(右队:0)%\@队！
+            PRINTFORML 但是\@守方 == 0 ? %ANAME(左队:0)% # %ANAME(右队:0)%\@队也将同等伤害反馈到了\@攻方 == 0 ? %ANAME(左队:0)% # %ANAME(右队:0)%\@队！
             生命值:守方 = MAX(生命值:守方 - 伤害, 0)
             生命值:攻方 = MAX(生命值:攻方 - 伤害, 0)
             CONTINUE
         ELSEIF RAND(总知略:攻方 + 总知略:守方) < 总知略:守方 - 敏捷判定 / 20
             CALL COLOR_PRINTL("闪避! ",0xFFFF00)
-            PRINTFORMW 但是\@守方 == 0 ? %ANAME(左队:0)% # %ANAME(右队:0)%\@队在千钧一发之际躲开了攻击！
+            PRINTFORML 但是\@守方 == 0 ? %ANAME(左队:0)% # %ANAME(右队:0)%\@队在千钧一发之际躲开了攻击！
             CONTINUE
         ENDIF
     ENDIF
     ;伤害结算
-    PRINTFORMW \@守方 == 0 ? %ANAME(左队:0)% # %ANAME(右队:0)%\@受到了{伤害}点伤害！
+    PRINTFORML \@守方 == 0 ? %ANAME(左队:0)% # %ANAME(右队:0)%\@受到了{伤害}点伤害！
     生命值:守方 = MAX(生命值:守方 - 伤害, 0)
 WEND
 IF 生命值:0 == 0 && 生命值:1 == 0

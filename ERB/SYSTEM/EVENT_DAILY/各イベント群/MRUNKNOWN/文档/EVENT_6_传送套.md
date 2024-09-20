@@ -1,5 +1,3 @@
-![image-20230314195847591](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230314195847591.png)
-
 ### 条件
 
 1. 风评差（hate>like数且hate不小于300的国家至少一半）

@@ -146,6 +146,8 @@ if visibility < 50:
 
 - influence = |reputation|
 
+- 零点积累值
+
 ##### 判定流程
 
 - 修正因子计算流程：
@@ -187,10 +189,15 @@ if visibility < 50:
     - 声望修正区间repuation_update_range：
       - 下届，repuationupdate_lowbound
       - 上届，repuation_update_upbound
+    
   - 判定流程：
     - 如果reputation_update_direction和当前声望reputation为同向：
       - 转到影响力修正
+      
     - 非同向时（以正向变为负向为例，反之逻辑相同）：
+      
+      - 计算当前声望区间与目标区间的差距数rep_diff，
+      
       - temp_influence_result = reputation - power
       - temp_influence_result不在区间内时，
       - 
@@ -259,13 +266,16 @@ if visibility < 50:
 
 ##### AI选择
 
+在通常情况下，
+
 ##### 例外
 
-当角色处于以下状态时，玩家可以对其行动进行操控
+当角色处于以下状态时，玩家可以对其行动进行操控，
 
 - 已经陷落
 - 相对玩家影响力小2个等级
 - 被催眠
+- 空虚
 
 ### 叛乱与起义
 

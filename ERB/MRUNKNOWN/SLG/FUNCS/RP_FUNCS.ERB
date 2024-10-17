@@ -1,0 +1,427 @@
+;检查声望是否在范围内
+@check_rp_inrange(rp)
+    #FUNCTION
+    #DIM rp
+    IF !INRANGE(rp,rp_min,rp_max)
+        THROW 错误声望！！！{rp}
+        RETURNF 0
+    ENDIF
+    RETURNF 1
+
+;检查声望系数是否在范围内
+@check_rp_inrange_factor(rp_factor)
+    #FUNCTION
+    #DIM rp_factor
+    IF !INRANGE(rp_factor,rp_factor_min,rp_factor_max)
+        THROW 错误声望系数！！！{rp_factor}
+        RETURNF 0
+    ENDIF
+    RETURNF 1
+
+;设置角色声望
+@set_reputation(chara,target_rp)
+    #DIM chara
+    #DIM target_rp
+    SIF !check_chara(chara)
+        RETURN 0
+    SIF !check_rp_inrange(target_rp)
+        RETURN 0
+    SIF MRU_DEBUG_ENABLE
+        PRINTFORM 设置角色{chara}:%ANAME(chara)%声望为{target_rp}
+    CFLAG:chara:reputation = target_rp
+    RETURN
+
+
+;获取角色声望
+@get_reputation(chara)
+    #FUNCTION
+    #DIM chara
+    SIF !check_chara(chara)
+        RETURNF 0
+    RETURNF CFLAG:chara:reputation
+
+;获取角色声望方向
+@get_rp_direction(chara)
+    #FUNCTION
+    #DIM chara
+    IF get_reputation(chara) >= 0
+        RETURNF 1
+    ELSE
+        RETURNF -1
+    ENDIF
+
+;检查角色声望方向是否相同
+@is_same_rp_direction(chara1,chara2)
+    #FUNCTION
+    #DIM chara1
+    #DIM chara2
+    IF is_same_rp_direction_val(get_reputation(chara1),get_reputation(chara2))
+        RETURNF 1
+    ELSE
+        RETURNF 0
+    ENDIF
+;检查声望值方向是否相同
+@is_same_rp_direction_val(val1,val2)
+    #FUNCTION
+    #DIM val1
+    #DIM val2
+    IF val1 >= 0 && val2 >= 0
+        RETURNF 1
+    ELSEIF val1 < 0 && val2 < 0
+        RETURNF 1
+    ELSE
+        RETURNF 0
+    ENDIF
+;设置角色声望系数
+@set_rp_factor(chara,target_rp_factor)
+    #DIM chara
+    #DIM target_rp_factor
+    SIF !check_chara(chara)
+        RETURN 0
+    SIF !check_rp_inrange_factor(target_rp_factor)
+        RETURN 0
+    SIF MRU_DEBUG_ENABLE
+        PRINTFORM 设置角色{chara}:%ANAME(chara)%声望系数为{target_rp_factor}
+    CFLAG:chara:rp_factor = target_rp_factor
+    RETURN
+
+;获取角色声望系数
+@get_rp_factor(chara)
+    #FUNCTION
+    #DIM chara
+    SIF !check_chara(chara)
+        RETURNF 0
+    RETURNF CFLAG:chara:rp_factor
+
+;设置角色零点声望限制值
+@set_rp_zero_limit(chara,target_rp_zero_limit)
+    #DIM chara
+    #DIM target_rp_zero_limit
+    SIF !check_chara(chara)
+        RETURN 0
+    CFLAG:chara:rp_zero_limit = target_rp_zero_limit
+    SIF MRU_DEBUG_ENABLE
+        PRINTFORM 设置角色{chara}:%ANAME(chara)%零点声望限制值为{target_rp_zero_limit}
+    RETURN
+
+;每期末更新角色零点声望限制值
+@turnend_update_rp_zero_limit(chara)
+    #DIM chara
+    LOCAL = get_rp_zero_limit(chara)
+    LOCAL += get_rp_state(get_reputation(chara))
+    SIF MRU_DEBUG_ENABLE
+        PRINTFORM 角色{chara}:%ANAME(chara)%零点声望限制值更新为{LOCAL}
+    CALL set_rp_zero_limit(chara,LOCAL)
+    RETURN
+
+;获取角色零点声望限制值
+@get_rp_zero_limit(chara)
+    #FUNCTION
+    #DIM chara
+    SIF !check_chara(chara)
+        RETURNF 0
+    RETURNF CFLAG:chara:rp_zero_limit
+
+;设置角色影响力
+@set_influence(chara,target_influence)
+    #DIM chara
+    #DIM target_influence
+    SIF !check_chara(chara)
+        RETURN 0
+    CALL set_influence(chara,target_influence*get_rp_direction(chara))
+    SIF MRU_DEBUG_ENABLE
+        PRINTFORM 设置角色{chara}:%ANAME(chara)%影响力为{target_influence}，声望方向为{get_rp_direction(chara)}
+    RETURN
+
+;获取角色影响力
+@get_influence(chara)
+    #FUNCTION
+    #DIM chara
+    SIF !check_chara(chara)
+        RETURNF 0
+    RETURNF ABS(get_reputation(chara))
+
+;获取角色声望阶段
+@get_rp_state(rp)
+    #FUNCTION
+    #DIM rp
+    SIF !check_rp_inrange(rp)
+        RETURNF 0
+    SELECTCASE rp
+        CASE INRANGE(rp,rp_stage_5_high,rp_stage_5_low)
+            RETURNF 5
+        CASE INRANGE(rp,rp_stage_4_high,rp_stage_4_low)
+            RETURNF 4
+        CASE INRANGE(rp,rp_stage_3_high,rp_stage_3_low)
+            RETURNF 3
+        CASE INRANGE(rp,rp_stage_2_high,rp_stage_2_low)
+            RETURNF 2
+        CASE INRANGE(rp,rp_stage_1_high,rp_stage_1_low)
+            RETURNF 1
+        CASE INRANGE(rp,rp_stage_n1_high,rp_stage_n1_low)
+            RETURNF -1
+        CASE INRANGE(rp,rp_stage_n2_high,rp_stage_n2_low)
+            RETURNF -2
+        CASE INRANGE(rp,rp_stage_n3_high,rp_stage_n3_low)
+            RETURNF -3
+        CASE INRANGE(rp,rp_stage_n4_high,rp_stage_n4_low)
+            RETURNF -4
+        CASE INRANGE(rp,rp_stage_n5_high,rp_stage_n5_low)
+            RETURNF -5
+        CASEELSE
+            THROW 声望阶段错误！！！{rp}
+    ENDSELECT
+
+;获取角色影响力阶段
+@get_influence_state(rp)
+    #FUNCTION
+    #DIM rp
+    RETURNF ABS(get_rp_state(rp))
+
+;修正角色声望
+;chara:角色
+;modify_power:修正值力度
+;modify_lowbound:修正下限
+;modify_upbound:修正上限
+{
+@modify_reputation(chara,
+        modify_power,
+        modify_lowbound,
+        modify_upbound)
+}
+    #DIM chara
+    #DIM modify_power
+    #DIM modify_lowbound
+    #DIM modify_upbound
+    #DIM now_rp
+    #DIM now_d
+    #DIM rp_factor
+    #DIM rp_zero_limit
+    SIF !check_chara(chara)
+        RETURN 0
+    now_rp = get_reputation(chara)
+    rp_factor = get_rp_factor(chara)
+    rp_zero_limit = get_rp_zero_limit(chara)
+    SIF !check_rp_inrange(modify_lowbound) || !check_rp_inrange(modify_upbound)
+        THROW 声望的修正区间不在范围内！{modify_lowbound},{modify_upbound}
+    ;如果是同方向的声望修正，则改为影响力计算
+    IF is_same_rp_direction_val(modify_power,now_rp)
+        SIF MRU_DEBUG_ENABLE
+            PRINTFORM 声望修正转为影响力修正，当前声望方向为{get_rp_direction(chara)}
+        CALL modify_influence(chara,ABS(modify_power),ABS(modify_lowbound),ABS(modify_upbound))
+        RETURN
+    ELSE
+        ;获取修正后的声望数值
+        now_rp = modify_rp_cal(now_rp,modify_power,modify_lowbound,modify_upbound,rp_factor)
+        SIF MRU_DEBUG_ENABLE
+            PRINTFORM 计算后的声望数值为{now_rp},修正前的数值为{get_reputation(chara)}
+        ;如果改变方向了，则优先修正零点积累值
+        ;如果未能越过零点积累值，则直接设置声望为当前方向上的1
+        ;如果越过了零点积累值，则设置声望为预计值减去零点积累值
+        IF !is_same_rp_direction_val(,get_reputation(chara))
+            IF ABS(rp_zero_limit) >= ABS(now_rp)
+                rp_zero_limit = rp_zero_limit - now_rp
+                now_rp = 1 * get_rp_direction(chara)
+            ELSE
+                now_rp += rp_zero_limit
+                rp_zero_limit = 0
+            ENDIF
+        ENDIF
+        ;设置声望
+        CALL set_reputation(chara,now_rp)
+        ;设置零点积累值
+        CALL set_rp_zero_limit(chara,rp_zero_limit)
+        RETURN
+    ENDIF
+;修正角色声望计算流程
+{
+@modify_rp_cal(now_rp,
+        rp_power,
+        lowbound,
+        upbound,
+        factor)
+}
+    #FUNCTION
+    #DIM now_rp
+    #DIM rp_power
+    #DIM lowbound
+    #DIM upbound
+    #DIM factor
+    IF now_rp >= 0 && rp_power < 0
+        RETURNF reduce_rp_cal(now_rp,-rp_power,lowbound,upbound,factor)
+    ELSE
+        RETURNF add_rp_cal(now_rp,rp_power,lowbound,upbound,factor)
+    ENDIF
+
+;从正向声望减少声望
+{
+@reduce_rp_cal(now_rp,
+        reduce_power,
+        lowbound,
+        upbound,
+        factor)
+}
+    #FUNCTION
+    #DIM now_rp
+    #DIM reduce_power
+    #DIM lowbound
+    #DIM upbound
+    #DIM factor
+    #DIM temp_result
+    temp_result = now_rp - reduce_power*(rp_factor_max+factor)/rp_factor_max
+    ;如果结果在预计范围内，则直接返回结果
+    IF INRANGE(temp_result,lowbound,upbound)
+        temp_result = temp_result
+    ;如果在上界之上，双倍减少power
+    ELSEIF temp_result > upbound
+        temp_result = now_rp - reduce_power*2*(rp_factor_max+factor)/rp_factor_max
+    ;如果在下界之下，返回下界-1或者现有值-1中的最小值
+    ELSE
+        temp_result = MIN(lowbound-1,now_rp-1)
+    ENDIF
+    RETURNF MAX(rp_min,temp_result)
+
+;从负向声望增加声望
+{
+@add_rp_cal(now_rp,
+        add_power,
+        lowbound,
+        upbound,
+        factor)
+}
+    #FUNCTION
+    #DIM now_rp
+    #DIM add_power
+    #DIM lowbound
+    #DIM upbound
+    #DIM factor
+    #DIM temp_result
+    temp_result = now_rp + add_power*(rp_factor_max+factor)/rp_factor_max
+    ;如果结果在预计范围内，则直接返回结果
+    IF INRANGE(temp_result,lowbound,upbound)
+        temp_result =  temp_result
+    ;如果在下界之下，双倍增加power
+    ELSEIF temp_result < lowbound
+        temp_result =  now_rp + add_power*2*(rp_factor_max+factor)/rp_factor_max
+    ;如果在上界之上，返回上界+1或者现有值+1中的最大值
+    ELSE
+        temp_result =  MAX(upbound+1,now_rp+1)
+    ENDIF
+    RETURNF MIN(rp_max,temp_result)
+;修正角色影响力
+{
+@modify_influence(chara,
+        modify_power,
+        modify_lowbound,
+        modify_upbound)
+}
+    #DIM chara
+    #DIM modify_power
+    #DIM modify_lowbound
+    #DIM modify_upbound
+    #DIM now_influence
+    #DIM now_direction
+    #DIM rp_factor
+    #DIM rp_zero_limit
+    #DIM cal_result
+    SIF !check_chara(chara)
+        RETURN 0
+    SIF modify_lowbound < 0 || modify_upbound < 0
+        THROW 影响力的修正区间都要为正！{modify_power},{modify_lowbound},{modify_upbound}
+    SIF !check_rp_inrange(modify_lowbound) || !check_rp_inrange(modify_upbound)
+        THROW 影响力的修正区间不在范围内！{modify_lowbound},{modify_upbound}
+    now_influence = get_influence(chara)
+    rp_factor = get_rp_factor(chara)
+    rp_zero_limit = get_rp_zero_limit(chara)
+    ;获取修正后的影响力数值
+    cal_result = modify_influence_cal(modify_power,modify_lowbound,modify_upbound,rp_factor)
+    SIF MRU_DEBUG_ENABLE
+            PRINTFORM 计算后的影响力数值为{cal_result},修正前的数值为{now_influence}
+    ;修正影响力不会改变声望方向，但会削减零点积累值、
+    IF cal_result < 0
+        rp_zero_limit = MAX(0,rp_zero_limit+cal_result)
+        cal_result = 1
+    ENDIF
+    ;设置影响力
+    CALL set_influence(chara,cal_result)
+    ;设置零点积累值
+    CALL set_rp_zero_limit(chara,rp_zero_limit)
+    RETURN
+
+;修正角色影响力计算流程
+{
+@modify_influence_cal(now_influence,
+        in_power,
+        lowbound,
+        upbound,
+        factor)
+}
+    #FUNCTION
+    #DIM now_influence
+    #DIM in_power
+    #DIM lowbound
+    #DIM upbound
+    #DIM factor
+    IF in_power > 0
+        RETURNF add_influence_cal(now_influence,in_power,lowbound,upbound,factor)
+    ELSE
+        RETURNF reduce_influence_cal(now_influence,in_power,lowbound,upbound,factor)
+    ENDIF
+;增加角色影响力
+{
+@add_influence_cal(now_influence,
+        add_power,
+        add_lowbound,
+        add_upbound,
+        factor)
+}
+    #FUNCTION
+    #DIM now_influence
+    #DIM add_power
+    #DIM add_lowbound
+    #DIM add_upbound
+    #DIM factor
+    #DIM temp_result
+    temp_result = now_influence + add_power*(rp_factor_max+factor)/rp_factor_max
+    ;如果结果在预计范围内，则直接返回结果
+    IF INRANGE(temp_result,add_lowbound,add_upbound)
+        temp_result = temp_result
+    ;如果结果超出上限，返回上限值+1或者现有值+1中的最大值
+    ELSEIF temp_result > add_upbound
+        temp_result = MAX(add_upbound+1,now_influence+1)
+    ;如果结果低于下限，则双倍着增加power
+    ELSE
+        temp_result = now_influence + add_power*2*(rp_factor_max+factor)/rp_factor_max
+    ENDIF
+    ;增加时不超过最大值
+    RETURNF MIN(rp_max,temp_result)
+;减少角色影响力
+{
+@reduce_influence_cal(now_influence,
+        reduce_power,
+        reduce_lowbound,
+        reduce_upbound,
+        factor)
+}
+    #FUNCTION
+    #DIM now_influence
+    #DIM reduce_power
+    #DIM reduce_lowbound
+    #DIM reduce_upbound
+    #DIM factor
+    #DIM temp_result
+
+
+    temp_result = now_influence - reduce_power*(rp_factor_max+factor)/rp_factor_max
+    ;如果结果在预计范围内，则直接返回结果
+    IF INRANGE(temp_result,reduce_lowbound,reduce_upbound)
+        temp_result = temp_result
+    ;如果结果超出下限，返回下限值-1或者现有值-1中的最小值
+    ELSEIF temp_result < reduce_lowbound
+        temp_result = MIN(reduce_lowbound-1,now_influence-1)
+    ;如果结果高于上限，则双倍着减少power
+    ELSE
+        temp_result = now_influence - reduce_power*2*(rp_factor_max+factor)/rp_factor_max
+    ENDIF
+    ;减少时返回原数值，用于修正零点积累值
+    RETURNF temp_result

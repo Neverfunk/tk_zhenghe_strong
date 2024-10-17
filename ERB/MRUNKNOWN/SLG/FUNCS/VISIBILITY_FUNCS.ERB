@@ -1,0 +1,103 @@
+;检查visibility是否在范围内
+@check_visibility_inrange(visibility)
+    #FUNCTION
+    #DIM visibility
+    IF !INRANGE(visibility,visibility_min,visibility_max)
+        THROW 错误visibility！！！{visibility}
+        RETURNF 0
+    ENDIF
+    RETURNF 1
+
+;设置角色visibility
+@set_visibility(chara,target_visibility)
+    #DIM chara
+    #DIM target_visibility
+    SIF !check_chara(chara)
+        RETURN 0
+    SIF !check_visibility_inrange(target_visibility)
+        RETURN 0
+    SIF MRU_DEBUG_ENABLE
+        PRINTFORM 设置角色{chara}:%ANAME(chara)%visibility为{target_visibility}
+    CFLAG:chara:visibility = target_visibility
+    RETURN
+
+;获取角色visibility
+@get_visibility(chara)
+    #FUNCTION
+    #DIM chara
+    SIF !check_chara(chara)
+        RETURNF 0
+    RETURNF CFLAG:chara:visibility
+
+;设置角色temp_visibility
+@set_temp_visibility(chara,target_temp_visibility)
+    #DIM chara
+    #DIM target_temp_visibility
+    SIF !check_chara(chara)
+        RETURN 0
+    SIF !check_visibility_inrange(target_temp_visibility)
+        RETURN 0
+    SIF MRU_DEBUG_ENABLE
+        PRINTFORM 设置角色{chara}:%ANAME(chara)%temp_visibility为{target_temp_visibility}
+    CFLAG:chara:temp_visibility = target_temp_visibility
+    RETURN
+
+;获取角色temp_visibility
+@get_temp_visibility(chara)
+    #FUNCTION
+    #DIM chara
+    SIF !check_chara(chara)
+        RETURNF 0
+    RETURNF CFLAG:chara:temp_visibility
+
+;根据角色性格修正visibility_d的实际值
+@get_visibility_d_correction(chara)
+    #FUNCTION
+    #DIM chara
+    RETURNF 0
+
+;获取角色visibility_d
+@get_visibility_d(chara)
+    #FUNCTION
+    #DIM chara
+    SELECTCASE get_influence_state(chara)
+        CASE 1
+            RETURNF RAND(-4,-2 + 1)
+        CASE 2
+            RETURNF RAND(-2,2 + 1)
+        CASE 3
+            RETURNF RAND(2,4 + 1)
+        CASE 4
+            RETURNF RAND(4,6 + 1)
+        CASE 5
+            RETURNF RAND(6,8 + 1)
+    ENDSELECT
+
+;修正角色的visibility
+@modify_visibility(chara)
+    #DIM chara
+    #DIM visibility
+    #DIM visibility_d
+    #DIM correction
+    #DIM new_visibility
+    visibility = get_visibility(chara)
+    visibility_d = get_visibility_d(chara)
+    correction = get_visibility_d_correction(chara)
+    visibility_d+=correction
+
+    ;visibility：在高值下，下降快，增长慢；在低值下增长快下降慢。
+    IF visibility < 50
+        IF visibility_d < 0
+            new_visibility = visibility + visibility_d * (1 - (50 - visibility) / 50)
+        ELSE
+            new_visibility = visibility + visibility_d * (1 + (50 - visibility) / 50)
+        ENDIF
+    ELSE
+        IF visibility_d < 0
+            new_visibility = visibility + visibility_d * (1 + (visibility - 50) / 100)
+        ELSE
+            new_visibility = visibility + visibility_d * (1 - (visibility - 50) / 100)
+        ENDIF
+    ENDIF
+    CALL set_visibility(chara,new_visibility)
+    RETURN

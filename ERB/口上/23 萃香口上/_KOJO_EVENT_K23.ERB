@@ -668,8 +668,8 @@ IF ARG == 21
 		PRINTFORMW 那种快活，是往常一样的%ANAME(TARGET)%
 		;TranslatedMark その快活さは、いつも通りの%ANAME(TARGET)%だった
 		PRINTFORML
-		PRINTFORMW 「喜欢的男人就要用尽全力抓走！　…就算不这样，我也还没有放弃呢」
-		;TranslatedMark 「好きな男は力尽くで攫う！　…は無しにしても、私はまだまだ諦めてないからね」
+		PRINTFORMW 「喜欢的男人要用千方百计去抢！......这作为最后的手段，我可还没有放弃哦。」
+		;TranslatedMark 「好きな男は力尽くで攫う！　…は最後の手段としても、私はまだまだ諦めてないからね」
 		PRINTFORML
 		PRINTFORMW 「我一定会让你回头看我的！做好觉悟吧~」
 		;TranslatedMark 「絶対%ANAME(MASTER)%を振り向かせて見せるから！　覚悟しとけよ～っ」
@@ -1017,156 +1017,159 @@ ENDIF
 ;拠点フェイズ終了(所属国家が同じなら常に呼ばれる)
 ;-------------------------------------------------
 IF ARG == 30
-	SETCOLOR カラー_オレンジ
-	;捕虜の時1/2の確率で表示
-	IF CFLAG:捕虜先
-		IF !RAND:2
-			SELECTCASE IFRAND("0TO1", 1, "2", TALENT:恋慕)
+	;主人公が多勢力に捕らわれていると表示されない
+	IF !CFLAG:MASTER:捕虜先
+		SETCOLOR カラー_オレンジ
+		;捕虜の時1/2の確率で表示
+		IF CFLAG:捕虜先
+			IF !RAND:2
+				SELECTCASE IFRAND("0TO1", 1, "2", TALENT:恋慕)
+					CASE 0
+						PRINTFORML %ANAME(TARGET)%「搞砸了啊…。那么，该怎么办呢」
+						;TranslatedMark %ANAME(TARGET)%「この私としたことがねぇ…。さて、どうしたもんか」
+					CASE 1
+						PRINTFORML %ANAME(TARGET)%「遇上这种事情也很新鲜啊」
+						;TranslatedMark %ANAME(TARGET)%「こういう目に会うのも新鮮だなー」
+					CASE 2
+						PRINTFORML %ANAME(TARGET)%「…%ANAME(MASTER)%那边没事吧…」
+						;TranslatedMark %ANAME(TARGET)%「…%ANAME(MASTER)%は元気にしてるかな…」
+				ENDSELECT
+			ENDIF
+		;恋慕 or 服従 or 親友
+		ELSEIF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+			SELECTCASE RAND:30
 				CASE 0
-					PRINTFORML %ANAME(TARGET)%「搞砸了啊…。那么，该怎么办呢」
-					;TranslatedMark %ANAME(TARGET)%「この私としたことがねぇ…。さて、どうしたもんか」
+					PRINTFORML %ANAME(TARGET)%「%ANAME(MASTER)%，回头见」
+					;TranslatedMark %ANAME(TARGET)%「%ANAME(MASTER)%、また後でねー」
 				CASE 1
-					PRINTFORML %ANAME(TARGET)%「遇上这种事情也很新鲜啊」
-					;TranslatedMark %ANAME(TARGET)%「こういう目に会うのも新鮮だなー」
+					PRINTFORML %ANAME(TARGET)%「那我出去一下」
+					;TranslatedMark %ANAME(TARGET)%「いっちょ行ってきますかー」
 				CASE 2
-					PRINTFORML %ANAME(TARGET)%「…%ANAME(MASTER)%那边没事吧…」
-					;TranslatedMark %ANAME(TARGET)%「…%ANAME(MASTER)%は元気にしてるかな…」
+					PRINTFORML %ANAME(TARGET)%「玩乐的时间结束了吗。那么接下来就好好享受战斗吧！」
+					;TranslatedMark %ANAME(TARGET)%「楽しい時間は終わりかー。じゃあ次は戦を楽しもうか！」
+				CASE 3
+					PRINTFORML %ANAME(TARGET)%「下次在战场上一起喝吧」
+					;TranslatedMark %ANAME(TARGET)%「次は戦場で飲もうかね」
+				CASE 4
+					PRINTFORML %ANAME(TARGET)%「那么，战斗战斗♪」
+					;TranslatedMark %ANAME(TARGET)%「さーて、戦だ戦だー♪」
+				CASE 5
+					PRINTFORML %ANAME(TARGET)%「一路顺风~」
+					;TranslatedMark %ANAME(TARGET)%「いってらっしゃーい」
+				CASE 6
+					PRINTFORML %ANAME(TARGET)%「去发泄发泄郁闷吗」
+					;TranslatedMark %ANAME(TARGET)%「鬱憤晴らしに行きますか」
+				CASE 7
+					PRINTFORML %ANAME(TARGET)%「来玩寒风游戏吧」
+					;TranslatedMark %ANAME(TARGET)%「木枯らしごっこでもしてくるかー」
+					RESETCOLOR
+					SIF !(MASTER == NAME_TO_CHARA("霊夢"))
+						PRINTFORML ……又会被灵梦教训的
+						;TranslatedMark ……また霊夢にシバかれるぞ
+				CASE 8
+					PRINTFORML %ANAME(TARGET)%「哦，%ANAME(MASTER)%。一起去吗？」
+					;TranslatedMark %ANAME(TARGET)%「お、%ANAME(MASTER)%。一緒に行くかい？」
+				CASE 9
+					PRINTFORML %ANAME(TARGET)%「战斗真好呢。鬼之血在骚动」
+					;TranslatedMark %ANAME(TARGET)%「戦は良いねぇ。鬼の血が騒ぐよ」
+				CASE 10
+					PRINTFORML %ANAME(TARGET)%「%ANAME(MASTER)%，回去之后一起喝一杯吧♪」
+					;TranslatedMark %ANAME(TARGET)%「%ANAME(MASTER)%、帰ったら一杯やろうよ♪」
+				CASE 11
+					PRINTFORML %ANAME(TARGET)%「%ANAME(MASTER)%，你不要因为无聊的事情就死了噢？变成喝不了酒的身体多没劲啊」
+					;TranslatedMark %ANAME(TARGET)%「%ANAME(MASTER)%、つまんないことで死ぬんじゃないよ？　酒の飲めない身体になるのはつまらんぞ」
+				CASE 12
+					PRINTFORML %ANAME(TARGET)%「到了紧要关头请叫我。我马上就跑过去♪」
+					;TranslatedMark %ANAME(TARGET)%「いざとなったら私を呼びな。すぐに駆けつけてやるからさ♪」
+				CASE 13
+					PRINTFORML %ANAME(TARGET)%「这种乱世的气氛，让我想起了从前…」
+					;TranslatedMark %ANAME(TARGET)%「こういう乱世の空気、昔を思い出すよ…」
+				CASE 14
+					PRINTFORML %ANAME(TARGET)%「该让你看看鬼的力量了」
+					;TranslatedMark %ANAME(TARGET)%「鬼の力の見せ所だね」
+				CASE 15
+					PRINTFORML %ANAME(TARGET)%「也许这么说不太好，但我也不讨厌这样的世界。毕竟哪怕施行暴力也没关系」
+					;TranslatedMark %ANAME(TARGET)%「不謹慎かもしれないけど、こういう世も嫌いじゃないよ。暴れられるからね」
+				CASE 16
+					PRINTFORML %ANAME(TARGET)%「打斗就交给我吧。那么，走吧！」
+					;TranslatedMark %ANAME(TARGET)%「荒事は私に任せな。さあ、行くぞー！」
+				CASE 17
+					PRINTFORML %ANAME(TARGET)%「该让大家知道一下鬼已经回到幻想乡了」
+					;TranslatedMark %ANAME(TARGET)%「幻想郷に鬼が帰ってきたと知らしめてやるとしよう」
+				CASE 18
+					PRINTFORML %ANAME(TARGET)%「快点结束去参加宴会吧♪」
+					;TranslatedMark %ANAME(TARGET)%「さっさと終わらせて宴会と行こうか♪」
+				CASE 19
+					PRINTFORML %ANAME(TARGET)%「%ANAME(MASTER)%，去之前陪我喝一杯吧♪」
+					;TranslatedMark %ANAME(TARGET)%「%ANAME(MASTER)%ー、行く前に一杯付き合ってー♪」
+				CASE 20
+					PRINTFORML %ANAME(TARGET)%「让我来大闹一场吧」
+					;TranslatedMark %ANAME(TARGET)%「一暴れしてこようかね」
+				CASE 21
+					PRINTFORML %ANAME(TARGET)%「战场上喝的酒也别有风味的」
+					;TranslatedMark %ANAME(TARGET)%「戦場で呑む酒もまた乙なもんだよ」
+				CASE 22
+					PRINTFORML %ANAME(TARGET)%「危险的话，随时都可以依靠我哦？」
+					;TranslatedMark %ANAME(TARGET)%「危なくなったら、いつでも頼りなよ？」
+				CASE 23
+					PRINTFORML %ANAME(TARGET)%「喝一杯再走吗？」
+					;TranslatedMark %ANAME(TARGET)%「一杯飲んでから行くかい？」
+				CASE 24
+					PRINTFORML %ANAME(TARGET)%「不赌赌谁取得的战功更多吗？输了的要请客喝酒哦♪」
+					;TranslatedMark %ANAME(TARGET)%「どっちが戦功を上げるか賭けない？　負けたほうが酒を奢るってことで♪」
+				CASE 25
+					PRINTFORML %ANAME(TARGET)%「嗯,呼……哈啊!战斗前的空气是最好的下酒菜啊♪」
+					;TranslatedMark %ANAME(TARGET)%「んっ、く…ぷはーっ！　戦の前のひりついた空気を肴に呑むのもいいもんだねぇ♪」
+				CASE 26
+					PRINTFORML %ANAME(TARGET)%「好了,战斗结束后出一身汗，这样喝酒会更美味。」
+					;TranslatedMark %ANAME(TARGET)%「さ～て、一汗かいてこようかね。終わった後の酒が美味くなるようにな」
+				CASE 27
+					PRINTFORML %ANAME(TARGET)%「为了同伴而不狂暴起来也很难呢。嘛,总之试试看吧。」
+					;TranslatedMark %ANAME(TARGET)%「味方から引かれないように暴れるってのも中々難しいな。ま、なんとかやってみるかね」
+				CASE 28
+					PRINTFORML %ANAME(TARGET)%「那个%ANAME(MASTER)%。情况危险就一定要呼唤我啊？我一定会去救你的」
+					;TranslatedMark %ANAME(TARGET)%「よう%ANAME(MASTER)%。危なくなったら私を呼べよー？　手遅れじゃなきゃ助けてやるからさ」
+				CASE 29
+					PRINTFORML %ANAME(TARGET)%「不要受伤哦%ANAME(MASTER)%? 因为回去后我想尽情跟你在一起♪」
+					;TranslatedMark %ANAME(TARGET)%「怪我するなよ%ANAME(MASTER)%？　帰った後はたっぷり付き合ってもらいたいからさ♪」
+			ENDSELECT
+		;恋慕等をとってないと1/2の確率で表示されない（主人公と面識が無くても表示されるのでそこに注意）
+		ELSEIF !RAND:2
+			SELECTCASE RAND:10
+				CASE 0
+					PRINTFORML %ANAME(TARGET)%「那么。要做什么呢」
+					;TranslatedMark %ANAME(TARGET)%「さて。何しようかなー」
+				CASE 1
+					PRINTFORML %ANAME(TARGET)%「哪里有有趣的家伙呢」
+					;TranslatedMark %ANAME(TARGET)%「どっかに面白い奴はいないかな」
+				CASE 2
+					PRINTFORML %ANAME(TARGET)%「去之前喝一杯吧」
+					;TranslatedMark %ANAME(TARGET)%「行く前にいっちょ呑むか」
+				CASE 3
+					PRINTFORML %ANAME(TARGET)%「随便穿一件bra去吧」
+					;TranslatedMark %ANAME(TARGET)%「適当にブラついてくるか」
+				CASE 4
+					PRINTFORML %ANAME(TARGET)%「来玩寒风游戏吧」
+					;TranslatedMark %ANAME(TARGET)%「木枯らしごっこでもしてくるかー」
+				CASE 5
+					PRINTFORML %ANAME(TARGET)%「来吧…。有没有发生什么有趣的事情呢」
+					;TranslatedMark %ANAME(TARGET)%「さぁて…。面白いことでも起きないかなー」
+				CASE 6
+					PRINTFORML %ANAME(TARGET)%「士兵们好紧张啊。要是能更轻松的准备就好了」
+					;TranslatedMark %ANAME(TARGET)%「兵たちはピリピリしてるねぇ。もっと気楽に構えりゃいいのに」
+				CASE 7
+					PRINTFORML %ANAME(TARGET)%「我去喝一杯」
+					;TranslatedMark %ANAME(TARGET)%「ちょいと呑んでくるか」
+				CASE 8
+					PRINTFORML %ANAME(TARGET)%「这紧张的空气…。回想起从前了」
+					;TranslatedMark %ANAME(TARGET)%「このピリピリした空気…。昔を思い出すなー」
+				CASE 9
+					PRINTFORML %ANAME(TARGET)%「要不要邀请谁来喝一杯呢」
+					;TranslatedMark %ANAME(TARGET)%「誰か誘って呑んでこようかな」
 			ENDSELECT
 		ENDIF
-	;恋慕 or 服従 or 親友
-	ELSEIF TALENT:恋慕 || TALENT:服従 || TALENT:親友
-		SELECTCASE RAND:30
-			CASE 0
-				PRINTFORML %ANAME(TARGET)%「%ANAME(MASTER)%，回头见」
-				;TranslatedMark %ANAME(TARGET)%「%ANAME(MASTER)%、また後でねー」
-			CASE 1
-				PRINTFORML %ANAME(TARGET)%「那我出去一下」
-				;TranslatedMark %ANAME(TARGET)%「いっちょ行ってきますかー」
-			CASE 2
-				PRINTFORML %ANAME(TARGET)%「玩乐的时间结束了吗。那么接下来就好好享受战斗吧！」
-				;TranslatedMark %ANAME(TARGET)%「楽しい時間は終わりかー。じゃあ次は戦を楽しもうか！」
-			CASE 3
-				PRINTFORML %ANAME(TARGET)%「下次在战场上一起喝吧」
-				;TranslatedMark %ANAME(TARGET)%「次は戦場で飲もうかね」
-			CASE 4
-				PRINTFORML %ANAME(TARGET)%「那么，战斗战斗♪」
-				;TranslatedMark %ANAME(TARGET)%「さーて、戦だ戦だー♪」
-			CASE 5
-				PRINTFORML %ANAME(TARGET)%「一路顺风~」
-				;TranslatedMark %ANAME(TARGET)%「いってらっしゃーい」
-			CASE 6
-				PRINTFORML %ANAME(TARGET)%「去发泄发泄郁闷吗」
-				;TranslatedMark %ANAME(TARGET)%「鬱憤晴らしに行きますか」
-			CASE 7
-				PRINTFORML %ANAME(TARGET)%「来玩寒风游戏吧」
-				;TranslatedMark %ANAME(TARGET)%「木枯らしごっこでもしてくるかー」
-				RESETCOLOR
-				SIF !(MASTER == NAME_TO_CHARA("霊夢"))
-					PRINTFORML ……又会被灵梦教训的
-					;TranslatedMark ……また霊夢にシバかれるぞ
-			CASE 8
-				PRINTFORML %ANAME(TARGET)%「哦，%ANAME(MASTER)%。一起去吗？」
-				;TranslatedMark %ANAME(TARGET)%「お、%ANAME(MASTER)%。一緒に行くかい？」
-			CASE 9
-				PRINTFORML %ANAME(TARGET)%「战斗真好呢。鬼之血在骚动」
-				;TranslatedMark %ANAME(TARGET)%「戦は良いねぇ。鬼の血が騒ぐよ」
-			CASE 10
-				PRINTFORML %ANAME(TARGET)%「%ANAME(MASTER)%，回去之后一起喝一杯吧♪」
-				;TranslatedMark %ANAME(TARGET)%「%ANAME(MASTER)%、帰ったら一杯やろうよ♪」
-			CASE 11
-				PRINTFORML %ANAME(TARGET)%「%ANAME(MASTER)%，你不要因为无聊的事情就死了噢？变成喝不了酒的身体多没劲啊」
-				;TranslatedMark %ANAME(TARGET)%「%ANAME(MASTER)%、つまんないことで死ぬんじゃないよ？　酒の飲めない身体になるのはつまらんぞ」
-			CASE 12
-				PRINTFORML %ANAME(TARGET)%「到了紧要关头请叫我。我马上就跑过去♪」
-				;TranslatedMark %ANAME(TARGET)%「いざとなったら私を呼びな。すぐに駆けつけてやるからさ♪」
-			CASE 13
-				PRINTFORML %ANAME(TARGET)%「这种乱世的气氛，让我想起了从前…」
-				;TranslatedMark %ANAME(TARGET)%「こういう乱世の空気、昔を思い出すよ…」
-			CASE 14
-				PRINTFORML %ANAME(TARGET)%「该让你看看鬼的力量了」
-				;TranslatedMark %ANAME(TARGET)%「鬼の力の見せ所だね」
-			CASE 15
-				PRINTFORML %ANAME(TARGET)%「也许这么说不太好，但我也不讨厌这样的世界。毕竟哪怕施行暴力也没关系」
-				;TranslatedMark %ANAME(TARGET)%「不謹慎かもしれないけど、こういう世も嫌いじゃないよ。暴れられるからね」
-			CASE 16
-				PRINTFORML %ANAME(TARGET)%「打斗就交给我吧。那么，走吧！」
-				;TranslatedMark %ANAME(TARGET)%「荒事は私に任せな。さあ、行くぞー！」
-			CASE 17
-				PRINTFORML %ANAME(TARGET)%「该让大家知道一下鬼已经回到幻想乡了」
-				;TranslatedMark %ANAME(TARGET)%「幻想郷に鬼が帰ってきたと知らしめてやるとしよう」
-			CASE 18
-				PRINTFORML %ANAME(TARGET)%「快点结束去参加宴会吧♪」
-				;TranslatedMark %ANAME(TARGET)%「さっさと終わらせて宴会と行こうか♪」
-			CASE 19
-				PRINTFORML %ANAME(TARGET)%「%ANAME(MASTER)%，去之前陪我喝一杯吧♪」
-				;TranslatedMark %ANAME(TARGET)%「%ANAME(MASTER)%ー、行く前に一杯付き合ってー♪」
-			CASE 20
-				PRINTFORML %ANAME(TARGET)%「让我来大闹一场吧」
-				;TranslatedMark %ANAME(TARGET)%「一暴れしてこようかね」
-			CASE 21
-				PRINTFORML %ANAME(TARGET)%「战场上喝的酒也别有风味的」
-				;TranslatedMark %ANAME(TARGET)%「戦場で呑む酒もまた乙なもんだよ」
-			CASE 22
-				PRINTFORML %ANAME(TARGET)%「危险的话，随时都可以依靠我哦？」
-				;TranslatedMark %ANAME(TARGET)%「危なくなったら、いつでも頼りなよ？」
-			CASE 23
-				PRINTFORML %ANAME(TARGET)%「喝一杯再走吗？」
-				;TranslatedMark %ANAME(TARGET)%「一杯飲んでから行くかい？」
-			CASE 24
-				PRINTFORML %ANAME(TARGET)%「不赌赌谁取得的战功更多吗？输了的要请客喝酒哦♪」
-				;TranslatedMark %ANAME(TARGET)%「どっちが戦功を上げるか賭けない？　負けたほうが酒を奢るってことで♪」
-			CASE 25
-				PRINTFORML %ANAME(TARGET)%「嗯,呼……哈啊!战斗前的空气是最好的下酒菜啊♪」
-				;TranslatedMark %ANAME(TARGET)%「んっ、く…ぷはーっ！　戦の前のひりついた空気を肴に呑むのもいいもんだねぇ♪」
-			CASE 26
-				PRINTFORML %ANAME(TARGET)%「好了,战斗结束后出一身汗，这样喝酒会更美味。」
-				;TranslatedMark %ANAME(TARGET)%「さ～て、一汗かいてこようかね。終わった後の酒が美味くなるようにな」
-			CASE 27
-				PRINTFORML %ANAME(TARGET)%「为了同伴而不狂暴起来也很难呢。嘛,总之试试看吧。」
-				;TranslatedMark %ANAME(TARGET)%「味方から引かれないように暴れるってのも中々難しいな。ま、なんとかやってみるかね」
-			CASE 28
-				PRINTFORML %ANAME(TARGET)%「那个%ANAME(MASTER)%。情况危险就一定要呼唤我啊？我一定会去救你的」
-				;TranslatedMark %ANAME(TARGET)%「よう%ANAME(MASTER)%。危なくなったら私を呼べよー？　手遅れじゃなきゃ助けてやるからさ」
-			CASE 29
-				PRINTFORML %ANAME(TARGET)%「叫我怪物什么的,%ANAME(MASTER)%你太会说笑了。等回去后还想跟你腻乎一番呢♪」
-				;TranslatedMark %ANAME(TARGET)%「怪我なんてしてくれるなよ%ANAME(MASTER)%？　帰った後はたっぷりイチャつきたいからさ♪」
-		ENDSELECT
-	;恋慕等をとってないと1/2の確率で表示されない（主人公と面識が無くても表示されるのでそこに注意）
-	ELSEIF !RAND:2
-		SELECTCASE RAND:10
-			CASE 0
-				PRINTFORML %ANAME(TARGET)%「那么。要做什么呢」
-				;TranslatedMark %ANAME(TARGET)%「さて。何しようかなー」
-			CASE 1
-				PRINTFORML %ANAME(TARGET)%「哪里有有趣的家伙呢」
-				;TranslatedMark %ANAME(TARGET)%「どっかに面白い奴はいないかな」
-			CASE 2
-				PRINTFORML %ANAME(TARGET)%「去之前喝一杯吧」
-				;TranslatedMark %ANAME(TARGET)%「行く前にいっちょ呑むか」
-			CASE 3
-				PRINTFORML %ANAME(TARGET)%「随便穿一件bra去吧」
-				;TranslatedMark %ANAME(TARGET)%「適当にブラついてくるか」
-			CASE 4
-				PRINTFORML %ANAME(TARGET)%「来玩寒风游戏吧」
-				;TranslatedMark %ANAME(TARGET)%「木枯らしごっこでもしてくるかー」
-			CASE 5
-				PRINTFORML %ANAME(TARGET)%「来吧…。有没有发生什么有趣的事情呢」
-				;TranslatedMark %ANAME(TARGET)%「さぁて…。面白いことでも起きないかなー」
-			CASE 6
-				PRINTFORML %ANAME(TARGET)%「士兵们好紧张啊。要是能更轻松的准备就好了」
-				;TranslatedMark %ANAME(TARGET)%「兵たちはピリピリしてるねぇ。もっと気楽に構えりゃいいのに」
-			CASE 7
-				PRINTFORML %ANAME(TARGET)%「我去喝一杯」
-				;TranslatedMark %ANAME(TARGET)%「ちょいと呑んでくるか」
-			CASE 8
-				PRINTFORML %ANAME(TARGET)%「这紧张的空气…。回想起从前了」
-				;TranslatedMark %ANAME(TARGET)%「このピリピリした空気…。昔を思い出すなー」
-			CASE 9
-				PRINTFORML %ANAME(TARGET)%「要不要邀请谁来喝一杯呢」
-				;TranslatedMark %ANAME(TARGET)%「誰か誘って呑んでこようかな」
-		ENDSELECT
+		RESETCOLOR
 	ENDIF
-	RESETCOLOR
 	RETURN 0
 ENDIF
 
@@ -1174,156 +1177,159 @@ ENDIF
 ;戦略フェイズ終了(所属国家が同じなら常に呼ばれる)
 ;-------------------------------------------------
 IF ARG == 31
-	SETCOLOR カラー_オレンジ
-	;捕虜の時1/2の確率で表示
-	IF CFLAG:捕虜先
-		IF !RAND:2
-			SELECTCASE IFRAND("0TO1", 1, "2", TALENT:恋慕)
+	;主人公が多勢力に捕らわれていると表示されない
+	IF !CFLAG:MASTER:捕虜先
+		SETCOLOR カラー_オレンジ
+		;捕虜の時1/2の確率で表示
+		IF CFLAG:捕虜先
+			IF !RAND:2
+				SELECTCASE IFRAND("0TO1", 1, "2", TALENT:恋慕)
+					CASE 0
+						PRINTFORML %ANAME(TARGET)%「果然能力被封印了啊…。那么，该怎么办呢」
+						;TranslatedMark %ANAME(TARGET)%「やっぱり能力封じがされてるねぇ…。さて、どうしたもんか」
+					CASE 1
+						PRINTFORML %ANAME(TARGET)%「酒，酒啊……给我喝酒！」
+						;TranslatedMark %ANAME(TARGET)%「さ、酒ェ……酒飲ませろーッ！」
+					CASE 2
+						PRINTFORML %ANAME(TARGET)%（%ANAME(MASTER)%那边还好吧…。不要因为我不在而死去啊…）
+						;TranslatedMark %ANAME(TARGET)%（%ANAME(MASTER)%は元気にしてるかな…。私のいないことで死んだりするなよ…）
+				ENDSELECT
+			ENDIF
+		;恋慕 or 服従 or 親友
+		ELSEIF TALENT:恋慕 || TALENT:服従 || TALENT:親友
+			SELECTCASE RAND:30
 				CASE 0
-					PRINTFORML %ANAME(TARGET)%「果然能力被封印了啊…。那么，该怎么办呢」
-					;TranslatedMark %ANAME(TARGET)%「やっぱり能力封じがされてるねぇ…。さて、どうしたもんか」
+					PRINTFORML %ANAME(TARGET)%「喂，%ANAME(MASTER)%，一会儿一起喝一杯吧♪」
+					;TranslatedMark %ANAME(TARGET)%「おー%ANAME(MASTER)%、後で一杯やろうねー♪」
 				CASE 1
-					PRINTFORML %ANAME(TARGET)%「酒，酒啊……给我喝酒！」
-					;TranslatedMark %ANAME(TARGET)%「さ、酒ェ……酒飲ませろーッ！」
+					PRINTFORML %ANAME(TARGET)%「啊，%ANAME(TARGET)%。欢迎回来」
+					;TranslatedMark %ANAME(TARGET)%「おう。おかえり%ANAME(MASTER)%」
 				CASE 2
-					PRINTFORML %ANAME(TARGET)%（%ANAME(MASTER)%那边还好吧…。不要因为我不在而死去啊…）
-					;TranslatedMark %ANAME(TARGET)%（%ANAME(MASTER)%は元気にしてるかな…。私のいないことで死んだりするなよ…）
+					PRINTFORML %ANAME(TARGET)%「慢慢喝吧」
+					;TranslatedMark %ANAME(TARGET)%「ゆっくり呑むぞー」
+				CASE 3
+					PRINTFORML %ANAME(TARGET)%「%ANAME(MASTER)%，没事吧？没有受伤吧？」
+					;TranslatedMark %ANAME(TARGET)%「%ANAME(MASTER)%、大丈夫？　怪我は無いかい？」
+				CASE 4
+					PRINTFORML %ANAME(TARGET)%「哪里有好喝的酒啊」
+					;TranslatedMark %ANAME(TARGET)%「どっかに美味い酒はないもんかねー」
+				CASE 5
+					PRINTFORML %ANAME(TARGET)%「我回来了!」
+					;TranslatedMark %ANAME(TARGET)%「ただいまー♪」
+				CASE 6
+					PRINTFORML %ANAME(TARGET)%「哈，闹得很痛快♪」
+					;TranslatedMark %ANAME(TARGET)%「はー、暴れてスッキリした♪」
+				CASE 7
+					PRINTFORML %ANAME(TARGET)%「玩寒风游戏的时候，不知从哪里飞来了符纸」
+					;TranslatedMark %ANAME(TARGET)%「木枯らしごっこしてたら、何処からかお札が飛んできたよ」
+					RESETCOLOR
+					SIF !(MASTER == NAME_TO_CHARA("霊夢"))
+						PRINTFORML ……灵梦桑，辛苦了
+						;TranslatedMark ……霊夢さん、お疲れ様です
+				CASE 8
+					PRINTFORML %ANAME(TARGET)%「哦，%ANAME(MASTER)%。那边怎么样？」
+					;TranslatedMark %ANAME(TARGET)%「お、%ANAME(MASTER)%。そっちはどうだった？」
+				CASE 9
+					PRINTFORML %ANAME(TARGET)%「血开始骚动后，喝酒是最好的！」
+					;TranslatedMark %ANAME(TARGET)%「血が騒いだ後は、呑むに限る！」
+				CASE 10
+					PRINTFORML %ANAME(TARGET)%「啊，%ANAME(MASTER)%。喝一杯吗？」
+					;TranslatedMark %ANAME(TARGET)%「あ、%ANAME(MASTER)%。一杯やる？」
+				CASE 11
+					PRINTFORML %ANAME(TARGET)%「好！为了纪念%ANAME(MASTER)%的生还而举行宴会……啊？不行吗？」
+					;TranslatedMark %ANAME(TARGET)%「よーし、%ANAME(MASTER)%の生還を記念して宴会を……え？　だめ？」
+				CASE 12
+					PRINTFORML %ANAME(TARGET)%「现在回去吗？一起回去吧」
+					;TranslatedMark %ANAME(TARGET)%「おーう、%ANAME(MASTER)%♪　今帰り？　一緒に帰ろうよ」
+				CASE 13
+					PRINTFORML %ANAME(TARGET)%「我回来了，%ANAME(MASTER)%。那边没事吧？」
+					;TranslatedMark %ANAME(TARGET)%「ただいま、%ANAME(MASTER)%。そっちは無事だったかい？」
+				CASE 14
+					PRINTFORML %ANAME(TARGET)%「还没闹够呢…」
+					;TranslatedMark %ANAME(TARGET)%「暴れ足りなかったなー…」
+				CASE 15
+					PRINTFORML %ANAME(TARGET)%「总有一天这个乱世也会结束吧……」
+					;TranslatedMark %ANAME(TARGET)%「いつかはこの乱世も終わるのかね……」
+				CASE 16
+					PRINTFORML %ANAME(TARGET)%「打斗的时间结束了。喝吧♪」
+					;TranslatedMark %ANAME(TARGET)%「荒事タイムは終わりっと。さー呑むぞー♪」
+				CASE 17
+					PRINTFORML %ANAME(TARGET)%「战斗后身体还很兴奋啊……%ANAME(MASTER)%，做我的对手吧♥」
+					;TranslatedMark %ANAME(TARGET)%「戦の後は身体が昂ぶるねぇ……%ANAME(MASTER)%、相手してよぉ♥」
+				CASE 18
+					PRINTFORML %ANAME(TARGET)%「结束了结束了，一起去宴会吧♪」
+					;TranslatedMark %ANAME(TARGET)%「終わった終わったー、それじゃあ宴会と行こうかー♪」
+				CASE 19
+					PRINTFORML %ANAME(TARGET)%「%ANAME(MASTER)%？正好，陪我喝一杯吧♪」
+					;TranslatedMark %ANAME(TARGET)%「帰ってきたとこかい、%ANAME(MASTER)%？　丁度良かった、一杯付き合えよー♪」
+				CASE 20
+					PRINTFORML %ANAME(TARGET)%「稍微闹一下就谁也不敢上来挑战了…。大家都很薄情呢」
+					;TranslatedMark %ANAME(TARGET)%「ちょっと暴れたら誰も挑んでこなくなった…。みんな薄情だねぇ」
+				CASE 21
+					PRINTFORML %ANAME(TARGET)%「回去的时候喝一杯怎么样？找到了好的店哦」
+					;TranslatedMark %ANAME(TARGET)%「帰りに一杯やってかない？　いい店見つけたんだよ」
+				CASE 22
+					PRINTFORML %ANAME(TARGET)%「那么工作也结束了，要悠哉悠哉地一起回去吗」
+					;TranslatedMark %ANAME(TARGET)%「さーてお仕事も終わったし、呑兵衛に戻りますか」
+				CASE 23
+					PRINTFORML %ANAME(TARGET)%「战斗很好呢。我会想起以前任意胡闹的时候…」
+					;TranslatedMark %ANAME(TARGET)%「戦はいいね。好き勝手暴れてた頃を思い出すよ…」
+				CASE 24
+					PRINTFORML %ANAME(TARGET)%「那么，直到下一场战斗都可以休息吗。%ANAME(MASTER)%也一起怎么样？」
+					;TranslatedMark %ANAME(TARGET)%「さて、次の戦までダラけるかー。%ANAME(MASTER)%も一緒にどうだい？」
+				CASE 25
+					PRINTFORML %ANAME(TARGET)%「你回来了。宴会吧♪」
+					;TranslatedMark %ANAME(TARGET)%「おかえり%ANAME(MASTER)%ー。宴会しようよ宴会ー♪」
+				CASE 26
+					PRINTFORML %ANAME(TARGET)%「嘿,%ANAME(MASTER)%如果你有空的话一起去喝酒如何？附近有一家赌场兼酒吧,可以一边喝酒一边博彩啊♪」
+					;TranslatedMark %ANAME(TARGET)%「よー%ANAME(MASTER)%、暇だったら飲みに行くついでに博打遊びはどうだい？　近くに賭場を兼ねた居酒屋があってねぇ♪」
+				CASE 27
+					PRINTFORML %ANAME(TARGET)%「呜——结束了。今天悄悄地喝点酒…明天还有宴会呢。」
+					;TranslatedMark %ANAME(TARGET)%「ふい～、終わった終わった。今日は静かに飲んで…明日は宴会だな」
+				CASE 28
+					PRINTFORML %ANAME(TARGET)%「哈哈%ANAME(MASTER)%,我们都没死真是太好了。多亏了你,我们还可以继续一起喝酒♪」
+					;TranslatedMark %ANAME(TARGET)%「やあやあ%ANAME(MASTER)%。お互い死に損なってなによりだねぇ。おかげでまだまだ一緒に呑めるな♪」
+				CASE 29
+					PRINTFORML %ANAME(TARGET)%「我没变成怪物吧？…太好了。那我们可以腻乎一番了对吧？呵呵♥」
+					;TranslatedMark %ANAME(TARGET)%「怪我はなかったかい？　…そりゃ良かった。それならイチャついても大丈夫だよなぁ？　んふふ♥」
+			ENDSELECT
+		;恋慕等をとってないと1/2の確率で表示されない（主人公と面識が無くても表示されるのでそこに注意）
+		ELSEIF !RAND:2
+			SELECTCASE RAND:10
+				CASE 0
+					PRINTFORML %ANAME(TARGET)%「那么。怎么打发时间呢…」
+					;TranslatedMark %ANAME(TARGET)%「さて。何して暇を潰そうかね…」
+				CASE 1
+					PRINTFORML %ANAME(TARGET)%「回去的时候喝一杯吧」
+					;TranslatedMark %ANAME(TARGET)%「帰りに一杯やってくかー」
+				CASE 2
+					PRINTFORML %ANAME(TARGET)%「回去慢慢喝点酒吧」
+					;TranslatedMark %ANAME(TARGET)%「帰ってゆっくり酒でも呑むか」
+				CASE 3
+					PRINTFORML %ANAME(TARGET)%「要喝到下一次可以暴走的时候为止吗。」
+					;TranslatedMark %ANAME(TARGET)%「次の暴れ時まで呑んで過ごすか」
+				CASE 4
+					PRINTFORML %ANAME(TARGET)%「还没闹够呢…」
+					;TranslatedMark %ANAME(TARGET)%「暴れ足りなかったなー…」
+				CASE 5
+					PRINTFORML %ANAME(TARGET)%「没有什么有趣的事情呢」
+					;TranslatedMark %ANAME(TARGET)%「面白いことって中々無いもんだね」
+				CASE 6
+					PRINTFORML %ANAME(TARGET)%「士兵们还是一如既往的紧张呢。嗯，太弱了没办法吗」
+					;TranslatedMark %ANAME(TARGET)%「相変わらず兵たちはピリピリしてるねぇ。ま、弱いヤツはしょうがないか」
+				CASE 7
+					PRINTFORML %ANAME(TARGET)%「回去之前喝一杯吧」
+					;TranslatedMark %ANAME(TARGET)%「帰る前にちょいと呑んでくか」
+				CASE 8
+					PRINTFORML %ANAME(TARGET)%「这气氛让我想起了以前激烈的战斗的时候…」
+					;TranslatedMark %ANAME(TARGET)%「昔のバチバチやってた頃を思い出す空気だねぇ…」
+				CASE 9
+					PRINTFORML %ANAME(TARGET)%「回去的时候邀请谁来喝一杯吧」
+					;TranslatedMark %ANAME(TARGET)%「帰りに誰か誘って呑んでこうかな」
 			ENDSELECT
 		ENDIF
-	;恋慕 or 服従 or 親友
-	ELSEIF TALENT:恋慕 || TALENT:服従 || TALENT:親友
-		SELECTCASE RAND:30
-			CASE 0
-				PRINTFORML %ANAME(TARGET)%「喂，%ANAME(MASTER)%，一会儿一起喝一杯吧♪」
-				;TranslatedMark %ANAME(TARGET)%「おー%ANAME(MASTER)%、後で一杯やろうねー♪」
-			CASE 1
-				PRINTFORML %ANAME(TARGET)%「啊，%ANAME(TARGET)%。欢迎回来」
-				;TranslatedMark %ANAME(TARGET)%「おう。おかえり%ANAME(MASTER)%」
-			CASE 2
-				PRINTFORML %ANAME(TARGET)%「慢慢喝吧」
-				;TranslatedMark %ANAME(TARGET)%「ゆっくり呑むぞー」
-			CASE 3
-				PRINTFORML %ANAME(TARGET)%「%ANAME(MASTER)%，没事吧？没有受伤吧？」
-				;TranslatedMark %ANAME(TARGET)%「%ANAME(MASTER)%、大丈夫？　怪我は無いかい？」
-			CASE 4
-				PRINTFORML %ANAME(TARGET)%「哪里有好喝的酒啊」
-				;TranslatedMark %ANAME(TARGET)%「どっかに美味い酒はないもんかねー」
-			CASE 5
-				PRINTFORML %ANAME(TARGET)%「我回来了!」
-				;TranslatedMark %ANAME(TARGET)%「ただいまー♪」
-			CASE 6
-				PRINTFORML %ANAME(TARGET)%「哈，闹得很痛快♪」
-				;TranslatedMark %ANAME(TARGET)%「はー、暴れてスッキリした♪」
-			CASE 7
-				PRINTFORML %ANAME(TARGET)%「玩寒风游戏的时候，不知从哪里飞来了符纸」
-				;TranslatedMark %ANAME(TARGET)%「木枯らしごっこしてたら、何処からかお札が飛んできたよ」
-				RESETCOLOR
-				SIF !(MASTER == NAME_TO_CHARA("霊夢"))
-					PRINTFORML ……灵梦桑，辛苦了
-					;TranslatedMark ……霊夢さん、お疲れ様です
-			CASE 8
-				PRINTFORML %ANAME(TARGET)%「哦，%ANAME(MASTER)%。那边怎么样？」
-				;TranslatedMark %ANAME(TARGET)%「お、%ANAME(MASTER)%。そっちはどうだった？」
-			CASE 9
-				PRINTFORML %ANAME(TARGET)%「血开始骚动后，喝酒是最好的！」
-				;TranslatedMark %ANAME(TARGET)%「血が騒いだ後は、呑むに限る！」
-			CASE 10
-				PRINTFORML %ANAME(TARGET)%「啊，%ANAME(MASTER)%。喝一杯吗？」
-				;TranslatedMark %ANAME(TARGET)%「あ、%ANAME(MASTER)%。一杯やる？」
-			CASE 11
-				PRINTFORML %ANAME(TARGET)%「好！为了纪念%ANAME(MASTER)%的生还而举行宴会……啊？不行吗？」
-				;TranslatedMark %ANAME(TARGET)%「よーし、%ANAME(MASTER)%の生還を記念して宴会を……え？　だめ？」
-			CASE 12
-				PRINTFORML %ANAME(TARGET)%「现在回去吗？一起回去吧」
-				;TranslatedMark %ANAME(TARGET)%「おーう、%ANAME(MASTER)%♪　今帰り？　一緒に帰ろうよ」
-			CASE 13
-				PRINTFORML %ANAME(TARGET)%「我回来了，%ANAME(MASTER)%。那边没事吧？」
-				;TranslatedMark %ANAME(TARGET)%「ただいま、%ANAME(MASTER)%。そっちは無事だったかい？」
-			CASE 14
-				PRINTFORML %ANAME(TARGET)%「还没闹够呢…」
-				;TranslatedMark %ANAME(TARGET)%「暴れ足りなかったなー…」
-			CASE 15
-				PRINTFORML %ANAME(TARGET)%「总有一天这个乱世也会结束吧……」
-				;TranslatedMark %ANAME(TARGET)%「いつかはこの乱世も終わるのかね……」
-			CASE 16
-				PRINTFORML %ANAME(TARGET)%「打斗的时间结束了。喝吧♪」
-				;TranslatedMark %ANAME(TARGET)%「荒事タイムは終わりっと。さー呑むぞー♪」
-			CASE 17
-				PRINTFORML %ANAME(TARGET)%「战斗后身体还很兴奋啊……%ANAME(MASTER)%，做我的对手吧♥」
-				;TranslatedMark %ANAME(TARGET)%「戦の後は身体が昂ぶるねぇ……%ANAME(MASTER)%、相手してよぉ♥」
-			CASE 18
-				PRINTFORML %ANAME(TARGET)%「结束了结束了，一起去宴会吧♪」
-				;TranslatedMark %ANAME(TARGET)%「終わった終わったー、それじゃあ宴会と行こうかー♪」
-			CASE 19
-				PRINTFORML %ANAME(TARGET)%「%ANAME(MASTER)%？正好，陪我喝一杯吧♪」
-				;TranslatedMark %ANAME(TARGET)%「帰ってきたとこかい、%ANAME(MASTER)%？　丁度良かった、一杯付き合えよー♪」
-			CASE 20
-				PRINTFORML %ANAME(TARGET)%「稍微闹一下就谁也不敢上来挑战了…。大家都很薄情呢」
-				;TranslatedMark %ANAME(TARGET)%「ちょっと暴れたら誰も挑んでこなくなった…。みんな薄情だねぇ」
-			CASE 21
-				PRINTFORML %ANAME(TARGET)%「回去的时候喝一杯怎么样？找到了好的店哦」
-				;TranslatedMark %ANAME(TARGET)%「帰りに一杯やってかない？　いい店見つけたんだよ」
-			CASE 22
-				PRINTFORML %ANAME(TARGET)%「那么工作也结束了，要悠哉悠哉地一起回去吗」
-				;TranslatedMark %ANAME(TARGET)%「さーてお仕事も終わったし、呑兵衛に戻りますか」
-			CASE 23
-				PRINTFORML %ANAME(TARGET)%「战斗很好呢。我会想起以前任意胡闹的时候…」
-				;TranslatedMark %ANAME(TARGET)%「戦はいいね。好き勝手暴れてた頃を思い出すよ…」
-			CASE 24
-				PRINTFORML %ANAME(TARGET)%「那么，直到下一场战斗都可以休息吗。%ANAME(MASTER)%也一起怎么样？」
-				;TranslatedMark %ANAME(TARGET)%「さて、次の戦までダラけるかー。%ANAME(MASTER)%も一緒にどうだい？」
-			CASE 25
-				PRINTFORML %ANAME(TARGET)%「你回来了。宴会吧♪」
-				;TranslatedMark %ANAME(TARGET)%「おかえり%ANAME(MASTER)%ー。宴会しようよ宴会ー♪」
-			CASE 26
-				PRINTFORML %ANAME(TARGET)%「嘿,%ANAME(MASTER)%如果你有空的话一起去喝酒如何？附近有一家赌场兼酒吧,可以一边喝酒一边博彩啊♪」
-				;TranslatedMark %ANAME(TARGET)%「よー%ANAME(MASTER)%、暇だったら飲みに行くついでに博打遊びはどうだい？　近くに賭場を兼ねた居酒屋があってねぇ♪」
-			CASE 27
-				PRINTFORML %ANAME(TARGET)%「呜——结束了。今天悄悄地喝点酒…明天还有宴会呢。」
-				;TranslatedMark %ANAME(TARGET)%「ふい～、終わった終わった。今日は静かに飲んで…明日は宴会だな」
-			CASE 28
-				PRINTFORML %ANAME(TARGET)%「哈哈%ANAME(MASTER)%,我们都没死真是太好了。多亏了你,我们还可以继续一起喝酒♪」
-				;TranslatedMark %ANAME(TARGET)%「やあやあ%ANAME(MASTER)%。お互い死に損なってなによりだねぇ。おかげでまだまだ一緒に呑めるな♪」
-			CASE 29
-				PRINTFORML %ANAME(TARGET)%「我没变成怪物吧？…太好了。那我们可以腻乎一番了对吧？呵呵♥」
-				;TranslatedMark %ANAME(TARGET)%「怪我はなかったかい？　…そりゃ良かった。それならイチャついても大丈夫だよなぁ？　んふふ♥」
-		ENDSELECT
-	;恋慕等をとってないと1/2の確率で表示されない（主人公と面識が無くても表示されるのでそこに注意）
-	ELSEIF !RAND:2
-		SELECTCASE RAND:10
-			CASE 0
-				PRINTFORML %ANAME(TARGET)%「那么。怎么打发时间呢…」
-				;TranslatedMark %ANAME(TARGET)%「さて。何して暇を潰そうかね…」
-			CASE 1
-				PRINTFORML %ANAME(TARGET)%「回去的时候喝一杯吧」
-				;TranslatedMark %ANAME(TARGET)%「帰りに一杯やってくかー」
-			CASE 2
-				PRINTFORML %ANAME(TARGET)%「回去慢慢喝点酒吧」
-				;TranslatedMark %ANAME(TARGET)%「帰ってゆっくり酒でも呑むか」
-			CASE 3
-				PRINTFORML %ANAME(TARGET)%「要喝到下一次可以暴走的时候为止吗。」
-				;TranslatedMark %ANAME(TARGET)%「次の暴れ時まで呑んで過ごすか」
-			CASE 4
-				PRINTFORML %ANAME(TARGET)%「还没闹够呢…」
-				;TranslatedMark %ANAME(TARGET)%「暴れ足りなかったなー…」
-			CASE 5
-				PRINTFORML %ANAME(TARGET)%「没有什么有趣的事情呢」
-				;TranslatedMark %ANAME(TARGET)%「面白いことって中々無いもんだね」
-			CASE 6
-				PRINTFORML %ANAME(TARGET)%「士兵们还是一如既往的紧张呢。嗯，太弱了没办法吗」
-				;TranslatedMark %ANAME(TARGET)%「相変わらず兵たちはピリピリしてるねぇ。ま、弱いヤツはしょうがないか」
-			CASE 7
-				PRINTFORML %ANAME(TARGET)%「回去之前喝一杯吧」
-				;TranslatedMark %ANAME(TARGET)%「帰る前にちょいと呑んでくか」
-			CASE 8
-				PRINTFORML %ANAME(TARGET)%「这气氛让我想起了以前激烈的战斗的时候…」
-				;TranslatedMark %ANAME(TARGET)%「昔のバチバチやってた頃を思い出す空気だねぇ…」
-			CASE 9
-				PRINTFORML %ANAME(TARGET)%「回去的时候邀请谁来喝一杯吧」
-				;TranslatedMark %ANAME(TARGET)%「帰りに誰か誘って呑んでこうかな」
-		ENDSELECT
+		RESETCOLOR
 	ENDIF
-	RESETCOLOR
 	RETURN 0
 ENDIF
 
@@ -1455,8 +1461,37 @@ ENDIF
 ;触手の子供を出産した
 ;-------------------------------------------------
 IF ARG == 44
-	PRINTFORMW 「…就算是这样的人的也算是我的孩子吧…。没办法，我来照顾你吧」
-	;TranslatedMark 「…こんなナリでも一応は私の子だしねぇ…。仕方ない、面倒見てやるか」
+	IF GETBIT(TALENT:淫乱系, 素質_淫乱_苗床)
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORML 「啊哈♥ 可爱的孩子们呢。快快长大来让我怀上你们的孩子吧♥」
+				;TranslatedMark 「あはぁっ♥　可愛い子達だねぇ。早く大きくなって私を孕ませておくれ♥」
+				PRINTFORMW 在%ANAME(TARGET)%的眼中，那些可怕的触手仿佛为自己带来快乐的天使。
+				;TranslatedMark %ANAME(TARGET)%の目にはおぞましい触手たちが、自分に快楽を与えてくれる天使のように見えている
+			CASE 1
+				PRINTFORMW 刚出生的触手有几只，就像是寻求乳汁般吮吸着%ANAME(TARGET)%敏感的阴蒂。
+				;TranslatedMark 生まれたばかりの触手たちが何匹か、母乳を求めて乳首に吸い付くように%ANAME(TARGET)%の敏感なクリトリスにぢゅうぢゅう吸い付いている
+				PRINTFORML 「は、别吸那里啊♥ 那里不会有奶出来的，呃呃嗯嗯♥♥♥」
+				;TranslatedMark 「はひぃッ！　そこ吸っちゃダメぇ♥　そこはお乳出ないからぁッ、んひぃいぃッッ♥♥♥」
+				PRINTFORMW 即便连婴儿的触碰也能让%ANAME(TARGET)%达到高潮，他从心底为这些能让自己达到巅峰的天使们的诞生感到喜悦。
+				;TranslatedMark 赤ん坊の触手にさえアクメさせられながら、%ANAME(TARGET)%は自分を絶頂させてくれる天使たちの誕生を心から喜んだ
+			CASE 2
+				PRINTFORML %ANAME(TARGET)%因体内生动的触手狂乱地在产道中穿梭的感觉而达到高潮，同时随着潮吹诞生了几条触手。
+				;TranslatedMark %ANAME(TARGET)%は元気な触手たちが暴れながら産道を進む感覚に絶頂し、潮を吹くとともに何匹かの触手が産まれる
+				PRINTFORMW 刚刚出生的触手们像是要爱抚一样，从%ANAME(TARGET)%的大腿缠绕到胸部，吮吸着乳头寻求母乳。
+				;TranslatedMark 生まれたばかりの触手たちは%ANAME(TARGET)%の太ももから愛撫するように胸元へ絡みつき、母乳を求めて乳首へ吸い付く
+				PRINTFORML 「啊、嗯嗯♥ 开心又淫荡的吸吮方式呢♥ 再多吸母亲的乳房，让我感觉更舒服吧♥♥」
+				;TranslatedMark 「あッ、ふぅんっ♥　げ、元気でいやらしい吸い方だねぇ♥　もっと母ちゃんのお乳吸って、キモチよくしてぇ♥♥」
+				PRINTFORMW 身体的内外都被触手玩弄着，%ANAME(TARGET)%感叹自己作为温床是多么幸福，并感谢触手带来的快感。
+				;TranslatedMark 身体の内も外も触手たちに弄ばれながら、%ANAME(TARGET)%は苗床となった自分はなんと幸福なのだろう、と触手が与える快楽に感謝していた
+		ENDSELECT
+	ELSEIF ABL:触手 >= 3
+		PRINTFORMW 「呼...习惯了之后，感觉还挺可爱的嘛。嗯，是不是想要喝奶？好啦好啦，乖乖。」
+		;TranslatedMark 「ふう…、慣れてきたらちょっとは可愛く見えるもんだなぁ。ん、おっぱい欲しいのか？　おう、よしよし」
+	ELSE
+		PRINTFORMW 「…就算是这样的人的也算是我的孩子吧…。没办法，我来照顾你吧」
+		;TranslatedMark 「…こんなナリでも一応は私の子だしねぇ…。仕方ない、面倒見てやるか」
+	ENDIF
 	RETURN 0
 ENDIF
 
@@ -1588,8 +1623,8 @@ ENDIF
 IF ARG == 63
 	PRINTL
 	SETCOLOR カラー_オレンジ
-	PRINTFORML %ANAME(TARGET)%在反复的调教中，终于察觉到了身体的屈服了
-	;TranslatedMark %ANAME(TARGET)%は度重なる調教に、ついに身体が屈してしまったことを察した
+	PRINTFORML %ANAME(TARGET)%意识到，经过反复的调教，自己的身体终于屈服于快感。
+	;TranslatedMark %ANAME(TARGET)%は度重なる調教に、ついに身体が快楽に屈してしまったことを察した
 	PRINTFORMW 「……够了。我明白了，我不会违抗的…。真是的，能让鬼屈从，你真是个了不起的家伙…」
 	;TranslatedMark 「……もういい。分かった、逆らわないよ…。まったく、鬼を従えるなんて大したヤツだよアンタは…」
 	RESETCOLOR
@@ -1626,8 +1661,8 @@ IF ARG == 65
 	SETCOLOR カラー_オレンジ
 	PRINTFORMW 「啊哈哈…♥原来做爱是这么棒的东西啊♥♥」
 	;TranslatedMark 「あはぁ…♥　セックスって、こんなにイイものだったんだ♥♥」
-	PRINTFORML 许多铭刻在身体和内心的快感，将%ANAME(TARGET)%变成了被快乐溶化的一只雌性
-	;TranslatedMark 身体と心に刻み込まれた快感の数々が、%ANAME(TARGET)%を快楽に蕩けきった一匹の雌に変えた
+	PRINTFORML 心灵和身体中铭刻的无数法悦，将%ANAME(TARGET)%变成了沉溺于快乐的一雌。
+	;TranslatedMark 心と身体に刻み込まれた法悦の数々が、%ANAME(TARGET)%を快楽に蕩けきった一匹の雌に変えた
 	PRINTFORMW 「哈，哈…好热…身体，身体♥疼痛着♥好热…♥♥」
 	;TranslatedMark 「はぁ、はぁ…あついぃ…からだ♥　疼いて♥あついぃ…♥♥」
 	PRINTFORML 原本就有这方面的素养吧。她那充满欲望般沉溺于快乐的姿态，非常淫荡美丽
@@ -1758,8 +1793,8 @@ IF ARG == 71
 	SETCOLOR カラー_オレンジ
 	PRINTFORML 「呵呵呵…被那样责备舒服吗？那太好了♪」
 	;TranslatedMark 「くふふ…そんなに責められるのが気持ちイイかい？　それはよかった♪」
-	PRINTFORMW %ANAME(TARGET)%的眼睛发出妖艳的光芒。那目光是捕食者的眼睛…鬼的加虐性渗了出出…
-	;TranslatedMark %ANAME(TARGET)%の瞳が妖しく光る。その眼光は捕食者のそれ…鬼の加虐性が滲み出ていた…
+	PRINTFORMW %ANAME(TARGET)%的瞳孔闪烁着妖异的光芒。这眼神如同捕食者一般......鬼的虐待本性从中透出。
+	;TranslatedMark %ANAME(TARGET)%の瞳が妖しく光る。その眼光は捕食者のそれ…鬼の加虐性が滲み出ていた
 	PRINTFORML 「别那么害怕。我会好好疼爱你，让你快乐起来的…」
 	;TranslatedMark 「そう怖がるなって。たーっぷり可愛がって、たーっぷりヨガらせてやるからさ…」
 	PRINTFORMW 「所以，请放心把身体交给我吧…♥」
@@ -1890,13 +1925,27 @@ ENDIF
 ;苗床取得
 ;-------------------------------------------------
 IF ARG == 86
-	;PRINTFORMW
+	PRINTL
+	SETCOLOR カラー_オレンジ
+	PRINTFORML 「はひぃッ♥　イ、イグっ♥♥　在生产的时候又要到高潮了ぅッッ♥♥」
+	;TranslatedMark 「はひぃッ♥　イ、イグっ♥♥　産みながらまたイっちゃうぅッッ♥♥」
+	PRINTFORMW %ANAME(TARGET)%的私密处在达到高潮时抽搐着，一个个小触手体正在不安分地依次从中生出。
+	;TranslatedMark 絶頂して痙攣する%ANAME(TARGET)%の秘所から、小さな触手体がびちびち暴れながら次々に生まれてくる
+	PRINTFORML 谁也没有教，就凭本能知道如何让女性快乐的触手们，在穿过产道时，舐弄敏感的肉褶直到沟壑的每个角落，带来快感。
+	;TranslatedMark 誰に教わるでもない本能で女を悦ばせる術を知る触手たちは、産道を通りながら敏感な肉ヒダを溝まで隅々に舐って快楽を与え
+	PRINTFORMW %ANAME(TARGET)%的身体中被铭刻了「触手的孕育与生产是一种快感」这一观念。
+	;TranslatedMark %ANAME(TARGET)%の肉体に「触手を孕み産むことは快感である」ことを刻み付けている
+	PRINTFORML 「啊啊♥♥哈啊♥啊啊啊ッ♥ッッ♥♥　好，好♥　感觉很好哦♥　更多...让我生更多吧♥♥　快点让我怀上吧♥♥♥」
+	;TranslatedMark 「あッ♥♥はあ♥ああッ♥ッッ♥♥　い、いい♥　キモチいいよぉ♥　もっと…もっと産ませてぇ♥♥　早く孕ませてぇ♥♥♥」
+	PRINTFORMW 产仔结束后就达到高潮，紧接着便用痴呆的表情恳求怀上下一个孩子的%ANAME(TARGET)%的模样，简直就是一个成熟触手的温床......
+	;TranslatedMark 産み終わってアクメしたそばからアヘ顔で次の妊娠をねだる%ANAME(TARGET)%の姿は、もはや立派な触手の苗床だ……
+	RESETCOLOR
 	RETURN 0
 ENDIF
 
-;───────────────────────────────────────
+;-------------------------------------------------
 ;生ハメ依存取得
-;───────────────────────────────────────
+;-------------------------------------------------
 IF ARG == 87
 	PRINTL
 	SETCOLOR カラー_オレンジ
@@ -1952,10 +2001,10 @@ ENDIF
 IF ARG == 93
 	PRINTL
 	SETCOLOR カラー_オレンジ
-	PRINTFORML (……好变态的想法啊,不过似乎摸索出怀孕的诀窍了。这都生这么多次孩子了……)
-	;TranslatedMark (…変な話だけど、なんとなく上手く産むコツみたいなのをつかんだかもしれないな。まあこんだけ産んでりゃなぁ…）
-	PRINTFORMW 频繁的妊娠和分娩已经把%ANAME(TARGET)%的身体调教成一个能生育大量后代的优质母体了
-	;TranslatedMark 大量の妊娠と出産を繰り返した%ANAME(TARGET)%の身体は、多くの子を産む優良な母体として覚醒した
+	PRINTFORML （虽然有点奇怪，但我好像无意中掌握了迅速怀孕和分娩的窍门。毕竟已经生了这么多个......））
+	;TranslatedMark (…変な話だけど、なんとなく上手く孕んで早く産むコツみたいなのをつかんだかもしれないな。まあこんだけ産んでりゃなぁ…）
+	PRINTFORMW 经过多次妊娠和生产，%ANAME(TARGET)%的身体已经觉醒，成为孕育多个孩子并成功产下健康后代的优秀母体。
+	;TranslatedMark 大量の妊娠と出産を繰り返した%ANAME(TARGET)%の身体は、多くの子を孕み元気な子を産む優秀な母体として覚醒した
 	PRINTFORMW 「呵呵,现在已经迫不及待想怀下一个孩子了♪ 为此还要再让我怀孕呢……♥」
 	;TranslatedMark 「ふふ、今から次の子が待ち遠しいよ♪　そのためにもまた私を孕ませておくれ…♥」
 	RESETCOLOR
@@ -2068,8 +2117,8 @@ IF ARG == 91
 	PRINTFORMW 「让您久等了。…怎、怎么样呢。…不会很奇怪吧…」
 	;TranslatedMark 「お待たせ。…ど、どうかな。…変じゃないかな…」
 	PRINTFORML
-	PRINTFORML 身穿着白无垢的%ANAME(TARGET)%出现之后，周围不断传来祝福的声音
-	;TranslatedMark 白無垢姿の%ANAME(TARGET)%が現れると、周囲から祝福の声が上がる
+	PRINTFORML 当%ANAME(TARGET)%以白无垢的身姿出现时，周围的人纷纷献上祝福（对从角隐中探出的角大家都视而不见）。）
+	;TranslatedMark 白無垢姿の%ANAME(TARGET)%が現れると、周囲から祝福の声が上がる（角隠しから突き出る角はみな見て見ぬ振りをした）
 	PRINTFORML
 	PRINTFORMW 「呜…没穿过这样的衣服，所以有点紧张…」
 	;TranslatedMark 「うぅ…こんなの着た事ないから、ちょっと緊張するな…」
@@ -2106,7 +2155,7 @@ IF ARG == 91
 ENDIF
 
 ;-------------------------------------------------
-;調教後自慰(Ｃ)
+;会いに行く終了後自慰(Ｃ)
 ;-------------------------------------------------
 IF ARG == 100
 	;恋慕 or 服従
@@ -2119,8 +2168,8 @@ IF ARG == 100
 				PRINTFORMW 「%ANAME(MASTER)%…%ANAME(MASTER)%…♥啊啊啊…噫♥」
 				;TranslatedMark 「%ANAME(MASTER)%…%ANAME(MASTER)%…♥　ふぁあッ…ッ♥」
 			CASE 2
-				PRINTFORMW 「唔……、%ANAME(MASTER)%…。这里好难受啊…」
-				;TranslatedMark 「うぅ……、%ANAME(MASTER)%…。切ないよぉ…」
+				PRINTFORMW 「唔嗯.........哈.........这样一点安慰也得不到......都怪你%ANAME(MASTER)%」
+				;TranslatedMark 「うっ、んんっ！　………はぁ…こんなんじゃ慰めにもならん…恨むよ%ANAME(MASTER)%」
 		ENDSELECT
 	;それ以外
 	ELSE
@@ -2131,7 +2180,7 @@ IF ARG == 100
 ENDIF
 
 ;-------------------------------------------------
-;調教後自慰(Ａ)
+;会いに行く終了後自慰(Ａ)
 ;-------------------------------------------------
 IF ARG == 101
 	PRINTFORMW 「我、我居然用这种地方…啊，不行，停不下来了…♥…啊啊啊♥」
@@ -2158,14 +2207,14 @@ IF ARG == 103
 			;TranslatedMark 「えっ」
 			PRINTFORML 不知道是不是以为不会被拒绝，%ANAME(TARGET)%愕然了
 			;TranslatedMark 断られると思ってなかったのか、%ANAME(TARGET)%は愕然としていた
-			PRINTFORMW 「为、为什么？%ANAME(MASTER)%哪里不舒服吗？」
-			;TranslatedMark 「な、なんでっ？　%ANAME(MASTER)%どっか悪いのっ？」
+			PRINTFORMW 「为、为什么啊？%ANAME(MASTER)%，哪里不舒服吗？」
+			;TranslatedMark 「な、なんでっ？　%ANAME(MASTER)%、どっか悪いのかい？」
 			PRINTFORML 看着%ANAME(TARGET)%一脸要哭的样子担心%ANAME(MASTER)%的身体状况会不好的姿态，虽然心里很痛
 			;TranslatedMark 泣きそうな顔で%ANAME(MASTER)%の体調が悪いのでは、と心配してくる%ANAME(TARGET)%の姿に心が痛むが、
 			PRINTFORMW 今天实在不方便，只好请你忍耐了
 			;TranslatedMark 今日のところは本当に都合が悪いので我慢してもらうことにした
-			PRINTFORML 「呜呜～…我知道了。但是下次一定要抱我哦！约定好了！」
-			;TranslatedMark 「うぅ～…分かったよ。でも今度は絶対抱いておくれよ！　約束だよ！」
+			PRINTFORML 「呜嗯~...知道啦。但是下次一定要抱我哦！说好哦！」
+			;TranslatedMark 「うぅ～…分かったよ。でも今度は絶対抱いておくれよ！　約束だぞ！」
 			PRINTFORMW 就像孩子约好一起玩一样，下一个情事的约定定下来后，%ANAME(TARGET)%很不情愿地回去了
 			;TranslatedMark 子供が遊びの約束をするような感覚で、次の情事の約束を取り付けると%ANAME(TARGET)%は渋々ながら応じてくれた
 		CASE 1
@@ -2176,10 +2225,25 @@ IF ARG == 103
 		CASE 2
 			PRINTFORML 「嗯～？怎么了，你累了吗？」
 			;TranslatedMark 「ん～？　なんだい、疲れてるのかい？」
-			PRINTFORMW 「诶，以为可以和%ANAME(MASTER)%做，还很期待的…」
-			;TranslatedMark 「ちぇーっ、%ANAME(MASTER)%とするの、楽しみにしてたのに…」
-			PRINTFORML %ANAME(TARGET)%一看就不满意
-			;TranslatedMark %ANAME(TARGET)%は見るからに不貞腐れている
+			;主人公が種族人間の場合
+			IF HAS_TAG(MASTER, タグ_人間)
+				PRINTFORMW 「.........唉～，真扫兴。本来还很期待和%ANAME(MASTER)%一起做呢......」
+				;TranslatedMark 「………はぁ～っ、興ざめだねぇ。%ANAME(MASTER)%とするの、楽しみにしてたのに…」
+				PRINTFORML %ANAME(TARGET)%一看就不满意
+				;TranslatedMark %ANAME(TARGET)%は見るからに不貞腐れている
+			;主人公が種族鬼の場合
+			ELSEIF HAS_TAG(MASTER, タグ_鬼)
+				PRINTFORMW 「唉，真是太没用啦。你若非柔弱的人，那倒也会是只魇鬼啊。」
+				;TranslatedMark 「はあ、まったく情けないねぇ。やわな人間じゃあるまいし、それでも鬼かい」
+				PRINTFORML %ANAME(TARGET)%显然情绪不佳......
+				;TranslatedMark %ANAME(TARGET)%は明らかに不機嫌になっている…
+			;主人公の種族が上記以外の場合
+			ELSE
+				PRINTFORMW 「...唉，即便是非人类，他们的精力也和人类差不多啊...。期待像鬼一样的精力是不是有点苛刻呢...。」
+				;TranslatedMark 「…はぁ、人外といえど精力は人間と大差ないか…。鬼並みを期待するのは酷というものかねぇ」
+				PRINTFORML %ANAME(TARGET)%看起来显然很失望......
+				;TranslatedMark %ANAME(TARGET)%は見るからにがっかりした様子だ…
+			ENDIF
 			PRINTFORMW 之后总算原谅了我，今天就勉强接受了
 			;TranslatedMark なんとか宥めて、今日のところは納得してもらった
 	ENDSELECT
@@ -2517,8 +2581,8 @@ ELSEIF ARG == 301
 			PRINTFORML %ANAME(TARGET)%「没有更强一点的家伙了吗！」
 			;TranslatedMark %ANAME(TARGET)%「強いヤツはいねーがー！」
 		CASE 9
-			PRINTFORML %ANAME(TARGET)%「把被守护的东西夺走的就是鬼的所作所为哦」
-			;TranslatedMark %ANAME(TARGET)%「守ってる物は奪い取っていくのが鬼ってもんさ」
+			PRINTFORML %ANAME(TARGET)%「由人类守护着的东西越是会被想要夺走，这就是魔鬼的本性。」」
+			;TranslatedMark %ANAME(TARGET)%「人が守ってる物は奪い取りたくなるのが鬼ってもんさ」
 		CASE 10
 			PRINTFORML %ANAME(TARGET)%「让我稍微打得开心一点吧」
 			;TranslatedMark %ANAME(TARGET)%「ちょっとは楽しませてよね」
@@ -2538,11 +2602,11 @@ ELSEIF ARG == 301
 			PRINTFORML %ANAME(TARGET)%「我会一边喝酒一边战斗的」
 			;TranslatedMark %ANAME(TARGET)%「呑みながら戦ってやるよ」
 		CASE 16
-			PRINTFORML %ANAME(TARGET)%「因为你们守得不好，所以我才会想要夺取。赶快投降吧」
-			;TranslatedMark %ANAME(TARGET)%「下手に守ってるから奪い取りたくなるんだよ。さっさと降参しな」
+			PRINTFORML 「因为我正下意识地防守，所以才会想要去争夺啊。赶快投降吧。」」
+			;TranslatedMark %ANAME(TARGET)%「下手に守ってるから取りたくなるんだよ。さっさと降参しな」
 		CASE 17
-			PRINTFORML %ANAME(TARGET)%「怎么能死掉变成花啊。在不能喝酒之前投降吧」
-			;TranslatedMark %ANAME(TARGET)%「死んで花実が咲くものか、ってね。酒が飲めなくなる前に降参しな」
+			PRINTFORML %ANAME(TARGET)%「死亡的话肚子上就开不了花，不是吗？在不能喝酒之前先投降吧。」」
+			;TranslatedMark %ANAME(TARGET)%「死んで花実が咲くものか、ってね。酒が飲めなくなる前に降参しなよ」
 		CASE 18
 			PRINTFORML %ANAME(TARGET)%「扎到草丛里就会跳出蛇…但是，如果突破这里的话会出现什么呢。好期待啊♪」
 			;TranslatedMark %ANAME(TARGET)%「藪を突くと蛇…というが、ここを突いたら何が出るんだろうねぇ。楽しみだー♪」
@@ -2605,8 +2669,8 @@ ELSEIF ARG == 302
 			PRINTFORML %ANAME(TARGET)%「我会一边喝酒一边战斗的」
 			;TranslatedMark %ANAME(TARGET)%「呑みながら戦ってやるよ」
 		CASE 16
-			PRINTFORML %ANAME(TARGET)%「想要夺取被守护的地方啊。我明白的」
-			;TranslatedMark %ANAME(TARGET)%「守ってる所からは奪い取って行きたくなるんだよねえ。分かるよ」
+			PRINTFORML %ANAME(TARGET)%「正是因为被人保护着，才更想要抢夺走呢。我明白的。」」
+			;TranslatedMark %ANAME(TARGET)%「守ってる所からこそ奪い取りたくなるもんだよねえ。分かるよ」
 		CASE 17
 			PRINTFORML %ANAME(TARGET)%「要不要像桃太郎那样呢？」
 			;TranslatedMark %ANAME(TARGET)%「桃太郎のように行くかなー？」
@@ -2740,8 +2804,8 @@ ELSEIF ARG == 333
 		CASE 0
 			PRINTFORML 「嗯，那个我拒绝」
 			;TranslatedMark 「んー、それは断るよ」
-			PRINTFORMW 「别看这样还是很讲义气的，我」
-			;TranslatedMark 「こう見えて義理堅いんでね、私はさ」
+			PRINTFORMW 「别看我这个样子，我可是很看重道义的。」
+			;TranslatedMark 「こう見えて義理は大事にするのさ、私はね」
 		CASE 1
 			PRINTFORML 「不好意思，不能那么轻易地点头」
 			;TranslatedMark 「悪いが、そう簡単に首は振れないね」
@@ -2763,12 +2827,14 @@ ELSEIF ARG == 334
 			;TranslatedMark 「え？　ほんとに？　豪気だねー」
 			PRINTFORMW 「…这份恩情总有一天会偿还的」
 			;TranslatedMark 「…この恩はいつか返すよ」
+			CFLAG:TARGET:面識 = 1
 		CASE 1
 			PRINTFORML 「你要放我走吗？真大度啊」
 			;TranslatedMark 「放してくれるっての？　太っ腹だねぇ」
 		CASE 2
 			PRINTFORML 「欠你人情了呢。……总有一天会还给你的」
 			;TranslatedMark 「借りが出来ちゃったねぇ。……これはいつか返させてもらうよ」
+			CFLAG:TARGET:面識 = 1
 	ENDSELECT
 	RESETCOLOR
 	RETURN 0
@@ -2896,8 +2962,8 @@ ELSEIF ARG == 351
 			PRINTFORML 「不想借鬼的力量吗？不要说些寂寞的话嘛…」
 			;TranslatedMark 「鬼の力は借りないって？　寂しいこと言うねぇ…」
 		CASE 2
-			PRINTFORML 「你信不过一个酒鬼！？这介家伙！」
-			;TranslatedMark 「飲んだくれは信用できないってか！？　こんにゃろーっ！」
+			PRINTFORML 「喝醉的人就不值得信赖吗？你这个家伙—」
+			;TranslatedMark 「飲んだくれは信用できないってか？　こんにゃろー」
 	ENDSELECT
 	RETURN 0
 ;投獄される
@@ -2914,8 +2980,8 @@ ENDIF
 IF ARG == 450
 	PRINTFORML 「是不是渐渐变得坦率了呢？」
 	;TranslatedMark 「そろそろ素直になってきたんじゃないかい？」
-	PRINTFORMW 「不要再逞强了……向我屈服吧」
-	;TranslatedMark 「もう意地を張らずにさ……私に下れよ」
+	PRINTFORMW 「不要再固执了嘛，......臣服于我吧。」
+	;TranslatedMark 「もう意地を張らずにさ、……私に下れよ」
 	RETURN 0
 ;主人公に対して忠誠を誓わせる/成功
 ELSEIF ARG == 451
@@ -2926,7 +2992,7 @@ ELSEIF ARG == 451
 	RETURN 0
 ;主人公に対して忠誠を誓わせる/失敗
 ELSEIF ARG == 452
-	PRINTFORMW 「真倔强啊。还想被欺负吗」
-	;TranslatedMark 「強情だねー。まだイジめられたいんだ」
+	PRINTFORMW 「真固执啊。还是，你其实还想被欺负？」
+	;TranslatedMark 「強情だねー。それとも、まだイジめられたいのかな？」
 	RETURN 0
 ENDIF

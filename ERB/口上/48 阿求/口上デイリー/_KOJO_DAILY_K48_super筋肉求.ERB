@@ -1,0 +1,90 @@
+﻿;@HZ=super筋肉求
+;@ENG=super筋肉求
+;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K48_super筋肉求_RATE(阿求)
+#DIM 阿求
+RETURN 500
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K48_super筋肉求_DECISION(阿求)
+	#DIM 阿求
+	#DIM 外来人
+	SIF ABL:阿求:知略 < 40 || ABL:阿求:政治 < 40
+		RETURN 0
+	外来人 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_外来人)
+	SIF 外来人 == -1
+		RETURN 0
+	SIF CFLAG:阿求:捕虜先 != 外来人
+		RETURN 0
+	SIF K48_FAR_AWAY_HOME_HAPPEND != 1
+		RETURN 0
+	SIF K48_super筋肉求_HAPPEND
+		RETURN 0
+	RETURN CHECK_KOJO_DAILY_HAPPEN(阿求)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K48_super筋肉求_GENRE(阿求)
+#DIM 阿求
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K48_super筋肉求(阿求)
+#DIM 阿求
+PRINTFORML 外乡人自入侵幻想乡以来，深不可测的他们令幻想乡恐惧
+PRINTFORML 没有人知道他们从何而来，也没人知道他们的真正实力
+PRINTFORML 在暗无天日的实验室底部，有人要领教了
+PRINTFORML 一个天人，一个大妖怪，一个鬼族，作为外乡人对幻想乡战争中的俘虏，被关进了一个类似斗技场的地方
+CALL K48_NPC_SAY(@"「啧，这什么地方？」")
+CALL K48_NPC_SAY(@"「谁知道呢，也许是他们想试探我们实力？」")
+CALL K48_NPC_SAY(@"「啧，不要大意」")
+PRINTFORML 这时，实验室大门缓缓打开，一个高大魁梧，身材壮硕的身影展现在他们眼前
+PRINTFORML 而站在实验室外的年长男子对着下面人喊到
+CALL K48_NPC_SAY(@"「谁能击败面前的怪物，谁就能获得自由」")
+CALL K48_NPC_SAY(@"「怎么样，很心动吧」")
+PRINTFORML 着实令人心动，鬼立刻冲了上去，但是怪物反应也不慢
+PRINTFORML 两拳相撞，刚一拼手，便已他妈战了个恐怖！
+PRINTFORML 拳速比拼，怪物更是占上风
+PRINTFORML 最终，轰隆一声，不敌怪物的鬼被打倒在地，然后被一脚踩扁
+PRINTFORML 大妖怪与天人谷动自身全部灵力，使用弹幕想拉开距离
+PRINTFORML 面对不懂灵力的外乡人的怪物，绝对能击败它。再怎么说也应该会有效果吧
+PRINTFORML 但是并没有！
+PRINTFORML 而怪物大吼一声，肩后弹出两门激光炮，对着妖怪与天人一人一炮
+PRINTFORML 炮响之后，妖怪天人双双倒地
+CALL K48_NPC_SAY(@"「哈哈哈哈，不错啊%NAME_FORMAL(阿求)%，很厉害嘛」")
+PRINTFORML 年长男子拍手称展后，转身离开去查看其他实验品结果了
+CALL K48_NPC_SAY(@"「...」")
+PRINTFORML 一个白衣男子在实验室角落偷偷望着这一切，望着已经变成了恐怖怪物的%ANAME(阿求)%
+CALL K48_NPC_SAY(@"「对不起...我无能为力...」")
+PRINTFORML 白衣男子也离开了实验室
+PRINTFORML 而现在，俾田%ANAME(阿求)%将作为外乡人的战争兵器，去度过她剩下的余生
+ABL:阿求:武闘 = 90
+ABL:阿求:防衛 = 90
+ABL:阿求:知略 = 1
+ABL:阿求:政治 = 1
+TALENT:阿求:特殊勢力陥落系 = 0
+SETBIT TALENT:阿求:特殊勢力陥落系, 特殊勢力_外来人
+K48_super筋肉求_HAPPEND = 1
+CALL SKILL_LEARN_BY_NAME(阿求, スキル_ジャンル_PERSONAL,NO:阿求, "御前试合")
+SIF RESULT
+	CALL COLOR_PRINTW(@"%ANAME(阿求)%习得了技能＜御前试合＞", カラー_注意)
+CALL SKILL_LEARN_BY_NAME(阿求, スキル_ジャンル_PERSONAL,NO:阿求, "颉颃胜负")
+SIF RESULT
+	CALL COLOR_PRINTW(@"%ANAME(阿求)%习得了技能＜颉颃胜负＞", カラー_注意)
+RETURN 1
+@KOJO_DAILY_K48_super筋肉求_ALLOW_WHEN_WANDERING()
+RETURN 0

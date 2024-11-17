@@ -2,19 +2,19 @@
     PRINTFORML 要根据TAG选择关闭部分日常事件吗？
     SETCOLOR カラー_注意
     PRINTFORML 请注意TAG仅标识事件中存在的内容，不代表一定会触发
-    PRINTFORML 因此仅推荐关闭不可规避的事件
+    PRINTFORML 因此只推荐关闭不可规避的性事件
     RESETCOLOR
     CALL ASK_YN()
     IF RESULT == 1
     ELSE
-        CALL CREATE_TMP_EVENT_DAILY_TAG_MAP
+        CALL CREATE_TMP_EVENT_DAILY_TAG_MAP()
         CALL ASK_MULTI("进行快速的设置","进行详细的设置","完全按个人喜好进行设置")
         IF RESULT == 0
-            CALL SET_EVENT_DAILY_BY_TAG_FAST
+            CALL SET_EVENT_DAILY_BY_TAG_FAST()
         ELSEIF RESULT ==1
-            CALL SET_EVENT_DAILY_BY_TAG_CAREFULLY
+            CALL SET_EVENT_DAILY_BY_TAG_CAREFULLY()
         ELSE
-            CALL SET_EVENT_DAILY_BY_TAG_BY_USER
+            CALL SET_EVENT_DAILY_BY_TAG_BY_USER()
         ENDIF
     ENDIF
     PRINTFORMW 你可以在设置中再次启用这个界面
@@ -26,10 +26,10 @@
     WHILE 1
         CLEARLINE LINECOUNT - LOCAL:1
         {
-        CALL ASK_MULTI_JUDGE("关闭不可规避的事件",BAN_TYPE:0,
-        "关闭与男性主角无关的事件",BAN_TYPE:1,
+        CALL ASK_MULTI_JUDGE("关闭不可规避的性事件",BAN_TYPE:0,
+        "关闭与男性主角无关的性事件",BAN_TYPE:1,
         "关闭存在兽奸的事件（即使只有一小部分兽奸的事件也会被关闭）",BAN_TYPE:2,
-        "关闭特殊势力且性描写与男性主角无关的事件（不会关闭每期结算的特殊势力调教）",BAN_TYPE:3,
+        "关闭特殊势力且与男性主角无关的性事件（不会关闭每期结算的特殊势力调教）",BAN_TYPE:3,
         "重置事件状态为全部启用",1,
         "完成",1
         )
@@ -52,7 +52,7 @@
             BAN_TYPE:3 = 0
             REUSELASTLINE 关闭了所有殊势力且性描写与男性主角无关的事件
         ELSEIF RESULT == 4
-            CALL EVENT_DAILY_DIABLE_RESET
+            CALL EVENT_DAILY_DIABLE_RESET()
             VARSET BAN_TYPE,1
             BAN_BIT = 0
             REUSELASTLINE 所有事件已经启用
@@ -275,6 +275,10 @@
     FOR LOCAL,0,DAILY_EVENT_NUM:デイリー_通常
         DAILY_DISABLE:LOCAL = 0
     NEXT
+    PRINTFORML 要重置角色日常口上状态为全部启用吗？
+    CALL ASK_YN()
+    SIF RESULT == 0
+        CALL SET_ALL_KOJO_DAILY(1)
 
 @BAN_EVENT_DAILY_BY_TAG(BAN_TAG_BIT)
     #DIM EVENT_DAILY_TAG_BIT
@@ -289,6 +293,33 @@
         SIF (BAN_TAG_BIT & EVENT_DAILY_TAG_BIT) == BAN_TAG_BIT
             DAILY_DISABLE:LOCAL = 1
     NEXT
+    CALL BAN_KOJO_EVENT_DAILY_BY_TAG(BAN_TAG_BIT)
+
+@BAN_KOJO_EVENT_DAILY_BY_TAG(BAN_TAG_BIT)
+    #DIM EVENT_DAILY_TAG_BIT
+    #DIM BAN_TAG_BIT
+    #DIMS EVENT_NAME_ENG
+    PRINTFORML 要对角色日常口上进行相同的处理吗？
+    CALL ASK_YN()
+    SIF RESULT == 1
+        RETURN
+    SIF BAN_TAG_BIT == 0
+        RETURN
+    FOR LOCAL, 0, CHARANUM
+        SIF !IS_TOHO_CHARA(LOCAL)
+            CONTINUE
+        FOR LOCAL:1, 0, VARSIZE("KOJO_DAILY_EVENT_NAME_ENG", 2)
+            
+            EVENT_NAME_ENG = %KOJO_DAILY_EVENT_NAME_ENG:(NO:LOCAL):デイリー_通常:(LOCAL:1)%
+            TRYCCALLFORM KOJO_DAILY_K{(NO:LOCAL)}_%EVENT_NAME_ENG%_TAG
+                CALLFORM KOJO_DAILY_K{(NO:LOCAL)}_%EVENT_NAME_ENG%_TAG
+                SIF (BAN_TAG_BIT & RESULT) == BAN_TAG_BIT
+                    CALL KOJO_DAILY_SET_DISABLE(LOCAL, EVENT_NAME_ENG, 1)
+            CATCH
+            ENDCATCH
+        NEXT
+    NEXT
+    
 @CREATE_EVENT_DAILY_BAN_TAG(BAN_TAG_BIT,BAN_TAG,RESET_FLAG = 0)
     #DIM REF BAN_TAG_BIT
     #DIM BAN_TAG

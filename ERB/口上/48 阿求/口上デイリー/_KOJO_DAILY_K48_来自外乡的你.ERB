@@ -1,0 +1,183 @@
+﻿;@HZ=来自外乡的你
+;@ENG=FAR_AWAY_HOME
+;---------------------
+;基本的な発生確率(1000分率 100で10%)
+;これにコンフィグ項目の発生頻度がかけられるので、必ずしもこの通りにはならない
+;---------------------
+@KOJO_DAILY_K48_FAR_AWAY_HOME_RATE(阿求)
+#DIM 阿求
+RETURN 1000
+
+
+;---------------------
+;確率以外の発生判定
+;〇期以降になると発生するとか、デイリー側で利用している変数が-1だったら起こさない　みたいなはじき方をするときに使う
+;---------------------
+@KOJO_DAILY_K48_FAR_AWAY_HOME_DECISION(阿求)
+	#DIM 阿求
+	#DIM 外来人
+	SIF ABL:阿求:知略 < 40 || ABL:阿求:政治 < 40
+		RETURN 0
+	外来人 = GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_外来人)
+	SIF 外来人 == -1
+		RETURN 0
+	SIF CFLAG:阿求:捕虜先 != 外来人
+		RETURN 0
+	SIF GETBIT(TALENT:阿求:特殊勢力陥落系, 特殊勢力_外来人)
+		RETURN 0
+	SIF K48_FAR_AWAY_HOME_HAPPEND
+		RETURN 0
+	RETURN CHECK_KOJO_DAILY_HAPPEN(阿求)
+
+;---------------------
+;ジャンル
+;コンフィグ設定で使用
+;---------------------
+@KOJO_DAILY_K48_FAR_AWAY_HOME_GENRE(阿求)
+#DIM 阿求
+RETURN デイリー_ジャンル_その他
+
+;---------------------
+;本体
+;イベントが発生した場合は1、発生しなかった場合は0を返す
+;発生しなかったというのは例えば、特定条件を満たすキャラからランダムに一人選ぶデイリーで、そもそもその条件を満たすキャラが一人もいないみたいなとき
+;旧仕様で作ったことある人向けにいうと「旧仕様のデイリー本体冒頭で-1を返すような状況」
+;---------------------
+@KOJO_DAILY_K48_FAR_AWAY_HOME(阿求)
+#DIM 阿求
+IF !IS_FALLEN(阿求)
+	CALL KOJO_DAILY_K48_FAR_AWAY_HOME_1(阿求)
+ELSE
+	CALL KOJO_DAILY_K48_FAR_AWAY_HOME_2(阿求)
+ENDIF
+CALL KOJO_DAILY_K48_FAR_AWAY_HOME_CHANGE_SKILL(阿求)
+PRINTFORML
+SETCOLOR カラー_警告
+CALL GAIRAI_FALLEN_MSG(阿求)
+RESETCOLOR
+SETBIT TALENT:阿求:特殊勢力陥落系, 特殊勢力_外来人
+SIF SP_TRAIN_IS_DECREASE_CFLAG(阿求, GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_外来人))
+	CALL LOSE_RELATION_TALENT(阿求)
+CALL GAIRAI_FALLEN_LEAVE_MARK(阿求)
+K48_FAR_AWAY_HOME_HAPPEND = 1
+
+RETURN 1
+
+
+@KOJO_DAILY_K48_FAR_AWAY_HOME_1(阿求)
+#DIM 阿求
+PRINTFORML ❤噗嗤❤噗嗤❤噗嗤❤噗嗤❤噗嗤❤噗嗤❤
+PRINTFORML ❤噗嗤❤噗嗤❤噗嗤❤噗嗤❤噗嗤❤噗嗤❤
+PRINTFORML ❤噗嗤❤噗嗤❤噗嗤❤噗嗤❤噗嗤❤噗嗤❤
+PRINTFORML ........
+PRINTFORML 自外乡人入侵幻想乡后，整个幻想乡就变了样
+PRINTFORML 他们的身份至今是迷，他们的真正实力未知
+PRINTFORML 幻想乡的人们与妖们只知道，他们拥有着幻想乡众人难以理解与想象的科技
+PRINTFORML 有传言，他们的科技水平甚至已经超过了月之都
+PRINTFORML ......
+PRINTFORML ❤噗嗤❤噗嗤❤噗嗤❤噗嗤❤噗嗤❤噗嗤❤
+PRINTFORML ❤噗嗤❤噗嗤❤噗嗤❤噗嗤❤噗嗤❤噗嗤❤
+PRINTFORML ❤噗嗤❤噗嗤❤噗嗤❤噗嗤❤噗嗤❤噗嗤❤
+PRINTFORML .......
+PRINTFORML 在外乡人的实验室深处，一个任何魔力或妖力亦无法探知的实验室内
+PRINTFORML 一男一女缠绵在实验床上
+PRINTFORML 「好❤好激烈啊❤%ANAME(阿求)%❤再用力狠狠地轰开我的后庭吧%ANAME(阿求)%！」
+PRINTFORML 若是以性别刻板印象来思考，想必定是男子将女子后入至高潮了罢
+PRINTFORML 然而，是男子趴在床上，而女子在以骑乘位后入
+CALL K48_AKYUU_SAY(@"「❤好，我要上了❤！」")
+PRINTFORML 纤弱的手用力拍男子的屁股，女子突然加速，男子身体震颤，可见应该是高潮了
+PRINTFORML 纤弱女子拔出她的下体，一番激战，疲累的女子躺在了床上，刚才的男子立马抱了上来
+CALL K48_AKYUU_SAY(@"「咿呀，这样都不能满足你吗」")
+CALL K48_NPC_SAY(@"「怎会，我怎么忍心看着我的%ANAME(阿求)%如此空虚呢」")
+PRINTFORML 男子紧紧抱住%ANAME(阿求)%，把%ANAME(阿求)%抱至身上，返过身来
+PRINTFORML 俾田%ANAME(阿求)%也配合的起身，肉棒纳入屁穴之内
+CALL K48_AKYUU_SAY(@"「啊❤啊❤～要，要高潮了～」")
+CALL K48_NPC_SAY(@"「我要～我要，全部给我～」")
+PRINTFORML 噗叽啪～俾田%ANAME(阿求)%的身体显然不能容纳，白色液体四溅
+CALL K48_AKYUU_SAY(@"「嗯❤～最爱你了」")
+PRINTFORML 男子回应到
+CALL K48_NPC_SAY(@"「我也爱你，%ANAME(阿求)%❤」")
+PRINTFORML ...
+PRINTFORML 一阵翻云覆雨之后，累坏了的俾田%ANAME(阿求)%安心地睡在了床上，而男子起身披上那标志性的白色风衣后，离开了实验室
+PRINTFORML ...
+CALL K48_NPC_SAY(@"「啧啧，你还是一如既往的变态啊」")
+CALL K48_NPC_SAY(@"「好端端个女人被你整成这么个模样」")
+CALL K48_NPC_SAY(@"「我说夏组长，反正她马上也要被送去改造，不如先陪我爽一会呢」")
+PRINTFORML 白衣男子对一名明显更年长的男人解释道
+CALL K48_NPC_SAY(@"「行吧行吧，只要我们要的资料拿到就行」")
+CALL K48_NPC_SAY(@"「放心，早就搞定啦」")
+CALL K48_NPC_SAY(@"「哈哈哈，这样还差不多」")
+PRINTFORML 二位实验人员离开了实验室后，实验室的大门缓缓关上
+PRINTFORML 而年轻的那位男子，回头看了最后一眼，一个复杂而沉重的表情后
+PRINTFORML 转身离开，留下昏睡的%ANAME(阿求)%...
+
+
+@KOJO_DAILY_K48_FAR_AWAY_HOME_2(阿求)
+#DIM 阿求
+PRINTFORML 在干净的房子内，俾田%ANAME(阿求)%与%ANAME(MASTER)%缠绵在床上
+PRINTFORML 手一点一点往上滑，让手指沿着鼠径部的线往上爬行…
+CALL K48_AKYUU_SAY(@"「嗯❤啊姆❤～呃啊～❤」")
+PRINTFORML 为了让她保持沉默而吻住了她的嘴唇，俾田%ANAME(阿求)%立刻变得老实下来
+PRINTFORML 然后手就这样轻轻地抚摸秘裂，手指上传来温润的触感…
+CALL K48_AKYUU_SAY(@"「嗯❤～呃唔❤～」")
+PRINTFORML %ANAME(阿求)%还想说些什么，但是%ANAME(MASTER)%紧紧地抱着%ANAME(阿求)%，深深地吻着%ANAME(阿求)%的嘴唇，让%ANAME(阿求)%难以说话
+CALL K48_AKYUU_SAY(@"「呃唔❤，揪❤～啊唔」")
+PRINTFORML 俾田%ANAME(阿求)%与%ANAME(MASTER)%激烈地亲吻，男女舌头搅在一起，互相品尝对方的唾液
+PRINTFORML 每过几十秒，%ANAME(MASTER)%就会抬起头给双方喘息的时间
+CALL K48_AKYUU_SAY(@"「呵啊...呵啊...」")
+PRINTFORML 而这期间，口水在半空中拉成丝，更显的一番色情
+CALL K48_NPC_SAY(@"「呃唔...啧唔...」")
+PRINTFORML %ANAME(MASTER)%想要坐起身来，却被少女的一双手臂阻拦
+PRINTFORML 把视线下移到她脸上的时候
+CALL K48_AKYUU_SAY(@"「不...不要离开我」")
+PRINTFORML %ANAME(阿求)%这样轻声回应
+CALL K48_NPC_SAY(@"「傻孩子，我怎么舍得离开你呢」")
+PRINTFORML %ANAME(MASTER)%又侧身躺着%ANAME(阿求)%旁，挽着%ANAME(阿求)%脖子
+CALL K48_AKYUU_SAY(@"「%ANAME(阿求)%，我发誓我这辈子都不会离开你」")
+CALL K48_NPC_SAY(@"「嗯，我也发誓，我这辈子都不会离开%ANAME(MASTER)%的」")
+PRINTFORML 看到俾田%ANAME(阿求)%幸福而兴奋地躺在自己怀里发誓，%ANAME(MASTER)%也幸福地笑着，但是这笑，却又并非那么高兴
+PRINTFORML 偷偷抹了把眼泪，%ANAME(MASTER)%为%ANAME(阿求)%盖好了被子
+CALL K48_NPC_SAY(@"「好了，该睡觉了，好好睡吧」")
+PRINTFORML %ANAME(阿求)%为了多再陪一会儿%ANAME(MASTER)%而继续撒娇，却被%ANAME(MASTER)%哄住了
+PRINTFORML 突然，实验室涌出白色不明气体
+CALL K48_AKYUU_SAY(@"「啊！这是什么，%ANAME(MASTER)%小心啊」")
+PRINTFORML %ANAME(阿求)%似乎很惊慌，而%ANAME(MASTER)%则露出了无奈的苦涩表情。很快，%ANAME(阿求)%昏睡了过去，而%ANAME(MASTER)%穿好衣服，起 身向门口走去
+PRINTFORML 而门口，一位较年长的男人，以一副不屑的表情看向%ANAME(MASTER)%
+CALL K48_NPC_SAY(@"「怎么样，过家家游戏玩的快乐不，%ANAME(MASTER)%的女人玩的爽不」")
+CALL K48_NPC_SAY(@"「一边把她有关%ANAME(MASTER)%的信息替换成自己，一边却连人体改造都不敢实施，甚至你连交配都不敢去实施，怎么，知道她心有所属怕伤害到了她吗」")
+PRINTFORML 年长男人一副失望的表情，而刚刚的所谓「%ANAME(MASTER)%」，则低着头，一个劲地对不起
+CALL K48_NPC_SAY(@"「好了，滚吧，剩下的由我亲自来完成，她脑子的东西才是最重要的，你以后也不用来关心了」")
+PRINTFORML 刚刚还发誓要与%ANAME(阿求)%一辈子在一起的男子连忙道谢，然后离开了实验室，而当他将回头时
+CALL K48_NPC_SAY(@"「滚！没听到吗？怎么？这么喜欢她？好，你再敢靠近她一点，我就安排我们组最变态最丑陋的试验品来和她交配！」")
+PRINTFORML 男子迅速离开了，年长男人巡视了一遍也离开了
+CALL K48_NPC_SAY(@"「俾田%ANAME(阿求)%......呵呵呵.....希望你能给我带来什么意外惊喜呢...」")
+
+@KOJO_DAILY_K48_FAR_AWAY_HOME_CHANGE_SKILL(阿求)
+#DIM 阿求
+CALL SKILL_FORGET_BY_NAME(阿求, スキル_ジャンル_PERSONAL, "阿加莎克里斯Ｑ")
+SIF RESULT
+	CALL COLOR_PRINTW(@"%ANAME(阿求)%失去了技能＜阿加莎克里斯Ｑ＞", カラー_注意)
+CALL SKILL_FORGET_BY_NAME(阿求, スキル_ジャンル_TROOP, "第九代学者")
+SIF RESULT
+	CALL COLOR_PRINTW(@"%ANAME(阿求)%失去了技能＜第九代学者＞", カラー_注意)
+CALL K48_GET_外来人首领()
+LOCAL = RESULT
+IF RESULT != -1
+	CALL SKILL_LEARN_BY_NAME(LOCAL, スキル_ジャンル_PERSONAL,NO:阿求, "阿加莎克里斯Ｑ")
+	SIF RESULT
+		CALL COLOR_PRINTW(@"%ANAME(LOCAL)%习得了技能＜阿加莎克里斯Ｑ＞", カラー_注意)
+	CALL SKILL_LEARN_BY_NAME(LOCAL, スキル_ジャンル_TROOP,NO:阿求, "第九代学者")
+	SIF RESULT
+		CALL COLOR_PRINTW(@"%ANAME(LOCAL)%习得了技能＜第九代学者＞", カラー_注意)
+ENDIF
+
+@K48_GET_外来人首领()
+	FOR LOCAL, 0, CHARANUM
+		IF GET_COUNTRY_FROM_ID(SP_COUNTRY_ID:特殊勢力_外来人) == CFLAG:LOCAL:所属
+			SIF GET_COUNTRY_BOSS(CFLAG:LOCAL:所属) == LOCAL
+				RETURN LOCAL
+		ENDIF
+	NEXT
+	RETURN -1
+@KOJO_DAILY_K48_FAR_AWAY_HOME_ALLOW_WHEN_WANDERING()
+RETURN 0

@@ -11,8 +11,36 @@
 IF TALENT:空虚
 	RETURN
 ENDIF
-PRINTL
 
+;搾精量リセット
+CFLAG:253 = 0
+
+PRINTL
+IF CFLAG:240 == 0
+	CFLAG:240 = 1
+	PRINTFORML
+	CALL COLOR_PRINTW(@"如果玩家角色是小孩的话，是否要对%ANAME(TARGET)%的对话进行部分修改？", カラー_注意)
+	;TranslatedMark プレイヤーキャラが子供の場合、%ANAME(TARGET)%の口上を一部変化させますか？
+	PRINTFORML
+		PRINTL [0] 不进行（默认设置。按照以往的方式行动）
+		;TranslatedMark [0] しない（デフォ設定。従来通りの口上）
+		PRINTL [1] （如果主角的体型设定为小孩，则极少数台词会有所改变。）
+		;TranslatedMark [1] する（主人公の体格設定が子供の場合、極一部のセリフが変化します）
+	$INPUT_LOOP
+	INPUT
+	IF RESULT == 0
+		CALL COLOR_PRINTW("开始时的台词维持原样", カラー_注意)
+		;TranslatedMark 口上は従来通りで開始します
+	ELSEIF RESULT == 1
+		CALL COLOR_PRINTW("如果主人公是孩子，极少部分的台词会发生变化。", カラー_注意)
+		;TranslatedMark 主人公が子供の場合、極一部の口上が変化します
+		SIF TALENT:MASTER:体格 == -2
+			CFLAG:252 = 1
+	ELSE
+		GOTO INPUT_LOOP
+	ENDIF
+ENDIF
+PRINTL
 ;-------------------------------------------------
 ;初回
 ;-------------------------------------------------
@@ -30,6 +58,8 @@ IF CFLAG:200 == 0
 			SETCOLOR カラー_黄
 			PRINTFORML
 			PRINTDATAL
+			DATAFORM ――――― 希望忙碌的式神 「%NAME_FORMAL(TARGET)%」 ―――――
+			;TranslatedMark ―――――　望んで大忙しの式神　『%NAME_FORMAL(TARGET)%』　―――――
 			DATAFORM ———— 隙间妖怪之式神 "%NAME_FORMAL(TARGET)%"————
 			;TranslatedMark ―――――　すきま妖怪の式　『%NAME_FORMAL(TARGET)%』　―――――
 			DATAFORM —————— 传说中妖怪 "%NAME_FORMAL(TARGET)%"——————
@@ -39,28 +69,67 @@ IF CFLAG:200 == 0
 			ENDDATA
 			PRINTFORMW
 			RESETCOLOR
-			PRINTFORML %ANAME(MASTER)%被她的美貌所惑而一时出神
-			;TranslatedMark %ANAME(MASTER)%はその美貌にしばし見とれる
-			PRINTFORMW 虽然完全没有露出皮肤，但却被散发着魅力的肉体和艳丽毛发的尾巴吸引了视线…
-			;TranslatedMark 肌の露出がまるで無いにも拘らず色気を放つ肉体と、艶々な毛並みの尻尾が視線を釘付けにする…
-			PRINTFORMW 「……嘛，我已经习惯了这种视线。那么，你想让我做什么？」
-			;TranslatedMark 「…まぁ、そういう目線には慣れております。それで、私に何か用ですか？」
-			PRINTFORML 视线朝着哪里看去了，好像在预料之中
-			;TranslatedMark 視線がどこに向かったか、お見通しのようだ
-			PRINTFORMW 心虚的咳嗽之后%ANAME(MASTER)%说，为了平定这个乱世，希望借助其力量。
-			;TranslatedMark 誤魔化しの咳払いの後%ANAME(MASTER)%は、この乱世を鎮めるため我が軍に力を貸して欲しい、と伝えた
-			PRINTFORML 「……不把我关在牢狱里，就是有求于我吗」
-			;TranslatedMark 「……私を牢に繋がず、この扱いをするのはそういうことでしたか」
-			PRINTFORMW 「但是，不能那么轻易地改变宗旨。我也有自豪感……」
-			;TranslatedMark 「ですが、そう易々と宗旨替えするわけにはいきません。私にも誇りはありますので……」
-			PRINTFORML ……看来还是不那么容易说服呢
-			;TranslatedMark ……やはりそう簡単には行かないようだ
-			PRINTFORMW 但是放弃她也太可惜了。请耐心地继续交流，以期其能改变心意
-			;TranslatedMark しかし彼女を諦めるというのもあまりに惜しい。根気強く交流を続けて心変わりを願おう
-			PRINTFORML 「…好像没有放弃的打算呢……啊……」
-			;TranslatedMark 「…諦めるつもりは無いようですね……、はあ……」
-			PRINTFORMW 「…虽然不知道会发生多少交集，总之请多关照，%ANAME(MASTER)%大人」
-			;TranslatedMark 「…どれくらいの付き合いになるか分かりませんが、とりあえずはよろしく、%ANAME(MASTER)%殿」
+			;主人公がショタの場合の口上変化分
+			IF CFLAG:252 == 1
+				PRINTFORML %ANAME(MASTER)%一时被%ANAME(TARGET)%的美貌所吸引
+				;TranslatedMark %ANAME(MASTER)%は%ANAME(TARGET)%の美貌にしばし見惚れてしまう
+				PRINTFORMW 充满成熟和庄重气质的身姿，加上硕大而亮丽的毛茸茸尾巴，让人目光无法移开...
+				;TranslatedMark 大人らしい凛とした佇まいと、大きく艶々な毛並みの尻尾が視線を釘付けにする…
+				PRINTFORMW 「...？ 啊，尾巴很稀奇吗？那么，像你这样的孩子有什么事吗？」
+				;TranslatedMark 「…？　ああ、この尻尾が珍しいのかな。それで、君のような子が私に何か用ですか？」
+				PRINTL
+				PRINTFORML %ANAME(MASTER)%盯着眼前的美人出神，直到对方开口叫他，他才回过神来。
+				;TranslatedMark 目の前の美人にぼーっとしていた%ANAME(MASTER)%だったが、当の本人に声を掛けられて気を取り戻した
+				PRINTFORMW 慌忙掩饰后，%ANAME(MASTER)%告诉他，希望能协助我军平定这个乱世。
+				;TranslatedMark 慌てて誤魔化した後、%ANAME(MASTER)%は、この乱世を鎮めるため我が軍に力を貸して欲しいです、と伝えた
+				PRINTFORML （......不把我关在牢房，而是如此礼遇，原来是这个原因吗。虽然我也能想象得到......）
+				;TranslatedMark （……私を牢に繋がず、丁重な扱いをするのはそのためだったか。まあ想像はできていたが…）
+				PRINTFORML 「虽然特地请你过来，我也很抱歉，但我也不能那么轻易改变立场。」
+				;TranslatedMark 「わざわざ来てくれた君には申し訳ないが、私もそう易々と宗旨替えするわけにはいかないのですよ」
+				PRINTFORMW 「我也有我的责任。很抱歉，能不能请你放弃呢？」
+				;TranslatedMark 「私にも課せられた責務がある。悪いが諦めてはくれませんか」
+				PRINTL
+				PRINTFORML ......果然事情没有那么简单。不过，最开始被拒绝也属正常。
+				;TranslatedMark …やはりそう簡単にはいかないようだ。とはいえ最初は断られて当たり前
+				PRINTFORMW %ANAME(MASTER)%新下决心，要耐心地继续交流，并用自己的方式去说服对方！
+				;TranslatedMark 根気強く交流を続けて、自分なりに説得していこう！　と%ANAME(MASTER)%は決意を新たにした
+				PRINTFORML （......毕竟这么轻言放弃，不会吧......唉，对小孩子太冷漠让我感到有些过意不去......）
+				;TranslatedMark （……流石に易々とは諦めないか……、はあ、小さい子に素っ気無くするのは気が引けるのだが……）
+				PRINTFORMW （或者说这是有意为之的人选吗？......总之，只能先陪他们一段时间了......）
+				;TranslatedMark （あるいはそれを狙っての人選か？　…ともあれ、しばらくは相手をするしかないか…）
+				PRINTL
+				PRINTFORML %ANAME(TARGET)%看到%ANAME(MASTER)%眼里闪着光芒，轻叹一口气后转过身来。
+				;TranslatedMark %ANAME(TARGET)%は目を輝かせている%ANAME(MASTER)%を見て、ため息交じりに向き直った
+				PRINTFORMW 「......即使拒绝了之后也不是马上能离开的。不知道这会是一段多长时间的相处，但总之，请多关照。」
+				;TranslatedMark 「…断ったところですぐに出られるでもなし。どれくらいの付き合いになるか分からないが、とりあえずはよろしく」
+				PRINTFORMW 「我的名字是%ANAME(TARGET)%。我是%NAME_FORMAL(TARGET)%。那么，你怎么称呼？」
+				;TranslatedMark 「私の名は%ANAME(TARGET)%。%NAME_FORMAL(TARGET)%だ。それで、君の方はなんと言う？」
+			ELSE
+				PRINTFORML %ANAME(MASTER)%一时被那美貌吸引住了。
+				;TranslatedMark %ANAME(MASTER)%はその美貌にしばし見惚れる
+				PRINTFORMW 虽然完全没有露出皮肤，但却被散发着魅力的肉体和艳丽毛发的尾巴吸引了视线…
+				;TranslatedMark 肌の露出がまるで無いにも拘らず色気を放つ肉体と、艶々な毛並みの尻尾が視線を釘付けにする…
+				PRINTFORMW 「……嘛，我已经习惯了这种视线。那么，你想让我做什么？」
+				;TranslatedMark 「…まぁ、そういう目線には慣れております。それで、私に何か用ですか？」
+				PRINTL
+				PRINTFORML 视线朝着哪里看去了，好像在预料之中
+				;TranslatedMark 視線がどこに向かったか、お見通しのようだ
+				PRINTFORMW 心虚的咳嗽之后%ANAME(MASTER)%说，为了平定这个乱世，希望借助其力量。
+				;TranslatedMark 誤魔化しの咳払いの後%ANAME(MASTER)%は、この乱世を鎮めるため我が軍に力を貸して欲しい、と伝えた
+				PRINTFORML 「……不把我关在牢狱里，就是有求于我吗」
+				;TranslatedMark 「……私を牢に繋がず、この扱いをするのはそういうことでしたか」
+				PRINTFORMW 「但是，不能那么轻易地改变宗旨。我也有自豪感……」
+				;TranslatedMark 「ですが、そう易々と宗旨替えするわけにはいきません。私にも誇りはありますので……」
+				PRINTL
+				PRINTFORML ……看来还是不那么容易说服呢
+				;TranslatedMark ……やはりそう簡単には行かないようだ
+				PRINTFORMW 但是放弃她也太可惜了。请耐心地继续交流，以期其能改变心意
+				;TranslatedMark しかし彼女を諦めるというのもあまりに惜しい。根気強く交流を続けて心変わりを願おう
+				PRINTFORML 「…好像没有放弃的打算呢……啊……」
+				;TranslatedMark 「…諦めるつもりは無いようですね……、はあ……」
+				PRINTFORMW 「…虽然不知道会发生多少交集，总之请多关照，%ANAME(MASTER)%大人」
+				;TranslatedMark 「…どれくらいの付き合いになるか分かりませんが、とりあえずはよろしく、%ANAME(MASTER)%殿」
+			ENDIF
 		;それ以外
 		ELSE
 			;相手が自国の君主の場合
@@ -77,6 +146,8 @@ IF CFLAG:200 == 0
 			SETCOLOR カラー_黄
 			PRINTFORML
 			PRINTDATAL
+			DATAFORM ――――― 希望忙碌的式神 「%NAME_FORMAL(TARGET)%」 ―――――
+			;TranslatedMark ―――――　望んで大忙しの式神　『%NAME_FORMAL(TARGET)%』　―――――
 			DATAFORM ———— 隙间妖怪之式神 "%NAME_FORMAL(TARGET)%"————
 			;TranslatedMark ―――――　すきま妖怪の式　『%NAME_FORMAL(TARGET)%』　―――――
 			DATAFORM —————— 传说中妖怪 "%NAME_FORMAL(TARGET)%"——————
@@ -86,64 +157,174 @@ IF CFLAG:200 == 0
 			ENDDATA
 			PRINTFORMW
 			RESETCOLOR
-			PRINTFORML %ANAME(MASTER)%被她的美貌所惑而一时出神
-			;TranslatedMark %ANAME(MASTER)%はその美貌にしばし見とれる
-			PRINTFORMW 虽然完全没有露出皮肤，但却被散发着魅力的肉体和艳丽毛发的尾巴吸引了视线…
-			;TranslatedMark 肌の露出がまるで無いにも拘らず色気を放つ肉体と、艶々な毛並みの尻尾が視線を釘付けにする…
 			;相手が自国の君主の場合
 			IF GET_COUNTRY_BOSS(CFLAG:MASTER:所属) == TARGET
-				PRINTFORMW 「嗯…你是那个…是%ANAME(MASTER)%吗？」
-				;TranslatedMark 「えーと、君は確か…%ANAME(MASTER)%だったかな？」
-				PRINTFORML 即使没有相识，作为部下的%ANAME(MASTER)%的脸和名字也能记住
-				;TranslatedMark 直接の面識は無くとも、部下である%ANAME(MASTER)%の顔と名前は覚えられているようだ
-				PRINTFORMW %ANAME(MASTER)%回答了提问的肯定后，向作为君主的%ANAME(TARGET)%传达了自己的问候
-				;TranslatedMark 問いに肯定を返した%ANAME(MASTER)%は、君主である%ANAME(TARGET)%に挨拶に伺わせていただきました、と伝えた
-				PRINTFORML 「特意来问候？嗯，那可有心了」
-				;TranslatedMark 「わざわざ挨拶に？　ふむ、それは感心だ」
-				PRINTFORMW 「…因为这个幻想乡有很多自由奔放的人物。你能有礼貌地来问候我，我很高兴」
-				;TranslatedMark 「…幻想郷は色々と自由奔放な人物が多いからな。ちゃんと礼節をもって挨拶に来てくれるのは嬉しいよ」
-				PRINTFORML 这么说着，%ANAME(TARGET)%带着温柔的眼神微笑着
-				;TranslatedMark そう言うと%ANAME(TARGET)%は柔和な眼差しで微笑んだ
-				PRINTFORML 面对着能俘获男人的美女的笑容，%ANAME(MASTER)%有着为她的美貌动心的感觉
-				;TranslatedMark 男を虜にするような美女の笑みを向けられ、%ANAME(MASTER)%はその美貌に心臓を打たれたような錯覚を抱いた
-				PRINTFORMW 「那么，今后请多关照。请为我而效力。……啊，还有」
-				;TranslatedMark 「それでは、これからよろしく頼むぞ。どうか私のために尽力してくれ。……ああ、それと」
-				PRINTFORML %ANAME(TARGET)%像想起来似地加上一句话
-				;TranslatedMark %ANAME(TARGET)%は思い出したかのように一言付け加える
-				PRINTFORMW 「下次来打招呼的时候记得带上些油豆腐当礼物，嗯？为什么？…因为我会很开心哦？」
-				;TranslatedMark 「今度挨拶に来る時は手土産に油揚げを持ってきてくれると、その、何だ…とても嬉しいぞ？」
+				;主人公がショタの場合の口上変化分
+				IF CFLAG:252 == 1
+					PRINTFORML %ANAME(MASTER)%一时被%ANAME(TARGET)%的美貌所吸引
+					;TranslatedMark %ANAME(MASTER)%は%ANAME(TARGET)%の美貌にしばし見惚れてしまう
+					PRINTFORMW 充满成熟和庄重气质的身姿，加上硕大而亮丽的毛茸茸尾巴，让人目光无法移开...
+					;TranslatedMark 大人らしい凛とした佇まいと、大きく艶々な毛並みの尻尾が視線を釘付けにする…
+					PRINTL
+					PRINTFORMW 「呃，你肯定是...%ANAME(MASTER)%吧？」
+					;TranslatedMark 「えーと、君は確か…、%ANAME(MASTER)%だったかな？」
+					PRINTFORML %ANAME(TARGET)%蹲下来一边和%ANAME(MASTER)%对视一边说。
+					;TranslatedMark %ANAME(TARGET)%はしゃがみこんで%ANAME(MASTER)%に視線を合わながら話してくれた
+					PRINTFORMW 即使没有直接见过面，%ANAME(MASTER)%作为下属的脸和名字似乎也被记住了。
+					;TranslatedMark 直接の面識は無くとも、部下である%ANAME(MASTER)%の顔と名前は覚えられているようだ
+					PRINTFORMW 询问后得到肯定答复的%ANAME(MASTER)%表示，将拜访主君%ANAME(TARGET)%大人，向其致意。
+					;TranslatedMark 問いに肯定を返した%ANAME(MASTER)%は、主君である%ANAME(TARGET)%様に挨拶に伺いました、と伝えた
+					PRINTL
+					PRINTFORML 「特意过来打招呼？嗯嗯，很不错啊。」
+					;TranslatedMark 「わざわざ挨拶に？　ふむふむ、それは感心だ」
+					PRINTFORMW 「…因为这个幻想乡有很多自由奔放的人物。你能有礼貌地来问候我，我很高兴」
+					;TranslatedMark 「…幻想郷は色々と自由奔放な人物が多いからな。ちゃんと礼節をもって挨拶に来てくれるのは嬉しいよ」
+					PRINTFORML 这样一说，%ANAME(TARGET)%便带着柔和的目光微笑着抚摸了%ANAME(MASTER)%的头。
+					;TranslatedMark そう言うと%ANAME(TARGET)%は柔和な眼差しで微笑みながら%ANAME(MASTER)%の頭を撫でた
+					PRINTFORMW 被令所有男人着迷的美丽女性微微笑着抚摸%ANAME(MASTER)%，他的心脏扑通一跳，脸变得越来越红。
+					;TranslatedMark 男を虜にするような美女に微笑みながら撫でられた%ANAME(MASTER)%は心臓がドキッと跳ね、顔がどんどん赤くなっていく
+					PRINTL
+					PRINTFORML 「那么，今后请多关照了。请为我尽全力......你的脸有些红，还好吗？」
+					;TranslatedMark 「それでは、これからよろしく頼むぞ。どうか私のために尽力してくれ。……顔が赤いが大丈夫か？」
+					PRINTFORMW 尽管%ANAME(TARGET)%注意到了他脸红而表示担心，但%ANAME(MASTER)%慌忙说「没关系」，以掩饰自己的窘态。
+					;TranslatedMark 顔を赤くしていることに気が付いた%ANAME(TARGET)%に心配されるも、%ANAME(MASTER)%は大丈夫ですっ、と慌てて取り繕った
+					PRINTFORMW （......总觉得真是个小小的可爱孩子啊。这让我觉得必须更加努力才行。）
+					;TranslatedMark （……何だか初々しくて可愛い子だなぁ。これは私がしっかり頑張ってやらねばいかんな）
+				;通常版
+				ELSE
+					PRINTFORML %ANAME(MASTER)%一时被那美貌吸引住了。
+					;TranslatedMark %ANAME(MASTER)%はその美貌にしばし見惚れる
+					PRINTFORMW 虽然完全没有露出皮肤，但却被散发着魅力的肉体和艳丽毛发的尾巴吸引了视线…
+					;TranslatedMark 肌の露出がまるで無いにも拘らず色気を放つ肉体と、艶々な毛並みの尻尾が視線を釘付けにする…
+					PRINTL
+					PRINTFORMW 「呃，你肯定是...%ANAME(MASTER)%吧？」
+					;TranslatedMark 「えーと、君は確か…、%ANAME(MASTER)%だったかな？」
+					PRINTFORML 即使没有直接见过面，%ANAME(MASTER)%作为下属的脸和名字似乎也被记住了。
+					;TranslatedMark 直接の面識は無くとも、部下である%ANAME(MASTER)%の顔と名前は覚えられているようだ
+					PRINTFORMW %ANAME(MASTER)%回答肯定后，转告他的主君%ANAME(TARGET)%阁下，自己去拜访致意。
+					;TranslatedMark 問いに肯定を返した%ANAME(MASTER)%は、主君である%ANAME(TARGET)%殿に挨拶に伺わせていただきました、と伝えた
+					PRINTL
+					PRINTFORML 「特地来打招呼？唔，这真让人欣赏。」
+					;TranslatedMark 「わざわざ挨拶に？　ふむ、それは感心です」
+					PRINTFORMW 「幻想乡有很多性格自由奔放的人，所以能有礼貌地来打招呼的话，会很有帮助。」
+					;TranslatedMark 「…幻想郷は色々と自由奔放な人物が多いのでね。ちゃんと礼節をもって挨拶に来てくれるのは助かります」
+					PRINTFORML 这么说着，%ANAME(TARGET)%带着温柔的眼神微笑着
+					;TranslatedMark そう言うと%ANAME(TARGET)%は柔和な眼差しで微笑んだ
+					PRINTFORML 面对着能俘获男人的美女的笑容，%ANAME(MASTER)%有着为她的美貌动心的感觉
+					;TranslatedMark 男を虜にするような美女の笑みを向けられ、%ANAME(MASTER)%はその美貌に心臓を打たれたような錯覚を抱いた
+					PRINTL
+					PRINTFORMW 「那么，接下来请多关照。请为我尽力。......哦，然后」
+					;TranslatedMark 「それでは、これからよろしく。どうか私のために尽力を。……ああ、それと」
+					PRINTFORML %ANAME(TARGET)%像想起来似地加上一句话
+					;TranslatedMark %ANAME(TARGET)%は思い出したかのように一言付け加える
+					PRINTFORMW 「下次来拜访的时候，如果能带些油豆腐作为小礼物，那、嗯，会非常开心的哦？」
+					;TranslatedMark 「今度挨拶に来る時は手土産に油揚げでも持ってきてくれると、その、あれです…とても嬉しいですよ？」
+				ENDIF
 			;相手が同盟国の士官の場合
 			ELSEIF CFLAG:TARGET:所属 != CFLAG:MASTER:所属
-				PRINTFORMW 「…嘛，我已经习惯了这种视线。那么，有什么事要我做吗？」
-				;TranslatedMark 「…まぁ、そういう目線には慣れております。それで、私に何か御用ですか？」
-				PRINTFORML 视线朝着哪里看去了，好像在预料之中
-				;TranslatedMark 視線がどこに向かったか、お見通しのようだ
-				PRINTFORMW 心虚地咳嗽后%ANAME(MASTER)%告诉同盟方的各位，我是来问候的
-				;TranslatedMark 誤魔化しの咳払いの後%ANAME(MASTER)%は、同盟先の方々に挨拶に参った、と伝えた
-				PRINTFORML 「是这样啊，谢谢您专程前来问候」
-				;TranslatedMark 「ほう、挨拶に。わざわざご丁寧にどうも」
-				PRINTFORMW 「我名为%NAME_FORMAL(TARGET)%。以后请多关照」
-				;TranslatedMark 「私は%NAME_FORMAL(TARGET)%と申します。以後お見知りおきを」
-				PRINTFORMW 「虽然不知道以后会发生什么，至少现在是伙伴。一起合力前进吧」
-				;TranslatedMark 「この先何があるか分かりませんが、少なくとも今は同士。共に力を合わせていきましょう」
+				;主人公がショタの場合の口上変化分
+				IF CFLAG:252 == 1
+					PRINTFORML %ANAME(MASTER)%一时被%ANAME(TARGET)%的美貌所吸引
+					;TranslatedMark %ANAME(MASTER)%は%ANAME(TARGET)%の美貌にしばし見惚れてしまう
+					PRINTFORMW 充满成熟和庄重气质的身姿，加上硕大而亮丽的毛茸茸尾巴，让人目光无法移开...
+					;TranslatedMark 大人らしい凛とした佇まいと、大きく艶々な毛並みの尻尾が視線を釘付けにする…
+					PRINTL
+					PRINTFORMW 「...？　你有什么事吗？　找我有什么事吗？」
+					;TranslatedMark 「…？　君、どうかしましたか？　私に何か御用が？」
+					PRINTFORML 当本人跟%ANAME(MASTER)%说话时，%ANAME(MASTER)%恍惚间回过了神。
+					;TranslatedMark 当の本人に声を掛けられて、ハッ、と気を取り戻した%ANAME(MASTER)%は
+					PRINTFORMW 慌忙掩饰了不小心被美丽姐姐吸引住视线的事情，告知%ANAME(TARGET)%我已经去拜访了同盟对象们。
+					;TranslatedMark 美人のお姉さんに思わず見惚れてしまったことを慌てて誤魔化し、%ANAME(TARGET)%へ、同盟先の方々へ挨拶に伺いました、と伝えた
+					PRINTL
+					PRINTFORML 「哦，特意来打招呼。%ANAME(MASTER)%，真的非常感谢您的特别用心。」
+					;TranslatedMark 「ほう、挨拶に。それはそれは%ANAME(MASTER)%殿、わざわざご丁寧にどうも」
+					PRINTFORMW %ANAME(TARGET)%蹲下来一边和%ANAME(MASTER)%对视一边说。
+					;TranslatedMark %ANAME(TARGET)%はしゃがみこんで%ANAME(MASTER)%に視線を合わながら話してくれた
+					PRINTFORML 「我名为%NAME_FORMAL(TARGET)%。以后请多关照」
+					;TranslatedMark 「私は%NAME_FORMAL(TARGET)%と申します。以後お見知りおきを」
+					PRINTFORMW 「虽然不知道以后会发生什么，至少现在是伙伴。一起合力前进吧」
+					;TranslatedMark 「この先何があるか分かりませんが、少なくとも今は同士。共に力を合わせていきましょう」
+				;通常版
+				ELSE
+					PRINTFORML %ANAME(MASTER)%一时被那美貌吸引住了。
+					;TranslatedMark %ANAME(MASTER)%はその美貌にしばし見惚れる
+					PRINTFORMW 虽然完全没有露出皮肤，但却被散发着魅力的肉体和艳丽毛发的尾巴吸引了视线…
+					;TranslatedMark 肌の露出がまるで無いにも拘らず色気を放つ肉体と、艶々な毛並みの尻尾が視線を釘付けにする…
+					PRINTL
+					PRINTFORMW 「…嘛，我已经习惯了这种视线。那么，有什么事要我做吗？」
+					;TranslatedMark 「…まぁ、そういう目線には慣れております。それで、私に何か御用ですか？」
+					PRINTFORML 视线朝着哪里看去了，好像在预料之中
+					;TranslatedMark 視線がどこに向かったか、お見通しのようだ
+					PRINTFORMW 心虚地咳嗽后%ANAME(MASTER)%告诉同盟方的各位，我是来问候的
+					;TranslatedMark 誤魔化しの咳払いの後%ANAME(MASTER)%は、同盟先の方々に挨拶に参った、と伝えた
+					PRINTL
+					PRINTFORML 「是这样啊，谢谢您专程前来问候」
+					;TranslatedMark 「ほう、挨拶に。わざわざご丁寧にどうも」
+					PRINTFORMW 「我名为%NAME_FORMAL(TARGET)%。以后请多关照」
+					;TranslatedMark 「私は%NAME_FORMAL(TARGET)%と申します。以後お見知りおきを」
+					PRINTFORMW 「虽然不知道以后会发生什么，至少现在是伙伴。一起合力前进吧」
+					;TranslatedMark 「この先何があるか分かりませんが、少なくとも今は同士。共に力を合わせていきましょう」
+				ENDIF
 			;それ以外
 			ELSE
-				PRINTFORMW 「…嘛，我已经习惯了这种视线。那么，有什么事要我做吗？」
-				;TranslatedMark 「…まぁ、そういう目線には慣れております。それで、私に何か御用ですか？」
-				PRINTFORML 视线朝着哪里看去了，好像在预料之中
-				;TranslatedMark 視線がどこに向かったか、お見通しのようだ
-				PRINTFORMW 假装咳嗽后%ANAME(MASTER)%告诉她，为了平定这个乱世，希望你能助我一臂之力
-				;TranslatedMark 誤魔化しの咳払いの後%ANAME(MASTER)%は、この乱世を鎮めるために力を貸して欲しい、と伝えた
-				PRINTFORML 「嗯……是这样吗」
-				;TranslatedMark 「……ふむ、そういうことですか」
-				PRINTFORMW 「为了幻想乡也要尽力而为了，那么请多关照」
-				;TranslatedMark 「私も幻想郷のために尽力する身、一先ずはよろしくお願いします」
-				PRINTFORML 这真是好极了！有了九尾的帮助，真是如虎添翼
-				;TranslatedMark これは心強い！　名高い九尾の狐の力を借りれるとなると鬼に金棒だ
-				PRINTFORMW 「啊，不，不是…严格说来，我并不是九尾，而是以此为凭依的式神…算了」
-				;TranslatedMark 「あ、いや…私は厳密に言えば九尾の狐ではなくて、それを依代にしている式神なのだが…、まぁいいか」
-				PRINTFORMW 「那么，鄙人%NAME_FORMAL(TARGET)%，虽力微，但让我相助吧」
-				;TranslatedMark 「それでは、不肖この%NAME_FORMAL(TARGET)%、微力ながらお手伝いしましょう」
+				;主人公がショタの場合の口上変化分
+				IF CFLAG:252 == 1
+					PRINTFORML %ANAME(MASTER)%一时被%ANAME(TARGET)%的美貌所吸引
+					;TranslatedMark %ANAME(MASTER)%は%ANAME(TARGET)%の美貌にしばし見惚れてしまう
+					PRINTFORMW 充满成熟和庄重气质的身姿，加上硕大而亮丽的毛茸茸尾巴，让人目光无法移开...
+					;TranslatedMark 大人らしい凛とした佇まいと、大きく艶々な毛並みの尻尾が視線を釘付けにする…
+					PRINTL
+					PRINTFORMW 「...？ 是您啊，怎么了吗？ 是因为找我有什么事吗？」
+					;TranslatedMark 「…？　君、どうかしましたか？　私に何か？」
+					PRINTFORML 被叫到名字而回过神来的%ANAME(MASTER)%，急忙装作没被这位美丽的小姐姐迷住。
+					;TranslatedMark 声を掛けられて、ハッ、と気を取り戻した%ANAME(MASTER)%は、美人のお姉さんに思わず見惚れてしまったことを慌てて誤魔化し、
+					PRINTFORMW %ANAME(TARGET)%告诉她，为了平定这个乱世，希望得到你的帮助。
+					;TranslatedMark %ANAME(TARGET)%へ、この乱世を鎮めるため、力を貸して欲しいんです、と伝えた
+					PRINTL
+					PRINTFORML 「......嗯，原来如此。是这么回事啊。」
+					;TranslatedMark 「……ふむ、なるほど。そういうことですか」
+					PRINTFORML （看来这么小的孩子也想为了幻想乡而努力啊。等他成熟起来之前，还是多加留意一下吧。）
+					;TranslatedMark （こんな小さい子も幻想郷のために頑張ろうとしているのだな。…一人前になるまでは、気にかけておこうか）
+					PRINTFORMW %ANAME(TARGET)%蹲下来一边和%ANAME(MASTER)%对视一边说。
+					;TranslatedMark %ANAME(TARGET)%はしゃがみこんで%ANAME(MASTER)%に視線を合わながら話してくれた
+					PRINTFORMW 「我也为幻想乡竭尽全力。%NAME_FORMAL(TARGET)%，虽然微不足道，愿意帮上一点忙。」
+					;TranslatedMark 「私も幻想郷のために尽力する身。この%NAME_FORMAL(TARGET)%、微力ながらお手伝いしましょう」
+					PRINTFORML 这样一说，%ANAME(TARGET)%便带着柔和的目光微笑着抚摸了%ANAME(MASTER)%的头。
+					;TranslatedMark そう言うと%ANAME(TARGET)%は柔和な眼差しで微笑みながら%ANAME(MASTER)%の頭を撫でた
+					PRINTFORMW 被令所有男人着迷的美丽女性微微笑着抚摸%ANAME(MASTER)%，他的心脏扑通一跳，脸变得越来越红。
+					;TranslatedMark 男を虜にするような美女に微笑みながら撫でられた%ANAME(MASTER)%は心臓がドキッと跳ね、顔がどんどん赤くなっていく
+					PRINTL
+					PRINTFORML 「那么，今后请多关照。......你的脸好像很红，还好吗？」
+					;TranslatedMark 「それでは、これからよろしく。……何だか顔が赤いけど大丈夫ですか？」
+					PRINTFORMW 注意到%ANAME(TARGET)%脸红，显得有些担心，但%ANAME(MASTER)%慌忙地应付说：「我没事！」
+					;TranslatedMark 顔を赤くしているに気が付いた%ANAME(TARGET)%に心配されるも、%ANAME(MASTER)%は大丈夫ですっ、と慌てて取り繕った
+					PRINTFORMW （......总觉得是个稚嫩又可爱的孩子啊。我一定要好好保护他才行。）
+					;TranslatedMark （……何だか初々しくて可愛い子だなぁ。これは私がしっかり守ってやらねばいかんな）
+				;通常版
+				ELSE
+					PRINTFORML %ANAME(MASTER)%一时被那美貌吸引住了。
+					;TranslatedMark %ANAME(MASTER)%はその美貌にしばし見惚れる
+					PRINTFORMW 虽然完全没有露出皮肤，但却被散发着魅力的肉体和艳丽毛发的尾巴吸引了视线…
+					;TranslatedMark 肌の露出がまるで無いにも拘らず色気を放つ肉体と、艶々な毛並みの尻尾が視線を釘付けにする…
+					PRINTL
+					PRINTFORMW 「…嘛，我已经习惯了这种视线。那么，有什么事要我做吗？」
+					;TranslatedMark 「…まぁ、そういう目線には慣れております。それで、私に何か御用ですか？」
+					PRINTFORML 视线朝着哪里看去了，好像在预料之中
+					;TranslatedMark 視線がどこに向かったか、お見通しのようだ
+					PRINTFORMW 假装咳嗽后%ANAME(MASTER)%告诉她，为了平定这个乱世，希望你能助我一臂之力
+					;TranslatedMark 誤魔化しの咳払いの後%ANAME(MASTER)%は、この乱世を鎮めるために力を貸して欲しい、と伝えた
+					PRINTL
+					PRINTFORML 「嗯……是这样吗」
+					;TranslatedMark 「……ふむ、そういうことですか」
+					PRINTFORMW 「为了幻想乡也要尽力而为了，那么请多关照」
+					;TranslatedMark 「私も幻想郷のために尽力する身、一先ずはよろしくお願いします」
+					PRINTFORML 这真是好极了！有了九尾的帮助，真是如虎添翼
+					;TranslatedMark これは心強い！　名高い九尾の狐の力を借りれるとなると鬼に金棒だ
+					PRINTFORMW 「啊，那个...严格来说，我并不是九尾狐，而是以它为寄托的式神，不过...这样说也没关系。」
+					;TranslatedMark 「あ、いや…私は厳密に言えば九尾の狐ではなくて、それを依代にしている式神なんだけど…、まぁいいか」
+					PRINTFORMW 「那么，鄙人%NAME_FORMAL(TARGET)%，虽力微，但让我相助吧」
+					;TranslatedMark 「それでは、不肖この%NAME_FORMAL(TARGET)%、微力ながらお手伝いしましょう」
+				ENDIF
 			ENDIF
 		ENDIF
 		PRINTFORML
@@ -159,6 +340,8 @@ IF CFLAG:200 == 0
 			SETCOLOR カラー_黄
 			PRINTFORML
 			PRINTDATAL
+			DATAFORM ――――― 希望忙碌的式神 「%NAME_FORMAL(TARGET)%」 ―――――
+			;TranslatedMark ―――――　望んで大忙しの式神　『%NAME_FORMAL(TARGET)%』　―――――
 			DATAFORM ———— 隙间妖怪之式神 "%NAME_FORMAL(TARGET)%"————
 			;TranslatedMark ―――――　すきま妖怪の式　『%NAME_FORMAL(TARGET)%』　―――――
 			DATAFORM —————— 传说中妖怪 "%NAME_FORMAL(TARGET)%"——————
@@ -168,63 +351,156 @@ IF CFLAG:200 == 0
 			ENDDATA
 			PRINTFORMW
 			RESETCOLOR
-			PRINTFORML %ANAME(MASTER)%对着她那一如既往的美貌，一时看得出神
-			;TranslatedMark %ANAME(MASTER)%は相変わらずの美貌にしばし見とれる
-			PRINTFORMW 虽然完全没有露出皮肤，但却被散发着魅力的肉体和艳丽毛发的尾巴吸引了视线…
-			;TranslatedMark 肌の露出がまるで無いにも拘らず色気を放つ肉体と、艶々な毛並みの尻尾が視線を釘付けにする…
 			IF CFLAG:好感度 >= 500
-				PRINTFORMW 「呵呵，还是老样子啊%ANAME(MASTER)%。那你找我有什么事吗？」
-				;TranslatedMark 「ふう、相変わらずだな%ANAME(MASTER)%は。それで、私に何の用かな？」
-				PRINTFORML 视线朝着哪里看去了，好像在预料之中
-				;TranslatedMark 視線がどこに向かったか、お見通しのようだ
-				PRINTFORMW 为缓解尴尬地羞笑后%ANAME(MASTER)%说道，为了平定这个乱世，希望能借助其力量
-				;TranslatedMark 誤魔化しの照れ笑いの後%ANAME(MASTER)%は、この乱世を鎮めるため我が軍に力を貸して欲しい、と伝えた
-				PRINTFORML 「……嗯。这就是你为什么不把我关在监狱里的原因吗」
-				;TranslatedMark 「……ふむ。私を牢に繋がずにいた理由はそれか」
-				IF CFLAG:好感度 >= 1000
-					PRINTFORMW 「嗯，怎么办呢。如果是为了你的话，那也不是很不乐意……」
-					;TranslatedMark 「うーん、どうしようかな。お前のためならそれもやぶさかではないが……」
+				;主人公がショタの場合の口上変化分
+				IF CFLAG:252 == 1
+					PRINTFORML %ANAME(MASTER)%依然拥有令人陶醉的美貌，让人不禁被深深吸引。
+					;TranslatedMark %ANAME(MASTER)%は相変わらずの美貌にしばし見惚れてしまう
+					PRINTFORMW 成熟优雅的姿态和那条总是会让人目不转睛的蓬松光亮的大尾巴...。
+					;TranslatedMark 大人らしい凛とした佇まいと、大きく艶々な毛並みの尻尾が何度見ても視線を釘付けにする…
+					PRINTL
+					PRINTFORMW 「好久不见，%ANAME(MASTER)%。如果可以的话，我并不想以这样的方式重逢......怎么了？在发呆吗？」
+					;TranslatedMark 「久しいな%ANAME(MASTER)%。できればこういう再会はしたくなかったが…、どうした？　ぼーっとして」
+					PRINTFORML 受到当事人搭话而猛然觉醒的%ANAME(MASTER)%，急忙掩饰自己因为对方不变的美丽而看呆的情况。
+					;TranslatedMark 当の本人に声を掛けられて、ハッ、となった%ANAME(MASTER)%は、変わらぬ美しさに見惚れてしまったことを慌てて誤魔化し、
+					PRINTFORMW %ANAME(TARGET)%，这乱世需要平息，我希望你能助我们军一臂之力，转告他。
+					;TranslatedMark %ANAME(TARGET)%へ、この乱世を鎮めるため我が軍に力を貸して欲しいのです、と伝えた
+					PRINTL
+					PRINTFORML 「……嗯。这就是你为什么不把我关在监狱里的原因吗」
+					;TranslatedMark 「……ふむ。私を牢に繋がずにいた理由はそれか」
+					IF CFLAG:好感度 >= 800
+						PRINTFORMW 「嗯，怎么办呢。如果是为了你的话，那也不是很不乐意……」
+						;TranslatedMark 「うーん、どうしようかな。お前のためならそれもやぶさかではないが……」
+					ELSE
+						PRINTFORMW 「嘛，虽然我并不讨厌你……但也不能和这事相提并论啊…」
+						;TranslatedMark 「まあ、お前のことは嫌いではないが……。それとこれは話が違うしなぁ…」
+					ENDIF
+					PRINTFORML 「…还是不能那么草率地给出答案。对不起，能再给我点时间吗」
+					;TranslatedMark 「…やはり、そう簡単に答えを出すわけにもいかない。すまないがもう少し時間をくれないだろうか」
+					PRINTFORMW ……看来还是不容易地说服
+					;TranslatedMark ……流石に易々とは行かないようだ
+					PRINTL
+					PRINTFORML 不过感觉还不错。就这样坚持不懈地继续交流，按照自己的方式去说服吧！%ANAME(MASTER)%眼中闪烁着光芒。
+					;TranslatedMark だが感触は悪くない。このまま根気強く交流を続けて、自分なりに説得していこう！　と%ANAME(MASTER)%は瞳を輝かせた
+					PRINTFORMW （......%ANAME(MASTER)%还是一如既往的青涩啊。也正因为这样，才让人无法就这么不管啊......）
+					;TranslatedMark （……相変わらず%ANAME(MASTER)%は初々しいな。こういうところがあるからどうにも放っておけないんだよなぁ…）
+					PRINTFORMW 「那么在这段时间里，就麻烦您照顾一下了，%ANAME(MASTER)%。」
+					;TranslatedMark 「それじゃあしばらくの間、面倒をよろしく頼むよ、%ANAME(MASTER)%」
+				;通常版
 				ELSE
-					PRINTFORMW 「嘛，虽然我并不讨厌你……但也不能和这事相提并论啊…」
-					;TranslatedMark 「まあ、お前のことは嫌いではないが……。それとこれは話が違うしなぁ…」
+					PRINTFORML %ANAME(MASTER)%依然有着令人着迷的美貌，让人不禁看得入迷。
+					;TranslatedMark %ANAME(MASTER)%は相変わらずの美貌にしばし見惚れる
+					PRINTFORMW 虽然完全没有露出皮肤，但却被散发着魅力的肉体和艳丽毛发的尾巴吸引了视线…
+					;TranslatedMark 肌の露出がまるで無いにも拘らず色気を放つ肉体と、艶々な毛並みの尻尾が視線を釘付けにする…
+					PRINTL
+					PRINTFORMW 「呵呵，还是老样子啊%ANAME(MASTER)%。那你找我有什么事吗？」
+					;TranslatedMark 「ふう、相変わらずだな%ANAME(MASTER)%は。それで、私に何の用かな？」
+					PRINTFORML 视线朝着哪里看去了，好像在预料之中
+					;TranslatedMark 視線がどこに向かったか、お見通しのようだ
+					PRINTFORMW 为缓解尴尬地羞笑后%ANAME(MASTER)%说道，为了平定这个乱世，希望能借助其力量
+					;TranslatedMark 誤魔化しの照れ笑いの後%ANAME(MASTER)%は、この乱世を鎮めるため我が軍に力を貸して欲しい、と伝えた
+					PRINTL
+					PRINTFORML 「……嗯。这就是你为什么不把我关在监狱里的原因吗」
+					;TranslatedMark 「……ふむ。私を牢に繋がずにいた理由はそれか」
+					IF CFLAG:好感度 >= 800
+						PRINTFORMW 「嗯，怎么办呢。如果是为了你的话，那也不是很不乐意……」
+						;TranslatedMark 「うーん、どうしようかな。お前のためならそれもやぶさかではないが……」
+					ELSE
+						PRINTFORMW 「嘛，虽然我并不讨厌你……但也不能和这事相提并论啊…」
+						;TranslatedMark 「まあ、お前のことは嫌いではないが……。それとこれは話が違うしなぁ…」
+					ENDIF
+					PRINTFORML 「…还是不能那么草率地给出答案。对不起，能再给我点时间吗」
+					;TranslatedMark 「…やはり、そう簡単に答えを出すわけにもいかない。すまないがもう少し時間をくれないだろうか」
+					PRINTFORMW ……看来还是不容易地说服
+					;TranslatedMark ……流石に易々とは行かないようだ
+					PRINTL
+					PRINTFORML 但感觉还不错。就这样耐心地继续交流，希望其能改变心意吧
+					;TranslatedMark だが感触は悪くない。このまま根気強く交流を続けて心変わりを願おう
+					PRINTFORMW 「那么暂时就麻烦多多关照了，%ANAME(MASTER)%」
+					;TranslatedMark 「それじゃあしばらく厄介になる。よろしく頼むよ、%ANAME(MASTER)%」
 				ENDIF
-				PRINTFORML 「…还是不能那么草率地给出答案。对不起，能再给我点时间吗」
-				;TranslatedMark 「…やはり、そう簡単に答えを出すわけにもいかない。すまないがもう少し時間をくれないだろうか」
-				PRINTFORMW ……看来还是不容易地说服
-				;TranslatedMark ……流石に易々とは行かないようだ
-				PRINTFORML 但感觉还不错。就这样耐心地继续交流，希望其能改变心意吧
-				;TranslatedMark だが感触は悪くない。このまま根気強く交流を続けて心変わりを願おう
-				PRINTFORMW 「那么暂时就麻烦多多关照了，%ANAME(MASTER)%」
-				;TranslatedMark 「それじゃあしばらく厄介になる。よろしく頼むよ、%ANAME(MASTER)%」
 			ELSE
-				PRINTFORMW 「…嘛，我已经习惯了这种视线。那你找我有什么事吗？」
-				;TranslatedMark 「…まぁ、そういう目線には慣れているよ。それで、私に何か用ですか？」
-				PRINTFORML 视线朝着哪里看去了，好像在预料之中
-				;TranslatedMark 視線がどこに向かったか、お見通しのようだ
-				PRINTFORMW 心虚的咳嗽之后%ANAME(MASTER)%说，为了平定这个乱世，希望借助其力量。
-				;TranslatedMark 誤魔化しの咳払いの後%ANAME(MASTER)%は、この乱世を鎮めるため我が軍に力を貸して欲しい、と伝えた
-				PRINTFORML 「……不把我关在牢狱里，就是有求于我吗」
-				;TranslatedMark 「……私を牢に繋がず、この扱いをするのはそういうことでしたか」
-				PRINTFORMW 「但是，不能那么轻易地改变宗旨。我也有自豪感……」
-				;TranslatedMark 「ですが、そう易々と宗旨替えするわけにはいきません。私にも誇りはありますので……」
-				PRINTFORML ……看来还是不那么容易说服呢
-				;TranslatedMark ……やはりそう簡単には行かないようだ
-				PRINTFORMW 但是放弃她也太可惜了。请耐心地继续交流，以期其能改变心意
-				;TranslatedMark しかし彼女を諦めるというのもあまりに惜しい。根気強く交流を続けて心変わりを願おう
-				PRINTFORML 「…好像没有放弃的打算呢……啊……」
-				;TranslatedMark 「…諦めるつもりは無いようですね……、はあ……」
-				PRINTFORMW 「…虽然不知道会发生多少交集，总之请多关照，%ANAME(MASTER)%大人」
-				;TranslatedMark 「…どれくらいの付き合いになるか分かりませんが、とりあえずはよろしく、%ANAME(MASTER)%殿」
+				;主人公がショタの場合の口上変化分
+				IF CFLAG:252 == 1
+					PRINTFORML %ANAME(MASTER)%依然拥有令人陶醉的美貌，让人不禁被深深吸引。
+					;TranslatedMark %ANAME(MASTER)%は相変わらずの美貌にしばし見惚れてしまう
+					PRINTFORMW 成熟优雅的姿态和那条总是会让人目不转睛的蓬松光亮的大尾巴...。
+					;TranslatedMark 大人らしい凛とした佇まいと、大きく艶々な毛並みの尻尾が何度見ても視線を釘付けにする…
+					PRINTL
+					PRINTFORMW 「......？　怎么了？　我脸上有什么吗？」
+					;TranslatedMark 「…？　どうかしましたか？　私の顔に何か？」
+					PRINTFORML 当那位本人开口说话时，%ANAME(MASTER)%愣住了，一时间被她不变的美丽所吸引，慌忙掩饰自己的失神。
+					;TranslatedMark 当の本人に声を掛けられて、ハッ、となった%ANAME(MASTER)%は、変わらぬ美しさに思わず見惚れてしまったことを慌てて誤魔化し、
+					PRINTFORMW %ANAME(TARGET)%，这乱世需要平息，我希望你能助我们军一臂之力，转告他。
+					;TranslatedMark %ANAME(TARGET)%へ、この乱世を鎮めるため我が軍に力を貸して欲しいのです、と伝えた
+					PRINTL
+					PRINTFORML （......不把我关在牢房，而是如此礼遇，原来是这个原因吗。虽然我也能想象得到......）
+					;TranslatedMark （……私を牢に繋がず、丁重な扱いをするのはそのためだったか。まあ想像はできていたが…）
+					PRINTFORML 「很抱歉尽管%ANAME(MASTER)%特地来看望我，但我也不能轻易改变我的信念。」
+					;TranslatedMark 「わざわざ来てくれた%ANAME(MASTER)%には申し訳ないが、私もそう易々と宗旨替えするわけにはいかないのですよ」
+					PRINTFORMW 「我也有我的责任。很抱歉，能不能请你放弃呢？」
+					;TranslatedMark 「私にも課せられた責務がある。悪いが諦めてはくれませんか」
+					PRINTL
+					PRINTFORML ......果然事情没有那么简单。不过，最开始被拒绝也属正常。
+					;TranslatedMark …やはりそう簡単にはいかないようだ。とはいえ最初は断られて当たり前
+					PRINTFORMW %ANAME(MASTER)%新下决心，要耐心地继续交流，并用自己的方式去说服对方！
+					;TranslatedMark 根気強く交流を続けて、自分なりに説得していこう！　と%ANAME(MASTER)%は決意を新たにした
+					PRINTFORML （......虽说这样依旧不放弃吗......，唉，对认识的小孩子冷漠相待还是有些不忍心啊......）
+					;TranslatedMark （……流石にこれだけでは諦めないか……、はあ、知り合いの小さな子に素っ気無くするのは気が引けるのだが……）
+					PRINTFORMW （或者说这是有意为之的人选吗？......总之，只能先陪他们一段时间了......）
+					;TranslatedMark （あるいはそれを狙っての人選か？　…ともあれ、しばらくは相手をするしかないか…）
+					PRINTL
+					PRINTFORML %ANAME(TARGET)%看到%ANAME(MASTER)%眼里闪着光芒，轻叹一口气后转过身来。
+					;TranslatedMark %ANAME(TARGET)%は目を輝かせている%ANAME(MASTER)%を見て、ため息交じりに向き直った
+					PRINTFORMW 「...嗯，话虽如此，你也不能只是听别人说就轻易放弃吧。唉......」
+					;TranslatedMark 「…まあ、君もそう言われただけで引き下がるわけにもいかないでしょうね。はあ……」
+					PRINTFORMW 「...不知道这段缘分能持续多久，但希望这段时间%ANAME(MASTER)%大人多多关照。」
+					;TranslatedMark 「…どれくらいの付き合いになるか分かりませんが、しばらくはよろしく頼むよ、%ANAME(MASTER)%殿」
+				;通常版
+				ELSE
+					PRINTFORML %ANAME(MASTER)%依然有着令人着迷的美貌，让人不禁看得入迷。
+					;TranslatedMark %ANAME(MASTER)%は相変わらずの美貌にしばし見惚れる
+					PRINTFORMW 虽然完全没有露出皮肤，但却被散发着魅力的肉体和艳丽毛发的尾巴吸引了视线…
+					;TranslatedMark 肌の露出がまるで無いにも拘らず色気を放つ肉体と、艶々な毛並みの尻尾が視線を釘付けにする…
+					PRINTL
+					PRINTFORMW 「…嘛，我已经习惯了这种视线。那你找我有什么事吗？」
+					;TranslatedMark 「…まぁ、そういう目線には慣れているよ。それで、私に何か用ですか？」
+					PRINTFORML 视线朝着哪里看去了，好像在预料之中
+					;TranslatedMark 視線がどこに向かったか、お見通しのようだ
+					PRINTFORMW 心虚的咳嗽之后%ANAME(MASTER)%说，为了平定这个乱世，希望借助其力量。
+					;TranslatedMark 誤魔化しの咳払いの後%ANAME(MASTER)%は、この乱世を鎮めるため我が軍に力を貸して欲しい、と伝えた
+					PRINTL
+					PRINTFORML 「……不把我关在牢狱里，就是有求于我吗」
+					;TranslatedMark 「……私を牢に繋がず、この扱いをするのはそういうことでしたか」
+					PRINTFORMW 「但是，不能那么轻易地改变宗旨。我也有自豪感……」
+					;TranslatedMark 「ですが、そう易々と宗旨替えするわけにはいきません。私にも誇りはありますので……」
+					PRINTFORMW ……看来还是不那么容易说服呢
+					;TranslatedMark ……やはりそう簡単には行かないようだ
+					PRINTL
+					PRINTFORML 但是放弃她也太可惜了。请耐心地继续交流，以期其能改变心意
+					;TranslatedMark しかし彼女を諦めるというのもあまりに惜しい。根気強く交流を続けて心変わりを願おう
+					PRINTFORMW 「…好像没有放弃的打算呢……啊……」
+					;TranslatedMark 「…諦めるつもりは無いようですね……、はあ……」
+					PRINTFORMW 「…虽然不知道会发生多少交集，总之请多关照，%ANAME(MASTER)%大人」
+					;TranslatedMark 「…どれくらいの付き合いになるか分かりませんが、とりあえずはよろしく、%ANAME(MASTER)%殿」
+				ENDIF
 			ENDIF
 		;それ以外
 		ELSE
-			PRINTFORML 「啊，%ANAME(MASTER)%。好久不见了」
-			;TranslatedMark 「ああ、%ANAME(MASTER)%。久しぶりだな」
+			IF CFLAG:好感度 >= 500
+				PRINTFORML 「啊，%ANAME(MASTER)%。好久不见了」
+				;TranslatedMark 「ああ、%ANAME(MASTER)%。久しぶりだな」
+			ELSE
+				PRINTFORML 「啊，%ANAME(MASTER)%。我们又见面了。」
+				;TranslatedMark 「ああ、%ANAME(MASTER)%。またお会いしましたね」
+			ENDIF
 			PRINTFORMW 有九根大尾巴的美女因%ANAME(MASTER)%的呼唤而转身
 			;TranslatedMark 九本の大きな尻尾を持った美女が%ANAME(MASTER)%の呼びかけに応えて振り向いた
 			SETCOLOR カラー_黄
 			PRINTFORML
 			PRINTDATAL
+			DATAFORM ――――― 希望忙碌的式神 「%NAME_FORMAL(TARGET)%」 ―――――
+			;TranslatedMark ―――――　望んで大忙しの式神　『%NAME_FORMAL(TARGET)%』　―――――
 			DATAFORM ———— 隙间妖怪之式神 "%NAME_FORMAL(TARGET)%"————
 			;TranslatedMark ―――――　すきま妖怪の式　『%NAME_FORMAL(TARGET)%』　―――――
 			DATAFORM —————— 传说中妖怪 "%NAME_FORMAL(TARGET)%"——————
@@ -234,110 +510,308 @@ IF CFLAG:200 == 0
 			ENDDATA
 			PRINTFORMW
 			RESETCOLOR
-			PRINTFORML %ANAME(MASTER)%对着她那一如既往的美貌，一时看得出神
-			;TranslatedMark %ANAME(MASTER)%は相変わらずの美貌にしばし見とれる
-			PRINTFORMW 虽然完全没有露出皮肤，但却被散发着魅力的肉体和艳丽毛发的尾巴吸引了视线…
-			;TranslatedMark 肌の露出がまるで無いにも拘らず色気を放つ肉体と、艶々な毛並みの尻尾が視線を釘付けにする…
 			;相手が自国の君主の場合
 			IF GET_COUNTRY_BOSS(CFLAG:MASTER:所属) == TARGET
-				IF CFLAG:好感度 >= 500
-					PRINTFORMW 「呵呵，还是老样子呢%ANAME(MASTER)%桑。那你找我有什么事吗？」
-					;TranslatedMark 「ふふ、相変わらずだな%ANAME(MASTER)%は。それで、私に何か用かい？」
-					PRINTFORML 视线朝着哪里看去了，好像在预料之中
-					;TranslatedMark 視線がどこに向かったか、お見通しのようだ
-					PRINTFORMW 尴尬地微笑后%ANAME(MASTER)%再次向%ANAME(TARGET)%大人打招呼
-					;TranslatedMark 誤魔化しの照れ笑いの後%ANAME(MASTER)%は、改めて%ANAME(TARGET)%様に挨拶に伺いました、と伝えた
-					PRINTFORML 「嗯，感觉不错呢%ANAME(MASTER)%桑。果然还是要好好问候呢」
-					;TranslatedMark 「ふむ、感心だぞ%ANAME(MASTER)%。やはり挨拶はちゃんとしないとな」
-					PRINTFORMW 这样说着，%ANAME(TARGET)%脸上浮现出笑容，温柔地抚摸着%ANAME(MASTER)%的头
-					;TranslatedMark そう言うと%ANAME(TARGET)%は笑顔を浮かべ、%ANAME(MASTER)%の頭をよしよしと撫でた
-					PRINTFORML 突然的，但却无法违抗温柔的手法，%ANAME(MASTER)%就这样任其所为
-					;TranslatedMark 突然の、しかし優しい手つきに逆らえず%ANAME(MASTER)%はなすがままになってしまった
-					PRINTFORML 「啊…对，对不起。不知不觉就习惯了…。你有没有心情不好？总觉得脸好像红了…」
-					;TranslatedMark 「あっ…す、すまない。ついいつものクセで…。気分を害したりしていないか？　何だが顔が赤いようだが…」
-					PRINTFORMW 当她用一张红潮的脸敷衍说没什么，两人之间便产生了奇妙的气氛…
-					;TranslatedMark 紅潮した顔を何でもありませんと誤魔化すと、お互いの間に妙な空気が流れた…
-					PRINTFORMW 「真是的...啊，那么重新来过。今后也请多关照了，%ANAME(MASTER)%」
-					;TranslatedMark 「こほんっ、あー、それでは改めて。これからもよろしく頼むぞ、%ANAME(MASTER)%」
+				;主人公がショタの場合の口上変化分
+				IF CFLAG:252 == 1
+					PRINTFORML %ANAME(MASTER)%依然拥有令人陶醉的美貌，让人不禁被深深吸引。
+					;TranslatedMark %ANAME(MASTER)%は相変わらずの美貌にしばし見惚れてしまう
+					PRINTFORMW 成熟优雅的姿态和那条总是会让人目不转睛的蓬松光亮的大尾巴...。
+					;TranslatedMark 大人らしい凛とした佇まいと、大きく艶々な毛並みの尻尾が何度見ても視線を釘付けにする…
+					PRINTL
+					IF CFLAG:好感度 >= 500
+						PRINTFORML 「哈哈，%ANAME(MASTER)%每次见到我都在发呆呢。那么，有什么事要找我吗？」
+						;TranslatedMark 「ふふ、私に会う度ぼーっとしているな%ANAME(MASTER)%は。それで、私に何か用かい？」
+						PRINTFORMW %ANAME(TARGET)%蹲下来一边和%ANAME(MASTER)%对视一边说。
+						;TranslatedMark %ANAME(TARGET)%はしゃがみこんで%ANAME(MASTER)%に視線を合わながら話してくれた
+						PRINTFORML 听到有人叫自己，猝不及防的%ANAME(MASTER)%急忙掩饰自己的失态，看着对方依旧不变的美丽略显愣神。
+						;TranslatedMark 声を掛けられて、ハッ、となった%ANAME(MASTER)%は、変わらぬ美しさに見惚れてしまったことを慌てて誤魔化し、
+						PRINTFORMW 我来拜见主君%ANAME(TARGET)%大人，请转达。
+						;TranslatedMark 主君である%ANAME(TARGET)%様に挨拶に伺いましたっ、と伝えた
+						PRINTL
+						PRINTFORML 「哟，特地来打招呼了啊。呵呵，%ANAME(MASTER)%，真令人感动啊。这些事情果然还是要好好做才行呢。」
+						;TranslatedMark 「ほう、わざわざ挨拶に来たのか。ふふ、感心だぞ%ANAME(MASTER)%。やはりそういうことはちゃんとしないとな」
+						PRINTFORMW 这样说着，%ANAME(TARGET)%脸上浮现出笑容，温柔地抚摸着%ANAME(MASTER)%的头
+						;TranslatedMark そう言うと%ANAME(TARGET)%は笑顔を浮かべ、%ANAME(MASTER)%の頭をよしよしと撫でた
+						PRINTFORMW 突然的，但却无法违抗温柔的手法，%ANAME(MASTER)%就这样任其所为
+						;TranslatedMark 突然の、しかし優しい手つきに逆らえず%ANAME(MASTER)%はなすがままになってしまった
+						PRINTL
+						PRINTFORML 「啊，抱歉。不自觉就变成习惯了......怎么了？你的脸好像有点红......」
+						;TranslatedMark 「あっ、すまない。ついいつものクセで…。どうかしたか？　何だが顔が赤いようだが…」
+						PRINTFORMW %ANAME(MASTER)%低下头，用红潮的脸隐藏自己的表情，急忙说「没什么」。
+						;TranslatedMark %ANAME(MASTER)%は紅潮した顔を俯いて隠し、何でもありませんっ、と慌てて取り繕った
+						PRINTFORML （......%ANAME(MASTER)%依旧那么天真可爱。我一定要努力好好守护。）
+						;TranslatedMark （……相変わらず初々しくて可愛なぁ%ANAME(MASTER)%は。これは私がしっかり頑張って守ってやらねばな）
+						PRINTFORMW 妙に温馨的表情的%ANAME(TARGET)%不再多说，告诉%ANAME(MASTER)%要继续努力。
+						;TranslatedMark 妙にほっこりした表情の%ANAME(TARGET)%はそれ以上触れず、今後とも精進するように、と%ANAME(MASTER)%に告げた
+					ELSE
+						PRINTFORML 「......？　怎么了，发呆呢。我脸上有什么东西吗？」
+						;TranslatedMark 「…？　どうした、ぼーっとして。私の顔に何かついてるか？」
+						PRINTFORMW %ANAME(TARGET)%担心地蹲下来，与%ANAME(MASTER)%四目相对。
+						;TranslatedMark %ANAME(TARGET)%は心配するようにしゃがみこんで%ANAME(MASTER)%に視線を合わせてきた
+						PRINTFORML 受到当事人搭话而猛然觉醒的%ANAME(MASTER)%，急忙掩饰自己因为对方不变的美丽而看呆的情况。
+						;TranslatedMark 当の本人に声を掛けられて、ハッ、となった%ANAME(MASTER)%は、変わらぬ美しさに見惚れてしまったことを慌てて誤魔化し、
+						PRINTFORMW 我来这拜见主君%ANAME(TARGET)%，还请转告一声。
+						;TranslatedMark 主君である%ANAME(TARGET)%様に挨拶に伺いました、と伝えた
+						PRINTL
+						PRINTFORML 「嗯，特意过来打招呼，真是令人欣慰。我也很期待哦。」
+						;TranslatedMark 「ふむ、ちゃんと挨拶に来るのは感心です。私も期待しているよ」
+						PRINTFORMW 这样说完，%ANAME(TARGET)%用仿佛是在夸奖孩子般柔和的目光抚摸了%ANAME(MASTER)%的头。
+						;TranslatedMark そう言うと%ANAME(TARGET)%は子供を褒めるような柔和な眼差しで%ANAME(MASTER)%の頭を撫でた
+						PRINTFORMW 被令所有男人着迷的美丽女性微微笑着抚摸%ANAME(MASTER)%，他的心脏扑通一跳，脸变得越来越红。
+						;TranslatedMark 男を虜にするような美女に微笑みながら撫でられた%ANAME(MASTER)%は心臓がドキッと跳ね、顔がどんどん赤くなっていく
+						PRINTL
+						PRINTFORML 「那今后请多多关照。请为我尽心尽力......？ 脸红了，没事吧？」
+						;TranslatedMark 「それでは、これからもよろしく頼む。どうか私のために尽力して、……？　顔が赤いが大丈夫か？」
+						PRINTFORMW 注意到%ANAME(TARGET)%脸红，显得有些担心，但%ANAME(MASTER)%慌忙地应付说：「我没事！」
+						;TranslatedMark 顔を赤くしているに気が付いた%ANAME(TARGET)%に心配されるも、%ANAME(MASTER)%は大丈夫ですっ、と慌てて取り繕った
+						PRINTFORMW （......依然是那么稚嫩的反应啊。这让我不得不努力啊。）
+						;TranslatedMark （……相変わらず初々しい反応だなぁ。これは私がしっかり頑張ってやらねばいかんな）
+					ENDIF
+				;通常版
 				ELSE
-					PRINTFORMW 「…嘛，虽然已经习惯了，但是对上司用那样的眼光看，真让人佩服啊。那你找我有什么事吗？」
-					;TranslatedMark 「…まぁ慣れてはいるが、目上の者にそういう視線を送るのは感心しないな。それで、私に何か用か？」
-					PRINTFORML 视线朝着哪里看去了，好像在预料之中
-					;TranslatedMark 視線がどこに向かったか、お見通しのようだ
-					PRINTFORMW 为缓解尴尬地咳嗽后%ANAME(MASTER)%说道，会为了平定这个乱世而尽力
-					;TranslatedMark 誤魔化しの咳払いの後%ANAME(MASTER)%は、この乱世を鎮めるため尽力します、と伝えた
-					PRINTFORML 「嗯，我也期待着哦」
-					;TranslatedMark 「ふむ、私も期待しているよ」
-					PRINTFORMW 「那么%ANAME(MASTER)%。再一次地，请多关照」
-					;TranslatedMark 「それでは%ANAME(MASTER)%。改めて、よろしく頼む」
+					PRINTFORML %ANAME(MASTER)%依然有着令人着迷的美貌，让人不禁看得入迷。
+					;TranslatedMark %ANAME(MASTER)%は相変わらずの美貌にしばし見惚れる
+					PRINTFORMW 虽然完全没有露出皮肤，但却被散发着魅力的肉体和艳丽毛发的尾巴吸引了视线…
+					;TranslatedMark 肌の露出がまるで無いにも拘らず色気を放つ肉体と、艶々な毛並みの尻尾が視線を釘付けにする…
+					PRINTL
+					IF CFLAG:好感度 >= 500
+						PRINTFORMW 「呵呵，还是老样子呢%ANAME(MASTER)%桑。那你找我有什么事吗？」
+						;TranslatedMark 「ふふ、相変わらずだな%ANAME(MASTER)%は。それで、私に何か用かい？」
+						PRINTFORML 视线朝着哪里看去了，好像在预料之中
+						;TranslatedMark 視線がどこに向かったか、お見通しのようだ
+						PRINTFORMW 尴尬地微笑后%ANAME(MASTER)%再次向%ANAME(TARGET)%大人打招呼
+						;TranslatedMark 誤魔化しの照れ笑いの後%ANAME(MASTER)%は、改めて%ANAME(TARGET)%様に挨拶に伺いました、と伝えた
+						PRINTL
+						PRINTFORML 「嗯，感觉不错呢%ANAME(MASTER)%桑。果然还是要好好问候呢」
+						;TranslatedMark 「ふむ、感心だぞ%ANAME(MASTER)%。やはり挨拶はちゃんとしないとな」
+						PRINTFORMW 这样说着，%ANAME(TARGET)%脸上浮现出笑容，温柔地抚摸着%ANAME(MASTER)%的头
+						;TranslatedMark そう言うと%ANAME(TARGET)%は笑顔を浮かべ、%ANAME(MASTER)%の頭をよしよしと撫でた
+						PRINTFORMW 突然的，但却无法违抗温柔的手法，%ANAME(MASTER)%就这样任其所为
+						;TranslatedMark 突然の、しかし優しい手つきに逆らえず%ANAME(MASTER)%はなすがままになってしまった
+						PRINTL
+						PRINTFORML 「啊…对，对不起。不知不觉就习惯了…。你有没有心情不好？总觉得脸好像红了…」
+						;TranslatedMark 「あっ…す、すまない。ついいつものクセで…。気分を害したりしていないか？　何だが顔が赤いようだが…」
+						PRINTFORMW 当她用一张红潮的脸敷衍说没什么，两人之间便产生了奇妙的气氛…
+						;TranslatedMark 紅潮した顔を何でもありませんと誤魔化すと、お互いの間に妙な空気が流れた…
+						PRINTFORMW 「真是的...啊，那么重新来过。今后也请多关照了，%ANAME(MASTER)%」
+						;TranslatedMark 「こほんっ、あー、それでは改めて。これからもよろしく頼むぞ、%ANAME(MASTER)%」
+					ELSE
+						PRINTFORMW 「…嘛，虽然已经习惯了，但是对上司用那样的眼光看，真让人佩服啊。那你找我有什么事吗？」
+						;TranslatedMark 「…まぁ慣れてはいるが、目上の者にそういう視線を送るのは感心しないな。それで、私に何か用か？」
+						PRINTFORML 视线朝着哪里看去了，好像在预料之中
+						;TranslatedMark 視線がどこに向かったか、お見通しのようだ
+						PRINTFORMW 为缓解尴尬地咳嗽后%ANAME(MASTER)%说道，会为了平定这个乱世而尽力
+						;TranslatedMark 誤魔化しの咳払いの後%ANAME(MASTER)%は、この乱世を鎮めるため尽力します、と伝えた
+						PRINTL
+						PRINTFORML 「嗯，我也很期待。」
+						;TranslatedMark 「ふむ、私も期待している」
+						PRINTFORMW 「那么%ANAME(MASTER)%。再一次地，请多关照」
+						;TranslatedMark 「それでは%ANAME(MASTER)%。改めて、よろしく頼む」
+					ENDIF
 				ENDIF
 			;相手が同盟国の士官の場合
 			ELSEIF CFLAG:TARGET:所属 != CFLAG:MASTER:所属
-				IF CFLAG:好感度 >= 500
-					PRINTFORMW 「呵呵，还是老样子呢%ANAME(MASTER)%桑。那你找我有什么事吗？」
-					;TranslatedMark 「ふふ、相変わらずだな%ANAME(MASTER)%は。それで、私に何か用かい？」
-					PRINTFORML 视线朝着哪里看去了，好像在预料之中
-					;TranslatedMark 視線がどこに向かったか、お見通しのようだ
-					PRINTFORMW 为缓解尴尬地害羞笑后%ANAME(MASTER)%告诉她，好不容易结成同盟，所以带着礼物来见她
-					;TranslatedMark 誤魔化しの照れ笑いの後%ANAME(MASTER)%は、せっかく同盟を組んだのだから手土産を持って会いに来た、と伝えた
-					PRINTFORML 「呵呵，你特地来见我，我很高兴」
-					;TranslatedMark 「ほほう、わざわざ顔を出してくれるとは嬉しいよ」
-					PRINTFORMW 「…而且那个包。是油炸食品吧？闻着味道就知道了。特的为我准备的吗？」
-					;TranslatedMark 「…それにその包み。油揚げだな？　匂いで分かるぞ。私のために用意してくれたのか？」
-					PRINTFORML 你说听闻她喜欢吃油炸豆腐就拿来了，%ANAME(TARGET)%似乎非常高兴
-					;TranslatedMark %ANAME(TARGET)%は油揚げが好物と聞き持参した物だが、当人は大いに喜んでくれたようだ
-					PRINTFORMW 「fufu♪%ANAME(MASTER)%很机灵呐。我很开心哦」
-					;TranslatedMark 「ふふ♪　%ANAME(MASTER)%は気が利くな。とても嬉しいよ」
-					PRINTFORMW 「我来泡茶吧，请慢慢来」
-					;TranslatedMark 「私の方もお茶を出そう。どうかゆっくりしていってくれ」
+				;主人公がショタの場合の口上変化分
+				IF CFLAG:252 == 1
+					PRINTFORML %ANAME(MASTER)%依然拥有令人陶醉的美貌，让人不禁被深深吸引。
+					;TranslatedMark %ANAME(MASTER)%は相変わらずの美貌にしばし見惚れてしまう
+					PRINTFORMW 成熟优雅的姿态和那条总是会让人目不转睛的蓬松光亮的大尾巴...。
+					;TranslatedMark 大人らしい凛とした佇まいと、大きく艶々な毛並みの尻尾が何度見ても視線を釘付けにする…
+					PRINTL
+					IF CFLAG:好感度 >= 500
+						PRINTFORML 「哈哈，%ANAME(MASTER)%每次见到我都在发呆呢。那么，有什么事要找我吗？」
+						;TranslatedMark 「ふふ、私に会う度ぼーっとしているな%ANAME(MASTER)%は。それで、私に何か用かい？」
+						PRINTFORMW %ANAME(TARGET)%蹲下来一边和%ANAME(MASTER)%对视一边说。
+						;TranslatedMark %ANAME(TARGET)%はしゃがみこんで%ANAME(MASTER)%に視線を合わながら話してくれた
+						PRINTFORML 听到有人叫自己，猝不及防的%ANAME(MASTER)%急忙掩饰自己的失态，看着对方依旧不变的美丽略显愣神。
+						;TranslatedMark 声を掛けられて、ハッ、となった%ANAME(MASTER)%は、変わらぬ美しさに見惚れてしまったことを慌てて誤魔化し、
+						PRINTFORMW 向%ANAME(TARGET)%和同盟的各位带去问候，同时送上随身准备好的礼物。
+						;TranslatedMark %ANAME(TARGET)%へ、同盟先の方々へ挨拶に伺いましたっ、と伝え、持参した手土産を渡した
+						PRINTL
+						PRINTFORML 「哟，从%ANAME(MASTER)%那里特意过来露个面，我真高兴啊。」
+						;TranslatedMark 「ほほう、わざわざ%ANAME(MASTER)%から顔を出してくれるとは嬉しいよ」
+						PRINTFORMW 「...それに这个包裹。是油豆腐吧？我能闻出来。是特意为我准备的吗？」
+						;TranslatedMark 「…それにこの包み。油揚げだな？　匂いで分かるぞ。私のために見繕ってくれたのか？」
+						PRINTFORMW 你说听闻她喜欢吃油炸豆腐就拿来了，%ANAME(TARGET)%似乎非常高兴
+						;TranslatedMark %ANAME(TARGET)%は油揚げが好物と聞き持参した物だが、当人は大いに喜んでくれたようだ
+						PRINTL
+						PRINTFORML 「fufu♪%ANAME(MASTER)%很机灵呐。我很开心哦」
+						;TranslatedMark 「ふふ♪　%ANAME(MASTER)%は気が利くな。とても嬉しいよ」
+						PRINTFORMW 这样说着，%ANAME(TARGET)%脸上浮现出笑容，温柔地抚摸着%ANAME(MASTER)%的头
+						;TranslatedMark そう言うと%ANAME(TARGET)%は笑顔を浮かべ、%ANAME(MASTER)%の頭をよしよしと撫でた
+						PRINTFORML 就在那温柔的抚摸下毫无抵抗，%ANAME(MASTER)%的脸颊微微发红。
+						;TranslatedMark 優しい手つきのなでなでに逆らえず、%ANAME(MASTER)%は少し頬を赤らめた
+						PRINTFORML （......%ANAME(MASTER)%还是一如既往的单纯又可爱呢。我得好好看着才行，以免有坏心眼的人靠近。）
+						;TranslatedMark （……相変わらず初々しくて可愛いなぁ%ANAME(MASTER)%は。これは悪い虫がつかないようにしっかり見ていなくてはな）
+						PRINTFORMW 「我来泡茶吧，请慢慢来」
+						;TranslatedMark 「私の方もお茶を出そう。どうかゆっくりしていってくれ」
+					ELSE
+						PRINTFORML 「...？　怎么了？　我的脸上有什么东西吗？」
+						;TranslatedMark 「…？　どうしました？　私の顔に何かついていますか？」
+						PRINTFORMW %ANAME(TARGET)%担心地蹲下来，与%ANAME(MASTER)%四目相对。
+						;TranslatedMark %ANAME(TARGET)%は心配するようにしゃがみこんで%ANAME(MASTER)%に視線を合わせてきた
+						PRINTFORML 受到当事人搭话而猛然觉醒的%ANAME(MASTER)%，急忙掩饰自己因为对方不变的美丽而看呆的情况。
+						;TranslatedMark 当の本人に声を掛けられて、ハッ、となった%ANAME(MASTER)%は、変わらぬ美しさに見惚れてしまったことを慌てて誤魔化し、
+						PRINTFORMW 我已经去拜访了同盟的各位，亲自传达了一声。
+						;TranslatedMark 同盟先の方々へ挨拶に伺いましたっ、と伝えた
+						PRINTL
+						PRINTFORML 「哦，非常感谢你这么礼貌。在你这个年纪就能好好地来打招呼，真了不起。」
+						;TranslatedMark 「おお、それはご丁寧にどうも。その年でちゃんと挨拶に来るのは感心です」
+						PRINTFORMW 这样说完，%ANAME(TARGET)%用仿佛是在夸奖孩子般柔和的目光抚摸了%ANAME(MASTER)%的头。
+						;TranslatedMark そう言うと%ANAME(TARGET)%は子供を褒めるような柔和な眼差しで%ANAME(MASTER)%の頭を撫でた
+						PRINTFORMW 被令所有男人着迷的美丽女性微微笑着抚摸%ANAME(MASTER)%，他的心脏扑通一跳，脸变得越来越红。
+						;TranslatedMark 男を虜にするような美女に微笑みながら撫でられた%ANAME(MASTER)%は心臓がドキッと跳ね、顔がどんどん赤くなっていく
+						PRINTL
+						PRINTFORML （......真是一如既往的天真反应啊。如果可以的话，真希望能和这样的孩子不发生争执......）
+						;TranslatedMark （……相変わらず初々しい反応だなぁ。できればこういう子とは争わずに済む道を行きたいものだ…）
+						PRINTFORMW 「那么，也没有什么特别的事情，请慢慢参观。」
+						;TranslatedMark 「それでは、何があるわけでもありませんが、どうぞゆっくりしていってください」
+					ENDIF
+				;通常版
 				ELSE
-					PRINTFORMW 「…嘛，我已经习惯了这种视线。那么，有什么事要我做吗？」
-					;TranslatedMark 「…まぁ、そういう目線には慣れております。それで、私に何か御用ですか？」
-					PRINTFORML 视线朝着哪里看去了，好像在预料之中
-					;TranslatedMark 視線がどこに向かったか、お見通しのようだ
-					PRINTFORMW 假装咳嗽后%ANAME(MASTER)%告诉她，好不容易结成同盟，所以特意来问候
-					;TranslatedMark 誤魔化しの咳払いの後%ANAME(MASTER)%は、せっかく同盟を組んだのだから挨拶に来た、と伝えた
-					PRINTFORML 「啊，特意来打招呼。那太客气了」
-					;TranslatedMark 「ほう、わざわざ挨拶に。それはご丁寧にどうも」
-					PRINTFORMW 「请不要客气，慢慢来就好」
-					;TranslatedMark 「何があるわけでもありませんが、どうぞゆっくりしていってください」
+					PRINTFORML %ANAME(MASTER)%依然有着令人着迷的美貌，让人不禁看得入迷。
+					;TranslatedMark %ANAME(MASTER)%は相変わらずの美貌にしばし見惚れる
+					PRINTFORMW 虽然完全没有露出皮肤，但却被散发着魅力的肉体和艳丽毛发的尾巴吸引了视线…
+					;TranslatedMark 肌の露出がまるで無いにも拘らず色気を放つ肉体と、艶々な毛並みの尻尾が視線を釘付けにする…
+					PRINTL
+					IF CFLAG:好感度 >= 500
+						PRINTFORMW 「呵呵，还是老样子呢%ANAME(MASTER)%桑。那你找我有什么事吗？」
+						;TranslatedMark 「ふふ、相変わらずだな%ANAME(MASTER)%は。それで、私に何か用かい？」
+						PRINTFORML 视线朝着哪里看去了，好像在预料之中
+						;TranslatedMark 視線がどこに向かったか、お見通しのようだ
+						PRINTFORMW 为缓解尴尬地害羞笑后%ANAME(MASTER)%告诉她，好不容易结成同盟，所以带着礼物来见她
+						;TranslatedMark 誤魔化しの照れ笑いの後%ANAME(MASTER)%は、せっかく同盟を組んだのだから手土産を持って会いに来た、と伝えた
+						PRINTL
+						PRINTFORML 「呵呵，你特地来见我，我很高兴」
+						;TranslatedMark 「ほほう、わざわざ顔を出してくれるとは嬉しいよ」
+						PRINTFORMW 「…而且那个包。是油炸食品吧？闻着味道就知道了。特的为我准备的吗？」
+						;TranslatedMark 「…それにその包み。油揚げだな？　匂いで分かるぞ。私のために用意してくれたのか？」
+						PRINTFORMW 你说听闻她喜欢吃油炸豆腐就拿来了，%ANAME(TARGET)%似乎非常高兴
+						;TranslatedMark %ANAME(TARGET)%は油揚げが好物と聞き持参した物だが、当人は大いに喜んでくれたようだ
+						PRINTL
+						PRINTFORML 「fufu♪%ANAME(MASTER)%很机灵呐。我很开心哦」
+						;TranslatedMark 「ふふ♪　%ANAME(MASTER)%は気が利くな。とても嬉しいよ」
+						PRINTFORMW 「我来泡茶吧，请慢慢来」
+						;TranslatedMark 「私の方もお茶を出そう。どうかゆっくりしていってくれ」
+					ELSE
+						PRINTFORMW 「…嘛，我已经习惯了这种视线。那么，有什么事要我做吗？」
+						;TranslatedMark 「…まぁ、そういう目線には慣れております。それで、私に何か御用ですか？」
+						PRINTFORML 视线朝着哪里看去了，好像在预料之中
+						;TranslatedMark 視線がどこに向かったか、お見通しのようだ
+						PRINTFORMW 假装咳嗽后%ANAME(MASTER)%告诉她，好不容易结成同盟，所以特意来问候
+						;TranslatedMark 誤魔化しの咳払いの後%ANAME(MASTER)%は、せっかく同盟を組んだのだから挨拶に来た、と伝えた
+						PRINTL
+						PRINTFORML 「啊，特意来打招呼。那太客气了」
+						;TranslatedMark 「ほう、わざわざ挨拶に。それはご丁寧にどうも」
+						PRINTFORMW 「请不要客气，慢慢来就好」
+						;TranslatedMark 「何があるわけでもありませんが、どうぞゆっくりしていってください」
+					ENDIF
 				ENDIF
 			;それ以外
 			ELSE
-				IF CFLAG:好感度 >= 500
-					PRINTFORMW 「呵呵，还是老样子呢%ANAME(MASTER)%桑。那你找我有什么事吗？」
-					;TranslatedMark 「ふふ、相変わらずだな%ANAME(MASTER)%は。それで、私に何か用かい？」
-					PRINTFORML 视线朝着哪里看去了，好像在预料之中
-					;TranslatedMark 視線がどこに向かったか、お見通しのようだ
-					PRINTFORMW 缓解尴尬地害羞笑后%ANAME(MASTER)%告诉她，为了平定这个乱世，希望能借助你的力量
-					;TranslatedMark 誤魔化しの照れ笑いの後%ANAME(MASTER)%は、この乱世を鎮めるために力を貸して欲しい、と伝えた
-					PRINTFORML 「……嗯，是这样啊」
-					;TranslatedMark 「……ふむ、そういうことか」
-					PRINTFORMW 「明白了。鄙人%NAME_FORMAL(TARGET)%，为了幻想乡的和平也要尽力而为了」
-					;TranslatedMark 「分かった。不肖この%NAME_FORMAL(TARGET)%、幻想郷の平和のために手を貸そう」
-					PRINTFORML 这真是好极了！有了九尾的帮助，真是如虎添翼
-					;TranslatedMark これは心強い！　名高い九尾の狐の力を借りれるとなると鬼に金棒だ
-					PRINTFORMW 「啊，那个…严格说来，我并不是九尾，而是以此为凭依的式神…啊，算了吧」
-					;TranslatedMark 「あ、その…私は厳密に言えば九尾の狐ではなくて、それを依代にしている式神なのだが…、あー、まぁいいか」
-					PRINTFORMW 「那么，接下来就拜托你了，%ANAME(MASTER)%」
-					;TranslatedMark 「それでは、これからよろしく頼むぞ、%ANAME(MASTER)%」
+				;主人公がショタの場合の口上変化分
+				IF CFLAG:252 == 1
+					PRINTFORML %ANAME(MASTER)%依然拥有令人陶醉的美貌，让人不禁被深深吸引。
+					;TranslatedMark %ANAME(MASTER)%は相変わらずの美貌にしばし見惚れてしまう
+					PRINTFORMW 成熟优雅的姿态和那条总是会让人目不转睛的蓬松光亮的大尾巴...。
+					;TranslatedMark 大人らしい凛とした佇まいと、大きく艶々な毛並みの尻尾が何度見ても視線を釘付けにする…
+					PRINTL
+					IF CFLAG:好感度 >= 500
+						PRINTFORML 「哈哈，%ANAME(MASTER)%每次见到我都在发呆呢。那么，有什么事要找我吗？」
+						;TranslatedMark 「ふふ、私に会う度ぼーっとしているな%ANAME(MASTER)%は。それで、私に何か用かい？」
+						PRINTFORMW %ANAME(TARGET)%蹲下来一边和%ANAME(MASTER)%对视一边说。
+						;TranslatedMark %ANAME(TARGET)%はしゃがみこんで%ANAME(MASTER)%に視線を合わながら話してくれた
+						PRINTFORML 受到当事人搭话而猛然觉醒的%ANAME(MASTER)%，急忙掩饰自己因为对方不变的美丽而看呆的情况。
+						;TranslatedMark 当の本人に声を掛けられて、ハッ、となった%ANAME(MASTER)%は、変わらぬ美しさに見惚れてしまったことを慌てて誤魔化し、
+						PRINTFORMW 向%ANAME(TARGET)%转达说，希望能借用他的力量来平息这个乱世。
+						;TranslatedMark %ANAME(TARGET)%へ、この乱世を鎮めるために力を貸して欲しいんですっ、と伝えた
+						PRINTL
+						PRINTFORML 「……嗯，是这样啊」
+						;TranslatedMark 「……ふむ、そういうことか」
+						PRINTFORMW 「明白了。不才%NAME_FORMAL(TARGET)%，将助力于幻想乡的平定。」
+						;TranslatedMark 「分かった。不肖この%NAME_FORMAL(TARGET)%、幻想郷の平定のために手を貸そう」
+						PRINTFORML  就在欢呼「やった！」的那一刻，%ANAME(TARGET)%微笑着顺手抚摸了%ANAME(MASTER)%的头。
+						;TranslatedMark やった！　と喜んだ矢先、%ANAME(TARGET)%は笑顔を浮かべて%ANAME(MASTER)%の頭をよしよしと撫でた
+						PRINTFORMW 突然的，但却无法违抗温柔的手法，%ANAME(MASTER)%就这样任其所为
+						;TranslatedMark 突然の、しかし優しい手つきに逆らえず%ANAME(MASTER)%はなすがままになってしまった
+						PRINTL
+						PRINTFORML 「啊，抱歉。不自觉就变成习惯了......怎么了？你的脸好像有点红......」
+						;TranslatedMark 「あっ、すまない。ついいつものクセで…。どうかしたか？　何だが顔が赤いようだが…」
+						PRINTFORMW %ANAME(MASTER)%低下头，用红潮的脸隐藏自己的表情，急忙说「没什么」。
+						;TranslatedMark %ANAME(MASTER)%は紅潮した顔を俯いて隠し、何でもありませんっ、と慌てて取り繕った
+						PRINTFORML （......%ANAME(MASTER)%依旧那么天真可爱。我一定要努力好好守护。）
+						;TranslatedMark （……相変わらず初々しくて可愛なぁ%ANAME(MASTER)%は。これは私がしっかり頑張って守ってやらねばな）
+						PRINTFORMW 妙に温暖表情的%ANAME(TARGET)%就没有再继续谈下去，只是对%ANAME(MASTER)%说，今后也请多多关照。
+						;TranslatedMark 妙にほっこりした表情の%ANAME(TARGET)%はそれ以上触れず、今後ともよろしく、と%ANAME(MASTER)%に告げた
+					ELSE
+						PRINTFORML 「...？　怎么了？　我的脸上有什么东西吗？」
+						;TranslatedMark 「…？　どうしました？　私の顔に何かついていますか？」
+						PRINTFORMW %ANAME(TARGET)%担心地蹲下来，与%ANAME(MASTER)%四目相对。
+						;TranslatedMark %ANAME(TARGET)%は心配するようにしゃがみこんで%ANAME(MASTER)%に視線を合わせてきた
+						PRINTFORML 听到有人叫自己，猝不及防的%ANAME(MASTER)%急忙掩饰自己的失态，看着对方依旧不变的美丽略显愣神。
+						;TranslatedMark 声を掛けられて、ハッ、となった%ANAME(MASTER)%は、変わらぬ美しさに見惚れてしまったことを慌てて誤魔化し、
+						PRINTFORMW 为平定这乱世，希望您能够提供支援っ，我传达了这样的请求。
+						;TranslatedMark この乱世を鎮めるために力を貸して欲しいのですっ、と伝えた
+						PRINTL
+						PRINTFORML 「......嗯，是这么回事吗。如果是那样的情况，那就让我来帮忙吧。」
+						;TranslatedMark 「……ふむ、そういうことですか。そういうことならお手伝いしましょう」
+						PRINTFORMW 「为了幻想乡我虽然力微但也要尽力而为之」
+						;TranslatedMark 「私も幻想郷のために尽力する身、微力ながら出来ることもあるでしょう」
+						PRINTFORMW 「太好了！」%ANAME(MASTER)%对于大妖怪的协助感到欢喜，而%ANAME(TARGET)%则以欣慰的神情注视着。
+						;TranslatedMark やった！　と大妖怪の協力に喜ぶ%ANAME(MASTER)%を、%ANAME(TARGET)%は微笑ましいという様子で見つめている
+						PRINTL
+						PRINTFORML （......还是一如既往地这么天真呢。像这样的孩子，我必须好好看着，别让她误入歧途才行。）
+						;TranslatedMark （……相変わらず初々しい反応だなぁ。こういう子が道を踏み外さないように、私がちゃんと見てやらねばな）
+						PRINTFORMW 「那么，我这%NAME_FORMAL(TARGET)%，就为了幻想乡出一份力吧。」
+						;TranslatedMark 「それでは、不肖この%NAME_FORMAL(TARGET)%、幻想郷のためにお手伝い致しましょう」
+					ENDIF
+				;通常版
 				ELSE
-					PRINTFORMW 「…嘛，我已经习惯了这种视线。那么，有什么事要我做吗？」
-					;TranslatedMark 「…まぁ、そういう目線には慣れております。それで、私に何か御用ですか？」
-					PRINTFORML 视线朝着哪里看去了，好像在预料之中
-					;TranslatedMark 視線がどこに向かったか、お見通しのようだ
-					PRINTFORMW 假装咳嗽后%ANAME(MASTER)%告诉她，为了平定这个乱世，希望你能助我一臂之力
-					;TranslatedMark 誤魔化しの咳払いの後%ANAME(MASTER)%は、この乱世を鎮めるために力を貸して欲しい、と伝えた
-					PRINTFORML 「嗯……是这样吗」
-					;TranslatedMark 「……ふむ、そういうことですか」
-					PRINTFORMW 「为了幻想乡我虽然力微但也要尽力而为之」
-					;TranslatedMark 「私も幻想郷のために尽力する身、微力ながら出来ることもあるでしょう」
-					PRINTFORML 这真是好极了！有了九尾的帮助，真是如虎添翼
-					;TranslatedMark これは心強い！　名高い九尾の狐の力を借りれるとなると鬼に金棒だ
-					PRINTFORMW 「啊，不，不是…严格说来，我并不是九尾，而是以此为凭依的式神…算了」
-					;TranslatedMark 「あ、いや…私は厳密に言えば九尾の狐ではなくて、それを依代にしている式神なのだが…、まぁいいか」
-					PRINTFORMW 「那么，鄙人%NAME_FORMAL(TARGET)%，来相助与你」
-					;TranslatedMark 「それでは、不肖この%NAME_FORMAL(TARGET)%、お手伝い致しましょう」
+					PRINTFORML %ANAME(MASTER)%依然有着令人着迷的美貌，让人不禁看得入迷。
+					;TranslatedMark %ANAME(MASTER)%は相変わらずの美貌にしばし見惚れる
+					PRINTFORMW 虽然完全没有露出皮肤，但却被散发着魅力的肉体和艳丽毛发的尾巴吸引了视线…
+					;TranslatedMark 肌の露出がまるで無いにも拘らず色気を放つ肉体と、艶々な毛並みの尻尾が視線を釘付けにする…
+					PRINTL
+					IF CFLAG:好感度 >= 500
+						PRINTFORMW 「呵呵，还是老样子呢%ANAME(MASTER)%桑。那你找我有什么事吗？」
+						;TranslatedMark 「ふふ、相変わらずだな%ANAME(MASTER)%は。それで、私に何か用かい？」
+						PRINTFORML 视线朝着哪里看去了，好像在预料之中
+						;TranslatedMark 視線がどこに向かったか、お見通しのようだ
+						PRINTFORMW 缓解尴尬地害羞笑后%ANAME(MASTER)%告诉她，为了平定这个乱世，希望能借助你的力量
+						;TranslatedMark 誤魔化しの照れ笑いの後%ANAME(MASTER)%は、この乱世を鎮めるために力を貸して欲しい、と伝えた
+						PRINTL
+						PRINTFORML 「……嗯，是这样啊」
+						;TranslatedMark 「……ふむ、そういうことか」
+						PRINTFORMW 「明白了。不才%NAME_FORMAL(TARGET)%，将助力于幻想乡的平定。」
+						;TranslatedMark 「分かった。不肖この%NAME_FORMAL(TARGET)%、幻想郷の平定のために手を貸そう」
+						PRINTFORMW 这真是好极了！有了九尾的帮助，真是如虎添翼
+						;TranslatedMark これは心強い！　名高い九尾の狐の力を借りれるとなると鬼に金棒だ
+						PRINTL
+						PRINTFORML 「啊，那个…严格说来，我并不是九尾，而是以此为凭依的式神…啊，算了吧」
+						;TranslatedMark 「あ、その…私は厳密に言えば九尾の狐ではなくて、それを依代にしている式神なのだが…、あー、まぁいいか」
+						PRINTFORMW 「那么，接下来就拜托你了，%ANAME(MASTER)%」
+						;TranslatedMark 「それでは、これからよろしく頼むぞ、%ANAME(MASTER)%」
+					ELSE
+						PRINTFORMW 「…嘛，我已经习惯了这种视线。那么，有什么事要我做吗？」
+						;TranslatedMark 「…まぁ、そういう目線には慣れております。それで、私に何か御用ですか？」
+						PRINTFORML 视线朝着哪里看去了，好像在预料之中
+						;TranslatedMark 視線がどこに向かったか、お見通しのようだ
+						PRINTFORMW 假装咳嗽后%ANAME(MASTER)%告诉她，为了平定这个乱世，希望你能助我一臂之力
+						;TranslatedMark 誤魔化しの咳払いの後%ANAME(MASTER)%は、この乱世を鎮めるために力を貸して欲しい、と伝えた
+						PRINTL
+						PRINTFORML 「嗯……是这样吗」
+						;TranslatedMark 「……ふむ、そういうことですか」
+						PRINTFORMW 「为了幻想乡我虽然力微但也要尽力而为之」
+						;TranslatedMark 「私も幻想郷のために尽力する身、微力ながら出来ることもあるでしょう」
+						PRINTFORMW 这真是好极了！有了九尾的帮助，真是如虎添翼
+						;TranslatedMark これは心強い！　名高い九尾の狐の力を借りれるとなると鬼に金棒だ
+						PRINTL
+						PRINTFORML 「啊，不，不是…严格说来，我并不是九尾，而是以此为凭依的式神…算了」
+						;TranslatedMark 「あ、いや…私は厳密に言えば九尾の狐ではなくて、それを依代にしている式神なのだが…、まぁいいか」
+						PRINTFORMW 「那么，鄙人%NAME_FORMAL(TARGET)%，来相助与你」
+						;TranslatedMark 「それでは、不肖この%NAME_FORMAL(TARGET)%、お手伝い致しましょう」
+					ENDIF
 				ENDIF
 			ENDIF
 		ENDIF
@@ -350,7 +824,8 @@ IF CFLAG:200 == 0
 ;正妻か妾
 ELSEIF CFLAG:200 < 7 && (TALENT:正妻 || TALENT:妾)
 	CFLAG:200 = 7;婚姻した次の回フラグ
-	PRINTFORML
+	PRINTL
+	;正妻の場合
 	IF TALENT:正妻
 		PRINTFORMW 「唔……早上好，%ANAME(MASTER)%♥睡得好吗？」
 		;TranslatedMark 「ちゅ……おはよう、%ANAME(MASTER)%♥　良く眠れたか？」
@@ -360,29 +835,34 @@ ELSEIF CFLAG:200 < 7 && (TALENT:正妻 || TALENT:妾)
 		;TranslatedMark 部屋に差し入る朝日が金の髪を輝かせ、眩いばかりの美しさとなって%ANAME(MASTER)%の目を奪う
 		PRINTFORMW 「fufu，迷上我了吗？那就再靠近一点吧♥」
 		;TranslatedMark 「ふふ、私に見惚れてくれるのか？　ならもっと、近くへおいで♥」
+		PRINTL
 		PRINTFORML %ANAME(TARGET)%把%ANAME(MASTER)%抱过来，接近到可以相触鼻子的距离
 		;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%を抱き寄せ、鼻が触れ合いそうな距離まで近づけた
 		PRINTFORML 「这样的话，我亲爱的脸也能看得清清楚楚呢♥」
 		;TranslatedMark 「これなら、私の愛しい旦那様の顔もよく見えるな♥」
 		PRINTFORMW 两个人拥抱在一起亲热了一阵……
 		;TranslatedMark 二人はしばし抱き合いながらイチャイチャした……
+		PRINTL
 		PRINTFORML 「啊啊，好幸福啊♥」
 		;TranslatedMark 「ああ、幸せだよ%ANAME(MASTER)%♥」
 		PRINTFORMW 「为了守护这份幸福，我什么都会做…」
 		;TranslatedMark 「この幸せを守るためなら、私はなんだってするからな…」
-	ELSEIF TALENT:妾
+	;妾の場合
+	ELSE
 		PRINTFORML 「…%ANAME(MASTER)%……我的爱人…♥」
 		;TranslatedMark 「…%ANAME(MASTER)%……私の愛しい人…♥」
 		PRINTFORML 早上，被舒畅的触感和香味吵醒的时候，发现正枕在%ANAME(TARGET)%的膝盖上
 		;TranslatedMark 朝、やたら心地良い感触と香りに目が覚めると、%ANAME(TARGET)%が膝枕してくれていた
 		PRINTFORMW 更甚的是被子被剥掉了，取而代之的是九条尾巴代替被子包裹着%ANAME(MASTER)%的身体
 		;TranslatedMark さらには布団が剥ぎ取られ、代わりに九本の尻尾が布団代わりに%ANAME(MASTER)%の身体を包んでいた
+		PRINTL
 		PRINTFORML 「呵呵…早上好，%ANAME(MASTER)%…♥」
 		;TranslatedMark 「ふふ…おはよう%ANAME(MASTER)%…♥」
 		PRINTFORML 虽然很想回复，但是九尾被褥的极舒适感让人如梦一般，意识再次被梦乡所迷醉…
 		;TranslatedMark 返事を返したいところだが、九尾布団の極上の気持ち良さに夢心地となり、再び意識が夢にいざなわれる…
 		PRINTFORMW 「我的尾巴被子很舒服吧？和那些被子氪不一样呢…♥」
 		;TranslatedMark 「私の尻尾布団、気持ち良いでしょう？　そこらの布団とはモノが違うぞ…♥」
+		PRINTL
 		PRINTFORML 轻声细语般的声音和轻飘飘的柔软尾巴包围着%ANAME(MASTER)%的意识出发去了梦的世界…
 		;TranslatedMark 囁くような声とふわふわモフモフで暖かい尻尾に包まれ、%ANAME(MASTER)%の意識は夢の世界に旅立った…
 		PRINTFORMW 「啊，流口水了…。fufu…真的那么舒服吗…感觉很开心呢…♥」
@@ -393,93 +873,144 @@ ELSEIF CFLAG:200 < 7 && (TALENT:正妻 || TALENT:妾)
 		;TranslatedMark …結局%ANAME(MASTER)%は、昼過ぎまで%ANAME(TARGET)%にたっぷり甘やかされてから今日の活動を開始した
 		TFLAG:55 += 2;時間経過
 	ENDIF
-	PRINTFORML
+	PRINTL
 
 ;親愛で主人公が紫ではない
 ELSEIF (CFLAG:200 < 6 && TALENT:親愛) && !(MASTER == NAME_TO_CHARA("紫"))
 	CFLAG:200 = 6;親愛か隷属になった次の回フラグ
-	PRINTFORML
+	PRINTL
 	PRINTFORML 「……我从心底里感谢紫大人」
 	;TranslatedMark 「……私は紫様に、心から感謝しているよ」
 	PRINTFORMW %ANAME(TARGET)%用爱恋的眼睛看着%ANAME(MASTER)%说道
 	;TranslatedMark %ANAME(TARGET)%は愛おしい目で%ANAME(MASTER)%を眺めながら語る
 	PRINTFORML 「我是服务于主人的式神。本来，除了命令以外的事情也应该不做的」
 	;TranslatedMark 「私は主のプログラム通りに動く式だ。本来、命令以外のことなどしない様にも出来たはずなんだ」
-	PRINTFORML 「尽管如此，紫大人还是给了我自由的意志。能爱着谁，给予了我回应的【心】」
+	PRINTFORMW 「尽管如此，紫大人还是给了我自由的意志。能爱着谁，给予了我回应的【心】」
 	;TranslatedMark 「それでも紫様は、私に自由な意思をくれた。誰かを愛し、それに応える心を与えてくれた」
-	PRINTFORMW 「所以能这样和%ANAME(MASTER)%在一起…。真是感激不尽」
+	PRINTL
+	PRINTFORML 「所以能这样和%ANAME(MASTER)%在一起…。真是感激不尽」
 	;TranslatedMark 「だから%ANAME(MASTER)%とこうしていられる…。本当に感謝してもしきれない」
-	PRINTFORML %ANAME(TARGET)%抱着%ANAME(MASTER)%的手臂依偎在一起。那双眼睛看上去有些湿润
-	;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の腕を抱いて寄り添っている。その目はうっすら潤んでいるように見えた
-	PRINTFORML %ANAME(MASTER)%温柔地抚摸着她的头
-	;TranslatedMark そんな彼女の頭を%ANAME(MASTER)%は優しく撫でた
+	;主人公がショタの場合の口上変化分
+	IF CFLAG:252 == 1
+		PRINTFORMW %ANAME(TARGET)%正温柔地拥抱着%ANAME(MASTER)%。他的目光似乎略带湿润。
+		;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%を優しく抱きしめている。その目はうっすら潤んでいるように見えた
+		PRINTFORML %ANAME(MASTER)%也回应着这样的爱意，将%ANAME(TARGET)%紧紧抱住，并轻拍他的背。
+		;TranslatedMark %ANAME(MASTER)%はその愛情に応えるように抱きしめ返し、%ANAME(TARGET)%の背をぽんぽんと擦る
+	;通常版
+	ELSE
+		PRINTFORMW %ANAME(TARGET)%抱着%ANAME(MASTER)%的手臂依偎在一起。那双眼睛看上去有些湿润
+		;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の腕を抱いて寄り添っている。その目はうっすら潤んでいるように見えた
+		PRINTFORML %ANAME(MASTER)%温柔地抚摸着她的头
+		;TranslatedMark そんな彼女の頭を%ANAME(MASTER)%は優しく撫でた
+	ENDIF
 	PRINTFORMW 「…谢谢你，%ANAME(MASTER)%♥」
 	;TranslatedMark 「…ありがとう、%ANAME(MASTER)%♥」
-	PRINTFORML
+	PRINTL
 
 ;既成事実Lv3(初めてセックスをした次の回)
 ELSEIF CFLAG:200 < 5 && TALENT:合意
 	CFLAG:200 = 5
-	PRINTFORML
-	IF TALENT:恋慕
-		PRINTFORML 「啊。欢迎，%ANAME(MASTER)%」
-		;TranslatedMark 「ああ。いらっしゃい、%ANAME(MASTER)%」
-		PRINTFORMW 去拜访%ANAME(TARGET)%时，她拿起%ANAME(MASTER)%的手腕紧紧地抱住了
-		;TranslatedMark %ANAME(TARGET)%を訪ねると、彼女は%ANAME(MASTER)%の腕を取って抱きついてきた
-		PRINTFORML 「fufu，这样不是挺好的吗？我们是做了更大胆的事了吧，不是么♥」
-		;TranslatedMark 「ふふ、いいじゃないか、これぐらい。もっと大胆なことをした仲だろう？　私たちは♥」
-		PRINTFORMW 在%ANAME(MASTER)%的耳边轻声细语着的她的脸上浮现出喜悦的色彩
-		;TranslatedMark %ANAME(MASTER)%の耳元で色っぽく囁く彼女の顔には愉悦の色が浮かんでいた
+	PRINTL
+	;主人公がショタの場合の口上変化分
+	IF CFLAG:252 == 1
+		IF TALENT:恋慕
+			PRINTFORML 「啊。欢迎，%ANAME(MASTER)%」
+			;TranslatedMark 「ああ。いらっしゃい、%ANAME(MASTER)%」
+			PRINTFORMW %ANAME(TARGET)%走上前来，正面拥抱%ANAME(MASTER)%，用胸口包住他的脸。
+			;TranslatedMark %ANAME(TARGET)%を訪ねると、彼女は%ANAME(MASTER)%の顔を胸で包むように正面から抱きしめてきた
+			PRINTFORML 「嗯？　怎么说是大胆？　呵呵，这样不是挺好的吗？我们可是更大胆的做过那些事的伙伴，不是吗？」
+			;TranslatedMark 「んー？　何だか大胆って？　ふふ、いいじゃないかこれぐらい。もっと大胆なことをした仲だろう？　私たちは」
+			PRINTFORMW （啊，真是够了。不管谁说什么，我都要让%ANAME(MASTER)% 成为一个顶天立地的人！）
+			;TranslatedMark （あー、もうヤケだ。誰に何を言われようと、私が%ANAME(MASTER)%を一人前にしてやろう！）
+		ELSE
+			PRINTFORML %ANAME(TARGET)%已经在约定地点等待。他的脸若隐若现有点泛红......
+			;TranslatedMark 待ち合わせ場所に既に%ANAME(TARGET)%が待っていた。その顔は心なしか赤い…
+			PRINTFORMW 「早上好%ANAME(MASTER)%。......说到之前的事，我可是很少轻易把身体给出去的啊。」
+			;TranslatedMark 「おはよう%ANAME(MASTER)%。……この前のことだが、私が身体を許すなんて滅多にしない事なんだぞ？」
+			PRINTFORMW 「不是是谁都可以的。所以%ANAME(MASTER)%，作为男人，你要负起责任啊。」
+			;TranslatedMark 「誰でもいいわけじゃないんだ。だから%ANAME(MASTER)%も男としての責任、取ってもらうぞ？」
+		ENDIF
+	;通常版
 	ELSE
-		PRINTFORML %ANAME(TARGET)%已经在约定的地方等待着。可能是心理作用吧，感觉脸都红了…
-		;TranslatedMark 待ち合わせ場所に既に%ANAME(TARGET)%が待っていた。心なしか顔が赤いような…
-		PRINTFORMW 「我以身相许，这种事是很难得的哦？」
-		;TranslatedMark 「私が身体を許すなんて、滅多にない事なんだぞ？」
-		PRINTFORMW 「所以好好负起责任吧」
-		;TranslatedMark 「だからちゃんと責任、取っておくれよ」
+		IF TALENT:恋慕
+			PRINTFORML 「啊。欢迎，%ANAME(MASTER)%」
+			;TranslatedMark 「ああ。いらっしゃい、%ANAME(MASTER)%」
+			PRINTFORMW 去拜访%ANAME(TARGET)%时，她拿起%ANAME(MASTER)%的手腕紧紧地抱住了
+			;TranslatedMark %ANAME(TARGET)%を訪ねると、彼女は%ANAME(MASTER)%の腕を取って抱きついてきた
+			PRINTFORML 「fufu，这样不是挺好的吗？我们是做了更大胆的事了吧，不是么♥」
+			;TranslatedMark 「ふふ、いいじゃないか、これぐらい。もっと大胆なことをした仲だろう？　私たちは♥」
+			PRINTFORMW 在%ANAME(MASTER)%的耳边轻声细语着的她的脸上浮现出喜悦的色彩
+			;TranslatedMark %ANAME(MASTER)%の耳元で色っぽく囁く彼女の顔には愉悦の色が浮かんでいた
+		ELSE
+			PRINTFORML %ANAME(TARGET)%已经在约定的地方等待着。可能是心理作用吧，感觉脸都红了…
+			;TranslatedMark 待ち合わせ場所に既に%ANAME(TARGET)%が待っていた。心なしか顔が赤いような…
+			PRINTFORMW 「我以身相许，这种事是很难得的哦？」
+			;TranslatedMark 「私が身体を許すなんて、滅多にない事なんだぞ？」
+			PRINTFORMW 「所以好好负起责任吧」
+			;TranslatedMark 「だからちゃんと責任、取っておくれよ」
+		ENDIF
 	ENDIF
-	PRINTFORML
+	PRINTL
 
 ;既成事実Lv2(恋人になった次の回)
 ELSEIF CFLAG:200 < 4 && TALENT:恋人
 	CFLAG:200 = 4
-	PRINTFORML
+	PRINTL
 	PRINTFORML 「啊…早上好，%ANAME(MASTER)%。真想见你啊♥」
 	;TranslatedMark 「あ…おはよう%ANAME(MASTER)%。会いたかったぞ♥」
 	PRINTFORMW %ANAME(TARGET)%发现%ANAME(MASTER)%时，笑着迎接了我
 	;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%を見つけると、笑顔で出迎えてくれた
-	PRINTFORML
+	PRINTL
 
 ;既成事実Lv1(初めてキスをした次の回)
 ELSEIF CFLAG:200 < 3 && CFLAG:250 == 1
 	CFLAG:200 = 3
-	PRINTFORML
+	PRINTL
 	PRINTFORML 「早上好%ANAME(MASTER)%。今天天气真好啊」
 	;TranslatedMark 「おはよう%ANAME(MASTER)%。今日はいい天気だな」
 	PRINTFORMW 我们前几天明明接吻过的，%ANAME(TARGET)%却和以前没什么变化的样子
 	;TranslatedMark 先日キスを交わしたはずだったが、%ANAME(TARGET)%は今までとあまり変わらない様子だ
-	PRINTFORML 「只是一个吻，不至于那么吵闹吧？」
-	;TranslatedMark 「口付けくらい、そう騒ぐほどのことではないだろう？」
-	PRINTFORMW 「……嘛，虽然并不是谁都可以的」
-	;TranslatedMark 「……まぁ、誰にでも許すわけではないけどな」
-	PRINTFORML
+	;主人公がショタの場合の口上変化分
+	IF CFLAG:252 == 1
+		PRINTFORML 「仅仅是接吻而已，用不着那么大惊小怪吧？不过，%ANAME(MASTER)%可能不太懂呢...咯吱♥」
+		;TranslatedMark 「口付けくらいでそう騒ぐことはなかろう？　まあ、%ANAME(MASTER)%にとっては分からないがな…くすっ♥」
+		PRINTFORMW %ANAME(TARGET)%正以妩媚的笑容调侃着%ANAME(MASTER)%。
+		;TranslatedMark %ANAME(TARGET)%は妖艶な笑みで%ANAME(MASTER)%をからかっている
+	;通常版
+	ELSE
+		PRINTFORML 「只是一个吻，不至于那么吵闹吧？」
+		;TranslatedMark 「口付けくらい、そう騒ぐほどのことではないだろう？」
+		PRINTFORMW 「……嘛，虽然并不是谁都可以的」
+		;TranslatedMark 「……まぁ、誰にでも許すわけではないけどな」
+	ENDIF
+	PRINTL
 
 ;既成事実Lv0で恋慕
 ELSEIF CFLAG:200 < 2 && !TALENT:恋人 && TALENT:恋慕 && !TALENT:合意 && CFLAG:250 < 1
 	CFLAG:200 = 2
-	PRINTFORML
-	PRINTFORML （…是一个比我想象中还要诚实的人啊……太棒了…）
-	;TranslatedMark （…私が思っていた以上に誠実な人なんだな……素敵だ…）
-	PRINTFORMW %ANAME(TARGET)%的稍微染上了绯红了，看向了%ANAME(MASTER)%
-	;TranslatedMark %ANAME(TARGET)%は少し頬を染めながら%ANAME(MASTER)%のことをぽーっと見ている
-	PRINTFORML
+	PRINTL
+	;主人公がショタの場合の口上変化分
+	IF CFLAG:252 == 1
+		PRINTFORML （我觉得那孩子比我想象得还要优秀。每每想起那孩子，总感到心里暖暖的...。）
+		;TranslatedMark （…私が思っていた以上に立派ないい子だったな。…あの子のことを思うと、何だか胸が熱くなる…）
+		PRINTFORMW %ANAME(TARGET)%稍微脸红了，并开始将%ANAME(MASTER)%视作异性。
+		;TranslatedMark %ANAME(TARGET)%は少し頬を染めながら%ANAME(MASTER)%のことを異性として意識している
+	;通常版
+	ELSE
+		PRINTFORML （…是一个比我想象中还要诚实的人啊……太棒了…）
+		;TranslatedMark （…私が思っていた以上に誠実な人なんだな……素敵だ…）
+		PRINTFORMW %ANAME(TARGET)%的稍微染上了绯红了，看向了%ANAME(MASTER)%
+		;TranslatedMark %ANAME(TARGET)%は少し頬を染めながら%ANAME(MASTER)%のことをぽーっと見ている
+	ENDIF
+	PRINTL
 
 ;-------------------------------------------------
 ;開始時(2回目以降)
 ;-------------------------------------------------
 ;正妻
 ELSEIF TALENT:正妻
-	SELECTCASE RAND:7
+	PRINTL
+	SELECTCASE RAND:8
 		CASE 0
 			PRINTFORML 「…%ANAME(MASTER)%……我心爱的丈夫…♥」
 			;TranslatedMark 「…%ANAME(MASTER)%……私の可愛い旦那様…♥」
@@ -487,12 +1018,14 @@ ELSEIF TALENT:正妻
 			;TranslatedMark 朝、やたら心地良い感触と香りに目が覚めると、%ANAME(TARGET)%が膝枕してくれていた
 			PRINTFORMW 更甚的是被子被剥掉了，取而代之的是九条尾巴代替被子包裹着%ANAME(MASTER)%的身体
 			;TranslatedMark さらには布団が剥ぎ取られ、代わりに九本の尻尾が布団代わりに%ANAME(MASTER)%の身体を包んでいた
+			PRINTL
 			PRINTFORML 「呵呵…早上好，%ANAME(MASTER)%…♥」
 			;TranslatedMark 「ふふ…おはよう%ANAME(MASTER)%…♥」
-			PRINTFORML 虽然很想回复，但是九尾被褥的极舒适感让人如梦一般，意识再次被梦乡所迷醉…
+			PRINTFORMW 虽然很想回复，但是九尾被褥的极舒适感让人如梦一般，意识再次被梦乡所迷醉…
 			;TranslatedMark 返事を返したいところだが、九尾布団の極上の気持ち良さに夢心地となり、再び意識が夢にいざなわれる…
 			PRINTFORMW 「我的尾巴被子舒服吗？和那边被子不一样哦…♥」
 			;TranslatedMark 「私の尻尾布団、良いだろう？　そこらの布団とはモノが違うぞ…♥」
+			PRINTL
 			PRINTFORML 轻声细语般的声音和轻飘飘的柔软尾巴包围着%ANAME(MASTER)%的意识出发去了梦的世界…
 			;TranslatedMark 囁くような声とふわふわモフモフで暖かい尻尾に包まれ、%ANAME(MASTER)%の意識は夢の世界に旅立った…
 			PRINTFORMW 「啊，都流口水了…。咦…真的是那么舒服啊，好开心啊…♥」
@@ -518,8 +1051,10 @@ ELSEIF TALENT:正妻
 			;TranslatedMark 彼女の後ろからこっそり近づいて驚かそうとしたが近づいた途端、九本の尻尾に体を絡め取られてしまった
 			PRINTFORML 「fufufu，我怎么可能不注意到心爱的夫君的行迹呢？%ANAME(MASTER)%♥」
 			;TranslatedMark 「ふっふっふっ、私が愛しい旦那様の気配に気付かないわけがないだろう？　%ANAME(MASTER)%♥」
-			PRINTFORMW %ANAME(MASTER)%被软绵绵的尾巴抚摸得神情恍惚
-			;TranslatedMark %ANAME(MASTER)%はふわふわモフモフの尻尾に揉みくちゃにされて恍惚としてしまった
+			PRINTFORML 「作为轻视我爱的惩罚，这段时间我要在尾巴里面好好教教你我有多爱你......嘻嘻♥」
+			;TranslatedMark 「私の愛を甘く見た罰として、しばらく尻尾の中でいかに私が愛しているか教えてやろう…くすっ♥」
+			PRINTFORMW %ANAME(MASTER)%被轻轻地从头到尾细心抚摸那柔软蓬松的尾巴，结果沉醉其中。
+			;TranslatedMark %ANAME(MASTER)%はふわふわモフモフの尻尾に全身をくまなく丁寧に撫で上げられてメロメロにされてしまった
 		CASE 3
 			PRINTFORML 「早上好，夫君♥　…fufu，从早上开始就很期待了呢」
 			;TranslatedMark 「おはよう、旦那様♥　…ふふっ、朝からちょっと舞い上がってしまったな」
@@ -536,8 +1071,15 @@ ELSEIF TALENT:正妻
 			;TranslatedMark %ANAME(TARGET)%は最初なにやら不安そうな顔だったが、%ANAME(MASTER)%の姿を見ると表情が明るくなった
 			PRINTFORML 「怎么了？不，那个…昨天做了个有点恐怖的梦…%ANAME(MASTER)%平安无事真是太好了…」
 			;TranslatedMark 「どうしたって？　いや、その…昨日、ちょっと怖い夢を見て…%ANAME(MASTER)%が無事で良かった…」
-			PRINTFORMW %ANAME(TARGET)%抱着%ANAME(MASTER)%的手臂靠了过来，脸上染上了绯红
-			;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の腕を抱くように寄り添ってきた。仄かに頬が染まっていた
+			;主人公がショタの場合の口上変化分
+			IF CFLAG:252 == 1
+				PRINTFORMW %ANAME(TARGET)%从正面靠近，亲昵地抱住%ANAME(MASTER)%。%ANAME(MASTER)%轻拍着%ANAME(TARGET)%那看起来有些寂寞的背部。
+				;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%に正面から抱き包むように寄り添ってきた。その寂しそうな背中を、%ANAME(MASTER)%は優しくぽんぽんと叩いた
+			;通常版
+			ELSE
+				PRINTFORMW %ANAME(TARGET)%抱着%ANAME(MASTER)%的手臂靠了过来，脸上染上了绯红
+				;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の腕を抱くように寄り添ってきた。仄かに頬が染まっていた
+			ENDIF
 		CASE 5
 			PRINTFORML 「fufu♪今天你也来了呢。我很高兴哦♥」
 			;TranslatedMark 「ふふ♪　今日も良く来てくれたな。嬉しいよ%ANAME(MASTER)%♥」
@@ -546,15 +1088,41 @@ ELSEIF TALENT:正妻
 		CASE 6
 			PRINTFORML 「早上好，%ANAME(MASTER)%。…fufu，已经变成了看不到%ANAME(MASTER)%的脸就不行的身体了呢」
 			;TranslatedMark 「おはよう、%ANAME(MASTER)%。…ふふっ、もう%ANAME(MASTER)%の顔を見ないと駄目な身体になってしまったよ」
-			PRINTFORML 「所以，请你负起责任，在我的眼睛里印上夫君那张漂亮的脸吧？　…啊，真可爱啊%ANAME(MASTER)%♥」
-			;TranslatedMark 「だから責任を取って、私の瞳に旦那様の素敵な顔を焼き付けておくれ？　…くすっ、ああもう可愛いなぁ%ANAME(MASTER)%は♥」
-			PRINTFORMW %ANAME(TARGET)%幸福地放松着脸颊，对%ANAME(MASTER)%微笑着
-			;TranslatedMark %ANAME(TARGET)%は幸せそうに頬を緩ませながら%ANAME(MASTER)%に微笑みかけてきた
+			PRINTFORML 「所以请你负责，让我把主人的这张俊脸深深印在我的眼里吧？......哎呀，真是好可爱啊，%ANAME(MASTER)%♥」
+			;TranslatedMark 「だから責任を取って、私の瞳に旦那様の素敵な顔を焼き付けさせておくれ？　…くすっ、ああもう可愛いなぁ%ANAME(MASTER)%は♥」
+			;主人公がショタの場合の口上変化分
+			IF CFLAG:252 == 1
+				PRINTFORMW %ANAME(TARGET)%幸福地微微松开脸颊，拥抱了%ANAME(MASTER)%。
+				;TranslatedMark %ANAME(TARGET)%は幸せそうに頬を緩ませながら%ANAME(MASTER)%を抱きしめてきた
+			;通常版
+			ELSE
+				PRINTFORMW %ANAME(TARGET)%幸福地放松着脸颊，对%ANAME(MASTER)%微笑着
+				;TranslatedMark %ANAME(TARGET)%は幸せそうに頬を緩ませながら%ANAME(MASTER)%に微笑みかけてきた
+			ENDIF
+		CASE 7
+			PRINTFORML %ANAME(MASTER)%决定对在约会地点等待的%ANAME(TARGET)%稍微恶作剧一下
+			;TranslatedMark %ANAME(MASTER)%は待ち合わせ場所で待つ%ANAME(TARGET)%にちょっとした悪戯をすることにした
+			PRINTFORMW 我悄悄地从她的后面靠近，想要吓她一跳。就在这时，被%ANAME(TARGET)%发现的动静先一步被她的尾巴察觉到了，将%ANAME(MASTER)%紧紧包住了！但...
+			;TranslatedMark 彼女の後ろからこっそり近づいて驚かそうと距離を詰める。その気配を察知して、%ANAME(TARGET)%の尻尾が先に%ANAME(MASTER)%を抱き包んだ！　…が
+			PRINTFORML （！？　奇怪的手感......这是人偶！？）
+			;TranslatedMark （！？　妙な手ごたえ…、これは人形！？）
+			PRINTFORMW %ANAME(MASTER)% 用为了这个特别准备的简易替身人偶给 %ANAME(TARGET)% 来了个措手不及。
+			;TranslatedMark このためだけに用意した簡易身代わり人形で、%ANAME(MASTER)%は%ANAME(TARGET)%の意表を突いた
+			PRINTL
+			PRINTFORML 在%ANAME(TARGET)%因意外脱空而惊慌时，我从另一个方向大喊「哇！」，成功地吓到了她。
+			;TranslatedMark 予想外の空振りに慌てる%ANAME(TARGET)%に、別方向からワッ！　と声をかけて、彼女を驚かせることに成功した
+			PRINTFORM 「哇呀啊！......呜呜，真是没想到......
+			;TranslatedMark 「わひゃあっ！　……うう、ふ、不覚だ…
+			PRINTL 在%ANAME(MASTER)%面前发出如此可怜的声音...///」
+			;TranslatedMark %ANAME(MASTER)%の前でこんな情けない声を…///」
+			PRINTFORMW %ANAME(MASTER)%脸涨得通红，一边轻轻抚摸%ANAME(TARGET)%的头安慰他，一边尽情地拥抱调情。
+			;TranslatedMark %ANAME(MASTER)%は顔を真っ赤にする%ANAME(TARGET)%の頭を優しく撫でながら慰めるように抱きしめてイチャイチャした
 	ENDSELECT
 
 ;親愛か隷属
 ELSEIF TALENT:親愛 || TALENT:隷属
-	SELECTCASE RAND:7
+	PRINTL
+	SELECTCASE RAND:8
 		CASE 0
 			PRINTFORML 「啊，%ANAME(MASTER)%，早上好♥今天天气也很好啊」
 			;TranslatedMark 「ああ、%ANAME(MASTER)%、おはよう♥　今日も気持ちいい天気だな」
@@ -567,14 +1135,26 @@ ELSEIF TALENT:親愛 || TALENT:隷属
 			;TranslatedMark %ANAME(TARGET)%との待ち合わせに向かうところだったが、部屋を出たとたん%ANAME(TARGET)%と鉢合わせた
 			PRINTFORML 「今天起得有点早呢。因为非常想看到%ANAME(MASTER)%的脸，所以不知不觉就来了…」
 			;TranslatedMark 「今日はちょっと早く起きてしまってな。無性に%ANAME(MASTER)%の顔が見たくなって、つい来てしまったよ…」
-			PRINTFORML %ANAME(TARGET)%一边用袖子遮住嘴角，一边害羞地说。后面九根尾巴高兴地摇着
+			PRINTFORMW %ANAME(TARGET)%一边用袖子遮住嘴角，一边害羞地说。后面九根尾巴高兴地摇着
 			;TranslatedMark 口元を袖で隠しながら、少し恥ずかしそうに言う%ANAME(TARGET)%。後ろでは九本の尻尾が嬉しそうに揺れている
-			PRINTFORMW 看着她那可爱的样子自然地露出了笑容。让她等着也不好，马上出发吧
-			;TranslatedMark そのいじらしい様に自然と笑みがこぼれる。待たせるのも悪いからすぐに行こう
-			PRINTFORML 「呵呵♪谢谢。虽然像催促你似地感觉不好意思，但是我很开心」
-			;TranslatedMark 「ふふっ♪ありがとう。急かすようで悪いが、とても嬉しいよ」
-			PRINTFORMW 「那么，今天想做什么？什么都可以说哦%ANAME(MASTER)%♥」
-			;TranslatedMark 「さあ、今日は何をしたい？　何でも言ってくれていいぞ%ANAME(MASTER)%♥」
+			PRINTL
+			;主人公がショタの場合の口上変化分
+			IF CFLAG:252 == 1
+				PRINTFORML 因为她那可爱的举动，心砰砰直跳。不能再让人久等了，于是%ANAME(MASTER)%也自然加快了脚步。
+				;TranslatedMark その可愛らしい仕草に胸が高鳴る。待たせるわけにはいかないと、%ANAME(MASTER)%も自然と足早になった
+				PRINTFORML 「呵呵♪　谢谢，不好意思有点催促你，但我真的很高兴。」
+				;TranslatedMark 「ふふっ♪　ありがとう。急かすようで悪いが、とても嬉しいよ」
+				PRINTFORMW 「今天想做些什么呢？为了补偿刚才催促你的不礼貌，我会陪你做任何事情的，%ANAME(MASTER)%♥」
+				;TranslatedMark 「さあ、今日はどんなことがしたい？　急かしたお詫びに何でも付き合うぞ、%ANAME(MASTER)%♥」
+			;通常版
+			ELSE
+				PRINTFORML 看着她那可爱的样子自然地露出了笑容。让她等着也不好，马上出发吧
+				;TranslatedMark そのいじらしい様に自然と笑みがこぼれる。待たせるのも悪いからすぐに行こう
+				PRINTFORML 「呵呵♪　谢谢，不好意思有点催促你，但我真的很高兴。」
+				;TranslatedMark 「ふふっ♪　ありがとう。急かすようで悪いが、とても嬉しいよ」
+				PRINTFORMW 「那么，今天想做什么？什么都可以说哦%ANAME(MASTER)%♥」
+				;TranslatedMark 「さあ、今日は何をしたい？　何でも言ってくれていいぞ%ANAME(MASTER)%♥」
+			ENDIF
 		CASE 2
 			PRINTFORML 吨吨吨……
 			;TranslatedMark トントントン……
@@ -604,16 +1184,27 @@ ELSEIF TALENT:親愛 || TALENT:隷属
 		CASE 6
 			PRINTFORML 「早上好，%ANAME(MASTER)%。…呵呵，最近不看%ANAME(MASTER)%的脸的话就提不起劲了呢」
 			;TranslatedMark 「おはよう、%ANAME(MASTER)%。…ふふっ、最近は%ANAME(MASTER)%の顔を見ないと調子が出ないようになってしまったよ」
-			PRINTFORML 「所以请负起责任，把你的脸印在我的眼睛里？　…呃，困惑的表情也很可爱哦，%ANAME(MASTER)%♥」
-			;TranslatedMark 「だから責任を取って、私の瞳にお前の顔を焼き付けておくれ？　…くすっ、困った顔も可愛いな%ANAME(MASTER)%は♥」
+			PRINTFORML 「所以请你负责，把你的样子深深印刻在我的眼中好吗？......呵呵，为难的表情也很可爱呢%ANAME(MASTER)%♥」
+			;TranslatedMark 「だから責任を取って、私の瞳にお前の顔を焼き付けてさせておくれ？　…くすっ、困った顔も可愛いな%ANAME(MASTER)%は♥」
 			PRINTFORMW %ANAME(TARGET)%恶作剧般地向%ANAME(MASTER)%微笑着
 			;TranslatedMark %ANAME(TARGET)%は悪戯っぽく%ANAME(MASTER)%に微笑みかけてきた
+		CASE 7
+			PRINTFORML %ANAME(MASTER)%决定对在约会地点等待的%ANAME(TARGET)%稍微恶作剧一下
+			;TranslatedMark %ANAME(MASTER)%は待ち合わせ場所で待つ%ANAME(TARGET)%にちょっとした悪戯をすることにした
+			PRINTFORMW 悄悄地从她后面靠近，想吓她一跳，但一靠近，身体就被九根尾巴缠住了
+			;TranslatedMark 彼女の後ろからこっそり近づいて驚かそうとしたが近づいた途端、九本の尻尾に体を絡め取られてしまった
+			PRINTFORML 「呵呵，太天真了%ANAME(MASTER)%。我怎么可能察觉不到重要的你的存在呢？」
+			;TranslatedMark 「ふふ、甘いぞ%ANAME(MASTER)%。私が大事なお前の気配に気づかぬわけがないだろう？」
+			PRINTFORML 「作为低估我的惩罚，你就在尾巴里好好反省一阵子吧......呵呵♥」
+			;TranslatedMark 「私を甘く見た罰として、しばらく尻尾の中で反省しているといい……くすっ♥」
+			PRINTFORMW %ANAME(MASTER)%被软绵绵的尾巴抚摸得神情恍惚
+			;TranslatedMark %ANAME(MASTER)%はふわふわモフモフの尻尾に揉みくちゃにされて恍惚としてしまった
 	ENDSELECT
 
 ;既成事実Lv3かつ恋慕
 ELSEIF TALENT:合意 && TALENT:恋慕
-	;ランダムで口上が変化する（使わない場合はすべて同じにすればよい）
-	SELECTCASE RAND:6
+	PRINTL
+	SELECTCASE RAND:7
 		CASE 0
 			PRINTFORML 吨吨吨……
 			;TranslatedMark トントントン……
@@ -652,19 +1243,43 @@ ELSEIF TALENT:合意 && TALENT:恋慕
 			;TranslatedMark 「ふふ♪　良く来てくれたな%ANAME(MASTER)%」
 			PRINTFORMW 「不好意思，请陪我今天一天。和%ANAME(MASTER)%在一起的时候心情会很愉快。」
 			;TranslatedMark 「悪いが今日一日付き合っておくれ。%ANAME(MASTER)%といると楽しい気分になるんだ」
+		CASE 6
+			PRINTFORML %ANAME(MASTER)%决定对在约会地点等待的%ANAME(TARGET)%稍微恶作剧一下
+			;TranslatedMark %ANAME(MASTER)%は待ち合わせ場所で待つ%ANAME(TARGET)%にちょっとした悪戯をすることにした
+			PRINTFORMW 当我想从她的背后偷偷靠近并伸手惊吓她时，还没来得及出声，手就先被她的尾巴打了一下。
+			;TranslatedMark 彼女の後ろからこっそり近づいて驚かそうと手を伸ばした途端、声を出す前に手を尻尾に叩かれてしまった
+			PRINTFORML 「你太天真了%ANAME(MASTER)%。你以为我不会察觉到这种程度的气息吗？」
+			;TranslatedMark 「甘いぞ%ANAME(MASTER)%。私がそれくらいの気配に気づかぬと思ったか？」
+			PRINTFORML 「......还需更加精进。ふふっ♪」
+			;TranslatedMark 「……もっと精進することだ。ふふっ♪」
+			PRINTFORMW 这样说完之后，%ANAME(MASTER)%灵巧地挥动一条毛绒绒的尾巴，轻轻地抚摸了一下%ANAME(MASTER)%的头。
+			;TranslatedMark そう言うと%ANAME(MASTER)%はモフモフの尻尾を一本、器用に動かして%ANAME(MASTER)%の頭を撫でてきた
 	ENDSELECT
 
 ;既成事実Lv3(セックス済み)
 ELSEIF TALENT:合意
-	PRINTFORML 「呀，%ANAME(MASTER)%」
-	;TranslatedMark 「やあ、%ANAME(MASTER)%」
-	PRINTFORMW 「……我先声明，虽然你得到了我的身体，但并没有得到我的心。」
-	;TranslatedMark 「…言っておくが、身体は許しても心まで許したわけではないからな」
-	PRINTFORMW 也许是心理作用吧，脸稍微红了点……
-	;TranslatedMark 心なしか、ほんのり顔が赤いような……
+	PRINTL
+	;主人公がショタの場合の口上変化分
+	IF CFLAG:252 == 1
+		PRINTFORML 「や、やあ、%ANAME(MASTER)%...」
+		;TranslatedMark 「や、やあ、%ANAME(MASTER)%…」
+		PRINTFORMW 「...那、那就走吧，嗯..................、我会负起责任的...」
+		;TranslatedMark 「…そ、それじゃあ行こうか、うん………………、責任は、取るからな…」
+		PRINTFORMW %ANAME(MASTER)%似乎对与%ANAME(MASTER)%发生肉体关系感到内疚......
+		;TranslatedMark %ANAME(MASTER)%は%ANAME(MASTER)%と肉体関係を持ってしまったことに後ろめたさを感じているようだ…
+	;通常版
+	ELSE
+		PRINTFORML 「呀，%ANAME(MASTER)%」
+		;TranslatedMark 「やあ、%ANAME(MASTER)%」
+		PRINTFORMW 「……我先声明，虽然你得到了我的身体，但并没有得到我的心。」
+		;TranslatedMark 「…言っておくが、身体は許しても心まで許したわけではないからな」
+		PRINTFORMW 也许是心理作用吧，脸稍微红了点……
+		;TranslatedMark 心なしか、ほんのり顔が赤いような……
+	ENDIF
 
 ;既成事実Lv2(恋人)
 ELSEIF TALENT:恋人
+	PRINTL
 	SELECTCASE RAND:2
 		CASE 0
 			PRINTFORML 「啊…早上好%ANAME(MASTER)%。真想见你啊」
@@ -680,6 +1295,7 @@ ELSEIF TALENT:恋人
 
 ;既成事実Lv1(キス済み)
 ELSEIF CFLAG:250 == 1
+	PRINTL
 	SELECTCASE RAND:2
 		CASE 0
 			PRINTFORMW 「啊，早上好%ANAME(MASTER)%。今天是个出门的好天气啊」
@@ -691,6 +1307,7 @@ ELSEIF CFLAG:250 == 1
 
 ;既成事実Lv0で恋慕
 ELSEIF !TALENT:恋人 && TALENT:恋慕 && !TALENT:合意 && CFLAG:250 < 1
+	PRINTL
 	PRINTFORML 「啊啦，%ANAME(MASTER)%。我一直在等着你♥」
 	;TranslatedMark 「やあ、%ANAME(MASTER)%。待っていたよ♥」
 	PRINTFORMW %ANAME(TARGET)%总觉得心情很好。也许是心理作用吧，脸有点红……
@@ -698,6 +1315,7 @@ ELSEIF !TALENT:恋人 && TALENT:恋慕 && !TALENT:合意 && CFLAG:250 < 1
 
 ;好感度500以上（ここから口調が砕けて親しげになる感じ）
 ELSEIF  CFLAG:好感度 >= 500
+	PRINTL
 	SELECTCASE RAND:3
 		CASE 0
 			PRINTFORMW 「啊啦，%ANAME(MASTER)%。今天天气真好啊」
@@ -712,9 +1330,11 @@ ELSEIF  CFLAG:好感度 >= 500
 
 ;既成事実Lv0
 ELSEIF CFLAG:250 < 1
+	PRINTL
 	PRINTFORMW 「啊，%ANAME(MASTER)%阁下。今天有什么事？」
 	;TranslatedMark 「やあ、%ANAME(MASTER)%殿。本日はどのような用件で？」
 ENDIF
+PRINTL
 
 ;=================================================
 ;●「会いに行く」の終了時のセリフ
@@ -746,33 +1366,44 @@ ENDIF
 ;既成事実Lv3(初めてセックスをした)
 IF CFLAG:201 < 5 && TALENT:合意
 	CFLAG:201 = 5
-	PRINTFORML
+	PRINTL
 	;行動不能ならフラグだけ立てて表示はしない
 	IF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
 		IF TALENT:恋慕
-			PRINTFORML 「…呐，%ANAME(MASTER)%」
-			;TranslatedMark 「…なぁ、%ANAME(MASTER)%」
-			PRINTFORML 第一次身体重叠后，%ANAME(TARGET)%用双手握住%ANAME(MASTER)%的手说道
-			;TranslatedMark 初めて身体を重ねた後、%ANAME(TARGET)%は%ANAME(MASTER)%の手を両手で包むように手に取って話す
-			PRINTFORMW 「既然做到了这一步…请一生珍惜我…♥」
-			;TranslatedMark 「ここまでしたからには…私のこと、大切にしておくれ…♥」
-			; PRINTFORMW 「既然做到了这一步…请一生珍惜我…♥」
-			; ;TranslatedMark 「ここまでしたからには…私のこと、一生大切にしておくれ…♥」
-			PRINTFORMW 之后两个人相拥而眠了
-			;TranslatedMark その後二人は、互いに抱き合うようにして眠りについた
+			;主人公がショタの場合の口上変化分
+			IF CFLAG:252 == 1
+				PRINTFORML 「…呐，%ANAME(MASTER)%」
+				;TranslatedMark 「…なぁ、%ANAME(MASTER)%」
+				PRINTFORMW 初次共度良宵的夜晚，%ANAME(TARGET)%一边温柔地抚摸着%ANAME(MASTER)%的头，一边说道。
+				;TranslatedMark 初めて身体を重ね合わせた夜、%ANAME(TARGET)%は%ANAME(MASTER)%の頭を優しく撫でながら話す
+				PRINTFORML 「那个，既然我们已经这样亲密了，我会负责任的......所以今后，对我也请多多关照......♥」
+				;TranslatedMark 「その、…こうして肌を重ねた以上は私も、責任取るから…これからは私のことも、その、……良くしておくれ…♥」
+				PRINTFORMW 之后两个人相拥而眠了
+				;TranslatedMark その後二人は、互いに抱き合うようにして眠りについた
+			;通常版
+			ELSE
+				PRINTFORML 「…呐，%ANAME(MASTER)%」
+				;TranslatedMark 「…なぁ、%ANAME(MASTER)%」
+				PRINTFORMW 第一次身体重叠后，%ANAME(TARGET)%用双手握住%ANAME(MASTER)%的手说道
+				;TranslatedMark 初めて身体を重ねた後、%ANAME(TARGET)%は%ANAME(MASTER)%の手を両手で包むように手に取って話す
+				PRINTFORML 「既然做到了这一步…请一生珍惜我…♥」
+				;TranslatedMark 「ここまでしたからには…私のこと、大切にしておくれ…♥」
+				PRINTFORMW 之后两个人相拥而眠了
+				;TranslatedMark その後二人は、互いに抱き合うようにして眠りについた
+			ENDIF
 		ELSE
 			PRINTFORML （我竟然连身体都允许了，真是的……）
 			;TranslatedMark （私が身体まで許すとは、な……）
 			PRINTFORMW 「不能作为橙的榜样了，这样的话…」
 			;TranslatedMark 「橙に示しがつかないな、こんなザマでは…」
 		ENDIF
-	PRINTFORML
+	PRINTL
 	ENDIF
 
 ;既成事実Lv2(恋人になった)
 ELSEIF CFLAG:201 < 4 && TALENT:恋人
 	CFLAG:201 = 4
-	PRINTFORML
+	PRINTL
 	;行動不能ならフラグだけ立てて表示はしない
 	IF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
 		IF TALENT:恋慕
@@ -782,23 +1413,30 @@ ELSEIF CFLAG:201 < 4 && TALENT:恋人
 			;TranslatedMark %ANAME(TARGET)%に呼ばれて%ANAME(MASTER)%が振り返ると、キスで唇をふさがれた
 			PRINTFORML 「嗯……。离别之吻啊，回去的时候要小心哦♥」
 			;TranslatedMark 「ん……。お休みのキスだよ、気をつけて帰るんだぞ♥」
-			; PRINTFORML 「嗯……。离别之吻啊，回去的时候要小心哦♥」
-			; ;TranslatedMark 「ん……。お別れのキスだよ、気をつけて帰るんだぞ♥」
 			PRINTFORMW 突然的吻和妖艳的微笑，让%ANAME(MASTER)%怦然心动…
 			;TranslatedMark 突然のキスと妖艶な微笑みに、%ANAME(MASTER)%はドキドキしている…
 		ELSE
-			PRINTFORML %ANAME(TARGET)%把头放在%ANAME(MASTER)%的肩上
-			;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の肩に頭をのせた
-			PRINTFORMW 「…再让我待一会儿吧…」
-			;TranslatedMark 「…もう少しこのままでいさせてくれ…」
+			;主人公がショタの場合の口上変化分
+			IF CFLAG:252 == 1
+				PRINTFORML 分别时，%ANAME(TARGET)%蹲下身来，紧紧抱住%ANAME(MASTER)%。
+				;TranslatedMark 別れ際、%ANAME(TARGET)%はしゃがみこんで、%ANAME(MASTER)%を抱きしめた
+				PRINTFORMW 「…再让我待一会儿吧…」
+				;TranslatedMark 「…もう少しこのままでいさせてくれ…」
+			;通常版
+			ELSE
+				PRINTFORML %ANAME(TARGET)%把头放在%ANAME(MASTER)%的肩上
+				;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の肩に頭をのせた
+				PRINTFORMW 「…再让我待一会儿吧…」
+				;TranslatedMark 「…もう少しこのままでいさせてくれ…」
+			ENDIF
 		ENDIF
-	PRINTFORML
+	PRINTL
 	ENDIF
 
 ;既成事実Lv1(初めてキスをした)
 ELSEIF CFLAG:201 < 3 && CFLAG:250 == 1
 	CFLAG:201 = 3
-	PRINTFORML
+	PRINTL
 	;行動不能ならフラグだけ立てて表示はしない
 	IF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
 		IF TALENT:恋慕
@@ -812,7 +1450,7 @@ ELSEIF CFLAG:201 < 3 && CFLAG:250 == 1
 			PRINTFORMW %ANAME(TARGET)%把手指贴在嘴唇上，有点呆了，但很快又恢复了平静
 			;TranslatedMark %ANAME(TARGET)%は唇に指を当て、少々呆けていたがすぐに平静を取り戻した
 		ENDIF
-	PRINTFORML
+	PRINTL
 	ENDIF
 
 ;-------------------------------------------------
@@ -859,11 +1497,66 @@ ELSEIF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
 					;TranslatedMark 「%ANAME(MASTER)%…今日もお疲れ様。カッコ良かったぞ…♥」
 					PRINTFORMW %ANAME(TARGET)%抱着%ANAME(MASTER)%的头温柔地抚摸着
 					;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の頭を抱きかかえながら優しく頭を撫でている
-					PRINTFORML 简直就像是哄孩子的样子，但是在%ANAME(TARGET)%的甜蜜香气和充满爱情的抚摸中，自然地放松了意识…
-					;TranslatedMark まるで子供をあやす様だが、%ANAME(TARGET)%の甘い香りと愛情が込められた撫で方に自然と意識が緩む…
+					;主人公がショタの場合の口上変化分
+					IF CFLAG:252 == 1
+						PRINTFORML 就像是安抚自己的孩子般充满爱意的抚摸，以及%ANAME(TARGET)%的甜美香气自然而然地让意识放松......
+						;TranslatedMark まるで我が子をあやす様な愛情が込められた撫で方と、%ANAME(TARGET)%の甘い香りに包まれて自然と意識が緩む…
+					;通常版
+					ELSE
+						PRINTFORML 简直就像是哄孩子的样子，但是在%ANAME(TARGET)%的甜蜜香气和充满爱情的抚摸中，自然地放松了意识…
+						;TranslatedMark まるで子供をあやす様だが、%ANAME(TARGET)%の甘い香りと愛情が込められた撫で方に自然と意識が緩む…
+					ENDIF
+					PRINTFORMW 「呵呵，快要睡着了吗？那我带你去睡觉吧。...晚安，我亲爱的亲爱的老公大人...♥」
+					;TranslatedMark 「ふふ、もう寝ちゃいそうか？　それじゃあ寝所まで連れていってあげるからな。…お休み、愛しい愛しい旦那様…♥」
 			ENDSELECT
 		;セックスした場合
 		ELSE
+			;主人公がショタの場合の口上変化分
+			IF CFLAG:252 == 1
+				;射精した回数に応じて台詞
+				SELECTCASE CFLAG:253
+					CASE 0
+						PRINTDATAL
+						DATAFORM 「对不起，没有考虑到您身体状况的缘故。我太过习惯以往的行事风格，做得太多了...」
+						;TranslatedMark 「す、すまない、旦那様の体調も考えずに。ついいつもの癖でやりすぎてしまった…」
+						ENDDATA
+					CASE 1
+						PRINTDATAL
+						DATAFORM 「呵呵，辛苦了，%ANAME(MASTER)%。感觉不错吧？」
+						;TranslatedMark 「くすっ、お疲れ様、%ANAME(MASTER)%。キモチよかったか？」
+						DATAFORM 「呵呵，和我一起高潮的感觉怎么样？」
+						;TranslatedMark 「ふふ、私を相手に射精した気分はどうだった？」
+						DATAFORM 「嗯？只出现过一次吗？没关系的。是我不擅长，这不是你的错。」
+						;TranslatedMark 「ん？　一回しか出せなかったって？　いいんだよ。私が下手だったからでお前のせいではないさ」
+						ENDDATA
+					CASE 2 TO 4
+						PRINTDATAL
+						DATAFORM 「呼，真是努力了呢%ANAME(MASTER)%♥ 尽情释放，我身为妻子也感到很开心哦♥」
+						;TranslatedMark 「ふう、頑張ったなぁ%ANAME(MASTER)%♥　いっぱい出してくれて、妻である私も嬉しいよ♥」
+						DATAFORM 「真是放了很多啊。你真厉害%ANAME(MASTER)%♥ 不愧是娶我为妻的男人，呵呵♥」
+						;TranslatedMark 「たくさん出したなぁ。すごいぞ%ANAME(MASTER)%♥　流石私を娶った男だ、ふふ♥」
+						DATAFORM 「嗯？...呵呵♪ 释放了这么多有点累了吧？ 那就到这边来......乖乖，真棒♥」
+						;TranslatedMark 「ん？　…ふふ♪　いっぱい出して疲れちゃったか？　ならこっちへおいで…よしよし、えらいえらい♥」
+						ENDDATA
+					CASEELSE
+						PRINTDATAL
+						DATAFORM 「哈啊啊♥　%ANAME(MASTER)%，你也太多了点吧。即使不用这么标记，我也是属于你的...♥」
+						;TranslatedMark 「はぁぁ♥　出しすぎだよ%ANAME(MASTER)%。そんなにマーキングしなくても、私はお前様のモノだよ…♥」
+						DATAFORM 「这么多啊...♥　是把给其他女孩子的量也都给我了吗？　呵呵っ♥」
+						;TranslatedMark 「こんなにたくさん出して…♥　他の女に出す分も全部くれたのか？　ふふっ♥」
+						DATAFORM 「呵呵呵...出来好多呢♥  这说明妻子的身体很有吸引力吧？ 呵呵♥」
+						;TranslatedMark 「ふふふ…すっごくいっぱい出したな♥　それだけ妻の身体が魅力的だってことだよな？　くすっ♥」
+						DATAFORM 「啊，已经流出这么多了...♥　我现在完全变成了少不了老公大人子种的身体了...♥」
+						;TranslatedMark 「ああ、こんなに出しちゃって…♥　もうすっかり旦那様の子種が入ってないとダメな身体にされてしまったよ…♥」
+						DATAFORM 「哎呀♥ 嗯...好像全都释放出来了呢♥ 不过没关系哦，我会好好接住%ANAME(MASTER)%可爱的种子的...♥」
+						;TranslatedMark 「ふふ♥　いぃ…っぱい出したな♥　でもいいぞ、%ANAME(MASTER)%の可愛い子種、いくらでも受け止めるから…♥」
+						ENDDATA
+				ENDSELECT
+				PRINTFORMW 情事结束后，%ANAME(TARGET)%和%ANAME(MASTER)%如夫妻般甜蜜地亲热着......
+				;TranslatedMark 情事を終えた%ANAME(TARGET)%は%ANAME(MASTER)%と夫婦でイチャイチャしながら睦み合っている…
+				PRINTFORMW ...
+				;TranslatedMark ・・・
+			ENDIF
 			SELECTCASE RAND:4
 				CASE 0
 					PRINTFORML 「唔…♥ 今天也辛苦了，%ANAME(MASTER)%」
@@ -897,8 +1590,8 @@ ELSEIF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
 					;TranslatedMark 「%ANAME(MASTER)%…今日もお疲れ様。とってもキモチ良かったぞ…♥」
 					PRINTFORMW %ANAME(TARGET)%抱着%ANAME(MASTER)%的头温柔地抚摸着
 					;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の頭を抱きかかえながら優しく頭を撫でている
-					PRINTFORML 简直就像是哄孩子的样子，但是在%ANAME(TARGET)%的甜蜜香气和充满爱情的抚摸中，自然地放松了意识…
-					;TranslatedMark まるで子供をあやす様だが、%ANAME(TARGET)%の甘い香りと愛情が込められた撫で方に自然と意識が緩む…
+					PRINTFORML 就像在哄自己的孩子一样，%ANAME(TARGET)%那充满甜美香气和爱的抚摸方式让人不自觉地意识模糊...
+					;TranslatedMark まるで我が子をあやす様だが、%ANAME(TARGET)%の甘い香りと愛情が込められた撫で方に自然と意識が微睡む…
 					PRINTFORMW 「嗯？要睡了吗？好啊，就这样陪你睡吧。…晚安，我亲爱的夫君…♥」
 					;TranslatedMark 「ん？　寝ちゃいそう？　良いぞ、このまま添い寝してあげるから。…お休み、愛しい愛しい旦那様…♥」
 			ENDSELECT
@@ -943,13 +1636,57 @@ ELSEIF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
 					;TranslatedMark 「%ANAME(MASTER)%…今日もお疲れ様。カッコ良かったぞ…♥」
 					PRINTFORMW %ANAME(TARGET)%抱着%ANAME(MASTER)%的头温柔地抚摸着
 					;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の頭を抱きかかえながら優しく頭を撫でている
-					PRINTFORML 简直就像是哄孩子的样子，但是在%ANAME(TARGET)%的甜蜜香气和充满爱情的抚摸中，自然地放松了意识…
-					;TranslatedMark まるで子供をあやす様だが、%ANAME(TARGET)%の甘い香りと愛情が込められた撫で方に自然と意識が緩む…
+					PRINTFORML 就像在哄自己的孩子一样，%ANAME(TARGET)%那充满甜美香气和爱的抚摸方式让人不自觉地意识模糊...
+					;TranslatedMark まるで我が子をあやす様だが、%ANAME(TARGET)%の甘い香りと愛情が込められた撫で方に自然と意識が微睡む…
 					PRINTFORMW 「嗯？要睡了吗？好啊，就这样陪你睡吧。晚安……我最喜欢的人…♥」
 					;TranslatedMark 「ん？　寝ちゃいそう？　良いぞ、このまま添い寝してあげるから。お休み……私の、大好きな人…♥」
 			ENDSELECT
 		;セックスした場合
 		ELSE
+			;主人公がショタの場合の口上変化分
+			IF CFLAG:252 == 1
+				;射精した回数に応じて台詞
+				SELECTCASE CFLAG:253
+					CASE 0
+						PRINTDATAL
+						DATAFORM 「す、すまない、%ANAME(MASTER)%的身体状态没有考虑周到。我又不自觉地过度了...」
+						;TranslatedMark 「す、すまない、%ANAME(MASTER)%の体調も考えずに。ついいつもの癖でやりすぎてしまった…」
+						ENDDATA
+					CASE 1
+						PRINTDATAL
+						DATAFORM 「呵呵，辛苦了，%ANAME(MASTER)%。感觉不错吧？」
+						;TranslatedMark 「くすっ、お疲れ様、%ANAME(MASTER)%。キモチよかったか？」
+						DATAFORM 「呵呵，和我一起高潮的感觉怎么样？」
+						;TranslatedMark 「ふふ、私を相手に射精した気分はどうだった？」
+						DATAFORM 「嗯？只出现过一次吗？没关系的。是我不擅长，这不是你的错。」
+						;TranslatedMark 「ん？　一回しか出せなかったって？　いいんだよ。私が下手だったからでお前のせいではないさ」
+						ENDDATA
+					CASE 2 TO 4
+						PRINTDATAL
+						DATAFORM 「呼，辛苦啦%ANAME(MASTER)%♥ 你释放了这么多，我也很开心哦♥」
+						;TranslatedMark 「ふう、頑張ったなぁ%ANAME(MASTER)%♥　いっぱい出してくれて私も嬉しいよ♥」
+						DATAFORM 「真是放了很多啊。你真厉害%ANAME(MASTER)%♥ 不愧是娶我为妻的男人，呵呵♥」
+						;TranslatedMark 「たくさん出したなぁ。すごいぞ%ANAME(MASTER)%♥　流石私を娶った男だ、ふふ♥」
+						DATAFORM 「嗯？......呵呵♪　是不是因为释放得太多而累了呢？ 来这边吧......好好好，真了不起♥」
+						;TranslatedMark 「ん？　…ふふ♪　いっぱい出して疲れちゃったか？　ほら、こっちへおいで…よしよし、えらいえらい♥」
+						ENDDATA
+					CASEELSE
+						PRINTDATAL
+						DATAFORM 「哈啊啊♥ 你射得太多了%ANAME(MASTER)%。完全是想让我怀孕吧...♥」
+						;TranslatedMark 「はぁぁ♥　出しすぎだよ%ANAME(MASTER)%。完全に私を孕ますつもりじゃないか…♥」
+						DATAFORM 「这样流出这么多...♥ 留点给你妻子，不好吗？　呵呵♥」
+						;TranslatedMark 「こんなにたくさん出して…♥　奥さんの分、残しておかなくて良かったのか？　ふふっ♥」
+						DATAFORM 「啊啊，这么多都流出来了...♥ 我已经完全记住了你精液的味道...♥」
+						;TranslatedMark 「ああ、こんなに出しちゃって…♥　もうすっかりお前の精液の味を覚え込まされてしまったよ…♥」
+						DATAFORM 「哈哈♥ ...你射出了好多呢♥ 不过没关系，我会把%ANAME(MASTER)%可爱的孩子都接住的...♥」
+						;TranslatedMark 「ふふ♥　いぃ…っぱい出したな♥　でもいいぞ、%ANAME(MASTER)%の可愛い子種、全部受け止めるから…♥」
+						ENDDATA
+				ENDSELECT
+				PRINTFORMW 情事结束后的%ANAME(TARGET)%正在与%ANAME(MASTER)%亲密地互动...
+				;TranslatedMark 情事を終えた%ANAME(TARGET)%は%ANAME(MASTER)%とイチャイチャしながら睦み合っている…
+				PRINTFORMW ...
+				;TranslatedMark ・・・
+			ENDIF
 			SELECTCASE RAND:4
 				CASE 0
 					PRINTFORML 「唔…♥ 今天也辛苦了，%ANAME(MASTER)%」
@@ -967,8 +1704,8 @@ ELSEIF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
 					;TranslatedMark 「はああぁ…♥♥　すごくよかったよ%ANAME(MASTER)%♥」
 					PRINTFORML %ANAME(TARGET)%用沉醉于爱欲的表情，在瞳孔中♥浮现在脑海中的是%ANAME(MASTER)%
 					;TranslatedMark %ANAME(TARGET)%は愛欲に蕩けきった表情で、瞳に♥を浮かべなが%ANAME(MASTER)%に寄り添っている
-					PRINTFORMW 「和%ANAME(MASTER)%一起做爱，非常幸福，感觉非常好…♥即使是和正妻一起也可以，今后也请多多抱我♥」
-					;TranslatedMark 「%ANAME(MASTER)%とのセックス、すごく幸せでとてもキモチいいんだ…♥　正妻のついででもいいから、これからもいっぱい私を抱いておくれ♥」
+					PRINTFORMW 「和%ANAME(MASTER)%的亲密时光是如此幸福，让我感觉无比美好...♥ 就算是正妻之外，你以后也一定要多多抱紧我哦♥」
+					;TranslatedMark 「%ANAME(MASTER)%とのセックス、すごく幸せでとてもキモチいいんだ…♥　正妻のついででいいから、これからもいっぱい私を抱いておくれ♥」
 				CASE 2
 					PRINTFORML 「今天一天也辛苦了，%ANAME(MASTER)%。已经很晚了，今晚就这样一起睡吧」
 					;TranslatedMark 「今日も一日お疲れ様、%ANAME(MASTER)%。もう遅いし、今夜はこのまま、一緒に眠ろうか」
@@ -983,8 +1720,8 @@ ELSEIF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
 					;TranslatedMark 「%ANAME(MASTER)%…今日もお疲れ様。とってもキモチ良かったぞ…♥」
 					PRINTFORMW %ANAME(TARGET)%抱着%ANAME(MASTER)%的头温柔地抚摸着
 					;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の頭を抱きかかえながら優しく頭を撫でている
-					PRINTFORML 简直就像是哄孩子的样子，但是在%ANAME(TARGET)%的甜蜜香气和充满爱情的抚摸中，自然地放松了意识…
-					;TranslatedMark まるで子供をあやす様だが、%ANAME(TARGET)%の甘い香りと愛情が込められた撫で方に自然と意識が緩む…
+					PRINTFORML 就像在哄自己的孩子一样，%ANAME(TARGET)%那充满甜美香气和爱的抚摸方式让人不自觉地意识模糊...
+					;TranslatedMark まるで我が子をあやす様だが、%ANAME(TARGET)%の甘い香りと愛情が込められた撫で方に自然と意識が微睡む…
 					PRINTFORMW 「嗯？要睡了吗？好啊，就这样陪你睡吧。晚安……我最喜欢的人…♥」
 					;TranslatedMark 「ん？　寝ちゃいそう？　良いぞ、このまま添い寝してあげるから。お休み……私の、大好きな人…♥」
 			ENDSELECT
@@ -1023,6 +1760,50 @@ ELSEIF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
 			ENDSELECT
 		;セックスした場合
 		ELSE
+			;主人公がショタの場合の口上変化分
+			IF CFLAG:252 == 1
+				;射精した回数に応じて台詞
+				SELECTCASE CFLAG:253
+					CASE 0
+						PRINTDATAL
+						DATAFORM 「す、すまない、%ANAME(MASTER)%的身体状态没有考虑周到。我又不自觉地过度了...」
+						;TranslatedMark 「す、すまない、%ANAME(MASTER)%の体調も考えずに。ついいつもの癖でやりすぎてしまった…」
+						ENDDATA
+					CASE 1
+						PRINTDATAL
+						DATAFORM 「呵呵，辛苦了，%ANAME(MASTER)%。感觉不错吧？」
+						;TranslatedMark 「くすっ、お疲れ様、%ANAME(MASTER)%。キモチよかったか？」
+						DATAFORM 「呵呵，和我一起高潮的感觉怎么样？」
+						;TranslatedMark 「ふふ、私を相手に射精した気分はどうだった？」
+						DATAFORM 「嗯？只出现过一次吗？没关系的。是我不擅长，这不是你的错。」
+						;TranslatedMark 「ん？　一回しか出せなかったって？　いいんだよ。私が下手だったからでお前のせいではないさ」
+						ENDDATA
+					CASE 2 TO 4
+						PRINTDATAL
+						DATAFORM 「呼，真努力啊%ANAME(MASTER)%♥　真棒，能释放出这么多♪」
+						;TranslatedMark 「ふう、頑張ったなぁ%ANAME(MASTER)%♥　いっぱい出せて偉いぞ♪」
+						DATAFORM 「真是大量释放呢。了不起，%ANAME(MASTER)%♥　看起来已经成长为一个成熟的男人了啊，呐呵。」
+						;TranslatedMark 「たくさん出したな。すごいぞ%ANAME(MASTER)%♥　もう一人前の男になったようだな、ふふ」
+						DATAFORM 「嗯？...呵呵♪ 弄了那么多累了吗？ 快，到我这边来...♥」
+						;TranslatedMark 「ん？　…ふふ♪　いっぱい出して疲れちゃったか？　ほら、こっちへおいで…♥」
+						ENDDATA
+					CASEELSE
+						PRINTDATAL
+						DATAFORM 「はぁぁ♥　已经太多了哦%ANAME(MASTER)%。你是完全打算让我怀上吧...♥」
+						;TranslatedMark 「はぁぁ♥　もう、出しすぎだよ%ANAME(MASTER)%。完全に私を孕ますつもりじゃないか…♥」
+						DATAFORM 「这么多......♥ 难道我的身体真的有那么吸引你吗？呵呵♪」
+						;TranslatedMark 「こんなにたくさん出して…♥　そんなに私の身体が魅力的だったか？　ふふっ♪」
+						DATAFORM 「啊啊，这么厉害地出来了...♥ 已经真的是个绝伦的大人呢，%ANAME(MASTER)%...♥」
+						;TranslatedMark 「ああ、こんなに出して…♥　もう立派な絶倫だな、%ANAME(MASTER)%…♥」
+						DATAFORM 「呵呵♥　好多呢......都出来了啊♥　%ANAME(MASTER)%已经完全变成性豪了呢......♥」
+						;TranslatedMark 「ふふ♥　いぃ…っぱい出したな♥　もうすっかり性豪だな%ANAME(MASTER)%は…♥」
+						ENDDATA
+				ENDSELECT
+				PRINTFORMW 情事结束后，%ANAME(TARGET)%和%ANAME(MASTER)%边聊就寝后的闲谈边亲热......
+				;TranslatedMark 情事を終えた%ANAME(TARGET)%は%ANAME(MASTER)%とピロートークしながらイチャイチャしている…
+				PRINTFORMW ...
+				;TranslatedMark ・・・
+			ENDIF
 			SELECTCASE RAND:3
 				CASE 0
 					PRINTFORML 「请再紧抱点。…唔……我会等你的♥」
@@ -1075,6 +1856,48 @@ ELSEIF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
 			ENDSELECT
 		;セックスした場合
 		ELSE
+			;主人公がショタの場合の口上変化分
+			IF CFLAG:252 == 1
+				;射精した回数に応じて台詞
+				SELECTCASE CFLAG:253
+					CASE 0
+						PRINTDATAL
+						DATAFORM 「す、すまない、%ANAME(MASTER)%的身体状态没有考虑周到。我又不自觉地过度了...」
+						;TranslatedMark 「す、すまない、%ANAME(MASTER)%の体調も考えずに。ついいつもの癖でやりすぎてしまった…」
+						ENDDATA
+					CASE 1
+						PRINTDATAL
+						DATAFORM 「呵呵，辛苦了，%ANAME(MASTER)%。感觉不错吧？」
+						;TranslatedMark 「くすっ、お疲れ様、%ANAME(MASTER)%。キモチよかったか？」
+						DATAFORM 「呵呵，和我一起高潮的感觉怎么样？」
+						;TranslatedMark 「ふふ、私を相手に射精した気分はどうだった？」
+						DATAFORM 「嗯？只有一次吗？没关系，体力是需要慢慢积累的。」
+						;TranslatedMark 「ん？　一回しか出せなかったって？　いいんだよ。体力はこれからついていくものだ」
+						ENDDATA
+					CASE 2 TO 4
+						PRINTDATAL
+						DATAFORM 「呼，真努力啊%ANAME(MASTER)%♥　真棒，能释放出这么多♪」
+						;TranslatedMark 「ふう、頑張ったなぁ%ANAME(MASTER)%♥　いっぱい出せて偉いぞ♪」
+						DATAFORM 「看来你出色地完成了很多呢。真了不起，%ANAME(MASTER)%♥ 看来你越来越像一个成熟的男人了啊，呵呵。」
+						;TranslatedMark 「たくさん出したな。偉いぞ%ANAME(MASTER)%♥　一人前の男になってきたようだな、ふふ」
+						DATAFORM 「你已经流了很多出来，一定累了吧？来，到我这边来...♥」
+						;TranslatedMark 「いっぱい出して疲れたろう？　さあ、こっちへおいで…♥」
+						ENDDATA
+					CASEELSE
+						PRINTDATAL
+						DATAFORM 「哈啊啊♥　真是的，太多了哦%ANAME(MASTER)%...♥」
+						;TranslatedMark 「はぁぁ♥　もう、出しすぎだよ%ANAME(MASTER)%…♥」
+						DATAFORM 「这么多......♥ 难道我的身体真的有那么吸引你吗？呵呵♪」
+						;TranslatedMark 「こんなにたくさん出して…♥　そんなに私の身体が魅力的だったか？　ふふっ♪」
+						DATAFORM 「啊啊，这么厉害地出来了...♥ 已经真的是个绝伦的大人呢，%ANAME(MASTER)%...♥」
+						;TranslatedMark 「ああ、こんなに出して…♥　もう立派な絶倫だな、%ANAME(MASTER)%…♥」
+						ENDDATA
+				ENDSELECT
+				PRINTFORMW 情事结束后%ANAME(TARGET)%和%ANAME(MASTER)%正在闲聊......
+				;TranslatedMark 情事を終えた%ANAME(TARGET)%は%ANAME(MASTER)%とピロートークしている…
+				PRINTFORMW ...
+				;TranslatedMark ・・・
+			ENDIF
 			SELECTCASE RAND:3
 				CASE 0
 					PRINTFORML 「下次相见时再抱紧我哦……我等着你」
@@ -1141,8 +1964,21 @@ ELSEIF !(TCVAR:51 || TCVAR:52 || TCVAR:53)
 		ENDSELECT
 	;既成事実Lv0
 	ELSEIF CFLAG:250 < 1
-		PRINTFORMW 「那就这样吧」
-		;TranslatedMark 「それじゃあ、これで」
+		;主人公がショタの場合の口上変化分
+		IF CFLAG:252 == 1
+			SELECTCASE RAND:2
+				CASE 0
+					PRINTFORMW 「那我就先走了。你也要注意不要太晚回家哦。」
+					;TranslatedMark 「それじゃあ、私はこれで。そちらも帰りは遅くならないように気を付けて」
+				CASE 1
+					PRINTFORMW 「送你回去吗？ ...没关系吗？」
+					;TranslatedMark 「送っていきましょうか？　…大丈夫？」
+			ENDSELECT
+		;通常版
+		ELSE
+			PRINTFORMW 「那就这样吧」
+			;TranslatedMark 「それじゃあ、これで」
+		ENDIF
 	ENDIF
 ENDIF
 
@@ -1154,6 +1990,7 @@ ENDIF
 IF TALENT:空虚
 	RETURN
 ENDIF
+PRINTL
 ;正妻
 IF TALENT:正妻
 	PRINTFORMW 「为了所爱的夫君，无论去哪里都可以♥」
@@ -1189,6 +2026,7 @@ IF TALENT:空虚
 	RETURN
 ENDIF
 
+PRINTL
 ;酒酔いによる行動不能　※現在死に分岐
 IF TCVAR:53 == 1
 	;PRINTFORMW
@@ -1234,8 +2072,15 @@ ELSEIF TALENT:正妻
 			;TranslatedMark 「%ANAME(MASTER)%…今日もお疲れ様。とってもキモチ良かったぞ…♥」
 			PRINTFORMW %ANAME(TARGET)%抱着%ANAME(MASTER)%的头温柔地抚摸着
 			;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の頭を抱きかかえながら優しく頭を撫でている
-			PRINTFORML 简直就像是哄孩子的样子，但是在%ANAME(TARGET)%的甜蜜香气和充满爱情的抚摸中，自然地放松了意识…
-			;TranslatedMark まるで子供をあやす様だが、%ANAME(TARGET)%の甘い香りと愛情が込められた撫で方に自然と意識が緩む…
+			;主人公がショタの場合の口上変化分
+			IF CFLAG:252 == 1
+				PRINTFORML 仿佛像是在安抚自己的孩子般注入了满满爱意的抚摸，加上%ANAME(TARGET)%的甜美香气，渐渐地意识开始昏昏欲睡...
+				;TranslatedMark まるで我が子をあやす様な愛情が込められた撫で方と、%ANAME(TARGET)%の甘い香りに包まれて段々と意識が微睡んでいく…
+			;通常版
+			ELSE
+				PRINTFORML 宛如哄小孩般，而%ANAME(TARGET)%那甜美的香气与充满爱意的抚摸让人不自觉地半梦半醒...
+				;TranslatedMark まるで子供をあやす様だが、%ANAME(TARGET)%の甘い香りと愛情が込められた撫で方に自然と意識が微睡む…
+			ENDIF
 			PRINTFORMW 「嗯？要睡了吗？好啊，就这样陪你睡吧。…晚安，我亲爱的夫君…♥」
 			;TranslatedMark 「ん？　寝ちゃいそう？　良いぞ、このまま添い寝してあげるから。…お休み、愛しい愛しい旦那様…♥」
 	ENDSELECT
@@ -1275,8 +2120,15 @@ ELSEIF TALENT:妾
 			;TranslatedMark 「%ANAME(MASTER)%…今日もお疲れ様。とってもキモチ良かったぞ…♥」
 			PRINTFORMW %ANAME(TARGET)%抱着%ANAME(MASTER)%的头温柔地抚摸着
 			;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の頭を抱きかかえながら優しく頭を撫でている
-			PRINTFORML 简直就像是哄孩子的样子，但是在%ANAME(TARGET)%的甜蜜香气和充满爱情的抚摸中，自然地放松了意识…
-			;TranslatedMark まるで子供をあやす様だが、%ANAME(TARGET)%の甘い香りと愛情が込められた撫で方に自然と意識が緩む…
+			;主人公がショタの場合の口上変化分
+			IF CFLAG:252 == 1
+				PRINTFORML 仿佛像是在安抚自己的孩子般注入了满满爱意的抚摸，加上%ANAME(TARGET)%的甜美香气，渐渐地意识开始昏昏欲睡...
+				;TranslatedMark まるで我が子をあやす様な愛情が込められた撫で方と、%ANAME(TARGET)%の甘い香りに包まれて段々と意識が微睡んでいく…
+			;通常版
+			ELSE
+				PRINTFORML 宛如哄小孩般，而%ANAME(TARGET)%那甜美的香气与充满爱意的抚摸让人不自觉地半梦半醒...
+				;TranslatedMark まるで子供をあやす様だが、%ANAME(TARGET)%の甘い香りと愛情が込められた撫で方に自然と意識が微睡む…
+			ENDIF
 			PRINTFORMW 「嗯？要睡了吗？好啊，就这样陪你睡吧。晚安……我最喜欢的人…♥」
 			;TranslatedMark 「ん？　寝ちゃいそう？　良いぞ、このまま添い寝してあげるから。お休み……私の、大好きな人…♥」
 	ENDSELECT
@@ -2813,8 +3665,8 @@ IF SELECTCOM == 9
 				IF ABL:Ｂ感 >= 3
 					SELECTCASE RAND:4
 						CASE 0
-							PRINTFORML 「唔啊啊啊♥…嗯~♥我的乳头好吃吗？ fufu♥」
-							;TranslatedMark 「ふあぁっ♥…んっ♥　私の乳首、おいしいか？　ふふ♥」
+							PRINTFORML 「啊哈♥...嗯♥　我的胸部，好吃吗？　呵呵♥」
+							;TranslatedMark 「ふあぁっ♥…んっ♥　私のおっぱい、おいしいか？　ふふ♥」
 							PRINTFORMW %ANAME(TARGET)%温柔地搂着吸着自己乳头的%ANAME(MASTER)%的头
 							;TranslatedMark %ANAME(TARGET)%は自分の乳首に吸い付く%ANAME(MASTER)%の頭を優しくかき抱いている
 						CASE 1
@@ -2899,8 +3751,8 @@ IF SELECTCOM == 9
 				IF ABL:Ｂ感 >= 3
 					SELECTCASE RAND:4
 						CASE 0
-							PRINTFORML 「唔啊啊啊♥…嗯~♥我的乳头好吃吗？ fufu♥」
-							;TranslatedMark 「ふあぁっ♥…んっ♥　私の乳首、おいしいか？　ふふ♥」
+							PRINTFORML 「啊哈♥...嗯♥　我的胸部，好吃吗？　呵呵♥」
+							;TranslatedMark 「ふあぁっ♥…んっ♥　私のおっぱい、おいしいか？　ふふ♥」
 							PRINTFORMW %ANAME(TARGET)%温柔地搂着吸着自己乳头的%ANAME(MASTER)%的头
 							;TranslatedMark %ANAME(TARGET)%は自分の乳首に吸い付く%ANAME(MASTER)%の頭を優しくかき抱いている
 						CASE 1
@@ -10726,53 +11578,107 @@ IF SELECTCOM == 300
 	ELSE
 		;親愛 or 隷属
 		IF TALENT:親愛 || TALENT:隷属
-			SELECTCASE RAND:7
-				CASE 0
-					PRINTFORML 「即使是无聊的闲谈，能与%ANAME(MASTER)%在一起渡过的话也是幸福的一段时间」
-					;TranslatedMark 「何でもない雑談でも、%ANAME(MASTER)%となら幸せな一時になるんだ」
-					PRINTFORMW %ANAME(TARGET)%笑着享受与%ANAME(MASTER)%的对话
-					;TranslatedMark %ANAME(TARGET)%は笑顔で%ANAME(MASTER)%との会話を楽しんでいる
-				CASE 1
-					PRINTFORML 「与%ANAME(MASTER)%交谈实在有趣…感觉每天的疲劳都消失了呢」
-					;TranslatedMark 「%ANAME(MASTER)%と話すのはすごく楽しいな…。日々の気疲れが消えていくよ」
-					PRINTFORMW 因为%ANAME(TARGET)%很优秀的缘故，所以每天做很多工作，但负担还是蛮重的
-					;TranslatedMark %ANAME(TARGET)%は優秀であるが故、日々多くの仕事をこなしているがやはり負担は大きいようだ
-					PRINTFORML %ANAME(MASTER)%让%ANAME(TARGET)%注意别太辛苦了
-					;TranslatedMark %ANAME(MASTER)%はそれとなく%ANAME(TARGET)%を労わった
-					PRINTFORMW 「fufu，我也没打算做的太过。但是谢谢你，%ANAME(MASTER)%♥」
-					;TranslatedMark 「ふふ、そんなにヤワではないつもりだよ。でもありがとう、%ANAME(MASTER)%♥」
-				CASE 2
-					PRINTFORML 说了关于以前%ANAME(MASTER)%去过的风景秀丽的地方
-					;TranslatedMark 前に%ANAME(MASTER)%が行ったことのある景色の良い場所について話した
-					PRINTFORMW 「下次要不要去那里看看？只有两个人哦…呼呼♥」
-					;TranslatedMark 「今度、そこに行ってみないか？　二人っきりで…な♥」
-				CASE 3
-					PRINTFORMW 「尾巴吗？确实护理很辛苦。但是最近%ANAME(MASTER)%帮了我大忙了」
-					;TranslatedMark 「この尻尾？　確かにケアが大変だよ。でも最近は%ANAME(MASTER)%が手伝ってくれて助かってるよ」
-				CASE 4
-					PRINTFORML %ANAME(TARGET)%一边抱着%ANAME(MASTER)%的手臂一边靠近着
-					;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の腕を抱きながら寄り添ってきた
-					PRINTFORMW 「这样的话就安心了…这样可以吗？」
-					;TranslatedMark 「こうしていると安心するんだ…このまま話しても構わないか？」
-					PRINTFORML 也没有什么拒绝的理由。%ANAME(MASTER)%欣然答应了%ANAME(TARGET)%的提议
-					;TranslatedMark わざわざ断る理由もない。%ANAME(MASTER)%は%ANAME(TARGET)%の申し出を快諾した
-					PRINTFORMW 「fufu…谢谢你，%ANAME(MASTER)%♥」
-					;TranslatedMark 「ふふ…ありがとう、%ANAME(MASTER)%♥」
-				CASE 5
-					PRINTFORML 「啊！%ANAME(MASTER)%，那家店的油炸食品可是极品哦。下次两个人一起去吃吧♪」
-					;TranslatedMark 「あ！　%ANAME(MASTER)%、あの店の油揚げ料理は絶品だぞ。今度二人で食べに行こう♪」
-					PRINTFORMW %ANAME(TARGET)%笑着，与%ANAME(MASTER)%聊着漫无天际的话
-					;TranslatedMark %ANAME(TARGET)%は笑顔で%ANAME(MASTER)%との他愛ない会話を楽しんでいる
-				CASE 6
-					PRINTFORML 「我自认为很努力，但是那个人的期待却没有增加…。痛感自己的不成熟」
-					;TranslatedMark 「自分では頑張っているつもりなんだが、それでもあの方の期待には添えられていないようで…。己の未熟さを痛感するよ」
-					PRINTFORMW 「……不好意思让你看到我软弱的一面。如果对方是%ANAME(MASTER)%的话，那就什么都能倾诉呢」
-					;TranslatedMark 「…弱気なところを見せてすまない。%ANAME(MASTER)%が相手だと、何でも話せてしまっていけないな」
-					PRINTFORML 作为九尾的%ANAME(TARGET)%也有%ANAME(TARGET)%的苦恼。能把这件事坦白出来，我很高兴
-					;TranslatedMark 九尾である%ANAME(TARGET)%にも、%ANAME(TARGET)%なりの苦悩があるようだ。それを打ち明けられる関係になれたことがなんとなしに嬉しかった
-					PRINTFORMW %ANAME(MASTER)%牵着%ANAME(TARGET)%的手，告诉她什么时候都可以倾听她说话，%ANAME(TARGET)%露出了腼腆的笑容
-					;TranslatedMark %ANAME(MASTER)%は%ANAME(TARGET)%の手を取り、またいつでも話を聞くよ、と告げると%ANAME(TARGET)%ははにかむような笑顔を見せた
-			ENDSELECT
+			;主人公がショタの場合の口上変化分
+			IF CFLAG:252 == 1
+				SELECTCASE RAND:7
+					CASE 0
+						PRINTFORML 「即使是无聊的闲谈，能与%ANAME(MASTER)%在一起渡过的话也是幸福的一段时间」
+						;TranslatedMark 「何でもない雑談でも、%ANAME(MASTER)%となら幸せな一時になるんだ」
+						PRINTFORMW %ANAME(TARGET)%笑着享受与%ANAME(MASTER)%的对话
+						;TranslatedMark %ANAME(TARGET)%は笑顔で%ANAME(MASTER)%との会話を楽しんでいる
+					CASE 1
+						PRINTFORML 「与%ANAME(MASTER)%交谈实在有趣…感觉每天的疲劳都消失了呢」
+						;TranslatedMark 「%ANAME(MASTER)%と話すのはすごく楽しいな…。日々の気疲れが消えていくよ」
+						PRINTFORMW %ANAME(TARGET)%非常优秀，因此每天都要完成大量的工作，但似乎并非毫无负担。
+						;TranslatedMark %ANAME(TARGET)%は優秀であるが故、日々多くの仕事をこなしているがやはり負担がないわけではないようだ
+						PRINTFORML %ANAME(MASTER)%让%ANAME(TARGET)%注意别太辛苦了
+						;TranslatedMark %ANAME(MASTER)%はそれとなく%ANAME(TARGET)%を労わった
+						PRINTFORMW 「fufu，我也没打算做的太过。但是谢谢你，%ANAME(MASTER)%♥」
+						;TranslatedMark 「ふふ、そんなにヤワではないつもりだよ。でもありがとう、%ANAME(MASTER)%♥」
+					CASE 2
+						PRINTFORML 说了关于以前%ANAME(MASTER)%去过的风景秀丽的地方
+						;TranslatedMark 前に%ANAME(MASTER)%が行ったことのある景色の良い場所について話した
+						PRINTFORMW 「下次要不要去那里看看？只有两个人哦…呼呼♥」
+						;TranslatedMark 「今度、そこに行ってみないか？　二人っきりで…な♥」
+						PRINTFORMW 成熟有魅力的声音，让%ANAME(MASTER)%的脊背泛起甜蜜而麻酥的颤栗。
+						;TranslatedMark 大人の情事を思わせる色っぽい声色が、%ANAME(MASTER)%の背筋にゾクゾクとした甘い痺れを走らせた
+					CASE 3
+						PRINTFORMW 「这条尾巴？确实，照顾起来很麻烦。不过最近%ANAME(MASTER)%在帮我，我省了不少劲。」
+						;TranslatedMark 「この尻尾？　確かにケアが大変だったよ。でも最近は%ANAME(MASTER)%が手伝ってくれて助かってるよ」
+					CASE 4
+						PRINTFORML %ANAME(TARGET)%从背后靠过来，轻轻拥住%ANAME(MASTER)%的身体。
+						;TranslatedMark %ANAME(TARGET)%は背後から%ANAME(MASTER)%の身体を抱きつつむように寄り添ってきた
+						PRINTFORMW 「这样的话就安心了…这样可以吗？」
+						;TranslatedMark 「こうしていると安心するんだ…このまま話しても構わないか？」
+						PRINTFORML 只要%ANAME(TARGET)%能安心，无论多少都可以，%ANAME(MASTER)%欣然接受了%ANAME(TARGET)%的提议。
+						;TranslatedMark %ANAME(TARGET)%が安心してくれるならいくらでも、と%ANAME(MASTER)%は%ANAME(TARGET)%の申し出を快諾した
+						PRINTFORMW 「fufu…谢谢你，%ANAME(MASTER)%♥」
+						;TranslatedMark 「ふふ…ありがとう、%ANAME(MASTER)%♥」
+					CASE 5
+						PRINTFORML 「啊！%ANAME(MASTER)%，那家店的油炸豆腐料理非常出色。下次我们一起去吃吧♪」
+						;TranslatedMark 「あ！　%ANAME(MASTER)%、あの店の油揚げ料理は絶品なんだ。今度二人で食べに行こう♪」
+						PRINTFORMW %ANAME(TARGET)%笑着，与%ANAME(MASTER)%聊着漫无天际的话
+						;TranslatedMark %ANAME(TARGET)%は笑顔で%ANAME(MASTER)%との他愛ない会話を楽しんでいる
+					CASE 6
+						PRINTFORML 「我自认为很努力，但是那个人的期待却没有增加…。痛感自己的不成熟」
+						;TranslatedMark 「自分では頑張っているつもりなんだが、それでもあの方の期待には添えられていないようで…。己の未熟さを痛感するよ」
+						PRINTFORMW 「...抱歉让你看到不坚定的一面。虽然应该要坚强起来，但是面对%ANAME(MASTER)%时，总觉得什么都可以说。」
+						;TranslatedMark 「…弱気なところを見せてすまない。しっかりしないといけないのに、%ANAME(MASTER)%が相手だと何でも話せてしまうな」
+						PRINTFORML 作为九尾的%ANAME(TARGET)%也有%ANAME(TARGET)%的苦恼。能把这件事坦白出来，我很高兴
+						;TranslatedMark 九尾である%ANAME(TARGET)%にも、%ANAME(TARGET)%なりの苦悩があるようだ。それを打ち明けられる関係になれたことがなんとなしに嬉しかった
+						PRINTFORMW %ANAME(MASTER)%握住了%ANAME(TARGET)%的手，并告诉他：「我随时都可以倾听你的心声。」%ANAME(TARGET)%露出了如静谧般慈爱的微笑。
+						;TranslatedMark %ANAME(MASTER)%は%ANAME(TARGET)%の手を取り、自分はいつでも話を聞きます、と告げると%ANAME(TARGET)%は慈しむような笑顔を見せた
+				ENDSELECT
+			;通常版
+			ELSE
+				SELECTCASE RAND:7
+					CASE 0
+						PRINTFORML 「即使是无聊的闲谈，能与%ANAME(MASTER)%在一起渡过的话也是幸福的一段时间」
+						;TranslatedMark 「何でもない雑談でも、%ANAME(MASTER)%となら幸せな一時になるんだ」
+						PRINTFORMW %ANAME(TARGET)%笑着享受与%ANAME(MASTER)%的对话
+						;TranslatedMark %ANAME(TARGET)%は笑顔で%ANAME(MASTER)%との会話を楽しんでいる
+					CASE 1
+						PRINTFORML 「与%ANAME(MASTER)%交谈实在有趣…感觉每天的疲劳都消失了呢」
+						;TranslatedMark 「%ANAME(MASTER)%と話すのはすごく楽しいな…。日々の気疲れが消えていくよ」
+						PRINTFORMW 因为%ANAME(TARGET)%很优秀的缘故，所以每天做很多工作，但负担还是蛮重的
+						;TranslatedMark %ANAME(TARGET)%は優秀であるが故、日々多くの仕事をこなしているがやはり負担は大きいようだ
+						PRINTFORML %ANAME(MASTER)%让%ANAME(TARGET)%注意别太辛苦了
+						;TranslatedMark %ANAME(MASTER)%はそれとなく%ANAME(TARGET)%を労わった
+						PRINTFORMW 「fufu，我也没打算做的太过。但是谢谢你，%ANAME(MASTER)%♥」
+						;TranslatedMark 「ふふ、そんなにヤワではないつもりだよ。でもありがとう、%ANAME(MASTER)%♥」
+					CASE 2
+						PRINTFORML 说了关于以前%ANAME(MASTER)%去过的风景秀丽的地方
+						;TranslatedMark 前に%ANAME(MASTER)%が行ったことのある景色の良い場所について話した
+						PRINTFORMW 「下次要不要去那里看看？只有两个人哦…呼呼♥」
+						;TranslatedMark 「今度、そこに行ってみないか？　二人っきりで…な♥」
+					CASE 3
+						PRINTFORMW 「这条尾巴？确实，照顾起来很麻烦。不过最近%ANAME(MASTER)%在帮我，我省了不少劲。」
+						;TranslatedMark 「この尻尾？　確かにケアが大変だったよ。でも最近は%ANAME(MASTER)%が手伝ってくれて助かってるよ」
+					CASE 4
+						PRINTFORML %ANAME(TARGET)%一边抱着%ANAME(MASTER)%的手臂一边靠近着
+						;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の腕を抱きながら寄り添ってきた
+						PRINTFORMW 「这样的话就安心了…这样可以吗？」
+						;TranslatedMark 「こうしていると安心するんだ…このまま話しても構わないか？」
+						PRINTFORML 也没有什么拒绝的理由。%ANAME(MASTER)%欣然答应了%ANAME(TARGET)%的提议
+						;TranslatedMark わざわざ断る理由もない。%ANAME(MASTER)%は%ANAME(TARGET)%の申し出を快諾した
+						PRINTFORMW 「fufu…谢谢你，%ANAME(MASTER)%♥」
+						;TranslatedMark 「ふふ…ありがとう、%ANAME(MASTER)%♥」
+					CASE 5
+						PRINTFORML 「啊！%ANAME(MASTER)%，那家店的油炸食品可是极品哦。下次两个人一起去吃吧♪」
+						;TranslatedMark 「あ！　%ANAME(MASTER)%、あの店の油揚げ料理は絶品だぞ。今度二人で食べに行こう♪」
+						PRINTFORMW %ANAME(TARGET)%笑着，与%ANAME(MASTER)%聊着漫无天际的话
+						;TranslatedMark %ANAME(TARGET)%は笑顔で%ANAME(MASTER)%との他愛ない会話を楽しんでいる
+					CASE 6
+						PRINTFORML 「我自认为很努力，但是那个人的期待却没有增加…。痛感自己的不成熟」
+						;TranslatedMark 「自分では頑張っているつもりなんだが、それでもあの方の期待には添えられていないようで…。己の未熟さを痛感するよ」
+						PRINTFORMW 「……不好意思让你看到我软弱的一面。如果对方是%ANAME(MASTER)%的话，那就什么都能倾诉呢」
+						;TranslatedMark 「…弱気なところを見せてすまない。%ANAME(MASTER)%が相手だと、何でも話せてしまっていけないな」
+						PRINTFORML 作为九尾的%ANAME(TARGET)%也有%ANAME(TARGET)%的苦恼。能把这件事坦白出来，我很高兴
+						;TranslatedMark 九尾である%ANAME(TARGET)%にも、%ANAME(TARGET)%なりの苦悩があるようだ。それを打ち明けられる関係になれたことがなんとなしに嬉しかった
+						PRINTFORMW %ANAME(MASTER)%牵着%ANAME(TARGET)%的手，告诉她什么时候都可以倾听她说话，%ANAME(TARGET)%露出了腼腆的笑容
+						;TranslatedMark %ANAME(MASTER)%は%ANAME(TARGET)%の手を取り、またいつでも話を聞くよ、と告げると%ANAME(TARGET)%ははにかむような笑顔を見せた
+				ENDSELECT
+			ENDIF
 		;恋慕 or 服従 or 親友
 		ELSEIF TALENT:恋慕 || TALENT:服従 || TALENT:親友
 			SELECTCASE RAND:5
@@ -10802,31 +11708,101 @@ IF SELECTCOM == 300
 			ENDSELECT
 		;好感度500以上
 		ELSEIF CFLAG:好感度 >= 500
-			SELECTCASE RAND:3
-				CASE 0
-					PRINTFORMW 「这样啊，我也还有很多不知道的事情呢」
-					;TranslatedMark 「ほう、私にもまだまだ知らないことがあるんだな」
-				CASE 1
-					PRINTFORMW 「嗯，我也这么认为」
-					;TranslatedMark 「うん、私もそう思うよ」
-				CASE 2
-					PRINTFORML 「那么，那个油炸豆腐怎么样了？」
-					;TranslatedMark 「で、その油揚げはどうなったんだ？」
-					PRINTFORMW %ANAME(TARGET)%眼睛闪闪发光地听着%ANAME(MASTER)%的话
-					;TranslatedMark %ANAME(TARGET)%は目を輝かせながら%ANAME(MASTER)%の話を聞いている
-			ENDSELECT
+			;主人公がショタの場合の口上変化分
+			IF CFLAG:252 == 1
+				SELECTCASE RAND:5
+					CASE 0
+						PRINTFORMW 「嗯，我也还有很多不知道的事情啊，%ANAME(MASTER)%教了我。」
+						;TranslatedMark 「ふむ、私にもまだまだ知らないことがあるんだな。%ANAME(MASTER)%に教えられたよ」
+					CASE 1
+						PRINTFORML 「嗯，我也这么认为」
+						;TranslatedMark 「うん、私もそう思うよ」
+						PRINTFORMW %ANAME(TARGET)%温柔地微笑着听%ANAME(MASTER)%说话。
+						;TranslatedMark %ANAME(TARGET)%は優しく微笑みながら%ANAME(MASTER)%の話を聞いている
+					CASE 2
+						PRINTFORML 「那么，那个油炸豆腐怎么样了？」
+						;TranslatedMark 「で、その油揚げはどうなったんだ？」
+						PRINTFORMW %ANAME(TARGET)%眼睛闪闪发光地听着%ANAME(MASTER)%的话
+						;TranslatedMark %ANAME(TARGET)%は目を輝かせながら%ANAME(MASTER)%の話を聞いている
+					CASE 3
+						PRINTFORML %ANAME(MASTER)%在美丽的%ANAME(TARGET)%面前，也渐渐能自然地进行交谈。
+						;TranslatedMark %ANAME(MASTER)%は美人の%ANAME(TARGET)%を前にしても、だんだんと自然体になって会話できるようになってきている
+						PRINTFORMW 「...呵呵，成长了呢%ANAME(MASTER)%。果然孩子总是很快成长，让周围的人感到惊喜啊。」
+						;TranslatedMark 「…ふふ、成長したな%ANAME(MASTER)%。やはり子供はすぐに成長して周りを驚かせてくれるんだな」
+					CASE 4
+						PRINTFORMW 「有什么需要帮忙的时候尽管跟我说。我并不讨厌帮忙，应该说我还挺喜欢的。」
+						;TranslatedMark 「何か手が足りない時は言っておくれ。手伝ったりするのは嫌いではない…、というか好きな方なんだ」
+				ENDSELECT
+			;通常版
+			ELSE
+				SELECTCASE RAND:5
+					CASE 0
+						PRINTFORMW 「这样啊，我也还有很多不知道的事情呢」
+						;TranslatedMark 「ほう、私にもまだまだ知らないことがあるんだな」
+					CASE 1
+						PRINTFORMW 「嗯，我也这么认为」
+						;TranslatedMark 「うん、私もそう思うよ」
+					CASE 2
+						PRINTFORML 「那么，那个油炸豆腐怎么样了？」
+						;TranslatedMark 「で、その油揚げはどうなったんだ？」
+						PRINTFORMW %ANAME(TARGET)%眼睛闪闪发光地听着%ANAME(MASTER)%的话
+						;TranslatedMark %ANAME(TARGET)%は目を輝かせながら%ANAME(MASTER)%の話を聞いている
+					CASE 3
+						PRINTFORMW 「每个人都有不愿触碰的过去，但我愿意相信，无论什么样的过去都会成为通往现在的养分。」
+						;TranslatedMark 「誰しも触れにくい過去はあるものだ。だがどんな過去も今への糧になると、そう信じたい」
+					CASE 4
+						PRINTFORMW 「人手不够的时候只要跟我说一声，我会帮忙的。我并不讨厌这样的事情。」
+						;TranslatedMark 「人手が足りない時は言ってくれれば手伝うよ。そういうのは嫌いではないんだ」
+				ENDSELECT
+			ENDIF
 		ELSE
-			SELECTCASE RAND:3
-				CASE 0
-					PRINTFORMW 「那么，那个油炸豆腐怎么样了？」
-					;TranslatedMark 「で、その油揚げはどうなったんです？」
-				CASE 1
-					PRINTFORMW 「我也还有很多不知道的事情啊」
-					;TranslatedMark 「私もまだまだ知らないことばかりです」
-				CASE 2
-					PRINTFORMW 「是的，我也这么认为」
-					;TranslatedMark 「ええ、私もそう思います」
-			ENDSELECT
+			;主人公がショタの場合の口上変化分
+			IF CFLAG:252 == 1
+				SELECTCASE RAND:5
+					CASE 0
+						PRINTFORMW 「以你的年纪应该正是爱玩的阶段吧。无论如何，我会尽早让这片幻想乡恢复平静。」
+						;TranslatedMark 「君の若さではまだ遊びたい盛りでしょう。何とか早いうちに、この幻想郷に平穏を取り戻しましょう」
+					CASE 1
+						PRINTFORMW 「我也有很多东西还不了解。你也要注意每天努力，不要懈怠。」
+						;TranslatedMark 「私もまだまだ知らないことばかりです。君も日々の精進を怠らないよう気を付けて」
+					CASE 2
+						PRINTFORML 「从刚才开始你的目光就一直停留在我的尾巴上呢。这真的那么稀奇吗？」
+						;TranslatedMark 「さっきから私の尻尾に目が行ってますね。そんなに珍しいですか？」
+						PRINTFORMW 「......嗯，确实，九尾狐的尾巴是很罕见啦。但是请不要随便去摸。」
+						;TranslatedMark 「……まあ確かに、九尾の尻尾は珍しいでしょうね。でも勝手に触ろうとしないように」
+					CASE 3
+						PRINTFORML 「我无法确定你将来是否会取得巨大成功，但从现在开始的日常积累将对未来有所帮助。」
+						;TranslatedMark 「君が将来大成するかどうかは分かりませんが、今からでも日々の積み重ねは将来への助けになります」
+						PRINTFORMW 「锻炼身体也好，刻苦学习也好，无论选择哪一个都可以。让我们一起加油吧。」
+						;TranslatedMark 「身体を鍛えるのも勉学に励むのも、どちらを選んでも構いません。ともに頑張りましょう」
+					CASE 4
+						PRINTFORML 美人的%ANAME(TARGET)%面前，尽管%ANAME(MASTER)%感到有些羞涩，但仍竭力进行着对话。
+						;TranslatedMark 美人の%ANAME(TARGET)%を前にして、%ANAME(MASTER)%は気恥ずかしさを感じながらも懸命に会話を進めている
+						PRINTFORMW （...真是充满了初次体验呢。说起来，橙也有过这样的时期吧...）
+						;TranslatedMark （…初々しいなぁ。そういえば橙もこんな時期があったっけ…）
+				ENDSELECT
+			;通常版
+			ELSE
+				SELECTCASE RAND:5
+					CASE 0
+						PRINTFORMW 「那么，那个油炸豆腐怎么样了？」
+						;TranslatedMark 「で、その油揚げはどうなったんです？」
+					CASE 1
+						PRINTFORMW 「我也还有很多不知道的事情啊」
+						;TranslatedMark 「私もまだまだ知らないことばかりです」
+					CASE 2
+						PRINTFORMW 「是的，我也这么认为」
+						;TranslatedMark 「ええ、私もそう思います」
+					CASE 3
+						PRINTFORML 「从刚才开始你的目光就一直停留在我的尾巴上呢。这真的那么稀奇吗？」
+						;TranslatedMark 「さっきから私の尻尾に目が行ってますね。そんなに珍しいですか？」
+						PRINTFORMW 「......嗯，确实，九尾的尾巴很珍贵。不过请不要擅自去触碰。」
+						;TranslatedMark 「……まあ確かに、九尾の尻尾は珍しいでしょう。でも勝手に触ろうとしないように」
+					CASE 4
+						PRINTFORMW 「人手不足的时候只要你说出来，我会帮忙的。我并不讨厌做这样的事情。」
+						;TranslatedMark 「人手が足りない時は言ってくれれば手伝いますよ。そういうのは嫌いではないので」
+				ENDSELECT
+			ENDIF
 		ENDIF
 	ENDIF
 ENDIF
@@ -10850,23 +11826,67 @@ IF SELECTCOM == 301
 	ELSE
 		;恋慕 or 服従 or 親友
 		IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
-			SELECTCASE RAND:3
-				CASE 0
-					PRINTFORMW 「虽说是训练，但我会认真对待的。来吧，%ANAME(MASTER)%也要全力以赴」
-					;TranslatedMark 「訓練といえど本気で行くぞ。さあ、%ANAME(MASTER)%も全力で」
-				CASE 1
-					PRINTFORML 「基本上做的不错。関心関心♪」
-					;TranslatedMark 「基本はできているようだ。関心関心♪」
-					PRINTFORMW %ANAME(TARGET)%似乎对%ANAME(MASTER)%的进步感到满意
-					;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の上達ぶりに満足しているようだ
-				CASE 2
-					PRINTFORML 「动作超出了预想。你在我不在的时候也在做训练吗？」
-					;TranslatedMark 「予想以上の動きだった。私のいない間に訓練でもしていたのか？」
-					PRINTFORML %ANAME(MASTER)%理所当然地挺起了胸膛
-					;TranslatedMark %ANAME(MASTER)%はそのとおりと胸を張った
-					PRINTFORMW %ANAME(TARGET)%微笑着，温柔地抚摸着%ANAME(MASTER)%的头
-					;TranslatedMark %ANAME(TARGET)%は微笑むと、%ANAME(MASTER)%の頭を優しく撫でた
-			ENDSELECT
+			;主人公がショタの場合の口上変化分
+			IF CFLAG:252 == 1
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORML 「ふふ，攻势不错呢。成长了啊%ANAME(MASTER)%。......晚上的「责备」也可以期待这种程度的吗？　呵呵♥」
+						;TranslatedMark 「ふふ、中々の攻めだ。成長したな%ANAME(MASTER)%。……夜の方の責めも、コレくらいを期待していいのかな？　くすっ♥」
+						PRINTFORMW 训练过程中，接近时从%ANAME(TARGET)%那里听到的淫秽言语，令%ANAME(MASTER)%脸红不已、感到动摇。
+						;TranslatedMark 訓練の最中、接近した際に%ANAME(TARGET)%から囁かれた淫らな言葉に、%ANAME(MASTER)%は顔を赤くして動揺した
+						PRINTFORML 「...有破绽。不行哦%ANAME(MASTER)%，仅仅因为这样就慌乱的话。」
+						;TranslatedMark 「…スキありっ。駄目だぞ%ANAME(MASTER)%、これくらいで動揺していては」
+						PRINTFORMW 由于一瞬的动摇，%ANAME(MASTER)%的脚被尾巴缠住，在%ANAME(TARGET)%的面前被悬在了半空中。
+						;TranslatedMark 一瞬の動揺により足を尻尾に絡めとられ、%ANAME(MASTER)%は%ANAME(TARGET)%の目の前で宙ぶらりんにされた
+						PRINTFORML 「有点担心呢。据说暗地里盯上你的女生还不少......看来这是需要我亲自给予色诱防备对策的时候啊♥」
+						;TranslatedMark 「ちょっと心配だなぁ。案外、お前を狙ってる女も多いと聞く。…これは私が直々に、色仕掛け対策を施してやらねばいかんかな♥」
+						PRINTFORMW 妖娆地眯起的%ANAME(TARGET)%的眼睛射向%ANAME(MASTER)%。%ANAME(MASTER)%在那视线中感受到了一种略微刺激的感觉。
+						;TranslatedMark 妖艶に細められた%ANAME(TARGET)%の目が%ANAME(MASTER)%を射貫く。その視線にどこかゾクゾクしたものを感じる%ANAME(MASTER)%であった
+					CASE 1
+						PRINTFORML 「嗯，还挺能干的嘛。如果可以这样的话，我也可以把后背托付给你呢。呵呵♪」
+						;TranslatedMark 「ほほう、中々の動きだ。それが出来るなら、私の背中も預けてよさそうだな。ふふっ♪」
+						PRINTFORMW %ANAME(TARGET)%似乎对%ANAME(MASTER)%的进步感到满意
+						;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の上達ぶりに満足しているようだ
+					CASE 2
+						PRINTFORML 「超出预期的动作。在我未见到的时候特训过吗？」
+						;TranslatedMark 「予想以上の動きだった。私の見ぬ間に特訓でもしていたのか？」
+						PRINTFORMW %ANAME(MASTER)%把幕后努力的成果抬头挺胸毫不惧色地告诉了对方，没有错！
+						;TranslatedMark %ANAME(MASTER)%は影の努力の成果を、そのとおりですっ、と胸を張って伝えた
+						PRINTFORML 「......呵呵♪　好乖好乖，真棒啊%ANAME(MASTER)%。今天就给你吃喜欢的东西吧♥」
+						;TranslatedMark 「…ふふ♪　よしよし、偉いぞ%ANAME(MASTER)%。今日は好きなもの食べさせてあげるぞ♥」
+						PRINTFORMW %ANAME(TARGET)%为%ANAME(MASTER)%的努力感到高兴，并轻轻地抚摸了他的头。
+						;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の努力を喜び、その頭を優しく撫でた
+				ENDSELECT
+			;通常版
+			ELSE
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORML 「呵呵，真是不错的攻击啊%ANAME(MASTER)%。......晚上那方面的进攻，我可以期待到这种程度吗？ 嘻嘻♥」
+						;TranslatedMark 「ふふ、中々の攻めだ%ANAME(MASTER)%。……夜の方の責めも、コレくらいを期待していいのかな？　くすっ♥」
+						PRINTFORMW 训练期间，靠近时被%ANAME(TARGET)%靠近耳边呢喃的话挑逗得%ANAME(MASTER)%禁不住心头一颤。
+						;TranslatedMark 訓練の最中、接近した際に%ANAME(TARGET)%から耳元へ囁かれた淫らな言葉に%ANAME(MASTER)%はドキッとした
+						PRINTFORML 「......スキありっ。%ANAME(MASTER)%，这样可不行，这么点小事就露出破绽。」
+						;TranslatedMark 「…スキありっ。駄目だぞ%ANAME(MASTER)%、これくらいでスキを見せていては」
+						PRINTFORMW 一瞬的动摇让全身被尾巴缠住，%ANAME(MASTER)%正被%ANAME(TARGET)%的九条尾巴搅得天翻地覆。
+						;TranslatedMark 一瞬の動揺により全身を尻尾に絡めとられ、%ANAME(MASTER)%は%ANAME(TARGET)%の九本の尻尾でもみくちゃにされている
+						PRINTFORML 「有点担心呢。据说暗地里盯上你的女生还不少......看来这是需要我亲自给予色诱防备对策的时候啊♥」
+						;TranslatedMark 「ちょっと心配だなぁ。案外、お前を狙ってる女も多いと聞く。…これは私が直々に、色仕掛け対策を施してやらねばいかんかな♥」
+						PRINTFORMW 妖娆地微微眯起的%ANAME(TARGET)%的眼睛盯住了%ANAME(MASTER)%。%ANAME(MASTER)%的下半身对这样的视线产生了反应。
+						;TranslatedMark 妖艶に細められた%ANAME(TARGET)%の目が%ANAME(MASTER)%を射貫く。その視線に下半身が反応してしまう%ANAME(MASTER)%であった
+					CASE 1
+						PRINTFORML 「基本上做的不错。関心関心♪」
+						;TranslatedMark 「基本はできているようだ。関心関心♪」
+						PRINTFORMW %ANAME(TARGET)%似乎对%ANAME(MASTER)%的进步感到满意
+						;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の上達ぶりに満足しているようだ
+					CASE 2
+						PRINTFORML 「超过预期的动作。在我没看到的期间进行过训练吗？」
+						;TranslatedMark 「予想以上の動きだった。私の見ぬ間に訓練でもしていたのか？」
+						PRINTFORML %ANAME(MASTER)%理所当然地挺起了胸膛
+						;TranslatedMark %ANAME(MASTER)%はそのとおりと胸を張った
+						PRINTFORMW %ANAME(TARGET)%微笑着，温柔地抚摸着%ANAME(MASTER)%的头
+						;TranslatedMark %ANAME(TARGET)%は微笑むと、%ANAME(MASTER)%の頭を優しく撫でた
+				ENDSELECT
+			ENDIF
 		;好感度500以上
 		ELSEIF CFLAG:好感度 >= 500
 			SELECTCASE RAND:3
@@ -10918,29 +11938,55 @@ IF SELECTCOM == 302
 	ELSE
 		;恋慕 or 服従 or 親友
 		IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
-			SELECTCASE RAND:3
-				CASE 0
-					PRINTFORMW 「虽说是训练，但我会认真对待的。来吧，%ANAME(MASTER)%也要全力以赴」
-					;TranslatedMark 「訓練といえど本気で行くぞ。さあ、%ANAME(MASTER)%も全力で」
-				CASE 1
-					PRINTFORML 「基本上做的不错。関心関心♪」
-					;TranslatedMark 「基本はできているようだ。関心関心♪」
-					PRINTFORMW %ANAME(TARGET)%似乎对%ANAME(MASTER)%的进步感到满意
-					;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の上達ぶりに満足しているようだ
-				CASE 2
-					PRINTFORML 「动作超出了预想。你在我不在的时候也在做训练吗？」
-					;TranslatedMark 「予想以上の動きだった。私のいない間に特訓でもしていたのか？」
-					PRINTFORML %ANAME(MASTER)%理所当然地挺起了胸膛
-					;TranslatedMark %ANAME(MASTER)%はそのとおりと胸を張った
-					PRINTFORMW %ANAME(TARGET)%微笑着，温柔地抚摸着%ANAME(MASTER)%的头
-					;TranslatedMark %ANAME(TARGET)%は微笑むと、%ANAME(MASTER)%の頭を優しく撫でた
-			ENDSELECT
+			;主人公がショタの場合の口上変化分
+			IF CFLAG:252 == 1
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORML 「训练时要像实战，实战时要像训练。始终保持专注去挑战。那么，%ANAME(MASTER)%也要全力以赴地...」
+						;TranslatedMark 「訓練は本番のように、本番の時は訓練のように。常に集中して挑むべし。さあ、%ANAME(MASTER)%も全力で」
+						PRINTFORMW %ANAME(TARGET)%担心%ANAME(MASTER)%的安全，热心地进行护身训练。
+						;TranslatedMark %ANAME(MASTER)%の身を案じる%ANAME(TARGET)%は、熱心に護身の訓練を行わせている
+					CASE 1
+						PRINTFORML 「哟，你的身手不错嘛。如果能做到这样，那也可以放心地把我的背后交给你呢。呵呵♪」
+						;TranslatedMark 「ほう、中々の動きだ。それが出来るなら、私の背中も任せてよさそうだな。ふふっ♪」
+						PRINTFORMW %ANAME(TARGET)%似乎对%ANAME(MASTER)%的进步感到满意
+						;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の上達ぶりに満足しているようだ
+					CASE 2
+						PRINTFORML 「超出预期的动作。在我未见到的时候特训过吗？」
+						;TranslatedMark 「予想以上の動きだった。私の見ぬ間に特訓でもしていたのか？」
+						PRINTFORMW %ANAME(MASTER)%把幕后努力的成果抬头挺胸毫不惧色地告诉了对方，没有错！
+						;TranslatedMark %ANAME(MASTER)%は影の努力の成果を、そのとおりですっ、と胸を張って伝えた
+						PRINTFORML 「......呵呵♪　好乖好乖，真棒啊%ANAME(MASTER)%。今天就给你吃喜欢的东西吧♥」
+						;TranslatedMark 「…ふふ♪　よしよし、偉いぞ%ANAME(MASTER)%。今日は好きなもの食べさせてあげるぞ♥」
+						PRINTFORMW %ANAME(TARGET)%为%ANAME(MASTER)%的努力感到高兴，并轻轻地抚摸了他的头。
+						;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の努力を喜び、その頭を優しく撫でた
+				ENDSELECT
+			;通常版
+			ELSE
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORMW 「训练时像实战一样，实战时像训练一样。来吧，%ANAME(MASTER)%也拼尽全力。」
+						;TranslatedMark 「訓練は本番のように、本番の時は訓練のように。さあ、%ANAME(MASTER)%も全力で」
+					CASE 1
+						PRINTFORML 「基本上做的不错。関心関心♪」
+						;TranslatedMark 「基本はできているようだ。関心関心♪」
+						PRINTFORMW %ANAME(TARGET)%似乎对%ANAME(MASTER)%的进步感到满意
+						;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の上達ぶりに満足しているようだ
+					CASE 2
+						PRINTFORML 「超出预期的动作。在我未见到的时候特训过吗？」
+						;TranslatedMark 「予想以上の動きだった。私の見ぬ間に特訓でもしていたのか？」
+						PRINTFORML %ANAME(MASTER)%理所当然地挺起了胸膛
+						;TranslatedMark %ANAME(MASTER)%はそのとおりと胸を張った
+						PRINTFORMW %ANAME(TARGET)%微笑着，温柔地抚摸着%ANAME(MASTER)%的头
+						;TranslatedMark %ANAME(TARGET)%は微笑むと、%ANAME(MASTER)%の頭を優しく撫でた
+				ENDSELECT
+			ENDIF
 		;好感度500以上
 		ELSEIF CFLAG:好感度 >= 500
 			SELECTCASE RAND:3
 				CASE 0
-					PRINTFORML 「没有基本啊。听好了，就这样…」
-					;TranslatedMark 「基本がなってないんだな。いいか、こうして…」
+					PRINTFORML 「基本还没有深入脑海呢。听着，这样做...」
+					;TranslatedMark 「基本がまだ沁みついていないんだな。いいか、こうして…」
 					PRINTFORMW %ANAME(MASTER)%像这样用图来解说教导着
 					;TranslatedMark %ANAME(MASTER)%に教えるように図で解説している
 				CASE 1
@@ -11005,30 +12051,64 @@ IF SELECTCOM == 303
 			ENDSELECT
 		;好感度500以上
 		ELSEIF CFLAG:好感度 >= 500
-			SELECTCASE RAND:3
-				CASE 0
-					PRINTFORMW 「战由兵说了算。掌握使之行动的兵法是必须的」
-					;TranslatedMark 「「戦は兵が物をいう。それを動かす兵法の習得は必須だ」
-				CASE 1
-					PRINTFORMW 「无论是活用还是杀死，都要取决于对策的。记住的话就会感觉好很多」
-					;TranslatedMark 「武を生かすも殺すも策次第。覚えると病みつきになるぞ」
-				CASE 2
-					PRINTFORMW 「我喜欢思考。%ANAME(MASTER)%觉得如何？」
-					;TranslatedMark 「考えることは好きだ。%ANAME(MASTER)%はどうだ？」
-			ENDSELECT
+			;主人公がショタの場合の口上変化分
+			IF CFLAG:252 == 1
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORML 「战争要靠士兵说话。掌握指挥士兵行动的策略是必不可少的。」
+						;TranslatedMark 「戦は兵が物をいう。それを動かす兵法の習得は必須だ」
+						PRINTFORMW 「%ANAME(MASTER)%一旦涉及到使用他人，这就是无法避免的事情了哦？来吧，努力加油吧。」
+						;TranslatedMark 「%ANAME(MASTER)%も人を使う側になるなら避けては通れんぞ？　さあ頑張ろう」
+					CASE 1
+						PRINTFORMW 「武艺的存废取决于谋略。一旦学会就会上瘾啊。%ANAME(MASTER)%不考虑加入我们这边吗？」
+						;TranslatedMark 「武を生かすも殺すも策次第。覚えると病みつきになるぞ。%ANAME(MASTER)%もコッチ側になってみないか？」
+					CASE 2
+						PRINTFORMW 「思考是我的爱好。%ANAME(MASTER)%呢？......呵呵，我还是更喜欢活动身体。」
+						;TranslatedMark 「考えることは好きだ。%ANAME(MASTER)%はどうだ？　…ふふ、まだ身体を動かす方が好きかな？」
+				ENDSELECT
+			;通常版
+			ELSE
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORMW 「战争要靠士兵说话。掌握指挥士兵行动的策略是必不可少的。」
+						;TranslatedMark 「戦は兵が物をいう。それを動かす兵法の習得は必須だ」
+					CASE 1
+						PRINTFORMW 「无论是活用还是杀死，都要取决于对策的。记住的话就会感觉好很多」
+						;TranslatedMark 「武を生かすも殺すも策次第。覚えると病みつきになるぞ」
+					CASE 2
+						PRINTFORMW 「我喜欢思考。%ANAME(MASTER)%觉得如何？」
+						;TranslatedMark 「考えることは好きだ。%ANAME(MASTER)%はどうだ？」
+				ENDSELECT
+			ENDIF
 		;それ以外
 		ELSE
-			SELECTCASE RAND:3
-				CASE 0
-					PRINTFORMW 「战由兵说了算。掌握使之行动的兵法是必须的」
-					;TranslatedMark 「戦は兵が物をいいます。それを動かす兵法の習得は必須です」
-				CASE 1
-					PRINTFORMW 「无论是活用还是杀死，都要取决于对策的」
-					;TranslatedMark 「武を生かすも殺すも策次第です」
-				CASE 2
-					PRINTFORMW 「我喜欢思考」
-					;TranslatedMark 「考えることは好きです」
-			ENDSELECT
+			;主人公がショタの場合の口上変化分
+			IF CFLAG:252 == 1
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORMW 「战争需要依靠士兵去传达。而掌握指挥士兵的兵法则是必修课。...你会感到无聊吗？」
+						;TranslatedMark 「戦は兵が物をいいます。それを動かす兵法の習得は必須です。…君には退屈でしょうか？」
+					CASE 1
+						PRINTFORMW 「武术的运用成败在于策略。我希望你能成为善用它的一方。」
+						;TranslatedMark 「武を生かすも殺すも策次第。願わくば君には生かす側になってもらいたいものです」
+					CASE 2
+						PRINTFORMW 「喜欢思考。%ANAME(MASTER)%呢？还是更喜欢运动呢？」
+						;TranslatedMark 「考えることは好きです。%ANAME(MASTER)%はどう？　まだ身体を動かす方が好きかな」
+				ENDSELECT
+			;通常版
+			ELSE
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORMW 「战由兵说了算。掌握使之行动的兵法是必须的」
+						;TranslatedMark 「戦は兵が物をいいます。それを動かす兵法の習得は必須です」
+					CASE 1
+						PRINTFORMW 「无论是活用还是杀死，都要取决于对策的」
+						;TranslatedMark 「武を生かすも殺すも策次第です」
+					CASE 2
+						PRINTFORMW 「我喜欢思考」
+						;TranslatedMark 「考えることは好きです」
+				ENDSELECT
+			ENDIF
 		ENDIF
 	ENDIF
 ENDIF
@@ -11090,14 +12170,27 @@ IF SELECTCOM == 304
 			ENDSELECT
 		;それ以外
 		ELSE
-			SELECTCASE RAND:2
-				CASE 0
-					PRINTFORMW 「发挥本式神的本领」
-					;TranslatedMark 「式の本領発揮です」
-				CASE 1
-					PRINTFORMW 「这是我的拿手好戏」
-					;TranslatedMark 「こういうのは私の得意分野です」
-			ENDSELECT
+			;主人公がショタの場合の口上変化分
+			IF CFLAG:252 == 1
+				SELECTCASE RAND:2
+					CASE 0
+						PRINTFORMW 「让我展示作为式神的本领给你看。」
+						;TranslatedMark 「式の本領をお見せしよう」
+					CASE 1
+						PRINTFORMW 「由于这是我的专长领域。」
+						;TranslatedMark 「こういうことは私の得意分野ゆえ」
+				ENDSELECT
+			;通常版
+			ELSE
+				SELECTCASE RAND:2
+					CASE 0
+						PRINTFORMW 「发挥本式神的本领」
+						;TranslatedMark 「式の本領発揮です」
+					CASE 1
+						PRINTFORMW 「这是我的拿手好戏」
+						;TranslatedMark 「こういうのは私の得意分野です」
+				ENDSELECT
+			ENDIF
 		ENDIF
 	ENDIF
 ENDIF
@@ -11121,46 +12214,97 @@ IF SELECTCOM == 305
 	ELSE
 		;恋慕 or 服従 or 親友
 		IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
-			SELECTCASE RAND:3
-				CASE 0
-					PRINTFORML 「啊，%ANAME(MASTER)%。那里的稻荷寿司，油炸豆腐的味道真是绝品。下次一起去吧？」
-					;TranslatedMark 「あ、%ANAME(MASTER)%。あそこの稲荷寿司な、油揚げの味付けが絶品なんだ。今度一緒に行かないか？」
-					PRINTFORMW %ANAME(TARGET)%在巡视途中，把自己喜欢的店介绍给了%ANAME(MASTER)%
-					;TranslatedMark %ANAME(TARGET)%は見回りの途中、お気に入りの店を%ANAME(MASTER)%に紹介している
-				CASE 1
-					PRINTFORML 「知道了。那么走吧，%ANAME(MASTER)%」
-					;TranslatedMark 「分かった。さあ行こう、%ANAME(MASTER)%」
-					PRINTFORMW %ANAME(TARGET)%挽着%ANAME(MASTER)%的手臂走着
-					;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の腕を取って歩いている
-				CASE 2
-					PRINTFORML 「公私应该分明…但在一起的时候不知不觉就想撒娇了…」
-					;TranslatedMark 「公私は分けるべきとは思うんだが…、一緒にいるとついつい甘えたくなってしまう…」
-					PRINTFORMW %ANAME(TARGET)%抱住%ANAME(MASTER)%的手臂环视着
-					;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の腕に抱きつきながら見回りしている
-			ENDSELECT
+			;主人公がショタの場合の口上変化分
+			IF CFLAG:252 == 1
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORML 「啊，%ANAME(MASTER)%。那里的稻荷寿司，油炸豆腐的味道真是绝品。下次一起去吧？」
+						;TranslatedMark 「あ、%ANAME(MASTER)%。あそこの稲荷寿司な、油揚げの味付けが絶品なんだ。今度一緒に行かないか？」
+						PRINTFORMW %ANAME(TARGET)%在巡视途中，把自己喜欢的店介绍给了%ANAME(MASTER)%
+						;TranslatedMark %ANAME(TARGET)%は見回りの途中、お気に入りの店を%ANAME(MASTER)%に紹介している
+					CASE 1
+						PRINTFORML 「知道了。那么走吧，%ANAME(MASTER)%」
+						;TranslatedMark 「分かった。さあ行こう、%ANAME(MASTER)%」
+						PRINTFORMW %ANAME(TARGET)%为了不和%ANAME(MASTER)%走散，一直牵着对方的手走着。
+						;TranslatedMark %ANAME(TARGET)%ははぐれないよう、%ANAME(MASTER)%と手を繋ぎながら歩いている
+					CASE 2
+						PRINTFORML （我其实觉得我们应该分开的，但在一起的时候总是忍不住想要去宠爱你...。）
+						;TranslatedMark （公私は分けるべきとは思うんだが…、一緒にいるとついつい可愛がりたくなってしまう）
+						PRINTFORMW %ANAME(TARGET)%把周围的事务交给式神处理，自己则一直紧盯着%ANAME(MASTER)%。
+						;TranslatedMark %ANAME(TARGET)%は周囲のことを式神に任せ、%ANAME(MASTER)%の方ばかり見てしまっている
+				ENDSELECT
+			;通常版
+			ELSE
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORML 「啊，%ANAME(MASTER)%。那里的稻荷寿司，油炸豆腐的味道真是绝品。下次一起去吧？」
+						;TranslatedMark 「あ、%ANAME(MASTER)%。あそこの稲荷寿司な、油揚げの味付けが絶品なんだ。今度一緒に行かないか？」
+						PRINTFORMW %ANAME(TARGET)%在巡视途中，把自己喜欢的店介绍给了%ANAME(MASTER)%
+						;TranslatedMark %ANAME(TARGET)%は見回りの途中、お気に入りの店を%ANAME(MASTER)%に紹介している
+					CASE 1
+						PRINTFORML 「知道了。那么走吧，%ANAME(MASTER)%」
+						;TranslatedMark 「分かった。さあ行こう、%ANAME(MASTER)%」
+						PRINTFORMW %ANAME(TARGET)%挽着%ANAME(MASTER)%的手臂走着
+						;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の腕を取って歩いている
+					CASE 2
+						PRINTFORML 「公私应该分明…但在一起的时候不知不觉就想撒娇了…」
+						;TranslatedMark 「公私は分けるべきとは思うんだが…、一緒にいるとついつい甘えたくなってしまう…」
+						PRINTFORMW %ANAME(TARGET)%抱住%ANAME(MASTER)%的手臂环视着
+						;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の腕に抱きつきながら見回りしている
+				ENDSELECT
+			ENDIF
 		;好感度500以上
 		ELSEIF CFLAG:好感度 >= 500
-			SELECTCASE RAND:3
-				CASE 0
-					PRINTFORMW 「我来监视妖怪之类的。如果那里有人类找麻烦的话就拜托你了」
-					;TranslatedMark 「妖のたぐいは私が見張る。そっちは人間のゴロツキ等がいたら頼む」
-				CASE 1
-					PRINTFORMW 「我巡查的话，小妖会很老实很多吧」
-					;TranslatedMark 「私が見回れば、木っ端妖怪は大人しくしているだろう」
-				CASE 2
-					PRINTFORMW 「为了保持秩序，巡视也是必要的。好好干吧」
-					;TranslatedMark 「秩序を保つためにも見回りは必要なものだ。しっかりやろう」
-			ENDSELECT
+			;主人公がショタの場合の口上変化分
+			IF CFLAG:252 == 1
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORMW 「妖怪之类的就由我来监视。你那边如果有不良人类之类的，要告诉我。不要试图一个人去解决。」
+						;TranslatedMark 「妖のたぐいは私が見張る。そっちは人間のゴロツキ等がいたら教えてくれ。一人でどうにかしようとしないようにな」
+					CASE 1
+						PRINTFORMW 「如果我环顾四周，那些微小的妖怪们就会规矩许多。%ANAME(MASTER)%，你要注意不要走散。......为了以防万一，要不要牵个手？」
+						;TranslatedMark 「私が見回れば木っ端妖怪は大人するだろう。%ANAME(MASTER)%ははぐれないよう気を付けて。…念のため手でも繋ぐか？」
+					CASE 2
+						PRINTFORMW 「如果发现什么就跟我说。不能一个人去危险的地方啊。」
+						;TranslatedMark 「何か見つけたら私に知らせるようにな。危ない所へは一人で行ってはいけないぞ」
+				ENDSELECT
+			;通常版
+			ELSE
+				SELECTCASE RAND:3
+					CASE 0
+						PRINTFORMW 「我来监视妖怪之类的。如果那里有人类找麻烦的话就拜托你了」
+						;TranslatedMark 「妖のたぐいは私が見張る。そっちは人間のゴロツキ等がいたら頼む」
+					CASE 1
+						PRINTFORMW 「我巡查的话，小妖会很老实很多吧」
+						;TranslatedMark 「私が見回れば、木っ端妖怪は大人しくしているだろう」
+					CASE 2
+						PRINTFORMW 「为了保持秩序，巡视也是必要的。好好干吧」
+						;TranslatedMark 「秩序を保つためにも見回りは必要なものだ。しっかりやろう」
+				ENDSELECT
+			ENDIF
 		;それ以外
 		ELSE
-			SELECTCASE RAND:2
-				CASE 0
-					PRINTFORMW 「我看了一下，小妖怪还蛮老实的」
-					;TranslatedMark 「私が見回れば、木っ端妖怪は大人しくしていましょう」
-				CASE 1
-					PRINTFORMW 「为了保持秩序也需要巡视」
-					;TranslatedMark 「秩序を保つためにも見回りは必要です」
-			ENDSELECT
+			;主人公がショタの場合の口上変化分
+			IF CFLAG:252 == 1
+				SELECTCASE RAND:2
+					CASE 0
+						PRINTFORMW 「如果我巡视一圈，这些小妖怪大概就会老实点吧...希望%ANAME(MASTER)%千万不要走丢了。」
+						;TranslatedMark 「私が見回れば木っ端妖怪は大人するだろうが…%ANAME(MASTER)%ははぐれないよう気を付けて」
+					CASE 1
+						PRINTFORMW 「如果发现什么就通知我。不要一个人去危险的地方。」
+						;TranslatedMark 「何か見つけたら私に知らせるように。危ない所へは一人で行かないようにしなさい」
+				ENDSELECT
+			;通常版
+			ELSE
+				SELECTCASE RAND:2
+					CASE 0
+						PRINTFORMW 「我看了一下，小妖怪还蛮老实的」
+						;TranslatedMark 「私が見回れば、木っ端妖怪は大人しくしていましょう」
+					CASE 1
+						PRINTFORMW 「为了保持秩序也需要巡视」
+						;TranslatedMark 「秩序を保つためにも見回りは必要です」
+				ENDSELECT
+			ENDIF
 		ENDIF
 	ENDIF
 ENDIF
@@ -11270,16 +12414,31 @@ IF SELECTCOM == 307
 			ENDSELECT
 		;それ以外
 		ELSE
-			SELECTCASE RAND:2
-				CASE 0
-					PRINTFORML %ANAME(TARGET)%很灵巧地用菜刀切菜
-					;TranslatedMark %ANAME(TARGET)%は手際よく食材に包丁を入れている
-					PRINTFORMW 「因为平时就经常碰菜刀」
-					;TranslatedMark 「普段から包丁は触ってますので」
-				CASE 1
-					PRINTFORMW 「我做不出精致的东西，但如果是这个程度的话…」
-					;TranslatedMark 「凝った物は作れませんが、これくらいなら…」
-			ENDSELECT
+			;主人公がショタの場合の口上変化分
+			IF CFLAG:252 == 1
+				PRINTFORML %ANAME(TARGET)%同时也在向%ANAME(MASTER)%传授技艺，熟练地用刀处理食材。
+				;TranslatedMark %ANAME(TARGET)%は手際よく食材に包丁を入れながら%ANAME(MASTER)%にも指導している
+				SELECTCASE RAND:2
+					CASE 0
+						PRINTFORMW 「菜刀要这样拿，手要这样放......对，就是要小心不割到手。」
+						;TranslatedMark 「包丁はこう持って、手はこう添えて…そう、指を切らないように慎重に」
+					CASE 1
+						PRINTFORMW 「无论在料理还是其他事情上，基本都很重要。慢慢来，记住正确的切法......就是这样。」
+						;TranslatedMark 「料理に限らず何事も基本が大事。ゆっくりでいいから正しい切り方を覚えるように…そう、その調子」
+				ENDSELECT
+			;通常版
+			ELSE
+				SELECTCASE RAND:2
+					CASE 0
+						PRINTFORML %ANAME(TARGET)%很灵巧地用菜刀切菜
+						;TranslatedMark %ANAME(TARGET)%は手際よく食材に包丁を入れている
+						PRINTFORMW 「因为平时就经常碰菜刀」
+						;TranslatedMark 「普段から包丁は触ってますので」
+					CASE 1
+						PRINTFORMW 「我做不出精致的东西，但如果是这个程度的话…」
+						;TranslatedMark 「凝った物は作れませんが、これくらいなら…」
+				ENDSELECT
+			ENDIF
 		ENDIF
 	ENDIF
 ENDIF
@@ -11443,8 +12602,8 @@ IF SELECTCOM == 320
 							PRINTFORMW 「更…可以更多地粘在一起哦♥」
 							;TranslatedMark 「もっと…くっついてもいいんだぞ♥」
 					ENDSELECT
-				;既成事実Lv2以上
-				ELSEIF TALENT:恋人 || TALENT:合意
+				;既成事実Lv2以上か好感度1000以上
+				ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 					SELECTCASE RAND:2
 						CASE 0
 							PRINTFORMW 「偶尔这样也不错啊♥」
@@ -11486,8 +12645,8 @@ IF SELECTCOM == 320
 							PRINTFORMW 「更…可以更多地粘在一起哦♥」
 							;TranslatedMark 「もっと…くっついてもいいんだぞ♥」
 					ENDSELECT
-				;既成事実Lv2以上
-				ELSEIF TALENT:恋人 || TALENT:合意
+				;既成事実Lv2以上か好感度1000以上
+				ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 					SELECTCASE RAND:2
 						CASE 0
 							PRINTFORMW 「偶尔这样也不错啊♥」
@@ -11526,8 +12685,8 @@ IF SELECTCOM == 320
 							;TranslatedMark %ANAME(TARGET)%は尻尾を広げて%ANAME(MASTER)%を誘っている
 							PRINTFORML 「fufu♥　可以随你喜欢哦？」
 							;TranslatedMark 「ふふ♥　お前の好きにしていいんだぞ？」
-							PRINTFORMW %ANAME(MASTER)%被诱惑着，扑向尾巴，享受着幸福的mofumofu时间
-							;TranslatedMark %ANAME(MASTER)%はその誘惑に乗っかり、尻尾に飛びついて幸せのモフモフタイムを堪能した
+							PRINTFORMW %ANAME(MASTER)%没有抵挡住诱惑，扑向尾巴，享受着幸福的毛茸茸时光。
+							;TranslatedMark %ANAME(MASTER)%はその誘惑に勝てず、尻尾に飛びついて幸せのモフモフタイムを堪能した
 						CASE 1
 							PRINTFORMW 「fufu♥　我的尾巴，手感不错吧？如果是你的话，不管怎么碰都可以哦♪」
 							;TranslatedMark 「ふふ♥　私の尻尾、いい手触りだろう？　お前ならいくらでも触っていいんだぞ♪」
@@ -11619,9 +12778,9 @@ IF SELECTCOM == 320
 							PRINTFORMW %ANAME(TARGET)%眯起眼睛神情恍惚地让%ANAME(MASTER)%揉着肩膀
 							;TranslatedMark %ANAME(TARGET)%は目を細めて恍惚とした様子で%ANAME(MASTER)%に肩を揉ませている
 					ENDSELECT
-				;既成事実Lv2以上
-				ELSEIF TALENT:恋人 || TALENT:合意
-					SELECTCASE RAND:2
+				;既成事実Lv2以上か好感度1000以上
+				ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
+					SELECTCASE RAND:3
 						CASE 0
 							PRINTFORMW 「想摸尾巴吗？如果是%ANAME(MASTER)%的话就原谅你」
 							;TranslatedMark 「尻尾、触りたいか？　%ANAME(MASTER)%になら許すぞ」
@@ -11630,9 +12789,12 @@ IF SELECTCOM == 320
 							;TranslatedMark %ANAME(TARGET)%はスキンシップを図る%ANAME(MASTER)%に自慢の尻尾を絡ませている
 							PRINTFORMW 「被尾巴挠了，看起来很开心啊…♪」
 							;TranslatedMark 「尻尾でくすぐられるの、嬉しそうだな…♪」
+						CASE 2
+							PRINTFORMW 「想牵手吗？　…呵呵，这些话什么时候都可以说」
+							;TranslatedMark 「手を繋ぎたいか？　…ふふ、これくらいいつでも言ってくれ」
 					ENDSELECT
-				;好感度1000以上
-				ELSEIF CFLAG:好感度 >= 1000
+				;好感度800以上
+				ELSEIF CFLAG:好感度 >= 800
 					SELECTCASE RAND:3
 						CASE 0
 							PRINTFORML 「你那么在意我的尾巴吗？」
@@ -11667,17 +12829,35 @@ IF SELECTCOM == 320
 					ENDSELECT
 				;それ以外
 				ELSE
-					SELECTCASE RAND:3
-						CASE 0
-							PRINTFORMW 「你在意尾巴吗？但是请不要碰哦。因为护理很麻烦的」
-							;TranslatedMark 「尻尾が気になりますか？　でも触らないようにしてくださいね。手入れが大変ですので」
-						CASE 1
-							PRINTFORMW 「请不要碰奇怪的地方」
-							;TranslatedMark 「へんな所は触らないでください」
-						CASE 2
-							PRINTFORMW 「想牵手吗？嗯，那样的话…」
-							;TranslatedMark 「手を繋ぎたい？　まあ、それくらいなら…」
-					ENDSELECT
+					;主人公がショタの場合の口上変化分
+					IF CFLAG:252 == 1
+						SELECTCASE RAND:3
+							CASE 0
+								PRINTFORMW 「你对尾巴感兴趣吗？我理解你的心情，但请尽量不要去碰。打理起来非常麻烦呢。」
+								;TranslatedMark 「尻尾が気になりますか？　気持ちは分かりますが触らないようにね。手入れが大変だから」
+							CASE 1
+								PRINTFORMW 「哎，不可以碰奇怪的地方。」
+								;TranslatedMark 「こら、へんな所は触っちゃだめです」
+							CASE 2
+								PRINTFORML 「想牵手吗？嗯，那样的话…」
+								;TranslatedMark 「手を繋ぎたい？　まあ、それくらいなら…」
+								PRINTFORMW （......手真小啊。有点让我想起橙。）
+								;TranslatedMark （……小っちゃい手だな。ちょっとだけ、橙を思い出すな）
+						ENDSELECT
+					;通常版
+					ELSE
+						SELECTCASE RAND:3
+							CASE 0
+								PRINTFORMW 「你在意尾巴吗？但是请不要碰哦。因为护理很麻烦的」
+								;TranslatedMark 「尻尾が気になりますか？　でも触らないようにしてくださいね。手入れが大変ですので」
+							CASE 1
+								PRINTFORMW 「请不要碰奇怪的地方」
+								;TranslatedMark 「へんな所は触らないでください」
+							CASE 2
+								PRINTFORMW 「想牵手吗？嗯，那样的话…」
+								;TranslatedMark 「手を繋ぎたい？　まあ、それくらいなら…」
+						ENDSELECT
+					ENDIF
 				ENDIF
 			ENDIF
 		;このキャラが主導権を持っていない
@@ -11748,8 +12928,8 @@ IF SELECTCOM == 320
 						CASE 9
 							PRINTFORML 「啊？可以给我按摩吗？fufu，谢谢。如果被%ANAME(MASTER)%摸的话，可以解开酸痛哦」
 							;TranslatedMark 「え？　マッサージをしてくれるのか？　ふふ、ありがとう。%ANAME(MASTER)%に触ってもらえたらコリも解れるよ」
-							PRINTFORMW %ANAME(MASTER)%带着爱意开始按摩肩膀。每当手指揉进柔软的肌肤，%ANAME(TARGET)%就会发出恍惚的美艳声
-							;TranslatedMark %ANAME(MASTER)%が愛情を込めた肩揉みマッサージを始める。指が柔肌を揉み込む度、%ANAME(TARGET)%から恍惚とした艶声をが漏れる
+							PRINTFORMW %ANAME(MASTER)%开始充满爱意的肩部按摩。每当手指揉捏柔嫩肌肤时，%ANAME(TARGET)%不禁发出迷人的呻吟。
+							;TranslatedMark %ANAME(MASTER)%が愛情を込めた肩揉みマッサージを始める。指が柔肌を揉み込む度、%ANAME(TARGET)%から恍惚とした艶声が漏れる
 							PRINTFORML 「嗯…哈…♥…很舒服哦，%ANAME(MASTER)%。…接下来是背…还有腰部…♥」
 							;TranslatedMark 「ぁん、…はぁ…♥…とても気持ち良いよ、%ANAME(MASTER)%。…次は背中とか…腰とかもしてほしいな…♥」
 							PRINTFORMW %ANAME(TARGET)%眯起眼睛，像是想让她多摸一碰似的，让身体舒服地颤抖着，无意识地诱惑着%ANAME(MASTER)%
@@ -11796,8 +12976,8 @@ IF SELECTCOM == 320
 							PRINTFORMW %ANAME(TARGET)%眯着眼睛放松的样子被%ANAME(MASTER)%揉着肩膀
 							;TranslatedMark %ANAME(TARGET)%は目を細めてリラックスした様子で%ANAME(MASTER)%に肩を揉まれている
 					ENDSELECT
-				;既成事実Lv2以上
-				ELSEIF TALENT:恋人 || TALENT:合意
+				;既成事実Lv2以上か好感度1000以上
+				ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 					SELECTCASE RAND:2
 						CASE 0
 							PRINTFORMW 「想摸尾巴吗？如果是%ANAME(MASTER)%的话就特许你」
@@ -11805,9 +12985,12 @@ IF SELECTCOM == 320
 						CASE 1
 							PRINTFORMW 「被尾巴挠了，看起来很开心啊…♪」
 							;TranslatedMark 「尻尾でくすぐられるの、嬉しそうだな…♪」
+						CASE 2
+							PRINTFORMW 「想牵手吗？这小事一桩啦。来，请抓住我的手。」
+							;TranslatedMark 「手を繋ぎたい？　それくらいお安い御用さ。ほら、どうぞ」
 					ENDSELECT
-				;好感度1000以上
-				ELSEIF CFLAG:好感度 >= 1000
+				;好感度800以上
+				ELSEIF CFLAG:好感度 >= 800
 					SELECTCASE RAND:3
 						CASE 0
 							PRINTFORML 「你那么在意尾巴吗？」
@@ -11820,8 +13003,8 @@ IF SELECTCOM == 320
 							PRINTFORMW 「哈哈，好痒啊」
 							;TranslatedMark 「ははっ、くすぐったいよ」
 						CASE 2
-							PRINTFORMW 「想牵手吗？那么简单的事」
-							;TranslatedMark 「手を繋ぎたい？　それくらいお安い御用さ」
+							PRINTFORMW 「想牵手吗？这小事一桩啦。来，请抓住我的手。」
+							;TranslatedMark 「手を繋ぎたい？　それくらいお安い御用さ。ほら、どうぞ」
 					ENDSELECT
 				;好感度500以上
 				ELSEIF CFLAG:好感度 >= 500
@@ -11842,17 +13025,35 @@ IF SELECTCOM == 320
 					ENDSELECT
 				;それ以外
 				ELSE
-					SELECTCASE RAND:3
-						CASE 0
-							PRINTFORMW 「你在意尾巴吗？但是请不要碰哦。因为护理很麻烦的」
-							;TranslatedMark 「尻尾が気になりますか？　でも触らないようにしてくださいね。手入れが大変ですので」
-						CASE 1
-							PRINTFORMW 「请不要碰奇怪的地方」
-							;TranslatedMark 「へんな所は触らないでください」
-						CASE 2
-							PRINTFORMW 「想牵手吗？嗯，那样的话…」
-							;TranslatedMark 「手を繋ぎたい？　まあ、それくらいなら…」
-					ENDSELECT
+					;主人公がショタの場合の口上変化分
+					IF CFLAG:252 == 1
+						SELECTCASE RAND:3
+							CASE 0
+								PRINTFORMW 「你对尾巴感兴趣吗？我理解你的心情，但请尽量不要去碰。打理起来非常麻烦呢。」
+								;TranslatedMark 「尻尾が気になりますか？　気持ちは分かりますが触らないようにね。手入れが大変だから」
+							CASE 1
+								PRINTFORMW 「哎，不可以碰奇怪的地方。」
+								;TranslatedMark 「こら、へんな所は触っちゃだめです」
+							CASE 2
+								PRINTFORML 「想牵手吗？嗯，那样的话…」
+								;TranslatedMark 「手を繋ぎたい？　まあ、それくらいなら…」
+								PRINTFORMW （......手真小啊。有点让我想起橙。）
+								;TranslatedMark （……小っちゃい手だな。ちょっとだけ、橙を思い出すな）
+						ENDSELECT
+					;通常版
+					ELSE
+						SELECTCASE RAND:3
+							CASE 0
+								PRINTFORMW 「你在意尾巴吗？但是请不要碰哦。因为护理很麻烦的」
+								;TranslatedMark 「尻尾が気になりますか？　でも触らないようにしてくださいね。手入れが大変ですので」
+							CASE 1
+								PRINTFORMW 「请不要碰奇怪的地方」
+								;TranslatedMark 「へんな所は触らないでください」
+							CASE 2
+								PRINTFORMW 「想牵手吗？嗯，那样的话…」
+								;TranslatedMark 「手を繋ぎたい？　まあ、それくらいなら…」
+						ENDSELECT
+					ENDIF
 				ENDIF
 			ENDIF
 		ENDIF
@@ -11869,66 +13070,153 @@ IF SELECTCOM == 321
 		IF IS_COM_FIRST()
 			;好感度500以上
 			IF CFLAG:好感度 >= 500
-				PRINTFORMW 「…你没有把我当孩子看待吧？」
-				;TranslatedMark 「…子ども扱いしているわけではないよな？」
+				;主人公がショタの場合の口上変化分
+				IF CFLAG:252 == 1
+					PRINTFORMW 「被抚摸的一方会有什么感觉我也想试试看。你可以帮我这个忙吗？%ANAME(MASTER)%」
+					;TranslatedMark 「撫でられる側がどんな気持ちか試してみたい。頼まれてくれるか？　%ANAME(MASTER)%」
+				;通常版
+				ELSE
+					PRINTFORMW 「被摸的一方是什么感觉，我们来试试看吧。可以吗？」
+					;TranslatedMark 「撫でられる側がどんな気持ちか、試してみようか。頼めるか？」
+				ENDIF
 			;それ以外
 			ELSE
-				PRINTFORMW 「…不是当做孩子看待的吧？」
-				;TranslatedMark 「…子ども扱いしているわけではないですよね？」
+				;主人公がショタの場合の口上変化分
+				IF CFLAG:252 == 1
+					PRINTFORMW 「被抚摸的一方是什么感觉的，我们来试试吧。......蹲下来。」
+					;TranslatedMark 「撫でられる側がどんな気持ちか、試してみましょう。…屈みますね」
+				;通常版
+				ELSE
+					PRINTFORMW 「让我们来试试看被抚摸一方是什么感觉吧。」
+					;TranslatedMark 「撫でられる側がどんな気持ちか、試してみましょう」
+				ENDIF
 			ENDIF
 		;二回目以降
 		ELSE
 			;恋慕 or 服従 or 親友
 			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
-				SELECTCASE RAND:3
-					CASE 0
-						PRINTFORML 「嗯…～♪」
-						;TranslatedMark 「んん…～♪」
-						PRINTFORMW %ANAME(TARGET)%好像很舒服似的被抚摸着头
-						;TranslatedMark %ANAME(TARGET)%は実に気持ちよさそうに頭を撫でられている
-					CASE 1
-						PRINTFORMW 「呵呵，可以抚摸下我的尾巴吗？」
-						;TranslatedMark 「ふふ、尻尾も撫でてくれていいんだぞ？」
-					CASE 2
-						PRINTFORMW 「…呵呵，被喜欢的人抚摸，感觉很舒服啊…」
-						;TranslatedMark 「…ふふ、好きな人に撫でられるのって、とても気持ちがいいな…」
-				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
-				SELECTCASE RAND:2
-					CASE 0
-						PRINTFORML 「嗯…～♪」
-						;TranslatedMark 「んん…～♪」
-						PRINTFORMW %ANAME(TARGET)%好像很舒服似的被抚摸着头
-						;TranslatedMark %ANAME(TARGET)%は実に気持ちよさそうに頭を撫でられている
-					CASE 1
-						PRINTFORMW 「用心地抚摸我吧？」
-						;TranslatedMark 「心を込めて撫でてくれよ？」
-				ENDSELECT
+				;主人公がショタの場合の口上変化分
+				IF CFLAG:252 == 1
+					SELECTCASE RAND:3
+						CASE 0
+							PRINTL （...不妙啊这个，...感觉很舒服，可能会上瘾...///）
+							;TranslatedMark （…まずいなコレ、…気持ちよくて癖になったかも…///）
+							PRINTFORMW 蹲下来的%ANAME(TARGET)%非常享受%ANAME(MASTER)%摸头的爱抚。
+							;TranslatedMark しゃがみこんだ%ANAME(TARGET)%は、実に気持ちよさそうに%ANAME(MASTER)%のなでなでを堪能している
+						CASE 1
+							PRINTFORML 「嗯嗯～♪　呵呵，被%ANAME(MASTER)%抚摸还真是挺舒服的呀。」
+							;TranslatedMark 「んん…～♪　ふふ、%ANAME(MASTER)%に撫でてもらうというのも気持ちいいものだな」
+							PRINTFORMW %ANAME(TARGET)%带着微笑的心情注视着看起来很开心地抚摸他头的%ANAME(MASTER)%。
+							;TranslatedMark %ANAME(TARGET)%は楽しそうに頭を撫でてくる%ANAME(MASTER)%を、微笑ましい気持ちで見つめている
+						CASE 2
+							PRINTFORML （...被%ANAME(MASTER)%抚摸，为什么会这么舒服。...难道这就是所谓的奶妈情结！？）
+							;TranslatedMark （…%ANAME(MASTER)%に撫でてもらうの、なんでこんなに気持ちいいんだ。…これがまさか、バブみ、というやつなのか！？）
+							PRINTFORMW 在%ANAME(MASTER)%轻抚着头的%ANAME(TARGET)%，对心中燃起的神秘情感感到困惑。
+							;TranslatedMark %ANAME(MASTER)%に頭を撫でさせている%ANAME(TARGET)%は、胸に灯った謎の感情に戸惑っている
+					ENDSELECT
+				;通常版
+				ELSE
+					SELECTCASE RAND:3
+						CASE 0
+							PRINTFORML 「嗯…～♪」
+							;TranslatedMark 「んん…～♪」
+							PRINTFORMW %ANAME(TARGET)%好像很舒服似的被抚摸着头
+							;TranslatedMark %ANAME(TARGET)%は実に気持ちよさそうに頭を撫でられている
+						CASE 1
+							PRINTFORMW 「呵呵，可以抚摸下我的尾巴吗？」
+							;TranslatedMark 「ふふ、尻尾も撫でてくれていいんだぞ？」
+						CASE 2
+							PRINTFORMW 「…呵呵，被喜欢的人抚摸，感觉很舒服啊…」
+							;TranslatedMark 「…ふふ、好きな人に撫でられるのって、とても気持ちがいいな…」
+					ENDSELECT
+				ENDIF
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
+				;主人公がショタの場合の口上変化分
+				IF CFLAG:252 == 1
+					SELECTCASE RAND:2
+						CASE 0
+							PRINTL （嗯、总觉得这个......可能会上瘾......///）
+							;TranslatedMark （な、何だかコレ…癖になるかも…///）
+							PRINTFORMW %ANAME(TARGET)%蹲在%ANAME(MASTER)%面前，让对方轻抚自己的头。
+							;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の前にしゃがみこんで、頭を撫でさせている
+						CASE 1
+							PRINTFORML （...渐渐地，%ANAME(MASTER)%的抚摸也习惯了呢...♪）
+							;TranslatedMark （…段々、%ANAME(MASTER)%に撫でられるのも慣れてきたかも…♪）
+							PRINTFORMW 蹲下身来让%ANAME(TARGET)%摸头，舒服地眯起了眼睛。
+							;TranslatedMark しゃがみこんで頭を撫でさせている%ANAME(TARGET)%は、気持ちよさそうに目を細めている
+					ENDSELECT
+				;通常版
+				ELSE
+					SELECTCASE RAND:2
+						CASE 0
+							PRINTFORML 「嗯…～♪」
+							;TranslatedMark 「んん…～♪」
+							PRINTFORMW %ANAME(TARGET)%正在心满意足地让人抚摸着她的头。
+							;TranslatedMark %ANAME(TARGET)%は実に気持ちよさそうに頭を撫でさせている
+						CASE 1
+							PRINTFORMW 「用心地抚摸我吧？」
+							;TranslatedMark 「心を込めて撫でてくれよ？」
+					ENDSELECT
+				ENDIF
 			;好感度500以上
 			ELSEIF CFLAG:好感度 >= 500
-				SELECTCASE RAND:2
-					CASE 0
-						PRINTFORML 「…你没有把我当孩子看待吧？」
-						;TranslatedMark 「…子ども扱いしているわけではないよな？」
-						PRINTFORMW 不习惯自己被抚摸吗，%ANAME(TARGET)%有点不知所措
-						;TranslatedMark 自分が撫でられることに慣れていないのか、%ANAME(TARGET)%は戸惑い気味だ
-					CASE 1
-						PRINTFORMW 「…请不要弄乱头发…」
-						;TranslatedMark 「…髪は乱さないようにしてくれ…」
-				ENDSELECT
+				;主人公がショタの場合の口上変化分
+				IF CFLAG:252 == 1
+					SELECTCASE RAND:2
+						CASE 0
+							PRINTL （...被%ANAME(MASTER)%抚摸，总觉得...心里有些怪怪的///　...被橙抚摸也会有这种感觉吗？）
+							;TranslatedMark （…%ANAME(MASTER)%に撫でられるのって、何だか、…変な気分になるな///　…橙に撫でられてもこんな気分になるのかな）
+							PRINTFORMW （...被%ANAME(MASTER)%抚摸，总觉得...心里有些怪怪的///　...被橙抚摸也会有这种感觉吗？）
+							;TranslatedMark 自分より小さい子供に撫でられることによる感情に%ANAME(TARGET)%は戸惑っている
+						CASE 1
+							PRINTFORML 「......有、有点害羞。被孩子抚摸就是这种感觉吗......」
+							;TranslatedMark 「…ち、ちょっと気恥ずかしいな。撫でられる側の子はこんな気持ちなのか…」
+							PRINTFORMW 不习惯被小孩子抚摸的%ANAME(TARGET)%，对内心涌现的情感感到有些困惑。
+							;TranslatedMark 小さい子に撫でられることに慣れていない%ANAME(TARGET)%は、胸に灯る感情に戸惑い気味だ
+					ENDSELECT
+				;通常版
+				ELSE
+					SELECTCASE RAND:2
+						CASE 0
+							PRINTFORML 「...有点不好意思啊，被人抚摸的一方原来是这种感觉。」
+							;TranslatedMark 「…ちょっと気恥ずかしいな。撫でられる側はこんな気持ちなのか」
+							PRINTFORMW 不习惯自己被抚摸吗，%ANAME(TARGET)%有点不知所措
+							;TranslatedMark 自分が撫でられることに慣れていないのか、%ANAME(TARGET)%は戸惑い気味だ
+						CASE 1
+							PRINTFORMW 「哦，请尽量不要弄乱了头发。」
+							;TranslatedMark 「あ、髪はなるべく乱さないようにしておくれ」
+					ENDSELECT
+				ENDIF
 			;それ以外
 			ELSE
-				SELECTCASE RAND:2
-					CASE 0
-						PRINTFORML 「…不是当做孩子看待的吧？」
-						;TranslatedMark 「…子ども扱いしているわけではないですよね？」
-						PRINTFORMW 不习惯自己被抚摸吗，%ANAME(TARGET)%有点不知所措
-						;TranslatedMark 自分が撫でられることに慣れていないのか、%ANAME(TARGET)%は戸惑い気味だ
-					CASE 1
-						PRINTFORMW 「…请不要弄乱头发哦」
-						;TranslatedMark 「…髪は乱さないようにしてくださいね」
-				ENDSELECT
+				;主人公がショタの場合の口上変化分
+				IF CFLAG:252 == 1
+					SELECTCASE RAND:2
+						CASE 0
+							PRINTL （...被%ANAME(MASTER)%抚摸，总觉得，有点奇怪的感觉啊...被橙抚摸也会有这种感觉吗？）
+							;TranslatedMark （…%ANAME(MASTER)%に撫でられるのって、何だか、…変な気分になるな…橙に撫でられてもこんな気分になるのかな）
+							PRINTFORMW （...被%ANAME(MASTER)%抚摸，总觉得...心里有些怪怪的///　...被橙抚摸也会有这种感觉吗？）
+							;TranslatedMark 自分より小さい子供に撫でられることによる感情に%ANAME(TARGET)%は戸惑っている
+						CASE 1
+							PRINTFORML 「...有点不好意思呢。被摸的一方的感觉就是这样吗...」
+							;TranslatedMark 「…す、少し気恥ずかしいですね。撫でられる側の子はこんな気持ちなのか…」
+							PRINTFORMW 不习惯被小孩子抚摸的%ANAME(TARGET)%，对内心涌现的情感感到有些困惑。
+							;TranslatedMark 小さい子に撫でられることに慣れていない%ANAME(TARGET)%は、胸に灯る感情に戸惑い気味だ
+					ENDSELECT
+				;通常版
+				ELSE
+					SELECTCASE RAND:2
+						CASE 0
+							PRINTFORML 「...真是让人觉得有点不好意思呢。被人轻抚的人会有这样的感觉吗？」
+							;TranslatedMark 「…結構気恥ずかしいですね。撫でられる側はこんな気持ちなのか」
+							PRINTFORMW 不习惯自己被抚摸吗，%ANAME(TARGET)%有点不知所措
+							;TranslatedMark 自分が撫でられることに慣れていないのか、%ANAME(TARGET)%は戸惑い気味だ
+						CASE 1
+							PRINTFORMW 「...啊，请尽量不要弄乱头发哦。」
+							;TranslatedMark 「…ああ、髪はなるべく乱さないようにしてくださいね」
+					ENDSELECT
+				ENDIF
 			ENDIF
 		ENDIF
 	;このキャラが主導権を持っていない
@@ -11937,66 +13225,153 @@ IF SELECTCOM == 321
 		IF IS_COM_FIRST()
 			;好感度500以上
 			IF CFLAG:好感度 >= 500
-				PRINTFORMW 「…你没有把我当孩子看待吧？」
-				;TranslatedMark 「…子ども扱いしているわけではないよな？」
+				;主人公がショタの場合の口上変化分
+				IF CFLAG:252 == 1
+					PRINTW 「...呃，是我要被抚摸吗？......总觉得，有点，......奇怪的感觉啊///」
+					;TranslatedMark 「…え、私が撫でられる側なのか？　……な、何だか、これ、…変な気分になるな///」
+				;通常版
+				ELSE
+					PRINTFORMW 「…你没有把我当孩子看待吧？」
+					;TranslatedMark 「…子ども扱いしているわけではないよな？」
+				ENDIF
 			;それ以外
 			ELSE
-				PRINTFORMW 「…不是当做孩子看待的吧？」
-				;TranslatedMark 「…子ども扱いしているわけではないですよね？」
+				;主人公がショタの場合の口上変化分
+				IF CFLAG:252 == 1
+					PRINTFORMW 「...诶，是我要被摸头吗？」
+					;TranslatedMark 「…え、私が撫でられる側？」
+				;通常版
+				ELSE
+					PRINTFORMW 「…不是当做孩子看待的吧？」
+					;TranslatedMark 「…子ども扱いしているわけではないですよね？」
+				ENDIF
 			ENDIF
 		;二回目以降
 		ELSE
 			;恋慕 or 服従 or 親友
 			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
-				SELECTCASE RAND:3
-					CASE 0
-						PRINTFORML 「嗯…～♪」
-						;TranslatedMark 「んん…～♪」
-						PRINTFORMW %ANAME(TARGET)%好像很舒服似的被抚摸着头
-						;TranslatedMark %ANAME(TARGET)%は実に気持ちよさそうに頭を撫でられている
-					CASE 1
-						PRINTFORMW 「…可以再抚摸我一点吗？」
-						;TranslatedMark 「…もっと撫でてくれてもいいんだぞ？」
-					CASE 2
-						PRINTFORMW 「fufu，被喜欢的人抚摸，感觉很舒服啊…」
-						;TranslatedMark 「ふふ、好きな人に撫でられるのって、とても気持ちがいいな…」
-				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
-				SELECTCASE RAND:2
-					CASE 0
-						PRINTFORML 「嗯…～♪」
-						;TranslatedMark 「んん…～♪」
-						PRINTFORMW %ANAME(TARGET)%好像很舒服似的被抚摸着头
-						;TranslatedMark %ANAME(TARGET)%は実に気持ちよさそうに頭を撫でられている
-					CASE 1
-						PRINTFORMW 「用心地抚摸我吧？」
-						;TranslatedMark 「心を込めて撫でてくれよ？」
-				ENDSELECT
+				;主人公がショタの場合の口上変化分
+				IF CFLAG:252 == 1
+					SELECTCASE RAND:3
+						CASE 0
+							PRINTL （这个...好像有点让人上瘾...///）
+							;TranslatedMark （な、何だかコレ…癖になりそうだ…///）
+							PRINTFORMW 蹲下的%ANAME(TARGET)%在被%ANAME(MASTER)%摸头时，看起来确实感到很舒适。
+							;TranslatedMark しゃがみこんだ%ANAME(TARGET)%は、実に気持ちよさそうに%ANAME(MASTER)%に頭を撫でられている
+						CASE 1
+							PRINTFORML 「嗯嗯～♪　呵呵，被%ANAME(MASTER)%抚摸还真是挺舒服的呀。」
+							;TranslatedMark 「んん…～♪　ふふ、%ANAME(MASTER)%に撫でてもらうというのも気持ちいいものだな」
+							PRINTFORMW %ANAME(TARGET)%带着微笑地注视着高兴地抚摸自己头的%ANAME(MASTER)%，心里充满了温馨的感觉。
+							;TranslatedMark %ANAME(TARGET)%は嬉しそうに頭を撫でてくる%ANAME(MASTER)%を、微笑ましい気持ちで見つめている
+						CASE 2
+							PRINTFORML （...被%ANAME(MASTER)%抚摸，为什么会这么舒服。...难道这就是所谓的奶妈情结！？）
+							;TranslatedMark （…%ANAME(MASTER)%に撫でてもらうの、なんでこんなに気持ちいいんだ。…これがまさか、バブみ、というやつなのか！？）
+							PRINTFORMW 蹲下身子并被抚摸头顶的%ANAME(TARGET)%，对心中燃起的未知情感感到困惑。
+							;TranslatedMark しゃがみこんで頭を撫でられている%ANAME(TARGET)%は、胸に灯った謎の感情に戸惑っている
+					ENDSELECT
+				;通常版
+				ELSE
+					SELECTCASE RAND:3
+						CASE 0
+							PRINTFORML 「嗯…～♪」
+							;TranslatedMark 「んん…～♪」
+							PRINTFORMW %ANAME(TARGET)%好像很舒服似的被抚摸着头
+							;TranslatedMark %ANAME(TARGET)%は実に気持ちよさそうに頭を撫でられている
+						CASE 1
+							PRINTFORMW 「…可以再抚摸我一点吗？」
+							;TranslatedMark 「…もっと撫でてくれてもいいんだぞ？」
+						CASE 2
+							PRINTFORMW 「fufu，被喜欢的人抚摸，感觉很舒服啊…」
+							;TranslatedMark 「ふふ、好きな人に撫でられるのって、とても気持ちがいいな…」
+					ENDSELECT
+				ENDIF
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
+				;主人公がショタの場合の口上変化分
+				IF CFLAG:252 == 1
+					SELECTCASE RAND:2
+						CASE 0
+							PRINTL （这个...好像有点让人上瘾...///）
+							;TranslatedMark （な、何だかコレ…癖になりそうだ…///）
+							PRINTFORMW %ANAME(MASTER)%开心地抚摸着蹲下的%ANAME(TARGET)%的头。
+							;TranslatedMark しゃがみこんだ%ANAME(TARGET)%の頭を、%ANAME(MASTER)%は嬉しそうに撫でている
+						CASE 1
+							PRINTFORML （...渐渐地，%ANAME(MASTER)%的抚摸也习惯了呢...♪）
+							;TranslatedMark （…段々、%ANAME(MASTER)%に撫でられるのも慣れてきたかも…♪）
+							PRINTFORMW 蹲坐着被摸头的%ANAME(TARGET)%，舒服得眯起了眼睛。
+							;TranslatedMark しゃがみこんで頭を撫でられている%ANAME(TARGET)%は、気持ちよさそうに目を細めている
+					ENDSELECT
+				;通常版
+				ELSE
+					SELECTCASE RAND:2
+						CASE 0
+							PRINTFORML 「嗯…～♪」
+							;TranslatedMark 「んん…～♪」
+							PRINTFORMW %ANAME(TARGET)%好像很舒服似的被抚摸着头
+							;TranslatedMark %ANAME(TARGET)%は実に気持ちよさそうに頭を撫でられている
+						CASE 1
+							PRINTFORMW 「用心地抚摸我吧？」
+							;TranslatedMark 「心を込めて撫でてくれよ？」
+					ENDSELECT
+				ENDIF
 			;好感度500以上
 			ELSEIF CFLAG:好感度 >= 500
-				SELECTCASE RAND:2
-					CASE 0
-						PRINTFORML 「…你没有把我当孩子看待吧？」
-						;TranslatedMark 「…子ども扱いしているわけではないよな？」
-						PRINTFORMW 不习惯自己被抚摸吗，%ANAME(TARGET)%有点不知所措
-						;TranslatedMark 自分が撫でられることに慣れていないのか、%ANAME(TARGET)%は戸惑い気味だ
-					CASE 1
-						PRINTFORMW 「…请不要弄乱头发…」
-						;TranslatedMark 「…髪は乱さないようにしてくれ…」
-				ENDSELECT
+				;主人公がショタの場合の口上変化分
+				IF CFLAG:252 == 1
+					SELECTCASE RAND:2
+						CASE 0
+							PRINTL 「被%ANAME(MASTER)%抚摸着，总觉得，怎么说呢，......有种奇怪的感觉///」
+							;TranslatedMark 「…%ANAME(MASTER)%に撫でられるのって、な、何だか、…変な気分になるな///」
+							PRINTFORMW 被比自己小的孩子摸头这件事让%ANAME(TARGET)%有些困惑。
+							;TranslatedMark 自分より小さい子供に撫でられることに%ANAME(TARGET)%は戸惑い気味だ
+						CASE 1
+							PRINTFORML 「...那个，尽量不要弄乱我的头发...」
+							;TranslatedMark 「…その、髪は乱さないようにしておくれ…」
+							PRINTFORMW %ANAME(TARGET)%虽然感到有些不好意思，但因对方是孩子而无法强烈拒绝。
+							;TranslatedMark %ANAME(TARGET)%は気恥ずかしくも、相手が子供だと強く拒否できないでいる
+					ENDSELECT
+				;通常版
+				ELSE
+					SELECTCASE RAND:2
+						CASE 0
+							PRINTFORML 「…你没有把我当孩子看待吧？」
+							;TranslatedMark 「…子ども扱いしているわけではないよな？」
+							PRINTFORMW 不习惯自己被抚摸吗，%ANAME(TARGET)%有点不知所措
+							;TranslatedMark 自分が撫でられることに慣れていないのか、%ANAME(TARGET)%は戸惑い気味だ
+						CASE 1
+							PRINTFORMW 「…请不要弄乱头发…」
+							;TranslatedMark 「…髪は乱さないようにしてくれ…」
+					ENDSELECT
+				ENDIF
 			;それ以外
 			ELSE
-				SELECTCASE RAND:2
-					CASE 0
-						PRINTFORML 「…不是当做孩子看待的吧？」
-						;TranslatedMark 「…子ども扱いしているわけではないですよね？」
-						PRINTFORMW 不习惯自己被抚摸吗，%ANAME(TARGET)%有点不知所措
-						;TranslatedMark 自分が撫でられることに慣れていないのか、%ANAME(TARGET)%は戸惑い気味だ
-					CASE 1
-						PRINTFORMW 「…请不要弄乱头发哦」
-						;TranslatedMark 「…髪は乱さないようにしてくださいね」
-				ENDSELECT
+				;主人公がショタの場合の口上変化分
+				IF CFLAG:252 == 1
+					SELECTCASE RAND:2
+						CASE 0
+							PRINTFORML 「...蹲下来就可以了吗？」
+							;TranslatedMark 「…しゃがめばいいですか？」
+							PRINTFORMW 不习惯自己被抚摸吗，%ANAME(TARGET)%有点不知所措
+							;TranslatedMark 自分が撫でられることに慣れていないのか、%ANAME(TARGET)%は戸惑い気味だ
+						CASE 1
+							PRINTFORML 「…请不要弄乱头发哦」
+							;TranslatedMark 「…髪は乱さないようにしてくださいね」
+							PRINTFORMW %ANAME(TARGET)%虽然感到有些不好意思，但因对方是孩子而无法强烈拒绝。
+							;TranslatedMark %ANAME(TARGET)%は気恥ずかしくも、相手が子供だと強く拒否できないでいる
+					ENDSELECT
+				;通常版
+				ELSE
+					SELECTCASE RAND:2
+						CASE 0
+							PRINTFORML 「…不是当做孩子看待的吧？」
+							;TranslatedMark 「…子ども扱いしているわけではないですよね？」
+							PRINTFORMW 不习惯自己被抚摸吗，%ANAME(TARGET)%有点不知所措
+							;TranslatedMark 自分が撫でられることに慣れていないのか、%ANAME(TARGET)%は戸惑い気味だ
+						CASE 1
+							PRINTFORMW 「…请不要弄乱头发哦」
+							;TranslatedMark 「…髪は乱さないようにしてくださいね」
+					ENDSELECT
+				ENDIF
 			ENDIF
 		ENDIF
 	ENDIF
@@ -12029,8 +13404,8 @@ IF SELECTCOM == 322
 					CASE 2
 						;PRINTFORMW
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				SELECTCASE RAND:2
 					CASE 0
 						;PRINTFORMW
@@ -12072,8 +13447,8 @@ IF SELECTCOM == 322
 					CASE 2
 						;PRINTFORMW
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				SELECTCASE RAND:2
 					CASE 0
 						;PRINTFORMW
@@ -12120,8 +13495,8 @@ IF SELECTCOM == 323
 					CASE 2
 						;PRINTFORMW
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				SELECTCASE RAND:2
 					CASE 0
 						;PRINTFORMW
@@ -12163,8 +13538,8 @@ IF SELECTCOM == 323
 					CASE 2
 						;PRINTFORMW
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				SELECTCASE RAND:2
 					CASE 0
 						;PRINTFORMW
@@ -12192,8 +13567,8 @@ IF SELECTCOM == 324
 	IF IS_INITIATIVE(TARGET)
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -12210,8 +13585,8 @@ IF SELECTCOM == 324
 					CASE 2
 						;PRINTFORMW
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				SELECTCASE RAND:2
 					CASE 0
 						;PRINTFORMW
@@ -12227,8 +13602,8 @@ IF SELECTCOM == 324
 	ELSE
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -12245,8 +13620,8 @@ IF SELECTCOM == 324
 					CASE 2
 						;PRINTFORMW
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				SELECTCASE RAND:2
 					CASE 0
 						;PRINTFORMW
@@ -12269,8 +13644,8 @@ IF SELECTCOM == 325
 	IF IS_INITIATIVE(TARGET)
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -12287,8 +13662,8 @@ IF SELECTCOM == 325
 					CASE 2
 						;PRINTFORMW
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				SELECTCASE RAND:2
 					CASE 0
 						;PRINTFORMW
@@ -12304,8 +13679,8 @@ IF SELECTCOM == 325
 	ELSE
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -12322,8 +13697,8 @@ IF SELECTCOM == 325
 					CASE 2
 						;PRINTFORMW
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				SELECTCASE RAND:2
 					CASE 0
 						;PRINTFORMW
@@ -12413,8 +13788,8 @@ IF SELECTCOM == 330
 	IF IS_INITIATIVE(TARGET)
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -12424,8 +13799,8 @@ IF SELECTCOM == 330
 			;恋慕 or 服従 or 親友
 			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
 				;PRINTFORMW
-			;既成事実Lv2以上
-				ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+				ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -12436,8 +13811,8 @@ IF SELECTCOM == 330
 	ELSE
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -12447,8 +13822,8 @@ IF SELECTCOM == 330
 			;恋慕 or 服従 or 親友
 			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
 				;PRINTFORMW
-			;既成事実Lv2以上
-				ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+				ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -12467,8 +13842,8 @@ IF SELECTCOM == 331
 	IF IS_INITIATIVE(TARGET)
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				PRINTFORML 「呐，%ANAME(MASTER)%……可以稍微借用点时间吗？」
 				;TranslatedMark 「な、なあ、%ANAME(MASTER)%……少しいいか？」
 				PRINTFORML 「……虽然说了些下流的话，但是我的胸口……有点疼。…能用你的手安慰我吗?」
@@ -12628,8 +14003,8 @@ IF SELECTCOM == 332
 	IF IS_INITIATIVE(TARGET)
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -12639,8 +14014,8 @@ IF SELECTCOM == 332
 			;恋慕 or 服従 or 親友
 			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
 				;PRINTFORMW
-			;既成事実Lv2以上
-				ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+				ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -12651,8 +14026,8 @@ IF SELECTCOM == 332
 	ELSE
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -12662,8 +14037,8 @@ IF SELECTCOM == 332
 			;恋慕 or 服従 or 親友
 			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
 				;PRINTFORMW
-			;既成事実Lv2以上
-				ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+				ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -12681,8 +14056,8 @@ IF SELECTCOM == 333
 	IF IS_INITIATIVE(TARGET)
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				PRINTFORMW 「啊♥……嗯！」
 				;TranslatedMark 「あっ♥……んんっ！」
 			;それ以外
@@ -12849,8 +14224,8 @@ IF SELECTCOM == 340
 						PRINTFORMW 「嗯…唔…fufu…继续么？」
 						;TranslatedMark 「ん…ちゅ…ふふ…もっとか？」
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				SELECTCASE RAND:2
 					CASE 0
 						PRINTFORMW 「啾…唔…再来…」
@@ -12920,8 +14295,8 @@ IF SELECTCOM == 340
 						PRINTFORMW 「嗯…唔…fufu…继续么？」
 						;TranslatedMark 「ん…ちゅ…ふふ…もっとか？」
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				SELECTCASE RAND:2
 					CASE 0
 						PRINTFORMW 「啾…唔…再来…」
@@ -12998,8 +14373,8 @@ IF SELECTCOM == 341
 						PRINTFORMW 「嗯…唔…fufu…继续么？」
 						;TranslatedMark 「ん…ちゅ…ふふ…もっとか？」
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				SELECTCASE RAND:2
 					CASE 0
 						PRINTFORMW 「啾…唔…再来…」
@@ -13069,8 +14444,8 @@ IF SELECTCOM == 341
 						PRINTFORMW 「嗯…唔…fufu…继续么？」
 						;TranslatedMark 「ん…ちゅ…ふふ…もっとか？」
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				SELECTCASE RAND:2
 					CASE 0
 						PRINTFORMW 「啾…唔…再来…」
@@ -13151,8 +14526,8 @@ IF SELECTCOM == 342
 						PRINTFORMW 「嗯…唔…fufu…继续么？」
 						;TranslatedMark 「ん…ちゅ…ふふ…もっとか？」
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				SELECTCASE RAND:2
 					CASE 0
 						PRINTFORMW 「啊…哈啊…啾…唔…别停…」
@@ -13228,8 +14603,8 @@ IF SELECTCOM == 342
 						PRINTFORMW 「嗯…唔…fufu…继续么？」
 						;TranslatedMark 「ん…ちゅ…ふふ…もっとか？」
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				SELECTCASE RAND:2
 					CASE 0
 						PRINTFORMW 「啊…哈啊…啾…唔…别停…」
@@ -13257,8 +14632,8 @@ IF SELECTCOM == 351
 	IF IS_INITIATIVE(TARGET)
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -13275,8 +14650,8 @@ IF SELECTCOM == 351
 					CASE 2
 						;PRINTFORMW
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -13287,8 +14662,8 @@ IF SELECTCOM == 351
 	ELSE
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -13305,8 +14680,8 @@ IF SELECTCOM == 351
 					CASE 2
 						;PRINTFORMW
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -13324,8 +14699,8 @@ IF SELECTCOM == 352
 	IF IS_INITIATIVE(TARGET)
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -13335,8 +14710,8 @@ IF SELECTCOM == 352
 			;恋慕 or 服従 or 親友
 			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
 				;PRINTFORMW
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -13347,8 +14722,8 @@ IF SELECTCOM == 352
 	ELSE
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -13358,8 +14733,8 @@ IF SELECTCOM == 352
 			;恋慕 or 服従 or 親友
 			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
 				;PRINTFORMW
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -13377,8 +14752,8 @@ IF SELECTCOM == 354
 	IF IS_INITIATIVE(TARGET)
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -13395,8 +14770,8 @@ IF SELECTCOM == 354
 					CASE 2
 						;PRINTFORMW
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -13407,8 +14782,8 @@ IF SELECTCOM == 354
 	ELSE
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -13425,8 +14800,8 @@ IF SELECTCOM == 354
 					CASE 2
 						;PRINTFORMW
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -13444,8 +14819,8 @@ IF SELECTCOM == 355
 	IF IS_INITIATIVE(TARGET)
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -13462,8 +14837,8 @@ IF SELECTCOM == 355
 					CASE 2
 						;PRINTFORMW
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -13474,8 +14849,8 @@ IF SELECTCOM == 355
 	ELSE
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -13492,8 +14867,8 @@ IF SELECTCOM == 355
 					CASE 2
 						;PRINTFORMW
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -13511,8 +14886,8 @@ IF SELECTCOM == 356
 	IF IS_INITIATIVE(TARGET)
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -13529,8 +14904,8 @@ IF SELECTCOM == 356
 					CASE 2
 						;PRINTFORMW
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -13541,8 +14916,8 @@ IF SELECTCOM == 356
 	ELSE
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -13559,8 +14934,8 @@ IF SELECTCOM == 356
 					CASE 2
 						;PRINTFORMW
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -13578,8 +14953,8 @@ IF SELECTCOM == 357
 	IF IS_INITIATIVE(TARGET)
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -13596,8 +14971,8 @@ IF SELECTCOM == 357
 					CASE 2
 						;PRINTFORMW
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -13608,8 +14983,8 @@ IF SELECTCOM == 357
 	ELSE
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -13626,8 +15001,8 @@ IF SELECTCOM == 357
 					CASE 2
 						;PRINTFORMW
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -13668,8 +15043,8 @@ IF SELECTCOM == 358
 						PRINTFORMW 「用肥皂起泡…我会用手温柔地洗的」
 						;TranslatedMark 「石鹸で泡立てて…手で優しく洗ってあげるからな」
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				PRINTFORMW 「让我给你洗背吧。 fufu，不用客气啦♥」
 				;TranslatedMark 「背中、流そうか。ふふ、遠慮なんてしなくていいぞ♥」
 			;それ以外
@@ -13705,8 +15080,8 @@ IF SELECTCOM == 358
 						PRINTFORMW 「用肥皂起泡…我会用手温柔地洗的」
 						;TranslatedMark 「石鹸で泡立てて…手で優しく洗ってあげるからな」
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				PRINTFORMW 「你想让我给你洗背吗?fufu，好啊♥不用客气。」
 				;TranslatedMark 「背中、流してもらいたいのか？　ふふ、いいぞ♥　遠慮なんてしなくていいからな」
 			;それ以外
@@ -13739,8 +15114,8 @@ IF SELECTCOM == 390
 			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
 				PRINTFORMW 「今天去哪里？%ANAME(MASTER)%」
 				;TranslatedMark 「今日はどこへ行く？　%ANAME(MASTER)%」
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				PRINTFORMW 「去哪里好呢…好期待啊」
 				;TranslatedMark 「どこへ行こうか…楽しみだな」
 			;それ以外
@@ -13765,8 +15140,8 @@ IF SELECTCOM == 390
 			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
 				PRINTFORMW 「今天带我去哪里？%ANAME(MASTER)%」
 				;TranslatedMark 「今日はどこへ連れて行ってくれるんだ？　%ANAME(MASTER)%」
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				PRINTFORMW 「要去哪里呢…好期待啊」
 				;TranslatedMark 「どこへ行くのか…楽しみだ」
 			;それ以外
@@ -13785,8 +15160,8 @@ IF SELECTCOM == 391
 	IF IS_INITIATIVE(TARGET)
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -13796,8 +15171,8 @@ IF SELECTCOM == 391
 			;恋慕 or 服従 or 親友
 			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
 				;PRINTFORMW
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -13808,8 +15183,8 @@ IF SELECTCOM == 391
 	ELSE
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -13819,8 +15194,8 @@ IF SELECTCOM == 391
 			;恋慕 or 服従 or 親友
 			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
 				;PRINTFORMW
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -13836,8 +15211,8 @@ ENDIF
 IF SELECTCOM == 392
 	;初めて(主導権を考慮しない)
 	IF IS_COM_FIRST(1)
-		;既成事実Lv2以上
-		IF TALENT:恋人 || TALENT:合意
+		;既成事実Lv2以上か好感度1000以上
+		IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 			;PRINTFORMW
 		ELSE
 			;PRINTFORMW
@@ -13847,8 +15222,8 @@ IF SELECTCOM == 392
 		;恋慕 or 服従 or 親友
 		IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
 			;PRINTFORMW
-		;既成事実Lv2以上
-		ELSEIF TALENT:恋人 || TALENT:合意
+		;既成事実Lv2以上か好感度1000以上
+		ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 			;PRINTFORMW
 		;それ以外
 		ELSE
@@ -13863,8 +15238,8 @@ ENDIF
 IF SELECTCOM == 393
 	;初めて(主導権を考慮しない)
 	IF IS_COM_FIRST(1)
-		;既成事実Lv2以上
-		IF TALENT:恋人 || TALENT:合意
+		;既成事実Lv2以上か好感度1000以上
+		IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 			;PRINTFORMW
 		ELSE
 			;PRINTFORMW
@@ -13874,8 +15249,8 @@ IF SELECTCOM == 393
 		;恋慕 or 服従 or 親友
 		IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
 			;PRINTFORMW
-		;既成事実Lv2以上
-		ELSEIF TALENT:恋人 || TALENT:合意
+		;既成事実Lv2以上か好感度1000以上
+		ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 			;PRINTFORMW
 		;それ以外
 		ELSE
@@ -13892,8 +15267,8 @@ IF SELECTCOM == 399
 	IF IS_INITIATIVE(TARGET)
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -13903,8 +15278,8 @@ IF SELECTCOM == 399
 			;恋慕 or 服従 or 親友
 			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
 				;PRINTFORMW
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -13915,8 +15290,8 @@ IF SELECTCOM == 399
 	ELSE
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -13926,8 +15301,8 @@ IF SELECTCOM == 399
 			;恋慕 or 服従 or 親友
 			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
 				;PRINTFORMW
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -15361,7 +16736,8 @@ IF SELECTCOM == 11
 						PRINTFORMW %ANAME(TARGET)%用出神的表情叼着肉棒，一口气让它滑到喉咙深处……
 						;TranslatedMark %ANAME(TARGET)%はうっとりした表情でペニスを咥えると、のど奥まで一気にグラインドさせていく…
 					CASE 3
-						PRINTFORML 「ん…♥ちゅ…♥れろ…　私の口まんこに、いっぱい出してくれ♥♥」
+						PRINTFORML 「嗯...♥啾...♥舔... 把东西都射到我的口穴里吧♥♥」
+						;TranslatedMark 「ん…♥ちゅ…♥れろ…　私の口まんこに、いっぱい出してくれ♥♥」
 						PRINTFORMW %ANAME(TARGET)%用舌头刺激着马眼、催促着%ANAME(MASTER)%射精…
 						;TranslatedMark %ANAME(TARGET)%はペニスの鈴口をチロチロと舌で刺激し、%ANAME(MASTER)%の射精を待ちわびている…
 					ENDSELECT
@@ -15421,7 +16797,8 @@ IF SELECTCOM == 11
 						PRINTFORMW %ANAME(TARGET)%用出神的表情叼着肉棒，一口气让它滑到喉咙深处……
 						;TranslatedMark %ANAME(TARGET)%はうっとりした表情でペニスを咥えると、のど奥まで一気にグラインドさせていく…
 					CASE 3
-						PRINTFORML 「ん…♥ちゅ…♥れろ…　私の口まんこに、いっぱい出してくれ♥♥」
+						PRINTFORML 「嗯...♥啾...♥舔... 把东西都射到我的口穴里吧♥♥」
+						;TranslatedMark 「ん…♥ちゅ…♥れろ…　私の口まんこに、いっぱい出してくれ♥♥」
 						PRINTFORMW %ANAME(TARGET)%用舌头刺激着马眼、催促着%ANAME(MASTER)%射精…
 						;TranslatedMark %ANAME(TARGET)%はペニスの鈴口をチロチロと舌で刺激し、%ANAME(MASTER)%の射精を待ちわびている…
 					ENDSELECT
@@ -15487,8 +16864,8 @@ IF SELECTCOM == 12
 						PRINTFORMW %ANAME(TARGET)%这么说道，扶着胸部，催促直接将肉棒刺入……
 						;TranslatedMark そう言うと、%ANAME(TARGET)%は谷間を作り、そのままペニスを突きいれるように促している…
 					CASE 1
-						PRINTFORML 「fufu♥怎么样？舒服程度不输于小穴吧？♥」
-						;TranslatedMark 「どうだ？　膣にも負けないほどキモチいいだろう？　ふふ♥」
+						PRINTFORML 「怎么样？和在膣中的感觉不一样吧？ 呵呵♥」
+						;TranslatedMark 「どうだ？　膣とはまた違ったキモチよさだろう？　ふふ♥」
 						PRINTFORML %ANAME(MASTER)%因过于快感而无法回答那个问题，在山谷里专心地耸动着肉棒
 						;TranslatedMark 余りの快感にその問いに応られず、%ANAME(MASTER)%は谷間にペニスを一心不乱に打ちつけている
 						PRINTFORMW %ANAME(TARGET)%也把乳房夹紧，把乳头摩擦到阴茎上，%ANAME(MASTER)%被快感支配着…
@@ -16098,8 +17475,8 @@ IF SELECTCOM == 17
 					CASE 2
 						PRINTFORML 「被我的尾巴轻抚着，感觉如何？　因为每天都在保养所以很漂亮吧？fufu♥」
 						;TranslatedMark 「私の尻尾でシゴかれるの、どうだ？　毎日手入れしているから綺麗だろう？　ふふ♥」
-						PRINTFORML %ANAME(MASTER)%因为包裹肉棒的触感带来的天堂般的快感而失神
-						;TranslatedMark %ANAME(MASTER)%はペニスを包み込む感触が与える天国のような快感に悶えている
+						PRINTFORML %ANAME(MASTER)%正沉浸在宛如天堂般的快乐中，那是一种包裹住阴茎的极致享受。
+						;TranslatedMark %ANAME(MASTER)%はペニスを包み込む感触が与える天国のような快楽に悶えている
 						PRINTFORMW “啊，这么的……舒服的♥可以再多一些哦♪”
 						;TranslatedMark 「あぁ、そんなにキモチいいんだな♥　もっとよがっていいんだぞ♪」
 					CASE 3
@@ -21173,8 +22550,8 @@ IF SELECTCOM == 320
 							PRINTFORMW 「更…可以更多地粘在一起哦♥」
 							;TranslatedMark 「もっと…くっついてもいいんだぞ♥」
 				ENDSELECT
-				;既成事実Lv2以上
-				ELSEIF TALENT:恋人 || TALENT:合意
+				;既成事実Lv2以上か好感度1000以上
+				ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 					SELECTCASE RAND:2
 						CASE 0
 							PRINTFORMW 「偶尔这样也不错啊♥」
@@ -21216,8 +22593,8 @@ IF SELECTCOM == 320
 							PRINTFORMW 「更…可以更多地粘在一起哦♥」
 							;TranslatedMark 「もっと…くっついてもいいんだぞ♥」
 					ENDSELECT
-				;既成事実Lv2以上
-				ELSEIF TALENT:恋人 || TALENT:合意
+				;既成事実Lv2以上か好感度1000以上
+				ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 					SELECTCASE RAND:2
 						CASE 0
 							PRINTFORMW 「偶尔这样也不错啊♥」
@@ -21260,8 +22637,8 @@ IF SELECTCOM == 320
 							;TranslatedMark %ANAME(TARGET)%は尻尾を広げて%ANAME(MASTER)%を誘っている
 							PRINTFORML 「fufu♥　可以随你喜欢哦？」
 							;TranslatedMark 「ふふ♥　お前の好きにしていいんだぞ？」
-							PRINTFORMW %ANAME(MASTER)%被诱惑着，扑向尾巴，享受着幸福的mofumofu时间
-							;TranslatedMark %ANAME(MASTER)%はその誘惑に乗っかり、尻尾に飛びついて幸せのモフモフタイムを堪能した
+							PRINTFORMW %ANAME(MASTER)%没能抵挡住诱惑，扑向尾巴，尽情享受那幸福的毛茸茸时光。
+							;TranslatedMark %ANAME(MASTER)%はその誘惑に負け、尻尾に飛びついて幸せのモフモフタイムを堪能した
 						CASE 1
 							PRINTFORML %ANAME(TARGET)%将艳丽的尾巴轻轻地缠绕在%ANAME(MASTER)%身上
 							;TranslatedMark %ANAME(TARGET)%は艶々の尻尾を%ANAME(MASTER)%にふんわりと絡みつかせてくる
@@ -21352,8 +22729,8 @@ IF SELECTCOM == 320
 							PRINTFORMW %ANAME(TARGET)%温柔地揉搓着%ANAME(MASTER)%的肩膀，开始按摩
 							;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の肩を優しく揉み込み、マッサージを始めた
 					ENDSELECT
-				;既成事実Lv2以上
-				ELSEIF TALENT:恋人 || TALENT:合意
+				;既成事実Lv2以上か好感度1000以上
+				ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 					SELECTCASE RAND:2
 						CASE 0
 							PRINTFORMW 「尾巴，不想摸吗？如果是%ANAME(MASTER)%的话就允许你」
@@ -21509,8 +22886,8 @@ IF SELECTCOM == 320
 							PRINTFORMW %ANAME(TARGET)%温柔地揉搓着%ANAME(MASTER)%的肩膀，开始按摩
 							;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の肩を優しく揉み込み、マッサージを始めた
 					ENDSELECT
-				;既成事実Lv2以上
-				ELSEIF TALENT:恋人 || TALENT:合意
+				;既成事実Lv2以上か好感度1000以上
+				ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 					SELECTCASE RAND:2
 						CASE 0
 							PRINTFORMW 「不想摸一下尾巴吗？如果是%ANAME(MASTER)%的话…可以哟♪」
@@ -21624,8 +23001,8 @@ IF SELECTCOM == 321
 						PRINTFORMW 在充满着%ANAME(TARGET)%甜美香味下，%ANAME(MASTER)%被温柔地抚摸着头
 						;TranslatedMark %ANAME(TARGET)%の甘い香りのする胸に抱き抱えられ、%ANAME(MASTER)%は頭を撫でられている
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				SELECTCASE RAND:2
 					CASE 0
 						PRINTFORML 「来，到这来♥」
@@ -21729,8 +23106,8 @@ IF SELECTCOM == 321
 						PRINTFORMW 在充满着%ANAME(TARGET)%甜美香味下，%ANAME(MASTER)%被温柔地抚摸着头
 						;TranslatedMark %ANAME(TARGET)%の甘い香りのする胸に抱き抱えられ、%ANAME(MASTER)%は頭を撫でられている
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				SELECTCASE RAND:2
 					CASE 0
 						PRINTFORML 「来，到这来♥」
@@ -21776,8 +23153,8 @@ IF SELECTCOM == 322
 	IF IS_INITIATIVE(TARGET)
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -21794,8 +23171,8 @@ IF SELECTCOM == 322
 					CASE 2
 						;PRINTFORMW
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -21806,8 +23183,8 @@ IF SELECTCOM == 322
 	ELSE
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -21824,8 +23201,8 @@ IF SELECTCOM == 322
 					CASE 2
 						;PRINTFORMW
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -21843,8 +23220,8 @@ IF SELECTCOM == 323
 	IF IS_INITIATIVE(TARGET)
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -21854,8 +23231,8 @@ IF SELECTCOM == 323
 			;恋慕 or 服従 or 親友
 			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
 				;PRINTFORMW
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -21866,8 +23243,8 @@ IF SELECTCOM == 323
 	ELSE
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -21877,8 +23254,8 @@ IF SELECTCOM == 323
 			;恋慕 or 服従 or 親友
 			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
 				;PRINTFORMW
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -21896,8 +23273,8 @@ IF SELECTCOM == 324
 	IF IS_INITIATIVE(TARGET)
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -21907,8 +23284,8 @@ IF SELECTCOM == 324
 			;恋慕 or 服従 or 親友
 			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
 				;PRINTFORMW
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -21919,8 +23296,8 @@ IF SELECTCOM == 324
 	ELSE
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -21930,8 +23307,8 @@ IF SELECTCOM == 324
 			;恋慕 or 服従 or 親友
 			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
 				;PRINTFORMW
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -21999,8 +23376,8 @@ IF SELECTCOM == 330
 						PRINTFORMW 「嗯…♥啾…♥呜…再多射点出来♥」
 						;TranslatedMark 「ん…♥　じゅ…♥　…いっぱい出していいぞ♥」
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				PRINTFORMW 「fufu…忍耐不住了吗♥　行吧…」
 				;TranslatedMark 「ふふ…我慢できないんだな♥　いいぞ…」
 			;それ以外
@@ -22063,8 +23440,8 @@ IF SELECTCOM == 330
 						PRINTFORMW 「嗯…♥啾…♥呜…再多射点出来♥」
 						;TranslatedMark 「ん…♥　じゅ…♥　…いっぱい出していいぞ♥」
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				PRINTFORMW 「fufu…忍耐不住了吗♥　行吧…」
 				;TranslatedMark 「ふふ…我慢できないんだな♥　いいぞ…」
 			;それ以外
@@ -22084,8 +23461,8 @@ IF SELECTCOM == 331
 	IF IS_INITIATIVE(TARGET)
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				PRINTFORML 「你这里…也让我摸一下吧…♥」
 				;TranslatedMark 「お前のここ…触らせてもらうからな…♥」
 			ELSE
@@ -22156,8 +23533,8 @@ IF SELECTCOM == 331
 						PRINTFORMW %ANAME(TARGET)%将%ANAME(MASTER)%从背后抱住，用手揉捏着胸部
 						;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の背中から抱きつき、胸を揉みこむように手を回している
 				ENDSELECT
-			;既成事実Lv2以上
-				ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+				ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 					PRINTFORML 「你这里…也让我摸一下吧…♥」
 					;TranslatedMark 「お前のここ…触らせてもらうからな…♥」
 					PRINTFORMW %ANAME(TARGET)%隔着衣服抚摸着%ANAME(MASTER)%的胸部
@@ -22172,8 +23549,8 @@ IF SELECTCOM == 331
 	ELSE
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				PRINTFORML 「想让我摸一下吗？　…如果是那样的话我很乐意」
 				;TranslatedMark 「私に触って欲しいのか？　…そういうことなら喜んで」
 			ELSE
@@ -22244,8 +23621,8 @@ IF SELECTCOM == 331
 						PRINTFORMW %ANAME(TARGET)%将%ANAME(MASTER)%从背后抱住，用手揉捏着胸部
 						;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の背中から抱きつき、胸を揉みこむように手を回している
 				ENDSELECT
-			;既成事実Lv2以上
-				ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+				ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 					PRINTFORML 「想要让我触摸？　…真没办法啊」
 					;TranslatedMark 「触って欲しいと？　…仕方ないな」
 					PRINTFORMW %ANAME(TARGET)%隔着衣服抚摸着%ANAME(MASTER)%的胸部
@@ -22267,8 +23644,8 @@ IF SELECTCOM == 332
 	IF IS_INITIATIVE(TARGET)
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				PRINTFORMW 「…失礼了。怎么了，没关系的。我会温柔做的…」
 				;TranslatedMark 「…ちょっと失礼するぞ。なに、大丈夫だ。優しくしてあげるから…」
 			ELSE
@@ -22294,8 +23671,8 @@ IF SELECTCOM == 332
 						;TranslatedMark 竿をシゴく手つきに恍惚となる%ANAME(MASTER)%の口から垂れる涎を、%ANAME(TARGET)%はキスしながら吸い上げる
 						PRINTFORML 「呼呼…我会尽情侍奉你的。所以好好地享受吧」
 						;TranslatedMark 「くすっ…私がちゃんと舐め取ってあげるからな。好きなだけよがってくれ」
-						PRINTFORMW 「堕落下去也无妨哦…我会把你变成没有我不行的小鸡鸡的…fufufu…♥」
-						;TranslatedMark 「もっと蕩けさせて…私無しではいられないチンポにしてあげるからな…うふふ…♥」
+						PRINTFORMW 「我要让你更加融化......甚至到没我不行的地步哦......呵呵......♥」」
+						;TranslatedMark 「もっと蕩けさせて…私無しではいられないカラダにしてあげるからな…うふふ…♥」
 					CASE 2
 						PRINTFORML 「fufufu…刺激龟头的话，会发出像女孩子一样可爱的声音呢…♪　…啊，声音太大的话可能有人会来哦？」
 						;TranslatedMark 「ふふふ…カリ首撫でるとビクンってして可愛いな…♪　…ああ、声を出したら誰か来ちゃうかもしれないぞ？」
@@ -22335,8 +23712,8 @@ IF SELECTCOM == 332
 						PRINTFORMW %ANAME(TARGET)%坐在%ANAME(MASTER)%的旁边，将手探入内裤，玩弄着肉棒
 						;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の隣に座り、その下着に手を入れ、肉棒をシゴいている
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				PRINTFORMW 「…失礼了。怎么了，没关系的。我会温柔做的…」
 				;TranslatedMark 「…ちょっと失礼するぞ。なに、大丈夫だ。優しくしてあげるから…」
 			;それ以外
@@ -22349,8 +23726,8 @@ IF SELECTCOM == 332
 	ELSE
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				PRINTFORML 「明明知道说不定谁会来，还做这样的事…真是没办法的家伙啊…」
 				;TranslatedMark 「誰が来るかも分からないのにこんなことを…まったく仕方ない奴だな…」
 				PRINTFORMW 「…啊，不要再露出那种表情了。我会好好做的…真是的」
@@ -22419,8 +23796,8 @@ IF SELECTCOM == 332
 						PRINTFORMW %ANAME(TARGET)%坐在%ANAME(MASTER)%的旁边，将手探入内裤，玩弄着肉棒
 						;TranslatedMark %ANAME(TARGET)%は%ANAME(MASTER)%の隣に座り、その下着に手を入れ、肉棒をシゴいている
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				PRINTFORMW 「明明不知道谁会来，还做了这样的事…真是没办法的家伙…」
 				;TranslatedMark 「誰が来るかも分からないのにこんなことを…まったく仕方ない奴だ…」
 			;それ以外
@@ -22440,8 +23817,8 @@ IF SELECTCOM == 333
 	IF IS_INITIATIVE(TARGET)
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -22451,8 +23828,8 @@ IF SELECTCOM == 333
 			;恋慕 or 服従 or 親友
 			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
 				;PRINTFORMW
-			;既成事実Lv2以上
-				ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+				ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -22463,8 +23840,8 @@ IF SELECTCOM == 333
 	ELSE
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -22474,8 +23851,8 @@ IF SELECTCOM == 333
 			;恋慕 or 服従 or 親友
 			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
 				;PRINTFORMW
-			;既成事実Lv2以上
-				ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+				ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -22542,8 +23919,8 @@ IF SELECTCOM == 340
 						PRINTFORMW 「嗯…唔…fufu…继续么？」
 						;TranslatedMark 「ん…ちゅ…ふふ…もっとか？」
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				SELECTCASE RAND:2
 					CASE 0
 						PRINTFORMW 「啾…唔…再来…」
@@ -22613,8 +23990,8 @@ IF SELECTCOM == 340
 						PRINTFORMW 「嗯…唔…fufu…继续么？」
 						;TranslatedMark 「ん…ちゅ…ふふ…もっとか？」
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				SELECTCASE RAND:2
 					CASE 0
 						PRINTFORMW 「啾…唔…再来…」
@@ -22691,8 +24068,8 @@ IF SELECTCOM == 341
 						PRINTFORMW 「嗯…啾……fufu，还想要吗？」
 						;TranslatedMark 「ん…ちゅ……ふふ、もっとか？」
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				SELECTCASE RAND:2
 					CASE 0
 						PRINTFORMW 「啾…唔…再来…」
@@ -22762,8 +24139,8 @@ IF SELECTCOM == 341
 						PRINTFORMW 「嗯…啾……fufu，还想要吗？」
 						;TranslatedMark 「ん…ちゅ……ふふ、もっとか？」
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				SELECTCASE RAND:2
 					CASE 0
 						PRINTFORMW 「啾…唔…再来…」
@@ -22844,8 +24221,8 @@ IF SELECTCOM == 342
 						PRINTFORMW 「嗯…唔…fufu…继续么？」
 						;TranslatedMark 「ん…ちゅ…ふふ…もっとか？」
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				SELECTCASE RAND:2
 					CASE 0
 						PRINTFORMW 「啊…哈啊…啾…唔…别停…」
@@ -22921,8 +24298,8 @@ IF SELECTCOM == 342
 						PRINTFORMW 「嗯…唔…fufu…继续么？」
 						;TranslatedMark 「ん…ちゅ…ふふ…もっとか？」
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				SELECTCASE RAND:2
 					CASE 0
 						PRINTFORMW 「啊…哈啊…啾…唔…别停…」
@@ -22950,8 +24327,8 @@ IF SELECTCOM == 356
 	IF IS_INITIATIVE(TARGET)
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -22961,8 +24338,8 @@ IF SELECTCOM == 356
 			;恋慕 or 服従 or 親友
 			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
 				;PRINTFORMW
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -22973,8 +24350,8 @@ IF SELECTCOM == 356
 	ELSE
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -22984,8 +24361,8 @@ IF SELECTCOM == 356
 			;恋慕 or 服従 or 親友
 			IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
 				;PRINTFORMW
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -23003,8 +24380,8 @@ IF SELECTCOM == 358
 	IF IS_INITIATIVE(TARGET)
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -23021,8 +24398,8 @@ IF SELECTCOM == 358
 					CASE 2
 						;PRINTFORMW
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -23033,8 +24410,8 @@ IF SELECTCOM == 358
 	ELSE
 		;初めて
 		IF IS_COM_FIRST()
-			;既成事実Lv2以上
-			IF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			ELSE
 				;PRINTFORMW
@@ -23051,8 +24428,8 @@ IF SELECTCOM == 358
 					CASE 2
 						;PRINTFORMW
 				ENDSELECT
-			;既成事実Lv2以上
-			ELSEIF TALENT:恋人 || TALENT:合意
+			;既成事実Lv2以上か好感度1000以上
+			ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 				;PRINTFORMW
 			;それ以外
 			ELSE
@@ -23068,8 +24445,8 @@ ENDIF
 IF SELECTCOM == 393
 	;初めて(主導権を考慮しない)
 	IF IS_COM_FIRST(1)
-		;既成事実Lv2以上
-		IF TALENT:恋人 || TALENT:合意
+		;既成事実Lv2以上か好感度1000以上
+		IF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 			;PRINTFORMW
 		ELSE
 			;PRINTFORMW
@@ -23079,8 +24456,8 @@ IF SELECTCOM == 393
 		;恋慕 or 服従 or 親友
 		IF TALENT:恋慕 || TALENT:服従 || TALENT:親友
 			;PRINTFORMW
-		;既成事実Lv2以上
-		ELSEIF TALENT:恋人 || TALENT:合意
+		;既成事実Lv2以上か好感度1000以上
+		ELSEIF (TALENT:恋人 || TALENT:合意) || (CFLAG:好感度 >= 1000)
 			;PRINTFORMW
 		;それ以外
 		ELSE
@@ -23141,12 +24518,25 @@ IF CFLAG:251 == 0 && CFLAG:好感度 >= 500
 	;TranslatedMark 「ふふ。そうだな、%ANAME(MASTER)%。……うん？　どうかしたかい？」
 	PRINTFORML %ANAME(TARGET)%和至今为止的事务性的样子不同，用平易近人的语调亲切地对待。总觉得气氛比以前柔和…
 	;TranslatedMark %ANAME(TARGET)%は今までの事務的な様子と違い、砕けた口調で親しげに接してきた。どことなく今までより雰囲気が柔らかい…
-	PRINTFORMW 「啊，我想我们的关系应该不会那么拘谨了吧……是太过亲昵了吗？」
-	;TranslatedMark 「ああ、もう堅苦しくするような間柄でもあるまいと思ったんだが、……馴れ馴れしかったかな？」
-	PRINTFORML 　不，还是这样比较轻松，我告诉%ANAME(TARGET)%道，她微笑了
-	;TranslatedMark いや、これくらいの方が気楽でいい　　そう告げると%ANAME(TARGET)%はにこりと微笑んだ
-	PRINTFORMW 「fufu，谢谢。我也这样做比较轻」
-	;TranslatedMark 「ふふ、ありがとう。私もこれくらいの方がやりやすいよ」
+	;主人公がショタの場合の口上変化分
+	IF CFLAG:252 == 1
+		PRINTFORMW 「啊，我想我们的关系应该不会那么拘谨了吧……是太过亲昵了吗？」
+		;TranslatedMark 「ああ、もう堅苦しくするような間柄でもあるまいと思ったんだが、……馴れ馴れしかったかな？」
+		PRINTFORML 　不，倒不如说感到关系更近一步，我很开心。%ANAME(TARGET)%听了这样的话，微微一笑。
+		;TranslatedMark いえ、むしろ仲良くなれたような気がして嬉しいです　　そう告げると%ANAME(TARGET)%はにこりと微笑んだ
+		PRINTFORMW 「呵呵，谢谢你%ANAME(MASTER)%。我也是这种做法比较顺手。」
+		;TranslatedMark 「ふふ、ありがとうな%ANAME(MASTER)%。私もこれくらいの方がやりやすいよ」
+		PRINTFORMW %ANAME(TARGET)%轻轻抚摸着%ANAME(MASTER)%的头。在他那温柔的手触中，%ANAME(MASTER)%心中感到一阵暖意。
+		;TranslatedMark %ANAME(TARGET)%が%ANAME(MASTER)%の頭を撫でる。その優しい手つきに%ANAME(MASTER)%の心が暖かくなった
+	;通常版
+	ELSE
+		PRINTFORMW 「啊，我感觉咱们已经不是需要那么客套的关系了......是不是太随便了？」
+		;TranslatedMark 「ああ、もう堅苦しくするような仲でもあるまいと思ったんだが、……馴れ馴れしいかな？」
+		PRINTFORML 　不，正是这样的事情才让人觉得轻松愉快。这么说完，%ANAME(TARGET)%微微一笑。
+		;TranslatedMark いや、これくらいの方が気楽でいい　　そう告げると%ANAME(TARGET)%はにこりと微笑んだ
+		PRINTFORMW 「fufu，谢谢。我也这样做比较轻」
+		;TranslatedMark 「ふふ、ありがとう。私もこれくらいの方がやりやすいよ」
+	ENDIF
 	PRINTFORML
 ENDIF
 
@@ -23549,7 +24939,8 @@ IF NOWEX:MASTER:射精 > 0
 				ENDSELECT
 			ENDIF
 	ENDSELECT
-
+	;搾精判定
+	CFLAG:253 ++
 ;-------------------------------------------------
 ;主人公を射精させずに絶頂させた　常に表示されると多重絶頂時にうるさいので、いくつか無言を織り交ぜておく
 ;-------------------------------------------------

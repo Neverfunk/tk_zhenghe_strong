@@ -1,4 +1,4 @@
-﻿@KOJO_DAILY_K21_AMAYAKASI_TAG	
+﻿@KOJO_DAILY_K21_AMAYAKASI_TAG
     LOCAL = 0
 	RETURN LOCAL
  ;---------------------
@@ -16,31 +16,36 @@ RETURN (KDVAR:対象:藍_甘やかし > 0 ? 200 # 70)
 @KOJO_DAILY_K21_AMAYAKASI_DECISION(対象)
 #DIM 対象
 
-;プレイヤーキャラが紫か幽幽子だと発生しない
-SIF (MASTER == NAME_TO_CHARA("紫") || MASTER == NAME_TO_CHARA("幽幽子"))
+;プレイヤーキャラが紫か幽々子だと発生しない
+SIF (MASTER == NAME_TO_CHARA("紫") || MASTER == NAME_TO_CHARA("幽々子"))
 	RETURN 0
 
-;恋慕系か主人系で、合意がなければだめ
-SIF !((IS_LOVER(対象) || IS_SLAVED_BY(対象)) && TALENT:対象:合意)
-	RETURN 0
+;ショタ口上ルートは好感度か支配度が500以上。それ以外は恋慕系か主人系で、合意がなければだめ
+IF CFLAG:対象:252 == 1
+	SIF !(CFLAG:対象:好感度 >= 500 || CFLAG:対象:支配度 >= 500)
+		RETURN 0
+ELSE
+	SIF !((IS_LOVER(対象) || IS_SLAVED_BY(対象)) && TALENT:対象:合意)
+		RETURN 0
+ENDIF
 
-;ペニスがないと駄目
+;主人公にペニスがないと駄目
 SIF !HAS_PENIS(MASTER)
 	RETURN 0
-	
-;対象が女でないとだめ
+
+;八雲藍が女でないとだめ
 SIF !IS_FEMALE(対象)
 	RETURN 0
-	
+
 ;終わってたら発生しない
 SIF KDVAR:対象:藍_甘やかし == -1
 	RETURN 0
-	
+
 ;ARG:0が口上デイリーイベントを実施できるかの簡易チェック関数。
 ;ARG:1 0 MASTERと別勢力である 1 MASTERと同一勢力である　-1 どちらでもよい
 ;ARG:2 0 捕虜でない 1 捕虜である -1 どちらでもよい
 ;ARG:3 0 面識がない 1 面識がある -1 どちらでもよい
-RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1) 
+RETURN CHECK_KOJO_DAILY_HAPPEN(対象, 1, 0, 1)
 
 ;---------------------
 ;ジャンル
@@ -75,277 +80,1140 @@ CALL DAILY_EVENT_RAND_CITYSELECT(0)
 対象都市2 = RESULT
 SIF 対象都市 < 0
 	RETURN 0
-	
-SELECTCASE KDVAR:対象:藍_甘やかし
-	CASE 0
-		PRINTFORMW 深夜。%ANAME(MASTER)%的房間裡還亮著燈
-		PRINTFORML 最近的文件工作堆積如山、%ANAME(MASTER)%常常工作到深夜…
-		PRINTFORML 不能因為領地內的經濟問題而偷懶、%ANAME(MASTER)%臉色蒼白地批閱著文件
-		PRINTFORMW 「…沒問題吧？　%ANAME(MASTER)%。看你一副很疲憊的樣子」
-		PRINTFORML 可能是擔心連日來的忙碌、%ANAME(対象)%過來探望了
-		PRINTFORMW 「嗯…这堆文件实在是多了吧。你的脸色也不好、稍微休息一下怎么样？　之后的就交给我了」
-		PRINTFORML 虽然是非常难得的建议、但是%ANAME(対象)%因为非常的优秀已经接受了比自己更多的工作了
-		PRINTFORMW 我还要给她添加负担吗…怎么办？
-		PRINTFORML
-		CALL ASK_YN("那就、恭敬不如从命吧…", "没关系、总会有办法的…总会有办法的…")
-		IF RESULT == 1
-			PRINTFORML 「真的没关系吗？　……那麼、我就先離開了…」
-			PRINTFORML %ANAME(対象)%帶著擔心的表情離開了……
-			PRINTFORMW 這是我的工作。不能給%ANAME(対象)%添加額外的負擔
-			PRINTFORML 再次埋頭進書山沒多久就開始視線模糊了
-			PRINTFORMW 可能是因為連日的疲勞、意識漸漸模糊了……
+
+PRINTL
+;主人公がショタの場合の口上変化分
+IF CFLAG:対象:252 == 1 && KDVAR:対象:藍_甘やかし_おねショタルート == 0
+	CALL COLOR_PRINTW(@"路线选择", カラー_注意)
+	;TranslatedMark ルート選択
+	CALL COLOR_PRINTW(@"%ANAME(MASTER)%是小孩子吗？", カラー_注意)
+	;TranslatedMark 幼い%ANAME(MASTER)%は‥
+	CALL ASK_YN("十足的大人！（传统路线）","需要姐姐！（姐弟路线）")
+	;TranslatedMark "大人びてる！（従来ルート）", "お姉ちゃんが必要！（おねショタルート）"
+	;おねショタルート
+	IF RESULT == 1
+		KDVAR:対象:藍_甘やかし_おねショタルート = 1
+	;従来ルート
+	ELSE
+		KDVAR:対象:藍_甘やかし_おねショタルート = 2
+	ENDIF
+ENDIF
+PRINTFORML ・
+;TranslatedMark ・
+PRINTFORML ・・
+;TranslatedMark ・・
+PRINTFORMW ・・・
+;TranslatedMark ・・・
+;おねショタルート
+IF KDVAR:対象:藍_甘やかし_おねショタルート == 1
+	SELECTCASE KDVAR:対象:藍_甘やかし
+		CASE 0
 			PRINTFORML
-			PRINTFORMW
-			CALL COLOR_PRINTL(@"%ANAME(MASTER)%因為過勞倒下了！", カラー_注意)
-			PRINTFORML
-			PRINTFORMW
+			PRINTFORMW 深夜。%ANAME(MASTER)%的房間裡還亮著燈
+			;TranslatedMark 深夜。%ANAME(MASTER)%の部屋にはまだ明かりが灯っている
+			IF ABL:MASTER:政治 >= 50
+				PRINTFORML 最近的文件工作堆積如山、%ANAME(MASTER)%常常工作到深夜...
+				;TranslatedMark %ANAME(MASTER)%はここ最近、書類仕事が山のように増え、連日夜遅くまで仕事に追われていた‥
+			ELSE
+				PRINTFORML 由於處理政務的能力無法滿足需求，未能完成的文件不斷增加著堆積如山，只好連夜工作......
+				;TranslatedMark まだ処理能力が追いつかず、書類仕事が残ってしまい連日夜遅くまで仕事に追われていた‥‥‥
+			ENDIF
+			PRINTFORML 不能因為領地內的經濟問題而偷懶、%ANAME(MASTER)%臉色蒼白地批閱著文件
+			;TranslatedMark 領内の経済に関わる事だけにサボるわけにも行かず、青白い顔で書類と向き合っていると
+			PRINTL
+			PRINTFORMW  「...沒問題吧？　%ANAME(MASTER)%。看你一副很疲憊的樣子」
+			;TranslatedMark 「‥大丈夫か？　%ANAME(MASTER)%。ずいぶん疲れた顔をしているぞ」
+			PRINTL
+			PRINTFORMW 可能是擔心連日來的忙碌、%ANAME(対象)%過來探望了
+			;TranslatedMark 連日の激務を心配してくれたのか、%ANAME(対象)%が様子を見に来たようだ
+			PRINTL
+			PRINTFORMW 「嗯...这堆文件实在是多了吧。你的脸色也不好、稍微休息一下怎么样？　之后的就交给我了」
+			;TranslatedMark 「ふむ‥、この量は中々厳しいだろう。顔色も悪いし、少し休んだらどうだ？　後は私がやっておくから」
+			PRINTL
+			PRINTFORML 虽然是非常难得的建议、但是%ANAME(対象)%因为非常的优秀已经接受了比自己更多的工作了
+			;TranslatedMark すごくありがたい申し出だが、%ANAME(対象)%はその優秀さから既に%ANAME(MASTER)%より多くの仕事を受け持っていた
+			PRINTFORMW 深知這一點的%ANAME(MASTER)%不願意就這樣開口，輕易地給人添加麻煩，而且......
+			;TranslatedMark それを知っている%ANAME(MASTER)%は軽々しく頼っては迷惑をかけてしまう、と逡巡していたが‥‥
+			PRINTL
+			PRINTFORMW 「喂，%ANAME(MASTER)%！？」
+			;TranslatedMark 「お、おいっ、%ANAME(MASTER)%っ！？」
+			PRINTL
+			PRINTFORML 一直勉強支撐著的%ANAME(MASTER)%體力瀕臨了極限。最後，視線逐漸模糊，意識逐漸陷入黑暗之中
+			;TranslatedMark 無理をしていた%ANAME(MASTER)%に、不意に体力の限界が訪れた。最後、薄れてゆく視界が暗くなる直前
+			PRINTFORMW 只記得自己的臉被只记得自己的脸被一种柔软而温暖的东西包裹着，非常地安心。
+			;TranslatedMark 顔が柔らかく温かな何かに包まれたのを感じ、安心できたのは覚えていた
+			PRINTL
 			PRINTFORML ・
+			;TranslatedMark ・
 			PRINTFORML ・・
+			;TranslatedMark ・・
 			PRINTFORMW ・・・
-			PRINTFORML 「……嗯？　終於醒過來了嗎%ANAME(MASTER)%。啊啊、你繼續睡吧。沒關係、文件就交給我吧」
-			PRINTFORML %ANAME(MASTER)%的意識恢復之後、%ANAME(対象)%打了聲招呼。她發現了倒下的%ANAME(MASTER)%並照顧了他
-			PRINTFORMW 「為了以防萬一再來看一次真的太好了、你好像輕微貧血、之後去看看醫生比較好」
-			PRINTFORML 到底失去了意識多久了呢？最近的文件很多、如果不快點繼續處理的話…
-			PRINTFORMW 「不行。我不是讓你繼續休息嗎？　你之前就是因為強撐著才暈過去的。不要擔心工作了」
-			PRINTFORML %ANAME(対象)%撫摸著%ANAME(MASTER)%的頭、她尾巴的末端正卷起無數的筆、以驚人的速度處理著文件
-			PRINTFORMW 「我的本體是九尾狐哦？　所以沒有關係的。首先、先從最近日期的文件開始處理起來吧」
-			PRINTFORML 結果%ANAME(対象)%一下子就把大量的文件都處理好了、這樣一來就暫時沒有問題了吧
-			PRINTFORMW 「真是的。雖然努力工作很了不起、但是希望你在倒下之前先依靠我。還是說、我靠不住？」
-			PRINTFORMW 不、我不是這個意思…我只是不想在工作中給%ANAME(対象)%增加多餘的負擔…
-			PRINTFORML 「…你這麼溫柔是你的優點、但是如果自己倒下的話就一切白費了。……我真的、很擔心你啊…」
-			PRINTFORMW %ANAME(対象)%一邊說著一邊抱住了%ANAME(MASTER)%、尾巴也溫柔地包裹住了%ANAME(MASTER)%的全身
-			PRINTFORMW 「今天就讓我陪著你睡覺吧。…以後也不用客氣、請盡情和我撒嬌…」
+			;TranslatedMark ・・・
+			PRINTL
+			PRINTFORMW 「......嗯？　終於醒過來了嗎%ANAME(MASTER)%。啊啊、你繼續睡吧。沒關係、文件就交給我吧」
+			;TranslatedMark 「‥‥ん？　気がついたか。ああ、まだ寝ているといい。大丈夫、書類は私が片付けてるから」
+			PRINTL
+			PRINTFORML 發現%ANAME(MASTER)%恢复意识后，%ANAME(対象)%書寫著，說出了問候的話語
+			;TranslatedMark %ANAME(MASTER)%が意識を取り戻すと、筆を走らせながら%ANAME(対象)%が声を掛ける
+			PRINTFORMW 雖然對自己躺在%ANAME(対象)%的膝上感到有些困惑，但額頭上那%ANAME(対象)%的手掌卻讓人非常安心。
+			;TranslatedMark %ANAME(対象)%の膝の上で目を覚ましたことに混乱するが、額に触れる%ANAME(対象)%の手のひらが心地よかった
+			PRINTFORMW 看起來%ANAME(MASTER)%好像是在膝枕上被照顧著。
+			;TranslatedMark どうやら倒れた%ANAME(MASTER)%を膝枕で看病してくれていたようだ
+			PRINTL
+			PRINTFORMW 「果然還是太勉强自己了啊。不記得了嗎？話說到一半就倒到我的胸口了呢」
+			;TranslatedMark 「やはり無理をしていたな。覚えているか？　話の途中に私の胸に倒れ込んできたんだ」
+			PRINTL
+			PRINTFORMW %ANAME(MASTER)%一邊明白原來那種溫柔的溫暖就是這樣，一邊臉紅着道歉。
+			;TranslatedMark %ANAME(MASTER)%はあの優しい暖かさは其れだったかと納得するとともに、赤面しながら謝罪する
+			PRINTFORML 幸好，%ANAME(対象)%雖然責備著%ANAME(MASTER)%太不小心了，但還是接受了道歉
+			;TranslatedMark 幸い、%ANAME(対象)%は小さいのに無理をするからだ、と窘めながらも謝罪を受け入れてくれた
+			PRINTFORMW 話說回來，自己究竟昏迷裡多久啊。而且還有很多臨期的文件，如果不趕快重新開始的話......
+			;TranslatedMark それはそうと、どのくらい気を失っていたのだろうか？　期日が近い書類も多いから、急いで再開しないと‥‥
+			PRINTL
+			PRINTFORMW 「不行。我說了還讓你再睡會兒吧？你可是因為勉強過度而倒下了啦。所以別再擔心工作的事了」
+			;TranslatedMark 「駄目だ。まだ寝ていろといったろう？　お前は無理をして倒れたんだぞ。仕事のことは心配するな」
+			PRINTFORMW 「我的身体好歹是九尾狐吧？这点小事不算什么。首先，我已经把日期较近的部分解决了」
+			PRINTFORMW 「我好歹是九尾狐吧？這點小事不算什麼。首先，我已經把日期較近的部分解決了」
+			;TranslatedMark 「私の体は仮にも九尾だぞ？　これくらい何てことはない。一先ず、期日が近い分から先にやっつけておいたからな」
+			PRINTL
+			PRINTFORML %ANAME(対象)%在膝上放着%ANAME(MASTER)%的头，一边抚摸一边以惊人的速度处理文件。
+			PRINTFORML %ANAME(対象)%讓%ANAME(MASTER)%的頭輕輕地靠在自己的大腿上，一邊撫摸着他的腦袋，以驚人的速度處理文件
+			;TranslatedMark %ANAME(対象)%は太ももに乗せた%ANAME(MASTER)%の頭を撫でながらも、凄まじい速さで書類を処理している
+			PRINTFORMW 就這樣%ANAME(対象)%迅速地整理了那一大堆文件。這樣一來，應該能暫時安心了吧。
+			;TranslatedMark 結局%ANAME(対象)%は大量にあった書類の束をあっという間に片付けてしまった。これでしばらくは大丈夫だろう
+			PRINTL
+			PRINTFORMW 「真是的......努力固然很好，但做到累倒可不叫努力，而叫做勉強。尤其是你還只是個孩子」
+			;TranslatedMark 「まったく‥。頑張るのは立派だが、倒れるまでやるのは頑張りでは無く無理をする、と言うのだ。特にお前はまだ子供なんだからな」
+			PRINTFORMW 「在倒下前將好好地依靠他人也是工作的一部分......還是說，覺得我靠不住嗎？」
+			;TranslatedMark 「倒れる前にまず頼るのも仕事の内だ。‥‥それとも、私では頼りないのか？」
+			PRINTFORMW
+			PRINTFORML 面對%ANAME(対象)%的勸誡，立刻回答道「不會這樣的」
+			;TranslatedMark 諌める%ANAME(対象)%に、そんなことはないと答えつつも
+			PRINTFORMW %ANAME(MASTER)%告诉%ANAME(対象)%：「因为想要尽快变得能被%ANAME(対象)%依賴」
+			;TranslatedMark %ANAME(MASTER)%は「はやく%ANAME(対象)%に頼られるくらいにまでなりたかったから」と%ANAME(対象)%に伝えた
+			PRINTFORMW 聽到這話之後，%ANAME(対象)%露出了困惑的表情，隨後展露出一種迷人的、甚至帶有些許淫靡色彩的微笑。
+			;TranslatedMark その言葉にきょとんとした表情をしたあと、%ANAME(対象)%は蕩けたような‥‥どこか、淫靡さすら感じさせる笑みを向けてくる
+			PRINTL
+			PRINTFORMW 「真是可愛的心思啊。那麼首先呢，要學會不讓人擔心呢」
+			;TranslatedMark 「‥そういういじらしい心がけは好ましいよ。ではまず、心配させないことから始めねばな」
+			PRINTL
+			PRINTFORMW %ANAME(対象)%这样说着，便拥抱住%ANAME(MASTER)%，用尾巴轻轻包裹着他的全身。
+			;TranslatedMark %ANAME(対象)%はそう言うと%ANAME(MASTER)%を抱きしめ、尻尾で全身を優しく包み込んでくる
+			PRINTL
+			PRINTFORMW 「会陪着你一起睡的，今天就这样入眠吧...从今以后，不用客气，可以随时依赖我哦♪」
+			;TranslatedMark 「添い寝してあげるから今日はもうこのまま眠るといい。‥これからは遠慮せず、私に甘えてくれていいからな♪」
+			PRINTL
+			PRINTFORML 刚才的回答可能真的打动了她的心弦。无论%ANAME(MASTER)%感觉多么害羞，她都不会在意
+			;TranslatedMark よほど先程の解答が琴線に触れたのだろうか。%ANAME(MASTER)%が照れて遠慮するのも構わず
+			PRINTFORMW %ANAME(対象)%铺好了被褥，依旧将%ANAME(MASTER)%紧紧抱在胸前，渐入梦乡......
+			;TranslatedMark %ANAME(対象)%は布団を敷き、そのまま胸に%ANAME(MASTER)%を包み込んだまま、眠りについた‥‥‥
+			PRINTFORMW 第二天，可能是由于感受到了%ANAME(対象)%的疗愈效果，醒来时特别清爽，完全没有感到身体不适。
+			;TranslatedMark ‥‥翌日、%ANAME(対象)%に癒された効果か、特に体調不良もなくスッキリ目覚めることが出来た
+			PRINTL
 			ABL:対象:主導度Ｎ += 150
 			CFLAG:対象:好感度 += 100
 			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了100", 0x00FFFF)
+			;TranslatedMark %ANAME(対象)%の好感度が100上がった
 			CALL PRINT_ADD_EXP(MASTER, "政治経験値", RAND(5, 10), 1)
+			;TranslatedMark 政治経験値
 			CALL TRAIN_AUTO_ABLUP(MASTER)
-			KDVAR:対象:藍_甘やかし = 1
-			PRINTFORMW
-		ELSE
-			PRINTFORMW 「呼呼、就請交給我吧。你就稍微休息一下吧」
-			PRINTFORML %ANAME(対象)%讓%ANAME(MASTER)%枕在自己的大腿上睡覺、她尾巴的末端卷起無數的筆、以驚人的速度處理著文件
-			PRINTFORML 「我的本體是九尾狐哦？　所以沒有關係的。首先、先從最近日期的文件開始處理起來吧」
-			PRINTFORMW 結果%ANAME(対象)%一下子就把大量的文件都處理好了、這樣一來就暫時沒有問題了吧
-			PRINTFORML 「怎麼樣？　我是不是很厲害。所以說、你隨時隨地都可以拜託我哦」
-			PRINTFORML %ANAME(対象)%開心地撫摸著%ANAME(MASTER)%的頭。似乎非常高興能夠被拜託幫忙
-			PRINTFORMW 「那麼、工作也完成了、…你的臉色還是很差勁呢。我去給你拿點開胃的飲料來吧」
-			PRINTFORML 工作結束喘了口氣後、%ANAME(対象)%抱住了%ANAME(MASTER)%、尾巴也溫柔地包裹住了%ANAME(MASTER)%的全身
-			PRINTFORML 「今天就讓我陪著你睡覺吧。…以後也不用客氣、請盡情和我撒嬌…」
-			PRINTFORMW ……第二天、可能是因為被%ANAME(対象)%治愈了的效果吧、身體已經沒有任何不適了、精神也徹底煥發了起來
-			ABL:対象:主導度Ｎ += 100
-			CFLAG:対象:好感度 += 150
-			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了150", 0x00FFFF)
 			KDVAR:対象:藍_甘やかし = 1
 			;クールタイムがあったら-1
 			SIF COOLTIME:MASTER:0 < 0
 				CALL ADD_COOLTIME(MASTER, -1)
-			PRINTFORMW
-		ENDIF
-	CASE 1
-		PRINTFORML 深夜。%ANAME(MASTER)%的房間裡還亮著燈
-		PRINTFORML %ANAME(MASTER)%又被堆積成山的文件給困住了…
-		PRINTFORMW 「沒問題嗎？　%ANAME(MASTER)%。可以的話請讓我再幫你吧？」
-		PRINTFORML 可能是擔心工作到深夜還沒完成、%ANAME(対象)%又來看望%ANAME(MASTER)%了
-		PRINTFORMW 那麼、怎麼辦呢？
-		PRINTFORML
-		CALL ASK_YN("那就、恭敬不如從命吧", "不、沒關係的")
-		IF RESULT == 1
-			PRINTFORML 「……看來、這不是強撐著說出來的話。臉色不錯」
-			PRINTFORML 如果需要被多次幫助的話那麼這個男人就是廢物。%ANAME(MASTER)%對著%ANAME(対象)%表示「這次沒問題」
-			PRINTFORMW （確實呢…如果我太多管閒事的話%ANAME(MASTER)%會覺得自己沒用的…雖然有點寂寞但是沒有辦法）
-			PRINTFORML 「我知道了。但是請讓我準備一下夜宵吧、這樣可以吧？」
-			PRINTFORMW 正好肚子也餓了。%ANAME(MASTER)%準備吃完%ANAME(対象)%做的夜宵再繼續工作
+			FORCEWAIT
+		CASE 1
+			PRINTL
+			PRINTFORML 深夜。%ANAME(MASTER)%的房间里还亮着灯。
+			;TranslatedMark 深夜。%ANAME(MASTER)%の部屋にはまだ明かりが灯っている
+			PRINTFORMW %ANAME(MASTER)%又被大量的文书工作压得喘不过气来。
+			;TranslatedMark %ANAME(MASTER)%はまたもや多くの書類仕事に追われてしまっていた
+			PRINTL
+			PRINTFORMW 「%ANAME(MASTER)%，今晚你房间的灯又开到很晚......还好吗？需要我的帮助吗？」
+			;TranslatedMark 「%ANAME(MASTER)%、また遅くまで明かりがついているが‥‥大丈夫か？　よかったらまた手伝おうか？」
+			PRINTL
+			PRINTFORML 估计是担心我的状况，%ANAME(対象)%特地来看我，我要向他表示感谢。
+			;TranslatedMark また心配してくれたのだろう、様子を見に来てくれた%ANAME(対象)%に例を述べ
+			PRINTFORMW 好不容易终于在刚刚独自完成了一份工作，并且做了汇报。
+			;TranslatedMark 今回はなんとか、つい今さきほど自力で終わらせたのだと報告した
+			PRINTL
+			PRINTFORMW 「......看起来，并不是勉强硬撑的样子。气色也不错」
+			;TranslatedMark 「‥‥どうやら、無理をしたわけではないようだな。顔色も悪くない」
+			PRINTL
+			PRINTFORML %ANAME(対象)%一边这么说着，一边摸了摸%ANAME(MASTER)%的头称赞着
+			;TranslatedMark そう言って%ANAME(対象)%が%ANAME(MASTER)%の頭を撫で、褒めた途端
+			PRINTFORMW 可能是放松了心神，%ANAME(MASTER)%的肚子发出了响亮的声音。
+			;TranslatedMark 気が緩んだのか%ANAME(MASTER)%の腹の虫が盛大に鳴いてしまう
+			PRINTFORML 听到那个声音，面前的女性先是一愣，然后咯咯地笑了起来。
+			;TranslatedMark その音を聞き、目の前の女性はきょとんとした後にクスクスと笑い出す
+			PRINTFORMW 看到那种情形，本想炫耀成果的%ANAME(MASTER)%变得面红耳赤。
+			;TranslatedMark その様子に、成果を誇りたかった%ANAME(MASTER)%は赤面するしかなかった
+			PRINTL
+			PRINTFORMW 「呵呵......不过，疏忽了晚餐可不太好呢」
+			;TranslatedMark 「ふふっ‥‥‥だが、夕飯をおろそかにするのはよくないな」
+			PRINTFORMW 「不过这样的话特地带来的东西就不会浪费了呢。你看，如果你喜欢的话，就吃一点吧？」
+			;TranslatedMark 「でも持ってきたものが無駄にならずに済んだ。ほら、よかったら食べてくれないか？」
+			PRINTL
 			PRINTDATAW
-			;DATA ちなみにメニューはきつねうどんだった
-			;DATA ちなみにメニューは稲荷寿司だった
-			;DATA ちなみにメニューは油揚げの味噌汁だった
-			;DATA ちなみにメニューは油揚げのサラダだった
-			;DATA ちなみにメニューは焼き油揚げだった
-			;DATA ちなみにメニューは信玄袋だった
-			DATA 今晚的菜品是油炸豆腐面
-			DATA 今晚的菜品是稲荷寿司
-			DATA 今晚的菜品是油炸味增湯
-			DATA 今晚的菜品是油炸莎拉
-			DATA 今晚的菜品是油炸豆腐
-			DATA 今晚的菜品是信玄袋
+			DATA  她这样说着递过来的是炸鸡。
+			;TranslatedMark そう言って差し出されたのはきつねうどんだった
+			DATA  她这样说着递过来的是稻荷寿司。
+			;TranslatedMark そう言って差し出されたのは稲荷寿司だった
+			DATA  她这样说着递过来的是油豆腐的味噌汤。
+			;TranslatedMark そう言って差し出されたのは油揚げの味噌汁だった
+			DATA  她这样说着递过来的是油豆腐皮沙拉。
+			;TranslatedMark そう言って差し出されたのは油揚げのサラダだった
+			DATA  她这样说着递出的是烤油豆腐。
+			;TranslatedMark そう言って差し出されたのは焼き油揚げだった
+			DATA  她这样说着递过来的是信玄袋。
+			;TranslatedMark そう言って差し出されたのは信玄袋だった
 			ENDDATA
-			PRINTFORML
-			PRINTFORML
-			PRINTFORMW …總算在天亮之前結束了工作。%ANAME(MASTER)%在愉快的成就感的包圍下很快睡著了…
-			CFLAG:対象:好感度 += 100
-			CALL PRINT_ADD_EXP(MASTER, "政治経験値", RAND(10, 25), 1)
-			CALL TRAIN_AUTO_ABLUP(MASTER)
-			KDVAR:対象:藍_甘やかし = -1
-			PRINTFORMW
-		ELSE
-			PRINTFORMW 撒嬌般地要求幫忙、%ANAME(対象)%一邊微笑著一邊溫柔撫摸著%ANAME(MASTER)%的頭
-			PRINTFORML 「呼呼。我很開心哦、你這麼坦率地要我幫忙。好、我馬上幫你忙」
-			PRINTFORMW %ANAME(対象)%說完後、在%ANAME(MASTER)%的眼前創造了很多式神
-			PRINTFORML 「這些傢伙雖然不會什麼複雜的工作、但是這些雜務還是可以處理得很好」
-			PRINTFORMW 巴掌般大小的式神各自拿起了筆開始工作
-			PRINTFORML 以防萬一、確認了一下完成的文件發現都沒問題。真是方便的能力啊……
-			PRINTFORMW 「那麼、接下來就交給式神吧…還有啊、還有就是…」
-			PRINTFORML 「%ANAME(MASTER)%、工作到深夜應該很累吧。讓我來幫你按摩吧」
-			PRINTFORMW 說著、%ANAME(対象)%開始為%ANAME(MASTER)%揉肩膀
-			PRINTFORML 力度恰到好處、以絕妙的方法不停揉捏著、讓%ANAME(MASTER)%情不自禁呻吟出聲
-			PRINTFORMW 「呼呼…喜歡嗎？　來吧、趴在床上…。背部和腰部都會幫你做的」
-			PRINTFORML %ANAME(対象)%那柔軟靈巧的手指確實能解除肌肉的酸痛、令%ANAME(MASTER)%舒服得沉迷其中
-			PRINTFORMW 「是不是特別舒服？　呼呼、紫大人也經常找我按摩哦…而且還被她稱讚過呢♪」
-			PRINTFORML 包含著愛情的按摩和她那甜蜜的香味、還有在耳邊輕聲細語的溫柔聲音讓%ANAME(MASTER)%悄然入睡…
-			PRINTFORMW 「已經睡著了啊…之後的事情就交給我吧…今後也、不用考慮這麼多呢……❤」
-			PRINTFORML ・
-			PRINTFORML ・・
-			PRINTFORMW …睡得很熟…。第二天早上、桌子上放著完成了的文件
+			PRINTFORMW 好像是因为很担心自己，所以带来了夜宵
+			;TranslatedMark 最初から心配して夜食を持ってきてくれていたらしい
+			PRINTFORML 心怀感激地吃完后，紧张也随着缓解了。
+			;TranslatedMark 心遣いに感謝して平らげると、ようやく緊張が解れたからか
+			PRINTFORMW 又一次不自觉地扑到了%ANAME(対象)%的怀里。她虽然苦笑着，却又温柔地抱了过来。
+			;TranslatedMark またもふらりと%ANAME(対象)%の胸へ倒れ込んでしまい、苦笑しながらもまた優しく抱きしめられてしまった
+			PRINTL
+			PRINTFORMW 「那又怎样，只是太累了吧。抱一抱又没什么大不了的」
+			;TranslatedMark 「なに、それだけ疲れていたんだろう。抱きしめてやるくらいなんでも無いさ」
+			PRINTFORMW 「既然这么难得，那就再一起睡吧——哎呀，你可不要跑哦♪」
+			;TranslatedMark 「せっかくだからまた一緒に寝ようか――こぉら、逃げるんじゃないのっ♪」
+			PRINTL
+			PRINTFORML 本来就不可能逃脱，%ANAME(MASTER)%再次被%ANAME(対象)%的%STR_BODY("胸", 対象)%包裹住了
+			;TranslatedMark もとより逃げられるはずもなく、%ANAME(MASTER)%はまたも%ANAME(対象)%の%STR_BODY("胸", 対象)%に包まれて
+			PRINTFORMW 不知不觉中两人彼此面对面地进到了被窝里。
+			;TranslatedMark 互いに向き合う形で布団の中へと入ってしまった。
+			IF ABL:MASTER:性知識 == 0 && ABL:対象:欲望 <= 1
+				PRINTFORML %ANAME(MASTER)%即使感到害羞，也只是稚气可爱的表现。
+				;TranslatedMark %ANAME(MASTER)%は恥ずかしがるも、其れがなお幼子の微笑ましさと捉えられ
+				PRINTFORMW %ANAME(MASTER)%就这样更加深入地埋在胸部的深处，被抚摸着头顶沉入了梦乡......
+				;TranslatedMark %ANAME(MASTER)%はそのまま、より深く胸の谷間に埋もれ、頭を撫でられながら眠りへと落ちていった‥‥‥
+				PRINTL
+				ABL:対象:主導度Ｎ += 100
+				CFLAG:対象:支配度 += 150
+				CALL COLOR_PRINTL(@"%ANAME(対象)%的支配度上升了150", 0x00FFFF)
+				;TranslatedMark %ANAME(対象)%の支配度が150上がった
+				CALL PRINT_ADD_EXP(MASTER, "政治経験値", RAND(5, 10), 1)
+				;TranslatedMark 政治経験値
+				CALL TRAIN_AUTO_ABLUP(MASTER)
+				;クールタイムがあったら-1
+				SIF COOLTIME:MASTER:0 < 0
+					CALL ADD_COOLTIME(MASTER, -1)
+				FORCEWAIT
+			ELSE
+				PRINTFORML 不过，这次因为刚结束工作非常兴奋，又加上肚子饱饱的，两者结合在一起，一时之间怎么也睡不着。
+				;TranslatedMark だが、今回は仕事明けでハイになって、腹もくちており、状況も相まってなかなか眠気が来るものではない
+				PRINTFORMW 相反，%ANAME(対象)%身上传来淡淡的甜香显得非常明显。更不用说被那丰满乳房的柔软包裹着的触感。
+				;TranslatedMark 逆に%ANAME(対象)%から香る仄かに甘い匂い。そしてなにより、豊満な乳房の柔らかさに包まれ――
+				PRINTL
+				IF KDVAR:対象:藍_性教育 >= 1
+					CALL COLOR_PRINTW(@"「‥‥‥你的那个小弟弟又站起来了呢♥ 是有那么喜欢我的身体吗♥」", カラー_ピンク)
+					;TranslatedMark 「‥‥‥またおちんちんが勃ってるな♥　そんなに私の体が気に入ったのか♥」
+				ELSE
+					CALL COLOR_PRINTW(@"「――呵呵，你也是男孩子呢......♡」", カラー_ピンク)
+					;TranslatedMark 「――ふふっ。そうか、%ANAME(MASTER)%も男の子なんだな‥‥‥♡」
+				ENDIF
+				PRINTL
+				PRINTFORML 不知不觉中那挺立的东西已经变成在%ANAME(対象)%的大腿之间摩擦的样子了。
+				;TranslatedMark 思わず反り返った一物が、%ANAME(対象)%の太ももの間に擦り付けるような形になってしまっていた
+				PRINTL
+				IF ABL:MASTER:性知識 >= 1 && KDVAR:対象:藍_性教育 == 2
+					PRINTFORML 急忙抬头看到的%ANAME(対象)%那带着迷人湿润的眼睛
+					;TranslatedMark 焦って見上げた%ANAME(対象)%の瞳は蠱惑的に濡れ
+					PRINTFORML 从一贯理性的氛围中完全转变，露出妩媚的表情。
+					;TranslatedMark いつもの理知的な雰囲気からガラッと代わり、妖艶な表情をのぞかせている
+					PRINTFORMW %ANAME(MASTER)%在看到那双眼睛的瞬间，全然忘记了辩解。
+					;TranslatedMark %ANAME(MASTER)%はその瞳を見た瞬間、弁明も忘れ
+					PRINTFORMW 被那双眼睛深深吸引，凝视着，咕噜一声吞下了口水。
+					;TranslatedMark 吸い込まれるように瞳を覗き込みながら、ゴクリ、と生唾を飲み込んだ
+					PRINTL
+					PRINTFORMW 「不必慌张。我也有些过于毫无防备」
+					;TranslatedMark 「慌てなくていいんだ。私も無防備が過ぎた」
+					PRINTFORMW 「所以呢......如果这样的话，我还是得负责到底呢♥」
+					;TranslatedMark 「だから、そうだな‥‥‥そうなった責任は、取ってあげないとな♥」
+					PRINTL
+					PRINTFORMW 这样说着，把自己和%ANAME(MASTER)%的睡衣前面敞开着，把勃起的肉棍夹在大腿间。
+					;TranslatedMark そう言って、自分と%ANAME(MASTER)%の寝間着の前を開き、勃起した肉竿を太ももに挟み込んだ
+					PRINTFORML
+					PRINTFORML ・
+					;TranslatedMark ・
+					PRINTFORML ・・
+					;TranslatedMark ・・
+					PRINTFORMW ・・・
+					;TranslatedMark ・・・
+					PRINTL
+					CALL COLOR_PRINTW(@"「加油♥ 加油♥」", カラー_ピンク)
+					;TranslatedMark 「ほら、頑張れ♥　頑張れ♥」
+					PRINTL
+					PRINTFORMW 一边抚摸着%ANAME(対象)%的头一边加油，伴随着迷醉心神的声音，响起了肉体交击的声音。
+					;TranslatedMark %ANAME(対象)%の頭をなでながらの応援と、脳をしびれさせるような蠱惑的な声音とともに肉の打ち付ける音が響く
+					PRINTFORML %ANAME(MASTER)%一边含住她的%STR_BODY("乳首：欲情", 対象)%，一边弄脏她的大腿
+					;TranslatedMark %ANAME(MASTER)%は彼女の%STR_BODY("乳首：欲情", 対象)%に吸い付きながら太ももを汚し
+					PRINTFORMW 尽管如此仍觉不足，被%ANAME(対象)%诱惑，不自觉地将肉竿插入她的蜜壺，继续摇动着腰部。
+					;TranslatedMark それでも足りず、%ANAME(対象)%に誘惑されるまま彼女の蜜壺へ肉竿を挿入し、腰を振り続けている
+					PRINTL
+					CALL COLOR_PRINTW(@"「啊♥　明明还是个小孩子，却想着交配让雌性怀孕......真是不知天高地厚的孩子♥」", カラー_ピンク)
+					;TranslatedMark 「あん♥　子供のくせに、雌を孕ませようとするなんて‥‥生意気な子だ♥」
+					PRINTL
+					PRINTFORML 一边这样说着，她的%STR_BODY("膣：欲情", 対象)%却丝毫没有放过到手猎物的打算。
+					;TranslatedMark そう言いながらも彼女の%STR_BODY("膣：欲情", 対象)%は咥えこんだ獲物を逃すつもりはなく
+					PRINTFORMW 吞咽到阴道深处并恳求射精，以名器的服务来取悦肉棒
+					;TranslatedMark 膣奥まで飲み込んでは射精を強請り、名器というにふさわしい奉仕で肉竿へ媚びている
+					PRINTFORMW 那是%ANAME(MASTER)%难以承受的快乐，而%ANAME(MASTER)%已经多次在膣深处射精了。
+					;TranslatedMark それは%ANAME(MASTER)%に耐えられるものではなく、%ANAME(MASTER)%は幾度も膣奥で射精させられてしまっていた
+					PRINTL
+					CALL COLOR_PRINTW(@"「想让我怀上你的孩子，然后成为你的人吗？但只有这样的孩子鸡鸡...呢♥」", カラー_ピンク)
+					;TranslatedMark 「私を孕ませて、自分のモノにしたいのか？　でもこの程度の子供ちんぽじゃ‥‥な♥」
+					PRINTL
+					PRINTFORML 几次射精过后，气喘吁吁地朝向%ANAME(MASTER)%。
+					;TranslatedMark 何度目かの射精を終え、息も絶え絶えになっている%ANAME(MASTER)%に向けて
+					PRINTFORMW %ANAME(対象)%四肢伏地，扭动臀部进行挑逗
+					;TranslatedMark %ANAME(対象)%は四つん這いになり尻を振って挑発する
+					PRINTFORML 刚刚体验到性的快感的%ANAME(MASTER)%，怎么可能不沉醉于面前如此极致的女性身体呢。
+					;TranslatedMark 性の快楽を覚えたばかりの%ANAME(MASTER)%が、目の前の極上の女体に溺れないはずがなく
+					PRINTFORMW %ANAME(対象)%想怎样就怎样，再次从后面搂住，一直缠绵到满意......
+					;TranslatedMark %ANAME(対象)%の思うままに、再び背後からかぶりつき、満足するまでまぐわい続けた‥‥‥
+					PRINTL
+					CALL FUCK(対象, "欲望, 奉仕, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 性交, 精愛, 露出, キス, 口淫, Ｖ性交, Ａ性交", "キス喪失, 処女喪失, Ａ処女喪失, 腸内射精, 口内射精", GET_SPERM_ID("MASTER"), @"%ANAME(MASTER)%的唇", @"%ANAME(MASTER)%", ,  "和姦")
+					;TranslatedMark 対象, "欲望, 奉仕, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 性交, 精愛, 露出, キス, 口淫, Ｖ性交, Ａ性交", "キス喪失, 処女喪失, Ａ処女喪失, 腸内射精, 口内射精", GET_SPERM_ID("MASTER"), @"%ANAME(MASTER)%の唇", @"%ANAME(MASTER)%", ,  "和姦"
+					CALL FUCK(MASTER, "欲望, 奉仕, 性技, Ｃ, Ａ, Ｂ, Ｍ, 性交, 露出, 射精, キス, ", "キス喪失, 童貞喪失", 0, @"%ANAME(対象)%の唇", , @"%ANAME(対象)%", "和姦")
+					;TranslatedMark MASTER, "欲望, 奉仕, 性技, Ｃ, Ａ, Ｂ, Ｍ, 性交, 露出, 射精, キス, ", "キス喪失, 童貞喪失", 0, @"%ANAME(対象)%の唇", , "%ANAME(対象)%", "和姦"
+					ABL:対象:主導度Ｎ += 150
+					CFLAG:対象:支配度 += 150
+					CALL COLOR_PRINTL(@"%ANAME(対象)%的支配度上升了150", 0x00FFFF)
+					;TranslatedMark %ANAME(対象)%の支配度が150上がった
+					CALL PRINT_ADD_EXP(MASTER, "政治経験値", RAND(5, 10), 1)
+					;TranslatedMark 政治経験値
+					CALL TRAIN_AUTO_ABLUP(MASTER)
+					KDVAR:対象:藍_甘やかし = 2
+					PRINTW
+				ELSE
+					IF KDVAR:対象:藍_性教育 == 1
+						PRINTFORML 忍不住想要道歉，却被她的双唇所阻碍
+						;TranslatedMark 思わず謝罪をしようとするが、それは彼女の唇で遮られ
+						PRINTFORMW 过了一会儿，舌头交缠的唾液声回荡在房间里。
+						;TranslatedMark またしばらくの間、舌が絡み合う唾液の音が部屋に響いた
+						PRINTL
+						PRINTFORMW 「不用道歉，我也很高兴因为这就像被你夸奖很有魅力一样呢♥」
+						;TranslatedMark 「謝らなくていい、私もキミに魅力的と言われているようなもので嬉しいんだぞ♥」
+						PRINTFORMW 「那么，这次就如约来教你一些能让女孩子更加开心的事吧♥」
+						;TranslatedMark 「さて、それじゃあ‥‥今度はもっと、女の子の気持ちいいことを教える約束だったな♥」
+						PRINTL
+						PRINTFORML 首先是被用手搓动直到射精，然后是享受口交，感觉身体要融化掉了一样。
+						;TranslatedMark そう言われてまずは手コキで射精まで導かれ、次は口淫で溶けるかと思うほど蕩けさせられ
+						PRINTFORMW %STR_BODY("胸：感触", 対象)%包裹并用力按摩，%ANAME(MASTER)%多次将欲望释放给了她。
+						;TranslatedMark %STR_BODY("胸：感触", 対象)%で包み込み扱き上げられ、%ANAME(MASTER)%は何度も彼女へ欲望を吐き出した
+						PRINTFORMW 每次%ANAME(対象)%都会把%ANAME(MASTER)%的精液含在嘴里，咀嚼后吞下，引起更大的兴奋。
+						;TranslatedMark その度に%ANAME(対象)%は%ANAME(MASTER)%の精液を口に含み、咀嚼し、嚥下してみせ、興奮を煽り続けた
+						PRINTL
+						PRINTFORMW 「呵呵，还很有精神嘛‥♥ 看，这里感觉更好哦——过来吧♥」
+						;TranslatedMark 「ふふ、まだまだ元気だな‥♥　ほら、ここはもっと気持ちがいいぞ――おいで♥」
+						PRINTL
+						PRINTFORML 最后，%ANAME(対象)%大幅张开双腿，用自己的手指分开私处。
+						;TranslatedMark そしてついに、%ANAME(対象)%は股を大きく開き、己の指で女陰を割り開いて
+						PRINTFORMW 湿透的蜜壶映入眼帘，她轻轻摇动腰肢，向%ANAME(MASTER)%发出邀请。
+						;TranslatedMark しとどに濡れそぼった蜜壺を見せ、腰をくゆらしながら%ANAME(MASTER)%を誘った
+						PRINTFORML 每当蜜汁溢出时，浓郁的雌性色味扑鼻而来，仿佛被蜜汁吸引的昆虫一样不自觉地被引诱接近。
+						;TranslatedMark 蜜が溢れる度に香る濃厚な雌の匂いに、蜜に誘われる虫のようにフラフラと引き寄せられ
+						PRINTL
+						IF TALENT:MASTER:童貞
+							CALL COLOR_PRINTW(@"「啊嗯♥ %ANAME(MASTER)%的童贞小鸡鸡，来了哦♪」", カラー_ピンク)
+							;TranslatedMark 「あんっ♥　%ANAME(MASTER)%の童貞ちんぽ、きたぁ♪」
+						ELSE
+							CALL COLOR_PRINTW(@"「啊嗯♥ 小小嫩嫩的小鸡鸡，来了♪」", カラー_ピンク)
+							;TranslatedMark 「あんっ♥　子供ちんぽ、きたぁ♪」
+						ENDIF
+						PRINTL
+						PRINTFORMW 贪婪地，连根本也一丝不剩地被含住了
+						;TranslatedMark ――貪るように、根本まで余すことなく咥えこまれてしまった
+						PRINTFORMW %ANAME(MASTER)%在未知的快感中呻吟着，拼命地随着她的需求继续摆动着腰。
+						;TranslatedMark %ANAME(MASTER)%は未知の快感に呻き声を上げながら、彼女の求めるままに懸命に腰を振り続ける
+						PRINTFORML 一边流着口水一边贪婪地享用着自己的%ANAME(MASTER)%，%ANAME(対象)%愉快地为其加油鼓劲。
+						;TranslatedMark 涎を垂らしながら己を貪る%ANAME(MASTER)%を、%ANAME(対象)%は嬉しそうに応援し
+						PRINTFORMW 用语言、手指以及自己所有的元素进行诱惑和贪婪。
+						;TranslatedMark 言葉で、指で、己のありとあらゆる要素を使って誘惑し、貪っている
+						PRINTL
+						PRINTFORML 「要出来了吗？ 是吗♥」
+						;TranslatedMark 「もう出そうか？　そうか♥」
+						PRINTFORMW 「不过，在那里释放的话会怀孕哦？所以不要不负责任地释放哦♥」
+						;TranslatedMark 「でも、口に出すのと違ってソコに出すと赤ちゃんができちゃうからな？　無責任に出してはだめだぞ♥」
+						PRINTFORML 「看，紧紧抓住我的腰......像这样轻轻地贴上来♥ 这样就能到达更深的地方了♪」
+						;TranslatedMark 「ほら、私の腰をしっかり掴んで‥‥腰を押し付けるように♥　そうすれば、奥に届くから♪」
+						PRINTFORMW 「尽情享受后，可以拔出%ちんぽ%，洒在我身上也可以哦♥」
+						;TranslatedMark 「たっぷり楽しんだらちんぽを抜いて、私の体にかけていいからな♥」
+						PRINTL
+						PRINTFORMW %ANAME(対象)%在教授过程中需注意引导，将愉悦与警惕一并传授，像是在潜移默化中教会人们如何感受在体内的快感。
+						;TranslatedMark %ANAME(対象)%は膣中の気持ちよさを教え込むような指導をしながら快楽を教え込み、注意を促す
+						PRINTFORML 然而，那双腿紧紧缠绕在%ANAME(MASTER)%的腰上，为了不让猎物逃走而不断向前推去。
+						;TranslatedMark だがその両脚はガッチリと%ANAME(MASTER)%の腰へ巻き付き、獲物を逃すまいとグイグイと前へ押し込んでいる
+						PRINTFORMW %ANAME(MASTER)%无法抵抗那贪婪的膣带来的刺激，便将腰紧紧贴上去，在最深处射精了。
+						;TranslatedMark %ANAME(MASTER)%はその貪欲な膣からの刺激に逆らえず、そのまま腰をピッタリと押し付け、一番奥で射精してしまった
+						PRINTL
+						PRINTFORMW 「嗯啊，啊――♥ ...不乖的孩子♥ 我明明让你在外面出来的，你却这样直接出来♥」
+						;TranslatedMark 「んぁ、あぁ――っ♥　‥‥悪い子だ♥　外に出すように言ったのに、そのまま出すなんて♥」
+						PRINTFORMW 「满满的、浓厚而滚烫的东西正在朝着我的子宫里进发，打算让我怀孕呢♪ 快点，不然就来不及喽♥」
+						;TranslatedMark 「いっぱい、濃くて熱いのが私を孕ませようと子宮に向かってるぞ♪　ほら、はやく抜かないと♥」
+						PRINTL
+						PRINTFORML 虽然腿部已经被牢牢控制住了，但%ANAME(MASTER)%却再也无法听到那些话语。
+						;TranslatedMark もとより脚でがっちり捕獲されているが、%ANAME(MASTER)%にもその言葉はもはや聞こえておらず
+						PRINTFORMW 因为过于强烈的射精感，他只能不断地将腰部推向%ANAME(対象)%，持续释放精液。
+						;TranslatedMark あまりに強い射精感に翻弄され、ただひたすらに%ANAME(対象)%へ腰を押し付け精を吐き出し続ける
+						PRINTFORMW 最终，%ANAME(対象)%的腿在彻底榨干之前，始终没有放开%ANAME(MASTER)%。
+						;TranslatedMark 結局、一滴残らず出し尽くすまで%ANAME(対象)%の脚が%ANAME(MASTER)%を開放することはなかった
+						PRINTL
+						PRINTFORML 「看起来一脸满足的样子......在我身上不负责任地留下种子就是那么好吗♥」
+						;TranslatedMark 「見るからに気持ちよかったという顔をして‥‥私に無責任な種付けするのはそんなによかったか♥」
+						PRINTFORMW 「不过，违反约定是不对的。所以......就把那个不知节制的东西榨取到空为止吧♥」
+						;TranslatedMark 「でも、言いつけを破ったのはいけない。だから‥‥その節操のないおちんちん、空になるまで搾り取ってあげよう♥」
+						PRINTL
+						PRINTFORML %ANAME(対象)%这样说道，随即展示之前刚流出的精液缓缓滴落的女性私密部位。
+						;TranslatedMark %ANAME(対象)%はそう告げて、先程出したばかりの精液がドロリとこぼれ落ちる女陰を開いて見せ
+						PRINTFORMW 用叫做「惩罚」的方式诱惑%ANAME(MASTER)%，一直呵护着她直到她满意为止......
+						;TranslatedMark %ANAME(MASTER)%をお仕置きという名で誘惑し、彼女が満足するまでたっぷりと%ANAME(MASTER)%をかわいがり続けた‥‥‥
+						PRINTL
+						CALL FUCK(対象, "欲望, 奉仕, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 性交, 精愛, 露出, キス, 口淫, Ｖ性交, Ａ性交", "キス喪失, 処女喪失, Ａ処女喪失, 腸内射精, 口内射精", GET_SPERM_ID("MASTER"), @"%ANAME(MASTER)%的唇", @"%ANAME(MASTER)%", ,  "和姦")
+						;TranslatedMark 対象, "欲望, 奉仕, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 性交, 精愛, 露出, キス, 口淫, Ｖ性交, Ａ性交", "キス喪失, 処女喪失, Ａ処女喪失, 腸内射精, 口内射精", GET_SPERM_ID("MASTER"), @"%ANAME(MASTER)%の唇", @"%ANAME(MASTER)%", ,  "和姦"
+						CALL FUCK(MASTER, "欲望, 奉仕, 性技, Ｃ, Ａ, Ｂ, Ｍ, 性交, 露出, 射精, キス, ", "キス喪失, 童貞喪失", 0, @"%ANAME(対象)%の唇", , @"%ANAME(対象)%", "和姦")
+						;TranslatedMark MASTER, "欲望, 奉仕, 性技, Ｃ, Ａ, Ｂ, Ｍ, 性交, 露出, 射精, キス, ", "キス喪失, 童貞喪失", 0, @"%ANAME(対象)%の唇", , @"%ANAME(対象)%", "和姦"
+						ABL:対象:主導度Ｎ += 150
+						CFLAG:対象:支配度 += 150
+						CALL COLOR_PRINTW(@"%ANAME(対象)%的支配度上升了150", 0x00FFFF)
+						;TranslatedMark %ANAME(対象)%の支配度が150上がった
+						CALL PRINT_ADD_EXP(MASTER, "政治経験値", RAND(5, 10), 1)
+						;TranslatedMark 政治経験値
+						CALL PRINT_ADD_EXP(MASTER, "性知识经验值", RAND(30, 100), 1)
+						;TranslatedMark 性知識経験値
+						CALL TRAIN_AUTO_ABLUP(MASTER)
+						KDVAR:対象:藍_性教育 = 2
+						FORCEWAIT
+					ELSE
+						IF ABL:MASTER:性知識 == 0
+							PRINTFORML 虽然对于自己身体的变化感到困惑，但还是觉得必须要说些什么，于是抬头看向%ANAME(対象)%。
+							;TranslatedMark 自分の体の変化に困惑しつつ、なにか言わなければと%ANAME(対象)%を見上げると
+							PRINTFORMW 她似乎察觉到%ANAME(MASTER)%在性方面缺乏知识。
+							;TranslatedMark 彼女は%ANAME(MASTER)%が性に関する知識を持ち合わせていないことを察したようだった
+							PRINTL
+							PRINTFORMW 「啊，我还是不明白为什么会变成这样。...这样啊♥」
+							;TranslatedMark 「ああ、どうしてこうなったのか、まだわからないか。‥‥‥そうか♥」
+							PRINTFORMW 「没关系，一点都不奇怪哦？这被称为勃起，是作为男孩正常的反应」
+							;TranslatedMark 「大丈夫、何もおかしいことはないぞ？　それは勃起と言って、男の子として正常な反応だからな」
+							PRINTL
+							PRINTFORML 一边摸着%ANAME(MASTER)%的头，一边安抚他不安的情绪。
+							;TranslatedMark うろたえる%ANAME(MASTER)%の頭をなでながらあやしつつ
+							PRINTL
+							PRINTFORMW 「那么，今天我来教你，要如何处置勃起的那个......♥」
+							;TranslatedMark 「それじゃあ今日は、勃起したソレをどうするのか、私が教えてあげよう‥‥♥」
+						ELSE
+							PRINTFORML %ANAME(MASTER)%在意识到自己勃起之后，脸色涨红地抬头看向%ANAME(対象)%
+							;TranslatedMark 勃起したことを知られた%ANAME(MASTER)%は、顔を赤くしながら%ANAME(対象)%を見上げると
+							PRINTFORMW 她注视着他的眼睛微笑着，将手放在%ANAME(MASTER)%的身体上，温柔地引导着。
+							;TranslatedMark 彼女は目を合わせて微笑み、%ANAME(MASTER)%の身体に手を添えて優しく導く
+							PRINTL
+							PRINTFORMW 「......呵呵♥ 是不是胸贴到你脸上，让你兴奋了？」
+							;TranslatedMark 「‥‥ふふ♥　顔におっぱい当てられて、興奮しちゃったのか？」
+							PRINTFORMW 「没关系的，男孩子有这种反应是很正常的事情。但是那样下去会很难受吧？」
+							;TranslatedMark 「いいんだぞ、男の子ならそうなっちゃうのは普通のことだからな。でもそのままじゃ辛いだろう？」
+							PRINTL
+							PRINTFORML 一边哄着害羞的%ANAME(MASTER)%，一边拍拍他的头
+							;TranslatedMark 恥ずかしがる%ANAME(MASTER)%の頭をなでながらあやしつつ
+							PRINTL
+							PRINTFORMW 「所以让我来为你解决这个问题吧......♥」
+							;TranslatedMark 「だから私が、ソレをスッキリさせてあげよう‥‥♥」
+						ENDIF
+						PRINTL
+						PRINTFORMW %ANAME(対象)%将%ANAME(MASTER)%的头拉得更靠近自己的胸口。
+						;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の頭をより胸元へ手繰り寄せる
+						PRINTFORML 只要呼吸中充满女性特有的香气，这种香味就会传递到大脑，让更多的血液流向下身。
+						;TranslatedMark 息をするだけで女性特有の香りが脳にまで伝わり、より下半身に血が集まり
+						PRINTFORMW 一边喘着粗气，%ANAME(対象)%把%ANAME(MASTER)%勃起的肉棒夹在大腿之间。
+						;TranslatedMark その反応に熱い吐息を吐きながら、%ANAME(対象)%は%ANAME(MASTER)%の勃起した肉竿を太ももに挟み込んだ
+						PRINTL
+						PRINTFORML
+						PRINTFORML ・
+						;TranslatedMark ・
+						PRINTFORML ・・
+						;TranslatedMark ・・
+						PRINTFORMW ・・・
+						;TranslatedMark ・・・
+						PRINTL
+						CALL COLOR_PRINTW(@"「好啊......更随心所欲地摆动腰肢吧♥　来，加油♥　加油♥」", カラー_ピンク)
+						;TranslatedMark 「いいぞ‥‥もっと思うままに腰を振って♥　ほら、頑張れ♥　頑張れ♥」
+						PRINTL
+						PRINTFORML 在模糊的喘息声和肉体撞击的声音中，%ANAME(対象)%开心地抱着%ANAME(MASTER)%。
+						;TranslatedMark くぐもった吐息と肉を打ち付ける音が響く中、%ANAME(対象)%は嬉しそうに%ANAME(MASTER)%を抱きしめている
+						PRINTFORMW %ANAME(MASTER)%被她露出的丰满大腿夹住了勃起的身体。
+						;TranslatedMark %ANAME(MASTER)%は彼女の顕になった太ももに勃起した一物を挟まれていた
+						PRINTFORML 吸附在%ANAME(対象)%的%STR_BODY("乳首：欲情", 対象)%上，因为自己感到愉悦导致的。
+						;TranslatedMark %ANAME(対象)%の%STR_BODY("乳首：欲情", 対象)%に吸い付き、それが自分が気持ちよくなっているからだと
+						PRINTFORMW 在耳边轻轻低语，为自己投来的浓浓爱意而感到高兴，带着磁性的声音给予鼓励，并轻轻抚摸头部，
+						;TranslatedMark 耳元で囁かれ、自分に夢中になってくれて嬉しい、と艶のある声で応援され、頭を撫でられる
+						PRINTFORMW 诚实地接受了那句话，沉迷其中不停地摆动腰肢——就这样，将炙热释放出来。
+						;TranslatedMark その言葉を正直に受け止め、夢中になって腰を振り続け――そのまま、滾りを吐き出した
+						PRINTL
+						PRINTFORML 「～～～♥♥♥」
+						PRINTFORMW 「好热......而且就算不看也能感觉到黏糊糊的哦♥　我的大腿让你感觉那么好吗？」
+						;TranslatedMark 「熱い‥‥そしてドロドロなのが見なくてもわかるぞ♥　そんなに私の太ももは気持ちよかったか？」
+						PRINTL
+						PRINTFORMW 面对欢乐的询问，张着嘴发呆的他点了点头。
+						;TranslatedMark 嬉しそうな問いかけに、口を開きっぱなしの呆けた顔で頷く
+						PRINTFORML %ANAME(対象)%紧紧吸住%ANAME(MASTER)%的唇，舌头交缠，肆意掠夺着口腔。
+						;TranslatedMark %ANAME(対象)%はそんな%ANAME(MASTER)%の唇に吸い付き、舌を絡め合わせ口内を蹂躙する
+						PRINTL
+						IF ABL:MASTER:性知識 == 0
+							PRINTFORMW 初吻充满了成年人的热情，让人仿佛被热潮淹没，无法自拔地去品味。
+							;TranslatedMark 初めての大人のキスに、熱に浮かされたようにまさしくなすがままに味わわれた
+							PRINTFORML 「哈......♥ 成年人的接吻感觉怎么样？——啊，从你的表情就知道了。我很高兴你喜欢♥」
+							;TranslatedMark 「はぁ‥‥♥　大人のキスはどうだった？　――ああ、表情を見ればわかる。気に入ってくれて嬉しいよ♥」
+						ELSE
+							PRINTFORMW 充满激情的成熟之吻，仿佛被热潮所感染，无限地细细品味。
+							;TranslatedMark 情熱的な大人のキスに、熱に浮かされたようにまさしくなすがままに味わわれた
+							PRINTFORML 「哈......♥我的吻怎么样？——啊，从表情就能看出来。非常高兴你喜欢♥」
+							;TranslatedMark 「はぁ‥‥♥　私のキスはどうだった？　――ああ、表情を見ればわかる。気に入ってくれて嬉しいよ♥」
+						ENDIF
+						PRINTFORMW 「今天早点睡吧。下次......我会教你更多女孩子觉得舒服的事情哦♥」
+						;TranslatedMark 「今日はもう寝なさい。次は‥‥もっと、女の子の気持ちいいことを教えてあげるからな♥」
+						PRINTL
+						PRINTFORML 即使这么说，%ANAME(MASTER)%似乎也因为被发情雌性的香味挑逗而无法勃起平息。
+						;TranslatedMark そう言われても、発情した雌の香りに当てられて%ANAME(MASTER)%の勃起が収まる様子はない
+						PRINTL
+						PRINTFORMW 「哎呀，真是个没办法的家伙......♥ 那就在事情解决之前，先用我的大腿吧......ふふっ」
+						;TranslatedMark 「ああもう、しょうがない奴だ‥‥♥　それじゃあ収まりがつくまで、私の太ももを使うといい‥‥ふふっ」
+						PRINTL
+						PRINTFORML %ANAME(MASTER)%向%ANAME(对象)%撒娇，仍然包裹在%STR_BODY("胸：欲情")%中
+						;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%におねだりし、%STR_BODY("胸：欲情")%に包まれたまま
+						PRINTFORMW 在多次多次受到%ANAME(対象)%的鼓励下，他像野兽一样不断摇动腰部，继续在她的大腿上......
+						;TranslatedMark 治まるまで何度も何度も%ANAME(対象)%に応援されながら、獣のように彼女の太ももへ腰を振り続けた‥‥‥
+						PRINTL
+						CALL FUCK(対象, "欲望, 奉仕, 性技, Ｃ, Ｂ, Ｍ, 精愛, キス", "キス喪失", GET_SPERM_ID("MASTER"), @"%ANAME(MASTER)%の唇", @"%ANAME(MASTER)%", ,  "和姦")
+						;TranslatedMark 対象, "欲望, 奉仕, 性技, Ｃ, Ｂ, Ｍ, 精愛, キス", "キス喪失", GET_SPERM_ID("MASTER"), @"%ANAME(MASTER)%の唇", @"%ANAME(MASTER)%", ,  "和姦"
+						CALL FUCK(MASTER, "欲望, 奉仕, 性技, Ｃ, Ａ, Ｍ, 射精, キス, ", "キス喪失", 0, @"%ANAME(対象)%の唇", , @"%ANAME(対象)%", "和姦")
+						;TranslatedMark MASTER, "欲望, 奉仕, 性技, Ｃ, Ａ, Ｍ, 射精, キス, ", "キス喪失", 0, @"%ANAME(対象)%の唇", , "%ANAME(対象)%", "和姦"
+						ABL:対象:主導度Ｎ += 150
+						CFLAG:対象:支配度 += 150
+						CALL COLOR_PRINTL(@"%ANAME(対象)%的支配度上升了150", 0x00FFFF)
+						;TranslatedMark %ANAME(対象)%の支配度が150上がった
+						CALL PRINT_ADD_EXP(MASTER, "政治経験値", RAND(5, 10), 1)
+						;TranslatedMark 政治経験値
+						CALL PRINT_ADD_EXP(MASTER, "性知识经验值", RAND(30, 100), 1)
+						;TranslatedMark 性知識経験値
+						CALL TRAIN_AUTO_ABLUP(MASTER)
+						KDVAR:対象:藍_性教育 = 1
+						;クールタイムがあったら-1
+						SIF COOLTIME:MASTER:0 < 0
+							CALL ADD_COOLTIME(MASTER, -1)
+						FORCEWAIT
+					ENDIF
+				ENDIF
+			ENDIF
+		CASE 2
+			PRINTL
+			PRINTFORML 越过这条界线后，%ANAME(対象)%更加关心%ANAME(MASTER)%的工作。
+			;TranslatedMark 一線を超えてから、%ANAME(対象)%はより一層、%ANAME(MASTER)%の仕事を気にする
+			PRINTFORMW ......看似无害，实际上抓着能促进精力的宵夜来诱惑我。
+			;TranslatedMark ‥‥ように見せかけて、精の付く夜食を片手に誘惑してくるようになった
+			PRINTDATAW
+				DATA  顺便说一下，今天的菜单是甲鱼火锅
+				;TranslatedMark ちなみに今日のメニューはすっぽん鍋だ
+				DATA  顺便说一下，今天的菜单里有蛇血
+				;TranslatedMark ちなみに今日メニューにはマムシの血がついていた
+				DATA  顺便提一下，今天的菜单里有烤蒜
+				;TranslatedMark ちなみに今日メニューにはにんにくのホイル焼きがついていた
+				DATA  顺便说一下，今天的菜单是鳗鱼饭
+				;TranslatedMark ちなみに今日のメニューはうな重だ
+				DATA  顺便说一下，今天的菜单里附有磨碎的山药
+				;TranslatedMark ちなみに今日のメニューには山芋のすりおろしがついていた
+				DATA  顺便说一下，今天的菜品里大量使用了纳豆和韭菜
+				;TranslatedMark ちなみに今日のメニューは納豆とニラが豊富に使われていた
+			ENDDATA
+			PRINTL
+			PRINTFORMW 接着填饱肚子之后，以坚持努力为奖励的名义紧紧拥抱。
+			;TranslatedMark そして腹を満たしたあとは、頑張っているご褒美と称して抱きしめる
+			PRINTFORML 在耳边用那充满魅惑且不加掩饰欲望的表情低语。
+			;TranslatedMark そのまま欲情を隠さない蠱惑的な表情で、耳元で囁きながら
+			PRINTFORMW 像是故意撩拨一般，她用那纤细的手指轻轻抓挠%ANAME(MASTER)%的股间，让他感到又刺激又诱惑。
+			;TranslatedMark 焦らすようにその細い指でカリカリと%ANAME(MASTER)%の股間を掻くように刺激し誘惑した
+			PRINTL
+			SELECTCASE RAND:3
+				CASE 0
+					PRINTFORML %ANAME(対象)%似乎很高兴能被依赖，一边给%ANAME(MASTER)%枕膝，还一边把他的脸包在胸口里。
+					;TranslatedMark %ANAME(対象)%は甘えられるのが嬉しいらしく、膝枕をした%ANAME(MASTER)%の顔を胸に包み込みながら
+					PRINTFORMW 正在用自己的手轻轻抚弄勃起的肉棒
+					;TranslatedMark 勃起した肉竿を己の手でやわやわと扱き上げている
+					PRINTL
+					PRINTFORML 一心一意地吸吮%STR_BODY("乳首：欲情", 対象)%的%ANAME(MASTER)%时，满怀爱意地轻轻抚摸。
+					;TranslatedMark 一心に己の%STR_BODY("乳首：欲情", 対象)%へ吸い付く%ANAME(MASTER)%を愛おしそうに撫でながら
+					PRINTFORMW 每次射精时都夸奖它，并舐去洒在手上的精液，细细品味直到满意为止
+					;TranslatedMark 射精をする度に褒めそやし、手に降り注いだ精を舐め取り、満足するまで味わい続ける
+				CASE 1
+					PRINTFORML %ANAME(対象)%好像很高兴被需要，让%ANAME(MASTER)%把自己的胸当作自慰器，随意使用。
+					;TranslatedMark %ANAME(対象)%は求められるのが嬉しいらしく、%ANAME(MASTER)%に胸をオナホとして好きに使わせて
+					PRINTFORMW 在忘我状态中，一边呼唤着自己的名字，一边抓住肩膀，不停地激烈刻蚀自己的胸口，我陶醉于%ANAME(MASTER)%的面容。
+					;TranslatedMark 無我夢中で自分の名を呼びながら、肩を掴んで必死に胸を犯し続ける%ANAME(MASTER)%の顔を愛でている
+					PRINTL
+					PRINTFORML 每次射精后，都给予夸奖，并舔去积在胸前的那股精液
+					;TranslatedMark 射精をする度に褒めそやし、胸に溜まった精を舐め取り
+					PRINTFORMW 为了不让对方感到厌烦，需要时不时切换到像是パイズリフェラ这样的方式，并持续变换花样，尽全力宠爱对方直到满足。
+					;TranslatedMark 時にパイズリフェラに切り替えるなど飽きさせないよう変化をつけて、満足するまで可愛がり続ける
+				CASE 2
+					PRINTFORML %ANAME(対象)%似乎对于提供服务并令对方高兴感到高兴，积极地用嘴玩弄%ANAME(MASTER)%的竿子。
+					;TranslatedMark %ANAME(対象)%は奉仕し、悦ばれるのが嬉しいらしく、口で積極的に%ANAME(MASTER)%の竿を弄び
+					PRINTFORMW 沉溺于快乐中，并深爱着呼喊%ANAME(MASTER)%名字的人。
+					;TranslatedMark 快楽に悶え、自分の名を呼ぶ%ANAME(MASTER)%を愛でている
+					PRINTL
+					PRINTFORML 用舌头轻舔顶端，用嘴吮舔杆身，高潮时报告一声，然后深喉咙吞下去，%一滴不剩地吸出并吞咽下去%。
+					;TranslatedMark 鈴口を舌でほじり、竿を舐めしゃぶり、イクときは報告をさせ、喉深くまで飲み込み一滴残らず吸い出し嚥下する
+					PRINTFORMW 有时她用舌头亲舔着菊花纹，同时用手弄竿，贯彻到其他雌性无法满足的地步，彻底地教会了他被自己服务的喜悦。
+					;TranslatedMark 時に舌で菊紋をほじりながら竿を扱き、他の雌では満足出来なくなるほど徹底的に、自分に奉仕される喜びを教え込んだ
+			ENDSELECT
+			PRINTL
+			CALL COLOR_PRINTW(@"「可爱的样子也很好，但该是时候......让我看看你坚强的一面了♥」", カラー_ピンク)
+			;TranslatedMark 「愛らしいのもいいが、そろそろ‥‥逞しいキミも見せて欲しいな♥」
+			PRINTL
+			PRINTFORML 一阵满足后，%ANAME(対象)%亲自分开私处，扭动腰身渴望进入。
+			;TranslatedMark ひとしきり満足したあと、%ANAME(対象)%は自ら女陰を割り開き、腰をくゆらせ挿入をねだる
+			PRINTFORMW 然后，在被让年幼的%ANAME(MASTER)%沉溺于肉欲的堕落感煽动下，一整晚彼此像蜗牛一样纠缠，并低声诉说着爱意......
+			;TranslatedMark そして幼い%ANAME(MASTER)%を肉欲に溺れさせる背徳感に煽られつつ、一晩中愛を囁きながらナメクジのように絡み合った‥‥‥
+			PRINTL
+			CALL FUCK(対象, "欲望, 奉仕, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 性交, 精愛, 露出, キス, 口淫, Ｖ性交, Ａ性交", "キス喪失, 処女喪失, Ａ処女喪失, 腸内射精, 口内射精", GET_SPERM_ID("MASTER"), @"%ANAME(MASTER)%の唇", @"%ANAME(MASTER)%", ,  "和姦")
+			;TranslatedMark 対象, "欲望, 奉仕, 性技, Ｃ, Ｖ, Ａ, Ｂ, Ｍ, 性交, 精愛, 露出, キス, 口淫, Ｖ性交, Ａ性交", "キス喪失, 処女喪失, Ａ処女喪失, 腸内射精, 口内射精", GET_SPERM_ID("MASTER"), @"%ANAME(MASTER)%の唇", @"%ANAME(MASTER)%", ,  "和姦"
+			CALL FUCK(MASTER, "欲望, 奉仕, 性技, Ｃ, Ａ, Ｂ, Ｍ, 性交, 露出, 射精, キス, ", "キス喪失, 童貞喪失", 0, @"%ANAME(対象)%の唇", , @"%ANAME(対象)%", "和姦")
+			;TranslatedMark MASTER, "欲望, 奉仕, 性技, Ｃ, Ａ, Ｂ, Ｍ, 性交, 露出, 射精, キス, ", "キス喪失, 童貞喪失", 0, @"%ANAME(対象)%の唇", , "%ANAME(対象)%", "和姦"
 			ABL:対象:主導度Ｎ += 150
-			CFLAG:対象:好感度 += 150
-			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了150", 0x00FFFF)
-			;クールタイムがあったら-1
-			SIF COOLTIME:MASTER:0 < 0
-				CALL ADD_COOLTIME(MASTER, -1)
-			KDVAR:対象:藍_甘やかし ++
-			PRINTFORMW
-		ENDIF
-	CASE 2
-		PRINTFORMW 某一天。忙于工作的%ANAME(MASTER)%、更多的文件堆積在了桌子上。看著文件的數量實在是令人苦笑不已…
-		PRINTFORML ……為什麼？　這麼多的文件會讓人累死的吧？　這工作到底要持續到什麼時候？
-		PRINTFORMW 「啊、%ANAME(MASTER)%、又在工作嗎…哇、這麼多真是太厲害了……。可以的話、讓我來做吧？」
-		PRINTFORML 正在緊繃著臉目瞪口呆的時候、%ANAME(対象)%再次來看望了
-		PRINTFORML 畢竟文件的數量實在是太多了、所以想讓她幫忙…
-		PRINTFORMW 那麼、要請她幫忙嗎？
-		PRINTFORML
-		CALL ASK_YN("幫幫我…", "没关系、总会有办法的…总会有办法的…")
-		IF RESULT == 1
-			PRINTFORML %ANAME(対象)%在聽到、「自己會想辦法」的回答後。笑容從臉上消失了
-			PRINTFORML 「誒誒っ！？　…這、這樣啊……我知道了よ……但、但是沒關係、你無論什麼時候都可以拜託我的哦？」
-			PRINTFORMW %ANAME(対象)%對%ANAME(MASTER)%的堅定意志表示尊重、但是很明顯非常不安的樣子…
-			PRINTFORML 「那麼、就幫你準備點吃的吧。幫這麼一點小忙的話也是可以的吧？」
-			PRINTFORMW …確實、需要補充能量呢。%ANAME(MASTER)%拜託%ANAME(対象)%做飯之後重新開始了工作
-			PRINTDATAW
-			;DATA ちなみにメニューはきつねうどんだった
-			;DATA ちなみにメニューは稲荷寿司だった
-			;DATA ちなみにメニューは油揚げの味噌汁だった
-			;DATA ちなみにメニューは油揚げのサラダだった
-			;DATA ちなみにメニューは焼き油揚げだった
-			;DATA ちなみにメニューは信玄袋だった
-			DATA 今晚的菜品是油炸豆腐面
-			DATA 今晚的菜品是稲荷寿司
-			DATA 今晚的菜品是油炸味增湯
-			DATA 今晚的菜品是油炸莎拉
-			DATA 今晚的菜品是油炸豆腐
-			DATA 今晚的菜品是信玄袋
-			ENDDATA
-			PRINTFORML ・
-			PRINTFORML ・・
-			PRINTFORMW ・・・幾天之後
-			PRINTFORML ……終於%ANAME(MASTER)%完成了！　把不可能完成的量的工作全部做完了！
-			PRINTFORMW 但是作為代價、好像失去了普通人的感情、但這也許只是暫時的吧…
-			PRINTFORMW 在一旁守護著%ANAME(MASTER)%的%ANAME(対象)%也不由得流下了淚水。仿佛在為自己的孩子成就了偉業而高興…
-			PRINTFORML 把完成的文件交給負責人的時候
-			PRINTFORML
-			CALL SINGLE_DRAWLINE
-			PRINTFORML 
-			PRINTFORMW 我只是把所有人的工作都收集起來放著、難道你一個人全部做完了！？
-			PRINTFORML 
-			CALL SINGLE_DRAWLINE
-			PRINTFORML
-			PRINTFORMW 之類的話、大概是心裡作用吧
-			PRINTFORMW 剩下的只有、睡覺了…、只有、睡覺了…、現在可以、睡覺了…………
-			PRINTFORML %ANAME(MASTER)%在那之後、因為過度疲勞而臥床不起…
-			CALL COLOR_PRINTW(@"%ANAME(MASTER)%因為過勞而倒下了！", カラー_注意)
-			CALL ADD_COOLTIME(MASTER, 1)
-			PRINTFORMW ……此後、%ANAME(MASTER)%暫時被免除了文書工作
-			CALL PRINT_ADD_EXP(MASTER, "政治経験値", RAND(40, 60), 1)
+			CFLAG:対象:支配度 += 150
+			CALL COLOR_PRINTL(@"%ANAME(対象)%的支配度上升了150", 0x00FFFF)
+			;TranslatedMark %ANAME(対象)%の支配度が150上がった
 			CALL TRAIN_AUTO_ABLUP(MASTER)
-			KDVAR:対象:藍_甘やかし = -1
-			PRINTFORMW
-		ELSE
-			PRINTFORML 已經不行了。%ANAME(MASTER)%撒嬌般地倒向了%ANAME(対象)%…
-			PRINTFORMW %ANAME(MASTER)%雙眼含淚地求著%ANAME(対象)%幫忙。那樣子大大刺激了%ANAME(対象)%的母性
-			PRINTFORML 「啊啊、啊啊！　就交給我吧！　沒關係、以後什麼都不用擔心了」
-			PRINTFORMW %ANAME(対象)%溫柔地抱住了%ANAME(MASTER)%、用自己的式神和尾巴開始處理起堆積如山的文件
-			PRINTFORML 「我也覺得這個數量太多了。分幾天高效率地完成吧。首先從城墻修繕方案開始…」
-			PRINTFORMW 她那全心投入工作的姿態讓人感到心痛。但是當提議自己也來幫忙、%ANAME(対象)%卻鄭重拒絕了
-			PRINTFORML 「沒關係、就交給我吧。我不會再讓你感到辛苦了」
-			PRINTFORMW 裡、%ANAME(対象)%溫柔地話語溫暖了被大量文件折磨的%ANAME(MASTER)%的心…
-			PRINTFORML 「現在就可以睡覺了…。你可以枕在我的胸口上睡覺哦…❤」
-			PRINTFORML %ANAME(対象)%把%ANAME(MASTER)%的臉溫柔地埋在自己的胸口、一邊輕輕撫摸著他的背部一邊唱著搖籃曲
-			PRINTFORMW %ANAME(MASTER)%在%ANAME(対象)%的體香和搖籃曲的包圍下、安心地入眠了……
-			CITY_GUARD:対象都市 += 20
-			CALL ICPRINT(@"%CITY_NAME:対象都市%的防御力上升了<20>點、變成了<{CITY_GUARD:対象都市}>", "W", カラー_注意)
-			PRINTFORML 
-			PRINTFORMW ―　过了一天　―
-			PRINTFORML 
-			PRINTFORMW 「今天是征召士兵的項目嗎…啊、早上好%ANAME(MASTER)%」
-			PRINTFORML 當%ANAME(MASTER)%醒來、發現%ANAME(対象)%早已開始工作了
-			PRINTFORML 「不用擔心哦。從今以後、所有的事情都交給我吧。不會再有不好的事情了」
-			PRINTFORMW 「比起這個…你最近好像很忙所以積攢了很多？」
-			PRINTFORML %ANAME(対象)%一邊說著一邊责弄著%ANAME(MASTER)%的股間。那根肉棒早已一柱擎天
-			PRINTFORMW 「呼呼❤　一大早就開始很有精神了呢❤。現在就做點能讓你更加精神的事情吧❤」
-			PRINTFORML 「所以今晚也請你什麼都別管、全部交給我就好了…❤」
-			PRINTFORMW ……結果這一天、聽之任之地充分享受了和%ANAME(対象)%的性愛生活……
-			CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
-			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴")
-			COUNTRY_SOLDIER:(CFLAG:対象:所属) += 4000
-			CALL ICPRINT("兵力增加了<4000>", "L", カラー_注意)
-			PRINTFORML 
-			PRINTFORMW ―　过了一天　―
-			PRINTFORML 
-			PRINTFORMW 「今天是投資周嗎。那麼就選這個吧…啊、早上好%ANAME(MASTER)%」
-			PRINTFORML 今天%ANAME(対象)%也早早地開始工作了。一大堆的文件都快處理得七七八八了
-			PRINTFORMW 「呼呼呼、如果是我就買這個！…話雖如此、果然還是有些累了…」
-			PRINTFORML %ANAME(MASTER)%為了犒勞%ANAME(対象)%、開始給她揉肩。こ雖然只能做這麼點事情…
-			PRINTFORML 「啊っ…❤　嗯嗯❤…很舒服喲❤、%ANAME(MASTER)%。謝謝你❤」
-			PRINTFORMW 「但是光這樣還是有點不夠呢…吶、%ANAME(MASTER)%。今天的工作好像也快要結束了…」
-			PRINTFORML 「作為獎勵、今晚能安慰一下我的身體嗎…❤」
-			PRINTFORMW %ANAME(対象)%靠在%ANAME(MASTER)%的身上、用貓咪發情般柔媚的聲音誘惑道
-			PRINTFORMW ……結果這一天、充分地享受了和%ANAME(対象)%的性愛生活……
-			CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
-			CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
-			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴")
-			CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴")
-			CALL MODIFY_CITY_ECONOMY(対象都市2, RAND(15000, 25000))
-			PRINTFORML 
-			PRINTFORMW ―　过了一天　―
-			PRINTFORML 
-			PRINTFORMW 「好了、工作已經結束了…但是這麼快提交文件的話、可能又要被派去做其他工作了吧」
-			PRINTFORML …確實。因為本來以為要花兩個星期的時間來做的工作、結果三天左右就做完了…
-			PRINTFORMW 「所以…吶、%ANAME(MASTER)%…。離期限還有一天、我們乾脆兩個人獨處、好好休息一下怎麼樣…？」
-			PRINTFORML %ANAME(対象)%一邊說著、一邊用妖艷的姿勢把%ANAME(MASTER)%抱住、在%ANAME(MASTER)%的耳邊熱情地低聲私語
-			PRINTFORMW 「因為一直都很努力、所以今天稍微偷一下懶也不會有人說閒話的…❤」
-			PRINTFORML 「想吃什麼我都會給你做的哦。要不用我的尾巴給你挖挖耳朵怎麼樣？　紫大人也很喜歡被我這麼做、甚至有點上癮呢…」
-			PRINTFORMW 「然後如果你還想…和我做之前做的那些事情、我們也可以做哦…❤」
-			PRINTFORML %ANAME(対象)%那溫暖的體香、甜美的聲音…然後用柔軟的身體抱住了%ANAME(MASTER)%
-			PRINTFORMW …那也許不錯…。%ANAME(MASTER)%決定和%ANAME(対象)%做愛
-			PRINTFORML 「呼呼…對對。你能坦率地對我撒嬌我很高興哦♪　接下來我會、好好地治愈你。然後…」
-			PRINTFORMW 「那之後就一直……做愛吧❤」
-			FOR LOCAL, 0, 5
+			FORCEWAIT
+	ENDSELECT
+;従来ルート
+ELSE
+	SELECTCASE KDVAR:対象:藍_甘やかし
+		CASE 0
+			PRINTFORMW 深夜。%ANAME(MASTER)%的房間裡還亮著燈
+			;TranslatedMark 深夜。%ANAME(MASTER)%の部屋にはまだ明かりが灯っている
+			PRINTFORML 最近的文件工作堆積如山、%ANAME(MASTER)%常常工作到深夜...
+			;TranslatedMark %ANAME(MASTER)%はここ最近、書類仕事が山のように増え、連日夜遅くまで仕事に追われていた‥
+			PRINTFORML 不能因為領地內的經濟問題而偷懶、%ANAME(MASTER)%臉色蒼白地批閱著文件
+			;TranslatedMark 領内の経済に関わる事だけにサボるわけにも行かず、青白い顔で書類と向き合っていると
+			PRINTL
+			PRINTFORMW 「...沒問題吧？　%ANAME(MASTER)%。看你一副很疲憊的樣子」
+			;TranslatedMark 「‥大丈夫か？　%ANAME(MASTER)%。ずいぶん疲れた顔をしているぞ」
+			PRINTL
+			PRINTFORML 连 可能是擔心連日來的忙碌、%ANAME(対象)%過來探望了
+			;TranslatedMark 連日の激務を心配してくれたのか、%ANAME(対象)%が様子を見に来たようだ
+			PRINTL
+			PRINTFORMW 「嗯...这堆文件实在是多了吧。你的脸色也不好、稍微休息一下怎么样？　之后的就交给我了」
+			;TranslatedMark 「ふむ‥この量は中々厳しいだろう。顔色も悪いし、少し休んだらどうだ？　後は私がやっておくから」
+			PRINTL
+			PRINTFORML 虽然是非常难得的建议、但是%ANAME(対象)%因为非常的优秀已经接受了比自己更多的工作了
+			;TranslatedMark 大変ありがたい申し出だが、%ANAME(対象)%はその優秀さから既に自分より多くの仕事を受け持っている
+			PRINTFORMW 我还要给她添加负担吗...怎么办？
+			;TranslatedMark これ以上彼女に負担をかけるような事をしていいものか‥どうしよう？
+			PRINTL
+			CALL ASK_YN("那就、恭敬不如从命吧...", "没关系、总会有办法的...总会有办法的...")
+			;TranslatedMark "それじゃあ、お言葉に甘えて‥", "これくらい大丈夫"
+			PRINTL
+			IF RESULT == 1
+				PRINTFORML 「真的没关系吗？　......那麼、我就先離開了...」
+				;TranslatedMark 「本当に大丈夫なのか？　‥‥それじゃあ、私は行くからな‥」
+				PRINTL
+				PRINTFORML %ANAME(対象)%帶著擔心的表情離開了......
+				;TranslatedMark %ANAME(対象)%は心配そうな顔で立ち去っていった‥‥
+				PRINTFORMW 這是我的工作。不能給%ANAME(対象)%添加額外的負擔。
+				;TranslatedMark これは自分の担当の仕事だ。%ANAME(対象)%に余計な負担をかけるわけには行かない
+				PRINTL
+				PRINTFORML 再次埋頭進書山沒多久就開始視線模糊了
+				;TranslatedMark 再び書類の山に向かうもしばらくすると目が霞みはじめる
+				PRINTFORMW 可能是因為連日的疲勞、意識漸漸模糊了......
+				;TranslatedMark 連日の疲れがたたったのか、だんだん意識が朦朧としてきた‥‥
+				PRINTL
+				PRINTW
+				CALL COLOR_PRINTL(@"%ANAME(MASTER)%因為過勞倒下了！", カラー_注意)
+				;TranslatedMark %ANAME(MASTER)%は過労で倒れてしまった！
+				PRINTL
+				PRINTFORMW
+				PRINTFORML ・
+				;TranslatedMark ・
+				PRINTFORML ・・
+				;TranslatedMark ・・
+				PRINTFORMW ・・・
+				;TranslatedMark ・・・
+				PRINTFORML 「......嗯？　終於醒過來了嗎%ANAME(MASTER)%。啊啊、你繼續睡吧。沒關係、文件就交給我吧」
+				;TranslatedMark 「‥‥ん？　気がついたか%ANAME(MASTER)%。ああ、まだ寝ているといい。大丈夫、書類は私が片付けてるから」
+				PRINTL
+				PRINTFORML %ANAME(MASTER)%的意識恢復之後、%ANAME(対象)%打了聲招呼。她發現了倒下的%ANAME(MASTER)%並照顧了他
+				;TranslatedMark %ANAME(MASTER)%が意識を取り戻すと、%ANAME(対象)%が声を掛ける。どうやら倒れた%ANAME(MASTER)%を見つけて看病してくれていたようだ
+				PRINTL
+				PRINTFORMW 「為了以防萬一再來看一次真的太好了、你好像輕微貧血、之後去看看醫生比較好」
+				;TranslatedMark 「念のためにもう一度見に来てよかったよ。どうやら軽い貧血のようだが、後でちゃんと医者に見てもらうといい」
+				PRINTL
+				PRINTFORML  ―到底失去了意識多久了呢？最近的文件很多、如果不快點繼續處理的話... ―
+				;TranslatedMark ― 一体どれぐらい気を失っていたのだろうか？　期日が近い書類も多い。早く取り掛からねば‥っ ―
+				PRINTL
+				PRINTFORMW 「不行。我不是讓你繼續休息嗎？　你之前就是因為強撐著才暈過去的。不要擔心工作了」
+				;TranslatedMark 「駄目だ。まだ寝ていろといったろう？　お前は無理をして倒れたんだぞ。仕事のことは心配するな」
+				PRINTL
+				PRINTFORML  %ANAME(対象)%撫摸著%ANAME(MASTER)%的頭、她尾巴的末端正卷起無數的筆、以驚人的速度處理著文件
+				;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の頭を撫でながら、その尻尾の毛先に無数のペンを持たせ、凄まじい速さで書類を処理している
+				PRINTL
+				PRINTFORMW 「我的本體是九尾狐哦？　所以沒有關係的。首先、先從最近日期的文件開始處理起來吧」
+				;TranslatedMark 「私の体は仮にも九尾だぞ？　これくらい何てことはない。一先ず、期日が近い分から先にやっつけておいたからな」
+				PRINTL
+				PRINTFORML 結果%ANAME(対象)%一下子就把大量的文件都處理好了、這樣一來就暫時沒有問題了吧
+				;TranslatedMark 結局%ANAME(対象)%は大量にあった書類の束をあっという間に片付けてしまった。これでしばらくは大丈夫だろう
+				PRINTL
+				PRINTFORMW 「真是的。雖然努力工作很了不起、但是希望你在倒下之前先依靠我。還是說、我靠不住？」
+				;TranslatedMark 「まったく。頑張るのは立派だが、倒れる前にまず頼って欲しいものだ。それとも、私じゃ頼りないのか？」
+				PRINTL
+				PRINTFORMW 不、我不是這個意思...我只是不想在工作中給%ANAME(対象)%增加多餘的負擔...
+				;TranslatedMark %ANAME(MASTER)%は、「自分の仕事で%ANAME(対象)%に余分な負担を掛けたくなかった」、と%ANAME(対象)%に伝えた
+				PRINTL
+				PRINTFORML 「...你這麼溫柔是你的優點、但是如果自己倒下的話就一切白費了。......我真的、很擔心你啊...」
+				;TranslatedMark 「‥そういう優しいところは美点だが、それで自分が倒れては元も子もないぞ。‥‥本当に、心配したんだからな‥」
+				PRINTL
+				PRINTFORMW %ANAME(対象)%一邊說著一邊抱住了%ANAME(MASTER)%、尾巴也溫柔地包裹住了%ANAME(MASTER)%的全身
+				;TranslatedMark %ANAME(対象)%はそう言うと%ANAME(MASTER)%を抱きしめ、尻尾で全身を優しく包み込んでくる
+				PRINTL
+				PRINTFORMW 「今天就讓我陪著你睡覺吧。...以後也不用客氣、請盡情和我撒嬌...」
+				;TranslatedMark 「添い寝してあげるから今日はもうこのまま眠るといい。‥これからは遠慮せず、私に甘えてくれていいからな‥」
+				PRINTL
+				ABL:対象:主導度Ｎ += 150
+				CFLAG:対象:好感度 += 100
+				CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了100", 0x00FFFF)
+				;TranslatedMark %ANAME(対象)%の好感度が100上がった
+				CALL PRINT_ADD_EXP(MASTER, "政治経験値", RAND(5, 10), 1)
+				;TranslatedMark 政治経験値
+				CALL TRAIN_AUTO_ABLUP(MASTER)
+				KDVAR:対象:藍_甘やかし = 1
+				PRINTFORMW
+			ELSE
+				PRINTFORMW 「呼呼、就請交給我吧。你就稍微休息一下吧」
+				;TranslatedMark 「ふふ、任せておくれ。お前はここで少し休んでいるといい」
+				PRINTL
+				PRINTFORML %ANAME(対象)%讓%ANAME(MASTER)%枕在自己的大腿上睡覺、她尾巴的末端卷起無數的筆、以驚人的速度處理著文件
+				;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%を膝枕で寝かしつけながら、その尻尾の毛先に無数のペンを持たせ、凄まじい速さで書類を処理している
+				PRINTL
+				PRINTFORML 「我的本體是九尾狐哦？　所以沒有關係的。首先、先從最近日期的文件開始處理起來吧」
+				;TranslatedMark 「私の体は仮にも九尾だ。これくらい何てことはない。一先ず、期日が近い分から先にやっつけておいたからな」
+				PRINTL
+				PRINTFORMW 結果%ANAME(対象)%一下子就把大量的文件都處理好了、這樣一來就暫時沒有問題了吧
+				;TranslatedMark 結局%ANAME(対象)%は大量にあった書類の束をあっという間に片付けてしまった。これでしばらくは大丈夫だろう
+				PRINTL
+				PRINTFORML 「怎麼樣？　我是不是很厲害。所以說、你隨時隨地都可以拜託我哦」
+				;TranslatedMark 「どうだ？　私に掛かればこんな物だ。これくらい、いつでも頼ってくれていいからな」
+				PRINTL
+				PRINTFORML %ANAME(対象)%開心地撫摸著%ANAME(MASTER)%的頭。似乎非常高興能夠被拜託幫忙
+				;TranslatedMark %ANAME(対象)%は上機嫌で%ANAME(MASTER)%の頭を撫でている。素直に頼ってもらえたのがよほど嬉しかったようだ
+				PRINTL
+				PRINTFORMW 「那麼、工作也完成了...你的臉色還是很差勁呢。我去給你拿點開胃的飲料來吧」
+				;TranslatedMark 「さて、作業は終わったが、‥まだ顔色が悪いように見えるな。何か胃に優しい飲み物を持ってくるよ」
+				PRINTL
+				PRINTFORML 工作結束喘了口氣後、%ANAME(対象)%抱住了%ANAME(MASTER)%、尾巴也溫柔地包裹住了%ANAME(MASTER)%的全身
+				;TranslatedMark 仕事が終わって一息ついた後、%ANAME(対象)%は%ANAME(MASTER)%を抱きしめ、尻尾で全身を優しく包み込んでくる
+				PRINTL
+				PRINTFORML 「今天就讓我陪著你睡覺吧。...以後也不用客氣、請盡情和我撒嬌...」
+				;TranslatedMark 「私が添い寝してあげるから今日はもうこのまま眠ろうか。‥これからも遠慮せず、いつでも私に甘えてくれていいからな‥」
+				PRINTL
+				PRINTFORMW ......第二天、可能是因為被%ANAME(対象)%治愈了的效果吧、身體已經沒有任何不適了、精神也徹底煥發了起來
+				;TranslatedMark ‥‥翌日、%ANAME(対象)%に癒された効果か、特に体調不良もなくスッキリ目覚めることが出来た
+				ABL:対象:主導度Ｎ += 100
+				CFLAG:対象:好感度 += 150
+				CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度提升了150", 0x00FFFF)
+				;TranslatedMark %ANAME(対象)%の好感度が150上がった
+				KDVAR:対象:藍_甘やかし = 1
+				;クールタイムがあったら-1
+				SIF COOLTIME:MASTER:0 < 0
+					CALL ADD_COOLTIME(MASTER, -1)
+				PRINTFORMW
+			ENDIF
+		CASE 1
+			PRINTFORML 深夜。%ANAME(MASTER)%的房間裡還亮著燈
+			;TranslatedMark 深夜。%ANAME(MASTER)%の部屋にはまだ明かりが灯っている
+			PRINTFORML %ANAME(MASTER)%又被堆積成山的文件給困住了...
+			;TranslatedMark %ANAME(MASTER)%はまたもや多くの書類仕事に追われていた‥
+			PRINTL
+			PRINTFORMW 「沒問題嗎？　%ANAME(MASTER)%。可以的話請讓我再幫你吧？」
+			;TranslatedMark 「大丈夫か？　%ANAME(MASTER)%。よかったらまた手伝おうか？」
+			PRINTL
+			PRINTFORML 可能是擔心工作到深夜還沒完成、%ANAME(対象)%又來看望%ANAME(MASTER)%了
+			;TranslatedMark 深夜まで終わらない仕事を心配してくれたのか、また%ANAME(対象)%が様子を見に来てくれたようだ
+			PRINTFORMW 那麼、怎麼辦呢？
+			;TranslatedMark さて、どうしよう？
+			PRINTL
+			CALL ASK_YN("那就、恭敬不如從命吧", "不、沒關係的")
+			;TranslatedMark "それじゃあ、お言葉に甘えて", "いや、もう大丈夫"
+			IF RESULT == 1
+				PRINTFORML 「......看來、這不是強撐著說出來的話。臉色不錯」
+				;TranslatedMark 「‥‥どうやら、やせ我慢で言ってるわけではないようだな。顔色も悪くない」
+				PRINTL
+				PRINTFORML 如果需要被多次幫助的話那麼這個男人就是廢物。%ANAME(MASTER)%對著%ANAME(対象)%表示「這次沒問題」
+				;TranslatedMark そう何度も手を借りるようでは示しがつかないというものだ。%ANAME(MASTER)%は%ANAME(対象)%に「今回は大丈夫」と伝えた
+				PRINTFORMW （確實呢...如果我太多管閒事的話%ANAME(MASTER)%會覺得自己沒用的...雖然有點寂寞但是沒有辦法）
+				;TranslatedMark （まあ確かに‥私が出しゃばりすぎたら%ANAME(MASTER)%の立つ瀬がないものな‥。ちょっと寂しいけど仕方ない）
+				PRINTL
+				PRINTFORML 「我知道了。但是請讓我準備一下夜宵吧、這樣可以吧？」
+				;TranslatedMark 「分かったよ。でも夜食くらいは用意させておくれ。それくらいはいいだろう？」
+				PRINTL
+				PRINTFORMW 正好肚子也餓了。%ANAME(MASTER)%準備吃完%ANAME(対象)%做的夜宵再繼續工作
+				;TranslatedMark ちょうど小腹が空いてきたところだ。%ANAME(MASTER)%は%ANAME(対象)%が作ってくれた夜食を食べて仕事に取り掛かった
+				PRINTDATAW
+				DATA 顺便说一下，今晚的菜品是油炸豆腐面
+				;TranslatedMark ちなみにメニューはきつねうどんだった
+				DATA 顺便说一下，今晚的菜品是稲荷寿司
+				;TranslatedMark ちなみにメニューは稲荷寿司だった
+				DATA 顺便说一下，今晚的菜品是油炸味增湯
+				;TranslatedMark ちなみにメニューは油揚げの味噌汁だった
+				DATA 顺便说一下，今晚的菜品是油炸莎拉
+				;TranslatedMark ちなみにメニューは油揚げのサラダだった
+				DATA 顺便说一下，今晚的菜品是油炸豆腐
+				;TranslatedMark ちなみにメニューは焼き油揚げだった
+				DATA 顺便说一下，今晚的菜品是信玄袋
+				;TranslatedMark ちなみにメニューは信玄袋だった
+				ENDDATA
+				PRINTL
+				PRINTFORML ・
+				;TranslatedMark ・
+				PRINTFORML ・・
+				;TranslatedMark ・・
+				PRINTFORMW ...總算在天亮之前結束了工作。%ANAME(MASTER)%在愉快的成就感的包圍下很快睡著了...
+				;TranslatedMark 何とか夜が明ける前に終えることが出来た。%ANAME(MASTER)%は心地よい達成感のようなものに包まれながら眠りについた‥
+				CFLAG:対象:好感度 += 100
+				CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度提升了150", 0x00FFFF)
+				;TranslatedMark %ANAME(対象)%の好感度が150上がった
+				CALL PRINT_ADD_EXP(MASTER, "政治経験値", RAND(10, 25), 1)
+				;TranslatedMark 政治経験値
+				CALL TRAIN_AUTO_ABLUP(MASTER)
+				KDVAR:対象:藍_甘やかし = -1
+				PRINTFORMW
+			ELSE
+				PRINTFORMW 撒嬌般地要求幫忙、%ANAME(対象)%一邊微笑著一邊溫柔撫摸著%ANAME(MASTER)%的頭
+				;TranslatedMark 申し出に甘えると、%ANAME(対象)%はにっこりと笑いながら%ANAME(MASTER)%の頭を優しく撫でる
+				PRINTL
+				PRINTFORML 「呼呼。我很開心哦、你這麼坦率地要我幫忙。好、我馬上幫你忙」
+				;TranslatedMark 「ふふ。嬉しいぞ、素直に頼ってくれて。よし、すぐに片付けてやるからな」
+				PRINTL
+				PRINTFORMW %ANAME(対象)%說完後、在%ANAME(MASTER)%的眼前創造了很多式神
+				;TranslatedMark %ANAME(対象)%はそう言うと、%ANAME(MASTER)%の目の前で多くの式神を作り出した
+				PRINTL
+				PRINTFORML 「這些傢伙雖然不會什麼複雜的工作、但是這些雜務還是可以處理得很好」
+				;TranslatedMark 「こいつらは複雑な動作こそ出来ないが、コレくらいの雑務なら問題なく処理できるぞ」
+				PRINTL
+				PRINTFORMW 巴掌般大小的式神各自拿起了筆開始工作
+				;TranslatedMark 手のひらサイズの式神たちは各々ペンをとって仕事に取り掛かる
+				PRINTFORML 以防萬一、確認了一下完成的文件發現都沒問題。真是方便的能力啊......
+				;TranslatedMark 念のため、出来上がった書類を確認しても特に問題はなかった。便利な能力だ‥‥
+				PRINTL
+				PRINTFORMW 「那麼、接下來就交給式神吧...還有啊、還有就是...」
+				;TranslatedMark 「さて、後のことは式に任せて大丈夫‥あとは、そうだな‥」
+				PRINTL
+				PRINTFORML 「%ANAME(MASTER)%、工作到深夜應該很累吧。讓我來幫你按摩吧」
+				;TranslatedMark 「%ANAME(MASTER)%、夜遅くまで仕事で疲れているだろう。私がマッサージしてあげよう」
+				PRINTL
+				PRINTFORMW 說著、%ANAME(対象)%開始為%ANAME(MASTER)%揉肩膀
+				;TranslatedMark そう言いながら%ANAME(対象)%は%ANAME(MASTER)%の肩を揉み始める
+				PRINTFORML 力度恰到好處、以絕妙的方法不停揉捏著、讓%ANAME(MASTER)%情不自禁呻吟出聲
+				;TranslatedMark 力加減は弱くもなく、痛くもなくの絶妙な按配での揉み解しに、思わず声が漏れる
+				PRINTL
+				PRINTFORMW 「呼呼...喜歡嗎？　來吧、趴在床上...。背部和腰部都會幫你做的」
+				;TranslatedMark 「ふふ‥気に入ってくれたか？　ほら、布団に横になって‥。背中も腰もやってあげるからな」
+				PRINTL
+				PRINTFORML %ANAME(対象)%那柔軟靈巧的手指確實能解除肌肉的酸痛、令%ANAME(MASTER)%舒服得沉迷其中
+				;TranslatedMark %ANAME(対象)%はしなやかで巧みな指使いで的確に筋肉のコリをほぐし、%ANAME(MASTER)%を夢心地にさせる
+				PRINTL
+				PRINTFORMW 「是不是特別舒服？　呼呼、紫大人也經常找我按摩哦...而且還被她稱讚過呢♪」
+				;TranslatedMark 「中々なものだろう？　ふふ、紫様にもたまに行うけど‥、けっこう評判なんだぞ」
+				PRINTL
+				PRINTFORML 包含著愛情的按摩和她那甜蜜的香味、還有在耳邊輕聲細語的溫柔聲音讓%ANAME(MASTER)%悄然入睡...
+				;TranslatedMark 愛情が込められた按摩と彼女の甘い香り、そして耳元で囁かれる優しい声色が%ANAME(MASTER)%を眠りに誘う‥
+				PRINTL
+				PRINTFORMW 「已經睡著了啊...之後的事情就交給我吧...今後也、不用考慮這麼多呢......❤」
+				;TranslatedMark 「いつでも寝ちゃってもいいからな‥後は私に任せておけ‥。これからも、遠慮なんていらないからな‥‥♥」
+				PRINTL
+				PRINTFORML ・
+				;TranslatedMark ・
+				PRINTFORML ・・
+				;TranslatedMark ・・
+				PRINTFORMW ...睡得很熟...。第二天早上、桌子上放著完成了的文件
+				;TranslatedMark ‥‥すっかり熟睡してしまっていた‥。翌朝、机に上にはちゃんと出来上がった書類が残されていた
+				ABL:対象:主導度Ｎ += 150
+				CFLAG:対象:好感度 += 150
+				CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度提升了150", 0x00FFFF)
+				;TranslatedMark %ANAME(対象)%の好感度が150上がった
+				;クールタイムがあったら-1
+				SIF COOLTIME:MASTER:0 < 0
+					CALL ADD_COOLTIME(MASTER, -1)
+				KDVAR:対象:藍_甘やかし ++
+				PRINTFORMW
+			ENDIF
+		CASE 2
+			PRINTFORMW 某一天。忙于工作的%ANAME(MASTER)%、更多的文件堆積在了桌子上。看著文件的數量實在是令人苦笑不已...
+			;TranslatedMark とある日。仕事に追われる%ANAME(MASTER)%に、更なる書類仕事が廻されてきた。思わず笑いがこみ上げてくるほど大量に‥
+			PRINTFORML ......為什麼？　這麼多的文件會讓人累死的吧？　這工作到底要持續到什麼時候？
+			;TranslatedMark ‥‥なんで？　あれだけやってどうして楽にならないの？　いつまでこの仕事は続くの？
+			PRINTL
+			PRINTFORMW 「啊、%ANAME(MASTER)%、又在工作嗎...哇、這麼多真是太厲害了......。可以的話、讓我來做吧？」
+			;TranslatedMark 「あ、%ANAME(MASTER)%、また仕事か‥って、この量は酷いな‥‥。良かったら、私がやろうか？」
+			PRINTL
+			PRINTFORML 正在緊繃著臉目瞪口呆的時候、%ANAME(対象)%再次來看望了
+			;TranslatedMark 引きつった顔で唖然としているところに、また%ANAME(対象)%が様子を見に来てくれた
+			PRINTFORML 畢竟文件的數量實在是太多了、所以想讓她幫忙...
+			;TranslatedMark 流石にとんでもない量なので、手伝いを申し出てくれている。‥‥心なしかワクワクしているような様子が見える
+			PRINTFORMW 那麼、要請她幫忙嗎？
+			;TranslatedMark さて、どうしよう？
+			PRINTL
+			CALL ASK_YN("幫幫我...", "没关系、总会有办法的...总会有办法的...")
+			;TranslatedMark "助けて‥‥", "大丈夫、何とかするよ‥何とかするさ‥‥"
+			IF RESULT == 1
+				PRINTFORML %ANAME(対象)%在聽到、「自己會想辦法」的回答後。笑容從臉上消失了
+				;TranslatedMark %ANAME(MASTER)%は感情が全て消え去ったような表情で、%ANAME(対象)%に「自分が何とかする」と伝えた
+				PRINTL
+				PRINTFORML 「誒誒っ！？　...這、這樣啊......我知道了よ......但、但是沒關係、你無論什麼時候都可以拜託我的哦？」
+				;TranslatedMark 「ええっ！？　‥そ、そうか‥‥分かったよ‥‥で、でも別に、いつでも頼ってくれていいんだからな？」
+				PRINTL
+				PRINTFORMW %ANAME(対象)%對%ANAME(MASTER)%的堅定意志表示尊重、但是很明顯非常不安的樣子...
+				;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の固い意志を尊重してくれたが、明らかに不安な様子だ‥
+				PRINTL
+				PRINTFORML 「那麼、就幫你準備點吃的吧。幫這麼一點小忙的話也是可以的吧？」」
+				;TranslatedMark 「じゃ、じゃあ軽食くらいは用意させてくれ。それくらいは手伝わってもいいだろう？」
+				PRINTL
+				PRINTFORMW ...確實、需要補充能量呢。%ANAME(MASTER)%拜託%ANAME(対象)%做飯之後重新開始了工作
+				;TranslatedMark ‥確かに、エネルギーの補給が必要だ。%ANAME(MASTER)%は%ANAME(対象)%に食事を頼んでから仕事に取り掛かった
+				PRINTDATAW
+				DATA 顺便说一下，今晚的菜品是油炸豆腐面
+				;TranslatedMark ちなみにメニューはきつねうどんだった
+				DATA 顺便说一下，今晚的菜品是稲荷寿司
+				;TranslatedMark ちなみにメニューは稲荷寿司だった
+				DATA 顺便说一下，今晚的菜品是油炸味增湯
+				;TranslatedMark ちなみにメニューは油揚げの味噌汁だった
+				DATA 顺便说一下，今晚的菜品是油炸莎拉
+				;TranslatedMark ちなみにメニューは油揚げのサラダだった
+				DATA 顺便说一下，今晚的菜品是油炸豆腐
+				;TranslatedMark ちなみにメニューは焼き油揚げだった
+				DATA 顺便说一下，今晚的菜品是信玄袋
+				;TranslatedMark ちなみにメニューは信玄袋だった
+				ENDDATA
+				PRINTFORML ・
+				;TranslatedMark ・
+				PRINTFORML ・・
+				;TranslatedMark ・・
+				PRINTFORMW ・・・幾天之後
+				;TranslatedMark ・・・数日後
+				PRINTFORML ......終於%ANAME(MASTER)%完成了！　把不可能完成的量的工作全部做完了！
+				;TranslatedMark ‥‥ついに%ANAME(MASTER)%は成し遂げた！　有り得ない量の仕事を全て片付けて見せた！
+				PRINTFORMW 但是作為代價、好像失去了普通人的感情、但這也許只是暫時的吧...
+				;TranslatedMark 代償として、人並みの感情を失ってしまったような気がするが、それも追々戻ってくるだろう‥
+				PRINTFORMW 在一旁守護著%ANAME(MASTER)%的%ANAME(対象)%也不由得流下了淚水。仿佛在為自己的孩子成就了偉業而高興...
+				;TranslatedMark 影から%ANAME(MASTER)%を見守っていた%ANAME(対象)%は思わず涙を流した。まるで我が子が偉業を成し遂げた様を喜ぶように‥
+				PRINTFORML 把完成的文件交給負責人的時候
+				;TranslatedMark 終わった書類を担当に渡す時
+				PRINTL
+				CALL SINGLE_DRAWLINE
+				PRINTL
+				PRINTFORMW 我只是把所有人的工作都收集起來放著、難道你一個人全部做完了！？
+				;TranslatedMark 他の人たちの書類をまとめて置いてただけなんですが、まさか一人でやったんですか！？
+				PRINTL
+				CALL SINGLE_DRAWLINE
+				PRINTL
+				PRINTFORMW 之類的話、大概是心裡作用吧
+				;TranslatedMark などと言われたような気がするが、たぶん気のせいだろう
+				PRINTFORMW 剩下的只有、睡覺了...、只有、睡覺了...、現在可以、睡覺了............
+				;TranslatedMark あとはただ、眠るだけ‥、ただ、眠るだけ‥、今はただ、眠るだけ‥‥‥‥
+				PRINTFORML %ANAME(MASTER)%在那之後、因為過度疲勞而臥床不起...
+				;TranslatedMark %ANAME(MASTER)%はその後、あまりの疲労のためしばらく寝込んだ‥
+				CALL COLOR_PRINTW(@"%ANAME(MASTER)%因為過勞而倒下了！", カラー_注意)
+				;TranslatedMark %ANAME(MASTER)%は過労で倒れてしまった！
+				CALL ADD_COOLTIME(MASTER, 1)
+				PRINTFORMW ......此後、%ANAME(MASTER)%暫時被免除了文書工作
+				;TranslatedMark ‥‥これ以後、しばらく%ANAME(MASTER)%は書類仕事を免除された
+				CALL PRINT_ADD_EXP(MASTER, "政治経験値", RAND(40, 60), 1)
+				;TranslatedMark 政治経験値
+				CALL TRAIN_AUTO_ABLUP(MASTER)
+				KDVAR:対象:藍_甘やかし = -1
+				PRINTFORMW
+			ELSE
+				PRINTFORML 已經不行了。%ANAME(MASTER)%撒嬌般地倒向了%ANAME(対象)%...
+				;TranslatedMark もう無理だ。心が折れた%ANAME(MASTER)%は%ANAME(対象)%の好意にすがることしか出来なかった‥
+				PRINTFORMW %ANAME(MASTER)%雙眼含淚地求著%ANAME(対象)%幫忙。那樣子大大刺激了%ANAME(対象)%的母性
+				;TranslatedMark %ANAME(MASTER)%は涙目で%ANAME(対象)%に助けを求める。その様は%ANAME(対象)%の母性を大いに刺激したようだ
+				PRINTL
+				PRINTFORML 「啊啊、啊啊！　就交給我吧！　沒關係、以後什麼都不用擔心了」
+				;TranslatedMark 「ああ、ああ！　私に任せておけ！　大丈夫、後は何も心配要らないからな」
+				PRINTL
+				PRINTFORMW %ANAME(対象)%溫柔地抱住了%ANAME(MASTER)%、用自己的式神和尾巴開始處理起堆積如山的文件
+				;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%を優しく抱きしめ、己の術で作り出した式と多数の尻尾で、山のような書類を片付け始めた
+				PRINTL
+				PRINTFORML 「我也覺得這個數量太多了。分幾天高效率地完成吧。首先從城墻修繕方案開始...」
+				;TranslatedMark 「私でもこの量は多いと思うからな。数日に分けて効率よく終わらせていこう。まずは都市の防壁修繕案件から‥」
+				PRINTL
+				PRINTFORMW 她那全心投入工作的姿態讓人感到心痛。但是當提議自己也來幫忙、%ANAME(対象)%卻鄭重拒絕了
+				;TranslatedMark 流石に全てを丸投げというのも心苦しい。自分も何か手伝おうかと提案すると、%ANAME(対象)%は丁重に断った
+				PRINTL
+				PRINTFORML 「沒關係、就交給我吧。我不會再讓你感到辛苦了」
+				;TranslatedMark 「大丈夫、私に任せてくれ。もうこれ以上、お前に苦しい思いはさせないからな」
+				PRINTL
+				PRINTFORMW %ANAME(対象)%溫柔地話語溫暖了被大量文件折磨的%ANAME(MASTER)%的心...
+				;TranslatedMark 尋常でない量の書類を前に心挫けた%ANAME(MASTER)%の心に、%ANAME(対象)%の優しい言葉が染み入る‥
+				PRINTL
+				PRINTFORML 「現在就可以睡覺了...。你可以枕在我的胸口上睡覺哦...❤」
+				;TranslatedMark 「今日はもう眠るといい‥。私の胸、枕にしちゃっていいからな‥♥」
+				PRINTL
+				PRINTFORML %ANAME(対象)%把%ANAME(MASTER)%的臉溫柔地埋在自己的胸口、一邊輕輕撫摸著他的背部一邊唱著搖籃曲
+				;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%の顔を柔らかな胸で受けとめ、背中をぽんぽんとさすりながら子守唄を歌ってくれた
+				PRINTFORMW %ANAME(MASTER)%在%ANAME(対象)%的體香和搖籃曲的包圍下、安心地入眠了......
+				;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%の甘い香りと子守唄に包まれて、安心して眠りについた‥‥
+				CITY_GUARD:対象都市 += 20
+				CALL ICPRINT(@"%CITY_NAME:対象都市%的防御力上升了<20>點、變成了<{CITY_GUARD:対象都市}>", "W", カラー_注意)
+				;TranslatedMark %CITY_NAME:対象都市%の防衛率が<20>上昇し、<{CITY_GUARD:対象都市}>になった
+				PRINTL
+				PRINTFORMW ―　过了一天　―
+				;TranslatedMark ―　翌　日　―
+				PRINTL
+				PRINTFORMW 「今天是征召士兵的項目嗎...啊、早上好%ANAME(MASTER)%」
+				;TranslatedMark 「今日は兵士の募集案件か‥あ、おはよう%ANAME(MASTER)%」
+				PRINTL
+				PRINTFORML 當%ANAME(MASTER)%醒來、發現%ANAME(対象)%早已開始工作了
+				;TranslatedMark %ANAME(MASTER)%が目を覚ますと、すでに%ANAME(対象)%は仕事に取り掛かっていた
+				PRINTL
+				PRINTFORML 「不用擔心哦。從今以後、所有的事情都交給我吧。不會再有不好的事情了」
+				;TranslatedMark 「心配は要らないぞ。後のことは、全て私に任せておけ。悪いようにはしないさ」
+				PRINTL
+				PRINTFORMW 「比起這個...你最近好像很忙所以積攢了很多？」
+				;TranslatedMark 「それよりも最近忙しかったから、‥溜まってるんじゃないか？」
+				PRINTL
+				PRINTFORML %ANAME(対象)%一邊說著一邊责弄著%ANAME(MASTER)%的股間。那根肉棒早已一柱擎天
+				;TranslatedMark そういうと%ANAME(対象)%は%ANAME(MASTER)%の股間を弄る。その一物は既にテントを張っていた
+				PRINTL
+				PRINTFORMW 「呼呼❤　一大早就開始很有精神了呢❤。現在就做點能讓你更加精神的事情吧❤」
+				;TranslatedMark 「ふふ♥　こっちは朝からとっても元気だ。今日は精がつくものを作ってやるぞ」
+				PRINTFORML 「所以今晚也請你什麼都別管、全部交給我就好了...❤」
+				;TranslatedMark 「だから今夜は何も気にせず、たっぷり私に出していいからな‥♥」
+				PRINTL
+				PRINTFORMW ......結果這一天、聽之任之地充分享受了和%ANAME(対象)%的性愛生活......
+				;TranslatedMark ‥‥結局この日は、流されるまま%ANAME(対象)%とセックスを楽しんだ‥‥
 				CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+				;TranslatedMark 対象, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", ANAME(MASTER)
 				CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴")
-			NEXT
-			PRINTFORML ・
-			PRINTFORML ・
-			PRINTFORMW 之後又過了幾天
-			PRINTFORML 因為太過於依賴%ANAME(対象)%、%ANAME(MASTER)%完全不出房間了、真是一場災難
-			PRINTFORMW 閉門不出不露面的結果就是、周圍開始傳說%ANAME(MASTER)%已經死了、所以慌忙出現在大家面前
-			PRINTFORML 然後兩人的墮落糜爛的生活被知道了、%ANAME(MASTER)%和%ANAME(対象)%一起都被人責備了
-			PRINTFORMW 為了限制%ANAME(対象)%一段時間、頒布了『禁止過度溺愛令』……
-			CFLAG:対象:好感度 += 500
-			CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了500", 0x00FFFF)
-			ABL:対象:主導度Ｎ += 300
-			ABL:対象:主導度Ｕ += 300
-			CALL COLOR_PRINTW(@"因為%ANAME(対象)%的溺愛、%ANAME(MASTER)%的身體變遲鈍了！", カラー_注意)
-			ABL:MASTER:防衛 -= 1
-			CALL COLOR_PRINTW(@"%ANAME(MASTER)%的防衛力下降了1", カラー_注意)
-			ABL:MASTER:武闘 -= 1
-			CALL COLOR_PRINTW(@"%ANAME(MASTER)%的武闘下降了1", カラー_注意)
-			ABL:MASTER:知略 -= 1
-			CALL COLOR_PRINTW(@"%ANAME(MASTER)%的知略下降了1", カラー_注意)
-			SIF !(MASTER == NAME_TO_CHARA("橙")) 
-				PRINTFORMW 被橙叮囑道「不要太依賴%ANAME(対象)%大人了哦」……
-			KDVAR:対象:藍_甘やかし = -1
-			PRINTFORMW
-		ENDIF
-ENDSELECT
-
+				;TranslatedMark MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣"
+				COUNTRY_SOLDIER:(CFLAG:対象:所属) += 4000
+				CALL ICPRINT("兵力增加了<4000>", "L", カラー_注意)
+				;TranslatedMark 兵が<4000>増えた
+				PRINTL
+				PRINTFORMW ―　过了一天　―
+				;TranslatedMark ―　翌　日　―
+				PRINTL
+				PRINTFORMW 「今天是投資周嗎。那麼就選這個吧...啊、早上好%ANAME(MASTER)%」
+				;TranslatedMark 「あとは%CITY_NAME:対象都市2%の投資関係か。これであらかた片付くな‥。あ、おはよう%ANAME(MASTER)%」
+				PRINTL
+				PRINTFORML 今天%ANAME(対象)%也早早地開始工作了。一大堆的文件都快處理得七七八八了
+				;TranslatedMark 今日も%ANAME(対象)%はすでに仕事に取り掛かっていた。あれほどの書類の山がもう無くなりそうだ
+				PRINTL
+				PRINTFORMW 「呼呼呼、如果是我就買這個！...話雖如此、果然還是有些累了...」
+				;TranslatedMark 「ふふふ、私にかかればこんな物さ！　‥とはいえ、流石に疲れたな‥」
+				PRINTL
+				PRINTFORML %ANAME(MASTER)%為了犒勞%ANAME(対象)%、開始給她揉肩。こ雖然只能做這麼點事情...
+				;TranslatedMark %ANAME(MASTER)%は%ANAME(対象)%を労わるため、肩揉みを始める。これくらいのことしか出来ないが‥
+				PRINTL
+				PRINTFORML 「啊っ...❤　嗯嗯❤...很舒服喲❤、%ANAME(MASTER)%。謝謝你❤」
+				;TranslatedMark 「あっ‥♥　んん‥気持ちいいよ、%ANAME(MASTER)%。ありがとう♥」
+				PRINTFORMW 「但是光這樣還是有點不夠呢...吶、%ANAME(MASTER)%。今天的工作好像也快要結束了...」
+				;TranslatedMark 「でもこれだけじゃあちょっと足りないな‥なあ、%ANAME(MASTER)%。今日で仕事も片付きそうだし‥」
+				PRINTL
+				PRINTFORML 「作為獎勵、今晚能安慰一下我的身體嗎...❤」
+				;TranslatedMark 「ご褒美として、今夜は私の身体を慰めてくれないだろうか‥‥♥」
+				PRINTL
+				PRINTFORMW  %ANAME(対象)%靠在%ANAME(MASTER)%的身上、用貓咪發情般柔媚的聲音誘惑道
+				;TranslatedMark %ANAME(対象)%は%ANAME(MASTER)%に寄りかかり、猫撫で声で誘惑してくる
+				PRINTFORMW ......結果這一天、充分地享受了和%ANAME(対象)%的性愛生活......
+				;TranslatedMark ‥‥結局この日も、%ANAME(対象)%とのセックスを楽しんだ‥‥
+				CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+				;TranslatedMark 対象, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", ANAME(MASTER)
+				CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的嘴唇", ANAME(MASTER))
+				;TranslatedMark 対象, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", ANAME(MASTER)
+				CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴")
+				;TranslatedMark MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣"
+				CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴")
+				;TranslatedMark MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣"
+				CALL MODIFY_CITY_ECONOMY(対象都市2, RAND(15000, 25000))
+				PRINTL
+				PRINTFORMW ―　过了一天　―
+				;TranslatedMark ―　翌　日　―
+				PRINTL
+				PRINTFORMW 「好了、工作已經結束了...但是這麼快提交文件的話、可能又要被派去做其他工作了吧」
+				;TranslatedMark 「さて、もう仕事は終わったが‥あんまり早く提出すると、また仕事を廻されてしまうかもな」
+				PRINTL
+				PRINTFORML ...確實。因為本來以為要花兩個星期的時間來做的工作、結果三天左右就做完了...
+				;TranslatedMark ‥確かに。なにせ２週間は掛かりきりになると思っていた仕事が３日ほどで終わってしまったのだから‥‥
+				PRINTL
+				PRINTFORMW 「所以...吶、%ANAME(MASTER)%...。離期限還有一天、我們乾脆兩個人獨處、好好休息一下怎麼樣...？」
+				;TranslatedMark 「だから‥ねえ、%ANAME(MASTER)%‥。期限まで日があるし、しばらく二人っきりでゆっくりしないか‥？」
+				PRINTL
+				PRINTFORML %ANAME(対象)%一邊說著、一邊用妖艷的姿勢把%ANAME(MASTER)%抱住、在%ANAME(MASTER)%的耳邊熱情地低聲私語
+				;TranslatedMark %ANAME(対象)%はそう言うと、艶かしい仕草で%ANAME(MASTER)%に抱きつき、耳元で熱っぽく囁いてくる
+				PRINTL
+				PRINTFORMW 「因為一直都很努力、所以今天稍微偷一下懶也不會有人說閒話的...❤」
+				;TranslatedMark 「今までいっぱい頑張ってきたんだから、少しくらいゆっくりしてもバチは当たらないさ‥♥」
+				PRINTFORML 「想吃什麼我都會給你做的哦。要不用我的尾巴給你挖挖耳朵怎麼樣？　紫大人也很喜歡被我這麼做、甚至有點上癮呢...」
+				;TranslatedMark 「食べたい物、なんでも作ってあげるぞ。尻尾を使った耳かきとかどうだ？　紫様も病みつきなるくらい気持ちいいんだ‥」
+				PRINTFORMW 「然後如果你還想...和我做之前做的那些事情、我們也可以做哦...❤」
+				;TranslatedMark 「そしてお前が望むなら‥もっともっとキモチいいことも、シてあげちゃうぞ‥♥」
+				PRINTL
+				PRINTFORML %ANAME(対象)%那溫暖的體香、甜美的聲音...然後用柔軟的身體抱住了%ANAME(MASTER)%
+				;TranslatedMark %ANAME(対象)%の温もりと甘い香り、甘い声‥そして柔らかな肢体が%ANAME(MASTER)%を包む
+				PRINTFORMW ...那也許不錯...。%ANAME(MASTER)%決定和%ANAME(対象)%做愛
+				;TranslatedMark ‥それもいいかも‥。%ANAME(MASTER)%は%ANAME(対象)%に身をゆだねることにした
+				PRINTL
+				PRINTFORMW 「呼呼...對對。你能坦率地對我撒嬌我很高興哦♪　接下來我會、好好地治愈你。然後...」
+				;TranslatedMark 「ふふ‥そうそう。素直に甘えてくれて嬉しいよ♪　これから私が、たっぷり癒してあげる。それで‥」
+				PRINTL
+				CALL COLOR_PRINTW(@"「那之後就一直......做愛吧❤」", カラー_ピンク)
+				;TranslatedMark 「その後はずーっと‥‥‥セックスして過ごそうな♥」
+				PRINTL
+				FOR LOCAL, 0, 5
+					CALL FUCK_MAKELOVE(対象, GET_ID(MASTER), @"%ANAME(MASTER)%的唇", ANAME(MASTER))
+					;TranslatedMark 対象, GET_ID(MASTER), @"%ANAME(MASTER)%の唇", ANAME(MASTER)
+					CALL FUCK(MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%的膣穴")
+					;TranslatedMark MASTER, "Ｃ, 射精, Ｖ挿入", "童貞喪失", 0, "", "", @"%ANAME(対象)%の膣"
+				NEXT
+				PRINTFORML ・
+				;TranslatedMark ・
+				PRINTFORML ・・
+				;TranslatedMark ・・
+				PRINTFORMW ・・・
+				;TranslatedMark ・・・
+				PRINTFORMW 之後又過了幾天
+				;TranslatedMark さらに数日後
+				PRINTFORML 因為太過於依賴%ANAME(対象)%、%ANAME(MASTER)%完全不出房間了、真是一場災難
+				;TranslatedMark %ANAME(対象)%に甘え倒すあまり、まったく部屋から出なかったことが災いした
+				PRINTFORMW 閉門不出不露面的結果就是、周圍開始傳說%ANAME(MASTER)%已經死了、所以慌忙出現在大家面前
+				;TranslatedMark 引きこもって姿を見せなかった結果、周りに%ANAME(MASTER)%死亡説まで流れ始めたため、慌てて皆の前に顔を出すことになった
+				PRINTL
+				PRINTFORML 然後兩人的墮落糜爛的生活被知道了、%ANAME(MASTER)%和%ANAME(対象)%一起都被人責備了
+				;TranslatedMark その際にここしばらくの爛れた生活が明らかになり、%ANAME(対象)%と一緒に二人共々怒られてしまった
+				PRINTFORMW 為了限制%ANAME(対象)%一段時間、頒布了『禁止過度溺愛令』......
+				;TranslatedMark しばらく%ANAME(対象)%に、『甘やかし禁止令』が出された‥‥
+				CFLAG:対象:好感度 += 500
+				CALL COLOR_PRINTL(@"%ANAME(対象)%的好感度上升了500", 0x00FFFF)
+				;TranslatedMark %ANAME(対象)%の好感度が500上がった
+				ABL:対象:主導度Ｎ += 300
+				ABL:対象:主導度Ｕ += 300
+				CALL COLOR_PRINTW(@"因為%ANAME(対象)%的溺愛、%ANAME(MASTER)%的身體變遲鈍了！", カラー_注意)
+				;TranslatedMark %ANAME(対象)%の甘やかしにより、%ANAME(MASTER)%の体は鈍ってしまった！
+				ABL:MASTER:防衛 -= 1
+				CALL COLOR_PRINTW(@"%ANAME(MASTER)%的防御力下降了1", カラー_注意)
+				;TranslatedMark %ANAME(MASTER)%の防衛が1下がった
+				ABL:MASTER:武闘 -= 1
+				CALL COLOR_PRINTW(@"%ANAME(MASTER)%的武斗下降了1", カラー_注意)
+				;TranslatedMark %ANAME(MASTER)%の武闘が1下がった
+				ABL:MASTER:知略 -= 1
+				CALL COLOR_PRINTW(@"%ANAME(MASTER)%的智略降低了1", カラー_注意)
+				;TranslatedMark %ANAME(MASTER)%の知略が1下がった
+				SIF !(MASTER == NAME_TO_CHARA("橙")) && (CFLAG:橙:所属 == CFLAG:MASTER:所属)
+					PRINTFORML 被橙叮囑道「不要太依賴%ANAME(対象)%大人了哦」......
+					;TranslatedMark 橙に「あんまり%ANAME(対象)%様を甘やかさないでよねー」と釘を刺された‥‥
+				KDVAR:対象:藍_甘やかし = -1
+				PRINTW
+			ENDIF
+	ENDSELECT
+ENDIF
 RETURN 1

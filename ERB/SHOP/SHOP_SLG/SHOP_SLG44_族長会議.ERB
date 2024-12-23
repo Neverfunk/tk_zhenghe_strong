@@ -573,7 +573,8 @@ IF RESULT == 10
 	REDRAW 1
 	RETURN
 ELSEIF RESULT == 2
-	MONEY += SOLDIER_Predatoriness_GOBLIN * 100
+	;MONEY += SOLDIER_Predatoriness_GOBLIN * 100
+	CALL ADD_MONEY((SOLDIER_Predatoriness_GOBLIN * 100))
 	SOLDIER_Predatoriness_GOBLIN = 0
 	Destination_Predatoriness_GOBLIN:0 = 0
 	Destination_Predatoriness_GOBLIN:1 = 0
@@ -616,9 +617,11 @@ INPUT
 IF RESULT == 0
 	RETURN
 ELSEIF RESULT <= 最大略奪兵数
-	MONEY += SOLDIER_Predatoriness_GOBLIN * 100
+	;MONEY += SOLDIER_Predatoriness_GOBLIN * 100
+	CALL ADD_MONEY((SOLDIER_Predatoriness_GOBLIN * 100))
 	SOLDIER_Predatoriness_GOBLIN = RESULT
-	MONEY -= RESULT * 100
+	;MONEY -= RESULT * 100
+	CALL ADD_MONEY(-1*(RESULT * 100))
 ELSE
 	CLEARLINE 1
 	GOTO INPUT_LOOP
@@ -785,7 +788,8 @@ ELSEIF RESULT == 1
 	;TranslatedMark %ANAME(GET_COUNTRY_BOSS(対象勢力))%勢力との関係が悪化しました
 	CALL DIPLOMACY_WORSEN_RELATION(対象勢力, 50)
 	CALL CAPTURE(対象, CFLAG:MASTER:所属)
-	MONEY -= 10000
+	;MONEY -= 10000
+	CALL ADD_MONEY(-1*(10000))
 	PRINTFORML 支持率上升了
 	;TranslatedMark 支持率が上昇しました
 	支持率 = ゴブリン支持率:MASTER:0
@@ -810,7 +814,8 @@ ELSEIF RESULT == 2 && CHANGE_Government_GOBLIN:1 != 2 && IS_FEMALE(対象) && CF
 		CALL DIPLOMACY_WORSEN_RELATION(所属勢力, 100)
 	ENDIF
 	CALL CAPTURE(対象, CFLAG:MASTER:所属)
-	MONEY -= 10000
+	;MONEY -= 10000
+	CALL ADD_MONEY(-1*(10000))
 	IF GET_COUNTRY_BOSS(CFLAG:MASTER:所属) == MASTER
 		PRINTFORML 支持率与集权性上升了
 		;TranslatedMark 支持率と集権性が上昇しました

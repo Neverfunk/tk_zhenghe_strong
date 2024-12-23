@@ -42,7 +42,6 @@ IF ARG == 2
 		PRINTFORML
 		PRINTFORML 难道不是『ＬＯＶＥ』而是『ＬＩＫＥ』的意思吗？正这样思考着
 		;TranslatedMark もしかして『ＬＯＶＥ』ではなく『ＬＩＫＥ』の意味で受け取られたのでは？　と、
-		PRINTFORML
 		PRINTFORMW 为了阻止想要确认的%ANAME(MASTER)%，%ANAME(TARGET)%用炽热的吻堵住了嘴唇
 		;TranslatedMark 確認しようとした%ANAME(MASTER)%を遮るように、%ANAME(TARGET)%は熱い口付けで唇を塞いできた
 		PRINTFORML
@@ -779,93 +778,96 @@ ENDIF
 ;拠点フェイズ終了(所属国家が同じなら常に呼ばれる)
 ;-------------------------------------------------
 IF ARG == 30
-	SETCOLOR 0xB40404
-	;捕虜の時1/2の確率で表示
-	IF CFLAG:捕虜先
-		IF !RAND:2
+	;主人公が多勢力に捕らわれていると表示されない
+	IF !CFLAG:MASTER:捕虜先
+		SETCOLOR 0xB40404
+		;捕虜の時1/2の確率で表示
+		IF CFLAG:捕虜先
+			IF !RAND:2
+				;淫魔スイッチＯＮ時淫乱
+				IF CFLAG:240 == 3
+					SELECTCASE RAND:3
+						CASE 0
+							PRINTFORML %ANAME(TARGET)%「啊，怎么办呢……会不会欲求不满呢…」
+							;TranslatedMark %ANAME(TARGET)%「あぁん、どうしましょう……欲求不満にならないかしら…」
+						CASE 1
+							PRINTFORML %ANAME(TARGET)%「如果有人能给我美味的精气就好了…」
+							;TranslatedMark %ANAME(TARGET)%「美味しい精気をくれる人がいたらいいんですが…」
+						CASE 2
+							PRINTFORML %ANAME(TARGET)%「哈啊♥　…一个人安慰也很空虚呢……好想快点得到肉棒啊…」
+							;TranslatedMark %ANAME(TARGET)%「んん、っ♥　…一人で慰めるのも虚しいですねぇ……早くペニスが欲しいわぁ…」
+					ENDSELECT
+				;通常
+				ELSE
+					SELECTCASE IFRAND("0TO1", 1, "2", TALENT:恋慕)
+						CASE 0
+							PRINTFORML %ANAME(TARGET)%「啊…怎么办呢……」
+							;TranslatedMark %ANAME(TARGET)%「はあ…どうしましょう……」
+						CASE 1
+							PRINTFORML %ANAME(TARGET)%「…如果觉得是个小假期的话，这里也会去东京…不行啊…」
+							;TranslatedMark %ANAME(TARGET)%「…ちょっとした休暇だと思えばここも都に…なりませんねぇ…」
+						CASE 2
+							PRINTFORML %ANAME(TARGET)%「…好想看那个人的脸啊……」
+							;TranslatedMark %ANAME(TARGET)%「…あの人の顔が見たいな……」
+					ENDSELECT
+				ENDIF
+			ENDIF
+		ELSEIF TALENT:恋慕 || TALENT:服従
 			;淫魔スイッチＯＮ時淫乱
 			IF CFLAG:240 == 3
-				SELECTCASE RAND:3
+				SELECTCASE RAND:5
 					CASE 0
-						PRINTFORML %ANAME(TARGET)%「啊，怎么办呢……会不会欲求不满呢…」
-						;TranslatedMark %ANAME(TARGET)%「あぁん、どうしましょう……欲求不満にならないかしら…」
+						PRINTFORML %ANAME(TARGET)%「可以在战场上找个男人吗？如果是敌兵的话，可以把他吸死吧♥」
+						;TranslatedMark %ANAME(TARGET)%「ちょっと戦場で男漁りをしても構いませんか？　敵兵だったら吸い殺してもいいですよね♥」
 					CASE 1
-						PRINTFORML %ANAME(TARGET)%「如果有人能给我美味的精气就好了…」
-						;TranslatedMark %ANAME(TARGET)%「美味しい精気をくれる人がいたらいいんですが…」
+						PRINTFORML %ANAME(TARGET)%「如果有像%ANAME(MASTER)%那样精气美味的人就好了…」
+						;TranslatedMark %ANAME(TARGET)%「%ANAME(MASTER)%くらい精気が美味しそうな人がいたらいいんですが…」
 					CASE 2
-						PRINTFORML %ANAME(TARGET)%「哈啊♥　…一个人安慰也很空虚呢……好想快点得到肉棒啊…」
-						;TranslatedMark %ANAME(TARGET)%「んん、っ♥　…一人で慰めるのも虚しいですねぇ……早くペニスが欲しいわぁ…」
+						PRINTFORML %ANAME(TARGET)%「%ANAME(TARGET)%♥　…那我走了，%ANAME(MASTER)%♥」
+						;TranslatedMark %ANAME(TARGET)%「んん、ちゅっ♥　…それじゃあ行って来ますね、%ANAME(MASTER)%♥」
+					CASE 3
+						PRINTFORML %ANAME(TARGET)%「请小心啊。如果不能做爱的话就太可惜了吧？」
+						;TranslatedMark %ANAME(TARGET)%「気をつけてくださいね%ANAME(MASTER)%。セックス出来なくなったら勿体無いですよ？」
+					CASE 4
+						PRINTFORML %ANAME(TARGET)%「暂时不能见面了。…为了不寂寞，请你再抱我一次吗♥」
+						;TranslatedMark %ANAME(TARGET)%「しばらく会えなくなりますね。…寂しくないよう、一回私を抱いていっちゃいますかぁ？　なんて♥」
 				ENDSELECT
 			;通常
 			ELSE
-				SELECTCASE IFRAND("0TO1", 1, "2", TALENT:恋慕)
+				SELECTCASE RAND:5
 					CASE 0
-						PRINTFORML %ANAME(TARGET)%「啊…怎么办呢……」
-						;TranslatedMark %ANAME(TARGET)%「はあ…どうしましょう……」
+						PRINTFORML %ANAME(TARGET)%「请慢走」
+						;TranslatedMark %ANAME(TARGET)%「いってらっしゃいませー」
 					CASE 1
-						PRINTFORML %ANAME(TARGET)%「…如果觉得是个小假期的话，这里也会去东京…不行啊…」
-						;TranslatedMark %ANAME(TARGET)%「…ちょっとした休暇だと思えばここも都に…なりませんねぇ…」
+						PRINTFORML %ANAME(TARGET)%「%ANAME(MASTER)%，回去后再去吃美味的蛋糕吧♪」
+						;TranslatedMark %ANAME(TARGET)%「%ANAME(MASTER)%、帰ったら美味しいケーキを食べに行きましょう♪」
 					CASE 2
-						PRINTFORML %ANAME(TARGET)%「…好想看那个人的脸啊……」
-						;TranslatedMark %ANAME(TARGET)%「…あの人の顔が見たいな……」
+						PRINTFORML %ANAME(TARGET)%「我喜欢混沌的世界，但是被卷入其中很讨厌呢…」
+						;TranslatedMark %ANAME(TARGET)%「混沌の世は好きなんですが、それに巻き込まれるのは嫌なんですよねぇ…」
+					CASE 3
+						PRINTFORML %ANAME(TARGET)%「战斗开始后会从无聊的杂务中解放出来…。稍微伸展一下翅膀吧！」
+						;TranslatedMark %ANAME(TARGET)%「戦が始まると退屈な雑務から開放される…。ちょっと羽を伸ばしますよー！」
+					CASE 4
+						PRINTFORML %ANAME(TARGET)%「我祈祷大家平安无事。请小心」
+						;TranslatedMark %ANAME(TARGET)%「皆さんの無事を祈ってます。どうかお気をつけて」
 				ENDSELECT
 			ENDIF
-		ENDIF
-	ELSEIF TALENT:恋慕 || TALENT:服従
-		;淫魔スイッチＯＮ時淫乱
-		IF CFLAG:240 == 3
-			SELECTCASE RAND:5
+		;恋慕等をとってないと1/2の確率で表示されない（主人公と面識が無くても表示されるのでそこに注意）
+		ELSEIF !RAND:2
+			SELECTCASE RAND:3
 				CASE 0
-					PRINTFORML %ANAME(TARGET)%「可以在战场上找个男人吗？如果是敌兵的话，可以把他吸死吧♥」
-					;TranslatedMark %ANAME(TARGET)%「ちょっと戦場で男漁りをしても構いませんか？　敵兵だったら吸い殺してもいいですよね♥」
+					PRINTFORML %ANAME(TARGET)%「大家请慢走」
+					;TranslatedMark %ANAME(TARGET)%「皆さん、いってらっしゃいませ」
 				CASE 1
-					PRINTFORML %ANAME(TARGET)%「如果有像%ANAME(MASTER)%那样精气美味的人就好了…」
-					;TranslatedMark %ANAME(TARGET)%「%ANAME(MASTER)%くらい精気が美味しそうな人がいたらいいんですが…」
+					PRINTFORML %ANAME(TARGET)%「稍微把翅膀伸出来吧♪」
+					;TranslatedMark %ANAME(TARGET)%「ちょっと羽を伸ばそうっと♪」
 				CASE 2
-					PRINTFORML %ANAME(TARGET)%「%ANAME(TARGET)%♥　…那我走了，%ANAME(MASTER)%♥」
-					;TranslatedMark %ANAME(TARGET)%「んん、ちゅっ♥　…それじゃあ行って来ますね、%ANAME(MASTER)%♥」
-				CASE 3
-					PRINTFORML %ANAME(TARGET)%「请小心啊。如果不能做爱的话就太可惜了吧？」
-					;TranslatedMark %ANAME(TARGET)%「気をつけてくださいね%ANAME(MASTER)%。セックス出来なくなったら勿体無いですよ？」
-				CASE 4
-					PRINTFORML %ANAME(TARGET)%「暂时不能见面了。…为了不寂寞，请你再抱我一次吗♥」
-					;TranslatedMark %ANAME(TARGET)%「しばらく会えなくなりますね。…寂しくないよう、一回私を抱いていっちゃいますかぁ？　なんて♥」
-			ENDSELECT
-		;通常
-		ELSE
-			SELECTCASE RAND:5
-				CASE 0
-					PRINTFORML %ANAME(TARGET)%「请慢走」
-					;TranslatedMark %ANAME(TARGET)%「いってらっしゃいませー」
-				CASE 1
-					PRINTFORML %ANAME(TARGET)%「%ANAME(MASTER)%，回去后再去吃美味的蛋糕吧♪」
-					;TranslatedMark %ANAME(TARGET)%「%ANAME(MASTER)%、帰ったら美味しいケーキを食べに行きましょう♪」
-				CASE 2
-					PRINTFORML %ANAME(TARGET)%「我喜欢混沌的世界，但是被卷入其中很讨厌呢…」
-					;TranslatedMark %ANAME(TARGET)%「混沌の世は好きなんですが、それに巻き込まれるのは嫌なんですよねぇ…」
-				CASE 3
-					PRINTFORML %ANAME(TARGET)%「战斗开始后会从无聊的杂务中解放出来…。稍微伸展一下翅膀吧！」
-					;TranslatedMark %ANAME(TARGET)%「戦が始まると退屈な雑務から開放される…。ちょっと羽を伸ばしますよー！」
-				CASE 4
-					PRINTFORML %ANAME(TARGET)%「我祈祷大家平安无事。请小心」
-					;TranslatedMark %ANAME(TARGET)%「皆さんの無事を祈ってます。どうかお気をつけて」
+					PRINTFORML %ANAME(TARGET)%「不要被卷入纷争中…」
+					;TranslatedMark %ANAME(TARGET)%「争い事には巻き込まれないようにしないと…」
 			ENDSELECT
 		ENDIF
-	;恋慕等をとってないと1/2の確率で表示されない（主人公と面識が無くても表示されるのでそこに注意）
-	ELSEIF !RAND:2
-		SELECTCASE RAND:3
-			CASE 0
-				PRINTFORML %ANAME(TARGET)%「大家请慢走」
-				;TranslatedMark %ANAME(TARGET)%「皆さん、いってらっしゃいませ」
-			CASE 1
-				PRINTFORML %ANAME(TARGET)%「稍微把翅膀伸出来吧♪」
-				;TranslatedMark %ANAME(TARGET)%「ちょっと羽を伸ばそうっと♪」
-			CASE 2
-				PRINTFORML %ANAME(TARGET)%「不要被卷入纷争中…」
-				;TranslatedMark %ANAME(TARGET)%「争い事には巻き込まれないようにしないと…」
-		ENDSELECT
+		RESETCOLOR
 	ENDIF
-	RESETCOLOR
 	RETURN 0
 ENDIF
 
@@ -873,93 +875,96 @@ ENDIF
 ;戦略フェイズ終了(所属国家が同じなら常に呼ばれる)
 ;-------------------------------------------------
 IF ARG == 31
-	SETCOLOR 0xB40404
-	;捕虜の時1/2の確率で表示
-	IF CFLAG:捕虜先
-		IF !RAND:2
+	;主人公が多勢力に捕らわれていると表示されない
+	IF !CFLAG:MASTER:捕虜先
+		SETCOLOR 0xB40404
+		;捕虜の時1/2の確率で表示
+		IF CFLAG:捕虜先
+			IF !RAND:2
+				;淫魔スイッチＯＮ時淫乱
+				IF CFLAG:240 == 3
+					SELECTCASE RAND:3
+						CASE 0
+							PRINTFORML %ANAME(TARGET)%「啊，请再多摸我的身体…」
+							;TranslatedMark %ANAME(TARGET)%「あぁん、もっと私の身体まさぐってくださぁい…」
+						CASE 1
+							PRINTFORML %ANAME(TARGET)%「嗯，哼！　……哈，这样的话只有手淫才行…
+							;TranslatedMark %ANAME(TARGET)%「んっ、ふうっ！　……はぁ、このままじゃオナニーだけ上手くなっちゃいそう…
+						CASE 2
+							PRINTFORML %ANAME(TARGET)%「啊…我想快点变得自由，尽情地做爱…」
+							;TranslatedMark %ANAME(TARGET)%「はぁ…、早く自由になって好きなだけセックスがしたいなぁ…」
+					ENDSELECT
+				;通常
+				ELSE
+					SELECTCASE IFRAND("0TO1", 1, "2", TALENT:恋慕)
+						CASE 0
+							PRINTFORML %ANAME(TARGET)%「啊…怎么也逃不掉啊……」
+							;TranslatedMark %ANAME(TARGET)%「はあ…何とか逃げれないものかなぁ……」
+						CASE 1
+							PRINTFORML %ANAME(TARGET)%「…想要一张睡起来更舒服的床呢…」
+							;TranslatedMark %ANAME(TARGET)%「…もっと寝心地良いベッドがほしいですねぇ…」
+						CASE 2
+							PRINTFORML %ANAME(TARGET)%「…我想快点见到那个人啊……请快点来救我啊…」
+							;TranslatedMark %ANAME(TARGET)%「…あの人と会いたい……早く助けに来てくださいよぉ…」
+					ENDSELECT
+				ENDIF
+			ENDIF
+		ELSEIF TALENT:恋慕 || TALENT:服従
 			;淫魔スイッチＯＮ時淫乱
 			IF CFLAG:240 == 3
-				SELECTCASE RAND:3
+				SELECTCASE RAND:5
 					CASE 0
-						PRINTFORML %ANAME(TARGET)%「啊，请再多摸我的身体…」
-						;TranslatedMark %ANAME(TARGET)%「あぁん、もっと私の身体まさぐってくださぁい…」
+						PRINTFORML %ANAME(TARGET)%「虽然在战场上吃得很多，但总觉得不太好…。果然还是%ANAME(MASTER)%最棒棒了啊♥」
+						;TranslatedMark %ANAME(TARGET)%「戦場でつまみ食いしてきましたけど、どうもイマイチで…。やっぱり%ANAME(MASTER)%が一番ですねぇ♥」
 					CASE 1
-						PRINTFORML %ANAME(TARGET)%「嗯，哼！　……哈，这样的话只有手淫才行…
-						;TranslatedMark %ANAME(TARGET)%「んっ、ふうっ！　……はぁ、このままじゃオナニーだけ上手くなっちゃいそう…
+						PRINTFORML %ANAME(TARGET)%「果然像%ANAME(MASTER)%那样精气美味的人很稀有啊…」
+						;TranslatedMark %ANAME(TARGET)%「やっぱり%ANAME(MASTER)%くらい精気が美味しそうな人って、滅多にいないんですねぇ…」
 					CASE 2
-						PRINTFORML %ANAME(TARGET)%「啊…我想快点变得自由，尽情地做爱…」
-						;TranslatedMark %ANAME(TARGET)%「はぁ…、早く自由になって好きなだけセックスがしたいなぁ…」
+						PRINTFORML %ANAME(TARGET)%「%ANAME(MASTER)%，欢迎回来，啵♥　…如果只是接吻不够的话请告诉我哦♥」
+						;TranslatedMark %ANAME(TARGET)%「%ANAME(MASTER)%、お帰りなさい、ちゅっ♥　…キスだけで足りないようなら言ってくださいねぇ♥」
+					CASE 3
+						PRINTFORML %ANAME(TARGET)%「辛苦了，%ANAME(MASTER)%。身体不兴奋吗？如果可以的话和我…吗♥」
+						;TranslatedMark %ANAME(TARGET)%「お疲れ様です、%ANAME(MASTER)%。身体は昂ってないですか？　良かったら私と…なーんて♥」
+					CASE 4
+						PRINTFORML %ANAME(TARGET)%「稍微失礼了♥啾……哈啊♥果然还是%ANAME(MASTER)%的味道最让人放心♥」
+						;TranslatedMark %ANAME(TARGET)%「ちょっと失礼しますね♥　ぎゅーっ……、あぁ♥　やっぱり%ANAME(MASTER)%の匂いが一番安心します♥」
 				ENDSELECT
 			;通常
 			ELSE
-				SELECTCASE IFRAND("0TO1", 1, "2", TALENT:恋慕)
+				SELECTCASE RAND:5
 					CASE 0
-						PRINTFORML %ANAME(TARGET)%「啊…怎么也逃不掉啊……」
-						;TranslatedMark %ANAME(TARGET)%「はあ…何とか逃げれないものでしょうか……」
+						PRINTFORML %ANAME(TARGET)%「欢迎回来。身体怎么样了？」
+						;TranslatedMark %ANAME(TARGET)%「お帰りなさいませ。調子はどうでしたか？」
 					CASE 1
-						PRINTFORML %ANAME(TARGET)%「…想要一张睡起来更舒服的床呢…」
-						;TranslatedMark %ANAME(TARGET)%「…もっと寝心地良いベッドがほしいですねぇ…」
+						PRINTFORML %ANAME(TARGET)%「辛苦了。不去吃甜食吗？」
+						;TranslatedMark %ANAME(TARGET)%「お疲れ様です%ANAME(MASTER)%。甘い物でも食べに行きませんか？」
 					CASE 2
-						PRINTFORML %ANAME(TARGET)%「…我想快点见到那个人啊……请快点来救我啊…」
-						;TranslatedMark %ANAME(TARGET)%「…あの人と会いたい……早く助けに来てくださいよぉ…」
+						PRINTFORML %ANAME(TARGET)%「我，我还以为已经死掉了的…。果然和平是最好的」
+						;TranslatedMark %ANAME(TARGET)%「し、死ぬかと思いました…。やっぱり安全と平和が一番ですねぇ」
+					CASE 3
+						PRINTFORML %ANAME(TARGET)%「翅膀伸展完成。那么，工作加油吧」
+						;TranslatedMark %ANAME(TARGET)%「羽伸ばし完了っと。さーて、お仕事頑張らないと」
+					CASE 4
+						PRINTFORML %ANAME(TARGET)%「%ANAME(MASTER)%没事真是太好了…。真的很担心呢？」
+						;TranslatedMark %ANAME(TARGET)%「%ANAME(MASTER)%が無事で良かった…。ホントに心配してたんですよ？」
 				ENDSELECT
 			ENDIF
-		ENDIF
-	ELSEIF TALENT:恋慕 || TALENT:服従
-		;淫魔スイッチＯＮ時淫乱
-		IF CFLAG:240 == 3
-			SELECTCASE RAND:5
+		;恋慕等をとってないと1/2の確率で表示されない（主人公と面識が無くても表示されるのでそこに注意）
+		ELSEIF !RAND:2
+			SELECTCASE RAND:3
 				CASE 0
-					PRINTFORML %ANAME(TARGET)%「虽然在战场上吃得很多，但总觉得不太好…。果然还是%ANAME(MASTER)%最棒棒了啊♥」
-					;TranslatedMark %ANAME(TARGET)%「戦場でつまみ食いしてきましたけど、どうもイマイチで…。やっぱり%ANAME(MASTER)%が一番ですねぇ♥」
+					PRINTFORML %ANAME(TARGET)%「大家，欢迎回来」
+					;TranslatedMark %ANAME(TARGET)%「皆さん、お帰りなさいませ」
 				CASE 1
-					PRINTFORML %ANAME(TARGET)%「果然像%ANAME(MASTER)%那样精气美味的人很稀有啊…」
-					;TranslatedMark %ANAME(TARGET)%「やっぱり%ANAME(MASTER)%くらい精気が美味しそうな人って、滅多にいないんですねぇ…」
+					PRINTFORML %ANAME(TARGET)%「翅膀伸展完成」
+					;TranslatedMark %ANAME(TARGET)%「羽伸ばし完了ーっと」
 				CASE 2
-					PRINTFORML %ANAME(TARGET)%「%ANAME(MASTER)%，欢迎回来，啵♥　…如果只是接吻不够的话请告诉我哦♥」
-					;TranslatedMark %ANAME(TARGET)%「%ANAME(MASTER)%、お帰りなさい、ちゅっ♥　…キスだけで足りないようなら言ってくださいねぇ♥」
-				CASE 3
-					PRINTFORML %ANAME(TARGET)%「辛苦了，%ANAME(MASTER)%。身体不兴奋吗？如果可以的话和我…吗♥」
-					;TranslatedMark %ANAME(TARGET)%「お疲れ様です、%ANAME(MASTER)%。身体は昂ってないですか？　良かったら私と…なーんて♥」
-				CASE 4
-					PRINTFORML %ANAME(TARGET)%「稍微失礼了♥啾……哈啊♥果然还是%ANAME(MASTER)%的味道最让人放心♥」
-					;TranslatedMark %ANAME(TARGET)%「ちょっと失礼しますね♥　ぎゅーっ……、あぁ♥　やっぱり%ANAME(MASTER)%の匂いが一番安心します♥」
-			ENDSELECT
-		;通常
-		ELSE
-			SELECTCASE RAND:5
-				CASE 0
-					PRINTFORML %ANAME(TARGET)%「欢迎回来。身体怎么样了？」
-					;TranslatedMark %ANAME(TARGET)%「お帰りなさいませ。調子はどうでしたか？」
-				CASE 1
-					PRINTFORML %ANAME(TARGET)%「辛苦了。不去吃甜食吗？」
-					;TranslatedMark %ANAME(TARGET)%「お疲れ様です%ANAME(MASTER)%。甘い物でも食べに行きませんか？」
-				CASE 2
-					PRINTFORML %ANAME(TARGET)%「我，我还以为已经死掉了的…。果然和平是最好的」
-					;TranslatedMark %ANAME(TARGET)%「し、死ぬかと思いました…。やっぱり安全と平和が一番ですねぇ」
-				CASE 3
-					PRINTFORML %ANAME(TARGET)%「翅膀伸展完成。那么，工作加油吧」
-					;TranslatedMark %ANAME(TARGET)%「羽伸ばし完了っと。さーて、お仕事頑張らないと」
-				CASE 4
-					PRINTFORML %ANAME(TARGET)%「%ANAME(MASTER)%没事真是太好了…。真的很担心呢？」
-					;TranslatedMark %ANAME(TARGET)%「%ANAME(MASTER)%が無事で良かった…。ホントに心配してたんですよ？」
+					PRINTFORML %ANAME(TARGET)%「我还以为会被杀…。果然和平是最好的」
+					;TranslatedMark %ANAME(TARGET)%「こ、殺されるかと思った…。やっぱり平和が一番です」
 			ENDSELECT
 		ENDIF
-	;恋慕等をとってないと1/2の確率で表示されない（主人公と面識が無くても表示されるのでそこに注意）
-	ELSEIF !RAND:2
-		SELECTCASE RAND:3
-			CASE 0
-				PRINTFORML %ANAME(TARGET)%「大家，欢迎回来」
-				;TranslatedMark %ANAME(TARGET)%「皆さん、お帰りなさいませ」
-			CASE 1
-				PRINTFORML %ANAME(TARGET)%「翅膀伸展完成」
-				;TranslatedMark %ANAME(TARGET)%「羽伸ばし完了ーっと」
-			CASE 2
-				PRINTFORML %ANAME(TARGET)%「我还以为会被杀…。果然和平是最好的」
-				;TranslatedMark %ANAME(TARGET)%「こ、殺されるかと思った…。やっぱり平和が一番です」
-		ENDSELECT
+		RESETCOLOR
 	ENDIF
-	RESETCOLOR
 	RETURN 0
 ENDIF
 
@@ -1465,9 +1470,9 @@ IF ARG == 86
 	RETURN 0
 ENDIF
 
-;───────────────────────────────────────
+;-------------------------------------------------
 ;生ハメ依存取得
-;───────────────────────────────────────
+;-------------------------------------------------
 IF ARG == 87
 	SETCOLOR 0xB40404
 	PRINTL
@@ -2416,8 +2421,8 @@ IF ARG == 450
 	IF CFLAG:240 == 3
 		PRINTFORML 「呵呵呵…是非常好的脸哦♥」
 		;TranslatedMark 「うふふ…とってもいい顔ですよぉ♥」
-		PRINTFORMW 「喂，已经成为我的东西了吧？我会更加心情舒畅的♥」
-		;TranslatedMark 「ねえ、もう私のモノになっちゃいましょう？　もっともっとキモチよくしてあげますよぉ♥」
+		PRINTFORMW 「喂，干脆彻底成为我的东西吧？那样的话，我会让你更加、更加地感到愉悦哦……♥」
+		;TranslatedMark 「ねえ、もう私のモノになっちゃいましょう？　そしたらもっともっとキモチよくしてあげますよぉ♥」
 	ELSE
 		PRINTFORML 「已经不必再逞强了吧？」
 		;TranslatedMark 「もう意地を張らなくてもいいんじゃないですかぁ？」

@@ -90,8 +90,7 @@
         RETURN 0
     SIF !check_rp_inrange(target_rp)
         RETURN 0
-    SIF MRU_DEBUG_ENABLE
-        PRINTFORM 设置角色{chara}:%ANAME(chara)%声望为{target_rp}
+    CALL mru_debug(@"设置角色{chara}:%ANAME(chara)%声望为{target_rp}")
     CFLAG:chara:reputation = target_rp
     RETURN
 
@@ -144,8 +143,7 @@
         RETURN 0
     SIF !check_rp_inrange_factor(target_rp_factor)
         RETURN 0
-    SIF MRU_DEBUG_ENABLE
-        PRINTFORM 设置角色{chara}:%ANAME(chara)%声望系数为{target_rp_factor}
+    CALL mru_debug(@"设置角色{chara}:%ANAME(chara)%声望系数为{target_rp_factor}")
     CFLAG:chara:rp_factor = target_rp_factor
     RETURN
 
@@ -164,8 +162,7 @@
     SIF !check_chara(chara)
         RETURN 0
     CFLAG:chara:rp_zero_limit = target_rp_zero_limit
-    SIF MRU_DEBUG_ENABLE
-        PRINTFORM 设置角色{chara}:%ANAME(chara)%零点声望限制值为{target_rp_zero_limit}
+    CALL mru_debug(@"设置角色{chara}:%ANAME(chara)%零点声望限制值为{target_rp_zero_limit}")
     RETURN
 
 ;每期末更新角色零点声望限制值
@@ -173,8 +170,7 @@
     #DIM chara
     LOCAL = get_rp_zero_limit(chara)
     LOCAL += get_rp_state(get_reputation(chara))
-    SIF MRU_DEBUG_ENABLE
-        PRINTFORM 角色{chara}:%ANAME(chara)%零点声望限制值更新为{LOCAL}
+    CALL mru_debug(@"角色{chara}:%ANAME(chara)%零点声望限制值更新为{LOCAL}")
     CALL set_rp_zero_limit(chara,LOCAL)
     RETURN
 
@@ -193,8 +189,7 @@
     SIF !check_chara(chara)
         RETURN 0
     CALL set_influence(chara,target_influence*get_rp_direction(chara))
-    SIF MRU_DEBUG_ENABLE
-        PRINTFORM 设置角色{chara}:%ANAME(chara)%影响力为{target_influence}，声望方向为{get_rp_direction(chara)}
+    CALL mru_debug(@"设置角色{chara}:%ANAME(chara)%影响力为{target_influence}，声望方向为{get_rp_direction(chara)}")
     RETURN
 
 ;获取角色影响力
@@ -270,15 +265,13 @@
         THROW 声望的修正区间不在范围内！{modify_lowbound},{modify_upbound}
     ;如果是同方向的声望修正，则改为影响力计算
     IF is_same_rp_direction_val(modify_power,now_rp)
-        SIF MRU_DEBUG_ENABLE
-            PRINTFORM 声望修正转为影响力修正，当前声望方向为{get_rp_direction(chara)}
+        CALL mru_debug(@"声望修正转为影响力修正，当前声望方向为{get_rp_direction(chara)}")
         CALL modify_influence(chara,ABS(modify_power),ABS(modify_lowbound),ABS(modify_upbound))
         RETURN
     ELSE
         ;获取修正后的声望数值
         now_rp = modify_rp_cal(now_rp,modify_power,modify_lowbound,modify_upbound,rp_factor)
-        SIF MRU_DEBUG_ENABLE
-            PRINTFORM 计算后的声望数值为{now_rp},修正前的数值为{get_reputation(chara)}
+        CALL mru_debug(@"修正后的声望数值为{now_rp},修正前的数值为{get_reputation(chara)}")
         ;如果改变方向了，则优先修正零点积累值
         ;如果未能越过零点积累值，则直接设置声望为当前方向上的1
         ;如果越过了零点积累值，则设置声望为预计值减去零点积累值
@@ -399,8 +392,7 @@
     rp_zero_limit = get_rp_zero_limit(chara)
     ;获取修正后的影响力数值
     cal_result = modify_influence_cal(modify_power,modify_lowbound,modify_upbound,rp_factor)
-    SIF MRU_DEBUG_ENABLE
-            PRINTFORM 计算后的影响力数值为{cal_result},修正前的数值为{now_influence}
+    CALL mru_debug(@"修正后的影响力数值为{cal_result},修正前的数值为{now_influence}")
     ;修正影响力不会改变声望方向，但会削减零点积累值、
     IF cal_result < 0
         rp_zero_limit = MAX(0,rp_zero_limit+cal_result)

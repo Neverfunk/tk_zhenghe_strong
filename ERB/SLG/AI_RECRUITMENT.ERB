@@ -26,7 +26,7 @@ FOR 候補, 0, VARSIZE("SCOUT_CANDIDATES")
 	基礎額 = SCOUT_CALC_PRICE_BASIS(対象) * 2 / 3
 	基礎額 = SCOUT_CALC_PRICE_TECHNOLOGY_CORRECTION(基礎額, 勢力)
 	SIF DAY % 5 == 0
-		基礎額 /= 2
+		基礎額 = MAX(基礎額 / 2,1)
 
 	;基本的に値段と同一
 	評価値:候補 = 基礎額
@@ -66,7 +66,7 @@ FOR LOCAL, 0, 3
 		評価値:候補 = __INT_MIN__
 		CONTINUE
 	ENDIF
-	
+
 	IF 基礎額 == 0
 		確率 = 100 * 支払額
 	ELSE
@@ -90,7 +90,7 @@ FOR LOCAL, 0, 3
 		ENDIF
 	ELSE
 		PRINTFORML %ANAME(君主)%嘗試雇用流浪中的%ANAME(対象)%……
-		IF RAND:100 < 確率 
+		IF RAND:100 < 確率
 			CALL COLOR_PRINTL(@"%ANAME(対象)%接受了雇用", カラー_注意)
 			CALL COLOR_PRINTL(@"%ANAME(対象)%移籍進了%ANAME(君主)%勢力", カラー_注意)
 			CALL CHANGE_COUNTRY(対象, 勢力, 1)
